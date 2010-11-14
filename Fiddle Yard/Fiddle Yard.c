@@ -56,7 +56,7 @@ static void Init_Pwm(void);
 static void Init_Ad(void);
 
 static unsigned char Enable_State_Machine_Update = 0;
-unsigned int State = 4, AdcResult = 0, Delay = 0;
+unsigned int State = 5, AdcResult = 0, Delay = 0;
 static unsigned char Send_Var_Out[3];
 
 static DWORD dwLastIP = 0;
