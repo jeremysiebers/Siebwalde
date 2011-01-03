@@ -72,7 +72,7 @@ void IO(void)
 		PLATFORMS_IO[1].F12_ = PORTHbits.RH5;
 		PLATFORMS_IO[0].F12_ = PORTEbits.RE1;
 		
-		PLATFORMS_IO[1].Bezet_Uit_5B_ = PORTHbits.RH6;
+		PLATFORMS_IO[1].Bezet_Uit_5B_ = PORTHbits.RH6;			// This means the occupied output of the PWM Rail regulator to the uProc
 		PLATFORMS_IO[0].Bezet_Uit_5B_ = PORTEbits.RE2;
 			
 		PLATFORMS_IO[1].Bezet_Uit_6_ = PORTHbits.RH7;
@@ -87,7 +87,7 @@ void IO(void)
 		PORTDbits.RD5 = PLATFORMS_IO[1].Bezet_Weerstand_;		// PORTDbits.RD6 and PORTDbits.RD7 spare outputs via opto
 		PORTCbits.RC7 = PLATFORMS_IO[0].Bezet_Weerstand_;
 		
-		PORTDbits.RD4 = PLATFORMS_IO[1].Bezet_In_7_;
+		PORTDbits.RD4 = PLATFORMS_IO[1].Bezet_In_7_;			// This means the occupied input of the PWM Rail regulator from the uProc
 		PORTCbits.RC6 = PLATFORMS_IO[0].Bezet_In_7_;
 		
 		PORTDbits.RD3 = PLATFORMS_IO[1].Bezet_In_6_;		
