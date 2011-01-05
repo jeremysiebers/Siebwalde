@@ -1,5 +1,5 @@
 MPLINK 4.35, Linker
-Linker Map File - Created Mon Jan 03 19:43:15 2011
+Linker Map File - Created Wed Jan 05 22:30:23 2011
 
                                  Section Info
                   Section       Type    Address   Location Size(Bytes)
@@ -52,39 +52,39 @@ Linker Map File - Created Mon Jan 03 19:43:15 2011
               .code_ARP.o       code   0x011364    program   0x0005c2
   .code_Command_Machine.o       code   0x011926    program   0x0004aa
                .code_IP.o       code   0x011dd0    program   0x0003fa
-      .code_Fiddle Yard.o       code   0x0121ca    program   0x000332
-         .code_Announce.o       code   0x0124fc    program   0x0002ac
-         .code_StackTsk.o       code   0x0127a8    program   0x000260
-                   STRING       code   0x012a08    program   0x0001b2
-             .code_ICMP.o       code   0x012bba    program   0x000146
-             .code_Tick.o       code   0x012d00    program   0x000140
-               _cinit_scn       code   0x012e40    program   0x00009e
-         .code_pw3setdc.o       code   0x012ede    program   0x00005e
-         .code_pw1setdc.o       code   0x012f3c    program   0x00005e
-         .code_fxd3232u.o       code   0x012f9a    program   0x000048
-                   STDLIB       code   0x012fe2    program   0x00003c
-                     PROG       code   0x01301e    program   0x00003c
-         .code_fxd1616u.o       code   0x01305a    program   0x00002c
-                    .code       code   0x013086    program   0x00002c
-             .stringtable    romdata   0x0130b2    program   0x000026
-             _startup_scn       code   0x0130d8    program   0x00001c
-       .idata_Var_Out.o_i    romdata   0x0130f4    program   0x000024
-          .idata_Tick.o_i    romdata   0x013118    program   0x000004
- .idata_State_Machine.o_i    romdata   0x01311c    program   0x0000e9
-      .idata_StackTsk.o_i    romdata   0x013205    program   0x000001
-.idata_Shift_Register.o_i    romdata   0x013206    program   0x00002c
-          .idata_NBNS.o_i    romdata   0x013232    program   0x000001
-            .idata_IP.o_i    romdata   0x013233    program   0x000002
-       .idata_Helpers.o_i    romdata   0x013235    program   0x000000
-   .idata_Fiddle Yard.o_i    romdata   0x013235    program   0x00000b
-          .idata_ICMP.o_i    romdata   0x013235    program   0x000000
-      .idata_ETH97J60.o_i    romdata   0x013240    program   0x000000
-.idata_Diagnostic_ret.o_i    romdata   0x013240    program   0x000007
-          .idata_DHCP.o_i    romdata   0x013247    program   0x000001
-.idata_Command_Machine.o_i    romdata   0x013248    program   0x000008
-      .idata_Announce.o_i    romdata   0x013250    program   0x000001
-           .idata_ARP.o_i    romdata   0x013251    program   0x000001
-            .code_c018i.o       code   0x013252    program   0x000000
+      .code_Fiddle Yard.o       code   0x0121ca    program   0x000336
+         .code_Announce.o       code   0x012500    program   0x0002ac
+         .code_StackTsk.o       code   0x0127ac    program   0x000260
+                   STRING       code   0x012a0c    program   0x0001b2
+             .code_ICMP.o       code   0x012bbe    program   0x000146
+             .code_Tick.o       code   0x012d04    program   0x000140
+               _cinit_scn       code   0x012e44    program   0x00009e
+         .code_pw3setdc.o       code   0x012ee2    program   0x00005e
+         .code_pw1setdc.o       code   0x012f40    program   0x00005e
+         .code_fxd3232u.o       code   0x012f9e    program   0x000048
+                   STDLIB       code   0x012fe6    program   0x00003c
+                     PROG       code   0x013022    program   0x00003c
+         .code_fxd1616u.o       code   0x01305e    program   0x00002c
+                    .code       code   0x01308a    program   0x00002c
+             .stringtable    romdata   0x0130b6    program   0x000026
+             _startup_scn       code   0x0130dc    program   0x00001c
+       .idata_Var_Out.o_i    romdata   0x0130f8    program   0x000024
+          .idata_Tick.o_i    romdata   0x01311c    program   0x000004
+ .idata_State_Machine.o_i    romdata   0x013120    program   0x0000e9
+      .idata_StackTsk.o_i    romdata   0x013209    program   0x000001
+.idata_Shift_Register.o_i    romdata   0x01320a    program   0x00002c
+          .idata_NBNS.o_i    romdata   0x013236    program   0x000001
+            .idata_IP.o_i    romdata   0x013237    program   0x000002
+       .idata_Helpers.o_i    romdata   0x013239    program   0x000000
+   .idata_Fiddle Yard.o_i    romdata   0x013239    program   0x00000b
+          .idata_ICMP.o_i    romdata   0x013239    program   0x000000
+      .idata_ETH97J60.o_i    romdata   0x013244    program   0x000000
+.idata_Diagnostic_ret.o_i    romdata   0x013244    program   0x000007
+          .idata_DHCP.o_i    romdata   0x01324b    program   0x000001
+.idata_Command_Machine.o_i    romdata   0x01324c    program   0x000008
+      .idata_Announce.o_i    romdata   0x013254    program   0x000001
+           .idata_ARP.o_i    romdata   0x013255    program   0x000001
+            .code_c018i.o       code   0x013256    program   0x000000
 .config_1fff8_Fiddle Yard.o    romdata   0x01fff8    program   0x000001
 .config_1fff9_Fiddle Yard.o    romdata   0x01fff9    program   0x000001
 .config_1fffa_Fiddle Yard.o    romdata   0x01fffa    program   0x000001
@@ -164,9 +164,9 @@ Linker Map File - Created Mon Jan 03 19:43:15 2011
                               Program Memory Usage 
                                Start         End      
                            ---------   ---------      
-                            0x000000    0x013251      
+                            0x000000    0x013255      
                             0x01fff8    0x01fffd      
-            78424 out of 131072 program addresses used, program memory utilization is 59%
+            78428 out of 131072 program addresses used, program memory utilization is 59%
 
 
 
@@ -178,7 +178,7 @@ Linker Map File - Created Mon Jan 03 19:43:15 2011
                ARPProcess   0x0114d6    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\ARP.c
                    ARPPut   0x011364    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\ARP.c
                ARPResolve   0x0116ae    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\ARP.c
-               AnnounceIP   0x0124fc    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Announce.c
+               AnnounceIP   0x012500    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Announce.c
                     BM_10   0x01007e    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Shift_Register.c
                     BM_11   0x010146    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Shift_Register.c
               Bezet_In_5B   0x01049c    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Shift_Register.c
@@ -236,7 +236,7 @@ Bridge_Open_Close_Timeout_Expired_Send   0x00bf14    program     extern C:\Docum
          DHCPStateChanged   0x00effc    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\DHCP.c
                  DHCPTask   0x00f038    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\DHCP.c
                Diagnostic   0x01056c    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Diagnostic_ret.c
-            DiscoveryTask   0x012610    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Announce.c
+            DiscoveryTask   0x012614    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Announce.c
                    EOS_10   0x0100e2    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Shift_Register.c
                    EOS_11   0x010114    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Shift_Register.c
         ERROR_Code_Report   0x00278a    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\State_Machine.c
@@ -248,9 +248,9 @@ Bridge_Open_Close_Timeout_Expired_Send   0x00bf14    program     extern C:\Docum
                       F10   0x0101aa    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Shift_Register.c
                       F11   0x0100b0    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Shift_Register.c
                       F12   0x0101dc    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Shift_Register.c
-                 FXD1616U   0x01305a    program     extern C:\MCC18\src\traditional\math\fxd1616u.c
-                 FXD3232U   0x012f9a    program     extern C:\MCC18\src\traditional\math\fxd3232u.c
-                 FXM1616U   0x01301e    program     extern C:\MCC18\src\traditional\math\fxm1616u.asm
+                 FXD1616U   0x01305e    program     extern C:\MCC18\src\traditional\math\fxd1616u.c
+                 FXD3232U   0x012f9e    program     extern C:\MCC18\src\traditional\math\fxd3232u.c
+                 FXM1616U   0x013022    program     extern C:\MCC18\src\traditional\math\fxm1616u.asm
      Fiddle_Multiple_Left   0x0077c0    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\State_Machine.c
   Fiddle_Multiple_Left_Ok   0x00b9aa    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Var_Out.c
     Fiddle_Multiple_Right   0x0049b0    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\State_Machine.c
@@ -266,19 +266,19 @@ Bridge_Open_Close_Timeout_Expired_Send   0x00bf14    program     extern C:\Docum
        FindMatchingSocket   0x00df56    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\UDP.c
         FormatNetBIOSName   0x00d286    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Helpers.c
       GenerateRandomDWORD   0x00c43c    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Helpers.c
-              GetTickCopy   0x012d10    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Tick.c
-              ICMPProcess   0x012bba    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\ICMP.c
+              GetTickCopy   0x012d14    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Tick.c
+              ICMPProcess   0x012bbe    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\ICMP.c
                        IO   0x00fc1e    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Shift_Register.c
               IPGetHeader   0x011dd0    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\IP.c
               IPPutHeader   0x011f44    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\IP.c
             IPSetRxBuffer   0x0120a8    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\IP.c
-            InitAppConfig   0x012442    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Fiddle Yard.c
-                  Init_Ad   0x01241a    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Fiddle Yard.c
+            InitAppConfig   0x012446    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Fiddle Yard.c
+                  Init_Ad   0x01241e    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Fiddle Yard.c
                 Init_Done   0x00bb36    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Var_Out.c
          Init_Fiddle_Yard   0x002944    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\State_Machine.c
-                 Init_Pwm   0x012424    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Fiddle Yard.c
+                 Init_Pwm   0x012428    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Fiddle Yard.c
              Init_Started   0x00bbfc    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Var_Out.c
-              Init_Timers   0x0123ea    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Fiddle Yard.c
+              Init_Timers   0x0123ee    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Fiddle Yard.c
        Laatste_Spoor_Send   0x00c0a0    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Var_Out.c
                       M10   0x010434    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Shift_Register.c
                M10_Status   0x010308    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Shift_Register.c
@@ -315,21 +315,21 @@ Bridge_Open_Close_Timeout_Expired_Send   0x00bf14    program     extern C:\Docum
            Send_Diag_Comm   0x010906    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Diagnostic_ret.c
           Sensor_F12_Send   0x00be4e    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Var_Out.c
      SerializedMACAddress   0x00000e    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Fiddle Yard.c
-                SetDCPWM1   0x012f3c    program     extern C:\MCC18\src\pmc_common\PWM\pw1setdc.c
-                SetDCPWM3   0x012ede    program     extern C:\MCC18\src\pmc_common\PWM\pw3setdc.c
-        StackApplications   0x012a00    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\StackTsk.c
-                StackInit   0x0127a8    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\StackTsk.c
-                StackTask   0x0127f0    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\StackTsk.c
+                SetDCPWM1   0x012f40    program     extern C:\MCC18\src\pmc_common\PWM\pw1setdc.c
+                SetDCPWM3   0x012ee2    program     extern C:\MCC18\src\pmc_common\PWM\pw3setdc.c
+        StackApplications   0x012a04    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\StackTsk.c
+                StackInit   0x0127ac    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\StackTsk.c
+                StackTask   0x0127f4    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\StackTsk.c
      State_Machine_Update   0x0000d4    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\State_Machine.c
         StringToIPAddress   0x00c740    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Helpers.c
             SwapARPPacket   0x01184e    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\ARP.c
              SwapIPHeader   0x0120e2    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\IP.c
-TickConvertToMilliseconds   0x012de8    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Tick.c
-                  TickGet   0x012d36    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Tick.c
-            TickGetDiv256   0x012d4c    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Tick.c
-            TickGetDiv64K   0x012d9a    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Tick.c
-                 TickInit   0x012d00    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Tick.c
-               TickUpdate   0x012e2c    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Tick.c
+TickConvertToMilliseconds   0x012dec    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Tick.c
+                  TickGet   0x012d3a    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Tick.c
+            TickGetDiv256   0x012d50    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Tick.c
+            TickGetDiv64K   0x012d9e    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Tick.c
+                 TickInit   0x012d04    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Tick.c
+               TickUpdate   0x012e30    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Tick.c
               Track_Mover   0x0044f6    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\State_Machine.c
                  Track_Nr   0x0102d6    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Shift_Register.c
           Train_Detection   0x0040d2    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\State_Machine.c
@@ -365,20 +365,20 @@ Train_Drive_In_Failed_F12   0x00baf4    program     extern C:\Documents and Sett
      Universal_Error_Send   0x00c124    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Var_Out.c
          Var_Out_Programm   0x00ab2a    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Var_Out.c
               WritePHYReg   0x00eed0    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\ETH97J60.c
-              _2jContinue   0x012b16    program     static C:\MCC18\src\traditional\stdclib\memset.asm
-                   _2jEnd   0x012b7a    program     static C:\MCC18\src\traditional\stdclib\slenpgm.asm
-              _3jContinue   0x012ae2    program     static C:\MCC18\src\traditional\stdclib\mcpyp2r.asm
-                   _3jEnd   0x012b20    program     static C:\MCC18\src\traditional\stdclib\memset.asm
-              _4jContinue   0x012a34    program     static C:\MCC18\src\traditional\stdclib\memcmp.asm
-              _4jContinue   0x012a8e    program     static C:\MCC18\src\traditional\stdclib\memcpy.asm
-                   _4jEnd   0x012aec    program     static C:\MCC18\src\traditional\stdclib\mcpyp2r.asm
-                   _5jEnd   0x012a98    program     static C:\MCC18\src\traditional\stdclib\memcpy.asm
-                   _5jEnd   0x012a3e    program     static C:\MCC18\src\traditional\stdclib\memcmp.asm
+              _2jContinue   0x012b1a    program     static C:\MCC18\src\traditional\stdclib\memset.asm
+                   _2jEnd   0x012b7e    program     static C:\MCC18\src\traditional\stdclib\slenpgm.asm
+              _3jContinue   0x012ae6    program     static C:\MCC18\src\traditional\stdclib\mcpyp2r.asm
+                   _3jEnd   0x012b24    program     static C:\MCC18\src\traditional\stdclib\memset.asm
+              _4jContinue   0x012a38    program     static C:\MCC18\src\traditional\stdclib\memcmp.asm
+              _4jContinue   0x012a92    program     static C:\MCC18\src\traditional\stdclib\memcpy.asm
+                   _4jEnd   0x012af0    program     static C:\MCC18\src\traditional\stdclib\mcpyp2r.asm
+                   _5jEnd   0x012a9c    program     static C:\MCC18\src\traditional\stdclib\memcpy.asm
+                   _5jEnd   0x012a42    program     static C:\MCC18\src\traditional\stdclib\memcmp.asm
              _DHCPReceive   0x00f4aa    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\DHCP.c
                 _DHCPSend   0x00f96e    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\DHCP.c
-           ___do_lbl00002   0x012d2e    program     static                          
-           ___do_lbl00003   0x012d32    program     static                          
-           ___do_lbl00004   0x012d10    program     static                          
+           ___do_lbl00002   0x012d32    program     static                          
+           ___do_lbl00003   0x012d36    program     static                          
+           ___do_lbl00004   0x012d14    program     static                          
           ___for_lbl00091   0x00d242    program     static                          
           ___for_lbl00092   0x00d248    program     static                          
           ___for_lbl00093   0x00d224    program     static                          
@@ -396,11 +396,11 @@ Train_Drive_In_Failed_F12   0x00baf4    program     extern C:\Documents and Sett
        ___return_lbl00000   0x00c72c    program     static                          
        ___return_lbl00000   0x000004    program     static                          
        ___return_lbl00000   0x00e294    program     static                          
-       ___return_lbl00000   0x012fe0    program     static                          
-       ___return_lbl00000   0x013084    program     static                          
-       ___return_lbl00001   0x0130f2    program     static                          
-       ___return_lbl00001   0x012d34    program     static                          
-       ___return_lbl00002   0x012edc    program     static                          
+       ___return_lbl00000   0x012fe4    program     static                          
+       ___return_lbl00000   0x013088    program     static                          
+       ___return_lbl00001   0x0130f6    program     static                          
+       ___return_lbl00001   0x012d38    program     static                          
+       ___return_lbl00002   0x012ee0    program     static                          
        ___return_lbl00013   0x00000c    program     static                          
        ___return_lbl00015   0x00001c    program     static                          
        ___return_lbl00019   0x00e5f6    program     static                          
@@ -431,8 +431,8 @@ Train_Drive_In_Failed_F12   0x00baf4    program     extern C:\Documents and Sett
                __config_4   0x01fffc    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Fiddle Yard.c
                __config_5   0x01fffd    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Fiddle Yard.c
                    __init   0x000006    program     extern C:\MCC18\src\traditional\stdclib\__init.c
-               __string_0   0x0130ce    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Fiddle Yard.c
-               __string_0   0x0130b2    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Announce.c
+               __string_0   0x0130d2    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Fiddle Yard.c
+               __string_0   0x0130b6    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Announce.c
                __tmplbl_0   0x00c528    program     static                          
               __tmplbl_10   0x00e512    program     static                          
               __tmplbl_10   0x00b89a    program     static                          
@@ -545,62 +545,62 @@ Train_Drive_In_Failed_F12   0x00baf4    program     extern C:\Documents and Sett
                __tmplbl_7   0x00e54a    program     static                          
                __tmplbl_8   0x00e536    program     static                          
                __tmplbl_9   0x00e520    program     static                          
-            __zero_memory   0x013086    program     extern C:\MCC18\src\traditional\proc\p18F97J60.asm
-                _do_cinit   0x012e40    program     extern C:\MCC18\src\traditional\startup\c018i.c
+            __zero_memory   0x01308a    program     extern C:\MCC18\src\traditional\proc\p18F97J60.asm
+                _do_cinit   0x012e44    program     extern C:\MCC18\src\traditional\startup\c018i.c
                    _entry   0x000000    program     extern C:\MCC18\src\traditional\startup\c018i.c
-                   _false   0x012fdc    program     static                          
-                 _startup   0x0130d8    program     extern C:\MCC18\src\traditional\startup\c018i.c
+                   _false   0x012fe0    program     static                          
+                 _startup   0x0130dc    program     extern C:\MCC18\src\traditional\startup\c018i.c
              btohexa_high   0x00ce00    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Helpers.c
               btohexa_low   0x00ce36    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Helpers.c
-                compare_l   0x0130a8    program     static C:\MCC18\src\traditional\proc\p18F97J60.asm
-                copy_loop   0x012eb2    program     static                          
-            copy_one_byte   0x012eb8    program     static                          
-                     done   0x012edc    program     static                          
-             done_copying   0x012ec6    program     static                          
-                  endloop   0x013080    program     static                          
+                compare_l   0x0130ac    program     static C:\MCC18\src\traditional\proc\p18F97J60.asm
+                copy_loop   0x012eb6    program     static                          
+            copy_one_byte   0x012ebc    program     static                          
+                     done   0x012ee0    program     static                          
+             done_copying   0x012eca    program     static                          
+                  endloop   0x013084    program     static                          
                   hexatob   0x00cd44    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Helpers.c
-                 high_isr   0x01231a    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Fiddle Yard.c
+                 high_isr   0x01231e    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Fiddle Yard.c
  interrupt_at_high_vector   0x000008    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Fiddle Yard.c
   interrupt_at_low_vector   0x000018    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Fiddle Yard.c
-                     jEnd   0x012bb8    program     static C:\MCC18\src\traditional\stdclib\strupr.asm
-                     jEnd   0x012b28    program     static C:\MCC18\src\traditional\stdclib\memset.asm
-                     jEnd   0x012b44    program     static C:\MCC18\src\traditional\stdclib\strlen.asm
-                     jEnd   0x012a44    program     static C:\MCC18\src\traditional\stdclib\memcmp.asm
-                     jEnd   0x012af4    program     static C:\MCC18\src\traditional\stdclib\mcpyp2r.asm
-                     jEnd   0x012b7c    program     static C:\MCC18\src\traditional\stdclib\slenpgm.asm
-                     jEnd   0x012a9e    program     static C:\MCC18\src\traditional\stdclib\memcpy.asm
-                    jLoop   0x012ad6    program     static C:\MCC18\src\traditional\stdclib\mcpyp2r.asm
-                    jLoop   0x012ba4    program     static C:\MCC18\src\traditional\stdclib\strupr.asm
-                    jLoop   0x012b64    program     static C:\MCC18\src\traditional\stdclib\slenpgm.asm
-                    jLoop   0x012b0a    program     static C:\MCC18\src\traditional\stdclib\memset.asm
-                    jLoop   0x012b3a    program     static C:\MCC18\src\traditional\stdclib\strlen.asm
-                    jLoop   0x012a82    program     static C:\MCC18\src\traditional\stdclib\memcpy.asm
-                    jLoop   0x012a28    program     static C:\MCC18\src\traditional\stdclib\memcmp.asm
-                    jSkip   0x012bb4    program     static C:\MCC18\src\traditional\stdclib\strupr.asm
+                     jEnd   0x012bbc    program     static C:\MCC18\src\traditional\stdclib\strupr.asm
+                     jEnd   0x012b2c    program     static C:\MCC18\src\traditional\stdclib\memset.asm
+                     jEnd   0x012b48    program     static C:\MCC18\src\traditional\stdclib\strlen.asm
+                     jEnd   0x012a48    program     static C:\MCC18\src\traditional\stdclib\memcmp.asm
+                     jEnd   0x012af8    program     static C:\MCC18\src\traditional\stdclib\mcpyp2r.asm
+                     jEnd   0x012b80    program     static C:\MCC18\src\traditional\stdclib\slenpgm.asm
+                     jEnd   0x012aa2    program     static C:\MCC18\src\traditional\stdclib\memcpy.asm
+                    jLoop   0x012ada    program     static C:\MCC18\src\traditional\stdclib\mcpyp2r.asm
+                    jLoop   0x012ba8    program     static C:\MCC18\src\traditional\stdclib\strupr.asm
+                    jLoop   0x012b68    program     static C:\MCC18\src\traditional\stdclib\slenpgm.asm
+                    jLoop   0x012b0e    program     static C:\MCC18\src\traditional\stdclib\memset.asm
+                    jLoop   0x012b3e    program     static C:\MCC18\src\traditional\stdclib\strlen.asm
+                    jLoop   0x012a86    program     static C:\MCC18\src\traditional\stdclib\memcpy.asm
+                    jLoop   0x012a2c    program     static C:\MCC18\src\traditional\stdclib\memcmp.asm
+                    jSkip   0x012bb8    program     static C:\MCC18\src\traditional\stdclib\strupr.asm
           leftRotateDWORD   0x00d1fa    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Helpers.c
-                     loop   0x012fa8    program     static                          
-                     loop   0x0130e8    program     static                          
-                     loop   0x013064    program     static                          
-                   loop_h   0x0130a0    program     static C:\MCC18\src\traditional\proc\p18F97J60.asm
-                   loop_l   0x0130aa    program     static C:\MCC18\src\traditional\proc\p18F97J60.asm
-                  low_isr   0x01232c    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Fiddle Yard.c
+                     loop   0x012fac    program     static                          
+                     loop   0x0130ec    program     static                          
+                     loop   0x013068    program     static                          
+                   loop_h   0x0130a4    program     static C:\MCC18\src\traditional\proc\p18F97J60.asm
+                   loop_l   0x0130ae    program     static C:\MCC18\src\traditional\proc\p18F97J60.asm
+                  low_isr   0x012330    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Fiddle Yard.c
                      main   0x0121ca    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Fiddle Yard.c
-                   memcmp   0x012a08    program     extern C:\MCC18\src\traditional\stdclib\memcmp.asm
-                   memcpy   0x012a5a    program     extern C:\MCC18\src\traditional\stdclib\memcpy.asm
-            memcpypgm2ram   0x012ab0    program     extern C:\MCC18\src\traditional\stdclib\mcpyp2r.asm
-                   memset   0x012af6    program     extern C:\MCC18\src\traditional\stdclib\memset.asm
-                     rand   0x012ff0    program     extern C:\MCC18\src\traditional\stdclib\rand.asm
-                    srand   0x012fe2    program     extern C:\MCC18\src\traditional\stdclib\rand.asm
+                   memcmp   0x012a0c    program     extern C:\MCC18\src\traditional\stdclib\memcmp.asm
+                   memcpy   0x012a5e    program     extern C:\MCC18\src\traditional\stdclib\memcpy.asm
+            memcpypgm2ram   0x012ab4    program     extern C:\MCC18\src\traditional\stdclib\mcpyp2r.asm
+                   memset   0x012afa    program     extern C:\MCC18\src\traditional\stdclib\memset.asm
+                     rand   0x012ff4    program     extern C:\MCC18\src\traditional\stdclib\rand.asm
+                    srand   0x012fe6    program     extern C:\MCC18\src\traditional\stdclib\rand.asm
            stricmppgm2ram   0x00ce6a    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Helpers.c
-                   strlen   0x012b2a    program     extern C:\MCC18\src\traditional\stdclib\strlen.asm
-                strlenpgm   0x012b46    program     extern C:\MCC18\src\traditional\stdclib\slenpgm.asm
+                   strlen   0x012b2e    program     extern C:\MCC18\src\traditional\stdclib\strlen.asm
+                strlenpgm   0x012b4a    program     extern C:\MCC18\src\traditional\stdclib\slenpgm.asm
                   strnchr   0x00d318    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Helpers.c
-                   strupr   0x012b90    program     extern C:\MCC18\src\traditional\stdclib\strupr.asm
+                   strupr   0x012b94    program     extern C:\MCC18\src\traditional\stdclib\strupr.asm
                     swapl   0x00cfd4    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Helpers.c
                     swaps   0x00cf80    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Helpers.c
-                     test   0x012e5a    program     static                          
+                     test   0x012e5e    program     static                          
                     uitoa   0x00cbf8    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Helpers.c
-               zero_block   0x0130a0    program     static C:\MCC18\src\traditional\proc\p18F97J60.asm
+               zero_block   0x0130a4    program     static C:\MCC18\src\traditional\proc\p18F97J60.asm
               ACT_ST_MCHN   0x000102       data     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\State_Machine.c
                    ADCON0   0x000fc2       data     extern C:\MCC18\src\traditional\proc\p18F97J60.asm
                ADCON0bits   0x000fc2       data     extern C:\MCC18\src\traditional\proc\p18F97J60.asm
@@ -1473,90 +1473,90 @@ BridgeMotorContact_11_Send   0x00c01c    program     extern C:\Documents and Set
             IPSetRxBuffer   0x0120a8    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\IP.c
              SwapIPHeader   0x0120e2    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\IP.c
                      main   0x0121ca    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Fiddle Yard.c
-                 high_isr   0x01231a    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Fiddle Yard.c
-                  low_isr   0x01232c    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Fiddle Yard.c
-              Init_Timers   0x0123ea    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Fiddle Yard.c
-                  Init_Ad   0x01241a    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Fiddle Yard.c
-                 Init_Pwm   0x012424    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Fiddle Yard.c
-            InitAppConfig   0x012442    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Fiddle Yard.c
-               AnnounceIP   0x0124fc    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Announce.c
-            DiscoveryTask   0x012610    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Announce.c
-                StackInit   0x0127a8    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\StackTsk.c
-                StackTask   0x0127f0    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\StackTsk.c
-        StackApplications   0x012a00    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\StackTsk.c
-                   memcmp   0x012a08    program     extern C:\MCC18\src\traditional\stdclib\memcmp.asm
-                    jLoop   0x012a28    program     static C:\MCC18\src\traditional\stdclib\memcmp.asm
-              _4jContinue   0x012a34    program     static C:\MCC18\src\traditional\stdclib\memcmp.asm
-                   _5jEnd   0x012a3e    program     static C:\MCC18\src\traditional\stdclib\memcmp.asm
-                     jEnd   0x012a44    program     static C:\MCC18\src\traditional\stdclib\memcmp.asm
-                   memcpy   0x012a5a    program     extern C:\MCC18\src\traditional\stdclib\memcpy.asm
-                    jLoop   0x012a82    program     static C:\MCC18\src\traditional\stdclib\memcpy.asm
-              _4jContinue   0x012a8e    program     static C:\MCC18\src\traditional\stdclib\memcpy.asm
-                   _5jEnd   0x012a98    program     static C:\MCC18\src\traditional\stdclib\memcpy.asm
-                     jEnd   0x012a9e    program     static C:\MCC18\src\traditional\stdclib\memcpy.asm
-            memcpypgm2ram   0x012ab0    program     extern C:\MCC18\src\traditional\stdclib\mcpyp2r.asm
-                    jLoop   0x012ad6    program     static C:\MCC18\src\traditional\stdclib\mcpyp2r.asm
-              _3jContinue   0x012ae2    program     static C:\MCC18\src\traditional\stdclib\mcpyp2r.asm
-                   _4jEnd   0x012aec    program     static C:\MCC18\src\traditional\stdclib\mcpyp2r.asm
-                     jEnd   0x012af4    program     static C:\MCC18\src\traditional\stdclib\mcpyp2r.asm
-                   memset   0x012af6    program     extern C:\MCC18\src\traditional\stdclib\memset.asm
-                    jLoop   0x012b0a    program     static C:\MCC18\src\traditional\stdclib\memset.asm
-              _2jContinue   0x012b16    program     static C:\MCC18\src\traditional\stdclib\memset.asm
-                   _3jEnd   0x012b20    program     static C:\MCC18\src\traditional\stdclib\memset.asm
-                     jEnd   0x012b28    program     static C:\MCC18\src\traditional\stdclib\memset.asm
-                   strlen   0x012b2a    program     extern C:\MCC18\src\traditional\stdclib\strlen.asm
-                    jLoop   0x012b3a    program     static C:\MCC18\src\traditional\stdclib\strlen.asm
-                     jEnd   0x012b44    program     static C:\MCC18\src\traditional\stdclib\strlen.asm
-                strlenpgm   0x012b46    program     extern C:\MCC18\src\traditional\stdclib\slenpgm.asm
-                    jLoop   0x012b64    program     static C:\MCC18\src\traditional\stdclib\slenpgm.asm
-                   _2jEnd   0x012b7a    program     static C:\MCC18\src\traditional\stdclib\slenpgm.asm
-                     jEnd   0x012b7c    program     static C:\MCC18\src\traditional\stdclib\slenpgm.asm
-                   strupr   0x012b90    program     extern C:\MCC18\src\traditional\stdclib\strupr.asm
-                    jLoop   0x012ba4    program     static C:\MCC18\src\traditional\stdclib\strupr.asm
-                    jSkip   0x012bb4    program     static C:\MCC18\src\traditional\stdclib\strupr.asm
-                     jEnd   0x012bb8    program     static C:\MCC18\src\traditional\stdclib\strupr.asm
-              ICMPProcess   0x012bba    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\ICMP.c
-                 TickInit   0x012d00    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Tick.c
-           ___do_lbl00004   0x012d10    program     static                          
-              GetTickCopy   0x012d10    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Tick.c
-           ___do_lbl00002   0x012d2e    program     static                          
-           ___do_lbl00003   0x012d32    program     static                          
-       ___return_lbl00001   0x012d34    program     static                          
-                  TickGet   0x012d36    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Tick.c
-            TickGetDiv256   0x012d4c    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Tick.c
-            TickGetDiv64K   0x012d9a    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Tick.c
-TickConvertToMilliseconds   0x012de8    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Tick.c
-               TickUpdate   0x012e2c    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Tick.c
-                _do_cinit   0x012e40    program     extern C:\MCC18\src\traditional\startup\c018i.c
-                     test   0x012e5a    program     static                          
-                copy_loop   0x012eb2    program     static                          
-            copy_one_byte   0x012eb8    program     static                          
-             done_copying   0x012ec6    program     static                          
-       ___return_lbl00002   0x012edc    program     static                          
-                     done   0x012edc    program     static                          
-                SetDCPWM3   0x012ede    program     extern C:\MCC18\src\pmc_common\PWM\pw3setdc.c
-                SetDCPWM1   0x012f3c    program     extern C:\MCC18\src\pmc_common\PWM\pw1setdc.c
-                 FXD3232U   0x012f9a    program     extern C:\MCC18\src\traditional\math\fxd3232u.c
-                     loop   0x012fa8    program     static                          
-                   _false   0x012fdc    program     static                          
-       ___return_lbl00000   0x012fe0    program     static                          
-                    srand   0x012fe2    program     extern C:\MCC18\src\traditional\stdclib\rand.asm
-                     rand   0x012ff0    program     extern C:\MCC18\src\traditional\stdclib\rand.asm
-                 FXM1616U   0x01301e    program     extern C:\MCC18\src\traditional\math\fxm1616u.asm
-                 FXD1616U   0x01305a    program     extern C:\MCC18\src\traditional\math\fxd1616u.c
-                     loop   0x013064    program     static                          
-                  endloop   0x013080    program     static                          
-       ___return_lbl00000   0x013084    program     static                          
-            __zero_memory   0x013086    program     extern C:\MCC18\src\traditional\proc\p18F97J60.asm
-               zero_block   0x0130a0    program     static C:\MCC18\src\traditional\proc\p18F97J60.asm
-                   loop_h   0x0130a0    program     static C:\MCC18\src\traditional\proc\p18F97J60.asm
-                compare_l   0x0130a8    program     static C:\MCC18\src\traditional\proc\p18F97J60.asm
-                   loop_l   0x0130aa    program     static C:\MCC18\src\traditional\proc\p18F97J60.asm
-               __string_0   0x0130b2    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Announce.c
-               __string_0   0x0130ce    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Fiddle Yard.c
-                 _startup   0x0130d8    program     extern C:\MCC18\src\traditional\startup\c018i.c
-                     loop   0x0130e8    program     static                          
-       ___return_lbl00001   0x0130f2    program     static                          
+                 high_isr   0x01231e    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Fiddle Yard.c
+                  low_isr   0x012330    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Fiddle Yard.c
+              Init_Timers   0x0123ee    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Fiddle Yard.c
+                  Init_Ad   0x01241e    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Fiddle Yard.c
+                 Init_Pwm   0x012428    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Fiddle Yard.c
+            InitAppConfig   0x012446    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Fiddle Yard.c
+               AnnounceIP   0x012500    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Announce.c
+            DiscoveryTask   0x012614    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Announce.c
+                StackInit   0x0127ac    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\StackTsk.c
+                StackTask   0x0127f4    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\StackTsk.c
+        StackApplications   0x012a04    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\StackTsk.c
+                   memcmp   0x012a0c    program     extern C:\MCC18\src\traditional\stdclib\memcmp.asm
+                    jLoop   0x012a2c    program     static C:\MCC18\src\traditional\stdclib\memcmp.asm
+              _4jContinue   0x012a38    program     static C:\MCC18\src\traditional\stdclib\memcmp.asm
+                   _5jEnd   0x012a42    program     static C:\MCC18\src\traditional\stdclib\memcmp.asm
+                     jEnd   0x012a48    program     static C:\MCC18\src\traditional\stdclib\memcmp.asm
+                   memcpy   0x012a5e    program     extern C:\MCC18\src\traditional\stdclib\memcpy.asm
+                    jLoop   0x012a86    program     static C:\MCC18\src\traditional\stdclib\memcpy.asm
+              _4jContinue   0x012a92    program     static C:\MCC18\src\traditional\stdclib\memcpy.asm
+                   _5jEnd   0x012a9c    program     static C:\MCC18\src\traditional\stdclib\memcpy.asm
+                     jEnd   0x012aa2    program     static C:\MCC18\src\traditional\stdclib\memcpy.asm
+            memcpypgm2ram   0x012ab4    program     extern C:\MCC18\src\traditional\stdclib\mcpyp2r.asm
+                    jLoop   0x012ada    program     static C:\MCC18\src\traditional\stdclib\mcpyp2r.asm
+              _3jContinue   0x012ae6    program     static C:\MCC18\src\traditional\stdclib\mcpyp2r.asm
+                   _4jEnd   0x012af0    program     static C:\MCC18\src\traditional\stdclib\mcpyp2r.asm
+                     jEnd   0x012af8    program     static C:\MCC18\src\traditional\stdclib\mcpyp2r.asm
+                   memset   0x012afa    program     extern C:\MCC18\src\traditional\stdclib\memset.asm
+                    jLoop   0x012b0e    program     static C:\MCC18\src\traditional\stdclib\memset.asm
+              _2jContinue   0x012b1a    program     static C:\MCC18\src\traditional\stdclib\memset.asm
+                   _3jEnd   0x012b24    program     static C:\MCC18\src\traditional\stdclib\memset.asm
+                     jEnd   0x012b2c    program     static C:\MCC18\src\traditional\stdclib\memset.asm
+                   strlen   0x012b2e    program     extern C:\MCC18\src\traditional\stdclib\strlen.asm
+                    jLoop   0x012b3e    program     static C:\MCC18\src\traditional\stdclib\strlen.asm
+                     jEnd   0x012b48    program     static C:\MCC18\src\traditional\stdclib\strlen.asm
+                strlenpgm   0x012b4a    program     extern C:\MCC18\src\traditional\stdclib\slenpgm.asm
+                    jLoop   0x012b68    program     static C:\MCC18\src\traditional\stdclib\slenpgm.asm
+                   _2jEnd   0x012b7e    program     static C:\MCC18\src\traditional\stdclib\slenpgm.asm
+                     jEnd   0x012b80    program     static C:\MCC18\src\traditional\stdclib\slenpgm.asm
+                   strupr   0x012b94    program     extern C:\MCC18\src\traditional\stdclib\strupr.asm
+                    jLoop   0x012ba8    program     static C:\MCC18\src\traditional\stdclib\strupr.asm
+                    jSkip   0x012bb8    program     static C:\MCC18\src\traditional\stdclib\strupr.asm
+                     jEnd   0x012bbc    program     static C:\MCC18\src\traditional\stdclib\strupr.asm
+              ICMPProcess   0x012bbe    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\ICMP.c
+                 TickInit   0x012d04    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Tick.c
+           ___do_lbl00004   0x012d14    program     static                          
+              GetTickCopy   0x012d14    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Tick.c
+           ___do_lbl00002   0x012d32    program     static                          
+           ___do_lbl00003   0x012d36    program     static                          
+       ___return_lbl00001   0x012d38    program     static                          
+                  TickGet   0x012d3a    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Tick.c
+            TickGetDiv256   0x012d50    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Tick.c
+            TickGetDiv64K   0x012d9e    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Tick.c
+TickConvertToMilliseconds   0x012dec    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Tick.c
+               TickUpdate   0x012e30    program     extern C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Tick.c
+                _do_cinit   0x012e44    program     extern C:\MCC18\src\traditional\startup\c018i.c
+                     test   0x012e5e    program     static                          
+                copy_loop   0x012eb6    program     static                          
+            copy_one_byte   0x012ebc    program     static                          
+             done_copying   0x012eca    program     static                          
+       ___return_lbl00002   0x012ee0    program     static                          
+                     done   0x012ee0    program     static                          
+                SetDCPWM3   0x012ee2    program     extern C:\MCC18\src\pmc_common\PWM\pw3setdc.c
+                SetDCPWM1   0x012f40    program     extern C:\MCC18\src\pmc_common\PWM\pw1setdc.c
+                 FXD3232U   0x012f9e    program     extern C:\MCC18\src\traditional\math\fxd3232u.c
+                     loop   0x012fac    program     static                          
+                   _false   0x012fe0    program     static                          
+       ___return_lbl00000   0x012fe4    program     static                          
+                    srand   0x012fe6    program     extern C:\MCC18\src\traditional\stdclib\rand.asm
+                     rand   0x012ff4    program     extern C:\MCC18\src\traditional\stdclib\rand.asm
+                 FXM1616U   0x013022    program     extern C:\MCC18\src\traditional\math\fxm1616u.asm
+                 FXD1616U   0x01305e    program     extern C:\MCC18\src\traditional\math\fxd1616u.c
+                     loop   0x013068    program     static                          
+                  endloop   0x013084    program     static                          
+       ___return_lbl00000   0x013088    program     static                          
+            __zero_memory   0x01308a    program     extern C:\MCC18\src\traditional\proc\p18F97J60.asm
+               zero_block   0x0130a4    program     static C:\MCC18\src\traditional\proc\p18F97J60.asm
+                   loop_h   0x0130a4    program     static C:\MCC18\src\traditional\proc\p18F97J60.asm
+                compare_l   0x0130ac    program     static C:\MCC18\src\traditional\proc\p18F97J60.asm
+                   loop_l   0x0130ae    program     static C:\MCC18\src\traditional\proc\p18F97J60.asm
+               __string_0   0x0130b6    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Microchip\TCPIP Stack\Announce.c
+               __string_0   0x0130d2    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Fiddle Yard.c
+                 _startup   0x0130dc    program     extern C:\MCC18\src\traditional\startup\c018i.c
+                     loop   0x0130ec    program     static                          
+       ___return_lbl00001   0x0130f6    program     static                          
                __config_0   0x01fff8    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Fiddle Yard.c
                __config_1   0x01fff9    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Fiddle Yard.c
                __config_2   0x01fffa    program     static C:\Documents and Settings\Treintje\Bureaublad\fiddleyard-siebwalde\Fiddle Yard\Fiddle Yard.c
