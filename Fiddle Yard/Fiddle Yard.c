@@ -48,7 +48,7 @@ BYTE AN0String[8];
 static void InitAppConfig(void);
 
 #define Init_TestOutputs()			TRISBbits.TRISB5=0,TRISBbits.TRISB4=0,TRISBbits.TRISB3=0,TRISBbits.TRISB2=0,TRISBbits.TRISB1=0;	// Led's
-#define Init_IO()					TRISJ=0xFF,TRISH=0xFF,TRISG=0xFC,TRISF=0xFF,TRISE=0xFF,TRISD=0x00,TRISC=0x00;TRISA=0xC;			// All ports including Pwm and AD
+#define Init_IO()					TRISJ=0xFF,TRISH=0xFF,TRISG=0xFC,TRISF=0xFF,TRISE=0x3F,TRISD=0x60,TRISC=0x00;TRISA=0xC;			// All ports including Pwm and AD
 									
 
 static void Init_Timers(void);
