@@ -47,9 +47,7 @@ BYTE AN0String[8];
 // These may or may not be present in all applications.
 static void InitAppConfig(void);
 
-#define Init_TestOutputs()			TRISBbits.TRISB5=0,TRISBbits.TRISB4=0,TRISBbits.TRISB3=0,TRISBbits.TRISB2=0,TRISBbits.TRISB1=0;	// Led's
-#define Init_IO()					TRISJ=0xFF,TRISH=0xFF,TRISG=0xFC,TRISF=0xFF,TRISE=0x3F,TRISD=0x60,TRISC=0x00;TRISA=0xC;			// All ports including Pwm and AD
-									
+#define Init_IO()			TRISJ=0xFF,TRISH=0xFF,TRISG=0xFC,TRISF=0xFF,TRISE=0x3F,TRISD=0x60,TRISC=0x00;TRISA=0xC;TRISB=0xC0;// All ports including Pwm and AD
 
 static void Init_Timers(void);
 static void Init_Pwm(void);
@@ -64,7 +62,8 @@ static DWORD dwLastIP = 0;
 //MAIN ROUTINE///////////////////////////////////////////////////////////////////////////////////////////
 void main()
 {			
-	TRISA = 0xFF;TRISB = 0xFF;TRISC = 0xFF;TRISD = 0xFF;TRISE = 0xFF;TRISF = 0xFF;TRISG = 0xFF;TRISH = 0xFF;TRISJ = 0xFF;	//	All IO are inputs
+	TRISA = 0xFF;TRISB = 0xFF;TRISC = 0xFF;TRISD = 0xFF;TRISE = 0xFF;TRISF = 0xFF;TRISG = 0xFF;TRISH = 0xFF;TRISJ = 0xFF;			//	All IO are inputs
+	PORTA = 0x00, PORTB = 0x00, PORTC = 0x00, PORTD = 0x00, PORTE = 0x00, PORTF = 0x00, PORTG = 0x00, PORTH = 0x00, PORTJ = 0x00; 	// All IO = 0 
 	ADCON0=0x00;						//AD OFF
 	ADCON1=0x0F;						//All Digital
 	CMCON=0x07;
@@ -73,24 +72,22 @@ void main()
 	TickInit(); 
 	InitAppConfig(); 
 	StackInit(); 
-	
-	Led1=0,Led2=0,Led3=0,Led4=0;
 	Init_Ad();	
 	Init_Pwm();	
-	Init_TestOutputs();	//Leds
 	Init_IO();
+	Led1=0,Led2=0,Led3=0,Led4=0;
 	
 	
 	while(1)
 	{
-		
+
 	 	StackTask();
 	 	StackApplications();
 	 		 	
 	 	Diagnostic();
 	    Command();
 				
-		if (Enable_State_Machine_Update == 1)
+		if (Enable_State_Machine_Update == 1 && Output_Enable == 1)
 		{
 			switch (State)												// not used (state == 4) only used for diagnose purposes only
 			{
@@ -138,11 +135,12 @@ void main()
 		if(dwLastIP != AppConfig.MyIPAddr.Val)
 		{
 			dwLastIP = AppConfig.MyIPAddr.Val;
-						
+					
 			#if defined(STACK_USE_ANNOUNCE)
 				AnnounceIP();
 			#endif
 		}
+		
 	}
 }
 
