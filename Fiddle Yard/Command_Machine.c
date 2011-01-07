@@ -97,7 +97,8 @@ void Command()
 				        }
 				        else{Cmd_Read_Switch = 0;}
 				        
-				        Output_Enable = 1; Led1=1;
+				        Led1=1;
+				        Output_Enable = 1; 
 				        
 				        break;				        
 		
