@@ -1,12 +1,12 @@
 /*********************************************************************
  *
- *	Simple Network Management Protocol (SNMP) Version 1 Agent 
+ *  Simple Network Management Protocol (SNMP) Version 1 Agent 
  *  Simple Network Management Protocol (SNMP) Version 2 community based Agent
  *  Module for Microchip TCP/IP Stack
  *	 -Provides SNMP API for doing stuff
  *	
  *	-Reference: RFC 1157 (for SNMP V1)
- *				RFC 3416 (for SNMPv2C)   	
+ *			     RFC 3416 (for SNMPv2C)   	
  *********************************************************************
  * FileName:        SNMP.c
  * Dependencies:    UDP, ARP
@@ -55,6 +55,7 @@
  *                              	required to lower code space requirements
  * Amit Shirbhate 		09/24/08	SNMPv2c Support, comments and function
  *									headers added.	
+ * Hrisikesh Sahu		04/15/10	SNMPv2 Trap Format Support.
  ********************************************************************/
 
 #define __SNMP_C
@@ -64,221 +65,11 @@
 #if defined(STACK_USE_SNMP_SERVER)
 
 #include "TCPIP Stack/TCPIP.h"
-
+#ifdef STACK_USE_SNMPV3_SERVER
+#include "TCPIP Stack/SNMPv3.h"
+#endif
 #if defined(STACK_USE_MPFS2)
-/****************************************************************************
- *
- *	Begin SNMP for MPFS2.
- *
- ****************************************************************************/
 
-/****************************************************************************
-  Section:
-	Macros and Definitions
-  ***************************************************************************/
-
-// Section:  SNMP agent version types
-#define SNMP_V1                 (0)
-#define SNMP_V2C				(1)
-
-// Section:  SNMP specific variables
-#define STRUCTURE               (0x30u)
-#define ASN_INT                 (0x02u)
-#define OCTET_STRING            (0x04u)
-#define ASN_NULL                (0x05u)
-#define ASN_OID                 (0x06u)
-
-#define SNMP_IP_ADDR            (0x40)
-#define SNMP_COUNTER32          (0x41)
-#define SNMP_GAUGE32            (0x42)
-#define SNMP_TIME_TICKS         (0x43)
-#define SNMP_OPAQUE             (0x44)
-#define SNMP_NSAP_ADDR          (0x45)
-
-// Section:  SNMP v1 and v2c pdu types
-#define GET_REQUEST             (0xa0)
-#define GET_NEXT_REQUEST        (0xa1)
-#define GET_RESPONSE            (0xa2)
-#define SET_REQUEST             (0xa3)
-#define TRAP                    (0xa4)
-#define GET_BULK_REQUEST        (0xa5)
-
-// Section:  SNMP specific data validation
-#define IS_STRUCTURE(a)         (a==STRUCTURE)
-#define IS_ASN_INT(a)           (a==ASN_INT)
-#define IS_OCTET_STRING(a)      (a==OCTET_STRING)
-#define IS_OID(a)               (a==ASN_OID)
-#define IS_ASN_NULL(a)          (a==ASN_NULL)
-#define IS_GET_REQUEST(a)       (a==GET_REQUEST)
-#define IS_GET_NEXT_REQUEST(a)  (a==GET_NEXT_REQUEST)
-#define IS_GET_RESPONSE(a)      (a==GET_RESPONSE)
-#define IS_SET_REQUEST(a)       (a==SET_REQUEST)
-#define IS_TRAP(a)              (a==TRAP)
-#define IS_AGENT_PDU(a)         (a==GET_REQUEST || \
-                                 a==GET_NEXT_REQUEST || \
-                                 a==SET_REQUEST || \
-                                 a==SNMP_V2C_GET_BULK)
-// Section:  SNMP Udp ports
-#define SNMP_AGENT_PORT     (161)
-#define SNMP_NMS_PORT       (162)
-#define AGENT_NOTIFY_PORT   (0xfffe)
-
-// Section:  SNMP Tx pdu offset settings
-#define _SNMPSetTxOffset(o)     (SNMPTxOffset = o)
-#define _SNMPGetTxOffset()      SNMPTxOffset
-
-
-/****************************************************************************
-  Section:
-	Data Structures and Enumerations
-  ***************************************************************************/
-
-// Section:  SNMP specific errors
-typedef enum 
-{
-    SNMP_NO_ERR = 0,			//Snmp no error
-    SNMP_TOO_BIG,				//Value too big error
-    SNMP_NO_SUCH_NAME,			//No such name in MIB error
-    SNMP_BAD_VALUE,				//Not assignable value for the var error	
-    SNMP_READ_ONLY,				//Read only variable, write not allowed err
-    SNMP_GEN_ERR,				//Snmp gen error
-    SNMP_NO_ACCESS,				//Access to modify or read not granted err 
-    SNMP_WRONG_TYPE,			//Variable data type wrong error	
-    SNMP_WRONG_LENGTH,			//Wrong data length error
-    SNMP_WRONG_ENCODING,		//Wrong encoding error
-    SNMP_WRONG_VALUE,			//Wrong value for the var type
-    SNMP_NO_CREATION,			//No creationg error
-    SNMP_INCONSISTENT_VAL,		//Inconsistent value error
-    SNMP_RESOURCE_UNAVAILABE,	//Resource unavailbe error	
-    SNMP_COMMIT_FAILED,			//Modification update failed error
-    SNMP_UNDO_FAILED,			//Modification undo failed	
-    SNMP_AUTH_ERROR,			//Authorization failed error
-    SNMP_NOT_WRITABLE,			//Variable read only
-    SNMP_INCONSISTENT_NAME,		//Inconsistent name
-    SNMP_NO_SUCH_OBJ=128,		//No such object error	
-    SNMP_NO_SUCH_INSTANCE=129,	//No such instance error
-    SNMP_END_OF_MIB_VIEW=130	//Reached to end of mib error
-} SNMP_ERR_STATUS;
-
-
-// Section:  SNMP specific data tyes
-typedef enum 
-{
-    INT8_VAL        = 0x00,		//8 bit integer value
-    INT16_VAL       = 0x01,		//16 bit integer value
-    INT32_VAL       = 0x02,		//32 bit integer value
-    BYTE_ARRAY      = 0x03,		//Aray of bytes	
-    ASCII_STRING    = 0x04,		//Ascii string type
-    IP_ADDRESS      = 0x05,		//IP address variable
-    COUNTER32       = 0x06,		//32 bit counter variable
-    TIME_TICKS_VAL  = 0x07,		//Timer vakue counter variable	
-    GAUGE32         = 0x08,		//32 bit guage variable
-    OID_VAL         = 0x09,		//Object id value var
-    DATA_TYPE_UNKNOWN			//Unknown data type
-} DATA_TYPE;
-
-
-// Section:  SNMP specific mib file access information
-typedef union
-{
-    struct
-    {
-        unsigned int bIsFileOpen : 1;  //MIB file access int flag
-    } Flags;						
-    BYTE Val;						   //MIB file access byte flag
-} SNMP_STATUS;
-
-
-// Section:  SNMP OID index information
-typedef union 
-{
-    struct
-    {
-        unsigned int bIsOID:1;	//value is OID/index int flag
-    } Flags;
-    BYTE Val;					//value is OID/index byte flag
-} INDEX_INFO;
-
-
-// Section:  SNMP object information
-typedef union 
-{
-    struct
-    {
-        unsigned int bIsDistantSibling : 1; //Object have distant sibling node
-        unsigned int bIsConstant : 1;		//Object is constant
-        unsigned int bIsSequence : 1;		//Object is sequence
-        unsigned int bIsSibling : 1;		//Sibling node flag
-
-        unsigned int bIsParent : 1;			//Node is parent flag	
-        unsigned int bIsEditable : 1;		//Node is editable flag
-        unsigned int bIsAgentID : 1;		//Node have agent id flag
-        unsigned int bIsIDPresent : 1;		//Id present flag
-    } Flags;
-	BYTE Val;								//MIB Obj info as byte value
-} MIB_INFO;
-
-
-// Section:  SNMP reuested variable list error status information.
-//Max variable in a request supported 15
-typedef struct 
-{
-WORD noSuchObjectErr;		//Var list no such obj errors flags
-WORD noSuchNameErr;			//Var list no such name error 
-WORD noSuchInstanceErr;		//Var list no such instance error
-WORD endOfMibViewErr;		//Var list end of mib view error
-}reqVarErrStatus;  
-
-
-// Section:  ASN data type info
-typedef struct 
-{
-    BYTE asnType;	//ASN data type
-    BYTE asnLen;	//ASN data length
-} DATA_TYPE_INFO;
-
-
-// Section:  SNMP trap notification information for agent
-typedef struct 
-{
-    char community[NOTIFY_COMMUNITY_LEN];	//Community name array
-    BYTE communityLen;						//Community name length
-    SNMP_ID agentIDVar;						//Agent id for trap identification
-    BYTE notificationCode;					//Trap notification code
-    UDP_SOCKET socket;						//Udp socket number	
-    DWORD_VAL timestamp;					//Time stamp for trap
-} SNMP_NOTIFY_INFO;
-
-
-// Section:  SNMP MIB variable object information
-typedef struct 
-{
-    DWORD           hNode;		//Node location in the mib		
-    BYTE            oid;		//Object Id
-    MIB_INFO        nodeInfo;	//Node info
-    DATA_TYPE       dataType;	//Data type 
-    SNMP_ID         id;			//Snmp Id	
-    WORD_VAL        dataLen;	//Data length	
-    DWORD           hData;		//Data
-    DWORD           hSibling;	//Sibling info
-    DWORD           hChild;		//Child info
-    BYTE            index;		//Index of object
-    BYTE            indexLen;	//Index length
-} OID_INFO;
-
-
-// Section:  SNMP pdu information database 
-typedef struct 
-{
-   	DWORD_VAL		requestID;		//Snmp request id
-	BYTE	        nonRepeators;	//# non repeaters in the request	
-    BYTE			maxRepetitions;	//# max repeaters in the request 
-	BYTE            pduType;		//Snmp pdu type
-	BYTE            errorStatus;	//Pdu error status
-    BYTE            erroIndex;		//Pdu error Index
-	BYTE			snmpVersion;	//Snmp version
-	WORD			pduLength;		//Pdu length
-} PDU_INFO;
 
 
 /****************************************************************************
@@ -287,43 +78,40 @@ typedef struct
   ***************************************************************************/
 
 // Section: Process SNMP request pdus,form response pdus routines
-static BYTE _SNMPGet(void);
-static void _SNMPPut(BYTE v);
+//static BYTE _SNMPGet(void);
+void _SNMPPut(BYTE v);
 static BYTE FindOIDsInRequest(WORD pdulen);
 static SNMP_ACTION ProcessHeader(PDU_INFO* pduDbPtr, char* community, BYTE* len);
 static BOOL ProcessGetSetHeader(PDU_INFO* pduDbPtr);
 static BOOL ProcessVariables(PDU_INFO* pduDbPtr,char* community, BYTE len);
-static BYTE ProcessGetVar(OID_INFO* rec, BOOL bAsOID);
-static BYTE ProcessGetNextVar(OID_INFO* rec);
-static BYTE ProcessSetVar(PDU_INFO* pduDbPtr,OID_INFO* rec, SNMP_ERR_STATUS* errorStatus);
-static BYTE ProcessGetBulkVar(OID_INFO* rec, BYTE* oidValuePtr, BYTE* oidLenPtr,BYTE* successor);
 
 // Section: Routines to validate snmp request pdu elements for SNMP format
 static BOOL IsValidOID(BYTE* oid, BYTE* len);
 static BOOL IsValidCommunity(char* community, BYTE* len);
-static BOOL IsValidInt(DWORD* val);
+//static BOOL IsValidInt(DWORD* val);
 static BOOL IsValidPDU(SNMP_ACTION* pdu);
-static BYTE IsValidLength(WORD* len);
-static BYTE IsValidStructure(WORD* dataLen);
+BYTE IsValidLength(WORD* len);
+//static BYTE IsValidStructure(WORD* dataLen);
 static BOOL IsASNNull(void);
 
 // Section: Routines to read/search OIDs,objects from the SNMP MIB database
-static BYTE OIDLookup(PDU_INFO* pduDbPtr,BYTE* oid, BYTE oidLen, OID_INFO* rec);
-static BOOL GetNextLeaf(OID_INFO* rec);
-static BOOL GetOIDStringByAddr(OID_INFO* rec, BYTE* oidString, BYTE* len);
-static BOOL GetDataTypeInfo(DATA_TYPE dataType, DATA_TYPE_INFO* info);
+BYTE OIDLookup(PDU_INFO* pduDbPtr,BYTE* oid, BYTE oidLen, OID_INFO* rec);
+BOOL GetNextLeaf(OID_INFO* rec);
+BOOL GetOIDStringByAddr(OID_INFO* rec, BYTE* oidString, BYTE* len);
+BOOL GetDataTypeInfo(DATA_TYPE dataType, DATA_TYPE_INFO* info);
 static void ReadMIBRecord(DWORD h, OID_INFO* rec);
 
 // Section: Global variables configuration for pdu processings
-static void _SNMPDuplexInit(UDP_SOCKET socket);
-static void SetErrorStatus(WORD errorStatusOffset,WORD errorIndexOffset,SNMP_ERR_STATUS errorStatus,BYTE errorIndex);
+ void _SNMPDuplexInit(UDP_SOCKET socket);
+void SetErrorStatus(WORD errorStatusOffset,WORD errorIndexOffset,SNMP_ERR_STATUS errorStatus,BYTE errorIndex);
 
 // Section: Routine to check if private mib object is requested by NMS.
 static BOOL SNMPCheckIfPvtMibObjRequested(BYTE* OIDValuePtr);
 
 // This function is used only when TRAP is enabled.
 #if !defined(SNMP_TRAP_DISABLED)
-static BOOL GetOIDStringByID(SNMP_ID id, OID_INFO* info, BYTE* oidString, BYTE* len);
+BOOL GetOIDStringByID(SNMP_ID id, OID_INFO* info, BYTE* oidString, BYTE* len);
+extern void Snmpv3InitializeUserDataBase(void);
 #endif
 
 
@@ -332,19 +120,26 @@ static BOOL GetOIDStringByID(SNMP_ID id, OID_INFO* info, BYTE* oidString, BYTE* 
   Section:
 	Global Variables
   ***************************************************************************/
-static WORD SNMPTxOffset;	//Snmp udp buffer tx offset
+WORD SNMPTxOffset;	//Snmp udp buffer tx offset
 static WORD SNMPRxOffset;	//Snmp udp buffer rx offset		
 static SNMP_STATUS SNMPStatus;	//MIB file access status
 static UDP_SOCKET SNMPAgentSocket = INVALID_UDP_SOCKET;	//Snmp udp socket
-static MPFS_HANDLE hMPFS;	//MPFS file handler
+MPFS_HANDLE hMPFS;	//MPFS file handler
 extern TRAP_INFO trapInfo;	//trap information
+WORD msgSecrtyParamLenOffset;
+/* This variable is used for gext next request for zero instance  */
+BOOL getZeroInstance;
 
-static BYTE appendZeroToOID;//global flag to modify OID by appending zero 	
+BYTE appendZeroToOID;//global flag to modify OID by appending zero 	
 reqVarErrStatus snmpReqVarErrStatus; //vars	from req list processing err status	
+WORD msgSecrtyParamLenOffset;
+
+
+
 
 // SNMPNotifyInfo is not required if TRAP is disabled
 #if !defined(SNMP_TRAP_DISABLED)
-static SNMP_NOTIFY_INFO SNMPNotifyInfo; //notify info for trap
+SNMP_NOTIFY_INFO SNMPNotifyInfo; //notify info for trap
 #endif
 
 //ASN format datatype for snmp v1 and v2c
@@ -362,6 +157,17 @@ static ROM DATA_TYPE_INFO dataTypeTable[] =
     { ASN_OID,           0xff    }  //OID_VAL           
 };
 
+/*
+ Below oidStr is the collection of OID variables which are not part of MIB.h file
+*/
+SNMPNONMIBRECDINFO gSnmpNonMibRecInfo[SNMP_MAX_NON_REC_ID_OID] =
+{
+#ifdef STACK_USE_SNMPV3_SERVER		
+	{{43,6,1,4,1,0x81,0x85,0x47,6},SNMP_V3},  /* SNMPv3 PVT test MIB OID is not part of mib.h file */
+#endif			
+	{{43,6,1,2,1,1},SNMP_V2C}, /* Max matching Subids of the MIB2.system tree*/	
+	{{43,6,1,4,1,0x81,0x85,0x47,1},SNMP_V2C}, /*Max matching Subids of the microchip.product tree*/			
+};
 
 /****************************************************************************
   ===========================================================================
@@ -403,7 +209,10 @@ void SNMPInit(void)
     SNMPAgentSocket = UDPOpen(SNMP_AGENT_PORT, 0, INVALID_UDP_SOCKET);
     // SNMPAgentSocket must not be INVALID_UDP_SOCKET.
     // If it is, compile time value of UDP Socket numbers must be increased.
-
+#ifdef STACK_USE_SNMPV3_SERVER
+	Snmpv3Init();
+#endif
+	
     return;
 }
 
@@ -437,7 +246,7 @@ BOOL SNMPTask(void)
     char community[SNMP_COMMUNITY_MAX_LEN];
     BYTE communityLen;
   	PDU_INFO pduInfoDB; //received pdu information database
-    BOOL lbReturn;
+    BOOL lbReturn=TRUE;
 
 	if(SNMPAgentSocket == INVALID_UDP_SOCKET)
 		return TRUE;
@@ -448,19 +257,20 @@ BOOL SNMPTask(void)
 
     // As we process SNMP variables, we will prepare response on-the-fly
     // creating full duplex transfer.
-    // Current MAC layer does not support full duplex transfer, so
-    // SNMP needs to manage its own full duplex connection.
     // Prepare for full duplex transfer.
     _SNMPDuplexInit(SNMPAgentSocket);
 
 	communityLen = 0;	// Suppress C30 warning: 'communityLen' may be used uninitialized in this function
     pduInfoDB.pduType = ProcessHeader(&pduInfoDB,community, &communityLen);
 
-    if ( pduInfoDB.pduType == SNMP_ACTION_UNKNOWN )
-        goto _SNMPDiscard;
+	if(pduInfoDB.snmpVersion != SNMP_V3)
+	{
+		if ( pduInfoDB.pduType == SNMP_ACTION_UNKNOWN )
+		    goto _SNMPDiscard;
 
-   if ( !ProcessGetSetHeader(&pduInfoDB))	
-        goto _SNMPDiscard;
+		if ( !ProcessGetSetHeader(&pduInfoDB))	
+		    goto _SNMPDiscard;
+	}
 
     // Open MIB file.
     SNMPStatus.Flags.bIsFileOpen = FALSE;
@@ -475,7 +285,19 @@ BOOL SNMPTask(void)
        SNMPStatus.Flags.bIsFileOpen = TRUE;
     }
 
-    lbReturn = ProcessVariables(&pduInfoDB,community, communityLen);
+	if(pduInfoDB.snmpVersion != SNMP_V3) // if(SNMP_V1, SNMP_V2C)
+	{
+    	lbReturn = ProcessVariables(&pduInfoDB,community, communityLen);
+	}
+
+	#ifdef STACK_USE_SNMPV3_SERVER
+	else
+	{
+		
+		lbReturn = ProcessSnmpv3MsgData(&pduInfoDB);
+	}
+	#endif 
+	
     if ( SNMPStatus.Flags.bIsFileOpen )
     {
        MPFSClose(hMPFS);
@@ -487,11 +309,19 @@ BOOL SNMPTask(void)
 	if(gSendTrapFlag==(BYTE)FALSE)	
    		UDPFlush();
 
+	#ifdef STACK_USE_SNMPV3_SERVER
+	Snmpv3FreeDynAllocMem();
+	#endif 
+
     return TRUE;
 
 _SNMPDiscard:
     UDPDiscard();
 
+	#ifdef STACK_USE_SNMPV3_SERVER
+	Snmpv3FreeDynAllocMem();
+	#endif 
+	
     return TRUE;
 }
 
@@ -598,6 +428,486 @@ BOOL SNMPIsNotifyReady(IP_ADDR* remoteHost)
     return FALSE;
 }
 
+/****************************************************************************
+  Function:
+	BYTE *getSnmpV2GenTrapOid(BYTE generic_trap_code,BYTE *len)
+  Summary:
+	Resolves generic trap code to generic trap OID.
+	
+  Description:
+  	This function resolves given generic trap code  to generic trap OID.
+	
+  Precondition:
+	SNMPNotifyPrepare() is already called.
+
+  Parameters:
+	generic_trap_code  - GENERIC_TRAP_NOTIFICATION_TYPE
+	len 	- generic trap OID length
+      
+  Return Values:
+	BYTE *- TRAP OID
+    
+  Remarks:
+	This would fail if generic_trap_code is not coming under 
+	GENERIC_TRAP_NOTIFICATION_TYPE 
+ ***************************************************************************/
+
+BYTE *getSnmpV2GenTrapOid(BYTE generic_trap_code,BYTE *len)
+{
+    static  BYTE gen_trap_oid[] = {0x2b,6,1,6,3,1,1,5,1};
+/*	
+	static  BYTE cold_trap_oid[] = {0x2b,6,1,6,3,1,1,5,1};
+    static  BYTE warm_start_oid = {0x2b,6,1,6,3,1,1,5,2};
+    static  BYTE auth_fail_oid  = {0x2b,6,1,6,3,1,1,5,5};
+    static  BYTE linkdown_oid   = {0x2b,6,1,6,3,1,1,5,3};
+    static  BYTE linkup_oid     = {0x2b,6,1,6,3,1,1,5,4};
+*/
+	static BYTE snmptrap_oids[]  = {0x2b,6,1,6,3,1,1,4,1 }; 
+
+	*len = sizeof(gen_trap_oid);
+    switch (generic_trap_code) 
+	{
+      case COLD_START:
+	  	  gen_trap_oid[*len-1] = 1;
+        break;
+
+      case WARM_START:
+        gen_trap_oid[*len-1] = 2;
+        break;
+      case LINK_UP:
+           gen_trap_oid[*len-1] = 4;
+        break;
+      case LINK_DOWN:
+          gen_trap_oid[*len-1] = 3;
+        break;
+      case AUTH_FAILURE:
+          gen_trap_oid[*len-1] = 5;
+        break;
+	case ENTERPRISE_SPECIFIC:
+		*len = sizeof(snmptrap_oids);
+		return snmptrap_oids;
+      default:
+          return NULL;
+
+    } /* switch (generic_trap_code) */
+
+    return gen_trap_oid;
+
+} /* end getSnmpV2TrapOid() */
+
+
+
+/****************************************************************************
+  Function:
+	BOOL SNMPNotify(SNMP_ID var,SNMP_VAL val,SNMP_INDEX index)
+
+  Summary:
+  	Creates and Sends TRAP pdu.
+	
+  Description:
+	This function creates SNMP V2 Trap PDU and sends it to previously specified
+	remoteHost.
+	
+	snmpv1 trap pdu:
+       | PDU-type | enterprise | agent-addr | generic-trap | specific-trap |
+       | time-stamp | varbind-list |
+
+       The v1 enterprise is mapped directly to SNMPv2TrapOID.0
+	SNMP v2 trap pdu:
+       version (0 or 1) | community | SNMP-PDU |pdu-type | request-id | error-status 
+       |err-index |varbinds
+
+       The first two variables (in varbind-list) of snmpv2 are: sysUpTime.0 and
+        SNMPv2TrapOID.0
+
+        Generic Trap OID is used as the varbind for authentication failure.
+
+  Precondition:
+ 	SNMPIsNotifyReady() is already called and returned TRUE.
+
+  Parameters:
+	var     - SNMP var ID that is to be used in notification
+	val     - Value of var. Only value of BYTE, WORD or DWORD can be sent.
+	index   - Index of var. If this var is a single,index would be 0, or else 
+			  if this var Is a sequence, index could be any value 
+			  from 0 to 127
+	  
+  Return Values:
+	TRUE	-	if SNMP notification was successful sent.
+	   			This does not guarantee that remoteHost recieved it.
+	FALSE	-	Notification sent failed.
+  			    This would fail under following contions:
+  			    1) Given SNMP_BIB_FILE does not exist in MPFS
+  			    2) Given var does not exist.
+  			    3) Previously given agentID does not exist
+  			    4) Data type of given var is unknown - only
+  			       possible if MPFS itself was corrupted.
+
+  Remarks:
+	This would fail if there were not UDP socket to open.
+ ***************************************************************************/
+#if defined(SNMP_STACK_USE_V2_TRAP)
+
+BOOL SNMPNotify(SNMP_ID var, SNMP_VAL val, SNMP_INDEX index)
+{
+	char* pCommunity;
+	BYTE len;
+	BYTE OIDValue[OID_MAX_LEN];
+	BYTE OIDLen;
+	static DWORD varbindlen = 0;
+	BYTE agentIDLen;
+	BYTE* pOIDValue;
+	static WORD packetStructLenOffset = 0;
+	static WORD pduStructLenOffset = 0;
+	static WORD varBindStructLenOffset = 0;
+	static WORD varPairStructLenOffset = 0;
+	static WORD prevOffset = 0;
+	WORD tempOffset = 0;
+	OID_INFO rec;
+	DATA_TYPE_INFO dataTypeInfo;
+	BYTE	snmptrap_oids[]  = {0x2b,6,1,6,3,1,1,4,1 }; /* len=10 */
+	BYTE	sysUpTime_oids[] = {0x2b,6,1,2,1,1,3}; /* len = 8 */
+	WORD_VAL trapVarBindLen={0};
+
+	hMPFS = MPFSOpenROM((ROM BYTE*)SNMP_BIB_FILE_NAME);
+	if ( hMPFS == MPFS_INVALID_HANDLE )
+	{
+		UDPClose(SNMPNotifyInfo.socket);
+		return FALSE;
+	}
+	
+	if((packetStructLenOffset == 0)&&(pduStructLenOffset==0))
+	{
+		_SNMPDuplexInit(SNMPNotifyInfo.socket);
+		prevOffset = _SNMPGetTxOffset();
+		
+		len = SNMPNotifyInfo.communityLen;
+		pCommunity = SNMPNotifyInfo.community;
+
+		_SNMPPut(STRUCTURE);			// First item is packet structure
+		_SNMPPut(0x82);
+		packetStructLenOffset = SNMPTxOffset;
+		_SNMPPut(0);
+		_SNMPPut(0);
+
+		// Put SNMP version info.
+		_SNMPPut(ASN_INT);				// Int type.
+		_SNMPPut(1);					// One byte long value.
+		_SNMPPut(SNMP_V2C); 		  // v2
+
+		//len = strlen(community);	// Save community length for later use.
+		_SNMPPut(OCTET_STRING); 		// Octet string type.
+		_SNMPPut(len);					// community string length
+		while( len-- )					// Copy entire string.
+			_SNMPPut(*(pCommunity++));
+
+		//TRAP Version type.  
+		_SNMPPut(SNMP_V2_TRAP);
+		_SNMPPut(0x82);
+		pduStructLenOffset = SNMPTxOffset;
+		_SNMPPut(0);
+		_SNMPPut(0);
+
+		//put Request ID for the trapv2 as 1 
+		_SNMPPut(ASN_INT);	// Int type.
+		_SNMPPut(4);		// To simplify logic, always use 4 byte long requestID
+		_SNMPPut(0); _SNMPPut(0); _SNMPPut(0); _SNMPPut(1); 
+
+		// Put error status.
+		_SNMPPut(ASN_INT);				// Int type
+		_SNMPPut(1);					// One byte long.
+		_SNMPPut(0);					// Placeholder.
+
+		// Similarly put error index.
+		_SNMPPut(ASN_INT);				// Int type
+		_SNMPPut(1);					// One byte long
+		_SNMPPut(0);					// Placeholder.
+
+		// Variable binding structure header
+		_SNMPPut(0x30);
+		_SNMPPut(0x82);
+		varBindStructLenOffset = SNMPTxOffset;
+		_SNMPPut(0);
+		_SNMPPut(0);
+
+		// Create variable name-pair structure
+		_SNMPPut(0x30);
+		varPairStructLenOffset = SNMPTxOffset;
+		_SNMPPut(0);
+
+		// Set 1st varbind object i,e sysUpTime.0 time stamp for the snmpv2 trap
+		// Get complete notification variable OID string.
+
+		_SNMPPut(ASN_OID);
+		OIDLen = (BYTE)sizeof(sysUpTime_oids);
+		_SNMPPut((BYTE)(OIDLen)+1);
+		pOIDValue = sysUpTime_oids;
+		while( OIDLen-- )
+			_SNMPPut(*pOIDValue++);
+
+		//1st varbind	 and this is a scalar object so index = 0
+		_SNMPPut(0);
+
+		// Time stamp
+		_SNMPPut(SNMP_TIME_TICKS);
+		_SNMPPut(4);
+		_SNMPPut(SNMPNotifyInfo.timestamp.v[3]);
+		_SNMPPut(SNMPNotifyInfo.timestamp.v[2]);
+		_SNMPPut(SNMPNotifyInfo.timestamp.v[1]);
+		_SNMPPut(SNMPNotifyInfo.timestamp.v[0]);
+
+		tempOffset = _SNMPGetTxOffset();
+		//set the snmp time varbind trap offset 
+		_SNMPSetTxOffset(varPairStructLenOffset);
+
+		// SNMP time stamp varbind length
+		OIDLen = 2							// 1st varbind header 
+		   + (BYTE)sizeof(sysUpTime_oids)
+		   + 1						   // index byte
+		   + 6 ;						// time stamp
+		   
+		_SNMPPut(OIDLen);
+		//set the previous TX offset
+		_SNMPSetTxOffset(tempOffset);
+		varbindlen += OIDLen // varbind length
+					+ 2;  // varbind type(30) and length of individual varbind pdu
+					
+		// Set 2nd varbind object i,e snmpTrapOID.0 for the snmpv2 trap
+		// Get complete notification variable OID string.
+
+		// Create variable name-pair structure
+		_SNMPPut(0x30);
+		varPairStructLenOffset = SNMPTxOffset;
+		_SNMPPut(0);
+
+		// Copy OID string into PDU.
+		_SNMPPut(ASN_OID);
+		OIDLen = (BYTE)sizeof(snmptrap_oids);
+		_SNMPPut((BYTE)(OIDLen)+1);
+
+		pOIDValue = snmptrap_oids;
+		while( OIDLen-- )
+		_SNMPPut(*pOIDValue++);
+
+		//2nd varbind  and this is a scalar object so index = 0
+		_SNMPPut(0);
+
+		// for microchip , SNMPNotifyInfo.agentIDVar == MICROCHIP
+		if ( !GetOIDStringByID(SNMPNotifyInfo.agentIDVar, &rec, OIDValue, &OIDLen) )
+		{
+			MPFSClose(hMPFS);
+			UDPClose(SNMPNotifyInfo.socket);
+			return FALSE;
+		}
+		if ( !rec.nodeInfo.Flags.bIsAgentID )
+		{
+			MPFSClose(hMPFS);
+			UDPClose(SNMPNotifyInfo.socket);
+			return FALSE;
+		}
+
+		MPFSSeek(hMPFS, rec.hData, MPFS_SEEK_START);
+
+		_SNMPPut(ASN_OID);
+		MPFSGet(hMPFS, &len);
+		agentIDLen = len;
+		_SNMPPut(agentIDLen);
+		while( len-- )
+		{
+			BYTE c;
+			MPFSGet(hMPFS, &c);
+			_SNMPPut(c);
+		}
+		tempOffset = _SNMPGetTxOffset();
+		//set the snmp varbind trap offset
+		_SNMPSetTxOffset(varPairStructLenOffset);
+		// Snmp trap varbind length 
+		OIDLen = 2					 // Agent ID header bytes
+			+ (BYTE)sizeof(snmptrap_oids)
+			+ 1 					   // index byte
+			+ 2 					 // header
+			+ agentIDLen;				 // Agent ID bytes				  
+		_SNMPPut(OIDLen);
+
+		//set the previous TX offset
+		_SNMPSetTxOffset(tempOffset);
+		varbindlen += OIDLen // varbind length
+					+ 2;	 // varbind type(30) and length of individual varbind pdu
+	
+	}
+	else
+	{ // collect the last varbind offset value.
+		_SNMPSetTxOffset(varPairStructLenOffset);
+	}
+	
+	// Create variable name-pair structure
+	_SNMPPut(0x30);
+	_SNMPPut(0x82);
+	varPairStructLenOffset = SNMPTxOffset;
+	_SNMPPut(0);
+	_SNMPPut(0);
+	/* to send generic trap trap */
+	if(gGenericTrapNotification != ENTERPRISE_SPECIFIC)
+	{
+		pOIDValue = getSnmpV2GenTrapOid(gGenericTrapNotification,&OIDLen);			
+		if(pOIDValue == NULL)
+		{
+			MPFSClose(hMPFS);
+			UDPClose(SNMPNotifyInfo.socket);
+			return FALSE;
+		}
+		// Copy OID string into PDU.
+		_SNMPPut(ASN_OID);
+		_SNMPPut((BYTE)(OIDLen)+1);
+		while( OIDLen-- )
+		_SNMPPut(*pOIDValue++);
+
+		//2nd varbind  and this is a scalar object so index = 0
+		_SNMPPut(0);
+		// for microchip , SNMPNotifyInfo.agentIDVar == MICROCHIP
+		if ( !GetOIDStringByID(SNMPNotifyInfo.agentIDVar, &rec, OIDValue, &OIDLen) )
+		{
+			MPFSClose(hMPFS);
+			UDPClose(SNMPNotifyInfo.socket);
+			return FALSE;
+		}
+		if ( !rec.nodeInfo.Flags.bIsAgentID )
+		{
+			MPFSClose(hMPFS);
+			UDPClose(SNMPNotifyInfo.socket);
+			return FALSE;
+		}
+
+		MPFSSeek(hMPFS, rec.hData, MPFS_SEEK_START);
+
+		_SNMPPut(ASN_OID);
+		MPFSGet(hMPFS, &len);
+		agentIDLen = len;
+		_SNMPPut(agentIDLen);
+		while( len-- )
+		{
+			BYTE c;
+			MPFSGet(hMPFS, &c);
+			_SNMPPut(c);
+		}
+		tempOffset = _SNMPGetTxOffset();
+		//set the snmp varbind trap offset
+		_SNMPSetTxOffset(varPairStructLenOffset);
+		// Snmp trap varbind length 
+		trapVarBindLen.Val = 2					 // Agent ID header bytes
+			+ (BYTE)sizeof(snmptrap_oids)
+			+ 1 					   // index byte
+			+ 2 					 // header
+			+ agentIDLen;				 // Agent ID bytes				  
+		_SNMPPut(trapVarBindLen.v[1]);
+		_SNMPPut(trapVarBindLen.v[0]);
+		len = trapVarBindLen.Val;
+	}
+	else
+	{
+		// Get complete notification variable OID string.
+		if ( !GetOIDStringByID(var, &rec, OIDValue, &OIDLen) )
+		{
+			MPFSClose(hMPFS);
+			UDPClose(SNMPNotifyInfo.socket);
+			return FALSE;
+		}		
+		pOIDValue = OIDValue;
+	
+		// Copy OID string into packet.
+		_SNMPPut(ASN_OID);
+		_SNMPPut((BYTE)(OIDLen+1));
+		len = OIDLen;
+		while( len-- )
+			_SNMPPut(*pOIDValue++);
+		_SNMPPut(index);
+
+		// Encode and Copy actual data bytes
+		if ( !GetDataTypeInfo(rec.dataType, &dataTypeInfo) )
+		{
+			MPFSClose(hMPFS);
+			UDPClose(SNMPNotifyInfo.socket);
+			return FALSE;
+		}
+		_SNMPPut(dataTypeInfo.asnType);
+		 //Modified to Send trap even for  dataTypeInfo.asnType= ASCII_STRING, 
+		//where dataTypeInfo.asnLen=0xff
+		if ( dataTypeInfo.asnLen == 0xff )
+		{
+			dataTypeInfo.asnLen=0x4;
+			val.dword=0;
+		}
+		len = dataTypeInfo.asnLen;
+
+		_SNMPPut(len);
+		while( len-- )
+			_SNMPPut(val.v[len]);
+	  
+		trapVarBindLen.Val = dataTypeInfo.asnLen	// data bytes count
+			 + 1					// Length byte
+			 + 1					// Data type byte
+			 + OIDLen				// OID bytes
+			 + 2					// OID header bytes
+			 + 1;					// index byte
+		tempOffset = _SNMPGetTxOffset();
+		_SNMPSetTxOffset(varPairStructLenOffset);
+		_SNMPPut(trapVarBindLen.v[1]);
+		_SNMPPut(trapVarBindLen.v[0]);						 
+	} 
+	//set the previous TX offset
+	_SNMPSetTxOffset(tempOffset);
+	varPairStructLenOffset = tempOffset;
+	
+	varbindlen += trapVarBindLen.Val // length of varbind
+				+4; // varbind type(30) and 0x82 , lenght1 and length2 of individual varbind pdu
+	if(gSetTrapSendFlag == TRUE)
+	{
+		MPFSClose(hMPFS);
+		return TRUE;
+	}
+	trapVarBindLen.Val = varbindlen;
+	_SNMPSetTxOffset(varBindStructLenOffset);
+	_SNMPPut(trapVarBindLen.v[1]);
+	_SNMPPut(trapVarBindLen.v[0]);
+	trapVarBindLen.Val = varbindlen
+	+ 4 				   //  Variable Binding structure header(0x30,0x82,length1,length2)
+	+ 12;					// req , error and error status for SNMPv2
+
+	_SNMPSetTxOffset(pduStructLenOffset);
+	_SNMPPut(trapVarBindLen.v[1]);
+	_SNMPPut(trapVarBindLen.v[0]);
+
+
+	trapVarBindLen.Val = trapVarBindLen.Val 						  // PDU struct length
+	+ 4 							// PDU trap header
+	+ SNMPNotifyInfo.communityLen			 // Community string bytes
+	+ 2 							// Community header bytes
+	+ 3;							// SNMP version bytes
+
+
+	_SNMPSetTxOffset(packetStructLenOffset);
+	_SNMPPut(trapVarBindLen.v[1]);
+	_SNMPPut(trapVarBindLen.v[0]);
+
+	_SNMPSetTxOffset(prevOffset);
+
+// after setting all the offset values, initialize all static variables to 0.
+	packetStructLenOffset = 0;
+	pduStructLenOffset = 0;
+	varBindStructLenOffset = 0;
+	varPairStructLenOffset = 0;
+	prevOffset = 0;
+	varbindlen = 0;
+	
+	MPFSClose(hMPFS);
+	UDPFlush();
+	UDPClose(SNMPNotifyInfo.socket);
+
+	return TRUE;
+}
+
+
+#else /* SNMP_STACK_USE_V2_TRAP */
 
 /****************************************************************************
   Function:
@@ -609,7 +919,12 @@ BOOL SNMPIsNotifyReady(IP_ADDR* remoteHost)
   Description:
 	This function creates SNMP trap PDU and sends it to previously specified
 	remoteHost.
-	
+	snmpv1 trap pdu:
+       | PDU-type | enterprise | agent-addr | generic-trap | specific-trap |
+       | time-stamp | varbind-list |
+
+       The v1 enterprise is mapped directly to SNMPv2TrapOID.0
+       
   Precondition:
 	SNMPIsNotifyReady() is already called and returned TRUE.
 
@@ -672,8 +987,8 @@ BOOL SNMPNotify(SNMP_ID var, SNMP_VAL val, SNMP_INDEX index)
 
 	//Application has to decide which snmp version has to be 
 	//updated to the notification pdu.
-    //_SNMPPut(SNMP_V1);              // v1.
-    _SNMPPut(SNMP_V2C);           // v2
+    _SNMPPut(SNMP_V1);              // v1.
+    
 
     //len = strlen(community);  // Save community length for later use.
     _SNMPPut(OCTET_STRING);         // Octet string type.
@@ -723,12 +1038,10 @@ BOOL SNMPNotify(SNMP_ID var, SNMP_VAL val, SNMP_INDEX index)
     _SNMPPut(AppConfig.MyIPAddr.v[2]);
     _SNMPPut(AppConfig.MyIPAddr.v[3]);
 
-	// Geberic Trap code
+	// Geberic/Enterprise Trap code
 	 _SNMPPut(ASN_INT);
 	 _SNMPPut(1);
 	 _SNMPPut(gGenericTrapNotification); 
-  //_SNMPPut(6);            // Enterprise specific trap code
-//    _SNMPPut(4);            // Enterprise specific trap code
 
 	// Specific Trap code
     _SNMPPut(ASN_INT);
@@ -780,28 +1093,14 @@ BOOL SNMPNotify(SNMP_ID var, SNMP_VAL val, SNMP_INDEX index)
 
     _SNMPPut(dataTypeInfo.asnType);
 
-	#if 0  //Amit 
-    // In this version, only data type of 4 bytes or less long can be
-    // notification variable.
-    if ( dataTypeInfo.asnLen == 0xff )
-    {
-        MPFSClose(hMPFS);
-        UDPClose(SNMPNotifyInfo.socket);
-        return FALSE;
-    }
-	#endif
-
-	#if 1 
 
 	//Modified to Send trap even for  dataTypeInfo.asnType= ASCII_STRING, 
 	//where dataTypeInfo.asnLen=0xff
-
 	if ( dataTypeInfo.asnLen == 0xff )
 	{
 		dataTypeInfo.asnLen=0x4;
 		val.dword=0;
 	}
-	#endif
 
     len = dataTypeInfo.asnLen;
     _SNMPPut(len);
@@ -850,6 +1149,9 @@ BOOL SNMPNotify(SNMP_ID var, SNMP_VAL val, SNMP_INDEX index)
 
     return TRUE;
 }
+
+#endif 
+
 #endif // Code removed when SNMP_TRAP_DISABLED
 
 
@@ -887,41 +1189,162 @@ BOOL SNMPNotify(SNMP_ID var, SNMP_VAL val, SNMP_INDEX index)
 	The received pdu will be processed only if this routine returns the
 	pdu type else the pdu is discarded as not Snmp pdu.
  ***************************************************************************/
+
+
 static SNMP_ACTION ProcessHeader(PDU_INFO* pduDbPtr, char* community, BYTE* len)
 {
-    DWORD_VAL tempLen;
-    SNMP_ACTION pdu;
+    DWORD_VAL tempLen; 
+	SNMP_ACTION pdu=0;   
+	UINT8 snmpMsgBuf[7];/* 0x30,0x81/0x82/length,0xlen,0xlen,0x02,0x01,0x03(Snmp Version)*/
+	WORD_VAL snmpMsgLen;
+	WORD retlen,tempCntr=0;
+	UINT8* tempPtr;
+#ifdef STACK_USE_SNMPV3_SERVER
+	UINT8* inDataPtr;
+	BYTE extraMemReqdFor16BytesBlocks;
+#endif
+	tempPtr=snmpMsgBuf;
+
+	//Get complete StructureOF var binds info
+	*snmpMsgBuf = _SNMPGet();
+	tempCntr+=1;
 	
-    // Very first item must be a structure
-    if ( !IsValidStructure((WORD*)&tempLen) )
-        return SNMP_ACTION_UNKNOWN;
+	if(!IS_STRUCTURE(*snmpMsgBuf))
+		 return SNMP_ACTION_UNKNOWN;
 
-    if ( !IsValidInt(&tempLen.Val) )
-        return SNMP_ACTION_UNKNOWN;
+	 // Retrieve structure length
+    retlen= IsValidLength(&tempLen.w[0]);
+    if ( !retlen )
+        return FALSE;
 
-	pduDbPtr->snmpVersion= tempLen.v[0];
-    if ( (tempLen.v[0] != (BYTE)SNMP_V1) && ( tempLen.v[0] != (BYTE)SNMP_V2C ))
-        return SNMP_ACTION_UNKNOWN;
-
-    // This function populates response as it processes community string.
-    if ( !IsValidCommunity(community, len) )
-        return SNMP_ACTION_UNKNOWN;
-
-    // Fetch and validate pdu type.  
-    if ( !IsValidPDU(&pdu) )
-        return SNMP_ACTION_UNKNOWN;
-
-	pduDbPtr->pduType = pdu;
-
-	//Get_Bulk_Request is not defined in SNMP V1, hence discard udp request packet	
-	if(pduDbPtr->snmpVersion==(BYTE)SNMP_V1 && pduDbPtr->pduType == GET_BULK_REQUEST)
+	if(retlen == 1)
+	{
+		tempCntr+=1;
+		*(snmpMsgBuf+1)=tempLen.w[0];	
+	}
+	else if( retlen== 2)
+	{	
+		tempCntr+=2;
+		*(snmpMsgBuf+1)=0x81; //BER encoding
+		*(snmpMsgBuf+2)=tempLen.w[0];
+		
+	} 
+	else if(retlen== 3)
+	{
+		tempCntr+=3;
+		*(snmpMsgBuf+1)=0x82;//BER encoding
+		*(snmpMsgBuf+2)=tempLen.v[1];	
+		*(snmpMsgBuf+3)=tempLen.v[0];	
+	}
+	else
+	{
 		return SNMP_ACTION_UNKNOWN;
+	}
+	snmpMsgLen.Val=tempLen.w[0];
 	
 
-    // Ask main application to verify community name against requested pdu type.
-    if(SNMPValidateCommunity((BYTE *)community)==(BYTE)INVALID_COMMUNITY)
+	//Get snmp version info ASN_INT (1 Byte) + Length (1 Byte)+ snmp Version 1 Byte
+
+	 if ( !IsValidInt(&tempLen.Val) )
         return SNMP_ACTION_UNKNOWN;
 
+	snmpMsgBuf[tempCntr]=ASN_INT;
+		
+	pduDbPtr->snmpVersion= tempLen.v[0];
+    if ( (tempLen.v[0] != (BYTE)SNMP_V1) && ( tempLen.v[0] != (BYTE)SNMP_V2C )&&( tempLen.v[0] != (BYTE)SNMP_V3 ))
+        return SNMP_ACTION_UNKNOWN;
+
+	snmpMsgBuf[tempCntr+1]=0x01;
+	snmpMsgBuf[tempCntr+2]=tempLen.v[0];
+
+#ifdef STACK_USE_SNMPV3_SERVER
+
+
+	//Valid snmp packet in the SNMP UDP Socket received 
+	if(pduDbPtr->snmpVersion == (BYTE)SNMP_V3)
+	{
+		
+		//Allocate dynamic memory to store the received SNMPv3 Whole Message.
+		gSnmpV3InPduWholeMsgBuf.wholeMsgLen.Val=(snmpMsgLen.Val+tempCntr);
+		extraMemReqdFor16BytesBlocks=16-(gSnmpV3InPduWholeMsgBuf.wholeMsgLen.Val%16);
+
+		gSnmpV3InPduWholeMsgBuf.wholeMsgHead=(UINT8*)(malloc((size_t)gSnmpV3InPduWholeMsgBuf.wholeMsgLen.Val+extraMemReqdFor16BytesBlocks+16));
+		if(gSnmpV3InPduWholeMsgBuf.wholeMsgHead == NULL)
+			return FALSE;
+		gSnmpV3InPduWholeMsgBuf.snmpMsgHead=gSnmpV3InPduWholeMsgBuf.wholeMsgHead+tempCntr+3/*snmp Version info 0x02,0x01,0x03*/;
+		gSnmpV3InPduWholeMsgBuf.snmpMsgLen.Val=snmpMsgLen.Val-3/*snmp Version info 0x02,0x01,0x03*/;
+
+
+		//copy the WholeMsg structure info and snmp version info to dynamic mem from the UDP buffer. 
+		//(WholeMsg is required to authenticate the received snmp pdu )//RFC 3414.
+		tempCntr=tempCntr+3/*snmp Version info 0x02,0x01,0x03*/;
+		inDataPtr=gSnmpV3InPduWholeMsgBuf.wholeMsgHead;
+		while((tempCntr--)!=0)
+		{
+			*inDataPtr++=*tempPtr++;
+		}
+
+		inDataPtr=gSnmpV3InPduWholeMsgBuf.snmpMsgHead;
+		tempCntr=gSnmpV3InPduWholeMsgBuf.snmpMsgLen.Val;
+
+		while(tempCntr--)
+		{
+			*inDataPtr++=_SNMPGet();
+	
+		}
+		
+		pdu=Snmpv3MsgProcessingModelProcessPDU(SNMP_REQUEST_PDU);
+		pdu=Snmpv3UserSecurityModelProcessPDU(SNMP_REQUEST_PDU);
+		pdu=Snmpv3ScopedPduProcessing(SNMP_REQUEST_PDU);
+
+
+		//Complete SNMPv3 data payload (Encrypted or as plain text) is received
+
+		 //Check if received SNMPv3 message is Authenticated
+		if((snmpSecurityLevel & 0x01)==0x01)
+		{		
+				//Message is authenticated
+				if(Snmpv3AuthenticateRxedPduForDataIntegrity(&gSnmpV3InPduWholeMsgBuf)
+					!= SNMPV3_MSG_AUTH_PASS)
+				return SNMPV3_MSG_AUTH_FAIL;
+		}	
+
+		//Check if received SNMPv3 message is Encrypted.
+		if((snmpSecurityLevel & 0x02)==0x02) 
+		{
+			 //Message is encrypted. Decrypt the message for processing
+			 //user privacy protocol is AES
+
+			if(Snmpv3AESDecryptRxedScopedPdu() != SNMPV3_MSG_PRIV_PASS)
+				return SNMPV3_MSG_PRIV_FAIL;
+		}	
+	}
+
+	else 
+#endif	
+
+	if((tempLen.v[0] == (BYTE)SNMP_V1)||(tempLen.v[0] == (BYTE)SNMP_V2C))
+	{
+
+	    // This function populates response as it processes community string.
+	    if ( !IsValidCommunity(community, len) )
+	        return SNMP_ACTION_UNKNOWN;
+
+    	// Fetch and validate pdu type.  
+    	if ( !IsValidPDU(&pdu) )
+        return SNMP_ACTION_UNKNOWN;
+
+		pduDbPtr->pduType = pdu;
+
+		//Get_Bulk_Request is not defined in SNMP V1, hence discard udp request packet	
+		if(pduDbPtr->snmpVersion==(BYTE)SNMP_V1 && pduDbPtr->pduType == GET_BULK_REQUEST)
+			return SNMP_ACTION_UNKNOWN;
+	
+	    // Ask main application to verify community name against requested pdu type.
+	    if(SNMPValidateCommunity((BYTE *)community)==(BYTE)INVALID_COMMUNITY)
+	        return SNMP_ACTION_UNKNOWN;
+	}
+		
     return pdu;
 }
 
@@ -963,7 +1386,7 @@ static BOOL ProcessGetSetHeader(PDU_INFO* pduDbPtr)
     else
         return FALSE;
 
-	if((pduDbPtr->snmpVersion == (BYTE)SNMP_V1 || pduDbPtr->snmpVersion == (BYTE)SNMP_V2C) &&(pduDbPtr->pduType != GET_BULK_REQUEST))
+	if((pduDbPtr->snmpVersion == (BYTE)SNMP_V1 || pduDbPtr->snmpVersion == (BYTE)SNMP_V2C /*|| pduDbPtr->snmpVersion == (BYTE)SNMP_V3*/) &&(pduDbPtr->pduType != GET_BULK_REQUEST))
 	{
 	    // Fetch and discard error status
 	    if ( !IsValidInt(&tempData.Val) )
@@ -972,7 +1395,7 @@ static BOOL ProcessGetSetHeader(PDU_INFO* pduDbPtr)
 	    // Fetch and disacard error index
 	    return IsValidInt(&tempData.Val);
 	}
-	else if( pduDbPtr->snmpVersion == (BYTE)SNMP_V2C && pduDbPtr->pduType == GET_BULK_REQUEST )
+	else if((pduDbPtr->snmpVersion == (BYTE)SNMP_V2C /*|| pduDbPtr->snmpVersion == (BYTE)SNMP_V3*/ )&& pduDbPtr->pduType == GET_BULK_REQUEST )
 	{
 		// Fetch non-repeaters value
 		if ( IsValidInt(&tempData.Val) )
@@ -1025,41 +1448,47 @@ static BOOL ProcessGetSetHeader(PDU_INFO* pduDbPtr)
 	None
  ***************************************************************************/
 static BOOL ProcessVariables(PDU_INFO* pduDbPtr,char* community, BYTE len)
-{
+{	
+ 	BYTE getbulkOverFlowFlag = FALSE;
     BYTE temp =0;
     BYTE OIDValue[OID_MAX_LEN];
-    BYTE OIDLen;
+    BYTE OIDLen=0;
    	BYTE varIndex =0;
 	BYTE errorIndex;
 	BYTE communityLen=0,commRetVal=0;
 	BYTE noOfOIDsInReq=0,tempNonRepeators=0,noOfVarToBeInResponse=0;
 	BYTE repeatCntr,varBindCntr;
 	BYTE Getbulk_N=0,Getbulk_M=0,Getbulk_R=0;/*Refer RFC 3416 Section "4.2.3" GetBulkRequest-PDU*/
-	BYTE oidLookUpRet;
-	BYTE templen;
-	BYTE successor=0;// 'I'th lexicographic successor 
-	 
+	BYTE oidLookUpRet=0;
+	BYTE templen=0;
+	BYTE successor=0;// 'I'th lexicographic successor 	 
 	BYTE *ptemp;
 	BYTE *ptroid;
 	BYTE *rxedCommunityName;
-   
-    WORD oidOffset;
-    WORD prevOffset;
+	WORD varBindStructOffset=0;
+   	WORD tempTxOffset=0;
+    WORD oidOffset=0;
+    WORD prevOffset=0;
 	WORD packetStructLenOffset=0;
+	//WORD snmpV3ScopedPduOffset=0;
     WORD pduLenOffset=0;
     WORD errorStatusOffset=0;
-    WORD errorIndexOffset=0;
-    WORD varBindStructOffset=0;
+    WORD errorIndexOffset=0;    
     WORD varStructLenOffset=0;	
 	WORD prevSnmpRxOffset=0;	
-	
-    WORD_VAL varBindingLen;
-    WORD_VAL tempLen;
-    WORD_VAL varPairLen;
-    WORD_VAL varBindLen;
-
-	OID_INFO OIDInfo;    
+    WORD_VAL varBindingLen={0};
+    WORD_VAL tempLen={0};
+    WORD_VAL varPairLen={0};
+    static WORD_VAL varBindLen={0};
+	OID_INFO OIDInfo;  
     SNMP_ERR_STATUS errorStatus;
+#ifdef STACK_USE_SNMPV3_SERVER	
+    BYTE agentIDLen;
+    OID_INFO rec;
+//	BYTE OIDValue[OID_MAX_LEN];
+	WORD_VAL tempByteCntr;
+#endif
+WORD_VAL bytesAdded2Pdu;
 	
 	static enum 
 	{
@@ -1083,7 +1512,12 @@ static BOOL ProcessVariables(PDU_INFO* pduDbPtr,char* community, BYTE len)
 	snmpReqVarErrStatus.endOfMibViewErr=0x0000;
 
 	rxedCommunityName=(BYTE *)community;
-
+	/* Locate the start offset of the TX PDU */
+	tempTxOffset = _SNMPGetTxOffset();
+	OIDLen = 0;
+	varBindLen.Val=0x0000;
+	getZeroInstance = FALSE;
+	bytesAdded2Pdu.Val=0x00;
 	while(1)
 	{
 		switch(smSnmp)
@@ -1099,8 +1533,12 @@ static BOOL ProcessVariables(PDU_INFO* pduDbPtr,char* community, BYTE len)
 
 			// Since we do not know length of structure at this point, use
 			// placeholder bytes that will be replaced with actual value.
-			_SNMPPut(0x82);
+
+			if(pduDbPtr->snmpVersion !=SNMP_V3)
+				_SNMPPut(0x82);
+			
 			packetStructLenOffset = SNMPTxOffset;
+			if(pduDbPtr->snmpVersion !=SNMP_V3)
 			_SNMPPut(0);
 			_SNMPPut(0);
 
@@ -1109,13 +1547,32 @@ static BOOL ProcessVariables(PDU_INFO* pduDbPtr,char* community, BYTE len)
 			_SNMPPut(1);                    // One byte long value.
 			_SNMPPut(pduDbPtr->snmpVersion);              // v1.0.
 
-			// Put community string
-			communityLen = len;             // Save community length for later use.
-			_SNMPPut(OCTET_STRING);         // Octet string type.
-			_SNMPPut(len);                  // community string length
-			while( len-- )                  // Copy entire string.
-			_SNMPPut(*community++);
+#if 0
+			//If SNMPv3 reuest, prepare the outgoing response PDU, update the 
+			//Message Processing Model parameters
+			//User Security Model Parameters and 
+			//Scoped PDU ContextEngineID and ContextName
+			if(pduDbPtr->snmpVersion == SNMP_V3)
+			{
+				Snmpv3MsgProcessingModelProcessPDU(SNMP_RESPONSE_PDU, &tempByteCntr);
+				bytesAdded2Pdu.Val+=tempByteCntr.Val;
+				Snmpv3UserSecurityModelProcessPDU(SNMP_RESPONSE_PDU,&tempByteCntr);
+				bytesAdded2Pdu.Val+=tempByteCntr.Val;
+				//Snmpv3ScopedPduProcessing(SNMP_RESPONSE_PDU,&tempByteCntr);
+				//bytesAdded2Pdu.Val+=tempByteCntr.Val;
+				Snmpv3ScopedPduProcessing(SNMP_RESPONSE_PDU);
 
+			}
+			else
+			{
+#endif 			
+				// Put community string
+				communityLen = len;             // Save community length for later use.
+				_SNMPPut(OCTET_STRING);         // Octet string type.
+				_SNMPPut(len);                  // community string length
+				while( len-- )                  // Copy entire string.
+				_SNMPPut(*community++);
+//			}
 			smSnmp++;
 
 			//return FALSE;
@@ -1126,8 +1583,11 @@ static BOOL ProcessVariables(PDU_INFO* pduDbPtr,char* community, BYTE len)
 			
 			// Since we don't know length of this response, use placeholders until
 			// we know for sure...
-			_SNMPPut(0x82);                    
+			if(pduDbPtr->snmpVersion !=SNMP_V3)
+				_SNMPPut(0x82);                    
+
 			pduLenOffset = SNMPTxOffset;
+			if(pduDbPtr->snmpVersion !=SNMP_V3)
 			_SNMPPut(0); // Be prepared for 2 byte-long length
 			_SNMPPut(0);
 
@@ -1184,7 +1644,9 @@ static BOOL ProcessVariables(PDU_INFO* pduDbPtr,char* community, BYTE len)
 
 			//Calulate number of variables to be responded for the received request
 			Getbulk_N = noOfOIDsInReq; Getbulk_M=0; Getbulk_R=0;
-			if((pduDbPtr->snmpVersion == (BYTE)SNMP_V2C) && (pduDbPtr->pduType == GET_BULK_REQUEST))
+			if(((pduDbPtr->snmpVersion == (BYTE)SNMP_V2C)||
+				((pduDbPtr->snmpVersion == (BYTE)SNMP_V3))) && 
+				(pduDbPtr->pduType == GET_BULK_REQUEST))
 			{
 				if((pduDbPtr->nonRepeators) <= noOfOIDsInReq)
 				{
@@ -1229,16 +1691,45 @@ static BOOL ProcessVariables(PDU_INFO* pduDbPtr,char* community, BYTE len)
 				and Tx offset accordigly. */
 			if(Getbulk_N==0u)
 			{
-				prevSnmpRxOffset=SNMPRxOffset;
-				smSnmp=SM_MAX_REPETITIONS;
-				varStructLenOffset = SNMPTxOffset;
-				SNMPTxOffset=SNMPTxOffset+4;
-				break;
+
+			#ifdef STACK_USE_SNMPV3_SERVER
+				if((pduDbPtr->snmpVersion == (BYTE)SNMP_V3))
+				{
+					// Get complete OID string from MPFS.
+				    GetOIDStringByID(MICROCHIP,&rec, OIDValue, &agentIDLen);
+				    
+				    if ( rec.nodeInfo.Flags.bIsAgentID )
+				    {
+				        MPFSSeek(hMPFS, rec.hData, MPFS_SEEK_START);
+				    }
+
+				    _SNMPPut(ASN_OID);
+				    MPFSGet(hMPFS, &len);
+				    agentIDLen = len;
+				    _SNMPPut(len);
+				    while( len-- )
+				    {
+					    BYTE c;
+					    MPFSGet(hMPFS, &c);
+				        _SNMPPut(c);
+				    }
+							
+				}
+				else
+			#endif			
+				{
+			
+					prevSnmpRxOffset=SNMPRxOffset;
+					smSnmp=SM_MAX_REPETITIONS;
+					varStructLenOffset = SNMPTxOffset;
+					SNMPTxOffset=SNMPTxOffset+4;
+					break;
+				}
 			}
 			
 			/*
 				Need to know what variable we are processing, so that in case
-				if there is problem for that varaible, we can put it in
+				if there is problem for that variable, we can put it in
 				errorIndex location of SNMP packet.
 			*/
 			varIndex++;
@@ -1246,8 +1737,13 @@ static BOOL ProcessVariables(PDU_INFO* pduDbPtr,char* community, BYTE len)
 			// Decode variable length structure
 			temp = IsValidStructure(&tempLen.Val);
 			if ( !temp )
-			return FALSE;
-
+			{
+				SetErrorStatus(errorStatusOffset,errorIndexOffset,SNMP_GEN_ERR,varIndex);
+				UDPTxCount = SNMPTxOffset;
+				goto GEN_ERROR;
+	//			return FALSE;
+			}
+			
 			varBindingLen.Val -= tempLen.Val;
 			varBindingLen.Val -= temp;
 
@@ -1268,7 +1764,12 @@ static BOOL ProcessVariables(PDU_INFO* pduDbPtr,char* community, BYTE len)
 			
 			// Decode next object
 			if ( !IsValidOID(OIDValue, &OIDLen) )
-			return FALSE;
+			{
+				SetErrorStatus(errorStatusOffset,errorIndexOffset,SNMP_GEN_ERR,varIndex);
+				UDPTxCount = SNMPTxOffset-4;
+				goto GEN_ERROR;
+	//			return FALSE;
+			}
 
 			// For Get & Get-Next, value must be NULL.
 			if ( pduDbPtr->pduType != (BYTE)SET_REQUEST )
@@ -1299,19 +1800,30 @@ static BOOL ProcessVariables(PDU_INFO* pduDbPtr,char* community, BYTE len)
 			   The agent should respond with encrypted community name.
 			*/
 
-			commRetVal=SNMPValidateCommunity(rxedCommunityName);
-				
-			smSnmp=SM_PKT_STRUCT_LEN_OFFSET;	// Start out assuming commRetVal == INVALID_COMMUNITY
-			if(pduDbPtr->pduType == (BYTE)SET_REQUEST)
+			if((pduDbPtr->snmpVersion != (BYTE)SNMP_V3))
 			{	
-				if(commRetVal==(BYTE)WRITE_COMMUNITY)//If SET request, then "community==WRITE_COMMUNITY" is must.
-					smSnmp=SM_FIND_OID_IN_MIB;
+				commRetVal=SNMPValidateCommunity(rxedCommunityName);
+					
+				smSnmp=SM_PKT_STRUCT_LEN_OFFSET;	// Start out assuming commRetVal == INVALID_COMMUNITY
+				if(pduDbPtr->pduType == (BYTE)SET_REQUEST)
+				{	
+					if(commRetVal==(BYTE)WRITE_COMMUNITY)//If SET request, then "community==WRITE_COMMUNITY" is must.
+						smSnmp=SM_FIND_OID_IN_MIB;
+				}
+				else 
+				{	
+					if(commRetVal!=(BYTE)INVALID_COMMUNITY)//If any GET request, then "community!=INVALID_COMMUNITY" is must (community is WRITE_COMMUNITY or READ_COMMUNITY).
+						smSnmp=SM_FIND_OID_IN_MIB;
+				}
+			
 			}
-			else 
-			{	
-				if(commRetVal!=(BYTE)INVALID_COMMUNITY)//If any GET request, then "community!=INVALID_COMMUNITY" is must (community is WRITE_COMMUNITY or READ_COMMUNITY).
-					smSnmp=SM_FIND_OID_IN_MIB;
+			#ifdef STACK_USE_SNMPV3_SERVER	
+			else
+			{
+				smSnmp=SM_FIND_OID_IN_MIB;
+
 			}
+			#endif
 
 			//Verify if trying to access the private object
 			//Application has to decide on what community name should allowed to
@@ -1359,7 +1871,8 @@ static BOOL ProcessVariables(PDU_INFO* pduDbPtr,char* community, BYTE len)
 			//Searching the requested OID in the MIB database 
 			oidLookUpRet = OIDLookup(pduDbPtr,OIDValue, OIDLen, &OIDInfo);	
 
-			if(oidLookUpRet != (BYTE)TRUE && pduDbPtr->pduType != GET_NEXT_REQUEST)
+			if(oidLookUpRet != (BYTE)TRUE && (pduDbPtr->pduType != GET_NEXT_REQUEST) &&
+				(pduDbPtr->pduType != GET_BULK_REQUEST))
 			{
 				_SNMPSetTxOffset(varStructLenOffset);
 
@@ -1402,7 +1915,9 @@ static BOOL ProcessVariables(PDU_INFO* pduDbPtr,char* community, BYTE len)
 					_SNMPPut(ASN_NULL);
 					_SNMPPut(0);	
 				}
-				else if( pduDbPtr->snmpVersion == (BYTE)SNMP_V2C && pduDbPtr->pduType != SET_REQUEST)
+				else if(((pduDbPtr->snmpVersion == (BYTE)SNMP_V2C)
+						||( pduDbPtr->snmpVersion == (BYTE)SNMP_V3))
+						&& pduDbPtr->pduType != SET_REQUEST)
 				{
 					if(pduDbPtr->pduType == SNMP_GET)
 					{
@@ -1417,14 +1932,9 @@ static BOOL ProcessVariables(PDU_INFO* pduDbPtr,char* community, BYTE len)
 							snmpReqVarErrStatus.noSuchInstanceErr|=(0x0001 << varIndex);
 						}
 					}
-					else if(pduDbPtr->pduType == GET_BULK_REQUEST )
-					{
-						_SNMPPut(SNMP_END_OF_MIB_VIEW);
-						_SNMPPut(0x00);
-						snmpReqVarErrStatus.endOfMibViewErr|=(0x0001 << varIndex);
-					}
 				}
 
+				if(pduDbPtr->snmpVersion !=SNMP_V3)
 				varPairLen.Val +=2 ;
 
 				varBindLen.Val += 4	// Variable Pair STRUCTURE byte + 1 length byte.
@@ -1472,6 +1982,26 @@ static BOOL ProcessVariables(PDU_INFO* pduDbPtr,char* community, BYTE len)
             {
             	templen=OIDLen;
 				ptroid=OIDValue;	
+				//to validate the REC ID is present or not
+	
+				if(SNMPIdRecrdValidation(pduDbPtr,&OIDInfo,OIDValue,OIDLen) != TRUE)
+				{
+					/*if(pduDbPtr->snmpVersion == (BYTE)SNMP_V1)
+			       		*errorStatus = SNMP_NO_SUCH_NAME;
+					else if ((pduDbPtr->snmpVersion == (BYTE)SNMP_V2C) ||
+									(pduDbPtr->snmpVersion == (BYTE)SNMP_V3))*/
+
+					 /*if the variable binding's name specifies a
+				     * variable which does not exist and could not ever be
+				     * created, then the value of the Response-PDU's error-
+				     * status field is set to `noCreation', and the value of its
+				     * error-index field is set to the index of the failed
+				     * variable binding.
+				     */
+					errorStatus = SNMP_NO_CREATION;
+					smSnmp=SM_PKT_STRUCT_LEN_OFFSET;
+					return FALSE;
+				}
 
 				if(appendZeroToOID)
 					_SNMPPut(OIDLen+1);//for appending "0"
@@ -1503,10 +2033,17 @@ static BOOL ProcessVariables(PDU_INFO* pduDbPtr,char* community, BYTE len)
                                 + temp;            // value bytes as put by SetVar
 				else
 					varPairLen.Val = OIDLen+2+temp;
-				
+
 			}
-			else if(pduDbPtr->pduType == SNMP_GET || pduDbPtr->pduType == SNMP_V2C_GET_BULK)
-			{	 
+			else if((pduDbPtr->pduType == SNMP_GET) || (getZeroInstance) ||
+				((pduDbPtr->pduType == SNMP_V2C_GET_BULK) && (oidLookUpRet == TRUE)))
+			{	
+				//to validate the REC ID is present or not
+				if(SNMPIdRecrdValidation(pduDbPtr,&OIDInfo,OIDValue,OIDLen) != TRUE)
+				{
+					smSnmp=SM_PKT_STRUCT_LEN_OFFSET;
+					return FALSE;
+				}
 				templen=OIDLen;
 				ptroid=OIDValue;	
 				
@@ -1526,14 +2063,16 @@ static BOOL ProcessVariables(PDU_INFO* pduDbPtr,char* community, BYTE len)
 				}
 				else 
 					varPairLen.Val = OIDLen +2;
-
+				
+				
 				//Now process the GET command
-				temp=ProcessGetVar(&OIDInfo,FALSE);
+				temp=ProcessGetVar(&OIDInfo,FALSE,pduDbPtr);
 
 			}	
-			else if(pduDbPtr->pduType == SNMP_GET_NEXT)
+			else if((pduDbPtr->pduType == SNMP_GET_NEXT)||
+				((pduDbPtr->pduType == SNMP_V2C_GET_BULK) && (oidLookUpRet != TRUE)))
 			{			
-				temp=ProcessGetNextVar(&OIDInfo);
+				temp=ProcessGetNextVar(&OIDInfo,pduDbPtr);
 
 				//If Get Next command failed
 				if(temp==0u)
@@ -1578,11 +2117,14 @@ static BOOL ProcessVariables(PDU_INFO* pduDbPtr,char* community, BYTE len)
 				
 				}
 
-				if(pduDbPtr->pduType == SNMP_GET || pduDbPtr->pduType == SNMP_V2C_GET_BULK)
+				if((pduDbPtr->pduType == SNMP_GET) || 
+					((pduDbPtr->pduType == SNMP_V2C_GET_BULK) && (oidLookUpRet == TRUE)))
 				{
 					temp = 2;
 				}
-				else if(pduDbPtr->pduType == SNMP_GET_NEXT)	{
+				else if((pduDbPtr->pduType == SNMP_GET_NEXT)||
+					((pduDbPtr->pduType == SNMP_V2C_GET_BULK) && (oidLookUpRet != TRUE)))
+				{
 				     varPairLen.Val = OIDLen+1          // as put by GetNextVar()
                                      + 2                // OID header
                                      + 2;               // END_OF_MIB_VIEW bytes
@@ -1598,13 +2140,17 @@ static BOOL ProcessVariables(PDU_INFO* pduDbPtr,char* community, BYTE len)
 				snmpReqVarErrStatus.endOfMibViewErr	 |=(0x0001 << varIndex);
 				
 			}
-			else if(pduDbPtr->pduType == SNMP_GET_NEXT)
+			else if((pduDbPtr->pduType == SNMP_GET_NEXT)||
+				((pduDbPtr->pduType == SNMP_V2C_GET_BULK) && (oidLookUpRet != TRUE)))
 			{
-				//varPairLen.Val = (temp + 2+OIDLen+1+1);
-				varPairLen.Val = (temp + 2);
+				if(getZeroInstance)
+					varPairLen.Val += temp;
+				else
+					varPairLen.Val = (temp + 2);
 			}
 	
-			if(pduDbPtr->pduType == SNMP_GET || pduDbPtr->pduType == SNMP_V2C_GET_BULK)
+			if((pduDbPtr->pduType == SNMP_GET) || 
+				((pduDbPtr->pduType == SNMP_V2C_GET_BULK) && (oidLookUpRet == TRUE)))
 				varPairLen.Val += temp;   
 
 			varBindLen.Val += 4	// Variable Pair STRUCTURE byte + 1 length byte.
@@ -1619,16 +2165,32 @@ static BOOL ProcessVariables(PDU_INFO* pduDbPtr,char* community, BYTE len)
 			_SNMPSetTxOffset(prevOffset);
 			varStructLenOffset = _SNMPGetTxOffset();
 
-			varPairLen.Val=0x00;
 
 			/* 	Decide on the number of Non repetition variables remained to 
 				be processed, decide the course of state machine.*/
 				
 			if((pduDbPtr->pduType==GET_BULK_REQUEST) &&
-			   (pduDbPtr->snmpVersion == (BYTE)SNMP_V2C) &&( Getbulk_N == 0u))
-				smSnmp=SM_MAX_REPETITIONS;
+			   ((pduDbPtr->snmpVersion == (BYTE)SNMP_V2C)||
+			    (pduDbPtr->snmpVersion == (BYTE)SNMP_V3))&&( Getbulk_N == 0u))
+			{
+				if((varStructLenOffset - tempTxOffset) >= SNMP_MAX_MSG_SIZE)
+				{
+					getbulkOverFlowFlag = TRUE;
+					goto GETBULK_MAX_REESPONSE;
+				}
+				else
+				{
+					smSnmp=SM_MAX_REPETITIONS;
+				}
+			}
 			else
 				smSnmp=SM_VARSTRUCT_LEN_OFFSET;
+
+			
+			varPairLen.Val=0x00;
+			getZeroInstance = FALSE;
+
+			/* check length*/
 			break;	
 
 			//return FALSE;
@@ -1662,7 +2224,10 @@ static BOOL ProcessVariables(PDU_INFO* pduDbPtr,char* community, BYTE len)
 						continue;
 					}
 
-					noOfVarToBeInResponse--;
+					if(noOfVarToBeInResponse != 0)
+					{
+						noOfVarToBeInResponse--;
+					}
 					prevOffset = _SNMPGetTxOffset();
 					_SNMPSetTxOffset(varStructLenOffset);
 
@@ -1681,8 +2246,12 @@ static BOOL ProcessVariables(PDU_INFO* pduDbPtr,char* community, BYTE len)
 
 					// Decode next object
 					if ( !IsValidOID(OIDValue, &OIDLen) )
-						return FALSE;
-
+					{
+						SetErrorStatus(errorStatusOffset,errorIndexOffset,SNMP_GEN_ERR,varIndex);
+						UDPTxCount = SNMPTxOffset -4;
+						goto GEN_ERROR;
+						//return FALSE;
+					}
 					templen=OIDLen;
 					ptroid=OIDValue;
 					
@@ -1691,14 +2260,22 @@ static BOOL ProcessVariables(PDU_INFO* pduDbPtr,char* community, BYTE len)
 						if ( !IsASNNull() )
 							break;
 
-					if(!OIDLookup(pduDbPtr,OIDValue, OIDLen, &OIDInfo))
+					oidLookUpRet = OIDLookup(pduDbPtr,OIDValue, OIDLen, &OIDInfo);
+					if(oidLookUpRet == SNMP_END_OF_MIB_VIEW)
+					{
+						temp = GetNextLeaf(&OIDInfo);
+					}
+					if(oidLookUpRet == FALSE)
 					{
 						templen=OIDLen;
 						ptroid=OIDValue;	
 						_SNMPPut(ASN_OID);
 
 						if(appendZeroToOID)
+						{
 							_SNMPPut(OIDLen+1);//for appending "0"
+							OIDLen += 1;
+						}
 						else 
 							_SNMPPut(OIDLen);//for appending "0"
 
@@ -1713,42 +2290,42 @@ static BOOL ProcessVariables(PDU_INFO* pduDbPtr,char* community, BYTE len)
 						_SNMPPut(0x00);
 
 						//Start counting total number of bytes in this structure.
-						varPairLen.Val = OIDLen+1 // as put by GetNextVar()
+						varPairLen.Val = OIDLen // as put by GetNextVar()
 						 +2       // OID header
 						 +2;      // endOfMibView bytes
 
 						snmpReqVarErrStatus.endOfMibViewErr	 |=(0x0001 << varIndex);
 					}
-					else
+					else if(temp != 0)//if(oidLookUpRet != SNMP_END_OF_MIB_VIEW)
 					{
-						temp = ProcessGetBulkVar(&OIDInfo, &OIDValue[0],&OIDLen,&successor);
-						if ( temp == 0u )
-						{
-							templen=OIDLen;
-							ptroid=OIDValue;	
-							_SNMPPut(ASN_OID);
-							_SNMPPut(OIDLen);
-
-							//Put OID
-							while( templen-- )
-							_SNMPPut(*ptroid++);
-
-							/*Do send back the Same OID if get_next is EndOfMibView. Do not
-							  append zero to this OID*/
-							
-							_SNMPPut(SNMP_END_OF_MIB_VIEW);
-							_SNMPPut(0x00);
-
-							snmpReqVarErrStatus.endOfMibViewErr	 |=(0x0001 << varIndex);
-							                    
-							//Start counting total number of bytes in this structure.
-							varPairLen.Val = OIDLen  // as put by GetNextVar()
-							     + 2     // OID header
-							     + 2;    // endOfMibView byte.
-						}
-						else 
-							varPairLen.Val = (temp + 2);        // + OID headerbytes
+						temp = ProcessGetBulkVar(&OIDInfo, &OIDValue[0],&OIDLen,&successor,pduDbPtr);
 					}
+					if ( temp == 0u )
+					{
+						templen=OIDLen;
+						ptroid=OIDValue;	
+						_SNMPPut(ASN_OID);
+						_SNMPPut(OIDLen);
+
+						//Put OID
+						while( templen-- )
+						_SNMPPut(*ptroid++);
+
+						/*Do send back the Same OID if get_next is EndOfMibView. Do not
+						  append zero to this OID*/
+						
+						_SNMPPut(SNMP_END_OF_MIB_VIEW);
+						_SNMPPut(0x00);
+
+						snmpReqVarErrStatus.endOfMibViewErr	 |=(0x0001 << varIndex);
+						                    
+						//Start counting total number of bytes in this structure.
+						varPairLen.Val = OIDLen  // as put by GetNextVar()
+						     + 2     // OID header
+						     + 2;    // endOfMibView byte.
+					}
+					else 
+						varPairLen.Val = (temp + 2);        // + OID headerbytes
 				
 					varBindLen.Val += 4	// Variable Pair STRUCTURE byte + 1 length byte.
 					+ varPairLen.Val;
@@ -1761,6 +2338,11 @@ static BOOL ProcessVariables(PDU_INFO* pduDbPtr,char* community, BYTE len)
 
 					_SNMPSetTxOffset(prevOffset);
 					varStructLenOffset = _SNMPGetTxOffset();
+					if((varStructLenOffset - tempTxOffset) >= SNMP_MAX_MSG_SIZE)
+					{
+						getbulkOverFlowFlag = TRUE;
+						goto GETBULK_MAX_REESPONSE;
+					}
 						 
 				}//for(varBindCntr=0;varBindCntr<Getbulk_R;varBindCntr++)
 				
@@ -1783,42 +2365,159 @@ static BOOL ProcessVariables(PDU_INFO* pduDbPtr,char* community, BYTE len)
 
 	// Update the place holders with respective values.
 		
+	//calculate the number of bytes are the part of RESPONSE PDU 
+	if(((prevOffset - tempTxOffset) > SNMP_MAX_MSG_SIZE) 
+		&& (pduDbPtr->pduType!=GET_BULK_REQUEST))
+	{
+		/* for snmpv2 (or snmpv3) by rfc3416 we return special
+		*   tooBig(1) response with empty variable-bindings field. 
+		* error status  = toobig(1) and error_index set to 0.
+		*/
+BIG_ERROR:		
+		SetErrorStatus(errorStatusOffset,errorIndexOffset,SNMP_TOO_BIG,0);
+		varBindLen.Val =  6 						// Request ID bytes (4+2)
+						+ 3 						// Error status 	(2+1)
+						+ 3;						// Error index		(2+1)
+		_SNMPSetTxOffset(pduLenOffset);
+		_SNMPPut(varBindLen.v[1]);
+		_SNMPPut(varBindLen.v[0]);
+	
+		// varBindLen is reused as "packetLen".
+		varBindLen.Val = 3						// SNMP Version bytes
+						+ 2 + communityLen		// community string bytes
+						+ 4 					// PDU structure header bytes.
+						+ varBindLen.Val;
+	
+		_SNMPSetTxOffset(packetStructLenOffset);
+		_SNMPPut(varBindLen.v[1]);
+		_SNMPPut(varBindLen.v[0]);
+								
+		UDPTxCount = _SNMPSetTxOffset(varBindStructOffset-2);
+		
+		smSnmp = SM_PKT_STRUCT_LEN_OFFSET;
+		return TRUE;
+	}
+GETBULK_MAX_REESPONSE:
+	
+	/* As per RFC 3416 - GET bULK Response - 4.2.3
+	If the size of the message encapsulating the Response-PDU containing the 
+	requested number of variable bindings would be greater than either a local
+	constraint or the maximum message size of the originator, then the response
+	is generated with a lesser number of variable bindings. This lesser number is
+	the ordered set of variable bindings with some of the variable bindings at the
+	end of the set removed, such that the size of the message encapsulating the
+	Response-PDU is approximately equal to but no greater than either a local
+	constraint or the maximum message size of the originator. Note that the 
+	number of variable bindings removed has no relationship to the values of N, M, or R.*/
+	if(getbulkOverFlowFlag && (pduDbPtr->pduType==GET_BULK_REQUEST))
+	{
+		SNMPTxOffset = SNMPTxOffset - (varPairLen.Val+4);
+		varBindLen.Val = varBindLen.Val - (varPairLen.Val+4);
+		UDPTxCount = SNMPTxOffset;
+	}
+GEN_ERROR:		
 	prevOffset = _SNMPGetTxOffset();
+	/* GetRequest-PDU (As per RFC 3416 - SECTION - 4.2.1)
+	During the process of any OID,variable binding fails due to invalid OID 
+	or invalid OID type or invalid OID length etc, i,e other than "noSuchObject"
+	or " noSuchInstance", then the Response-PDU is re-formatted with the same 
+	values in its request-id and variable-bindings fields as the received 
+    GetRequest-PDU , with the value of its error-status field set to "genErr", 
+	
+	GetNextRequest-PDU (As per RFC 3416 - SECTION - 4.2.2)
+	During the process of any OID,variable binding fails due to invalid OID 
+	or invalid OID type or invalid OID length etc, other than "endOfMibView" ,
+	then the Response-PDU is re-formatted with the same values in its request-id and 
+	variable-bindings fields as the received GetNextRequest-PDU,with the value of 
+	its error-status field set to "genErr", and the value of its error-index
+	field is set to the index of the failed variable binding. 
 
+	The generated Response-PDU is then encapsulated into a message. If the size of the resultant 
+	message is less than or equal to maximum message size of the originator, it is transmitted 
+	to the originator of the GetNextRequest-PDU. 
+
+	Otherwise, an alternate Response-PDU is generated. This alternate Response-PDU is formatted 
+	with the same values in its request-id field as the received GetNextRequest-PDU, with the value 
+	of its error-status field set to "tooBig", the value of its error-index field set to zero, and an empty 
+	variable-bindings field.
+	
+	*/
+	if(((prevOffset - tempTxOffset) > SNMP_MAX_MSG_SIZE) )
+		goto BIG_ERROR;
+	
     _SNMPSetTxOffset(varBindStructOffset);
     _SNMPPut(varBindLen.v[1]);
     _SNMPPut(varBindLen.v[0]);
+
+	_SNMPSetTxOffset(prevOffset);
 
     // varBindLen is reused as "pduLen"
     varBindLen.Val = varBindLen.Val+4       // Variable Binding Strucure length
                 + 6                         // Request ID bytes (4+2)
                 + 3                         // Error status		(2+1)
                 + 3;                        // Error index		(2+1)	
+	prevOffset = _SNMPGetTxOffset();
 
     _SNMPSetTxOffset(pduLenOffset);
-    _SNMPPut(varBindLen.v[1]);
-    _SNMPPut(varBindLen.v[0]);
-
-    // varBindLen is reused as "packetLen".
-    varBindLen.Val = 3                      // SNMP Version bytes
-                    + 2 + communityLen      // community string bytes
-                    + 4                     // PDU structure header bytes.
-                    + varBindLen.Val;
-
-    _SNMPSetTxOffset(packetStructLenOffset);
+	if(pduDbPtr->snmpVersion !=SNMP_V3)
     _SNMPPut(varBindLen.v[1]);
     _SNMPPut(varBindLen.v[0]);
 
 	_SNMPSetTxOffset(prevOffset);
 
-     return TRUE;
+#ifdef STACK_USE_SNMPV3_SERVER	
+	if(pduDbPtr->snmpVersion == SNMP_V3)
+	{
+		prevOffset = _SNMPGetTxOffset();
+	
+		_SNMPSetTxOffset(msgSecrtyParamLenOffset);
+	   // _SNMPPut(varBindLen.v[1]);
+		_SNMPPut(varBindLen.v[0]+tempByteCntr.v[0]);
+	
+		_SNMPSetTxOffset(prevOffset);
+	
+	}
+#endif
+
+	// Update the place holders with respective values.
+	if(pduDbPtr->snmpVersion != SNMP_V3)
+	{
+    	// varBindLen is reused as "packetLen".
+    	varBindLen.Val = 3                      // SNMP Version bytes
+                    + 2 + communityLen      // community string bytes
+                    + 4                     // PDU structure header bytes.
+                    + varBindLen.Val;
+	}
+#ifdef STACK_USE_SNMPV3_SERVER		
+	else
+	{
+		varBindLen.Val = 3       // SNMP Version bytes
+		 + 2                     // PDU structure header bytes.
+         + varBindLen.Val
+		 +bytesAdded2Pdu.Val;
+			
+	}
+#endif
+
+	prevOffset = _SNMPGetTxOffset();
+
+    _SNMPSetTxOffset(packetStructLenOffset);
+	if(pduDbPtr->snmpVersion !=SNMP_V3)
+    _SNMPPut(varBindLen.v[1]);
+    _SNMPPut(varBindLen.v[0]);
+
+	_SNMPSetTxOffset(prevOffset);
+	smSnmp = SM_PKT_STRUCT_LEN_OFFSET;
+
+
+    return TRUE;
 	
 }
 
 
 /****************************************************************************
   Function:
-	BYTE ProcessGetNextVar(OID_INFO* rec)
+	BYTE ProcessGetNextVar(OID_INFO* rec,PDU_INFO* pduDbPtr)
 	
   Summary:
   	Retrieves next node from the MIB database.  
@@ -1846,10 +2545,10 @@ static BOOL ProcessVariables(PDU_INFO* pduDbPtr,char* community, BYTE len)
   Remarks:
 	None.
  ***************************************************************************/
-static BYTE ProcessGetNextVar(OID_INFO* rec)
+BYTE ProcessGetNextVar(OID_INFO* rec,PDU_INFO* pduDbPtr)
 {
     WORD_VAL temp;
-    BYTE putBytes;
+    BYTE putBytes=0;
     OID_INFO indexRec;
     BYTE *pOIDValue;
     BYTE OIDValue[OID_MAX_LEN];
@@ -1857,14 +2556,18 @@ static BYTE ProcessGetNextVar(OID_INFO* rec)
     INDEX_INFO indexInfo;
     MIB_INFO varNodeInfo;
     SNMP_ID varID;
-    WORD OIDValOffset;
+    WORD OIDValOffset=0;
     WORD prevOffset;
     BOOL lbNextLeaf;
     BYTE ref;
     static SNMP_VAL v;
     static BYTE varDataType;
     static BYTE indexBytes;
- 
+	#ifdef STACK_USE_SNMPV3_SERVER	
+	SNMPV3MSGDATA	*dynPduBuf=NULL;
+	dynPduBuf = &gSNMPv3ScopedPduResponseBuf;
+	#endif
+	
     lbNextLeaf = FALSE;
     temp.v[0] = 0;
 
@@ -1883,16 +2586,46 @@ static BYTE ProcessGetNextVar(OID_INFO* rec)
 	{	
         return FALSE;
 	}
+	//to validate the REC ID is present or not
+	while(1)
+	{
+		if(SNMPIdRecrdValidation(pduDbPtr,rec,OIDValue,OIDLen) != TRUE)
+		{
+			if(!GetNextLeaf(rec))
+				return FALSE;
+		}
+		else
+		{
+			break;
+		}
+	}
 
     // Copy complete OID string to create response packet.
-    pOIDValue = OIDValue;
-    OIDValOffset = _SNMPGetTxOffset();
-    temp.v[0] = OIDLen;
-    _SNMPSetTxOffset(OIDValOffset+1);
+    pOIDValue = OIDValue;	
+	temp.v[0] = OIDLen;
+	if(pduDbPtr->snmpVersion != SNMP_V3)
+	{
+	    OIDValOffset = _SNMPGetTxOffset();
+	    //temp.v[0] = OIDLen;
+	    _SNMPSetTxOffset(OIDValOffset+1);
+		while( temp.v[0]-- )
+		_SNMPPut(*pOIDValue++);
+	}
+	#ifdef STACK_USE_SNMPV3_SERVER	
+	else
+	{
+	    OIDValOffset = dynPduBuf->length;
+	    //temp.v[0] = OIDLen;
+	    //dynPduBuf.length = OIDValOffset+1;	// offset for the OID length	    
+		if(Snmpv3BufferPut(0,dynPduBuf)!= TRUE)
+			return FALSE;
+		while( temp.v[0]-- )
+			if(Snmpv3BufferPut(*pOIDValue++,dynPduBuf) != TRUE)
+				return FALSE;
+	}
+	#endif
 
 	//Put OID
-	while( temp.v[0]-- )
-    _SNMPPut(*pOIDValue++);
 
     // Start counting number of bytes put - OIDLen is already counted.
     temp.v[0] = OIDLen;
@@ -1903,30 +2636,63 @@ static BYTE ProcessGetNextVar(OID_INFO* rec)
     // If this is a simple OID, handle it as a GetVar command.
     if(!rec->nodeInfo.Flags.bIsSequence)
     {
-		// This is an addition to previously copied OID string.
-        // This is index value of '0'.
-        _SNMPPut(0);
-        temp.v[0]++;
+    	if(pduDbPtr->snmpVersion != SNMP_V3)
+		{
+			// This is an addition to previously copied OID string.
+		    // This is index value of '0'.
+		    _SNMPPut(0);
+		    temp.v[0]++;
 
-        // Since we added one more byte to previously copied OID
-        // string, we need to update OIDLen value.
-        prevOffset = _SNMPGetTxOffset();
-        _SNMPSetTxOffset(OIDValOffset);
-        _SNMPPut(++OIDLen);
-        _SNMPSetTxOffset(prevOffset);
+		    // Since we added one more byte to previously copied OID
+		    // string, we need to update OIDLen value.
+		    prevOffset = _SNMPGetTxOffset();
+		    _SNMPSetTxOffset(OIDValOffset);
+		    _SNMPPut(++OIDLen);
+		    _SNMPSetTxOffset(prevOffset);
 
-        // Now do Get on this simple variable.
-        prevOffset = _SNMPGetTxOffset();
-        putBytes = ProcessGetVar(rec, FALSE);
-        if ( putBytes == 0u )
-        {
-            _SNMPSetTxOffset(prevOffset);
-            _SNMPPut(ASN_NULL);
-            _SNMPPut(0);
-            putBytes = 2;
-        }
-
-        temp.v[0] += putBytes; // ProcessGetVar(rec, FALSE);
+		    // Now do Get on this simple variable.
+		    prevOffset = _SNMPGetTxOffset();
+		    putBytes = ProcessGetVar(rec, FALSE,pduDbPtr);
+		    if ( putBytes == 0u )
+		    {
+		        _SNMPSetTxOffset(prevOffset);
+		        _SNMPPut(ASN_NULL);
+		        _SNMPPut(0);
+		        putBytes = 2;
+		    }
+		}
+		#ifdef STACK_USE_SNMPV3_SERVER	
+		else
+		{
+		    // This is index value of '0'.
+			if(Snmpv3BufferPut(0,dynPduBuf) != TRUE)
+				return FALSE;
+		    temp.v[0]++;
+		    prevOffset = dynPduBuf->length;
+		    dynPduBuf->length = OIDValOffset;
+		    // Since we added one more byte to previously copied OID
+		    // string, we need to update OIDLen value.
+			if(Snmpv3BufferPut(++OIDLen,dynPduBuf)!= TRUE)
+				return FALSE;
+		    dynPduBuf->length = prevOffset;
+			
+		    // Now do Get on this simple variable.
+		    prevOffset = dynPduBuf->length;
+		    putBytes = ProcessGetVar(rec, FALSE,pduDbPtr);
+			if(dynPduBuf->length >= dynPduBuf->maxlength)
+				return FALSE;
+			if(( putBytes == 0u ) && (pduDbPtr->snmpVersion == SNMP_V3))
+			{
+				dynPduBuf->length = prevOffset;
+				if(Snmpv3BufferPut(ASN_NULL,dynPduBuf)!= TRUE)
+					return FALSE;
+				if(Snmpv3BufferPut(0,dynPduBuf)!= TRUE)
+					return FALSE;
+				putBytes = 2;
+			}
+		}
+		#endif
+        temp.v[0] += putBytes; // ProcessGetVar(rec, FALSE,pduDbPtr);
 
          // Return with total number of bytes copied to response packet.
         return temp.v[0];
@@ -1948,7 +2714,13 @@ static BYTE ProcessGetNextVar(OID_INFO* rec)
             //lbNextSequence = TRUE;
 
             // Reset the response packet pointer to begining of OID.
-            _SNMPSetTxOffset(OIDValOffset);
+           // _SNMPSetTxOffset(OIDValOffset);
+		   #ifdef STACK_USE_SNMPV3_SERVER	
+             if(pduDbPtr->snmpVersion == SNMP_V3)
+			 	dynPduBuf->length = OIDValOffset;
+			 else
+		   #endif
+	            _SNMPSetTxOffset(OIDValOffset);
 
             // Jump to this label within this function - Not a good SW engineering
             // practice, but this will reuse code at much lower expense.
@@ -1982,8 +2754,14 @@ static BYTE ProcessGetNextVar(OID_INFO* rec)
     {
         //lbNextSeqeuence = TRUE;
          // Reset the response packet pointer to begining of OID.
-        _SNMPSetTxOffset(OIDValOffset);
-
+       // _SNMPSetTxOffset(OIDValOffset);
+	   #ifdef STACK_USE_SNMPV3_SERVER	
+		if(pduDbPtr->snmpVersion == SNMP_V3)
+		   dynPduBuf->length = OIDValOffset;
+		else
+		#endif
+		   _SNMPSetTxOffset(OIDValOffset);
+		
         // Jump to this label.  Not a good practice, but once-in-a-while
         // it should be acceptable !
         goto _GetNextLeaf;
@@ -1997,7 +2775,7 @@ static BYTE ProcessGetNextVar(OID_INFO* rec)
 
     // Now handle this as simple GetVar.
     // Keep track of number of bytes added to OID.
-    indexBytes += ProcessGetVar(&indexRec, TRUE);
+    indexBytes += ProcessGetVar(&indexRec, TRUE,pduDbPtr);
 
     rec->index = indexRec.index;
 
@@ -2007,13 +2785,26 @@ static BYTE ProcessGetNextVar(OID_INFO* rec)
     // These are the total number of bytes in OID string including index bytes.
     OIDLen += indexBytes;
 
-    // Since we added index bytes to previously copied OID
-    // string, we need to update OIDLen value.
-    prevOffset = _SNMPGetTxOffset();
-    _SNMPSetTxOffset(OIDValOffset);
-    _SNMPPut(OIDLen);
-    _SNMPSetTxOffset(prevOffset);
-
+	if(pduDbPtr->snmpVersion != SNMP_V3)
+	{
+	    // Since we added index bytes to previously copied OID
+	    // string, we need to update OIDLen value.
+	    prevOffset = _SNMPGetTxOffset();
+	    _SNMPSetTxOffset(OIDValOffset);
+	    _SNMPPut(OIDLen);
+	    _SNMPSetTxOffset(prevOffset);
+	}
+	#ifdef STACK_USE_SNMPV3_SERVER	
+	else
+	{
+	    // Since we added index bytes to previously copied OID
+	    // string, we need to update OIDLen value.
+	    prevOffset = dynPduBuf->length;
+	    dynPduBuf->length = OIDValOffset;
+	    Snmpv3BufferPut(OIDLen,dynPduBuf);
+		dynPduBuf->length = prevOffset;
+	}
+     #endif
 
     // Fetch actual value itself.
     // Need to restore original OID value.
@@ -2021,7 +2812,7 @@ static BYTE ProcessGetNextVar(OID_INFO* rec)
     rec->id = varID;
     rec->dataType = varDataType;
 
-    temp.v[0] += ProcessGetVar(rec, FALSE);
+    temp.v[0] += ProcessGetVar(rec, FALSE,pduDbPtr);
      return temp.v[0];
 }
 
@@ -2061,57 +2852,139 @@ static BYTE ProcessGetNextVar(OID_INFO* rec)
   Remarks:
 	None.
 ***************************************************************************/
-static BYTE ProcessGetBulkVar(OID_INFO* rec, BYTE* oidValuePtr, BYTE* oidLenPtr,BYTE* successor)
+BYTE ProcessGetBulkVar(OID_INFO* rec, BYTE* oidValuePtr, BYTE* oidLenPtr,BYTE* successor,PDU_INFO* pduDbPtr)
 {
     
     BYTE ref,putBytes,cntr;
     BYTE OIDLen;
 	static BYTE varDataType;
     static BYTE indexBytes;
-	SNMP_ID varID;
+	BYTE sequenceCnt=0;
+	BYTE sequenceRepeatCnt=0;	
 	BOOL lbNextLeaf;
+	SNMP_ID varID;
+	OID_INFO indexRec;	
 	INDEX_INFO indexInfo;
     MIB_INFO varNodeInfo;
  	WORD OIDValOffset;
+	WORD varBindOffset=0;
     WORD prevOffset;	
 	WORD_VAL temp;
-	OID_INFO indexRec;
 	static SNMP_VAL v;
- 
+	#ifdef STACK_USE_SNMPV3_SERVER	
+	SNMPV3MSGDATA	*dynPduBuf=NULL;
+	dynPduBuf = &gSNMPv3ScopedPduResponseBuf;
+	#endif
+	/* intialize the local variables to 0 */
+	OIDLen=0;
+	sequenceCnt=0;
+	sequenceRepeatCnt=0;
+	varID=0;
+	OIDValOffset=0;
+	varBindOffset=0;
+	prevOffset=0;
+	temp.Val=0;
+	
     lbNextLeaf = FALSE;
     temp.v[0] = 0;
+	sequenceRepeatCnt=*successor;
 
+	
+	
 	//Reach to the node for the expected iteration
 	for(cntr=1;cntr<=*successor;cntr++)
 	{
     	// Get next leaf only if this OID is a parent or a simple leaf node.
-    	if((rec->nodeInfo.Flags.bIsParent)||(rec->nodeInfo.Flags.bIsSequence)||
-        (!rec->nodeInfo.Flags.bIsParent && !rec->nodeInfo.Flags.bIsSequence))
-        {	
+    	if((rec->nodeInfo.Flags.bIsParent)|| 
+        (!rec->nodeInfo.Flags.bIsParent && !rec->nodeInfo.Flags.bIsSequence)) 
+		{	/* to maintain the number of interations */
+			sequenceCnt++;
 		   	_GetNextLeaf:
 	        lbNextLeaf = TRUE;
 	        if(!GetNextLeaf(rec))
 				return FALSE;
 		}
 	}
+	
+	/* If request OID is a sequence variable, the below for loop retrives the 
+	expected instance for the OID. SequenceRepeatCnt starts with "0th instance" and 
+	increments to Max repeatations. Find the exact indexed OID in the request at first. 
+	If indexed OID is not available, then go for the next index. 
+	If the next index is not available , then go to the next leaf.
+	*/
+	if(rec->nodeInfo.Flags.bIsSequence)
+	{
+		for(;sequenceCnt<=sequenceRepeatCnt;sequenceCnt++)
+		{
+			if(!SNMPGetExactIndex(rec->id, rec->index))
+			{
+				if(!SNMPGetNextIndex(rec->id,&rec->index))
+				{
+		        	if(!GetNextLeaf(rec))
+						return FALSE;
+				}
+			}
+			if(sequenceRepeatCnt>sequenceCnt)
+				rec->index+=1;
+		}
+	}	
 
     // Get complete OID string from oid record.
     if(!GetOIDStringByAddr(rec, oidValuePtr, &OIDLen))
         return FALSE;
 
-    _SNMPPut(ASN_OID);
-
-	OIDValOffset = _SNMPGetTxOffset();
-	temp.v[0] =*oidLenPtr= OIDLen;
-    _SNMPSetTxOffset(OIDValOffset+1);
-
-	//Put OID
-	while( temp.v[0]-- )
+	//to validate the REC ID is present or not
+	while(1)
 	{
-		_SNMPPut(*oidValuePtr);
-		oidValuePtr++;
+		if(SNMPIdRecrdValidation(pduDbPtr,rec,oidValuePtr,OIDLen) != TRUE)
+		{
+			if(!GetNextLeaf(rec))
+				return FALSE;
+		}
+		else
+		{
+			break;
+		}
 	}
+	
+	#ifdef STACK_USE_SNMPV3_SERVER	
+	if(pduDbPtr->snmpVersion == SNMP_V3)
+	{
+		varBindOffset = dynPduBuf->length;
+		if(Snmpv3BufferPut(ASN_OID,dynPduBuf) != TRUE)
+			return FALSE;
 
+		OIDValOffset = dynPduBuf->length;
+		temp.v[0] = OIDLen;
+	    //_SNMPSetTxOffset(OIDValOffset+1);
+		if(Snmpv3BufferPut(0,dynPduBuf) != TRUE)
+			return FALSE;
+		//Put OID
+		while( temp.v[0]-- )
+		{
+			//_SNMPPut(*oidValuePtr);	
+			if(Snmpv3BufferPut(*oidValuePtr,dynPduBuf) != TRUE)
+				return FALSE;
+			oidValuePtr++;
+		}
+	}
+	else
+	#endif
+	{
+		varBindOffset = _SNMPGetTxOffset();
+	    _SNMPPut(ASN_OID);
+
+		OIDValOffset = _SNMPGetTxOffset();
+		temp.v[0] = OIDLen;
+	    _SNMPSetTxOffset(OIDValOffset+1);
+
+		//Put OID
+		while( temp.v[0]-- )
+		{
+			_SNMPPut(*oidValuePtr);		
+			oidValuePtr++;
+		}
+	}
 	// Start counting number of bytes put - OIDLen is already counted.
 	temp.v[0] =*oidLenPtr= OIDLen;
 
@@ -2121,24 +2994,48 @@ static BYTE ProcessGetBulkVar(OID_INFO* rec, BYTE* oidValuePtr, BYTE* oidLenPtr,
     // If this is a simple OID, handle it as a GetVar command.
     if ( !rec->nodeInfo.Flags.bIsSequence )
     {
-    	
-         // This is an addition to previously copied OID string.
-        // This is index value of '0'.
-        _SNMPPut(0);
-        temp.v[0]++;
+		#ifdef STACK_USE_SNMPV3_SERVER	
+    	if(pduDbPtr->snmpVersion == SNMP_V3)
+    	{
+	         // This is an addition to previously copied OID string.
+	        // This is index value of '0'.
+			 if(Snmpv3BufferPut(0,dynPduBuf) != TRUE)
+				 return FALSE;
+	        temp.v[0]++;
 
-        // Since we added one more byte to previously copied OID
-        // string, we need to update OIDLen value.
-        prevOffset = _SNMPGetTxOffset();
-        _SNMPSetTxOffset(OIDValOffset);
-        _SNMPPut(++OIDLen);
-        _SNMPSetTxOffset(prevOffset);
+	        // Since we added one more byte to previously copied OID
+	        // string, we need to update OIDLen value.
+	        prevOffset = dynPduBuf->length;
+	        dynPduBuf->length = OIDValOffset;
+			if(Snmpv3BufferPut(++OIDLen,dynPduBuf) != TRUE)
+				return FALSE;
+	        dynPduBuf->length = prevOffset;
+	       
 
-        // Now do Get on this simple variable.
-        prevOffset = _SNMPGetTxOffset();
-        putBytes = ProcessGetVar(rec, FALSE);
-     
-        temp.v[0] += putBytes; // ProcessGetVar(rec, FALSE);
+	        // Now do Get on this simple variable.
+	        prevOffset = dynPduBuf->length;
+	        putBytes = ProcessGetVar(rec, FALSE,pduDbPtr);
+    	}
+		else
+		#endif
+		{
+			 // This is an addition to previously copied OID string.
+			// This is index value of '0'.
+			_SNMPPut(0);
+			temp.v[0]++;
+		
+			// Since we added one more byte to previously copied OID
+			// string, we need to update OIDLen value.
+			prevOffset = _SNMPGetTxOffset();
+			_SNMPSetTxOffset(OIDValOffset);
+			_SNMPPut(++OIDLen);
+			_SNMPSetTxOffset(prevOffset);
+		
+			// Now do Get on this simple variable.
+			prevOffset = _SNMPGetTxOffset();
+			putBytes = ProcessGetVar(rec, FALSE,pduDbPtr);
+		}
+        temp.v[0] += putBytes; // ProcessGetVar(rec, FALSE,pduDbPtr);
    
 	    // Return with total number of bytes copied to response packet.
         return temp.v[0];
@@ -2151,7 +3048,12 @@ static BYTE ProcessGetBulkVar(OID_INFO* rec, BYTE* oidValuePtr, BYTE* oidLenPtr,
         if ( !SNMPGetVar(rec->id, rec->index, &ref, &v) )
         {
              // Reset the response packet pointer to begining of OID.
-            _SNMPSetTxOffset(OIDValOffset);
+           #ifdef STACK_USE_SNMPV3_SERVER	
+		     if(pduDbPtr->snmpVersion == SNMP_V3)
+			 	dynPduBuf->length = varBindOffset;
+			 else
+			 #endif
+	            _SNMPSetTxOffset(varBindOffset);
 
             // Jump to this label within this function - Not a good SW engineering
             // practice, but this will reuse code at much lower expense.
@@ -2177,22 +3079,23 @@ static BYTE ProcessGetBulkVar(OID_INFO* rec, BYTE* oidValuePtr, BYTE* oidLenPtr,
     MPFSGet(hMPFS, (BYTE*)&indexRec.dataType);
 
     indexRec.index = rec->index;
-
+#if 0
     // Check with application to see if there exists next index
     // for this index id.
-    if ( !lbNextLeaf && !SNMPGetNextIndex(indexRec.id, &indexRec.index) )
-    {	
-    	 //lbNextSeqeuence = TRUE;
+   if ( !lbNextLeaf && !SNMPGetNextIndex(indexRec.id, &indexRec.index) )
+   {   
+		//lbNextSeqeuence = TRUE;
 
-        // Reset the response packet pointer to begining of OID.
-        _SNMPSetTxOffset(OIDValOffset);
+	   // Reset the response packet pointer to begining of OID.
+	   _SNMPSetTxOffset(OIDValOffset);
 
-        // Jump to this label.  Not a good practice, but once-in-a-while
-        // it should be acceptable !
-        
-        goto _GetNextLeaf;
-    }
+	   // Jump to this label.  Not a good practice, but once-in-a-while
+	   // it should be acceptable !
+	   
+	   goto _GetNextLeaf;
+   }
 
+#endif
     // Index is assumed to be dynamic, and leaf node.
     // mib2bib has already ensured that this was the case.
     indexRec.nodeInfo.Flags.bIsConstant = 0;
@@ -2201,7 +3104,7 @@ static BYTE ProcessGetBulkVar(OID_INFO* rec, BYTE* oidValuePtr, BYTE* oidLenPtr,
 
     // Now handle this as simple GetVar.
     // Keep track of number of bytes added to OID.
-    indexBytes += ProcessGetVar(&indexRec, TRUE);
+    indexBytes += ProcessGetVar(&indexRec, TRUE,pduDbPtr);
 
     rec->index = indexRec.index;
 
@@ -2211,21 +3114,33 @@ static BYTE ProcessGetBulkVar(OID_INFO* rec, BYTE* oidValuePtr, BYTE* oidLenPtr,
     // These are the total number of bytes in OID string including index bytes.
     OIDLen += indexBytes;
 
-    // Since we added index bytes to previously copied OID
-    // string, we need to update OIDLen value.
-    prevOffset = _SNMPGetTxOffset();
-    _SNMPSetTxOffset(OIDValOffset);
-    _SNMPPut(OIDLen);
-    _SNMPSetTxOffset(prevOffset);
-
-
+	if(pduDbPtr->snmpVersion != SNMP_V3)
+	{
+		// Since we added index bytes to previously copied OID
+		// string, we need to update OIDLen value.
+		prevOffset = _SNMPGetTxOffset();
+		_SNMPSetTxOffset(OIDValOffset);
+		_SNMPPut(OIDLen);
+		_SNMPSetTxOffset(prevOffset);
+	}
+	#ifdef STACK_USE_SNMPV3_SERVER	
+	else
+	{
+		// Since we added index bytes to previously copied OID
+		// string, we need to update OIDLen value.
+		prevOffset = dynPduBuf->length;
+		dynPduBuf->length =OIDValOffset;
+		Snmpv3BufferPut(OIDLen,dynPduBuf);		
+		dynPduBuf->length = prevOffset;
+	}
+	#endif
     // Fetch actual value itself.
     // Need to restore original OID value.
     rec->nodeInfo.Val = varNodeInfo.Val;
     rec->id = varID;
     rec->dataType = varDataType;
 
-    temp.v[0] += ProcessGetVar(rec, FALSE);
+    temp.v[0] += ProcessGetVar(rec, FALSE,pduDbPtr);
 	
 	return temp.v[0];
 }
@@ -2270,7 +3185,7 @@ static BYTE ProcessGetBulkVar(OID_INFO* rec, BYTE* oidValuePtr, BYTE* oidLenPtr,
 	This routine works for the MPFS2 mib storage format. It uses the MPFS2
 	APIs to read,search and collect information from the mib database. 
 ***************************************************************************/
-static BYTE OIDLookup(PDU_INFO* pduDbPtr,BYTE* oid, BYTE oidLen, OID_INFO* rec)
+BYTE OIDLookup(PDU_INFO* pduDbPtr,BYTE* oid, BYTE oidLen, OID_INFO* rec)
 {
 	
 	BYTE savedOID,tempSavedOID;
@@ -2380,16 +3295,21 @@ static BYTE OIDLookup(PDU_INFO* pduDbPtr,BYTE* oid, BYTE oidLen, OID_INFO* rec)
 					appendZeroToOID=FALSE;
 					goto DidNotFindIt;
                  }
-				else if(snmpReqType==(BYTE)SNMP_GET && matchedCount == 1u && *reqOidPtr == 0x00u)
+				else if(snmpReqType==(BYTE)SNMP_GET 
+					&& matchedCount == 1u && *reqOidPtr == 0x00u)
 				{
 					appendZeroToOID=FALSE;
                  }
 				else if(snmpReqType==SNMP_GET_NEXT && matchedCount == 0u)
 				{
 					appendZeroToOID=TRUE;
-					snmpReqType=pduDbPtr->pduType=SNMP_GET;
+					getZeroInstance=TRUE;
+					
 				}
-
+				else if(snmpReqType==(BYTE)SNMP_V2C_GET_BULK && matchedCount == 1u )
+				{
+					appendZeroToOID=FALSE;
+				}
                 goto FoundIt;
             }
             else if(matchedCount == 1u && *reqOidPtr == 0x00u)
@@ -2513,7 +3433,7 @@ DidNotFindIt:
   Remarks:
 	None.
 ***************************************************************************/
-static BOOL GetNextLeaf(OID_INFO* rec)
+BOOL GetNextLeaf(OID_INFO* rec)
 {
     WORD_VAL temp;
 
@@ -2660,7 +3580,7 @@ static BOOL IsValidCommunity(char* community, BYTE* len)
   Remarks:
 	None.
 ***************************************************************************/
-static BOOL IsValidInt(DWORD* val)
+BOOL IsValidInt(DWORD* val)
 {
     DWORD_VAL tempData;
     DWORD_VAL tempLen;
@@ -2712,7 +3632,7 @@ static BOOL IsValidInt(DWORD* val)
   Remarks:
 	None.
 ***************************************************************************/
-static BOOL IsValidPDU(SNMP_ACTION* pdu)
+BOOL IsValidPDU(SNMP_ACTION* pdu)
 {
     BYTE tempData;
     WORD tempLen;
@@ -2758,7 +3678,7 @@ static BOOL IsValidPDU(SNMP_ACTION* pdu)
   Remarks:
 	None.
 ***************************************************************************/
-static BYTE IsValidLength(WORD *len)
+BYTE IsValidLength(WORD *len)
 {
     BYTE tempData;
     WORD_VAL tempLen;
@@ -2918,7 +3838,7 @@ static BOOL IsValidOID(BYTE* oid, BYTE* len)
   Remarks:
 	None.
 ***************************************************************************/
-static BYTE IsValidStructure(WORD* dataLen)
+BYTE IsValidStructure(WORD* dataLen)
 {
     DWORD_VAL tempLen;
     BYTE headerBytes;
@@ -2967,7 +3887,7 @@ static BYTE IsValidStructure(WORD* dataLen)
   Remarks:
   	 This routine should be called for every new snmp packet received.
 ***************************************************************************/
-static void _SNMPDuplexInit(UDP_SOCKET socket)
+void _SNMPDuplexInit(UDP_SOCKET socket)
 {
     // In full duplex transfer, transport protocol must be ready to
     // accept new transmit packet.
@@ -3004,7 +3924,7 @@ static void _SNMPDuplexInit(UDP_SOCKET socket)
   Remarks:
   	None.
 ***************************************************************************/
-static void _SNMPPut(BYTE v)
+void _SNMPPut(BYTE v)
 {
     UDPSetTxBuffer(SNMPTxOffset);
 
@@ -3038,7 +3958,7 @@ static void _SNMPPut(BYTE v)
   Remarks:
   	None.
 ***************************************************************************/
-static BYTE _SNMPGet(void)
+BYTE _SNMPGet(void)
 {
     BYTE v;
 
@@ -3078,7 +3998,7 @@ static BYTE _SNMPGet(void)
   Remarks:
   	This function is used only when TRAP is enabled.
 ***************************************************************************/
-static BOOL GetOIDStringByID(SNMP_ID id, OID_INFO* info, BYTE* oidString, BYTE* len)
+BOOL GetOIDStringByID(SNMP_ID id, OID_INFO* info, BYTE* oidString, BYTE* len)
 {
     DWORD hCurrent;
 
@@ -3138,7 +4058,7 @@ static BOOL GetOIDStringByID(SNMP_ID id, OID_INFO* info, BYTE* oidString, BYTE* 
   Remarks:
   	None.
 ***************************************************************************/
-static BOOL GetOIDStringByAddr(OID_INFO* rec, BYTE* oidString, BYTE* len)
+BOOL GetOIDStringByAddr(OID_INFO* rec, BYTE* oidString, BYTE* len)
 {
     DWORD hTarget;
     DWORD hCurrent;
@@ -3277,7 +4197,7 @@ static void ReadMIBRecord(DWORD h, OID_INFO* rec)
 
 }
 
-static BOOL GetDataTypeInfo(DATA_TYPE dataType, DATA_TYPE_INFO *info )
+BOOL GetDataTypeInfo(DATA_TYPE dataType, DATA_TYPE_INFO *info )
 {
     if ( dataType >= DATA_TYPE_UNKNOWN )
     {
@@ -3320,20 +4240,26 @@ static BOOL GetDataTypeInfo(DATA_TYPE dataType, DATA_TYPE_INFO *info )
   Remarks:
   	None.
 ***************************************************************************/
-static BYTE ProcessSetVar(PDU_INFO* pduDbPtr,OID_INFO* rec, SNMP_ERR_STATUS* errorStatus)
+BYTE ProcessSetVar(PDU_INFO* pduDbPtr,OID_INFO* rec, SNMP_ERR_STATUS* errorStatus)
 {
 	BYTE ref;
-	BYTE temp;
-	BYTE dataType;
-	BYTE dataLen;
-	BYTE copiedBytes;
+	BYTE temp=0;
+	BYTE dataType=0;
+	BYTE dataLen=0;
+	BYTE copiedBytes=0;
     SNMP_ERR_STATUS errorCode;
     DATA_TYPE_INFO actualDataTypeInfo;
     SNMP_VAL dataValue;
-    
+	
+	#ifdef STACK_USE_SNMPV3_SERVER	
+	SNMPV3MSGDATA	*dynPduBuf=NULL;
+	dynPduBuf = &gSNMPv3ScopedPduResponseBuf;
+    #endif
     // Start with no error.
     errorCode = SNMP_NO_ERR;
     copiedBytes = 0;
+
+	
 
     // Non-leaf, Constant and ReadOnly node cannot be modified
     if(rec->nodeInfo.Flags.bIsParent   ||
@@ -3342,13 +4268,24 @@ static BYTE ProcessSetVar(PDU_INFO* pduDbPtr,OID_INFO* rec, SNMP_ERR_STATUS* err
     {	
         if(pduDbPtr->snmpVersion == (BYTE)SNMP_V1)
        		errorCode = SNMP_NO_SUCH_NAME;
-		else if (pduDbPtr->snmpVersion == (BYTE)SNMP_V2C)
+		else if ((pduDbPtr->snmpVersion == (BYTE)SNMP_V2C) ||
+						(pduDbPtr->snmpVersion == (BYTE)SNMP_V3))
 			errorCode = SNMP_NOT_WRITABLE;
 	}
 
-    dataType = _SNMPGet();
-    _SNMPPut(dataType);
-    copiedBytes++;
+	if(pduDbPtr->snmpVersion != (BYTE)SNMP_V3)
+	{
+	    dataType = _SNMPGet();
+	    _SNMPPut(dataType);
+	}
+	#ifdef STACK_USE_SNMPV3_SERVER	
+	else
+	{
+	    dataType = Snmpv3GetBufferData(gSNMPv3ScopedPduRequestBuf,++gSNMPv3ScopedPduDataPos);	    
+		Snmpv3BufferPut(dataType,dynPduBuf);
+	}
+	#endif
+	copiedBytes++;
 
     // Get data type for this node.
     //actualDataType = MPFSGet();
@@ -3356,7 +4293,8 @@ static BYTE ProcessSetVar(PDU_INFO* pduDbPtr,OID_INFO* rec, SNMP_ERR_STATUS* err
 	{
 		if(pduDbPtr->snmpVersion == (BYTE)SNMP_V1)
         	errorCode = SNMP_BAD_VALUE;
-		else if (pduDbPtr->snmpVersion == (BYTE)SNMP_V2C)
+		else if ((pduDbPtr->snmpVersion == (BYTE)SNMP_V2C) ||
+					(pduDbPtr->snmpVersion == (BYTE) SNMP_V3))
 			errorCode = SNMP_WRONG_TYPE;
 	}
 
@@ -3366,13 +4304,24 @@ static BYTE ProcessSetVar(PDU_INFO* pduDbPtr,OID_INFO* rec, SNMP_ERR_STATUS* err
 	{	
         if(pduDbPtr->snmpVersion == (BYTE)SNMP_V1)
         	errorCode = SNMP_BAD_VALUE;
-		else if (pduDbPtr->snmpVersion == (BYTE)SNMP_V2C)
+		else if ((pduDbPtr->snmpVersion == (BYTE)SNMP_V2C) ||
+					(pduDbPtr->snmpVersion == (BYTE) SNMP_V3))
 			errorCode = SNMP_WRONG_TYPE;
 	}
 
     // Make sure that received data length is within our capability.
-    dataLen = _SNMPGet();
-    _SNMPPut(dataLen);
+	if(pduDbPtr->snmpVersion != (BYTE) SNMP_V3)
+	{
+	    dataLen = _SNMPGet();
+	    _SNMPPut(dataLen);
+	}
+	#ifdef STACK_USE_SNMPV3_SERVER	
+	else
+	{
+	    dataLen = Snmpv3GetBufferData(gSNMPv3ScopedPduRequestBuf,++gSNMPv3ScopedPduDataPos);	    
+		Snmpv3BufferPut(dataLen,dynPduBuf);
+	}
+	#endif
     copiedBytes++;
 
     // Only max data length of 127 is supported.
@@ -3380,7 +4329,8 @@ static BYTE ProcessSetVar(PDU_INFO* pduDbPtr,OID_INFO* rec, SNMP_ERR_STATUS* err
 	{
 		if(pduDbPtr->snmpVersion == (BYTE)SNMP_V1)
         	errorCode = SNMP_BAD_VALUE;
-		else if (pduDbPtr->snmpVersion == (BYTE)SNMP_V2C)
+		else if ((pduDbPtr->snmpVersion == (BYTE)SNMP_V2C)||
+				(pduDbPtr->snmpVersion == (BYTE) SNMP_V3))
 			errorCode = SNMP_WRONG_LENGTH;
 	}
 
@@ -3408,11 +4358,20 @@ static BYTE ProcessSetVar(PDU_INFO* pduDbPtr,OID_INFO* rec, SNMP_ERR_STATUS* err
 
             while( dataLen-- )
             {
-                temp = _SNMPGet();
-                dataValue.v[dataLen] = temp;
-
-                // Copy same byte back to create response...
-                _SNMPPut(temp);
+				if(pduDbPtr->snmpVersion != (BYTE) SNMP_V3)
+				{
+	                temp = _SNMPGet();
+	                // Copy same byte back to create response...
+	                _SNMPPut(temp);
+				}
+				#ifdef STACK_USE_SNMPV3_SERVER	
+				else
+				{
+					temp = Snmpv3GetBufferData(gSNMPv3ScopedPduRequestBuf,++gSNMPv3ScopedPduDataPos);		
+					Snmpv3BufferPut(temp,dynPduBuf);
+				}
+				#endif
+				dataValue.v[dataLen] = temp;
                 copiedBytes++;
             }
 
@@ -3424,7 +4383,8 @@ static BYTE ProcessSetVar(PDU_INFO* pduDbPtr,OID_INFO* rec, SNMP_ERR_STATUS* err
 				{
                    	if(pduDbPtr->snmpVersion == (BYTE)SNMP_V1)
         				errorCode = SNMP_BAD_VALUE;
-					else if (pduDbPtr->snmpVersion == (BYTE)SNMP_V2C)
+					else if ((pduDbPtr->snmpVersion == (BYTE)SNMP_V2C) ||
+							(pduDbPtr->snmpVersion == (BYTE) SNMP_V3))
 						errorCode = SNMP_WRONG_VALUE;
 				}
             }
@@ -3433,8 +4393,10 @@ static BYTE ProcessSetVar(PDU_INFO* pduDbPtr,OID_INFO* rec, SNMP_ERR_STATUS* err
 		{
             if(pduDbPtr->snmpVersion == (BYTE)SNMP_V1)
         		errorCode = SNMP_BAD_VALUE;
-			else if (pduDbPtr->snmpVersion == (BYTE)SNMP_V2C)
-			{	if( rec->nodeInfo.Flags.bIsConstant)
+			else if ((pduDbPtr->snmpVersion == (BYTE)SNMP_V2C)||
+				(pduDbPtr->snmpVersion == (BYTE) SNMP_V3))
+			{	
+				if( rec->nodeInfo.Flags.bIsConstant)
 					errorCode = SNMP_NOT_WRITABLE;
 				else
 					errorCode = SNMP_WRONG_LENGTH;
@@ -3446,11 +4408,12 @@ static BYTE ProcessSetVar(PDU_INFO* pduDbPtr,OID_INFO* rec, SNMP_ERR_STATUS* err
         // This is a multi-byte Set operation.
         // Check with application to see if this many bytes can be
         // written to current variable.
-        if ( !SNMPIsValidSetLen(rec->id, dataLen) )
+        if ( !SNMPIsValidSetLen(rec->id, dataLen,rec->index) )
 		{
             if(pduDbPtr->snmpVersion == (BYTE)SNMP_V1)
         		errorCode = SNMP_BAD_VALUE;
-			else if (pduDbPtr->snmpVersion == (BYTE)SNMP_V2C)
+			else if ((pduDbPtr->snmpVersion == (BYTE)SNMP_V2C)  ||
+				(pduDbPtr->snmpVersion == (BYTE) SNMP_V3))
 			{
 				if( rec->nodeInfo.Flags.bIsConstant)
 					errorCode = SNMP_NOT_WRITABLE;
@@ -3463,9 +4426,18 @@ static BYTE ProcessSetVar(PDU_INFO* pduDbPtr,OID_INFO* rec, SNMP_ERR_STATUS* err
         // so at least copy those bytes.
         while( dataLen-- )
         {
-            dataValue.byte = _SNMPGet();
-
-            _SNMPPut(dataValue.byte);
+			if(pduDbPtr->snmpVersion != (BYTE) SNMP_V3)
+			{
+	            dataValue.byte = _SNMPGet();
+	            _SNMPPut(dataValue.byte);
+			}
+			#ifdef STACK_USE_SNMPV3_SERVER	
+			else
+			{
+				dataValue.byte = Snmpv3GetBufferData(gSNMPv3ScopedPduRequestBuf,++gSNMPv3ScopedPduDataPos);		
+				Snmpv3BufferPut(dataValue.byte,dynPduBuf);
+			}
+			#endif
             copiedBytes++;
 
             // Ask applicaton to set this variable only if there was
@@ -3481,7 +4453,10 @@ static BYTE ProcessSetVar(PDU_INFO* pduDbPtr,OID_INFO* rec, SNMP_ERR_STATUS* err
         // Let application know about end of data transfer
         if ( errorCode == SNMP_NO_ERR )
 		{
-            SNMPSetVar(rec->id, rec->index, (WORD)SNMP_END_OF_VAR, dataValue);
+            if(!SNMPSetVar(rec->id, rec->index, (WORD)SNMP_END_OF_VAR, dataValue))
+			{
+                errorCode = SNMP_BAD_VALUE;
+			}
 		}
     }
     *errorStatus = errorCode;
@@ -3492,7 +4467,7 @@ static BYTE ProcessSetVar(PDU_INFO* pduDbPtr,OID_INFO* rec, SNMP_ERR_STATUS* err
 
 /****************************************************************************
   Function:
-	BYTE ProcessGetVar(OID_INFO* rec, BOOL bAsOID)
+	BYTE ProcessGetVar(OID_INFO* rec, BOOL bAsOID,PDU_INFO* pduDbPtr)
 	
   Summary:
   	Processes snmp Get request pdu.
@@ -3515,7 +4490,7 @@ static BYTE ProcessSetVar(PDU_INFO* pduDbPtr,OID_INFO* rec, SNMP_ERR_STATUS* err
   Remarks:
   	None.
 ***************************************************************************/
-static BYTE ProcessGetVar(OID_INFO* rec, BOOL bAsOID)
+BYTE ProcessGetVar(OID_INFO* rec, BOOL bAsOID,PDU_INFO* pduDbPtr)
 {
     BYTE ref;
     BYTE temp;
@@ -3525,7 +4500,11 @@ static BYTE ProcessGetVar(OID_INFO* rec, BOOL bAsOID)
     WORD prevOffset;
     SNMP_VAL v;
     DATA_TYPE_INFO dataTypeInfo;
-
+	#ifdef STACK_USE_SNMPV3_SERVER	
+	SNMPV3MSGDATA	*dynPduBuf=NULL;
+	dynPduBuf = &gSNMPv3ScopedPduResponseBuf;
+	#endif
+	
 	offset = 0;	// Suppress C30 warning: 'offset' may be used uninitialized in this function
     v.dword   = 0;
 
@@ -3548,10 +4527,23 @@ static BYTE ProcessGetVar(OID_INFO* rec, BOOL bAsOID)
 
     if ( !bAsOID )
     {
-        _SNMPPut(dataTypeInfo.asnType);
+		if(pduDbPtr->snmpVersion != (BYTE) SNMP_V3)
+		{
+			_SNMPPut(dataTypeInfo.asnType);
 
-        offset = SNMPTxOffset;
-        _SNMPPut(dataTypeInfo.asnLen);
+	        offset = SNMPTxOffset;
+	        _SNMPPut(dataTypeInfo.asnLen);
+		}
+		#ifdef STACK_USE_SNMPV3_SERVER	
+		else
+		{
+			if(Snmpv3BufferPut(dataTypeInfo.asnType,dynPduBuf) != TRUE)
+				return FALSE;
+	        offset = dynPduBuf->length;
+			if(Snmpv3BufferPut(dataTypeInfo.asnLen,dynPduBuf)!= TRUE)
+				return FALSE;
+		}
+		#endif
     }
 
     if ( rec->nodeInfo.Flags.bIsConstant )
@@ -3564,7 +4556,13 @@ static BYTE ProcessGetVar(OID_INFO* rec, BOOL bAsOID)
         while( temp-- )
 	    {
 	        MPFSGet(hMPFS, &c);
-            _SNMPPut(c);
+			if(pduDbPtr->snmpVersion != (BYTE) SNMP_V3)
+            	_SNMPPut(c);
+			#ifdef STACK_USE_SNMPV3_SERVER	
+			else
+				if(Snmpv3BufferPut(c,dynPduBuf) != TRUE)
+					return FALSE;
+			#endif	
         }
     }
     else
@@ -3582,31 +4580,59 @@ static BYTE ProcessGetVar(OID_INFO* rec, BOOL bAsOID)
                     varLen = dataTypeInfo.asnLen;
 
                     while( dataTypeInfo.asnLen )
-                        _SNMPPut(v.v[--dataTypeInfo.asnLen]);
+                    {
+						if(pduDbPtr->snmpVersion != (BYTE) SNMP_V3)
+                      	 	_SNMPPut(v.v[--dataTypeInfo.asnLen]);
+						#ifdef STACK_USE_SNMPV3_SERVER
+						else
+							if(Snmpv3BufferPut(v.v[--dataTypeInfo.asnLen],dynPduBuf)!=TRUE)
+								return FALSE;
+						#endif
+                    }
 
                     break;
                 }
                 else
                 {
                     varLen++;
-                    _SNMPPut(v.v[0]);
+					if(pduDbPtr->snmpVersion != (BYTE) SNMP_V3)
+						_SNMPPut(v.v[0]);
+					#ifdef STACK_USE_SNMPV3_SERVER
+					else
+						if(Snmpv3BufferPut(v.v[0],dynPduBuf) != TRUE)
+							return FALSE;
+					#endif
                 }
             }
             else
-                return FALSE;
+            {
+            	return FALSE;
+            }
 
         } while( ref != SNMP_END_OF_VAR );
     }
 
     if ( !bAsOID )
     {
-         prevOffset = _SNMPGetTxOffset();
 
-        _SNMPSetTxOffset(offset);
-        _SNMPPut(varLen);
+		 if(pduDbPtr->snmpVersion != SNMP_V3)
+		 {
+	         prevOffset = _SNMPGetTxOffset();
 
-        _SNMPSetTxOffset(prevOffset);
+	        _SNMPSetTxOffset(offset);
+	        _SNMPPut(varLen);
 
+	        _SNMPSetTxOffset(prevOffset);
+		 }
+		 #ifdef STACK_USE_SNMPV3_SERVER	
+		 else
+	 	{
+	 		prevOffset = dynPduBuf->length;
+			dynPduBuf->length = offset;
+			Snmpv3BufferPut(varLen,dynPduBuf);	
+			dynPduBuf->length = prevOffset;
+	 	}
+		#endif
         varLen++;
         varLen++;
     }
@@ -3644,7 +4670,7 @@ static BYTE ProcessGetVar(OID_INFO* rec, BOOL bAsOID)
   Remarks:
   	None.
 ***************************************************************************/
-static void SetErrorStatus(WORD errorStatusOffset,
+void SetErrorStatus(WORD errorStatusOffset,
                            WORD errorIndexOffset,
                            SNMP_ERR_STATUS errorStatus,
                            BYTE errorIndex)
@@ -3767,6 +4793,30 @@ static BOOL SNMPCheckIfPvtMibObjRequested(BYTE* OIDValuePtr)
 }
 
 
+#ifdef STACK_USE_SNMPV3_SERVER	
+
+void Snmpv3Init(void)
+{
+UINT8 userDBIndex,fifthOctectIdentifier;
+
+	Snmpv3InitializeUserDataBase();
+
+	fifthOctectIdentifier=MAC_ADDR_ENGN_ID;
+	
+	Snmpv3FormulateEngineID(fifthOctectIdentifier);
+
+#if 1
+	for(userDBIndex=0;userDBIndex<SNMPV3_USM_MAX_USER;userDBIndex++)
+	{
+	
+		Snmpv3UsmSnmpEngnAuthPrivPswdLocalization(userDBIndex);
+		Snmpv3ComputeHMACIpadOpadForAuthLoclzedKey(userDBIndex);
+
+	}
+#endif
+
+}
+#endif
 #endif
 
 #endif //#if defined(STACK_USE_SNMP_SERVER)

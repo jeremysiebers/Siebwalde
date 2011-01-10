@@ -343,7 +343,7 @@ void TelnetTask(void)
 					// Put analog value with space padding on right side for 4 characters
 					TCPPutROMArray(MySocket, (ROM BYTE*)strSpaces, 4-strlen((char*)AN0String));
 					TCPPutString(MySocket, AN0String);
-					
+	
 					// Put Buttons
 					TCPPutROMString(MySocket, (ROM BYTE*)"\x1b[12;18f");
 					TCPPut(MySocket, BUTTON3_IO ? '1':'0');
@@ -372,7 +372,7 @@ void TelnetTask(void)
 					TCPPut(MySocket, LED1_IO ? '1':'0');
 					TCPPut(MySocket, ' ');
 					TCPPut(MySocket, LED0_IO ? '1':'0');
-					
+		
 		
 					// Put cursor at beginning of next line
 					TCPPutROMString(MySocket, (ROM BYTE*)"\x1b[14;1f");

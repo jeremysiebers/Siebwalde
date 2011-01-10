@@ -50,6 +50,8 @@
  ********************************************************************/
 #include "TCPIP Stack/TCPIP.h"
 
+#if defined(STACK_USE_MDD)
+
 int FileSystemInit(void)
 {
     #if defined STACK_USE_MPFS2
@@ -249,3 +251,4 @@ size_t FileReadUInt16(WORD *ptr, FILE_HANDLE stream)
 }
 
 
+#endif //#if defined(STACK_USE_MDD)

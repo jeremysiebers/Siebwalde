@@ -87,6 +87,21 @@ void ARPResolve(IP_ADDR* IPAddr);
 BOOL ARPIsResolved(IP_ADDR* IPAddr, MAC_ADDR* MACAddr);
 void SwapARPPacket(ARP_PACKET* p);
 
+#ifdef STACK_USE_ZEROCONF_LINK_LOCAL
+	/* API specific Definitions */
+	#define ARP_REQ       0x0001u		// Operation code indicating an ARP Request
+	#define ARP_RESP      0x0002u		// Operation code indicating an ARP Response
+
+	struct arp_app_callbacks {
+    	BOOL used;
+    	void (*ARPPkt_notify)(DWORD SenderIPAddr, DWORD TargetIPAddr, 
+                          	MAC_ADDR* SenderMACAddr, MAC_ADDR* TargetMACAddr, BYTE op_req);
+	};
+	CHAR ARPRegisterCallbacks(struct arp_app_callbacks *app);
+	BOOL ARPDeRegisterCallbacks(CHAR id);
+	BOOL ARPSendPkt(DWORD SrcIPAddr, DWORD DestIPAddr, BYTE op_req );
+#endif
+
 #endif
 
 

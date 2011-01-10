@@ -108,7 +108,7 @@ void UDPPerformanceTask(void)
 	if(!MACIsLinked())
 		return;
 	
-	#if defined(STACK_USE_DHCP_CLIENT) && defined(DELAY_UDP_PERFORMANCE_TEST)
+	#if defined(STACK_USE_DHCP_CLIENT) && defined(UDP_PERFORMANCE)
 	{
 		static DWORD dwTimer = 0;
 		

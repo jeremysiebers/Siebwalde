@@ -9,7 +9,7 @@
  *********************************************************************
  * FileName:        StackTsk.c
  * Dependencies:    ARP, IP, Network layer interface (ENC28J60.c, 
- *					ETH97J60.c, ENCX24J600.c, or ZG2100.c)
+ *					ETH97J60.c, ENCX24J600.c, or WFMac.c)
  * Processor:       PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
  * Compiler:        Microchip C32 v1.05 or higher
  *					Microchip C30 v3.12 or higher
@@ -68,16 +68,14 @@
 
 #include "TCPIP Stack/TCPIP.h"
 
-#if defined( ZG_CS_TRIS )
-    #if defined(ZG_CONFIG_LINKMGRII) 
-        #include "TCPIP Stack\ZGLinkMgrII.h"
-    #endif
-    #if defined( ZG_CONFIG_CONSOLE )
-        #include "TCPIP Stack\ZGConsole.h"
+#if defined( WF_CS_TRIS )
+    #if defined( WF_CONFIG_CONSOLE )
+        #include "TCPIP Stack/WFConsole.h"
     #endif
     #if defined( STACK_USE_EZ_CONFIG ) || defined( EZ_CONFIG_SCAN )
-        #include "TCPIP Stack\ZGEasyConfig.h"
+        #include "TCPIP Stack/WFEasyConfig.h"
     #endif
+	#include "TCPIP Stack/WFApi.h"
 #endif
 
 // Stack FSM states.
@@ -124,20 +122,14 @@ void StackInit(void)
 
 #endif
 
-	// Seed the rand() function
-	srand(GenerateRandomDWORD());
+	// Seed the LFSRRand() function
+	LFSRSeedRand(GenerateRandomDWORD());
 
     MACInit();
-#if defined( ZG_CS_TRIS )
-    #if defined(ZG_CONFIG_LINKMGRII) 
-        ZGLibInitialize();
-        ZGLinkMgrInit();
-    #endif
-    #if defined(STACK_USE_EZ_CONFIG)
-        ZGEasyConfigInit();
-    #endif
-#endif    
 
+#if defined(WF_CS_TRIS) && defined(STACK_USE_EZ_CONFIG)
+    WFEasyConfigInit();
+#endif    
 
     ARPInit();
 
@@ -186,10 +178,12 @@ void StackInit(void)
 #endif
 
 #if defined(STACK_USE_DYNAMICDNS_CLIENT)
-		DDNSInit();
+	DDNSInit();
 #endif
 
-
+#if defined(STACK_USE_RANDOM)
+	RandomInit();
+#endif
 }
 
 
@@ -219,19 +213,15 @@ void StackTask(void)
 	BYTE cFrameType;
 	BYTE cIPFrameType;
 
-    #if defined( ZG_CS_TRIS )
-        // This task performs low-level MAC processing specific to the ZG2100
+   
+    #if defined( WF_CS_TRIS )
+        // This task performs low-level MAC processing specific to the MRF24WB0M
         MACProcess();
-        #if defined(ZG_CONFIG_LINKMGRII) 
-            ZGLinkMgr();
-        #endif     
-        #if defined ( EZ_CONFIG_SCAN )
-            ZGUserScanMgr();
-        #endif /* EZ_CONFIG_SCAN */ 
         #if defined( STACK_USE_EZ_CONFIG )
-            ZGEasyConfigMgr();
+            WFEasyConfigMgr();
         #endif
     #endif
+
 
 	#if defined(STACK_USE_DHCP_CLIENT)
 	// Normally, an application would not include  DHCP module
@@ -301,6 +291,16 @@ void StackTask(void)
 		if(!MACGetHeader(&remoteNode.MACAddr, &cFrameType))
 			break;
 
+		// When using a WiFi module, filter out all incoming packets that have 
+		// the same source MAC address as our own MAC address.  This is to 
+		// prevent receiving and passing our own broadcast packets up to other 
+		// layers and avoid, for example, having our own gratuitous ARPs get 
+		// answered by ourself.
+		#if defined(WF_CS_TRIS)
+			if(memcmp((void*)&remoteNode.MACAddr, (void*)&AppConfig.MyMACAddr, 6) == 0u)
+				continue;
+		#endif
+
 		// Dispatch the packet to the appropriate handler
 		switch(cFrameType)
 		{
@@ -318,7 +318,7 @@ void StackTask(void)
 					#if defined(STACK_USE_IP_GLEANING)
 					if(AppConfig.Flags.bInConfigMode && AppConfig.Flags.bIsDHCPEnabled)
 					{
-						// Accoriding to "IP Gleaning" procedure,
+						// According to "IP Gleaning" procedure,
 						// when we receive an ICMP packet with a valid
 						// IP address while we are still in configuration
 						// mode, accept that address as ours and conclude
@@ -334,6 +334,9 @@ void StackTask(void)
 					// Process this ICMP packet if it the destination IP address matches our address or one of the broadcast IP addressees
 					if( (tempLocalIP.Val == AppConfig.MyIPAddr.Val) ||
 						(tempLocalIP.Val == 0xFFFFFFFF) ||
+#if defined(STACK_USE_ZEROCONF_LINK_LOCAL) || defined(STACK_USE_ZEROCONF_MDNS_SD)
+                                                (tempLocalIP.Val == 0xFB0000E0) ||
+#endif
 						(tempLocalIP.Val == ((AppConfig.MyIPAddr.Val & AppConfig.MyMask.Val) | ~AppConfig.MyMask.Val)))
 					{
 						ICMPProcess(&remoteNode, dataCount);
@@ -404,6 +407,10 @@ void StackApplications(void)
 	
 	#if defined(STACK_USE_DHCP_SERVER)
 	DHCPServerTask();
+	#endif
+	
+	#if defined(STACK_USE_DNS_SERVER)
+	DNSServerTask();
 	#endif
 	
 	#if defined (STACK_USE_DYNAMICDNS_CLIENT)

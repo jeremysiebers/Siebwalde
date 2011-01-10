@@ -63,6 +63,115 @@
 
 /*****************************************************************************
   Function:
+	DWORD LFSRSeedRand(DWORD dwSeed)
+
+  Summary:
+	Seeds the LFSR random number generator invoked by the LFSRRand() function.  
+	The prior seed is returned.
+
+  Description:
+	Seeds the LFSR random number generator invoked by the LFSRRand() function.  
+	The prior seed is returned.
+
+  Precondition:
+	None
+
+  Parameters:
+	wSeed - The new 32-bit seed value to assign to the LFSR.
+
+  Returns:
+  	The last seed in use.  This can be saved and restored by a subsequent call 
+	to LFSRSeedRand() if you wish to use LFSRRand() in multiple contexts 
+	without disrupting the random number sequence from the alternative 
+	context.  For example, if App 1 needs a given sequence of random numbers 
+	to perform a test, if you save and restore the seed in App 2, it is 
+	possible for App 2 to not disrupt the random number sequence provided to 
+	App 1, even if the number of times App 2 calls LFSRRand() varies.
+  	
+  Side Effects:
+	None
+	
+  Remarks:
+	Upon initial power up, the internal seed is initialized to 0x1.  Using a 
+	dwSeed value of 0x0 will return the same sequence of random numbers as 
+	using the seed of 0x1.
+  ***************************************************************************/
+static DWORD dwLFSRRandSeed = 0x41FE9F9E;	// 0x41FE9F9E corresponds to calling LFSRSeedRand(1)
+DWORD LFSRSeedRand(DWORD dwSeed)
+{
+	DWORD dwOldSeed;
+	BYTE i;
+
+	// Save original seed to be returned later
+	dwOldSeed = dwLFSRRandSeed;
+
+	// Ensure zero isn't selected as a seed value, this would result in all 
+	// 0x0000 output values from the LFSR
+	if(dwSeed == 0u)
+		dwSeed = 1;
+		
+	// Set the new seed
+	dwLFSRRandSeed = dwSeed;
+	
+	// Run the LFSR a few times to get rid of obvious start up artifacts for 
+	// seed values that don't have many set bits.
+	for(i = 0; i < 16; i++)
+		LFSRRand();
+	
+	// Return saved old seed
+	return dwOldSeed;
+}
+
+/*****************************************************************************
+  Function:
+	WORD LFSRRand(void)
+
+  Summary:
+	Returns a pseudo-random 16-bit unsigned integer in the range from 0 
+	to 65535 (0x0000 to 0xFFFF).
+
+  Description:
+	Returns a pseudo-random 16-bit unsigned integer in the range from 0 
+	to 65535 (0x0000 to 0xFFFF).  The random number is generated using a 
+	Linear Feedback Shift Register (LFSR) type pseudo-random number generator 
+	algorithm.  The LFSR can be seeded by calling the LFSRSeedRand() function
+	to generate the same sequence of random numbers as a prior string of calls.
+	
+	The internal LFSR will repeat after 2^32-1 iterations.
+
+  Precondition:
+	None
+
+  Parameters:
+	None
+
+  Returns:
+  	Random 16-bit unsigned integer.
+  	
+  Side Effects:
+	The internal LFSR seed is updated so that the next call to LFSRRand() 
+	will return a different random number.
+	
+  Remarks:
+	None
+  ***************************************************************************/
+WORD LFSRRand(void)
+{
+	BYTE i;
+	
+	// Taps: 32 31 29 1
+	// Characteristic polynomial: x^32 + x^31 + x^29 + x + 1
+	// Repeat 15 times to make the shift pattern less obvious
+	for(i = 0; i < 15; i++)
+		dwLFSRRandSeed = (dwLFSRRandSeed >> 1) ^ ((0ul - (dwLFSRRandSeed & 1ul)) & 0xD0000001ul);
+
+	// Return 16-bits as pseudo-random number
+	return (WORD)dwLFSRRandSeed;
+}
+
+
+/*****************************************************************************
+  Function:
 	DWORD GenerateRandomDWORD(void)
 
   Summary:
@@ -72,8 +181,8 @@
 	This function generates a random 32-bit integer.  It collects
 	randomness by comparing the A/D converter's internal R/C oscillator
 	clock with our main system clock.  By passing collected entropy to the
-	C rand()/srand() functions, the output is normalized to meet statistical
-	randomness tests.
+	LFSRSeedRand()/LFSRRand() functions, the output is normalized (deskewed) 
+	in the hopes of meeting statistical randomness tests.
 
   Precondition:
 	None
@@ -86,7 +195,7 @@
   	
   Side Effects:
 	This function uses the A/D converter (and so you must disable 
-	interrupts if you use the A/D converted in your ISR).  The C rand()
+	interrupts if you use the A/D converted in your ISR).  The LFSRRand() 
 	function will be reseeded, and Timer0 (PIC18) and Timer1 (PIC24, 
 	dsPIC, and PIC32) will be used.  TMR#H:TMR#L will have a new value.
 	Note that this is the same timer used by the Tick module.
@@ -105,7 +214,11 @@ DWORD GenerateRandomDWORD(void)
 	BYTE vBitCount;
 	WORD w, wTime, wLastValue;
 	DWORD dwTotalTime;
-	DWORD dwRandomResult;
+	union
+	{
+		DWORD	dw;
+		WORD	w[2];
+	} randomResult;
 
 #if defined __18CXX	
 {
@@ -126,7 +239,7 @@ DWORD GenerateRandomDWORD(void)
 	vBitCount = 0;
 	dwTotalTime = 0;
 	wLastValue = 0;
-	dwRandomResult = rand();
+	randomResult.dw = LFSRRand();
 	while(1)
 	{
 		// Time the duration of an A/D acquisition and conversion
@@ -137,13 +250,14 @@ DWORD GenerateRandomDWORD(void)
 		while(ADCON0bits.GO);
 		((BYTE*)&wTime)[0] = TMR0L;
 		((BYTE*)&wTime)[1] = TMR0H;
-		w = rand();
+		w = LFSRRand();
 	
 		// Wait no longer than 1 second obtaining entropy
 		dwTotalTime += wTime;
 		if(dwTotalTime >= GetInstructionClock())
 		{
-			dwRandomResult ^= rand() | (((DWORD)rand())<<15ul) | (((DWORD)rand())<<30ul);
+			randomResult.w[0] ^= LFSRRand();
+			randomResult.w[1] ^= LFSRRand();
 			break;
 		}
 	
@@ -152,13 +266,13 @@ DWORD GenerateRandomDWORD(void)
 			continue;
 	
 		// Add this entropy into the pseudo random number generator by reseeding
-		srand(w + (wLastValue - wTime));
+		LFSRSeedRand(w + (wLastValue - wTime));
 		wLastValue = wTime;
 	
 		// Accumulate at least 32 bits of randomness over time
-		dwRandomResult <<= 1;
-		if(rand() >= 16384)
-			dwRandomResult |= 0x1;
+		randomResult.dw <<= 1;
+		if(LFSRRand() & 0x0080)
+			randomResult.w[0] |= 0x1;
 	
 		// See if we've collected a fair amount of entropy and can quit early
 		if(++vBitCount == 0u)
@@ -185,15 +299,16 @@ DWORD GenerateRandomDWORD(void)
 	PR1Save = PR1;
 
 	// Set up Timer and A/D converter module
-	AD1CON1 = 0x80E4;	// Turn on the A/D module, auto-convert
-	AD1CON2 = 0x003F;	// Interrupt after every 16th sample/convert
-	AD1CON3 = 0x9F00;	// Frc A/D clock, 31 Tad acquisition
-	T1CON = 0x8000;	// TON = 1, no prescalar
-	PR1 = 0xFFFF;	// Don't clear timer early
+	AD1CON1 = 0x0000;		// Turn off the ADC so we can write to it
+	AD1CON3 = 0x9F00;		// Frc A/D clock, 31 Tad acquisition
+	AD1CON2 = 0x003F;		// Interrupt after every 16th sample/convert
+	AD1CON1 = 0x80E4;		// Turn on the A/D module, auto-convert
+	T1CON = 0x8000;			// TON = 1, no prescalar
+	PR1 = 0xFFFF;			// Don't clear timer early
 	vBitCount = 0;
 	dwTotalTime = 0;
 	wLastValue = 0;
-	dwRandomResult = rand();
+	randomResult.dw = LFSRRand();
 	while(1)
 	{
 		ClrWdt();
@@ -208,15 +323,16 @@ DWORD GenerateRandomDWORD(void)
 		#if defined(__C30__)
 			IFS0bits.AD1IF = 0;
 		#else
-			IFS1bits.AD1IF = 0;
+			IFS1CLR = _IFS1_AD1IF_MASK;
 		#endif
-		w = rand();
+		w = LFSRRand();
 	
 		// Wait no longer than 1 second obtaining entropy
 		dwTotalTime += wTime;
 		if(dwTotalTime >= GetInstructionClock())
 		{
-			dwRandomResult ^= rand() | (((DWORD)rand())<<15) | (((DWORD)rand())<<30);
+			randomResult.w[0] ^= LFSRRand();
+			randomResult.w[1] ^= LFSRRand();
 			break;
 		}
 	
@@ -225,13 +341,13 @@ DWORD GenerateRandomDWORD(void)
 			continue;
 	
 		// Add this entropy into the pseudo random number generator by reseeding
-		srand(w + (wLastValue - wTime));
+		LFSRSeedRand(w + (wLastValue - wTime));
 		wLastValue = wTime;
 	
 		// Accumulate at least 32 bits of randomness over time
-		dwRandomResult <<= 1;
-		if(rand() >= 16384)
-			dwRandomResult |= 0x1;
+		randomResult.dw <<= 1;
+		if(LFSRRand() & 0x0080)
+			randomResult.w[0] |= 0x1;
 	
 		// See if we've collected a fair amount of entropy and can quit early
 		if(++vBitCount == 0u)
@@ -240,15 +356,16 @@ DWORD GenerateRandomDWORD(void)
 
 
 	// Restore hardware SFRs
-	AD1CON1 = AD1CON1Save;
-	AD1CON2 = AD1CON2Save;
+	AD1CON1 = 0x0000;		// Turn off the ADC so we can write to it
 	AD1CON3 = AD1CON3Save;
+	AD1CON2 = AD1CON2Save;
+	AD1CON1 = AD1CON1Save;
 	T1CON = T1CONSave;
 	PR1 = PR1Save;
 }
 #endif
 
-	return dwRandomResult;
+	return randomResult.dw;
 }
 
 
@@ -528,7 +645,6 @@ WORD Base64Decode(BYTE* cSourceData, WORD wSourceLen, BYTE* cDestData, WORD wDes
 {
 	BYTE i;
 	BYTE vByteNumber;
-	BOOL bPad;
 	WORD wBytesOutput;
 
 	vByteNumber = 0;
@@ -539,7 +655,6 @@ WORD Base64Decode(BYTE* cSourceData, WORD wSourceLen, BYTE* cDestData, WORD wDes
 	{
 		// Fetch a Base64 byte and decode it to the original 6 bits
 		i = *cSourceData++;
-		bPad = (i == '=');
 		if(i >= 'A' && i <= 'Z')	// Regular data
 			i -= 'A' - 0;
 		else if(i >= 'a' && i <= 'z')
@@ -557,8 +672,6 @@ WORD Base64Decode(BYTE* cSourceData, WORD wSourceLen, BYTE* cDestData, WORD wDes
 		// Write the 6 bits to the correct destination location(s)
 		if(vByteNumber == 0u)
 		{
-			if(bPad)				// Padding here would be illegal, treat it as a non-Base64 chacter and just skip over it
-				continue;
 			vByteNumber++;
 			if(wBytesOutput >= wDestLen)
 				break;
@@ -571,8 +684,6 @@ WORD Base64Decode(BYTE* cSourceData, WORD wSourceLen, BYTE* cDestData, WORD wDes
 			*cDestData++ |= i >> 4;
 			if(wBytesOutput >= wDestLen)
 				break;
-			if(bPad)
-				continue;
 			wBytesOutput++;
 			*cDestData = i << 4;
 		}
@@ -582,12 +693,10 @@ WORD Base64Decode(BYTE* cSourceData, WORD wSourceLen, BYTE* cDestData, WORD wDes
 			*cDestData++ |= i >> 2;
 			if(wBytesOutput >= wDestLen)
 				break;
-			if(bPad)
-				continue;
 			wBytesOutput++;
 			*cDestData = i << 6;
 		}
-		else if(vByteNumber == 3u)
+		else
 		{
 			vByteNumber = 0;
 			*cDestData++ |= i;
@@ -765,8 +874,10 @@ void uitoa(WORD Value, BYTE* Buffer)
   Returns:
   	None
   ***************************************************************************/
-// HI-TECH PICC-18 PRO 9.63 already has a ultoa() library function
-#if !defined(__18CXX) && !defined(HI_TECH_C)
+// HI-TECH PICC-18 PRO 9.63 and C30 v3.25 already have a ultoa() library function
+// C18 already has a ultoa() function that more-or-less matches this one
+// C32 and C30 < v3.25 need this function
+#if defined(__PIC32MX__) || (defined (__C30__) && (__C30_VERSION__ < 325)) || defined(__C30_LEGACY_LIBC__)
 void ultoa(DWORD Value, BYTE* Buffer)
 {
 	BYTE i;
@@ -1048,21 +1159,26 @@ WORD CalcIPChecksum(BYTE* buffer, WORD count)
 {
 	WORD i;
 	WORD *val;
-	DWORD_VAL sum = {0x00000000ul};
+	union
+	{
+		WORD w[2];
+		DWORD dw;
+	} sum;
 
 	i = count >> 1;
 	val = (WORD*)buffer;
 
 	// Calculate the sum of all words
+	sum.dw = 0x00000000ul;
 	while(i--)
-		sum.Val += (DWORD)*val++;
+		sum.dw += (DWORD)*val++;
 
 	// Add in the sum of the remaining byte, if present
-	if(((WORD_VAL*)&count)->bits.b0)
-		sum.Val += (DWORD)*(BYTE*)val;
+	if(count & 0x1)
+		sum.dw += (DWORD)*(BYTE*)val;
 
 	// Do an end-around carry (one's complement arrithmatic)
-	sum.Val = (DWORD)sum.w[0] + (DWORD)sum.w[1];
+	sum.dw = sum.w[0] + sum.w[1];
 
 	// Do another end-around carry in case if the prior add 
 	// caused a carry out

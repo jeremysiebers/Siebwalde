@@ -655,7 +655,7 @@ void DDNSTask(void)
 			if(TCPIsPutReady(MySocket) < 50u)
 				break;
 			
-			TCPPutROMString(MySocket, (ROM BYTE*)"\r\nUser-Agent: Microchip - TCPIPSTACK - "VERSION"\r\n\r\n");
+			TCPPutROMString(MySocket, (ROM BYTE*)"\r\nUser-Agent: Microchip - TCPIPSTACK - "TCPIP_STACK_VERSION"\r\n\r\n");
 			TCPFlush(MySocket);
 			smDDNS++;
 			

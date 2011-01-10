@@ -7,19 +7,448 @@ Note: Please file bug-reports/bug-fixes at http://support.microchip.com/ or post
       Look for stack updates at http://www.microchip.com/tcpip/
 
 ********
-v5.20b 		18 November 2009
+v5.31 		19 October 2010
 ********
 Changes:
-1.  Removed ZeroG license agreement and replaced license stubs at the top of 
-    all ZG2100 WiFi driver files.  ZeroG Wireless, Inc. has been acquired by 
-    Microchip Technology.
+1.  Reorganized demo projects.  The TCPIP ENCX24J600 Demo App, TCPIP PIC32 ETH 
+    Demo App, and TCPIP WiFi Demo App projects in stack versions 5.25 and prior 
+    have all been merged into the TCPIP Demo App folder.  All four of these 
+    projects were almost identical to each other, with the primary difference 
+    being the network interface controller the projects were preconfigured to 
+    support.  In this 5.31 TCP/IP Stack release, each hardware combination now 
+    has its own MPLAB IDE project in the TCPIP Demo App folder.
+2.  Reorganized HardwareProfile.h and TCPIPConfig.h structure for the TCPIP Demo 
+    App, TCPIP Google PowerMeter Demo App, and TCPIP WebVend App projects.  Now, 
+    instead of having one massive HardwareProfile.h file that supports a 
+    multitude of hardware platforms simultaneously, simple individual 
+    hardware profiles have been created for specific hardware combinations and 
+    placed in the "Alternative Configurations" sub-folder.  The correct hardware 
+    profile or TCPIP config file is selected by #including "HardwareProfile.h" 
+    or "TCPIPConfig.h" as in previous stack versions.  However, the active 
+    hardware profile or config file from the Alternative Configurations folder 
+    is selected by a preprocessor macro defined in the MPLAB project settings 
+    (passed on the command line to the compiler).
+3.  Added HTTP_SAVE_CONTEXT_IN_PIC_RAM option to TCPIPConfig.h (HTTP2 server 
+    module).  This option, when enabled, will increase HTTP2 server performance 
+    when servicing multiple simultaneous connections at the expense of using 
+    more PIC RAM.
+4.  Added automatic TPIN+/- polarity swapping logic to ETH97J60.c driver for 
+    PIC18F97J60 family devices.  Some 3rd party Ethernet switches, routers, and 
+    end devices have their TX+/- pins wired backwards such that the remote TX+ 
+    signal connects to the PIC TPIN- pin and the remote TX- signal connects to 
+    the PIC TPIN+ pin.  Because 10BaseT Ethernet signaling is polarized and the 
+    PIC18F97J60 family does not implement an auto-polarity feature, this 
+    normally prevents all RX communications with these non-IEEE 802.3 compliant 
+    link partners.  To work around this incompatibility, it is possible to 
+    implement circuitry to swap the RX+ and RX- signals before reaching the 
+    TPIN+ and TPIN- pins.  The PICDEM.net 2 Rev 6 reference design includes this 
+    necessary circuitry (U6, U7, R54, and RX_SWAP GPIO output pin from PIC).  
+    This stack version automatically controls the RX_SWAP signal based on the 
+    ETH_RX_POLARITY_SWAP_TRIS and ETH_RX_POLARITY_SWAP_IO definitions in 
+    HardwareProfile.h.  If these macros are undefined, then the automatic 
+    polarity swapping feature is disabled in the ETH97J60.c driver.
+5.  Added portable LFSRRand() and LFSRSeedRand() public functions to Helpers.c 
+    and removed all references to C rand() and srand() functions.  The C rand() 
+    function returns a 15 bit integer on 8 and 16 bit PICs, but a 31 bit integer 
+    on PIC32s.  The LFSRRand() function returns a 16-bit integer, regardless of 
+    which PIC you are using.
+6.  Added support for various SST/Microchip brand SST25xxxxx SPI Flash chips to 
+    SPIFlash.c driver.  Previously only devices supporting the Auto Address 
+    Increment (AAI) Word Program opcode (0xAD) would work.  Now, devices such as 
+    the SST2525VF010A should work, which require the AAI Byte program opcode 
+    (0xAF) instead.
+7.  Removed support for Spansion brand SPI Flash chips in the SPIFlash.c driver.  
+    If your application is already using one of these devices, continue to use 
+    the SPIFlash.c/.h files from TCP/IP Stack 5.25.  These older files are API 
+    compatible with the current version, so can be dropped in by simply 
+    overwriting the SPIFlash.c and SPIFlash.h files.
+8.  Removed a -4 offset from the advirtised TCP Maximum Segment Size option 
+    (MSS) and TCP_MAX_SEG_SIZE_RX configuration value in TCP.c.  The default 
+    TCP MSS advertised is now 536 instead of 532.    
+9.  For Wi-Fi projects in the TCPIP Demo App folder, changed 
+    MY_DEFAULT_LIST_RETRY_COUNT to WF_RETRY_FOREVER instead of 3.  This
+    changes default connection behavior to keep trying to connect instead of
+    just trying 3 times which makes more sense for demonstration.
+10. Changed WF_Connect() beacon timeout to 40.
+11. IFConfig command in TCPIP WiFi Console Demo App modified to return 
+    application-perspective MAC address from the AppConfig structure, and not 
+    the Wi-Fi serialized MAC address (they may not match if user desired custom 
+    MAC).
+12. Updated the TCP/IP Configuration Wizard.  The user can now configure 
+    wireless settings and stack settings seperately.  Because of the changes to 
+    the TCPIPConfig.h file, the user must now select the specific copy of 
+    TCPIPConfig.h (or any of its variants) instead of selecting a project 
+    directory. Added the ability to select WF_RETRY_FOREVER in the Wi-Fi 
+    configuration settings.  Added a selection parameter for BSD socket count. 
+    Added validation to check for the proper number of Berkeley sockets and TCP 
+    performance test sockets in the socket configuration screen (Advanced 
+    Settings) if either of these features are enabled.  Added the ability to 
+    create sockets of the same type with different TX/RX buffer sizes in the 
+    socket configuration screen.
+13. Updated the TCPIP WebVend Demo App to support Wi-Fi in several 
+    configurations.
+14. Modified the Google PowerMeter demo to automatically determine the 
+    date/time from the HTTP module if the date/time cannot be obtained from the 
+    SNTP module.
+15. Added a new Google Map project example to the Combo Demos folder.  This 
+    example runs on a PIC24FJ256DA210 Development Board + Fast 100Mbps Ethernet 
+    PICtail Plus (or Ethernet PICtail Plus) + Truly 3.2" 240x320 display, 
+    TFT_G240320LTSW_118W_E (or Powertip 4.3" 480x272 display, 
+    PH480272T_005_I11Q).  It also can run on the PIC32 Multimedia Expansion 
+    Board + PIC32 Ethernet Starter Kit.  This demo connects to the Internet, 
+    sends an HTTP query for a specific map tile to the Google Static Maps API, 
+    and then displays the compressed tile to the graphics display.  For more 
+    information, see the "Getting Started - Running the Graphics Google Map 
+    Demo.htm" file in the Combo Demos\Google Map folder.
+16. Added preliminary SNMPv3 module.  This module, enabled with the 
+    STACK_USE_SNMPV3_SERVER option in TCPIPConfig.h, implements the Simple 
+    Network Management Protocol, version 3.  Among other things, SNMPv3 adds 
+    secure authentication and cryptographic privacy as compared to SNMPv2C.  
+    This implementation currently only supports AES encryption (no DES support).  
+    It also has only been tested with the PIC32 Ethernet Starter Kit (TCPIP 
+    Demo App - C32 - PIC32_ENET_SK_DM320004_INTERNAL_ETHERNET.mcp MPLAB IDE 
+    project).  SNMPv3 on PIC18, PIC24, and dsPIC platforms are not supported at 
+    this time.  Because AES encryption has specialized United States export 
+    requirements, this TCP/IP Stack release does not include the required AES 
+    library to enable SNMPv3.  To obtain the needed AES library, you must 
+    purchase SW300052 v2.6 or later.  Older v2.5 and previous versions include 
+    AES related files on them, but do not include the new AES files required by 
+    SNMPv3.  For more information on using SNMP, refer to the TCP/IP Stack Help 
+    (Demo Information -> Available Demos -> TCPIP Demo App -> Demo Modules -> 
+    Network Management (SNMP) Server).
+17. Altered the SaveAppConfig() function in MainDemo.c to store a more robust 
+    signature to EEPROM/SPI Flash when saving the AppConfig structure.  In v5.25 
+    and prior stack versions, when EEPROM or SPI Flash memory was available, the 
+    stack would automatically write a one byte marker character to address 
+    0x000000 in the EEPROM/Flash indicating if a valid AppConfig structure was 
+    stored in the non-volatile memory.  This resulted in the EEPROM/Flash 
+    contents being organized like the following:
+        Address                 Data Contents
+        ===================     ==============================================
+        0x000000:               Marker Byte
+        0x000001:               AppConfig structure
+        MPFS_RESERVE_BLOCK:     Start of MPFS/MPFS2 image containing web pages
+    In this stack version, EEPOM/Flash contents will now contain:
+        Address                 Data Contents
+        ===================     ==============================================
+        0x000000:               Length of AppConfig structure (16-bit integer)
+        0x000002:               IP checksum of the AppConfig default values, as 
+                                defined in TCPIPConfig.h and WF_Config.h 
+                                (16-bit integer).
+        0x000004:               IP checksum of the subsequent EEPROM/Flash 
+                                bytes of the AppConfig values.
+        0x000006:               AppConfig structure
+        MPFS_RESERVE_BLOCK:     Start of MPFS/MPFS2 image containing web pages
+   The additional checkums allow automatic detection to occur if you change one 
+   of the values in TCPIPConfig.h or WF_Config.h that affects AppConfig.  If 
+   you change one of the values in code, then upon boot up, the application 
+   will automatically detect this change and start using the values that you 
+   selected in code.  If, at run time, you decide to change the AppConfig 
+   values and commit the changes to EEPROM/Flash, then the stack will 
+   subsequently use the run-time saved values on future reboots.  The checksum 
+   at offset 0x000004 ensures that if any corrupted AppConfig contents are 
+   found in EEPROM/Flash (ex: power is lost between writing the signature 
+   structure and actual AppConfig structure, or code unintentionally overwrites 
+   something in the AppConfig memory area), then the original defaults defined 
+   in TCPIPConfig.h and WF_Config.h will be used instead of the corrupted 
+   values.  This EEPROM/SPI Flash change affects all projects except TCPIP 
+   Internet Radio App, TCPIP Internet Bootloader App, and all PIC32 Starter Kit 
+   projects since these projects do not have or use external EEPROM or SPI 
+   Flash memory.
 
-Fixes: 
-1.  None
 
-Known Problems: 
-1.  See v5.20 release notes.  Stack v5.20b does not contain any code changes 
-    relative to v5.20.
+Fixes:
+1.  Fixed a UDP bug in which a transmitted packet would have been addressed 
+    to the wrong destination node if the UDP socket received a broadcast packet 
+    from a different remote node from the last received packet, but using the 
+    same source port number as the last received packet.  The 
+    FindMatchingSocket() function in UDP.c will now always change the local 
+    socket parameters to send to the most recent remote node's unicast IP 
+    address, regardless of if the last received packet was addressed to a 
+    multicast or broadcast destination.  Thanks go to Billy Walton for reporting 
+    this erroneous behavior.  If you wish to change the destination IP/MAC 
+    addresses or port number for a UDP packet that you are ready to send, write 
+    the new parameters to the UDPSocketInfo[SocketHandle] global structure 
+    before calling UDPFlush().  This structure contains remoteNode and 
+    remotePort parameters for the remote IP address/MAC address and remote UDP 
+    port, respectively.  You can also read these values to obtain the remote 
+    addressing parameters for the last received packet on the given UDP socket.  
+    Note that "SocketHandle" refers to the UDP socket handle returned by the 
+    UDPOpen() API, not the literal string "SocketHandle".
+2.  Fixed ADC state save/restore bug in GenerateRandomDWORD() function in 
+    Helpers.c.  PIC24, dsPIC, and PIC32 platforms require the ADC ON/ADON bit to 
+    be cleared before modifying certain other ADC register contents.
+3.  Fixed an ENC28J60 MAC/MII register write timing violation when using a 
+    PIC24H or dsPIC at over 33MIPS.  There was inadequate Chip Select hold time 
+    provided, violating the 210ns minimum specified in the ENC28J60 data sheet.  
+    This violation may have resulted in certain devices losing the ability to 
+    receive packets (due to the MARXEN bit, MACON1<0>, getting cleared 
+    unintentionally).
+4.  Fixed an ENCX24J600.c driver bug in which operating at 100Mbps with the 
+    ENC424J600/624J600 Ethernet controller, it would be possible for the 
+    MACGetHeader() function to issue a Reset() operation under rare 
+    circumstances.  The PIC would reset whenever the PHY detected an illegal 
+    symbol during 4B5B decoding but guessed the correct 4B symbol such that no 
+    data corruption or CRC error occurred.  This condition results in a valid 
+    packet being received but with the Received Ok Receive Status Vector bit 
+    being clear (RSV<23> == 0).  This issue would become more probable when 
+    using very long Ethernet cables (ex: 100 meters) and receiving a lot of 
+    data.
+5.  Fixed a TCP bug in which calling TCPDisconnect() to close a connection when 
+    the remote node's RX window was 0 bytes would have caused the stack to enter 
+    an infinite loop sending duplicate ACK packets.
+6.  Fixed Wi-Fi bug that caused assert condition if too many management messages 
+    were being received during data traffic.
+7.  Fixed Wi-Fi bug that caused WF_EVENT_CONNECTION_RESTABLISHED event case to 
+    send the wrong notification to the app.  
+8.  Fixed Wi-Fi bug that caused assert failure with Scratch move failure.
+9.  Fixed Wi-Fi bug in WF_CAGetChannelList() and WF_CAGetSecurity that caused 
+    failure.
+10. Fixed Wi-Fi EasyConfig bug that required development boards to be manually 
+    reset even after new network was selected.
+11. Fixed MRF24WB0 bug that caused assert if invalid WPA/WPA2 key was entered.
+12. Fixed Wi-Fi power management bit behavior in PS-Poll frame that was causing 
+    some AP’s to never send data or disconnect when in power save mode.
+13. Fixed a TCP bug in which attempting to open a client TCP socket to a remote 
+    server, specified by IP address (not DNS address), that was offline, but 
+    who's MAC address was already cached by the ARP client, would result in 
+    endless back-offs. For example, when attempting to contact the remote node 
+    (that was not responding), the TCP module would have transmitted a SYN at 
+    time T=0 seconds, T=1s, T=3s, T=7s, T=15s, T=31s, T=63s, T=127s, T=255s, 
+    etc.  The exponential back-off between retransmissions would grow 
+    indefinitely until the retransmission interval would have grown so large 
+    that effectively no-retransmissions would be occurring.  Assuming the 
+    application wasn't written with its own timeout to prevent endless waiting, 
+    this would prevent the socket from automatically establishing the 
+    connection to the remote server once the server came back online.  With this 
+    TCP fix, the exponential back off now saturates after TCP_MAX_RETRIES (5) 
+    back offs and continues to retransmit using the same interval.  By default, 
+    this means SYN transmissions will occur at T=0 seconds, T=1s, T=3s, T=7s, 
+    T=15s, T=31s, T=63s, T=95s, T=127s, etc.  After 5 back-offs the 
+    retransmission interval stops growing and stays constant at 32 seconds.
+14. Fixed an RSA computation bug that would cause the RSA module to never 
+    complete if you attempted to compute y = x^e % n where e = 3 (or similar 
+    number < 256 with only 0, 1, or 2 bits set).  Thanks go to Kevin Maidment 
+    for pointing this error out and suggesting a solution.  Note, that this fix 
+    to RSA.c is not distributed with the ordinary TCP/IP Stack due to United 
+    States export restrictions.  To get this fix, you must repurchase SW300052.  
+    This fix is included in SW300052 v2.6 or later.  If you don't have CD media 
+    to identify the SW300052 version that you have, you can test the RSA.c file 
+    that you have.  RSA.c in SW300052 v2.6 has a CRC32 checksum of 0x91F66711.  
+    RSA.c in v2.5 and prior had a checksum of 0xB1E8B0CC.
+
+
+Known Problems:
+1.  Telnet server module does not implement a lot of Telnet functions.  As a 
+    result, it will likely not display correctly or work at all with some Telnet 
+    clients.  The server was tested with the Microsoft telnet.exe utility which 
+    is provided with Microsoft Windows.
+2.  If the DHCP client and DHCP server are used at the same time and you connect 
+    two similar boards to each other (ex: two PICDEM.net 2 boards connected via 
+    a crossover cable), a race condition can occur where both nodes will disable 
+    their DHCP server and neither board will get a successful DHCP lease.  If 
+    this unlikely scenario occurs, as a work around, simply reset one of the 
+    boards to reenable it's DHCP server.
+3.  LCDBlocking.c timing for the LCD_E_IO enable signal is too fast to meet 
+    published data sheet limits for various LCD controllers when compiling for 
+    a PIC32 running at > 43MHz.  Despite this potential timing violation, the 
+    LCD does normally work correctly on the precompiled PIC32 demos for the 
+    Explorer 16 at 80MHz.
+
+
+
+********
+v5.25 		07 May 2010
+********
+Changes:
+1.  Added support for the Microchip MRF24WB0 802.11 WiFi controller (module 
+    part number MRF24WB0MA).  This product is intended as a backwards 
+    compatible, drop in replacement to the ZG2100.  The MRF24WB0MA should work 
+    with previous TCP/IP Stack versions as if it were a ZG2100M, but when the 
+    MRF24WB0MA is used with this (5.25) and future TCP/IP Stack versions, 
+    feature improvements inside the MRF24WB0 allow the TCP/IP Stack code/RAM 
+    size to be smaller and run faster.  
+2.  Dropped support for the ZeroG ZG2100 802.11 WiFi controller.  Applications 
+    that must stay with this device should continue to use TCP/IP Stack 
+    version 5.20b or earlier.  All new projects or preexisting projects 
+    undergoing updates should be developed with the MRF24WB0 instead.
+3.  The WiFi connection management state machines now run on the MRF24WB0 
+    instead of the PIC host, freeing up code and data space.  Connection profiles 
+    can be created and the connection algorithm fine-tuned by the PIC 
+    application. In the WiFi demos see the WF_Connect function in MainDemo.c for 
+    an example of how to configure and then establish a WiFi connection.  The
+    programming model has changed to an API model which is documented in 
+    'TCPIP Stack Help.chm'.
+4.  Changed "VERSION" macro definition in TCPIP.h to "TCPIP_STACK_VERSION".  
+    "VERSION" is overly generic and will likely conflict with other identical 
+    tokens one may use in their application code or source libraries.
+5.  Added support for the PIC24FJ256GA110, PIC24FJ256GB110 and PIC24FJ256GB210
+    PIMs for the Explorer 16.  Note that when using the PIC24FJ256GA110 
+    general purpose PIM, the Ethernet PICtail Plus, Fast 100Mbps Ethernet 
+    PICtail Plus, MRF24WB0MA Wi-Fi PICtail Plus, or other SPI PICtail daughter 
+    board should be installed in the middle SPI2 slot of the Explorer 16, not 
+    the ordinary topmost SPI1 slot used by other PIMs, including the 
+    PIC24FJ256GB110 and PIC24FJ256GB210 ones.  The software is set up to use 
+    SPI2 for the PIC24FJ256GA110 PIM to avoid incompatibilities with silicon 
+    revision A3, which does not allow the SCK1 pin to be configured as a PPS 
+    output.
+6.  Added support for the PIC24FJ256DA210 Development Board.
+7.  Added TFTPUploadRAMFileToHost(), TFTPUploadFragmentedRAMFileToHost() and 
+    TFTPGetUploadStatus() APIs to the TFTPc.c file.  These APIs provide a very 
+    simple means of uploading a whole file to a remote TFTP server without 
+    requiring a great deal of application state machine logic.  These APIs 
+    require the DNS client module to be enabled (STACK_USE_DNS must be defined, 
+    in addition to STACK_USE_TFTP_CLIENT).
+8.  Added a dummy DNS Server module.  This server always sends the local IP 
+    address in response to all queries received.  When using the PIC DHCP 
+    server, its purpose is to allow a user to type anything into a web browser 
+    (ex: http://asdf/) and still receive the web page provided by the PIC, much 
+    as a hotel or airport WiFi router will serve to you before you've paid or 
+    agreed to the network's terms of service.  This DNS server module is 
+    implemented in DNSs.c, requires one UDP socket, and is enabled via the 
+    STACK_USE_DNS_SERVER option in TCPIPConfig.h.
+9.  Changed SPIFlash.h file defaults to target an SST SPI Flash with 4096 byte 
+    sectors instead of a Spansion Flash with 65536 byte sectors.  These new 
+    defaults are, among other reasons, in support of the PIC24FJ256DA210 
+    Development Board, which has an SST SST25VF016B on it.
+10. Made TCP Keep-Alive packets consistently get sent TCP_KEEP_ALIVE_TIMEOUT 
+    (default 10 seconds) after the last socket TX or RX activity.  In earlier 
+    stack versions, if the local node transmitted some data and then let the 
+    socket go idle, the first Keep-Alive packet sent would use the 
+    TCP_START_TIMEOUT_VAL (default 1 second) timer value before getting sent.  
+    While benign in terms of application behavior, these faster than normal 
+    keep-alive transmissions were distracting when viewed in Wireshark or other 
+    packet capture tools.
+11. Disabled STACK_USE_DYNAMICDNS_CLIENT option in TCPIPConfig.h by default for 
+    the TCPIP Demo App and TCPIP ENCX24J600 Demo App projects.  This option was 
+    enabled by default in earlier stack releases.  This was done to save code 
+    size and allow out-of-box compilation on devices with 128KB of Flash when 
+    not using compiler optimizations.  The TCPIP PIC32 ETH Demo App project 
+    continutes to have this option enabled by default.
+12. Added SNMP v2 TRAP PDU format.  Macro SNMP_STACK_USE_V2_TRAP is used to 
+    enable the SNMP v2 trap format.  New API function SNMPV2TrapDemo() is 
+    included to support more than one variable binding to the SNMPv2 TRAP. This 
+    API can be used for a single SNMPv2 TRAP variable varbind and is part of 
+    CustomSNMPApp.c. A multiple variable binding demo can be enabled 
+    MainDemo.c.  One should not enable both SNMPTrapDemo and SNMPV2TrapDemo 
+    simultaneously.  Global flag "gSetTrapSendFlag" is used to indicate the 
+    start and end of SNMPv2 trap varbinds.  If gSetTrapSendFlag is FALSE, then 
+    very next variable varbind for the SNMPv2 TRAP, is the last or only one 
+    variable varbind.  If gSetTrapSendFlag is TRUE, then there is another 
+    variable varbind available to be part of the SNMPv2 TRAP PDU.
+13. Added support for PIC32MX6XX/7XX external PHY's: SMSC 8700LAN and National 
+    DP83640.
+14. Added schematics and BOM for the PIC32 Ethernet Starter Kit.
+15. Added the Google PowerMeter demo project. Consult the "Reference 
+    Implementation for Google PowerMeter.chm" help file for more information.
+16. Modified the SSL and TCP modules to create the TCPStartSSLClientEx function.
+    This function will enable the SSL module to store supplementary data
+    (currently only SSL Certificate Public Keys) in a structure.
+17. Moved the HTTP_PORT, HTTPS_PORT, HTTP_MAX_DATA_LEN, and HTTP_MIN_CALLBACK_FREE
+    macros from HTTP2.c to TCPIPConfig.h.
+
+
+Fixes:
+1.  The SPIFlashEraseSector() function in the SPIFlash.c file incorrectly erased 
+    the sector specified by the current write pointer (set by calling 
+    SPIFlashBeginWrite()) instead of the specified dwAddr parameter address.  
+    This error had no impact on any TCP/IP Stack code as these parameters always 
+    matched.  However, application code using the API would have been affected.  
+    Thanks go to Marc Boon for reporting this issue on the Microchip Ethernet 
+    forum.
+2.  Fixed ENC424J600/624J600 driver for PSP modes 2, 4, 6, and 10.  The PIC's 
+    PMP PMMODE<9:8> bits were not set correctly.
+3.  Removed from lingering references to TickGetDiff() in FTP.c, TFTPc.c and 
+    UARTConfig.c.
+4.  Fixed DNS client module from returning the DNS server IP address if the DNS 
+    query failed due to a server error (i.e. DNS did respond, but did not 
+    return any records, such as when attempting to resolve a name that isn't in 
+    the DNS).  DNSIsResolved() will now return 0.0.0.0 on any non-recoverable 
+    DNS error or timeout.
+5.  Fixed HTTP2 MPFS upload page being accessible from URLs that weren't an 
+    exact match.  For example, in 5.20 and earlier, accessing 
+    http://mchpboard/mpfsuploadASDF would still have opened the mpfsupload page.  
+    Thanks go to Andrea Rivolta on the Microchip Ethernet Forum for identifying 
+    this error.
+6.  Improved UDP TX checksum code for the special case when the computed 
+    checksum was 0x0000.  According to the UDP RFC, for this corner case, the 
+    checksum should be converted to 0xFFFF before transmission to differentiate 
+    from the checksum disabled case, improving error detection by a minuscule 
+    amount.
+7.  Fixed GetCLKOUT() function in ENCX24J600.c driver file.  Previously, 0x00 
+    would always be returned, regardless of the value in the COCON bits of 
+    ECON2.  The function documentation for SetCLKOUT() and GetCLKOUT() was also 
+    corrected (had obsolete information ported over from ENC28J60 driver file).
+8.  Fixed DHCP client rebinding bug in which the DHCP client would request the 
+    wrong IP address if an unrelated DHCP OFFER or ACK message were received 
+    after we transmitted a DHCP REQUEST but before we received our DHCP ACK. 
+    Under rare conditions, this would have resulted in the TCP/IP stack 
+    reverting to the static or AutoIP assigned address for a few seconds 
+    between DHCP lease renewals.
+9.  Fixed TFTP Internet Bootloader bug in which uncommon .hex files containing 
+    a certain data pattern could not be uploaded correctly to the PIC18F97J60 
+    family device.  For these problem .hex files, a block of 32 program words 
+    (64 bytes) would remain unprogrammed (left as 0xFFFF) due to a parsing error 
+    in the bootloader's DecodeHex() function.  The TFTP upload operation would 
+    succeed without reporting a programming error.  The problem can be detected 
+    by using an ICD3 or similar ICSP programmer and reading the program Flash 
+    out of a device that is programmed with the bootloader and application .hex 
+    files.  Compare the resulting memory dump to a device programmed only with 
+    the application .hex file.  If you have devices deployed in the field with 
+    the previous bootloader and happen to generate a  problem application .hex 
+    file, you can potentially work around the bootloader bug by opening the 
+    application .hex file with Notepad and appending dummy address records to 
+    the beginning to move the data around in the file.  For example, at the very 
+    top of the .hex file, add lines containing ":020000040000FA" until the 
+    bootload process works correctly.  You may alternatively try adding spaces 
+    at the end of any line, although this may make the .hex file incompatible 
+    with some programming utilities.  Thanks go to Jonathan Seidmann for 
+    identifying and reporting this bug.
+10. Fixed SNMPv2 TRAP format issue where SNMP browser was displaying all the 
+    SNMPv2 traps as SNMP version 1.  SNMP v2 TRAP pdu format is rectified.  
+    Macro SNMP_STACK_USE_V2_TRAP is used to form and send a SNMPv2 TRAP PDU.  
+    SNMPTrapDemo API is used for both SNMPv1 and SNMPv2 single variable 
+    varbind trap.
+11. Fixed an HTTP2.c server module initialization bug when using the 
+    PIC32MX7XX/6XX series internal Ethernet module.  During initialization the 
+    HTTPLoadConn() function would overwrite over 100 bytes of PIC RAM past the 
+    end of the reserved memory allocated for the HTTP2 module.  This problem 
+    would manifest itself by locking up the TCPIP PIC32 ETH Demo App-C32 demo 
+    shortly after power up if you compiled TCP/IP Stack version 5.20 with the 
+    MPLAB C Compiler for PIC32 MCUs (C32) version 1.11.
+12. Fixed SSL client from incorrectly parsing for the server's public key in 
+    rare cases where the RSA Public Key Algorithm identifier was received, but 
+    the key hadn't been received by TCP yet.  Thanks go to Kevin Maimdnet for 
+    identifing this error in SSL.c and reporting it via 
+    http://support.microchip.com/.
+13. Fixed Tick.c TickGet(), TickGetDiv256() and TickGetDiv64K() APIs sometimes 
+    returning the wrong value on PIC32 platforms.  On the PIC32MX3XX/4XX family 
+    devices a wrong return result would sometimes occur if using -O3 compiler 
+    optimizations (maximum speed) with the Microchip MPLAB C Compiler for PIC32 
+    MCUs (C32).  On the PIC32MX5XX/6XX/7XX family devices, such as the 
+    PIC32MX795F512L device used on the PIC32 Ethernet Starter Kit, wrong values 
+    could be returned, regardless of the compiler optimization level.
+
+
+Known Problems:
+1.  Telnet server module does not implement a lot of Telnet functions.  As a 
+    result, it will likely not display correctly or work at all with some Telnet 
+    clients.  The server was tested with the Microsoft telnet.exe utility which 
+    is provided with Microsoft Windows.
+2.  If the DHCP client and DHCP server are used at the same time and you connect 
+    two similar boards to each other (ex: two PICDEM.net 2 boards connected via 
+    a crossover cable), a race condition can occur where both nodes will disable 
+    their DHCP server and neither board will get a successful DHCP lease.  If 
+    this unlikely scenario occurs, as a work around, simply reset one of the 
+    boards to reenable it's DHCP server.
+3.  HI-TECH PICC-18 compilers are not supported in this release.  The supplied 
+    HI-TECH PICC-18 MPLAB projects usually will not compile and/or link.
+4.  LCDBlocking.c timing for the LCD_E_IO enable signal is too fast to meet 
+    published data sheet limits for various LCD controllers when compiling for 
+    a PIC32 running at > 43MHz.  Despite this potential timing violation, the 
+    LCD does normally work correctly on the precompiled PIC32 demos for the 
+    Explorer 16 at 80MHz.
+
 
 
 ********

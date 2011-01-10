@@ -331,7 +331,7 @@ void SSLPeriodic(TCP_SOCKET hTCP, BYTE id)
 
 /*****************************************************************************
   Function:
-	BYTE SSLStartSession(TCP_SOCKET hTCP)
+	BYTE SSLStartSession(TCP_SOCKET hTCP, BYTE * buffer, BYTE supDataType)
 
   Description:
 	Begins a new SSL session for the given TCP connection.
@@ -341,12 +341,14 @@ void SSLPeriodic(TCP_SOCKET hTCP, BYTE id)
 
   Parameters:
 	hTCP - the socket to begin the SSL connection on
+	buffer - pointer to a supplementary data buffer
+	supDataType - type of supplementary data to store
 	
   Return Values:
   	SSL_INVALID_ID - insufficient SSL resources to start a new connection
   	others - the allocated SSL stub ID
   ***************************************************************************/
-BYTE SSLStartSession(TCP_SOCKET hTCP)
+BYTE SSLStartSession(TCP_SOCKET hTCP, void * buffer, BYTE supDataType)
 {
 	BYTE i;
 	
@@ -368,7 +370,9 @@ BYTE SSLStartSession(TCP_SOCKET hTCP)
 	sslStub.idTxBuffer = SSL_INVALID_ID;
 	sslStub.requestedMessage = SSL_NO_MESSAGE;
 	sslStub.dwTemp.Val = 0;
-	
+	sslStub.supplementaryBuffer = buffer;
+    sslStub.supplementaryDataType = supDataType;
+
 	// Allocate handshake hashes for use, or fail
 	SSLHashAlloc(&sslStub.idMD5);
 	SSLHashAlloc(&sslStub.idSHA1);
@@ -1465,7 +1469,7 @@ static void SSLRxServerCertificate(TCP_SOCKET hTCP)
 			// Find RSA Public Key Algorithm identifier
 			len = TCPFindROMArray(hTCP, (ROM BYTE*)"\x2A\x86\x48\x86\xF7\x0D\x01\x01\x01", 9, 0, FALSE);
 			
-			if(len == 0xffff)
+			if(len == 0xFFFFu)
 			{// If not found, clear most of buffer and return to wait
 				HSGetArray(hTCP, NULL, TCPIsGetReady(hTCP) - 10);
 				return;
@@ -1479,7 +1483,7 @@ static void SSLRxServerCertificate(TCP_SOCKET hTCP)
 			// Search for beginning of struct
 			len = TCPFind(hTCP, 0x30, 0, FALSE);
 			
-			if(len == 0xff)
+			if(len == 0xFFFFu)
 			{// Not found, so clear and return
 				HSGetArray(hTCP, NULL, TCPIsGetReady(hTCP));
 			}
@@ -1555,6 +1559,15 @@ static void SSLRxServerCertificate(TCP_SOCKET hTCP)
 				sslBuffer.full[i] = 0x00;
 			HSGetArray(hTCP, sslBuffer.full, sslStub.dwTemp.v[1]);
 			
+            if (sslStub.supplementaryDataType == SSL_SUPPLEMENTARY_DATA_CERT_PUBLIC_KEY)
+            {
+                SSL_PKEY_INFO * tmpPKeyPtr = ((SSL_PKEY_INFO *)sslStub.supplementaryBuffer);
+                tmpPKeyPtr->pub_size_bytes = sslStub.dwTemp.v[1];
+                if (tmpPKeyPtr->pub_size_bytes <= sizeof (tmpPKeyPtr->pub_key))
+                    memcpy (&tmpPKeyPtr->pub_key[0], sslBuffer.full, tmpPKeyPtr->pub_size_bytes);
+            }
+
+
 			// Hash what we just read
 			SSLHashSync(sslStub.idSHA1);
 			HashAddData(&sslHash, sslBuffer.full, sslStub.dwTemp.v[1]);
@@ -1595,7 +1608,14 @@ static void SSLRxServerCertificate(TCP_SOCKET hTCP)
 			
 			// Read E to temp
 			HSGetArray(hTCP, e, i);
-			
+
+            if (sslStub.supplementaryDataType == SSL_SUPPLEMENTARY_DATA_CERT_PUBLIC_KEY)
+            {
+                SSL_PKEY_INFO * tmpPKeyPtr = ((SSL_PKEY_INFO *)sslStub.supplementaryBuffer);
+                if (i <= sizeof (tmpPKeyPtr->pub_e))
+                    memcpy (&tmpPKeyPtr->pub_e[0], e, i);
+            }
+
 			// Set RSA engine to encrypt with E
 			RSASetE(e, i, RSA_BIG_ENDIAN);
 			

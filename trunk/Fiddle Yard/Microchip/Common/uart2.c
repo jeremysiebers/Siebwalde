@@ -252,16 +252,18 @@ Output: None.
 void  UART2PutDec(unsigned char dec)
 {
     unsigned char res;
+    unsigned char printed_already = 0;
 
     res = dec;
 
     if (res/100)
     {
         UART2PutChar( res/100 + '0' );
+        printed_already = 1;
     }
     res = res - (res/100)*100;
 
-    if (res/10)
+    if ((res/10) || (printed_already == 1))
     {
         UART2PutChar( res/10 + '0' );
     }

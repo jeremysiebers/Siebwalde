@@ -108,10 +108,10 @@ static void LCDWrite(BYTE RS, BYTE Data)
 	#if defined(LCD_DATA_IO)
 		LCD_DATA_IO = Data>>4;
 	#else
-		LCD_DATA0_IO = Data & 0x10;
-		LCD_DATA1_IO = Data & 0x20;
-		LCD_DATA2_IO = Data & 0x40;
-		LCD_DATA3_IO = Data & 0x80;
+		LCD_DATA0_IO = ((Data & 0x10) == 0x10);
+		LCD_DATA1_IO = ((Data & 0x20) == 0x20);
+		LCD_DATA2_IO = ((Data & 0x40) == 0x40);
+		LCD_DATA3_IO = ((Data & 0x80) == 0x80);
 	#endif
 	Nop();					// Wait Data setup time (min 40ns)
 	Nop();

@@ -160,7 +160,13 @@
 	#if defined(__18CXX) && !defined(HI_TECH_C)	
 		#pragma udata HTTP_CONNECTION_STATES
 	#endif
-	HTTP_CONN curHTTP;							// Current HTTP connection state
+	#if defined(HTTP_SAVE_CONTEXT_IN_PIC_RAM)
+		HTTP_CONN					HTTPControlBlocks[MAX_HTTP_CONNECTIONS];
+		#define HTTPLoadConn(a)		do{curHTTPID = (a);}while(0)
+	#else
+		HTTP_CONN curHTTP;							// Current HTTP connection state
+		static void HTTPLoadConn(BYTE hHTTP);
+	#endif
 	HTTP_STUB httpStubs[MAX_HTTP_CONNECTIONS];	// HTTP stubs with state machine and socket
 	BYTE curHTTPID;								// ID of the currently loaded HTTP_CONN
 	#if defined(__18CXX) && !defined(HI_TECH_C)	
@@ -185,13 +191,13 @@
 	
 	static void HTTPProcess(void);
 	static BOOL HTTPSendFile(void);
-	static void HTTPLoadConn(BYTE hHTTP);
 
 	#if defined(HTTP_MPFS_UPLOAD)
 	static HTTP_IO_RESULT HTTPMPFSUpload(void);
 	#endif
 
 	#define mMIN(a, b)	((a<b)?a:b)
+	#define smHTTP		httpStubs[curHTTPID].sm			// Access the current state machine
 
 /*****************************************************************************
   Function:
@@ -221,10 +227,6 @@ void HTTPInit(void)
 {
 	PTR_BASE oldPtr;
 
-	// Make sure the file handles are invalidated
-	curHTTP.file = MPFS_INVALID_HANDLE;
-	curHTTP.offsets = MPFS_INVALID_HANDLE;
-		
     for(curHTTPID = 0; curHTTPID < MAX_HTTP_CONNECTIONS; curHTTPID++)
     {
 		smHTTP = SM_HTTP_IDLE;
@@ -234,10 +236,18 @@ void HTTPInit(void)
 		#endif
 		
 	    // Save the default record (just invalid file handles)
-    	oldPtr = MACSetWritePtr(BASE_HTTPB_ADDR + curHTTPID*sizeof(HTTP_CONN));
-		MACPutArray((BYTE*)&curHTTP, sizeof(HTTP_CONN));
-		MACSetWritePtr(oldPtr);
+		curHTTP.file = MPFS_INVALID_HANDLE;
+		curHTTP.offsets = MPFS_INVALID_HANDLE;
+		#if !defined(HTTP_SAVE_CONTEXT_IN_PIC_RAM)		
+	    	oldPtr = MACSetWritePtr(BASE_HTTPB_ADDR + curHTTPID*sizeof(HTTP_CONN));
+			MACPutArray((BYTE*)&curHTTP, sizeof(HTTP_CONN));
+			MACSetWritePtr(oldPtr);
+		#endif
     }
+
+	// Set curHTTPID to zero so that first call to HTTPLoadConn() doesn't write 
+	// dummy data outside reserved HTTP memory.
+    curHTTPID = 0;	
 }
 
 
@@ -332,6 +342,7 @@ void HTTPServer(void)
   Returns:
   	None
   ***************************************************************************/
+#if !defined(HTTP_SAVE_CONTEXT_IN_PIC_RAM)
 static void HTTPLoadConn(BYTE hHTTP)
 {
     WORD oldPtr;
@@ -354,6 +365,7 @@ static void HTTPLoadConn(BYTE hHTTP)
 	curHTTPID = hHTTP;
 			
 }
+#endif
 
 /*****************************************************************************
   Function:
@@ -481,7 +493,7 @@ static void HTTPProcess(void)
 
 			// Check if this is an MPFS Upload
 			#if defined(HTTP_MPFS_UPLOAD)
-			if(memcmppgm2ram(&curHTTP.data[1], HTTP_MPFS_UPLOAD, strlenpgm(HTTP_MPFS_UPLOAD)) == 0)
+			if(memcmppgm2ram(&curHTTP.data[1], HTTP_MPFS_UPLOAD, sizeof(HTTP_MPFS_UPLOAD)) == 0)
 			{// Read remainder of line, and bypass all file opening, etc.
 				#if defined(HTTP_USE_AUTHENTICATION)
 				curHTTP.isAuthorized = HTTPNeedsAuth(&curHTTP.data[1]);
@@ -1010,7 +1022,7 @@ static BOOL HTTPSendFile(void)
 	curHTTP.byteCount += numBytes;
 	while(numBytes > 0u)
 	{
-		len = MPFSGetArray(curHTTP.file, data, mMIN(numBytes, 64u));
+		len = MPFSGetArray(curHTTP.file, data, mMIN(numBytes, sizeof(data)));
 		if(len == 0u)
 			return TRUE;
 		else
@@ -1320,7 +1332,7 @@ BYTE* HTTPURLDecode(BYTE* cData)
 	BYTE *pRead, *pWrite;
 	WORD wLen;
 	BYTE c;
-	WORD_VAL hex;
+	WORD hex;
 	 
 	// Determine length of input
 	wLen = strlen((char*)cData);
@@ -1341,11 +1353,11 @@ BYTE* HTTPURLDecode(BYTE* cData)
 				wLen = 0;
 			else
 			{
-				hex.v[1] = *pRead++;
-				hex.v[0] = *pRead++;
+				((BYTE*)&hex)[1] = *pRead++;
+				((BYTE*)&hex)[0] = *pRead++;
 				wLen--;
 				wLen--;
-				*pWrite++ = hexatob(hex);
+				*pWrite++ = hexatob(*((WORD_VAL*)&hex));
 			}
 		}
 		else
@@ -1850,7 +1862,7 @@ void HTTPIncFile(ROM BYTE* cFile)
 	wCount = TCPIsPutReady(sktHTTP);
 	while(wCount > 0u)
 	{
-		wLen = MPFSGetArray(fp, data, mMIN(wCount, 64u));
+		wLen = MPFSGetArray(fp, data, mMIN(wCount, sizeof(data)));
 		if(wLen == 0u)
 		{// If no bytes were read, an EOF was reached
 			MPFSClose(fp);

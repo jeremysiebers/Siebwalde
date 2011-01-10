@@ -67,11 +67,37 @@
   Section:
 	Constants and Variables
   ***************************************************************************/
+#ifdef STACK_USE_ZEROCONF_LINK_LOCAL
+//#define ARP_OPERATION_REQ       0x01u		// Operation code indicating an ARP Request
+//#define ARP_OPERATION_RESP      0x02u		// Operation code indicating an ARP Response
+
+#define HW_ETHERNET             (0x0001u)	// ARP Hardware type as defined by IEEE 802.3
+#define ARP_IP                  (0x0800u)	// ARP IP packet type as defined by IEEE 802.3
+#endif
 
 #ifdef STACK_CLIENT_MODE
 static NODE_INFO Cache;						// Cache for one ARP response
 #endif
 
+#ifdef STACK_USE_ZEROCONF_LINK_LOCAL
+#define MAX_REG_APPS            2           // MAX num allowed registrations of Modules/Apps
+static struct arp_app_callbacks reg_apps[MAX_REG_APPS]; // Call-Backs storage for MAX of two Modules/Apps
+/*
+// ARP packet structure
+typedef struct __attribute__((aligned(2), packed))
+{
+    WORD        HardwareType;
+    WORD        Protocol;
+    BYTE        MACAddrLen;
+    BYTE        ProtocolLen;
+    WORD        Operation;
+    MAC_ADDR    SenderMACAddr;
+    IP_ADDR     SenderIPAddr;
+    MAC_ADDR    TargetMACAddr;
+    IP_ADDR     TargetIPAddr;
+} ARP_PACKET;
+*/
+#endif
 
 
 /****************************************************************************
@@ -86,6 +112,191 @@ static BOOL ARPPut(ARP_PACKET* packet);
   Section:
 	Function Implementations
   ***************************************************************************/
+#ifdef STACK_USE_ZEROCONF_LINK_LOCAL
+/************ User Application APIs ****************************************/
+
+/*****************************************************************************
+  Function:
+	CHAR ARPRegisterCallbacks(struct arp_app_callbacks *app)
+
+  Summary:
+	Registering callback with ARP module to get notified about certian events.
+	
+  Description:
+  	This function allows end user application to register with callbacks, which
+    will be called by ARP module to give notification to user-application about 
+    events occurred at ARP layer. For ex: when a ARP-packet is received, which is
+    conflicting with our own pair of addresses (MAC-Address and IP-address).
+    This is an extension for zeroconf protocol implementation (ZeroconfLL.c)
+
+  Precondition:
+	None
+
+  Parameters:
+	app - ARP-Application callbacks structure supplied by user-application 
+    
+  Returns:
+    id > 0 - Returns non-negative value that represents the id of registration
+             The same id needs to be used in de-registration
+    -1     - When registered applications exceed MAX_REG_APPS and there is no
+             free slot for registration
+ 
+  ***************************************************************************/
+CHAR ARPRegisterCallbacks(struct arp_app_callbacks *app)
+{
+    BYTE i;
+    for(i=0; i<MAX_REG_APPS; i++)
+    {
+        if(!reg_apps[i].used)
+        {
+            reg_apps[i].ARPPkt_notify = app->ARPPkt_notify;
+            reg_apps[i].used = 1;
+            return (i+1); // Return Code. Should be used in deregister.
+        }
+    }
+    return -1; // No space for registration
+}
+
+/*****************************************************************************
+  Function:
+	BOOL ARPDeRegisterCallbacks(CHAR reg_id)
+
+  Summary:
+	De-Registering callbacks with ARP module that are registered previously.
+	
+  Description:
+  	This function allows end user-application to de-register with callbacks, 
+    which were registered previously.
+    This is called by user-application, when its no longer interested in 
+    notifications from ARP-Module. This allows the other application to get 
+    registered with ARP-module.   
+
+  Precondition:
+	None
+
+  Parameters:
+	reg_id - Registration-id returned in ARPRegisterCallbacks call
+    
+  Returns:
+    TRUE  - On success
+    FALSE - Failure to indicate invalid reg_id  
+  ***************************************************************************/ 
+BOOL ARPDeRegisterCallbacks(CHAR reg_id)
+{
+    if(reg_id <= 0 || reg_id > MAX_REG_APPS)
+        return FALSE;
+
+    reg_apps[reg_id-1].used = 0; // To indicate free slot for registration
+	return TRUE;
+}
+
+/*****************************************************************************
+  Function:
+	void ARPSendPkt(IP_ADDR* SrcIPAddr, IP_ADDR* DestIPAddr, int op_req )
+
+  Summary:
+	Transmits an ARP request/Reply initated by Application or external module.
+	
+  Description:
+  	This function transmits and ARP request/reply to determine the hardware
+  	address of a given IP address (or) Announce self-address to all nodes in
+    network. Extended for zeroconf protocol. 
+
+  Precondition:
+	ARP packet is ready in the MAC buffer.
+
+  Parameters:
+	SrcIPAddr - The Source IP-address 
+    DestIPAddr - The Destination IP-Address
+    op_req     - Operation Request (ARP_REQ/ARP_RESP)
+
+  Returns:
+    TRUE - The ARP packet was generated properly
+  	FALSE - Not possible return value
+
+  Remarks:
+  	This API is to give control over AR-packet to external modules. 
+  ***************************************************************************/
+BOOL ARPSendPkt(DWORD SrcIPAddr, DWORD DestIPAddr, BYTE op_req )
+{
+    ARP_PACKET packet;
+
+    if(op_req == ARP_REQ)
+        packet.Operation = ARP_OPERATION_REQ;
+    else if (op_req == ARP_RESP) 
+        packet.Operation = ARP_OPERATION_RESP;
+    else
+        return FALSE; // Invalid op-code
+
+	packet.TargetMACAddr.v[0]   = 0xff;
+	packet.TargetMACAddr.v[1]   = 0xff;
+	packet.TargetMACAddr.v[2]   = 0xff;
+	packet.TargetMACAddr.v[3]   = 0xff;
+	packet.TargetMACAddr.v[4]   = 0xff;
+	packet.TargetMACAddr.v[5]   = 0xff;
+
+    packet.TargetIPAddr.Val	= DestIPAddr;
+    packet.SenderIPAddr.Val = SrcIPAddr;
+
+    return ( ARPPut(&packet) );
+}
+
+/*****************************************************************************
+  Function:
+	void ARPProcessRxPkt(ARP_PACKET* packet)
+
+  Summary:
+	Processes Received-ARP packet (ARP request/Reply).
+	
+  Description:
+  	This function is to pass-on the ARP-packet to registered application,
+    with the notification of Rx-ARP packet. 
+
+  Precondition:
+	ARP packet is received completely from MAC
+
+  Parameters:
+	packet - Rx packet to be processed     
+
+  Returns:
+    None   
+  ***************************************************************************/
+void ARPProcessRxPkt(ARP_PACKET* packet)
+{
+    BYTE pass_on = 0; // Flag to indicate whether need to be forwarded
+    BYTE i;
+
+    // Probing Stage
+    if(AppConfig.MyIPAddr.Val == 0x00)
+    {
+        pass_on = 1; // Pass to Registered-Application for further processing        
+    }
+    else if(AppConfig.MyIPAddr.Val)
+    {
+        /* Late-conflict */
+        if(packet->SenderIPAddr.Val == AppConfig.MyIPAddr.Val)
+        {
+            pass_on = 1;
+        }
+    }
+    if(pass_on)
+    {
+    
+        for(i =0; i< MAX_REG_APPS; i++)
+        {
+            if(reg_apps[i].used)
+            {
+                reg_apps[i].ARPPkt_notify(packet->SenderIPAddr.Val,
+                                      packet->TargetIPAddr.Val,
+                                      &packet->SenderMACAddr,
+                                      &packet->TargetMACAddr,
+                                      packet->Operation);                
+            }
+        }
+    }
+}
+#endif
+
 
 /*****************************************************************************
   Function:
@@ -117,7 +328,11 @@ static BOOL ARPPut(ARP_PACKET* packet)
     packet->ProtocolLen   = sizeof(IP_ADDR);
 //    packet->SenderMACAddr = AppConfig.MyMACAddr;	// HI-TECH PICC-18 compiler can't handle this statement, use memcpy() as a workaround
 	memcpy(&packet->SenderMACAddr, (void*)&AppConfig.MyMACAddr, sizeof(packet->SenderMACAddr));
+#ifdef STACK_USE_ZEROCONF_LINK_LOCAL
+    //packet->SenderIPAddr  = AppConfig.MyIPAddr; /* Removed for ZCLL, SenderIPAddr should be filled in */
+#else
     packet->SenderIPAddr  = AppConfig.MyIPAddr;
+#endif
 
     SwapARPPacket(packet);
 
@@ -222,6 +437,9 @@ BOOL ARPProcess(void)
 		    {
 		         return TRUE;
 		    }
+#ifdef STACK_USE_ZEROCONF_LINK_LOCAL
+			ARPProcessRxPkt(&packet);
+#endif
 
 			// Handle incoming ARP responses
 #ifdef STACK_CLIENT_MODE
@@ -245,6 +463,18 @@ BOOL ARPProcess(void)
 				{
 					return TRUE;
 				}
+#ifdef STACK_USE_ZEROCONF_LINK_LOCAL
+                               /* Fix for Loop-Back suppression:
+                                * For ZCLL-Claim packets, host should not respond.
+                                * Check Sender's MAC-address with own MAC-address and 
+                                * if it is matched, response will not be sent back. This
+                                * was leading to flooding of ARP-answeres */
+                                if(!memcmp (&packet.SenderMACAddr, &AppConfig.MyMACAddr, 6))
+                                {
+                                     putsUART("Loopback answer suppressed \r\n");
+                                     return TRUE;
+                                }
+#endif
                 #if defined(STACK_USE_AUTO_IP)
                 for (i = 0; i < NETWORK_INTERFACES; i++)
                     if ((packet.SenderIPAddr.Val == AppConfig.MyIPAddr.Val) || AutoIPConfigIsInProgress(i))
@@ -276,6 +506,9 @@ BOOL ARPProcess(void)
             #endif
         	    packet.TargetMACAddr	= Target.MACAddr;
     	    packet.TargetIPAddr		= Target.IPAddr;
+#ifdef STACK_USE_ZEROCONF_LINK_LOCAL
+            packet.SenderIPAddr		= AppConfig.MyIPAddr;
+#endif
 
 			// Send an ARP response to a previously received request
 			if(!ARPPut(&packet))
@@ -325,6 +558,28 @@ void ARPResolve(IP_ADDR* IPAddr)
 {
     ARP_PACKET packet;
 
+#ifdef STACK_USE_ZEROCONF_LINK_LOCAL
+#define KS_ARP_IP_MULTICAST_HACK y
+#ifdef KS_ARP_IP_MULTICAST_HACK
+    if ((IPAddr->v[0] >= 224) &&(IPAddr->v[0] <= 239))
+    {
+		// "Resolve" the IP to MAC address mapping for
+		// IP multicast address range from 224.0.0.0 to 239.255.255.255
+
+		Cache.MACAddr.v[0] = 0x01;
+		Cache.MACAddr.v[1] = 0x00;
+		Cache.MACAddr.v[2] = 0x5E;
+		Cache.MACAddr.v[3] = 0x7f & IPAddr->v[1];
+		Cache.MACAddr.v[4] = IPAddr->v[2];
+		Cache.MACAddr.v[5] = IPAddr->v[3];
+
+		Cache.IPAddr.Val = IPAddr->Val;
+
+		return;
+	}
+#endif
+#endif
+
 	packet.Operation            = ARP_OPERATION_REQ;
 	packet.TargetMACAddr.v[0]   = 0xff;
 	packet.TargetMACAddr.v[1]   = 0xff;
@@ -336,6 +591,9 @@ void ARPResolve(IP_ADDR* IPAddr)
 
     // ARP query either the IP address directly (on our subnet), or do an ARP query for our Gateway if off of our subnet
 	packet.TargetIPAddr			= ((AppConfig.MyIPAddr.Val ^ IPAddr->Val) & AppConfig.MyMask.Val) ? AppConfig.MyGateway : *IPAddr;
+#ifdef STACK_USE_ZEROCONF_LINK_LOCAL
+	packet.SenderIPAddr			= AppConfig.MyIPAddr;
+#endif
 
     ARPPut(&packet);
 }

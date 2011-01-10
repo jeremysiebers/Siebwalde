@@ -915,6 +915,7 @@ WORD MPFSPutArray(MPFS_HANDLE hMPFS, BYTE* cData, WORD wLen)
 	#else
 		// Write to the SPI Flash
 		SPIFlashWriteArray(cData, wLen);
+		return wLen;
 	#endif
 }
 #endif

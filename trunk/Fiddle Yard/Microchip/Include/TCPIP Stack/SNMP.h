@@ -53,7 +53,7 @@
 #ifndef SNMP_H
 #define SNMP_H
 
-
+#include "TCPIP Stack/TCPIP.h"
 /****************************************************************************
   Section:
 	Macros and Definitions 
@@ -70,6 +70,10 @@
 #else
 #define SNMP_BIB_FILE_NAME		"snmp.bib"
 #endif
+
+// Section:  SNMP Tx pdu offset settings
+#define _SNMPSetTxOffset(o)     (SNMPTxOffset = o)
+#define _SNMPGetTxOffset()      SNMPTxOffset
 
 
 //Change this to match your OID string length.
@@ -88,6 +92,40 @@
 #define TRAP_COMMUNITY_MAX_LEN       (8)
 
 
+
+// Section:  SNMP specific data validation
+#define IS_STRUCTURE(a)         (a==STRUCTURE)
+#define IS_ASN_INT(a)           (a==ASN_INT)
+#define IS_OCTET_STRING(a)      (a==OCTET_STRING)
+#define IS_OID(a)               (a==ASN_OID)
+#define IS_ASN_NULL(a)          (a==ASN_NULL)
+#define IS_GET_REQUEST(a)       (a==GET_REQUEST)
+#define IS_GET_NEXT_REQUEST(a)  (a==GET_NEXT_REQUEST)
+#define IS_GET_RESPONSE(a)      (a==GET_RESPONSE)
+#define IS_SET_REQUEST(a)       (a==SET_REQUEST)
+#define IS_TRAP(a)              (a==TRAP)
+#define IS_AGENT_PDU(a)         (a==GET_REQUEST || \
+                                 a==GET_NEXT_REQUEST || \
+                                 a==SET_REQUEST || \
+                                 a==SNMP_V2C_GET_BULK)
+#define IS_SNMPV3_AUTH_STRUCTURE(a) (a==SNMPV3_ENCRYPTION)
+
+
+// Section:  SNMP specific variables
+#define STRUCTURE               (0x30u)
+#define ASN_INT                 (0x02u)
+#define OCTET_STRING            (0x04u)
+#define ASN_NULL                (0x05u)
+#define ASN_OID                 (0x06u)
+
+#define SNMP_IP_ADDR            (0x40)
+#define SNMP_COUNTER32          (0x41)
+#define SNMP_GAUGE32            (0x42)
+#define SNMP_TIME_TICKS         (0x43)
+#define SNMP_OPAQUE             (0x44)
+#define SNMP_NSAP_ADDR          (0x45)
+
+
 //This is the SNMP OID variable id.
 //This id is assigned via MIB file.  Only dynamic and AgentID
 //variables can contian ID.  MIB2BIB utility enforces this
@@ -95,12 +133,190 @@
 typedef BYTE SNMP_ID;
 typedef BYTE SNMP_INDEX;
 
+/*SNMP MIN and MAX message 484 bytes in size */
+/*As per RFC 3411 snmpEngineMaxMessageSize and 
+RFC 1157 ( section 4- protocol specification )
+and implementation  supports more than 484 whenever
+feasible.*/
+#define SNMP_MAX_MSG_SIZE  484
 
+// Section:  SNMP agent version types
+#define SNMP_V1                 (0)
+#define SNMP_V2C				(1)
+#define SNMP_V3					(3)
+
+
+// Section:  SNMP v1 and v2c pdu types
+#define GET_REQUEST             (0xa0)
+#define GET_NEXT_REQUEST        (0xa1)
+#define GET_RESPONSE            (0xa2)
+#define SET_REQUEST             (0xa3)
+#define TRAP                    (0xa4)
+#define GET_BULK_REQUEST        (0xa5)
+#define REPORT_RESPONSE			(0xa8)
+
+// Section:  SNMP Udp ports
+#define SNMP_AGENT_PORT     (161)
+#define SNMP_NMS_PORT       (162)
+#define AGENT_NOTIFY_PORT   (0xfffe)
+
+
+/* Update the Non record id OID value 
+   which is part of CustomSnmpDemo.c file
+*/
+#define SNMP_MAX_NON_REC_ID_OID  3
 
 /****************************************************************************
   Section:
 	Data Structures and Enumerations
   ***************************************************************************/
+// Section:  SNMP specific data tyes
+typedef enum 
+{
+	INT8_VAL		= 0x00, 	//8 bit integer value
+	INT16_VAL		= 0x01, 	//16 bit integer value
+	INT32_VAL		= 0x02, 	//32 bit integer value
+	BYTE_ARRAY		= 0x03, 	//Aray of bytes 
+	ASCII_STRING	= 0x04, 	//Ascii string type
+	IP_ADDRESS		= 0x05, 	//IP address variable
+	COUNTER32		= 0x06, 	//32 bit counter variable
+	TIME_TICKS_VAL	= 0x07, 	//Timer vakue counter variable	
+	GAUGE32 		= 0x08, 	//32 bit guage variable
+	OID_VAL 		= 0x09, 	//Object id value var
+	DATA_TYPE_UNKNOWN			//Unknown data type
+} DATA_TYPE;
+
+
+// Section:  SNMP specific mib file access information
+typedef union
+{
+	struct
+	{
+		unsigned int bIsFileOpen : 1;  //MIB file access int flag
+	} Flags;						
+	BYTE Val;						   //MIB file access byte flag
+} SNMP_STATUS;
+
+
+// Section:  SNMP OID index information
+typedef union 
+{
+	struct
+	{
+		unsigned int bIsOID:1;	//value is OID/index int flag
+	} Flags;
+	BYTE Val;					//value is OID/index byte flag
+} INDEX_INFO;
+
+
+// Section:  SNMP object information
+typedef union 
+{
+	struct
+	{
+		unsigned int bIsDistantSibling : 1; //Object have distant sibling node
+		unsigned int bIsConstant : 1;		//Object is constant
+		unsigned int bIsSequence : 1;		//Object is sequence
+		unsigned int bIsSibling : 1;		//Sibling node flag
+
+		unsigned int bIsParent : 1; 		//Node is parent flag	
+		unsigned int bIsEditable : 1;		//Node is editable flag
+		unsigned int bIsAgentID : 1;		//Node have agent id flag
+		unsigned int bIsIDPresent : 1;		//Id present flag
+	} Flags;
+	BYTE Val;								//MIB Obj info as byte value
+} MIB_INFO;
+
+
+// Section:  SNMP reuested variable list error status information.
+//Max variable in a request supported 15
+typedef struct 
+{
+WORD noSuchObjectErr;		//Var list no such obj errors flags
+WORD noSuchNameErr; 		//Var list no such name error 
+WORD noSuchInstanceErr; 	//Var list no such instance error
+WORD endOfMibViewErr;		//Var list end of mib view error
+}reqVarErrStatus;  
+
+
+// Section:  ASN data type info
+typedef struct 
+{
+	BYTE asnType;	//ASN data type
+	BYTE asnLen;	//ASN data length
+} DATA_TYPE_INFO;
+
+
+// Section:  SNMP trap notification information for agent
+typedef struct 
+{
+	char community[NOTIFY_COMMUNITY_LEN];	//Community name array
+	BYTE communityLen;						//Community name length
+	SNMP_ID agentIDVar; 					//Agent id for trap identification
+	BYTE notificationCode;					//Trap notification code
+	UDP_SOCKET socket;						//Udp socket number 
+	DWORD_VAL timestamp;					//Time stamp for trap
+} SNMP_NOTIFY_INFO;
+
+
+// Section:  SNMP MIB variable object information
+typedef struct 
+{
+	DWORD			hNode;		//Node location in the mib		
+	BYTE			oid;		//Object Id
+	MIB_INFO		nodeInfo;	//Node info
+	DATA_TYPE		dataType;	//Data type 
+	SNMP_ID 		id; 		//Snmp Id	
+	WORD_VAL		dataLen;	//Data length	
+	DWORD			hData;		//Data
+	DWORD			hSibling;	//Sibling info
+	DWORD			hChild; 	//Child info
+	BYTE			index;		//Index of object
+	BYTE			indexLen;	//Index length
+} OID_INFO;
+
+
+// Section:  SNMP pdu information database 
+typedef struct 
+{
+	DWORD_VAL		requestID;		//Snmp request id
+	BYTE			nonRepeators;	//# non repeaters in the request	
+	BYTE			maxRepetitions; //# max repeaters in the request 
+	BYTE			pduType;		//Snmp pdu type
+	BYTE			errorStatus;	//Pdu error status
+	BYTE			erroIndex;		//Pdu error Index
+	BYTE			snmpVersion;	//Snmp version
+	WORD			pduLength;		//Pdu length
+} PDU_INFO;
+
+
+// Section:  SNMP specific errors
+typedef enum 
+{
+    SNMP_NO_ERR = 0,			//Snmp no error
+    SNMP_TOO_BIG,				//Value too big error
+    SNMP_NO_SUCH_NAME,			//No such name in MIB error
+    SNMP_BAD_VALUE,				//Not assignable value for the var error	
+    SNMP_READ_ONLY,				//Read only variable, write not allowed err
+    SNMP_GEN_ERR,				//Snmp gen error
+    SNMP_NO_ACCESS,				//Access to modify or read not granted err 
+    SNMP_WRONG_TYPE,			//Variable data type wrong error	
+    SNMP_WRONG_LENGTH,			//Wrong data length error
+    SNMP_WRONG_ENCODING,		//Wrong encoding error
+    SNMP_WRONG_VALUE,			//Wrong value for the var type
+    SNMP_NO_CREATION,			//No creationg error
+    SNMP_INCONSISTENT_VAL,		//Inconsistent value error
+    SNMP_RESOURCE_UNAVAILABE,	//Resource unavailbe error	
+    SNMP_COMMIT_FAILED,			//Modification update failed error
+    SNMP_UNDO_FAILED,			//Modification undo failed	
+    SNMP_AUTH_ERROR,			//Authorization failed error
+    SNMP_NOT_WRITABLE,			//Variable read only
+    SNMP_INCONSISTENT_NAME,		//Inconsistent name
+    SNMP_NO_SUCH_OBJ=128,		//No such object error	
+    SNMP_NO_SUCH_INSTANCE=129,	//No such instance error
+    SNMP_END_OF_MIB_VIEW=130	//Reached to end of mib error
+} SNMP_ERR_STATUS;
+
 
 typedef struct 
 {
@@ -146,6 +362,8 @@ typedef enum
     SNMP_SET            = 0xa3,	//Snmp SET identifier
     SNMP_TRAP           = 0xa4,	//Snmp TRAP identifier
     SNMP_V2C_GET_BULK	= 0xa5,	//Snmp GET_BULK identifier
+    SNMP_V2_TRAP		= 0xa7, //Snmp v2 Trap Identifier
+    SNMPV3_ENCRYPTION	= 0x04,
     SNMP_ACTION_UNKNOWN = 0		//Snmp requested action unknown
 } SNMP_ACTION;
 
@@ -170,6 +388,38 @@ typedef enum
 } VENDOR_SPECIFIC_TRAP_NOTIFICATION_TYPE;
 
 
+
+typedef enum
+{
+	SNMP_RESPONSE_PDU=0x01,
+	SNMP_REQUEST_PDU=0x02
+
+}INOUT_SNMP_PDU;
+
+// SNMPv3 
+typedef struct 
+{	
+	UINT8 *head;
+	WORD length;
+	WORD maxlength;
+	WORD msgAuthParamOffset;
+}SNMPV3MSGDATA;
+
+
+typedef struct
+{
+	UINT8 oidstr[16];
+	UINT8 version;
+}SNMPNONMIBRECDINFO;
+
+
+
+extern UINT16 gSNMPv3ScopedPduDataPos;
+extern SNMPV3MSGDATA gSNMPv3ScopedPduRequestBuf;
+extern SNMPV3MSGDATA gSNMPv3ScopedPduResponseBuf;
+//extern SNMPV3_REQUEST_WHOLEMSG gSnmpV3InPduWholeMsgBuf;
+
+
 /****************************************************************************
   Section:
 	Global Variables
@@ -178,6 +428,16 @@ extern BYTE gSendTrapFlag;//Global flag to send Trap
 extern BYTE gGenericTrapNotification;//Global flag for Generic trap notification
 extern BYTE gSpecificTrapNotification;//Global flag for vendor specific trap notification
 extern BYTE gOIDCorrespondingSnmpMibID;//Gloabal var to store SNMP ID of var for OID received in SNMP request.
+extern BYTE	gSetTrapSendFlag;
+extern BYTE appendZeroToOID;//global flag to modify OID by appending zero	
+extern BOOL getZeroInstance;
+
+// SNMPNotifyInfo is not required if TRAP is disabled
+#if !defined(SNMP_TRAP_DISABLED)
+extern SNMP_NOTIFY_INFO SNMPNotifyInfo; //notify info for trap
+#endif
+extern MPFS_HANDLE hMPFS;	//MPFS file handler
+extern SNMPNONMIBRECDINFO gSnmpNonMibRecInfo[];
 
 
 /****************************************************************************
@@ -194,6 +454,55 @@ BOOL SNMPGetVar(SNMP_ID var, SNMP_INDEX index,BYTE* ref, SNMP_VAL* val);
 BOOL SNMPIsNotifyReady(IP_ADDR* remoteHost);
 void SNMPNotifyPrepare(IP_ADDR* remoteHost, char* community, BYTE communityLen, SNMP_ID agentIDVar, BYTE notificationCode, DWORD timestamp);
 BOOL SNMPGetNextIndex(SNMP_ID var, SNMP_INDEX* index);
-BOOL SNMPIsValidSetLen(SNMP_ID var, BYTE len);
+BOOL SNMPGetExactIndex(SNMP_ID var, SNMP_INDEX index);
+BOOL SNMPIsValidSetLen(SNMP_ID var, BYTE len,BYTE index);
+
+BYTE ProcessGetVar(OID_INFO* rec, BOOL bAsOID,PDU_INFO* pduDbPtr);
+BYTE ProcessGetNextVar(OID_INFO* rec,PDU_INFO* pduDbPtr);
+BYTE ProcessSetVar(PDU_INFO* pduDbPtr,OID_INFO* rec, SNMP_ERR_STATUS* errorStatus);
+BYTE ProcessGetBulkVar(OID_INFO* rec, BYTE* oidValuePtr, BYTE* oidLenPtr,BYTE* successor,PDU_INFO* pduDbPtr);
+extern BYTE IsValidStructure(WORD* dataLen);
+extern BOOL IsValidInt(DWORD* val);
+extern BYTE _SNMPGet(void);
+extern void _SNMPPut(BYTE v);
+
+extern 	void SetErrorStatus(WORD errorStatusOffset,WORD errorIndexOffset, SNMP_ERR_STATUS errorStatus,BYTE errorIndex);
+extern BYTE OIDLookup(PDU_INFO* pduDbPtr,BYTE* oid, BYTE oidLen, OID_INFO* rec);
+extern 	BOOL GetNextLeaf(OID_INFO* rec);
+extern BYTE IsValidLength(WORD *len);
+
+extern BOOL SNMPIdRecrdValidation(PDU_INFO* pduDbPtr,OID_INFO *var,BYTE * oidValuePtr,BYTE oidlen);
+
+
+
+extern SNMP_ACTION Snmpv3MsgProcessingModelProcessPDU(BYTE inOutPdu);
+extern SNMP_ACTION Snmpv3UserSecurityModelProcessPDU(BYTE inOutPdu);
+extern SNMP_ACTION Snmpv3ScopedPduProcessing(BYTE inOutPdu);
+
+extern UINT8 Snmpv3TrapScopedpdu(SNMP_ID var, SNMP_VAL val, SNMP_INDEX index,UINT8 targetIndex);
+extern BOOL GetOIDStringByID(SNMP_ID id, OID_INFO* info, BYTE* oidString, BYTE* len);
+
+
+extern void _SNMPDuplexInit(UDP_SOCKET socket);
+extern void Snmpv3GetAuthEngineTime(void);
+extern void Snmpv3UsmAesEncryptDecryptInitVector(BYTE inOutPdu);
+extern void Snmpv3UsmOutMsgAuthenticationParam(UINT8 hashType);
+
+extern BYTE Snmpv3AESDecryptRxedScopedPdu(/*UINT8 userDBIndex*/);
+extern BYTE *getSnmpV2GenTrapOid(BYTE generic_trap_code,BYTE *len);
+extern BYTE Snmpv3GetBufferData(SNMPV3MSGDATA getbuf,UINT16 pos);
+extern void Snmpv3FormulateEngineID(UINT8 fifthOctectIdentifier );
+
+
+extern BOOL Snmpv3ValidateSecNameAndSecLvl(void);
+extern BOOL Snmpv3ValidateSecurityName(void);
+extern BOOL Snmpv3ValidateEngineId(void);
+extern BOOL GetDataTypeInfo(DATA_TYPE dataType, DATA_TYPE_INFO *info );
+extern BOOL Snmpv3Notify(SNMP_ID var, SNMP_VAL val, SNMP_INDEX index,UINT8 targetIndex);
+extern BOOL ProcessSnmpv3MsgData(PDU_INFO* pduDbPtr);
+extern BOOL Snmpv3BufferPut(BYTE val ,SNMPV3MSGDATA *putbuf);
+
+
+
 
 #endif

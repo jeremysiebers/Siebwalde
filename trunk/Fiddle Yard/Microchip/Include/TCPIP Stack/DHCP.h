@@ -136,4 +136,6 @@ BOOL DHCPIsBound(BYTE vInterface);
 BOOL DHCPStateChanged(BYTE vInterface);
 BOOL DHCPIsServerDetected(BYTE vInterface);
 
+extern BOOL bDHCPServerEnabled;
+
 #endif
