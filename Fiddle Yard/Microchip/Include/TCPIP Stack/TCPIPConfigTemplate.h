@@ -14,7 +14,7 @@
  *
  * Software License Agreement
  *
- * Copyright (C) 2002-2009 Microchip Technology Inc.  All rights
+ * Copyright (C) 2002-2010 Microchip Technology Inc.  All rights
  * reserved.
  *
  * Microchip licenses to you the right to use, modify, copy, and
@@ -80,12 +80,14 @@
 %STACK_USE_FTP_SERVER%#define STACK_USE_FTP_SERVER			// File Transfer Protocol (old)
 %STACK_USE_SMTP_CLIENT%#define STACK_USE_SMTP_CLIENT			// Simple Mail Transfer Protocol for sending email
 %STACK_USE_SNMP_SERVER%#define STACK_USE_SNMP_SERVER			// Simple Network Management Protocol v2C Community Agent
+%STACK_USE_SNMPV3_SERVER%#define STACK_USE_SNMPV3_SERVER			// Simple Network Management Protocol v3 Agent
 %STACK_USE_TFTP_CLIENT%#define STACK_USE_TFTP_CLIENT			// Trivial File Transfer Protocol client
 %STACK_USE_GENERIC_TCP_CLIENT_EXAMPLE%#define STACK_USE_GENERIC_TCP_CLIENT_EXAMPLE	// HTTP Client example in GenericTCPClient.c
 %STACK_USE_GENERIC_TCP_SERVER_EXAMPLE%#define STACK_USE_GENERIC_TCP_SERVER_EXAMPLE	// ToUpper server example in GenericTCPServer.c
 %STACK_USE_TELNET_SERVER%#define STACK_USE_TELNET_SERVER			// Telnet server
 %STACK_USE_ANNOUNCE%#define STACK_USE_ANNOUNCE				// Microchip Embedded Ethernet Device Discoverer server/client
 %STACK_USE_DNS%#define STACK_USE_DNS					// Domain Name Service Client for resolving hostname strings to IP addresses
+%STACK_USE_DNS_SERVER%#define STACK_USE_DNS_SERVER			// Domain Name Service Server for redirection to the local device
 %STACK_USE_NBNS%#define STACK_USE_NBNS					// NetBIOS Name Service Server for repsonding to NBNS hostname broadcast queries
 %STACK_USE_REBOOT_SERVER%#define STACK_USE_REBOOT_SERVER			// Module for resetting this PIC remotely.  Primarily useful for a Bootloader.
 %STACK_USE_SNTP_CLIENT%#define STACK_USE_SNTP_CLIENT			// Simple Network Time Protocol for obtaining current date/time from Internet
@@ -93,6 +95,8 @@
 %STACK_USE_TCP_PERFORMANCE_TEST%#define STACK_USE_TCP_PERFORMANCE_TEST	// Module for testing TCP TX performance characteristics
 %STACK_USE_DYNAMICDNS_CLIENT%#define STACK_USE_DYNAMICDNS_CLIENT		// Dynamic DNS client updater module
 %STACK_USE_BERKELEY_API%#define STACK_USE_BERKELEY_API			// Berekely Sockets APIs are available
+%STACK_USE_ZEROCONF_LINK_LOCAL%#define STACK_USE_ZEROCONF_LINK_LOCAL	// Zeroconf IPv4 Link-Local Addressing
+%STACK_USE_ZEROCONF_MDNS_SD%#define STACK_USE_ZEROCONF_MDNS_SD		// Zeroconf mDNS and mDNS service discovery
 
 
 // =======================================================================
@@ -117,7 +121,7 @@
  *   Supported serial flash parts include the SST25VFxxxB series.
  */
 %MPFS_USE_EEPROM%#define MPFS_USE_EEPROM
-//#define MPFS_USE_SPI_FLASH
+%MPFS_USE_SPI_FLASH%#define MPFS_USE_SPI_FLASH
 
 /* EEPROM Addressing Selection
  *   If using the 1Mbit EEPROM, uncomment this line
@@ -152,11 +156,11 @@
  */
 #define MY_DEFAULT_HOST_NAME			%MY_DEFAULT_HOST_NAME%
 
-#define MY_DEFAULT_MAC_BYTE1            (0x00)	// Use the default of
-#define MY_DEFAULT_MAC_BYTE2            (0x04)	// 00-04-A3-00-00-00 if using
-#define MY_DEFAULT_MAC_BYTE3            (0xA3)	// an ENCX24J600 or ZeroG ZG2100
-#define MY_DEFAULT_MAC_BYTE4            (0x00)	// and wish to use the internal
-#define MY_DEFAULT_MAC_BYTE5            (0x00)	// factory programmed MAC
+#define MY_DEFAULT_MAC_BYTE1            (0x00)	// Use the default of 00-04-A3-00-00-00
+#define MY_DEFAULT_MAC_BYTE2            (0x04)	// if using an ENCX24J600, MRF24WB0M, or
+#define MY_DEFAULT_MAC_BYTE3            (0xA3)	// PIC32MX6XX/7XX internal Ethernet 
+#define MY_DEFAULT_MAC_BYTE4            (0x00)	// controller and wish to use the 
+#define MY_DEFAULT_MAC_BYTE5            (0x00)	// internal factory programmed MAC
 #define MY_DEFAULT_MAC_BYTE6            (0x00)	// address instead.
 
 #define MY_DEFAULT_IP_ADDR_BYTE1        (169ul)
@@ -184,137 +188,6 @@
 #define MY_DEFAULT_SECONDARY_DNS_BYTE3	(0ul)
 #define MY_DEFAULT_SECONDARY_DNS_BYTE4	(0ul)
 
-
-// =======================================================================
-//   ZeroG Wireless Options
-//   If not using a ZG2100 device, ignore this section.
-// =======================================================================
-
-%STACK_USE_ZG2100%#define STACK_USE_ZG2100
-
-%USE_GRATUITOUS_ARP%#define USE_GRATUITOUS_ARP
-
-// Default SSID or wireless network name to connect to
-#define MY_DEFAULT_SSID_NAME                "MicrochipDemoAP"
-
-/*******************************************/
-/* DOMAINS & CHANNEL COMPILE TIME DEFAULTS */
-/*******************************************/
-/* Valid domains:    kZGRegDomainFCC      Available Channels: 1 - 11     */
-/*                   kZGRegDomainIC       Available Channels: 1 - 11     */
-/*                   kZGRegDomainETSI     Available Channels: 1 - 13     */
-/*                   kZGRegDomainJapanA   Available Channels: 14         */
-/*                   kZGRegDomainJapanB   Available Channels: 1 - 13     */
-#define MY_DEFAULT_DOMAIN                   kZGRegDomainFCC
-
-// When attempting to find the wireless network, only these radio channels
-// will be scanned.  Channels 1, 6, and 11 are the three non-overlapping
-// radio channels normally used in the FCC regulatory domain.  If you add
-// or subtract radio channels, be sure to also update the
-// MY_DEFAULT_CHANNEL_LIST_SIZE setting.
-#define MY_DEFAULT_CHANNEL_SCAN_LIST        {1, 6, 11, }
-#define END_OF_MY_DEFAULT_CHANNEL_SCAN_LIST
-
-// Count of elements in the MY_DEFAULT_CHANNEL_SCAN_LIST macro
-#define MY_DEFAULT_CHANNEL_LIST_SIZE        (3u)
-
-/**********************************/
-/* SECURITY COMPILE TIME DEFAULTS */
-/**********************************/
-// Security used on WiFi network.  Legal values are:
-// kKeyTypeNone: No encryption/authentication
-// kKeyTypeWep: Wired Equivalency Protocol (WEP) encryption
-// kKeyTypePsk: WPA-PSK Personal or WPA2-PSK Personal TKIP or AES
-//              encryption with precalculated key (see MY_DEFAULT_PSK).
-// kKeyTypeCalcPsk: WPA-PSK Personal or WPA2-PSK Personal TKIP or AES
-//              encryption with the hardware dynamically generating the
-//              needed key for the selected SSID and passphrase.  This
-//              option requires more time to associate with the access
-//              point relative to kKeyTypePsk which has the key
-//              pre-calculated.
-#define MY_DEFAULT_ENCRYPTION_TYPE          kKeyTypeNone
-
-// If using security type of kKeyTypePsk, then this section must be set to
-// match the key for the MY_DEFAULT_SSID_NAME and MY_DEFAULT_PSK_PHRASE
-// combination.  The tool at http://www.wireshark.org/tools/wpa-psk.html
-// can be used to generate this field.
-#define MY_DEFAULT_PSK                      {0x86, 0xC5, 0x1D, 0x71, 0xD9, 0x1A, 0xAA, 0x49, \
-                                            0x40, 0xC8, 0x88, 0xC6, 0xE9, 0x7A, 0x4A, 0xD5, \
-                                            0xE5, 0x6D, 0xDA, 0x44, 0x8E, 0xFB, 0x9C, 0x0A, \
-                                            0xE1, 0x47, 0x81, 0x52, 0x31, 0x1C, 0x13, 0x7C, \
-                                            }
-#define END_OF_MY_DEFAULT_PSK
-
-// Default pass phrase used for kKeyTypePsk and kKeyTypeCalcPsk security modes
-#define MY_DEFAULT_PSK_PHRASE               "Microchip 802.11 Secret PSK Password"
-
-#define MY_DEFAULT_WEP_KEY_LEN				kZGWEPKeyLenLong
-#define MY_DEFAULT_WEP_KEYS					MY_DEFAULT_WEP_KEYS_LONG
-
-// Default WEP keys used in kKeyTypeWep security mode
-#define MY_DEFAULT_WEP_KEYS_LONG        {   {{0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0A,0x0B,0x0C}},\
-                                            {{0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,0x18,0x19,0x1A,0x1B,0x1C}},\
-                                            {{0x20,0x21,0x22,0x23,0x24,0x25,0x26,0x27,0x28,0x29,0x2A,0x2B,0x2C}},\
-                                            {{0x30,0x31,0x32,0x33,0x34,0x35,0x36,0x37,0x38,0x39,0x3A,0x3B,0x3C}},\
-                                            }
-#define END_OF_MY_DEFAULT_WEP_KEYS_LONG
-#define MY_DEFAULT_WEP_KEYS_SHORT      		{{{0x00,0x01,0x02,0x03,0x04}},\
-                                        	{{0x10,0x11,0x12,0x13,0x14}},\
-                                        	{{0x20,0x21,0x22,0x23,0x24}},\
-                                        	{{0x30,0x31,0x32,0x33,0x34}},\
-                                        	}
-#define END_OF_MY_DEFAULT_WEP_KEYS_SHORT
-
-/* Valid Key Index: 0, 1, 2, 3  */
-#define MY_DEFAULT_WEP_KEY_INDEX            (0u)
-
-/* Valid WEP auth:   kZGAuthAlgOpen   */
-/*                   kZGAuthAlgShared */
-#define MY_DEFAULT_WEP_AUTH                 kZGAuthAlgOpen
-
-// These options are required for all PIC devices
-#if defined(__18CXX)
-    #define ZG_NO_FUNC_PTRS                 y
-#endif
-#define ZG_CONFIG_LIBRARY                   y
-#define ZG_PKG_STDIO                        y
-#define ZG_RAW_DRIVER                       y
-
-// These options are configurable
-// Provides indication if AP beacons are lost
-#define CONNECTION_LOST_FEATURE             y
-
-// Command line interface
-%ZG_CONFIG_CONSOLE%#define ZG_CONFIG_CONSOLE                   y
-
-// Provides API to switch between static and dynamic IP addressing
-#if defined ( ZG_CONFIG_CONSOLE )
-    %ZG_CONFIG_DHCP%#define ZG_CONFIG_DHCP                  y
-#endif
-
-// WiFi (BSS), Adhoc (IBSS) connection management turn on/off
-#define ZG_CONFIG_LINKMGRII                 y
-
-// Default link management
-/* Valid Modes:   kZGLMNetworkModeIdle            (Standby / neutral state)  */
-/*                kZGLMNetworkModeAdhoc           (IBSS networks)            */
-/*                kZGLMNetworkModeInfrastructure  (BSS networks)             */
-#define MY_DEFAULT_LINK_MGMT                kZGLMNetworkModeInfrastructure
-
-// Uncomment this line if you do NOT need IBSS "adhoc" networks.
-// If uncommented, ensure that MY_DEFAULT_LINK_MGMT is not kZGLMNetworkModeAdhoc
-%ZG_CONFIG_NO_ADHOCMGRII%#define ZG_CONFIG_NO_ADHOCMGRII             y
-
-// Uncomment this line if you do NOT need BSS "managed" networks.
-// If uncommented, ensure that MY_DEFAULT_LINK_MGMT is not kZGLMNetworkModeInfrastructure
-//#define ZG_CONFIG_NO_WIFIMGRII              y
-
-// Enable Iperf application code.  Iperf is for performance benchmarking 
-// and should normally be left disabled, unless you are using the TCPIP 
-// WiFi Iperf App project.
-%STACK_USE_IPERF%#define STACK_USE_IPERF                     // Iperf Application
-
-
 // =======================================================================
 //   PIC32MX7XX/6XX MAC Layer Options
 //   If not using a PIC32MX7XX/6XX device, ignore this section.
@@ -328,10 +201,10 @@
 	#define	ETH_CFG_HDUPLEX		1		// use/advertise half duplex capability
 	#define	ETH_CFG_FDUPLEX		1		// use/advertise full duplex capability
 	#define	ETH_CFG_AUTO_MDIX	1		// use/advertise auto MDIX capability
-	#define	ETH_CFG_SWAP_MDIX	1		// use swapped MDIX. else normal MDIX 
-	
+	#define	ETH_CFG_SWAP_MDIX	1		// use swapped MDIX. else normal MDIX
+
 #define EMAC_TX_DESCRIPTORS		2		// number of the TX descriptors to be created
-#define EMAC_RX_DESCRIPTORS		8		// number of the RX descriptors and RX buffers to be created 
+#define EMAC_RX_DESCRIPTORS		8		// number of the RX descriptors and RX buffers to be created
 
 #define	EMAC_RX_BUFF_SIZE		1536	// size of a RX buffer. should be multiple of 16
 										// this is the size of all receive buffers processed by the ETHC
@@ -419,7 +292,7 @@
  *   or not to include a checksum on packets being transmitted.
  */
 #define MAX_UDP_SOCKETS     (%MAX_UDP_SOCKETS%)
-#define UDP_USE_TX_CHECKSUM		// This slows UDP TX performance by nearly 50%, except when using the ENCX24J600, which has a super fast DMA and incurs virtually no speed pentalty.
+%UDP_USE_TX_CHECKSUM%#define UDP_USE_TX_CHECKSUM		// This slows UDP TX performance by nearly 50%, except when using the ENCX24J600 or PIC32MX6XX/7XX, which have a super fast DMA and incurs virtually no speed pentalty.
 
 
 /* Berkeley API Sockets Configuration
@@ -445,6 +318,16 @@
 	// Each connection consumes 2 bytes of RAM and a TCP socket
 	#define MAX_HTTP_CONNECTIONS	(2u)
 
+	// Optional setting to use PIC RAM instead of Ethernet/Wi-Fi RAM for
+	// storing HTTP Connection Context variables (HTTP_CONN structure for each 
+	// HTTP connection).  Undefining this macro results in the Ethernet/Wi-Fi 
+	// RAM being used (minimum PIC RAM usage, lower performance).  Defining 
+	// this macro results in PIC RAM getting used (higher performance, but uses 
+	// PIC RAM).  This option should not be enabled on PIC18 devices.  The 
+	// performance increase of having this option defined is only apparent when 
+	// the HTTP server is servicing multiple connections simultaneously.
+	//#define HTTP_SAVE_CONTEXT_IN_PIC_RAM
+
 	// Indicate what file to serve when no specific one is requested
 	#define HTTP_DEFAULT_FILE		"index.htm"
 	#define HTTPS_DEFAULT_FILE		"index.htm"
@@ -465,9 +348,18 @@
 	%HTTP_USE_AUTHENTICATION%#define HTTP_USE_AUTHENTICATION			// Enable basic authentication support
 
 	//#define HTTP_NO_AUTH_WITHOUT_SSL		// Uncomment to require SSL before requesting a password
-	#define HTTP_SSL_ONLY_CHAR		(0xFF)	// Files beginning with this character will only be served over HTTPS
-											// Set to 0x00 to require for all files
-											// Set to 0xff to require for no files
+
+    // Define the listening port for the HTTP server
+  	#define HTTP_PORT               (80u)
+	
+    // Define the listening port for the HTTPS server (if STACK_USE_SSL_SERVER is enabled)
+	#define HTTPS_PORT				(443u)
+	
+    // Define the maximum data length for reading cookie and GET/POST arguments (bytes)
+	#define HTTP_MAX_DATA_LEN		(%HTTP_MAX_DATA_LEN%)
+	
+    // Define the minimum number of bytes free in the TX FIFO before executing callbacks
+	#define HTTP_MIN_CALLBACK_FREE	(16u)
 
 	%STACK_USE_HTTP_APP_RECONFIG%#define STACK_USE_HTTP_APP_RECONFIG		// Use the AppConfig web page in the Demo App (~2.5kb ROM, ~0b RAM)
 	%STACK_USE_HTTP_MD5_DEMO%#define STACK_USE_HTTP_MD5_DEMO			// Use the MD5 Demo web page (~5kb ROM, ~160b RAM)
@@ -522,6 +414,11 @@
 	// Comment following line if SNMP TRAP support is needed
 	//#define SNMP_TRAP_DISABLED
 
+	//#define SNMP_STACK_USE_V2_TRAP
+	#if defined(STACK_USE_SNMPV3_SERVER)
+		#define SNMP_V1_V2_TRAP_WITH_SNMPV3
+	#endif
+
 	// This is the maximum length for community string.
 	// Application must ensure that this length is observed.
 	// SNMP module adds one byte extra after SNMP_COMMUNITY_MAX_LEN
@@ -544,8 +441,8 @@
 	// legal, as long as at least one is present.  A string larger than
 	// SNMP_COMMUNITY_MAX_LEN bytes will be ignored.
 	#define SNMP_READ_COMMUNITIES		{"public", "read", ""}
-    #define END_OF_SNMP_READ_COMMUNITIES
+	#define END_OF_SNMP_READ_COMMUNITIES
 	#define SNMP_WRITE_COMMUNITIES     	{"private", "write", "public"}
-    #define END_OF_SNMP_WRITE_COMMUNITIES
+	#define END_OF_SNMP_WRITE_COMMUNITIES
 #endif
 

@@ -55,14 +55,22 @@
 
 #if !defined(__18CXX) || defined(HI_TECH_C)
 	char *strupr(char* s);
-	
-	#if defined(HI_TECH_C)
-		// HI-TECH PICC-18 PRO 9.63 seems to already have a ultoa() library 
-		// function, but the parameter list is different!
-		#define ultoa(val,buf)	ultoa((buf),(val),10)
-	#else
-		void ultoa(DWORD Value, BYTE* Buffer);
-	#endif
+#endif
+
+// Implement consistent ultoa() function
+#if defined(__PIC32MX__) || (defined (__C30__) && (__C30_VERSION__ < 325)) || defined(__C30_LEGACY_LIBC__)
+	// C32 and C30 < v3.25 need this 2 parameter stack implemented function
+	void ultoa(DWORD Value, BYTE* Buffer);
+#elif defined(__18CXX) && !defined(HI_TECH_C)
+	// C18 already has a 2 parameter ultoa() function
+	#include <stdlib.h>
+#else
+	// HI-TECH PICC-18 PRO 9.63 and C30 v3.25+ already have a ultoa() stdlib 
+	// library function, but it requires 3 parameters.  The TCP/IP Stack 
+	// assumes the C18 style 2 parameter ultoa() function, so we shall 
+	// create a macro to automatically convert the code.
+	#include <stdlib.h>
+	#define ultoa(val,buf)	ultoa((char*)(buf),(val),10)
 #endif
 
 #if defined(DEBUG)
@@ -71,6 +79,8 @@
 	#define DebugPrint(a)
 #endif
 
+DWORD	LFSRSeedRand(DWORD dwSeed);
+WORD	LFSRRand(void);
 DWORD	GenerateRandomDWORD(void);
 void 	uitoa(WORD Value, BYTE* Buffer);
 void 	UnencodeURL(BYTE* URL);

@@ -6,7 +6,7 @@ Processor:       PIC18/PIC24/dsPIC30/dsPIC33/PIC32
 Compiler:        C30 v3.12
 Company:         Microchip Technology, Inc.
 
-Copyright ? 2009 Microchip Technology Inc.  All rights reserved.
+Copyright (C) 2010 Microchip Technology Inc.  All rights reserved.
 
 Microchip licenses to you the right to use, modify, copy and distribute 
 Software only when embedded on a Microchip microcontroller or digital signal 
@@ -16,7 +16,7 @@ controller that is integrated into your product or third party product
 You should refer to the license agreement accompanying this Software for 
 additional information regarding your rights and obligations.
 
-SOFTWARE AND DOCUMENTATION ARE PROVIDED ?AS IS? WITHOUT WARRANTY OF ANY KIND, 
+SOFTWARE AND DOCUMENTATION ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, 
 EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF 
 MERCHANTABILITY, TITLE, NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR PURPOSE. 
 IN NO EVENT SHALL MICROCHIP OR ITS LICENSORS BE LIABLE OR OBLIGATED UNDER 
@@ -36,10 +36,12 @@ AKN	2009.10.26	ADDED C32 DELAY ROUTINE TO MATCH C18 IMPLEMENTATION
 AKN	2009.10.27	CONSOLIDATED C30 AND C32 IMPLEMENTATIONS, ADDED PADDING TO
                 MAKE C30 DELAYS MORE ACCURATE
 PAT	2010.01.26	CONVERTED LOCALS TO VOLATILE 
+PAT	2010.03.07	ADDED include "Compiler.h"
 *******************************************************************************/
 #if defined(__PIC32MX__)
 	#include <plib.h>
 #endif
+#include "Compiler.h"
 #include "HardwareProfile.h"
 #include "TimeDelay.h" 
 
@@ -76,7 +78,7 @@ void Delay10us( UINT32 tenMicroSecondCounter )
             //For FOSC == 4MHZ, it takes 26us
             //For FOSC == 8MHZ, it takes 13us.
             //For FOSC == 10MHZ, it takes 10.5us.
-        }    
+        }
         else
         {
             //14 cycles burned to this point.

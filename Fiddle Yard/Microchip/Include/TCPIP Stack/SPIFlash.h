@@ -1,8 +1,9 @@
 /*********************************************************************
  *
- *  SPI Flash Interface Headers
+ *  SPI Flash Memory Driver Header
  *	- Tested to be compatible with SST25VF016B
- *	- Expected compatibility with all SST25VFxxxB devices
+ *  - Expected compatibility with other SST (Microchip) SST25 series 
+ *    devices
  *
  *********************************************************************
  * FileName:        SPIFlash.h
@@ -16,7 +17,7 @@
  *
  * Software License Agreement
  *
- * Copyright (C) 2002-2009 Microchip Technology Inc.  All rights
+ * Copyright (C) 2002-2010 Microchip Technology Inc.  All rights
  * reserved.
  *
  * Microchip licenses to you the right to use, modify, copy, and
@@ -55,18 +56,10 @@
 
 #include "HardwareProfile.h"
 
-//#define SPI_FLASH_SST
-//#define SPI_FLASH_SECTOR_SIZE		(4096ul)
-//#define SPI_FLASH_PAGE_SIZE		(0ul)		// SST has no page boundary requirements
-
-#define SPI_FLASH_SPANSION
-#define SPI_FLASH_SECTOR_SIZE		(65536ul)
-//#define SPI_FLASH_SECTOR_SIZE		(262144ul)
-//#define SPI_FLASH_SECTOR_SIZE		(524288ul)
-#define SPI_FLASH_PAGE_SIZE			(256)
+#define SPI_FLASH_SECTOR_SIZE		(4096ul)
+#define SPI_FLASH_PAGE_SIZE			(0ul)		// SST has no page boundary requirements
 
 #define SPI_FLASH_SECTOR_MASK		(SPI_FLASH_SECTOR_SIZE - 1)
-#define SPI_FLASH_PAGE_MASK			(SPI_FLASH_PAGE_SIZE - 1)
 
 
 #if defined(SPIFLASH_CS_TRIS)

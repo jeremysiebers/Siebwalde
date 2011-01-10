@@ -748,7 +748,7 @@ static void SHA1HashBlock(BYTE* data, DWORD* h0, DWORD* h1, DWORD* h2,
 
 /*****************************************************************************
   Function:
-	void MD5Calculate(HASH_SUM* theSum, BYTE* result)
+	void SHA1Calculate(HASH_SUM* theSum, BYTE* result)
 
   Summary:
 	Calculates a SHA-1 hash
@@ -821,26 +821,26 @@ void SHA1Calculate(HASH_SUM* theSum, BYTE* result)
 	SHA1HashBlock(lastBlock, &h0, &h1, &h2, &h3, &h4);
 	
 	// Format the result in big-endian format
-	*result++ = h0 >> 24;
-	*result++ = h0 >> 16;
-	*result++ = h0 >> 8;
-	*result++ = h0;
-	*result++ = h1 >> 24;
-	*result++ = h1 >> 16;
-	*result++ = h1 >> 8;
-	*result++ = h1;
-	*result++ = h2 >> 24;
-	*result++ = h2 >> 16;
-	*result++ = h2 >> 8;
-	*result++ = h2;
-	*result++ = h3 >> 24;
-	*result++ = h3 >> 16;
-	*result++ = h3 >> 8;
-	*result++ = h3;
-	*result++ = h4 >> 24;
-	*result++ = h4 >> 16;
-	*result++ = h4 >> 8;
-	*result++ = h4;
+	*result++ = ((BYTE*)&h0)[3];
+	*result++ = ((BYTE*)&h0)[2];
+	*result++ = ((BYTE*)&h0)[1];
+	*result++ = ((BYTE*)&h0)[0];
+	*result++ = ((BYTE*)&h1)[3];
+	*result++ = ((BYTE*)&h1)[2];
+	*result++ = ((BYTE*)&h1)[1];
+	*result++ = ((BYTE*)&h1)[0];
+	*result++ = ((BYTE*)&h2)[3];
+	*result++ = ((BYTE*)&h2)[2];
+	*result++ = ((BYTE*)&h2)[1];
+	*result++ = ((BYTE*)&h2)[0];
+	*result++ = ((BYTE*)&h3)[3];
+	*result++ = ((BYTE*)&h3)[2];
+	*result++ = ((BYTE*)&h3)[1];
+	*result++ = ((BYTE*)&h3)[0];
+	*result++ = ((BYTE*)&h4)[3];
+	*result++ = ((BYTE*)&h4)[2];
+	*result++ = ((BYTE*)&h4)[1];
+	*result++ = ((BYTE*)&h4)[0];
 }
 
 #endif	//#end SHA-1

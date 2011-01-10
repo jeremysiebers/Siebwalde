@@ -65,7 +65,7 @@
 
 #define SPIRAM_MAX_SPI_FREQ     (15000000ul)    // Hz
 
-#if defined(__PIC24F__)
+#if defined(__PIC24F__) || defined(__PIC24FK__)
     #define PROPER_SPICON1  (0x001B | 0x0120)   // 1:1 primary prescale, 2:1 secondary prescale, CKE=1, MASTER mode
 #elif defined(__dsPIC30F__)
     #define PROPER_SPICON1  (0x0017 | 0x0120)   // 1:1 primary prescale, 3:1 secondary prescale, CKE=1, MASTER mode

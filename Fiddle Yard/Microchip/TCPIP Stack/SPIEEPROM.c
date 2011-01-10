@@ -139,7 +139,7 @@ static BYTE vBytesInBuffer;
  ********************************************************************/
 #if (defined(HPC_EXPLORER) || defined(PIC18_EXPLORER)) && !defined(__18F87J10) && !defined(__18F87J11) && !defined(__18F87J50)
     #define PROPER_SPICON1  (0x20)      /* SSPEN bit is set, SPI in master mode, FOSC/4, IDLE state is low level */
-#elif defined(__PIC24F__)
+#elif defined(__PIC24F__) || defined(__PIC24FK__)
     #define PROPER_SPICON1  (0x0013 | 0x0120)   /* 1:1 primary prescale, 4:1 secondary prescale, CKE=1, MASTER mode */
 #elif defined(__dsPIC30F__)
     #define PROPER_SPICON1  (0x0017 | 0x0120)   /* 1:1 primary prescale, 3:1 secondary prescale, CKE=1, MASTER mode */

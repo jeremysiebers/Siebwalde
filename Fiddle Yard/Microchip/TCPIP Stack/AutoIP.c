@@ -396,7 +396,7 @@ void AutoIPTasks(void)
                 SwapARPPacket(&AutoIPClient.packet);
     
                 // Generate a random delay between 0 and 1 second
-                AutoIPClient.randomDelay = ((rand() % 20) * TICK_SECOND) / 20;
+                AutoIPClient.randomDelay = ((LFSRRand() % 20) * TICK_SECOND) / 20;
                 // Store the current time
                 AutoIPClient.eventTime = TickGet();
     
@@ -415,7 +415,7 @@ void AutoIPTasks(void)
                     // Store the new event time
                     AutoIPClient.eventTime = TickGet();
                     // Generate a new random delay between 1 and 2 seconds
-                    AutoIPClient.randomDelay = TICK_SECOND + (((rand() % 20) * TICK_SECOND) / 20);
+                    AutoIPClient.randomDelay = TICK_SECOND + (((LFSRRand() % 20) * TICK_SECOND) / 20);
     
                     // Transmit the packet
                 	while(!MACIsTxReady());
@@ -521,7 +521,7 @@ void AutoIPConflict (BYTE vInterface)
         case SM_AUTOIP_GRATUITOUS_ARP2:
         case SM_AUTOIP_GRATUITOUS_ARP3:
         case SM_AUTOIP_DELAY:
-            if (AutoIPClient.conflicts >= 10)
+            if (AutoIPClient.conflicts >= 10u)
                 AutoIPClient.smAUTOIPState = SM_AUTOIP_RATE_LIMIT_SET;
             else
                 AutoIPClient.smAUTOIPState = SM_AUTOIP_CHECK_ADDRESS;
@@ -536,7 +536,7 @@ void AutoIPConflict (BYTE vInterface)
         // 10 seconds, claim a new address.
         case SM_AUTOIP_CONFIGURED:
         case SM_AUTOIP_DEFEND:
-            if (AutoIPClient.gAutoIPConflictTimer != 0)
+            if (AutoIPClient.gAutoIPConflictTimer != 0u)
             {
                 if (TickGet() - AutoIPClient.gAutoIPConflictTimer < TICK_SECOND * 10)
                 {
@@ -705,7 +705,7 @@ void AutoIPRandSeed (DWORD seed, BYTE vInterface)
 	Generates a random number
 
   Description:
-	Generates a random number using a Linear Congruential Generator
+	Generates a random number using a LFSR
 
   Precondition:
 	None
@@ -714,7 +714,7 @@ void AutoIPRandSeed (DWORD seed, BYTE vInterface)
 	vInterface - The interface to generate the RNG for
 
   Returns:
-	A random number from 0- 2^31
+	A random number from 0 to 2^32-1
 
   Remarks:
     None
@@ -723,7 +723,8 @@ void AutoIPRandSeed (DWORD seed, BYTE vInterface)
 DWORD AutoIPRand (BYTE vInterface)
 {
     LoadState (vInterface);
-    AutoIPClient.wRandSeed = (((AutoIPClient.wRandSeed * 1103515245) + 12345) % 0x80000000);
+    LFSRSeedRand(AutoIPClient.wRandSeed);
+    AutoIPClient.wRandSeed = LFSRRand();
     return AutoIPClient.wRandSeed;
 }
 

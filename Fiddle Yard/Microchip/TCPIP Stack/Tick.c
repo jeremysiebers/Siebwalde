@@ -7,7 +7,7 @@
  * Dependencies:    Timer 0 (PIC18) or Timer 1 (PIC24F, PIC24H, 
  *					dsPIC30F, dsPIC33F, PIC32)
  * Processor:       PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
- * Compiler:        Microchip C32 v1.05 or higher
+ * Compiler:        Microchip C32 v1.10b or higher
  *					Microchip C30 v3.12 or higher
  *					Microchip C18 v3.30 or higher
  *					HI-TECH PICC-18 PRO 9.63PL2 or higher
@@ -15,7 +15,7 @@
  *
  * Software License Agreement
  *
- * Copyright (C) 2002-2009 Microchip Technology Inc.  All rights
+ * Copyright (C) 2002-2010 Microchip Technology Inc.  All rights
  * reserved.
  *
  * Microchip licenses to you the right to use, modify, copy, and
@@ -200,19 +200,26 @@ static void GetTickCopy(void)
 		IEC0SET = _IEC0_T1IE_MASK;	// Enable interrupt
 		Nop();
 		IEC0CLR = _IEC0_T1IE_MASK;	// Disable interrupt
-		Nop();						// PIC32 has some latency before the disable will
-		Nop();						// take affect, so we need to wait a couple of cyles
 		
 		// Get low 2 bytes
-		((WORD*)vTickReading)[0] = TMR1;
+		((volatile WORD*)vTickReading)[0] = TMR1;
 		
 		// Correct corner case where interrupt increments byte[4+] but 
 		// TMR1 hasn't rolled over to 0x0000 yet
 		dwTempTicks = dwInternalTicks;
-		Nop();						// PIC32 has some latency between the TMR1 match to PR1 before the IFS0bits.T1IF bit gets set.
-		Nop();						// These Nop()s force the C32 compiler to hold off sampling the volatile IFS0 register for a couple of cycles for the bit to get set.
-		if(((WORD*)vTickReading)[0] == 0xFFFFu)
-			dwTempTicks--;
+
+		// PIC32MX3XX/4XX devices trigger the timer interrupt when TMR1 == PR1 
+		// (TMR1 prescalar is 0x00), requiring us to undo the ISR's increment 
+		// of the upper 32 bits of our 48 bit timer in the special case when 
+		// TMR1 == PR1 == 0xFFFF.  For other PIC32 families, the ISR is 
+		// triggered when TMR1 increments from PR1 to 0x0000, making no special 
+		// corner case.
+		#if __PIC32_FEATURE_SET__ <= 460
+			if(((WORD*)vTickReading)[0] == 0xFFFFu)
+				dwTempTicks--;
+		#elif !defined(__PIC32_FEATURE_SET__)
+			#error __PIC32_FEATURE_SET__ macro must be defined.  You need to download a newer C32 compiler version.
+		#endif
 		
 		// Get high 4 bytes
 		vTickReading[2] = ((BYTE*)&dwTempTicks)[0];
@@ -281,15 +288,15 @@ DWORD TickGet(void)
   ***************************************************************************/
 DWORD TickGetDiv256(void)
 {
-	DWORD_VAL ret;
+	DWORD dw;
 
 	GetTickCopy();
-	ret.v[0] = vTickReading[1];	// Note: This copy must be done one 
-	ret.v[1] = vTickReading[2];	// byte at a time to prevent misaligned 
-	ret.v[2] = vTickReading[3];	// memory reads, which will reset the PIC.
-	ret.v[3] = vTickReading[4];
+	((BYTE*)&dw)[0] = vTickReading[1];	// Note: This copy must be done one 
+	((BYTE*)&dw)[1] = vTickReading[2];	// byte at a time to prevent misaligned 
+	((BYTE*)&dw)[2] = vTickReading[3];	// memory reads, which will reset the PIC.
+	((BYTE*)&dw)[3] = vTickReading[4];
 	
-	return ret.Val;
+	return dw;
 }
 
 /*****************************************************************************
@@ -318,15 +325,15 @@ DWORD TickGetDiv256(void)
   ***************************************************************************/
 DWORD TickGetDiv64K(void)
 {
-	DWORD_VAL ret;
+	DWORD dw;
 
 	GetTickCopy();
-	ret.v[0] = vTickReading[2];	// Note: This copy must be done one 
-	ret.v[1] = vTickReading[3];	// byte at a time to prevent misaligned 
-	ret.v[2] = vTickReading[4];	// memory reads, which will reset the PIC.
-	ret.v[3] = vTickReading[5];
+	((BYTE*)&dw)[0] = vTickReading[2];	// Note: This copy must be done one 
+	((BYTE*)&dw)[1] = vTickReading[3];	// byte at a time to prevent misaligned 
+	((BYTE*)&dw)[2] = vTickReading[4];	// memory reads, which will reset the PIC.
+	((BYTE*)&dw)[3] = vTickReading[5];
 	
-	return ret.Val;
+	return dw;
 }
 
 
@@ -386,7 +393,7 @@ void TickUpdate(void)
     {
 		// Increment internal high tick counter
 		dwInternalTicks++;
-		
+
 		// Reset interrupt flag
         INTCONbits.TMR0IF = 0;
     }

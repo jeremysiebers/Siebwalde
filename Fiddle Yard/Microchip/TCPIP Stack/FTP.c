@@ -299,7 +299,7 @@ BOOL FTPServer(void)
     else if ( smFTP != SM_FTP_NOT_CONNECTED )
     {
         currentTick = TickGet();
-        currentTick = TickGetDiff(currentTick, lastActivity);
+        currentTick = currentTick - lastActivity;
         if ( currentTick >= FTP_TIMEOUT )
         {
             lastActivity                = TickGet();

@@ -180,7 +180,26 @@
 		} Flags;
 		
 		BYTE requestedMessage;				// Currently requested message to send, or 0xff
+        void * supplementaryBuffer;
+        BYTE supplementaryDataType;
 	} SSL_STUB;
+
+    typedef enum
+    {
+        SSL_SUPPLEMENTARY_DATA_NONE = 0,
+        SSL_SUPPLEMENTARY_DATA_CERT_PUBLIC_KEY
+    } SSL_SUPPLEMENTARY_DATA_TYPES;
+
+    // To hash the public key information, we need to actually get
+    // the public key information...
+    // 1024 bit key at 8 bits/byte = 128 bytes needed for the public key.
+    typedef struct
+    {
+      WORD pub_size_bytes;
+      BYTE pub_key[128];
+      BYTE pub_e[3];
+      BYTE pub_guid;    // This is used as a TCP_SOCKET which is a BYTE
+    } SSL_PKEY_INFO;
 
 	// Memory definition for SSL keys.  This area is split into Local and
 	// Remote areas.  During the handshake, Local.random and Remote.random
@@ -275,7 +294,7 @@
 
 void SSLInit(void);
 
-BYTE SSLStartSession(TCP_SOCKET hTCP);
+BYTE SSLStartSession(TCP_SOCKET hTCP, void * buffer, BYTE supDataType);
 void SSLTerminate(BYTE sslStubId);
 void SSLPeriodic(TCP_SOCKET hTCP, BYTE sslStubID);
 WORD SSLRxRecord(TCP_SOCKET hTCP, BYTE sslStubID);

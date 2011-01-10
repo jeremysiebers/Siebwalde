@@ -8,7 +8,7 @@
  *********************************************************************
  * FileName:        IP.c
  * Dependencies:    Network Layer interface (ENC28J60.c, ETH97J60.c, 
- *					ENCX24J600.c or ZG2100.c)
+ *					ENCX24J600.c or WFMac.c)
  * Processor:       PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
  * Compiler:        Microchip C32 v1.05 or higher
  *					Microchip C30 v3.12 or higher
@@ -89,8 +89,12 @@
 
 #define IP_SERVICE          (IP_SERVICE_ROUTINE | IP_SERVICE_N_DELAY)
 
-#define MY_IP_TTL           (100)  // Time-To-Live in hops
-
+#if defined(STACK_USE_ZEROCONF_MDNS_SD)
+  #define MY_IP_TTL           (255)  // Time-To-Live in hops 
+  // IP TTL is set to 255 for Multicast DNS compatibility. See mDNS-draft-08, section 4.
+#else
+  #define MY_IP_TTL           (100)  // Time-To-Live in hops
+#endif
 
 
 

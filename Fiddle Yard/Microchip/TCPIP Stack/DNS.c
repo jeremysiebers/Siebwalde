@@ -339,7 +339,9 @@ void DNSResolveROM(ROM BYTE* Hostname, BYTE Type)
 
   Return Values:
   	TRUE - The DNS client has obtained an IP, or the DNS process
-  		has timed out.  HostIP will be 0.0.0.0 on timeout.
+  		has encountered an error.  HostIP will be 0.0.0.0 on error.  Possible 
+  		errors include server timeout (i.e. DNS server not available), hostname 
+  		not in the DNS, or DNS server errors.
   	FALSE - The resolution process is still in progress.
   ***************************************************************************/
 BOOL DNSIsResolved(IP_ADDR* HostIP)
@@ -581,6 +583,10 @@ DoneSearchingRecords:
 			// No break, DNS_DONE is the correct step
 
 		case DNS_DONE:
+			// Return 0.0.0.0 if DNS resolution failed, otherwise return the 
+			// resolved IP address
+			if(!Flags.bits.AddressValid)
+				ResolvedInfo.IPAddr.Val = 0;
 			HostIP->Val = ResolvedInfo.IPAddr.Val;
 			return TRUE;
 

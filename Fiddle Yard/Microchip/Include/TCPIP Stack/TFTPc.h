@@ -99,6 +99,24 @@ typedef enum _TFTP_ACCESS_ERROR
     TFTP_ERROR_NO_SUCH_USE
 } TFTP_ACCESS_ERROR;
 
+// Status codes for TFTPGetUploadStatus() function.  Zero means upload success, >0 means working and <0 means fatal error.
+#define TFTP_UPLOAD_COMPLETE				0
+#define TFTP_UPLOAD_GET_DNS					1
+#define TFTP_UPLOAD_RESOLVE_HOST			2
+#define TFTP_UPLOAD_CONNECT					3
+#define TFTP_UPLOAD_SEND_FILENAME			4
+#define TFTP_UPLOAD_SEND_DATA				5
+#define TFTP_UPLOAD_WAIT_FOR_CLOSURE		6
+#define TFTP_UPLOAD_HOST_RESOLVE_TIMEOUT	-1
+#define TFTP_UPLOAD_CONNECT_TIMEOUT			-2
+#define TFTP_UPLOAD_SERVER_ERROR			-3
+
+typedef	struct
+{
+	BYTE *vDataPointer;
+	WORD wDataLength;
+} TFTP_CHUNK_DESCRIPTOR;
+
 void TFTPOpen(IP_ADDR *host);
 TFTP_RESULT TFTPIsOpened(void);
 void TFTPOpenFile(BYTE *fileName, TFTP_FILE_MODE mode);
@@ -107,7 +125,7 @@ void TFTPOpenFile(BYTE *fileName, TFTP_FILE_MODE mode);
     // PIC18 ROM argument implementation of TFTPOpenFile
 	void TFTPOpenROMFile(ROM BYTE *fileName, TFTP_FILE_MODE mode);
 #else
-	#define TFTPOpenROMFile(a,b)	TFTPOpenFile(a,b)
+	#define TFTPOpenROMFile(a,b)	TFTPOpenFile((BYTE*)(a),b)
 #endif
 
 TFTP_RESULT TFTPIsFileOpened(void);
@@ -118,6 +136,9 @@ BYTE TFTPGet(void);
 TFTP_RESULT TFTPIsPutReady(void);
 void TFTPPut(BYTE c);
 
+void TFTPUploadRAMFileToHost(ROM BYTE *vRemoteHost, ROM BYTE *vFilename, BYTE *vData, WORD wDataLength);
+void TFTPUploadFragmentedRAMFileToHost(ROM BYTE *vRemoteHost, ROM BYTE *vFilename, TFTP_CHUNK_DESCRIPTOR *vFirstChunkDescriptor);
+CHAR TFTPGetUploadStatus(void);
 
 /*********************************************************************
  * Macro:           void TFTPClose(void)
