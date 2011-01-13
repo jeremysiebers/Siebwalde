@@ -87,7 +87,7 @@ void IO(void)
 		PORTDbits.RD7 = PLATFORMS_IO[1].Bezet_Weerstand_;		// PORTDbits.RD5 and PORTDbits.RD6 are I^2C Clock and Data
 		PORTCbits.RC7 = PLATFORMS_IO[0].Bezet_Weerstand_;
 		
-		PORTDbits.RD4 = PLATFORMS_IO[1].Bezet_In_7_;			// This means the occupied input of the PWM Rail regulator from the uProc
+		PORTDbits.RD4 = PLATFORMS_IO[1].Bezet_In_7_;			// This means to the "occupied" input of the PWM Rail regulator from the uProc
 		PORTCbits.RC6 = PLATFORMS_IO[0].Bezet_In_7_;
 		
 		PORTDbits.RD3 = PLATFORMS_IO[1].Bezet_In_6_;		

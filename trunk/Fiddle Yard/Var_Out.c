@@ -10,10 +10,11 @@ typedef struct
 	unsigned char 	Var_Out;	
 	unsigned int	Variables_Out_Counter;
 	unsigned char	Send_Var_Out_Old[5][3];
+	unsigned char	ForceSendUpdate;
 }OUTPUT_VAR;
 
-static OUTPUT_VAR VAR_OUT_FY[2] = { {0,0 ,{{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0}}},
-								    {0,15,{{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0}}}	};
+static OUTPUT_VAR VAR_OUT_FY[2] = { {0,0 ,{{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0}},0},
+								    {0,15,{{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0}},0}	};
 
 static unsigned char Send_Var_Out[3];
 
@@ -22,11 +23,14 @@ void Var_Out_Programm(unsigned  char ASL)
 	
 	VAR_OUT_FY[ASL].Variables_Out_Counter++;
 	
-	if (VAR_OUT_FY[ASL].Variables_Out_Counter >= 5)
+	if (VAR_OUT_FY[ASL].Variables_Out_Counter >= 5000)			// Auto send an update every second to ensure up-to-date data is available in user gui
 	{			
-		VAR_OUT_FY[ASL].Variables_Out_Counter = 0;
+		VAR_OUT_FY[ASL].Variables_Out_Counter = 0;				// Reset counter
+		VAR_OUT_FY[ASL].Var_Out = 0;							// Force start case 0
+		VAR_OUT_FY[ASL].ForceSendUpdate = True;					// After all 4 cases have been send, make this variable False.
+	}
 
-		switch (VAR_OUT_FY[ASL].Var_Out)
+	switch (VAR_OUT_FY[ASL].Var_Out)
 		{
 			case	0	:	if (ASL == TOP)
 							{
@@ -54,8 +58,9 @@ void Var_Out_Programm(unsigned  char ASL)
 							Send_Var_Out[1] = Send_Var_Out[1] | 0x1;
 							Send_Var_Out[2] = 0x00;
 							if (VAR_OUT_FY[ASL].Send_Var_Out_Old[VAR_OUT_FY[ASL].Var_Out][0] == Send_Var_Out[0] &&
-								VAR_OUT_FY[ASL].Send_Var_Out_Old[VAR_OUT_FY[ASL].Var_Out][1] == Send_Var_Out[1])	// if previous send value is same as present than
-							{																						// don't send anything
+								VAR_OUT_FY[ASL].Send_Var_Out_Old[VAR_OUT_FY[ASL].Var_Out][1] == Send_Var_Out[1] && VAR_OUT_FY[ASL].ForceSendUpdate == False)	
+							{																						// if previous send value is same as present than
+																													// don't send anything
 								VAR_OUT_FY[ASL].Var_Out = 1;														// VAR_OUT_FY[ASL].Send_Var_Out_Old is an array of
 								break;																				// 5 (for case 0 to 4) and has 3 bytes for the previous 
 							}																						// send bytes
@@ -85,7 +90,7 @@ void Var_Out_Programm(unsigned  char ASL)
 							Send_Var_Out[1] = Send_Var_Out[1] | 0x1;
 							Send_Var_Out[2] = 0x00;
 							if (VAR_OUT_FY[ASL].Send_Var_Out_Old[VAR_OUT_FY[ASL].Var_Out][0] == Send_Var_Out[0] &&
-								VAR_OUT_FY[ASL].Send_Var_Out_Old[VAR_OUT_FY[ASL].Var_Out][1] == Send_Var_Out[1])	// if previous send value is same as present than
+								VAR_OUT_FY[ASL].Send_Var_Out_Old[VAR_OUT_FY[ASL].Var_Out][1] == Send_Var_Out[1] && VAR_OUT_FY[ASL].ForceSendUpdate == False)	// if previous send value is same as present than
 							{																						// don't send anything
 								VAR_OUT_FY[ASL].Var_Out = 2;														// VAR_OUT_FY[ASL].Send_Var_Out_Old is an array of
 								break;																				// 5 (for case 0 to 4) and has 3 bytes for the previous 
@@ -123,7 +128,7 @@ void Var_Out_Programm(unsigned  char ASL)
 							Send_Var_Out[1] = Send_Var_Out[1] | 0x1;
 							Send_Var_Out[2] = 0x00;
 							if (VAR_OUT_FY[ASL].Send_Var_Out_Old[VAR_OUT_FY[ASL].Var_Out][0] == Send_Var_Out[0] &&
-								VAR_OUT_FY[ASL].Send_Var_Out_Old[VAR_OUT_FY[ASL].Var_Out][1] == Send_Var_Out[1])	// if previous send value is same as present than
+								VAR_OUT_FY[ASL].Send_Var_Out_Old[VAR_OUT_FY[ASL].Var_Out][1] == Send_Var_Out[1] && VAR_OUT_FY[ASL].ForceSendUpdate == False)	// if previous send value is same as present than
 							{																						// don't send anything
 								VAR_OUT_FY[ASL].Var_Out = 3;														// VAR_OUT_FY[ASL].Send_Var_Out_Old is an array of
 								break;																				// 5 (for case 0 to 4) and has 3 bytes for the previous 
@@ -160,7 +165,7 @@ void Var_Out_Programm(unsigned  char ASL)
 							Send_Var_Out[1] = Send_Var_Out[1] | 0x1;
 							Send_Var_Out[2] = 0x00;
 							if (VAR_OUT_FY[ASL].Send_Var_Out_Old[VAR_OUT_FY[ASL].Var_Out][0] == Send_Var_Out[0] &&
-								VAR_OUT_FY[ASL].Send_Var_Out_Old[VAR_OUT_FY[ASL].Var_Out][1] == Send_Var_Out[1])	// if previous send value is same as present than
+								VAR_OUT_FY[ASL].Send_Var_Out_Old[VAR_OUT_FY[ASL].Var_Out][1] == Send_Var_Out[1] && VAR_OUT_FY[ASL].ForceSendUpdate == False)	// if previous send value is same as present than
 							{																						// don't send anything
 								VAR_OUT_FY[ASL].Var_Out = 4;														// VAR_OUT_FY[ASL].Send_Var_Out_Old is an array of
 								break;																				// 5 (for case 0 to 4) and has 3 bytes for the previous 
@@ -197,7 +202,7 @@ void Var_Out_Programm(unsigned  char ASL)
 							Send_Var_Out[1] = Send_Var_Out[1] | 0x1;
 							Send_Var_Out[2] = 0x00;
 							if (VAR_OUT_FY[ASL].Send_Var_Out_Old[VAR_OUT_FY[ASL].Var_Out][0] == Send_Var_Out[0] &&
-								VAR_OUT_FY[ASL].Send_Var_Out_Old[VAR_OUT_FY[ASL].Var_Out][1] == Send_Var_Out[1])	// if previous send value is same as present than
+								VAR_OUT_FY[ASL].Send_Var_Out_Old[VAR_OUT_FY[ASL].Var_Out][1] == Send_Var_Out[1] && VAR_OUT_FY[ASL].ForceSendUpdate == False)	// if previous send value is same as present than
 							{																						// don't send anything
 								VAR_OUT_FY[ASL].Var_Out = 0;														// VAR_OUT_FY[ASL].Send_Var_Out_Old is an array of
 								break;																				// 5 (for case 0 to 4) and has 3 bytes for the previous 
@@ -206,13 +211,15 @@ void Var_Out_Programm(unsigned  char ASL)
 							VAR_OUT_FY[ASL].Send_Var_Out_Old[VAR_OUT_FY[ASL].Var_Out][1] = Send_Var_Out[1];
 							Send_Diag_Comm(Send_Var_Out);
 							VAR_OUT_FY[ASL].Var_Out = 0;
+							if (VAR_OUT_FY[ASL].ForceSendUpdate == True)
+							{
+								 VAR_OUT_FY[ASL].ForceSendUpdate = False;
+							}
 							break;
 					
 			default		:	VAR_OUT_FY[ASL].Var_Out = 0;
 							break;
-		}
-	}
-	
+		}	
 	
 }
 

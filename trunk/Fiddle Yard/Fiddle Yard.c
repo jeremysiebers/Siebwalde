@@ -15,6 +15,7 @@
 #include <Diagnostic_ret.h>		// serial transmitting of IO
 #include <Var_Out.h>			// building packets to transmit
 #include <adc.h>				// ADC lib
+#include <IO_Expander.h>		// IO Expander extra IO
 
 //CONFIGURATION BITS//
 #pragma config DEBUG = OFF
@@ -48,35 +49,33 @@ BYTE AN0String[8];
 static void InitAppConfig(void);
 
 #define Init_IO()			TRISJ=0xFF,TRISH=0xFF,TRISG=0xFC,TRISF=0xFF,TRISE=0x3F,TRISD=0x60,TRISC=0x00;TRISA=0xC;TRISB=0xC0;// All ports including Pwm and AD
+#define Leds_Off()			Led1 = Off, Led2 = Off, Led3 = Off, Led4 = Off, Led5 = Off;
 
 static void Init_Timers(void);
 static void Init_Pwm(void);
 static void Init_Ad(void);
 
 static unsigned char Enable_State_Machine_Update = 0;
-unsigned int State = 5, AdcResult = 0, Delay = 0;
-static unsigned char Send_Var_Out[3];
-
 static DWORD dwLastIP = 0;
 
 //MAIN ROUTINE///////////////////////////////////////////////////////////////////////////////////////////
 void main()
 {			
-	TRISA = 0xFF;TRISB = 0xFF;TRISC = 0xFF;TRISD = 0xFF;TRISE = 0xFF;TRISF = 0xFF;TRISG = 0xFF;TRISH = 0xFF;TRISJ = 0xFF;			//	All IO are inputs
-	PORTA = 0x00, PORTB = 0x00, PORTC = 0x00, PORTD = 0x00, PORTE = 0x00, PORTF = 0x00, PORTG = 0x00, PORTH = 0x00, PORTJ = 0x00; 	// All IO = 0 
-	ADCON0=0x00;						//AD OFF
-	ADCON1=0x0F;						//All Digital
-	CMCON=0x07;
+	TRISA 	= 0xFF;TRISB = 0xFF;TRISC = 0xFF;TRISD = 0xFF;TRISE = 0xFF;TRISF = 0xFF;TRISG = 0xFF;TRISH = 0xFF;TRISJ = 0xFF;				// All IO are inputs
+	PORTA 	= 0x00, PORTB = 0x00, PORTC = 0x00, PORTD = 0x00, PORTE = 0x00, PORTF = 0x00, PORTG = 0x00, PORTH = 0x00, PORTJ = 0x00; 	// All IO = 0 
+	ADCON0 	= 0x00;																														// AD OFF
+	ADCON1 	= 0x0F;																														// All Digital
+	CMCON 	= 0x07;
 	
 	Init_Timers();
+	Init_IOExpander();
 	TickInit(); 
 	InitAppConfig(); 
 	StackInit(); 
 	Init_Ad();	
-	Init_Pwm();	
+	Init_Pwm();
 	Init_IO();
-	Led1=0,Led2=0,Led3=0,Led4=0;
-	
+	Leds_Off();	
 	
 	while(1)
 	{
@@ -87,48 +86,14 @@ void main()
 	 	Diagnostic();
 	    Command();
 				
-		if (Enable_State_Machine_Update == 1 && Output_Enable == 1)
-		{
-			switch (State)												// not used (state == 4) only used for diagnose purposes only
-			{
-				case	0	:	//ADCON0 = 0x09;	// channel AN2
-								ADCON0 = 0x0D;	// channel AN3
-								State = 1;
-								break;
-								
-				case	1	:	Led3 =! Led3;
-								ADCON0bits.GO = 1;
-								State = 2;
-								break;
-								
-				case	2	:	if (ADCON0bits.GO == 0)
-								{
-									Send_Var_Out[0] = 'H';
-									Send_Var_Out[1] = ADRESH;
-									Send_Var_Out[2] = ADRESL;
-									Send_Diag_Comm(Send_Var_Out);
-									State = 3;
-								}
-								break;
-								
-				case	3	:	if (Delay == 100)
-								{
-									Delay = 0;
-									State = 1;
-								}
-								Delay++;
-								break;
-								
-				default		:	State = 4;
-			}
-			
+		if (Enable_State_Machine_Update == True && Output_Enable == True)
+		{			
 			Led4 = 1;
 			IO();	
 			State_Machine_Update(TOP);
 			State_Machine_Update(BOTTOM);
-			Enable_State_Machine_Update = 0;
-			Led4 = 0;
-						
+			Enable_State_Machine_Update = False;
+			Led4 = 0;						
 		}
 		
 		/////Announce IP after IP change or power up event////////		
@@ -179,8 +144,8 @@ void low_isr()
 	{	
 		TMR1H = 0xF0;//0xF3	= 3333 Hz, 0x00 = 1587 Hz, 0xF0 = 2439 Hz
 		TMR1L = 0x00;
-		Enable_State_Machine_Update = 1;
-		PIR1bits.TMR1IF=0;		
+		Enable_State_Machine_Update = True;
+		PIR1bits.TMR1IF=False;		
 	}	
 }
 #pragma code
@@ -191,7 +156,7 @@ void Init_Timers()
 {	
 	// enable Timers and interrupts, Timer0 is used for TCPIP stack, this is configured in Tick.c
 	// Enable Interrupts before stackinit etc
-	OSCTUNE = 0x40;	// setting uProc speed to 41.667 MHz
+	OSCTUNE = 0x40;			// setting uProc speed to 41.667 MHz
 	RCONbits.IPEN = 1;		// Enable interrupt priorities
     INTCONbits.GIEH = 1;	// Enables all high priority interrupts
     INTCONbits.GIEL = 1;	// Enables all low priority interrupts

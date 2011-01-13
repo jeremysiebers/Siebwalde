@@ -5,11 +5,11 @@ PORTBbits.RA3 = ADCONVERTER ENC BOTTOM
 PORTBbits.RA4 = FREE
 PORTBbits.RA5 = FREE
 
-PORTBbits.RB0 = FREE
-PORTBbits.RB1 = Led1
-PORTBbits.RB2 = Led2
-PORTBbits.RB3 = Led3
-PORTBbits.RB4 = Led4
+PORTBbits.RB0 = Led1
+PORTBbits.RB1 = Led2
+PORTBbits.RB2 = Led3
+PORTBbits.RB3 = Led4
+PORTBbits.RB4 = Led5
 PORTBbits.RB5 = Output_Enable
 PORTBbits.RB6 = INCIRCUIT PROGRAM/DEBUG
 PORTBbits.RB7 = INCIRCUIT PROGRAM/DEBUG	
@@ -38,8 +38,8 @@ PORTEbits.RE2 = Bezet_Uit_5B_ Bottom
 PORTEbits.RE3 = Bezet_Uit_6_ Bottom
 PORTEbits.RE4 = Bezet_Uit_7_ Bottom
 PORTEbits.RE5 = Bezet_Uit_8A_ Bottom
-PORTEbits.RE6 = SPARE OUTPUT VIA OPTO
-PORTEbits.RE7 = SPARE OUTPUT VIA OPTO
+PORTEbits.RE6 = IO_Expander_Reset
+PORTEbits.RE7 = Externall_WDT
 
 PORTFbits.RF0 = CL_10_ bit4 Bottom
 PORTFbits.RF1 = CL_10_Heart_ Bottom
@@ -76,3 +76,70 @@ PORTJbits.RJ4 = CL_10_ bit4 Top
 PORTJbits.RJ5 = CL_10_Heart_ Top
 PORTJbits.RJ6 = BM_10_ Top
 PORTJbits.RJ7 = F11_ Top
+
+#ifdef   __18F97J60
+/*############################################################*/
+/*          Configuration for device =  'PIC18F97J60'         */
+/*############################################################*/
+
+/* ADC */
+#define ADC_V6
+
+/* ECC */
+/*No configuration chosen for this peripheral*/
+
+/* CC */
+#define CC_V4
+
+/* EPWM */
+#define PWM_V4
+
+/* PWM */
+#define PWM_V4
+
+/* PCPWM */
+/*No configuration chosen for this peripheral*/
+
+/* USART */
+#define EAUSART_V9
+
+/* SPI */
+#define SPI_V3
+
+/* I2C */
+#define I2C_V3
+
+/* TIMERS */
+#define TMR_V4
+
+/* EEPROM */
+/*No configuration chosen for this peripheral*/
+
+/* PORT_B */
+#define PTB_V2
+
+/* ANCOMP */
+#define ANCOM_V2
+
+/* MWIRE */
+#define MWIRE_V2
+
+/* CTMU */
+/*No configuration chosen for this peripheral*/
+
+/* PPS */
+/*No configuration chosen for this peripheral*/
+
+/* RTCC */
+/*No configuration chosen for this peripheral*/
+
+/* DPSLP */
+/*No configuration chosen for this peripheral*/
+
+/* PMP */
+/*No configuration chosen for this peripheral*/
+
+/* FLASH */
+#define FLASH_V1
+
+#endif
