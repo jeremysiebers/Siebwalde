@@ -68,13 +68,13 @@ void main()
 	CMCON 	= 0x07;
 	
 	Init_Timers();
-	Init_IOExpander();
 	TickInit(); 
 	InitAppConfig(); 
 	StackInit(); 
 	Init_Ad();	
 	Init_Pwm();
 	Init_IO();
+	Init_IOExpander();
 	Leds_Off();	
 	
 	while(1)
@@ -85,6 +85,7 @@ void main()
 	 		 	
 	 	Diagnostic();
 	    Command();
+	    IOExpander();
 				
 		if (Enable_State_Machine_Update == True && Output_Enable == True)
 		{			

@@ -119,6 +119,7 @@ file_091=.
 file_092=.
 file_093=.
 file_094=.
+file_095=.
 [GENERATED_FILES]
 file_000=no
 file_001=no
@@ -215,6 +216,7 @@ file_091=no
 file_092=no
 file_093=no
 file_094=no
+file_095=no
 [OTHER_FILES]
 file_000=no
 file_001=no
@@ -311,6 +313,7 @@ file_091=no
 file_092=yes
 file_093=yes
 file_094=yes
+file_095=yes
 [FILE_INFO]
 file_000=Microchip\TCPIP Stack\Announce.c
 file_001=Microchip\TCPIP Stack\StackTsk.c
@@ -407,6 +410,7 @@ file_091=I2c2\i2c2.h
 file_092=C:\MCC18\h\p18f97j60.h
 file_093=C:\MCC18\mpasm\P18F97J60.INC
 file_094=IO_useage.c
+file_095=C:\MCC18\src\traditional\proc\p18F97J60.asm
 [SUITE_INFO]
 suite_guid={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
 suite_state=
