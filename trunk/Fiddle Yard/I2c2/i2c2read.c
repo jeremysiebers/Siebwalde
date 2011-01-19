@@ -11,7 +11,7 @@
 #if defined (I2C_V3) || defined (I2C_V6) || defined (I2C_V6_1)
 static unsigned char 	CM=0;	// Cooperative Multitasking status bit
 						
-unsigned char ReadI2C2( void )
+unsigned int ReadI2C2( void )
 {
 	if( ((SSP2CON1&0x0F)==0x08) || ((SSP2CON1&0x0F)==0x0B) )	//master mode only
 	{
