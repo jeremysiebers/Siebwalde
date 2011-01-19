@@ -85,11 +85,12 @@ void main()
 	 		 	
 	 	Diagnostic();
 	    Command();
-	    IOExpander();
+	    
 				
 		if (Enable_State_Machine_Update == True && Output_Enable == True)
 		{			
 			Led4 = 1;
+			IOExpander();
 			IO();	
 			State_Machine_Update(TOP);
 			State_Machine_Update(BOTTOM);
