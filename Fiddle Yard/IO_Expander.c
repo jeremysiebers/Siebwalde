@@ -18,6 +18,7 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Jeremy siebers		19-01-2011	
  *********************************************************************/
+#include <IO_Expander.h>			// IO Expander extra IO
 #include <i2c2.h>					// I^2C lib adapted for cooperative multitasking
 #include <Fiddle_Yard.h>			// To enherit the MCLR port of the attached io expanders and some definitions
 #include <delays.h>					// delay routines
@@ -228,7 +229,8 @@ IOEXPANDER IOEXP[EXPNDNQ]={
 #endif													// End off intializer
 									
 					            };
-					            
+
+
 #if EXPNDNQ >= 1
  #define DIR_K	IOEXP[0].GDATA[0]
  #define PORTK	IOEXP[0].GDATA[14]
@@ -277,18 +279,43 @@ IOEXPANDER IOEXP[EXPNDNQ]={
  #define DIR_Z	IOEXP[7].GDATA[1]
  #define PORTZ	IOEXP[7].GDATA[15]
 #endif
+
 					            
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------//
 
-enum {INIT, IDLE, ADDR, REG, DATAOUT, DATAIN, START, STARTI2C, RSTRTI2C, STOPI2C, WRITE1, WRITE2, WRITE3, INIT1, IDLE1, ADDR1, REG1, DATAOUT1, DATAIN1, START1, STARTI2C1, RSTRTI2C1, STOPI2C1, WRITE11, WRITE21, WRITE31};
-//enum {INIT1, IDLE1, ADDR1, REG1, DATAOUT1 DATAIN1, START1, STARTI2C1, RSTRTI2C1, STOPI2C1, WRITE11, WRITE21, WRITE31};
+typedef enum {INIT, IDLE, ADDR, REG, DATAOUT, DATAIN, START, STARTI2C, RSTRTI2C, STOPI2C, WRITE1, WRITE2, WRITE3, NOPP};
 
-static unsigned char data = 0, CM = INIT, CM2 = INIT, Active_IOEXP = 0, Active_REG = 0, Active_DATA = 0, Active_PORT = 0;
-static unsigned char CM11 = INIT1, CM21 = INIT1;
-static unsigned char Return_Val = Busy, Return_Val_Routine;
+static unsigned char data = 0, CMI = INIT, CMI2 = INIT, Active_IOEXP = 0, Active_REG = 0, Active_DATA = 0, Active_PORT = 0,
+					           CMR = INIT, CMR2 = INIT; 
+														
+static unsigned char Return_Val = Busy, Return_Val_Routine, IOExpander_Updater = False;
 static unsigned int Return_Val_Routine2;
 
+
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------//
+
+/******************************************************************************
+ * Function:        void IOExpander_Update(unsigned char Update)
+ *
+ * PreCondition:    None
+ *
+ * Input:           None
+ *
+ * Output:          None
+ *
+ * Side Effects:    None
+ *
+ * Overview:        MACInit enables the Ethernet module, waits for the
+ *                  to become ready, and programs all registers for future
+ *                  TX/RX operations.
+ *
+ * Note:            This function blocks for at least 1ms, waiting for the
+ *                  hardware to stabilize.
+ *****************************************************************************/
+void IOExpander_Update(unsigned char Update)
+{
+	IOExpander_Updater = Update;
+}
 
 /******************************************************************************
  * Function:        void IOExpander(void)
@@ -310,46 +337,46 @@ static unsigned int Return_Val_Routine2;
  *****************************************************************************/
 void IOExpander(void)
 {	
-	switch ( CM11 )
+	switch ( CMR )
 	{
-		case	INIT1	:	//init Active_IOEXP with te number of total IOexpanders
+		case	INIT	:	//init Active_IOEXP with te number of total IOexpanders
 							Active_IOEXP = 0;
-							CM21 = INIT1;
-							CM11 = START1;
+							CMR2 = INIT;
+							CMR = NOPP;
 							PORTK = 0x00;
 							PORTL = 0x00;
 							break;
 								
-		case	START1	:	switch ( CM21 )
+		case	START	:	switch ( CMR2 )
 							{
-								case	INIT1	:	if ( (Active_IOEXP >= EXPNDNQ))
+								case	INIT	:	if ( (Active_IOEXP >= EXPNDNQ))
 													{
-														CM11 = START1;
-														CM21 = INIT1;
+														CMR = NOPP;
+														CMR2 = INIT;
 														Active_IOEXP = 0;
 														break;
 													}
 													Active_REG 		= 0x00;
 													Active_DATA 	= 0x00;
 													Active_PORT 	= 0x00;
-													CM21				= IDLE1;
+													CMR2			= IDLE;
 													break;
 														
-									case	IDLE1	:	if ( Active_PORT >= 1 )
+									case	IDLE	:	if ( Active_PORT >= 2 )
 														{
-															CM21 = INIT1;
+															CMR2 = INIT;
 															Active_IOEXP++;
 															break;
 														}
-														CM11 = IDLE1;
-														CM21 = STARTI2C1;
+														CMR = IDLE;
+														CMR2 = STARTI2C;
 														break;
 														
-									case	STARTI2C1:	StartI2C2();
-														CM21 = WRITE11;
+									case	STARTI2C:	StartI2C2();
+														CMR2 = WRITE1;
 														break;
 														
-									case	WRITE11	:	if (IOEXP[Active_IOEXP].GDATA[Active_PORT]== 0xFF)
+									case	WRITE1	:	if (IOEXP[Active_IOEXP].GDATA[Active_PORT]== 0xFF)
 														{
 															IOEXP[Active_IOEXP].GADDR &= READ;
 														}
@@ -357,51 +384,51 @@ void IOExpander(void)
 														{
 															IOEXP[Active_IOEXP].GADDR &= WRITE;
 														}
-														CM11 = ADDR1;
-														CM21 = WRITE21;
+														CMR = ADDR;
+														CMR2 = WRITE2;
 														break;
 														
-									case	WRITE21	:	if ( Active_PORT )
+									case	WRITE2	:	if ( Active_PORT )
 														{
-															Active_REG = GPIOB;
+															Active_REG = 15;
 														}
 														else
 														{
-															Active_REG = GPIOA;
+															Active_REG = 14;
 														}
-														CM11 = REG1;
-														CM21 = WRITE31;
+														CMR = REG;
+														CMR2 = WRITE3;
 														break;
 														
-									case	WRITE31	:	switch ( Active_PORT )
+									case	WRITE3	:	switch ( Active_PORT )
 														{
 															case	0	:	if ( IOEXP[Active_IOEXP].GDATA[Active_PORT]== 0xFF )
 																			{
 																				Active_DATA = 14;
-																				CM11 = DATAIN1;
-																				CM21 = STOPI2C1;
+																				CMR = DATAIN;
+																				CMR2 = STOPI2C;
 																				break;
 																			}
 																			else
 																			{
 																				Active_DATA = 14;
-																				CM11 = DATAOUT1;
-																				CM21 = STOPI2C1;
+																				CMR = DATAOUT;
+																				CMR2 = STOPI2C;
 																				break;
 																			}
 																																						
 															case	1	:	if ( IOEXP[Active_IOEXP].GDATA[Active_PORT]== 0xFF )
 																			{
 																				Active_DATA = 15;
-																				CM11 = DATAIN1;
-																				CM21 = STOPI2C1;
+																				CMR = DATAIN;
+																				CMR2 = STOPI2C;
 																				break;
 																			}
 																			else
 																			{
 																				Active_DATA = 15;
-																				CM11 = DATAOUT1;
-																				CM21 = STOPI2C1;
+																				CMR = DATAOUT;
+																				CMR2 = STOPI2C;
 																				break;
 																			}
 																			
@@ -409,80 +436,92 @@ void IOExpander(void)
 														}
 														break;
 														
-									case	STOPI2C1:	Active_PORT++;
+									case	STOPI2C:	Active_PORT++;
 														StopI2C2();
-														CM21 = RSTRTI2C1;
+														CMR2 = RSTRTI2C;
 														break;
 														
-									case	RSTRTI2C1:	RestartI2C2();
-														CM21 = IDLE1;
+									case	RSTRTI2C:	RestartI2C2();
+														CMR2 = IDLE;
 														break;
 														
 									default			:	break;
 								}
 								break;
 								
-			case	IDLE1	:	switch ( Return_Val_Routine = IdleI2C2() )								//check for bus idle condition in multi master communication
+			case	IDLE	:	switch ( Return_Val_Routine = IdleI2C2() )								//check for bus idle condition in multi master communication
 								{
-									case	Finished	:	CM11 = START1;
+									case	Finished	:	CMR = START;
 															break;
 															
-									case	Busy		:	CM11 = IDLE1;
+									case	Busy		:	CMR = IDLE;
 															break;
 																
-									default				:	CM11 = IDLE1;
+									default				:	CMR = IDLE;
 															break;
 								}
 								break;
 								
-			case	ADDR1	:	switch ( Return_Val_Routine = WriteI2C2 (IOEXP[Active_IOEXP].GADDR) )
+			case	ADDR	:	switch ( Return_Val_Routine = WriteI2C2 (IOEXP[Active_IOEXP].GADDR) )
 								{
-									case	Finished	:	CM11 = START1;
+									case	Finished	:	CMR = START;
 															break;
 									
-									case	Busy		:	CM11 = ADDR1;
+									case	Busy		:	CMR = ADDR;
 															break;
 																															
-									default				:	CM11 = ADDR1;
+									default				:	CMR = ADDR;
 															break;
 								}
 								break;
 								
-			case	REG1	:	switch ( Return_Val_Routine = WriteI2C2 (GREG[Active_REG]) )
+			case	REG	:	switch ( Return_Val_Routine = WriteI2C2 (GREG[Active_REG]) )
 								{
-									case	Finished	:	CM = START;
+									case	Finished	:	CMR = START;
 															break;
 									
-									case	Busy		:	CM = REG;
+									case	Busy		:	CMR = REG;
 															break;
 																															
-									default				:	CM = REG;
+									default				:	CMR = REG;
 															break;
 								}
 								break;
 								
-			case	DATAOUT1:	switch ( Return_Val_Routine = WriteI2C2 (IOEXP[Active_IOEXP].GDATA[Active_DATA]) )
+			case	DATAOUT:	switch ( Return_Val_Routine = WriteI2C2 (IOEXP[Active_IOEXP].GDATA[Active_DATA]) )
 								{
-									case	Finished	:	CM11 = START1;
+									case	Finished	:	CMR = START;
 															break;
 									
-									case	Busy		:	CM11 = DATAOUT1;
+									case	Busy		:	CMR = DATAOUT;
 															break;
 																															
-									default				:	CM11 = DATAOUT1;
+									default				:	CMR = DATAOUT;
 															break;
 								}
 								break;
 								
-			case	DATAIN1	:	switch ( Return_Val_Routine2 = ReadI2C2 () )
+			case	DATAIN	:	switch ( Return_Val_Routine2 = ReadI2C2 () )
 								{
-									case	Busy		:	CM11 = DATAIN1;
+									case	Busy		:	CMR = DATAIN;
 															break;
 																															
 									default				:	IOEXP[Active_IOEXP].GDATA[Active_DATA] = Return_Val_Routine2;
-															CM11 = START1;
+															CMR = START;
 															break;
 								}
+								break;
+								
+			case	NOPP	:	if ( IOExpander_Updater == True )
+								{
+									CMR = START;
+									IOExpander_Updater = True;
+									Led5 = !Led5;
+									PORTK = !PORTK;
+									PORTL = !PORTL;
+									break;
+								}
+								IOExpander_Updater = True;
 								break;
 								
 			default			:	break;
@@ -512,7 +551,7 @@ void Init_IOExpander(void)
 {
 	while (Return_Val == Busy)
 	{
-		switch ( CM )
+		switch ( CMI )
 		{
 			case	INIT	:	// Clear MCLR pins of the IOexpanders
 								IO_Expander_Enable = True;
@@ -525,8 +564,8 @@ void Init_IOExpander(void)
 								//---INITIALISE THE I2C MODULE FOR MASTER MODE WITH 100KHz ---							
 								OpenI2C2(MASTER,SLEW_ON);
 								
-								//400kHz Baud clock @41.667MHz = 0x19 // 100kHz Baud clock @41.667MHz = 0x67
-								SSP2ADD=0x19;
+								//400kHz Baud clock @41.667MHz = 0x19 // 100kHz Baud clock @41.667MHz = 0x67 // 1MHz Baud clock @41.667MHz = 0x09 // 1.7MHzBaud clock @41.667MHz = 0x05
+								SSP2ADD=0x09;
 								
 								//read any previous stored content in buffer to clear buffer full status   EXPNDNQ
 								data = SSP2BUF;	
@@ -534,58 +573,58 @@ void Init_IOExpander(void)
 								//init Active_IOEXP with te number of total IOexpanders
 								Active_IOEXP = 0;
 								
-								CM = START;
+								CMI = START;
 								break;
 								
-			case	START	:	switch ( CM2 )
+			case	START	:	switch ( CMI2 )
 								{
 									case	INIT	:	if ( (Active_IOEXP >= EXPNDNQ))
 														{
 															Return_Val = Finished;
-															CM = INIT;
-															CM2 = INIT;
+															CMI = INIT;
+															CMI2 = INIT;
 															Active_IOEXP = 0;
 															break;
 														}
 														Active_REG 		= 0;
 														Active_DATA 	= 0;
-														CM2				= IDLE;
+														CMI2				= IDLE;
 														break;
 														
 									case	IDLE	:	if ( Active_REG >= WRITE_REG )
 														{
-															CM2 = INIT;
+															CMI2 = INIT;
 															Active_IOEXP++;
 															break;
 														}
-														CM = IDLE;
-														CM2 = STARTI2C;
+														CMI = IDLE;
+														CMI2 = STARTI2C;
 														break;
 														
 									case	STARTI2C:	StartI2C2();
-														CM2 = WRITE1;
+														CMI2 = WRITE1;
 														break;
 														
-									case	WRITE1	:	CM = ADDR;
-														CM2 = WRITE2;
+									case	WRITE1	:	CMI = ADDR;
+														CMI2 = WRITE2;
 														break;
 														
-									case	WRITE2	:	CM = REG;
-														CM2 = WRITE3;
+									case	WRITE2	:	CMI = REG;
+														CMI2 = WRITE3;
 														break;
 														
-									case	WRITE3	:	CM = DATAOUT;
-														CM2 = STOPI2C;
+									case	WRITE3	:	CMI = DATAOUT;
+														CMI2 = STOPI2C;
 														break;
 														
 									case	STOPI2C	:	Active_REG++;
 														Active_DATA++;
 														StopI2C2();
-														CM2 = RSTRTI2C;
+														CMI2 = RSTRTI2C;
 														break;
 														
 									case	RSTRTI2C:	RestartI2C2();
-														CM2 = IDLE;
+														CMI2 = IDLE;
 														break;
 														
 									default			:	break;
@@ -594,52 +633,52 @@ void Init_IOExpander(void)
 								
 			case	IDLE	:	switch ( Return_Val_Routine = IdleI2C2() )								//check for bus idle condition in multi master communication
 								{
-									case	Finished	:	CM = START;
+									case	Finished	:	CMI = START;
 															break;
 															
-									case	Busy		:	CM = IDLE;
+									case	Busy		:	CMI = IDLE;
 															break;
 																
-									default				:	CM = IDLE;
+									default				:	CMI = IDLE;
 															break;
 								}
 								break;
 								
 			case	ADDR	:	switch ( Return_Val_Routine = WriteI2C2 (IOEXP[Active_IOEXP].GADDR) )
 								{
-									case	Finished	:	CM = START;
+									case	Finished	:	CMI = START;
 															break;
 									
-									case	Busy		:	CM = ADDR;
+									case	Busy		:	CMI = ADDR;
 															break;
 																															
-									default				:	CM = ADDR;
+									default				:	CMI = ADDR;
 															break;
 								}
 								break;
 								
 			case	REG		:	switch ( Return_Val_Routine = WriteI2C2 (GREG[Active_REG]) )
 								{
-									case	Finished	:	CM = START;
+									case	Finished	:	CMI = START;
 															break;
 									
-									case	Busy		:	CM = REG;
+									case	Busy		:	CMI = REG;
 															break;
 																															
-									default				:	CM = REG;
+									default				:	CMI = REG;
 															break;
 								}
 								break;
 								
 			case	DATAOUT	:	switch ( Return_Val_Routine = WriteI2C2 (IOEXP[Active_IOEXP].GDATA[Active_DATA]) )
 								{
-									case	Finished	:	CM = START;
+									case	Finished	:	CMI = START;
 															break;
 									
-									case	Busy		:	CM = DATAOUT;
+									case	Busy		:	CMI = DATAOUT;
 															break;
 																															
-									default				:	CM = DATAOUT;
+									default				:	CMI = DATAOUT;
 															break;
 								}
 								break;
@@ -648,3 +687,6 @@ void Init_IOExpander(void)
 		}
 	}
 }
+
+
+

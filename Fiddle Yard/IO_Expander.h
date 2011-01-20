@@ -3,5 +3,5 @@
 
 extern void Init_IOExpander(void);
 extern void IOExpander(void);
-
+extern void IOExpander_Update(unsigned char Update);
 #endif
