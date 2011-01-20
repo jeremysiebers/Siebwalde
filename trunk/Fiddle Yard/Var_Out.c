@@ -4,7 +4,6 @@
 #include <Fiddle_Yard.h>
 #include <State_Machine.h>
 
-
 typedef struct
 {
 	unsigned char 	Var_Out;	
