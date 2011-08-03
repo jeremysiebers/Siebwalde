@@ -78,7 +78,7 @@ void IO(void)
 		PLATFORMS_IO[1].Bezet_Uit_6_ = PORTHbits.RH7;
 		PLATFORMS_IO[0].Bezet_Uit_6_ = PORTEbits.RE3;
 		
-		PLATFORMS_IO[1].Bezet_Uit_7_ = PORTGbits.RG2;			// RG0 and RG1 are used for PWM and brake output
+		PLATFORMS_IO[1].Bezet_Uit_7_ = PORTGbits.RG2;			// RG0 and RG1 are used for PWM and brake BOTTOM output
 		PLATFORMS_IO[0].Bezet_Uit_7_ = PORTEbits.RE4;
 		
 		PLATFORMS_IO[1].Bezet_Uit_8A_ = PORTGbits.RG3;
@@ -97,7 +97,7 @@ void IO(void)
 		PORTCbits.RC4 = PLATFORMS_IO[0].Bezet_In_5B_;
 		
 		PORTDbits.RD1 = PLATFORMS_IO[1].M11_;
-		PORTCbits.RC3 = PLATFORMS_IO[0].M11_;					// RC1 and RC2 are used for PWM and brake output
+		PORTCbits.RC3 = PLATFORMS_IO[0].M11_;					// RC1 and RC2 are used for PWM and brake TOP output
 		
 		PORTDbits.RD0 = PLATFORMS_IO[1].M10_;
 		PORTCbits.RC0 = PLATFORMS_IO[0].M10_;	
