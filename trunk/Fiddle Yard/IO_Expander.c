@@ -516,7 +516,7 @@ void IOExpander(void)
 								{
 									CMR = START;
 									IOExpander_Updater = True;
-									Led5 = !Led5;
+									//Led5 = !Led5;
 									PORTK = !PORTK;
 									PORTL = !PORTL;
 									break;

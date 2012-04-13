@@ -48,8 +48,8 @@ BYTE AN0String[8];
 // These may or may not be present in all applications.
 static void InitAppConfig(void);
 
-#define Init_IO()			TRISJ=0xFF,TRISH=0xFF,TRISG=0xFC,TRISF=0xFF,TRISE=0x3F,TRISD=0x60,TRISC=0x00;TRISA=0xC;TRISB=0xC0;// All ports including Pwm and AD
-#define Leds_Off()			Led1 = Off, Led2 = Off, Led3 = Off, Led4 = Off, Led5 = Off;
+#define Init_IO()			TRISJ=0xFF,TRISH=0xFF,TRISG=0xFA,TRISF=0xFF,TRISE=0x00,TRISD=0x60,TRISC=0xFA;TRISA=0xC;TRISB=0xC3;// All ports including Pwm and AD
+#define Leds_Off()			Led1 = Off, Led2 = Off, Led3 = Off;
 
 static void Init_Timers(void);
 static void Init_Pwm(void);
@@ -89,12 +89,13 @@ void main()
 	    	    		
 		if (Enable_State_Machine_Update == True && Output_Enable == True)
 		{			
-			Led4 = 1;
+			//Led4 = 1;
+			To_Externall_WDT_Pulse =! To_Externall_WDT_Pulse;
 			IO();	
 			State_Machine_Update(TOP);
 			State_Machine_Update(BOTTOM);
 			Enable_State_Machine_Update = False;
-			Led4 = 0;						
+			//Led4 = 0;						
 		}
 		
 		/////Announce IP after IP change or power up event////////		

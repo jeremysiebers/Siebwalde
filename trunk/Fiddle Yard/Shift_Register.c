@@ -39,68 +39,68 @@ static INPUT_VAR PLATFORMS_IO[2] = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0
 void IO(void)
 {			
 	
-		PLATFORMS_IO[1].Bridge_10L_ = PORTJbits.RJ0;
-		PLATFORMS_IO[0].Bridge_10L_ = PORTGbits.RG4;
+		PLATFORMS_IO[1].Bridge_10L_ = PORTGbits.RG1;
+		PLATFORMS_IO[0].Bridge_10L_ = PORTCbits.RC1;
 		
-		PLATFORMS_IO[1].CL_10_= ((PORTJ & 0x1E) >> 1); // Port J bits 1 to 4
-		PLATFORMS_IO[0].CL_10_= (((PORTG & 0xE0) >> 5) | ((PORTF & 0x01) << 3) ); // Port G bits 5,6 to 7 and Port F bit 0
+		PLATFORMS_IO[1].CL_10_= ((PORTJ & 0x0F)); // Port J bits 0 to 3
+		PLATFORMS_IO[0].CL_10_= ((PORTF & 0x0F)); // Port F bits 0 to 3
 				
-		PLATFORMS_IO[1].CL_10_Heart_ = PORTJbits.RJ5;
-		PLATFORMS_IO[0].CL_10_Heart_ = PORTFbits.RF1;
+		PLATFORMS_IO[1].CL_10_Heart_ = PORTJbits.RJ4;
+		PLATFORMS_IO[0].CL_10_Heart_ = PORTFbits.RF4;
 		
-		PLATFORMS_IO[1].BM_10_ = PORTJbits.RJ6;
-		PLATFORMS_IO[0].BM_10_ = PORTFbits.RF2;
+		PLATFORMS_IO[1].BM_10_ = PORTJbits.RJ5;
+		PLATFORMS_IO[0].BM_10_ = PORTFbits.RF5;
 		
-		PLATFORMS_IO[1].F11_ = PORTJbits.RJ7;	
-		PLATFORMS_IO[0].F11_ = PORTFbits.RF3;	
+		PLATFORMS_IO[1].F11_ = PORTGbits.RG5;	
+		PLATFORMS_IO[0].F11_ = PORTCbits.RC5;	
 		
-		PLATFORMS_IO[1].EOS_10_ = PORTHbits.RH0;	
-		PLATFORMS_IO[0].EOS_10_ = PORTFbits.RF4;	
+		PLATFORMS_IO[1].EOS_10_ = PORTGbits.RG7;	
+		PLATFORMS_IO[0].EOS_10_ = PORTCbits.RC7;	
 		
-		PLATFORMS_IO[1].EOS_11_ = PORTHbits.RH1;	
-		PLATFORMS_IO[0].EOS_11_ = PORTFbits.RF5;		
+		PLATFORMS_IO[1].EOS_11_ = PORTJbits.RJ7;	
+		PLATFORMS_IO[0].EOS_11_ = PORTFbits.RF7;		
 		
-		PLATFORMS_IO[1].BM_11_ = PORTHbits.RH2;
+		PLATFORMS_IO[1].BM_11_ = PORTJbits.RJ6;
 		PLATFORMS_IO[0].BM_11_ = PORTFbits.RF6;
 		
-		PLATFORMS_IO[1].Bridge_10R_ = PORTHbits.RH3;
-		PLATFORMS_IO[0].Bridge_10R_ = PORTFbits.RF7;
+		PLATFORMS_IO[1].Bridge_10R_ = PORTGbits.RG3;
+		PLATFORMS_IO[0].Bridge_10R_ = PORTCbits.RC3;
 		
-		PLATFORMS_IO[1].F10_ = PORTHbits.RH4;
-		PLATFORMS_IO[0].F10_ = PORTEbits.RE0;
+		PLATFORMS_IO[1].F10_ = PORTGbits.RG4;
+		PLATFORMS_IO[0].F10_ = PORTCbits.RC4;
 		
-		PLATFORMS_IO[1].F12_ = PORTHbits.RH5;
-		PLATFORMS_IO[0].F12_ = PORTEbits.RE1;
+		PLATFORMS_IO[1].F12_ = PORTGbits.RG6;
+		PLATFORMS_IO[0].F12_ = PORTCbits.RC6;
 		
-		PLATFORMS_IO[1].Bezet_Uit_5B_ = PORTHbits.RH6;			// This means the occupied output of the PWM Rail regulator to the uProc
-		PLATFORMS_IO[0].Bezet_Uit_5B_ = PORTEbits.RE2;
+		PLATFORMS_IO[1].Bezet_Uit_5B_ = PORTHbits.RH0;			// This means the occupied output of the PWM Rail regulator to the uProc
+		PLATFORMS_IO[0].Bezet_Uit_5B_ = PORTHbits.RH4;
 			
-		PLATFORMS_IO[1].Bezet_Uit_6_ = PORTHbits.RH7;
-		PLATFORMS_IO[0].Bezet_Uit_6_ = PORTEbits.RE3;
+		PLATFORMS_IO[1].Bezet_Uit_6_ = PORTHbits.RH1;
+		PLATFORMS_IO[0].Bezet_Uit_6_ = PORTHbits.RH5;
 		
-		PLATFORMS_IO[1].Bezet_Uit_7_ = PORTGbits.RG2;			// RG0 and RG1 are used for PWM and brake BOTTOM output
-		PLATFORMS_IO[0].Bezet_Uit_7_ = PORTEbits.RE4;
+		PLATFORMS_IO[1].Bezet_Uit_7_ = PORTHbits.RH2;			// RG0 and RG1 are used for PWM and brake BOTTOM output
+		PLATFORMS_IO[0].Bezet_Uit_7_ = PORTHbits.RH6;
 		
-		PLATFORMS_IO[1].Bezet_Uit_8A_ = PORTGbits.RG3;
-		PLATFORMS_IO[0].Bezet_Uit_8A_ = PORTEbits.RE5;			// PORTEbits.RE6 and PORTEbits.RE7 spare outputs via opto
+		PLATFORMS_IO[1].Bezet_Uit_8A_ = PORTHbits.RH3;
+		PLATFORMS_IO[0].Bezet_Uit_8A_ = PORTHbits.RH7;			// PORTEbits.RE6 and PORTEbits.RE7 spare outputs via opto
 		
-		PORTDbits.RD7 = PLATFORMS_IO[1].Bezet_Weerstand_;		// PORTDbits.RD5 and PORTDbits.RD6 are I^2C Clock and Data
-		PORTCbits.RC7 = PLATFORMS_IO[0].Bezet_Weerstand_;
+		PORTDbits.RD2 = PLATFORMS_IO[1].Bezet_Weerstand_;		// PORTDbits.RD5 and PORTDbits.RD6 are I^2C Clock and Data
+		PORTDbits.RD7 = PLATFORMS_IO[0].Bezet_Weerstand_;
 		
-		PORTDbits.RD4 = PLATFORMS_IO[1].Bezet_In_7_;			// This means to the "occupied" input of the PWM Rail regulator from the uProc
-		PORTCbits.RC6 = PLATFORMS_IO[0].Bezet_In_7_;
+		PORTEbits.RE2 = PLATFORMS_IO[1].Bezet_In_7_;			// This means to the "occupied" input of the PWM Rail regulator from the uProc
+		PORTEbits.RE6 = PLATFORMS_IO[0].Bezet_In_7_;
 		
-		PORTDbits.RD3 = PLATFORMS_IO[1].Bezet_In_6_;		
-		PORTCbits.RC5 = PLATFORMS_IO[0].Bezet_In_6_;				
+		PORTEbits.RE1 = PLATFORMS_IO[1].Bezet_In_6_;		
+		PORTEbits.RE5 = PLATFORMS_IO[0].Bezet_In_6_;				
 		
-		PORTDbits.RD2 = PLATFORMS_IO[1].Bezet_In_5B_;
-		PORTCbits.RC4 = PLATFORMS_IO[0].Bezet_In_5B_;
+		PORTEbits.RE0 = PLATFORMS_IO[1].Bezet_In_5B_;
+		PORTEbits.RE4 = PLATFORMS_IO[0].Bezet_In_5B_;
 		
 		PORTDbits.RD1 = PLATFORMS_IO[1].M11_;
-		PORTCbits.RC3 = PLATFORMS_IO[0].M11_;					// RC1 and RC2 are used for PWM and brake TOP output
+		PORTDbits.RD4 = PLATFORMS_IO[0].M11_;					// RC1 and RC2 are used for PWM and brake TOP output
 		
 		PORTDbits.RD0 = PLATFORMS_IO[1].M10_;
-		PORTCbits.RC0 = PLATFORMS_IO[0].M10_;	
+		PORTDbits.RD3 = PLATFORMS_IO[0].M10_;	
 		
 		
 		if (PLATFORMS_IO[1].CL_10_Heart_ == 1)
