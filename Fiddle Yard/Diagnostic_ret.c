@@ -156,16 +156,16 @@ void Diagnostic(void)
 						break;
 						
 		case	21	:	TestTarget.MACAddr.v[0] = 0x00;
-						TestTarget.MACAddr.v[1] = 0x25;
-						TestTarget.MACAddr.v[2] = 0x22;
-						TestTarget.MACAddr.v[3] = 0x32;
-						TestTarget.MACAddr.v[4] = 0x5B;
-						TestTarget.MACAddr.v[5] = 0x4D;
+						TestTarget.MACAddr.v[1] = 0x0E;
+						TestTarget.MACAddr.v[2] = 0x0C;
+						TestTarget.MACAddr.v[3] = 0x74;
+						TestTarget.MACAddr.v[4] = 0xCC;
+						TestTarget.MACAddr.v[5] = 0x08;
 						
 						TestTarget.IPAddr.v[0] = 192;
 						TestTarget.IPAddr.v[1] = 168;
 						TestTarget.IPAddr.v[2] = 1;
-						TestTarget.IPAddr.v[3] = 20;
+						TestTarget.IPAddr.v[3] = 15;
 												
 			            socket1 = UDPOpen(0x7000, &TestTarget, 0x7000);  //open the socket 
 			            
