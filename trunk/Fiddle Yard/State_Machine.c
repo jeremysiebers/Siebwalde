@@ -88,9 +88,9 @@
 #define PWM_ONE_RIGHT 323
 #define PWM_ONE_SLOW_RIGHT 424
 
-#define PWM_MULTIPLE_LEFT 800	//923
+#define PWM_MULTIPLE_LEFT 800
 #define PWM_MULTIPLE_SLOW_LEFT 600
-#define PWM_MULTIPLE_RIGHT 223	//100
+#define PWM_MULTIPLE_RIGHT 223
 #define PWM_MULTIPLE_SLOW_RIGHT 424
 
 #define PWM_ONE_COUNT_LEFT_INIT 512
@@ -100,16 +100,16 @@
 
 #define PWM_ADC_MULTIPLE_SPEED 650
 #define PWM_ADC_MULTIPLE_SPEED_LOW 630
-#define PWM_ADC_ONE_SPEED 450
-#define PWM_ADC_ONE_SPEED_LOW 430
-#define PWM_ADC_SLOW 150
-#define PWM_ADC_SLOW_LOW 130
+#define PWM_ADC_ONE_SPEED 550
+#define PWM_ADC_ONE_SPEED_LOW 530
+#define PWM_ADC_SLOW 250
+#define PWM_ADC_SLOW_LOW 230
 #define PWM_ADC_ENC_STALL 25
 
 
 #define MECH_CONSTANT 5
 #define MECH_REWIND 500
-#define MECH_SKIP_HEART 50
+#define MECH_SKIP_HEART 200
 #define PWM_FAST_COUNTER_CONST 3
 #define PWM_ONE_INBETWEEN_COUNTER_CONST 625	
 #define PWM_RAMP_UP_DELAY_REG_CONST 5
@@ -128,6 +128,8 @@ static unsigned char Track_Mover(unsigned char ASL, char New_Track);
 static unsigned char Fiddle_Multiple_Right(unsigned char ASL, char New_Track_Muktiple_Right);
 static unsigned char Fiddle_Multiple_Left(unsigned char ASL, char New_Track_Muktiple_Left);
 static unsigned char Fiddle_Yard_Full(unsigned char ASL, unsigned char Return_Val);
+
+static unsigned int Send_Var_Out[3];
 
 void ERROR_Code_Report(unsigned char ASL, unsigned char Code);
 void PWM_Update(unsigned char ASL, unsigned int Value);
@@ -918,9 +920,9 @@ void Pwm_Brake(unsigned char ASL, unsigned char Value)
 {
 	switch (ASL)
 	{
-		case	TOP		:	Pwm_Brake_TOP = Value;
+		case	TOP		:	Pwm_Brake_TOP =! Value;
 							break;
-		case	BOTTOM	:	Pwm_Brake_BOTTOM = Value;
+		case	BOTTOM	:	Pwm_Brake_BOTTOM =! Value;
 							break;	
 		default			:	break;
 	}
@@ -1687,6 +1689,7 @@ static unsigned char Fiddle_Multiple_Right(unsigned char ASL, char New_Track_Muk
 											
 							case	2	:	if (ADCON0bits.GO == 0)
 											{
+												
 												ACT_ST_MCHN[ASL].AdcResults = (((unsigned int)ADRESH)<<8)|(ADRESL);	
 												
 												if (ACT_ST_MCHN[ASL].AdcResults >= PWM_ADC_MULTIPLE_SPEED)																		// When move started, Pwm_One_Left=700 == AdcResult=400
@@ -1771,22 +1774,21 @@ static unsigned char Fiddle_Multiple_Right(unsigned char ASL, char New_Track_Muk
 											
 							case	2	:	if (ADCON0bits.GO == 0)
 											{
-												ACT_ST_MCHN[ASL].AdcResults = (((unsigned int)ADRESH)<<8)|(ADRESL);												// back to dec=200 -> hex= 0xC8   100-0x64	50-0x32	25-0x19
-												
-												if (ACT_ST_MCHN[ASL].AdcResults >= PWM_ADC_SLOW)
+												if ((ACT_ST_MCHN[ASL].AdcResults >= PWM_ADC_SLOW) && (ACT_ST_MCHN[ASL].Pwm_Multiple_Count_Right < 430))
 												{
 													//ACT_ST_MCHN[ASL].Pwm_Multiple_Count_Right++;
 													ACT_ST_MCHN[ASL].Pwm_Multiple_Count_Right++;													
 													PWM_Update(ASL, ACT_ST_MCHN[ASL].Pwm_Multiple_Count_Right);
 												}
-												else if ((ACT_ST_MCHN[ASL].AdcResults <= PWM_ADC_SLOW_LOW) && (ACT_ST_MCHN[ASL].AdcResults > PWM_ADC_ENC_STALL))// lower limit dec=180 -> hex= 0xB4    80-0x50	40-0x28	20-0x14
+												
+												else if ((ACT_ST_MCHN[ASL].AdcResults <= PWM_ADC_SLOW_LOW) && (ACT_ST_MCHN[ASL].Pwm_Multiple_Count_Right > 5) )//&& (ACT_ST_MCHN[ASL].AdcResults > PWM_ADC_ENC_STALL))// lower limit dec=180 -> hex= 0xB4    80-0x50	40-0x28	20-0x14
 												{
 													ACT_ST_MCHN[ASL].Encoder_Lost_Counter = 0;
 													//ACT_ST_MCHN[ASL].Pwm_Multiple_Count_Right--;
 													ACT_ST_MCHN[ASL].Pwm_Multiple_Count_Right--;
 													PWM_Update(ASL, ACT_ST_MCHN[ASL].Pwm_Multiple_Count_Right);
 													ACT_ST_MCHN[ASL].Encoder_Lost_Counter = 0;
-												}
+												}												
 												else if (ACT_ST_MCHN[ASL].AdcResults < PWM_ADC_ENC_STALL)
 												{
 													ACT_ST_MCHN[ASL].Encoder_Lost_Counter++;
@@ -1810,12 +1812,15 @@ static unsigned char Fiddle_Multiple_Right(unsigned char ASL, char New_Track_Muk
 											ACT_ST_MCHN[ASL].Pwm_Ramp_up_delay_Reg++;
 											break;
 											
-							default		:	ACT_ST_MCHN[ASL].Pwm_Reg_Switch = 4;
+							default		:	ACT_ST_MCHN[ASL].Pwm_Reg_Switch = 0;
+											break;
 						}
 						
 						ACT_ST_MCHN[ASL].Mech_Delay++;	
 						if (ACT_ST_MCHN[ASL].Mech_Delay > MECH_SKIP_HEART)
 						{
+							ACT_ST_MCHN[ASL].Mech_Delay = MECH_SKIP_HEART;
+							
 							if (CL_10_Heart(ASL) == 1)
 							{
 								ACT_ST_MCHN[ASL].ADCconversion_Inuse = False;
@@ -1840,7 +1845,7 @@ static unsigned char Fiddle_Multiple_Right(unsigned char ASL, char New_Track_Muk
 						}
 						ACT_ST_MCHN[ASL].Pwm_Fast_Counter++;	// loop herhaling ophogen
 						*/
-						break;
+						//break;
 						
 		case	5	:	if (EOS_10(ASL))
 						{
@@ -2174,7 +2179,8 @@ static unsigned char Fiddle_One_Right(unsigned char ASL)	//rechts op bewegen 11 
 											ACT_ST_MCHN[ASL].Pwm_Ramp_up_delay_Reg++;
 											break;
 											
-							default		:	ACT_ST_MCHN[ASL].Pwm_Reg_Switch = 4;
+							default		:	ACT_ST_MCHN[ASL].Pwm_Reg_Switch = 0;
+											break;
 						}
 						
 						
@@ -2389,6 +2395,8 @@ static unsigned char Fiddle_Multiple_Left(unsigned char ASL, char New_Track_Mukt
 											
 							case	2	:	if (ADCON0bits.GO == 0)
 											{
+											
+												
 												ACT_ST_MCHN[ASL].AdcResults = (((unsigned int)ADRESH)<<8)|(ADRESL);	
 												
 												if (ACT_ST_MCHN[ASL].AdcResults >= PWM_ADC_MULTIPLE_SPEED)																			// When move started, Pwm_One_Left=700 == AdcResult=400
@@ -2473,6 +2481,7 @@ static unsigned char Fiddle_Multiple_Left(unsigned char ASL, char New_Track_Mukt
 											
 							case	2	:	if (ADCON0bits.GO == 0)
 											{
+																								
 												ACT_ST_MCHN[ASL].AdcResults = (((unsigned int)ADRESH)<<8)|(ADRESL);												// back to dec=200 -> hex= 0xC8   100-0x64	50-0x32	25-0x19
 												
 												if (ACT_ST_MCHN[ASL].AdcResults >= PWM_ADC_SLOW)
@@ -2518,6 +2527,7 @@ static unsigned char Fiddle_Multiple_Left(unsigned char ASL, char New_Track_Mukt
 						ACT_ST_MCHN[ASL].Mech_Delay++;	
 						if (ACT_ST_MCHN[ASL].Mech_Delay > MECH_SKIP_HEART)
 						{
+							ACT_ST_MCHN[ASL].Mech_Delay = MECH_SKIP_HEART;
 							
 							if (CL_10_Heart(ASL) == 1)
 							{
@@ -2543,7 +2553,7 @@ static unsigned char Fiddle_Multiple_Left(unsigned char ASL, char New_Track_Mukt
 						}
 						ACT_ST_MCHN[ASL].Pwm_Fast_Counter++;	// loop herhaling ophogen
 						*/
-						break;						
+						//break;						
 		
 		case	5	:	if (EOS_11(ASL))
 						{
