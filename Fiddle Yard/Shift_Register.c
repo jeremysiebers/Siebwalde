@@ -66,11 +66,11 @@ void IO(void)
 		PLATFORMS_IO[1].Bridge_10R_ = PORTGbits.RG3;
 		PLATFORMS_IO[0].Bridge_10R_ = PORTCbits.RC3;
 		
-		PLATFORMS_IO[1].F10_ = PORTGbits.RG4;
-		PLATFORMS_IO[0].F10_ = PORTCbits.RC4;
+		PLATFORMS_IO[1].F10_ = !PORTGbits.RG4;
+		PLATFORMS_IO[0].F10_ = !PORTCbits.RC4;
 		
-		PLATFORMS_IO[1].F12_ = PORTGbits.RG6;
-		PLATFORMS_IO[0].F12_ = PORTCbits.RC6;
+		PLATFORMS_IO[1].F12_ = !PORTGbits.RG6;
+		PLATFORMS_IO[0].F12_ = !PORTCbits.RC6;
 		
 		PLATFORMS_IO[1].Bezet_Uit_5B_ = PORTHbits.RH0;			// This means the occupied output of the PWM Rail regulator to the uProc
 		PLATFORMS_IO[0].Bezet_Uit_5B_ = PORTHbits.RH4;

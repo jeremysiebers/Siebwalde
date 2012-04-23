@@ -58,6 +58,8 @@ static void Init_Ad(void);
 static unsigned char Enable_State_Machine_Update = 0;
 static DWORD dwLastIP = 0;
 
+static unsigned char Send_Var_Out[3];
+
 //MAIN ROUTINE///////////////////////////////////////////////////////////////////////////////////////////
 void main()
 {			
@@ -74,7 +76,7 @@ void main()
 	Init_Ad();	
 	Init_Pwm();
 	Init_IO();
-	Init_IOExpander();
+	//Init_IOExpander();
 	Leds_Off();	
 	
 	while(1)
@@ -85,10 +87,10 @@ void main()
 	 		 	
 	 	Diagnostic();
 	    Command();
-	    IOExpander();
+	    //IOExpander();
 	    	    		
 		if (Enable_State_Machine_Update == True && Output_Enable == True)
-		{			
+		{
 			//Led4 = 1;
 			To_Externall_WDT_Pulse =! To_Externall_WDT_Pulse;
 			IO();	
