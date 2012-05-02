@@ -98,13 +98,13 @@
 #define PWM_ONE_COUNT_RIGHT_INIT 512
 #define PWM_MULTIPLE_COUNT_RIGHT_INIT 512
 
-#define PWM_ADC_MULTIPLE_SPEED 650
-#define PWM_ADC_MULTIPLE_SPEED_LOW 630
-#define PWM_ADC_ONE_SPEED 550
-#define PWM_ADC_ONE_SPEED_LOW 530
-#define PWM_ADC_SLOW 250
-#define PWM_ADC_SLOW_LOW 230
-#define PWM_ADC_ENC_STALL 25
+#define PWM_ADC_MULTIPLE_SPEED 720			//hysteresis upper
+#define PWM_ADC_MULTIPLE_SPEED_LOW 700		//hysteresis lower
+#define PWM_ADC_ONE_SPEED 570
+#define PWM_ADC_ONE_SPEED_LOW 550
+#define PWM_ADC_SLOW 280
+#define PWM_ADC_SLOW_LOW 260
+#define PWM_ADC_ENC_STALL 50
 
 
 #define MECH_CONSTANT 5
@@ -616,7 +616,7 @@ void State_Machine_Update(unsigned char ASL)	//ASL = Active_Struct_Level, BOTTOM
 										
 										switch (ACT_ST_MCHN[ASL].Fy_Running)
 										{
-											case	Train_On_5B_Start	:	if (Bezet_Uit_5B(ASL) && Fiddle_Yard_Full(ASL,0))
+											case	Train_On_5B_Start	:	if ((Bezet_Uit_5B(ASL)) && (Fiddle_Yard_Full(ASL,0)))
 																			{
 																				Train_In_Track_Out_Count_Repeater = 0;
 																				Train_On_5B(ASL);
@@ -742,7 +742,7 @@ void State_Machine_Update(unsigned char ASL)	//ASL = Active_Struct_Level, BOTTOM
 																				
 										switch (ACT_ST_MCHN[ASL].Fy_Running_2)
 										{
-											case	Train_On_5B_Start	:	if (Bezet_Uit_5B(ASL) && Fiddle_Yard_Full(ASL,0))
+											case	Train_On_5B_Start	:	if ((Bezet_Uit_5B(ASL)) && (Fiddle_Yard_Full(ASL,0)))
 																			{
 																				Train_In_Track_Out_Count_Repeater = 0;
 																				Train_On_5B(ASL);
@@ -1774,17 +1774,17 @@ static unsigned char Fiddle_Multiple_Right(unsigned char ASL, char New_Track_Muk
 											
 							case	2	:	if (ADCON0bits.GO == 0)
 											{
-												if ((ACT_ST_MCHN[ASL].AdcResults >= PWM_ADC_SLOW) && (ACT_ST_MCHN[ASL].Pwm_Multiple_Count_Right < 430))
+												ACT_ST_MCHN[ASL].AdcResults = (((unsigned int)ADRESH)<<8)|(ADRESL);
+												
+												if ((ACT_ST_MCHN[ASL].AdcResults >= PWM_ADC_SLOW))// && (ACT_ST_MCHN[ASL].Pwm_Multiple_Count_Right < 430))
 												{
-													//ACT_ST_MCHN[ASL].Pwm_Multiple_Count_Right++;
 													ACT_ST_MCHN[ASL].Pwm_Multiple_Count_Right++;													
 													PWM_Update(ASL, ACT_ST_MCHN[ASL].Pwm_Multiple_Count_Right);
 												}
 												
-												else if ((ACT_ST_MCHN[ASL].AdcResults <= PWM_ADC_SLOW_LOW) && (ACT_ST_MCHN[ASL].Pwm_Multiple_Count_Right > 5) )//&& (ACT_ST_MCHN[ASL].AdcResults > PWM_ADC_ENC_STALL))// lower limit dec=180 -> hex= 0xB4    80-0x50	40-0x28	20-0x14
+												else if ((ACT_ST_MCHN[ASL].AdcResults <= PWM_ADC_SLOW_LOW) && (ACT_ST_MCHN[ASL].AdcResults > PWM_ADC_ENC_STALL))// lower limit dec=180 -> hex= 0xB4    80-0x50	40-0x28	20-0x14
 												{
 													ACT_ST_MCHN[ASL].Encoder_Lost_Counter = 0;
-													//ACT_ST_MCHN[ASL].Pwm_Multiple_Count_Right--;
 													ACT_ST_MCHN[ASL].Pwm_Multiple_Count_Right--;
 													PWM_Update(ASL, ACT_ST_MCHN[ASL].Pwm_Multiple_Count_Right);
 													ACT_ST_MCHN[ASL].Encoder_Lost_Counter = 0;
