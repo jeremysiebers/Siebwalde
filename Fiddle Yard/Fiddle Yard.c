@@ -89,14 +89,14 @@ void main()
 	    Command();
 	    //IOExpander();
 	    	    		
-		if (Enable_State_Machine_Update == True && Output_Enable == True)
+		if (Enable_State_Machine_Update == True && Output_Enable == True)	// When the output is enabled (after getting IP from DHCP) and update bit is true
 		{
 			//Led4 = 1;
-			To_Externall_WDT_Pulse =! To_Externall_WDT_Pulse;
-			IO();	
-			State_Machine_Update(TOP);
-			State_Machine_Update(BOTTOM);
-			Enable_State_Machine_Update = False;
+			To_Externall_WDT_Pulse =! To_Externall_WDT_Pulse;				// Kick external watchdog to preserve runaway when going into debug mode
+			IO();															// Write/Read all IO
+			State_Machine_Update(TOP);										// Update TOP level of Fiddle Yard
+			State_Machine_Update(BOTTOM);									// Update BOTTOM level of Fiddle Yard
+			Enable_State_Machine_Update = False;							// Reset Fiddle Yard update bit
 			//Led4 = 0;						
 		}
 		
