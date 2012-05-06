@@ -2,7 +2,8 @@
 #include <Diagnostic_ret.h>
 #include <Shift_Register.h>
 #include <Fiddle_Yard.h>
-#include <State_Machine.h>
+//#include <State_Machine.h>
+#include <Drive_Train_IO.h>
 
 typedef struct
 {
