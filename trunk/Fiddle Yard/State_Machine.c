@@ -425,7 +425,7 @@ void State_Machine_Update(unsigned char ASL)	//ASL = Active_Struct_Level, BOTTOM
 										{
 											case	Train_On_5B_Start	:	if ((Bezet_Uit_5B(ASL)) && (Fiddle_Yard_Full(ASL,0)))
 																			{
-																				Train_In_Track_Out_Count_Set(0);
+																				//Train_In_Track_Out_Count_Set(ASL,0);
 																				Train_On_5B(ASL);
 																				Train_Drive_In_Start(ASL);
 																				ACT_ST_MCHN[ASL].Fy_Running = Drive_Train_In; // Train Drive In
@@ -453,7 +453,7 @@ void State_Machine_Update(unsigned char ASL)	//ASL = Active_Struct_Level, BOTTOM
 																			}
 																			break;
 																			
-											case	No_Train_On_8_Start	:	if (!(Bezet_Uit_8A(ASL)) && (Train_In_Track_Out_Count_Repeater_Ret() == 0))
+											case	No_Train_On_8_Start	:	if (!(Bezet_Uit_8A(ASL)) && (Train_In_Track_Out_Count_Repeater_Ret(ASL) == 0))
 																			{
 																				Train_On_8A(ASL);
 																				ACT_ST_MCHN[ASL].Fy_Running = Drive_Train_Out; // Train Drive Out
@@ -551,7 +551,7 @@ void State_Machine_Update(unsigned char ASL)	//ASL = Active_Struct_Level, BOTTOM
 										{
 											case	Train_On_5B_Start	:	if ((Bezet_Uit_5B(ASL)) && (Fiddle_Yard_Full(ASL,0)))
 																			{
-																				Train_In_Track_Out_Count_Set(0);
+																				//Train_In_Track_Out_Count_Set(ASL,0);
 																				Train_On_5B(ASL);
 																				Train_Drive_In_Start(ASL);
 																				ACT_ST_MCHN[ASL].Fy_Running_2 = Drive_Train_In; // Train Drive In

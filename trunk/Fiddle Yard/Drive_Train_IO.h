@@ -7,7 +7,7 @@ extern void Drive_Train_IO_Reset(unsigned char ASL);
 extern void Train_In_Track_actual(unsigned char ASL, unsigned char *Train_In_Track_Val);
 extern unsigned char *Trains_On_Fiddle_Yard(unsigned char ASL);
 extern unsigned char Fiddle_Yard_Full(unsigned char ASL, unsigned char Return_Val);
-extern unsigned int Train_In_Track_Out_Count_Repeater_Ret(void);
-extern void Train_In_Track_Out_Count_Set(unsigned int update_Train_In_Track_Out_Count_Repeater);
+extern unsigned int Train_In_Track_Out_Count_Repeater_Ret(unsigned char ASL);
+extern void Train_In_Track_Out_Count_Set(unsigned char ASL, unsigned int update_Train_In_Track_Out_Count_Repeater);
 
 #endif
