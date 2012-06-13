@@ -15,7 +15,6 @@
 #define Busy -1
 #define Finished 0
 
-unsigned int Train_In_Track_Out_Count_Repeater = 0;						// When no trains on fiddle yard and train out then stop drive out, reset every time used, therefore not in struct
 
 typedef struct
 {
@@ -30,6 +29,7 @@ typedef struct
 							Train_In_Track[12];							// Array containing occupied track in fiddle yard
 																				
 	unsigned int			Train_Brake_Delay,//=0, 					// Delay for braking of Train
+							Train_In_Track_Out_Count_Repeater,			// When no trains on fiddle yard and train out then stop drive out, reset every time used
 							Universal_Delay;//=0;						// Delay after F11 (train detection sensor)
 							
 							
@@ -65,14 +65,14 @@ void Drive_Train_IO_Reset(unsigned char ASL)
 }
 
 
-unsigned int Train_In_Track_Out_Count_Repeater_Ret(void)
+unsigned int Train_In_Track_Out_Count_Repeater_Ret(unsigned char ASL)
 {
-	return 	Train_In_Track_Out_Count_Repeater;
+	return 	ACT_ST_MCHN[ASL].Train_In_Track_Out_Count_Repeater;
 }
 
-void Train_In_Track_Out_Count_Set(unsigned int update_Train_In_Track_Out_Count_Repeater)
+void Train_In_Track_Out_Count_Set(unsigned char ASL, unsigned int update_Train_In_Track_Out_Count_Repeater)
 {
-	Train_In_Track_Out_Count_Repeater = update_Train_In_Track_Out_Count_Repeater;	
+	ACT_ST_MCHN[ASL].Train_In_Track_Out_Count_Repeater = update_Train_In_Track_Out_Count_Repeater;	
 }
 
 void Train_In_Track_actual(unsigned char ASL, unsigned char *Train_In_Track_Val)
@@ -321,7 +321,7 @@ unsigned char Train_Drive_Out(unsigned char ASL)
 							Return_Val = Busy;
 							break;
 						}
-						if (Train_In_Track_Out_Count_Repeater > 1)
+						if (ACT_ST_MCHN[ASL].Train_In_Track_Out_Count_Repeater > 1)
 						{							
 							ACT_ST_MCHN[ASL].Train_Drive_Sequencer = 0;
 							Bezet_Weerstand(ASL, Off);
@@ -337,7 +337,7 @@ unsigned char Train_Drive_Out(unsigned char ASL)
 						
 		case	1	:	if (ACT_ST_MCHN[ASL].Train_Out_Track_Count > 10) // wanneer spoor 12
 						{
-							Train_In_Track_Out_Count_Repeater++;		// Wanneer geen trein meer op Fiddle Yard
+							ACT_ST_MCHN[ASL].Train_In_Track_Out_Count_Repeater++;		// Wanneer geen trein meer op Fiddle Yard
 							ACT_ST_MCHN[ASL].Train_Out_Track_Count = 0; // dan teller terug op spoor 1
 						}
 						ACT_ST_MCHN[ASL].Train_Out += ACT_ST_MCHN[ASL].Train_Out_Track_Count;
@@ -355,7 +355,7 @@ unsigned char Train_Drive_Out(unsigned char ASL)
 						Return_Val = Busy;
 						break;
 		
-		case	2	:	Train_In_Track_Out_Count_Repeater = 0;
+		case	2	:	ACT_ST_MCHN[ASL].Train_In_Track_Out_Count_Repeater = 0;
 						switch (Return_Val_Routine = Track_Mover(ASL,(ACT_ST_MCHN[ASL].Train_Out_Track_Count + 1)))	// ga naar vol spoor
 						{							
 							case	Finished	:	ACT_ST_MCHN[ASL].Train_Drive_Sequencer = 3;
