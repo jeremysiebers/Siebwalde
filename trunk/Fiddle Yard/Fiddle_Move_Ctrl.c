@@ -46,6 +46,7 @@
 #define MECH_CONSTANT 5
 #define MECH_REWIND 500
 #define MECH_SKIP_HEART 200
+#define MECH_HEART_CTR 125												// To delay the disable of the motor to get to the center of the heart pulse
 #define PWM_FAST_COUNTER_CONST 3
 #define PWM_ONE_INBETWEEN_COUNTER_CONST 625	
 #define PWM_RAMP_UP_DELAY_REG_CONST 5
@@ -65,6 +66,7 @@ typedef struct
 							Pwm_One_Count_Right_Init,// = 400,			// Start value PWM right
 							Mech_Constant,// = 5,						// Delay for check if heart = 0
 							Mech_Rewind,// = 500,						// Delay before oposite movement
+							Mech_Heart_Ctr,								// To delay the disable of the motor to get to the center of the heart pulse
 							Pwm_Fast_Counter_Const,// = 4,				// Delay PWM increment/decrement
 							Pwm_One_Inbetween_Counter_Const,			// When moving one track, slow start - run until this counter has passed - to slow left - stop
 							
@@ -97,8 +99,8 @@ typedef struct
 							
 }STATE_MACHINE_VAR;
 
-static STATE_MACHINE_VAR ACT_ST_MCHN[2]= 	{{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},		// is 0 is BOTTOM
-											 {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}};		// is 1 is TOP
+static STATE_MACHINE_VAR ACT_ST_MCHN[2]= 	{{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},		// is 0 is BOTTOM
+											 {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}};		// is 1 is TOP
 
 
 void Fiddle_Move_Ctrl_Reset(unsigned char ASL)
@@ -121,6 +123,7 @@ void Fiddle_Move_Ctrl_Reset(unsigned char ASL)
 	ACT_ST_MCHN[ASL].Pwm_One_Count_Right_Init = PWM_ONE_COUNT_RIGHT_INIT;						// Start value PWM right
 	ACT_ST_MCHN[ASL].Mech_Constant = MECH_CONSTANT;												// Delay for check if heart = 0
 	ACT_ST_MCHN[ASL].Mech_Rewind = MECH_REWIND;													// Delay before oposite movement
+	ACT_ST_MCHN[ASL].Mech_Heart_Ctr = MECH_HEART_CTR;											// To delay the disable of the motor to get to the center of the heart pulse
 	ACT_ST_MCHN[ASL].Pwm_Fast_Counter_Const = PWM_FAST_COUNTER_CONST;							// Delay PWM increment/decrement
 	ACT_ST_MCHN[ASL].Pwm_One_Inbetween_Counter_Const = PWM_ONE_INBETWEEN_COUNTER_CONST;			// When moving one track, slow start - run until this counter has passed - to slow left - stop
 	ACT_ST_MCHN[ASL].Pwm_Ramp_up_delay_Reg = 0;													// Frequentie divider from the 2.4KHz to determine delta of actual and wanted motor speed of the regulator							
@@ -188,29 +191,13 @@ unsigned char Fiddle_Multiple_Right(unsigned char ASL, char New_Track_Muktiple_R
 	
 	switch(ACT_ST_MCHN[ASL].Fiddle)
 	{
-		case	0	:	if (!BM_10(ASL) || Bridge_10L(ASL) || Bridge_10R(ASL) || BM_11(ASL) || EOS_10(ASL) || (CL_10(ASL) == 0x2))
+		case	0	:	if (EOS_10(ASL) || (CL_10(ASL) == 0x2))
 						{															// laatste spoor (uiteinde) 0x2//
 							ACT_ST_MCHN[ASL].Fiddle = 0;
 							M10(ASL, Off);
 							PWM_Update(ASL,  512 );
 							Pwm_Brake(ASL, On);
-							if (!BM_10(ASL))
-							{
-								Return_Val = BridgeMotorContact_10;
-							}
-							else if ( Bridge_10L(ASL))
-							{
-								Return_Val = Bridge_10L_Contact;
-							}
-							else if (Bridge_10R(ASL))
-							{
-								Return_Val = Bridge_10R_Contact;
-							}
-							else if (BM_11(ASL))
-							{
-								Return_Val = BridgeMotorContact_11;
-							}
-							else if (EOS_10(ASL))
+							if (EOS_10(ASL))
 							{
 								Return_Val = EndOffStroke_10;
 							}
@@ -428,11 +415,20 @@ unsigned char Fiddle_Multiple_Right(unsigned char ASL, char New_Track_Muktiple_R
 							
 							if (CL_10_Heart(ASL) == 1)
 							{
-								ACT_ST_MCHN[ASL].ADCconversion_Inuse = False;
-								ACT_ST_MCHN[ASL].Mech_Delay = 0;
-								ACT_ST_MCHN[ASL].Fiddle = 6;
-								PWM_Update(ASL,  512 );
+								ACT_ST_MCHN[ASL].Mech_Heart_Ctr--;	// Extra delay to ensure heart stop position is in the middle of the heart bit
+								
+								if (ACT_ST_MCHN[ASL].Mech_Heart_Ctr < 1)
+								{
+									ACT_ST_MCHN[ASL].ADCconversion_Inuse = False;
+									ACT_ST_MCHN[ASL].Mech_Delay = 0;
+									ACT_ST_MCHN[ASL].Mech_Heart_Ctr = MECH_HEART_CTR;
+									ACT_ST_MCHN[ASL].Fiddle = 6;
+									PWM_Update(ASL,  512 );
+								}
+								
 							}
+							
+							
 						}
 						Return_Val = Busy;
 						break;
@@ -548,29 +544,13 @@ unsigned char Fiddle_One_Right(unsigned char ASL)	//rechts op bewegen 11 naar 1
 	
 	switch(ACT_ST_MCHN[ASL].Fiddle)
 	{
-		case	0	:	if (!BM_10(ASL) || Bridge_10L(ASL) || Bridge_10R(ASL) || BM_11(ASL) || EOS_10(ASL) || (CL_10(ASL) == 0x2))// laatste spoor (uiteinde) 0x2//
+		case	0	:	if (EOS_10(ASL) || (CL_10(ASL) == 0x2))// laatste spoor (uiteinde) 0x2//
 						{															
 							ACT_ST_MCHN[ASL].Fiddle = 0;
 							M10(ASL, Off);
 							PWM_Update(ASL,  512 );
 							Pwm_Brake(ASL, On);
-							if (!BM_10(ASL))
-							{
-								Return_Val = BridgeMotorContact_10;
-							}
-							else if ( Bridge_10L(ASL))
-							{
-								Return_Val = Bridge_10L_Contact;
-							}
-							else if (Bridge_10R(ASL))
-							{
-								Return_Val = Bridge_10R_Contact;
-							}
-							else if (BM_11(ASL))
-							{
-								Return_Val = BridgeMotorContact_11;
-							}
-							else if (EOS_10(ASL))
+							if (EOS_10(ASL))
 							{
 								Return_Val = EndOffStroke_10;
 							}
@@ -788,15 +768,22 @@ unsigned char Fiddle_One_Right(unsigned char ASL)	//rechts op bewegen 11 naar 1
 											break;
 						}
 						
-						
 						if (CL_10_Heart(ASL) == 1)
 						{
-							ACT_ST_MCHN[ASL].ADCconversion_Inuse = False;
-							M10(ASL, On);
-							ACT_ST_MCHN[ASL].Pwm_Fast_Counter = 0;
-							ACT_ST_MCHN[ASL].Fiddle = 6;
-							PWM_Update(ASL,  512 );
+							ACT_ST_MCHN[ASL].Mech_Heart_Ctr--;
+							
+							if (ACT_ST_MCHN[ASL].Mech_Heart_Ctr < 1)
+							{
+								ACT_ST_MCHN[ASL].ADCconversion_Inuse = False;
+								M10(ASL, On);
+								ACT_ST_MCHN[ASL].Mech_Heart_Ctr = MECH_HEART_CTR;
+								ACT_ST_MCHN[ASL].Pwm_Fast_Counter = 0;
+								ACT_ST_MCHN[ASL].Fiddle = 6;
+								PWM_Update(ASL,  512 );
+							}
+							
 						}
+												
 						Return_Val = Busy;
 						break;
 												
@@ -894,29 +881,13 @@ unsigned char Fiddle_Multiple_Left(unsigned char ASL, char New_Track_Muktiple_Le
 	
 	switch(ACT_ST_MCHN[ASL].Fiddle)
 	{
-		case	0	:	if (!BM_10(ASL) || Bridge_10L(ASL) || Bridge_10R(ASL) || BM_11(ASL) || EOS_11(ASL) || (CL_10(ASL) == 0xD))
+		case	0	:	if (EOS_11(ASL) || (CL_10(ASL) == 0xD))
 						{															// laatste spoor (uiteinde) 0xD//
 							ACT_ST_MCHN[ASL].Fiddle = 0;
 							M10(ASL, Off);
 							PWM_Update(ASL,  512 );
 							Pwm_Brake(ASL, On);
-							if (!BM_10(ASL))
-							{
-								Return_Val = BridgeMotorContact_10;
-							}
-							else if ( Bridge_10L(ASL))
-							{
-								Return_Val = Bridge_10L_Contact;
-							}
-							else if (Bridge_10R(ASL))
-							{
-								Return_Val = Bridge_10R_Contact;
-							}
-							else if (BM_11(ASL))
-							{
-								Return_Val = BridgeMotorContact_11;
-							}
-							else if (EOS_11(ASL))
+							if (EOS_11(ASL))
 							{
 								Return_Val = EndOffStroke_11;
 							}
@@ -1136,11 +1107,19 @@ unsigned char Fiddle_Multiple_Left(unsigned char ASL, char New_Track_Muktiple_Le
 							
 							if (CL_10_Heart(ASL) == 1)
 							{
-								ACT_ST_MCHN[ASL].ADCconversion_Inuse = False;
-								ACT_ST_MCHN[ASL].Mech_Delay = 0;
-								ACT_ST_MCHN[ASL].Fiddle = 6;
-								PWM_Update(ASL,  512 );
+								ACT_ST_MCHN[ASL].Mech_Heart_Ctr--;	// Extra delay to ensure heart stop position is in the middle of the heart bit
+								
+								if (ACT_ST_MCHN[ASL].Mech_Heart_Ctr < 1)
+								{
+									ACT_ST_MCHN[ASL].ADCconversion_Inuse = False;
+									ACT_ST_MCHN[ASL].Mech_Delay = 0;
+									ACT_ST_MCHN[ASL].Mech_Heart_Ctr = MECH_HEART_CTR;
+									ACT_ST_MCHN[ASL].Fiddle = 6;
+									PWM_Update(ASL,  512 );
+								}
+								
 							}
+							
 						}
 						Return_Val = Busy;
 						break;
@@ -1252,29 +1231,13 @@ unsigned char Fiddle_One_Left(unsigned char ASL)	//Move from 1 to 11
 	
 	switch(ACT_ST_MCHN[ASL].Fiddle)
 	{
-		case	0	:	if (!BM_10(ASL) || Bridge_10L(ASL) || Bridge_10R(ASL) || BM_11(ASL) || EOS_11(ASL) || (CL_10(ASL) == 0xD)) // 0xD = spoor 11
+		case	0	:	if (EOS_11(ASL) || (CL_10(ASL) == 0xD)) // 0xD = spoor 11
 						{
 							ACT_ST_MCHN[ASL].Fiddle = 0;
 							M10(ASL, Off);
 							PWM_Update(ASL,  512 );
 							Pwm_Brake(ASL, On);
-							if (!BM_10(ASL))
-							{
-								Return_Val = BridgeMotorContact_10;
-							}
-							else if ( Bridge_10L(ASL))
-							{
-								Return_Val = Bridge_10L_Contact;
-							}
-							else if (Bridge_10R(ASL))
-							{
-								Return_Val = Bridge_10R_Contact;
-							}
-							else if (BM_11(ASL))
-							{
-								Return_Val = BridgeMotorContact_11;
-							}
-							else if (EOS_11(ASL))
+							if (EOS_11(ASL))
 							{
 								Return_Val = EndOffStroke_11;
 							}
@@ -1497,11 +1460,18 @@ unsigned char Fiddle_One_Left(unsigned char ASL)	//Move from 1 to 11
 						
 						if (CL_10_Heart(ASL) == 1)
 						{
-							ACT_ST_MCHN[ASL].ADCconversion_Inuse = False;
-							M10(ASL, On);
-							ACT_ST_MCHN[ASL].Pwm_Fast_Counter = 0;
-							ACT_ST_MCHN[ASL].Fiddle = 6;
-							PWM_Update(ASL,  512 );
+							ACT_ST_MCHN[ASL].Mech_Heart_Ctr--;
+							
+							if (ACT_ST_MCHN[ASL].Mech_Heart_Ctr < 1)
+							{
+								ACT_ST_MCHN[ASL].ADCconversion_Inuse = False;
+								M10(ASL, On);
+								ACT_ST_MCHN[ASL].Mech_Heart_Ctr = MECH_HEART_CTR;
+								ACT_ST_MCHN[ASL].Pwm_Fast_Counter = 0;
+								ACT_ST_MCHN[ASL].Fiddle = 6;
+								PWM_Update(ASL,  512 );
+							}
+							
 						}
 						Return_Val = Busy;
 						break;
