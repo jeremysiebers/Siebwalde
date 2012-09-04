@@ -40,7 +40,7 @@ unsigned char Init_Fiddle_Yard(unsigned char ASL, unsigned char Train_Detection_
 	{
 		case	0	:	Init_Started(ASL);
 						Return_Val = Busy;
-						if (BM_10(ASL) && !BM_11(ASL) && !Bridge_10R(ASL) && !Bridge_10L(ASL) && (Track_Nr(ASL) > 0) && !F12(ASL))
+						if ((Track_Nr(ASL) > 0) && !F12(ASL))
 						{
 							ACT_ST_MCHN[ASL].Init_Fy = 1; //Situatie 1 init
 							Return_Val = Busy;
@@ -72,13 +72,13 @@ unsigned char Init_Fiddle_Yard(unsigned char ASL, unsigned char Train_Detection_
 						}
 						break;
 						
-		case	2	:	if (Track_Nr(ASL) == 0 && BM_10(ASL))
+		case	2	:	if (Track_Nr(ASL) == 0)
 						{
 							ACT_ST_MCHN[ASL].Init_Fy = 3; // Not aligned, Move 1 track
 							Return_Val = Busy;
 							break;
 						}
-						if ((BM_11(ASL) && (Bridge_10R(ASL) || Bridge_10L(ASL)) && F10(ASL)) && (Bezet_Uit_6(ASL) || F12(ASL)))
+						if (F10(ASL) && (Bezet_Uit_6(ASL) || F12(ASL)))
 						{
 							ACT_ST_MCHN[ASL].Init_Fy = 4; // Trein uit/door laten rijden
 							Return_Val = Busy;
@@ -90,18 +90,12 @@ unsigned char Init_Fiddle_Yard(unsigned char ASL, unsigned char Train_Detection_
 							Return_Val = Busy;
 							break;	
 						}
-						if (BM_11(ASL) && (Bridge_10R(ASL) || Bridge_10L(ASL)) && !F10(ASL) && !F11(ASL) && !F12(ASL) && !Bezet_Uit_6(ASL) && !Bezet_Uit_7(ASL))
+						if (!F10(ASL) && !F11(ASL) && !F12(ASL) && !Bezet_Uit_6(ASL) && !Bezet_Uit_7(ASL))
 						{
 							ACT_ST_MCHN[ASL].Init_Fy = 5; // Geen trein aanwezig wel bruggen dicht > bruggen open
 							Return_Val = Busy;
 							break;
-						}
-						if (!BM_10(ASL) && !BM_11(ASL))
-						{
-							ACT_ST_MCHN[ASL].Init_Fy = 5;
-							Return_Val = Busy;
-							break;
-						}
+						}						
 						Return_Val = Busy;
 						break;
 						
@@ -122,7 +116,7 @@ unsigned char Init_Fiddle_Yard(unsigned char ASL, unsigned char Train_Detection_
 						
 		case	4	:	Bezet_In_6(ASL, Off);
 						Bezet_In_7(ASL, Off);
-						if (BM_11(ASL) && (Bridge_10R(ASL) && Bridge_10L(ASL)) && !F10(ASL) && !F11(ASL) && !F12(ASL) && !Bezet_Uit_6(ASL) && !Bezet_Uit_7(ASL))
+						if (!F10(ASL) && !F11(ASL) && !F12(ASL) && !Bezet_Uit_6(ASL) && !Bezet_Uit_7(ASL))
 						{
 							Bezet_In_6(ASL, On);
 							Bezet_In_7(ASL, On);

@@ -50,6 +50,11 @@ unsigned char Bridge_Open(unsigned char ASL)
 	static char Return_Val = Busy;
 	static char send_top, send_bottom;
 	
+	Bridge_Opening(ASL);
+	Bridge_Open_Ok(ASL);
+	Return_Val = Finished;
+	
+	/*
 	switch(ACT_ST_MCHN[ASL].Bridge_Open)
 	{
 		case	0		:	Bridge_Opening(ASL);
@@ -104,14 +109,18 @@ unsigned char Bridge_Open(unsigned char ASL)
 		default			:	ACT_ST_MCHN[ASL].Bridge_Open = 0;
 							Return_Val = ERROR;
 							break;
-	}
+	}*/
 	return (Return_Val);
 }
 
 unsigned char Bridge_Close(unsigned char ASL)
 {
 	static char Return_Val = Busy;
+	Bridge_Closing(ASL);
+	Bridge_Close_Ok(ASL);
+	Return_Val = Finished;
 	
+	/*	
 	switch(ACT_ST_MCHN[ASL].Bridge_Close)
 	{
 		case	0	:	Bridge_Closing(ASL);
@@ -171,6 +180,6 @@ unsigned char Bridge_Close(unsigned char ASL)
 		default		:	ACT_ST_MCHN[ASL].Bridge_Close = 0;
 						Return_Val = ERROR;
 						break;
-	}
+	}*/
 	return (Return_Val);
 }
