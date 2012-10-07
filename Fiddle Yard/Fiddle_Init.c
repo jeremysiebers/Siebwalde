@@ -2,7 +2,6 @@
 #include <Shift_Register.h>
 #include <Var_Out.h>
 #include <Track_Move_Ctrl.h>
-#include <Bridge_Ctrl.h>
 #include <Train_Detection.h>
 #include <Fiddle_Move_Ctrl.h>
 
@@ -90,7 +89,7 @@ unsigned char Init_Fiddle_Yard(unsigned char ASL, unsigned char Train_Detection_
 							Return_Val = Busy;
 							break;	
 						}
-						if (!F10(ASL) && !F11(ASL) && !F12(ASL) && !Bezet_Uit_6(ASL) && !Bezet_Uit_7(ASL))
+						if (!F10(ASL) && !F11(ASL) && !F12(ASL) && !F13 && !Bezet_Uit_6(ASL) && !Bezet_Uit_7(ASL))
 						{
 							ACT_ST_MCHN[ASL].Init_Fy = 5; // Geen trein aanwezig wel bruggen dicht > bruggen open
 							Return_Val = Busy;
@@ -116,30 +115,17 @@ unsigned char Init_Fiddle_Yard(unsigned char ASL, unsigned char Train_Detection_
 						
 		case	4	:	Bezet_In_6(ASL, Off);
 						Bezet_In_7(ASL, Off);
-						if (!F10(ASL) && !F11(ASL) && !F12(ASL) && !Bezet_Uit_6(ASL) && !Bezet_Uit_7(ASL))
+						if (!F10(ASL) && !F11(ASL) && !F12(ASL) && !F13 && !Bezet_Uit_6(ASL) && !Bezet_Uit_7(ASL))
 						{
 							Bezet_In_6(ASL, On);
 							Bezet_In_7(ASL, On);
-							Bezet_In_5B(ASL, On);
-							ACT_ST_MCHN[ASL].Init_Fy = 5; // Geen trein meer aanwezig wel bruggen dicht > bruggen open
+							Bezet_In_5B(ASL, On);							
 						}
 						Return_Val = Busy;
 						break;
-		
-		case	5	:	switch (Return_Val_Routine = Bridge_Open(ASL))
-						{
-							case	Finished	:	ACT_ST_MCHN[ASL].Init_Fy = 0;				// check again if everything ok?
-													Return_Val = Busy;
-													break;
-							case	Busy		:	Return_Val = Busy;
-													break;
-							default				:	Return_Val = Return_Val_Routine;
-													ACT_ST_MCHN[ASL].Init_Fy = 0;
-													break;
-						}
-						break;
 						
-		default		:	break;
+		default		:	ACT_ST_MCHN[ASL].Init_Fy = 0;
+						break;
 	}
 	return(Return_Val);	
 }

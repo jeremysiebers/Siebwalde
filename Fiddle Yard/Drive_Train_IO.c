@@ -3,7 +3,7 @@
 #include <Var_Out.h>
 #include <Fiddle_Yard.h>
 #include <Track_Move_Ctrl.h>
-#include <Bridge_Ctrl.h>
+//#include <Bridge_Ctrl.h>
 
 #define On 1
 #define Off 0
@@ -61,6 +61,7 @@ void Drive_Train_IO_Reset(unsigned char ASL)
 	ACT_ST_MCHN[ASL].Train_Out_Track_Count=0;													// Track counter max is 11
 	ACT_ST_MCHN[ASL].Train_Brake_Delay=0; 														// Delay before check if train has drove too far
 	ACT_ST_MCHN[ASL].Universal_Delay=0;															// Delay after F11 (train detection sensor)
+	ACT_ST_MCHN[ASL].Train_In_Track_Out_Count_Repeater=0;										// Counter, when no train is on the fiddle yard, the drive out is skipped
 
 }
 
@@ -91,15 +92,40 @@ unsigned char *Trains_On_Fiddle_Yard(unsigned char ASL)
 	return (ACT_ST_MCHN[ASL].Train_In_Track); // return fiddle yard occupation status by sending array to var_out.c
 }
 
-unsigned char Fiddle_Yard_Full(unsigned char ASL, unsigned char Return_Val)
+unsigned char Fiddle_Yard_Full(unsigned char ASL, unsigned char Mode)
 {
-	if ((ACT_ST_MCHN[ASL].Train_In_Track[1] + ACT_ST_MCHN[ASL].Train_In_Track[2] + ACT_ST_MCHN[ASL].Train_In_Track[3] + ACT_ST_MCHN[ASL].Train_In_Track[4]
-		+ ACT_ST_MCHN[ASL].Train_In_Track[5] + ACT_ST_MCHN[ASL].Train_In_Track[6] + ACT_ST_MCHN[ASL].Train_In_Track[7] + ACT_ST_MCHN[ASL].Train_In_Track[8]
-		+ ACT_ST_MCHN[ASL].Train_In_Track[9] + ACT_ST_MCHN[ASL].Train_In_Track[10] + ACT_ST_MCHN[ASL].Train_In_Track[11]) >= 10 )	// when fiddle yard is full
+	unsigned char Return_Val = 0;
+	
+	switch (Mode)
 	{
-		Return_Val = 0;
+		case	0	:	if ((ACT_ST_MCHN[ASL].Train_In_Track[1] + ACT_ST_MCHN[ASL].Train_In_Track[2] + ACT_ST_MCHN[ASL].Train_In_Track[3] + ACT_ST_MCHN[ASL].Train_In_Track[4]
+							+ ACT_ST_MCHN[ASL].Train_In_Track[5] + ACT_ST_MCHN[ASL].Train_In_Track[6] + ACT_ST_MCHN[ASL].Train_In_Track[7] + ACT_ST_MCHN[ASL].Train_In_Track[8]
+							+ ACT_ST_MCHN[ASL].Train_In_Track[9] + ACT_ST_MCHN[ASL].Train_In_Track[10] + ACT_ST_MCHN[ASL].Train_In_Track[11]) >= 10 )	// when fiddle yard is full
+						{
+							Return_Val = 0;
+						}
+						else { Return_Val = 1; }
+						break;
+						
+		case	1	:	if ((ACT_ST_MCHN[ASL].Train_In_Track[1] + ACT_ST_MCHN[ASL].Train_In_Track[2] + ACT_ST_MCHN[ASL].Train_In_Track[3] + ACT_ST_MCHN[ASL].Train_In_Track[4]
+							+ ACT_ST_MCHN[ASL].Train_In_Track[5] + ACT_ST_MCHN[ASL].Train_In_Track[6] + ACT_ST_MCHN[ASL].Train_In_Track[7] + ACT_ST_MCHN[ASL].Train_In_Track[8]
+							+ ACT_ST_MCHN[ASL].Train_In_Track[9] + ACT_ST_MCHN[ASL].Train_In_Track[10] + ACT_ST_MCHN[ASL].Train_In_Track[11]) >= 11 )	// when fiddle yard is full
+						{
+							Return_Val = 0;
+						}
+						else { Return_Val = 1; }
+						break;
+						
+		default		:	if ((ACT_ST_MCHN[ASL].Train_In_Track[1] + ACT_ST_MCHN[ASL].Train_In_Track[2] + ACT_ST_MCHN[ASL].Train_In_Track[3] + ACT_ST_MCHN[ASL].Train_In_Track[4]
+							+ ACT_ST_MCHN[ASL].Train_In_Track[5] + ACT_ST_MCHN[ASL].Train_In_Track[6] + ACT_ST_MCHN[ASL].Train_In_Track[7] + ACT_ST_MCHN[ASL].Train_In_Track[8]
+							+ ACT_ST_MCHN[ASL].Train_In_Track[9] + ACT_ST_MCHN[ASL].Train_In_Track[10] + ACT_ST_MCHN[ASL].Train_In_Track[11]) >= 10 )	// when fiddle yard is full
+						{
+							Return_Val = 0;
+						}
+						else { Return_Val = 1; }
+						break;
 	}
-	else { Return_Val = 1; }
+	
 	
 	return Return_Val;
 }
@@ -150,19 +176,7 @@ unsigned char Train_Drive_In(unsigned char ASL, unsigned char Collect_Full)
 						}
 						break;
 												
-		case	3	:	switch (Return_Val_Routine = Bridge_Close(ASL))
-						{
-							case	Finished	:	ACT_ST_MCHN[ASL].Train_Drive_Sequencer = 4; // bruggen dicht
-													Return_Val = Busy;
-													break;
-							case	Busy		:	Return_Val = Busy;
-													break;
-							default				:	Return_Val = Return_Val_Routine;
-													ACT_ST_MCHN[ASL].Train_Drive_Sequencer_Old = ACT_ST_MCHN[ASL].Train_Drive_Sequencer;
-													ACT_ST_MCHN[ASL].Train_Drive_Sequencer = ERROR;
-													break;
-						}
-						break;
+		case	3	:	ACT_ST_MCHN[ASL].Train_Drive_Sequencer = 4;
 						
 		case	4	:	Bezet_In_7(ASL, Off);		//  blok vrij geven
 						Bezet_In_6(ASL, Off);
@@ -240,14 +254,14 @@ unsigned char Train_Drive_In(unsigned char ASL, unsigned char Collect_Full)
 						Return_Val = Busy;
 						break;
 						
-		case	9	:	if (ACT_ST_MCHN[ASL].Train_Brake_Delay >= Train_Brake_Delay_Value && !F12(ASL)) // wachten x sec trein stil staat en F12 niks ziet dan verder
+		case	9	:	if (ACT_ST_MCHN[ASL].Train_Brake_Delay >= Train_Brake_Delay_Value && !F12(ASL) && !F13(ASL)) // wachten x sec trein stil staat en F12 en F13 niks ziet dan verder
 						{
 							ACT_ST_MCHN[ASL].Train_Drive_Sequencer = 10;
 							ACT_ST_MCHN[ASL].Train_Brake_Delay = 0;
 							Return_Val = Busy;
 							break;
 						}
-						else if (F12(ASL))												// wanneer F12
+						else if (F12(ASL) || F13(ASL))												// wanneer F12
 						{
 							ACT_ST_MCHN[ASL].Universal_Delay++;
 							if (ACT_ST_MCHN[ASL].Universal_Delay > Universal_Delay_Value)
@@ -264,26 +278,16 @@ unsigned char Train_Drive_In(unsigned char ASL, unsigned char Collect_Full)
 						ACT_ST_MCHN[ASL].Train_Brake_Delay++;
 						break;
 						
-		case	10	:	switch (Return_Val_Routine = Bridge_Open(ASL))
-						{
-							case	Finished	:	*(ACT_ST_MCHN[ASL].Train_In) = 1;							// betreffende spoor staat een trein
-													//ACT_ST_MCHN[ASL].Train_In_Track_Count = 1;				// spoor teller reset
-													ACT_ST_MCHN[ASL].Train_Drive_Sequencer = 0;					// sequencer reset
-													Train_Drive_In_Finished(ASL);
-													Return_Val = Finished;
-													break;
-							case	Busy		:	Return_Val = Busy;
-													break;
-							default				:	Return_Val = Return_Val_Routine;
-													ACT_ST_MCHN[ASL].Train_Drive_Sequencer_Old = ACT_ST_MCHN[ASL].Train_Drive_Sequencer;
-													ACT_ST_MCHN[ASL].Train_Drive_Sequencer = ERROR;
-													break;
-						}
-						break;
+		case	10	:	*(ACT_ST_MCHN[ASL].Train_In) = 1;							// betreffende spoor staat een trein
+						//ACT_ST_MCHN[ASL].Train_In_Track_Count = 1;				// spoor teller reset
+						ACT_ST_MCHN[ASL].Train_Drive_Sequencer = 0;					// sequencer reset
+						Train_Drive_In_Finished(ASL);
+						Return_Val = Finished;
+						break;							
 												
 		case	11	:	Bezet_In_6(ASL, Off);
 						Bezet_In_7(ASL, Off);
-						if (!F10(ASL) && !F11(ASL) && !F12(ASL) && !Bezet_Uit_6(ASL) && !Bezet_Uit_7(ASL))
+						if (!F10(ASL) && !F11(ASL) && !F12(ASL) && !F13(ASL) && !Bezet_Uit_6(ASL) && !Bezet_Uit_7(ASL))
 						{
 							Bezet_In_6(ASL, On);
 							Bezet_In_7(ASL, On);
@@ -315,13 +319,7 @@ unsigned char Train_Drive_Out(unsigned char ASL)
 	
 	switch(ACT_ST_MCHN[ASL].Train_Drive_Sequencer)
 	{
-		case	0	:	if (!BM_10(ASL) || Bridge_10L(ASL) || Bridge_10R(ASL))
-						{
-							ACT_ST_MCHN[ASL].Train_Drive_Sequencer = 10;	//Open bridges
-							Return_Val = Busy;
-							break;
-						}
-						if (ACT_ST_MCHN[ASL].Train_In_Track_Out_Count_Repeater > 1)
+		case	0	:	if (ACT_ST_MCHN[ASL].Train_In_Track_Out_Count_Repeater > 1)
 						{							
 							ACT_ST_MCHN[ASL].Train_Drive_Sequencer = 0;
 							Bezet_Weerstand(ASL, Off);
@@ -370,19 +368,7 @@ unsigned char Train_Drive_Out(unsigned char ASL)
 						}
 						break;
 						
-		case	3	:	switch (Return_Val_Routine = Bridge_Close(ASL))
-						{
-							case	Finished	:	ACT_ST_MCHN[ASL].Train_Drive_Sequencer = 4; // bruggen dicht
-													Return_Val = Busy;
-													break;
-							case	Busy		:	Return_Val = Busy;
-													break;
-							default				:	Return_Val = Return_Val_Routine;
-													ACT_ST_MCHN[ASL].Train_Drive_Sequencer_Old = ACT_ST_MCHN[ASL].Train_Drive_Sequencer;
-													ACT_ST_MCHN[ASL].Train_Drive_Sequencer = ERROR;
-													break;
-						}
-						break;
+		case	3	:	ACT_ST_MCHN[ASL].Train_Drive_Sequencer = 4; // bruggen dicht
 						
 		case	4	:	Bezet_Weerstand(ASL, Off);
 						Bezet_In_7(ASL, Off);
@@ -390,7 +376,7 @@ unsigned char Train_Drive_Out(unsigned char ASL)
 						Return_Val = Busy;
 						break;
 						
-		case	5	:	if (BM_11(ASL) && (Bridge_10R(ASL) && Bridge_10L(ASL)) && !F10(ASL) && !F11(ASL) && !F12(ASL) && !Bezet_Uit_7(ASL))
+		case	5	:	if (!F10(ASL) && !F11(ASL) && !F12(ASL) && !F13(ASL) && !Bezet_Uit_7(ASL))
 						{
 							Bezet_In_7(ASL, On);	
 							ACT_ST_MCHN[ASL].Train_Drive_Sequencer = 6;					
@@ -405,20 +391,11 @@ unsigned char Train_Drive_Out(unsigned char ASL)
 						Return_Val = Finished;						
 						break;
 						
-		case	10	:	switch (Return_Val_Routine = Bridge_Open(ASL))
-						{
-							case	Finished	:	ACT_ST_MCHN[ASL].Train_Drive_Sequencer = 0; // bruggen Open
-													ACT_ST_MCHN[ASL].Train_Out_Track_Count = 1;
-													Return_Val = Busy;
-													break;
-							case	Busy		:	Return_Val = Busy;
-													break;
-							default				:	Return_Val = Return_Val_Routine;
-													ACT_ST_MCHN[ASL].Train_Drive_Sequencer_Old = ACT_ST_MCHN[ASL].Train_Drive_Sequencer;
-													ACT_ST_MCHN[ASL].Train_Drive_Sequencer = ERROR;
-													break;
-						}
+		case	10	:	ACT_ST_MCHN[ASL].Train_Drive_Sequencer = 0; // bruggen Open
+						ACT_ST_MCHN[ASL].Train_Out_Track_Count = 1;
+						Return_Val = Busy;
 						break;
+						
 						
 		case	ERROR	:	break;
 		

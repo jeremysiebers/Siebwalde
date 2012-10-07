@@ -43,7 +43,7 @@ void Var_Out_Programm(unsigned  char ASL)
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
 							Send_Var_Out[1] = Send_Var_Out[1] | CL_10_Heart(ASL);
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
-							Send_Var_Out[1] = Send_Var_Out[1] | BM_10(ASL);
+							Send_Var_Out[1] = Send_Var_Out[1] | SPARE2(ASL);
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
 							Send_Var_Out[1] = Send_Var_Out[1] | F11(ASL);
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
@@ -51,9 +51,9 @@ void Var_Out_Programm(unsigned  char ASL)
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
 							Send_Var_Out[1] = Send_Var_Out[1] | EOS_11(ASL);
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
-							Send_Var_Out[1] = Send_Var_Out[1] | BM_11(ASL);
+							Send_Var_Out[1] = Send_Var_Out[1] | SPARE3(ASL);
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
-							Send_Var_Out[1] = Send_Var_Out[1] | Bridge_10R(ASL);
+							Send_Var_Out[1] = Send_Var_Out[1] | F13(ASL);
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
 							Send_Var_Out[1] = Send_Var_Out[1] | 0x1;
 							Send_Var_Out[2] = 0x00;
@@ -111,7 +111,7 @@ void Var_Out_Programm(unsigned  char ASL)
 								Send_Var_Out[0] = 'X';
 							}
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
-							Send_Var_Out[1] = Send_Var_Out[1] | M11_Status(ASL);
+							Send_Var_Out[1] = Send_Var_Out[1] | Enable_Track_Status(ASL);
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
 							Send_Var_Out[1] = Send_Var_Out[1] | Bezet_In_5B_Status(ASL);
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
@@ -189,7 +189,7 @@ void Var_Out_Programm(unsigned  char ASL)
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
 							Send_Var_Out[1] = Send_Var_Out[1] | Bezet_Uit_7(ASL);
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
-							Send_Var_Out[1] = Send_Var_Out[1] | Bridge_10L(ASL);
+							Send_Var_Out[1] = Send_Var_Out[1] | SPARE1(ASL);
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
 							Send_Var_Out[1] = Send_Var_Out[1] | F10(ASL);
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);

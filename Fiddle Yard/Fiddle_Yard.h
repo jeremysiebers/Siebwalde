@@ -17,6 +17,8 @@
 #define False 0
 #define On 1
 #define Off 0
+#define True 1
+#define False 0
 
 #if defined(EEPROM_CS_TRIS) || defined(SPIFLASH_CS_TRIS)
 	void SaveAppConfig(void);
