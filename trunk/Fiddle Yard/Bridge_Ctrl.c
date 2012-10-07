@@ -1,7 +1,7 @@
 #include <Bridge_Ctrl.h>
-#include <Shift_Register.h>
-#include <Fiddle_Yard.h>
-#include <Var_Out.h>
+//#include <Shift_Register.h>
+//#include <Fiddle_Yard.h>
+//#include <Var_Out.h>
 
 #define On 1
 #define Off 0
@@ -32,8 +32,8 @@ typedef struct
 							
 }STATE_MACHINE_VAR;
 
-static STATE_MACHINE_VAR ACT_ST_MCHN[2]= 	{{0,0,0,0},	// is 0 is BOTTOM
-											 {0,0,0,0}};// is 1 is TOP
+static STATE_MACHINE_VAR ACT_ST_MCHN[2]= 	{{1,1,0,0},	// is 0 is BOTTOM
+											 {1,1,0,0}};// is 1 is TOP
 											 
 
 void Bridge_Ctrl_Reset(unsigned char ASL)
@@ -51,10 +51,8 @@ unsigned char Bridge_Open(unsigned char ASL)
 	static char send_top, send_bottom;
 	
 	Bridge_Opening(ASL);
-	Bridge_Open_Ok(ASL);
-	Return_Val = Finished;
 	
-	/*
+	
 	switch(ACT_ST_MCHN[ASL].Bridge_Open)
 	{
 		case	0		:	Bridge_Opening(ASL);
@@ -81,8 +79,8 @@ unsigned char Bridge_Open(unsigned char ASL)
 							break;
 								
 		case	1		:	M11(ASL, On);
-							Return_Val = Busy;
-							ACT_ST_MCHN[ASL].Bridge_Open = 2;
+							Return_Val = Finished;
+							ACT_ST_MCHN[ASL].Bridge_Open = 1;
 							break;
 							
 		case	2		:	ACT_ST_MCHN[ASL].Bridge_Open_Close_Timeout_Counter++;
@@ -109,7 +107,7 @@ unsigned char Bridge_Open(unsigned char ASL)
 		default			:	ACT_ST_MCHN[ASL].Bridge_Open = 0;
 							Return_Val = ERROR;
 							break;
-	}*/
+	}
 	return (Return_Val);
 }
 
@@ -117,10 +115,8 @@ unsigned char Bridge_Close(unsigned char ASL)
 {
 	static char Return_Val = Busy;
 	Bridge_Closing(ASL);
-	Bridge_Close_Ok(ASL);
-	Return_Val = Finished;
 	
-	/*	
+		
 	switch(ACT_ST_MCHN[ASL].Bridge_Close)
 	{
 		case	0	:	Bridge_Closing(ASL);
@@ -151,9 +147,9 @@ unsigned char Bridge_Close(unsigned char ASL)
 						ACT_ST_MCHN[ASL].Bridge_Close = 1;
 						break;
 								
-		case	1	:	M11(ASL, On);
-						Return_Val = Busy;
-						ACT_ST_MCHN[ASL].Bridge_Close = 2;
+		case	1	:	M11(ASL, Off);
+						Return_Val = Finished;
+						ACT_ST_MCHN[ASL].Bridge_Close = 1;
 						break;
 						
 		case	2	:	ACT_ST_MCHN[ASL].Bridge_Open_Close_Timeout_Counter++;
@@ -180,6 +176,6 @@ unsigned char Bridge_Close(unsigned char ASL)
 		default		:	ACT_ST_MCHN[ASL].Bridge_Close = 0;
 						Return_Val = ERROR;
 						break;
-	}*/
+	}
 	return (Return_Val);
 }

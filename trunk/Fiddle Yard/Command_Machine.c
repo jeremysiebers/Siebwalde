@@ -113,16 +113,16 @@ void Command_Exe(void)
 	{
 		case	'a'		:	switch (Cmd[1])
 							{
-								case	'1'		:	Exe_Cmd[1] = 1;	//Bruggen open			Exe_Cmd[1] = TOP	Exe_Cmd[0] = Bottom
+								case	'1'		:	Exe_Cmd[1] = 1;	//Enable Track			Exe_Cmd[1] = TOP	Exe_Cmd[0] = Bottom
 													break;
-								case	'2'		:	Exe_Cmd[1] = 2;	//Bruggen dicht
+								case	'2'		:	Exe_Cmd[1] = 2;	//Disable Track
 													break;
 								case	'3'		:	Exe_Cmd[1] = 3;	//Fiddle yard naar links = spoor++
 													break;
 								case	'4'		:	Exe_Cmd[1] = 4;	//Fiddle yard naar rechts = spoor--
 													break;
 								case	'5'		:	Exe_Cmd[1] = 5;	// Ga naar spoor 1
-													//Exe_Cmd[0] = 5;	// Ga naar spoor 1
+													Exe_Cmd[0] = 5;	// Ga naar spoor 1
 													break;
 								case	'6'		:	Exe_Cmd[1] = 6;	// ga naar spoor 2
 													break;
@@ -146,6 +146,7 @@ void Command_Exe(void)
 													//Exe_Cmd[0] = 15;	//ga naar spoor 11
 													break;
 								case	'G'		:	Exe_Cmd[1] = 16;	//Trein detectie
+													//Exe_Cmd[0] = 16;	//Trein detectie
 													break;
 								case	'H'		:	Exe_Cmd[1] = 17;	//Start Fiddle Yard
 													break;

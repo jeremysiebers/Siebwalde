@@ -1,9 +1,9 @@
 #include <Train_Detection.h>
 #include <Shift_Register.h>
 #include <Track_Move_Ctrl.h>
-#include <Bridge_Ctrl.h>
 #include <Drive_Train_IO.h>
 #include <Var_Out.h>
+#include <Fiddle_Yard.h>
 
 #define On 1
 #define Off 0
@@ -45,6 +45,7 @@ void Train_Detection_Reset(unsigned char ASL)
 	ACT_ST_MCHN[ASL].Train_In_Track[11]=0;														// Array containing occupied track in fiddle yard
 }
 
+
 unsigned char Train_Detection(unsigned char ASL)
 {
 	static char Return_Val = Busy, Return_Val_Routine = Busy;
@@ -62,21 +63,15 @@ unsigned char Train_Detection(unsigned char ASL)
 						Return_Val = Busy;
 						break;
 						
-		case	1	:	switch (Return_Val_Routine = Track_Mover(ASL,ACT_ST_MCHN[ASL].Train_Detector_Move))
+		case	1	:	if (Track_Nr(ASL) <= 6)																		// Check where the fiddle yard is, and decide how to start detecting trains
 						{
-							case	Finished	:	ACT_ST_MCHN[ASL].PTIT++;
-													ACT_ST_MCHN[ASL].Train_Detector = 2;
-													Return_Val = Busy;
-													break;
-							case	Busy		:	Return_Val = Busy;
-													break;
-							default				:	Return_Val = Return_Val_Routine;
-													ACT_ST_MCHN[ASL].Train_Detector = 0;
-													break;
+							ACT_ST_MCHN[ASL].Train_Detector_Move = 1;
 						}
-						break;
+						else { ACT_ST_MCHN[ASL].Train_Detector_Move = 11;}
+						ACT_ST_MCHN[ASL].Train_Detector = 2;
+						break;						
 						
-		case	2	:	switch (Return_Val_Routine = Bridge_Close(ASL))
+		case	2	:	switch (Return_Val_Routine = Track_Mover(ASL,ACT_ST_MCHN[ASL].Train_Detector_Move))			// Move to the clossest outer track ( 1 or 11)
 						{
 							case	Finished	:	ACT_ST_MCHN[ASL].Train_Detector = 3;
 													Return_Val = Busy;
@@ -88,6 +83,70 @@ unsigned char Train_Detection(unsigned char ASL)
 													break;
 						}
 						break;
+		
+		case	3	:	if(ACT_ST_MCHN[ASL].Train_Detector_Move == 1)												// When 1 was the clossest outer track, then detect trains towards 11
+						{
+							ACT_ST_MCHN[ASL].Train_Detector_Move = 11;
+							ACT_ST_MCHN[ASL].Train_Detector = 4;
+							break;
+						}
+						if(ACT_ST_MCHN[ASL].Train_Detector_Move == 11)												// When 11 was the clossest outer track, then detect trains towards 1
+						{
+							ACT_ST_MCHN[ASL].Train_Detector_Move = 1;
+							ACT_ST_MCHN[ASL].Train_Detector = 4;
+							break;
+						}
+						
+		case	4	:	switch (Return_Val_Routine = Track_Mover(ASL,ACT_ST_MCHN[ASL].Train_Detector_Move))			// Move to the clossest outer track ( 1 or 11)
+						{
+							case	Finished	:	ACT_ST_MCHN[ASL].Train_Detector_Move = 1;
+													ACT_ST_MCHN[ASL].Train_Detector = 0;
+													Bezet_Weerstand(ASL, Off);							
+													Train_Detection_Finished(ASL);
+													Train_In_Track_actual(ASL, &ACT_ST_MCHN[ASL].Train_In_Track[0]);		// Update the Train_In_Track array in State_Machine.c with the
+																															// the latest status of the Train_In_Track array in Train_Detection.c ( to heavy to update on the fly -> solution required)
+													Return_Val = Finished;
+													break;
+													
+							case	Busy		:	if ((CL_10_Heart(ASL == On)) && (F10(ASL) == On))
+														{
+															ACT_ST_MCHN[ASL].Train_In_Track[Track_Nr(ASL)] = True;
+														}
+													else {ACT_ST_MCHN[ASL].Train_In_Track[Track_Nr(ASL)] = False;}
+														
+													
+													Return_Val = Busy;
+													break;
+													
+							default				:	Return_Val = Return_Val_Routine;
+													ACT_ST_MCHN[ASL].Train_Detector = 0;
+													break;
+						}
+						break;
+						
+		default		:	break;
+	}
+	return (Return_Val);
+}
+				
+
+
+/*
+		
+		case	1	:	switch (Return_Val_Routine = Track_Mover(ASL,ACT_ST_MCHN[ASL].Train_Detector_Move))
+						{
+							case	Finished	:	ACT_ST_MCHN[ASL].PTIT++;
+													ACT_ST_MCHN[ASL].Train_Detector = 3;
+													Return_Val = Busy;
+													break;
+							case	Busy		:	Return_Val = Busy;
+													break;
+							default				:	Return_Val = Return_Val_Routine;
+													ACT_ST_MCHN[ASL].Train_Detector = 0;
+													break;
+						}
+						break;
+						
 						
 		case	3	:	if (F10(ASL) == 1)
 						{
@@ -98,19 +157,9 @@ unsigned char Train_Detection(unsigned char ASL)
 						ACT_ST_MCHN[ASL].Train_Detector = 4;									// the latest status of the Train_In_Track array in Train_Detection.c
 						Return_Val = Busy;
 						break;
-						
-		case	4	:	switch (Return_Val_Routine = Bridge_Open(ASL))
-						{
-							case	Finished	:	ACT_ST_MCHN[ASL].Train_Detector = 5;
-													ACT_ST_MCHN[ASL].Train_Detector_Move++;
-													Return_Val = Busy;
-													break;
-							case	Busy		:	Return_Val = Busy;
-													break;
-							default				:	Return_Val = Return_Val_Routine;
-													ACT_ST_MCHN[ASL].Train_Detector = 0;
-													break;
-						}
+
+		case	4	:	ACT_ST_MCHN[ASL].Train_Detector_Move++;						
+						ACT_ST_MCHN[ASL].Train_Detector = 5;
 						break;
 						
 		case	5	:	if (ACT_ST_MCHN[ASL].Train_Detector_Move >= 12)
@@ -122,11 +171,11 @@ unsigned char Train_Detection(unsigned char ASL)
 							Return_Val = Finished;
 							break;
 						}
-						else {ACT_ST_MCHN[ASL].Train_Detector = 1;Return_Val = Busy;}
-						Return_Val = Busy;
+						else {ACT_ST_MCHN[ASL].Train_Detector = 1; Return_Val = Busy;}
 						break;
 		
 		default		:	break;
 	}
 	return (Return_Val);
 }
+*/

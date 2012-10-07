@@ -3,7 +3,7 @@
 #include <Command_Machine.h>
 #include <Var_Out.h>
 #include <Fiddle_Yard.h>
-#include <Bridge_Ctrl.h>
+//#include <Bridge_Ctrl.h>
 #include <Fiddle_Move_Ctrl.h>
 #include <Track_Move_Ctrl.h>
 #include <Train_Detection.h>
@@ -44,8 +44,8 @@
 
 ////////Exe_Cmd_()////////
 #define Nopp 0
-#define Open_Bridge 1
-#define Close_Bridge 2
+#define Assert_Track 1
+#define Deassert_Track 2
 #define Fiddle_Yard_One_Left 3
 #define Fiddle_Yard_One_Right 4
 #define Track_1 5
@@ -117,8 +117,7 @@ void State_Machine_Update(unsigned char ASL)	//ASL = Active_Struct_Level, BOTTOM
 	switch (ACT_ST_MCHN[ASL].State_Machine_Switch)
 	{
 		
-		case Fy_Reset	:	Bridge_Ctrl_Reset(ASL);																		// Reset all Bridge Ctrl var
-							Fiddle_Move_Ctrl_Reset(ASL);																// Reset all Fiddle Move Ctrl var
+		case Fy_Reset	:	Fiddle_Move_Ctrl_Reset(ASL);																// Reset all Fiddle Move Ctrl var
 							Track_Move_Ctrl_Reset(ASL);																	// Reset all Track Move Ctrl var
 							Train_Detection_Reset(ASL);																	// Reset all Train Detection var
 							Drive_Train_IO_Reset(ASL);																	// Reset all Drive Train IO var
@@ -139,37 +138,20 @@ void State_Machine_Update(unsigned char ASL)	//ASL = Active_Struct_Level, BOTTOM
 							ACT_ST_MCHN[ASL].Execute_Command_Old = Nopp;												// Used when resuming
 							ACT_ST_MCHN[ASL].FY_Running_Error = 0;														// Switch used when resuming from error inside program
 							ACT_ST_MCHN[ASL].Collect = Off;																// When trains need to be collected
-																		
+							
+							Enable_Track(ASL,Off);
+																									
 							ACT_ST_MCHN[ASL].State_Machine_Switch = Idle;
 							break;
 		
 		case Idle	:		switch (ACT_ST_MCHN[ASL].Execute_Command = Exe_Cmd_(ASL))
 							{
 								case	Nopp					:	break; // no command received (No Opperation Pending ;-)
-								case	Open_Bridge				:	switch(Return_Val_Routine = Bridge_Open(ASL))
-																	{
-																		case	Finished	:	Exe_Cmd_Ret(ASL,0);
-																								break;
-																		case	Busy		:	break;
-																		default				:	ERROR_Code_Report(ASL,Return_Val_Routine);
-																								ACT_ST_MCHN[ASL].Execute_Command_Old = ACT_ST_MCHN[ASL].Execute_Command;
-																								Exe_Cmd_Ret(ASL,0);
-																								ACT_ST_MCHN[ASL].State_Machine_Switch = ERROR_Handler_Idle;
-																								break;
-																	}
+								
+								case	Assert_Track			:	Enable_Track(ASL,On);
 																	break;
 																	
-								case	Close_Bridge			:	switch(Return_Val_Routine = Bridge_Close(ASL))
-																	{
-																		case	Finished	:	Exe_Cmd_Ret(ASL,0);
-																								break;
-																		case	Busy		:	break;
-																		default				:	ERROR_Code_Report(ASL,Return_Val_Routine);
-																								ACT_ST_MCHN[ASL].Execute_Command_Old = ACT_ST_MCHN[ASL].Execute_Command;
-																								Exe_Cmd_Ret(ASL,0);
-																								ACT_ST_MCHN[ASL].State_Machine_Switch = ERROR_Handler_Idle;
-																								break;
-																	}
+								case	Deassert_Track			:	Enable_Track(ASL,Off);
 																	break;
 																	
 								case	Fiddle_Yard_One_Left	:	switch(Return_Val_Routine = Fiddle_One_Left(ASL))
@@ -423,7 +405,7 @@ void State_Machine_Update(unsigned char ASL)	//ASL = Active_Struct_Level, BOTTOM
 										
 										switch (ACT_ST_MCHN[ASL].Fy_Running)
 										{
-											case	Train_On_5B_Start	:	if ((Bezet_Uit_5B(ASL)) && (Fiddle_Yard_Full(ASL,0)))
+											case	Train_On_5B_Start	:	if ((Bezet_Uit_5B(ASL)) && (Fiddle_Yard_Full(ASL,1)))
 																			{
 																				//Train_In_Track_Out_Count_Set(ASL,0);
 																				Train_On_5B(ASL);
@@ -436,7 +418,8 @@ void State_Machine_Update(unsigned char ASL)	//ASL = Active_Struct_Level, BOTTOM
 																			
 											case	Drive_Train_In		:	switch (Return_Val_Routine = Train_Drive_In(ASL,0))
 																			{
-																				case	Finished	:	if (Exe_Cmd_(ASL) == Stop_Fiddle_Yard)
+																				case	Finished	:	Train_In_Track_Out_Count_Set(ASL,0);
+																										if (Exe_Cmd_(ASL) == Stop_Fiddle_Yard)
 																										{
 																											Fiddle_Yard_Stopped(ASL);
 																											ACT_ST_MCHN[ASL].State_Machine_Switch = Idle;
