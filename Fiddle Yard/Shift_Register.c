@@ -7,7 +7,7 @@ static void Calc_Track_Nr(unsigned char y);
 
 typedef struct
 {
-	unsigned char 	SPARE1_,//=0,
+	unsigned char 	TR_MEAS_,//=0,
 					CL_10_,//=0, 
 					CL_10_Heart_,//=0,
 					SPARE2_,//=0, 
@@ -39,9 +39,9 @@ static INPUT_VAR PLATFORMS_IO[2] = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0
 void IO(void)
 {			
 	
-		PLATFORMS_IO[1].SPARE1_ = PORTGbits.RG1;
-		PLATFORMS_IO[0].SPARE1_ = PORTCbits.RC1;
-		
+		PLATFORMS_IO[1].TR_MEAS_ = PORTGbits.RG1;				// Not used, not connected (same name as TR_MEAS, no new name required, spare1 -> TR_MEAS
+		PLATFORMS_IO[0].TR_MEAS_ = PORTCbits.RC1;				// Measures the 15 V track voltage, if not present inhibit all fiddle yard desision actions 
+																// because occupied signals will go to 0V if track voltage is disanled by emergency button
 		PLATFORMS_IO[1].CL_10_= ((PORTJ & 0x0F)); // Port J bits 0 to 3
 		PLATFORMS_IO[0].CL_10_= ((PORTF & 0x0F)); // Port F bits 0 to 3
 				
@@ -97,7 +97,7 @@ void IO(void)
 		PORTEbits.RE4 = PLATFORMS_IO[0].Bezet_In_5B_;
 		
 		PORTDbits.RD1 = PLATFORMS_IO[1].Enable_Track_;
-		PORTDbits.RD4 = PLATFORMS_IO[0].Enable_Track_;					// RC1 and RC2 are used for PWM and brake TOP output
+		PORTDbits.RD4 = PLATFORMS_IO[0].Enable_Track_;					// RC0 and RC2 are used for PWM and brake TOP output
 		
 		PORTDbits.RD0 = PLATFORMS_IO[1].M10_;
 		PORTDbits.RD3 = PLATFORMS_IO[0].M10_;	
@@ -152,9 +152,9 @@ void Calc_Track_Nr(unsigned char y)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////Inputs///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-unsigned char SPARE1(unsigned char ASL)
+unsigned char TR_MEAS(unsigned char ASL)
 {
-	return(PLATFORMS_IO[ASL].SPARE1_);	
+	return(PLATFORMS_IO[ASL].TR_MEAS_);	
 }
 
 unsigned char CL_10(unsigned char ASL)

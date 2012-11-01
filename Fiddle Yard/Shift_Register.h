@@ -3,7 +3,7 @@
 
 extern void IO(void);
 
-extern unsigned char SPARE1(unsigned char ASL);
+extern unsigned char TR_MEAS(unsigned char ASL);
 extern unsigned char CL_10(unsigned char ASL);
 extern unsigned char CL_10_Heart(unsigned char ASL);
 extern unsigned char SPARE2(unsigned char ASL);

@@ -29,6 +29,8 @@ extern void Collect_Finished_Fy_Full(unsigned char ASL);
 extern void Collect_On(unsigned char ASL);
 extern void Collect_Off(unsigned char ASL);
 
+extern void Train_Drive_Out_Cancelled(unsigned char ASL);
+
 //////////////////ERROR CODES//////////////////////////
 extern void Bezet_Uit_Blok_6_Send(unsigned char ASL);
 extern void Sensor_F12_Send(unsigned char ASL);
@@ -56,4 +58,6 @@ extern void Bridge_Opening_Msg_11(unsigned char ASL);
 extern void Bridge_Opening_Msg_12(unsigned char ASL);
 extern void Bridge_Opening_Msg_13(unsigned char ASL);
 extern void Bridge_Opening_Msg_14(unsigned char ASL);
+
+
 #endif

@@ -189,7 +189,7 @@ void Var_Out_Programm(unsigned  char ASL)
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
 							Send_Var_Out[1] = Send_Var_Out[1] | Bezet_Uit_7(ASL);
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
-							Send_Var_Out[1] = Send_Var_Out[1] | SPARE1(ASL);
+							Send_Var_Out[1] = Send_Var_Out[1] | TR_MEAS(ASL);
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
 							Send_Var_Out[1] = Send_Var_Out[1] | F10(ASL);
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
@@ -887,6 +887,21 @@ extern void Bridge_Opening_Msg_14(unsigned char ASL)
 		Send_Var_Out[0] = 'B';
 	}
 	Send_Var_Out[1] = 0b00101110;		//46
+	Send_Var_Out[2] = 0x00;
+	Send_Diag_Comm(Send_Var_Out);
+}
+
+extern void Train_Drive_Out_Cancelled(unsigned char ASL)
+{
+	if (ASL == TOP)
+	{
+		Send_Var_Out[0] = 'A';
+	}
+	else if (ASL == BOTTOM)
+	{
+		Send_Var_Out[0] = 'B';
+	}
+	Send_Var_Out[1] = 0b00101111;		//47
 	Send_Var_Out[2] = 0x00;
 	Send_Diag_Comm(Send_Var_Out);
 }
