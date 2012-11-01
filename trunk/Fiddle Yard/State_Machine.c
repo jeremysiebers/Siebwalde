@@ -78,11 +78,13 @@
 #define Drive_Train_In 2
 #define Drive_Train_Out 3
 #define Fy_Collect_Full 4
+#define Track_15V_Present 5
 
 
 static unsigned int Send_Var_Out[3];
 
 void ERROR_Code_Report(unsigned char ASL, unsigned char Code);
+unsigned char Track_15V_Present_Check(unsigned char ASL);
 
 
 typedef struct
@@ -96,24 +98,20 @@ typedef struct
 							Execute_Command,// = Nopp,					// Used for executing commands when Idle, manipulate when resuming from error
 							Execute_Command_Old,// = Nopp;				// Used when resuming
 							FY_Running_Error,							// Switch used when resuming from error inside program
-							Collect; // = Off;							// When trains need to be collected
+							Collect, // = Off;							// When trains need to be collected
+							Track_15V_Present_Switch;					// Used for Track 15V switched off -> back to on
+	char					Return_Val_Routine;							// Used for returns stats
+	unsigned int 			Track_15V_Present_Check_Timer;				// Used for delay when track voltage is switched on again
 							
 }STATE_MACHINE_VAR;
 
-static STATE_MACHINE_VAR ACT_ST_MCHN[2]= 	{{Fy_Reset,Train_On_5B_Start,0,0,0,Off,Nopp,Nopp,0,0},	// is 0 is BOTTOM
-											 {Fy_Reset,Train_On_5B_Start,0,0,0,Off,Nopp,Nopp,0,0}};	// is 1 is TOP
+static STATE_MACHINE_VAR ACT_ST_MCHN[2]= 	{{Fy_Reset,Train_On_5B_Start,0,0,0,Off,Nopp,Nopp,0,0,Busy,0},	// is 0 is BOTTOM
+											 {Fy_Reset,Train_On_5B_Start,0,0,0,Off,Nopp,Nopp,0,0,Busy,0}};	// is 1 is TOP
 											 
-
-
-
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void State_Machine_Update(unsigned char ASL)	//ASL = Active_Struct_Level, BOTTOM(0) or TOP(1)
-{
-	static char Return_Val_Routine = Busy;
-	
-
-		
+{		
 	switch (ACT_ST_MCHN[ASL].State_Machine_Switch)
 	{
 		
@@ -138,6 +136,7 @@ void State_Machine_Update(unsigned char ASL)	//ASL = Active_Struct_Level, BOTTOM
 							ACT_ST_MCHN[ASL].Execute_Command_Old = Nopp;												// Used when resuming
 							ACT_ST_MCHN[ASL].FY_Running_Error = 0;														// Switch used when resuming from error inside program
 							ACT_ST_MCHN[ASL].Collect = Off;																// When trains need to be collected
+							ACT_ST_MCHN[ASL].Return_Val_Routine = Busy;													// Used for returns stats
 							
 							Enable_Track(ASL,Off);
 																									
@@ -149,150 +148,152 @@ void State_Machine_Update(unsigned char ASL)	//ASL = Active_Struct_Level, BOTTOM
 								case	Nopp					:	break; // no command received (No Opperation Pending ;-)
 								
 								case	Assert_Track			:	Enable_Track(ASL,On);
+																	Exe_Cmd_Ret(ASL,0);
 																	break;
 																	
 								case	Deassert_Track			:	Enable_Track(ASL,Off);
+																	Exe_Cmd_Ret(ASL,0);
 																	break;
 																	
-								case	Fiddle_Yard_One_Left	:	switch(Return_Val_Routine = Fiddle_One_Left(ASL))
+								case	Fiddle_Yard_One_Left	:	switch(ACT_ST_MCHN[ASL].Return_Val_Routine = Fiddle_One_Left(ASL))
 																	{
 																		case	Finished	:	Exe_Cmd_Ret(ASL,0);
 																								break;
 																		case	Busy		:	break;
-																		default				:	ERROR_Code_Report(ASL,Return_Val_Routine);
+																		default				:	ERROR_Code_Report(ASL,ACT_ST_MCHN[ASL].Return_Val_Routine);
 																								Exe_Cmd_Ret(ASL,0);
 																								break;
 																	}
 																	break;
 																	
-								case	Fiddle_Yard_One_Right	:	switch(Return_Val_Routine = Fiddle_One_Right(ASL))
+								case	Fiddle_Yard_One_Right	:	switch(ACT_ST_MCHN[ASL].Return_Val_Routine = Fiddle_One_Right(ASL))
 																	{
 																		case	Finished	:	Exe_Cmd_Ret(ASL,0);
 																								break;
 																		case	Busy		:	break;
-																		default				:	ERROR_Code_Report(ASL,Return_Val_Routine);
+																		default				:	ERROR_Code_Report(ASL,ACT_ST_MCHN[ASL].Return_Val_Routine);
 																								Exe_Cmd_Ret(ASL,0);
 																								break;
 																	}
 																	break;
 																														
-								case	Track_1					:	switch(Return_Val_Routine = Track_Mover(ASL,1))
+								case	Track_1					:	switch(ACT_ST_MCHN[ASL].Return_Val_Routine = Track_Mover(ASL,1))
 																	{	
 																		case	Finished	:	Exe_Cmd_Ret(ASL,0);
 																								break;
 																		case	Busy		:	break;
-																		default				:	ERROR_Code_Report(ASL,Return_Val_Routine);
+																		default				:	ERROR_Code_Report(ASL,ACT_ST_MCHN[ASL].Return_Val_Routine);
 																								Exe_Cmd_Ret(ASL,0);
 																								break;
 																	}
 																	break;
-								case	Track_2					:	switch(Return_Val_Routine = Track_Mover(ASL,2))
+								case	Track_2					:	switch(ACT_ST_MCHN[ASL].Return_Val_Routine = Track_Mover(ASL,2))
 																	{	
 																		case	Finished	:	Exe_Cmd_Ret(ASL,0);
 																								break;
 																		case	Busy		:	break;
-																		default				:	ERROR_Code_Report(ASL,Return_Val_Routine);
+																		default				:	ERROR_Code_Report(ASL,ACT_ST_MCHN[ASL].Return_Val_Routine);
 																								Exe_Cmd_Ret(ASL,0);
 																								break;
 																	}
 																	break;
-								case	Track_3					:	switch(Return_Val_Routine = Track_Mover(ASL,3))
+								case	Track_3					:	switch(ACT_ST_MCHN[ASL].Return_Val_Routine = Track_Mover(ASL,3))
 																	{	
 																		case	Finished	:	Exe_Cmd_Ret(ASL,0);
 																								break;
 																		case	Busy		:	break;
-																		default				:	ERROR_Code_Report(ASL,Return_Val_Routine);
+																		default				:	ERROR_Code_Report(ASL,ACT_ST_MCHN[ASL].Return_Val_Routine);
 																								Exe_Cmd_Ret(ASL,0);
 																								break;
 																	}
 																	break;
-								case	Track_4					:	switch(Return_Val_Routine = Track_Mover(ASL,4))
+								case	Track_4					:	switch(ACT_ST_MCHN[ASL].Return_Val_Routine = Track_Mover(ASL,4))
 																	{	
 																		case	Finished	:	Exe_Cmd_Ret(ASL,0);
 																								break;
 																		case	Busy		:	break;
-																		default				:	ERROR_Code_Report(ASL,Return_Val_Routine);
+																		default				:	ERROR_Code_Report(ASL,ACT_ST_MCHN[ASL].Return_Val_Routine);
 																								Exe_Cmd_Ret(ASL,0);
 																								break;
 																	}
 																	break;
-								case	Track_5					:	switch(Return_Val_Routine = Track_Mover(ASL,5))
+								case	Track_5					:	switch(ACT_ST_MCHN[ASL].Return_Val_Routine = Track_Mover(ASL,5))
 																	{	
 																		case	Finished	:	Exe_Cmd_Ret(ASL,0);
 																								break;
 																		case	Busy		:	break;
-																		default				:	ERROR_Code_Report(ASL,Return_Val_Routine);
+																		default				:	ERROR_Code_Report(ASL,ACT_ST_MCHN[ASL].Return_Val_Routine);
 																								Exe_Cmd_Ret(ASL,0);
 																								break;
 																	}
 																	break;
-								case	Track_6					:	switch(Return_Val_Routine = Track_Mover(ASL,6))
+								case	Track_6					:	switch(ACT_ST_MCHN[ASL].Return_Val_Routine = Track_Mover(ASL,6))
 																	{	
 																		case	Finished	:	Exe_Cmd_Ret(ASL,0);
 																								break;
 																		case	Busy		:	break;
-																		default				:	ERROR_Code_Report(ASL,Return_Val_Routine);
+																		default				:	ERROR_Code_Report(ASL,ACT_ST_MCHN[ASL].Return_Val_Routine);
 																								Exe_Cmd_Ret(ASL,0);
 																								break;
 																	}
 																	break;
-								case	Track_7					:	switch(Return_Val_Routine = Track_Mover(ASL,7))
+								case	Track_7					:	switch(ACT_ST_MCHN[ASL].Return_Val_Routine = Track_Mover(ASL,7))
 																	{	
 																		case	Finished	:	Exe_Cmd_Ret(ASL,0);
 																								break;
 																		case	Busy		:	break;
-																		default				:	ERROR_Code_Report(ASL,Return_Val_Routine);
+																		default				:	ERROR_Code_Report(ASL,ACT_ST_MCHN[ASL].Return_Val_Routine);
 																								Exe_Cmd_Ret(ASL,0);
 																								break;
 																	}
 																	break;
-								case	Track_8					:	switch(Return_Val_Routine = Track_Mover(ASL,8))
+								case	Track_8					:	switch(ACT_ST_MCHN[ASL].Return_Val_Routine = Track_Mover(ASL,8))
 																	{	
 																		case	Finished	:	Exe_Cmd_Ret(ASL,0);
 																								break;
 																		case	Busy		:	break;
-																		default				:	ERROR_Code_Report(ASL,Return_Val_Routine);
+																		default				:	ERROR_Code_Report(ASL,ACT_ST_MCHN[ASL].Return_Val_Routine);
 																								Exe_Cmd_Ret(ASL,0);
 																								break;
 																	}
 																	break;
-								case	Track_9					:	switch(Return_Val_Routine = Track_Mover(ASL,9))
+								case	Track_9					:	switch(ACT_ST_MCHN[ASL].Return_Val_Routine = Track_Mover(ASL,9))
 																	{	
 																		case	Finished	:	Exe_Cmd_Ret(ASL,0);
 																								break;
 																		case	Busy		:	break;
-																		default				:	ERROR_Code_Report(ASL,Return_Val_Routine);
+																		default				:	ERROR_Code_Report(ASL,ACT_ST_MCHN[ASL].Return_Val_Routine);
 																								Exe_Cmd_Ret(ASL,0);
 																								break;
 																	}
 																	break;
-								case	Track_10				:	switch(Return_Val_Routine = Track_Mover(ASL,10))
+								case	Track_10				:	switch(ACT_ST_MCHN[ASL].Return_Val_Routine = Track_Mover(ASL,10))
 																	{	
 																		case	Finished	:	Exe_Cmd_Ret(ASL,0);
 																								break;
 																		case	Busy		:	break;
-																		default				:	ERROR_Code_Report(ASL,Return_Val_Routine);
+																		default				:	ERROR_Code_Report(ASL,ACT_ST_MCHN[ASL].Return_Val_Routine);
 																								Exe_Cmd_Ret(ASL,0);
 																								break;
 																	}
 																	break;
-								case	Track_11				:	switch(Return_Val_Routine = Track_Mover(ASL,11))
+								case	Track_11				:	switch(ACT_ST_MCHN[ASL].Return_Val_Routine = Track_Mover(ASL,11))
 																	{	
 																		case	Finished	:	Exe_Cmd_Ret(ASL,0);
 																								break;
 																		case	Busy		:	break;
-																		default				:	ERROR_Code_Report(ASL,Return_Val_Routine);
+																		default				:	ERROR_Code_Report(ASL,ACT_ST_MCHN[ASL].Return_Val_Routine);
 																								Exe_Cmd_Ret(ASL,0);
 																								break;
 																	}
 																	break;
 																	
-								case	Detection_Train			:	switch(Return_Val_Routine = Train_Detection(ASL))
+								case	Detection_Train			:	switch(ACT_ST_MCHN[ASL].Return_Val_Routine = Train_Detection(ASL))
 																	{	
 																		case	Finished	:	Exe_Cmd_Ret(ASL,0);
 																								break;
 																		case	Busy		:	break;
-																		default				:	ERROR_Code_Report(ASL,Return_Val_Routine);
+																		default				:	ERROR_Code_Report(ASL,ACT_ST_MCHN[ASL].Return_Val_Routine);
 																								ACT_ST_MCHN[ASL].Execute_Command_Old = ACT_ST_MCHN[ASL].Execute_Command;
 																								Exe_Cmd_Ret(ASL,0);
 																								ACT_ST_MCHN[ASL].State_Machine_Switch = ERROR_Handler_Idle;
@@ -370,7 +371,7 @@ void State_Machine_Update(unsigned char ASL)	//ASL = Active_Struct_Level, BOTTOM
 											ACT_ST_MCHN[ASL].State_Machine_Switch = Fy_Reset;
 											break;
 										} 
-										switch (Return_Val_Routine = Init_Fiddle_Yard(ASL,ACT_ST_MCHN[ASL].Fy_Init_Done))
+										switch (ACT_ST_MCHN[ASL].Return_Val_Routine = Init_Fiddle_Yard(ASL,ACT_ST_MCHN[ASL].Fy_Init_Done))
 										{
 											case	Finished	:	ACT_ST_MCHN[ASL].Fy_Init_Done = On;
 																	if (Exe_Cmd_(ASL) == Stop_Fiddle_Yard)
@@ -389,7 +390,7 @@ void State_Machine_Update(unsigned char ASL)	//ASL = Active_Struct_Level, BOTTOM
 																	} 
 																	break;
 											case	Busy		:	break;
-											default				:	ERROR_Code_Report(ASL,Return_Val_Routine);
+											default				:	ERROR_Code_Report(ASL,ACT_ST_MCHN[ASL].Return_Val_Routine);
 																	ACT_ST_MCHN[ASL].State_Machine_Switch = Idle;
 																	break;	//TERUG LATEN SCHREEUWEN wanneer error naar boven komt!!!!!!!!!!!!!!!!!!!
 										}										
@@ -416,7 +417,7 @@ void State_Machine_Update(unsigned char ASL)	//ASL = Active_Struct_Level, BOTTOM
 																			else {ACT_ST_MCHN[ASL].Fy_Running = No_Train_On_8_Start;}
 																			break;	
 																			
-											case	Drive_Train_In		:	switch (Return_Val_Routine = Train_Drive_In(ASL,0))
+											case	Drive_Train_In		:	switch (ACT_ST_MCHN[ASL].Return_Val_Routine = Train_Drive_In(ASL,0))
 																			{
 																				case	Finished	:	Train_In_Track_Out_Count_Set(ASL,0);
 																										if (Exe_Cmd_(ASL) == Stop_Fiddle_Yard)
@@ -428,7 +429,7 @@ void State_Machine_Update(unsigned char ASL)	//ASL = Active_Struct_Level, BOTTOM
 																										ACT_ST_MCHN[ASL].Fy_Running = No_Train_On_8_Start; // Train out?
 																										break;
 																				case	Busy		:	break;
-																				default				:	ERROR_Code_Report(ASL,Return_Val_Routine);
+																				default				:	ERROR_Code_Report(ASL,ACT_ST_MCHN[ASL].Return_Val_Routine);
 																										ACT_ST_MCHN[ASL].Fy_Running_Old = ACT_ST_MCHN[ASL].Fy_Running;
 																										ACT_ST_MCHN[ASL].Fy_Running = ERROR;
 																										//ACT_ST_MCHN[ASL].Fy_Init_Done = Off;
@@ -439,14 +440,14 @@ void State_Machine_Update(unsigned char ASL)	//ASL = Active_Struct_Level, BOTTOM
 											case	No_Train_On_8_Start	:	if (!(Bezet_Uit_8A(ASL)) && (Train_In_Track_Out_Count_Repeater_Ret(ASL) == 0))
 																			{
 																				Train_On_8A(ASL);
-																				ACT_ST_MCHN[ASL].Fy_Running = Drive_Train_Out; // Train Drive Out
+																				ACT_ST_MCHN[ASL].Fy_Running = Track_15V_Present; // check if track voltage is present
 																				Train_Drive_Out_Start(ASL);
 																				break;
 																			}
 																			else {ACT_ST_MCHN[ASL].Fy_Running = Train_On_5B_Start;}
 																			break;		
 																			
-											case	Drive_Train_Out		:	switch (Return_Val_Routine = Train_Drive_Out(ASL))
+											case	Drive_Train_Out		:	switch (ACT_ST_MCHN[ASL].Return_Val_Routine = Train_Drive_Out(ASL))
 																			{
 																				case	Finished	:	if (Exe_Cmd_(ASL) == Stop_Fiddle_Yard)
 																										{
@@ -457,11 +458,22 @@ void State_Machine_Update(unsigned char ASL)	//ASL = Active_Struct_Level, BOTTOM
 																										ACT_ST_MCHN[ASL].Fy_Running = Train_On_5B_Start; // back to main
 																										break;
 																				case	Busy		:	break;
-																				default				:	ERROR_Code_Report(ASL,Return_Val_Routine);
+																				default				:	ERROR_Code_Report(ASL,ACT_ST_MCHN[ASL].Return_Val_Routine);
 																										ACT_ST_MCHN[ASL].Fy_Running_Old = ACT_ST_MCHN[ASL].Fy_Running;
 																										ACT_ST_MCHN[ASL].Fy_Running = ERROR;
 																										//ACT_ST_MCHN[ASL].Fy_Init_Done = Off;
 																										break;	//TERUG LATEN SCHREEUWEN wanneer error naar boven komt!!!!!!!!!!!!!!!!!!!
+																			}
+																			break;
+																			
+											case	Track_15V_Present	: 	switch (ACT_ST_MCHN[ASL].Return_Val_Routine = Track_15V_Present_Check(ASL))
+																			{
+																				case	Finished	:	ACT_ST_MCHN[ASL].Fy_Running = Drive_Train_Out; // Train Drive Out
+																										break;																				
+																				case	Busy		:	break;
+																				default				:	ACT_ST_MCHN[ASL].Fy_Running = Train_On_5B_Start; // after power was gone, first check if a train has to drive in.
+																										Train_Drive_Out_Cancelled(ASL);					// say that the drive train is cancelled due to track voltage loss
+																										break;																										
 																			}
 																			break;
 																			
@@ -473,7 +485,7 @@ void State_Machine_Update(unsigned char ASL)	//ASL = Active_Struct_Level, BOTTOM
 																								Bezet_Weerstand(ASL, Off);
 																								break;
 																								
-																				case	1	:	switch (Return_Val_Routine = Init_Fiddle_Yard(ASL,Off))
+																				case	1	:	switch (ACT_ST_MCHN[ASL].Return_Val_Routine = Init_Fiddle_Yard(ASL,Off))
 																								{
 																									case	Finished	:	ACT_ST_MCHN[ASL].Fy_Init_Done = On;
 																															if (Exe_Cmd_(ASL) == Stop_Fiddle_Yard)
@@ -485,7 +497,7 @@ void State_Machine_Update(unsigned char ASL)	//ASL = Active_Struct_Level, BOTTOM
 																															ACT_ST_MCHN[ASL].FY_Running_Error = 2;				// bridges are open after init=ok
 																															break;
 																									case	Busy		:	break;
-																									default				:	ERROR_Code_Report(ASL,Return_Val_Routine);
+																									default				:	ERROR_Code_Report(ASL,ACT_ST_MCHN[ASL].Return_Val_Routine);
 																															ACT_ST_MCHN[ASL].Fy_Running = ERROR;
 																															ACT_ST_MCHN[ASL].FY_Running_Error = 1;
 																															ACT_ST_MCHN[ASL].State_Machine_Switch = Idle;
@@ -493,14 +505,14 @@ void State_Machine_Update(unsigned char ASL)	//ASL = Active_Struct_Level, BOTTOM
 																								}
 																								break;
 																								
-																				case	2	:	switch (Return_Val_Routine = Track_Mover(ASL,Old_Track2_When_Error_Ret(ASL)))
+																				case	2	:	switch (ACT_ST_MCHN[ASL].Return_Val_Routine = Track_Mover(ASL,Old_Track2_When_Error_Ret(ASL)))
 																								{
 																									case	Finished	:	ACT_ST_MCHN[ASL].FY_Running_Error = 0; 
 																															ACT_ST_MCHN[ASL].Fy_Running = ACT_ST_MCHN[ASL].Fy_Running_Old;
 																															ACT_ST_MCHN[ASL].Train_Drive_Sequencer = ACT_ST_MCHN[ASL].Train_Drive_Sequencer_Old;
 																															break;
 																									case	Busy		:	break;
-																									default				:	ERROR_Code_Report(ASL,Return_Val_Routine);
+																									default				:	ERROR_Code_Report(ASL,ACT_ST_MCHN[ASL].Return_Val_Routine);
 																															ACT_ST_MCHN[ASL].Fy_Running = ERROR;
 																															ACT_ST_MCHN[ASL].FY_Running_Error = 1;
 																															ACT_ST_MCHN[ASL].State_Machine_Switch = Idle;
@@ -547,7 +559,7 @@ void State_Machine_Update(unsigned char ASL)	//ASL = Active_Struct_Level, BOTTOM
 																			}
 																			break;	
 																			
-											case	Drive_Train_In		:	switch (Return_Val_Routine = Train_Drive_In(ASL,0))
+											case	Drive_Train_In		:	switch (ACT_ST_MCHN[ASL].Return_Val_Routine = Train_Drive_In(ASL,0))
 																			{
 																				case	Finished	:	if (Exe_Cmd_(ASL) == Stop_Fiddle_Yard)
 																										{
@@ -558,14 +570,14 @@ void State_Machine_Update(unsigned char ASL)	//ASL = Active_Struct_Level, BOTTOM
 																										ACT_ST_MCHN[ASL].Fy_Running_2 = Train_On_5B_Start; // Train out?
 																										break;
 																				case	Busy		:	break;
-																				default				:	ERROR_Code_Report(ASL,Return_Val_Routine);
+																				default				:	ERROR_Code_Report(ASL,ACT_ST_MCHN[ASL].Return_Val_Routine);
 																										ACT_ST_MCHN[ASL].Fy_Running_Old_2 = ACT_ST_MCHN[ASL].Fy_Running_2;
 																										ACT_ST_MCHN[ASL].Fy_Running_2 = ERROR;
 																										break;	//TERUG LATEN SCHREEUWEN wanneer error naar boven komt!!!!!!!!!!!!!!!!!!!
 																			}
 																			break;
 																			
-											case	Fy_Collect_Full		:	switch (Return_Val_Routine = Train_Drive_In(ASL,1))
+											case	Fy_Collect_Full		:	switch (ACT_ST_MCHN[ASL].Return_Val_Routine = Train_Drive_In(ASL,1))
 																			{
 																				case	Finished	:	if (Exe_Cmd_(ASL) == Stop_Fiddle_Yard)
 																										{
@@ -578,7 +590,7 @@ void State_Machine_Update(unsigned char ASL)	//ASL = Active_Struct_Level, BOTTOM
 																										ACT_ST_MCHN[ASL].Collect = Off;
 																										break;
 																				case	Busy		:	break;
-																				default				:	ERROR_Code_Report(ASL,Return_Val_Routine);
+																				default				:	ERROR_Code_Report(ASL,ACT_ST_MCHN[ASL].Return_Val_Routine);
 																										ACT_ST_MCHN[ASL].Fy_Running_Old_2 = ACT_ST_MCHN[ASL].Fy_Running_2;
 																										ACT_ST_MCHN[ASL].Fy_Running_2 = ERROR;
 																										break;	//TERUG LATEN SCHREEUWEN wanneer error naar boven komt!!!!!!!!!!!!!!!!!!!
@@ -593,7 +605,7 @@ void State_Machine_Update(unsigned char ASL)	//ASL = Active_Struct_Level, BOTTOM
 																								Bezet_Weerstand(ASL, Off);
 																								break;
 																								
-																				case	1	:	switch (Return_Val_Routine = Init_Fiddle_Yard(ASL,Off))
+																				case	1	:	switch (ACT_ST_MCHN[ASL].Return_Val_Routine = Init_Fiddle_Yard(ASL,Off))
 																								{
 																									case	Finished	:	ACT_ST_MCHN[ASL].Fy_Init_Done = On;
 																															if (Exe_Cmd_(ASL) == Stop_Fiddle_Yard)
@@ -605,7 +617,7 @@ void State_Machine_Update(unsigned char ASL)	//ASL = Active_Struct_Level, BOTTOM
 																															ACT_ST_MCHN[ASL].FY_Running_Error = 2;				// bridges are open after init=ok
 																															break;
 																									case	Busy		:	break;
-																									default				:	ERROR_Code_Report(ASL,Return_Val_Routine);
+																									default				:	ERROR_Code_Report(ASL,ACT_ST_MCHN[ASL].Return_Val_Routine);
 																															ACT_ST_MCHN[ASL].Fy_Running_2 = ERROR;
 																															ACT_ST_MCHN[ASL].FY_Running_Error = 1;
 																															ACT_ST_MCHN[ASL].State_Machine_Switch = Idle;
@@ -613,14 +625,14 @@ void State_Machine_Update(unsigned char ASL)	//ASL = Active_Struct_Level, BOTTOM
 																								}
 																								break;
 																								
-																				case	2	:	switch (Return_Val_Routine = Track_Mover(ASL,Old_Track2_When_Error_Ret(ASL)))
+																				case	2	:	switch (ACT_ST_MCHN[ASL].Return_Val_Routine = Track_Mover(ASL,Old_Track2_When_Error_Ret(ASL)))
 																								{
 																									case	Finished	:	ACT_ST_MCHN[ASL].FY_Running_Error = 0; 
 																															ACT_ST_MCHN[ASL].Fy_Running_2 = ACT_ST_MCHN[ASL].Fy_Running_Old_2;
 																															ACT_ST_MCHN[ASL].Train_Drive_Sequencer = ACT_ST_MCHN[ASL].Train_Drive_Sequencer_Old;
 																															break;
 																									case	Busy		:	break;
-																									default				:	ERROR_Code_Report(ASL,Return_Val_Routine);
+																									default				:	ERROR_Code_Report(ASL,ACT_ST_MCHN[ASL].Return_Val_Routine);
 																															ACT_ST_MCHN[ASL].Fy_Running_2 = ERROR;
 																															ACT_ST_MCHN[ASL].FY_Running_Error = 1;
 																															ACT_ST_MCHN[ASL].State_Machine_Switch = Idle;
@@ -682,3 +694,57 @@ void ERROR_Code_Report(unsigned char ASL, unsigned char Code)
 		default										:	Universal_Error_Send(ASL);						break;
 	}
 }
+
+unsigned char Track_15V_Present_Check(unsigned char ASL)
+{
+	char Return_Val = Busy;
+	
+	switch (ACT_ST_MCHN[ASL].Track_15V_Present_Switch)
+	{
+		case	0	:	if (TR_MEAS(0) == On)						// Check on bottom input only, top equivalent input is not connected.
+						{
+							Return_Val = Finished;
+							ACT_ST_MCHN[ASL].Track_15V_Present_Check_Timer = 0;
+						}
+						else
+						{
+							ACT_ST_MCHN[ASL].Track_15V_Present_Switch = 1;
+							Return_Val = Busy;
+						}
+						break;
+						
+		case	1	:	if (TR_MEAS(0) == Off)						// Check on bottom input only, top equivalent input is not connected.
+						{
+							Return_Val = Busy;
+							ACT_ST_MCHN[ASL].Track_15V_Present_Check_Timer = 0;
+						}
+						else if (TR_MEAS(0) == On)
+						{							
+							ACT_ST_MCHN[ASL].Track_15V_Present_Check_Timer++;
+							if (ACT_ST_MCHN[ASL].Track_15V_Present_Check_Timer >= 10000)
+							{
+								ACT_ST_MCHN[ASL].Track_15V_Present_Check_Timer = 0;			// goto extra check: if track 8 is clear then execute drive train in, 
+								ACT_ST_MCHN[ASL].Track_15V_Present_Switch = 2;				// else go 1 state up and re-check track 8 clear and track voltage ok.
+							}
+						}
+						Return_Val = Busy;
+						break;
+						
+		case	2	:	if (TR_MEAS(0) == On)						// Check on bottom input only, top equivalent input is not connected.
+						{
+							Return_Val = On;										// if not busy or finished then the default case is active forcing a extra check
+																					// if track 8 is clear
+							ACT_ST_MCHN[ASL].Track_15V_Present_Check_Timer = 0;
+							ACT_ST_MCHN[ASL].Track_15V_Present_Switch = 0;
+						}
+						else
+						{
+							ACT_ST_MCHN[ASL].Track_15V_Present_Switch = 1;
+						}
+						break;
+						
+		default		:	ACT_ST_MCHN[ASL].Track_15V_Present_Switch = 0;
+	}		
+
+	return(Return_Val);
+}	
