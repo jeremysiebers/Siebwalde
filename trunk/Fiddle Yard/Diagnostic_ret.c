@@ -162,10 +162,10 @@ void Diagnostic(void)
 						TestTarget.MACAddr.v[4] = 0xCC;
 						TestTarget.MACAddr.v[5] = 0x08;
 						
-						TestTarget.IPAddr.v[0] = 192;
-						TestTarget.IPAddr.v[1] = 168;
-						TestTarget.IPAddr.v[2] = 1;
-						TestTarget.IPAddr.v[3] = 15;
+						TestTarget.IPAddr.v[0] = 10;
+						TestTarget.IPAddr.v[1] = 0;
+						TestTarget.IPAddr.v[2] = 0;
+						TestTarget.IPAddr.v[3] = 11;
 												
 			            socket1 = UDPOpen(0x7000, &TestTarget, 0x7000);  //open the socket 
 			            
