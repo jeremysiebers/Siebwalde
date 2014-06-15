@@ -1,6 +1,7 @@
 #include <Fiddle_Yard.h>
 #include "TCPIP Stack/TCPIP.h"
 #include <Command_Machine.h>
+
 #define Enter 13
 
 static UDP_SOCKET socket2 = INVALID_UDP_SOCKET;
@@ -10,6 +11,9 @@ static unsigned char Cmd[3],Cmd_Read_Switch=20;
 static unsigned char Exe_Cmd[2];
 static unsigned char Exe_Cmd_Ret_1=0;
 static unsigned char SuccesFull_Read = 0;	//3 bytes received or less?
+unsigned char MACPC[6] = {0,0,0,0,0,0};
+unsigned char IPPC[4] = {0,0,0,0};
+unsigned char MAC_IP_READY = FALSE;
 
 unsigned char Exe_Cmd_(unsigned char ASL)
 {
@@ -267,6 +271,80 @@ void Command_Exe(void)
 													break;
 							}
 							break;
+							
+		case	't'		:	MAC_IP_READY = Cmd[1];	// when MAC and IP is send over send the MAC_IP_READY command to initiate adress copy and send info back
+							break;
+		
+		case	'u'		:	MACPC[0] = Cmd[1] << 4;
+							break;
+							
+		case	'v'		:	MACPC[0] = MACPC[0] | Cmd[1];
+							break;
+							
+		case	'w'		:	MACPC[1] = Cmd[1] << 4;
+							break;
+							
+		case	'x'		:	MACPC[1] = MACPC[1] | Cmd[1];
+							break;
+							
+		case	'y'		:	MACPC[2] = Cmd[1] << 4;
+							break;
+							
+		case	'z'		:	MACPC[2] = MACPC[2] | Cmd[1];
+							break;
+				
+		case	'0'		:	MACPC[3] = Cmd[1] << 4;
+							break;
+							
+		case	'1'		:	MACPC[3] = MACPC[3] | Cmd[1];
+							break;
+							
+		case	'2'		:	MACPC[4] = Cmd[1] << 4;
+							break;
+							
+		case	'3'		:	MACPC[4] = MACPC[4] | Cmd[1];
+							break;
+							
+		case	'4'		:	MACPC[5] = Cmd[1] << 4;
+							break;
+							
+		case	'5'		:	MACPC[5] = MACPC[5] | Cmd[1];
+							break;
+							
+		case	'6'		:	IPPC[0] = Cmd[1];
+							break;
+							
+		case	'7'		:	IPPC[1] = Cmd[1];
+							break;
+							
+		case	'8'		:	IPPC[2] = Cmd[1];
+							break;
+							
+		case	'9'		:	IPPC[3] = Cmd[1];
+							break;
+												
 		default			:	break;
 	}
 }
+
+
+/*
+
+MACAddr[6];
+IPAddr[4];
+MAC_IP_READY
+
+TestTarget.MACAddr.v[0] = 0x00;
+TestTarget.MACAddr.v[1] = 0x0E;
+TestTarget.MACAddr.v[2] = 0x0C;
+TestTarget.MACAddr.v[3] = 0x74;
+TestTarget.MACAddr.v[4] = 0xCC;
+TestTarget.MACAddr.v[5] = 0x08;
+
+TestTarget.IPAddr.v[0] = 192;
+TestTarget.IPAddr.v[1] = 168;
+TestTarget.IPAddr.v[2] = 1;
+TestTarget.IPAddr.v[3] = 24;
+						
+						
+*/
