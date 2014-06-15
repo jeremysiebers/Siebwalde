@@ -1,5 +1,6 @@
 #include <Diagnostic_ret.h>
 #include <Fiddle_Yard.h>
+#include <Command_Machine.h>
 #include "TCPIP Stack/TCPIP.h"
 
 static UDP_SOCKET socket1 = INVALID_UDP_SOCKET;
@@ -155,25 +156,28 @@ void Diagnostic(void)
 						Diag_Comm2 = 21;
 						break;
 						
-		case	21	:	TestTarget.MACAddr.v[0] = 0x00;
-						TestTarget.MACAddr.v[1] = 0x0E;
-						TestTarget.MACAddr.v[2] = 0x0C;
-						TestTarget.MACAddr.v[3] = 0x74;
-						TestTarget.MACAddr.v[4] = 0xCC;
-						TestTarget.MACAddr.v[5] = 0x08;
-						
-						TestTarget.IPAddr.v[0] = 10;
-						TestTarget.IPAddr.v[1] = 0;
-						TestTarget.IPAddr.v[2] = 0;
-						TestTarget.IPAddr.v[3] = 11;
-												
-			            socket1 = UDPOpen(0x7000, &TestTarget, 0x7000);  //open the socket 
+		case	21	:	if (MAC_IP_READY == True)
+						{
+							TestTarget.MACAddr.v[0] = MACPC[0];//0x00;
+							TestTarget.MACAddr.v[1] = MACPC[1];//0x0E;
+							TestTarget.MACAddr.v[2] = MACPC[2];//0x0C;
+							TestTarget.MACAddr.v[3] = MACPC[3];//0x74;
+							TestTarget.MACAddr.v[4] = MACPC[4];//0xCC;
+							TestTarget.MACAddr.v[5] = MACPC[5];//0x08;
+							
+							TestTarget.IPAddr.v[0] = IPPC[0];//192;
+							TestTarget.IPAddr.v[1] = IPPC[1];//168; 
+							TestTarget.IPAddr.v[2] = IPPC[2];//1;
+							TestTarget.IPAddr.v[3] = IPPC[3];//24;
+							
+				            socket1 = UDPOpen(0x7000, &TestTarget, 0x7000);  //open the socket 
 			            
-			            if(socket1 == 0xFF) //Invalid socket
-			            {
-				            break;
-				        }
-				        else{Diag_Comm2 = 1;}
+				            if(socket1 == 0xFF) //Invalid socket
+				            {
+					            break;
+					        }
+					        else{Diag_Comm2 = 1;}
+					 	}	      
 				        break;
 				        
 		case	22	:	break;
@@ -181,6 +185,7 @@ void Diagnostic(void)
 		default		:	break;
 	}
 }
+
 
 unsigned char Send_Diag_Comm(unsigned char *Comm)
 {
