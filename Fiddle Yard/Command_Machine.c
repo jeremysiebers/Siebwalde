@@ -126,7 +126,7 @@ void Command_Exe(void)
 								case	'4'		:	Exe_Cmd[1] = 4;	//Fiddle yard naar rechts = spoor--
 													break;
 								case	'5'		:	Exe_Cmd[1] = 5;	// Ga naar spoor 1
-													Exe_Cmd[0] = 5;	// Ga naar spoor 1
+													//Exe_Cmd[0] = 5;	// Ga naar spoor 1
 													break;
 								case	'6'		:	Exe_Cmd[1] = 6;	// ga naar spoor 2
 													break;

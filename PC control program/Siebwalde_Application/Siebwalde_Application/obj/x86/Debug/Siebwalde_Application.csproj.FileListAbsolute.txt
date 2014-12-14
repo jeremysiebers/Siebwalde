@@ -1,0 +1,21 @@
+C:\Users\jsiebers\documents\visual studio 2010\Projects\Siebwalde_Application\Siebwalde_Application\obj\x86\Debug\Siebwalde_Application.Main.resources
+C:\Users\jsiebers\documents\visual studio 2010\Projects\Siebwalde_Application\Siebwalde_Application\obj\x86\Debug\Siebwalde_Application.Properties.Resources.resources
+C:\Users\jsiebers\documents\visual studio 2010\Projects\Siebwalde_Application\Siebwalde_Application\obj\x86\Debug\Siebwalde_Application.csproj.GenerateResource.Cache
+C:\Users\jsiebers\documents\visual studio 2010\Projects\Siebwalde_Application\Siebwalde_Application\obj\x86\Debug\Siebwalde_Application.csprojResolveAssemblyReference.cache
+C:\Users\jsiebers\Documents\Visual Studio 2010\Projects\Siebwalde_Application\Siebwalde_Application\obj\x86\Debug\Siebwalde_Application.AboutBox.resources
+C:\Users\jsiebers\Documents\Visual Studio 2010\Projects\Siebwalde_Application\Siebwalde_Application\bin\Debug\Glg.NetCE.dll
+C:\Users\jsiebers\Documents\Visual Studio 2010\Projects\Siebwalde_Application\Siebwalde_Application\bin\Debug\Siebwalde App.exe.config
+C:\Users\jsiebers\Documents\Visual Studio 2010\Projects\Siebwalde_Application\Siebwalde_Application\bin\Debug\Siebwalde App.exe
+C:\Users\jsiebers\Documents\Visual Studio 2010\Projects\Siebwalde_Application\Siebwalde_Application\bin\Debug\Siebwalde App.pdb
+C:\Users\jsiebers\Documents\Visual Studio 2010\Projects\Siebwalde_Application\Siebwalde_Application\obj\x86\Debug\Siebwalde App.exe
+C:\Users\jsiebers\Documents\Visual Studio 2010\Projects\Siebwalde_Application\Siebwalde_Application\obj\x86\Debug\Siebwalde App.pdb
+C:\Documents and Settings\siebwalde\Bureaublad\fiddleyard-siebwalde\PC control program\Siebwalde_Application\Siebwalde_Application\bin\Debug\Siebwalde App.exe
+C:\Documents and Settings\siebwalde\Bureaublad\fiddleyard-siebwalde\PC control program\Siebwalde_Application\Siebwalde_Application\bin\Debug\Siebwalde App.pdb
+C:\Documents and Settings\siebwalde\Bureaublad\fiddleyard-siebwalde\PC control program\Siebwalde_Application\Siebwalde_Application\obj\x86\Debug\ResolveAssemblyReference.cache
+C:\Documents and Settings\siebwalde\Bureaublad\fiddleyard-siebwalde\PC control program\Siebwalde_Application\Siebwalde_Application\obj\x86\Debug\Siebwalde_Application.AboutBox.resources
+C:\Documents and Settings\siebwalde\Bureaublad\fiddleyard-siebwalde\PC control program\Siebwalde_Application\Siebwalde_Application\obj\x86\Debug\Siebwalde_Application.Main.resources
+C:\Documents and Settings\siebwalde\Bureaublad\fiddleyard-siebwalde\PC control program\Siebwalde_Application\Siebwalde_Application\obj\x86\Debug\Siebwalde_Application.Properties.Resources.resources
+C:\Documents and Settings\siebwalde\Bureaublad\fiddleyard-siebwalde\PC control program\Siebwalde_Application\Siebwalde_Application\obj\x86\Debug\GenerateResource.read.1.tlog
+C:\Documents and Settings\siebwalde\Bureaublad\fiddleyard-siebwalde\PC control program\Siebwalde_Application\Siebwalde_Application\obj\x86\Debug\GenerateResource.write.1.tlog
+C:\Documents and Settings\siebwalde\Bureaublad\fiddleyard-siebwalde\PC control program\Siebwalde_Application\Siebwalde_Application\obj\x86\Debug\Siebwalde App.exe
+C:\Documents and Settings\siebwalde\Bureaublad\fiddleyard-siebwalde\PC control program\Siebwalde_Application\Siebwalde_Application\obj\x86\Debug\Siebwalde App.pdb
