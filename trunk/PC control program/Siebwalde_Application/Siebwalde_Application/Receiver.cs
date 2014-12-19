@@ -18,7 +18,6 @@ namespace Siebwalde_Application
         public Receiver(int poort)
         {
             _poort = poort;
-
         }
 
         public void Start()
@@ -44,7 +43,6 @@ namespace Siebwalde_Application
                 {
                     // Synchroon
                     NewData(receivedData);
-
 
                     // Asynchroon
                     //Task.Factory.StartNew(() => NewData(receivedData));
