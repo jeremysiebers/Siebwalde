@@ -15,6 +15,8 @@ unsigned char MACPC[6] = {0,0,0,0,0,0};
 unsigned char IPPC[4] = {0,0,0,0};
 unsigned char MAC_IP_READY = FALSE;
 
+void ResetPic(void);
+
 unsigned char Exe_Cmd_(unsigned char ASL)
 {
 	return(Exe_Cmd[ASL]);
@@ -272,6 +274,12 @@ void Command_Exe(void)
 							}
 							break;
 							
+		case	's'		:	/*if (Cmd[1] == 0x1)
+							{
+								ResetPic();
+							}*/
+							break;	
+							
 		case	't'		:	MAC_IP_READY = Cmd[1];	// when MAC and IP is send over send the MAC_IP_READY command to initiate adress copy and send info back
 							break;
 		
@@ -326,6 +334,15 @@ void Command_Exe(void)
 		default			:	break;
 	}
 }
+
+void ResetPic(void)
+{
+	//Reset();
+	/*_asm
+	reset
+	_endasm*/
+}	
+
 
 
 /*

@@ -3,8 +3,6 @@ C:\Users\jsiebers\documents\visual studio 2010\Projects\Siebwalde_Application\Si
 C:\Users\jsiebers\documents\visual studio 2010\Projects\Siebwalde_Application\Siebwalde_Application\obj\x86\Release\Siebwalde_Application.csproj.GenerateResource.Cache
 C:\Users\jsiebers\Documents\Visual Studio 2010\Projects\Siebwalde_Application\Siebwalde_Application\obj\x86\Release\Siebwalde_Application.csprojResolveAssemblyReference.cache
 C:\Users\jsiebers\Documents\Visual Studio 2010\Projects\Siebwalde_Application\Siebwalde_Application\obj\x86\Release\Siebwalde_Application.AboutBox.resources
-C:\Users\jsiebers\Documents\Visual Studio 2010\Projects\Siebwalde_Application\Siebwalde_Application\bin\Release\Glg.NetCE.dll
-C:\Users\jsiebers\Documents\Visual Studio 2010\Projects\Siebwalde_Application\Siebwalde_Application\bin\Release\Siebwalde App.exe.config
 C:\Users\jsiebers\Documents\Visual Studio 2010\Projects\Siebwalde_Application\Siebwalde_Application\bin\Release\Siebwalde App.exe
 C:\Users\jsiebers\Documents\Visual Studio 2010\Projects\Siebwalde_Application\Siebwalde_Application\bin\Release\Siebwalde App.pdb
 C:\Users\jsiebers\Documents\Visual Studio 2010\Projects\Siebwalde_Application\Siebwalde_Application\obj\x86\Release\Siebwalde App.exe
@@ -19,3 +17,13 @@ C:\Documents and Settings\siebwalde\Bureaublad\fiddleyard-siebwalde\PC control p
 C:\Documents and Settings\siebwalde\Bureaublad\fiddleyard-siebwalde\PC control program\Siebwalde_Application\Siebwalde_Application\obj\x86\Release\Siebwalde_Application.Properties.Resources.resources
 C:\Documents and Settings\siebwalde\Bureaublad\fiddleyard-siebwalde\PC control program\Siebwalde_Application\Siebwalde_Application\obj\x86\Release\GenerateResource.read.1.tlog
 C:\Documents and Settings\siebwalde\Bureaublad\fiddleyard-siebwalde\PC control program\Siebwalde_Application\Siebwalde_Application\obj\x86\Release\GenerateResource.write.1.tlog
+C:\Users\jsiebers\Documents\Visual Studio 2010\Projects\Siebwalde_Application\Siebwalde_Application\bin\Release\Siebwalde App.exe.manifest
+C:\Users\jsiebers\Documents\Visual Studio 2010\Projects\Siebwalde_Application\Siebwalde_Application\bin\Release\Siebwalde App.application
+C:\Users\jsiebers\Documents\Visual Studio 2010\Projects\Siebwalde_Application\Siebwalde_Application\obj\x86\Release\Siebwalde App.TrustInfo.xml
+C:\Users\jsiebers\Documents\Visual Studio 2010\Projects\Siebwalde_Application\Siebwalde_Application\obj\x86\Release\Siebwalde App.exe.manifest
+C:\Users\jsiebers\Documents\Visual Studio 2010\Projects\Siebwalde_Application\Siebwalde_Application\obj\x86\Release\Siebwalde App.application
+C:\Documents and Settings\siebwalde\Bureaublad\fiddleyard-siebwalde\PC control program\Siebwalde_Application\Siebwalde_Application\bin\Release\Siebwalde App.exe.manifest
+C:\Documents and Settings\siebwalde\Bureaublad\fiddleyard-siebwalde\PC control program\Siebwalde_Application\Siebwalde_Application\bin\Release\Siebwalde App.application
+C:\Documents and Settings\siebwalde\Bureaublad\fiddleyard-siebwalde\PC control program\Siebwalde_Application\Siebwalde_Application\obj\x86\Release\Siebwalde App.TrustInfo.xml
+C:\Documents and Settings\siebwalde\Bureaublad\fiddleyard-siebwalde\PC control program\Siebwalde_Application\Siebwalde_Application\obj\x86\Release\Siebwalde App.exe.manifest
+C:\Documents and Settings\siebwalde\Bureaublad\fiddleyard-siebwalde\PC control program\Siebwalde_Application\Siebwalde_Application\obj\x86\Release\Siebwalde App.application

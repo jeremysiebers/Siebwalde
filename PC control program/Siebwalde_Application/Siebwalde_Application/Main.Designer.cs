@@ -28,21 +28,27 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Main));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.reConnectFiddleYardToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.clearEventLoggersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.resetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.hardResetFiddleYardToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.ReceivedCmdTOP = new System.Windows.Forms.TextBox();
             this.Logging1 = new System.Windows.Forms.Label();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.button5 = new System.Windows.Forms.Button();
-            this.button4 = new System.Windows.Forms.Button();
-            this.button3 = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
+            this.Led_TrackPower_TOP = new System.Windows.Forms.Button();
+            this.Led_Resistor_TOP = new System.Windows.Forms.Button();
+            this.Led_Block7In_TOP = new System.Windows.Forms.Button();
+            this.Led_Block6In_TOP = new System.Windows.Forms.Button();
+            this.Led_Block5BIn_TOP = new System.Windows.Forms.Button();
             this.Led_EOS11_TOP = new System.Windows.Forms.Button();
             this.Track_No_TOP = new System.Windows.Forms.TextBox();
             this.Led_Heart_TOP = new System.Windows.Forms.Button();
@@ -86,6 +92,35 @@
             this.Btn_Bridge_Open_TOP = new System.Windows.Forms.Button();
             this.Btn_Track_Plus_TOP = new System.Windows.Forms.Button();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.Led_TrackPower_BOT = new System.Windows.Forms.Button();
+            this.Led_Resistor_BOT = new System.Windows.Forms.Button();
+            this.Led_Block18In_BOT = new System.Windows.Forms.Button();
+            this.Led_Block17In_BOT = new System.Windows.Forms.Button();
+            this.Led_Block16BIn_BOT = new System.Windows.Forms.Button();
+            this.Led_EOS21_BOT = new System.Windows.Forms.Button();
+            this.Track_No_BOT = new System.Windows.Forms.TextBox();
+            this.Led_Heart_BOT = new System.Windows.Forms.Button();
+            this.Led_F20_BOT = new System.Windows.Forms.Button();
+            this.Led_M20_BOT = new System.Windows.Forms.Button();
+            this.Led_EOS20_BOT = new System.Windows.Forms.Button();
+            this.Led_F23_BOT = new System.Windows.Forms.Button();
+            this.Led_F21_BOT = new System.Windows.Forms.Button();
+            this.Led_F22_BOT = new System.Windows.Forms.Button();
+            this.Led_Block16B_BOT = new System.Windows.Forms.Button();
+            this.Led_Block19A_BOT = new System.Windows.Forms.Button();
+            this.Led_Block18_BOT = new System.Windows.Forms.Button();
+            this.Led_Block17_BOT = new System.Windows.Forms.Button();
+            this.Led_Track11_BOT = new System.Windows.Forms.Button();
+            this.Led_Track10_BOT = new System.Windows.Forms.Button();
+            this.Led_Track9_BOT = new System.Windows.Forms.Button();
+            this.Led_Track8_BOT = new System.Windows.Forms.Button();
+            this.Led_Track7_BOT = new System.Windows.Forms.Button();
+            this.Led_Track6_BOT = new System.Windows.Forms.Button();
+            this.Led_Track5_BOT = new System.Windows.Forms.Button();
+            this.Led_Track4_BOT = new System.Windows.Forms.Button();
+            this.Led_Track3_BOT = new System.Windows.Forms.Button();
+            this.Led_Track2_BOT = new System.Windows.Forms.Button();
+            this.Led_Track1_BOT = new System.Windows.Forms.Button();
             this.Btn_Bezet7Off_BOTTOM = new System.Windows.Forms.Button();
             this.Btn_Bezet6Off_BOTTOM = new System.Windows.Forms.Button();
             this.Btn_Bezet5BOff_BOTTOM = new System.Windows.Forms.Button();
@@ -106,7 +141,9 @@
             this.Btn_Track_Plus_BOTTOM = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.ReceivedCmdBOTTOM = new System.Windows.Forms.TextBox();
-            this.progressBar1 = new System.Windows.Forms.ProgressBar();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.Led_CommLink = new System.Windows.Forms.Button();
+            this.Led_TrackPower = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -119,10 +156,11 @@
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
+            this.fToolStripMenuItem,
             this.aboutToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(1370, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(1396, 24);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -131,28 +169,67 @@
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(35, 20);
             this.fileToolStripMenuItem.Text = "File";
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(92, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(103, 22);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click_1);
+            // 
+            // fToolStripMenuItem
+            // 
+            this.fToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.reConnectFiddleYardToolStripMenuItem,
+            this.clearEventLoggersToolStripMenuItem,
+            this.resetToolStripMenuItem});
+            this.fToolStripMenuItem.Name = "fToolStripMenuItem";
+            this.fToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
+            this.fToolStripMenuItem.Text = "Edit";
+            // 
+            // reConnectFiddleYardToolStripMenuItem
+            // 
+            this.reConnectFiddleYardToolStripMenuItem.Name = "reConnectFiddleYardToolStripMenuItem";
+            this.reConnectFiddleYardToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
+            this.reConnectFiddleYardToolStripMenuItem.Text = "Re-Connect to Fiddle Yard";
+            this.reConnectFiddleYardToolStripMenuItem.Click += new System.EventHandler(this.reConnectFiddleYardToolStripMenuItem_Click);
+            // 
+            // clearEventLoggersToolStripMenuItem
+            // 
+            this.clearEventLoggersToolStripMenuItem.Name = "clearEventLoggersToolStripMenuItem";
+            this.clearEventLoggersToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
+            this.clearEventLoggersToolStripMenuItem.Text = "Clear Event Loggers";
+            this.clearEventLoggersToolStripMenuItem.Click += new System.EventHandler(this.clearEventLoggersToolStripMenuItem_Click);
+            // 
+            // resetToolStripMenuItem
+            // 
+            this.resetToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.hardResetFiddleYardToolStripMenuItem});
+            this.resetToolStripMenuItem.Name = "resetToolStripMenuItem";
+            this.resetToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
+            this.resetToolStripMenuItem.Text = "Reset";
+            // 
+            // hardResetFiddleYardToolStripMenuItem
+            // 
+            this.hardResetFiddleYardToolStripMenuItem.Name = "hardResetFiddleYardToolStripMenuItem";
+            this.hardResetFiddleYardToolStripMenuItem.Size = new System.Drawing.Size(195, 22);
+            this.hardResetFiddleYardToolStripMenuItem.Text = "Hard Reset Fiddle Yard";
+            this.hardResetFiddleYardToolStripMenuItem.Click += new System.EventHandler(this.hardResetFiddleYardToolStripMenuItem_Click);
             // 
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.aboutToolStripMenuItem1});
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(40, 20);
             this.aboutToolStripMenuItem.Text = "Help";
             // 
             // aboutToolStripMenuItem1
             // 
             this.aboutToolStripMenuItem1.Name = "aboutToolStripMenuItem1";
-            this.aboutToolStripMenuItem1.Size = new System.Drawing.Size(107, 22);
+            this.aboutToolStripMenuItem1.Size = new System.Drawing.Size(114, 22);
             this.aboutToolStripMenuItem1.Text = "About";
             this.aboutToolStripMenuItem1.Click += new System.EventHandler(this.aboutToolStripMenuItem1_Click);
             // 
@@ -180,7 +257,7 @@
             // 
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
-            this.tabControl1.Location = new System.Drawing.Point(0, 22);
+            this.tabControl1.Location = new System.Drawing.Point(0, 27);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(1396, 541);
@@ -188,11 +265,11 @@
             // 
             // tabPage1
             // 
-            this.tabPage1.Controls.Add(this.button5);
-            this.tabPage1.Controls.Add(this.button4);
-            this.tabPage1.Controls.Add(this.button3);
-            this.tabPage1.Controls.Add(this.button2);
-            this.tabPage1.Controls.Add(this.button1);
+            this.tabPage1.Controls.Add(this.Led_TrackPower_TOP);
+            this.tabPage1.Controls.Add(this.Led_Resistor_TOP);
+            this.tabPage1.Controls.Add(this.Led_Block7In_TOP);
+            this.tabPage1.Controls.Add(this.Led_Block6In_TOP);
+            this.tabPage1.Controls.Add(this.Led_Block5BIn_TOP);
             this.tabPage1.Controls.Add(this.Led_EOS11_TOP);
             this.tabPage1.Controls.Add(this.Track_No_TOP);
             this.tabPage1.Controls.Add(this.Led_Heart_TOP);
@@ -245,50 +322,50 @@
             this.tabPage1.Text = "Fiddle Yard TOP";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
-            // button5
+            // Led_TrackPower_TOP
             // 
-            this.button5.Location = new System.Drawing.Point(724, 26);
-            this.button5.Name = "button5";
-            this.button5.Size = new System.Drawing.Size(91, 23);
-            this.button5.TabIndex = 24;
-            this.button5.Text = "Track Powered";
-            this.button5.UseVisualStyleBackColor = true;
+            this.Led_TrackPower_TOP.Location = new System.Drawing.Point(724, 26);
+            this.Led_TrackPower_TOP.Name = "Led_TrackPower_TOP";
+            this.Led_TrackPower_TOP.Size = new System.Drawing.Size(91, 23);
+            this.Led_TrackPower_TOP.TabIndex = 24;
+            this.Led_TrackPower_TOP.Text = "Track Powered";
+            this.Led_TrackPower_TOP.UseVisualStyleBackColor = true;
             // 
-            // button4
+            // Led_Resistor_TOP
             // 
-            this.button4.Location = new System.Drawing.Point(620, 26);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(98, 23);
-            this.button4.TabIndex = 24;
-            this.button4.Text = "Bezet Weerstand";
-            this.button4.UseVisualStyleBackColor = true;
+            this.Led_Resistor_TOP.Location = new System.Drawing.Point(620, 26);
+            this.Led_Resistor_TOP.Name = "Led_Resistor_TOP";
+            this.Led_Resistor_TOP.Size = new System.Drawing.Size(98, 23);
+            this.Led_Resistor_TOP.TabIndex = 24;
+            this.Led_Resistor_TOP.Text = "Occ Resistor";
+            this.Led_Resistor_TOP.UseVisualStyleBackColor = true;
             // 
-            // button3
+            // Led_Block7In_TOP
             // 
-            this.button3.Location = new System.Drawing.Point(539, 26);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(75, 23);
-            this.button3.TabIndex = 24;
-            this.button3.Text = "Bezet 7";
-            this.button3.UseVisualStyleBackColor = true;
+            this.Led_Block7In_TOP.Location = new System.Drawing.Point(539, 26);
+            this.Led_Block7In_TOP.Name = "Led_Block7In_TOP";
+            this.Led_Block7In_TOP.Size = new System.Drawing.Size(75, 23);
+            this.Led_Block7In_TOP.TabIndex = 24;
+            this.Led_Block7In_TOP.Text = "Occ 7 In";
+            this.Led_Block7In_TOP.UseVisualStyleBackColor = true;
             // 
-            // button2
+            // Led_Block6In_TOP
             // 
-            this.button2.Location = new System.Drawing.Point(458, 26);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(75, 23);
-            this.button2.TabIndex = 24;
-            this.button2.Text = "Bezet 6";
-            this.button2.UseVisualStyleBackColor = true;
+            this.Led_Block6In_TOP.Location = new System.Drawing.Point(458, 26);
+            this.Led_Block6In_TOP.Name = "Led_Block6In_TOP";
+            this.Led_Block6In_TOP.Size = new System.Drawing.Size(75, 23);
+            this.Led_Block6In_TOP.TabIndex = 24;
+            this.Led_Block6In_TOP.Text = "Occ 6 In";
+            this.Led_Block6In_TOP.UseVisualStyleBackColor = true;
             // 
-            // button1
+            // Led_Block5BIn_TOP
             // 
-            this.button1.Location = new System.Drawing.Point(377, 26);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 24;
-            this.button1.Text = "Bezet 5B";
-            this.button1.UseVisualStyleBackColor = true;
+            this.Led_Block5BIn_TOP.Location = new System.Drawing.Point(377, 26);
+            this.Led_Block5BIn_TOP.Name = "Led_Block5BIn_TOP";
+            this.Led_Block5BIn_TOP.Size = new System.Drawing.Size(75, 23);
+            this.Led_Block5BIn_TOP.TabIndex = 24;
+            this.Led_Block5BIn_TOP.Text = "Occ 5B In";
+            this.Led_Block5BIn_TOP.UseVisualStyleBackColor = true;
             // 
             // Led_EOS11_TOP
             // 
@@ -510,7 +587,8 @@
             this.Btn_Bezet7Off_TOP.Name = "Btn_Bezet7Off_TOP";
             this.Btn_Bezet7Off_TOP.Size = new System.Drawing.Size(75, 23);
             this.Btn_Bezet7Off_TOP.TabIndex = 7;
-            this.Btn_Bezet7Off_TOP.Text = "Bezet 7 Off";
+            this.Btn_Bezet7Off_TOP.Text = "Occ 7 Off";
+            this.toolTip1.SetToolTip(this.Btn_Bezet7Off_TOP, "Reset Occupied signal to block 7");
             this.Btn_Bezet7Off_TOP.UseVisualStyleBackColor = true;
             this.Btn_Bezet7Off_TOP.Click += new System.EventHandler(this.Btn_Bezet7Off_TOP_Click);
             // 
@@ -520,7 +598,8 @@
             this.Btn_Bezet6Off_TOP.Name = "Btn_Bezet6Off_TOP";
             this.Btn_Bezet6Off_TOP.Size = new System.Drawing.Size(75, 23);
             this.Btn_Bezet6Off_TOP.TabIndex = 7;
-            this.Btn_Bezet6Off_TOP.Text = "Bezet 6 Off";
+            this.Btn_Bezet6Off_TOP.Text = "Occ 6 Off";
+            this.toolTip1.SetToolTip(this.Btn_Bezet6Off_TOP, "Reset Occupied signal to block 6");
             this.Btn_Bezet6Off_TOP.UseVisualStyleBackColor = true;
             this.Btn_Bezet6Off_TOP.Click += new System.EventHandler(this.Btn_Bezet6Off_TOP_Click);
             // 
@@ -530,7 +609,8 @@
             this.Btn_Bezet5BOff_TOP.Name = "Btn_Bezet5BOff_TOP";
             this.Btn_Bezet5BOff_TOP.Size = new System.Drawing.Size(75, 23);
             this.Btn_Bezet5BOff_TOP.TabIndex = 7;
-            this.Btn_Bezet5BOff_TOP.Text = "Bezet 5B Off";
+            this.Btn_Bezet5BOff_TOP.Text = "Occ 5B Off";
+            this.toolTip1.SetToolTip(this.Btn_Bezet5BOff_TOP, "Reset Occupied signal to block 5B");
             this.Btn_Bezet5BOff_TOP.UseVisualStyleBackColor = true;
             this.Btn_Bezet5BOff_TOP.Click += new System.EventHandler(this.Btn_Bezet5BOff_TOP_Click);
             // 
@@ -540,7 +620,8 @@
             this.Btn_Bezet7On_TOP.Name = "Btn_Bezet7On_TOP";
             this.Btn_Bezet7On_TOP.Size = new System.Drawing.Size(75, 23);
             this.Btn_Bezet7On_TOP.TabIndex = 7;
-            this.Btn_Bezet7On_TOP.Text = "Bezet 7 On";
+            this.Btn_Bezet7On_TOP.Text = "Occ 7 On";
+            this.toolTip1.SetToolTip(this.Btn_Bezet7On_TOP, "Set Occupied signal to block 7");
             this.Btn_Bezet7On_TOP.UseVisualStyleBackColor = true;
             this.Btn_Bezet7On_TOP.Click += new System.EventHandler(this.Btn_Bezet7On_TOP_Click);
             // 
@@ -550,7 +631,8 @@
             this.Btn_Bezet6On_TOP.Name = "Btn_Bezet6On_TOP";
             this.Btn_Bezet6On_TOP.Size = new System.Drawing.Size(75, 23);
             this.Btn_Bezet6On_TOP.TabIndex = 7;
-            this.Btn_Bezet6On_TOP.Text = "Bezet 6 On";
+            this.Btn_Bezet6On_TOP.Text = "Occ 6 On";
+            this.toolTip1.SetToolTip(this.Btn_Bezet6On_TOP, "Set Occupied signal to block 6");
             this.Btn_Bezet6On_TOP.UseVisualStyleBackColor = true;
             this.Btn_Bezet6On_TOP.Click += new System.EventHandler(this.Btn_Bezet6On_TOP_Click);
             // 
@@ -560,7 +642,8 @@
             this.Btn_Bezet5BOn_TOP.Name = "Btn_Bezet5BOn_TOP";
             this.Btn_Bezet5BOn_TOP.Size = new System.Drawing.Size(75, 23);
             this.Btn_Bezet5BOn_TOP.TabIndex = 7;
-            this.Btn_Bezet5BOn_TOP.Text = "Bezet 5B On";
+            this.Btn_Bezet5BOn_TOP.Text = "Occ 5B On";
+            this.toolTip1.SetToolTip(this.Btn_Bezet5BOn_TOP, "Set Occupied signal to block 5B");
             this.Btn_Bezet5BOn_TOP.UseVisualStyleBackColor = true;
             this.Btn_Bezet5BOn_TOP.Click += new System.EventHandler(this.Btn_Bezet5BOn_TOP_Click);
             // 
@@ -572,7 +655,8 @@
             this.Btn_Reset_TOP.Name = "Btn_Reset_TOP";
             this.Btn_Reset_TOP.Size = new System.Drawing.Size(169, 43);
             this.Btn_Reset_TOP.TabIndex = 6;
-            this.Btn_Reset_TOP.Text = "RESET";
+            this.Btn_Reset_TOP.Text = "SOFT RESET";
+            this.toolTip1.SetToolTip(this.Btn_Reset_TOP, "Soft reset, resets uController internall TOP program");
             this.Btn_Reset_TOP.UseVisualStyleBackColor = true;
             this.Btn_Reset_TOP.Click += new System.EventHandler(this.Btn_Reset_TOP_Click);
             // 
@@ -582,6 +666,7 @@
             this.Nuo_Track_No_TOP.Name = "Nuo_Track_No_TOP";
             this.Nuo_Track_No_TOP.Size = new System.Drawing.Size(38, 20);
             this.Nuo_Track_No_TOP.TabIndex = 5;
+            this.toolTip1.SetToolTip(this.Nuo_Track_No_TOP, "Set the number were the Fiddle Yard has to move to after pressing the \"Go\"button");
             this.Nuo_Track_No_TOP.Value = new decimal(new int[] {
             1,
             0,
@@ -596,6 +681,7 @@
             this.Btn_Collect_TOP.Size = new System.Drawing.Size(75, 23);
             this.Btn_Collect_TOP.TabIndex = 4;
             this.Btn_Collect_TOP.Text = "Collect";
+            this.toolTip1.SetToolTip(this.Btn_Collect_TOP, "Start collecting trains (first stop FiddleYard)");
             this.Btn_Collect_TOP.UseVisualStyleBackColor = true;
             this.Btn_Collect_TOP.Click += new System.EventHandler(this.Btn_Collect_TOP_Click);
             // 
@@ -606,6 +692,7 @@
             this.Btn_Stop_Fiddle_TOP.Size = new System.Drawing.Size(75, 23);
             this.Btn_Stop_Fiddle_TOP.TabIndex = 4;
             this.Btn_Stop_Fiddle_TOP.Text = "Stop Fiddle";
+            this.toolTip1.SetToolTip(this.Btn_Stop_Fiddle_TOP, "Stop the automatic FiddleYard train in/out program");
             this.Btn_Stop_Fiddle_TOP.UseVisualStyleBackColor = true;
             this.Btn_Stop_Fiddle_TOP.Click += new System.EventHandler(this.Btn_Stop_Fiddle_TOP_Click);
             // 
@@ -616,6 +703,7 @@
             this.Btn_Go_To_Track_TOP.Size = new System.Drawing.Size(31, 23);
             this.Btn_Go_To_Track_TOP.TabIndex = 4;
             this.Btn_Go_To_Track_TOP.Text = "Go";
+            this.toolTip1.SetToolTip(this.Btn_Go_To_Track_TOP, "Move the FiddleYard to the selected track");
             this.Btn_Go_To_Track_TOP.UseVisualStyleBackColor = true;
             this.Btn_Go_To_Track_TOP.Click += new System.EventHandler(this.Btn_Go_To_Track_TOP_Click);
             // 
@@ -626,6 +714,7 @@
             this.Btn_Bridge_Close_TOP.Size = new System.Drawing.Size(75, 23);
             this.Btn_Bridge_Close_TOP.TabIndex = 4;
             this.Btn_Bridge_Close_TOP.Text = "Track Off";
+            this.toolTip1.SetToolTip(this.Btn_Bridge_Close_TOP, "Disable Power to the active track");
             this.Btn_Bridge_Close_TOP.UseVisualStyleBackColor = true;
             this.Btn_Bridge_Close_TOP.Click += new System.EventHandler(this.Btn_Bridge_Close_TOP_Click);
             // 
@@ -636,6 +725,7 @@
             this.Btn_Train_Detect_TOP.Size = new System.Drawing.Size(75, 23);
             this.Btn_Train_Detect_TOP.TabIndex = 4;
             this.Btn_Train_Detect_TOP.Text = "Train detect";
+            this.toolTip1.SetToolTip(this.Btn_Train_Detect_TOP, "Start the train detection routine");
             this.Btn_Train_Detect_TOP.UseVisualStyleBackColor = true;
             this.Btn_Train_Detect_TOP.Click += new System.EventHandler(this.Btn_Train_Detect_TOP_Click);
             // 
@@ -646,6 +736,7 @@
             this.Btn_Track_Min_TOP.Size = new System.Drawing.Size(75, 23);
             this.Btn_Track_Min_TOP.TabIndex = 4;
             this.Btn_Track_Min_TOP.Text = "Track --";
+            this.toolTip1.SetToolTip(this.Btn_Track_Min_TOP, "Move the FiddleYard 1 track down");
             this.Btn_Track_Min_TOP.UseVisualStyleBackColor = true;
             this.Btn_Track_Min_TOP.Click += new System.EventHandler(this.Btn_Track_Min_TOP_Click);
             // 
@@ -656,6 +747,7 @@
             this.Btn_Recovered_TOP.Size = new System.Drawing.Size(75, 23);
             this.Btn_Recovered_TOP.TabIndex = 4;
             this.Btn_Recovered_TOP.Text = "Recoverd";
+            this.toolTip1.SetToolTip(this.Btn_Recovered_TOP, "Click to confirm reported error is solved");
             this.Btn_Recovered_TOP.UseVisualStyleBackColor = true;
             this.Btn_Recovered_TOP.Click += new System.EventHandler(this.Btn_Recovered_TOP_Click);
             // 
@@ -666,6 +758,7 @@
             this.Btn_Start_Fiddle_TOP.Size = new System.Drawing.Size(75, 23);
             this.Btn_Start_Fiddle_TOP.TabIndex = 4;
             this.Btn_Start_Fiddle_TOP.Text = "Start Fiddle";
+            this.toolTip1.SetToolTip(this.Btn_Start_Fiddle_TOP, "Start the automatic FiddleYard train in/out program");
             this.Btn_Start_Fiddle_TOP.UseVisualStyleBackColor = true;
             this.Btn_Start_Fiddle_TOP.Click += new System.EventHandler(this.Btn_Start_Fiddle_TOP_Click);
             // 
@@ -675,7 +768,9 @@
             this.Btn_Bridge_Open_TOP.Name = "Btn_Bridge_Open_TOP";
             this.Btn_Bridge_Open_TOP.Size = new System.Drawing.Size(75, 23);
             this.Btn_Bridge_Open_TOP.TabIndex = 4;
+            this.Btn_Bridge_Open_TOP.Tag = "";
             this.Btn_Bridge_Open_TOP.Text = "Track On";
+            this.toolTip1.SetToolTip(this.Btn_Bridge_Open_TOP, "Enable Power to the active track");
             this.Btn_Bridge_Open_TOP.UseVisualStyleBackColor = true;
             this.Btn_Bridge_Open_TOP.Click += new System.EventHandler(this.Btn_Bridge_Open_TOP_Click);
             // 
@@ -686,11 +781,41 @@
             this.Btn_Track_Plus_TOP.Size = new System.Drawing.Size(75, 23);
             this.Btn_Track_Plus_TOP.TabIndex = 4;
             this.Btn_Track_Plus_TOP.Text = "Track ++";
+            this.toolTip1.SetToolTip(this.Btn_Track_Plus_TOP, "Move the FiddleYard 1 track up");
             this.Btn_Track_Plus_TOP.UseVisualStyleBackColor = true;
             this.Btn_Track_Plus_TOP.Click += new System.EventHandler(this.Btn_Track_Plus_TOP_Click);
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.Led_TrackPower_BOT);
+            this.tabPage2.Controls.Add(this.Led_Resistor_BOT);
+            this.tabPage2.Controls.Add(this.Led_Block18In_BOT);
+            this.tabPage2.Controls.Add(this.Led_Block17In_BOT);
+            this.tabPage2.Controls.Add(this.Led_Block16BIn_BOT);
+            this.tabPage2.Controls.Add(this.Led_EOS21_BOT);
+            this.tabPage2.Controls.Add(this.Track_No_BOT);
+            this.tabPage2.Controls.Add(this.Led_Heart_BOT);
+            this.tabPage2.Controls.Add(this.Led_F20_BOT);
+            this.tabPage2.Controls.Add(this.Led_M20_BOT);
+            this.tabPage2.Controls.Add(this.Led_EOS20_BOT);
+            this.tabPage2.Controls.Add(this.Led_F23_BOT);
+            this.tabPage2.Controls.Add(this.Led_F21_BOT);
+            this.tabPage2.Controls.Add(this.Led_F22_BOT);
+            this.tabPage2.Controls.Add(this.Led_Block16B_BOT);
+            this.tabPage2.Controls.Add(this.Led_Block19A_BOT);
+            this.tabPage2.Controls.Add(this.Led_Block18_BOT);
+            this.tabPage2.Controls.Add(this.Led_Block17_BOT);
+            this.tabPage2.Controls.Add(this.Led_Track11_BOT);
+            this.tabPage2.Controls.Add(this.Led_Track10_BOT);
+            this.tabPage2.Controls.Add(this.Led_Track9_BOT);
+            this.tabPage2.Controls.Add(this.Led_Track8_BOT);
+            this.tabPage2.Controls.Add(this.Led_Track7_BOT);
+            this.tabPage2.Controls.Add(this.Led_Track6_BOT);
+            this.tabPage2.Controls.Add(this.Led_Track5_BOT);
+            this.tabPage2.Controls.Add(this.Led_Track4_BOT);
+            this.tabPage2.Controls.Add(this.Led_Track3_BOT);
+            this.tabPage2.Controls.Add(this.Led_Track2_BOT);
+            this.tabPage2.Controls.Add(this.Led_Track1_BOT);
             this.tabPage2.Controls.Add(this.Btn_Bezet7Off_BOTTOM);
             this.tabPage2.Controls.Add(this.Btn_Bezet6Off_BOTTOM);
             this.tabPage2.Controls.Add(this.Btn_Bezet5BOff_BOTTOM);
@@ -719,13 +844,273 @@
             this.tabPage2.Text = "Fiddle Yard BOTTOM";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
+            // Led_TrackPower_BOT
+            // 
+            this.Led_TrackPower_BOT.Location = new System.Drawing.Point(724, 26);
+            this.Led_TrackPower_BOT.Name = "Led_TrackPower_BOT";
+            this.Led_TrackPower_BOT.Size = new System.Drawing.Size(91, 23);
+            this.Led_TrackPower_BOT.TabIndex = 50;
+            this.Led_TrackPower_BOT.Text = "Track Powered";
+            this.Led_TrackPower_BOT.UseVisualStyleBackColor = true;
+            // 
+            // Led_Resistor_BOT
+            // 
+            this.Led_Resistor_BOT.Location = new System.Drawing.Point(620, 26);
+            this.Led_Resistor_BOT.Name = "Led_Resistor_BOT";
+            this.Led_Resistor_BOT.Size = new System.Drawing.Size(98, 23);
+            this.Led_Resistor_BOT.TabIndex = 49;
+            this.Led_Resistor_BOT.Text = "Occ Resistor";
+            this.Led_Resistor_BOT.UseVisualStyleBackColor = true;
+            // 
+            // Led_Block18In_BOT
+            // 
+            this.Led_Block18In_BOT.Location = new System.Drawing.Point(539, 26);
+            this.Led_Block18In_BOT.Name = "Led_Block18In_BOT";
+            this.Led_Block18In_BOT.Size = new System.Drawing.Size(75, 23);
+            this.Led_Block18In_BOT.TabIndex = 51;
+            this.Led_Block18In_BOT.Text = "Occ 18 In";
+            this.Led_Block18In_BOT.UseVisualStyleBackColor = true;
+            // 
+            // Led_Block17In_BOT
+            // 
+            this.Led_Block17In_BOT.Location = new System.Drawing.Point(458, 26);
+            this.Led_Block17In_BOT.Name = "Led_Block17In_BOT";
+            this.Led_Block17In_BOT.Size = new System.Drawing.Size(75, 23);
+            this.Led_Block17In_BOT.TabIndex = 53;
+            this.Led_Block17In_BOT.Text = "Occ 17 In";
+            this.Led_Block17In_BOT.UseVisualStyleBackColor = true;
+            // 
+            // Led_Block16BIn_BOT
+            // 
+            this.Led_Block16BIn_BOT.Location = new System.Drawing.Point(377, 26);
+            this.Led_Block16BIn_BOT.Name = "Led_Block16BIn_BOT";
+            this.Led_Block16BIn_BOT.Size = new System.Drawing.Size(75, 23);
+            this.Led_Block16BIn_BOT.TabIndex = 52;
+            this.Led_Block16BIn_BOT.Text = "Occ 16B In";
+            this.Led_Block16BIn_BOT.UseVisualStyleBackColor = true;
+            // 
+            // Led_EOS21_BOT
+            // 
+            this.Led_EOS21_BOT.Location = new System.Drawing.Point(465, 132);
+            this.Led_EOS21_BOT.Name = "Led_EOS21_BOT";
+            this.Led_EOS21_BOT.Size = new System.Drawing.Size(49, 19);
+            this.Led_EOS21_BOT.TabIndex = 48;
+            this.Led_EOS21_BOT.Text = "EOS21";
+            this.Led_EOS21_BOT.UseVisualStyleBackColor = true;
+            // 
+            // Track_No_BOT
+            // 
+            this.Track_No_BOT.Location = new System.Drawing.Point(218, 322);
+            this.Track_No_BOT.Name = "Track_No_BOT";
+            this.Track_No_BOT.Size = new System.Drawing.Size(44, 20);
+            this.Track_No_BOT.TabIndex = 47;
+            // 
+            // Led_Heart_BOT
+            // 
+            this.Led_Heart_BOT.Location = new System.Drawing.Point(218, 348);
+            this.Led_Heart_BOT.Name = "Led_Heart_BOT";
+            this.Led_Heart_BOT.Size = new System.Drawing.Size(44, 19);
+            this.Led_Heart_BOT.TabIndex = 45;
+            this.Led_Heart_BOT.Text = "Heart";
+            this.Led_Heart_BOT.UseVisualStyleBackColor = true;
+            // 
+            // Led_F20_BOT
+            // 
+            this.Led_F20_BOT.Location = new System.Drawing.Point(218, 297);
+            this.Led_F20_BOT.Name = "Led_F20_BOT";
+            this.Led_F20_BOT.Size = new System.Drawing.Size(44, 19);
+            this.Led_F20_BOT.TabIndex = 46;
+            this.Led_F20_BOT.Text = "F20";
+            this.Led_F20_BOT.UseVisualStyleBackColor = true;
+            // 
+            // Led_M20_BOT
+            // 
+            this.Led_M20_BOT.Location = new System.Drawing.Point(530, 468);
+            this.Led_M20_BOT.Name = "Led_M20_BOT";
+            this.Led_M20_BOT.Size = new System.Drawing.Size(44, 38);
+            this.Led_M20_BOT.TabIndex = 41;
+            this.Led_M20_BOT.Text = "M20";
+            this.Led_M20_BOT.UseVisualStyleBackColor = true;
+            // 
+            // Led_EOS20_BOT
+            // 
+            this.Led_EOS20_BOT.Location = new System.Drawing.Point(465, 468);
+            this.Led_EOS20_BOT.Name = "Led_EOS20_BOT";
+            this.Led_EOS20_BOT.Size = new System.Drawing.Size(49, 19);
+            this.Led_EOS20_BOT.TabIndex = 40;
+            this.Led_EOS20_BOT.Text = "EOS20";
+            this.Led_EOS20_BOT.UseVisualStyleBackColor = true;
+            // 
+            // Led_F23_BOT
+            // 
+            this.Led_F23_BOT.Location = new System.Drawing.Point(415, 468);
+            this.Led_F23_BOT.Name = "Led_F23_BOT";
+            this.Led_F23_BOT.Size = new System.Drawing.Size(44, 19);
+            this.Led_F23_BOT.TabIndex = 42;
+            this.Led_F23_BOT.Text = "F23";
+            this.Led_F23_BOT.UseVisualStyleBackColor = true;
+            // 
+            // Led_F21_BOT
+            // 
+            this.Led_F21_BOT.Location = new System.Drawing.Point(788, 468);
+            this.Led_F21_BOT.Name = "Led_F21_BOT";
+            this.Led_F21_BOT.Size = new System.Drawing.Size(44, 19);
+            this.Led_F21_BOT.TabIndex = 44;
+            this.Led_F21_BOT.Text = "F21";
+            this.Led_F21_BOT.UseVisualStyleBackColor = true;
+            // 
+            // Led_F22_BOT
+            // 
+            this.Led_F22_BOT.Location = new System.Drawing.Point(894, 468);
+            this.Led_F22_BOT.Name = "Led_F22_BOT";
+            this.Led_F22_BOT.Size = new System.Drawing.Size(44, 19);
+            this.Led_F22_BOT.TabIndex = 43;
+            this.Led_F22_BOT.Text = "F22";
+            this.Led_F22_BOT.UseVisualStyleBackColor = true;
+            // 
+            // Led_Block16B_BOT
+            // 
+            this.Led_Block16B_BOT.Location = new System.Drawing.Point(283, 92);
+            this.Led_Block16B_BOT.Name = "Led_Block16B_BOT";
+            this.Led_Block16B_BOT.Size = new System.Drawing.Size(18, 199);
+            this.Led_Block16B_BOT.TabIndex = 39;
+            this.Led_Block16B_BOT.Text = "Block 16B";
+            this.Led_Block16B_BOT.UseVisualStyleBackColor = true;
+            // 
+            // Led_Block19A_BOT
+            // 
+            this.Led_Block19A_BOT.Location = new System.Drawing.Point(377, 78);
+            this.Led_Block19A_BOT.Name = "Led_Block19A_BOT";
+            this.Led_Block19A_BOT.Size = new System.Drawing.Size(650, 19);
+            this.Led_Block19A_BOT.TabIndex = 36;
+            this.Led_Block19A_BOT.Text = "Block 19A";
+            this.Led_Block19A_BOT.UseVisualStyleBackColor = true;
+            // 
+            // Led_Block18_BOT
+            // 
+            this.Led_Block18_BOT.Location = new System.Drawing.Point(944, 297);
+            this.Led_Block18_BOT.Name = "Led_Block18_BOT";
+            this.Led_Block18_BOT.Size = new System.Drawing.Size(83, 19);
+            this.Led_Block18_BOT.TabIndex = 37;
+            this.Led_Block18_BOT.Text = "Block 18";
+            this.Led_Block18_BOT.UseVisualStyleBackColor = true;
+            // 
+            // Led_Block17_BOT
+            // 
+            this.Led_Block17_BOT.Location = new System.Drawing.Point(283, 297);
+            this.Led_Block17_BOT.Name = "Led_Block17_BOT";
+            this.Led_Block17_BOT.Size = new System.Drawing.Size(126, 19);
+            this.Led_Block17_BOT.TabIndex = 38;
+            this.Led_Block17_BOT.Text = "Block 17";
+            this.Led_Block17_BOT.UseVisualStyleBackColor = true;
+            // 
+            // Led_Track11_BOT
+            // 
+            this.Led_Track11_BOT.Location = new System.Drawing.Point(415, 422);
+            this.Led_Track11_BOT.Name = "Led_Track11_BOT";
+            this.Led_Track11_BOT.Size = new System.Drawing.Size(523, 19);
+            this.Led_Track11_BOT.TabIndex = 35;
+            this.Led_Track11_BOT.Text = "Track11";
+            this.Led_Track11_BOT.UseVisualStyleBackColor = true;
+            // 
+            // Led_Track10_BOT
+            // 
+            this.Led_Track10_BOT.Location = new System.Drawing.Point(415, 397);
+            this.Led_Track10_BOT.Name = "Led_Track10_BOT";
+            this.Led_Track10_BOT.Size = new System.Drawing.Size(523, 19);
+            this.Led_Track10_BOT.TabIndex = 34;
+            this.Led_Track10_BOT.Text = "Track10";
+            this.Led_Track10_BOT.UseVisualStyleBackColor = true;
+            // 
+            // Led_Track9_BOT
+            // 
+            this.Led_Track9_BOT.Location = new System.Drawing.Point(415, 372);
+            this.Led_Track9_BOT.Name = "Led_Track9_BOT";
+            this.Led_Track9_BOT.Size = new System.Drawing.Size(523, 19);
+            this.Led_Track9_BOT.TabIndex = 33;
+            this.Led_Track9_BOT.Text = "Track9";
+            this.Led_Track9_BOT.UseVisualStyleBackColor = true;
+            // 
+            // Led_Track8_BOT
+            // 
+            this.Led_Track8_BOT.Location = new System.Drawing.Point(415, 347);
+            this.Led_Track8_BOT.Name = "Led_Track8_BOT";
+            this.Led_Track8_BOT.Size = new System.Drawing.Size(523, 19);
+            this.Led_Track8_BOT.TabIndex = 32;
+            this.Led_Track8_BOT.Text = "Track8";
+            this.Led_Track8_BOT.UseVisualStyleBackColor = true;
+            // 
+            // Led_Track7_BOT
+            // 
+            this.Led_Track7_BOT.Location = new System.Drawing.Point(415, 322);
+            this.Led_Track7_BOT.Name = "Led_Track7_BOT";
+            this.Led_Track7_BOT.Size = new System.Drawing.Size(523, 19);
+            this.Led_Track7_BOT.TabIndex = 31;
+            this.Led_Track7_BOT.Text = "Track7";
+            this.Led_Track7_BOT.UseVisualStyleBackColor = true;
+            // 
+            // Led_Track6_BOT
+            // 
+            this.Led_Track6_BOT.Location = new System.Drawing.Point(415, 297);
+            this.Led_Track6_BOT.Name = "Led_Track6_BOT";
+            this.Led_Track6_BOT.Size = new System.Drawing.Size(523, 19);
+            this.Led_Track6_BOT.TabIndex = 30;
+            this.Led_Track6_BOT.Text = "Track6";
+            this.Led_Track6_BOT.UseVisualStyleBackColor = true;
+            // 
+            // Led_Track5_BOT
+            // 
+            this.Led_Track5_BOT.Location = new System.Drawing.Point(415, 272);
+            this.Led_Track5_BOT.Name = "Led_Track5_BOT";
+            this.Led_Track5_BOT.Size = new System.Drawing.Size(523, 19);
+            this.Led_Track5_BOT.TabIndex = 29;
+            this.Led_Track5_BOT.Text = "Track5";
+            this.Led_Track5_BOT.UseVisualStyleBackColor = true;
+            // 
+            // Led_Track4_BOT
+            // 
+            this.Led_Track4_BOT.Location = new System.Drawing.Point(415, 247);
+            this.Led_Track4_BOT.Name = "Led_Track4_BOT";
+            this.Led_Track4_BOT.Size = new System.Drawing.Size(523, 19);
+            this.Led_Track4_BOT.TabIndex = 28;
+            this.Led_Track4_BOT.Text = "Track4";
+            this.Led_Track4_BOT.UseVisualStyleBackColor = true;
+            // 
+            // Led_Track3_BOT
+            // 
+            this.Led_Track3_BOT.Location = new System.Drawing.Point(415, 222);
+            this.Led_Track3_BOT.Name = "Led_Track3_BOT";
+            this.Led_Track3_BOT.Size = new System.Drawing.Size(523, 19);
+            this.Led_Track3_BOT.TabIndex = 27;
+            this.Led_Track3_BOT.Text = "Track3";
+            this.Led_Track3_BOT.UseVisualStyleBackColor = true;
+            // 
+            // Led_Track2_BOT
+            // 
+            this.Led_Track2_BOT.Location = new System.Drawing.Point(415, 197);
+            this.Led_Track2_BOT.Name = "Led_Track2_BOT";
+            this.Led_Track2_BOT.Size = new System.Drawing.Size(523, 19);
+            this.Led_Track2_BOT.TabIndex = 26;
+            this.Led_Track2_BOT.Text = "Track2";
+            this.Led_Track2_BOT.UseVisualStyleBackColor = true;
+            // 
+            // Led_Track1_BOT
+            // 
+            this.Led_Track1_BOT.Location = new System.Drawing.Point(415, 172);
+            this.Led_Track1_BOT.Name = "Led_Track1_BOT";
+            this.Led_Track1_BOT.Size = new System.Drawing.Size(523, 19);
+            this.Led_Track1_BOT.TabIndex = 25;
+            this.Led_Track1_BOT.Text = "Track1";
+            this.Led_Track1_BOT.UseVisualStyleBackColor = true;
+            // 
             // Btn_Bezet7Off_BOTTOM
             // 
             this.Btn_Bezet7Off_BOTTOM.Location = new System.Drawing.Point(102, 255);
             this.Btn_Bezet7Off_BOTTOM.Name = "Btn_Bezet7Off_BOTTOM";
             this.Btn_Bezet7Off_BOTTOM.Size = new System.Drawing.Size(75, 23);
             this.Btn_Bezet7Off_BOTTOM.TabIndex = 22;
-            this.Btn_Bezet7Off_BOTTOM.Text = "Bezet 7 Off";
+            this.Btn_Bezet7Off_BOTTOM.Text = "Occ 18 Off";
+            this.toolTip1.SetToolTip(this.Btn_Bezet7Off_BOTTOM, "Reset Occupied signal to block 18");
             this.Btn_Bezet7Off_BOTTOM.UseVisualStyleBackColor = true;
             this.Btn_Bezet7Off_BOTTOM.Click += new System.EventHandler(this.Btn_Bezet7Off_BOTTOM_Click_1);
             // 
@@ -735,7 +1120,8 @@
             this.Btn_Bezet6Off_BOTTOM.Name = "Btn_Bezet6Off_BOTTOM";
             this.Btn_Bezet6Off_BOTTOM.Size = new System.Drawing.Size(75, 23);
             this.Btn_Bezet6Off_BOTTOM.TabIndex = 23;
-            this.Btn_Bezet6Off_BOTTOM.Text = "Bezet 6 Off";
+            this.Btn_Bezet6Off_BOTTOM.Text = "Occ 17 Off";
+            this.toolTip1.SetToolTip(this.Btn_Bezet6Off_BOTTOM, "Reset Occupied signal to block 17");
             this.Btn_Bezet6Off_BOTTOM.UseVisualStyleBackColor = true;
             this.Btn_Bezet6Off_BOTTOM.Click += new System.EventHandler(this.Btn_Bezet6Off_BOTTOM_Click_1);
             // 
@@ -745,7 +1131,8 @@
             this.Btn_Bezet5BOff_BOTTOM.Name = "Btn_Bezet5BOff_BOTTOM";
             this.Btn_Bezet5BOff_BOTTOM.Size = new System.Drawing.Size(75, 23);
             this.Btn_Bezet5BOff_BOTTOM.TabIndex = 24;
-            this.Btn_Bezet5BOff_BOTTOM.Text = "Bezet 5B Off";
+            this.Btn_Bezet5BOff_BOTTOM.Text = "Occ 16B Off";
+            this.toolTip1.SetToolTip(this.Btn_Bezet5BOff_BOTTOM, "Reset Occupied signal to block 16B");
             this.Btn_Bezet5BOff_BOTTOM.UseVisualStyleBackColor = true;
             this.Btn_Bezet5BOff_BOTTOM.Click += new System.EventHandler(this.Btn_Bezet5BOff_BOTTOM_Click_1);
             // 
@@ -755,7 +1142,8 @@
             this.Btn_Bezet7On_BOTTOM.Name = "Btn_Bezet7On_BOTTOM";
             this.Btn_Bezet7On_BOTTOM.Size = new System.Drawing.Size(75, 23);
             this.Btn_Bezet7On_BOTTOM.TabIndex = 19;
-            this.Btn_Bezet7On_BOTTOM.Text = "Bezet 7 On";
+            this.Btn_Bezet7On_BOTTOM.Text = "Occ 18 On";
+            this.toolTip1.SetToolTip(this.Btn_Bezet7On_BOTTOM, "Set Occupied signal to block 18");
             this.Btn_Bezet7On_BOTTOM.UseVisualStyleBackColor = true;
             this.Btn_Bezet7On_BOTTOM.Click += new System.EventHandler(this.Btn_Bezet7On_BOTTOM_Click_1);
             // 
@@ -765,7 +1153,8 @@
             this.Btn_Bezet6On_BOTTOM.Name = "Btn_Bezet6On_BOTTOM";
             this.Btn_Bezet6On_BOTTOM.Size = new System.Drawing.Size(75, 23);
             this.Btn_Bezet6On_BOTTOM.TabIndex = 20;
-            this.Btn_Bezet6On_BOTTOM.Text = "Bezet 6 On";
+            this.Btn_Bezet6On_BOTTOM.Text = "Occ 17 On";
+            this.toolTip1.SetToolTip(this.Btn_Bezet6On_BOTTOM, "Set Occupied signal to block 17");
             this.Btn_Bezet6On_BOTTOM.UseVisualStyleBackColor = true;
             this.Btn_Bezet6On_BOTTOM.Click += new System.EventHandler(this.Btn_Bezet6On_BOTTOM_Click_1);
             // 
@@ -775,7 +1164,8 @@
             this.Btn_Bezet5BOn_BOTTOM.Name = "Btn_Bezet5BOn_BOTTOM";
             this.Btn_Bezet5BOn_BOTTOM.Size = new System.Drawing.Size(75, 23);
             this.Btn_Bezet5BOn_BOTTOM.TabIndex = 21;
-            this.Btn_Bezet5BOn_BOTTOM.Text = "Bezet 5B On";
+            this.Btn_Bezet5BOn_BOTTOM.Text = "Occ 16B On";
+            this.toolTip1.SetToolTip(this.Btn_Bezet5BOn_BOTTOM, "Set Occupied signal to block 16B");
             this.Btn_Bezet5BOn_BOTTOM.UseVisualStyleBackColor = true;
             this.Btn_Bezet5BOn_BOTTOM.Click += new System.EventHandler(this.Btn_Bezet5BOn_BOTTOM_Click_1);
             // 
@@ -787,7 +1177,8 @@
             this.Btn_Reset_BOTTOM.Name = "Btn_Reset_BOTTOM";
             this.Btn_Reset_BOTTOM.Size = new System.Drawing.Size(169, 43);
             this.Btn_Reset_BOTTOM.TabIndex = 18;
-            this.Btn_Reset_BOTTOM.Text = "RESET";
+            this.Btn_Reset_BOTTOM.Text = "SOFT RESET";
+            this.toolTip1.SetToolTip(this.Btn_Reset_BOTTOM, "Soft reset, resets uController internall BOTTOM program");
             this.Btn_Reset_BOTTOM.UseVisualStyleBackColor = true;
             this.Btn_Reset_BOTTOM.Click += new System.EventHandler(this.Btn_Reset_BOTTOM_Click);
             // 
@@ -797,6 +1188,7 @@
             this.Nuo_Track_No_BOTTOM.Name = "Nuo_Track_No_BOTTOM";
             this.Nuo_Track_No_BOTTOM.Size = new System.Drawing.Size(38, 20);
             this.Nuo_Track_No_BOTTOM.TabIndex = 17;
+            this.toolTip1.SetToolTip(this.Nuo_Track_No_BOTTOM, "Set the number were the Fiddle Yard has to move to after pressing the \"Go\"button");
             this.Nuo_Track_No_BOTTOM.Value = new decimal(new int[] {
             1,
             0,
@@ -811,6 +1203,7 @@
             this.Btn_Collect_BOTTOM.Size = new System.Drawing.Size(75, 23);
             this.Btn_Collect_BOTTOM.TabIndex = 13;
             this.Btn_Collect_BOTTOM.Text = "Collect";
+            this.toolTip1.SetToolTip(this.Btn_Collect_BOTTOM, "Start collecting trains (first stop FiddleYard)");
             this.Btn_Collect_BOTTOM.UseVisualStyleBackColor = true;
             this.Btn_Collect_BOTTOM.Click += new System.EventHandler(this.Btn_Collect_BOTTOM_Click_1);
             // 
@@ -821,6 +1214,7 @@
             this.Btn_Stop_Fiddle_BOTTOM.Size = new System.Drawing.Size(75, 23);
             this.Btn_Stop_Fiddle_BOTTOM.TabIndex = 16;
             this.Btn_Stop_Fiddle_BOTTOM.Text = "Stop Fiddle";
+            this.toolTip1.SetToolTip(this.Btn_Stop_Fiddle_BOTTOM, "Stop the automatic FiddleYard train in/out program");
             this.Btn_Stop_Fiddle_BOTTOM.UseVisualStyleBackColor = true;
             this.Btn_Stop_Fiddle_BOTTOM.Click += new System.EventHandler(this.Btn_Stop_Fiddle_BOTTOM_Click_1);
             // 
@@ -831,6 +1225,7 @@
             this.Btn_Go_To_Track_BOTTOM.Size = new System.Drawing.Size(31, 23);
             this.Btn_Go_To_Track_BOTTOM.TabIndex = 15;
             this.Btn_Go_To_Track_BOTTOM.Text = "Go";
+            this.toolTip1.SetToolTip(this.Btn_Go_To_Track_BOTTOM, "Move the FiddleYard to the selected track");
             this.Btn_Go_To_Track_BOTTOM.UseVisualStyleBackColor = true;
             this.Btn_Go_To_Track_BOTTOM.Click += new System.EventHandler(this.Btn_Go_To_Track_BOTTOM_Click_1);
             // 
@@ -841,6 +1236,7 @@
             this.Btn_Bridge_Close_BOTTOM.Size = new System.Drawing.Size(75, 23);
             this.Btn_Bridge_Close_BOTTOM.TabIndex = 14;
             this.Btn_Bridge_Close_BOTTOM.Text = "Track Off";
+            this.toolTip1.SetToolTip(this.Btn_Bridge_Close_BOTTOM, "Disable Power to the active track");
             this.Btn_Bridge_Close_BOTTOM.UseVisualStyleBackColor = true;
             this.Btn_Bridge_Close_BOTTOM.Click += new System.EventHandler(this.Btn_Bridge_Close_BOTTOM_Click_1);
             // 
@@ -851,6 +1247,7 @@
             this.Btn_Train_Detect_BOTTOM.Size = new System.Drawing.Size(75, 23);
             this.Btn_Train_Detect_BOTTOM.TabIndex = 8;
             this.Btn_Train_Detect_BOTTOM.Text = "Train detect";
+            this.toolTip1.SetToolTip(this.Btn_Train_Detect_BOTTOM, "Start the train detection routine");
             this.Btn_Train_Detect_BOTTOM.UseVisualStyleBackColor = true;
             this.Btn_Train_Detect_BOTTOM.Click += new System.EventHandler(this.Btn_Train_Detect_BOTTOM_Click_1);
             // 
@@ -861,6 +1258,7 @@
             this.Btn_Track_Min_BOTTOM.Size = new System.Drawing.Size(75, 23);
             this.Btn_Track_Min_BOTTOM.TabIndex = 7;
             this.Btn_Track_Min_BOTTOM.Text = "Track --";
+            this.toolTip1.SetToolTip(this.Btn_Track_Min_BOTTOM, "Move the FiddleYard 1 track down");
             this.Btn_Track_Min_BOTTOM.UseVisualStyleBackColor = true;
             this.Btn_Track_Min_BOTTOM.Click += new System.EventHandler(this.Btn_Track_Min_BOTTOM_Click_1);
             // 
@@ -871,6 +1269,7 @@
             this.Btn_Recovered_BOTTOM.Size = new System.Drawing.Size(75, 23);
             this.Btn_Recovered_BOTTOM.TabIndex = 9;
             this.Btn_Recovered_BOTTOM.Text = "Recoverd";
+            this.toolTip1.SetToolTip(this.Btn_Recovered_BOTTOM, "Click to confirm reported error is solved");
             this.Btn_Recovered_BOTTOM.UseVisualStyleBackColor = true;
             this.Btn_Recovered_BOTTOM.Click += new System.EventHandler(this.Btn_Recovered_BOTTOM_Click);
             // 
@@ -881,6 +1280,7 @@
             this.Btn_Start_Fiddle_BOTTOM.Size = new System.Drawing.Size(75, 23);
             this.Btn_Start_Fiddle_BOTTOM.TabIndex = 11;
             this.Btn_Start_Fiddle_BOTTOM.Text = "Start Fiddle";
+            this.toolTip1.SetToolTip(this.Btn_Start_Fiddle_BOTTOM, "Start the automatic FiddleYard train in/out program");
             this.Btn_Start_Fiddle_BOTTOM.UseVisualStyleBackColor = true;
             this.Btn_Start_Fiddle_BOTTOM.Click += new System.EventHandler(this.Btn_Start_Fiddle_BOTTOM_Click_1);
             // 
@@ -891,6 +1291,7 @@
             this.Btn_Bridge_Open_BOTTOM.Size = new System.Drawing.Size(75, 23);
             this.Btn_Bridge_Open_BOTTOM.TabIndex = 10;
             this.Btn_Bridge_Open_BOTTOM.Text = "Track On";
+            this.toolTip1.SetToolTip(this.Btn_Bridge_Open_BOTTOM, "Enable Power to the active track");
             this.Btn_Bridge_Open_BOTTOM.UseVisualStyleBackColor = true;
             this.Btn_Bridge_Open_BOTTOM.Click += new System.EventHandler(this.Btn_Bridge_Open_BOTTOM_Click_1);
             // 
@@ -901,6 +1302,7 @@
             this.Btn_Track_Plus_BOTTOM.Size = new System.Drawing.Size(75, 23);
             this.Btn_Track_Plus_BOTTOM.TabIndex = 12;
             this.Btn_Track_Plus_BOTTOM.Text = "Track ++";
+            this.toolTip1.SetToolTip(this.Btn_Track_Plus_BOTTOM, "Move the FiddleYard 1 track up");
             this.Btn_Track_Plus_BOTTOM.UseVisualStyleBackColor = true;
             this.Btn_Track_Plus_BOTTOM.Click += new System.EventHandler(this.Btn_Track_Plus_BOTTOM_Click_1);
             // 
@@ -924,25 +1326,42 @@
             this.ReceivedCmdBOTTOM.Size = new System.Drawing.Size(319, 484);
             this.ReceivedCmdBOTTOM.TabIndex = 2;
             // 
-            // progressBar1
+            // toolTip1
             // 
-            this.progressBar1.Location = new System.Drawing.Point(1289, 0);
-            this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(100, 23);
-            this.progressBar1.TabIndex = 5;
+            this.toolTip1.ShowAlways = true;
+            // 
+            // Led_CommLink
+            // 
+            this.Led_CommLink.Location = new System.Drawing.Point(1325, 0);
+            this.Led_CommLink.Name = "Led_CommLink";
+            this.Led_CommLink.Size = new System.Drawing.Size(71, 23);
+            this.Led_CommLink.TabIndex = 25;
+            this.Led_CommLink.Text = "Comm Link";
+            this.Led_CommLink.UseVisualStyleBackColor = true;
+            // 
+            // Led_TrackPower
+            // 
+            this.Led_TrackPower.Location = new System.Drawing.Point(1065, 0);
+            this.Led_TrackPower.Name = "Led_TrackPower";
+            this.Led_TrackPower.Size = new System.Drawing.Size(109, 24);
+            this.Led_TrackPower.TabIndex = 25;
+            this.Led_TrackPower.Text = "15V Drive Power";
+            this.Led_TrackPower.UseVisualStyleBackColor = true;
             // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1370, 562);
-            this.Controls.Add(this.progressBar1);
+            this.AutoScroll = true;
+            this.ClientSize = new System.Drawing.Size(1396, 582);
+            this.Controls.Add(this.Led_TrackPower);
+            this.Controls.Add(this.Led_CommLink);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.menuStrip1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
-            this.MaximumSize = new System.Drawing.Size(1412, 600);
-            this.MinimumSize = new System.Drawing.Size(1364, 600);
+            this.MaximumSize = new System.Drawing.Size(1412, 620);
+            this.MinimumSize = new System.Drawing.Size(240, 400);
             this.Name = "Main";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Siebwalde App";
@@ -1034,12 +1453,48 @@
         private System.Windows.Forms.Button Led_Block8A_TOP;
         private System.Windows.Forms.Button Led_Block7_TOP;
         private System.Windows.Forms.Button Led_EOS11_TOP;
-        private System.Windows.Forms.Button button5;
-        private System.Windows.Forms.Button button4;
-        private System.Windows.Forms.Button button3;
-        private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.ProgressBar progressBar1;
+        private System.Windows.Forms.Button Led_TrackPower_TOP;
+        private System.Windows.Forms.Button Led_Resistor_TOP;
+        private System.Windows.Forms.Button Led_Block7In_TOP;
+        private System.Windows.Forms.Button Led_Block6In_TOP;
+        private System.Windows.Forms.Button Led_Block5BIn_TOP;
+        private System.Windows.Forms.Button Led_TrackPower_BOT;
+        private System.Windows.Forms.Button Led_Resistor_BOT;
+        private System.Windows.Forms.Button Led_Block18In_BOT;
+        private System.Windows.Forms.Button Led_Block17In_BOT;
+        private System.Windows.Forms.Button Led_Block16BIn_BOT;
+        private System.Windows.Forms.Button Led_EOS21_BOT;
+        private System.Windows.Forms.TextBox Track_No_BOT;
+        private System.Windows.Forms.Button Led_Heart_BOT;
+        private System.Windows.Forms.Button Led_F20_BOT;
+        private System.Windows.Forms.Button Led_M20_BOT;
+        private System.Windows.Forms.Button Led_EOS20_BOT;
+        private System.Windows.Forms.Button Led_F23_BOT;
+        private System.Windows.Forms.Button Led_F21_BOT;
+        private System.Windows.Forms.Button Led_F22_BOT;
+        private System.Windows.Forms.Button Led_Block16B_BOT;
+        private System.Windows.Forms.Button Led_Block19A_BOT;
+        private System.Windows.Forms.Button Led_Block18_BOT;
+        private System.Windows.Forms.Button Led_Block17_BOT;
+        private System.Windows.Forms.Button Led_Track11_BOT;
+        private System.Windows.Forms.Button Led_Track10_BOT;
+        private System.Windows.Forms.Button Led_Track9_BOT;
+        private System.Windows.Forms.Button Led_Track8_BOT;
+        private System.Windows.Forms.Button Led_Track7_BOT;
+        private System.Windows.Forms.Button Led_Track6_BOT;
+        private System.Windows.Forms.Button Led_Track5_BOT;
+        private System.Windows.Forms.Button Led_Track4_BOT;
+        private System.Windows.Forms.Button Led_Track3_BOT;
+        private System.Windows.Forms.Button Led_Track2_BOT;
+        private System.Windows.Forms.Button Led_Track1_BOT;
+        private System.Windows.Forms.ToolStripMenuItem fToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem reConnectFiddleYardToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem clearEventLoggersToolStripMenuItem;
+        private System.Windows.Forms.ToolTip toolTip1;
+        private System.Windows.Forms.Button Led_CommLink;
+        private System.Windows.Forms.Button Led_TrackPower;
+        private System.Windows.Forms.ToolStripMenuItem resetToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem hardResetFiddleYardToolStripMenuItem;
     }
 }
 
