@@ -138,7 +138,7 @@ void State_Machine_Update(unsigned char ASL)	//ASL = Active_Struct_Level, BOTTOM
 							ACT_ST_MCHN[ASL].Collect = Off;																// When trains need to be collected
 							ACT_ST_MCHN[ASL].Return_Val_Routine = Busy;													// Used for returns stats
 							
-							Enable_Track(ASL,Off);
+							Enable_Track(ASL,Off);																		// decouple track as default that no trains start running
 																									
 							ACT_ST_MCHN[ASL].State_Machine_Switch = Idle;
 							break;
@@ -148,10 +148,12 @@ void State_Machine_Update(unsigned char ASL)	//ASL = Active_Struct_Level, BOTTOM
 								case	Nopp					:	break; // no command received (No Opperation Pending ;-)
 								
 								case	Assert_Track			:	Enable_Track(ASL,On);
+																	Bezet_Weerstand(ASL, Off);
 																	Exe_Cmd_Ret(ASL,0);
 																	break;
 																	
 								case	Deassert_Track			:	Enable_Track(ASL,Off);
+																	Bezet_Weerstand(ASL, On);
 																	Exe_Cmd_Ret(ASL,0);
 																	break;
 																	

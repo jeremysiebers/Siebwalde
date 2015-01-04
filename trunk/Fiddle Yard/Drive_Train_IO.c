@@ -139,6 +139,7 @@ unsigned char Train_Drive_In(unsigned char ASL, unsigned char Collect_Full)
 		case	0	:	ACT_ST_MCHN[ASL].Train_In = &ACT_ST_MCHN[ASL].Train_In_Track[1]; // set pointer voor check of trein op spoor
 						ACT_ST_MCHN[ASL].Train_Drive_Sequencer = 1;
 						ACT_ST_MCHN[ASL].Train_In_Track_Count = (Track_Nr(ASL) - 1); // Train_In_Track_Count is counter from 0 to 10 sow track - 1
+						Bezet_Weerstand(ASL, Off);
 						Return_Val = Busy;
 						break;
 						
