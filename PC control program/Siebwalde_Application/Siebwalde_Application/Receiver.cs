@@ -7,6 +7,7 @@ using System.IO;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace Siebwalde_Application
 {
@@ -29,25 +30,34 @@ namespace Siebwalde_Application
 
         private void HardwareReadout()
         {
-            //Creates a UdpClient for reading incoming data.
-            UdpClient receivingUdpClient = new UdpClient(_poort);
-            //Creates an IPEndPoint to record the IP Address and port number of the sender.  
-            // The IPEndPoint will allow you to read datagrams sent from any source.
-            IPEndPoint RemoteIpEndPoint = new IPEndPoint(IPAddress.Any, 0);
-
-            while (true)
+            try
             {
-                byte[] receivedData = receivingUdpClient.Receive(ref RemoteIpEndPoint); // Blocking untill new data
+                //Creates a UdpClient for reading incoming data.
+                UdpClient receivingUdpClient = new UdpClient(_poort);
+                //Creates an IPEndPoint to record the IP Address and port number of the sender.  
+                // The IPEndPoint will allow you to read datagrams sent from any source.
+                IPEndPoint RemoteIpEndPoint = new IPEndPoint(IPAddress.Any, 0);
+            
 
-                if (NewData != null)
+                while (true)
                 {
-                    // Synchroon
-                    NewData(receivedData);
+                    byte[] receivedData = receivingUdpClient.Receive(ref RemoteIpEndPoint); // Blocking untill new data
 
-                    // Asynchroon
-                    //Task.Factory.StartNew(() => NewData(receivedData));
+                    if (NewData != null)
+                    {
+                        // Synchroon
+                        NewData(receivedData);
+
+                        // Asynchroon
+                        //Task.Factory.StartNew(() => NewData(receivedData));
+                    }
+
                 }
 
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Receiving port error" );
             }
         }
     }

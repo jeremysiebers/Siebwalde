@@ -207,6 +207,7 @@ unsigned char Fiddle_Multiple_Right(unsigned char ASL, char New_Track_Muktiple_R
 						Return_Val = Busy;
 						ACT_ST_MCHN[ASL].Pwm_Multiple_Count_Right = ACT_ST_MCHN[ASL].Pwm_Multiple_Count_Right_Init;	// reset pwm start waarde
 						Enable_Track(ASL,Off);
+						Bezet_Weerstand(ASL, On);
 						ACT_ST_MCHN[ASL].Fiddle = 1;
 						break;		
 		case	1	:	Return_Val = Busy;
@@ -491,6 +492,7 @@ unsigned char Fiddle_Multiple_Right(unsigned char ASL, char New_Track_Muktiple_R
 							ACT_ST_MCHN[ASL].ADCconversion_Inuse = False;
 							Fiddle_Multiple_Right_Ok(ASL);
 							Enable_Track(ASL,On);
+							Bezet_Weerstand(ASL, Off);
 							Return_Val = Finished;
 							break;
 						}
@@ -522,6 +524,7 @@ unsigned char Fiddle_Multiple_Right(unsigned char ASL, char New_Track_Muktiple_R
 							ACT_ST_MCHN[ASL].ADCconversion_Inuse = False;
 							Fiddle_Multiple_Right_Ok(ASL);
 							Enable_Track(ASL,On);
+							Bezet_Weerstand(ASL, Off);
 							Return_Val = Finished;
 							break;
 						}
@@ -558,6 +561,7 @@ unsigned char Fiddle_One_Right(unsigned char ASL)	//rechts op bewegen 11 naar 1
 						Return_Val = Busy;
 						ACT_ST_MCHN[ASL].Pwm_One_Count_Right = ACT_ST_MCHN[ASL].Pwm_One_Count_Right_Init;	// reset pwm start waarde
 						Enable_Track(ASL,Off);
+						Bezet_Weerstand(ASL, On);
 						ACT_ST_MCHN[ASL].Fiddle = 1;
 						break;		
 		case	1	:	M10(ASL, On);
@@ -826,6 +830,7 @@ unsigned char Fiddle_One_Right(unsigned char ASL)	//rechts op bewegen 11 naar 1
 							ACT_ST_MCHN[ASL].ADCconversion_Inuse = False;
 							Fiddle_One_Right_Ok(ASL);
 							Enable_Track(ASL,On);
+							Bezet_Weerstand(ASL, Off);
 							Return_Val = Finished;
 							break;
 						}
@@ -857,6 +862,7 @@ unsigned char Fiddle_One_Right(unsigned char ASL)	//rechts op bewegen 11 naar 1
 							ACT_ST_MCHN[ASL].ADCconversion_Inuse = False;
 							Fiddle_One_Right_Ok(ASL);
 							Enable_Track(ASL,On);
+							Bezet_Weerstand(ASL, Off);
 							Return_Val = Finished;
 							break;
 						}
@@ -893,6 +899,7 @@ unsigned char Fiddle_Multiple_Left(unsigned char ASL, char New_Track_Muktiple_Le
 						Return_Val = Busy;
 						ACT_ST_MCHN[ASL].Pwm_Multiple_Count_Left = ACT_ST_MCHN[ASL].Pwm_Multiple_Count_Left_Init;	// reset pwm start waarde
 						Enable_Track(ASL,Off);
+						Bezet_Weerstand(ASL, On);
 						ACT_ST_MCHN[ASL].Fiddle = 1;
 						break;		
 		case	1	:	Return_Val = Busy;
@@ -1176,6 +1183,7 @@ unsigned char Fiddle_Multiple_Left(unsigned char ASL, char New_Track_Muktiple_Le
 							ACT_ST_MCHN[ASL].ADCconversion_Inuse = False;
 							Fiddle_Multiple_Left_Ok(ASL);
 							Enable_Track(ASL,On);
+							Bezet_Weerstand(ASL, Off);
 							Return_Val = Finished;
 							break;
 						}
@@ -1206,6 +1214,7 @@ unsigned char Fiddle_Multiple_Left(unsigned char ASL, char New_Track_Muktiple_Le
 							ACT_ST_MCHN[ASL].ADCconversion_Inuse = False;
 							Fiddle_Multiple_Left_Ok(ASL);
 							Enable_Track(ASL,On);
+							Bezet_Weerstand(ASL, Off);
 							Return_Val = Finished;
 							break;
 						}
@@ -1241,6 +1250,7 @@ unsigned char Fiddle_One_Left(unsigned char ASL)	//Move from 1 to 11
 						Return_Val = Busy;
 						ACT_ST_MCHN[ASL].Pwm_One_Count_Left = ACT_ST_MCHN[ASL].Pwm_One_Count_Left_Init;
 						Enable_Track(ASL,Off);
+						Bezet_Weerstand(ASL, On);
 						ACT_ST_MCHN[ASL].Fiddle = 1;
 						break;		
 		case	1	:	M10(ASL, On);																														// Start Fiddle Yard move to next track
@@ -1511,6 +1521,7 @@ unsigned char Fiddle_One_Left(unsigned char ASL)	//Move from 1 to 11
 							ACT_ST_MCHN[ASL].ADCconversion_Inuse = False;
 							Fiddle_One_Left_Ok(ASL);
 							Enable_Track(ASL,On);
+							Bezet_Weerstand(ASL, Off);
 							Return_Val = Finished;
 							break;
 						}
@@ -1543,6 +1554,7 @@ unsigned char Fiddle_One_Left(unsigned char ASL)	//Move from 1 to 11
 							ACT_ST_MCHN[ASL].ADCconversion_Inuse = False;
 							Fiddle_One_Left_Ok(ASL);
 							Enable_Track(ASL,On);
+							Bezet_Weerstand(ASL, Off);
 							Return_Val = Finished;
 							break;
 						}

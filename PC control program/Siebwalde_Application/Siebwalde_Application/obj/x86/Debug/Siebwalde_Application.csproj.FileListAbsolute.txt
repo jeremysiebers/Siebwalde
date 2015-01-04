@@ -27,3 +27,7 @@ C:\Documents and Settings\siebwalde\Bureaublad\fiddleyard-siebwalde\PC control p
 C:\Documents and Settings\siebwalde\Bureaublad\fiddleyard-siebwalde\PC control program\Siebwalde_Application\Siebwalde_Application\obj\x86\Debug\Siebwalde App.TrustInfo.xml
 C:\Documents and Settings\siebwalde\Bureaublad\fiddleyard-siebwalde\PC control program\Siebwalde_Application\Siebwalde_Application\obj\x86\Debug\Siebwalde App.exe.manifest
 C:\Documents and Settings\siebwalde\Bureaublad\fiddleyard-siebwalde\PC control program\Siebwalde_Application\Siebwalde_Application\obj\x86\Debug\Siebwalde App.application
+C:\Documents and Settings\siebwalde\Bureaublad\fiddleyard-siebwalde\PC control program\Siebwalde_Application\Siebwalde_Application\obj\x86\Debug\Siebwalde_Application.FiddleYardFormTop.resources
+C:\Documents and Settings\siebwalde\Bureaublad\fiddleyard-siebwalde\PC control program\Siebwalde_Application\Siebwalde_Application\obj\x86\Debug\Siebwalde_Application.FiddleYardFormBot.resources
+C:\Users\jsiebers\Documents\Visual Studio 2010\Projects\Siebwalde_Application\Siebwalde_Application\obj\x86\Debug\Siebwalde_Application.FiddleYardFormTop.resources
+C:\Users\jsiebers\Documents\Visual Studio 2010\Projects\Siebwalde_Application\Siebwalde_Application\obj\x86\Debug\Siebwalde_Application.FiddleYardFormBot.resources
