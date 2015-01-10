@@ -179,6 +179,74 @@ namespace Siebwalde_Application
             _receiver = new Receiver(_poort);
             _receiver.NewData += HandleNewData;
             _receiver.Start();
+
+            _DataVariables[0].CL_10_Heart = 999;
+            _DataVariables[0].SPARE2 = 999;
+            _DataVariables[0].F11 = 999;
+            _DataVariables[0].EOS_10 = 999;
+            _DataVariables[0].EOS_11 = 999;
+            _DataVariables[0].SPARE3 = 999;
+            _DataVariables[0].F13 = 999;
+            _DataVariables[0].F12 = 999;
+            _DataVariables[0].Occ_From_5B = 999;
+            _DataVariables[0].Occ_From_8A = 999;                       
+            _DataVariables[0].Enable_Track_Status = 999;               
+            _DataVariables[0].Occ_To_5B_Status = 999;                  
+            _DataVariables[0].Occ_To_6_Status = 999;                   
+            _DataVariables[0].Occ_To_7_Status = 999;                   
+            _DataVariables[0].Occ_Resistor_Status = 999;               
+            _DataVariables[0].Trains_On_Fiddle_Yard_Track1 = 999;      
+            _DataVariables[0].Trains_On_Fiddle_Yard_Track2 = 999;      
+            _DataVariables[0].Trains_On_Fiddle_Yard_Track3 = 999;      
+            _DataVariables[0].Trains_On_Fiddle_Yard_Track4 = 999;      
+            _DataVariables[0].Trains_On_Fiddle_Yard_Track5 = 999;      
+            _DataVariables[0].Trains_On_Fiddle_Yard_Track6 = 999;      
+            _DataVariables[0].Trains_On_Fiddle_Yard_Track7 = 999;      
+            _DataVariables[0].Trains_On_Fiddle_Yard_Track8 = 999;      
+            _DataVariables[0].Trains_On_Fiddle_Yard_Track9 = 999;      
+            _DataVariables[0].Trains_On_Fiddle_Yard_Track10 = 999;     
+            _DataVariables[0].Trains_On_Fiddle_Yard_Track11 = 999;     
+            _DataVariables[0].Occ_From_6 = 999;                        
+            _DataVariables[0].Occ_From_7 = 999;                        
+            _DataVariables[0].TR_MEAS = 999;                           
+            _DataVariables[0].F10 = 999;                               
+            _DataVariables[0].M10_Status = 999;                        
+            _DataVariables[0].Track_Nr = 999;
+
+            _DataVariables[1].CL_10_Heart = 999;
+            _DataVariables[1].SPARE2 = 999;
+            _DataVariables[1].F11 = 999;
+            _DataVariables[1].EOS_10 = 999;
+            _DataVariables[1].EOS_11 = 999;
+            _DataVariables[1].SPARE3 = 999;
+            _DataVariables[1].F13 = 999;
+            _DataVariables[1].F12 = 999;
+            _DataVariables[1].Occ_From_5B = 999;
+            _DataVariables[1].Occ_From_8A = 999;
+            _DataVariables[1].Enable_Track_Status = 999;
+            _DataVariables[1].Occ_To_5B_Status = 999;
+            _DataVariables[1].Occ_To_6_Status = 999;
+            _DataVariables[1].Occ_To_7_Status = 999;
+            _DataVariables[1].Occ_Resistor_Status = 999;
+            _DataVariables[1].Trains_On_Fiddle_Yard_Track1 = 999;
+            _DataVariables[1].Trains_On_Fiddle_Yard_Track2 = 999;
+            _DataVariables[1].Trains_On_Fiddle_Yard_Track3 = 999;
+            _DataVariables[1].Trains_On_Fiddle_Yard_Track4 = 999;
+            _DataVariables[1].Trains_On_Fiddle_Yard_Track5 = 999;
+            _DataVariables[1].Trains_On_Fiddle_Yard_Track6 = 999;
+            _DataVariables[1].Trains_On_Fiddle_Yard_Track7 = 999;
+            _DataVariables[1].Trains_On_Fiddle_Yard_Track8 = 999;
+            _DataVariables[1].Trains_On_Fiddle_Yard_Track9 = 999;
+            _DataVariables[1].Trains_On_Fiddle_Yard_Track10 = 999;
+            _DataVariables[1].Trains_On_Fiddle_Yard_Track11 = 999;
+            _DataVariables[1].Occ_From_6 = 999;
+            _DataVariables[1].Occ_From_7 = 999;
+            _DataVariables[1].TR_MEAS = 999;
+            _DataVariables[1].F10 = 999;
+            _DataVariables[1].M10_Status = 999;
+            _DataVariables[1].Track_Nr = 999;   
+
+
         }
 
         public void HandleNewData(byte[] b)

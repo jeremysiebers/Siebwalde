@@ -25,7 +25,7 @@ namespace Siebwalde_Application
         public Controller _controller1;
 
         public FiddleYardFormTop FYTOP = new FiddleYardFormTop();
-        public FiddleYardFormBot FYBOT = new FiddleYardFormBot();
+        public FiddleYardFormTop FYBOT = new FiddleYardFormTop();
         public const int SEND_DELAY = 10;
         
         public bool Led_CommLink_Toggle = false;
@@ -41,6 +41,8 @@ namespace Siebwalde_Application
             this.Location = new Point(0, 0);
             this.Width = SystemInformation.VirtualScreen.Width;
             InitializeComponent();
+            FYTOP.Name = "FiddleYardTOP";
+            FYBOT.Name = "FiddleYardBOT";
             FYTOP.Show();
             FYTOP.Hide();
             FYBOT.Show();
@@ -85,7 +87,7 @@ namespace Siebwalde_Application
                 int poort1 = 28672;
                 FYTOP.SetText_ReceivedCmdTOP(DateTime.Now + " Listening UDP Port is: " + Convert.ToString(poort1) + Environment.NewLine, 1, 0, 0);
                 FYTOP.SetText_ReceivedCmdTOP(DateTime.Now + " Starting controller..." + Environment.NewLine, 1, 0, 0);
-                _controller1 = new Controller(poort1, FYTOP.SetText_ReceivedCmdTOP, FYBOT.SetText_ReceivedCmdBOT, Toggle_Comm_Link);
+                _controller1 = new Controller(poort1, FYTOP.SetText_ReceivedCmdTOP, FYBOT.SetText_ReceivedCmdTOP, Toggle_Comm_Link);
                 _controller1.Start();
                 FYTOP.SetText_ReceivedCmdTOP(DateTime.Now + " Controller started." + Environment.NewLine, 1, 0, 0);
 
@@ -122,7 +124,7 @@ namespace Siebwalde_Application
         private void clearEventLoggersToolStripMenuItem_Click(object sender, EventArgs e)
         {
             FYTOP.ClearReceivedCmdTOP();
-            FYBOT.ClearReceivedCmdBOTTOM();
+            FYBOT.ClearReceivedCmdTOP();
         }
 
         private void hardResetFiddleYardToolStripMenuItem_Click(object sender, EventArgs e)
@@ -156,8 +158,8 @@ namespace Siebwalde_Application
         }
 
         private void FiddleYardFormBot_Click(object sender, EventArgs e)
-        {            
-            FYBOT.FYBOTShow();
+        {
+            FYBOT.FYTOPShow();
         }
 
         #endregion Constructor     

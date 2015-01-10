@@ -43,14 +43,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Siebwalde App.exe" size="128512">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Siebwalde App.exe" size="114688">
       <assemblyIdentity name="Siebwalde App" version="1.0.0.0" language="neutral" processorArchitecture="x86" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>rokqbRbcEfhjFJvpfi8IvvTCApg=</dsig:DigestValue>
+        <dsig:DigestValue>i2ktyMScRQx44QbXMOmOsyOx5A8=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>

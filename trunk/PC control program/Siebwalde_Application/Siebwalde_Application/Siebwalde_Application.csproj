@@ -98,12 +98,6 @@
     <Compile Include="FiddleYardFormTop.Designer.cs">
       <DependentUpon>FiddleYardFormTop.cs</DependentUpon>
     </Compile>
-    <Compile Include="FiddleYardFormBot.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="FiddleYardFormBot.Designer.cs">
-      <DependentUpon>FiddleYardFormBot.cs</DependentUpon>
-    </Compile>
     <Compile Include="Main.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -119,9 +113,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FiddleYardFormTop.resx">
       <DependentUpon>FiddleYardFormTop.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="FiddleYardFormBot.resx">
-      <DependentUpon>FiddleYardFormBot.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Main.resx">
       <DependentUpon>Main.cs</DependentUpon>

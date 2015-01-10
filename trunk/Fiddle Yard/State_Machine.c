@@ -416,6 +416,12 @@ void State_Machine_Update(unsigned char ASL)	//ASL = Active_Struct_Level, BOTTOM
 																				ACT_ST_MCHN[ASL].Fy_Running = Drive_Train_In; // Train Drive In
 																				break;
 																			}
+																			else if (Exe_Cmd_(ASL) == Stop_Fiddle_Yard)
+																			{
+																				Fiddle_Yard_Stopped(ASL);
+																				ACT_ST_MCHN[ASL].State_Machine_Switch = Idle;
+																				break;
+																			}
 																			else {ACT_ST_MCHN[ASL].Fy_Running = No_Train_On_8_Start;}
 																			break;	
 																			
@@ -444,6 +450,12 @@ void State_Machine_Update(unsigned char ASL)	//ASL = Active_Struct_Level, BOTTOM
 																				Train_On_8A(ASL);
 																				ACT_ST_MCHN[ASL].Fy_Running = Track_15V_Present; // check if track voltage is present
 																				Train_Drive_Out_Start(ASL);
+																				break;
+																			}
+																			else if (Exe_Cmd_(ASL) == Stop_Fiddle_Yard)
+																			{
+																				Fiddle_Yard_Stopped(ASL);
+																				ACT_ST_MCHN[ASL].State_Machine_Switch = Idle;
 																				break;
 																			}
 																			else {ACT_ST_MCHN[ASL].Fy_Running = Train_On_5B_Start;}
