@@ -21,17 +21,22 @@ namespace Siebwalde_Application
     public delegate void ToggleCommLinkCallback();
     
     public partial class Main : Form
-    {  
-        public Controller _controller1;
+    {
+        public Sender FYSender = new Sender("FIDDLEYARD");
+        public Sender LHSender = new Sender("LocalHost");
+        public FiddleYardController FYcontroller;
+        public FiddleYardForm FYTOP = new FiddleYardForm();
+        public FiddleYardForm FYBOT = new FiddleYardForm();
+        
 
-        public FiddleYardFormTop FYTOP = new FiddleYardFormTop();
-        public FiddleYardFormTop FYBOT = new FiddleYardFormTop();
         public const int SEND_DELAY = 10;
         
         public bool Led_CommLink_Toggle = false;
 
         public const int TOP = 1;
         public const int BOTTOM = 0;
+
+        private const int LINKACTMAX = 100;
                 
         #region Constructor
 
@@ -39,17 +44,26 @@ namespace Siebwalde_Application
         {
             this.StartPosition = FormStartPosition.Manual;
             this.Location = new Point(0, 0);
-            this.Width = SystemInformation.VirtualScreen.Width;
+            //this.Width = SystemInformation.VirtualScreen.Width;
             InitializeComponent();
             FYTOP.Name = "FiddleYardTOP";
             FYBOT.Name = "FiddleYardBOT";
             FYTOP.Show();
             FYTOP.Hide();
             FYBOT.Show();
-            FYBOT.Hide();            
-            StartCommunication();
-        }
+            FYBOT.Hide();
+            FYTOP.Start(FYSender.SendUdp, FYSender.StoreText);
+            FYBOT.Start(FYSender.SendUdp, FYSender.StoreText);
+                                   
+            
+            LinkActivity.Minimum = 0;
+            LinkActivity.Maximum = LINKACTMAX;
+            LinkActivity.Step = 1;
+            LinkActivity.Value = 0;
 
+            
+        }
+        
         public string LocalIPAddress()
         {
             IPHostEntry host;
@@ -81,30 +95,36 @@ namespace Siebwalde_Application
 
                 string ipAddr = LocalIPAddress();
 
-                FYTOP.SetText_ReceivedCmdTOP(DateTime.Now + " PC MAC adress is: " + macAddr + Environment.NewLine, 1, 0, 0);
-                FYTOP.SetText_ReceivedCmdTOP(DateTime.Now + " PC IP adress is: " + ipAddr + Environment.NewLine, 1, 0, 0);
+                SiebwaldeAppLogging(DateTime.Now + " PC MAC adress is: " + macAddr + Environment.NewLine, 1, 0, 0);
+                SiebwaldeAppLogging(DateTime.Now + " PC IP adress is: " + ipAddr + Environment.NewLine, 1, 0, 0);
 
-                int poort1 = 28672;
-                FYTOP.SetText_ReceivedCmdTOP(DateTime.Now + " Listening UDP Port is: " + Convert.ToString(poort1) + Environment.NewLine, 1, 0, 0);
-                FYTOP.SetText_ReceivedCmdTOP(DateTime.Now + " Starting controller..." + Environment.NewLine, 1, 0, 0);
-                _controller1 = new Controller(poort1, FYTOP.SetText_ReceivedCmdTOP, FYBOT.SetText_ReceivedCmdTOP, Toggle_Comm_Link);
-                _controller1.Start();
-                FYTOP.SetText_ReceivedCmdTOP(DateTime.Now + " Controller started." + Environment.NewLine, 1, 0, 0);
+                int poort1 = 0;
 
-                ConnectFiddleYard(macAddr, ipAddr);
+                if (ConnectFiddleYard(macAddr, ipAddr) == true)
+                {
 
+                    poort1 = 28672;
+                    SiebwaldeAppLogging(DateTime.Now + " FiddleYard Listening UDP Port is: " + Convert.ToString(poort1) + Environment.NewLine, 1, 0, 0);
+
+                }
+                
+                SiebwaldeAppLogging(DateTime.Now + " FiddleYard controller Starting ..." + Environment.NewLine, 1, 0, 0);
+                FYcontroller = new FiddleYardController(poort1, FYTOP.SetText_ReceivedCmd, FYBOT.SetText_ReceivedCmd, Toggle_Comm_Link);
+                FYcontroller.Start();               
+
+                SiebwaldeAppLogging(DateTime.Now + " FiddleYard Controller started." + Environment.NewLine, 1, 0, 0);
+                
             }
             catch (Exception ex)
             {
                 //logger.error(.../.)
                 MessageBox.Show(ex.Message);
-
             }
         } 
 
         private void exitToolStripMenuItem_Click_1(object sender, EventArgs e)
         {
-            Sender.CloseUdp();
+            FYSender.CloseUdp();
             Application.Exit();
         }
 
@@ -123,8 +143,9 @@ namespace Siebwalde_Application
 
         private void clearEventLoggersToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            FYTOP.ClearReceivedCmdTOP();
-            FYBOT.ClearReceivedCmdTOP();
+            FYTOP.ClearReceivedCmd();
+            FYBOT.ClearReceivedCmd();
+            SiebwaldeAppLog.Clear();
         }
 
         private void hardResetFiddleYardToolStripMenuItem_Click(object sender, EventArgs e)
@@ -136,13 +157,12 @@ namespace Siebwalde_Application
                 MessageBoxIcon.Stop);
 
             if (result == DialogResult.OK)
-            {
-                //FYTOP.SetText_ReceivedCmdTOP(DateTime.Now + " Hard reset of FIDDLEYARD!!!." + Environment.NewLine, 1, 0, 0);
+            {                
                 byte[] Send = new byte[3];
                 Send[0] = Convert.ToByte('s');
                 Send[1] = Convert.ToByte(0x01);
                 Send[2] = 0x0D; // send CR afterwards
-                Sender.SendUdp(Send);                
+                FYSender.SendUdp(Send);                
             }
         }
 
@@ -154,50 +174,78 @@ namespace Siebwalde_Application
 
         private void FiddleYardFormTop_Click(object sender, EventArgs e)
         {
-            FYTOP.FYTOPShow();            
+            if (this.Height < 1199)
+                FYTOP.AutoScroll = true;
+            else { FYTOP.AutoScroll = false; }
+            FYTOP.Location = new System.Drawing.Point(0, 75);            
+            FYTOP.Height = this.Height - 60 - 20;
+            FYTOP.Width = 960;
+            FYTOP.FYFORMShow();            
         }
 
         private void FiddleYardFormBot_Click(object sender, EventArgs e)
         {
-            FYBOT.FYTOPShow();
+            if (this.Height < 1199)
+                FYBOT.AutoScroll = true;
+            else {FYBOT.AutoScroll = false;}
+            FYBOT.Location = new System.Drawing.Point(960, 75);
+            FYBOT.Height = this.Height - 60 - 20;
+            FYBOT.Width = 960;
+            FYBOT.FYFORMShow();
         }
 
-        #endregion Constructor     
+        #endregion Constructor  
+   
+        private void SiebwaldeAppLogging(string text, int Layer, int Indicator, int Val)
+        {
+            SiebwaldeAppLog.AppendText(text);
+            byte[] info = new UTF8Encoding(true).GetBytes(text);
+            FYSender.StoreText(text, "MAIN ");
+        }
    
         #region Connect Fiddle yard, Program MAC and IP
 
-        private void ConnectFiddleYard(string macAddr, string ipAddr)
+        private bool ConnectFiddleYard(string macAddr, string ipAddr)
         {
             try
-            {                
-                FYTOP.SetText_ReceivedCmdTOP(DateTime.Now + " Connecting to FIDDLEYARD..." + Environment.NewLine, 1, 0, 0);
-                //sendingUdpClientMain.Connect("FIDDLEYARD", 28671);
-                Sender.ConnectUdp();
+            {
+                SiebwaldeAppLogging(DateTime.Now + " FiddleYard Connecting..." + Environment.NewLine, 1, 0, 0);
                 
-                                
-                FYTOP.SetText_ReceivedCmdTOP(DateTime.Now + " Connected to FIDDLEYARD." + Environment.NewLine, 1, 0, 0);
-                FYTOP.SetText_ReceivedCmdTOP(DateTime.Now + " Send FIDDLEYARD MAC and IP..." + Environment.NewLine, 1, 0, 0);
+                FYSender.ConnectUdp();
+                LHSender.ConnectUdp();
+
+                labelFiddleYard.Text = "Link Activity FiddleYard";
+                FYTOP.ShowNotConnected(false);
+                FYBOT.ShowNotConnected(false);
+
+                SiebwaldeAppLogging(DateTime.Now + " FiddleYard Connected." + Environment.NewLine, 1, 0, 0);
+                SiebwaldeAppLogging(DateTime.Now + " FiddleYard MAC and IP Send..." + Environment.NewLine, 1, 0, 0);
                 
                 ProgramMAC(macAddr);
 
-                FYTOP.SetText_ReceivedCmdTOP(DateTime.Now + " MAC is sent." + Environment.NewLine, 1, 0, 0);
+                SiebwaldeAppLogging(DateTime.Now + " FiddleYard MAC is sent." + Environment.NewLine, 1, 0, 0);
 
                 ProgramIP(ipAddr);
 
-                FYTOP.SetText_ReceivedCmdTOP(DateTime.Now + " IP is sent." + Environment.NewLine, 1, 0, 0);
+                SiebwaldeAppLogging(DateTime.Now + " FiddleYard IP is sent." + Environment.NewLine, 1, 0, 0);
 
                 ProgramReady();
 
-                FYTOP.SetText_ReceivedCmdTOP(DateTime.Now + " MAC_IP_READY is sent." + Environment.NewLine, 1, 0, 0);
+                SiebwaldeAppLogging(DateTime.Now + " FiddleYard MAC_IP_READY is sent." + Environment.NewLine, 1, 0, 0);
 
+                return true; // connection succesfull
 
             }
-            catch (Exception ex)
+            catch (Exception )//ex)
             {
-                MessageBox.Show(ex.Message);
-                FYTOP.SetText_ReceivedCmdTOP(DateTime.Now + " FIDDLEYARD not found..." + Environment.NewLine, 1, 0, 0);
-                Sender.ConnectUdpLocalHost();//sendingUdpClientMain.Connect("LocalHost", 28671);//Fiddle Yard not found, swiching to localhost...                
-                FYTOP.SetText_ReceivedCmdTOP(DateTime.Now + " Connected to LocalHost." + Environment.NewLine, 1, 0, 0);
+                //MessageBox.Show(ex.Message);
+                SiebwaldeAppLogging(DateTime.Now + " FiddleYard not found..." + Environment.NewLine, 1, 0, 0);
+                FYSender.ConnectUdpLocalHost();
+                SiebwaldeAppLogging(DateTime.Now + " Connected to LocalHost." + Environment.NewLine, 1, 0, 0);
+                FYTOP.ShowNotConnected(true);
+                FYBOT.ShowNotConnected(true);
+                labelFiddleYard.Text = "FiddleYard in Simulation";
+                return false; // no connection
             }
         }
 
@@ -213,10 +261,9 @@ namespace Siebwalde_Application
                 Send[0] = _Identifier[0];
                 Send[1] = Convert.ToByte(int.Parse(Convert.ToString(macAddr[i]), NumberStyles.HexNumber));
                 Send[2] = 0x0D; // send CR afterwards
-                Sender.SendUdp(Send);//sendingUdpClientMain.Send(Send, Send.Length);
-
-                //FYTOP.SetText_ReceivedCmdTOP(DateTime.Now + " Send Mac: " + macAddr[i] + Environment.NewLine, 1, 0, 0);  // for debugging
-
+                FYSender.SendUdp(Send);//sendingUdpClientMain.Send(Send, Send.Length);
+                LHSender.SendUdp(Send);//sendingUdpClientMain.Send(Send, Send.Length);
+                                
                 System.Threading.Thread.Sleep(SEND_DELAY);
             }
         }
@@ -247,7 +294,7 @@ namespace Siebwalde_Application
             Send[0] = Convert.ToByte('6');
             Send[1] = Convert.ToByte(IpSend);
             Send[2] = 0x0D; // send CR afterwards
-            Sender.SendUdp(Send); //sendingUdpClientMain.Send(Send, Send.Length);
+            FYSender.SendUdp(Send); //sendingUdpClientMain.Send(Send, Send.Length);
 
             //SetText_ReceivedCmdTOP(DateTime.Now + " " + " Send Ip: " + Convert.ToString(Send[1]) + Environment.NewLine, 1, 0, 0);  // for debugging
 
@@ -262,7 +309,7 @@ namespace Siebwalde_Application
             Send[0] = Convert.ToByte('7');
             Send[1] = Convert.ToByte(IpSend);
             Send[2] = 0x0D; // send CR afterwards
-            Sender.SendUdp(Send); //sendingUdpClientMain.Send(Send, Send.Length);
+            FYSender.SendUdp(Send); //sendingUdpClientMain.Send(Send, Send.Length);
 
             //SetText_ReceivedCmdTOP(DateTime.Now + " " + " Send Ip: " + Convert.ToString(Send[1]) + Environment.NewLine, 1, 0, 0);  // for debugging
 
@@ -277,7 +324,7 @@ namespace Siebwalde_Application
             Send[0] = Convert.ToByte('8');
             Send[1] = Convert.ToByte(IpSend);
             Send[2] = 0x0D; // send CR afterwards
-            Sender.SendUdp(Send); //sendingUdpClientMain.Send(Send, Send.Length);
+            FYSender.SendUdp(Send); //sendingUdpClientMain.Send(Send, Send.Length);
 
             //SetText_ReceivedCmdTOP(DateTime.Now + " " + " Send Ip: " + Convert.ToString(Send[1]) + Environment.NewLine, 1, 0, 0);  // for debugging
 
@@ -292,7 +339,7 @@ namespace Siebwalde_Application
             Send[0] = Convert.ToByte('9');
             Send[1] = Convert.ToByte(IpSend);
             Send[2] = 0x0D; // send CR afterwards
-            Sender.SendUdp(Send); //sendingUdpClientMain.Send(Send, Send.Length);
+            FYSender.SendUdp(Send); //sendingUdpClientMain.Send(Send, Send.Length);
 
             //SetText_ReceivedCmdTOP(DateTime.Now + " " + " Send Ip: " + Convert.ToString(Send[1]) + Environment.NewLine, 1, 0, 0);  // for debugging
 
@@ -306,26 +353,35 @@ namespace Siebwalde_Application
             Send[0] = Convert.ToByte('t');
             Send[1] = 0x1;
             Send[2] = 0xD;
-            Sender.SendUdp(Send); //sendingUdpClientMain.Send(Send, Send.Length);
-
-            //SetText_ReceivedCmdTOP(DateTime.Now + " Send Prog_Ready: " + Encoding.UTF8.GetString(Send) + Environment.NewLine, 1, 0, 0);  // for debugging
+            FYSender.SendUdp(Send); //sendingUdpClientMain.Send(Send, Send.Length);
         }
 
         #endregion Connect Fiddle yard, Program MAC and IP
         
         private void Toggle_Comm_Link()
-        {            
-            Led_CommLink_Toggle = !Led_CommLink_Toggle;
-            if (Led_CommLink_Toggle == true)
+        {
+            if (LinkActivity.InvokeRequired)
             {
-                Led_CommLink.BackColor = Color.Fuchsia;
+                ToggleCommLinkCallback d = new ToggleCommLinkCallback(Toggle_Comm_Link);
+                LinkActivity.Invoke(d, new object[] { });  // invoking itself
             }
-            if (Led_CommLink_Toggle == false)
+            else
             {
-                Led_CommLink.BackColor = Color.Transparent;
+                if (LinkActivity.Value >= LINKACTMAX)
+                {
+                    LinkActivity.Value = 0;                    
+                }                
+                LinkActivity.Value++;
             }
         }
 
-                       
+        private void Main_Load(object sender, EventArgs e)
+        {
+            LinkActivity.Location = new System.Drawing.Point(this.Width - LinkActivity.Width - 20, 1);
+            labelFiddleYard.Location = new System.Drawing.Point(this.Width - LinkActivity.Width - 20 - labelFiddleYard.Width, 6);
+
+            StartCommunication();
+        }
+                        
     }
 }
