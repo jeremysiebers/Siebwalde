@@ -91,12 +91,12 @@
     <Compile Include="AboutBox1.Designer.cs">
       <DependentUpon>AboutBox1.cs</DependentUpon>
     </Compile>
-    <Compile Include="Controller.cs" />
-    <Compile Include="FiddleYardFormTop.cs">
+    <Compile Include="FiddleYardController.cs" />
+    <Compile Include="FiddleYardForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FiddleYardFormTop.Designer.cs">
-      <DependentUpon>FiddleYardFormTop.cs</DependentUpon>
+    <Compile Include="FiddleYardForm.Designer.cs">
+      <DependentUpon>FiddleYardForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Main.cs">
       <SubType>Form</SubType>
@@ -111,8 +111,8 @@
     <EmbeddedResource Include="AboutBox1.resx">
       <DependentUpon>AboutBox1.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FiddleYardFormTop.resx">
-      <DependentUpon>FiddleYardFormTop.cs</DependentUpon>
+    <EmbeddedResource Include="FiddleYardForm.resx">
+      <DependentUpon>FiddleYardForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Main.resx">
       <DependentUpon>Main.cs</DependentUpon>
@@ -137,7 +137,6 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <None Include="Siebwalde_Application_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="favicon.ico" />

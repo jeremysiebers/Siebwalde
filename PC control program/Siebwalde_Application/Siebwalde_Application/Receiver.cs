@@ -26,8 +26,6 @@ namespace Siebwalde_Application
             Task.Factory.StartNew(HardwareReadout);
         }
 
-
-
         private void HardwareReadout()
         {
             try

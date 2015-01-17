@@ -18,32 +18,43 @@ using System.Globalization;
 
 namespace Siebwalde_Application
 {
-    class Sender
-    {
-        static public UdpClient sendingUdpClient = new UdpClient(28671);
-        static public string path = @"c:\localdata\Logging.txt";        
+    public delegate void SendUdpCallback(byte[] send);
+    public delegate void StoreTextCallback(string text, string Layer);
 
-        static public void SendUdp(byte[] send)
+    public class Sender
+    {
+        private UdpClient sendingUdpClient = new UdpClient(); // PC always transmits on PORT 28671 to ethernet targets
+        private string path = @"c:\localdata\Logging.txt"; // different logging file per target, this is default
+
+        private string _target = "LocalHost";
+
+        public Sender(string target)
+        {
+            _target = target;
+            path = @"c:\localdata\" + _target + "Logging.txt"; // different logging file per target created by instantiating it
+        }
+       
+        public void SendUdp(byte[] send)
         {
             sendingUdpClient.Send(send, send.Length);
         }
 
-        static public void ConnectUdp()
+        public void ConnectUdp()
         {
-            sendingUdpClient.Connect("FIDDLEYARD", 28671);
+            sendingUdpClient.Connect(_target , 28671);
         }
 
-        static public void ConnectUdpLocalHost()
+        public void ConnectUdpLocalHost()
         {
             sendingUdpClient.Connect("LocalHost", 28671);
         }
 
-        static public void CloseUdp()
+        public void CloseUdp()
         {
             sendingUdpClient.Close();
         }
 
-        static public void StoreText(string text, string Layer)
+        public void StoreText(string text, string Layer)
         {
             try
             {
