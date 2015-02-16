@@ -1,0 +1,273 @@
+LLed_Heart
+LLed_F11
+LLed_EOS10
+LLed_EOS11
+LLed_F13
+LLed_F12
+LLed_Block5B
+LLed_Block8A
+LLed_TrackPower
+LLed_Block5BIn
+LLed_Block6In
+LLed_Block7In
+LLed_Resistor
+LLed_Track1
+LLed_Track2
+LLed_Track3
+LLed_Track4
+LLed_Track5
+LLed_Track6
+LLed_Track7
+LLed_Track8
+LLed_Track9
+LLed_Track10
+LLed_Track11
+LLed_Block6
+LLed_Block7
+LLed_15VTrackPower
+LLed_F10
+LLed_M10
+Track_No
+Train_Detection
+Fiddle_Yard_Stopped
+
+
+			CL10Heart = new SensorBoolUpdater();
+            F11 = new SensorBoolUpdater();
+            EOS10 = new SensorBoolUpdater();
+            EOS11 = new SensorBoolUpdater();
+            F13 = new SensorBoolUpdater();
+            F12 = new SensorBoolUpdater();
+            Block5B = new SensorBoolUpdater();
+            Block8A = new SensorBoolUpdater();
+            TrackPowerTop = new SensorBoolUpdater();
+            Block5BIn = new SensorBoolUpdater();
+            Block6In = new SensorBoolUpdater();
+            Block7In = new SensorBoolUpdater();
+            ResistorTop = new SensorBoolUpdater();
+            Track1Top = new SensorBoolUpdater();
+            Track2Top = new SensorBoolUpdater();
+            Track3Top = new SensorBoolUpdater();
+            Track4Top = new SensorBoolUpdater();
+            Track5Top = new SensorBoolUpdater();
+            Track6Top = new SensorBoolUpdater();
+            Track7Top = new SensorBoolUpdater();
+            Track8Top = new SensorBoolUpdater();
+            Track9Top = new SensorBoolUpdater();
+            Track10Top = new SensorBoolUpdater();
+            Track11Top = new SensorBoolUpdater();
+            Block6 = new SensorBoolUpdater();
+            Block7 = new SensorBoolUpdater();
+            F10 = new SensorBoolUpdater();
+            M10 = new SensorBoolUpdater();
+            TrackNoTop = new SensorBoolUpdater();
+            TrainDetectionTop = new SensorBoolUpdater();
+            FiddleYardStoppedTop = new SensorBoolUpdater();
+
+            CL20Heart = new SensorBoolUpdater();
+            F21 = new SensorBoolUpdater();
+            EOS20 = new SensorBoolUpdater();
+            EOS21 = new SensorBoolUpdater();
+            F23 = new SensorBoolUpdater();
+            F22 = new SensorBoolUpdater();
+            Block16B = new SensorBoolUpdater();
+            Block19A = new SensorBoolUpdater();
+            TrackPowerBot = new SensorBoolUpdater();
+            Block16BIn = new SensorBoolUpdater();
+            Block17In = new SensorBoolUpdater();
+            Block18In = new SensorBoolUpdater();
+            ResistorBot = new SensorBoolUpdater();
+            Track1Bot = new SensorBoolUpdater();
+            Track2Bot = new SensorBoolUpdater();
+            Track3Bot = new SensorBoolUpdater();
+            Track4Bot = new SensorBoolUpdater();
+            Track5Bot = new SensorBoolUpdater();
+            Track6Bot = new SensorBoolUpdater();
+            Track7Bot = new SensorBoolUpdater();
+            Track8Bot = new SensorBoolUpdater();
+            Track9Bot = new SensorBoolUpdater();
+            Track10Bot = new SensorBoolUpdater();
+            Track11Bot = new SensorBoolUpdater();
+            Block17 = new SensorBoolUpdater();
+            Block18 = new SensorBoolUpdater();
+            F20 = new SensorBoolUpdater();
+            M20 = new SensorBoolUpdater();
+            TrackNoBot = new SensorBoolUpdater();
+            TrainDetectionBot = new SensorBoolUpdater();
+            FiddleYardStoppedBot = new SensorBoolUpdater();
+			
+			TrackPower15V = new SensorBoolUpdater();
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			CL10Heart.ChangeSensorBoolStatus(1);            
+            F11.ChangeSensorBoolStatus(1);
+            EOS10.ChangeSensorBoolStatus(1);
+            EOS11.ChangeSensorBoolStatus(1);
+            F13.ChangeSensorBoolStatus(1);
+			
+			TrackNoTop.ChangeSensorBoolStatus(0x10);
+            F12.ChangeSensorBoolStatus(1);
+            Block5B.ChangeSensorBoolStatus(1);
+            Block8A.ChangeSensorBoolStatus(1);
+			
+            TrackPowerTop.ChangeSensorBoolStatus(1);
+            Block5BIn.ChangeSensorBoolStatus(1);
+            Block6In.ChangeSensorBoolStatus(1);
+            Block7In.ChangeSensorBoolStatus(1);
+            ResistorTop.ChangeSensorBoolStatus(1);
+            Track1Top.ChangeSensorBoolStatus(1);
+            Track2Top.ChangeSensorBoolStatus(1);
+			
+            Track4Top.ChangeSensorBoolStatus(1);
+            Track5Top.ChangeSensorBoolStatus(1);
+            Track6Top.ChangeSensorBoolStatus(1);
+            Track7Top.ChangeSensorBoolStatus(1);
+            Track8Top.ChangeSensorBoolStatus(1);
+            Track9Top.ChangeSensorBoolStatus(1);
+            Track10Top.ChangeSensorBoolStatus(1);
+			
+            Block6.ChangeSensorBoolStatus(1);
+            Block7.ChangeSensorBoolStatus(1);
+			TrackPower15V.ChangeSensorBoolStatus(1);
+            F10.ChangeSensorBoolStatus(1);
+            M10.ChangeSensorBoolStatus(1);  
+			Track3Top.ChangeSensorBoolStatus(1);
+			Track11Top.ChangeSensorBoolStatus(1);
+			
+            TrainDetectionTop.ChangeSensorBoolStatus(1);
+            FiddleYardStoppedTop.ChangeSensorBoolStatus(1);
+
+			
+			
+			
+			
+			
+			
+            CL20Heart.ChangeSensorBoolStatus(1);
+            F21.ChangeSensorBoolStatus(1);
+            EOS20.ChangeSensorBoolStatus(1);
+            EOS21.ChangeSensorBoolStatus(1);
+            F23.ChangeSensorBoolStatus(1);
+			
+			TrackNoBot.ChangeSensorBoolStatus(0x10);
+            F22.ChangeSensorBoolStatus(1);
+            Block16B.ChangeSensorBoolStatus(1);
+            Block19A.ChangeSensorBoolStatus(1);
+			
+            TrackPowerBot.ChangeSensorBoolStatus(1);
+            Block16BIn.ChangeSensorBoolStatus(1);
+            Block17In.ChangeSensorBoolStatus(1);
+            Block18In.ChangeSensorBoolStatus(1);
+            ResistorBot.ChangeSensorBoolStatus(1);
+            Track1Bot.ChangeSensorBoolStatus(1);
+            Track2Bot.ChangeSensorBoolStatus(1);
+			
+            Track4Bot.ChangeSensorBoolStatus(1);
+            Track5Bot.ChangeSensorBoolStatus(1);
+            Track6Bot.ChangeSensorBoolStatus(1);
+            Track7Bot.ChangeSensorBoolStatus(1);
+            Track8Bot.ChangeSensorBoolStatus(1);
+            Track9Bot.ChangeSensorBoolStatus(1);
+            Track10Bot.ChangeSensorBoolStatus(1);
+			
+			Block17.ChangeSensorBoolStatus(1);
+            Block18.ChangeSensorBoolStatus(1);
+			TrackPower15V.ChangeSensorBoolStatus(1);
+            F20.ChangeSensorBoolStatus(1);
+            M20.ChangeSensorBoolStatus(1);  
+			Track3Bot.ChangeSensorBoolStatus(1);
+            Track11Bot.ChangeSensorBoolStatus(1);
+			
+			TrainDetectionBot.ChangeSensorBoolStatus(1);
+            FiddleYardStoppedBot.ChangeSensorBoolStatus(1);
+
+            #region cmd's string array
+        string[] CmdToFY = new string[27] {
+            "1" + "\r",               //  0  Track On
+            "2" + "\r",               //  1  Track Off
+            "3" + "\r",               //  2  Fiddle Track to the left track ++
+            "4" + "\r",               //  3  Fiddle Track to the right track --
+            "5" + "\r",               //  4  To track 1
+            "6" + "\r",               //  5  To track 2
+            "7" + "\r",               //  6  To track 3
+            "8" + "\r",               //  7  To track 4
+            "9" + "\r",               //  8  To track 5
+            "A" + "\r",               //  9  To track 6
+            "B" + "\r",               //  10  To track 7
+            "C" + "\r",               //  11  To track 8
+            "D" + "\r",               //  12 To track 9
+            "E" + "\r",               //  13  To track 10
+            "F" + "\r",               //  14  To track 11
+            "G" + "\r",               //  15  Train Detection
+            "H" + "\r",               //  16  Start Fiddle Yard
+            "I" + "\r",               //  17  Stop Fiddle Yard
+            "J" + "\r",               //  18  Stop Fiddle Yard Now (Reset)
+            "K" + "\r",               //  19  Bezet_In_5B_Switch_On
+            "L" + "\r",               //  20  Bezet_In_5B_Switch_Off
+            "M" + "\r",               //  21  Bezet_In_6_Switch_On
+            "N" + "\r",               //  22  Bezet_In_6_Switch_Off
+            "O" + "\r",               //  23  Bezet_In_7_Switch_On
+            "P" + "\r",               //  24  Bezet_In_7_Switch_Off
+            "Q" + "\r",               //  25  Resume previous operation
+            "R" + "\r"                //  26  Start Collect
+        };
+        #endregion cmd's string array
+		
+		
+		
+		
+		
+		
+	      FiddleOneLeftTop;
+          FiddleOneRightTop;
+          FiddleMultipleLeftTop;
+          FiddleMultipleRightTop;
+          TrainDetectionTop;  
+		  
+          TrainDriveOutFinishedTop;
+          TrainDriveInFinishedTop;
+          InitDoneTop;
+          InitStartedTop;
+          TrainOn5BTop;
+          TrainDriveInStartTop;
+          TrainOn8ATop;
+          TrainDriveOutStartTop;
+          FiddleYardSoftStartTop;
+		  
+          FiddleYardStoppedTop;
+		  
+          FiddleYardResetTop;
+          OccfromBlock6Top;
+          SensorF12HighTop;
+          OccfromBlock6AndSensorF12Top;
+          TrainDriveInFailedF12Top;
+          LastTrackTop;
+          UniversalErrorTop;
+          CollectFinishedFYFullTop;
+          CollectOnTop;
+          CollectOffTop;
+          TrainDriveOutCancelledTop;
+		  
+		  
+		  
+		  
+
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
