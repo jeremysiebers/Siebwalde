@@ -41,7 +41,7 @@ static STATE_MACHINE_VAR ACT_ST_MCHN[2]= 	{{0,0,0,0,0,0,0,0,{0,0,0,0,0,0,0,0,0,0
 
 void Drive_Train_IO_Reset(unsigned char ASL)
 {
-	
+		
 	ACT_ST_MCHN[ASL].Train_In_Track[0]=0;														// Array containing occupied track in fiddle yard (0 is not used)
 	ACT_ST_MCHN[ASL].Train_In_Track[1]=0;														// Array containing occupied track in fiddle yard
 	ACT_ST_MCHN[ASL].Train_In_Track[2]=0;														// Array containing occupied track in fiddle yard
@@ -54,6 +54,7 @@ void Drive_Train_IO_Reset(unsigned char ASL)
 	ACT_ST_MCHN[ASL].Train_In_Track[9]=0;														// Array containing occupied track in fiddle yard
 	ACT_ST_MCHN[ASL].Train_In_Track[10]=0;														// Array containing occupied track in fiddle yard
 	ACT_ST_MCHN[ASL].Train_In_Track[11]=0;														// Array containing occupied track in fiddle yard
+	
 	ACT_ST_MCHN[ASL].Train_Drive_Sequencer=0;													// Switch for Train in and out
 	ACT_ST_MCHN[ASL].Train_Drive_Sequencer_Old=0;												// Switch for Train in and out previous value
 	ACT_ST_MCHN[ASL].Scan_Delay=0;																// Delay before scan IO							
