@@ -261,13 +261,224 @@ Fiddle_Yard_Stopped
 		  
 		  
 		  
+CL10Heart;
+F11;		  
+EOS10;		  
+EOS11;		  
+F13;		  
+F12;		  
+Block5B;		  
+Block8A;		  
+TrackPowerTop;		  
+Block5BIn;		  
+Block6In;
+Block7In;
+ResistorTop;
+Track1Top;
+Track2Top;
+Track3Top;
+Track4Top;
+Track5Top;
+Track6Top;
+Track7Top;
+Track8Top;
+Track9Top;
+Track10Top;
+Track11Top;
+Block6;
+Block7;
+F10;
+M10;
+TrackNoTop;
 
-		  
-		  
-		  
-		  
-		  
-		  
-		  
-		  
-		  
+
+
+
+
+public Trk GetCL10Heart()
+        {
+            return TrackNo;
+        }
+        public Trk GetTrackPower()
+        {
+            return TrackNo;
+        }
+        public Trk GetM10()
+        {
+            return TrackNo;
+        }
+        public Trk GetResistor()
+        {
+            return TrackNo;
+        }        
+		
+		
+		
+		
+	
+               
+                
+                Message Msg_FiddleMultipleLeftTop = new Message("FiddleMultipleLeftFinished", " Fiddle Multiple Left Finished ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+                m_iFYCtrl.GetIoHandler().FiddleMultipleLeftTop.Attach(Msg_FiddleMultipleLeftTop);
+                Message Msg_FiddleMultipleRightTop = new Message("FiddleMultipleRightFinished", " Fiddle Multiple Right Finished ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+                m_iFYCtrl.GetIoHandler().FiddleMultipleRightTop.Attach(Msg_FiddleMultipleRightTop);
+                Message Msg_TrainDetectionTop = new Message("TrainDetectionFinished", " Train Detection Finished ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+                m_iFYCtrl.GetIoHandler().TrainDetectionTop.Attach(Msg_TrainDetectionTop);
+                Message Msg_TrainDriveOutFinishedTop = new Message("TrainDriveOutFinished", " Train Drive Out Finished ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+                m_iFYCtrl.GetIoHandler().TrainDriveOutFinishedTop.Attach(Msg_TrainDriveOutFinishedTop);
+                Message Msg_TrainDriveInFinishedTop = new Message("TrainDriveInFinished", " Train Drive In Finished ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+                m_iFYCtrl.GetIoHandler().TrainDriveInFinishedTop.Attach(Msg_TrainDriveInFinishedTop);
+                Message Msg_InitDoneTop = new Message("InitDone", " Init Done ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+                m_iFYCtrl.GetIoHandler().InitDoneTop.Attach(Msg_InitDoneTop);
+                Message Msg_InitStartedTop = new Message("InitStarted", " Init Started ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+                m_iFYCtrl.GetIoHandler().InitStartedTop.Attach(Msg_InitStartedTop);
+                Message Msg_TrainOn5BTop = new Message("TrainOn5B", " Train On 5B ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+                m_iFYCtrl.GetIoHandler().TrainOn5BTop.Attach(Msg_TrainOn5BTop);
+                Message Msg_TrainDriveInStartTop = new Message("TrainDriveInStart", " Train Drive In Start ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+                m_iFYCtrl.GetIoHandler().TrainDriveInStartTop.Attach(Msg_TrainDriveInStartTop);
+                Message Msg_TrainOn8ATop = new Message("TrainOn8A", " Train On 8A ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+                m_iFYCtrl.GetIoHandler().TrainOn8ATop.Attach(Msg_TrainOn8ATop);
+                Message Msg_TrainDriveOutStartTop = new Message("TrainDriveOutStart", " Train Drive Out Start ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+                m_iFYCtrl.GetIoHandler().TrainDriveOutStartTop.Attach(Msg_TrainDriveOutStartTop);
+                //Message Msg_FiddleYardSoftStartTop = new Message("FiddleYardSoftStart", " Fiddle Yard Soft Start ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+                //m_iFYCtrl.GetIoHandler().FiddleYardSoftStartTop.Attach(Msg_FiddleYardSoftStartTop);
+                //Message Msg_FiddleYardStoppedTop = new Message("FiddleYardStopped", " Fiddle Yard Stopped ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+                //m_iFYCtrl.GetIoHandler().FiddleYardStoppedTop.Attach(Msg_FiddleYardStoppedTop);
+                Message Msg_FiddleYardResetTop = new Message("FiddleYardReset", " Fiddle Yard Reset ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+                m_iFYCtrl.GetIoHandler().FiddleYardResetTop.Attach(Msg_FiddleYardResetTop);
+                Message Msg_OccfromBlock6Top = new Message("OccfromBlock6", " Occupied from Block6 ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+                m_iFYCtrl.GetIoHandler().OccfromBlock6Top.Attach(Msg_OccfromBlock6Top);
+                Message Msg_SensorF12HighTop = new Message("SensorF12High", " Message F12 High ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+                m_iFYCtrl.GetIoHandler().SensorF12HighTop.Attach(Msg_SensorF12HighTop);
+                Message Msg_OccfromBlock6AndSensorF12Top = new Message("OccfromBlock6AndSensorF12", " Occupied from Block6 And Message F12 High ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+                m_iFYCtrl.GetIoHandler().OccfromBlock6AndSensorF12Top.Attach(Msg_OccfromBlock6AndSensorF12Top);
+                Message Msg_TrainDriveInFailedF12Top = new Message("TrainDriveInFailedF12", " Train Drive In Failed F12 High ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+                m_iFYCtrl.GetIoHandler().TrainDriveInFailedF12Top.Attach(Msg_TrainDriveInFailedF12Top);
+                Message Msg_LastTrackTop = new Message("LastTrack", " Last Track ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+                m_iFYCtrl.GetIoHandler().LastTrackTop.Attach(Msg_LastTrackTop);
+                Message Msg_UniversalErrorTop = new Message("UniversalError", " Universal Error ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+                m_iFYCtrl.GetIoHandler().UniversalErrorTop.Attach(Msg_UniversalErrorTop);
+                Message Msg_CollectFinishedFYFullTop = new Message("CollectFinishedFYFull", " Collect Finished FY Full ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+                m_iFYCtrl.GetIoHandler().CollectFinishedFYFullTop.Attach(Msg_CollectFinishedFYFullTop);
+                Message Msg_CollectOnTop = new Message("CollectOn", " Collect On ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+                m_iFYCtrl.GetIoHandler().CollectOnTop.Attach(Msg_CollectOnTop);
+                Message Msg_CollectOffTop = new Message("CollectOff", " Collect Off ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+                m_iFYCtrl.GetIoHandler().CollectOffTop.Attach(Msg_CollectOffTop);
+                Message Msg_TrainDriveOutCancelledTop = new Message("TrainDriveOutCancelled", " Train Drive Out Cancelled ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+                m_iFYCtrl.GetIoHandler().TrainDriveOutCancelledTop.Attach(Msg_TrainDriveOutCancelledTop);
+		
+		
+		
+				Sensor Led_CL_10_Heart = new Sensor("LLed_Heart", " CL 10 Heart ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+                m_iFYCtrl.GetIoHandler().CL10Heart.Attach(Led_CL_10_Heart);
+                Sensor Led_F11 = new Sensor("LLed_F11", " F11 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+                m_iFYCtrl.GetIoHandler().F11.Attach(Led_F11);
+                Sensor Led_EOS10 = new Sensor("LLed_EOS10", " EOS 10 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+                m_iFYCtrl.GetIoHandler().EOS10.Attach(Led_EOS10);
+                Sensor Led_EOS11 = new Sensor("LLed_EOS11", " EOS 11 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+                m_iFYCtrl.GetIoHandler().EOS11.Attach(Led_EOS11);
+                Sensor Led_F13 = new Sensor("LLed_F13", " F13 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+                m_iFYCtrl.GetIoHandler().F13.Attach(Led_F13);
+                Sensor Led_F12 = new Sensor("LLed_F12", " F12 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+                m_iFYCtrl.GetIoHandler().F12.Attach(Led_F12);
+                Sensor Led_Block5B = new Sensor("LLed_Block5B", " Occupied from 5B ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+                m_iFYCtrl.GetIoHandler().Block5B.Attach(Led_Block5B);
+                Sensor Led_Block8A = new Sensor("LLed_Block8A", " Occupied from 8A ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+                m_iFYCtrl.GetIoHandler().Block8A.Attach(Led_Block8A);
+                Sensor Led_TrackPowerTop = new Sensor("LLed_TrackPower", " Enable Track ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+                m_iFYCtrl.GetIoHandler().TrackPowerTop.Attach(Led_TrackPowerTop);
+                Sensor Led_Block5BIn = new Sensor("LLed_Block5BIn", " Occupied to 5B ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+                m_iFYCtrl.GetIoHandler().Block5BIn.Attach(Led_Block5BIn);
+                Sensor Led_Block6In = new Sensor("LLed_Block6In", " Occupied to 6 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+                m_iFYCtrl.GetIoHandler().Block6In.Attach(Led_Block6In);
+                Sensor Led_Block7In = new Sensor("LLed_Block7In", " Occupied to 7 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+                m_iFYCtrl.GetIoHandler().Block7In.Attach(Led_Block7In);
+                Sensor Led_ResistorTop = new Sensor("LLed_Resistor", " Occupied Resistor ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+                m_iFYCtrl.GetIoHandler().ResistorTop.Attach(Led_ResistorTop);
+                Sensor Led_Track1Top = new Sensor("LLed_Track1", " Trains On Fiddle Yard Track1 ", 0, (name, val, log) => UpdateTrainsOnFY(name, val, log)); // initialize and subscribe sensors
+                m_iFYCtrl.GetIoHandler().Track1Top.Attach(Led_Track1Top);
+                Sensor Led_Track2Top = new Sensor("LLed_Track2", " Trains On Fiddle Yard Track2 ", 0, (name, val, log) => UpdateTrainsOnFY(name, val, log)); // initialize and subscribe sensors
+                m_iFYCtrl.GetIoHandler().Track2Top.Attach(Led_Track2Top);
+                Sensor Led_Track3Top = new Sensor("LLed_Track3", " Trains On Fiddle Yard Track3 ", 0, (name, val, log) => UpdateTrainsOnFY(name, val, log)); // initialize and subscribe sensors
+                m_iFYCtrl.GetIoHandler().Track3Top.Attach(Led_Track3Top);
+                Sensor Led_Track4Top = new Sensor("LLed_Track4", " Trains On Fiddle Yard Track4 ", 0, (name, val, log) => UpdateTrainsOnFY(name, val, log)); // initialize and subscribe sensors
+                m_iFYCtrl.GetIoHandler().Track4Top.Attach(Led_Track4Top);
+                Sensor Led_Track5Top = new Sensor("LLed_Track5", " Trains On Fiddle Yard Track5 ", 0, (name, val, log) => UpdateTrainsOnFY(name, val, log)); // initialize and subscribe sensors
+                m_iFYCtrl.GetIoHandler().Track5Top.Attach(Led_Track5Top);
+                Sensor Led_Track6Top = new Sensor("LLed_Track6", " Trains On Fiddle Yard Track6 ", 0, (name, val, log) => UpdateTrainsOnFY(name, val, log)); // initialize and subscribe sensors
+                m_iFYCtrl.GetIoHandler().Track6Top.Attach(Led_Track6Top);
+                Sensor Led_Track7Top = new Sensor("LLed_Track7", " Trains On Fiddle Yard Track7 ", 0, (name, val, log) => UpdateTrainsOnFY(name, val, log)); // initialize and subscribe sensors
+                m_iFYCtrl.GetIoHandler().Track7Top.Attach(Led_Track7Top);
+                Sensor Led_Track8Top = new Sensor("LLed_Track8", " Trains On Fiddle Yard Track8 ", 0, (name, val, log) => UpdateTrainsOnFY(name, val, log)); // initialize and subscribe sensors
+                m_iFYCtrl.GetIoHandler().Track8Top.Attach(Led_Track8Top);
+                Sensor Led_Track9Top = new Sensor("LLed_Track9", " Trains On Fiddle Yard Track9 ", 0, (name, val, log) => UpdateTrainsOnFY(name, val, log)); // initialize and subscribe sensors
+                m_iFYCtrl.GetIoHandler().Track9Top.Attach(Led_Track9Top);
+                Sensor Led_Track10Top = new Sensor("LLed_Track10", " Trains On Fiddle Yard Track10 ", 0, (name, val, log) => UpdateTrainsOnFY(name, val, log)); // initialize and subscribe sensors
+                m_iFYCtrl.GetIoHandler().Track10Top.Attach(Led_Track10Top);
+                Sensor Led_Track11Top = new Sensor("LLed_Track11", " Trains On Fiddle Yard Track11 ", 0, (name, val, log) => UpdateTrainsOnFY(name, val, log)); // initialize and subscribe sensors
+                m_iFYCtrl.GetIoHandler().Track11Top.Attach(Led_Track11Top);
+                Sensor Led_Block6 = new Sensor("LLed_Block6", " Occupied from 6 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+                m_iFYCtrl.GetIoHandler().Block6.Attach(Led_Block6);
+                Sensor Led_Block7 = new Sensor("LLed_Block7", " Occupied from 7 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+                m_iFYCtrl.GetIoHandler().Block7.Attach(Led_Block7);
+                Sensor Led_F10 = new Sensor("LLed_F10", " F10 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+                m_iFYCtrl.GetIoHandler().F10.Attach(Led_F10);
+                Sensor Led_M10 = new Sensor("LLed_M10", " M10 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+                m_iFYCtrl.GetIoHandler().M10.Attach(Led_M10);
+                Sensor Led_TrackNoTop = new Sensor("Track_No", " Track Nr ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+                m_iFYCtrl.GetIoHandler().TrackNoTop.Attach(Led_TrackNoTop);
+                Sensor Led_TrackPower15VTOP = new Sensor("LLed_15VTrackPower", " 15V Track Power ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+                m_iFYCtrl.GetIoHandler().TrackPower15V.Attach(Led_TrackPower15VTOP);
+		
+		
+		
+		
+		
+		
+		 CL_10_Heart =
+		 F11 = false;
+		 EOS10 = false
+		 EOS11 = false
+		 F13 = false;
+		 F12 = false;
+		 Block5B = fal
+		 Block8A = fal
+		 TrackPower = 
+		 Block5BIn = f
+		 Block6In = fa
+		 Block7In = fa
+		 Resistor = fa
+		 Block6 = fals
+		 Block7 = fals
+		 F10 = false;
+		 M10 = false;
+		 TrackPower15V
+		TrackNo = 0;
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		

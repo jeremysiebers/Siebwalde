@@ -91,6 +91,8 @@
     <Compile Include="AboutBox1.Designer.cs">
       <DependentUpon>AboutBox1.cs</DependentUpon>
     </Compile>
+    <Compile Include="FiddleYardAppInit.cs" />
+    <Compile Include="FiddleYardSimOneMove.cs" />
     <Compile Include="FiddleYardApplication.cs" />
     <Compile Include="FiddleYardSimulator.cs" />
     <Compile Include="FiddleYardIOHandle.cs" />

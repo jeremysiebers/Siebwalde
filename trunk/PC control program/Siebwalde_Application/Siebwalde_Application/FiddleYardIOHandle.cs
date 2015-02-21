@@ -60,8 +60,8 @@ namespace Siebwalde_Application
         public MessageUpdater TrainDriveInStartTop;
         public MessageUpdater TrainOn8ATop;
         public MessageUpdater TrainDriveOutStartTop;
-        public MessageUpdater FiddleYardSoftStartTop;
-        public MessageUpdater FiddleYardStoppedTop;
+        //public MessageUpdater FiddleYardStartTop;  --> moved to FYapplication
+        //public MessageUpdater FiddleYardStoppedTop;  --> moved to FYapplication
         public MessageUpdater FiddleYardResetTop;
         public MessageUpdater OccfromBlock6Top;
         public MessageUpdater SensorF12HighTop;
@@ -73,7 +73,8 @@ namespace Siebwalde_Application
         public MessageUpdater CollectOnTop;
         public MessageUpdater CollectOffTop;
         public MessageUpdater TrainDriveOutCancelledTop;
-       
+        public MessageUpdater TargetAliveTop;
+                                   
         // Create sensors BOT
         public SensorUpdater CL20Heart;
         public SensorUpdater F21;
@@ -131,6 +132,7 @@ namespace Siebwalde_Application
         public MessageUpdater CollectOnBot;
         public MessageUpdater CollectOffBot;
         public MessageUpdater TrainDriveOutCancelledBot;
+        public MessageUpdater TargetAliveBot;
 
         // Creating sensors TOP/BOT
         public SensorUpdater TrackPower15V;
@@ -210,8 +212,8 @@ namespace Siebwalde_Application
             TrainDriveInStartTop = new MessageUpdater();
             TrainOn8ATop = new MessageUpdater();
             TrainDriveOutStartTop = new MessageUpdater();
-            FiddleYardSoftStartTop = new MessageUpdater();
-            FiddleYardStoppedTop = new MessageUpdater();
+            //FiddleYardStartTop = new MessageUpdater();    --> moved to FYapplication
+            //FiddleYardStoppedTop = new MessageUpdater();  --> moved to FYapplication
             FiddleYardResetTop = new MessageUpdater();
             OccfromBlock6Top = new MessageUpdater();
             SensorF12HighTop = new MessageUpdater();
@@ -223,6 +225,7 @@ namespace Siebwalde_Application
             CollectOnTop = new MessageUpdater();
             CollectOffTop = new MessageUpdater();
             TrainDriveOutCancelledTop = new MessageUpdater();
+            TargetAliveTop = new MessageUpdater();
 
             // Instantiate sensors BOT
             CL20Heart = new SensorUpdater();
@@ -281,6 +284,8 @@ namespace Siebwalde_Application
             CollectOnBot = new MessageUpdater();
             CollectOffBot = new MessageUpdater();
             TrainDriveOutCancelledBot = new MessageUpdater();
+            TargetAliveBot = new MessageUpdater();
+
             // Instantiate sensors TOP/BOT
             TrackPower15V = new SensorUpdater();
 
@@ -289,11 +294,13 @@ namespace Siebwalde_Application
 
         /*#--------------------------------------------------------------------------#*/
         /*  Description: ActuatorCmd
+         *               Sends all commands from FYApplication to real target or
+         *               to simulator.
          *               
          *
          *  Input(s)   :
          *
-         *  Output(s)  : Sends all commands trough FYApplication
+         *  Output(s)  : 
          *
          *  Returns    :
          *
@@ -322,8 +329,10 @@ namespace Siebwalde_Application
 
         /*#--------------------------------------------------------------------------#*/
         /*  Description: IO Handle start
-         *               to couple or real target to application to get real sensor feedback
+         *               to couple real target to application to get real sensor feedback
          *               or to couple simulator output back to application
+         *               Also reset target/simulator to achieve known startup, target
+         *               maybe already be running/initialized
          *               
          *
          *  Input(s)   :
@@ -341,7 +350,7 @@ namespace Siebwalde_Application
         /*#--------------------------------------------------------------------------#*/
         public void Start(bool FYSimulatorActive)
         {
-            // Instantiate actuators TOP here, after all source files are generated and itmes are created
+            // Instantiate actuators TOP here, after all source files are generated and itmes are created, otherwise deadlock (egg - chicken story)
             Actuator Act_CoupleTop = new Actuator("Couple", "FiddleYardTOP", "a1\r", (name, layer, cmd) => ActuatorCmd(name, layer, cmd)); // initialize and subscribe actuators
             m_iFYCtrl.GetFYAppTop().Couple.Attach(Act_CoupleTop);
             Actuator Act_UncoupleTop = new Actuator("Uncouple", "FiddleYardTOP", "a2\r", (name, layer, cmd) => ActuatorCmd(name, layer, cmd)); // initialize and subscribe actuators
@@ -397,7 +406,7 @@ namespace Siebwalde_Application
             Actuator Act_CollectTop = new Actuator("Collect", "FiddleYardTOP", "aR\r", (name, layer, cmd) => ActuatorCmd(name, layer, cmd)); // initialize and subscribe actuators
             m_iFYCtrl.GetFYAppTop().Collect.Attach(Act_CollectTop);
 
-            // Instantiate actuators BOT here, after all source files are generated and itmes are created
+            // Instantiate actuators BOT here, after all source files are generated and itmes are created, otherwise deadlock (egg - chicken story)
             Actuator Act_CoupleBot = new Actuator("Couple", "FiddleYardBOT", "b1\r", (name, layer, cmd) => ActuatorCmd(name, layer, cmd)); // initialize and subscribe actuators
             m_iFYCtrl.GetFYAppBot().Couple.Attach(Act_CoupleBot);
             Actuator Act_UncoupleBot = new Actuator("Uncouple", "FiddleYardBOT", "b2\r", (name, layer, cmd) => ActuatorCmd(name, layer, cmd)); // initialize and subscribe actuators
@@ -468,12 +477,11 @@ namespace Siebwalde_Application
                 m_iFYCtrl.GetFYSimulatorTop().NewData += HandleNewData;
                 m_iFYCtrl.GetFYSimulatorBot().NewData += HandleNewData; 
             }
-
-            System.Threading.Thread.Sleep(50);
-            ActuatorCmd("Reset", "FiddleYardTOP", "aJ\r"); // Reset Fiddle Yard TOP layer to reset target
-            System.Threading.Thread.Sleep(50);
-            ActuatorCmd("Reset", "FiddleYardBOT", "bJ\r"); // Reset Fiddle Yard BOT layer to reset target
-            System.Threading.Thread.Sleep(50);
+            
+            ActuatorCmd("Reset", "FiddleYardTOP", "aJ\r");  // Reset Fiddle Yard TOP layer to reset target in order to sync C# application and C embedded software
+            System.Threading.Thread.Sleep(50);              // Add aditional wait time for the target to process the reset command
+            ActuatorCmd("Reset", "FiddleYardBOT", "bJ\r");  // Reset Fiddle Yard BOT layer to reset target in order to sync C# application and C embedded software
+            System.Threading.Thread.Sleep(50);              // Add aditional wait time for the target to process the reset command
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -641,9 +649,9 @@ namespace Siebwalde_Application
                             break;
                         case 0x12: TrainDriveOutStartTop.UpdateMessage();
                             break;
-                        case 0x13: FiddleYardSoftStartTop.UpdateMessage();
+                        case 0x13: //FiddleYardSoftStartTop.UpdateMessage();
                             break;
-                        case 0x14: FiddleYardStoppedTop.UpdateMessage();
+                        case 0x14: //FiddleYardStoppedTop.UpdateMessage();
                             break;
                         case 0x15: FiddleYardResetTop.UpdateMessage();
                             break;
@@ -666,6 +674,8 @@ namespace Siebwalde_Application
                         case 0x26: CollectOffTop.UpdateMessage();
                             break;
                         case 0x2F: TrainDriveOutCancelledTop.UpdateMessage();
+                            break;
+                        case 0x30: TargetAliveTop.UpdateMessage();
                             break;
                         default: break;
                     }
@@ -727,6 +737,8 @@ namespace Siebwalde_Application
                             break;
                         case 0x2F: TrainDriveOutCancelledBot.UpdateMessage();
                             break;
+                        case 0x30: TargetAliveBot.UpdateMessage();
+                            break;
                         default: break;
                     }
                 }
@@ -758,18 +770,20 @@ namespace Siebwalde_Application
     public abstract class ASensor
     {
 
-        public delegate void StatusUpdate(int Value, bool ForceUpdate);
+        public delegate void StatusUpdate(int Value, bool ForceUpdate);        
         public event StatusUpdate OnStatusUpdate = null;
+        
 
         public void Attach(Sensor SensorUpdate)
         {
-            OnStatusUpdate += new StatusUpdate(SensorUpdate.Update);
+            OnStatusUpdate += new StatusUpdate(SensorUpdate.Update);            
         }
 
         public void Detach(Sensor SensorUpdate)
         {
             OnStatusUpdate -= new StatusUpdate(SensorUpdate.Update);
-        }
+            
+        }      
 
         public void Notify(int Value, bool ForceUpdate)
         {
@@ -777,7 +791,7 @@ namespace Siebwalde_Application
             {
                 OnStatusUpdate(Value, ForceUpdate);
             }
-        }
+        }        
     }
 
     public class SensorUpdater : ASensor
@@ -785,12 +799,12 @@ namespace Siebwalde_Application
         public void UpdateSensorValue(int Value, bool ForceUpdate)
         {
             Notify(Value, ForceUpdate);
-        }
+        }        
     }
 
     interface SensorUpdate
     {
-        void Update(int NewSensorValue, bool NewForceUpdate);
+        void Update(int NewSensorValue, bool NewForceUpdate);        
     }
 
     public class Sensor : SensorUpdate
@@ -824,6 +838,10 @@ namespace Siebwalde_Application
                 this.Value = NewSensorValue;
                 m_OnChangedAction(this.name, this.Value, this.LogString);
             }
+        }
+        public int GetValue()
+        {
+            return this.Value;
         }
     }
 
