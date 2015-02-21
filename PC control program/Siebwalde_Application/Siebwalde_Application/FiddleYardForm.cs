@@ -30,10 +30,10 @@ namespace Siebwalde_Application
         public const int TOP = 1;
         public const int BOT = 0;
 
-        public const int GWinHalf = 740/2+32; // The Height of GWin devided by 2 plus the offset in Y is the center line of GWin
-        public const int GWinX = 5;           // The X location of Gwin border line.
-        public const int Track6LocY = GWinHalf - 8;
-        public const int Track6LocX = GWinX + 170;
+        public int GWinHalf;    // The Height of GWin devided by 2 plus the offset in Y is the center line of GWin
+        public int GWinX;       // The X location of Gwin border line.
+        public int Track6LocY;
+        public int Track6LocX;
 
         public bool[] TrackStatusLight = new bool[12]
         {
@@ -67,12 +67,12 @@ namespace Siebwalde_Application
         public CommandUpdater FYStart;
         public CommandUpdater FYStop;
         public CommandUpdater Reset;
-        public CommandUpdater Bezet5BOnTrue;
-        public CommandUpdater Bezet5BOnFalse;
-        public CommandUpdater Bezet6OnTrue;
-        public CommandUpdater Bezet6OnFalse;
-        public CommandUpdater Bezet7OnTrue;
-        public CommandUpdater Bezet7OnFalse;
+        public CommandUpdater Occ5BOnTrue;
+        public CommandUpdater Occ5BOnFalse;
+        public CommandUpdater Occ6OnTrue;
+        public CommandUpdater Occ6OnFalse; 
+        public CommandUpdater Occ7OnTrue;
+        public CommandUpdater Occ7OnFalse; 
         public CommandUpdater Recoverd;
         public CommandUpdater Collect;
 
@@ -83,6 +83,13 @@ namespace Siebwalde_Application
             #region Indicator init
             // Size of window on Modeltrain PC is 960; 1085
             // Placed on 0; 85
+
+            GWinHalf = 740/2+32;            // The Height of GWin devided by 2 plus the offset in Y is the center line of GWin
+            GWinX = 5;                      // The X location of Gwin border line.
+            Track6LocY = GWinHalf - 8;
+            Track6LocX = GWinX + 170;
+            
+
             GWin.Size = new Size (940,740);
             GWin.Location = new System.Drawing.Point(5, 32);
 
@@ -202,6 +209,9 @@ namespace Siebwalde_Application
             Btn_Reset_TOP.Size = new Size(80, 32);
             Btn_Reset_TOP.Location = new System.Drawing.Point(GWinX + 10, GWinHalf - 360);
 
+            //LLed_Alive.Size = new Size(16, 16);
+            //LLed_Alive.Location = new System.Drawing.Point(GWinX + 880, GWinHalf + 360 - 16);
+
             SimulationMode.Visible = false;
 
             #endregion Indicator init
@@ -226,12 +236,12 @@ namespace Siebwalde_Application
             FYStart = new CommandUpdater();
             FYStop = new CommandUpdater();
             Reset = new CommandUpdater();
-            Bezet5BOnTrue = new CommandUpdater();
-            Bezet5BOnFalse = new CommandUpdater();
-            Bezet6OnTrue = new CommandUpdater();
-            Bezet6OnFalse = new CommandUpdater();
-            Bezet7OnTrue = new CommandUpdater();
-            Bezet7OnFalse = new CommandUpdater();
+            Occ5BOnTrue = new CommandUpdater();
+            Occ5BOnFalse = new CommandUpdater();
+            Occ6OnTrue = new CommandUpdater();
+            Occ6OnFalse = new CommandUpdater();
+            Occ7OnTrue = new CommandUpdater();
+            Occ7OnFalse = new CommandUpdater();
             Recoverd = new CommandUpdater();
             Collect = new CommandUpdater();
 
@@ -294,6 +304,7 @@ namespace Siebwalde_Application
                 m_iFYCtrl.GetIoHandler().Track10Top.Attach(Led_Track10Top);
                 Sensor Led_Track11Top = new Sensor("LLed_Track11", " Trains On Fiddle Yard Track11 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
                 m_iFYCtrl.GetIoHandler().Track11Top.Attach(Led_Track11Top);*/
+
                 Sensor Led_Track1Top = new Sensor("LLed_Track1", " Trains On Fiddle Yard Track1 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
                 m_iFYCtrl.GetFYAppTop().Track1.Attach(Led_Track1Top);
                 Sensor Led_Track2Top = new Sensor("LLed_Track2", " Trains On Fiddle Yard Track2 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
@@ -338,7 +349,7 @@ namespace Siebwalde_Application
                 m_iFYCtrl.GetIoHandler().FiddleMultipleLeftTop.Attach(Msg_FiddleMultipleLeftTop);
                 Message Msg_FiddleMultipleRightTop = new Message("FiddleMultipleRight", " Fiddle Multiple Right Ok ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
                 m_iFYCtrl.GetIoHandler().FiddleMultipleRightTop.Attach(Msg_FiddleMultipleRightTop);
-                Message Msg_TrainDetectionTop = new Message("TrainDetection", " Train Detection Finished ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+                Message Msg_TrainDetectionTop = new Message("TrainDetectionFinished", " Train Detection Finished ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
                 m_iFYCtrl.GetIoHandler().TrainDetectionTop.Attach(Msg_TrainDetectionTop);
                 Message Msg_TrainDriveOutFinishedTop = new Message("TrainDriveOut", " Train Drive Out Finished ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
                 m_iFYCtrl.GetIoHandler().TrainDriveOutFinishedTop.Attach(Msg_TrainDriveOutFinishedTop);
@@ -356,10 +367,12 @@ namespace Siebwalde_Application
                 m_iFYCtrl.GetIoHandler().TrainOn8ATop.Attach(Msg_TrainOn8ATop);
                 Message Msg_TrainDriveOutStartTop = new Message("TrainDriveOut", " Train Drive Out Start ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
                 m_iFYCtrl.GetIoHandler().TrainDriveOutStartTop.Attach(Msg_TrainDriveOutStartTop);
-                Message Msg_FiddleYardSoftStartTop = new Message("FiddleYardSoftStart", " Fiddle Yard Soft Start ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().FiddleYardSoftStartTop.Attach(Msg_FiddleYardSoftStartTop);
+
+                Message Msg_FiddleYardStartTop = new Message("FiddleYardStart", " Fiddle Yard Start ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+                m_iFYCtrl.GetFYAppTop().FiddleYardStart.Attach(Msg_FiddleYardStartTop);
                 Message Msg_FiddleYardStoppedTop = new Message("FiddleYardStopped", " Fiddle Yard Stopped ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().FiddleYardStoppedTop.Attach(Msg_FiddleYardStoppedTop);
+                m_iFYCtrl.GetFYAppTop().FiddleYardStopped.Attach(Msg_FiddleYardStoppedTop);
+
                 Message Msg_FiddleYardResetTop = new Message("FiddleYardReset", " Fiddle Yard Reset ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
                 m_iFYCtrl.GetIoHandler().FiddleYardResetTop.Attach(Msg_FiddleYardResetTop);
                 Message Msg_OccfromBlock6Top = new Message("OccfromBlock6", " Occupied from Block6 ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
@@ -381,7 +394,9 @@ namespace Siebwalde_Application
                 Message Msg_CollectOffTop = new Message("CollectOff", " Collect Off ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
                 m_iFYCtrl.GetIoHandler().CollectOffTop.Attach(Msg_CollectOffTop);
                 Message Msg_TrainDriveOutCancelledTop = new Message("TrainDriveOutCancelled", " Train Drive Out Cancelled ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().TrainDriveOutCancelledTop.Attach(Msg_TrainDriveOutCancelledTop);    
+                m_iFYCtrl.GetIoHandler().TrainDriveOutCancelledTop.Attach(Msg_TrainDriveOutCancelledTop);
+                Message Msg_TargetAliveTop = new Message("TargetAlive", "", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+                m_iFYCtrl.GetIoHandler().TargetAliveTop.Attach(Msg_TargetAliveTop); 
             }
             else if (this.Name == "FiddleYardBOT")
             {
@@ -436,6 +451,7 @@ namespace Siebwalde_Application
                 m_iFYCtrl.GetIoHandler().Track10Bot.Attach(Led_Track10Bot);
                 Sensor Led_Track11Bot = new Sensor("LLed_Track11", " Trains On Fiddle Yard Track11 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
                 m_iFYCtrl.GetIoHandler().Track11Bot.Attach(Led_Track11Bot);*/
+
                 Sensor Led_Track1Bot = new Sensor("LLed_Track1", " Trains On Fiddle Yard Track1 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
                 m_iFYCtrl.GetFYAppBot().Track1.Attach(Led_Track1Bot);
                 Sensor Led_Track2Bot = new Sensor("LLed_Track2", " Trains On Fiddle Yard Track2 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
@@ -480,7 +496,7 @@ namespace Siebwalde_Application
                 m_iFYCtrl.GetIoHandler().FiddleMultipleLeftBot.Attach(Msg_FiddleMultipleLeftBot);
                 Message Msg_FiddleMultipleRightBot = new Message("FiddleMultipleRight", " Fiddle Multiple Right Ok ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
                 m_iFYCtrl.GetIoHandler().FiddleMultipleRightBot.Attach(Msg_FiddleMultipleRightBot);
-                Message Msg_TrainDetectionBot = new Message("TrainDetection", " Train Detection Finished ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+                Message Msg_TrainDetectionBot = new Message("TrainDetectionFinished", " Train Detection Finished ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
                 m_iFYCtrl.GetIoHandler().TrainDetectionBot.Attach(Msg_TrainDetectionBot);
                 Message Msg_TrainDriveOutFinishedBot = new Message("TrainDriveOut", " Train Drive Out Finished ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
                 m_iFYCtrl.GetIoHandler().TrainDriveOutFinishedBot.Attach(Msg_TrainDriveOutFinishedBot);
@@ -498,10 +514,12 @@ namespace Siebwalde_Application
                 m_iFYCtrl.GetIoHandler().TrainOn8ABot.Attach(Msg_TrainOn8ABot);
                 Message Msg_TrainDriveOutStartBot = new Message("TrainDriveOut", " Train Drive Out Start ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
                 m_iFYCtrl.GetIoHandler().TrainDriveOutStartBot.Attach(Msg_TrainDriveOutStartBot);
-                Message Msg_FiddleYardSoftStartBot = new Message("FiddleYardSoftStart", " Fiddle Yard Soft Start ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().FiddleYardSoftStartBot.Attach(Msg_FiddleYardSoftStartBot);
-                Message Msg_FiddleYardSBotpedBot = new Message("FiddleYardSBotped", " Fiddle Yard SBotped ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().FiddleYardStoppedBot.Attach(Msg_FiddleYardSBotpedBot);
+
+                Message Msg_FiddleYardStartBot = new Message("FiddleYardStart", " Fiddle Yard Start ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+                m_iFYCtrl.GetFYAppBot().FiddleYardStart.Attach(Msg_FiddleYardStartBot);
+                Message Msg_FiddleYardStoppedBot = new Message("FiddleYardStopped", " Fiddle Yard Stopped ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+                m_iFYCtrl.GetFYAppBot().FiddleYardStopped.Attach(Msg_FiddleYardStoppedBot);
+
                 Message Msg_FiddleYardResetBot = new Message("FiddleYardReset", " Fiddle Yard Reset ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
                 m_iFYCtrl.GetIoHandler().FiddleYardResetBot.Attach(Msg_FiddleYardResetBot);
                 Message Msg_OccfromBlock6Bot = new Message("OccfromBlock6", " Occupied from Block6 ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
@@ -523,7 +541,9 @@ namespace Siebwalde_Application
                 Message Msg_CollectOffBot = new Message("CollectOff", " Collect Off ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
                 m_iFYCtrl.GetIoHandler().CollectOffBot.Attach(Msg_CollectOffBot);
                 Message Msg_TrainDriveOutCancelledBot = new Message("TrainDriveOutCancelled", " Train Drive Out Cancelled ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().TrainDriveOutCancelledBot.Attach(Msg_TrainDriveOutCancelledBot);                
+                m_iFYCtrl.GetIoHandler().TrainDriveOutCancelledBot.Attach(Msg_TrainDriveOutCancelledBot);
+                Message Msg_TargetAliveBot = new Message("TargetAlive", "", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+                m_iFYCtrl.GetIoHandler().TargetAliveBot.Attach(Msg_TargetAliveBot); 
                 
             }
         }
@@ -575,8 +595,8 @@ namespace Siebwalde_Application
             this.Opacity = 100;
             this.ShowInTaskbar = true;
             this.Show();
-            this.TopMost = true;
-
+            this.TopLevel = true;
+            
             if (this.Name == "FiddleYardTOP")
             {
                 //this.Location = new System.Drawing.Point(0, 75);
@@ -766,13 +786,13 @@ namespace Siebwalde_Application
             if (Btn_Bezet5BOn_TOP_Click_Toggle == true)
             {
                 Btn_Bezet5BOn_TOP_Click_Toggle = false;
-                Bezet5BOnTrue.UpdateCommand();
+                Occ5BOnTrue.UpdateCommand();
                 Btn_Bezet5BOn_TOP.Text = "Off";
             }
             else if (Btn_Bezet5BOn_TOP_Click_Toggle == false)
             {
                 Btn_Bezet5BOn_TOP_Click_Toggle = true;
-                Bezet5BOnFalse.UpdateCommand();
+                Occ5BOnFalse.UpdateCommand();
                 Btn_Bezet5BOn_TOP.Text = "On";
             }
         }
@@ -782,13 +802,13 @@ namespace Siebwalde_Application
             if (Btn_Bezet6On_TOP_Click_Toggle == true)
             {
                 Btn_Bezet6On_TOP_Click_Toggle = false;
-                Bezet6OnTrue.UpdateCommand();
+                Occ6OnTrue.UpdateCommand();
                 Btn_Bezet6On_TOP.Text = "Off";
             }
             else if (Btn_Bezet6On_TOP_Click_Toggle == false)
             {
                 Btn_Bezet6On_TOP_Click_Toggle = true;
-                Bezet6OnFalse.UpdateCommand();
+                Occ6OnFalse.UpdateCommand();
                 Btn_Bezet6On_TOP.Text = "On";
             }
         }
@@ -798,13 +818,13 @@ namespace Siebwalde_Application
             if (Btn_Bezet7On_TOP_Click_Toggle == true)
             {
                 Btn_Bezet7On_TOP_Click_Toggle = false;
-                Bezet7OnTrue.UpdateCommand();
+                Occ7OnTrue.UpdateCommand();
                 Btn_Bezet7On_TOP.Text = "Off";
             }
             else if (Btn_Bezet7On_TOP_Click_Toggle == false)
             {
                 Btn_Bezet7On_TOP_Click_Toggle = true;
-                Bezet7OnFalse.UpdateCommand();
+                Occ7OnFalse.UpdateCommand();
                 Btn_Bezet7On_TOP.Text = "On";
             }
         }
@@ -828,13 +848,20 @@ namespace Siebwalde_Application
             }
             else
             {
-                string text = null;
-                text = DateTime.Now + log + Environment.NewLine;
-                ReceivedCmd.AppendText(text);
-                StoreText(text);
-                switch (log)
+                if (log != "")
                 {
-                    case " Train Detection Finished ":                                  // Traindetection (because message train detection comes first and "trains on fiddle yard trackX true/false                        
+                    string text = null;
+                    text = DateTime.Now + log + Environment.NewLine;
+                    ReceivedCmd.AppendText(text);
+                    StoreText(text);
+                }
+
+                switch (name)
+                {
+                    case "TargetAlive" :                                   
+                        
+                        break;
+                    case "TrainDetectionFinished":                          // Traindetection (because message train detection comes first and "trains on fiddle yard trackX true/false                        
                         if (Initialized == false)
                         {
                             LLed_Track1.BackColor = Color.Transparent;      // comes later, all tracks get the correct color.
@@ -863,7 +890,7 @@ namespace Siebwalde_Application
                         Initialized = true;
                         break;
 
-                    case " Fiddle Yard Stopped ":
+                    case "FiddleYardStopped":
                         Btn_Collect_TOP.Enabled = true;
                         manualModeToolStripMenuItem.Enabled = true;
                         Btn_Start_Fiddle_TOP.Enabled = true;

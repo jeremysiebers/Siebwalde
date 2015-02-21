@@ -4,273 +4,163 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 
 namespace Siebwalde_Application
 {
-    public class FiddleYardSimulator
+    public interface iFiddleYardSimulator
+    {
+        Trk GetTrackNo();
+        Var GetCL10Heart();
+        Var GetTrackPower();
+        Var GetM10();
+        Var GetResistor();
+        Msg GetFiddleOneLeftFinished();
+        Msg GetFiddleOneRightFinished();
+        Msg GetFiddleMultipleLeftFinished();
+        Msg  GetFiddleMultipleRightFinished();
+        Msg GetTrainDetectionFinished();
+        Msg GetTrainOn5B();
+        Msg GetTrainOn8A();
+        Msg GetFiddleYardReset();
+    }
+
+    public class FiddleYardSimulator : iFiddleYardSimulator
     {
         public iFiddleYardController m_iFYCtrl; // connect variable to connect to FYController class for defined interfaces
         public Action<byte[]> NewData;
-
         string m_instance = null;
-        
+        FiddleYardSimOneMove FYOneMove;
 
+        private enum State { Idle, CL10Heart, Reset, FiddleOneLeft, FiddleOneRight };
+        private State State_Machine;        
+
+        // Create a timer
+        System.Timers.Timer aTimer = new System.Timers.Timer();
+        // Hook up the Elapsed event for the timer. 
+
+        Var CL10Heart = new Var();
+        Var F11 = new Var();		
+        Var EOS10 = new Var();		
+        Var EOS11 = new Var();		
+        Var F13 = new Var();		
+        Var F12 = new Var();		
+        Var Block5B = new Var();	
+        Var Block8A = new Var();
+        Var TrackPower = new Var();
+        Var Block5BIn = new Var();	
+        Var Block6In = new Var();
+        Var Block7In = new Var();
+        Var Resistor = new Var();
+        Var Track1 = new Var();
+        Var Track2 = new Var();
+        Var Track3 = new Var();
+        Var Track4 = new Var();
+        Var Track5 = new Var();
+        Var Track6 = new Var();
+        Var Track7 = new Var();
+        Var Track8 = new Var();
+        Var Track9 = new Var();
+        Var Track10 = new Var();
+        Var Track11 = new Var();
+        Var Block6 = new Var();
+        Var Block7 = new Var();
+        Var F10 = new Var();
+        Var M10 = new Var();
+        Trk TrackNo = new Trk();
+        Var TrackPower15V = new Var();
+        Msg FiddleOneLeftFinished = new Msg();
+        Msg FiddleOneRightFinished = new Msg();
+        Msg FiddleMultipleLeftFinished = new Msg();
+        Msg FiddleMultipleRightFinished = new Msg();
+        Msg TrainDetectionFinished = new Msg();
+        Msg TrainOn5B = new Msg();
+        Msg TrainOn8A = new Msg();
+        Msg FiddleYardReset = new Msg();
+
+        List<Msg> list = new List<Msg>();
+
+        public Trk GetTrackNo()
+        {
+            return TrackNo;
+        }
+        public Var GetCL10Heart()
+        {
+            return CL10Heart;
+        }
+        public Var GetTrackPower()
+        {
+            return TrackPower;
+        }
+        public Var GetM10()
+        {
+            return M10;
+        }
+        public Var GetResistor()
+        {
+            return Resistor;
+        }    
+        public Msg GetFiddleOneLeftFinished()
+        {
+            return FiddleOneLeftFinished;
+        }
+        public Msg GetFiddleOneRightFinished()
+        {
+            return FiddleOneRightFinished;
+        }        
+        public Msg GetFiddleMultipleLeftFinished()
+        {
+            return FiddleMultipleLeftFinished;
+        }        
+        public Msg  GetFiddleMultipleRightFinished()
+        {
+            return FiddleMultipleRightFinished;
+        }        
+        public Msg GetTrainDetectionFinished()
+        {
+            return TrainDetectionFinished;
+        }        
+        public Msg GetTrainOn5B()
+        {
+            return TrainOn5B;
+        }
+        public Msg GetTrainOn8A()
+        {
+            return TrainOn8A;
+        }
+        public Msg GetFiddleYardReset()
+        {
+            return FiddleYardReset;
+        }
+        
+        
         public FiddleYardSimulator(string Instance, iFiddleYardController iFYCtrl)
         {
             m_iFYCtrl = iFYCtrl;    // connect to FYController interface, save interface in variable
-            m_instance = Instance;            
+            m_instance = Instance;
+
+            FYOneMove = new FiddleYardSimOneMove(this);           
 
             if ("FiddleYardTOP" == m_instance)
-            {
-                //Sensors
-                Sensor Led_CL_10_Heart = new Sensor("LLed_Heart", " CL 10 Heart ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                 m_iFYCtrl.GetIoHandler().CL10Heart.Attach(Led_CL_10_Heart);
-                Sensor Led_F11 = new Sensor("LLed_F11", " F11 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().F11.Attach(Led_F11);
-                Sensor Led_EOS10 = new Sensor("LLed_EOS10", " EOS 10 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().EOS10.Attach(Led_EOS10);
-                Sensor Led_EOS11 = new Sensor("LLed_EOS11", " EOS 11 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().EOS11.Attach(Led_EOS11);
-                Sensor Led_F13 = new Sensor("LLed_F13", " F13 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().F13.Attach(Led_F13);
-                Sensor Led_F12 = new Sensor("LLed_F12", " F12 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().F12.Attach(Led_F12);
-                Sensor Led_Block5B = new Sensor("LLed_Block5B", " Occupied from 5B ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().Block5B.Attach(Led_Block5B);
-                Sensor Led_Block8A = new Sensor("LLed_Block8A", " Occupied from 8A ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().Block8A.Attach(Led_Block8A);
-                Sensor Led_TrackPowerTop = new Sensor("LLed_TrackPower", " Enable Track ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().TrackPowerTop.Attach(Led_TrackPowerTop);
-                Sensor Led_Block5BIn = new Sensor("LLed_Block5BIn", " Occupied to 5B ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().Block5BIn.Attach(Led_Block5BIn);
-                Sensor Led_Block6In = new Sensor("LLed_Block6In", " Occupied to 6 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().Block6In.Attach(Led_Block6In);
-                Sensor Led_Block7In = new Sensor("LLed_Block7In", " Occupied to 7 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().Block7In.Attach(Led_Block7In);
-                Sensor Led_ResistorTop = new Sensor("LLed_Resistor", " Occupied Resistor ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().ResistorTop.Attach(Led_ResistorTop);
-                Sensor Led_Track1Top = new Sensor("LLed_Track1", " Trains On Fiddle Yard Track1 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().Track1Top.Attach(Led_Track1Top);
-                Sensor Led_Track2Top = new Sensor("LLed_Track2", " Trains On Fiddle Yard Track2 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().Track2Top.Attach(Led_Track2Top);
-                Sensor Led_Track3Top = new Sensor("LLed_Track3", " Trains On Fiddle Yard Track3 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().Track3Top.Attach(Led_Track3Top);
-                Sensor Led_Track4Top = new Sensor("LLed_Track4", " Trains On Fiddle Yard Track4 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().Track4Top.Attach(Led_Track4Top);
-                Sensor Led_Track5Top = new Sensor("LLed_Track5", " Trains On Fiddle Yard Track5 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().Track5Top.Attach(Led_Track5Top);
-                Sensor Led_Track6Top = new Sensor("LLed_Track6", " Trains On Fiddle Yard Track6 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().Track6Top.Attach(Led_Track6Top);
-                Sensor Led_Track7Top = new Sensor("LLed_Track7", " Trains On Fiddle Yard Track7 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().Track7Top.Attach(Led_Track7Top);
-                Sensor Led_Track8Top = new Sensor("LLed_Track8", " Trains On Fiddle Yard Track8 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().Track8Top.Attach(Led_Track8Top);
-                Sensor Led_Track9Top = new Sensor("LLed_Track9", " Trains On Fiddle Yard Track9 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().Track9Top.Attach(Led_Track9Top);
-                Sensor Led_Track10Top = new Sensor("LLed_Track10", " Trains On Fiddle Yard Track10 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().Track10Top.Attach(Led_Track10Top);
-                Sensor Led_Track11Top = new Sensor("LLed_Track11", " Trains On Fiddle Yard Track11 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().Track11Top.Attach(Led_Track11Top);
-                Sensor Led_Block6 = new Sensor("LLed_Block6", " Occupied from 6 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().Block6.Attach(Led_Block6);
-                Sensor Led_Block7 = new Sensor("LLed_Block7", " Occupied from 7 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().Block7.Attach(Led_Block7);
-                Sensor Led_F10 = new Sensor("LLed_F10", " F10 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().F10.Attach(Led_F10);
-                Sensor Led_M10 = new Sensor("LLed_M10", " M10 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().M10.Attach(Led_M10);
-                Sensor Led_TrackNoTop = new Sensor("Track_No", " Track Nr ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().TrackNoTop.Attach(Led_TrackNoTop);
-                Sensor Led_TrackPower15VTOP = new Sensor("LLed_15VTrackPower", " 15V Track Power ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().TrackPower15V.Attach(Led_TrackPower15VTOP);
-                //Messages
-                Message Msg_FiddleOneLeftTop = new Message("FiddleOneLeft", " Fiddle One Left Ok ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().FiddleOneLeftTop.Attach(Msg_FiddleOneLeftTop);
-                Message Msg_FiddleOneRightTop = new Message("FiddleOneRight", " Fiddle One Right Ok ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().FiddleOneRightTop.Attach(Msg_FiddleOneRightTop);
-                Message Msg_FiddleMultipleLeftTop = new Message("FiddleMultipleLeft", " Fiddle Multiple Left Ok ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().FiddleMultipleLeftTop.Attach(Msg_FiddleMultipleLeftTop);
-                Message Msg_FiddleMultipleRightTop = new Message("FiddleMultipleRight", " Fiddle Multiple Right Ok ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().FiddleMultipleRightTop.Attach(Msg_FiddleMultipleRightTop);
-                Message Msg_TrainDetectionTop = new Message("TrainDetection", " Train Detection Finished ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().TrainDetectionTop.Attach(Msg_TrainDetectionTop);
-                Message Msg_TrainDriveOutFinishedTop = new Message("TrainDriveOut", " Train Drive Out Finished ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().TrainDriveOutFinishedTop.Attach(Msg_TrainDriveOutFinishedTop);
-                Message Msg_TrainDriveInFinishedTop = new Message("TrainDriveIn", " Train Drive In Finished ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().TrainDriveInFinishedTop.Attach(Msg_TrainDriveInFinishedTop);
-                Message Msg_InitDoneTop = new Message("InitDone", " Init Done ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().InitDoneTop.Attach(Msg_InitDoneTop);
-                Message Msg_InitStartedTop = new Message("InitStarted", " Init Started ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().InitStartedTop.Attach(Msg_InitStartedTop);
-                Message Msg_TrainOn5BTop = new Message("TrainOn5BTop", " Train On 5B ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().TrainOn5BTop.Attach(Msg_TrainOn5BTop);
-                Message Msg_TrainDriveInStartTop = new Message("TrainDriveInStart", " Train Drive In Start ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().TrainDriveInStartTop.Attach(Msg_TrainDriveInStartTop);
-                Message Msg_TrainOn8ATop = new Message("TrainOn8A", " Train On 8A ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().TrainOn8ATop.Attach(Msg_TrainOn8ATop);
-                Message Msg_TrainDriveOutStartTop = new Message("TrainDriveOut", " Train Drive Out Start ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().TrainDriveOutStartTop.Attach(Msg_TrainDriveOutStartTop);
-                Message Msg_FiddleYardSoftStartTop = new Message("FiddleYardSoftStart", " Fiddle Yard Soft Start ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().FiddleYardSoftStartTop.Attach(Msg_FiddleYardSoftStartTop);
-                Message Msg_FiddleYardStoppedTop = new Message("FiddleYardStopped", " Fiddle Yard Stopped ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().FiddleYardStoppedTop.Attach(Msg_FiddleYardStoppedTop);
-                Message Msg_FiddleYardResetTop = new Message("FiddleYardReset", " Fiddle Yard Reset ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().FiddleYardResetTop.Attach(Msg_FiddleYardResetTop);
-                Message Msg_OccfromBlock6Top = new Message("OccfromBlock6", " Occupied from Block6 ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().OccfromBlock6Top.Attach(Msg_OccfromBlock6Top);
-                Message Msg_SensorF12HighTop = new Message("SensorF12High", " Message F12 High ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().SensorF12HighTop.Attach(Msg_SensorF12HighTop);
-                Message Msg_OccfromBlock6AndSensorF12Top = new Message("OccfromBlock6AndSensorF12", " Occupied from Block6 And Message F12 High ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().OccfromBlock6AndSensorF12Top.Attach(Msg_OccfromBlock6AndSensorF12Top);
-                Message Msg_TrainDriveInFailedF12Top = new Message("TrainDriveInFailedF12", " Train Drive In Failed F12 High ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().TrainDriveInFailedF12Top.Attach(Msg_TrainDriveInFailedF12Top);
-                Message Msg_LastTrackTop = new Message("LastTrack", " Last Track ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().LastTrackTop.Attach(Msg_LastTrackTop);
-                Message Msg_UniversalErrorTop = new Message("UniversalError", " Universal Error ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().UniversalErrorTop.Attach(Msg_UniversalErrorTop);
-                Message Msg_CollectFinishedFYFullTop = new Message("CollectFinishedFYFull", " Collect Finished FY Full ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().CollectFinishedFYFullTop.Attach(Msg_CollectFinishedFYFullTop);
-                Message Msg_CollectOnTop = new Message("CollectOn", " Collect On ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().CollectOnTop.Attach(Msg_CollectOnTop);
-                Message Msg_CollectOffTop = new Message("CollectOff", " Collect Off ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().CollectOffTop.Attach(Msg_CollectOffTop);
-                Message Msg_TrainDriveOutCancelledTop = new Message("TrainDriveOutCancelled", " Train Drive Out Cancelled ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().TrainDriveOutCancelledTop.Attach(Msg_TrainDriveOutCancelledTop);    
+            {                
+                Message Msg_TargetAliveTop = new Message("TargetAlive", " Target Alive ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+                m_iFYCtrl.GetIoHandler().TargetAliveTop.Attach(Msg_TargetAliveTop); 
             }
             else if ("FiddleYardBOT" == m_instance)
-            {
-                //Sensors
-                Sensor Led_CL_20_Heart = new Sensor("LLed_Heart", " CL 20 Heart ", 0, (name, val, log) => SetLedIndicator(name, val, log));
-                m_iFYCtrl.GetIoHandler().CL20Heart.Attach(Led_CL_20_Heart);
-                Sensor Led_F21 = new Sensor("LLed_F11", " F21 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().F21.Attach(Led_F21);
-                Sensor Led_EOS20 = new Sensor("LLed_EOS10", " EOS 20 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().EOS20.Attach(Led_EOS20);
-                Sensor Led_EOS21 = new Sensor("LLed_EOS11", " EOS 21 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().EOS21.Attach(Led_EOS21);
-                Sensor Led_F23 = new Sensor("LLed_F13", " F23 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().F23.Attach(Led_F23);
-                Sensor Led_F22 = new Sensor("LLed_F12", " F22 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().F22.Attach(Led_F22);
-                Sensor Led_Block16B = new Sensor("LLed_Block5B", " Occupied from 16B ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().Block16B.Attach(Led_Block16B);
-                Sensor Led_Block19A = new Sensor("LLed_Block8A", " Occupied from 19A ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().Block19A.Attach(Led_Block19A);
-                Sensor Led_TrackPowerBot = new Sensor("LLed_TrackPower", " Enable Track ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().TrackPowerBot.Attach(Led_TrackPowerBot);
-                Sensor Led_Block16BIn = new Sensor("LLed_Block5BIn", " Occupied to 16B ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().Block16BIn.Attach(Led_Block16BIn);
-                Sensor Led_Block17In = new Sensor("LLed_Block6In", " Occupied to 17 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().Block17In.Attach(Led_Block17In);
-                Sensor Led_Block18In = new Sensor("LLed_Block7In", " Occupied to 18 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().Block18In.Attach(Led_Block18In);
-                Sensor Led_ResistorBot = new Sensor("LLed_Resistor", " Occupied Resistor ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().ResistorBot.Attach(Led_ResistorBot);
-                Sensor Led_Track1Bot = new Sensor("LLed_Track1", " Trains On Fiddle Yard Track1 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().Track1Bot.Attach(Led_Track1Bot);
-                Sensor Led_Track2Bot = new Sensor("LLed_Track2", " Trains On Fiddle Yard Track2 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().Track2Bot.Attach(Led_Track2Bot);
-                Sensor Led_Track3Bot = new Sensor("LLed_Track3", " Trains On Fiddle Yard Track3 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().Track3Bot.Attach(Led_Track3Bot);
-                Sensor Led_Track4Bot = new Sensor("LLed_Track4", " Trains On Fiddle Yard Track4 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().Track4Bot.Attach(Led_Track4Bot);
-                Sensor Led_Track5Bot = new Sensor("LLed_Track5", " Trains On Fiddle Yard Track5 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().Track5Bot.Attach(Led_Track5Bot);
-                Sensor Led_Track6Bot = new Sensor("LLed_Track6", " Trains On Fiddle Yard Track6 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().Track6Bot.Attach(Led_Track6Bot);
-                Sensor Led_Track7Bot = new Sensor("LLed_Track7", " Trains On Fiddle Yard Track7 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().Track7Bot.Attach(Led_Track7Bot);
-                Sensor Led_Track8Bot = new Sensor("LLed_Track8", " Trains On Fiddle Yard Track8 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().Track8Bot.Attach(Led_Track8Bot);
-                Sensor Led_Track9Bot = new Sensor("LLed_Track9", " Trains On Fiddle Yard Track9 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().Track9Bot.Attach(Led_Track9Bot);
-                Sensor Led_Track10Bot = new Sensor("LLed_Track10", " Trains On Fiddle Yard Track10 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().Track10Bot.Attach(Led_Track10Bot);
-                Sensor Led_Track11Bot = new Sensor("LLed_Track11", " Trains On Fiddle Yard Track11 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().Track11Bot.Attach(Led_Track11Bot);
-                Sensor Led_Block17 = new Sensor("LLed_Block6", " Occupied from 17 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().Block17.Attach(Led_Block17);
-                Sensor Led_Block18 = new Sensor("LLed_Block7", " Occupied from 18 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().Block18.Attach(Led_Block18);
-                Sensor Led_F20 = new Sensor("LLed_F10", " F20 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().F20.Attach(Led_F20);
-                Sensor Led_M20 = new Sensor("LLed_M10", " M20 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().M20.Attach(Led_M20);
-                Sensor Led_TrackNoBot = new Sensor("Track_No", " Track Nr ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().TrackNoBot.Attach(Led_TrackNoBot);
-                Sensor Led_TrackPower15VBot = new Sensor("LLed_15VTrackPower", " 15V Track Power ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-                m_iFYCtrl.GetIoHandler().TrackPower15V.Attach(Led_TrackPower15VBot);
-                //Messages
-                Message Msg_FiddleOneLeftBot = new Message("FiddleOneLeft", " Fiddle One Left Ok ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().FiddleOneLeftBot.Attach(Msg_FiddleOneLeftBot);
-                Message Msg_FiddleOneRightBot = new Message("FiddleOneRight", " Fiddle One Right Ok ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().FiddleOneRightBot.Attach(Msg_FiddleOneRightBot);
-                Message Msg_FiddleMultipleLeftBot = new Message("FiddleMultipleLeft", " Fiddle Multiple Left Ok ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().FiddleMultipleLeftBot.Attach(Msg_FiddleMultipleLeftBot);
-                Message Msg_FiddleMultipleRightBot = new Message("FiddleMultipleRight", " Fiddle Multiple Right Ok ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().FiddleMultipleRightBot.Attach(Msg_FiddleMultipleRightBot);
-                Message Msg_TrainDetectionBot = new Message("TrainDetection", " Train Detection Finished ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().TrainDetectionBot.Attach(Msg_TrainDetectionBot);
-                Message Msg_TrainDriveOutFinishedBot = new Message("TrainDriveOut", " Train Drive Out Finished ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().TrainDriveOutFinishedBot.Attach(Msg_TrainDriveOutFinishedBot);
-                Message Msg_TrainDriveInFinishedBot = new Message("TrainDriveIn", " Train Drive In Finished ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().TrainDriveInFinishedBot.Attach(Msg_TrainDriveInFinishedBot);
-                Message Msg_InitDoneBot = new Message("InitDone", " Init Done ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().InitDoneBot.Attach(Msg_InitDoneBot);
-                Message Msg_InitStartedBot = new Message("InitStarted", " Init Started ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().InitStartedBot.Attach(Msg_InitStartedBot);
-                Message Msg_TrainOn5BBot = new Message("TrainOn5BBot", " Train On 5B ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().TrainOn5BBot.Attach(Msg_TrainOn5BBot);
-                Message Msg_TrainDriveInStartBot = new Message("TrainDriveInStart", " Train Drive In Start ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().TrainDriveInStartBot.Attach(Msg_TrainDriveInStartBot);
-                Message Msg_TrainOn8ABot = new Message("TrainOn8A", " Train On 8A ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().TrainOn8ABot.Attach(Msg_TrainOn8ABot);
-                Message Msg_TrainDriveOutStartBot = new Message("TrainDriveOut", " Train Drive Out Start ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().TrainDriveOutStartBot.Attach(Msg_TrainDriveOutStartBot);
-                Message Msg_FiddleYardSoftStartBot = new Message("FiddleYardSoftStart", " Fiddle Yard Soft Start ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().FiddleYardSoftStartBot.Attach(Msg_FiddleYardSoftStartBot);
-                Message Msg_FiddleYardSBotpedBot = new Message("FiddleYardSBotped", " Fiddle Yard SBotped ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().FiddleYardStoppedBot.Attach(Msg_FiddleYardSBotpedBot);
-                Message Msg_FiddleYardResetBot = new Message("FiddleYardReset", " Fiddle Yard Reset ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().FiddleYardResetBot.Attach(Msg_FiddleYardResetBot);
-                Message Msg_OccfromBlock6Bot = new Message("OccfromBlock6", " Occupied from Block6 ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().OccfromBlock6Bot.Attach(Msg_OccfromBlock6Bot);
-                Message Msg_SensorF12HighBot = new Message("SensorF12High", " Message F12 High ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().SensorF12HighBot.Attach(Msg_SensorF12HighBot);
-                Message Msg_OccfromBlock6AndSensorF12Bot = new Message("OccfromBlock6AndSensorF12", " Occupied from Block6 And Message F12 High ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().OccfromBlock6AndSensorF12Bot.Attach(Msg_OccfromBlock6AndSensorF12Bot);
-                Message Msg_TrainDriveInFailedF12Bot = new Message("TrainDriveInFailedF12", " Train Drive In Failed F12 High ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().TrainDriveInFailedF12Bot.Attach(Msg_TrainDriveInFailedF12Bot);
-                Message Msg_LastTrackBot = new Message("LastTrack", " Last Track ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().LastTrackBot.Attach(Msg_LastTrackBot);
-                Message Msg_UniversalErrorBot = new Message("UniversalError", " Universal Error ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().UniversalErrorBot.Attach(Msg_UniversalErrorBot);
-                Message Msg_CollectFinishedFYFullBot = new Message("CollectFinishedFYFull", " Collect Finished FY Full ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().CollectFinishedFYFullBot.Attach(Msg_CollectFinishedFYFullBot);
-                Message Msg_CollectOnBot = new Message("CollectOn", " Collect On ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().CollectOnBot.Attach(Msg_CollectOnBot);
-                Message Msg_CollectOffBot = new Message("CollectOff", " Collect Off ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().CollectOffBot.Attach(Msg_CollectOffBot);
-                Message Msg_TrainDriveOutCancelledBot = new Message("TrainDriveOutCancelled", " Train Drive Out Cancelled ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().TrainDriveOutCancelledBot.Attach(Msg_TrainDriveOutCancelledBot);    
-
-            }
-        }
-
-        public void Start()
-        {
-            
+            {                
+                Message Msg_TargetAliveBot = new Message("TargetAlive", " Target Alive ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+                m_iFYCtrl.GetIoHandler().TargetAliveBot.Attach(Msg_TargetAliveBot); 
+            }            
         }
 
         /*#--------------------------------------------------------------------------#*/
-        /*  Description: CommandToSend
-         *               When a command is send to the simulator a program must be
-         *               started to simulate that command and send secuential data
-         *               to NewData assynchronicaly.
+        /*  Description: Start: When simulator is required, start the alive kick
+         *               and create the simulator variables
+         *                  
+         * 
+         *  Input(s)   : 
          *
-         *  Input(s)   :
-         *
-         *  Output(s)  :
+         *  Output(s)  : timer timed event
          *
          *  Returns    :
          *
@@ -278,25 +168,529 @@ namespace Siebwalde_Application
          *
          *  Post.Cond. :
          *
-         *  Notes      :
+         *  Notes      : 
+         *  
          */
         /*#--------------------------------------------------------------------------#*/
-        public void CommandToSend(string name, string layer, string cmd)
+        public void Start()
         {
-            byte[] data = new byte[]{ 0x4D, 0x35};
-            NewData(data);
-            byte[] data2 = new byte[] { 0x4D, 0x36 };
-            NewData(data2);
-            NewData(data);
-            NewData(data2);
+            CL10Heart.Value = true;
+            F11.Value = false;
+            EOS10.Value = false;
+            EOS11.Value = false;
+            F13.Value = false;
+            F12.Value = false;
+            Block5B.Value = false;
+            Block8A.Value = false;
+            TrackPower.Value = false;
+            Block5BIn.Value = true;
+            Block6In.Value = true;
+            Block7In.Value = true;
+            Resistor.Value = true;
+            Track1.Value = false;
+            Track2.Value = false;
+            Track3.Value = false;
+            Track4.Value = false;
+            Track5.Value = false;
+            Track6.Value = false;
+            Track7.Value = false;
+            Track8.Value = false;
+            Track9.Value = false;
+            Track10.Value = false;
+            Track11.Value = false;
+            Block6.Value = false;
+            Block7.Value = false;
+            F10.Value = false;
+            M10.Value = false;
+            TrackNo.Count = 1;
+            TrackPower15V.Value = false;
+
+            FiddleOneLeftFinished.Mssg = false;
+            FiddleOneLeftFinished.Data = 0x03;
+            FiddleOneRightFinished.Mssg = false;
+            FiddleOneRightFinished.Data = 0x04;
+
+            FiddleMultipleLeftFinished.Mssg = false;
+            FiddleMultipleLeftFinished.Data = 0x05;
+            FiddleMultipleRightFinished.Mssg = false;
+            FiddleMultipleRightFinished.Data = 0x06;
+            TrainDetectionFinished.Mssg = false;
+            TrainDetectionFinished.Data = 0x09;
+            TrainOn5B.Mssg = false;
+            TrainOn5B.Data = 0x0F;
+            TrainOn8A.Mssg = false;
+            TrainOn8A.Data = 0x11;
+            FiddleYardReset.Mssg = false;
+            FiddleYardReset.Data = 0x15;
+
+            list.Add(FiddleOneLeftFinished);
+            list.Add(FiddleOneRightFinished);
+            list.Add(FiddleMultipleLeftFinished);
+            list.Add(FiddleMultipleRightFinished);
+            list.Add(TrainDetectionFinished);
+            list.Add(TrainOn5B);
+            list.Add(TrainOn8A);
+            list.Add(FiddleYardReset);
+            
+            aTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
+            // Set the Interval to [x] seconds.
+            aTimer.Interval = 100;
+            // Enable the timer
+            aTimer.Enabled = true;
+            
         }
 
-        public void SetLedIndicator(string name, int val, string log)
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: SimulatorUpdate, simulator application
+         *               This is the main Fiddle Yard simulator, simulating movements,
+         *               controlling the contents of the tracks etc.
+         *  Input(s)   : Sensors, actuators, messages and commands and alive ping
+         *
+         *  Output(s)  : 
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      : 
+         *  
+         */
+        /*#--------------------------------------------------------------------------#*/
+        public void SimulatorUpdate(string kicksimulator, int val)
         {
+            switch (State_Machine)
+            {
+                case State.Idle:
+                    if (kicksimulator == "FiddleOneLeft")
+                    {
+                        State_Machine = State.FiddleOneLeft;                                // When a sequence has to be executed, the corresponding state is started
+                    }
+                    else if (kicksimulator == "FiddleOneRight")
+                    {
+                        State_Machine = State.FiddleOneRight;
+                    }
+                    else if (kicksimulator != "TargetAlive")
+                    {
+                        IdleSetVariable(kicksimulator);                                   // When only a variable has to be set it is done directly (manualy sending commands to target/simulator from FORM
+                    }                          
+                    break;
+
+                case State.FiddleOneLeft:
+                    if (true == FYOneMove.FiddleOneMove("Left"))
+                    {
+                        State_Machine = State.Idle;
+                    }                    
+                    break;
+
+                case State.FiddleOneRight:
+                    if (true == FYOneMove.FiddleOneMove("Right"))
+                    {
+                        State_Machine = State.Idle;
+                    }                    
+                    break;
+
+                case State.Reset:
+                    
+                    break;
+
+                default:
+                    break;
+            }
         }
 
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: IdleSetVariable
+         * 
+         *  Input(s)   : Variable to be set, no sequence required
+         *
+         *  Output(s)  : 
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      : 
+         */
+        /*#--------------------------------------------------------------------------#*/
+        public void IdleSetVariable(string Variable)
+        {
+            if (Variable == "Bezet5BOnTrue")
+            {
+                Block5BIn.Value = true;
+            }
+            else if (Variable == "Bezet5BOnFalse")
+            {
+                Block5BIn.Value = false;
+            }
+            else if (Variable == "Bezet6OnTrue")
+            {
+                Block6In.Value = true;
+            }
+            else if (Variable == "Bezet6OnFalse")
+            {
+                Block6In.Value = false;
+            }
+            else if (Variable == "Bezet7OnTrue")
+            {
+                Block7In.Value = true;
+            }
+            else if (Variable == "Bezet7OnFalse")
+            {
+                Block7In.Value = false;
+            }
+            else if (Variable == "Couple")
+            {
+                TrackPower.Value = true;
+                Resistor.Value = false;
+            }
+            else if (Variable == "Uncouple")
+            {
+                TrackPower.Value = false;
+                Resistor.Value = true;
+            }
+            else if (Variable == "Reset")
+            {
+                //Reset.Value = true;           // Send message here              
+            }
+        }
+                
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: SetMessage and CommandToSend are used to catch 
+         *               updates from simulator/application and process the contents in 
+         *               the main simulator loop
+         * 
+         *  Input(s)   :
+         *
+         *  Output(s)  : 
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      : 
+         */
+        /*#--------------------------------------------------------------------------#*/
         public void SetMessage(string name, string log)
         {
-        }        
+            int val = 0;
+            SimulatorUpdate(name, val);
+        }
+        public void CommandToSend(string name, string layer, string cmd)
+        {
+            int val = 0;
+            SimulatorUpdate(name, val);
+        }
+
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: OnTimedEvent
+         *               Only used when simulator is active to kick the main application
+         *               and to kick the simulator. real target returns always every
+         *               second values to C# application. The otherway around is 
+         *               important to let the target know the C# application is still
+         *               responding, this is not handled here.
+         * 
+         *  Input(s)   :
+         *
+         *  Output(s)  : 
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      : 
+         */
+        /*#--------------------------------------------------------------------------#*/
+        public void OnTimedEvent(object source, ElapsedEventArgs e)
+        {
+            aTimer.Enabled = false;
+            byte[] data = new byte[] { 0x00, 0x00 };
+
+            if ("FiddleYardTOP" == m_instance)
+            {
+                NewData(CreateData("AliveTOP"));                                  //Send alive TOP               
+                NewData(CreateData("M"));
+                NewData(CreateData("L"));
+                NewData(CreateData("K"));
+                NewData(CreateData("J"));
+                NewData(CreateData("I"));
+                NewData(CreateData("A"));
+
+            }
+            else if ("FiddleYardBOT" == m_instance)
+            {
+                NewData(CreateData("AliveBOT"));                                  //Send alive BOT
+                NewData(CreateData("Z"));
+                NewData(CreateData("Y"));
+                NewData(CreateData("X"));
+                NewData(CreateData("W"));
+                NewData(CreateData("V"));
+                NewData(CreateData("B"));
+            }
+            aTimer.Enabled = true;
+        }
+
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: CreateData
+         *               To create the data as it would be sent by the real target
+         * 
+         *  Input(s)   :
+         *
+         *  Output(s)  : 
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      : 
+         */
+        /*#--------------------------------------------------------------------------#*/
+        public byte[] CreateData(string group)
+        {
+            byte[] data = new byte[] { 0x00, 0x00 };
+            byte[] _group = new byte[] {0, 0};
+            int _data = 0;
+
+            if ("AliveTOP" == group)
+            {
+                data[0] = 0x41;
+                data[1] = 0x30;
+            }
+            else if ("AliveBOT" == group)
+            {
+                data[0] = 0x42;
+                data[1] = 0x30;
+            }
+            else if ("M" == group || "Z" == group)
+            {
+                _group = Encoding.ASCII.GetBytes(group);
+                data[0] = _group[0];
+                _data |= Convert.ToByte(CL10Heart.Value);
+                _data = _data << 1;
+                _data |= Convert.ToByte(false);
+                _data = _data << 1;
+                _data |= Convert.ToByte(F11.Value);
+                _data = _data << 1;
+                _data |= Convert.ToByte(EOS10.Value);
+                _data = _data << 1;
+                _data |= Convert.ToByte(EOS11.Value);
+                _data = _data << 1;
+                _data |= Convert.ToByte(false);
+                _data = _data << 1;
+                _data |= Convert.ToByte(F13.Value);
+                _data = _data << 1;
+                data[1] = Convert.ToByte(_data);
+            }
+            else if ("L" == group || "Y" == group)
+            {
+                _group = Encoding.ASCII.GetBytes(group);
+                data[0] = _group[0];
+                _data |= Convert.ToByte(TrackNo.Count);
+                _data = _data << 1;
+                _data |= Convert.ToByte(F12.Value);
+                _data = _data << 1;
+                _data |= Convert.ToByte(Block5B.Value);
+                _data = _data << 1;
+                _data |= Convert.ToByte(Block8A.Value);
+                _data = _data << 1;
+                data[1] = Convert.ToByte(_data);
+            }
+            else if ("K" == group || "X" == group)
+            {
+                _group = Encoding.ASCII.GetBytes(group);
+                data[0] = _group[0];
+                _data |= Convert.ToByte(TrackPower.Value);
+                _data = _data << 1;
+                _data |= Convert.ToByte(Block5BIn.Value);
+                _data = _data << 1;
+                _data |= Convert.ToByte(Block6In.Value);
+                _data = _data << 1;
+                _data |= Convert.ToByte(Block7In.Value);
+                _data = _data << 1;
+                _data |= Convert.ToByte(Resistor.Value);
+                _data = _data << 1;
+                _data |= Convert.ToByte(Track1.Value);
+                _data = _data << 1;
+                _data |= Convert.ToByte(Track2.Value);
+                _data = _data << 1;
+                data[1] = Convert.ToByte(_data);
+            }
+            else if ("J" == group || "W" == group)
+            {
+                _group = Encoding.ASCII.GetBytes(group);
+                data[0] = _group[0];
+                _data |= Convert.ToByte(Track4.Value);
+                _data = _data << 1;
+                _data |= Convert.ToByte(Track5.Value);
+                _data = _data << 1;
+                _data |= Convert.ToByte(Track6.Value);
+                _data = _data << 1;
+                _data |= Convert.ToByte(Track7.Value);
+                _data = _data << 1;
+                _data |= Convert.ToByte(Track8.Value);
+                _data = _data << 1;
+                _data |= Convert.ToByte(Track9.Value);
+                _data = _data << 1;
+                _data |= Convert.ToByte(Track10.Value);
+                _data = _data << 1;
+                data[1] = Convert.ToByte(_data);
+            }
+            else if ("I" == group || "V" == group)
+            {
+                _group = Encoding.ASCII.GetBytes(group);
+                data[0] = _group[0];
+                _data |= Convert.ToByte(Block6.Value);
+                _data = _data << 1;
+                _data |= Convert.ToByte(Block7.Value);
+                _data = _data << 1;
+                _data |= Convert.ToByte(TrackPower15V.Value);
+                _data = _data << 1;
+                _data |= Convert.ToByte(F10.Value);
+                _data = _data << 1;
+                _data |= Convert.ToByte(M10.Value);
+                _data = _data << 1;
+                _data |= Convert.ToByte(Track3.Value);
+                _data = _data << 1;
+                _data |= Convert.ToByte(Track11.Value);
+                _data = _data << 1;
+                data[1] = Convert.ToByte(_data);
+            }
+            else if ("A" == group || "B" == group)
+            {                
+                _group = Encoding.ASCII.GetBytes(group);
+                data[0] = _group[0];
+                data[1] = 0x00;
+
+                foreach (Msg msg in list)
+                {
+                    if (msg.Mssg == true)
+                    {
+                        msg.Mssg = false;
+                        data[1] = Convert.ToByte(msg.Data);
+                        break;
+                    }
+                }
+            }  
+
+            return(data);
+        }
+}
+
+
+    /*#--------------------------------------------------------------------------#*/
+    /*  Description: Var
+     * 
+     *  Input(s)   : Set New bool value for sensor
+     *
+     *  Output(s)  : Return bool value of the sensor
+     *
+     *  Returns    :
+     *
+     *  Pre.Cond.  :
+     *
+     *  Post.Cond. :
+     *
+     *  Notes      : 
+     */
+    /*#--------------------------------------------------------------------------#*/
+    public class Var
+    {
+        public bool Value { get; set; }
+    }
+
+    /*#--------------------------------------------------------------------------#*/
+    /*  Description: Trk
+     * 
+     *  Input(s)   : Set New count value for Track no
+     *
+     *  Output(s)  : Return track no value target like
+     *
+     *  Returns    :
+     *
+     *  Pre.Cond.  :
+     *
+     *  Post.Cond. :
+     *
+     *  Notes      : 
+     */
+    /*#--------------------------------------------------------------------------#*/
+    public class Trk
+    {
+        private int _Count;
+        private int Count_Return;
+
+        public int Count 
+        { 
+            set 
+            {
+                _Count = value;
+            }
+
+            get 
+            {
+                switch (_Count)
+                {
+                    case 0: Count_Return = 0;
+                        break;
+                    case 1: Count_Return = 0x1;
+                        break;
+                    case 2: Count_Return = 0x2;
+                        break;
+                    case 3: Count_Return = 0x3;
+                        break;
+                    case 4: Count_Return = 0x4;
+                        break;
+                    case 5: Count_Return = 0x5;
+                        break;
+                    case 6: Count_Return = 0x6;
+                        break;
+                    case 7: Count_Return = 0x7;
+                        break;
+                    case 8: Count_Return = 0x8;
+                        break;
+                    case 9: Count_Return = 0x9;
+                        break;
+                    case 10: Count_Return = 0xA;
+                        break;
+                    case 11: Count_Return = 0xB;
+                        break;
+                    default: Count_Return = 0;
+                        break;
+                }
+
+                return Count_Return;
+            }
+        }
+    }
+
+    /*#--------------------------------------------------------------------------#*/
+    /*  Description: Msg
+     * 
+     *  Input(s)   : Set New Message
+     *
+     *  Output(s)  : 
+     *
+     *  Returns    :
+     *
+     *  Pre.Cond.  :
+     *
+     *  Post.Cond. :
+     *
+     *  Notes      : 
+     */
+    /*#--------------------------------------------------------------------------#*/
+    public class Msg
+    {
+        public bool Mssg { get; set; }
+        public int Data { get; set; }
     }
 }

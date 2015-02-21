@@ -5,16 +5,19 @@
 //#include <State_Machine.h>
 #include <Drive_Train_IO.h>
 
+void Target_Alive_Update(unsigned char ASL);
+
 typedef struct
 {
 	unsigned char 	Var_Out;	
 	unsigned int	Variables_Out_Counter;
+	unsigned int 	Target_Alive_Counter;
 	unsigned char	Send_Var_Out_Old[5][3];
 	unsigned char	ForceSendUpdate;
 }OUTPUT_VAR;
 
-static OUTPUT_VAR VAR_OUT_FY[2] = { {0,0 ,{{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0}},0},
-								    {0,15,{{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0}},0}	};
+static OUTPUT_VAR VAR_OUT_FY[2] = { {0,0 ,0,{{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0}},0},
+								    {0,15,15,{{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0}},0}	};
 
 static unsigned char Send_Var_Out[3];
 
@@ -29,6 +32,13 @@ void Var_Out_Programm(unsigned  char ASL)
 		VAR_OUT_FY[ASL].Var_Out = 0;							// Force start case 0
 		VAR_OUT_FY[ASL].ForceSendUpdate = True;					// After all 4 cases have been send, make this variable False.
 	}
+	
+	VAR_OUT_FY[ASL].Target_Alive_Counter++;
+	if (VAR_OUT_FY[ASL].Target_Alive_Counter >= 250)
+	{
+		Target_Alive_Update(ASL);
+		VAR_OUT_FY[ASL].Target_Alive_Counter = 0;
+	}	
 
 	switch (VAR_OUT_FY[ASL].Var_Out)
 		{
@@ -902,6 +912,21 @@ extern void Train_Drive_Out_Cancelled(unsigned char ASL)
 		Send_Var_Out[0] = 'B';
 	}
 	Send_Var_Out[1] = 0b00101111;		//47
+	Send_Var_Out[2] = 0x00;
+	Send_Diag_Comm(Send_Var_Out);
+}
+
+void Target_Alive_Update(unsigned char ASL)
+{
+	if (ASL == TOP)
+	{
+		Send_Var_Out[0] = 'A';
+	}
+	else if (ASL == BOTTOM)
+	{
+		Send_Var_Out[0] = 'B';
+	}
+	Send_Var_Out[1] = 0b00110000;		//48
 	Send_Var_Out[2] = 0x00;
 	Send_Diag_Comm(Send_Var_Out);
 }
