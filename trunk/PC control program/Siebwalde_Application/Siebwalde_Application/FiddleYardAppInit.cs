@@ -56,13 +56,20 @@ namespace Siebwalde_Application
          *  Notes      : 
          */
         /*#--------------------------------------------------------------------------#*/
-        public string Init(string kickapplication)
+        public string Init(string kickInit)
         {
             string _Return = "Busy";
             switch (State_Machine)
             {
                 case State.Idle:
-                    
+
+                    if ("Reset" == kickInit)
+                    {
+                        m_iFYApp.StoreText("FYAppInit.Init() Reset == kickInit");
+                        State_Machine = State.Idle;
+                        m_iFYApp.StoreText("FYAppInit.Init() State_Machine = State.Idle");
+                        break;
+                    }
                     FiddleYardInitStarted.UpdateMessage();
                     m_iFYApp.StoreText("FYAppInit.Init() started");
                     if (m_iFYApp.TrackNr() > 0 && !m_iFYApp.Sensor("F12"))
@@ -80,8 +87,8 @@ namespace Siebwalde_Application
 
 
                 case State.Situation1:
-                    m_iFYApp.Cmd("TrainDetect","");
                     m_iFYApp.StoreText("FYAppInit.Init() Start Train Detection");
+                    m_iFYApp.Cmd("TrainDetect","");                    
                     State_Machine = State.TrainDetection;
                     m_iFYApp.StoreText("FYAppInit.Init() State_Machine = State.TrainDetection");
                     break;
@@ -107,7 +114,7 @@ namespace Siebwalde_Application
                         m_iFYApp.StoreText("FYAppInit.Init() Occ6OnFalse");
                         m_iFYApp.Cmd("Occ7OnFalse", "");
                         m_iFYApp.StoreText("FYAppInit.Init() Occ7OnFalse");
-                    }
+                    }                    
                     break;
 
 
@@ -132,19 +139,25 @@ namespace Siebwalde_Application
 
 
                 case State.FiddleOneLeftRight:
-                    if (kickapplication == "FiddleOneLeftFinished" && Direction == "Left")
+                    if (kickInit == "FiddleOneLeftFinished" && Direction == "Left")
                     {
                         Direction = "Right";
                         m_iFYApp.StoreText("FYAppInit.Init() kickapplication == FiddleOneLeftFinished");
                         State_Machine = State.Idle;
                         m_iFYApp.StoreText("FYAppInit.Init() State_Machine = State.Idle; Moved and aligned to track, try again to init");
                     }
-                    else if (kickapplication == "FiddleOneRightFinished" && Direction == "Right")
+                    else if (kickInit == "FiddleOneRightFinished" && Direction == "Right")
                     {
                         Direction = "Left";
                         m_iFYApp.StoreText("FYAppInit.Init() kickapplication == FiddleOneRightFinished");
                         State_Machine = State.Idle;
                         m_iFYApp.StoreText("FYAppInit.Init() State_Machine = State.Idle; Moved and aligned to track, try again to init");
+                    }
+                    else if ("Reset" == kickInit)
+                    {
+                        m_iFYApp.StoreText("FYAppInit.Init() Reset == kickInit");
+                        State_Machine = State.Idle;
+                        m_iFYApp.StoreText("FYAppInit.Init() State_Machine = State.Idle");
                     }
                     break;
 
@@ -162,18 +175,30 @@ namespace Siebwalde_Application
                         State_Machine = State.Idle;
                         m_iFYApp.StoreText("FYAppInit.Init() State_Machine = State.Idle, try to init again.");
                     }
+                    else if ("Reset" == kickInit)
+                    {
+                        m_iFYApp.StoreText("FYAppInit.Init() Reset == kickInit");
+                        State_Machine = State.Idle;
+                        m_iFYApp.StoreText("FYAppInit.Init() State_Machine = State.Idle");
+                    }
                     break;
 
 
 
                 case State.TrainDetection:
-                    if (kickapplication == "TrainDetectionFinished")
+                    if (kickInit == "TrainDetectionFinished")
                     {
                         m_iFYApp.StoreText("FYAppInit.Init()  Train Detection Finished");
                         State_Machine = State.Idle;
                         m_iFYApp.StoreText("FYAppInit.Init() State_Machine = State.Idle");
                         _Return = "Finished";
                         m_iFYApp.StoreText("FYAppInit.Init() _Return = Finished");
+                    }
+                    else if ("Reset" == kickInit)
+                    {
+                        m_iFYApp.StoreText("FYAppInit.Init() Reset == kickInit");
+                        State_Machine = State.Idle;
+                        m_iFYApp.StoreText("FYAppInit.Init() State_Machine = State.Idle");
                     }
                     break;
 

@@ -1,10 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Windows.Forms;
+using System.Timers;
+using System.Net.Sockets;
+using System.IO;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Timers;
+using System.Management;
+using System.Net.NetworkInformation;
+using System.Globalization;
 
 namespace Siebwalde_Application
 {
@@ -12,17 +22,43 @@ namespace Siebwalde_Application
     {
         Trk GetTrackNo();
         Var GetCL10Heart();
+        Var GetF10();
+        Var GetF11();
+        Var GetF12();
+        Var GetF13();
         Var GetTrackPower();
         Var GetM10();
         Var GetResistor();
+        Var GetTrack1();
+        Var GetTrack2();
+        Var GetTrack3();
+        Var GetTrack4();
+        Var GetTrack5();
+        Var GetTrack6();
+        Var GetTrack7();
+        Var GetTrack8();
+        Var GetTrack9();
+        Var GetTrack10();
+        Var GetTrack11();
+        Var GetBlock5B();
+        Var GetBlock6();
+        Var GetBlock7();
+        Var GetBlock8A();
+        Var GetBlock5BIn();
+        Var GetBlock6In();
+        Var GetBlock7In();
         Msg GetFiddleOneLeftFinished();
         Msg GetFiddleOneRightFinished();
         Msg GetFiddleMultipleLeftFinished();
-        Msg  GetFiddleMultipleRightFinished();
+        Msg GetFiddleMultipleRightFinished();
         Msg GetTrainDetectionFinished();
         Msg GetTrainOn5B();
         Msg GetTrainOn8A();
         Msg GetFiddleYardReset();
+        void StoreText(string text);
+        void UpdateSimArrayToAppArray();
+        FiddleYardSimMove GetFYMove();
+        SensorUpdater GetTargetAlive();        
     }
 
     public class FiddleYardSimulator : iFiddleYardSimulator
@@ -30,10 +66,15 @@ namespace Siebwalde_Application
         public iFiddleYardController m_iFYCtrl; // connect variable to connect to FYController class for defined interfaces
         public Action<byte[]> NewData;
         string m_instance = null;
-        FiddleYardSimOneMove FYOneMove;
+        FiddleYardSimMove FYMove;
+        FiddleYardSimTrainDetect FYTrDt;        
+        string path = "null";
 
-        private enum State { Idle, CL10Heart, Reset, FiddleOneLeft, FiddleOneRight };
-        private State State_Machine;        
+        private enum State { Idle, CL10Heart, Reset, FiddleOneLeft, FiddleOneRight, FiddleMultipleMove, TrainDetect, Start };
+        private State State_Machine;
+        private int[] TrainsOnFYSim = new int[14];
+        private Random rng = new Random();
+        private const int NoOfSimTrains = 12; // Added 1 extra for counter, 13 --> 12 trains
 
         // Create a timer
         System.Timers.Timer aTimer = new System.Timers.Timer();
@@ -66,9 +107,11 @@ namespace Siebwalde_Application
         Var Block6 = new Var();
         Var Block7 = new Var();
         Var F10 = new Var();
-        Var M10 = new Var();
-        Trk TrackNo = new Trk();
+        Var M10 = new Var();        
         Var TrackPower15V = new Var();
+
+        Trk TrackNo = new Trk();
+
         Msg FiddleOneLeftFinished = new Msg();
         Msg FiddleOneRightFinished = new Msg();
         Msg FiddleMultipleLeftFinished = new Msg();
@@ -79,15 +122,63 @@ namespace Siebwalde_Application
         Msg FiddleYardReset = new Msg();
 
         List<Msg> list = new List<Msg>();
+        List<FiddleYardSimTrain> FYSimTrains = new List<FiddleYardSimTrain>();
+        FiddleYardSimTrain current = null;
 
         public Trk GetTrackNo()
         {
             return TrackNo;
         }
+        public Var GetBlock5B()
+        {
+            return Block5B;
+        }
+        public Var GetBlock6()
+        {
+            return Block6;
+        }
+        public Var GetBlock7()
+        {
+            return Block7;
+        }
+        public Var GetBlock8A()
+        {
+            return Block8A;
+        }
+        public Var GetBlock5BIn()
+        {
+            return Block5BIn;
+        }
+        public Var GetBlock6In()
+        {
+            return Block6In;
+        }
+        public Var GetBlock7In()
+        {
+            return Block7In;
+        }        
         public Var GetCL10Heart()
         {
             return CL10Heart;
         }
+
+        public Var GetF10()
+        {
+            return F10;
+        }
+        public Var GetF11()
+        {
+            return F11;
+        }
+        public Var GetF12()
+        {
+            return F12;
+        }
+        public Var GetF13()
+        {
+            return F13;
+        }
+
         public Var GetTrackPower()
         {
             return TrackPower;
@@ -99,7 +190,51 @@ namespace Siebwalde_Application
         public Var GetResistor()
         {
             return Resistor;
-        }    
+        }
+        public Var GetTrack1()
+        {
+            return Track1;
+        }
+        public Var GetTrack2()
+        {
+            return Track2;
+        }
+        public Var GetTrack3()
+        {
+            return Track3;
+        }
+        public Var GetTrack4()
+        {
+            return Track4;
+        }
+        public Var GetTrack5()
+        {
+            return Track5;
+        }
+        public Var GetTrack6()
+        {
+            return Track6;
+        }
+        public Var GetTrack7()
+        {
+            return Track7;
+        }
+        public Var GetTrack8()
+        {
+            return Track8;
+        }
+        public Var GetTrack9()
+        {
+            return Track9;
+        }
+        public Var GetTrack10()
+        {
+            return Track10;
+        }
+        public Var GetTrack11()
+        {
+            return Track11;
+        }
         public Msg GetFiddleOneLeftFinished()
         {
             return FiddleOneLeftFinished;
@@ -132,25 +267,132 @@ namespace Siebwalde_Application
         {
             return FiddleYardReset;
         }
-        
+        public FiddleYardSimMove GetFYMove()
+        {
+            return FYMove;
+        }
+
+        public SensorUpdater TargetAlive;
+        public SensorUpdater GetTargetAlive()
+        {
+            return TargetAlive;
+        }
         
         public FiddleYardSimulator(string Instance, iFiddleYardController iFYCtrl)
         {
             m_iFYCtrl = iFYCtrl;    // connect to FYController interface, save interface in variable
             m_instance = Instance;
 
-            FYOneMove = new FiddleYardSimOneMove(this);           
-
+            TargetAlive = new SensorUpdater();
+            FYMove = new FiddleYardSimMove(this);
+            FYTrDt = new FiddleYardSimTrainDetect(this);
+            
             if ("FiddleYardTOP" == m_instance)
-            {                
+            {      
+                path = @"c:\localdata\FiddleYardSimTOPLogging.txt"; // different logging file per target, this is default
                 Message Msg_TargetAliveTop = new Message("TargetAlive", " Target Alive ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().TargetAliveTop.Attach(Msg_TargetAliveTop); 
+                m_iFYCtrl.GetIoHandler().TargetAliveTop.Attach(Msg_TargetAliveTop);
+
+                for (int i = 1; i < NoOfSimTrains; i++)
+                {
+                    TrainsOnFYSim[i]=rng.Next(0, 2);
+                    current = new FiddleYardSimTrain(m_instance, this, m_iFYCtrl);
+                    current.FYSimtrainInstance = current.ClassName + i.ToString();
+                    if (TrainsOnFYSim[i] == 1)
+                    {
+                        current.SimTrainLocation = TrackNoToTrackString(i);
+                    }
+                    else
+                    {
+                        current.SimTrainLocation = TrackNoToTrackString(0);
+                    }
+                    FYSimTrains.Add(current);
+                }
+                TrackNo.Count = 1;
             }
             else if ("FiddleYardBOT" == m_instance)
-            {                
+            {    
+                path = @"c:\localdata\FiddleYardSimBOTLogging.txt"; // different logging file per target, this is default
                 Message Msg_TargetAliveBot = new Message("TargetAlive", " Target Alive ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-                m_iFYCtrl.GetIoHandler().TargetAliveBot.Attach(Msg_TargetAliveBot); 
+                m_iFYCtrl.GetIoHandler().TargetAliveBot.Attach(Msg_TargetAliveBot);
+
+                for (int i = 1; i < NoOfSimTrains; i++)
+                {
+                    rng.Next(0, 2);
+                }
+                for (int i = 1; i < NoOfSimTrains; i++)
+                {
+                    TrainsOnFYSim[i] = rng.Next(0, 2);
+                    current = new FiddleYardSimTrain(m_instance, this, m_iFYCtrl);
+                    current.FYSimtrainInstance = current.ClassName + i.ToString();
+                    if (TrainsOnFYSim[i] == 1)
+                    {
+                        current.SimTrainLocation = TrackNoToTrackString(i);
+                    }
+                    else
+                    {
+                        current.SimTrainLocation = TrackNoToTrackString(0);
+                    }
+                    FYSimTrains.Add(current);
+                }
+                TrackNo.Count = 1;
             }            
+        }
+
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: TrackNoToTrackString
+         *                  convert chosen track number to string according
+         *                  the active track and if a train is present
+         *  Input(s)   : 
+         *
+         *  Output(s)  : 
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      : 
+         *  
+         */
+        /*#--------------------------------------------------------------------------#*/
+        public string TrackNoToTrackString(int val)
+        {
+            string _return = null;
+            switch (val)
+            {
+                case 1: _return = "Track1";
+                    break;
+                case 2: _return = "Track2";
+                    break;
+                case 3: _return = "Track3";
+                    break;
+                case 4: _return = "Track4";
+                    break;
+                case 5: _return = "Track5";
+                    break;
+                case 6: _return = "Track6";
+                    break;
+                case 7: _return = "Track7";
+                    break;
+                case 8: _return = "Track8";
+                    break;
+                case 9: _return = "Track9";
+                    break;
+                case 10: _return = "Track10";
+                    break;
+                case 11: _return = "Track11";
+                    break;
+                case 12: _return = "Block5B";
+                    break;
+                case 13: _return = "Block8A";
+                    break;
+                default: _return = "Buffer";
+                    break;
+            }
+
+            return _return;
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -173,6 +415,168 @@ namespace Siebwalde_Application
          */
         /*#--------------------------------------------------------------------------#*/
         public void Start()
+        {
+            StoreText("### Fiddle Yard Simulator started ###");
+            Reset();            
+            StoreText("FYSim Simulator Reset()");
+
+            list.Add(FiddleOneLeftFinished);
+            list.Add(FiddleOneRightFinished);
+            list.Add(FiddleMultipleLeftFinished);
+            list.Add(FiddleMultipleRightFinished);
+            list.Add(TrainDetectionFinished);
+            list.Add(TrainOn5B);
+            list.Add(TrainOn8A);
+            list.Add(FiddleYardReset);
+            
+            aTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
+            // Set the Interval to [x] seconds.
+            aTimer.Interval = 100;
+            // Enable the timer
+            aTimer.Enabled = true;
+            
+            StoreText("FYSim Simulator Timer started: aTimer.Interval = 100");
+            StoreText("FYSim State_Machine = State.Idle from Start()");            
+        }
+
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: SimulatorUpdate, simulator application
+         *               This is the main Fiddle Yard simulator, simulating movements,
+         *               controlling the contents of the tracks etc.
+         *  Input(s)   : Sensors, actuators, messages and commands and alive ping
+         *
+         *  Output(s)  : 
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      : 
+         *  
+         */
+        /*#--------------------------------------------------------------------------#*/
+        public void SimulatorUpdate(string kicksimulator, int val)
+        {
+            switch (State_Machine)
+            {
+                case State.Idle:
+                    if (kicksimulator == "FiddleOneLeft")
+                    {
+                        StoreText("FYSim State_Machine = State.FiddleOneLeft");
+                        State_Machine = State.FiddleOneLeft;                                                // When a sequence has to be executed, the corresponding state is started
+                    }
+                    else if (kicksimulator == "FiddleOneRight")
+                    {
+                        StoreText("FYSim State_Machine = State.FiddleOneRight");
+                        State_Machine = State.FiddleOneRight;
+                    }
+                    else if (kicksimulator.TrimEnd(kicksimulator[kicksimulator.Length - 1]) == "FiddleGo")
+                    {
+                        StoreText("FYSim FYMove.FiddleMultipleMove(" + kicksimulator + ")");
+                        FYMove.FiddleMultipleMove(kicksimulator);                                           // Already pass the command which was received, else it will be lost
+                        StoreText("FYSim State_Machine = State.FiddleMultipleMove");
+                        State_Machine = State.FiddleMultipleMove;                                           // When a sequence has to be executed, the corresponding state is started
+                    }
+                    else if (kicksimulator == "TrainDetect")
+                    {
+                        StoreText("FYSim State_Machine = State.TrainDetect");                        
+                        State_Machine = State.TrainDetect;
+                    }
+                    else if (kicksimulator == "Reset")
+                    {
+                        StoreText("FYSim kicksimulator == Reset");
+                        State_Machine = State.Reset;
+                        StoreText("FYSim State_Machine = State.Reset");
+                    }
+                    else if (kicksimulator != "TargetAlive")
+                    {
+                        IdleSetVariable(kicksimulator);                                                     // Only when a variable needs to be set it is done directly (manualy sending commands to target/simulator from FORM
+                        StoreText("FYSim IdleSetVariable(" + kicksimulator + ")");
+                    }
+                    else if (kicksimulator == "TargetAlive")
+                    {                        
+                        TargetAlive.UpdateSensorValue(1, true);                                             // Update all clients of TargetAlive (SimTrains)
+                    }
+                    break;
+
+
+                    
+                case State.FiddleOneLeft:
+                    if (true == FYMove.FiddleOneMove("Left"))
+                    {
+                        StoreText("FYSim true == FYMove.FiddleOneMove(Left)");
+                        State_Machine = State.Idle;
+                        StoreText("FYSim State_Machine = State.Idle from State.FiddleOneLeft");
+                    }                    
+                    break;
+
+                case State.FiddleOneRight:
+                    if (true == FYMove.FiddleOneMove("Right"))
+                    {
+                        StoreText("FYSim true == FYMove.FiddleOneMove(Right)");
+                        State_Machine = State.Idle;
+                        StoreText("FYSim State_Machine = State.Idle from State.FiddleOneRight");
+                    }                    
+                    break;
+
+                case State.FiddleMultipleMove:
+                    if (true == FYMove.FiddleMultipleMove(kicksimulator))
+                    {
+                        StoreText("FYSim true == FYMove.FiddleMultipleMove(kicksimulator)");
+                        State_Machine = State.Idle;
+                        StoreText("FYSim State_Machine = State.Idle from State.FiddleMultipleMove");
+                    }
+                    break;
+
+                case State.TrainDetect:
+                    if (true == FYTrDt.FiddleTrDt())
+                    {
+                        StoreText("FYSim true == FYTrDt.FiddleTrDt()");
+                        State_Machine = State.Idle;
+                        StoreText("FYSim State_Machine = State.Idle from State.TrainDetect");
+                    }                    
+                    break;
+
+                case State.Reset:                    
+                    Reset();
+                    FiddleYardReset.Mssg = true;
+                    State_Machine = State.Idle;
+                    StoreText("FYSim State_Machine = State.Idle from State.Reset");
+                    break;
+
+                default:
+                    break;
+            }
+
+            // reset certain simulated sensor signals when shifting the fiddle yard
+            if (TrackNo.Count == 0)
+            {
+                F10.Value = false;
+                F11.Value = false;
+                F12.Value = false;
+                F12.Value = false;
+            }
+        }
+
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: Reset
+         * 
+         *  Input(s)   : Reset all variables to default
+         *
+         *  Output(s)  : 
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      : 
+         */
+        /*#--------------------------------------------------------------------------#*/
+        public void Reset()
         {
             CL10Heart.Value = true;
             F11.Value = false;
@@ -202,7 +606,7 @@ namespace Siebwalde_Application
             Block7.Value = false;
             F10.Value = false;
             M10.Value = false;
-            TrackNo.Count = 1;
+            //TrackNo.Count = 1;
             TrackPower15V.Value = false;
 
             FiddleOneLeftFinished.Mssg = false;
@@ -215,95 +619,57 @@ namespace Siebwalde_Application
             FiddleMultipleRightFinished.Mssg = false;
             FiddleMultipleRightFinished.Data = 0x06;
             TrainDetectionFinished.Mssg = false;
-            TrainDetectionFinished.Data = 0x09;
+            TrainDetectionFinished.Data = 0x07;
             TrainOn5B.Mssg = false;
             TrainOn5B.Data = 0x0F;
             TrainOn8A.Mssg = false;
             TrainOn8A.Data = 0x11;
             FiddleYardReset.Mssg = false;
             FiddleYardReset.Data = 0x15;
-
-            list.Add(FiddleOneLeftFinished);
-            list.Add(FiddleOneRightFinished);
-            list.Add(FiddleMultipleLeftFinished);
-            list.Add(FiddleMultipleRightFinished);
-            list.Add(TrainDetectionFinished);
-            list.Add(TrainOn5B);
-            list.Add(TrainOn8A);
-            list.Add(FiddleYardReset);
             
-            aTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
-            // Set the Interval to [x] seconds.
-            aTimer.Interval = 100;
-            // Enable the timer
-            aTimer.Enabled = true;
-            
-        }
-
-        /*#--------------------------------------------------------------------------#*/
-        /*  Description: SimulatorUpdate, simulator application
-         *               This is the main Fiddle Yard simulator, simulating movements,
-         *               controlling the contents of the tracks etc.
-         *  Input(s)   : Sensors, actuators, messages and commands and alive ping
-         *
-         *  Output(s)  : 
-         *
-         *  Returns    :
-         *
-         *  Pre.Cond.  :
-         *
-         *  Post.Cond. :
-         *
-         *  Notes      : 
-         *  
-         */
-        /*#--------------------------------------------------------------------------#*/
-        public void SimulatorUpdate(string kicksimulator, int val)
-        {
-            switch (State_Machine)
+            if ("FiddleYardTOP" == m_instance)
             {
-                case State.Idle:
-                    if (kicksimulator == "FiddleOneLeft")
+                for (int i = 1; i < NoOfSimTrains; i++)
+                {
+                    TrainsOnFYSim[i] = rng.Next(0, 2);
+                    current = FYSimTrains[i - 1];
+                    if (TrainsOnFYSim[i] == 1)
                     {
-                        State_Machine = State.FiddleOneLeft;                                // When a sequence has to be executed, the corresponding state is started
+                        current.SimTrainLocation = TrackNoToTrackString(i);
                     }
-                    else if (kicksimulator == "FiddleOneRight")
+                    else
                     {
-                        State_Machine = State.FiddleOneRight;
+                        current.SimTrainLocation = TrackNoToTrackString(0);
+                    }                    
+                }
+            }
+            else if ("FiddleYardBOT" == m_instance)
+            {
+                for (int i = 1; i < NoOfSimTrains; i++)
+                {
+                    rng.Next(0, 2);
+                }
+                for (int i = 1; i < NoOfSimTrains; i++)
+                {
+                    TrainsOnFYSim[i] = rng.Next(0, 2);
+                    current = FYSimTrains[i - 1];
+                    if (TrainsOnFYSim[i] == 1)
+                    {
+                        current.SimTrainLocation = TrackNoToTrackString(i);
                     }
-                    else if (kicksimulator != "TargetAlive")
+                    else
                     {
-                        IdleSetVariable(kicksimulator);                                   // When only a variable has to be set it is done directly (manualy sending commands to target/simulator from FORM
-                    }                          
-                    break;
-
-                case State.FiddleOneLeft:
-                    if (true == FYOneMove.FiddleOneMove("Left"))
-                    {
-                        State_Machine = State.Idle;
+                        current.SimTrainLocation = TrackNoToTrackString(0);
                     }                    
-                    break;
-
-                case State.FiddleOneRight:
-                    if (true == FYOneMove.FiddleOneMove("Right"))
-                    {
-                        State_Machine = State.Idle;
-                    }                    
-                    break;
-
-                case State.Reset:
-                    
-                    break;
-
-                default:
-                    break;
+                }
             }
         }
+
 
         /*#--------------------------------------------------------------------------#*/
         /*  Description: IdleSetVariable
          * 
-         *  Input(s)   : Variable to be set, no sequence required
+         *  Input(s)   : Variable to be set, no sequence required, these are commands
          *
          *  Output(s)  : 
          *
@@ -318,27 +684,27 @@ namespace Siebwalde_Application
         /*#--------------------------------------------------------------------------#*/
         public void IdleSetVariable(string Variable)
         {
-            if (Variable == "Bezet5BOnTrue")
+            if (Variable == "Occ5BOnTrue")
             {
                 Block5BIn.Value = true;
             }
-            else if (Variable == "Bezet5BOnFalse")
+            else if (Variable == "Occ5BOnFalse")
             {
                 Block5BIn.Value = false;
             }
-            else if (Variable == "Bezet6OnTrue")
+            else if (Variable == "Occ6OnTrue")
             {
                 Block6In.Value = true;
             }
-            else if (Variable == "Bezet6OnFalse")
+            else if (Variable == "Occ6OnFalse")
             {
                 Block6In.Value = false;
             }
-            else if (Variable == "Bezet7OnTrue")
+            else if (Variable == "Occ7OnTrue")
             {
                 Block7In.Value = true;
             }
-            else if (Variable == "Bezet7OnFalse")
+            else if (Variable == "Occ7OnFalse")
             {
                 Block7In.Value = false;
             }
@@ -351,11 +717,7 @@ namespace Siebwalde_Application
             {
                 TrackPower.Value = false;
                 Resistor.Value = true;
-            }
-            else if (Variable == "Reset")
-            {
-                //Reset.Value = true;           // Send message here              
-            }
+            }            
         }
                 
         /*#--------------------------------------------------------------------------#*/
@@ -385,6 +747,39 @@ namespace Siebwalde_Application
         {
             int val = 0;
             SimulatorUpdate(name, val);
+        }
+
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: UpdateSimArrayToAppArray
+         *                  Update the Track[x] VAR to imitate an update after a
+         *                  traindetection() command which tracks are occupied
+         * 
+         *  Input(s)   :
+         *
+         *  Output(s)  : 
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      : 
+         */
+        /*#--------------------------------------------------------------------------#*/
+        public void UpdateSimArrayToAppArray()
+        {
+            Track1.Value = Convert.ToBoolean(TrainsOnFYSim[1]);
+            Track2.Value = Convert.ToBoolean(TrainsOnFYSim[2]);
+            Track3.Value = Convert.ToBoolean(TrainsOnFYSim[3]);
+            Track4.Value = Convert.ToBoolean(TrainsOnFYSim[4]);
+            Track5.Value = Convert.ToBoolean(TrainsOnFYSim[5]);
+            Track6.Value = Convert.ToBoolean(TrainsOnFYSim[6]);
+            Track7.Value = Convert.ToBoolean(TrainsOnFYSim[7]);
+            Track8.Value = Convert.ToBoolean(TrainsOnFYSim[8]);
+            Track9.Value = Convert.ToBoolean(TrainsOnFYSim[9]);
+            Track10.Value = Convert.ToBoolean(TrainsOnFYSim[10]);
+            Track11.Value = Convert.ToBoolean(TrainsOnFYSim[11]);     
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -582,6 +977,44 @@ namespace Siebwalde_Application
             }  
 
             return(data);
+        }
+
+
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: StoreText
+         * 
+         *  Input(s)   : Store diagnostic text
+         *
+         *  Output(s)  : 
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      : 
+         */
+        /*#--------------------------------------------------------------------------#*/
+        public void StoreText(string text)
+        {
+            string m_text = DateTime.Now + " " + text + " " + Environment.NewLine;
+
+            try
+            {
+
+                using (var fs = new FileStream(path, FileMode.Append))
+                {
+                    Byte[] info =
+                        new UTF8Encoding(true).GetBytes(m_text);
+                    fs.Write(info, 0, info.Length);
+                    fs.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 }
 

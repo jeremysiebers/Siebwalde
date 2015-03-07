@@ -389,18 +389,18 @@ namespace Siebwalde_Application
             m_iFYCtrl.GetFYAppTop().FYStop.Attach(Act_StopTop);
             Actuator Act_ResetTop = new Actuator("Reset", "FiddleYardTOP", "aJ\r", (name, layer, cmd) => ActuatorCmd(name, layer, cmd)); // initialize and subscribe actuators
             m_iFYCtrl.GetFYAppTop().Reset.Attach(Act_ResetTop);
-            Actuator Act_Bezet5BOnTrueTop = new Actuator("Bezet5BOnTrue", "FiddleYardTOP", "aK\r", (name, layer, cmd) => ActuatorCmd(name, layer, cmd)); // initialize and subscribe actuators
-            m_iFYCtrl.GetFYAppTop().Bezet5BOnTrue.Attach(Act_Bezet5BOnTrueTop);
-            Actuator Act_Bezet5BOnFalseTop = new Actuator("Bezet5BOnFalse", "FiddleYardTOP", "aL\r", (name, layer, cmd) => ActuatorCmd(name, layer, cmd)); // initialize and subscribe actuators
-            m_iFYCtrl.GetFYAppTop().Bezet5BOnFalse.Attach(Act_Bezet5BOnFalseTop);
-            Actuator Act_Bezet6OnTrueTop = new Actuator("Bezet6OnTrue", "FiddleYardTOP", "aM\r", (name, layer, cmd) => ActuatorCmd(name, layer, cmd)); // initialize and subscribe actuators
-            m_iFYCtrl.GetFYAppTop().Bezet6OnTrue.Attach(Act_Bezet6OnTrueTop);
-            Actuator Act_Bezet6OnFalseTop = new Actuator("Bezet6OnFalse", "FiddleYardTOP", "aN\r", (name, layer, cmd) => ActuatorCmd(name, layer, cmd)); // initialize and subscribe actuators
-            m_iFYCtrl.GetFYAppTop().Bezet6OnFalse.Attach(Act_Bezet6OnFalseTop);
-            Actuator Act_Bezet7OnTrueTop = new Actuator("Bezet7OnTrue", "FiddleYardTOP", "aO\r", (name, layer, cmd) => ActuatorCmd(name, layer, cmd)); // initialize and subscribe actuators
-            m_iFYCtrl.GetFYAppTop().Bezet7OnTrue.Attach(Act_Bezet7OnTrueTop);
-            Actuator Act_Bezet7OnFalseTop = new Actuator("Bezet7OnFalse", "FiddleYardTOP", "aP\r", (name, layer, cmd) => ActuatorCmd(name, layer, cmd)); // initialize and subscribe actuators
-            m_iFYCtrl.GetFYAppTop().Bezet7OnFalse.Attach(Act_Bezet7OnFalseTop);
+            Actuator Act_Occ5BOnTrueTop = new Actuator("Occ5BOnTrue", "FiddleYardTOP", "aK\r", (name, layer, cmd) => ActuatorCmd(name, layer, cmd)); // initialize and subscribe actuators
+            m_iFYCtrl.GetFYAppTop().Occ5BOnTrue.Attach(Act_Occ5BOnTrueTop);
+            Actuator Act_Occ5BOnFalseTop = new Actuator("Occ5BOnFalse", "FiddleYardTOP", "aL\r", (name, layer, cmd) => ActuatorCmd(name, layer, cmd)); // initialize and subscribe actuators
+            m_iFYCtrl.GetFYAppTop().Occ5BOnFalse.Attach(Act_Occ5BOnFalseTop);
+            Actuator Act_Occ6OnTrueTop = new Actuator("Occ6OnTrue", "FiddleYardTOP", "aM\r", (name, layer, cmd) => ActuatorCmd(name, layer, cmd)); // initialize and subscribe actuators
+            m_iFYCtrl.GetFYAppTop().Occ6OnTrue.Attach(Act_Occ6OnTrueTop);
+            Actuator Act_Occ6OnFalseTop = new Actuator("Occ6OnFalse", "FiddleYardTOP", "aN\r", (name, layer, cmd) => ActuatorCmd(name, layer, cmd)); // initialize and subscribe actuators
+            m_iFYCtrl.GetFYAppTop().Occ6OnFalse.Attach(Act_Occ6OnFalseTop);
+            Actuator Act_Occ7OnTrueTop = new Actuator("Occ7OnTrue", "FiddleYardTOP", "aO\r", (name, layer, cmd) => ActuatorCmd(name, layer, cmd)); // initialize and subscribe actuators
+            m_iFYCtrl.GetFYAppTop().Occ7OnTrue.Attach(Act_Occ7OnTrueTop);
+            Actuator Act_Occ7OnFalseTop = new Actuator("Occ7OnFalse", "FiddleYardTOP", "aP\r", (name, layer, cmd) => ActuatorCmd(name, layer, cmd)); // initialize and subscribe actuators
+            m_iFYCtrl.GetFYAppTop().Occ7OnFalse.Attach(Act_Occ7OnFalseTop);
             Actuator Act_RecoverdTop = new Actuator("Recoverd", "FiddleYardTOP", "aQ\r", (name, layer, cmd) => ActuatorCmd(name, layer, cmd)); // initialize and subscribe actuators
             m_iFYCtrl.GetFYAppTop().Recoverd.Attach(Act_RecoverdTop);
             Actuator Act_CollectTop = new Actuator("Collect", "FiddleYardTOP", "aR\r", (name, layer, cmd) => ActuatorCmd(name, layer, cmd)); // initialize and subscribe actuators
@@ -445,18 +445,18 @@ namespace Siebwalde_Application
             m_iFYCtrl.GetFYAppBot().FYStop.Attach(Act_StopBot);
             Actuator Act_ResetBot = new Actuator("Reset", "FiddleYardBOT", "bJ\r", (name, layer, cmd) => ActuatorCmd(name, layer, cmd)); // initialize and subscribe actuators
             m_iFYCtrl.GetFYAppBot().Reset.Attach(Act_ResetBot);
-            Actuator Act_Bezet5BOnTrueBot = new Actuator("Bezet5BOnTrue", "FiddleYardBOT", "bK\r", (name, layer, cmd) => ActuatorCmd(name, layer, cmd)); // initialize and subscribe actuators
-            m_iFYCtrl.GetFYAppBot().Bezet5BOnTrue.Attach(Act_Bezet5BOnTrueBot);
-            Actuator Act_Bezet5BOnFalseBot = new Actuator("Bezet5BOnFalse", "FiddleYardBOT", "bL\r", (name, layer, cmd) => ActuatorCmd(name, layer, cmd)); // initialize and subscribe actuators
-            m_iFYCtrl.GetFYAppBot().Bezet5BOnFalse.Attach(Act_Bezet5BOnFalseBot);
-            Actuator Act_Bezet6OnTrueBot = new Actuator("Bezet6OnTrue", "FiddleYardBOT", "bM\r", (name, layer, cmd) => ActuatorCmd(name, layer, cmd)); // initialize and subscribe actuators
-            m_iFYCtrl.GetFYAppBot().Bezet6OnTrue.Attach(Act_Bezet6OnTrueBot);
-            Actuator Act_Bezet6OnFalseBot = new Actuator("Bezet6OnFalse", "FiddleYardBOT", "bN\r", (name, layer, cmd) => ActuatorCmd(name, layer, cmd)); // initialize and subscribe actuators
-            m_iFYCtrl.GetFYAppBot().Bezet6OnFalse.Attach(Act_Bezet6OnFalseBot);
-            Actuator Act_Bezet7OnTrueBot = new Actuator("Bezet7OnTrue", "FiddleYardBOT", "bO\r", (name, layer, cmd) => ActuatorCmd(name, layer, cmd)); // initialize and subscribe actuators
-            m_iFYCtrl.GetFYAppBot().Bezet7OnTrue.Attach(Act_Bezet7OnTrueBot);
-            Actuator Act_Bezet7OnFalseBot = new Actuator("Bezet7OnFalse", "FiddleYardBOT", "bP\r", (name, layer, cmd) => ActuatorCmd(name, layer, cmd)); // initialize and subscribe actuators
-            m_iFYCtrl.GetFYAppBot().Bezet7OnFalse.Attach(Act_Bezet7OnFalseBot);
+            Actuator Act_Occ5BOnTrueBot = new Actuator("Occ5BOnTrue", "FiddleYardBOT", "bK\r", (name, layer, cmd) => ActuatorCmd(name, layer, cmd)); // initialize and subscribe actuators
+            m_iFYCtrl.GetFYAppBot().Occ5BOnTrue.Attach(Act_Occ5BOnTrueBot);
+            Actuator Act_Occ5BOnFalseBot = new Actuator("Occ5BOnFalse", "FiddleYardBOT", "bL\r", (name, layer, cmd) => ActuatorCmd(name, layer, cmd)); // initialize and subscribe actuators
+            m_iFYCtrl.GetFYAppBot().Occ5BOnFalse.Attach(Act_Occ5BOnFalseBot);
+            Actuator Act_Occ6OnTrueBot = new Actuator("Occ6OnTrue", "FiddleYardBOT", "bM\r", (name, layer, cmd) => ActuatorCmd(name, layer, cmd)); // initialize and subscribe actuators
+            m_iFYCtrl.GetFYAppBot().Occ6OnTrue.Attach(Act_Occ6OnTrueBot);
+            Actuator Act_Occ6OnFalseBot = new Actuator("Occ6OnFalse", "FiddleYardBOT", "bN\r", (name, layer, cmd) => ActuatorCmd(name, layer, cmd)); // initialize and subscribe actuators
+            m_iFYCtrl.GetFYAppBot().Occ6OnFalse.Attach(Act_Occ6OnFalseBot);
+            Actuator Act_Occ7OnTrueBot = new Actuator("Occ7OnTrue", "FiddleYardBOT", "bO\r", (name, layer, cmd) => ActuatorCmd(name, layer, cmd)); // initialize and subscribe actuators
+            m_iFYCtrl.GetFYAppBot().Occ7OnTrue.Attach(Act_Occ7OnTrueBot);
+            Actuator Act_Occ7OnFalseBot = new Actuator("Occ7OnFalse", "FiddleYardBOT", "bP\r", (name, layer, cmd) => ActuatorCmd(name, layer, cmd)); // initialize and subscribe actuators
+            m_iFYCtrl.GetFYAppBot().Occ7OnFalse.Attach(Act_Occ7OnFalseBot);
             Actuator Act_RecoverdBot = new Actuator("Recoverd", "FiddleYardBOT", "bQ\r", (name, layer, cmd) => ActuatorCmd(name, layer, cmd)); // initialize and subscribe actuators
             m_iFYCtrl.GetFYAppBot().Recoverd.Attach(Act_RecoverdBot);
             Actuator Act_CollectBot = new Actuator("Collect", "FiddleYardBOT", "bR\r", (name, layer, cmd) => ActuatorCmd(name, layer, cmd)); // initialize and subscribe actuators
