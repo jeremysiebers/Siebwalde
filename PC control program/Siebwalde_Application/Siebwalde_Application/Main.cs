@@ -35,6 +35,8 @@ namespace Siebwalde_Application
 
         private const int LINKACTMAX = 100;
         private string path = @"c:\localdata\SiebwaldeAppLogging.txt"; // different logging file per target, this is default
+        private bool ViewTop = true;
+        private bool ViewBot = true;
         
         public Main()
         {
@@ -61,9 +63,13 @@ namespace Siebwalde_Application
         }
 
         private void StartApplication_Click(object sender, EventArgs e)
-        {                                                                                           
-            SiebwaldeAppLogging("##########################################################" + Environment.NewLine);
-            SiebwaldeAppLogging(DateTime.Now + " Main: Siebwalde Application started." + Environment.NewLine);
+        {
+            StoreText("########################################################################" + Environment.NewLine);
+            StoreText("#                                                                      #" + Environment.NewLine);
+            StoreText("#                   Siebwalde Application started.                     #" + Environment.NewLine);
+            StoreText("#                                                                      #" + Environment.NewLine);
+            StoreText("########################################################################" + Environment.NewLine);
+            SiebwaldeAppLogging(DateTime.Now + " Siebwalde Application started." + Environment.NewLine);
             SiebwaldeAppLogging(DateTime.Now + " Main: PC MAC adress is: " + MACIPConditioner.MACstring() + Environment.NewLine);
             SiebwaldeAppLogging(DateTime.Now + " Main: PC IP adress is: " + MACIPConditioner.IPstring() + Environment.NewLine);
 
@@ -114,22 +120,42 @@ namespace Siebwalde_Application
 
         private void FiddleYardFormTop_Click(object sender, EventArgs e)
         {
-            bool autoscroll = false;
-            SiebwaldeAppLogging(DateTime.Now + " Main: Show Fiddle Yard Top Layer interface" + Environment.NewLine);
-            if (this.Height < 1199)
+            bool autoscroll = false;            
+            if (this.Height < 1200 || this.Width < 1920)
                 autoscroll = true;
             else { autoscroll = false; }
-            FYcontroller.FYTOPShow(autoscroll, this.Height);
+            FYcontroller.FYTOPShow(autoscroll, this.Height, this.Width, this.Location.X, this.Location.Y, ViewTop);
+            ViewTop = !ViewTop;
+            if (!ViewTop)
+            {
+                SiebwaldeAppLogging(DateTime.Now + " Main: Show Fiddle Yard Top Layer interface" + Environment.NewLine);
+                FiddleYardFormTop.Text = "Hide Fiddle Yard Top";
+            }
+            else 
+            {
+                SiebwaldeAppLogging(DateTime.Now + " Main: Hide Fiddle Yard Top Layer interface" + Environment.NewLine);
+                FiddleYardFormTop.Text = "Show Fiddle Yard Top"; 
+            }
         }
 
         private void FiddleYardFormBot_Click(object sender, EventArgs e)
         {
-            bool autoscroll = false;
-            SiebwaldeAppLogging(DateTime.Now + " Main: Show Fiddle Yard Bottom Layer interface" + Environment.NewLine);
-            if (this.Height < 1199)
+            bool autoscroll = false;            
+            if (this.Height < 1200 || this.Width < 1920)
                 autoscroll = true;
             else { autoscroll = false; }
-            FYcontroller.FYBOTShow(autoscroll, this.Height);
+            FYcontroller.FYBOTShow(autoscroll, this.Height, this.Width, this.Location.X, this.Location.Y, ViewBot);
+            ViewBot = !ViewBot;
+            if (!ViewBot)
+            {
+                SiebwaldeAppLogging(DateTime.Now + " Main: Show Fiddle Yard Bottom Layer interface" + Environment.NewLine);
+                FiddleYardFormBot.Text = "Hide Fiddle Yard Bot";
+            }
+            else 
+            {
+                SiebwaldeAppLogging(DateTime.Now + " Main: Hide Fiddle Yard Bottom Layer interface" + Environment.NewLine);
+                FiddleYardFormBot.Text = "Show Fiddle Yard Bot"; 
+            }
         }
 
         private void MaintrackForm_Click(object sender, EventArgs e)

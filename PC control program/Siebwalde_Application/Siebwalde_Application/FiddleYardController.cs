@@ -111,23 +111,6 @@ namespace Siebwalde_Application
 
         public void Start()
         {
-            ReConnect();            
-        }
-
-        public void Stop()
-        {
-            if (GetIoHandler().FYSender != null) // when a real connection is made, close the UDP port
-            {
-
-                //Also send stop command to uController to suspend all and to put tracks to occupied.
-                //FYSender.SendUdp(Encoding.ASCII.GetBytes("a" + CmdToFY[18])); // uController program build-in-reset setting all occupied to true stopping motors etc.
-                //FYSender.SendUdp(Encoding.ASCII.GetBytes("b" + CmdToFY[18])); // uController program build-in-reset setting all occupied to true stopping motors etc.
-                GetIoHandler().FYSender.CloseUdp();
-            }
-        }
-
-        public void ReConnect()
-        {
             if (ConnectFiddleYard(m_macAddr, m_ipAddr) == true) // when connection was succesfull and target was found and is connected
             {
                 m_iMain.SiebwaldeAppLogging(DateTime.Now + " FYCTRL: Fiddle Yard uController target in real mode" + Environment.NewLine);
@@ -147,7 +130,20 @@ namespace Siebwalde_Application
                 FYSimulatorBot.Start();
             }
             FYIOHandle.Start(FYSimulatorActive);
-            m_iMain.SiebwaldeAppLogging(DateTime.Now + " FYCTRL: Fiddle Yard uController Reset." + Environment.NewLine);
+            m_iMain.SiebwaldeAppLogging(DateTime.Now + " FYCTRL: Fiddle Yard uController Reset." + Environment.NewLine);      
+        }
+
+        public void Stop()
+        {
+            if (GetIoHandler().FYSender != null) // when a real connection is made, close the UDP port
+            {                
+                GetIoHandler().FYSender.CloseUdp();
+            }
+        }
+
+        public void ReConnect()
+        {
+            // stop simulators / timers etc, then call start again
         }
 
         public void ClearEventLoggers()
@@ -161,22 +157,39 @@ namespace Siebwalde_Application
             m_iMain.FYLinkActivityUpdate();
         }        
 
-        public void FYTOPShow(bool autoscroll, int height)
+        public void FYTOPShow(bool autoscroll, int height, int width, int LocX, int LocY, bool View)
         {
-            FYTOP.Location = new System.Drawing.Point(0, 75);            
-            FYTOP.Height = height - 60 - 20;
-            FYTOP.Width = 960;
+                        
+            FYTOP.Height = height - 60 - 27;
+            if (autoscroll == true)
+            {
+                FYTOP.Location = new System.Drawing.Point(LocX + 8, LocY + 80);
+                FYTOP.Width = width / 2 -8;
+            }
+            else
+            {
+                FYTOP.Location = new System.Drawing.Point(LocX, LocY + 80);
+                FYTOP.Width = width / 2;
+            }
             FYTOP.AutoScroll = autoscroll;
-            FYTOP.FYFORMShow(); 
+            FYTOP.FYFORMShow(View); 
         }
 
-        public void FYBOTShow(bool autoscroll, int height)
-        {
-            FYBOT.Location = new System.Drawing.Point(960, 75);
-            FYBOT.Height = height - 60 - 20;
-            FYBOT.Width = 960;
-            FYBOT.AutoScroll = autoscroll;
-            FYBOT.FYFORMShow();
+        public void FYBOTShow(bool autoscroll, int height, int width, int LocX, int LocY, bool View)
+        {            
+            FYBOT.Height = height - 60 - 27;
+            if (autoscroll == true)
+            {
+                FYBOT.Location = new System.Drawing.Point(LocX + width / 2, LocY + 80);  //960
+                FYBOT.Width = width / 2 - 8;
+            }
+            else
+            {
+                FYBOT.Location = new System.Drawing.Point(LocX + width / 2, LocY + 80);  //960
+                FYBOT.Width = width / 2;
+            }            
+            FYBOT.AutoScroll = autoscroll;            
+            FYBOT.FYFORMShow(View);
         }
         
         private bool ConnectFiddleYard(byte[,] macAddr, byte[,] ipAddr)

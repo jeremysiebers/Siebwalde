@@ -32,6 +32,7 @@ namespace Siebwalde_Application
 
         public int GWinHalf;    // The Height of GWin devided by 2 plus the offset in Y is the center line of GWin
         public int GWinX;       // The X location of Gwin border line.
+        public int GWinY;       // The Y location of Gwin border line.
         public int Track6LocY;
         public int Track6LocX;
 
@@ -81,17 +82,20 @@ namespace Siebwalde_Application
             InitializeComponent();
 
             #region Indicator init
+            // size of window resolution on Modeltrain PC is 1920; 1200
             // Size of window on Modeltrain PC is 960; 1085
             // Placed on 0; 85
 
-            GWinHalf = 740/2+32;            // The Height of GWin devided by 2 plus the offset in Y is the center line of GWin
+            
             GWinX = 5;                      // The X location of Gwin border line.
+            GWinY = 32;                     // The X location of Gwin border line.
+            GWinHalf = 740 / 2 + GWinY;     // The Height of GWin devided by 2 plus the offset in Y is the center line of GWin
             Track6LocY = GWinHalf - 8;
             Track6LocX = GWinX + 170;
             
 
             GWin.Size = new Size (940,740);
-            GWin.Location = new System.Drawing.Point(5, 32);
+            GWin.Location = new System.Drawing.Point(GWinX, GWinY); // was 5, 32
 
             LLed_F10.Size = new Size (30, 16);
             LLed_F10.Location = new System.Drawing.Point(GWinX + 10, GWinHalf - 8);
@@ -213,6 +217,8 @@ namespace Siebwalde_Application
             //LLed_Alive.Location = new System.Drawing.Point(GWinX + 880, GWinHalf + 360 - 16);
 
             SimulationMode.Visible = false;
+            alwaysOnTopToolStripMenuItem.Checked = true;
+            this.TopMost = true;
 
             #endregion Indicator init
 
@@ -590,11 +596,15 @@ namespace Siebwalde_Application
             ReceivedCmd.Clear();
         }
 
-        public void FYFORMShow()
+        public void FYFORMShow(bool View)
         {
             this.Opacity = 100;
             this.ShowInTaskbar = true;
-            this.Show();
+            if (View)
+            {
+                this.Show();
+            }
+            else { this.Hide(); }
             this.TopLevel = true;
             
             if (this.Name == "FiddleYardTOP")
@@ -749,7 +759,7 @@ namespace Siebwalde_Application
             Reset.UpdateCommand();
             Initialized = false;
             
-            /*
+            
             // Next also force all track color to cyan including text becasue if a track is already false no update is executed on each track color.
             LLed_Track1.BackColor = Color.Cyan;
             LLed_Track1.Text = "                     Not Initialized";
@@ -773,7 +783,7 @@ namespace Siebwalde_Application
             LLed_Track10.Text = "                     Not Initialized";
             LLed_Track11.BackColor = Color.Cyan;
             LLed_Track11.Text = "                     Not Initialized";
-            */
+            
 
             Btn_Collect_TOP.Enabled = true;
             Btn_Start_Fiddle_TOP.Enabled = true;
@@ -1873,6 +1883,12 @@ namespace Siebwalde_Application
 
         private void ShiftIndicatorPos(int val)
         {
+            // Check position of Gwin
+            GWinHalf = 740 / 2 + GWin.Location.Y;
+            GWinX = GWin.Location.X;
+            Track6LocY = GWinHalf - 8;
+            Track6LocX = GWinX + 170;
+
             switch (val)
             {
                 case 1: LLed_Track1.Location = new System.Drawing.Point(Track6LocX, Track6LocY);
@@ -2054,6 +2070,12 @@ namespace Siebwalde_Application
             AutomaticMode.Visible = false;
             ManualMode.Visible = true;
 
+
+            Btn_Bezet5BOn_TOP.Location = new System.Drawing.Point(GWin.Location.X + 50 + 16 + 10, (740 / 2 + GWin.Location.Y) - 18 - (250 / 2) - (23 / 2));
+            Btn_Bezet6On_TOP.Location = new System.Drawing.Point(GWin.Location.X + 100 - (32 / 2), (740 / 2 + GWin.Location.Y) + 8 + 10);
+            Btn_Bezet7On_TOP.Location = new System.Drawing.Point(GWin.Location.X + 840 - (32 / 2), (740 / 2 + GWin.Location.Y) + 8 + 10);
+            ManualMode.Location = new System.Drawing.Point(GWin.Location.X + 745, GWin.Location.Y + 761);  //(750,793);
+            
             Btn_Bezet5BOn_TOP.Visible = true;
             Btn_Bezet6On_TOP.Visible = true;
             Btn_Bezet7On_TOP.Visible = true;
@@ -2064,6 +2086,12 @@ namespace Siebwalde_Application
         private void quitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.Hide();
+        }
+
+        private void alwaysOnTopToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            alwaysOnTopToolStripMenuItem.Checked = !alwaysOnTopToolStripMenuItem.Checked;
+            this.TopMost = alwaysOnTopToolStripMenuItem.Checked;                    
         }
     }    
 }

@@ -145,7 +145,7 @@
             this.FiddleYardFormTop.Name = "FiddleYardFormTop";
             this.FiddleYardFormTop.Size = new System.Drawing.Size(150, 23);
             this.FiddleYardFormTop.TabIndex = 26;
-            this.FiddleYardFormTop.Text = "Fiddle Yard TOP Layer";
+            this.FiddleYardFormTop.Text = "Show Fiddle Yard Top";
             this.FiddleYardFormTop.UseVisualStyleBackColor = true;
             this.FiddleYardFormTop.Click += new System.EventHandler(this.FiddleYardFormTop_Click);
             // 
@@ -155,7 +155,7 @@
             this.FiddleYardFormBot.Name = "FiddleYardFormBot";
             this.FiddleYardFormBot.Size = new System.Drawing.Size(150, 23);
             this.FiddleYardFormBot.TabIndex = 27;
-            this.FiddleYardFormBot.Text = "Fiddle Yard BOT Layer";
+            this.FiddleYardFormBot.Text = "Show Fiddle Yard Bot";
             this.FiddleYardFormBot.UseVisualStyleBackColor = true;
             this.FiddleYardFormBot.Click += new System.EventHandler(this.FiddleYardFormBot_Click);
             // 
