@@ -30,6 +30,7 @@ extern void Collect_On(unsigned char ASL);
 extern void Collect_Off(unsigned char ASL);
 
 extern void Train_Drive_Out_Cancelled(unsigned char ASL);
+extern void Target_Ready(unsigned char ASL);
 
 //////////////////ERROR CODES//////////////////////////
 extern void Bezet_Uit_Blok_6_Send(unsigned char ASL);

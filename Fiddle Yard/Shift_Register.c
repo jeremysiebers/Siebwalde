@@ -39,7 +39,7 @@ static INPUT_VAR PLATFORMS_IO[2] = {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0
 void IO(void)
 {			
 	
-		PLATFORMS_IO[1].TR_MEAS_ = PORTGbits.RG1;				// Not used, not connected (same name as TR_MEAS, no new name required, spare1 -> TR_MEAS
+		PLATFORMS_IO[1].TR_MEAS_ = PORTCbits.RC1;				// PORTGbits.RG1 Not used, not connected (same name as TR_MEAS, no new name required, spare1 -> TR_MEAS
 		PLATFORMS_IO[0].TR_MEAS_ = PORTCbits.RC1;				// Measures the 15 V track voltage, if not present inhibit all fiddle yard desision actions 
 																// because occupied signals will go to 0V if track voltage is disabled by emergency button
 		PLATFORMS_IO[1].CL_10_= ((PORTJ & 0x0F)); // Port J bits 0 to 3

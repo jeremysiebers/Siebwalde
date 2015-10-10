@@ -6,26 +6,29 @@
 #include <Drive_Train_IO.h>
 
 void Target_Alive_Update(unsigned char ASL);
+void Var_Out_Switcher(unsigned  char ASL);
+void Sent_Track_Power_Meassage(unsigned char ASL);
 
 typedef struct
 {
 	unsigned char 	Var_Out;	
 	unsigned int	Variables_Out_Counter;
 	unsigned int 	Target_Alive_Counter;
+	unsigned int	Variables_Out_Counter2;
 	unsigned char	Send_Var_Out_Old[5][3];
 	unsigned char	ForceSendUpdate;
+	unsigned char	Track_Power_Meassage;
 }OUTPUT_VAR;
 
-static OUTPUT_VAR VAR_OUT_FY[2] = { {0,0 ,0,{{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0}},0},
-								    {0,15,15,{{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0}},0}	};
+static OUTPUT_VAR VAR_OUT_FY[2] = { {0,0 ,0 ,0 ,{{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0}},0,0},
+								    {0,15,15,5, {{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0}},0,0}	};
 
 static unsigned char Send_Var_Out[3];
 
 void Var_Out_Programm(unsigned  char ASL)
 {
 	
-	VAR_OUT_FY[ASL].Variables_Out_Counter++;
-	
+	VAR_OUT_FY[ASL].Variables_Out_Counter++;	
 	if (VAR_OUT_FY[ASL].Variables_Out_Counter >= 5000)			// Auto send an update every second to ensure up-to-date data is available in user gui
 	{			
 		VAR_OUT_FY[ASL].Variables_Out_Counter = 0;				// Reset counter
@@ -33,13 +36,29 @@ void Var_Out_Programm(unsigned  char ASL)
 		VAR_OUT_FY[ASL].ForceSendUpdate = True;					// After all 4 cases have been send, make this variable False.
 	}
 	
-	VAR_OUT_FY[ASL].Target_Alive_Counter++;
-	if (VAR_OUT_FY[ASL].Target_Alive_Counter >= 250)
+	if (TR_MEAS(0) == 0)														// Track power measurement are equal for TOP and BOTTOM. there for sent message only once
 	{
-		Target_Alive_Update(ASL);
-		VAR_OUT_FY[ASL].Target_Alive_Counter = 0;
+		if (VAR_OUT_FY[ASL].Track_Power_Meassage == 1)							// when falling edge off track power is detected
+		{
+			Sent_Track_Power_Meassage(ASL);
+			VAR_OUT_FY[ASL].Track_Power_Meassage = 0;
+		}
 	}	
+	else if (TR_MEAS(0) == 1) 									// When power restored do not send message, but set the local variable Track_Power_Meassage to 1
+	{
+		VAR_OUT_FY[ASL].Track_Power_Meassage = 1;
+	}
 
+	VAR_OUT_FY[ASL].Variables_Out_Counter2++;
+	if (VAR_OUT_FY[ASL].Variables_Out_Counter2 >= 0)//10)			// Send IO info with approx 250Hz iso 2500Hz
+	{			
+		VAR_OUT_FY[ASL].Variables_Out_Counter2 = 0;				// Reset counter
+		Var_Out_Switcher(ASL);
+	}	
+}
+
+void Var_Out_Switcher(unsigned  char ASL)
+{
 	switch (VAR_OUT_FY[ASL].Var_Out)
 		{
 			case	0	:	if (ASL == TOP)
@@ -199,7 +218,7 @@ void Var_Out_Programm(unsigned  char ASL)
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
 							Send_Var_Out[1] = Send_Var_Out[1] | Bezet_Uit_7(ASL);
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
-							Send_Var_Out[1] = Send_Var_Out[1] | TR_MEAS(ASL);
+							Send_Var_Out[1] = Send_Var_Out[1] | TR_MEAS(ASL);		// TRACK_POWER This is sensor, for the message that the power is gone a separate message is created
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
 							Send_Var_Out[1] = Send_Var_Out[1] | F10(ASL);
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
@@ -229,9 +248,8 @@ void Var_Out_Programm(unsigned  char ASL)
 					
 			default		:	VAR_OUT_FY[ASL].Var_Out = 0;
 							break;
-		}	
-	
-}
+		}
+}		
 
 extern void Bridge_Open_Ok(unsigned char ASL)
 {
@@ -916,7 +934,7 @@ extern void Train_Drive_Out_Cancelled(unsigned char ASL)
 	Send_Diag_Comm(Send_Var_Out);
 }
 
-void Target_Alive_Update(unsigned char ASL)
+extern void Target_Ready(unsigned char ASL)
 {
 	if (ASL == TOP)
 	{
@@ -927,6 +945,21 @@ void Target_Alive_Update(unsigned char ASL)
 		Send_Var_Out[0] = 'B';
 	}
 	Send_Var_Out[1] = 0b00110000;		//48
+	Send_Var_Out[2] = 0x00;
+	Send_Diag_Comm(Send_Var_Out);
+}
+
+void Sent_Track_Power_Meassage(unsigned char ASL)
+{
+	if (ASL == TOP)
+	{
+		Send_Var_Out[0] = 'A';
+	}
+	else if (ASL == BOTTOM)
+	{
+		Send_Var_Out[0] = 'B';
+	}
+	Send_Var_Out[1] = 0b00110001;		//49
 	Send_Var_Out[2] = 0x00;
 	Send_Diag_Comm(Send_Var_Out);
 }

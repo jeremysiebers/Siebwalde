@@ -8,7 +8,7 @@ static UDP_SOCKET socket2 = INVALID_UDP_SOCKET;
 
 static void Command_Exe(void);
 static unsigned char Cmd[3],Cmd_Read_Switch=20;
-static unsigned char Exe_Cmd[2];
+static unsigned char Exe_Cmd[2] = {0,0};
 static unsigned char Exe_Cmd_Ret_1=0;
 static unsigned char SuccesFull_Read = 0;	//3 bytes received or less?
 unsigned char MACPC[6] = {0,0,0,0,0,0};
@@ -40,35 +40,23 @@ void Command()
 		case	0	:	if(UDPIsGetReady(socket2))
 						{
 							SuccesFull_Read = UDPGetArray(Cmd, 0x3);
-							if (Cmd[0] == Enter || Cmd[0] == 0 || Exe_Cmd_Ret_1 > 1 || SuccesFull_Read < 3)
+							if (Cmd[0] == Enter || Cmd[0] == 0 || SuccesFull_Read < 3 || Cmd[1] == Enter || Cmd[1] == 0)
 							{
 								Cmd_Read_Switch = 0;
 								Cmd[0] = 0;
 								break;
+							}							
+							else if (Cmd[2] == Enter)
+							{
+								Cmd_Read_Switch = 0;
+								Command_Exe();									
 							}
-							Cmd_Read_Switch++;
-							break;
-						}
-						break;
-						
-		case	1	:	if (Cmd[1] == Enter || Cmd[1] == 0 || Exe_Cmd_Ret_1 > 1)
-						{
 							Cmd_Read_Switch = 0;
 							Cmd[0] = 0;
+							Cmd[1] = 0;
+							Cmd[2] = 0;
 							break;
 						}
-						Cmd_Read_Switch++;
-						break;
-						
-		case	2	:	if (Cmd[2] == Enter)
-						{
-							Cmd_Read_Switch = 0;
-							Command_Exe();							
-						}
-						Cmd_Read_Switch = 0;
-						Cmd[0] = 0;
-						Cmd[1] = 0;
-						Cmd[2] = 0;
 						break;
 						
 		case	20	:	if(!MACIsLinked())
@@ -117,161 +105,169 @@ void Command_Exe(void)
 {
 	switch (Cmd[0])
 	{
-		case	'a'		:	switch (Cmd[1])
+		case	'a'		:	if (Exe_Cmd[1] == 0)
 							{
-								case	'1'		:	Exe_Cmd[1] = 1;	//Enable Track			Exe_Cmd[1] = TOP	Exe_Cmd[0] = Bottom
-													break;
-								case	'2'		:	Exe_Cmd[1] = 2;	//Disable Track
-													break;
-								case	'3'		:	Exe_Cmd[1] = 3;	//Fiddle yard naar links = spoor++
-													break;
-								case	'4'		:	Exe_Cmd[1] = 4;	//Fiddle yard naar rechts = spoor--
-													break;
-								case	'5'		:	Exe_Cmd[1] = 5;	// Ga naar spoor 1
-													//Exe_Cmd[0] = 5;	// Ga naar spoor 1
-													break;
-								case	'6'		:	Exe_Cmd[1] = 6;	// ga naar spoor 2
-													break;
-								case	'7'		:	Exe_Cmd[1] = 7;	//ga naar spoor 3
-													break;
-								case	'8'		:	Exe_Cmd[1] = 8;	//ga naar spoor 4
-													break;
-								case	'9'		:	Exe_Cmd[1] = 9;	//ga naar spoor 5
-													break;
-								case	'A'		:	Exe_Cmd[1] = 10;	//ga naar spoor 6
-													break;
-								case	'B'		:	Exe_Cmd[1] = 11;	//ga naar spoor 7
-													break;
-								case	'C'		:	Exe_Cmd[1] = 12;	//ga naar spoor 8
-													break;
-								case	'D'		:	Exe_Cmd[1] = 13;	//ga naar spoor 9
-													break;
-								case	'E'		:	Exe_Cmd[1] = 14;	//ga naar spoor 10
-													break;
-								case	'F'		:	Exe_Cmd[1] = 15;	//ga naar spoor 11
-													//Exe_Cmd[0] = 15;	//ga naar spoor 11
-													break;
-								case	'G'		:	Exe_Cmd[1] = 16;	//Trein detectie
-													//Exe_Cmd[0] = 16;	//Trein detectie
-													break;
-								case	'H'		:	Exe_Cmd[1] = 17;	//Start Fiddle Yard
-													break;
-								case	'I'		:	Exe_Cmd[1] = 18;	//Stop Fiddle Yard
-													break;
-								case	'J'		:	Exe_Cmd[1] = 19;	//Stop Fiddle Yard NOW
-													break;
-								case	'K'		:	Exe_Cmd[1] = 20;	//Bezet_In_5B_Switch_On
-													break;
-								case	'L'		:	Exe_Cmd[1] = 21;	//Bezet_In_5B_Switch_Off
-													break;
-								case	'M'		:	Exe_Cmd[1] = 22;	//Bezet_In_6_Switch_On
-													break;
-								case	'N'		:	Exe_Cmd[1] = 23;	//Bezet_In_6_Switch_Off
-													break;
-								case	'O'		:	Exe_Cmd[1] = 24;	//Bezet_In_7_Switch_On
-													break;
-								case	'P'		:	Exe_Cmd[1] = 25;	//Bezet_In_7_Switch_Off
-													break;
-								case	'Q'		:	Exe_Cmd[1] = 26;	//Resume previous operation
-													break;
-								case	'R'		:	Exe_Cmd[1] = 27;	//Collect Start
-													break;
-								case	'S'		:	Exe_Cmd[1] = 0;	//Bruggen open
-													break;
-								case	'T'		:	Exe_Cmd[1] = 0;	//Bruggen open
-													break;
-								case	'U'		:	Exe_Cmd[1] = 0;	//Bruggen open
-													break;
-								case	'V'		:	Exe_Cmd[1] = 0;	//Bruggen open
-													break;
-								case	'W'		:	Exe_Cmd[1] = 0;	//Bruggen open
-													break;
-								case	'X'		:	Exe_Cmd[1] = 0;	//Bruggen open
-													break;
-								case	'Y'		:	Exe_Cmd[1] = 0;	//Bruggen open
-													break;
-								case	'Z'		:	Exe_Cmd[1] = 0;	//Bruggen open
-													break;
-								default			:	Exe_Cmd[1] = 0;
-													break;
+								
+								switch (Cmd[1])
+								{
+									case	'1'		:	Exe_Cmd[1] = 1;	//Enable Track			Exe_Cmd[1] = TOP	Exe_Cmd[0] = Bottom
+														break;
+									case	'2'		:	Exe_Cmd[1] = 2;	//Disable Track
+														break;
+									case	'3'		:	Exe_Cmd[1] = 3;	//Fiddle yard naar links = spoor++
+														break;
+									case	'4'		:	Exe_Cmd[1] = 4;	//Fiddle yard naar rechts = spoor--
+														break;
+									case	'5'		:	Exe_Cmd[1] = 5;	// Ga naar spoor 1
+														//Exe_Cmd[0] = 5;	// Ga naar spoor 1
+														break;
+									case	'6'		:	Exe_Cmd[1] = 6;	// ga naar spoor 2
+														break;
+									case	'7'		:	Exe_Cmd[1] = 7;	//ga naar spoor 3
+														break;
+									case	'8'		:	Exe_Cmd[1] = 8;	//ga naar spoor 4
+														break;
+									case	'9'		:	Exe_Cmd[1] = 9;	//ga naar spoor 5
+														break;
+									case	'A'		:	Exe_Cmd[1] = 10;	//ga naar spoor 6
+														break;
+									case	'B'		:	Exe_Cmd[1] = 11;	//ga naar spoor 7
+														break;
+									case	'C'		:	Exe_Cmd[1] = 12;	//ga naar spoor 8
+														break;
+									case	'D'		:	Exe_Cmd[1] = 13;	//ga naar spoor 9
+														break;
+									case	'E'		:	Exe_Cmd[1] = 14;	//ga naar spoor 10
+														break;
+									case	'F'		:	Exe_Cmd[1] = 15;	//ga naar spoor 11
+														//Exe_Cmd[0] = 15;	//ga naar spoor 11
+														break;
+									case	'G'		:	Exe_Cmd[1] = 16;	//Trein detectie
+														//Exe_Cmd[0] = 16;	//Trein detectie
+														break;
+									case	'H'		:	Exe_Cmd[1] = 17;	//Start Fiddle Yard
+														break;
+									case	'I'		:	Exe_Cmd[1] = 18;	//Stop Fiddle Yard
+														break;
+									case	'J'		:	Exe_Cmd[1] = 19;	//Stop Fiddle Yard NOW
+														break;
+									case	'K'		:	Exe_Cmd[1] = 20;	//Bezet_In_5B_Switch_On
+														break;
+									case	'L'		:	Exe_Cmd[1] = 21;	//Bezet_In_5B_Switch_Off
+														break;
+									case	'M'		:	Exe_Cmd[1] = 22;	//Bezet_In_6_Switch_On
+														break;
+									case	'N'		:	Exe_Cmd[1] = 23;	//Bezet_In_6_Switch_Off
+														break;
+									case	'O'		:	Exe_Cmd[1] = 24;	//Bezet_In_7_Switch_On
+														break;
+									case	'P'		:	Exe_Cmd[1] = 25;	//Bezet_In_7_Switch_Off
+														break;
+									case	'Q'		:	Exe_Cmd[1] = 26;	//Resume previous operation
+														break;
+									case	'R'		:	Exe_Cmd[1] = 27;	//Collect Start
+														break;
+									case	'S'		:	Exe_Cmd[1] = 0;	//Bruggen open
+														break;
+									case	'T'		:	Exe_Cmd[1] = 0;	//Bruggen open
+														break;
+									case	'U'		:	Exe_Cmd[1] = 0;	//Bruggen open
+														break;
+									case	'V'		:	Exe_Cmd[1] = 0;	//Bruggen open
+														break;
+									case	'W'		:	Exe_Cmd[1] = 0;	//Bruggen open
+														break;
+									case	'X'		:	Exe_Cmd[1] = 0;	//Bruggen open
+														break;
+									case	'Y'		:	Exe_Cmd[1] = 0;	//Bruggen open
+														break;
+									case	'Z'		:	Exe_Cmd[1] = 0;	//Bruggen open
+														break;
+									default			:	Exe_Cmd[1] = 0;
+														break;
+								}
 							}
 							break;
 							
-		case	'b'		:	switch (Cmd[1])
+		case	'b'		:	if (Exe_Cmd[0] == 0)
 							{
-								case	'1'		:	Exe_Cmd[0] = 1;	//Bruggen open			Exe_Cmd[1] = TOP	Exe_Cmd[0] = Bottom
-													break;
-								case	'2'		:	Exe_Cmd[0] = 2;	//Bruggen dicht
-													break;
-								case	'3'		:	Exe_Cmd[0] = 3;	//Fiddle yard naar links = spoor++
-													break;
-								case	'4'		:	Exe_Cmd[0] = 4;	//Fiddle yard naar rechts = spoor--
-													break;
-								case	'5'		:	Exe_Cmd[0] = 5;	// Ga naar spoor 1
-													break;
-								case	'6'		:	Exe_Cmd[0] = 6;	// ga naar spoor 2
-													break;
-								case	'7'		:	Exe_Cmd[0] = 7;	//ga naar spoor 3
-													break;
-								case	'8'		:	Exe_Cmd[0] = 8;	//ga naar spoor 4
-													break;
-								case	'9'		:	Exe_Cmd[0] = 9;	//ga naar spoor 5
-													break;
-								case	'A'		:	Exe_Cmd[0] = 10;	//ga naar spoor 6
-													break;
-								case	'B'		:	Exe_Cmd[0] = 11;	//ga naar spoor 7
-													break;
-								case	'C'		:	Exe_Cmd[0] = 12;	//ga naar spoor 8
-													break;
-								case	'D'		:	Exe_Cmd[0] = 13;	//ga naar spoor 9
-													break;
-								case	'E'		:	Exe_Cmd[0] = 14;	//ga naar spoor 10
-													break;
-								case	'F'		:	Exe_Cmd[0] = 15;	//ga naar spoor 11
-													break;
-								case	'G'		:	Exe_Cmd[0] = 16;	//Trein detectie
-													break;
-								case	'H'		:	Exe_Cmd[0] = 17;	//Start Fiddle Yard
-													break;
-								case	'I'		:	Exe_Cmd[0] = 18;	//Stop Fiddle Yard
-													break;
-								case	'J'		:	Exe_Cmd[0] = 19;	//Stop Fiddle Yard NOW (RESET)
-													break;
-								case	'K'		:	Exe_Cmd[0] = 20;	//Bezet_In_5B_Switch_On
-													break;
-								case	'L'		:	Exe_Cmd[0] = 21;	//Bezet_In_5B_Switch_Off
-													break;
-								case	'M'		:	Exe_Cmd[0] = 22;	//Bezet_In_6_Switch_On
-													break;
-								case	'N'		:	Exe_Cmd[0] = 23;	//Bezet_In_6_Switch_Off
-													break;
-								case	'O'		:	Exe_Cmd[0] = 24;	//Bezet_In_7_Switch_On
-													break;
-								case	'P'		:	Exe_Cmd[0] = 25;	//Bezet_In_7_Switch_Off
-													break;
-								case	'Q'		:	Exe_Cmd[0] = 26;	//Resume previous operation
-													break;
-								case	'R'		:	Exe_Cmd[0] = 27;	//Collect Start
-													break;
-								case	'S'		:	Exe_Cmd[0] = 0;	//Bruggen open
-													break;
-								case	'T'		:	Exe_Cmd[0] = 0;	//Bruggen open
-													break;
-								case	'U'		:	Exe_Cmd[0] = 0;	//Bruggen open
-													break;
-								case	'V'		:	Exe_Cmd[0] = 0;	//Bruggen open
-													break;
-								case	'W'		:	Exe_Cmd[0] = 0;	//Bruggen open
-													break;
-								case	'X'		:	Exe_Cmd[0] = 0;	//Bruggen open
-													break;
-								case	'Y'		:	Exe_Cmd[0] = 0;	//Bruggen open
-													break;
-								case	'Z'		:	Exe_Cmd[0] = 0;	//Bruggen open
-													break;
-								default			:	Exe_Cmd[0] = 0;
-													break;
-							}
+								
+								switch (Cmd[1])
+								{
+									case	'1'		:	Exe_Cmd[0] = 1;	//Bruggen open			Exe_Cmd[1] = TOP	Exe_Cmd[0] = Bottom
+														break;
+									case	'2'		:	Exe_Cmd[0] = 2;	//Bruggen dicht
+														break;
+									case	'3'		:	Exe_Cmd[0] = 3;	//Fiddle yard naar links = spoor++
+														break;
+									case	'4'		:	Exe_Cmd[0] = 4;	//Fiddle yard naar rechts = spoor--
+														break;
+									case	'5'		:	Exe_Cmd[0] = 5;	// Ga naar spoor 1
+														break;
+									case	'6'		:	Exe_Cmd[0] = 6;	// ga naar spoor 2
+														break;
+									case	'7'		:	Exe_Cmd[0] = 7;	//ga naar spoor 3
+														break;
+									case	'8'		:	Exe_Cmd[0] = 8;	//ga naar spoor 4
+														break;
+									case	'9'		:	Exe_Cmd[0] = 9;	//ga naar spoor 5
+														break;
+									case	'A'		:	Exe_Cmd[0] = 10;	//ga naar spoor 6
+														break;
+									case	'B'		:	Exe_Cmd[0] = 11;	//ga naar spoor 7
+														break;
+									case	'C'		:	Exe_Cmd[0] = 12;	//ga naar spoor 8
+														break;
+									case	'D'		:	Exe_Cmd[0] = 13;	//ga naar spoor 9
+														break;
+									case	'E'		:	Exe_Cmd[0] = 14;	//ga naar spoor 10
+														break;
+									case	'F'		:	Exe_Cmd[0] = 15;	//ga naar spoor 11
+														break;
+									case	'G'		:	Exe_Cmd[0] = 16;	//Trein detectie
+														break;
+									case	'H'		:	Exe_Cmd[0] = 17;	//Start Fiddle Yard
+														break;
+									case	'I'		:	Exe_Cmd[0] = 18;	//Stop Fiddle Yard
+														break;
+									case	'J'		:	Exe_Cmd[0] = 19;	//Stop Fiddle Yard NOW (RESET)
+														break;
+									case	'K'		:	Exe_Cmd[0] = 20;	//Bezet_In_5B_Switch_On
+														break;
+									case	'L'		:	Exe_Cmd[0] = 21;	//Bezet_In_5B_Switch_Off
+														break;
+									case	'M'		:	Exe_Cmd[0] = 22;	//Bezet_In_6_Switch_On
+														break;
+									case	'N'		:	Exe_Cmd[0] = 23;	//Bezet_In_6_Switch_Off
+														break;
+									case	'O'		:	Exe_Cmd[0] = 24;	//Bezet_In_7_Switch_On
+														break;
+									case	'P'		:	Exe_Cmd[0] = 25;	//Bezet_In_7_Switch_Off
+														break;
+									case	'Q'		:	Exe_Cmd[0] = 26;	//Resume previous operation
+														break;
+									case	'R'		:	Exe_Cmd[0] = 27;	//Collect Start
+														break;
+									case	'S'		:	Exe_Cmd[0] = 0;	//Bruggen open
+														break;
+									case	'T'		:	Exe_Cmd[0] = 0;	//Bruggen open
+														break;
+									case	'U'		:	Exe_Cmd[0] = 0;	//Bruggen open
+														break;
+									case	'V'		:	Exe_Cmd[0] = 0;	//Bruggen open
+														break;
+									case	'W'		:	Exe_Cmd[0] = 0;	//Bruggen open
+														break;
+									case	'X'		:	Exe_Cmd[0] = 0;	//Bruggen open
+														break;
+									case	'Y'		:	Exe_Cmd[0] = 0;	//Bruggen open
+														break;
+									case	'Z'		:	Exe_Cmd[0] = 0;	//Bruggen open
+														break;
+									default			:	Exe_Cmd[0] = 0;
+														break;
+								}
+							}	
 							break;
 							
 		case	's'		:	/*if (Cmd[1] == 0x1)
