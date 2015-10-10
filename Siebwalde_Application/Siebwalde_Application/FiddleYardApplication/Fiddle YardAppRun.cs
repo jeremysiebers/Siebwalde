@@ -64,10 +64,12 @@ namespace Siebwalde_Application
             if (name == "TrackPower15VDown")
             {
                 TrackPower15VDown = true;
+                m_iFYApp.GetFYApp().FiddleYardApplicationLogging.StoreText("FYAppRun.Run() TrackPower15VDown = true");
             }
             else if (name == "15VTrackPower" && val > 0)
             {
                 TrackPower15VDown = false;
+                m_iFYApp.GetFYApp().FiddleYardApplicationLogging.StoreText("FYAppRun.Run() TrackPower15VDown = false");
             }
             else if (name == "Collect")
             {

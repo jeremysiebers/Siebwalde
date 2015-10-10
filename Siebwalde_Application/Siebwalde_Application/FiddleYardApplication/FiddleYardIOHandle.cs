@@ -31,7 +31,7 @@ namespace Siebwalde_Application
         public bool m_FYSimulatorActive;
         public iFiddleYardController m_iFYCtrl; // connect variable to connect to FYController class for defined interfaces
         public FiddleYardSimulator FYSimulator; // create Simulator
-        public FiddleYardApplication FYApp;        
+        public FiddleYardApplication FYApp;
 
         #region Create Sensors---------------------------------------------------------------------------------------
 
@@ -491,6 +491,6 @@ namespace Siebwalde_Application
             }
             
             m_iFYCtrl.FYLinkActivityUpdate();
-        }        
+        }
     }    
 }
