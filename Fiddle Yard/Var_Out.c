@@ -44,16 +44,17 @@ void Var_Out_Programm(unsigned  char ASL)
 			VAR_OUT_FY[ASL].Track_Power_Meassage = 0;
 		}
 	}	
-	else if (TR_MEAS(0) == 1) 									// When power restored do not send message, but set the local variable Track_Power_Meassage to 1
-	{
-		VAR_OUT_FY[ASL].Track_Power_Meassage = 1;
-	}
+	
 
 	VAR_OUT_FY[ASL].Variables_Out_Counter2++;
-	if (VAR_OUT_FY[ASL].Variables_Out_Counter2 >= 0)//10)			// Send IO info with approx 250Hz iso 2500Hz
+	if (VAR_OUT_FY[ASL].Variables_Out_Counter2 > 9)//10)			// Send IO info with approx 250Hz iso 2500Hz
 	{			
 		VAR_OUT_FY[ASL].Variables_Out_Counter2 = 0;				// Reset counter
 		Var_Out_Switcher(ASL);
+		if (TR_MEAS(0) == 1) 									// When power restored do not send message, but set the local variable Track_Power_Meassage to 1, but on a slower pase
+		{
+			VAR_OUT_FY[ASL].Track_Power_Meassage = 1;
+		}
 	}	
 }
 

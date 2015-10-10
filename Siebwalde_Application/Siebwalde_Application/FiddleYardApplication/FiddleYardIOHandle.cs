@@ -25,19 +25,13 @@ namespace Siebwalde_Application
 
     public class FiddleYardIOHandle : iFiddleYardIOHandle
     {
-        string path = "null"; // different logging file per target, this is default
-        
         private const bool TOP = true;
         private const bool BOT = false;
         public bool m_instance = TOP;        
         public bool m_FYSimulatorActive;
         public iFiddleYardController m_iFYCtrl; // connect variable to connect to FYController class for defined interfaces
         public FiddleYardSimulator FYSimulator; // create Simulator
-        public FiddleYardApplication FYApp;
-
-        List<string> TextToFile = new List<string>();
-        List<string> TextToFile2 = new List<string>();
-        private bool WritingTextToFileReady = true;
+        public FiddleYardApplication FYApp;        
 
         #region Create Sensors---------------------------------------------------------------------------------------
 
@@ -340,17 +334,7 @@ namespace Siebwalde_Application
         {
             if (false == m_FYSimulatorActive)
             {
-                m_iFYCtrl.GetFYSender().SendUdp(Encoding.ASCII.GetBytes(cmd));
-                if (m_instance == TOP)
-                {
-                    path = @"c:\localdata\FiddleYardTOPUDPSENDLogging.txt"; // different logging file per target, this is default
-                    StoreText(cmd);
-                }
-                else if (m_instance == BOT)
-                {
-                    path = @"c:\localdata\FiddleYardBOTUDPSENDLogging.txt"; // different logging file per target, this is default
-                    StoreText(cmd);
-                }
+                m_iFYCtrl.GetFYSender().SendUdp(Encoding.ASCII.GetBytes(cmd));                
             }
             else if (true == m_FYSimulatorActive)
             {
@@ -507,77 +491,6 @@ namespace Siebwalde_Application
             }
             
             m_iFYCtrl.FYLinkActivityUpdate();
-        }
-
-        /*#--------------------------------------------------------------------------#*/
-        /*  Description: StoreText
-         *               Store application specific logging in seperate file
-         * 
-         *  Input(s)   :
-         *
-         *  Output(s)  : 
-         *
-         *  Returns    :
-         *
-         *  Pre.Cond.  :
-         *
-         *  Post.Cond. :
-         *
-         *  Notes      : 
-         */
-        /*#--------------------------------------------------------------------------#*/
-        public void StoreText(string text)
-        {
-            string Spaces = " ";
-            int m_Millisecond = DateTime.Now.Millisecond;
-            if (m_Millisecond < 10)
-            {
-                Spaces = "   ";
-            }
-            else if (m_Millisecond < 100)
-            {
-                Spaces = "  ";
-            }
-            string m_text = DateTime.Now + ":" + Convert.ToString(m_Millisecond) + Spaces + text + " " + Environment.NewLine;
-
-            TextToFile.Add(m_text);
-
-            if (WritingTextToFileReady == true)
-            {
-                WritingTextToFileReady = false;     // Make sure this can be started only once
-
-                foreach (string text2 in TextToFile)
-                {
-                    TextToFile2.Add(text2);          // deepcopy content of text to be written into mailbox TextToFile2
-                }
-
-                TextToFile.Clear();                 // clear this local buffer of text to be written
-                StoreText2();                       // start writing mailbox to files
-            }
-
-        }
-
-        public void StoreText2()
-        {            
-            try
-            {
-
-                using (var fs = new FileStream(path, FileMode.Append))
-                {
-                    foreach (string text in TextToFile2)
-                    {
-                        Byte[] info = new UTF8Encoding(true).GetBytes(text);
-                        fs.Write(info, 0, info.Length);
-                    }
-                    fs.Close();
-                    TextToFile2.Clear();                                        // clear mailbox
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-            WritingTextToFileReady = true;
-        }
+        }        
     }    
 }
