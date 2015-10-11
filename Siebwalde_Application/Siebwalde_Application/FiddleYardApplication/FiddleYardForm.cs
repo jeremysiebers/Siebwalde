@@ -333,7 +333,7 @@ namespace Siebwalde_Application
             Sensor Led_TrackNoTop = new Sensor("Track_No", " Track Nr ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
             m_iFYIOH.GetIoHandler().TrackNo.Attach(Led_TrackNoTop);
             Sensor Led_TrackPower15VTOP = new Sensor("LLed_15VTrackPower", " 15V Track Power ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-            m_iFYIOH.GetIoHandler().TrackPower15V.Attach(Led_TrackPower15VTOP);
+            m_iFYIOH.GetIoHandler().TrackPower15V.Attach(Led_TrackPower15VTOP);            
             //Messages
             Message Msg_FiddleOneLeftTop = new Message("FiddleOneLeft", " Fiddle One Left Ok ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
             m_iFYIOH.GetIoHandler().FiddleOneLeft.Attach(Msg_FiddleOneLeftTop);
@@ -368,7 +368,9 @@ namespace Siebwalde_Application
             Message Msg_LastTrackTop = new Message("LastTrack", " Last Track ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
             m_iFYIOH.GetIoHandler().LastTrack.Attach(Msg_LastTrackTop);
             Message Msg_UniversalErrorTop = new Message("UniversalError", " Universal Error ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-            m_iFYIOH.GetIoHandler().UniversalError.Attach(Msg_UniversalErrorTop);            
+            m_iFYIOH.GetIoHandler().UniversalError.Attach(Msg_UniversalErrorTop);
+            Message Msg_TrackPower15VDown = new Message("TrackPower15VDown", " TrackPower15VDown ", (name, log) => SetLedIndicator(name, 0, log)); // initialize and subscribe readback action, Message
+            m_iFYApp.GetFYApp().m_iFYIOH.GetIoHandler().TrackPower15VDown.Attach(Msg_TrackPower15VDown);
         }
 
         public void SimMode(bool val)
@@ -694,7 +696,7 @@ namespace Siebwalde_Application
                         Btn_Collect_TOP.Enabled = true;
                         manualModeToolStripMenuItem.Enabled = true;
                         Btn_Start_Fiddle_TOP.Enabled = true;
-                        break;
+                        break;                   
 
                     default: break;
                 }
@@ -711,7 +713,7 @@ namespace Siebwalde_Application
             else
             {
                 int a = 0;
-                
+
                 if (Log != "" && Indicator != "Track_No")
                 {
                     string Spaces = " ";
@@ -1229,7 +1231,7 @@ namespace Siebwalde_Application
                         {
                             LLed_15VTrackPower.BackColor = Color.Red;
                             LLed_15VTrackPower.ForeColor = Color.Yellow;
-                            LLed_15VTrackPower.Text = "Drive Power Off";
+                            LLed_15VTrackPower.Text = "Drive Power Off";                            
                         }
                         break;
 
@@ -1267,7 +1269,7 @@ namespace Siebwalde_Application
                         {
                             UpdateTrackIndicatorColor();                    // After/during shift update color of tracks accordingly
                         }
-                        break;
+                        break;                    
 
                     default: break;
                 }

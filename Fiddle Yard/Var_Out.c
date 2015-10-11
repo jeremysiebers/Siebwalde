@@ -113,12 +113,21 @@ void Var_Out_Switcher(unsigned  char ASL)
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
 							Send_Var_Out[1] = (Send_Var_Out[1] << 4) | Track_Nr(ASL);
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
-							Send_Var_Out[1] = Send_Var_Out[1] | F12(ASL);
+							Send_Var_Out[1] = Send_Var_Out[1] | F12(ASL);							
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
 							Send_Var_Out[1] = Send_Var_Out[1] | Bezet_Uit_5B(ASL);
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
-							Send_Var_Out[1] = Send_Var_Out[1] | Bezet_Uit_8A(ASL);
+							
+							if (VAR_OUT_FY[ASL].Track_Power_Meassage == 0) // when falling edge off track power is detected and occupied out signal is gone, don't update C# app, tell block is occupied
+							{
+								Send_Var_Out[1] = Send_Var_Out[1] | 1;
+							}	
+							else if (VAR_OUT_FY[ASL].Track_Power_Meassage == 1)
+							{
+								Send_Var_Out[1] = Send_Var_Out[1] | Bezet_Uit_8A(ASL);
+							}
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
+							
 							Send_Var_Out[1] = Send_Var_Out[1] | 0x1;
 							Send_Var_Out[2] = 0x00;
 							if (VAR_OUT_FY[ASL].Send_Var_Out_Old[VAR_OUT_FY[ASL].Var_Out][0] == Send_Var_Out[0] &&
