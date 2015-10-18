@@ -12,7 +12,7 @@ namespace Siebwalde_Application
 
         private enum State
         {
-            Idle, Situation1, Situation2, TrainDetection, TrackNotAligned, TrainObstruction, FiddleOneLeftRight, WaitTargetUpdateTrack, Situation2_1, Situation2_2, TrainObstruction_1, TrainObstruction_2
+            Idle, Situation1, Situation2, TrainDetection, TrackNotAligned, TrainObstruction, FiddleOneLeftRight, WaitTargetUpdateTrack, Situation2_1, Situation2_2, Situation2_3, TrainObstruction_1, TrainObstruction_2,
         };
         private State State_Machine;
         private string Direction = "Left";
@@ -123,8 +123,8 @@ namespace Siebwalde_Application
                         m_iFYApp.GetFYApp().FiddleYardApplicationLogging.StoreText("FYAppInit.Init() m_iFYApp.GetF13() = " + Convert.ToString(m_iFYApp.GetFYApp().F13));
                         m_iFYApp.GetFYApp().FiddleYardApplicationLogging.StoreText("FYAppInit.Init() m_iFYApp.GetBlock6() = " + Convert.ToString(m_iFYApp.GetFYApp().Block6));
                         uControllerReady = false;
-                        m_iFYApp.Cmd(" Occ6OnFalse ", "");
-                        m_iFYApp.GetFYApp().FiddleYardApplicationLogging.StoreText("FYAppInit.Init() Occ6OnFalse");
+                        m_iFYApp.Cmd(" Couple ", "");
+                        m_iFYApp.GetFYApp().FiddleYardApplicationLogging.StoreText("FYAppInit.Init() Couple");
                         State_Machine = State.Situation2_1;
                         m_iFYApp.GetFYApp().FiddleYardApplicationLogging.StoreText("FYAppInit.Init() State_Machine = State.Situation2_1");
                         m_iFYApp.GetFYApp().FYFORM.SetMessage("FYAppInit", "FiddleYard train obstruction...");
@@ -135,14 +135,25 @@ namespace Siebwalde_Application
                     if (uControllerReady == true)
                     {
                         uControllerReady = false;
-                        m_iFYApp.Cmd(" Occ7OnFalse ", "");
-                        m_iFYApp.GetFYApp().FiddleYardApplicationLogging.StoreText("FYAppInit.Init() Occ7OnFalse");
+                        m_iFYApp.Cmd(" Occ6OnFalse ", "");
+                        m_iFYApp.GetFYApp().FiddleYardApplicationLogging.StoreText("FYAppInit.Init() Occ6OnFalse");
                         State_Machine = State.Situation2_2;
                         m_iFYApp.GetFYApp().FiddleYardApplicationLogging.StoreText("FYAppInit.Init() State_Machine = State.Situation2_2");
                     }
                     break;
 
                 case State.Situation2_2:
+                    if (uControllerReady == true)
+                    {
+                        uControllerReady = false;
+                        m_iFYApp.Cmd(" Occ7OnFalse ", "");
+                        m_iFYApp.GetFYApp().FiddleYardApplicationLogging.StoreText("FYAppInit.Init() Occ7OnFalse");
+                        State_Machine = State.Situation2_3;
+                        m_iFYApp.GetFYApp().FiddleYardApplicationLogging.StoreText("FYAppInit.Init() State_Machine = State.Situation2_3");
+                    }
+                    break;
+
+                case State.Situation2_3:
                     if (uControllerReady == true)
                     {
                         uControllerReady = false;
@@ -206,8 +217,10 @@ namespace Siebwalde_Application
                         uControllerReady = false;
                         m_iFYApp.Cmd(" Occ6OnTrue ", "");
                         m_iFYApp.GetFYApp().FiddleYardApplicationLogging.StoreText("FYAppInit.Init() Occ6OnTrue");
+                        State_Machine = State.TrainObstruction_1;
+                        m_iFYApp.GetFYApp().FiddleYardApplicationLogging.StoreText("FYAppInit.Init() State_Machine = State.TrainObstruction_1");
                     }
-                    else if (" Reset " == kickInit)
+                    else if ("Reset" == kickInit)
                     {
                         m_iFYApp.GetFYApp().FiddleYardApplicationLogging.StoreText("FYAppInit.Init() Reset == kickInit");
                         State_Machine = State.Idle;

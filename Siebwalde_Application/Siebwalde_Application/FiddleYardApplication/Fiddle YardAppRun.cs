@@ -147,17 +147,17 @@ namespace Siebwalde_Application
                     if (FYFull() < 11)                                                                               // Always drive trains into FiddleYard regardless the status of m_collect until FYFull == 11
                     {
                         State_Machine = State.Check5B;                                                              // alway scheck 5B first, when no train is present, check then 8B
-                        m_iFYApp.GetFYApp().FiddleYardApplicationLogging.StoreText("FYAppRun.Run() FYFull() < 10 -> State_Machine = State.Check5B");
+                        //m_iFYApp.GetFYApp().FiddleYardApplicationLogging.StoreText("FYAppRun.Run() FYFull() < 10 -> State_Machine = State.Check5B");
                     }
                     else if (true == m_collect && m_iFYApp.GetFYApp().Block5B)                                      // When the FiddleYard is full, but m_collect is true and a train appears on 5B, then shift-pass trains
                     {
                         State_Machine = State.Check8A;
-                        m_iFYApp.GetFYApp().FiddleYardApplicationLogging.StoreText("FYAppRun.Run() false == m_collect && FYFull() > 0 -> State_Machine = State.Check8A");
+                        //m_iFYApp.GetFYApp().FiddleYardApplicationLogging.StoreText("FYAppRun.Run() false == m_collect && FYFull() > 0 -> State_Machine = State.Check8A");
                     }
                     else if (false == m_collect && FYFull() > 0)                                                    // When the FiddleYard is full, but m_collect is false, then check if a train may leave
                     {
                         State_Machine = State.Check8A;
-                        m_iFYApp.GetFYApp().FiddleYardApplicationLogging.StoreText("FYAppRun.Run() false == m_collect && FYFull() > 0 -> State_Machine = State.Check8A");
+                        //m_iFYApp.GetFYApp().FiddleYardApplicationLogging.StoreText("FYAppRun.Run() false == m_collect && FYFull() > 0 -> State_Machine = State.Check8A");
                     }
                     break;
 
@@ -165,7 +165,7 @@ namespace Siebwalde_Application
                     if (m_iFYApp.GetFYApp().Block5B && FYFull() < 11)
                     {
                         State_Machine = State.TrainDriveIn;
-                        m_iFYApp.GetFYApp().FiddleYardApplicationLogging.StoreText("FYAppRun.Run() GetBlock5B() -> State_Machine = State.TrainDriveIn");//<-----------------------------------------------------------------Send to FORM!!!
+                        m_iFYApp.GetFYApp().FiddleYardApplicationLogging.StoreText("FYAppRun.Run() State_Machine = State.Check5B -> State_Machine = State.TrainDriveIn");//<-----------------------------------------------------------------Send to FORM!!!
                     }
                     else if (false == m_collect)
                     { 
@@ -181,7 +181,7 @@ namespace Siebwalde_Application
                     if (FYFull() > 0 && m_iFYApp.GetFYApp().Block8A == false)
                     {
                         State_Machine = State.TrainDriveOut;
-                        m_iFYApp.GetFYApp().FiddleYardApplicationLogging.StoreText("FYAppRun.Run() GetBlock8A() -> State_Machine = State.TrainDriveOut");//<-----------------------------------------------------------------Send to FORM!!!
+                        m_iFYApp.GetFYApp().FiddleYardApplicationLogging.StoreText("FYAppRun.Run() State_Machine = State.Check8A -> State_Machine = State.TrainDriveOut");//<-----------------------------------------------------------------Send to FORM!!!
                     }
                     else { State_Machine = State.Idle; }
                     break;

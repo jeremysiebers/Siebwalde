@@ -30,7 +30,7 @@ namespace Siebwalde_Application
         private State TrainDriveOut_Machine;
         private State TrainDriveThrough_Machine;        
         private int TrainDriveInPointer = 1;        // points to a track in which it is required to check if a train is present for traindrive in
-        private int TrainDriveOutPointer = 1;       // points to a track in which it is required to check if a train is present for traindrive out  
+        private int TrainDriveOutPointer = 5;       // points to a track in which it is required to check if a train is present for traindrive out  
         private uint TrainDriveDelay = 0;
         private bool uControllerReady = true;
         private uint TRAINDRIVEDELAY = 0;
@@ -93,7 +93,7 @@ namespace Siebwalde_Application
             TrainDriveOut_Machine = State.Start;
             TrainDriveThrough_Machine = State.Start;
             TrainDriveInPointer = 1;
-            TrainDriveOutPointer = 1;
+            TrainDriveOutPointer = 5;
             TrainDriveDelay = 0;
         }
 

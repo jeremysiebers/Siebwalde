@@ -436,7 +436,7 @@ namespace Siebwalde_Application
             FYFORM.FiddleOneRight.Attach(Act_FiddleOneRight);
             Command Act_FiddleGo1 = new Command(" FiddleGo1 ", (name) => FormCmd(name)); // initialize and subscribe Commands
             FYFORM.FiddleGo1.Attach(Act_FiddleGo1);
-            Command Act_FiddleGo2 = new Command("FiddleGo2", (name) => FormCmd(name)); // initialize and subscribe Commands
+            Command Act_FiddleGo2 = new Command(" FiddleGo2 ", (name) => FormCmd(name)); // initialize and subscribe Commands
             FYFORM.FiddleGo2.Attach(Act_FiddleGo2);
             Command Act_FiddleGo3 = new Command(" FiddleGo3 ", (name) => FormCmd(name)); // initialize and subscribe Commands
             FYFORM.FiddleGo3.Attach(Act_FiddleGo3);
