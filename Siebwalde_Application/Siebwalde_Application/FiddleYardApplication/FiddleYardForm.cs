@@ -297,8 +297,7 @@ namespace Siebwalde_Application
             Sensor Led_Block7In = new Sensor("LLed_Block7In", " Occupied to 7 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
             m_iFYIOH.GetIoHandler().Block7In.Attach(Led_Block7In);
             Sensor Led_ResistorTop = new Sensor("LLed_Resistor", " Occupied Resistor ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-            m_iFYIOH.GetIoHandler().Resistor.Attach(Led_ResistorTop);            
-
+            m_iFYIOH.GetIoHandler().Resistor.Attach(Led_ResistorTop);
             Sensor Led_Track1Top = new Sensor("LLed_Track1", " Trains On Fiddle Yard Track1 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
             m_iFYApp.GetFYApp().Track1.Attach(Led_Track1Top);
             Sensor Led_Track2Top = new Sensor("LLed_Track2", " Trains On Fiddle Yard Track2 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
@@ -321,7 +320,6 @@ namespace Siebwalde_Application
             m_iFYApp.GetFYApp().Track10.Attach(Led_Track10Top);
             Sensor Led_Track11Top = new Sensor("LLed_Track11", " Trains On Fiddle Yard Track11 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
             m_iFYApp.GetFYApp().Track11.Attach(Led_Track11Top);
-
             Sensor Led_Block6 = new Sensor("LLed_Block6", " Occupied from 6 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
             m_iFYIOH.GetIoHandler().Block6.Attach(Led_Block6);
             Sensor Led_Block7 = new Sensor("LLed_Block7", " Occupied from 7 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
@@ -335,42 +333,30 @@ namespace Siebwalde_Application
             Sensor Led_TrackPower15VTOP = new Sensor("LLed_15VTrackPower", " 15V Track Power ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
             m_iFYIOH.GetIoHandler().TrackPower15V.Attach(Led_TrackPower15VTOP);            
             //Messages
-            Message Msg_FiddleOneLeftTop = new Message("FiddleOneLeft", " Fiddle One Left Ok ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+            Message Msg_FiddleOneLeftTop = new Message("FiddleOneLeft", "", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
             m_iFYIOH.GetIoHandler().FiddleOneLeft.Attach(Msg_FiddleOneLeftTop);
-            Message Msg_FiddleOneRightTop = new Message("FiddleOneRight", " Fiddle One Right Ok ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+            Message Msg_FiddleOneRightTop = new Message("FiddleOneRight", "", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
             m_iFYIOH.GetIoHandler().FiddleOneRight.Attach(Msg_FiddleOneRightTop);
-            Message Msg_FiddleMultipleLeftTop = new Message("FiddleMultipleLeft", " Fiddle Multiple Left Ok ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+            Message Msg_FiddleMultipleLeftTop = new Message("FiddleMultipleLeft", "", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
             m_iFYIOH.GetIoHandler().FiddleMultipleLeft.Attach(Msg_FiddleMultipleLeftTop);
-            Message Msg_FiddleMultipleRightTop = new Message("FiddleMultipleRight", " Fiddle Multiple Right Ok ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+            Message Msg_FiddleMultipleRightTop = new Message("FiddleMultipleRight", "", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
             m_iFYIOH.GetIoHandler().FiddleMultipleRight.Attach(Msg_FiddleMultipleRightTop);
             Message Msg_TrainDetectionTop = new Message("TrainDetectionFinished", " Train Detection Finished ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
             m_iFYIOH.GetIoHandler().TrainDetection.Attach(Msg_TrainDetectionTop);
-            Message Msg_TrainDriveOutFinishedTop = new Message("TrainDriveOut", " Train Drive Out Finished ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-            m_iFYIOH.GetIoHandler().TrainDriveOutFinished.Attach(Msg_TrainDriveOutFinishedTop);
             Message Msg_TrainOn5BTop = new Message("TrainOn5BTop", " Train On 5B ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
             m_iFYIOH.GetIoHandler().TrainOn5B.Attach(Msg_TrainOn5BTop);
             Message Msg_TrainOn8ATop = new Message("TrainOn8A", " Train On 8A ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-            m_iFYIOH.GetIoHandler().TrainOn8A.Attach(Msg_TrainOn8ATop);
-            Message Msg_FiddleYardStartTop = new Message("FiddleYardStart", " Fiddle Yard Start ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-            m_iFYApp.GetFYApp().FiddleYardStart.Attach(Msg_FiddleYardStartTop);
-            Message Msg_FiddleYardStoppedTop = new Message("FiddleYardStopped", " Fiddle Yard Stopped ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-            m_iFYApp.GetFYApp().FiddleYardStopped.Attach(Msg_FiddleYardStoppedTop);
-            Message Msg_FiddleYardResetTop = new Message("FiddleYardReset", " Fiddle Yard Reset ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-            m_iFYIOH.GetIoHandler().FiddleYardReset.Attach(Msg_FiddleYardResetTop);
+            m_iFYIOH.GetIoHandler().TrainOn8A.Attach(Msg_TrainOn8ATop);                       
             Message Msg_OccfromBlock6Top = new Message("OccfromBlock6", " Occupied from Block6 ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
             m_iFYIOH.GetIoHandler().OccfromBlock6.Attach(Msg_OccfromBlock6Top);
             Message Msg_SensorF12HighTop = new Message("SensorF12High", " Message F12 High ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
             m_iFYIOH.GetIoHandler().SensorF12High.Attach(Msg_SensorF12HighTop);
             Message Msg_OccfromBlock6AndSensorF12Top = new Message("OccfromBlock6AndSensorF12", " Occupied from Block6 And Message F12 High ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
             m_iFYIOH.GetIoHandler().OccfromBlock6AndSensorF12.Attach(Msg_OccfromBlock6AndSensorF12Top);
-            Message Msg_TrainDriveInFailedF12Top = new Message("TrainDriveInFailedF12", " Train Drive In Failed F12 High ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-            m_iFYIOH.GetIoHandler().TrainDriveInFailedF12.Attach(Msg_TrainDriveInFailedF12Top);
             Message Msg_LastTrackTop = new Message("LastTrack", " Last Track ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
             m_iFYIOH.GetIoHandler().LastTrack.Attach(Msg_LastTrackTop);
             Message Msg_UniversalErrorTop = new Message("UniversalError", " Universal Error ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-            m_iFYIOH.GetIoHandler().UniversalError.Attach(Msg_UniversalErrorTop);
-            Message Msg_TrackPower15VDown = new Message("TrackPower15VDown", " TrackPower15VDown ", (name, log) => SetLedIndicator(name, 0, log)); // initialize and subscribe readback action, Message
-            m_iFYApp.GetFYApp().m_iFYIOH.GetIoHandler().TrackPower15VDown.Attach(Msg_TrackPower15VDown);
+            m_iFYIOH.GetIoHandler().UniversalError.Attach(Msg_UniversalErrorTop);            
         }
 
         public void SimMode(bool val)
@@ -626,7 +612,7 @@ namespace Siebwalde_Application
         }
 
         private void Btn_Recovered_TOP_Click_1(object sender, EventArgs e)
-        {
+        {            
             Recoverd.UpdateCommand();
         }
 
@@ -647,17 +633,9 @@ namespace Siebwalde_Application
                 if (log != "")
                 {
                     FiddleYardFormLogging.StoreText(log);
-                    string Spaces = " ";
+                    string fmt = "000";
                     int m_Millisecond = DateTime.Now.Millisecond;
-                    if (m_Millisecond < 10)
-                    {
-                        Spaces = "   ";
-                    }
-                    else if (m_Millisecond < 100)
-                    {
-                        Spaces = "  ";
-                    }
-                    string m_text = DateTime.Now + ":" + Convert.ToString(m_Millisecond) + Spaces + log + " " + Environment.NewLine;
+                    string m_text = DateTime.Now + ":" + m_Millisecond.ToString(fmt) + " " + log + " " + Environment.NewLine;                    
                     ReceivedCmd.AppendText(m_text);                    
                 }
 
@@ -713,42 +691,8 @@ namespace Siebwalde_Application
             else
             {
                 int a = 0;
-
-                if (Log != "" && Indicator != "Track_No")
-                {
-                    string Spaces = " ";
-                    int m_Millisecond = DateTime.Now.Millisecond;
-                    if (m_Millisecond < 10)
-                    {
-                        Spaces = "   ";
-                    }
-                    else if (m_Millisecond < 100)
-                    {
-                        Spaces = "  ";
-                    }
-                    string m_text = DateTime.Now + ":" + Convert.ToString(m_Millisecond) + Spaces + Log + Convert.ToBoolean(Val) + " " + Environment.NewLine;
-                    ReceivedCmd.AppendText(m_text);
-                    FiddleYardFormLogging.StoreText(Log + Convert.ToBoolean(Val));
-                }
-                else if (Log != "" && Indicator == "Track_No")
-                {
-                    a = Convert.ToInt16(Val) >> 4;
-
-                    string Spaces = " ";
-                    int m_Millisecond = DateTime.Now.Millisecond;
-                    if (m_Millisecond < 10)
-                    {
-                        Spaces = "   ";
-                    }
-                    else if (m_Millisecond < 100)
-                    {
-                        Spaces = "  ";
-                    }
-                    string m_text = DateTime.Now + ":" + Convert.ToString(m_Millisecond) + Spaces + Log + Convert.ToString(a) + " " + Environment.NewLine;
-                    ReceivedCmd.AppendText(m_text);
-                    FiddleYardFormLogging.StoreText(Log + Convert.ToString(a));
-                }
-
+                a = Convert.ToInt16(Val) >> 4;
+                
                 switch (Indicator)
                 {
                     case "LLed_Heart": if (Val >= 1)

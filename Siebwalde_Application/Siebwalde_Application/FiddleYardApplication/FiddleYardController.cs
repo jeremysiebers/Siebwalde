@@ -25,11 +25,12 @@ namespace Siebwalde_Application
         void ReConnect();                           // Re-connect to target
         Sender GetFYSender();                       // interface to FYSender
         Receiver GetFYReceiver();                   // interface to Receiver
+        FiddleYardController GetFYController();     // interface to FYController
     }
     
     public class FiddleYardController : iFiddleYardController
     {
-        iMain m_iMain; // connect variable to connect to FYController class to Main for application logging        
+        public iMain m_iMain; // connect variable to connect to FYController class to Main for application logging        
         public const int SEND_DELAY = 10;
         public FiddleYardIOHandle FYIOHandleTOP;
         public FiddleYardIOHandle FYIOHandleBOT;
@@ -54,10 +55,10 @@ namespace Siebwalde_Application
             return FYReceiver;
         }
 
-        public void Connect(iMain iMainCtrl)
+        public FiddleYardController GetFYController()
         {
-            m_iMain = iMainCtrl;    // connect to Main interface for application text logging and link activity update, save interface in variable
-        }
+            return this;
+        }        
 
         /*#--------------------------------------------------------------------------#*/
         /*  Description: FiddleYardController
@@ -78,8 +79,9 @@ namespace Siebwalde_Application
          *  Notes      :
          */
         /*#--------------------------------------------------------------------------#*/
-        public FiddleYardController(byte[,] macAddr, byte[,] ipAddr, int FYReceivingPort)
+        public FiddleYardController(iMain iMainCtrl, byte[,] macAddr, byte[,] ipAddr, int FYReceivingPort)
         {
+            m_iMain = iMainCtrl;                        // connect to Main interface for application text logging and link activity update, save interface in variable
             m_FYReceivingPort = FYReceivingPort;
             m_macAddr = macAddr;
             m_ipAddr = ipAddr;

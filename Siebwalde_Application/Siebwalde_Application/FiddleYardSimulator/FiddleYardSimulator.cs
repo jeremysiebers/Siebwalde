@@ -17,7 +17,7 @@ using System.Net.NetworkInformation;
 using System.Globalization;
 
 namespace Siebwalde_Application
-{
+{    
     public interface iFiddleYardSimulator
     {
         FiddleYardSimulator GetFYSim();      // interface to pass the FYSIm methods        
@@ -38,6 +38,7 @@ namespace Siebwalde_Application
         public int[] TrainsOnFYSim = new int[NoOfSimTrains + 1]; // counting from 1!!!
         private Random rng = new Random();
         private const int NoOfSimTrains = 12; // counting from 1!!!
+        private string fmt = "00";
         string path = "null";
         public Log2LoggingFile FiddleYardSimulatorLogging;
 
@@ -90,13 +91,13 @@ namespace Siebwalde_Application
         List<Msg> list = new List<Msg>();
         List<FiddleYardSimTrain> FYSimTrains = new List<FiddleYardSimTrain>();
         FiddleYardSimTrain current = null;
-
+        
         public SensorUpdater TargetAlive;
 
         public FiddleYardSimulator GetFYSim()
         {
             return (this);
-        }    
+        }
 
         /*#--------------------------------------------------------------------------#*/
         /*  Description: FiddleYardSimulator constructor
@@ -140,7 +141,7 @@ namespace Siebwalde_Application
             {
                 TrainsOnFYSim[i] = rng.Next(0, 2);
                 current = new FiddleYardSimTrain(m_instance, this, m_iFYIOH);
-                current.FYSimtrainInstance = current.ClassName + i.ToString();
+                current.FYSimtrainInstance = current.ClassName + i.ToString(fmt);
                 if (TrainsOnFYSim[i] == 1)
                 {
                     current.SimTrainLocation = TrackNoToTrackString(i);
@@ -152,6 +153,36 @@ namespace Siebwalde_Application
                 FYSimTrains.Add(current);
             }
             TrackNo.Count = 1;
+
+            Sensor Sns_FYSimSpeedSetting = new Sensor("FYSimSpeedSetting", " FYSimSpeedSetting ", 0, (name, val, log) => SimulatorSettings(name, val, log)); // initialize and subscribe sensors
+            //m_iFYIOH.GetIoHandler().m_iFYCtrl.GetFYController().m_iMain.GetMain(). SiebWaldeSettings.GetSettings().FYSimSpeedSetting.Attach(Sns_FYSimSpeedSetting);
+            Siebwalde_Application.Properties.Settings.Default.FYSimSpeedSetting.Attach(Sns_FYSimSpeedSetting);
+        }
+
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: Simulator settings from settings form
+         * 
+         *  Input(s)   : 
+         *
+         *  Output(s)  : 
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      : 
+         *  
+         */
+        /*#--------------------------------------------------------------------------#*/
+        public void SimulatorSettings(string name, int val, string log)
+        {
+            if (name == "FYSimSpeedSetting")
+            {
+                aTimer.Interval = val;
+                FiddleYardSimulatorLogging.StoreText("FYSim Simulator aTimer.Interval = " + Convert.ToString(aTimer.Interval));
+            }
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -208,7 +239,7 @@ namespace Siebwalde_Application
             }
 
             return _return;
-        }
+        }       
 
         /*#--------------------------------------------------------------------------#*/
         /*  Description: Start: When simulator is required, start the alive kick
@@ -247,9 +278,11 @@ namespace Siebwalde_Application
             
             aTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
             // Set the Interval to [x] miliseconds.
-            aTimer.Interval = 1;
+            aTimer.Interval = Convert.ToInt16(Siebwalde_Application.Properties.Settings.Default.FIDDLExYARDxSIMxSPEEDxSETTING);
+            aTimer.AutoReset = true;
             // Enable the timer
             aTimer.Enabled = true;
+
 
             FiddleYardSimulatorLogging.StoreText("FYSim Simulator Timer started: aTimer.Interval = " + Convert.ToString(aTimer.Interval));
             FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.Idle from Start()");            
@@ -625,7 +658,7 @@ namespace Siebwalde_Application
         /*#--------------------------------------------------------------------------#*/
         public void OnTimedEvent(object source, ElapsedEventArgs e)
         {
-            aTimer.Enabled = false;
+            aTimer.Stop();
             byte[] data = new byte[] { 0x00, 0x00 };
 
             if (TOP == m_instance)
@@ -650,7 +683,7 @@ namespace Siebwalde_Application
                 NewData(CreateData("B"));
             }
             SetMessage("TargetAlive", " Target Alive ");
-            aTimer.Enabled = true;
+            aTimer.Start();
         }
 
         /*#--------------------------------------------------------------------------#*/

@@ -117,7 +117,7 @@ namespace Siebwalde_Application
             }
             return _return;
         }
-
+        
         public void CmdFiddleOneLeft()
         {
             FiddleOneLeft.UpdateActuator();
@@ -426,59 +426,57 @@ namespace Siebwalde_Application
         {
             #region Inatialize and subsribe interfaces
              //Instantiate cmd handler for receiving commands from the Form            
-            Command Act_Couple = new Command("Couple", (name) => FormCmd(name)); // initialize and subscribe Commands
+            Command Act_Couple = new Command(" Couple ", (name) => FormCmd(name)); // initialize and subscribe Commands
             FYFORM.Couple.Attach(Act_Couple);
-            Command Act_Uncouple = new Command("Uncouple", (name) => FormCmd(name)); // initialize and subscribe Commands
+            Command Act_Uncouple = new Command(" Uncouple ", (name) => FormCmd(name)); // initialize and subscribe Commands
             FYFORM.Uncouple.Attach(Act_Uncouple);
-            Command Act_FiddleOneLeft = new Command("FiddleOneLeft", (name) => FormCmd(name)); // initialize and subscribe Commands
+            Command Act_FiddleOneLeft = new Command(" FiddleOneLeft ", (name) => FormCmd(name)); // initialize and subscribe Commands
             FYFORM.FiddleOneLeft.Attach(Act_FiddleOneLeft);
-            Command Act_FiddleOneRight = new Command("FiddleOneRight", (name) => FormCmd(name)); // initialize and subscribe Commands
+            Command Act_FiddleOneRight = new Command(" FiddleOneRight ", (name) => FormCmd(name)); // initialize and subscribe Commands
             FYFORM.FiddleOneRight.Attach(Act_FiddleOneRight);
-            Command Act_FiddleGo1 = new Command("FiddleGo1", (name) => FormCmd(name)); // initialize and subscribe Commands
+            Command Act_FiddleGo1 = new Command(" FiddleGo1 ", (name) => FormCmd(name)); // initialize and subscribe Commands
             FYFORM.FiddleGo1.Attach(Act_FiddleGo1);
             Command Act_FiddleGo2 = new Command("FiddleGo2", (name) => FormCmd(name)); // initialize and subscribe Commands
             FYFORM.FiddleGo2.Attach(Act_FiddleGo2);
-            Command Act_FiddleGo3 = new Command("FiddleGo3", (name) => FormCmd(name)); // initialize and subscribe Commands
+            Command Act_FiddleGo3 = new Command(" FiddleGo3 ", (name) => FormCmd(name)); // initialize and subscribe Commands
             FYFORM.FiddleGo3.Attach(Act_FiddleGo3);
-            Command Act_FiddleGo4 = new Command("FiddleGo4", (name) => FormCmd(name)); // initialize and subscribe Commands
+            Command Act_FiddleGo4 = new Command(" FiddleGo4 ", (name) => FormCmd(name)); // initialize and subscribe Commands
             FYFORM.FiddleGo4.Attach(Act_FiddleGo4);
-            Command Act_FiddleGo5 = new Command("FiddleGo5", (name) => FormCmd(name)); // initialize and subscribe Commands
+            Command Act_FiddleGo5 = new Command(" FiddleGo5 ", (name) => FormCmd(name)); // initialize and subscribe Commands
             FYFORM.FiddleGo5.Attach(Act_FiddleGo5);
-            Command Act_FiddleGo6 = new Command("FiddleGo6", (name) => FormCmd(name)); // initialize and subscribe Commands
+            Command Act_FiddleGo6 = new Command(" FiddleGo6 ", (name) => FormCmd(name)); // initialize and subscribe Commands
             FYFORM.FiddleGo6.Attach(Act_FiddleGo6);
-            Command Act_FiddleGo7 = new Command("FiddleGo7", (name) => FormCmd(name)); // initialize and subscribe Commands
+            Command Act_FiddleGo7 = new Command(" FiddleGo7 ", (name) => FormCmd(name)); // initialize and subscribe Commands
             FYFORM.FiddleGo7.Attach(Act_FiddleGo7);
-            Command Act_FiddleGo8 = new Command("FiddleGo8", (name) => FormCmd(name)); // initialize and subscribe Commands
+            Command Act_FiddleGo8 = new Command(" FiddleGo8 ", (name) => FormCmd(name)); // initialize and subscribe Commands
             FYFORM.FiddleGo8.Attach(Act_FiddleGo8);
-            Command Act_FiddleGo9 = new Command("FiddleGo9", (name) => FormCmd(name)); // initialize and subscribe Commands
+            Command Act_FiddleGo9 = new Command(" FiddleGo9 ", (name) => FormCmd(name)); // initialize and subscribe Commands
             FYFORM.FiddleGo9.Attach(Act_FiddleGo9);
-            Command Act_FiddleGo10 = new Command("FiddleGo10", (name) => FormCmd(name)); // initialize and subscribe Commands
+            Command Act_FiddleGo10 = new Command(" FiddleGo10 ", (name) => FormCmd(name)); // initialize and subscribe Commands
             FYFORM.FiddleGo10.Attach(Act_FiddleGo10);
-            Command Act_FiddleGo11 = new Command("FiddleGo11", (name) => FormCmd(name)); // initialize and subscribe Commands
+            Command Act_FiddleGo11 = new Command(" FiddleGo11 ", (name) => FormCmd(name)); // initialize and subscribe Commands
             FYFORM.FiddleGo11.Attach(Act_FiddleGo11);
-            Command Act_TrainDetect = new Command("TrainDetect", (name) => FormCmd(name)); // initialize and subscribe Commands
+            Command Act_TrainDetect = new Command(" TrainDetect ", (name) => FormCmd(name)); // initialize and subscribe Commands
             FYFORM.TrainDetect.Attach(Act_TrainDetect);
-            Command Act_Start = new Command("Start", (name) => FormCmd(name)); // initialize and subscribe Commands
+            Command Act_Start = new Command(" Start ", (name) => FormCmd(name)); // initialize and subscribe Commands
             FYFORM.FYStart.Attach(Act_Start);
-            Command Act_Stop = new Command("Stop", (name) => FormCmd(name)); // initialize and subscribe Commands
+            Command Act_Stop = new Command(" Stop ", (name) => FormCmd(name)); // initialize and subscribe Commands
             FYFORM.FYStop.Attach(Act_Stop);
-            Command Act_Reset = new Command("Reset", (name) => FormCmd(name)); // initialize and subscribe Commands
+            Command Act_Reset = new Command(" Reset ", (name) => FormCmd(name)); // initialize and subscribe Commands
             FYFORM.Reset.Attach(Act_Reset);
-            Command Act_Occ5BOnTrue = new Command("Occ5BOnTrue", (name) => FormCmd(name)); // initialize and subscribe Commands
+            Command Act_Occ5BOnTrue = new Command(" Occ5BOnTrue ", (name) => FormCmd(name)); // initialize and subscribe Commands
             FYFORM.Occ5BOnTrue.Attach(Act_Occ5BOnTrue);
-            Command Act_Occ5BOnFalse = new Command("Occ5BOnFalse", (name) => FormCmd(name)); // initialize and subscribe Commands
+            Command Act_Occ5BOnFalse = new Command(" Occ5BOnFalse ", (name) => FormCmd(name)); // initialize and subscribe Commands
             FYFORM.Occ5BOnFalse.Attach(Act_Occ5BOnFalse);
-            Command Act_Occ6OnTrue = new Command("Occ6OnTrue", (name) => FormCmd(name)); // initialize and subscribe Commands
+            Command Act_Occ6OnTrue = new Command(" Occ6OnTrue ", (name) => FormCmd(name)); // initialize and subscribe Commands
             FYFORM.Occ6OnTrue.Attach(Act_Occ6OnTrue);
-            Command Act_Occ6OnFalse = new Command("Occ6OnFalse", (name) => FormCmd(name)); // initialize and subscribe Commands
+            Command Act_Occ6OnFalse = new Command(" Occ6OnFalse ", (name) => FormCmd(name)); // initialize and subscribe Commands
             FYFORM.Occ6OnFalse.Attach(Act_Occ6OnFalse);
-            Command Act_Occ7OnTrue = new Command("Occ7OnTrue", (name) => FormCmd(name)); // initialize and subscribe Commands
+            Command Act_Occ7OnTrue = new Command(" Occ7OnTrue ", (name) => FormCmd(name)); // initialize and subscribe Commands
             FYFORM.Occ7OnTrue.Attach(Act_Occ7OnTrue);
-            Command Act_Occ7OnFalse = new Command("Occ7OnFalse", (name) => FormCmd(name)); // initialize and subscribe Commands
-            FYFORM.Occ7OnFalse.Attach(Act_Occ7OnFalse);
-            Command Act_Recoverd = new Command("Recoverd", (name) => FormCmd(name)); // initialize and subscribe Commands
-            FYFORM.Recoverd.Attach(Act_Recoverd);
-            Command Act_Collect = new Command("Collect", (name) => FormCmd(name)); // initialize and subscribe Commands
+            Command Act_Occ7OnFalse = new Command(" Occ7OnFalse ", (name) => FormCmd(name)); // initialize and subscribe Commands
+            FYFORM.Occ7OnFalse.Attach(Act_Occ7OnFalse);            
+            Command Act_Collect = new Command(" Collect ", (name) => FormCmd(name)); // initialize and subscribe Commands
             FYFORM.Collect.Attach(Act_Collect);
 
             //Sensors
@@ -555,8 +553,6 @@ namespace Siebwalde_Application
             m_iFYIOH.GetIoHandler().FiddleMultipleRight.Attach(Msg_FiddleMultipleRight);
             Message Msg_TrainDetection = new Message("TrainDetectionFinished", " Train Detection Finished ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
             m_iFYIOH.GetIoHandler().TrainDetection.Attach(Msg_TrainDetection);
-            Message Msg_TrainDriveOutFinished = new Message("TrainDriveOutFinished", " Train Drive Out Finished ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-            m_iFYIOH.GetIoHandler().TrainDriveOutFinished.Attach(Msg_TrainDriveOutFinished);            
             Message Msg_TrainOn5B = new Message("TrainOn5B", " Train On 5B ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
             m_iFYIOH.GetIoHandler().TrainOn5B.Attach(Msg_TrainOn5B);
             Message Msg_TrainOn8A = new Message("TrainOn8A", " Train On 8A ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
@@ -569,8 +565,6 @@ namespace Siebwalde_Application
             m_iFYIOH.GetIoHandler().SensorF12High.Attach(Msg_SensorF12High);
             Message Msg_OccfromBlock6AndSensorF12 = new Message("OccfromBlock6AndSensorF12", " Occupied from Block6 And Message F12 High ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
             m_iFYIOH.GetIoHandler().OccfromBlock6AndSensorF12.Attach(Msg_OccfromBlock6AndSensorF12);
-            Message Msg_TrainDriveInFailedF12 = new Message("TrainDriveInFailedF12", " Train Drive In Failed F12 High ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-            m_iFYIOH.GetIoHandler().TrainDriveInFailedF12.Attach(Msg_TrainDriveInFailedF12);
             Message Msg_LastTrack = new Message("LastTrack", " Last Track ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
             m_iFYIOH.GetIoHandler().LastTrack.Attach(Msg_LastTrack);
             Message Msg_UniversalError = new Message("UniversalError", " Universal Error ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
@@ -610,8 +604,7 @@ namespace Siebwalde_Application
          */
         /*#--------------------------------------------------------------------------#*/
         public void OnTimedEvent(object source, ElapsedEventArgs e)
-        {
-            //System.Diagnostics.Debug.WriteLine("TimerEventFYApp = " + DateTime.Now);            
+        {            
             ApplicationUpdate("TimerEvent", 0);            
         }
 
@@ -638,27 +631,24 @@ namespace Siebwalde_Application
         {
             aTimer.Stop();//--------------------------------------------------------------------- Stop the timer an event was received from target
 
-            if (kickapplication == "CmdBusy")
-            {                
-                System.Diagnostics.Debug.WriteLine("CmdBusy = " + Convert.ToString(val));
-            }
-            
-            if (kickapplication == "Start")                             // FYFORM Start FiddleYard button command
+            if (kickapplication == " Start ")                             // FYFORM Start FiddleYard button command
             {
-                FiddleYardStart.UpdateMessage();
+                FYFORM.SetMessage("FYApp FYStart", "FiddleYard Auto mode Start");
                 State_Machine = State.Start;
                 FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Start");
+                FYFORM.SetMessage("FYApp FYStart", "FiddleYard init...");
             }
-            else if (kickapplication == "Reset")                        // FYFORM Reset FiddleYard button command
+            else if (kickapplication == " Reset ")                        // FYFORM Reset FiddleYard button command
             {
                 FiddleYardApplicationLogging.StoreText("FYApp kickapplication == Reset");
                 State_Machine = State.Reset;
                 FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Reset");
             }
-            else if (kickapplication == "Stop")                        // FYFORM Reset FiddleYard button command
+            else if (kickapplication == " Stop ")                        // FYFORM Reset FiddleYard button command
             {
                 StopApplication = "Stop";
                 FiddleYardApplicationLogging.StoreText("FYApp StopApplication = Stop");
+                FYFORM.SetMessage("FYApp FYStop", "FiddleYard Auto mode is going to stop...");
             }
 
             StateMachineUpdate(kickapplication, val);
@@ -688,11 +678,11 @@ namespace Siebwalde_Application
             switch (State_Machine)
             {
                 case State.Reset:
-                    Reset.UpdateActuator();
+                    FYFORM.SetMessage("FYApp FYStart", "FiddleYard Reset");
                     FiddleYardApplicationLogging.StoreText("FYApp Reset target");
                     FYAppInit.Init("Reset", val);
                     FiddleYardApplicationLogging.StoreText("FYApp FYAppInit.Init(Reset)");
-                    FYAppRun.FiddleYardAppRunReset();
+                    FYAppRun.FiddleYardAppRunReset();   // also resets the sub programs!
                     FiddleYardApplicationLogging.StoreText("FYApp FYAppRun.FiddleYardAppRunReset()");
                     State_Machine = State.Idle;
                     FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle from State.Reset");
@@ -706,15 +696,17 @@ namespace Siebwalde_Application
                     if (FYAppInit.Init(kickapplication, val) == "Finished")
                     {
                         FiddleYardApplicationLogging.StoreText("FYApp FYAppInit.Init() == Finished");
+                        FYFORM.SetMessage("FYApp FYInit", "FiddleYard init Finished");
                         State_Machine = State.Running;
-                        FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Running from State.Start");                        
+                        FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Running from State.Start");
+                        FYFORM.SetMessage("FYApp FYInit", "FiddleYard Application running...");
                     }
                     break;
 
                 case State.Running:
                     if (FYAppRun.Run(kickapplication, StopApplication) == "Stop")
                     {
-                        FiddleYardStopped.UpdateMessage();
+                        FYFORM.SetMessage("FiddleYardStopped", "FiddleYard Auto mode is Stopped");  // FYFORM reacts on: FiddleYardStopped setting the buttons visable etc
                         FiddleYardApplicationLogging.StoreText("FYApp kickapplication = Stop");
                         State_Machine = State.Stop;
                         FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Stop from State.Running");
@@ -751,9 +743,11 @@ namespace Siebwalde_Application
          *  Notes      : 
          */
         /*#--------------------------------------------------------------------------#*/
-        public void SetLedIndicator(string name, int val, string log)
+        public void SetLedIndicator(string indicator, int val, string log)
         {
-            switch (name)
+            int a;
+
+            switch (indicator)
             {
                 case "CL10Heart": CL_10_Heart = Convert.ToBoolean(val);
                     break;
@@ -796,33 +790,58 @@ namespace Siebwalde_Application
                 default:
                     break;
             }
-            ApplicationUpdate(name, val); // let the application know to update sub programs because a value of a sensor has changed
+
+            if (log != "" && indicator != "Track_No")           // Log every  sensor if enabled
+                {
+                    FiddleYardApplicationLogging.StoreText("FYApp received a Sensor event:" + log + Convert.ToBoolean(val));
+                }
+            else if (log != "" && indicator == "Track_No")
+                {
+                    a = Convert.ToInt16(val) >> 4;
+                    FiddleYardApplicationLogging.StoreText("FYApp received a Sensor event:" + log + Convert.ToString(a));
+                }
+
+            ApplicationUpdate(indicator, val); // let the application know to update sub programs because a value of a sensor has changed
         }
 
-        public void SetMessage(string name, string log)
+        public void SetMessage(string message, string log)
         {
             int val = 0;
-            ApplicationUpdate(name, val); // let the application know that a message is received from the target
+
+            if (log != "" )           
+            {
+                FiddleYardApplicationLogging.StoreText("FYApp received a Message event:" + log);
+            }
+
+            ApplicationUpdate(message, val); // let the application know that a message is received from the target
         }
 
         public void FormCmd(string name)
         {
             switch (name)                                           // commands who must work always regardless of automatic or manual mode
             {
-                case "Collect": FYCollect = !FYCollect;
+                case " Collect ": FYCollect = !FYCollect;
                     if (FYCollect == true)
                     {
                         FYFORM.Btn_Collect_TOP.Text = "Collect On";                        
+                        FYFORM.SetMessage("Collect On", "Collecting Trains enabled");
                     }
                     else
                     {
                         FYFORM.Btn_Collect_TOP.Text = "Collect Off";                        
+                        FYFORM.SetMessage("Collect Off", "Collecting Trains disabled");
                     }
                     break;
 
                 default: break;
             }
             int val = 0;
+
+            if (name != "")
+            {
+                FiddleYardApplicationLogging.StoreText("FYApp received a FormCmd event:" + name);
+            }
+
             ApplicationUpdate(name, val); // let the application know that a command is sent from the FORM (button)
         }
         
@@ -848,58 +867,52 @@ namespace Siebwalde_Application
         {            
             switch (name)
             {
-                case "FiddleOneLeft": FiddleOneLeft.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
+                case " FiddleOneLeft ": FiddleOneLeft.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
                     break;
-                case "FiddleOneRight": FiddleOneRight.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
+                case " FiddleOneRight ": FiddleOneRight.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
                     break;
-                case "Couple": Couple.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
+                case " Couple ": Couple.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
                     break;
-                case "Uncouple": Uncouple.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
+                case " Uncouple ": Uncouple.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
                     break;
-                case "FiddleGo1": FiddleGo1.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
+                case " FiddleGo1 ": FiddleGo1.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
                     break;
-                case "FiddleGo2": FiddleGo2.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
+                case " FiddleGo2 ": FiddleGo2.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
                     break;
-                case "FiddleGo3": FiddleGo3.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
+                case " FiddleGo3 ": FiddleGo3.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
                     break;
-                case "FiddleGo4": FiddleGo4.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
+                case " FiddleGo4 ": FiddleGo4.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
                     break;
-                case "FiddleGo5": FiddleGo5.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
+                case " FiddleGo5 ": FiddleGo5.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
                     break;
-                case "FiddleGo6": FiddleGo6.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
+                case " FiddleGo6 ": FiddleGo6.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
                     break;
-                case "FiddleGo7": FiddleGo7.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
+                case " FiddleGo7 ": FiddleGo7.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
                     break;
-                case "FiddleGo8": FiddleGo8.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
+                case " FiddleGo8 ": FiddleGo8.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
                     break;
-                case "FiddleGo9": FiddleGo9.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
+                case " FiddleGo9 ": FiddleGo9.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
                     break;
-                case "FiddleGo10": FiddleGo10.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
+                case " FiddleGo10 ": FiddleGo10.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
                     break;
-                case "FiddleGo11": FiddleGo11.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
+                case " FiddleGo11 ": FiddleGo11.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
                     break;
-                case "TrainDetect": TrainDetect.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
+                case " TrainDetect ": TrainDetect.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
+                    break;                
+                case " Reset ": Reset.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
                     break;
-                case "Start":           
+                case " Occ5BOnTrue ": Occ5BOnTrue.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
                     break;
-                case "Stop": 
+                case " Occ5BOnFalse ": Occ5BOnFalse.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
                     break;
-                case "Reset": Reset.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
+                case " Occ6OnTrue ": Occ6OnTrue.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
                     break;
-                case "Occ5BOnTrue": Occ5BOnTrue.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
+                case " Occ6OnFalse ": Occ6OnFalse.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
                     break;
-                case "Occ5BOnFalse": Occ5BOnFalse.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
+                case " Occ7OnTrue ": Occ7OnTrue.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
                     break;
-                case "Occ6OnTrue": Occ6OnTrue.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
-                    break;
-                case "Occ6OnFalse": Occ6OnFalse.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
-                    break;
-                case "Occ7OnTrue": Occ7OnTrue.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
-                    break;
-                case "Occ7OnFalse": Occ7OnFalse.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
-                    break;
-                case "Recoverd":
-                    break;
+                case " Occ7OnFalse ": Occ7OnFalse.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
+                    break;                
                                 
                 default: break;
             }       

@@ -94,6 +94,7 @@ namespace Siebwalde_Application
             TrainDriveThrough_Machine = State.Start;
             TrainDriveInPointer = 1;
             TrainDriveOutPointer = 1;
+            TrainDriveDelay = 0;
         }
 
 
@@ -152,7 +153,7 @@ namespace Siebwalde_Application
 
                 case State.MoveToEmptyTrack:
                     uControllerReady = false;
-                    m_iFYApp.Cmd("FiddleGo" + Convert.ToString(TrainDriveInPointer), "");//----------------------------------------------------- Go to empty track
+                    m_iFYApp.Cmd(" FiddleGo" + Convert.ToString(TrainDriveInPointer) + " ", "");//----------------------------------------------------- Go to empty track
                     m_iFYApp.GetFYApp().FiddleYardApplicationLogging.StoreText("FYAppTrainDrive().TrainDriveIn FiddleGo" + Convert.ToString(TrainDriveInPointer));
                     TrainDriveIn_Machine = State.CheckArrivedAtEmptyTrack;                    
                     m_iFYApp.GetFYApp().FiddleYardApplicationLogging.StoreText("FYAppTrainDrive().TrainDriveIn TrainDriveIn_Machine = State.CheckArrivedAtEmptyTrack");
@@ -393,7 +394,7 @@ namespace Siebwalde_Application
 
                 case State.MoveToFullTrack:
                     uControllerReady = false;
-                    m_iFYApp.Cmd("FiddleGo" + Convert.ToString(TrainDriveOutPointer), "");
+                    m_iFYApp.Cmd(" FiddleGo" + Convert.ToString(TrainDriveOutPointer) + " ", "");
                     m_iFYApp.GetFYApp().FiddleYardApplicationLogging.StoreText("FYAppTrainDrive().TrainDriveOut FiddleGo" + Convert.ToString(TrainDriveOutPointer));
                     TrainDriveOut_Machine = State.MoveToFullTrack_1;
                     m_iFYApp.GetFYApp().FiddleYardApplicationLogging.StoreText("FYAppTrainDrive().TrainDriveOut TrainDriveOut_Machine = State.MoveToFullTrack_1");                    

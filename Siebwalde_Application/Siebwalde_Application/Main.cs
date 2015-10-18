@@ -24,6 +24,7 @@ namespace Siebwalde_Application
     {
         void SiebwaldeAppLogging(string text);
         void FYLinkActivityUpdate();
+        Main GetMain();                             // interface to Main
     }
     
     public partial class Main : Form , iMain
@@ -39,10 +40,17 @@ namespace Siebwalde_Application
         public Log2LoggingFile SiebwaldeApplicationMainLogging;
 
         private bool ViewTop = true;
-        private bool ViewBot = true;       
-        
+        private bool ViewBot = true;
+
+        public Main GetMain()
+        {
+            return this;
+        }
+
         public Main()
         {
+
+            Siebwalde_Application.Properties.Settings.Default.Reload();
             SiebwaldeApplicationMainLogging = new Log2LoggingFile(path);
             this.StartPosition = FormStartPosition.Manual;
             this.Location = new Point(0, 0);
@@ -68,14 +76,14 @@ namespace Siebwalde_Application
 
         private void StartApplication_Click(object sender, EventArgs e)
         {
-            SiebwaldeApplicationMainLogging.StoreText("########################################################################");
-            SiebwaldeApplicationMainLogging.StoreText("#                                                                      #");
-            SiebwaldeApplicationMainLogging.StoreText("#                   Siebwalde Application started.                     #");
-            SiebwaldeApplicationMainLogging.StoreText("#                                                                      #");
-            SiebwaldeApplicationMainLogging.StoreText("########################################################################");
+            SiebwaldeAppLogging("########################################################################");
+            SiebwaldeAppLogging("#                                                                      #");
+            SiebwaldeAppLogging("#                   Siebwalde Application started.                     #");
+            SiebwaldeAppLogging("#                                                                      #");
+            SiebwaldeAppLogging("########################################################################");
             SiebwaldeAppLogging("Siebwalde Application started.");
-            SiebwaldeAppLogging("Main: PC MAC adress is: "+ MACIPConditioner.MACstring());
-            SiebwaldeAppLogging("Main: PC IP adress is: "+ MACIPConditioner.IPstring());
+            SiebwaldeAppLogging("Main: PC MAC adress is: " + MACIPConditioner.MACstring());
+            SiebwaldeAppLogging("Main: PC IP adress is: " + MACIPConditioner.IPstring());
 
             StartApplication.Visible = false;
             LStartApplication.Visible = false;       
@@ -93,8 +101,7 @@ namespace Siebwalde_Application
         private void StartFYController()
         {
             int FYReceivingport = 0x7000;    
-            FYcontroller = new FiddleYardController(MACIPConditioner.MAC(), MACIPConditioner.IP(), FYReceivingport);
-            FYcontroller.Connect(this);
+            FYcontroller = new FiddleYardController(this, MACIPConditioner.MAC(), MACIPConditioner.IP(), FYReceivingport);            
             SiebwaldeAppLogging("Main: FiddleYard Controller starting...");
             FYcontroller.Start();
             FiddleYardFormTop.Visible = true;
@@ -107,7 +114,7 @@ namespace Siebwalde_Application
         private void StartMTController()
         {
             int MTReceivingport = 28673;
-            MTcontroller = new FiddleYardController(MACIPConditioner.MAC(), MACIPConditioner.IP(), MTReceivingport);
+            MTcontroller = new FiddleYardController(this, MACIPConditioner.MAC(), MACIPConditioner.IP(), MTReceivingport);
             //MTcontroller.start();
             MaintrackForm.Visible = true;
             SiebwaldeAppLogging("Main: Track Controller started.");
@@ -116,7 +123,7 @@ namespace Siebwalde_Application
         private void StartYARDController()
         {
             int YDReceivingport = 28674;
-            YDcontroller = new FiddleYardController(MACIPConditioner.MAC(), MACIPConditioner.IP(), YDReceivingport);
+            YDcontroller = new FiddleYardController(this, MACIPConditioner.MAC(), MACIPConditioner.IP(), YDReceivingport);
             //YDcontroller.start();
             YardForm.Visible = true;
             SiebwaldeAppLogging("Main: Yard Controller started.");
@@ -174,8 +181,11 @@ namespace Siebwalde_Application
 
         public void SiebwaldeAppLogging(string text)
         {
-            SiebwaldeAppLog.AppendText(text);
             SiebwaldeApplicationMainLogging.StoreText(text);
+            string fmt = "000";
+            int m_Millisecond = DateTime.Now.Millisecond;
+            string m_text = DateTime.Now + ":" + m_Millisecond.ToString(fmt) + " " + text + " " + Environment.NewLine;
+            SiebwaldeAppLog.AppendText(m_text);            
         }
                
         private void exitToolStripMenuItem_Click_1(object sender, EventArgs e)

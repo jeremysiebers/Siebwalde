@@ -71,15 +71,13 @@ namespace Siebwalde_Application
         public MessageUpdater FiddleOneRight;
         public MessageUpdater FiddleMultipleLeft;
         public MessageUpdater FiddleMultipleRight;
-        public MessageUpdater TrainDetection;        
-        public MessageUpdater TrainDriveOutFinished;        
+        public MessageUpdater TrainDetection;
         public MessageUpdater TrainOn5B;        
         public MessageUpdater TrainOn8A;        
         public MessageUpdater FiddleYardReset;
         public MessageUpdater OccfromBlock6;
         public MessageUpdater SensorF12High;
         public MessageUpdater OccfromBlock6AndSensorF12;
-        public MessageUpdater TrainDriveInFailedF12;
         public MessageUpdater LastTrack;
         public MessageUpdater UniversalError;        
         public MessageUpdater uControllerReady;             // ready for next command, C# has to assume ucontroller is busy after sending a command
@@ -162,15 +160,13 @@ namespace Siebwalde_Application
             FiddleOneRight = new MessageUpdater();
             FiddleMultipleLeft = new MessageUpdater();
             FiddleMultipleRight = new MessageUpdater();
-            TrainDetection = new MessageUpdater();
-            TrainDriveOutFinished = new MessageUpdater();            
+            TrainDetection = new MessageUpdater();            
             TrainOn5B = new MessageUpdater();            
             TrainOn8A = new MessageUpdater();            
             FiddleYardReset = new MessageUpdater();
             OccfromBlock6 = new MessageUpdater();
             SensorF12High = new MessageUpdater();
-            OccfromBlock6AndSensorF12 = new MessageUpdater();
-            TrainDriveInFailedF12 = new MessageUpdater();
+            OccfromBlock6AndSensorF12 = new MessageUpdater();            
             LastTrack = new MessageUpdater();
             UniversalError = new MessageUpdater();            
             uControllerReady = new MessageUpdater();
@@ -185,8 +181,8 @@ namespace Siebwalde_Application
 
         /*#--------------------------------------------------------------------------#*/
         /*  Description: IO Handle start
-         *               to couple real target to application to get real sensor feedback
-         *               or to couple simulator output back to application
+         *               to  Couple  real target to application to get real sensor feedback
+         *               or to  Couple  simulator output back to application
          *               Also reset target/simulator to achieve known startup, target
          *               maybe already be running/initialized
          *               
@@ -218,7 +214,7 @@ namespace Siebwalde_Application
 
             // Instantiate actuators  here, after all source files are generated and items are created, otherwise deadlock (egg - chicken story)
             Actuator Act_Couple = new Actuator("Couple",  Layer + "1\r", (name, cmd) => ActuatorCmd(name, cmd)); // initialize and subscribe actuators
-            FYApp.Couple.Attach(Act_Couple);
+            FYApp. Couple .Attach(Act_Couple);
             Actuator Act_Uncouple = new Actuator("Uncouple",  Layer + "2\r", (name, cmd) => ActuatorCmd(name, cmd)); // initialize and subscribe actuators
             FYApp.Uncouple.Attach(Act_Uncouple);
             Actuator Act_FiddleOneLeft = new Actuator("FiddleOneLeft",  Layer + "3\r", (name, cmd) => ActuatorCmd(name, cmd)); // initialize and subscribe actuators
@@ -306,7 +302,7 @@ namespace Siebwalde_Application
                 FYSimulator.NewData += HandleNewData;                
             }
 
-            ActuatorCmd("Reset", Layer + "J\r");       // Reset Fiddle Yard layer to reset target in order to sync C# application and C embedded software
+            ActuatorCmd("Reset", Layer + "J\r");            // Reset Fiddle Yard layer to reset target in order to sync C# application and C embedded software
             System.Threading.Thread.Sleep(50);              // Add aditional wait time for the target to process the reset command
             
         }
@@ -440,7 +436,7 @@ namespace Siebwalde_Application
                         break;
                     case 0x07: TrainDetection.UpdateMessage();
                         break;
-                    case 0x08: TrainDriveOutFinished.UpdateMessage();
+                    case 0x08: 
                         break;
                     case 0x09: 
                         break;
@@ -468,7 +464,7 @@ namespace Siebwalde_Application
                         break;
                     case 0x18: OccfromBlock6AndSensorF12.UpdateMessage();
                         break;
-                    case 0x1B: TrainDriveInFailedF12.UpdateMessage();
+                    case 0x1B: 
                         break;
                     case 0x21: LastTrack.UpdateMessage();
                         break;

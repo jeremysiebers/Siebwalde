@@ -31,31 +31,23 @@ namespace Siebwalde_Application
         private void FiddleYardSettingsForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             Properties.Settings.Default.Reload();
-        }
-
-        private void BtnOk_Click(object sender, EventArgs e)
-        {
-            if (FiddleYardSimSpeedSetting.Value != FYSimSpeedSetting)
-            {
-                DialogResult dr = MessageBox.Show(
-                           "Save current values for application settings?",
-                           "Save Settings", MessageBoxButtons.YesNo);
-                if (DialogResult.Yes == dr)
-                {
-                    Properties.Settings.Default.Save();
-                    this.Close();
-                }
-            }
-            if (FiddleYardSimSpeedSetting.Value == FYSimSpeedSetting)
-            {
-                this.Close();
-            }
-        }
+        }        
 
         private void BtnCancel_Click(object sender, EventArgs e)
         {            
             this.Close();
         }
+
+        private void BtnReload_Click(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.Reset();
+        }
+
+        private void BtnSave_Click(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.Save();
+            this.Close();            
+        }        
         
     }
 }

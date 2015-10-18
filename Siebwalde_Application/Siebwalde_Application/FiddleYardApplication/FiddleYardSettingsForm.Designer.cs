@@ -28,24 +28,15 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.BtnOk = new System.Windows.Forms.Button();
             this.FiddleYardSimSpeedSetting = new System.Windows.Forms.NumericUpDown();
             this.BtnCancel = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.BtnReload = new System.Windows.Forms.Button();
+            this.BtnSave = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.FiddleYardSimSpeedSetting)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // BtnOk
-            // 
-            this.BtnOk.Location = new System.Drawing.Point(6, 19);
-            this.BtnOk.Name = "BtnOk";
-            this.BtnOk.Size = new System.Drawing.Size(75, 23);
-            this.BtnOk.TabIndex = 1;
-            this.BtnOk.Text = "Ok";
-            this.BtnOk.UseVisualStyleBackColor = true;
-            this.BtnOk.Click += new System.EventHandler(this.BtnOk_Click);
             // 
             // FiddleYardSimSpeedSetting
             // 
@@ -57,7 +48,7 @@
             0,
             0});
             this.FiddleYardSimSpeedSetting.Minimum = new decimal(new int[] {
-            1,
+            10,
             0,
             0,
             0});
@@ -68,7 +59,7 @@
             // 
             // BtnCancel
             // 
-            this.BtnCancel.Location = new System.Drawing.Point(87, 19);
+            this.BtnCancel.Location = new System.Drawing.Point(179, 19);
             this.BtnCancel.Name = "BtnCancel";
             this.BtnCancel.Size = new System.Drawing.Size(75, 23);
             this.BtnCancel.TabIndex = 1;
@@ -87,13 +78,34 @@
             // 
             // groupBox1
             // 
-            this.groupBox1.Controls.Add(this.BtnOk);
+            this.groupBox1.Controls.Add(this.BtnSave);
+            this.groupBox1.Controls.Add(this.BtnReload);
             this.groupBox1.Controls.Add(this.BtnCancel);
-            this.groupBox1.Location = new System.Drawing.Point(106, 129);
+            this.groupBox1.Location = new System.Drawing.Point(10, 129);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(169, 48);
+            this.groupBox1.Size = new System.Drawing.Size(265, 48);
             this.groupBox1.TabIndex = 2;
             this.groupBox1.TabStop = false;
+            // 
+            // BtnReload
+            // 
+            this.BtnReload.Location = new System.Drawing.Point(17, 19);
+            this.BtnReload.Name = "BtnReload";
+            this.BtnReload.Size = new System.Drawing.Size(75, 23);
+            this.BtnReload.TabIndex = 2;
+            this.BtnReload.Text = "Reload";
+            this.BtnReload.UseVisualStyleBackColor = true;
+            this.BtnReload.Click += new System.EventHandler(this.BtnReload_Click);
+            // 
+            // BtnSave
+            // 
+            this.BtnSave.Location = new System.Drawing.Point(98, 19);
+            this.BtnSave.Name = "BtnSave";
+            this.BtnSave.Size = new System.Drawing.Size(75, 23);
+            this.BtnSave.TabIndex = 3;
+            this.BtnSave.Text = "Save";
+            this.BtnSave.UseVisualStyleBackColor = true;
+            this.BtnSave.Click += new System.EventHandler(this.BtnSave_Click);
             // 
             // FiddleYardSettingsForm
             // 
@@ -121,11 +133,12 @@
 
         #endregion
 
-        private System.Windows.Forms.Button BtnOk;
         private System.Windows.Forms.NumericUpDown FiddleYardSimSpeedSetting;
         private System.Windows.Forms.Button BtnCancel;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.Button BtnReload;
+        private System.Windows.Forms.Button BtnSave;
 
     }
 }

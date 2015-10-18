@@ -5,8 +5,5 @@
     <Setting Name="FIDDLExYARDxSIMxSPEEDxSETTING" Type="System.Decimal" Scope="User">
       <Value Profile="(Default)">100</Value>
     </Setting>
-    <Setting Name="test" Type="System.Decimal" Scope="User">
-      <Value Profile="(Default)">0</Value>
-    </Setting>
   </Settings>
 </SettingsFile>

@@ -65,11 +65,13 @@ namespace Siebwalde_Application
             {
                 TrackPower15VDown = true;
                 m_iFYApp.GetFYApp().FiddleYardApplicationLogging.StoreText("FYAppRun.Run() TrackPower15VDown = true");
+                m_iFYApp.GetFYApp().FYFORM.SetMessage("FYAppInit", "EMO pressed, 15V Track Power down!");
             }
             else if (name == "15VTrackPower" && val > 0)
             {
                 TrackPower15VDown = false;
                 m_iFYApp.GetFYApp().FiddleYardApplicationLogging.StoreText("FYAppRun.Run() TrackPower15VDown = false");
+                m_iFYApp.GetFYApp().FYFORM.SetMessage("FYAppInit", "EMO released, 15V Track Power up!");
             }
             else if (name == "Collect")
             {
@@ -140,14 +142,7 @@ namespace Siebwalde_Application
                         m_iFYApp.GetFYApp().FiddleYardApplicationLogging.StoreText("FYAppRun.Run() Stop == kickrun -> State_Machine = State.Start");
                         m_iFYApp.GetFYApp().FiddleYardApplicationLogging.StoreText("FYAppRun.Run() _Return = Stop");
                         break;
-                    }
-
-                    /*
-                    if (true == m_collect && FYFull() > 10)
-                    {                        
-                        State_Machine = State.TrainDriveTroughPrepare;
-                        m_iFYApp.GetFYApp().FiddleYardApplicationLogging.StoreText("FYAppRun.Run() true == m_collect && FYFull() > 10 -> State_Machine = State.TrainDriveTroughPrepare");
-                    }*/
+                    }                    
 
                     if (FYFull() < 11)                                                                               // Always drive trains into FiddleYard regardless the status of m_collect until FYFull == 11
                     {
@@ -190,39 +185,6 @@ namespace Siebwalde_Application
                     }
                     else { State_Machine = State.Idle; }
                     break;
-
-                case State.TrainDriveTroughPrepare:
-                    if (FYAppTrainDrive.TrainDriveThrough(kickrun) == "Finished")
-                    {
-                        m_iFYApp.GetFYApp().FiddleYardApplicationLogging.StoreText("FYAppRun.Run() State_Machine = State.TrainDriveTrough");
-                        State_Machine = State.TrainDriveTrough;
-                    }
-                    break;
-
-                case State.TrainDriveTrough:
-                    if (false == m_collect)
-                    {                        
-                        State_Machine = State.TrainDriveTroughCleanup;
-                        m_iFYApp.GetFYApp().FiddleYardApplicationLogging.StoreText("FYAppRun.Run() false == m_collect -> State_Machine = State.TrainDriveTroughCleanup");
-                    }
-                    else if ("Stop" == StopApplication)
-                    {
-                        FYAppTrainDrive.FiddleYardAppTrainDriveReset();
-                        State_Machine = State.Idle;
-                        _Return = "Stop";
-                        m_iFYApp.GetFYApp().FiddleYardApplicationLogging.StoreText("FYAppRun.Run() Stop == kickrun -> State_Machine = State.Start");
-                        m_iFYApp.GetFYApp().FiddleYardApplicationLogging.StoreText("FYAppRun.Run() _Return = Stop");
-                    }
-                    break;
-
-                case State.TrainDriveTroughCleanup:
-                    if (FYAppTrainDrive.TrainDriveThrough("CollectFalse") == "Finished")
-                    {
-                        m_iFYApp.GetFYApp().FiddleYardApplicationLogging.StoreText("FYAppRun.Run() State_Machine = State.Idle");
-                        State_Machine = State.Idle;
-                    }
-                    break;
-
 
                 case State.TrainDriveIn:
                     if (FYAppTrainDrive.TrainDriveIn(kickrun) == "Finished")
