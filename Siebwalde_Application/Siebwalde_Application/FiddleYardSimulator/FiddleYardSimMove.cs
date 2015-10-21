@@ -79,6 +79,10 @@ namespace Siebwalde_Application
                     m_iFYSim.GetFYSim().Resistor.Value = true;
                     m_iFYSim.GetFYSim().M10.Value = true;
                     m_iFYSim.GetFYSim().CL10Heart.Value = false;
+                    m_iFYSim.GetFYSim().F10.Value = false;
+                    m_iFYSim.GetFYSim().F11.Value = false;
+                    m_iFYSim.GetFYSim().F12.Value = false;
+                    m_iFYSim.GetFYSim().F13.Value = false;
                     m_iFYSim.GetFYSim().TrackNo.Count = 0;
                     AliveUpdateCnt = 0;
                     FiddleOneMoveState = 2;                                                                                                         // pass wait state
@@ -199,12 +203,12 @@ namespace Siebwalde_Application
                     m_iFYSim.GetFYSim().CL10Heart.Value = false;
                     m_iFYSim.GetFYSim().TrackNo.Count = 0;
                     AliveUpdateCnt = 0;
-                    FiddleOneMoveState = 2;                                                                                                         // pass wait state
+                    FiddleOneMoveState = 2;                                                                                                        
                     m_iFYSim.GetFYSim().FiddleYardSimulatorLogging.StoreText("FYMove.FiddleMultipleMove FiddleOneMoveState = 1");
                     break;
 
                 case 1:
-                    if (AliveUpdateCnt >= 0)
+                    if (AliveUpdateCnt >= 2)
                     {
                         AliveUpdateCnt = 0;
                         FiddleOneMoveState = 2;
@@ -226,12 +230,12 @@ namespace Siebwalde_Application
                         m_iFYSim.GetFYSim().TrackNo.Count = GetTrackNoCnt;
                     }
                     m_iFYSim.GetFYSim().FiddleYardSimulatorLogging.StoreText("FYMove.FiddleMultipleMove GetTrackNoCnt = " + Convert.ToString(GetTrackNoCnt));
-                    FiddleOneMoveState = 4;                                                                                                         // pass wait state
+                    FiddleOneMoveState = 4;                                                                                                        
                     m_iFYSim.GetFYSim().FiddleYardSimulatorLogging.StoreText("FYMove.FiddleMultipleMove FiddleOneMoveState = 4");
                     break;
 
                 case 3:
-                    if (AliveUpdateCnt >= 0)
+                    if (AliveUpdateCnt >= 2)
                     {
                         AliveUpdateCnt = 0;
                         FiddleOneMoveState = 4;
@@ -265,9 +269,13 @@ namespace Siebwalde_Application
                     {
                         m_iFYSim.GetFYSim().FiddleYardSimulatorLogging.StoreText("FYMove.FiddleMultipleMove GetTrackNoCnt != GetNewTrackNo");
                         m_iFYSim.GetFYSim().CL10Heart.Value = false;
+                        m_iFYSim.GetFYSim().F10.Value = false;
+                        m_iFYSim.GetFYSim().F11.Value = false;
+                        m_iFYSim.GetFYSim().F12.Value = false;
+                        m_iFYSim.GetFYSim().F13.Value = false;
                         m_iFYSim.GetFYSim().TrackNo.Count = 0;
                         AliveUpdateCnt = 0;
-                        FiddleOneMoveState = 2;                                                                                                         // pass wait state
+                        FiddleOneMoveState = 2;                                                                                                         
                         m_iFYSim.GetFYSim().FiddleYardSimulatorLogging.StoreText("FYMove.FiddleMultipleMove FiddleOneMoveState = 1");
                         _Return = false;
                         m_iFYSim.GetFYSim().FiddleYardSimulatorLogging.StoreText("FYMove.FiddleMultipleMove _Return = false");

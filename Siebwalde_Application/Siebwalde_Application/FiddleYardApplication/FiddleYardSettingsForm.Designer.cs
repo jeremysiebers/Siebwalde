@@ -32,8 +32,8 @@
             this.BtnCancel = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.BtnReload = new System.Windows.Forms.Button();
             this.BtnSave = new System.Windows.Forms.Button();
+            this.BtnReload = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.FiddleYardSimSpeedSetting)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
@@ -43,12 +43,12 @@
             this.FiddleYardSimSpeedSetting.DataBindings.Add(new System.Windows.Forms.Binding("Value", global::Siebwalde_Application.Properties.Settings.Default, "FIDDLExYARDxSIMxSPEEDxSETTING", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
             this.FiddleYardSimSpeedSetting.Location = new System.Drawing.Point(189, 9);
             this.FiddleYardSimSpeedSetting.Maximum = new decimal(new int[] {
-            1000,
+            10000,
             0,
             0,
             0});
             this.FiddleYardSimSpeedSetting.Minimum = new decimal(new int[] {
-            10,
+            1,
             0,
             0,
             0});
@@ -87,16 +87,6 @@
             this.groupBox1.TabIndex = 2;
             this.groupBox1.TabStop = false;
             // 
-            // BtnReload
-            // 
-            this.BtnReload.Location = new System.Drawing.Point(17, 19);
-            this.BtnReload.Name = "BtnReload";
-            this.BtnReload.Size = new System.Drawing.Size(75, 23);
-            this.BtnReload.TabIndex = 2;
-            this.BtnReload.Text = "Reload";
-            this.BtnReload.UseVisualStyleBackColor = true;
-            this.BtnReload.Click += new System.EventHandler(this.BtnReload_Click);
-            // 
             // BtnSave
             // 
             this.BtnSave.Location = new System.Drawing.Point(98, 19);
@@ -106,6 +96,16 @@
             this.BtnSave.Text = "Save";
             this.BtnSave.UseVisualStyleBackColor = true;
             this.BtnSave.Click += new System.EventHandler(this.BtnSave_Click);
+            // 
+            // BtnReload
+            // 
+            this.BtnReload.Location = new System.Drawing.Point(17, 19);
+            this.BtnReload.Name = "BtnReload";
+            this.BtnReload.Size = new System.Drawing.Size(75, 23);
+            this.BtnReload.TabIndex = 2;
+            this.BtnReload.Text = "Reload";
+            this.BtnReload.UseVisualStyleBackColor = true;
+            this.BtnReload.Click += new System.EventHandler(this.BtnReload_Click);
             // 
             // FiddleYardSettingsForm
             // 

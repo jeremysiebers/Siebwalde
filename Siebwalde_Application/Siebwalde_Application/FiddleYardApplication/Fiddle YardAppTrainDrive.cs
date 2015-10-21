@@ -128,7 +128,7 @@ namespace Siebwalde_Application
 
                     if (m_iFYApp.GetFYApp().m_iFYIOH.GetIoHandler().m_FYSimulatorActive == true)
                     {
-                        TRAINDRIVEDELAY = 0;
+                        TRAINDRIVEDELAY = 10;
                     }
                     else { TRAINDRIVEDELAY = 60; }
 

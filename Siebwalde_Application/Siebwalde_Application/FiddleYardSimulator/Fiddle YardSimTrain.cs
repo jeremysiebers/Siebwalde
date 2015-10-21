@@ -30,8 +30,16 @@ namespace Siebwalde_Application
         private int BufferWaitDelay = 0;
         private int BufferWaitDelayRandomTrigger = 0;
         private Random rng = new Random();
-        private int MinimumWaitTime = 80;//80; 100 or 10 us timer
-        private int MaximumWaitTime = 500;//500; 100 or 10 us timer
+        private int MinimumWaitTime = 300; // value for 100ms = 8
+        private int MaximumWaitTime = 1500;// value for 100ms = 50
+        private int MINIMUMxWAITxTIME = 8;
+        private int MAXIMUMxWAITxTIME = 50;
+        private const int ActionCounter1 = 3;
+        private const int ActionCounter5 = 15;
+        private const int ActionCounter10 = 30;
+        private const int ActionCounter15 = 45;
+        private const int ActionCounter20 = 60;
+        private const int ActionCounter25 = 75;
 
         private enum State { Idle, FYActiveTrack, TrainDriveToBlock8A, TrainInBlock5B, TrainInBlock8A, TrainDriveToBlock6, TrainDriveToBlock7, TrainDriveToBuffer, TrainInBuffer,
                                 TrainInBlock6};
@@ -79,6 +87,37 @@ namespace Siebwalde_Application
                 path = @"c:\localdata\Siebwalde\" + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_FiddleYardSimTrainBOT.txt"; //  different logging file per target, this is default
                 FiddleYardSimTrainLogging = new Log2LoggingFile(path);
             }
+
+            Sensor Sns_FYSimSpeedSetting = new Sensor("FYSimSpeedSetting", " FYSimSpeedSetting ", 0, (name, val, log) => SimulatorSettings(name, val, log)); // initialize and subscribe sensors
+            Siebwalde_Application.Properties.Settings.Default.FYSimSpeedSetting.Attach(Sns_FYSimSpeedSetting);
+        }
+
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: Simulator settings from settings form
+         * 
+         *  Input(s)   : 
+         *
+         *  Output(s)  : 
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      : 
+         *  
+         */
+        /*#--------------------------------------------------------------------------#*/
+        public void SimulatorSettings(string name, int val, string log)
+        {
+            if (name == "FYSimSpeedSetting")
+            {
+                MINIMUMxWAITxTIME = 80 / 100 * val;
+                MAXIMUMxWAITxTIME = 500 / 100 * val;
+                //FiddleYardSimTrainLogging.StoreText(FYSimtrainInstance + " MINIMUMxWAITxTIME = " + Convert.ToString(MINIMUMxWAITxTIME));
+                //FiddleYardSimTrainLogging.StoreText(FYSimtrainInstance + " MAXIMUMxWAITxTIME = " + Convert.ToString(MAXIMUMxWAITxTIME));
+            }
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -101,6 +140,7 @@ namespace Siebwalde_Application
          */
         /*#--------------------------------------------------------------------------#*/
         private string _SimTrainLocation;
+
         public string SimTrainLocation
         {
             get { return _SimTrainLocation; }
@@ -208,6 +248,8 @@ namespace Siebwalde_Application
                     if (kicksimtrain == "Track_No" && SimTrainLocation != TrackNoToTrackString(val))
                     {
                         FYSimTrainState = State.Idle;
+                        m_iFYSim.GetFYSim().F10.Value = false;
+                        m_iFYSim.GetFYSim().F11.Value = false;
                         FiddleYardSimTrainLogging.StoreText(FYSimtrainInstance + " kicksimtrain == Track_No && SimTrainLocation != TrackNoToTrackString(val)");
                         FiddleYardSimTrainLogging.StoreText(FYSimtrainInstance + " FYSimTrainState = State.Idle");
                     }
@@ -219,26 +261,23 @@ namespace Siebwalde_Application
                         ActionCounter = 0;
                         FYSimTrainState = State.Idle;
                     }
-                    else if (kicksimtrain == "Track_No")
-                    {
-                        break;
-                    }
+                   
 
-                    if (m_iFYSim.GetFYSim().Block7In.Value == false && m_iFYSim.GetFYSim().TrackPower.Value == true && ActionCounter < 5)
+                    if (m_iFYSim.GetFYSim().Block7In.Value == false && m_iFYSim.GetFYSim().TrackPower.Value == true && ActionCounter < ActionCounter5)
                     {
                         ActionCounter++;
                     }
-                    else if (ActionCounter >= 5)
+                    else if (ActionCounter >= ActionCounter5)
                     {
                         ActionCounter++;
                     }
 
-                    if (ActionCounter >= 1 && ActionCounter < 5)
+                    if (ActionCounter >= ActionCounter5 && ActionCounter < ActionCounter10)
                     {
                         m_iFYSim.GetFYSim().F11.Value = false;
                     }
 
-                    if (ActionCounter >= 5 && ActionCounter < 10)
+                    if (ActionCounter >= ActionCounter5 && ActionCounter < ActionCounter15)
                     {
                         m_iFYSim.GetFYSim().F12.Value = true;
                         m_iFYSim.GetFYSim().TrainsOnFYSim[m_iFYSim.GetFYSim().TrackNo.Count] = 0; // basicaly when train is driving and passing F12 it has "left" the track of the fiddleyard, no way back!
@@ -248,19 +287,19 @@ namespace Siebwalde_Application
                         m_iFYSim.GetFYSim().F12.Value = false;
                     }
 
-                    if (ActionCounter >= 5 && ActionCounter < 15)
+                    if (ActionCounter >= ActionCounter10 && ActionCounter < ActionCounter15)
                     {
                         SimTrainLocation = "Block8A";                   // train drives into block 8A, tail is still in block7
                         m_iFYSim.GetFYSim().Block8A.Value = true;
-                    }                    
+                    }
 
-                    if (ActionCounter > 15)
+                    if (ActionCounter > ActionCounter20)
                     {
                         m_iFYSim.GetFYSim().Block7.Value = false;             // train has left block 7, also passed F10
                         m_iFYSim.GetFYSim().F10.Value = false;
                     }
 
-                    if (ActionCounter >= 20)
+                    if (ActionCounter >= ActionCounter25)
                     {
                         m_iFYSim.GetFYSim().TrainsOnFYSim[m_iFYSim.GetFYSim().TrackNo.Count] = 0;
                         ActionCounter = 0;
@@ -274,14 +313,10 @@ namespace Siebwalde_Application
                     {
                         ActionCounter = 0;
                         FYSimTrainState = State.Idle;
-                    }
-                    else if (kicksimtrain == "Track_No")
-                    {
-                        break;
-                    }
+                    }                 
 
                     ActionCounter++;
-                    if (ActionCounter >= 5)
+                    if (ActionCounter >= ActionCounter5)
                     {
                         ActionCounter = 0;
                         FYSimTrainState = State.TrainDriveToBuffer;
@@ -294,11 +329,7 @@ namespace Siebwalde_Application
                     {
                         ActionCounter = 0;
                         FYSimTrainState = State.Idle;
-                    }
-                    else if (kicksimtrain == "Track_No")
-                    {
-                        break;
-                    }
+                    }                    
 
                     SimTrainLocation = "Buffer";                        // train drives into buffer
                     m_iFYSim.GetFYSim().Block8A.Value = false;
@@ -319,16 +350,13 @@ namespace Siebwalde_Application
                         ActionCounter = 0;
                         FYSimTrainState = State.Idle;
                     }
-                    else if (kicksimtrain == "Track_No")
-                    {
-                        break;
-                    }
+                    
 
                     ActionCounter++;
                     if (ActionCounter >= BufferWaitDelay)
                     {
                         ActionCounter = 0;                        
-                        if (m_iFYSim.GetFYSim().Block5B.Value == true || m_iFYSim.GetFYSim().Block6.Value == true)  // A new train may enter block 5B when a train has left block 5B and block6 
+                        if (m_iFYSim.GetFYSim().Block5B.Value == true)  // A new train may enter block 5B when a train has left block 5B
                         {
                             FYSimTrainState = State.TrainInBuffer;                            
                         }
@@ -348,23 +376,20 @@ namespace Siebwalde_Application
                         ActionCounter = 0;
                         FYSimTrainState = State.Idle;
                     }
-                    else if (kicksimtrain == "Track_No")
-                    {
-                        break;
-                    }
 
-                    if (m_iFYSim.GetFYSim().Block5BIn.Value != true) // when block occupied signal is set by application trains stops moving in block 5B
+
+                    if (m_iFYSim.GetFYSim().Block5BIn.Value == false && m_iFYSim.GetFYSim().Block6.Value == false) // when block occupied signal is set by application OR another train is stil in block 6 trains stops moving in block 5B
                     {
                         ActionCounter++;// when block occupied signal is set by application trains stops moving in block 6, block 5B is also still occupied by the length of the train
-                    }                    
-                    
-                    if (ActionCounter >= 5)
-                    {
-                        m_iFYSim.GetFYSim().Block6.Value = true;                        
-                        ActionCounter = 5;
                     }
 
-                    if (m_iFYSim.GetFYSim().Block6In.Value == false && ActionCounter >= 5)// check if block6 is not occupied and that the trains has driven to edge of block5B towards block6
+                    if (ActionCounter >= ActionCounter5)
+                    {
+                        m_iFYSim.GetFYSim().Block6.Value = true;
+                        ActionCounter = ActionCounter5;
+                    }
+
+                    if (m_iFYSim.GetFYSim().Block6In.Value == false && ActionCounter >= ActionCounter5)// check if block6 is not occupied and that the trains has driven to edge of block5B towards block6
                     {
                         ActionCounter = 0;
                         FYSimTrainState = State.TrainDriveToBlock6;
@@ -378,17 +403,14 @@ namespace Siebwalde_Application
                         ActionCounter = 0;
                         FYSimTrainState = State.Idle;
                     }
-                    else if (kicksimtrain == "Track_No")
-                    {
-                        break;
-                    }
+                   
 
                     if (m_iFYSim.GetFYSim().Block6In.Value != true)
                     {
                         ActionCounter++;// when block occupied signal is set by application trains stops moving in block 6, block 5B is also still occupied by the length of the train
-                    }                                        
+                    }
 
-                    if (ActionCounter >= 5)
+                    if (ActionCounter >= ActionCounter5)
                     {
                         m_iFYSim.GetFYSim().Block5B.Value = false; 
                         m_iFYSim.GetFYSim().F10.Value = true;
@@ -405,10 +427,7 @@ namespace Siebwalde_Application
                         ActionCounter = 0;
                         FYSimTrainState = State.Idle;
                     }
-                    else if (kicksimtrain == "Track_No")
-                    {
-                        break;
-                    }
+                   
 
                     if (m_iFYSim.GetFYSim().Block7.Value == false && m_iFYSim.GetFYSim().TrackNo.Count != 0 && m_iFYSim.GetFYSim().TrackPower.Value == true)// check if train may drive into block7, if the fiddle yard is aligned and if coupled
                     {                        
@@ -439,23 +458,23 @@ namespace Siebwalde_Application
                     {
                         ActionCounter++;// when block occupied signal is set by application trains stops moving in block 7, block 6 is also still occupied by the length of the train
                     }
-                    
-                    if (ActionCounter >= 1 && ActionCounter < 5)
+
+                    if (ActionCounter >= ActionCounter1 && ActionCounter < ActionCounter10)
                     {
                         SimTrainLocation = "Track" + Convert.ToString(m_iFYSim.GetFYSim().TrackNo.Count);
                         m_iFYSim.GetFYSim().F13.Value = true;                        
                         //FiddleYardSimTrainLogging.StoreText(FYSimtrainInstance + " in " + SimTrainLocation); <-------------------- a lot of logging!!!
                     }
-                    else { m_iFYSim.GetFYSim().F13.Value = false; }                    
+                    else { m_iFYSim.GetFYSim().F13.Value = false; }
 
-                    if (ActionCounter >= 5)
+                    if (ActionCounter >= ActionCounter15)
                     {
                         m_iFYSim.GetFYSim().F11.Value = true;
                         m_iFYSim.GetFYSim().Block6.Value = false;
                     }
                     else { m_iFYSim.GetFYSim().F11.Value = false; }
 
-                    if (ActionCounter >= 25)
+                    if (ActionCounter >= ActionCounter25)
                     {
                         ActionCounter = 0;
                         FiddleYardSimTrainLogging.StoreText(FYSimtrainInstance + " Train not stopped on fiddle yard...");

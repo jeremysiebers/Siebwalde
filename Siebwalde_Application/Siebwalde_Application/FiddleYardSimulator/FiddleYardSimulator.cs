@@ -155,7 +155,6 @@ namespace Siebwalde_Application
             TrackNo.Count = 1;
 
             Sensor Sns_FYSimSpeedSetting = new Sensor("FYSimSpeedSetting", " FYSimSpeedSetting ", 0, (name, val, log) => SimulatorSettings(name, val, log)); // initialize and subscribe sensors
-            //m_iFYIOH.GetIoHandler().m_iFYCtrl.GetFYController().m_iMain.GetMain(). SiebWaldeSettings.GetSettings().FYSimSpeedSetting.Attach(Sns_FYSimSpeedSetting);
             Siebwalde_Application.Properties.Settings.Default.FYSimSpeedSetting.Attach(Sns_FYSimSpeedSetting);
         }
 
@@ -436,16 +435,7 @@ namespace Siebwalde_Application
 
                 default:
                     break;
-            }
-
-            // reset certain simulated sensor signals when shifting the fiddle yard
-            if (TrackNo.Count == 0)
-            {
-                F10.Value = false;
-                F11.Value = false;
-                F12.Value = false;
-                F12.Value = false;
-            }
+            }            
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -471,9 +461,7 @@ namespace Siebwalde_Application
             EOS10.Value = false;
             EOS11.Value = false;
             F13.Value = false;
-            F12.Value = false;
-            Block5B.Value = false;
-            Block8A.Value = false;
+            F12.Value = false;            
             TrackPower.Value = false;
             Block5BIn.Value = true;
             Block6In.Value = true;
