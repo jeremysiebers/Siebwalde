@@ -5,5 +5,17 @@
     <Setting Name="FIDDLExYARDxSIMxSPEEDxSETTING" Type="System.Decimal" Scope="User">
       <Value Profile="(Default)">100</Value>
     </Setting>
+    <Setting Name="SETxCOLORxTRACKxOCCUPIED" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">Lime</Value>
+    </Setting>
+    <Setting Name="SETxCOLORxTRACKxNOTxINITIALIZED" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">Lime</Value>
+    </Setting>
+    <Setting Name="SETxCOLORxTRACKxNOTxACTIVE" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">Lime</Value>
+    </Setting>
+    <Setting Name="SETxCOLORxTRACKxEMPTY" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">Lime</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

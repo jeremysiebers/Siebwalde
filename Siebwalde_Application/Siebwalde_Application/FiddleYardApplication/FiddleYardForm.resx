@@ -141,7 +141,7 @@
     <value>8</value>
   </data>
   <data name="Btn_Bezet7On_TOP.Location" type="System.Drawing.Point, System.Drawing">
-    <value>825, 416</value>
+    <value>829, 433</value>
   </data>
   <data name="Btn_Bezet7On_TOP.Size" type="System.Drawing.Size, System.Drawing">
     <value>32, 24</value>
@@ -168,7 +168,7 @@
     <value>1</value>
   </data>
   <data name="Btn_Bezet6On_TOP.Location" type="System.Drawing.Point, System.Drawing">
-    <value>86, 413</value>
+    <value>89, 433</value>
   </data>
   <data name="Btn_Bezet6On_TOP.Size" type="System.Drawing.Size, System.Drawing">
     <value>32, 24</value>
@@ -195,7 +195,7 @@
     <value>2</value>
   </data>
   <data name="Btn_Bezet5BOn_TOP.Location" type="System.Drawing.Point, System.Drawing">
-    <value>81, 247</value>
+    <value>101, 246</value>
   </data>
   <data name="Btn_Bezet5BOn_TOP.Size" type="System.Drawing.Size, System.Drawing">
     <value>32, 24</value>
@@ -565,7 +565,7 @@
     <value>39</value>
   </data>
   <data name="LLed_Block5BIn.Location" type="System.Drawing.Point, System.Drawing">
-    <value>56, 246</value>
+    <value>81, 246</value>
   </data>
   <data name="LLed_Block5BIn.Size" type="System.Drawing.Size, System.Drawing">
     <value>14, 26</value>
@@ -628,7 +628,7 @@
     <value>36</value>
   </data>
   <data name="LLed_Block6In.Location" type="System.Drawing.Point, System.Drawing">
-    <value>92, 395</value>
+    <value>92, 415</value>
   </data>
   <data name="LLed_Block6In.Size" type="System.Drawing.Size, System.Drawing">
     <value>26, 14</value>
@@ -649,7 +649,7 @@
     <value>35</value>
   </data>
   <data name="LLed_Block7In.Location" type="System.Drawing.Point, System.Drawing">
-    <value>832, 395</value>
+    <value>832, 415</value>
   </data>
   <data name="LLed_Block7In.Size" type="System.Drawing.Size, System.Drawing">
     <value>25, 14</value>
@@ -1317,42 +1317,6 @@
   <metadata name="menuStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
-  <data name="automaticModeToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>164, 22</value>
-  </data>
-  <data name="automaticModeToolStripMenuItem.Text" xml:space="preserve">
-    <value>Automatic mode</value>
-  </data>
-  <data name="manualModeToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>164, 22</value>
-  </data>
-  <data name="manualModeToolStripMenuItem.Text" xml:space="preserve">
-    <value>Manual Mode</value>
-  </data>
-  <data name="quitToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>164, 22</value>
-  </data>
-  <data name="quitToolStripMenuItem.Text" xml:space="preserve">
-    <value>Exit</value>
-  </data>
-  <data name="fileToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>37, 20</value>
-  </data>
-  <data name="fileToolStripMenuItem.Text" xml:space="preserve">
-    <value>File</value>
-  </data>
-  <data name="alwaysOnTopToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>154, 22</value>
-  </data>
-  <data name="alwaysOnTopToolStripMenuItem.Text" xml:space="preserve">
-    <value>Always On Top</value>
-  </data>
-  <data name="editToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>44, 20</value>
-  </data>
-  <data name="editToolStripMenuItem.Text" xml:space="preserve">
-    <value>View</value>
-  </data>
   <data name="menuStrip1.Location" type="System.Drawing.Point, System.Drawing">
     <value>0, 0</value>
   </data>
@@ -1376,6 +1340,42 @@
   </data>
   <data name="&gt;&gt;menuStrip1.ZOrder" xml:space="preserve">
     <value>45</value>
+  </data>
+  <data name="fileToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>37, 20</value>
+  </data>
+  <data name="fileToolStripMenuItem.Text" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="automaticModeToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>164, 22</value>
+  </data>
+  <data name="automaticModeToolStripMenuItem.Text" xml:space="preserve">
+    <value>Automatic mode</value>
+  </data>
+  <data name="manualModeToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>164, 22</value>
+  </data>
+  <data name="manualModeToolStripMenuItem.Text" xml:space="preserve">
+    <value>Manual Mode</value>
+  </data>
+  <data name="quitToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>164, 22</value>
+  </data>
+  <data name="quitToolStripMenuItem.Text" xml:space="preserve">
+    <value>Exit</value>
+  </data>
+  <data name="editToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>44, 20</value>
+  </data>
+  <data name="editToolStripMenuItem.Text" xml:space="preserve">
+    <value>View</value>
+  </data>
+  <data name="alwaysOnTopToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>154, 22</value>
+  </data>
+  <data name="alwaysOnTopToolStripMenuItem.Text" xml:space="preserve">
+    <value>Always On Top</value>
   </data>
   <data name="AutomaticMode.Location" type="System.Drawing.Point, System.Drawing">
     <value>750, 793</value>

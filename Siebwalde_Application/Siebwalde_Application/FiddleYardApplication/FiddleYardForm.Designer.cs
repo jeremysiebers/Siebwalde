@@ -226,7 +226,8 @@
             // 
             // LLed_Block5BIn
             // 
-            this.LLed_Block5BIn.BackColor = System.Drawing.Color.Transparent;
+            this.LLed_Block5BIn.BackColor = System.Drawing.Color.Red;
+            this.LLed_Block5BIn.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             resources.ApplyResources(this.LLed_Block5BIn, "LLed_Block5BIn");
             this.LLed_Block5BIn.Name = "LLed_Block5BIn";
             // 
@@ -246,13 +247,15 @@
             // 
             // LLed_Block6In
             // 
-            this.LLed_Block6In.BackColor = System.Drawing.Color.Transparent;
+            this.LLed_Block6In.BackColor = System.Drawing.Color.Red;
+            this.LLed_Block6In.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             resources.ApplyResources(this.LLed_Block6In, "LLed_Block6In");
             this.LLed_Block6In.Name = "LLed_Block6In";
             // 
             // LLed_Block7In
             // 
-            this.LLed_Block7In.BackColor = System.Drawing.Color.Transparent;
+            this.LLed_Block7In.BackColor = System.Drawing.Color.Red;
+            this.LLed_Block7In.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             resources.ApplyResources(this.LLed_Block7In, "LLed_Block7In");
             this.LLed_Block7In.Name = "LLed_Block7In";
             // 

@@ -10,6 +10,7 @@ using System.Timers;
 using System.Net.Sockets;
 using System.IO;
 using System.Net;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Management;
@@ -25,7 +26,11 @@ namespace Siebwalde_Application.Properties
     //  The SettingsSaving event is raised before the setting values are saved.
     public sealed partial class Settings
     {
-        public SensorUpdater FYSimSpeedSetting;        
+        public SensorUpdater FYSimSpeedSetting;
+        public ColorUpdater SWSetColorTrainOccupied;
+        public ColorUpdater SWSetColorTrackNotInitialized;
+        public ColorUpdater SWSetColorTrackNotActive;
+        public ColorUpdater SWSetColorTrackEmpty;
         
         public Settings() 
         {
@@ -36,6 +41,10 @@ namespace Siebwalde_Application.Properties
             this.SettingsSaving += this.SettingsSavingEventHandler;
             //
             FYSimSpeedSetting = new SensorUpdater();
+            SWSetColorTrainOccupied = new ColorUpdater();
+            SWSetColorTrackNotInitialized = new ColorUpdater();
+            SWSetColorTrackNotActive = new ColorUpdater();
+            SWSetColorTrackEmpty = new ColorUpdater();
         }
         
         private void SettingChangingEventHandler(object sender, System.Configuration.SettingChangingEventArgs e) 
@@ -46,13 +55,25 @@ namespace Siebwalde_Application.Properties
                 case "FIDDLExYARDxSIMxSPEEDxSETTING":
                     FYSimSpeedSetting.UpdateSensorValue(Convert.ToInt16(e.NewValue), false);                
                     break;
+                case "SETxCOLORxTRACKxOCCUPIED":
+                    SWSetColorTrainOccupied.UpdateColorValue((Color)e.NewValue);
+                    break;
+                case "SETxCOLORxTRACKxNOTxINITIALIZED":
+                    SWSetColorTrackNotInitialized.UpdateColorValue((Color)e.NewValue);
+                    break;
+                case "SETxCOLORxTRACKxNOTxACTIVE":
+                    SWSetColorTrackNotActive.UpdateColorValue((Color)e.NewValue);
+                    break;
+                case "SETxCOLORxTRACKxEMPTY":
+                    SWSetColorTrackEmpty.UpdateColorValue((Color)e.NewValue);
+                    break;
                 default: break;
-            }
+            }            
         }
         
         private void SettingsSavingEventHandler(object sender, System.ComponentModel.CancelEventArgs e) 
-        {            
-            // Add code to handle the SettingsSaving event here.
+        {
+            
         }        
     }
 }

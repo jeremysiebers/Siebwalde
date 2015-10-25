@@ -106,13 +106,15 @@ namespace Siebwalde_Application
             LLed_Block6.Location = new System.Drawing.Point(GWinX + 50, GWinHalf - 8);
 
             LLed_Block6In.Size = new Size(26, 14);
-            LLed_Block6In.Location = new System.Drawing.Point(GWinX + 50 + (100 / 2 - 26 / 2), GWinHalf -7);
+            LLed_Block6In.Location = new System.Drawing.Point(GWinX + 50 + (100 / 2 - 26 / 2), GWinHalf - 7 + 25);
+            //LLed_Block6In.Location = new System.Drawing.Point(GWinX + 50 + (100 / 2 - 26 / 2), GWinHalf -7);
 
             LLed_Block5B.Size = new Size(16, 250);
             LLed_Block5B.Location = new System.Drawing.Point(GWinX + 50, GWinHalf - 18 - 250);
 
             LLed_Block5BIn.Size = new Size(14, 26);
-            LLed_Block5BIn.Location = new System.Drawing.Point(GWinX + 50 + 1, GWinHalf - 18 - (250/2 + 26/2));
+            LLed_Block5BIn.Location = new System.Drawing.Point(GWinX + 50 + 16 + 10, GWinHalf - 18 - (250 / 2 + 26 / 2));
+            //LLed_Block5BIn.Location = new System.Drawing.Point(GWinX + 50 + 1, GWinHalf - 18 - (250/2 + 26/2));
 
             LLed_FYPLATE_TOP.Size = new Size(620, 368);
             LLed_FYPLATE_TOP.Location = new System.Drawing.Point(GWinX + 160, GWinHalf - 368 / 2);
@@ -133,7 +135,8 @@ namespace Siebwalde_Application
             LLed_Block7.Location = new System.Drawing.Point(GWinX + 790, GWinHalf - 8);
 
             LLed_Block7In.Size = new Size(26, 14);
-            LLed_Block7In.Location = new System.Drawing.Point(GWinX + 790 + (100 / 2 - 26 / 2), GWinHalf - 7);
+            LLed_Block7In.Location = new System.Drawing.Point(GWinX + 790 + (100 / 2 - 26 / 2), GWinHalf - 7 + 25);
+            //LLed_Block7In.Location = new System.Drawing.Point(GWinX + 790 + (100 / 2 - 26 / 2), GWinHalf - 7);
 
             LLed_Block8A.Size = new Size(16, 250);
             LLed_Block8A.Location = new System.Drawing.Point(GWinX + 790 + (100 - 16), GWinHalf - 250 - 18);
@@ -178,13 +181,16 @@ namespace Siebwalde_Application
             LLed_EOS10.Location = new System.Drawing.Point(GWinX + 180, GWinHalf + 360 - 16);
 
             Btn_Bezet5BOn_TOP.Size = new Size(32, 24);
-            Btn_Bezet5BOn_TOP.Location = new System.Drawing.Point(GWinX + 50 + 16 + 10, GWinHalf - 18 - (250/2) - (23/2) );
+            Btn_Bezet5BOn_TOP.Location = new System.Drawing.Point(GWinX + 50 + 16 + 30, GWinHalf - 18 - (250 / 2) - (23 / 2));
+            //Btn_Bezet5BOn_TOP.Location = new System.Drawing.Point(GWinX + 50 + 16 + 10, GWinHalf - 18 - (250/2) - (23/2) );
 
             Btn_Bezet6On_TOP.Size = new Size(32, 24);
-            Btn_Bezet6On_TOP.Location = new System.Drawing.Point(GWinX + 100 - (32/2), GWinHalf + 8 + 10);
+            Btn_Bezet6On_TOP.Location = new System.Drawing.Point(GWinX + 100 - (32 / 2), GWinHalf + 8 + 30);
+            //Btn_Bezet6On_TOP.Location = new System.Drawing.Point(GWinX + 100 - (32/2), GWinHalf + 8 + 10);
 
             Btn_Bezet7On_TOP.Size = new Size(32, 24);
-            Btn_Bezet7On_TOP.Location = new System.Drawing.Point(GWinX + 840 - (32/2), GWinHalf + 8 + 10);
+            Btn_Bezet7On_TOP.Location = new System.Drawing.Point(GWinX + 840 - (32 / 2), GWinHalf + 8 + 30);
+            //Btn_Bezet7On_TOP.Location = new System.Drawing.Point(GWinX + 840 - (32/2), GWinHalf + 8 + 10);
 
             LabelBlock6.Size = new Size(44, 13);
             LabelBlock6.Location = new System.Drawing.Point(GWinX + 100 - (44 / 2), GWinHalf - 8 - 10 - 13);
@@ -270,8 +276,9 @@ namespace Siebwalde_Application
                 path = @"c:\localdata\Siebwalde\" + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_FiddleYardFormBOT.txt"; //  different logging file per target, this is default
                 FiddleYardFormLogging = new Log2LoggingFile(path);
             }
-            
+
             //Sensors
+            
             Sensor Led_CL_10_Heart = new Sensor("LLed_Heart", " CL 10 Heart ",0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
             m_iFYIOH.GetIoHandler().CL10Heart.Attach(Led_CL_10_Heart);
             Sensor Led_F11 = new Sensor("LLed_F11", " F11 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
@@ -331,8 +338,10 @@ namespace Siebwalde_Application
             Sensor Led_TrackNoTop = new Sensor("Track_No", " Track Nr ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
             m_iFYIOH.GetIoHandler().TrackNo.Attach(Led_TrackNoTop);
             Sensor Led_TrackPower15VTOP = new Sensor("LLed_15VTrackPower", " 15V Track Power ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-            m_iFYIOH.GetIoHandler().TrackPower15V.Attach(Led_TrackPower15VTOP);            
+            m_iFYIOH.GetIoHandler().TrackPower15V.Attach(Led_TrackPower15VTOP);   
+             
             //Messages
+            
             Message Msg_FiddleOneLeftTop = new Message("FiddleOneLeft", "", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
             m_iFYIOH.GetIoHandler().FiddleOneLeft.Attach(Msg_FiddleOneLeftTop);
             Message Msg_FiddleOneRightTop = new Message("FiddleOneRight", "", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
@@ -342,7 +351,7 @@ namespace Siebwalde_Application
             Message Msg_FiddleMultipleRightTop = new Message("FiddleMultipleRight", "", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
             m_iFYIOH.GetIoHandler().FiddleMultipleRight.Attach(Msg_FiddleMultipleRightTop);
             Message Msg_TrainDetectionTop = new Message("TrainDetectionFinished", " Train Detection Finished ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-            m_iFYIOH.GetIoHandler().TrainDetection.Attach(Msg_TrainDetectionTop);
+            m_iFYIOH.GetIoHandler().TrainDetection.Attach(Msg_TrainDetectionTop); 
             Message Msg_TrainOn5BTop = new Message("TrainOn5BTop", " Train On 5B ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
             m_iFYIOH.GetIoHandler().TrainOn5B.Attach(Msg_TrainOn5BTop);
             Message Msg_TrainOn8ATop = new Message("TrainOn8A", " Train On 8A ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
@@ -356,7 +365,7 @@ namespace Siebwalde_Application
             Message Msg_LastTrackTop = new Message("LastTrack", " Last Track ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
             m_iFYIOH.GetIoHandler().LastTrack.Attach(Msg_LastTrackTop);
             Message Msg_UniversalErrorTop = new Message("UniversalError", " Universal Error ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-            m_iFYIOH.GetIoHandler().UniversalError.Attach(Msg_UniversalErrorTop);            
+            m_iFYIOH.GetIoHandler().UniversalError.Attach(Msg_UniversalErrorTop);         
         }
 
         public void SimMode(bool val)
@@ -841,7 +850,7 @@ namespace Siebwalde_Application
                         }
                         if (Val == 0)
                         {
-                            LLed_Block5BIn.BackColor = Color.Transparent;
+                            LLed_Block5BIn.BackColor = Color.Lime;
                             Btn_Bezet5BOn_TOP.Text = "On";
                             Btn_Bezet5BOn_TOP_Click_Toggle = true;
                         }
@@ -855,7 +864,7 @@ namespace Siebwalde_Application
                         }
                         if (Val == 0)
                         {
-                            LLed_Block6In.BackColor = Color.Transparent;
+                            LLed_Block6In.BackColor = Color.Lime;
                             Btn_Bezet6On_TOP.Text = "On";
                             Btn_Bezet6On_TOP_Click_Toggle = true;
                         }
@@ -869,14 +878,7 @@ namespace Siebwalde_Application
                         }
                         if (Val == 0)
                         {
-                            if (LLed_Block7.BackColor == Color.Lime)
-                            {
-                                LLed_Block7In.BackColor = Color.Lime;
-                            }
-                            else
-                            {
-                                LLed_Block7In.BackColor = Color.Transparent;
-                            }
+                            LLed_Block7In.BackColor = Color.Lime;                                                        
                             Btn_Bezet7On_TOP.Text = "On";
                             Btn_Bezet7On_TOP_Click_Toggle = true;
                         }
@@ -1826,10 +1828,13 @@ namespace Siebwalde_Application
             AutomaticMode.Visible = false;
             ManualMode.Visible = true;
 
+            Btn_Bezet5BOn_TOP.Location = new System.Drawing.Point(GWinX + 50 + 16 + 30, GWinHalf - 18 - (250 / 2) - (23 / 2));
+            Btn_Bezet6On_TOP.Location = new System.Drawing.Point(GWinX + 100 - (32 / 2), GWinHalf + 8 + 30);
+            Btn_Bezet7On_TOP.Location = new System.Drawing.Point(GWinX + 840 - (32 / 2), GWinHalf + 8 + 30);
 
-            Btn_Bezet5BOn_TOP.Location = new System.Drawing.Point(GWin.Location.X + 50 + 16 + 10, (740 / 2 + GWin.Location.Y) - 18 - (250 / 2) - (23 / 2));
-            Btn_Bezet6On_TOP.Location = new System.Drawing.Point(GWin.Location.X + 100 - (32 / 2), (740 / 2 + GWin.Location.Y) + 8 + 10);
-            Btn_Bezet7On_TOP.Location = new System.Drawing.Point(GWin.Location.X + 840 - (32 / 2), (740 / 2 + GWin.Location.Y) + 8 + 10);
+            //Btn_Bezet5BOn_TOP.Location = new System.Drawing.Point(GWin.Location.X + 50 + 16 + 10, (740 / 2 + GWin.Location.Y) - 18 - (250 / 2) - (23 / 2));
+            //Btn_Bezet6On_TOP.Location = new System.Drawing.Point(GWin.Location.X + 100 - (32 / 2), (740 / 2 + GWin.Location.Y) + 8 + 10);
+            //Btn_Bezet7On_TOP.Location = new System.Drawing.Point(GWin.Location.X + 840 - (32 / 2), (740 / 2 + GWin.Location.Y) + 8 + 10);
             ManualMode.Location = new System.Drawing.Point(GWin.Location.X + 745, GWin.Location.Y + 761);  //(750,793);
             
             Btn_Bezet5BOn_TOP.Visible = true;

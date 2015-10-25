@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Drawing;
 
 namespace Siebwalde_Application
 {
@@ -96,10 +97,7 @@ namespace Siebwalde_Application
                 m_OnChangedAction(this.name, this.Value, this.LogString);
             }
         }
-        public int GetValue()
-        {
-            return this.Value;
-        }
+
     }
 
     /*#--------------------------------------------------------------------------#*/
@@ -334,5 +332,92 @@ namespace Siebwalde_Application
         {
             m_OnChangedAction(this.Cmd);
         }
+    }
+
+
+/*#--------------------------------------------------------------------------#*/
+    /*  Description: Collor class interface 
+     *               to push coller settings to Application
+     *               
+     *               
+     *
+     *  Input(s)   :
+     *
+     *  Output(s)  :
+     *
+     *  Returns    :
+     *
+     *  Pre.Cond.  :
+     *
+     *  Post.Cond. :
+     *
+     *  Notes      :
+     */
+    /*#--------------------------------------------------------------------------#*/
+    public abstract class EColor
+    {
+
+        public delegate void StatusUpdate(Color NewColor);
+        public event StatusUpdate OnStatusUpdate = null;
+
+
+        public void Attach(Colorc ColorUpdate)
+        {
+            OnStatusUpdate += new StatusUpdate(ColorUpdate.Update);
+        }
+
+        public void Detach(Colorc ColorUpdate)
+        {
+            OnStatusUpdate -= new StatusUpdate(ColorUpdate.Update);
+
+        }
+
+        public void Notify(Color NewColor)
+        {
+            if (OnStatusUpdate != null)
+            {
+                OnStatusUpdate(NewColor);
+            }
+        }
+    }
+
+    public class ColorUpdater : EColor
+    {
+        public void UpdateColorValue(Color NewColor)
+        {
+            Notify(NewColor);
+        }
+    }
+
+    interface ColorUpdate
+    {
+        void Update(Color NewColor);
+    }
+
+    public class Colorc : ColorUpdate
+    {
+        //Name of the Sensor
+        Color m_color;
+        //String to be written when updated
+        string LogString;
+        //When variable has changed generate an event
+        Action<Color, string> m_OnChangedAction;
+
+        public Colorc(Color NewColor, string LogString, Action<Color, string> OnChangedAction)
+        {
+            this.m_color = NewColor;
+            this.LogString = LogString;
+            m_OnChangedAction = OnChangedAction;
+        }
+
+        public void Update(Color NewColorValue)
+        {
+            if (this.m_color != NewColorValue) //When variable is not equal to stored variable
+            {
+                this.m_color = NewColorValue;
+                m_OnChangedAction(this.m_color, this.LogString);
+            }            
+        }
+
     }
 }

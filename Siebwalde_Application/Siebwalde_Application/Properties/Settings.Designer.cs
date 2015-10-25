@@ -34,5 +34,53 @@ namespace Siebwalde_Application.Properties {
                 this["FIDDLExYARDxSIMxSPEEDxSETTING"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Lime")]
+        public global::System.Drawing.Color SETxCOLORxTRACKxOCCUPIED {
+            get {
+                return ((global::System.Drawing.Color)(this["SETxCOLORxTRACKxOCCUPIED"]));
+            }
+            set {
+                this["SETxCOLORxTRACKxOCCUPIED"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Lime")]
+        public global::System.Drawing.Color SETxCOLORxTRACKxNOTxINITIALIZED {
+            get {
+                return ((global::System.Drawing.Color)(this["SETxCOLORxTRACKxNOTxINITIALIZED"]));
+            }
+            set {
+                this["SETxCOLORxTRACKxNOTxINITIALIZED"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Lime")]
+        public global::System.Drawing.Color SETxCOLORxTRACKxNOTxACTIVE {
+            get {
+                return ((global::System.Drawing.Color)(this["SETxCOLORxTRACKxNOTxACTIVE"]));
+            }
+            set {
+                this["SETxCOLORxTRACKxNOTxACTIVE"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Lime")]
+        public global::System.Drawing.Color SETxCOLORxTRACKxEMPTY {
+            get {
+                return ((global::System.Drawing.Color)(this["SETxCOLORxTRACKxEMPTY"]));
+            }
+            set {
+                this["SETxCOLORxTRACKxEMPTY"] = value;
+            }
+        }
     }
 }
