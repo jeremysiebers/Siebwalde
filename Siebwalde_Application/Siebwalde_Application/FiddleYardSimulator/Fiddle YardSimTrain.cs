@@ -459,18 +459,21 @@ namespace Siebwalde_Application
                         ActionCounter++;// when block occupied signal is set by application trains stops moving in block 7, block 6 is also still occupied by the length of the train
                     }
 
-                    if (ActionCounter >= ActionCounter1 && ActionCounter < ActionCounter10)
+                    if (ActionCounter >= ActionCounter1 && ActionCounter < ActionCounter15)
                     {
                         SimTrainLocation = "Track" + Convert.ToString(m_iFYSim.GetFYSim().TrackNo.Count);
                         m_iFYSim.GetFYSim().F13.Value = true;                        
                         //FiddleYardSimTrainLogging.StoreText(FYSimtrainInstance + " in " + SimTrainLocation); <-------------------- a lot of logging!!!
                     }
-                    else { m_iFYSim.GetFYSim().F13.Value = false; }
+                    else 
+                    { 
+                        m_iFYSim.GetFYSim().F13.Value = false;                        
+                    }
 
                     if (ActionCounter >= ActionCounter15)
                     {
-                        m_iFYSim.GetFYSim().F11.Value = true;
                         m_iFYSim.GetFYSim().Block6.Value = false;
+                        m_iFYSim.GetFYSim().F11.Value = true;                        
                     }
                     else { m_iFYSim.GetFYSim().F11.Value = false; }
 

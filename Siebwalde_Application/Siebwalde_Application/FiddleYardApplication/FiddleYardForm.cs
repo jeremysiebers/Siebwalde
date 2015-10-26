@@ -77,6 +77,11 @@ namespace Siebwalde_Application
         public CommandUpdater Recoverd;
         public CommandUpdater Collect;
 
+        public Image SeinGreen = Siebwalde_Application.Properties.Resources.SeinGreen.ToBitmap();
+        public Image SeinRed = Siebwalde_Application.Properties.Resources.SeinRed.ToBitmap();
+        public Image SeinGreen90 = Siebwalde_Application.Properties.Resources.SeinGreen.ToBitmap();
+        public Image SeinRed90 = Siebwalde_Application.Properties.Resources.SeinRed.ToBitmap();
+
         public FiddleYardForm()
         {
             InitializeComponent();
@@ -86,7 +91,9 @@ namespace Siebwalde_Application
             // Size of window on Modeltrain PC is 960; 1085
             // Placed on 0; 85
 
-            
+            SeinGreen90.RotateFlip(RotateFlipType.Rotate90FlipX);
+            SeinRed90.RotateFlip(RotateFlipType.Rotate90FlipX);
+
             GWinX = 5;                      // The X location of Gwin border line.
             GWinY = 32;                     // The X location of Gwin border line.
             GWinHalf = 740 / 2 + GWinY;     // The Height of GWin devided by 2 plus the offset in Y is the center line of GWin
@@ -108,13 +115,19 @@ namespace Siebwalde_Application
             LLed_Block6In.Size = new Size(26, 14);
             LLed_Block6In.Location = new System.Drawing.Point(GWinX + 50 + (100 / 2 - 26 / 2), GWinHalf - 7 + 25);
             //LLed_Block6In.Location = new System.Drawing.Point(GWinX + 50 + (100 / 2 - 26 / 2), GWinHalf -7);
+            LLed_Block6In.Hide();
+            PB_Block6In.Location = new System.Drawing.Point(GWinX + 50 + (100 / 2 - 26 / 2 - 4), GWinHalf - 7 + 20);
+            PB_Block6In.Image = SeinRed90;            
 
             LLed_Block5B.Size = new Size(16, 250);
             LLed_Block5B.Location = new System.Drawing.Point(GWinX + 50, GWinHalf - 18 - 250);
 
             LLed_Block5BIn.Size = new Size(14, 26);
-            LLed_Block5BIn.Location = new System.Drawing.Point(GWinX + 50 + 16 + 10, GWinHalf - 18 - (250 / 2 + 26 / 2));
+            LLed_Block5BIn.Location = new System.Drawing.Point(GWinX + 50 + 16 + 10, GWinHalf - 18 - (250 / 2 + 26 / 2));            
             //LLed_Block5BIn.Location = new System.Drawing.Point(GWinX + 50 + 1, GWinHalf - 18 - (250/2 + 26/2));
+            LLed_Block5BIn.Hide();
+            PB_Block5BIn.Location = new System.Drawing.Point(GWinX + 50 + 16, GWinHalf - 20 - (250 / 2 + 26 / 2));            
+            PB_Block5BIn.Image = SeinRed;
 
             LLed_FYPLATE_TOP.Size = new Size(620, 368);
             LLed_FYPLATE_TOP.Location = new System.Drawing.Point(GWinX + 160, GWinHalf - 368 / 2);
@@ -137,6 +150,9 @@ namespace Siebwalde_Application
             LLed_Block7In.Size = new Size(26, 14);
             LLed_Block7In.Location = new System.Drawing.Point(GWinX + 790 + (100 / 2 - 26 / 2), GWinHalf - 7 + 25);
             //LLed_Block7In.Location = new System.Drawing.Point(GWinX + 790 + (100 / 2 - 26 / 2), GWinHalf - 7);
+            LLed_Block7In.Hide();
+            PB_Block7In.Location = new System.Drawing.Point(GWinX + 790 + (100 / 2 - 26 / 2 - 4), GWinHalf - 7 + 20);
+            PB_Block7In.Image = SeinRed90;  
 
             LLed_Block8A.Size = new Size(16, 250);
             LLed_Block8A.Location = new System.Drawing.Point(GWinX + 790 + (100 - 16), GWinHalf - 250 - 18);
@@ -185,11 +201,11 @@ namespace Siebwalde_Application
             //Btn_Bezet5BOn_TOP.Location = new System.Drawing.Point(GWinX + 50 + 16 + 10, GWinHalf - 18 - (250/2) - (23/2) );
 
             Btn_Bezet6On_TOP.Size = new Size(32, 24);
-            Btn_Bezet6On_TOP.Location = new System.Drawing.Point(GWinX + 100 - (32 / 2), GWinHalf + 8 + 30);
+            Btn_Bezet6On_TOP.Location = new System.Drawing.Point(GWinX + 100 - (32 / 2), GWinHalf + 8 + 40);
             //Btn_Bezet6On_TOP.Location = new System.Drawing.Point(GWinX + 100 - (32/2), GWinHalf + 8 + 10);
 
             Btn_Bezet7On_TOP.Size = new Size(32, 24);
-            Btn_Bezet7On_TOP.Location = new System.Drawing.Point(GWinX + 840 - (32 / 2), GWinHalf + 8 + 30);
+            Btn_Bezet7On_TOP.Location = new System.Drawing.Point(GWinX + 840 - (32 / 2), GWinHalf + 8 + 40);
             //Btn_Bezet7On_TOP.Location = new System.Drawing.Point(GWinX + 840 - (32/2), GWinHalf + 8 + 10);
 
             LabelBlock6.Size = new Size(44, 13);
@@ -844,12 +860,14 @@ namespace Siebwalde_Application
 
                     case "LLed_Block5BIn": if (Val >= 1)
                         {
+                            PB_Block5BIn.Image = SeinRed;
                             LLed_Block5BIn.BackColor = Color.Red;
                             Btn_Bezet5BOn_TOP.Text = "Off";
                             Btn_Bezet5BOn_TOP_Click_Toggle = false;
                         }
                         if (Val == 0)
                         {
+                            PB_Block5BIn.Image = SeinGreen;
                             LLed_Block5BIn.BackColor = Color.Lime;
                             Btn_Bezet5BOn_TOP.Text = "On";
                             Btn_Bezet5BOn_TOP_Click_Toggle = true;
@@ -858,12 +876,14 @@ namespace Siebwalde_Application
 
                     case "LLed_Block6In": if (Val >= 1)
                         {
+                            PB_Block6In.Image = SeinRed90;
                             LLed_Block6In.BackColor = Color.Red;
                             Btn_Bezet6On_TOP.Text = "Off";
                             Btn_Bezet6On_TOP_Click_Toggle = false;
                         }
                         if (Val == 0)
                         {
+                            PB_Block6In.Image = SeinGreen90;
                             LLed_Block6In.BackColor = Color.Lime;
                             Btn_Bezet6On_TOP.Text = "On";
                             Btn_Bezet6On_TOP_Click_Toggle = true;
@@ -872,12 +892,14 @@ namespace Siebwalde_Application
 
                     case "LLed_Block7In": if (Val >= 1)
                         {
+                            PB_Block7In.Image = SeinRed90; 
                             LLed_Block7In.BackColor = Color.Red;
                             Btn_Bezet7On_TOP.Text = "Off";
                             Btn_Bezet7On_TOP_Click_Toggle = false;
                         }
                         if (Val == 0)
                         {
+                            PB_Block7In.Image = SeinGreen90; 
                             LLed_Block7In.BackColor = Color.Lime;                                                        
                             Btn_Bezet7On_TOP.Text = "On";
                             Btn_Bezet7On_TOP_Click_Toggle = true;
@@ -1826,15 +1848,11 @@ namespace Siebwalde_Application
             automaticModeToolStripMenuItem.Checked = false;
             manualModeToolStripMenuItem.Checked = true;
             AutomaticMode.Visible = false;
-            ManualMode.Visible = true;
+            ManualMode.Visible = true;                       
 
-            Btn_Bezet5BOn_TOP.Location = new System.Drawing.Point(GWinX + 50 + 16 + 30, GWinHalf - 18 - (250 / 2) - (23 / 2));
-            Btn_Bezet6On_TOP.Location = new System.Drawing.Point(GWinX + 100 - (32 / 2), GWinHalf + 8 + 30);
-            Btn_Bezet7On_TOP.Location = new System.Drawing.Point(GWinX + 840 - (32 / 2), GWinHalf + 8 + 30);
-
-            //Btn_Bezet5BOn_TOP.Location = new System.Drawing.Point(GWin.Location.X + 50 + 16 + 10, (740 / 2 + GWin.Location.Y) - 18 - (250 / 2) - (23 / 2));
-            //Btn_Bezet6On_TOP.Location = new System.Drawing.Point(GWin.Location.X + 100 - (32 / 2), (740 / 2 + GWin.Location.Y) + 8 + 10);
-            //Btn_Bezet7On_TOP.Location = new System.Drawing.Point(GWin.Location.X + 840 - (32 / 2), (740 / 2 + GWin.Location.Y) + 8 + 10);
+            Btn_Bezet5BOn_TOP.Location = new System.Drawing.Point(GWin.Location.X + 50 + 16 + 30, (740 / 2 + GWin.Location.Y) - 18 - (250 / 2) - (23 / 2));
+            Btn_Bezet6On_TOP.Location = new System.Drawing.Point(GWin.Location.X + 100 - (32 / 2), (740 / 2 + GWin.Location.Y) + 8 + 40);
+            Btn_Bezet7On_TOP.Location = new System.Drawing.Point(GWin.Location.X + 840 - (32 / 2), (740 / 2 + GWin.Location.Y) + 8 + 40);
             ManualMode.Location = new System.Drawing.Point(GWin.Location.X + 745, GWin.Location.Y + 761);  //(750,793);
             
             Btn_Bezet5BOn_TOP.Visible = true;

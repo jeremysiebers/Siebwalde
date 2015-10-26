@@ -140,8 +140,12 @@
   <data name="&gt;&gt;Track_No.ZOrder" xml:space="preserve">
     <value>8</value>
   </data>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="Btn_Bezet7On_TOP.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
   <data name="Btn_Bezet7On_TOP.Location" type="System.Drawing.Point, System.Drawing">
-    <value>829, 433</value>
+    <value>829, 443</value>
   </data>
   <data name="Btn_Bezet7On_TOP.Size" type="System.Drawing.Size, System.Drawing">
     <value>32, 24</value>
@@ -165,10 +169,13 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;Btn_Bezet7On_TOP.ZOrder" xml:space="preserve">
-    <value>1</value>
+    <value>5</value>
+  </data>
+  <data name="Btn_Bezet6On_TOP.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="Btn_Bezet6On_TOP.Location" type="System.Drawing.Point, System.Drawing">
-    <value>89, 433</value>
+    <value>89, 443</value>
   </data>
   <data name="Btn_Bezet6On_TOP.Size" type="System.Drawing.Size, System.Drawing">
     <value>32, 24</value>
@@ -192,7 +199,10 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;Btn_Bezet6On_TOP.ZOrder" xml:space="preserve">
-    <value>2</value>
+    <value>6</value>
+  </data>
+  <data name="Btn_Bezet5BOn_TOP.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="Btn_Bezet5BOn_TOP.Location" type="System.Drawing.Point, System.Drawing">
     <value>101, 246</value>
@@ -219,10 +229,13 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;Btn_Bezet5BOn_TOP.ZOrder" xml:space="preserve">
-    <value>3</value>
+    <value>2</value>
   </data>
   <data name="Btn_Reset_TOP.Font" type="System.Drawing.Font, System.Drawing">
     <value>Microsoft Sans Serif, 12pt, style=Bold</value>
+  </data>
+  <data name="Btn_Reset_TOP.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="Btn_Reset_TOP.Location" type="System.Drawing.Point, System.Drawing">
     <value>15, 42</value>
@@ -246,7 +259,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;Btn_Reset_TOP.ZOrder" xml:space="preserve">
-    <value>40</value>
+    <value>43</value>
   </data>
   <data name="Nuo_Track_No_TOP.Location" type="System.Drawing.Point, System.Drawing">
     <value>138, 63</value>
@@ -268,6 +281,9 @@
   </data>
   <data name="&gt;&gt;Nuo_Track_No_TOP.ZOrder" xml:space="preserve">
     <value>6</value>
+  </data>
+  <data name="Btn_Collect_TOP.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="Btn_Collect_TOP.Location" type="System.Drawing.Point, System.Drawing">
     <value>16, 60</value>
@@ -293,6 +309,9 @@
   <data name="&gt;&gt;Btn_Collect_TOP.ZOrder" xml:space="preserve">
     <value>0</value>
   </data>
+  <data name="Btn_Stop_Fiddle_TOP.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
   <data name="Btn_Stop_Fiddle_TOP.Location" type="System.Drawing.Point, System.Drawing">
     <value>93, 19</value>
   </data>
@@ -316,6 +335,9 @@
   </data>
   <data name="&gt;&gt;Btn_Stop_Fiddle_TOP.ZOrder" xml:space="preserve">
     <value>1</value>
+  </data>
+  <data name="Btn_Go_To_Track_TOP.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="Btn_Go_To_Track_TOP.Location" type="System.Drawing.Point, System.Drawing">
     <value>73, 60</value>
@@ -341,6 +363,9 @@
   <data name="&gt;&gt;Btn_Go_To_Track_TOP.ZOrder" xml:space="preserve">
     <value>7</value>
   </data>
+  <data name="Btn_Uncouple.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
   <data name="Btn_Uncouple.Location" type="System.Drawing.Point, System.Drawing">
     <value>101, 101</value>
   </data>
@@ -364,6 +389,9 @@
   </data>
   <data name="&gt;&gt;Btn_Uncouple.ZOrder" xml:space="preserve">
     <value>3</value>
+  </data>
+  <data name="Btn_Train_Detect_TOP.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="Btn_Train_Detect_TOP.Location" type="System.Drawing.Point, System.Drawing">
     <value>6, 130</value>
@@ -389,6 +417,9 @@
   <data name="&gt;&gt;Btn_Train_Detect_TOP.ZOrder" xml:space="preserve">
     <value>4</value>
   </data>
+  <data name="Btn_Track_Min_TOP.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
   <data name="Btn_Track_Min_TOP.Location" type="System.Drawing.Point, System.Drawing">
     <value>101, 19</value>
   </data>
@@ -412,6 +443,9 @@
   </data>
   <data name="&gt;&gt;Btn_Track_Min_TOP.ZOrder" xml:space="preserve">
     <value>1</value>
+  </data>
+  <data name="Btn_Recovered_TOP.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="Btn_Recovered_TOP.Location" type="System.Drawing.Point, System.Drawing">
     <value>101, 130</value>
@@ -437,6 +471,9 @@
   <data name="&gt;&gt;Btn_Recovered_TOP.ZOrder" xml:space="preserve">
     <value>5</value>
   </data>
+  <data name="Btn_Start_Fiddle_TOP.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
   <data name="Btn_Start_Fiddle_TOP.Location" type="System.Drawing.Point, System.Drawing">
     <value>16, 19</value>
   </data>
@@ -460,6 +497,9 @@
   </data>
   <data name="&gt;&gt;Btn_Start_Fiddle_TOP.ZOrder" xml:space="preserve">
     <value>2</value>
+  </data>
+  <data name="Btn_Couple.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="Btn_Couple.Location" type="System.Drawing.Point, System.Drawing">
     <value>5, 101</value>
@@ -494,7 +534,6 @@
   <data name="ReceivedCmd.Multiline" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="ReceivedCmd.ScrollBars" type="System.Windows.Forms.ScrollBars, System.Windows.Forms">
     <value>Vertical</value>
   </data>
@@ -514,10 +553,13 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;ReceivedCmd.ZOrder" xml:space="preserve">
-    <value>41</value>
+    <value>44</value>
   </data>
   <data name="Logging1.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
+  </data>
+  <data name="Logging1.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="Logging1.Location" type="System.Drawing.Point, System.Drawing">
     <value>14, 776</value>
@@ -541,7 +583,10 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;Logging1.ZOrder" xml:space="preserve">
-    <value>42</value>
+    <value>45</value>
+  </data>
+  <data name="LLed_Block5B.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="LLed_Block5B.Location" type="System.Drawing.Point, System.Drawing">
     <value>55, 134</value>
@@ -562,7 +607,10 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_Block5B.ZOrder" xml:space="preserve">
-    <value>39</value>
+    <value>42</value>
+  </data>
+  <data name="LLed_Block5BIn.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="LLed_Block5BIn.Location" type="System.Drawing.Point, System.Drawing">
     <value>81, 246</value>
@@ -583,7 +631,10 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_Block5BIn.ZOrder" xml:space="preserve">
-    <value>38</value>
+    <value>41</value>
+  </data>
+  <data name="LLed_Block8A.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="LLed_Block8A.Location" type="System.Drawing.Point, System.Drawing">
     <value>879, 134</value>
@@ -604,7 +655,10 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_Block8A.ZOrder" xml:space="preserve">
-    <value>37</value>
+    <value>40</value>
+  </data>
+  <data name="LLed_Block6.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="LLed_Block6.Location" type="System.Drawing.Point, System.Drawing">
     <value>55, 394</value>
@@ -625,7 +679,10 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_Block6.ZOrder" xml:space="preserve">
-    <value>36</value>
+    <value>39</value>
+  </data>
+  <data name="LLed_Block6In.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="LLed_Block6In.Location" type="System.Drawing.Point, System.Drawing">
     <value>92, 415</value>
@@ -646,7 +703,10 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_Block6In.ZOrder" xml:space="preserve">
-    <value>35</value>
+    <value>38</value>
+  </data>
+  <data name="LLed_Block7In.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="LLed_Block7In.Location" type="System.Drawing.Point, System.Drawing">
     <value>832, 415</value>
@@ -667,7 +727,10 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_Block7In.ZOrder" xml:space="preserve">
-    <value>33</value>
+    <value>36</value>
+  </data>
+  <data name="LLed_Block7.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="LLed_Block7.Location" type="System.Drawing.Point, System.Drawing">
     <value>795, 394</value>
@@ -688,7 +751,10 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_Block7.ZOrder" xml:space="preserve">
-    <value>34</value>
+    <value>37</value>
+  </data>
+  <data name="LLed_Track11.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="LLed_Track11.Location" type="System.Drawing.Point, System.Drawing">
     <value>177, 554</value>
@@ -715,7 +781,10 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_Track11.ZOrder" xml:space="preserve">
-    <value>32</value>
+    <value>35</value>
+  </data>
+  <data name="LLed_TrackPower.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="LLed_TrackPower.Location" type="System.Drawing.Point, System.Drawing">
     <value>625, 395</value>
@@ -742,7 +811,10 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_TrackPower.ZOrder" xml:space="preserve">
-    <value>21</value>
+    <value>24</value>
+  </data>
+  <data name="LLed_Track10.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="LLed_Track10.Location" type="System.Drawing.Point, System.Drawing">
     <value>175, 522</value>
@@ -769,7 +841,10 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_Track10.ZOrder" xml:space="preserve">
-    <value>31</value>
+    <value>34</value>
+  </data>
+  <data name="LLed_Track9.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="LLed_Track9.Location" type="System.Drawing.Point, System.Drawing">
     <value>175, 490</value>
@@ -796,7 +871,10 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_Track9.ZOrder" xml:space="preserve">
-    <value>30</value>
+    <value>33</value>
+  </data>
+  <data name="LLed_Track8.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="LLed_Track8.Location" type="System.Drawing.Point, System.Drawing">
     <value>175, 458</value>
@@ -823,7 +901,10 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_Track8.ZOrder" xml:space="preserve">
-    <value>29</value>
+    <value>32</value>
+  </data>
+  <data name="LLed_Track7.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="LLed_Track7.Location" type="System.Drawing.Point, System.Drawing">
     <value>175, 426</value>
@@ -850,7 +931,10 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_Track7.ZOrder" xml:space="preserve">
-    <value>28</value>
+    <value>31</value>
+  </data>
+  <data name="LLed_Track6.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="LLed_Track6.Location" type="System.Drawing.Point, System.Drawing">
     <value>175, 394</value>
@@ -877,7 +961,10 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_Track6.ZOrder" xml:space="preserve">
-    <value>27</value>
+    <value>30</value>
+  </data>
+  <data name="LLed_Track5.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="LLed_Track5.Location" type="System.Drawing.Point, System.Drawing">
     <value>175, 362</value>
@@ -904,7 +991,10 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_Track5.ZOrder" xml:space="preserve">
-    <value>26</value>
+    <value>29</value>
+  </data>
+  <data name="LLed_Track4.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="LLed_Track4.Location" type="System.Drawing.Point, System.Drawing">
     <value>175, 330</value>
@@ -931,7 +1021,10 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_Track4.ZOrder" xml:space="preserve">
-    <value>25</value>
+    <value>28</value>
+  </data>
+  <data name="LLed_Track3.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="LLed_Track3.Location" type="System.Drawing.Point, System.Drawing">
     <value>175, 298</value>
@@ -958,7 +1051,10 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_Track3.ZOrder" xml:space="preserve">
-    <value>24</value>
+    <value>27</value>
+  </data>
+  <data name="LLed_Track2.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="LLed_Track2.Location" type="System.Drawing.Point, System.Drawing">
     <value>175, 266</value>
@@ -985,7 +1081,10 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_Track2.ZOrder" xml:space="preserve">
-    <value>23</value>
+    <value>26</value>
+  </data>
+  <data name="LLed_Track1.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="LLed_Track1.Location" type="System.Drawing.Point, System.Drawing">
     <value>175, 234</value>
@@ -1012,7 +1111,10 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_Track1.ZOrder" xml:space="preserve">
-    <value>22</value>
+    <value>25</value>
+  </data>
+  <data name="LLed_FYPLATE_TOP.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="LLed_FYPLATE_TOP.Location" type="System.Drawing.Point, System.Drawing">
     <value>165, 218</value>
@@ -1033,10 +1135,13 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_FYPLATE_TOP.ZOrder" xml:space="preserve">
-    <value>43</value>
+    <value>46</value>
   </data>
   <data name="LabelBlock5B.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
+  </data>
+  <data name="LabelBlock5B.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="LabelBlock5B.Location" type="System.Drawing.Point, System.Drawing">
     <value>73, 134</value>
@@ -1060,10 +1165,13 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LabelBlock5B.ZOrder" xml:space="preserve">
-    <value>20</value>
+    <value>23</value>
   </data>
   <data name="LabelBlock6.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
+  </data>
+  <data name="LabelBlock6.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="LabelBlock6.Location" type="System.Drawing.Point, System.Drawing">
     <value>83, 371</value>
@@ -1087,10 +1195,13 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LabelBlock6.ZOrder" xml:space="preserve">
-    <value>19</value>
+    <value>22</value>
   </data>
   <data name="LabelBlock7.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
+  </data>
+  <data name="LabelBlock7.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="LabelBlock7.Location" type="System.Drawing.Point, System.Drawing">
     <value>823, 371</value>
@@ -1114,10 +1225,13 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LabelBlock7.ZOrder" xml:space="preserve">
-    <value>18</value>
+    <value>21</value>
   </data>
   <data name="LabelBlock8A.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
+  </data>
+  <data name="LabelBlock8A.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="LabelBlock8A.Location" type="System.Drawing.Point, System.Drawing">
     <value>816, 131</value>
@@ -1141,7 +1255,10 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LabelBlock8A.ZOrder" xml:space="preserve">
-    <value>17</value>
+    <value>20</value>
+  </data>
+  <data name="LLed_F10_2_TOP.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="LLed_F10_2_TOP.Location" type="System.Drawing.Point, System.Drawing">
     <value>905, 394</value>
@@ -1165,7 +1282,10 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_F10_2_TOP.ZOrder" xml:space="preserve">
-    <value>16</value>
+    <value>19</value>
+  </data>
+  <data name="LLed_F10.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="LLed_F10.Location" type="System.Drawing.Point, System.Drawing">
     <value>15, 394</value>
@@ -1189,7 +1309,10 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_F10.ZOrder" xml:space="preserve">
-    <value>10</value>
+    <value>13</value>
+  </data>
+  <data name="LLed_F13.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="LLed_F13.Location" type="System.Drawing.Point, System.Drawing">
     <value>185, 395</value>
@@ -1213,7 +1336,10 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_F13.ZOrder" xml:space="preserve">
-    <value>15</value>
+    <value>18</value>
+  </data>
+  <data name="LLed_F12.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="LLed_F12.Location" type="System.Drawing.Point, System.Drawing">
     <value>735, 395</value>
@@ -1237,7 +1363,10 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_F12.ZOrder" xml:space="preserve">
-    <value>11</value>
+    <value>14</value>
+  </data>
+  <data name="LLed_F11.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="LLed_F11.Location" type="System.Drawing.Point, System.Drawing">
     <value>585, 395</value>
@@ -1261,7 +1390,10 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_F11.ZOrder" xml:space="preserve">
-    <value>14</value>
+    <value>17</value>
+  </data>
+  <data name="GWin.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="GWin.Location" type="System.Drawing.Point, System.Drawing">
     <value>2, 32</value>
@@ -1288,7 +1420,10 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;GWin.ZOrder" xml:space="preserve">
-    <value>44</value>
+    <value>47</value>
+  </data>
+  <data name="Btn_Track_Plus_TOP.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="Btn_Track_Plus_TOP.Location" type="System.Drawing.Point, System.Drawing">
     <value>6, 19</value>
@@ -1317,6 +1452,42 @@
   <metadata name="menuStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
+  <data name="automaticModeToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>164, 22</value>
+  </data>
+  <data name="automaticModeToolStripMenuItem.Text" xml:space="preserve">
+    <value>Automatic mode</value>
+  </data>
+  <data name="manualModeToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>164, 22</value>
+  </data>
+  <data name="manualModeToolStripMenuItem.Text" xml:space="preserve">
+    <value>Manual Mode</value>
+  </data>
+  <data name="quitToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>164, 22</value>
+  </data>
+  <data name="quitToolStripMenuItem.Text" xml:space="preserve">
+    <value>Exit</value>
+  </data>
+  <data name="fileToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>37, 20</value>
+  </data>
+  <data name="fileToolStripMenuItem.Text" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="alwaysOnTopToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>154, 22</value>
+  </data>
+  <data name="alwaysOnTopToolStripMenuItem.Text" xml:space="preserve">
+    <value>Always On Top</value>
+  </data>
+  <data name="editToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>44, 20</value>
+  </data>
+  <data name="editToolStripMenuItem.Text" xml:space="preserve">
+    <value>View</value>
+  </data>
   <data name="menuStrip1.Location" type="System.Drawing.Point, System.Drawing">
     <value>0, 0</value>
   </data>
@@ -1339,43 +1510,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;menuStrip1.ZOrder" xml:space="preserve">
-    <value>45</value>
-  </data>
-  <data name="fileToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>37, 20</value>
-  </data>
-  <data name="fileToolStripMenuItem.Text" xml:space="preserve">
-    <value>File</value>
-  </data>
-  <data name="automaticModeToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>164, 22</value>
-  </data>
-  <data name="automaticModeToolStripMenuItem.Text" xml:space="preserve">
-    <value>Automatic mode</value>
-  </data>
-  <data name="manualModeToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>164, 22</value>
-  </data>
-  <data name="manualModeToolStripMenuItem.Text" xml:space="preserve">
-    <value>Manual Mode</value>
-  </data>
-  <data name="quitToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>164, 22</value>
-  </data>
-  <data name="quitToolStripMenuItem.Text" xml:space="preserve">
-    <value>Exit</value>
-  </data>
-  <data name="editToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>44, 20</value>
-  </data>
-  <data name="editToolStripMenuItem.Text" xml:space="preserve">
-    <value>View</value>
-  </data>
-  <data name="alwaysOnTopToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>154, 22</value>
-  </data>
-  <data name="alwaysOnTopToolStripMenuItem.Text" xml:space="preserve">
-    <value>Always On Top</value>
+    <value>48</value>
   </data>
   <data name="AutomaticMode.Location" type="System.Drawing.Point, System.Drawing">
     <value>750, 793</value>
@@ -1399,7 +1534,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;AutomaticMode.ZOrder" xml:space="preserve">
-    <value>12</value>
+    <value>15</value>
   </data>
   <data name="ManualMode.Location" type="System.Drawing.Point, System.Drawing">
     <value>750, 793</value>
@@ -1426,7 +1561,10 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;ManualMode.ZOrder" xml:space="preserve">
-    <value>13</value>
+    <value>16</value>
+  </data>
+  <data name="LLed_EOS11.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="LLed_EOS11.Location" type="System.Drawing.Point, System.Drawing">
     <value>185, 42</value>
@@ -1453,7 +1591,10 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_EOS11.ZOrder" xml:space="preserve">
-    <value>9</value>
+    <value>12</value>
+  </data>
+  <data name="LLed_EOS10.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="LLed_EOS10.Location" type="System.Drawing.Point, System.Drawing">
     <value>185, 746</value>
@@ -1480,7 +1621,10 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_EOS10.ZOrder" xml:space="preserve">
-    <value>8</value>
+    <value>11</value>
+  </data>
+  <data name="LLed_Heart.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="LLed_Heart.Location" type="System.Drawing.Point, System.Drawing">
     <value>21, 746</value>
@@ -1507,7 +1651,10 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_Heart.ZOrder" xml:space="preserve">
-    <value>7</value>
+    <value>10</value>
+  </data>
+  <data name="LLed_M10.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="LLed_M10.Location" type="System.Drawing.Point, System.Drawing">
     <value>275, 746</value>
@@ -1534,7 +1681,10 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_M10.ZOrder" xml:space="preserve">
-    <value>6</value>
+    <value>9</value>
+  </data>
+  <data name="LLed_Resistor.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="LLed_Resistor.Location" type="System.Drawing.Point, System.Drawing">
     <value>625, 746</value>
@@ -1561,7 +1711,10 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_Resistor.ZOrder" xml:space="preserve">
-    <value>5</value>
+    <value>8</value>
+  </data>
+  <data name="LLed_15VTrackPower.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="LLed_15VTrackPower.Location" type="System.Drawing.Point, System.Drawing">
     <value>840, 42</value>
@@ -1588,13 +1741,16 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_15VTrackPower.ZOrder" xml:space="preserve">
-    <value>4</value>
+    <value>7</value>
   </data>
   <data name="SimulationMode.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>
   <data name="SimulationMode.Font" type="System.Drawing.Font, System.Drawing">
     <value>Microsoft Sans Serif, 15pt, style=Bold</value>
+  </data>
+  <data name="SimulationMode.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
   <data name="SimulationMode.Location" type="System.Drawing.Point, System.Drawing">
     <value>372, 4</value>
@@ -1618,6 +1774,87 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;SimulationMode.ZOrder" xml:space="preserve">
+    <value>4</value>
+  </data>
+  <data name="PB_Block5BIn.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="PB_Block5BIn.InitialImage" type="System.Resources.ResXNullRef, System.Windows.Forms">
+    <value />
+  </data>
+  <data name="PB_Block5BIn.Location" type="System.Drawing.Point, System.Drawing">
+    <value>71, 242</value>
+  </data>
+  <data name="PB_Block5BIn.Size" type="System.Drawing.Size, System.Drawing">
+    <value>32, 32</value>
+  </data>
+  <data name="PB_Block5BIn.TabIndex" type="System.Int32, mscorlib">
+    <value>118</value>
+  </data>
+  <data name="&gt;&gt;PB_Block5BIn.Name" xml:space="preserve">
+    <value>PB_Block5BIn</value>
+  </data>
+  <data name="&gt;&gt;PB_Block5BIn.Type" xml:space="preserve">
+    <value>System.Windows.Forms.PictureBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;PB_Block5BIn.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;PB_Block5BIn.ZOrder" xml:space="preserve">
+    <value>3</value>
+  </data>
+  <data name="PB_Block6In.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="PB_Block6In.InitialImage" type="System.Resources.ResXNullRef, System.Windows.Forms">
+    <value />
+  </data>
+  <data name="PB_Block6In.Location" type="System.Drawing.Point, System.Drawing">
+    <value>89, 411</value>
+  </data>
+  <data name="PB_Block6In.Size" type="System.Drawing.Size, System.Drawing">
+    <value>32, 32</value>
+  </data>
+  <data name="PB_Block6In.TabIndex" type="System.Int32, mscorlib">
+    <value>119</value>
+  </data>
+  <data name="&gt;&gt;PB_Block6In.Name" xml:space="preserve">
+    <value>PB_Block6In</value>
+  </data>
+  <data name="&gt;&gt;PB_Block6In.Type" xml:space="preserve">
+    <value>System.Windows.Forms.PictureBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;PB_Block6In.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;PB_Block6In.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="PB_Block7In.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="PB_Block7In.InitialImage" type="System.Resources.ResXNullRef, System.Windows.Forms">
+    <value />
+  </data>
+  <data name="PB_Block7In.Location" type="System.Drawing.Point, System.Drawing">
+    <value>829, 411</value>
+  </data>
+  <data name="PB_Block7In.Size" type="System.Drawing.Size, System.Drawing">
+    <value>32, 32</value>
+  </data>
+  <data name="PB_Block7In.TabIndex" type="System.Int32, mscorlib">
+    <value>120</value>
+  </data>
+  <data name="&gt;&gt;PB_Block7In.Name" xml:space="preserve">
+    <value>PB_Block7In</value>
+  </data>
+  <data name="&gt;&gt;PB_Block7In.Type" xml:space="preserve">
+    <value>System.Windows.Forms.PictureBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;PB_Block7In.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;PB_Block7In.ZOrder" xml:space="preserve">
     <value>0</value>
   </data>
   <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">

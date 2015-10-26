@@ -222,20 +222,28 @@ namespace Siebwalde_Application
                     if (MoveDirection == "Left")
                     {
                         GetTrackNoCnt += 1;
+                        if (GetTrackNoCnt > 11)
+                        {
+                            GetTrackNoCnt = 0;
+                        }
                         m_iFYSim.GetFYSim().TrackNo.Count = GetTrackNoCnt;
                     }
                     else if (MoveDirection == "Right")
                     {
-                        GetTrackNoCnt -= 1;
+                        GetTrackNoCnt -= 1;                        
+                        if (GetTrackNoCnt < 1)
+                        {
+                            GetTrackNoCnt = 12;
+                        }
                         m_iFYSim.GetFYSim().TrackNo.Count = GetTrackNoCnt;
                     }
                     m_iFYSim.GetFYSim().FiddleYardSimulatorLogging.StoreText("FYMove.FiddleMultipleMove GetTrackNoCnt = " + Convert.ToString(GetTrackNoCnt));
-                    FiddleOneMoveState = 4;                                                                                                        
-                    m_iFYSim.GetFYSim().FiddleYardSimulatorLogging.StoreText("FYMove.FiddleMultipleMove FiddleOneMoveState = 4");
+                    FiddleOneMoveState = 3;                                                                                                        
+                    m_iFYSim.GetFYSim().FiddleYardSimulatorLogging.StoreText("FYMove.FiddleMultipleMove FiddleOneMoveState = 3");
                     break;
 
                 case 3:
-                    if (AliveUpdateCnt >= 2)
+                    if (AliveUpdateCnt >= 1)
                     {
                         AliveUpdateCnt = 0;
                         FiddleOneMoveState = 4;

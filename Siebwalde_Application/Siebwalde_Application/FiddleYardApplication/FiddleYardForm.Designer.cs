@@ -89,10 +89,16 @@
             this.LLed_Resistor = new System.Windows.Forms.Label();
             this.LLed_15VTrackPower = new System.Windows.Forms.Label();
             this.SimulationMode = new System.Windows.Forms.Label();
+            this.PB_Block5BIn = new System.Windows.Forms.PictureBox();
+            this.PB_Block6In = new System.Windows.Forms.PictureBox();
+            this.PB_Block7In = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.Nuo_Track_No_TOP)).BeginInit();
             this.menuStrip1.SuspendLayout();
             this.AutomaticMode.SuspendLayout();
             this.ManualMode.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Block5BIn)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Block6In)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Block7In)).BeginInit();
             this.SuspendLayout();
             // 
             // Track_No
@@ -548,14 +554,38 @@
             this.SimulationMode.ForeColor = System.Drawing.Color.Red;
             this.SimulationMode.Name = "SimulationMode";
             // 
+            // PB_Block5BIn
+            // 
+            this.PB_Block5BIn.BackColor = System.Drawing.Color.Beige;
+            resources.ApplyResources(this.PB_Block5BIn, "PB_Block5BIn");
+            this.PB_Block5BIn.Name = "PB_Block5BIn";
+            this.PB_Block5BIn.TabStop = false;
+            // 
+            // PB_Block6In
+            // 
+            this.PB_Block6In.BackColor = System.Drawing.Color.Beige;
+            resources.ApplyResources(this.PB_Block6In, "PB_Block6In");
+            this.PB_Block6In.Name = "PB_Block6In";
+            this.PB_Block6In.TabStop = false;
+            // 
+            // PB_Block7In
+            // 
+            this.PB_Block7In.BackColor = System.Drawing.Color.Beige;
+            resources.ApplyResources(this.PB_Block7In, "PB_Block7In");
+            this.PB_Block7In.Name = "PB_Block7In";
+            this.PB_Block7In.TabStop = false;
+            // 
             // FiddleYardForm
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.PB_Block7In);
+            this.Controls.Add(this.PB_Block6In);
+            this.Controls.Add(this.Btn_Bezet5BOn_TOP);
+            this.Controls.Add(this.PB_Block5BIn);
             this.Controls.Add(this.SimulationMode);
             this.Controls.Add(this.Btn_Bezet7On_TOP);
             this.Controls.Add(this.Btn_Bezet6On_TOP);
-            this.Controls.Add(this.Btn_Bezet5BOn_TOP);
             this.Controls.Add(this.LLed_15VTrackPower);
             this.Controls.Add(this.LLed_Resistor);
             this.Controls.Add(this.LLed_M10);
@@ -607,6 +637,9 @@
             this.AutomaticMode.ResumeLayout(false);
             this.ManualMode.ResumeLayout(false);
             this.ManualMode.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Block5BIn)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Block6In)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Block7In)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -678,5 +711,8 @@
         private System.Windows.Forms.Label SimulationMode;
         private System.Windows.Forms.ToolStripMenuItem editToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem alwaysOnTopToolStripMenuItem;
+        private System.Windows.Forms.PictureBox PB_Block5BIn;
+        private System.Windows.Forms.PictureBox PB_Block6In;
+        private System.Windows.Forms.PictureBox PB_Block7In;
     }
 }

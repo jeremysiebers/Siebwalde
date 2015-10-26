@@ -176,6 +176,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="favicon.ico" />
+    <Resource Include="FiddleYardApplication\SeinRed.ico" />
+    <Resource Include="FiddleYardApplication\SeinGreen.ico" />
+    <Resource Include="FiddleYardApplication\Seinlicht.ico" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0,Profile=Client">

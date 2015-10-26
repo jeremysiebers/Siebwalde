@@ -578,7 +578,6 @@ namespace Siebwalde_Application
             FiddleYardApplicationLogging.StoreText("State_Machine = State.Idle from Start()");
 
             aTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
-            // Set the Interval to [x] miliseconds.
             aTimer.Interval = 50;
             aTimer.AutoReset = true;
             // Enable the timer
