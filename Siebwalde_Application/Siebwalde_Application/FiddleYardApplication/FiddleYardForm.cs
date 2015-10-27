@@ -91,8 +91,8 @@ namespace Siebwalde_Application
             // Size of window on Modeltrain PC is 960; 1085
             // Placed on 0; 85
 
-            SeinGreen90.RotateFlip(RotateFlipType.Rotate90FlipX);
-            SeinRed90.RotateFlip(RotateFlipType.Rotate90FlipX);
+            SeinGreen90.RotateFlip(RotateFlipType.Rotate270FlipX);
+            SeinRed90.RotateFlip(RotateFlipType.Rotate270FlipX);
 
             GWinX = 5;                      // The X location of Gwin border line.
             GWinY = 32;                     // The X location of Gwin border line.
@@ -117,7 +117,8 @@ namespace Siebwalde_Application
             //LLed_Block6In.Location = new System.Drawing.Point(GWinX + 50 + (100 / 2 - 26 / 2), GWinHalf -7);
             LLed_Block6In.Hide();
             PB_Block6In.Location = new System.Drawing.Point(GWinX + 50 + (100 / 2 - 26 / 2 - 4), GWinHalf - 7 + 20);
-            PB_Block6In.Image = SeinRed90;            
+            PB_Block6In.Image = SeinRed90;
+            PB_Block6In.Enabled = false;
 
             LLed_Block5B.Size = new Size(16, 250);
             LLed_Block5B.Location = new System.Drawing.Point(GWinX + 50, GWinHalf - 18 - 250);
@@ -128,6 +129,7 @@ namespace Siebwalde_Application
             LLed_Block5BIn.Hide();
             PB_Block5BIn.Location = new System.Drawing.Point(GWinX + 50 + 16, GWinHalf - 20 - (250 / 2 + 26 / 2));            
             PB_Block5BIn.Image = SeinRed;
+            PB_Block5BIn.Enabled = false;
 
             LLed_FYPLATE_TOP.Size = new Size(620, 368);
             LLed_FYPLATE_TOP.Location = new System.Drawing.Point(GWinX + 160, GWinHalf - 368 / 2);
@@ -152,7 +154,8 @@ namespace Siebwalde_Application
             //LLed_Block7In.Location = new System.Drawing.Point(GWinX + 790 + (100 / 2 - 26 / 2), GWinHalf - 7);
             LLed_Block7In.Hide();
             PB_Block7In.Location = new System.Drawing.Point(GWinX + 790 + (100 / 2 - 26 / 2 - 4), GWinHalf - 7 + 20);
-            PB_Block7In.Image = SeinRed90;  
+            PB_Block7In.Image = SeinRed90;
+            PB_Block7In.Enabled = false;
 
             LLed_Block8A.Size = new Size(16, 250);
             LLed_Block8A.Location = new System.Drawing.Point(GWinX + 790 + (100 - 16), GWinHalf - 250 - 18);
@@ -1841,6 +1844,10 @@ namespace Siebwalde_Application
             Btn_Bezet7On_TOP.Visible = false;
             Btn_Collect_TOP.Visible = true;
 
+            PB_Block5BIn.Enabled = false;
+            PB_Block6In.Enabled = false;
+            PB_Block7In.Enabled = false;
+
         }
 
         private void manualModeToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1855,10 +1862,14 @@ namespace Siebwalde_Application
             Btn_Bezet7On_TOP.Location = new System.Drawing.Point(GWin.Location.X + 840 - (32 / 2), (740 / 2 + GWin.Location.Y) + 8 + 40);
             ManualMode.Location = new System.Drawing.Point(GWin.Location.X + 745, GWin.Location.Y + 761);  //(750,793);
             
-            Btn_Bezet5BOn_TOP.Visible = true;
-            Btn_Bezet6On_TOP.Visible = true;
-            Btn_Bezet7On_TOP.Visible = true;
+            Btn_Bezet5BOn_TOP.Visible = false;
+            Btn_Bezet6On_TOP.Visible = false;
+            Btn_Bezet7On_TOP.Visible = false;
             Btn_Collect_TOP.Visible = false;
+
+            PB_Block5BIn.Enabled = true;
+            PB_Block6In.Enabled = true;
+            PB_Block7In.Enabled = true;
 
         }
 
@@ -1876,6 +1887,48 @@ namespace Siebwalde_Application
         private void LLed_Track1_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void PB_Block5BIn_Click(object sender, EventArgs e)
+        {
+            if (Btn_Bezet5BOn_TOP_Click_Toggle == true)
+            {
+                Btn_Bezet5BOn_TOP_Click_Toggle = false;
+                Occ5BOnTrue.UpdateCommand();                
+            }
+            else if (Btn_Bezet5BOn_TOP_Click_Toggle == false)
+            {
+                Btn_Bezet5BOn_TOP_Click_Toggle = true;
+                Occ5BOnFalse.UpdateCommand();                
+            }
+        }
+
+        private void PB_Block6In_Click(object sender, EventArgs e)
+        {
+            if (Btn_Bezet6On_TOP_Click_Toggle == true)
+            {
+                Btn_Bezet6On_TOP_Click_Toggle = false;
+                Occ6OnTrue.UpdateCommand();                
+            }
+            else if (Btn_Bezet6On_TOP_Click_Toggle == false)
+            {
+                Btn_Bezet6On_TOP_Click_Toggle = true;
+                Occ6OnFalse.UpdateCommand();                
+            }
+        }
+
+        private void PB_Block7In_Click(object sender, EventArgs e)
+        {
+            if (Btn_Bezet7On_TOP_Click_Toggle == true)
+            {
+                Btn_Bezet7On_TOP_Click_Toggle = false;
+                Occ7OnTrue.UpdateCommand();                
+            }
+            else if (Btn_Bezet7On_TOP_Click_Toggle == false)
+            {
+                Btn_Bezet7On_TOP_Click_Toggle = true;
+                Occ7OnFalse.UpdateCommand();                
+            }
         }
     }    
 }

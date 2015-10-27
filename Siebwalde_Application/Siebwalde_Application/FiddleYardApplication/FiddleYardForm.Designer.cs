@@ -560,6 +560,7 @@
             resources.ApplyResources(this.PB_Block5BIn, "PB_Block5BIn");
             this.PB_Block5BIn.Name = "PB_Block5BIn";
             this.PB_Block5BIn.TabStop = false;
+            this.PB_Block5BIn.Click += new System.EventHandler(this.PB_Block5BIn_Click);
             // 
             // PB_Block6In
             // 
@@ -567,6 +568,7 @@
             resources.ApplyResources(this.PB_Block6In, "PB_Block6In");
             this.PB_Block6In.Name = "PB_Block6In";
             this.PB_Block6In.TabStop = false;
+            this.PB_Block6In.Click += new System.EventHandler(this.PB_Block6In_Click);
             // 
             // PB_Block7In
             // 
@@ -574,6 +576,7 @@
             resources.ApplyResources(this.PB_Block7In, "PB_Block7In");
             this.PB_Block7In.Name = "PB_Block7In";
             this.PB_Block7In.TabStop = false;
+            this.PB_Block7In.Click += new System.EventHandler(this.PB_Block7In_Click);
             // 
             // FiddleYardForm
             // 
