@@ -14,6 +14,7 @@
         protected override void Dispose(bool disposing)
         {
             this.Hide();
+            //this.Close();
         }
 
         #region Windows Form Designer generated code

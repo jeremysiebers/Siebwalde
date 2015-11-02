@@ -36,18 +36,18 @@
             this.label2 = new System.Windows.Forms.Label();
             this.SetColorTrackOccupied = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.FiddleYardSimSpeedSetting = new System.Windows.Forms.NumericUpDown();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.label5 = new System.Windows.Forms.Label();
+            this.SetColorTrackEmpty = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.SetColorTrackNotActive = new System.Windows.Forms.Label();
             this.SetColorTrackNotInitialized = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
-            this.FiddleYardSimSpeedSetting = new System.Windows.Forms.NumericUpDown();
-            this.label5 = new System.Windows.Forms.Label();
-            this.SetColorTrackEmpty = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
-            this.groupBox3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.FiddleYardSimSpeedSetting)).BeginInit();
+            this.groupBox3.SuspendLayout();
             this.SuspendLayout();
             // 
             // BtnCancel
@@ -131,6 +131,25 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "FiddleYard Settings";
             // 
+            // FiddleYardSimSpeedSetting
+            // 
+            this.FiddleYardSimSpeedSetting.DataBindings.Add(new System.Windows.Forms.Binding("Value", global::Siebwalde_Application.Properties.Settings.Default, "FIDDLExYARDxSIMxSPEEDxSETTING", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.FiddleYardSimSpeedSetting.Location = new System.Drawing.Point(197, 19);
+            this.FiddleYardSimSpeedSetting.Maximum = new decimal(new int[] {
+            10000,
+            0,
+            0,
+            0});
+            this.FiddleYardSimSpeedSetting.Minimum = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            this.FiddleYardSimSpeedSetting.Name = "FiddleYardSimSpeedSetting";
+            this.FiddleYardSimSpeedSetting.Size = new System.Drawing.Size(57, 20);
+            this.FiddleYardSimSpeedSetting.TabIndex = 0;
+            this.FiddleYardSimSpeedSetting.Value = global::Siebwalde_Application.Properties.Settings.Default.FIDDLExYARDxSIMxSPEEDxSETTING;
+            // 
             // groupBox3
             // 
             this.groupBox3.Controls.Add(this.label5);
@@ -147,6 +166,26 @@
             this.groupBox3.TabIndex = 83;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "SiebWalde Settings";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(15, 94);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(149, 13);
+            this.label5.TabIndex = 87;
+            this.label5.Text = "SiebWalde Track Empty Color";
+            // 
+            // SetColorTrackEmpty
+            // 
+            this.SetColorTrackEmpty.BackColor = System.Drawing.Color.Red;
+            this.SetColorTrackEmpty.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.SetColorTrackEmpty.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.SetColorTrackEmpty.Location = new System.Drawing.Point(228, 93);
+            this.SetColorTrackEmpty.Name = "SetColorTrackEmpty";
+            this.SetColorTrackEmpty.Size = new System.Drawing.Size(26, 14);
+            this.SetColorTrackEmpty.TabIndex = 86;
+            this.SetColorTrackEmpty.Click += new System.EventHandler(this.SetColorTrackEmpty_Click);
             // 
             // label3
             // 
@@ -188,45 +227,6 @@
             this.label4.TabIndex = 3;
             this.label4.Text = "SiebWalde Track Not Initialized Color";
             // 
-            // FiddleYardSimSpeedSetting
-            // 
-            this.FiddleYardSimSpeedSetting.DataBindings.Add(new System.Windows.Forms.Binding("Value", global::Siebwalde_Application.Properties.Settings.Default, "FIDDLExYARDxSIMxSPEEDxSETTING", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-            this.FiddleYardSimSpeedSetting.Location = new System.Drawing.Point(197, 19);
-            this.FiddleYardSimSpeedSetting.Maximum = new decimal(new int[] {
-            10000,
-            0,
-            0,
-            0});
-            this.FiddleYardSimSpeedSetting.Minimum = new decimal(new int[] {
-            3,
-            0,
-            0,
-            0});
-            this.FiddleYardSimSpeedSetting.Name = "FiddleYardSimSpeedSetting";
-            this.FiddleYardSimSpeedSetting.Size = new System.Drawing.Size(57, 20);
-            this.FiddleYardSimSpeedSetting.TabIndex = 0;
-            this.FiddleYardSimSpeedSetting.Value = global::Siebwalde_Application.Properties.Settings.Default.FIDDLExYARDxSIMxSPEEDxSETTING;
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(15, 94);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(149, 13);
-            this.label5.TabIndex = 87;
-            this.label5.Text = "SiebWalde Track Empty Color";
-            // 
-            // SetColorTrackEmpty
-            // 
-            this.SetColorTrackEmpty.BackColor = System.Drawing.Color.Red;
-            this.SetColorTrackEmpty.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.SetColorTrackEmpty.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.SetColorTrackEmpty.Location = new System.Drawing.Point(228, 93);
-            this.SetColorTrackEmpty.Name = "SetColorTrackEmpty";
-            this.SetColorTrackEmpty.Size = new System.Drawing.Size(26, 14);
-            this.SetColorTrackEmpty.TabIndex = 86;
-            this.SetColorTrackEmpty.Click += new System.EventHandler(this.SetColorTrackEmpty_Click);
-            // 
             // FiddleYardSettingsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -247,9 +247,9 @@
             this.groupBox1.ResumeLayout(false);
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.FiddleYardSimSpeedSetting)).EndInit();
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.FiddleYardSimSpeedSetting)).EndInit();
             this.ResumeLayout(false);
 
         }

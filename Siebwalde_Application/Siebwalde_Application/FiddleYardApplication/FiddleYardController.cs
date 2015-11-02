@@ -24,8 +24,7 @@ namespace Siebwalde_Application
         void ClearEventLoggers();                   // Clear event loggers interface to form eventloggers for clearing
         void ReConnect();                           // Re-connect to target
         Sender GetFYSender();                       // interface to FYSender
-        Receiver GetFYReceiver();                   // interface to Receiver
-        FiddleYardController GetFYController();     // interface to FYController
+        Receiver GetFYReceiver();                   // interface to Receiver        
     }
     
     public class FiddleYardController : iFiddleYardController
@@ -40,8 +39,6 @@ namespace Siebwalde_Application
         public PingTarget m_PingTarget = new PingTarget { };
         private int m_FYReceivingPort = 0;
         private bool FYSimulatorActive = false;        
-        private const bool TOP = true;
-        private const bool BOT = false;
         private byte[,] m_macAddr;
         private byte[,] m_ipAddr;
 
@@ -53,12 +50,7 @@ namespace Siebwalde_Application
         public Receiver GetFYReceiver()
         {
             return FYReceiver;
-        }
-
-        public FiddleYardController GetFYController()
-        {
-            return this;
-        }        
+        }   
 
         /*#--------------------------------------------------------------------------#*/
         /*  Description: FiddleYardController
@@ -85,9 +77,9 @@ namespace Siebwalde_Application
             m_FYReceivingPort = FYReceivingPort;
             m_macAddr = macAddr;
             m_ipAddr = ipAddr;
-            FYReceiver = new Receiver(m_FYReceivingPort);                        
-            FYIOHandleTOP = new FiddleYardIOHandle(TOP, this);
-            FYIOHandleBOT = new FiddleYardIOHandle(BOT, this);                 
+            FYReceiver = new Receiver(m_FYReceivingPort);
+            FYIOHandleTOP = new FiddleYardIOHandle("TOP", this);
+            FYIOHandleBOT = new FiddleYardIOHandle("BOT", this);                 
         }
 
         /*#--------------------------------------------------------------------------#*/

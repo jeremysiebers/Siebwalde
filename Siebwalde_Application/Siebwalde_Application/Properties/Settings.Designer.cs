@@ -25,7 +25,7 @@ namespace Siebwalde_Application.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        [global::System.Configuration.DefaultSettingValueAttribute("10")]
         public decimal FIDDLExYARDxSIMxSPEEDxSETTING {
             get {
                 return ((decimal)(this["FIDDLExYARDxSIMxSPEEDxSETTING"]));

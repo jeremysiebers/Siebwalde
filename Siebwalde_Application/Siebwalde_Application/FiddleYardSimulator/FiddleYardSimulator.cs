@@ -26,11 +26,11 @@ namespace Siebwalde_Application
 
     public class FiddleYardSimulator : iFiddleYardSimulator
     {
-        public iFiddleYardIOHandle m_iFYIOH; // connect variable to connect to FYIOH class for defined interfaces
+        public FiddleYardIOHandleVariables m_FYIOHandleVar;             // connect variable to connect to FYIOH class for defined variables
         public Action<byte[]> NewData;
-        bool m_instance = true;
+        private string m_instance = null;
         public FiddleYardSimMove FYMove;
-        FiddleYardSimTrainDetect FYTrDt; 
+        public FiddleYardSimTrainDetect FYTrDt; 
         private const bool TOP = true;
         private const bool BOT = false;
         private enum State { Idle, CL10Heart, Reset, FiddleOneLeft, FiddleOneRight, FiddleMultipleMove, TrainDetect, Start };
@@ -117,17 +117,17 @@ namespace Siebwalde_Application
          */
         /*#--------------------------------------------------------------------------#*/
 
-        public FiddleYardSimulator(bool Instance, iFiddleYardIOHandle iFYIOH)
+        public FiddleYardSimulator(string Instance, FiddleYardIOHandleVariables FYIOHandleVar)
         {
-            m_iFYIOH = iFYIOH;    // connect to FYIOHandle interface, save interface in variable
+            m_FYIOHandleVar = FYIOHandleVar;
             m_instance = Instance;
 
-            if (TOP == m_instance)
+            if ("TOP" == m_instance)
             {
                 path = @"c:\localdata\Siebwalde\" + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_FiddleYardSimulatorTOP.txt"; //  different logging file per target, this is default
                 FiddleYardSimulatorLogging = new Log2LoggingFile(path);
             }
-            else if (BOT == m_instance)
+            else if ("BOT" == m_instance)
             {
                 path = @"c:\localdata\Siebwalde\" + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_FiddleYardSimulatorBOT.txt"; //  different logging file per target, this is default
                 FiddleYardSimulatorLogging = new Log2LoggingFile(path);
@@ -140,7 +140,7 @@ namespace Siebwalde_Application
             for (int i = 1; i <= NoOfSimTrains; i++)
             {
                 TrainsOnFYSim[i] = rng.Next(0, 2);
-                current = new FiddleYardSimTrain(m_instance, this, m_iFYIOH);
+                current = new FiddleYardSimTrain(m_instance, this, m_FYIOHandleVar);
                 current.FYSimtrainInstance = current.ClassName + i.ToString(fmt);
                 if (TrainsOnFYSim[i] == 1)
                 {
@@ -427,7 +427,7 @@ namespace Siebwalde_Application
                     break;
 
                 case State.Reset:                    
-                    Reset();
+                    Reset(); // <-------------------------------------------------------------------------------- Also reset SUB programs of simulator !!!! TBD !!!
                     FiddleYardReset.Mssg = true;
                     State_Machine = State.Idle;
                     FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.Idle from State.Reset");                    
@@ -649,7 +649,7 @@ namespace Siebwalde_Application
             aTimer.Stop();
             byte[] data = new byte[] { 0x00, 0x00 };
 
-            if (TOP == m_instance)
+            if ("TOP" == m_instance)
             {                           
                 NewData(CreateData("M"));
                 NewData(CreateData("L"));
@@ -660,7 +660,7 @@ namespace Siebwalde_Application
                 NewData(CreateData("A"));
 
             }
-            else if (BOT == m_instance)
+            else if ("BOT" == m_instance)
             {                
                 NewData(CreateData("Z"));
                 NewData(CreateData("Y"));

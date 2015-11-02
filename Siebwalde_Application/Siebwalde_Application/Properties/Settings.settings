@@ -3,7 +3,7 @@
   <Profiles />
   <Settings>
     <Setting Name="FIDDLExYARDxSIMxSPEEDxSETTING" Type="System.Decimal" Scope="User">
-      <Value Profile="(Default)">100</Value>
+      <Value Profile="(Default)">10</Value>
     </Setting>
     <Setting Name="SETxCOLORxTRACKxOCCUPIED" Type="System.Drawing.Color" Scope="User">
       <Value Profile="(Default)">Lime</Value>

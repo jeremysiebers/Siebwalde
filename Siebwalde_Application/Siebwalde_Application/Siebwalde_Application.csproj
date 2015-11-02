@@ -100,9 +100,11 @@
     <Compile Include="AboutBox1.Designer.cs">
       <DependentUpon>AboutBox1.cs</DependentUpon>
     </Compile>
-    <Compile Include="FiddleYardApplication\Fiddle YardAppRun.cs" />
-    <Compile Include="FiddleYardApplication\Fiddle YardAppTrainDrive.cs" />
-    <Compile Include="FiddleYardSimulator\Fiddle YardSimTrain.cs" />
+    <Compile Include="FiddleYardApplication\FiddleYardApplicationVariables.cs" />
+    <Compile Include="FiddleYardApplication\FiddleYardAppRun.cs" />
+    <Compile Include="FiddleYardApplication\FiddleYardAppTrainDrive.cs" />
+    <Compile Include="FiddleYardApplication\FiddleYardIOHandleVariables.cs" />
+    <Compile Include="FiddleYardSimulator\FiddleYardSimTrain.cs" />
     <Compile Include="FiddleYardApplication\FiddleYardAppInit.cs" />
     <Compile Include="FiddleYardApplication\FiddleYardSettingsForm.cs">
       <SubType>Form</SubType>
