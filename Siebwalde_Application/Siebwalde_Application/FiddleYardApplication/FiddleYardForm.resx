@@ -286,7 +286,7 @@
     <value>NoControl</value>
   </data>
   <data name="Btn_Collect_TOP.Location" type="System.Drawing.Point, System.Drawing">
-    <value>16, 60</value>
+    <value>16, 118</value>
   </data>
   <data name="Btn_Collect_TOP.Size" type="System.Drawing.Size, System.Drawing">
     <value>75, 23</value>
@@ -307,16 +307,16 @@
     <value>AutomaticMode</value>
   </data>
   <data name="&gt;&gt;Btn_Collect_TOP.ZOrder" xml:space="preserve">
-    <value>0</value>
+    <value>9</value>
   </data>
   <data name="Btn_Stop_Fiddle_TOP.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
   </data>
   <data name="Btn_Stop_Fiddle_TOP.Location" type="System.Drawing.Point, System.Drawing">
-    <value>93, 19</value>
+    <value>16, 67</value>
   </data>
   <data name="Btn_Stop_Fiddle_TOP.Size" type="System.Drawing.Size, System.Drawing">
-    <value>62, 31</value>
+    <value>75, 31</value>
   </data>
   <data name="Btn_Stop_Fiddle_TOP.TabIndex" type="System.Int32, mscorlib">
     <value>32</value>
@@ -334,7 +334,7 @@
     <value>AutomaticMode</value>
   </data>
   <data name="&gt;&gt;Btn_Stop_Fiddle_TOP.ZOrder" xml:space="preserve">
-    <value>1</value>
+    <value>11</value>
   </data>
   <data name="Btn_Go_To_Track_TOP.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -478,7 +478,7 @@
     <value>16, 19</value>
   </data>
   <data name="Btn_Start_Fiddle_TOP.Size" type="System.Drawing.Size, System.Drawing">
-    <value>52, 31</value>
+    <value>75, 31</value>
   </data>
   <data name="Btn_Start_Fiddle_TOP.TabIndex" type="System.Int32, mscorlib">
     <value>35</value>
@@ -496,7 +496,7 @@
     <value>AutomaticMode</value>
   </data>
   <data name="&gt;&gt;Btn_Start_Fiddle_TOP.ZOrder" xml:space="preserve">
-    <value>2</value>
+    <value>12</value>
   </data>
   <data name="Btn_Couple.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -526,7 +526,7 @@
     <value>2</value>
   </data>
   <data name="ReceivedCmd.Location" type="System.Drawing.Point, System.Drawing">
-    <value>12, 795</value>
+    <value>2, 777</value>
   </data>
   <data name="ReceivedCmd.MaxLength" type="System.Int32, mscorlib">
     <value>999999</value>
@@ -538,7 +538,7 @@
     <value>Vertical</value>
   </data>
   <data name="ReceivedCmd.Size" type="System.Drawing.Size, System.Drawing">
-    <value>718, 156</value>
+    <value>613, 194</value>
   </data>
   <data name="ReceivedCmd.TabIndex" type="System.Int32, mscorlib">
     <value>26</value>
@@ -554,36 +554,6 @@
   </data>
   <data name="&gt;&gt;ReceivedCmd.ZOrder" xml:space="preserve">
     <value>44</value>
-  </data>
-  <data name="Logging1.AutoSize" type="System.Boolean, mscorlib">
-    <value>True</value>
-  </data>
-  <data name="Logging1.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
-    <value>NoControl</value>
-  </data>
-  <data name="Logging1.Location" type="System.Drawing.Point, System.Drawing">
-    <value>14, 776</value>
-  </data>
-  <data name="Logging1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>71, 13</value>
-  </data>
-  <data name="Logging1.TabIndex" type="System.Int32, mscorlib">
-    <value>27</value>
-  </data>
-  <data name="Logging1.Text" xml:space="preserve">
-    <value>Event Logger</value>
-  </data>
-  <data name="&gt;&gt;Logging1.Name" xml:space="preserve">
-    <value>Logging1</value>
-  </data>
-  <data name="&gt;&gt;Logging1.Type" xml:space="preserve">
-    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;Logging1.Parent" xml:space="preserve">
-    <value>$this</value>
-  </data>
-  <data name="&gt;&gt;Logging1.ZOrder" xml:space="preserve">
-    <value>45</value>
   </data>
   <data name="LLed_Block5B.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -1135,7 +1105,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_FYPLATE_TOP.ZOrder" xml:space="preserve">
-    <value>46</value>
+    <value>45</value>
   </data>
   <data name="LabelBlock5B.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -1398,12 +1368,6 @@
   <data name="GWin.Location" type="System.Drawing.Point, System.Drawing">
     <value>2, 32</value>
   </data>
-  <data name="GWin.MaximumSize" type="System.Drawing.Size, System.Drawing">
-    <value>940, 740</value>
-  </data>
-  <data name="GWin.MinimumSize" type="System.Drawing.Size, System.Drawing">
-    <value>940, 740</value>
-  </data>
   <data name="GWin.Size" type="System.Drawing.Size, System.Drawing">
     <value>940, 740</value>
   </data>
@@ -1420,7 +1384,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;GWin.ZOrder" xml:space="preserve">
-    <value>47</value>
+    <value>46</value>
   </data>
   <data name="Btn_Track_Plus_TOP.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -1452,42 +1416,6 @@
   <metadata name="menuStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
-  <data name="automaticModeToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>164, 22</value>
-  </data>
-  <data name="automaticModeToolStripMenuItem.Text" xml:space="preserve">
-    <value>Automatic mode</value>
-  </data>
-  <data name="manualModeToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>164, 22</value>
-  </data>
-  <data name="manualModeToolStripMenuItem.Text" xml:space="preserve">
-    <value>Manual Mode</value>
-  </data>
-  <data name="quitToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>164, 22</value>
-  </data>
-  <data name="quitToolStripMenuItem.Text" xml:space="preserve">
-    <value>Exit</value>
-  </data>
-  <data name="fileToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>37, 20</value>
-  </data>
-  <data name="fileToolStripMenuItem.Text" xml:space="preserve">
-    <value>File</value>
-  </data>
-  <data name="alwaysOnTopToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>154, 22</value>
-  </data>
-  <data name="alwaysOnTopToolStripMenuItem.Text" xml:space="preserve">
-    <value>Always On Top</value>
-  </data>
-  <data name="editToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>44, 20</value>
-  </data>
-  <data name="editToolStripMenuItem.Text" xml:space="preserve">
-    <value>View</value>
-  </data>
   <data name="menuStrip1.Location" type="System.Drawing.Point, System.Drawing">
     <value>0, 0</value>
   </data>
@@ -1510,13 +1438,454 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;menuStrip1.ZOrder" xml:space="preserve">
-    <value>48</value>
+    <value>47</value>
+  </data>
+  <data name="fileToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>35, 20</value>
+  </data>
+  <data name="fileToolStripMenuItem.Text" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="automaticModeToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>162, 22</value>
+  </data>
+  <data name="automaticModeToolStripMenuItem.Text" xml:space="preserve">
+    <value>Automatic mode</value>
+  </data>
+  <data name="manualModeToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>162, 22</value>
+  </data>
+  <data name="manualModeToolStripMenuItem.Text" xml:space="preserve">
+    <value>Manual Mode</value>
+  </data>
+  <data name="quitToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>162, 22</value>
+  </data>
+  <data name="quitToolStripMenuItem.Text" xml:space="preserve">
+    <value>Exit</value>
+  </data>
+  <data name="editToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>41, 20</value>
+  </data>
+  <data name="editToolStripMenuItem.Text" xml:space="preserve">
+    <value>View</value>
+  </data>
+  <data name="alwaysOnTopToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>157, 22</value>
+  </data>
+  <data name="alwaysOnTopToolStripMenuItem.Text" xml:space="preserve">
+    <value>Always On Top</value>
+  </data>
+  <data name="label1.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="label1.Location" type="System.Drawing.Point, System.Drawing">
+    <value>98, 161</value>
+  </data>
+  <data name="label1.Size" type="System.Drawing.Size, System.Drawing">
+    <value>60, 13</value>
+  </data>
+  <data name="label1.TabIndex" type="System.Int32, mscorlib">
+    <value>123</value>
+  </data>
+  <data name="label1.Text" xml:space="preserve">
+    <value>Next Track</value>
+  </data>
+  <data name="&gt;&gt;label1.Name" xml:space="preserve">
+    <value>label1</value>
+  </data>
+  <data name="&gt;&gt;label1.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;label1.Parent" xml:space="preserve">
+    <value>AutomaticMode</value>
+  </data>
+  <data name="&gt;&gt;label1.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="ForceNextTrack.Location" type="System.Drawing.Point, System.Drawing">
+    <value>16, 155</value>
+  </data>
+  <data name="ForceNextTrack.Size" type="System.Drawing.Size, System.Drawing">
+    <value>75, 20</value>
+  </data>
+  <data name="ForceNextTrack.TabIndex" type="System.Int32, mscorlib">
+    <value>122</value>
+  </data>
+  <data name="&gt;&gt;ForceNextTrack.Name" xml:space="preserve">
+    <value>ForceNextTrack</value>
+  </data>
+  <data name="&gt;&gt;ForceNextTrack.Type" xml:space="preserve">
+    <value>System.Windows.Forms.NumericUpDown, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;ForceNextTrack.Parent" xml:space="preserve">
+    <value>AutomaticMode</value>
+  </data>
+  <data name="&gt;&gt;ForceNextTrack.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="checkBoxTrack10.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="checkBoxTrack10.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="checkBoxTrack10.Location" type="System.Drawing.Point, System.Drawing">
+    <value>226, 155</value>
+  </data>
+  <data name="checkBoxTrack10.Size" type="System.Drawing.Size, System.Drawing">
+    <value>69, 17</value>
+  </data>
+  <data name="checkBoxTrack10.TabIndex" type="System.Int32, mscorlib">
+    <value>121</value>
+  </data>
+  <data name="checkBoxTrack10.Text" xml:space="preserve">
+    <value>Track 10</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack10.Name" xml:space="preserve">
+    <value>checkBoxTrack10</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack10.Type" xml:space="preserve">
+    <value>System.Windows.Forms.CheckBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack10.Parent" xml:space="preserve">
+    <value>AutomaticMode</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack10.ZOrder" xml:space="preserve">
+    <value>2</value>
+  </data>
+  <data name="checkBoxTrack9.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="checkBoxTrack9.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="checkBoxTrack9.Location" type="System.Drawing.Point, System.Drawing">
+    <value>226, 139</value>
+  </data>
+  <data name="checkBoxTrack9.Size" type="System.Drawing.Size, System.Drawing">
+    <value>63, 17</value>
+  </data>
+  <data name="checkBoxTrack9.TabIndex" type="System.Int32, mscorlib">
+    <value>121</value>
+  </data>
+  <data name="checkBoxTrack9.Text" xml:space="preserve">
+    <value>Track 9</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack9.Name" xml:space="preserve">
+    <value>checkBoxTrack9</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack9.Type" xml:space="preserve">
+    <value>System.Windows.Forms.CheckBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack9.Parent" xml:space="preserve">
+    <value>AutomaticMode</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack9.ZOrder" xml:space="preserve">
+    <value>3</value>
+  </data>
+  <data name="checkBoxTrack8.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="checkBoxTrack8.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="checkBoxTrack8.Location" type="System.Drawing.Point, System.Drawing">
+    <value>226, 123</value>
+  </data>
+  <data name="checkBoxTrack8.Size" type="System.Drawing.Size, System.Drawing">
+    <value>63, 17</value>
+  </data>
+  <data name="checkBoxTrack8.TabIndex" type="System.Int32, mscorlib">
+    <value>121</value>
+  </data>
+  <data name="checkBoxTrack8.Text" xml:space="preserve">
+    <value>Track 8</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack8.Name" xml:space="preserve">
+    <value>checkBoxTrack8</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack8.Type" xml:space="preserve">
+    <value>System.Windows.Forms.CheckBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack8.Parent" xml:space="preserve">
+    <value>AutomaticMode</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack8.ZOrder" xml:space="preserve">
+    <value>4</value>
+  </data>
+  <data name="checkBoxTrack7.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="checkBoxTrack7.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="checkBoxTrack7.Location" type="System.Drawing.Point, System.Drawing">
+    <value>226, 107</value>
+  </data>
+  <data name="checkBoxTrack7.Size" type="System.Drawing.Size, System.Drawing">
+    <value>63, 17</value>
+  </data>
+  <data name="checkBoxTrack7.TabIndex" type="System.Int32, mscorlib">
+    <value>121</value>
+  </data>
+  <data name="checkBoxTrack7.Text" xml:space="preserve">
+    <value>Track 7</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack7.Name" xml:space="preserve">
+    <value>checkBoxTrack7</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack7.Type" xml:space="preserve">
+    <value>System.Windows.Forms.CheckBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack7.Parent" xml:space="preserve">
+    <value>AutomaticMode</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack7.ZOrder" xml:space="preserve">
+    <value>5</value>
+  </data>
+  <data name="checkBoxTrack6.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="checkBoxTrack6.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="checkBoxTrack6.Location" type="System.Drawing.Point, System.Drawing">
+    <value>226, 91</value>
+  </data>
+  <data name="checkBoxTrack6.Size" type="System.Drawing.Size, System.Drawing">
+    <value>63, 17</value>
+  </data>
+  <data name="checkBoxTrack6.TabIndex" type="System.Int32, mscorlib">
+    <value>121</value>
+  </data>
+  <data name="checkBoxTrack6.Text" xml:space="preserve">
+    <value>Track 6</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack6.Name" xml:space="preserve">
+    <value>checkBoxTrack6</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack6.Type" xml:space="preserve">
+    <value>System.Windows.Forms.CheckBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack6.Parent" xml:space="preserve">
+    <value>AutomaticMode</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack6.ZOrder" xml:space="preserve">
+    <value>6</value>
+  </data>
+  <data name="checkBoxTrack5.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="checkBoxTrack5.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="checkBoxTrack5.Location" type="System.Drawing.Point, System.Drawing">
+    <value>226, 75</value>
+  </data>
+  <data name="checkBoxTrack5.Size" type="System.Drawing.Size, System.Drawing">
+    <value>63, 17</value>
+  </data>
+  <data name="checkBoxTrack5.TabIndex" type="System.Int32, mscorlib">
+    <value>121</value>
+  </data>
+  <data name="checkBoxTrack5.Text" xml:space="preserve">
+    <value>Track 5</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack5.Name" xml:space="preserve">
+    <value>checkBoxTrack5</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack5.Type" xml:space="preserve">
+    <value>System.Windows.Forms.CheckBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack5.Parent" xml:space="preserve">
+    <value>AutomaticMode</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack5.ZOrder" xml:space="preserve">
+    <value>7</value>
+  </data>
+  <data name="checkBoxTrack4.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="checkBoxTrack4.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="checkBoxTrack4.Location" type="System.Drawing.Point, System.Drawing">
+    <value>226, 59</value>
+  </data>
+  <data name="checkBoxTrack4.Size" type="System.Drawing.Size, System.Drawing">
+    <value>63, 17</value>
+  </data>
+  <data name="checkBoxTrack4.TabIndex" type="System.Int32, mscorlib">
+    <value>121</value>
+  </data>
+  <data name="checkBoxTrack4.Text" xml:space="preserve">
+    <value>Track 4</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack4.Name" xml:space="preserve">
+    <value>checkBoxTrack4</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack4.Type" xml:space="preserve">
+    <value>System.Windows.Forms.CheckBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack4.Parent" xml:space="preserve">
+    <value>AutomaticMode</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack4.ZOrder" xml:space="preserve">
+    <value>8</value>
+  </data>
+  <data name="checkBoxTrack11.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="checkBoxTrack11.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="checkBoxTrack11.Location" type="System.Drawing.Point, System.Drawing">
+    <value>226, 171</value>
+  </data>
+  <data name="checkBoxTrack11.Size" type="System.Drawing.Size, System.Drawing">
+    <value>69, 17</value>
+  </data>
+  <data name="checkBoxTrack11.TabIndex" type="System.Int32, mscorlib">
+    <value>121</value>
+  </data>
+  <data name="checkBoxTrack11.Text" xml:space="preserve">
+    <value>Track 11</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack11.Name" xml:space="preserve">
+    <value>checkBoxTrack11</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack11.Type" xml:space="preserve">
+    <value>System.Windows.Forms.CheckBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack11.Parent" xml:space="preserve">
+    <value>AutomaticMode</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack11.ZOrder" xml:space="preserve">
+    <value>10</value>
+  </data>
+  <data name="checkBoxToggle.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="checkBoxToggle.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="checkBoxToggle.Location" type="System.Drawing.Point, System.Drawing">
+    <value>161, 91</value>
+  </data>
+  <data name="checkBoxToggle.Size" type="System.Drawing.Size, System.Drawing">
+    <value>59, 17</value>
+  </data>
+  <data name="checkBoxToggle.TabIndex" type="System.Int32, mscorlib">
+    <value>121</value>
+  </data>
+  <data name="checkBoxToggle.Text" xml:space="preserve">
+    <value>Toggle</value>
+  </data>
+  <data name="&gt;&gt;checkBoxToggle.Name" xml:space="preserve">
+    <value>checkBoxToggle</value>
+  </data>
+  <data name="&gt;&gt;checkBoxToggle.Type" xml:space="preserve">
+    <value>System.Windows.Forms.CheckBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;checkBoxToggle.Parent" xml:space="preserve">
+    <value>AutomaticMode</value>
+  </data>
+  <data name="&gt;&gt;checkBoxToggle.ZOrder" xml:space="preserve">
+    <value>13</value>
+  </data>
+  <data name="checkBoxTrack1.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="checkBoxTrack1.Location" type="System.Drawing.Point, System.Drawing">
+    <value>226, 11</value>
+  </data>
+  <data name="checkBoxTrack1.Size" type="System.Drawing.Size, System.Drawing">
+    <value>63, 17</value>
+  </data>
+  <data name="checkBoxTrack1.TabIndex" type="System.Int32, mscorlib">
+    <value>121</value>
+  </data>
+  <data name="checkBoxTrack1.Text" xml:space="preserve">
+    <value>Track 1</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack1.Name" xml:space="preserve">
+    <value>checkBoxTrack1</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack1.Type" xml:space="preserve">
+    <value>System.Windows.Forms.CheckBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack1.Parent" xml:space="preserve">
+    <value>AutomaticMode</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack1.ZOrder" xml:space="preserve">
+    <value>14</value>
+  </data>
+  <data name="checkBoxTrack2.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="checkBoxTrack2.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="checkBoxTrack2.Location" type="System.Drawing.Point, System.Drawing">
+    <value>226, 27</value>
+  </data>
+  <data name="checkBoxTrack2.Size" type="System.Drawing.Size, System.Drawing">
+    <value>63, 17</value>
+  </data>
+  <data name="checkBoxTrack2.TabIndex" type="System.Int32, mscorlib">
+    <value>121</value>
+  </data>
+  <data name="checkBoxTrack2.Text" xml:space="preserve">
+    <value>Track 2</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack2.Name" xml:space="preserve">
+    <value>checkBoxTrack2</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack2.Type" xml:space="preserve">
+    <value>System.Windows.Forms.CheckBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack2.Parent" xml:space="preserve">
+    <value>AutomaticMode</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack2.ZOrder" xml:space="preserve">
+    <value>15</value>
+  </data>
+  <data name="checkBoxTrack3.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="checkBoxTrack3.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="checkBoxTrack3.Location" type="System.Drawing.Point, System.Drawing">
+    <value>226, 43</value>
+  </data>
+  <data name="checkBoxTrack3.Size" type="System.Drawing.Size, System.Drawing">
+    <value>63, 17</value>
+  </data>
+  <data name="checkBoxTrack3.TabIndex" type="System.Int32, mscorlib">
+    <value>121</value>
+  </data>
+  <data name="checkBoxTrack3.Text" xml:space="preserve">
+    <value>Track 3</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack3.Name" xml:space="preserve">
+    <value>checkBoxTrack3</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack3.Type" xml:space="preserve">
+    <value>System.Windows.Forms.CheckBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack3.Parent" xml:space="preserve">
+    <value>AutomaticMode</value>
+  </data>
+  <data name="&gt;&gt;checkBoxTrack3.ZOrder" xml:space="preserve">
+    <value>16</value>
   </data>
   <data name="AutomaticMode.Location" type="System.Drawing.Point, System.Drawing">
-    <value>750, 793</value>
+    <value>625, 776</value>
   </data>
   <data name="AutomaticMode.Size" type="System.Drawing.Size, System.Drawing">
-    <value>182, 95</value>
+    <value>307, 194</value>
   </data>
   <data name="AutomaticMode.TabIndex" type="System.Int32, mscorlib">
     <value>109</value>
@@ -1537,19 +1906,16 @@
     <value>15</value>
   </data>
   <data name="ManualMode.Location" type="System.Drawing.Point, System.Drawing">
-    <value>750, 793</value>
+    <value>625, 776</value>
   </data>
   <data name="ManualMode.Size" type="System.Drawing.Size, System.Drawing">
-    <value>182, 158</value>
+    <value>307, 194</value>
   </data>
   <data name="ManualMode.TabIndex" type="System.Int32, mscorlib">
     <value>110</value>
   </data>
   <data name="ManualMode.Text" xml:space="preserve">
     <value>Manual Mode</value>
-  </data>
-  <data name="ManualMode.Visible" type="System.Boolean, mscorlib">
-    <value>False</value>
   </data>
   <data name="&gt;&gt;ManualMode.Name" xml:space="preserve">
     <value>ManualMode</value>
@@ -1861,13 +2227,13 @@
     <value>True</value>
   </metadata>
   <metadata name="$this.TrayHeight" type="System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-    <value>25</value>
+    <value>44</value>
   </metadata>
   <data name="$this.AutoScaleDimensions" type="System.Drawing.SizeF, System.Drawing">
     <value>6, 13</value>
   </data>
   <data name="$this.ClientSize" type="System.Drawing.Size, System.Drawing">
-    <value>944, 955</value>
+    <value>944, 976</value>
   </data>
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>

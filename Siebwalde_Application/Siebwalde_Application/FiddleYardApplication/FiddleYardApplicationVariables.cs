@@ -120,6 +120,7 @@ namespace Siebwalde_Application
         public CommandUpdater FormCollect;          // pass Form command through FiddleYardApplicationVariables, in case Form gets replaced or closed
 
         public int[] iTrainsOnFY = new int[12];
+        public int[] icheckBoxTrack = new int[12];
         public bool bCL_10_Heart = false;
         public bool bF11 = false;
         public bool bEOS10 = false;
@@ -326,7 +327,11 @@ namespace Siebwalde_Application
 
             Colorc Clr_FYTrackEmptyColorSetting = new Colorc(Color.Transparent, "Clr_FYTrackEmptyColorSetting", (NewColor, log) => SetColorIndicator(NewColor, log));
             Siebwalde_Application.Properties.Settings.Default.SWSetColorTrackEmpty.Attach(Clr_FYTrackEmptyColorSetting);
-            
+
+            for (int i = 1; i < 12; i++)
+            {
+                icheckBoxTrack[i] = 1;
+            }
         }
 
         /*#--------------------------------------------------------------------------#*/

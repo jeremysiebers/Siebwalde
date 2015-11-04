@@ -42,7 +42,6 @@
             this.Btn_Start_Fiddle_TOP = new System.Windows.Forms.Button();
             this.Btn_Couple = new System.Windows.Forms.Button();
             this.ReceivedCmd = new System.Windows.Forms.TextBox();
-            this.Logging1 = new System.Windows.Forms.Label();
             this.LLed_Block5B = new System.Windows.Forms.Label();
             this.LLed_Block5BIn = new System.Windows.Forms.Label();
             this.LLed_Block8A = new System.Windows.Forms.Label();
@@ -82,6 +81,20 @@
             this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.alwaysOnTopToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.AutomaticMode = new System.Windows.Forms.GroupBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.ForceNextTrack = new System.Windows.Forms.NumericUpDown();
+            this.checkBoxTrack10 = new System.Windows.Forms.CheckBox();
+            this.checkBoxTrack9 = new System.Windows.Forms.CheckBox();
+            this.checkBoxTrack8 = new System.Windows.Forms.CheckBox();
+            this.checkBoxTrack7 = new System.Windows.Forms.CheckBox();
+            this.checkBoxTrack6 = new System.Windows.Forms.CheckBox();
+            this.checkBoxTrack5 = new System.Windows.Forms.CheckBox();
+            this.checkBoxTrack4 = new System.Windows.Forms.CheckBox();
+            this.checkBoxTrack11 = new System.Windows.Forms.CheckBox();
+            this.checkBoxToggle = new System.Windows.Forms.CheckBox();
+            this.checkBoxTrack1 = new System.Windows.Forms.CheckBox();
+            this.checkBoxTrack2 = new System.Windows.Forms.CheckBox();
+            this.checkBoxTrack3 = new System.Windows.Forms.CheckBox();
             this.ManualMode = new System.Windows.Forms.GroupBox();
             this.LLed_EOS11 = new System.Windows.Forms.Label();
             this.LLed_EOS10 = new System.Windows.Forms.Label();
@@ -96,6 +109,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.Nuo_Track_No_TOP)).BeginInit();
             this.menuStrip1.SuspendLayout();
             this.AutomaticMode.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.ForceNextTrack)).BeginInit();
             this.ManualMode.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.PB_Block5BIn)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.PB_Block6In)).BeginInit();
@@ -218,11 +232,6 @@
             resources.ApplyResources(this.ReceivedCmd, "ReceivedCmd");
             this.ReceivedCmd.Name = "ReceivedCmd";
             this.ReceivedCmd.ReadOnly = true;
-            // 
-            // Logging1
-            // 
-            resources.ApplyResources(this.Logging1, "Logging1");
-            this.Logging1.Name = "Logging1";
             // 
             // LLed_Block5B
             // 
@@ -483,12 +492,136 @@
             // 
             // AutomaticMode
             // 
+            this.AutomaticMode.Controls.Add(this.label1);
+            this.AutomaticMode.Controls.Add(this.ForceNextTrack);
+            this.AutomaticMode.Controls.Add(this.checkBoxTrack10);
+            this.AutomaticMode.Controls.Add(this.checkBoxTrack9);
+            this.AutomaticMode.Controls.Add(this.checkBoxTrack8);
+            this.AutomaticMode.Controls.Add(this.checkBoxTrack7);
+            this.AutomaticMode.Controls.Add(this.checkBoxTrack6);
+            this.AutomaticMode.Controls.Add(this.checkBoxTrack5);
+            this.AutomaticMode.Controls.Add(this.checkBoxTrack4);
             this.AutomaticMode.Controls.Add(this.Btn_Collect_TOP);
+            this.AutomaticMode.Controls.Add(this.checkBoxTrack11);
             this.AutomaticMode.Controls.Add(this.Btn_Stop_Fiddle_TOP);
             this.AutomaticMode.Controls.Add(this.Btn_Start_Fiddle_TOP);
+            this.AutomaticMode.Controls.Add(this.checkBoxToggle);
+            this.AutomaticMode.Controls.Add(this.checkBoxTrack1);
+            this.AutomaticMode.Controls.Add(this.checkBoxTrack2);
+            this.AutomaticMode.Controls.Add(this.checkBoxTrack3);
             resources.ApplyResources(this.AutomaticMode, "AutomaticMode");
             this.AutomaticMode.Name = "AutomaticMode";
             this.AutomaticMode.TabStop = false;
+            // 
+            // label1
+            // 
+            resources.ApplyResources(this.label1, "label1");
+            this.label1.Name = "label1";
+            // 
+            // ForceNextTrack
+            // 
+            resources.ApplyResources(this.ForceNextTrack, "ForceNextTrack");
+            this.ForceNextTrack.Maximum = new decimal(new int[] {
+            11,
+            0,
+            0,
+            0});
+            this.ForceNextTrack.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.ForceNextTrack.Name = "ForceNextTrack";
+            this.ForceNextTrack.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.ForceNextTrack.ValueChanged += new System.EventHandler(this.ForceNextTrack_ValueChanged);
+            // 
+            // checkBoxTrack10
+            // 
+            resources.ApplyResources(this.checkBoxTrack10, "checkBoxTrack10");
+            this.checkBoxTrack10.Name = "checkBoxTrack10";
+            this.checkBoxTrack10.UseVisualStyleBackColor = true;
+            this.checkBoxTrack10.CheckedChanged += new System.EventHandler(this.checkBoxTrack10_CheckedChanged);
+            // 
+            // checkBoxTrack9
+            // 
+            resources.ApplyResources(this.checkBoxTrack9, "checkBoxTrack9");
+            this.checkBoxTrack9.Name = "checkBoxTrack9";
+            this.checkBoxTrack9.UseVisualStyleBackColor = true;
+            this.checkBoxTrack9.CheckedChanged += new System.EventHandler(this.checkBoxTrack9_CheckedChanged);
+            // 
+            // checkBoxTrack8
+            // 
+            resources.ApplyResources(this.checkBoxTrack8, "checkBoxTrack8");
+            this.checkBoxTrack8.Name = "checkBoxTrack8";
+            this.checkBoxTrack8.UseVisualStyleBackColor = true;
+            this.checkBoxTrack8.CheckedChanged += new System.EventHandler(this.checkBoxTrack8_CheckedChanged);
+            // 
+            // checkBoxTrack7
+            // 
+            resources.ApplyResources(this.checkBoxTrack7, "checkBoxTrack7");
+            this.checkBoxTrack7.Name = "checkBoxTrack7";
+            this.checkBoxTrack7.UseVisualStyleBackColor = true;
+            this.checkBoxTrack7.CheckedChanged += new System.EventHandler(this.checkBoxTrack7_CheckedChanged);
+            // 
+            // checkBoxTrack6
+            // 
+            resources.ApplyResources(this.checkBoxTrack6, "checkBoxTrack6");
+            this.checkBoxTrack6.Name = "checkBoxTrack6";
+            this.checkBoxTrack6.UseVisualStyleBackColor = true;
+            this.checkBoxTrack6.CheckedChanged += new System.EventHandler(this.checkBoxTrack6_CheckedChanged);
+            // 
+            // checkBoxTrack5
+            // 
+            resources.ApplyResources(this.checkBoxTrack5, "checkBoxTrack5");
+            this.checkBoxTrack5.Name = "checkBoxTrack5";
+            this.checkBoxTrack5.UseVisualStyleBackColor = true;
+            this.checkBoxTrack5.CheckedChanged += new System.EventHandler(this.checkBoxTrack5_CheckedChanged);
+            // 
+            // checkBoxTrack4
+            // 
+            resources.ApplyResources(this.checkBoxTrack4, "checkBoxTrack4");
+            this.checkBoxTrack4.Name = "checkBoxTrack4";
+            this.checkBoxTrack4.UseVisualStyleBackColor = true;
+            this.checkBoxTrack4.CheckedChanged += new System.EventHandler(this.checkBoxTrack4_CheckedChanged);
+            // 
+            // checkBoxTrack11
+            // 
+            resources.ApplyResources(this.checkBoxTrack11, "checkBoxTrack11");
+            this.checkBoxTrack11.Name = "checkBoxTrack11";
+            this.checkBoxTrack11.UseVisualStyleBackColor = true;
+            this.checkBoxTrack11.CheckedChanged += new System.EventHandler(this.checkBoxTrack11_CheckedChanged);
+            // 
+            // checkBoxToggle
+            // 
+            resources.ApplyResources(this.checkBoxToggle, "checkBoxToggle");
+            this.checkBoxToggle.Name = "checkBoxToggle";
+            this.checkBoxToggle.UseVisualStyleBackColor = true;
+            this.checkBoxToggle.CheckedChanged += new System.EventHandler(this.checkBoxToggle_CheckedChanged);
+            // 
+            // checkBoxTrack1
+            // 
+            resources.ApplyResources(this.checkBoxTrack1, "checkBoxTrack1");
+            this.checkBoxTrack1.Name = "checkBoxTrack1";
+            this.checkBoxTrack1.UseVisualStyleBackColor = true;
+            this.checkBoxTrack1.CheckedChanged += new System.EventHandler(this.checkBoxTrack1_CheckedChanged);
+            // 
+            // checkBoxTrack2
+            // 
+            resources.ApplyResources(this.checkBoxTrack2, "checkBoxTrack2");
+            this.checkBoxTrack2.Name = "checkBoxTrack2";
+            this.checkBoxTrack2.UseVisualStyleBackColor = true;
+            this.checkBoxTrack2.CheckedChanged += new System.EventHandler(this.checkBoxTrack2_CheckedChanged);
+            // 
+            // checkBoxTrack3
+            // 
+            resources.ApplyResources(this.checkBoxTrack3, "checkBoxTrack3");
+            this.checkBoxTrack3.Name = "checkBoxTrack3";
+            this.checkBoxTrack3.UseVisualStyleBackColor = true;
+            this.checkBoxTrack3.CheckedChanged += new System.EventHandler(this.checkBoxTrack3_CheckedChanged);
             // 
             // ManualMode
             // 
@@ -628,7 +761,6 @@
             this.Controls.Add(this.LLed_Block5B);
             this.Controls.Add(this.Btn_Reset_TOP);
             this.Controls.Add(this.ReceivedCmd);
-            this.Controls.Add(this.Logging1);
             this.Controls.Add(this.LLed_FYPLATE_TOP);
             this.Controls.Add(this.GWin);
             this.Controls.Add(this.menuStrip1);
@@ -639,6 +771,8 @@
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.AutomaticMode.ResumeLayout(false);
+            this.AutomaticMode.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.ForceNextTrack)).EndInit();
             this.ManualMode.ResumeLayout(false);
             this.ManualMode.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.PB_Block5BIn)).EndInit();
@@ -667,7 +801,6 @@
         private System.Windows.Forms.Button Btn_Start_Fiddle_TOP;
         private System.Windows.Forms.Button Btn_Couple;
         private System.Windows.Forms.TextBox ReceivedCmd;
-        private System.Windows.Forms.Label Logging1;
         private System.Windows.Forms.Label LLed_Block5B;
         private System.Windows.Forms.Label LLed_Block5BIn;
         private System.Windows.Forms.Label LLed_Block8A;
@@ -718,5 +851,19 @@
         private System.Windows.Forms.PictureBox PB_Block5BIn;
         private System.Windows.Forms.PictureBox PB_Block6In;
         private System.Windows.Forms.PictureBox PB_Block7In;
+        private System.Windows.Forms.CheckBox checkBoxTrack1;
+        private System.Windows.Forms.CheckBox checkBoxTrack2;
+        private System.Windows.Forms.CheckBox checkBoxTrack3;
+        private System.Windows.Forms.CheckBox checkBoxTrack4;
+        private System.Windows.Forms.CheckBox checkBoxTrack5;
+        private System.Windows.Forms.CheckBox checkBoxTrack6;
+        private System.Windows.Forms.CheckBox checkBoxTrack7;
+        private System.Windows.Forms.CheckBox checkBoxTrack8;
+        private System.Windows.Forms.CheckBox checkBoxTrack9;
+        private System.Windows.Forms.CheckBox checkBoxTrack10;
+        private System.Windows.Forms.CheckBox checkBoxTrack11;
+        private System.Windows.Forms.NumericUpDown ForceNextTrack;
+        private System.Windows.Forms.CheckBox checkBoxToggle;
+        private System.Windows.Forms.Label label1;
     }
 }

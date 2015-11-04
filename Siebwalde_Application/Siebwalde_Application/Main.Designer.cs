@@ -38,11 +38,11 @@
             this.clearEventLoggersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.resetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.hardResetFiddleYardToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fiddleYardSettingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.FiddleYardFormTop = new System.Windows.Forms.Button();
-            this.FiddleYardFormBot = new System.Windows.Forms.Button();
             this.FYLinkActivity = new System.Windows.Forms.ProgressBar();
             this.LFYLinkActivity = new System.Windows.Forms.Label();
             this.SiebwaldeAppLog = new System.Windows.Forms.TextBox();
@@ -51,7 +51,7 @@
             this.YardForm = new System.Windows.Forms.Button();
             this.StartApplication = new System.Windows.Forms.Button();
             this.LStartApplication = new System.Windows.Forms.Label();
-            this.fiddleYardSettingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.FiddleYardFormBot = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -72,13 +72,13 @@
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(35, 20);
             this.fileToolStripMenuItem.Text = "File";
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(92, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(103, 22);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click_1);
             // 
@@ -90,20 +90,20 @@
             this.resetToolStripMenuItem,
             this.fiddleYardSettingsToolStripMenuItem});
             this.fToolStripMenuItem.Name = "fToolStripMenuItem";
-            this.fToolStripMenuItem.Size = new System.Drawing.Size(39, 20);
+            this.fToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fToolStripMenuItem.Text = "Edit";
             // 
             // reConnectFiddleYardToolStripMenuItem
             // 
             this.reConnectFiddleYardToolStripMenuItem.Name = "reConnectFiddleYardToolStripMenuItem";
-            this.reConnectFiddleYardToolStripMenuItem.Size = new System.Drawing.Size(213, 22);
+            this.reConnectFiddleYardToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
             this.reConnectFiddleYardToolStripMenuItem.Text = "Re-Connect to Fiddle Yard";
             this.reConnectFiddleYardToolStripMenuItem.Click += new System.EventHandler(this.reConnectFiddleYardToolStripMenuItem_Click);
             // 
             // clearEventLoggersToolStripMenuItem
             // 
             this.clearEventLoggersToolStripMenuItem.Name = "clearEventLoggersToolStripMenuItem";
-            this.clearEventLoggersToolStripMenuItem.Size = new System.Drawing.Size(213, 22);
+            this.clearEventLoggersToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
             this.clearEventLoggersToolStripMenuItem.Text = "Clear Event Loggers";
             this.clearEventLoggersToolStripMenuItem.Click += new System.EventHandler(this.clearEventLoggersToolStripMenuItem_Click);
             // 
@@ -112,28 +112,35 @@
             this.resetToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.hardResetFiddleYardToolStripMenuItem});
             this.resetToolStripMenuItem.Name = "resetToolStripMenuItem";
-            this.resetToolStripMenuItem.Size = new System.Drawing.Size(213, 22);
+            this.resetToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
             this.resetToolStripMenuItem.Text = "Reset";
             // 
             // hardResetFiddleYardToolStripMenuItem
             // 
             this.hardResetFiddleYardToolStripMenuItem.Name = "hardResetFiddleYardToolStripMenuItem";
-            this.hardResetFiddleYardToolStripMenuItem.Size = new System.Drawing.Size(193, 22);
+            this.hardResetFiddleYardToolStripMenuItem.Size = new System.Drawing.Size(195, 22);
             this.hardResetFiddleYardToolStripMenuItem.Text = "Hard Reset Fiddle Yard";
             this.hardResetFiddleYardToolStripMenuItem.Click += new System.EventHandler(this.hardResetFiddleYardToolStripMenuItem_Click);
+            // 
+            // fiddleYardSettingsToolStripMenuItem
+            // 
+            this.fiddleYardSettingsToolStripMenuItem.Name = "fiddleYardSettingsToolStripMenuItem";
+            this.fiddleYardSettingsToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
+            this.fiddleYardSettingsToolStripMenuItem.Text = "Fiddle Yard Settings";
+            this.fiddleYardSettingsToolStripMenuItem.Click += new System.EventHandler(this.fiddleYardSettingsToolStripMenuItem_Click);
             // 
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.aboutToolStripMenuItem1});
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(40, 20);
             this.aboutToolStripMenuItem.Text = "Help";
             // 
             // aboutToolStripMenuItem1
             // 
             this.aboutToolStripMenuItem1.Name = "aboutToolStripMenuItem1";
-            this.aboutToolStripMenuItem1.Size = new System.Drawing.Size(107, 22);
+            this.aboutToolStripMenuItem1.Size = new System.Drawing.Size(114, 22);
             this.aboutToolStripMenuItem1.Text = "About";
             this.aboutToolStripMenuItem1.Click += new System.EventHandler(this.aboutToolStripMenuItem1_Click);
             // 
@@ -147,19 +154,9 @@
             this.FiddleYardFormTop.Name = "FiddleYardFormTop";
             this.FiddleYardFormTop.Size = new System.Drawing.Size(150, 23);
             this.FiddleYardFormTop.TabIndex = 26;
-            this.FiddleYardFormTop.Text = "Show Fiddle Yard Top";
+            this.FiddleYardFormTop.Text = "Show Fiddle Yard";
             this.FiddleYardFormTop.UseVisualStyleBackColor = true;
             this.FiddleYardFormTop.Click += new System.EventHandler(this.FiddleYardFormTop_Click);
-            // 
-            // FiddleYardFormBot
-            // 
-            this.FiddleYardFormBot.Location = new System.Drawing.Point(160, 25);
-            this.FiddleYardFormBot.Name = "FiddleYardFormBot";
-            this.FiddleYardFormBot.Size = new System.Drawing.Size(150, 23);
-            this.FiddleYardFormBot.TabIndex = 27;
-            this.FiddleYardFormBot.Text = "Show Fiddle Yard Bot";
-            this.FiddleYardFormBot.UseVisualStyleBackColor = true;
-            this.FiddleYardFormBot.Click += new System.EventHandler(this.FiddleYardFormBot_Click);
             // 
             // FYLinkActivity
             // 
@@ -199,7 +196,7 @@
             // 
             // MaintrackForm
             // 
-            this.MaintrackForm.Location = new System.Drawing.Point(316, 25);
+            this.MaintrackForm.Location = new System.Drawing.Point(160, 25);
             this.MaintrackForm.Name = "MaintrackForm";
             this.MaintrackForm.Size = new System.Drawing.Size(150, 23);
             this.MaintrackForm.TabIndex = 32;
@@ -209,7 +206,7 @@
             // 
             // YardForm
             // 
-            this.YardForm.Location = new System.Drawing.Point(472, 25);
+            this.YardForm.Location = new System.Drawing.Point(316, 25);
             this.YardForm.Name = "YardForm";
             this.YardForm.Size = new System.Drawing.Size(150, 23);
             this.YardForm.TabIndex = 33;
@@ -236,19 +233,23 @@
             this.LStartApplication.TabIndex = 35;
             this.LStartApplication.Text = "StartApplication";
             // 
-            // fiddleYardSettingsToolStripMenuItem
+            // FiddleYardFormBot
             // 
-            this.fiddleYardSettingsToolStripMenuItem.Name = "fiddleYardSettingsToolStripMenuItem";
-            this.fiddleYardSettingsToolStripMenuItem.Size = new System.Drawing.Size(213, 22);
-            this.fiddleYardSettingsToolStripMenuItem.Text = "Fiddle Yard Settings";
-            this.fiddleYardSettingsToolStripMenuItem.Click += new System.EventHandler(this.fiddleYardSettingsToolStripMenuItem_Click);
+            this.FiddleYardFormBot.Location = new System.Drawing.Point(472, 25);
+            this.FiddleYardFormBot.Name = "FiddleYardFormBot";
+            this.FiddleYardFormBot.Size = new System.Drawing.Size(150, 23);
+            this.FiddleYardFormBot.TabIndex = 27;
+            this.FiddleYardFormBot.Text = "Show Fiddle Yard Bot";
+            this.FiddleYardFormBot.UseVisualStyleBackColor = true;
+            this.FiddleYardFormBot.Visible = false;
+            this.FiddleYardFormBot.Click += new System.EventHandler(this.FiddleYardFormBot_Click);
             // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoScroll = true;
-            this.ClientSize = new System.Drawing.Size(1081, 562);
+            this.ClientSize = new System.Drawing.Size(1081, 566);
             this.Controls.Add(this.YardForm);
             this.Controls.Add(this.MaintrackForm);
             this.Controls.Add(this.FiddleYardFormBot);
@@ -288,7 +289,6 @@
         private System.Windows.Forms.ToolStripMenuItem resetToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem hardResetFiddleYardToolStripMenuItem;
         private System.Windows.Forms.Button FiddleYardFormTop;
-        private System.Windows.Forms.Button FiddleYardFormBot;
         private System.Windows.Forms.ProgressBar FYLinkActivity;
         private System.Windows.Forms.Label LFYLinkActivity;
         private System.Windows.Forms.TextBox SiebwaldeAppLog;
@@ -298,6 +298,7 @@
         private System.Windows.Forms.Button StartApplication;
         private System.Windows.Forms.Label LStartApplication;
         private System.Windows.Forms.ToolStripMenuItem fiddleYardSettingsToolStripMenuItem;
+        private System.Windows.Forms.Button FiddleYardFormBot;
     }
 }
 

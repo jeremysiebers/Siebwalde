@@ -32,8 +32,10 @@ namespace Siebwalde_Application
         private State TrainDriveIn_Machine;
         private State TrainDriveOut_Machine;
         private State TrainDriveThrough_Machine;        
-        private int TrainDriveInPointer = 1;        // points to a track in which it is required to check if a train is present for traindrive in
-        private int TrainDriveOutPointer = 5;       // points to a track in which it is required to check if a train is present for traindrive out  
+        private int TrainDriveInPointer = 1;            // points to a track in which it is required to check if a train is present for traindrive in
+        private int TrainDriveOutPointer = 5;           // points to a track in which it is required to check if a train is present for traindrive out  
+        private int TrainDriveInPointerCheckedAll = 1;  // stores the start value, in case all tracks are disabled, exit traindrive-in program
+        private int TrainDriveOutPointerCheckedAll = 1; // stores the start value, in case all tracks are disabled, exit traindrive-out program
         private uint TrainDriveDelay = 0;
         private bool uControllerReady = true;
         private uint TRAINDRIVEDELAY = 0;
@@ -104,6 +106,8 @@ namespace Siebwalde_Application
             TrainDriveOut_Machine = State.Start;
             TrainDriveThrough_Machine = State.Start;
             TrainDriveInPointer = 1;
+            TrainDriveInPointerCheckedAll = 1;
+            TrainDriveOutPointerCheckedAll = 1;
             TrainDriveOutPointer = 5;
             TrainDriveDelay = 0;
         }
@@ -146,12 +150,18 @@ namespace Siebwalde_Application
                     break;
 
                 case State.CheckEmptyTrack:
-                    if (m_FYAppVar.iTrainsOnFY[TrainDriveInPointer] == 1)
+                    if ((m_FYAppVar.iTrainsOnFY[TrainDriveInPointer] == 1) || (m_FYAppVar.icheckBoxTrack[TrainDriveInPointer] == 1))
                     {
                         TrainDriveInPointer++;
                         if (TrainDriveInPointer > 11)
                         {
                             TrainDriveInPointer = 1;
+                        }
+                        if (TrainDriveInPointerCheckedAll == TrainDriveInPointer)
+                        {
+                            TrainDriveIn_Machine = State.Start;
+                            _Return = "Finished";
+                            m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveIn All tracks are disabled, cancelling Traindrive in Program");
                         }
                     }
                     else 
@@ -387,12 +397,18 @@ namespace Siebwalde_Application
                     break;
 
                 case State.CheckFullTrack:
-                    if (m_FYAppVar.iTrainsOnFY[TrainDriveOutPointer] == 0)
+                    if ((m_FYAppVar.iTrainsOnFY[TrainDriveOutPointer] == 0) || (m_FYAppVar.icheckBoxTrack[TrainDriveOutPointer] == 1))
                     {
                         TrainDriveOutPointer++;
                         if (TrainDriveOutPointer > 11)
                         {
                             TrainDriveOutPointer = 1;
+                        }
+                        if (TrainDriveOutPointerCheckedAll == TrainDriveOutPointer)
+                        {
+                            TrainDriveOut_Machine = State.Start;
+                            _Return = "Finished";
+                            m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveOut All tracks are disabled, cancelling Traindrive out Program");
                         }
                     }
                     else

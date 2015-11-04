@@ -264,6 +264,19 @@ namespace Siebwalde_Application
             alwaysOnTopToolStripMenuItem.Checked = true;
             this.TopMost = true;
 
+            checkBoxTrack1.Checked = true;
+            checkBoxTrack2.Checked = true;
+            checkBoxTrack3.Checked = true;
+            checkBoxTrack4.Checked = true;
+            checkBoxTrack5.Checked = true;
+            checkBoxTrack6.Checked = true;
+            checkBoxTrack7.Checked = true;
+            checkBoxTrack8.Checked = true;
+            checkBoxTrack9.Checked = true;
+            checkBoxTrack10.Checked = true;
+            checkBoxTrack11.Checked = true;
+            checkBoxToggle.Checked = true;
+
             #endregion Indicator init
 
             // Instantiate actuators
@@ -2347,6 +2360,97 @@ namespace Siebwalde_Application
                 Btn_Bezet7On_TOP_Click_Toggle = true;
                 Occ7OnFalse.UpdateCommand();                
             }
+        }
+
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: checkBoxTrack<x>_CheckedChanged
+         *               
+         *              
+         *               
+         *
+         *  Input(s)   : 
+         *
+         *  Output(s)  :
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      :
+         */
+        /*#--------------------------------------------------------------------------#*/
+        private void checkBoxTrack1_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBoxTrack1.Checked == true)
+            {
+                m_FYAppVar.icheckBoxTrack//m_FYAppVar.icheckBoxTrack[1] == 1;
+            }
+            else
+            {
+                m_FYAppVar.icheckBoxTrack[1] == 0;
+            }
+        }
+
+        private void checkBoxTrack2_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void checkBoxTrack3_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void checkBoxTrack4_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void checkBoxTrack5_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void checkBoxTrack6_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void checkBoxTrack7_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void checkBoxTrack8_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void checkBoxTrack9_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void checkBoxTrack10_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void checkBoxTrack11_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void checkBoxToggle_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void ForceNextTrack_ValueChanged(object sender, EventArgs e)
+        {
+
         }
     }    
 }

@@ -99,7 +99,7 @@ namespace Siebwalde_Application
             SiebwaldeAppLogging("Main: FiddleYard Controller starting...");
             FYcontroller.Start();
             FiddleYardFormTop.Visible = true;
-            FiddleYardFormBot.Visible = true;
+            FiddleYardFormBot.Visible = false;
             FYLinkActivity.Visible = true;
             LFYLinkActivity.Visible = true;
             SiebwaldeAppLogging("Main: FiddleYard Controller started.");
@@ -134,12 +134,28 @@ namespace Siebwalde_Application
             if (!ViewTop)
             {
                 SiebwaldeAppLogging("Main: Show Fiddle Yard Top Layer interface");
-                FiddleYardFormTop.Text = "Hide Fiddle Yard Top";
+                FiddleYardFormTop.Text = "Hide Fiddle Yard";
             }
             else 
             {
                 SiebwaldeAppLogging("Main: Hide Fiddle Yard Top Layer interface");
-                FiddleYardFormTop.Text = "Show Fiddle Yard Top"; 
+                FiddleYardFormTop.Text = "Show Fiddle Yard"; 
+            }
+                        
+            if (this.Height < 1200 || this.Width < 1920)
+                autoscroll = true;
+            else { autoscroll = false; }
+            FYcontroller.FYBOTShow(autoscroll, this.Height, this.Width, this.Location.X, this.Location.Y, ViewBot);
+            ViewBot = !ViewBot;
+            if (!ViewBot)
+            {
+                SiebwaldeAppLogging("Main: Show Fiddle Yard Bottom Layer interface");
+                FiddleYardFormBot.Text = "Hide Fiddle Yard Bot";
+            }
+            else
+            {
+                SiebwaldeAppLogging("Main: Hide Fiddle Yard Bottom Layer interface");
+                FiddleYardFormBot.Text = "Show Fiddle Yard Bot";
             }
         }
 
