@@ -81,7 +81,26 @@ namespace Siebwalde_Application
         public Image SeinRed = Siebwalde_Application.Properties.Resources.SeinRed.ToBitmap();
         public Image SeinGreen90 = Siebwalde_Application.Properties.Resources.SeinGreen.ToBitmap();
         public Image SeinRed90 = Siebwalde_Application.Properties.Resources.SeinRed.ToBitmap();
-
+        
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: FiddleYardForm
+         *               Constructor
+         *              
+         *               
+         *
+         *  Input(s)   : 
+         *
+         *  Output(s)  :
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      :
+         */
+        /*#--------------------------------------------------------------------------#*/
         public FiddleYardForm()
         {
             InitializeComponent();
@@ -161,7 +180,7 @@ namespace Siebwalde_Application
             LLed_Block8A.Location = new System.Drawing.Point(GWinX + 790 + (100 - 16), GWinHalf - 250 - 18);
 
             LLed_Track1.Size = new Size(600, 16);
-            LLed_Track1.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 160);
+            LLed_Track1.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 160);            
 
             LLed_Track2.Size = new Size(600, 16);
             LLed_Track2.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 128);
@@ -280,6 +299,25 @@ namespace Siebwalde_Application
             
         }
 
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: Connect
+         *               hookup sensors/messages etc
+         *              
+         *               
+         *
+         *  Input(s)   : 
+         *
+         *  Output(s)  :
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      :
+         */
+        /*#--------------------------------------------------------------------------#*/
         public void Connect(FiddleYardIOHandleVariables FYIOHandleVar, FiddleYardApplicationVariables FYAppVar)
         {
             m_FYIOHandleVar = FYIOHandleVar;    // connect to FYIOHandle interface, save interface in variable
@@ -296,33 +334,34 @@ namespace Siebwalde_Application
                 FiddleYardFormLogging = new Log2LoggingFile(path);
             }
 
+            #region Attach sensors
             //Sensors -----------------------------> to be pushed from Application variables
             Sensor Led_CL_10_Heart = new Sensor("LLed_Heart", " CL 10 Heart ",0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-            m_FYIOHandleVar.CL10Heart.Attach(Led_CL_10_Heart);
+            m_FYAppVar.CL10Heart.Attach(Led_CL_10_Heart);
             Sensor Led_F11 = new Sensor("LLed_F11", " F11 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-            m_FYIOHandleVar.F11.Attach(Led_F11);
+            m_FYAppVar.F11.Attach(Led_F11);
             Sensor Led_EOS10 = new Sensor("LLed_EOS10", " EOS 10 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-            m_FYIOHandleVar.EOS10.Attach(Led_EOS10);
+            m_FYAppVar.EOS10.Attach(Led_EOS10);
             Sensor Led_EOS11 = new Sensor("LLed_EOS11", " EOS 11 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-            m_FYIOHandleVar.EOS11.Attach(Led_EOS11);
+            m_FYAppVar.EOS11.Attach(Led_EOS11);
             Sensor Led_F13 = new Sensor("LLed_F13", " F13 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-            m_FYIOHandleVar.F13.Attach(Led_F13);
+            m_FYAppVar.F13.Attach(Led_F13);
             Sensor Led_F12 = new Sensor("LLed_F12", " F12 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-            m_FYIOHandleVar.F12.Attach(Led_F12);
+            m_FYAppVar.F12.Attach(Led_F12);
             Sensor Led_Block5B = new Sensor("LLed_Block5B", " Occupied from 5B ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-            m_FYIOHandleVar.Block5B.Attach(Led_Block5B);
+            m_FYAppVar.Block5B.Attach(Led_Block5B);
             Sensor Led_Block8A = new Sensor("LLed_Block8A", " Occupied from 8A ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-            m_FYIOHandleVar.Block8A.Attach(Led_Block8A);
+            m_FYAppVar.Block8A.Attach(Led_Block8A);
             Sensor Led_TrackPowerTop = new Sensor("LLed_TrackPower", " Enable Track ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-            m_FYIOHandleVar.TrackPower.Attach(Led_TrackPowerTop);
+            m_FYAppVar.TrackPower.Attach(Led_TrackPowerTop);
             Sensor Led_Block5BIn = new Sensor("LLed_Block5BIn", " Occupied to 5B ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-            m_FYIOHandleVar.Block5BIn.Attach(Led_Block5BIn);
+            m_FYAppVar.Block5BIn.Attach(Led_Block5BIn);
             Sensor Led_Block6In = new Sensor("LLed_Block6In", " Occupied to 6 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-            m_FYIOHandleVar.Block6In.Attach(Led_Block6In);
+            m_FYAppVar.Block6In.Attach(Led_Block6In);
             Sensor Led_Block7In = new Sensor("LLed_Block7In", " Occupied to 7 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-            m_FYIOHandleVar.Block7In.Attach(Led_Block7In);
+            m_FYAppVar.Block7In.Attach(Led_Block7In);
             Sensor Led_ResistorTop = new Sensor("LLed_Resistor", " Occupied Resistor ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-            m_FYIOHandleVar.Resistor.Attach(Led_ResistorTop);
+            m_FYAppVar.Resistor.Attach(Led_ResistorTop);
             Sensor Led_Track1Top = new Sensor("LLed_Track1", " Trains On Fiddle Yard Track1 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
             m_FYAppVar.Track1.Attach(Led_Track1Top);
             Sensor Led_Track2Top = new Sensor("LLed_Track2", " Trains On Fiddle Yard Track2 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
@@ -346,17 +385,17 @@ namespace Siebwalde_Application
             Sensor Led_Track11Top = new Sensor("LLed_Track11", " Trains On Fiddle Yard Track11 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
             m_FYAppVar.Track11.Attach(Led_Track11Top);
             Sensor Led_Block6 = new Sensor("LLed_Block6", " Occupied from 6 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-            m_FYIOHandleVar.Block6.Attach(Led_Block6);
+            m_FYAppVar.Block6.Attach(Led_Block6);
             Sensor Led_Block7 = new Sensor("LLed_Block7", " Occupied from 7 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-            m_FYIOHandleVar.Block7.Attach(Led_Block7);
+            m_FYAppVar.Block7.Attach(Led_Block7);
             Sensor Led_F10 = new Sensor("LLed_F10", " F10 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-            m_FYIOHandleVar.F10.Attach(Led_F10);
+            m_FYAppVar.F10.Attach(Led_F10);
             Sensor Led_M10 = new Sensor("LLed_M10", " M10 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-            m_FYIOHandleVar.M10.Attach(Led_M10);
+            m_FYAppVar.M10.Attach(Led_M10);
             Sensor Led_TrackNoTop = new Sensor("Track_No", " Track Nr ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-            m_FYIOHandleVar.TrackNo.Attach(Led_TrackNoTop);
+            m_FYAppVar.TrackNo.Attach(Led_TrackNoTop);
             Sensor Led_TrackPower15VTOP = new Sensor("LLed_15VTrackPower", " 15V Track Power ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-            m_FYIOHandleVar.TrackPower15V.Attach(Led_TrackPower15VTOP);   
+            m_FYAppVar.TrackPower.Attach(Led_TrackPower15VTOP);   
              
             //Messages
             Message Msg_TrainDetectionTop = new Message("TrainDetectionFinished", " Train Detection Finished ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
@@ -395,18 +434,91 @@ namespace Siebwalde_Application
             m_FYAppVar.CollectingTrainsEnabled.Attach(Msg_CollectingTrainsEnabled);
             Message Msg_CollectingTrainsDisabled = new Message("CollectingTrainsDisabled", " Collecting Trains disabled ", (name, log) => SetMessage(name, log));
             m_FYAppVar.CollectingTrainsDisabled.Attach(Msg_CollectingTrainsDisabled);
+
+            #endregion Attach sensors
+
+            LLed_Track1.BackColor = m_FYAppVar.TrackNotInitializedColor;
+            LLed_Track2.BackColor = m_FYAppVar.TrackNotInitializedColor;
+            LLed_Track3.BackColor = m_FYAppVar.TrackNotInitializedColor;
+            LLed_Track4.BackColor = m_FYAppVar.TrackNotInitializedColor;
+            LLed_Track5.BackColor = m_FYAppVar.TrackNotInitializedColor;
+            LLed_Track5.BackColor = m_FYAppVar.TrackNotInitializedColor;
+            LLed_Track6.BackColor = m_FYAppVar.TrackNotInitializedColor;
+            LLed_Track7.BackColor = m_FYAppVar.TrackNotInitializedColor;
+            LLed_Track8.BackColor = m_FYAppVar.TrackNotInitializedColor;
+            LLed_Track9.BackColor = m_FYAppVar.TrackNotInitializedColor;
+            LLed_Track10.BackColor = m_FYAppVar.TrackNotInitializedColor;
+            LLed_Track11.BackColor = m_FYAppVar.TrackNotInitializedColor;
         }
 
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: SimMode
+         *               
+         *              
+         *               
+         *
+         *  Input(s)   : 
+         *
+         *  Output(s)  :
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      :
+         */
+        /*#--------------------------------------------------------------------------#*/
         public void SimMode(bool val)
         {
             SimulationMode.Visible = val;
         }
 
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: SimMode
+         *               
+         *              
+         *               
+         *
+         *  Input(s)   : 
+         *
+         *  Output(s)  :
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         * 
+         *  Post.Cond. :
+         *
+         *  Notes      :
+         */
+        /*#--------------------------------------------------------------------------#*/
         public void ClearReceivedCmd()
         {
             ReceivedCmd.Clear();
         }
 
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: SimMode
+         *               
+         *              
+         *               
+         *
+         *  Input(s)   : 
+         *
+         *  Output(s)  :
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      :
+         */
+        /*#--------------------------------------------------------------------------#*/
         public void FYFORMShow(bool View)
         {
             this.Opacity = 100;
@@ -454,8 +566,27 @@ namespace Siebwalde_Application
                 LLed_EOS11.Text = "EOS 21";
                 LLed_M10.Text = "M 20";
             }  
-        }        
+        }
 
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: FYFORM Buttons
+         *               
+         *              
+         *               
+         *
+         *  Input(s)   : 
+         *
+         *  Output(s)  :
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      :
+         */
+        /*#--------------------------------------------------------------------------#*/
         private void Btn_Bridge_Open_TOP_Click_1(object sender, EventArgs e) //Couple
         {
             Couple.UpdateCommand();
@@ -552,53 +683,17 @@ namespace Siebwalde_Application
 
         private void Btn_Start_Fiddle_TOP_Click_1(object sender, EventArgs e)
         {
-            FYStart.UpdateCommand();            
-            Btn_Stop_Fiddle_TOP.Enabled = true;
-            manualModeToolStripMenuItem.Enabled = false;
-            Btn_Start_Fiddle_TOP.Enabled = false;
+            FYStart.UpdateCommand(); 
         }
 
         private void Btn_Stop_Fiddle_TOP_Click_1(object sender, EventArgs e)
         {
-            FYStop.UpdateCommand();
-            Btn_Stop_Fiddle_TOP.Enabled = false;            
+            FYStop.UpdateCommand();                
         }
 
         private void Btn_Reset_TOP_Click_1(object sender, EventArgs e)
         {
-            Reset.UpdateCommand();
-            Initialized = false;
-            
-            
-            // Next also force all track color to cyan including text becasue if a track is already false no update is executed on each track color.
-            LLed_Track1.BackColor = Color.Cyan;
-            LLed_Track1.Text = "                     Not Initialized";
-            LLed_Track2.BackColor = Color.Cyan;
-            LLed_Track2.Text = "                     Not Initialized";
-            LLed_Track3.BackColor = Color.Cyan;
-            LLed_Track3.Text = "                     Not Initialized";
-            LLed_Track4.BackColor = Color.Cyan;
-            LLed_Track4.Text = "                     Not Initialized";
-            LLed_Track5.BackColor = Color.Cyan;
-            LLed_Track5.Text = "                     Not Initialized";
-            LLed_Track6.BackColor = Color.Cyan;
-            LLed_Track6.Text = "                     Not Initialized";
-            LLed_Track7.BackColor = Color.Cyan;
-            LLed_Track7.Text = "                     Not Initialized";
-            LLed_Track8.BackColor = Color.Cyan;
-            LLed_Track8.Text = "                     Not Initialized";
-            LLed_Track9.BackColor = Color.Cyan;
-            LLed_Track9.Text = "                     Not Initialized";
-            LLed_Track10.BackColor = Color.Cyan;
-            LLed_Track10.Text = "                     Not Initialized";
-            LLed_Track11.BackColor = Color.Cyan;
-            LLed_Track11.Text = "                     Not Initialized";
-            
-
-            Btn_Collect_TOP.Enabled = true;
-            Btn_Start_Fiddle_TOP.Enabled = true;
-            Btn_Stop_Fiddle_TOP.Enabled = false;
-            manualModeToolStripMenuItem.Enabled = true;
+            Reset.UpdateCommand();            
         }
 
         private void Btn_Bezet5BOn_TOP_Click_1(object sender, EventArgs e)
@@ -659,6 +754,26 @@ namespace Siebwalde_Application
             Collect.UpdateCommand();
         }
 
+
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: SetMessage
+         *               
+         *              
+         *               
+         *
+         *  Input(s)   : 
+         *
+         *  Output(s)  :
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      :
+         */
+        /*#--------------------------------------------------------------------------#*/
         private void SetMessage(string name, string log)
         {
             if (ReceivedCmd.InvokeRequired)
@@ -716,11 +831,74 @@ namespace Siebwalde_Application
                         Btn_Collect_TOP.Text = "Collect Off";
                         break;
 
+                    case "FiddleYardAutoModeIsStopped":
+                        Btn_Start_Fiddle_TOP.Enabled = true;
+                        Btn_Stop_Fiddle_TOP.Enabled = false;
+                        manualModeToolStripMenuItem.Enabled = true;
+                        break;
+
+                    case "FiddleYardAutoModeStart":
+                        Btn_Start_Fiddle_TOP.Enabled = false;
+                        Btn_Stop_Fiddle_TOP.Enabled = true;
+                        manualModeToolStripMenuItem.Enabled = false;
+                        break;
+
+                    case "FiddleYardReset":
+                        Initialized = false;            
+                        // Next also force all track color to cyan including text becasue if a track is already false no update is executed on each track color.
+                        LLed_Track1.BackColor = m_FYAppVar.TrackNotInitializedColor;;
+                        LLed_Track1.Text = "                     Not Initialized";
+                        LLed_Track2.BackColor = m_FYAppVar.TrackNotInitializedColor;;
+                        LLed_Track2.Text = "                     Not Initialized";
+                        LLed_Track3.BackColor = m_FYAppVar.TrackNotInitializedColor;;
+                        LLed_Track3.Text = "                     Not Initialized";
+                        LLed_Track4.BackColor = m_FYAppVar.TrackNotInitializedColor;;
+                        LLed_Track4.Text = "                     Not Initialized";
+                        LLed_Track5.BackColor = m_FYAppVar.TrackNotInitializedColor;;
+                        LLed_Track5.Text = "                     Not Initialized";
+                        LLed_Track6.BackColor = m_FYAppVar.TrackNotInitializedColor;;
+                        LLed_Track6.Text = "                     Not Initialized";
+                        LLed_Track7.BackColor = m_FYAppVar.TrackNotInitializedColor;;
+                        LLed_Track7.Text = "                     Not Initialized";
+                        LLed_Track8.BackColor = m_FYAppVar.TrackNotInitializedColor;;
+                        LLed_Track8.Text = "                     Not Initialized";
+                        LLed_Track9.BackColor = m_FYAppVar.TrackNotInitializedColor;;
+                        LLed_Track9.Text = "                     Not Initialized";
+                        LLed_Track10.BackColor = m_FYAppVar.TrackNotInitializedColor;;
+                        LLed_Track10.Text = "                     Not Initialized";
+                        LLed_Track11.BackColor = m_FYAppVar.TrackNotInitializedColor;;
+                        LLed_Track11.Text = "                     Not Initialized";       
+                 
+                        Btn_Collect_TOP.Enabled = true;
+                        Btn_Start_Fiddle_TOP.Enabled = true;
+                        Btn_Stop_Fiddle_TOP.Enabled = false;
+                        manualModeToolStripMenuItem.Enabled = true;
+                        break;
+
                     default: break;
                 }
             }
         }
 
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: SetLedIndicator
+         *               
+         *              
+         *               
+         *
+         *  Input(s)   : 
+         *
+         *  Output(s)  :
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      :
+         */
+        /*#--------------------------------------------------------------------------#*/
         public void SetLedIndicator(string Indicator, int Val, string Log)
         {
             if (ReceivedCmd.InvokeRequired)
@@ -760,7 +938,7 @@ namespace Siebwalde_Application
                         {
                             if (Initialized == false)
                             {
-                                LLed_F11.BackColor = Color.Cyan;
+                                LLed_F11.BackColor = m_FYAppVar.TrackNotInitializedColor;;
                             }
                             else
                             {
@@ -807,7 +985,7 @@ namespace Siebwalde_Application
                             if (Initialized == false)
                             {
                                 LLed_F13.ForeColor = Color.Black;
-                                LLed_F13.BackColor = Color.Cyan;
+                                LLed_F13.BackColor = m_FYAppVar.TrackNotInitializedColor;;
                             }
                             else
                             {
@@ -827,7 +1005,7 @@ namespace Siebwalde_Application
                         {
                             if (Initialized == false)
                             {
-                                LLed_F12.BackColor = Color.Cyan;
+                                LLed_F12.BackColor = m_FYAppVar.TrackNotInitializedColor;;
                                 LLed_F12.ForeColor = Color.Black;
                             }
                             else
@@ -841,27 +1019,27 @@ namespace Siebwalde_Application
 
                     case "LLed_Block5B": if (Val >= 1)
                         {
-                            LLed_Block5B.BackColor = Color.Lime;
+                            LLed_Block5B.BackColor = m_FYAppVar.TrackOccupiedColor;//     Color.Lime;//GetBackColor when active
                         }
                         if (Val == 0)
                         {
-                            LLed_Block5B.BackColor = Color.Transparent;
+                            LLed_Block5B.BackColor = Color.Transparent;//    Color.Transparent;//GetBackcolor when not active
                         }
                         break;
 
                     case "LLed_Block8A": if (Val >= 1)
                         {
-                            LLed_Block8A.BackColor = Color.Lime;
+                            LLed_Block8A.BackColor = m_FYAppVar.TrackOccupiedColor;//Color.Lime;
                         }
                         if (Val == 0)
                         {
-                            LLed_Block8A.BackColor = Color.Transparent;
+                            LLed_Block8A.BackColor = Color.Transparent;//   Color.Transparent;
                         }
                         break;
 
                     case "LLed_TrackPower": if (Val >= 1)
                         {
-                            LLed_TrackPower.BackColor = Color.Lime;
+                            LLed_TrackPower.BackColor = m_FYAppVar.TrackOccupiedColor;//Color.Lime;
                             LLed_TrackPower.Text = "Coupled";
                             LLed_TrackPower.ForeColor = Color.Black;
                         }
@@ -883,7 +1061,7 @@ namespace Siebwalde_Application
                         if (Val == 0)
                         {
                             PB_Block5BIn.Image = SeinGreen;
-                            LLed_Block5BIn.BackColor = Color.Lime;
+                            LLed_Block5BIn.BackColor = m_FYAppVar.TrackOccupiedColor;             //Color.Lime;
                             Btn_Bezet5BOn_TOP.Text = "On";
                             Btn_Bezet5BOn_TOP_Click_Toggle = true;
                         }
@@ -899,7 +1077,7 @@ namespace Siebwalde_Application
                         if (Val == 0)
                         {
                             PB_Block6In.Image = SeinGreen90;
-                            LLed_Block6In.BackColor = Color.Lime;
+                            LLed_Block6In.BackColor = m_FYAppVar.TrackOccupiedColor;             //Color.Lime;
                             Btn_Bezet6On_TOP.Text = "On";
                             Btn_Bezet6On_TOP_Click_Toggle = true;
                         }
@@ -915,7 +1093,7 @@ namespace Siebwalde_Application
                         if (Val == 0)
                         {
                             PB_Block7In.Image = SeinGreen90; 
-                            LLed_Block7In.BackColor = Color.Lime;                                                        
+                            LLed_Block7In.BackColor = m_FYAppVar.TrackOccupiedColor;             //Color.Lime;                                                        
                             Btn_Bezet7On_TOP.Text = "On";
                             Btn_Bezet7On_TOP_Click_Toggle = true;
                         }
@@ -923,7 +1101,7 @@ namespace Siebwalde_Application
 
                     case "LLed_Resistor": if (Val >= 1)
                         {
-                            LLed_Resistor.BackColor = Color.Lime;
+                            LLed_Resistor.BackColor = m_FYAppVar.TrackOccupiedColor;             //Color.Lime;
                         }
                         if (Val == 0)
                         {
@@ -933,274 +1111,274 @@ namespace Siebwalde_Application
 
                     case "LLed_Track1": if (Val >= 1 && TrackStatusLight[1] == true)
                         {
-                            LLed_Track1.BackColor = Color.Lime;
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            LLed_Track1.BackColor = m_FYAppVar.TrackOccupiedColor;              //Color.Lime;
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         else if (Val >= 1)
                         {
-                            LLed_Track1.BackColor = Color.Green;
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            LLed_Track1.BackColor = m_FYAppVar.TrackNotActiveColor;             //m_FYAppVar.TrackNotActiveColor;             //Color.Green;
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         if (Val == 0 && Initialized == true)
                         {
                             LLed_Track1.BackColor = Color.Transparent;
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         else if (Initialized == false)
                         {
-                            LLed_Track1.BackColor = Color.Cyan;             // After processor update from true to false set to cyan if initialized is false.
+                            LLed_Track1.BackColor = m_FYAppVar.TrackNotInitializedColor;        //Color.Cyan;// After processor update from true to false set to cyan if initialized is false.
                             LLed_Track1.Text = "                     Not Initialized";
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         break;
 
                     case "LLed_Track2": if (Val >= 1 && TrackStatusLight[2] == true)
                         {
-                            LLed_Track2.BackColor = Color.Lime;
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            LLed_Track2.BackColor = m_FYAppVar.TrackOccupiedColor;              //Color.Lime;
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         else if (Val >= 1)
                         {
-                            LLed_Track2.BackColor = Color.Green;
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            LLed_Track2.BackColor = m_FYAppVar.TrackNotActiveColor;             //Color.Green;
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         if (Val == 0 && Initialized == true)
                         {
                             LLed_Track2.BackColor = Color.Transparent;
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         else if (Initialized == false)
                         {
-                            LLed_Track2.BackColor = Color.Cyan;
+                            LLed_Track2.BackColor = m_FYAppVar.TrackNotInitializedColor;        //Color.Cyan;
                             LLed_Track2.Text = "                     Not Initialized";
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         break;
 
                     case "LLed_Track3": if (Val >= 1 && TrackStatusLight[3] == true)
                         {
-                            LLed_Track3.BackColor = Color.Lime;
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            LLed_Track3.BackColor = m_FYAppVar.TrackOccupiedColor;              //Color.Lime;
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         else if (Val >= 1)
                         {
-                            LLed_Track3.BackColor = Color.Green;
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            LLed_Track3.BackColor = m_FYAppVar.TrackNotActiveColor;             //Color.Green;
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         if (Val == 0 && Initialized == true)
                         {
                             LLed_Track3.BackColor = Color.Transparent;
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         else if (Initialized == false)
                         {
-                            LLed_Track3.BackColor = Color.Cyan;
+                            LLed_Track3.BackColor = m_FYAppVar.TrackNotInitializedColor;        //Color.Cyan;
                             LLed_Track3.Text = "                     Not Initialized";
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         break;
 
                     case "LLed_Track4": if (Val >= 1 && TrackStatusLight[4] == true)
                         {
-                            LLed_Track4.BackColor = Color.Lime;
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            LLed_Track4.BackColor = m_FYAppVar.TrackOccupiedColor;              //Color.Lime;
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         else if (Val >= 1)
                         {
-                            LLed_Track4.BackColor = Color.Green;
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            LLed_Track4.BackColor = m_FYAppVar.TrackNotActiveColor;             //Color.Green;
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         if (Val == 0 && Initialized == true)
                         {
                             LLed_Track4.BackColor = Color.Transparent;
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         else if (Initialized == false)
                         {
-                            LLed_Track4.BackColor = Color.Cyan;
+                            LLed_Track4.BackColor = m_FYAppVar.TrackNotInitializedColor;        //Color.Cyan;
                             LLed_Track4.Text = "                     Not Initialized";
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         break;
 
                     case "LLed_Track5": if (Val >= 1 && TrackStatusLight[5] == true)
                         {
-                            LLed_Track5.BackColor = Color.Lime;
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            LLed_Track5.BackColor = m_FYAppVar.TrackOccupiedColor;              //Color.Lime;
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         else if (Val >= 1)
                         {
-                            LLed_Track5.BackColor = Color.Green;
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            LLed_Track5.BackColor = m_FYAppVar.TrackNotActiveColor;             //Color.Green;
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         if (Val == 0 && Initialized == true)
                         {
                             LLed_Track5.BackColor = Color.Transparent;
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         else if (Initialized == false)
                         {
-                            LLed_Track5.BackColor = Color.Cyan;
+                            LLed_Track5.BackColor = m_FYAppVar.TrackNotInitializedColor;        //Color.Cyan;
                             LLed_Track5.Text = "                     Not Initialized";
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         break;
 
                     case "LLed_Track6": if (Val >= 1 && TrackStatusLight[6] == true)
                         {
-                            LLed_Track6.BackColor = Color.Lime;
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            LLed_Track6.BackColor = m_FYAppVar.TrackOccupiedColor;              //Color.Lime;
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         else if (Val >= 1)
                         {
-                            LLed_Track6.BackColor = Color.Green;
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            LLed_Track6.BackColor = m_FYAppVar.TrackNotActiveColor;             //Color.Green;
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         if (Val == 0 && Initialized == true)
                         {
                             LLed_Track6.BackColor = Color.Transparent;
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         else if (Initialized == false)
                         {
-                            LLed_Track6.BackColor = Color.Cyan;
+                            LLed_Track6.BackColor = m_FYAppVar.TrackNotInitializedColor;        //Color.Cyan;
                             LLed_Track6.Text = "                     Not Initialized";
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         break;
 
                     case "LLed_Track7": if (Val >= 1 && TrackStatusLight[7] == true)
                         {
-                            LLed_Track7.BackColor = Color.Lime;
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            LLed_Track7.BackColor = m_FYAppVar.TrackOccupiedColor;              //Color.Lime;
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         else if (Val >= 1)
                         {
-                            LLed_Track7.BackColor = Color.Green;
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            LLed_Track7.BackColor = m_FYAppVar.TrackNotActiveColor;             //Color.Green;
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         if (Val == 0 && Initialized == true)
                         {
                             LLed_Track7.BackColor = Color.Transparent;
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         else if (Initialized == false)
                         {
-                            LLed_Track7.BackColor = Color.Cyan;
+                            LLed_Track7.BackColor = m_FYAppVar.TrackNotInitializedColor;        //Color.Cyan;
                             LLed_Track7.Text = "                     Not Initialized";
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         break;
 
                     case "LLed_Track8": if (Val >= 1 && TrackStatusLight[8] == true)
                         {
-                            LLed_Track8.BackColor = Color.Lime;
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            LLed_Track8.BackColor = m_FYAppVar.TrackOccupiedColor;              //Color.Lime;
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         else if (Val >= 1)
                         {
-                            LLed_Track8.BackColor = Color.Green;
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            LLed_Track8.BackColor = m_FYAppVar.TrackNotActiveColor;             //Color.Green;
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         if (Val == 0 && Initialized == true)
                         {
                             LLed_Track8.BackColor = Color.Transparent;
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         else if (Initialized == false)
                         {
-                            LLed_Track8.BackColor = Color.Cyan;
+                            LLed_Track8.BackColor = m_FYAppVar.TrackNotInitializedColor;        //Color.Cyan;
                             LLed_Track8.Text = "                     Not Initialized";
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         break;
 
                     case "LLed_Track9": if (Val >= 1 && TrackStatusLight[9] == true)
                         {
-                            LLed_Track9.BackColor = Color.Lime;
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            LLed_Track9.BackColor = m_FYAppVar.TrackOccupiedColor;              //Color.Lime;
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         else if (Val >= 1)
                         {
-                            LLed_Track9.BackColor = Color.Green;
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            LLed_Track9.BackColor = m_FYAppVar.TrackNotActiveColor;             //Color.Green;
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         if (Val == 0 && Initialized == true)
                         {
                             LLed_Track9.BackColor = Color.Transparent;
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         else if (Initialized == false)
                         {
-                            LLed_Track9.BackColor = Color.Cyan;
+                            LLed_Track9.BackColor = m_FYAppVar.TrackNotInitializedColor;        //Color.Cyan;
                             LLed_Track9.Text = "                     Not Initialized";
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         break;
 
                     case "LLed_Track10": if (Val >= 1 && TrackStatusLight[10] == true)
                         {
-                            LLed_Track10.BackColor = Color.Lime;
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            LLed_Track10.BackColor = m_FYAppVar.TrackOccupiedColor;             //Color.Lime;
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         else if (Val >= 1)
                         {
-                            LLed_Track10.BackColor = Color.Green;
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            LLed_Track10.BackColor = m_FYAppVar.TrackNotActiveColor;            //Color.Green;
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         if (Val == 0 && Initialized == true)
                         {
-                            LLed_Track10.BackColor = Color.Transparent;
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            LLed_Track10.BackColor = Color.Transparent;                //Color.Transparent;
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         else if (Initialized == false)
                         {
-                            LLed_Track10.BackColor = Color.Cyan;
+                            LLed_Track10.BackColor = m_FYAppVar.TrackNotInitializedColor;       //Color.Cyan;
                             LLed_Track10.Text = "                     Not Initialized";
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         break;
 
                     case "LLed_Track11": if (Val >= 1 && TrackStatusLight[11] == true)
                         {
-                            LLed_Track11.BackColor = Color.Lime;
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            LLed_Track11.BackColor = m_FYAppVar.TrackOccupiedColor;             //Color.Lime;
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         else if (Val >= 1)
                         {
-                            LLed_Track11.BackColor = Color.Green;
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            LLed_Track11.BackColor = m_FYAppVar.TrackNotActiveColor;            //Color.Green;
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         if (Val == 0 && Initialized == true)
                         {
-                            LLed_Track11.BackColor = Color.Transparent;
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            LLed_Track11.BackColor = Color.Transparent;                //Color.Transparent;
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         else if (Initialized == false)
                         {
-                            LLed_Track11.BackColor = Color.Cyan;
+                            LLed_Track11.BackColor = m_FYAppVar.TrackNotInitializedColor;       //m_FYAppVar.TrackNotInitializedColor;;
                             LLed_Track11.Text = "                     Not Initialized";
-                            CheckWhichTrackInline();                            // Sensor background color update
+                            CheckWhichTrackInline();                                            // Sensor background color update
                         }
                         break;
 
                     case "LLed_Block6": if (Val >= 1)
                         {
-                            LLed_Block6.BackColor = Color.Lime;
+                            LLed_Block6.BackColor = m_FYAppVar.TrackOccupiedColor;//Color.Lime;
                         }
                         if (Val == 0)
                         {
-                            LLed_Block6.BackColor = Color.Transparent;
+                            LLed_Block6.BackColor = Color.Transparent;//   Color.Transparent;
                         }
                         break;
 
                     case "LLed_Block7": if (Val >= 1)
                         {
-                            LLed_Block7.BackColor = Color.Lime;
+                            LLed_Block7.BackColor = m_FYAppVar.TrackOccupiedColor;//Color.Lime;
                         }
                         if (Val == 0)
                         {
-                            LLed_Block7.BackColor = Color.Transparent;
+                            LLed_Block7.BackColor = Color.Transparent;//   Color.Transparent;
                         }
                         break;
 
@@ -1259,53 +1437,72 @@ namespace Siebwalde_Application
             }
         }
 
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: UpdateTrackIndicatorColor
+         *               
+         *              
+         *               
+         *
+         *  Input(s)   : 
+         *
+         *  Output(s)  :
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      :
+         */
+        /*#--------------------------------------------------------------------------#*/
         private void UpdateTrackIndicatorColor()
         {
             if (TrackStatusLight[0] == true)            // in between tracks every occupied track becomes green
             {
                 if (LLed_Track1.BackColor != Color.Transparent)
                 {
-                    LLed_Track1.BackColor = Color.Green;
+                    LLed_Track1.BackColor = m_FYAppVar.TrackNotActiveColor;            //Color.Green;
                 }
                 if (LLed_Track2.BackColor != Color.Transparent)
                 {
-                    LLed_Track2.BackColor = Color.Green;
+                    LLed_Track2.BackColor = m_FYAppVar.TrackNotActiveColor;            //Color.Green;
                 }
                 if (LLed_Track3.BackColor != Color.Transparent)
                 {
-                    LLed_Track3.BackColor = Color.Green;
+                    LLed_Track3.BackColor = m_FYAppVar.TrackNotActiveColor;            //Color.Green;
                 }
                 if (LLed_Track4.BackColor != Color.Transparent)
                 {
-                    LLed_Track4.BackColor = Color.Green;
+                    LLed_Track4.BackColor = m_FYAppVar.TrackNotActiveColor;            //Color.Green;
                 }
                 if (LLed_Track5.BackColor != Color.Transparent)
                 {
-                    LLed_Track5.BackColor = Color.Green;
+                    LLed_Track5.BackColor = m_FYAppVar.TrackNotActiveColor;            //Color.Green;
                 }
                 if (LLed_Track6.BackColor != Color.Transparent)
                 {
-                    LLed_Track6.BackColor = Color.Green;
+                    LLed_Track6.BackColor = m_FYAppVar.TrackNotActiveColor;            //Color.Green;
                 }
                 if (LLed_Track7.BackColor != Color.Transparent)
                 {
-                    LLed_Track7.BackColor = Color.Green;
+                    LLed_Track7.BackColor = m_FYAppVar.TrackNotActiveColor;            //Color.Green;
                 }
                 if (LLed_Track8.BackColor != Color.Transparent)
                 {
-                    LLed_Track8.BackColor = Color.Green;
+                    LLed_Track8.BackColor = m_FYAppVar.TrackNotActiveColor;            //Color.Green;
                 }
                 if (LLed_Track9.BackColor != Color.Transparent)
                 {
-                    LLed_Track9.BackColor = Color.Green;
+                    LLed_Track9.BackColor = m_FYAppVar.TrackNotActiveColor;            //Color.Green;
                 }
                 if (LLed_Track10.BackColor != Color.Transparent)
                 {
-                    LLed_Track10.BackColor = Color.Green;
+                    LLed_Track10.BackColor = m_FYAppVar.TrackNotActiveColor;            //Color.Green;
                 }
                 if (LLed_Track11.BackColor != Color.Transparent)
                 {
-                    LLed_Track11.BackColor = Color.Green;
+                    LLed_Track11.BackColor = m_FYAppVar.TrackNotActiveColor;            //Color.Green;
                 }
 
                 CheckWhichTrackInline();
@@ -1314,137 +1511,156 @@ namespace Siebwalde_Application
 
             if (TrackStatusLight[1] == true && LLed_Track1.BackColor != Color.Transparent) // track selected? when occupied color becomes Lime otherwise green
             {
-                LLed_Track1.BackColor = Color.Lime;
+                LLed_Track1.BackColor = m_FYAppVar.TrackOccupiedColor;             //Color.Lime;
                 CheckWhichTrackInline();
             }
             else if (LLed_Track1.BackColor != Color.Transparent)
             {
-                LLed_Track1.BackColor = Color.Green;
+                LLed_Track1.BackColor = m_FYAppVar.TrackNotActiveColor;             //Color.Green;
                 CheckWhichTrackInline();
             }
             else { CheckWhichTrackInline(); }
 
             if (TrackStatusLight[2] == true && LLed_Track2.BackColor != Color.Transparent) // track selected? when occupied color becomes Lime otherwise green
             {
-                LLed_Track2.BackColor = Color.Lime;
+                LLed_Track2.BackColor = m_FYAppVar.TrackOccupiedColor;             //Color.Lime;
                 CheckWhichTrackInline();
             }
             else if (LLed_Track2.BackColor != Color.Transparent)
             {
-                LLed_Track2.BackColor = Color.Green;
+                LLed_Track2.BackColor = m_FYAppVar.TrackNotActiveColor;             //Color.Green;
                 CheckWhichTrackInline();
             }
             else { CheckWhichTrackInline(); }
 
             if (TrackStatusLight[3] == true && LLed_Track3.BackColor != Color.Transparent) // track selected? when occupied color becomes Lime otherwise green
             {
-                LLed_Track3.BackColor = Color.Lime;
+                LLed_Track3.BackColor = m_FYAppVar.TrackOccupiedColor;             //Color.Lime;
                 CheckWhichTrackInline();
             }
             else if (LLed_Track3.BackColor != Color.Transparent)
             {
-                LLed_Track3.BackColor = Color.Green;
+                LLed_Track3.BackColor = m_FYAppVar.TrackNotActiveColor;             //Color.Green;
                 CheckWhichTrackInline();
             }
             else { CheckWhichTrackInline(); }
 
             if (TrackStatusLight[4] == true && LLed_Track4.BackColor != Color.Transparent) // track selected? when occupied color becomes Lime otherwise green
             {
-                LLed_Track4.BackColor = Color.Lime;
+                LLed_Track4.BackColor = m_FYAppVar.TrackOccupiedColor;             //Color.Lime;
                 CheckWhichTrackInline();
             }
             else if (LLed_Track4.BackColor != Color.Transparent)
             {
-                LLed_Track4.BackColor = Color.Green;
+                LLed_Track4.BackColor = m_FYAppVar.TrackNotActiveColor;             //Color.Green;
                 CheckWhichTrackInline();
             }
             else { CheckWhichTrackInline(); }
 
             if (TrackStatusLight[5] == true && LLed_Track5.BackColor != Color.Transparent) // track selected? when occupied color becomes Lime otherwise green
             {
-                LLed_Track5.BackColor = Color.Lime;
+                LLed_Track5.BackColor = m_FYAppVar.TrackOccupiedColor;             //Color.Lime;
                 CheckWhichTrackInline();
             }
             else if (LLed_Track5.BackColor != Color.Transparent)
             {
-                LLed_Track5.BackColor = Color.Green;
+                LLed_Track5.BackColor = m_FYAppVar.TrackNotActiveColor;             //Color.Green;
                 CheckWhichTrackInline();
             }
             else { CheckWhichTrackInline(); }
 
             if (TrackStatusLight[6] == true && LLed_Track6.BackColor != Color.Transparent) // track selected? when occupied color becomes Lime otherwise green
             {
-                LLed_Track6.BackColor = Color.Lime;
+                LLed_Track6.BackColor = m_FYAppVar.TrackOccupiedColor;             //Color.Lime;
                 CheckWhichTrackInline();
             }
             else if (LLed_Track6.BackColor != Color.Transparent)
             {
-                LLed_Track6.BackColor = Color.Green;
+                LLed_Track6.BackColor = m_FYAppVar.TrackNotActiveColor;             //Color.Green;
                 CheckWhichTrackInline();
             }
             else { CheckWhichTrackInline(); }
 
             if (TrackStatusLight[7] == true && LLed_Track7.BackColor != Color.Transparent) // track selected? when occupied color becomes Lime otherwise green
             {
-                LLed_Track7.BackColor = Color.Lime;
+                LLed_Track7.BackColor = m_FYAppVar.TrackOccupiedColor;             //Color.Lime;
                 CheckWhichTrackInline();
             }
             else if (LLed_Track7.BackColor != Color.Transparent)
             {
-                LLed_Track7.BackColor = Color.Green;
+                LLed_Track7.BackColor = m_FYAppVar.TrackNotActiveColor;             //Color.Green;
                 CheckWhichTrackInline();
             }
             else { CheckWhichTrackInline(); }
 
             if (TrackStatusLight[8] == true && LLed_Track8.BackColor != Color.Transparent) // track selected? when occupied color becomes Lime otherwise green
             {
-                LLed_Track8.BackColor = Color.Lime;
+                LLed_Track8.BackColor = m_FYAppVar.TrackOccupiedColor;             //Color.Lime;
                 CheckWhichTrackInline();
             }
             else if (LLed_Track8.BackColor != Color.Transparent)
             {
-                LLed_Track8.BackColor = Color.Green;
+                LLed_Track8.BackColor = m_FYAppVar.TrackNotActiveColor;             //Color.Green;
                 CheckWhichTrackInline();
             }
             else { CheckWhichTrackInline(); }
 
             if (TrackStatusLight[9] == true && LLed_Track9.BackColor != Color.Transparent) // track selected? when occupied color becomes Lime otherwise green
             {
-                LLed_Track9.BackColor = Color.Lime;
+                LLed_Track9.BackColor = m_FYAppVar.TrackOccupiedColor;             //Color.Lime;
                 CheckWhichTrackInline();
             }
             else if (LLed_Track9.BackColor != Color.Transparent)
             {
-                LLed_Track9.BackColor = Color.Green;
+                LLed_Track9.BackColor = m_FYAppVar.TrackNotActiveColor;             //Color.Green;
                 CheckWhichTrackInline();
             }
             else { CheckWhichTrackInline(); }
 
             if (TrackStatusLight[10] == true && LLed_Track10.BackColor != Color.Transparent) // track selected? when occupied color becomes Lime otherwise green
             {
-                LLed_Track10.BackColor = Color.Lime;
+                LLed_Track10.BackColor = m_FYAppVar.TrackOccupiedColor;             //Color.Lime;
                 CheckWhichTrackInline();
             }
             else if (LLed_Track10.BackColor != Color.Transparent)
             {
-                LLed_Track10.BackColor = Color.Green;
+                LLed_Track10.BackColor = m_FYAppVar.TrackNotActiveColor;             //Color.Green;
                 CheckWhichTrackInline();
             }
             else { CheckWhichTrackInline(); }
 
             if (TrackStatusLight[11] == true && LLed_Track11.BackColor != Color.Transparent) // track selected? when occupied color becomes Lime otherwise green
             {
-                LLed_Track11.BackColor = Color.Lime;
+                LLed_Track11.BackColor = m_FYAppVar.TrackOccupiedColor;             //Color.Lime;
                 CheckWhichTrackInline();
             }
             else if (LLed_Track11.BackColor != Color.Transparent)
             {
-                LLed_Track11.BackColor = Color.Green;
+                LLed_Track11.BackColor = m_FYAppVar.TrackNotActiveColor;             //Color.Green;
                 CheckWhichTrackInline();
             }
             else { CheckWhichTrackInline(); }
         }
 
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: CheckWhichTrackInline
+         *               
+         *              
+         *               
+         *
+         *  Input(s)   : 
+         *
+         *  Output(s)  :
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      :
+         */
+        /*#--------------------------------------------------------------------------#*/
         private void CheckWhichTrackInline()
         {
             if (LLed_Track1.Location.Y == LLed_Block6.Location.Y)   // When shifting the color of F11/12/13 must change accordingly to the track positioned
@@ -1503,6 +1719,25 @@ namespace Siebwalde_Application
             }
         }
 
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: SensorBackcolorUpdate
+         *               
+         *              
+         *               
+         *
+         *  Input(s)   : 
+         *
+         *  Output(s)  :
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      :
+         */
+        /*#--------------------------------------------------------------------------#*/
         private void SensorBackcolorUpdate(int track)
         {
             switch (track)
@@ -1676,6 +1911,25 @@ namespace Siebwalde_Application
             }
         }
 
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: ShiftIndicatorPos
+         *               
+         *              
+         *               
+         *
+         *  Input(s)   : 
+         *
+         *  Output(s)  :
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      :
+         */
+        /*#--------------------------------------------------------------------------#*/
         private void ShiftIndicatorPos(int val)
         {
             // Check position of Gwin
@@ -1842,8 +2096,27 @@ namespace Siebwalde_Application
 
                 default: break;
             }
-        }        
+        }
 
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: automaticModeToolStripMenuItem_Click
+         *               
+         *              
+         *               
+         *
+         *  Input(s)   : 
+         *
+         *  Output(s)  :
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      :
+         */
+        /*#--------------------------------------------------------------------------#*/
         private void automaticModeToolStripMenuItem_Click(object sender, EventArgs e)
         {
             automaticModeToolStripMenuItem.Checked = true;
@@ -1862,6 +2135,25 @@ namespace Siebwalde_Application
 
         }
 
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: manualModeToolStripMenuItem_Click
+         *               
+         *              
+         *               
+         *
+         *  Input(s)   : 
+         *
+         *  Output(s)  :
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      :
+         */
+        /*#--------------------------------------------------------------------------#*/
         private void manualModeToolStripMenuItem_Click(object sender, EventArgs e)
         {
             automaticModeToolStripMenuItem.Checked = false;
@@ -1885,22 +2177,98 @@ namespace Siebwalde_Application
 
         }
 
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: quitToolStripMenuItem_Click
+         *               
+         *              
+         *               
+         *
+         *  Input(s)   : 
+         *
+         *  Output(s)  :
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      :
+         */
+        /*#--------------------------------------------------------------------------#*/
         private void quitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.Hide();
         }
 
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: alwaysOnTopToolStripMenuItem_Click
+         *               
+         *              
+         *               
+         *
+         *  Input(s)   : 
+         *
+         *  Output(s)  :
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      :
+         */
+        /*#--------------------------------------------------------------------------#*/
         private void alwaysOnTopToolStripMenuItem_Click(object sender, EventArgs e)
         {
             alwaysOnTopToolStripMenuItem.Checked = !alwaysOnTopToolStripMenuItem.Checked;
             this.TopMost = alwaysOnTopToolStripMenuItem.Checked;                    
         }
 
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: LLed_Trackx_Click
+         *               
+         *              
+         *               
+         *
+         *  Input(s)   : 
+         *
+         *  Output(s)  :
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      :
+         */
+        /*#--------------------------------------------------------------------------#*/
         private void LLed_Track1_Click(object sender, EventArgs e)
         {
 
         }
 
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: PB_Block5BIn_Click
+         *               
+         *              
+         *               
+         *
+         *  Input(s)   : 
+         *
+         *  Output(s)  :
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      :
+         */
+        /*#--------------------------------------------------------------------------#*/
         private void PB_Block5BIn_Click(object sender, EventArgs e)
         {
             if (Btn_Bezet5BOn_TOP_Click_Toggle == true)
@@ -1915,6 +2283,25 @@ namespace Siebwalde_Application
             }
         }
 
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: PB_Block6In_Click
+         *               
+         *              
+         *               
+         *
+         *  Input(s)   : 
+         *
+         *  Output(s)  :
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      :
+         */
+        /*#--------------------------------------------------------------------------#*/
         private void PB_Block6In_Click(object sender, EventArgs e)
         {
             if (Btn_Bezet6On_TOP_Click_Toggle == true)
@@ -1929,6 +2316,25 @@ namespace Siebwalde_Application
             }
         }
 
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: PB_Block7In_Click
+         *               
+         *              
+         *               
+         *
+         *  Input(s)   : 
+         *
+         *  Output(s)  :
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      :
+         */
+        /*#--------------------------------------------------------------------------#*/
         private void PB_Block7In_Click(object sender, EventArgs e)
         {
             if (Btn_Bezet7On_TOP_Click_Toggle == true)

@@ -9,13 +9,13 @@
       <Value Profile="(Default)">Lime</Value>
     </Setting>
     <Setting Name="SETxCOLORxTRACKxNOTxINITIALIZED" Type="System.Drawing.Color" Scope="User">
-      <Value Profile="(Default)">Lime</Value>
+      <Value Profile="(Default)">Cyan</Value>
     </Setting>
     <Setting Name="SETxCOLORxTRACKxNOTxACTIVE" Type="System.Drawing.Color" Scope="User">
-      <Value Profile="(Default)">Lime</Value>
+      <Value Profile="(Default)">DarkGreen</Value>
     </Setting>
     <Setting Name="SETxCOLORxTRACKxEMPTY" Type="System.Drawing.Color" Scope="User">
-      <Value Profile="(Default)">Lime</Value>
+      <Value Profile="(Default)">Transparent</Value>
     </Setting>
   </Settings>
 </SettingsFile>

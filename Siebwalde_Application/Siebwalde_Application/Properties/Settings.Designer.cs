@@ -49,7 +49,7 @@ namespace Siebwalde_Application.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Lime")]
+        [global::System.Configuration.DefaultSettingValueAttribute("Cyan")]
         public global::System.Drawing.Color SETxCOLORxTRACKxNOTxINITIALIZED {
             get {
                 return ((global::System.Drawing.Color)(this["SETxCOLORxTRACKxNOTxINITIALIZED"]));
@@ -61,7 +61,7 @@ namespace Siebwalde_Application.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Lime")]
+        [global::System.Configuration.DefaultSettingValueAttribute("DarkGreen")]
         public global::System.Drawing.Color SETxCOLORxTRACKxNOTxACTIVE {
             get {
                 return ((global::System.Drawing.Color)(this["SETxCOLORxTRACKxNOTxACTIVE"]));
@@ -73,7 +73,7 @@ namespace Siebwalde_Application.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Lime")]
+        [global::System.Configuration.DefaultSettingValueAttribute("Transparent")]
         public global::System.Drawing.Color SETxCOLORxTRACKxEMPTY {
             get {
                 return ((global::System.Drawing.Color)(this["SETxCOLORxTRACKxEMPTY"]));

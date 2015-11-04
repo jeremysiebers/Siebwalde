@@ -75,7 +75,7 @@ namespace Siebwalde_Application
         {
             if (TrainDriveIn_Machine != State.Start || TrainDriveOut_Machine != State.Start)
             {
-                m_FYAppLog.StoreText("FYAppTrainDrive(). recieved uControllerReady = true");
+                m_FYAppLog.StoreText("FYAppTrainDrive().recieved uControllerReady = true");
             }            
             uControllerReady = true;
         }
@@ -146,7 +146,7 @@ namespace Siebwalde_Application
                     break;
 
                 case State.CheckEmptyTrack:
-                    if (m_FYAppVar.TrainsOnFY[TrainDriveInPointer] == 1)
+                    if (m_FYAppVar.iTrainsOnFY[TrainDriveInPointer] == 1)
                     {
                         TrainDriveInPointer++;
                         if (TrainDriveInPointer > 11)
@@ -203,7 +203,7 @@ namespace Siebwalde_Application
                     break;
 
                 case State.CheckTrainInTrack6:
-                    if (m_FYAppVar.Block6 == true)
+                    if (m_FYAppVar.bBlock6 == true)
                     {
                         m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveIn m_iFYApp.GetBlock6() == true");
                         // <---------------------------------------------------------------------------------------------------------delay required in real life?
@@ -224,7 +224,7 @@ namespace Siebwalde_Application
                     break;
                     
                 case State.CheckTrainF10:
-                    if (m_FYAppVar.F10 == true)
+                    if (m_FYAppVar.bF10 == true)
                     {
                         m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveIn m_iFYApp.GetF10() == true");
                         uControllerReady = false;
@@ -244,7 +244,7 @@ namespace Siebwalde_Application
                     break;
 
                 case State.CheckTrainInTrack7:
-                    if (m_FYAppVar.Block7 == true)
+                    if (m_FYAppVar.bBlock7 == true)
                     {
                         m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveIn m_iFYApp.GetBlock7() == true");
                         TrainDriveIn_Machine = State.CheckTrainF11;
@@ -253,7 +253,7 @@ namespace Siebwalde_Application
                     break;
 
                 case State.CheckTrainF11:
-                    if (m_FYAppVar.F11 == true)
+                    if (m_FYAppVar.bF11 == true)
                     {
                         m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveIn m_iFYApp.GetF11() == true");
                         uControllerReady = false;
@@ -275,7 +275,7 @@ namespace Siebwalde_Application
                 case State.CheckTrainStopped:
                     // <---------------------------------------------------------------------------------------------------------delay required in real life? -> yes wait time for train to stop after occ on 7!!!
                     TrainDriveDelay++;
-                    if (m_FYAppVar.F12 == false && m_FYAppVar.F13 == false && TrainDriveDelay > TRAINDRIVEDELAY)
+                    if (m_FYAppVar.bF12 == false && m_FYAppVar.bF13 == false && TrainDriveDelay > TRAINDRIVEDELAY)
                     {
                         m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveIn m_iFYApp.GetF12() == false && m_iFYApp.GetF13() == false");
                         TrainDriveDelay = 0;
@@ -286,7 +286,7 @@ namespace Siebwalde_Application
                         m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveIn TrainDriveIn_Machine = State.CheckTrainStopped_1");
                         
                     }
-                    else if (m_FYAppVar.F12 == true || m_FYAppVar.F13 == true && TrainDriveDelay > TRAINDRIVEDELAY)
+                    else if (m_FYAppVar.bF12 == true || m_FYAppVar.bF13 == true && TrainDriveDelay > TRAINDRIVEDELAY)
                     {
                         TrainDriveDelay = 0;
                         m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveIn m_iFYApp.GetF12()->" + Convert.ToString(m_FYAppVar.F12) + ", m_iFYApp.GetF13()->" + Convert.ToString(m_FYAppVar.F13));
@@ -302,7 +302,7 @@ namespace Siebwalde_Application
                 case State.CheckTrainStopped_1:
                     if (uControllerReady == true)
                     {
-                        m_FYAppVar.TrainsOnFY[TrainDriveInPointer] = 1;
+                        m_FYAppVar.iTrainsOnFY[TrainDriveInPointer] = 1;
                         m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveIn m_iFYApp.GetTrainsOnFY()[" + Convert.ToString(TrainDriveInPointer) + "] = 1 (TRAIN IN)");//<-----------------------------------------------------------------Send to FORM!!!
                         m_FYAppVar.UpdateTrainsOnFY("Track" + Convert.ToString(TrainDriveInPointer), 1, "");
                         m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveIn m_iFYApp.UpdateTrainsOnFY()");
@@ -332,10 +332,10 @@ namespace Siebwalde_Application
                     break;
 
                 case State.TrainDriveInFailed:
-                    if (m_FYAppVar.F10 == false && m_FYAppVar.F11 == false && m_FYAppVar.F12 == false && m_FYAppVar.F13 == false && m_FYAppVar.Block6 == false && m_FYAppVar.Block7 == false)
+                    if (m_FYAppVar.bF10 == false && m_FYAppVar.bF11 == false && m_FYAppVar.bF12 == false && m_FYAppVar.bF13 == false && m_FYAppVar.bBlock6 == false && m_FYAppVar.bBlock7 == false)
                     {
                         m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveIn Train has driven away");//<-----------------------------------------------------------------Send to FORM!!!
-                        m_FYAppVar.TrainsOnFY[TrainDriveInPointer] = 0;
+                        m_FYAppVar.iTrainsOnFY[TrainDriveInPointer] = 0;
                         m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveIn m_iFYApp.GetTrainsOnFY()[" + Convert.ToString(TrainDriveInPointer) + "] = 0 (NO TRAIN IN)");
                         m_FYAppVar.UpdateTrainsOnFY("Track" + Convert.ToString(TrainDriveInPointer), 0, "");
                         m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveIn m_iFYApp.UpdateTrainsOnFY()");
@@ -387,7 +387,7 @@ namespace Siebwalde_Application
                     break;
 
                 case State.CheckFullTrack:
-                    if (m_FYAppVar.TrainsOnFY[TrainDriveOutPointer] == 0)
+                    if (m_FYAppVar.iTrainsOnFY[TrainDriveOutPointer] == 0)
                     {
                         TrainDriveOutPointer++;
                         if (TrainDriveOutPointer > 11)
@@ -439,7 +439,7 @@ namespace Siebwalde_Application
                     break;
 
                 case State.CheckTrainLeftTrack7:
-                    if (m_FYAppVar.F10 == false && m_FYAppVar.F11 == false && m_FYAppVar.F12 == false && m_FYAppVar.F13 == false && m_FYAppVar.Block7 == false)
+                    if (m_FYAppVar.bF10 == false && m_FYAppVar.bF11 == false && m_FYAppVar.bF12 == false && m_FYAppVar.bF13 == false && m_FYAppVar.bBlock7 == false)
                     {
                         uControllerReady = false;
                         m_FYAppVar.Occ7OnTrue.UpdateActuator();//m_iFYApp.GetFYApp().CmdOcc7OnTrue();
@@ -453,7 +453,7 @@ namespace Siebwalde_Application
                     if (uControllerReady == true)
                     {
                         m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveOut Train has driven out of the Fiddle Yard"); //<-----------------------------------------------------------------Send to FORM!!!
-                        m_FYAppVar.TrainsOnFY[TrainDriveOutPointer] = 0;
+                        m_FYAppVar.iTrainsOnFY[TrainDriveOutPointer] = 0;
                         m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveOut m_iFYApp.GetTrainsOnFY()[" + Convert.ToString(TrainDriveOutPointer) + "] = 0 (TRAIN LEFT)");
                         m_FYAppVar.UpdateTrainsOnFY("Track" + Convert.ToString(TrainDriveOutPointer), 0, "");
                         m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveOut m_iFYApp.UpdateTrainsOnFY()");

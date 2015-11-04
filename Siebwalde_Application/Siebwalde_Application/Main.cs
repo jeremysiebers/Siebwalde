@@ -23,8 +23,7 @@ namespace Siebwalde_Application
     public interface iMain
     {
         void SiebwaldeAppLogging(string text);
-        void FYLinkActivityUpdate();
-        Main GetMain();                             // interface to Main
+        void FYLinkActivityUpdate();        
     }
     
     public partial class Main : Form , iMain
@@ -40,12 +39,7 @@ namespace Siebwalde_Application
         public Log2LoggingFile SiebwaldeApplicationMainLogging;
 
         private bool ViewTop = true;
-        private bool ViewBot = true;
-
-        public Main GetMain()
-        {
-            return this;
-        }
+        private bool ViewBot = true;        
 
         public Main()
         {

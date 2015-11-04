@@ -8,6 +8,8 @@ namespace Siebwalde_Application
     public class FiddleYardSimMove
     {
         public iFiddleYardSimulator m_iFYSim;
+        private Log2LoggingFile m_FYSimLog;
+        private FiddleYardSimulatorVariables m_FYSimVar;
         private int FiddleOneMoveState;
         private int AliveUpdateCnt;
         private int GetTrackNoCnt;
@@ -15,7 +17,7 @@ namespace Siebwalde_Application
         private string MoveDirection;
 
         /*#--------------------------------------------------------------------------#*/
-        /*  Description: FiddleYardOneMove Init
+        /*  Description: FiddleYardOneMove Constructor
          * 
          *  Input(s)   : 
          *
@@ -30,9 +32,11 @@ namespace Siebwalde_Application
          *  Notes      : 
          */
         /*#--------------------------------------------------------------------------#*/
-        public FiddleYardSimMove(iFiddleYardSimulator iFYSim)
+        public FiddleYardSimMove(iFiddleYardSimulator iFYSim, Log2LoggingFile FiddleYardSimulatorLogging, FiddleYardSimulatorVariables FYSimVar)
         {
             m_iFYSim = iFYSim;
+            m_FYSimLog = FiddleYardSimulatorLogging;
+            m_FYSimVar = FYSimVar;
             FiddleOneMoveState = 0;
             AliveUpdateCnt = 0;
             GetTrackNoCnt = 0;
@@ -63,30 +67,30 @@ namespace Siebwalde_Application
             switch (FiddleOneMoveState)
             {                
                 case 0:
-                    if (m_iFYSim.GetFYSim().F12.Value == true)
+                    if (m_FYSimVar.F12.Value == true)
                     {
                         _Return = true;
                         break; //<------------------------------------------------------------------------error text to IOHANDLE to FORM as message here about F12!!!also into traindetect!!!
                     }
-                    else if (m_iFYSim.GetFYSim().F13.Value == true)
+                    else if (m_FYSimVar.F13.Value == true)
                     {
                         _Return = true;
                         break;
                     }
-                    m_iFYSim.GetFYSim().FiddleYardSimulatorLogging.StoreText("FYMove.FiddleOneMove(" + direction + ") started");
-                    GetTrackNoCnt = m_iFYSim.GetFYSim().TrackNo.Count;
-                    m_iFYSim.GetFYSim().TrackPower.Value = false;
-                    m_iFYSim.GetFYSim().Resistor.Value = true;
-                    m_iFYSim.GetFYSim().M10.Value = true;
-                    m_iFYSim.GetFYSim().CL10Heart.Value = false;
-                    m_iFYSim.GetFYSim().F10.Value = false;
-                    m_iFYSim.GetFYSim().F11.Value = false;
-                    m_iFYSim.GetFYSim().F12.Value = false;
-                    m_iFYSim.GetFYSim().F13.Value = false;
-                    m_iFYSim.GetFYSim().TrackNo.Count = 0;
+                    m_FYSimLog.StoreText("FYMove.FiddleOneMove(" + direction + ") started");
+                    GetTrackNoCnt = m_FYSimVar.TrackNo.Count;
+                    m_FYSimVar.TrackPower.Value = false;
+                    m_FYSimVar.Resistor.Value = true;
+                    m_FYSimVar.M10.Value = true;
+                    m_FYSimVar.CL10Heart.Value = false;
+                    m_FYSimVar.F10.Value = false;
+                    m_FYSimVar.F11.Value = false;
+                    m_FYSimVar.F12.Value = false;
+                    m_FYSimVar.F13.Value = false;
+                    m_FYSimVar.TrackNo.Count = 0;
                     AliveUpdateCnt = 0;
                     FiddleOneMoveState = 2;                                                                                                         // pass wait state
-                    m_iFYSim.GetFYSim().FiddleYardSimulatorLogging.StoreText("FYMove.FiddleOneMove FiddleOneMoveState = 1");
+                    m_FYSimLog.StoreText("FYMove.FiddleOneMove FiddleOneMoveState = 1");
                     break;
 
                 case 1: 
@@ -94,33 +98,33 @@ namespace Siebwalde_Application
                     {
                         AliveUpdateCnt = 0;
                         FiddleOneMoveState = 2;
-                        m_iFYSim.GetFYSim().FiddleYardSimulatorLogging.StoreText("FYMove.FiddleOneMove FiddleOneMoveState = 2");
+                        m_FYSimLog.StoreText("FYMove.FiddleOneMove FiddleOneMoveState = 2");
                     }
                     else { AliveUpdateCnt++; }
                     break;
 
                 case 2:
-                    m_iFYSim.GetFYSim().CL10Heart.Value = true;
+                    m_FYSimVar.CL10Heart.Value = true;
                     if (direction == "Left")
                     {
-                        m_iFYSim.GetFYSim().TrackNo.Count = GetTrackNoCnt + 1;
-                        m_iFYSim.GetFYSim().FiddleOneLeftFinished.Mssg = true;
-                        m_iFYSim.GetFYSim().FiddleYardSimulatorLogging.StoreText("FYMove.FiddleOneMove One left finished");
+                        m_FYSimVar.TrackNo.Count = GetTrackNoCnt + 1;
+                        m_FYSimVar.FiddleOneLeftFinished.Mssg = true;
+                        m_FYSimLog.StoreText("FYMove.FiddleOneMove One left finished");
                     }
                     else if (direction == "Right")
                     {
-                        m_iFYSim.GetFYSim().TrackNo.Count = GetTrackNoCnt - 1;
-                        m_iFYSim.GetFYSim().FiddleOneRightFinished.Mssg = true;
-                        m_iFYSim.GetFYSim().FiddleYardSimulatorLogging.StoreText("FYMove.FiddleOneMove One right finished");
+                        m_FYSimVar.TrackNo.Count = GetTrackNoCnt - 1;
+                        m_FYSimVar.FiddleOneRightFinished.Mssg = true;
+                        m_FYSimLog.StoreText("FYMove.FiddleOneMove One right finished");
                     }
-                    m_iFYSim.GetFYSim().TrackPower.Value = true;
-                    m_iFYSim.GetFYSim().Resistor.Value = false;
-                    m_iFYSim.GetFYSim().M10.Value = false;
+                    m_FYSimVar.TrackPower.Value = true;
+                    m_FYSimVar.Resistor.Value = false;
+                    m_FYSimVar.M10.Value = false;
                     AliveUpdateCnt = 0;
                     FiddleOneMoveState = 0;
-                    m_iFYSim.GetFYSim().FiddleYardSimulatorLogging.StoreText("FYMove.FiddleOneMove FiddleOneMoveState = 0");
+                    m_FYSimLog.StoreText("FYMove.FiddleOneMove FiddleOneMoveState = 0");
                     _Return = true;
-                    m_iFYSim.GetFYSim().FiddleYardSimulatorLogging.StoreText("FYMove.FiddleOneMove _Return = true");
+                    m_FYSimLog.StoreText("FYMove.FiddleOneMove _Return = true");
                     break;
 
                 default: FiddleOneMoveState = 0;
@@ -152,36 +156,36 @@ namespace Siebwalde_Application
             switch (FiddleOneMoveState)
             {
                 case 0:
-                    if (m_iFYSim.GetFYSim().F12.Value == true)
+                    if (m_FYSimVar.F12.Value == true)
                     {
                         _Return = true;
                         break; //<------------------------------------------------------------------------error text to IOHANDLE to FORM as message here about F12!!!also into traindetect!!!
                     }
-                    else if (m_iFYSim.GetFYSim().F13.Value == true)
+                    else if (m_FYSimVar.F13.Value == true)
                     {
                         _Return = true;
                         break;
                     }
 
-                    m_iFYSim.GetFYSim().FiddleYardSimulatorLogging.StoreText("FYMove.FiddleMultipleMove(" + direction + ") started");
+                    m_FYSimLog.StoreText("FYMove.FiddleMultipleMove(" + direction + ") started");
                     if (direction == "TargetAlive")
                     {
                         _Return = true;
-                        m_iFYSim.GetFYSim().FiddleYardSimulatorLogging.StoreText("FYMove.FiddleMultipleMove direction == TargetAlive --> _Return = true");
+                        m_FYSimLog.StoreText("FYMove.FiddleMultipleMove direction == TargetAlive --> _Return = true");
                         break;
                     }
                     try
                     {
                         GetNewTrackNo = Convert.ToInt16(direction.Substring(direction.IndexOf(@"o") + 1));
-                        m_iFYSim.GetFYSim().FiddleYardSimulatorLogging.StoreText("FYMove.FiddleMultipleMove GetNewTrackNo = " + direction.Substring(direction.IndexOf(@"o") + 1));
+                        m_FYSimLog.StoreText("FYMove.FiddleMultipleMove GetNewTrackNo = " + direction.Substring(direction.IndexOf(@"o") + 1));
                     }
                     catch
                     {
                         _Return = true;
-                        m_iFYSim.GetFYSim().FiddleYardSimulatorLogging.StoreText("FYMove.FiddleMultipleMove Error converting to int from string!!! --> _Return = true");
+                        m_FYSimLog.StoreText("FYMove.FiddleMultipleMove Error converting to int from string!!! --> _Return = true");
                         break;
                     }
-                    GetTrackNoCnt = m_iFYSim.GetFYSim().TrackNo.Count;
+                    GetTrackNoCnt = m_FYSimVar.TrackNo.Count;
                     if (GetNewTrackNo > GetTrackNoCnt)
                     {
                         MoveDirection = "Left";                        
@@ -196,15 +200,15 @@ namespace Siebwalde_Application
                         _Return = true;
                         break;
                     }
-                    m_iFYSim.GetFYSim().FiddleYardSimulatorLogging.StoreText("FYMove.FiddleMultipleMove MoveDirection = " + MoveDirection);
-                    m_iFYSim.GetFYSim().TrackPower.Value = false;
-                    m_iFYSim.GetFYSim().Resistor.Value = true;
-                    m_iFYSim.GetFYSim().M10.Value = true;
-                    m_iFYSim.GetFYSim().CL10Heart.Value = false;
-                    m_iFYSim.GetFYSim().TrackNo.Count = 0;
+                    m_FYSimLog.StoreText("FYMove.FiddleMultipleMove MoveDirection = " + MoveDirection);
+                    m_FYSimVar.TrackPower.Value = false;
+                    m_FYSimVar.Resistor.Value = true;
+                    m_FYSimVar.M10.Value = true;
+                    m_FYSimVar.CL10Heart.Value = false;
+                    m_FYSimVar.TrackNo.Count = 0;
                     AliveUpdateCnt = 0;
                     FiddleOneMoveState = 2;                                                                                                        
-                    m_iFYSim.GetFYSim().FiddleYardSimulatorLogging.StoreText("FYMove.FiddleMultipleMove FiddleOneMoveState = 1");
+                    m_FYSimLog.StoreText("FYMove.FiddleMultipleMove FiddleOneMoveState = 1");
                     break;
 
                 case 1:
@@ -212,13 +216,13 @@ namespace Siebwalde_Application
                     {
                         AliveUpdateCnt = 0;
                         FiddleOneMoveState = 2;
-                        m_iFYSim.GetFYSim().FiddleYardSimulatorLogging.StoreText("FYMove.FiddleMultipleMove FiddleOneMoveState = 2");
+                        m_FYSimLog.StoreText("FYMove.FiddleMultipleMove FiddleOneMoveState = 2");
                     }
                     else { AliveUpdateCnt++; }
                     break;
 
                 case 2:
-                    m_iFYSim.GetFYSim().CL10Heart.Value = true;
+                    m_FYSimVar.CL10Heart.Value = true;
                     if (MoveDirection == "Left")
                     {
                         GetTrackNoCnt += 1;
@@ -226,7 +230,7 @@ namespace Siebwalde_Application
                         {
                             GetTrackNoCnt = 0;
                         }
-                        m_iFYSim.GetFYSim().TrackNo.Count = GetTrackNoCnt;
+                        m_FYSimVar.TrackNo.Count = GetTrackNoCnt;
                     }
                     else if (MoveDirection == "Right")
                     {
@@ -235,11 +239,11 @@ namespace Siebwalde_Application
                         {
                             GetTrackNoCnt = 12;
                         }
-                        m_iFYSim.GetFYSim().TrackNo.Count = GetTrackNoCnt;
+                        m_FYSimVar.TrackNo.Count = GetTrackNoCnt;
                     }
-                    m_iFYSim.GetFYSim().FiddleYardSimulatorLogging.StoreText("FYMove.FiddleMultipleMove GetTrackNoCnt = " + Convert.ToString(GetTrackNoCnt));
+                    m_FYSimLog.StoreText("FYMove.FiddleMultipleMove GetTrackNoCnt = " + Convert.ToString(GetTrackNoCnt));
                     FiddleOneMoveState = 3;                                                                                                        
-                    m_iFYSim.GetFYSim().FiddleYardSimulatorLogging.StoreText("FYMove.FiddleMultipleMove FiddleOneMoveState = 3");
+                    m_FYSimLog.StoreText("FYMove.FiddleMultipleMove FiddleOneMoveState = 3");
                     break;
 
                 case 3:
@@ -247,7 +251,7 @@ namespace Siebwalde_Application
                     {
                         AliveUpdateCnt = 0;
                         FiddleOneMoveState = 4;
-                        m_iFYSim.GetFYSim().FiddleYardSimulatorLogging.StoreText("FYMove.FiddleMultipleMove FiddleOneMoveState = 4");
+                        m_FYSimLog.StoreText("FYMove.FiddleMultipleMove FiddleOneMoveState = 4");
                     }
                     else { AliveUpdateCnt++; }
                     break;
@@ -255,38 +259,38 @@ namespace Siebwalde_Application
                 case 4:
                     if (GetTrackNoCnt == GetNewTrackNo)
                     {
-                        m_iFYSim.GetFYSim().FiddleYardSimulatorLogging.StoreText("FYMove.FiddleMultipleMove GetTrackNoCnt == GetNewTrackNo");
+                        m_FYSimLog.StoreText("FYMove.FiddleMultipleMove GetTrackNoCnt == GetNewTrackNo");
                         if (MoveDirection == "Left")
                         {
-                            m_iFYSim.GetFYSim().FiddleMultipleLeftFinished.Mssg = true;
+                            m_FYSimVar.FiddleMultipleLeftFinished.Mssg = true;
                         }
                         else if (MoveDirection == "Right")
                         {
-                            m_iFYSim.GetFYSim().FiddleMultipleRightFinished.Mssg = true;
+                            m_FYSimVar.FiddleMultipleRightFinished.Mssg = true;
                         }
-                        m_iFYSim.GetFYSim().TrackPower.Value = true;
-                        m_iFYSim.GetFYSim().Resistor.Value = false;
-                        m_iFYSim.GetFYSim().M10.Value = false;
+                        m_FYSimVar.TrackPower.Value = true;
+                        m_FYSimVar.Resistor.Value = false;
+                        m_FYSimVar.M10.Value = false;
                         AliveUpdateCnt = 0;
                         FiddleOneMoveState = 0;
-                        m_iFYSim.GetFYSim().FiddleYardSimulatorLogging.StoreText("FYMove.FiddleMultipleMove FiddleOneMoveState = 0");
+                        m_FYSimLog.StoreText("FYMove.FiddleMultipleMove FiddleOneMoveState = 0");
                         _Return = true;
-                        m_iFYSim.GetFYSim().FiddleYardSimulatorLogging.StoreText("FYMove.FiddleMultipleMove _Return = true");
+                        m_FYSimLog.StoreText("FYMove.FiddleMultipleMove _Return = true");
                     }
                     else
                     {
-                        m_iFYSim.GetFYSim().FiddleYardSimulatorLogging.StoreText("FYMove.FiddleMultipleMove GetTrackNoCnt != GetNewTrackNo");
-                        m_iFYSim.GetFYSim().CL10Heart.Value = false;
-                        m_iFYSim.GetFYSim().F10.Value = false;
-                        m_iFYSim.GetFYSim().F11.Value = false;
-                        m_iFYSim.GetFYSim().F12.Value = false;
-                        m_iFYSim.GetFYSim().F13.Value = false;
-                        m_iFYSim.GetFYSim().TrackNo.Count = 0;
+                        m_FYSimLog.StoreText("FYMove.FiddleMultipleMove GetTrackNoCnt != GetNewTrackNo");
+                        m_FYSimVar.CL10Heart.Value = false;
+                        m_FYSimVar.F10.Value = false;
+                        m_FYSimVar.F11.Value = false;
+                        m_FYSimVar.F12.Value = false;
+                        m_FYSimVar.F13.Value = false;
+                        m_FYSimVar.TrackNo.Count = 0;
                         AliveUpdateCnt = 0;
                         FiddleOneMoveState = 2;                                                                                                         
-                        m_iFYSim.GetFYSim().FiddleYardSimulatorLogging.StoreText("FYMove.FiddleMultipleMove FiddleOneMoveState = 1");
+                        m_FYSimLog.StoreText("FYMove.FiddleMultipleMove FiddleOneMoveState = 1");
                         _Return = false;
-                        m_iFYSim.GetFYSim().FiddleYardSimulatorLogging.StoreText("FYMove.FiddleMultipleMove _Return = false");
+                        m_FYSimLog.StoreText("FYMove.FiddleMultipleMove _Return = false");
                     }
                     break;
 

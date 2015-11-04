@@ -56,6 +56,31 @@ namespace Siebwalde_Application
         }
 
         /*#--------------------------------------------------------------------------#*/
+        /*  Description: FiddleYardInitReset()
+         *               Reset
+         *               
+         * 
+         *  Input(s)   :
+         *
+         *  Output(s)  : 
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      : 
+         */
+        /*#--------------------------------------------------------------------------#*/
+        public void FiddleYardInitReset()
+        {            
+            State_Machine = State.Idle; 
+            WaitCnt = 0;
+            uControllerReady = true;
+        } 
+
+        /*#--------------------------------------------------------------------------#*/
         /*  Description: Init()
          *               This wil try to initialise the Fiddle yard, checking various
          *               start conditions and start a train detection
@@ -89,7 +114,7 @@ namespace Siebwalde_Application
                     }
                     
                     m_FYAppLog.StoreText("FYAppInit.Init() started");
-                    if (m_FYAppVar.GetTrackNr() > 0 && !m_FYAppVar.F12 && !m_FYAppVar.F13)
+                    if (m_FYAppVar.GetTrackNr() > 0 && !m_FYAppVar.bF12 && !m_FYAppVar.bF13)
                     {                        
                         State_Machine = State.Situation1;
                         m_FYAppLog.StoreText("FYAppInit.Init() State_Machine = State.Situation1");
@@ -120,7 +145,7 @@ namespace Siebwalde_Application
                         m_FYAppLog.StoreText("FYAppInit.Init() State_Machine = State.TrackNotAligned");
                         m_FYAppVar.FiddleYardTrackNotAligned.UpdateMessage();//m_iFYApp.GetFYApp().FYFORM.SetMessage("FYAppInit", "FiddleYard track not aligned..."); // create event for text to form, if form does not exist no error will occur, via FYAppVar
                     }
-                    else if (m_FYAppVar.F10 && (m_FYAppVar.Block6 || m_FYAppVar.F12 || m_FYAppVar.F13))
+                    else if (m_FYAppVar.bF10 && (m_FYAppVar.bBlock6 || m_FYAppVar.bF12 || m_FYAppVar.bF13))
                     {
                         m_FYAppLog.StoreText("FYAppInit.Init() m_iFYApp.GetF10() = " + Convert.ToString(m_FYAppVar.F10));
                         m_FYAppLog.StoreText("FYAppInit.Init() m_iFYApp.GetF12() = " + Convert.ToString(m_FYAppVar.F12));
@@ -213,7 +238,7 @@ namespace Siebwalde_Application
 
 
                 case State.TrainObstruction:
-                    if (!m_FYAppVar.F10 && !m_FYAppVar.F11 && !m_FYAppVar.F12 && !m_FYAppVar.F13 && !m_FYAppVar.Block6 && !m_FYAppVar.Block7)
+                    if (!m_FYAppVar.bF10 && !m_FYAppVar.bF11 && !m_FYAppVar.bF12 && !m_FYAppVar.bF13 && !m_FYAppVar.bBlock6 && !m_FYAppVar.bBlock7)
                     {
                         m_FYAppLog.StoreText("!m_iFYApp.GetF10() && !m_iFYApp.GetF11() && !m_iFYApp.GetF12() && !m_iFYApp.GetF13() && !m_iFYApp.GetBlock6() && !m_iFYApp.GetBlock7()");
                         m_FYAppLog.StoreText("Train has left FiddleYard successfully");

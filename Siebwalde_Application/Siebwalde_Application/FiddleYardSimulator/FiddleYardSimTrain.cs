@@ -22,6 +22,7 @@ namespace Siebwalde_Application
     {
         private iFiddleYardSimulator m_iFYSim;
         private FiddleYardIOHandleVariables m_FYIOHandleVar;             // connect variable to connect to FYIOH class for defined variables
+        private FiddleYardSimulatorVariables m_FYSimVar;
         public string FYSimtrainInstance = null;
         public string ClassName { get { return "FYSimTrain"; } }
         private string m_instance = null;        
@@ -65,14 +66,16 @@ namespace Siebwalde_Application
          */
         /*#--------------------------------------------------------------------------#*/
 
-        public FiddleYardSimTrain(string instance, iFiddleYardSimulator iFYSim, FiddleYardIOHandleVariables FYIOHandleVar)
+        public FiddleYardSimTrain(string instance, iFiddleYardSimulator iFYSim, FiddleYardIOHandleVariables FYIOHandleVar, FiddleYardSimulatorVariables FYSimVar)
         {
+        
+            m_FYSimVar = FYSimVar;
             m_iFYSim = iFYSim;
             m_FYIOHandleVar = FYIOHandleVar;
             m_instance = instance;            
 
             Sensor Cmd_TargetAlive = new Sensor("TargetAlive", "TargetAlive", 0, (name, val, log) => SimulatorCmd(name, val, log)); // initialize and subscribe sensors
-            m_iFYSim.GetFYSim().TargetAlive.Attach(Cmd_TargetAlive);
+            m_FYSimVar.TargetAlive.Attach(Cmd_TargetAlive);
             Sensor TrackNo = new Sensor("Track_No", " Track Nr ", 0, (name, val, log) => SimulatorCmd(name, val, log)); // initialize and subscribe sensors
             m_FYIOHandleVar.TrackNo.Attach(TrackNo);
 
@@ -190,19 +193,19 @@ namespace Siebwalde_Application
                     }
                     else if (SimTrainLocation == "Block5B")
                     {
-                        m_iFYSim.GetFYSim().Block5B.Value = true;
+                        m_FYSimVar.Block5B.Value = true;
                         FYSimTrainState = State.TrainInBlock5B;
                         FiddleYardSimTrainLogging.StoreText(FYSimtrainInstance + " FYSimTrainState = State.TrainInBlock5B");
                     }
                     else if (SimTrainLocation == "Block8A")
                     {
-                        m_iFYSim.GetFYSim().Block8A.Value = true;
+                        m_FYSimVar.Block8A.Value = true;
                         FYSimTrainState = State.TrainInBlock8A;
                         FiddleYardSimTrainLogging.StoreText(FYSimtrainInstance + " FYSimTrainState = State.TrainInBlock8A");
                     }
                     else if (SimTrainLocation == "Block6")
                     {
-                        m_iFYSim.GetFYSim().Block6.Value = true;
+                        m_FYSimVar.Block6.Value = true;
                         FYSimTrainState = State.TrainInBlock6;
                         FiddleYardSimTrainLogging.StoreText(FYSimtrainInstance + " FYSimTrainState = State.TrainInBlock6");
                     }
@@ -226,19 +229,19 @@ namespace Siebwalde_Application
                         break;
                     }                    
 
-                    m_iFYSim.GetFYSim().F10.Value = true;
-                    m_iFYSim.GetFYSim().F11.Value = true;
+                    m_FYSimVar.F10.Value = true;
+                    m_FYSimVar.F11.Value = true;
 
-                    if (m_iFYSim.GetFYSim().TrackPower.Value == true)
+                    if (m_FYSimVar.TrackPower.Value == true)
                     {
-                        m_iFYSim.GetFYSim().Block7.Value = true;
+                        m_FYSimVar.Block7.Value = true;
                     }
                     else
                     {
-                        m_iFYSim.GetFYSim().Block7.Value = false;
+                        m_FYSimVar.Block7.Value = false;
                     }
 
-                    if (m_iFYSim.GetFYSim().Block7In.Value == false && m_iFYSim.GetFYSim().Block8A.Value == false && m_iFYSim.GetFYSim().TrackPower.Value == true)// check if train may leave and if block 8 is free and track is powered (coupled)
+                    if (m_FYSimVar.Block7In.Value == false && m_FYSimVar.Block8A.Value == false && m_FYSimVar.TrackPower.Value == true)// check if train may leave and if block 8 is free and track is powered (coupled)
                     {
                         FYSimTrainState = State.TrainDriveToBlock8A;
                         FiddleYardSimTrainLogging.StoreText(FYSimtrainInstance + " FYSimTrainState = State.TrainDriveToBlock8A");
@@ -247,8 +250,8 @@ namespace Siebwalde_Application
                     if (kicksimtrain == "Track_No" && SimTrainLocation != TrackNoToTrackString(val))
                     {
                         FYSimTrainState = State.Idle;
-                        m_iFYSim.GetFYSim().F10.Value = false;
-                        m_iFYSim.GetFYSim().F11.Value = false;
+                        m_FYSimVar.F10.Value = false;
+                        m_FYSimVar.F11.Value = false;
                         FiddleYardSimTrainLogging.StoreText(FYSimtrainInstance + " kicksimtrain == Track_No && SimTrainLocation != TrackNoToTrackString(val)");
                         FiddleYardSimTrainLogging.StoreText(FYSimtrainInstance + " FYSimTrainState = State.Idle");
                     }
@@ -262,7 +265,7 @@ namespace Siebwalde_Application
                     }
                    
 
-                    if (m_iFYSim.GetFYSim().Block7In.Value == false && m_iFYSim.GetFYSim().TrackPower.Value == true && ActionCounter < ActionCounter5)
+                    if (m_FYSimVar.Block7In.Value == false && m_FYSimVar.TrackPower.Value == true && ActionCounter < ActionCounter5)
                     {
                         ActionCounter++;
                     }
@@ -273,34 +276,34 @@ namespace Siebwalde_Application
 
                     if (ActionCounter >= ActionCounter5 && ActionCounter < ActionCounter10)
                     {
-                        m_iFYSim.GetFYSim().F11.Value = false;
+                        m_FYSimVar.F11.Value = false;
                     }
 
                     if (ActionCounter >= ActionCounter5 && ActionCounter < ActionCounter15)
                     {
-                        m_iFYSim.GetFYSim().F12.Value = true;
-                        m_iFYSim.GetFYSim().TrainsOnFYSim[m_iFYSim.GetFYSim().TrackNo.Count] = 0; // basicaly when train is driving and passing F12 it has "left" the track of the fiddleyard, no way back!
+                        m_FYSimVar.F12.Value = true;
+                        m_iFYSim.GetTrainsOnFYSim()[m_FYSimVar.TrackNo.Count] = 0; // basicaly when train is driving and passing F12 it has "left" the track of the fiddleyard, no way back!
                     }
                     else
                     {
-                        m_iFYSim.GetFYSim().F12.Value = false;
+                        m_FYSimVar.F12.Value = false;
                     }
 
                     if (ActionCounter >= ActionCounter10 && ActionCounter < ActionCounter15)
                     {
                         SimTrainLocation = "Block8A";                   // train drives into block 8A, tail is still in block7
-                        m_iFYSim.GetFYSim().Block8A.Value = true;
+                        m_FYSimVar.Block8A.Value = true;
                     }
 
                     if (ActionCounter > ActionCounter20)
                     {
-                        m_iFYSim.GetFYSim().Block7.Value = false;             // train has left block 7, also passed F10
-                        m_iFYSim.GetFYSim().F10.Value = false;
+                        m_FYSimVar.Block7.Value = false;             // train has left block 7, also passed F10
+                        m_FYSimVar.F10.Value = false;
                     }
 
                     if (ActionCounter >= ActionCounter25)
                     {
-                        m_iFYSim.GetFYSim().TrainsOnFYSim[m_iFYSim.GetFYSim().TrackNo.Count] = 0;
+                        m_iFYSim.GetTrainsOnFYSim()[m_FYSimVar.TrackNo.Count] = 0;
                         ActionCounter = 0;
                         FYSimTrainState = State.TrainInBlock8A;
                         FiddleYardSimTrainLogging.StoreText(FYSimtrainInstance + " FYSimTrainState = State.TrainInBlock8A");
@@ -331,7 +334,7 @@ namespace Siebwalde_Application
                     }                    
 
                     SimTrainLocation = "Buffer";                        // train drives into buffer
-                    m_iFYSim.GetFYSim().Block8A.Value = false;
+                    m_FYSimVar.Block8A.Value = false;
                     FYSimTrainState = State.TrainInBuffer;
                     FiddleYardSimTrainLogging.StoreText(FYSimtrainInstance + " FYSimTrainState = State.TrainInBuffer");
 
@@ -355,13 +358,13 @@ namespace Siebwalde_Application
                     if (ActionCounter >= BufferWaitDelay)
                     {
                         ActionCounter = 0;                        
-                        if (m_iFYSim.GetFYSim().Block5B.Value == true)  // A new train may enter block 5B when a train has left block 5B
+                        if (m_FYSimVar.Block5B.Value == true)  // A new train may enter block 5B when a train has left block 5B
                         {
                             FYSimTrainState = State.TrainInBuffer;                            
                         }
                         else 
                         {                            
-                            m_iFYSim.GetFYSim().Block5B.Value = true;
+                            m_FYSimVar.Block5B.Value = true;
                             FYSimTrainState = State.TrainInBlock5B;
                             FiddleYardSimTrainLogging.StoreText(FYSimtrainInstance + " FYSimTrainState = State.TrainInBlock5B");
                             SimTrainLocation = "Block5B";
@@ -377,18 +380,18 @@ namespace Siebwalde_Application
                     }
 
 
-                    if (m_iFYSim.GetFYSim().Block5BIn.Value == false && m_iFYSim.GetFYSim().Block6.Value == false) // when block occupied signal is set by application OR another train is stil in block 6 trains stops moving in block 5B
+                    if (m_FYSimVar.Block5BIn.Value == false && m_FYSimVar.Block6.Value == false) // when block occupied signal is set by application OR another train is stil in block 6 trains stops moving in block 5B
                     {
                         ActionCounter++;// when block occupied signal is set by application trains stops moving in block 6, block 5B is also still occupied by the length of the train
                     }
 
                     if (ActionCounter >= ActionCounter5)
                     {
-                        m_iFYSim.GetFYSim().Block6.Value = true;
+                        m_FYSimVar.Block6.Value = true;
                         ActionCounter = ActionCounter5;
                     }
 
-                    if (m_iFYSim.GetFYSim().Block6In.Value == false && ActionCounter >= ActionCounter5)// check if block6 is not occupied and that the trains has driven to edge of block5B towards block6
+                    if (m_FYSimVar.Block6In.Value == false && ActionCounter >= ActionCounter5)// check if block6 is not occupied and that the trains has driven to edge of block5B towards block6
                     {
                         ActionCounter = 0;
                         FYSimTrainState = State.TrainDriveToBlock6;
@@ -404,15 +407,15 @@ namespace Siebwalde_Application
                     }
                    
 
-                    if (m_iFYSim.GetFYSim().Block6In.Value != true)
+                    if (m_FYSimVar.Block6In.Value != true)
                     {
                         ActionCounter++;// when block occupied signal is set by application trains stops moving in block 6, block 5B is also still occupied by the length of the train
                     }
 
                     if (ActionCounter >= ActionCounter5)
                     {
-                        m_iFYSim.GetFYSim().Block5B.Value = false; 
-                        m_iFYSim.GetFYSim().F10.Value = true;
+                        m_FYSimVar.Block5B.Value = false; 
+                        m_FYSimVar.F10.Value = true;
                         ActionCounter = 0;
                         FYSimTrainState = State.TrainInBlock6;
                         FiddleYardSimTrainLogging.StoreText(FYSimtrainInstance + " FYSimTrainState = State.TrainInBlock6");
@@ -428,11 +431,11 @@ namespace Siebwalde_Application
                     }
                    
 
-                    if (m_iFYSim.GetFYSim().Block7.Value == false && m_iFYSim.GetFYSim().TrackNo.Count != 0 && m_iFYSim.GetFYSim().TrackPower.Value == true)// check if train may drive into block7, if the fiddle yard is aligned and if coupled
+                    if (m_FYSimVar.Block7.Value == false && m_FYSimVar.TrackNo.Count != 0 && m_FYSimVar.TrackPower.Value == true)// check if train may drive into block7, if the fiddle yard is aligned and if coupled
                     {                        
                         FYSimTrainState = State.TrainDriveToBlock7;
                         FiddleYardSimTrainLogging.StoreText(FYSimtrainInstance + " FYSimTrainState = State.TrainDriveToBlock7");
-                        m_iFYSim.GetFYSim().Block7.Value = true;
+                        m_FYSimVar.Block7.Value = true;
                     }
                     break;
 
@@ -444,37 +447,37 @@ namespace Siebwalde_Application
                     }
                     else if (kicksimtrain == "Track_No" && SimTrainLocation != TrackNoToTrackString(val)) // when fiddle yard moves away, train is on track[x], update TrainsOnFYSim
                     {
-                        m_iFYSim.GetFYSim().TrainsOnFYSim[Convert.ToInt16(SimTrainLocation.Substring(SimTrainLocation.IndexOf(@"k") + 1))] = 1; 
+                        m_iFYSim.GetTrainsOnFYSim()[Convert.ToInt16(SimTrainLocation.Substring(SimTrainLocation.IndexOf(@"k") + 1))] = 1; 
                         ActionCounter = 0;
-                        m_iFYSim.GetFYSim().Block7.Value = false;
+                        m_FYSimVar.Block7.Value = false;
                         FYSimTrainState = State.Idle;
                         FiddleYardSimTrainLogging.StoreText(FYSimtrainInstance + " kicksimtrain == Track_No && SimTrainLocation != TrackNoToTrackString(val)");
                         FiddleYardSimTrainLogging.StoreText(FYSimtrainInstance + " FYSimTrainState = State.Idle");
                         break;
                     }
 
-                    if (m_iFYSim.GetFYSim().Block7In.Value == false && m_iFYSim.GetFYSim().TrackPower.Value == true)
+                    if (m_FYSimVar.Block7In.Value == false && m_FYSimVar.TrackPower.Value == true)
                     {
                         ActionCounter++;// when block occupied signal is set by application trains stops moving in block 7, block 6 is also still occupied by the length of the train
                     }
 
                     if (ActionCounter >= ActionCounter1 && ActionCounter < ActionCounter15)
                     {
-                        SimTrainLocation = "Track" + Convert.ToString(m_iFYSim.GetFYSim().TrackNo.Count);
-                        m_iFYSim.GetFYSim().F13.Value = true;                        
+                        SimTrainLocation = "Track" + Convert.ToString(m_FYSimVar.TrackNo.Count);
+                        m_FYSimVar.F13.Value = true;                        
                         //FiddleYardSimTrainLogging.StoreText(FYSimtrainInstance + " in " + SimTrainLocation); <-------------------- a lot of logging!!!
                     }
                     else 
                     { 
-                        m_iFYSim.GetFYSim().F13.Value = false;                        
+                        m_FYSimVar.F13.Value = false;                        
                     }
 
                     if (ActionCounter >= ActionCounter15)
                     {
-                        m_iFYSim.GetFYSim().Block6.Value = false;
-                        m_iFYSim.GetFYSim().F11.Value = true;                        
+                        m_FYSimVar.Block6.Value = false;
+                        m_FYSimVar.F11.Value = true;                        
                     }
-                    else { m_iFYSim.GetFYSim().F11.Value = false; }
+                    else { m_FYSimVar.F11.Value = false; }
 
                     if (ActionCounter >= ActionCounter25)
                     {

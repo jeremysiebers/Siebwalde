@@ -155,7 +155,7 @@ namespace Siebwalde_Application
                         State_Machine = State.Check5B;                                                              // alway scheck 5B first, when no train is present, check then 8B
                         //m_FYAppLog.StoreText("FYAppRun.Run() FYFull() < 10 -> State_Machine = State.Check5B");
                     }
-                    else if (true == m_collect && m_FYAppVar.Block5B)                                      // When the FiddleYard is full, but m_collect is true and a train appears on 5B, then shift-pass trains
+                    else if (true == m_collect && m_FYAppVar.bBlock5B)                                      // When the FiddleYard is full, but m_collect is true and a train appears on 5B, then shift-pass trains
                     {
                         State_Machine = State.Check8A;
                         //m_FYAppLog.StoreText("FYAppRun.Run() false == m_collect && FYFull() > 0 -> State_Machine = State.Check8A");
@@ -168,7 +168,7 @@ namespace Siebwalde_Application
                     break;
 
                 case State.Check5B:
-                    if (m_FYAppVar.Block5B && FYFull() < 11)
+                    if (m_FYAppVar.bBlock5B && FYFull() < 11)
                     {
                         State_Machine = State.TrainDriveIn;
                         m_FYAppLog.StoreText("FYAppRun.Run() State_Machine = State.Check5B -> State_Machine = State.TrainDriveIn");//<-----------------------------------------------------------------Send to FORM!!!
@@ -184,7 +184,7 @@ namespace Siebwalde_Application
                     break;
 
                 case State.Check8A:
-                    if (FYFull() > 0 && m_FYAppVar.Block8A == false)
+                    if (FYFull() > 0 && m_FYAppVar.bBlock8A == false)
                     {
                         State_Machine = State.TrainDriveOut;
                         m_FYAppLog.StoreText("FYAppRun.Run() State_Machine = State.Check8A -> State_Machine = State.TrainDriveOut");//<-----------------------------------------------------------------Send to FORM!!!
@@ -241,7 +241,7 @@ namespace Siebwalde_Application
 
             for (int i = 1; i < 12; i++)
             {
-                if (m_FYAppVar.TrainsOnFY[i] == 1)
+                if (m_FYAppVar.iTrainsOnFY[i] == 1)
                 {
                     TrainTotal++;
                 }

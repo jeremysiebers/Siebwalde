@@ -67,7 +67,20 @@ namespace Siebwalde_Application
         public ActuatorUpdater Occ7OnFalse;
         public ActuatorUpdater Recoverd;
         public ActuatorUpdater Collect;
-        // Create FORM Track updaters, these are uncoupled from the array within the target
+        // Create FORM updaters, these are uncoupled from the target and used to update the FYForm
+        public SensorUpdater CL10Heart;
+        public SensorUpdater F11;
+        public SensorUpdater EOS10;
+        public SensorUpdater EOS11;
+        public SensorUpdater F13;
+        public SensorUpdater F12;
+        public SensorUpdater Block5B;
+        public SensorUpdater Block8A;
+        public SensorUpdater TrackPower;
+        public SensorUpdater Block5BIn;
+        public SensorUpdater Block6In;
+        public SensorUpdater Block7In;
+        public SensorUpdater Resistor;
         public SensorUpdater Track1;
         public SensorUpdater Track2;
         public SensorUpdater Track3;
@@ -79,6 +92,12 @@ namespace Siebwalde_Application
         public SensorUpdater Track9;
         public SensorUpdater Track10;
         public SensorUpdater Track11;
+        public SensorUpdater Block6;
+        public SensorUpdater Block7;
+        public SensorUpdater F10;
+        public SensorUpdater M10;
+        public SensorUpdater TrackNo;
+        public SensorUpdater CmdBusy;
 
         public MessageUpdater FiddleYardStopped;
         public MessageUpdater FiddleYardStart;
@@ -100,27 +119,32 @@ namespace Siebwalde_Application
 
         public CommandUpdater FormCollect;          // pass Form command through FiddleYardApplicationVariables, in case Form gets replaced or closed
 
-        public int[] TrainsOnFY = new int[12];
-        public bool CL_10_Heart = false;
-        public bool F11 = false;
-        public bool EOS10 = false;
-        public bool EOS11 = false;
-        public bool F13 = false;
-        public bool F12 = false;
-        public bool Block5B = false;
-        public bool Block8A = false;
-        public bool TrackPower = false;
-        public bool Block5BIn = false;
-        public bool Block6In = false;
-        public bool Block7In = false;
-        public bool Resistor = false;
-        public bool Block6 = false;
-        public bool Block7 = false;
-        public bool F10 = false;
-        public bool M10 = false;
-        public bool TrackPower15V = false;
-        public bool FYCollect = false;
-        public int TrackNo = 0;
+        public int[] iTrainsOnFY = new int[12];
+        public bool bCL_10_Heart = false;
+        public bool bF11 = false;
+        public bool bEOS10 = false;
+        public bool bEOS11 = false;
+        public bool bF13 = false;
+        public bool bF12 = false;
+        public bool bBlock5B = false;
+        public bool bBlock8A = false;
+        public bool bTrackPower = false;
+        public bool bBlock5BIn = false;
+        public bool bBlock6In = false;
+        public bool bBlock7In = false;
+        public bool bResistor = false;
+        public bool bBlock6 = false;
+        public bool bBlock7 = false;
+        public bool bF10 = false;
+        public bool bM10 = false;
+        public bool bTrackPower15V = false;
+        public bool bFYCollect = false;
+        public int iTrackNo = 0;
+
+        public Color TrackOccupiedColor = Siebwalde_Application.Properties.Settings.Default.SETxCOLORxTRACKxOCCUPIED;
+        public Color TrackNotInitializedColor = Siebwalde_Application.Properties.Settings.Default.SETxCOLORxTRACKxNOTxINITIALIZED;
+        public Color TrackNotActiveColor = Siebwalde_Application.Properties.Settings.Default.SETxCOLORxTRACKxNOTxACTIVE;
+        public Color TrackEmptyColor = Siebwalde_Application.Properties.Settings.Default.SETxCOLORxTRACKxEMPTY;
 
         /*#--------------------------------------------------------------------------#*/
         /*  Description: FiddleYardVariables constructor
@@ -173,6 +197,19 @@ namespace Siebwalde_Application
             Recoverd = new ActuatorUpdater();
             Collect = new ActuatorUpdater();
 
+            CL10Heart = new SensorUpdater();
+            F11 = new SensorUpdater();
+            EOS10 = new SensorUpdater();
+            EOS11 = new SensorUpdater();
+            F13 = new SensorUpdater();
+            F12 = new SensorUpdater();
+            Block5B = new SensorUpdater();
+            Block8A = new SensorUpdater();
+            TrackPower = new SensorUpdater();
+            Block5BIn = new SensorUpdater();
+            Block6In = new SensorUpdater();
+            Block7In = new SensorUpdater();
+            Resistor = new SensorUpdater();
             Track1 = new SensorUpdater();
             Track2 = new SensorUpdater();
             Track3 = new SensorUpdater();
@@ -184,6 +221,12 @@ namespace Siebwalde_Application
             Track9 = new SensorUpdater();
             Track10 = new SensorUpdater();
             Track11 = new SensorUpdater();
+            Block6 = new SensorUpdater();
+            Block7 = new SensorUpdater();
+            F10 = new SensorUpdater();
+            M10 = new SensorUpdater();
+            TrackNo = new SensorUpdater();
+            CmdBusy = new SensorUpdater();
 
             FiddleYardStopped = new MessageUpdater();
             FiddleYardStart = new MessageUpdater();
@@ -271,17 +314,92 @@ namespace Siebwalde_Application
 
             Command Act_Collect = new Command(" Collect ", (name) => FormCmd(name)); // Catch Form command pass to subscribers
             m_FYFORM.Collect.Attach(Act_Collect);
+
+            Colorc Clr_FYTrackOccupiedColorSetting = new Colorc(Color.Transparent, "Clr_FYTrackOccupiedColorSetting", (NewColor, log) => SetColorIndicator(NewColor, log));
+            Siebwalde_Application.Properties.Settings.Default.SWSetColorTrainOccupied.Attach(Clr_FYTrackOccupiedColorSetting);
+
+            Colorc Clr_FYTrackNotInitializedColorSetting = new Colorc(Color.Transparent, "Clr_FYTrackNotInitializedColorSetting", (NewColor, log) => SetColorIndicator(NewColor, log));
+            Siebwalde_Application.Properties.Settings.Default.SWSetColorTrackNotInitialized.Attach(Clr_FYTrackNotInitializedColorSetting);
+
+            Colorc Clr_FYTrackNotActiveColorSetting = new Colorc(Color.Transparent, "Clr_FYTrackNotActiveColorSetting", (NewColor, log) => SetColorIndicator(NewColor, log));
+            Siebwalde_Application.Properties.Settings.Default.SWSetColorTrackNotActive.Attach(Clr_FYTrackNotActiveColorSetting);
+
+            Colorc Clr_FYTrackEmptyColorSetting = new Colorc(Color.Transparent, "Clr_FYTrackEmptyColorSetting", (NewColor, log) => SetColorIndicator(NewColor, log));
+            Siebwalde_Application.Properties.Settings.Default.SWSetColorTrackEmpty.Attach(Clr_FYTrackEmptyColorSetting);
             
         }
 
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: SetColorIndicator(NewColor, log)
+         *               
+         * 
+         *  Input(s)   :
+         *
+         *  Output(s)  : 
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      : 
+         */
+        /*#--------------------------------------------------------------------------#*/
+        public void SetColorIndicator(Color NewColor, string log)
+        {
+            switch (log)
+            {
+                case "Clr_FYTrackOccupiedColorSetting":
+                    TrackOccupiedColor = NewColor;
+                    break;
+
+                case "Clr_FYTrackNotInitializedColorSetting":
+                    TrackNotInitializedColor = NewColor;
+                    break;
+
+                case "Clr_FYTrackNotActiveColorSetting":
+                    TrackNotActiveColor = NewColor;
+                    break;
+
+                case "Clr_FYTrackEmptyColorSetting":
+                    TrackEmptyColor = NewColor;
+                    break;
+
+                default: break;
+            }
+            Block5B.UpdateSensorValue(Convert.ToInt16(bBlock5B), true);
+            Block8A.UpdateSensorValue(Convert.ToInt16(bBlock8A), true);
+            Block6.UpdateSensorValue(Convert.ToInt16(bBlock6), true);
+            Block7.UpdateSensorValue(Convert.ToInt16(bBlock7), true);
+            TrackTrainsOnFYUpdater();
+        }
+
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: FormCmd(string name)
+         *               
+         * 
+         *  Input(s)   :
+         *
+         *  Output(s)  : 
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      : 
+         */
+        /*#--------------------------------------------------------------------------#*/
         public void FormCmd(string name)
         {
             switch (name)                                           // commands who must work always regardless of automatic or manual mode
             {
                 case " Collect ": 
-                    FYCollect = !FYCollect;
+                    bFYCollect = !bFYCollect;
                     FormCollect.UpdateCommand();
-                    if (FYCollect == true)
+                    if (bFYCollect == true)
                     {
                         CollectingTrainsEnabled.UpdateMessage();}
                     else{
@@ -372,44 +490,101 @@ namespace Siebwalde_Application
         {
             switch (indicator)
             {
-                case "CL10Heart": CL_10_Heart = Convert.ToBoolean(val);
+                case "CL10Heart": 
+                    bCL_10_Heart = Convert.ToBoolean(val);
+                    CL10Heart.UpdateSensorValue(Convert.ToInt16(bCL_10_Heart), false);
                     break;
-                case "F11": F11 = Convert.ToBoolean(val);
+
+                case "F11": 
+                    bF11 = Convert.ToBoolean(val);
+                    F11.UpdateSensorValue(Convert.ToInt16(bF11), false);
                     break;
-                case "EOS10": EOS10 = Convert.ToBoolean(val);
+
+                case "EOS10": 
+                    bEOS10 = Convert.ToBoolean(val);
+                    EOS10.UpdateSensorValue(Convert.ToInt16(bEOS10), false);
                     break;
-                case "EOS11": EOS11 = Convert.ToBoolean(val);
+
+                case "EOS11": 
+                    bEOS11 = Convert.ToBoolean(val);
+                    EOS11.UpdateSensorValue(Convert.ToInt16(bEOS11), false);
                     break;
-                case "F13": F13 = Convert.ToBoolean(val);
+
+                case "F13": 
+                    bF13 = Convert.ToBoolean(val);
+                    F13.UpdateSensorValue(Convert.ToInt16(bF13), false);
                     break;
-                case "F12": F12 = Convert.ToBoolean(val);
+
+                case "F12": 
+                    bF12 = Convert.ToBoolean(val);
+                    F12.UpdateSensorValue(Convert.ToInt16(bF12), false);
                     break;
-                case "Block5B": Block5B = Convert.ToBoolean(val);
+
+                case "Block5B": 
+                    bBlock5B = Convert.ToBoolean(val);
+                    Block5B.UpdateSensorValue(Convert.ToInt16(bBlock5B), false);
                     break;
-                case "Block8A": Block8A = Convert.ToBoolean(val);
+
+                case "Block8A": 
+                    bBlock8A = Convert.ToBoolean(val);
+                    Block8A.UpdateSensorValue(Convert.ToInt16(bBlock8A), false);
                     break;
-                case "TrackPower": TrackPower = Convert.ToBoolean(val);
+
+                case "TrackPower": 
+                    bTrackPower = Convert.ToBoolean(val);
+                    TrackPower.UpdateSensorValue(Convert.ToInt16(bTrackPower), false);
                     break;
-                case "Block5BIn": Block5BIn = Convert.ToBoolean(val);
+
+                case "Block5BIn": 
+                    bBlock5BIn = Convert.ToBoolean(val);
+                    Block5BIn.UpdateSensorValue(Convert.ToInt16(bBlock5BIn), false);
                     break;
-                case "Block6In": Block6In = Convert.ToBoolean(val);
+
+                case "Block6In": 
+                    bBlock6In = Convert.ToBoolean(val);
+                    Block6In.UpdateSensorValue(Convert.ToInt16(bBlock6In), false);
                     break;
-                case "Block7In": Block7In = Convert.ToBoolean(val);
+
+                case "Block7In": 
+                    bBlock7In = Convert.ToBoolean(val);
+                    Block7In.UpdateSensorValue(Convert.ToInt16(bBlock7In), false);
                     break;
-                case "Resistor": Resistor = Convert.ToBoolean(val);
+
+                case "Resistor": 
+                    bResistor = Convert.ToBoolean(val);
+                    Resistor.UpdateSensorValue(Convert.ToInt16(bResistor), false);
                     break;
-                case "Block6": Block6 = Convert.ToBoolean(val);
+
+                case "Block6": 
+                    bBlock6 = Convert.ToBoolean(val);
+                    Block6.UpdateSensorValue(Convert.ToInt16(bBlock6), false);
                     break;
-                case "Block7": Block7 = Convert.ToBoolean(val);
+
+                case "Block7": 
+                    bBlock7 = Convert.ToBoolean(val);
+                    Block7.UpdateSensorValue(Convert.ToInt16(bBlock7), false);
                     break;
-                case "F10": F10 = Convert.ToBoolean(val);
+
+                case "F10": 
+                    bF10 = Convert.ToBoolean(val);
+                    F10.UpdateSensorValue(Convert.ToInt16(bF10), false);
                     break;
-                case "M10": M10 = Convert.ToBoolean(val);
+
+                case "M10": 
+                    bM10 = Convert.ToBoolean(val);
+                    M10.UpdateSensorValue(Convert.ToInt16(bM10), false);
                     break;
-                case "TrackPower15V": TrackPower15V = Convert.ToBoolean(val);
+
+                case "TrackPower15V": 
+                    bTrackPower15V = Convert.ToBoolean(val);
+                    TrackPower.UpdateSensorValue(Convert.ToInt16(bTrackPower15V), false);
                     break;
-                case "Track_No": TrackNo = val;
+
+                case "Track_No": 
+                    iTrackNo = val;
+                    TrackNo.UpdateSensorValue(iTrackNo, false);
                     break;
+
                 default:
                     break;
             }
@@ -450,113 +625,113 @@ namespace Siebwalde_Application
             {
                 case "Track1": if (Val > 0)
                     {
-                        TrainsOnFY[1] = 1;
+                        iTrainsOnFY[1] = 1;
                     }
                     else if (Val == 0)
                     {
-                        TrainsOnFY[1] = 0;
+                        iTrainsOnFY[1] = 0;
                     }
-                    Track1.UpdateSensorValue(TrainsOnFY[1], true); // Forced only to update FORM, not forced reading from received data (IOHANDLER)
+                    Track1.UpdateSensorValue(iTrainsOnFY[1], true); // Forced only to update FORM, not forced reading from received data (IOHANDLER)
                     break;
                 case "Track2": if (Val > 0)
                     {
-                        TrainsOnFY[2] = 1;
+                        iTrainsOnFY[2] = 1;
                     }
                     else if (Val == 0)
                     {
-                        TrainsOnFY[2] = 0;
+                        iTrainsOnFY[2] = 0;
                     }
-                    Track2.UpdateSensorValue(TrainsOnFY[2], true);
+                    Track2.UpdateSensorValue(iTrainsOnFY[2], true);
                     break;
                 case "Track3": if (Val > 0)
                     {
-                        TrainsOnFY[3] = 1;
+                        iTrainsOnFY[3] = 1;
                     }
                     else if (Val == 0)
                     {
-                        TrainsOnFY[3] = 0;
+                        iTrainsOnFY[3] = 0;
                     }
-                    Track3.UpdateSensorValue(TrainsOnFY[3], true);
+                    Track3.UpdateSensorValue(iTrainsOnFY[3], true);
                     break;
                 case "Track4": if (Val > 0)
                     {
-                        TrainsOnFY[4] = 1;
+                        iTrainsOnFY[4] = 1;
                     }
                     else if (Val == 0)
                     {
-                        TrainsOnFY[4] = 0;
+                        iTrainsOnFY[4] = 0;
                     }
-                    Track4.UpdateSensorValue(TrainsOnFY[4], true);
+                    Track4.UpdateSensorValue(iTrainsOnFY[4], true);
                     break;
                 case "Track5": if (Val > 0)
                     {
-                        TrainsOnFY[5] = 1;
+                        iTrainsOnFY[5] = 1;
                     }
                     else if (Val == 0)
                     {
-                        TrainsOnFY[5] = 0;
+                        iTrainsOnFY[5] = 0;
                     }
-                    Track5.UpdateSensorValue(TrainsOnFY[5], true);
+                    Track5.UpdateSensorValue(iTrainsOnFY[5], true);
                     break;
                 case "Track6": if (Val > 0)
                     {
-                        TrainsOnFY[6] = 1;
+                        iTrainsOnFY[6] = 1;
                     }
                     else if (Val == 0)
                     {
-                        TrainsOnFY[6] = 0;
+                        iTrainsOnFY[6] = 0;
                     }
-                    Track6.UpdateSensorValue(TrainsOnFY[6], true);
+                    Track6.UpdateSensorValue(iTrainsOnFY[6], true);
                     break;
                 case "Track7": if (Val > 0)
                     {
-                        TrainsOnFY[7] = 1;
+                        iTrainsOnFY[7] = 1;
                     }
                     else if (Val == 0)
                     {
-                        TrainsOnFY[7] = 0;
+                        iTrainsOnFY[7] = 0;
                     }
-                    Track7.UpdateSensorValue(TrainsOnFY[7], true);
+                    Track7.UpdateSensorValue(iTrainsOnFY[7], true);
                     break;
                 case "Track8": if (Val > 0)
                     {
-                        TrainsOnFY[8] = 1;
+                        iTrainsOnFY[8] = 1;
                     }
                     else if (Val == 0)
                     {
-                        TrainsOnFY[8] = 0;
+                        iTrainsOnFY[8] = 0;
                     }
-                    Track8.UpdateSensorValue(TrainsOnFY[8], true);
+                    Track8.UpdateSensorValue(iTrainsOnFY[8], true);
                     break;
                 case "Track9": if (Val > 0)
                     {
-                        TrainsOnFY[9] = 1;
+                        iTrainsOnFY[9] = 1;
                     }
                     else if (Val == 0)
                     {
-                        TrainsOnFY[9] = 0;
+                        iTrainsOnFY[9] = 0;
                     }
-                    Track9.UpdateSensorValue(TrainsOnFY[9], true);
+                    Track9.UpdateSensorValue(iTrainsOnFY[9], true);
                     break;
                 case "Track10": if (Val > 0)
                     {
-                        TrainsOnFY[10] = 1;
+                        iTrainsOnFY[10] = 1;
                     }
                     else if (Val == 0)
                     {
-                        TrainsOnFY[10] = 0;
+                        iTrainsOnFY[10] = 0;
                     }
-                    Track10.UpdateSensorValue(TrainsOnFY[10], true);
+                    Track10.UpdateSensorValue(iTrainsOnFY[10], true);
                     break;
                 case "Track11": if (Val > 0)
                     {
-                        TrainsOnFY[11] = 1;
+                        iTrainsOnFY[11] = 1;
                     }
                     else if (Val == 0)
                     {
-                        TrainsOnFY[11] = 0;
+                        iTrainsOnFY[11] = 0;
                     }
-                    Track11.UpdateSensorValue(TrainsOnFY[11], true);
+                    Track11.UpdateSensorValue(iTrainsOnFY[11], true);
                     break;
                 default: break;
             }
@@ -581,17 +756,17 @@ namespace Siebwalde_Application
         /*#--------------------------------------------------------------------------#*/
         public void TrackTrainsOnFYUpdater()
         {
-            Track1.UpdateSensorValue(TrainsOnFY[1], true); // Forced only to update FORM not forced reading from received data
-            Track2.UpdateSensorValue(TrainsOnFY[2], true);
-            Track3.UpdateSensorValue(TrainsOnFY[3], true);
-            Track4.UpdateSensorValue(TrainsOnFY[4], true);
-            Track5.UpdateSensorValue(TrainsOnFY[5], true);
-            Track6.UpdateSensorValue(TrainsOnFY[6], true);
-            Track7.UpdateSensorValue(TrainsOnFY[7], true);
-            Track8.UpdateSensorValue(TrainsOnFY[8], true);
-            Track9.UpdateSensorValue(TrainsOnFY[9], true);
-            Track10.UpdateSensorValue(TrainsOnFY[10], true);
-            Track11.UpdateSensorValue(TrainsOnFY[11], true);
+            Track1.UpdateSensorValue(iTrainsOnFY[1], true); // Forced only to update FORM not forced reading from received data
+            Track2.UpdateSensorValue(iTrainsOnFY[2], true);
+            Track3.UpdateSensorValue(iTrainsOnFY[3], true);
+            Track4.UpdateSensorValue(iTrainsOnFY[4], true);
+            Track5.UpdateSensorValue(iTrainsOnFY[5], true);
+            Track6.UpdateSensorValue(iTrainsOnFY[6], true);
+            Track7.UpdateSensorValue(iTrainsOnFY[7], true);
+            Track8.UpdateSensorValue(iTrainsOnFY[8], true);
+            Track9.UpdateSensorValue(iTrainsOnFY[9], true);
+            Track10.UpdateSensorValue(iTrainsOnFY[10], true);
+            Track11.UpdateSensorValue(iTrainsOnFY[11], true);
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -613,7 +788,7 @@ namespace Siebwalde_Application
         public int GetTrackNr()
         {
             int _return = 0;
-            switch (TrackNo)
+            switch (iTrackNo)
             {
                 case 0x10: _return = 1;
                     break;

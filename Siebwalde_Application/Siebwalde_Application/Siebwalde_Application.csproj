@@ -117,6 +117,7 @@
     <Compile Include="FiddleYardSimulator\FiddleYardSimTrainDetect.cs" />
     <Compile Include="FiddleYardSimulator\FiddleYardSimulator.cs" />
     <Compile Include="FiddleYardApplication\FiddleYardIOHandle.cs" />
+    <Compile Include="FiddleYardSimulator\FiddleYardSimulatorVariables.cs" />
     <Compile Include="Log2LoggingFile.cs" />
     <Compile Include="MAC_IP_Conditioner.cs" />
     <Compile Include="FiddleYardApplication\FiddleYardController.cs" />
