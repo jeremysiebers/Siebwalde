@@ -98,6 +98,7 @@ namespace Siebwalde_Application
         public SensorUpdater M10;
         public SensorUpdater TrackNo;
         public SensorUpdater CmdBusy;
+        public SensorUpdater TrainDriveOutPointer;
 
         public MessageUpdater FiddleYardStopped;
         public MessageUpdater FiddleYardStart;
@@ -141,6 +142,7 @@ namespace Siebwalde_Application
         public bool bTrackPower15V = false;
         public bool bFYCollect = false;
         public int iTrackNo = 0;
+        public int iTrainDriveOutPointer = 5;
 
         public Color TrackOccupiedColor = Siebwalde_Application.Properties.Settings.Default.SETxCOLORxTRACKxOCCUPIED;
         public Color TrackNotInitializedColor = Siebwalde_Application.Properties.Settings.Default.SETxCOLORxTRACKxNOTxINITIALIZED;
@@ -228,6 +230,7 @@ namespace Siebwalde_Application
             M10 = new SensorUpdater();
             TrackNo = new SensorUpdater();
             CmdBusy = new SensorUpdater();
+            TrainDriveOutPointer = new SensorUpdater();
 
             FiddleYardStopped = new MessageUpdater();
             FiddleYardStart = new MessageUpdater();

@@ -25,7 +25,7 @@ namespace Siebwalde_Application
         private FiddleYardApplicationVariables m_FYAppVar;
         private Log2LoggingFile m_FYAppLog;
         private FiddleYardAppTrainDrive FYAppTrainDrive;
-        private enum State { Idle, Check5B, TrainDriveIn, Check8A, TrainDriveOut, TrainDriveTrough, TrainDriveTroughPrepare, TrainDriveTroughCleanup};
+        public enum State { Idle, Check5B, TrainDriveIn, Check8A, TrainDriveOut, TrainDriveTrough, TrainDriveTroughPrepare, TrainDriveTroughCleanup};        
         private State State_Machine;
         private bool m_collect = false;
         private bool TrackPower15VDown = true;
@@ -148,9 +148,9 @@ namespace Siebwalde_Application
                         m_FYAppLog.StoreText("FYAppRun.Run() Stop == kickrun -> State_Machine = State.Start");
                         m_FYAppLog.StoreText("FYAppRun.Run() _Return = Stop");
                         break;
-                    }                    
+                    }
 
-                    if (FYFull() < 11)                                                                               // Always drive trains into FiddleYard regardless the status of m_collect until FYFull == 11
+                    if (FYFull(State.Check5B) < 11)                                                                               // Always drive trains into FiddleYard regardless the status of m_collect until FYFull == 11
                     {
                         State_Machine = State.Check5B;                                                              // alway scheck 5B first, when no train is present, check then 8B
                         //m_FYAppLog.StoreText("FYAppRun.Run() FYFull() < 10 -> State_Machine = State.Check5B");
@@ -160,7 +160,7 @@ namespace Siebwalde_Application
                         State_Machine = State.Check8A;
                         //m_FYAppLog.StoreText("FYAppRun.Run() false == m_collect && FYFull() > 0 -> State_Machine = State.Check8A");
                     }
-                    else if (false == m_collect && FYFull() > 0)                                                    // When the FiddleYard is full, but m_collect is false, then check if a train may leave
+                    else if (false == m_collect && FYFull(State.Check8A) > 0)                                                    // When the FiddleYard is full, but m_collect is false, then check if a train may leave
                     {
                         State_Machine = State.Check8A;
                         //m_FYAppLog.StoreText("FYAppRun.Run() false == m_collect && FYFull() > 0 -> State_Machine = State.Check8A");
@@ -168,7 +168,7 @@ namespace Siebwalde_Application
                     break;
 
                 case State.Check5B:
-                    if (m_FYAppVar.bBlock5B && FYFull() < 11)
+                    if (m_FYAppVar.bBlock5B && FYFull(State.Check5B) < 11)
                     {
                         State_Machine = State.TrainDriveIn;
                         m_FYAppLog.StoreText("FYAppRun.Run() State_Machine = State.Check5B -> State_Machine = State.TrainDriveIn");//<-----------------------------------------------------------------Send to FORM!!!
@@ -184,7 +184,7 @@ namespace Siebwalde_Application
                     break;
 
                 case State.Check8A:
-                    if (FYFull() > 0 && m_FYAppVar.bBlock8A == false)
+                    if (FYFull(State.Check8A) > 0 && m_FYAppVar.bBlock8A == false)
                     {
                         State_Machine = State.TrainDriveOut;
                         m_FYAppLog.StoreText("FYAppRun.Run() State_Machine = State.Check8A -> State_Machine = State.TrainDriveOut");//<-----------------------------------------------------------------Send to FORM!!!
@@ -235,13 +235,17 @@ namespace Siebwalde_Application
          *  Notes      : 
          */
         /*#--------------------------------------------------------------------------#*/
-        public int FYFull()
+        public int FYFull(State state)
         {
             int TrainTotal = 0;
 
             for (int i = 1; i < 12; i++)
             {
-                if (m_FYAppVar.iTrainsOnFY[i] == 1)
+                if (state == State.Check5B && (m_FYAppVar.iTrainsOnFY[i] == 1 || m_FYAppVar.icheckBoxTrack[i] == 1))
+                {
+                    TrainTotal++;
+                }
+                else if (state == State.Check8A && (m_FYAppVar.iTrainsOnFY[i] == 1 && m_FYAppVar.icheckBoxTrack[i] == 0))
                 {
                     TrainTotal++;
                 }

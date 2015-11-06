@@ -46,7 +46,7 @@ namespace Siebwalde_Application
         public bool Btn_Bezet7On_TOP_Click_Toggle = false;
 
         private FiddleYardIOHandleVariables m_FYIOHandleVar;             // connect variable to connect to FYIOH class for defined variables
-        private FiddleYardApplicationVariables m_FYAppVar;
+        public FiddleYardApplicationVariables m_FYAppVar;
 
         // Create actuators, when a button is pressed an event is generated to send a command to target via IOHandle and to the controlling program
         public CommandUpdater FiddleOneLeft;
@@ -408,7 +408,10 @@ namespace Siebwalde_Application
             Sensor Led_TrackNoTop = new Sensor("Track_No", " Track Nr ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
             m_FYAppVar.TrackNo.Attach(Led_TrackNoTop);
             Sensor Led_TrackPower15VTOP = new Sensor("LLed_15VTrackPower", " 15V Track Power ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-            m_FYAppVar.TrackPower.Attach(Led_TrackPower15VTOP);   
+            m_FYAppVar.TrackPower.Attach(Led_TrackPower15VTOP);
+
+            Sensor Sns_ForceNextTrack = new Sensor("ForceNextTrack", " ForceNextTrack ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+            m_FYAppVar.TrainDriveOutPointer.Attach(Sns_ForceNextTrack);  
              
             //Messages
             Message Msg_TrainDetectionTop = new Message("TrainDetectionFinished", " Train Detection Finished ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
@@ -1443,7 +1446,10 @@ namespace Siebwalde_Application
                         {
                             UpdateTrackIndicatorColor();                    // After/during shift update color of tracks accordingly
                         }
-                        break;                    
+                        break;
+
+                    case "ForceNextTrack": ForceNextTrack.Value = Val;
+                        break;
 
                     default: break;
                 }
@@ -2383,74 +2389,114 @@ namespace Siebwalde_Application
         /*#--------------------------------------------------------------------------#*/
         private void checkBoxTrack1_CheckedChanged(object sender, EventArgs e)
         {
-            if (checkBoxTrack1.Checked == true)
-            {
-                m_FYAppVar.icheckBoxTrack//m_FYAppVar.icheckBoxTrack[1] == 1;
-            }
-            else
-            {
-                m_FYAppVar.icheckBoxTrack[1] == 0;
-            }
+            SetcheckBoxTrackIntArray(1, checkBoxTrack1.Checked);
         }
 
         private void checkBoxTrack2_CheckedChanged(object sender, EventArgs e)
         {
-
+            SetcheckBoxTrackIntArray(2, checkBoxTrack2.Checked);
         }
 
         private void checkBoxTrack3_CheckedChanged(object sender, EventArgs e)
         {
-
+            SetcheckBoxTrackIntArray(3, checkBoxTrack3.Checked);
         }
 
         private void checkBoxTrack4_CheckedChanged(object sender, EventArgs e)
         {
-
+            SetcheckBoxTrackIntArray(4, checkBoxTrack4.Checked);
         }
 
         private void checkBoxTrack5_CheckedChanged(object sender, EventArgs e)
         {
-
+            SetcheckBoxTrackIntArray(5, checkBoxTrack5.Checked);
         }
 
         private void checkBoxTrack6_CheckedChanged(object sender, EventArgs e)
         {
-
+            SetcheckBoxTrackIntArray(6, checkBoxTrack6.Checked);
         }
 
         private void checkBoxTrack7_CheckedChanged(object sender, EventArgs e)
         {
-
+            SetcheckBoxTrackIntArray(7, checkBoxTrack7.Checked);
         }
 
         private void checkBoxTrack8_CheckedChanged(object sender, EventArgs e)
         {
-
+            SetcheckBoxTrackIntArray(8, checkBoxTrack8.Checked);
         }
 
         private void checkBoxTrack9_CheckedChanged(object sender, EventArgs e)
         {
-
+            SetcheckBoxTrackIntArray(9, checkBoxTrack9.Checked);
         }
 
         private void checkBoxTrack10_CheckedChanged(object sender, EventArgs e)
         {
-
+            SetcheckBoxTrackIntArray(10, checkBoxTrack10.Checked);
         }
 
         private void checkBoxTrack11_CheckedChanged(object sender, EventArgs e)
         {
-
+            SetcheckBoxTrackIntArray(11, checkBoxTrack11.Checked);
         }
 
         private void checkBoxToggle_CheckedChanged(object sender, EventArgs e)
         {
-
+            if (checkBoxToggle.Checked == false)
+            {
+                checkBoxTrack1.Checked = false;
+                checkBoxTrack2.Checked = false;
+                checkBoxTrack3.Checked = false;
+                checkBoxTrack4.Checked = false;
+                checkBoxTrack5.Checked = false;
+                checkBoxTrack6.Checked = false;
+                checkBoxTrack7.Checked = false;
+                checkBoxTrack8.Checked = false;
+                checkBoxTrack9.Checked = false;
+                checkBoxTrack10.Checked = false;
+                checkBoxTrack11.Checked = false;
+            }
+            else
+            {
+                checkBoxTrack1.Checked = true;
+                checkBoxTrack2.Checked = true;
+                checkBoxTrack3.Checked = true;
+                checkBoxTrack4.Checked = true;
+                checkBoxTrack5.Checked = true;
+                checkBoxTrack6.Checked = true;
+                checkBoxTrack7.Checked = true;
+                checkBoxTrack8.Checked = true;
+                checkBoxTrack9.Checked = true;
+                checkBoxTrack10.Checked = true;
+                checkBoxTrack11.Checked = true;
+            }
         }
 
         private void ForceNextTrack_ValueChanged(object sender, EventArgs e)
         {
+            m_FYAppVar.iTrainDriveOutPointer = Convert.ToInt16(ForceNextTrack.Value);
+        }
 
+        public void SetcheckBoxTrackIntArray(int Track, bool Checked)
+        {
+            if (Checked == true)
+            {
+                try
+                {
+                    m_FYAppVar.icheckBoxTrack[Track] = 1;
+                }
+                catch { }
+            }
+            else
+            {
+                try
+                {
+                    m_FYAppVar.icheckBoxTrack[Track] = 0;
+                }
+                catch { }                
+            }
         }
     }    
 }

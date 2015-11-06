@@ -137,6 +137,7 @@ namespace Siebwalde_Application
             {
                 case State.Start:                    
                     TrainDriveInPointer = m_FYAppVar.GetTrackNr();        // Driving trains into the fiddle yard may be done without memorizeing, driving out is done in Fi-La
+                    TrainDriveInPointerCheckedAll = TrainDriveInPointer;
                     m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveIn TrainDriveInPointer = m_iFYApp.GetTrackNr() = " + Convert.ToString(m_FYAppVar.GetTrackNr()));
                     TrainDriveIn_Machine = State.CheckEmptyTrack;
                     m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveIn TrainDriveIn_Machine = State.CheckEmptyTrack");
@@ -386,12 +387,9 @@ namespace Siebwalde_Application
 
             switch (TrainDriveOut_Machine)
             {
-                case State.Start:
-                    if (TrainDriveOutPointer > 11)
-                    {
-                        TrainDriveOutPointer = 1;
-                        m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveOut TrainDriveOutPointer > 11 -> TrainDriveOutPointer == " + Convert.ToString(TrainDriveOutPointer));
-                    }
+                case State.Start:                    
+                    TrainDriveOutPointer = m_FYAppVar.iTrainDriveOutPointer;                        // get latest next traindriveout pointer number, if not changed in FYFORM it is th elast value created here
+                    TrainDriveOutPointerCheckedAll = TrainDriveOutPointer;                    
                     TrainDriveOut_Machine = State.CheckFullTrack;
                     m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveOut TrainDriveOut_Machine = State.CheckFullTrack");
                     break;
@@ -403,7 +401,10 @@ namespace Siebwalde_Application
                         if (TrainDriveOutPointer > 11)
                         {
                             TrainDriveOutPointer = 1;
+                            m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveOut TrainDriveOutPointer > 11 -> TrainDriveOutPointer == " + Convert.ToString(TrainDriveOutPointer));
                         }
+                        m_FYAppVar.TrainDriveOutPointer.UpdateSensorValue(TrainDriveOutPointer, false); // When Traindrive out created a new number for TrainDriveOutPointer then update FYFORM with this numeber
+
                         if (TrainDriveOutPointerCheckedAll == TrainDriveOutPointer)
                         {
                             TrainDriveOut_Machine = State.Start;
@@ -473,7 +474,18 @@ namespace Siebwalde_Application
                         m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveOut m_iFYApp.GetTrainsOnFY()[" + Convert.ToString(TrainDriveOutPointer) + "] = 0 (TRAIN LEFT)");
                         m_FYAppVar.UpdateTrainsOnFY("Track" + Convert.ToString(TrainDriveOutPointer), 0, "");
                         m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveOut m_iFYApp.UpdateTrainsOnFY()");
-                        TrainDriveOutPointer++;
+
+                        if (m_FYAppVar.iTrainDriveOutPointer == TrainDriveOutPointer)   // check if user has changed next track to drive train out of
+                        {
+                            TrainDriveOutPointer++;
+                            if (TrainDriveOutPointer > 11)
+                            {
+                                TrainDriveOutPointer = 1;
+                                m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveOut TrainDriveOutPointer > 11 -> TrainDriveOutPointer == " + Convert.ToString(TrainDriveOutPointer));
+                            }
+                            m_FYAppVar.TrainDriveOutPointer.UpdateSensorValue(TrainDriveOutPointer, false); // When Traindrive out created a new number for TrainDriveOutPointer then update FYFORM with this numeber
+                        }
+
                         m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveOut TrainDriveOutPointer++ -> TrainDriveOutPointer == " + Convert.ToString(TrainDriveOutPointer));
                         _Return = "Finished";
                         TrainDriveOut_Machine = State.Start;
