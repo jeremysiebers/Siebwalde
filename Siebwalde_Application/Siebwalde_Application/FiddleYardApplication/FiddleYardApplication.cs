@@ -27,7 +27,7 @@ namespace Siebwalde_Application
     {
         public FiddleYardApplicationVariables FYAppVar;                             // IOHanlder connects the event handlers via this way
         public Log2LoggingFile FiddleYardApplicationLogging;        
-        public FiddleYardForm FYFORM = new FiddleYardForm();
+        public FiddleYardForm FYFORM;
         private FiddleYardIOHandleVariables m_FYIOHandleVar;                        // connect variable to connect to FYIOH class for defined interfaces
         private iFiddleYardIOHandle m_iFYIOH;
         private FiddleYardAppInit FYAppInit;
@@ -95,7 +95,8 @@ namespace Siebwalde_Application
             }
 
             // Sub programs  
-            FYAppVar = new FiddleYardApplicationVariables(m_FYIOHandleVar, FYFORM);                 // FiddleYard Application variables class, holds all variables and functions regarding variables
+            FYAppVar = new FiddleYardApplicationVariables(m_FYIOHandleVar);                 // FiddleYard Application variables class, holds all variables and functions regarding variables
+            FYFORM = new FiddleYardForm();
             FYAppInit = new FiddleYardAppInit(m_FYIOHandleVar, FYAppVar, FiddleYardApplicationLogging);
             FYAppRun = new FiddleYardAppRun(m_FYIOHandleVar, m_iFYIOH, FYAppVar, FiddleYardApplicationLogging);
 
@@ -175,57 +176,57 @@ namespace Siebwalde_Application
 
              //Instantiate cmd handler for receiving commands from the Form            
             Command Act_Couple = new Command(" Couple ", (name) => FormCmd(name)); // initialize and subscribe Commands
-            FYFORM.Couple.Attach(Act_Couple);
+            FYAppVar.CmdCouple.Attach(Act_Couple);
             Command Act_Uncouple = new Command(" Uncouple ", (name) => FormCmd(name)); // initialize and subscribe Commands
-            FYFORM.Uncouple.Attach(Act_Uncouple);
+            FYAppVar.CmdUncouple.Attach(Act_Uncouple);
             Command Act_FiddleOneLeft = new Command(" FiddleOneLeft ", (name) => FormCmd(name)); // initialize and subscribe Commands
-            FYFORM.FiddleOneLeft.Attach(Act_FiddleOneLeft);
+            FYAppVar.CmdFiddleOneLeft.Attach(Act_FiddleOneLeft);
             Command Act_FiddleOneRight = new Command(" FiddleOneRight ", (name) => FormCmd(name)); // initialize and subscribe Commands
-            FYFORM.FiddleOneRight.Attach(Act_FiddleOneRight);
+            FYAppVar.CmdFiddleOneRight.Attach(Act_FiddleOneRight);
             Command Act_FiddleGo1 = new Command(" FiddleGo1 ", (name) => FormCmd(name)); // initialize and subscribe Commands
-            FYFORM.FiddleGo1.Attach(Act_FiddleGo1);
+            FYAppVar.CmdFiddleGo1.Attach(Act_FiddleGo1);
             Command Act_FiddleGo2 = new Command(" FiddleGo2 ", (name) => FormCmd(name)); // initialize and subscribe Commands
-            FYFORM.FiddleGo2.Attach(Act_FiddleGo2);
+            FYAppVar.CmdFiddleGo2.Attach(Act_FiddleGo2);
             Command Act_FiddleGo3 = new Command(" FiddleGo3 ", (name) => FormCmd(name)); // initialize and subscribe Commands
-            FYFORM.FiddleGo3.Attach(Act_FiddleGo3);
+            FYAppVar.CmdFiddleGo3.Attach(Act_FiddleGo3);
             Command Act_FiddleGo4 = new Command(" FiddleGo4 ", (name) => FormCmd(name)); // initialize and subscribe Commands
-            FYFORM.FiddleGo4.Attach(Act_FiddleGo4);
+            FYAppVar.CmdFiddleGo4.Attach(Act_FiddleGo4);
             Command Act_FiddleGo5 = new Command(" FiddleGo5 ", (name) => FormCmd(name)); // initialize and subscribe Commands
-            FYFORM.FiddleGo5.Attach(Act_FiddleGo5);
+            FYAppVar.CmdFiddleGo5.Attach(Act_FiddleGo5);
             Command Act_FiddleGo6 = new Command(" FiddleGo6 ", (name) => FormCmd(name)); // initialize and subscribe Commands
-            FYFORM.FiddleGo6.Attach(Act_FiddleGo6);
+            FYAppVar.CmdFiddleGo6.Attach(Act_FiddleGo6);
             Command Act_FiddleGo7 = new Command(" FiddleGo7 ", (name) => FormCmd(name)); // initialize and subscribe Commands
-            FYFORM.FiddleGo7.Attach(Act_FiddleGo7);
+            FYAppVar.CmdFiddleGo7.Attach(Act_FiddleGo7);
             Command Act_FiddleGo8 = new Command(" FiddleGo8 ", (name) => FormCmd(name)); // initialize and subscribe Commands
-            FYFORM.FiddleGo8.Attach(Act_FiddleGo8);
+            FYAppVar.CmdFiddleGo8.Attach(Act_FiddleGo8);
             Command Act_FiddleGo9 = new Command(" FiddleGo9 ", (name) => FormCmd(name)); // initialize and subscribe Commands
-            FYFORM.FiddleGo9.Attach(Act_FiddleGo9);
+            FYAppVar.CmdFiddleGo9.Attach(Act_FiddleGo9);
             Command Act_FiddleGo10 = new Command(" FiddleGo10 ", (name) => FormCmd(name)); // initialize and subscribe Commands
-            FYFORM.FiddleGo10.Attach(Act_FiddleGo10);
+            FYAppVar.CmdFiddleGo10.Attach(Act_FiddleGo10);
             Command Act_FiddleGo11 = new Command(" FiddleGo11 ", (name) => FormCmd(name)); // initialize and subscribe Commands
-            FYFORM.FiddleGo11.Attach(Act_FiddleGo11);
+            FYAppVar.CmdFiddleGo11.Attach(Act_FiddleGo11);
             Command Act_TrainDetect = new Command(" TrainDetect ", (name) => FormCmd(name)); // initialize and subscribe Commands
-            FYFORM.TrainDetect.Attach(Act_TrainDetect);
+            FYAppVar.CmdTrainDetect.Attach(Act_TrainDetect);
             Command Act_Start = new Command(" Start ", (name) => FormCmd(name)); // initialize and subscribe Commands
-            FYFORM.FYStart.Attach(Act_Start);
+            FYAppVar.CmdFYStart.Attach(Act_Start);
             Command Act_Stop = new Command(" Stop ", (name) => FormCmd(name)); // initialize and subscribe Commands
-            FYFORM.FYStop.Attach(Act_Stop);
+            FYAppVar.CmdFYStop.Attach(Act_Stop);
             Command Act_Reset = new Command(" Reset ", (name) => FormCmd(name)); // initialize and subscribe Commands
-            FYFORM.Reset.Attach(Act_Reset);
+            FYAppVar.CmdReset.Attach(Act_Reset);
             Command Act_Occ5BOnTrue = new Command(" Occ5BOnTrue ", (name) => FormCmd(name)); // initialize and subscribe Commands
-            FYFORM.Occ5BOnTrue.Attach(Act_Occ5BOnTrue);
+            FYAppVar.CmdOcc5BOnTrue.Attach(Act_Occ5BOnTrue);
             Command Act_Occ5BOnFalse = new Command(" Occ5BOnFalse ", (name) => FormCmd(name)); // initialize and subscribe Commands
-            FYFORM.Occ5BOnFalse.Attach(Act_Occ5BOnFalse);
+            FYAppVar.CmdOcc5BOnFalse.Attach(Act_Occ5BOnFalse);
             Command Act_Occ6OnTrue = new Command(" Occ6OnTrue ", (name) => FormCmd(name)); // initialize and subscribe Commands
-            FYFORM.Occ6OnTrue.Attach(Act_Occ6OnTrue);
+            FYAppVar.CmdOcc6OnTrue.Attach(Act_Occ6OnTrue);
             Command Act_Occ6OnFalse = new Command(" Occ6OnFalse ", (name) => FormCmd(name)); // initialize and subscribe Commands
-            FYFORM.Occ6OnFalse.Attach(Act_Occ6OnFalse);
+            FYAppVar.CmdOcc6OnFalse.Attach(Act_Occ6OnFalse);
             Command Act_Occ7OnTrue = new Command(" Occ7OnTrue ", (name) => FormCmd(name)); // initialize and subscribe Commands
-            FYFORM.Occ7OnTrue.Attach(Act_Occ7OnTrue);
+            FYAppVar.CmdOcc7OnTrue.Attach(Act_Occ7OnTrue);
             Command Act_Occ7OnFalse = new Command(" Occ7OnFalse ", (name) => FormCmd(name)); // initialize and subscribe Commands
-            FYFORM.Occ7OnFalse.Attach(Act_Occ7OnFalse);            
+            FYAppVar.CmdOcc7OnFalse.Attach(Act_Occ7OnFalse);            
             Command Act_Collect = new Command(" Collect ", (name) => FormCmd(name)); // initialize and subscribe Commands
-            FYFORM.Collect.Attach(Act_Collect);
+            FYAppVar.CmdCollect.Attach(Act_Collect);
 
             State_Machine = State.Idle;
 

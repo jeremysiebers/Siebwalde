@@ -66,7 +66,9 @@ namespace Siebwalde_Application
         public SensorUpdater F10;
         public SensorUpdater M10;
         public SensorUpdater TrackNo;
+        public SensorUpdater TrackPower15V;                 // This is sensor indicator
         public SensorUpdater CmdBusy;
+
         // Create Messages
         public MessageUpdater FiddleOneLeft;
         public MessageUpdater FiddleOneRight;
@@ -83,7 +85,7 @@ namespace Siebwalde_Application
         public MessageUpdater UniversalError;
         public MessageUpdater uControllerReady;             // ready for next command, C# has to assume ucontroller is busy after sending a command
         public MessageUpdater TrackPower15VDown;            // Quick message to indicate track power is down, halt FYApplication!!
-        public SensorUpdater TrackPower15V;                 // This is sensor indicator
+        
 
         /*#--------------------------------------------------------------------------#*/
         /*  Description: FiddleYardVariables constructor
@@ -133,7 +135,9 @@ namespace Siebwalde_Application
             F10 = new SensorUpdater();
             M10 = new SensorUpdater();
             TrackNo = new SensorUpdater();
+            TrackPower15V = new SensorUpdater();
             CmdBusy = new SensorUpdater();
+
             // Instantiate messages
             FiddleOneLeft = new MessageUpdater();
             FiddleOneRight = new MessageUpdater();
@@ -150,7 +154,7 @@ namespace Siebwalde_Application
             UniversalError = new MessageUpdater();
             uControllerReady = new MessageUpdater();
             TrackPower15VDown = new MessageUpdater();
-            TrackPower15V = new SensorUpdater();
+            
         }        
     }
 }

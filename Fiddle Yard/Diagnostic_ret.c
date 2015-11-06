@@ -156,7 +156,7 @@ void Diagnostic(void)
 						Diag_Comm2 = 21;
 						break;
 						
-		case	21	:	if (MAC_IP_READY == True)
+		case	21	:	if (MAC_IP_READY == True)	// when all data is transmitted to target stet up communication back to PC.
 						{
 							TestTarget.MACAddr.v[0] = MACPC[0];//0x00;
 							TestTarget.MACAddr.v[1] = MACPC[1];//0x0E;
@@ -170,7 +170,7 @@ void Diagnostic(void)
 							TestTarget.IPAddr.v[2] = IPPC[2];//1;
 							TestTarget.IPAddr.v[3] = IPPC[3];//24;
 							
-				            socket1 = UDPOpen(0x7000, &TestTarget, 0x7000);  //open the socket 
+				            socket1 = UDPOpen(PORTPC, &TestTarget, PORTPC);  //open the socket at the communicated PORT
 			            
 				            if(socket1 == 0xFF) //Invalid socket
 				            {

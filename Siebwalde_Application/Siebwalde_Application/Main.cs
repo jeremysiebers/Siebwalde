@@ -94,7 +94,7 @@ namespace Siebwalde_Application
 
         private void StartFYController()
         {
-            int FYReceivingport = 0x7000;    
+            int FYReceivingport = 0x7000; // Port on which the PC will receive data from the FiddleYard   
             FYcontroller = new FiddleYardController(this, MACIPConditioner.MAC(), MACIPConditioner.IP(), FYReceivingport);            
             SiebwaldeAppLogging("Main: FiddleYard Controller starting...");
             FYcontroller.Start();

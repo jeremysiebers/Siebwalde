@@ -127,14 +127,14 @@ namespace Siebwalde_Application
         }
 
         /*#--------------------------------------------------------------------------#*/
-        /*  Description: FiddleYardController stop
+        /*  Description: FiddleYardController ConnectFiddleYard
          *               
          *
-         *  Input(s)   :
+         *  Input(s)   : macAddr, ipAddr
          *
-         *  Output(s)  :
+         *  Output(s)  : FYSimulatorActive
          *
-         *  Returns    :
+         *  Returns    : ConnectFiddleYard
          *
          *  Pre.Cond.  :
          *
@@ -143,11 +143,40 @@ namespace Siebwalde_Application
          *  Notes      :
          */
         /*#--------------------------------------------------------------------------#*/
-        public void Stop()
+        private bool ConnectFiddleYard(byte[,] macAddr, byte[,] ipAddr)
         {
-            if (FYSender != null) // when a real connection is made, close the UDP port
-            {                
-                FYSender.CloseUdp();
+            string PingReturn = "";
+            try
+            {
+                m_iMain.SiebwaldeAppLogging("FYCTRL: Pinging FIDDLEYARD target...");
+                PingReturn = m_PingTarget.TargetFound(Target);
+                if (PingReturn == "targetfound")
+                {
+                    m_iMain.SiebwaldeAppLogging("FYCTRL: Ping successfull.");
+
+                    m_iMain.SiebwaldeAppLogging("FYCTRL: FiddleYard Connecting...");
+                    FYSender.ConnectUdp();
+
+                    m_iMain.SiebwaldeAppLogging("FYCTRL: FiddleYard Connected.");
+                    m_iMain.SiebwaldeAppLogging("FYCTRL: FiddleYard Send MAC and IP...");
+
+                    ProgramMACIPPORT(macAddr, ipAddr);
+                    FYSimulatorActive = false;
+                    return true; // connection succesfull to FIDDLEYARD
+                }
+                else
+                {
+                    m_iMain.SiebwaldeAppLogging("FYCTRL: " + PingReturn);
+                    FYSimulatorActive = true;
+                    return false; // ping was unsuccessfull    
+                }
+
+            }
+            catch (Exception)
+            {
+                m_iMain.SiebwaldeAppLogging("FYCTRL: FiddleYard failed to connect.");
+                FYSimulatorActive = true;
+                return false; // ping was successfull but connecting failed
             }
         }
 
@@ -170,7 +199,35 @@ namespace Siebwalde_Application
         /*#--------------------------------------------------------------------------#*/
         public void ReConnect()
         {
-            // stop simulators / timers etc, then call start again
+            if (FYSimulatorActive == false)
+            {
+
+            }
+        }
+
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: FiddleYardController stop
+         *               
+         *
+         *  Input(s)   :
+         *
+         *  Output(s)  :
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      :
+         */
+        /*#--------------------------------------------------------------------------#*/
+        public void Stop()
+        {
+            if (FYSender != null) // when a real connection is made, close the UDP port
+            {                
+                FYSender.CloseUdp();
+            }
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -263,60 +320,6 @@ namespace Siebwalde_Application
         }
 
         /*#--------------------------------------------------------------------------#*/
-        /*  Description: FiddleYardController ConnectFiddleYard
-         *               
-         *
-         *  Input(s)   : macAddr, ipAddr
-         *
-         *  Output(s)  : FYSimulatorActive
-         *
-         *  Returns    : ConnectFiddleYard
-         *
-         *  Pre.Cond.  :
-         *
-         *  Post.Cond. :
-         *
-         *  Notes      :
-         */
-        /*#--------------------------------------------------------------------------#*/
-        private bool ConnectFiddleYard(byte[,] macAddr, byte[,] ipAddr)
-        {
-            string PingReturn = "";
-            try
-            {                
-                m_iMain.SiebwaldeAppLogging("FYCTRL: Pinging FIDDLEYARD target...");
-                PingReturn = m_PingTarget.TargetFound(Target);
-                if (PingReturn == "targetfound")
-                {
-                    m_iMain.SiebwaldeAppLogging("FYCTRL: Ping successfull.");
-
-                    m_iMain.SiebwaldeAppLogging("FYCTRL: FiddleYard Connecting...");
-                    FYSender.ConnectUdp();
-
-                    m_iMain.SiebwaldeAppLogging("FYCTRL: FiddleYard Connected.");
-                    m_iMain.SiebwaldeAppLogging("FYCTRL: FiddleYard Send MAC and IP...");
-
-                    ProgramMACIPPORT(macAddr, ipAddr);
-                    FYSimulatorActive = false;
-                    return true; // connection succesfull to FIDDLEYARD
-                }
-                else
-                {
-                    m_iMain.SiebwaldeAppLogging("FYCTRL: "+ PingReturn);
-                    FYSimulatorActive = true;
-                    return false; // ping was unsuccessfull    
-                }
-
-            }
-            catch (Exception)
-            {                
-                m_iMain.SiebwaldeAppLogging("FYCTRL: FiddleYard failed to connect.");                
-                FYSimulatorActive = true;
-                return false; // ping was successfull but connecting failed
-            }
-        }
-
-        /*#--------------------------------------------------------------------------#*/
         /*  Description: FiddleYardController ProgramMACIPPORT
          *               
          *
@@ -356,17 +359,23 @@ namespace Siebwalde_Application
             }
             m_iMain.SiebwaldeAppLogging("FYCTRL: FiddleYard IP is sent.");
 
-            /* Also sent to FY uController to set the port on which it has to sent its data to the PC: m_FYReceivingPort
+            System.Threading.Thread.Sleep(50);
+
+            // Also sent to FY uController to set the port on which it has to sent its data to the PC: m_FYReceivingPort
             Send[0] = Convert.ToByte('r');
             Send[1] = Convert.ToByte(m_FYReceivingPort >> 8);
             Send[2] = 0xD;
             FYSender.SendUdp(Send);
+            System.Threading.Thread.Sleep(50);
             
             Send[0] = Convert.ToByte('s');
-            Send[1] = Convert.ToByte(m_FYReceivingPort & 0xFF00 >> 8);
+            Send[1] = Convert.ToByte(m_FYReceivingPort & 0x00FF);// >> 8);
             Send[2] = 0xD;
             FYSender.SendUdp(Send);
-            m_iMain.SiebwaldeAppLogging("FYCTRL: FiddleYard sending Port is sent.");*/
+            System.Threading.Thread.Sleep(50);
+            m_iMain.SiebwaldeAppLogging("FYCTRL: FiddleYard sending Port is sent.");
+
+
 
             Send[0] = Convert.ToByte('t');
             Send[1] = 0x1;

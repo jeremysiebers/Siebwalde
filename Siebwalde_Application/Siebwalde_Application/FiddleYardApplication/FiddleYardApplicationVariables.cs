@@ -20,8 +20,7 @@ namespace Siebwalde_Application
 {
     public class FiddleYardApplicationVariables
     {
-        private FiddleYardIOHandleVariables m_FYIOHandleVar;                // connect variable to connect to FYIOH class for defined variables
-        private FiddleYardForm m_FYFORM;                                    // Get FORM commands
+        private FiddleYardIOHandleVariables m_FYIOHandleVar;                // connect variable to connect to FYIOH class for defined variables       
 
         /*#--------------------------------------------------------------------------#*/
         /*  Description: Application variables
@@ -40,6 +39,34 @@ namespace Siebwalde_Application
          *  
          */
         /*#--------------------------------------------------------------------------#*/
+        public CommandUpdater CmdFiddleOneLeft;
+        public CommandUpdater CmdFiddleOneRight;
+        public CommandUpdater CmdCouple;
+        public CommandUpdater CmdUncouple;
+        public CommandUpdater CmdFiddleGo1;
+        public CommandUpdater CmdFiddleGo2;
+        public CommandUpdater CmdFiddleGo3;
+        public CommandUpdater CmdFiddleGo4;
+        public CommandUpdater CmdFiddleGo5;
+        public CommandUpdater CmdFiddleGo6;
+        public CommandUpdater CmdFiddleGo7;
+        public CommandUpdater CmdFiddleGo8;
+        public CommandUpdater CmdFiddleGo9;
+        public CommandUpdater CmdFiddleGo10;
+        public CommandUpdater CmdFiddleGo11;
+        public CommandUpdater CmdTrainDetect;
+        public CommandUpdater CmdFYStart;
+        public CommandUpdater CmdFYStop;
+        public CommandUpdater CmdReset;
+        public CommandUpdater CmdOcc5BOnTrue;
+        public CommandUpdater CmdOcc5BOnFalse;
+        public CommandUpdater CmdOcc6OnTrue;
+        public CommandUpdater CmdOcc6OnFalse;
+        public CommandUpdater CmdOcc7OnTrue;
+        public CommandUpdater CmdOcc7OnFalse;
+        public CommandUpdater CmdRecoverd;
+        public CommandUpdater CmdCollect;
+        
         public ActuatorUpdater FiddleOneLeft;
         public ActuatorUpdater FiddleOneRight;
         public ActuatorUpdater Couple;
@@ -98,6 +125,7 @@ namespace Siebwalde_Application
         public SensorUpdater M10;
         public SensorUpdater TrackNo;
         public SensorUpdater CmdBusy;
+        public SensorUpdater TrackPower15V;
         public SensorUpdater TrainDriveOutPointer;
 
         public MessageUpdater FiddleYardStopped;
@@ -147,7 +175,7 @@ namespace Siebwalde_Application
         public Color TrackOccupiedColor = Siebwalde_Application.Properties.Settings.Default.SETxCOLORxTRACKxOCCUPIED;
         public Color TrackNotInitializedColor = Siebwalde_Application.Properties.Settings.Default.SETxCOLORxTRACKxNOTxINITIALIZED;
         public Color TrackNotActiveColor = Siebwalde_Application.Properties.Settings.Default.SETxCOLORxTRACKxNOTxACTIVE;
-        public Color TrackEmptyColor = Siebwalde_Application.Properties.Settings.Default.SETxCOLORxTRACKxEMPTY;
+        public Color TrackDisabledColor = Siebwalde_Application.Properties.Settings.Default.SETxCOLORxTRACKxDISABLED;
 
         /*#--------------------------------------------------------------------------#*/
         /*  Description: FiddleYardVariables constructor
@@ -166,10 +194,38 @@ namespace Siebwalde_Application
          *  
          */
         /*#--------------------------------------------------------------------------#*/
-        public FiddleYardApplicationVariables(FiddleYardIOHandleVariables FYIOHandleVar, FiddleYardForm FYFORM)
+        public FiddleYardApplicationVariables(FiddleYardIOHandleVariables FYIOHandleVar)
         {
-            m_FYIOHandleVar = FYIOHandleVar;
-            m_FYFORM = FYFORM;
+            m_FYIOHandleVar = FYIOHandleVar;            
+
+            // Instantiate Commands from FYFORM
+            CmdFiddleOneLeft = new CommandUpdater();
+            CmdFiddleOneRight = new CommandUpdater();
+            CmdCouple = new CommandUpdater();
+            CmdUncouple = new CommandUpdater();
+            CmdFiddleGo1 = new CommandUpdater();
+            CmdFiddleGo2 = new CommandUpdater();
+            CmdFiddleGo3 = new CommandUpdater();
+            CmdFiddleGo4 = new CommandUpdater();
+            CmdFiddleGo5 = new CommandUpdater();
+            CmdFiddleGo6 = new CommandUpdater();
+            CmdFiddleGo7 = new CommandUpdater();
+            CmdFiddleGo8 = new CommandUpdater();
+            CmdFiddleGo9 = new CommandUpdater();
+            CmdFiddleGo10 = new CommandUpdater();
+            CmdFiddleGo11 = new CommandUpdater();
+            CmdTrainDetect = new CommandUpdater();
+            CmdFYStart = new CommandUpdater();
+            CmdFYStop = new CommandUpdater();
+            CmdReset = new CommandUpdater();
+            CmdOcc5BOnTrue = new CommandUpdater();
+            CmdOcc5BOnFalse = new CommandUpdater();
+            CmdOcc6OnTrue = new CommandUpdater();
+            CmdOcc6OnFalse = new CommandUpdater();
+            CmdOcc7OnTrue = new CommandUpdater();
+            CmdOcc7OnFalse = new CommandUpdater();
+            CmdRecoverd = new CommandUpdater();
+            CmdCollect = new CommandUpdater();
 
             // Instantiate actuators for sending command out to the target or simulator
             FiddleOneLeft = new ActuatorUpdater();
@@ -229,6 +285,7 @@ namespace Siebwalde_Application
             F10 = new SensorUpdater();
             M10 = new SensorUpdater();
             TrackNo = new SensorUpdater();
+            TrackPower15V = new SensorUpdater();
             CmdBusy = new SensorUpdater();
             TrainDriveOutPointer = new SensorUpdater();
 
@@ -313,11 +370,11 @@ namespace Siebwalde_Application
             m_FYIOHandleVar.TrackNo.Attach(Sns_TrackNo);
             Sensor Sns_CmdBusy = new Sensor("CmdBusy", " uController busy ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
             m_FYIOHandleVar.CmdBusy.Attach(Sns_CmdBusy);
-            Sensor Sns_TrackPower15V = new Sensor("15VTrackPower", " 15V Track Power ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+            Sensor Sns_TrackPower15V = new Sensor("TrackPower15V", " 15V Track Power ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
             m_FYIOHandleVar.TrackPower15V.Attach(Sns_TrackPower15V);
 
             Command Act_Collect = new Command(" Collect ", (name) => FormCmd(name)); // Catch Form command pass to subscribers
-            m_FYFORM.Collect.Attach(Act_Collect);
+            CmdCollect.Attach(Act_Collect);
 
             Colorc Clr_FYTrackOccupiedColorSetting = new Colorc(Color.Transparent, "Clr_FYTrackOccupiedColorSetting", (NewColor, log) => SetColorIndicator(NewColor, log));
             Siebwalde_Application.Properties.Settings.Default.SWSetColorTrainOccupied.Attach(Clr_FYTrackOccupiedColorSetting);
@@ -328,8 +385,8 @@ namespace Siebwalde_Application
             Colorc Clr_FYTrackNotActiveColorSetting = new Colorc(Color.Transparent, "Clr_FYTrackNotActiveColorSetting", (NewColor, log) => SetColorIndicator(NewColor, log));
             Siebwalde_Application.Properties.Settings.Default.SWSetColorTrackNotActive.Attach(Clr_FYTrackNotActiveColorSetting);
 
-            Colorc Clr_FYTrackEmptyColorSetting = new Colorc(Color.Transparent, "Clr_FYTrackEmptyColorSetting", (NewColor, log) => SetColorIndicator(NewColor, log));
-            Siebwalde_Application.Properties.Settings.Default.SWSetColorTrackEmpty.Attach(Clr_FYTrackEmptyColorSetting);
+            Colorc Clr_FYTrackDisabledColorSetting = new Colorc(Color.Transparent, "Clr_FYTrackDisabledColorSetting", (NewColor, log) => SetColorIndicator(NewColor, log));
+            Siebwalde_Application.Properties.Settings.Default.SWSetColorTrackDisabled.Attach(Clr_FYTrackDisabledColorSetting);
 
             for (int i = 1; i < 12; i++)
             {
@@ -370,8 +427,8 @@ namespace Siebwalde_Application
                     TrackNotActiveColor = NewColor;
                     break;
 
-                case "Clr_FYTrackEmptyColorSetting":
-                    TrackEmptyColor = NewColor;
+                case "Clr_FYTrackDisabledColorSetting":
+                    TrackDisabledColor = NewColor;
                     break;
 
                 default: break;
@@ -538,11 +595,6 @@ namespace Siebwalde_Application
                     Block8A.UpdateSensorValue(Convert.ToInt16(bBlock8A), false);
                     break;
 
-                case "TrackPower": 
-                    bTrackPower = Convert.ToBoolean(val);
-                    TrackPower.UpdateSensorValue(Convert.ToInt16(bTrackPower), false);
-                    break;
-
                 case "Block5BIn": 
                     bBlock5BIn = Convert.ToBoolean(val);
                     Block5BIn.UpdateSensorValue(Convert.ToInt16(bBlock5BIn), false);
@@ -583,9 +635,14 @@ namespace Siebwalde_Application
                     M10.UpdateSensorValue(Convert.ToInt16(bM10), false);
                     break;
 
+                case "TrackPower":
+                    bTrackPower = Convert.ToBoolean(val);
+                    TrackPower.UpdateSensorValue(Convert.ToInt16(bTrackPower), false);
+                    break;
+
                 case "TrackPower15V": 
                     bTrackPower15V = Convert.ToBoolean(val);
-                    TrackPower.UpdateSensorValue(Convert.ToInt16(bTrackPower15V), false);
+                    TrackPower15V.UpdateSensorValue(Convert.ToInt16(bTrackPower15V), false);
                     break;
 
                 case "Track_No": 

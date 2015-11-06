@@ -45,37 +45,11 @@ namespace Siebwalde_Application
         public bool Btn_Bezet6On_TOP_Click_Toggle = false;
         public bool Btn_Bezet7On_TOP_Click_Toggle = false;
 
-        private FiddleYardIOHandleVariables m_FYIOHandleVar;             // connect variable to connect to FYIOH class for defined variables
+        private FiddleYardIOHandleVariables m_FYIOHandleVar;             // connect variable to connect to FYIOH class for traindetection
         public FiddleYardApplicationVariables m_FYAppVar;
 
         // Create actuators, when a button is pressed an event is generated to send a command to target via IOHandle and to the controlling program
-        public CommandUpdater FiddleOneLeft;
-        public CommandUpdater FiddleOneRight;
-        public CommandUpdater Couple;
-        public CommandUpdater Uncouple;
-        public CommandUpdater FiddleGo1;
-        public CommandUpdater FiddleGo2;
-        public CommandUpdater FiddleGo3;
-        public CommandUpdater FiddleGo4;
-        public CommandUpdater FiddleGo5;
-        public CommandUpdater FiddleGo6;
-        public CommandUpdater FiddleGo7;
-        public CommandUpdater FiddleGo8;
-        public CommandUpdater FiddleGo9;
-        public CommandUpdater FiddleGo10;
-        public CommandUpdater FiddleGo11;
-        public CommandUpdater TrainDetect;
-        public CommandUpdater FYStart;
-        public CommandUpdater FYStop;
-        public CommandUpdater Reset;
-        public CommandUpdater Occ5BOnTrue;
-        public CommandUpdater Occ5BOnFalse;
-        public CommandUpdater Occ6OnTrue;
-        public CommandUpdater Occ6OnFalse; 
-        public CommandUpdater Occ7OnTrue;
-        public CommandUpdater Occ7OnFalse; 
-        public CommandUpdater Recoverd;
-        public CommandUpdater Collect;
+        
 
         public Image SeinGreen = Siebwalde_Application.Properties.Resources.SeinGreen.ToBitmap();
         public Image SeinRed = Siebwalde_Application.Properties.Resources.SeinRed.ToBitmap();
@@ -264,52 +238,22 @@ namespace Siebwalde_Application
             alwaysOnTopToolStripMenuItem.Checked = true;
             this.TopMost = true;
 
-            checkBoxTrack1.Checked = true;
-            checkBoxTrack2.Checked = true;
-            checkBoxTrack3.Checked = true;
-            checkBoxTrack4.Checked = true;
-            checkBoxTrack5.Checked = true;
-            checkBoxTrack6.Checked = true;
-            checkBoxTrack7.Checked = true;
-            checkBoxTrack8.Checked = true;
-            checkBoxTrack9.Checked = true;
-            checkBoxTrack10.Checked = true;
-            checkBoxTrack11.Checked = true;
-            checkBoxToggle.Checked = true;
+            checkBoxTrack1.Checked = false;
+            checkBoxTrack2.Checked = false;
+            checkBoxTrack3.Checked = false;
+            checkBoxTrack4.Checked = false;
+            checkBoxTrack5.Checked = false;
+            checkBoxTrack6.Checked = false;
+            checkBoxTrack7.Checked = false;
+            checkBoxTrack8.Checked = false;
+            checkBoxTrack9.Checked = false;
+            checkBoxTrack10.Checked = false;
+            checkBoxTrack11.Checked = false;
+            checkBoxToggle.Checked = false;
 
-            #endregion Indicator init
+            #endregion Indicator init            
 
-            // Instantiate actuators
-            FiddleOneLeft = new CommandUpdater();
-            FiddleOneRight = new CommandUpdater();
-            Couple = new CommandUpdater();
-            Uncouple = new CommandUpdater();
-            FiddleGo1 = new CommandUpdater();
-            FiddleGo2 = new CommandUpdater();
-            FiddleGo3 = new CommandUpdater();
-            FiddleGo4 = new CommandUpdater();
-            FiddleGo5 = new CommandUpdater();
-            FiddleGo6 = new CommandUpdater();
-            FiddleGo7 = new CommandUpdater();
-            FiddleGo8 = new CommandUpdater();
-            FiddleGo9 = new CommandUpdater();
-            FiddleGo10 = new CommandUpdater();
-            FiddleGo11 = new CommandUpdater();
-            TrainDetect = new CommandUpdater();
-            FYStart = new CommandUpdater();
-            FYStop = new CommandUpdater();
-            Reset = new CommandUpdater();
-            Occ5BOnTrue = new CommandUpdater();
-            Occ5BOnFalse = new CommandUpdater();
-            Occ6OnTrue = new CommandUpdater();
-            Occ6OnFalse = new CommandUpdater();
-            Occ7OnTrue = new CommandUpdater();
-            Occ7OnFalse = new CommandUpdater();
-            Recoverd = new CommandUpdater();
-            Collect = new CommandUpdater();
-
-            Btn_Stop_Fiddle_TOP.Enabled = false;
-            
+            Btn_Stop_Fiddle_TOP.Enabled = false;            
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -407,8 +351,8 @@ namespace Siebwalde_Application
             m_FYAppVar.M10.Attach(Led_M10);
             Sensor Led_TrackNoTop = new Sensor("Track_No", " Track Nr ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
             m_FYAppVar.TrackNo.Attach(Led_TrackNoTop);
-            Sensor Led_TrackPower15VTOP = new Sensor("LLed_15VTrackPower", " 15V Track Power ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
-            m_FYAppVar.TrackPower.Attach(Led_TrackPower15VTOP);
+            Sensor Led_TrackPower15VTOP = new Sensor("LLed_TrackPower15V", " 15V Track Power ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+            m_FYAppVar.TrackPower15V.Attach(Led_TrackPower15VTOP);
 
             Sensor Sns_ForceNextTrack = new Sensor("ForceNextTrack", " ForceNextTrack ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
             m_FYAppVar.TrainDriveOutPointer.Attach(Sns_ForceNextTrack);  
@@ -430,7 +374,7 @@ namespace Siebwalde_Application
             m_FYAppVar.TrainHasLeftFiddleYardSuccessfully.Attach(Msg_TrainHasLeftFiddleYardSuccessfully);
             Message Msg_EMOPressed15VTrackPowerDown = new Message("EMOPressed15VTrackPowerDown", " EMO pressed, 15V Track Power down! ", (name, log) => SetMessage(name, log));
             m_FYAppVar.EMOPressed15VTrackPowerDown.Attach(Msg_EMOPressed15VTrackPowerDown);
-            Message Msg_EMOPressed15VTrackPowerUp = new Message("EMOPressed15VTrackPowerUp", " EMO pressed, 15V Track Power up! ", (name, log) => SetMessage(name, log));
+            Message Msg_EMOPressed15VTrackPowerUp = new Message("EMOPressed15VTrackPowerUp", " EMO released, 15V Track Power up! ", (name, log) => SetMessage(name, log));
             m_FYAppVar.EMOPressed15VTrackPowerUp.Attach(Msg_EMOPressed15VTrackPowerUp);
             Message Msg_FiddleYardAutoModeStart = new Message("FiddleYardAutoModeStart", " FiddleYard Auto mode Start ", (name, log) => SetMessage(name, log));
             m_FYAppVar.FiddleYardAutoModeStart.Attach(Msg_FiddleYardAutoModeStart);
@@ -605,12 +549,12 @@ namespace Siebwalde_Application
         /*#--------------------------------------------------------------------------#*/
         private void Btn_Bridge_Open_TOP_Click_1(object sender, EventArgs e) //Couple
         {
-            Couple.UpdateCommand();
+            m_FYAppVar.CmdCouple.UpdateCommand();
         }
 
         private void Btn_Bridge_Close_TOP_Click_1(object sender, EventArgs e) //Uncouple
         {
-            Uncouple.UpdateCommand();            
+            m_FYAppVar.CmdUncouple.UpdateCommand();            
         }
 
         private void Btn_Track_Plus_TOP_Click_1(object sender, EventArgs e)
@@ -618,7 +562,7 @@ namespace Siebwalde_Application
             // Check if the the fiddle yard is not at the limit, last track 11
             if (Track_No.Text != "11")
             {
-                FiddleOneLeft.UpdateCommand();
+                m_FYAppVar.CmdFiddleOneLeft.UpdateCommand();
             }
         }
 
@@ -627,7 +571,7 @@ namespace Siebwalde_Application
             // Check if the the fiddle yard is not at the limit, first track 11
             if (Track_No.Text != "1")
             {
-                FiddleOneRight.UpdateCommand();
+                m_FYAppVar.CmdFiddleOneRight.UpdateCommand();
             }            
         }
 
@@ -648,68 +592,68 @@ namespace Siebwalde_Application
         {
             if (Nuo_Track_No_TOP.Value == 1)
             {
-                FiddleGo1.UpdateCommand(); 
+                m_FYAppVar.CmdFiddleGo1.UpdateCommand(); 
             }
             else if (Nuo_Track_No_TOP.Value == 2)
             {
-                FiddleGo2.UpdateCommand(); 
+                m_FYAppVar.CmdFiddleGo2.UpdateCommand(); 
             }
             else if (Nuo_Track_No_TOP.Value == 3)
             {
-                FiddleGo3.UpdateCommand(); 
+                m_FYAppVar.CmdFiddleGo3.UpdateCommand(); 
             }
             else if (Nuo_Track_No_TOP.Value == 4)
             {
-                FiddleGo4.UpdateCommand(); 
+                m_FYAppVar.CmdFiddleGo4.UpdateCommand(); 
             }
             else if (Nuo_Track_No_TOP.Value == 5)
             {
-                FiddleGo5.UpdateCommand(); 
+                m_FYAppVar.CmdFiddleGo5.UpdateCommand(); 
             }
             else if (Nuo_Track_No_TOP.Value == 6)
             {
-                FiddleGo6.UpdateCommand(); 
+                m_FYAppVar.CmdFiddleGo6.UpdateCommand(); 
             }
             else if (Nuo_Track_No_TOP.Value == 7)
             {
-                FiddleGo7.UpdateCommand(); 
+                m_FYAppVar.CmdFiddleGo7.UpdateCommand(); 
             }
             else if (Nuo_Track_No_TOP.Value == 8)
             {
-                FiddleGo8.UpdateCommand(); 
+                m_FYAppVar.CmdFiddleGo8.UpdateCommand(); 
             }
             else if (Nuo_Track_No_TOP.Value == 9)
             {
-                FiddleGo9.UpdateCommand(); 
+                m_FYAppVar.CmdFiddleGo9.UpdateCommand(); 
             }
             else if (Nuo_Track_No_TOP.Value == 10)
             {
-                FiddleGo10.UpdateCommand(); 
+                m_FYAppVar.CmdFiddleGo10.UpdateCommand(); 
             }
             else if (Nuo_Track_No_TOP.Value == 11)
             {
-                FiddleGo11.UpdateCommand(); 
+                m_FYAppVar.CmdFiddleGo11.UpdateCommand(); 
             }
         }
 
         private void Btn_Train_Detect_TOP_Click_1(object sender, EventArgs e)
         {
-            TrainDetect.UpdateCommand();
+            m_FYAppVar.CmdTrainDetect.UpdateCommand();
         }
 
         private void Btn_Start_Fiddle_TOP_Click_1(object sender, EventArgs e)
         {
-            FYStart.UpdateCommand(); 
+            m_FYAppVar.CmdFYStart.UpdateCommand(); 
         }
 
         private void Btn_Stop_Fiddle_TOP_Click_1(object sender, EventArgs e)
         {
-            FYStop.UpdateCommand();                
+            m_FYAppVar.CmdFYStop.UpdateCommand();                
         }
 
         private void Btn_Reset_TOP_Click_1(object sender, EventArgs e)
         {
-            Reset.UpdateCommand();            
+            m_FYAppVar.CmdReset.UpdateCommand();            
         }
 
         private void Btn_Bezet5BOn_TOP_Click_1(object sender, EventArgs e)
@@ -717,13 +661,13 @@ namespace Siebwalde_Application
             if (Btn_Bezet5BOn_TOP_Click_Toggle == true)
             {
                 Btn_Bezet5BOn_TOP_Click_Toggle = false;
-                Occ5BOnTrue.UpdateCommand();
+                m_FYAppVar.CmdOcc5BOnTrue.UpdateCommand();
                 Btn_Bezet5BOn_TOP.Text = "Off";
             }
             else if (Btn_Bezet5BOn_TOP_Click_Toggle == false)
             {
                 Btn_Bezet5BOn_TOP_Click_Toggle = true;
-                Occ5BOnFalse.UpdateCommand();
+                m_FYAppVar.CmdOcc5BOnFalse.UpdateCommand();
                 Btn_Bezet5BOn_TOP.Text = "On";
             }
         }
@@ -733,13 +677,13 @@ namespace Siebwalde_Application
             if (Btn_Bezet6On_TOP_Click_Toggle == true)
             {
                 Btn_Bezet6On_TOP_Click_Toggle = false;
-                Occ6OnTrue.UpdateCommand();
+                m_FYAppVar.CmdOcc6OnTrue.UpdateCommand();
                 Btn_Bezet6On_TOP.Text = "Off";
             }
             else if (Btn_Bezet6On_TOP_Click_Toggle == false)
             {
                 Btn_Bezet6On_TOP_Click_Toggle = true;
-                Occ6OnFalse.UpdateCommand();
+                m_FYAppVar.CmdOcc6OnFalse.UpdateCommand();
                 Btn_Bezet6On_TOP.Text = "On";
             }
         }
@@ -749,25 +693,25 @@ namespace Siebwalde_Application
             if (Btn_Bezet7On_TOP_Click_Toggle == true)
             {
                 Btn_Bezet7On_TOP_Click_Toggle = false;
-                Occ7OnTrue.UpdateCommand();
+                m_FYAppVar.CmdOcc7OnTrue.UpdateCommand();
                 Btn_Bezet7On_TOP.Text = "Off";
             }
             else if (Btn_Bezet7On_TOP_Click_Toggle == false)
             {
                 Btn_Bezet7On_TOP_Click_Toggle = true;
-                Occ7OnFalse.UpdateCommand();
+                m_FYAppVar.CmdOcc7OnFalse.UpdateCommand();
                 Btn_Bezet7On_TOP.Text = "On";
             }
         }
 
         private void Btn_Recovered_TOP_Click_1(object sender, EventArgs e)
-        {            
-            Recoverd.UpdateCommand();
+        {
+            m_FYAppVar.CmdRecoverd.UpdateCommand();
         }
 
         private void Btn_Collect_TOP_Click_1(object sender, EventArgs e)
         {
-            Collect.UpdateCommand();
+            m_FYAppVar.CmdCollect.UpdateCommand();
         }
 
 
@@ -1125,258 +1069,335 @@ namespace Siebwalde_Application
                         }
                         break;
 
-                    case "LLed_Track1": if (Val >= 1 && TrackStatusLight[1] == true)
+                    case "LLed_Track1": 
+                        if (Val >= 1 && TrackStatusLight[1] == true && m_FYAppVar.icheckBoxTrack[1] == 0)       // If train present and Track is active and track is enabled
                         {
-                            LLed_Track1.BackColor = m_FYAppVar.TrackOccupiedColor;              //Color.Lime;
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track1.BackColor = m_FYAppVar.TrackOccupiedColor;                              // Set TrackOccupiedColor
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        else if (Val >= 1)
+                        else if (Val >= 1 && TrackStatusLight[1] == false && m_FYAppVar.icheckBoxTrack[1] == 0) // If train present and Track is not active and track is enabled
                         {
-                            LLed_Track1.BackColor = m_FYAppVar.TrackNotActiveColor;             //m_FYAppVar.TrackNotActiveColor;             //Color.Green;
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track1.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        if (Val == 0 && Initialized == true)
+                        else if (m_FYAppVar.icheckBoxTrack[1] == 1)                                             // If track is disabled
                         {
-                            LLed_Track1.BackColor = Color.Transparent;
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track1.BackColor = m_FYAppVar.TrackDisabledColor;                              // Set TrackDisabledColor
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        else if (Initialized == false)
+                        else if (Val == 0 && Initialized == true && m_FYAppVar.icheckBoxTrack[1] == 0)          // If train not present and FY is initialized and Track is enabled
                         {
-                            LLed_Track1.BackColor = m_FYAppVar.TrackNotInitializedColor;        //Color.Cyan;// After processor update from true to false set to cyan if initialized is false.
-                            LLed_Track1.Text = "                     Not Initialized";
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track1.BackColor = Color.Transparent;                                          // Set Color.Transparent
+                            CheckWhichTrackInline();                                                            // Sensor background color update
+                        }
+
+                        if (Initialized == false)                                                               // If FY is not initialized
+                        {
+                            LLed_Track1.BackColor = m_FYAppVar.TrackNotInitializedColor;                        // Set TrackNotInitializedColor
+                            LLed_Track1.Text = "                     Not Initialized";                          // Set Track text
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         break;
 
-                    case "LLed_Track2": if (Val >= 1 && TrackStatusLight[2] == true)
+                    case "LLed_Track2":
+                        if (Val >= 1 && TrackStatusLight[2] == true && m_FYAppVar.icheckBoxTrack[2] == 0)       // If train present and Track is active and track is enabled
                         {
-                            LLed_Track2.BackColor = m_FYAppVar.TrackOccupiedColor;              //Color.Lime;
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track2.BackColor = m_FYAppVar.TrackOccupiedColor;                              // Set TrackOccupiedColor
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        else if (Val >= 1)
+                        else if (Val >= 1 && TrackStatusLight[2] == false && m_FYAppVar.icheckBoxTrack[2] == 0) // If train present and Track is not active and track is enabled
                         {
-                            LLed_Track2.BackColor = m_FYAppVar.TrackNotActiveColor;             //Color.Green;
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track2.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        if (Val == 0 && Initialized == true)
+                        else if (m_FYAppVar.icheckBoxTrack[2] == 1)                                             // If track is disabled
                         {
-                            LLed_Track2.BackColor = Color.Transparent;
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track2.BackColor = m_FYAppVar.TrackDisabledColor;                              // Set TrackDisabledColor
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        else if (Initialized == false)
+                        else if (Val == 0 && Initialized == true && m_FYAppVar.icheckBoxTrack[2] == 0)          // If train not present and FY is initialized and Track is enabled
                         {
-                            LLed_Track2.BackColor = m_FYAppVar.TrackNotInitializedColor;        //Color.Cyan;
-                            LLed_Track2.Text = "                     Not Initialized";
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track2.BackColor = Color.Transparent;                                          // Set Color.Transparent
+                            CheckWhichTrackInline();                                                            // Sensor background color update
+                        }
+
+                        if (Initialized == false)                                                               // If FY is not initialized
+                        {
+                            LLed_Track2.BackColor = m_FYAppVar.TrackNotInitializedColor;                        // Set TrackNotInitializedColor
+                            LLed_Track2.Text = "                     Not Initialized";                          // Set Track text
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         break;
 
-                    case "LLed_Track3": if (Val >= 1 && TrackStatusLight[3] == true)
+                    case "LLed_Track3":
+                        if (Val >= 1 && TrackStatusLight[3] == true && m_FYAppVar.icheckBoxTrack[3] == 0)       // If train present and Track is active and track is enabled
                         {
-                            LLed_Track3.BackColor = m_FYAppVar.TrackOccupiedColor;              //Color.Lime;
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track3.BackColor = m_FYAppVar.TrackOccupiedColor;                              // Set TrackOccupiedColor
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        else if (Val >= 1)
+                        else if (Val >= 1 && TrackStatusLight[3] == false && m_FYAppVar.icheckBoxTrack[3] == 0) // If train present and Track is not active and track is enabled
                         {
-                            LLed_Track3.BackColor = m_FYAppVar.TrackNotActiveColor;             //Color.Green;
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track3.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        if (Val == 0 && Initialized == true)
+                        else if (m_FYAppVar.icheckBoxTrack[3] == 1)                                             // If track is disabled
                         {
-                            LLed_Track3.BackColor = Color.Transparent;
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track3.BackColor = m_FYAppVar.TrackDisabledColor;                              // Set TrackDisabledColor
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        else if (Initialized == false)
+                        else if (Val == 0 && Initialized == true && m_FYAppVar.icheckBoxTrack[3] == 0)          // If train not present and FY is initialized and Track is enabled
                         {
-                            LLed_Track3.BackColor = m_FYAppVar.TrackNotInitializedColor;        //Color.Cyan;
-                            LLed_Track3.Text = "                     Not Initialized";
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track3.BackColor = Color.Transparent;                                          // Set Color.Transparent
+                            CheckWhichTrackInline();                                                            // Sensor background color update
+                        }
+
+                        if (Initialized == false)                                                               // If FY is not initialized
+                        {
+                            LLed_Track3.BackColor = m_FYAppVar.TrackNotInitializedColor;                        // Set TrackNotInitializedColor
+                            LLed_Track3.Text = "                     Not Initialized";                          // Set Track text
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         break;
 
-                    case "LLed_Track4": if (Val >= 1 && TrackStatusLight[4] == true)
+                    case "LLed_Track4":
+                        if (Val >= 1 && TrackStatusLight[4] == true && m_FYAppVar.icheckBoxTrack[4] == 0)       // If train present and Track is active and track is enabled
                         {
-                            LLed_Track4.BackColor = m_FYAppVar.TrackOccupiedColor;              //Color.Lime;
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track4.BackColor = m_FYAppVar.TrackOccupiedColor;                              // Set TrackOccupiedColor
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        else if (Val >= 1)
+                        else if (Val >= 1 && TrackStatusLight[4] == false && m_FYAppVar.icheckBoxTrack[4] == 0) // If train present and Track is not active and track is enabled
                         {
-                            LLed_Track4.BackColor = m_FYAppVar.TrackNotActiveColor;             //Color.Green;
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track4.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        if (Val == 0 && Initialized == true)
+                        else if (m_FYAppVar.icheckBoxTrack[4] == 1)                                             // If track is disabled
                         {
-                            LLed_Track4.BackColor = Color.Transparent;
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track4.BackColor = m_FYAppVar.TrackDisabledColor;                              // Set TrackDisabledColor
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        else if (Initialized == false)
+                        else if (Val == 0 && Initialized == true && m_FYAppVar.icheckBoxTrack[4] == 0)          // If train not present and FY is initialized and Track is enabled
                         {
-                            LLed_Track4.BackColor = m_FYAppVar.TrackNotInitializedColor;        //Color.Cyan;
-                            LLed_Track4.Text = "                     Not Initialized";
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track4.BackColor = Color.Transparent;                                          // Set Color.Transparent
+                            CheckWhichTrackInline();                                                            // Sensor background color update
+                        }
+
+                        if (Initialized == false)                                                               // If FY is not initialized
+                        {
+                            LLed_Track4.BackColor = m_FYAppVar.TrackNotInitializedColor;                        // Set TrackNotInitializedColor
+                            LLed_Track4.Text = "                     Not Initialized";                          // Set Track text
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         break;
 
-                    case "LLed_Track5": if (Val >= 1 && TrackStatusLight[5] == true)
+                    case "LLed_Track5":
+                        if (Val >= 1 && TrackStatusLight[5] == true && m_FYAppVar.icheckBoxTrack[5] == 0)       // If train present and Track is active and track is enabled
                         {
-                            LLed_Track5.BackColor = m_FYAppVar.TrackOccupiedColor;              //Color.Lime;
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track5.BackColor = m_FYAppVar.TrackOccupiedColor;                              // Set TrackOccupiedColor
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        else if (Val >= 1)
+                        else if (Val >= 1 && TrackStatusLight[5] == false && m_FYAppVar.icheckBoxTrack[5] == 0) // If train present and Track is not active and track is enabled
                         {
-                            LLed_Track5.BackColor = m_FYAppVar.TrackNotActiveColor;             //Color.Green;
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track5.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        if (Val == 0 && Initialized == true)
+                        else if (m_FYAppVar.icheckBoxTrack[5] == 1)                                             // If track is disabled
                         {
-                            LLed_Track5.BackColor = Color.Transparent;
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track5.BackColor = m_FYAppVar.TrackDisabledColor;                              // Set TrackDisabledColor
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        else if (Initialized == false)
+                        else if (Val == 0 && Initialized == true && m_FYAppVar.icheckBoxTrack[5] == 0)          // If train not present and FY is initialized and Track is enabled
                         {
-                            LLed_Track5.BackColor = m_FYAppVar.TrackNotInitializedColor;        //Color.Cyan;
-                            LLed_Track5.Text = "                     Not Initialized";
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track5.BackColor = Color.Transparent;                                          // Set Color.Transparent
+                            CheckWhichTrackInline();                                                            // Sensor background color update
+                        }
+
+                        if (Initialized == false)                                                               // If FY is not initialized
+                        {
+                            LLed_Track5.BackColor = m_FYAppVar.TrackNotInitializedColor;                        // Set TrackNotInitializedColor
+                            LLed_Track5.Text = "                     Not Initialized";                          // Set Track text
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         break;
 
-                    case "LLed_Track6": if (Val >= 1 && TrackStatusLight[6] == true)
+                    case "LLed_Track6":
+                        if (Val >= 1 && TrackStatusLight[6] == true && m_FYAppVar.icheckBoxTrack[6] == 0)       // If train present and Track is active and track is enabled
                         {
-                            LLed_Track6.BackColor = m_FYAppVar.TrackOccupiedColor;              //Color.Lime;
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track6.BackColor = m_FYAppVar.TrackOccupiedColor;                              // Set TrackOccupiedColor
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        else if (Val >= 1)
+                        else if (Val >= 1 && TrackStatusLight[6] == false && m_FYAppVar.icheckBoxTrack[6] == 0) // If train present and Track is not active and track is enabled
                         {
-                            LLed_Track6.BackColor = m_FYAppVar.TrackNotActiveColor;             //Color.Green;
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track6.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        if (Val == 0 && Initialized == true)
+                        else if (m_FYAppVar.icheckBoxTrack[6] == 1)                                             // If track is disabled
                         {
-                            LLed_Track6.BackColor = Color.Transparent;
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track6.BackColor = m_FYAppVar.TrackDisabledColor;                              // Set TrackDisabledColor
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        else if (Initialized == false)
+                        else if (Val == 0 && Initialized == true && m_FYAppVar.icheckBoxTrack[6] == 0)          // If train not present and FY is initialized and Track is enabled
                         {
-                            LLed_Track6.BackColor = m_FYAppVar.TrackNotInitializedColor;        //Color.Cyan;
-                            LLed_Track6.Text = "                     Not Initialized";
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track6.BackColor = Color.Transparent;                                          // Set Color.Transparent
+                            CheckWhichTrackInline();                                                            // Sensor background color update
+                        }
+
+                        if (Initialized == false)                                                               // If FY is not initialized
+                        {
+                            LLed_Track6.BackColor = m_FYAppVar.TrackNotInitializedColor;                        // Set TrackNotInitializedColor
+                            LLed_Track6.Text = "                     Not Initialized";                          // Set Track text
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         break;
 
-                    case "LLed_Track7": if (Val >= 1 && TrackStatusLight[7] == true)
+                    case "LLed_Track7":
+                        if (Val >= 1 && TrackStatusLight[7] == true && m_FYAppVar.icheckBoxTrack[7] == 0)       // If train present and Track is active and track is enabled
                         {
-                            LLed_Track7.BackColor = m_FYAppVar.TrackOccupiedColor;              //Color.Lime;
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track7.BackColor = m_FYAppVar.TrackOccupiedColor;                              // Set TrackOccupiedColor
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        else if (Val >= 1)
+                        else if (Val >= 1 && TrackStatusLight[7] == false && m_FYAppVar.icheckBoxTrack[7] == 0) // If train present and Track is not active and track is enabled
                         {
-                            LLed_Track7.BackColor = m_FYAppVar.TrackNotActiveColor;             //Color.Green;
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track7.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        if (Val == 0 && Initialized == true)
+                        else if (m_FYAppVar.icheckBoxTrack[7] == 1)                                             // If track is disabled
                         {
-                            LLed_Track7.BackColor = Color.Transparent;
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track7.BackColor = m_FYAppVar.TrackDisabledColor;                              // Set TrackDisabledColor
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        else if (Initialized == false)
+                        else if (Val == 0 && Initialized == true && m_FYAppVar.icheckBoxTrack[7] == 0)          // If train not present and FY is initialized and Track is enabled
                         {
-                            LLed_Track7.BackColor = m_FYAppVar.TrackNotInitializedColor;        //Color.Cyan;
-                            LLed_Track7.Text = "                     Not Initialized";
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track7.BackColor = Color.Transparent;                                          // Set Color.Transparent
+                            CheckWhichTrackInline();                                                            // Sensor background color update
+                        }
+
+                        if (Initialized == false)                                                               // If FY is not initialized
+                        {
+                            LLed_Track7.BackColor = m_FYAppVar.TrackNotInitializedColor;                        // Set TrackNotInitializedColor
+                            LLed_Track7.Text = "                     Not Initialized";                          // Set Track text
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         break;
 
-                    case "LLed_Track8": if (Val >= 1 && TrackStatusLight[8] == true)
+                    case "LLed_Track8":
+                        if (Val >= 1 && TrackStatusLight[8] == true && m_FYAppVar.icheckBoxTrack[8] == 0)       // If train present and Track is active and track is enabled
                         {
-                            LLed_Track8.BackColor = m_FYAppVar.TrackOccupiedColor;              //Color.Lime;
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track8.BackColor = m_FYAppVar.TrackOccupiedColor;                              // Set TrackOccupiedColor
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        else if (Val >= 1)
+                        else if (Val >= 1 && TrackStatusLight[8] == false && m_FYAppVar.icheckBoxTrack[8] == 0) // If train present and Track is not active and track is enabled
                         {
-                            LLed_Track8.BackColor = m_FYAppVar.TrackNotActiveColor;             //Color.Green;
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track8.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        if (Val == 0 && Initialized == true)
+                        else if (m_FYAppVar.icheckBoxTrack[8] == 1)                                             // If track is disabled
                         {
-                            LLed_Track8.BackColor = Color.Transparent;
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track8.BackColor = m_FYAppVar.TrackDisabledColor;                              // Set TrackDisabledColor
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        else if (Initialized == false)
+                        else if (Val == 0 && Initialized == true && m_FYAppVar.icheckBoxTrack[8] == 0)          // If train not present and FY is initialized and Track is enabled
                         {
-                            LLed_Track8.BackColor = m_FYAppVar.TrackNotInitializedColor;        //Color.Cyan;
-                            LLed_Track8.Text = "                     Not Initialized";
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track8.BackColor = Color.Transparent;                                          // Set Color.Transparent
+                            CheckWhichTrackInline();                                                            // Sensor background color update
+                        }
+
+                        if (Initialized == false)                                                               // If FY is not initialized
+                        {
+                            LLed_Track8.BackColor = m_FYAppVar.TrackNotInitializedColor;                        // Set TrackNotInitializedColor
+                            LLed_Track8.Text = "                     Not Initialized";                          // Set Track text
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         break;
 
-                    case "LLed_Track9": if (Val >= 1 && TrackStatusLight[9] == true)
+                    case "LLed_Track9":
+                        if (Val >= 1 && TrackStatusLight[9] == true && m_FYAppVar.icheckBoxTrack[9] == 0)       // If train present and Track is active and track is enabled
                         {
-                            LLed_Track9.BackColor = m_FYAppVar.TrackOccupiedColor;              //Color.Lime;
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track9.BackColor = m_FYAppVar.TrackOccupiedColor;                              // Set TrackOccupiedColor
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        else if (Val >= 1)
+                        else if (Val >= 1 && TrackStatusLight[9] == false && m_FYAppVar.icheckBoxTrack[9] == 0) // If train present and Track is not active and track is enabled
                         {
-                            LLed_Track9.BackColor = m_FYAppVar.TrackNotActiveColor;             //Color.Green;
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track9.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        if (Val == 0 && Initialized == true)
+                        else if (m_FYAppVar.icheckBoxTrack[9] == 1)                                             // If track is disabled
                         {
-                            LLed_Track9.BackColor = Color.Transparent;
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track9.BackColor = m_FYAppVar.TrackDisabledColor;                              // Set TrackDisabledColor
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        else if (Initialized == false)
+                        else if (Val == 0 && Initialized == true && m_FYAppVar.icheckBoxTrack[9] == 0)          // If train not present and FY is initialized and Track is enabled
                         {
-                            LLed_Track9.BackColor = m_FYAppVar.TrackNotInitializedColor;        //Color.Cyan;
-                            LLed_Track9.Text = "                     Not Initialized";
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track9.BackColor = Color.Transparent;                                          // Set Color.Transparent
+                            CheckWhichTrackInline();                                                            // Sensor background color update
+                        }
+
+                        if (Initialized == false)                                                               // If FY is not initialized
+                        {
+                            LLed_Track9.BackColor = m_FYAppVar.TrackNotInitializedColor;                        // Set TrackNotInitializedColor
+                            LLed_Track9.Text = "                     Not Initialized";                          // Set Track text
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         break;
 
-                    case "LLed_Track10": if (Val >= 1 && TrackStatusLight[10] == true)
+                    case "LLed_Track10":
+                        if (Val >= 1 && TrackStatusLight[10] == true && m_FYAppVar.icheckBoxTrack[10] == 0)       // If train present and Track is active and track is enabled
                         {
-                            LLed_Track10.BackColor = m_FYAppVar.TrackOccupiedColor;             //Color.Lime;
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track10.BackColor = m_FYAppVar.TrackOccupiedColor;                              // Set TrackOccupiedColor
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        else if (Val >= 1)
+                        else if (Val >= 1 && TrackStatusLight[10] == false && m_FYAppVar.icheckBoxTrack[10] == 0) // If train present and Track is not active and track is enabled
                         {
-                            LLed_Track10.BackColor = m_FYAppVar.TrackNotActiveColor;            //Color.Green;
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track10.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        if (Val == 0 && Initialized == true)
+                        else if (m_FYAppVar.icheckBoxTrack[10] == 1)                                             // If track is disabled
                         {
-                            LLed_Track10.BackColor = Color.Transparent;                //Color.Transparent;
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track10.BackColor = m_FYAppVar.TrackDisabledColor;                              // Set TrackDisabledColor
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        else if (Initialized == false)
+                        else if (Val == 0 && Initialized == true && m_FYAppVar.icheckBoxTrack[10] == 0)          // If train not present and FY is initialized and Track is enabled
                         {
-                            LLed_Track10.BackColor = m_FYAppVar.TrackNotInitializedColor;       //Color.Cyan;
-                            LLed_Track10.Text = "                     Not Initialized";
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track10.BackColor = Color.Transparent;                                          // Set Color.Transparent
+                            CheckWhichTrackInline();                                                            // Sensor background color update
+                        }
+
+                        if (Initialized == false)                                                               // If FY is not initialized
+                        {
+                            LLed_Track10.BackColor = m_FYAppVar.TrackNotInitializedColor;                        // Set TrackNotInitializedColor
+                            LLed_Track10.Text = "                     Not Initialized";                          // Set Track text
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         break;
 
-                    case "LLed_Track11": if (Val >= 1 && TrackStatusLight[11] == true)
+                    case "LLed_Track11":
+                        if (Val >= 1 && TrackStatusLight[11] == true && m_FYAppVar.icheckBoxTrack[11] == 0)       // If train present and Track is active and track is enabled
                         {
-                            LLed_Track11.BackColor = m_FYAppVar.TrackOccupiedColor;             //Color.Lime;
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track11.BackColor = m_FYAppVar.TrackOccupiedColor;                              // Set TrackOccupiedColor
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        else if (Val >= 1)
+                        else if (Val >= 1 && TrackStatusLight[11] == false && m_FYAppVar.icheckBoxTrack[11] == 0) // If train present and Track is not active and track is enabled
                         {
-                            LLed_Track11.BackColor = m_FYAppVar.TrackNotActiveColor;            //Color.Green;
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track11.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        if (Val == 0 && Initialized == true)
+                        else if (m_FYAppVar.icheckBoxTrack[11] == 1)                                             // If track is disabled
                         {
-                            LLed_Track11.BackColor = Color.Transparent;                //Color.Transparent;
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track11.BackColor = m_FYAppVar.TrackDisabledColor;                              // Set TrackDisabledColor
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        else if (Initialized == false)
+                        else if (Val == 0 && Initialized == true && m_FYAppVar.icheckBoxTrack[11] == 0)          // If train not present and FY is initialized and Track is enabled
                         {
-                            LLed_Track11.BackColor = m_FYAppVar.TrackNotInitializedColor;       //m_FYAppVar.TrackNotInitializedColor;;
-                            LLed_Track11.Text = "                     Not Initialized";
-                            CheckWhichTrackInline();                                            // Sensor background color update
+                            LLed_Track11.BackColor = Color.Transparent;                                          // Set Color.Transparent
+                            CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        break;
+
+                        if (Initialized == false)                                                               // If FY is not initialized
+                        {
+                            LLed_Track11.BackColor = m_FYAppVar.TrackNotInitializedColor;                        // Set TrackNotInitializedColor
+                            LLed_Track11.Text = "                     Not Initialized";                          // Set Track text
+                            CheckWhichTrackInline();                                                            // Sensor background color update
+                        }
+                        break;                    
 
                     case "LLed_Block6": if (Val >= 1)
                         {
@@ -1398,7 +1419,7 @@ namespace Siebwalde_Application
                         }
                         break;
 
-                    case "LLed_15VTrackPower": if (Val >= 1)
+                    case "LLed_TrackPower15V": if (Val >= 1)
                         {
                             LLed_15VTrackPower.BackColor = Color.Lime;
                             LLed_15VTrackPower.ForeColor = Color.Black;
@@ -1477,188 +1498,310 @@ namespace Siebwalde_Application
         /*#--------------------------------------------------------------------------#*/
         private void UpdateTrackIndicatorColor()
         {
-            if (TrackStatusLight[0] == true)            // in between tracks every occupied track becomes green
+            if (TrackStatusLight[0] == true)                                            // in between tracks every occupied track becomes TrackNotActiveColor or TrackDisabledColor
             {
-                if (LLed_Track1.BackColor != Color.Transparent)
+                if (LLed_Track1.BackColor != Color.Transparent)                         // If the track is not empty
                 {
-                    LLed_Track1.BackColor = m_FYAppVar.TrackNotActiveColor;            //Color.Green;
-                }
-                if (LLed_Track2.BackColor != Color.Transparent)
-                {
-                    LLed_Track2.BackColor = m_FYAppVar.TrackNotActiveColor;            //Color.Green;
-                }
-                if (LLed_Track3.BackColor != Color.Transparent)
-                {
-                    LLed_Track3.BackColor = m_FYAppVar.TrackNotActiveColor;            //Color.Green;
-                }
-                if (LLed_Track4.BackColor != Color.Transparent)
-                {
-                    LLed_Track4.BackColor = m_FYAppVar.TrackNotActiveColor;            //Color.Green;
-                }
-                if (LLed_Track5.BackColor != Color.Transparent)
-                {
-                    LLed_Track5.BackColor = m_FYAppVar.TrackNotActiveColor;            //Color.Green;
-                }
-                if (LLed_Track6.BackColor != Color.Transparent)
-                {
-                    LLed_Track6.BackColor = m_FYAppVar.TrackNotActiveColor;            //Color.Green;
-                }
-                if (LLed_Track7.BackColor != Color.Transparent)
-                {
-                    LLed_Track7.BackColor = m_FYAppVar.TrackNotActiveColor;            //Color.Green;
-                }
-                if (LLed_Track8.BackColor != Color.Transparent)
-                {
-                    LLed_Track8.BackColor = m_FYAppVar.TrackNotActiveColor;            //Color.Green;
-                }
-                if (LLed_Track9.BackColor != Color.Transparent)
-                {
-                    LLed_Track9.BackColor = m_FYAppVar.TrackNotActiveColor;            //Color.Green;
-                }
-                if (LLed_Track10.BackColor != Color.Transparent)
-                {
-                    LLed_Track10.BackColor = m_FYAppVar.TrackNotActiveColor;            //Color.Green;
-                }
-                if (LLed_Track11.BackColor != Color.Transparent)
-                {
-                    LLed_Track11.BackColor = m_FYAppVar.TrackNotActiveColor;            //Color.Green;
+                    if (LLed_Track1.BackColor != m_FYAppVar.TrackDisabledColor)         // And if the track is not disabled
+                    {
+                        LLed_Track1.BackColor = m_FYAppVar.TrackNotActiveColor;         // Set the track not active color (old color was Color.Green)
+                    }
+                    else { LLed_Track1.BackColor = m_FYAppVar.TrackDisabledColor; }     // Else the track is disabled set the disabled color
                 }
 
+                if (LLed_Track2.BackColor != Color.Transparent)                         // If the track is not empty
+                {
+                    if (LLed_Track2.BackColor != m_FYAppVar.TrackDisabledColor)         // And if the track is not disabled
+                    {
+                        LLed_Track2.BackColor = m_FYAppVar.TrackNotActiveColor;         // Set the track not active color (old color was Color.Green)
+                    }
+                    else { LLed_Track2.BackColor = m_FYAppVar.TrackDisabledColor; }     // Else the track is disabled set the disabled color
+                }
+
+                if (LLed_Track3.BackColor != Color.Transparent)                         // If the track is not empty
+                {
+                    if (LLed_Track3.BackColor != m_FYAppVar.TrackDisabledColor)         // And if the track is not disabled
+                    {
+                        LLed_Track3.BackColor = m_FYAppVar.TrackNotActiveColor;         // Set the track not active color (old color was Color.Green)
+                    }
+                    else { LLed_Track3.BackColor = m_FYAppVar.TrackDisabledColor; }     // Else the track is disabled set the disabled color
+                }
+
+                if (LLed_Track4.BackColor != Color.Transparent)                         // If the track is not empty
+                {
+                    if (LLed_Track4.BackColor != m_FYAppVar.TrackDisabledColor)         // And if the track is not disabled
+                    {
+                        LLed_Track4.BackColor = m_FYAppVar.TrackNotActiveColor;         // Set the track not active color (old color was Color.Green)
+                    }
+                    else { LLed_Track4.BackColor = m_FYAppVar.TrackDisabledColor; }     // Else the track is disabled set the disabled color
+                }
+
+                if (LLed_Track5.BackColor != Color.Transparent)                         // If the track is not empty
+                {
+                    if (LLed_Track5.BackColor != m_FYAppVar.TrackDisabledColor)         // And if the track is not disabled
+                    {
+                        LLed_Track5.BackColor = m_FYAppVar.TrackNotActiveColor;         // Set the track not active color (old color was Color.Green)
+                    }
+                    else { LLed_Track5.BackColor = m_FYAppVar.TrackDisabledColor; }     // Else the track is disabled set the disabled color
+                }
+
+                if (LLed_Track6.BackColor != Color.Transparent)                         // If the track is not empty
+                {
+                    if (LLed_Track6.BackColor != m_FYAppVar.TrackDisabledColor)         // And if the track is not disabled
+                    {
+                        LLed_Track6.BackColor = m_FYAppVar.TrackNotActiveColor;         // Set the track not active color (old color was Color.Green)
+                    }
+                    else { LLed_Track6.BackColor = m_FYAppVar.TrackDisabledColor; }     // Else the track is disabled set the disabled color
+                }
+
+                if (LLed_Track7.BackColor != Color.Transparent)                         // If the track is not empty
+                {
+                    if (LLed_Track7.BackColor != m_FYAppVar.TrackDisabledColor)         // And if the track is not disabled
+                    {
+                        LLed_Track7.BackColor = m_FYAppVar.TrackNotActiveColor;         // Set the track not active color (old color was Color.Green)
+                    }
+                    else { LLed_Track7.BackColor = m_FYAppVar.TrackDisabledColor; }     // Else the track is disabled set the disabled color
+                }
+
+                if (LLed_Track8.BackColor != Color.Transparent)                         // If the track is not empty
+                {
+                    if (LLed_Track8.BackColor != m_FYAppVar.TrackDisabledColor)         // And if the track is not disabled
+                    {
+                        LLed_Track8.BackColor = m_FYAppVar.TrackNotActiveColor;         // Set the track not active color (old color was Color.Green)
+                    }
+                    else { LLed_Track8.BackColor = m_FYAppVar.TrackDisabledColor; }     // Else the track is disabled set the disabled color
+                }
+
+                if (LLed_Track9.BackColor != Color.Transparent)                         // If the track is not empty
+                {
+                    if (LLed_Track9.BackColor != m_FYAppVar.TrackDisabledColor)         // And if the track is not disabled
+                    {
+                        LLed_Track9.BackColor = m_FYAppVar.TrackNotActiveColor;         // Set the track not active color (old color was Color.Green)
+                    }
+                    else { LLed_Track9.BackColor = m_FYAppVar.TrackDisabledColor; }     // Else the track is disabled set the disabled color
+                }
+
+                if (LLed_Track10.BackColor != Color.Transparent)                         // If the track is not empty
+                {
+                    if (LLed_Track10.BackColor != m_FYAppVar.TrackDisabledColor)         // And if the track is not disabled
+                    {
+                        LLed_Track10.BackColor = m_FYAppVar.TrackNotActiveColor;         // Set the track not active color (old color was Color.Green)
+                    }
+                    else { LLed_Track10.BackColor = m_FYAppVar.TrackDisabledColor; }     // Else the track is disabled set the disabled color
+                }
+
+                if (LLed_Track11.BackColor != Color.Transparent)                         // If the track is not empty
+                {
+                    if (LLed_Track11.BackColor != m_FYAppVar.TrackDisabledColor)         // And if the track is not disabled
+                    {
+                        LLed_Track11.BackColor = m_FYAppVar.TrackNotActiveColor;         // Set the track not active color (old color was Color.Green)
+                    }
+                    else { LLed_Track11.BackColor = m_FYAppVar.TrackDisabledColor; }     // Else the track is disabled set the disabled color
+                }
                 CheckWhichTrackInline();
 
             }
 
-            if (TrackStatusLight[1] == true && LLed_Track1.BackColor != Color.Transparent) // track selected? when occupied color becomes Lime otherwise green
-            {
-                LLed_Track1.BackColor = m_FYAppVar.TrackOccupiedColor;             //Color.Lime;
-                CheckWhichTrackInline();
-            }
-            else if (LLed_Track1.BackColor != Color.Transparent)
-            {
-                LLed_Track1.BackColor = m_FYAppVar.TrackNotActiveColor;             //Color.Green;
-                CheckWhichTrackInline();
-            }
-            else { CheckWhichTrackInline(); }
+            /*---------------------------------------------------------------------------------------------------------------------------------------------*/
+            // On a track and track becomes TrackOccupiedColor or TrackNotActiveColor when not TrackDisabledColor and not Color.Transparent
 
-            if (TrackStatusLight[2] == true && LLed_Track2.BackColor != Color.Transparent) // track selected? when occupied color becomes Lime otherwise green
+            if (TrackStatusLight[1] == true && 
+                LLed_Track1.BackColor != Color.Transparent && 
+                LLed_Track1.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is active and not disabled and not transparant
             {
-                LLed_Track2.BackColor = m_FYAppVar.TrackOccupiedColor;             //Color.Lime;
-                CheckWhichTrackInline();
+                LLed_Track1.BackColor = m_FYAppVar.TrackOccupiedColor;      // Set the track TrackOccupiedColor
+                CheckWhichTrackInline();                                    // Set the color to the corresponding sensors to the LLed_Track1.BackColor
             }
-            else if (LLed_Track2.BackColor != Color.Transparent)
+            else if (TrackStatusLight[1] == false && 
+                LLed_Track1.BackColor != Color.Transparent && 
+                LLed_Track1.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is not active and not disabled and not transparant
             {
-                LLed_Track2.BackColor = m_FYAppVar.TrackNotActiveColor;             //Color.Green;
-                CheckWhichTrackInline();
+                LLed_Track1.BackColor = m_FYAppVar.TrackNotActiveColor;     // Set the track TrackNotActiveColor
+                CheckWhichTrackInline();                                    // Set the color to the corresponding sensors to the LLed_Track1.BackColor
             }
-            else { CheckWhichTrackInline(); }
+            else { CheckWhichTrackInline(); }                               // Set the color to the corresponding sensors to the LLed_Track1.BackColor
 
-            if (TrackStatusLight[3] == true && LLed_Track3.BackColor != Color.Transparent) // track selected? when occupied color becomes Lime otherwise green
-            {
-                LLed_Track3.BackColor = m_FYAppVar.TrackOccupiedColor;             //Color.Lime;
-                CheckWhichTrackInline();
-            }
-            else if (LLed_Track3.BackColor != Color.Transparent)
-            {
-                LLed_Track3.BackColor = m_FYAppVar.TrackNotActiveColor;             //Color.Green;
-                CheckWhichTrackInline();
-            }
-            else { CheckWhichTrackInline(); }
+            /*---------------------------------------------------------------------------------------------------------------------------------------------*/
 
-            if (TrackStatusLight[4] == true && LLed_Track4.BackColor != Color.Transparent) // track selected? when occupied color becomes Lime otherwise green
+            if (TrackStatusLight[2] == true &&
+                LLed_Track2.BackColor != Color.Transparent &&
+                LLed_Track2.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is active and not disabled and not transparant
             {
-                LLed_Track4.BackColor = m_FYAppVar.TrackOccupiedColor;             //Color.Lime;
-                CheckWhichTrackInline();
+                LLed_Track2.BackColor = m_FYAppVar.TrackOccupiedColor;      // Set the track TrackOccupiedColor
+                CheckWhichTrackInline();                                    // Set the color to the corresponding sensors to the LLed_Track2.BackColor
             }
-            else if (LLed_Track4.BackColor != Color.Transparent)
+            else if (TrackStatusLight[2] == false &&
+                LLed_Track2.BackColor != Color.Transparent &&
+                LLed_Track2.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is not active and not disabled and not transparant
             {
-                LLed_Track4.BackColor = m_FYAppVar.TrackNotActiveColor;             //Color.Green;
-                CheckWhichTrackInline();
+                LLed_Track2.BackColor = m_FYAppVar.TrackNotActiveColor;     // Set the track TrackNotActiveColor
+                CheckWhichTrackInline();                                    // Set the color to the corresponding sensors to the LLed_Track2.BackColor
             }
-            else { CheckWhichTrackInline(); }
+            else { CheckWhichTrackInline(); }                               // Set the color to the corresponding sensors to the LLed_Track2.BackColor
 
-            if (TrackStatusLight[5] == true && LLed_Track5.BackColor != Color.Transparent) // track selected? when occupied color becomes Lime otherwise green
-            {
-                LLed_Track5.BackColor = m_FYAppVar.TrackOccupiedColor;             //Color.Lime;
-                CheckWhichTrackInline();
-            }
-            else if (LLed_Track5.BackColor != Color.Transparent)
-            {
-                LLed_Track5.BackColor = m_FYAppVar.TrackNotActiveColor;             //Color.Green;
-                CheckWhichTrackInline();
-            }
-            else { CheckWhichTrackInline(); }
+            /*---------------------------------------------------------------------------------------------------------------------------------------------*/
 
-            if (TrackStatusLight[6] == true && LLed_Track6.BackColor != Color.Transparent) // track selected? when occupied color becomes Lime otherwise green
+            if (TrackStatusLight[3] == true &&
+                            LLed_Track3.BackColor != Color.Transparent &&
+                            LLed_Track3.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is active and not disabled and not transparant
             {
-                LLed_Track6.BackColor = m_FYAppVar.TrackOccupiedColor;             //Color.Lime;
-                CheckWhichTrackInline();
+                LLed_Track3.BackColor = m_FYAppVar.TrackOccupiedColor;      // Set the track TrackOccupiedColor
+                CheckWhichTrackInline();                                    // Set the color to the corresponding sensors to the LLed_Track3.BackColor
             }
-            else if (LLed_Track6.BackColor != Color.Transparent)
+            else if (TrackStatusLight[3] == false &&
+                LLed_Track3.BackColor != Color.Transparent &&
+                LLed_Track3.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is not active and not disabled and not transparant
             {
-                LLed_Track6.BackColor = m_FYAppVar.TrackNotActiveColor;             //Color.Green;
-                CheckWhichTrackInline();
+                LLed_Track3.BackColor = m_FYAppVar.TrackNotActiveColor;     // Set the track TrackNotActiveColor
+                CheckWhichTrackInline();                                    // Set the color to the corresponding sensors to the LLed_Track3.BackColor
             }
-            else { CheckWhichTrackInline(); }
+            else { CheckWhichTrackInline(); }                               // Set the color to the corresponding sensors to the LLed_Track3.BackColor
 
-            if (TrackStatusLight[7] == true && LLed_Track7.BackColor != Color.Transparent) // track selected? when occupied color becomes Lime otherwise green
-            {
-                LLed_Track7.BackColor = m_FYAppVar.TrackOccupiedColor;             //Color.Lime;
-                CheckWhichTrackInline();
-            }
-            else if (LLed_Track7.BackColor != Color.Transparent)
-            {
-                LLed_Track7.BackColor = m_FYAppVar.TrackNotActiveColor;             //Color.Green;
-                CheckWhichTrackInline();
-            }
-            else { CheckWhichTrackInline(); }
+            /*---------------------------------------------------------------------------------------------------------------------------------------------*/
 
-            if (TrackStatusLight[8] == true && LLed_Track8.BackColor != Color.Transparent) // track selected? when occupied color becomes Lime otherwise green
+            if (TrackStatusLight[4] == true &&
+                            LLed_Track4.BackColor != Color.Transparent &&
+                            LLed_Track4.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is active and not disabled and not transparant
             {
-                LLed_Track8.BackColor = m_FYAppVar.TrackOccupiedColor;             //Color.Lime;
-                CheckWhichTrackInline();
+                LLed_Track4.BackColor = m_FYAppVar.TrackOccupiedColor;      // Set the track TrackOccupiedColor
+                CheckWhichTrackInline();                                    // Set the color to the corresponding sensors to the LLed_Track4.BackColor
             }
-            else if (LLed_Track8.BackColor != Color.Transparent)
+            else if (TrackStatusLight[4] == false &&
+                LLed_Track4.BackColor != Color.Transparent &&
+                LLed_Track4.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is not active and not disabled and not transparant
             {
-                LLed_Track8.BackColor = m_FYAppVar.TrackNotActiveColor;             //Color.Green;
-                CheckWhichTrackInline();
+                LLed_Track4.BackColor = m_FYAppVar.TrackNotActiveColor;     // Set the track TrackNotActiveColor
+                CheckWhichTrackInline();                                    // Set the color to the corresponding sensors to the LLed_Track4.BackColor
             }
-            else { CheckWhichTrackInline(); }
+            else { CheckWhichTrackInline(); }                               // Set the color to the corresponding sensors to the LLed_Track4.BackColor
 
-            if (TrackStatusLight[9] == true && LLed_Track9.BackColor != Color.Transparent) // track selected? when occupied color becomes Lime otherwise green
-            {
-                LLed_Track9.BackColor = m_FYAppVar.TrackOccupiedColor;             //Color.Lime;
-                CheckWhichTrackInline();
-            }
-            else if (LLed_Track9.BackColor != Color.Transparent)
-            {
-                LLed_Track9.BackColor = m_FYAppVar.TrackNotActiveColor;             //Color.Green;
-                CheckWhichTrackInline();
-            }
-            else { CheckWhichTrackInline(); }
+            /*---------------------------------------------------------------------------------------------------------------------------------------------*/
 
-            if (TrackStatusLight[10] == true && LLed_Track10.BackColor != Color.Transparent) // track selected? when occupied color becomes Lime otherwise green
+            if (TrackStatusLight[5] == true &&
+                            LLed_Track5.BackColor != Color.Transparent &&
+                            LLed_Track5.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is active and not disabled and not transparant
             {
-                LLed_Track10.BackColor = m_FYAppVar.TrackOccupiedColor;             //Color.Lime;
-                CheckWhichTrackInline();
+                LLed_Track5.BackColor = m_FYAppVar.TrackOccupiedColor;      // Set the track TrackOccupiedColor
+                CheckWhichTrackInline();                                    // Set the color to the corresponding sensors to the LLed_Track5.BackColor
             }
-            else if (LLed_Track10.BackColor != Color.Transparent)
+            else if (TrackStatusLight[5] == false &&
+                LLed_Track5.BackColor != Color.Transparent &&
+                LLed_Track5.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is not active and not disabled and not transparant
             {
-                LLed_Track10.BackColor = m_FYAppVar.TrackNotActiveColor;             //Color.Green;
-                CheckWhichTrackInline();
+                LLed_Track5.BackColor = m_FYAppVar.TrackNotActiveColor;     // Set the track TrackNotActiveColor
+                CheckWhichTrackInline();                                    // Set the color to the corresponding sensors to the LLed_Track5.BackColor
             }
-            else { CheckWhichTrackInline(); }
+            else { CheckWhichTrackInline(); }                               // Set the color to the corresponding sensors to the LLed_Track5.BackColor
 
-            if (TrackStatusLight[11] == true && LLed_Track11.BackColor != Color.Transparent) // track selected? when occupied color becomes Lime otherwise green
+            /*---------------------------------------------------------------------------------------------------------------------------------------------*/
+
+            if (TrackStatusLight[6] == true &&
+                            LLed_Track6.BackColor != Color.Transparent &&
+                            LLed_Track6.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is active and not disabled and not transparant
             {
-                LLed_Track11.BackColor = m_FYAppVar.TrackOccupiedColor;             //Color.Lime;
-                CheckWhichTrackInline();
+                LLed_Track6.BackColor = m_FYAppVar.TrackOccupiedColor;      // Set the track TrackOccupiedColor
+                CheckWhichTrackInline();                                    // Set the color to the corresponding sensors to the LLed_Track6.BackColor
             }
-            else if (LLed_Track11.BackColor != Color.Transparent)
+            else if (TrackStatusLight[6] == false &&
+                LLed_Track6.BackColor != Color.Transparent &&
+                LLed_Track6.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is not active and not disabled and not transparant
             {
-                LLed_Track11.BackColor = m_FYAppVar.TrackNotActiveColor;             //Color.Green;
-                CheckWhichTrackInline();
+                LLed_Track6.BackColor = m_FYAppVar.TrackNotActiveColor;     // Set the track TrackNotActiveColor
+                CheckWhichTrackInline();                                    // Set the color to the corresponding sensors to the LLed_Track6.BackColor
             }
-            else { CheckWhichTrackInline(); }
+            else { CheckWhichTrackInline(); }                               // Set the color to the corresponding sensors to the LLed_Track6.BackColor
+
+            /*---------------------------------------------------------------------------------------------------------------------------------------------*/
+
+            if (TrackStatusLight[7] == true &&
+                            LLed_Track7.BackColor != Color.Transparent &&
+                            LLed_Track7.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is active and not disabled and not transparant
+            {
+                LLed_Track7.BackColor = m_FYAppVar.TrackOccupiedColor;      // Set the track TrackOccupiedColor
+                CheckWhichTrackInline();                                    // Set the color to the corresponding sensors to the LLed_Track7.BackColor
+            }
+            else if (TrackStatusLight[7] == false &&
+                LLed_Track7.BackColor != Color.Transparent &&
+                LLed_Track7.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is not active and not disabled and not transparant
+            {
+                LLed_Track7.BackColor = m_FYAppVar.TrackNotActiveColor;     // Set the track TrackNotActiveColor
+                CheckWhichTrackInline();                                    // Set the color to the corresponding sensors to the LLed_Track7.BackColor
+            }
+            else { CheckWhichTrackInline(); }                               // Set the color to the corresponding sensors to the LLed_Track7.BackColor
+
+            /*---------------------------------------------------------------------------------------------------------------------------------------------*/
+
+            if (TrackStatusLight[8] == true &&
+                            LLed_Track8.BackColor != Color.Transparent &&
+                            LLed_Track8.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is active and not disabled and not transparant
+            {
+                LLed_Track8.BackColor = m_FYAppVar.TrackOccupiedColor;      // Set the track TrackOccupiedColor
+                CheckWhichTrackInline();                                    // Set the color to the corresponding sensors to the LLed_Track8.BackColor
+            }
+            else if (TrackStatusLight[8] == false &&
+                LLed_Track8.BackColor != Color.Transparent &&
+                LLed_Track8.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is not active and not disabled and not transparant
+            {
+                LLed_Track8.BackColor = m_FYAppVar.TrackNotActiveColor;     // Set the track TrackNotActiveColor
+                CheckWhichTrackInline();                                    // Set the color to the corresponding sensors to the LLed_Track8.BackColor
+            }
+            else { CheckWhichTrackInline(); }                               // Set the color to the corresponding sensors to the LLed_Track8.BackColor
+
+            /*---------------------------------------------------------------------------------------------------------------------------------------------*/
+
+            if (TrackStatusLight[9] == true &&
+                            LLed_Track9.BackColor != Color.Transparent &&
+                            LLed_Track9.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is active and not disabled and not transparant
+            {
+                LLed_Track9.BackColor = m_FYAppVar.TrackOccupiedColor;      // Set the track TrackOccupiedColor
+                CheckWhichTrackInline();                                    // Set the color to the corresponding sensors to the LLed_Track9.BackColor
+            }
+            else if (TrackStatusLight[9] == false &&
+                LLed_Track9.BackColor != Color.Transparent &&
+                LLed_Track9.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is not active and not disabled and not transparant
+            {
+                LLed_Track9.BackColor = m_FYAppVar.TrackNotActiveColor;     // Set the track TrackNotActiveColor
+                CheckWhichTrackInline();                                    // Set the color to the corresponding sensors to the LLed_Track9.BackColor
+            }
+            else { CheckWhichTrackInline(); }                               // Set the color to the corresponding sensors to the LLed_Track9.BackColor
+
+            /*---------------------------------------------------------------------------------------------------------------------------------------------*/
+
+            if (TrackStatusLight[10] == true &&
+                            LLed_Track10.BackColor != Color.Transparent &&
+                            LLed_Track10.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is active and not disabled and not transparant
+            {
+                LLed_Track10.BackColor = m_FYAppVar.TrackOccupiedColor;      // Set the track TrackOccupiedColor
+                CheckWhichTrackInline();                                    // Set the color to the corresponding sensors to the LLed_Track10.BackColor
+            }
+            else if (TrackStatusLight[10] == false &&
+                LLed_Track10.BackColor != Color.Transparent &&
+                LLed_Track10.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is not active and not disabled and not transparant
+            {
+                LLed_Track10.BackColor = m_FYAppVar.TrackNotActiveColor;     // Set the track TrackNotActiveColor
+                CheckWhichTrackInline();                                    // Set the color to the corresponding sensors to the LLed_Track10.BackColor
+            }
+            else { CheckWhichTrackInline(); }                               // Set the color to the corresponding sensors to the LLed_Track10.BackColor
+
+            /*---------------------------------------------------------------------------------------------------------------------------------------------*/
+
+            if (TrackStatusLight[11] == true &&
+                            LLed_Track11.BackColor != Color.Transparent &&
+                            LLed_Track11.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is active and not disabled and not transparant
+            {
+                LLed_Track11.BackColor = m_FYAppVar.TrackOccupiedColor;      // Set the track TrackOccupiedColor
+                CheckWhichTrackInline();                                    // Set the color to the corresponding sensors to the LLed_Track11.BackColor
+            }
+            else if (TrackStatusLight[11] == false &&
+                LLed_Track11.BackColor != Color.Transparent &&
+                LLed_Track11.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is not active and not disabled and not transparant
+            {
+                LLed_Track11.BackColor = m_FYAppVar.TrackNotActiveColor;     // Set the track TrackNotActiveColor
+                CheckWhichTrackInline();                                    // Set the color to the corresponding sensors to the LLed_Track11.BackColor
+            }
+            else { CheckWhichTrackInline(); }                               // Set the color to the corresponding sensors to the LLed_Track11.BackColor
+
+            /*---------------------------------------------------------------------------------------------------------------------------------------------*/
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -2293,12 +2436,12 @@ namespace Siebwalde_Application
             if (Btn_Bezet5BOn_TOP_Click_Toggle == true)
             {
                 Btn_Bezet5BOn_TOP_Click_Toggle = false;
-                Occ5BOnTrue.UpdateCommand();                
+                m_FYAppVar.CmdOcc5BOnTrue.UpdateCommand();                
             }
             else if (Btn_Bezet5BOn_TOP_Click_Toggle == false)
             {
                 Btn_Bezet5BOn_TOP_Click_Toggle = true;
-                Occ5BOnFalse.UpdateCommand();                
+                m_FYAppVar.CmdOcc5BOnFalse.UpdateCommand();                
             }
         }
 
@@ -2326,12 +2469,12 @@ namespace Siebwalde_Application
             if (Btn_Bezet6On_TOP_Click_Toggle == true)
             {
                 Btn_Bezet6On_TOP_Click_Toggle = false;
-                Occ6OnTrue.UpdateCommand();                
+                m_FYAppVar.CmdOcc6OnTrue.UpdateCommand();                
             }
             else if (Btn_Bezet6On_TOP_Click_Toggle == false)
             {
                 Btn_Bezet6On_TOP_Click_Toggle = true;
-                Occ6OnFalse.UpdateCommand();                
+                m_FYAppVar.CmdOcc6OnFalse.UpdateCommand();                
             }
         }
 
@@ -2359,12 +2502,12 @@ namespace Siebwalde_Application
             if (Btn_Bezet7On_TOP_Click_Toggle == true)
             {
                 Btn_Bezet7On_TOP_Click_Toggle = false;
-                Occ7OnTrue.UpdateCommand();                
+                m_FYAppVar.CmdOcc7OnTrue.UpdateCommand();                
             }
             else if (Btn_Bezet7On_TOP_Click_Toggle == false)
             {
                 Btn_Bezet7On_TOP_Click_Toggle = true;
-                Occ7OnFalse.UpdateCommand();                
+                m_FYAppVar.CmdOcc7OnFalse.UpdateCommand();                
             }
         }
 
@@ -2390,56 +2533,67 @@ namespace Siebwalde_Application
         private void checkBoxTrack1_CheckedChanged(object sender, EventArgs e)
         {
             SetcheckBoxTrackIntArray(1, checkBoxTrack1.Checked);
+            m_FYAppVar.TrackTrainsOnFYUpdater();
         }
 
         private void checkBoxTrack2_CheckedChanged(object sender, EventArgs e)
         {
             SetcheckBoxTrackIntArray(2, checkBoxTrack2.Checked);
+            m_FYAppVar.TrackTrainsOnFYUpdater();
         }
 
         private void checkBoxTrack3_CheckedChanged(object sender, EventArgs e)
         {
             SetcheckBoxTrackIntArray(3, checkBoxTrack3.Checked);
+            m_FYAppVar.TrackTrainsOnFYUpdater();
         }
 
         private void checkBoxTrack4_CheckedChanged(object sender, EventArgs e)
         {
             SetcheckBoxTrackIntArray(4, checkBoxTrack4.Checked);
+            m_FYAppVar.TrackTrainsOnFYUpdater();
         }
 
         private void checkBoxTrack5_CheckedChanged(object sender, EventArgs e)
         {
             SetcheckBoxTrackIntArray(5, checkBoxTrack5.Checked);
+            m_FYAppVar.TrackTrainsOnFYUpdater();
         }
 
         private void checkBoxTrack6_CheckedChanged(object sender, EventArgs e)
         {
             SetcheckBoxTrackIntArray(6, checkBoxTrack6.Checked);
+            m_FYAppVar.TrackTrainsOnFYUpdater();
         }
 
         private void checkBoxTrack7_CheckedChanged(object sender, EventArgs e)
         {
             SetcheckBoxTrackIntArray(7, checkBoxTrack7.Checked);
+            m_FYAppVar.TrackTrainsOnFYUpdater();
         }
 
         private void checkBoxTrack8_CheckedChanged(object sender, EventArgs e)
         {
             SetcheckBoxTrackIntArray(8, checkBoxTrack8.Checked);
+            m_FYAppVar.TrackTrainsOnFYUpdater();
         }
 
         private void checkBoxTrack9_CheckedChanged(object sender, EventArgs e)
         {
             SetcheckBoxTrackIntArray(9, checkBoxTrack9.Checked);
+            m_FYAppVar.TrackTrainsOnFYUpdater();
         }
 
         private void checkBoxTrack10_CheckedChanged(object sender, EventArgs e)
         {
             SetcheckBoxTrackIntArray(10, checkBoxTrack10.Checked);
+            m_FYAppVar.TrackTrainsOnFYUpdater();
         }
 
         private void checkBoxTrack11_CheckedChanged(object sender, EventArgs e)
         {
             SetcheckBoxTrackIntArray(11, checkBoxTrack11.Checked);
+            m_FYAppVar.TrackTrainsOnFYUpdater();
         }
 
         private void checkBoxToggle_CheckedChanged(object sender, EventArgs e)
@@ -2472,6 +2626,7 @@ namespace Siebwalde_Application
                 checkBoxTrack10.Checked = true;
                 checkBoxTrack11.Checked = true;
             }
+            m_FYAppVar.TrackTrainsOnFYUpdater();
         }
 
         private void ForceNextTrack_ValueChanged(object sender, EventArgs e)
@@ -2483,19 +2638,11 @@ namespace Siebwalde_Application
         {
             if (Checked == true)
             {
-                try
-                {
-                    m_FYAppVar.icheckBoxTrack[Track] = 1;
-                }
-                catch { }
+                m_FYAppVar.icheckBoxTrack[Track] = 0;                
             }
             else
             {
-                try
-                {
-                    m_FYAppVar.icheckBoxTrack[Track] = 0;
-                }
-                catch { }                
+                m_FYAppVar.icheckBoxTrack[Track] = 1;                       
             }
         }
     }    

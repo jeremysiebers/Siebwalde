@@ -307,7 +307,7 @@
     <value>AutomaticMode</value>
   </data>
   <data name="&gt;&gt;Btn_Collect_TOP.ZOrder" xml:space="preserve">
-    <value>9</value>
+    <value>10</value>
   </data>
   <data name="Btn_Stop_Fiddle_TOP.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -334,7 +334,7 @@
     <value>AutomaticMode</value>
   </data>
   <data name="&gt;&gt;Btn_Stop_Fiddle_TOP.ZOrder" xml:space="preserve">
-    <value>11</value>
+    <value>12</value>
   </data>
   <data name="Btn_Go_To_Track_TOP.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -496,7 +496,7 @@
     <value>AutomaticMode</value>
   </data>
   <data name="&gt;&gt;Btn_Start_Fiddle_TOP.ZOrder" xml:space="preserve">
-    <value>12</value>
+    <value>13</value>
   </data>
   <data name="Btn_Couple.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -1416,6 +1416,42 @@
   <metadata name="menuStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
+  <data name="automaticModeToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>162, 22</value>
+  </data>
+  <data name="automaticModeToolStripMenuItem.Text" xml:space="preserve">
+    <value>Automatic mode</value>
+  </data>
+  <data name="manualModeToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>162, 22</value>
+  </data>
+  <data name="manualModeToolStripMenuItem.Text" xml:space="preserve">
+    <value>Manual Mode</value>
+  </data>
+  <data name="quitToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>162, 22</value>
+  </data>
+  <data name="quitToolStripMenuItem.Text" xml:space="preserve">
+    <value>Exit</value>
+  </data>
+  <data name="fileToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>35, 20</value>
+  </data>
+  <data name="fileToolStripMenuItem.Text" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="alwaysOnTopToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>157, 22</value>
+  </data>
+  <data name="alwaysOnTopToolStripMenuItem.Text" xml:space="preserve">
+    <value>Always On Top</value>
+  </data>
+  <data name="editToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>41, 20</value>
+  </data>
+  <data name="editToolStripMenuItem.Text" xml:space="preserve">
+    <value>View</value>
+  </data>
   <data name="menuStrip1.Location" type="System.Drawing.Point, System.Drawing">
     <value>0, 0</value>
   </data>
@@ -1440,47 +1476,41 @@
   <data name="&gt;&gt;menuStrip1.ZOrder" xml:space="preserve">
     <value>47</value>
   </data>
-  <data name="fileToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>35, 20</value>
+  <data name="label2.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
   </data>
-  <data name="fileToolStripMenuItem.Text" xml:space="preserve">
-    <value>File</value>
+  <data name="label2.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
   </data>
-  <data name="automaticModeToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>162, 22</value>
+  <data name="label2.Location" type="System.Drawing.Point, System.Drawing">
+    <value>147, 11</value>
   </data>
-  <data name="automaticModeToolStripMenuItem.Text" xml:space="preserve">
-    <value>Automatic mode</value>
+  <data name="label2.Size" type="System.Drawing.Size, System.Drawing">
+    <value>73, 13</value>
   </data>
-  <data name="manualModeToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>162, 22</value>
+  <data name="label2.TabIndex" type="System.Int32, mscorlib">
+    <value>123</value>
   </data>
-  <data name="manualModeToolStripMenuItem.Text" xml:space="preserve">
-    <value>Manual Mode</value>
+  <data name="label2.Text" xml:space="preserve">
+    <value>Disable Track</value>
   </data>
-  <data name="quitToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>162, 22</value>
+  <data name="&gt;&gt;label2.Name" xml:space="preserve">
+    <value>label2</value>
   </data>
-  <data name="quitToolStripMenuItem.Text" xml:space="preserve">
-    <value>Exit</value>
+  <data name="&gt;&gt;label2.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="editToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>41, 20</value>
+  <data name="&gt;&gt;label2.Parent" xml:space="preserve">
+    <value>AutomaticMode</value>
   </data>
-  <data name="editToolStripMenuItem.Text" xml:space="preserve">
-    <value>View</value>
-  </data>
-  <data name="alwaysOnTopToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>157, 22</value>
-  </data>
-  <data name="alwaysOnTopToolStripMenuItem.Text" xml:space="preserve">
-    <value>Always On Top</value>
+  <data name="&gt;&gt;label2.ZOrder" xml:space="preserve">
+    <value>0</value>
   </data>
   <data name="label1.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>
   <data name="label1.Location" type="System.Drawing.Point, System.Drawing">
-    <value>98, 161</value>
+    <value>98, 159</value>
   </data>
   <data name="label1.Size" type="System.Drawing.Size, System.Drawing">
     <value>60, 13</value>
@@ -1501,7 +1531,7 @@
     <value>AutomaticMode</value>
   </data>
   <data name="&gt;&gt;label1.ZOrder" xml:space="preserve">
-    <value>0</value>
+    <value>1</value>
   </data>
   <data name="ForceNextTrack.Location" type="System.Drawing.Point, System.Drawing">
     <value>16, 155</value>
@@ -1522,7 +1552,7 @@
     <value>AutomaticMode</value>
   </data>
   <data name="&gt;&gt;ForceNextTrack.ZOrder" xml:space="preserve">
-    <value>1</value>
+    <value>2</value>
   </data>
   <data name="checkBoxTrack10.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -1552,7 +1582,7 @@
     <value>AutomaticMode</value>
   </data>
   <data name="&gt;&gt;checkBoxTrack10.ZOrder" xml:space="preserve">
-    <value>2</value>
+    <value>3</value>
   </data>
   <data name="checkBoxTrack9.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -1582,7 +1612,7 @@
     <value>AutomaticMode</value>
   </data>
   <data name="&gt;&gt;checkBoxTrack9.ZOrder" xml:space="preserve">
-    <value>3</value>
+    <value>4</value>
   </data>
   <data name="checkBoxTrack8.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -1612,7 +1642,7 @@
     <value>AutomaticMode</value>
   </data>
   <data name="&gt;&gt;checkBoxTrack8.ZOrder" xml:space="preserve">
-    <value>4</value>
+    <value>5</value>
   </data>
   <data name="checkBoxTrack7.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -1642,7 +1672,7 @@
     <value>AutomaticMode</value>
   </data>
   <data name="&gt;&gt;checkBoxTrack7.ZOrder" xml:space="preserve">
-    <value>5</value>
+    <value>6</value>
   </data>
   <data name="checkBoxTrack6.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -1672,7 +1702,7 @@
     <value>AutomaticMode</value>
   </data>
   <data name="&gt;&gt;checkBoxTrack6.ZOrder" xml:space="preserve">
-    <value>6</value>
+    <value>7</value>
   </data>
   <data name="checkBoxTrack5.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -1702,7 +1732,7 @@
     <value>AutomaticMode</value>
   </data>
   <data name="&gt;&gt;checkBoxTrack5.ZOrder" xml:space="preserve">
-    <value>7</value>
+    <value>8</value>
   </data>
   <data name="checkBoxTrack4.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -1732,7 +1762,7 @@
     <value>AutomaticMode</value>
   </data>
   <data name="&gt;&gt;checkBoxTrack4.ZOrder" xml:space="preserve">
-    <value>8</value>
+    <value>9</value>
   </data>
   <data name="checkBoxTrack11.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -1762,7 +1792,7 @@
     <value>AutomaticMode</value>
   </data>
   <data name="&gt;&gt;checkBoxTrack11.ZOrder" xml:space="preserve">
-    <value>10</value>
+    <value>11</value>
   </data>
   <data name="checkBoxToggle.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -1771,7 +1801,7 @@
     <value>NoControl</value>
   </data>
   <data name="checkBoxToggle.Location" type="System.Drawing.Point, System.Drawing">
-    <value>161, 91</value>
+    <value>150, 91</value>
   </data>
   <data name="checkBoxToggle.Size" type="System.Drawing.Size, System.Drawing">
     <value>59, 17</value>
@@ -1792,7 +1822,7 @@
     <value>AutomaticMode</value>
   </data>
   <data name="&gt;&gt;checkBoxToggle.ZOrder" xml:space="preserve">
-    <value>13</value>
+    <value>14</value>
   </data>
   <data name="checkBoxTrack1.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -1819,7 +1849,7 @@
     <value>AutomaticMode</value>
   </data>
   <data name="&gt;&gt;checkBoxTrack1.ZOrder" xml:space="preserve">
-    <value>14</value>
+    <value>15</value>
   </data>
   <data name="checkBoxTrack2.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -1849,7 +1879,7 @@
     <value>AutomaticMode</value>
   </data>
   <data name="&gt;&gt;checkBoxTrack2.ZOrder" xml:space="preserve">
-    <value>15</value>
+    <value>16</value>
   </data>
   <data name="checkBoxTrack3.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -1879,7 +1909,7 @@
     <value>AutomaticMode</value>
   </data>
   <data name="&gt;&gt;checkBoxTrack3.ZOrder" xml:space="preserve">
-    <value>16</value>
+    <value>17</value>
   </data>
   <data name="AutomaticMode.Location" type="System.Drawing.Point, System.Drawing">
     <value>625, 776</value>

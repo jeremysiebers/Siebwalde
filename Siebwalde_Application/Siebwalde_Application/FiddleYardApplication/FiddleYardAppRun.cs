@@ -132,7 +132,7 @@ namespace Siebwalde_Application
         public string Run(string kickrun, string StopApplication)
         {
             string _Return = "Running";
-
+                        
             if (TrackPower15VDown == true)
             {
                 return _Return;

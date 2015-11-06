@@ -9,5 +9,6 @@ extern void Exe_Cmd_Resume(unsigned char ASL, char Resume_Cmd);
 extern unsigned char MACPC[6];
 extern unsigned char IPPC[4];
 extern unsigned char MAC_IP_READY;
+extern unsigned int PORTPC;
 
 #endif

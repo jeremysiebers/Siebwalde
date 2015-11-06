@@ -396,7 +396,7 @@ namespace Siebwalde_Application
 
                 case State.CheckFullTrack:
                     if ((m_FYAppVar.iTrainsOnFY[TrainDriveOutPointer] == 0) || (m_FYAppVar.icheckBoxTrack[TrainDriveOutPointer] == 1))
-                    {
+                    {                        
                         TrainDriveOutPointer++;
                         if (TrainDriveOutPointer > 11)
                         {
@@ -410,6 +410,15 @@ namespace Siebwalde_Application
                             TrainDriveOut_Machine = State.Start;
                             _Return = "Finished";
                             m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveOut All tracks are disabled, cancelling Traindrive out Program");
+                        }
+
+                        if (m_FYAppVar.iTrainsOnFY[TrainDriveOutPointer] == 0)
+                        {
+                            m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveOut track: " + Convert.ToString(TrainDriveOutPointer) + " is empty");
+                        }
+                        if (m_FYAppVar.icheckBoxTrack[TrainDriveOutPointer] == 1)
+                        {
+                            m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveOut track: " + Convert.ToString(TrainDriveOutPointer) + " is disabled in FYFORM");
                         }
                     }
                     else

@@ -30,7 +30,7 @@ namespace Siebwalde_Application
             SetColorTrackOccupied.BackColor = Properties.Settings.Default.SETxCOLORxTRACKxOCCUPIED;
             SetColorTrackNotInitialized.BackColor = Properties.Settings.Default.SETxCOLORxTRACKxNOTxINITIALIZED;
             SetColorTrackNotActive.BackColor = Properties.Settings.Default.SETxCOLORxTRACKxNOTxACTIVE;
-            SetColorTrackEmpty.BackColor = Properties.Settings.Default.SETxCOLORxTRACKxEMPTY;
+            SetColorTrackDisabled.BackColor = Properties.Settings.Default.SETxCOLORxTRACKxDISABLED;
         }
 
         private void FiddleYardSettingsForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -107,9 +107,9 @@ namespace Siebwalde_Application
                 SetColorTrackNotActive.BackColor = MyDialog.Color;
                 Properties.Settings.Default.SETxCOLORxTRACKxNOTxACTIVE = SetColorTrackNotActive.BackColor;
             }
-        }
+        }       
 
-        private void SetColorTrackEmpty_Click(object sender, EventArgs e)
+        private void SetColorTrackDisabled_Click(object sender, EventArgs e)
         {
             ColorDialog MyDialog = new ColorDialog();
             // Keeps the user from selecting a custom color.
@@ -117,13 +117,13 @@ namespace Siebwalde_Application
             // Allows the user to get help. (The default is false.)
             MyDialog.ShowHelp = true;
             // Sets the initial color select to the current text color.
-            MyDialog.Color = SetColorTrackEmpty.BackColor;
+            MyDialog.Color = SetColorTrackDisabled.BackColor;
 
             // Update the text box color if the user clicks OK 
             if (MyDialog.ShowDialog() == DialogResult.OK)
             {
-                SetColorTrackEmpty.BackColor = MyDialog.Color;
-                Properties.Settings.Default.SETxCOLORxTRACKxEMPTY = SetColorTrackEmpty.BackColor;
+                SetColorTrackDisabled.BackColor = MyDialog.Color;
+                Properties.Settings.Default.SETxCOLORxTRACKxDISABLED = SetColorTrackDisabled.BackColor;
             }
         }        
         

@@ -106,6 +106,7 @@
             this.PB_Block5BIn = new System.Windows.Forms.PictureBox();
             this.PB_Block6In = new System.Windows.Forms.PictureBox();
             this.PB_Block7In = new System.Windows.Forms.PictureBox();
+            this.label2 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.Nuo_Track_No_TOP)).BeginInit();
             this.menuStrip1.SuspendLayout();
             this.AutomaticMode.SuspendLayout();
@@ -492,6 +493,7 @@
             // 
             // AutomaticMode
             // 
+            this.AutomaticMode.Controls.Add(this.label2);
             this.AutomaticMode.Controls.Add(this.label1);
             this.AutomaticMode.Controls.Add(this.ForceNextTrack);
             this.AutomaticMode.Controls.Add(this.checkBoxTrack10);
@@ -712,6 +714,11 @@
             this.PB_Block7In.TabStop = false;
             this.PB_Block7In.Click += new System.EventHandler(this.PB_Block7In_Click);
             // 
+            // label2
+            // 
+            resources.ApplyResources(this.label2, "label2");
+            this.label2.Name = "label2";
+            // 
             // FiddleYardForm
             // 
             resources.ApplyResources(this, "$this");
@@ -865,5 +872,6 @@
         private System.Windows.Forms.NumericUpDown ForceNextTrack;
         private System.Windows.Forms.CheckBox checkBoxToggle;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label2;
     }
 }

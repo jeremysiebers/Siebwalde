@@ -14,8 +14,8 @@
     <Setting Name="SETxCOLORxTRACKxNOTxACTIVE" Type="System.Drawing.Color" Scope="User">
       <Value Profile="(Default)">DarkGreen</Value>
     </Setting>
-    <Setting Name="SETxCOLORxTRACKxEMPTY" Type="System.Drawing.Color" Scope="User">
-      <Value Profile="(Default)">Transparent</Value>
+    <Setting Name="SETxCOLORxTRACKxDISABLED" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">192, 0, 0</Value>
     </Setting>
   </Settings>
 </SettingsFile>
