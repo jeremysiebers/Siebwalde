@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="62">
+  <logicalFolder name="root" displayName="root" projectFiles="true">
+    <logicalFolder name="HeaderFiles"
+                   displayName="Header Files"
+                   projectFiles="true">
+      <logicalFolder name="I2c2" displayName="I2c2" projectFiles="true">
+        <itemPath>I2c2/i2c2.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="Microchip" displayName="Microchip" projectFiles="true">
+        <logicalFolder name="Include" displayName="Include" projectFiles="true">
+          <logicalFolder name="PIC18Salloc" displayName="PIC18Salloc" projectFiles="true">
+            <itemPath>Microchip/Include/PIC18Salloc/salloc.h</itemPath>
+          </logicalFolder>
+          <logicalFolder name="TCPIPStack" displayName="TCPIPStack" projectFiles="true">
+            <itemPath>Microchip/Include/TCPIPStack/Announce.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/ARCFOUR.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/ARP.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/AutoIP.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/BerkeleyAPI.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/BigInt.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/Delay.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/DHCP.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/DNS.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/DynDNS.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/ENC28J60.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/ENCX24J600.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/ETH97J60.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/FileSystem.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/FTP.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/HardwareProfileTemplate.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/Hashes.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/Helpers.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/HTTP.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/HTTP2.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/ICMP.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/IP.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/LCDBlocking.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/MAC.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/MPFS.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/MPFS2.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/NBNS.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/Random.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/Reboot.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/regdef.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/RSA.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/SMTP.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/SNMP.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/SNMPv3.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/SNTP.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/SPIFlash.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/SPIRAM.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/SSL.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/StackTsk.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/TCP.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/TCPIP.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/TCPIPConfigTemplate.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/TCPPerformanceTest.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/Telnet.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/TFTPc.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/Tick.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/UART.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/UART2TCPBridge.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/UDP.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/UDPPerformanceTest.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/XEEPROM.h</itemPath>
+            <itemPath>Microchip/Include/TCPIPStack/_HTTP2.h</itemPath>
+          </logicalFolder>
+          <itemPath>Microchip/Include/Compiler.h</itemPath>
+          <itemPath>Microchip/Include/GenericTypeDefs.h</itemPath>
+          <itemPath>Microchip/Include/LCDBlocking.h</itemPath>
+          <itemPath>Microchip/Include/struct_queue.h</itemPath>
+          <itemPath>Microchip/Include/TimeDelay.h</itemPath>
+          <itemPath>Microchip/Include/timer.h</itemPath>
+          <itemPath>Microchip/Include/uart2.h</itemPath>
+        </logicalFolder>
+      </logicalFolder>
+      <itemPath>Command_Machine.h</itemPath>
+      <itemPath>Diagnostic_ret.h</itemPath>
+      <itemPath>Drive_Train_IO.h</itemPath>
+      <itemPath>Fiddle_Init.h</itemPath>
+      <itemPath>Fiddle_Move_Ctrl.h</itemPath>
+      <itemPath>Fiddle_Yard.h</itemPath>
+      <itemPath>HardwareProfile.h</itemPath>
+      <itemPath>IO_Expander.h</itemPath>
+      <itemPath>Shift_Register.h</itemPath>
+      <itemPath>State_Machine.h</itemPath>
+      <itemPath>TCPIPConfig.h</itemPath>
+      <itemPath>Track_Move_Ctrl.h</itemPath>
+      <itemPath>Train_Detection.h</itemPath>
+      <itemPath>Var_Out.h</itemPath>
+    </logicalFolder>
+    <logicalFolder name="LinkerScript"
+                   displayName="Linker Files"
+                   projectFiles="true">
+    </logicalFolder>
+    <logicalFolder name="SourceFiles"
+                   displayName="Source Files"
+                   projectFiles="true">
+      <logicalFolder name="I2c2" displayName="I2c2" projectFiles="true">
+        <itemPath>I2c2/i2c2ack.c</itemPath>
+        <itemPath>I2c2/i2c2clos.c</itemPath>
+        <itemPath>I2c2/i2c2dtrd.c</itemPath>
+        <itemPath>I2c2/i2c2gets.c</itemPath>
+        <itemPath>I2c2/i2c2idle.c</itemPath>
+        <itemPath>I2c2/i2c2nack.c</itemPath>
+        <itemPath>I2c2/i2c2open.c</itemPath>
+        <itemPath>I2c2/i2c2puts.c</itemPath>
+        <itemPath>I2c2/i2c2read.c</itemPath>
+        <itemPath>I2c2/i2c2rstr.c</itemPath>
+        <itemPath>I2c2/i2c2stop.c</itemPath>
+        <itemPath>I2c2/i2c2strt.c</itemPath>
+        <itemPath>I2c2/i2c2writ.c</itemPath>
+      </logicalFolder>
+      <logicalFolder name="Microchip" displayName="Microchip" projectFiles="true">
+        <logicalFolder name="Common" displayName="Common" projectFiles="true">
+          <itemPath>Microchip/Common/TimeDelay.c</itemPath>
+          <itemPath>Microchip/Common/timer.c</itemPath>
+        </logicalFolder>
+        <logicalFolder name="PIC18Salloc" displayName="PIC18Salloc" projectFiles="true">
+          <itemPath>Microchip/PIC18Salloc/salloc.c</itemPath>
+        </logicalFolder>
+        <logicalFolder name="TCPIPStack" displayName="TCPIPStack" projectFiles="true">
+          <itemPath>Microchip/TCPIPStack/Announce.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/ARCFOUR.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/ARP.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/AutoIP.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/BerkeleyAPI.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/BigInt.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/Delay.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/DHCP.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/DHCPs.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/DNS.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/DNSs.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/DynDNS.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/ETH97J60.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/FileSystem.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/FTP.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/Hashes.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/Helpers.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/HTTP.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/HTTP2.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/ICMP.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/IP.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/LCDBlocking.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/MPFS.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/MPFS2.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/NBNS.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/Random.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/Reboot.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/RSA.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/SMTP.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/SNMP.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/SNMPv3.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/SNMPv3USM.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/SNTP.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/SPIEEPROM.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/SPIFlash.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/SPIRAM.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/SSL.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/StackTsk.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/TCP.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/TCPPerformanceTest.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/Telnet.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/TFTPc.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/Tick.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/UART.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/UART2TCPBridge.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/UDP.c</itemPath>
+          <itemPath>Microchip/TCPIPStack/UDPPerformanceTest.c</itemPath>
+        </logicalFolder>
+      </logicalFolder>
+      <itemPath>Command_Machine.c</itemPath>
+      <itemPath>Diagnostic_ret.c</itemPath>
+      <itemPath>Drive_Train_IO.c</itemPath>
+      <itemPath>Fiddle_Init.c</itemPath>
+      <itemPath>Fiddle_Move_Ctrl.c</itemPath>
+      <itemPath>IO_Expander.c</itemPath>
+      <itemPath>Shift_Register.c</itemPath>
+      <itemPath>State_Machine.c</itemPath>
+      <itemPath>Track_Move_Ctrl.c</itemPath>
+      <itemPath>Train_Detection.c</itemPath>
+      <itemPath>Var_Out.c</itemPath>
+      <itemPath>FiddleYard.c</itemPath>
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
+    <logicalFolder name="OtherFiles" displayName="Other Files" projectFiles="false">
+      <itemPath>../Fiddle Yard/IO_useage.c</itemPath>
+      <itemPath>../Fiddle Yard/Bridge_Ctrl.h</itemPath>
+      <itemPath>../Fiddle Yard/Bridge_Ctrl.c</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <sourceRootList>
+    <Elem>..\Fiddle Yard\Microchip\Include\TCPIP Stack</Elem>
+    <Elem>../Fiddle Yard</Elem>
+    <Elem>..\Fiddle Yard\I2c2</Elem>
+    <Elem>..\Fiddle Yard\Microchip\TCPIP Stack</Elem>
+    <Elem>..\Fiddle Yard</Elem>
+    <Elem></Elem>
+    <Elem>../../../../../../Localdata/Microchip/MCC18/bin/LKR</Elem>
+  </sourceRootList>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="default" type="2">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <targetDevice>PIC18F97J60</targetDevice>
+        <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
+        <platformTool>ICD3PlatformTool</platformTool>
+        <languageToolchain>C18</languageToolchain>
+        <languageToolchainVersion>3.36</languageToolchainVersion>
+        <platform>3</platform>
+      </toolsSet>
+      <compileType>
+        <linkerTool>
+          <linkerLibItems>
+          </linkerLibItems>
+        </linkerTool>
+        <archiverTool>
+        </archiverTool>
+        <loading>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <parseOnProdLoad>false</parseOnProdLoad>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
+      </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
+      </makeCustomizationType>
+      <C18>
+        <property key="code-model" value="ml"/>
+        <property key="data-model" value="Oa-"/>
+        <property key="default-char-unsigned" value="false"/>
+        <property key="enable-all-optimizations" value="true"/>
+        <property key="enable-int-promotion" value="false"/>
+        <property key="enable-multi-bank-stack-model" value="false"/>
+        <property key="enable-ob" value="false"/>
+        <property key="enable-od" value="false"/>
+        <property key="enable-om" value="true"/>
+        <property key="enable-on" value="true"/>
+        <property key="enable-op" value="false"/>
+        <property key="enable-opa" value="false"/>
+        <property key="enable-or" value="false"/>
+        <property key="enable-os" value="true"/>
+        <property key="enable-ot" value="false"/>
+        <property key="enable-ou" value="false"/>
+        <property key="enable-ow" value="true"/>
+        <property key="extra-include-directories"
+                  value="../Fiddle Yard;../Fiddle Yard/Microchip/Include/TCPIP Stack;../Fiddle Yard/Microchip/Include;../Fiddle Yard/i2C2;../../../../../../MCC18/h;../Fiddle Yard/I2c2;;."/>
+        <property key="optimization-master" value="Custom"/>
+        <property key="preprocessor-macros" value=""/>
+        <property key="procedural-abstraction-passes" value="4"/>
+        <property key="storage-class" value="sca"/>
+        <property key="verbose" value="false"/>
+        <property key="warning-level" value="2"/>
+      </C18>
+      <C18-AS>
+        <property key="cross.reference.file" value=""/>
+        <property key="default.radix" value="HEX"/>
+        <property key="enable.case.sensitivity" value="true"/>
+        <property key="hex.output.format" value="INHX32"/>
+        <property key="preprocessor.macros" value=""/>
+        <property key="warning.level" value="0"/>
+      </C18-AS>
+      <C18-LD>
+        <property key="cod-file" value="true"/>
+        <property key="extra-lib-directories" value="../../../../../../MCC18/lib;;."/>
+        <property key="hex-output-format" value="INHX32"/>
+        <property key="map-file" value="&quot;$(BINDIR_)$(TARGETBASE).map&quot;"/>
+      </C18-LD>
+      <C18LanguageToolchain>
+        <property key="extended-mode" value="false"/>
+        <property key="extended-mode-mcc18" value="false"/>
+        <property key="extended-mode-mpasm" value="false"/>
+        <property key="extended-mode-mplink" value="false"/>
+        <property key="stack-analysis" value="false"/>
+        <property key="stack-analysis-mcc18" value="false"/>
+        <property key="stack-analysis-mplink" value="false"/>
+      </C18LanguageToolchain>
+      <ICD3PlatformTool>
+        <property key="tracecontrol.disablemacros" value="true"/>
+        <property key="tracecontrol.medium" value="0"/>
+        <property key="tracecontrol.select" value="0"/>
+      </ICD3PlatformTool>
+    </conf>
+  </confs>
+</configurationDescriptor>
