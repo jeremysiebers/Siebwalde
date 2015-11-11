@@ -110,7 +110,7 @@ namespace Siebwalde_Application
             //LLed_Block6In.Location = new System.Drawing.Point(GWinX + 50 + (100 / 2 - 26 / 2), GWinHalf -7);
             LLed_Block6In.Hide();
             PB_Block6In.Location = new System.Drawing.Point(GWinX + 50 + (100 / 2 - 26 / 2 - 4), GWinHalf - 7 + 20);
-            PB_Block6In.Image = SeinRed90;
+            PB_Block6In.Image = SeinRed;
             PB_Block6In.Enabled = false;
 
             LLed_Block5B.Size = new Size(16, 250);
@@ -147,7 +147,7 @@ namespace Siebwalde_Application
             //LLed_Block7In.Location = new System.Drawing.Point(GWinX + 790 + (100 / 2 - 26 / 2), GWinHalf - 7);
             LLed_Block7In.Hide();
             PB_Block7In.Location = new System.Drawing.Point(GWinX + 790 + (100 / 2 - 26 / 2 - 4), GWinHalf - 7 + 20);
-            PB_Block7In.Image = SeinRed90;
+            PB_Block7In.Image = SeinRed;
             PB_Block7In.Enabled = false;
 
             LLed_Block8A.Size = new Size(16, 250);
@@ -1029,14 +1029,14 @@ namespace Siebwalde_Application
 
                     case "LLed_Block6In": if (Val >= 1)
                         {
-                            PB_Block6In.Image = SeinRed90;
+                            PB_Block6In.Image = SeinRed;
                             LLed_Block6In.BackColor = Color.Red;
                             Btn_Bezet6On_TOP.Text = "Off";
                             Btn_Bezet6On_TOP_Click_Toggle = false;
                         }
                         if (Val == 0)
                         {
-                            PB_Block6In.Image = SeinGreen90;
+                            PB_Block6In.Image = SeinGreen;
                             LLed_Block6In.BackColor = m_FYAppVar.TrackOccupiedColor;             //Color.Lime;
                             Btn_Bezet6On_TOP.Text = "On";
                             Btn_Bezet6On_TOP_Click_Toggle = true;
@@ -1045,14 +1045,14 @@ namespace Siebwalde_Application
 
                     case "LLed_Block7In": if (Val >= 1)
                         {
-                            PB_Block7In.Image = SeinRed90; 
+                            PB_Block7In.Image = SeinRed; 
                             LLed_Block7In.BackColor = Color.Red;
                             Btn_Bezet7On_TOP.Text = "Off";
                             Btn_Bezet7On_TOP_Click_Toggle = false;
                         }
                         if (Val == 0)
                         {
-                            PB_Block7In.Image = SeinGreen90; 
+                            PB_Block7In.Image = SeinGreen; 
                             LLed_Block7In.BackColor = m_FYAppVar.TrackOccupiedColor;             //Color.Lime;                                                        
                             Btn_Bezet7On_TOP.Text = "On";
                             Btn_Bezet7On_TOP_Click_Toggle = true;
