@@ -85,6 +85,10 @@ namespace Siebwalde_Application
         public MessageUpdater UniversalError;
         public MessageUpdater uControllerReady;             // ready for next command, C# has to assume ucontroller is busy after sending a command
         public MessageUpdater TrackPower15VDown;            // Quick message to indicate track power is down, halt FYApplication!!
+        public MessageUpdater EndOffStroke11Assert;
+        public MessageUpdater EndOffStroke10Assert;
+        public MessageUpdater FiddleYardMoveAndF12Assert;
+        public MessageUpdater FiddleYardMoveAndF13Assert;
         
 
         /*#--------------------------------------------------------------------------#*/
@@ -154,7 +158,10 @@ namespace Siebwalde_Application
             UniversalError = new MessageUpdater();
             uControllerReady = new MessageUpdater();
             TrackPower15VDown = new MessageUpdater();
-            
-        }        
+            EndOffStroke11Assert = new MessageUpdater();
+            EndOffStroke10Assert = new MessageUpdater();   
+            FiddleYardMoveAndF12Assert = new MessageUpdater();
+            FiddleYardMoveAndF13Assert = new MessageUpdater();    
+        }
     }
 }

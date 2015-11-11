@@ -321,49 +321,59 @@ namespace Siebwalde_Application
             {
                 switch (b[1])
                 {
-                    case 0x03: FYIOHandleVar.FiddleOneLeft.UpdateMessage();
+                    case 0x01: FYIOHandleVar.FiddleOneLeft.UpdateMessage();
                         break;
-                    case 0x04: FYIOHandleVar.FiddleOneRight.UpdateMessage();
+                    case 0x02: FYIOHandleVar.FiddleOneRight.UpdateMessage();
                         break;
-                    case 0x05: FYIOHandleVar.FiddleMultipleLeft.UpdateMessage();
+                    case 0x03: FYIOHandleVar.FiddleMultipleLeft.UpdateMessage();
                         break;
-                    case 0x06: FYIOHandleVar.FiddleMultipleRight.UpdateMessage();
+                    case 0x04: FYIOHandleVar.FiddleMultipleRight.UpdateMessage();
                         break;
-                    case 0x07: FYIOHandleVar.TrainDetection.UpdateMessage();
+                    case 0x05: FYIOHandleVar.TrainDetection.UpdateMessage();
                         break;
-                    case 0x08: 
+                    case 0x06: FYIOHandleVar.TrainOn5B.UpdateMessage();
                         break;
-                    case 0x09: 
+                    case 0x07: FYIOHandleVar.TrainOn8A.UpdateMessage();
                         break;
-                    case 0x0B: 
+                    case 0x08: FYIOHandleVar.FiddleYardReset.UpdateMessage();
                         break;
-                    case 0x0E: 
+                    case 0x09: FYIOHandleVar.OccfromBlock6.UpdateMessage();
                         break;
-                    case 0x0F: FYIOHandleVar.TrainOn5B.UpdateMessage();
+                    case 0x0A: FYIOHandleVar.uControllerReady.UpdateMessage();
+                        break;                    
+                    case 0x0B: FYIOHandleVar.SensorF12High.UpdateMessage();
                         break;
-                    case 0x10: 
+                    case 0x0C: FYIOHandleVar.OccfromBlock6AndSensorF12.UpdateMessage();
                         break;
-                    case 0x11: FYIOHandleVar.TrainOn8A.UpdateMessage();
+                    case 0x0D: FYIOHandleVar.LastTrack.UpdateMessage();
                         break;
-                    case 0x12: 
+                    case 0x0E: FYIOHandleVar.TrackPower15VDown.UpdateMessage();
                         break;
-                    case 0x13: 
+                    case 0x0F: FYIOHandleVar.UniversalError.UpdateMessage();
+                        break;
+                    case 0x10: FYIOHandleVar.EndOffStroke11Assert.UpdateMessage();
+                        break;
+                    case 0x11: FYIOHandleVar.EndOffStroke10Assert.UpdateMessage();
+                        break;
+                    case 0x12: FYIOHandleVar.FiddleYardMoveAndF12Assert.UpdateMessage();
+                        break;
+                    case 0x13: FYIOHandleVar.FiddleYardMoveAndF13Assert.UpdateMessage();
                         break;
                     case 0x14: 
                         break;
-                    case 0x15: FYIOHandleVar.FiddleYardReset.UpdateMessage();
+                    case 0x15: 
                         break;
-                    case 0x16: FYIOHandleVar.OccfromBlock6.UpdateMessage();
+                    case 0x16: 
                         break;
-                    case 0x17: FYIOHandleVar.SensorF12High.UpdateMessage();
+                    case 0x17: 
                         break;
-                    case 0x18: FYIOHandleVar.OccfromBlock6AndSensorF12.UpdateMessage();
+                    case 0x18: 
                         break;
                     case 0x1B: 
                         break;
-                    case 0x21: FYIOHandleVar.LastTrack.UpdateMessage();
+                    case 0x21: 
                         break;
-                    case 0x23: FYIOHandleVar.UniversalError.UpdateMessage();
+                    case 0x23: 
                         break;
                     case 0x24: 
                         break;
@@ -373,9 +383,9 @@ namespace Siebwalde_Application
                         break;
                     case 0x2F: 
                         break;
-                    case 0x30: FYIOHandleVar.uControllerReady.UpdateMessage();
+                    case 0x30: 
                         break;
-                    case 0x31: FYIOHandleVar.TrackPower15VDown.UpdateMessage();
+                    case 0x31: 
                         break;
                     default: break;
                 }
