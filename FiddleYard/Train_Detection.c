@@ -1,7 +1,8 @@
 #include <Train_Detection.h>
 #include <Shift_Register.h>
 #include <Track_Move_Ctrl.h>
-#include <Drive_Train_IO.h>
+//#include <Drive_Train_IO.h>
+#include <State_Machine.h>
 #include <Var_Out.h>
 #include <Fiddle_Yard.h>
 
@@ -45,11 +46,9 @@ void Train_Detection_Reset(unsigned char ASL)
 	ACT_ST_MCHN[ASL].Train_In_Track[11]=0;														// Array containing occupied track in fiddle yard
 }
 
-
 unsigned char Train_Detection(unsigned char ASL)
 {
 	static char Return_Val = Busy, Return_Val_Routine = Busy;
-	unsigned int Train_In_Track_pointer = 0;
 	
 	switch(ACT_ST_MCHN[ASL].Train_Detector)
 	{
@@ -103,8 +102,6 @@ unsigned char Train_Detection(unsigned char ASL)
 													ACT_ST_MCHN[ASL].Train_Detector = 0;
 													Bezet_Weerstand(ASL, Off);							
 													Train_Detection_Finished(ASL);
-													Train_In_Track_actual(ASL, &ACT_ST_MCHN[ASL].Train_In_Track[0]);		// Update the Train_In_Track array in State_Machine.c with the
-																															// the latest status of the Train_In_Track array in Train_Detection.c ( to heavy to update on the fly -> solution required)
 													Return_Val = Finished;
 													break;
 													
@@ -128,54 +125,8 @@ unsigned char Train_Detection(unsigned char ASL)
 	}
 	return (Return_Val);
 }
-				
 
-
-/*
-		
-		case	1	:	switch (Return_Val_Routine = Track_Mover(ASL,ACT_ST_MCHN[ASL].Train_Detector_Move))
-						{
-							case	Finished	:	ACT_ST_MCHN[ASL].PTIT++;
-													ACT_ST_MCHN[ASL].Train_Detector = 3;
-													Return_Val = Busy;
-													break;
-							case	Busy		:	Return_Val = Busy;
-													break;
-							default				:	Return_Val = Return_Val_Routine;
-													ACT_ST_MCHN[ASL].Train_Detector = 0;
-													break;
-						}
-						break;
-						
-						
-		case	3	:	if (F10(ASL) == 1)
-						{
-							*(ACT_ST_MCHN[ASL].PTIT) = 1;
-						}
-						else { *(ACT_ST_MCHN[ASL].PTIT) = 0;}
-						Train_In_Track_actual(ASL, &ACT_ST_MCHN[ASL].Train_In_Track[0]);		// Update the Train_In_Track array in State_Machine.c with the
-						ACT_ST_MCHN[ASL].Train_Detector = 4;									// the latest status of the Train_In_Track array in Train_Detection.c
-						Return_Val = Busy;
-						break;
-
-		case	4	:	ACT_ST_MCHN[ASL].Train_Detector_Move++;						
-						ACT_ST_MCHN[ASL].Train_Detector = 5;
-						break;
-						
-		case	5	:	if (ACT_ST_MCHN[ASL].Train_Detector_Move >= 12)
-						{
-							ACT_ST_MCHN[ASL].Train_Detector_Move = 1;
-							ACT_ST_MCHN[ASL].Train_Detector = 0;
-							Bezet_Weerstand(ASL, Off);							
-							Train_Detection_Finished(ASL);
-							Return_Val = Finished;
-							break;
-						}
-						else {ACT_ST_MCHN[ASL].Train_Detector = 1; Return_Val = Busy;}
-						break;
-		
-		default		:	break;
-	}
-	return (Return_Val);
+unsigned char Trains_On_Fiddle_Yard(unsigned char ASL, unsigned char Track)
+{
+	return (ACT_ST_MCHN[ASL].Train_In_Track[Track]); // return fiddle yard occupation status by sending array address to var_out.c
 }
-*/

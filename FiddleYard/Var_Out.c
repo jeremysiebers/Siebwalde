@@ -2,8 +2,9 @@
 #include <Diagnostic_ret.h>
 #include <Shift_Register.h>
 #include <Fiddle_Yard.h>
-//#include <State_Machine.h>
-#include <Drive_Train_IO.h>
+#include <Train_Detection.h>
+
+extern unsigned char Trains_On_Fiddle_Yard(unsigned char ASL, unsigned char Track); // Get Track status from Train_In_Track array
 
 void Target_Alive_Update(unsigned char ASL);
 void Var_Out_Switcher(unsigned  char ASL);
@@ -162,9 +163,9 @@ void Var_Out_Switcher(unsigned  char ASL)
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
 							Send_Var_Out[1] = Send_Var_Out[1] | Bezet_Weerstand_Status(ASL);
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
-							Send_Var_Out[1] = Send_Var_Out[1] | Trains_On_Fiddle_Yard(ASL)[1];
+							Send_Var_Out[1] = Send_Var_Out[1] | Trains_On_Fiddle_Yard(ASL, 1);
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
-							Send_Var_Out[1] = Send_Var_Out[1] | Trains_On_Fiddle_Yard(ASL)[2];
+							Send_Var_Out[1] = Send_Var_Out[1] | Trains_On_Fiddle_Yard(ASL, 2);
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
 							Send_Var_Out[1] = Send_Var_Out[1] | 0x1;
 							Send_Var_Out[2] = 0x00;
@@ -189,19 +190,19 @@ void Var_Out_Switcher(unsigned  char ASL)
 								Send_Var_Out[0] = 'W';
 							}
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
-							Send_Var_Out[1] = Send_Var_Out[1] | Trains_On_Fiddle_Yard(ASL)[4];
+							Send_Var_Out[1] = Send_Var_Out[1] | Trains_On_Fiddle_Yard(ASL, 4);
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
-							Send_Var_Out[1] = Send_Var_Out[1] | Trains_On_Fiddle_Yard(ASL)[5];
+							Send_Var_Out[1] = Send_Var_Out[1] | Trains_On_Fiddle_Yard(ASL, 5);
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
-							Send_Var_Out[1] = Send_Var_Out[1] | Trains_On_Fiddle_Yard(ASL)[6];
+							Send_Var_Out[1] = Send_Var_Out[1] | Trains_On_Fiddle_Yard(ASL, 6);
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
-							Send_Var_Out[1] = Send_Var_Out[1] | Trains_On_Fiddle_Yard(ASL)[7];
+							Send_Var_Out[1] = Send_Var_Out[1] | Trains_On_Fiddle_Yard(ASL, 7);
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
-							Send_Var_Out[1] = Send_Var_Out[1] | Trains_On_Fiddle_Yard(ASL)[8];
+							Send_Var_Out[1] = Send_Var_Out[1] | Trains_On_Fiddle_Yard(ASL, 8);
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
-							Send_Var_Out[1] = Send_Var_Out[1] | Trains_On_Fiddle_Yard(ASL)[9];
+							Send_Var_Out[1] = Send_Var_Out[1] | Trains_On_Fiddle_Yard(ASL, 9);
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
-							Send_Var_Out[1] = Send_Var_Out[1] | Trains_On_Fiddle_Yard(ASL)[10];
+							Send_Var_Out[1] = Send_Var_Out[1] | Trains_On_Fiddle_Yard(ASL, 10);
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
 							Send_Var_Out[1] = Send_Var_Out[1] | 0x1;
 							Send_Var_Out[2] = 0x00;
@@ -236,9 +237,9 @@ void Var_Out_Switcher(unsigned  char ASL)
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
 							Send_Var_Out[1] = Send_Var_Out[1] | M10_Status(ASL);
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
-							Send_Var_Out[1] = Send_Var_Out[1] | Trains_On_Fiddle_Yard(ASL)[3];
+							Send_Var_Out[1] = Send_Var_Out[1] | Trains_On_Fiddle_Yard(ASL, 3);
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
-							Send_Var_Out[1] = Send_Var_Out[1] | Trains_On_Fiddle_Yard(ASL)[11];
+							Send_Var_Out[1] = Send_Var_Out[1] | Trains_On_Fiddle_Yard(ASL, 11);
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
 							Send_Var_Out[1] = Send_Var_Out[1] | 0x1;
 							Send_Var_Out[2] = 0x00;
@@ -263,7 +264,8 @@ void Var_Out_Switcher(unsigned  char ASL)
 		}
 }		
 
-extern void Bridge_Open_Ok(unsigned char ASL)
+
+void Fiddle_One_Left_Ok(unsigned char ASL)
 {
 	if (ASL == TOP)
 	{
@@ -277,8 +279,7 @@ extern void Bridge_Open_Ok(unsigned char ASL)
 	Send_Var_Out[2] = 0x00;
 	Send_Diag_Comm(Send_Var_Out);
 }
-	
-extern void Bridge_Close_Ok(unsigned char ASL)
+void Fiddle_One_Right_Ok(unsigned char ASL)
 {
 	if (ASL == TOP)
 	{
@@ -292,7 +293,7 @@ extern void Bridge_Close_Ok(unsigned char ASL)
 	Send_Var_Out[2] = 0x00;
 	Send_Diag_Comm(Send_Var_Out);
 }
-extern void Fiddle_One_Left_Ok(unsigned char ASL)
+void Fiddle_Multiple_Left_Ok(unsigned char ASL)
 {
 	if (ASL == TOP)
 	{
@@ -306,7 +307,7 @@ extern void Fiddle_One_Left_Ok(unsigned char ASL)
 	Send_Var_Out[2] = 0x00;
 	Send_Diag_Comm(Send_Var_Out);
 }
-extern void Fiddle_One_Right_Ok(unsigned char ASL)
+void Fiddle_Multiple_Right_Ok(unsigned char ASL)
 {
 	if (ASL == TOP)
 	{
@@ -320,7 +321,7 @@ extern void Fiddle_One_Right_Ok(unsigned char ASL)
 	Send_Var_Out[2] = 0x00;
 	Send_Diag_Comm(Send_Var_Out);
 }
-extern void Fiddle_Multiple_Left_Ok(unsigned char ASL)
+void Train_Detection_Finished(unsigned char ASL)
 {
 	if (ASL == TOP)
 	{
@@ -334,7 +335,8 @@ extern void Fiddle_Multiple_Left_Ok(unsigned char ASL)
 	Send_Var_Out[2] = 0x00;
 	Send_Diag_Comm(Send_Var_Out);
 }
-extern void Fiddle_Multiple_Right_Ok(unsigned char ASL)
+
+void Train_On_5B(unsigned char ASL)
 {
 	if (ASL == TOP)
 	{
@@ -348,7 +350,8 @@ extern void Fiddle_Multiple_Right_Ok(unsigned char ASL)
 	Send_Var_Out[2] = 0x00;
 	Send_Diag_Comm(Send_Var_Out);
 }
-extern void Train_Detection_Finished(unsigned char ASL)
+
+void Train_On_8A(unsigned char ASL)
 {
 	if (ASL == TOP)
 	{
@@ -362,7 +365,8 @@ extern void Train_Detection_Finished(unsigned char ASL)
 	Send_Var_Out[2] = 0x00;
 	Send_Diag_Comm(Send_Var_Out);
 }
-extern void Train_Drive_Out_Finished(unsigned char ASL)
+
+void Fiddle_Yard_Reset(unsigned char ASL)
 {
 	if (ASL == TOP)
 	{
@@ -376,7 +380,7 @@ extern void Train_Drive_Out_Finished(unsigned char ASL)
 	Send_Var_Out[2] = 0x00;
 	Send_Diag_Comm(Send_Var_Out);
 }
-extern void Train_Drive_In_Finished(unsigned char ASL)
+void Bezet_Uit_Blok_6_Send(unsigned char ASL)
 {
 	if (ASL == TOP)
 	{
@@ -390,7 +394,8 @@ extern void Train_Drive_In_Finished(unsigned char ASL)
 	Send_Var_Out[2] = 0x00;
 	Send_Diag_Comm(Send_Var_Out);
 }
-extern void Train_Drive_In_Failed_F12(unsigned char ASL)
+
+void Target_Ready(unsigned char ASL)
 {
 	if (ASL == TOP)
 	{
@@ -400,11 +405,12 @@ extern void Train_Drive_In_Failed_F12(unsigned char ASL)
 	{
 		Send_Var_Out[0] = 'B';
 	}
-	Send_Var_Out[1] = 0b00011011;			//27 anders is het 0x0A is line feed
+	Send_Var_Out[1] = 0b00001010;		//10 previous not used because of line feed commando
 	Send_Var_Out[2] = 0x00;
 	Send_Diag_Comm(Send_Var_Out);
 }
-extern void Init_Done(unsigned char ASL)
+
+void Sensor_F12_Send(unsigned char ASL)
 {
 	if (ASL == TOP)
 	{
@@ -418,7 +424,8 @@ extern void Init_Done(unsigned char ASL)
 	Send_Var_Out[2] = 0x00;
 	Send_Diag_Comm(Send_Var_Out);
 }
-extern void Bridge_Opening(unsigned char ASL)
+
+void Bezet_Uit_Blok_6_AND_Sensor_F12_Send(unsigned char ASL)
 {
 	if (ASL == TOP)
 	{
@@ -432,7 +439,8 @@ extern void Bridge_Opening(unsigned char ASL)
 	Send_Var_Out[2] = 0x00;
 	Send_Diag_Comm(Send_Var_Out);
 }
-extern void Bridge_Closing(unsigned char ASL)
+
+void Laatste_Spoor_Send(unsigned char ASL)
 {
 	if (ASL == TOP)
 	{
@@ -443,520 +451,6 @@ extern void Bridge_Closing(unsigned char ASL)
 		Send_Var_Out[0] = 'B';
 	}
 	Send_Var_Out[1] = 0b00001101;		//13
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-extern void Init_Started(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00001110;		//14
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-extern void Train_On_5B(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00001111;		//15
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-extern void Train_Drive_In_Start(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00010000;		//16
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-extern void Train_On_8A(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00010001;		//17
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-extern void Train_Drive_Out_Start(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00010010;		//18
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-extern void Fiddle_Yard_Soft_Start(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00010011;		//19
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-extern void Fiddle_Yard_Stopped(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00010100;		//20
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-extern void Fiddle_Yard_Reset(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00010101;		//21
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-extern void Bezet_Uit_Blok_6_Send(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00010110;		//22
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-extern void Sensor_F12_Send(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00010111;		//23
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-extern void Bezet_Uit_Blok_6_AND_Sensor_F12_Send(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00011000;		//24
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-extern void CL_10_Heart_Sensor_Send(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00011001;		//25
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-extern void Bridge_Open_Close_Timeout_Expired_Send(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00011010;		//26
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-
-
-
-
-
-
-
-
-
-
-
-
-extern void BridgeMotorContact_10_Send(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00011100;		//28
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-extern void Bridge_10L_Contact_Send(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00011101;		//29
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-extern void Bridge_10R_Contact_Send(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00011110;		//30
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-extern void BridgeMotorContact_11_Send(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00011111;		//31
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-extern void EndOffStroke_11_Send(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00100000;		//32
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-extern void Laatste_Spoor_Send(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00100001;		//33
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-extern void EndOffStroke_10_Send(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00100010;		//34
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-extern void Universal_Error_Send(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00100011;		//35
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-
-extern void Collect_Finished_Fy_Full(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00100100;		//36
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-
-extern void Collect_On(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00100101;		//37
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-
-extern void Collect_Off(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00100110;		//38
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-
-
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//Bridge error logging//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-extern void Bridge_Opening_Msg_1(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00100111;		//39
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-
-extern void Bridge_Opening_Msg_2(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00101000;		//40
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-
-extern void Bridge_Opening_Msg_3(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00101001;		//41
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-
-extern void Bridge_Opening_Msg_4(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00101010;		//42
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-
-
-
-
-
-
-
-extern void Bridge_Opening_Msg_11(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00101011;		//43
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-
-extern void Bridge_Opening_Msg_12(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00101100;		//44
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-
-extern void Bridge_Opening_Msg_13(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00101101;		//45
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-
-extern void Bridge_Opening_Msg_14(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00101110;		//46
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-
-extern void Train_Drive_Out_Cancelled(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00101111;		//47
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-
-extern void Target_Ready(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00110000;		//48
 	Send_Var_Out[2] = 0x00;
 	Send_Diag_Comm(Send_Var_Out);
 }
@@ -971,7 +465,81 @@ void Sent_Track_Power_Meassage(unsigned char ASL)
 	{
 		Send_Var_Out[0] = 'B';
 	}
-	Send_Var_Out[1] = 0b00110001;		//49
+	Send_Var_Out[1] = 0b00001110;		//14
+	Send_Var_Out[2] = 0x00;
+	Send_Diag_Comm(Send_Var_Out);
+}
+
+void Universal_Error_Send(unsigned char ASL)
+{
+	if (ASL == TOP)
+	{
+		Send_Var_Out[0] = 'A';
+	}
+	else if (ASL == BOTTOM)
+	{
+		Send_Var_Out[0] = 'B';
+	}
+	Send_Var_Out[1] = 0b00001111;		//15
+	Send_Diag_Comm(Send_Var_Out);
+}
+
+void EndOffStroke_11_Send(unsigned char ASL)
+{
+	if (ASL == TOP)
+	{
+		Send_Var_Out[0] = 'A';
+	}
+	else if (ASL == BOTTOM)
+	{
+		Send_Var_Out[0] = 'B';
+	}
+	Send_Var_Out[1] = 0b00010000;		//16
+	Send_Var_Out[2] = 0x00;
+	Send_Diag_Comm(Send_Var_Out);
+}
+
+void EndOffStroke_10_Send(unsigned char ASL)
+{
+	if (ASL == TOP)
+	{
+		Send_Var_Out[0] = 'A';
+	}
+	else if (ASL == BOTTOM)
+	{
+		Send_Var_Out[0] = 'B';
+	}
+	Send_Var_Out[1] = 0b00010001;		//17
+	Send_Var_Out[2] = 0x00;
+	Send_Diag_Comm(Send_Var_Out);
+}
+
+void F12TrainDetect_Send(unsigned char ASL)
+{
+	if (ASL == TOP)
+	{
+		Send_Var_Out[0] = 'A';
+	}
+	else if (ASL == BOTTOM)
+	{
+		Send_Var_Out[0] = 'B';
+	}
+	Send_Var_Out[1] = 0b00010010;		//18
+	Send_Var_Out[2] = 0x00;
+	Send_Diag_Comm(Send_Var_Out);
+}
+
+void F13TrainDetect_Send(unsigned char ASL)
+{
+	if (ASL == TOP)
+	{
+		Send_Var_Out[0] = 'A';
+	}
+	else if (ASL == BOTTOM)
+	{
+		Send_Var_Out[0] = 'B';
+	}
+	Send_Var_Out[1] = 0b00010011;		//19
 	Send_Var_Out[2] = 0x00;
 	Send_Diag_Comm(Send_Var_Out);
 }

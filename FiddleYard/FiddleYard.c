@@ -8,14 +8,17 @@
 #include <string.h>				// string lib
 #include <delays.h>				// delay routines
 #include <pwm.h>				// Pwm routines
+#include <Command_Machine.h>	// serial commands received
+#include <Diagnostic_ret.h>		// serial transmitting of IO
+#include <Fiddle_Move_Ctrl.h>   //
 #include <Fiddle_Yard.h>		// main header file
 #include <Shift_Register.h>		// IO from Fiddle Yard
-#include <Command_Machine.h>	// serial commands received
 #include <State_Machine.h>		// all movements and fidle yard program
-#include <Diagnostic_ret.h>		// serial transmitting of IO
+#include <Track_Move_Ctrl.h>   //
+#include <Train_Detection.h>    //
 #include <Var_Out.h>			// building packets to transmit
 #include <adc.h>				// ADC lib
-#include <IO_Expander.h>		// IO Expander extra IO
+//#include <IO_Expander.h>		// IO Expander extra IO
 
 //CONFIGURATION BITS//
 #pragma config DEBUG = OFF

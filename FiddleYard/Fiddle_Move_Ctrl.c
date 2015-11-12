@@ -17,6 +17,8 @@
 #define EndOffStroke_11 0x0A
 #define Laatste_Spoor 0x0B
 #define EndOffStroke_10 0x0C
+#define F12TrainDetect 0x0D
+#define F13TrainDetect 0x0E
 
 ////////Motor max PWM settings////////
 #define PWM_ONE_LEFT 700
@@ -192,7 +194,7 @@ unsigned char Fiddle_Multiple_Right(unsigned char ASL, char New_Track_Muktiple_R
 	
 	switch(ACT_ST_MCHN[ASL].Fiddle)
 	{
-		case	0	:	if (EOS_10(ASL))// || (CL_10(ASL) == 0x2))
+		case	0	:	if (EOS_10(ASL) || F12(ASL) || F13(ASL))// || (CL_10(ASL) == 0x2))
 						{															// laatste spoor (uiteinde) 0x2//
 							ACT_ST_MCHN[ASL].Fiddle = 0;
 							M10(ASL, Off);
@@ -202,6 +204,14 @@ unsigned char Fiddle_Multiple_Right(unsigned char ASL, char New_Track_Muktiple_R
 							{
 								Return_Val = EndOffStroke_10;
 							}
+                            else if (F12(ASL))
+                            {
+                                Return_Val = F12TrainDetect;
+                            }
+                            else if (F13(ASL))
+                            {
+                                Return_Val = F13TrainDetect;
+                            }
 							break;
 						}
 						Return_Val = Busy;
@@ -226,9 +236,20 @@ unsigned char Fiddle_Multiple_Right(unsigned char ASL, char New_Track_Muktiple_R
 						}
 						ACT_ST_MCHN[ASL].Pwm_Fast_Counter++;	// loop herhaling ophogen
 						break;
-		case	2	:	if (EOS_10(ASL))
+		case	2	:	if (EOS_10(ASL) || F12(ASL) || F13(ASL))
 						{
-							Return_Val = EndOffStroke_10;
+							if (EOS_10(ASL))
+							{
+								Return_Val = EndOffStroke_10;
+							}
+                            else if (F12(ASL))
+                            {
+                                Return_Val = F12TrainDetect;
+                            }
+                            else if (F13(ASL))
+                            {
+                                Return_Val = F13TrainDetect;
+                            }
 							ACT_ST_MCHN[ASL].Fiddle = 0;
 							M10(ASL, On);
 							PWM_Update(ASL,  512 );
@@ -244,9 +265,20 @@ unsigned char Fiddle_Multiple_Right(unsigned char ASL, char New_Track_Muktiple_R
 							ACT_ST_MCHN[ASL].Mech_Delay = 0;
 						}
 						break;						
-		case	3	:	if (EOS_10(ASL))
+		case	3	:	if (EOS_10(ASL) || F12(ASL) || F13(ASL))
 						{
-							Return_Val = EndOffStroke_10;
+							if (EOS_10(ASL))
+							{
+								Return_Val = EndOffStroke_10;
+							}
+                            else if (F12(ASL))
+                            {
+                                Return_Val = F12TrainDetect;
+                            }
+                            else if (F13(ASL))
+                            {
+                                Return_Val = F13TrainDetect;
+                            }
 							ACT_ST_MCHN[ASL].Fiddle = 0;
 							M10(ASL, Off);
 							ACT_ST_MCHN[ASL].ADCconversion_Inuse = False;
@@ -328,9 +360,20 @@ unsigned char Fiddle_Multiple_Right(unsigned char ASL, char New_Track_Muktiple_R
 						}
 						break;
 						
-		case	4	:	if (EOS_10(ASL))
+		case	4	:	if (EOS_10(ASL) || F12(ASL) || F13(ASL))
 						{
-							Return_Val = EndOffStroke_10;
+							if (EOS_10(ASL))
+							{
+								Return_Val = EndOffStroke_10;
+							}
+                            else if (F12(ASL))
+                            {
+                                Return_Val = F12TrainDetect;
+                            }
+                            else if (F13(ASL))
+                            {
+                                Return_Val = F13TrainDetect;
+                            }
 							ACT_ST_MCHN[ASL].Fiddle = 0;
 							M10(ASL, Off);
 							ACT_ST_MCHN[ASL].ADCconversion_Inuse = False;
@@ -446,9 +489,20 @@ unsigned char Fiddle_Multiple_Right(unsigned char ASL, char New_Track_Muktiple_R
 						*/
 						//break;
 						
-		case	5	:	if (EOS_10(ASL))
+		case	5	:	if (EOS_10(ASL) || F12(ASL) || F13(ASL))
 						{
-							Return_Val = EndOffStroke_10;
+							if (EOS_10(ASL))
+							{
+								Return_Val = EndOffStroke_10;
+							}
+                            else if (F12(ASL))
+                            {
+                                Return_Val = F12TrainDetect;
+                            }
+                            else if (F13(ASL))
+                            {
+                                Return_Val = F13TrainDetect;
+                            }
 							ACT_ST_MCHN[ASL].Fiddle = 0;
 							M10(ASL, Off);
 							ACT_ST_MCHN[ASL].ADCconversion_Inuse = False;
@@ -471,9 +525,20 @@ unsigned char Fiddle_Multiple_Right(unsigned char ASL, char New_Track_Muktiple_R
 							ACT_ST_MCHN[ASL].Fiddle = 7;
 						}
 						break;						
-		case	7	:	if (EOS_10(ASL))
+		case	7	:	if (EOS_10(ASL) || F12(ASL) || F13(ASL))
 						{
-							Return_Val = EndOffStroke_10;
+							if (EOS_10(ASL))
+							{
+								Return_Val = EndOffStroke_10;
+							}
+                            else if (F12(ASL))
+                            {
+                                Return_Val = F12TrainDetect;
+                            }
+                            else if (F13(ASL))
+                            {
+                                Return_Val = F13TrainDetect;
+                            }
 							ACT_ST_MCHN[ASL].Fiddle = 0;
 							M10(ASL, Off);
 							ACT_ST_MCHN[ASL].ADCconversion_Inuse = False;
@@ -502,9 +567,20 @@ unsigned char Fiddle_Multiple_Right(unsigned char ASL, char New_Track_Muktiple_R
 							PWM_Update(ASL,  ACT_ST_MCHN[ASL].Pwm_One_Slow_Left );
 						}
 						break;
-		case	8	:	if (EOS_11(ASL))
+		case	8	:	if (EOS_11(ASL) || F12(ASL) || F13(ASL))
 						{
-							Return_Val = EndOffStroke_11;
+							if (EOS_11(ASL))
+							{
+								Return_Val = EndOffStroke_11;
+							}
+                            else if (F12(ASL))
+                            {
+                                Return_Val = F12TrainDetect;
+                            }
+                            else if (F13(ASL))
+                            {
+                                Return_Val = F13TrainDetect;
+                            }
 							ACT_ST_MCHN[ASL].Fiddle = 0;
 							M10(ASL, Off);
 							ACT_ST_MCHN[ASL].ADCconversion_Inuse = False;
@@ -546,7 +622,7 @@ unsigned char Fiddle_One_Right(unsigned char ASL)	//rechts op bewegen 11 naar 1
 	
 	switch(ACT_ST_MCHN[ASL].Fiddle)
 	{
-		case	0	:	if (EOS_10(ASL))// || (CL_10(ASL) == 0x2))// laatste spoor (uiteinde) 0x2//
+		case	0	:	if (EOS_10(ASL) || F12(ASL) || F13(ASL))// || (CL_10(ASL) == 0x2))// laatste spoor (uiteinde) 0x2//
 						{															
 							ACT_ST_MCHN[ASL].Fiddle = 0;
 							M10(ASL, Off);
@@ -556,6 +632,14 @@ unsigned char Fiddle_One_Right(unsigned char ASL)	//rechts op bewegen 11 naar 1
 							{
 								Return_Val = EndOffStroke_10;
 							}
+                            else if (F12(ASL))
+                            {
+                                Return_Val = F12TrainDetect;
+                            }
+                            else if (F13(ASL))
+                            {
+                                Return_Val = F13TrainDetect;
+                            }
 							break;
 						}
 						Return_Val = Busy;
@@ -579,9 +663,20 @@ unsigned char Fiddle_One_Right(unsigned char ASL)	//rechts op bewegen 11 naar 1
 						ACT_ST_MCHN[ASL].Pwm_Fast_Counter++;	// loop herhaling ophogen
 						Return_Val = Busy;
 						break;
-		case	2	:	if (EOS_10(ASL))
+		case	2	:	if (EOS_10(ASL) || F12(ASL) || F13(ASL))
 						{
-							Return_Val = EndOffStroke_10;
+							if (EOS_10(ASL))
+							{
+								Return_Val = EndOffStroke_10;
+							}
+                            else if (F12(ASL))
+                            {
+                                Return_Val = F12TrainDetect;
+                            }
+                            else if (F13(ASL))
+                            {
+                                Return_Val = F13TrainDetect;
+                            }
 							ACT_ST_MCHN[ASL].Fiddle = 0;
 							M10(ASL, On);
 							PWM_Update(ASL,  512 );
@@ -598,9 +693,20 @@ unsigned char Fiddle_One_Right(unsigned char ASL)	//rechts op bewegen 11 naar 1
 						}
 						break;
 						
-		case	3	:	if (EOS_10(ASL))
+		case	3	:	if (EOS_10(ASL) || F12(ASL) || F13(ASL))
 						{
-							Return_Val = EndOffStroke_10;
+							if (EOS_10(ASL))
+							{
+								Return_Val = EndOffStroke_10;
+							}
+                            else if (F12(ASL))
+                            {
+                                Return_Val = F12TrainDetect;
+                            }
+                            else if (F13(ASL))
+                            {
+                                Return_Val = F13TrainDetect;
+                            }
 							ACT_ST_MCHN[ASL].Fiddle = 0;
 							M10(ASL, On);
 							ACT_ST_MCHN[ASL].Fiddle = 0;
@@ -691,9 +797,20 @@ unsigned char Fiddle_One_Right(unsigned char ASL)	//rechts op bewegen 11 naar 1
 						ACT_ST_MCHN[ASL].Pwm_One_Inbetween_Counter++;
 						break;
 						
-		case	4	:	if (EOS_10(ASL))
+		case	4	:	if (EOS_10(ASL) || F12(ASL) || F13(ASL))
 						{
-							Return_Val = EndOffStroke_10;
+							if (EOS_10(ASL))
+							{
+								Return_Val = EndOffStroke_10;
+							}
+                            else if (F12(ASL))
+                            {
+                                Return_Val = F12TrainDetect;
+                            }
+                            else if (F13(ASL))
+                            {
+                                Return_Val = F13TrainDetect;
+                            }
 							ACT_ST_MCHN[ASL].Fiddle = 0;
 							M10(ASL, On);
 							ACT_ST_MCHN[ASL].Fiddle = 0;
@@ -786,9 +903,20 @@ unsigned char Fiddle_One_Right(unsigned char ASL)	//rechts op bewegen 11 naar 1
 						Return_Val = Busy;
 						break;
 												
-		case	5	:	if (EOS_10(ASL))
+		case	5	:	if (EOS_10(ASL) || F12(ASL) || F13(ASL))
 						{
-							Return_Val = EndOffStroke_10;
+							if (EOS_10(ASL))
+							{
+								Return_Val = EndOffStroke_10;
+							}
+                            else if (F12(ASL))
+                            {
+                                Return_Val = F12TrainDetect;
+                            }
+                            else if (F13(ASL))
+                            {
+                                Return_Val = F13TrainDetect;
+                            }
 							ACT_ST_MCHN[ASL].Fiddle = 0;
 							M10(ASL, On);
 							ACT_ST_MCHN[ASL].Fiddle = 0;
@@ -810,9 +938,20 @@ unsigned char Fiddle_One_Right(unsigned char ASL)	//rechts op bewegen 11 naar 1
 						}
 						Return_Val = Busy;
 						break;						
-		case	7	:	if (EOS_10(ASL))
+		case	7	:	if (EOS_10(ASL) || F12(ASL) || F13(ASL))
 						{
-							Return_Val = EndOffStroke_10;
+							if (EOS_10(ASL))
+							{
+								Return_Val = EndOffStroke_10;
+							}
+                            else if (F12(ASL))
+                            {
+                                Return_Val = F12TrainDetect;
+                            }
+                            else if (F13(ASL))
+                            {
+                                Return_Val = F13TrainDetect;
+                            }
 							ACT_ST_MCHN[ASL].Fiddle = 0;
 							M10(ASL, Off);
 							ACT_ST_MCHN[ASL].Fiddle = 0;
@@ -840,9 +979,20 @@ unsigned char Fiddle_One_Right(unsigned char ASL)	//rechts op bewegen 11 naar 1
 							PWM_Update(ASL,  ACT_ST_MCHN[ASL].Pwm_One_Slow_Left );
 						}
 						break;
-		case	8	:	if (EOS_11(ASL))
+		case	8	:	if (EOS_11(ASL) || F12(ASL) || F13(ASL))
 						{
-							Return_Val = EndOffStroke_11;
+							if (EOS_11(ASL))
+							{
+								Return_Val = EndOffStroke_11;
+							}
+                            else if (F12(ASL))
+                            {
+                                Return_Val = F12TrainDetect;
+                            }
+                            else if (F13(ASL))
+                            {
+                                Return_Val = F13TrainDetect;
+                            }
 							ACT_ST_MCHN[ASL].Fiddle = 0;
 							M10(ASL, Off);
 							ACT_ST_MCHN[ASL].Fiddle = 0;
@@ -884,7 +1034,7 @@ unsigned char Fiddle_Multiple_Left(unsigned char ASL, char New_Track_Muktiple_Le
 	
 	switch(ACT_ST_MCHN[ASL].Fiddle)
 	{
-		case	0	:	if (EOS_11(ASL))// || (CL_10(ASL) == 0xD))
+		case	0	:	if (EOS_11(ASL) || F12(ASL) || F13(ASL))// || (CL_10(ASL) == 0xD))
 						{															// laatste spoor (uiteinde) 0xD//
 							ACT_ST_MCHN[ASL].Fiddle = 0;
 							M10(ASL, Off);
@@ -894,6 +1044,14 @@ unsigned char Fiddle_Multiple_Left(unsigned char ASL, char New_Track_Muktiple_Le
 							{
 								Return_Val = EndOffStroke_11;
 							}
+                            else if (F12(ASL))
+                            {
+                                Return_Val = F12TrainDetect;
+                            }
+                            else if (F13(ASL))
+                            {
+                                Return_Val = F13TrainDetect;
+                            }
 							break;
 						}
 						Return_Val = Busy;
@@ -918,9 +1076,20 @@ unsigned char Fiddle_Multiple_Left(unsigned char ASL, char New_Track_Muktiple_Le
 						}
 						ACT_ST_MCHN[ASL].Pwm_Fast_Counter++;	// loop herhaling ophogen
 						break;
-		case	2	:	if (EOS_11(ASL))
+		case	2	:	if (EOS_11(ASL) || F12(ASL) || F13(ASL))
 						{
-							Return_Val = EndOffStroke_11;
+							if (EOS_11(ASL))
+							{
+								Return_Val = EndOffStroke_11;
+							}
+                            else if (F12(ASL))
+                            {
+                                Return_Val = F12TrainDetect;
+                            }
+                            else if (F13(ASL))
+                            {
+                                Return_Val = F13TrainDetect;
+                            }
 							ACT_ST_MCHN[ASL].Fiddle = 0;
 							M10(ASL, Off);
 							PWM_Update(ASL,  512 );
@@ -936,9 +1105,20 @@ unsigned char Fiddle_Multiple_Left(unsigned char ASL, char New_Track_Muktiple_Le
 							ACT_ST_MCHN[ASL].Mech_Delay = 0;
 						}
 						break;						
-		case	3	:	if (EOS_11(ASL))
+		case	3	:	if (EOS_11(ASL) || F12(ASL) || F13(ASL))
 						{
-							Return_Val = EndOffStroke_11;
+							if (EOS_11(ASL))
+							{
+								Return_Val = EndOffStroke_11;
+							}
+                            else if (F12(ASL))
+                            {
+                                Return_Val = F12TrainDetect;
+                            }
+                            else if (F13(ASL))
+                            {
+                                Return_Val = F13TrainDetect;
+                            }
 							ACT_ST_MCHN[ASL].Fiddle = 0;
 							M10(ASL, Off);
 							ACT_ST_MCHN[ASL].Fiddle = 0;
@@ -1022,9 +1202,20 @@ unsigned char Fiddle_Multiple_Left(unsigned char ASL, char New_Track_Muktiple_Le
 						Return_Val = Busy;
 						break;
 						
-		case	4	:	if (EOS_11(ASL))
+		case	4	:	if (EOS_11(ASL) || F12(ASL) || F13(ASL))
 						{
-							Return_Val = EndOffStroke_11;
+							if (EOS_11(ASL))
+							{
+								Return_Val = EndOffStroke_11;
+							}
+                            else if (F12(ASL))
+                            {
+                                Return_Val = F12TrainDetect;
+                            }
+                            else if (F13(ASL))
+                            {
+                                Return_Val = F13TrainDetect;
+                            }
 							ACT_ST_MCHN[ASL].Fiddle = 0;
 							M10(ASL, Off);
 							ACT_ST_MCHN[ASL].ADCconversion_Inuse = False;
@@ -1139,9 +1330,20 @@ unsigned char Fiddle_Multiple_Left(unsigned char ASL, char New_Track_Muktiple_Le
 						*/
 						//break;						
 		
-		case	5	:	if (EOS_11(ASL))
+		case	5	:	if (EOS_11(ASL) || F12(ASL) || F13(ASL))
 						{
-							Return_Val = EndOffStroke_11;
+                            if (EOS_11(ASL))
+							{
+								Return_Val = EndOffStroke_11;
+							}
+                            else if (F12(ASL))
+                            {
+                                Return_Val = F12TrainDetect;
+                            }
+                            else if (F13(ASL))
+                            {
+                                Return_Val = F13TrainDetect;
+                            }
 							ACT_ST_MCHN[ASL].Fiddle = 0;
 							M10(ASL, Off);
 							ACT_ST_MCHN[ASL].ADCconversion_Inuse = False;
@@ -1163,9 +1365,20 @@ unsigned char Fiddle_Multiple_Left(unsigned char ASL, char New_Track_Muktiple_Le
 							ACT_ST_MCHN[ASL].Fiddle = 7;
 						}
 						break;						
-		case	7	:	if (EOS_11(ASL))
+		case	7	:	if (EOS_11(ASL) || F12(ASL) || F13(ASL))
 						{
-							Return_Val = EndOffStroke_11;
+							if (EOS_11(ASL))
+							{
+								Return_Val = EndOffStroke_11;
+							}
+                            else if (F12(ASL))
+                            {
+                                Return_Val = F12TrainDetect;
+                            }
+                            else if (F13(ASL))
+                            {
+                                Return_Val = F13TrainDetect;
+                            }
 							ACT_ST_MCHN[ASL].Fiddle = 0;
 							M10(ASL, Off);
 							ACT_ST_MCHN[ASL].ADCconversion_Inuse = False;
@@ -1193,9 +1406,20 @@ unsigned char Fiddle_Multiple_Left(unsigned char ASL, char New_Track_Muktiple_Le
 							PWM_Update(ASL,  ACT_ST_MCHN[ASL].Pwm_One_Slow_Right );
 						}
 						break;
-		case	8	:	if (EOS_10(ASL))
+		case	8	:	if (EOS_10(ASL) || F12(ASL) || F13(ASL))
 						{
-							Return_Val = EndOffStroke_10;
+							if (EOS_10(ASL))
+							{
+								Return_Val = EndOffStroke_10;
+							}
+                            else if (F12(ASL))
+                            {
+                                Return_Val = F12TrainDetect;
+                            }
+                            else if (F13(ASL))
+                            {
+                                Return_Val = F13TrainDetect;
+                            }
 							ACT_ST_MCHN[ASL].Fiddle = 0;
 							M10(ASL, Off);
 							ACT_ST_MCHN[ASL].ADCconversion_Inuse = False;
@@ -1235,7 +1459,7 @@ unsigned char Fiddle_One_Left(unsigned char ASL)	//Move from 1 to 11
 	
 	switch(ACT_ST_MCHN[ASL].Fiddle)
 	{
-		case	0	:	if (EOS_11(ASL))// || (CL_10(ASL) == 0xD)) // 0xD = spoor 11
+		case	0	:	if (EOS_11(ASL) || F12(ASL) || F13(ASL))// || (CL_10(ASL) == 0xD)) // 0xD = spoor 11
 						{
 							ACT_ST_MCHN[ASL].Fiddle = 0;
 							M10(ASL, Off);
@@ -1245,6 +1469,14 @@ unsigned char Fiddle_One_Left(unsigned char ASL)	//Move from 1 to 11
 							{
 								Return_Val = EndOffStroke_11;
 							}
+                            else if (F12(ASL))
+                            {
+                                Return_Val = F12TrainDetect;
+                            }
+                            else if (F13(ASL))
+                            {
+                                Return_Val = F13TrainDetect;
+                            }
 							break;
 						}
 						Return_Val = Busy;
@@ -1272,10 +1504,21 @@ unsigned char Fiddle_One_Left(unsigned char ASL)	//Move from 1 to 11
 						
 						Return_Val = Busy;
 						break;
-		case	2	:	if (EOS_11(ASL))
+		case	2	:	if (EOS_11(ASL) || F12(ASL) || F13(ASL))
 						{
-							Return_Val = EndOffStroke_11;
-							ACT_ST_MCHN[ASL].Fiddle = 0;
+							if (EOS_11(ASL))
+							{
+								Return_Val = EndOffStroke_11;
+							}
+                            else if (F12(ASL))
+                            {
+                                Return_Val = F12TrainDetect;
+                            }
+                            else if (F13(ASL))
+                            {
+                                Return_Val = F13TrainDetect;
+                            }
+                            ACT_ST_MCHN[ASL].Fiddle = 0;
 							M10(ASL, Off);
 							PWM_Update(ASL,  512 );
 							Pwm_Brake(ASL, On);
@@ -1290,10 +1533,21 @@ unsigned char Fiddle_One_Left(unsigned char ASL)	//Move from 1 to 11
 						Return_Val = Busy;
 						break;
 						
-		case	3	:	if (EOS_11(ASL))																													// Keep the Fiddle Yard speed constant during "Inbetween_Counter"
+		case	3	:	if (EOS_11(ASL) || F12(ASL) || F13(ASL))																													// Keep the Fiddle Yard speed constant during "Inbetween_Counter"
 						{
-							Return_Val = EndOffStroke_11;
-							ACT_ST_MCHN[ASL].Fiddle = 0;
+							if (EOS_11(ASL))
+							{
+								Return_Val = EndOffStroke_11;
+							}
+                            else if (F12(ASL))
+                            {
+                                Return_Val = F12TrainDetect;
+                            }
+                            else if (F13(ASL))
+                            {
+                                Return_Val = F13TrainDetect;
+                            }
+                            ACT_ST_MCHN[ASL].Fiddle = 0;
 							M10(ASL, Off);
 							ACT_ST_MCHN[ASL].ADCconversion_Inuse = False;
 							PWM_Update(ASL,  512 );
@@ -1383,10 +1637,21 @@ unsigned char Fiddle_One_Left(unsigned char ASL)	//Move from 1 to 11
 						ACT_ST_MCHN[ASL].Pwm_One_Inbetween_Counter++;
 						break;
 						
-		case	4	:	if (EOS_11(ASL))																													// Ramp down of Fiddle Yard
+		case	4	:	if (EOS_11(ASL) || F12(ASL) || F13(ASL))																													// Ramp down of Fiddle Yard
 						{
-							Return_Val = EndOffStroke_11;
-							ACT_ST_MCHN[ASL].Fiddle = 0;
+							if (EOS_11(ASL))
+							{
+								Return_Val = EndOffStroke_11;
+							}
+                            else if (F12(ASL))
+                            {
+                                Return_Val = F12TrainDetect;
+                            }
+                            else if (F13(ASL))
+                            {
+                                Return_Val = F13TrainDetect;
+                            }
+                            ACT_ST_MCHN[ASL].Fiddle = 0;
 							M10(ASL, Off);
 							ACT_ST_MCHN[ASL].ADCconversion_Inuse = False;
 							PWM_Update(ASL,  512 );
@@ -1477,10 +1742,21 @@ unsigned char Fiddle_One_Left(unsigned char ASL)	//Move from 1 to 11
 						Return_Val = Busy;
 						break;
 												
-		case	5	:	if (EOS_11(ASL))
+		case	5	:	if (EOS_11(ASL) || F12(ASL) || F13(ASL))
 						{
-							Return_Val = EndOffStroke_11;
-							ACT_ST_MCHN[ASL].Fiddle = 0;
+							if (EOS_11(ASL))
+							{
+								Return_Val = EndOffStroke_11;
+							}
+                            else if (F12(ASL))
+                            {
+                                Return_Val = F12TrainDetect;
+                            }
+                            else if (F13(ASL))
+                            {
+                                Return_Val = F13TrainDetect;
+                            }
+                            ACT_ST_MCHN[ASL].Fiddle = 0;
 							M10(ASL, Off);
 							ACT_ST_MCHN[ASL].ADCconversion_Inuse = False;
 							PWM_Update(ASL,  512 );
@@ -1502,10 +1778,21 @@ unsigned char Fiddle_One_Left(unsigned char ASL)	//Move from 1 to 11
 						}
 						Return_Val = Busy;
 						break;
-		case	7	:	if (EOS_11(ASL))
+		case	7	:	if (EOS_11(ASL) || F12(ASL) || F13(ASL))
 						{
-							Return_Val = EndOffStroke_11;
-							ACT_ST_MCHN[ASL].Fiddle = 0;
+							if (EOS_11(ASL))
+							{
+								Return_Val = EndOffStroke_11;
+							}
+                            else if (F12(ASL))
+                            {
+                                Return_Val = F12TrainDetect;
+                            }
+                            else if (F13(ASL))
+                            {
+                                Return_Val = F13TrainDetect;
+                            }
+                            ACT_ST_MCHN[ASL].Fiddle = 0;
 							M10(ASL, Off);
 							ACT_ST_MCHN[ASL].ADCconversion_Inuse = False;
 							PWM_Update(ASL,  512 );
@@ -1533,10 +1820,21 @@ unsigned char Fiddle_One_Left(unsigned char ASL)	//Move from 1 to 11
 						}
 						Return_Val = Busy;
 						break;
-		case	8	:	if (EOS_10(ASL))
+		case	8	:	if (EOS_10(ASL) || F12(ASL) || F13(ASL))
 						{
-							Return_Val = EndOffStroke_10;
-							ACT_ST_MCHN[ASL].Fiddle = 0;
+							if (EOS_10(ASL))
+							{
+								Return_Val = EndOffStroke_10;
+							}
+                            else if (F12(ASL))
+                            {
+                                Return_Val = F12TrainDetect;
+                            }
+                            else if (F13(ASL))
+                            {
+                                Return_Val = F13TrainDetect;
+                            }
+                            ACT_ST_MCHN[ASL].Fiddle = 0;
 							M10(ASL, Off);
 							ACT_ST_MCHN[ASL].ADCconversion_Inuse = False;
 							PWM_Update(ASL,  512 );

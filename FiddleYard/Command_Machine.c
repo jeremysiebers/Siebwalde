@@ -1,11 +1,13 @@
 #include <Fiddle_Yard.h>
 #include "TCPIP Stack/TCPIP.h"
 #include <Command_Machine.h>
+#include <State_Machine.h>
 
 #define Enter 13
 
 static UDP_SOCKET socket2 = INVALID_UDP_SOCKET;
 
+extern void State_Machine_Reset(unsigned char ASL);
 static void Command_Exe(unsigned char Command[3]);
 
 static unsigned char Cmd[3],Cmd_Read_Switch=20;
@@ -16,8 +18,6 @@ unsigned char MACPC[6] = {0,0,0,0,0,0};
 unsigned char IPPC[4] = {0,0,0,0};
 unsigned int PORTPC = 0xFFFF;
 unsigned char MAC_IP_READY = FALSE;
-
-void ResetPic(void);
 
 unsigned char Exe_Cmd_(unsigned char ASL)
 {
@@ -107,7 +107,7 @@ void Command_Exe(unsigned char Command[3])
 {
 	switch (Command[0])
 	{
-		case	'a'		:	if (Exe_Cmd[1] == 0 || Command[1] != 19) // block new commands until last one has finished
+		case	'a'		:	if (Exe_Cmd[1] == 0 || Command[1] == 'J') // block new commands until last one has finished
 							{
 								
 								switch (Command[1])
@@ -120,8 +120,7 @@ void Command_Exe(unsigned char Command[3])
 														break;
 									case	'4'		:	Exe_Cmd[1] = 4;	//Fiddle yard naar rechts = spoor--
 														break;
-									case	'5'		:	Exe_Cmd[1] = 5;	// Ga naar spoor 1
-														//Exe_Cmd[0] = 5;	// Ga naar spoor 1
+									case	'5'		:	Exe_Cmd[1] = 5;	// Ga naar spoor 1//Exe_Cmd[0] = 5;	// Ga naar spoor 1
 														break;
 									case	'6'		:	Exe_Cmd[1] = 6;	// ga naar spoor 2
 														break;
@@ -141,17 +140,15 @@ void Command_Exe(unsigned char Command[3])
 														break;
 									case	'E'		:	Exe_Cmd[1] = 14;	//ga naar spoor 10
 														break;
-									case	'F'		:	Exe_Cmd[1] = 15;	//ga naar spoor 11
-														//Exe_Cmd[0] = 15;	//ga naar spoor 11
+									case	'F'		:	Exe_Cmd[1] = 15;	//ga naar spoor 11														//Exe_Cmd[0] = 15;	//ga naar spoor 11
 														break;
-									case	'G'		:	Exe_Cmd[1] = 16;	//Trein detectie
-														//Exe_Cmd[0] = 16;	//Trein detectie
+									case	'G'		:	Exe_Cmd[1] = 16;	//Trein detectie														//Exe_Cmd[0] = 16;	//Trein detectie
 														break;
 									case	'H'		:	Exe_Cmd[1] = 17;	//Start Fiddle Yard
 														break;
 									case	'I'		:	Exe_Cmd[1] = 18;	//Stop Fiddle Yard
 														break;
-									case	'J'		:	Exe_Cmd[1] = 19;	//Stop Fiddle Yard NOW
+									case	'J'		:	State_Machine_Reset(TOP);// Exe_Cmd[1] = 19;	//Stop Fiddle Yard NOW
 														break;
 									case	'K'		:	Exe_Cmd[1] = 20;	//Bezet_In_5B_Switch_On
 														break;
@@ -191,7 +188,7 @@ void Command_Exe(unsigned char Command[3])
 							}
 							break;
 							
-		case	'b'		:	if (Exe_Cmd[0] == 0 || Command[1] != 19)	// block new commands until last one has finished except with Reset (stop NOW)
+		case	'b'		:	if (Exe_Cmd[0] == 0 || Command[1] == 'J')	// block new commands until last one has finished except with Reset (stop NOW)
 							{
 								
 								switch (Command[1])
@@ -232,7 +229,7 @@ void Command_Exe(unsigned char Command[3])
 														break;
 									case	'I'		:	Exe_Cmd[0] = 18;	//Stop Fiddle Yard
 														break;
-									case	'J'		:	Exe_Cmd[0] = 19;	//Stop Fiddle Yard NOW (RESET)
+									case	'J'		:	State_Machine_Reset(BOTTOM);// Exe_Cmd[0] = 19;	//Stop Fiddle Yard NOW (RESET)
 														break;
 									case	'K'		:	Exe_Cmd[0] = 20;	//Bezet_In_5B_Switch_On
 														break;
@@ -333,11 +330,3 @@ void Command_Exe(unsigned char Command[3])
 		default			:	break;
 	}
 }
-
-void ResetPic(void)
-{
-	//Reset();
-	/*_asm
-	reset
-	_endasm*/
-}	

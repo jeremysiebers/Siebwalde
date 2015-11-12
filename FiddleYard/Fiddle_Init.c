@@ -37,7 +37,7 @@ unsigned char Init_Fiddle_Yard(unsigned char ASL, unsigned char Train_Detection_
 	
 	switch(ACT_ST_MCHN[ASL].Init_Fy)
 	{
-		case	0	:	Init_Started(ASL);
+		case	0	:	//Init_Started(ASL);
 						Return_Val = Busy;
 						if ((Track_Nr(ASL) > 0) && !F12(ASL))
 						{
@@ -53,7 +53,7 @@ unsigned char Init_Fiddle_Yard(unsigned char ASL, unsigned char Train_Detection_
 							{
 								case	Finished	:	ACT_ST_MCHN[ASL].Init_Fy = 0; //Sporen in lezen klaar init done
 														Return_Val = Finished;
-														Init_Done(ASL);
+														//Init_Done(ASL);
 														break;
 								case	Busy		:	Return_Val = Busy;
 														break;
@@ -66,7 +66,7 @@ unsigned char Init_Fiddle_Yard(unsigned char ASL, unsigned char Train_Detection_
 						{
 							ACT_ST_MCHN[ASL].Init_Fy = 0; //init done
 							Return_Val = Finished;
-							Init_Done(ASL);
+							//Init_Done(ASL);
 							break;	
 						}
 						break;
