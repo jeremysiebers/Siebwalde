@@ -10,9 +10,9 @@
                    displayName="Source Files"
                    projectFiles="true">
       <itemPath>MainTrainJunction.c</itemPath>
-      <itemPath>MainFallerCarJunctionLeft.c</itemPath>
       <itemPath>MainFallerCarJunctionRight.c</itemPath>
-      <itemPath>MainFallerCarJunctionRightBusFactory.c</itemPath>
+      <itemPath>MainFallerStop.c</itemPath>
+      <itemPath>MainFallerCarJunctionRightMiddleLeft.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -164,14 +164,6 @@
         <property key="programoptions.uselvpprogramming" value="false"/>
         <property key="voltagevalue" value="5.0"/>
       </ICD3PlatformTool>
-      <item path="MainFallerCarJunctionLeft.c" ex="true" overriding="false">
-        <HI-TECH-COMP>
-        </HI-TECH-COMP>
-        <HI-TECH-LINK>
-        </HI-TECH-LINK>
-        <XC8-config-global>
-        </XC8-config-global>
-      </item>
       <item path="MainFallerCarJunctionRight.c" ex="true" overriding="false">
         <HI-TECH-COMP>
         </HI-TECH-COMP>
@@ -180,9 +172,17 @@
         <XC8-config-global>
         </XC8-config-global>
       </item>
-      <item path="MainFallerCarJunctionRightBusFactory.c"
+      <item path="MainFallerCarJunctionRightMiddleLeft.c"
             ex="true"
             overriding="false">
+        <HI-TECH-COMP>
+        </HI-TECH-COMP>
+        <HI-TECH-LINK>
+        </HI-TECH-LINK>
+        <XC8-config-global>
+        </XC8-config-global>
+      </item>
+      <item path="MainFallerStop.c" ex="true" overriding="false">
         <HI-TECH-COMP>
         </HI-TECH-COMP>
         <HI-TECH-LINK>
@@ -195,7 +195,7 @@
         <property key="pk2settings.preserveee" value="false"/>
         <property key="pk2settings.setvddvoltage" value="5,00"/>
         <property key="pk2settings.userpgmexec" value="true"/>
-        <property key="pk2settings.usetargetpower" value="false"/>
+        <property key="pk2settings.usetargetpower" value="true"/>
       </PICkit2PlatformTool>
       <XC8-config-global>
         <property key="advanced-elf" value="true"/>
@@ -206,10 +206,10 @@
         <property key="stack-type" value="compiled"/>
       </XC8-config-global>
     </conf>
-    <conf name="FallerCarJunctionLeft" type="2">
+    <conf name="FallerCarStop" type="2">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
-        <targetDevice>PIC12F675</targetDevice>
+        <targetDevice>PIC12F629</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
         <platformTool>PICkit2PlatformTool</platformTool>
@@ -361,7 +361,7 @@
         <XC8-config-global>
         </XC8-config-global>
       </item>
-      <item path="MainFallerCarJunctionRightBusFactory.c"
+      <item path="MainFallerCarJunctionRightMiddleLeft.c"
             ex="true"
             overriding="false">
         <HI-TECH-COMP>
@@ -384,7 +384,7 @@
         <property key="pk2settings.preserveee" value="false"/>
         <property key="pk2settings.setvddvoltage" value="5,00"/>
         <property key="pk2settings.userpgmexec" value="true"/>
-        <property key="pk2settings.usetargetpower" value="false"/>
+        <property key="pk2settings.usetargetpower" value="true"/>
       </PICkit2PlatformTool>
       <XC8-config-global>
         <property key="advanced-elf" value="true"/>
@@ -398,7 +398,7 @@
     <conf name="FallerCarJunctionRight" type="2">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
-        <targetDevice>PIC12F675</targetDevice>
+        <targetDevice>PIC12F629</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
         <platformTool>PICkit2PlatformTool</platformTool>
@@ -542,7 +542,9 @@
         <XC8-config-global>
         </XC8-config-global>
       </item>
-      <item path="MainFallerCarJunctionLeft.c" ex="true" overriding="false">
+      <item path="MainFallerCarJunctionRightMiddleLeft.c"
+            ex="true"
+            overriding="false">
         <HI-TECH-COMP>
         </HI-TECH-COMP>
         <HI-TECH-LINK>
@@ -550,9 +552,7 @@
         <XC8-config-global>
         </XC8-config-global>
       </item>
-      <item path="MainFallerCarJunctionRightBusFactory.c"
-            ex="true"
-            overriding="false">
+      <item path="MainFallerStop.c" ex="true" overriding="false">
         <HI-TECH-COMP>
         </HI-TECH-COMP>
         <HI-TECH-LINK>
@@ -573,7 +573,7 @@
         <property key="pk2settings.preserveee" value="false"/>
         <property key="pk2settings.setvddvoltage" value="5,00"/>
         <property key="pk2settings.userpgmexec" value="true"/>
-        <property key="pk2settings.usetargetpower" value="false"/>
+        <property key="pk2settings.usetargetpower" value="true"/>
       </PICkit2PlatformTool>
       <XC8-config-global>
         <property key="advanced-elf" value="true"/>
@@ -584,10 +584,10 @@
         <property key="stack-type" value="compiled"/>
       </XC8-config-global>
     </conf>
-    <conf name="FallerCarJunctionRightBusFactory" type="2">
+    <conf name="FallerCarJunctionRightMiddleLeft" type="2">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
-        <targetDevice>PIC12F675</targetDevice>
+        <targetDevice>PIC12F629</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
         <platformTool>PICkit2PlatformTool</platformTool>
@@ -724,14 +724,6 @@
         <property key="voltagevalue" value="5.0"/>
       </ICD3PlatformTool>
       <item path="Main.h" ex="false" overriding="false">
-        <HI-TECH-COMP>
-        </HI-TECH-COMP>
-        <HI-TECH-LINK>
-        </HI-TECH-LINK>
-        <XC8-config-global>
-        </XC8-config-global>
-      </item>
-      <item path="MainFallerCarJunctionLeft.c" ex="true" overriding="false">
         <HI-TECH-COMP>
         </HI-TECH-COMP>
         <HI-TECH-LINK>
@@ -747,6 +739,14 @@
         <XC8-config-global>
         </XC8-config-global>
       </item>
+      <item path="MainFallerStop.c" ex="true" overriding="false">
+        <HI-TECH-COMP>
+        </HI-TECH-COMP>
+        <HI-TECH-LINK>
+        </HI-TECH-LINK>
+        <XC8-config-global>
+        </XC8-config-global>
+      </item>
       <item path="MainTrainJunction.c" ex="true" overriding="false">
         <HI-TECH-COMP>
         </HI-TECH-COMP>
@@ -760,7 +760,7 @@
         <property key="pk2settings.preserveee" value="false"/>
         <property key="pk2settings.setvddvoltage" value="5,00"/>
         <property key="pk2settings.userpgmexec" value="true"/>
-        <property key="pk2settings.usetargetpower" value="false"/>
+        <property key="pk2settings.usetargetpower" value="true"/>
       </PICkit2PlatformTool>
       <XC8-config-global>
         <property key="advanced-elf" value="true"/>

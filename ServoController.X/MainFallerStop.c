@@ -4,7 +4,7 @@
  *
  * Created on December 10, 2012, 9:36 PM
  */
-#include <pic12f675.h>
+#include <pic12f629.h>
 #include <xc.h>
 #include "Main.h"
 
@@ -23,19 +23,19 @@
 
 #define Init_IO()						TRISIO = 0x14;  //0x10;	// Setting in and outputs
 
-#define SeinStraight                         			GP1             // SeinStraight Led output
-#define SeinBend						GP0		// SeinBend Led output
-#define ServoOut                                                GP2             // Servo pulse output
-#define SwMiddle                                                GP3             // Spare
-#define SwInput  						GP4		// Switch input high to drive servo to the left
-#define Heart_Pol        					GP5		// Heart polaization relais output
+#define SeinStraight                    GP1             // SeinStraight Led output
+#define SeinBend						GP0             // SeinBend Led output
+#define ServoOut                        GP2             // Servo pulse output
+#define SwMiddle                        GP3             // Spare
+#define SwInput  						!GP4            // Switch input high to drive servo to the right (bus exit lane)
+#define Heart_Pol                       GP5             // Heart polaization relais output
 
 #define SERVO_RIGHT                                                (SERVO_MIDDLE + SERVO_DIST)
 #define SERVO_LEFT                                                 (SERVO_MIDDLE - SERVO_DIST)
 
-#define SERVO_MIDDLE                                              0xFA4D        // 1.5ms is also used for switching Heart_Pol
+#define SERVO_MIDDLE                                              0xFA00//4D        // 1.5ms is also used for switching Heart_Pol
 
-#define SERVO_DIST                                                200//70
+#define SERVO_DIST                                                900          //90 degrees move
 
 //#define SERVO_LEFT                                              0xFD40          // 1ms
 //#define SERVO_MIDDLE                                            0xFBD7          // 1.5ms
@@ -57,7 +57,7 @@ void main(void)
     // Hardware Initialization
     TRISIO = 0xFF; // All IO are inputs to be safe
     GPIO = 0x00; // All IO to 0
-    ANSEL = 0x00; // Turn off ADC
+    //ANSEL = 0x00; // Turn off ADC
     CMCON = 7; // Turn off Comparators
 
     Init_Timers(); // Initialize Timers (TMR0)
@@ -99,11 +99,11 @@ isr(void) // Here the interrupt function
 
             if ((SwInput == Off) && (SwMiddle == Off) && (Servo_Pos < SERVO_RIGHT))
             {
-            Servo_Pos = Servo_Pos + 0x10;//SERVO_RIGHT; //Servo_Pos + 0x1;
+            Servo_Pos = SERVO_RIGHT; //Servo_Pos + 0x1;
             }
-            else if ((SwInput == On) && (SwMiddle == Off) && (Servo_Pos > SERVO_LEFT))
+            else if ((SwInput == On) && (SwMiddle == Off) && (Servo_Pos > SERVO_MIDDLE))
             {
-                Servo_Pos = Servo_Pos - 0x10;//SERVO_LEFT; //Servo_Pos - 0x1;
+                Servo_Pos = SERVO_MIDDLE; //Servo_Pos - 0x1;
             }
             else if (SwMiddle == On)
             {

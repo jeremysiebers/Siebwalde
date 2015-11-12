@@ -23,12 +23,12 @@
 
 #define Init_IO()						TRISIO = 0x14;  //0x10;	// Setting in and outputs
 
-#define SeinStraight                         			GP1             // SeinStraight Led output
+#define SeinStraight                    GP1     // SeinStraight Led output
 #define SeinBend						GP0		// SeinBend Led output
-#define ServoOut                                                GP2             // Servo pulse output
-#define SwMiddle                                                GP3             // Spare
+#define ServoOut                        GP2     // Servo pulse output
+#define SwMiddle                        GP3     // Spare
 #define SwInput  						GP4		// Switch input to drive servo to the right or the left
-#define Heart_Pol        					GP5		// Heart polaization relais output
+#define Heart_Pol        				GP5		// Heart polaization relais output
 
 #define SERVO_RIGHT                                              (SERVO_MIDDLE + SERVO_DIST)
 #define SERVO_LEFT                                               (SERVO_MIDDLE - SERVO_DIST)
