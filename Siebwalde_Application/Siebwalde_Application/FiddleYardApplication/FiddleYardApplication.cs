@@ -170,11 +170,89 @@ namespace Siebwalde_Application
         /*#--------------------------------------------------------------------------#*/        
         public void Start()
         {
+            //Sensors for update kick and logging, variables are updated in FiddleYardApplicationVariables
+            Sensor Sns_CL_10_Heart = new Sensor("CL10Heart", " CL 10 Heart ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+            m_FYIOHandleVar.CL10Heart.Attach(Sns_CL_10_Heart);
+            Sensor Sns_F11 = new Sensor("F11", " F11 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+            m_FYIOHandleVar.F11.Attach(Sns_F11);
+            Sensor Sns_EOS10 = new Sensor("EOS10", " EOS 10 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+            m_FYIOHandleVar.EOS10.Attach(Sns_EOS10);
+            Sensor Sns_EOS11 = new Sensor("EOS11", " EOS 11 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+            m_FYIOHandleVar.EOS11.Attach(Sns_EOS11);
+            Sensor Sns_F13 = new Sensor("F13", " F13 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+            m_FYIOHandleVar.F13.Attach(Sns_F13);
+            Sensor Sns_F12 = new Sensor("F12", " F12 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+            m_FYIOHandleVar.F12.Attach(Sns_F12);
+            Sensor Sns_Block5B = new Sensor("Block5B", " Occupied from 5B ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+            m_FYIOHandleVar.Block5B.Attach(Sns_Block5B);
+            Sensor Sns_Block8A = new Sensor("Block8A", " Occupied from 8A ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+            m_FYIOHandleVar.Block8A.Attach(Sns_Block8A);
+            Sensor Sns_TrackPower = new Sensor("TrackPower", " Enable Track ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+            m_FYIOHandleVar.TrackPower.Attach(Sns_TrackPower);
+            Sensor Sns_Block5BIn = new Sensor("Block5BIn", " Occupied to 5B ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+            m_FYIOHandleVar.Block5BIn.Attach(Sns_Block5BIn);
+            Sensor Sns_Block6In = new Sensor("Block6In", " Occupied to 6 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+            m_FYIOHandleVar.Block6In.Attach(Sns_Block6In);
+            Sensor Sns_Block7In = new Sensor("Block7In", " Occupied to 7 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+            m_FYIOHandleVar.Block7In.Attach(Sns_Block7In);
+            Sensor Sns_Resistor = new Sensor("Resistor", " Occupied Resistor ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+            m_FYIOHandleVar.Resistor.Attach(Sns_Resistor);
+            Sensor Sns_Block6 = new Sensor("Block6", " Occupied from 6 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+            m_FYIOHandleVar.Block6.Attach(Sns_Block6);
+            Sensor Sns_Block7 = new Sensor("Block7", " Occupied from 7 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+            m_FYIOHandleVar.Block7.Attach(Sns_Block7);
+            Sensor Sns_F10 = new Sensor("F10", " F10 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+            m_FYIOHandleVar.F10.Attach(Sns_F10);
+            Sensor Sns_M10 = new Sensor("M10", " M10 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+            m_FYIOHandleVar.M10.Attach(Sns_M10);
+            Sensor Sns_TrackNo = new Sensor("Track_No", " Track Nr ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+            m_FYIOHandleVar.TrackNo.Attach(Sns_TrackNo);
+            Sensor Sns_CmdBusy = new Sensor("CmdBusy", " uController busy ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+            m_FYIOHandleVar.CmdBusy.Attach(Sns_CmdBusy);
+            Sensor Sns_TrackPower15V = new Sensor("TrackPower15V", " 15V Track Power ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+            m_FYIOHandleVar.TrackPower15V.Attach(Sns_TrackPower15V);
 
+            //Messages for update kick and logging
+            Message Msg_FiddleOneLeft = new Message("FiddleOneLeftFinished", " Fiddle One Left Finished ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+            m_FYIOHandleVar.FiddleOneLeft.Attach(Msg_FiddleOneLeft);
+            Message Msg_FiddleOneRight = new Message("FiddleOneRightFinished", " Fiddle One Right Finished ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+            m_FYIOHandleVar.FiddleOneRight.Attach(Msg_FiddleOneRight);
+            Message Msg_FiddleMultipleLeft = new Message("FiddleMultipleLeftFinished", " Fiddle Multiple Left Finished ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+            m_FYIOHandleVar.FiddleMultipleLeft.Attach(Msg_FiddleMultipleLeft);
+            Message Msg_FiddleMultipleRight = new Message("FiddleMultipleRightFinished", " Fiddle Multiple Right Finished ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+            m_FYIOHandleVar.FiddleMultipleRight.Attach(Msg_FiddleMultipleRight);
             Message Msg_TrainDetectionTop = new Message("TrainDetectionFinished", "TrainDetectionFinished", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
             m_FYIOHandleVar.TrainDetection.Attach(Msg_TrainDetectionTop);
+            Message Msg_TrainOn5B = new Message("TrainOn5B", " Train On 5B ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+            m_FYIOHandleVar.TrainOn5B.Attach(Msg_TrainOn5B);
+            Message Msg_TrainOn8A = new Message("TrainOn8A", " Train On 8A ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+            m_FYIOHandleVar.TrainOn8A.Attach(Msg_TrainOn8A);
+            Message Msg_FiddleYardReset = new Message("FiddleYardReset", " Fiddle Yard Reset ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+            m_FYIOHandleVar.FiddleYardReset.Attach(Msg_FiddleYardReset);
+            Message Msg_OccfromBlock6 = new Message("OccfromBlock6", " Occupied from Block6 ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+            m_FYIOHandleVar.OccfromBlock6.Attach(Msg_OccfromBlock6);
+            Message Msg_SensorF12High = new Message("SensorF12High", " Message F12 High ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+            m_FYIOHandleVar.SensorF12High.Attach(Msg_SensorF12High);
+            Message Msg_OccfromBlock6AndSensorF12 = new Message("OccfromBlock6AndSensorF12", " Occupied from Block6 And Message F12 High ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+            m_FYIOHandleVar.OccfromBlock6AndSensorF12.Attach(Msg_OccfromBlock6AndSensorF12);            
+            Message Msg_LastTrack = new Message("LastTrack", " Last Track ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+            m_FYIOHandleVar.LastTrack.Attach(Msg_LastTrack);
+            Message Msg_UniversalError = new Message("UniversalError", " Universal Error ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+            m_FYIOHandleVar.UniversalError.Attach(Msg_UniversalError);
+            Message Msg_uControllerReady = new Message("uControllerReady", " uControllerReady ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+            m_FYIOHandleVar.uControllerReady.Attach(Msg_uControllerReady);
+            Message Msg_TrackPower15VDown = new Message("TrackPower15VDown", " TrackPower15VDown ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+            m_FYIOHandleVar.TrackPower15VDown.Attach(Msg_TrackPower15VDown);
+            Message Msg_EndOffStroke11Assert = new Message("EndOffStroke11Assert", " EndOffStroke11Assert ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+            m_FYIOHandleVar.EndOffStroke11Assert.Attach(Msg_EndOffStroke11Assert);
+            Message Msg_EndOffStroke10Assert = new Message("EndOffStroke10Assert", " EndOffStroke10Assert ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+            m_FYIOHandleVar.EndOffStroke10Assert.Attach(Msg_EndOffStroke10Assert);
+            Message Msg_FiddleYardMoveAndF12Assert = new Message("FiddleYardMoveAndF12Assert", " FiddleYardMoveAndF12Assert ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+            m_FYIOHandleVar.FiddleYardMoveAndF12Assert.Attach(Msg_FiddleYardMoveAndF12Assert);
+            Message Msg_FiddleYardMoveAndF13Assert = new Message("FiddleYardMoveAndF13Assert", " FiddleYardMoveAndF13Assert ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+            m_FYIOHandleVar.FiddleYardMoveAndF13Assert.Attach(Msg_FiddleYardMoveAndF13Assert);
 
-             //Instantiate cmd handler for receiving commands from the Form            
+            //Instantiate cmd handler for receiving commands from the Form and for update kick and logging       
             Command Act_Couple = new Command(" Couple ", (name) => FormCmd(name)); // initialize and subscribe Commands
             FYAppVar.CmdCouple.Attach(Act_Couple);
             Command Act_Uncouple = new Command(" Uncouple ", (name) => FormCmd(name)); // initialize and subscribe Commands

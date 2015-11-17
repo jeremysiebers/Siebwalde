@@ -31,6 +31,7 @@ namespace Siebwalde_Application
             SetColorTrackNotInitialized.BackColor = Properties.Settings.Default.SETxCOLORxTRACKxNOTxINITIALIZED;
             SetColorTrackNotActive.BackColor = Properties.Settings.Default.SETxCOLORxTRACKxNOTxACTIVE;
             SetColorTrackDisabled.BackColor = Properties.Settings.Default.SETxCOLORxTRACKxDISABLED;
+            SetColorTrackDisabledNotOccupied.BackColor = Properties.Settings.Default.SETxCOLORxTRACKxDISABLEDxNOTxOCCUPIED;
         }
 
         private void FiddleYardSettingsForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -124,6 +125,24 @@ namespace Siebwalde_Application
             {
                 SetColorTrackDisabled.BackColor = MyDialog.Color;
                 Properties.Settings.Default.SETxCOLORxTRACKxDISABLED = SetColorTrackDisabled.BackColor;
+            }
+        }
+
+        private void SetColorTrackDisabledNotOccupied_Click(object sender, EventArgs e)
+        {
+            ColorDialog MyDialog = new ColorDialog();
+            // Keeps the user from selecting a custom color.
+            MyDialog.AllowFullOpen = false;
+            // Allows the user to get help. (The default is false.)
+            MyDialog.ShowHelp = true;
+            // Sets the initial color select to the current text color.
+            MyDialog.Color = SetColorTrackDisabledNotOccupied.BackColor;
+
+            // Update the text box color if the user clicks OK 
+            if (MyDialog.ShowDialog() == DialogResult.OK)
+            {
+                SetColorTrackDisabledNotOccupied.BackColor = MyDialog.Color;
+                Properties.Settings.Default.SETxCOLORxTRACKxDISABLEDxNOTxOCCUPIED = SetColorTrackDisabledNotOccupied.BackColor;
             }
         }        
         

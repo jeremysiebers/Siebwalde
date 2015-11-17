@@ -163,24 +163,23 @@ namespace Siebwalde_Application
             TrackPower15V.Value = true;
 
             FiddleOneLeftFinished.Mssg = false;
-            FiddleOneLeftFinished.Data = 0x03;
+            FiddleOneLeftFinished.Data = 0x01;
             FiddleOneRightFinished.Mssg = false;
-            FiddleOneRightFinished.Data = 0x04;
-
+            FiddleOneRightFinished.Data = 0x02;
             FiddleMultipleLeftFinished.Mssg = false;
-            FiddleMultipleLeftFinished.Data = 0x05;
+            FiddleMultipleLeftFinished.Data = 0x03;
             FiddleMultipleRightFinished.Mssg = false;
-            FiddleMultipleRightFinished.Data = 0x06;
+            FiddleMultipleRightFinished.Data = 0x04;
             TrainDetectionFinished.Mssg = false;
-            TrainDetectionFinished.Data = 0x07;
+            TrainDetectionFinished.Data = 0x05;
             TrainOn5B.Mssg = false;
-            TrainOn5B.Data = 0x0F;
+            TrainOn5B.Data = 0x06;
             TrainOn8A.Mssg = false;
-            TrainOn8A.Data = 0x11;
+            TrainOn8A.Data = 0x07;
             FiddleYardReset.Mssg = false;
-            FiddleYardReset.Data = 0x15;
+            FiddleYardReset.Data = 0x08;
             uControllerReady.Mssg = false;
-            uControllerReady.Data = 0x30;
+            uControllerReady.Data = 0x0A;
         }
 
         /*#--------------------------------------------------------------------------#*/

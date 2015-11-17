@@ -44,6 +44,8 @@
             this.SetColorTrackNotActive = new System.Windows.Forms.Label();
             this.SetColorTrackNotInitialized = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
+            this.SetColorTrackDisabledNotOccupied = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.FiddleYardSimSpeedSetting)).BeginInit();
@@ -114,7 +116,7 @@
             this.SetColorTrackOccupied.BackColor = System.Drawing.Color.Red;
             this.SetColorTrackOccupied.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.SetColorTrackOccupied.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.SetColorTrackOccupied.Location = new System.Drawing.Point(228, 25);
+            this.SetColorTrackOccupied.Location = new System.Drawing.Point(280, 25);
             this.SetColorTrackOccupied.Name = "SetColorTrackOccupied";
             this.SetColorTrackOccupied.Size = new System.Drawing.Size(26, 14);
             this.SetColorTrackOccupied.TabIndex = 81;
@@ -152,6 +154,8 @@
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.SetColorTrackDisabledNotOccupied);
+            this.groupBox3.Controls.Add(this.label6);
             this.groupBox3.Controls.Add(this.label5);
             this.groupBox3.Controls.Add(this.label3);
             this.groupBox3.Controls.Add(this.SetColorTrackDisabled);
@@ -172,9 +176,9 @@
             this.label5.AutoSize = true;
             this.label5.Location = new System.Drawing.Point(15, 94);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(161, 13);
+            this.label5.Size = new System.Drawing.Size(232, 13);
             this.label5.TabIndex = 87;
-            this.label5.Text = "SiebWalde Track Disabled Color";
+            this.label5.Text = "SiebWalde Track Disabled And Occupied Color";
             // 
             // label3
             // 
@@ -190,7 +194,7 @@
             this.SetColorTrackDisabled.BackColor = System.Drawing.Color.Red;
             this.SetColorTrackDisabled.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.SetColorTrackDisabled.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.SetColorTrackDisabled.Location = new System.Drawing.Point(228, 94);
+            this.SetColorTrackDisabled.Location = new System.Drawing.Point(280, 94);
             this.SetColorTrackDisabled.Name = "SetColorTrackDisabled";
             this.SetColorTrackDisabled.Size = new System.Drawing.Size(26, 14);
             this.SetColorTrackDisabled.TabIndex = 84;
@@ -201,7 +205,7 @@
             this.SetColorTrackNotActive.BackColor = System.Drawing.Color.Red;
             this.SetColorTrackNotActive.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.SetColorTrackNotActive.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.SetColorTrackNotActive.Location = new System.Drawing.Point(228, 71);
+            this.SetColorTrackNotActive.Location = new System.Drawing.Point(280, 71);
             this.SetColorTrackNotActive.Name = "SetColorTrackNotActive";
             this.SetColorTrackNotActive.Size = new System.Drawing.Size(26, 14);
             this.SetColorTrackNotActive.TabIndex = 84;
@@ -212,7 +216,7 @@
             this.SetColorTrackNotInitialized.BackColor = System.Drawing.Color.Red;
             this.SetColorTrackNotInitialized.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.SetColorTrackNotInitialized.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.SetColorTrackNotInitialized.Location = new System.Drawing.Point(228, 48);
+            this.SetColorTrackNotInitialized.Location = new System.Drawing.Point(280, 48);
             this.SetColorTrackNotInitialized.Name = "SetColorTrackNotInitialized";
             this.SetColorTrackNotInitialized.Size = new System.Drawing.Size(26, 14);
             this.SetColorTrackNotInitialized.TabIndex = 84;
@@ -226,6 +230,26 @@
             this.label4.Size = new System.Drawing.Size(183, 13);
             this.label4.TabIndex = 3;
             this.label4.Text = "SiebWalde Track Not Initialized Color";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(14, 116);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(230, 13);
+            this.label6.TabIndex = 87;
+            this.label6.Text = "SiebWalde Track Disabled Not Occupied Color";
+            // 
+            // SetColorTrackDisabledNotOccupied
+            // 
+            this.SetColorTrackDisabledNotOccupied.BackColor = System.Drawing.Color.Red;
+            this.SetColorTrackDisabledNotOccupied.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.SetColorTrackDisabledNotOccupied.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.SetColorTrackDisabledNotOccupied.Location = new System.Drawing.Point(280, 116);
+            this.SetColorTrackDisabledNotOccupied.Name = "SetColorTrackDisabledNotOccupied";
+            this.SetColorTrackDisabledNotOccupied.Size = new System.Drawing.Size(26, 14);
+            this.SetColorTrackDisabledNotOccupied.TabIndex = 88;
+            this.SetColorTrackDisabledNotOccupied.Click += new System.EventHandler(this.SetColorTrackDisabledNotOccupied_Click);
             // 
             // FiddleYardSettingsForm
             // 
@@ -272,6 +296,8 @@
         private System.Windows.Forms.Label SetColorTrackNotActive;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label SetColorTrackDisabled;
+        private System.Windows.Forms.Label SetColorTrackDisabledNotOccupied;
+        private System.Windows.Forms.Label label6;
 
     }
 }

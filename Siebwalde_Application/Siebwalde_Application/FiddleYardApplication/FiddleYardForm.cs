@@ -1080,9 +1080,14 @@ namespace Siebwalde_Application
                             LLed_Track1.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        else if (m_FYAppVar.icheckBoxTrack[1] == 1)                                             // If track is disabled
+                        else if (Val >= 1 && m_FYAppVar.icheckBoxTrack[1] == 1)                                 // If track is disabled and occupied
                         {
                             LLed_Track1.BackColor = m_FYAppVar.TrackDisabledColor;                              // Set TrackDisabledColor
+                            CheckWhichTrackInline();                                                            // Sensor background color update
+                        }
+                        else if (Val >= 0 && m_FYAppVar.icheckBoxTrack[1] == 1)                                 // If track is disabled and not occupied
+                        {
+                            LLed_Track1.BackColor = m_FYAppVar.TrackDisabledNotOccupiedColor;                   // Set TrackDisabledNotOccupiedColor
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         else if (Val == 0 && Initialized == true && m_FYAppVar.icheckBoxTrack[1] == 0)          // If train not present and FY is initialized and Track is enabled
@@ -1110,9 +1115,14 @@ namespace Siebwalde_Application
                             LLed_Track2.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        else if (m_FYAppVar.icheckBoxTrack[2] == 1)                                             // If track is disabled
+                        else if (Val >= 1 && m_FYAppVar.icheckBoxTrack[2] == 1)                                 // If track is disabled and occupied
                         {
                             LLed_Track2.BackColor = m_FYAppVar.TrackDisabledColor;                              // Set TrackDisabledColor
+                            CheckWhichTrackInline();                                                            // Sensor background color update
+                        }
+                        else if (Val >= 0 && m_FYAppVar.icheckBoxTrack[2] == 1)                                 // If track is disabled and not occupied
+                        {
+                            LLed_Track2.BackColor = m_FYAppVar.TrackDisabledNotOccupiedColor;                   // Set TrackDisabledNotOccupiedColor
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         else if (Val == 0 && Initialized == true && m_FYAppVar.icheckBoxTrack[2] == 0)          // If train not present and FY is initialized and Track is enabled
@@ -1140,9 +1150,14 @@ namespace Siebwalde_Application
                             LLed_Track3.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        else if (m_FYAppVar.icheckBoxTrack[3] == 1)                                             // If track is disabled
+                        else if (Val >= 1 && m_FYAppVar.icheckBoxTrack[3] == 1)                                 // If track is disabled and occupied
                         {
                             LLed_Track3.BackColor = m_FYAppVar.TrackDisabledColor;                              // Set TrackDisabledColor
+                            CheckWhichTrackInline();                                                            // Sensor background color update
+                        }
+                        else if (Val >= 0 && m_FYAppVar.icheckBoxTrack[3] == 1)                                 // If track is disabled and not occupied
+                        {
+                            LLed_Track3.BackColor = m_FYAppVar.TrackDisabledNotOccupiedColor;                   // Set TrackDisabledNotOccupiedColor
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         else if (Val == 0 && Initialized == true && m_FYAppVar.icheckBoxTrack[3] == 0)          // If train not present and FY is initialized and Track is enabled
@@ -1170,9 +1185,14 @@ namespace Siebwalde_Application
                             LLed_Track4.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        else if (m_FYAppVar.icheckBoxTrack[4] == 1)                                             // If track is disabled
+                        else if (Val >= 1 && m_FYAppVar.icheckBoxTrack[4] == 1)                                 // If track is disabled and occupied
                         {
                             LLed_Track4.BackColor = m_FYAppVar.TrackDisabledColor;                              // Set TrackDisabledColor
+                            CheckWhichTrackInline();                                                            // Sensor background color update
+                        }
+                        else if (Val >= 0 && m_FYAppVar.icheckBoxTrack[4] == 1)                                 // If track is disabled and not occupied
+                        {
+                            LLed_Track4.BackColor = m_FYAppVar.TrackDisabledNotOccupiedColor;                   // Set TrackDisabledNotOccupiedColor
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         else if (Val == 0 && Initialized == true && m_FYAppVar.icheckBoxTrack[4] == 0)          // If train not present and FY is initialized and Track is enabled
@@ -1200,9 +1220,14 @@ namespace Siebwalde_Application
                             LLed_Track5.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        else if (m_FYAppVar.icheckBoxTrack[5] == 1)                                             // If track is disabled
+                        else if (Val >= 1 && m_FYAppVar.icheckBoxTrack[5] == 1)                                 // If track is disabled and occupied
                         {
                             LLed_Track5.BackColor = m_FYAppVar.TrackDisabledColor;                              // Set TrackDisabledColor
+                            CheckWhichTrackInline();                                                            // Sensor background color update
+                        }
+                        else if (Val >= 0 && m_FYAppVar.icheckBoxTrack[5] == 1)                                 // If track is disabled and not occupied
+                        {
+                            LLed_Track5.BackColor = m_FYAppVar.TrackDisabledNotOccupiedColor;                   // Set TrackDisabledNotOccupiedColor
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         else if (Val == 0 && Initialized == true && m_FYAppVar.icheckBoxTrack[5] == 0)          // If train not present and FY is initialized and Track is enabled
@@ -1230,9 +1255,14 @@ namespace Siebwalde_Application
                             LLed_Track6.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        else if (m_FYAppVar.icheckBoxTrack[6] == 1)                                             // If track is disabled
+                        else if (Val >= 1 && m_FYAppVar.icheckBoxTrack[6] == 1)                                 // If track is disabled and occupied
                         {
                             LLed_Track6.BackColor = m_FYAppVar.TrackDisabledColor;                              // Set TrackDisabledColor
+                            CheckWhichTrackInline();                                                            // Sensor background color update
+                        }
+                        else if (Val >= 0 && m_FYAppVar.icheckBoxTrack[6] == 1)                                 // If track is disabled and not occupied
+                        {
+                            LLed_Track6.BackColor = m_FYAppVar.TrackDisabledNotOccupiedColor;                   // Set TrackDisabledNotOccupiedColor
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         else if (Val == 0 && Initialized == true && m_FYAppVar.icheckBoxTrack[6] == 0)          // If train not present and FY is initialized and Track is enabled
@@ -1260,9 +1290,14 @@ namespace Siebwalde_Application
                             LLed_Track7.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        else if (m_FYAppVar.icheckBoxTrack[7] == 1)                                             // If track is disabled
+                        else if (Val >= 1 && m_FYAppVar.icheckBoxTrack[7] == 1)                                 // If track is disabled and occupied
                         {
                             LLed_Track7.BackColor = m_FYAppVar.TrackDisabledColor;                              // Set TrackDisabledColor
+                            CheckWhichTrackInline();                                                            // Sensor background color update
+                        }
+                        else if (Val >= 0 && m_FYAppVar.icheckBoxTrack[7] == 1)                                 // If track is disabled and not occupied
+                        {
+                            LLed_Track7.BackColor = m_FYAppVar.TrackDisabledNotOccupiedColor;                   // Set TrackDisabledNotOccupiedColor
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         else if (Val == 0 && Initialized == true && m_FYAppVar.icheckBoxTrack[7] == 0)          // If train not present and FY is initialized and Track is enabled
@@ -1290,9 +1325,14 @@ namespace Siebwalde_Application
                             LLed_Track8.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        else if (m_FYAppVar.icheckBoxTrack[8] == 1)                                             // If track is disabled
+                        else if (Val >= 1 && m_FYAppVar.icheckBoxTrack[8] == 1)                                 // If track is disabled and occupied
                         {
                             LLed_Track8.BackColor = m_FYAppVar.TrackDisabledColor;                              // Set TrackDisabledColor
+                            CheckWhichTrackInline();                                                            // Sensor background color update
+                        }
+                        else if (Val >= 0 && m_FYAppVar.icheckBoxTrack[8] == 1)                                 // If track is disabled and not occupied
+                        {
+                            LLed_Track8.BackColor = m_FYAppVar.TrackDisabledNotOccupiedColor;                   // Set TrackDisabledNotOccupiedColor
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         else if (Val == 0 && Initialized == true && m_FYAppVar.icheckBoxTrack[8] == 0)          // If train not present and FY is initialized and Track is enabled
@@ -1320,9 +1360,14 @@ namespace Siebwalde_Application
                             LLed_Track9.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        else if (m_FYAppVar.icheckBoxTrack[9] == 1)                                             // If track is disabled
+                        else if (Val >= 1 && m_FYAppVar.icheckBoxTrack[9] == 1)                                 // If track is disabled and occupied
                         {
                             LLed_Track9.BackColor = m_FYAppVar.TrackDisabledColor;                              // Set TrackDisabledColor
+                            CheckWhichTrackInline();                                                            // Sensor background color update
+                        }
+                        else if (Val >= 0 && m_FYAppVar.icheckBoxTrack[9] == 1)                                 // If track is disabled and not occupied
+                        {
+                            LLed_Track9.BackColor = m_FYAppVar.TrackDisabledNotOccupiedColor;                   // Set TrackDisabledNotOccupiedColor
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         else if (Val == 0 && Initialized == true && m_FYAppVar.icheckBoxTrack[9] == 0)          // If train not present and FY is initialized and Track is enabled
@@ -1350,9 +1395,14 @@ namespace Siebwalde_Application
                             LLed_Track10.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        else if (m_FYAppVar.icheckBoxTrack[10] == 1)                                             // If track is disabled
+                        else if (Val >= 1 && m_FYAppVar.icheckBoxTrack[10] == 1)                                 // If track is disabled and occupied
                         {
                             LLed_Track10.BackColor = m_FYAppVar.TrackDisabledColor;                              // Set TrackDisabledColor
+                            CheckWhichTrackInline();                                                            // Sensor background color update
+                        }
+                        else if (Val >= 0 && m_FYAppVar.icheckBoxTrack[10] == 1)                                 // If track is disabled and not occupied
+                        {
+                            LLed_Track10.BackColor = m_FYAppVar.TrackDisabledNotOccupiedColor;                   // Set TrackDisabledNotOccupiedColor
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         else if (Val == 0 && Initialized == true && m_FYAppVar.icheckBoxTrack[10] == 0)          // If train not present and FY is initialized and Track is enabled
@@ -1380,9 +1430,14 @@ namespace Siebwalde_Application
                             LLed_Track11.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        else if (m_FYAppVar.icheckBoxTrack[11] == 1)                                             // If track is disabled
+                        else if (Val >= 1 && m_FYAppVar.icheckBoxTrack[11] == 1)                                 // If track is disabled and occupied
                         {
                             LLed_Track11.BackColor = m_FYAppVar.TrackDisabledColor;                              // Set TrackDisabledColor
+                            CheckWhichTrackInline();                                                            // Sensor background color update
+                        }
+                        else if (Val >= 0 && m_FYAppVar.icheckBoxTrack[11] == 1)                                 // If track is disabled and not occupied
+                        {
+                            LLed_Track11.BackColor = m_FYAppVar.TrackDisabledNotOccupiedColor;                   // Set TrackDisabledNotOccupiedColor
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         else if (Val == 0 && Initialized == true && m_FYAppVar.icheckBoxTrack[11] == 0)          // If train not present and FY is initialized and Track is enabled

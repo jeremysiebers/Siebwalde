@@ -176,6 +176,7 @@ namespace Siebwalde_Application
         public Color TrackNotInitializedColor = Siebwalde_Application.Properties.Settings.Default.SETxCOLORxTRACKxNOTxINITIALIZED;
         public Color TrackNotActiveColor = Siebwalde_Application.Properties.Settings.Default.SETxCOLORxTRACKxNOTxACTIVE;
         public Color TrackDisabledColor = Siebwalde_Application.Properties.Settings.Default.SETxCOLORxTRACKxDISABLED;
+        public Color TrackDisabledNotOccupiedColor = Siebwalde_Application.Properties.Settings.Default.SETxCOLORxTRACKxDISABLEDxNOTxOCCUPIED;
 
         /*#--------------------------------------------------------------------------#*/
         /*  Description: FiddleYardVariables constructor
@@ -388,6 +389,10 @@ namespace Siebwalde_Application
             Colorc Clr_FYTrackDisabledColorSetting = new Colorc(Color.Transparent, "Clr_FYTrackDisabledColorSetting", (NewColor, log) => SetColorIndicator(NewColor, log));
             Siebwalde_Application.Properties.Settings.Default.SWSetColorTrackDisabled.Attach(Clr_FYTrackDisabledColorSetting);
 
+            Colorc Clr_FYTrackDisabledNotOccupiedColorSetting = new Colorc(Color.Transparent, "Clr_FYTrackDisabledNotOccupiedColorSetting", (NewColor, log) => SetColorIndicator(NewColor, log));
+            Siebwalde_Application.Properties.Settings.Default.SWSetColorTrackDisabledNotOccupied.Attach(Clr_FYTrackDisabledNotOccupiedColorSetting);
+            
+
             for (int i = 1; i < 12; i++)
             {
                 icheckBoxTrack[i] = 1;
@@ -396,7 +401,7 @@ namespace Siebwalde_Application
 
         /*#--------------------------------------------------------------------------#*/
         /*  Description: SetColorIndicator(NewColor, log)
-         *               
+         *               Force all colors to all sub routines
          * 
          *  Input(s)   :
          *
@@ -429,6 +434,10 @@ namespace Siebwalde_Application
 
                 case "Clr_FYTrackDisabledColorSetting":
                     TrackDisabledColor = NewColor;
+                    break;
+
+                case "Clr_FYTrackDisabledNotOccupiedColorSetting":
+                    TrackDisabledNotOccupiedColor = NewColor;
                     break;
 
                 default: break;

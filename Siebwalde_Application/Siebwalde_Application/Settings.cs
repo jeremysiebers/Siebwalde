@@ -31,6 +31,7 @@ namespace Siebwalde_Application.Properties
         public ColorUpdater SWSetColorTrackNotInitialized;
         public ColorUpdater SWSetColorTrackNotActive;
         public ColorUpdater SWSetColorTrackDisabled;
+        public ColorUpdater SWSetColorTrackDisabledNotOccupied;
         
         public Settings() 
         {
@@ -45,6 +46,7 @@ namespace Siebwalde_Application.Properties
             SWSetColorTrackNotInitialized = new ColorUpdater();
             SWSetColorTrackNotActive = new ColorUpdater();
             SWSetColorTrackDisabled = new ColorUpdater();
+            SWSetColorTrackDisabledNotOccupied = new ColorUpdater();
         }
         
         private void SettingChangingEventHandler(object sender, System.Configuration.SettingChangingEventArgs e) 
@@ -66,6 +68,9 @@ namespace Siebwalde_Application.Properties
                     break;
                 case "SETxCOLORxTRACKxDISABLED":
                     SWSetColorTrackDisabled.UpdateColorValue((Color)e.NewValue);
+                    break;
+                case "SETxCOLORxTRACKxDISABLEDxNOTxOCCUPIED":
+                    SWSetColorTrackDisabledNotOccupied.UpdateColorValue((Color)e.NewValue);
                     break;
                 default: break;
             }            

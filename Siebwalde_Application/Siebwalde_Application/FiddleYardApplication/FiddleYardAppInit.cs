@@ -297,6 +297,8 @@ namespace Siebwalde_Application
                     if (WaitCnt > 10)
                     {
                         m_FYAppLog.StoreText("FYAppInit.Init()  WaitCnt > 10");
+                        m_FYAppVar.TrackTrainsOnFYUpdater();
+                        m_FYAppLog.StoreText("FYAppInit.Init()  Update FYFORM Tracks to display in correct color: TrackTrainsOnFYUpdater()");
                         State_Machine = State.Idle;
                         m_FYAppLog.StoreText("FYAppInit.Init() State_Machine = State.Idle");
                         _Return = "Finished";
