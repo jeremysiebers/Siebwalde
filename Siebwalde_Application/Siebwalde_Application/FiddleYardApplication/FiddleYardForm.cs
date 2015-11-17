@@ -394,9 +394,13 @@ namespace Siebwalde_Application
             m_FYAppVar.CollectingTrainsEnabled.Attach(Msg_CollectingTrainsEnabled);
             Message Msg_CollectingTrainsDisabled = new Message("CollectingTrainsDisabled", " Collecting Trains disabled ", (name, log) => SetMessage(name, log));
             m_FYAppVar.CollectingTrainsDisabled.Attach(Msg_CollectingTrainsDisabled);
-
+            Message Msg_FiddleYardMoveAndF12Assert = new Message("FiddleYardMoveAndF12Assert", " FiddleYard Moving And F12 Assert!!! FiddleYard Stopped!!! ", (name, log) => SetMessage(name, log));
+            m_FYIOHandleVar.FiddleYardMoveAndF12Assert.Attach(Msg_FiddleYardMoveAndF12Assert);
+            Message Msg_FiddleYardMoveAndF13Assert = new Message("FiddleYardMoveAndF13Assert", " FiddleYard Moving And F13 Assert!!! FiddleYard Stopped!!! ", (name, log) => SetMessage(name, log));
+            m_FYIOHandleVar.FiddleYardMoveAndF13Assert.Attach(Msg_FiddleYardMoveAndF13Assert);
             #endregion Attach sensors
 
+            // Init Track colors
             LLed_Track1.BackColor = m_FYAppVar.TrackNotInitializedColor;
             LLed_Track2.BackColor = m_FYAppVar.TrackNotInitializedColor;
             LLed_Track3.BackColor = m_FYAppVar.TrackNotInitializedColor;
@@ -1553,123 +1557,247 @@ namespace Siebwalde_Application
         /*#--------------------------------------------------------------------------#*/
         private void UpdateTrackIndicatorColor()
         {
-            if (TrackStatusLight[0] == true)                                            // in between tracks every occupied track becomes TrackNotActiveColor or TrackDisabledColor
+            if (TrackStatusLight[0] == true)                                                    // in between tracks every occupied track becomes TrackNotActiveColor or TrackDisabledColor or TrackDisabledNotOccupiedColor
             {
-                if (LLed_Track1.BackColor != Color.Transparent)                         // If the track is not empty
+                if (LLed_Track1.BackColor != Color.Transparent && 
+                    LLed_Track1.BackColor != m_FYAppVar.TrackDisabledNotOccupiedColor)          // If the track is not empty (transparent or TrackDisabledNotOccupiedColor)
                 {
-                    if (LLed_Track1.BackColor != m_FYAppVar.TrackDisabledColor)         // And if the track is not disabled
+                    if (m_FYAppVar.icheckBoxTrack[1] == 0)                                      // If the track is not disabled
                     {
-                        LLed_Track1.BackColor = m_FYAppVar.TrackNotActiveColor;         // Set the track not active color (old color was Color.Green)
+                        LLed_Track1.BackColor = m_FYAppVar.TrackNotActiveColor;                 // Set the track not active color (old color was Color.Green)
                     }
-                    else { LLed_Track1.BackColor = m_FYAppVar.TrackDisabledColor; }     // Else the track is disabled set the disabled color
+                    else
+                    {
+                        LLed_Track1.BackColor = m_FYAppVar.TrackDisabledColor;                  // Else the track is disabled set the TrackDisabledColor color
+                    }
                 }
-
-                if (LLed_Track2.BackColor != Color.Transparent)                         // If the track is not empty
+                else                                                                            // If the track is empty
                 {
-                    if (LLed_Track2.BackColor != m_FYAppVar.TrackDisabledColor)         // And if the track is not disabled
+                    if (m_FYAppVar.icheckBoxTrack[1] == 1)                                      // If the track is disabled
                     {
-                        LLed_Track2.BackColor = m_FYAppVar.TrackNotActiveColor;         // Set the track not active color (old color was Color.Green)
+                        LLed_Track1.BackColor = m_FYAppVar.TrackDisabledNotOccupiedColor;       // Set the track not active empty color
                     }
-                    else { LLed_Track2.BackColor = m_FYAppVar.TrackDisabledColor; }     // Else the track is disabled set the disabled color
                 }
-
-                if (LLed_Track3.BackColor != Color.Transparent)                         // If the track is not empty
+                /*---------------------------------------------------------------------------------------------------------------------------------------------*/
+                if (LLed_Track2.BackColor != Color.Transparent &&
+                    LLed_Track2.BackColor != m_FYAppVar.TrackDisabledNotOccupiedColor)          // If the track is not empty (transparent or TrackDisabledNotOccupiedColor)
                 {
-                    if (LLed_Track3.BackColor != m_FYAppVar.TrackDisabledColor)         // And if the track is not disabled
+                    if (m_FYAppVar.icheckBoxTrack[2] == 0)                                      // If the track is not disabled
                     {
-                        LLed_Track3.BackColor = m_FYAppVar.TrackNotActiveColor;         // Set the track not active color (old color was Color.Green)
+                        LLed_Track2.BackColor = m_FYAppVar.TrackNotActiveColor;                 // Set the track not active color (old color was Color.Green)
                     }
-                    else { LLed_Track3.BackColor = m_FYAppVar.TrackDisabledColor; }     // Else the track is disabled set the disabled color
+                    else
+                    {
+                        LLed_Track2.BackColor = m_FYAppVar.TrackDisabledColor;                  // Else the track is disabled set the TrackDisabledColor color
+                    }
                 }
-
-                if (LLed_Track4.BackColor != Color.Transparent)                         // If the track is not empty
+                else                                                                            // If the track is empty
                 {
-                    if (LLed_Track4.BackColor != m_FYAppVar.TrackDisabledColor)         // And if the track is not disabled
+                    if (m_FYAppVar.icheckBoxTrack[2] == 1)                                      // If the track is disabled
                     {
-                        LLed_Track4.BackColor = m_FYAppVar.TrackNotActiveColor;         // Set the track not active color (old color was Color.Green)
+                        LLed_Track2.BackColor = m_FYAppVar.TrackDisabledNotOccupiedColor;       // Set the track not active empty color
                     }
-                    else { LLed_Track4.BackColor = m_FYAppVar.TrackDisabledColor; }     // Else the track is disabled set the disabled color
                 }
-
-                if (LLed_Track5.BackColor != Color.Transparent)                         // If the track is not empty
+                /*---------------------------------------------------------------------------------------------------------------------------------------------*/
+                if (LLed_Track3.BackColor != Color.Transparent &&
+                                    LLed_Track3.BackColor != m_FYAppVar.TrackDisabledNotOccupiedColor)          // If the track is not empty (transparent or TrackDisabledNotOccupiedColor)
                 {
-                    if (LLed_Track5.BackColor != m_FYAppVar.TrackDisabledColor)         // And if the track is not disabled
+                    if (m_FYAppVar.icheckBoxTrack[3] == 0)                                      // If the track is not disabled
                     {
-                        LLed_Track5.BackColor = m_FYAppVar.TrackNotActiveColor;         // Set the track not active color (old color was Color.Green)
+                        LLed_Track3.BackColor = m_FYAppVar.TrackNotActiveColor;                 // Set the track not active color (old color was Color.Green)
                     }
-                    else { LLed_Track5.BackColor = m_FYAppVar.TrackDisabledColor; }     // Else the track is disabled set the disabled color
+                    else
+                    {
+                        LLed_Track3.BackColor = m_FYAppVar.TrackDisabledColor;                  // Else the track is disabled set the TrackDisabledColor color
+                    }
                 }
-
-                if (LLed_Track6.BackColor != Color.Transparent)                         // If the track is not empty
+                else                                                                            // If the track is empty
                 {
-                    if (LLed_Track6.BackColor != m_FYAppVar.TrackDisabledColor)         // And if the track is not disabled
+                    if (m_FYAppVar.icheckBoxTrack[3] == 1)                                      // If the track is disabled
                     {
-                        LLed_Track6.BackColor = m_FYAppVar.TrackNotActiveColor;         // Set the track not active color (old color was Color.Green)
+                        LLed_Track3.BackColor = m_FYAppVar.TrackDisabledNotOccupiedColor;       // Set the track not active empty color
                     }
-                    else { LLed_Track6.BackColor = m_FYAppVar.TrackDisabledColor; }     // Else the track is disabled set the disabled color
                 }
-
-                if (LLed_Track7.BackColor != Color.Transparent)                         // If the track is not empty
+                /*---------------------------------------------------------------------------------------------------------------------------------------------*/
+                if (LLed_Track4.BackColor != Color.Transparent &&
+                                    LLed_Track4.BackColor != m_FYAppVar.TrackDisabledNotOccupiedColor)          // If the track is not empty (transparent or TrackDisabledNotOccupiedColor)
                 {
-                    if (LLed_Track7.BackColor != m_FYAppVar.TrackDisabledColor)         // And if the track is not disabled
+                    if (m_FYAppVar.icheckBoxTrack[4] == 0)                                      // If the track is not disabled
                     {
-                        LLed_Track7.BackColor = m_FYAppVar.TrackNotActiveColor;         // Set the track not active color (old color was Color.Green)
+                        LLed_Track4.BackColor = m_FYAppVar.TrackNotActiveColor;                 // Set the track not active color (old color was Color.Green)
                     }
-                    else { LLed_Track7.BackColor = m_FYAppVar.TrackDisabledColor; }     // Else the track is disabled set the disabled color
+                    else
+                    {
+                        LLed_Track4.BackColor = m_FYAppVar.TrackDisabledColor;                  // Else the track is disabled set the TrackDisabledColor color
+                    }
                 }
-
-                if (LLed_Track8.BackColor != Color.Transparent)                         // If the track is not empty
+                else                                                                            // If the track is empty
                 {
-                    if (LLed_Track8.BackColor != m_FYAppVar.TrackDisabledColor)         // And if the track is not disabled
+                    if (m_FYAppVar.icheckBoxTrack[4] == 1)                                      // If the track is disabled
                     {
-                        LLed_Track8.BackColor = m_FYAppVar.TrackNotActiveColor;         // Set the track not active color (old color was Color.Green)
+                        LLed_Track4.BackColor = m_FYAppVar.TrackDisabledNotOccupiedColor;       // Set the track not active empty color
                     }
-                    else { LLed_Track8.BackColor = m_FYAppVar.TrackDisabledColor; }     // Else the track is disabled set the disabled color
                 }
-
-                if (LLed_Track9.BackColor != Color.Transparent)                         // If the track is not empty
+                /*---------------------------------------------------------------------------------------------------------------------------------------------*/
+                if (LLed_Track5.BackColor != Color.Transparent &&
+                                    LLed_Track5.BackColor != m_FYAppVar.TrackDisabledNotOccupiedColor)          // If the track is not empty (transparent or TrackDisabledNotOccupiedColor)
                 {
-                    if (LLed_Track9.BackColor != m_FYAppVar.TrackDisabledColor)         // And if the track is not disabled
+                    if (m_FYAppVar.icheckBoxTrack[5] == 0)                                      // If the track is not disabled
                     {
-                        LLed_Track9.BackColor = m_FYAppVar.TrackNotActiveColor;         // Set the track not active color (old color was Color.Green)
+                        LLed_Track5.BackColor = m_FYAppVar.TrackNotActiveColor;                 // Set the track not active color (old color was Color.Green)
                     }
-                    else { LLed_Track9.BackColor = m_FYAppVar.TrackDisabledColor; }     // Else the track is disabled set the disabled color
+                    else
+                    {
+                        LLed_Track5.BackColor = m_FYAppVar.TrackDisabledColor;                  // Else the track is disabled set the TrackDisabledColor color
+                    }
                 }
-
-                if (LLed_Track10.BackColor != Color.Transparent)                         // If the track is not empty
+                else                                                                            // If the track is empty
                 {
-                    if (LLed_Track10.BackColor != m_FYAppVar.TrackDisabledColor)         // And if the track is not disabled
+                    if (m_FYAppVar.icheckBoxTrack[5] == 1)                                      // If the track is disabled
                     {
-                        LLed_Track10.BackColor = m_FYAppVar.TrackNotActiveColor;         // Set the track not active color (old color was Color.Green)
+                        LLed_Track5.BackColor = m_FYAppVar.TrackDisabledNotOccupiedColor;       // Set the track not active empty color
                     }
-                    else { LLed_Track10.BackColor = m_FYAppVar.TrackDisabledColor; }     // Else the track is disabled set the disabled color
                 }
-
-                if (LLed_Track11.BackColor != Color.Transparent)                         // If the track is not empty
+                /*---------------------------------------------------------------------------------------------------------------------------------------------*/
+                if (LLed_Track6.BackColor != Color.Transparent &&
+                                    LLed_Track6.BackColor != m_FYAppVar.TrackDisabledNotOccupiedColor)          // If the track is not empty (transparent or TrackDisabledNotOccupiedColor)
                 {
-                    if (LLed_Track11.BackColor != m_FYAppVar.TrackDisabledColor)         // And if the track is not disabled
+                    if (m_FYAppVar.icheckBoxTrack[6] == 0)                                      // If the track is not disabled
                     {
-                        LLed_Track11.BackColor = m_FYAppVar.TrackNotActiveColor;         // Set the track not active color (old color was Color.Green)
+                        LLed_Track6.BackColor = m_FYAppVar.TrackNotActiveColor;                 // Set the track not active color (old color was Color.Green)
                     }
-                    else { LLed_Track11.BackColor = m_FYAppVar.TrackDisabledColor; }     // Else the track is disabled set the disabled color
+                    else
+                    {
+                        LLed_Track6.BackColor = m_FYAppVar.TrackDisabledColor;                  // Else the track is disabled set the TrackDisabledColor color
+                    }
                 }
+                else                                                                            // If the track is empty
+                {
+                    if (m_FYAppVar.icheckBoxTrack[6] == 1)                                      // If the track is disabled
+                    {
+                        LLed_Track6.BackColor = m_FYAppVar.TrackDisabledNotOccupiedColor;       // Set the track not active empty color
+                    }
+                }
+                /*---------------------------------------------------------------------------------------------------------------------------------------------*/
+                if (LLed_Track7.BackColor != Color.Transparent &&
+                                    LLed_Track7.BackColor != m_FYAppVar.TrackDisabledNotOccupiedColor)          // If the track is not empty (transparent or TrackDisabledNotOccupiedColor)
+                {
+                    if (m_FYAppVar.icheckBoxTrack[7] == 0)                                      // If the track is not disabled
+                    {
+                        LLed_Track7.BackColor = m_FYAppVar.TrackNotActiveColor;                 // Set the track not active color (old color was Color.Green)
+                    }
+                    else
+                    {
+                        LLed_Track7.BackColor = m_FYAppVar.TrackDisabledColor;                  // Else the track is disabled set the TrackDisabledColor color
+                    }
+                }
+                else                                                                            // If the track is empty
+                {
+                    if (m_FYAppVar.icheckBoxTrack[7] == 1)                                      // If the track is disabled
+                    {
+                        LLed_Track7.BackColor = m_FYAppVar.TrackDisabledNotOccupiedColor;       // Set the track not active empty color
+                    }
+                }
+                /*---------------------------------------------------------------------------------------------------------------------------------------------*/
+                if (LLed_Track8.BackColor != Color.Transparent &&
+                                    LLed_Track8.BackColor != m_FYAppVar.TrackDisabledNotOccupiedColor)          // If the track is not empty (transparent or TrackDisabledNotOccupiedColor)
+                {
+                    if (m_FYAppVar.icheckBoxTrack[8] == 0)                                      // If the track is not disabled
+                    {
+                        LLed_Track8.BackColor = m_FYAppVar.TrackNotActiveColor;                 // Set the track not active color (old color was Color.Green)
+                    }
+                    else
+                    {
+                        LLed_Track8.BackColor = m_FYAppVar.TrackDisabledColor;                  // Else the track is disabled set the TrackDisabledColor color
+                    }
+                }
+                else                                                                            // If the track is empty
+                {
+                    if (m_FYAppVar.icheckBoxTrack[8] == 1)                                      // If the track is disabled
+                    {
+                        LLed_Track8.BackColor = m_FYAppVar.TrackDisabledNotOccupiedColor;       // Set the track not active empty color
+                    }
+                }
+                /*---------------------------------------------------------------------------------------------------------------------------------------------*/
+                if (LLed_Track9.BackColor != Color.Transparent &&
+                                    LLed_Track9.BackColor != m_FYAppVar.TrackDisabledNotOccupiedColor)          // If the track is not empty (transparent or TrackDisabledNotOccupiedColor)
+                {
+                    if (m_FYAppVar.icheckBoxTrack[9] == 0)                                      // If the track is not disabled
+                    {
+                        LLed_Track9.BackColor = m_FYAppVar.TrackNotActiveColor;                 // Set the track not active color (old color was Color.Green)
+                    }
+                    else
+                    {
+                        LLed_Track9.BackColor = m_FYAppVar.TrackDisabledColor;                  // Else the track is disabled set the TrackDisabledColor color
+                    }
+                }
+                else                                                                            // If the track is empty
+                {
+                    if (m_FYAppVar.icheckBoxTrack[9] == 1)                                      // If the track is disabled
+                    {
+                        LLed_Track9.BackColor = m_FYAppVar.TrackDisabledNotOccupiedColor;       // Set the track not active empty color
+                    }
+                }
+                /*---------------------------------------------------------------------------------------------------------------------------------------------*/
+                if (LLed_Track10.BackColor != Color.Transparent &&
+                                    LLed_Track10.BackColor != m_FYAppVar.TrackDisabledNotOccupiedColor)          // If the track is not empty (transparent or TrackDisabledNotOccupiedColor)
+                {
+                    if (m_FYAppVar.icheckBoxTrack[10] == 0)                                      // If the track is not disabled
+                    {
+                        LLed_Track10.BackColor = m_FYAppVar.TrackNotActiveColor;                 // Set the track not active color (old color was Color.Green)
+                    }
+                    else
+                    {
+                        LLed_Track10.BackColor = m_FYAppVar.TrackDisabledColor;                  // Else the track is disabled set the TrackDisabledColor color
+                    }
+                }
+                else                                                                            // If the track is empty
+                {
+                    if (m_FYAppVar.icheckBoxTrack[10] == 1)                                      // If the track is disabled
+                    {
+                        LLed_Track10.BackColor = m_FYAppVar.TrackDisabledNotOccupiedColor;       // Set the track not active empty color
+                    }
+                }
+                /*---------------------------------------------------------------------------------------------------------------------------------------------*/
+                if (LLed_Track11.BackColor != Color.Transparent &&
+                                    LLed_Track11.BackColor != m_FYAppVar.TrackDisabledNotOccupiedColor)          // If the track is not empty (transparent or TrackDisabledNotOccupiedColor)
+                {
+                    if (m_FYAppVar.icheckBoxTrack[11] == 0)                                      // If the track is not disabled
+                    {
+                        LLed_Track11.BackColor = m_FYAppVar.TrackNotActiveColor;                 // Set the track not active color (old color was Color.Green)
+                    }
+                    else
+                    {
+                        LLed_Track11.BackColor = m_FYAppVar.TrackDisabledColor;                  // Else the track is disabled set the TrackDisabledColor color
+                    }
+                }
+                else                                                                            // If the track is empty
+                {
+                    if (m_FYAppVar.icheckBoxTrack[11] == 1)                                      // If the track is disabled
+                    {
+                        LLed_Track11.BackColor = m_FYAppVar.TrackDisabledNotOccupiedColor;       // Set the track not active empty color
+                    }
+                }
+                /*---------------------------------------------------------------------------------------------------------------------------------------------*/
                 CheckWhichTrackInline();
 
             }
 
             /*---------------------------------------------------------------------------------------------------------------------------------------------*/
-            // On a track and track becomes TrackOccupiedColor or TrackNotActiveColor when not TrackDisabledColor and not Color.Transparent
+            // On a track and track becomes TrackOccupiedColor or TrackNotActiveColor when not TrackDisabledColor and not Color.Transparent and not TrackDisabledNotOccupiedColor
 
             if (TrackStatusLight[1] == true && 
-                LLed_Track1.BackColor != Color.Transparent && 
-                LLed_Track1.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is active and not disabled and not transparant
+                LLed_Track1.BackColor != Color.Transparent &&
+                LLed_Track1.BackColor != m_FYAppVar.TrackDisabledNotOccupiedColor &&
+                LLed_Track1.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is active and not disabled and not transparant and not TrackDisabledNotOccupiedColor
             {
                 LLed_Track1.BackColor = m_FYAppVar.TrackOccupiedColor;      // Set the track TrackOccupiedColor
                 CheckWhichTrackInline();                                    // Set the color to the corresponding sensors to the LLed_Track1.BackColor
             }
             else if (TrackStatusLight[1] == false && 
-                LLed_Track1.BackColor != Color.Transparent && 
-                LLed_Track1.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is not active and not disabled and not transparant
+                LLed_Track1.BackColor != Color.Transparent &&
+                LLed_Track1.BackColor != m_FYAppVar.TrackDisabledNotOccupiedColor &&
+                LLed_Track1.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is not active and not disabled and not transparant and not TrackDisabledNotOccupiedColor
             {
                 LLed_Track1.BackColor = m_FYAppVar.TrackNotActiveColor;     // Set the track TrackNotActiveColor
                 CheckWhichTrackInline();                                    // Set the color to the corresponding sensors to the LLed_Track1.BackColor
@@ -1680,6 +1808,7 @@ namespace Siebwalde_Application
 
             if (TrackStatusLight[2] == true &&
                 LLed_Track2.BackColor != Color.Transparent &&
+                LLed_Track2.BackColor != m_FYAppVar.TrackDisabledNotOccupiedColor &&
                 LLed_Track2.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is active and not disabled and not transparant
             {
                 LLed_Track2.BackColor = m_FYAppVar.TrackOccupiedColor;      // Set the track TrackOccupiedColor
@@ -1687,6 +1816,7 @@ namespace Siebwalde_Application
             }
             else if (TrackStatusLight[2] == false &&
                 LLed_Track2.BackColor != Color.Transparent &&
+                LLed_Track2.BackColor != m_FYAppVar.TrackDisabledNotOccupiedColor &&
                 LLed_Track2.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is not active and not disabled and not transparant
             {
                 LLed_Track2.BackColor = m_FYAppVar.TrackNotActiveColor;     // Set the track TrackNotActiveColor
@@ -1697,14 +1827,16 @@ namespace Siebwalde_Application
             /*---------------------------------------------------------------------------------------------------------------------------------------------*/
 
             if (TrackStatusLight[3] == true &&
-                            LLed_Track3.BackColor != Color.Transparent &&
-                            LLed_Track3.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is active and not disabled and not transparant
+                LLed_Track3.BackColor != Color.Transparent &&
+                LLed_Track3.BackColor != m_FYAppVar.TrackDisabledNotOccupiedColor &&
+                LLed_Track3.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is active and not disabled and not transparant
             {
                 LLed_Track3.BackColor = m_FYAppVar.TrackOccupiedColor;      // Set the track TrackOccupiedColor
                 CheckWhichTrackInline();                                    // Set the color to the corresponding sensors to the LLed_Track3.BackColor
             }
             else if (TrackStatusLight[3] == false &&
                 LLed_Track3.BackColor != Color.Transparent &&
+                LLed_Track3.BackColor != m_FYAppVar.TrackDisabledNotOccupiedColor &&
                 LLed_Track3.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is not active and not disabled and not transparant
             {
                 LLed_Track3.BackColor = m_FYAppVar.TrackNotActiveColor;     // Set the track TrackNotActiveColor
@@ -1715,14 +1847,16 @@ namespace Siebwalde_Application
             /*---------------------------------------------------------------------------------------------------------------------------------------------*/
 
             if (TrackStatusLight[4] == true &&
-                            LLed_Track4.BackColor != Color.Transparent &&
-                            LLed_Track4.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is active and not disabled and not transparant
+                LLed_Track4.BackColor != Color.Transparent &&
+                LLed_Track4.BackColor != m_FYAppVar.TrackDisabledNotOccupiedColor &&
+                LLed_Track4.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is active and not disabled and not transparant
             {
                 LLed_Track4.BackColor = m_FYAppVar.TrackOccupiedColor;      // Set the track TrackOccupiedColor
                 CheckWhichTrackInline();                                    // Set the color to the corresponding sensors to the LLed_Track4.BackColor
             }
             else if (TrackStatusLight[4] == false &&
                 LLed_Track4.BackColor != Color.Transparent &&
+                LLed_Track4.BackColor != m_FYAppVar.TrackDisabledNotOccupiedColor &&
                 LLed_Track4.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is not active and not disabled and not transparant
             {
                 LLed_Track4.BackColor = m_FYAppVar.TrackNotActiveColor;     // Set the track TrackNotActiveColor
@@ -1733,14 +1867,16 @@ namespace Siebwalde_Application
             /*---------------------------------------------------------------------------------------------------------------------------------------------*/
 
             if (TrackStatusLight[5] == true &&
-                            LLed_Track5.BackColor != Color.Transparent &&
-                            LLed_Track5.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is active and not disabled and not transparant
+                LLed_Track5.BackColor != Color.Transparent &&
+                LLed_Track5.BackColor != m_FYAppVar.TrackDisabledNotOccupiedColor &&
+                LLed_Track5.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is active and not disabled and not transparant
             {
                 LLed_Track5.BackColor = m_FYAppVar.TrackOccupiedColor;      // Set the track TrackOccupiedColor
                 CheckWhichTrackInline();                                    // Set the color to the corresponding sensors to the LLed_Track5.BackColor
             }
             else if (TrackStatusLight[5] == false &&
                 LLed_Track5.BackColor != Color.Transparent &&
+                LLed_Track5.BackColor != m_FYAppVar.TrackDisabledNotOccupiedColor &&
                 LLed_Track5.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is not active and not disabled and not transparant
             {
                 LLed_Track5.BackColor = m_FYAppVar.TrackNotActiveColor;     // Set the track TrackNotActiveColor
@@ -1751,14 +1887,16 @@ namespace Siebwalde_Application
             /*---------------------------------------------------------------------------------------------------------------------------------------------*/
 
             if (TrackStatusLight[6] == true &&
-                            LLed_Track6.BackColor != Color.Transparent &&
-                            LLed_Track6.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is active and not disabled and not transparant
+                LLed_Track6.BackColor != Color.Transparent &&
+                LLed_Track6.BackColor != m_FYAppVar.TrackDisabledNotOccupiedColor &&
+                LLed_Track6.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is active and not disabled and not transparant
             {
                 LLed_Track6.BackColor = m_FYAppVar.TrackOccupiedColor;      // Set the track TrackOccupiedColor
                 CheckWhichTrackInline();                                    // Set the color to the corresponding sensors to the LLed_Track6.BackColor
             }
             else if (TrackStatusLight[6] == false &&
                 LLed_Track6.BackColor != Color.Transparent &&
+                LLed_Track6.BackColor != m_FYAppVar.TrackDisabledNotOccupiedColor &&
                 LLed_Track6.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is not active and not disabled and not transparant
             {
                 LLed_Track6.BackColor = m_FYAppVar.TrackNotActiveColor;     // Set the track TrackNotActiveColor
@@ -1769,14 +1907,16 @@ namespace Siebwalde_Application
             /*---------------------------------------------------------------------------------------------------------------------------------------------*/
 
             if (TrackStatusLight[7] == true &&
-                            LLed_Track7.BackColor != Color.Transparent &&
-                            LLed_Track7.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is active and not disabled and not transparant
+                LLed_Track7.BackColor != Color.Transparent &&
+                LLed_Track7.BackColor != m_FYAppVar.TrackDisabledNotOccupiedColor &&
+                LLed_Track7.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is active and not disabled and not transparant
             {
                 LLed_Track7.BackColor = m_FYAppVar.TrackOccupiedColor;      // Set the track TrackOccupiedColor
                 CheckWhichTrackInline();                                    // Set the color to the corresponding sensors to the LLed_Track7.BackColor
             }
             else if (TrackStatusLight[7] == false &&
                 LLed_Track7.BackColor != Color.Transparent &&
+                LLed_Track7.BackColor != m_FYAppVar.TrackDisabledNotOccupiedColor &&
                 LLed_Track7.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is not active and not disabled and not transparant
             {
                 LLed_Track7.BackColor = m_FYAppVar.TrackNotActiveColor;     // Set the track TrackNotActiveColor
@@ -1787,14 +1927,16 @@ namespace Siebwalde_Application
             /*---------------------------------------------------------------------------------------------------------------------------------------------*/
 
             if (TrackStatusLight[8] == true &&
-                            LLed_Track8.BackColor != Color.Transparent &&
-                            LLed_Track8.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is active and not disabled and not transparant
+                LLed_Track8.BackColor != Color.Transparent &&
+                LLed_Track8.BackColor != m_FYAppVar.TrackDisabledNotOccupiedColor &&
+                LLed_Track8.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is active and not disabled and not transparant
             {
                 LLed_Track8.BackColor = m_FYAppVar.TrackOccupiedColor;      // Set the track TrackOccupiedColor
                 CheckWhichTrackInline();                                    // Set the color to the corresponding sensors to the LLed_Track8.BackColor
             }
             else if (TrackStatusLight[8] == false &&
                 LLed_Track8.BackColor != Color.Transparent &&
+                LLed_Track8.BackColor != m_FYAppVar.TrackDisabledNotOccupiedColor &&
                 LLed_Track8.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is not active and not disabled and not transparant
             {
                 LLed_Track8.BackColor = m_FYAppVar.TrackNotActiveColor;     // Set the track TrackNotActiveColor
@@ -1805,14 +1947,16 @@ namespace Siebwalde_Application
             /*---------------------------------------------------------------------------------------------------------------------------------------------*/
 
             if (TrackStatusLight[9] == true &&
-                            LLed_Track9.BackColor != Color.Transparent &&
-                            LLed_Track9.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is active and not disabled and not transparant
+                LLed_Track9.BackColor != Color.Transparent &&
+                LLed_Track9.BackColor != m_FYAppVar.TrackDisabledNotOccupiedColor &&
+                LLed_Track9.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is active and not disabled and not transparant
             {
                 LLed_Track9.BackColor = m_FYAppVar.TrackOccupiedColor;      // Set the track TrackOccupiedColor
                 CheckWhichTrackInline();                                    // Set the color to the corresponding sensors to the LLed_Track9.BackColor
             }
             else if (TrackStatusLight[9] == false &&
                 LLed_Track9.BackColor != Color.Transparent &&
+                LLed_Track9.BackColor != m_FYAppVar.TrackDisabledNotOccupiedColor &&
                 LLed_Track9.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is not active and not disabled and not transparant
             {
                 LLed_Track9.BackColor = m_FYAppVar.TrackNotActiveColor;     // Set the track TrackNotActiveColor
@@ -1823,14 +1967,16 @@ namespace Siebwalde_Application
             /*---------------------------------------------------------------------------------------------------------------------------------------------*/
 
             if (TrackStatusLight[10] == true &&
-                            LLed_Track10.BackColor != Color.Transparent &&
-                            LLed_Track10.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is active and not disabled and not transparant
+                LLed_Track10.BackColor != Color.Transparent &&
+                LLed_Track10.BackColor != m_FYAppVar.TrackDisabledNotOccupiedColor &&
+                LLed_Track10.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is active and not disabled and not transparant
             {
                 LLed_Track10.BackColor = m_FYAppVar.TrackOccupiedColor;      // Set the track TrackOccupiedColor
                 CheckWhichTrackInline();                                    // Set the color to the corresponding sensors to the LLed_Track10.BackColor
             }
             else if (TrackStatusLight[10] == false &&
                 LLed_Track10.BackColor != Color.Transparent &&
+                LLed_Track10.BackColor != m_FYAppVar.TrackDisabledNotOccupiedColor &&
                 LLed_Track10.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is not active and not disabled and not transparant
             {
                 LLed_Track10.BackColor = m_FYAppVar.TrackNotActiveColor;     // Set the track TrackNotActiveColor
@@ -1841,14 +1987,16 @@ namespace Siebwalde_Application
             /*---------------------------------------------------------------------------------------------------------------------------------------------*/
 
             if (TrackStatusLight[11] == true &&
-                            LLed_Track11.BackColor != Color.Transparent &&
-                            LLed_Track11.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is active and not disabled and not transparant
+                LLed_Track11.BackColor != Color.Transparent &&
+                LLed_Track11.BackColor != m_FYAppVar.TrackDisabledNotOccupiedColor &&
+                LLed_Track11.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is active and not disabled and not transparant
             {
                 LLed_Track11.BackColor = m_FYAppVar.TrackOccupiedColor;      // Set the track TrackOccupiedColor
                 CheckWhichTrackInline();                                    // Set the color to the corresponding sensors to the LLed_Track11.BackColor
             }
             else if (TrackStatusLight[11] == false &&
                 LLed_Track11.BackColor != Color.Transparent &&
+                LLed_Track11.BackColor != m_FYAppVar.TrackDisabledNotOccupiedColor &&
                 LLed_Track11.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is not active and not disabled and not transparant
             {
                 LLed_Track11.BackColor = m_FYAppVar.TrackNotActiveColor;     // Set the track TrackNotActiveColor

@@ -503,6 +503,12 @@ namespace Siebwalde_Application
             {
                 FiddleYardApplicationLogging.StoreText("FYApp received a Message event:" + log);
             }
+
+            if (message == "FiddleYardMoveAndF12Assert" || message == "FiddleYardMoveAndF13Assert")     // If the program is running and during fiddle yard move 1 of the 2 sensors trips, Reset the program.
+            {                                                                                           // A future upgrade is to halt the running program and built in a resume command... TBD!!!
+                message = " Reset ";
+            }
+
             ApplicationUpdate(message, val); // let the application know that a message is received from the target
         }
 

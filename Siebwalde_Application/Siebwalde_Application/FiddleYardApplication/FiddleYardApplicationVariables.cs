@@ -395,7 +395,7 @@ namespace Siebwalde_Application
 
             for (int i = 1; i < 12; i++)
             {
-                icheckBoxTrack[i] = 1;
+                icheckBoxTrack[i] = 1;      // Init all tracks disabled
             }
         }
 
