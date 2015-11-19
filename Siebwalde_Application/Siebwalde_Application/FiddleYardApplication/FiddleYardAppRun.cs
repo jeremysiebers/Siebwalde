@@ -77,6 +77,8 @@ namespace Siebwalde_Application
             {
                 TrackPower15VDown = false;
                 m_FYAppLog.StoreText("FYAppRun.Run() TrackPower15VDown = false");
+                m_FYAppLog.StoreText("FYAppRun.Run() Wait aditional time for signals to arrive: System.Threading.Thread.Sleep(500)");
+                System.Threading.Thread.Sleep(500);
                 m_FYAppVar.EMOPressed15VTrackPowerUp.UpdateMessage();//m_iFYApp.GetFYApp().FYFORM.SetMessage("FYAppInit", "EMO released, 15V Track Power up!");
             }
             else if (name == "Collect")

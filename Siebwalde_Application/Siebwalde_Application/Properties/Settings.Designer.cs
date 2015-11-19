@@ -94,5 +94,17 @@ namespace Siebwalde_Application.Properties {
                 this["SETxCOLORxTRACKxDISABLEDxNOTxOCCUPIED"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string dummy {
+            get {
+                return ((string)(this["dummy"]));
+            }
+            set {
+                this["dummy"] = value;
+            }
+        }
     }
 }

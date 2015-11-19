@@ -20,5 +20,8 @@
     <Setting Name="SETxCOLORxTRACKxDISABLEDxNOTxOCCUPIED" Type="System.Drawing.Color" Scope="User">
       <Value Profile="(Default)">192, 0, 0</Value>
     </Setting>
+    <Setting Name="dummy" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
   </Settings>
 </SettingsFile>
