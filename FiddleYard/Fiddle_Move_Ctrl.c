@@ -22,9 +22,9 @@
 
 ////////Motor max PWM settings////////
 #define PWM_ONE_LEFT 700
-#define PWM_ONE_SLOW_LEFT 600
+#define PWM_ONE_SLOW_LEFT 700//600
 #define PWM_ONE_RIGHT 323
-#define PWM_ONE_SLOW_RIGHT 424
+#define PWM_ONE_SLOW_RIGHT 323//424
 
 #define PWM_MULTIPLE_LEFT 800
 #define PWM_MULTIPLE_SLOW_LEFT 600
