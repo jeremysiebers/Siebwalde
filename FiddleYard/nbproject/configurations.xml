@@ -25,7 +25,6 @@
             <itemPath>Microchip/Include/TCPIPStack/ETH97J60.h</itemPath>
             <itemPath>Microchip/Include/TCPIPStack/FileSystem.h</itemPath>
             <itemPath>Microchip/Include/TCPIPStack/FTP.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/HardwareProfileTemplate.h</itemPath>
             <itemPath>Microchip/Include/TCPIPStack/Hashes.h</itemPath>
             <itemPath>Microchip/Include/TCPIPStack/Helpers.h</itemPath>
             <itemPath>Microchip/Include/TCPIPStack/HTTP.h</itemPath>
@@ -56,8 +55,6 @@
             <itemPath>Microchip/Include/TCPIPStack/Telnet.h</itemPath>
             <itemPath>Microchip/Include/TCPIPStack/TFTPc.h</itemPath>
             <itemPath>Microchip/Include/TCPIPStack/Tick.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/UART.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/UART2TCPBridge.h</itemPath>
             <itemPath>Microchip/Include/TCPIPStack/UDP.h</itemPath>
             <itemPath>Microchip/Include/TCPIPStack/UDPPerformanceTest.h</itemPath>
             <itemPath>Microchip/Include/TCPIPStack/XEEPROM.h</itemPath>
@@ -69,7 +66,6 @@
           <itemPath>Microchip/Include/struct_queue.h</itemPath>
           <itemPath>Microchip/Include/TimeDelay.h</itemPath>
           <itemPath>Microchip/Include/timer.h</itemPath>
-          <itemPath>Microchip/Include/uart2.h</itemPath>
         </logicalFolder>
       </logicalFolder>
       <itemPath>Command_Machine.h</itemPath>
@@ -83,6 +79,8 @@
       <itemPath>Track_Move_Ctrl.h</itemPath>
       <itemPath>Train_Detection.h</itemPath>
       <itemPath>Var_Out.h</itemPath>
+      <itemPath>eusart1.h</itemPath>
+      <itemPath>eusart2.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -143,8 +141,6 @@
           <itemPath>Microchip/TCPIPStack/Telnet.c</itemPath>
           <itemPath>Microchip/TCPIPStack/TFTPc.c</itemPath>
           <itemPath>Microchip/TCPIPStack/Tick.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/UART.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/UART2TCPBridge.c</itemPath>
           <itemPath>Microchip/TCPIPStack/UDP.c</itemPath>
           <itemPath>Microchip/TCPIPStack/UDPPerformanceTest.c</itemPath>
         </logicalFolder>
@@ -158,6 +154,8 @@
       <itemPath>Train_Detection.c</itemPath>
       <itemPath>Var_Out.c</itemPath>
       <itemPath>FiddleYard.c</itemPath>
+      <itemPath>eusart1.c</itemPath>
+      <itemPath>eusart2.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -178,6 +176,7 @@
     <Elem>..\Fiddle Yard</Elem>
     <Elem></Elem>
     <Elem>../../../../../../Localdata/Microchip/MCC18/bin/LKR</Elem>
+    <Elem>../../../../../../Program Files/Microchip/xc8/v1.35/include</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
@@ -187,9 +186,9 @@
         <targetDevice>PIC18F97J60</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool>PICkit2PlatformTool</platformTool>
+        <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>C18</languageToolchain>
-        <languageToolchainVersion>3.36</languageToolchainVersion>
+        <languageToolchainVersion>3.37.01</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -251,7 +250,7 @@
       </C18-AS>
       <C18-LD>
         <property key="cod-file" value="true"/>
-        <property key="extra-lib-directories" value="../../../../../../MCC18/lib;;."/>
+        <property key="extra-lib-directories" value="../../../../../../MCC18/lib;."/>
         <property key="hex-output-format" value="INHX32"/>
         <property key="map-file" value="&quot;$(BINDIR_)$(TARGETBASE).map&quot;"/>
       </C18-LD>
@@ -266,11 +265,13 @@
       </C18LanguageToolchain>
       <ICD3PlatformTool>
         <property key="AutoSelectMemRanges" value="auto"/>
+        <property key="Freeze Peripherals" value="true"/>
         <property key="SecureSegment.SegmentProgramming" value="FullChipProgramming"/>
         <property key="ToolFirmwareFilePath"
                   value="Press to browse for a specific firmware version"/>
         <property key="ToolFirmwareOption.UseLatestFirmware" value="true"/>
         <property key="debugoptions.useswbreakpoints" value="false"/>
+        <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="memories.aux" value="false"/>
         <property key="memories.bootflash" value="false"/>
@@ -307,9 +308,9 @@
       <PICkit2PlatformTool>
         <property key="pk2settings.3state" value="false"/>
         <property key="pk2settings.preserveee" value="false"/>
-        <property key="pk2settings.setvddvoltage" value=""/>
+        <property key="pk2settings.setvddvoltage" value="3,3"/>
         <property key="pk2settings.userpgmexec" value="true"/>
-        <property key="pk2settings.usetargetpower" value="false"/>
+        <property key="pk2settings.usetargetpower" value="true"/>
       </PICkit2PlatformTool>
     </conf>
   </confs>

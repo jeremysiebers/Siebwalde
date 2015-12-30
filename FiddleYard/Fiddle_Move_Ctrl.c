@@ -168,9 +168,9 @@ void PWM_Update(unsigned char ASL, unsigned int Value)
 {
 	switch (ASL)
 	{
-		case	TOP		:	SetDCPWM3(Value);
+		case	TOP		:	//SetDCPWM3(Value);
 							break;
-		case	BOTTOM	:	SetDCPWM1(Value);
+		case	BOTTOM	:	//SetDCPWM1(Value);
 							break;
 		default			:	break;
 	}	
@@ -180,9 +180,9 @@ void Pwm_Brake(unsigned char ASL, unsigned char Value)
 {
 	switch (ASL)
 	{
-		case	TOP		:	Pwm_Brake_TOP =! Value;
+		case	TOP		:	//Pwm_Brake_TOP =! Value;
 							break;
-		case	BOTTOM	:	Pwm_Brake_BOTTOM =! Value;
+		case	BOTTOM	:	//Pwm_Brake_BOTTOM =! Value;
 							break;	
 		default			:	break;
 	}

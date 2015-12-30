@@ -2,6 +2,7 @@
 #define THIS_IS_STACK_APPLICATION
 
 #include <p18f97j60.h>			// uProc lib
+#include <Fiddle_Yard.h>		// main header file
 #include <TCPIP.h>				// TCPIP header
 #include <stdio.h>				// stdio lib
 #include <stdlib.h>				// std lib
@@ -11,13 +12,14 @@
 #include <Command_Machine.h>	// serial commands received
 #include <Diagnostic_ret.h>		// serial transmitting of IO
 #include <Fiddle_Move_Ctrl.h>   //
-#include <Fiddle_Yard.h>		// main header file
 #include <Shift_Register.h>		// IO from Fiddle Yard
 #include <State_Machine.h>		// all movements and fidle yard program
 #include <Track_Move_Ctrl.h>   //
 #include <Train_Detection.h>    //
 #include <Var_Out.h>			// building packets to transmit
 #include <adc.h>				// ADC lib
+#include <eusart1.h>            // UART1 lib
+#include <eusart2.h>            // UART1 lib
 //#include <IO_Expander.h>		// IO Expander extra IO
 
 //CONFIGURATION BITS//
@@ -51,37 +53,55 @@ BYTE AN0String[8];
 // These may or may not be present in all applications.
 static void InitAppConfig(void);
 
-#define Init_IO()			TRISJ=0xFF,TRISH=0xFF,TRISG=0xFA,TRISF=0xFF,TRISE=0x00,TRISD=0x60,TRISC=0xFA;TRISA=0xC;TRISB=0xC3;// All ports including Pwm and AD
+#define Init_IO()			TRISJ=0xFF,TRISH=0xFF,TRISG=0xFF,TRISF=0xFF,TRISE=0x00,TRISD=0x60,TRISC=0xFF;TRISA=0xC;TRISB=0xC3;// All ports including Pwm and AD
 #define Leds_Off()			Led1 = Off, Led2 = Off, Led3 = Off;
 
 static void Init_Timers(void);
-static void Init_Pwm(void);
-static void Init_Ad(void);
 
 static unsigned char Enable_State_Machine_Update = 0;
 static DWORD dwLastIP = 0;
 
 static unsigned char Send_Var_Out[3];
 
+
+
 //MAIN ROUTINE///////////////////////////////////////////////////////////////////////////////////////////
 void main()
-{			
+{
+    stdout = _H_USER;
 	TRISA 	= 0xFF;TRISB = 0xFF;TRISC = 0xFF;TRISD = 0xFF;TRISE = 0xFF;TRISF = 0xFF;TRISG = 0xFF;TRISH = 0xFF;TRISJ = 0xFF;				// All IO are inputs
 	PORTA 	= 0x00, PORTB = 0x00, PORTC = 0x00, PORTD = 0x00, PORTE = 0x00, PORTF = 0x00, PORTG = 0x00, PORTH = 0x00, PORTJ = 0x00; 	// All IO = 0 
 	ADCON0 	= 0x00;																														// AD OFF
 	ADCON1 	= 0x0F;																														// All Digital
 	CMCON 	= 0x07;
 	
+    EUSART1_Initialize();
+    EUSART2_Initialize();    
 	Init_Timers();
 	TickInit(); 
 	InitAppConfig(); 
 	StackInit(); 
-	Init_Ad();	
-	Init_Pwm();
-	Init_IO();
-	//Init_IOExpander();
+	Init_IO();	
 	Leds_Off();	
 	
+    printf("E1xG");
+    printf("C1x2r2t0.2G");
+    printf("V1x100G");
+    printf("n1xG");
+    printf("H1xG");
+    printf("R1x42800G");
+    printf("R1x42800G");
+    printf("R1x42800G");
+    printf("R1x42800G");
+    printf("R1x42800G");
+    printf("R1x42800G");
+    printf("R1x42800G");
+    printf("R1x42800G");
+    printf("R1x42800G");
+    printf("R1x42800G");
+    printf("A1x0G");
+    printf("f1xG");
+    
 	while(1)
 	{
 
@@ -147,13 +167,24 @@ void low_isr()
 		TickUpdate();
 	}
 				
-	if (PIR1bits.TMR1IF)						
+	else if (PIR1bits.TMR1IF)						
 	{	
 		TMR1H = 0xF0;//0xF3	= 3333 Hz, 0x00 = 1587 Hz, 0xF0 = 2439 Hz
 		TMR1L = 0x00;
 		Enable_State_Machine_Update = True;
 		PIR1bits.TMR1IF=False;		
-	}	
+	}
+    else if (PIE3bits.RC2IE == 1 && PIR3bits.RC2IF == 1) {
+        EUSART2_Receive_ISR();
+    } else if (PIE3bits.TX2IE == 1 && PIR3bits.TX2IF == 1) {
+        EUSART2_Transmit_ISR();
+    } else if (PIE1bits.RC1IE == 1 && PIR1bits.RC1IF == 1) {
+        EUSART1_Receive_ISR();
+    } else if (PIE1bits.TX1IE == 1 && PIR1bits.TX1IF == 1) {
+        EUSART1_Transmit_ISR();
+    } else {
+        //Unhandled Interrupt
+    }
 }
 #pragma code
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -202,9 +233,10 @@ void Init_Ad()
 	ADCON1 = 0x0B;	// Channel AN0 to AN3 are configured as AD inputs for the AD converter. However AN0 to AN1 are Ethernet leds, so they are outputs.AN2 and AN3 are PORTA bits 2 and 3 (RA2, RA3)
 	ADCON2 = 0x92;	// Acquisition time and converting time of the AD same for both channels 0x92 = /32	0x96 = /64 and 4 TAD (Tacq)
 }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Init_Pwm()
-{
+void Init_PWM()
+{   /*
 	// PWM setup using 25mA outputs to drive opto's ECCP 3 and 1 are chosen for PWM
 	T3CON = 0x00;			// Timer 2 and 4 are clock sources for all CCPx/ECCPx modules, tmr2 is used for PWM mode page 186, 0x60 for tmr 3 and 4, 0x00 for tmr 1 and 2
 	
@@ -218,7 +250,7 @@ void Init_Pwm()
 	Pwm_Brake_TOP = 1;
 	CCPR3L = 0x7F;			//PWM Duty cycle PWM2
 	CCP3CON = 0x0C;			//PWM Mode
-
+    */
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
