@@ -65,7 +65,7 @@ PORTFbits.RF7 = Bridge_10R_ Bottom              PORTFbits.RF7 = EOS_11_ Bottom  
 												3.3V, 2mA                                           3.3V, 2mA
                                                                                                     
 												OPTO_BOARD_1_TOP_PG1                                OPTO_BOARD_1_TOP_PG3
-PORTGbits.RG0 = PWM Top                         PORTGbits.RG0 = PWM Top                             PORTGbits.RG0 = PWM Top
+PORTGbits.RG0 = PWM Top                         PORTGbits.RG0 = PWM Top                             PORTGbits.RG0 = SPARE_INPUT Top
 PORTGbits.RG1 = Brake Top                       PORTGbits.RG1 = Bridge_10L_ Top                     PORTGbits.RG1 = TX2
 PORTGbits.RG2 = Bezet_Uit_7_ Top                PORTGbits.RG2 = Brake Top                           PORTGbits.RG2 = RX2
 PORTGbits.RG3 = Bezet_Uit_8A_ Top               PORTGbits.RG3 = Bridge_10R_ Top                     PORTGbits.RG3 = F13_ Top
