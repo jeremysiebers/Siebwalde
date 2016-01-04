@@ -6,59 +6,61 @@
                    projectFiles="true">
       <logicalFolder name="Microchip" displayName="Microchip" projectFiles="true">
         <logicalFolder name="Include" displayName="Include" projectFiles="true">
-          <logicalFolder name="PIC18Salloc" displayName="PIC18Salloc" projectFiles="true">
-            <itemPath>Microchip/Include/PIC18Salloc/salloc.h</itemPath>
+          <logicalFolder name="PIC18Salloc"
+                         displayName="PIC18 Salloc"
+                         projectFiles="true">
+            <itemPath>Microchip/Include/PIC18 Salloc/salloc.h</itemPath>
           </logicalFolder>
-          <logicalFolder name="TCPIPStack" displayName="TCPIPStack" projectFiles="true">
-            <itemPath>Microchip/Include/TCPIPStack/Announce.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/ARCFOUR.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/ARP.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/AutoIP.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/BerkeleyAPI.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/BigInt.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/Delay.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/DHCP.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/DNS.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/DynDNS.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/ENC28J60.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/ENCX24J600.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/ETH97J60.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/FileSystem.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/FTP.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/Hashes.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/Helpers.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/HTTP.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/HTTP2.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/ICMP.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/IP.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/LCDBlocking.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/MAC.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/MPFS.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/MPFS2.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/NBNS.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/Random.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/Reboot.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/regdef.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/RSA.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/SMTP.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/SNMP.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/SNMPv3.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/SNTP.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/SPIFlash.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/SPIRAM.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/SSL.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/StackTsk.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/TCP.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/TCPIP.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/TCPIPConfigTemplate.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/TCPPerformanceTest.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/Telnet.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/TFTPc.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/Tick.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/UDP.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/UDPPerformanceTest.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/XEEPROM.h</itemPath>
-            <itemPath>Microchip/Include/TCPIPStack/_HTTP2.h</itemPath>
+          <logicalFolder name="TCPIPStack" displayName="TCPIP Stack" projectFiles="true">
+            <itemPath>Microchip/Include/TCPIP Stack/ARCFOUR.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/ARP.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/Announce.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/AutoIP.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/BerkeleyAPI.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/BigInt.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/DHCP.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/DNS.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/Delay.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/DynDNS.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/ENC28J60.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/ENCX24J600.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/ETH97J60.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/FTP.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/FileSystem.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/HTTP.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/HTTP2.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/Hashes.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/Helpers.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/ICMP.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/IP.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/LCDBlocking.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/MAC.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/MPFS.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/MPFS2.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/NBNS.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/RSA.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/Random.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/Reboot.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/SMTP.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/SNMP.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/SNMPv3.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/SNTP.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/SPIFlash.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/SPIRAM.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/SSL.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/StackTsk.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/TCP.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/TCPIP.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/TCPIPConfigTemplate.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/TCPPerformanceTest.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/TFTPc.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/Telnet.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/Tick.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/UDP.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/UDPPerformanceTest.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/XEEPROM.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/_HTTP2.h</itemPath>
+            <itemPath>Microchip/Include/TCPIP Stack/regdef.h</itemPath>
           </logicalFolder>
           <itemPath>Microchip/Include/Compiler.h</itemPath>
           <itemPath>Microchip/Include/GenericTypeDefs.h</itemPath>
@@ -70,7 +72,6 @@
       </logicalFolder>
       <itemPath>Command_Machine.h</itemPath>
       <itemPath>Diagnostic_ret.h</itemPath>
-      <itemPath>Fiddle_Move_Ctrl.h</itemPath>
       <itemPath>Fiddle_Yard.h</itemPath>
       <itemPath>HardwareProfile.h</itemPath>
       <itemPath>Shift_Register.h</itemPath>
@@ -81,6 +82,7 @@
       <itemPath>Var_Out.h</itemPath>
       <itemPath>eusart1.h</itemPath>
       <itemPath>eusart2.h</itemPath>
+      <itemPath>Mip50_API.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -94,68 +96,70 @@
           <itemPath>Microchip/Common/TimeDelay.c</itemPath>
           <itemPath>Microchip/Common/timer.c</itemPath>
         </logicalFolder>
-        <logicalFolder name="PIC18Salloc" displayName="PIC18Salloc" projectFiles="true">
-          <itemPath>Microchip/PIC18Salloc/salloc.c</itemPath>
+        <logicalFolder name="PIC18Salloc"
+                       displayName="PIC18 Salloc"
+                       projectFiles="true">
+          <itemPath>Microchip/PIC18 Salloc/salloc.c</itemPath>
         </logicalFolder>
-        <logicalFolder name="TCPIPStack" displayName="TCPIPStack" projectFiles="true">
-          <itemPath>Microchip/TCPIPStack/Announce.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/ARCFOUR.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/ARP.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/AutoIP.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/BerkeleyAPI.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/BigInt.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/Delay.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/DHCP.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/DHCPs.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/DNS.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/DNSs.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/DynDNS.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/ETH97J60.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/FileSystem.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/FTP.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/Hashes.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/Helpers.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/HTTP.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/HTTP2.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/ICMP.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/IP.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/LCDBlocking.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/MPFS.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/MPFS2.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/NBNS.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/Random.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/Reboot.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/RSA.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/SMTP.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/SNMP.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/SNMPv3.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/SNMPv3USM.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/SNTP.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/SPIEEPROM.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/SPIFlash.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/SPIRAM.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/SSL.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/StackTsk.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/TCP.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/TCPPerformanceTest.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/Telnet.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/TFTPc.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/Tick.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/UDP.c</itemPath>
-          <itemPath>Microchip/TCPIPStack/UDPPerformanceTest.c</itemPath>
+        <logicalFolder name="TCPIP Stack" displayName="TCPIP Stack" projectFiles="true">
+          <itemPath>Microchip/TCPIP Stack/Announce.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/ARCFOUR.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/ARP.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/AutoIP.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/BerkeleyAPI.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/BigInt.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/Delay.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/DHCP.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/DHCPs.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/DNS.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/DNSs.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/DynDNS.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/ETH97J60.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/FileSystem.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/FTP.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/Hashes.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/Helpers.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/HTTP.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/HTTP2.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/ICMP.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/IP.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/LCDBlocking.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/MPFS.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/MPFS2.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/NBNS.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/Random.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/Reboot.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/RSA.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/SMTP.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/SNMP.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/SNMPv3.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/SNMPv3USM.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/SNTP.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/SPIEEPROM.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/SPIFlash.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/SPIRAM.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/SSL.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/StackTsk.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/TCP.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/TCPPerformanceTest.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/Telnet.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/TFTPc.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/Tick.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/UDP.c</itemPath>
+          <itemPath>Microchip/TCPIP Stack/UDPPerformanceTest.c</itemPath>
         </logicalFolder>
       </logicalFolder>
       <itemPath>Command_Machine.c</itemPath>
       <itemPath>Diagnostic_ret.c</itemPath>
-      <itemPath>Fiddle_Move_Ctrl.c</itemPath>
       <itemPath>Shift_Register.c</itemPath>
       <itemPath>State_Machine.c</itemPath>
-      <itemPath>Track_Move_Ctrl.c</itemPath>
       <itemPath>Train_Detection.c</itemPath>
       <itemPath>Var_Out.c</itemPath>
       <itemPath>FiddleYard.c</itemPath>
       <itemPath>eusart1.c</itemPath>
       <itemPath>eusart2.c</itemPath>
+      <itemPath>Mip50_API.c</itemPath>
+      <itemPath>Track_Move_Ctrl.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -232,7 +236,7 @@
         <property key="enable-ou" value="false"/>
         <property key="enable-ow" value="true"/>
         <property key="extra-include-directories"
-                  value="../Fiddle Yard;../Fiddle Yard/Microchip/Include/TCPIP Stack;../Fiddle Yard/Microchip/Include;../Fiddle Yard/i2C2;../../../../../../MCC18/h;../Fiddle Yard/I2c2;."/>
+                  value="../FiddleYard;../FiddleYard/Microchip/Include/TCPIP Stack;../FiddleYard/Microchip/Include;../../../../../../MCC18/h;."/>
         <property key="optimization-master" value="Custom"/>
         <property key="preprocessor-macros" value=""/>
         <property key="procedural-abstraction-passes" value="4"/>

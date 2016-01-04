@@ -11,19 +11,18 @@
 #include <pwm.h>				// Pwm routines
 #include <Command_Machine.h>	// serial commands received
 #include <Diagnostic_ret.h>		// serial transmitting of IO
-#include <Fiddle_Move_Ctrl.h>   //
 #include <Shift_Register.h>		// IO from Fiddle Yard
 #include <State_Machine.h>		// all movements and fidle yard program
 #include <Track_Move_Ctrl.h>   //
 #include <Train_Detection.h>    //
 #include <Var_Out.h>			// building packets to transmit
 #include <adc.h>				// ADC lib
-#include <eusart1.h>            // UART1 lib
-#include <eusart2.h>            // UART1 lib
-//#include <IO_Expander.h>		// IO Expander extra IO
+#include "eusart1.h"
+#include "eusart2.h"
+
 
 //CONFIGURATION BITS//
-#pragma config DEBUG = OFF
+#pragma config DEBUG = ON
 //#pragma config XINST = OFF
 #pragma config STVR = ON
 //#pragma config WDT = OFF
@@ -83,24 +82,6 @@ void main()
 	StackInit(); 
 	Init_IO();	
 	Leds_Off();	
-	
-    printf("E1xG");
-    printf("C1x2r2t0.2G");
-    printf("V1x100G");
-    printf("n1xG");
-    printf("H1xG");
-    printf("R1x42800G");
-    printf("R1x42800G");
-    printf("R1x42800G");
-    printf("R1x42800G");
-    printf("R1x42800G");
-    printf("R1x42800G");
-    printf("R1x42800G");
-    printf("R1x42800G");
-    printf("R1x42800G");
-    printf("R1x42800G");
-    printf("A1x0G");
-    printf("f1xG");
     
 	while(1)
 	{
@@ -110,7 +91,16 @@ void main()
 	 		 	
 	 	Diagnostic();
 	    Command();
-	    //IOExpander();
+	    
+        
+        if (EUSART1_DataReady)
+        {
+            MIP50xRECEIVEDxDATA(0);                                             // MIP50 Bottom recieved date
+        }
+        if (EUSART2_DataReady)
+        {
+            MIP50xRECEIVEDxDATA(1);                                             // MIP50 TOP received data
+        }
 	    	    		
 		if (Enable_State_Machine_Update == True && Output_Enable == True)	// When the output is enabled (after getting IP from DHCP) and update bit is true
 		{
@@ -227,32 +217,6 @@ void Init_Timers()
 	T1CON = 0x81;					// 0xB1 = 1:8(40mS), 0xA1 = 1:4(22.5mS), 0x91 = 1:2(11mS), 0x81 = 1:1(5.5mS) 0x81 = 16Bit and anabled
 
 }
-
-void Init_Ad()
-{
-	ADCON1 = 0x0B;	// Channel AN0 to AN3 are configured as AD inputs for the AD converter. However AN0 to AN1 are Ethernet leds, so they are outputs.AN2 and AN3 are PORTA bits 2 and 3 (RA2, RA3)
-	ADCON2 = 0x92;	// Acquisition time and converting time of the AD same for both channels 0x92 = /32	0x96 = /64 and 4 TAD (Tacq)
-}
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void Init_PWM()
-{   /*
-	// PWM setup using 25mA outputs to drive opto's ECCP 3 and 1 are chosen for PWM
-	T3CON = 0x00;			// Timer 2 and 4 are clock sources for all CCPx/ECCPx modules, tmr2 is used for PWM mode page 186, 0x60 for tmr 3 and 4, 0x00 for tmr 1 and 2
-	
-	T2CON = 0x04;			// Postscale 1:1, Timer2 On, Prescaler is 1
-		
-	Pwm_Brake_BOTTOM = 1;
-	PR2=0xff;				//PWM Period TMR2 zelfde voor PWM1(ECCP1) en PWM2(ECCP3)
-	CCPR1L = 0x7F;			//PWM Duty cycle PWM1
-	CCP1CON = 0x0C;			//PWM Mode
-		
-	Pwm_Brake_TOP = 1;
-	CCPR3L = 0x7F;			//PWM Duty cycle PWM2
-	CCP3CON = 0x0C;			//PWM Mode
-    */
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /*********************************************************************
  * Function:        void InitAppConfig(void)

@@ -3,7 +3,6 @@
 #include <Command_Machine.h>
 #include <Var_Out.h>
 #include <Fiddle_Yard.h>
-#include <Fiddle_Move_Ctrl.h>
 #include <Track_Move_Ctrl.h>
 #include <Train_Detection.h>
 
@@ -63,6 +62,7 @@
 #define Bezet_In_7_Switch_Off 25
 #define Restart_Previous_Command 26
 #define Start_Collect 27
+#define FY_Home 28
 
 ////////Fy_Running (standard)////////
 #define Train_On_5B_Start 0
@@ -122,8 +122,7 @@ static STATE_MACHINE_VAR ACT_ST_MCHN[2]= 	{{Fy_Reset,Train_On_5B_Start,0,0,0,Off
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void State_Machine_Reset(unsigned char ASL)
-{
-    Fiddle_Move_Ctrl_Reset(ASL);																// Reset all Fiddle Move Ctrl var
+{    
     Track_Move_Ctrl_Reset(ASL);																	// Reset all Track Move Ctrl var
     Train_Detection_Reset(ASL);																	// Reset all Train Detection var
     
@@ -158,8 +157,7 @@ void State_Machine_Update(unsigned char ASL)	//ASL = Active_Struct_Level, BOTTOM
 	switch (ACT_ST_MCHN[ASL].State_Machine_Switch)
 	{
 		
-		case Fy_Reset	:	Fiddle_Move_Ctrl_Reset(ASL);																// Reset all Fiddle Move Ctrl var
-							Track_Move_Ctrl_Reset(ASL);																	// Reset all Track Move Ctrl var
+		case Fy_Reset	:	Track_Move_Ctrl_Reset(ASL);																	// Reset all Track Move Ctrl var
 							Train_Detection_Reset(ASL);																	// Reset all Train Detection var
 																
 							Bezet_In_5B(ASL,On);
@@ -203,22 +201,8 @@ void State_Machine_Update(unsigned char ASL)	//ASL = Active_Struct_Level, BOTTOM
 																	Target_Ready(ASL);
 																	break;
 																	
-								case	Fiddle_Yard_One_Left	:	switch(ACT_ST_MCHN[ASL].Return_Val_Routine = Fiddle_One_Left(ASL))
-																	{
-																		case	Finished	:	Exe_Cmd_Ret(ASL,0);
-																								Target_Ready(ASL);
-																								break;
-																		case	Busy		:	//Exe_Cmd_Ret(ASL,1);	// ASL,1 (1) means no other commands allowed
-																								break;
-																		default				:	ERROR_Code_Report(ASL,ACT_ST_MCHN[ASL].Return_Val_Routine);
-																								Exe_Cmd_Ret(ASL,0);
-                                                                                                Target_Ready(ASL);
-																								break;
-																	}
-																	break;
-																	
-								case	Fiddle_Yard_One_Right	:	switch(ACT_ST_MCHN[ASL].Return_Val_Routine = Fiddle_One_Right(ASL))
-																	{
+								case	FY_Home                 :	switch(ACT_ST_MCHN[ASL].Return_Val_Routine = Track_Mover(ASL,0))        // 0 is used to Home FY (homing routine MIP50)
+																	{	
 																		case	Finished	:	Exe_Cmd_Ret(ASL,0);
 																								Target_Ready(ASL);
 																								break;
