@@ -221,7 +221,7 @@
         <property key="code-model" value="ml"/>
         <property key="data-model" value="oa-"/>
         <property key="default-char-unsigned" value="false"/>
-        <property key="enable-all-optimizations" value="true"/>
+        <property key="enable-all-optimizations" value="false"/>
         <property key="enable-int-promotion" value="false"/>
         <property key="enable-multi-bank-stack-model" value="false"/>
         <property key="enable-ob" value="false"/>
@@ -237,7 +237,7 @@
         <property key="enable-ow" value="true"/>
         <property key="extra-include-directories"
                   value="../FiddleYard;../FiddleYard/Microchip/Include/TCPIP Stack;../FiddleYard/Microchip/Include;../../../../../../MCC18/h;."/>
-        <property key="optimization-master" value="Debug friendly"/>
+        <property key="optimization-master" value="Disable all"/>
         <property key="preprocessor-macros" value=""/>
         <property key="procedural-abstraction-passes" value="4"/>
         <property key="storage-class" value="sca"/>

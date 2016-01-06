@@ -92,7 +92,7 @@ void main()
 	 		 	
 	 	Diagnostic();
 	    Command();
-	    //UARTxCOMM(TOP);                                                         // Check if data is received from MIP or that data must be sent Top layer
+	    UARTxCOMM(TOP);                                                         // Check if data is received from MIP or that data must be sent Top layer
         UARTxCOMM(BOTTOM);                                                      // Check if data is received from MIP or that data must be sent Bottom layer
 	    	    		
 		if (Enable_State_Machine_Update == True && Output_Enable == True)       // When the output is enabled (after getting IP from DHCP) and update bit is true
