@@ -48,7 +48,7 @@ void Train_Detection_Reset(unsigned char ASL)
 
 unsigned char Train_Detection(unsigned char ASL)
 {
-	static char Return_Val = Busy, Return_Val_Routine = Busy;
+	char Return_Val = Busy, Return_Val_Routine = Busy;
 	
 	switch(ACT_ST_MCHN[ASL].Train_Detector)
 	{
@@ -106,12 +106,10 @@ unsigned char Train_Detection(unsigned char ASL)
 													break;
 													
 							case	Busy		:	if ((CL_10_Heart(ASL == On)) && (F10(ASL) == On))
-														{
-															ACT_ST_MCHN[ASL].Train_In_Track[Track_Nr(ASL)] = True;
-														}
+													{
+														ACT_ST_MCHN[ASL].Train_In_Track[Track_Nr(ASL)] = True;
+													}
 													else {ACT_ST_MCHN[ASL].Train_In_Track[Track_Nr(ASL)] = False;}
-														
-													
 													Return_Val = Busy;
 													break;
 													

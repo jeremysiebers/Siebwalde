@@ -5,6 +5,7 @@
 #include <Fiddle_Yard.h>
 #include <Track_Move_Ctrl.h>
 #include <Train_Detection.h>
+#include <Mip50_API.h>
 
 ////////ERROR and return CODES////////
 #define ERROR 0xEE	// general switch case when error
@@ -60,9 +61,9 @@
 #define Bezet_In_6_Switch_Off 23
 #define Bezet_In_7_Switch_On 24
 #define Bezet_In_7_Switch_Off 25
-#define Restart_Previous_Command 26
+#define FY_Home 26
 #define Start_Collect 27
-#define FY_Home 28
+#define Restart_Previous_Command 28
 
 ////////Fy_Running (standard)////////
 #define Train_On_5B_Start 0
@@ -178,7 +179,7 @@ void State_Machine_Update(unsigned char ASL)	//ASL = Active_Struct_Level, BOTTOM
 							ACT_ST_MCHN[ASL].Return_Val_Routine = Busy;													// Used for returns stats
                                                         
 							Enable_Track(ASL,Off);																		// decouple track as default that no trains start running
-							
+                            							
                             Exe_Cmd_Ret(ASL,0);                                                                         // Return with command execution ready internal
 							Target_Ready(ASL);                                                                          // Send message to C# uProc is ready for next command
                             
@@ -201,7 +202,7 @@ void State_Machine_Update(unsigned char ASL)	//ASL = Active_Struct_Level, BOTTOM
 																	Target_Ready(ASL);
 																	break;
 																	
-								case	FY_Home                 :	switch(ACT_ST_MCHN[ASL].Return_Val_Routine = Track_Mover(ASL,0))        // 0 is used to Home FY (homing routine MIP50)
+								case	FY_Home                 :	switch(ACT_ST_MCHN[ASL].Return_Val_Routine = Track_Mover(ASL,0))
 																	{	
 																		case	Finished	:	Exe_Cmd_Ret(ASL,0);
 																								Target_Ready(ASL);
@@ -211,6 +212,32 @@ void State_Machine_Update(unsigned char ASL)	//ASL = Active_Struct_Level, BOTTOM
 																		default				:	ERROR_Code_Report(ASL,ACT_ST_MCHN[ASL].Return_Val_Routine);
 																								Exe_Cmd_Ret(ASL,0);
                                                                                                 Target_Ready(ASL);
+																								break;
+																	}
+																	break;
+                                                                    
+                                case	Fiddle_Yard_One_Left	:	switch(ACT_ST_MCHN[ASL].Return_Val_Routine = Track_Mover(ASL,Track_Nr(ASL) + 1))
+																	{
+																		case	Finished	:	Exe_Cmd_Ret(ASL,0);
+																								Target_Ready(ASL);
+																								break;
+																		case	Busy		:	//Exe_Cmd_Ret(ASL,1);	// ASL,1 (1) means no other commands allowed
+																								break;
+																		default				:	ERROR_Code_Report(ASL,ACT_ST_MCHN[ASL].Return_Val_Routine);
+																								Exe_Cmd_Ret(ASL,0);
+																								break;
+																	}
+																	break;
+																	
+								case	Fiddle_Yard_One_Right	:	switch(ACT_ST_MCHN[ASL].Return_Val_Routine = Track_Mover(ASL,Track_Nr(ASL) - 1))
+																	{
+																		case	Finished	:	Exe_Cmd_Ret(ASL,0);
+																								Target_Ready(ASL);
+																								break;
+																		case	Busy		:	//Exe_Cmd_Ret(ASL,1);	// ASL,1 (1) means no other commands allowed
+																								break;
+																		default				:	ERROR_Code_Report(ASL,ACT_ST_MCHN[ASL].Return_Val_Routine);
+																								Exe_Cmd_Ret(ASL,0);
 																								break;
 																	}
 																	break;

@@ -53,8 +53,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 /**
   Section: Macro Declarations
  */
-#define EUSART2_TX_BUFFER_SIZE 8
-#define EUSART2_RX_BUFFER_SIZE 8
+#define EUSART2_TX_BUFFER_SIZE 20
+#define EUSART2_RX_BUFFER_SIZE 20
 
 /**
   Section: Global Variables
@@ -110,12 +110,34 @@ void EUSART2_Initialize(void) {
     PIE3bits.RC2IE = 1;
 }
 
+/*
 uint8_t EUSART2_Read(void) {
     uint8_t readValue = 0;
 
-    while (0 == eusart2RxCount) {
+    if (0 == eusart2RxCount) {
+        readValue = 0;
     }
+    else
+    {
+        PIE3bits.RC2IE = 0;
 
+        readValue = eusart2RxBuffer[eusart2RxTail++];
+        if (sizeof (eusart2RxBuffer) <= eusart2RxTail) {
+            eusart2RxTail = 0;
+        }
+        eusart2RxCount--;
+        PIE3bits.RC2IE = 1;
+    }
+    return readValue;
+}
+*/
+
+ uint8_t EUSART2_Read(void) {
+    uint8_t readValue = 0;
+
+    while (0 == eusart2RxCount) {       
+    }
+    
     PIE3bits.RC2IE = 0;
 
     readValue = eusart2RxBuffer[eusart2RxTail++];
@@ -124,9 +146,10 @@ uint8_t EUSART2_Read(void) {
     }
     eusart2RxCount--;
     PIE3bits.RC2IE = 1;
-
+    
     return readValue;
 }
+
 
 void EUSART2_Write(uint8_t txData) {
     while (0 == eusart2TxBufferRemaining) {

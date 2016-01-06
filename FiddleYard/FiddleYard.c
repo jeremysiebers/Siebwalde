@@ -19,10 +19,11 @@
 #include <adc.h>				// ADC lib
 #include "eusart1.h"
 #include "eusart2.h"
+#include "Mip50_API.h"
 
 
 //CONFIGURATION BITS//
-#pragma config DEBUG = ON
+#pragma config DEBUG = OFF
 //#pragma config XINST = OFF
 #pragma config STVR = ON
 //#pragma config WDT = OFF
@@ -72,16 +73,16 @@ void main()
 	PORTA 	= 0x00, PORTB = 0x00, PORTC = 0x00, PORTD = 0x00, PORTE = 0x00, PORTF = 0x00, PORTG = 0x00, PORTH = 0x00, PORTJ = 0x00; 	// All IO = 0 
 	ADCON0 	= 0x00;																														// AD OFF
 	ADCON1 	= 0x0F;																														// All Digital
-	CMCON 	= 0x07;
-	
-    EUSART1_Initialize();
-    EUSART2_Initialize();    
-	Init_Timers();
+	CMCON 	= 0x07;	
+    
+	Init_Timers();                                                              // before UARTS
 	TickInit(); 
 	InitAppConfig(); 
-	StackInit(); 
+	StackInit();      
 	Init_IO();	
 	Leds_Off();	
+    EUSART1_Initialize();
+    EUSART2_Initialize();  
     
 	while(1)
 	{
@@ -91,25 +92,17 @@ void main()
 	 		 	
 	 	Diagnostic();
 	    Command();
-	    
-        
-        if (EUSART1_DataReady)
-        {
-            MIP50xRECEIVEDxDATA(0);                                             // MIP50 Bottom recieved date
-        }
-        if (EUSART2_DataReady)
-        {
-            MIP50xRECEIVEDxDATA(1);                                             // MIP50 TOP received data
-        }
+	    //UARTxCOMM(TOP);                                                         // Check if data is received from MIP or that data must be sent Top layer
+        UARTxCOMM(BOTTOM);                                                      // Check if data is received from MIP or that data must be sent Bottom layer
 	    	    		
-		if (Enable_State_Machine_Update == True && Output_Enable == True)	// When the output is enabled (after getting IP from DHCP) and update bit is true
+		if (Enable_State_Machine_Update == True && Output_Enable == True)       // When the output is enabled (after getting IP from DHCP) and update bit is true
 		{
 			//Led4 = 1;
-			To_Externall_WDT_Pulse =! To_Externall_WDT_Pulse;				// Kick external watchdog to preserve runaway when going into debug mode
-			IO();															// Write/Read all IO
-			State_Machine_Update(TOP);										// Update TOP level of Fiddle Yard
-			State_Machine_Update(BOTTOM);									// Update BOTTOM level of Fiddle Yard
-			Enable_State_Machine_Update = False;							// Reset Fiddle Yard update bit
+			To_Externall_WDT_Pulse =! To_Externall_WDT_Pulse;                   // Kick external watchdog to preserve runaway when going into debug mode
+			IO();                                                               // Write/Read all IO
+			State_Machine_Update(TOP);                                          // Update TOP level of Fiddle Yard
+			State_Machine_Update(BOTTOM);                                       // Update BOTTOM level of Fiddle Yard
+			Enable_State_Machine_Update = False;                                // Reset Fiddle Yard update bit
 			//Led4 = 0;						
 		}
 		
@@ -157,23 +150,24 @@ void low_isr()
 		TickUpdate();
 	}
 				
-	else if (PIR1bits.TMR1IF)						
+	if (PIR1bits.TMR1IF)						
 	{	
 		TMR1H = 0xF0;//0xF3	= 3333 Hz, 0x00 = 1587 Hz, 0xF0 = 2439 Hz
 		TMR1L = 0x00;
 		Enable_State_Machine_Update = True;
 		PIR1bits.TMR1IF=False;		
 	}
-    else if (PIE3bits.RC2IE == 1 && PIR3bits.RC2IF == 1) {
+    if (PIE3bits.RC2IE == 1 && PIR3bits.RC2IF == 1) {
         EUSART2_Receive_ISR();
-    } else if (PIE3bits.TX2IE == 1 && PIR3bits.TX2IF == 1) {
+    } 
+    if (PIE3bits.TX2IE == 1 && PIR3bits.TX2IF == 1) {
         EUSART2_Transmit_ISR();
-    } else if (PIE1bits.RC1IE == 1 && PIR1bits.RC1IF == 1) {
+    } 
+    if (PIE1bits.RC1IE == 1 && PIR1bits.RC1IF == 1) {
         EUSART1_Receive_ISR();
-    } else if (PIE1bits.TX1IE == 1 && PIR1bits.TX1IF == 1) {
+    } 
+    if (PIE1bits.TX1IE == 1 && PIR1bits.TX1IF == 1) {
         EUSART1_Transmit_ISR();
-    } else {
-        //Unhandled Interrupt
     }
 }
 #pragma code
@@ -197,8 +191,10 @@ void Init_Timers()
 	INTCON3bits.INT2IE = 0;
 	INTCON3bits.INT1IE = 0;
 	
-	PIE1 = 0x01;					//TMR1 overflow interrupt enable on=0x1 off=0x00
+	//PIE1 = 0x01;					//TMR1 overflow interrupt enable on=0x1 off=0x00
 	
+    PIE1bits.TMR1IE = 1;            //TMR1 overflow interrupt enable on=0x1 off=0x00
+    
 	PIE2bits.TMR3IE = 0;
 	PIE2bits.CCP2IE = 0;
 	

@@ -237,7 +237,7 @@
         <property key="enable-ow" value="true"/>
         <property key="extra-include-directories"
                   value="../FiddleYard;../FiddleYard/Microchip/Include/TCPIP Stack;../FiddleYard/Microchip/Include;../../../../../../MCC18/h;."/>
-        <property key="optimization-master" value="Custom"/>
+        <property key="optimization-master" value="Debug friendly"/>
         <property key="preprocessor-macros" value=""/>
         <property key="procedural-abstraction-passes" value="4"/>
         <property key="storage-class" value="sca"/>
@@ -269,13 +269,12 @@
       </C18LanguageToolchain>
       <ICD3PlatformTool>
         <property key="AutoSelectMemRanges" value="auto"/>
-        <property key="Freeze Peripherals" value="true"/>
+        <property key="Freeze Peripherals" value="false"/>
         <property key="SecureSegment.SegmentProgramming" value="FullChipProgramming"/>
         <property key="ToolFirmwareFilePath"
                   value="Press to browse for a specific firmware version"/>
         <property key="ToolFirmwareOption.UseLatestFirmware" value="true"/>
         <property key="debugoptions.useswbreakpoints" value="false"/>
-        <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="memories.aux" value="false"/>
         <property key="memories.bootflash" value="false"/>

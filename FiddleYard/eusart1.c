@@ -53,8 +53,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 /**
   Section: Macro Declarations
  */
-#define EUSART1_TX_BUFFER_SIZE 8
-#define EUSART1_RX_BUFFER_SIZE 8
+#define EUSART1_TX_BUFFER_SIZE 20
+#define EUSART1_RX_BUFFER_SIZE 20
 
 /**
   Section: Global Variables
@@ -109,6 +109,28 @@ void EUSART1_Initialize(void) {
     // enable receive interrupt
     PIE1bits.RC1IE = 1;
 }
+
+/*
+uint8_t EUSART1_Read(void) {
+    uint8_t readValue = 0;
+
+    if (0 == eusart1RxCount) {
+        readValue = 0;
+    }
+    else
+    {
+        PIE1bits.RC1IE = 0;
+
+        readValue = eusart1RxBuffer[eusart1RxTail++];
+        if (sizeof (eusart1RxBuffer) <= eusart1RxTail) {
+            eusart1RxTail = 0;
+        }
+        eusart1RxCount--;
+        PIE1bits.RC1IE = 1;
+    }
+    return readValue;
+}
+*/
 
 uint8_t EUSART1_Read(void) {
     uint8_t readValue = 0;

@@ -166,7 +166,7 @@ void Command_Exe(unsigned char Command[3])
 														break;
 									case	'R'		:	Exe_Cmd[1] = 27;	//Collect Start
 														break;
-									case	'S'		:	Exe_Cmd[1] = 0;	//Bruggen open
+									case	'S'		:	Exe_Cmd[1] = 28;	//FY Home procedure start
 														break;
 									case	'T'		:	Exe_Cmd[1] = 0;	//Bruggen open
 														break;
@@ -247,7 +247,7 @@ void Command_Exe(unsigned char Command[3])
 														break;
 									case	'R'		:	Exe_Cmd[0] = 27;	//Collect Start
 														break;
-									case	'S'		:	Exe_Cmd[0] = 0;	//Bruggen open
+									case	'S'		:	Exe_Cmd[0] = 28;	//FY Home procedure start
 														break;
 									case	'T'		:	Exe_Cmd[0] = 0;	//Bruggen open
 														break;
