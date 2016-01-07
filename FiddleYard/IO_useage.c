@@ -76,14 +76,14 @@ PORTGbits.RG7 = CL_10_ bit3 Bottom              PORTGbits.RG7 = EOS_10_ Top     
 												5.0V, 2mA                                           5.0V, 2mA
                                                                                                     
 												OPTO_BOARD_3_PG1                                    OPTO_BOARD_3_PG7
-PORTHbits.RH0 = EOS_10_ Top                     PORTHbits.RH0 = Bezet_In_5B_ Top                    PORTHbits.RH0 = Bezet_In_5B Top 
-PORTHbits.RH1 = EOS_11_ Top                     PORTHbits.RH1 = Bezet_In_6_ Top	                    PORTHbits.RH1 = Bezet_In_6 Top	 
-PORTHbits.RH2 = BM_11_ Top                      PORTHbits.RH2 = Bezet_In_7_ Top                     PORTHbits.RH2 = Bezet_In_7 Top
-PORTHbits.RH3 = Bridge_10R_ Top                 PORTHbits.RH3 = Bezet_Uit_5B_ Top                   PORTHbits.RH3 = Bezet_In_8A Top
-PORTHbits.RH4 = F10_ Top                        PORTHbits.RH4 = Bezet_Uit_6_ Top                    PORTHbits.RH4 = Bezet_In_16B Bottom
-PORTHbits.RH5 = F12_ Top                        PORTHbits.RH5 = Bezet_Uit_7_ Top                    PORTHbits.RH5 = Bezet_In_17 Bottom
-PORTHbits.RH6 = Bezet_Uit_5B_ Top               PORTHbits.RH6 = Bezet_Uit_8A_ Top                   PORTHbits.RH6 = Bezet_In_18 Bottom
-PORTHbits.RH7 = Bezet_Uit_6_ Top                PORTHbits.RH7 = BEZET_SPARE / Led5                  PORTHbits.RH7 = Bezet_In_19A Bottom
+PORTHbits.RH0 = EOS_10_ Top                     PORTHbits.RH0 = Bezet_In_5B_ Top                    PORTHbits.RH0 = Bezet_Uit_5B Top 
+PORTHbits.RH1 = EOS_11_ Top                     PORTHbits.RH1 = Bezet_In_6_ Top	                    PORTHbits.RH1 = Bezet_Uit_6 Top	 
+PORTHbits.RH2 = BM_11_ Top                      PORTHbits.RH2 = Bezet_In_7_ Top                     PORTHbits.RH2 = Bezet_Uit_7 Top
+PORTHbits.RH3 = Bridge_10R_ Top                 PORTHbits.RH3 = Bezet_Uit_5B_ Top                   PORTHbits.RH3 = Bezet_Uit_8A Top
+PORTHbits.RH4 = F10_ Top                        PORTHbits.RH4 = Bezet_Uit_6_ Top                    PORTHbits.RH4 = Bezet_Uit_16B Bottom
+PORTHbits.RH5 = F12_ Top                        PORTHbits.RH5 = Bezet_Uit_7_ Top                    PORTHbits.RH5 = Bezet_Uit_17 Bottom
+PORTHbits.RH6 = Bezet_Uit_5B_ Top               PORTHbits.RH6 = Bezet_Uit_8A_ Top                   PORTHbits.RH6 = Bezet_Uit_18 Bottom
+PORTHbits.RH7 = Bezet_Uit_6_ Top                PORTHbits.RH7 = BEZET_SPARE / Led5                  PORTHbits.RH7 = Bezet_Uit_19A Bottom
 												3.3V, 2mA                                           3.3V, 2mA
                                                                                                     
 												OPTO_BOARD_1_TOP_PG1                                OPTO_BOARD_1_TOP_PG3

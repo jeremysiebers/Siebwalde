@@ -167,9 +167,7 @@
       <itemPath>Makefile</itemPath>
     </logicalFolder>
     <logicalFolder name="OtherFiles" displayName="Other Files" projectFiles="false">
-      <itemPath>../Fiddle Yard/IO_useage.c</itemPath>
-      <itemPath>../Fiddle Yard/Bridge_Ctrl.h</itemPath>
-      <itemPath>../Fiddle Yard/Bridge_Ctrl.c</itemPath>
+      <itemPath>IO_useage.c</itemPath>
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>
