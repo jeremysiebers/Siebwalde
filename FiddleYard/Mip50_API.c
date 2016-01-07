@@ -17,7 +17,7 @@
 
 #define MIP50RECDATA 16
 #define MIP50RECCMDARRAY 16
-
+int MIP50HOMEOFFSETMOVEMENT[2]={5700,1900};                                     // Home offset movement BOTTOM = 5700, TOP = 1900
             
 typedef struct
 {
@@ -474,10 +474,44 @@ char MIP50xMOVE(unsigned char ASL, long int New_Track)
     return(Return_Val);
 }
 
-void MIP50xCRLFxAppend(unsigned char ASL)
+void MIP50xCRLFxAppend(unsigned char ASL)                                       // Used for clear terminal readout
 {
     MIP50xWritexUart(ASL, 0xD);
     MIP50xWritexUart(ASL, 0xA);
+}
+
+void MIP50xSetxPermanentxParameterxHomexOffsetxMovement(unsigned char ASL)
+{
+    char str[6];
+    char length = 0;
+    int i = 0;
+    itoa(MIP50HOMEOFFSETMOVEMENT[ASL], str);
+    length = strlen(str);    
+    
+    MIP50xWritexUart(ASL, 'w');
+    MIP50xWritexUart(ASL, '1');
+    MIP50xWritexUart(ASL, 'x');
+    MIP50xWritexUart(ASL, '3'); 
+    MIP50xWritexUart(ASL, '3');
+    MIP50xWritexUart(ASL, 'p');
+    for (i = 0; i < length; i++)
+    {
+        MIP50xWritexUart(ASL, str[i]);
+    }
+    MIP50xWritexUart(ASL, 'x');    
+    MIP50xCRLFxAppend(ASL);
+}
+
+void MIP50xReadxPermanentxParameterxHomexOffsetxMovement(unsigned char ASL)      // Response to be captured M#26 1 25 5700 or M#26 1 25 1900
+{
+    MIP50xWritexUart(ASL, 'q');
+    MIP50xWritexUart(ASL, '1');
+    MIP50xWritexUart(ASL, 'x');
+    MIP50xWritexUart(ASL, '2');
+    MIP50xWritexUart(ASL, '5');
+    MIP50xWritexUart(ASL, 'p');
+    MIP50xWritexUart(ASL, 'G');
+    MIP50xCRLFxAppend(ASL);
 }
 
 void MIP50xClearxError(unsigned char ASL)

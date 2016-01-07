@@ -20,6 +20,8 @@ extern void MIP50xAPIxRESET(unsigned char ASL);                                 
 void MIP50xCLEARxRECIEVEDxDATA(unsigned char ASL);
 unsigned char MIP50xACK(unsigned char ASL);                                     // Check if acknowledge is received from MIP after execution of command that was sent
 void MIP50xCRLFxAppend(unsigned char ASL);                                      // Append CR and LF to get clear status logging in a terminal
+void MIP50xSetxPermanentxParameterxHomexOffsetxMovement(unsigned char ASL);     // Set Homing home offset movement number
+void MIP50xReadxPermanentxParameterxHomexOffsetxMovement(unsigned char ASL);     // Read the Homing home offset movement number 
 void MIP50xClearxError(unsigned char ASL);
 void MIP50xSetxAcceleration(unsigned char ASL);
 void MIP50xSetxPositioningxVelxDefault(unsigned char ASL);
