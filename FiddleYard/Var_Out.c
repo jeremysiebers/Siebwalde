@@ -15,7 +15,7 @@ typedef struct
 	unsigned char 	Var_Out;	
 	unsigned int	Variables_Out_Counter;
 	unsigned int 	Target_Alive_Counter;
-	unsigned int	Variables_Out_Counter2;
+	unsigned char	Variables_Out_Counter2;
 	unsigned char	Send_Var_Out_Old[5][3];
 	unsigned char	ForceSendUpdate;
 	unsigned char	Track_Power_Meassage;
@@ -30,7 +30,7 @@ void Var_Out_Programm(unsigned  char ASL)
 {
 	
 	VAR_OUT_FY[ASL].Variables_Out_Counter++;	
-	if (VAR_OUT_FY[ASL].Variables_Out_Counter >= 5000)			// Auto send an update every second to ensure up-to-date data is available in user gui
+	if (VAR_OUT_FY[ASL].Variables_Out_Counter >= 5000)			// Auto send an update every 2 seconds to ensure up-to-date data is available in user gui
 	{			
 		VAR_OUT_FY[ASL].Variables_Out_Counter = 0;				// Reset counter
 		VAR_OUT_FY[ASL].Var_Out = 0;							// Force start case 0
@@ -46,19 +46,19 @@ void Var_Out_Programm(unsigned  char ASL)
 		}
 		
 	}
-	else if (TR_MEAS(0) == 1) 									// When power restored do not send message, but set the local variable Track_Power_Meassage to 1, but on a slower pase
+	else if (TR_MEAS(0) == 1)                                                   // When power restored do not send message, but set the local variable Track_Power_Meassage to 1, but on a slower pase
 	{
 		VAR_OUT_FY[ASL].Track_Power_Meassage = 1;
 	}	
 	
 
 	VAR_OUT_FY[ASL].Variables_Out_Counter2++;
-	if (VAR_OUT_FY[ASL].Variables_Out_Counter2 >= 0)//10)			// Send IO info with approx 250Hz iso 2500Hz --> NOK!!!! updates are too slow
+	if (VAR_OUT_FY[ASL].Variables_Out_Counter2 >= 255)                      	// Send Frame counter
 	{			
-		VAR_OUT_FY[ASL].Variables_Out_Counter2 = 0;				// Reset counter
-		Var_Out_Switcher(ASL);
-		
+		VAR_OUT_FY[ASL].Variables_Out_Counter2 = 0;                             // Reset counter
 	}	
+    
+    Var_Out_Switcher(ASL);
 }
 
 void Var_Out_Switcher(unsigned  char ASL)

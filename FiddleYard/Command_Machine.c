@@ -1,7 +1,8 @@
 #include <Fiddle_Yard.h>
 #include "TCPIP Stack/TCPIP.h"
-#include <Command_Machine.h>
-#include <State_Machine.h>
+#include "Command_Machine.h"
+#include "State_Machine.h"
+#include "Mip50_API.h"
 
 #define Enter 13
 
@@ -9,6 +10,7 @@ static UDP_SOCKET socket2 = INVALID_UDP_SOCKET;
 
 extern void State_Machine_Reset(unsigned char ASL);
 static void Command_Exe(unsigned char Command[3]);
+void Clear_Cmd(void);
 
 static unsigned char Cmd[3],Cmd_Read_Switch=20;
 static unsigned char Exe_Cmd[2] = {0,0};
@@ -27,7 +29,7 @@ unsigned char Exe_Cmd_(unsigned char ASL)
 unsigned char Exe_Cmd_Ret(unsigned char ASL, char Exe_Cmd_Ret_)
 {
 	Exe_Cmd_Ret_1 = Exe_Cmd_Ret_;
-	Exe_Cmd[ASL] = 0;					// reset commando to 0, after executing the command. Next command allowed
+	Exe_Cmd[ASL] = 0;                                                           // reset commando to 0, after executing the command. Next command allowed
 }
 
 void Exe_Cmd_Resume(unsigned char ASL, char Resume_Cmd)
@@ -49,14 +51,11 @@ void Command()
 								break;
 							}							
 							else if (Cmd[2] == Enter)
-							{
-								Cmd_Read_Switch = 0;
-								Command_Exe(Cmd);									
-							}
-							Cmd_Read_Switch = 0;
-							Cmd[0] = 0;
-							Cmd[1] = 0;
-							Cmd[2] = 0;
+                            {
+                                Cmd_Read_Switch = 0;
+                                Command_Exe(Cmd);									
+                            }                            
+                            Clear_Cmd();
 							break;
 						}
 						break;
@@ -103,11 +102,18 @@ void Command()
 	
 }
 
+void Clear_Cmd(void)
+{
+    Cmd[0] = 0;  
+    Cmd[0] = 1;
+    Cmd[0] = 2;
+}
+
 void Command_Exe(unsigned char Command[3])
 {
 	switch (Command[0])
 	{
-		case	'a'		:	if (Exe_Cmd[1] == 0 || Command[1] == 'J') // block new commands until last one has finished
+		case	'a'		:	if (Exe_Cmd[1] == 0 || Command[1] == 'J') // block new commands until last one has finished except with Reset (stop NOW)
 							{
 								
 								switch (Command[1])
@@ -162,11 +168,11 @@ void Command_Exe(unsigned char Command[3])
 														break;
 									case	'P'		:	Exe_Cmd[1] = 25;	//Bezet_In_7_Switch_Off
 														break;
-									case	'Q'		:	Exe_Cmd[1] = 26;	//Resume previous operation
+									case	'Q'		:	Exe_Cmd[1] = 26;	//FY Home procedure start
 														break;
 									case	'R'		:	Exe_Cmd[1] = 27;	//Collect Start
 														break;
-									case	'S'		:	Exe_Cmd[1] = 28;	//FY Home procedure start
+									case	'S'		:	Exe_Cmd[1] = 28;	//Resume previous operation
 														break;
 									case	'T'		:	Exe_Cmd[1] = 0;	//Bruggen open
 														break;
@@ -268,7 +274,12 @@ void Command_Exe(unsigned char Command[3])
 								}
 							}	
 							break;
-							
+                            
+        case    'p'     :   MIP50xWritexUart(TOP, Command[1]);                  // Write MIP50 command directly to MIP50 TOP
+                            break;
+            
+        case    'q'     :   MIP50xWritexUart(BOTTOM, Command[1]);               // Write MIP50 command directly to MIP50 BOTTOM
+                            break;
 							
 		case	'r'		:	PORTPC = Command[1];
 							break;

@@ -5,6 +5,7 @@
 #include "Shift_Register.h"
 #include <stdlib.h>
 #include <string.h>
+#include "Diagnostic_ret.h"
 
 ////////ERROR and return CODES////////
 #define ERROR 0xEE	// general switch case when error
@@ -35,39 +36,29 @@ typedef struct
 
 static STATE_MACHINE_VAR ACT_ST_MCHN[2]= 	{{0,0,0,0,0,Busy,0,0,{0,0,0,0,0,0,0,0,0,0,0,0,0,0},0 }, // is 0 is BOTTOM
                                              {0,0,0,0,0,Busy,0,0,{0,0,0,0,0,0,0,0,0,0,0,0,0,0},0 }};// is 1 is TOP
-/*
-void MIP50xAPIxRESET(unsigned char ASL)                                         // During ucontroller reset also reset API and MIP
-{
-    int i = 0;
-    char MIP50_Received_Data = 0;
-    char MIP50_Received_Data_Count = MIP50xRECEIVEDxDATAxAVAILABLE(ASL);    
-    if (MIP50_Received_Data_Count > 0)
-    {
-        for(i=0; i < MIP50_Received_Data_Count; i++)
-        {
-            MIP50_Received_Data = MIP50xReadxUart(ASL);
-        }
-    }
+
+static unsigned char Send_Var_Out[3];
+
+void MIP50xAPIxRESET(unsigned char ASL)                                         // During ucontroller reset also reset API
+{    
     //MIP50xClearxError(ASL);    
     MIP50xCLEARxRECIEVEDxDATA(ASL);                                             // Clear received data array
     ACT_ST_MCHN[ASL].Mip50_SwitchState = 0;
     ACT_ST_MCHN[ASL].Mip50_ReadSwitchState = 0;
     ACT_ST_MCHN[ASL].MIP50_Rec_Data_Counter = 0;
     ACT_ST_MCHN[ASL].Return_Val_Routine = Busy;
-}*/
+}
 
 /*
  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
  Main loop call routines
  */
-
-
 void UARTxCOMM(unsigned char ASL)                                               // Check if data is received from MIP or that data must be sent main loop routine
-{   
+{
     ACT_ST_MCHN[ASL].MIP50_Received_Data_Count = MIP50xRECEIVEDxDATAxAVAILABLE(ASL);
     
     if(ACT_ST_MCHN[ASL].MIP50_Received_Data_Count > 0)
-    {    
+    {
         ACT_ST_MCHN[ASL].MIP50_Received_Data = MIP50xReadxUart(ASL);
         
         switch (ACT_ST_MCHN[ASL].Mip50_ReadSwitchState)
@@ -76,148 +67,94 @@ void UARTxCOMM(unsigned char ASL)                                               
 /*---------------------------------------CHECK FOR CR and LF -----------------------------------------------------------------------------------------------------------------
 */            
             
-            case 0 :    if(ACT_ST_MCHN[ASL].MIP50_Received_Data == 0xD)                          // Check if received char is CR
+            case 0 :    if(ACT_ST_MCHN[ASL].MIP50_Received_Data == 0xD)         // Check if received char is CR
                         {
+                            if (ASL == TOP)
+                            {
+                                Send_Var_Out[0] = 'H';
+                            }
+                            else if (ASL == BOTTOM)
+                            {
+                                Send_Var_Out[0] = 'U';
+                            }
+                            Send_Var_Out[1] = ACT_ST_MCHN[ASL].MIP50_Received_Data;
+                            Send_Var_Out[2] = 0x00;
+                            Send_Diag_Comm(Send_Var_Out);
                             ACT_ST_MCHN[ASL].Mip50_ReadSwitchState = 1;         // If CR then check bext char for LF
                         }
                         else{ACT_ST_MCHN[ASL].Mip50_ReadSwitchState = 0;}       // else reset switch
                         break;
                         
-            case 1 :    if(ACT_ST_MCHN[ASL].MIP50_Received_Data == 0xA)                          // Check if second received char is LF
+            case 1 :    if(ACT_ST_MCHN[ASL].MIP50_Received_Data == 0xA)         // Check if second received char is LF
                         {
+                            if (ASL == TOP)
+                            {
+                                Send_Var_Out[0] = 'H';
+                            }
+                            else if (ASL == BOTTOM)
+                            {
+                                Send_Var_Out[0] = 'U';
+                            }
+                            Send_Var_Out[1] = ACT_ST_MCHN[ASL].MIP50_Received_Data;
+                            Send_Var_Out[2] = 0x00;
+                            Send_Diag_Comm(Send_Var_Out);
                             ACT_ST_MCHN[ASL].Mip50_ReadSwitchState = 2;         // If LF then the next chars are data from MIP
                         }
                         else{ACT_ST_MCHN[ASL].Mip50_ReadSwitchState = 0;}       // If the second char is not LF then the whole message is carbage reset switch
                         break;
                         
-/*---------------------------------------CHECK FOR X / M / E -----------------------------------------------------------------------------------------------------------------
-*/                        
-                        
-            case 2 :    if (ACT_ST_MCHN[ASL].MIP50_Received_Data == 0x58)       // When received data is X0 message
+            case 2 :    if (ACT_ST_MCHN[ASL].MIP50_Received_Data == 0xD)        // When the next char data is a CR then the end of the data is found and next a LF is expected
                         {
-                            ACT_ST_MCHN[ASL].Mip50_ReadSwitchState = 3;         // Next a 0x30 is expected from the X0
-                        }
-                        else if (ACT_ST_MCHN[ASL].MIP50_Received_Data == 0x4D)  // When received data is M# Message
-                        {
-                            ACT_ST_MCHN[ASL].MIP50_Rec_Data[ACT_ST_MCHN[ASL].MIP50_Rec_Data_Counter] = ACT_ST_MCHN[ASL].MIP50_Received_Data; // Store 'M' in array
-                            ACT_ST_MCHN[ASL].MIP50_Rec_Data_Counter++;                                                      // increment array counter
-                            ACT_ST_MCHN[ASL].Mip50_ReadSwitchState = 6;         // Next characters of the Message M are expected
-                        }
-                        else if (ACT_ST_MCHN[ASL].MIP50_Received_Data == 0x45)  // When received data is E# message
-                        {
-                            ACT_ST_MCHN[ASL].MIP50_Rec_Data[ACT_ST_MCHN[ASL].MIP50_Rec_Data_Counter] = ACT_ST_MCHN[ASL].MIP50_Received_Data; // Store 'E' in array
-                            ACT_ST_MCHN[ASL].MIP50_Rec_Data_Counter++;
-                            ACT_ST_MCHN[ASL].Mip50_ReadSwitchState = 6;         // Next characters of the Message E are expected
-                        }
-                        else if (ACT_ST_MCHN[ASL].MIP50_Received_Data == 0xD)   // When the next char data is a CR then the end of the data is not found and new data is coming
-                        {                            
-                            ACT_ST_MCHN[ASL].Mip50_ReadSwitchState = 1;         // Goto the check for new data so new 0xD even if a LF comes...
-                            ACT_ST_MCHN[ASL].MIP50_Rec_Data_Counter = 0;        // Reset array counter
-                            MIP50xCLEARxRECIEVEDxDATA(ASL);                     // Clear received data array
-                        }
-                        break;                        
-                        
-/*---------------------------------------THIS IS X0 ROUTINE---------------------------------------------------------------------------------------------------------------------
-*/
-                        
-            case 3 :    if (ACT_ST_MCHN[ASL].MIP50_Received_Data == 0x30)       // When received data is 0 from X0
-                        {
-                            ACT_ST_MCHN[ASL].MIP50_Rec_Cmd[ACT_ST_MCHN[ASL].MIP50_Rec_Cmd_Counter_W] = ACKNOWLEDGED;    // Write into mailbox
-                            ACT_ST_MCHN[ASL].MIP50_Rec_Cmd_Counter_W++;                                                 // Increment write counter
-                            if (ACT_ST_MCHN[ASL].MIP50_Rec_Cmd_Counter_W >= MIP50RECCMDARRAY)                           // If end of mailbox, start at 0 again (overflow not guarded)
+                            if (ASL == TOP)
                             {
-                                ACT_ST_MCHN[ASL].MIP50_Rec_Cmd_Counter_W = 0;                                           // Reset write counter
-                            }  
-                            ACT_ST_MCHN[ASL].Mip50_ReadSwitchState = 0;
-                        }
-                        else 
-                        {
-                            ACT_ST_MCHN[ASL].Mip50_ReadSwitchState = 0;         // else data not OK, reset switch
-                            //Return_Val = ERROR;                               // Send back Error
-                        }
-                        break;
-                        
-        /*    case 4 :    if(MIP50_Received_Data == 0xD)                        // Check if received char is CR
-                        {
-                            ACT_ST_MCHN[ASL].Mip50_ReadSwitchState = 5;         // If CR then check next char for LF
-                        }
-                        else{ACT_ST_MCHN[ASL].Mip50_ReadSwitchState = 0;}       // else reset switch
-                        break;
-                        
-            case 5 :    if(MIP50_Received_Data == 0xA)                          // Check if second received char is LF
-                        {
-                            ACT_ST_MCHN[ASL].Mip50_ReadSwitchState = 0;         // If LF then the data from the MIP is closed
-                            //Return_Val = ACKNOWLEDGED;                          // Send back: command acknowledged
-                            
-                            ACT_ST_MCHN[ASL].MIP50_Rec_Cmd[ACT_ST_MCHN[ASL].MIP50_Rec_Cmd_Counter_W] = ACKNOWLEDGED;    // Write into mailbox
-                            ACT_ST_MCHN[ASL].MIP50_Rec_Cmd_Counter_W++;                                                 // Increment write counter
-                            if (ACT_ST_MCHN[ASL].MIP50_Rec_Cmd_Counter_W >= MIP50RECCMDARRAY)                           // If end of mailbox, start at 0 again (overflow not guarded)
-                            {
-                                ACT_ST_MCHN[ASL].MIP50_Rec_Cmd_Counter_W = 0;                                           // Reset write counter
+                                Send_Var_Out[0] = 'H';
                             }
-                        }
-                        else{ACT_ST_MCHN[ASL].Mip50_ReadSwitchState = 0;}       // If the second char is not LF then the whole message is carbage reset switch
-                        break;*/
-                        
-/*---------------------------------------THIS IS M#/E# ROUTINE---------------------------------------------------------------------------------------------------------------------
-*/                        
-                        
-            case 6 :    if (ACT_ST_MCHN[ASL].MIP50_Received_Data == 0xD)        // When the next char data is a CR then the end of the data is found and next a LF is expected
-                        {                            
-                            ACT_ST_MCHN[ASL].Mip50_ReadSwitchState = 7;         // Goto the check for LF...
-                            ACT_ST_MCHN[ASL].MIP50_Rec_Data_Counter = 0;        // Reset array counter                            
+                            else if (ASL == BOTTOM)
+                            {
+                                Send_Var_Out[0] = 'U';
+                            }
+                            Send_Var_Out[1] = ACT_ST_MCHN[ASL].MIP50_Received_Data;
+                            Send_Var_Out[2] = 0x00;
+                            Send_Diag_Comm(Send_Var_Out);                            
+                            ACT_ST_MCHN[ASL].Mip50_ReadSwitchState = 3;         // Goto the check for LF...                            
                         }
                         else
                         {
-                            ACT_ST_MCHN[ASL].MIP50_Rec_Data[ACT_ST_MCHN[ASL].MIP50_Rec_Data_Counter] = ACT_ST_MCHN[ASL].MIP50_Received_Data; // Store data in array
-                            ACT_ST_MCHN[ASL].MIP50_Rec_Data_Counter++;                                                      // increment array counter
-                            if (ACT_ST_MCHN[ASL].MIP50_Rec_Data_Counter > MIP50RECDATA)                                     // When too much data is received stop proces and clear array
+                            if (ASL == TOP)
                             {
-                                ACT_ST_MCHN[ASL].MIP50_Rec_Data_Counter = 0;    // Reset array counter
-                                MIP50xCLEARxRECIEVEDxDATA(ASL);                 // Clear array
-                                ACT_ST_MCHN[ASL].Mip50_ReadSwitchState = 0;     // Reset switch
-                                //Return_Val = ERROR;                             // Send back Error                                
+                                Send_Var_Out[0] = 'H';
                             }
+                            else if (ASL == BOTTOM)
+                            {
+                                Send_Var_Out[0] = 'U';
+                            }
+                            Send_Var_Out[1] = ACT_ST_MCHN[ASL].MIP50_Received_Data;
+                            Send_Var_Out[2] = 0x00;
+                            Send_Diag_Comm(Send_Var_Out);
                         }
                         break;
                         
-            case 7 :    if(ACT_ST_MCHN[ASL].MIP50_Received_Data == 0xA)         // Check if second received char is LF
+            case 3 :    if(ACT_ST_MCHN[ASL].MIP50_Received_Data == 0xA)         // Check if second received char is LF
                         {
-                            ACT_ST_MCHN[ASL].Mip50_ReadSwitchState = 0;         // If LF then the data from the MIP is closed Reset switch
-                            // SEND DATA TO UDP###########!!! TBD !!!!###########!!! TBD !!!!###########!!! TBD !!!!###########!!! TBD !!!!###########!!! TBD !!!!                            
-                            if (ACT_ST_MCHN[ASL].MIP50_Rec_Data[0] == 0x4D)
+                            if (ASL == TOP)
                             {
-                                //Return_Val = MMESSAGE;                        // Send back: command MESSAGE received                                
+                                Send_Var_Out[0] = 'H';
                             }
-                            else if (ACT_ST_MCHN[ASL].MIP50_Rec_Data[0] == 0x45)
+                            else if (ASL == BOTTOM)
                             {
-                                //Return_Val = EMESSAGE;                          // Send back: command Error Message received      
-                                ACT_ST_MCHN[ASL].MIP50_Rec_Cmd[ACT_ST_MCHN[ASL].MIP50_Rec_Cmd_Counter_W] = EMESSAGE;        // Write into mailbox
-                                ACT_ST_MCHN[ASL].MIP50_Rec_Cmd_Counter_W++;                                                 // Increment write counter
-                                if (ACT_ST_MCHN[ASL].MIP50_Rec_Cmd_Counter_W >= MIP50RECCMDARRAY)                           // If end of mailbox, start at 0 again (overflow not guarded)
-                                {
-                                    ACT_ST_MCHN[ASL].MIP50_Rec_Cmd_Counter_W = 0;                                           // Reset write counter
-                                }
+                                Send_Var_Out[0] = 'U';
                             }
-                            MIP50xCLEARxRECIEVEDxDATA(ASL);                     // Clear array
-                            
+                            Send_Var_Out[1] = ACT_ST_MCHN[ASL].MIP50_Received_Data;
+                            Send_Var_Out[2] = 0x00;
+                            Send_Diag_Comm(Send_Var_Out);
+                            ACT_ST_MCHN[ASL].Mip50_ReadSwitchState = 0;         // If LF then the data from the MIP is closed Reset switch                            
                         }
-                        else
-                        {
-                            ACT_ST_MCHN[ASL].Mip50_ReadSwitchState = 0;         // Reset switch
-                            MIP50xCLEARxRECIEVEDxDATA(ASL);                     // Clear array}       // If the second char is not LF then the whole message is carbage reset switch
-                            //Return_Val = ERROR;                                 // Send back Error
-                        }
-                        break;                        
-                        
-            default :   ACT_ST_MCHN[ASL].Mip50_ReadSwitchState = 0;             // Reset switch
-                        MIP50xCLEARxRECIEVEDxDATA(ASL);                         // Clear array}       // If the second char is not LF then the whole message is carbage reset switch
-                        //Return_Val = ERROR;                                   // Send back Error
                         break;
+                        
+            default : break;
         }
     }
 }
-
 
 /*
  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

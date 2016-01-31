@@ -63,10 +63,11 @@ namespace Siebwalde_Application
         public CommandUpdater CmdOcc6OnTrue;
         public CommandUpdater CmdOcc6OnFalse;
         public CommandUpdater CmdOcc7OnTrue;
-        public CommandUpdater CmdOcc7OnFalse;
-        public CommandUpdater CmdRecoverd;
+        public CommandUpdater CmdOcc7OnFalse;       
         public CommandUpdater CmdCollect;
-        
+        public CommandUpdater CmdHomeFY;
+
+
         public ActuatorUpdater FiddleOneLeft;
         public ActuatorUpdater FiddleOneRight;
         public ActuatorUpdater Couple;
@@ -92,7 +93,7 @@ namespace Siebwalde_Application
         public ActuatorUpdater Occ6OnFalse;
         public ActuatorUpdater Occ7OnTrue;
         public ActuatorUpdater Occ7OnFalse;
-        public ActuatorUpdater Recoverd;
+        public ActuatorUpdater HomeFY;
         public ActuatorUpdater Collect;
         // Create FORM updaters, these are uncoupled from the target and used to update the FYForm
         public SensorUpdater CL10Heart;
@@ -225,8 +226,8 @@ namespace Siebwalde_Application
             CmdOcc6OnFalse = new CommandUpdater();
             CmdOcc7OnTrue = new CommandUpdater();
             CmdOcc7OnFalse = new CommandUpdater();
-            CmdRecoverd = new CommandUpdater();
             CmdCollect = new CommandUpdater();
+            CmdHomeFY = new CommandUpdater();
 
             // Instantiate actuators for sending command out to the target or simulator
             FiddleOneLeft = new ActuatorUpdater();
@@ -254,7 +255,7 @@ namespace Siebwalde_Application
             Occ6OnFalse = new ActuatorUpdater();
             Occ7OnTrue = new ActuatorUpdater();
             Occ7OnFalse = new ActuatorUpdater();
-            Recoverd = new ActuatorUpdater();
+            HomeFY = new ActuatorUpdater();
             Collect = new ActuatorUpdater();
 
             CL10Heart = new SensorUpdater();

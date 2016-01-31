@@ -38,32 +38,16 @@
 #define Nopp 0
 #define Assert_Track 1
 #define Deassert_Track 2
-#define Fiddle_Yard_One_Left 3
-#define Fiddle_Yard_One_Right 4
-#define Track_1 5
-#define Track_2 6
-#define Track_3 7
-#define Track_4 8
-#define Track_5 9
-#define Track_6 10
-#define Track_7 11
-#define Track_8 12
-#define Track_9 13
-#define Track_10 14
-#define Track_11 15
-#define Detection_Train 16
-#define Run_Fiddle_Yard 17
-#define Stop_Fiddle_Yard 18
-#define Stop_Fiddle_Yard_Now 19
-#define Bezet_In_5B_Switch_On 20
-#define Bezet_In_5B_Switch_Off 21
-#define Bezet_In_6_Switch_On 22
-#define Bezet_In_6_Switch_Off 23
-#define Bezet_In_7_Switch_On 24
-#define Bezet_In_7_Switch_Off 25
-#define FY_Home 26
-#define Start_Collect 27
-#define Restart_Previous_Command 28
+#define FY_Moving_On 3
+#define FY_Moving_Off 4
+#define Stop_Fiddle_Yard_Now 5     //(reset)
+#define Bezet_In_5B_Switch_On 6
+#define Bezet_In_5B_Switch_Off 7
+#define Bezet_In_6_Switch_On 8
+#define Bezet_In_6_Switch_Off 9
+#define Bezet_In_7_Switch_On 10
+#define Bezet_In_7_Switch_Off 11
+
 
 ////////Fy_Running (standard)////////
 #define Train_On_5B_Start 0
@@ -202,206 +186,15 @@ void State_Machine_Update(unsigned char ASL)	//ASL = Active_Struct_Level, BOTTOM
 																	Target_Ready(ASL);
 																	break;
 																	
-								case	FY_Home                 :	switch(ACT_ST_MCHN[ASL].Return_Val_Routine = Track_Mover(ASL,0))
-																	{	
-																		case	Finished	:	Exe_Cmd_Ret(ASL,0);
-																								Target_Ready(ASL);
-																								break;
-																		case	Busy		:	//Exe_Cmd_Ret(ASL,1);	// ASL,1 (1) means no other commands allowed
-																								break;
-																		default				:	ERROR_Code_Report(ASL,ACT_ST_MCHN[ASL].Return_Val_Routine);
-																								Exe_Cmd_Ret(ASL,0);
-                                                                                                Target_Ready(ASL);
-																								break;
-																	}
-																	break;
+                                case    FY_Moving_On            :   // EOS etc, sensor F12 and F13 check and reset in C#
+                                                                    Exe_Cmd_Ret(ASL,0);
+                                                                    Target_Ready(ASL);
+                                                                    break;
                                                                     
-                                case	Fiddle_Yard_One_Left	:	switch(ACT_ST_MCHN[ASL].Return_Val_Routine = Track_Mover(ASL,Track_Nr(ASL) + 1))
-																	{
-																		case	Finished	:	Exe_Cmd_Ret(ASL,0);
-																								Target_Ready(ASL);
-																								break;
-																		case	Busy		:	//Exe_Cmd_Ret(ASL,1);	// ASL,1 (1) means no other commands allowed
-																								break;
-																		default				:	ERROR_Code_Report(ASL,ACT_ST_MCHN[ASL].Return_Val_Routine);
-																								Exe_Cmd_Ret(ASL,0);
-																								break;
-																	}
-																	break;
-																	
-								case	Fiddle_Yard_One_Right	:	switch(ACT_ST_MCHN[ASL].Return_Val_Routine = Track_Mover(ASL,Track_Nr(ASL) - 1))
-																	{
-																		case	Finished	:	Exe_Cmd_Ret(ASL,0);
-																								Target_Ready(ASL);
-																								break;
-																		case	Busy		:	//Exe_Cmd_Ret(ASL,1);	// ASL,1 (1) means no other commands allowed
-																								break;
-																		default				:	ERROR_Code_Report(ASL,ACT_ST_MCHN[ASL].Return_Val_Routine);
-																								Exe_Cmd_Ret(ASL,0);
-																								break;
-																	}
-																	break;
-																														
-								case	Track_1					:	switch(ACT_ST_MCHN[ASL].Return_Val_Routine = Track_Mover(ASL,1))
-																	{	
-																		case	Finished	:	Exe_Cmd_Ret(ASL,0);
-																								Target_Ready(ASL);
-																								break;
-																		case	Busy		:	//Exe_Cmd_Ret(ASL,1);	// ASL,1 (1) means no other commands allowed
-																								break;
-																		default				:	ERROR_Code_Report(ASL,ACT_ST_MCHN[ASL].Return_Val_Routine);
-																								Exe_Cmd_Ret(ASL,0);
-                                                                                                Target_Ready(ASL);
-																								break;
-																	}
-																	break;
-								case	Track_2					:	switch(ACT_ST_MCHN[ASL].Return_Val_Routine = Track_Mover(ASL,2))
-																	{	
-																		case	Finished	:	Exe_Cmd_Ret(ASL,0);
-																								Target_Ready(ASL);
-																								break;
-																		case	Busy		:	//Exe_Cmd_Ret(ASL,1);	// ASL,1 (1) means no other commands allowed
-																								break;
-																		default				:	ERROR_Code_Report(ASL,ACT_ST_MCHN[ASL].Return_Val_Routine);
-																								Exe_Cmd_Ret(ASL,0);
-                                                                                                Target_Ready(ASL);
-																								break;
-																	}
-																	break;
-								case	Track_3					:	switch(ACT_ST_MCHN[ASL].Return_Val_Routine = Track_Mover(ASL,3))
-																	{	
-																		case	Finished	:	Exe_Cmd_Ret(ASL,0);
-																								Target_Ready(ASL);
-																								break;
-																		case	Busy		:	//Exe_Cmd_Ret(ASL,1);	// ASL,1 (1) means no other commands allowed
-																								break;
-																		default				:	ERROR_Code_Report(ASL,ACT_ST_MCHN[ASL].Return_Val_Routine);
-																								Exe_Cmd_Ret(ASL,0);
-                                                                                                Target_Ready(ASL);
-																								break;
-																	}
-																	break;
-								case	Track_4					:	switch(ACT_ST_MCHN[ASL].Return_Val_Routine = Track_Mover(ASL,4))
-																	{	
-																		case	Finished	:	Exe_Cmd_Ret(ASL,0);
-																								Target_Ready(ASL);
-																								break;
-																		case	Busy		:	//Exe_Cmd_Ret(ASL,1);	// ASL,1 (1) means no other commands allowed
-																								break;
-																		default				:	ERROR_Code_Report(ASL,ACT_ST_MCHN[ASL].Return_Val_Routine);
-																								Exe_Cmd_Ret(ASL,0);
-                                                                                                Target_Ready(ASL);
-																								break;
-																	}
-																	break;
-								case	Track_5					:	switch(ACT_ST_MCHN[ASL].Return_Val_Routine = Track_Mover(ASL,5))
-																	{	
-																		case	Finished	:	Exe_Cmd_Ret(ASL,0);
-																								Target_Ready(ASL);
-																								break;
-																		case	Busy		:	//Exe_Cmd_Ret(ASL,1);	// ASL,1 (1) means no other commands allowed
-																								break;
-																		default				:	ERROR_Code_Report(ASL,ACT_ST_MCHN[ASL].Return_Val_Routine);
-																								Exe_Cmd_Ret(ASL,0);
-                                                                                                Target_Ready(ASL);
-																								break;
-																	}
-																	break;
-								case	Track_6					:	switch(ACT_ST_MCHN[ASL].Return_Val_Routine = Track_Mover(ASL,6))
-																	{	
-																		case	Finished	:	Exe_Cmd_Ret(ASL,0);
-																								Target_Ready(ASL);
-																								break;
-																		case	Busy		:	//Exe_Cmd_Ret(ASL,1);	// ASL,1 (1) means no other commands allowed
-																								break;
-																		default				:	ERROR_Code_Report(ASL,ACT_ST_MCHN[ASL].Return_Val_Routine);
-																								Exe_Cmd_Ret(ASL,0);
-                                                                                                Target_Ready(ASL);
-																								break;
-																	}
-																	break;
-								case	Track_7					:	switch(ACT_ST_MCHN[ASL].Return_Val_Routine = Track_Mover(ASL,7))
-																	{	
-																		case	Finished	:	Exe_Cmd_Ret(ASL,0);
-																								Target_Ready(ASL);
-																								break;
-																		case	Busy		:	//Exe_Cmd_Ret(ASL,1);	// ASL,1 (1) means no other commands allowed
-																								break;
-																		default				:	ERROR_Code_Report(ASL,ACT_ST_MCHN[ASL].Return_Val_Routine);
-																								Exe_Cmd_Ret(ASL,0);
-                                                                                                Target_Ready(ASL);
-																								break;
-																	}
-																	break;
-								case	Track_8					:	switch(ACT_ST_MCHN[ASL].Return_Val_Routine = Track_Mover(ASL,8))
-																	{	
-																		case	Finished	:	Exe_Cmd_Ret(ASL,0);
-																								Target_Ready(ASL);
-																								break;
-																		case	Busy		:	//Exe_Cmd_Ret(ASL,1);	// ASL,1 (1) means no other commands allowed
-																								break;
-																		default				:	ERROR_Code_Report(ASL,ACT_ST_MCHN[ASL].Return_Val_Routine);
-																								Exe_Cmd_Ret(ASL,0);
-                                                                                                Target_Ready(ASL);
-																								break;
-																	}
-																	break;
-								case	Track_9					:	switch(ACT_ST_MCHN[ASL].Return_Val_Routine = Track_Mover(ASL,9))
-																	{	
-																		case	Finished	:	Exe_Cmd_Ret(ASL,0);
-																								Target_Ready(ASL);
-																								break;
-																		case	Busy		:	//Exe_Cmd_Ret(ASL,1);	// ASL,1 (1) means no other commands allowed
-																								break;
-																		default				:	ERROR_Code_Report(ASL,ACT_ST_MCHN[ASL].Return_Val_Routine);
-																								Exe_Cmd_Ret(ASL,0);
-                                                                                                Target_Ready(ASL);
-																								break;
-																	}
-																	break;
-								case	Track_10				:	switch(ACT_ST_MCHN[ASL].Return_Val_Routine = Track_Mover(ASL,10))
-																	{	
-																		case	Finished	:	Exe_Cmd_Ret(ASL,0);
-																								Target_Ready(ASL);
-																								break;
-																		case	Busy		:	//Exe_Cmd_Ret(ASL,1);	// ASL,1 (1) means no other commands allowed
-																								break;
-																		default				:	ERROR_Code_Report(ASL,ACT_ST_MCHN[ASL].Return_Val_Routine);
-																								Exe_Cmd_Ret(ASL,0);
-                                                                                                Target_Ready(ASL);
-																								break;
-																	}
-																	break;
-								case	Track_11				:	switch(ACT_ST_MCHN[ASL].Return_Val_Routine = Track_Mover(ASL,11))
-																	{	
-																		case	Finished	:	Exe_Cmd_Ret(ASL,0);
-																								Target_Ready(ASL);
-																								break;
-																		case	Busy		:	//Exe_Cmd_Ret(ASL,1);	// ASL,1 (1) means no other commands allowed
-																								break;
-																		default				:	ERROR_Code_Report(ASL,ACT_ST_MCHN[ASL].Return_Val_Routine);
-																								Exe_Cmd_Ret(ASL,0);
-                                                                                                Target_Ready(ASL);
-																								break;
-																	}
-																	break;
-																	
-								case	Detection_Train			:	switch(ACT_ST_MCHN[ASL].Return_Val_Routine = Train_Detection(ASL))
-																	{	
-																		case	Finished	:	Exe_Cmd_Ret(ASL,0);
-																								Target_Ready(ASL);
-																								break;
-																		case	Busy		:	//Exe_Cmd_Ret(ASL,1);	// ASL,1 (1) means no other commands allowed
-																								break;
-																		default				:	ERROR_Code_Report(ASL,ACT_ST_MCHN[ASL].Return_Val_Routine);
-																								ACT_ST_MCHN[ASL].Execute_Command_Old = ACT_ST_MCHN[ASL].Execute_Command;
-																								Exe_Cmd_Ret(ASL,0);
-																								ACT_ST_MCHN[ASL].State_Machine_Switch = ERROR_Handler_Idle;
-                                                                                                Target_Ready(ASL);
-																								break;
-																	}
-																	break;
-																	
+                                case    FY_Moving_Off           :   // EOS etc, sensor F12 and F13 check and reset in C#
+                                                                    Exe_Cmd_Ret(ASL,0);
+                                                                    Target_Ready(ASL);
+                                                                    break;
 																	
 								case	Stop_Fiddle_Yard_Now	:	Fiddle_Yard_Reset(ASL);
 																	ACT_ST_MCHN[ASL].State_Machine_Switch = Fy_Reset;	// replaced by directly calling extern void State_Machine_Reset(unsigned char ASL);																

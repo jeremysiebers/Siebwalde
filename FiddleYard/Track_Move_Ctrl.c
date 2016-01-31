@@ -8,6 +8,7 @@
 #define ERROR 0xEE	// general switch case when error
 #define Busy -1
 #define Finished 0
+#define NotHomed 0x01
 
 ////////Fiddle Yard move Errors//////
 #define BridgeMotorContact_10 0x06
@@ -40,12 +41,34 @@ void Track_Move_Ctrl_Reset(unsigned char ASL)
 {
 	ACT_ST_MCHN[ASL].Fiddle_Track_Mover=0;										// Switch for Fiddle direction movement
 	ACT_ST_MCHN[ASL].Old_Track=0;												// Previous track	
-    //M10(ASL, Off);                                                              // Set MIP50 Enable to off after reset    
-    //MIP50xAPIxRESET(ASL);                                                       // Clear error on MIP during reset of ucontroller        }                                                          
+    M10(ASL, Off);                                                              // Set MIP50 Enable to off after reset    
+    MIP50xAPIxRESET(ASL);                                                       // Clear error on MIP during reset of ucontroller        }                                                          
     ACT_ST_MCHN[ASL].FY_Homed = False;                                          // Set Homed to False after reset (force new home after reset)
     ACT_ST_MCHN[ASL].Return_Val_Routine = Busy;                                 // Set sub routine value to Busy after reset    
 }
-  
+
+/*#----------------------------------------------------------------------------------#*/
+        /*  Description: void TrackxCountxNumber(unsigned char ASL, char New_Track)
+         *  Input(s)   : Active Struct Level, New Track
+         *               
+         *
+         *  Output(s)  : temp
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      : This routines determines move direction, is move direction is
+         *               backward, the FY must move further back due to mechanical
+         *               tolerances.
+         *               Temp is written to hold the value which i sused to send to
+         *               MIP50xMOVE(ASL,temp). Because only 1 threaded uProc, temp 
+         *               is guranteed to be updated and used by same ASL.
+         */
+        /*#--------------------------------------------------------------------------#*/
+
 void TrackxCountxNumber(unsigned char ASL, char New_Track)
 {   
     long int Track_Forward = 0;
@@ -63,23 +86,86 @@ void TrackxCountxNumber(unsigned char ASL, char New_Track)
     }
     else                                                                        // When new rack is equal to current track pass the forward movement count number 
     {   
-        temp = TrackForward[New_Track];                                   // When New Track is movement in forward direction
+        temp = TrackForward[New_Track];                                         // When New Track is movement in forward direction
     }    
 }
 
+/*#----------------------------------------------------------------------------------#*/
+        /*  Description: char Track_Mover_Home(unsigned char ASL)
+         *  Input(s)   : Active Struct Level
+         *               
+         *
+         *  Output(s)  : FY_Homed
+         *
+         *  Returns    : Busy, Finished or Error
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      : This routines Executes the homing routine of the MIP50
+         */
+        /*#--------------------------------------------------------------------------#*/
 
-unsigned char Track_Mover(unsigned char ASL, char New_Track)
+char Track_Mover_Home(unsigned char ASL)
+{
+    char Return_Val = Busy;     
+    
+    switch(ACT_ST_MCHN[ASL].Fiddle_Track_Mover)
+    {
+        case	0	:	Return_Val = Busy;
+                        M10(ASL, On);                                           // Set MIP50 Enable to True
+                        Enable_Track(ASL,Off);                                  // Disable FiddleYard moving part of block7
+						Bezet_Weerstand(ASL, On);                               // Enable occupied resistor
+						ACT_ST_MCHN[ASL].Fiddle_Track_Mover = 1;
+                        break;
+        
+        case	1	:	switch(ACT_ST_MCHN[ASL].Return_Val_Routine = MIP50xHOME(ASL))
+                        {	
+                            case	Finished	:	ACT_ST_MCHN[ASL].FY_Homed = True;  
+                                                    ACT_ST_MCHN[ASL].Fiddle_Track_Mover = 0;
+                                                    Return_Val = Finished;
+                                                    break;
+                            case	Busy		:	Return_Val = Busy;
+                                                    break;
+                            default				:	break;
+                        }						
+						break;
+    }
+    return (Return_Val);
+}
+
+/*#----------------------------------------------------------------------------------#*/
+        /*  Description: char Track_Mover(unsigned char ASL, char New_Track)
+         *  Input(s)   : Active Struct Level, New_Track number
+         *               
+         *
+         *  Output(s)  : FY_Homed
+         *
+         *  Returns    : Busy, Finished or Error
+         *
+         *  Pre.Cond.  : FY_Homed == true
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      : This routines checks if move is allowed and executes
+         *               MIP50xMOVE(ASL,temp).
+         */
+        /*#--------------------------------------------------------------------------#*/
+
+char Track_Mover(unsigned char ASL, char New_Track)
 {
 	char Return_Val = Busy;    
 	
 	switch(ACT_ST_MCHN[ASL].Fiddle_Track_Mover)
 	{
 		case	0	:	Return_Val = Busy;
-						if (Track_Nr(ASL) == 0 || ACT_ST_MCHN[ASL].FY_Homed == False)  //If the track is not aligned OR FY not Homed
+						if (ACT_ST_MCHN[ASL].FY_Homed == False)                 //If the FY is not Homed
 						{
                             Enable_Track(ASL,Off);                              // Disable FiddleYard moving track
 							Bezet_Weerstand(ASL, On);                           // Enable occupied resistor
-							ACT_ST_MCHN[ASL].Fiddle_Track_Mover = 1;            // Start homing FY
+							ACT_ST_MCHN[ASL].Fiddle_Track_Mover = 0;            // Do Nothing, C# application must read out homed status and decide to send homing command
+                            Return_Val = NotHomed;
 							break;
 						}
         
@@ -105,17 +191,7 @@ unsigned char Track_Mover(unsigned char ASL, char New_Track)
                         }
 						break;
 						
-		case	1	:	M10(ASL, On);                                                           // Enable MIP50, during home do not check EOS, allowing the MIP to home
-                        switch(ACT_ST_MCHN[ASL].Return_Val_Routine = MIP50xHOME(ASL))
-                        {	
-                            case	Finished	:	ACT_ST_MCHN[ASL].FY_Homed = True;
-                                                    ACT_ST_MCHN[ASL].Fiddle_Track_Mover = 2;    // After homing go to the requested track                                                    
-                                                    Return_Val = Busy;
-                                                    break;
-                            case	Busy		:	Return_Val = Busy;
-                                                    break;
-                            default				:	break;
-                        }						
+		case	1	:	ACT_ST_MCHN[ASL].Fiddle_Track_Mover = 2;                // Old homing routine, replaced by separate homing routine                                                                         						
 						break;
                         
         case	2	:	if (EOS_10(ASL))

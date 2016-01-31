@@ -158,8 +158,8 @@ namespace Siebwalde_Application
             FYApp.FYAppVar.Occ7OnTrue.Attach(Act_Occ7OnTrue);
             Actuator Act_Occ7OnFalse = new Actuator("Occ7OnFalse",  Layer + "P\r", (name, cmd) => ActuatorCmd(name, cmd)); // initialize and subscribe actuators
             FYApp.FYAppVar.Occ7OnFalse.Attach(Act_Occ7OnFalse);
-            Actuator Act_Recoverd = new Actuator("Recoverd",  Layer + "Q\r", (name, cmd) => ActuatorCmd(name, cmd)); // initialize and subscribe actuators
-            FYApp.FYAppVar.Recoverd.Attach(Act_Recoverd);
+            Actuator Act_HomeFY = new Actuator("HomeFY",  Layer + "Q\r", (name, cmd) => ActuatorCmd(name, cmd)); // initialize and subscribe actuators
+            FYApp.FYAppVar.HomeFY.Attach(Act_HomeFY);
             Actuator Act_Collect = new Actuator("Collect",  Layer + "R\r", (name, cmd) => ActuatorCmd(name, cmd)); // initialize and subscribe actuators
             FYApp.FYAppVar.Collect.Attach(Act_Collect);
 
@@ -308,13 +308,7 @@ namespace Siebwalde_Application
 
             else if (_b[0] == Identifier6)
             {
-                    //CmdBusy.UpdateSensorValue(b[1] & 0x80, false);
-                    //Block7.UpdateSensorValue(b[1] & 0x40, false);
-                    //Spare.UpdateSensorValue(b[1] & 0x20, false);
-                    //F10.UpdateSensorValue(b[1] & 0x10, false);
-                    //M10.UpdateSensorValue(b[1] & 0x08, false);
-                    //Track3.UpdateSensorValue(b[1] & 0x04, false);
-                    //Track11.UpdateSensorValue(b[1] & 0x02, false);
+                FYIOHandleVar.Mip50Rec.UpdateSensorValue(b[1] & 0xFF, true);        // Set this force to true to receive and update everytime data is received from MIP50!
             }
 
             else if (_b[0] == Identifier7)

@@ -91,12 +91,12 @@ void main()
 	 	StackApplications();
 	 		 	
 	 	Diagnostic();
-	    Command();
-	    UARTxCOMM(TOP);                                                         // Check if data is received from MIP or that data must be sent Top layer
-        UARTxCOMM(BOTTOM);                                                      // Check if data is received from MIP or that data must be sent Bottom layer
+	    Command();    
+        UARTxCOMM(TOP);                                                     // Check if data is received from MIP or that data must be sent Top layer
+        UARTxCOMM(BOTTOM);                                                  // Check if data is received from MIP or that data must be sent Bottom layer
 	    	    		
 		if (Enable_State_Machine_Update == True && Output_Enable == True)       // When the output is enabled (after getting IP from DHCP) and update bit is true
-		{
+		{           
 			//Led4 = 1;
 			To_Externall_WDT_Pulse =! To_Externall_WDT_Pulse;                   // Kick external watchdog to preserve runaway when going into debug mode
 			IO();                                                               // Write/Read all IO

@@ -1,20 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
 using System.Text;
-using System.Windows.Forms;
 using System.Timers;
-using System.Net.Sockets;
-using System.IO;
-using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Management;
-using System.Net.NetworkInformation;
-using System.Globalization;
+
 
 namespace Siebwalde_Application
 {
@@ -211,6 +198,8 @@ namespace Siebwalde_Application
             m_FYIOHandleVar.CmdBusy.Attach(Sns_CmdBusy);
             Sensor Sns_TrackPower15V = new Sensor("TrackPower15V", " 15V Track Power ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
             m_FYIOHandleVar.TrackPower15V.Attach(Sns_TrackPower15V);
+            Sensor Sns_Mip50Rec = new Sensor("Mip50Rec", " Mip50ReceivedCmd ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
+            m_FYIOHandleVar.Mip50Rec.Attach(Sns_Mip50Rec);
 
             //Messages for update kick and logging
             Message Msg_FiddleOneLeft = new Message("FiddleOneLeftFinished", " Fiddle One Left Finished ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
@@ -305,7 +294,9 @@ namespace Siebwalde_Application
             FYAppVar.CmdOcc7OnFalse.Attach(Act_Occ7OnFalse);            
             Command Act_Collect = new Command(" Collect ", (name) => FormCmd(name)); // initialize and subscribe Commands
             FYAppVar.CmdCollect.Attach(Act_Collect);
-
+            Command Act_HomeFY = new Command(" HomeFY ", (name) => FormCmd(name)); // initialize and subscribe Commands
+            FYAppVar.CmdHomeFY.Attach(Act_HomeFY);
+            
             State_Machine = State.Idle;
 
             FiddleYardApplicationLogging.StoreText("### Fiddle Yard Application started ###");
@@ -483,7 +474,7 @@ namespace Siebwalde_Application
         {
             int a;            
 
-            if (log != "" && indicator != "Track_No")           // Log every  sensor if enabled
+            if (log != "" && indicator != "Track_No" && indicator != "Mip50Rec")           // Log every  sensor if enabled
             {
                 FiddleYardApplicationLogging.StoreText("FYApp received a Sensor event:" + log + Convert.ToBoolean(val));
             }
@@ -491,6 +482,10 @@ namespace Siebwalde_Application
             {
                 a = Convert.ToInt16(val) >> 4;
                 FiddleYardApplicationLogging.StoreText("FYApp received a Sensor event:" + log + Convert.ToString(a));
+            }
+            else if (log != "" && indicator == "Mip50Rec")
+            {
+                FiddleYardApplicationLogging.StoreText("FYApp received MIP50 data :" + Convert.ToChar(val));
             }
             ApplicationUpdate(indicator, val); // let the application know to update sub programs because a value of a sensor has changed
         }
@@ -589,8 +584,10 @@ namespace Siebwalde_Application
                 case " Occ7OnTrue ": FYAppVar.Occ7OnTrue.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
                     break;
                 case " Occ7OnFalse ": FYAppVar.Occ7OnFalse.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
-                    break;                
-                                
+                    break;
+                case " HomeFY ":FYAppVar.HomeFY.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);                    
+                    break;
+
                 default: break;
             }       
         }            

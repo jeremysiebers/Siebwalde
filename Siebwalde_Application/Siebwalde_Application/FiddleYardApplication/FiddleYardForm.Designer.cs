@@ -81,6 +81,7 @@
             this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.alwaysOnTopToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.AutomaticMode = new System.Windows.Forms.GroupBox();
+            this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.ForceNextTrack = new System.Windows.Forms.NumericUpDown();
             this.checkBoxTrack10 = new System.Windows.Forms.CheckBox();
@@ -106,7 +107,6 @@
             this.PB_Block5BIn = new System.Windows.Forms.PictureBox();
             this.PB_Block6In = new System.Windows.Forms.PictureBox();
             this.PB_Block7In = new System.Windows.Forms.PictureBox();
-            this.label2 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.Nuo_Track_No_TOP)).BeginInit();
             this.menuStrip1.SuspendLayout();
             this.AutomaticMode.SuspendLayout();
@@ -515,6 +515,11 @@
             this.AutomaticMode.Name = "AutomaticMode";
             this.AutomaticMode.TabStop = false;
             // 
+            // label2
+            // 
+            resources.ApplyResources(this.label2, "label2");
+            this.label2.Name = "label2";
+            // 
             // label1
             // 
             resources.ApplyResources(this.label1, "label1");
@@ -714,15 +719,11 @@
             this.PB_Block7In.TabStop = false;
             this.PB_Block7In.Click += new System.EventHandler(this.PB_Block7In_Click);
             // 
-            // label2
-            // 
-            resources.ApplyResources(this.label2, "label2");
-            this.label2.Name = "label2";
-            // 
             // FiddleYardForm
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.AutomaticMode);
             this.Controls.Add(this.PB_Block7In);
             this.Controls.Add(this.PB_Block6In);
             this.Controls.Add(this.Btn_Bezet5BOn_TOP);
@@ -738,7 +739,6 @@
             this.Controls.Add(this.LLed_EOS11);
             this.Controls.Add(this.LLed_F10);
             this.Controls.Add(this.LLed_F12);
-            this.Controls.Add(this.AutomaticMode);
             this.Controls.Add(this.ManualMode);
             this.Controls.Add(this.LLed_F11);
             this.Controls.Add(this.LLed_F13);

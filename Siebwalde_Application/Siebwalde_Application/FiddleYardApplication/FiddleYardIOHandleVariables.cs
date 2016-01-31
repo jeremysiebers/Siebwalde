@@ -68,6 +68,7 @@ namespace Siebwalde_Application
         public SensorUpdater TrackNo;
         public SensorUpdater TrackPower15V;                 // This is sensor indicator
         public SensorUpdater CmdBusy;
+        public SensorUpdater Mip50Rec;
 
         // Create Messages
         public MessageUpdater FiddleOneLeft;
@@ -141,6 +142,7 @@ namespace Siebwalde_Application
             TrackNo = new SensorUpdater();
             TrackPower15V = new SensorUpdater();
             CmdBusy = new SensorUpdater();
+            Mip50Rec = new SensorUpdater();
 
             // Instantiate messages
             FiddleOneLeft = new MessageUpdater();

@@ -251,6 +251,9 @@ namespace Siebwalde_Application
             checkBoxTrack11.Checked = false;
             checkBoxToggle.Checked = false;
 
+            ManualMode.Location = new System.Drawing.Point(625, 776);
+            AutomaticMode.Location = new System.Drawing.Point(625, 776);
+
             #endregion Indicator init            
 
             Btn_Stop_Fiddle_TOP.Enabled = false;            
@@ -710,7 +713,7 @@ namespace Siebwalde_Application
 
         private void Btn_Recovered_TOP_Click_1(object sender, EventArgs e)
         {
-            m_FYAppVar.CmdRecoverd.UpdateCommand();
+            m_FYAppVar.CmdHomeFY.UpdateCommand();
         }
 
         private void Btn_Collect_TOP_Click_1(object sender, EventArgs e)
@@ -2486,6 +2489,7 @@ namespace Siebwalde_Application
         {
             automaticModeToolStripMenuItem.Checked = true;
             manualModeToolStripMenuItem.Checked = false;
+            AutomaticMode.Location = new System.Drawing.Point(625, 776);
             AutomaticMode.Visible = true;
             ManualMode.Visible = false;
 
@@ -2524,6 +2528,7 @@ namespace Siebwalde_Application
             automaticModeToolStripMenuItem.Checked = false;
             manualModeToolStripMenuItem.Checked = true;
             AutomaticMode.Visible = false;
+            ManualMode.Location = new System.Drawing.Point(625, 776);
             ManualMode.Visible = true;                       
 
             Btn_Bezet5BOn_TOP.Location = new System.Drawing.Point(GWin.Location.X + 50 + 16 + 30, (740 / 2 + GWin.Location.Y) - 18 - (250 / 2) - (23 / 2));
