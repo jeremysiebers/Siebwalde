@@ -1,20 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
-using System.Timers;
-using System.Net.Sockets;
-using System.IO;
-using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Management;
-using System.Net.NetworkInformation;
-using System.Globalization;
 
 namespace Siebwalde_Application
 {
@@ -127,7 +112,7 @@ namespace Siebwalde_Application
         public SensorUpdater TrackNo;
         public SensorUpdater CmdBusy;
         public SensorUpdater TrackPower15V;
-        public SensorUpdater TrainDriveOutPointer;
+        public SensorUpdater TrainDriveOutPointer;        
 
         public MessageUpdater FiddleYardStopped;
         public MessageUpdater FiddleYardStart;
@@ -290,7 +275,7 @@ namespace Siebwalde_Application
             TrackPower15V = new SensorUpdater();
             CmdBusy = new SensorUpdater();
             TrainDriveOutPointer = new SensorUpdater();
-
+            
             FiddleYardStopped = new MessageUpdater();
             FiddleYardStart = new MessageUpdater();
             FiddleYardTrackNotAligned = new MessageUpdater();

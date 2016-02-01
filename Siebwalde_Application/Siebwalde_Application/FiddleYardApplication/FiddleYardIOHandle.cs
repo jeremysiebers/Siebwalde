@@ -21,6 +21,7 @@ namespace Siebwalde_Application
     public interface iFiddleYardIOHandle
     {        
         bool GetFYSimulatorActive();
+        void ActuatorCmd(string name, string cmd);
     }
 
     public class FiddleYardIOHandle : iFiddleYardIOHandle
@@ -144,19 +145,19 @@ namespace Siebwalde_Application
             FYApp.FYAppVar.FYStart.Attach(Act_Start);
             Actuator Act_Stop = new Actuator("Stop",  Layer + "I\r", (name, cmd) => ActuatorCmd(name, cmd)); // initialize and subscribe actuators
             FYApp.FYAppVar.FYStop.Attach(Act_Stop);
-            Actuator Act_Reset = new Actuator("Reset",  Layer + "J\r", (name, cmd) => ActuatorCmd(name, cmd)); // initialize and subscribe actuators
+            Actuator Act_Reset = new Actuator("Reset",  Layer + "5\r", (name, cmd) => ActuatorCmd(name, cmd)); // initialize and subscribe actuators
             FYApp.FYAppVar.Reset.Attach(Act_Reset);
-            Actuator Act_Occ5BOnTrue = new Actuator("Occ5BOnTrue",  Layer + "K\r", (name, cmd) => ActuatorCmd(name, cmd)); // initialize and subscribe actuators
+            Actuator Act_Occ5BOnTrue = new Actuator("Occ5BOnTrue",  Layer + "6\r", (name, cmd) => ActuatorCmd(name, cmd)); // initialize and subscribe actuators
             FYApp.FYAppVar.Occ5BOnTrue.Attach(Act_Occ5BOnTrue);
-            Actuator Act_Occ5BOnFalse = new Actuator("Occ5BOnFalse",  Layer + "L\r", (name, cmd) => ActuatorCmd(name, cmd)); // initialize and subscribe actuators
+            Actuator Act_Occ5BOnFalse = new Actuator("Occ5BOnFalse",  Layer + "7\r", (name, cmd) => ActuatorCmd(name, cmd)); // initialize and subscribe actuators
             FYApp.FYAppVar.Occ5BOnFalse.Attach(Act_Occ5BOnFalse);
-            Actuator Act_Occ6OnTrue = new Actuator("Occ6OnTrue",  Layer + "M\r", (name, cmd) => ActuatorCmd(name, cmd)); // initialize and subscribe actuators
+            Actuator Act_Occ6OnTrue = new Actuator("Occ6OnTrue",  Layer + "8\r", (name, cmd) => ActuatorCmd(name, cmd)); // initialize and subscribe actuators
             FYApp.FYAppVar.Occ6OnTrue.Attach(Act_Occ6OnTrue);
-            Actuator Act_Occ6OnFalse = new Actuator("Occ6OnFalse",  Layer + "N\r", (name, cmd) => ActuatorCmd(name, cmd)); // initialize and subscribe actuators
+            Actuator Act_Occ6OnFalse = new Actuator("Occ6OnFalse",  Layer + "9\r", (name, cmd) => ActuatorCmd(name, cmd)); // initialize and subscribe actuators
             FYApp.FYAppVar.Occ6OnFalse.Attach(Act_Occ6OnFalse);
-            Actuator Act_Occ7OnTrue = new Actuator("Occ7OnTrue",  Layer + "O\r", (name, cmd) => ActuatorCmd(name, cmd)); // initialize and subscribe actuators
+            Actuator Act_Occ7OnTrue = new Actuator("Occ7OnTrue",  Layer + "A\r", (name, cmd) => ActuatorCmd(name, cmd)); // initialize and subscribe actuators
             FYApp.FYAppVar.Occ7OnTrue.Attach(Act_Occ7OnTrue);
-            Actuator Act_Occ7OnFalse = new Actuator("Occ7OnFalse",  Layer + "P\r", (name, cmd) => ActuatorCmd(name, cmd)); // initialize and subscribe actuators
+            Actuator Act_Occ7OnFalse = new Actuator("Occ7OnFalse",  Layer + "B\r", (name, cmd) => ActuatorCmd(name, cmd)); // initialize and subscribe actuators
             FYApp.FYAppVar.Occ7OnFalse.Attach(Act_Occ7OnFalse);
             Actuator Act_HomeFY = new Actuator("HomeFY",  Layer + "Q\r", (name, cmd) => ActuatorCmd(name, cmd)); // initialize and subscribe actuators
             FYApp.FYAppVar.HomeFY.Attach(Act_HomeFY);
@@ -221,7 +222,7 @@ namespace Siebwalde_Application
          *  Notes      :
          */
         /*#--------------------------------------------------------------------------#*/
-        void ActuatorCmd(string name, string cmd)
+        public void ActuatorCmd(string name, string cmd)
         {
             if (false == m_FYSimulatorActive)
             {

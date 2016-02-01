@@ -18,7 +18,8 @@ namespace Siebwalde_Application
         private FiddleYardIOHandleVariables m_FYIOHandleVar;                        // connect variable to connect to FYIOH class for defined interfaces
         private iFiddleYardIOHandle m_iFYIOH;
         private FiddleYardAppInit FYAppInit;
-        private FiddleYardAppRun FYAppRun;        
+        private FiddleYardAppRun FYAppRun;
+        private FiddleYardMip50 FYMIP50;                                            // Create new MIP50 sub program       
         private string m_instance = null;
         private string path = "null";
 
@@ -86,6 +87,7 @@ namespace Siebwalde_Application
             FYFORM = new FiddleYardForm();
             FYAppInit = new FiddleYardAppInit(m_FYIOHandleVar, FYAppVar, FiddleYardApplicationLogging);
             FYAppRun = new FiddleYardAppRun(m_FYIOHandleVar, m_iFYIOH, FYAppVar, FiddleYardApplicationLogging);
+            FYMIP50 = new FiddleYardMip50(m_instance, m_FYIOHandleVar, m_iFYIOH, FYAppVar);
 
             //Init and setup FYFORM (after the creation of the sensors and commands)
             if ("TOP" == m_instance)
@@ -157,6 +159,8 @@ namespace Siebwalde_Application
         /*#--------------------------------------------------------------------------#*/        
         public void Start()
         {
+            FYMIP50.Start();        // start MIP50 data composer/API
+
             //Sensors for update kick and logging, variables are updated in FiddleYardApplicationVariables
             Sensor Sns_CL_10_Heart = new Sensor("CL10Heart", " CL 10 Heart ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
             m_FYIOHandleVar.CL10Heart.Attach(Sns_CL_10_Heart);
@@ -483,10 +487,12 @@ namespace Siebwalde_Application
                 a = Convert.ToInt16(val) >> 4;
                 FiddleYardApplicationLogging.StoreText("FYApp received a Sensor event:" + log + Convert.ToString(a));
             }
+            /*
             else if (log != "" && indicator == "Mip50Rec")
             {
                 FiddleYardApplicationLogging.StoreText("FYApp received MIP50 data :" + Convert.ToChar(val));
             }
+            */
             ApplicationUpdate(indicator, val); // let the application know to update sub programs because a value of a sensor has changed
         }
 
@@ -585,7 +591,7 @@ namespace Siebwalde_Application
                     break;
                 case " Occ7OnFalse ": FYAppVar.Occ7OnFalse.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
                     break;
-                case " HomeFY ":FYAppVar.HomeFY.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);                    
+                case " HomeFY ": FYMIP50.MIP50xHOME(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);                    
                     break;
 
                 default: break;
