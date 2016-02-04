@@ -41,7 +41,7 @@ namespace Siebwalde_Application
          */
         /*#--------------------------------------------------------------------------#*/       
 
-        public enum State { Idle, Start, Init, Running, Stop, Reset };
+        public enum State { Idle, Start, Init, Running, Stop, Reset, MIP50Home, MIP50Move };
         public State State_Machine;
         public string StopApplication = null;
 
@@ -202,8 +202,10 @@ namespace Siebwalde_Application
             m_FYIOHandleVar.CmdBusy.Attach(Sns_CmdBusy);
             Sensor Sns_TrackPower15V = new Sensor("TrackPower15V", " 15V Track Power ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
             m_FYIOHandleVar.TrackPower15V.Attach(Sns_TrackPower15V);
+            /*
             Sensor Sns_Mip50Rec = new Sensor("Mip50Rec", " Mip50ReceivedCmd ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
             m_FYIOHandleVar.Mip50Rec.Attach(Sns_Mip50Rec);
+            */
 
             //Messages for update kick and logging
             Message Msg_FiddleOneLeft = new Message("FiddleOneLeftFinished", " Fiddle One Left Finished ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
@@ -423,6 +425,20 @@ namespace Siebwalde_Application
                     Cmd(kickapplication, "");                    
                     break;
 
+                case State.MIP50Home:
+                    if (FYMIP50.MIP50xHOME() == "Finished")
+                    {
+                        State_Machine = State.Idle;
+                    }
+                    break;
+
+                case State.MIP50Move:
+                    if (FYMIP50.MIP50xMOVE() == "Finished")
+                    {
+                        State_Machine = State.Idle;
+                    }
+                    break;
+
                 case State.Start:
                     if (FYAppInit.Init(kickapplication, val) == "Finished")
                     {
@@ -486,13 +502,7 @@ namespace Siebwalde_Application
             {
                 a = Convert.ToInt16(val) >> 4;
                 FiddleYardApplicationLogging.StoreText("FYApp received a Sensor event:" + log + Convert.ToString(a));
-            }
-            /*
-            else if (log != "" && indicator == "Mip50Rec")
-            {
-                FiddleYardApplicationLogging.StoreText("FYApp received MIP50 data :" + Convert.ToChar(val));
-            }
-            */
+            }            
             ApplicationUpdate(indicator, val); // let the application know to update sub programs because a value of a sensor has changed
         }
 
@@ -545,35 +555,35 @@ namespace Siebwalde_Application
         {            
             switch (name)
             {
-                case " FiddleOneLeft ": FYAppVar.FiddleOneLeft.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
+                case " FiddleOneLeft ": FYMIP50.MIP50xMOVExCALC(12); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.MIP50Move Cmd = " + name); State_Machine = State.MIP50Move;
                     break;
-                case " FiddleOneRight ": FYAppVar.FiddleOneRight.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
+                case " FiddleOneRight ": FYMIP50.MIP50xMOVExCALC(13); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.MIP50Move Cmd = " + name); State_Machine = State.MIP50Move;
                     break;
                 case " Couple ": FYAppVar.Couple.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
                     break;
                 case " Uncouple ": FYAppVar.Uncouple.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
                     break;
-                case " FiddleGo1 ": FYAppVar.FiddleGo1.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
+                case " FiddleGo1 ": FYMIP50.MIP50xMOVExCALC(1); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.MIP50Move Cmd = " + name); State_Machine = State.MIP50Move;
                     break;
-                case " FiddleGo2 ": FYAppVar.FiddleGo2.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
+                case " FiddleGo2 ": FYMIP50.MIP50xMOVExCALC(2); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.MIP50Move Cmd = " + name); State_Machine = State.MIP50Move;
                     break;
-                case " FiddleGo3 ": FYAppVar.FiddleGo3.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
+                case " FiddleGo3 ": FYMIP50.MIP50xMOVExCALC(3); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.MIP50Move Cmd = " + name); State_Machine = State.MIP50Move;
                     break;
-                case " FiddleGo4 ": FYAppVar.FiddleGo4.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
+                case " FiddleGo4 ": FYMIP50.MIP50xMOVExCALC(4); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.MIP50Move Cmd = " + name); State_Machine = State.MIP50Move;
                     break;
-                case " FiddleGo5 ": FYAppVar.FiddleGo5.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
+                case " FiddleGo5 ": FYMIP50.MIP50xMOVExCALC(5); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.MIP50Move Cmd = " + name); State_Machine = State.MIP50Move;
                     break;
-                case " FiddleGo6 ": FYAppVar.FiddleGo6.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
+                case " FiddleGo6 ": FYMIP50.MIP50xMOVExCALC(6); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.MIP50Move Cmd = " + name); State_Machine = State.MIP50Move;
                     break;
-                case " FiddleGo7 ": FYAppVar.FiddleGo7.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
+                case " FiddleGo7 ": FYMIP50.MIP50xMOVExCALC(7); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.MIP50Move Cmd = " + name); State_Machine = State.MIP50Move;
                     break;
-                case " FiddleGo8 ": FYAppVar.FiddleGo8.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
+                case " FiddleGo8 ": FYMIP50.MIP50xMOVExCALC(8); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.MIP50Move Cmd = " + name); State_Machine = State.MIP50Move;
                     break;
-                case " FiddleGo9 ": FYAppVar.FiddleGo9.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
+                case " FiddleGo9 ": FYMIP50.MIP50xMOVExCALC(9); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.MIP50Move Cmd = " + name); State_Machine = State.MIP50Move;
                     break;
-                case " FiddleGo10 ": FYAppVar.FiddleGo10.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
+                case " FiddleGo10 ": FYMIP50.MIP50xMOVExCALC(10); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.MIP50Move Cmd = " + name); State_Machine = State.MIP50Move;
                     break;
-                case " FiddleGo11 ": FYAppVar.FiddleGo11.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
+                case " FiddleGo11 ": FYMIP50.MIP50xMOVExCALC(11); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.MIP50Move Cmd = " + name); State_Machine = State.MIP50Move;
                     break;
                 case " TrainDetect ": FYAppVar.TrainDetect.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
                     break;
@@ -591,7 +601,7 @@ namespace Siebwalde_Application
                     break;
                 case " Occ7OnFalse ": FYAppVar.Occ7OnFalse.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
                     break;
-                case " HomeFY ": FYMIP50.MIP50xHOME(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);                    
+                case " HomeFY ": FYMIP50.MIP50xHOME(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.MIP50HOME Cmd = " + name); State_Machine = State.MIP50Home;
                     break;
 
                 default: break;

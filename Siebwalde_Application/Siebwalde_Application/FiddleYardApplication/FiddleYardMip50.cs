@@ -30,7 +30,7 @@ namespace Siebwalde_Application
          *  
          */
         /*#--------------------------------------------------------------------------#*/
-
+        
         private string m_instance = null;
         private string path = null;
         private enum State { CR, LF, Head, X0, X0_C0, X0_C1, ME, ME_C, Reset };
@@ -40,6 +40,11 @@ namespace Siebwalde_Application
         private bool MIP50AckReceived = false;
         private bool MIP50NotAckReceived = false;
         private string Layer = null;
+
+        private uint Next_Track = 0;
+        private const int TEMPOFFSET = 700;
+        private uint[] TrackForward = new uint[12] { 0, 0, 42800, 85600, 128400, 171200, 214000, 256800, 299600, 342400, 385200, 428000 };// New track coordinates forward movement 1 --> 11
+        private uint[] TrackBackwardOffset = new uint[12] { 0, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, 0 };   // New track coordinates forward movement 11 --> 1 offset number
 
         /*#--------------------------------------------------------------------------#*/
         /*  Description: FiddleYardApplication constructor
@@ -75,7 +80,7 @@ namespace Siebwalde_Application
             {
                 path = @"c:\localdata\Siebwalde\" + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_FiddleYardMIP50BOT.txt"; //  different logging file per target, this is default
                 FiddleYardMIP50Logging = new Log2LoggingFile(path);
-            }            
+            }           
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -134,7 +139,7 @@ namespace Siebwalde_Application
          *  Notes      : 
          */
         /*#--------------------------------------------------------------------------#*/
-        public void ReceivedMIP50Data(string indicator, int val, string log)
+        private void ReceivedMIP50Data(string indicator, int val, string log)
         {
             switch (MIP50ReceivedData)
             {
@@ -246,6 +251,42 @@ namespace Siebwalde_Application
         }
 
         /*#--------------------------------------------------------------------------#*/
+        /*  Description: MIP50xMOVExCALCULATE next move with correction for direction
+         * 
+         *  Input(s)   : Absolute new track number
+         *
+         *  Output(s)  : Sets variable Next_Track with absolute track number
+         *
+         *  Returns    : 
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      : 
+         */
+        /*#--------------------------------------------------------------------------#*/
+        public void MIP50xMOVExCALC(uint New_Track)
+        {
+            if (New_Track == 12)
+            {
+                Next_Track = TrackForward[FYAppVar.GetTrackNr() + 1];
+            }
+            else if (New_Track == 13)
+            {
+                Next_Track = TrackForward[FYAppVar.GetTrackNr() - 1] - TrackBackwardOffset[FYAppVar.GetTrackNr() - 1];
+            }
+            else if (New_Track > FYAppVar.GetTrackNr())
+            {
+                Next_Track = TrackForward[New_Track];
+            }
+            else if (New_Track < FYAppVar.GetTrackNr())
+            {
+                Next_Track = TrackForward[New_Track] - TrackBackwardOffset[New_Track];
+            }            
+        }
+
+        /*#--------------------------------------------------------------------------#*/
         /*  Description: MIP50 command Move (absolute moves)
          * 
          *  Input(s)   : Absolute new track position
@@ -261,14 +302,14 @@ namespace Siebwalde_Application
          *  Notes      : 
          */
         /*#--------------------------------------------------------------------------#*/
-        public string MIP50xMOVE(uint New_Track)
+        public string MIP50xMOVE()
         {
             string _Return = "Running";
 
             switch (MIP50TransmitData)
             {
                 case 0:
-                    FiddleYardMIP50Logging.StoreText("MIP50 Start Absolute Move to " + Convert.ToString(New_Track));
+                    FiddleYardMIP50Logging.StoreText("MIP50 Start Absolute Move to " + Convert.ToString(Next_Track));
                     MIP50xActivatexPosxReg();                    
                     MIP50TransmitData = 1;
                     break;
@@ -289,7 +330,7 @@ namespace Siebwalde_Application
                     break;
 
                 case 2:
-                    MIP50xAbs_Pos(New_Track);
+                    MIP50xAbs_Pos(Next_Track);
                     MIP50TransmitData = 3;
                     break;
 
