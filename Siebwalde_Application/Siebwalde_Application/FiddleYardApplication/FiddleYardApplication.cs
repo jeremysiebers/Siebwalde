@@ -415,6 +415,8 @@ namespace Siebwalde_Application
                     FYAppRun.FiddleYardAppRunReset();   // also resets the sub programs!
                     FYAppInit.FiddleYardInitReset();
                     FiddleYardApplicationLogging.StoreText("FYApp FYAppRun.FiddleYardAppRunReset()");
+                    FYMIP50.MIP50Reset();   //Reset MIP50 program
+                    FiddleYardApplicationLogging.StoreText("FYApp FYMIP50.MIP50Reset()");
                     Cmd(" Reset ", ""); // reset target
                     FiddleYardApplicationLogging.StoreText("FYApp reset target");
                     State_Machine = State.Idle;
