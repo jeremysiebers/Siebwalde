@@ -405,6 +405,8 @@ namespace Siebwalde_Application
         /*#--------------------------------------------------------------------------#*/
         public void StateMachineUpdate(string kickapplication, int val)
         {
+            string SubProgramReturnVal = null;
+
             switch (State_Machine)
             {
                 case State.Reset:
@@ -428,15 +430,27 @@ namespace Siebwalde_Application
                     break;
 
                 case State.MIP50Home:
-                    if (FYMIP50.MIP50xHOME() == "Finished")
+                    SubProgramReturnVal = FYMIP50.MIP50xHOME();
+                    if (SubProgramReturnVal == "Finished")
                     {
+                        State_Machine = State.Idle;
+                    }
+                    else if (SubProgramReturnVal == "Error")
+                    {
+                        //TBD do something with the message or error!!!<---------------------------------------------------------------------------------------------------------------
                         State_Machine = State.Idle;
                     }
                     break;
 
                 case State.MIP50Move:
-                    if (FYMIP50.MIP50xMOVE() == "Finished")
+                    SubProgramReturnVal = FYMIP50.MIP50xMOVE();                    
+                    if (SubProgramReturnVal == "Finished")
                     {
+                        State_Machine = State.Idle;
+                    }
+                    else if (SubProgramReturnVal == "Error")
+                    {
+                        //TBD do something with the message or error!!!<---------------------------------------------------------------------------------------------------------------
                         State_Machine = State.Idle;
                     }
                     break;
@@ -557,36 +571,115 @@ namespace Siebwalde_Application
         {            
             switch (name)
             {
-                case " FiddleOneLeft ": FYMIP50.MIP50xMOVExCALC(12); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.MIP50Move Cmd = " + name); State_Machine = State.MIP50Move;
+                case " FiddleOneLeft ":
+                    if (FYAppVar.FYHomed.BoolVariable == true)
+                    {
+                        FYMIP50.MIP50xMOVExCALC(12); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.MIP50Move Cmd = " + name); State_Machine = State.MIP50Move;
+                    }
+                    else { FiddleYardApplicationLogging.StoreText("FYApp Form Command Move FiddleYard Cancelled, FYHomed == false"); FYAppVar.FYNotHomed.UpdateMessage(); }
                     break;
-                case " FiddleOneRight ": FYMIP50.MIP50xMOVExCALC(13); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.MIP50Move Cmd = " + name); State_Machine = State.MIP50Move;
+
+                case " FiddleOneRight ": 
+                    if (FYAppVar.FYHomed.BoolVariable == true)
+                    {
+                        FYMIP50.MIP50xMOVExCALC(13); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.MIP50Move Cmd = " + name); State_Machine = State.MIP50Move;
+                    }
+                    else { FiddleYardApplicationLogging.StoreText("FYApp Form Command Move FiddleYard Cancelled, FYHomed == false"); FYAppVar.FYNotHomed.UpdateMessage(); }
                     break;
+
                 case " Couple ": FYAppVar.Couple.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
                     break;
                 case " Uncouple ": FYAppVar.Uncouple.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
                     break;
-                case " FiddleGo1 ": FYMIP50.MIP50xMOVExCALC(1); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.MIP50Move Cmd = " + name); State_Machine = State.MIP50Move;
+
+                case " FiddleGo1 ": 
+                    if (FYAppVar.FYHomed.BoolVariable == true)
+                    {
+                        FYMIP50.MIP50xMOVExCALC(1); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.MIP50Move Cmd = " + name); State_Machine = State.MIP50Move;
+                    }
+                    else { FiddleYardApplicationLogging.StoreText("FYApp Form Command Move FiddleYard Cancelled, FYHomed == false"); FYAppVar.FYNotHomed.UpdateMessage(); }
                     break;
-                case " FiddleGo2 ": FYMIP50.MIP50xMOVExCALC(2); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.MIP50Move Cmd = " + name); State_Machine = State.MIP50Move;
+
+                case " FiddleGo2 ": 
+                    if (FYAppVar.FYHomed.BoolVariable == true)
+                    {
+                        FYMIP50.MIP50xMOVExCALC(2); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.MIP50Move Cmd = " + name); State_Machine = State.MIP50Move;
+                    }
+                    else { FiddleYardApplicationLogging.StoreText("FYApp Form Command Move FiddleYard Cancelled, FYHomed == false"); FYAppVar.FYNotHomed.UpdateMessage(); }
                     break;
-                case " FiddleGo3 ": FYMIP50.MIP50xMOVExCALC(3); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.MIP50Move Cmd = " + name); State_Machine = State.MIP50Move;
+
+                case " FiddleGo3 ": 
+                    if (FYAppVar.FYHomed.BoolVariable == true)
+                    {
+                        FYMIP50.MIP50xMOVExCALC(3); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.MIP50Move Cmd = " + name); State_Machine = State.MIP50Move;
+                    }
+                    else { FiddleYardApplicationLogging.StoreText("FYApp Form Command Move FiddleYard Cancelled, FYHomed == false"); FYAppVar.FYNotHomed.UpdateMessage(); }
                     break;
-                case " FiddleGo4 ": FYMIP50.MIP50xMOVExCALC(4); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.MIP50Move Cmd = " + name); State_Machine = State.MIP50Move;
+
+                case " FiddleGo4 ": 
+                    if (FYAppVar.FYHomed.BoolVariable == true)
+                    {
+                        FYMIP50.MIP50xMOVExCALC(4); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.MIP50Move Cmd = " + name); State_Machine = State.MIP50Move;
+                    }
+                    else { FiddleYardApplicationLogging.StoreText("FYApp Form Command Move FiddleYard Cancelled, FYHomed == false"); FYAppVar.FYNotHomed.UpdateMessage(); }
                     break;
-                case " FiddleGo5 ": FYMIP50.MIP50xMOVExCALC(5); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.MIP50Move Cmd = " + name); State_Machine = State.MIP50Move;
+
+                case " FiddleGo5 ": 
+                    if (FYAppVar.FYHomed.BoolVariable == true)
+                    {
+                        FYMIP50.MIP50xMOVExCALC(5); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.MIP50Move Cmd = " + name); State_Machine = State.MIP50Move;
+                    }
+                    else { FiddleYardApplicationLogging.StoreText("FYApp Form Command Move FiddleYard Cancelled, FYHomed == false"); FYAppVar.FYNotHomed.UpdateMessage(); }
                     break;
-                case " FiddleGo6 ": FYMIP50.MIP50xMOVExCALC(6); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.MIP50Move Cmd = " + name); State_Machine = State.MIP50Move;
+
+                case " FiddleGo6 ": 
+                    if (FYAppVar.FYHomed.BoolVariable == true)
+                    {
+                        FYMIP50.MIP50xMOVExCALC(6); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.MIP50Move Cmd = " + name); State_Machine = State.MIP50Move;
+                    }
+                    else { FiddleYardApplicationLogging.StoreText("FYApp Form Command Move FiddleYard Cancelled, FYHomed == false"); FYAppVar.FYNotHomed.UpdateMessage(); }
                     break;
-                case " FiddleGo7 ": FYMIP50.MIP50xMOVExCALC(7); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.MIP50Move Cmd = " + name); State_Machine = State.MIP50Move;
+
+                case " FiddleGo7 ": 
+                    if (FYAppVar.FYHomed.BoolVariable == true)
+                    {
+                        FYMIP50.MIP50xMOVExCALC(7); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.MIP50Move Cmd = " + name); State_Machine = State.MIP50Move;
+                    }
+                    else { FiddleYardApplicationLogging.StoreText("FYApp Form Command Move FiddleYard Cancelled, FYHomed == false"); FYAppVar.FYNotHomed.UpdateMessage(); }
                     break;
-                case " FiddleGo8 ": FYMIP50.MIP50xMOVExCALC(8); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.MIP50Move Cmd = " + name); State_Machine = State.MIP50Move;
+
+                case " FiddleGo8 ": 
+                    if (FYAppVar.FYHomed.BoolVariable == true)
+                    {
+                        FYMIP50.MIP50xMOVExCALC(8); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.MIP50Move Cmd = " + name); State_Machine = State.MIP50Move;
+                    }
+                    else { FiddleYardApplicationLogging.StoreText("FYApp Form Command Move FiddleYard Cancelled, FYHomed == false"); FYAppVar.FYNotHomed.UpdateMessage(); }
                     break;
-                case " FiddleGo9 ": FYMIP50.MIP50xMOVExCALC(9); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.MIP50Move Cmd = " + name); State_Machine = State.MIP50Move;
+
+                case " FiddleGo9 ": 
+                    if (FYAppVar.FYHomed.BoolVariable == true)
+                    {
+                        FYMIP50.MIP50xMOVExCALC(9); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.MIP50Move Cmd = " + name); State_Machine = State.MIP50Move;
+                    }
+                    else { FiddleYardApplicationLogging.StoreText("FYApp Form Command Move FiddleYard Cancelled, FYHomed == false"); FYAppVar.FYNotHomed.UpdateMessage(); }
                     break;
-                case " FiddleGo10 ": FYMIP50.MIP50xMOVExCALC(10); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.MIP50Move Cmd = " + name); State_Machine = State.MIP50Move;
+
+                case " FiddleGo10 ": 
+                    if (FYAppVar.FYHomed.BoolVariable == true)
+                    {
+                        FYMIP50.MIP50xMOVExCALC(10); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.MIP50Move Cmd = " + name); State_Machine = State.MIP50Move;
+                    }
+                    else { FiddleYardApplicationLogging.StoreText("FYApp Form Command Move FiddleYard Cancelled, FYHomed == false"); FYAppVar.FYNotHomed.UpdateMessage(); }
                     break;
-                case " FiddleGo11 ": FYMIP50.MIP50xMOVExCALC(11); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.MIP50Move Cmd = " + name); State_Machine = State.MIP50Move;
+
+                case " FiddleGo11 ": 
+                    if (FYAppVar.FYHomed.BoolVariable == true)
+                    {
+                        FYMIP50.MIP50xMOVExCALC(11); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.MIP50Move Cmd = " + name); State_Machine = State.MIP50Move;
+                    }
+                    else { FiddleYardApplicationLogging.StoreText("FYApp Form Command Move FiddleYard Cancelled, FYHomed == false"); FYAppVar.FYNotHomed.UpdateMessage(); }
                     break;
+
                 case " TrainDetect ": FYAppVar.TrainDetect.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
                     break;
                 case " Reset ": FYAppVar.Reset.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);

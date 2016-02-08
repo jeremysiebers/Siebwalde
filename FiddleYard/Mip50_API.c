@@ -116,7 +116,7 @@ void UARTxCOMM(unsigned char ASL)                                               
                             Send_Var_Out[1] = ACT_ST_MCHN[ASL].MIP50_Received_Data;
                             Send_Var_Out[2] = 0x00;
                             Send_Diag_Comm(Send_Var_Out);                            
-                            ACT_ST_MCHN[ASL].Mip50_ReadSwitchState = 3;         // Goto the check for LF...                            
+                            ACT_ST_MCHN[ASL].Mip50_ReadSwitchState = 1;         // Goto the check for LF...                            
                         }
                         else
                         {
@@ -131,23 +131,6 @@ void UARTxCOMM(unsigned char ASL)                                               
                             Send_Var_Out[1] = ACT_ST_MCHN[ASL].MIP50_Received_Data;
                             Send_Var_Out[2] = 0x00;
                             Send_Diag_Comm(Send_Var_Out);
-                        }
-                        break;
-                        
-            case 3 :    if(ACT_ST_MCHN[ASL].MIP50_Received_Data == 0xA)         // Check if second received char is LF
-                        {
-                            if (ASL == TOP)
-                            {
-                                Send_Var_Out[0] = 'H';
-                            }
-                            else if (ASL == BOTTOM)
-                            {
-                                Send_Var_Out[0] = 'U';
-                            }
-                            Send_Var_Out[1] = ACT_ST_MCHN[ASL].MIP50_Received_Data;
-                            Send_Var_Out[2] = 0x00;
-                            Send_Diag_Comm(Send_Var_Out);
-                            ACT_ST_MCHN[ASL].Mip50_ReadSwitchState = 0;         // If LF then the data from the MIP is closed Reset switch                            
                         }
                         break;
                         

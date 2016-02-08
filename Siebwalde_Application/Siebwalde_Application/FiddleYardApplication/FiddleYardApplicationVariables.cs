@@ -3,7 +3,13 @@ using System.Drawing;
 
 namespace Siebwalde_Application
 {
-    public class FiddleYardApplicationVariables
+
+    //public interface iFiddleYardApplicationVariables
+    //{
+    //    PublicBool FYHomed { get; set; }
+    //}
+
+    public class FiddleYardApplicationVariables //: iFiddleYardApplicationVariables
     {
         private FiddleYardIOHandleVariables m_FYIOHandleVar;                // connect variable to connect to FYIOH class for defined variables       
 
@@ -131,6 +137,7 @@ namespace Siebwalde_Application
         public MessageUpdater FiddleYardAutoModeIsStopped;
         public MessageUpdater CollectingTrainsEnabled;
         public MessageUpdater CollectingTrainsDisabled;
+        public MessageUpdater FYNotHomed;
 
         public CommandUpdater FormCollect;          // pass Form command through FiddleYardApplicationVariables, in case Form gets replaced or closed
 
@@ -156,13 +163,15 @@ namespace Siebwalde_Application
         public bool bTrackPower15V = false;
         public bool bFYCollect = false;
         public int iTrackNo = 0;
-        public int iTrainDriveOutPointer = 5;
+        public int iTrainDriveOutPointer = 5;        
 
         public Color TrackOccupiedColor = Siebwalde_Application.Properties.Settings.Default.SETxCOLORxTRACKxOCCUPIED;
         public Color TrackNotInitializedColor = Siebwalde_Application.Properties.Settings.Default.SETxCOLORxTRACKxNOTxINITIALIZED;
         public Color TrackNotActiveColor = Siebwalde_Application.Properties.Settings.Default.SETxCOLORxTRACKxNOTxACTIVE;
         public Color TrackDisabledColor = Siebwalde_Application.Properties.Settings.Default.SETxCOLORxTRACKxDISABLED;
         public Color TrackDisabledNotOccupiedColor = Siebwalde_Application.Properties.Settings.Default.SETxCOLORxTRACKxDISABLEDxNOTxOCCUPIED;
+
+        public PublicBool FYHomed = new PublicBool();
 
         /*#--------------------------------------------------------------------------#*/
         /*  Description: FiddleYardVariables constructor
@@ -293,6 +302,7 @@ namespace Siebwalde_Application
             FiddleYardAutoModeIsStopped = new MessageUpdater();
             CollectingTrainsEnabled = new MessageUpdater();
             CollectingTrainsDisabled = new MessageUpdater();
+            FYNotHomed = new MessageUpdater();
 
             FormCollect = new CommandUpdater();
             
@@ -383,6 +393,8 @@ namespace Siebwalde_Application
             {
                 icheckBoxTrack[i] = 1;      // Init all tracks disabled
             }
+                        
+            FYHomed.BoolVariable = false;   // Init variable
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -876,6 +888,16 @@ namespace Siebwalde_Application
                     break;
             }
             return _return;
+        }
+    }
+
+    public class PublicBool
+    {
+        private bool boolvariable;
+        public bool BoolVariable
+        {
+            get { return boolvariable; }
+            set { boolvariable = value; }
         }
     }
 }

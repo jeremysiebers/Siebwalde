@@ -401,6 +401,8 @@ namespace Siebwalde_Application
             m_FYIOHandleVar.FiddleYardMoveAndF12Assert.Attach(Msg_FiddleYardMoveAndF12Assert);
             Message Msg_FiddleYardMoveAndF13Assert = new Message("FiddleYardMoveAndF13Assert", " FiddleYard Moving And F13 Assert!!! FiddleYard Stopped!!! ", (name, log) => SetMessage(name, log));
             m_FYIOHandleVar.FiddleYardMoveAndF13Assert.Attach(Msg_FiddleYardMoveAndF13Assert);
+            Message Msg_FYNotHomed = new Message("FYNotHomed", " Fiddle Yard Not Homed! Press Home FY Button to start Homing... ", (name, log) => SetMessage(name, log));
+            m_FYAppVar.FYNotHomed.Attach(Msg_FYNotHomed);
             #endregion Attach sensors
 
             // Init Track colors

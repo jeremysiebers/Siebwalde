@@ -33,17 +33,20 @@ namespace Siebwalde_Application
         
         private string m_instance = null;
         private string path = null;
-        private enum State { CR, LF, Head, X0, X0_C0, X0_C1, ME, ME_C, Reset };
+        private enum State { CR, LF, Head, X0, X0_C0, X0_C1, E, E_C, M, Reset };
         private State MIP50ReceivedData;
         private int MIP50TransmitData;
-        private string MIP50ReceivedDataBuffer = null;
-        private bool MIP50AckReceived = false;
-        private bool MIP50NotAckReceived = false;
+        private string MIP50ReceivedDataBuffer = null;        
+        private uint MIP50_Rec_Cmd_Counter_R = 0;
+        private uint MIP50_Rec_Cmd_Counter_W = 0;
+        private const uint MIP50RECCMDARRAY = 8;
+        private string[] MIP50_Rec_Cmd = new string[MIP50RECCMDARRAY];        
         private string Layer = null;
 
         private int ActualPosition = 0;
         private bool ActualPositionUpdated = false;
         private uint Next_Track = 0;
+        private uint Current_Track = 0;
         private const int TEMPOFFSET = 700;
         private uint[] TrackForward = new uint[12] { 0, 0, 42800, 85600, 128400, 171200, 214000, 256800, 299600, 342400, 385200, 428000 };// New track coordinates forward movement 1 --> 11
         private uint[] TrackBackwardOffset = new uint[12] { 0, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, 0 };   // New track coordinates forward movement 11 --> 1 offset number
@@ -112,15 +115,11 @@ namespace Siebwalde_Application
             MIP50ReceivedData = State.CR;
             MIP50TransmitData = 0;
 
-            
             if (m_instance == "TOP")
                 Layer = "p";
             else if (m_instance == "BOT")
                 Layer = "q";
-
-            MIP50AckReceived = false;
-            MIP50NotAckReceived = false;
-
+            
             FiddleYardMIP50Logging.StoreText("### Fiddle Yard MIP50 API started ###");
         }
 
@@ -144,13 +143,12 @@ namespace Siebwalde_Application
         public void MIP50Reset()
         {
             MIP50TransmitData = 0;
-            MIP50ReceivedDataBuffer = null;
-            MIP50AckReceived = false;
-            MIP50NotAckReceived = false;
+            MIP50ReceivedDataBuffer = null;            
             Next_Track = 0;
             MIP50ReceivedData = State.CR;
             ActualPosition = 0;
             ActualPositionUpdated = false;
+            m_FYAppVar.FYHomed.BoolVariable = false;
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -174,12 +172,14 @@ namespace Siebwalde_Application
         {
             switch (MIP50ReceivedData)
             {
+
+                /*---------------------------------------CHECK FOR CR and LF -----------------------------------------------------------------------------------------------------------------
+                */
+
                 case State.CR:
                     if (val == 0xD)                                                     // Check if received char is CR
                     {
-                        MIP50ReceivedDataBuffer = null;                                 // Clear buffer of previous data
-                        MIP50AckReceived = false;                                       // Clear acknowledge receieved
-                        MIP50NotAckReceived = false;                                    // Clear not acknowledge received
+                        MIP50ReceivedDataBuffer = null;                                 // Clear buffer of previous data                        
                         MIP50ReceivedData = State.LF;                                   // If CR then check next char for LF
                     }
                     break;
@@ -192,6 +192,9 @@ namespace Siebwalde_Application
                     else { MIP50ReceivedData = State.CR; }                              // If the second char is not LF then the whole message is carbage reset switch
                     break;
 
+                /*---------------------------------------CHECK FOR X, M, E or P -----------------------------------------------------------------------------------------------------------------
+                */
+
                 case State.Head:
                     if (val == 0x58)                                                    // When received data is X0 message
                     {
@@ -200,12 +203,12 @@ namespace Siebwalde_Application
                     else if (val == 0x4D)                                               // When received data is M# Message
                     {
                         MIP50ReceivedDataBuffer += Convert.ToChar(val);                 // store 'M' in string array
-                        MIP50ReceivedData = State.ME;                                   // Next characters of the Message M are expected
+                        MIP50ReceivedData = State.M;                                    // Next characters of the Message M are expected
                     }
                     else if (val == 0x45)                                               // When received data is E# message
                     {
                         MIP50ReceivedDataBuffer += Convert.ToChar(val);                 // store 'E' in string array
-                        MIP50ReceivedData = State.ME;                                   // Next characters of the Message E are expected
+                        MIP50ReceivedData = State.E;                                    // Next characters of the Message E are expected
                     }
                     else if (val == 0xD)                                                // When the next char data is a CR then the end of the data was not found and new data is coming
                     {
@@ -215,47 +218,32 @@ namespace Siebwalde_Application
                     else if (val == 0x50)
                     {
                         MIP50ReceivedDataBuffer += Convert.ToChar(val);                 // store 'P' in string array
-                        MIP50ReceivedData = State.ME;                                   // Next characters of the MIP50 power ON Message are expected
+                        MIP50ReceivedData = State.M;                                    // Next characters of the MIP50 power ON Message are expected
                     }
                     break;
+
+                /*---------------------------------------X0 Message -----------------------------------------------------------------------------------------------------------------
+                */
 
                 case State.X0:
                     if (val == 0x30)                                                    // When received data is 0 from X0
                     {
-                        FiddleYardMIP50Logging.StoreText("X0");
-                        MIP50AckReceived = true;
-                        MIP50ReceivedData = State.X0_C0;                                // Next characters are 0xD and 0xA
+                        FiddleYardMIP50Logging.StoreText("Received Acknowledge from MIP50: X0");
+                        MIP50xRECxCMDxW("X0");                                          // Put X0 into mailbox
+                        MIP50ReceivedData = State.CR;                                   // Start again with checking for CR
                     }
                     else { MIP50ReceivedData = State.CR; }                              // else data not OK, reset switch
-                    break;
+                    break;                
 
-                case State.X0_C0:
+                /*---------------------------------------M Message -----------------------------------------------------------------------------------------------------------------
+                */
+
+                case State.M:
                     if (val == 0xD)                                                     // When the next char data is a CR then the end of the data is found and next a LF is expected
                     {
-                        MIP50ReceivedData = State.X0_C1;                                // Goto the check for LF in order to close the telegram                        
-                    }
-                    else
-                    {                       
-                        MIP50ReceivedData = State.CR;                                   // Start again with checking for CR                                
-                    }
-                    break;
-
-                case State.X0_C1:
-                    if (val == 0xA)                                                     // Check if second received char is LF
-                    {
-                        
-                        MIP50ReceivedData = State.CR;                                   // If LF then the data from the MIP is closed Reset switch
-                    }
-                    else
-                    {
-                        MIP50ReceivedData = State.CR;                                   // Start again with checking for CR                                
-                    }
-                    break;
-
-                case State.ME:
-                    if (val == 0xD)                                                     // When the next char data is a CR then the end of the data is found and next a LF is expected
-                    {
-                        MIP50ReceivedData = State.ME_C;                                 // Goto the check for LF in order to close the telegram                        
+                        FiddleYardMIP50Logging.StoreText(MIP50ReceivedDataBuffer);      // Log original received data fom MIP in logging file
+                        MIP50xRECxCMDxW(MIP50ReceivedDataBuffer);                       // Put received data into mailbox
+                        MIP50ReceivedData = State.LF;                                   // Goto the check for LF for next telegram                        
                     }
                     else
                     {
@@ -263,13 +251,26 @@ namespace Siebwalde_Application
                     }
                     break;
 
-                case State.ME_C:
+                /*---------------------------------------E Message -----------------------------------------------------------------------------------------------------------------
+                */
+
+                case State.E:
+                    if (val == 0xD)                                                     // When the next char data is a CR then the end of the data is found and next a LF is expected
+                    {
+                        MIP50ReceivedData = State.E_C;                                 // Goto the check for LF in order to close the telegram                        
+                    }
+                    else
+                    {
+                        MIP50ReceivedDataBuffer += Convert.ToChar(val);                 // store incoming data into string array
+                    }
+                    break;
+
+                case State.E_C:
                     if (val == 0xA)                                                     // Check if second received char is LF
                     {
                         FiddleYardMIP50Logging.StoreText(MIP50ReceivedDataBuffer);      // Log original received data fom MIP in logging file
-                        MIP50NotAckReceived = true;                        
-                        MIP50ReceivedData = State.CR;                                   // If LF then the data from the MIP is closed Reset switch
-                        MIP50xTranslatexME(MIP50ReceivedDataBuffer);                    // Translate message or error and set local variables accordingly
+                        MIP50xRECxCMDxW(MIP50ReceivedDataBuffer);                       // Put received data into mailbox
+                        MIP50ReceivedData = State.CR;                                   // If LF then the data from the MIP is closed Reset switch                        
                     }
                     else
                     {
@@ -280,6 +281,65 @@ namespace Siebwalde_Application
 
                 default: break;
             }
+        }
+
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: MIP50xRECxCMDxW 
+         * 
+         *  Input(s)   : String received from MIP
+         *
+         *  Output(s)  : Increments wright counter MIP50_Rec_Cmd_Counter_W
+         *
+         *  Returns    : 
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      : 
+         */
+        /*#--------------------------------------------------------------------------#*/
+        private void MIP50xRECxCMDxW(string Cmd)
+        {
+            MIP50_Rec_Cmd[MIP50_Rec_Cmd_Counter_W] = Cmd;
+            MIP50_Rec_Cmd_Counter_W++;
+            if (MIP50_Rec_Cmd_Counter_W >= MIP50RECCMDARRAY)
+            {
+                MIP50_Rec_Cmd_Counter_W = 0;
+            }
+        }
+
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: MIP50xRECxCMDxR 
+         * 
+         *  Input(s)   : 
+         *
+         *  Output(s)  : When mailbox is filled returns next mail item
+         *
+         *  Returns    : 
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      : 
+         */
+        /*#--------------------------------------------------------------------------#*/
+        private string MIP50xRECxCMDxR()
+        {
+            string _Return = "";
+
+            if (MIP50_Rec_Cmd_Counter_R != MIP50_Rec_Cmd_Counter_W)
+            {
+                _Return = MIP50_Rec_Cmd[MIP50_Rec_Cmd_Counter_R];
+                MIP50_Rec_Cmd_Counter_R++;
+                if (MIP50_Rec_Cmd_Counter_R >= MIP50RECCMDARRAY)
+                {
+                    MIP50_Rec_Cmd_Counter_R = 0;
+                }
+            }
+            
+            return (_Return);
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -300,14 +360,31 @@ namespace Siebwalde_Application
         /*#--------------------------------------------------------------------------#*/
         public void MIP50xMOVExCALC(uint New_Track)
         {
-            MIP50xReadxPosition();
-            Next_Track = New_Track;           
+            FiddleYardMIP50Logging.StoreText("---------------------------------------------------------------------");
+            MIP50xReadxPosition();            
+            Next_Track = New_Track;            
+            if (New_Track < 12)
+            {
+                Current_Track = New_Track; // Already store track te become.(memory when next time track++ or track-- is used)                
+                FiddleYardMIP50Logging.StoreText("MIP50 Start Absolute Move to track " + Convert.ToString(Next_Track));
+            }
+            else
+            {
+                if (New_Track == 12 && Current_Track < 11)
+                {
+                    FiddleYardMIP50Logging.StoreText("MIP50 Start Absolute Move to track " + Convert.ToString(Current_Track + 1));
+                }
+                else if (New_Track == 13 && Current_Track > 1)
+                {
+                    FiddleYardMIP50Logging.StoreText("MIP50 Start Absolute Move to track " + Convert.ToString(Current_Track - 1));
+                }                
+            }  
         }
 
         /*#--------------------------------------------------------------------------#*/
         /*  Description: MIP50 command Move (absolute moves)
          * 
-         *  Input(s)   : Absolute new track position
+         *  Input(s)   : 
          *
          *  Output(s)  : Char by char over UDP to uController to RS232 to MIP50
          *
@@ -317,43 +394,74 @@ namespace Siebwalde_Application
          *
          *  Post.Cond. :
          *
-         *  Notes      : 
+         *  Notes      : Keep calling until finished or error
          */
         /*#--------------------------------------------------------------------------#*/
         public string MIP50xMOVE()
         {
             string _Return = "Running";
+            string m_MIP50xRECxCMDxR = null;
 
             switch (MIP50TransmitData)
             {
                 case 0:
-                    if (ActualPositionUpdated == true)
+                    m_MIP50xRECxCMDxR = MIP50xRECxCMDxR();
+                    if (m_MIP50xRECxCMDxR == "X0")
                     {
-                        ActualPositionUpdated = false;
                         MIP50TransmitData = 1;
                     }
+                    else if (m_MIP50xRECxCMDxR != "")
+                    {
+                        if (MIP50xTranslatexME(m_MIP50xRECxCMDxR) == false)                     // Translate message or error and set local variables accordingly, when no error but message a true is returned
+                        {
+                            MIP50TransmitData = 0;
+                            _Return = "Error";
+                        }
+                    }                   
                     break;
 
                 case 1:
-                    if (Next_Track == 12)                                                        // Track ++
+                    if (ActualPositionUpdated == true)                                              // Check if actualposition is updated
                     {
+                        ActualPositionUpdated = false;                                              // Set local bool to false for future next update-and-check
 
-                        Next_Track = TrackForward[FYAppVar.GetTrackNr() + 1];
+                        if (Next_Track == 12 && Current_Track < 11)                                 // Track ++
+                        {
+                            Next_Track = TrackForward[Current_Track + 1];
+                            Current_Track += 1;
+                            MIP50TransmitData = 2;
+                        }
+                        else if (Next_Track == 13 && Current_Track > 1)                             // Track --
+                        {
+                            Next_Track = TrackForward[Current_Track - 1] - TrackBackwardOffset[Current_Track - 1];
+                            Current_Track -= 1;
+                            MIP50TransmitData = 2;
+                        }
+                        else if (Next_Track != 13 && Next_Track != 12)                              // Check for bounds when still track++ or track-- is pressed
+                        {
+                            if (TrackForward[Next_Track] > ActualPosition)
+                            {
+                                Next_Track = TrackForward[Next_Track];
+                            }
+                            else if (TrackForward[Next_Track] < ActualPosition)
+                            {
+                                Next_Track = TrackForward[Next_Track] - TrackBackwardOffset[Next_Track];
+                            }
+                            MIP50TransmitData = 2;
+                        }
+                        else
+                        {
+                            FiddleYardMIP50Logging.StoreText("MIP50 New position same as current position");
+                            FiddleYardMIP50Logging.StoreText("MIP50 Absolute Move Routine Finished.");
+                            MIP50TransmitData = 0;
+                            _Return = "Finished";
+                        }
                     }
-                    else if (Next_Track == 13)                                                   // Track --
+                    else
                     {
-                        Next_Track = TrackForward[FYAppVar.GetTrackNr() - 1] - TrackBackwardOffset[FYAppVar.GetTrackNr() - 1];
+                        MIP50TransmitData = 0;
+                        MIP50xReadxPosition();                                                          // when position was not read, execute again and restart
                     }
-
-                    else if (TrackForward[Next_Track] > ActualPosition)
-                    {
-                        Next_Track = TrackForward[Next_Track];
-                    }
-                    else if (TrackForward[Next_Track] < ActualPosition)
-                    {
-                        Next_Track = TrackForward[Next_Track] - TrackBackwardOffset[Next_Track];
-                    }
-                    MIP50TransmitData = 2;
                     break;
 
                 case 2:
@@ -363,18 +471,18 @@ namespace Siebwalde_Application
                     break;
 
                 case 3:
-                    if (MIP50AckReceived == true)
+                    m_MIP50xRECxCMDxR = MIP50xRECxCMDxR();
+                    if (m_MIP50xRECxCMDxR == "X0")
                     {
-                        MIP50AckReceived = false;
                         MIP50TransmitData = 4;
                     }
-                    else if (MIP50NotAckReceived == true)
+                    else if (m_MIP50xRECxCMDxR != "")
                     {
-                        MIP50TransmitData = 0;
-                        _Return = "Error";
-                        FiddleYardMIP50Logging.StoreText("MIP50TransmitData case 3 MIP50NotAckReceived == true ERROR");
-                        //TBD do something with the message or error!!!<---------------------------------------------------------------------------------------------------------------
-                        MIP50NotAckReceived = false;
+                        if (MIP50xTranslatexME(m_MIP50xRECxCMDxR) == false)                     // Translate message or error and set local variables accordingly, when no error but message a true is returned
+                        {
+                            MIP50TransmitData = 0;
+                            _Return = "Error";
+                        }
                     }
                     break;
 
@@ -384,18 +492,18 @@ namespace Siebwalde_Application
                     break;
 
                 case 5:
-                    if (MIP50AckReceived == true)
+                    m_MIP50xRECxCMDxR = MIP50xRECxCMDxR();
+                    if (m_MIP50xRECxCMDxR == "X0")
                     {
-                        MIP50AckReceived = false;
                         MIP50TransmitData = 6;
                     }
-                    else if (MIP50NotAckReceived == true)
+                    else if (m_MIP50xRECxCMDxR != "")
                     {
-                        MIP50TransmitData = 0;
-                        _Return = "Error";
-                        FiddleYardMIP50Logging.StoreText("MIP50TransmitData case 5 MIP50NotAckReceived == true ERROR");
-                        //TBD do something with the message or error!!!<---------------------------------------------------------------------------------------------------------------
-                        MIP50NotAckReceived = false;
+                        if (MIP50xTranslatexME(m_MIP50xRECxCMDxR) == false)                     // Translate message or error and set local variables accordingly, when no error but message a true is returned
+                        {
+                            MIP50TransmitData = 0;
+                            _Return = "Error";
+                        }
                     }
                     break;
 
@@ -405,20 +513,38 @@ namespace Siebwalde_Application
                     break;
 
                 case 7:
-                    if (MIP50AckReceived == true)
+                    m_MIP50xRECxCMDxR = MIP50xRECxCMDxR();
+                    if (m_MIP50xRECxCMDxR == "X0")
                     {
-                        MIP50AckReceived = false;
+                        MIP50xReadxPosition();
+                        MIP50TransmitData = 8;
+                    }
+                    else if (m_MIP50xRECxCMDxR != "")
+                    {
+                        if (MIP50xTranslatexME(m_MIP50xRECxCMDxR) == false)                     // Translate message or error and set local variables accordingly, when no error but message a true is returned
+                        {
+                            MIP50TransmitData = 0;
+                            _Return = "Error";
+                        }
+                    }
+                    break;               
+
+                case 8:
+                    m_MIP50xRECxCMDxR = MIP50xRECxCMDxR();
+                    if (m_MIP50xRECxCMDxR == "X0")
+                    {
                         MIP50TransmitData = 0;
+                        ActualPositionUpdated = false;                                          // Set local bool to false for future next update-and-check
                         FiddleYardMIP50Logging.StoreText("MIP50 Absolute Move Routine Finished.");
                         _Return = "Finished";
                     }
-                    else if (MIP50NotAckReceived == true)
+                    else if (m_MIP50xRECxCMDxR != "")
                     {
-                        MIP50TransmitData = 0;
-                        _Return = "Error";
-                        FiddleYardMIP50Logging.StoreText("MIP50TransmitData case 7 MIP50NotAckReceived == true ERROR");
-                        //TBD do something with the message or error!!!<---------------------------------------------------------------------------------------------------------------
-                        MIP50NotAckReceived = false;
+                        if (MIP50xTranslatexME(m_MIP50xRECxCMDxR) == false)                     // Translate message or error and set local variables accordingly, when no error but message a true is returned
+                        {
+                            MIP50TransmitData = 0;
+                            _Return = "Error";
+                        }
                     }
                     break;
 
@@ -440,34 +566,37 @@ namespace Siebwalde_Application
          *
          *  Post.Cond. :
          *
-         *  Notes      : 
+         *  Notes      : Keep calling until finished or error
          */
         /*#--------------------------------------------------------------------------#*/
         public string MIP50xHOME()
         {
             string _Return = "Running";
+            string m_MIP50xRECxCMDxR = null;
 
             switch (MIP50TransmitData)
             {
-                case 0:                    
-                    FiddleYardMIP50Logging.StoreText("MIP50 Start Homing Routine:");
+                case 0:
+                    FiddleYardMIP50Logging.StoreText("---------------------------------------------------------------------");
+                    FiddleYardMIP50Logging.StoreText("MIP50 Start Homing Routine:");                    
                     MIP50xDeactivatexPosxReg();                    
                     MIP50TransmitData = 1;
                     break;
 
                 case 1:
-                    if (MIP50AckReceived == true)
+                    m_MIP50xRECxCMDxR = MIP50xRECxCMDxR();
+                    if (m_MIP50xRECxCMDxR == "X0")
                     {
-                        MIP50AckReceived = false;
                         MIP50TransmitData = 2;
                     }
-                    else if (MIP50NotAckReceived == true)
+                    else if(m_MIP50xRECxCMDxR != "")
                     {
-                        MIP50TransmitData = 0;
-                        _Return = "Error";
-                        //TBD do something with the message or error!!!<---------------------------------------------------------------------------------------------------------------
-                        MIP50NotAckReceived = false;
-                    }
+                        if(MIP50xTranslatexME(m_MIP50xRECxCMDxR) == false)                     // Translate message or error and set local variables accordingly, when no error but message a true is returned
+                        {
+                            MIP50TransmitData = 0;
+                            _Return = "Error";                            
+                        }
+                    }                    
                     break;
 
                 case 2:
@@ -476,17 +605,18 @@ namespace Siebwalde_Application
                     break;
 
                 case 3:
-                    if (MIP50AckReceived == true)
+                    m_MIP50xRECxCMDxR = MIP50xRECxCMDxR();
+                    if (m_MIP50xRECxCMDxR == "X0")
                     {
-                        MIP50AckReceived = false;
                         MIP50TransmitData = 4;
                     }
-                    else if (MIP50NotAckReceived == true)
+                    else if (m_MIP50xRECxCMDxR != "")
                     {
-                        MIP50TransmitData = 0;
-                        _Return = "Error";
-                        //TBD do something with the message or error!!!<---------------------------------------------------------------------------------------------------------------
-                        MIP50NotAckReceived = false;
+                        if (MIP50xTranslatexME(m_MIP50xRECxCMDxR) == false)                     // Translate message or error and set local variables accordingly, when no error but message a true is returned
+                        {
+                            MIP50TransmitData = 0;
+                            _Return = "Error";
+                        }
                     }
                     break;
 
@@ -496,17 +626,18 @@ namespace Siebwalde_Application
                     break;
 
                 case 5:
-                    if (MIP50AckReceived == true)
+                    m_MIP50xRECxCMDxR = MIP50xRECxCMDxR();
+                    if (m_MIP50xRECxCMDxR == "X0")
                     {
-                        MIP50AckReceived = false;
                         MIP50TransmitData = 6;
                     }
-                    else if (MIP50NotAckReceived == true)
+                    else if (m_MIP50xRECxCMDxR != "")
                     {
-                        MIP50TransmitData = 0;
-                        _Return = "Error";
-                        //TBD do something with the message or error!!!<---------------------------------------------------------------------------------------------------------------
-                        MIP50NotAckReceived = false;
+                        if (MIP50xTranslatexME(m_MIP50xRECxCMDxR) == false)                     // Translate message or error and set local variables accordingly, when no error but message a true is returned
+                        {
+                            MIP50TransmitData = 0;
+                            _Return = "Error";
+                        }
                     }
                     break;
 
@@ -516,17 +647,18 @@ namespace Siebwalde_Application
                     break;
 
                 case 7:
-                    if (MIP50AckReceived == true)
+                    m_MIP50xRECxCMDxR = MIP50xRECxCMDxR();
+                    if (m_MIP50xRECxCMDxR == "X0")
                     {
-                        MIP50AckReceived = false;
                         MIP50TransmitData = 8;
                     }
-                    else if (MIP50NotAckReceived == true)
+                    else if (m_MIP50xRECxCMDxR != "")
                     {
-                        MIP50TransmitData = 0;
-                        _Return = "Error";
-                        //TBD do something with the message or error!!!<---------------------------------------------------------------------------------------------------------------
-                        MIP50NotAckReceived = false;
+                        if (MIP50xTranslatexME(m_MIP50xRECxCMDxR) == false)                     // Translate message or error and set local variables accordingly, when no error but message a true is returned
+                        {
+                            MIP50TransmitData = 0;
+                            _Return = "Error";
+                        }
                     }
                     break;
 
@@ -536,17 +668,18 @@ namespace Siebwalde_Application
                     break;
 
                 case 9:
-                    if (MIP50AckReceived == true)
+                    m_MIP50xRECxCMDxR = MIP50xRECxCMDxR();
+                    if (m_MIP50xRECxCMDxR == "X0")
                     {
-                        MIP50AckReceived = false;
                         MIP50TransmitData = 10;
                     }
-                    else if (MIP50NotAckReceived == true)
+                    else if (m_MIP50xRECxCMDxR != "")
                     {
-                        MIP50TransmitData = 0;
-                        _Return = "Error";
-                        //TBD do something with the message or error!!!<---------------------------------------------------------------------------------------------------------------
-                        MIP50NotAckReceived = false;
+                        if (MIP50xTranslatexME(m_MIP50xRECxCMDxR) == false)                     // Translate message or error and set local variables accordingly, when no error but message a true is returned
+                        {
+                            MIP50TransmitData = 0;
+                            _Return = "Error";
+                        }
                     }
                     break;
 
@@ -556,17 +689,18 @@ namespace Siebwalde_Application
                     break;
 
                 case 11:
-                    if (MIP50AckReceived == true)
+                    m_MIP50xRECxCMDxR = MIP50xRECxCMDxR();
+                    if (m_MIP50xRECxCMDxR == "X0")
                     {
-                        MIP50AckReceived = false;
                         MIP50TransmitData = 12;
                     }
-                    else if (MIP50NotAckReceived == true)
+                    else if (m_MIP50xRECxCMDxR != "")
                     {
-                        MIP50TransmitData = 0;
-                        _Return = "Error";
-                        //TBD do something with the message or error!!!<---------------------------------------------------------------------------------------------------------------
-                        MIP50NotAckReceived = false;
+                        if (MIP50xTranslatexME(m_MIP50xRECxCMDxR) == false)                     // Translate message or error and set local variables accordingly, when no error but message a true is returned
+                        {
+                            MIP50TransmitData = 0;
+                            _Return = "Error";
+                        }
                     }
                     break;
 
@@ -576,19 +710,24 @@ namespace Siebwalde_Application
                     break;
 
                 case 13:
-                    if (MIP50AckReceived == true)
+                    m_MIP50xRECxCMDxR = MIP50xRECxCMDxR();
+                    if (m_MIP50xRECxCMDxR == "X0")
                     {
-                        MIP50AckReceived = false;
                         MIP50TransmitData = 0;
-                        FiddleYardMIP50Logging.StoreText("MIP50 Homing Routine Finished.");
+                        Current_Track = 1;
+                        FiddleYardMIP50Logging.StoreText("MIP50 Current Track = 1.");
+                        m_FYAppVar.FYHomed.BoolVariable = true;
+                        FiddleYardMIP50Logging.StoreText("MIP50 Homing Routine FYAppVar.FYHomed = true");
+                        FiddleYardMIP50Logging.StoreText("MIP50 Homing Routine Finished.");                        
                         _Return = "Finished";
                     }
-                    else if (MIP50NotAckReceived == true)
+                    else if (m_MIP50xRECxCMDxR != "")
                     {
-                        MIP50TransmitData = 0;
-                        _Return = "Error";
-                        //TBD do something with the message or error!!!<---------------------------------------------------------------------------------------------------------------
-                        MIP50NotAckReceived = false;
+                        if (MIP50xTranslatexME(m_MIP50xRECxCMDxR) == false)                     // Translate message or error and set local variables accordingly, when no error but message a true is returned
+                        {
+                            MIP50TransmitData = 0;
+                            _Return = "Error";
+                        }
                     }
                     break;
 
@@ -683,7 +822,7 @@ namespace Siebwalde_Application
             m_iFYIOH.ActuatorCmd("", Layer + "0" + "\r");
             m_iFYIOH.ActuatorCmd("", Layer + "G" + "\r");
             MIP50xCRLFxAppend();
-            FiddleYardMIP50Logging.StoreText("MIP50 Set Velocity");
+            FiddleYardMIP50Logging.StoreText("MIP50 Set Velocity to 100 Qc/ms");
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -716,7 +855,7 @@ namespace Siebwalde_Application
             m_iFYIOH.ActuatorCmd("", Layer + "2" + "\r");
             m_iFYIOH.ActuatorCmd("", Layer + "G" + "\r");
             MIP50xCRLFxAppend();
-            FiddleYardMIP50Logging.StoreText("MIP50 Set Accleration");
+            FiddleYardMIP50Logging.StoreText("MIP50 Set Accleration and deceleration to 0.2 Qc/ms^2");
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -898,8 +1037,9 @@ namespace Siebwalde_Application
          *               logging and sets appropiate variables accordingly
          */
         /*#--------------------------------------------------------------------------#*/
-        void MIP50xTranslatexME(string MIP50ReceivedDataBuffer)
-        {            
+        bool MIP50xTranslatexME(string MIP50ReceivedDataBuffer)
+        {
+            bool _Return = false;           
             string[] m_MIP50ReceivedDataBuffer = MIP50ReceivedDataBuffer.Split('#',' ');
             int i = 0, j = 0;
             StringBuilder LogString = new StringBuilder();
@@ -908,14 +1048,31 @@ namespace Siebwalde_Application
             {
                 switch(m_MIP50ReceivedDataBuffer[1])
                 {
-                    case "20": 
+                    case "20": // M#20 %bn %bv
+                        LogString.Append("Error number (after a clear error command), axis nr: ");
+                        for (i = 2; i < m_MIP50ReceivedDataBuffer.Length; i++)
+                        {
+                            if (m_MIP50ReceivedDataBuffer[i] != "")
+                            {
+                                if (j == 0)
+                                {
+                                    LogString.Append(m_MIP50ReceivedDataBuffer[i] + " , Error: ");
+                                }
+                                else if (j == 1)
+                                {
+                                    LogString.Append(m_MIP50ReceivedDataBuffer[i]);
+                                }
+                                j++;
+                            }
+                        }
+                        FiddleYardMIP50Logging.StoreText(LogString.ToString());
+                        _Return = true;
                         break;
 
                     case "21": // M#21 %bn %lv --> 3 items
                         ActualPosition = Convert.ToInt32(m_MIP50ReceivedDataBuffer[m_MIP50ReceivedDataBuffer.Length - 1]);      // In case of command position, the position data comes as last in the array
-                        ActualPositionUpdated = true;
+                        ActualPositionUpdated = true;                        
                         LogString.Append( "Message: Momentary or command position, axis nr: ");
-
                         for (i = 2; i < m_MIP50ReceivedDataBuffer.Length; i++)
                         {
                             if (m_MIP50ReceivedDataBuffer[i] != "")
@@ -932,6 +1089,7 @@ namespace Siebwalde_Application
                             }
                         }
                         FiddleYardMIP50Logging.StoreText(LogString.ToString());
+                        _Return = true;
                         break;
 
                     default: break;
@@ -945,7 +1103,9 @@ namespace Siebwalde_Application
             else if (m_MIP50ReceivedDataBuffer[0] == "P0")
             {
                 //nop
-            }                           
+            }
+
+            return (_Return);                          
         }
     }
 }
