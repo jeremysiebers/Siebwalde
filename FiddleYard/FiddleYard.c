@@ -13,8 +13,6 @@
 #include <Diagnostic_ret.h>		// serial transmitting of IO
 #include <Shift_Register.h>		// IO from Fiddle Yard
 #include <State_Machine.h>		// all movements and fidle yard program
-#include <Track_Move_Ctrl.h>   //
-#include <Train_Detection.h>    //
 #include <Var_Out.h>			// building packets to transmit
 #include <adc.h>				// ADC lib
 #include "eusart1.h"
@@ -86,14 +84,13 @@ void main()
     
 	while(1)
 	{
-
 	 	StackTask();
 	 	StackApplications();
 	 		 	
 	 	Diagnostic();
 	    Command();    
-        UARTxCOMM(TOP);                                                     // Check if data is received from MIP or that data must be sent Top layer
-        UARTxCOMM(BOTTOM);                                                  // Check if data is received from MIP or that data must be sent Bottom layer
+        UARTxCOMM(TOP);                                                         // Check if data is received from MIP or that data must be sent Top layer
+        UARTxCOMM(BOTTOM);                                                      // Check if data is received from MIP or that data must be sent Bottom layer
 	    	    		
 		if (Enable_State_Machine_Update == True && Output_Enable == True)       // When the output is enabled (after getting IP from DHCP) and update bit is true
 		{           

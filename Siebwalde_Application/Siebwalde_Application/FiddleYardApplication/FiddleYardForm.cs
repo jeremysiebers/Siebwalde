@@ -361,8 +361,8 @@ namespace Siebwalde_Application
             m_FYAppVar.TrainDriveOutPointer.Attach(Sns_ForceNextTrack);  
              
             //Messages
-            Message Msg_TrainDetectionTop = new Message("TrainDetectionFinished", " Train Detection Finished ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-            m_FYIOHandleVar.TrainDetection.Attach(Msg_TrainDetectionTop);
+            //Message Msg_TrainDetectionTop = new Message("TrainDetectionFinished", " Train Detection Finished ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+            //m_FYIOHandleVar.TrainDetection.Attach(Msg_TrainDetectionTop);
             Message Msg_FiddleYardStopped = new Message("FiddleYardStopped", " FiddleYard Auto mode Stopped ", (name, log) => SetMessage(name, log));
             m_FYAppVar.FiddleYardStopped.Attach(Msg_FiddleYardStopped);
             Message Msg_FiddleYardStart = new Message("FiddleYardStart", " FiddleYard Auto mode Start ", (name, log) => SetMessage(name, log));
@@ -397,10 +397,10 @@ namespace Siebwalde_Application
             m_FYAppVar.CollectingTrainsEnabled.Attach(Msg_CollectingTrainsEnabled);
             Message Msg_CollectingTrainsDisabled = new Message("CollectingTrainsDisabled", " Collecting Trains disabled ", (name, log) => SetMessage(name, log));
             m_FYAppVar.CollectingTrainsDisabled.Attach(Msg_CollectingTrainsDisabled);
-            Message Msg_FiddleYardMoveAndF12Assert = new Message("FiddleYardMoveAndF12Assert", " FiddleYard Moving And F12 Assert!!! FiddleYard Stopped!!! ", (name, log) => SetMessage(name, log));
-            m_FYIOHandleVar.FiddleYardMoveAndF12Assert.Attach(Msg_FiddleYardMoveAndF12Assert);
-            Message Msg_FiddleYardMoveAndF13Assert = new Message("FiddleYardMoveAndF13Assert", " FiddleYard Moving And F13 Assert!!! FiddleYard Stopped!!! ", (name, log) => SetMessage(name, log));
-            m_FYIOHandleVar.FiddleYardMoveAndF13Assert.Attach(Msg_FiddleYardMoveAndF13Assert);
+            //Message Msg_FiddleYardMoveAndF12Assert = new Message("FiddleYardMoveAndF12Assert", " FiddleYard Moving And F12 Assert!!! FiddleYard Stopped!!! ", (name, log) => SetMessage(name, log));
+            //m_FYIOHandleVar.FiddleYardMoveAndF12Assert.Attach(Msg_FiddleYardMoveAndF12Assert);
+            //Message Msg_FiddleYardMoveAndF13Assert = new Message("FiddleYardMoveAndF13Assert", " FiddleYard Moving And F13 Assert!!! FiddleYard Stopped!!! ", (name, log) => SetMessage(name, log));
+            //m_FYIOHandleVar.FiddleYardMoveAndF13Assert.Attach(Msg_FiddleYardMoveAndF13Assert);
             Message Msg_FYNotHomed = new Message("FYNotHomed", " Fiddle Yard Not Homed! Press Home FY Button to start Homing... ", (name, log) => SetMessage(name, log));
             m_FYAppVar.FYNotHomed.Attach(Msg_FYNotHomed);
             #endregion Attach sensors

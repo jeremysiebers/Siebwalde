@@ -265,6 +265,7 @@ namespace Siebwalde_Application
             Block6In = new SensorUpdater();
             Block7In = new SensorUpdater();
             Resistor = new SensorUpdater();
+            // Trackx sensor is used internally in C#, not from target anymore
             Track1 = new SensorUpdater();
             Track2 = new SensorUpdater();
             Track3 = new SensorUpdater();
@@ -333,28 +334,28 @@ namespace Siebwalde_Application
             m_FYIOHandleVar.Block7In.Attach(Sns_Block7In);
             Sensor Sns_Resistor = new Sensor("Resistor", " Occupied Resistor ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
             m_FYIOHandleVar.Resistor.Attach(Sns_Resistor);
-            Sensor Sns_Track1 = new Sensor("Track1", " Train On Fiddle Yard Track1 ", 0, (name, val, log) => UpdateTrainsOnFY(name, val, log)); // initialize and subscribe sensors
-            m_FYIOHandleVar.Track1.Attach(Sns_Track1);
-            Sensor Sns_Track2 = new Sensor("Track2", " Train On Fiddle Yard Track2 ", 0, (name, val, log) => UpdateTrainsOnFY(name, val, log)); // initialize and subscribe sensors
-            m_FYIOHandleVar.Track2.Attach(Sns_Track2);
-            Sensor Sns_Track3 = new Sensor("Track3", " Train On Fiddle Yard Track3 ", 0, (name, val, log) => UpdateTrainsOnFY(name, val, log)); // initialize and subscribe sensors
-            m_FYIOHandleVar.Track3.Attach(Sns_Track3);
-            Sensor Sns_Track4 = new Sensor("Track4", " Train On Fiddle Yard Track4 ", 0, (name, val, log) => UpdateTrainsOnFY(name, val, log)); // initialize and subscribe sensors
-            m_FYIOHandleVar.Track4.Attach(Sns_Track4);
-            Sensor Sns_Track5 = new Sensor("Track5", " Train On Fiddle Yard Track5 ", 0, (name, val, log) => UpdateTrainsOnFY(name, val, log)); // initialize and subscribe sensors
-            m_FYIOHandleVar.Track5.Attach(Sns_Track5);
-            Sensor Sns_Track6 = new Sensor("Track6", " Train On Fiddle Yard Track6 ", 0, (name, val, log) => UpdateTrainsOnFY(name, val, log)); // initialize and subscribe sensors
-            m_FYIOHandleVar.Track6.Attach(Sns_Track6);
-            Sensor Sns_Track7 = new Sensor("Track7", " Train On Fiddle Yard Track7 ", 0, (name, val, log) => UpdateTrainsOnFY(name, val, log)); // initialize and subscribe sensors
-            m_FYIOHandleVar.Track7.Attach(Sns_Track7);
-            Sensor Sns_Track8 = new Sensor("Track8", " Train On Fiddle Yard Track8 ", 0, (name, val, log) => UpdateTrainsOnFY(name, val, log)); // initialize and subscribe sensors
-            m_FYIOHandleVar.Track8.Attach(Sns_Track8);
-            Sensor Sns_Track9 = new Sensor("Track9", " Train On Fiddle Yard Track9 ", 0, (name, val, log) => UpdateTrainsOnFY(name, val, log)); // initialize and subscribe sensors
-            m_FYIOHandleVar.Track9.Attach(Sns_Track9);
-            Sensor Sns_Track10 = new Sensor("Track10", " Train On Fiddle Yard Track10 ", 0, (name, val, log) => UpdateTrainsOnFY(name, val, log)); // initialize and subscribe sensors
-            m_FYIOHandleVar.Track10.Attach(Sns_Track10);
-            Sensor Sns_Track11 = new Sensor("Track11", " Train On Fiddle Yard Track11 ", 0, (name, val, log) => UpdateTrainsOnFY(name, val, log)); // initialize and subscribe sensors
-            m_FYIOHandleVar.Track11.Attach(Sns_Track11);
+            //Sensor Sns_Track1 = new Sensor("Track1", " Train On Fiddle Yard Track1 ", 0, (name, val, log) => UpdateTrainsOnFY(name, val, log)); // initialize and subscribe sensors
+            //m_FYIOHandleVar.Track1.Attach(Sns_Track1);
+            //Sensor Sns_Track2 = new Sensor("Track2", " Train On Fiddle Yard Track2 ", 0, (name, val, log) => UpdateTrainsOnFY(name, val, log)); // initialize and subscribe sensors
+            //m_FYIOHandleVar.Track2.Attach(Sns_Track2);
+            //Sensor Sns_Track3 = new Sensor("Track3", " Train On Fiddle Yard Track3 ", 0, (name, val, log) => UpdateTrainsOnFY(name, val, log)); // initialize and subscribe sensors
+            //m_FYIOHandleVar.Track3.Attach(Sns_Track3);
+            //Sensor Sns_Track4 = new Sensor("Track4", " Train On Fiddle Yard Track4 ", 0, (name, val, log) => UpdateTrainsOnFY(name, val, log)); // initialize and subscribe sensors
+            //m_FYIOHandleVar.Track4.Attach(Sns_Track4);
+            //Sensor Sns_Track5 = new Sensor("Track5", " Train On Fiddle Yard Track5 ", 0, (name, val, log) => UpdateTrainsOnFY(name, val, log)); // initialize and subscribe sensors
+            //m_FYIOHandleVar.Track5.Attach(Sns_Track5);
+            //Sensor Sns_Track6 = new Sensor("Track6", " Train On Fiddle Yard Track6 ", 0, (name, val, log) => UpdateTrainsOnFY(name, val, log)); // initialize and subscribe sensors
+            //m_FYIOHandleVar.Track6.Attach(Sns_Track6);
+            //Sensor Sns_Track7 = new Sensor("Track7", " Train On Fiddle Yard Track7 ", 0, (name, val, log) => UpdateTrainsOnFY(name, val, log)); // initialize and subscribe sensors
+            //m_FYIOHandleVar.Track7.Attach(Sns_Track7);
+            //Sensor Sns_Track8 = new Sensor("Track8", " Train On Fiddle Yard Track8 ", 0, (name, val, log) => UpdateTrainsOnFY(name, val, log)); // initialize and subscribe sensors
+            //m_FYIOHandleVar.Track8.Attach(Sns_Track8);
+            //Sensor Sns_Track9 = new Sensor("Track9", " Train On Fiddle Yard Track9 ", 0, (name, val, log) => UpdateTrainsOnFY(name, val, log)); // initialize and subscribe sensors
+            //m_FYIOHandleVar.Track9.Attach(Sns_Track9);
+            //Sensor Sns_Track10 = new Sensor("Track10", " Train On Fiddle Yard Track10 ", 0, (name, val, log) => UpdateTrainsOnFY(name, val, log)); // initialize and subscribe sensors
+            //m_FYIOHandleVar.Track10.Attach(Sns_Track10);
+            //Sensor Sns_Track11 = new Sensor("Track11", " Train On Fiddle Yard Track11 ", 0, (name, val, log) => UpdateTrainsOnFY(name, val, log)); // initialize and subscribe sensors
+            //m_FYIOHandleVar.Track11.Attach(Sns_Track11);
             Sensor Sns_Block6 = new Sensor("Block6", " Occupied from 6 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
             m_FYIOHandleVar.Block6.Attach(Sns_Block6);
             Sensor Sns_Block7 = new Sensor("Block7", " Occupied from 7 ", 0, (name, val, log) => SetLedIndicator(name, val, log)); // initialize and subscribe sensors
@@ -484,7 +485,8 @@ namespace Siebwalde_Application
 
         /*#--------------------------------------------------------------------------#*/
         /*  Description: FiddleGo(int TrackNo)
-         *               Get command in int TrackNo and kick the corresponding event
+         *               Get command from C# train drive program and send FY to 
+         *               required track.
          * 
          *  Input(s)   :
          *

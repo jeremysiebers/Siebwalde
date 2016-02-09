@@ -40,13 +40,8 @@ static STATE_MACHINE_VAR ACT_ST_MCHN[2]= 	{{0,0,0,0,0,Busy,0,0,{0,0,0,0,0,0,0,0,
 static unsigned char Send_Var_Out[3];
 
 void MIP50xAPIxRESET(unsigned char ASL)                                         // During ucontroller reset also reset API
-{    
-    //MIP50xClearxError(ASL);    
-    MIP50xCLEARxRECIEVEDxDATA(ASL);                                             // Clear received data array
-    ACT_ST_MCHN[ASL].Mip50_SwitchState = 0;
+{   
     ACT_ST_MCHN[ASL].Mip50_ReadSwitchState = 0;
-    ACT_ST_MCHN[ASL].MIP50_Rec_Data_Counter = 0;
-    ACT_ST_MCHN[ASL].Return_Val_Routine = Busy;
 }
 
 /*
@@ -143,7 +138,48 @@ void UARTxCOMM(unsigned char ASL)                                               
  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
  State_Machine_Update loop call routines (2.4 kHz)
  */
+void MIP50xWritexUart(unsigned char ASL, char Data)
+{
+    switch (ASL)
+    {
+        case TOP    :   EUSART2_Write(Data);                                      
+                        break;
+        case BOTTOM :   EUSART1_Write(Data);                                      
+                        break;
+        default : break;
+    }
+}
 
+char MIP50xReadxUart(unsigned char ASL)
+{
+    switch (ASL)
+    {
+        case TOP    : return EUSART2_Read();
+        break;
+        case BOTTOM : return EUSART1_Read();                             
+        break;
+        default : break;
+    }
+}
+
+char MIP50xRECEIVEDxDATAxAVAILABLE(unsigned char ASL)                                     
+{ 
+    char Return_Val = False;
+    switch (ASL)
+    {
+        case TOP        :   if (EUSART2_DataReady > 0){
+                            Return_Val = EUSART2_DataReady;
+                            }
+                            break;
+                      
+        case BOTTOM   :     if (EUSART1_DataReady > 0){
+                            Return_Val = EUSART1_DataReady;
+                            }
+                            break;
+    }
+    return (Return_Val);
+}
+/*
 void MIP50xCLEARxRECIEVEDxDATA(unsigned char ASL)
 {   
     int i = 0;
@@ -400,6 +436,7 @@ void MIP50xCRLFxAppend(unsigned char ASL)                                       
     MIP50xWritexUart(ASL, 0xA);
 }
 
+
 void MIP50xSetxPermanentxParameterxHomexOffsetxMovement(unsigned char ASL)
 {
     char str[6];
@@ -536,17 +573,7 @@ void MIP50xAbs_Pos(unsigned char ASL, long int Pos)
     MIP50xCRLFxAppend(ASL);
 }
 
-void MIP50xWritexUart(unsigned char ASL, char Data)
-{
-    switch (ASL)
-    {
-        case TOP    :   EUSART2_Write(Data);                                      
-                        break;
-        case BOTTOM :   EUSART1_Write(Data);                                      
-                        break;
-        default : break;
-    }
-}
+
 
 char MIP50xSENDxBUFFERxEMPTY(unsigned char ASL)                                     
 {  
@@ -566,88 +593,5 @@ char MIP50xSENDxBUFFERxEMPTY(unsigned char ASL)
     return (Return_Val);
 }
 
-char MIP50xReadxUart(unsigned char ASL)
-{
-    switch (ASL)
-    {
-        case TOP    : return EUSART2_Read();
-        break;
-        case BOTTOM : return EUSART1_Read();                             
-        break;
-        default : break;
-    }
-}
 
-char MIP50xRECEIVEDxDATAxAVAILABLE(unsigned char ASL)                                     
-{ 
-    char Return_Val = False;
-    switch (ASL)
-    {
-        case TOP        :   if (EUSART2_DataReady > 0){
-                            Return_Val = EUSART2_DataReady;
-                            }
-                            break;
-                      
-        case BOTTOM   :     if (EUSART1_DataReady > 0){
-                            Return_Val = EUSART1_DataReady;
-                            }
-                            break;
-    }
-    return (Return_Val);
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
- * ////////MIP50 CODES////////
-#define CLEAR_ERROR "E1xG"                                                      // Clear Error
-#define SET_ACCELERATION "C1x2r2t0.2G"                                          // Set Acceleration on axis 1 for both ramps to sinusodial and to 0.20 qc/ms^2
-#define SET_POSITIONING_VEL "V1x100G"                                           // Set Positioning Velocity of axis 1 to 100 qc/ms^2
-#define ACTIVATE_POS_REG "n1xG"                                                 // Activate Position Regulation
-#define DEACTIVATE_POS_REG "f1xG"                                               // Deactivate Position Regulation
-#define HOME_AXIS "H1xG"                                                        // Home axis 1
-#define ABS_POS "A1x"                                                           // Absolute positining (after homing) GO command ('G') must be appended by caller
-    printf("E1xG");
-    printf("C1x2r2t0.2G");
-    printf("V1x100G");
-    printf("n1xG");
-    printf("H1xG");
-    printf("R1x42800G");
-    printf("R1x42800G");
-    printf("R1x42800G");
-    printf("R1x42800G");
-    printf("R1x42800G");
-    printf("R1x42800G");
-    printf("R1x42800G");
-    printf("R1x42800G");
-    printf("R1x42800G");
-    printf("R1x42800G");
-    printf("A1x0G");
-    printf("f1xG");
  */

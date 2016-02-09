@@ -50,17 +50,6 @@ namespace Siebwalde_Application
         public SensorUpdater Block6In;
         public SensorUpdater Block7In;
         public SensorUpdater Resistor;
-        public SensorUpdater Track1;
-        public SensorUpdater Track2;
-        public SensorUpdater Track3;
-        public SensorUpdater Track4;
-        public SensorUpdater Track5;
-        public SensorUpdater Track6;
-        public SensorUpdater Track7;
-        public SensorUpdater Track8;
-        public SensorUpdater Track9;
-        public SensorUpdater Track10;
-        public SensorUpdater Track11;
         public SensorUpdater Block6;
         public SensorUpdater Block7;
         public SensorUpdater F10;
@@ -71,25 +60,25 @@ namespace Siebwalde_Application
         public SensorUpdater Mip50Rec;
 
         // Create Messages
-        public MessageUpdater FiddleOneLeft;
-        public MessageUpdater FiddleOneRight;
-        public MessageUpdater FiddleMultipleLeft;
-        public MessageUpdater FiddleMultipleRight;
-        public MessageUpdater TrainDetection;
-        public MessageUpdater TrainOn5B;
-        public MessageUpdater TrainOn8A;
+        //public MessageUpdater FiddleOneLeft;
+        //public MessageUpdater FiddleOneRight;
+        //public MessageUpdater FiddleMultipleLeft;
+        //public MessageUpdater FiddleMultipleRight;
+        //public MessageUpdater TrainDetection;
+        //public MessageUpdater TrainOn5B;
+        //public MessageUpdater TrainOn8A;
         public MessageUpdater FiddleYardReset;
-        public MessageUpdater OccfromBlock6;
-        public MessageUpdater SensorF12High;
-        public MessageUpdater OccfromBlock6AndSensorF12;
-        public MessageUpdater LastTrack;
-        public MessageUpdater UniversalError;
+        //public MessageUpdater OccfromBlock6;
+        //public MessageUpdater SensorF12High;
+        //public MessageUpdater OccfromBlock6AndSensorF12;
+        //public MessageUpdater LastTrack;
+        //public MessageUpdater UniversalError;
         public MessageUpdater uControllerReady;             // ready for next command, C# has to assume ucontroller is busy after sending a command
         public MessageUpdater TrackPower15VDown;            // Quick message to indicate track power is down, halt FYApplication!!
-        public MessageUpdater EndOffStroke11Assert;
-        public MessageUpdater EndOffStroke10Assert;
-        public MessageUpdater FiddleYardMoveAndF12Assert;
-        public MessageUpdater FiddleYardMoveAndF13Assert;
+        //public MessageUpdater EndOffStroke11Assert;
+        //public MessageUpdater EndOffStroke10Assert;
+        //public MessageUpdater FiddleYardMoveAndF12Assert;
+        //public MessageUpdater FiddleYardMoveAndF13Assert;
         
 
         /*#--------------------------------------------------------------------------#*/
@@ -124,17 +113,6 @@ namespace Siebwalde_Application
             Block6In = new SensorUpdater();
             Block7In = new SensorUpdater();
             Resistor = new SensorUpdater();
-            Track1 = new SensorUpdater();
-            Track2 = new SensorUpdater();
-            Track3 = new SensorUpdater();
-            Track4 = new SensorUpdater();
-            Track5 = new SensorUpdater();
-            Track6 = new SensorUpdater();
-            Track7 = new SensorUpdater();
-            Track8 = new SensorUpdater();
-            Track9 = new SensorUpdater();
-            Track10 = new SensorUpdater();
-            Track11 = new SensorUpdater();
             Block6 = new SensorUpdater();
             Block7 = new SensorUpdater();
             F10 = new SensorUpdater();
@@ -145,25 +123,25 @@ namespace Siebwalde_Application
             Mip50Rec = new SensorUpdater();
 
             // Instantiate messages
-            FiddleOneLeft = new MessageUpdater();
-            FiddleOneRight = new MessageUpdater();
-            FiddleMultipleLeft = new MessageUpdater();
-            FiddleMultipleRight = new MessageUpdater();
-            TrainDetection = new MessageUpdater();
-            TrainOn5B = new MessageUpdater();
-            TrainOn8A = new MessageUpdater();
+            //FiddleOneLeft = new MessageUpdater();
+            //FiddleOneRight = new MessageUpdater();
+            //FiddleMultipleLeft = new MessageUpdater();
+            //FiddleMultipleRight = new MessageUpdater();
+            //TrainDetection = new MessageUpdater();
+            //TrainOn5B = new MessageUpdater();
+            //TrainOn8A = new MessageUpdater();
             FiddleYardReset = new MessageUpdater();
-            OccfromBlock6 = new MessageUpdater();
-            SensorF12High = new MessageUpdater();
-            OccfromBlock6AndSensorF12 = new MessageUpdater();
-            LastTrack = new MessageUpdater();
-            UniversalError = new MessageUpdater();
+            //OccfromBlock6 = new MessageUpdater();
+            //SensorF12High = new MessageUpdater();
+            //OccfromBlock6AndSensorF12 = new MessageUpdater();
+            //LastTrack = new MessageUpdater();
+            //UniversalError = new MessageUpdater();
             uControllerReady = new MessageUpdater();
             TrackPower15VDown = new MessageUpdater();
-            EndOffStroke11Assert = new MessageUpdater();
-            EndOffStroke10Assert = new MessageUpdater();   
-            FiddleYardMoveAndF12Assert = new MessageUpdater();
-            FiddleYardMoveAndF13Assert = new MessageUpdater();    
+            //EndOffStroke11Assert = new MessageUpdater();
+            //EndOffStroke10Assert = new MessageUpdater();   
+            //FiddleYardMoveAndF12Assert = new MessageUpdater();
+            //FiddleYardMoveAndF13Assert = new MessageUpdater();    
         }
     }
 }

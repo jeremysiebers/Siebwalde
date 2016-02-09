@@ -122,11 +122,11 @@ void Command_Exe(unsigned char Command[3])
 														break;
 									case	'2'		:	Exe_Cmd[1] = 2;	//Disable Track
 														break;
-									case	'3'		:	Exe_Cmd[1] = 3;	//FY moving ON
+									case	'3'		:	Exe_Cmd[1] = 3;	//MIP50_Enable
 														break;
-									case	'4'		:	Exe_Cmd[1] = 4;	//FY moving OFF
+									case	'4'		:	Exe_Cmd[1] = 4;	//MIP50_Disable
 														break;
-									case	'5'		:	Exe_Cmd[1] = 5;	//Stop Fiddle Yard NOW
+									case	'5'		:	Exe_Cmd[1] = 5;	//Stop Fiddle Yard NOW (RESET)
 														break;
 									case	'6'		:	Exe_Cmd[1] = 6;	//Bezet_In_5B_Switch_On
 														break;
@@ -155,11 +155,11 @@ void Command_Exe(unsigned char Command[3])
 														break;
 									case	'2'		:	Exe_Cmd[0] = 2;	//Disable Track
 														break;
-									case	'3'		:	Exe_Cmd[0] = 3;	//FY moving ON
+									case	'3'		:	Exe_Cmd[0] = 3;	//MIP50_Enable
 														break;
-									case	'4'		:	Exe_Cmd[0] = 4;	//FY moving OFF
+									case	'4'		:	Exe_Cmd[0] = 4;	//MIP50_Disable
 														break;
-									case	'5'		:	Exe_Cmd[0] = 5;	//Stop Fiddle Yard NOW
+									case	'5'		:	Exe_Cmd[0] = 5;	//Stop Fiddle Yard NOW (RESET)
 														break;
 									case	'6'		:	Exe_Cmd[0] = 6;	//Bezet_In_5B_Switch_On
 														break;

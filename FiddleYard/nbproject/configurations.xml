@@ -77,8 +77,6 @@
       <itemPath>Shift_Register.h</itemPath>
       <itemPath>State_Machine.h</itemPath>
       <itemPath>TCPIPConfig.h</itemPath>
-      <itemPath>Track_Move_Ctrl.h</itemPath>
-      <itemPath>Train_Detection.h</itemPath>
       <itemPath>Var_Out.h</itemPath>
       <itemPath>eusart1.h</itemPath>
       <itemPath>eusart2.h</itemPath>
@@ -153,13 +151,11 @@
       <itemPath>Diagnostic_ret.c</itemPath>
       <itemPath>Shift_Register.c</itemPath>
       <itemPath>State_Machine.c</itemPath>
-      <itemPath>Train_Detection.c</itemPath>
       <itemPath>Var_Out.c</itemPath>
       <itemPath>FiddleYard.c</itemPath>
       <itemPath>eusart1.c</itemPath>
       <itemPath>eusart2.c</itemPath>
       <itemPath>Mip50_API.c</itemPath>
-      <itemPath>Track_Move_Ctrl.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

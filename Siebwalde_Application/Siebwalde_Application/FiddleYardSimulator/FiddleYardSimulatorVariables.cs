@@ -104,13 +104,13 @@ namespace Siebwalde_Application
         {
             TargetAlive = new SensorUpdater();
 
-            list.Add(FiddleOneLeftFinished);
-            list.Add(FiddleOneRightFinished);
-            list.Add(FiddleMultipleLeftFinished);
-            list.Add(FiddleMultipleRightFinished);
-            list.Add(TrainDetectionFinished);
-            list.Add(TrainOn5B);
-            list.Add(TrainOn8A);
+            //list.Add(FiddleOneLeftFinished);
+            //list.Add(FiddleOneRightFinished);
+            //list.Add(FiddleMultipleLeftFinished);
+            //list.Add(FiddleMultipleRightFinished);
+            //list.Add(TrainDetectionFinished);
+            //list.Add(TrainOn5B);
+            //list.Add(TrainOn8A);
             list.Add(FiddleYardReset);
             list.Add(uControllerReady);
         }
