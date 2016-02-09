@@ -58,7 +58,6 @@ namespace Siebwalde_Application
         public CommandUpdater CmdCollect;
         public CommandUpdater CmdHomeFY;
 
-
         public ActuatorUpdater FiddleOneLeft;
         public ActuatorUpdater FiddleOneRight;
         public ActuatorUpdater Couple;
@@ -137,7 +136,7 @@ namespace Siebwalde_Application
         public MessageUpdater FiddleYardAutoModeIsStopped;
         public MessageUpdater CollectingTrainsEnabled;
         public MessageUpdater CollectingTrainsDisabled;
-        public MessageUpdater FYNotHomed;
+        public MessageUpdater FYNotHomed;   // Message to FORM
 
         public CommandUpdater FormCollect;          // pass Form command through FiddleYardApplicationVariables, in case Form gets replaced or closed
 
@@ -223,7 +222,7 @@ namespace Siebwalde_Application
             CmdCollect = new CommandUpdater();
             CmdHomeFY = new CommandUpdater();
 
-            // Instantiate actuators for sending command out to the target or simulator
+            // Instantiate actuators for sending command out to the target or simulator            
             FiddleOneLeft = new ActuatorUpdater();
             FiddleOneRight = new ActuatorUpdater();
             Couple = new ActuatorUpdater();

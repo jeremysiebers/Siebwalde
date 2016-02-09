@@ -113,10 +113,10 @@ namespace Siebwalde_Application
             FYApp.FYAppVar.Couple.Attach(Act_Couple);
             Actuator Act_Uncouple = new Actuator("Uncouple",  Layer + "2\r", (name, cmd) => ActuatorCmd(name, cmd)); // initialize and subscribe actuators
             FYApp.FYAppVar.Uncouple.Attach(Act_Uncouple);
-            //Actuator Act_FiddleOneLeft = new Actuator("FiddleOneLeft",  Layer + "3\r", (name, cmd) => ActuatorCmd(name, cmd)); // initialize and subscribe actuators
-            //FYApp.FYAppVar.FiddleOneLeft.Attach(Act_FiddleOneLeft);
-            //Actuator Act_FiddleOneRight = new Actuator("FiddleOneRight",  Layer + "4\r", (name, cmd) => ActuatorCmd(name, cmd)); // initialize and subscribe actuators
-            //FYApp.FYAppVar.FiddleOneRight.Attach(Act_FiddleOneRight);
+            //Actuator Act_MIP50_Enable = new Actuator("MIP50_Enable",  Layer + "3\r", (name, cmd) => ActuatorCmd(name, cmd)); // initialize and subscribe actuators
+            //FYApp.FYAppVar.MIP50_Enable.Attach(Act_MIP50_Enable);
+            //Actuator Act_MIP50_Disable = new Actuator("MIP50_Disable",  Layer + "4\r", (name, cmd) => ActuatorCmd(name, cmd)); // initialize and subscribe actuators
+            //FYApp.FYAppVar.MIP50_Disable.Attach(Act_MIP50_Disable);
             //Actuator Act_FiddleGo1 = new Actuator("FiddleGo1",  Layer + "5\r", (name, cmd) => ActuatorCmd(name, cmd)); // initialize and subscribe actuators
             //FYApp.FYAppVar.FiddleGo1.Attach(Act_FiddleGo1);
             //Actuator Act_FiddleGo2 = new Actuator("FiddleGo2",  Layer + "6\r", (name, cmd) => ActuatorCmd(name, cmd)); // initialize and subscribe actuators

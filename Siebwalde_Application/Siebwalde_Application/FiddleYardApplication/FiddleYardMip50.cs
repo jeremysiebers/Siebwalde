@@ -578,7 +578,8 @@ namespace Siebwalde_Application
             {
                 case 0:
                     FiddleYardMIP50Logging.StoreText("---------------------------------------------------------------------");
-                    FiddleYardMIP50Logging.StoreText("MIP50 Start Homing Routine:");                    
+                    FiddleYardMIP50Logging.StoreText("MIP50 Start Homing Routine:");
+                    MIP50xENABLE();
                     MIP50xDeactivatexPosxReg();                    
                     MIP50TransmitData = 1;
                     break;
@@ -768,6 +769,64 @@ namespace Siebwalde_Application
             m_iFYIOH.ActuatorCmd("", Layer + "G" + "\r");
             MIP50xCRLFxAppend();
             FiddleYardMIP50Logging.StoreText("MIP50 Start Absolute Move...");
+        }
+
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: MIP50xENABLE
+         * 
+         *  Input(s)   : 
+         *
+         *  Output(s)  : Char by char over UDP to uController
+         *
+         *  Returns    : 
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      : Enable MIP50
+         */
+        /*#--------------------------------------------------------------------------#*/
+        private void MIP50xENABLE()
+        {
+            if (m_instance == "TOP")
+            {
+                m_iFYIOH.ActuatorCmd("", "a3" + "\r");
+            }
+            else if (m_instance == "BOT")
+            {
+                m_iFYIOH.ActuatorCmd("", "b3" + "\r");
+            }
+            FiddleYardMIP50Logging.StoreText("MIP50 Enable (M10)");
+        }
+
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: MIP50xDISABLE
+         * 
+         *  Input(s)   : 
+         *
+         *  Output(s)  : Char by char over UDP to uController
+         *
+         *  Returns    : 
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      : Enable MIP50
+         */
+        /*#--------------------------------------------------------------------------#*/
+        private void MIP50xDISABLE()
+        {
+            if (m_instance == "TOP")
+            {
+                m_iFYIOH.ActuatorCmd("", "a4" + "\r");
+            }
+            else if (m_instance == "BOT")
+            {
+                m_iFYIOH.ActuatorCmd("", "b4" + "\r");
+            }
+            FiddleYardMIP50Logging.StoreText("MIP50 Disable (M10)");
         }
 
         /*#--------------------------------------------------------------------------#*/

@@ -20,6 +20,7 @@ namespace Siebwalde_Application
         private FiddleYardAppInit FYAppInit;
         private FiddleYardAppRun FYAppRun;
         private FiddleYardMip50 FYMIP50;                                            // Create new MIP50 sub program       
+        private FiddleYardTrainDetection FYTDT;                                     // Create new Traindetection sub program
         private string m_instance = null;
         private string path = "null";
 
@@ -84,10 +85,12 @@ namespace Siebwalde_Application
 
             // Sub programs  
             FYAppVar = new FiddleYardApplicationVariables(m_FYIOHandleVar);                 // FiddleYard Application variables class, holds all variables and functions regarding variables
-            FYFORM = new FiddleYardForm();
-            FYAppInit = new FiddleYardAppInit(m_FYIOHandleVar, FYAppVar, FiddleYardApplicationLogging);
+            FYFORM = new FiddleYardForm();            
             FYAppRun = new FiddleYardAppRun(m_FYIOHandleVar, m_iFYIOH, FYAppVar, FiddleYardApplicationLogging);
             FYMIP50 = new FiddleYardMip50(m_instance, m_FYIOHandleVar, m_iFYIOH, FYAppVar);
+            FYTDT = new FiddleYardTrainDetection(m_FYIOHandleVar, FYAppVar, FYMIP50, FiddleYardApplicationLogging);
+            FYAppInit = new FiddleYardAppInit(m_FYIOHandleVar, FYAppVar, FYMIP50, FYTDT, FiddleYardApplicationLogging);
+            
 
             //Init and setup FYFORM (after the creation of the sensors and commands)
             if ("TOP" == m_instance)
@@ -415,6 +418,8 @@ namespace Siebwalde_Application
                     FiddleYardApplicationLogging.StoreText("FYApp FYAppRun.FiddleYardAppRunReset()");
                     FYMIP50.MIP50Reset();   //Reset MIP50 program
                     FiddleYardApplicationLogging.StoreText("FYApp FYMIP50.MIP50Reset()");
+                    FYTDT.FiddleYardTdtReset();
+                    FiddleYardApplicationLogging.StoreText("FYApp FYTDT.FiddleYardTdtReset()");
                     Cmd(" Reset ", ""); // reset target
                     FiddleYardApplicationLogging.StoreText("FYApp reset target");
                     State_Machine = State.Idle;
@@ -692,7 +697,7 @@ namespace Siebwalde_Application
                     break;
                 case " Occ7OnFalse ": FYAppVar.Occ7OnFalse.UpdateActuator(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle Cmd = " + name);
                     break;
-                case " HomeFY ": FYMIP50.MIP50xHOME(); FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.MIP50HOME Cmd = " + name); State_Machine = State.MIP50Home;
+                case " HomeFY ": FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.MIP50HOME Cmd = " + name); State_Machine = State.MIP50Home;
                     break;
 
                 default: break;
