@@ -757,16 +757,16 @@ namespace Siebwalde_Application
         {
             string m_New_Track = Convert.ToString(New_Track);
 
-            m_iFYIOH.ActuatorCmd("", Layer + "A" + "\r");
-            m_iFYIOH.ActuatorCmd("", Layer + "1" + "\r");
-            m_iFYIOH.ActuatorCmd("", Layer + "x" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xAbs_Pos", Layer + "A" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xAbs_Pos", Layer + "1" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xAbs_Pos", Layer + "x" + "\r");
 
             foreach (char c in m_New_Track)
             {
-                m_iFYIOH.ActuatorCmd("", Layer + c + "\r");
+                m_iFYIOH.ActuatorCmd("MIP50xAbs_Pos", Layer + c + "\r");
             }
 
-            m_iFYIOH.ActuatorCmd("", Layer + "G" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xAbs_Pos", Layer + "G" + "\r");
             MIP50xCRLFxAppend();
             FiddleYardMIP50Logging.StoreText("MIP50 Start Absolute Move...");
         }
@@ -791,11 +791,11 @@ namespace Siebwalde_Application
         {
             if (m_instance == "TOP")
             {
-                m_iFYIOH.ActuatorCmd("", "a3" + "\r");
+                m_iFYIOH.ActuatorCmd("MIP50xENABLE", "a3" + "\r");
             }
             else if (m_instance == "BOT")
             {
-                m_iFYIOH.ActuatorCmd("", "b3" + "\r");
+                m_iFYIOH.ActuatorCmd("MIP50xENABLE", "b3" + "\r");
             }
             FiddleYardMIP50Logging.StoreText("MIP50 Enable (M10)");
         }
@@ -820,11 +820,11 @@ namespace Siebwalde_Application
         {
             if (m_instance == "TOP")
             {
-                m_iFYIOH.ActuatorCmd("", "a4" + "\r");
+                m_iFYIOH.ActuatorCmd("MIP50xDISABLE", "a4" + "\r");
             }
             else if (m_instance == "BOT")
             {
-                m_iFYIOH.ActuatorCmd("", "b4" + "\r");
+                m_iFYIOH.ActuatorCmd("MIP50xDISABLE", "b4" + "\r");
             }
             FiddleYardMIP50Logging.StoreText("MIP50 Disable (M10)");
         }
@@ -847,10 +847,10 @@ namespace Siebwalde_Application
         /*#--------------------------------------------------------------------------#*/
         private void MIP50xHomexAxis()
         {
-            m_iFYIOH.ActuatorCmd("", Layer + "H" + "\r");
-            m_iFYIOH.ActuatorCmd("", Layer + "1" + "\r");
-            m_iFYIOH.ActuatorCmd("", Layer + "x" + "\r");
-            m_iFYIOH.ActuatorCmd("", Layer + "G" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xHomexAxis", Layer + "H" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xHomexAxis", Layer + "1" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xHomexAxis", Layer + "x" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xHomexAxis", Layer + "G" + "\r");
             MIP50xCRLFxAppend();
             FiddleYardMIP50Logging.StoreText("MIP50 Start Homing...");
         }
@@ -873,13 +873,13 @@ namespace Siebwalde_Application
         /*#--------------------------------------------------------------------------#*/
         private void MIP50xSetxPositioningxVelxDefault()
         {
-            m_iFYIOH.ActuatorCmd("", Layer + "V" + "\r");
-            m_iFYIOH.ActuatorCmd("", Layer + "1" + "\r");
-            m_iFYIOH.ActuatorCmd("", Layer + "x" + "\r");
-            m_iFYIOH.ActuatorCmd("", Layer + "1" + "\r");
-            m_iFYIOH.ActuatorCmd("", Layer + "0" + "\r");
-            m_iFYIOH.ActuatorCmd("", Layer + "0" + "\r");
-            m_iFYIOH.ActuatorCmd("", Layer + "G" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xSetxPositioningxVelxDefault", Layer + "V" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xSetxPositioningxVelxDefault", Layer + "1" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xSetxPositioningxVelxDefault", Layer + "x" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xSetxPositioningxVelxDefault", Layer + "1" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xSetxPositioningxVelxDefault", Layer + "0" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xSetxPositioningxVelxDefault", Layer + "0" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xSetxPositioningxVelxDefault", Layer + "G" + "\r");
             MIP50xCRLFxAppend();
             FiddleYardMIP50Logging.StoreText("MIP50 Set Velocity to 100 Qc/ms");
         }
@@ -902,17 +902,17 @@ namespace Siebwalde_Application
         /*#--------------------------------------------------------------------------#*/
         private void MIP50xSetxAcceleration()
         {
-            m_iFYIOH.ActuatorCmd("", Layer + "C" + "\r");
-            m_iFYIOH.ActuatorCmd("", Layer + "1" + "\r");
-            m_iFYIOH.ActuatorCmd("", Layer + "x" + "\r");
-            m_iFYIOH.ActuatorCmd("", Layer + "2" + "\r");
-            m_iFYIOH.ActuatorCmd("", Layer + "r" + "\r");
-            m_iFYIOH.ActuatorCmd("", Layer + "2" + "\r");
-            m_iFYIOH.ActuatorCmd("", Layer + "t" + "\r");
-            m_iFYIOH.ActuatorCmd("", Layer + "0" + "\r");
-            m_iFYIOH.ActuatorCmd("", Layer + "." + "\r");
-            m_iFYIOH.ActuatorCmd("", Layer + "2" + "\r");
-            m_iFYIOH.ActuatorCmd("", Layer + "G" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xSetxAcceleration", Layer + "C" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xSetxAccelerationMIP50xSetxAcceleration", Layer + "1" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xSetxAcceleration", Layer + "x" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xSetxAcceleration", Layer + "2" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xSetxAcceleration", Layer + "r" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xSetxAccelerationMIP50xSetxAcceleration", Layer + "2" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xSetxAcceleration", Layer + "t" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xSetxAcceleration", Layer + "0" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xSetxAcceleration", Layer + "." + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xSetxAcceleration", Layer + "2" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xSetxAcceleration", Layer + "G" + "\r");
             MIP50xCRLFxAppend();
             FiddleYardMIP50Logging.StoreText("MIP50 Set Accleration and deceleration to 0.2 Qc/ms^2");
         }
@@ -936,10 +936,10 @@ namespace Siebwalde_Application
         /*#--------------------------------------------------------------------------#*/
         private void MIP50xClearxError()
         {
-            m_iFYIOH.ActuatorCmd("", Layer + "E" + "\r");
-            m_iFYIOH.ActuatorCmd("", Layer + "1" + "\r");
-            m_iFYIOH.ActuatorCmd("", Layer + "x" + "\r");
-            m_iFYIOH.ActuatorCmd("", Layer + "G" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xClearxError", Layer + "E" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xClearxError", Layer + "1" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xClearxError", Layer + "x" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xClearxError", Layer + "G" + "\r");
             MIP50xCRLFxAppend();
             FiddleYardMIP50Logging.StoreText("MIP50 Try Clear All Errors");
         }
@@ -962,10 +962,10 @@ namespace Siebwalde_Application
         /*#--------------------------------------------------------------------------#*/
         private void MIP50xActivatexPosxReg()
         {
-            m_iFYIOH.ActuatorCmd("", Layer + "n" + "\r");
-            m_iFYIOH.ActuatorCmd("", Layer + "1" + "\r");
-            m_iFYIOH.ActuatorCmd("", Layer + "x" + "\r");
-            m_iFYIOH.ActuatorCmd("", Layer + "G" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xActivatexPosxReg", Layer + "n" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xActivatexPosxReg", Layer + "1" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xActivatexPosxReg", Layer + "x" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xActivatexPosxReg", Layer + "G" + "\r");
             MIP50xCRLFxAppend();
             FiddleYardMIP50Logging.StoreText("MIP50 Activate Position Regulation");
         }
@@ -988,10 +988,10 @@ namespace Siebwalde_Application
         /*#--------------------------------------------------------------------------#*/
         private void MIP50xDeactivatexPosxReg()
         {
-            m_iFYIOH.ActuatorCmd("", Layer + "f" + "\r");
-            m_iFYIOH.ActuatorCmd("", Layer + "1" + "\r");
-            m_iFYIOH.ActuatorCmd("", Layer + "x" + "\r");
-            m_iFYIOH.ActuatorCmd("", Layer + "G" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xDeactivatexPosxReg", Layer + "f" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xDeactivatexPosxReg", Layer + "1" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xDeactivatexPosxReg", Layer + "x" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xDeactivatexPosxReg", Layer + "G" + "\r");
             MIP50xCRLFxAppend();
             FiddleYardMIP50Logging.StoreText("MIP50 Deactivate Position Regulation");
         }
@@ -1014,10 +1014,10 @@ namespace Siebwalde_Application
         /*#--------------------------------------------------------------------------#*/
         private void MIP50xReadxPosition()
         {
-            m_iFYIOH.ActuatorCmd("", Layer + "P" + "\r");
-            m_iFYIOH.ActuatorCmd("", Layer + "1" + "\r");
-            m_iFYIOH.ActuatorCmd("", Layer + "x" + "\r");
-            m_iFYIOH.ActuatorCmd("", Layer + "G" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xReadxPosition", Layer + "P" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xReadxPosition", Layer + "1" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xReadxPosition", Layer + "x" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xReadxPosition", Layer + "G" + "\r");
             MIP50xCRLFxAppend();
             FiddleYardMIP50Logging.StoreText("MIP50 Read Actual Position");
         }
@@ -1041,8 +1041,8 @@ namespace Siebwalde_Application
         /*#--------------------------------------------------------------------------#*/
         private void MIP50xCRLFxAppend()                                      
         {
-            m_iFYIOH.ActuatorCmd("", Layer + "\n" + "\r"); // Carriage return
-            m_iFYIOH.ActuatorCmd("", Layer + "\r" + "\r"); // Line feed
+            m_iFYIOH.ActuatorCmd("MIP50xCRLFxAppend", Layer + "\n" + "\r"); // Carriage return
+            m_iFYIOH.ActuatorCmd("MIP50xCRLFxAppend", Layer + "\r" + "\r"); // Line feed
         }
 
         /*#--------------------------------------------------------------------------#*/

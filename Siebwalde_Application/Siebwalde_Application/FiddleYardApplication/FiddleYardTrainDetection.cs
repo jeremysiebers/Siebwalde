@@ -14,7 +14,7 @@ namespace Siebwalde_Application
 
         private enum State
         {
-            Idle, MoveToTrack1, MoveToTrack11, TDT2
+            Idle, MoveToTrack1, MoveToTrack11, TDT
         };
         private State State_Machine;
         private bool CL10Heart = false;
@@ -129,17 +129,17 @@ namespace Siebwalde_Application
                 case State.Idle:
                     if(m_FYAppVar.GetTrackNr() != 1 && m_FYAppVar.GetTrackNr() != 11)
                     {
-                        if (m_FYAppVar.GetTrackNr() > 6)        // Go to track 1
+                        if (m_FYAppVar.GetTrackNr() < 7)        // Go to track 1
                         {
                             m_FYMIP50.MIP50xMOVExCALC(1);
                             m_FYAppLog.StoreText("FYTDT.Traindetection() m_FYMIP50.MIP50xMOVExCALC(1)");
                             State_Machine = State.MoveToTrack1;
                             m_FYAppLog.StoreText("FYTDT.Traindetection() State_Machine = State.MoveToTrack1");
                         }
-                        else if (m_FYAppVar.GetTrackNr() < 7)   // Go to track 11
+                        else if (m_FYAppVar.GetTrackNr() > 6)   // Go to track 11
                         {
                             m_FYMIP50.MIP50xMOVExCALC(11);
-                            m_FYAppLog.StoreText("FYTDT.Traindetection() m_FYMIP50.MIP50xMOVExCALC(1)");
+                            m_FYAppLog.StoreText("FYTDT.Traindetection() m_FYMIP50.MIP50xMOVExCALC(11)");
                             State_Machine = State.MoveToTrack11;
                             m_FYAppLog.StoreText("FYTDT.Traindetection() State_Machine = State.MoveToTrack11");
                         }
@@ -147,35 +147,35 @@ namespace Siebwalde_Application
                     else if(m_FYAppVar.GetTrackNr() == 1)       // On track 1, Go to Track 11 for scan
                     {
                         m_FYMIP50.MIP50xMOVExCALC(11);
-                        m_FYAppLog.StoreText("FYTDT.Traindetection() m_FYMIP50.MIP50xMOVExCALC(1)");
-                        State_Machine = State.TDT2;
-                        m_FYAppLog.StoreText("FYTDT.Traindetection() State_Machine = State.TDT2");
+                        m_FYAppLog.StoreText("FYTDT.Traindetection() m_FYMIP50.MIP50xMOVExCALC(11)");
+                        State_Machine = State.TDT;
+                        m_FYAppLog.StoreText("FYTDT.Traindetection() State_Machine = State.TDT");
                     }
                     else if (m_FYAppVar.GetTrackNr() == 11)       // On track 11, Go to Track 1 for scan
                     {
                         m_FYMIP50.MIP50xMOVExCALC(1);
                         m_FYAppLog.StoreText("FYTDT.Traindetection() m_FYMIP50.MIP50xMOVExCALC(1)");
-                        State_Machine = State.TDT2;
-                        m_FYAppLog.StoreText("FYTDT.Traindetection() State_Machine = State.TDT2");
+                        State_Machine = State.TDT;
+                        m_FYAppLog.StoreText("FYTDT.Traindetection() State_Machine = State.TDT");
                     }                    
                     break;
 
                 /*--------------------------------------------------------------------------------------------------------------------------------------------------------
                 */
 
-                case State.MoveToTrack1:                            // After startup track was not on 1
+                case State.MoveToTrack1:                            // After startup track was not on 1, move to track 1
                     SubProgramReturnVal = m_FYMIP50.MIP50xMOVE();
                     if (SubProgramReturnVal == "Finished")
                     {
-                        State_Machine = State.TDT2;
+                        State_Machine = State.TDT;                 // When finished moving, execute TrainDetection TDT
                         m_FYAppLog.StoreText("FYTDT.Traindetection() State_Machine = State.TDT2");
                     }
                     break;
-                case State.MoveToTrack11:                           // After startup track was not on 11
+                case State.MoveToTrack11:                           // After startup track was not on 11, move to track 11
                     SubProgramReturnVal = m_FYMIP50.MIP50xMOVE();
                     if (SubProgramReturnVal == "Finished")
                     {
-                        State_Machine = State.TDT2;
+                        State_Machine = State.TDT;
                         m_FYAppLog.StoreText("FYTDT.Traindetection() State_Machine = State.TDT2");
                     }
                     break;
@@ -183,8 +183,8 @@ namespace Siebwalde_Application
                 /*--------------------------------------------------------------------------------------------------------------------------------------------------------
                 */
 
-                case State.TDT2:
-                    SubProgramReturnVal = m_FYMIP50.MIP50xMOVE();
+                case State.TDT:
+                    SubProgramReturnVal = m_FYMIP50.MIP50xMOVE();                                           // Keep kicking MIP50xMOVE until "Finished"
                     if (SubProgramReturnVal == "Finished")
                     {
                         m_FYAppVar.TrackTrainsOnFYUpdater();
@@ -195,13 +195,13 @@ namespace Siebwalde_Application
                         m_FYAppLog.StoreText("FYTDT.Traindetection() _Return = Finished");
                     }
 
-                    if(CL10Heart == true && F10 == true)
+                    if (CL10Heart == true && F10 == true && m_FYAppVar.GetTrackNr() > 0)                        // While checking if heartbit is true and F10 is true and GetTracknr() is 1 <> 11
                     {
-                        m_FYAppVar.UpdateTrainsOnFY(FiddleYardTdtTrackName(m_FYAppVar.GetTrackNr()), 1, "");
+                        m_FYAppVar.UpdateTrainsOnFY(FiddleYardTdtTrackName(m_FYAppVar.GetTrackNr()), 1, "");    // If true then update UpdateTrainsOnFY[] with 1
                     }
-                    else
+                    else if (CL10Heart == true && F10 == false && m_FYAppVar.GetTrackNr() > 0)                  // While checking if heartbit is true and F10 is true and GetTracknr() is 1 <> 11
                     {
-                        m_FYAppVar.UpdateTrainsOnFY(FiddleYardTdtTrackName(m_FYAppVar.GetTrackNr()), 0, "");
+                        m_FYAppVar.UpdateTrainsOnFY(FiddleYardTdtTrackName(m_FYAppVar.GetTrackNr()), 0, "");    // If false then update UpdateTrainsOnFY[] with 0
                     }
                     break;
                     
@@ -213,14 +213,13 @@ namespace Siebwalde_Application
         }
 
         /*#--------------------------------------------------------------------------#*/
-        /*  Description: FiddleYardInitReset()
-         *               Reset
+        /*  Description: FiddleYardTdtTrackName(int Track)
          *               
          * 
-         *  Input(s)   :
+         *  Input(s)   : track number in integer
          *
          *  Output(s)  : 
-         *
+         *track number in string written as Track<x>
          *  Returns    :
          *
          *  Pre.Cond.  :
