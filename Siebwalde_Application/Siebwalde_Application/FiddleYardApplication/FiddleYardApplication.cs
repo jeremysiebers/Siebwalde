@@ -431,28 +431,34 @@ namespace Siebwalde_Application
                     break;
 
                 case State.MIP50Home:
-                    SubProgramReturnVal = FYMIP50.MIP50xHOME();
-                    if (SubProgramReturnVal == "Finished")
+                    if (kickapplication == "TimerEvent") // Only update on 1 thread: TimerEvent.
                     {
-                        State_Machine = State.Idle;
-                    }
-                    else if (SubProgramReturnVal == "Error")
-                    {
-                        //TBD do something with the message or error!!!<---------------------------------------------------------------------------------------------------------------
-                        State_Machine = State.Idle;
+                        SubProgramReturnVal = FYMIP50.MIP50xHOME();
+                        if (SubProgramReturnVal == "Finished")
+                        {
+                            State_Machine = State.Idle;
+                        }
+                        else if (SubProgramReturnVal == "Error")
+                        {
+                            //TBD do something with the message or error!!!<---------------------------------------------------------------------------------------------------------------
+                            State_Machine = State.Idle;
+                        }
                     }
                     break;
 
                 case State.MIP50Move:
-                    SubProgramReturnVal = FYMIP50.MIP50xMOVE();                    
-                    if (SubProgramReturnVal == "Finished")
+                    if (kickapplication == "TimerEvent") // Only update on 1 thread: TimerEvent.
                     {
-                        State_Machine = State.Idle;
-                    }
-                    else if (SubProgramReturnVal == "Error")
-                    {
-                        //TBD do something with the message or error!!!<---------------------------------------------------------------------------------------------------------------
-                        State_Machine = State.Idle;
+                        SubProgramReturnVal = FYMIP50.MIP50xMOVE();
+                        if (SubProgramReturnVal == "Finished")
+                        {
+                            State_Machine = State.Idle;
+                        }
+                        else if (SubProgramReturnVal == "Error")
+                        {
+                            //TBD do something with the message or error!!!<---------------------------------------------------------------------------------------------------------------
+                            State_Machine = State.Idle;
+                        }
                     }
                     break;
 

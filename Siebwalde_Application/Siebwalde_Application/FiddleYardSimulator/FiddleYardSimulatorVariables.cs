@@ -66,6 +66,7 @@ namespace Siebwalde_Application
         public Var F10 = new Var();
         public Var M10 = new Var();
         public Var TrackPower15V = new Var();
+        public int MIP50DataReturn = 0;
 
         public Trk TrackNo = new Trk();
 
@@ -82,6 +83,10 @@ namespace Siebwalde_Application
         public SensorUpdater TargetAlive;
 
         public List<Msg> list = new List<Msg>();
+
+        public int MIP50Cnt = 0;
+        public int MIP50Cnt2 = 0;
+        public int[] MIP50xAbs_Pos = new int[10]; // used to catch absolute move number
 
         /*#--------------------------------------------------------------------------#*/
         /*  Description: FiddleYardVariables constructor
@@ -161,6 +166,7 @@ namespace Siebwalde_Application
             M10.Value = false;
             //TrackNo.Count = 1;            
             TrackPower15V.Value = true;
+            MIP50DataReturn = 0;
 
             FiddleOneLeftFinished.Mssg = false;
             FiddleOneLeftFinished.Data = 0x01;
@@ -180,6 +186,14 @@ namespace Siebwalde_Application
             FiddleYardReset.Data = 0x08;
             uControllerReady.Mssg = false;
             uControllerReady.Data = 0x0A;
+
+            MIP50Cnt = 0;
+            MIP50Cnt2 = 0;
+
+            for (int i = 0; i < MIP50xAbs_Pos.Length; i++)
+            {
+                MIP50xAbs_Pos[i] = 0;
+            }
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -233,6 +247,14 @@ namespace Siebwalde_Application
             {
                 TrackPower.Value = false;
                 Resistor.Value = true;
+            }
+            else if (Variable == "MIP50xENABLE")
+            {
+                M10.Value = true;
+            }
+            else if (Variable == "MIP50xDISABLE")
+            {
+                M10.Value = false;
             }
         }
 
@@ -353,25 +375,12 @@ namespace Siebwalde_Application
                 _data = _data << 1;
                 data[1] = Convert.ToByte(_data);
             }
-            else if ("H" == group || "U" == group)
+            else if (("H" == group || "U" == group) && MIP50DataReturn != '\0')
             {
                 _group = Encoding.ASCII.GetBytes(group);
                 data[0] = _group[0];
-                _data |= Convert.ToByte(false);
-                _data = _data << 1;
-                _data |= Convert.ToByte(false);
-                _data = _data << 1;
-                _data |= Convert.ToByte(false);
-                _data = _data << 1;
-                _data |= Convert.ToByte(false);
-                _data = _data << 1;
-                _data |= Convert.ToByte(false);
-                _data = _data << 1;
-                _data |= Convert.ToByte(false);
-                _data = _data << 1;
-                _data |= Convert.ToByte(false);
-                _data = _data << 1;
-                data[1] = Convert.ToByte(_data);
+                data[1] = Convert.ToByte(MIP50DataReturn);
+                MIP50DataReturn = '\0'; // Only send data once!!!
             }
             else if ("A" == group || "B" == group)
             {

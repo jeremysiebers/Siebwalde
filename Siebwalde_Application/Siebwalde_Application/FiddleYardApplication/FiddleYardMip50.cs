@@ -116,9 +116,13 @@ namespace Siebwalde_Application
             MIP50TransmitData = 0;
 
             if (m_instance == "TOP")
+            {
                 Layer = "p";
+            }
             else if (m_instance == "BOT")
+            {
                 Layer = "q";
+            }
             
             FiddleYardMIP50Logging.StoreText("### Fiddle Yard MIP50 API started ###");
         }
@@ -903,11 +907,11 @@ namespace Siebwalde_Application
         private void MIP50xSetxAcceleration()
         {
             m_iFYIOH.ActuatorCmd("MIP50xSetxAcceleration", Layer + "C" + "\r");
-            m_iFYIOH.ActuatorCmd("MIP50xSetxAccelerationMIP50xSetxAcceleration", Layer + "1" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xSetxAcceleration", Layer + "1" + "\r");
             m_iFYIOH.ActuatorCmd("MIP50xSetxAcceleration", Layer + "x" + "\r");
             m_iFYIOH.ActuatorCmd("MIP50xSetxAcceleration", Layer + "2" + "\r");
             m_iFYIOH.ActuatorCmd("MIP50xSetxAcceleration", Layer + "r" + "\r");
-            m_iFYIOH.ActuatorCmd("MIP50xSetxAccelerationMIP50xSetxAcceleration", Layer + "2" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xSetxAcceleration", Layer + "2" + "\r");
             m_iFYIOH.ActuatorCmd("MIP50xSetxAcceleration", Layer + "t" + "\r");
             m_iFYIOH.ActuatorCmd("MIP50xSetxAcceleration", Layer + "0" + "\r");
             m_iFYIOH.ActuatorCmd("MIP50xSetxAcceleration", Layer + "." + "\r");

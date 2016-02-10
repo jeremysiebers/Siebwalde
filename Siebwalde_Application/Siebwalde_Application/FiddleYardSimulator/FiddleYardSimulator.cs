@@ -34,12 +34,20 @@ namespace Siebwalde_Application
         public FiddleYardSimTrainDetect FYTrDt;
         private Log2LoggingFile FiddleYardSimulatorLogging;
 
-        private enum State { Idle, CL10Heart, Reset, FiddleOneLeft, FiddleOneRight, FiddleMultipleMove, TrainDetect, Start };
+        private enum State { Idle, Reset, MIP50xAbs_Pos, MIP50xHomexAxis, MIP50xSetxPositioningxVelxDefault, MIP50xSetxAcceleration, MIP50xClearxError, MIP50xActivatexPosxReg, MIP50xDeactivatexPosxReg,
+                             MIP50xReadxPosition
+        };
         private State State_Machine;
 
         private const int NoOfSimTrains = 12; // counting from 1!!!
         public int[] TrainsOnFYSim = new int[NoOfSimTrains + 1]; // counting from 1!!!
         private Random rng = new Random();
+
+        
+        private const int GO = 0x47;
+        private const string MIP50xM20xHeader = "M#20    1   ";
+        private const string MIP50xM21xHeader = "M#21    1      ";
+        
 
         public int[] GetTrainsOnFYSim()
         {
@@ -197,35 +205,48 @@ namespace Siebwalde_Application
         {
             switch (State_Machine)
             {
-                case State.Idle:
-                    if (kicksimulator == "FiddleOneLeft")
+                /*---------------------------------------CHECK FOR Type of command -----------------------------------------------------------------------------------------------------------------
+                */
+                case State.Idle:                    
+                    if (kicksimulator == "MIP50xAbs_Pos")
                     {
-                        FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.FiddleOneLeft");
-                        State_Machine = State.FiddleOneLeft;                                                // When a sequence has to be executed, the corresponding state is started
-
-
+                        FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.MIP50xAbs_Pos");
+                        State_Machine = State.MIP50xAbs_Pos;
                     }
-                    else if (kicksimulator == "FiddleOneRight")
+                    else if (kicksimulator == "MIP50xHomexAxis" && val == GO)
                     {
-                        FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.FiddleOneRight");
-                        State_Machine = State.FiddleOneRight;
-
-
+                        FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.MIP50xHomexAxis");
+                        State_Machine = State.MIP50xHomexAxis;
                     }
-                    else if (kicksimulator.TrimEnd(kicksimulator[kicksimulator.Length - 1]) == "FiddleGo" || kicksimulator == "FiddleGo10") // the 0 of 10 is not recognized...therefore: || kicksimulator == "FiddleGo10"
+                    else if (kicksimulator == "MIP50xSetxPositioningxVelxDefault" && val == GO)
                     {
-                        string test = kicksimulator.TrimEnd(kicksimulator[kicksimulator.Length - 1]);
-                        FiddleYardSimulatorLogging.StoreText("FYSim FYMove.FiddleMultipleMove(" + kicksimulator + ")");
-                        FYMove.FiddleMultipleMove(kicksimulator);                                           // Already pass the command which was received, else it will be lost
-                        FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.FiddleMultipleMove");
-                        State_Machine = State.FiddleMultipleMove;                                           // When a sequence has to be executed, the corresponding state is started
-
-
+                        FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.MIP50xSetxPositioningxVelxDefault");
+                        State_Machine = State.MIP50xSetxPositioningxVelxDefault;
                     }
-                    else if (kicksimulator == "TrainDetect")
+                    else if (kicksimulator == "MIP50xSetxAcceleration" && val == GO)
                     {
-                        FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.TrainDetect");
-                        State_Machine = State.TrainDetect;
+                        FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.MIP50xSetxAcceleration");
+                        State_Machine = State.MIP50xSetxAcceleration;
+                    }
+                    else if (kicksimulator == "MIP50xClearxError" && val == GO)
+                    {
+                        FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.MIP50xClearxError");
+                        State_Machine = State.MIP50xClearxError;
+                    }
+                    else if (kicksimulator == "MIP50xActivatexPosxReg" && val == GO)
+                    {
+                        FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.MIP50xActivatexPosxReg");
+                        State_Machine = State.MIP50xActivatexPosxReg;
+                    }
+                    else if (kicksimulator == "MIP50xDeactivatexPosxReg" && val == GO)
+                    {
+                        FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.MIP50xDeactivatexPosxReg");
+                        State_Machine = State.MIP50xDeactivatexPosxReg;
+                    }
+                    else if (kicksimulator == "MIP50xReadxPosition" && val == GO)
+                    {
+                        FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.MIP50xReadxPosition");
+                        State_Machine = State.MIP50xReadxPosition;
                     }
                     else if (kicksimulator == "Reset")
                     {
@@ -233,59 +254,254 @@ namespace Siebwalde_Application
                         State_Machine = State.Reset;
                         FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.Reset");
                     }
-
                     else if (kicksimulator != "TargetAlive")
                     {
                         FYSimVar.IdleSetVariable(kicksimulator);                                                     // Only when a variable needs to be set it is done directly (manualy sending commands to target/simulator from FORM
-                        FiddleYardSimulatorLogging.StoreText("FYSim IdleSetVariable(" + kicksimulator + ")");
+                        //FiddleYardSimulatorLogging.StoreText("FYSim IdleSetVariable(" + kicksimulator + ")");
                         FYSimVar.uControllerReady.Mssg = true;
                     }
-
                     else if (kicksimulator == "TargetAlive")
                     {
                         FYSimVar.TargetAlive.UpdateSensorValue(1, true);                                             // Update all clients of TargetAlive (SimTrains)
                     }
                     break;
 
+                /*---------------------------------------Execute Type of command -----------------------------------------------------------------------------------------------------------------
+                */
 
-
-                case State.FiddleOneLeft:
-                    if (true == FYMove.FiddleOneMove("Left"))
+                case State.MIP50xAbs_Pos:
+                    if (kicksimulator == "MIP50xAbs_Pos" && val != GO)
                     {
-                        FiddleYardSimulatorLogging.StoreText("FYSim true == FYMove.FiddleOneMove(Left)");
+                        FYSimVar.MIP50xAbs_Pos[FYSimVar.MIP50Cnt] = val; // first character (A) is lost due to switching from state.
+                        FYSimVar.MIP50Cnt++;
+                    }
+                    else if (kicksimulator == "MIP50xAbs_Pos" && val == GO)
+                    {
+                        FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.Idle"); // To do--> filter out new track number, kick old move program, after program clear FYSimVar.MIP50xAbs_Pos[x]!!!!!!
                         State_Machine = State.Idle;
-                        FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.Idle from State.FiddleOneLeft");
-                        FYSimVar.uControllerReady.Mssg = true;
                     }
                     break;
 
-                case State.FiddleOneRight:
-                    if (true == FYMove.FiddleOneMove("Right"))
+                case State.MIP50xHomexAxis:
+                    if (kicksimulator == "MIP50xDataxToxSend")
                     {
-                        FiddleYardSimulatorLogging.StoreText("FYSim true == FYMove.FiddleOneMove(Right)");
-                        State_Machine = State.Idle;
-                        FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.Idle from State.FiddleOneRight");
-                        FYSimVar.uControllerReady.Mssg = true;
+                        switch (FYSimVar.MIP50Cnt)
+                        {
+                            case 0:
+                                FYSimVar.MIP50DataReturn = 0xD;
+                                FYSimVar.MIP50Cnt++;
+                                break;
+                            case 1:
+                                FYSimVar.MIP50DataReturn = 0xA;
+                                FYSimVar.MIP50Cnt++;
+                                break;
+                            case 2:
+                                FYSimVar.MIP50DataReturn = 0x58;
+                                FYSimVar.MIP50Cnt++;
+                                break;
+                            case 3:
+                                FYSimVar.MIP50DataReturn = 0x30;
+                                FYSimVar.MIP50Cnt = 0;
+                                FYSimVar.Track1.Value = true;   // After homing Track 1 is active
+                                FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.Idle");
+                                State_Machine = State.Idle;
+                                break;
+                        }
                     }
                     break;
 
-                case State.FiddleMultipleMove:
-                    if (true == FYMove.FiddleMultipleMove(kicksimulator))
+                case State.MIP50xSetxPositioningxVelxDefault:
+                    if (kicksimulator == "MIP50xDataxToxSend")
                     {
-                        FiddleYardSimulatorLogging.StoreText("FYSim true == FYMove.FiddleMultipleMove(kicksimulator)");
-                        State_Machine = State.Idle;
-                        FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.Idle from State.FiddleMultipleMove");
-                        FYSimVar.uControllerReady.Mssg = true;
+                        switch (FYSimVar.MIP50Cnt)
+                        {
+                            case 0:
+                                FYSimVar.MIP50DataReturn = 0xD;
+                                FYSimVar.MIP50Cnt++;
+                                break;
+                            case 1:
+                                FYSimVar.MIP50DataReturn = 0xA;
+                                FYSimVar.MIP50Cnt++;
+                                break;
+                            case 2:
+                                FYSimVar.MIP50DataReturn = 0x58;
+                                FYSimVar.MIP50Cnt++;
+                                break;
+                            case 3:
+                                FYSimVar.MIP50DataReturn = 0x30;
+                                FYSimVar.MIP50Cnt = 0;
+                                FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.Idle");
+                                State_Machine = State.Idle;
+                                break;
+                        }
                     }
                     break;
 
-                case State.TrainDetect:
-                    if (true == FYTrDt.FiddleTrDt())
+                case State.MIP50xSetxAcceleration:
+                    if (kicksimulator == "MIP50xDataxToxSend")
                     {
-                        FiddleYardSimulatorLogging.StoreText("FYSim true == FYTrDt.FiddleTrDt()");
-                        State_Machine = State.Idle;
-                        FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.Idle from State.TrainDetect");
-                        FYSimVar.uControllerReady.Mssg = true;
+                        switch (FYSimVar.MIP50Cnt)
+                        {
+                            case 0:
+                                FYSimVar.MIP50DataReturn = 0xD;
+                                FYSimVar.MIP50Cnt++;
+                                break;
+                            case 1:
+                                FYSimVar.MIP50DataReturn = 0xA;
+                                FYSimVar.MIP50Cnt++;
+                                break;
+                            case 2:
+                                FYSimVar.MIP50DataReturn = 0x58;
+                                FYSimVar.MIP50Cnt++;
+                                break;
+                            case 3:
+                                FYSimVar.MIP50DataReturn = 0x30;
+                                FYSimVar.MIP50Cnt = 0;
+                                FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.Idle");
+                                State_Machine = State.Idle;
+                                break;
+                        }
+                    }
+                    break;
+
+
+                case State.MIP50xClearxError:
+                    if (kicksimulator == "MIP50xDataxToxSend")
+                    {
+                        switch (FYSimVar.MIP50Cnt)
+                        {
+                            case 0:
+                                FYSimVar.MIP50DataReturn = 0xD;
+                                FYSimVar.MIP50Cnt++;
+                                break;
+                            case 1:
+                                FYSimVar.MIP50DataReturn = 0xA;
+                                FYSimVar.MIP50Cnt++;
+                                break;
+                            case 2:
+                                FYSimVar.MIP50DataReturn = 0x58;
+                                FYSimVar.MIP50Cnt++;
+                                break;
+                            case 3:
+                                FYSimVar.MIP50DataReturn = 0x30;
+                                FYSimVar.MIP50Cnt = 0;
+                                FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.Idle");
+                                State_Machine = State.Idle;
+                                break;
+                        }
+                    }
+                    break;
+
+                case State.MIP50xActivatexPosxReg:
+                    if (kicksimulator == "MIP50xDataxToxSend")
+                    {
+                        switch (FYSimVar.MIP50Cnt)
+                        {
+                            case 0:
+                                FYSimVar.MIP50DataReturn = 0xD;
+                                FYSimVar.MIP50Cnt++;
+                                break;
+                            case 1:
+                                FYSimVar.MIP50DataReturn = 0xA;
+                                FYSimVar.MIP50Cnt++;
+                                break;
+                            case 2:
+                                FYSimVar.MIP50DataReturn = 0x58;
+                                FYSimVar.MIP50Cnt++;
+                                break;
+                            case 3:
+                                FYSimVar.MIP50DataReturn = 0x30;
+                                FYSimVar.MIP50Cnt = 0;
+                                FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.Idle");
+                                State_Machine = State.Idle;
+                                break;
+                        }
+                    }
+                    break;
+
+                case State.MIP50xDeactivatexPosxReg:
+                    if (kicksimulator == "MIP50xDataxToxSend")
+                    {
+                        switch (FYSimVar.MIP50Cnt)
+                        {
+                            case 0:
+                                FYSimVar.MIP50DataReturn = 0xD;
+                                FYSimVar.MIP50Cnt++;
+                                break;
+                            case 1:
+                                FYSimVar.MIP50DataReturn = 0xA;
+                                FYSimVar.MIP50Cnt++;
+                                break;
+                            case 2:
+                                FYSimVar.MIP50DataReturn = 0x58;
+                                FYSimVar.MIP50Cnt++;
+                                break;
+                            case 3:
+                                FYSimVar.MIP50DataReturn = 0x30;
+                                FYSimVar.MIP50Cnt = 0;
+                                FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.Idle");
+                                State_Machine = State.Idle;
+                                break;                                
+                        }
+                    }
+                    break;
+
+                case State.MIP50xReadxPosition:
+                    if (kicksimulator == "MIP50xDataxToxSend")
+                    {
+                        switch (FYSimVar.MIP50Cnt)
+                        {
+                            case 0:
+                                FYSimVar.MIP50DataReturn = 0xD;
+                                FYSimVar.MIP50Cnt++;
+                                break;
+
+                            case 1:
+                                FYSimVar.MIP50DataReturn = 0xA;
+                                FYSimVar.MIP50Cnt++;
+                                break;
+
+                            case 2:
+                                if (FYSimVar.MIP50Cnt2 != MIP50xM21xHeader.Length)
+                                {
+                                    FYSimVar.MIP50DataReturn = Convert.ToInt16(MIP50xM21xHeader[FYSimVar.MIP50Cnt2]);
+                                    FYSimVar.MIP50Cnt2++;
+                                }
+                                else { FYSimVar.MIP50Cnt2 = 0; FYSimVar.MIP50Cnt++; }
+                                break;
+
+                            case 3:
+                                if (FYSimVar.MIP50Cnt2 != ConvertTrackNo2AbsoluteNo(FYSimVar.TrackNo.Count).Length)
+                                {
+                                    FYSimVar.MIP50DataReturn = Convert.ToInt16(ConvertTrackNo2AbsoluteNo(FYSimVar.TrackNo.Count)[FYSimVar.MIP50Cnt2]);
+                                    FYSimVar.MIP50Cnt2++;
+                                }
+                                else
+                                {
+                                    FYSimVar.MIP50Cnt2 = 0;
+                                    FYSimVar.MIP50Cnt++;                                    
+                                }
+                                break;
+
+                            case 4:
+                                FYSimVar.MIP50DataReturn = 0xD;
+                                FYSimVar.MIP50Cnt++;
+                                break;
+                            case 5:
+                                FYSimVar.MIP50DataReturn = 0xA;
+                                FYSimVar.MIP50Cnt++;
+                                break;
+                            case 6:
+                                FYSimVar.MIP50DataReturn = 0x58;
+                                FYSimVar.MIP50Cnt++;
+                                break;
+                            case 7:
+                                FYSimVar.MIP50DataReturn = 0x30;
+                                FYSimVar.MIP50Cnt = 0;
+                                FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.Idle");
+                                State_Machine = State.Idle;
+                                break;
+                        }
                     }
                     break;
 
@@ -299,6 +515,30 @@ namespace Siebwalde_Application
                 default:
                     break;
             }
+        }
+
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: ConvertTrackNo2AbsoluteNo
+         * 
+         *  Input(s)   : TrackNo 1 <> 11
+         *
+         *  Output(s)  : Track number in absolute POS count
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      : 
+         *  
+         */
+        /*#--------------------------------------------------------------------------#*/
+        private uint[] TrackForward = new uint[12] { 0, 0, 42800, 85600, 128400, 171200, 214000, 256800, 299600, 342400, 385200, 428000 };// New track coordinates forward movement 1 --> 11 to be moved and get from Application Variables 
+
+        public string ConvertTrackNo2AbsoluteNo(int TrackNo)
+        {
+            return (Convert.ToString(TrackForward[TrackNo]));
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -409,6 +649,15 @@ namespace Siebwalde_Application
         public void CommandToSend(string name, string cmd)
         {
             int val = 0;
+           
+            if (cmd == "pG\r"|| cmd == "qG\r")
+            {
+                val = GO;
+            }  
+            else
+            {
+                val = Convert.ToInt32(cmd[1]);
+            }          
             SimulatorUpdate(name, val);
         }
 
@@ -471,6 +720,9 @@ namespace Siebwalde_Application
             aTimer.Stop();
             byte[] data = new byte[] { 0x00, 0x00 };
 
+            SimulatorUpdate("MIP50xDataxToxSend", 1);   // Kick data senders to simulate data that is passing from MIP50 via uController to C#. These may only be send after the 
+                                                        // previous character of a command has been send by OnTimedEvent.
+
             if ("TOP" == m_instance)
             {
                 NewData(FYSimVar.CreateData("M"));
@@ -498,3 +750,73 @@ namespace Siebwalde_Application
     }
 }
 
+
+
+
+
+
+
+
+//if (kicksimulator == "FiddleOneLeft")
+//{
+//    FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.FiddleOneLeft");
+//    State_Machine = State.FiddleOneLeft;                                                // When a sequence has to be executed, the corresponding state is started
+//}
+//else if (kicksimulator == "FiddleOneRight")
+//{
+//    FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.FiddleOneRight");
+//    State_Machine = State.FiddleOneRight;
+//}
+//else if (kicksimulator.TrimEnd(kicksimulator[kicksimulator.Length - 1]) == "FiddleGo" || kicksimulator == "FiddleGo10") // the 0 of 10 is not recognized...therefore: || kicksimulator == "FiddleGo10"
+//{
+//    string test = kicksimulator.TrimEnd(kicksimulator[kicksimulator.Length - 1]);
+//    FiddleYardSimulatorLogging.StoreText("FYSim FYMove.FiddleMultipleMove(" + kicksimulator + ")");
+//    FYMove.FiddleMultipleMove(kicksimulator);                                           // Already pass the command which was received, else it will be lost
+//    FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.FiddleMultipleMove");
+//    State_Machine = State.FiddleMultipleMove;                                           // When a sequence has to be executed, the corresponding state is started
+//}
+//else if (kicksimulator == "TrainDetect")
+//{
+//    FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.TrainDetect");
+//    State_Machine = State.TrainDetect;
+//}
+
+//case State.FiddleOneLeft:
+//    if (true == FYMove.FiddleOneMove("Left"))
+//    {
+//        FiddleYardSimulatorLogging.StoreText("FYSim true == FYMove.FiddleOneMove(Left)");
+//        State_Machine = State.Idle;
+//        FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.Idle from State.FiddleOneLeft");
+//        FYSimVar.uControllerReady.Mssg = true;
+//    }
+//    break;
+
+//case State.FiddleOneRight:
+//    if (true == FYMove.FiddleOneMove("Right"))
+//    {
+//        FiddleYardSimulatorLogging.StoreText("FYSim true == FYMove.FiddleOneMove(Right)");
+//        State_Machine = State.Idle;
+//        FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.Idle from State.FiddleOneRight");
+//        FYSimVar.uControllerReady.Mssg = true;
+//    }
+//    break;
+
+//case State.FiddleMultipleMove:
+//    if (true == FYMove.FiddleMultipleMove(kicksimulator))
+//    {
+//        FiddleYardSimulatorLogging.StoreText("FYSim true == FYMove.FiddleMultipleMove(kicksimulator)");
+//        State_Machine = State.Idle;
+//        FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.Idle from State.FiddleMultipleMove");
+//        FYSimVar.uControllerReady.Mssg = true;
+//    }
+//    break;
+
+//case State.TrainDetect:
+//    if (true == FYTrDt.FiddleTrDt())
+//    {
+//        FiddleYardSimulatorLogging.StoreText("FYSim true == FYTrDt.FiddleTrDt()");
+//        State_Machine = State.Idle;
+//        FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.Idle from State.TrainDetect");
+//        FYSimVar.uControllerReady.Mssg = true;
+//    }
+//    break;
