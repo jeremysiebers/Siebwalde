@@ -212,6 +212,7 @@ namespace Siebwalde_Application
                     {
                         FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.MIP50xAbs_Pos");
                         State_Machine = State.MIP50xAbs_Pos;
+                        FYSimVar.MIP50Cnt = 0; // Reset this variable
                     }
                     else if (kicksimulator == "MIP50xHomexAxis" && val == GO)
                     {
@@ -285,11 +286,11 @@ namespace Siebwalde_Application
                         {
                             Number += FYSimVar.MIP50xAbs_Pos[i] * Convert.ToInt32(Math.Pow(10, FYSimVar.MIP50xAbs_Pos.Length - i - 3));
                         }
+                        FYSimVar.MIP50Cnt = 0;
                         Number = ConvertAbsoluteNo2TrackNo(Number);
                         FYMove.FiddleMultipleMove("Go" + Convert.ToString(Number));                                         
                         FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.FiddleMultipleMove");
-                        State_Machine = State.FiddleMultipleMove;
-                        FYSimVar.MIP50Cnt = 0;                  
+                        State_Machine = State.FiddleMultipleMove;                                        
                     }
                     break;
 
@@ -566,7 +567,17 @@ namespace Siebwalde_Application
 
         public int ConvertAbsoluteNo2TrackNo(int AbsoluteNo)
         {
-            return (Array.IndexOf(TrackForward, AbsoluteNo));
+            int _Return = Array.IndexOf(TrackForward, AbsoluteNo);
+
+            if (_Return == -1)
+            {
+                return (Array.IndexOf(TrackForward, AbsoluteNo + 700));
+            }
+            else
+            {
+                return (_Return);
+            }
+
         }
 
         /*#--------------------------------------------------------------------------#*/
