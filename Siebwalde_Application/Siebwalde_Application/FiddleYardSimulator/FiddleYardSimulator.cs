@@ -35,7 +35,7 @@ namespace Siebwalde_Application
         private Log2LoggingFile FiddleYardSimulatorLogging;
 
         private enum State { Idle, Reset, MIP50xAbs_Pos, MIP50xHomexAxis, MIP50xSetxPositioningxVelxDefault, MIP50xSetxAcceleration, MIP50xClearxError, MIP50xActivatexPosxReg, MIP50xDeactivatexPosxReg,
-                             MIP50xReadxPosition
+                                MIP50xReadxPosition, FiddleMultipleMove
         };
         private State State_Machine;
 
@@ -279,6 +279,27 @@ namespace Siebwalde_Application
                     {
                         FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.Idle"); // To do--> filter out new track number, kick old move program, after program clear FYSimVar.MIP50xAbs_Pos[x]!!!!!!
                         State_Machine = State.Idle;
+
+                        int Number = 0;
+                        for (int i = 2; i < FYSimVar.MIP50Cnt; i++) // Start with LSB
+                        {
+                            Number += FYSimVar.MIP50xAbs_Pos[i] * Convert.ToInt32(Math.Pow(10, FYSimVar.MIP50xAbs_Pos.Length - i - 3));
+                        }
+                        Number = ConvertAbsoluteNo2TrackNo(Number);
+                        FYMove.FiddleMultipleMove("Go" + Convert.ToString(Number));                                         
+                        FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.FiddleMultipleMove");
+                        State_Machine = State.FiddleMultipleMove;
+                        FYSimVar.MIP50Cnt = 0;                  
+                    }
+                    break;
+
+                case State.FiddleMultipleMove:
+                    if (true == FYMove.FiddleMultipleMove(kicksimulator))
+                    {
+                        FiddleYardSimulatorLogging.StoreText("FYSim true == FYMove.FiddleMultipleMove(kicksimulator)");
+                        State_Machine = State.MIP50xSetxPositioningxVelxDefault;
+                        FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.MIP50xSetxPositioningxVelxDefault from State.FiddleMultipleMove"); // to sen X0 after move
+                        FYSimVar.uControllerReady.Mssg = true;
                     }
                     break;
 
@@ -509,6 +530,8 @@ namespace Siebwalde_Application
                     FYSimVar.Reset(); // <-------------------------------------------------------------------------------- Also reset SUB programs of simulator !!!! TBD !!!
                     FYSimVar.FiddleYardReset.Mssg = true;
                     State_Machine = State.Idle;
+                    FYSimVar.MIP50Cnt = 0;
+                    FYSimVar.MIP50Cnt2 = 0;
                     FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.Idle from State.Reset");
                     break;
 
@@ -534,11 +557,16 @@ namespace Siebwalde_Application
          *  
          */
         /*#--------------------------------------------------------------------------#*/
-        private uint[] TrackForward = new uint[12] { 0, 0, 42800, 85600, 128400, 171200, 214000, 256800, 299600, 342400, 385200, 428000 };// New track coordinates forward movement 1 --> 11 to be moved and get from Application Variables 
+        private int[] TrackForward = new int[12] { 0, 0, 42800, 85600, 128400, 171200, 214000, 256800, 299600, 342400, 385200, 428000 };// New track coordinates forward movement 1 --> 11 to be moved and get from Application Variables 
 
         public string ConvertTrackNo2AbsoluteNo(int TrackNo)
         {
             return (Convert.ToString(TrackForward[TrackNo]));
+        }
+
+        public int ConvertAbsoluteNo2TrackNo(int AbsoluteNo)
+        {
+            return (Array.IndexOf(TrackForward, AbsoluteNo));
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -643,12 +671,13 @@ namespace Siebwalde_Application
         /*#--------------------------------------------------------------------------#*/
         public void SetMessage(string name, string log)
         {
-            int val = 0;
+            int val = 0;            
             SimulatorUpdate(name, val);
         }
         public void CommandToSend(string name, string cmd)
         {
             int val = 0;
+            string CmdNo2String;
            
             if (cmd == "pG\r"|| cmd == "qG\r")
             {
@@ -656,7 +685,16 @@ namespace Siebwalde_Application
             }  
             else
             {
-                val = Convert.ToInt32(cmd[1]);
+                if (char.IsNumber(cmd[1]))                      // Check if send character is a number
+                {
+                    CmdNo2String = Convert.ToString(cmd[1]);    // Convert the number character only to string
+                    //Int32.TryParse(CmdNo2String, 16, out val);      // parse string number only to int
+                    val = Convert.ToInt32(CmdNo2String, 16);
+                }
+                else
+                {
+                    val = Convert.ToInt32(cmd[1]);  // if string is number, this is converted to dec number in int.
+                }
             }          
             SimulatorUpdate(name, val);
         }

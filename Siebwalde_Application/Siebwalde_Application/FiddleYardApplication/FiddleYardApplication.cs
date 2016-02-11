@@ -409,21 +409,24 @@ namespace Siebwalde_Application
             switch (State_Machine)
             {
                 case State.Reset:
-                    FYAppVar.FiddleYardReset.UpdateMessage();//FYFORM.SetMessage("FYApp FYStart", "FiddleYard Reset");
-                    FiddleYardApplicationLogging.StoreText("FYApp Reset target");
-                    FYAppInit.Init("Reset", val);
-                    FiddleYardApplicationLogging.StoreText("FYApp FYAppInit.Init(Reset)");
-                    FYAppRun.FiddleYardAppRunReset();   // also resets the sub programs!
-                    FYAppInit.FiddleYardInitReset();
-                    FiddleYardApplicationLogging.StoreText("FYApp FYAppRun.FiddleYardAppRunReset()");
-                    FYMIP50.MIP50Reset();   //Reset MIP50 program
-                    FiddleYardApplicationLogging.StoreText("FYApp FYMIP50.MIP50Reset()");
-                    FYTDT.FiddleYardTdtReset();
-                    FiddleYardApplicationLogging.StoreText("FYApp FYTDT.FiddleYardTdtReset()");
-                    Cmd(" Reset ", ""); // reset target
-                    FiddleYardApplicationLogging.StoreText("FYApp reset target");
-                    State_Machine = State.Idle;
-                    FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle from State.Reset");                    
+                    if (kickapplication == "TimerEvent") // Only update on 1 thread: TimerEvent.
+                    {
+                        FYAppVar.FiddleYardReset.UpdateMessage();//FYFORM.SetMessage("FYApp FYStart", "FiddleYard Reset");
+                        FiddleYardApplicationLogging.StoreText("FYApp Reset target");
+                        FYAppInit.Init("Reset", val);
+                        FiddleYardApplicationLogging.StoreText("FYApp FYAppInit.Init(Reset)");
+                        FYAppRun.FiddleYardAppRunReset();   // also resets the sub programs!
+                        FYAppInit.FiddleYardInitReset();
+                        FiddleYardApplicationLogging.StoreText("FYApp FYAppRun.FiddleYardAppRunReset()");
+                        FYMIP50.MIP50Reset();   //Reset MIP50 program
+                        FiddleYardApplicationLogging.StoreText("FYApp FYMIP50.MIP50Reset()");
+                        FYTDT.FiddleYardTdtReset();
+                        FiddleYardApplicationLogging.StoreText("FYApp FYTDT.FiddleYardTdtReset()");
+                        Cmd(" Reset ", ""); // reset target
+                        FiddleYardApplicationLogging.StoreText("FYApp reset target");
+                        State_Machine = State.Idle;
+                        FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle from State.Reset");
+                    }
                     break;
 
                 case State.Idle:
