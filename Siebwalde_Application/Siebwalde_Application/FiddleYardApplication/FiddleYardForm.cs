@@ -251,8 +251,8 @@ namespace Siebwalde_Application
             checkBoxTrack11.Checked = false;
             checkBoxToggle.Checked = false;
 
-            ManualMode.Location = new System.Drawing.Point(625, 776);
-            AutomaticMode.Location = new System.Drawing.Point(625, 776);
+            //ManualMode.Location = new System.Drawing.Point(625, 776);
+            //AutomaticMode.Location = new System.Drawing.Point(625, 776);
 
             #endregion Indicator init            
 
@@ -361,14 +361,18 @@ namespace Siebwalde_Application
             m_FYAppVar.TrainDriveOutPointer.Attach(Sns_ForceNextTrack);  
              
             //Messages
-            //Message Msg_TrainDetectionTop = new Message("TrainDetectionFinished", " Train Detection Finished ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
-            //m_FYIOHandleVar.TrainDetection.Attach(Msg_TrainDetectionTop);
+            Message Msg_TrainDetectionTop = new Message("TrainDetectionFinished", " Train Detection Finished ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+            m_FYAppVar.TrainDetection.Attach(Msg_TrainDetectionTop);
+            Message Msg_TrainDetectionStarted = new Message("TrainDetectionStarted", " Train Detection Started ", (name, log) => SetMessage(name, log)); // initialize and subscribe readback action, Message
+            m_FYAppVar.TrainDetectionStarted.Attach(Msg_TrainDetectionStarted);
             Message Msg_FiddleYardStopped = new Message("FiddleYardStopped", " FiddleYard Auto mode Stopped ", (name, log) => SetMessage(name, log));
             m_FYAppVar.FiddleYardStopped.Attach(Msg_FiddleYardStopped);
             Message Msg_FiddleYardStart = new Message("FiddleYardStart", " FiddleYard Auto mode Start ", (name, log) => SetMessage(name, log));
             m_FYAppVar.FiddleYardStart.Attach(Msg_FiddleYardStart);
-            Message Msg_FiddleYardTrackNotAligned = new Message("FiddleYardTrackNotAligned", " FiddleYard track not aligned... ", (name, log) => SetMessage(name, log));
-            m_FYAppVar.FiddleYardTrackNotAligned.Attach(Msg_FiddleYardTrackNotAligned);
+            Message Msg_FiddleYardNotHomed = new Message("FiddleYardNotHomed", " FiddleYard not homed, start homing ", (name, log) => SetMessage(name, log));
+            m_FYAppVar.FiddleYardNotHomed.Attach(Msg_FiddleYardNotHomed);
+            Message Msg_FiddleYardHomingFinished = new Message("FiddleYardHomingFinished", " FiddleYard homing finished ", (name, log) => SetMessage(name, log));
+            m_FYAppVar.FiddleYardHomingFinished.Attach(Msg_FiddleYardHomingFinished);
             Message Msg_FiddleYardTrainObstruction = new Message("FiddleYardTrainObstruction", " FiddleYard train obstruction... ", (name, log) => SetMessage(name, log));
             m_FYAppVar.FiddleYardTrainObstruction.Attach(Msg_FiddleYardTrainObstruction);
             Message Msg_FiddleYardTrackAligned = new Message("FiddleYardTrackAligned", " FiddleYard track aligned ", (name, log) => SetMessage(name, log));
@@ -2491,7 +2495,7 @@ namespace Siebwalde_Application
         {
             automaticModeToolStripMenuItem.Checked = true;
             manualModeToolStripMenuItem.Checked = false;
-            AutomaticMode.Location = new System.Drawing.Point(625, 776);
+            //AutomaticMode.Location = new System.Drawing.Point(625, 776);
             AutomaticMode.Visible = true;
             ManualMode.Visible = false;
 
@@ -2529,14 +2533,13 @@ namespace Siebwalde_Application
         {
             automaticModeToolStripMenuItem.Checked = false;
             manualModeToolStripMenuItem.Checked = true;
-            AutomaticMode.Visible = false;
-            ManualMode.Location = new System.Drawing.Point(625, 776);
+            AutomaticMode.Visible = false;            
             ManualMode.Visible = true;                       
 
             Btn_Bezet5BOn_TOP.Location = new System.Drawing.Point(GWin.Location.X + 50 + 16 + 30, (740 / 2 + GWin.Location.Y) - 18 - (250 / 2) - (23 / 2));
             Btn_Bezet6On_TOP.Location = new System.Drawing.Point(GWin.Location.X + 100 - (32 / 2), (740 / 2 + GWin.Location.Y) + 8 + 40);
             Btn_Bezet7On_TOP.Location = new System.Drawing.Point(GWin.Location.X + 840 - (32 / 2), (740 / 2 + GWin.Location.Y) + 8 + 40);
-            ManualMode.Location = new System.Drawing.Point(GWin.Location.X + 745, GWin.Location.Y + 761);  //(750,793);
+            //ManualMode.Location = new System.Drawing.Point(GWin.Location.X + 745, GWin.Location.Y + 761);  //(750,793);
             
             Btn_Bezet5BOn_TOP.Visible = false;
             Btn_Bezet6On_TOP.Visible = false;

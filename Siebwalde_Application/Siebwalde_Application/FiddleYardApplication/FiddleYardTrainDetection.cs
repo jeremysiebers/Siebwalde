@@ -150,6 +150,7 @@ namespace Siebwalde_Application
                         m_FYAppLog.StoreText("FYTDT.Traindetection() m_FYMIP50.MIP50xMOVExCALC(11)");
                         State_Machine = State.TDT;
                         m_FYAppLog.StoreText("FYTDT.Traindetection() State_Machine = State.TDT");
+                        m_FYAppVar.TrainDetectionStarted.UpdateMessage();                           // Set message on Form
                     }
                     else if (m_FYAppVar.GetTrackNr() == 11)       // On track 11, Go to Track 1 for scan
                     {
@@ -157,6 +158,7 @@ namespace Siebwalde_Application
                         m_FYAppLog.StoreText("FYTDT.Traindetection() m_FYMIP50.MIP50xMOVExCALC(1)");
                         State_Machine = State.TDT;
                         m_FYAppLog.StoreText("FYTDT.Traindetection() State_Machine = State.TDT");
+                        m_FYAppVar.TrainDetectionStarted.UpdateMessage();                           // Set message on Form
                     }                    
                     break;
 
@@ -169,6 +171,7 @@ namespace Siebwalde_Application
                     {
                         State_Machine = State.TDT;                 // When finished moving, execute TrainDetection TDT
                         m_FYAppLog.StoreText("FYTDT.Traindetection() State_Machine = State.TDT2");
+                        m_FYAppVar.TrainDetectionStarted.UpdateMessage();                           // Set message on Form
                     }
                     break;
                 case State.MoveToTrack11:                           // After startup track was not on 11, move to track 11
@@ -177,6 +180,7 @@ namespace Siebwalde_Application
                     {
                         State_Machine = State.TDT;
                         m_FYAppLog.StoreText("FYTDT.Traindetection() State_Machine = State.TDT2");
+                        m_FYAppVar.TrainDetectionStarted.UpdateMessage();                           // Set message on Form
                     }
                     break;
 
@@ -184,10 +188,11 @@ namespace Siebwalde_Application
                 */
 
                 case State.TDT:
-                    SubProgramReturnVal = m_FYMIP50.MIP50xMOVE();                                           // Keep kicking MIP50xMOVE until "Finished"
+                    SubProgramReturnVal = m_FYMIP50.MIP50xMOVE();                                               // Keep kicking MIP50xMOVE until "Finished"
                     if (SubProgramReturnVal == "Finished")
                     {
-                        m_FYAppVar.TrackTrainsOnFYUpdater();
+                        m_FYAppVar.TrainDetection.UpdateMessage();                                              // Set Train detection finished in Form, set initialized to true in form
+                        m_FYAppVar.TrackTrainsOnFYUpdater();                                                    // Force update Form
 
                         State_Machine = State.Idle;
                         m_FYAppLog.StoreText("FYTDT.Traindetection() State_Machine = State.Idle");

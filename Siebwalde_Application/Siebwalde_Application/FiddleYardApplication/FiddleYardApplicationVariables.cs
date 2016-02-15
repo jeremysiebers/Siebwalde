@@ -121,7 +121,7 @@ namespace Siebwalde_Application
 
         public MessageUpdater FiddleYardStopped;
         public MessageUpdater FiddleYardStart;
-        public MessageUpdater FiddleYardTrackNotAligned;
+        public MessageUpdater FiddleYardNotHomed;
         public MessageUpdater FiddleYardTrainObstruction;
         public MessageUpdater FiddleYardTrackAligned;
         public MessageUpdater TrainHasLeftFiddleYardSuccessfully;
@@ -137,6 +137,9 @@ namespace Siebwalde_Application
         public MessageUpdater CollectingTrainsEnabled;
         public MessageUpdater CollectingTrainsDisabled;
         public MessageUpdater FYNotHomed;   // Message to FORM
+        public MessageUpdater TrainDetection;
+        public MessageUpdater FiddleYardHomingFinished;
+        public MessageUpdater TrainDetectionStarted;
 
         public CommandUpdater FormCollect;          // pass Form command through FiddleYardApplicationVariables, in case Form gets replaced or closed
 
@@ -287,7 +290,7 @@ namespace Siebwalde_Application
             
             FiddleYardStopped = new MessageUpdater();
             FiddleYardStart = new MessageUpdater();
-            FiddleYardTrackNotAligned = new MessageUpdater();
+            FiddleYardNotHomed = new MessageUpdater();
             FiddleYardTrainObstruction = new MessageUpdater();
             FiddleYardTrackAligned = new MessageUpdater();
             TrainHasLeftFiddleYardSuccessfully = new MessageUpdater();
@@ -303,6 +306,9 @@ namespace Siebwalde_Application
             CollectingTrainsEnabled = new MessageUpdater();
             CollectingTrainsDisabled = new MessageUpdater();
             FYNotHomed = new MessageUpdater();
+            TrainDetection = new MessageUpdater();
+            FiddleYardHomingFinished = new MessageUpdater();
+            TrainDetectionStarted = new MessageUpdater();
 
             FormCollect = new CommandUpdater();
             

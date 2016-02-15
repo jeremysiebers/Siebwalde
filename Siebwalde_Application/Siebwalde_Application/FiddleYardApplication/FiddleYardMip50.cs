@@ -723,7 +723,8 @@ namespace Siebwalde_Application
                         FiddleYardMIP50Logging.StoreText("MIP50 Current Track = 1.");
                         m_FYAppVar.FYHomed.BoolVariable = true;
                         FiddleYardMIP50Logging.StoreText("MIP50 Homing Routine FYAppVar.FYHomed = true");
-                        FiddleYardMIP50Logging.StoreText("MIP50 Homing Routine Finished.");                        
+                        FiddleYardMIP50Logging.StoreText("MIP50 Homing Routine Finished.");
+                        m_FYAppVar.FiddleYardHomingFinished.UpdateMessage();                                // Set message text in Form: Homing finished
                         _Return = "Finished";
                     }
                     else if (m_MIP50xRECxCMDxR != "")

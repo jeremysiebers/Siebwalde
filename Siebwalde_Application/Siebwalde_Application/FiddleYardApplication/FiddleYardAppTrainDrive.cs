@@ -25,8 +25,8 @@ namespace Siebwalde_Application
         private FiddleYardApplicationVariables m_FYAppVar;
         private Log2LoggingFile m_FYAppLog;
         private enum State { Start, CheckEmptyTrack, MoveToEmptyTrack, CheckArrivedAtEmptyTrack, CheckTrainInTrack6, CheckTrainF10, CheckTrainInTrack7, CheckTrainF11, CheckTrainStopped, TrainDriveInFailed,
-        CheckFullTrack, MoveToFullTrack, CheckArrivedAtFullTrack, CheckTrainLeftTrack7, Idle, Stop, CheckArrivedAtEmptyTrack_1, CheckArrivedAtEmptyTrack_2, CheckTrainInTrack6_1, CheckTrainF10_1, CheckTrainF11_1,
-        CheckTrainStopped_1, CheckTrainStopped_2, CheckTrainStopped_3, MoveToFullTrack_1, CheckArrivedAtFullTrack_1, CheckTrainLeftTrack7_1, TrainDriveThrough_1, TrainDriveThrough_2, TrainDriveThrough_3,
+        CheckFullTrack, MoveToFullTrack, CheckArrivedAtFullTrack, CheckTrainLeftTrack7, Idle, Stop, CheckArrivedAtEmptyTrack_1, CheckArrivedAtEmptyTrack_2, CheckArrivedAtEmptyTrack_3, CheckTrainInTrack6_1, CheckTrainF10_1, CheckTrainF11_1,
+        CheckTrainStopped_1, CheckTrainStopped_2, CheckTrainStopped_3, MoveToFullTrack_1, CheckArrivedAtFullTrack_1, CheckArrivedAtFullTrack_2, CheckTrainLeftTrack7_1, TrainDriveThrough_1, TrainDriveThrough_2, TrainDriveThrough_3,
         TrainDriveThrough_4, TrainDriveThrough_5, TrainDriveThrough_6
         };
         private State TrainDriveIn_Machine;
@@ -175,7 +175,9 @@ namespace Siebwalde_Application
 
                 case State.MoveToEmptyTrack:
                     uControllerReady = false;
-                    m_FYAppVar.FiddleGo(TrainDriveInPointer);//m_iFYApp.Cmd(" FiddleGo" + Convert.ToString(TrainDriveInPointer) + " ", "");//----- Go to empty track
+                    m_FYAppVar.Uncouple.UpdateActuator(); // This will give back uCOntroller ready. 
+                    m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveIn m_FYAppVar.Uncouple.UpdateActuator()");
+                    m_FYAppVar.FiddleGo(TrainDriveInPointer);//m_iFYApp.Cmd(" FiddleGo" + Convert.ToString(TrainDriveInPointer) + " ", "");//----- Go to empty track (this will not give uCOntroller ready anymore
                     m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveIn FiddleGo" + Convert.ToString(TrainDriveInPointer));
                     TrainDriveIn_Machine = State.CheckArrivedAtEmptyTrack;                    
                     m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveIn TrainDriveIn_Machine = State.CheckArrivedAtEmptyTrack");
@@ -187,26 +189,37 @@ namespace Siebwalde_Application
                     {
                         m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveIn m_iFYApp.GetTrackNr() == TrainDriveInPointer");
                         uControllerReady = false;
-                        m_FYAppVar.Occ5BOnFalse.UpdateActuator();//m_iFYApp.GetFYApp().CmdOcc5BOnFalse();                            
-                        m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveIn m_iFYApp.CmdOcc5BOnFalse()");
+                        m_FYAppVar.Couple.UpdateActuator();
+                        m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveIn m_FYAppVar.Couple.UpdateActuator()");
                         TrainDriveIn_Machine = State.CheckArrivedAtEmptyTrack_1;
                         m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveIn TrainDriveIn_Machine = State.CheckArrivedAtEmptyTrack1");
                     }
                     break;
 
                 case State.CheckArrivedAtEmptyTrack_1:
-                    if (uControllerReady == true)
+                    if (uControllerReady == true)   // Check if coupled
                     {
                         uControllerReady = false;
-                        m_FYAppVar.Occ6OnFalse.UpdateActuator();//m_iFYApp.GetFYApp().CmdOcc6OnFalse();
-                        m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveIn m_iFYApp.CmdOcc6OnFalse()");
+                        m_FYAppVar.Occ5BOnFalse.UpdateActuator();//m_iFYApp.GetFYApp().CmdOcc5BOnFalse();  
+                        m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveIn m_FYAppVar.Occ5BOnFalse.UpdateActuator()");
                         TrainDriveIn_Machine = State.CheckArrivedAtEmptyTrack_2;
                         m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveIn TrainDriveIn_Machine = State.CheckArrivedAtEmptyTrack2");
                     }
                     break;
 
                 case State.CheckArrivedAtEmptyTrack_2:
-                    if (uControllerReady == true)
+                    if (uControllerReady == true)   // Check if Occ5BOnFalse
+                    {
+                        uControllerReady = false;
+                        m_FYAppVar.Occ6OnFalse.UpdateActuator();//m_iFYApp.GetFYApp().CmdOcc6OnFalse();
+                        m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveIn m_FYAppVar.Occ6OnFalse.UpdateActuator()");
+                        TrainDriveIn_Machine = State.CheckArrivedAtEmptyTrack_3;
+                        m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveIn TrainDriveIn_Machine = State.CheckArrivedAtEmptyTrack3");
+                    }
+                    break;
+
+                case State.CheckArrivedAtEmptyTrack_3:
+                    if (uControllerReady == true)   // Check if Occ6OnFalse
                     {
                         TrainDriveIn_Machine = State.CheckTrainInTrack6;
                         m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveIn TrainDriveIn_Machine = State.CheckTrainInTrack6");
@@ -431,6 +444,8 @@ namespace Siebwalde_Application
 
                 case State.MoveToFullTrack:
                     uControllerReady = false;
+                    m_FYAppVar.Uncouple.UpdateActuator(); // This will give back uCOntroller ready. 
+                    m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveIn m_FYAppVar.Uncouple.UpdateActuator()");
                     m_FYAppVar.FiddleGo(TrainDriveOutPointer);//m_iFYApp.Cmd(" FiddleGo" + Convert.ToString(TrainDriveOutPointer) + " ", "");
                     m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveOut FiddleGo" + Convert.ToString(TrainDriveOutPointer));
                     TrainDriveOut_Machine = State.MoveToFullTrack_1;
@@ -438,26 +453,37 @@ namespace Siebwalde_Application
                     break;
 
                 case State.MoveToFullTrack_1:
-                    if (uControllerReady == true)
+                    if (uControllerReady == true)   // Check if uncoupled
                     {
                         TrainDriveOut_Machine = State.CheckArrivedAtFullTrack;
                         m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveOut TrainDriveOut_Machine = State.CheckArrivedAtFullTrack");
                     }
                     break;
 
-                case State.CheckArrivedAtFullTrack:
+                case State.CheckArrivedAtFullTrack:   // Check if Moved
                     if (m_FYAppVar.GetTrackNr() == TrainDriveOutPointer && uControllerReady == true)
                     {
                         uControllerReady = false;
-                        m_FYAppVar.Occ7OnFalse.UpdateActuator();//m_iFYApp.GetFYApp().CmdOcc7OnFalse();
-                        m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveOut m_iFYApp.CmdOcc7OnFalse()");
+                        m_FYAppVar.Couple.UpdateActuator();
+                        m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveIn m_FYAppVar.Couple.UpdateActuator()");
                         TrainDriveOut_Machine = State.CheckArrivedAtFullTrack_1;
                         m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveOut TrainDriveOut_Machine = State.CheckArrivedAtFullTrack_1");
                     }
                     break;
 
                 case State.CheckArrivedAtFullTrack_1:
-                    if (uControllerReady == true)
+                    if (uControllerReady == true)   // Check if Coupled
+                    {
+                        uControllerReady = false;
+                        m_FYAppVar.Occ7OnFalse.UpdateActuator();
+                        m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveOut m_FYAppVar.Occ7OnFalse.UpdateActuator()");
+                        TrainDriveOut_Machine = State.CheckArrivedAtFullTrack_2;
+                        m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveOut TrainDriveOut_Machine = State.CheckArrivedAtFullTrack_2");
+                    }
+                    break;
+
+                case State.CheckArrivedAtFullTrack_2:
+                    if (uControllerReady == true)   // Check if Occ7OnFalse
                     {
                         TrainDriveOut_Machine = State.CheckTrainLeftTrack7;
                         m_FYAppLog.StoreText("FYAppTrainDrive().TrainDriveOut TrainDriveOut_Machine = State.CheckTrainLeftTrack7");

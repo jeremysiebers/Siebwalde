@@ -106,7 +106,7 @@ namespace Siebwalde_Application
                 FYIOHandleBOT.FYApp.FYFORM.SimMode(FYSimulatorActive);
             }
             FYIOHandleTOP.Start(FYSimulatorActive);   // use these to disable this layer of the fiddle yard in order to do easy debugging by commenting this line
-            //FYIOHandleBOT.Start(FYSimulatorActive);   // use these to disable this layer of the fiddle yard in order to do easy debugging by commenting this line
+            FYIOHandleBOT.Start(FYSimulatorActive);   // use these to disable this layer of the fiddle yard in order to do easy debugging by commenting this line
             m_iMain.SiebwaldeAppLogging("FYCTRL: Fiddle Yard uController Reset.");      
         }
 

@@ -153,7 +153,7 @@ namespace Siebwalde_Application
                         m_FYAppLog.StoreText("FYAppInit.Init() m_FYAppVar.FYHomed.BoolVariable == false");
                         State_Machine = State.FYHOME;
                         m_FYAppLog.StoreText("FYAppInit.Init() State_Machine = State.FYHOME");
-                        m_FYAppVar.FiddleYardTrackNotAligned.UpdateMessage();
+                        m_FYAppVar.FiddleYardNotHomed.UpdateMessage();
                     }
                     else if (m_FYAppVar.GetTrackNr() > 0 && m_FYAppVar.bF10 && (m_FYAppVar.bBlock6 || m_FYAppVar.bF12 || m_FYAppVar.bF13))
                     {
