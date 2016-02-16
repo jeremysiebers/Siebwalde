@@ -208,11 +208,10 @@ namespace Siebwalde_Application
                 /*---------------------------------------CHECK FOR Type of command -----------------------------------------------------------------------------------------------------------------
                 */
                 case State.Idle:                    
-                    if (kicksimulator == "MIP50xAbs_Pos")
+                    if (kicksimulator == "MIP50xAbs_Pos" && val == GO)
                     {
                         FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.MIP50xAbs_Pos");
-                        State_Machine = State.MIP50xAbs_Pos;
-                        FYSimVar.MIP50Cnt = 0; // Reset this variable
+                        State_Machine = State.MIP50xAbs_Pos;                        
                     }
                     else if (kicksimulator == "MIP50xHomexAxis" && val == GO)
                     {
@@ -271,26 +270,16 @@ namespace Siebwalde_Application
                 */
 
                 case State.MIP50xAbs_Pos:
-                    if (kicksimulator == "MIP50xAbs_Pos" && val != GO)
-                    {
-                        FYSimVar.MIP50xAbs_Pos[FYSimVar.MIP50Cnt] = val; // first character (A) is lost due to switching from state.
-                        FYSimVar.MIP50Cnt++;
-                    }
-                    else if (kicksimulator == "MIP50xAbs_Pos" && val == GO)
-                    {
-                        FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.Idle"); // To do--> filter out new track number, kick old move program, after program clear FYSimVar.MIP50xAbs_Pos[x]!!!!!!
-                        State_Machine = State.Idle;
-
-                        int Number = 0;
-                        for (int i = 2; i < FYSimVar.MIP50Cnt; i++) // Start with LSB
-                        {
-                            Number += FYSimVar.MIP50xAbs_Pos[i] * Convert.ToInt32(Math.Pow(10, FYSimVar.MIP50xAbs_Pos.Length - i - 3));
-                        }
-                        FYSimVar.MIP50Cnt = 0;
-                        Number = ConvertAbsoluteNo2TrackNo(Number);
-                        FYMove.FiddleMultipleMove("Go" + Convert.ToString(Number));                                         
+                    if (kicksimulator == "MIP50xDataxToxSend")
+                    {                        
+                        FYSimVar.MIP50xReceivedxCmdxStringxTemp = FYSimVar.MIP50xReceivedxCmdxStringxTemp.Split('x')[1];
+                        
+                        UInt32 Number = Convert.ToUInt32(FYSimVar.MIP50xReceivedxCmdxStringxTemp);                      // To UInt32 because otherwise the number is recognized as large positive number
+                        FYSimVar.MIP50xReceivedxCmdxArrayxCounterxTemp = 0;
+                        Number = Convert.ToUInt32(ConvertAbsoluteNo2TrackNo(Number));
+                        FYMove.FiddleMultipleMove("Go" + Convert.ToString(Number));
                         FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.FiddleMultipleMove");
-                        State_Machine = State.FiddleMultipleMove;                                        
+                        State_Machine = State.FiddleMultipleMove;
                     }
                     break;
 
@@ -558,26 +547,30 @@ namespace Siebwalde_Application
          *  
          */
         /*#--------------------------------------------------------------------------#*/
-        private int[] TrackForward = new int[12] { 0, 0, 42800, 85600, 128400, 171200, 214000, 256800, 299600, 342400, 385200, 428000 };// New track coordinates forward movement 1 --> 11 to be moved and get from Application Variables 
+        private UInt32[] TrackForward = new UInt32[12] { 0, 0, 42800, 85600, 128400, 171200, 214000, 256800, 299600, 342400, 385200, 428000 };// New track coordinates forward movement 1 --> 11 to be moved and get from Application Variables 
 
         public string ConvertTrackNo2AbsoluteNo(int TrackNo)
         {
             return (Convert.ToString(TrackForward[TrackNo]));
         }
 
-        public int ConvertAbsoluteNo2TrackNo(int AbsoluteNo)
+        public int ConvertAbsoluteNo2TrackNo(UInt32 AbsoluteNo)
         {
-            int _Return = Array.IndexOf(TrackForward, AbsoluteNo);
+            int _Return = 0;
+            _Return = Array.IndexOf(TrackForward, Convert.ToUInt32(AbsoluteNo));    // when not negative give track number back when track movement is forward it will return valid track number            
 
-            if (_Return == -1)
+            if (_Return == -1)                                                      // When returned track number is -1, a backward motion is probably used
             {
-                return (Array.IndexOf(TrackForward, AbsoluteNo + 700));
-            }
-            else
-            {
-                return (_Return);
+                _Return = (Array.IndexOf(TrackForward, AbsoluteNo + 700));          // so add 700 to the number
+                if (_Return == 0)                                                   // If 0 is returned, track 1 is ment..
+                {
+                    _Return = 1;                                                    // return then track 1 for the FYMove.FiddleMultipleMove("Go" + Convert.ToString(Number)) which accpets only numbers 1 to 11.
+                }
             }
 
+            
+
+            return (_Return);
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -688,25 +681,33 @@ namespace Siebwalde_Application
         public void CommandToSend(string name, string cmd)
         {
             int val = 0;
-            string CmdNo2String;
-           
+                       
             if (cmd == "pG\r"|| cmd == "qG\r")
             {
                 val = GO;
+                FYSimVar.MIP50xReceivedxCmdxArrayxCounterxTemp = FYSimVar.MIP50xReceivedxCmdxArrayxCounter;     // Store counter value in temp counter
+                FYSimVar.MIP50xReceivedxCmdxStringxTemp = FYSimVar.MIP50xReceivedxCmdxString;
+                FYSimVar.MIP50xReceivedxCmdxArrayxCounter = 0;                                                  // Reset FYSimVar.MIP50xReceivedxCmdxArrayxCounter for next command
+                FYSimVar.MIP50xReceivedxCmdxString = "";
             }  
-            else
+            else if (cmd[1] != '\r' && cmd[1] != '\n')          // Discard carriage return and line feed
             {
-                if (char.IsNumber(cmd[1]))                      // Check if send character is a number
-                {
-                    CmdNo2String = Convert.ToString(cmd[1]);    // Convert the number character only to string
-                    //Int32.TryParse(CmdNo2String, 16, out val);      // parse string number only to int
-                    val = Convert.ToInt32(CmdNo2String, 16);
-                }
-                else
-                {
-                    val = Convert.ToInt32(cmd[1]);  // if string is number, this is converted to dec number in int.
-                }
-            }          
+
+                FYSimVar.MIP50xReceivedxCmdxString = string.Concat(FYSimVar.MIP50xReceivedxCmdxString, cmd[1]);
+                FYSimVar.MIP50xReceivedxCmdxArrayxCounter++;
+
+                //if (char.IsNumber(cmd[1]))                      // Check if send character is a number
+                //{
+                //    CmdNo2String = Convert.ToString(cmd[1]);    // Convert the number character only to string
+                //    //Int32.TryParse(CmdString, 16, out val);      // parse string number only to int
+                //    FYSimVar.MIP50xReceivedxCmdxArray[FYSimVar.MIP50xReceivedxCmdxArrayxCounter] = Convert.ToInt32(CmdString, 16);  // if string is number, this is converted to dec number in int.
+                //}
+                //else
+                //{
+                //    FYSimVar.MIP50xReceivedxCmdxArray[FYSimVar.MIP50xReceivedxCmdxArrayxCounter] = cmd[1];// Convert.ToInt32(cmd[1]); // else store ascii hex value
+                //}
+                //FYSimVar.MIP50xReceivedxCmdxArrayxCounter++;
+            }
             SimulatorUpdate(name, val);
         }
 

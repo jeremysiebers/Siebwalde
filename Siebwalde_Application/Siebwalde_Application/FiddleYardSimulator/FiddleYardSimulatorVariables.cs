@@ -84,9 +84,13 @@ namespace Siebwalde_Application
 
         public List<Msg> list = new List<Msg>();
 
-        public int MIP50Cnt = 0;
-        public int MIP50Cnt2 = 0;
-        public int[] MIP50xAbs_Pos = new int[10]; // used to catch absolute move number
+        public int MIP50Cnt = 0;                                // Used as universal switch variable
+        public int MIP50Cnt2 = 0;                               // Used as second universal counter
+        public int MIP50xReceivedxCmdxArrayxCounter = 0;        // Used for receiving and stoing received command/data into MIP50xReceivedxCmdxArray
+        public int MIP50xReceivedxCmdxArrayxCounterxTemp = 0;   // Used for storing temp MIP50Cnt3
+        public int[] MIP50xReceivedxCmdxArray = new int[20];    // used to store received cmd into array
+        public string MIP50xReceivedxCmdxString = "";
+        public string MIP50xReceivedxCmdxStringxTemp = "";
 
         /*#--------------------------------------------------------------------------#*/
         /*  Description: FiddleYardVariables constructor
@@ -189,10 +193,14 @@ namespace Siebwalde_Application
 
             MIP50Cnt = 0;
             MIP50Cnt2 = 0;
+            MIP50xReceivedxCmdxArrayxCounter = 0;
+            MIP50xReceivedxCmdxArrayxCounterxTemp = 0;
+            MIP50xReceivedxCmdxString = "";
+            MIP50xReceivedxCmdxStringxTemp = "";
 
-            for (int i = 0; i < MIP50xAbs_Pos.Length; i++)
+            for (int i = 0; i < MIP50xReceivedxCmdxArray.Length; i++)
             {
-                MIP50xAbs_Pos[i] = 0;
+                MIP50xReceivedxCmdxArray[i] = 0;
             }
         }
 

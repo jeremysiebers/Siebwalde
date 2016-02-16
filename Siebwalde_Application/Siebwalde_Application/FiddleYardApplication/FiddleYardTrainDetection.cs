@@ -169,8 +169,10 @@ namespace Siebwalde_Application
                     SubProgramReturnVal = m_FYMIP50.MIP50xMOVE();
                     if (SubProgramReturnVal == "Finished")
                     {
+                        m_FYMIP50.MIP50xMOVExCALC(11);
+                        m_FYAppLog.StoreText("FYTDT.Traindetection() m_FYMIP50.MIP50xMOVExCALC(11)");
                         State_Machine = State.TDT;                 // When finished moving, execute TrainDetection TDT
-                        m_FYAppLog.StoreText("FYTDT.Traindetection() State_Machine = State.TDT2");
+                        m_FYAppLog.StoreText("FYTDT.Traindetection() State_Machine = State.TDT");
                         m_FYAppVar.TrainDetectionStarted.UpdateMessage();                           // Set message on Form
                     }
                     break;
@@ -178,8 +180,10 @@ namespace Siebwalde_Application
                     SubProgramReturnVal = m_FYMIP50.MIP50xMOVE();
                     if (SubProgramReturnVal == "Finished")
                     {
+                        m_FYMIP50.MIP50xMOVExCALC(1);
+                        m_FYAppLog.StoreText("FYTDT.Traindetection() m_FYMIP50.MIP50xMOVExCALC(1)");
                         State_Machine = State.TDT;
-                        m_FYAppLog.StoreText("FYTDT.Traindetection() State_Machine = State.TDT2");
+                        m_FYAppLog.StoreText("FYTDT.Traindetection() State_Machine = State.TDT");
                         m_FYAppVar.TrainDetectionStarted.UpdateMessage();                           // Set message on Form
                     }
                     break;

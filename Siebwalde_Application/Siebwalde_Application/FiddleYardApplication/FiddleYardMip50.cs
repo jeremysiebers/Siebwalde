@@ -367,7 +367,7 @@ namespace Siebwalde_Application
             FiddleYardMIP50Logging.StoreText("---------------------------------------------------------------------");
             MIP50xReadxPosition();            
             Next_Track = New_Track;            
-            if (New_Track < 12)
+            if (New_Track < 12)				// Not track++ or track-- button used
             {
                 Current_Track = New_Track; // Already store track te become.(memory when next time track++ or track-- is used)                
                 FiddleYardMIP50Logging.StoreText("MIP50 Start Absolute Move to track " + Convert.ToString(Next_Track));
@@ -446,12 +446,21 @@ namespace Siebwalde_Application
                             if (TrackForward[Next_Track] > ActualPosition)
                             {
                                 Next_Track = TrackForward[Next_Track];
+                                MIP50TransmitData = 2;
                             }
                             else if (TrackForward[Next_Track] < ActualPosition)
                             {
                                 Next_Track = TrackForward[Next_Track] - TrackBackwardOffset[Next_Track];
+                                MIP50TransmitData = 2;
                             }
-                            MIP50TransmitData = 2;
+                            else
+                            {
+                                MIP50TransmitData = 0;
+                                ActualPositionUpdated = false;                                          // Set local bool to false for future next update-and-check
+                                FiddleYardMIP50Logging.StoreText("MIP50 Absolute Move Routine Finished.");
+                                _Return = "Finished";
+                            }
+                            
                         }
                         else
                         {

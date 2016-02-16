@@ -474,14 +474,17 @@ namespace Siebwalde_Application
                     break;
 
                 case State.TrainDetection:
-                    SubProgramReturnVal = FYTDT.Traindetection();
-                    if (SubProgramReturnVal == "Finished")
+                    if (kickapplication == "TimerEvent") // Only update on 1 thread: TimerEvent.
                     {
-                        FiddleYardApplicationLogging.StoreText("FYAppInit.Init() OR CMD FYTDT.TRAINDETECTION() == Finished");
-                        FYAppVar.Couple.UpdateActuator();
-                        FiddleYardApplicationLogging.StoreText("FYApp FYTDT.Traindetection() FYAppVar.Couple.UpdateActuator()");
-                        State_Machine = State.Idle;
-                        FiddleYardApplicationLogging.StoreText("FYAppInit.Init() OR CMD State_Machine = State.Idle");                        
+                        SubProgramReturnVal = FYTDT.Traindetection();
+                        if (SubProgramReturnVal == "Finished")
+                        {
+                            FiddleYardApplicationLogging.StoreText("FYAppInit.Init() OR CMD FYTDT.TRAINDETECTION() == Finished");
+                            FYAppVar.Couple.UpdateActuator();
+                            FiddleYardApplicationLogging.StoreText("FYApp FYTDT.Traindetection() FYAppVar.Couple.UpdateActuator()");
+                            State_Machine = State.Idle;
+                            FiddleYardApplicationLogging.StoreText("FYAppInit.Init() OR CMD State_Machine = State.Idle");
+                        }
                     }
                     break;
 
