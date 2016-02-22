@@ -198,7 +198,7 @@ namespace Siebwalde_Application
                 FYSimulator.NewData += HandleNewData;                
             }
 
-            ActuatorCmd("Reset", Layer + "J\r");            // Reset Fiddle Yard layer to reset target in order to sync C# application and C embedded software
+            //ActuatorCmd("Reset", Layer + "J\r");            // Reset Fiddle Yard layer to reset target in order to sync C# application and C embedded software --> not required due to all intelligence to FY application
             System.Threading.Thread.Sleep(50);              // Add aditional wait time for the target to process the reset command
             
         }

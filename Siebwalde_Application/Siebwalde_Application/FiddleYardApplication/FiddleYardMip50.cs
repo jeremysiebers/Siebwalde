@@ -457,7 +457,7 @@ namespace Siebwalde_Application
                             {
                                 MIP50TransmitData = 0;
                                 ActualPositionUpdated = false;                                          // Set local bool to false for future next update-and-check
-                                FiddleYardMIP50Logging.StoreText("MIP50 Absolute Move Routine Finished.");
+                                FiddleYardMIP50Logging.StoreText("MIP50 Absolute Move Routine Finished, TrackForward[Next_Track] == ActualPosition.");
                                 _Return = "Finished";
                             }
                             

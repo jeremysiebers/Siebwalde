@@ -207,10 +207,12 @@ namespace Siebwalde_Application
                     if (CL10Heart == true && F10 == true && m_FYAppVar.GetTrackNr() > 0)                        // While checking if heartbit is true and F10 is true and GetTracknr() is 1 <> 11
                     {
                         m_FYAppVar.UpdateTrainsOnFY(FiddleYardTdtTrackName(m_FYAppVar.GetTrackNr()), 1, "");    // If true then update UpdateTrainsOnFY[] with 1
+                        System.Diagnostics.Debug.Write("Train on Track: " + m_FYAppVar.GetTrackNr() + Environment.NewLine);
                     }
                     else if (CL10Heart == true && F10 == false && m_FYAppVar.GetTrackNr() > 0)                  // While checking if heartbit is true and F10 is true and GetTracknr() is 1 <> 11
                     {
                         m_FYAppVar.UpdateTrainsOnFY(FiddleYardTdtTrackName(m_FYAppVar.GetTrackNr()), 0, "");    // If false then update UpdateTrainsOnFY[] with 0
+                        System.Diagnostics.Debug.Write("No Train on Track: " + m_FYAppVar.GetTrackNr() + Environment.NewLine);
                     }
                     break;
                     

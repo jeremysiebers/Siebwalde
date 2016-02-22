@@ -62,17 +62,17 @@ namespace Siebwalde_Application
         public ActuatorUpdater FiddleOneRight;
         public ActuatorUpdater Couple;
         public ActuatorUpdater Uncouple;
-        public ActuatorUpdater FiddleGo1;
-        public ActuatorUpdater FiddleGo2;
-        public ActuatorUpdater FiddleGo3;
-        public ActuatorUpdater FiddleGo4;
-        public ActuatorUpdater FiddleGo5;
-        public ActuatorUpdater FiddleGo6;
-        public ActuatorUpdater FiddleGo7;
-        public ActuatorUpdater FiddleGo8;
-        public ActuatorUpdater FiddleGo9;
-        public ActuatorUpdater FiddleGo10;
-        public ActuatorUpdater FiddleGo11;
+        //public ActuatorUpdater FiddleGo1;
+        //public ActuatorUpdater FiddleGo2;
+        //public ActuatorUpdater FiddleGo3;
+        //public ActuatorUpdater FiddleGo4;
+        //public ActuatorUpdater FiddleGo5;
+        //public ActuatorUpdater FiddleGo6;
+        //public ActuatorUpdater FiddleGo7;
+        //public ActuatorUpdater FiddleGo8;
+        //public ActuatorUpdater FiddleGo9;
+        //public ActuatorUpdater FiddleGo10;
+        //public ActuatorUpdater FiddleGo11;
         public ActuatorUpdater TrainDetect;
         public ActuatorUpdater FYStart;
         public ActuatorUpdater FYStop;
@@ -230,17 +230,17 @@ namespace Siebwalde_Application
             FiddleOneRight = new ActuatorUpdater();
             Couple = new ActuatorUpdater();
             Uncouple = new ActuatorUpdater();
-            FiddleGo1 = new ActuatorUpdater();
-            FiddleGo2 = new ActuatorUpdater();
-            FiddleGo3 = new ActuatorUpdater();
-            FiddleGo4 = new ActuatorUpdater();
-            FiddleGo5 = new ActuatorUpdater();
-            FiddleGo6 = new ActuatorUpdater();
-            FiddleGo7 = new ActuatorUpdater();
-            FiddleGo8 = new ActuatorUpdater();
-            FiddleGo9 = new ActuatorUpdater();
-            FiddleGo10 = new ActuatorUpdater();
-            FiddleGo11 = new ActuatorUpdater();
+            //FiddleGo1 = new ActuatorUpdater();
+            //FiddleGo2 = new ActuatorUpdater();
+            //FiddleGo3 = new ActuatorUpdater();
+            //FiddleGo4 = new ActuatorUpdater();
+            //FiddleGo5 = new ActuatorUpdater();
+            //FiddleGo6 = new ActuatorUpdater();
+            //FiddleGo7 = new ActuatorUpdater();
+            //FiddleGo8 = new ActuatorUpdater();
+            //FiddleGo9 = new ActuatorUpdater();
+            //FiddleGo10 = new ActuatorUpdater();
+            //FiddleGo11 = new ActuatorUpdater();
             TrainDetect = new ActuatorUpdater();
             FYStart = new ActuatorUpdater();
             FYStop = new ActuatorUpdater();
@@ -506,47 +506,47 @@ namespace Siebwalde_Application
          *  Notes      : 
          */
         /*#--------------------------------------------------------------------------#*/
-        public void FiddleGo(int TrackNo)
-        {
-            switch (TrackNo)
-            {
-                case 1: FiddleGo1.UpdateActuator();
-                    break;
+        //public void FiddleGo(int TrackNo)
+        //{
+        //    switch (TrackNo)
+        //    {
+        //        case 1: FiddleGo1.UpdateActuator();
+        //            break;
 
-                case 2: FiddleGo2.UpdateActuator();
-                    break;
+        //        case 2: FiddleGo2.UpdateActuator();
+        //            break;
 
-                case 3: FiddleGo3.UpdateActuator();
-                    break;
+        //        case 3: FiddleGo3.UpdateActuator();
+        //            break;
 
-                case 4: FiddleGo4.UpdateActuator();
-                    break;
+        //        case 4: FiddleGo4.UpdateActuator();
+        //            break;
 
-                case 5: FiddleGo5.UpdateActuator();
-                    break;
+        //        case 5: FiddleGo5.UpdateActuator();
+        //            break;
 
-                case 6: FiddleGo6.UpdateActuator();
-                    break;
+        //        case 6: FiddleGo6.UpdateActuator();
+        //            break;
 
-                case 7: FiddleGo7.UpdateActuator();
-                    break;
+        //        case 7: FiddleGo7.UpdateActuator();
+        //            break;
 
-                case 8: FiddleGo8.UpdateActuator();
-                    break;
+        //        case 8: FiddleGo8.UpdateActuator();
+        //            break;
 
-                case 9: FiddleGo9.UpdateActuator();
-                    break;
+        //        case 9: FiddleGo9.UpdateActuator();
+        //            break;
 
-                case 10: FiddleGo10.UpdateActuator();
-                    break;
+        //        case 10: FiddleGo10.UpdateActuator();
+        //            break;
 
-                case 11: FiddleGo11.UpdateActuator();
-                    break;
+        //        case 11: FiddleGo11.UpdateActuator();
+        //            break;
 
-                default : break;
+        //        default : break;
                                     
-            }
-        }
+        //    }
+        //}
 
         /*#--------------------------------------------------------------------------#*/
         /*  Description: SetLedIndicator updates from target/simulator

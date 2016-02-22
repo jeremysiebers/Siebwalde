@@ -78,7 +78,8 @@ namespace Siebwalde_Application
         public Msg TrainOn5B = new Msg();
         public Msg TrainOn8A = new Msg();
         public Msg FiddleYardReset = new Msg();
-        public Msg uControllerReady = new Msg();  
+        public Msg uControllerReady = new Msg();
+        public Msg msgTrackPower15V = new Msg();
 
         public SensorUpdater TargetAlive;
 
@@ -122,6 +123,7 @@ namespace Siebwalde_Application
             //list.Add(TrainOn8A);
             list.Add(FiddleYardReset);
             list.Add(uControllerReady);
+            //list.Add(msgTrackPower15V);
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -187,9 +189,11 @@ namespace Siebwalde_Application
             TrainOn8A.Mssg = false;
             TrainOn8A.Data = 0x07;
             FiddleYardReset.Mssg = false;
-            FiddleYardReset.Data = 0x08;
+            FiddleYardReset.Data = 0x01;
             uControllerReady.Mssg = false;
-            uControllerReady.Data = 0x0A;
+            uControllerReady.Data = 0x02;
+            msgTrackPower15V.Mssg = TrackPower15V.Value;
+            msgTrackPower15V.Data = 0x03;
 
             MIP50Cnt = 0;
             MIP50Cnt2 = 0;
@@ -202,6 +206,8 @@ namespace Siebwalde_Application
             {
                 MIP50xReceivedxCmdxArray[i] = 0;
             }
+
+            
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -225,44 +231,54 @@ namespace Siebwalde_Application
             if (Variable == "Occ5BOnTrue")
             {
                 Block5BIn.Value = true;
+                uControllerReady.Mssg = true;
             }
             else if (Variable == "Occ5BOnFalse")
             {
                 Block5BIn.Value = false;
+                uControllerReady.Mssg = true;
             }
             else if (Variable == "Occ6OnTrue")
             {
                 Block6In.Value = true;
+                uControllerReady.Mssg = true;
             }
             else if (Variable == "Occ6OnFalse")
             {
                 Block6In.Value = false;
+                uControllerReady.Mssg = true;
             }
             else if (Variable == "Occ7OnTrue")
             {
                 Block7In.Value = true;
+                uControllerReady.Mssg = true;
             }
             else if (Variable == "Occ7OnFalse")
             {
                 Block7In.Value = false;
+                uControllerReady.Mssg = true;
             }
             else if (Variable == "Couple")
             {
                 TrackPower.Value = true;
                 Resistor.Value = false;
+                uControllerReady.Mssg = true;
             }
             else if (Variable == "Uncouple")
             {
                 TrackPower.Value = false;
                 Resistor.Value = true;
+                uControllerReady.Mssg = true;
             }
             else if (Variable == "MIP50xENABLE")
             {
                 M10.Value = true;
+                uControllerReady.Mssg = true;
             }
             else if (Variable == "MIP50xDISABLE")
             {
                 M10.Value = false;
+                uControllerReady.Mssg = true;
             }
         }
 
@@ -337,9 +353,9 @@ namespace Siebwalde_Application
                 _data = _data << 1;
                 _data |= Convert.ToByte(Resistor.Value);
                 _data = _data << 1;
-                _data |= Convert.ToByte(Track1.Value);
+                _data |= 0; // Convert.ToByte(Track1.Value);
                 _data = _data << 1;
-                _data |= Convert.ToByte(Track2.Value);
+                _data |= 0; // Convert.ToByte(Track2.Value);
                 _data = _data << 1;
                 data[1] = Convert.ToByte(_data);
             }
@@ -347,19 +363,19 @@ namespace Siebwalde_Application
             {
                 _group = Encoding.ASCII.GetBytes(group);
                 data[0] = _group[0];
-                _data |= Convert.ToByte(Track4.Value);
+                _data |= 0; // Convert.ToByte(Track4.Value);
                 _data = _data << 1;
-                _data |= Convert.ToByte(Track5.Value);
+                _data |= 0; // Convert.ToByte(Track5.Value);
                 _data = _data << 1;
-                _data |= Convert.ToByte(Track6.Value);
+                _data |= 0; // Convert.ToByte(Track6.Value);
                 _data = _data << 1;
-                _data |= Convert.ToByte(Track7.Value);
+                _data |= 0; // Convert.ToByte(Track7.Value);
                 _data = _data << 1;
-                _data |= Convert.ToByte(Track8.Value);
+                _data |= 0; // Convert.ToByte(Track8.Value);
                 _data = _data << 1;
-                _data |= Convert.ToByte(Track9.Value);
+                _data |= 0; // Convert.ToByte(Track9.Value);
                 _data = _data << 1;
-                _data |= Convert.ToByte(Track10.Value);
+                _data |= 0; // Convert.ToByte(Track10.Value);
                 _data = _data << 1;
                 data[1] = Convert.ToByte(_data);
             }
@@ -377,13 +393,13 @@ namespace Siebwalde_Application
                 _data = _data << 1;
                 _data |= Convert.ToByte(M10.Value);
                 _data = _data << 1;
-                _data |= Convert.ToByte(Track3.Value);
+                _data |= 0; // Convert.ToByte(Track3.Value);
                 _data = _data << 1;
-                _data |= Convert.ToByte(Track11.Value);
+                _data |= 0; // Convert.ToByte(Track11.Value);
                 _data = _data << 1;
                 data[1] = Convert.ToByte(_data);
             }
-            else if (("H" == group || "U" == group) && MIP50DataReturn != '\0')
+            else if (("H" == group || "U" == group) && MIP50DataReturn != '\0') // check if data is already has been sent
             {
                 _group = Encoding.ASCII.GetBytes(group);
                 data[0] = _group[0];

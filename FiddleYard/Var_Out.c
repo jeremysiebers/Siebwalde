@@ -175,7 +175,8 @@ void Var_Out_Switcher(unsigned  char ASL)
 							VAR_OUT_FY[ASL].Send_Var_Out_Old[VAR_OUT_FY[ASL].Var_Out][0] = Send_Var_Out[0];	
 							VAR_OUT_FY[ASL].Send_Var_Out_Old[VAR_OUT_FY[ASL].Var_Out][1] = Send_Var_Out[1];
 							Send_Diag_Comm(Send_Var_Out);
-							VAR_OUT_FY[ASL].Var_Out = 3;
+							//VAR_OUT_FY[ASL].Var_Out = 3; this case is empty tracks removed
+							VAR_OUT_FY[ASL].Var_Out = 4;
 							break;
 					
 			case	3	:	if (ASL == TOP)

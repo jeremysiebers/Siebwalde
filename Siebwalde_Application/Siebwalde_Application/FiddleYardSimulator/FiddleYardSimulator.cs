@@ -30,8 +30,8 @@ namespace Siebwalde_Application
         public FiddleYardIOHandleVariables m_FYIOHandleVar;             // connect variable to connect to FYIOH class for defined variables
         public Action<byte[]> NewData;
         private string m_instance = null;
-        public FiddleYardSimMove FYMove;
-        public FiddleYardSimTrainDetect FYTrDt;
+        public FiddleYardSimMove FYSimMove;
+        public FiddleYardSimTrainDetect FYSimTrDt;
         private Log2LoggingFile FiddleYardSimulatorLogging;
 
         private enum State { Idle, Reset, MIP50xAbs_Pos, MIP50xHomexAxis, MIP50xSetxPositioningxVelxDefault, MIP50xSetxAcceleration, MIP50xClearxError, MIP50xActivatexPosxReg, MIP50xDeactivatexPosxReg,
@@ -98,8 +98,8 @@ namespace Siebwalde_Application
             }
 
             FYSimVar = new FiddleYardSimulatorVariables();            
-            FYMove = new FiddleYardSimMove(this, FiddleYardSimulatorLogging, FYSimVar);
-            FYTrDt = new FiddleYardSimTrainDetect(this, FiddleYardSimulatorLogging, FYSimVar, FYMove);
+            FYSimMove = new FiddleYardSimMove(this, FiddleYardSimulatorLogging, FYSimVar);
+            FYSimTrDt = new FiddleYardSimTrainDetect(this, FiddleYardSimulatorLogging, FYSimVar, FYSimMove);
 
             for (int i = 1; i <= NoOfSimTrains; i++)
             {
@@ -108,15 +108,15 @@ namespace Siebwalde_Application
                 current.FYSimtrainInstance = current.ClassName + i.ToString(fmt);
                 if (TrainsOnFYSim[i] == 1)
                 {
-                    current.SimTrainLocation = TrackNoToTrackString(i);
+                    current.SimTrainLocation = TrackNoToTrackString(i); // on FY OR Block 5B/7/8A OR buffer
                 }
                 else
                 {
-                    current.SimTrainLocation = TrackNoToTrackString(0);
+                    current.SimTrainLocation = TrackNoToTrackString(0); // Always in buffer in this case
                 }
                 FYSimTrains.Add(current);
             }
-            FYSimVar.TrackNo.Count = 1;
+            FYSimVar.TrackNo.Count = 1;            
 
             Sensor Sns_FYSimSpeedSetting = new Sensor("FYSimSpeedSetting", " FYSimSpeedSetting ", 0, (name, val, log) => SimulatorSettings(name, val, log)); // initialize and subscribe sensors
             Siebwalde_Application.Properties.Settings.Default.FYSimSpeedSetting.Attach(Sns_FYSimSpeedSetting);
@@ -145,7 +145,9 @@ namespace Siebwalde_Application
         {
             FiddleYardSimulatorLogging.StoreText("### Fiddle Yard Simulator started ###");
             FYSimVar.Reset();
-            FiddleYardSimulatorLogging.StoreText("FYSim Simulator Reset()");            
+            FiddleYardSimulatorLogging.StoreText("FYSim Simulator Reset()");
+            UpdateSimArrayToAppArray(); // Update track variables if a train is present or not  
+            FiddleYardSimulatorLogging.StoreText("FYSim Simulator UpdateSimArrayToAppArray()");
 
             aTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
             // Set the Interval to [x] miliseconds.
@@ -155,7 +157,7 @@ namespace Siebwalde_Application
             aTimer.Enabled = true;
 
             FiddleYardSimulatorLogging.StoreText("FYSim Simulator Timer started: aTimer.Interval = " + Convert.ToString(aTimer.Interval));
-            FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.Idle from Start()");
+            FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.Idle from Start()");            
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -165,7 +167,7 @@ namespace Siebwalde_Application
          * 
          *  Input(s)   : 
          *
-         *  Output(s)  : timer timed event
+         *  Output(s)  : 
          *
          *  Returns    :
          *
@@ -256,13 +258,12 @@ namespace Siebwalde_Application
                     }
                     else if (kicksimulator != "TargetAlive")
                     {
-                        FYSimVar.IdleSetVariable(kicksimulator);                                                     // Only when a variable needs to be set it is done directly (manualy sending commands to target/simulator from FORM
-                        //FiddleYardSimulatorLogging.StoreText("FYSim IdleSetVariable(" + kicksimulator + ")");
-                        FYSimVar.uControllerReady.Mssg = true;
+                        FYSimVar.IdleSetVariable(kicksimulator); // Only when a variable needs to be set it is done directly (manualy sending commands to target/simulator from FORM
+                        
                     }
                     else if (kicksimulator == "TargetAlive")
                     {
-                        FYSimVar.TargetAlive.UpdateSensorValue(1, true);                                             // Update all clients of TargetAlive (SimTrains)
+                        FYSimVar.TargetAlive.UpdateSensorValue(1, true);  // Update all clients of TargetAlive (SimTrains)
                     }
                     break;
 
@@ -277,19 +278,22 @@ namespace Siebwalde_Application
                         UInt32 Number = Convert.ToUInt32(FYSimVar.MIP50xReceivedxCmdxStringxTemp);                      // To UInt32 because otherwise the number is recognized as large positive number
                         FYSimVar.MIP50xReceivedxCmdxArrayxCounterxTemp = 0;
                         Number = Convert.ToUInt32(ConvertAbsoluteNo2TrackNo(Number));
-                        FYMove.FiddleMultipleMove("Go" + Convert.ToString(Number));
+                        FYSimMove.FiddleMultipleMove("Go" + Convert.ToString(Number));
                         FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.FiddleMultipleMove");
                         State_Machine = State.FiddleMultipleMove;
                     }
                     break;
 
                 case State.FiddleMultipleMove:
-                    if (true == FYMove.FiddleMultipleMove(kicksimulator))
+                    if (kicksimulator == "MIP50xDataxToxSend") // also here only 1 thread from timer event
                     {
-                        FiddleYardSimulatorLogging.StoreText("FYSim true == FYMove.FiddleMultipleMove(kicksimulator)");
-                        State_Machine = State.MIP50xSetxPositioningxVelxDefault;
-                        FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.MIP50xSetxPositioningxVelxDefault from State.FiddleMultipleMove"); // to sen X0 after move
-                        FYSimVar.uControllerReady.Mssg = true;
+                        if (true == FYSimMove.FiddleMultipleMove(kicksimulator))
+                        {
+                            FiddleYardSimulatorLogging.StoreText("FYSim true == FYMove.FiddleMultipleMove(kicksimulator)");
+                            State_Machine = State.MIP50xSetxPositioningxVelxDefault;
+                            FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.MIP50xSetxPositioningxVelxDefault from State.FiddleMultipleMove"); // to sen X0 after move
+                            FYSimVar.uControllerReady.Mssg = true;
+                        }
                     }
                     break;
 
@@ -313,7 +317,11 @@ namespace Siebwalde_Application
                             case 3:
                                 FYSimVar.MIP50DataReturn = 0x30;
                                 FYSimVar.MIP50Cnt = 0;
-                                FYSimVar.Track1.Value = true;   // After homing Track 1 is active
+                                FYSimVar.TrackNo.Count = 1;   // After homing Track 1 is active
+                                if (FYSimVar.Track1.Value == true) // Check if track 1 is occupied, prep for traindetection etc.
+                                {
+                                    FYSimVar.F10.Value = true;
+                                }
                                 FiddleYardSimulatorLogging.StoreText("FYSim State_Machine = State.Idle");
                                 State_Machine = State.Idle;
                                 break;
@@ -473,7 +481,7 @@ namespace Siebwalde_Application
                                 break;
 
                             case 2:
-                                if (FYSimVar.MIP50Cnt2 != MIP50xM21xHeader.Length)
+                                if (FYSimVar.MIP50Cnt2 != MIP50xM21xHeader.Length)      // Send message header
                                 {
                                     FYSimVar.MIP50DataReturn = Convert.ToInt16(MIP50xM21xHeader[FYSimVar.MIP50Cnt2]);
                                     FYSimVar.MIP50Cnt2++;
@@ -692,21 +700,8 @@ namespace Siebwalde_Application
             }  
             else if (cmd[1] != '\r' && cmd[1] != '\n')          // Discard carriage return and line feed
             {
-
                 FYSimVar.MIP50xReceivedxCmdxString = string.Concat(FYSimVar.MIP50xReceivedxCmdxString, cmd[1]);
-                FYSimVar.MIP50xReceivedxCmdxArrayxCounter++;
-
-                //if (char.IsNumber(cmd[1]))                      // Check if send character is a number
-                //{
-                //    CmdNo2String = Convert.ToString(cmd[1]);    // Convert the number character only to string
-                //    //Int32.TryParse(CmdString, 16, out val);      // parse string number only to int
-                //    FYSimVar.MIP50xReceivedxCmdxArray[FYSimVar.MIP50xReceivedxCmdxArrayxCounter] = Convert.ToInt32(CmdString, 16);  // if string is number, this is converted to dec number in int.
-                //}
-                //else
-                //{
-                //    FYSimVar.MIP50xReceivedxCmdxArray[FYSimVar.MIP50xReceivedxCmdxArrayxCounter] = cmd[1];// Convert.ToInt32(cmd[1]); // else store ascii hex value
-                //}
-                //FYSimVar.MIP50xReceivedxCmdxArrayxCounter++;
+                FYSimVar.MIP50xReceivedxCmdxArrayxCounter++;              
             }
             SimulatorUpdate(name, val);
         }
@@ -778,7 +773,7 @@ namespace Siebwalde_Application
                 NewData(FYSimVar.CreateData("M"));
                 NewData(FYSimVar.CreateData("L"));
                 NewData(FYSimVar.CreateData("K"));
-                NewData(FYSimVar.CreateData("J"));
+                //NewData(FYSimVar.CreateData("J"));    // Tracks not sent anymore due to traindetection by FYapplication iso target
                 NewData(FYSimVar.CreateData("I"));
                 NewData(FYSimVar.CreateData("H"));
                 NewData(FYSimVar.CreateData("A"));
@@ -789,7 +784,7 @@ namespace Siebwalde_Application
                 NewData(FYSimVar.CreateData("Z"));
                 NewData(FYSimVar.CreateData("Y"));
                 NewData(FYSimVar.CreateData("X"));
-                NewData(FYSimVar.CreateData("W"));
+                //NewData(FYSimVar.CreateData("W"));    // Tracks not sent anymore due to traindetection by FYapplication iso target
                 NewData(FYSimVar.CreateData("V"));
                 NewData(FYSimVar.CreateData("U"));
                 NewData(FYSimVar.CreateData("B"));

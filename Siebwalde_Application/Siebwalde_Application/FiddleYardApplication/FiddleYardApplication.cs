@@ -23,6 +23,7 @@ namespace Siebwalde_Application
         private FiddleYardTrainDetection FYTDT;                                     // Create new Traindetection sub program
         private string m_instance = null;
         private string path = "null";
+        private object ExecuteLock = new object();
 
         /*#--------------------------------------------------------------------------#*/
         /*  Description: Application variables
@@ -40,7 +41,7 @@ namespace Siebwalde_Application
          *  Notes      : 
          *  
          */
-        /*#--------------------------------------------------------------------------#*/       
+        /*#--------------------------------------------------------------------------#*/
 
         public enum State { Idle, Start, Init, Running, Stop, Reset, MIP50Home, MIP50Move, TrainDetection };
         public State State_Machine;
@@ -85,9 +86,9 @@ namespace Siebwalde_Application
 
             // Sub programs  
             FYAppVar = new FiddleYardApplicationVariables(m_FYIOHandleVar);                 // FiddleYard Application variables class, holds all variables and functions regarding variables
-            FYFORM = new FiddleYardForm();            
-            FYAppRun = new FiddleYardAppRun(m_FYIOHandleVar, m_iFYIOH, FYAppVar, FiddleYardApplicationLogging);
+            FYFORM = new FiddleYardForm();
             FYMIP50 = new FiddleYardMip50(m_instance, m_FYIOHandleVar, m_iFYIOH, FYAppVar);
+            FYAppRun = new FiddleYardAppRun(m_FYIOHandleVar, m_iFYIOH, FYAppVar, FYMIP50, FiddleYardApplicationLogging);            
             FYTDT = new FiddleYardTrainDetection(m_FYIOHandleVar, FYAppVar, FYMIP50, FiddleYardApplicationLogging);
             FYAppInit = new FiddleYardAppInit(m_FYIOHandleVar, FYAppVar, FYMIP50, FYTDT, FiddleYardApplicationLogging);
             
@@ -358,31 +359,33 @@ namespace Siebwalde_Application
         /*#--------------------------------------------------------------------------#*/
         public void ApplicationUpdate(string kickapplication, int val)
         {
-            aTimer.Stop();//--------------------------------------------------------------------- Stop the timer an event was received from target
-
-            if (kickapplication == " Start ")                             // FYFORM Start FiddleYard button command
+            lock (ExecuteLock)
             {
-                FYAppVar.FiddleYardAutoModeStart.UpdateMessage();//FYFORM.SetMessage("FYApp FYStart", "FiddleYard Auto mode Start");
-                State_Machine = State.Start;
-                FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Start");
-                FYAppVar.FiddleYardInit.UpdateMessage();//FYFORM.SetMessage("FYApp FYStart", "FiddleYard init...");
-            }
-            else if (kickapplication == " Reset ")                        // FYFORM Reset FiddleYard button command
-            {
-                FiddleYardApplicationLogging.StoreText("FYApp kickapplication == Reset");
-                State_Machine = State.Reset;
-                FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Reset");
-            }
-            else if (kickapplication == " Stop ")                        // FYFORM Reset FiddleYard button command
-            {
-                StopApplication = "Stop";
-                FiddleYardApplicationLogging.StoreText("FYApp StopApplication = Stop");
-                FYAppVar.FiddleYardAutoModeIsGoingToStop.UpdateMessage();//FYFORM.SetMessage("FYApp FYStop", "FiddleYard Auto mode is going to stop...");
-            }
+                aTimer.Stop();//--------------------------------------------------------------------- Stop the timer an event was received from target
+                if (kickapplication == " Start ")                             // FYFORM Start FiddleYard button command
+                {
+                    FYAppVar.FiddleYardAutoModeStart.UpdateMessage();//FYFORM.SetMessage("FYApp FYStart", "FiddleYard Auto mode Start");
+                    State_Machine = State.Start;
+                    FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Start");
+                    FYAppVar.FiddleYardInit.UpdateMessage();//FYFORM.SetMessage("FYApp FYStart", "FiddleYard init...");
+                }
+                else if (kickapplication == " Reset ")                        // FYFORM Reset FiddleYard button command
+                {
+                    FiddleYardApplicationLogging.StoreText("FYApp kickapplication == Reset");
+                    State_Machine = State.Reset;
+                    FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Reset");
+                }
+                else if (kickapplication == " Stop ")                        // FYFORM Reset FiddleYard button command
+                {
+                    StopApplication = "Stop";
+                    FiddleYardApplicationLogging.StoreText("FYApp StopApplication = Stop");
+                    FYAppVar.FiddleYardAutoModeIsGoingToStop.UpdateMessage();//FYFORM.SetMessage("FYApp FYStop", "FiddleYard Auto mode is going to stop...");
+                }
 
-            StateMachineUpdate(kickapplication, val);
+                StateMachineUpdate(kickapplication, val);
 
-            aTimer.Start();//-------------------------------------------------------------------- Start the timer until event from target
+                aTimer.Start();//-------------------------------------------------------------------- Start the timer until event from target
+            }
         }
         
         /*#--------------------------------------------------------------------------#*/
@@ -409,8 +412,8 @@ namespace Siebwalde_Application
             switch (State_Machine)
             {
                 case State.Reset:
-                    if (kickapplication == "TimerEvent") // Only update on 1 thread: TimerEvent.
-                    {
+                    //if (kickapplication == "TimerEvent") // Only update on 1 thread: TimerEvent.
+                    //{
                         FYAppVar.FiddleYardReset.UpdateMessage();//FYFORM.SetMessage("FYApp FYStart", "FiddleYard Reset");
                         FiddleYardApplicationLogging.StoreText("FYApp Reset target");
                         FYAppInit.Init("Reset", val);
@@ -426,7 +429,7 @@ namespace Siebwalde_Application
                         FiddleYardApplicationLogging.StoreText("FYApp reset target");
                         State_Machine = State.Idle;
                         FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Idle from State.Reset");
-                    }
+                    //}
                     break;
 
                 case State.Idle:
@@ -434,8 +437,8 @@ namespace Siebwalde_Application
                     break;
 
                 case State.MIP50Home:
-                    if (kickapplication == "TimerEvent") // Only update on 1 thread: TimerEvent.
-                    {
+                    //if (kickapplication == "TimerEvent") // Only update on 1 thread: TimerEvent.
+                    //{
                         SubProgramReturnVal = FYMIP50.MIP50xHOME();
                         if (SubProgramReturnVal == "Finished")
                         {
@@ -450,12 +453,12 @@ namespace Siebwalde_Application
                             //TBD do something with the message or error!!!<---------------------------------------------------------------------------------------------------------------
                             State_Machine = State.Idle;
                         }
-                    }
+                    //}
                     break;
 
                 case State.MIP50Move:
-                    if (kickapplication == "TimerEvent") // Only update on 1 thread: TimerEvent.
-                    {
+                    //if (kickapplication == "TimerEvent") // Only update on 1 thread: TimerEvent.
+                    //{
                         SubProgramReturnVal = FYMIP50.MIP50xMOVE();
                         if (SubProgramReturnVal == "Finished")
                         {
@@ -470,12 +473,12 @@ namespace Siebwalde_Application
                             //TBD do something with the message or error!!!<---------------------------------------------------------------------------------------------------------------
                             State_Machine = State.Idle;
                         }
-                    }
+                    //}
                     break;
 
                 case State.TrainDetection:
-                    if (kickapplication == "TimerEvent") // Only update on 1 thread: TimerEvent.
-                    {
+                    //if (kickapplication == "TimerEvent") // Only update on 1 thread: TimerEvent.
+                    //{
                         SubProgramReturnVal = FYTDT.Traindetection();
                         if (SubProgramReturnVal == "Finished")
                         {
@@ -485,28 +488,34 @@ namespace Siebwalde_Application
                             State_Machine = State.Idle;
                             FiddleYardApplicationLogging.StoreText("FYAppInit.Init() OR CMD State_Machine = State.Idle");
                         }
-                    }
+                    //}
                     break;
 
                 case State.Start:
-                    if (FYAppInit.Init(kickapplication, val) == "Finished")
-                    {
-                        FiddleYardApplicationLogging.StoreText("FYApp FYAppInit.Init() == Finished");
-                        FYAppVar.FiddleYardInitFinished.UpdateMessage();//FYFORM.SetMessage("FYApp FYInit", "FiddleYard init Finished");
-                        State_Machine = State.Running;
-                        FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Running from State.Start");
-                        FYAppVar.FiddleYardApplicationRunning.UpdateMessage();//FYFORM.SetMessage("FYApp FYInit", "FiddleYard Application running...");
-                    }
+                    //if (kickapplication == "TimerEvent") // Only update on 1 thread: TimerEvent.
+                    //{
+                        if (FYAppInit.Init(kickapplication, val) == "Finished")
+                        {
+                            FiddleYardApplicationLogging.StoreText("FYApp FYAppInit.Init() == Finished");
+                            FYAppVar.FiddleYardInitFinished.UpdateMessage();//FYFORM.SetMessage("FYApp FYInit", "FiddleYard init Finished");
+                            State_Machine = State.Running;
+                            FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Running from State.Start");
+                            FYAppVar.FiddleYardApplicationRunning.UpdateMessage();//FYFORM.SetMessage("FYApp FYInit", "FiddleYard Application running...");
+                        }
+                    //}
                     break;
 
                 case State.Running:
-                    if (FYAppRun.Run(kickapplication, StopApplication) == "Stop")
-                    {
-                        FYAppVar.FiddleYardAutoModeIsStopped.UpdateMessage();//FYFORM.SetMessage("FiddleYardStopped", "FiddleYard Auto mode is Stopped");  // FYFORM reacts on: FiddleYardStopped setting the buttons visable etc
-                        FiddleYardApplicationLogging.StoreText("FYApp kickapplication = Stop");
-                        State_Machine = State.Stop;
-                        FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Stop from State.Running");
-                    }                    
+                    //if (kickapplication == "TimerEvent") // Only update on 1 thread: TimerEvent.
+                    //{
+                        if (FYAppRun.Run(kickapplication, StopApplication) == "Stop")
+                        {
+                            FYAppVar.FiddleYardAutoModeIsStopped.UpdateMessage();//FYFORM.SetMessage("FiddleYardStopped", "FiddleYard Auto mode is Stopped");  // FYFORM reacts on: FiddleYardStopped setting the buttons visable etc
+                            FiddleYardApplicationLogging.StoreText("FYApp kickapplication = Stop");
+                            State_Machine = State.Stop;
+                            FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Stop from State.Running");
+                        }
+                    //}                 
                     break;
 
                 case State.Stop:

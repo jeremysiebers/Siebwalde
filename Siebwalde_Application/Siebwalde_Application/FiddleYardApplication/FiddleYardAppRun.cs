@@ -23,6 +23,7 @@ namespace Siebwalde_Application
         private iFiddleYardIOHandle m_iFYIOH;
         private FiddleYardIOHandleVariables m_FYIOHandleVar;             // connect variable to connect to FYIOH class for defined variables
         private FiddleYardApplicationVariables m_FYAppVar;
+        private FiddleYardMip50 m_FYMIP50;                               // Create new MIP50 sub program       
         private Log2LoggingFile m_FYAppLog;
         private FiddleYardAppTrainDrive FYAppTrainDrive;
         public enum State { Idle, Check5B, TrainDriveIn, Check8A, TrainDriveOut, TrainDriveTrough, TrainDriveTroughPrepare, TrainDriveTroughCleanup};        
@@ -48,13 +49,14 @@ namespace Siebwalde_Application
          *  Notes      : 
          */
         /*#--------------------------------------------------------------------------#*/
-        public FiddleYardAppRun(FiddleYardIOHandleVariables FYIOHandleVar, iFiddleYardIOHandle iFYIOH, FiddleYardApplicationVariables FYAppVar, Log2LoggingFile FiddleYardApplicationLogging)
+        public FiddleYardAppRun(FiddleYardIOHandleVariables FYIOHandleVar, iFiddleYardIOHandle iFYIOH, FiddleYardApplicationVariables FYAppVar, FiddleYardMip50 FYMIP50, Log2LoggingFile FiddleYardApplicationLogging)
         {
             m_iFYIOH = iFYIOH;
             m_FYIOHandleVar = FYIOHandleVar;
             m_FYAppVar = FYAppVar;
+            m_FYMIP50 = FYMIP50;
             m_FYAppLog = FiddleYardApplicationLogging;
-            FYAppTrainDrive = new FiddleYardAppTrainDrive(m_FYIOHandleVar, m_iFYIOH, m_FYAppVar, m_FYAppLog);
+            FYAppTrainDrive = new FiddleYardAppTrainDrive(m_FYIOHandleVar, m_iFYIOH, m_FYAppVar, m_FYMIP50, m_FYAppLog);
             State_Machine = State.Idle;
 
             Message Msg_TrackPower15VDown = new Message("TrackPower15VDown", " TrackPower15VDown ", (name, log) => SetMessage(name, 0, log)); // initialize and subscribe readback action, Message
@@ -152,17 +154,17 @@ namespace Siebwalde_Application
                         break;
                     }
 
-                    if (FYFull(State.Check5B) < 11)                                                                               // Always drive trains into FiddleYard regardless the status of m_collect until FYFull == 11
+                    if (FYFull(State.Check5B) < 11)                                                                                 // Always drive trains into FiddleYard regardless the status of m_collect until FYFull == 11
                     {
-                        State_Machine = State.Check5B;                                                              // alway scheck 5B first, when no train is present, check then 8B
+                        State_Machine = State.Check5B;                                                                              // alway scheck 5B first, when no train is present, check then 8B
                         //m_FYAppLog.StoreText("FYAppRun.Run() FYFull() < 10 -> State_Machine = State.Check5B");
                     }
-                    else if (true == m_collect && m_FYAppVar.bBlock5B)                                      // When the FiddleYard is full, but m_collect is true and a train appears on 5B, then shift-pass trains
+                    else if (true == m_collect && m_FYAppVar.bBlock5B)                                                              // When the FiddleYard is full, but m_collect is true and a train appears on 5B, then shift-pass trains
                     {
                         State_Machine = State.Check8A;
                         //m_FYAppLog.StoreText("FYAppRun.Run() false == m_collect && FYFull() > 0 -> State_Machine = State.Check8A");
                     }
-                    else if (false == m_collect && FYFull(State.Check8A) > 0)                                                    // When the FiddleYard is full, but m_collect is false, then check if a train may leave
+                    else if (false == m_collect && FYFull(State.Check8A) > 0)                                                       // When the FiddleYard is full, but m_collect is false, then check if a train may leave
                     {
                         State_Machine = State.Check8A;
                         //m_FYAppLog.StoreText("FYAppRun.Run() false == m_collect && FYFull() > 0 -> State_Machine = State.Check8A");

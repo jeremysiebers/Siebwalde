@@ -137,7 +137,7 @@ namespace Siebwalde_Application
                     SubProgramReturnVal = m_FYTDT.Traindetection();
                     if (SubProgramReturnVal == "Finished")
                     {
-                        m_FYAppLog.StoreText("FYAppInit.Init() FYTDT.TRAINDETECTION() == Finished");
+                        m_FYAppLog.StoreText("FYAppInit.Init() FYTDT.Traindetection() == Finished");
                         State_Machine = State.Idle;
                         m_FYAppLog.StoreText("FYAppInit.Init() State_Machine = State.Idle");
                         _Return = "Finished";
