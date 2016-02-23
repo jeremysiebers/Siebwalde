@@ -4,7 +4,7 @@
     <PublishUrlHistory>C:\Localdata\Siebwalde\publish\|publish\</PublishUrlHistory>
     <InstallUrlHistory>http://www.siebers.org/siebwaldeapp/|\\Localdata\Siebwalde\</InstallUrlHistory>
     <SupportUrlHistory />
-    <UpdateUrlHistory>\\server\TrainPC_Backup\SiebwaldeApplicationUpdate\</UpdateUrlHistory>
+    <UpdateUrlHistory>http://www.siebers.org/siebwaldeapp/|\\server\TrainPC_Backup\SiebwaldeApplicationUpdate\</UpdateUrlHistory>
     <BootstrapperUrlHistory />
     <ErrorReportUrlHistory />
     <FallbackCulture>en-US</FallbackCulture>
