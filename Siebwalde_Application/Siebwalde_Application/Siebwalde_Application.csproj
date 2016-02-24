@@ -107,6 +107,7 @@
     <Compile Include="AboutBox1.Designer.cs">
       <DependentUpon>AboutBox1.cs</DependentUpon>
     </Compile>
+    <Compile Include="CropBitmap.cs" />
     <Compile Include="FiddleYardApplication\FiddleYardApplicationVariables.cs" />
     <Compile Include="FiddleYardApplication\FiddleYardAppRun.cs" />
     <Compile Include="FiddleYardApplication\FiddleYardAppTrainDrive.cs" />
@@ -151,6 +152,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Receiver.cs" />
+    <Compile Include="ScaleBitmap.cs" />
     <Compile Include="SenActCmdMes.cs" />
     <Compile Include="Sender.cs" />
     <Compile Include="Settings.cs" />
@@ -188,6 +190,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="favicon.ico" />
+    <Resource Include="FiddleYardApplication\Arrow.ico" />
+    <Resource Include="FiddleYardApplication\StopSign.ico" />
+    <Resource Include="FiddleYardApplication\TrainWithWagon.ico" />
     <Resource Include="FiddleYardApplication\SeinRed.ico" />
     <Resource Include="FiddleYardApplication\SeinGreen.ico" />
   </ItemGroup>

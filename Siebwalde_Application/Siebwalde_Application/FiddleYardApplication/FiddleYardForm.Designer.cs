@@ -107,6 +107,9 @@
             this.PB_Block5BIn = new System.Windows.Forms.PictureBox();
             this.PB_Block6In = new System.Windows.Forms.PictureBox();
             this.PB_Block7In = new System.Windows.Forms.PictureBox();
+            this.PB_Tr1_Train = new System.Windows.Forms.PictureBox();
+            this.PB_Tr1_Active = new System.Windows.Forms.PictureBox();
+            this.PB_Tr1_Inline = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.Nuo_Track_No_TOP)).BeginInit();
             this.menuStrip1.SuspendLayout();
             this.AutomaticMode.SuspendLayout();
@@ -115,6 +118,9 @@
             ((System.ComponentModel.ISupportInitialize)(this.PB_Block5BIn)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.PB_Block6In)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.PB_Block7In)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr1_Train)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr1_Active)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr1_Inline)).BeginInit();
             this.SuspendLayout();
             // 
             // Track_No
@@ -719,10 +725,34 @@
             this.PB_Block7In.TabStop = false;
             this.PB_Block7In.Click += new System.EventHandler(this.PB_Block7In_Click);
             // 
+            // PB_Tr1_Train
+            // 
+            this.PB_Tr1_Train.BackColor = System.Drawing.Color.Transparent;
+            resources.ApplyResources(this.PB_Tr1_Train, "PB_Tr1_Train");
+            this.PB_Tr1_Train.Name = "PB_Tr1_Train";
+            this.PB_Tr1_Train.TabStop = false;
+            // 
+            // PB_Tr1_Active
+            // 
+            this.PB_Tr1_Active.BackColor = System.Drawing.Color.Transparent;
+            resources.ApplyResources(this.PB_Tr1_Active, "PB_Tr1_Active");
+            this.PB_Tr1_Active.Name = "PB_Tr1_Active";
+            this.PB_Tr1_Active.TabStop = false;
+            // 
+            // PB_Tr1_Inline
+            // 
+            this.PB_Tr1_Inline.BackColor = System.Drawing.Color.Transparent;
+            resources.ApplyResources(this.PB_Tr1_Inline, "PB_Tr1_Inline");
+            this.PB_Tr1_Inline.Name = "PB_Tr1_Inline";
+            this.PB_Tr1_Inline.TabStop = false;
+            // 
             // FiddleYardForm
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.PB_Tr1_Active);
+            this.Controls.Add(this.PB_Tr1_Inline);
+            this.Controls.Add(this.PB_Tr1_Train);
             this.Controls.Add(this.AutomaticMode);
             this.Controls.Add(this.PB_Block7In);
             this.Controls.Add(this.PB_Block6In);
@@ -785,6 +815,9 @@
             ((System.ComponentModel.ISupportInitialize)(this.PB_Block5BIn)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.PB_Block6In)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.PB_Block7In)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr1_Train)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr1_Active)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr1_Inline)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -873,5 +906,8 @@
         private System.Windows.Forms.CheckBox checkBoxToggle;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.PictureBox PB_Tr1_Train;
+        private System.Windows.Forms.PictureBox PB_Tr1_Active;
+        private System.Windows.Forms.PictureBox PB_Tr1_Inline;
     }
 }

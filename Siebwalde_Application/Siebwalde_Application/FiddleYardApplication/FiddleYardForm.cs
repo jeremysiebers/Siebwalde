@@ -26,7 +26,7 @@ namespace Siebwalde_Application
     {
         string path = "null";
         public Log2LoggingFile FiddleYardFormLogging;
-
+        
         public const int TOP = 1;
         public const int BOT = 0;
 
@@ -55,7 +55,10 @@ namespace Siebwalde_Application
         public Image SeinRed = Siebwalde_Application.Properties.Resources.SeinRed.ToBitmap();
         public Image SeinGreen90 = Siebwalde_Application.Properties.Resources.SeinGreen.ToBitmap();
         public Image SeinRed90 = Siebwalde_Application.Properties.Resources.SeinRed.ToBitmap();
-        
+        public Image Train = CropBitmap.Crop(ScaleBitmap.Scale(CropBitmap.Crop(Siebwalde_Application.Properties.Resources.TrainWithWagon.ToBitmap()), 32));
+        public Image Active = CropBitmap.Crop(ScaleBitmap.Scale(CropBitmap.Crop(Siebwalde_Application.Properties.Resources.StopSign.ToBitmap()), 14));
+        public Image Inline = CropBitmap.Crop(ScaleBitmap.Scale(CropBitmap.Crop(Siebwalde_Application.Properties.Resources.Arrow.ToBitmap()), 14));
+
         /*#--------------------------------------------------------------------------#*/
         /*  Description: FiddleYardForm
          *               Constructor
@@ -152,40 +155,52 @@ namespace Siebwalde_Application
 
             LLed_Block8A.Size = new Size(16, 250);
             LLed_Block8A.Location = new System.Drawing.Point(GWinX + 790 + (100 - 16), GWinHalf - 250 - 18);
-
+            //----------------------------------------------------------------------------------------------------------------------------//
             LLed_Track1.Size = new Size(600, 16);
-            LLed_Track1.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 160);            
+            LLed_Track1.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 160);
 
+            PB_Tr1_Train.Size = new Size(Train.Width, Train.Height);
+            PB_Tr1_Train.Location = new System.Drawing.Point(Track6LocX + 200, Track6LocY - 152 - Train.Height / 2);
+            PB_Tr1_Train.Image = Train;
+
+            PB_Tr1_Inline.Size = new Size(Inline.Width, Inline.Height);
+            PB_Tr1_Inline.Location = new System.Drawing.Point(Track6LocX + 270, Track6LocY - 161);
+            PB_Tr1_Inline.Image = Inline;
+
+            PB_Tr1_Active.Size = new Size(Active.Width, Active.Height);
+            PB_Tr1_Active.Location = new System.Drawing.Point(Track6LocX + 360, Track6LocY - 161);
+            PB_Tr1_Active.Image = Active;
+            //----------------------------------------------------------------------------------------------------------------------------//
             LLed_Track2.Size = new Size(600, 16);
             LLed_Track2.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 128);
-
+            //----------------------------------------------------------------------------------------------------------------------------//
             LLed_Track3.Size = new Size(600, 16);
             LLed_Track3.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 96);
-
+            //----------------------------------------------------------------------------------------------------------------------------//
             LLed_Track4.Size = new Size(600, 16);
             LLed_Track4.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 64);
-
+            //----------------------------------------------------------------------------------------------------------------------------//
             LLed_Track5.Size = new Size(600, 16);
             LLed_Track5.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 32);
-
+            //----------------------------------------------------------------------------------------------------------------------------//
             LLed_Track6.Size = new Size(600, 16);
             LLed_Track6.Location = new System.Drawing.Point(Track6LocX, Track6LocY);
-
+            //----------------------------------------------------------------------------------------------------------------------------//
             LLed_Track7.Size = new Size(600, 16);
             LLed_Track7.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 32);
-
+            //----------------------------------------------------------------------------------------------------------------------------//
             LLed_Track8.Size = new Size(600, 16);
             LLed_Track8.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 64);
-
+            //----------------------------------------------------------------------------------------------------------------------------//
             LLed_Track9.Size = new Size(600, 16);
             LLed_Track9.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 96);
-
+            //----------------------------------------------------------------------------------------------------------------------------//
             LLed_Track10.Size = new Size(600, 16);
             LLed_Track10.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 128);
-
+            //----------------------------------------------------------------------------------------------------------------------------//
             LLed_Track11.Size = new Size(600, 16);
             LLed_Track11.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 160);
-
+            //----------------------------------------------------------------------------------------------------------------------------//
             LLed_EOS11.Size = new Size(50, 16);
             LLed_EOS11.Location = new System.Drawing.Point(GWinX + 180, GWinHalf - 360);
 
@@ -1115,6 +1130,11 @@ namespace Siebwalde_Application
                             LLed_Track1.Text = "                     Not Initialized";                          // Set Track text
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
+                        PB_Tr1_Active.BackColor = LLed_Track1.BackColor;
+                        PB_Tr1_Inline.BackColor = LLed_Track1.BackColor;
+                        PB_Tr1_Train.BackColor = LLed_Track1.BackColor;
+
+
                         break;
 
                     case "LLed_Track2":
@@ -1821,7 +1841,7 @@ namespace Siebwalde_Application
                 LLed_Track2.BackColor != m_FYAppVar.TrackDisabledColor)     // If this track is active and not disabled and not transparant
             {
                 LLed_Track2.BackColor = m_FYAppVar.TrackOccupiedColor;      // Set the track TrackOccupiedColor
-                CheckWhichTrackInline();                                    // Set the color to the corresponding sensors to the LLed_Track2.BackColor
+                CheckWhichTrackInline();                                    // Set the color to the corresponding sensors to the LLed_Track2.BackColor                
             }
             else if (TrackStatusLight[2] == false &&
                 LLed_Track2.BackColor != Color.Transparent &&
@@ -2014,6 +2034,10 @@ namespace Siebwalde_Application
             else { CheckWhichTrackInline(); }                               // Set the color to the corresponding sensors to the LLed_Track11.BackColor
 
             /*---------------------------------------------------------------------------------------------------------------------------------------------*/
+
+            PB_Tr1_Active.BackColor = LLed_Track1.BackColor;
+            PB_Tr1_Inline.BackColor = LLed_Track1.BackColor;
+            PB_Tr1_Train.BackColor = LLed_Track1.BackColor;
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -2314,7 +2338,12 @@ namespace Siebwalde_Application
 
             switch (val)
             {
-                case 1: LLed_Track1.Location = new System.Drawing.Point(Track6LocX, Track6LocY);
+                case 1:
+                    LLed_Track1.Location = new System.Drawing.Point(Track6LocX, Track6LocY);
+                    PB_Tr1_Train.Location = new System.Drawing.Point(Track6LocX + 200, Track6LocY + 15 - Train.Height);
+                    PB_Tr1_Inline.Location = new System.Drawing.Point(Track6LocX + 270, Track6LocY + 1);
+                    PB_Tr1_Active.Location = new System.Drawing.Point(Track6LocX + 360, Track6LocY + 1);
+
                     LLed_Track2.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 32);
                     LLed_Track3.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 64);
                     LLed_Track4.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 96);
@@ -2328,7 +2357,12 @@ namespace Siebwalde_Application
                     LLed_FYPLATE_TOP.Location = new System.Drawing.Point(Track6LocX - 10, Track6LocY - 16);                    
                     break;
 
-                case 2: LLed_Track1.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 32);
+                case 2:
+                    LLed_Track1.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 32);
+                    PB_Tr1_Train.Location = new System.Drawing.Point(Track6LocX + 200, Track6LocY - 24 - Train.Height / 2);
+                    PB_Tr1_Inline.Location = new System.Drawing.Point(Track6LocX + 270, Track6LocY - 32 + 1);
+                    PB_Tr1_Active.Location = new System.Drawing.Point(Track6LocX + 360, Track6LocY - 32 + 1);
+
                     LLed_Track2.Location = new System.Drawing.Point(Track6LocX, Track6LocY);
                     LLed_Track3.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 32);
                     LLed_Track4.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 64);
@@ -2342,7 +2376,12 @@ namespace Siebwalde_Application
                     LLed_FYPLATE_TOP.Location = new System.Drawing.Point(Track6LocX - 10, Track6LocY - 48);
                     break;
 
-                case 3: LLed_Track1.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 64);
+                case 3:
+                    LLed_Track1.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 64);
+                    PB_Tr1_Train.Location = new System.Drawing.Point(Track6LocX + 200, Track6LocY - 56 - Train.Height / 2);
+                    PB_Tr1_Inline.Location = new System.Drawing.Point(Track6LocX + 270, Track6LocY - 64 + 1);
+                    PB_Tr1_Active.Location = new System.Drawing.Point(Track6LocX + 360, Track6LocY - 64 + 1);
+
                     LLed_Track2.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 32);
                     LLed_Track3.Location = new System.Drawing.Point(Track6LocX, Track6LocY);
                     LLed_Track4.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 32);
@@ -2356,7 +2395,12 @@ namespace Siebwalde_Application
                     LLed_FYPLATE_TOP.Location = new System.Drawing.Point(Track6LocX - 10, Track6LocY - 80);
                     break;
 
-                case 4: LLed_Track1.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 96);
+                case 4:
+                    LLed_Track1.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 96);
+                    PB_Tr1_Train.Location = new System.Drawing.Point(Track6LocX + 200, Track6LocY - 88 - Train.Height / 2);
+                    PB_Tr1_Inline.Location = new System.Drawing.Point(Track6LocX + 270, Track6LocY - 96 + 1);
+                    PB_Tr1_Active.Location = new System.Drawing.Point(Track6LocX + 360, Track6LocY - 96 + 1);
+
                     LLed_Track2.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 64);
                     LLed_Track3.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 32);
                     LLed_Track4.Location = new System.Drawing.Point(Track6LocX, Track6LocY);
@@ -2370,7 +2414,12 @@ namespace Siebwalde_Application
                     LLed_FYPLATE_TOP.Location = new System.Drawing.Point(Track6LocX - 10, Track6LocY - 112);
                     break;
 
-                case 5: LLed_Track1.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 128);
+                case 5:
+                    LLed_Track1.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 128);
+                    PB_Tr1_Train.Location = new System.Drawing.Point(Track6LocX + 200, Track6LocY - 120 - Train.Height / 2);
+                    PB_Tr1_Inline.Location = new System.Drawing.Point(Track6LocX + 270, Track6LocY - 128 + 1);
+                    PB_Tr1_Active.Location = new System.Drawing.Point(Track6LocX + 360, Track6LocY - 128 + 1);
+
                     LLed_Track2.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 96);
                     LLed_Track3.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 64);
                     LLed_Track4.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 32);
@@ -2384,7 +2433,12 @@ namespace Siebwalde_Application
                     LLed_FYPLATE_TOP.Location = new System.Drawing.Point(Track6LocX - 10, Track6LocY - 144);
                     break;
 
-                case 6: LLed_Track1.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 160);
+                case 6:
+                    LLed_Track1.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 160);
+                    PB_Tr1_Train.Location = new System.Drawing.Point(Track6LocX + 200, Track6LocY - 152 - Train.Height / 2);
+                    PB_Tr1_Inline.Location = new System.Drawing.Point(Track6LocX + 270, Track6LocY - 160 + 1);
+                    PB_Tr1_Active.Location = new System.Drawing.Point(Track6LocX + 360, Track6LocY - 160 + 1);
+
                     LLed_Track2.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 128);
                     LLed_Track3.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 96);
                     LLed_Track4.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 64);
@@ -2398,7 +2452,12 @@ namespace Siebwalde_Application
                     LLed_FYPLATE_TOP.Location = new System.Drawing.Point(Track6LocX - 10, Track6LocY - 176);
                     break;
 
-                case 7: LLed_Track1.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 192);
+                case 7:
+                    LLed_Track1.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 192);
+                    PB_Tr1_Train.Location = new System.Drawing.Point(Track6LocX + 200, Track6LocY - 184 - Train.Height / 2);
+                    PB_Tr1_Inline.Location = new System.Drawing.Point(Track6LocX + 270, Track6LocY - 192 + 1);
+                    PB_Tr1_Active.Location = new System.Drawing.Point(Track6LocX + 360, Track6LocY - 192 + 1);
+
                     LLed_Track2.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 160);
                     LLed_Track3.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 128);
                     LLed_Track4.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 96);
@@ -2412,7 +2471,12 @@ namespace Siebwalde_Application
                     LLed_FYPLATE_TOP.Location = new System.Drawing.Point(Track6LocX - 10, Track6LocY - 208);
                     break;
 
-                case 8: LLed_Track1.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 224);
+                case 8:
+                    LLed_Track1.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 224);
+                    PB_Tr1_Train.Location = new System.Drawing.Point(Track6LocX + 200, Track6LocY - 216 - Train.Height / 2);
+                    PB_Tr1_Inline.Location = new System.Drawing.Point(Track6LocX + 270, Track6LocY - 224 + 1);
+                    PB_Tr1_Active.Location = new System.Drawing.Point(Track6LocX + 360, Track6LocY - 224 + 1);
+
                     LLed_Track2.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 192);
                     LLed_Track3.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 160);
                     LLed_Track4.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 128);
@@ -2426,7 +2490,12 @@ namespace Siebwalde_Application
                     LLed_FYPLATE_TOP.Location = new System.Drawing.Point(Track6LocX - 10, Track6LocY - 240);
                     break;
 
-                case 9: LLed_Track1.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 256);
+                case 9:
+                    LLed_Track1.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 256);
+                    PB_Tr1_Train.Location = new System.Drawing.Point(Track6LocX + 200, Track6LocY - 248 - Train.Height / 2);
+                    PB_Tr1_Inline.Location = new System.Drawing.Point(Track6LocX + 270, Track6LocY - 256 + 1);
+                    PB_Tr1_Active.Location = new System.Drawing.Point(Track6LocX + 360, Track6LocY - 256 + 1);
+
                     LLed_Track2.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 224);
                     LLed_Track3.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 192);
                     LLed_Track4.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 160);
@@ -2440,7 +2509,12 @@ namespace Siebwalde_Application
                     LLed_FYPLATE_TOP.Location = new System.Drawing.Point(Track6LocX - 10, Track6LocY - 272);
                     break;
 
-                case 10: LLed_Track1.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 288);
+                case 10:
+                    LLed_Track1.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 288);
+                    PB_Tr1_Train.Location = new System.Drawing.Point(Track6LocX + 200, Track6LocY - 280 - Train.Height / 2);
+                    PB_Tr1_Inline.Location = new System.Drawing.Point(Track6LocX + 270, Track6LocY - 288 + 1);
+                    PB_Tr1_Active.Location = new System.Drawing.Point(Track6LocX + 360, Track6LocY - 288 + 1);
+
                     LLed_Track2.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 256);
                     LLed_Track3.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 224);
                     LLed_Track4.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 192);
@@ -2454,7 +2528,12 @@ namespace Siebwalde_Application
                     LLed_FYPLATE_TOP.Location = new System.Drawing.Point(Track6LocX - 10, Track6LocY - 304);
                     break;
 
-                case 11: LLed_Track1.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 320);
+                case 11:
+                    LLed_Track1.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 320);
+                    PB_Tr1_Train.Location = new System.Drawing.Point(Track6LocX + 200, Track6LocY - 312 - Train.Height / 2);
+                    PB_Tr1_Inline.Location = new System.Drawing.Point(Track6LocX + 270, Track6LocY - 320 + 1);
+                    PB_Tr1_Active.Location = new System.Drawing.Point(Track6LocX + 360, Track6LocY - 320 + 1);
+
                     LLed_Track2.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 288);
                     LLed_Track3.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 256);
                     LLed_Track4.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 224);
