@@ -112,38 +112,38 @@ namespace Siebwalde_Application
 
         private void SetColorTrackDisabled_Click(object sender, EventArgs e)
         {
-            ColorDialog MyDialog = new ColorDialog();
-            // Keeps the user from selecting a custom color.
-            MyDialog.AllowFullOpen = false;
-            // Allows the user to get help. (The default is false.)
-            MyDialog.ShowHelp = true;
-            // Sets the initial color select to the current text color.
-            MyDialog.Color = SetColorTrackDisabled.BackColor;
+            //ColorDialog MyDialog = new ColorDialog();
+            //// Keeps the user from selecting a custom color.
+            //MyDialog.AllowFullOpen = false;
+            //// Allows the user to get help. (The default is false.)
+            //MyDialog.ShowHelp = true;
+            //// Sets the initial color select to the current text color.
+            //MyDialog.Color = SetColorTrackDisabled.BackColor;
 
-            // Update the text box color if the user clicks OK 
-            if (MyDialog.ShowDialog() == DialogResult.OK)
-            {
-                SetColorTrackDisabled.BackColor = MyDialog.Color;
-                Properties.Settings.Default.SETxCOLORxTRACKxDISABLED = SetColorTrackDisabled.BackColor;
-            }
+            //// Update the text box color if the user clicks OK 
+            //if (MyDialog.ShowDialog() == DialogResult.OK)
+            //{
+            //    SetColorTrackDisabled.BackColor = MyDialog.Color;
+            //    Properties.Settings.Default.SETxCOLORxTRACKxDISABLED = SetColorTrackDisabled.BackColor;
+            //}
         }
 
         private void SetColorTrackDisabledNotOccupied_Click(object sender, EventArgs e)
         {
-            ColorDialog MyDialog = new ColorDialog();
-            // Keeps the user from selecting a custom color.
-            MyDialog.AllowFullOpen = false;
-            // Allows the user to get help. (The default is false.)
-            MyDialog.ShowHelp = true;
-            // Sets the initial color select to the current text color.
-            MyDialog.Color = SetColorTrackDisabledNotOccupied.BackColor;
+            //ColorDialog MyDialog = new ColorDialog();
+            //// Keeps the user from selecting a custom color.
+            //MyDialog.AllowFullOpen = false;
+            //// Allows the user to get help. (The default is false.)
+            //MyDialog.ShowHelp = true;
+            //// Sets the initial color select to the current text color.
+            //MyDialog.Color = SetColorTrackDisabledNotOccupied.BackColor;
 
-            // Update the text box color if the user clicks OK 
-            if (MyDialog.ShowDialog() == DialogResult.OK)
-            {
-                SetColorTrackDisabledNotOccupied.BackColor = MyDialog.Color;
-                Properties.Settings.Default.SETxCOLORxTRACKxDISABLEDxNOTxOCCUPIED = SetColorTrackDisabledNotOccupied.BackColor;
-            }
+            //// Update the text box color if the user clicks OK 
+            //if (MyDialog.ShowDialog() == DialogResult.OK)
+            //{
+            //    SetColorTrackDisabledNotOccupied.BackColor = MyDialog.Color;
+            //    Properties.Settings.Default.SETxCOLORxTRACKxDISABLEDxNOTxOCCUPIED = SetColorTrackDisabledNotOccupied.BackColor;
+            //}
         }        
         
     }

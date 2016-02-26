@@ -6,19 +6,19 @@
       <Value Profile="(Default)">10</Value>
     </Setting>
     <Setting Name="SETxCOLORxTRACKxOCCUPIED" Type="System.Drawing.Color" Scope="User">
-      <Value Profile="(Default)">Lime</Value>
-    </Setting>
-    <Setting Name="SETxCOLORxTRACKxNOTxINITIALIZED" Type="System.Drawing.Color" Scope="User">
       <Value Profile="(Default)">Cyan</Value>
     </Setting>
+    <Setting Name="SETxCOLORxTRACKxNOTxINITIALIZED" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">Yellow</Value>
+    </Setting>
     <Setting Name="SETxCOLORxTRACKxNOTxACTIVE" Type="System.Drawing.Color" Scope="User">
-      <Value Profile="(Default)">DarkGreen</Value>
+      <Value Profile="(Default)">128, 128, 255</Value>
     </Setting>
     <Setting Name="SETxCOLORxTRACKxDISABLED" Type="System.Drawing.Color" Scope="User">
-      <Value Profile="(Default)">255, 128, 128</Value>
+      <Value Profile="(Default)">Transparent</Value>
     </Setting>
     <Setting Name="SETxCOLORxTRACKxDISABLEDxNOTxOCCUPIED" Type="System.Drawing.Color" Scope="User">
-      <Value Profile="(Default)">192, 0, 0</Value>
+      <Value Profile="(Default)">Transparent</Value>
     </Setting>
     <Setting Name="dummy" Type="System.String" Scope="User">
       <Value Profile="(Default)" />

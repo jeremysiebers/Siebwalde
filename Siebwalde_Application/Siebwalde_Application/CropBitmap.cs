@@ -63,11 +63,11 @@ namespace Siebwalde_Application
 
             int croppedWidth = rightmost - leftmost;
             int croppedHeight = bottommost - topmost;
-            if (croppedWidth == 0)
+            if (croppedWidth <= 0)
             {
                 croppedWidth = bmp.Width;
             }
-            if (croppedHeight == 0)
+            if (croppedHeight <= 0)
             {
                 croppedHeight = bmp.Height;
             }

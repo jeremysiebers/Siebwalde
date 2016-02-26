@@ -8,7 +8,7 @@ namespace Siebwalde_Application
 {
     class ScaleBitmap
     {        
-        const float WIDTH = 100;
+        const float WIDTH = 1000;
 
         public static Bitmap Scale(Bitmap bmp, float HEIGHT)
         {
