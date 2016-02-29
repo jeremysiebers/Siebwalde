@@ -111,6 +111,7 @@
     <Compile Include="FiddleYardApplication\FiddleYardApplicationVariables.cs" />
     <Compile Include="FiddleYardApplication\FiddleYardAppRun.cs" />
     <Compile Include="FiddleYardApplication\FiddleYardAppTrainDrive.cs" />
+    <Compile Include="FiddleYardApplication\FiddleYardFormIndicator.cs" />
     <Compile Include="FiddleYardApplication\FiddleYardIOHandleVariables.cs" />
     <Compile Include="FiddleYardApplication\FiddleYardMip50.cs" />
     <Compile Include="FiddleYardApplication\FiddleYardTrainDetection.cs" />
