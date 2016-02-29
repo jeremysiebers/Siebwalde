@@ -110,6 +110,39 @@
             this.PB_Tr1_Train = new System.Windows.Forms.PictureBox();
             this.PB_Tr1_Active = new System.Windows.Forms.PictureBox();
             this.PB_Tr1_Inline = new System.Windows.Forms.PictureBox();
+            this.PB_Tr2_Train = new System.Windows.Forms.PictureBox();
+            this.PB_Tr2_Inline = new System.Windows.Forms.PictureBox();
+            this.PB_Tr2_Active = new System.Windows.Forms.PictureBox();
+            this.PB_Tr3_Train = new System.Windows.Forms.PictureBox();
+            this.PB_Tr3_Inline = new System.Windows.Forms.PictureBox();
+            this.PB_Tr3_Active = new System.Windows.Forms.PictureBox();
+            this.PB_Tr4_Train = new System.Windows.Forms.PictureBox();
+            this.PB_Tr4_Inline = new System.Windows.Forms.PictureBox();
+            this.PB_Tr4_Active = new System.Windows.Forms.PictureBox();
+            this.PB_Tr5_Train = new System.Windows.Forms.PictureBox();
+            this.PB_Tr5_Inline = new System.Windows.Forms.PictureBox();
+            this.PB_Tr5_Active = new System.Windows.Forms.PictureBox();
+            this.PB_Tr6_Train = new System.Windows.Forms.PictureBox();
+            this.PB_Tr6_Inline = new System.Windows.Forms.PictureBox();
+            this.PB_Tr6_Active = new System.Windows.Forms.PictureBox();
+            this.PB_Tr7_Train = new System.Windows.Forms.PictureBox();
+            this.PB_Tr7_Inline = new System.Windows.Forms.PictureBox();
+            this.PB_Tr7_Active = new System.Windows.Forms.PictureBox();
+            this.PB_Tr8_Train = new System.Windows.Forms.PictureBox();
+            this.PB_Tr8_Inline = new System.Windows.Forms.PictureBox();
+            this.PB_Tr8_Active = new System.Windows.Forms.PictureBox();
+            this.PB_Tr9_Train = new System.Windows.Forms.PictureBox();
+            this.PB_Tr9_Inline = new System.Windows.Forms.PictureBox();
+            this.PB_Tr9_Active = new System.Windows.Forms.PictureBox();
+            this.PB_Tr10_Train = new System.Windows.Forms.PictureBox();
+            this.PB_Tr10_Inline = new System.Windows.Forms.PictureBox();
+            this.PB_Tr10_Active = new System.Windows.Forms.PictureBox();
+            this.PB_Tr11_Train = new System.Windows.Forms.PictureBox();
+            this.PB_Tr11_Inline = new System.Windows.Forms.PictureBox();
+            this.PB_Tr11_Active = new System.Windows.Forms.PictureBox();
+            this.PB_Bk5_Train = new System.Windows.Forms.PictureBox();
+            this.PB_Bk8_Train = new System.Windows.Forms.PictureBox();
+            this.PB_Bk6_Train = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.Nuo_Track_No_TOP)).BeginInit();
             this.menuStrip1.SuspendLayout();
             this.AutomaticMode.SuspendLayout();
@@ -121,6 +154,39 @@
             ((System.ComponentModel.ISupportInitialize)(this.PB_Tr1_Train)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.PB_Tr1_Active)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.PB_Tr1_Inline)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr2_Train)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr2_Inline)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr2_Active)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr3_Train)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr3_Inline)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr3_Active)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr4_Train)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr4_Inline)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr4_Active)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr5_Train)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr5_Inline)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr5_Active)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr6_Train)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr6_Inline)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr6_Active)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr7_Train)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr7_Inline)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr7_Active)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr8_Train)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr8_Inline)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr8_Active)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr9_Train)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr9_Inline)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr9_Active)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr10_Train)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr10_Inline)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr10_Active)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr11_Train)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr11_Inline)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr11_Active)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Bk5_Train)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Bk8_Train)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Bk6_Train)).BeginInit();
             this.SuspendLayout();
             // 
             // Track_No
@@ -746,12 +812,277 @@
             this.PB_Tr1_Inline.Name = "PB_Tr1_Inline";
             this.PB_Tr1_Inline.TabStop = false;
             // 
+            // PB_Tr2_Train
+            // 
+            this.PB_Tr2_Train.BackColor = System.Drawing.Color.Transparent;
+            resources.ApplyResources(this.PB_Tr2_Train, "PB_Tr2_Train");
+            this.PB_Tr2_Train.Name = "PB_Tr2_Train";
+            this.PB_Tr2_Train.TabStop = false;
+            // 
+            // PB_Tr2_Inline
+            // 
+            this.PB_Tr2_Inline.BackColor = System.Drawing.Color.Transparent;
+            resources.ApplyResources(this.PB_Tr2_Inline, "PB_Tr2_Inline");
+            this.PB_Tr2_Inline.Name = "PB_Tr2_Inline";
+            this.PB_Tr2_Inline.TabStop = false;
+            // 
+            // PB_Tr2_Active
+            // 
+            this.PB_Tr2_Active.BackColor = System.Drawing.Color.Transparent;
+            resources.ApplyResources(this.PB_Tr2_Active, "PB_Tr2_Active");
+            this.PB_Tr2_Active.Name = "PB_Tr2_Active";
+            this.PB_Tr2_Active.TabStop = false;
+            // 
+            // PB_Tr3_Train
+            // 
+            this.PB_Tr3_Train.BackColor = System.Drawing.Color.Transparent;
+            resources.ApplyResources(this.PB_Tr3_Train, "PB_Tr3_Train");
+            this.PB_Tr3_Train.Name = "PB_Tr3_Train";
+            this.PB_Tr3_Train.TabStop = false;
+            // 
+            // PB_Tr3_Inline
+            // 
+            this.PB_Tr3_Inline.BackColor = System.Drawing.Color.Transparent;
+            resources.ApplyResources(this.PB_Tr3_Inline, "PB_Tr3_Inline");
+            this.PB_Tr3_Inline.Name = "PB_Tr3_Inline";
+            this.PB_Tr3_Inline.TabStop = false;
+            // 
+            // PB_Tr3_Active
+            // 
+            this.PB_Tr3_Active.BackColor = System.Drawing.Color.Transparent;
+            resources.ApplyResources(this.PB_Tr3_Active, "PB_Tr3_Active");
+            this.PB_Tr3_Active.Name = "PB_Tr3_Active";
+            this.PB_Tr3_Active.TabStop = false;
+            // 
+            // PB_Tr4_Train
+            // 
+            this.PB_Tr4_Train.BackColor = System.Drawing.Color.Transparent;
+            resources.ApplyResources(this.PB_Tr4_Train, "PB_Tr4_Train");
+            this.PB_Tr4_Train.Name = "PB_Tr4_Train";
+            this.PB_Tr4_Train.TabStop = false;
+            // 
+            // PB_Tr4_Inline
+            // 
+            this.PB_Tr4_Inline.BackColor = System.Drawing.Color.Transparent;
+            resources.ApplyResources(this.PB_Tr4_Inline, "PB_Tr4_Inline");
+            this.PB_Tr4_Inline.Name = "PB_Tr4_Inline";
+            this.PB_Tr4_Inline.TabStop = false;
+            // 
+            // PB_Tr4_Active
+            // 
+            this.PB_Tr4_Active.BackColor = System.Drawing.Color.Transparent;
+            resources.ApplyResources(this.PB_Tr4_Active, "PB_Tr4_Active");
+            this.PB_Tr4_Active.Name = "PB_Tr4_Active";
+            this.PB_Tr4_Active.TabStop = false;
+            // 
+            // PB_Tr5_Train
+            // 
+            this.PB_Tr5_Train.BackColor = System.Drawing.Color.Transparent;
+            resources.ApplyResources(this.PB_Tr5_Train, "PB_Tr5_Train");
+            this.PB_Tr5_Train.Name = "PB_Tr5_Train";
+            this.PB_Tr5_Train.TabStop = false;
+            // 
+            // PB_Tr5_Inline
+            // 
+            this.PB_Tr5_Inline.BackColor = System.Drawing.Color.Transparent;
+            resources.ApplyResources(this.PB_Tr5_Inline, "PB_Tr5_Inline");
+            this.PB_Tr5_Inline.Name = "PB_Tr5_Inline";
+            this.PB_Tr5_Inline.TabStop = false;
+            // 
+            // PB_Tr5_Active
+            // 
+            this.PB_Tr5_Active.BackColor = System.Drawing.Color.Transparent;
+            resources.ApplyResources(this.PB_Tr5_Active, "PB_Tr5_Active");
+            this.PB_Tr5_Active.Name = "PB_Tr5_Active";
+            this.PB_Tr5_Active.TabStop = false;
+            // 
+            // PB_Tr6_Train
+            // 
+            this.PB_Tr6_Train.BackColor = System.Drawing.Color.Transparent;
+            resources.ApplyResources(this.PB_Tr6_Train, "PB_Tr6_Train");
+            this.PB_Tr6_Train.Name = "PB_Tr6_Train";
+            this.PB_Tr6_Train.TabStop = false;
+            // 
+            // PB_Tr6_Inline
+            // 
+            this.PB_Tr6_Inline.BackColor = System.Drawing.Color.Transparent;
+            resources.ApplyResources(this.PB_Tr6_Inline, "PB_Tr6_Inline");
+            this.PB_Tr6_Inline.Name = "PB_Tr6_Inline";
+            this.PB_Tr6_Inline.TabStop = false;
+            // 
+            // PB_Tr6_Active
+            // 
+            this.PB_Tr6_Active.BackColor = System.Drawing.Color.Transparent;
+            resources.ApplyResources(this.PB_Tr6_Active, "PB_Tr6_Active");
+            this.PB_Tr6_Active.Name = "PB_Tr6_Active";
+            this.PB_Tr6_Active.TabStop = false;
+            // 
+            // PB_Tr7_Train
+            // 
+            this.PB_Tr7_Train.BackColor = System.Drawing.Color.Transparent;
+            resources.ApplyResources(this.PB_Tr7_Train, "PB_Tr7_Train");
+            this.PB_Tr7_Train.Name = "PB_Tr7_Train";
+            this.PB_Tr7_Train.TabStop = false;
+            // 
+            // PB_Tr7_Inline
+            // 
+            this.PB_Tr7_Inline.BackColor = System.Drawing.Color.Transparent;
+            resources.ApplyResources(this.PB_Tr7_Inline, "PB_Tr7_Inline");
+            this.PB_Tr7_Inline.Name = "PB_Tr7_Inline";
+            this.PB_Tr7_Inline.TabStop = false;
+            // 
+            // PB_Tr7_Active
+            // 
+            this.PB_Tr7_Active.BackColor = System.Drawing.Color.Transparent;
+            resources.ApplyResources(this.PB_Tr7_Active, "PB_Tr7_Active");
+            this.PB_Tr7_Active.Name = "PB_Tr7_Active";
+            this.PB_Tr7_Active.TabStop = false;
+            // 
+            // PB_Tr8_Train
+            // 
+            this.PB_Tr8_Train.BackColor = System.Drawing.Color.Transparent;
+            resources.ApplyResources(this.PB_Tr8_Train, "PB_Tr8_Train");
+            this.PB_Tr8_Train.Name = "PB_Tr8_Train";
+            this.PB_Tr8_Train.TabStop = false;
+            // 
+            // PB_Tr8_Inline
+            // 
+            this.PB_Tr8_Inline.BackColor = System.Drawing.Color.Transparent;
+            resources.ApplyResources(this.PB_Tr8_Inline, "PB_Tr8_Inline");
+            this.PB_Tr8_Inline.Name = "PB_Tr8_Inline";
+            this.PB_Tr8_Inline.TabStop = false;
+            // 
+            // PB_Tr8_Active
+            // 
+            this.PB_Tr8_Active.BackColor = System.Drawing.Color.Transparent;
+            resources.ApplyResources(this.PB_Tr8_Active, "PB_Tr8_Active");
+            this.PB_Tr8_Active.Name = "PB_Tr8_Active";
+            this.PB_Tr8_Active.TabStop = false;
+            // 
+            // PB_Tr9_Train
+            // 
+            this.PB_Tr9_Train.BackColor = System.Drawing.Color.Transparent;
+            resources.ApplyResources(this.PB_Tr9_Train, "PB_Tr9_Train");
+            this.PB_Tr9_Train.Name = "PB_Tr9_Train";
+            this.PB_Tr9_Train.TabStop = false;
+            // 
+            // PB_Tr9_Inline
+            // 
+            this.PB_Tr9_Inline.BackColor = System.Drawing.Color.Transparent;
+            resources.ApplyResources(this.PB_Tr9_Inline, "PB_Tr9_Inline");
+            this.PB_Tr9_Inline.Name = "PB_Tr9_Inline";
+            this.PB_Tr9_Inline.TabStop = false;
+            // 
+            // PB_Tr9_Active
+            // 
+            this.PB_Tr9_Active.BackColor = System.Drawing.Color.Transparent;
+            resources.ApplyResources(this.PB_Tr9_Active, "PB_Tr9_Active");
+            this.PB_Tr9_Active.Name = "PB_Tr9_Active";
+            this.PB_Tr9_Active.TabStop = false;
+            // 
+            // PB_Tr10_Train
+            // 
+            this.PB_Tr10_Train.BackColor = System.Drawing.Color.Transparent;
+            resources.ApplyResources(this.PB_Tr10_Train, "PB_Tr10_Train");
+            this.PB_Tr10_Train.Name = "PB_Tr10_Train";
+            this.PB_Tr10_Train.TabStop = false;
+            // 
+            // PB_Tr10_Inline
+            // 
+            this.PB_Tr10_Inline.BackColor = System.Drawing.Color.Transparent;
+            resources.ApplyResources(this.PB_Tr10_Inline, "PB_Tr10_Inline");
+            this.PB_Tr10_Inline.Name = "PB_Tr10_Inline";
+            this.PB_Tr10_Inline.TabStop = false;
+            // 
+            // PB_Tr10_Active
+            // 
+            this.PB_Tr10_Active.BackColor = System.Drawing.Color.Transparent;
+            resources.ApplyResources(this.PB_Tr10_Active, "PB_Tr10_Active");
+            this.PB_Tr10_Active.Name = "PB_Tr10_Active";
+            this.PB_Tr10_Active.TabStop = false;
+            // 
+            // PB_Tr11_Train
+            // 
+            this.PB_Tr11_Train.BackColor = System.Drawing.Color.Transparent;
+            resources.ApplyResources(this.PB_Tr11_Train, "PB_Tr11_Train");
+            this.PB_Tr11_Train.Name = "PB_Tr11_Train";
+            this.PB_Tr11_Train.TabStop = false;
+            // 
+            // PB_Tr11_Inline
+            // 
+            this.PB_Tr11_Inline.BackColor = System.Drawing.Color.Transparent;
+            resources.ApplyResources(this.PB_Tr11_Inline, "PB_Tr11_Inline");
+            this.PB_Tr11_Inline.Name = "PB_Tr11_Inline";
+            this.PB_Tr11_Inline.TabStop = false;
+            // 
+            // PB_Tr11_Active
+            // 
+            this.PB_Tr11_Active.BackColor = System.Drawing.Color.Transparent;
+            resources.ApplyResources(this.PB_Tr11_Active, "PB_Tr11_Active");
+            this.PB_Tr11_Active.Name = "PB_Tr11_Active";
+            this.PB_Tr11_Active.TabStop = false;
+            // 
+            // PB_Bk5_Train
+            // 
+            this.PB_Bk5_Train.BackColor = System.Drawing.Color.Transparent;
+            resources.ApplyResources(this.PB_Bk5_Train, "PB_Bk5_Train");
+            this.PB_Bk5_Train.Name = "PB_Bk5_Train";
+            this.PB_Bk5_Train.TabStop = false;
+            // 
+            // PB_Bk8_Train
+            // 
+            this.PB_Bk8_Train.BackColor = System.Drawing.Color.Transparent;
+            resources.ApplyResources(this.PB_Bk8_Train, "PB_Bk8_Train");
+            this.PB_Bk8_Train.Name = "PB_Bk8_Train";
+            this.PB_Bk8_Train.TabStop = false;
+            this.PB_Bk8_Train.Click += new System.EventHandler(this.pictureBox2_Click);
+            // 
+            // PB_Bk6_Train
+            // 
+            this.PB_Bk6_Train.BackColor = System.Drawing.Color.Transparent;
+            resources.ApplyResources(this.PB_Bk6_Train, "PB_Bk6_Train");
+            this.PB_Bk6_Train.Name = "PB_Bk6_Train";
+            this.PB_Bk6_Train.TabStop = false;
+            // 
             // FiddleYardForm
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.PB_Tr11_Active);
+            this.Controls.Add(this.PB_Tr11_Inline);
+            this.Controls.Add(this.PB_Tr10_Active);
+            this.Controls.Add(this.PB_Tr10_Inline);
+            this.Controls.Add(this.PB_Tr9_Active);
+            this.Controls.Add(this.PB_Tr9_Inline);
+            this.Controls.Add(this.PB_Tr8_Active);
+            this.Controls.Add(this.PB_Tr8_Inline);
+            this.Controls.Add(this.PB_Tr7_Active);
+            this.Controls.Add(this.PB_Tr7_Inline);
+            this.Controls.Add(this.PB_Tr6_Active);
+            this.Controls.Add(this.PB_Tr6_Inline);
+            this.Controls.Add(this.PB_Tr11_Train);
+            this.Controls.Add(this.PB_Tr5_Active);
+            this.Controls.Add(this.PB_Tr10_Train);
+            this.Controls.Add(this.PB_Tr5_Inline);
+            this.Controls.Add(this.PB_Tr9_Train);
+            this.Controls.Add(this.PB_Tr4_Active);
+            this.Controls.Add(this.PB_Tr8_Train);
+            this.Controls.Add(this.PB_Tr4_Inline);
+            this.Controls.Add(this.PB_Tr7_Train);
+            this.Controls.Add(this.PB_Tr3_Active);
+            this.Controls.Add(this.PB_Tr6_Train);
+            this.Controls.Add(this.PB_Tr3_Inline);
+            this.Controls.Add(this.PB_Tr5_Train);
+            this.Controls.Add(this.PB_Tr2_Active);
+            this.Controls.Add(this.PB_Tr4_Train);
+            this.Controls.Add(this.PB_Tr2_Inline);
+            this.Controls.Add(this.PB_Tr3_Train);
             this.Controls.Add(this.PB_Tr1_Active);
+            this.Controls.Add(this.PB_Tr2_Train);
             this.Controls.Add(this.PB_Tr1_Inline);
+            this.Controls.Add(this.PB_Bk8_Train);
+            this.Controls.Add(this.PB_Bk5_Train);
+            this.Controls.Add(this.PB_Bk6_Train);
             this.Controls.Add(this.PB_Tr1_Train);
             this.Controls.Add(this.AutomaticMode);
             this.Controls.Add(this.PB_Block7In);
@@ -818,6 +1149,39 @@
             ((System.ComponentModel.ISupportInitialize)(this.PB_Tr1_Train)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.PB_Tr1_Active)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.PB_Tr1_Inline)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr2_Train)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr2_Inline)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr2_Active)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr3_Train)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr3_Inline)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr3_Active)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr4_Train)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr4_Inline)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr4_Active)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr5_Train)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr5_Inline)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr5_Active)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr6_Train)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr6_Inline)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr6_Active)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr7_Train)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr7_Inline)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr7_Active)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr8_Train)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr8_Inline)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr8_Active)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr9_Train)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr9_Inline)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr9_Active)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr10_Train)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr10_Inline)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr10_Active)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr11_Train)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr11_Inline)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Tr11_Active)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Bk5_Train)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Bk8_Train)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Bk6_Train)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -909,5 +1273,38 @@
         private System.Windows.Forms.PictureBox PB_Tr1_Train;
         private System.Windows.Forms.PictureBox PB_Tr1_Active;
         private System.Windows.Forms.PictureBox PB_Tr1_Inline;
+        private System.Windows.Forms.PictureBox PB_Tr2_Train;
+        private System.Windows.Forms.PictureBox PB_Tr2_Inline;
+        private System.Windows.Forms.PictureBox PB_Tr2_Active;
+        private System.Windows.Forms.PictureBox PB_Tr3_Train;
+        private System.Windows.Forms.PictureBox PB_Tr3_Inline;
+        private System.Windows.Forms.PictureBox PB_Tr3_Active;
+        private System.Windows.Forms.PictureBox PB_Tr4_Train;
+        private System.Windows.Forms.PictureBox PB_Tr4_Inline;
+        private System.Windows.Forms.PictureBox PB_Tr4_Active;
+        private System.Windows.Forms.PictureBox PB_Tr5_Train;
+        private System.Windows.Forms.PictureBox PB_Tr5_Inline;
+        private System.Windows.Forms.PictureBox PB_Tr5_Active;
+        private System.Windows.Forms.PictureBox PB_Tr6_Train;
+        private System.Windows.Forms.PictureBox PB_Tr6_Inline;
+        private System.Windows.Forms.PictureBox PB_Tr6_Active;
+        private System.Windows.Forms.PictureBox PB_Tr7_Train;
+        private System.Windows.Forms.PictureBox PB_Tr7_Inline;
+        private System.Windows.Forms.PictureBox PB_Tr7_Active;
+        private System.Windows.Forms.PictureBox PB_Tr8_Train;
+        private System.Windows.Forms.PictureBox PB_Tr8_Inline;
+        private System.Windows.Forms.PictureBox PB_Tr8_Active;
+        private System.Windows.Forms.PictureBox PB_Tr9_Train;
+        private System.Windows.Forms.PictureBox PB_Tr9_Inline;
+        private System.Windows.Forms.PictureBox PB_Tr9_Active;
+        private System.Windows.Forms.PictureBox PB_Tr10_Train;
+        private System.Windows.Forms.PictureBox PB_Tr10_Inline;
+        private System.Windows.Forms.PictureBox PB_Tr10_Active;
+        private System.Windows.Forms.PictureBox PB_Tr11_Train;
+        private System.Windows.Forms.PictureBox PB_Tr11_Inline;
+        private System.Windows.Forms.PictureBox PB_Tr11_Active;
+        private System.Windows.Forms.PictureBox PB_Bk5_Train;
+        private System.Windows.Forms.PictureBox PB_Bk8_Train;
+        private System.Windows.Forms.PictureBox PB_Bk6_Train;
     }
 }

@@ -36,6 +36,20 @@ namespace Siebwalde_Application
         public int Track6LocY;
         public int Track6LocX;
 
+        public int TrackLocDelta = 32;
+        public int Track1Loc = 0;
+        public int Track2Loc = 0;
+        public int Track3Loc = 0;
+        public int Track4Loc = 0;
+        public int Track5Loc = 0;
+        public int Track6Loc = 0;
+        public int Track7Loc = 0;
+        public int Track8Loc = 0;
+        public int Track9Loc = 0;
+        public int Track10Loc = 0;
+        public int Track11Loc = 0;
+        public int FYPlateLoc = 0;
+
         public bool[] TrackStatusLight = new bool[12]
         {
             false, false, false, false, false, false, false, false, false, false, false, false};
@@ -49,16 +63,16 @@ namespace Siebwalde_Application
         public FiddleYardApplicationVariables m_FYAppVar;
 
         // Create actuators, when a button is pressed an event is generated to send a command to target via IOHandle and to the controlling program
-        
 
+        private static int FYTrackHeight = 16;
+        private static int PBHeight = FYTrackHeight - 2;        
         public Image SeinGreen = Siebwalde_Application.Properties.Resources.SeinGreen.ToBitmap();
         public Image SeinRed = Siebwalde_Application.Properties.Resources.SeinRed.ToBitmap();
         public Image SeinGreen90 = Siebwalde_Application.Properties.Resources.SeinGreen.ToBitmap();
         public Image SeinRed90 = Siebwalde_Application.Properties.Resources.SeinRed.ToBitmap();
-        public Image Train = CropBitmap.Crop(ScaleBitmap.Scale(CropBitmap.Crop(Siebwalde_Application.Properties.Resources.TrainWithWagon.ToBitmap()), 22));
-        public Image Active = CropBitmap.Crop(ScaleBitmap.Scale(CropBitmap.Crop(Siebwalde_Application.Properties.Resources.StopSign.ToBitmap()), 22));
-        public Image Inline = CropBitmap.Crop(ScaleBitmap.Scale(CropBitmap.Crop(Siebwalde_Application.Properties.Resources.Arrow.ToBitmap()), 22));
-
+        public Image Train = CropBitmap.Crop(ScaleBitmap.Scale(CropBitmap.Crop(Siebwalde_Application.Properties.Resources.TrainWithWagon.ToBitmap()), PBHeight));
+        public Image Active = CropBitmap.Crop(ScaleBitmap.Scale(CropBitmap.Crop(Siebwalde_Application.Properties.Resources.StopSign.ToBitmap()), PBHeight));
+        public Image Inline = CropBitmap.Crop(ScaleBitmap.Scale(CropBitmap.Crop(Siebwalde_Application.Properties.Resources.Arrow.ToBitmap()), PBHeight));
         /*#--------------------------------------------------------------------------#*/
         /*  Description: FiddleYardForm
          *               Constructor
@@ -93,7 +107,7 @@ namespace Siebwalde_Application
             GWinX = 5;                      // The X location of Gwin border line.
             GWinY = 32;                     // The X location of Gwin border line.
             GWinHalf = 740 / 2 + GWinY;     // The Height of GWin devided by 2 plus the offset in Y is the center line of GWin
-            Track6LocY = GWinHalf - 8;
+            Track6LocY = GWinHalf;// - 8;
             Track6LocX = GWinX + 170;
             
 
@@ -142,8 +156,8 @@ namespace Siebwalde_Application
             LLed_F12.Size = new Size(30, 14);
             LLed_F12.Location = new System.Drawing.Point(GWinX + 730, GWinHalf - 7);
 
-            LLed_Block7.Size = new Size(100,16);
-            LLed_Block7.Location = new System.Drawing.Point(GWinX + 790, GWinHalf - 8);
+            LLed_Block7.Size = new Size(121,16);
+            LLed_Block7.Location = new System.Drawing.Point(GWinX + 769, GWinHalf - 8);
 
             LLed_Block7In.Size = new Size(26, 14);
             LLed_Block7In.Location = new System.Drawing.Point(GWinX + 790 + (100 / 2 - 26 / 2), GWinHalf - 7 + 25);
@@ -156,52 +170,151 @@ namespace Siebwalde_Application
             LLed_Block8A.Size = new Size(16, 250);
             LLed_Block8A.Location = new System.Drawing.Point(GWinX + 790 + (100 - 16), GWinHalf - 250 - 18);
             //----------------------------------------------------------------------------------------------------------------------------//
-            LLed_Track1.Size = new Size(600, 24);
-            LLed_Track1.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 164);
+            LLed_Track1.Size = new Size(600, FYTrackHeight);            
 
-            PB_Tr1_Train.Size = new Size(Train.Width, Train.Height);
-            PB_Tr1_Train.Location = new System.Drawing.Point(Track6LocX + 150, Track6LocY - 152 - Train.Height / 2);
+            PB_Tr1_Train.Size = new Size(Train.Width, Train.Height);            
             PB_Tr1_Train.Image = Train;
-            PB_Tr1_Train.Hide();                                                                // Train present?
+            PB_Tr1_Train.Hide();                                                                
             
-            PB_Tr1_Inline.Size = new Size(Inline.Width, Inline.Height);
-            PB_Tr1_Inline.Location = new System.Drawing.Point(Track6LocX + 270, Track6LocY - 161);
+            PB_Tr1_Inline.Size = new Size(Inline.Width, Inline.Height);            
             PB_Tr1_Inline.Image = Inline;
-            PB_Tr1_Inline.Hide();                                                               // Track active?
+            PB_Tr1_Inline.Hide();                                                               
 
-            PB_Tr1_Active.Size = new Size(Active.Width, Active.Height);
-            PB_Tr1_Active.Location = new System.Drawing.Point(Track6LocX + 410, Track6LocY - 161);
+            PB_Tr1_Active.Size = new Size(Active.Width, Active.Height);            
             PB_Tr1_Active.Image = Active;
             //----------------------------------------------------------------------------------------------------------------------------//
-            LLed_Track2.Size = new Size(600, 16);
-            LLed_Track2.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 128);
+            LLed_Track2.Size = new Size(600, FYTrackHeight);
+            
+            PB_Tr2_Train.Size = new Size(Train.Width, Train.Height);            
+            PB_Tr2_Train.Image = Train;
+            PB_Tr2_Train.Hide();
+                       
+            PB_Tr2_Inline.Size = new Size(Inline.Width, Inline.Height);            
+            PB_Tr2_Inline.Image = Inline;
+            PB_Tr2_Inline.Hide();           
+                        
+            PB_Tr2_Active.Size = new Size(Active.Width, Active.Height);            
+            PB_Tr2_Active.Image = Active;                 
             //----------------------------------------------------------------------------------------------------------------------------//
-            LLed_Track3.Size = new Size(600, 16);
-            LLed_Track3.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 96);
+            LLed_Track3.Size = new Size(600, FYTrackHeight);
+
+            PB_Tr3_Train.Size = new Size(Train.Width, Train.Height);
+            PB_Tr3_Train.Image = Train;
+            PB_Tr3_Train.Hide();
+
+            PB_Tr3_Inline.Size = new Size(Inline.Width, Inline.Height);
+            PB_Tr3_Inline.Image = Inline;
+            PB_Tr3_Inline.Hide();
+
+            PB_Tr3_Active.Size = new Size(Active.Width, Active.Height);
+            PB_Tr3_Active.Image = Active;
             //----------------------------------------------------------------------------------------------------------------------------//
-            LLed_Track4.Size = new Size(600, 16);
-            LLed_Track4.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 64);
+            LLed_Track4.Size = new Size(600, FYTrackHeight);
+
+            PB_Tr4_Train.Size = new Size(Train.Width, Train.Height);
+            PB_Tr4_Train.Image = Train;
+            PB_Tr4_Train.Hide();
+
+            PB_Tr4_Inline.Size = new Size(Inline.Width, Inline.Height);
+            PB_Tr4_Inline.Image = Inline;
+            PB_Tr4_Inline.Hide();
+
+            PB_Tr4_Active.Size = new Size(Active.Width, Active.Height);
+            PB_Tr4_Active.Image = Active;
             //----------------------------------------------------------------------------------------------------------------------------//
-            LLed_Track5.Size = new Size(600, 16);
-            LLed_Track5.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 32);
+            LLed_Track5.Size = new Size(600, FYTrackHeight);
+
+            PB_Tr5_Train.Size = new Size(Train.Width, Train.Height);
+            PB_Tr5_Train.Image = Train;
+            PB_Tr5_Train.Hide();
+
+            PB_Tr5_Inline.Size = new Size(Inline.Width, Inline.Height);
+            PB_Tr5_Inline.Image = Inline;
+            PB_Tr5_Inline.Hide();
+
+            PB_Tr5_Active.Size = new Size(Active.Width, Active.Height);
+            PB_Tr5_Active.Image = Active;
             //----------------------------------------------------------------------------------------------------------------------------//
-            LLed_Track6.Size = new Size(600, 16);
-            LLed_Track6.Location = new System.Drawing.Point(Track6LocX, Track6LocY);
+            LLed_Track6.Size = new Size(600, FYTrackHeight);
+
+            PB_Tr6_Train.Size = new Size(Train.Width, Train.Height);
+            PB_Tr6_Train.Image = Train;
+            PB_Tr6_Train.Hide();
+
+            PB_Tr6_Inline.Size = new Size(Inline.Width, Inline.Height);
+            PB_Tr6_Inline.Image = Inline;
+            PB_Tr6_Inline.Hide();
+
+            PB_Tr6_Active.Size = new Size(Active.Width, Active.Height);
+            PB_Tr6_Active.Image = Active;
             //----------------------------------------------------------------------------------------------------------------------------//
-            LLed_Track7.Size = new Size(600, 16);
-            LLed_Track7.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 32);
+            LLed_Track7.Size = new Size(600, FYTrackHeight);
+
+            PB_Tr7_Train.Size = new Size(Train.Width, Train.Height);
+            PB_Tr7_Train.Image = Train;
+            PB_Tr7_Train.Hide();
+
+            PB_Tr7_Inline.Size = new Size(Inline.Width, Inline.Height);
+            PB_Tr7_Inline.Image = Inline;
+            PB_Tr7_Inline.Hide();
+
+            PB_Tr7_Active.Size = new Size(Active.Width, Active.Height);
+            PB_Tr7_Active.Image = Active;
             //----------------------------------------------------------------------------------------------------------------------------//
-            LLed_Track8.Size = new Size(600, 16);
-            LLed_Track8.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 64);
+            LLed_Track8.Size = new Size(600, FYTrackHeight);
+
+            PB_Tr8_Train.Size = new Size(Train.Width, Train.Height);
+            PB_Tr8_Train.Image = Train;
+            PB_Tr8_Train.Hide();
+
+            PB_Tr8_Inline.Size = new Size(Inline.Width, Inline.Height);
+            PB_Tr8_Inline.Image = Inline;
+            PB_Tr8_Inline.Hide();
+
+            PB_Tr8_Active.Size = new Size(Active.Width, Active.Height);
+            PB_Tr8_Active.Image = Active;
             //----------------------------------------------------------------------------------------------------------------------------//
-            LLed_Track9.Size = new Size(600, 16);
-            LLed_Track9.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 96);
+            LLed_Track9.Size = new Size(600, FYTrackHeight);
+
+            PB_Tr9_Train.Size = new Size(Train.Width, Train.Height);
+            PB_Tr9_Train.Image = Train;
+            PB_Tr9_Train.Hide();
+
+            PB_Tr9_Inline.Size = new Size(Inline.Width, Inline.Height);
+            PB_Tr9_Inline.Image = Inline;
+            PB_Tr9_Inline.Hide();
+
+            PB_Tr9_Active.Size = new Size(Active.Width, Active.Height);
+            PB_Tr9_Active.Image = Active;
             //----------------------------------------------------------------------------------------------------------------------------//
-            LLed_Track10.Size = new Size(600, 16);
-            LLed_Track10.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 128);
+            LLed_Track10.Size = new Size(600, FYTrackHeight);
+
+            PB_Tr10_Train.Size = new Size(Train.Width, Train.Height);
+            PB_Tr10_Train.Image = Train;
+            PB_Tr10_Train.Hide();
+
+            PB_Tr10_Inline.Size = new Size(Inline.Width, Inline.Height);
+            PB_Tr10_Inline.Image = Inline;
+            PB_Tr10_Inline.Hide();
+
+            PB_Tr10_Active.Size = new Size(Active.Width, Active.Height);
+            PB_Tr10_Active.Image = Active;
             //----------------------------------------------------------------------------------------------------------------------------//
-            LLed_Track11.Size = new Size(600, 16);
-            LLed_Track11.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 160);
+            LLed_Track11.Size = new Size(600, FYTrackHeight);
+
+            PB_Tr11_Train.Size = new Size(Train.Width, Train.Height);
+            PB_Tr11_Train.Image = Train;
+            PB_Tr11_Train.Hide();
+
+            PB_Tr11_Inline.Size = new Size(Inline.Width, Inline.Height);
+            PB_Tr11_Inline.Image = Inline;
+            PB_Tr11_Inline.Hide();
+
+            PB_Tr11_Active.Size = new Size(Active.Width, Active.Height);
+            PB_Tr11_Active.Image = Active;
+            //----------------------------------------------------------------------------------------------------------------------------//
+            //PB_Bk5_Train.Size = ------------$#*&^@$)*&^#$)*&$^#@_&$^_@!&$^_@!&@%^_(&*@#^$_(&@#^_&^@!$_&^@!_(*&$^_*(&$^
+
             //----------------------------------------------------------------------------------------------------------------------------//
             LLed_EOS11.Size = new Size(50, 16);
             LLed_EOS11.Location = new System.Drawing.Point(GWinX + 180, GWinHalf - 360);
@@ -273,7 +386,8 @@ namespace Siebwalde_Application
 
             #endregion Indicator init            
 
-            Btn_Stop_Fiddle_TOP.Enabled = false;            
+            Btn_Stop_Fiddle_TOP.Enabled = false;    
+                    
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -837,10 +951,9 @@ namespace Siebwalde_Application
                         Initialized = false;            
                         // Next also force all track color to cyan including text becasue if a track is already false no update is executed on each track color.
                         LLed_Track1.BackColor = m_FYAppVar.TrackNotInitializedColor;;
-                        LLed_Track1.Text = "                     Not Initialized";
-                        PB_Tr1_Train.Hide(); PB_Tr1_Inline.Hide();
+                        LLed_Track1.Text = "                     Not Initialized";                        
                         LLed_Track2.BackColor = m_FYAppVar.TrackNotInitializedColor;;
-                        LLed_Track2.Text = "                     Not Initialized";
+                        LLed_Track2.Text = "                     Not Initialized";                        
                         LLed_Track3.BackColor = m_FYAppVar.TrackNotInitializedColor;;
                         LLed_Track3.Text = "                     Not Initialized";
                         LLed_Track4.BackColor = m_FYAppVar.TrackNotInitializedColor;;
@@ -858,8 +971,20 @@ namespace Siebwalde_Application
                         LLed_Track10.BackColor = m_FYAppVar.TrackNotInitializedColor;;
                         LLed_Track10.Text = "                     Not Initialized";
                         LLed_Track11.BackColor = m_FYAppVar.TrackNotInitializedColor;;
-                        LLed_Track11.Text = "                     Not Initialized";       
-                 
+                        LLed_Track11.Text = "                     Not Initialized";
+                        PB_Tr1_Train.Hide(); PB_Tr1_Inline.Hide();
+                        PB_Tr2_Train.Hide(); PB_Tr2_Inline.Hide();
+                        PB_Tr3_Train.Hide(); PB_Tr3_Inline.Hide();
+                        PB_Tr4_Train.Hide(); PB_Tr4_Inline.Hide();
+                        PB_Tr5_Train.Hide(); PB_Tr5_Inline.Hide();
+                        PB_Tr6_Train.Hide(); PB_Tr6_Inline.Hide();
+                        PB_Tr7_Train.Hide(); PB_Tr7_Inline.Hide();
+                        PB_Tr8_Train.Hide(); PB_Tr8_Inline.Hide();
+                        PB_Tr9_Train.Hide(); PB_Tr9_Inline.Hide();
+                        PB_Tr10_Train.Hide(); PB_Tr10_Inline.Hide();
+                        PB_Tr11_Train.Hide(); PB_Tr11_Inline.Hide();
+
+
                         Btn_Collect_TOP.Enabled = true;
                         Btn_Start_Fiddle_TOP.Enabled = true;
                         Btn_Stop_Fiddle_TOP.Enabled = false;
@@ -1112,19 +1237,7 @@ namespace Siebwalde_Application
                             LLed_Track1.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
                             PB_Tr1_Train.Show();                                                                // Train present?
                             CheckWhichTrackInline();                                                            // Sensor background color update
-                        }                        
-                        //else if (Val >= 1 && m_FYAppVar.icheckBoxTrack[1] == 1)                                 // If track is disabled and occupied
-                        //{
-                        //    LLed_Track1.BackColor = m_FYAppVar.TrackDisabledColor;                              // Set TrackDisabledColor
-                        //    PB_Tr1_Train.Show();                                                                // Train present?
-                        //    CheckWhichTrackInline();                                                            // Sensor background color update
-                        //}
-                        //else if (Val >= 0 && m_FYAppVar.icheckBoxTrack[1] == 1)                                 // If track is disabled and not occupied
-                        //{
-                        //    LLed_Track1.BackColor = m_FYAppVar.TrackDisabledNotOccupiedColor;                   // Set TrackDisabledNotOccupiedColor
-                        //    PB_Tr1_Train.Hide();                                                                // Train present?
-                        //    CheckWhichTrackInline();                                                            // Sensor background color update
-                        //}
+                        } 
                         else if (Val == 0 && Initialized == true)                                                 // If train not present and FY is initialized and Track is enabled
                         {
                             LLed_Track1.BackColor = Color.Transparent;                                          // Set Color.Transparent
@@ -1148,26 +1261,19 @@ namespace Siebwalde_Application
                         if (Val >= 1 && TrackStatusLight[2] == true)                                            // If train present and Track is active and track is enabled
                         {
                             LLed_Track2.BackColor = m_FYAppVar.TrackOccupiedColor;                              // Set TrackOccupiedColor
+                            PB_Tr2_Train.Show();                                                                // Train present?
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         else if (Val >= 1 && TrackStatusLight[2] == false)                                      // If train present and Track is not active and track is enabled
                         {
                             LLed_Track2.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
+                            PB_Tr2_Train.Show();                                                                // Train present?
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        //else if (Val >= 1 && m_FYAppVar.icheckBoxTrack[2] == 1)                                 // If track is disabled and occupied
-                        //{
-                        //    LLed_Track2.BackColor = m_FYAppVar.TrackDisabledColor;                              // Set TrackDisabledColor
-                        //    CheckWhichTrackInline();                                                            // Sensor background color update
-                        //}
-                        //else if (Val >= 0 && m_FYAppVar.icheckBoxTrack[2] == 1)                                 // If track is disabled and not occupied
-                        //{
-                        //    LLed_Track2.BackColor = m_FYAppVar.TrackDisabledNotOccupiedColor;                   // Set TrackDisabledNotOccupiedColor
-                        //    CheckWhichTrackInline();                                                            // Sensor background color update
-                        //}
                         else if (Val == 0 && Initialized == true)                                               // If train not present and FY is initialized and Track is enabled
                         {
                             LLed_Track2.BackColor = Color.Transparent;                                          // Set Color.Transparent
+                            PB_Tr2_Train.Hide();                                                                // Train present?
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
 
@@ -1175,34 +1281,31 @@ namespace Siebwalde_Application
                         {
                             LLed_Track2.BackColor = m_FYAppVar.TrackNotInitializedColor;                        // Set TrackNotInitializedColor
                             LLed_Track2.Text = "                     Not Initialized";                          // Set Track text
+                            PB_Tr2_Train.Hide();                                                                // Train present?
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
+                        PB_Tr2_Active.BackColor = LLed_Track2.BackColor;
+                        PB_Tr2_Inline.BackColor = LLed_Track2.BackColor;
+                        PB_Tr2_Train.BackColor = LLed_Track2.BackColor;
                         break;
 
                     case "LLed_Track3":
                         if (Val >= 1 && TrackStatusLight[3] == true)                                            // If train present and Track is active and track is enabled
                         {
                             LLed_Track3.BackColor = m_FYAppVar.TrackOccupiedColor;                              // Set TrackOccupiedColor
+                            PB_Tr3_Train.Show();                                                                // Train present?
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         else if (Val >= 1 && TrackStatusLight[3] == false)                                      // If train present and Track is not active and track is enabled
                         {
                             LLed_Track3.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
+                            PB_Tr3_Train.Show();                                                                // Train present?
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        //else if (Val >= 1 && m_FYAppVar.icheckBoxTrack[3] == 1)                                 // If track is disabled and occupied
-                        //{
-                        //    LLed_Track3.BackColor = m_FYAppVar.TrackDisabledColor;                              // Set TrackDisabledColor
-                        //    CheckWhichTrackInline();                                                            // Sensor background color update
-                        //}
-                        //else if (Val >= 0 && m_FYAppVar.icheckBoxTrack[3] == 1)                                 // If track is disabled and not occupied
-                        //{
-                        //    LLed_Track3.BackColor = m_FYAppVar.TrackDisabledNotOccupiedColor;                   // Set TrackDisabledNotOccupiedColor
-                        //    CheckWhichTrackInline();                                                            // Sensor background color update
-                        //}
                         else if (Val == 0 && Initialized == true)                                               // If train not present and FY is initialized and Track is enabled
                         {
                             LLed_Track3.BackColor = Color.Transparent;                                          // Set Color.Transparent
+                            PB_Tr3_Train.Hide();                                                                // Train present?
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
 
@@ -1210,34 +1313,31 @@ namespace Siebwalde_Application
                         {
                             LLed_Track3.BackColor = m_FYAppVar.TrackNotInitializedColor;                        // Set TrackNotInitializedColor
                             LLed_Track3.Text = "                     Not Initialized";                          // Set Track text
+                            PB_Tr3_Train.Hide();                                                                // Train present?
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
+                        PB_Tr3_Active.BackColor = LLed_Track3.BackColor;
+                        PB_Tr3_Inline.BackColor = LLed_Track3.BackColor;
+                        PB_Tr3_Train.BackColor = LLed_Track3.BackColor;
                         break;
 
                     case "LLed_Track4":
                         if (Val >= 1 && TrackStatusLight[4] == true)                                            // If train present and Track is active and track is enabled
                         {
                             LLed_Track4.BackColor = m_FYAppVar.TrackOccupiedColor;                              // Set TrackOccupiedColor
+                            PB_Tr4_Train.Show();                                                                // Train present?
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         else if (Val >= 1 && TrackStatusLight[4] == false)                                      // If train present and Track is not active and track is enabled
                         {
                             LLed_Track4.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
+                            PB_Tr4_Train.Show();                                                                // Train present?
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        ////else if (Val >= 1 && m_FYAppVar.icheckBoxTrack[4] == 1)                                 // If track is disabled and occupied
-                        ////{
-                        ////    LLed_Track4.BackColor = m_FYAppVar.TrackDisabledColor;                              // Set TrackDisabledColor
-                        ////    CheckWhichTrackInline();                                                            // Sensor background color update
-                        ////}
-                        ////else if (Val >= 0 && m_FYAppVar.icheckBoxTrack[4] == 1)                                 // If track is disabled and not occupied
-                        ////{
-                        ////    LLed_Track4.BackColor = m_FYAppVar.TrackDisabledNotOccupiedColor;                   // Set TrackDisabledNotOccupiedColor
-                        ////    CheckWhichTrackInline();                                                            // Sensor background color update
-                        ////}
                         else if (Val == 0 && Initialized == true)                                                   // If train not present and FY is initialized and Track is enabled
                         {
                             LLed_Track4.BackColor = Color.Transparent;                                          // Set Color.Transparent
+                            PB_Tr4_Train.Hide();                                                                // Train present?
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
 
@@ -1245,34 +1345,31 @@ namespace Siebwalde_Application
                         {
                             LLed_Track4.BackColor = m_FYAppVar.TrackNotInitializedColor;                        // Set TrackNotInitializedColor
                             LLed_Track4.Text = "                     Not Initialized";                          // Set Track text
+                            PB_Tr4_Train.Hide();                                                                // Train present?
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
+                        PB_Tr4_Active.BackColor = LLed_Track4.BackColor;
+                        PB_Tr4_Inline.BackColor = LLed_Track4.BackColor;
+                        PB_Tr4_Train.BackColor = LLed_Track4.BackColor;
                         break;
 
                     case "LLed_Track5":
                         if (Val >= 1 && TrackStatusLight[5] == true)                                            // If train present and Track is active and track is enabled
                         {
                             LLed_Track5.BackColor = m_FYAppVar.TrackOccupiedColor;                              // Set TrackOccupiedColor
+                            PB_Tr5_Train.Show();                                                                // Train present?
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         else if (Val >= 1 && TrackStatusLight[5] == false)                                      // If train present and Track is not active and track is enabled
                         {
                             LLed_Track5.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
+                            PB_Tr5_Train.Show();                                                                // Train present?
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        //else if (Val >= 1 && m_FYAppVar.icheckBoxTrack[5] == 1)                                 // If track is disabled and occupied
-                        //{
-                        //    LLed_Track5.BackColor = m_FYAppVar.TrackDisabledColor;                              // Set TrackDisabledColor
-                        //    CheckWhichTrackInline();                                                            // Sensor background color update
-                        //}
-                        //else if (Val >= 0 && m_FYAppVar.icheckBoxTrack[5] == 1)                                 // If track is disabled and not occupied
-                        //{
-                        //    LLed_Track5.BackColor = m_FYAppVar.TrackDisabledNotOccupiedColor;                   // Set TrackDisabledNotOccupiedColor
-                        //    CheckWhichTrackInline();                                                            // Sensor background color update
-                        //}
                         else if (Val == 0 && Initialized == true)                                                 // If train not present and FY is initialized and Track is enabled
                         {
                             LLed_Track5.BackColor = Color.Transparent;                                          // Set Color.Transparent
+                            PB_Tr5_Train.Hide();                                                                // Train present?
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
 
@@ -1280,34 +1377,31 @@ namespace Siebwalde_Application
                         {
                             LLed_Track5.BackColor = m_FYAppVar.TrackNotInitializedColor;                        // Set TrackNotInitializedColor
                             LLed_Track5.Text = "                     Not Initialized";                          // Set Track text
+                            PB_Tr5_Train.Hide();                                                                // Train present?
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
+                        PB_Tr5_Active.BackColor = LLed_Track5.BackColor;
+                        PB_Tr5_Inline.BackColor = LLed_Track5.BackColor;
+                        PB_Tr5_Train.BackColor = LLed_Track5.BackColor;
                         break;
 
                     case "LLed_Track6":
                         if (Val >= 1 && TrackStatusLight[6] == true)                                            // If train present and Track is active and track is enabled
                         {
                             LLed_Track6.BackColor = m_FYAppVar.TrackOccupiedColor;                              // Set TrackOccupiedColor
+                            PB_Tr6_Train.Show();                                                                // Train present?
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         else if (Val >= 1 && TrackStatusLight[6] == false)                                      // If train present and Track is not active and track is enabled
                         {
                             LLed_Track6.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
+                            PB_Tr6_Train.Show();                                                                // Train present?
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        //else if (Val >= 1 && m_FYAppVar.icheckBoxTrack[6] == 1)                                 // If track is disabled and occupied
-                        //{
-                        //    LLed_Track6.BackColor = m_FYAppVar.TrackDisabledColor;                              // Set TrackDisabledColor
-                        //    CheckWhichTrackInline();                                                            // Sensor background color update
-                        //}
-                        //else if (Val >= 0 && m_FYAppVar.icheckBoxTrack[6] == 1)                                 // If track is disabled and not occupied
-                        //{
-                        //    LLed_Track6.BackColor = m_FYAppVar.TrackDisabledNotOccupiedColor;                   // Set TrackDisabledNotOccupiedColor
-                        //    CheckWhichTrackInline();                                                            // Sensor background color update
-                        //}
                         else if (Val == 0 && Initialized == true)                                                 // If train not present and FY is initialized and Track is enabled
                         {
                             LLed_Track6.BackColor = Color.Transparent;                                          // Set Color.Transparent
+                            PB_Tr6_Train.Hide();                                                                // Train present?
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
 
@@ -1315,34 +1409,31 @@ namespace Siebwalde_Application
                         {
                             LLed_Track6.BackColor = m_FYAppVar.TrackNotInitializedColor;                        // Set TrackNotInitializedColor
                             LLed_Track6.Text = "                     Not Initialized";                          // Set Track text
+                            PB_Tr6_Train.Hide();                                                                // Train present?
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
+                        PB_Tr6_Active.BackColor = LLed_Track6.BackColor;
+                        PB_Tr6_Inline.BackColor = LLed_Track6.BackColor;
+                        PB_Tr6_Train.BackColor = LLed_Track6.BackColor;
                         break;
 
                     case "LLed_Track7":
                         if (Val >= 1 && TrackStatusLight[7] == true)                                            // If train present and Track is active and track is enabled
                         {
                             LLed_Track7.BackColor = m_FYAppVar.TrackOccupiedColor;                              // Set TrackOccupiedColor
+                            PB_Tr7_Train.Show();                                                                // Train present?
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         else if (Val >= 1 && TrackStatusLight[7] == false)                                      // If train present and Track is not active and track is enabled
                         {
                             LLed_Track7.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
+                            PB_Tr7_Train.Show();                                                                // Train present?
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        //else if (Val >= 1 && m_FYAppVar.icheckBoxTrack[7] == 1)                                 // If track is disabled and occupied
-                        //{
-                        //    LLed_Track7.BackColor = m_FYAppVar.TrackDisabledColor;                              // Set TrackDisabledColor
-                        //    CheckWhichTrackInline();                                                            // Sensor background color update
-                        //}
-                        //else if (Val >= 0 && m_FYAppVar.icheckBoxTrack[7] == 1)                                 // If track is disabled and not occupied
-                        //{
-                        //    LLed_Track7.BackColor = m_FYAppVar.TrackDisabledNotOccupiedColor;                   // Set TrackDisabledNotOccupiedColor
-                        //    CheckWhichTrackInline();                                                            // Sensor background color update
-                        //}
                         else if (Val == 0 && Initialized == true)                                               // If train not present and FY is initialized and Track is enabled
                         {
                             LLed_Track7.BackColor = Color.Transparent;                                          // Set Color.Transparent
+                            PB_Tr7_Train.Hide();                                                                // Train present?
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
 
@@ -1350,34 +1441,31 @@ namespace Siebwalde_Application
                         {
                             LLed_Track7.BackColor = m_FYAppVar.TrackNotInitializedColor;                        // Set TrackNotInitializedColor
                             LLed_Track7.Text = "                     Not Initialized";                          // Set Track text
+                            PB_Tr7_Train.Hide();                                                                // Train present?
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
+                        PB_Tr7_Active.BackColor = LLed_Track7.BackColor;
+                        PB_Tr7_Inline.BackColor = LLed_Track7.BackColor;
+                        PB_Tr7_Train.BackColor = LLed_Track7.BackColor;
                         break;
 
                     case "LLed_Track8":
                         if (Val >= 1 && TrackStatusLight[8] == true)                                            // If train present and Track is active and track is enabled
                         {
                             LLed_Track8.BackColor = m_FYAppVar.TrackOccupiedColor;                              // Set TrackOccupiedColor
+                            PB_Tr8_Train.Show();                                                                // Train present?
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         else if (Val >= 1 && TrackStatusLight[8] == false)                                      // If train present and Track is not active and track is enabled
                         {
                             LLed_Track8.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
+                            PB_Tr8_Train.Show();                                                                // Train present?
                             CheckWhichTrackInline();                                                            // Sensor background color update
-                        }
-                        //else if (Val >= 1 && m_FYAppVar.icheckBoxTrack[8] == 1)                                 // If track is disabled and occupied
-                        //{
-                        //    LLed_Track8.BackColor = m_FYAppVar.TrackDisabledColor;                              // Set TrackDisabledColor
-                        //    CheckWhichTrackInline();                                                            // Sensor background color update
-                        //}
-                        //else if (Val >= 0 && m_FYAppVar.icheckBoxTrack[8] == 1)                                 // If track is disabled and not occupied
-                        //{
-                        //    LLed_Track8.BackColor = m_FYAppVar.TrackDisabledNotOccupiedColor;                   // Set TrackDisabledNotOccupiedColor
-                        //    CheckWhichTrackInline();                                                            // Sensor background color update
-                        //}
+                        }                        
                         else if (Val == 0 && Initialized == true)                                               // If train not present and FY is initialized and Track is enabled
                         {
                             LLed_Track8.BackColor = Color.Transparent;                                          // Set Color.Transparent
+                            PB_Tr8_Train.Hide();                                                                // Train present?
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
 
@@ -1385,34 +1473,31 @@ namespace Siebwalde_Application
                         {
                             LLed_Track8.BackColor = m_FYAppVar.TrackNotInitializedColor;                        // Set TrackNotInitializedColor
                             LLed_Track8.Text = "                     Not Initialized";                          // Set Track text
+                            PB_Tr8_Train.Hide();                                                                // Train present?
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
+                        PB_Tr8_Active.BackColor = LLed_Track8.BackColor;
+                        PB_Tr8_Inline.BackColor = LLed_Track8.BackColor;
+                        PB_Tr8_Train.BackColor = LLed_Track8.BackColor;
                         break;
 
                     case "LLed_Track9":
                         if (Val >= 1 && TrackStatusLight[9] == true)                                            // If train present and Track is active and track is enabled
                         {
                             LLed_Track9.BackColor = m_FYAppVar.TrackOccupiedColor;                              // Set TrackOccupiedColor
+                            PB_Tr9_Train.Show();                                                                // Train present?
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         else if (Val >= 1 && TrackStatusLight[9] == false)                                      // If train present and Track is not active and track is enabled
                         {
                             LLed_Track9.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
+                            PB_Tr9_Train.Show();                                                                // Train present?
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        //else if (Val >= 1 && m_FYAppVar.icheckBoxTrack[9] == 1)                                 // If track is disabled and occupied
-                        //{
-                        //    LLed_Track9.BackColor = m_FYAppVar.TrackDisabledColor;                              // Set TrackDisabledColor
-                        //    CheckWhichTrackInline();                                                            // Sensor background color update
-                        //}
-                        //else if (Val >= 0 && m_FYAppVar.icheckBoxTrack[9] == 1)                                 // If track is disabled and not occupied
-                        //{
-                        //    LLed_Track9.BackColor = m_FYAppVar.TrackDisabledNotOccupiedColor;                   // Set TrackDisabledNotOccupiedColor
-                        //    CheckWhichTrackInline();                                                            // Sensor background color update
-                        //}
                         else if (Val == 0 && Initialized == true)                                               // If train not present and FY is initialized and Track is enabled
                         {
                             LLed_Track9.BackColor = Color.Transparent;                                          // Set Color.Transparent
+                            PB_Tr9_Train.Hide();                                                                // Train present?
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
 
@@ -1420,34 +1505,31 @@ namespace Siebwalde_Application
                         {
                             LLed_Track9.BackColor = m_FYAppVar.TrackNotInitializedColor;                        // Set TrackNotInitializedColor
                             LLed_Track9.Text = "                     Not Initialized";                          // Set Track text
+                            PB_Tr9_Train.Hide();                                                                // Train present?
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
+                        PB_Tr9_Active.BackColor = LLed_Track9.BackColor;
+                        PB_Tr9_Inline.BackColor = LLed_Track9.BackColor;
+                        PB_Tr9_Train.BackColor = LLed_Track9.BackColor;
                         break;
 
                     case "LLed_Track10":
                         if (Val >= 1 && TrackStatusLight[10] == true)                                           // If train present and Track is active and track is enabled
                         {
                             LLed_Track10.BackColor = m_FYAppVar.TrackOccupiedColor;                              // Set TrackOccupiedColor
+                            PB_Tr10_Train.Show();                                                                // Train present?
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         else if (Val >= 1 && TrackStatusLight[10] == false)                                     // If train present and Track is not active and track is enabled
                         {
                             LLed_Track10.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
+                            PB_Tr10_Train.Show();                                                                // Train present?
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        //else if (Val >= 1 && m_FYAppVar.icheckBoxTrack[10] == 1)                                 // If track is disabled and occupied
-                        //{
-                        //    LLed_Track10.BackColor = m_FYAppVar.TrackDisabledColor;                              // Set TrackDisabledColor
-                        //    CheckWhichTrackInline();                                                            // Sensor background color update
-                        //}
-                        //else if (Val >= 0 && m_FYAppVar.icheckBoxTrack[10] == 1)                                 // If track is disabled and not occupied
-                        //{
-                        //    LLed_Track10.BackColor = m_FYAppVar.TrackDisabledNotOccupiedColor;                   // Set TrackDisabledNotOccupiedColor
-                        //    CheckWhichTrackInline();                                                            // Sensor background color update
-                        //}
                         else if (Val == 0 && Initialized == true)                                                 // If train not present and FY is initialized and Track is enabled
                         {
                             LLed_Track10.BackColor = Color.Transparent;                                          // Set Color.Transparent
+                            PB_Tr10_Train.Hide();                                                                // Train present?
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
 
@@ -1455,34 +1537,31 @@ namespace Siebwalde_Application
                         {
                             LLed_Track10.BackColor = m_FYAppVar.TrackNotInitializedColor;                        // Set TrackNotInitializedColor
                             LLed_Track10.Text = "                     Not Initialized";                          // Set Track text
+                            PB_Tr10_Train.Hide();                                                                // Train present?
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
+                        PB_Tr10_Active.BackColor = LLed_Track10.BackColor;
+                        PB_Tr10_Inline.BackColor = LLed_Track10.BackColor;
+                        PB_Tr10_Train.BackColor = LLed_Track10.BackColor;
                         break;
 
                     case "LLed_Track11":
                         if (Val >= 1 && TrackStatusLight[11] == true)                                           // If train present and Track is active and track is enabled
                         {
                             LLed_Track11.BackColor = m_FYAppVar.TrackOccupiedColor;                              // Set TrackOccupiedColor
+                            PB_Tr11_Train.Show();                                                                // Train present?
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         else if (Val >= 1 && TrackStatusLight[11] == false)                                     // If train present and Track is not active and track is enabled
                         {
                             LLed_Track11.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
+                            PB_Tr11_Train.Show();                                                                // Train present?
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
-                        //else if (Val >= 1 && m_FYAppVar.icheckBoxTrack[11] == 1)                                 // If track is disabled and occupied
-                        //{
-                        //    LLed_Track11.BackColor = m_FYAppVar.TrackDisabledColor;                              // Set TrackDisabledColor
-                        //    CheckWhichTrackInline();                                                            // Sensor background color update
-                        //}
-                        //else if (Val >= 0 && m_FYAppVar.icheckBoxTrack[11] == 1)                                 // If track is disabled and not occupied
-                        //{
-                        //    LLed_Track11.BackColor = m_FYAppVar.TrackDisabledNotOccupiedColor;                   // Set TrackDisabledNotOccupiedColor
-                        //    CheckWhichTrackInline();                                                            // Sensor background color update
-                        //}
                         else if (Val == 0 && Initialized == true)                                                   // If train not present and FY is initialized and Track is enabled
                         {
                             LLed_Track11.BackColor = Color.Transparent;                                          // Set Color.Transparent
+                            PB_Tr11_Train.Hide();                                                                // Train present?
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
 
@@ -1490,8 +1569,12 @@ namespace Siebwalde_Application
                         {
                             LLed_Track11.BackColor = m_FYAppVar.TrackNotInitializedColor;                        // Set TrackNotInitializedColor
                             LLed_Track11.Text = "                     Not Initialized";                          // Set Track text
+                            PB_Tr11_Train.Hide();                                                                // Train present?
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
+                        PB_Tr11_Active.BackColor = LLed_Track11.BackColor;
+                        PB_Tr11_Inline.BackColor = LLed_Track11.BackColor;
+                        PB_Tr11_Train.BackColor = LLed_Track11.BackColor;
                         break;                    
 
                     case "LLed_Block6": if (Val >= 1)
@@ -1576,12 +1659,54 @@ namespace Siebwalde_Application
         private void ALlPB_InlineOff()
         {
             PB_Tr1_Inline.Hide();
+            PB_Tr2_Inline.Hide();
+            PB_Tr3_Inline.Hide();
+            PB_Tr4_Inline.Hide();
+            PB_Tr5_Inline.Hide();
+            PB_Tr6_Inline.Hide();
+            PB_Tr7_Inline.Hide();
+            PB_Tr8_Inline.Hide();
+            PB_Tr9_Inline.Hide();
+            PB_Tr10_Inline.Hide();
+            PB_Tr11_Inline.Hide();
+
         }
         private void TrackPB_InlineOn(int a)
         {
             switch (a)
             {
-                case 1: PB_Tr1_Inline.Show();
+                case 1:
+                    PB_Tr1_Inline.Show();
+                    break;
+                case 2:
+                    PB_Tr2_Inline.Show();
+                    break;
+                case 3:
+                    PB_Tr3_Inline.Show();
+                    break;
+                case 4:
+                    PB_Tr4_Inline.Show();
+                    break;
+                case 5:
+                    PB_Tr5_Inline.Show();
+                    break;
+                case 6:
+                    PB_Tr6_Inline.Show();
+                    break;
+                case 7:
+                    PB_Tr7_Inline.Show();
+                    break;
+                case 8:
+                    PB_Tr8_Inline.Show();
+                    break;
+                case 9:
+                    PB_Tr9_Inline.Show();
+                    break;
+                case 10:
+                    PB_Tr10_Inline.Show();
+                    break;
+                case 11:
+                    PB_Tr11_Inline.Show();
                     break;
                 default: break;
             }
@@ -2059,6 +2184,38 @@ namespace Siebwalde_Application
             PB_Tr1_Active.BackColor = LLed_Track1.BackColor;
             PB_Tr1_Inline.BackColor = LLed_Track1.BackColor;
             PB_Tr1_Train.BackColor = LLed_Track1.BackColor;
+            PB_Tr2_Active.BackColor = LLed_Track2.BackColor;
+            PB_Tr2_Inline.BackColor = LLed_Track2.BackColor;
+            PB_Tr2_Train.BackColor = LLed_Track2.BackColor;
+            PB_Tr3_Active.BackColor = LLed_Track3.BackColor;
+            PB_Tr3_Inline.BackColor = LLed_Track3.BackColor;
+            PB_Tr3_Train.BackColor = LLed_Track3.BackColor;
+            PB_Tr4_Active.BackColor = LLed_Track4.BackColor;
+            PB_Tr4_Inline.BackColor = LLed_Track4.BackColor;
+            PB_Tr4_Train.BackColor = LLed_Track4.BackColor;
+            PB_Tr5_Active.BackColor = LLed_Track5.BackColor;
+            PB_Tr5_Inline.BackColor = LLed_Track5.BackColor;
+            PB_Tr5_Train.BackColor = LLed_Track5.BackColor;
+            PB_Tr6_Active.BackColor = LLed_Track6.BackColor;
+            PB_Tr6_Inline.BackColor = LLed_Track6.BackColor;
+            PB_Tr6_Train.BackColor = LLed_Track6.BackColor;
+            PB_Tr7_Active.BackColor = LLed_Track7.BackColor;
+            PB_Tr7_Inline.BackColor = LLed_Track7.BackColor;
+            PB_Tr7_Train.BackColor = LLed_Track7.BackColor;
+            PB_Tr8_Active.BackColor = LLed_Track8.BackColor;
+            PB_Tr8_Inline.BackColor = LLed_Track8.BackColor;
+            PB_Tr8_Train.BackColor = LLed_Track8.BackColor;
+            PB_Tr9_Active.BackColor = LLed_Track9.BackColor;
+            PB_Tr9_Inline.BackColor = LLed_Track9.BackColor;
+            PB_Tr9_Train.BackColor = LLed_Track9.BackColor;
+            PB_Tr10_Active.BackColor = LLed_Track10.BackColor;
+            PB_Tr10_Inline.BackColor = LLed_Track10.BackColor;
+            PB_Tr10_Train.BackColor = LLed_Track10.BackColor;
+            PB_Tr11_Active.BackColor = LLed_Track11.BackColor;
+            PB_Tr11_Inline.BackColor = LLed_Track11.BackColor;
+            PB_Tr11_Train.BackColor = LLed_Track11.BackColor;
+
+
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -2354,222 +2511,235 @@ namespace Siebwalde_Application
             // Check position of Gwin
             GWinHalf = 740 / 2 + GWin.Location.Y;
             GWinX = GWin.Location.X;
-            Track6LocY = GWinHalf - 8;
+            Track6LocY = GWinHalf;// - 8;
             Track6LocX = GWinX + 170;
 
             switch (val)
             {
                 case 1:
-                    LLed_Track1.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 4);
-                    PB_Tr1_Train.Location = new System.Drawing.Point(Track6LocX + 150, Track6LocY + 8 - Train.Height / 2);
-                    PB_Tr1_Inline.Location = new System.Drawing.Point(Track6LocX + 270, Track6LocY + 8 - Inline.Height / 2);
-                    PB_Tr1_Active.Location = new System.Drawing.Point(Track6LocX + 370, Track6LocY + 8 - Active.Height / 2);
-
-                    LLed_Track2.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 32);
-                    LLed_Track3.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 64);
-                    LLed_Track4.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 96);
-                    LLed_Track5.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 128);
-                    LLed_Track6.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 160);
-                    LLed_Track7.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 192);
-                    LLed_Track8.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 224);
-                    LLed_Track9.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 256);
-                    LLed_Track10.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 288);
-                    LLed_Track11.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 320);
-                    LLed_FYPLATE_TOP.Location = new System.Drawing.Point(Track6LocX - 10, Track6LocY - 16);                    
+                    Track1Loc = 0;
+                    Track2Loc = TrackLocDelta * 1;
+                    Track3Loc = TrackLocDelta * 2;
+                    Track4Loc = TrackLocDelta * 3;
+                    Track5Loc = TrackLocDelta * 4;
+                    Track6Loc = TrackLocDelta * 5;
+                    Track7Loc = TrackLocDelta * 6;
+                    Track8Loc = TrackLocDelta * 7;
+                    Track9Loc = TrackLocDelta * 8;
+                    Track10Loc = TrackLocDelta * 9;
+                    Track11Loc = TrackLocDelta * 10;
+                    FYPlateLoc = TrackLocDelta * 5;
                     break;
 
                 case 2:
-                    LLed_Track1.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 32);
-                    PB_Tr1_Train.Location = new System.Drawing.Point(Track6LocX + 150, Track6LocY - 24 - Train.Height / 2);
-                    PB_Tr1_Inline.Location = new System.Drawing.Point(Track6LocX + 270, Track6LocY - 24 - Inline.Height / 2);
-                    PB_Tr1_Active.Location = new System.Drawing.Point(Track6LocX + 370, Track6LocY - 24 - Active.Height / 2);
-
-                    LLed_Track2.Location = new System.Drawing.Point(Track6LocX, Track6LocY);
-                    LLed_Track3.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 32);
-                    LLed_Track4.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 64);
-                    LLed_Track5.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 96);
-                    LLed_Track6.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 128);
-                    LLed_Track7.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 160);
-                    LLed_Track8.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 192);
-                    LLed_Track9.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 224);
-                    LLed_Track10.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 256);
-                    LLed_Track11.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 288);
-                    LLed_FYPLATE_TOP.Location = new System.Drawing.Point(Track6LocX - 10, Track6LocY - 48);
+                    Track1Loc = -(TrackLocDelta * 1);
+                    Track2Loc = 0;
+                    Track3Loc = TrackLocDelta * 1;
+                    Track4Loc = TrackLocDelta * 2;
+                    Track5Loc = TrackLocDelta * 3;
+                    Track6Loc = TrackLocDelta * 4;
+                    Track7Loc = TrackLocDelta * 5;
+                    Track8Loc = TrackLocDelta * 6;
+                    Track9Loc = TrackLocDelta * 7;
+                    Track10Loc =TrackLocDelta * 8;
+                    Track11Loc = TrackLocDelta * 9; 
+                    FYPlateLoc = TrackLocDelta * 4;
                     break;
 
                 case 3:
-                    LLed_Track1.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 64);
-                    PB_Tr1_Train.Location = new System.Drawing.Point(Track6LocX + 150, Track6LocY - 56 - Train.Height / 2);
-                    PB_Tr1_Inline.Location = new System.Drawing.Point(Track6LocX + 270, Track6LocY - 56 - Inline.Height / 2);
-                    PB_Tr1_Active.Location = new System.Drawing.Point(Track6LocX + 370, Track6LocY - 56 - Active.Height / 2);
-
-                    LLed_Track2.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 32);
-                    LLed_Track3.Location = new System.Drawing.Point(Track6LocX, Track6LocY);
-                    LLed_Track4.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 32);
-                    LLed_Track5.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 64);
-                    LLed_Track6.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 96);
-                    LLed_Track7.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 128);
-                    LLed_Track8.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 160);
-                    LLed_Track9.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 192);
-                    LLed_Track10.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 224);
-                    LLed_Track11.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 256);
-                    LLed_FYPLATE_TOP.Location = new System.Drawing.Point(Track6LocX - 10, Track6LocY - 80);
+                    Track1Loc = -(TrackLocDelta * 2);
+                    Track2Loc = -(TrackLocDelta * 1);
+                    Track3Loc = 0;
+                    Track4Loc = TrackLocDelta * 1;
+                    Track5Loc = TrackLocDelta * 2;
+                    Track6Loc = TrackLocDelta * 3;
+                    Track7Loc = TrackLocDelta * 4;
+                    Track8Loc = TrackLocDelta * 5;
+                    Track9Loc = TrackLocDelta * 6;
+                    Track10Loc =TrackLocDelta * 7;
+                    Track11Loc =TrackLocDelta * 8; 
+                    FYPlateLoc = TrackLocDelta * 3;
                     break;
 
                 case 4:
-                    LLed_Track1.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 96);
-                    PB_Tr1_Train.Location = new System.Drawing.Point(Track6LocX + 150, Track6LocY - 88 - Train.Height / 2);
-                    PB_Tr1_Inline.Location = new System.Drawing.Point(Track6LocX + 270, Track6LocY - 88 - Inline.Height / 2);
-                    PB_Tr1_Active.Location = new System.Drawing.Point(Track6LocX + 370, Track6LocY - 88 - Active.Height / 2);
-
-                    LLed_Track2.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 64);
-                    LLed_Track3.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 32);
-                    LLed_Track4.Location = new System.Drawing.Point(Track6LocX, Track6LocY);
-                    LLed_Track5.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 32);
-                    LLed_Track6.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 64);
-                    LLed_Track7.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 96);
-                    LLed_Track8.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 128);
-                    LLed_Track9.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 160);
-                    LLed_Track10.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 192);
-                    LLed_Track11.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 224);
-                    LLed_FYPLATE_TOP.Location = new System.Drawing.Point(Track6LocX - 10, Track6LocY - 112);
+                    Track1Loc = -(TrackLocDelta * 3);
+                    Track2Loc = -(TrackLocDelta * 2);
+                    Track3Loc = -(TrackLocDelta * 1);
+                    Track4Loc = 0;
+                    Track5Loc = TrackLocDelta * 1;
+                    Track6Loc = TrackLocDelta * 2;
+                    Track7Loc = TrackLocDelta * 3;
+                    Track8Loc = TrackLocDelta * 4;
+                    Track9Loc = TrackLocDelta * 5;
+                    Track10Loc =TrackLocDelta * 6;
+                    Track11Loc = TrackLocDelta * 7;
+                    FYPlateLoc = TrackLocDelta * 2;
                     break;
 
                 case 5:
-                    LLed_Track1.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 128);
-                    PB_Tr1_Train.Location = new System.Drawing.Point(Track6LocX + 150, Track6LocY - 120 - Train.Height / 2);
-                    PB_Tr1_Inline.Location = new System.Drawing.Point(Track6LocX + 270, Track6LocY - 120 - Inline.Height / 2);
-                    PB_Tr1_Active.Location = new System.Drawing.Point(Track6LocX + 370, Track6LocY - 120 - Active.Height / 2);
-
-                    LLed_Track2.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 96);
-                    LLed_Track3.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 64);
-                    LLed_Track4.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 32);
-                    LLed_Track5.Location = new System.Drawing.Point(Track6LocX, Track6LocY);
-                    LLed_Track6.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 32);
-                    LLed_Track7.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 64);
-                    LLed_Track8.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 96);
-                    LLed_Track9.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 128);
-                    LLed_Track10.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 160);
-                    LLed_Track11.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 192);
-                    LLed_FYPLATE_TOP.Location = new System.Drawing.Point(Track6LocX - 10, Track6LocY - 144);
+                    Track1Loc = -(TrackLocDelta * 4);
+                    Track2Loc = -(TrackLocDelta * 3);
+                    Track3Loc = -(TrackLocDelta * 2);
+                    Track4Loc = -(TrackLocDelta * 1);
+                    Track5Loc = 0;
+                    Track6Loc = TrackLocDelta * 1;
+                    Track7Loc = TrackLocDelta * 2;
+                    Track8Loc = TrackLocDelta * 3;
+                    Track9Loc = TrackLocDelta * 4;
+                    Track10Loc =TrackLocDelta * 5;
+                    Track11Loc = TrackLocDelta * 6;
+                    FYPlateLoc = TrackLocDelta * 1;
                     break;
 
                 case 6:
-                    LLed_Track1.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 160);
-                    PB_Tr1_Train.Location = new System.Drawing.Point(Track6LocX + 150, Track6LocY - 152 - Train.Height / 2);
-                    PB_Tr1_Inline.Location = new System.Drawing.Point(Track6LocX + 270, Track6LocY - 152 - Inline.Height / 2);
-                    PB_Tr1_Active.Location = new System.Drawing.Point(Track6LocX + 370, Track6LocY - 152 - Active.Height / 2);
-
-                    LLed_Track2.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 128);
-                    LLed_Track3.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 96);
-                    LLed_Track4.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 64);
-                    LLed_Track5.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 32);
-                    LLed_Track6.Location = new System.Drawing.Point(Track6LocX, Track6LocY);
-                    LLed_Track7.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 32);
-                    LLed_Track8.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 64);
-                    LLed_Track9.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 96);
-                    LLed_Track10.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 128);
-                    LLed_Track11.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 160);
-                    LLed_FYPLATE_TOP.Location = new System.Drawing.Point(Track6LocX - 10, Track6LocY - 176);
+                    Track1Loc = -(TrackLocDelta * 5);
+                    Track2Loc = -(TrackLocDelta * 4);
+                    Track3Loc = -(TrackLocDelta * 3);
+                    Track4Loc = -(TrackLocDelta * 2);
+                    Track5Loc = -(TrackLocDelta * 1);
+                    Track6Loc = 0;
+                    Track7Loc = TrackLocDelta * 1;
+                    Track8Loc = TrackLocDelta * 2;
+                    Track9Loc = TrackLocDelta * 3;
+                    Track10Loc =TrackLocDelta * 4;
+                    Track11Loc = TrackLocDelta * 5;
+                    FYPlateLoc = 0;
                     break;
 
                 case 7:
-                    LLed_Track1.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 192);
-                    PB_Tr1_Train.Location = new System.Drawing.Point(Track6LocX + 150, Track6LocY - 184 - Train.Height / 2);
-                    PB_Tr1_Inline.Location = new System.Drawing.Point(Track6LocX + 270, Track6LocY - 184 - Inline.Height / 2);
-                    PB_Tr1_Active.Location = new System.Drawing.Point(Track6LocX + 370, Track6LocY - 184 - Active.Height / 2);
-
-                    LLed_Track2.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 160);
-                    LLed_Track3.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 128);
-                    LLed_Track4.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 96);
-                    LLed_Track5.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 64);
-                    LLed_Track6.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 32);
-                    LLed_Track7.Location = new System.Drawing.Point(Track6LocX, Track6LocY);
-                    LLed_Track8.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 32);
-                    LLed_Track9.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 64);
-                    LLed_Track10.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 96);
-                    LLed_Track11.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 128);
-                    LLed_FYPLATE_TOP.Location = new System.Drawing.Point(Track6LocX - 10, Track6LocY - 208);
+                    Track1Loc = -(TrackLocDelta * 6);
+                    Track2Loc = -(TrackLocDelta * 5);
+                    Track3Loc = -(TrackLocDelta * 4);
+                    Track4Loc = -(TrackLocDelta * 3);
+                    Track5Loc = -(TrackLocDelta * 2);
+                    Track6Loc = -(TrackLocDelta * 1);
+                    Track7Loc = 0;
+                    Track8Loc = TrackLocDelta * 1;
+                    Track9Loc = TrackLocDelta * 2;
+                    Track10Loc =TrackLocDelta * 3;
+                    Track11Loc = TrackLocDelta * 4;
+                    FYPlateLoc = -(TrackLocDelta * 1);
                     break;
 
                 case 8:
-                    LLed_Track1.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 224);
-                    PB_Tr1_Train.Location = new System.Drawing.Point(Track6LocX + 150, Track6LocY - 216 - Train.Height / 2);
-                    PB_Tr1_Inline.Location = new System.Drawing.Point(Track6LocX + 270, Track6LocY - 216 - Inline.Height / 2);
-                    PB_Tr1_Active.Location = new System.Drawing.Point(Track6LocX + 370, Track6LocY - 216 - Active.Height / 2);
-
-                    LLed_Track2.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 192);
-                    LLed_Track3.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 160);
-                    LLed_Track4.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 128);
-                    LLed_Track5.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 96);
-                    LLed_Track6.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 64);
-                    LLed_Track7.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 32);
-                    LLed_Track8.Location = new System.Drawing.Point(Track6LocX, Track6LocY);
-                    LLed_Track9.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 32);
-                    LLed_Track10.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 64);
-                    LLed_Track11.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 96);
-                    LLed_FYPLATE_TOP.Location = new System.Drawing.Point(Track6LocX - 10, Track6LocY - 240);
+                    Track1Loc = -(TrackLocDelta * 7);
+                    Track2Loc = -(TrackLocDelta * 6);
+                    Track3Loc = -(TrackLocDelta * 5);
+                    Track4Loc = -(TrackLocDelta * 4);
+                    Track5Loc = -(TrackLocDelta * 3);
+                    Track6Loc = -(TrackLocDelta * 2);
+                    Track7Loc = -(TrackLocDelta * 1);
+                    Track8Loc = 0;
+                    Track9Loc = TrackLocDelta * 1;
+                    Track10Loc =TrackLocDelta * 2;
+                    Track11Loc = TrackLocDelta * 3;
+                    FYPlateLoc = -(TrackLocDelta * 2);
                     break;
 
                 case 9:
-                    LLed_Track1.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 256);
-                    PB_Tr1_Train.Location = new System.Drawing.Point(Track6LocX + 150, Track6LocY - 248 - Train.Height / 2);
-                    PB_Tr1_Inline.Location = new System.Drawing.Point(Track6LocX + 270, Track6LocY - 248 - Inline.Height / 2);
-                    PB_Tr1_Active.Location = new System.Drawing.Point(Track6LocX + 370, Track6LocY - 248 - Active.Height / 2);
-
-                    LLed_Track2.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 224);
-                    LLed_Track3.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 192);
-                    LLed_Track4.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 160);
-                    LLed_Track5.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 128);
-                    LLed_Track6.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 96);
-                    LLed_Track7.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 64);
-                    LLed_Track8.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 32);
-                    LLed_Track9.Location = new System.Drawing.Point(Track6LocX, Track6LocY);
-                    LLed_Track10.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 32);
-                    LLed_Track11.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 64);
-                    LLed_FYPLATE_TOP.Location = new System.Drawing.Point(Track6LocX - 10, Track6LocY - 272);
+                    Track1Loc = -(TrackLocDelta * 8);
+                    Track2Loc = -(TrackLocDelta * 7);
+                    Track3Loc = -(TrackLocDelta * 6);
+                    Track4Loc = -(TrackLocDelta * 5);
+                    Track5Loc = -(TrackLocDelta * 4);
+                    Track6Loc = -(TrackLocDelta * 3);
+                    Track7Loc = -(TrackLocDelta * 2);
+                    Track8Loc = -(TrackLocDelta * 1);
+                    Track9Loc = 0;
+                    Track10Loc = TrackLocDelta * 1;
+                    Track11Loc = TrackLocDelta * 2;
+                    FYPlateLoc = -(TrackLocDelta * 3);
                     break;
 
                 case 10:
-                    LLed_Track1.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 288);
-                    PB_Tr1_Train.Location = new System.Drawing.Point(Track6LocX + 150, Track6LocY - 280 - Train.Height / 2);
-                    PB_Tr1_Inline.Location = new System.Drawing.Point(Track6LocX + 270, Track6LocY - 280 - Inline.Height / 2);
-                    PB_Tr1_Active.Location = new System.Drawing.Point(Track6LocX + 370, Track6LocY - 280 - Active.Height / 2);
-
-                    LLed_Track2.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 256);
-                    LLed_Track3.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 224);
-                    LLed_Track4.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 192);
-                    LLed_Track5.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 160);
-                    LLed_Track6.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 128);
-                    LLed_Track7.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 96);
-                    LLed_Track8.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 64);
-                    LLed_Track9.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 32);
-                    LLed_Track10.Location = new System.Drawing.Point(Track6LocX, Track6LocY);
-                    LLed_Track11.Location = new System.Drawing.Point(Track6LocX, Track6LocY + 32);
-                    LLed_FYPLATE_TOP.Location = new System.Drawing.Point(Track6LocX - 10, Track6LocY - 304);
+                    Track1Loc = -(TrackLocDelta * 9);
+                    Track2Loc = -(TrackLocDelta * 8);
+                    Track3Loc = -(TrackLocDelta * 7);
+                    Track4Loc = -(TrackLocDelta * 6);
+                    Track5Loc = -(TrackLocDelta * 5);
+                    Track6Loc = -(TrackLocDelta * 4);
+                    Track7Loc = -(TrackLocDelta * 3);
+                    Track8Loc = -(TrackLocDelta * 2);
+                    Track9Loc = -(TrackLocDelta * 1);
+                    Track10Loc = 0;
+                    Track11Loc = TrackLocDelta * 1;
+                    FYPlateLoc = -(TrackLocDelta * 4);
                     break;
 
                 case 11:
-                    LLed_Track1.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 320);
-                    PB_Tr1_Train.Location = new System.Drawing.Point(Track6LocX + 150, Track6LocY - 312 - Train.Height / 2);
-                    PB_Tr1_Inline.Location = new System.Drawing.Point(Track6LocX + 270, Track6LocY - 312 - Inline.Height / 2);
-                    PB_Tr1_Active.Location = new System.Drawing.Point(Track6LocX + 370, Track6LocY - 312 - Active.Height / 2);
-
-                    LLed_Track2.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 288);
-                    LLed_Track3.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 256);
-                    LLed_Track4.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 224);
-                    LLed_Track5.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 192);
-                    LLed_Track6.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 160);
-                    LLed_Track7.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 128);
-                    LLed_Track8.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 96);
-                    LLed_Track9.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 64);
-                    LLed_Track10.Location = new System.Drawing.Point(Track6LocX, Track6LocY - 32);
-                    LLed_Track11.Location = new System.Drawing.Point(Track6LocX, Track6LocY);
-                    LLed_FYPLATE_TOP.Location = new System.Drawing.Point(Track6LocX - 10, Track6LocY - 336);
+                    Track1Loc = -(TrackLocDelta * 10);
+                    Track2Loc = -(TrackLocDelta * 9);
+                    Track3Loc = -(TrackLocDelta * 8);
+                    Track4Loc = -(TrackLocDelta * 7);
+                    Track5Loc = -(TrackLocDelta * 6);
+                    Track6Loc = -(TrackLocDelta * 5);
+                    Track7Loc = -(TrackLocDelta * 4);
+                    Track8Loc = -(TrackLocDelta * 3);
+                    Track9Loc = -(TrackLocDelta * 2);
+                    Track10Loc = -(TrackLocDelta * 1);
+                    Track11Loc = 0;
+                    FYPlateLoc = -(TrackLocDelta * 5);
                     break;
 
                 default: break;
             }
+
+            LLed_Track1.Location = new System.Drawing.Point(Track6LocX, Track6LocY - LLed_Track1.Height / 2 + Track1Loc);
+            PB_Tr1_Train.Location = new System.Drawing.Point(Track6LocX + 150, Track6LocY - Train.Height / 2 + Track1Loc);
+            PB_Tr1_Inline.Location = new System.Drawing.Point(Track6LocX + 270, Track6LocY - Inline.Height / 2 + Track1Loc);
+            PB_Tr1_Active.Location = new System.Drawing.Point(Track6LocX + 370, Track6LocY - Active.Height / 2 + Track1Loc);
+
+            LLed_Track2.Location = new System.Drawing.Point(Track6LocX, Track6LocY - LLed_Track2.Height / 2 + Track2Loc);
+            PB_Tr2_Train.Location = new System.Drawing.Point(Track6LocX + 150, Track6LocY - Train.Height / 2 + Track2Loc);
+            PB_Tr2_Inline.Location = new System.Drawing.Point(Track6LocX + 270, Track6LocY - Inline.Height / 2 + Track2Loc);
+            PB_Tr2_Active.Location = new System.Drawing.Point(Track6LocX + 370, Track6LocY - Active.Height / 2 + Track2Loc);
+
+            LLed_Track3.Location = new System.Drawing.Point(Track6LocX, Track6LocY - LLed_Track3.Height / 2 + Track3Loc);
+            PB_Tr3_Train.Location = new System.Drawing.Point(Track6LocX + 150, Track6LocY - Train.Height / 2 + Track3Loc);
+            PB_Tr3_Inline.Location = new System.Drawing.Point(Track6LocX + 270, Track6LocY - Inline.Height / 2 + Track3Loc);
+            PB_Tr3_Active.Location = new System.Drawing.Point(Track6LocX + 370, Track6LocY - Active.Height / 2 + Track3Loc);
+
+            LLed_Track4.Location = new System.Drawing.Point(Track6LocX, Track6LocY - LLed_Track4.Height / 2 + Track4Loc);
+            PB_Tr4_Train.Location = new System.Drawing.Point(Track6LocX + 150, Track6LocY - Train.Height / 2 + Track4Loc);
+            PB_Tr4_Inline.Location = new System.Drawing.Point(Track6LocX + 270, Track6LocY - Inline.Height / 2 + Track4Loc);
+            PB_Tr4_Active.Location = new System.Drawing.Point(Track6LocX + 370, Track6LocY - Active.Height / 2 + Track4Loc);
+
+            LLed_Track5.Location = new System.Drawing.Point(Track6LocX, Track6LocY - LLed_Track5.Height / 2 + Track5Loc);
+            PB_Tr5_Train.Location = new System.Drawing.Point(Track6LocX + 150, Track6LocY - Train.Height / 2 + Track5Loc);
+            PB_Tr5_Inline.Location = new System.Drawing.Point(Track6LocX + 270, Track6LocY - Inline.Height / 2 + Track5Loc);
+            PB_Tr5_Active.Location = new System.Drawing.Point(Track6LocX + 370, Track6LocY - Active.Height / 2 + Track5Loc);
+
+            LLed_Track6.Location = new System.Drawing.Point(Track6LocX, Track6LocY - LLed_Track6.Height / 2 + Track6Loc);
+            PB_Tr6_Train.Location = new System.Drawing.Point(Track6LocX + 150, Track6LocY - Train.Height / 2 + Track6Loc);
+            PB_Tr6_Inline.Location = new System.Drawing.Point(Track6LocX + 270, Track6LocY - Inline.Height / 2 + Track6Loc);
+            PB_Tr6_Active.Location = new System.Drawing.Point(Track6LocX + 370, Track6LocY - Active.Height / 2 + Track6Loc);
+
+            LLed_Track7.Location = new System.Drawing.Point(Track6LocX, Track6LocY - LLed_Track7.Height / 2 + Track7Loc);
+            PB_Tr7_Train.Location = new System.Drawing.Point(Track6LocX + 150, Track6LocY - Train.Height / 2 + Track7Loc);
+            PB_Tr7_Inline.Location = new System.Drawing.Point(Track6LocX + 270, Track6LocY - Inline.Height / 2 + Track7Loc);
+            PB_Tr7_Active.Location = new System.Drawing.Point(Track6LocX + 370, Track6LocY - Active.Height / 2 + Track7Loc);
+
+            LLed_Track8.Location = new System.Drawing.Point(Track6LocX, Track6LocY - LLed_Track8.Height / 2 + Track8Loc);
+            PB_Tr8_Train.Location = new System.Drawing.Point(Track6LocX + 150, Track6LocY - Train.Height / 2 + Track8Loc);
+            PB_Tr8_Inline.Location = new System.Drawing.Point(Track6LocX + 270, Track6LocY - Inline.Height / 2 + Track8Loc);
+            PB_Tr8_Active.Location = new System.Drawing.Point(Track6LocX + 370, Track6LocY - Active.Height / 2 + Track8Loc);
+
+            LLed_Track9.Location = new System.Drawing.Point(Track6LocX, Track6LocY - LLed_Track9.Height / 2 + Track9Loc);
+            PB_Tr9_Train.Location = new System.Drawing.Point(Track6LocX + 150, Track6LocY - Train.Height / 2 + Track9Loc);
+            PB_Tr9_Inline.Location = new System.Drawing.Point(Track6LocX + 270, Track6LocY - Inline.Height / 2 + Track9Loc);
+            PB_Tr9_Active.Location = new System.Drawing.Point(Track6LocX + 370, Track6LocY - Active.Height / 2 + Track9Loc);
+
+            LLed_Track10.Location = new System.Drawing.Point(Track6LocX, Track6LocY - LLed_Track10.Height / 2 + Track10Loc);
+            PB_Tr10_Train.Location = new System.Drawing.Point(Track6LocX + 150, Track6LocY - Train.Height / 2 + Track10Loc);
+            PB_Tr10_Inline.Location = new System.Drawing.Point(Track6LocX + 270, Track6LocY - Inline.Height / 2 + Track10Loc);
+            PB_Tr10_Active.Location = new System.Drawing.Point(Track6LocX + 370, Track6LocY - Active.Height / 2 + Track10Loc);
+
+            LLed_Track11.Location = new System.Drawing.Point(Track6LocX, Track6LocY - LLed_Track11.Height / 2 + Track11Loc);
+            PB_Tr11_Train.Location = new System.Drawing.Point(Track6LocX + 150, Track6LocY - Train.Height / 2 + Track11Loc);
+            PB_Tr11_Inline.Location = new System.Drawing.Point(Track6LocX + 270, Track6LocY - Inline.Height / 2 + Track11Loc);
+            PB_Tr11_Active.Location = new System.Drawing.Point(Track6LocX + 370, Track6LocY - Active.Height / 2 + Track11Loc);
+
+            LLed_FYPLATE_TOP.Location = new System.Drawing.Point(Track6LocX - 10, Track6LocY - (LLed_FYPLATE_TOP.Height / 2) + FYPlateLoc);// - 16);                    
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -2858,69 +3028,118 @@ namespace Siebwalde_Application
         {
             SetcheckBoxTrackIntArray(2, checkBoxTrack2.Checked);
             m_FYAppVar.TrackTrainsOnFYUpdater();
+            if (checkBoxTrack2.Checked == true)
+            {
+                PB_Tr2_Active.Hide();
+            }
+            else { PB_Tr2_Active.Show(); }
         }
 
         private void checkBoxTrack3_CheckedChanged(object sender, EventArgs e)
         {
             SetcheckBoxTrackIntArray(3, checkBoxTrack3.Checked);
             m_FYAppVar.TrackTrainsOnFYUpdater();
+            if (checkBoxTrack3.Checked == true)
+            {
+                PB_Tr3_Active.Hide();
+            }
+            else { PB_Tr3_Active.Show(); }
         }
 
         private void checkBoxTrack4_CheckedChanged(object sender, EventArgs e)
         {
             SetcheckBoxTrackIntArray(4, checkBoxTrack4.Checked);
             m_FYAppVar.TrackTrainsOnFYUpdater();
+            if (checkBoxTrack4.Checked == true)
+            {
+                PB_Tr4_Active.Hide();
+            }
+            else { PB_Tr4_Active.Show(); }
         }
 
         private void checkBoxTrack5_CheckedChanged(object sender, EventArgs e)
         {
             SetcheckBoxTrackIntArray(5, checkBoxTrack5.Checked);
             m_FYAppVar.TrackTrainsOnFYUpdater();
+            if (checkBoxTrack5.Checked == true)
+            {
+                PB_Tr5_Active.Hide();
+            }
+            else { PB_Tr5_Active.Show(); }
         }
 
         private void checkBoxTrack6_CheckedChanged(object sender, EventArgs e)
         {
             SetcheckBoxTrackIntArray(6, checkBoxTrack6.Checked);
             m_FYAppVar.TrackTrainsOnFYUpdater();
+            if (checkBoxTrack6.Checked == true)
+            {
+                PB_Tr6_Active.Hide();
+            }
+            else { PB_Tr6_Active.Show(); }
         }
 
         private void checkBoxTrack7_CheckedChanged(object sender, EventArgs e)
         {
             SetcheckBoxTrackIntArray(7, checkBoxTrack7.Checked);
             m_FYAppVar.TrackTrainsOnFYUpdater();
+            if (checkBoxTrack7.Checked == true)
+            {
+                PB_Tr7_Active.Hide();
+            }
+            else { PB_Tr7_Active.Show(); }
         }
 
         private void checkBoxTrack8_CheckedChanged(object sender, EventArgs e)
         {
             SetcheckBoxTrackIntArray(8, checkBoxTrack8.Checked);
             m_FYAppVar.TrackTrainsOnFYUpdater();
+            if (checkBoxTrack8.Checked == true)
+            {
+                PB_Tr8_Active.Hide();
+            }
+            else { PB_Tr8_Active.Show(); }
         }
 
         private void checkBoxTrack9_CheckedChanged(object sender, EventArgs e)
         {
             SetcheckBoxTrackIntArray(9, checkBoxTrack9.Checked);
             m_FYAppVar.TrackTrainsOnFYUpdater();
+            if (checkBoxTrack9.Checked == true)
+            {
+                PB_Tr9_Active.Hide();
+            }
+            else { PB_Tr9_Active.Show(); }
         }
 
         private void checkBoxTrack10_CheckedChanged(object sender, EventArgs e)
         {
             SetcheckBoxTrackIntArray(10, checkBoxTrack10.Checked);
             m_FYAppVar.TrackTrainsOnFYUpdater();
+            if (checkBoxTrack10.Checked == true)
+            {
+                PB_Tr10_Active.Hide();
+            }
+            else { PB_Tr10_Active.Show(); }
         }
 
         private void checkBoxTrack11_CheckedChanged(object sender, EventArgs e)
         {
             SetcheckBoxTrackIntArray(11, checkBoxTrack11.Checked);
             m_FYAppVar.TrackTrainsOnFYUpdater();
+            if (checkBoxTrack11.Checked == true)
+            {
+                PB_Tr11_Active.Hide();
+            }
+            else { PB_Tr11_Active.Show(); }
         }
 
         private void checkBoxToggle_CheckedChanged(object sender, EventArgs e)
         {
             if (checkBoxToggle.Checked == false)
             {
-                checkBoxTrack1.Checked = false;
-                PB_Tr1_Active.Show();
-                checkBoxTrack2.Checked = false;
+                checkBoxTrack1.Checked = false;                
+                checkBoxTrack2.Checked = false;                
                 checkBoxTrack3.Checked = false;
                 checkBoxTrack4.Checked = false;
                 checkBoxTrack5.Checked = false;
@@ -2930,12 +3149,23 @@ namespace Siebwalde_Application
                 checkBoxTrack9.Checked = false;
                 checkBoxTrack10.Checked = false;
                 checkBoxTrack11.Checked = false;
+                PB_Tr1_Active.Show();
+                PB_Tr2_Active.Show();
+                PB_Tr3_Active.Show();
+                PB_Tr4_Active.Show();
+                PB_Tr5_Active.Show();
+                PB_Tr6_Active.Show();
+                PB_Tr7_Active.Show();
+                PB_Tr8_Active.Show();
+                PB_Tr9_Active.Show();
+                PB_Tr10_Active.Show();
+                PB_Tr11_Active.Show();
+
             }
             else
             {
-                checkBoxTrack1.Checked = true;
-                PB_Tr1_Active.Hide();
-                checkBoxTrack2.Checked = true;
+                checkBoxTrack1.Checked = true;                
+                checkBoxTrack2.Checked = true;                
                 checkBoxTrack3.Checked = true;
                 checkBoxTrack4.Checked = true;
                 checkBoxTrack5.Checked = true;
@@ -2945,6 +3175,18 @@ namespace Siebwalde_Application
                 checkBoxTrack9.Checked = true;
                 checkBoxTrack10.Checked = true;
                 checkBoxTrack11.Checked = true;
+                PB_Tr1_Active.Hide();
+                PB_Tr2_Active.Hide();
+                PB_Tr3_Active.Hide();
+                PB_Tr4_Active.Hide();
+                PB_Tr5_Active.Hide();
+                PB_Tr6_Active.Hide();
+                PB_Tr7_Active.Hide();
+                PB_Tr8_Active.Hide();
+                PB_Tr9_Active.Hide();
+                PB_Tr10_Active.Hide();
+                PB_Tr11_Active.Hide();
+
             }
             m_FYAppVar.TrackTrainsOnFYUpdater();
         }
@@ -2964,6 +3206,11 @@ namespace Siebwalde_Application
             {
                 m_FYAppVar.icheckBoxTrack[Track] = 1;                       
             }
+        }
+
+        private void pictureBox2_Click(object sender, EventArgs e)
+        {
+
         }
     }    
 }
