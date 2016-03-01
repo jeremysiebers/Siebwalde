@@ -191,6 +191,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="favicon.ico" />
+    <Resource Include="FiddleYardApplication\HalfTrainWithWagon.ico" />
+    <Resource Include="FiddleYardApplication\HalfWagon.ico" />
     <Resource Include="FiddleYardApplication\Arrow.ico" />
     <Resource Include="FiddleYardApplication\StopSign.ico" />
     <Resource Include="FiddleYardApplication\TrainWithWagon.ico" />

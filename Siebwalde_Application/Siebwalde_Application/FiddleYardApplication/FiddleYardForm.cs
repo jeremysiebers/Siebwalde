@@ -68,11 +68,17 @@ namespace Siebwalde_Application
         private static int PBHeight = FYTrackHeight - 2;        
         public Image SeinGreen = Siebwalde_Application.Properties.Resources.SeinGreen.ToBitmap();
         public Image SeinRed = Siebwalde_Application.Properties.Resources.SeinRed.ToBitmap();
-        public Image SeinGreen90 = Siebwalde_Application.Properties.Resources.SeinGreen.ToBitmap();
-        public Image SeinRed90 = Siebwalde_Application.Properties.Resources.SeinRed.ToBitmap();
+        public Image SeinGreen270 = Siebwalde_Application.Properties.Resources.SeinGreen.ToBitmap();
+        public Image SeinRed270 = Siebwalde_Application.Properties.Resources.SeinRed.ToBitmap();
         public Image Train = CropBitmap.Crop(ScaleBitmap.Scale(CropBitmap.Crop(Siebwalde_Application.Properties.Resources.TrainWithWagon.ToBitmap()), PBHeight));
+        public Image Train90 = CropBitmap.Crop(ScaleBitmap.Scale(CropBitmap.Crop(Siebwalde_Application.Properties.Resources.TrainWithWagon.ToBitmap()), PBHeight));
+        public Image Train270 = CropBitmap.Crop(ScaleBitmap.Scale(CropBitmap.Crop(Siebwalde_Application.Properties.Resources.TrainWithWagon.ToBitmap()), PBHeight));
         public Image Active = CropBitmap.Crop(ScaleBitmap.Scale(CropBitmap.Crop(Siebwalde_Application.Properties.Resources.StopSign.ToBitmap()), PBHeight));
         public Image Inline = CropBitmap.Crop(ScaleBitmap.Scale(CropBitmap.Crop(Siebwalde_Application.Properties.Resources.Arrow.ToBitmap()), PBHeight));
+        public Image HalfTrain = CropBitmap.Crop(ScaleBitmap.Scale(CropBitmap.Crop(Siebwalde_Application.Properties.Resources.HalfTrainWithWagon.ToBitmap()), PBHeight));
+        public Image HalfTrain270 = CropBitmap.Crop(ScaleBitmap.Scale(CropBitmap.Crop(Siebwalde_Application.Properties.Resources.HalfTrainWithWagon.ToBitmap()), PBHeight));
+        public Image HalfWagon = CropBitmap.Crop(ScaleBitmap.Scale(CropBitmap.Crop(Siebwalde_Application.Properties.Resources.HalfWagon.ToBitmap()), PBHeight));
+        public Image HalfWagon90 = CropBitmap.Crop(ScaleBitmap.Scale(CropBitmap.Crop(Siebwalde_Application.Properties.Resources.HalfWagon.ToBitmap()), PBHeight));
         /*#--------------------------------------------------------------------------#*/
         /*  Description: FiddleYardForm
          *               Constructor
@@ -101,8 +107,12 @@ namespace Siebwalde_Application
             // Size of window on Modeltrain PC is 960; 1085
             // Placed on 0; 85
 
-            SeinGreen90.RotateFlip(RotateFlipType.Rotate270FlipX);
-            SeinRed90.RotateFlip(RotateFlipType.Rotate270FlipX);
+            SeinGreen270.RotateFlip(RotateFlipType.Rotate270FlipNone);
+            SeinRed270.RotateFlip(RotateFlipType.Rotate270FlipNone);
+            Train90.RotateFlip(RotateFlipType.Rotate90FlipNone);           
+            Train270.RotateFlip(RotateFlipType.Rotate270FlipNone);
+            HalfTrain270.RotateFlip(RotateFlipType.Rotate270FlipNone);
+            HalfWagon90.RotateFlip(RotateFlipType.Rotate90FlipNone);
 
             GWinX = 5;                      // The X location of Gwin border line.
             GWinY = 32;                     // The X location of Gwin border line.
@@ -313,8 +323,20 @@ namespace Siebwalde_Application
             PB_Tr11_Active.Size = new Size(Active.Width, Active.Height);
             PB_Tr11_Active.Image = Active;
             //----------------------------------------------------------------------------------------------------------------------------//
-            //PB_Bk5_Train.Size = ------------$#*&^@$)*&^#$)*&$^#@_&$^_@!&$^_@!&@%^_(&*@#^$_(&@#^_&^@!$_&^@!_(*&$^_*(&$^
-
+            PB_Bk5_Train.Size = new Size(Train90.Width, Train90.Height);
+            PB_Bk5_Train.Location = new System.Drawing.Point(LLed_Block5B.Location.X + 1, LLed_Block5B.Location.Y + LLed_Block5B.Location.Y / 2 + PB_Bk5_Train.Height / 2);
+            PB_Bk5_Train.Image = Train90;
+            PB_Bk5_Train.Show();
+            //----------------------------------------------------------------------------------------------------------------------------//
+            PB_Bk6_Train.Size = new Size(Train.Width, Train.Height);
+            PB_Bk6_Train.Location = new System.Drawing.Point(LLed_Block6.Location.X + PB_Bk6_Train.Width / 2, LLed_Block6.Location.Y + 1);
+            PB_Bk6_Train.Image = Train;
+            PB_Bk6_Train.Show();
+            //----------------------------------------------------------------------------------------------------------------------------//
+            PB_Bk8A_Train.Size = new Size(Train270.Width, Train270.Height);
+            PB_Bk8A_Train.Location = new System.Drawing.Point(LLed_Block8A.Location.X + 1, LLed_Block8A.Location.Y + LLed_Block8A.Location.Y / 2 + PB_Bk8A_Train.Height / 2);
+            PB_Bk8A_Train.Image = Train270;
+            PB_Bk8A_Train.Show();
             //----------------------------------------------------------------------------------------------------------------------------//
             LLed_EOS11.Size = new Size(50, 16);
             LLed_EOS11.Location = new System.Drawing.Point(GWinX + 180, GWinHalf - 360);
@@ -379,10 +401,7 @@ namespace Siebwalde_Application
             checkBoxTrack9.Checked = false;
             checkBoxTrack10.Checked = false;
             checkBoxTrack11.Checked = false;
-            checkBoxToggle.Checked = false;
-
-            //ManualMode.Location = new System.Drawing.Point(625, 776);
-            //AutomaticMode.Location = new System.Drawing.Point(625, 776);
+            checkBoxToggle.Checked = false;            
 
             #endregion Indicator init            
 
@@ -1135,22 +1154,28 @@ namespace Siebwalde_Application
 
                     case "LLed_Block5B": if (Val >= 1)
                         {
-                            LLed_Block5B.BackColor = m_FYAppVar.TrackOccupiedColor;//     Color.Lime;//GetBackColor when active
+                            LLed_Block5B.BackColor = m_FYAppVar.TrackOccupiedColor;//     Color.Lime;//GetBackColor when active                            
+                            PB_Bk5_Train.Show();
                         }
                         if (Val == 0)
                         {
                             LLed_Block5B.BackColor = Color.Transparent;//    Color.Transparent;//GetBackcolor when not active
+                            PB_Bk5_Train.Hide();
                         }
+                        PB_Bk5_Train.BackColor = LLed_Block5B.BackColor;
                         break;
 
                     case "LLed_Block8A": if (Val >= 1)
                         {
                             LLed_Block8A.BackColor = m_FYAppVar.TrackOccupiedColor;//Color.Lime;
+                            PB_Bk8A_Train.Show();
                         }
                         if (Val == 0)
                         {
                             LLed_Block8A.BackColor = Color.Transparent;//   Color.Transparent;
+                            PB_Bk8A_Train.Hide();
                         }
+                        PB_Bk8A_Train.BackColor = LLed_Block8A.BackColor;
                         break;
 
                     case "LLed_TrackPower": if (Val >= 1)
@@ -1580,11 +1605,14 @@ namespace Siebwalde_Application
                     case "LLed_Block6": if (Val >= 1)
                         {
                             LLed_Block6.BackColor = m_FYAppVar.TrackOccupiedColor;//Color.Lime;
+                            PB_Bk6_Train.Show();
                         }
                         if (Val == 0)
                         {
                             LLed_Block6.BackColor = Color.Transparent;//   Color.Transparent;
+                            PB_Bk6_Train.Hide();
                         }
+                        PB_Bk6_Train.BackColor = LLed_Block6.BackColor;
                         break;
 
                     case "LLed_Block7": if (Val >= 1)

@@ -141,7 +141,7 @@
             this.PB_Tr11_Inline = new System.Windows.Forms.PictureBox();
             this.PB_Tr11_Active = new System.Windows.Forms.PictureBox();
             this.PB_Bk5_Train = new System.Windows.Forms.PictureBox();
-            this.PB_Bk8_Train = new System.Windows.Forms.PictureBox();
+            this.PB_Bk8A_Train = new System.Windows.Forms.PictureBox();
             this.PB_Bk6_Train = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.Nuo_Track_No_TOP)).BeginInit();
             this.menuStrip1.SuspendLayout();
@@ -185,7 +185,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.PB_Tr11_Inline)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.PB_Tr11_Active)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.PB_Bk5_Train)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.PB_Bk8_Train)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Bk8A_Train)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.PB_Bk6_Train)).BeginInit();
             this.SuspendLayout();
             // 
@@ -1029,13 +1029,13 @@
             this.PB_Bk5_Train.Name = "PB_Bk5_Train";
             this.PB_Bk5_Train.TabStop = false;
             // 
-            // PB_Bk8_Train
+            // PB_Bk8A_Train
             // 
-            this.PB_Bk8_Train.BackColor = System.Drawing.Color.Transparent;
-            resources.ApplyResources(this.PB_Bk8_Train, "PB_Bk8_Train");
-            this.PB_Bk8_Train.Name = "PB_Bk8_Train";
-            this.PB_Bk8_Train.TabStop = false;
-            this.PB_Bk8_Train.Click += new System.EventHandler(this.pictureBox2_Click);
+            this.PB_Bk8A_Train.BackColor = System.Drawing.Color.Transparent;
+            resources.ApplyResources(this.PB_Bk8A_Train, "PB_Bk8A_Train");
+            this.PB_Bk8A_Train.Name = "PB_Bk8A_Train";
+            this.PB_Bk8A_Train.TabStop = false;
+            this.PB_Bk8A_Train.Click += new System.EventHandler(this.pictureBox2_Click);
             // 
             // PB_Bk6_Train
             // 
@@ -1080,7 +1080,7 @@
             this.Controls.Add(this.PB_Tr1_Active);
             this.Controls.Add(this.PB_Tr2_Train);
             this.Controls.Add(this.PB_Tr1_Inline);
-            this.Controls.Add(this.PB_Bk8_Train);
+            this.Controls.Add(this.PB_Bk8A_Train);
             this.Controls.Add(this.PB_Bk5_Train);
             this.Controls.Add(this.PB_Bk6_Train);
             this.Controls.Add(this.PB_Tr1_Train);
@@ -1180,7 +1180,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.PB_Tr11_Inline)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.PB_Tr11_Active)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.PB_Bk5_Train)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.PB_Bk8_Train)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Bk8A_Train)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.PB_Bk6_Train)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -1304,7 +1304,7 @@
         private System.Windows.Forms.PictureBox PB_Tr11_Inline;
         private System.Windows.Forms.PictureBox PB_Tr11_Active;
         private System.Windows.Forms.PictureBox PB_Bk5_Train;
-        private System.Windows.Forms.PictureBox PB_Bk8_Train;
+        private System.Windows.Forms.PictureBox PB_Bk8A_Train;
         private System.Windows.Forms.PictureBox PB_Bk6_Train;
     }
 }
