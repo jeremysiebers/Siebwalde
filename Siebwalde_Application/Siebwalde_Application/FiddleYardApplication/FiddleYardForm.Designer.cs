@@ -143,6 +143,7 @@
             this.PB_Bk5_Train = new System.Windows.Forms.PictureBox();
             this.PB_Bk8A_Train = new System.Windows.Forms.PictureBox();
             this.PB_Bk6_Train = new System.Windows.Forms.PictureBox();
+            this.PB_Bk7_Train = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.Nuo_Track_No_TOP)).BeginInit();
             this.menuStrip1.SuspendLayout();
             this.AutomaticMode.SuspendLayout();
@@ -187,6 +188,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.PB_Bk5_Train)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.PB_Bk8A_Train)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.PB_Bk6_Train)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Bk7_Train)).BeginInit();
             this.SuspendLayout();
             // 
             // Track_No
@@ -1044,6 +1046,13 @@
             this.PB_Bk6_Train.Name = "PB_Bk6_Train";
             this.PB_Bk6_Train.TabStop = false;
             // 
+            // PB_Bk7_Train
+            // 
+            this.PB_Bk7_Train.BackColor = System.Drawing.Color.Transparent;
+            resources.ApplyResources(this.PB_Bk7_Train, "PB_Bk7_Train");
+            this.PB_Bk7_Train.Name = "PB_Bk7_Train";
+            this.PB_Bk7_Train.TabStop = false;
+            // 
             // FiddleYardForm
             // 
             resources.ApplyResources(this, "$this");
@@ -1082,6 +1091,7 @@
             this.Controls.Add(this.PB_Tr1_Inline);
             this.Controls.Add(this.PB_Bk8A_Train);
             this.Controls.Add(this.PB_Bk5_Train);
+            this.Controls.Add(this.PB_Bk7_Train);
             this.Controls.Add(this.PB_Bk6_Train);
             this.Controls.Add(this.PB_Tr1_Train);
             this.Controls.Add(this.AutomaticMode);
@@ -1182,6 +1192,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.PB_Bk5_Train)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.PB_Bk8A_Train)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.PB_Bk6_Train)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PB_Bk7_Train)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1306,5 +1317,6 @@
         private System.Windows.Forms.PictureBox PB_Bk5_Train;
         private System.Windows.Forms.PictureBox PB_Bk8A_Train;
         private System.Windows.Forms.PictureBox PB_Bk6_Train;
+        private System.Windows.Forms.PictureBox PB_Bk7_Train;
     }
 }

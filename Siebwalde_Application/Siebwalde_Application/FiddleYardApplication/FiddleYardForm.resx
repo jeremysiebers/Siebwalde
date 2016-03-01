@@ -169,7 +169,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;Btn_Bezet7On_TOP.ZOrder" xml:space="preserve">
-    <value>42</value>
+    <value>43</value>
   </data>
   <data name="Btn_Bezet6On_TOP.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -199,7 +199,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;Btn_Bezet6On_TOP.ZOrder" xml:space="preserve">
-    <value>43</value>
+    <value>44</value>
   </data>
   <data name="Btn_Bezet5BOn_TOP.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -229,7 +229,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;Btn_Bezet5BOn_TOP.ZOrder" xml:space="preserve">
-    <value>39</value>
+    <value>40</value>
   </data>
   <data name="Btn_Reset_TOP.Font" type="System.Drawing.Font, System.Drawing">
     <value>Microsoft Sans Serif, 12pt, style=Bold</value>
@@ -259,7 +259,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;Btn_Reset_TOP.ZOrder" xml:space="preserve">
-    <value>79</value>
+    <value>80</value>
   </data>
   <data name="Nuo_Track_No_TOP.Location" type="System.Drawing.Point, System.Drawing">
     <value>138, 63</value>
@@ -553,7 +553,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;ReceivedCmd.ZOrder" xml:space="preserve">
-    <value>80</value>
+    <value>81</value>
   </data>
   <data name="LLed_Block5B.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -577,7 +577,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_Block5B.ZOrder" xml:space="preserve">
-    <value>78</value>
+    <value>79</value>
   </data>
   <data name="LLed_Block5BIn.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -601,7 +601,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_Block5BIn.ZOrder" xml:space="preserve">
-    <value>77</value>
+    <value>78</value>
   </data>
   <data name="LLed_Block8A.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -625,7 +625,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_Block8A.ZOrder" xml:space="preserve">
-    <value>76</value>
+    <value>77</value>
   </data>
   <data name="LLed_Block6.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -649,7 +649,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_Block6.ZOrder" xml:space="preserve">
-    <value>75</value>
+    <value>76</value>
   </data>
   <data name="LLed_Block6In.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -673,7 +673,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_Block6In.ZOrder" xml:space="preserve">
-    <value>74</value>
+    <value>75</value>
   </data>
   <data name="LLed_Block7In.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -697,7 +697,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_Block7In.ZOrder" xml:space="preserve">
-    <value>72</value>
+    <value>73</value>
   </data>
   <data name="LLed_Block7.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -721,7 +721,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_Block7.ZOrder" xml:space="preserve">
-    <value>73</value>
+    <value>74</value>
   </data>
   <data name="LLed_Track11.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -751,7 +751,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_Track11.ZOrder" xml:space="preserve">
-    <value>71</value>
+    <value>72</value>
   </data>
   <data name="LLed_TrackPower.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -781,7 +781,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_TrackPower.ZOrder" xml:space="preserve">
-    <value>60</value>
+    <value>61</value>
   </data>
   <data name="LLed_Track10.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -811,7 +811,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_Track10.ZOrder" xml:space="preserve">
-    <value>70</value>
+    <value>71</value>
   </data>
   <data name="LLed_Track9.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -841,7 +841,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_Track9.ZOrder" xml:space="preserve">
-    <value>69</value>
+    <value>70</value>
   </data>
   <data name="LLed_Track8.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -871,7 +871,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_Track8.ZOrder" xml:space="preserve">
-    <value>68</value>
+    <value>69</value>
   </data>
   <data name="LLed_Track7.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -901,7 +901,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_Track7.ZOrder" xml:space="preserve">
-    <value>67</value>
+    <value>68</value>
   </data>
   <data name="LLed_Track6.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -931,7 +931,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_Track6.ZOrder" xml:space="preserve">
-    <value>66</value>
+    <value>67</value>
   </data>
   <data name="LLed_Track5.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -961,7 +961,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_Track5.ZOrder" xml:space="preserve">
-    <value>65</value>
+    <value>66</value>
   </data>
   <data name="LLed_Track4.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -991,7 +991,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_Track4.ZOrder" xml:space="preserve">
-    <value>64</value>
+    <value>65</value>
   </data>
   <data name="LLed_Track3.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -1021,7 +1021,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_Track3.ZOrder" xml:space="preserve">
-    <value>63</value>
+    <value>64</value>
   </data>
   <data name="LLed_Track2.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -1051,7 +1051,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_Track2.ZOrder" xml:space="preserve">
-    <value>62</value>
+    <value>63</value>
   </data>
   <data name="LLed_Track1.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -1081,7 +1081,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_Track1.ZOrder" xml:space="preserve">
-    <value>61</value>
+    <value>62</value>
   </data>
   <data name="LLed_FYPLATE_TOP.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -1105,7 +1105,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_FYPLATE_TOP.ZOrder" xml:space="preserve">
-    <value>81</value>
+    <value>82</value>
   </data>
   <data name="LabelBlock5B.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -1135,7 +1135,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LabelBlock5B.ZOrder" xml:space="preserve">
-    <value>59</value>
+    <value>60</value>
   </data>
   <data name="LabelBlock6.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -1165,7 +1165,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LabelBlock6.ZOrder" xml:space="preserve">
-    <value>58</value>
+    <value>59</value>
   </data>
   <data name="LabelBlock7.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -1195,7 +1195,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LabelBlock7.ZOrder" xml:space="preserve">
-    <value>57</value>
+    <value>58</value>
   </data>
   <data name="LabelBlock8A.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -1225,7 +1225,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LabelBlock8A.ZOrder" xml:space="preserve">
-    <value>56</value>
+    <value>57</value>
   </data>
   <data name="LLed_F10_2_TOP.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -1252,7 +1252,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_F10_2_TOP.ZOrder" xml:space="preserve">
-    <value>55</value>
+    <value>56</value>
   </data>
   <data name="LLed_F10.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -1279,7 +1279,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_F10.ZOrder" xml:space="preserve">
-    <value>50</value>
+    <value>51</value>
   </data>
   <data name="LLed_F13.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -1306,7 +1306,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_F13.ZOrder" xml:space="preserve">
-    <value>54</value>
+    <value>55</value>
   </data>
   <data name="LLed_F12.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -1333,7 +1333,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_F12.ZOrder" xml:space="preserve">
-    <value>51</value>
+    <value>52</value>
   </data>
   <data name="LLed_F11.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -1360,7 +1360,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_F11.ZOrder" xml:space="preserve">
-    <value>53</value>
+    <value>54</value>
   </data>
   <data name="GWin.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -1384,7 +1384,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;GWin.ZOrder" xml:space="preserve">
-    <value>82</value>
+    <value>83</value>
   </data>
   <data name="Btn_Track_Plus_TOP.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -1441,7 +1441,7 @@
     <value>File</value>
   </data>
   <data name="alwaysOnTopToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>154, 22</value>
+    <value>153, 22</value>
   </data>
   <data name="alwaysOnTopToolStripMenuItem.Text" xml:space="preserve">
     <value>Always On Top</value>
@@ -1474,7 +1474,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;menuStrip1.ZOrder" xml:space="preserve">
-    <value>83</value>
+    <value>84</value>
   </data>
   <data name="label2.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -1933,7 +1933,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;AutomaticMode.ZOrder" xml:space="preserve">
-    <value>36</value>
+    <value>37</value>
   </data>
   <data name="ManualMode.Location" type="System.Drawing.Point, System.Drawing">
     <value>625, 776</value>
@@ -1957,7 +1957,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;ManualMode.ZOrder" xml:space="preserve">
-    <value>52</value>
+    <value>53</value>
   </data>
   <data name="LLed_EOS11.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -1987,7 +1987,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_EOS11.ZOrder" xml:space="preserve">
-    <value>49</value>
+    <value>50</value>
   </data>
   <data name="LLed_EOS10.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -2017,7 +2017,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_EOS10.ZOrder" xml:space="preserve">
-    <value>48</value>
+    <value>49</value>
   </data>
   <data name="LLed_Heart.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -2047,7 +2047,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_Heart.ZOrder" xml:space="preserve">
-    <value>47</value>
+    <value>48</value>
   </data>
   <data name="LLed_M10.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -2077,7 +2077,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_M10.ZOrder" xml:space="preserve">
-    <value>46</value>
+    <value>47</value>
   </data>
   <data name="LLed_Resistor.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -2107,7 +2107,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_Resistor.ZOrder" xml:space="preserve">
-    <value>45</value>
+    <value>46</value>
   </data>
   <data name="LLed_15VTrackPower.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -2137,7 +2137,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;LLed_15VTrackPower.ZOrder" xml:space="preserve">
-    <value>44</value>
+    <value>45</value>
   </data>
   <data name="SimulationMode.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -2170,7 +2170,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;SimulationMode.ZOrder" xml:space="preserve">
-    <value>41</value>
+    <value>42</value>
   </data>
   <data name="PB_Block5BIn.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -2197,7 +2197,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;PB_Block5BIn.ZOrder" xml:space="preserve">
-    <value>40</value>
+    <value>41</value>
   </data>
   <data name="PB_Block6In.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -2224,7 +2224,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;PB_Block6In.ZOrder" xml:space="preserve">
-    <value>38</value>
+    <value>39</value>
   </data>
   <data name="PB_Block7In.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -2251,7 +2251,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;PB_Block7In.ZOrder" xml:space="preserve">
-    <value>37</value>
+    <value>38</value>
   </data>
   <data name="PB_Tr1_Train.Location" type="System.Drawing.Point, System.Drawing">
     <value>340, 235</value>
@@ -2272,7 +2272,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;PB_Tr1_Train.ZOrder" xml:space="preserve">
-    <value>35</value>
+    <value>36</value>
   </data>
   <data name="PB_Tr1_Active.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -3112,6 +3112,30 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;PB_Bk6_Train.ZOrder" xml:space="preserve">
+    <value>35</value>
+  </data>
+  <data name="PB_Bk7_Train.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="PB_Bk7_Train.Location" type="System.Drawing.Point, System.Drawing">
+    <value>797, 395</value>
+  </data>
+  <data name="PB_Bk7_Train.Size" type="System.Drawing.Size, System.Drawing">
+    <value>80, 14</value>
+  </data>
+  <data name="PB_Bk7_Train.TabIndex" type="System.Int32, mscorlib">
+    <value>121</value>
+  </data>
+  <data name="&gt;&gt;PB_Bk7_Train.Name" xml:space="preserve">
+    <value>PB_Bk7_Train</value>
+  </data>
+  <data name="&gt;&gt;PB_Bk7_Train.Type" xml:space="preserve">
+    <value>System.Windows.Forms.PictureBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;PB_Bk7_Train.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;PB_Bk7_Train.ZOrder" xml:space="preserve">
     <value>34</value>
   </data>
   <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
