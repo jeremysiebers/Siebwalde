@@ -315,7 +315,7 @@ namespace Siebwalde_Application
             //----------------------------------------------------------------------------------------------------------------------------//
             PB_Bk6_Train.Size = new Size(Train.Width, Train.Height);
             PB_Bk6_Train.Location = new System.Drawing.Point(LLed_Block6.Location.X + PB_Bk6_Train.Width / 2, LLed_Block6.Location.Y + 2);
-            PB_Bk6_Train.Image = Train;
+            PB_Bk6_Train.Image = HalfTrain;
             PB_Bk6_Train.Show();
             //----------------------------------------------------------------------------------------------------------------------------//
             PB_Bk7_Train.Size = new Size(Train.Width, Train.Height);
@@ -1773,14 +1773,15 @@ namespace Siebwalde_Application
 
         private void MoveTrainImage(string Indicator, bool Active)
         {
-            lock (ExecuteLock)
-            {
+            //lock (ExecuteLock)
+            //{
                 switch (TrainMove)
                 {
                     case State.Start:
                         if (PB_Block5BIn.Image == SeinGreen)
-                        {
+                        {                            
                             TrainMove = State.DriveIn_1;
+                            //PB_Bk7_Train.Image = null;
                         }
                         else if (PB_Block7In.Image == SeinGreen)
                         {
@@ -1809,6 +1810,7 @@ namespace Siebwalde_Application
                         if (Indicator == "LLed_F13" && Active == true)
                         {
                             PB_Bk6_Train.Image = HalfWagon;
+                            MoveTrainUpdateTrack(HalfTrain);
                             TrainMove = State.DriveIn_4;
                         }
                         break;
@@ -1817,12 +1819,79 @@ namespace Siebwalde_Application
                         if (Indicator == "LLed_F13" && Active == false)
                         {
                             PB_Bk6_Train.Image = HalfTrain;
+                            MoveTrainUpdateTrack(Train);
                             TrainMove = State.Start;
                         }
                         break;
 
                     default: break;
                 }
+           // }
+        }
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: 
+         *              
+         *              
+         *               
+         *
+         *  Input(s)   : 
+         *
+         *  Output(s)  :
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      :
+         */
+        /*#--------------------------------------------------------------------------#*/
+        private void MoveTrainUpdateTrack(Image NewTrackImage)
+        {
+            if (TrackStatusLight[1] == true)
+            {
+                PB_Tr1_Train.Image = NewTrackImage;
+            }
+            else if (TrackStatusLight[2] == true)
+            {
+                PB_Tr2_Train.Image = NewTrackImage;
+            }
+            else if (TrackStatusLight[3] == true)
+            {
+                PB_Tr3_Train.Image = NewTrackImage;
+            }
+            else if (TrackStatusLight[4] == true)
+            {
+                PB_Tr4_Train.Image = NewTrackImage;
+            }
+            else if (TrackStatusLight[5] == true)
+            {
+                PB_Tr5_Train.Image = NewTrackImage;
+            }
+            else if (TrackStatusLight[6] == true)
+            {
+                PB_Tr6_Train.Image = NewTrackImage;
+            }
+            else if (TrackStatusLight[7] == true)
+            {
+                PB_Tr7_Train.Image = NewTrackImage;
+            }
+            else if (TrackStatusLight[8] == true)
+            {
+                PB_Tr8_Train.Image = NewTrackImage;
+            }
+            else if (TrackStatusLight[9] == true)
+            {
+                PB_Tr9_Train.Image = NewTrackImage;
+            }
+            else if (TrackStatusLight[10] == true)
+            {
+                PB_Tr10_Train.Image = NewTrackImage;
+            }
+            else if (TrackStatusLight[11] == true)
+            {
+                PB_Tr11_Train.Image = NewTrackImage;
             }
         }
         /*#--------------------------------------------------------------------------#*/
