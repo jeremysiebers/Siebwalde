@@ -610,6 +610,9 @@ namespace Siebwalde_Application
             PB_Bk6_Train.Hide();
             PB_Bk8A_Train.Hide();
             PB_Bk7_Train.Hide();
+
+            PB_Bk7_Train.Image = null;
+            PB_Bk8A_Train.Image = null;
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -1215,12 +1218,13 @@ namespace Siebwalde_Application
                         {
                             LLed_Block8A.BackColor = m_FYAppVar.TrackOccupiedColor;//Color.Lime;
                             MoveTrainImage("LLed_Block8A", true);
-                            PB_Bk8A_Train.Show();
+                            PB_Bk8A_Train.Show();                            
                         }
                         if (Val == 0)
                         {
                             LLed_Block8A.BackColor = Color.Transparent;//   Color.Transparent;
-                            PB_Bk8A_Train.Hide();
+                            //PB_Bk8A_Train.Hide();
+                            PB_Bk8A_Train.Image = null;                     // clear image for next train drive_out
                             MoveTrainImage("LLed_Block8A", false);
                         }
                         PB_Bk8A_Train.BackColor = LLed_Block8A.BackColor;
@@ -1253,6 +1257,7 @@ namespace Siebwalde_Application
                             LLed_Block5BIn.BackColor = m_FYAppVar.TrackOccupiedColor;             //Color.Lime;
                             Btn_Bezet5BOn_TOP.Text = "On";
                             Btn_Bezet5BOn_TOP_Click_Toggle = true;
+                            MoveTrainImage("LLed_Block5BIn", true);
                         }
                         break;
 
@@ -1285,6 +1290,7 @@ namespace Siebwalde_Application
                             LLed_Block7In.BackColor = m_FYAppVar.TrackOccupiedColor;             //Color.Lime;                                                        
                             Btn_Bezet7On_TOP.Text = "On";
                             Btn_Bezet7On_TOP_Click_Toggle = true;
+                            MoveTrainImage("LLed_Block7In", true);
                         }
                         break;
 
@@ -1766,7 +1772,7 @@ namespace Siebwalde_Application
         /*#--------------------------------------------------------------------------#*/
         private enum State
         {
-            Start, DriveIn_1, DriveIn_2, DriveIn_3, DriveIn_4
+            Start, DriveIn_1, DriveIn_2, DriveIn_3, DriveIn_4, DriveOut_1, DriveOut_2, DriveOut_3, DriveOut_4, DriveOut_5
         };
         private State TrainMove = State.Start;
         private object ExecuteLock = new object();
@@ -1780,12 +1786,11 @@ namespace Siebwalde_Application
                     case State.Start:
                         if (PB_Block5BIn.Image == SeinGreen)
                         {                            
-                            TrainMove = State.DriveIn_1;
-                            //PB_Bk7_Train.Image = null;
+                            TrainMove = State.DriveIn_1;                            
                         }
                         else if (PB_Block7In.Image == SeinGreen)
                         {
-                            //TrainMove = State.DriveOut_1;
+                            TrainMove = State.DriveOut_1;
                         }
                         break;
 
@@ -1821,6 +1826,50 @@ namespace Siebwalde_Application
                             PB_Bk6_Train.Image = HalfTrain;
                             MoveTrainUpdateTrack(Train);
                             TrainMove = State.Start;
+                        }
+                        break;
+                    /*##################################################################*/
+                    case State.DriveOut_1:
+                        if (Indicator == "LLed_F12" && Active == true)
+                        {
+                            PB_Bk7_Train.Image = HalfTrain;
+                            MoveTrainUpdateTrack(HalfWagon);
+                            TrainMove = State.DriveOut_2;
+                        }                        
+                        break;
+
+                    case State.DriveOut_2:
+                        if ((Indicator == "LLed_F12" && Active == false) || (Indicator == "LLed_Block8A" && Active == true)) // for real life check on F12 first, check on block8A due to simulator
+                        {
+                            PB_Bk7_Train.Image = Train;
+                            MoveTrainUpdateTrack(null);
+                            TrainMove = State.DriveOut_3;
+                        }
+                        break;
+
+                    case State.DriveOut_3:
+                        if ((Indicator == "LLed_Block8A" && Active == true) || (Indicator == "LLed_F12" && Active == false)) // for real life check on block8A first, check on F12 due to simulator
+                        {
+                            PB_Bk7_Train.Image = HalfWagon;
+                            PB_Bk8A_Train.Image = HalfTrain270;
+                            TrainMove = State.DriveOut_4;
+                        }
+                        break;
+
+                    case State.DriveOut_4:
+                        if (Indicator == "LLed_Block7" && Active == false)
+                        {
+                            PB_Bk7_Train.Image = null;
+                            PB_Bk8A_Train.Image = Train270;
+                            TrainMove = State.DriveOut_5;
+                        }
+                        break;
+
+                    case State.DriveOut_5:
+                        if (PB_Block7In.Image == SeinRed)
+                        {
+                            TrainMove = State.Start;
+
                         }
                         break;
 
