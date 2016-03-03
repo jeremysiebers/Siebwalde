@@ -180,9 +180,9 @@ namespace Siebwalde_Application
             //----------------------------------------------------------------------------------------------------------------------------//
             LLed_Track2.Size = new Size(600, FYTrackHeight);
             
-            PB_Tr2_Train.Size = new Size(Train.Width, Train.Height);            
-            PB_Tr2_Train.Image = Train;
-            PB_Tr2_Train.Hide();
+            PB_Tr2_Train.Size = new Size(Train.Width, Train.Height);
+            PB_Tr2_Train.Image = null;
+            PB_Tr2_Train.Show();
                        
             PB_Tr2_Inline.Size = new Size(Inline.Width, Inline.Height);            
             PB_Tr2_Inline.Image = Inline;
@@ -194,8 +194,8 @@ namespace Siebwalde_Application
             LLed_Track3.Size = new Size(600, FYTrackHeight);
 
             PB_Tr3_Train.Size = new Size(Train.Width, Train.Height);
-            PB_Tr3_Train.Image = Train;
-            PB_Tr3_Train.Hide();
+            PB_Tr3_Train.Image = null;
+            PB_Tr3_Train.Show();
 
             PB_Tr3_Inline.Size = new Size(Inline.Width, Inline.Height);
             PB_Tr3_Inline.Image = Inline;
@@ -207,8 +207,8 @@ namespace Siebwalde_Application
             LLed_Track4.Size = new Size(600, FYTrackHeight);
 
             PB_Tr4_Train.Size = new Size(Train.Width, Train.Height);
-            PB_Tr4_Train.Image = Train;
-            PB_Tr4_Train.Hide();
+            PB_Tr4_Train.Image = null;
+            PB_Tr4_Train.Show();
 
             PB_Tr4_Inline.Size = new Size(Inline.Width, Inline.Height);
             PB_Tr4_Inline.Image = Inline;
@@ -220,8 +220,8 @@ namespace Siebwalde_Application
             LLed_Track5.Size = new Size(600, FYTrackHeight);
 
             PB_Tr5_Train.Size = new Size(Train.Width, Train.Height);
-            PB_Tr5_Train.Image = Train;
-            PB_Tr5_Train.Hide();
+            PB_Tr5_Train.Image = null;
+            PB_Tr5_Train.Show();
 
             PB_Tr5_Inline.Size = new Size(Inline.Width, Inline.Height);
             PB_Tr5_Inline.Image = Inline;
@@ -233,8 +233,8 @@ namespace Siebwalde_Application
             LLed_Track6.Size = new Size(600, FYTrackHeight);
 
             PB_Tr6_Train.Size = new Size(Train.Width, Train.Height);
-            PB_Tr6_Train.Image = Train;
-            PB_Tr6_Train.Hide();
+            PB_Tr6_Train.Image = null;
+            PB_Tr6_Train.Show();
 
             PB_Tr6_Inline.Size = new Size(Inline.Width, Inline.Height);
             PB_Tr6_Inline.Image = Inline;
@@ -246,8 +246,8 @@ namespace Siebwalde_Application
             LLed_Track7.Size = new Size(600, FYTrackHeight);
 
             PB_Tr7_Train.Size = new Size(Train.Width, Train.Height);
-            PB_Tr7_Train.Image = Train;
-            PB_Tr7_Train.Hide();
+            PB_Tr7_Train.Image = null;
+            PB_Tr7_Train.Show();
 
             PB_Tr7_Inline.Size = new Size(Inline.Width, Inline.Height);
             PB_Tr7_Inline.Image = Inline;
@@ -259,8 +259,8 @@ namespace Siebwalde_Application
             LLed_Track8.Size = new Size(600, FYTrackHeight);
 
             PB_Tr8_Train.Size = new Size(Train.Width, Train.Height);
-            PB_Tr8_Train.Image = Train;
-            PB_Tr8_Train.Hide();
+            PB_Tr8_Train.Image = null;
+            PB_Tr8_Train.Show();
 
             PB_Tr8_Inline.Size = new Size(Inline.Width, Inline.Height);
             PB_Tr8_Inline.Image = Inline;
@@ -272,8 +272,8 @@ namespace Siebwalde_Application
             LLed_Track9.Size = new Size(600, FYTrackHeight);
 
             PB_Tr9_Train.Size = new Size(Train.Width, Train.Height);
-            PB_Tr9_Train.Image = Train;
-            PB_Tr9_Train.Hide();
+            PB_Tr9_Train.Image = null;
+            PB_Tr9_Train.Show();
 
             PB_Tr9_Inline.Size = new Size(Inline.Width, Inline.Height);
             PB_Tr9_Inline.Image = Inline;
@@ -285,8 +285,8 @@ namespace Siebwalde_Application
             LLed_Track10.Size = new Size(600, FYTrackHeight);
 
             PB_Tr10_Train.Size = new Size(Train.Width, Train.Height);
-            PB_Tr10_Train.Image = Train;
-            PB_Tr10_Train.Hide();
+            PB_Tr10_Train.Image = null;
+            PB_Tr10_Train.Show();
 
             PB_Tr10_Inline.Size = new Size(Inline.Width, Inline.Height);
             PB_Tr10_Inline.Image = Inline;
@@ -298,8 +298,8 @@ namespace Siebwalde_Application
             LLed_Track11.Size = new Size(600, FYTrackHeight);
 
             PB_Tr11_Train.Size = new Size(Train.Width, Train.Height);
-            PB_Tr11_Train.Image = Train;
-            PB_Tr11_Train.Hide();
+            PB_Tr11_Train.Image = null;
+            PB_Tr11_Train.Show();
 
             PB_Tr11_Inline.Size = new Size(Inline.Width, Inline.Height);
             PB_Tr11_Inline.Image = Inline;
@@ -325,7 +325,7 @@ namespace Siebwalde_Application
             //----------------------------------------------------------------------------------------------------------------------------//
             PB_Bk8A_Train.Size = new Size(Train270.Width, Train270.Height);
             PB_Bk8A_Train.Location = new System.Drawing.Point(LLed_Block8A.Location.X + 2, LLed_Block8A.Location.Y + LLed_Block8A.Location.Y / 2 + PB_Bk8A_Train.Height / 2);
-            PB_Bk8A_Train.Image = Train270;
+            PB_Bk8A_Train.Image = HalfTrain270;
             PB_Bk8A_Train.Show();
             //----------------------------------------------------------------------------------------------------------------------------//
             LLed_EOS11.Size = new Size(50, 16);
@@ -1344,19 +1344,22 @@ namespace Siebwalde_Application
                         if (Val >= 1 && TrackStatusLight[2] == true)                                            // If train present and Track is active and track is enabled
                         {
                             LLed_Track2.BackColor = m_FYAppVar.TrackOccupiedColor;                              // Set TrackOccupiedColor
-                            PB_Tr2_Train.Show();                                                                // Train present?
+                            //PB_Tr2_Train.Show();                                                                // Train present?
+                            PB_Tr2_Train.Image = Train;
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         else if (Val >= 1 && TrackStatusLight[2] == false)                                      // If train present and Track is not active and track is enabled
                         {
                             LLed_Track2.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
-                            PB_Tr2_Train.Show();                                                                // Train present?
+                            //PB_Tr2_Train.Show();                                                                // Train present?
+                            PB_Tr2_Train.Image = Train;
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         else if (Val == 0 && Initialized == true)                                               // If train not present and FY is initialized and Track is enabled
                         {
                             LLed_Track2.BackColor = Color.Transparent;                                          // Set Color.Transparent
-                            PB_Tr2_Train.Hide();                                                                // Train present?
+                            //PB_Tr2_Train.Hide();                                                                // Train present?
+                            PB_Tr2_Train.Image = null;
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
 
@@ -1364,7 +1367,8 @@ namespace Siebwalde_Application
                         {
                             LLed_Track2.BackColor = m_FYAppVar.TrackNotInitializedColor;                        // Set TrackNotInitializedColor
                             LLed_Track2.Text = "                     Not Initialized";                          // Set Track text
-                            PB_Tr2_Train.Hide();                                                                // Train present?
+                            //PB_Tr2_Train.Hide();                                                                // Train present?
+                            PB_Tr2_Train.Image = null;
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         PB_Tr2_Active.BackColor = LLed_Track2.BackColor;
@@ -1376,19 +1380,22 @@ namespace Siebwalde_Application
                         if (Val >= 1 && TrackStatusLight[3] == true)                                            // If train present and Track is active and track is enabled
                         {
                             LLed_Track3.BackColor = m_FYAppVar.TrackOccupiedColor;                              // Set TrackOccupiedColor
-                            PB_Tr3_Train.Show();                                                                // Train present?
+                            //PB_Tr3_Train.Show();                                                                // Train present?
+                            PB_Tr3_Train.Image = Train;
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         else if (Val >= 1 && TrackStatusLight[3] == false)                                      // If train present and Track is not active and track is enabled
                         {
                             LLed_Track3.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
-                            PB_Tr3_Train.Show();                                                                // Train present?
+                            //PB_Tr3_Train.Show();                                                                // Train present?
+                            PB_Tr3_Train.Image = Train;
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         else if (Val == 0 && Initialized == true)                                               // If train not present and FY is initialized and Track is enabled
                         {
                             LLed_Track3.BackColor = Color.Transparent;                                          // Set Color.Transparent
-                            PB_Tr3_Train.Hide();                                                                // Train present?
+                            //PB_Tr3_Train.Hide();                                                                // Train present?
+                            PB_Tr3_Train.Image = null;
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
 
@@ -1396,7 +1403,8 @@ namespace Siebwalde_Application
                         {
                             LLed_Track3.BackColor = m_FYAppVar.TrackNotInitializedColor;                        // Set TrackNotInitializedColor
                             LLed_Track3.Text = "                     Not Initialized";                          // Set Track text
-                            PB_Tr3_Train.Hide();                                                                // Train present?
+                            //PB_Tr3_Train.Hide();                                                                // Train present?
+                            PB_Tr3_Train.Image = null;
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         PB_Tr3_Active.BackColor = LLed_Track3.BackColor;
@@ -1408,19 +1416,22 @@ namespace Siebwalde_Application
                         if (Val >= 1 && TrackStatusLight[4] == true)                                            // If train present and Track is active and track is enabled
                         {
                             LLed_Track4.BackColor = m_FYAppVar.TrackOccupiedColor;                              // Set TrackOccupiedColor
-                            PB_Tr4_Train.Show();                                                                // Train present?
+                            //PB_Tr4_Train.Show();                                                                // Train present?
+                            PB_Tr4_Train.Image = Train;
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         else if (Val >= 1 && TrackStatusLight[4] == false)                                      // If train present and Track is not active and track is enabled
                         {
                             LLed_Track4.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
-                            PB_Tr4_Train.Show();                                                                // Train present?
+                            //PB_Tr4_Train.Show();                                                                // Train present?
+                            PB_Tr4_Train.Image = Train;
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         else if (Val == 0 && Initialized == true)                                                   // If train not present and FY is initialized and Track is enabled
                         {
                             LLed_Track4.BackColor = Color.Transparent;                                          // Set Color.Transparent
-                            PB_Tr4_Train.Hide();                                                                // Train present?
+                            //PB_Tr4_Train.Hide();                                                                // Train present?
+                            PB_Tr4_Train.Image = null;
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
 
@@ -1428,7 +1439,8 @@ namespace Siebwalde_Application
                         {
                             LLed_Track4.BackColor = m_FYAppVar.TrackNotInitializedColor;                        // Set TrackNotInitializedColor
                             LLed_Track4.Text = "                     Not Initialized";                          // Set Track text
-                            PB_Tr4_Train.Hide();                                                                // Train present?
+                            //PB_Tr4_Train.Hide();                                                                // Train present?
+                            PB_Tr4_Train.Image = null;
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         PB_Tr4_Active.BackColor = LLed_Track4.BackColor;
@@ -1440,19 +1452,22 @@ namespace Siebwalde_Application
                         if (Val >= 1 && TrackStatusLight[5] == true)                                            // If train present and Track is active and track is enabled
                         {
                             LLed_Track5.BackColor = m_FYAppVar.TrackOccupiedColor;                              // Set TrackOccupiedColor
-                            PB_Tr5_Train.Show();                                                                // Train present?
+                            //PB_Tr5_Train.Show();                                                                // Train present?
+                            PB_Tr5_Train.Image = Train;
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         else if (Val >= 1 && TrackStatusLight[5] == false)                                      // If train present and Track is not active and track is enabled
                         {
                             LLed_Track5.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
-                            PB_Tr5_Train.Show();                                                                // Train present?
+                            //PB_Tr5_Train.Show();                                                                // Train present?
+                            PB_Tr5_Train.Image = Train;
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         else if (Val == 0 && Initialized == true)                                                 // If train not present and FY is initialized and Track is enabled
                         {
                             LLed_Track5.BackColor = Color.Transparent;                                          // Set Color.Transparent
-                            PB_Tr5_Train.Hide();                                                                // Train present?
+                            //PB_Tr5_Train.Hide();                                                                // Train present?
+                            PB_Tr5_Train.Image = null;
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
 
@@ -1460,7 +1475,8 @@ namespace Siebwalde_Application
                         {
                             LLed_Track5.BackColor = m_FYAppVar.TrackNotInitializedColor;                        // Set TrackNotInitializedColor
                             LLed_Track5.Text = "                     Not Initialized";                          // Set Track text
-                            PB_Tr5_Train.Hide();                                                                // Train present?
+                            //PB_Tr5_Train.Hide();                                                                // Train present?
+                            PB_Tr5_Train.Image = null;
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         PB_Tr5_Active.BackColor = LLed_Track5.BackColor;
@@ -1472,19 +1488,22 @@ namespace Siebwalde_Application
                         if (Val >= 1 && TrackStatusLight[6] == true)                                            // If train present and Track is active and track is enabled
                         {
                             LLed_Track6.BackColor = m_FYAppVar.TrackOccupiedColor;                              // Set TrackOccupiedColor
-                            PB_Tr6_Train.Show();                                                                // Train present?
+                            //PB_Tr6_Train.Show();                                                                // Train present?
+                            PB_Tr6_Train.Image = Train;
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         else if (Val >= 1 && TrackStatusLight[6] == false)                                      // If train present and Track is not active and track is enabled
                         {
                             LLed_Track6.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
-                            PB_Tr6_Train.Show();                                                                // Train present?
+                            //PB_Tr6_Train.Show();                                                                // Train present?
+                            PB_Tr6_Train.Image = Train;
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         else if (Val == 0 && Initialized == true)                                                 // If train not present and FY is initialized and Track is enabled
                         {
                             LLed_Track6.BackColor = Color.Transparent;                                          // Set Color.Transparent
-                            PB_Tr6_Train.Hide();                                                                // Train present?
+                            //PB_Tr6_Train.Hide();                                                                // Train present?
+                            PB_Tr6_Train.Image = null;
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
 
@@ -1492,7 +1511,8 @@ namespace Siebwalde_Application
                         {
                             LLed_Track6.BackColor = m_FYAppVar.TrackNotInitializedColor;                        // Set TrackNotInitializedColor
                             LLed_Track6.Text = "                     Not Initialized";                          // Set Track text
-                            PB_Tr6_Train.Hide();                                                                // Train present?
+                            //PB_Tr6_Train.Hide();                                                                // Train present?
+                            PB_Tr6_Train.Image = null;
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         PB_Tr6_Active.BackColor = LLed_Track6.BackColor;
@@ -1504,19 +1524,22 @@ namespace Siebwalde_Application
                         if (Val >= 1 && TrackStatusLight[7] == true)                                            // If train present and Track is active and track is enabled
                         {
                             LLed_Track7.BackColor = m_FYAppVar.TrackOccupiedColor;                              // Set TrackOccupiedColor
-                            PB_Tr7_Train.Show();                                                                // Train present?
+                            //PB_Tr7_Train.Show();                                                                // Train present?
+                            PB_Tr7_Train.Image = Train;
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         else if (Val >= 1 && TrackStatusLight[7] == false)                                      // If train present and Track is not active and track is enabled
                         {
                             LLed_Track7.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
-                            PB_Tr7_Train.Show();                                                                // Train present?
+                            //PB_Tr7_Train.Show();                                                                // Train present?
+                            PB_Tr7_Train.Image = Train;
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         else if (Val == 0 && Initialized == true)                                               // If train not present and FY is initialized and Track is enabled
                         {
                             LLed_Track7.BackColor = Color.Transparent;                                          // Set Color.Transparent
-                            PB_Tr7_Train.Hide();                                                                // Train present?
+                            //PB_Tr7_Train.Hide();                                                                // Train present?
+                            PB_Tr7_Train.Image = null;
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
 
@@ -1524,7 +1547,8 @@ namespace Siebwalde_Application
                         {
                             LLed_Track7.BackColor = m_FYAppVar.TrackNotInitializedColor;                        // Set TrackNotInitializedColor
                             LLed_Track7.Text = "                     Not Initialized";                          // Set Track text
-                            PB_Tr7_Train.Hide();                                                                // Train present?
+                            //PB_Tr7_Train.Hide();                                                                // Train present?
+                            PB_Tr7_Train.Image = null;
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         PB_Tr7_Active.BackColor = LLed_Track7.BackColor;
@@ -1536,19 +1560,22 @@ namespace Siebwalde_Application
                         if (Val >= 1 && TrackStatusLight[8] == true)                                            // If train present and Track is active and track is enabled
                         {
                             LLed_Track8.BackColor = m_FYAppVar.TrackOccupiedColor;                              // Set TrackOccupiedColor
-                            PB_Tr8_Train.Show();                                                                // Train present?
+                            //PB_Tr8_Train.Show();                                                                // Train present?
+                            PB_Tr8_Train.Image = Train;
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         else if (Val >= 1 && TrackStatusLight[8] == false)                                      // If train present and Track is not active and track is enabled
                         {
                             LLed_Track8.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
-                            PB_Tr8_Train.Show();                                                                // Train present?
+                            //PB_Tr8_Train.Show();                                                                // Train present?
+                            PB_Tr8_Train.Image = Train;
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }                        
                         else if (Val == 0 && Initialized == true)                                               // If train not present and FY is initialized and Track is enabled
                         {
                             LLed_Track8.BackColor = Color.Transparent;                                          // Set Color.Transparent
-                            PB_Tr8_Train.Hide();                                                                // Train present?
+                            //PB_Tr8_Train.Hide();                                                                // Train present?
+                            PB_Tr8_Train.Image = null;
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
 
@@ -1556,7 +1583,8 @@ namespace Siebwalde_Application
                         {
                             LLed_Track8.BackColor = m_FYAppVar.TrackNotInitializedColor;                        // Set TrackNotInitializedColor
                             LLed_Track8.Text = "                     Not Initialized";                          // Set Track text
-                            PB_Tr8_Train.Hide();                                                                // Train present?
+                            //PB_Tr8_Train.Hide();                                                                // Train present?
+                            PB_Tr8_Train.Image = null;
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         PB_Tr8_Active.BackColor = LLed_Track8.BackColor;
@@ -1568,19 +1596,22 @@ namespace Siebwalde_Application
                         if (Val >= 1 && TrackStatusLight[9] == true)                                            // If train present and Track is active and track is enabled
                         {
                             LLed_Track9.BackColor = m_FYAppVar.TrackOccupiedColor;                              // Set TrackOccupiedColor
-                            PB_Tr9_Train.Show();                                                                // Train present?
+                            //PB_Tr9_Train.Show();                                                                // Train present?
+                            PB_Tr9_Train.Image = Train;
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         else if (Val >= 1 && TrackStatusLight[9] == false)                                      // If train present and Track is not active and track is enabled
                         {
                             LLed_Track9.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
-                            PB_Tr9_Train.Show();                                                                // Train present?
+                            //PB_Tr9_Train.Show();                                                                // Train present?
+                            PB_Tr9_Train.Image = Train;
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         else if (Val == 0 && Initialized == true)                                               // If train not present and FY is initialized and Track is enabled
                         {
                             LLed_Track9.BackColor = Color.Transparent;                                          // Set Color.Transparent
-                            PB_Tr9_Train.Hide();                                                                // Train present?
+                            //PB_Tr9_Train.Hide();                                                                // Train present?
+                            PB_Tr9_Train.Image = null;
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
 
@@ -1588,7 +1619,8 @@ namespace Siebwalde_Application
                         {
                             LLed_Track9.BackColor = m_FYAppVar.TrackNotInitializedColor;                        // Set TrackNotInitializedColor
                             LLed_Track9.Text = "                     Not Initialized";                          // Set Track text
-                            PB_Tr9_Train.Hide();                                                                // Train present?
+                            //PB_Tr9_Train.Hide();                                                                // Train present?
+                            PB_Tr9_Train.Image = null;
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         PB_Tr9_Active.BackColor = LLed_Track9.BackColor;
@@ -1600,19 +1632,22 @@ namespace Siebwalde_Application
                         if (Val >= 1 && TrackStatusLight[10] == true)                                           // If train present and Track is active and track is enabled
                         {
                             LLed_Track10.BackColor = m_FYAppVar.TrackOccupiedColor;                              // Set TrackOccupiedColor
-                            PB_Tr10_Train.Show();                                                                // Train present?
+                            //PB_Tr10_Train.Show();                                                                // Train present?
+                            PB_Tr10_Train.Image = Train;
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         else if (Val >= 1 && TrackStatusLight[10] == false)                                     // If train present and Track is not active and track is enabled
                         {
                             LLed_Track10.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
-                            PB_Tr10_Train.Show();                                                                // Train present?
+                            //PB_Tr10_Train.Show();                                                                // Train present?
+                            PB_Tr10_Train.Image = Train;
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         else if (Val == 0 && Initialized == true)                                                 // If train not present and FY is initialized and Track is enabled
                         {
                             LLed_Track10.BackColor = Color.Transparent;                                          // Set Color.Transparent
-                            PB_Tr10_Train.Hide();                                                                // Train present?
+                            //PB_Tr10_Train.Hide();                                                                // Train present?
+                            PB_Tr10_Train.Image = null;
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
 
@@ -1620,7 +1655,8 @@ namespace Siebwalde_Application
                         {
                             LLed_Track10.BackColor = m_FYAppVar.TrackNotInitializedColor;                        // Set TrackNotInitializedColor
                             LLed_Track10.Text = "                     Not Initialized";                          // Set Track text
-                            PB_Tr10_Train.Hide();                                                                // Train present?
+                            //PB_Tr10_Train.Hide();                                                                // Train present?
+                            PB_Tr10_Train.Image = null;
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         PB_Tr10_Active.BackColor = LLed_Track10.BackColor;
@@ -1632,19 +1668,22 @@ namespace Siebwalde_Application
                         if (Val >= 1 && TrackStatusLight[11] == true)                                           // If train present and Track is active and track is enabled
                         {
                             LLed_Track11.BackColor = m_FYAppVar.TrackOccupiedColor;                              // Set TrackOccupiedColor
-                            PB_Tr11_Train.Show();                                                                // Train present?
+                            //PB_Tr11_Train.Show();                                                                // Train present?
+                            PB_Tr11_Train.Image = Train;
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         else if (Val >= 1 && TrackStatusLight[11] == false)                                     // If train present and Track is not active and track is enabled
                         {
                             LLed_Track11.BackColor = m_FYAppVar.TrackNotActiveColor;                             // Set TrackNotActiveColor (but is occupied)
-                            PB_Tr11_Train.Show();                                                                // Train present?
+                            //PB_Tr11_Train.Show();                                                                // Train present?
+                            PB_Tr11_Train.Image = Train;
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         else if (Val == 0 && Initialized == true)                                                   // If train not present and FY is initialized and Track is enabled
                         {
                             LLed_Track11.BackColor = Color.Transparent;                                          // Set Color.Transparent
-                            PB_Tr11_Train.Hide();                                                                // Train present?
+                            //PB_Tr11_Train.Hide();                                                                // Train present?
+                            PB_Tr11_Train.Image = null;
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
 
@@ -1652,7 +1691,8 @@ namespace Siebwalde_Application
                         {
                             LLed_Track11.BackColor = m_FYAppVar.TrackNotInitializedColor;                        // Set TrackNotInitializedColor
                             LLed_Track11.Text = "                     Not Initialized";                          // Set Track text
-                            PB_Tr11_Train.Hide();                                                                // Train present?
+                            //PB_Tr11_Train.Hide();                                                                // Train present?
+                            PB_Tr11_Train.Image = null;
                             CheckWhichTrackInline();                                                            // Sensor background color update
                         }
                         PB_Tr11_Active.BackColor = LLed_Track11.BackColor;
@@ -1785,8 +1825,13 @@ namespace Siebwalde_Application
                 {
                     case State.Start:
                         if (PB_Block5BIn.Image == SeinGreen)
-                        {                            
-                            TrainMove = State.DriveIn_1;                            
+                        {
+                            if (Indicator == "LLed_Block6" && Active == true)
+                            {
+                                PB_Bk5_Train.Image = HalfWagon90;
+                                TrainMove = State.DriveIn_2;
+                            }
+                            else { TrainMove = State.DriveIn_1; }
                         }
                         else if (PB_Block7In.Image == SeinGreen)
                         {
@@ -1803,7 +1848,7 @@ namespace Siebwalde_Application
                         break;
 
                     case State.DriveIn_2:
-                        if (Indicator == "LLed_Block5B" && Active == false)
+                        if ((Indicator == "LLed_Block5B" && Active == false) || (Indicator == "LLed_F10" && Active == true)) 
                         {
                             PB_Bk5_Train.Image = Train90;
                             PB_Bk6_Train.Image = Train;
