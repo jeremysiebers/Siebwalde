@@ -13,14 +13,14 @@ namespace Siebwalde_Application
     public partial class FiddleYardSettingsForm : Form
     {
         private decimal FYSimSpeedSetting;
-        
+                
         public FiddleYardSettingsForm()
-        {
+        {            
             InitializeComponent();
             this.Show();
             this.TopLevel = true;
             this.TopMost = true;
-            this.StartPosition = FormStartPosition.CenterScreen;
+            this.StartPosition = FormStartPosition.CenterScreen;            
         }
 
         private void FiddleYardSettingsForm_Load(object sender, EventArgs e)

@@ -21,6 +21,7 @@ namespace Siebwalde_Application
         private FiddleYardAppRun FYAppRun;
         private FiddleYardMip50 FYMIP50;                                            // Create new MIP50 sub program       
         private FiddleYardTrainDetection FYTDT;                                     // Create new Traindetection sub program
+        private FiddleYardMip50SettingsForm FYMip50SettingsForm;                    // Create new MIP50 settings Form for calibration of MIP50 coordinates etc 
         private string m_instance = null;
         private string path = "null";
         private object ExecuteLock = new object();
@@ -85,13 +86,13 @@ namespace Siebwalde_Application
             }
 
             // Sub programs  
-            FYAppVar = new FiddleYardApplicationVariables(m_FYIOHandleVar);                 // FiddleYard Application variables class, holds all variables and functions regarding variables
-            FYFORM = new FiddleYardForm();
+            FYAppVar = new FiddleYardApplicationVariables(m_FYIOHandleVar);                 // FiddleYard Application variables class, holds all variables and functions regarding variables            
             FYMIP50 = new FiddleYardMip50(m_instance, m_FYIOHandleVar, m_iFYIOH, FYAppVar);
+            FYMip50SettingsForm = new FiddleYardMip50SettingsForm(FYMIP50);
             FYAppRun = new FiddleYardAppRun(m_FYIOHandleVar, m_iFYIOH, FYAppVar, FYMIP50, FiddleYardApplicationLogging);            
             FYTDT = new FiddleYardTrainDetection(m_FYIOHandleVar, FYAppVar, FYMIP50, FiddleYardApplicationLogging);
             FYAppInit = new FiddleYardAppInit(m_FYIOHandleVar, FYAppVar, FYMIP50, FYTDT, FiddleYardApplicationLogging);
-            
+            FYFORM = new FiddleYardForm(FYMip50SettingsForm);
 
             //Init and setup FYFORM (after the creation of the sensors and commands)
             if ("TOP" == m_instance)

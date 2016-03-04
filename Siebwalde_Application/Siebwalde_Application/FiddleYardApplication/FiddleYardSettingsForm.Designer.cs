@@ -38,18 +38,23 @@
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.FiddleYardSimSpeedSetting = new System.Windows.Forms.NumericUpDown();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.SetColorTrackDisabledNotOccupied = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.SetColorTrackDisabled = new System.Windows.Forms.Label();
             this.SetColorTrackNotActive = new System.Windows.Forms.Label();
             this.SetColorTrackNotInitialized = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
-            this.SetColorTrackDisabledNotOccupied = new System.Windows.Forms.Label();
+            this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.FiddleYard = new System.Windows.Forms.TabPage();
+            this.New = new System.Windows.Forms.TabPage();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.FiddleYardSimSpeedSetting)).BeginInit();
             this.groupBox3.SuspendLayout();
+            this.tabControl1.SuspendLayout();
+            this.FiddleYard.SuspendLayout();
             this.SuspendLayout();
             // 
             // BtnCancel
@@ -76,7 +81,7 @@
             this.groupBox1.Controls.Add(this.BtnSave);
             this.groupBox1.Controls.Add(this.BtnReload);
             this.groupBox1.Controls.Add(this.BtnCancel);
-            this.groupBox1.Location = new System.Drawing.Point(12, 309);
+            this.groupBox1.Location = new System.Drawing.Point(6, 368);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(265, 48);
             this.groupBox1.TabIndex = 2;
@@ -126,7 +131,7 @@
             // 
             this.groupBox2.Controls.Add(this.label1);
             this.groupBox2.Controls.Add(this.FiddleYardSimSpeedSetting);
-            this.groupBox2.Location = new System.Drawing.Point(12, 12);
+            this.groupBox2.Location = new System.Drawing.Point(16, 11);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(333, 128);
             this.groupBox2.TabIndex = 82;
@@ -164,12 +169,32 @@
             this.groupBox3.Controls.Add(this.label4);
             this.groupBox3.Controls.Add(this.label2);
             this.groupBox3.Controls.Add(this.SetColorTrackOccupied);
-            this.groupBox3.Location = new System.Drawing.Point(12, 146);
+            this.groupBox3.Location = new System.Drawing.Point(16, 145);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Size = new System.Drawing.Size(333, 157);
             this.groupBox3.TabIndex = 83;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "SiebWalde Settings";
+            // 
+            // SetColorTrackDisabledNotOccupied
+            // 
+            this.SetColorTrackDisabledNotOccupied.BackColor = System.Drawing.Color.Red;
+            this.SetColorTrackDisabledNotOccupied.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.SetColorTrackDisabledNotOccupied.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.SetColorTrackDisabledNotOccupied.Location = new System.Drawing.Point(280, 116);
+            this.SetColorTrackDisabledNotOccupied.Name = "SetColorTrackDisabledNotOccupied";
+            this.SetColorTrackDisabledNotOccupied.Size = new System.Drawing.Size(26, 14);
+            this.SetColorTrackDisabledNotOccupied.TabIndex = 88;
+            this.SetColorTrackDisabledNotOccupied.Click += new System.EventHandler(this.SetColorTrackDisabledNotOccupied_Click);
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(14, 116);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(230, 13);
+            this.label6.TabIndex = 87;
+            this.label6.Text = "SiebWalde Track Disabled Not Occupied Color";
             // 
             // label5
             // 
@@ -231,34 +256,46 @@
             this.label4.TabIndex = 3;
             this.label4.Text = "SiebWalde Track Not Initialized Color";
             // 
-            // label6
+            // tabControl1
             // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(14, 116);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(230, 13);
-            this.label6.TabIndex = 87;
-            this.label6.Text = "SiebWalde Track Disabled Not Occupied Color";
+            this.tabControl1.Controls.Add(this.FiddleYard);
+            this.tabControl1.Controls.Add(this.New);
+            this.tabControl1.Location = new System.Drawing.Point(5, 5);
+            this.tabControl1.Name = "tabControl1";
+            this.tabControl1.SelectedIndex = 0;
+            this.tabControl1.Size = new System.Drawing.Size(380, 360);
+            this.tabControl1.TabIndex = 2;
             // 
-            // SetColorTrackDisabledNotOccupied
+            // FiddleYard
             // 
-            this.SetColorTrackDisabledNotOccupied.BackColor = System.Drawing.Color.Red;
-            this.SetColorTrackDisabledNotOccupied.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.SetColorTrackDisabledNotOccupied.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.SetColorTrackDisabledNotOccupied.Location = new System.Drawing.Point(280, 116);
-            this.SetColorTrackDisabledNotOccupied.Name = "SetColorTrackDisabledNotOccupied";
-            this.SetColorTrackDisabledNotOccupied.Size = new System.Drawing.Size(26, 14);
-            this.SetColorTrackDisabledNotOccupied.TabIndex = 88;
-            this.SetColorTrackDisabledNotOccupied.Click += new System.EventHandler(this.SetColorTrackDisabledNotOccupied_Click);
+            this.FiddleYard.BackColor = System.Drawing.SystemColors.Control;
+            this.FiddleYard.Controls.Add(this.groupBox3);
+            this.FiddleYard.Controls.Add(this.groupBox2);
+            this.FiddleYard.Location = new System.Drawing.Point(4, 22);
+            this.FiddleYard.Name = "FiddleYard";
+            this.FiddleYard.Padding = new System.Windows.Forms.Padding(3);
+            this.FiddleYard.Size = new System.Drawing.Size(372, 334);
+            this.FiddleYard.TabIndex = 0;
+            this.FiddleYard.Text = "FiddleYard";
+            // 
+            // New
+            // 
+            this.New.BackColor = System.Drawing.SystemColors.Control;
+            this.New.Location = new System.Drawing.Point(4, 22);
+            this.New.Name = "New";
+            this.New.Padding = new System.Windows.Forms.Padding(3);
+            this.New.Size = new System.Drawing.Size(372, 334);
+            this.New.TabIndex = 1;
+            this.New.Text = "New";
             // 
             // FiddleYardSettingsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(357, 371);
-            this.Controls.Add(this.groupBox3);
-            this.Controls.Add(this.groupBox2);
+            this.BackColor = System.Drawing.SystemColors.Control;
+            this.ClientSize = new System.Drawing.Size(389, 422);
+            this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.groupBox1);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -274,6 +311,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.FiddleYardSimSpeedSetting)).EndInit();
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
+            this.tabControl1.ResumeLayout(false);
+            this.FiddleYard.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -298,6 +337,9 @@
         private System.Windows.Forms.Label SetColorTrackDisabled;
         private System.Windows.Forms.Label SetColorTrackDisabledNotOccupied;
         private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.TabControl tabControl1;
+        private System.Windows.Forms.TabPage FiddleYard;
+        private System.Windows.Forms.TabPage New;
 
     }
 }

@@ -144,6 +144,8 @@
             this.PB_Bk8A_Train = new System.Windows.Forms.PictureBox();
             this.PB_Bk6_Train = new System.Windows.Forms.PictureBox();
             this.PB_Bk7_Train = new System.Windows.Forms.PictureBox();
+            this.editToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.mIP50SettingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.Nuo_Track_No_TOP)).BeginInit();
             this.menuStrip1.SuspendLayout();
             this.AutomaticMode.SuspendLayout();
@@ -440,7 +442,6 @@
             this.LLed_Track1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             resources.ApplyResources(this.LLed_Track1, "LLed_Track1");
             this.LLed_Track1.Name = "LLed_Track1";
-            this.LLed_Track1.Click += new System.EventHandler(this.LLed_Track1_Click);
             // 
             // LLed_FYPLATE_TOP
             // 
@@ -519,6 +520,7 @@
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
+            this.editToolStripMenuItem1,
             this.editToolStripMenuItem});
             resources.ApplyResources(this.menuStrip1, "menuStrip1");
             this.menuStrip1.Name = "menuStrip1";
@@ -1036,8 +1038,7 @@
             this.PB_Bk8A_Train.BackColor = System.Drawing.Color.Transparent;
             resources.ApplyResources(this.PB_Bk8A_Train, "PB_Bk8A_Train");
             this.PB_Bk8A_Train.Name = "PB_Bk8A_Train";
-            this.PB_Bk8A_Train.TabStop = false;
-            this.PB_Bk8A_Train.Click += new System.EventHandler(this.pictureBox2_Click);
+            this.PB_Bk8A_Train.TabStop = false;            
             // 
             // PB_Bk6_Train
             // 
@@ -1052,6 +1053,19 @@
             resources.ApplyResources(this.PB_Bk7_Train, "PB_Bk7_Train");
             this.PB_Bk7_Train.Name = "PB_Bk7_Train";
             this.PB_Bk7_Train.TabStop = false;
+            // 
+            // editToolStripMenuItem1
+            // 
+            this.editToolStripMenuItem1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mIP50SettingsToolStripMenuItem});
+            this.editToolStripMenuItem1.Name = "editToolStripMenuItem1";
+            resources.ApplyResources(this.editToolStripMenuItem1, "editToolStripMenuItem1");
+            // 
+            // mIP50SettingsToolStripMenuItem
+            // 
+            this.mIP50SettingsToolStripMenuItem.Name = "mIP50SettingsToolStripMenuItem";
+            resources.ApplyResources(this.mIP50SettingsToolStripMenuItem, "mIP50SettingsToolStripMenuItem");
+            this.mIP50SettingsToolStripMenuItem.Click += new System.EventHandler(this.mIP50SettingsToolStripMenuItem_Click);
             // 
             // FiddleYardForm
             // 
@@ -1318,5 +1332,7 @@
         private System.Windows.Forms.PictureBox PB_Bk8A_Train;
         private System.Windows.Forms.PictureBox PB_Bk6_Train;
         private System.Windows.Forms.PictureBox PB_Bk7_Train;
+        private System.Windows.Forms.ToolStripMenuItem editToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem mIP50SettingsToolStripMenuItem;
     }
 }

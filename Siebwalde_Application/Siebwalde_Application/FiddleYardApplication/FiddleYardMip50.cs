@@ -48,8 +48,9 @@ namespace Siebwalde_Application
         private uint Next_Track = 0;
         private uint Current_Track = 0;
         private const int TEMPOFFSET = 700;
-        private uint[] TrackForward = new uint[12] { 0, 0, 42800, 85600, 128400, 171200, 214000, 256800, 299600, 342400, 385200, 428000 };// New track coordinates forward movement 1 --> 11
-        private uint[] TrackBackwardOffset = new uint[12] { 0, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, 0 };   // New track coordinates forward movement 11 --> 1 offset number
+        public uint[] TrackForward = new uint[12] { 0, 0, 42800, 85600, 128400, 171200, 214000, 256800, 299600, 342400, 385200, 428000 };// New track coordinates forward movement 1 --> 11
+        public uint[] TrackBackwardOffset = new uint[12] { 0, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, 0 };   // New track coordinates forward movement 11 --> 1 offset number
+        
 
         /*#--------------------------------------------------------------------------#*/
         /*  Description: FiddleYardApplication constructor
@@ -1117,6 +1118,7 @@ namespace Siebwalde_Application
             int i = 0, j = 0;
             StringBuilder LogString = new StringBuilder();
 
+            /*###############################################__MESSAGES__#####################################################*/
             if (m_MIP50ReceivedDataBuffer[0] == "M")
             {
                 switch(m_MIP50ReceivedDataBuffer[1])
@@ -1165,17 +1167,94 @@ namespace Siebwalde_Application
                         _Return = true;
                         break;
 
-                    default: break;
-                }
-            }           
+                    case "26": //M#26 %bn %bp %lv --> 3 items
+                        LogString.Append("Value of a parameter, axis nr: ");
+                        for (i = 2; i < m_MIP50ReceivedDataBuffer.Length; i++)
+                        {
+                            if (m_MIP50ReceivedDataBuffer[i] != "")
+                            {
+                                if (j == 0)
+                                {
+                                    LogString.Append(m_MIP50ReceivedDataBuffer[i] + " , Parameter nr: ");
+                                }
+                                else if (j == 1)
+                                {
+                                    LogString.Append(m_MIP50ReceivedDataBuffer[i]);
+                                }
+                                j++;
+                            }
+                        }
+                        FiddleYardMIP50Logging.StoreText(LogString.ToString());
+                        _Return = true;
+                        break;
 
+                    default:
+                        LogString.Append("Recieved untranslated Message: " + m_MIP50ReceivedDataBuffer);    //log complete buffer
+                        FiddleYardMIP50Logging.StoreText(LogString.ToString());
+                        _Return = true;
+                        break;
+                }
+            }
+            /*###############################################__ERROR__#####################################################*/
             else if (m_MIP50ReceivedDataBuffer[0] == "E")
             {
-                
+                switch(m_MIP50ReceivedDataBuffer[1])
+                {
+                    case "180": // E#180 %bn ‘%c’
+                        LogString.Append("WARN_POSREGOFF: Position regulation is switched off, axis nr: ");
+                        for (i = 2; i < m_MIP50ReceivedDataBuffer.Length; i++)
+                        {
+                            if (m_MIP50ReceivedDataBuffer[i] != "")
+                            {
+                                if (j == 0)
+                                {
+                                    LogString.Append(m_MIP50ReceivedDataBuffer[i] + " , ASCII-command: ");
+                                }
+                                else if (j == 1)
+                                {
+                                    LogString.Append(m_MIP50ReceivedDataBuffer[i]);
+                                }
+                                j++;
+                            }
+                        }
+                        FiddleYardMIP50Logging.StoreText(LogString.ToString());
+                        _Return = true;
+                        break;
+
+                    case "181": // E#181 %bn ‘%c’
+                        LogString.Append("WARN_CURREGOFF: Current regulation is switched off, axis nr: ");
+                        for (i = 2; i < m_MIP50ReceivedDataBuffer.Length; i++)
+                        {
+                            if (m_MIP50ReceivedDataBuffer[i] != "")
+                            {
+                                if (j == 0)
+                                {
+                                    LogString.Append(m_MIP50ReceivedDataBuffer[i] + " , ASCII-command: ");
+                                }
+                                else if (j == 1)
+                                {
+                                    LogString.Append(m_MIP50ReceivedDataBuffer[i]);
+                                }
+                                j++;
+                            }
+                        }
+                        FiddleYardMIP50Logging.StoreText(LogString.ToString());
+                        _Return = true;
+                        break;
+
+                    default:
+                        LogString.Append("Recieved untranslated Error/Warning: " + m_MIP50ReceivedDataBuffer);    //log complete buffer
+                        FiddleYardMIP50Logging.StoreText(LogString.ToString());
+                        _Return = true;
+                        break;
+                }
             }
+            /*###############################################__STARTUP__#####################################################*/
             else if (m_MIP50ReceivedDataBuffer[0] == "P0")
             {
-                //nop
+                LogString.Append("Recieved startup message: P0" + m_MIP50ReceivedDataBuffer);
+                FiddleYardMIP50Logging.StoreText(LogString.ToString());
+                _Return = true;
             }
 
             return (_Return);                          

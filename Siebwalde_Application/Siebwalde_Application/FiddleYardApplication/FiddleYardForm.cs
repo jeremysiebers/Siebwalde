@@ -9,6 +9,8 @@ namespace Siebwalde_Application
 
     public partial class FiddleYardForm : Form
     {
+        private FiddleYardMip50SettingsForm m_FYMip50SettingsForm;                    // Create new MIP50 settings Form for calibration of MIP50 coordinates etc 
+
         string path = "null";
         public Log2LoggingFile FiddleYardFormLogging;
         
@@ -83,9 +85,12 @@ namespace Siebwalde_Application
          *  Notes      :
          */
         /*#--------------------------------------------------------------------------#*/
-        public FiddleYardForm()
+        public FiddleYardForm(FiddleYardMip50SettingsForm FYMip50SettingsForm)
         {
             InitializeComponent();
+
+            m_FYMip50SettingsForm = FYMip50SettingsForm;
+            m_FYMip50SettingsForm.Hide();
 
             #region Indicator init
             // size of window resolution on Modeltrain PC is 1920; 1200
@@ -379,6 +384,7 @@ namespace Siebwalde_Application
             SimulationMode.Visible = false;
             alwaysOnTopToolStripMenuItem.Checked = true;
             this.TopMost = true;
+            mIP50SettingsToolStripMenuItem.Enabled = false;
 
             checkBoxTrack1.Checked = false;
             checkBoxTrack2.Checked = false;
@@ -3119,6 +3125,7 @@ namespace Siebwalde_Application
             //AutomaticMode.Location = new System.Drawing.Point(625, 776);
             AutomaticMode.Visible = true;
             ManualMode.Visible = false;
+            mIP50SettingsToolStripMenuItem.Enabled = false;
 
             Btn_Bezet5BOn_TOP.Visible = false;
             Btn_Bezet6On_TOP.Visible = false;
@@ -3155,7 +3162,8 @@ namespace Siebwalde_Application
             automaticModeToolStripMenuItem.Checked = false;
             manualModeToolStripMenuItem.Checked = true;
             AutomaticMode.Visible = false;            
-            ManualMode.Visible = true;                       
+            ManualMode.Visible = true;
+            mIP50SettingsToolStripMenuItem.Enabled = true;        
 
             Btn_Bezet5BOn_TOP.Location = new System.Drawing.Point(GWin.Location.X + 50 + 16 + 30, (740 / 2 + GWin.Location.Y) - 18 - (250 / 2) - (23 / 2));
             Btn_Bezet6On_TOP.Location = new System.Drawing.Point(GWin.Location.X + 100 - (32 / 2), (740 / 2 + GWin.Location.Y) + 8 + 40);
@@ -3222,29 +3230,6 @@ namespace Siebwalde_Application
             this.TopMost = alwaysOnTopToolStripMenuItem.Checked;                    
         }
 
-        /*#--------------------------------------------------------------------------#*/
-        /*  Description: LLed_Trackx_Click
-         *               
-         *              
-         *               
-         *
-         *  Input(s)   : 
-         *
-         *  Output(s)  :
-         *
-         *  Returns    :
-         *
-         *  Pre.Cond.  :
-         *
-         *  Post.Cond. :
-         *
-         *  Notes      :
-         */
-        /*#--------------------------------------------------------------------------#*/
-        private void LLed_Track1_Click(object sender, EventArgs e)
-        {
-
-        }
 
         /*#--------------------------------------------------------------------------#*/
         /*  Description: PB_Block5BIn_Click
@@ -3541,7 +3526,25 @@ namespace Siebwalde_Application
             }
             m_FYAppVar.TrackTrainsOnFYUpdater();
         }
-
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: ForceNextTrack_ValueChanged
+         *               
+         *              
+         *               
+         *
+         *  Input(s)   : 
+         *
+         *  Output(s)  :
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      :
+         */
+        /*#--------------------------------------------------------------------------#*/
         private void ForceNextTrack_ValueChanged(object sender, EventArgs e)
         {
             m_FYAppVar.iTrainDriveOutPointer = Convert.ToInt16(ForceNextTrack.Value);
@@ -3558,10 +3561,29 @@ namespace Siebwalde_Application
                 m_FYAppVar.icheckBoxTrack[Track] = 1;                       
             }
         }
-
-        private void pictureBox2_Click(object sender, EventArgs e)
+        
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: mIP50SettingsToolStripMenuItem_Click
+         *               
+         *              
+         *               
+         *
+         *  Input(s)   : 
+         *
+         *  Output(s)  :
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      :
+         */
+        /*#--------------------------------------------------------------------------#*/
+        private void mIP50SettingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+            m_FYMip50SettingsForm.Show();
         }
     }    
 }
