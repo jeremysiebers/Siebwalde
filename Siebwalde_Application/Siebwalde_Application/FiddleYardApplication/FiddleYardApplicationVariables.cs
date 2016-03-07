@@ -117,7 +117,8 @@ namespace Siebwalde_Application
         public SensorUpdater TrackNo;
         public SensorUpdater CmdBusy;
         public SensorUpdater TrackPower15V;
-        public SensorUpdater TrainDriveOutPointer;        
+        public SensorUpdater TrainDriveOutPointer;
+        public SensorUpdater ReceivedDataFromMip50;
 
         public MessageUpdater FiddleYardStopped;
         public MessageUpdater FiddleYardStart;
@@ -287,7 +288,8 @@ namespace Siebwalde_Application
             TrackPower15V = new SensorUpdater();
             CmdBusy = new SensorUpdater();
             TrainDriveOutPointer = new SensorUpdater();
-            
+            ReceivedDataFromMip50 = new SensorUpdater();
+
             FiddleYardStopped = new MessageUpdater();
             FiddleYardStart = new MessageUpdater();
             FiddleYardNotHomed = new MessageUpdater();

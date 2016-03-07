@@ -312,6 +312,7 @@ namespace Siebwalde_Application
             {
                 MIP50_Rec_Cmd_Counter_W = 0;
             }
+            m_FYAppVar.ReceivedDataFromMip50.UpdateSensorValue(Convert.ToInt16(MIP50_Rec_Cmd_Counter_W), true); // Throw out an event that a message was received from MIP50
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -330,7 +331,7 @@ namespace Siebwalde_Application
          *  Notes      : 
          */
         /*#--------------------------------------------------------------------------#*/
-        private string MIP50xRECxCMDxR()
+        public string MIP50xRECxCMDxR()
         {
             string _Return = "";
 
@@ -657,7 +658,7 @@ namespace Siebwalde_Application
                     break;
 
                 case 6:
-                    MIP50xSetxPositioningxVelxDefault();                    
+                    MIP50xSetxPositioningxVelxDefault(System.Configuration.ConfigurationManager.AppSettings["MIP50PositioningVelocity"]);    // Get velocity setting from config file                
                     MIP50TransmitData = 7;
                     break;
 
@@ -886,17 +887,23 @@ namespace Siebwalde_Application
          *  Notes      : Set Velocity parameter to MIP
          */
         /*#--------------------------------------------------------------------------#*/
-        private void MIP50xSetxPositioningxVelxDefault()
+        public void MIP50xSetxPositioningxVelxDefault(string Velocity)
         {
             m_iFYIOH.ActuatorCmd("MIP50xSetxPositioningxVelxDefault", Layer + "V" + "\r");
             m_iFYIOH.ActuatorCmd("MIP50xSetxPositioningxVelxDefault", Layer + "1" + "\r");
             m_iFYIOH.ActuatorCmd("MIP50xSetxPositioningxVelxDefault", Layer + "x" + "\r");
-            m_iFYIOH.ActuatorCmd("MIP50xSetxPositioningxVelxDefault", Layer + "1" + "\r");
-            m_iFYIOH.ActuatorCmd("MIP50xSetxPositioningxVelxDefault", Layer + "0" + "\r");
-            m_iFYIOH.ActuatorCmd("MIP50xSetxPositioningxVelxDefault", Layer + "0" + "\r");
+
+            foreach (char c in Velocity)
+            {
+                m_iFYIOH.ActuatorCmd("MIP50xSetxPositioningxVelxDefault", Layer + c + "\r");
+            }
+
+            //m_iFYIOH.ActuatorCmd("MIP50xSetxPositioningxVelxDefault", Layer + "1" + "\r");
+            //m_iFYIOH.ActuatorCmd("MIP50xSetxPositioningxVelxDefault", Layer + "0" + "\r");
+            //m_iFYIOH.ActuatorCmd("MIP50xSetxPositioningxVelxDefault", Layer + "0" + "\r");
             m_iFYIOH.ActuatorCmd("MIP50xSetxPositioningxVelxDefault", Layer + "G" + "\r");
             MIP50xCRLFxAppend();
-            FiddleYardMIP50Logging.StoreText("MIP50 Set Velocity to 100 Qc/ms");
+            FiddleYardMIP50Logging.StoreText("MIP50 Set Velocity to "+ Velocity + " Qc/ms");
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -1111,7 +1118,7 @@ namespace Siebwalde_Application
          *               logging and sets appropiate variables accordingly
          */
         /*#--------------------------------------------------------------------------#*/
-        bool MIP50xTranslatexME(string MIP50ReceivedDataBuffer)
+        public bool MIP50xTranslatexME(string MIP50ReceivedDataBuffer)
         {
             bool _Return = false;           
             string[] m_MIP50ReceivedDataBuffer = MIP50ReceivedDataBuffer.Split('#',' ');
@@ -1189,7 +1196,11 @@ namespace Siebwalde_Application
                         break;
 
                     default:
-                        LogString.Append("Recieved untranslated Message: " + m_MIP50ReceivedDataBuffer);    //log complete buffer
+                        LogString.Append("Recieved untranslated Message: ");    //log complete buffer
+                        foreach (string ArrayIndex in m_MIP50ReceivedDataBuffer)      //log complete buffer
+                        {
+                            LogString.Append(ArrayIndex);
+                        }
                         FiddleYardMIP50Logging.StoreText(LogString.ToString());
                         _Return = true;
                         break;
@@ -1218,7 +1229,7 @@ namespace Siebwalde_Application
                             }
                         }
                         FiddleYardMIP50Logging.StoreText(LogString.ToString());
-                        _Return = true;
+                        _Return = false; // Error message return false to indicate an error has occured
                         break;
 
                     case "181": // E#181 %bn ‘%c’
@@ -1239,20 +1250,28 @@ namespace Siebwalde_Application
                             }
                         }
                         FiddleYardMIP50Logging.StoreText(LogString.ToString());
-                        _Return = true;
+                        _Return = false; // Error message return false to indicate an error has occured
                         break;
 
                     default:
-                        LogString.Append("Recieved untranslated Error/Warning: " + m_MIP50ReceivedDataBuffer);    //log complete buffer
+                        LogString.Append("Recieved untranslated Error/Warning: ");    //log complete buffer
+                        foreach (string ArrayIndex in m_MIP50ReceivedDataBuffer)      //log complete buffer
+                        {
+                            LogString.Append(ArrayIndex);
+                        }
                         FiddleYardMIP50Logging.StoreText(LogString.ToString());
-                        _Return = true;
+                        _Return = false; // Error message return false to indicate an error has occured
                         break;
                 }
             }
             /*###############################################__STARTUP__#####################################################*/
             else if (m_MIP50ReceivedDataBuffer[0] == "P0")
             {
-                LogString.Append("Recieved startup message: P0" + m_MIP50ReceivedDataBuffer);
+                LogString.Append("Recieved startup message: P0");    //log complete buffer
+                foreach (string ArrayIndex in m_MIP50ReceivedDataBuffer)      //log complete buffer
+                {
+                    LogString.Append(ArrayIndex);
+                }
                 FiddleYardMIP50Logging.StoreText(LogString.ToString());
                 _Return = true;
             }

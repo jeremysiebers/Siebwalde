@@ -3583,7 +3583,14 @@ namespace Siebwalde_Application
         /*#--------------------------------------------------------------------------#*/
         private void mIP50SettingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            m_FYMip50SettingsForm.Show();
+            try
+            {
+                m_FYMip50SettingsForm.Show();
+            }
+            catch
+            {
+
+            }
         }
     }    
 }
