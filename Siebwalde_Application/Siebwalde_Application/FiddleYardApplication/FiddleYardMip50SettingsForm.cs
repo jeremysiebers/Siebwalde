@@ -11,15 +11,19 @@ namespace Siebwalde_Application
 {
     public partial class FiddleYardMip50SettingsForm : Form
     {
-        private FiddleYardMip50 m_FYMip50;                    // 
+        private FiddleYardMip50 m_FYMip50;                    // connect to MIP50 class
 
         public FiddleYardMip50SettingsForm(FiddleYardMip50 FYMip50)
         {
             InitializeComponent();
-
             m_FYMip50 = FYMip50;
-
-
+            this.TopLevel = true;
+            this.Opacity = 100;
+            this.ShowInTaskbar = true;
+            this.TopMost = true;
+            
         }
+
+
     }
 }
