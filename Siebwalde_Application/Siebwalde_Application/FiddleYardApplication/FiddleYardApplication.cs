@@ -6,8 +6,8 @@ using System.Timers;
 namespace Siebwalde_Application
 {
     public interface iFiddleYardApplication
-    {        
-        
+    {
+        void OpenFYMip50SettingsForm();
     }
 
     public class FiddleYardApplication : iFiddleYardApplication
@@ -21,7 +21,7 @@ namespace Siebwalde_Application
         private FiddleYardAppRun FYAppRun;
         private FiddleYardMip50 FYMIP50;                                            // Create new MIP50 sub program       
         private FiddleYardTrainDetection FYTDT;                                     // Create new Traindetection sub program
-        private FiddleYardMip50SettingsForm FYMip50SettingsForm;                    // Create new MIP50 settings Form for calibration of MIP50 coordinates etc 
+        public FiddleYardMip50SettingsForm FYMip50SettingsForm;                    // Create new MIP50 settings Form for calibration of MIP50 coordinates etc 
         private string m_instance = null;
         private string path = "null";
         private object ExecuteLock = new object();
@@ -87,12 +87,11 @@ namespace Siebwalde_Application
 
             // Sub programs  
             FYAppVar = new FiddleYardApplicationVariables(m_FYIOHandleVar);                 // FiddleYard Application variables class, holds all variables and functions regarding variables            
-            FYMIP50 = new FiddleYardMip50(m_instance, m_FYIOHandleVar, m_iFYIOH, FYAppVar);
-            FYMip50SettingsForm = new FiddleYardMip50SettingsForm(FYMIP50, FYAppVar);
+            FYMIP50 = new FiddleYardMip50(m_instance, m_FYIOHandleVar, m_iFYIOH, FYAppVar);            
             FYAppRun = new FiddleYardAppRun(m_FYIOHandleVar, m_iFYIOH, FYAppVar, FYMIP50, FiddleYardApplicationLogging);            
             FYTDT = new FiddleYardTrainDetection(m_FYIOHandleVar, FYAppVar, FYMIP50, FiddleYardApplicationLogging);
             FYAppInit = new FiddleYardAppInit(m_FYIOHandleVar, FYAppVar, FYMIP50, FYTDT, FiddleYardApplicationLogging);
-            FYFORM = new FiddleYardForm(FYMip50SettingsForm);
+            FYFORM = new FiddleYardForm(this);//, FYMip50SettingsForm);
 
             //Init and setup FYFORM (after the creation of the sensors and commands)
             if ("TOP" == m_instance)
@@ -105,7 +104,33 @@ namespace Siebwalde_Application
             FYFORM.Connect(m_FYIOHandleVar, FYAppVar); // connect the Form to the FYIOHandle interface           
             
         }
-
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: OpenFYMip50SettingsForm
+         *               Create a new instance of settings form
+         * 
+         *  Input(s)   :
+         *
+         *  Output(s)  : 
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      : 
+         *  
+         */
+        /*#--------------------------------------------------------------------------#*/
+        public void OpenFYMip50SettingsForm()
+        {
+            FYMip50SettingsForm = new FiddleYardMip50SettingsForm(m_instance, FYMIP50, FYAppVar);
+            if ("TOP" == m_instance)
+                FYMip50SettingsForm.Name = "FiddleYardTOP";
+            else if ("BOT" == m_instance)
+                FYMip50SettingsForm.Name = "FiddleYardBOT";
+            FYMip50SettingsForm.FYMIP50SETTINGSFORMShow();
+        }
         /*#--------------------------------------------------------------------------#*/
         /*  Description: FYFORMShow show or hide the FORM and set width and etc.
          *               
@@ -123,7 +148,7 @@ namespace Siebwalde_Application
          *  Notes      : 
          *  
          */
-        /*#--------------------------------------------------------------------------#*/        
+        /*#--------------------------------------------------------------------------#*/
         public void FYFORMShow(bool autoscroll, int height, int width, int LocX, int LocY, bool View)
         {
 

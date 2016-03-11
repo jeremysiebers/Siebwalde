@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Text;
 
@@ -12,6 +13,7 @@ namespace Siebwalde_Application
         private FiddleYardIOHandleVariables m_FYIOHandleVar;                        // connect variable to connect to FYIOH class for defined interfaces  
         private iFiddleYardIOHandle m_iFYIOH;
         private FiddleYardApplicationVariables m_FYAppVar;                          // connect variable to connect to FYAppVar class for defined interfaces
+        public Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
 
         /*#--------------------------------------------------------------------------#*/
         /*  Description: Application variables
@@ -30,7 +32,7 @@ namespace Siebwalde_Application
          *  
          */
         /*#--------------------------------------------------------------------------#*/
-        
+
         private string m_instance = null;
         private string path = null;
         private enum State { CR, LF, Head, X0, X0_C0, X0_C1, E, E_C, M, Reset };
@@ -43,13 +45,13 @@ namespace Siebwalde_Application
         private string[] MIP50_Rec_Cmd = new string[MIP50RECCMDARRAY];        
         private string Layer = null;
 
-        private int ActualPosition = 0;
+        public int ActualPosition = 0;
         private bool ActualPositionUpdated = false;
         private uint Next_Track = 0;
         private uint Current_Track = 0;
-        private const int TEMPOFFSET = 700;
-        public uint[] TrackForward = new uint[12] { 0, 0, 42800, 85600, 128400, 171200, 214000, 256800, 299600, 342400, 385200, 428000 };// New track coordinates forward movement 1 --> 11
-        public uint[] TrackBackwardOffset = new uint[12] { 0, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, 0 };   // New track coordinates forward movement 11 --> 1 offset number
+        //private const int TEMPOFFSET = 700;
+        //public uint[] TrackForward = new uint[12] { 0, 0, 42800, 85600, 128400, 171200, 214000, 256800, 299600, 342400, 385200, 428000 };// New track coordinates forward movement 1 --> 11
+        //public uint[] TrackBackwardOffset = new uint[12] { 0, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, 0 };   // New track coordinates forward movement 11 --> 1 offset number
         
 
         /*#--------------------------------------------------------------------------#*/
@@ -347,7 +349,112 @@ namespace Siebwalde_Application
             
             return (_Return);
         }
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: TrackForward and  TrackBackwardOffset
+         * 
+         *  Input(s)   : trackno to go to
+         *
+         *  Output(s)  : trackno position numbe rin quad counts, offset for backward 
+         *               movement in quad counts
+         *
+         *  Returns    : 
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      : 
+         */
+        /*#--------------------------------------------------------------------------#*/
+        private uint TrackForward(uint Trackno)
+        {
+            uint _Return = 0;
 
+            switch (Trackno)
+            {
+                case 1:
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track1_Abs_Position"].Value);
+                    break;
+                case 2:
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track2_Abs_Position"].Value);
+                    break;
+                case 3:
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track3_Abs_Position"].Value);
+                    break;
+                case 4:
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track4_Abs_Position"].Value);
+                    break;
+                case 5:
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track5_Abs_Position"].Value);
+                    break;
+                case 6:
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track6_Abs_Position"].Value);
+                    break;
+                case 7:
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track7_Abs_Position"].Value);
+                    break;
+                case 8:
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track8_Abs_Position"].Value);
+                    break;
+                case 9:
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track9_Abs_Position"].Value);
+                    break;
+                case 10:
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track10_Abs_Position"].Value);
+                    break;
+                case 11:
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track11_Abs_Position"].Value);
+                    break;
+
+                default: break;
+            }
+            return (_Return);
+        }
+
+        private uint TrackBackwardOffset(uint Trackno)
+        {
+            uint _Return = 0;
+
+            switch (Trackno)
+            {
+                case 1:
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track1_Back_Offset"].Value);
+                    break;
+                case 2:
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track2_Back_Offset"].Value);
+                    break;
+                case 3:
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track3_Back_Offset"].Value);
+                    break;
+                case 4:
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track4_Back_Offset"].Value);
+                    break;
+                case 5:
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track5_Back_Offset"].Value);
+                    break;
+                case 6:
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track6_Back_Offset"].Value);
+                    break;
+                case 7:
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track7_Back_Offset"].Value);
+                    break;
+                case 8:
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track8_Back_Offset"].Value);
+                    break;
+                case 9:
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track9_Back_Offset"].Value);
+                    break;
+                case 10:
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track10_Back_Offset"].Value);
+                    break;
+                case 11:
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track11_Back_Offset"].Value);
+                    break;
+
+                default: break;
+            }
+            return (_Return);
+        }
         /*#--------------------------------------------------------------------------#*/
         /*  Description: MIP50xMOVExCALCULATE next move with correction for direction
          * 
@@ -376,11 +483,11 @@ namespace Siebwalde_Application
             }
             else
             {
-                if (New_Track == 12 && Current_Track < 11)
+                if (New_Track == 12 && Current_Track < 11) //track++
                 {
                     FiddleYardMIP50Logging.StoreText("MIP50 Start Absolute Move to track " + Convert.ToString(Current_Track + 1));
                 }
-                else if (New_Track == 13 && Current_Track > 1)
+                else if (New_Track == 13 && Current_Track > 1) //track--
                 {
                     FiddleYardMIP50Logging.StoreText("MIP50 Start Absolute Move to track " + Convert.ToString(Current_Track - 1));
                 }                
@@ -431,28 +538,28 @@ namespace Siebwalde_Application
                     {
                         ActualPositionUpdated = false;                                              // Set local bool to false for future next update-and-check
 
-                        if (Next_Track == 12 && Current_Track < 11)                                 // Track ++
+                        if (Next_Track == 12 && Current_Track < 11)                                 // Track ++ over current track, NExt_Track holds either the next track or button track++/--
                         {
-                            Next_Track = TrackForward[Current_Track + 1];
+                            Next_Track = TrackForward(Current_Track + 1);                           // Next_Track will now be overwritten with the coordinate of the next track to go to in quad counts
                             Current_Track += 1;
                             MIP50TransmitData = 2;
                         }
                         else if (Next_Track == 13 && Current_Track > 1)                             // Track --
                         {
-                            Next_Track = TrackForward[Current_Track - 1] - TrackBackwardOffset[Current_Track - 1];
+                            Next_Track = TrackForward(Current_Track - 1) - TrackBackwardOffset(Current_Track - 1);
                             Current_Track -= 1;
                             MIP50TransmitData = 2;
                         }
                         else if (Next_Track != 13 && Next_Track != 12)                              // Check for bounds when still track++ or track-- is pressed
                         {
-                            if (TrackForward[Next_Track] > ActualPosition)
+                            if (TrackForward(Next_Track) > ActualPosition)
                             {
-                                Next_Track = TrackForward[Next_Track];
+                                Next_Track = TrackForward(Next_Track);
                                 MIP50TransmitData = 2;
                             }
-                            else if (TrackForward[Next_Track] < ActualPosition)
+                            else if (TrackForward(Next_Track) < ActualPosition)
                             {
-                                Next_Track = TrackForward[Next_Track] - TrackBackwardOffset[Next_Track];
+                                Next_Track = TrackForward(Next_Track) - TrackBackwardOffset(Next_Track);
                                 MIP50TransmitData = 2;
                             }
                             else
@@ -637,7 +744,7 @@ namespace Siebwalde_Application
                     break;
 
                 case 4:
-                    MIP50xSetxAcceleration();                    
+                    MIP50xSetxAcceleration(config.AppSettings.Settings[m_instance + "_" + "MIP50PositioningAcceleration"].Value);     // Get acceleration/deceleration setting from config file                   
                     MIP50TransmitData = 5;
                     break;
 
@@ -658,7 +765,7 @@ namespace Siebwalde_Application
                     break;
 
                 case 6:
-                    MIP50xSetxPositioningxVelxDefault(System.Configuration.ConfigurationManager.AppSettings["MIP50PositioningVelocity"]);    // Get velocity setting from config file                
+                    MIP50xSetxPositioningxVelxDefault(config.AppSettings.Settings[m_instance + "_" + "MIP50PositioningVelocity"].Value);    // Get velocity setting from config file                
                     MIP50TransmitData = 7;
                     break;
 
@@ -769,7 +876,7 @@ namespace Siebwalde_Application
          *  Notes      : Start absolute move
          */
         /*#--------------------------------------------------------------------------#*/
-        private void MIP50xAbs_Pos(uint New_Track)
+        public void MIP50xAbs_Pos(uint New_Track)
         {
             string m_New_Track = Convert.ToString(New_Track);
 
@@ -803,7 +910,7 @@ namespace Siebwalde_Application
          *  Notes      : Enable MIP50
          */
         /*#--------------------------------------------------------------------------#*/
-        private void MIP50xENABLE()
+        public void MIP50xENABLE()
         {
             if (m_instance == "TOP")
             {
@@ -832,7 +939,7 @@ namespace Siebwalde_Application
          *  Notes      : Enable MIP50
          */
         /*#--------------------------------------------------------------------------#*/
-        private void MIP50xDISABLE()
+        public void MIP50xDISABLE()
         {
             if (m_instance == "TOP")
             {
@@ -861,7 +968,7 @@ namespace Siebwalde_Application
          *  Notes      : Execute Homing procedure
          */
         /*#--------------------------------------------------------------------------#*/
-        private void MIP50xHomexAxis()
+        public void MIP50xHomexAxis()
         {
             m_iFYIOH.ActuatorCmd("MIP50xHomexAxis", Layer + "H" + "\r");
             m_iFYIOH.ActuatorCmd("MIP50xHomexAxis", Layer + "1" + "\r");
@@ -922,7 +1029,7 @@ namespace Siebwalde_Application
          *  Notes      : Set Acceleration parameter to MIP
          */
         /*#--------------------------------------------------------------------------#*/
-        private void MIP50xSetxAcceleration()
+        public void MIP50xSetxAcceleration(string Acceleration)
         {
             m_iFYIOH.ActuatorCmd("MIP50xSetxAcceleration", Layer + "C" + "\r");
             m_iFYIOH.ActuatorCmd("MIP50xSetxAcceleration", Layer + "1" + "\r");
@@ -931,9 +1038,16 @@ namespace Siebwalde_Application
             m_iFYIOH.ActuatorCmd("MIP50xSetxAcceleration", Layer + "r" + "\r");
             m_iFYIOH.ActuatorCmd("MIP50xSetxAcceleration", Layer + "2" + "\r");
             m_iFYIOH.ActuatorCmd("MIP50xSetxAcceleration", Layer + "t" + "\r");
-            m_iFYIOH.ActuatorCmd("MIP50xSetxAcceleration", Layer + "0" + "\r");
-            m_iFYIOH.ActuatorCmd("MIP50xSetxAcceleration", Layer + "." + "\r");
-            m_iFYIOH.ActuatorCmd("MIP50xSetxAcceleration", Layer + "2" + "\r");
+
+            //m_iFYIOH.ActuatorCmd("MIP50xSetxAcceleration", Layer + "0" + "\r");
+            //m_iFYIOH.ActuatorCmd("MIP50xSetxAcceleration", Layer + "." + "\r");
+            //m_iFYIOH.ActuatorCmd("MIP50xSetxAcceleration", Layer + "2" + "\r");
+
+            foreach (char c in Acceleration)
+            {
+                m_iFYIOH.ActuatorCmd("MIP50xSetxAcceleration", Layer + c + "\r");
+            }
+
             m_iFYIOH.ActuatorCmd("MIP50xSetxAcceleration", Layer + "G" + "\r");
             MIP50xCRLFxAppend();
             FiddleYardMIP50Logging.StoreText("MIP50 Set Accleration and deceleration to 0.2 Qc/ms^2");
@@ -956,7 +1070,7 @@ namespace Siebwalde_Application
          *               if not the MIP will respond with message or error?
          */
         /*#--------------------------------------------------------------------------#*/
-        private void MIP50xClearxError()
+        public void MIP50xClearxError()
         {
             m_iFYIOH.ActuatorCmd("MIP50xClearxError", Layer + "E" + "\r");
             m_iFYIOH.ActuatorCmd("MIP50xClearxError", Layer + "1" + "\r");
@@ -982,7 +1096,7 @@ namespace Siebwalde_Application
          *  Notes      : Enable position regulation
          */
         /*#--------------------------------------------------------------------------#*/
-        private void MIP50xActivatexPosxReg()
+        public void MIP50xActivatexPosxReg()
         {
             m_iFYIOH.ActuatorCmd("MIP50xActivatexPosxReg", Layer + "n" + "\r");
             m_iFYIOH.ActuatorCmd("MIP50xActivatexPosxReg", Layer + "1" + "\r");
@@ -1008,7 +1122,7 @@ namespace Siebwalde_Application
          *  Notes      : 
          */
         /*#--------------------------------------------------------------------------#*/
-        private void MIP50xDeactivatexPosxReg()
+        public void MIP50xDeactivatexPosxReg()
         {
             m_iFYIOH.ActuatorCmd("MIP50xDeactivatexPosxReg", Layer + "f" + "\r");
             m_iFYIOH.ActuatorCmd("MIP50xDeactivatexPosxReg", Layer + "1" + "\r");
@@ -1034,7 +1148,7 @@ namespace Siebwalde_Application
          *  Notes      : Response must be captured and interpreterd
          */
         /*#--------------------------------------------------------------------------#*/
-        private void MIP50xReadxPosition()
+        public void MIP50xReadxPosition()
         {
             m_iFYIOH.ActuatorCmd("MIP50xReadxPosition", Layer + "P" + "\r");
             m_iFYIOH.ActuatorCmd("MIP50xReadxPosition", Layer + "1" + "\r");

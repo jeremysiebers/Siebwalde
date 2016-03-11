@@ -8,8 +8,8 @@ namespace Siebwalde_Application
     public delegate void SetMessageCallback(string name, string Log);  // defines a delegate type TOP/BOT if caller runs on other thread
 
     public partial class FiddleYardForm : Form
-    {
-        private FiddleYardMip50SettingsForm m_FYMip50SettingsForm;                    // Create new MIP50 settings Form for calibration of MIP50 coordinates etc 
+    {        
+        private iFiddleYardApplication m_iFYApp;
 
         string path = "null";
         public Log2LoggingFile FiddleYardFormLogging;
@@ -85,12 +85,13 @@ namespace Siebwalde_Application
          *  Notes      :
          */
         /*#--------------------------------------------------------------------------#*/
-        public FiddleYardForm(FiddleYardMip50SettingsForm FYMip50SettingsForm)
+        public FiddleYardForm(iFiddleYardApplication iFYApp)//, FiddleYardMip50SettingsForm FYMip50SettingsForm)
         {
             InitializeComponent();
 
-            m_FYMip50SettingsForm = FYMip50SettingsForm;
-            m_FYMip50SettingsForm.Hide();
+            //m_FYMip50SettingsForm = FYMip50SettingsForm;
+            //m_FYMip50SettingsForm.Hide();
+            m_iFYApp = iFYApp;
 
             #region Indicator init
             // size of window resolution on Modeltrain PC is 1920; 1200
@@ -3585,11 +3586,11 @@ namespace Siebwalde_Application
         {
             try
             {
-                m_FYMip50SettingsForm.Show();
+                m_iFYApp.OpenFYMip50SettingsForm();                
             }
             catch
             {
-
+                MessageBox.Show(e.ToString(), "m_iFYApp.OpenFYMip50SettingsForm() error");
             }
         }
     }    
