@@ -38,11 +38,11 @@ namespace Siebwalde_Application
         private enum State { CR, LF, Head, X0, X0_C0, X0_C1, E, E_C, M, Reset };
         private State MIP50ReceivedData;
         private int MIP50TransmitData;
-        private string MIP50ReceivedDataBuffer = null;        
+        private string MIP50ReceivedDataBuffer = null;
         private uint MIP50_Rec_Cmd_Counter_R = 0;
         private uint MIP50_Rec_Cmd_Counter_W = 0;
         private const uint MIP50RECCMDARRAY = 8;
-        private string[] MIP50_Rec_Cmd = new string[MIP50RECCMDARRAY];        
+        private string[] MIP50_Rec_Cmd = new string[MIP50RECCMDARRAY];
         private string Layer = null;
 
         public int ActualPosition = 0;
@@ -52,7 +52,7 @@ namespace Siebwalde_Application
         //private const int TEMPOFFSET = 700;
         //public uint[] TrackForward = new uint[12] { 0, 0, 42800, 85600, 128400, 171200, 214000, 256800, 299600, 342400, 385200, 428000 };// New track coordinates forward movement 1 --> 11
         //public uint[] TrackBackwardOffset = new uint[12] { 0, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, 0 };   // New track coordinates forward movement 11 --> 1 offset number
-        
+
 
         /*#--------------------------------------------------------------------------#*/
         /*  Description: FiddleYardApplication constructor
@@ -88,7 +88,7 @@ namespace Siebwalde_Application
             {
                 path = @"c:\localdata\Siebwalde\" + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_FiddleYardMIP50BOT.txt"; //  different logging file per target, this is default
                 FiddleYardMIP50Logging = new Log2LoggingFile(path);
-            }           
+            }
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -126,7 +126,7 @@ namespace Siebwalde_Application
             {
                 Layer = "q";
             }
-            
+
             FiddleYardMIP50Logging.StoreText("### Fiddle Yard MIP50 API started ###");
         }
 
@@ -150,7 +150,7 @@ namespace Siebwalde_Application
         public void MIP50Reset()
         {
             MIP50TransmitData = 0;
-            MIP50ReceivedDataBuffer = null;            
+            MIP50ReceivedDataBuffer = null;
             Next_Track = 0;
             MIP50ReceivedData = State.CR;
             ActualPosition = 0;
@@ -240,7 +240,7 @@ namespace Siebwalde_Application
                         MIP50ReceivedData = State.CR;                                   // Start again with checking for CR
                     }
                     else { MIP50ReceivedData = State.CR; }                              // else data not OK, reset switch
-                    break;                
+                    break;
 
                 /*---------------------------------------M Message -----------------------------------------------------------------------------------------------------------------
                 */
@@ -346,7 +346,7 @@ namespace Siebwalde_Application
                     MIP50_Rec_Cmd_Counter_R = 0;
                 }
             }
-            
+
             return (_Return);
         }
         /*#--------------------------------------------------------------------------#*/
@@ -373,37 +373,37 @@ namespace Siebwalde_Application
             switch (Trackno)
             {
                 case 1:
-                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track1_Abs_Position"].Value);
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance + "_" + "Track1_Abs_Position"].Value);
                     break;
                 case 2:
-                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track2_Abs_Position"].Value);
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance + "_" + "Track2_Abs_Position"].Value);
                     break;
                 case 3:
-                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track3_Abs_Position"].Value);
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance + "_" + "Track3_Abs_Position"].Value);
                     break;
                 case 4:
-                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track4_Abs_Position"].Value);
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance + "_" + "Track4_Abs_Position"].Value);
                     break;
                 case 5:
-                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track5_Abs_Position"].Value);
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance + "_" + "Track5_Abs_Position"].Value);
                     break;
                 case 6:
-                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track6_Abs_Position"].Value);
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance + "_" + "Track6_Abs_Position"].Value);
                     break;
                 case 7:
-                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track7_Abs_Position"].Value);
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance + "_" + "Track7_Abs_Position"].Value);
                     break;
                 case 8:
-                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track8_Abs_Position"].Value);
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance + "_" + "Track8_Abs_Position"].Value);
                     break;
                 case 9:
-                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track9_Abs_Position"].Value);
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance + "_" + "Track9_Abs_Position"].Value);
                     break;
                 case 10:
-                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track10_Abs_Position"].Value);
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance + "_" + "Track10_Abs_Position"].Value);
                     break;
                 case 11:
-                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track11_Abs_Position"].Value);
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance + "_" + "Track11_Abs_Position"].Value);
                     break;
 
                 default: break;
@@ -418,37 +418,37 @@ namespace Siebwalde_Application
             switch (Trackno)
             {
                 case 1:
-                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track1_Back_Offset"].Value);
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance + "_" + "Track1_Back_Offset"].Value);
                     break;
                 case 2:
-                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track2_Back_Offset"].Value);
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance + "_" + "Track2_Back_Offset"].Value);
                     break;
                 case 3:
-                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track3_Back_Offset"].Value);
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance + "_" + "Track3_Back_Offset"].Value);
                     break;
                 case 4:
-                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track4_Back_Offset"].Value);
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance + "_" + "Track4_Back_Offset"].Value);
                     break;
                 case 5:
-                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track5_Back_Offset"].Value);
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance + "_" + "Track5_Back_Offset"].Value);
                     break;
                 case 6:
-                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track6_Back_Offset"].Value);
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance + "_" + "Track6_Back_Offset"].Value);
                     break;
                 case 7:
-                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track7_Back_Offset"].Value);
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance + "_" + "Track7_Back_Offset"].Value);
                     break;
                 case 8:
-                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track8_Back_Offset"].Value);
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance + "_" + "Track8_Back_Offset"].Value);
                     break;
                 case 9:
-                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track9_Back_Offset"].Value);
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance + "_" + "Track9_Back_Offset"].Value);
                     break;
                 case 10:
-                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track10_Back_Offset"].Value);
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance + "_" + "Track10_Back_Offset"].Value);
                     break;
                 case 11:
-                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance+"_"+"Track11_Back_Offset"].Value);
+                    _Return = Convert.ToUInt32(config.AppSettings.Settings[m_instance + "_" + "Track11_Back_Offset"].Value);
                     break;
 
                 default: break;
@@ -474,8 +474,8 @@ namespace Siebwalde_Application
         public void MIP50xMOVExCALC(uint New_Track)
         {
             FiddleYardMIP50Logging.StoreText("---------------------------------------------------------------------");
-            MIP50xReadxPosition();            
-            Next_Track = New_Track;            
+            MIP50xReadxPosition();
+            Next_Track = New_Track;
             if (New_Track < 12)				// Not track++ or track-- button used
             {
                 Current_Track = New_Track; // Already store track te become.(memory when next time track++ or track-- is used)                
@@ -490,8 +490,8 @@ namespace Siebwalde_Application
                 else if (New_Track == 13 && Current_Track > 1) //track--
                 {
                     FiddleYardMIP50Logging.StoreText("MIP50 Start Absolute Move to track " + Convert.ToString(Current_Track - 1));
-                }                
-            }  
+                }
+            }
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -530,7 +530,7 @@ namespace Siebwalde_Application
                             MIP50TransmitData = 0;
                             _Return = "Error";
                         }
-                    }                   
+                    }
                     break;
 
                 case 1:
@@ -569,7 +569,7 @@ namespace Siebwalde_Application
                                 FiddleYardMIP50Logging.StoreText("MIP50 Absolute Move Routine Finished, TrackForward[Next_Track] == ActualPosition.");
                                 _Return = "Finished";
                             }
-                            
+
                         }
                         else
                         {
@@ -588,7 +588,7 @@ namespace Siebwalde_Application
 
                 case 2:
                     FiddleYardMIP50Logging.StoreText("MIP50 Start Absolute Move to " + Convert.ToString(Next_Track));
-                    MIP50xActivatexPosxReg();                    
+                    MIP50xActivatexPosxReg();
                     MIP50TransmitData = 3;
                     break;
 
@@ -649,7 +649,7 @@ namespace Siebwalde_Application
                             _Return = "Error";
                         }
                     }
-                    break;               
+                    break;
 
                 case 8:
                     m_MIP50xRECxCMDxR = MIP50xRECxCMDxR();
@@ -702,7 +702,7 @@ namespace Siebwalde_Application
                     FiddleYardMIP50Logging.StoreText("---------------------------------------------------------------------");
                     FiddleYardMIP50Logging.StoreText("MIP50 Start Homing Routine:");
                     MIP50xENABLE();
-                    MIP50xDeactivatexPosxReg();                    
+                    MIP50xDeactivatexPosxReg();
                     MIP50TransmitData = 1;
                     break;
 
@@ -712,18 +712,18 @@ namespace Siebwalde_Application
                     {
                         MIP50TransmitData = 2;
                     }
-                    else if(m_MIP50xRECxCMDxR != "")
+                    else if (m_MIP50xRECxCMDxR != "")
                     {
-                        if(MIP50xTranslatexME(m_MIP50xRECxCMDxR) == false)                     // Translate message or error and set local variables accordingly, when no error but message a true is returned
+                        if (MIP50xTranslatexME(m_MIP50xRECxCMDxR) == false)                     // Translate message or error and set local variables accordingly, when no error but message a true is returned
                         {
                             MIP50TransmitData = 0;
-                            _Return = "Error";                            
+                            _Return = "Error";
                         }
-                    }                    
+                    }
                     break;
 
                 case 2:
-                    MIP50xClearxError();                    
+                    MIP50xClearxError();
                     MIP50TransmitData = 3;
                     break;
 
@@ -786,7 +786,7 @@ namespace Siebwalde_Application
                     break;
 
                 case 8:
-                    MIP50xActivatexPosxReg();                    
+                    MIP50xActivatexPosxReg();
                     MIP50TransmitData = 9;
                     break;
 
@@ -807,7 +807,7 @@ namespace Siebwalde_Application
                     break;
 
                 case 10:
-                    MIP50xHomexAxis();                    
+                    MIP50xHomexAxis();
                     MIP50TransmitData = 11;
                     break;
 
@@ -828,7 +828,7 @@ namespace Siebwalde_Application
                     break;
 
                 case 12:
-                    MIP50xDeactivatexPosxReg();                    
+                    MIP50xDeactivatexPosxReg();
                     MIP50TransmitData = 13;
                     break;
 
@@ -893,7 +893,39 @@ namespace Siebwalde_Application
             MIP50xCRLFxAppend();
             FiddleYardMIP50Logging.StoreText("MIP50 Start Absolute Move...");
         }
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: MIP50xRel_Pos
+         * 
+         *  Input(s)   : New_Track in raw count value
+         *
+         *  Output(s)  : Char by char over UDP to uController to RS232 to MIP50
+         *
+         *  Returns    : 
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      : Start relative move
+         */
+        /*#--------------------------------------------------------------------------#*/
+        public void MIP50xRel_Pos(uint New_Track)
+        {
+            string m_New_Track = Convert.ToString(New_Track);
 
+            m_iFYIOH.ActuatorCmd("MIP50xRel_Pos", Layer + "R" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xRel_Pos", Layer + "1" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xRel_Pos", Layer + "x" + "\r");
+
+            foreach (char c in m_New_Track)
+            {
+                m_iFYIOH.ActuatorCmd("MIP50xRel_Pos", Layer + c + "\r");
+            }
+
+            m_iFYIOH.ActuatorCmd("MIP50xRel_Pos", Layer + "G" + "\r");
+            MIP50xCRLFxAppend();
+            FiddleYardMIP50Logging.StoreText("MIP50 Start Relative Move...");
+        }
         /*#--------------------------------------------------------------------------#*/
         /*  Description: MIP50xENABLE
          * 
@@ -1010,7 +1042,7 @@ namespace Siebwalde_Application
             //m_iFYIOH.ActuatorCmd("MIP50xSetxPositioningxVelxDefault", Layer + "0" + "\r");
             m_iFYIOH.ActuatorCmd("MIP50xSetxPositioningxVelxDefault", Layer + "G" + "\r");
             MIP50xCRLFxAppend();
-            FiddleYardMIP50Logging.StoreText("MIP50 Set Velocity to "+ Velocity + " Qc/ms");
+            FiddleYardMIP50Logging.StoreText("MIP50 Set Velocity to " + Velocity + " Qc/ms");
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -1157,6 +1189,74 @@ namespace Siebwalde_Application
             MIP50xCRLFxAppend();
             FiddleYardMIP50Logging.StoreText("MIP50 Read Actual Position");
         }
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: MIP50xReadxPermanentxParameter
+         * 
+         *  Input(s)   : Command to send back A fixed in flas parameter
+         *
+         *  Output(s)  : Char by char over UDP to uController to RS232 to MIP50
+         *
+         *  Returns    : 
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      : Response must be captured and interpreterd
+         */
+        /*#--------------------------------------------------------------------------#*/
+        public void MIP50xReadxPermanentxParameter(string parameter)
+        {
+            m_iFYIOH.ActuatorCmd("MIP50xReadxPermanentxParameter", Layer + "q" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xReadxPermanentxParameter", Layer + "1" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xReadxPermanentxParameter", Layer + "x" + "\r");
+
+            foreach (char c in parameter)
+            {
+                m_iFYIOH.ActuatorCmd("MIP50xReadxPermanentxParameter", Layer + c + "\r");
+            }
+
+            m_iFYIOH.ActuatorCmd("MIP50xReadxPermanentxParameter", Layer + "p" + "\r");
+            MIP50xCRLFxAppend();
+            FiddleYardMIP50Logging.StoreText("MIP50 Read Permanent Parameter: " + parameter);
+        }
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: MIP50xWritexPermanentxParameter
+         * 
+         *  Input(s)   : Command to send A new fixed in flash parameter
+         *
+         *  Output(s)  : Char by char over UDP to uController to RS232 to MIP50
+         *
+         *  Returns    : 
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      : Response must be captured and interpreterd
+         */
+        /*#--------------------------------------------------------------------------#*/
+        public void MIP50xWritexPermanentxParameter(string parameter, string value)
+        {
+            m_iFYIOH.ActuatorCmd("MIP50xReadxPermanentxParameter", Layer + "w" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xReadxPermanentxParameter", Layer + "1" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xReadxPermanentxParameter", Layer + "x" + "\r");
+
+            foreach (char c in parameter)
+            {
+                m_iFYIOH.ActuatorCmd("MIP50xReadxPermanentxParameter", Layer + c + "\r");
+            }
+
+            m_iFYIOH.ActuatorCmd("MIP50xReadxPermanentxParameter", Layer + "p" + "\r");
+
+            foreach (char d in value)
+            {
+                m_iFYIOH.ActuatorCmd("MIP50xReadxPermanentxParameter", Layer + d + "\r");
+            }
+
+            MIP50xCRLFxAppend();
+            FiddleYardMIP50Logging.StoreText("MIP50 Read Permanent Parameter: " + parameter);
+        }
 
         /*#--------------------------------------------------------------------------#*/
         /*  Description: MIP50xCRLFxAppend
@@ -1175,7 +1275,7 @@ namespace Siebwalde_Application
          *               by MIP50
          */
         /*#--------------------------------------------------------------------------#*/
-        private void MIP50xCRLFxAppend()                                      
+        private void MIP50xCRLFxAppend()
         {
             m_iFYIOH.ActuatorCmd("MIP50xCRLFxAppend", Layer + "\n" + "\r"); // Carriage return
             m_iFYIOH.ActuatorCmd("MIP50xCRLFxAppend", Layer + "\r" + "\r"); // Line feed
@@ -1234,15 +1334,15 @@ namespace Siebwalde_Application
         /*#--------------------------------------------------------------------------#*/
         public bool MIP50xTranslatexME(string MIP50ReceivedDataBuffer)
         {
-            bool _Return = false;           
-            string[] m_MIP50ReceivedDataBuffer = MIP50ReceivedDataBuffer.Split('#',' ');
+            bool _Return = false;
+            string[] m_MIP50ReceivedDataBuffer = MIP50ReceivedDataBuffer.Split('#', ' ');
             int i = 0, j = 0;
             StringBuilder LogString = new StringBuilder();
 
             /*###############################################__MESSAGES__#####################################################*/
             if (m_MIP50ReceivedDataBuffer[0] == "M")
             {
-                switch(m_MIP50ReceivedDataBuffer[1])
+                switch (m_MIP50ReceivedDataBuffer[1])
                 {
                     case "20": // M#20 %bn %bv
                         LogString.Append("Error number (after a clear error command), axis nr: ");
@@ -1267,8 +1367,8 @@ namespace Siebwalde_Application
 
                     case "21": // M#21 %bn %lv --> 3 items
                         ActualPosition = Convert.ToInt32(m_MIP50ReceivedDataBuffer[m_MIP50ReceivedDataBuffer.Length - 1]);      // In case of command position, the position data comes as last in the array
-                        ActualPositionUpdated = true;                        
-                        LogString.Append( "Message: Momentary or command position, axis nr: ");
+                        ActualPositionUpdated = true;
+                        LogString.Append("Message: Momentary or command position, axis nr: ");
                         for (i = 2; i < m_MIP50ReceivedDataBuffer.Length; i++)
                         {
                             if (m_MIP50ReceivedDataBuffer[i] != "")
@@ -1323,7 +1423,7 @@ namespace Siebwalde_Application
             /*###############################################__ERROR__#####################################################*/
             else if (m_MIP50ReceivedDataBuffer[0] == "E")
             {
-                switch(m_MIP50ReceivedDataBuffer[1])
+                switch (m_MIP50ReceivedDataBuffer[1])
                 {
                     case "180": // E#180 %bn ‘%c’
                         LogString.Append("WARN_POSREGOFF: Position regulation is switched off, axis nr: ");
@@ -1390,7 +1490,28 @@ namespace Siebwalde_Application
                 _Return = true;
             }
 
-            return (_Return);                          
+            return (_Return);
+        }
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: GetActualPositionUpdated
+         * 
+         *  Input(s)   : 
+         *
+         *  Output(s)  : Gets the ActualPositionUpdated and returns it (read only)
+         *
+         *  Returns    : 
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      : 
+         *
+         */
+        /*#--------------------------------------------------------------------------#*/
+        public bool GetActualPositionUpdated()
+        {
+            return ActualPositionUpdated;
         }
     }
 }

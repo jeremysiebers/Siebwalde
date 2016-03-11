@@ -39,8 +39,12 @@
             this.BT_MIP50PositioningAcceleration_SET = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.BT_SAVEPARAMS = new System.Windows.Forms.Button();
+            this.BT_MIP50HOMEOFFSETMOVE_READ = new System.Windows.Forms.Button();
+            this.BT_MIP50HOMEOFFSETMOVE_SET = new System.Windows.Forms.Button();
+            this.TB_HOMEOFFSETMOVE = new System.Windows.Forms.MaskedTextBox();
             this.BT_MIP50PositioningAcceleration_RELOAD = new System.Windows.Forms.Button();
             this.BT_MIP50PositioningVelocity_RELOAD = new System.Windows.Forms.Button();
+            this.label19 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.label5 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
@@ -141,8 +145,8 @@
             // 
             // TB_MIP50PositioningAcceleration
             // 
-            this.TB_MIP50PositioningAcceleration.Location = new System.Drawing.Point(172, 69);
-            this.TB_MIP50PositioningAcceleration.Mask = "0.0";
+            this.TB_MIP50PositioningAcceleration.Location = new System.Drawing.Point(172, 56);
+            this.TB_MIP50PositioningAcceleration.Mask = "0.90";
             this.TB_MIP50PositioningAcceleration.Name = "TB_MIP50PositioningAcceleration";
             this.TB_MIP50PositioningAcceleration.Size = new System.Drawing.Size(49, 20);
             this.TB_MIP50PositioningAcceleration.TabIndex = 0;
@@ -151,7 +155,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(18, 72);
+            this.label1.Location = new System.Drawing.Point(18, 56);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(148, 13);
             this.label1.TabIndex = 1;
@@ -172,17 +176,17 @@
             this.BT_MIP50PositioningVelocity_SET.Name = "BT_MIP50PositioningVelocity_SET";
             this.BT_MIP50PositioningVelocity_SET.Size = new System.Drawing.Size(75, 23);
             this.BT_MIP50PositioningVelocity_SET.TabIndex = 2;
-            this.BT_MIP50PositioningVelocity_SET.Text = "Set";
+            this.BT_MIP50PositioningVelocity_SET.Text = "Set in MIP";
             this.BT_MIP50PositioningVelocity_SET.UseVisualStyleBackColor = true;
             this.BT_MIP50PositioningVelocity_SET.Click += new System.EventHandler(this.BT_MIP50PositioningVelocity_SET_Click);
             // 
             // BT_MIP50PositioningAcceleration_SET
             // 
-            this.BT_MIP50PositioningAcceleration_SET.Location = new System.Drawing.Point(250, 67);
+            this.BT_MIP50PositioningAcceleration_SET.Location = new System.Drawing.Point(250, 53);
             this.BT_MIP50PositioningAcceleration_SET.Name = "BT_MIP50PositioningAcceleration_SET";
             this.BT_MIP50PositioningAcceleration_SET.Size = new System.Drawing.Size(75, 23);
             this.BT_MIP50PositioningAcceleration_SET.TabIndex = 2;
-            this.BT_MIP50PositioningAcceleration_SET.Text = "Set";
+            this.BT_MIP50PositioningAcceleration_SET.Text = "Set in MIP";
             this.BT_MIP50PositioningAcceleration_SET.UseVisualStyleBackColor = true;
             this.BT_MIP50PositioningAcceleration_SET.Click += new System.EventHandler(this.BT_MIP50PositioningAcceleration_SET_Click);
             // 
@@ -190,12 +194,16 @@
             // 
             this.groupBox1.Controls.Add(this.label2);
             this.groupBox1.Controls.Add(this.BT_SAVEPARAMS);
+            this.groupBox1.Controls.Add(this.BT_MIP50HOMEOFFSETMOVE_READ);
+            this.groupBox1.Controls.Add(this.BT_MIP50HOMEOFFSETMOVE_SET);
             this.groupBox1.Controls.Add(this.BT_MIP50PositioningAcceleration_SET);
+            this.groupBox1.Controls.Add(this.TB_HOMEOFFSETMOVE);
             this.groupBox1.Controls.Add(this.TB_MIP50PositioningVelocity);
             this.groupBox1.Controls.Add(this.BT_MIP50PositioningAcceleration_RELOAD);
             this.groupBox1.Controls.Add(this.BT_MIP50PositioningVelocity_RELOAD);
             this.groupBox1.Controls.Add(this.BT_MIP50PositioningVelocity_SET);
             this.groupBox1.Controls.Add(this.TB_MIP50PositioningAcceleration);
+            this.groupBox1.Controls.Add(this.label19);
             this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Location = new System.Drawing.Point(12, 12);
             this.groupBox1.Name = "groupBox1";
@@ -206,21 +214,50 @@
             // 
             // BT_SAVEPARAMS
             // 
-            this.BT_SAVEPARAMS.Location = new System.Drawing.Point(251, 117);
+            this.BT_SAVEPARAMS.Location = new System.Drawing.Point(331, 117);
             this.BT_SAVEPARAMS.Name = "BT_SAVEPARAMS";
             this.BT_SAVEPARAMS.Size = new System.Drawing.Size(75, 23);
             this.BT_SAVEPARAMS.TabIndex = 0;
-            this.BT_SAVEPARAMS.Text = "Update";
+            this.BT_SAVEPARAMS.Text = "Update Conf";
             this.BT_SAVEPARAMS.UseVisualStyleBackColor = true;
             this.BT_SAVEPARAMS.Click += new System.EventHandler(this.BT_SAVEPARAMS_Click);
             // 
+            // BT_MIP50HOMEOFFSETMOVE_READ
+            // 
+            this.BT_MIP50HOMEOFFSETMOVE_READ.Location = new System.Drawing.Point(332, 82);
+            this.BT_MIP50HOMEOFFSETMOVE_READ.Name = "BT_MIP50HOMEOFFSETMOVE_READ";
+            this.BT_MIP50HOMEOFFSETMOVE_READ.Size = new System.Drawing.Size(75, 23);
+            this.BT_MIP50HOMEOFFSETMOVE_READ.TabIndex = 2;
+            this.BT_MIP50HOMEOFFSETMOVE_READ.Text = "Read fr MIP";
+            this.BT_MIP50HOMEOFFSETMOVE_READ.UseVisualStyleBackColor = true;
+            this.BT_MIP50HOMEOFFSETMOVE_READ.Click += new System.EventHandler(this.BT_MIP50HOMEOFFSETMOVE_READ_Click);
+            // 
+            // BT_MIP50HOMEOFFSETMOVE_SET
+            // 
+            this.BT_MIP50HOMEOFFSETMOVE_SET.Location = new System.Drawing.Point(251, 82);
+            this.BT_MIP50HOMEOFFSETMOVE_SET.Name = "BT_MIP50HOMEOFFSETMOVE_SET";
+            this.BT_MIP50HOMEOFFSETMOVE_SET.Size = new System.Drawing.Size(75, 23);
+            this.BT_MIP50HOMEOFFSETMOVE_SET.TabIndex = 2;
+            this.BT_MIP50HOMEOFFSETMOVE_SET.Text = "Set in MIP";
+            this.BT_MIP50HOMEOFFSETMOVE_SET.UseVisualStyleBackColor = true;
+            this.BT_MIP50HOMEOFFSETMOVE_SET.Click += new System.EventHandler(this.BT_MIP50HOMEOFFSETMOVE_SET_Click);
+            // 
+            // TB_HOMEOFFSETMOVE
+            // 
+            this.TB_HOMEOFFSETMOVE.Location = new System.Drawing.Point(172, 84);
+            this.TB_HOMEOFFSETMOVE.Mask = "00000";
+            this.TB_HOMEOFFSETMOVE.Name = "TB_HOMEOFFSETMOVE";
+            this.TB_HOMEOFFSETMOVE.Size = new System.Drawing.Size(49, 20);
+            this.TB_HOMEOFFSETMOVE.TabIndex = 0;
+            this.TB_HOMEOFFSETMOVE.MaskInputRejected += new System.Windows.Forms.MaskInputRejectedEventHandler(this.TB_MIP50PositioningVelocity_MaskInputRejected);
+            // 
             // BT_MIP50PositioningAcceleration_RELOAD
             // 
-            this.BT_MIP50PositioningAcceleration_RELOAD.Location = new System.Drawing.Point(331, 67);
+            this.BT_MIP50PositioningAcceleration_RELOAD.Location = new System.Drawing.Point(331, 53);
             this.BT_MIP50PositioningAcceleration_RELOAD.Name = "BT_MIP50PositioningAcceleration_RELOAD";
             this.BT_MIP50PositioningAcceleration_RELOAD.Size = new System.Drawing.Size(75, 23);
             this.BT_MIP50PositioningAcceleration_RELOAD.TabIndex = 2;
-            this.BT_MIP50PositioningAcceleration_RELOAD.Text = "Reload";
+            this.BT_MIP50PositioningAcceleration_RELOAD.Text = "Reload Conf";
             this.BT_MIP50PositioningAcceleration_RELOAD.UseVisualStyleBackColor = true;
             this.BT_MIP50PositioningAcceleration_RELOAD.Click += new System.EventHandler(this.BT_MIP50PositioningAcceleration_RELOAD_Click);
             // 
@@ -230,9 +267,18 @@
             this.BT_MIP50PositioningVelocity_RELOAD.Name = "BT_MIP50PositioningVelocity_RELOAD";
             this.BT_MIP50PositioningVelocity_RELOAD.Size = new System.Drawing.Size(75, 23);
             this.BT_MIP50PositioningVelocity_RELOAD.TabIndex = 2;
-            this.BT_MIP50PositioningVelocity_RELOAD.Text = "Reload";
+            this.BT_MIP50PositioningVelocity_RELOAD.Text = "Reload Conf";
             this.BT_MIP50PositioningVelocity_RELOAD.UseVisualStyleBackColor = true;
             this.BT_MIP50PositioningVelocity_RELOAD.Click += new System.EventHandler(this.BT_MIP50PositioningVelocity_RELOAD_Click);
+            // 
+            // label19
+            // 
+            this.label19.AutoSize = true;
+            this.label19.Location = new System.Drawing.Point(18, 87);
+            this.label19.Name = "label19";
+            this.label19.Size = new System.Drawing.Size(153, 13);
+            this.label19.TabIndex = 1;
+            this.label19.Text = "MIP50 Home Offset Movement";
             // 
             // groupBox2
             // 
@@ -298,7 +344,7 @@
             this.groupBox2.Size = new System.Drawing.Size(438, 341);
             this.groupBox2.TabIndex = 3;
             this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "MIP50 FiddleYard Constants";
+            this.groupBox2.Text = "Update Conf";
             // 
             // label5
             // 
@@ -621,7 +667,7 @@
             this.BT_TRACK11_BKOFFSET_SAVE.Name = "BT_TRACK11_BKOFFSET_SAVE";
             this.BT_TRACK11_BKOFFSET_SAVE.Size = new System.Drawing.Size(75, 20);
             this.BT_TRACK11_BKOFFSET_SAVE.TabIndex = 2;
-            this.BT_TRACK11_BKOFFSET_SAVE.Text = "Update";
+            this.BT_TRACK11_BKOFFSET_SAVE.Text = "Update Conf";
             this.BT_TRACK11_BKOFFSET_SAVE.UseVisualStyleBackColor = true;
             this.BT_TRACK11_BKOFFSET_SAVE.Click += new System.EventHandler(this.BT_TRACK11_BKOFFSET_SAVE_Click);
             // 
@@ -631,7 +677,7 @@
             this.BT_TRACK11_ABS_POS_SAVE.Name = "BT_TRACK11_ABS_POS_SAVE";
             this.BT_TRACK11_ABS_POS_SAVE.Size = new System.Drawing.Size(75, 20);
             this.BT_TRACK11_ABS_POS_SAVE.TabIndex = 2;
-            this.BT_TRACK11_ABS_POS_SAVE.Text = "Update";
+            this.BT_TRACK11_ABS_POS_SAVE.Text = "Update Conf";
             this.BT_TRACK11_ABS_POS_SAVE.UseVisualStyleBackColor = true;
             this.BT_TRACK11_ABS_POS_SAVE.Click += new System.EventHandler(this.BT_TRACK11_ABS_POS_SAVE_Click);
             // 
@@ -641,7 +687,7 @@
             this.BT_TRACK10_BKOFFSET_SAVE.Name = "BT_TRACK10_BKOFFSET_SAVE";
             this.BT_TRACK10_BKOFFSET_SAVE.Size = new System.Drawing.Size(75, 20);
             this.BT_TRACK10_BKOFFSET_SAVE.TabIndex = 2;
-            this.BT_TRACK10_BKOFFSET_SAVE.Text = "Update";
+            this.BT_TRACK10_BKOFFSET_SAVE.Text = "Update Conf";
             this.BT_TRACK10_BKOFFSET_SAVE.UseVisualStyleBackColor = true;
             this.BT_TRACK10_BKOFFSET_SAVE.Click += new System.EventHandler(this.BT_TRACK10_BKOFFSET_SAVE_Click);
             // 
@@ -651,7 +697,7 @@
             this.BT_TRACK10_ABS_POS_SAVE.Name = "BT_TRACK10_ABS_POS_SAVE";
             this.BT_TRACK10_ABS_POS_SAVE.Size = new System.Drawing.Size(75, 20);
             this.BT_TRACK10_ABS_POS_SAVE.TabIndex = 2;
-            this.BT_TRACK10_ABS_POS_SAVE.Text = "Update";
+            this.BT_TRACK10_ABS_POS_SAVE.Text = "Update Conf";
             this.BT_TRACK10_ABS_POS_SAVE.UseVisualStyleBackColor = true;
             this.BT_TRACK10_ABS_POS_SAVE.Click += new System.EventHandler(this.BT_TRACK10_ABS_POS_SAVE_Click);
             // 
@@ -661,7 +707,7 @@
             this.BT_TRACK9_BKOFFSET_SAVE.Name = "BT_TRACK9_BKOFFSET_SAVE";
             this.BT_TRACK9_BKOFFSET_SAVE.Size = new System.Drawing.Size(75, 20);
             this.BT_TRACK9_BKOFFSET_SAVE.TabIndex = 2;
-            this.BT_TRACK9_BKOFFSET_SAVE.Text = "Update";
+            this.BT_TRACK9_BKOFFSET_SAVE.Text = "Update Conf";
             this.BT_TRACK9_BKOFFSET_SAVE.UseVisualStyleBackColor = true;
             this.BT_TRACK9_BKOFFSET_SAVE.Click += new System.EventHandler(this.BT_TRACK9_BKOFFSET_SAVE_Click);
             // 
@@ -671,7 +717,7 @@
             this.BT_TRACK9_ABS_POS_SAVE.Name = "BT_TRACK9_ABS_POS_SAVE";
             this.BT_TRACK9_ABS_POS_SAVE.Size = new System.Drawing.Size(75, 20);
             this.BT_TRACK9_ABS_POS_SAVE.TabIndex = 2;
-            this.BT_TRACK9_ABS_POS_SAVE.Text = "Update";
+            this.BT_TRACK9_ABS_POS_SAVE.Text = "Update Conf";
             this.BT_TRACK9_ABS_POS_SAVE.UseVisualStyleBackColor = true;
             this.BT_TRACK9_ABS_POS_SAVE.Click += new System.EventHandler(this.BT_TRACK9_ABS_POS_SAVE_Click);
             // 
@@ -681,7 +727,7 @@
             this.BT_TRACK8_BKOFFSET_SAVE.Name = "BT_TRACK8_BKOFFSET_SAVE";
             this.BT_TRACK8_BKOFFSET_SAVE.Size = new System.Drawing.Size(75, 20);
             this.BT_TRACK8_BKOFFSET_SAVE.TabIndex = 2;
-            this.BT_TRACK8_BKOFFSET_SAVE.Text = "Update";
+            this.BT_TRACK8_BKOFFSET_SAVE.Text = "Update Conf";
             this.BT_TRACK8_BKOFFSET_SAVE.UseVisualStyleBackColor = true;
             this.BT_TRACK8_BKOFFSET_SAVE.Click += new System.EventHandler(this.BT_TRACK8_BKOFFSET_SAVE_Click);
             // 
@@ -691,7 +737,7 @@
             this.BT_TRACK8_ABS_POS_SAVE.Name = "BT_TRACK8_ABS_POS_SAVE";
             this.BT_TRACK8_ABS_POS_SAVE.Size = new System.Drawing.Size(75, 20);
             this.BT_TRACK8_ABS_POS_SAVE.TabIndex = 2;
-            this.BT_TRACK8_ABS_POS_SAVE.Text = "Update";
+            this.BT_TRACK8_ABS_POS_SAVE.Text = "Update Conf";
             this.BT_TRACK8_ABS_POS_SAVE.UseVisualStyleBackColor = true;
             this.BT_TRACK8_ABS_POS_SAVE.Click += new System.EventHandler(this.BT_TRACK8_ABS_POS_SAVE_Click);
             // 
@@ -701,7 +747,7 @@
             this.BT_TRACK7_BKOFFSET_SAVE.Name = "BT_TRACK7_BKOFFSET_SAVE";
             this.BT_TRACK7_BKOFFSET_SAVE.Size = new System.Drawing.Size(75, 20);
             this.BT_TRACK7_BKOFFSET_SAVE.TabIndex = 2;
-            this.BT_TRACK7_BKOFFSET_SAVE.Text = "Update";
+            this.BT_TRACK7_BKOFFSET_SAVE.Text = "Update Conf";
             this.BT_TRACK7_BKOFFSET_SAVE.UseVisualStyleBackColor = true;
             this.BT_TRACK7_BKOFFSET_SAVE.Click += new System.EventHandler(this.BT_TRACK7_BKOFFSET_SAVE_Click);
             // 
@@ -711,7 +757,7 @@
             this.BT_TRACK7_ABS_POS_SAVE.Name = "BT_TRACK7_ABS_POS_SAVE";
             this.BT_TRACK7_ABS_POS_SAVE.Size = new System.Drawing.Size(75, 20);
             this.BT_TRACK7_ABS_POS_SAVE.TabIndex = 2;
-            this.BT_TRACK7_ABS_POS_SAVE.Text = "Update";
+            this.BT_TRACK7_ABS_POS_SAVE.Text = "Update Conf";
             this.BT_TRACK7_ABS_POS_SAVE.UseVisualStyleBackColor = true;
             this.BT_TRACK7_ABS_POS_SAVE.Click += new System.EventHandler(this.BT_TRACK7_ABS_POS_SAVE_Click);
             // 
@@ -721,7 +767,7 @@
             this.BT_TRACK6_BKOFFSET_SAVE.Name = "BT_TRACK6_BKOFFSET_SAVE";
             this.BT_TRACK6_BKOFFSET_SAVE.Size = new System.Drawing.Size(75, 20);
             this.BT_TRACK6_BKOFFSET_SAVE.TabIndex = 2;
-            this.BT_TRACK6_BKOFFSET_SAVE.Text = "Update";
+            this.BT_TRACK6_BKOFFSET_SAVE.Text = "Update Conf";
             this.BT_TRACK6_BKOFFSET_SAVE.UseVisualStyleBackColor = true;
             this.BT_TRACK6_BKOFFSET_SAVE.Click += new System.EventHandler(this.BT_TRACK6_BKOFFSET_SAVE_Click);
             // 
@@ -731,7 +777,7 @@
             this.BT_TRACK6_ABS_POS_SAVE.Name = "BT_TRACK6_ABS_POS_SAVE";
             this.BT_TRACK6_ABS_POS_SAVE.Size = new System.Drawing.Size(75, 20);
             this.BT_TRACK6_ABS_POS_SAVE.TabIndex = 2;
-            this.BT_TRACK6_ABS_POS_SAVE.Text = "Update";
+            this.BT_TRACK6_ABS_POS_SAVE.Text = "Update Conf";
             this.BT_TRACK6_ABS_POS_SAVE.UseVisualStyleBackColor = true;
             this.BT_TRACK6_ABS_POS_SAVE.Click += new System.EventHandler(this.BT_TRACK6_ABS_POS_SAVE_Click);
             // 
@@ -741,7 +787,7 @@
             this.BT_TRACK5_BKOFFSET_SAVE.Name = "BT_TRACK5_BKOFFSET_SAVE";
             this.BT_TRACK5_BKOFFSET_SAVE.Size = new System.Drawing.Size(75, 20);
             this.BT_TRACK5_BKOFFSET_SAVE.TabIndex = 2;
-            this.BT_TRACK5_BKOFFSET_SAVE.Text = "Update";
+            this.BT_TRACK5_BKOFFSET_SAVE.Text = "Update Conf";
             this.BT_TRACK5_BKOFFSET_SAVE.UseVisualStyleBackColor = true;
             this.BT_TRACK5_BKOFFSET_SAVE.Click += new System.EventHandler(this.BT_TRACK5_BKOFFSET_SAVE_Click);
             // 
@@ -751,7 +797,7 @@
             this.BT_TRACK5_ABS_POS_SAVE.Name = "BT_TRACK5_ABS_POS_SAVE";
             this.BT_TRACK5_ABS_POS_SAVE.Size = new System.Drawing.Size(75, 20);
             this.BT_TRACK5_ABS_POS_SAVE.TabIndex = 2;
-            this.BT_TRACK5_ABS_POS_SAVE.Text = "Update";
+            this.BT_TRACK5_ABS_POS_SAVE.Text = "Update Conf";
             this.BT_TRACK5_ABS_POS_SAVE.UseVisualStyleBackColor = true;
             this.BT_TRACK5_ABS_POS_SAVE.Click += new System.EventHandler(this.BT_TRACK5_ABS_POS_SAVE_Click);
             // 
@@ -761,7 +807,7 @@
             this.BT_TRACK4_BKOFFSET_SAVE.Name = "BT_TRACK4_BKOFFSET_SAVE";
             this.BT_TRACK4_BKOFFSET_SAVE.Size = new System.Drawing.Size(75, 20);
             this.BT_TRACK4_BKOFFSET_SAVE.TabIndex = 2;
-            this.BT_TRACK4_BKOFFSET_SAVE.Text = "Update";
+            this.BT_TRACK4_BKOFFSET_SAVE.Text = "Update Conf";
             this.BT_TRACK4_BKOFFSET_SAVE.UseVisualStyleBackColor = true;
             this.BT_TRACK4_BKOFFSET_SAVE.Click += new System.EventHandler(this.BT_TRACK4_BKOFFSET_SAVE_Click);
             // 
@@ -771,7 +817,7 @@
             this.BT_TRACK4_ABS_POS_SAVE.Name = "BT_TRACK4_ABS_POS_SAVE";
             this.BT_TRACK4_ABS_POS_SAVE.Size = new System.Drawing.Size(75, 20);
             this.BT_TRACK4_ABS_POS_SAVE.TabIndex = 2;
-            this.BT_TRACK4_ABS_POS_SAVE.Text = "Update";
+            this.BT_TRACK4_ABS_POS_SAVE.Text = "Update Conf";
             this.BT_TRACK4_ABS_POS_SAVE.UseVisualStyleBackColor = true;
             this.BT_TRACK4_ABS_POS_SAVE.Click += new System.EventHandler(this.BT_TRACK4_ABS_POS_SAVE_Click);
             // 
@@ -781,7 +827,7 @@
             this.BT_TRACK3_BKOFFSET_SAVE.Name = "BT_TRACK3_BKOFFSET_SAVE";
             this.BT_TRACK3_BKOFFSET_SAVE.Size = new System.Drawing.Size(75, 20);
             this.BT_TRACK3_BKOFFSET_SAVE.TabIndex = 2;
-            this.BT_TRACK3_BKOFFSET_SAVE.Text = "Update";
+            this.BT_TRACK3_BKOFFSET_SAVE.Text = "Update Conf";
             this.BT_TRACK3_BKOFFSET_SAVE.UseVisualStyleBackColor = true;
             this.BT_TRACK3_BKOFFSET_SAVE.Click += new System.EventHandler(this.BT_TRACK3_BKOFFSET_SAVE_Click);
             // 
@@ -791,7 +837,7 @@
             this.BT_TRACK3_ABS_POS_SAVE.Name = "BT_TRACK3_ABS_POS_SAVE";
             this.BT_TRACK3_ABS_POS_SAVE.Size = new System.Drawing.Size(75, 20);
             this.BT_TRACK3_ABS_POS_SAVE.TabIndex = 2;
-            this.BT_TRACK3_ABS_POS_SAVE.Text = "Update";
+            this.BT_TRACK3_ABS_POS_SAVE.Text = "Update Conf";
             this.BT_TRACK3_ABS_POS_SAVE.UseVisualStyleBackColor = true;
             this.BT_TRACK3_ABS_POS_SAVE.Click += new System.EventHandler(this.BT_TRACK3_ABS_POS_SAVE_Click);
             // 
@@ -801,7 +847,7 @@
             this.BT_TRACK2_BKOFFSET_SAVE.Name = "BT_TRACK2_BKOFFSET_SAVE";
             this.BT_TRACK2_BKOFFSET_SAVE.Size = new System.Drawing.Size(75, 20);
             this.BT_TRACK2_BKOFFSET_SAVE.TabIndex = 2;
-            this.BT_TRACK2_BKOFFSET_SAVE.Text = "Update";
+            this.BT_TRACK2_BKOFFSET_SAVE.Text = "Update Conf";
             this.BT_TRACK2_BKOFFSET_SAVE.UseVisualStyleBackColor = true;
             this.BT_TRACK2_BKOFFSET_SAVE.Click += new System.EventHandler(this.BT_TRACK2_BKOFFSET_SAVE_Click);
             // 
@@ -811,7 +857,7 @@
             this.BT_TRACK2_ABS_POS_SAVE.Name = "BT_TRACK2_ABS_POS_SAVE";
             this.BT_TRACK2_ABS_POS_SAVE.Size = new System.Drawing.Size(75, 20);
             this.BT_TRACK2_ABS_POS_SAVE.TabIndex = 2;
-            this.BT_TRACK2_ABS_POS_SAVE.Text = "Update";
+            this.BT_TRACK2_ABS_POS_SAVE.Text = "Update Conf";
             this.BT_TRACK2_ABS_POS_SAVE.UseVisualStyleBackColor = true;
             this.BT_TRACK2_ABS_POS_SAVE.Click += new System.EventHandler(this.BT_TRACK2_ABS_POS_SAVE_Click);
             // 
@@ -821,7 +867,7 @@
             this.BT_TRACK1_BKOFFSET_SAVE.Name = "BT_TRACK1_BKOFFSET_SAVE";
             this.BT_TRACK1_BKOFFSET_SAVE.Size = new System.Drawing.Size(75, 20);
             this.BT_TRACK1_BKOFFSET_SAVE.TabIndex = 2;
-            this.BT_TRACK1_BKOFFSET_SAVE.Text = "Update";
+            this.BT_TRACK1_BKOFFSET_SAVE.Text = "Update Conf";
             this.BT_TRACK1_BKOFFSET_SAVE.UseVisualStyleBackColor = true;
             this.BT_TRACK1_BKOFFSET_SAVE.Click += new System.EventHandler(this.BT_TRACK1_BKOFFSET_SAVE_Click);
             // 
@@ -831,7 +877,7 @@
             this.BT_TRACK1_ABS_POS_SAVE.Name = "BT_TRACK1_ABS_POS_SAVE";
             this.BT_TRACK1_ABS_POS_SAVE.Size = new System.Drawing.Size(75, 20);
             this.BT_TRACK1_ABS_POS_SAVE.TabIndex = 2;
-            this.BT_TRACK1_ABS_POS_SAVE.Text = "Update";
+            this.BT_TRACK1_ABS_POS_SAVE.Text = "Update Conf";
             this.BT_TRACK1_ABS_POS_SAVE.UseVisualStyleBackColor = true;
             this.BT_TRACK1_ABS_POS_SAVE.Click += new System.EventHandler(this.BT_TRACK1_ABS_POS_SAVE_Click);
             // 
@@ -1188,5 +1234,9 @@
         private System.Windows.Forms.Label label18;
         private System.Windows.Forms.TextBox TB_MOVEABSPOS;
         private System.Windows.Forms.Button BT_MOVEABS;
+        private System.Windows.Forms.Button BT_MIP50HOMEOFFSETMOVE_READ;
+        private System.Windows.Forms.Button BT_MIP50HOMEOFFSETMOVE_SET;
+        private System.Windows.Forms.MaskedTextBox TB_HOMEOFFSETMOVE;
+        private System.Windows.Forms.Label label19;
     }
 }
