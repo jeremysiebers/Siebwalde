@@ -2,6 +2,7 @@
 using System.Windows.Forms;
 using System.Threading;
 using System.Configuration;
+using System.Timers;
 
 namespace Siebwalde_Application
 {
@@ -15,7 +16,7 @@ namespace Siebwalde_Application
         private string m_instance = null;
 
         private enum State { NOP, BT_MIP50PositioningVelocity_SET_Click, BT_MIP50PositioningAcceleration_SET_Click, BT_CLEARERROR_Click, BT_POSREGON_Click, BT_POSREGOFF_Click,
-            BT_HOME_Click, BT_READPOS_Click, BT_MOVEREL_Click, BT_MOVEABS_Click, BT_READPOS_Click2
+            BT_HOME_Click, BT_READPOS_Click, BT_MOVEREL_Click, BT_MOVEABS_Click, BT_READPOS_Click2, BT_MIP50HOMEOFFSETMOVE_SET_Click, BT_MIP50HOMEOFFSETMOVE_READ_Click, BT_MIP50HOMEOFFSETMOVE_READ_Click2
         };
         private State LastExecCommand;
 
@@ -25,6 +26,9 @@ namespace Siebwalde_Application
         public string Previous_TB_MIP50PositioningVelocity_Value = null;
         public string Previous_TB_MIP50PositioningAcceleration_Value = null;
         public Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+        // Create a timer
+        private System.Timers.Timer bTimer = new System.Timers.Timer();
+        private bool SettingsFormActive = false;
 
         /*#--------------------------------------------------------------------------#*/
         /*  Description: Constructor
@@ -94,6 +98,8 @@ namespace Siebwalde_Application
 
             Sensor Sns_ReceivedDataFromMip50 = new Sensor("Mip50Rec", " Mip50ReceivedCmd ", 0, (name, val, log) => ReceivedMIP50Data(name, val, log));  // initialize sensors
             m_FYAppVar.ReceivedDataFromMip50.Attach(Sns_ReceivedDataFromMip50);                                                                         // Attach 
+
+            
         }
 
 
@@ -104,6 +110,7 @@ namespace Siebwalde_Application
             this.ShowInTaskbar = true;
             this.TopMost = true;
             this.StartPosition = FormStartPosition.CenterScreen;
+            SettingsFormActive = true;
 
             if (this.Name == "FiddleYardTOP")
             {               
@@ -113,9 +120,37 @@ namespace Siebwalde_Application
             {
                 this.Text = "FiddleYard MIP50 Settings BOTTOM Layer";
             }
-            this.Show();
-        }
+            this.ShowDialog();
 
+            bTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
+            bTimer.Interval = 100;
+            bTimer.AutoReset = true;
+            // Enable the timer
+            bTimer.Enabled = true;
+        }
+        /*#--------------------------------------------------------------------------#*/
+        /*  Description: OnTimedEvent
+         *               Used to keep the application alive independent from the target
+         * 
+         *  Input(s)   :
+         *
+         *  Output(s)  : 
+         *
+         *  Returns    :
+         *
+         *  Pre.Cond.  :
+         *
+         *  Post.Cond. :
+         *
+         *  Notes      : 
+         */
+        /*#--------------------------------------------------------------------------#*/
+        public void OnTimedEvent(object source, ElapsedEventArgs e)
+        {
+            bTimer.Stop();
+            ReceivedMIP50Data("TimerEvent", 0,"");
+            bTimer.Start();
+        }
         /*#--------------------------------------------------------------------------#*/
         /*  Description: BT_MIP50PositioningVelocity
          * 
@@ -199,6 +234,7 @@ namespace Siebwalde_Application
             if (LastExecCommand != State.NOP)                                       // Check if the received command is created due to change of data in this form
             {
                 m_MIP50xRECxCMDxR = m_FYMip50.MIP50xRECxCMDxR();                    // Read from mailbox
+                
 
                 if (m_MIP50xRECxCMDxR == "X0")                                      // Check first if received message is X0
                 {                    
@@ -206,6 +242,7 @@ namespace Siebwalde_Application
                 }
                 else if (m_MIP50xRECxCMDxR != "")                                   // if X0 was not received
                 {
+                    TB_LOGGING_APPEND(m_MIP50xRECxCMDxR);
                     if (m_FYMip50.MIP50xTranslatexME(m_MIP50xRECxCMDxR) == false)   // check if Translated message is error, else Message was received wait for next command to be X0
                     {
                         ExecResult = "Error";                                      // Set active state to UNDO action because an error from MIP50 was received
@@ -369,18 +406,69 @@ namespace Siebwalde_Application
                     }
                     break;
 
+                case State.BT_MIP50HOMEOFFSETMOVE_SET_Click:
+                    if (ExecResult == "Error")
+                    {
+                        TB_LOGGING_APPEND("Error returned from MIP50, check MIP50 error log");
+                        LastExecCommand = State.NOP;
+                    }
+                    else if (ExecResult == "OK")
+                    {
+                        TB_LOGGING_APPEND("OK returned from MIP50");
+                        LastExecCommand = State.NOP;                        
+                    }
+                    break;
+
+                case State.BT_MIP50HOMEOFFSETMOVE_READ_Click:
+                    if (ExecResult == "Error")
+                    {
+                        TB_LOGGING_APPEND("Error returned from MIP50, check MIP50 error log");
+                        LastExecCommand = State.NOP;
+                    }
+                    else if (ExecResult == "OK")
+                    {
+                        TB_LOGGING_APPEND("OK returned from MIP50");
+                        LastExecCommand = State.BT_MIP50HOMEOFFSETMOVE_READ_Click2;
+                        
+                    }
+                    break;
+
+                case State.BT_MIP50HOMEOFFSETMOVE_READ_Click2:
+                    if (m_FYMip50.GetHomeOffsetMovementUpdated() == true)
+                    {
+                        if (TB_HOMEOFFSETMOVE.InvokeRequired)
+                        {
+                            ReceivedMIP50Data d = new ReceivedMIP50Data(ReceivedMIP50Data);
+                            TB_HOMEOFFSETMOVE.Invoke(d, new object[] { name, val, log });  // invoking itself      
+                        }
+                        else
+                        {
+                            TB_HOMEOFFSETMOVE.Text = Convert.ToString(m_FYMip50.GetHomeOffsetMovement());
+                            LastExecCommand = State.NOP;
+                        }                        
+                    }
+                    break;
+                    
                 default: break;
             }
 
-            if (TB_ACTUALPOSITION.InvokeRequired)
+            if (SettingsFormActive == true) // because of not detaching (because of unkown object while detach --> ask somebody (detach from unknown object or something))
             {
-                ReceivedMIP50Data d = new ReceivedMIP50Data(ReceivedMIP50Data);
-                TB_ACTUALPOSITION.Invoke(d, new object[] { name, val, log });  // invoking itself      
+                try
+                {
+                    if (TB_ACTUALPOSITION.InvokeRequired)
+                    {
+                        ReceivedMIP50Data d = new ReceivedMIP50Data(ReceivedMIP50Data);
+                        TB_ACTUALPOSITION.Invoke(d, new object[] { name, val, log });  // invoking itself                      
+                    }
+                    else
+                    {
+                        TB_ACTUALPOSITION.Text = Convert.ToString(m_FYMip50.GetActualPosition());
+                    }
+                }
+                catch { }
             }
-            else
-            {                
-                TB_ACTUALPOSITION.Text = Convert.ToString(m_FYMip50.ActualPosition);
-            }
+            
         }
         /*#--------------------------------------------------------------------------#*/
         /*  Description: TB_LOGGING_APPEND
@@ -522,7 +610,8 @@ namespace Siebwalde_Application
 
         private void FiddleYardMip50SettingsForm_Close(object sender, FormClosingEventArgs e)
         {
-
+            bTimer.Enabled = false;
+            SettingsFormActive = false;
         }
 
         private void BT_TRACK1_ABS_POS_SAVE_Click(object sender, EventArgs e)
@@ -723,12 +812,16 @@ namespace Siebwalde_Application
 
         private void BT_MIP50HOMEOFFSETMOVE_SET_Click(object sender, EventArgs e)
         {
-            m_FYMip50.MIP50xReadxPermanentxParameter("33");
+            m_FYMip50.MIP50xWritexPermanentxParameter("33", TB_HOMEOFFSETMOVE.Text);
+            LastExecCommand = State.BT_MIP50HOMEOFFSETMOVE_SET_Click;                  // Set state in order to check when a message from MIP50 is received, if it is X0 or something else
+            TB_LOGGING_APPEND("Set MIP50 Parameter 33 Home Offset Move to: " + TB_HOMEOFFSETMOVE.Text);
         }
 
         private void BT_MIP50HOMEOFFSETMOVE_READ_Click(object sender, EventArgs e)
         {
-            m_FYMip50.MIP50xWritexPermanentxParameter("33", "1900");
+            m_FYMip50.MIP50xReadxPermanentxParameter("33");
+            LastExecCommand = State.BT_MIP50HOMEOFFSETMOVE_READ_Click;                  // Set state in order to check when a message from MIP50 is received, if it is X0 or something else
+            TB_LOGGING_APPEND("Read MIP50 Parameter 33 Home Offset Move");
         }
     }
 }

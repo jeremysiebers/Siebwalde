@@ -45,8 +45,10 @@ namespace Siebwalde_Application
         private string[] MIP50_Rec_Cmd = new string[MIP50RECCMDARRAY];
         private string Layer = null;
 
-        public int ActualPosition = 0;
+        private int ActualPosition = 0;
+        private int HomeOffsetMovement = 0;
         private bool ActualPositionUpdated = false;
+        private bool HomeOffsetMovementUpdated = false;
         private uint Next_Track = 0;
         private uint Current_Track = 0;
         //private const int TEMPOFFSET = 700;
@@ -156,6 +158,15 @@ namespace Siebwalde_Application
             ActualPosition = 0;
             ActualPositionUpdated = false;
             m_FYAppVar.FYHomed.BoolVariable = false;
+            ActualPosition = 0;
+            HomeOffsetMovement = 0;
+            ActualPositionUpdated = false;
+            HomeOffsetMovementUpdated = false;            
+            MIP50xClearxError();
+            MIP50xDeactivatexPosxReg();
+            MIP50xDISABLE();
+            MIP50_Rec_Cmd_Counter_R = 0;
+            MIP50_Rec_Cmd_Counter_W = 0;
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -1188,6 +1199,7 @@ namespace Siebwalde_Application
             m_iFYIOH.ActuatorCmd("MIP50xReadxPosition", Layer + "G" + "\r");
             MIP50xCRLFxAppend();
             FiddleYardMIP50Logging.StoreText("MIP50 Read Actual Position");
+            ActualPositionUpdated = false;
         }
         /*#--------------------------------------------------------------------------#*/
         /*  Description: MIP50xReadxPermanentxParameter
@@ -1217,8 +1229,15 @@ namespace Siebwalde_Application
             }
 
             m_iFYIOH.ActuatorCmd("MIP50xReadxPermanentxParameter", Layer + "p" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xReadxPermanentxParameter", Layer + "G" + "\r");
             MIP50xCRLFxAppend();
             FiddleYardMIP50Logging.StoreText("MIP50 Read Permanent Parameter: " + parameter);
+
+            if(parameter == "33")
+            {
+                HomeOffsetMovementUpdated = false;
+            }
+            
         }
         /*#--------------------------------------------------------------------------#*/
         /*  Description: MIP50xWritexPermanentxParameter
@@ -1238,24 +1257,24 @@ namespace Siebwalde_Application
         /*#--------------------------------------------------------------------------#*/
         public void MIP50xWritexPermanentxParameter(string parameter, string value)
         {
-            m_iFYIOH.ActuatorCmd("MIP50xReadxPermanentxParameter", Layer + "w" + "\r");
-            m_iFYIOH.ActuatorCmd("MIP50xReadxPermanentxParameter", Layer + "1" + "\r");
-            m_iFYIOH.ActuatorCmd("MIP50xReadxPermanentxParameter", Layer + "x" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xWritexPermanentxParameter", Layer + "w" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xWritexPermanentxParameter", Layer + "1" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xWritexPermanentxParameter", Layer + "x" + "\r");
 
             foreach (char c in parameter)
             {
-                m_iFYIOH.ActuatorCmd("MIP50xReadxPermanentxParameter", Layer + c + "\r");
+                m_iFYIOH.ActuatorCmd("MIP50xWritexPermanentxParameter", Layer + c + "\r");
             }
 
-            m_iFYIOH.ActuatorCmd("MIP50xReadxPermanentxParameter", Layer + "p" + "\r");
+            m_iFYIOH.ActuatorCmd("MIP50xWritexPermanentxParameter", Layer + "p" + "\r");
 
             foreach (char d in value)
             {
-                m_iFYIOH.ActuatorCmd("MIP50xReadxPermanentxParameter", Layer + d + "\r");
+                m_iFYIOH.ActuatorCmd("MIP50xWritexPermanentxParameter", Layer + d + "\r");
             }
-
+            m_iFYIOH.ActuatorCmd("MIP50xWritexPermanentxParameter", Layer + "G" + "\r");
             MIP50xCRLFxAppend();
-            FiddleYardMIP50Logging.StoreText("MIP50 Read Permanent Parameter: " + parameter);
+            FiddleYardMIP50Logging.StoreText("MIP50 Write Permanent Parameter: " + parameter + ", value: " + value);
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -1389,6 +1408,8 @@ namespace Siebwalde_Application
                         break;
 
                     case "26": //M#26 %bn %bp %lv --> 3 items
+                        HomeOffsetMovement = Convert.ToInt32(m_MIP50ReceivedDataBuffer[m_MIP50ReceivedDataBuffer.Length - 1]);      // In case of read home offset move, the data comes as last in the array
+                        HomeOffsetMovementUpdated = true;
                         LogString.Append("Value of a parameter, axis nr: ");
                         for (i = 2; i < m_MIP50ReceivedDataBuffer.Length; i++)
                         {
@@ -1513,5 +1534,23 @@ namespace Siebwalde_Application
         {
             return ActualPositionUpdated;
         }
+
+        public int GetActualPosition()
+        {
+            ActualPositionUpdated = false;
+            return ActualPosition;
+        }
+
+        public bool GetHomeOffsetMovementUpdated()
+        {
+            return HomeOffsetMovementUpdated;
+        }
+
+        public int GetHomeOffsetMovement()
+        {
+            HomeOffsetMovementUpdated = false;
+            return HomeOffsetMovement;
+        }
+            
     }
 }
