@@ -5,6 +5,8 @@ using System.Drawing;
 using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
+using System.Diagnostics;
+using System.Globalization;
 
 namespace Siebwalde_Application
 {
@@ -41,10 +43,13 @@ namespace Siebwalde_Application
         }
 
         public string AssemblyVersion
-        {
+        {            
             get
-            {
+            {                
                 return Assembly.GetExecutingAssembly().GetName().Version.ToString();
+                //Version v = Assembly.GetExecutingAssembly().GetName().Version;
+                //string About = string.Format(CultureInfo.InvariantCulture, @" {0}.{1}.{2} (r{3})", v.Major, v.Minor, v.Build, v.Revision);
+                //return About;
             }
         }
 
