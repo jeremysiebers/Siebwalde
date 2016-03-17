@@ -1039,19 +1039,77 @@ namespace Siebwalde_Application
                         LLed_Track10.Text = "                     Not Initialized";
                         LLed_Track11.BackColor = m_FYAppVar.TrackNotInitializedColor;;
                         LLed_Track11.Text = "                     Not Initialized";
-                        /*PB_Tr1_Train.Hide();*/ PB_Tr1_Inline.Hide();
-                        PB_Tr2_Train.Hide(); PB_Tr2_Inline.Hide();
-                        PB_Tr3_Train.Hide(); PB_Tr3_Inline.Hide();
-                        PB_Tr4_Train.Hide(); PB_Tr4_Inline.Hide();
-                        PB_Tr5_Train.Hide(); PB_Tr5_Inline.Hide();
-                        PB_Tr6_Train.Hide(); PB_Tr6_Inline.Hide();
-                        PB_Tr7_Train.Hide(); PB_Tr7_Inline.Hide();
-                        PB_Tr8_Train.Hide(); PB_Tr8_Inline.Hide();
-                        PB_Tr9_Train.Hide(); PB_Tr9_Inline.Hide();
-                        PB_Tr10_Train.Hide(); PB_Tr10_Inline.Hide();
-                        PB_Tr11_Train.Hide(); PB_Tr11_Inline.Hide();
 
+                        PB_Tr1_Inline.Hide();       
+                        PB_Tr2_Inline.Hide();       
+                        PB_Tr3_Inline.Hide();       
+                        PB_Tr4_Inline.Hide();       
+                        PB_Tr5_Inline.Hide();       
+                        PB_Tr6_Inline.Hide();       
+                        PB_Tr7_Inline.Hide();       
+                        PB_Tr8_Inline.Hide();       
+                        PB_Tr9_Inline.Hide();       
+                        PB_Tr10_Inline.Hide();      
+                        PB_Tr11_Inline.Hide();
 
+                        PB_Tr1_Train.Image = null;
+                        PB_Tr2_Train.Image = null;
+                        PB_Tr3_Train.Image = null;
+                        PB_Tr4_Train.Image = null;
+                        PB_Tr5_Train.Image = null;
+                        PB_Tr6_Train.Image = null;
+                        PB_Tr7_Train.Image = null;
+                        PB_Tr8_Train.Image = null;
+                        PB_Tr9_Train.Image = null;
+                        PB_Tr10_Train.Image = null;
+                        PB_Tr11_Train.Image = null;
+
+                        PB_Tr1_Active.BackColor = LLed_Track1.BackColor;
+                        PB_Tr1_Inline.BackColor = LLed_Track1.BackColor;
+                        PB_Tr1_Train.BackColor = LLed_Track1.BackColor;
+
+                        PB_Tr2_Active.BackColor = LLed_Track2.BackColor;
+                        PB_Tr2_Inline.BackColor = LLed_Track2.BackColor;
+                        PB_Tr2_Train.BackColor = LLed_Track2.BackColor;
+
+                        PB_Tr3_Active.BackColor = LLed_Track3.BackColor;
+                        PB_Tr3_Inline.BackColor = LLed_Track3.BackColor;
+                        PB_Tr3_Train.BackColor = LLed_Track3.BackColor;
+
+                        PB_Tr4_Active.BackColor = LLed_Track4.BackColor;
+                        PB_Tr4_Inline.BackColor = LLed_Track4.BackColor;
+                        PB_Tr4_Train.BackColor = LLed_Track4.BackColor;
+
+                        PB_Tr5_Active.BackColor = LLed_Track5.BackColor;
+                        PB_Tr5_Inline.BackColor = LLed_Track5.BackColor;
+                        PB_Tr5_Train.BackColor = LLed_Track5.BackColor;
+
+                        PB_Tr6_Active.BackColor = LLed_Track6.BackColor;
+                        PB_Tr6_Inline.BackColor = LLed_Track6.BackColor;
+                        PB_Tr6_Train.BackColor = LLed_Track6.BackColor;
+
+                        PB_Tr7_Active.BackColor = LLed_Track7.BackColor;
+                        PB_Tr7_Inline.BackColor = LLed_Track7.BackColor;
+                        PB_Tr7_Train.BackColor = LLed_Track7.BackColor;
+
+                        PB_Tr8_Active.BackColor = LLed_Track8.BackColor;
+                        PB_Tr8_Inline.BackColor = LLed_Track8.BackColor;
+                        PB_Tr8_Train.BackColor = LLed_Track8.BackColor;
+
+                        PB_Tr9_Active.BackColor = LLed_Track9.BackColor;
+                        PB_Tr9_Inline.BackColor = LLed_Track9.BackColor;
+                        PB_Tr9_Train.BackColor = LLed_Track9.BackColor;
+
+                        PB_Tr10_Active.BackColor = LLed_Track10.BackColor;
+                        PB_Tr10_Inline.BackColor = LLed_Track10.BackColor;
+                        PB_Tr10_Train.BackColor = LLed_Track10.BackColor;
+
+                        PB_Tr11_Active.BackColor = LLed_Track11.BackColor;
+                        PB_Tr11_Inline.BackColor = LLed_Track11.BackColor;
+                        PB_Tr11_Train.BackColor = LLed_Track11.BackColor;
+
+                        CheckWhichTrackInline();
+                        
                         Btn_Collect_TOP.Enabled = true;
                         Btn_Start_Fiddle_TOP.Enabled = true;
                         Btn_Stop_Fiddle_TOP.Enabled = false;

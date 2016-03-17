@@ -100,22 +100,7 @@ namespace Siebwalde_Application
             FYSimVar = new FiddleYardSimulatorVariables();            
             FYSimMove = new FiddleYardSimMove(this, FiddleYardSimulatorLogging, FYSimVar);
             FYSimTrDt = new FiddleYardSimTrainDetect(this, FiddleYardSimulatorLogging, FYSimVar, FYSimMove);
-
-            for (int i = 1; i <= NoOfSimTrains; i++)
-            {
-                TrainsOnFYSim[i] = rng.Next(0, 2);
-                current = new FiddleYardSimTrain(m_instance, this, m_FYIOHandleVar, FYSimVar);
-                current.FYSimtrainInstance = current.ClassName + i.ToString(fmt);
-                if (TrainsOnFYSim[i] == 1)
-                {
-                    current.SimTrainLocation = TrackNoToTrackString(i); // on FY OR Block 5B/7/8A OR buffer
-                }
-                else
-                {
-                    current.SimTrainLocation = TrackNoToTrackString(0); // Always in buffer in this case
-                }
-                FYSimTrains.Add(current);
-            }
+            
             FYSimVar.TrackNo.Count = 1;            
 
             Sensor Sns_FYSimSpeedSetting = new Sensor("FYSimSpeedSetting", " FYSimSpeedSetting ", 0, (name, val, log) => SimulatorSettings(name, val, log)); // initialize and subscribe sensors
@@ -144,6 +129,26 @@ namespace Siebwalde_Application
         public void Start()
         {
             FiddleYardSimulatorLogging.StoreText("### Fiddle Yard Simulator started ###");
+
+
+            // Create simtrains here, when the simulator is not started the simulated trains are not created
+            for (int i = 1; i <= NoOfSimTrains; i++)
+            {
+                TrainsOnFYSim[i] = rng.Next(0, 2);
+                current = new FiddleYardSimTrain(m_instance, this, m_FYIOHandleVar, FYSimVar);
+                current.FYSimtrainInstance = current.ClassName + i.ToString(fmt);
+                if (TrainsOnFYSim[i] == 1)
+                {
+                    current.SimTrainLocation = TrackNoToTrackString(i); // on FY OR Block 5B/7/8A OR buffer
+                }
+                else
+                {
+                    current.SimTrainLocation = TrackNoToTrackString(0); // Always in buffer in this case
+                }
+                FYSimTrains.Add(current);
+            }
+            FiddleYardSimulatorLogging.StoreText("FYSim created "+ Convert.ToString(NoOfSimTrains) +" FYSimTrains.");
+
             FYSimVar.Reset();
             FiddleYardSimulatorLogging.StoreText("FYSim Simulator Reset()");
             UpdateSimArrayToAppArray(); // Update track variables if a train is present or not  
