@@ -10,7 +10,9 @@
 
 /**
   Section: Included Files
+
  */
+#include <xc.h>
 
 #ifdef __cplusplus  // Provide C++ Compatibility
 

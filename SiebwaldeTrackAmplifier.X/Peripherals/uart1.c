@@ -53,6 +53,11 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 /**
   Section: Macro Declarations
  */
+#define FP 60000000
+#define BAUDRATE 57600
+#define BRGVAL ((FP/BAUDRATE)/16)-1
+#define DELAY_105uS asm volatile ("REPEAT, #4201"); Nop(); // 105uS delay
+
 #define EUSART1_TX_BUFFER_SIZE 20
 #define EUSART1_RX_BUFFER_SIZE 126
 
@@ -76,30 +81,22 @@ volatile uint8_t eusart1RxCount;
 
 void EUSART1_Initialize(void) {
     
-    U1MODEbits.UARTEN = 1;// Enable UART1 all other registers on default 0 are OK
-    U1STAbits.UTXEN = 1;  // UART1 Transmit enable all other registers on default 0 are OK
-    
-    
-    // disable interrupts before changing states
-    PIE1bits.RC1IE = 0;
-    PIE1bits.TX1IE = 0;
-
-    // Set the EUSART1 module to the options selected in the user interface.
-
-    // ABDEN disabled; WUE disabled; RCIDL idle; ABDOVF no_overflow; CKTXP async_noninverted_sync_fallingedge; BRG16 16bit_generator; DTRXP not_inverted; 
-    BAUDCON1 = 0x48;
-
-    // ADDEN disabled; RX9 8-bit; RX9D 0x0; FERR no_error; CREN enabled; SPEN enabled; SREN disabled; OERR no_error; 
-    RCSTA1 = 0x90;
-
-    // CSRC slave_mode; TRMT TSR_empty; TXEN enabled; BRGH hi_speed; SYNC asynchronous; SENDB sync_break_complete; TX9D 0x0; TX9 8-bit; 
-    TXSTA1 = 0x26;
-
-    // Baud Rate = 57600; SPBRGL 180; 
-    SPBRG1 = 0xB4;
-
-    // Baud Rate = 57600; SPBRGH 0; 
-    SPBRGH1 = 0x00;
+    U1MODEbits.STSEL = 0; // 1-Stop bit
+    U1MODEbits.PDSEL = 0; // No Parity, 8-Data bits
+    U1MODEbits.ABAUD = 0; // Auto-Baud disabled
+    U1MODEbits.BRGH = 0; // Standard-Speed mode
+    U1BRG = BRGVAL; // Baud Rate setting for 57600
+    U1STAbits.UTXISEL0 = 0; // Interrupt after one TX character is transmitted
+    U1STAbits.URXISEL0 = 0; // Interrupt after one RX character is received;
+    U1STAbits.UTXISEL1 = 0;
+    U1STAbits.URXISEL1 = 0;
+    IEC0bits.U1TXIE = 1; // Enable UART TX interrupt
+    IEC0bits.U1RXIE = 1; // Enable UART RX interrupt
+    U1MODEbits.UARTEN = 1; // Enable UART
+    U1STAbits.UTXEN = 1; // Enable UART TX
+        
+    /* Wait at least 105 microseconds (1/9600) before sending first char */
+    DELAY_105uS
 
 
     // initializing the driver state
@@ -110,9 +107,6 @@ void EUSART1_Initialize(void) {
     eusart1RxHead = 0;
     eusart1RxTail = 0;
     eusart1RxCount = 0;
-
-    // enable receive interrupt
-    PIE1bits.RC1IE = 1;
 }
 
 uint8_t EUSART1_Read(void) {
@@ -121,14 +115,14 @@ uint8_t EUSART1_Read(void) {
     while (0 == eusart1RxCount) {
     }
 
-    PIE1bits.RC1IE = 0;
+    IEC0bits.U1RXIE = 0;
 
     readValue = eusart1RxBuffer[eusart1RxTail++];
     if (sizeof (eusart1RxBuffer) <= eusart1RxTail) {
         eusart1RxTail = 0;
     }
     eusart1RxCount--;
-    PIE1bits.RC1IE = 1;
+    IEC0bits.U1RXIE = 1;
 
     return readValue;
 }
@@ -137,43 +131,49 @@ void EUSART1_Write(uint8_t txData) {
     while (0 == eusart1TxBufferRemaining) {
     }
 
-    if (0 == PIE1bits.TX1IE) {
-        TXREG1 = txData;
+    if (0 == IEC0bits.U1TXIE) {
+        U1TXREG = txData;
     } else {
-        PIE1bits.TX1IE = 0;
+        IEC0bits.U1TXIE = 0;
         eusart1TxBuffer[eusart1TxHead++] = txData;
         if (sizeof (eusart1TxBuffer) <= eusart1TxHead) {
             eusart1TxHead = 0;
         }
         eusart1TxBufferRemaining--;
     }
-    PIE1bits.TX1IE = 1;
+    IEC0bits.U1TXIE = 1;
 }
 
 void EUSART1_Transmit_ISR(void) {
 
     // add your EUSART1 interrupt custom code
     if (sizeof (eusart1TxBuffer) > eusart1TxBufferRemaining) {
-        TXREG1 = eusart1TxBuffer[eusart1TxTail++];
+        U1TXREG = eusart1TxBuffer[eusart1TxTail++];
         if (sizeof (eusart1TxBuffer) <= eusart1TxTail) {
             eusart1TxTail = 0;
         }
         eusart1TxBufferRemaining++;
     } else {
-        PIE1bits.TX1IE = 0;
+        IEC0bits.U1TXIE = 0;
     }
 }
 
 void EUSART1_Receive_ISR(void) {
-    if (1 == RCSTA1bits.OERR) {
+    if (1 == U1STAbits.OERR) {
         // EUSART1 error - restart
 
-        RCSTA1bits.CREN = 0;
-        RCSTA1bits.CREN = 1;
+        U1STAbits.OERR = 0;        
     }
 
+    /*
+     from datasheet:
+     * if(U1STAbits.URXDA == 1)
+        {
+        ReceivedChar = U1RXREG;
+        }
+     */
     // buffer overruns are ignored
-    eusart1RxBuffer[eusart1RxHead++] = RCREG1;
+    eusart1RxBuffer[eusart1RxHead++] = U1RXREG;
     if (sizeof (eusart1RxBuffer) <= eusart1RxHead) {
         eusart1RxHead = 0;
     }

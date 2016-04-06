@@ -2,6 +2,9 @@
 #define	CONFIG_H
 
 #include <xc.h>
+#include "uart1.h"
+
+#define Led1            LATBbits.LATB9
 
 #ifdef	__cplusplus
 extern "C" {

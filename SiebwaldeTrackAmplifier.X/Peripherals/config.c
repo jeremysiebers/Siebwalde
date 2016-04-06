@@ -7,7 +7,7 @@
 
 #include "xc.h"
 #include "config.h"
-//#include "uart1.h"
+#include "uart1.h"
 
 // DSPIC33EP512GM304 Configuration Bit Settings
 
@@ -46,12 +46,10 @@
 #pragma config GCP = OFF                // General Segment Code-Protect bit (General Segment Code protect is Disabled)
 
 
-
-
-
 void SYSTEM_Initialize(void) {
     OSCILLATOR_Initialize();
     IO_Configuration();
+    EUSART1_Initialize();
 }
 
 void OSCILLATOR_Initialize(void) {
@@ -84,4 +82,6 @@ void IO_Configuration(void) {
     RPOR1 = 0x0001;         // COnnecting UART1TX to RP36 Pin33 5V tolerant     (RPOR1 usable LSB <5-0> for RP36, MSB <13-8> for RP37)
     TRISBbits.TRISB4 = 0;   // Set RP36 as Output for UART1TX
     TRISAbits.TRISA8 = 1;   // Set RPI24 as Input for UART1RX
+    TRISBbits.TRISB9 = 0;   // Used for LED1
+    
 }
