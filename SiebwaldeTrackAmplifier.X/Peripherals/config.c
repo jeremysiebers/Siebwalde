@@ -7,7 +7,6 @@
 
 #include "xc.h"
 #include "config.h"
-#include "uart1.h"
 
 // DSPIC33EP512GM304 Configuration Bit Settings
 
