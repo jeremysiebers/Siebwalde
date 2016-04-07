@@ -49,6 +49,7 @@ void SYSTEM_Initialize(void) {
     OSCILLATOR_Initialize();
     IO_Configuration();
     EUSART1_Initialize();
+    PWM_Initialize();
 }
 
 void OSCILLATOR_Initialize(void) {

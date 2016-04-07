@@ -8,11 +8,13 @@
 #ifndef PWM_H
 #define	PWM_H
 
+#include <xc.h>
+
 #ifdef	__cplusplus
 extern "C" {
 #endif
 
-
+extern void PWM_Initialize(void);
 
 
 #ifdef	__cplusplus

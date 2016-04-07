@@ -3,6 +3,7 @@
 
 #include <xc.h>
 #include "uart1.h"
+#include "pwm.h"
 
 #define Led1            LATBbits.LATB9
 
