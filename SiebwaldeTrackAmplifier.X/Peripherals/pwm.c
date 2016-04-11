@@ -2,16 +2,52 @@
   Section: Included Files
  */
 #include "pwm.h"
+#include "config.h"
 #include <xc.h>
 
+int DutyCycle = 0;
 
 void PWM_Initialize(void) {
     
+    /*reference: Example 14-30: Independent PWM Mode ? Independent Duty Cycle and Phase, Fixed Primary Period,Edge-Aligned*/
     /* Disable PWM Module */
-    PTCONbits.PTEN = 0;         //  bits should be changed only when PTEN = 0. Changing the clock selection during operation will yield unpredictable results.
+    PTCONbits.PTEN = 0;         //  bits should be changed only when PTEN = 0. Changing the clock selection during operation will yield unpredictable results.    
     
-    /* Set PWM Period on Primary Time Base */
-    PTPER = 0x0BB8;             // Master time base @ 60MIPS 20KHz PWM --> 3000dec for Primary Master Time Base (PMTMR) Period Value bits(
+    #if defined	PWM_MASTER || defined PWM_MASTER2
+    /* Synchronizing External Device with Master Time Base */
+    PTCONbits.SYNCPOL = 0; /* SYNCO output is active-high */
+    PTCONbits.SYNCOEN = 1; /* Enable SYNCO output */
+    #endif /* PWM_MASTER */
+
+    #if defined PWM_SLAVE || defined PWM_SLAVE2
+    /* Synchronizing Master Time Base with External Signal */
+    PTCONbits.SYNCSRC = 0; /* Select SYNC1 input as synchronizing source */
+    PTCONbits.SYNCPOL = 0; /* Rising edge of SYNC1 resets the PWM Timer */
+    PTCONbits.SYNCEN = 1; /* Enable external synchronization */
+    #endif /* PWM_SLAVE */
+    
+    /* Set PWM Period on Primary Time Base, Equation 14-1: PERIOD, PHASEx and SPHASEx Register Value Calculation for Edge-Aligned Mode */
+    /* Master time base @ 60MIPS(120MHz) 800dec duty cycle number --> 18.750Hz for Primary Master Time Base (PMTMR) Period Value bits */
+    
+    #if defined	PWM_MASTER
+    PTPER = 800;
+    DutyCycle = 400;
+    #endif /* PWM_MASTER */
+
+    #if defined	PWM_MASTER2
+    PTPER = 400;
+    DutyCycle = 200;
+    #endif /* PWM_MASTER */
+
+    #if defined	PWM_SLAVE
+    PTPER = 1000;
+    DutyCycle = 400;
+    #endif /* PWM_SLAVE */
+
+    #if defined	PWM_SLAVE2
+    PTPER = 600;
+    DutyCycle = 200;
+    #endif /* PWM_SLAVE */
     
     /* Set Phase Shift */
     PHASE1 = 0;
@@ -28,18 +64,18 @@ void PWM_Initialize(void) {
     SPHASE6 = 0;
     
     /* Set Duty Cycles */
-    PDC1 = 32768;
-    SDC1 = 32768;
-    PDC2 = 32768;
-    SDC2 = 32768;
-    PDC3 = 32768;
-    SDC3 = 32768;
-    PDC4 = 32768;
-    SDC4 = 32768;
-    PDC5 = 32768;
-    SDC5 = 32768;
-    PDC6 = 32768;
-    SDC6 = 32768;
+    PDC1 = DutyCycle;
+    SDC1 = DutyCycle;
+    PDC2 = DutyCycle;
+    SDC2 = DutyCycle;
+    PDC3 = DutyCycle;
+    SDC3 = DutyCycle;
+    PDC4 = DutyCycle;
+    SDC4 = DutyCycle;
+    PDC5 = DutyCycle;
+    SDC5 = DutyCycle;
+    PDC6 = DutyCycle;
+    SDC6 = DutyCycle;
     
     /* Set Dead Time Values */
     DTR1 = DTR2 = DTR3 = DTR4 = DTR5 = DTR6 = 0;
@@ -52,12 +88,19 @@ void PWM_Initialize(void) {
     PWMCON1 = PWMCON2 = PWMCON3 = PWMCON4 = PWMCON5 = PWMCON6 = 0x0000;
     
     /* Configure Faults */
-    FCLCON1 = FCLCON2 = FCLCON3 = FCLCON4 = FCLCON5 = FCLCON6 = 0x0;
+    FCLCON1 = FCLCON2 = FCLCON3 = FCLCON4 = FCLCON5 = FCLCON6 = 0x3;
     
-    /* 1:1 Prescaler */
-    PTCON2 = 0x0000;            // Maximum resolution @ 60MIPS
+    #if defined	PWM_MASTER || defined PWM_SLAVE
+    /* 1:8 Prescaler --> @120MHz --> 15MHz PWM clock */
+    PTCON2 = 0x0003;            
+    #endif /* PWM_MASTER */
+    
+    #if defined	PWM_MASTER2 || defined PWM_SLAVE2
+    /* 1:16 Prescaler --> @120MHz --> 7.5MHz PWM clock */
+    PTCON2 = 0x0004;            
+    #endif /* PWM_MASTER */
       
     /* Enable PWM Module */
-    PTCON = 0x8000;             //  bits should be changed only when PTEN = 0. Changing the clock selection during operation will yield unpredictable results.
+    PTCONbits.PTEN = 1;             //  bits should be changed only when PTEN = 0. Changing the clock selection during operation will yield unpredictable results.
         
 }

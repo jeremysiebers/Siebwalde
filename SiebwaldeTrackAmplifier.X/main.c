@@ -24,13 +24,13 @@ int main(void) {
         Led1 ^= 1;
         if (Led1 == 1)
         {
-            printf("Led1 = 1\n\r");
+            printf("Led1 = Off\n\r");
         }
         else
         {
-            printf("Led1 = 0\n\r");
+            printf("Led1 = On\n\r");
         }
-        __delay_ms(1000);
+        __delay_ms(500);        
     }
 }
 

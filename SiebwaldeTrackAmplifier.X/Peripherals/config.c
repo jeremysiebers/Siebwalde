@@ -78,10 +78,43 @@ void IO_Configuration(void) {
     TRISA = 0xFF;
     TRISB = 0xFF;
     TRISC = 0xFF;
-    RPINR18 = 0x0018;       // Connecting UART1RX to RPI24 Pin32 5V tolerant   (RPINR18 only usable for UART1RX)
-    RPOR1 = 0x0001;         // COnnecting UART1TX to RP36 Pin33 5V tolerant     (RPOR1 usable LSB <5-0> for RP36, MSB <13-8> for RP37)
-    TRISBbits.TRISB4 = 0;   // Set RP36 as Output for UART1TX
-    TRISAbits.TRISA8 = 1;   // Set RPI24 as Input for UART1RX
+    
+    //CNPUBbits.CNPUB4 = 1;   // Use PUll up to clear FLT32    
+    //TRISBbits.TRISB4 = 1;   // FLT32 latched PWM fault must be cleared before PWM will enable    
+    
+    RPINR18 = 0x0022;       // Connecting UART1RX to RPI34 Pin23 3.3V tolerant  (RPINR18 only usable for UART1RX (LSB))
+    RPOR0 = 0x0100;         // COnnecting UART1TX to RP35 Pin24 3.3V tolerant   (RPOR0 usable LSB <5-0> for RP20, MSB <13-8> for RP35)
+    TRISBbits.TRISB3 = 0;   // Set RP35 as Output for UART1TX
+    TRISBbits.TRISB2 = 1;   // Set RPI34 as Input for UART1RX
+    
+    #if defined	PWM_MASTER || defined PWM_MASTER2
+    RPOR5 = 0x002D;         // Connecting SYNC Output to RP48 (LSB))
+    TRISCbits.TRISC0 = 0;   // Set RP48 as Output for SYNCO
+    #endif /* PWM_MASTER */
+
+    #if defined PWM_SLAVE || defined PWM_SLAVE2
+    RPINR37 = 0x3000;       // Connecting SYNC Input to RP48 (MSB)
+    TRISCbits.TRISC0 = 1;   // Set RP48 as Input for SYNCI
+    #endif /* PWM_SLAVE */
+    
+    
     TRISBbits.TRISB9 = 0;   // Used for LED1
     
+    TRISBbits.TRISB14 = 0;  // PWM1H
+    TRISBbits.TRISB15 = 0;  // PWM1L
+    
+    TRISBbits.TRISB12 = 0;  // PWM2H
+    TRISBbits.TRISB13 = 0;  // PWM2L
+    
+    TRISBbits.TRISB10 = 0;  // PWM3H
+    TRISBbits.TRISB11 = 0;  // PWM3L    
+    
+    TRISAbits.TRISA10 = 0;  // PWM4H
+    TRISAbits.TRISA7 = 0;   // PWM4L
+    
+    TRISCbits.TRISC8 = 0;   // PWM5H
+    TRISCbits.TRISC9 = 0;   // PWM5L
+    
+    TRISCbits.TRISC6 = 0;   // PWM6H
+    TRISCbits.TRISC7 = 0;   // PWM6L
 }
