@@ -5,8 +5,8 @@
 #include "uart1.h"
 #include "pwm.h"
 
-#define PWM_MASTER  /* Used to switch to PWM_MASTER setting regarding SYNC_Output */
-//#define PWM_SLAVE /* Used to switch to PWM_SLAVE setting regarding SYNC_Input */
+//#define PWM_MASTER  /* Used to switch to PWM_MASTER setting regarding SYNC_Output */
+#define PWM_SLAVE /* Used to switch to PWM_SLAVE setting regarding SYNC_Input */
 
 //#define PWM_MASTER2 /* Used to switch to other frequency setting */
 //#define PWM_SLAVE2 /* Used to switch to other frequency setting */
