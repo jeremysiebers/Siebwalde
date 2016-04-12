@@ -51,12 +51,11 @@ BYTE AN0String[8];
 // These may or may not be present in all applications.
 static void InitAppConfig(void);
 
-#define Init_IO()			TRISJ=0xFF,TRISH=0xFF,TRISG=0xFA,TRISF=0xFF,TRISE=0x00,TRISD=0x60,TRISC=0xFA;TRISA=0xC;TRISB=0xC3;// All ports including Pwm and AD
+#define Init_IO()			TRISJ=0x00,TRISH=0x00,TRISG=0x00,TRISF=0x00,TRISE=0x00,TRISD=0x00,TRISC=0x00;TRISA=0x00;TRISB=0x00;// All ports are outputs !!!
 #define Leds_Off()			Led1 = Off, Led2 = Off, Led3 = Off;
 
 static void Init_Timers(void);
 static void Init_Pwm(void);
-static void Init_Ad(void);
 
 static unsigned char Enable_State_Machine_Update = 0;
 static DWORD dwLastIP = 0;
@@ -75,11 +74,9 @@ void main()
 	Init_Timers();
 	TickInit(); 
 	InitAppConfig(); 
-	StackInit(); 
-	Init_Ad();	
+	StackInit();	
 	Init_Pwm();
-	Init_IO();
-	//Init_IOExpander();
+	Init_IO();	
 	Leds_Off();	
 	
 	while(1)
@@ -87,22 +84,12 @@ void main()
 
 	 	StackTask();
 	 	StackApplications();
-	 		 	
+	    	    		
 	 	Diagnostic();
 	    Command();
 	    //IOExpander();
-	    	    		
-		if (Enable_State_Machine_Update == True && Output_Enable == True)	// When the output is enabled (after getting IP from DHCP) and update bit is true
-		{
-			//Led4 = 1;
-			To_Externall_WDT_Pulse =! To_Externall_WDT_Pulse;				// Kick external watchdog to preserve runaway when going into debug mode
-			IO();															// Write/Read all IO
-			State_Machine_Update(TOP);										// Update TOP level of Fiddle Yard
-			State_Machine_Update(BOTTOM);									// Update BOTTOM level of Fiddle Yard
-			Enable_State_Machine_Update = False;							// Reset Fiddle Yard update bit
-			//Led4 = 0;						
-		}
-		
+        
+				
 		/////Announce IP after IP change or power up event////////		
 		if(dwLastIP != AppConfig.MyIPAddr.Val)
 		{
@@ -193,14 +180,8 @@ void Init_Timers()
 	
 	TMR1H = 0x0;
 	TMR1L = 0x0;
-	T1CON = 0x81;					// 0xB1 = 1:8(40mS), 0xA1 = 1:4(22.5mS), 0x91 = 1:2(11mS), 0x81 = 1:1(5.5mS) 0x81 = 16Bit and anabled
-
-}
-
-void Init_Ad()
-{
-	ADCON1 = 0x0B;	// Channel AN0 to AN3 are configured as AD inputs for the AD converter. However AN0 to AN1 are Ethernet leds, so they are outputs.AN2 and AN3 are PORTA bits 2 and 3 (RA2, RA3)
-	ADCON2 = 0x92;	// Acquisition time and converting time of the AD same for both channels 0x92 = /32	0x96 = /64 and 4 TAD (Tacq)
+	T1CON = 0x00; //Timer OFF              //T1CON = 0x81;					// 0xB1 = 1:8(40mS), 0xA1 = 1:4(22.5mS), 0x91 = 1:2(11mS), 0x81 = 1:1(5.5mS) 0x81 = 16Bit and anabled
+    T4CON = 0x00; //Timer OFF
 }
 
 void Init_Pwm()
@@ -208,16 +189,13 @@ void Init_Pwm()
 	// PWM setup using 25mA outputs to drive opto's ECCP 3 and 1 are chosen for PWM
 	T3CON = 0x00;			// Timer 2 and 4 are clock sources for all CCPx/ECCPx modules, tmr2 is used for PWM mode page 186, 0x60 for tmr 3 and 4, 0x00 for tmr 1 and 2
 	
-	T2CON = 0x04;			// Postscale 1:1, Timer2 On, Prescaler is 1
-		
-	Pwm_Brake_BOTTOM = 1;
-	PR2=0xff;				//PWM Period TMR2 zelfde voor PWM1(ECCP1) en PWM2(ECCP3)
-	CCPR1L = 0x7F;			//PWM Duty cycle PWM1
-	CCP1CON = 0x0C;			//PWM Mode
-		
+	T2CON = 0x05;			// Postscale 1:1, Timer2 On, Prescaler is 4		
+	
+	PR2=129;				// 129 = 20.03 kHz SYNC signal, 138 = 18.74 kHz SYNC signal to dsPIC   PWM Period TMR2 zelfde voor PWM1(ECCP1) en PWM2(ECCP3)
+			
 	Pwm_Brake_TOP = 1;
-	CCPR3L = 0x7F;			//PWM Duty cycle PWM2
-	CCP3CON = 0x0C;			//PWM Mode
+	CCPR3L = 1;             // 1 = 366 ns, 7 = SYNC pulse of 2.67 us to dsPIC     PWM Duty cycle PWM2
+	CCP3CON = 0x0C;			// PWM Mode
 
 }
 

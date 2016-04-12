@@ -87,16 +87,8 @@ void IO_Configuration(void) {
     TRISBbits.TRISB3 = 0;   // Set RP35 as Output for UART1TX
     TRISBbits.TRISB2 = 1;   // Set RPI34 as Input for UART1RX
     
-    #if defined	PWM_MASTER || defined PWM_MASTER2
-    RPOR5 = 0x002D;         // Connecting SYNC Output to RP48 (LSB))
-    TRISCbits.TRISC0 = 0;   // Set RP48 as Output for SYNCO
-    #endif /* PWM_MASTER */
-
-    #if defined PWM_SLAVE || defined PWM_SLAVE2
     RPINR37 = 0x3000;       // Connecting SYNC Input to RP48 (MSB)
-    TRISCbits.TRISC0 = 1;   // Set RP48 as Input for SYNCI
-    #endif /* PWM_SLAVE */
-    
+    TRISCbits.TRISC0 = 1;   // Set RP48 as Input for SYNCI    
     
     TRISBbits.TRISB9 = 0;   // Used for LED1
     

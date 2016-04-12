@@ -13,12 +13,7 @@ void PWM_Initialize(void) {
     /* Disable PWM Module */
     PTCONbits.PTEN = 0;         //  bits should be changed only when PTEN = 0. Changing the clock selection during operation will yield unpredictable results.    
     
-    #if defined	PWM_MASTER || defined PWM_MASTER2
-    /* Synchronizing External Device with Master Time Base */
-    PTCONbits.SYNCPOL = 0; /* SYNCO output is active-high */
-    PTCONbits.SYNCOEN = 1; /* Enable SYNCO output */
-    #endif /* PWM_MASTER */
-
+    
     #if defined PWM_SLAVE || defined PWM_SLAVE2
     /* Synchronizing Master Time Base with External Signal */
     PTCONbits.SYNCSRC = 0; /* Select SYNC1 input as synchronizing source */
@@ -29,25 +24,15 @@ void PWM_Initialize(void) {
     /* Set PWM Period on Primary Time Base, Equation 14-1: PERIOD, PHASEx and SPHASEx Register Value Calculation for Edge-Aligned Mode */
     /* Master time base @ 60MIPS(120MHz) 800dec duty cycle number --> 18.750Hz for Primary Master Time Base (PMTMR) Period Value bits */
     
-    #if defined	PWM_MASTER
-    PTPER = 800;
-    DutyCycle = 400;
-    #endif /* PWM_MASTER */
-
-    #if defined	PWM_MASTER2
-    PTPER = 400;
-    DutyCycle = 200;
-    #endif /* PWM_MASTER */
-
     #if defined	PWM_SLAVE
     PTPER = 1000;
     DutyCycle = 400;
     #endif /* PWM_SLAVE */
 
     #if defined	PWM_SLAVE2
-    PTPER = 600;
-    DutyCycle = 200;
-    #endif /* PWM_SLAVE */
+    PTPER = 6020;           // PTPER should be greater then the selected/wanted output frequency, if 20kHz is desired, PTPER should be 6000 --> external sync --> PTPER example 6100
+    DutyCycle = 3100;       // in this config jitter < 25ns!!!
+    #endif /* PWM_SLAVE2 */
     
     /* Set Phase Shift */
     PHASE1 = 0;
@@ -90,15 +75,15 @@ void PWM_Initialize(void) {
     /* Configure Faults */
     FCLCON1 = FCLCON2 = FCLCON3 = FCLCON4 = FCLCON5 = FCLCON6 = 0x3;
     
-    #if defined	PWM_MASTER || defined PWM_SLAVE
+    #if defined PWM_SLAVE
     /* 1:8 Prescaler --> @120MHz --> 15MHz PWM clock */
     PTCON2 = 0x0003;            
-    #endif /* PWM_MASTER */
+    #endif /* PWM_SLAVE */
     
-    #if defined	PWM_MASTER2 || defined PWM_SLAVE2
+    #if defined	PWM_SLAVE2
     /* 1:16 Prescaler --> @120MHz --> 7.5MHz PWM clock */
-    PTCON2 = 0x0004;            
-    #endif /* PWM_MASTER */
+    PTCON2 = 0x0000;            
+    #endif /* PWM_SLAVE2 */
       
     /* Enable PWM Module */
     PTCONbits.PTEN = 1;             //  bits should be changed only when PTEN = 0. Changing the clock selection during operation will yield unpredictable results.
