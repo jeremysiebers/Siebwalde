@@ -90,11 +90,11 @@ void EUSART1_Initialize(void) {
     // CSRC slave_mode; TRMT TSR_empty; TXEN enabled; BRGH hi_speed; SYNC asynchronous; SENDB sync_break_complete; TX9D 0x0; TX9 8-bit; 
     TXSTA1 = 0x26;
 
-    // Baud Rate = 57600; SPBRGL 180; 
-    SPBRG1 = 0xB4;
+    // Baud Rate = 19200; SPBRGL 542; 
+    SPBRG1 = 0x1E;
 
-    // Baud Rate = 57600; SPBRGH 0; 
-    SPBRGH1 = 0x00;
+    // Baud Rate = 19200; SPBRGH 542; 
+    SPBRGH1 = 0x02;
 
 
     // initializing the driver state
