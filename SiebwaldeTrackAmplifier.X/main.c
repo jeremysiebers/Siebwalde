@@ -12,25 +12,74 @@
 #include <stdio.h>
 #include <libpic30.h>
 
+int DutyCycle[4] = {0,0,0,3};
+char ReceivedNumber = 0;
+int Counter = 3;
+
+long int UpdateToPutty = 0;
 
 int main(void) {
     // Initialize the device
     SYSTEM_Initialize();    
-    
+    printf("\f");                                                       //printf("\033[2J");
     printf("dsPIC33EP512GM304 started up!!!\n\r");
     
     while(1)
     {
-        Led1 ^= 1;
-        if (Led1 == 1)
+        
+        UpdateToPutty++;
+        
+        if (UpdateToPutty > 0xB0000)
         {
-            printf("Led1 = Off\n\r");
+            UpdateToPutty = 0;            
+            
+            printf("\f");                                                       //printf("\033[2J");
+            Led1 ^= 1;
+            if (Led1 == 1)
+            {
+                printf("Led1 = Off\r\n");
+            }
+            else
+            {
+                printf("Led1 = On\r\n");
+            }
+            printf("Soll : DutyCycle = %d%d%d%d\r\n", DutyCycle[3],DutyCycle[2],DutyCycle[1],DutyCycle[0]);
+            printf("Ist  : DutyCycle = %d\r\n",PDC1);
         }
-        else
+        
+        
+        if (EUSART1_DataReady > 0)
         {
-            printf("Led1 = On\n\r");
-        }
-        __delay_ms(500);        
+            ReceivedNumber = EUSART1_Read();
+            if (ReceivedNumber == 0xD)
+            {
+                PDC1 = DutyCycle[3] *1000 + DutyCycle[2] * 100 + DutyCycle[1] + DutyCycle[0];
+                Counter = 3;
+            }
+            else if (ReceivedNumber == 0x77)
+            {
+                if (PDC1 < 6000)
+                {
+                    PDC1 += 100;
+                }
+            }
+            else if (ReceivedNumber == 0x73)
+            {
+                if (PDC1 > 0)
+                {
+                    PDC1 -= 100;
+                }                
+            }
+            else
+            {
+                if (Counter == -1)
+                {
+                    Counter = 3;
+                }                 
+                DutyCycle[Counter] = ReceivedNumber - '0';    
+                Counter--;                
+            }
+        }     
     }
 }
 

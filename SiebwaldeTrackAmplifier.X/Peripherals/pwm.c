@@ -5,9 +5,11 @@
 #include "config.h"
 #include <xc.h>
 
-int DutyCycle = 0;
+
 
 void PWM_Initialize(void) {
+    
+    int DutyCycle = 0;
     
     /*reference: Example 14-30: Independent PWM Mode ? Independent Duty Cycle and Phase, Fixed Primary Period,Edge-Aligned*/
     /* Disable PWM Module */
@@ -31,7 +33,7 @@ void PWM_Initialize(void) {
 
     #if defined	PWM_SLAVE2
     PTPER = 6020;           // PTPER should be greater then the selected/wanted output frequency, if 20kHz is desired, PTPER should be 6000 --> external sync --> PTPER example 6100
-    DutyCycle = 3100;       // in this config jitter < 25ns!!!
+    DutyCycle = 3000;       // in this config jitter < 25ns!!!
     #endif /* PWM_SLAVE2 */
     
     /* Set Phase Shift */
