@@ -43,6 +43,16 @@ int main(void) {
             {
                 printf("Led1 = On\r\n");
             }
+            
+            if (TrainPresent == 1)
+            {
+                printf("Train Present!\r\n");
+            }
+            else
+            {
+                printf("No Train Detected.\r\n");
+            }
+            
             printf("Soll : DutyCycle = %d%d%d%d\r\n", DutyCycle[3],DutyCycle[2],DutyCycle[1],DutyCycle[0]);
             printf("Ist  : DutyCycle = %d\r\n",PDC1);
         }
@@ -54,18 +64,19 @@ int main(void) {
             if (ReceivedNumber == 0xD)
             {
                 PDC1 = DutyCycle[3] *1000 + DutyCycle[2] * 100 + DutyCycle[1] + DutyCycle[0];
+                //SDC1 = PDC1;
                 Counter = 3;
             }
             else if (ReceivedNumber == 0x77)
             {
-                if (PDC1 < 6000)
+                if (PDC1 < 5900)
                 {
                     PDC1 += 100;
                 }
             }
             else if (ReceivedNumber == 0x73)
             {
-                if (PDC1 > 0)
+                if (PDC1 > 100)
                 {
                     PDC1 -= 100;
                 }                

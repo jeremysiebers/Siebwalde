@@ -9,6 +9,7 @@
 #define PWM_SLAVE2 /* Used to switch to other frequency setting */
 
 #define Led1            LATBbits.LATB9
+#define TrainPresent    PORTBbits.RB8
 
 #ifdef	__cplusplus
 extern "C" {

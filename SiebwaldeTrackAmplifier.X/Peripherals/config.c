@@ -92,6 +92,8 @@ void IO_Configuration(void) {
     
     TRISBbits.TRISB9 = 0;   // Used for LED1
     
+    TRISBbits.TRISB8 = 1;   // Used for train detection (input)
+    
     TRISBbits.TRISB14 = 0;  // PWM1H
     TRISBbits.TRISB15 = 0;  // PWM1L
     
