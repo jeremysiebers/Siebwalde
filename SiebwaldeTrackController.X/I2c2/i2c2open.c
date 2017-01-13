@@ -1,5 +1,5 @@
 #include <p18cxxx.h>
-#include <i2c2.h>
+#include <i2c.h>
 
 /********************************************************************
 *   Function Name:  OpenI2C2                                        *

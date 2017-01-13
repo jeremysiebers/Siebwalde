@@ -18,6 +18,7 @@
 #include <Train_Detection.h>    //
 #include <Var_Out.h>			// building packets to transmit
 #include <adc.h>				// ADC lib
+#include "I2c2/i2c.h"
 //#include <IO_Expander.h>		// IO Expander extra IO
 
 //CONFIGURATION BITS//
@@ -62,6 +63,13 @@ static DWORD dwLastIP = 0;
 
 static unsigned char Send_Var_Out[3];
 
+unsigned char tx_data[] = {'M','I','C','R','O','C','H','I','P','\0'};
+unsigned char *wrptr, data;
+unsigned char address = 0x4;
+unsigned char rw = 0;
+unsigned char addrw;
+unsigned char sw = 0, Return_Val_Routine = 0;
+
 //MAIN ROUTINE///////////////////////////////////////////////////////////////////////////////////////////
 void main()
 {			
@@ -72,24 +80,99 @@ void main()
 	CMCON 	= 0x07;
 	
 	Init_Timers();
-	TickInit(); 
-	InitAppConfig(); 
-	StackInit();	
+	//TickInit(); 
+	//InitAppConfig(); 
+	//StackInit();	
 	Init_Pwm();
 	Init_IO();	
 	Leds_Off();	
+    
+    // Use MSSP2, the pins of this module are connected to RD5 and RD6, 
+    // all calls to I2C lib must be nummerated with 2 : OpenI2C2																													   _																																	
+    //---INITIALISE THE I2C MODULE FOR MASTER MODE WITH 100KHz ---		
+    //400kHz Baud clock @41.667MHz = 0x19 // 100kHz Baud clock @41.667MHz = 0x67 // 1MHz Baud clock @41.667MHz = 0x09 // 1.7MHzBaud clock @41.667MHz = 0x05
+    SSP2ADD= 255;//0x67;
+    //read any previous stored content in buffer to clear buffer full status   EXPNDNQ
+    data = SSP2BUF;
+    
+    wrptr = tx_data;
+    
+    addrw = (address << 1) | rw; // shift the address due to LSB is read/write bit (0 for write)
 	
+    OpenI2C2(MASTER,SLEW_OFF);
+    
 	while(1)
 	{
 
-	 	StackTask();
-	 	StackApplications();
+	 	//StackTask();
+	 	//StackApplications();
 	    	    		
-	 	Diagnostic();
-	    Command();
-	    //IOExpander();
+	 	//Diagnostic();
+	    //Command();
+	    
         
-				
+        if (Enable_State_Machine_Update == True)
+		{
+            switch(sw){
+                case 0 :    T1CON = 0x00;                            
+                            IdleI2C2();
+                            StartI2C2();
+                            sw = 1;
+                            break;
+
+                case 1 :    switch (WriteI2C2(addrw))
+                            {
+                                case 0 : sw = 2;
+                                break;
+
+                                case -2: sw = 3;
+                                break;
+
+                                default : sw = 3;
+                                break;
+                            }
+                            break;
+
+                case 2 :    switch (putcI2C2('A'))
+                            {
+                                case 0 : sw = 3;
+                                break;
+
+                                case -2: sw = 3;
+                                break;
+
+                                default : sw = 3;
+                                break;
+                            }
+                            break;
+
+                case 3 :    StopI2C2();                            
+                            sw = 4;
+                            break;
+
+                case 4 :    Delay10KTCYx(255);
+                            Delay10KTCYx(255);
+                            Delay10KTCYx(255);
+                            Delay10KTCYx(255);
+                            Delay10KTCYx(255);
+                            
+                            sw = 0;
+                            Enable_State_Machine_Update = False;
+                            T1CON = 0x81;
+                            break;
+
+                default : sw = 4;
+                    break;                       
+
+            }
+        
+        
+        
+        
+        
+        }
+                
+		/*		
 		/////Announce IP after IP change or power up event////////		
 		if(dwLastIP != AppConfig.MyIPAddr.Val)
 		{
@@ -99,7 +182,7 @@ void main()
 				AnnounceIP();
 			#endif
 		}
-		
+		*/
 	}
 }
 
@@ -131,12 +214,12 @@ void low_isr()
 	Led2 = !Led2;
 	if (INTCONbits.TMR0IF)
 	{
-		TickUpdate();
+		//TickUpdate();
 	}
 				
 	if (PIR1bits.TMR1IF)						
 	{	
-		TMR1H = 0xF0;//0xF3	= 3333 Hz, 0x00 = 1587 Hz, 0xF0 = 2439 Hz
+		TMR1H = 0x00;//0xF3	= 3333 Hz, 0x00 = 1587 Hz, 0xF0 = 2439 Hz
 		TMR1L = 0x00;
 		Enable_State_Machine_Update = True;
 		PIR1bits.TMR1IF=False;		
@@ -163,7 +246,7 @@ void Init_Timers()
 	INTCON3bits.INT2IE = 0;
 	INTCON3bits.INT1IE = 0;
 	
-	PIE1 = 0x01;					//TMR1 overflow interrupt enable on=0x1 off=0x00
+	PIE1 = 0x1;					//TMR1 overflow interrupt enable on=0x1 off=0x00
 	
 	PIE2bits.TMR3IE = 0;
 	PIE2bits.CCP2IE = 0;
@@ -180,7 +263,7 @@ void Init_Timers()
 	
 	TMR1H = 0x0;
 	TMR1L = 0x0;
-	T1CON = 0x00; //Timer OFF              //T1CON = 0x81;					// 0xB1 = 1:8(40mS), 0xA1 = 1:4(22.5mS), 0x91 = 1:2(11mS), 0x81 = 1:1(5.5mS) 0x81 = 16Bit and anabled
+	T1CON = 0x81; //Timer OFF              //T1CON = 0x81;					// 0xB1 = 1:8(40mS), 0xA1 = 1:4(22.5mS), 0x91 = 1:2(11mS), 0x81 = 1:1(5.5mS) 0x81 = 16Bit and enabled
     T4CON = 0x00; //Timer OFF
 }
 

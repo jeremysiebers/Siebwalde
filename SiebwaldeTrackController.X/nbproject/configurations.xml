@@ -4,6 +4,9 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <logicalFolder name="f1" displayName="I2c2" projectFiles="true">
+        <itemPath>I2c2/i2c.h</itemPath>
+      </logicalFolder>
       <logicalFolder name="Microchip" displayName="Microchip" projectFiles="true">
         <logicalFolder name="Include" displayName="Include" projectFiles="true">
           <logicalFolder name="PIC18Salloc" displayName="PIC18Salloc" projectFiles="true">
@@ -91,6 +94,46 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
+      <logicalFolder name="f1" displayName="I2c2" projectFiles="true">
+        <itemPath>I2c2/i2c1ack.c</itemPath>
+        <itemPath>I2c2/i2c1clos.c</itemPath>
+        <itemPath>I2c2/i2c1dtrd.c</itemPath>
+        <itemPath>I2c2/i2c1eeap.c</itemPath>
+        <itemPath>I2c2/i2c1eebw.c</itemPath>
+        <itemPath>I2c2/i2c1eecr.c</itemPath>
+        <itemPath>I2c2/i2c1eepw.c</itemPath>
+        <itemPath>I2c2/i2c1eerr.c</itemPath>
+        <itemPath>I2c2/i2c1eesr.c</itemPath>
+        <itemPath>I2c2/i2c1gets.c</itemPath>
+        <itemPath>I2c2/i2c1idle.c</itemPath>
+        <itemPath>I2c2/i2c1nack.c</itemPath>
+        <itemPath>I2c2/i2c1open.c</itemPath>
+        <itemPath>I2c2/i2c1puts.c</itemPath>
+        <itemPath>I2c2/i2c1read.c</itemPath>
+        <itemPath>I2c2/i2c1rstr.c</itemPath>
+        <itemPath>I2c2/i2c1stop.c</itemPath>
+        <itemPath>I2c2/i2c1strt.c</itemPath>
+        <itemPath>I2c2/i2c1writ.c</itemPath>
+        <itemPath>I2c2/i2c2ack.c</itemPath>
+        <itemPath>I2c2/i2c2clos.c</itemPath>
+        <itemPath>I2c2/i2c2dtrd.c</itemPath>
+        <itemPath>I2c2/i2c2eeap.c</itemPath>
+        <itemPath>I2c2/i2c2eebw.c</itemPath>
+        <itemPath>I2c2/i2c2eecr.c</itemPath>
+        <itemPath>I2c2/i2c2eepw.c</itemPath>
+        <itemPath>I2c2/i2c2eerr.c</itemPath>
+        <itemPath>I2c2/i2c2eesr.c</itemPath>
+        <itemPath>I2c2/i2c2gets.c</itemPath>
+        <itemPath>I2c2/i2c2idle.c</itemPath>
+        <itemPath>I2c2/i2c2nack.c</itemPath>
+        <itemPath>I2c2/i2c2open.c</itemPath>
+        <itemPath>I2c2/i2c2puts.c</itemPath>
+        <itemPath>I2c2/i2c2read.c</itemPath>
+        <itemPath>I2c2/i2c2rstr.c</itemPath>
+        <itemPath>I2c2/i2c2stop.c</itemPath>
+        <itemPath>I2c2/i2c2strt.c</itemPath>
+        <itemPath>I2c2/i2c2writ.c</itemPath>
+      </logicalFolder>
       <logicalFolder name="Microchip" displayName="Microchip" projectFiles="true">
         <logicalFolder name="Common" displayName="Common" projectFiles="true">
           <itemPath>Microchip/Common/TimeDelay.c</itemPath>
@@ -199,6 +242,8 @@
           <parseOnProdLoad>false</parseOnProdLoad>
           <alternateLoadableFile></alternateLoadableFile>
         </loading>
+        <subordinates>
+        </subordinates>
       </compileType>
       <makeCustomizationType>
         <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
@@ -314,6 +359,7 @@
         <property key="ToolFirmwareFilePath"
                   value="Press to browse for a specific firmware version"/>
         <property key="ToolFirmwareOption.UseLatestFirmware" value="true"/>
+        <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="memories.aux" value="false"/>
         <property key="memories.bootflash" value="true"/>
