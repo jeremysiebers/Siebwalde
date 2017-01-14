@@ -19,6 +19,14 @@
 
 extern void I2C_Initialize(void);
 extern void I2C1_ISR(void);
+extern uint8_t API[256];
+
+struct FlagType
+{
+    uint8_t AddrFlag : 1;
+    uint8_t DataFlag : 1;
+};
+extern struct FlagType  flag;
 
 /* I2C module definitions for dsPIC30F devices only */
 

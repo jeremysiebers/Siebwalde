@@ -17,7 +17,7 @@
 #pragma config JTAGEN = OFF             // JTAG Enable bit (JTAG is disabled)
 
 // FPOR
-#pragma config BOREN = OFF              //  (BOR is disabled)
+#pragma config BOREN = OFF              // (BOR is disabled)
 #pragma config ALTI2C1 = OFF            // Alternate I2C1 pins (I2C1 mapped to SDA1/SCL1 pins)
 #pragma config ALTI2C2 = OFF            // Alternate I2C2 pins (I2C2 mapped to SDA2/SCL2 pins)
 #pragma config WDTWIN = WIN25           // Watchdog Window Select bits (WDT Window is 25% of WDT period)
@@ -49,7 +49,7 @@ void SYSTEM_Initialize(void) {
     OSCILLATOR_Initialize();
     IO_Configuration();
     EUSART1_Initialize();
-    PWM_Initialize();
+    //PWM_Initialize();
     I2C_Initialize();
 }
 
@@ -70,13 +70,14 @@ void OSCILLATOR_Initialize(void) {
 	while(OSCCONbits.COSC != 0b001);		/* Wait for new Oscillator to become FRC w/ PLL */  
     while(OSCCONbits.LOCK != 1);			/* Wait for Pll to Lock */
     
+    /*
     PMD1 = 0xFD59;
     PMD2 = 0xFFFF;
     PMD3 = 0xFFFF;    
     PMD4 = 0xFFFF;    
     PMD6 = 0x1;
     PMD7 = 0xFFFF;
-
+    */
 }
 
 void IO_Configuration(void) {
@@ -95,8 +96,8 @@ void IO_Configuration(void) {
     TRISBbits.TRISB3 = 0;   // Set RP35 as Output for UART1TX
     TRISBbits.TRISB2 = 1;   // Set RPI34 as Input for UART1RX
     
-    TRISCbits.TRISC4 = 1;   // I2C1 SDA1
-    TRISCbits.TRISC5 = 1;   // I2C1 SCL1
+    //TRISCbits.TRISC4 = 1;   // I2C1 SDA1
+    //TRISCbits.TRISC5 = 1;   // I2C1 SCL1
     
     RPINR37 = 0x3000;       // Connecting SYNC Input to RP48 (MSB)
     TRISCbits.TRISC0 = 1;   // Set RP48 as Input for SYNCI    

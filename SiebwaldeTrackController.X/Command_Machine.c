@@ -1,7 +1,8 @@
 #include <Fiddle_Yard.h>
 #include "TCPIP Stack/TCPIP.h"
-#include <Command_Machine.h>
-#include <State_Machine.h>
+#include "Command_Machine.h"
+#include "State_Machine.h"
+#include "Mip50_API.h"
 
 #define Enter 13
 
@@ -9,6 +10,7 @@ static UDP_SOCKET socket2 = INVALID_UDP_SOCKET;
 
 extern void State_Machine_Reset(unsigned char ASL);
 static void Command_Exe(unsigned char Command[3]);
+void Clear_Cmd(void);
 
 static unsigned char Cmd[3],Cmd_Read_Switch=20;
 static unsigned char Exe_Cmd[2] = {0,0};
@@ -27,7 +29,7 @@ unsigned char Exe_Cmd_(unsigned char ASL)
 unsigned char Exe_Cmd_Ret(unsigned char ASL, char Exe_Cmd_Ret_)
 {
 	Exe_Cmd_Ret_1 = Exe_Cmd_Ret_;
-	Exe_Cmd[ASL] = 0;					// reset commando to 0, after executing the command. Next command allowed
+	Exe_Cmd[ASL] = 0;                                                           // reset commando to 0, after executing the command. Next command allowed
 }
 
 void Exe_Cmd_Resume(unsigned char ASL, char Resume_Cmd)
@@ -49,14 +51,11 @@ void Command()
 								break;
 							}							
 							else if (Cmd[2] == Enter)
-							{
-								Cmd_Read_Switch = 0;
-								Command_Exe(Cmd);									
-							}
-							Cmd_Read_Switch = 0;
-							Cmd[0] = 0;
-							Cmd[1] = 0;
-							Cmd[2] = 0;
+                            {
+                                Cmd_Read_Switch = 0;
+                                Command_Exe(Cmd);									
+                            }                            
+                            Clear_Cmd();
 							break;
 						}
 						break;
@@ -103,12 +102,19 @@ void Command()
 	
 }
 
+void Clear_Cmd(void)
+{
+    Cmd[0] = 0;  
+    Cmd[0] = 1;
+    Cmd[0] = 2;
+}
+
 void Command_Exe(unsigned char Command[3])
 {
 	switch (Command[0])
 	{
-		case	'a'		:	if (Exe_Cmd[1] == 0 || Command[1] == 'J') // block new commands until last one has finished
-							{
+		case	'a'		:	//if (Exe_Cmd[1] == 0 || Command[1] == 'J') // block new commands until last one has finished except with Reset (stop NOW)
+							//{
 								
 								switch (Command[1])
 								{
@@ -116,159 +122,68 @@ void Command_Exe(unsigned char Command[3])
 														break;
 									case	'2'		:	Exe_Cmd[1] = 2;	//Disable Track
 														break;
-									case	'3'		:	Exe_Cmd[1] = 3;	//Fiddle yard naar links = spoor++
+									case	'3'		:	Exe_Cmd[1] = 3;	//MIP50_Enable
 														break;
-									case	'4'		:	Exe_Cmd[1] = 4;	//Fiddle yard naar rechts = spoor--
+									case	'4'		:	Exe_Cmd[1] = 4;	//MIP50_Disable
 														break;
-									case	'5'		:	Exe_Cmd[1] = 5;	// Ga naar spoor 1//Exe_Cmd[0] = 5;	// Ga naar spoor 1
+									case	'5'		:	Exe_Cmd[1] = 5;	//Stop Fiddle Yard NOW (RESET)
 														break;
-									case	'6'		:	Exe_Cmd[1] = 6;	// ga naar spoor 2
+									case	'6'		:	Exe_Cmd[1] = 6;	//Bezet_In_5B_Switch_On
 														break;
-									case	'7'		:	Exe_Cmd[1] = 7;	//ga naar spoor 3
+									case	'7'		:	Exe_Cmd[1] = 7;	//Bezet_In_5B_Switch_Off
 														break;
-									case	'8'		:	Exe_Cmd[1] = 8;	//ga naar spoor 4
+									case	'8'		:	Exe_Cmd[1] = 8;	//Bezet_In_6_Switch_On
 														break;
-									case	'9'		:	Exe_Cmd[1] = 9;	//ga naar spoor 5
+									case	'9'		:	Exe_Cmd[1] = 9;	//Bezet_In_6_Switch_Off
 														break;
-									case	'A'		:	Exe_Cmd[1] = 10;	//ga naar spoor 6
+									case	'A'		:	Exe_Cmd[1] = 10;//Bezet_In_7_Switch_On
 														break;
-									case	'B'		:	Exe_Cmd[1] = 11;	//ga naar spoor 7
-														break;
-									case	'C'		:	Exe_Cmd[1] = 12;	//ga naar spoor 8
-														break;
-									case	'D'		:	Exe_Cmd[1] = 13;	//ga naar spoor 9
-														break;
-									case	'E'		:	Exe_Cmd[1] = 14;	//ga naar spoor 10
-														break;
-									case	'F'		:	Exe_Cmd[1] = 15;	//ga naar spoor 11														//Exe_Cmd[0] = 15;	//ga naar spoor 11
-														break;
-									case	'G'		:	Exe_Cmd[1] = 16;	//Trein detectie														//Exe_Cmd[0] = 16;	//Trein detectie
-														break;
-									case	'H'		:	Exe_Cmd[1] = 17;	//Start Fiddle Yard
-														break;
-									case	'I'		:	Exe_Cmd[1] = 18;	//Stop Fiddle Yard
-														break;
-									case	'J'		:	State_Machine_Reset(TOP);// Exe_Cmd[1] = 19;	//Stop Fiddle Yard NOW
-														break;
-									case	'K'		:	Exe_Cmd[1] = 20;	//Bezet_In_5B_Switch_On
-														break;
-									case	'L'		:	Exe_Cmd[1] = 21;	//Bezet_In_5B_Switch_Off
-														break;
-									case	'M'		:	Exe_Cmd[1] = 22;	//Bezet_In_6_Switch_On
-														break;
-									case	'N'		:	Exe_Cmd[1] = 23;	//Bezet_In_6_Switch_Off
-														break;
-									case	'O'		:	Exe_Cmd[1] = 24;	//Bezet_In_7_Switch_On
-														break;
-									case	'P'		:	Exe_Cmd[1] = 25;	//Bezet_In_7_Switch_Off
-														break;
-									case	'Q'		:	Exe_Cmd[1] = 26;	//Resume previous operation
-														break;
-									case	'R'		:	Exe_Cmd[1] = 27;	//Collect Start
-														break;
-									case	'S'		:	Exe_Cmd[1] = 0;	//Bruggen open
-														break;
-									case	'T'		:	Exe_Cmd[1] = 0;	//Bruggen open
-														break;
-									case	'U'		:	Exe_Cmd[1] = 0;	//Bruggen open
-														break;
-									case	'V'		:	Exe_Cmd[1] = 0;	//Bruggen open
-														break;
-									case	'W'		:	Exe_Cmd[1] = 0;	//Bruggen open
-														break;
-									case	'X'		:	Exe_Cmd[1] = 0;	//Bruggen open
-														break;
-									case	'Y'		:	Exe_Cmd[1] = 0;	//Bruggen open
-														break;
-									case	'Z'		:	Exe_Cmd[1] = 0;	//Bruggen open
-														break;
+									case	'B'		:	Exe_Cmd[1] = 11;//Bezet_In_7_Switch_Off
+														break;									
 									default			:	Exe_Cmd[1] = 0;
 														break;
 								}
-							}
+							//}
 							break;
 							
-		case	'b'		:	if (Exe_Cmd[0] == 0 || Command[1] == 'J')	// block new commands until last one has finished except with Reset (stop NOW)
-							{
+		case	'b'		:	//if (Exe_Cmd[0] == 0 || Command[1] == 'J')	// block new commands until last one has finished except with Reset (stop NOW)
+							//{
 								
 								switch (Command[1])
 								{
-									case	'1'		:	Exe_Cmd[0] = 1;	//Bruggen open			Exe_Cmd[1] = TOP	Exe_Cmd[0] = Bottom
+									case	'1'		:	Exe_Cmd[0] = 1;	//Enable Track			Exe_Cmd[1] = TOP	Exe_Cmd[0] = Bottom
 														break;
-									case	'2'		:	Exe_Cmd[0] = 2;	//Bruggen dicht
+									case	'2'		:	Exe_Cmd[0] = 2;	//Disable Track
 														break;
-									case	'3'		:	Exe_Cmd[0] = 3;	//Fiddle yard naar links = spoor++
+									case	'3'		:	Exe_Cmd[0] = 3;	//MIP50_Enable
 														break;
-									case	'4'		:	Exe_Cmd[0] = 4;	//Fiddle yard naar rechts = spoor--
+									case	'4'		:	Exe_Cmd[0] = 4;	//MIP50_Disable
 														break;
-									case	'5'		:	Exe_Cmd[0] = 5;	// Ga naar spoor 1
+									case	'5'		:	Exe_Cmd[0] = 5;	//Stop Fiddle Yard NOW (RESET)
 														break;
-									case	'6'		:	Exe_Cmd[0] = 6;	// ga naar spoor 2
+									case	'6'		:	Exe_Cmd[0] = 6;	//Bezet_In_5B_Switch_On
 														break;
-									case	'7'		:	Exe_Cmd[0] = 7;	//ga naar spoor 3
+									case	'7'		:	Exe_Cmd[0] = 7;	//Bezet_In_5B_Switch_Off
 														break;
-									case	'8'		:	Exe_Cmd[0] = 8;	//ga naar spoor 4
+									case	'8'		:	Exe_Cmd[0] = 8;	//Bezet_In_6_Switch_On
 														break;
-									case	'9'		:	Exe_Cmd[0] = 9;	//ga naar spoor 5
+									case	'9'		:	Exe_Cmd[0] = 9;	//Bezet_In_6_Switch_Off
 														break;
-									case	'A'		:	Exe_Cmd[0] = 10;	//ga naar spoor 6
+									case	'A'		:	Exe_Cmd[0] = 10;//Bezet_In_7_Switch_On
 														break;
-									case	'B'		:	Exe_Cmd[0] = 11;	//ga naar spoor 7
-														break;
-									case	'C'		:	Exe_Cmd[0] = 12;	//ga naar spoor 8
-														break;
-									case	'D'		:	Exe_Cmd[0] = 13;	//ga naar spoor 9
-														break;
-									case	'E'		:	Exe_Cmd[0] = 14;	//ga naar spoor 10
-														break;
-									case	'F'		:	Exe_Cmd[0] = 15;	//ga naar spoor 11
-														break;
-									case	'G'		:	Exe_Cmd[0] = 16;	//Trein detectie
-														break;
-									case	'H'		:	Exe_Cmd[0] = 17;	//Start Fiddle Yard
-														break;
-									case	'I'		:	Exe_Cmd[0] = 18;	//Stop Fiddle Yard
-														break;
-									case	'J'		:	State_Machine_Reset(BOTTOM);// Exe_Cmd[0] = 19;	//Stop Fiddle Yard NOW (RESET)
-														break;
-									case	'K'		:	Exe_Cmd[0] = 20;	//Bezet_In_5B_Switch_On
-														break;
-									case	'L'		:	Exe_Cmd[0] = 21;	//Bezet_In_5B_Switch_Off
-														break;
-									case	'M'		:	Exe_Cmd[0] = 22;	//Bezet_In_6_Switch_On
-														break;
-									case	'N'		:	Exe_Cmd[0] = 23;	//Bezet_In_6_Switch_Off
-														break;
-									case	'O'		:	Exe_Cmd[0] = 24;	//Bezet_In_7_Switch_On
-														break;
-									case	'P'		:	Exe_Cmd[0] = 25;	//Bezet_In_7_Switch_Off
-														break;
-									case	'Q'		:	Exe_Cmd[0] = 26;	//Resume previous operation
-														break;
-									case	'R'		:	Exe_Cmd[0] = 27;	//Collect Start
-														break;
-									case	'S'		:	Exe_Cmd[0] = 0;	//Bruggen open
-														break;
-									case	'T'		:	Exe_Cmd[0] = 0;	//Bruggen open
-														break;
-									case	'U'		:	Exe_Cmd[0] = 0;	//Bruggen open
-														break;
-									case	'V'		:	Exe_Cmd[0] = 0;	//Bruggen open
-														break;
-									case	'W'		:	Exe_Cmd[0] = 0;	//Bruggen open
-														break;
-									case	'X'		:	Exe_Cmd[0] = 0;	//Bruggen open
-														break;
-									case	'Y'		:	Exe_Cmd[0] = 0;	//Bruggen open
-														break;
-									case	'Z'		:	Exe_Cmd[0] = 0;	//Bruggen open
-														break;
+									case	'B'		:	Exe_Cmd[0] = 11;//Bezet_In_7_Switch_Off
+														break;									
 									default			:	Exe_Cmd[0] = 0;
 														break;
 								}
-							}	
+							//}	
 							break;
-							
+                            
+        case    'p'     :   MIP50xWritexUart(TOP, Command[1]);                  // Write MIP50 command directly to MIP50 TOP
+                            break;
+            
+        case    'q'     :   MIP50xWritexUart(BOTTOM, Command[1]);               // Write MIP50 command directly to MIP50 BOTTOM
+                            break;
 							
 		case	'r'		:	PORTPC = Command[1];
 							break;

@@ -23,8 +23,7 @@ int main(void) {
     // Initialize the device
     SYSTEM_Initialize();    
     printf("\f");                                                       //printf("\033[2J");
-    printf("x");
-    //printf("dsPIC33EP512GM304 started up!!!\n\r");
+    printf("dsPIC33EP512GM304 started up!!!\n\r");
     
     SDC1 = PDC1 = 3000;
          
@@ -38,9 +37,11 @@ int main(void) {
         if (UpdateToPutty > 0xA0000)
         {
             UpdateToPutty = 0;    
+            
+            I2C_Initialize();
+            
             Led1 ^= 1;
-
-            /*
+                        
             printf("\f");                                                       //printf("\033[2J");
             
                         
@@ -82,7 +83,7 @@ int main(void) {
             
             printf("Soll : DutyCycle = %d%d%d%d\r\n", DutyCycle[3],DutyCycle[2],DutyCycle[1],DutyCycle[0]);
             printf("Ist  : DutyCycle = %d\r\n",SDC1); 
-            */
+            
         }
         
         
@@ -132,10 +133,4 @@ void __attribute__((__interrupt__,no_auto_psv)) _U1RXInterrupt(void)
 {
     IFS0bits.U1RXIF = 0; // Clear TX Interrupt flag
     EUSART1_Receive_ISR();
-}
-
-void __attribute__((__interrupt__,no_auto_psv)) _SI2C1Interrupt(void)
-{
-    IFS1bits.SI2C1IF = 0; // Clear I2C1 Interrupt flag
-    I2C1_ISR();
 }

@@ -55,7 +55,7 @@ void IO(void)
 		PLATFORMS_IO[0].F11_ = PORTCbits.RC5;	
 		
 		PLATFORMS_IO[1].EOS_10_ = PORTGbits.RG7;	
-		PLATFORMS_IO[0].EOS_10_ = PORTCbits.RC7;	
+		PLATFORMS_IO[0].EOS_10_ = PORTCbits.RC2;	
 		
 		PLATFORMS_IO[1].EOS_11_ = PORTJbits.RJ7;	
 		PLATFORMS_IO[0].EOS_11_ = PORTFbits.RF7;		
@@ -70,7 +70,7 @@ void IO(void)
 		PLATFORMS_IO[0].F10_ = !PORTCbits.RC4;					// Invert logic from IO port, after this the logical state = train present -> F10 True
 		
 		PLATFORMS_IO[1].F12_ = !PORTGbits.RG6;					// Invert logic from IO port, after this the logical state = train present -> F12 True
-		PLATFORMS_IO[0].F12_ = !PORTCbits.RC6;					// Invert logic from IO port, after this the logical state = train present -> F12 True
+		PLATFORMS_IO[0].F12_ = !PORTCbits.RC0;					// Invert logic from IO port, after this the logical state = train present -> F12 True
 		
 		PLATFORMS_IO[1].Bezet_Uit_5B_ = PORTHbits.RH0;			// This means the occupied output of the PWM Rail regulator to the uProc
 		PLATFORMS_IO[0].Bezet_Uit_5B_ = PORTHbits.RH4;
@@ -78,7 +78,7 @@ void IO(void)
 		PLATFORMS_IO[1].Bezet_Uit_6_ = PORTHbits.RH1;
 		PLATFORMS_IO[0].Bezet_Uit_6_ = PORTHbits.RH5;
 		
-		PLATFORMS_IO[1].Bezet_Uit_7_ = PORTHbits.RH2;			// RG0 and RG1 are used for PWM and brake BOTTOM output
+		PLATFORMS_IO[1].Bezet_Uit_7_ = PORTHbits.RH2;			
 		PLATFORMS_IO[0].Bezet_Uit_7_ = PORTHbits.RH6;
 		
 		PLATFORMS_IO[1].Bezet_Uit_8A_ = PORTHbits.RH3;
@@ -97,7 +97,7 @@ void IO(void)
 		PORTEbits.RE4 = PLATFORMS_IO[0].Bezet_In_5B_;
 		
 		PORTDbits.RD1 = PLATFORMS_IO[1].Enable_Track_;
-		PORTDbits.RD4 = PLATFORMS_IO[0].Enable_Track_;					// RC0 and RC2 are used for PWM and brake TOP output
+		PORTDbits.RD4 = PLATFORMS_IO[0].Enable_Track_;					
 		
 		PORTDbits.RD0 = PLATFORMS_IO[1].M10_;
 		PORTDbits.RD3 = PLATFORMS_IO[0].M10_;	

@@ -180,9 +180,9 @@ void Pwm_Brake(unsigned char ASL, unsigned char Value)
 {
 	switch (ASL)
 	{
-		case	TOP		:	Pwm_Brake_TOP =! Value;
+		case	TOP		:	
 							break;
-		case	BOTTOM	:	Pwm_Brake_BOTTOM =! Value;
+		case	BOTTOM	:	
 							break;	
 		default			:	break;
 	}

@@ -2,9 +2,6 @@
 #include <Diagnostic_ret.h>
 #include <Shift_Register.h>
 #include <Fiddle_Yard.h>
-#include <Train_Detection.h>
-
-extern unsigned char Trains_On_Fiddle_Yard(unsigned char ASL, unsigned char Track); // Get Track status from Train_In_Track array
 
 void Target_Alive_Update(unsigned char ASL);
 void Var_Out_Switcher(unsigned  char ASL);
@@ -15,7 +12,7 @@ typedef struct
 	unsigned char 	Var_Out;	
 	unsigned int	Variables_Out_Counter;
 	unsigned int 	Target_Alive_Counter;
-	unsigned int	Variables_Out_Counter2;
+	unsigned char	Variables_Out_Counter2;
 	unsigned char	Send_Var_Out_Old[5][3];
 	unsigned char	ForceSendUpdate;
 	unsigned char	Track_Power_Meassage;
@@ -30,7 +27,7 @@ void Var_Out_Programm(unsigned  char ASL)
 {
 	
 	VAR_OUT_FY[ASL].Variables_Out_Counter++;	
-	if (VAR_OUT_FY[ASL].Variables_Out_Counter >= 5000)			// Auto send an update every second to ensure up-to-date data is available in user gui
+	if (VAR_OUT_FY[ASL].Variables_Out_Counter >= 5000)			// Auto send an update every 2 seconds to ensure up-to-date data is available in user gui
 	{			
 		VAR_OUT_FY[ASL].Variables_Out_Counter = 0;				// Reset counter
 		VAR_OUT_FY[ASL].Var_Out = 0;							// Force start case 0
@@ -46,19 +43,19 @@ void Var_Out_Programm(unsigned  char ASL)
 		}
 		
 	}
-	else if (TR_MEAS(0) == 1) 									// When power restored do not send message, but set the local variable Track_Power_Meassage to 1, but on a slower pase
+	else if (TR_MEAS(0) == 1)                                                   // When power restored do not send message, but set the local variable Track_Power_Meassage to 1, but on a slower pase
 	{
 		VAR_OUT_FY[ASL].Track_Power_Meassage = 1;
 	}	
 	
 
-	VAR_OUT_FY[ASL].Variables_Out_Counter2++;
-	if (VAR_OUT_FY[ASL].Variables_Out_Counter2 >= 0)//10)			// Send IO info with approx 250Hz iso 2500Hz --> NOK!!!! updates are too slow
-	{			
-		VAR_OUT_FY[ASL].Variables_Out_Counter2 = 0;				// Reset counter
-		Var_Out_Switcher(ASL);
-		
-	}	
+//	VAR_OUT_FY[ASL].Variables_Out_Counter2++;
+//	if (VAR_OUT_FY[ASL].Variables_Out_Counter2 >= 255)                      	// Send Frame counter
+//	{			
+//		VAR_OUT_FY[ASL].Variables_Out_Counter2 = 0;                             // Reset counter
+//	}	
+    
+    Var_Out_Switcher(ASL);
 }
 
 void Var_Out_Switcher(unsigned  char ASL)
@@ -163,9 +160,9 @@ void Var_Out_Switcher(unsigned  char ASL)
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
 							Send_Var_Out[1] = Send_Var_Out[1] | Bezet_Weerstand_Status(ASL);
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
-							Send_Var_Out[1] = Send_Var_Out[1] | Trains_On_Fiddle_Yard(ASL, 1);
+							Send_Var_Out[1] = Send_Var_Out[1] | 0;
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
-							Send_Var_Out[1] = Send_Var_Out[1] | Trains_On_Fiddle_Yard(ASL, 2);
+							Send_Var_Out[1] = Send_Var_Out[1] | 0;
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
 							Send_Var_Out[1] = Send_Var_Out[1] | 0x1;
 							Send_Var_Out[2] = 0x00;
@@ -178,7 +175,8 @@ void Var_Out_Switcher(unsigned  char ASL)
 							VAR_OUT_FY[ASL].Send_Var_Out_Old[VAR_OUT_FY[ASL].Var_Out][0] = Send_Var_Out[0];	
 							VAR_OUT_FY[ASL].Send_Var_Out_Old[VAR_OUT_FY[ASL].Var_Out][1] = Send_Var_Out[1];
 							Send_Diag_Comm(Send_Var_Out);
-							VAR_OUT_FY[ASL].Var_Out = 3;
+							//VAR_OUT_FY[ASL].Var_Out = 3; this case is empty tracks removed
+							VAR_OUT_FY[ASL].Var_Out = 4;
 							break;
 					
 			case	3	:	if (ASL == TOP)
@@ -190,19 +188,19 @@ void Var_Out_Switcher(unsigned  char ASL)
 								Send_Var_Out[0] = 'W';
 							}
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
-							Send_Var_Out[1] = Send_Var_Out[1] | Trains_On_Fiddle_Yard(ASL, 4);
+							Send_Var_Out[1] = Send_Var_Out[1] | 0;
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
-							Send_Var_Out[1] = Send_Var_Out[1] | Trains_On_Fiddle_Yard(ASL, 5);
+							Send_Var_Out[1] = Send_Var_Out[1] | 0;
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
-							Send_Var_Out[1] = Send_Var_Out[1] | Trains_On_Fiddle_Yard(ASL, 6);
+							Send_Var_Out[1] = Send_Var_Out[1] | 0;
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
-							Send_Var_Out[1] = Send_Var_Out[1] | Trains_On_Fiddle_Yard(ASL, 7);
+							Send_Var_Out[1] = Send_Var_Out[1] | 0;
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
-							Send_Var_Out[1] = Send_Var_Out[1] | Trains_On_Fiddle_Yard(ASL, 8);
+							Send_Var_Out[1] = Send_Var_Out[1] | 0;
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
-							Send_Var_Out[1] = Send_Var_Out[1] | Trains_On_Fiddle_Yard(ASL, 9);
+							Send_Var_Out[1] = Send_Var_Out[1] | 0;
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
-							Send_Var_Out[1] = Send_Var_Out[1] | Trains_On_Fiddle_Yard(ASL, 10);
+							Send_Var_Out[1] = Send_Var_Out[1] | 0;
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
 							Send_Var_Out[1] = Send_Var_Out[1] | 0x1;
 							Send_Var_Out[2] = 0x00;
@@ -237,9 +235,9 @@ void Var_Out_Switcher(unsigned  char ASL)
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
 							Send_Var_Out[1] = Send_Var_Out[1] | M10_Status(ASL);
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
-							Send_Var_Out[1] = Send_Var_Out[1] | Trains_On_Fiddle_Yard(ASL, 3);
+							Send_Var_Out[1] = Send_Var_Out[1] | 0;
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
-							Send_Var_Out[1] = Send_Var_Out[1] | Trains_On_Fiddle_Yard(ASL, 11);
+							Send_Var_Out[1] = Send_Var_Out[1] | 0;
 							Send_Var_Out[1] = (Send_Var_Out[1] << 1);
 							Send_Var_Out[1] = Send_Var_Out[1] | 0x1;
 							Send_Var_Out[2] = 0x00;
@@ -265,107 +263,6 @@ void Var_Out_Switcher(unsigned  char ASL)
 }		
 
 
-void Fiddle_One_Left_Ok(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00000001;		//1
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-void Fiddle_One_Right_Ok(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00000010;		//2
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-void Fiddle_Multiple_Left_Ok(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00000011;		//3
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-void Fiddle_Multiple_Right_Ok(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00000100;		//4
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-void Train_Detection_Finished(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00000101;		//5
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-
-void Train_On_5B(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00000110;		//6
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-
-void Train_On_8A(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00000111;		//7
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-
 void Fiddle_Yard_Reset(unsigned char ASL)
 {
 	if (ASL == TOP)
@@ -376,21 +273,7 @@ void Fiddle_Yard_Reset(unsigned char ASL)
 	{
 		Send_Var_Out[0] = 'B';
 	}
-	Send_Var_Out[1] = 0b00001000;		//8
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-void Bezet_Uit_Blok_6_Send(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00001001;		//9
+	Send_Var_Out[1] = 0b00000001;		//1
 	Send_Var_Out[2] = 0x00;
 	Send_Diag_Comm(Send_Var_Out);
 }
@@ -405,52 +288,7 @@ void Target_Ready(unsigned char ASL)
 	{
 		Send_Var_Out[0] = 'B';
 	}
-	Send_Var_Out[1] = 0b00001010;		//10 previous not used because of line feed commando
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-
-void Sensor_F12_Send(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00001011;		//11
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-
-void Bezet_Uit_Blok_6_AND_Sensor_F12_Send(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00001100;		//12
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-
-void Laatste_Spoor_Send(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00001101;		//13
+	Send_Var_Out[1] = 0b00000010;		//2
 	Send_Var_Out[2] = 0x00;
 	Send_Diag_Comm(Send_Var_Out);
 }
@@ -465,81 +303,7 @@ void Sent_Track_Power_Meassage(unsigned char ASL)
 	{
 		Send_Var_Out[0] = 'B';
 	}
-	Send_Var_Out[1] = 0b00001110;		//14
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-
-void Universal_Error_Send(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00001111;		//15
-	Send_Diag_Comm(Send_Var_Out);
-}
-
-void EndOffStroke_11_Send(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00010000;		//16
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-
-void EndOffStroke_10_Send(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00010001;		//17
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-
-void F12TrainDetect_Send(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00010010;		//18
-	Send_Var_Out[2] = 0x00;
-	Send_Diag_Comm(Send_Var_Out);
-}
-
-void F13TrainDetect_Send(unsigned char ASL)
-{
-	if (ASL == TOP)
-	{
-		Send_Var_Out[0] = 'A';
-	}
-	else if (ASL == BOTTOM)
-	{
-		Send_Var_Out[0] = 'B';
-	}
-	Send_Var_Out[1] = 0b00010011;		//19
+	Send_Var_Out[1] = 0b00000011;		//3
 	Send_Var_Out[2] = 0x00;
 	Send_Diag_Comm(Send_Var_Out);
 }

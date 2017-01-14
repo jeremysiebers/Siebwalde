@@ -1,5 +1,6 @@
 /** I N C L U D E S **********************************************************/
 #define THIS_IS_STACK_APPLICATION
+//#define USE_TCPIP
 
 #include <p18f97j60.h>			// uProc lib
 #include <TCPIP.h>				// TCPIP header
@@ -19,6 +20,8 @@
 #include <Var_Out.h>			// building packets to transmit
 #include <adc.h>				// ADC lib
 #include "I2c2/i2c.h"
+#include "eusart1.h"
+#include "eusart2.h"
 //#include <IO_Expander.h>		// IO Expander extra IO
 
 //CONFIGURATION BITS//
@@ -52,6 +55,8 @@ BYTE AN0String[8];
 // These may or may not be present in all applications.
 static void InitAppConfig(void);
 
+
+
 #define Init_IO()			TRISJ=0x00,TRISH=0x00,TRISG=0x00,TRISF=0x00,TRISE=0x00,TRISD=0x00,TRISC=0x00;TRISA=0x00;TRISB=0x00;// All ports are outputs !!!
 #define Leds_Off()			Led1 = Off, Led2 = Off, Led3 = Off;
 
@@ -63,12 +68,14 @@ static DWORD dwLastIP = 0;
 
 static unsigned char Send_Var_Out[3];
 
-unsigned char tx_data[] = {'M','I','C','R','O','C','H','I','P','\0'};
+unsigned char tx_data[] = {'M',1,'\0'};
+unsigned char tx_data2[] = {0,0,'\0'};
 unsigned char *wrptr, data;
-unsigned char address = 0x4;
-unsigned char rw = 0;
-unsigned char addrw;
+const unsigned char address = 0x50;
+const unsigned char rW = 0, Rw = 1;
+unsigned char addrW, addrR;
 unsigned char sw = 0, Return_Val_Routine = 0;
+unsigned int DataReceived = 0;
 
 //MAIN ROUTINE///////////////////////////////////////////////////////////////////////////////////////////
 void main()
@@ -80,35 +87,40 @@ void main()
 	CMCON 	= 0x07;
 	
 	Init_Timers();
-	//TickInit(); 
-	//InitAppConfig(); 
-	//StackInit();	
+    #if defined (USE_TCPIP)
+	TickInit(); 
+	InitAppConfig(); 
+	StackInit();
+    #endif
 	Init_Pwm();
 	Init_IO();	
 	Leds_Off();	
+    EUSART1_Initialize();
+    //EUSART2_Initialize(); 
     
     // Use MSSP2, the pins of this module are connected to RD5 and RD6, 
     // all calls to I2C lib must be nummerated with 2 : OpenI2C2																													   _																																	
     //---INITIALISE THE I2C MODULE FOR MASTER MODE WITH 100KHz ---		
     //400kHz Baud clock @41.667MHz = 0x19 // 100kHz Baud clock @41.667MHz = 0x67 // 1MHz Baud clock @41.667MHz = 0x09 // 1.7MHzBaud clock @41.667MHz = 0x05
-    SSP2ADD= 255;//0x67;
+    SSP2ADD= 0x19;
     //read any previous stored content in buffer to clear buffer full status   EXPNDNQ
     data = SSP2BUF;
     
     wrptr = tx_data;
     
-    addrw = (address << 1) | rw; // shift the address due to LSB is read/write bit (0 for write)
+    addrW = (address << 1) | rW; // shift the address due to LSB is read/write bit (0 for write)
+    addrR = (address << 1) | Rw; // shift the address due to LSB is read/write bit (1 for read)
 	
     OpenI2C2(MASTER,SLEW_OFF);
     
 	while(1)
 	{
-
-	 	//StackTask();
-	 	//StackApplications();
-	    	    		
-	 	//Diagnostic();
-	    //Command();
+        #if defined (USE_TCPIP)
+	 	StackTask();
+	 	StackApplications();
+        #endif
+	 	Diagnostic();
+	    Command();
 	    
         
         if (Enable_State_Machine_Update == True)
@@ -120,59 +132,108 @@ void main()
                             sw = 1;
                             break;
 
-                case 1 :    switch (WriteI2C2(addrw))
+                case 1 :    switch (WriteI2C2(addrW))
                             {
                                 case 0 : sw = 2;
                                 break;
 
-                                case -2: sw = 3;
+                                case -2: sw = 99;
                                 break;
 
-                                default : sw = 3;
+                                default : sw = 99;
                                 break;
                             }
                             break;
 
-                case 2 :    switch (putcI2C2('A'))
+                case 2 :    switch (putsI2C2(wrptr))
                             {
                                 case 0 : sw = 3;
                                 break;
 
-                                case -2: sw = 3;
+                                case -2: sw = 99;
                                 break;
 
-                                default : sw = 3;
+                                default : sw = 99;
                                 break;
                             }
                             break;
 
-                case 3 :    StopI2C2();                            
+                case 3 :    StopI2C2();  
+                            IdleI2C2();
+                            StartI2C2();
                             sw = 4;
                             break;
-
-                case 4 :    Delay10KTCYx(255);
-                            Delay10KTCYx(255);
-                            Delay10KTCYx(255);
-                            Delay10KTCYx(255);
-                            Delay10KTCYx(255);
                             
+                case 4 :    switch (WriteI2C2(addrR))
+                            {
+                                case 0 : sw = 5;
+                                break;
+
+                                case -2: sw = 99;
+                                break;
+
+                                default : sw = 99;
+                                break;
+                            }
+                            break;
+                        
+                case 5 :    DataReceived = ReadI2C2();
+                            DataReceived ++;
+                            if (DataReceived > 255){
+                                DataReceived = 0;
+                            }
+                            sw = 6;
+                            break;
+                            
+                case 6 :    StopI2C2();  
+                            IdleI2C2();
+                            StartI2C2();
+                            sw = 7;
+                            break;
+                            
+                case 7 :    switch (WriteI2C2(addrW))
+                            {
+                                case 0 : sw = 8;
+                                break;
+
+                                case -2: sw = 99;
+                                break;
+
+                                default : sw = 99;
+                                break;
+                            }
+                            break;
+                            
+                case 8 :    tx_data2[0] = 1;
+                            tx_data2[1] = (unsigned char)DataReceived;
+                            switch (putsI2C2(tx_data2))
+                            {
+                                case 0 : sw = 99;
+                                break;
+
+                                case -2: sw = 99;
+                                break;
+
+                                default : sw = 99;
+                                break;
+                            }
+                            break;
+
+                case 99 :   StopI2C2();
+                            Delay10KTCYx(255);
+                            Delay10KTCYx(255);
                             sw = 0;
                             Enable_State_Machine_Update = False;
                             T1CON = 0x81;
                             break;
 
-                default : sw = 4;
+                default : sw = 99;
                     break;                       
 
             }
-        
-        
-        
-        
-        
         }
-                
-		/*		
+        
+        #if defined (USE_TCPIP)
 		/////Announce IP after IP change or power up event////////		
 		if(dwLastIP != AppConfig.MyIPAddr.Val)
 		{
@@ -182,7 +243,8 @@ void main()
 				AnnounceIP();
 			#endif
 		}
-		*/
+        #endif
+		
 	}
 }
 
@@ -212,18 +274,31 @@ void interrupt_at_low_vector (void)
 void low_isr()
 {
 	Led2 = !Led2;
-	if (INTCONbits.TMR0IF)
-	{
-		//TickUpdate();
+	if (INTCONbits.TMR0IF){
+        #if defined (USE_TCPIP)
+		TickUpdate();
+        #endif
 	}
 				
-	if (PIR1bits.TMR1IF)						
-	{	
+	if (PIR1bits.TMR1IF){	
 		TMR1H = 0x00;//0xF3	= 3333 Hz, 0x00 = 1587 Hz, 0xF0 = 2439 Hz
 		TMR1L = 0x00;
 		Enable_State_Machine_Update = True;
 		PIR1bits.TMR1IF=False;		
 	}	
+    
+    if (PIE3bits.RC2IE == 1 && PIR3bits.RC2IF == 1) {
+        EUSART2_Receive_ISR();
+    } 
+    if (PIE3bits.TX2IE == 1 && PIR3bits.TX2IF == 1) {
+        EUSART2_Transmit_ISR();
+    } 
+    if (PIE1bits.RC1IE == 1 && PIR1bits.RC1IF == 1) {
+        EUSART1_Receive_ISR();
+    } 
+    if (PIE1bits.TX1IE == 1 && PIR1bits.TX1IF == 1) {
+        EUSART1_Transmit_ISR();
+    }
 }
 #pragma code
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -276,7 +351,7 @@ void Init_Pwm()
 	
 	PR2=129;				// 129 = 20.03 kHz SYNC signal, 138 = 18.74 kHz SYNC signal to dsPIC   PWM Period TMR2 zelfde voor PWM1(ECCP1) en PWM2(ECCP3)
 			
-	Pwm_Brake_TOP = 1;
+	
 	CCPR3L = 1;             // 1 = 366 ns, 7 = SYNC pulse of 2.67 us to dsPIC     PWM Duty cycle PWM2
 	CCP3CON = 0x0C;			// PWM Mode
 
@@ -436,4 +511,3 @@ void SaveAppConfig(void)
     #endif
 }
 #endif
-

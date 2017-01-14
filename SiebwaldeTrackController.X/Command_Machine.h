@@ -10,5 +10,6 @@ extern unsigned char MACPC[6];
 extern unsigned char IPPC[4];
 extern unsigned char MAC_IP_READY;
 extern unsigned int PORTPC;
+extern unsigned char MIP50_VEL;                                                 // To set the velocity from C# app (default 100)
 
 #endif
