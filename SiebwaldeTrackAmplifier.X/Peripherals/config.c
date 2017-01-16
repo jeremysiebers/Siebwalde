@@ -49,7 +49,7 @@ void SYSTEM_Initialize(void) {
     OSCILLATOR_Initialize();
     IO_Configuration();
     EUSART1_Initialize();
-    //PWM_Initialize();
+    PWM_Initialize();
     I2C_Initialize();
 }
 

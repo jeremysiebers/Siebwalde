@@ -133,10 +133,10 @@ int main(void) {
         
         UpdateToPutty++;
         
-        if (UpdateToPutty > 0xA0000)
+        if (UpdateToPutty > 0x90000)
         {
             UpdateToPutty = 0;    
-            Led1 ^= 1;
+            //Led1 ^= 1;
             
             printf("\f");                                                       //printf("\033[2J");
             
@@ -181,6 +181,10 @@ int main(void) {
             printf("Ist  : DutyCycle = %d\r\n",SDC1); 
                         
             printf("TestStorage is %d\r\n",TestStorage);
+            
+            if (Led1 == 0){
+                Led1 = 1;
+            }
         }
         
         

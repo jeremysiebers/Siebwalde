@@ -1,6 +1,6 @@
 /** I N C L U D E S **********************************************************/
 #define THIS_IS_STACK_APPLICATION
-//#define USE_TCPIP
+#define USE_TCPIP
 
 #include <p18f97j60.h>			// uProc lib
 #include <TCPIP.h>				// TCPIP header
@@ -71,9 +71,9 @@ static unsigned char Send_Var_Out[3];
 unsigned char tx_data[] = {'M',1,'\0'};
 unsigned char tx_data2[] = {0,0,'\0'};
 unsigned char *wrptr, data;
-const unsigned char address = 0x50;
+unsigned char address = 0x0;
 const unsigned char rW = 0, Rw = 1;
-unsigned char addrW, addrR;
+unsigned char addrW, addrR, NextAddr = 0;
 unsigned char sw = 0, Return_Val_Routine = 0;
 unsigned int DataReceived = 0;
 
@@ -102,7 +102,7 @@ void main()
     // all calls to I2C lib must be nummerated with 2 : OpenI2C2																													   _																																	
     //---INITIALISE THE I2C MODULE FOR MASTER MODE WITH 100KHz ---		
     //400kHz Baud clock @41.667MHz = 0x19 // 100kHz Baud clock @41.667MHz = 0x67 // 1MHz Baud clock @41.667MHz = 0x09 // 1.7MHzBaud clock @41.667MHz = 0x05
-    SSP2ADD= 0x19;
+    SSP2ADD= 0x67;
     //read any previous stored content in buffer to clear buffer full status   EXPNDNQ
     data = SSP2BUF;
     
@@ -129,6 +129,24 @@ void main()
                 case 0 :    T1CON = 0x00;                            
                             IdleI2C2();
                             StartI2C2();
+                            NextAddr++;
+                            if(NextAddr == 1){
+                                address = 0x50;
+                            }
+                            else if (NextAddr == 2){
+                                address = 0x51;
+                            }
+                            else if (NextAddr == 3){
+                                address = 0x52;
+                            }
+                            else if (NextAddr == 4){
+                                address = 0x53;
+                                NextAddr = 0;
+                            }
+                            
+                            addrW = (address << 1) | rW; // shift the address due to LSB is read/write bit (0 for write)
+                            addrR = (address << 1) | Rw; // shift the address due to LSB is read/write bit (1 for read)
+                            
                             sw = 1;
                             break;
 
@@ -177,12 +195,21 @@ void main()
                             }
                             break;
                         
-                case 5 :    DataReceived = ReadI2C2();
-                            DataReceived ++;
-                            if (DataReceived > 255){
-                                DataReceived = 0;
+                case 5 :    switch (DataReceived = ReadI2C2())
+                            {
+                                case 255 :   sw = 100;
+                                break;
+                                
+                                default :   DataReceived ++;
+                                            if (DataReceived > 3){
+                                                DataReceived = 0;
+                                                sw = 101;
+                                            }
+                                            else{
+                                                sw = 6;}
+                                            break;
                             }
-                            sw = 6;
+                            
                             break;
                             
                 case 6 :    StopI2C2();  
@@ -220,12 +247,50 @@ void main()
                             break;
 
                 case 99 :   StopI2C2();
+                            IdleI2C2();
                             Delay10KTCYx(255);
-                            Delay10KTCYx(255);
+                            //Delay10KTCYx(255);
+                            
                             sw = 0;
                             Enable_State_Machine_Update = False;
                             T1CON = 0x81;
                             break;
+                            
+                case 100 :  CloseI2C1();
+                            OpenI2C2(MASTER,SLEW_OFF);
+                            sw = 99;
+                            break;
+                            
+                case 101 :  StopI2C2();  
+                            IdleI2C2();                            
+                            StartI2C2();
+                            switch (WriteI2C2(0))
+                            {
+                                case 0 : sw = 102;
+                                break;
+
+                                case -2: sw = 99;
+                                break;
+
+                                default : sw = 99;
+                                break;
+                            }
+                            break;
+                            
+                case 102 :  switch (putcI2C2('R'))
+                            {
+                                case 0 : sw = 99;
+                                break;
+
+                                case -2: sw = 99;
+                                break;
+
+                                default : sw = 99;
+                                break;
+                            }
+                            break;
+                            
+                case 103 :  break;
 
                 default : sw = 99;
                     break;                       

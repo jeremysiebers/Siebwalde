@@ -106,6 +106,8 @@ void EUSART1_Initialize(void) {
     eusart1RxTail = 0;
     eusart1RxCount = 0;
 
+    IPR1bits.RC1IP = 0;     // Low priority Receive interrupt
+    IPR1bits.TX1IP = 0;     // Low priority Transmit interrupt
     // enable receive interrupt
     PIE1bits.RC1IE = 1;
 }

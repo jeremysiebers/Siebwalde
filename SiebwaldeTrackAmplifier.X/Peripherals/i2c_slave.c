@@ -58,6 +58,8 @@ void I2C_Initialize()
     I2C1CON = 0x9040;       //Enable I2C1 module, enable clock stretching
     #endif
     I2C1ADD = 0x50;         // 7-bit I2C slave address must be initialised here.
+    I2C1MSK = 0x0;          // Mask --> I2C1 should react on adresses 0x40(broadcast) and 0x4
+    I2C1CONbits.GCEN = 1;   // General Call address enabled for broadcast purposes, to write all new PWM values sync
     IFS1 = 0;
     apiPtr = &API[0];       //set the RAM pointer and points to beginning of API
     flag.AddrFlag = 0;      //Initlize Addflag
@@ -83,7 +85,12 @@ void I2C1_ISR()
     unsigned char   temp;   //used for dummy read
     if( (I2C1STATbits.R_W == 0) && (I2C1STATbits.D_A == 0) )                    //I2C1 Address matched and a write from master is detected
     {
-        temp = I2C1RCV;     //dummy read
+        
+        temp = I2C1RCV >> 1;     //dummy read (address received)
+        if (I2C1STATbits.GCSTAT == 1)
+        {
+            flag.GCFlag = 1;
+        }
         flag.AddrFlag = 1;                                                      //next byte will be TrackAmplifier Memory address
         #if defined( USE_I2C_Clock_Stretch )
         I2C1CONbits.SCLREL = 1;                 //Release SCL1 line
@@ -91,8 +98,8 @@ void I2C1_ISR()
     }
     
     else if( (I2C1STATbits.R_W == 0) && (I2C1STATbits.D_A == 1) )               //check for data
-    {
-        if( flag.AddrFlag )
+    {        
+        if( flag.AddrFlag && !flag.GCFlag)
         {
             flag.AddrFlag = 0;
             flag.DataFlag = 1;                      //next byte is data
@@ -108,7 +115,7 @@ void I2C1_ISR()
             I2C1CONbits.SCLREL = 1;                 //Release SCL1 line
             #endif
         }
-        else if( flag.DataFlag && MasterCmd == 0 )
+        else if( flag.DataFlag && MasterCmd == 0 && !flag.GCFlag)
         {
             *apiPtr = ( unsigned char ) I2C1RCV;    // store data into RAM
             flag.AddrFlag = 0;                      //end of tx
@@ -116,26 +123,39 @@ void I2C1_ISR()
             apiPtr = &API[0];                       //reset the RAM pointer
             #if defined( USE_I2C_Clock_Stretch )
             I2C1CONbits.SCLREL = 1;                 //Release SCL1 line
-            #endif
+            #endif            
         }
-        else if( flag.DataFlag && MasterCmd != 0){
+        else if( flag.DataFlag && MasterCmd != 0 && !flag.GCFlag){
             apiPtr = apiPtr + I2C1RCV;                                          // Hold the address the Master wants to read next time
             flag.AddrFlag = 0;                                                  //end of tx
             flag.DataFlag = 0;
+            #if defined( USE_I2C_Clock_Stretch )
+            I2C1CONbits.SCLREL = 1;                 //Release SCL1 line
+            #endif            
+        }
+        else if (flag.GCFlag){
+            flag.GCFlag   = 0;
+            flag.AddrFlag = 0;                                                  
+            flag.DataFlag = 0;
+            temp = I2C1RCV;
+            if (temp == 'R'){                       // When an R is received during broadcast
+                API[1] = 0;                         // Reset mem
+                Led1 = 0;
+            }
             #if defined( USE_I2C_Clock_Stretch )
             I2C1CONbits.SCLREL = 1;                 //Release SCL1 line
             #endif
         }
     }
     else if( (I2C1STATbits.R_W == 1) && (I2C1STATbits.D_A == 0) )               //I2C1 Address matched and a read from master is detected
-    {
+    {        
         temp = I2C1RCV;
         I2C1TRN = *apiPtr;      //Read data from RAM & send data to I2C master device
         I2C1CONbits.SCLREL = 1; //Release SCL1 line
         while( I2C1STATbits.TBF );
         //Wait till all
-        apiPtr = &API[0]; //reset the RAM pointer   
-    }    
+        apiPtr = &API[0]; //reset the RAM pointer           
+    }
 }
 /**
   End of File
