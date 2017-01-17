@@ -45,12 +45,12 @@
 #pragma config GCP = OFF                // General Segment Code-Protect bit (General Segment Code protect is Disabled)
 
 
-void SYSTEM_Initialize(void) {
+void SYSTEMxInitialize(void) {
     OSCILLATOR_Initialize();
     IO_Configuration();
-    EUSART1_Initialize();
-    PWM_Initialize();
-    I2C_Initialize();
+    EUSART1xInitialize();
+    PWMxInitialize();
+    I2CxInitialize();
 }
 
 void OSCILLATOR_Initialize(void) {

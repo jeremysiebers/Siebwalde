@@ -17,10 +17,10 @@
 #ifndef I2C_H
 #define I2C_H
 
-extern void I2C_Initialize(void);
-extern void I2C1_ISR(void);
-extern uint8_t API[256];
+extern void I2CxInitialize(void);
+extern void I2C1xISR(void);
 
+extern uint8_t API[256];
 struct FlagType
 {
     uint8_t AddrFlag : 1;

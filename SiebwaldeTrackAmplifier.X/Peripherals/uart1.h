@@ -24,7 +24,7 @@ typedef unsigned char uint8_t;
       Section: Macro Declarations
      */
 
-#define EUSART1_DataReady  (eusart1RxCount)
+#define EUSART1xDataReady  (eusart1RxCount)
 
     /**
       Section: Data Type Definitions
@@ -62,7 +62,7 @@ typedef unsigned char uint8_t;
 
       @Example
      */
-    extern void EUSART1_Initialize(void);
+    extern void EUSART1xInitialize(void);
 
     /**
       @Summary
@@ -111,7 +111,7 @@ typedef unsigned char uint8_t;
                                 }
         </code>
      */
-    extern uint8_t EUSART1_Read(void);
+    extern uint8_t EUSART1xRead(void);
 
     /**
      @Summary
@@ -136,7 +136,7 @@ typedef unsigned char uint8_t;
              Refer to EUSART1_Read() for an example	
          </code>
      */
-    extern void EUSART1_Write(uint8_t txData);
+    extern void EUSART1xWrite(uint8_t txData);
 
     /**
       @Summary
@@ -157,7 +157,7 @@ typedef unsigned char uint8_t;
       @Returns
         None
      */
-    extern void EUSART1_Transmit_ISR(void);
+    extern void EUSART1xTransmitxISR(void);
 
     /**
       @Summary
@@ -178,7 +178,7 @@ typedef unsigned char uint8_t;
       @Returns
         None
      */
-    extern void EUSART1_Receive_ISR(void);
+    extern void EUSART1xReceivexISR(void);
 
 #ifdef __cplusplus  // Provide C++ Compatibility
 

@@ -33,7 +33,7 @@ volatile uint8_t eusart1RxCount;
   Section: EUSART1 APIs
  */
 
-void EUSART1_Initialize(void) {
+void EUSART1xInitialize(void) {
     
     U1MODEbits.STSEL = 0; // 1-Stop bit
     U1MODEbits.PDSEL = 0; // No Parity, 8-Data bits
@@ -63,7 +63,7 @@ void EUSART1_Initialize(void) {
     eusart1RxCount = 0;
 }
 
-uint8_t EUSART1_Read(void) {
+uint8_t EUSART1xRead(void) {
     uint8_t readValue = 0;
 
     while (0 == eusart1RxCount) {
@@ -81,7 +81,7 @@ uint8_t EUSART1_Read(void) {
     return readValue;
 }
 
-void EUSART1_Write(uint8_t txData) {
+void EUSART1xWrite(uint8_t txData) {
     while (0 == eusart1TxBufferRemaining) {
     }
 
@@ -98,7 +98,7 @@ void EUSART1_Write(uint8_t txData) {
     IEC0bits.U1TXIE = 1;
 }
 
-void EUSART1_Transmit_ISR(void) {
+void EUSART1xTransmitxISR(void) {
 
     // add your EUSART1 interrupt custom code
     if (sizeof (eusart1TxBuffer) > eusart1TxBufferRemaining) {
@@ -112,7 +112,7 @@ void EUSART1_Transmit_ISR(void) {
     }
 }
 
-void EUSART1_Receive_ISR(void) {
+void EUSART1xReceivexISR(void) {
     if (1 == U1STAbits.OERR) {
         // EUSART1 error - restart
 

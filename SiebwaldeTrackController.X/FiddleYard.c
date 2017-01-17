@@ -68,7 +68,7 @@ static DWORD dwLastIP = 0;
 
 static unsigned char Send_Var_Out[3];
 
-unsigned char tx_data[] = {'M',1,'\0'};
+unsigned char tx_data[] = {255,1,'\0'};
 unsigned char tx_data2[] = {0,0,'\0'};
 unsigned char *wrptr, data;
 unsigned char address = 0x0;
@@ -201,7 +201,7 @@ void main()
                                 break;
                                 
                                 default :   DataReceived ++;
-                                            if (DataReceived > 3){
+                                            if (DataReceived > 15){
                                                 DataReceived = 0;
                                                 sw = 101;
                                             }
@@ -248,12 +248,12 @@ void main()
 
                 case 99 :   StopI2C2();
                             IdleI2C2();
-                            Delay10KTCYx(255);
+                            //Delay10KTCYx(255);
                             //Delay10KTCYx(255);
                             
                             sw = 0;
                             Enable_State_Machine_Update = False;
-                            T1CON = 0x81;
+                            T1CON = 0xB1;
                             break;
                             
                 case 100 :  CloseI2C1();
@@ -403,7 +403,7 @@ void Init_Timers()
 	
 	TMR1H = 0x0;
 	TMR1L = 0x0;
-	T1CON = 0x81; //Timer OFF              //T1CON = 0x81;					// 0xB1 = 1:8(40mS), 0xA1 = 1:4(22.5mS), 0x91 = 1:2(11mS), 0x81 = 1:1(5.5mS) 0x81 = 16Bit and enabled
+	T1CON = 0xB1; //16 Bit and ON and 1:8 prescale              //T1CON = 0x81;					// 0xB1 = 1:8(40mS), 0xA1 = 1:4(22.5mS), 0x91 = 1:2(11mS), 0x81 = 1:1(5.5mS) 0x81 = 16Bit and enabled
     T4CON = 0x00; //Timer OFF
 }
 

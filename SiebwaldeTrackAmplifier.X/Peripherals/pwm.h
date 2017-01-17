@@ -14,8 +14,12 @@
 extern "C" {
 #endif
 
-extern void PWM_Initialize(void);
-
+extern void PWMxInitialize(void);
+extern void PWMxSetDutyCycles(void);
+extern void PWMxReadxOccupiedxSignals(void);
+extern void PWMxSTART(void);
+extern void PWMxSTOP(void);
+extern void PWMxSETxALLxAMP(void);
 
 #ifdef	__cplusplus
 }
