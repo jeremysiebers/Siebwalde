@@ -179,10 +179,10 @@ void Command_Exe(unsigned char Command[3])
 							//}	
 							break;
                             
-        case    'p'     :   MIP50xWritexUart(TOP, Command[1]);                  // Write MIP50 command directly to MIP50 TOP
+        case    'p'     :   //MIP50xWritexUart(TOP, Command[1]);                  // Write MIP50 command directly to MIP50 TOP
                             break;
             
-        case    'q'     :   MIP50xWritexUart(BOTTOM, Command[1]);               // Write MIP50 command directly to MIP50 BOTTOM
+        case    'q'     :   //MIP50xWritexUart(BOTTOM, Command[1]);               // Write MIP50 command directly to MIP50 BOTTOM
                             break;
 							
 		case	'r'		:	PORTPC = Command[1];

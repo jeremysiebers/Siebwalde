@@ -2,12 +2,11 @@
   Section: Included Files
  */
 #include <xc.h>
-#include "config.h"
-#include "i2c.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <libpic30.h>
-
+#include "config.h"
+#include "i2c.h"
 
 /**
   Section: Macro Declarations
@@ -18,14 +17,14 @@
 /**
   Section: Global Variables
  */
-uint8_t API[256];                                                               // API RAM space
+
 
 /**
   Section: Local Variables
  */
-volatile uint8_t         *apiPtr;           //Pointer to API memory locations
-struct          FlagType flag;              // Received flags to determine data/address or General Call address
-unsigned char   MasterCmd = 0;              //Holds received command from master
+volatile uint8_t    *apiPtr;                                                    //Pointer to API memory locations
+struct              FlagType flag;                                              // Received flags to determine data/address or General Call address
+unsigned char       MasterCmd = 0;                                              //Holds received command from master
 
 /******************************************************************************
  * Function:       void I2C1_Init(void)
@@ -41,19 +40,7 @@ unsigned char   MasterCmd = 0;              //Holds received command from master
  * Overview:        Initializes I2C1 peripheral as Slave.
  *****************************************************************************/
 void I2CxInitialize()
-{
-    /*
-    unsigned int i;
-    for(i = 0; i < 256; i++ )
-    {
-        API[i] = 0;                       //Initlize API with 0
-
-        //in case MasterI2C device wants to read
-        //before it writes to it.
-    }
-    */
-    
-    
+{    
     /*
     I2C1MSK = 0x0;         // 0x7F Only 7 bit addresses are masked, 0x3FF 10 bit
     I2C1ADD = 0x50;        // Real address I2CxADD<6:0>
@@ -128,7 +115,21 @@ void I2C1xISR()
             }
             else{                                                               // Else a direct write to memory is required next time and the apiPtr is set
                 MasterCmd = 0;                                                  // reset Master command
-                apiPtr = apiPtr + temp;                                         // Set the API address to be written (can only be 255 - 1(255) = 254 addresses)
+                if (temp > APISIZE){                                            // When a request is to write a memory location outside APISIZE
+                    flag.GCFlag   = 0;                                          // reset all flags
+                    flag.AddrFlag = 0;                                                  
+                    flag.DataFlag = 0;
+                    NotAckI2C1();                                               // Send a Not-Acknowledge
+                }
+                else if (GETxAPIxRW(temp) == RO){                               // check if the memory location in API is ReadOnly
+                    flag.GCFlag   = 0;                                          // reset all flags
+                    flag.AddrFlag = 0;                                                  
+                    flag.DataFlag = 0;
+                    NotAckI2C1();                                               // Send a Not-Acknowledge
+                }
+                else{
+                    apiPtr = apiPtr + temp;                                     // Set the API address to be written (can only be 255 - 1(255) = 254 addresses)
+                }                
             }
             #if defined( USE_I2C_Clock_Stretch )
             I2C1CONbits.SCLREL = 1;                                             //Release SCL1 line

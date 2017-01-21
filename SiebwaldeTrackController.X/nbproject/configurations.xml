@@ -80,12 +80,12 @@
       <itemPath>Fiddle_Yard.h</itemPath>
       <itemPath>HardwareProfile.h</itemPath>
       <itemPath>Shift_Register.h</itemPath>
-      <itemPath>State_Machine.h</itemPath>
       <itemPath>TCPIPConfig.h</itemPath>
       <itemPath>Var_Out.h</itemPath>
       <itemPath>eusart1.h</itemPath>
       <itemPath>eusart2.h</itemPath>
-      <itemPath>Mip50_API.h</itemPath>
+      <itemPath>api.h</itemPath>
+      <itemPath>TrackAmplifier.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -195,12 +195,11 @@
       <itemPath>Command_Machine.c</itemPath>
       <itemPath>Diagnostic_ret.c</itemPath>
       <itemPath>Shift_Register.c</itemPath>
-      <itemPath>State_Machine.c</itemPath>
       <itemPath>Var_Out.c</itemPath>
       <itemPath>FiddleYard.c</itemPath>
       <itemPath>eusart1.c</itemPath>
       <itemPath>eusart2.c</itemPath>
-      <itemPath>Mip50_API.c</itemPath>
+      <itemPath>TrackAmplifier.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -359,6 +358,7 @@
         <property key="ToolFirmwareFilePath"
                   value="Press to browse for a specific firmware version"/>
         <property key="ToolFirmwareOption.UseLatestFirmware" value="true"/>
+        <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="memories.aux" value="false"/>
         <property key="memories.bootflash" value="true"/>

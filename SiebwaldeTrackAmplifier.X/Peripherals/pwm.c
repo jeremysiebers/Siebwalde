@@ -5,6 +5,8 @@
 #include "config.h"
 #include <xc.h>
 
+#define SET_NO_OF_PWM_OUTPUTS 2
+
 
 /******************************************************************************
  * Function:        PWM init
@@ -44,7 +46,7 @@ void PWMxInitialize(void) {
     #endif /* PWM_SLAVE */
 
     #if defined	PWM_SLAVE2
-    PTPER = 6020;           // PTPER should be greater then the selected/wanted output frequency, if 20kHz is desired, PTPER should be 6000 --> external sync --> PTPER example 6100
+    PTPER = 6120;           // PTPER should be greater then the selected/wanted output frequency, if 20kHz is desired, PTPER should be 6000 --> external sync --> PTPER example 6100
     DutyCycle = 3000;       // in this config jitter < 25ns!!!
     #endif /* PWM_SLAVE2 */
     
@@ -81,7 +83,18 @@ void PWMxInitialize(void) {
     ALTDTR1 = ALTDTR2 = ALTDTR3 = ALTDTR4 = ALTDTR5 = ALTDTR6 = 0;
     
     /* Set PWM Mode to Independent */
-    IOCON1 = IOCON2 = IOCON3 = IOCON4 = IOCON5 = IOCON6 = 0xCC00;
+    unsigned int PWM_SET_REGISTER = 0xCC00;
+    switch(SET_NO_OF_PWM_OUTPUTS){
+        case 0 : break;
+        case 1 : IOCON1 = PWM_SET_REGISTER; break;
+        case 2 : IOCON1 = PWM_SET_REGISTER; break;
+        case 3 : IOCON1 = PWM_SET_REGISTER; break;
+        case 4 : IOCON1 = PWM_SET_REGISTER; break;
+        case 5 : IOCON1 = PWM_SET_REGISTER; break;
+        case 6 : IOCON1 = PWM_SET_REGISTER; break;
+        default: break;
+    }
+    //IOCON1 = IOCON2 = IOCON3 = IOCON4 = IOCON5 = IOCON6 = 0xCC00;
     
     /* Set Primary Time Base, Edge-Aligned Mode and Independent Duty Cycles */
     PWMCON1 = PWMCON2 = PWMCON3 = PWMCON4 = PWMCON5 = PWMCON6 = 0x0000;
@@ -103,18 +116,18 @@ void PWMxInitialize(void) {
     PTCONbits.PTEN = 1;             //  bits should be changed only when PTEN = 0. Changing the clock selection during operation will yield unpredictable results.
     
 	/* Set API register to current values */
-	API[PWM1 ] = DutyCycle / 24;
-	API[PWM2 ] = DutyCycle / 24;
-	API[PWM3 ] = DutyCycle / 24;
-	API[PWM4 ] = DutyCycle / 24;
-	API[PWM5 ] = DutyCycle / 24;
-	API[PWM6 ] = DutyCycle / 24;
-	API[PWM7 ] = DutyCycle / 24;
-	API[PWM8 ] = DutyCycle / 24;
-	API[PWM9 ] = DutyCycle / 24;
-	API[PWM10] = DutyCycle / 24;
-	API[PWM11] = DutyCycle / 24;
-	API[PWM12] = DutyCycle / 24;
+	API[PWM1_SETPOINT ] = DutyCycle / 24;
+	API[PWM2_SETPOINT ] = DutyCycle / 24;
+	API[PWM3_SETPOINT ] = DutyCycle / 24;
+	API[PWM4_SETPOINT ] = DutyCycle / 24;
+	API[PWM5_SETPOINT ] = DutyCycle / 24;
+	API[PWM6_SETPOINT ] = DutyCycle / 24;
+	API[PWM7_SETPOINT ] = DutyCycle / 24;
+	API[PWM8_SETPOINT ] = DutyCycle / 24;
+	API[PWM9_SETPOINT ] = DutyCycle / 24;
+	API[PWM10_SETPOINT] = DutyCycle / 24;
+	API[PWM11_SETPOINT] = DutyCycle / 24;
+	API[PWM12_SETPOINT] = DutyCycle / 24;
 }
 
 /******************************************************************************
@@ -126,10 +139,12 @@ void PWMxInitialize(void) {
  *
  * Output:          None
  *
- * Side Effects:    API value is multiplied due to char(255) to PWM 6000 value
+ * Side Effects:    API value is multiplied by 24 due to char(255) 
+ *                  to PWM 61200 value
  *
- * Overview:        Here all PWM duty cycles are set according to content in
- *                  the API. This is triggered by a broadcast from the Master.
+ * Overview:        Here all PWM duty cycles are set according to the 
+ *                  PWMx_SETPOINT in the API. 
+ *                  This is triggered by a broadcast from the Master.
  *                  All PWM generating dsPIC's used are synced this way
  *****************************************************************************/
 void PWMxSetDutyCycles(){
@@ -147,18 +162,18 @@ void PWMxSetDutyCycles(){
     unsigned int _PWM12;
     
     /* Set Duty Cycles */
-    _PWM1  = ( unsigned char )API[PWM1 ] * 24;
-    _PWM2  = ( unsigned char )API[PWM2 ] * 24;
-    _PWM3  = ( unsigned char )API[PWM3 ] * 24;
-    _PWM4  = ( unsigned char )API[PWM4 ] * 24;
-    _PWM5  = ( unsigned char )API[PWM5 ] * 24;
-    _PWM6  = ( unsigned char )API[PWM6 ] * 24;
-    _PWM7  = ( unsigned char )API[PWM7 ] * 24;
-    _PWM8  = ( unsigned char )API[PWM8 ] * 24;
-    _PWM9  = ( unsigned char )API[PWM9 ] * 24;
-    _PWM10 = ( unsigned char )API[PWM10] * 24;
-    _PWM11 = ( unsigned char )API[PWM11] * 24;
-    _PWM12 = ( unsigned char )API[PWM12] * 24;
+    _PWM1  = ( unsigned char )API[PWM1_SETPOINT ] * 24;
+    _PWM2  = ( unsigned char )API[PWM2_SETPOINT ] * 24;
+    _PWM3  = ( unsigned char )API[PWM3_SETPOINT ] * 24;
+    _PWM4  = ( unsigned char )API[PWM4_SETPOINT ] * 24;
+    _PWM5  = ( unsigned char )API[PWM5_SETPOINT ] * 24;
+    _PWM6  = ( unsigned char )API[PWM6_SETPOINT ] * 24;
+    _PWM7  = ( unsigned char )API[PWM7_SETPOINT ] * 24;
+    _PWM8  = ( unsigned char )API[PWM8_SETPOINT ] * 24;
+    _PWM9  = ( unsigned char )API[PWM9_SETPOINT ] * 24;
+    _PWM10 = ( unsigned char )API[PWM10_SETPOINT] * 24;
+    _PWM11 = ( unsigned char )API[PWM11_SETPOINT] * 24;
+    _PWM12 = ( unsigned char )API[PWM12_SETPOINT] * 24;
 	
 	PDC1 = _PWM1 ;
     SDC1 = _PWM2 ;
@@ -189,18 +204,18 @@ void PWMxSetDutyCycles(){
  *                  boards and put the content in the API
  *****************************************************************************/
 void PWMxReadxOccupiedxSignals(){
-    API[PWM1_OCC]  = !OCC_1;
-    API[PWM2_OCC]  = !OCC_2;
-    API[PWM3_OCC]  = !OCC_3;
-    API[PWM4_OCC]  = !OCC_4;
-    API[PWM5_OCC]  = !OCC_5;
-    API[PWM6_OCC]  = !OCC_6;
-    API[PWM7_OCC]  = !OCC_7;
-    API[PWM8_OCC]  = !OCC_8;
-    API[PWM9_OCC]  = !OCC_9;
-    API[PWM10_OCC] = !OCC_10;
-    API[PWM11_OCC] = !OCC_11;
-    API[PWM12_OCC] = !OCC_12;    
+    API[PWM1_OCCUPIED]  = !OCCUPIED_1;
+    API[PWM2_OCCUPIED]  = !OCCUPIED_2;
+    API[PWM3_OCCUPIED]  = !OCCUPIED_3;
+    API[PWM4_OCCUPIED]  = !OCCUPIED_4;
+    API[PWM5_OCCUPIED]  = !OCCUPIED_5;
+    API[PWM6_OCCUPIED]  = !OCCUPIED_6;
+    API[PWM7_OCCUPIED]  = !OCCUPIED_7;
+    API[PWM8_OCCUPIED]  = !OCCUPIED_8;
+    API[PWM9_OCCUPIED]  = !OCCUPIED_9;
+    API[PWM10_OCCUPIED] = !OCCUPIED_10;
+    API[PWM11_OCCUPIED] = !OCCUPIED_11;
+    API[PWM12_OCCUPIED] = !OCCUPIED_12;    
 }
 
 /******************************************************************************
@@ -218,21 +233,56 @@ void PWMxReadxOccupiedxSignals(){
  *                  the actual content of the API
  *****************************************************************************/
 void PWMxSETxALLxAMP(){
+    
+    AMP1_ENABLE  = API[PWM1_ENABLE]; 
+    AMP2_ENABLE  = API[PWM2_ENABLE];
     /*
-    AMP_1  = API[PWM1_ENA]; 
-    AMP_2  = API[PWM2_ENA]; 
-    AMP_3  = API[PWM3_ENA]; 
-    AMP_4  = API[PWM4_ENA]; 
-    AMP_5  = API[PWM5_ENA]; 
-    AMP_6  = API[PWM6_ENA]; 
-    AMP_7  = API[PWM7_ENA]; 
-    AMP_8  = API[PWM8_ENA];
-    AMP_9  = API[PWM9_ENA]; 
-    AMP_10 = API[PWM10_ENA];
-    AMP_11 = API[PWM11_ENA];
-    AMP_12 = API[PWM12_ENA];
+    AMP_3  = API[PWM3_ENABLE]; 
+    AMP_4  = API[PWM4_ENABLE]; 
+    AMP_5  = API[PWM5_ENABLE]; 
+    AMP_6  = API[PWM6_ENABLE]; 
+    AMP_7  = API[PWM7_ENABLE]; 
+    AMP_8  = API[PWM8_ENABLE];
+    AMP_9  = API[PWM9_ENABLE]; 
+    AMP_10 = API[PWM10_ENABLE];
+    AMP_11 = API[PWM11_ENABLE];
+    AMP_12 = API[PWM12_ENABLE];
     */
 }
+
+/******************************************************************************
+ * Function:        PWMxSETxALLxAMPxDIRECTIONS
+ *
+ * PreCondition:    Execute this routine every cycle
+ *
+ * Input:           0 = backwards, 1 = forwards
+ *
+ * Output:          None
+ *
+ * Side Effects:    None
+ *
+ * Overview:        Here all PWM Directions are set according to the 
+ *                  PWMx_DIRECTION in the API. 
+ *****************************************************************************/
+void PWMxSETxALLxAMPxDIRECTIONS(){
+    
+    AMP1_DIRECTION  = API[PWM1_DIRECTION]; 
+	AMP2_DIRECTION  = API[PWM2_DIRECTION]; 	
+    /*
+	AMP3_DIRECTION  = API[PWM3_DIRECTION];  
+	AMP4_DIRECTION  = API[PWM4_DIRECTION];  
+	AMP5_DIRECTION  = API[PWM5_DIRECTION];  
+	AMP6_DIRECTION  = API[PWM6_DIRECTION];  
+	AMP7_DIRECTION  = API[PWM7_DIRECTION];  
+	AMP8_DIRECTION  = API[PWM8_DIRECTION];  
+	AMP9_DIRECTION  = API[PWM9_DIRECTION];  
+	AMP10_DIRECTION = API[PWM10_DIRECTION]; 
+	AMP11_DIRECTION = API[PWM11_DIRECTION]; 
+	AMP12_DIRECTION = API[PWM12_DIRECTION]; 
+    */
+}
+	
+	
 
 /******************************************************************************
  * Function:        PWMxSTART
@@ -250,18 +300,18 @@ void PWMxSETxALLxAMP(){
  *                  directly written to the outputs by calling PWMxSETxALLxAMP()
  *****************************************************************************/
 void PWMxSTART(){
-    API[PWM1_ENA]  = 1;
-    API[PWM2_ENA]  = 1;
-    API[PWM3_ENA]  = 1;
-    API[PWM4_ENA]  = 1;
-    API[PWM5_ENA]  = 1;
-    API[PWM6_ENA]  = 1;
-    API[PWM7_ENA]  = 1;
-    API[PWM8_ENA]  = 1;
-    API[PWM9_ENA]  = 1;
-    API[PWM10_ENA] = 1;
-    API[PWM11_ENA] = 1;
-    API[PWM12_ENA] = 1;
+    API[PWM1_ENABLE]  = 1;
+    API[PWM2_ENABLE]  = 1;
+    API[PWM3_ENABLE]  = 1;
+    API[PWM4_ENABLE]  = 1;
+    API[PWM5_ENABLE]  = 1;
+    API[PWM6_ENABLE]  = 1;
+    API[PWM7_ENABLE]  = 1;
+    API[PWM8_ENABLE]  = 1;
+    API[PWM9_ENABLE]  = 1;
+    API[PWM10_ENABLE] = 1;
+    API[PWM11_ENABLE] = 1;
+    API[PWM12_ENABLE] = 1;
 	PWMxSETxALLxAMP();
 }
 
@@ -281,17 +331,17 @@ void PWMxSTART(){
  *                  directly written to the outputs by calling PWMxSETxALLxAMP()
  *****************************************************************************/
 void PWMxSTOP(){
-    API[PWM1_ENA]  = 0;
-    API[PWM2_ENA]  = 0;
-    API[PWM3_ENA]  = 0;
-    API[PWM4_ENA]  = 0;
-    API[PWM5_ENA]  = 0;
-    API[PWM6_ENA]  = 0;
-    API[PWM7_ENA]  = 0;
-    API[PWM8_ENA]  = 0;
-    API[PWM9_ENA]  = 0;
-    API[PWM10_ENA] = 0;
-    API[PWM11_ENA] = 0;
-    API[PWM12_ENA] = 0;
+    API[PWM1_ENABLE]  = 0;
+    API[PWM2_ENABLE]  = 0;
+    API[PWM3_ENABLE]  = 0;
+    API[PWM4_ENABLE]  = 0;
+    API[PWM5_ENABLE]  = 0;
+    API[PWM6_ENABLE]  = 0;
+    API[PWM7_ENABLE]  = 0;
+    API[PWM8_ENABLE]  = 0;
+    API[PWM9_ENABLE]  = 0;
+    API[PWM10_ENABLE] = 0;
+    API[PWM11_ENABLE] = 0;
+    API[PWM12_ENABLE] = 0;
 	PWMxSETxALLxAMP();
 }

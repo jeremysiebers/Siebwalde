@@ -11,6 +11,7 @@
         <itemPath>Peripherals/i2c.h</itemPath>
       </logicalFolder>
       <itemPath>main.h</itemPath>
+      <itemPath>api.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -28,6 +29,7 @@
       </logicalFolder>
       <itemPath>main_slave.c</itemPath>
       <itemPath>main_master.c</itemPath>
+      <itemPath>api.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

@@ -20,6 +20,7 @@ extern void PWMxReadxOccupiedxSignals(void);
 extern void PWMxSTART(void);
 extern void PWMxSTOP(void);
 extern void PWMxSETxALLxAMP(void);
+extern void PWMxSETxALLxAMPxDIRECTIONS(void);
 
 #ifdef	__cplusplus
 }

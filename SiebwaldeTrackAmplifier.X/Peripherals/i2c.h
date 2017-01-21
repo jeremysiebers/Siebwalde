@@ -20,7 +20,6 @@
 extern void I2CxInitialize(void);
 extern void I2C1xISR(void);
 
-extern uint8_t API[256];
 struct FlagType
 {
     uint8_t AddrFlag : 1;

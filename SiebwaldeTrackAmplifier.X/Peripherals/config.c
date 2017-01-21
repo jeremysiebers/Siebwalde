@@ -5,7 +5,7 @@
  * Created on April 5, 2016, 8:46 PM
  */
 
-#include "xc.h"
+#include <xc.h>
 #include "config.h"
 
 // DSPIC33EP512GM304 Configuration Bit Settings
@@ -47,6 +47,7 @@
 
 void SYSTEMxInitialize(void) {
     OSCILLATOR_Initialize();
+    APIxInitialize();
     IO_Configuration();
     EUSART1xInitialize();
     PWMxInitialize();
@@ -116,15 +117,15 @@ void IO_Configuration(void) {
     TRISBbits.TRISB12 = 0;  // PWM2H
     TRISBbits.TRISB13 = 0;  // PWM2L
     
-    TRISBbits.TRISB10 = 0;  // PWM3H
-    TRISBbits.TRISB11 = 0;  // PWM3L    
+    TRISBbits.TRISB10 = 0;  // AMP1_DIRECTION //PWM3H
+    TRISBbits.TRISB11 = 0;  // AMP2_DIRECTION //PWM3L    
     
     TRISAbits.TRISA10 = 0;  // PWM4H
     TRISAbits.TRISA7 = 0;   // PWM4L
     
-    TRISCbits.TRISC8 = 0;   // PWM5H
-    TRISCbits.TRISC9 = 0;   // PWM5L
+    TRISCbits.TRISC8 = 1;   // AMP1_TFLAG //PWM5H
+    TRISCbits.TRISC9 = 1;   // AMP2_TFLAG //PWM5L
     
-    TRISCbits.TRISC6 = 0;   // PWM6H
-    TRISCbits.TRISC7 = 0;   // PWM6L
+    TRISCbits.TRISC6 = 0;   // AMP1_ENABLE //PWM6H
+    TRISCbits.TRISC7 = 0;   // AMP2_ENABLE //PWM6L
 }
