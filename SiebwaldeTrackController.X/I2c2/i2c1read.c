@@ -8,7 +8,7 @@
 *     Description:      Read single byte from I2C1 bus.             *
 ********************************************************************/
 #if defined (I2C_V2) || defined (I2C_V3) || defined (I2C_V5) || defined (I2C_V6) || defined (I2C_V6_1) || defined (I2C_V6_2)
-unsigned char ReadI2C1( void )
+unsigned int ReadI2C1( void )
 {
 
 if( ((SSP1CON1&0x0F)==0x08) || ((SSP1CON1&0x0F)==0x0B) )	//master mode only

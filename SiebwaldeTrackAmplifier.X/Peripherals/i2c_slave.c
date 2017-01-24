@@ -110,47 +110,60 @@ void I2C1xISR()
             flag.AddrFlag = 0;
             flag.DataFlag = 1;                                                  // next byte is data which must be written to API
             temp = I2C1RCV;                                                     // Readout the received data
-            if (temp == 255){                                                   // if the Master indicates a read from specified API address next time
+            if (temp == 0xAA){                                                  // if the Master indicates a read or write from/to specified API address next time
                 MasterCmd = temp;                                               // Store the master command that it wants to read memory next time
             }
-            else{                                                               // Else a direct write to memory is required next time and the apiPtr is set
-                MasterCmd = 0;                                                  // reset Master command
-                if (temp > APISIZE){                                            // When a request is to write a memory location outside APISIZE
-                    flag.GCFlag   = 0;                                          // reset all flags
-                    flag.AddrFlag = 0;                                                  
-                    flag.DataFlag = 0;
-                    NotAckI2C1();                                               // Send a Not-Acknowledge
-                }
-                else if (GETxAPIxRW(temp) == RO){                               // check if the memory location in API is ReadOnly
-                    flag.GCFlag   = 0;                                          // reset all flags
-                    flag.AddrFlag = 0;                                                  
-                    flag.DataFlag = 0;
-                    NotAckI2C1();                                               // Send a Not-Acknowledge
-                }
-                else{
-                    apiPtr = apiPtr + temp;                                     // Set the API address to be written (can only be 255 - 1(255) = 254 addresses)
-                }                
+            else if (temp == 0x55){                                             // Else a write to memory is required next time and the apiPtr must get set
+                MasterCmd = temp;                                               // Store the master command that it wants to write memory next time
             }
             #if defined( USE_I2C_Clock_Stretch )
             I2C1CONbits.SCLREL = 1;                                             //Release SCL1 line
             #endif
         }
-        else if( flag.DataFlag && MasterCmd == 0 && !flag.GCFlag)               // When again data is received and it is a direct write to API
+        else if( flag.DataFlag == 1 && MasterCmd == 0x55 && !flag.GCFlag)       // When again data is received and it is a write to API
         {
-            *apiPtr = ( unsigned char ) I2C1RCV;                                // store data into RAM API
-            flag.AddrFlag = 0;                                                  //end of tx
+            temp = I2C1RCV;
+            if (temp > APISIZE){                                                // When a request is to write a memory location outside APISIZE
+                    flag.GCFlag   = 0;                                          // reset all flags
+                    flag.AddrFlag = 0;                                                  
+                    flag.DataFlag = 0;
+                    NotAckI2C1();                                               // Send a Not-Acknowledge
+            }
+            else if (GETxAPIxRW(temp) == RO){                                   // check if the memory location in API is ReadOnly
+                flag.GCFlag   = 0;                                              // reset all flags
+                flag.AddrFlag = 0;                                                  
+                flag.DataFlag = 0;
+                MasterCmd = 0;                                                  // Reset MasterCmd
+                NotAckI2C1();                                                   // Send a Not-Acknowledge
+            }
+            else{
+                apiPtr = apiPtr + temp;                                         // Set the API address to be written
+                flag.AddrFlag = 0;                                              // end of tx
+                flag.DataFlag = 2;                                              // Get the data next time which will be written to API
+            }
+            #if defined( USE_I2C_Clock_Stretch )
+            I2C1CONbits.SCLREL = 1;                                             // Release SCL1 line
+            #endif            
+        }
+        else if( flag.DataFlag == 2 && MasterCmd == 0x55 && !flag.GCFlag)       // When again data is received and it is a write to API
+        {
+            temp = I2C1RCV;
+            *apiPtr = ( unsigned char ) temp;                                   // store data into RAM API
+            flag.AddrFlag = 0;                                                  // end of tx
             flag.DataFlag = 0;
-            apiPtr = &API[0];                                                   //reset the API pointer
+            apiPtr = &API[0];                                                   // reset the API pointer
+            MasterCmd = 0;                                                      // Reset MasterCmd
             #if defined( USE_I2C_Clock_Stretch )
             I2C1CONbits.SCLREL = 1;                                             //Release SCL1 line
             #endif            
         }
-        else if( flag.DataFlag && MasterCmd == 255 && !flag.GCFlag){            // When again data is received and a master command is active set the apiPtr to this address of the API
+        else if( flag.DataFlag == 1 && MasterCmd == 0xAA && !flag.GCFlag){      // When again data is received and a master command is active set the apiPtr to this address of the API
             apiPtr = apiPtr + I2C1RCV;                                          // Hold the address the Master wants to read next time
-            flag.AddrFlag = 0;                                                  //end of tx
-            flag.DataFlag = 0;
+            flag.AddrFlag = 0;                                                  // end of tx
+            flag.DataFlag = 0;                                                  // Reset receive of data to be written to API for next time
+            MasterCmd = 0;                                                      // Reset MasterCmd
             #if defined( USE_I2C_Clock_Stretch )
-            I2C1CONbits.SCLREL = 1;                                             //Release SCL1 line
+            I2C1CONbits.SCLREL = 1;                                             // Release SCL1 line
             #endif            
         }
         else if (flag.GCFlag){                                                  // When a General Call address was received

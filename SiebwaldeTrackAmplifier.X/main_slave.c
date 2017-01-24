@@ -31,7 +31,7 @@ int main(void) {
 		
         UpdateToPutty++;
         
-        if (UpdateToPutty > 0x90000)
+        if (UpdateToPutty > 0x30000)
         {
             UpdateToPutty = 0;    
             //Led1 ^= 1;

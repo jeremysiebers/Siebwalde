@@ -23,7 +23,7 @@ extern void I2C1xISR(void);
 struct FlagType
 {
     uint8_t AddrFlag : 1;
-    uint8_t DataFlag : 1;
+    uint8_t DataFlag : 2;
     uint8_t GCFlag   : 1;
 };
 extern struct FlagType  flag;

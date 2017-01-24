@@ -3,11 +3,11 @@
 
 
 #define Led3						PORTBbits.RB2	//Output
-#define Led2						PORTAbits.RA4	//Output
-#define Led1						PORTAbits.RA5	//Output
-#define Output_Enable				PORTBbits.RB4	//Output
-#define IO_Expander_Enable			PORTBbits.RB3	//Output
-#define To_Externall_WDT_Pulse		PORTBbits.RB5	//Output
+#define Led2						PORTBbits.RB1	//Output
+#define Led1						PORTBbits.RB0	//Output
+//#define Output_Enable				PORTBbits.RB4	//Output
+//#define IO_Expander_Enable			PORTBbits.RB3	//Output
+//#define To_Externall_WDT_Pulse		PORTBbits.RB5	//Output
 
 #define TOP 1
 #define BOTTOM 0

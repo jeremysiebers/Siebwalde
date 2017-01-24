@@ -261,7 +261,7 @@ Remarks            : This Macro determines if there is any byte to read from
 
 #define DataRdyI2C DataRdyI2C1
 
-unsigned char ReadI2C1( void );
+unsigned int ReadI2C1( void );
 #define ReadI2C ReadI2C1
 
 /**************************************************************************
@@ -614,7 +614,7 @@ Remarks            : This Macro determines if there is any byte to read from
 *************************************************************************/
 #define DataRdyI2C2()    (SSP2STATbits.BF)
 
-unsigned char ReadI2C2( void );
+unsigned int ReadI2C2( void );
 
 /**************************************************************************
 Macro       : getcI2C2

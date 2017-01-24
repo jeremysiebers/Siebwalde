@@ -8,20 +8,20 @@
 #include "Diagnostic_ret.h"
 #include "I2c2/i2c.h"
 #include "api.h"
+#include "TrackAmplifier.h"
 
-#define ACK      0
-#define WCOL    -1
-#define NACK    -2
-#define TIMEOUT -3
 
-char TrackAmplifier_Write(unsigned char address, unsigned char *data);
+
+char TrackAmplifier_Write(unsigned char address, unsigned char *writecommand);
 char TrackAmplifier_Read(unsigned char address, unsigned char *data);
 
 const unsigned char rW = 0, Rw = 1;                                             // I2C Write and Read
 unsigned char addrW, addrR;
-unsigned char DataReceived = 0;
-unsigned char ReadCommand[3] = {255,0,'\0'};
+unsigned int DataReceived = 0;
+unsigned char ReadCommand[3] = {0xAA,0,'\0'};
+unsigned char WriteCommand[4] = {0x55,0,0,'\0'};
 unsigned char *DataReceivedToLoc;
+char _return_val;
 
 /******************************************************************************
  * Function:        TrackAmplifierxReadxAPI(unsigned char address, unsigned char data)
@@ -30,7 +30,7 @@ unsigned char *DataReceivedToLoc;
  *
  * Input:           Address of amp, api index to read, pointer to ram data to return the data to
  *
- * Output:          None
+ * Output:          ACK, NACK, TIMEOUT
  *
  * Side Effects:    None
  *
@@ -40,7 +40,7 @@ unsigned char *DataReceivedToLoc;
 
 char TrackAmplifierxReadxAPI(unsigned char address, unsigned char api_index, unsigned char *data){
     
-    ReadCommand[1] = api_index;                                                       // fill in the api mem register to read
+    ReadCommand[1] = api_index;                                                 // fill in the api mem register to read
         
     switch (TrackAmplifier_Write(address, ReadCommand)){
         case ACK : break;
@@ -75,18 +75,21 @@ char TrackAmplifierxReadxAPI(unsigned char address, unsigned char api_index, uns
  *
  * PreCondition:    None
  *
- * Input:           None
+ * Input:           Address of slave, api index to be written to and the data (null terminated)
  *
- * Output:          None
+ * Output:          ACK, NACK, WCOL
  *
  * Side Effects:    None
  *
  * Overview:        None
  *****************************************************************************/
 
-char TrackAmplifierxWritexAPI(unsigned char address, unsigned char *data){
+char TrackAmplifierxWritexAPI(unsigned char address, unsigned char api_index, unsigned char data){
     
-    switch (TrackAmplifier_Write(address, data)){
+    WriteCommand[1] = api_index;                                                // fill in the api mem register to write to
+    WriteCommand[2] = data;
+    
+    switch (TrackAmplifier_Write(address, WriteCommand)){
         case ACK : return(ACK);
         break;
 
@@ -98,7 +101,7 @@ char TrackAmplifierxWritexAPI(unsigned char address, unsigned char *data){
         
         default : return(NACK);
         break;
-    }
+    }    
 }
 
 /******************************************************************************
@@ -112,43 +115,54 @@ char TrackAmplifierxWritexAPI(unsigned char address, unsigned char *data){
  *
  * Side Effects:    None
  *
- * Overview:        Write data to an address ( null terminated!! )
+ * Overview:        Write data to an address ( data null terminated!! )
  *****************************************************************************/
 
-char TrackAmplifier_Write(unsigned char address, unsigned char *data){
-
+char TrackAmplifier_Write(unsigned char address, unsigned char *writecommand){
+    
+    _return_val = 0;
     addrW = (address << 1) | rW; // shift the address due to LSB is read/write bit (0 for write)
     IdleI2C2();
-	StartI2C2();
+    StartI2C2();
     switch (WriteI2C2(addrW))
     {
-        case ACK : break;
+        case ACK : _return_val = 0;
+        break;
 
-        case NACK: return(NACK);
+        case NACK: _return_val = NACK;
         break;
-        
-        case WCOL: return(WCOL);
+
+        case WCOL: _return_val = WCOL;
         break;
-        
-        default : return(NACK);
+
+        default : _return_val = NACK;
         break;
     }
     
-    switch (putsI2C2(data))
+    if (_return_val != ACK)
     {
-        case ACK : break;
-
-        case NACK: return(NACK);
-        break;
-        
-        case WCOL: return(WCOL);
-        break;
-        
-        default : return(NACK);
-        break;
+        IdleI2C2();
+        StopI2C2();
+        return(_return_val);
     }
+    
+    switch (putsI2C2(writecommand))
+    {
+        case ACK : _return_val = ACK;
+            break;
+
+        case NACK: _return_val = NACK;
+        break;
+        
+        case WCOL: _return_val = WCOL;
+        break;
+        
+        default : _return_val = NACK;
+        break;
+    } 
+    IdleI2C2();
     StopI2C2();
-    return(ACK);
+    return(_return_val);
 }
 
 /******************************************************************************
@@ -186,17 +200,16 @@ char TrackAmplifier_Read(unsigned char address, unsigned char *data){
         break;
     }
     
-    switch (DataReceived = ReadI2C2())
-    {
-        case 255 :   return(TIMEOUT);
-        break;
-
-        default :   *DataReceivedToLoc = DataReceived;                          // write the data received to the pointed location
-                    StopI2C2();
-                    return(ACK);
-                    break;
+    DataReceived = ReadI2C2();
+    if (DataReceived > 0x7FFF){
+        StopI2C2();
+        return(TIMEOUT);
     }
-    
+    else{
+        *DataReceivedToLoc = DataReceived;                                      // write the data received to the pointed location
+        StopI2C2();
+        return(ACK);
+    }
 }
 
 /*

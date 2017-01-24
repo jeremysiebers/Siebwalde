@@ -8,12 +8,20 @@
 #ifndef TRACKAMPLIFIER_H
 #define	TRACKAMPLIFIER_H
 
+#define ACK         0
+#define WCOL        -1
+#define NACK        -2
+#define TIMEOUT     -3
+#define WRITE       11
+#define READ        10
+
+
 #ifdef	__cplusplus
 extern "C" {
 #endif
 
-    extern char TrackAmplifierxWritexAPI(unsigned char address, unsigned char data);
-    extern char TrackAmplifierxReadxAPI(unsigned char address, unsigned char data);
+    extern char TrackAmplifierxWritexAPI(unsigned char address, unsigned char api_index, unsigned char data);
+    extern char TrackAmplifierxReadxAPI(unsigned char address, unsigned char api_index, unsigned char *data);
 
 #ifdef	__cplusplus
 }

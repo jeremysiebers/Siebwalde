@@ -61,6 +61,8 @@ static void Init_Pwm(void);
 static void I2C1_Initialize(void);
 
 unsigned char Enable_State_Machine_Update = 0;
+unsigned char Data_receieved[1];
+unsigned char *DataR;
 
 //MAIN ROUTINE///////////////////////////////////////////////////////////////////////////////////////////
 void main()
@@ -83,6 +85,8 @@ void main()
     EUSART1_Initialize();
     //EUSART2_Initialize();
     I2C1_Initialize();
+    
+    DataR = &Data_receieved[0];
         
     while(1)
 	{
@@ -93,10 +97,32 @@ void main()
 	 	Diagnostic();
 	    Command();
 	    
-        
         if (Enable_State_Machine_Update == True)
 		{
-            Enable_State_Machine_Update = False;
+            Led2 ^= 1;
+            switch (TrackAmplifierxWritexAPI(0x50, PWM1_SETPOINT, 127)){
+                case ACK  : Enable_State_Machine_Update = False;//Led3 ^= 1;
+                    break;
+                case NACK :Enable_State_Machine_Update = False;//Led2 = 0;
+                    break;
+                case WCOL :Enable_State_Machine_Update = False;//Led2 = 0;
+                    break;
+                case TIMEOUT :Enable_State_Machine_Update = False;//Led2 = 0;
+                    break;
+                default : break;
+            }
+            
+            switch (TrackAmplifierxReadxAPI(0x50, PWM1_SETPOINT, DataR)){
+                case ACK  : Enable_State_Machine_Update = False;Led3 ^= 1;
+                    break;
+                case NACK :Enable_State_Machine_Update = False;//Led2 = 0;
+                    break;
+                case WCOL :Enable_State_Machine_Update = False;//Led2 = 0;
+                    break;
+                case TIMEOUT :Enable_State_Machine_Update = False;//Led2 = 0;
+                    break;
+                default : break;
+            }
         }
         
         #if defined (USE_TCPIP)
@@ -139,7 +165,7 @@ void interrupt_at_low_vector (void)
 #pragma interrupt low_isr
 void low_isr()
 {
-	Led2 = !Led2;
+	
 	if (INTCONbits.TMR0IF){
         #if defined (USE_TCPIP)
 		TickUpdate();
@@ -150,6 +176,7 @@ void low_isr()
 		TMR1H = 0x00;//0xF3	= 3333 Hz, 0x00 = 1587 Hz, 0xF0 = 2439 Hz
 		TMR1L = 0x00;
 		Enable_State_Machine_Update = True;
+        Led1 ^= 1;
 		PIR1bits.TMR1IF=False;		
 	}	
     
