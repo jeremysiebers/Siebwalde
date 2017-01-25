@@ -65,6 +65,8 @@ char TrackAmplifierxReadxAPI(unsigned char address, unsigned char api_index, uns
         case WCOL: return(WCOL);
         break;
         
+        case TIMEOUT: return(TIMEOUT);
+        
         default : return(NACK);
         break;
     }    
@@ -122,8 +124,8 @@ char TrackAmplifier_Write(unsigned char address, unsigned char *writecommand){
     
     _return_val = 0;
     addrW = (address << 1) | rW; // shift the address due to LSB is read/write bit (0 for write)
-    IdleI2C2();
     StartI2C2();
+    IdleI2C2();    
     switch (WriteI2C2(addrW))
     {
         case ACK : _return_val = 0;
@@ -143,8 +145,11 @@ char TrackAmplifier_Write(unsigned char address, unsigned char *writecommand){
     {
         IdleI2C2();
         StopI2C2();
+        IdleI2C2();
         return(_return_val);
     }
+    
+    IdleI2C2();
     
     switch (putsI2C2(writecommand))
     {
@@ -162,6 +167,7 @@ char TrackAmplifier_Write(unsigned char address, unsigned char *writecommand){
     } 
     IdleI2C2();
     StopI2C2();
+    IdleI2C2();
     return(_return_val);
 }
 
@@ -184,8 +190,8 @@ char TrackAmplifier_Read(unsigned char address, unsigned char *data){
     DataReceivedToLoc = data;                                                   // get the address of the location were the data has to go
     
     addrR = (address << 1) | Rw; // shift the address due to LSB is read/write bit (1 for read)
-    IdleI2C2();
-	StartI2C2();
+    StartI2C2();
+    IdleI2C2();	
     switch (WriteI2C2(addrR))
     {
         case ACK : break;
@@ -199,15 +205,19 @@ char TrackAmplifier_Read(unsigned char address, unsigned char *data){
         default : return(NACK);
         break;
     }
-    
+    IdleI2C2();	
     DataReceived = ReadI2C2();
     if (DataReceived > 0x7FFF){
+        IdleI2C2();
         StopI2C2();
+        IdleI2C2();
         return(TIMEOUT);
     }
     else{
         *DataReceivedToLoc = DataReceived;                                      // write the data received to the pointed location
+        IdleI2C2();
         StopI2C2();
+        IdleI2C2();
         return(ACK);
     }
 }

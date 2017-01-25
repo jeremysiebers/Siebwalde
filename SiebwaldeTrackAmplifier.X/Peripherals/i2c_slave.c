@@ -126,15 +126,14 @@ void I2C1xISR()
             if (temp > APISIZE){                                                // When a request is to write a memory location outside APISIZE
                     flag.GCFlag   = 0;                                          // reset all flags
                     flag.AddrFlag = 0;                                                  
-                    flag.DataFlag = 0;
-                    NotAckI2C1();                                               // Send a Not-Acknowledge
+                    flag.DataFlag = 0;                    
+                    MasterCmd = 0;                                              // Reset MasterCmd         
             }
             else if (GETxAPIxRW(temp) == RO){                                   // check if the memory location in API is ReadOnly
                 flag.GCFlag   = 0;                                              // reset all flags
                 flag.AddrFlag = 0;                                                  
                 flag.DataFlag = 0;
-                MasterCmd = 0;                                                  // Reset MasterCmd
-                NotAckI2C1();                                                   // Send a Not-Acknowledge
+                MasterCmd = 0;                                                  // Reset MasterCmd                
             }
             else{
                 apiPtr = apiPtr + temp;                                         // Set the API address to be written
@@ -185,6 +184,17 @@ void I2C1xISR()
             I2C1CONbits.SCLREL = 1;                                             //Release SCL1 line
             #endif
         }
+        else{                                                                   // Reset all
+            flag.GCFlag   = 0;                                                  // reset all flags
+            flag.AddrFlag = 0;                                                  
+            flag.DataFlag = 0;     
+            apiPtr = &API[0];                                                   // reset the API pointer
+            MasterCmd = 0;                                                      // Reset MasterCmd
+            temp = I2C1RCV;                                                     // dummy read
+            #if defined( USE_I2C_Clock_Stretch )
+            I2C1CONbits.SCLREL = 1;                                             //Release SCL1 line
+            #endif
+        }
     }
     else if( (I2C1STATbits.R_W == 1) && (I2C1STATbits.D_A == 0) )               //I2C1 Address matched and a read from master is detected
     {        
@@ -192,7 +202,10 @@ void I2C1xISR()
         I2C1TRN = *apiPtr;                                                      // Read data from API on specified location & send data to I2C master device
         I2C1CONbits.SCLREL = 1;                                                 //Release SCL1 line
         while( I2C1STATbits.TBF );                                              //Wait till all has been sent
-        apiPtr = &API[0];                                                       //reset the RAM pointer           
+        apiPtr = &API[0];                                                       //reset the RAM pointer   
+        flag.GCFlag   = 0;                                                      // reset all flags
+        flag.AddrFlag = 0;                                                  
+        flag.DataFlag = 0;        
     }
 }
 /**

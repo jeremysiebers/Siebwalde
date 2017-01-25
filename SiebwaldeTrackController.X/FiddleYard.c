@@ -63,6 +63,7 @@ static void I2C1_Initialize(void);
 unsigned char Enable_State_Machine_Update = 0;
 unsigned char Data_receieved[1];
 unsigned char *DataR;
+unsigned int I2C_write_counter = 1, I2C_read_counter = 1;
 
 //MAIN ROUTINE///////////////////////////////////////////////////////////////////////////////////////////
 void main()
@@ -87,6 +88,10 @@ void main()
     I2C1_Initialize();
     
     DataR = &Data_receieved[0];
+    
+    printf("PIC18f97j60 started up!!!\n\r");
+    printf("\f");                                                               // Clear terminal (printf("\033[2J");)
+    printf("PIC18f97j60 started up!!!\n\r");                                    // Welcome message
         
     while(1)
 	{
@@ -99,30 +104,44 @@ void main()
 	    
         if (Enable_State_Machine_Update == True)
 		{
-            Led2 ^= 1;
-            switch (TrackAmplifierxWritexAPI(0x50, PWM1_SETPOINT, 127)){
-                case ACK  : Enable_State_Machine_Update = False;//Led3 ^= 1;
+            //printf("\f");
+            //printf("Start write: %d\n\r",I2C_write_counter);
+            //printf("Start read: %d\n\r",I2C_read_counter);
+            switch (TrackAmplifierxWritexAPI(0x50, PWM1_SETPOINT, 0x55)){
+                case ACK  : I2C_write_counter++;
                     break;
-                case NACK :Enable_State_Machine_Update = False;//Led2 = 0;
+                case NACK :printf("Set:NACK\n\r");
                     break;
-                case WCOL :Enable_State_Machine_Update = False;//Led2 = 0;
+                case WCOL :printf("Set:WCOL\n\r");
                     break;
-                case TIMEOUT :Enable_State_Machine_Update = False;//Led2 = 0;
+                case TIMEOUT :printf("Set:TIMEOUT\n\r");
                     break;
                 default : break;
-            }
-            
+            }            
             switch (TrackAmplifierxReadxAPI(0x50, PWM1_SETPOINT, DataR)){
-                case ACK  : Enable_State_Machine_Update = False;Led3 ^= 1;
+                case ACK  : I2C_read_counter++;
                     break;
-                case NACK :Enable_State_Machine_Update = False;//Led2 = 0;
+                case NACK :printf("Read:NACK\n\r");//Led2 = 0;
                     break;
-                case WCOL :Enable_State_Machine_Update = False;//Led2 = 0;
+                case WCOL :printf("Read:WCOL\n\r");//Led2 = 0;
                     break;
-                case TIMEOUT :Enable_State_Machine_Update = False;//Led2 = 0;
+                case TIMEOUT :printf("Read:TIMEOUT\n\r");//Led2 = 0;
                     break;
                 default : break;
             }
+            //printf("Done\n\r");
+            //printf("\033[3A");
+            //Delay10KTCYx(255);
+            if (I2C_write_counter >99){
+                I2C_write_counter = 0;
+                Led2 ^= 1;
+            }
+            if (I2C_read_counter >99){
+                I2C_read_counter = 0;
+                Led3 ^= 1;
+            }
+            Enable_State_Machine_Update = False;
+            //T1CON = 0x81;
         }
         
         #if defined (USE_TCPIP)
@@ -176,8 +195,8 @@ void low_isr()
 		TMR1H = 0x00;//0xF3	= 3333 Hz, 0x00 = 1587 Hz, 0xF0 = 2439 Hz
 		TMR1L = 0x00;
 		Enable_State_Machine_Update = True;
-        Led1 ^= 1;
-		PIR1bits.TMR1IF=False;		
+        Led1 ^= 1;        
+        PIR1bits.TMR1IF=False;        	
 	}	
     
     if (PIE3bits.RC2IE == 1 && PIR3bits.RC2IF == 1) {
@@ -244,7 +263,7 @@ void Init_Timers()
 	
 	TMR1H = 0x0;
 	TMR1L = 0x0;
-	T1CON = 0xB1; //16 Bit and ON and 1:8 prescale              //T1CON = 0x81;					// 0xB1 = 1:8(40mS), 0xA1 = 1:4(22.5mS), 0x91 = 1:2(11mS), 0x81 = 1:1(5.5mS) 0x81 = 16Bit and enabled
+	T1CON = 0x80; //0xB1 16 Bit and ON and 1:8 prescale              //T1CON = 0x81;					// 0xB1 = 1:8(40mS), 0xA1 = 1:4(22.5mS), 0x91 = 1:2(11mS), 0x81 = 1:1(5.5mS) 0x81 = 16Bit and enabled
     T4CON = 0x00; //Timer OFF
 }
 
@@ -296,10 +315,11 @@ void I2C1_Initialize(){
     // all calls to I2C lib must be nummerated with 2 : OpenI2C2																													   _																																	
     //---INITIALISE THE I2C MODULE FOR MASTER MODE WITH 100KHz ---		
     //400kHz Baud clock @41.667MHz = 0x19 // 100kHz Baud clock @41.667MHz = 0x67 // 1MHz Baud clock @41.667MHz = 0x09 // 1.7MHzBaud clock @41.667MHz = 0x05
-    SSP2ADD= 0x67;
+    SSP2ADD= 0x19;
     //read any previous stored content in buffer to clear buffer full status   EXPNDNQ
     temp = SSP2BUF;
     OpenI2C2(MASTER,SLEW_OFF);
+    T1CONbits.TMR1ON = 1; // start timer1 here after I2C is ready
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
