@@ -110,22 +110,22 @@ void main()
             switch (TrackAmplifierxWritexAPI(0x50, PWM1_SETPOINT, 0x55)){
                 case ACK  : I2C_write_counter++;
                     break;
-                case NACK :printf("Set:NACK\n\r");
+                case NACK :printf("Set 50:NACK\n\r");
                     break;
-                case WCOL :printf("Set:WCOL\n\r");
+                case WCOL :printf("Set 50:WCOL\n\r");
                     break;
-                case TIMEOUT :printf("Set:TIMEOUT\n\r");
+                case TIMEOUT :printf("Set 50:TIMEOUT\n\r");
                     break;
                 default : break;
             }            
             switch (TrackAmplifierxReadxAPI(0x50, PWM1_SETPOINT, DataR)){
                 case ACK  : I2C_read_counter++;
                     break;
-                case NACK :printf("Read:NACK\n\r");//Led2 = 0;
+                case NACK :printf("Read 50:NACK\n\r");//Led2 = 0;
                     break;
-                case WCOL :printf("Read:WCOL\n\r");//Led2 = 0;
+                case WCOL :printf("Read 50:WCOL\n\r");//Led2 = 0;
                     break;
-                case TIMEOUT :printf("Read:TIMEOUT\n\r");//Led2 = 0;
+                case TIMEOUT :printf("Read 50:TIMEOUT\n\r");//Led2 = 0;
                     break;
                 default : break;
             }
@@ -140,6 +140,80 @@ void main()
                 I2C_read_counter = 0;
                 Led3 ^= 1;
             }
+            switch (TrackAmplifierxWritexAPI(0x51, PWM1_SETPOINT, 0x55)){
+                case ACK  : 
+                    break;
+                case NACK :printf("Set 51:NACK\n\r");
+                    break;
+                case WCOL :printf("Set 51:WCOL\n\r");
+                    break;
+                case TIMEOUT :printf("Set 51:TIMEOUT\n\r");
+                    break;
+                default : break;
+            }            
+            switch (TrackAmplifierxReadxAPI(0x51, PWM1_SETPOINT, DataR)){
+                case ACK  : 
+                    break;
+                case NACK :printf("Read 51:NACK\n\r");//Led2 = 0;
+                    break;
+                case WCOL :printf("Read 51:WCOL\n\r");//Led2 = 0;
+                    break;
+                case TIMEOUT :printf("Read 51:TIMEOUT\n\r");//Led2 = 0;
+                    break;
+                default : break;
+            }
+            switch (TrackAmplifierxWritexAPI(0x52, PWM1_SETPOINT, 0x55)){
+                case ACK  : 
+                    break;
+                case NACK :printf("Set 52:NACK\n\r");
+                    break;
+                case WCOL :printf("Set 52:WCOL\n\r");
+                    break;
+                case TIMEOUT :printf("Set 52:TIMEOUT\n\r");
+                    break;
+                default : break;
+            }            
+            switch (TrackAmplifierxReadxAPI(0x52, PWM1_SETPOINT, DataR)){
+                case ACK  : 
+                    break;
+                case NACK :printf("Read 52:NACK\n\r");//Led2 = 0;
+                    break;
+                case WCOL :printf("Read 52:WCOL\n\r");//Led2 = 0;
+                    break;
+                case TIMEOUT :printf("Read 52:TIMEOUT\n\r");//Led2 = 0;
+                    break;
+                default : break;
+            }
+            switch (TrackAmplifierxWritexAPI(0x53, PWM1_SETPOINT, 0x55)){
+                case ACK  : 
+                    break;
+                case NACK :printf("Set 53:NACK\n\r");
+                    break;
+                case WCOL :printf("Set 53:WCOL\n\r");
+                    break;
+                case TIMEOUT :printf("Set 53:TIMEOUT\n\r");
+                    break;
+                default : break;
+            }            
+            switch (TrackAmplifierxReadxAPI(0x53, PWM1_SETPOINT, DataR)){
+                case ACK  : 
+                    break;
+                case NACK :printf("Read 53:NACK\n\r");//Led2 = 0;
+                    break;
+                case WCOL :printf("Read 53:WCOL\n\r");//Led2 = 0;
+                    break;
+                case TIMEOUT :printf("Read 53:TIMEOUT\n\r");//Led2 = 0;
+                    break;
+                default : break;
+            }
+            
+            IdleI2C2();                            
+            StartI2C2();
+            IdleI2C2();  
+            WriteI2C2(0);
+            IdleI2C2(); 
+            putcI2C2('R');
+            
             Enable_State_Machine_Update = False;
             //T1CON = 0x81;
         }
@@ -263,7 +337,7 @@ void Init_Timers()
 	
 	TMR1H = 0x0;
 	TMR1L = 0x0;
-	T1CON = 0x80; //0xB1 16 Bit and ON and 1:8 prescale              //T1CON = 0x81;					// 0xB1 = 1:8(40mS), 0xA1 = 1:4(22.5mS), 0x91 = 1:2(11mS), 0x81 = 1:1(5.5mS) 0x81 = 16Bit and enabled
+	T1CON = 0xB0; //0xB1 16 Bit and ON and 1:8 prescale              //T1CON = 0x81;					// 0xB1 = 1:8(40mS), 0xA1 = 1:4(22.5mS), 0x91 = 1:2(11mS), 0x81 = 1:1(5.5mS) 0x81 = 16Bit and enabled
     T4CON = 0x00; //Timer OFF
 }
 
