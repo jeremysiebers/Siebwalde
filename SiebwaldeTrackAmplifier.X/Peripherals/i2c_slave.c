@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <libpic30.h>
+#include <timer.h>
 #include "config.h"
 #include "i2c.h"
 
@@ -172,7 +173,8 @@ void I2C1xISR()
             temp = I2C1RCV;                                                     // Readout the received command
             if (temp == 'R'){                                                   // When an C (synC) is received during broadcast
                 PWMxSetDutyCycles();                                            // Set PWM duty cycles to the PWM setpoints in the API
-                Led1 = 0;
+                Led1 = 0;    
+                T1CONbits.TON = 1;
             }
             else if (temp == 'S'){                                              // When an S (Start) is received during broadcast
                 PWMxSTART();

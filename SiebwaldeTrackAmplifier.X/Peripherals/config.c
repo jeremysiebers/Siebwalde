@@ -7,6 +7,7 @@
 
 #include <xc.h>
 #include "config.h"
+#include <timer.h>
 
 // DSPIC33EP512GM304 Configuration Bit Settings
 
@@ -52,6 +53,7 @@ void SYSTEMxInitialize(void) {
     EUSART1xInitialize();
     PWMxInitialize();
     I2CxInitialize();
+    Timers_Initialize();
 }
 
 void OSCILLATOR_Initialize(void) {
@@ -79,6 +81,15 @@ void OSCILLATOR_Initialize(void) {
     PMD6 = 0x1;
     PMD7 = 0xFFFF;
     */
+}
+
+void Timers_Initialize(void){
+    
+    /* Timer 1 used for input polling */
+    ConfigIntTimer1(T1_INT_PRIOR_1 & T1_INT_ON);
+    WriteTimer1(0);
+    OpenTimer1(T1_ON & T1_GATE_OFF & T1_IDLE_STOP & T1_PS_1_8 & T1_SYNC_EXT_OFF & T1_SOURCE_INT, 0xFFFF);
+    T1CONbits.TON = 0;
 }
 
 void IO_Configuration(void) {

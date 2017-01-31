@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <libpic30.h>
+#include <timer.h>
 #include "main.h"
 #include "Peripherals/config.h"
 
@@ -81,12 +82,20 @@ int main(void) {
             printf("PWM4 BLock 2B: %d\r\n",API[PWM4_SETPOINT]);
             
             
-            
+            /*
             if (Led1 == 0){
                 Led1 = 1;
-            }
+            }*/
         } 
     }
+}
+
+void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
+{
+    Led1 = 1;    
+    T1CONbits.TON = 0;
+    WriteTimer1(0);
+    IFS0bits.T1IF = 0;  /* Clear Timer interrupt flag */
 }
 
 void __attribute__((__interrupt__,no_auto_psv)) _U1TXInterrupt(void)

@@ -107,7 +107,7 @@ void main()
             //printf("\f");
             //printf("Start write: %d\n\r",I2C_write_counter);
             //printf("Start read: %d\n\r",I2C_read_counter);
-            switch (TrackAmplifierxWritexAPI(0x50, PWM1_SETPOINT, 0x55)){
+            switch (TrackAmplifierxWritexAPI(0x50, PWM1_SETPOINT, 0xE0)){
                 case ACK  : I2C_write_counter++;
                     break;
                 case NACK :printf("Set 50:NACK\n\r");
@@ -140,7 +140,7 @@ void main()
                 I2C_read_counter = 0;
                 Led3 ^= 1;
             }
-            switch (TrackAmplifierxWritexAPI(0x51, PWM1_SETPOINT, 0x55)){
+            switch (TrackAmplifierxWritexAPI(0x50, PWM2_SETPOINT, 0xE0)){
                 case ACK  : 
                     break;
                 case NACK :printf("Set 51:NACK\n\r");
@@ -151,7 +151,7 @@ void main()
                     break;
                 default : break;
             }            
-            switch (TrackAmplifierxReadxAPI(0x51, PWM1_SETPOINT, DataR)){
+            switch (TrackAmplifierxReadxAPI(0x50, PWM2_SETPOINT, DataR)){
                 case ACK  : 
                     break;
                 case NACK :printf("Read 51:NACK\n\r");//Led2 = 0;
@@ -213,6 +213,7 @@ void main()
             WriteI2C2(0);
             IdleI2C2(); 
             putcI2C2('R');
+            StopI2C2();
             
             Enable_State_Machine_Update = False;
             //T1CON = 0x81;

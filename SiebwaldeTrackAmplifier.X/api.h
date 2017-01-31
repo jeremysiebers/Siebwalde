@@ -32,6 +32,7 @@ extern uint8_t API[];
  * Overview:        Here all API addresses are declared
  *****************************************************************************/
 #define     API_SIZE            0                                               // Size of the API
+#define     WATCHDOG            1                                               // Variable in API will be written and read by master to verify communication on both sides
 #define     PWM_OUTPUT_MODE     10		                                        // PWM output mode, 0 is dual sided PWM, 1 is single sided PWM
 
 #define     PWM1_SETPOINT       11                                              // PWM Speed setpoint

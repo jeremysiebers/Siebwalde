@@ -20,6 +20,7 @@ extern "C" {
 extern void SYSTEMxInitialize(void);
 void OSCILLATOR_Initialize(void);
 void IO_Configuration(void);
+void Timers_Initialize(void);
 
 #ifdef	__cplusplus
 }
