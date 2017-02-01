@@ -102,7 +102,18 @@ extern uint8_t API[];
 #define     PWM11_CURRENT       91
 #define     PWM12_CURRENT       92
 
-
+#define     PWM1_GAIN	        101                                              // PWM Speed setpoint
+#define     PWM2_GAIN	        102
+#define     PWM3_GAIN	        103
+#define     PWM4_GAIN	        104
+#define     PWM5_GAIN	        105
+#define     PWM6_GAIN	        106
+#define     PWM7_GAIN	        107
+#define     PWM8_GAIN	        108
+#define     PWM9_GAIN	        109
+#define     PWM10_GAIN      	110
+#define     PWM11_GAIN      	111
+#define     PWM12_GAIN      	112
 
 /******************************************************************************
  * Function:        I/O to API 

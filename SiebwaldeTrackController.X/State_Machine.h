@@ -1,7 +1,8 @@
 #ifndef __State_Machine_H
 #define __State_Machine_H
 
-extern void State_Machine_Update(unsigned char ASL);
-extern void State_Machine_Reset(unsigned char ASL);
+extern void StatexMachinexUpdate(void);
+extern void StatexMachinexInit(void);
+extern void ReadxAmplifiers(void);
 
 #endif

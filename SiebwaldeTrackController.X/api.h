@@ -1,16 +1,22 @@
 /* 
- * File:   api.h
- * Author: Jeremy Siebers
- *
- * Created on January 20, 2017, 11:56 PM
+ * File:   
+ * Author: 
+ * Comments:
+ * Revision history: 
  */
+ 
+#ifndef XC_HEADER_TEMPLATE_H
+#define	XC_HEADER_TEMPLATE_H
 
-#ifndef API_H
-#define	API_H
+extern void APIxInitialize(void);
+extern unsigned char GETxAPIxRW(unsigned char index);
+extern uint8_t API[];
 
-#ifdef	__cplusplus
-extern "C" {
-#endif
+#define APISIZE 150
+#define RO	0
+#define RW	1
+#define DSPWM 0
+#define SSPWM 1
 
 /******************************************************************************
  * Function:        API
@@ -26,6 +32,7 @@ extern "C" {
  * Overview:        Here all API addresses are declared
  *****************************************************************************/
 #define     API_SIZE            0                                               // Size of the API
+#define     WATCHDOG            1                                               // Variable in API will be written and read by master to verify communication on both sides
 #define     PWM_OUTPUT_MODE     10		                                        // PWM output mode, 0 is dual sided PWM, 1 is single sided PWM
 
 #define     PWM1_SETPOINT       11                                              // PWM Speed setpoint
@@ -95,10 +102,97 @@ extern "C" {
 #define     PWM11_CURRENT       91
 #define     PWM12_CURRENT       92
 
+#define     PWM1_GAIN	        101                                              // PWM Speed setpoint
+#define     PWM2_GAIN	        102
+#define     PWM3_GAIN	        103
+#define     PWM4_GAIN	        104
+#define     PWM5_GAIN	        105
+#define     PWM6_GAIN	        106
+#define     PWM7_GAIN	        107
+#define     PWM8_GAIN	        108
+#define     PWM9_GAIN	        109
+#define     PWM10_GAIN      	110
+#define     PWM11_GAIN      	111
+#define     PWM12_GAIN      	112
+
+/******************************************************************************
+ * Function:        I/O to API 
+ *
+ * PreCondition:    None
+ *
+ * Input:           None
+ *
+ * Output:          None
+ *
+ * Side Effects:    None
+ *
+ * Overview:        Here all I/o is specified that is put into the API
+ *****************************************************************************/
+
+#define OCCUPIED_1           	PORTBbits.RB7                                   // OCCUPIEDupied signal input
+#define OCCUPIED_2           	PORTBbits.RB8
+#define OCCUPIED_3           	PORTCbits.RC3
+#define OCCUPIED_4           	PORTAbits.RA9
+#define OCCUPIED_5           	0 //define here I/O ports to be read
+#define OCCUPIED_6           	0
+#define OCCUPIED_7           	0
+#define OCCUPIED_8           	0
+#define OCCUPIED_9           	0
+#define OCCUPIED_10          	0
+#define OCCUPIED_11          	0
+#define OCCUPIED_12          	0
+
+
+#define AMP1_ENABLE 			TRISCbits.TRISC6                                // Amplifier anable output (BRAKE INPUT ON LMD18200T)
+#define AMP2_ENABLE 			TRISCbits.TRISC7
+#define AMP3_ENABLE 			0
+#define AMP4_ENABLE 			0
+#define AMP5_ENABLE 			0
+#define AMP6_ENABLE 			0
+#define AMP7_ENABLE 			0
+#define AMP8_ENABLE 			0
+#define AMP9_ENABLE 			0
+#define AMP10_ENABLE			0
+#define AMP11_ENABLE			0
+#define AMP12_ENABLE			0
+
+#define AMP1_TFLAG              TRISCbits.TRISC8                                // Amplifier 1 Thermal flag input (THERMAL FLAG OUTPUT ON LMD18200T)
+#define AMP2_TFLAG              TRISCbits.TRISC9
+#define AMP3_TFLAG              0
+#define AMP4_TFLAG              0
+#define AMP5_TFLAG              0
+#define AMP6_TFLAG              0
+#define AMP7_TFLAG              0
+#define AMP8_TFLAG              0
+#define AMP9_TFLAG              0
+#define AMP10_TFLAG             0
+#define AMP11_TFLAG             0
+#define AMP12_TFLAG             0
+
+/* Used only during single side PWM configuration, during double side PWM config, this ouput is connected to the PWM input on the LMD18200T and must then allways be high */
+#define AMP1_DIRECTION			TRISBbits.TRISB10                               // Amplifier 1 Direction output (DIRECTION INPUT ON LMD18200T)
+#define AMP2_DIRECTION			TRISBbits.TRISB11
+#define AMP3_DIRECTION          0
+#define AMP4_DIRECTION          0
+#define AMP5_DIRECTION          0
+#define AMP6_DIRECTION          0
+#define AMP7_DIRECTION          0
+#define AMP8_DIRECTION          0
+#define AMP9_DIRECTION          0
+#define AMP10_DIRECTION         0
+#define AMP11_DIRECTION         0
+#define AMP12_DIRECTION         0
+
+
+#ifdef	__cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+    // TODO If C++ is being used, regular C code needs function names to have C 
+    // linkage so the functions can be used by the c code. 
 
 #ifdef	__cplusplus
 }
-#endif
+#endif /* __cplusplus */
 
-#endif	/* API_H */
-
+#endif	/* XC_HEADER_TEMPLATE_H */

@@ -2,13 +2,11 @@
 #include "TCPIP Stack/TCPIP.h"
 #include "Command_Machine.h"
 #include "State_Machine.h"
-#include "Mip50_API.h"
 
 #define Enter 13
 
 static UDP_SOCKET socket2 = INVALID_UDP_SOCKET;
 
-extern void State_Machine_Reset(unsigned char ASL);
 static void Command_Exe(unsigned char Command[3]);
 void Clear_Cmd(void);
 

@@ -5,7 +5,9 @@
 #include "config.h"
 #include <xc.h>
 
-#define SET_NO_OF_PWM_OUTPUTS 2
+#define SET_NO_OF_PWM_GENERATORS_ACTIVE 1
+
+static unsigned int _PWM1,_PWM2,_PWM3,_PWM4,_PWM5,_PWM6,_PWM7,_PWM8,_PWM9,_PWM10,_PWM11,_PWM12 = 3000;
 
 
 /******************************************************************************
@@ -84,14 +86,14 @@ void PWMxInitialize(void) {
     
     /* Set PWM Mode to Independent */
     unsigned int PWM_SET_REGISTER = 0xCC00;
-    switch(SET_NO_OF_PWM_OUTPUTS){
+    switch(SET_NO_OF_PWM_GENERATORS_ACTIVE){
         case 0 : break;
         case 1 : IOCON1 = PWM_SET_REGISTER; break;
-        case 2 : IOCON1 = PWM_SET_REGISTER; break;
-        case 3 : IOCON1 = PWM_SET_REGISTER; break;
-        case 4 : IOCON1 = PWM_SET_REGISTER; break;
-        case 5 : IOCON1 = PWM_SET_REGISTER; break;
-        case 6 : IOCON1 = PWM_SET_REGISTER; break;
+        case 2 : IOCON1 = IOCON2 = PWM_SET_REGISTER; break;
+        case 3 : IOCON1 = IOCON2 = IOCON3 = PWM_SET_REGISTER; break;
+        case 4 : IOCON1 = IOCON2 = IOCON3 = IOCON4 = PWM_SET_REGISTER; break;
+        case 5 : IOCON1 = IOCON2 = IOCON3 = IOCON4 = IOCON5 = PWM_SET_REGISTER; break;
+        case 6 : IOCON1 = IOCON2 = IOCON3 = IOCON4 = IOCON5 = IOCON6 = PWM_SET_REGISTER; break;
         default: break;
     }
     //IOCON1 = IOCON2 = IOCON3 = IOCON4 = IOCON5 = IOCON6 = 0xCC00;
@@ -115,7 +117,7 @@ void PWMxInitialize(void) {
     /* Enable PWM Module */
     PTCONbits.PTEN = 1;             //  bits should be changed only when PTEN = 0. Changing the clock selection during operation will yield unpredictable results.
     
-	/* Set API register to current values */
+	/* Set API register to current values 
 	API[PWM1_SETPOINT ] = DutyCycle / 24;
 	API[PWM2_SETPOINT ] = DutyCycle / 24;
 	API[PWM3_SETPOINT ] = DutyCycle / 24;
@@ -127,7 +129,22 @@ void PWMxInitialize(void) {
 	API[PWM9_SETPOINT ] = DutyCycle / 24;
 	API[PWM10_SETPOINT] = DutyCycle / 24;
 	API[PWM11_SETPOINT] = DutyCycle / 24;
-	API[PWM12_SETPOINT] = DutyCycle / 24;
+	API[PWM12_SETPOINT] = DutyCycle / 24;*/
+	
+	_PWM1  = DutyCycle;
+	_PWM2  = DutyCycle;
+	_PWM3  = DutyCycle;
+	_PWM4  = DutyCycle;
+	_PWM5  = DutyCycle;
+	_PWM6  = DutyCycle;
+	_PWM7  = DutyCycle;
+	_PWM8  = DutyCycle;
+	_PWM9  = DutyCycle;
+	_PWM10 = DutyCycle;
+	_PWM11 = DutyCycle;
+	_PWM12 = DutyCycle;
+	
+	
 }
 
 /******************************************************************************
@@ -148,20 +165,8 @@ void PWMxInitialize(void) {
  *                  All PWM generating dsPIC's used are synced this way
  *****************************************************************************/
 void PWMxSetDutyCycles(){
-    unsigned int _PWM1;
-    unsigned int _PWM2;
-    unsigned int _PWM3;
-    unsigned int _PWM4;
-    unsigned int _PWM5;
-    unsigned int _PWM6;
-    unsigned int _PWM7;
-    unsigned int _PWM8;
-    unsigned int _PWM9;
-    unsigned int _PWM10;
-    unsigned int _PWM11;
-    unsigned int _PWM12;
     
-    /* Set Duty Cycles */
+    /* Set new Setpoints (Duty Cycles) */
     _PWM1  = ( unsigned char )API[PWM1_SETPOINT ] * 24;
     _PWM2  = ( unsigned char )API[PWM2_SETPOINT ] * 24;
     _PWM3  = ( unsigned char )API[PWM3_SETPOINT ] * 24;
@@ -174,19 +179,6 @@ void PWMxSetDutyCycles(){
     _PWM10 = ( unsigned char )API[PWM10_SETPOINT] * 24;
     _PWM11 = ( unsigned char )API[PWM11_SETPOINT] * 24;
     _PWM12 = ( unsigned char )API[PWM12_SETPOINT] * 24;
-	
-	PDC1 = _PWM1 ;
-    SDC1 = _PWM2 ;
-    PDC2 = _PWM3 ;
-    SDC2 = _PWM4 ;
-    PDC3 = _PWM5 ;
-    SDC3 = _PWM6 ;
-    PDC4 = _PWM7 ;
-    SDC4 = _PWM8 ;
-    PDC5 = _PWM9 ;
-    SDC5 = _PWM10;
-    PDC6 = _PWM11;
-    SDC6 = _PWM12;
 }
 
 /******************************************************************************
@@ -344,4 +336,106 @@ void PWMxSTOP(){
     API[PWM11_ENABLE] = 0;
     API[PWM12_ENABLE] = 0;
 	PWMxSETxALLxAMP();
+}
+
+/******************************************************************************
+ * Function:        PWMxPROCESSxSETPOINTS
+ *
+ * PreCondition:    Periodic update via timer
+ *
+ * Input:           None
+ *
+ * Output:          None
+ *
+ * Side Effects:    After sync via I2C the new _PWMx value is set to the 
+ *                  designated PWM output linear
+ *
+ * Overview:        
+ * 
+ *****************************************************************************/
+void PWMxPROCESSxSETPOINTS(){
+    
+    if (_PWM1 > PDC1){
+        PDC1 = PDC1 + API[PWM1_GAIN];
+    }
+    else if(_PWM1 < PDC1){
+        PDC1 = PDC1- API[PWM1_GAIN];
+    }
+    
+    if (_PWM2 > SDC1){
+        SDC1 = SDC1+ API[PWM2_GAIN];
+    }
+    else if (_PWM2 < SDC1){
+        SDC1 = SDC1- API[PWM2_GAIN];
+    }
+    
+    if (_PWM3 > PDC2){
+        PDC2++;
+    }
+    else if(_PWM3 < PDC2){
+        PDC2--;
+    }
+    
+    if (_PWM4 > SDC2){
+        SDC2++;
+    }
+    else if(_PWM4 < SDC2){
+        SDC2--;
+    }
+    
+    if (_PWM5 > PDC3){
+        PDC3++;
+    }
+    else if(_PWM5 < PDC3){
+        PDC3--;
+    }
+    
+    if (_PWM6 > SDC3){
+        SDC3++;
+    }
+    else if(_PWM6 < SDC3){
+        SDC3--;
+    }
+    
+    if (_PWM7 > PDC4){
+        PDC4++;
+    }
+    else if(_PWM7 < PDC4){
+        PDC4--;
+    }
+    
+    if (_PWM8 > SDC4){
+        SDC4++;
+    }
+    else if(_PWM8 < SDC4){
+        SDC4--;
+    }
+    
+    if (_PWM9 > PDC5){
+        PDC5++;
+    }
+    else if(_PWM9 < PDC5){
+        PDC5--;
+    }
+    
+    if (_PWM10 > SDC5){
+        SDC5++;
+    }
+    else if(_PWM10 < SDC5){
+        SDC5--;
+    }
+    
+    if (_PWM11 > PDC6){
+        PDC6++;
+    }
+    else if(_PWM11 < PDC6){
+        PDC6--;
+    }
+    
+    if (_PWM12 > SDC6){
+        SDC6++;
+    }
+    else if(_PWM12 < SDC6){
+        SDC6--;
+    }
 }

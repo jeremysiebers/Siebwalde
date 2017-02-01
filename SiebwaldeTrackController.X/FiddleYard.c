@@ -20,6 +20,7 @@
 #include "eusart2.h"            // EUSART2 lib 
 #include "api.h"                // API of the PWM slaves
 #include "TrackAmplifier.h"     // Track Amplifier communication interface
+#include "State_Machine.h"      // Trackamplifier state machine
 //#include <IO_Expander.h>		// IO Expander extra IO
 
 //CONFIGURATION BITS//
@@ -92,6 +93,8 @@ void main()
     printf("PIC18f97j60 started up!!!\n\r");
     printf("\f");                                                               // Clear terminal (printf("\033[2J");)
     printf("PIC18f97j60 started up!!!\n\r");                                    // Welcome message
+    
+    StatexMachinexInit();
         
     while(1)
 	{
@@ -104,6 +107,11 @@ void main()
 	    
         if (Enable_State_Machine_Update == True)
 		{
+            ReadxAmplifiers();
+            StatexMachinexUpdate();
+            Enable_State_Machine_Update = False;
+            
+            /*
             //printf("\f");
             //printf("Start write: %d\n\r",I2C_write_counter);
             //printf("Start read: %d\n\r",I2C_read_counter);
@@ -215,8 +223,9 @@ void main()
             putcI2C2('R');
             StopI2C2();
             
-            Enable_State_Machine_Update = False;
+            
             //T1CON = 0x81;
+            */
         }
         
         #if defined (USE_TCPIP)
@@ -267,10 +276,11 @@ void low_isr()
 	}
 				
 	if (PIR1bits.TMR1IF){	
-		TMR1H = 0x00;//0xF3	= 3333 Hz, 0x00 = 1587 Hz, 0xF0 = 2439 Hz
-		TMR1L = 0x00;
 		Enable_State_Machine_Update = True;
-        Led1 ^= 1;        
+        Led1 ^= 1; 
+        //T1CONbits.TMR1ON = 0;
+        TMR1H = 0x00;//0xF3	= 3333 Hz, 0x00 = 1587 Hz, 0xF0 = 2439 Hz
+		TMR1L = 0x00;
         PIR1bits.TMR1IF=False;        	
 	}	
     

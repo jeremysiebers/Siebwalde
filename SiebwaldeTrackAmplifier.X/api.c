@@ -57,6 +57,45 @@ void APIxInitialize(){
 	API_RW[PWM11_SETPOINT]          =   RW;
 	API_RW[PWM12_SETPOINT]          =   RW;
 	
+	API[PWM1_SETPOINT ]             =   125;									// Set default to 50% dutycycle
+	API[PWM2_SETPOINT ]             =   125;
+	API[PWM3_SETPOINT ]             =   125;
+	API[PWM4_SETPOINT ]             =   125;
+	API[PWM5_SETPOINT ]             =   125;
+	API[PWM6_SETPOINT ]             =   125;
+	API[PWM7_SETPOINT ]             =   125;
+	API[PWM8_SETPOINT ]             =   125;
+	API[PWM9_SETPOINT ]             =   125;
+	API[PWM10_SETPOINT]             =   125;
+	API[PWM11_SETPOINT]             =   125;
+	API[PWM12_SETPOINT]             =   125;
+    
+    API_RW[PWM1_GAIN]          		=   RW;
+	API_RW[PWM2_GAIN]          		=   RW;
+	API_RW[PWM3_GAIN]          		=   RW;
+	API_RW[PWM4_GAIN]          		=   RW;
+	API_RW[PWM5_GAIN]          		=   RW;
+	API_RW[PWM6_GAIN]          		=   RW;
+	API_RW[PWM7_GAIN]          		=   RW;
+	API_RW[PWM8_GAIN]          		=   RW;
+	API_RW[PWM9_GAIN]          		=   RW;
+	API_RW[PWM10_GAIN]         		=   RW;
+	API_RW[PWM11_GAIN]         		=   RW;
+	API_RW[PWM12_GAIN]         		=   RW;
+	
+	API[PWM1_GAIN]          		=   3;                                      // Set Gain default to 1
+	API[PWM2_GAIN]          		=   3;
+	API[PWM3_GAIN]          		=   1;
+	API[PWM4_GAIN]          		=   1;
+	API[PWM5_GAIN]          		=   1;
+	API[PWM6_GAIN]          		=   1;
+	API[PWM7_GAIN]          		=   1;
+	API[PWM8_GAIN]          		=   1;
+	API[PWM9_GAIN]          		=   1;
+	API[PWM10_GAIN]         		=   1;
+	API[PWM11_GAIN]         		=   1;
+	API[PWM12_GAIN]         		=   1;
+	
 	if (API[PWM_OUTPUT_MODE] == SSPWM){                                         // When Single Sided PWM is programmed by Master (in API!!) then set RW_API to RW
 		API_RW[PWM1_DIRECTION ]         =   RW;
 		API_RW[PWM2_DIRECTION ]         =   RW;

@@ -19,7 +19,7 @@
 #ifdef	__cplusplus
 extern "C" {
 #endif
-
+    extern void TrackAmplifierxSynchronizexSetpoints(void);
     extern char TrackAmplifierxWritexAPI(unsigned char address, unsigned char api_index, unsigned char data);
     extern char TrackAmplifierxReadxAPI(unsigned char address, unsigned char api_index, unsigned char *data);
 

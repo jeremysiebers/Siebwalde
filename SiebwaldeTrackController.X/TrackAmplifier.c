@@ -24,6 +24,30 @@ unsigned char *DataReceivedToLoc;
 char _return_val;
 
 /******************************************************************************
+ * Function:        TrackAmplifierxSynchronizexSetpoints
+ *
+ * PreCondition:    None
+ *
+ * Input:           None
+ *
+ * Output:          None
+ *
+ * Side Effects:    None
+ *
+ * Overview:        Send synchronization command to all slaves
+ * 
+ *****************************************************************************/
+void TrackAmplifierxSynchronizexSetpoints(void){
+    IdleI2C2();                            
+    StartI2C2();
+    IdleI2C2();  
+    WriteI2C2(0);
+    IdleI2C2(); 
+    putcI2C2('R');
+    StopI2C2();
+}
+
+/******************************************************************************
  * Function:        TrackAmplifierxReadxAPI(unsigned char address, unsigned char data)
  *
  * PreCondition:    None

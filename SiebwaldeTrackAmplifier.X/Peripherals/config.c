@@ -85,11 +85,21 @@ void OSCILLATOR_Initialize(void) {
 
 void Timers_Initialize(void){
     
-    /* Timer 1 used for input polling */
+    /* Timer 1 used for Led off control */
     ConfigIntTimer1(T1_INT_PRIOR_1 & T1_INT_ON);
     WriteTimer1(0);
     OpenTimer1(T1_ON & T1_GATE_OFF & T1_IDLE_STOP & T1_PS_1_8 & T1_SYNC_EXT_OFF & T1_SOURCE_INT, 0xFFFF);
     T1CONbits.TON = 0;
+    
+    /* Timer 2 used for input polling and PWM setpoint updates */
+    ConfigIntTimer2(T2_INT_PRIOR_1 & T2_INT_ON);
+    WriteTimer2(0);
+    OpenTimer2(T2_ON & T2_GATE_OFF & T2_IDLE_STOP & T2_PS_1_8 & T2_SOURCE_INT, 0x2490); // 100Hz  
+    
+    /* Timer 3 used for putty */
+    ConfigIntTimer3(T3_INT_PRIOR_7 & T3_INT_ON);
+    WriteTimer3(0);
+    OpenTimer3(T3_ON & T3_GATE_OFF & T3_IDLE_STOP & T3_PS_1_256 & T3_SOURCE_INT, 0xE400); // 4Hz  
 }
 
 void IO_Configuration(void) {
