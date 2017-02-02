@@ -1,6 +1,7 @@
 /** I N C L U D E S **********************************************************/
 #define THIS_IS_STACK_APPLICATION
 #define USE_TCPIP
+#define THIS_IS_TRACK_CONTROLLER
 
 #include <p18f97j60.h>			// uProc lib
 #include <stdio.h>				// stdio lib

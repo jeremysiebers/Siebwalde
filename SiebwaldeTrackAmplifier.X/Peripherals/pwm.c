@@ -211,6 +211,34 @@ void PWMxReadxOccupiedxSignals(){
 }
 
 /******************************************************************************
+ * Function:        PWMxReadxTFlag
+ *
+ * PreCondition:    Execute this routine every cycle
+ *
+ * Input:           None
+ *
+ * Output:          None
+ *
+ * Side Effects:    
+ *
+ * Overview:        Read every cycle all Thermal Flags from the H-Bridges
+ *****************************************************************************/
+void PWMxReadxTFlag(){
+    API[PWM1_TFLAG]  = AMP1_TFLAG;
+    API[PWM2_TFLAG]  = AMP2_TFLAG;/*
+    API[PWM3_TFLAG]  = AMP3_TFLAG;
+    API[PWM4_TFLAG]  = AMP4_TFLAG;
+    API[PWM5_TFLAG]  = AMP5_TFLAG;
+    API[PWM6_TFLAG]  = AMP6_TFLAG;
+    API[PWM7_TFLAG]  = AMP7_TFLAG;
+    API[PWM8_TFLAG]  = AMP8_TFLAG;
+    API[PWM9_TFLAG]  = AMP9_TFLAG;
+    API[PWM10_TFLAG] = AMP10_TFLAG;
+    API[PWM11_TFLAG] = AMP11_TFLAG;
+    API[PWM12_TFLAG] = AMP12_TFLAG; */   
+}
+
+/******************************************************************************
  * Function:        PWMxSETxALLxAMP
  *
  * PreCondition:    Execute this routine every cycle

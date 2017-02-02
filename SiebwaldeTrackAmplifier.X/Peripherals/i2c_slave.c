@@ -90,14 +90,13 @@ void I2C1xISR()
     unsigned char   temp;                                                       // used for dummy read
     if( (I2C1STATbits.R_W == 0) && (I2C1STATbits.D_A == 0) )                    // I2C1 Address matched and a write from master is detected
     {
-        
         temp = I2C1RCV >> 1;                                                    // dummy read (address received)
         if (I2C1STATbits.GCSTAT == 1)                                           // When an General call is made
         {
             flag.GCFlag = 1;                                                    // Set the General call flag
         }
         else{
-            flag.AddrFlag = 1;                                                  // next byte will be TrackAmplifier Memory address
+            flag.AddrFlag = 1;                                                  // next byte will be TrackAmplifier Memory address            
         }        
         #if defined( USE_I2C_Clock_Stretch )
         I2C1CONbits.SCLREL = 1;                                                 //Release SCL1 line
@@ -105,7 +104,7 @@ void I2C1xISR()
     }
     
     else if( (I2C1STATbits.R_W == 0) && (I2C1STATbits.D_A == 1) )               // I2C1 data received from master
-    {        
+    {  
         if( flag.AddrFlag && !flag.GCFlag)                                      // When the last time the AddrFlag was set, then current data is a pointer to API
         {
             flag.AddrFlag = 0;
@@ -171,10 +170,8 @@ void I2C1xISR()
             flag.AddrFlag = 0;                                                  
             flag.DataFlag = 0;
             temp = I2C1RCV;                                                     // Readout the received command
-            if (temp == 'R'){                                                   // When an C (synC) is received during broadcast
-                PWMxSetDutyCycles();                                            // Set PWM duty cycles to the PWM setpoints in the API
-                Led1 = 0;    
-                T1CONbits.TON = 1;
+            if (temp == 'C'){                                                   // When an C (synC) is received during broadcast
+                PWMxSetDutyCycles();                                            // Set PWM duty cycles to the PWM setpoints in the API                
             }
             else if (temp == 'S'){                                              // When an S (Start) is received during broadcast
                 PWMxSTART();
@@ -207,7 +204,9 @@ void I2C1xISR()
         apiPtr = &API[0];                                                       //reset the RAM pointer   
         flag.GCFlag   = 0;                                                      // reset all flags
         flag.AddrFlag = 0;                                                  
-        flag.DataFlag = 0;        
+        flag.DataFlag = 0;    
+        Led1 ^= 1;    
+        T1CONbits.TON = 1;
     }
 }
 /**

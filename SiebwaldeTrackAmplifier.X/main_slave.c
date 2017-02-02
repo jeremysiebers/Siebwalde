@@ -4,6 +4,7 @@
  *
  * Created on April 5, 2016, 8:38 PM
  */
+#define THIS_IS_TRACK_AMPLIFIER
 #define FCY 60000000
 
 #include "xc.h"
@@ -14,6 +15,7 @@
 #include <stdbool.h>
 #include "main.h"
 #include "Peripherals/config.h"
+#include "api.h"
 
 bool UpdateToPutty = false;
 
@@ -86,6 +88,7 @@ void __attribute__((__interrupt__,no_auto_psv)) _T1Interrupt(void)
 void __attribute__((__interrupt__,no_auto_psv)) _T2Interrupt(void)
 {
     //Led1 ^= 1;
+    PWMxReadxTFlag();                                                           // Update: Read all Thermal Flags
     PWMxReadxOccupiedxSignals();                                                // Update: Read all occupied signals
     PWMxSETxALLxAMP();                                                          // Update: All PWM H-bridge enable signals
     PWMxSETxALLxAMPxDIRECTIONS();                                               // Update: All PWM H-bridge direction signals

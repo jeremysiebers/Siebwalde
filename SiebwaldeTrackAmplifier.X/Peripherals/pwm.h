@@ -22,6 +22,7 @@ extern void PWMxSTOP(void);
 extern void PWMxSETxALLxAMP(void);
 extern void PWMxSETxALLxAMPxDIRECTIONS(void);
 extern void PWMxPROCESSxSETPOINTS(void);
+extern void PWMxReadxTFlag(void);
 
 #ifdef	__cplusplus
 }

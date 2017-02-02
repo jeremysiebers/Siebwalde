@@ -10,8 +10,6 @@
 #include "api.h"
 #include "TrackAmplifier.h"
 
-
-
 char TrackAmplifier_Write(unsigned char address, unsigned char *writecommand);
 char TrackAmplifier_Read(unsigned char address, unsigned char *data);
 
@@ -43,7 +41,7 @@ void TrackAmplifierxSynchronizexSetpoints(void){
     IdleI2C2();  
     WriteI2C2(0);
     IdleI2C2(); 
-    putcI2C2('R');
+    putcI2C2('C');
     StopI2C2();
 }
 

@@ -7,10 +7,11 @@
  
 #ifndef XC_HEADER_TEMPLATE_H
 #define	XC_HEADER_TEMPLATE_H
-
+/*
 extern void APIxInitialize(void);
 extern unsigned char GETxAPIxRW(unsigned char index);
 extern uint8_t API[];
+*/
 
 #define APISIZE 150
 #define RO	0
@@ -115,6 +116,19 @@ extern uint8_t API[];
 #define     PWM11_GAIN      	111
 #define     PWM12_GAIN      	112
 
+#define     PWM1_TFLAG	        121                                              // H-Bridge Thermal flag output
+#define     PWM2_TFLAG	        122
+#define     PWM3_TFLAG	        123
+#define     PWM4_TFLAG	        124
+#define     PWM5_TFLAG	        125
+#define     PWM6_TFLAG	        126
+#define     PWM7_TFLAG	        127
+#define     PWM8_TFLAG	        128
+#define     PWM9_TFLAG	        129
+#define     PWM10_TFLAG      	130
+#define     PWM11_TFLAG      	131
+#define     PWM12_TFLAG      	132
+
 /******************************************************************************
  * Function:        I/O to API 
  *
@@ -128,7 +142,7 @@ extern uint8_t API[];
  *
  * Overview:        Here all I/o is specified that is put into the API
  *****************************************************************************/
-
+/*
 #define OCCUPIED_1           	PORTBbits.RB7                                   // OCCUPIEDupied signal input
 #define OCCUPIED_2           	PORTBbits.RB8
 #define OCCUPIED_3           	PORTCbits.RC3
@@ -143,8 +157,8 @@ extern uint8_t API[];
 #define OCCUPIED_12          	0
 
 
-#define AMP1_ENABLE 			TRISCbits.TRISC6                                // Amplifier anable output (BRAKE INPUT ON LMD18200T)
-#define AMP2_ENABLE 			TRISCbits.TRISC7
+#define AMP1_ENABLE 			LATCbits.LATC6                                // Amplifier anable output (BRAKE INPUT ON LMD18200T)
+#define AMP2_ENABLE 			LATCbits.LATC7
 #define AMP3_ENABLE 			0
 #define AMP4_ENABLE 			0
 #define AMP5_ENABLE 			0
@@ -156,8 +170,8 @@ extern uint8_t API[];
 #define AMP11_ENABLE			0
 #define AMP12_ENABLE			0
 
-#define AMP1_TFLAG              TRISCbits.TRISC8                                // Amplifier 1 Thermal flag input (THERMAL FLAG OUTPUT ON LMD18200T)
-#define AMP2_TFLAG              TRISCbits.TRISC9
+#define AMP1_TFLAG              PORTCbits.PORTC8                                // Amplifier 1 Thermal flag input (THERMAL FLAG OUTPUT ON LMD18200T)
+#define AMP2_TFLAG              PORTCbits.PORTC9
 #define AMP3_TFLAG              0
 #define AMP4_TFLAG              0
 #define AMP5_TFLAG              0
@@ -168,10 +182,11 @@ extern uint8_t API[];
 #define AMP10_TFLAG             0
 #define AMP11_TFLAG             0
 #define AMP12_TFLAG             0
-
+*/
 /* Used only during single side PWM configuration, during double side PWM config, this ouput is connected to the PWM input on the LMD18200T and must then allways be high */
-#define AMP1_DIRECTION			TRISBbits.TRISB10                               // Amplifier 1 Direction output (DIRECTION INPUT ON LMD18200T)
-#define AMP2_DIRECTION			TRISBbits.TRISB11
+/*
+#define AMP1_DIRECTION			LATBbits.LATB10                                 // Amplifier 1 Direction output (DIRECTION INPUT ON LMD18200T)
+#define AMP2_DIRECTION			LATBbits.LATB11
 #define AMP3_DIRECTION          0
 #define AMP4_DIRECTION          0
 #define AMP5_DIRECTION          0
@@ -182,8 +197,7 @@ extern uint8_t API[];
 #define AMP10_DIRECTION         0
 #define AMP11_DIRECTION         0
 #define AMP12_DIRECTION         0
-
-
+*/
 #ifdef	__cplusplus
 extern "C" {
 #endif /* __cplusplus */
