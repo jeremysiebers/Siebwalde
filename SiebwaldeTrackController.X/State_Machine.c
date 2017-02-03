@@ -10,7 +10,7 @@
 #include "TrackAmplifier.h"
 
 
-uint8_t API[APISIZE];
+uint8_t API_50[APISIZE],API_51[APISIZE],API_52[APISIZE],API_53[APISIZE],API_54[APISIZE],;
 unsigned int i = 0;
 
 /******************************************************************************
@@ -26,54 +26,29 @@ unsigned int i = 0;
  *
  * Overview:        
  *****************************************************************************/
-void StatexMachinexInit()	
+void StatexMachinexInit()
 {
     for(i = PWM1_GAIN; i < PWM12_GAIN; i++){
         if(TrackAmplifierxWritexAPI(0x50, i, 1)){
-            printf("Set 50 Gain Error\n\r");        
-        }
+            printf("Set 50 Gain Error\n\r");}
+		if(TrackAmplifierxWritexAPI(0x51, i, 1)){
+            printf("Set 51 Gain Error\n\r");}
+		if(TrackAmplifierxWritexAPI(0x52, i, 1)){
+            printf("Set 52 Gain Error\n\r");}
+		if(TrackAmplifierxWritexAPI(0x53, i, 1)){
+            printf("Set 53 Gain Error\n\r");}
     }
-    
-    for(i = PWM1_GAIN; i < PWM12_GAIN; i++){
-        if(TrackAmplifierxWritexAPI(0x51, i, 1)){
-            printf("Set 51 Gain Error\n\r");       
-        }
-    }
-	  
-    for(i = PWM1_GAIN; i < PWM12_GAIN; i++){
-        if(TrackAmplifierxWritexAPI(0x52, i, 1)){
-            printf("Set 52 Gain Error\n\r");         
-        }
-    }
-    
-    for(i = PWM1_GAIN; i < PWM12_GAIN; i++){
-        if(TrackAmplifierxWritexAPI(0x53, i, 1)){
-            printf("Set 53 Gain Error\n\r");           
-        }
-    }
+        
     
     for(i = PWM1_SETPOINT; i < PWM12_SETPOINT; i++){
         if(TrackAmplifierxWritexAPI(0x50, i, 125)){
-            printf("Set 50 PWM Error\n\r");        
-        }
-    }
-    
-    for(i = PWM1_SETPOINT; i < PWM12_SETPOINT; i++){
-        if(TrackAmplifierxWritexAPI(0x51, i, 125)){
-            printf("Set 51 PWM Error\n\r");        
-        }
-    }
-    
-    for(i = PWM1_SETPOINT; i < PWM12_SETPOINT; i++){
-        if(TrackAmplifierxWritexAPI(0x52, i, 125)){
-            printf("Set 52 PWM Error\n\r");        
-        }
-    }
-    
-    for(i = PWM1_SETPOINT; i < PWM12_SETPOINT; i++){
-        if(TrackAmplifierxWritexAPI(0x53, i, 125)){
-            printf("Set 53 PWM Error\n\r");        
-        }
+            printf("Set 50 PWM Error\n\r");}
+		if(TrackAmplifierxWritexAPI(0x51, i, 125)){
+            printf("Set 51 PWM Error\n\r");}
+		if(TrackAmplifierxWritexAPI(0x52, i, 125)){
+            printf("Set 52 PWM Error\n\r");}
+		if(TrackAmplifierxWritexAPI(0x53, i, 125)){
+            printf("Set 53 PWM Error\n\r");}
     }
     
     TrackAmplifierxSynchronizexSetpoints();
@@ -96,33 +71,33 @@ void StatexMachinexInit()
 void ReadxAmplifiers(){
     
     for(i = PWM1_OCCUPIED; i < PWM12_OCCUPIED; i++){
-        if(TrackAmplifierxReadxAPI(0x50, i, &API[i])){
+        if(TrackAmplifierxReadxAPI(0x50, i, &API_50[i])){
             printf("Set 50 Occupied read Error\n\r");}
-        if(TrackAmplifierxReadxAPI(0x51, i, &API[i])){
+        if(TrackAmplifierxReadxAPI(0x51, i, &API_51[i])){
             printf("Set 51 Occupied read Error\n\r");}
-        if(TrackAmplifierxReadxAPI(0x52, i, &API[i])){
+        if(TrackAmplifierxReadxAPI(0x52, i, &API_52[i])){
             printf("Set 52 Occupied read Error\n\r");}
-        if(TrackAmplifierxReadxAPI(0x53, i, &API[i])){
+        if(TrackAmplifierxReadxAPI(0x53, i, &API_53[i])){
             printf("Set 53 Occupied read Error\n\r");}}
     
     for(i = PWM1_CURRENT; i < PWM12_CURRENT; i++){
-        if(TrackAmplifierxReadxAPI(0x50, i, &API[i])){
+        if(TrackAmplifierxReadxAPI(0x50, i, &API_50[i])){
             printf("Set 50 Current read Error\n\r");}
-        if(TrackAmplifierxReadxAPI(0x51, i, &API[i])){
+        if(TrackAmplifierxReadxAPI(0x51, i, &API_51[i])){
             printf("Set 51 Current read Error\n\r");}
-        if(TrackAmplifierxReadxAPI(0x52, i, &API[i])){
+        if(TrackAmplifierxReadxAPI(0x52, i, &API_52[i])){
             printf("Set 52 Current read Error\n\r");}
-        if(TrackAmplifierxReadxAPI(0x53, i, &API[i])){
+        if(TrackAmplifierxReadxAPI(0x53, i, &API_53[i])){
             printf("Set 53 Current read Error\n\r");}}
     
     for(i = PWM1_TFLAG; i < PWM12_TFLAG; i++){
-        if(TrackAmplifierxReadxAPI(0x50, i, &API[i])){
+        if(TrackAmplifierxReadxAPI(0x50, i, &API_50[i])){
             printf("Set 50 TFLAG read Error\n\r");}
-        if(TrackAmplifierxReadxAPI(0x51, i, &API[i])){
+        if(TrackAmplifierxReadxAPI(0x51, i, &API_51[i])){
             printf("Set 51 TFLAG read Error\n\r");}
-        if(TrackAmplifierxReadxAPI(0x52, i, &API[i])){
+        if(TrackAmplifierxReadxAPI(0x52, i, &API_52[i])){
             printf("Set 52 TFLAG read Error\n\r");}
-        if(TrackAmplifierxReadxAPI(0x53, i, &API[i])){
+        if(TrackAmplifierxReadxAPI(0x53, i, &API_53[i])){
             printf("Set 53 TFLAG read Error\n\r");}}
 }
 
@@ -142,7 +117,7 @@ void ReadxAmplifiers(){
 void StatexMachinexUpdate()	
 {
     /* Block 1*/
-	if (API[PWM1_OCCUPIED] && API[PWM4_OCCUPIED]){
+	if (API_50[PWM1_OCCUPIED] && API_50[PWM4_OCCUPIED]){
         
         switch (TrackAmplifierxWritexAPI(0x50, PWM2_SETPOINT, 125)){
         case ACK  : break;
@@ -172,7 +147,7 @@ void StatexMachinexUpdate()
     }
     
     /* Block 2*/
-    if (API[PWM3_OCCUPIED]&& API[PWM2_OCCUPIED]){
+    if (API_50[PWM3_OCCUPIED]&& API_50[PWM2_OCCUPIED]){
         
         switch (TrackAmplifierxWritexAPI(0x50, PWM1_SETPOINT, 125)){
         case ACK  : break;
