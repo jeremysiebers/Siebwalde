@@ -19,6 +19,7 @@
 
 extern void I2CxInitialize(void);
 extern void I2C1xISR(void);
+extern void I2C1xReleasexClock(void);
 
 struct FlagType
 {

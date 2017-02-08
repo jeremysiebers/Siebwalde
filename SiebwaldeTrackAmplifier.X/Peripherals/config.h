@@ -5,6 +5,7 @@
 #include "uart1.h"
 #include "pwm.h"
 #include "i2c.h"
+#include "adc.h"
 #include "../api.h"
 
 //#define PWM_SLAVE1 /* Used to switch to PWM_SLAVE settings regarding SYNC_Input */

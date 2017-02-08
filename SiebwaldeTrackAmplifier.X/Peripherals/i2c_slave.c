@@ -73,6 +73,29 @@ void I2CxInitialize()
 }
 
 /******************************************************************************
+ * Function:        I2C1xReleasexClock
+ *
+ * PreCondition:    None
+ *
+ * Input:           None
+ *
+ * Output:          None
+ *
+ * Side Effects:    None
+ *
+ * Overview:        This is to reset I2C after failing sync
+ *****************************************************************************/
+void I2C1xReleasexClock()
+{
+    flag.GCFlag   = 0;                                                          // reset all flags
+    flag.AddrFlag = 0;                                                  
+    flag.DataFlag = 0;
+    #if defined( USE_I2C_Clock_Stretch )
+    I2C1CONbits.SCLREL = 1;                                                     //Release SCL1 line
+    #endif
+}
+
+/******************************************************************************
  * Function:   void __attribute__((interrupt,no_auto_psv)) _SI2C1Interrupt(void)
  *
  * PreCondition:    None
@@ -171,7 +194,9 @@ void I2C1xISR()
             flag.DataFlag = 0;
             temp = I2C1RCV;                                                     // Readout the received command
             if (temp == 'C'){                                                   // When an C (synC) is received during broadcast
-                PWMxSetDutyCycles();                                            // Set PWM duty cycles to the PWM setpoints in the API                
+                PWMxSetDutyCycles();                                            // Set PWM duty cycles to the PWM setpoints in the API   
+                WriteTimer4(0);                                                 // Reset timer 4 watchdog
+                //T4CONbits.TON = 1;                                              // Start timer 4
             }
             else if (temp == 'S'){                                              // When an S (Start) is received during broadcast
                 PWMxSTART();

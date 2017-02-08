@@ -9,8 +9,18 @@
 #include "api.h"
 #include "TrackAmplifier.h"
 
+#pragma udata API_SECTION_1
+    uint8_t API_50[APISIZE];
+#pragma udata API_SECTION_2
+    uint8_t API_51[APISIZE];
+#pragma udata API_SECTION_3
+    uint8_t API_52[APISIZE];
+#pragma udata API_SECTION_4
+    uint8_t API_53[APISIZE];
+#pragma udata API_SECTION_5
+    uint8_t API_54[APISIZE];
 
-uint8_t API_50[APISIZE],API_51[APISIZE],API_52[APISIZE],API_53[APISIZE],API_54[APISIZE],;
+
 unsigned int i = 0;
 
 /******************************************************************************

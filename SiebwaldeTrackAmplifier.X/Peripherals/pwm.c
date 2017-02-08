@@ -364,6 +364,18 @@ void PWMxSTOP(){
     API[PWM11_ENABLE] = 0;
     API[PWM12_ENABLE] = 0;
 	PWMxSETxALLxAMP();
+	_PWM1  = 3000;
+	_PWM2  = 3000;
+	_PWM3  = 3000;
+	_PWM4  = 3000;
+	_PWM5  = 3000;
+	_PWM6  = 3000;
+	_PWM7  = 3000;
+	_PWM8  = 3000;
+	_PWM9  = 3000;
+	_PWM10 = 3000;
+	_PWM11 = 3000;
+	_PWM12 = 3000;
 }
 
 /******************************************************************************
@@ -387,14 +399,14 @@ void PWMxPROCESSxSETPOINTS(){
         PDC1 = PDC1 + API[PWM1_GAIN];
     }
     else if(_PWM1 < PDC1){
-        PDC1 = PDC1- API[PWM1_GAIN];
+        PDC1 = PDC1 - API[PWM1_GAIN];
     }
     
     if (_PWM2 > SDC1){
-        SDC1 = SDC1+ API[PWM2_GAIN];
+        SDC1 = SDC1 + API[PWM2_GAIN];
     }
     else if (_PWM2 < SDC1){
-        SDC1 = SDC1- API[PWM2_GAIN];
+        SDC1 = SDC1 - API[PWM2_GAIN];
     }
     
     if (_PWM3 > PDC2){

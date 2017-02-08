@@ -23,6 +23,8 @@ bool UpdateToPutty = false;
 int main(void) {
     // Initialize the device
     SYSTEMxInitialize(); 
+    
+    Led1 = 1;                                                                   // Led off (low active)
         
     //printf("dsPIC33EP512GM304 started up!!!\n\r");                              // Welcome message
              
@@ -68,10 +70,10 @@ int main(void) {
                 printf("Brake BLock 2B: -----\r\n");
             }
 
-            printf("PWM1 BLock 1A: %d, PWM1 Setpoint: %d\r\n",PDC1 / 24,API[PWM1_SETPOINT]);
-            printf("PWM1 BLock 1B: %d, PWM1 Setpoint: %d\r\n",PDC1 / 24,API[PWM1_SETPOINT]);
-            printf("PWM2 BLock 2A: %d, PWM2 Setpoint: %d\r\n",SDC1 / 24,API[PWM2_SETPOINT]);
-            printf("PWM2 BLock 2B: %d, PWM2 Setpoint: %d\r\n",SDC1 / 24,API[PWM2_SETPOINT]);
+            printf("PWM1 BLock 1A: %d, PWM1 Setpoint: %d\r\n",PDC1,API[PWM1_SETPOINT] * 24);
+            printf("PWM1 BLock 1B: %d, PWM1 Setpoint: %d\r\n",PDC1,API[PWM1_SETPOINT] * 24);
+            printf("PWM2 BLock 2A: %d, PWM2 Setpoint: %d\r\n",SDC1,API[PWM2_SETPOINT] * 24);
+            printf("PWM2 BLock 2B: %d, PWM2 Setpoint: %d\r\n",SDC1,API[PWM2_SETPOINT] * 24);
                
         } 
     }
@@ -102,6 +104,15 @@ void __attribute__((__interrupt__,no_auto_psv)) _T3Interrupt(void)
     UpdateToPutty = true;
     WriteTimer3(0);    
     IFS0bits.T3IF = 0;  /* Clear Timer interrupt flag */     
+}
+
+void __attribute__((__interrupt__,no_auto_psv)) _T4Interrupt(void)
+{  
+    I2C1xReleasexClock();                                                       // Release clock on I2C
+    PWMxSTOP();                                                                 // Watchdog timer triggered, timeout on receiving C (synC) broadcast stop all PWM    
+    //T4CONbits.TON = 0;
+    WriteTimer4(0);
+    IFS1bits.T4IF = 0;  /* Clear Timer interrupt flag */    
 }
 
 void __attribute__((__interrupt__,no_auto_psv)) _U1TXInterrupt(void)
