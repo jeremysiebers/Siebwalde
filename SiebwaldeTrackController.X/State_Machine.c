@@ -143,7 +143,7 @@ void StatexMachinexUpdate()
     }
     else //if (!API[PWM1_OCCUPIED] && API[PWM4_OCCUPIED])
     {
-        switch (TrackAmplifierxWritexAPI(0x50, PWM2_SETPOINT, 200)){
+        switch (TrackAmplifierxWritexAPI(0x50, PWM2_SETPOINT, 210)){
         case ACK  : break;
         
         case NACK :printf("Set 50:NACK\n\r");
@@ -173,7 +173,7 @@ void StatexMachinexUpdate()
     }
     else //if (!API[PWM3_OCCUPIED] && API[PWM2_OCCUPIED])
     {
-        switch (TrackAmplifierxWritexAPI(0x50, PWM1_SETPOINT, 200)){
+        switch (TrackAmplifierxWritexAPI(0x50, PWM1_SETPOINT, 210)){
         case ACK  : break;
         
         case NACK :printf("Set 50:NACK\n\r");
