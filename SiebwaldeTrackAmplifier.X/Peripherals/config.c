@@ -115,6 +115,8 @@ void IO_Configuration(void) {
     TRISB = 0xFF;
     TRISC = 0xFF;
     
+    //_STEP31 = 0x0;
+    
     //CNPUBbits.CNPUB4 = 1;   // Use PUll up to clear FLT32    
     //TRISBbits.TRISB4 = 1;   // FLT32 latched PWM fault must be cleared before PWM will enable    
     
