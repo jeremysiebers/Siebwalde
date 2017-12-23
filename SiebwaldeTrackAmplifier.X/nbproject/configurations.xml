@@ -9,7 +9,7 @@
         <itemPath>Peripherals/uart1.h</itemPath>
         <itemPath>Peripherals/pwm.h</itemPath>
         <itemPath>Peripherals/i2c.h</itemPath>
-        <itemPath>Peripherals/adc.h</itemPath>
+        <itemPath>Peripherals/ptg.h</itemPath>
       </logicalFolder>
       <itemPath>main.h</itemPath>
       <itemPath>api.h</itemPath>
@@ -27,7 +27,7 @@
         <itemPath>Peripherals/pwm.c</itemPath>
         <itemPath>Peripherals/i2c_slave.c</itemPath>
         <itemPath>Peripherals/i2c_master.c</itemPath>
-        <itemPath>Peripherals/adc.c</itemPath>
+        <itemPath>Peripherals/ptg.c</itemPath>
       </logicalFolder>
       <itemPath>main_slave.c</itemPath>
       <itemPath>main_master.c</itemPath>

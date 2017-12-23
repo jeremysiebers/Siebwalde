@@ -7,7 +7,9 @@
 
 #include <xc.h>
 #include <timer.h>
+#include <adc.h>
 #include "config.h"
+#include <pps.h>
 
 // DSPIC33EP512GM304 Configuration Bit Settings
 
@@ -50,10 +52,11 @@ void SYSTEMxInitialize(void) {
     APIxInitialize();
     IO_Configuration();
     EUSART1xInitialize();
-    ADCxInitialize();
+    ADC_Initialize();
     PWMxInitialize();
     I2CxInitialize();
     Timers_Initialize();
+    PTGxInitialize();
 }
 
 void OSCILLATOR_Initialize(void) {
@@ -114,21 +117,22 @@ void IO_Configuration(void) {
     TRISA = 0xFF;
     TRISB = 0xFF;
     TRISC = 0xFF;
-    
-    //_STEP31 = 0x0;
-    
+        
     //CNPUBbits.CNPUB4 = 1;   // Use PUll up to clear FLT32    
     //TRISBbits.TRISB4 = 1;   // FLT32 latched PWM fault must be cleared before PWM will enable    
     
-    RPINR18 = 0x0022;       // Connecting UART1RX to RPI34 Pin23 3.3V tolerant  (RPINR18 only usable for UART1RX (LSB))
-    RPOR0 = 0x0100;         // COnnecting UART1TX to RP35 Pin24 3.3V tolerant   (RPOR0 usable LSB <5-0> for RP20, MSB <13-8> for RP35)
+    PPSInput(IN_FN_PPS_U1RX  , IN_PIN_PPS_RPI34);       // Connecting UART1RX to RPI34 Pin23 3.3V tolerant  (RPINR18 only usable for UART1RX (LSB))
+    PPSOutput(OUT_FN_PPS_U1TX, OUT_PIN_PPS_RP35);      // COnnecting UART1TX to RP35 Pin24 3.3V tolerant   (RPOR0 usable LSB <5-0> for RP20, MSB <13-8> for RP35)
+    //RPINR18 = 0x0022;       // Connecting UART1RX to RPI34 Pin23 3.3V tolerant  (RPINR18 only usable for UART1RX (LSB))
+    //RPOR0 = 0x0100;         // COnnecting UART1TX to RP35 Pin24 3.3V tolerant   (RPOR0 usable LSB <5-0> for RP20, MSB <13-8> for RP35)
     TRISBbits.TRISB3 = 0;   // Set RP35 as Output for UART1TX
     TRISBbits.TRISB2 = 1;   // Set RPI34 as Input for UART1RX
     
     //TRISCbits.TRISC4 = 1;   // I2C1 SDA1
     //TRISCbits.TRISC5 = 1;   // I2C1 SCL1
     
-    RPINR37 = 0x3000;       // Connecting SYNC Input to RP48 (MSB)
+    PPSInput(IN_FN_PPS_SYNCI1, IN_PIN_PPS_RP48); // <-- changed pps.h for this to happen, RP48 is not added as input pin function...?
+    //RPINR37 = 0x3000;       // Connecting SYNC Input to RP48 (MSB)
     TRISCbits.TRISC0 = 1;   // Set RP48 as Input for SYNCI    
     
     TRISBbits.TRISB9 = 0;   // Used for LED1
@@ -156,4 +160,10 @@ void IO_Configuration(void) {
     
     TRISCbits.TRISC6 = 0;   // AMP1_ENABLE //PWM6H
     TRISCbits.TRISC7 = 0;   // AMP2_ENABLE //PWM6L
+}
+
+void ADC_Initialize(){
+    
+    OpenADC1(0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0);
+    
 }
