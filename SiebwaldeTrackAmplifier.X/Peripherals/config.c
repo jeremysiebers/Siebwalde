@@ -7,7 +7,6 @@
 
 #include <xc.h>
 #include <timer.h>
-#include <adc.h>
 #include "config.h"
 #include <pps.h>
 
@@ -52,7 +51,7 @@ void SYSTEMxInitialize(void) {
     APIxInitialize();
     IO_Configuration();
     EUSART1xInitialize();
-    ADC_Initialize();
+    ADCxInitialize();
     PWMxInitialize();
     I2CxInitialize();
     Timers_Initialize();
@@ -131,7 +130,7 @@ void IO_Configuration(void) {
     //TRISCbits.TRISC4 = 1;   // I2C1 SDA1
     //TRISCbits.TRISC5 = 1;   // I2C1 SCL1
     
-    PPSInput(IN_FN_PPS_SYNCI1, IN_PIN_PPS_RP48); // <-- changed pps.h for this to happen, RP48 is not added as input pin function...?
+    PPSInput(IN_FN_PPS_SYNCI1, IN_PIN_PPS_RP48); // <-- changed pps.h for this to happen, RP48 is not added as input pin function...? --> #define IN_PIN_PPS_RP48			    48					/* Assign RP48 as Input Pin */
     //RPINR37 = 0x3000;       // Connecting SYNC Input to RP48 (MSB)
     TRISCbits.TRISC0 = 1;   // Set RP48 as Input for SYNCI    
     
@@ -160,10 +159,4 @@ void IO_Configuration(void) {
     
     TRISCbits.TRISC6 = 0;   // AMP1_ENABLE //PWM6H
     TRISCbits.TRISC7 = 0;   // AMP2_ENABLE //PWM6L
-}
-
-void ADC_Initialize(){
-    
-    OpenADC1(0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0);
-    
 }

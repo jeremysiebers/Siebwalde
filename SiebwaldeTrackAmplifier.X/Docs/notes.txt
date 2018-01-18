@@ -1,0 +1,12 @@
+
+
+Amplifier current measurement:
+
+Take multiple samples during longer period and storing the info in DMA.
+Trigger ADC channels via PTG, multiple channels simultaneously
+
+Amplifier back EMF measurement:
+
+By SW (determine when train is running at speed x) trigger PTG to read 
+ADC channel(s) and sample 1 to x periods of PWM cycles the back EMF.
+SW has to take care of disabling H-bridge into disconnected mode Brake = H, PWM = L.

@@ -132,3 +132,13 @@ void __attribute__ ( (__interrupt__, no_auto_psv) ) _SI2C1Interrupt( void )
     I2C1xISR();
     _SI2C1IF = 0; // Clear I2C1 Slave interrupt flag
 }
+
+void __attribute__( (__interrupt__, no_auto_psv) ) _AD1Interrupt(void)
+{
+        //Clear the A/D Interrupt flag bit or else the CPU will
+        //keep vectoring back to the ISR
+        
+
+        //Copy the A/D conversion results to variable "inputSignal"       
+
+}

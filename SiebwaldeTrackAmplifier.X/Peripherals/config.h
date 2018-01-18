@@ -7,6 +7,7 @@
 #include "i2c.h"
 #include "../api.h"
 #include "ptg.h"
+#include "adc.h"
 
 //#define PWM_SLAVE1 /* Used to switch to PWM_SLAVE settings regarding SYNC_Input */
 #define PWM_SLAVE2 /* Used to switch to other frequency settings */
