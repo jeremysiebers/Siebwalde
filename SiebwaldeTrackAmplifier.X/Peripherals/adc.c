@@ -8,69 +8,46 @@
 void ADCxInitialize(){
     
     //ADCON1 Register
-    //Set up A/D for Automatic Sampling
-    //Use Timer3 to provide sampling time
-    //Set up A/D conversrion results to be read in 1.15 fractional
-    //number format.
-    //All other bits to their default state
-    bla
-
+    //ADC is off
+    AD1CON1bits.ADON = Off;
+    //DMA buffers are written in the order of conversion; the module provides an 
+    //address to the DMA channel that is the same as the address used for the non-DMA stand-alone buffer
+    AD1CON1bits.ADDMABM = 1;
+    //0 = 10-bit, 4-channel ADC operation
+    AD1CON1bits.AD12B = 0;
+    //111 = Internal counter ends sampling and starts conversion (auto-convert)
+    AD1CON1bits.SSRC = 7;
+    AD1CON1bits.SSRCG = 0;
+    //1 = Samples CH0, CH1, CH2, CH3 simultaneously (when CHPS<1:0> = 1x), or samples CH0 and CH1
+    //simultaneously (when CHPS<1:0> = 01)
+    AD1CON1bits.SIMSAM = 0;
+    // 1 = Sampling begins immediately after last conversion; SAMP bit is auto-set
+    AD1CON1bits.ASAM = 1;
+    
     //ADCON2 Register
-    //Set up A/D for interrupting after 16 samples get filled in the buffer
-    //All other bits to their default state
+    //000 AVDD AVSS
+    AD1CON2bits.VCFG = 0;
+    //1x = Converts CH0, CH1, CH2 and CH3
+    AD1CON2bits.CHPS = 2;
+    //When ADDMAEN = 1:
+    //11111 = Increments the DMA address after completion of every 32nd sample/conversion operation
+    AD1CON2bits.SMPI = 0b11111;
+    //0 = Always uses channel input selects for Sample MUXA
+    AD1CON2bits.ALTS = 0;
     
-
     //ADCON3 Register
-    //We would like to set up a sampling rate of 8KHz
-    //Total Conversion Time= 1/Sampling Rate = 125 microseconds
-    //At 29.4 MIPS, Tcy = 33.9 ns = Instruction Cycle Time
-    //Tad > 667ns (for -40C to 125C temperature range)
-    //We will set up Sampling Time using Timer3 & Tad using ADCS<5:0> bits
-    //All other bits to their default state
-    //Let's set up ADCS arbitrarily to the maximum possible amount = 63
-    //So Tad = Tcy*(ADCS+1)/2 = 1.085 microseconds
-    //So, the A/D converter will take 14*Tad periods to convert each sample
+    //0 = Clock derived from system clock
+    AD1CON3bits.ADRC = 0;
+    //11111 = 31 TAD
+    AD1CON3bits.SAMC = 0b11111;
+    //11111111 = TP ? (ADCS<7:0> + 1) = TP ? 256 = TAD
+    AD1CON3bits.ADCS = 0b11111111;
     
-
-    //Next, we will to set up Timer 3 to time-out every 125 microseconds
-    //As a result, the module will stop sampling and trigger a conversion
-    //on every Timer3 time-out, i.e., 125 microseconds. At that time,
-    //the conversion process starts and completes 14*Tad periods later.
-    //When the conversion completes, the module starts sampling again
-    //However, since Timer3 is already on and counting, about 110
-    //microseconds later (=125 microseconds - 14*Tad), Timer3 will expire
-    //again. Effectively, the module samples for 110 microseconds and
-    //converts for 15 microseconds
-    //NOTE: The actual sampling rate realized may be 7998.698 Hz
-    //      due to a small round off error. Ensure you provide the
-    //      true sampling rate to dsPICworks if you are trying to plot
-    //      the sampled or filtered signal.
+    //ADCON4 Register
+    //0 = Conversion results are stored in the ADC1BUF0 through ADC1BUFF registers; DMA will not be used
+    AD1CON4bits.ADDMAEN = 0;
+    //111 = Allocates 128 words of DMA buffer to each analog input
+    AD1CON4bits.DMABL = 0b111;
     
-
-    //ADCHS Register
-    //Set up A/D Channel Select Register to convert AN7 on Mux A input
-    
-
-    //ADCSSL Register
-    //Channel Scanning is disabled. All bits left to their default state
-    
-
-    //ADPCFG Register
-    //Set up channels AN7 as analog input and configure rest as digital
-    //Recall that we configured all A/D pins as digital when code execution
-    //entered main() out of reset
-    
-
-    //Clear the A/D interrupt flag bit
-    
-    
-    //Set the A/D interrupt enable bit
-    
-
-    //Turn on the A/D converter
-    //This is typically done after configuring other registers
-    
-
-    //Start Timer 3
-    
+    AD1CHS123bits.
 }
