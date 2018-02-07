@@ -9,7 +9,7 @@
 // Use project enums instead of #define for ON and OFF.
 
 // CONFIG1
-#pragma config FOSC = HS        // Oscillator Selection bits (HS oscillator)
+#pragma config FOSC = EC        // Oscillator Selection bits (EXTCLK; port I/O function on OSC2/CLKO/RA6)
 #pragma config WDTE = OFF       // Watchdog Timer Enable bit (WDT disabled)
 #pragma config PWRTE = OFF      // Power-up Timer Enable bit (PWRT enabled)
 #pragma config MCLRE = ON       // MCLR/VPP/RE3 Pin Function Select bit (MCLR/VPP/RE3 pin function is MCLR)
@@ -27,18 +27,21 @@
 void SYSTEM_Initialize(void) {
     OSCILLATOR_Initialize();
     PIN_MANAGER_Initialize();
-    //TMR0_Initialize();
+    TMR0_Initialize();
     TMR2_Initialize();
     PWM_Initialize();
+    ausart_Initialize();
     //INT0_Initialize();
     INTERRUPT_Initialize();
 }
 
 void OSCILLATOR_Initialize(void) {
     // SCS FOSC; IDLEN disabled; IRCF 8MHz_HFINTOSC/4; 
-    OSCCON = 0x70;
+    //OSCCON = 0x70;
+    OSCCON = 0x00;
+    
     // INTSRC disabled; PLLEN disabled; TUN 0x00; 
-    OSCTUNE = 0x00;
+    //OSCTUNE = 0x00;
     // Set the secondary oscillator
 
 }

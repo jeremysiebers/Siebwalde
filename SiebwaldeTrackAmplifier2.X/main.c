@@ -20,6 +20,6 @@ void main(void) {
     
     while(1)
     {
-        PORTCbits.RC3 = !PORTCbits.RC3;
+        PORTCbits.RC1 = !PORTCbits.RC1;
     }
 }

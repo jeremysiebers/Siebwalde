@@ -21,8 +21,9 @@ extern "C" {
 #include "pwm.h"
 #include "INT0.h"
 #include "tmr0.h"
+#include "ausart.h"
 
-#define _XTAL_FREQ  8000000
+#define _XTAL_FREQ  20000000
     
 enum
 {
