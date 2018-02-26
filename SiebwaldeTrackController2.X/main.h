@@ -12,7 +12,7 @@
 extern "C" {
 #endif
 
-
+    extern volatile uint8_t Update;
 
 
 #ifdef	__cplusplus

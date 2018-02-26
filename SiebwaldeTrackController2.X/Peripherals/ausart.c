@@ -32,20 +32,22 @@ void ausart_Initialize(void) {
     PIE1bits.RCIE = 0;
     PIE1bits.TXIE = 0;
 
-    // Baud Rate = 19531; SPBRG 255; synchronous mode
-    SPBRG = 0xFF;    
+    // Baud Rate = 19200; 
+    SPBRG = 64;    
 
     
     RCSTAbits.SPEN = 1; // 1 = Serial port enabled (configures RC7/RX/DT and RC6/TX/CK pins as serial port pins)
     RCSTAbits.RX9  = 0; // 0 = Selects 8-bit reception
     RCSTAbits.SREN = 0; // 0 = Disables single receive
-    RCSTAbits.CREN = 1; // 1 = Enables continuous receive until enable bit CREN is cleared (CREN overrides SREN)
-    RCSTAbits.ADDEN= 1; // 1 = Enables address detection, enables interrupt and load of the receive buffer when RSR<8> is set
+    RCSTAbits.CREN = 1; // 1 = Enables continuous receive
+    RCSTAbits.ADDEN= 0; // 1 = Enables address detection, enables interrupt and load of the receive buffer when RSR<8> is set
         
     TXSTAbits.CSRC = 1; // Master mode
     TXSTAbits.TXEN = 1; // Transmit Enable bit (SREN/CREN overrides TXEN in Sync mode)
-    TXSTAbits.SYNC = 1; // Synchronous mode
-    TXSTAbits.BRGH = 0; // Unused in sync mode
+    TXSTAbits.SYNC = 0; // Asynchronous mode
+    TXSTAbits.BRGH = 1; // Used in sync mode
+    TXSTAbits.TX9  = 1; // Selects 9-bit transmission
+    TXSTAbits.TX9D = 0; // 9th bit of transmit data
     
 
     // initializing the driver state

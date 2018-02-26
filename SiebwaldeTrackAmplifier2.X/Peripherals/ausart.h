@@ -27,6 +27,7 @@ extern "C" {
      */
 
 #define ausart_DataReady  (ausartRxCount)
+#define ausart_AddressDetect (ausartAddressBit)
 
     /**
       Section: Data Type Definitions
@@ -37,7 +38,7 @@ extern "C" {
      */
     extern volatile uint8_t ausartTxBufferRemaining;
     extern volatile uint8_t ausartRxCount;
-
+    extern volatile uint8_t ausartAddressBit;
 
     /**
       Section: ausart APIs

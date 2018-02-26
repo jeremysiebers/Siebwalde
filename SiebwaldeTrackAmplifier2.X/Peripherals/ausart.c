@@ -21,6 +21,7 @@ volatile uint8_t ausartTxBufferRemaining;
 static uint8_t ausartRxHead = 0;
 static uint8_t ausartRxTail = 0;
 static uint8_t ausartRxBuffer[ausart_RX_BUFFER_SIZE];
+volatile uint8_t ausartAddressBit = 0;
 volatile uint8_t ausartRxCount;
 
 /**
@@ -32,8 +33,8 @@ void ausart_Initialize(void) {
     PIE1bits.RCIE = 0;
     PIE1bits.TXIE = 0;
 
-    // Baud Rate = 19531; SPBRG 255; synchronous mode
-    SPBRG = 0xFF;    
+    // Baud Rate = 19200
+    SPBRG = 64;
 
     
     RCSTAbits.SPEN = 1; // 1 = Serial port enabled (configures RC7/RX/DT and RC6/TX/CK pins as serial port pins)
@@ -44,8 +45,8 @@ void ausart_Initialize(void) {
         
     TXSTAbits.CSRC = 0; // Master mode
     TXSTAbits.TXEN = 1; // Transmit Enable bit (SREN/CREN overrides TXEN in Sync mode)
-    TXSTAbits.SYNC = 1; // Synchronous mode
-    TXSTAbits.BRGH = 0; // Unused in sync mode
+    TXSTAbits.SYNC = 0; // Asynchronous mode
+    TXSTAbits.BRGH = 1; // Used in sync mode
     
 
     // initializing the driver state
@@ -144,6 +145,11 @@ void ausart_Receive_ISR(void) {
 
         RCSTAbits.CREN = 0;
         RCSTAbits.CREN = 1;
+    }
+    
+    if (RCSTAbits.ADDEN == 1){
+        ausartAddressBit = RCSTAbits.RX9D;
+        RCSTAbits.ADDEN = 0;
     }
 
     // buffer overruns are ignored

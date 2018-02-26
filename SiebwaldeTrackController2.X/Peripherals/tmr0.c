@@ -1,5 +1,6 @@
 #include <xc.h>
 #include "tmr0.h"
+#include "../main.h"
 
 /**
   Section: TMR0 APIs
@@ -48,9 +49,10 @@ void TMR0_ISR(){
     if (count > 50){
         count = 0;
         PORTDbits.RD1 = !PORTDbits.RD1;
-    }
-    
+    }    
     count++;
+    
+    Update = 1;
     
     INTCONbits.TMR0IF = 0;
 }
