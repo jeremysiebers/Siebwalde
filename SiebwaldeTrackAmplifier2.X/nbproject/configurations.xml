@@ -14,6 +14,9 @@
         <itemPath>Peripherals/pwm.h</itemPath>
         <itemPath>Peripherals/ausart.h</itemPath>
       </logicalFolder>
+      <logicalFolder name="f1" displayName="port" projectFiles="true">
+        <itemPath>port/port.h</itemPath>
+      </logicalFolder>
       <itemPath>main.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
@@ -33,6 +36,12 @@
         <itemPath>Peripherals/pwm.c</itemPath>
         <itemPath>Peripherals/ausart.c</itemPath>
       </logicalFolder>
+      <logicalFolder name="f1" displayName="port" projectFiles="true">
+        <itemPath>port/mbcrc.c</itemPath>
+        <itemPath>port/portevent.c</itemPath>
+        <itemPath>port/portserial.c</itemPath>
+        <itemPath>port/porttimer.c</itemPath>
+      </logicalFolder>
       <itemPath>main.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
@@ -43,6 +52,7 @@
   </logicalFolder>
   <sourceRootList>
     <Elem>Peripherals</Elem>
+    <Elem>port</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>

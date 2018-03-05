@@ -57,17 +57,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=Peripherals/config.c Peripherals/INT0.c Peripherals/interrupt_manager.c Peripherals/pin_manager.c Peripherals/tmr2.c Peripherals/tmr0.c Peripherals/pwm.c Peripherals/ausart.c main.c
+SOURCEFILES_QUOTED_IF_SPACED=Peripherals/config.c Peripherals/INT0.c Peripherals/interrupt_manager.c Peripherals/pin_manager.c Peripherals/tmr2.c Peripherals/tmr0.c Peripherals/pwm.c Peripherals/ausart.c main.c port/mbcrc.c port/portevent.c port/portserial.c port/porttimer.c
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/Peripherals/config.p1 ${OBJECTDIR}/Peripherals/INT0.p1 ${OBJECTDIR}/Peripherals/interrupt_manager.p1 ${OBJECTDIR}/Peripherals/pin_manager.p1 ${OBJECTDIR}/Peripherals/tmr2.p1 ${OBJECTDIR}/Peripherals/tmr0.p1 ${OBJECTDIR}/Peripherals/pwm.p1 ${OBJECTDIR}/Peripherals/ausart.p1 ${OBJECTDIR}/main.p1
-POSSIBLE_DEPFILES=${OBJECTDIR}/Peripherals/config.p1.d ${OBJECTDIR}/Peripherals/INT0.p1.d ${OBJECTDIR}/Peripherals/interrupt_manager.p1.d ${OBJECTDIR}/Peripherals/pin_manager.p1.d ${OBJECTDIR}/Peripherals/tmr2.p1.d ${OBJECTDIR}/Peripherals/tmr0.p1.d ${OBJECTDIR}/Peripherals/pwm.p1.d ${OBJECTDIR}/Peripherals/ausart.p1.d ${OBJECTDIR}/main.p1.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/Peripherals/config.p1 ${OBJECTDIR}/Peripherals/INT0.p1 ${OBJECTDIR}/Peripherals/interrupt_manager.p1 ${OBJECTDIR}/Peripherals/pin_manager.p1 ${OBJECTDIR}/Peripherals/tmr2.p1 ${OBJECTDIR}/Peripherals/tmr0.p1 ${OBJECTDIR}/Peripherals/pwm.p1 ${OBJECTDIR}/Peripherals/ausart.p1 ${OBJECTDIR}/main.p1 ${OBJECTDIR}/port/mbcrc.p1 ${OBJECTDIR}/port/portevent.p1 ${OBJECTDIR}/port/portserial.p1 ${OBJECTDIR}/port/porttimer.p1
+POSSIBLE_DEPFILES=${OBJECTDIR}/Peripherals/config.p1.d ${OBJECTDIR}/Peripherals/INT0.p1.d ${OBJECTDIR}/Peripherals/interrupt_manager.p1.d ${OBJECTDIR}/Peripherals/pin_manager.p1.d ${OBJECTDIR}/Peripherals/tmr2.p1.d ${OBJECTDIR}/Peripherals/tmr0.p1.d ${OBJECTDIR}/Peripherals/pwm.p1.d ${OBJECTDIR}/Peripherals/ausart.p1.d ${OBJECTDIR}/main.p1.d ${OBJECTDIR}/port/mbcrc.p1.d ${OBJECTDIR}/port/portevent.p1.d ${OBJECTDIR}/port/portserial.p1.d ${OBJECTDIR}/port/porttimer.p1.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/Peripherals/config.p1 ${OBJECTDIR}/Peripherals/INT0.p1 ${OBJECTDIR}/Peripherals/interrupt_manager.p1 ${OBJECTDIR}/Peripherals/pin_manager.p1 ${OBJECTDIR}/Peripherals/tmr2.p1 ${OBJECTDIR}/Peripherals/tmr0.p1 ${OBJECTDIR}/Peripherals/pwm.p1 ${OBJECTDIR}/Peripherals/ausart.p1 ${OBJECTDIR}/main.p1
+OBJECTFILES=${OBJECTDIR}/Peripherals/config.p1 ${OBJECTDIR}/Peripherals/INT0.p1 ${OBJECTDIR}/Peripherals/interrupt_manager.p1 ${OBJECTDIR}/Peripherals/pin_manager.p1 ${OBJECTDIR}/Peripherals/tmr2.p1 ${OBJECTDIR}/Peripherals/tmr0.p1 ${OBJECTDIR}/Peripherals/pwm.p1 ${OBJECTDIR}/Peripherals/ausart.p1 ${OBJECTDIR}/main.p1 ${OBJECTDIR}/port/mbcrc.p1 ${OBJECTDIR}/port/portevent.p1 ${OBJECTDIR}/port/portserial.p1 ${OBJECTDIR}/port/porttimer.p1
 
 # Source Files
-SOURCEFILES=Peripherals/config.c Peripherals/INT0.c Peripherals/interrupt_manager.c Peripherals/pin_manager.c Peripherals/tmr2.c Peripherals/tmr0.c Peripherals/pwm.c Peripherals/ausart.c main.c
+SOURCEFILES=Peripherals/config.c Peripherals/INT0.c Peripherals/interrupt_manager.c Peripherals/pin_manager.c Peripherals/tmr2.c Peripherals/tmr0.c Peripherals/pwm.c Peripherals/ausart.c main.c port/mbcrc.c port/portevent.c port/portserial.c port/porttimer.c
 
 
 CFLAGS=
@@ -165,6 +165,38 @@ ${OBJECTDIR}/main.p1: main.c  nbproject/Makefile-${CND_CONF}.mk
 	@-${MV} ${OBJECTDIR}/main.d ${OBJECTDIR}/main.p1.d 
 	@${FIXDEPS} ${OBJECTDIR}/main.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
 	
+${OBJECTDIR}/port/mbcrc.p1: port/mbcrc.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}/port" 
+	@${RM} ${OBJECTDIR}/port/mbcrc.p1.d 
+	@${RM} ${OBJECTDIR}/port/mbcrc.p1 
+	${MP_CC} --pass1 $(MP_EXTRA_CC_PRE) --chip=$(MP_PROCESSOR_OPTION) -Q -G  -D__DEBUG=1 --debugger=pickit3  --double=24 --float=24 --opt=+asm,+asmfile,-speed,+space,-debug,-local --addrqual=ignore --mode=free -P -N255 --warn=0 --asmlist -DXPRJ_default=$(CND_CONF)  --summary=default,-psect,-class,+mem,-hex,-file --output=default,-inhx032 --runtime=default,+clear,+init,-keep,-no_startup,-osccal,-resetbits,-download,-stackcall,+clib $(COMPARISON_BUILD)  --output=-mcof,+elf:multilocs --stack=compiled:auto:auto "--errformat=%f:%l: error: (%n) %s" "--warnformat=%f:%l: warning: (%n) %s" "--msgformat=%f:%l: advisory: (%n) %s"    -o${OBJECTDIR}/port/mbcrc.p1  port/mbcrc.c 
+	@-${MV} ${OBJECTDIR}/port/mbcrc.d ${OBJECTDIR}/port/mbcrc.p1.d 
+	@${FIXDEPS} ${OBJECTDIR}/port/mbcrc.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
+	
+${OBJECTDIR}/port/portevent.p1: port/portevent.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}/port" 
+	@${RM} ${OBJECTDIR}/port/portevent.p1.d 
+	@${RM} ${OBJECTDIR}/port/portevent.p1 
+	${MP_CC} --pass1 $(MP_EXTRA_CC_PRE) --chip=$(MP_PROCESSOR_OPTION) -Q -G  -D__DEBUG=1 --debugger=pickit3  --double=24 --float=24 --opt=+asm,+asmfile,-speed,+space,-debug,-local --addrqual=ignore --mode=free -P -N255 --warn=0 --asmlist -DXPRJ_default=$(CND_CONF)  --summary=default,-psect,-class,+mem,-hex,-file --output=default,-inhx032 --runtime=default,+clear,+init,-keep,-no_startup,-osccal,-resetbits,-download,-stackcall,+clib $(COMPARISON_BUILD)  --output=-mcof,+elf:multilocs --stack=compiled:auto:auto "--errformat=%f:%l: error: (%n) %s" "--warnformat=%f:%l: warning: (%n) %s" "--msgformat=%f:%l: advisory: (%n) %s"    -o${OBJECTDIR}/port/portevent.p1  port/portevent.c 
+	@-${MV} ${OBJECTDIR}/port/portevent.d ${OBJECTDIR}/port/portevent.p1.d 
+	@${FIXDEPS} ${OBJECTDIR}/port/portevent.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
+	
+${OBJECTDIR}/port/portserial.p1: port/portserial.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}/port" 
+	@${RM} ${OBJECTDIR}/port/portserial.p1.d 
+	@${RM} ${OBJECTDIR}/port/portserial.p1 
+	${MP_CC} --pass1 $(MP_EXTRA_CC_PRE) --chip=$(MP_PROCESSOR_OPTION) -Q -G  -D__DEBUG=1 --debugger=pickit3  --double=24 --float=24 --opt=+asm,+asmfile,-speed,+space,-debug,-local --addrqual=ignore --mode=free -P -N255 --warn=0 --asmlist -DXPRJ_default=$(CND_CONF)  --summary=default,-psect,-class,+mem,-hex,-file --output=default,-inhx032 --runtime=default,+clear,+init,-keep,-no_startup,-osccal,-resetbits,-download,-stackcall,+clib $(COMPARISON_BUILD)  --output=-mcof,+elf:multilocs --stack=compiled:auto:auto "--errformat=%f:%l: error: (%n) %s" "--warnformat=%f:%l: warning: (%n) %s" "--msgformat=%f:%l: advisory: (%n) %s"    -o${OBJECTDIR}/port/portserial.p1  port/portserial.c 
+	@-${MV} ${OBJECTDIR}/port/portserial.d ${OBJECTDIR}/port/portserial.p1.d 
+	@${FIXDEPS} ${OBJECTDIR}/port/portserial.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
+	
+${OBJECTDIR}/port/porttimer.p1: port/porttimer.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}/port" 
+	@${RM} ${OBJECTDIR}/port/porttimer.p1.d 
+	@${RM} ${OBJECTDIR}/port/porttimer.p1 
+	${MP_CC} --pass1 $(MP_EXTRA_CC_PRE) --chip=$(MP_PROCESSOR_OPTION) -Q -G  -D__DEBUG=1 --debugger=pickit3  --double=24 --float=24 --opt=+asm,+asmfile,-speed,+space,-debug,-local --addrqual=ignore --mode=free -P -N255 --warn=0 --asmlist -DXPRJ_default=$(CND_CONF)  --summary=default,-psect,-class,+mem,-hex,-file --output=default,-inhx032 --runtime=default,+clear,+init,-keep,-no_startup,-osccal,-resetbits,-download,-stackcall,+clib $(COMPARISON_BUILD)  --output=-mcof,+elf:multilocs --stack=compiled:auto:auto "--errformat=%f:%l: error: (%n) %s" "--warnformat=%f:%l: warning: (%n) %s" "--msgformat=%f:%l: advisory: (%n) %s"    -o${OBJECTDIR}/port/porttimer.p1  port/porttimer.c 
+	@-${MV} ${OBJECTDIR}/port/porttimer.d ${OBJECTDIR}/port/porttimer.p1.d 
+	@${FIXDEPS} ${OBJECTDIR}/port/porttimer.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
+	
 else
 ${OBJECTDIR}/Peripherals/config.p1: Peripherals/config.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Peripherals" 
@@ -237,6 +269,38 @@ ${OBJECTDIR}/main.p1: main.c  nbproject/Makefile-${CND_CONF}.mk
 	${MP_CC} --pass1 $(MP_EXTRA_CC_PRE) --chip=$(MP_PROCESSOR_OPTION) -Q -G  --double=24 --float=24 --opt=+asm,+asmfile,-speed,+space,-debug,-local --addrqual=ignore --mode=free -P -N255 --warn=0 --asmlist -DXPRJ_default=$(CND_CONF)  --summary=default,-psect,-class,+mem,-hex,-file --output=default,-inhx032 --runtime=default,+clear,+init,-keep,-no_startup,-osccal,-resetbits,-download,-stackcall,+clib $(COMPARISON_BUILD)  --output=-mcof,+elf:multilocs --stack=compiled:auto:auto "--errformat=%f:%l: error: (%n) %s" "--warnformat=%f:%l: warning: (%n) %s" "--msgformat=%f:%l: advisory: (%n) %s"    -o${OBJECTDIR}/main.p1  main.c 
 	@-${MV} ${OBJECTDIR}/main.d ${OBJECTDIR}/main.p1.d 
 	@${FIXDEPS} ${OBJECTDIR}/main.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
+	
+${OBJECTDIR}/port/mbcrc.p1: port/mbcrc.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}/port" 
+	@${RM} ${OBJECTDIR}/port/mbcrc.p1.d 
+	@${RM} ${OBJECTDIR}/port/mbcrc.p1 
+	${MP_CC} --pass1 $(MP_EXTRA_CC_PRE) --chip=$(MP_PROCESSOR_OPTION) -Q -G  --double=24 --float=24 --opt=+asm,+asmfile,-speed,+space,-debug,-local --addrqual=ignore --mode=free -P -N255 --warn=0 --asmlist -DXPRJ_default=$(CND_CONF)  --summary=default,-psect,-class,+mem,-hex,-file --output=default,-inhx032 --runtime=default,+clear,+init,-keep,-no_startup,-osccal,-resetbits,-download,-stackcall,+clib $(COMPARISON_BUILD)  --output=-mcof,+elf:multilocs --stack=compiled:auto:auto "--errformat=%f:%l: error: (%n) %s" "--warnformat=%f:%l: warning: (%n) %s" "--msgformat=%f:%l: advisory: (%n) %s"    -o${OBJECTDIR}/port/mbcrc.p1  port/mbcrc.c 
+	@-${MV} ${OBJECTDIR}/port/mbcrc.d ${OBJECTDIR}/port/mbcrc.p1.d 
+	@${FIXDEPS} ${OBJECTDIR}/port/mbcrc.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
+	
+${OBJECTDIR}/port/portevent.p1: port/portevent.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}/port" 
+	@${RM} ${OBJECTDIR}/port/portevent.p1.d 
+	@${RM} ${OBJECTDIR}/port/portevent.p1 
+	${MP_CC} --pass1 $(MP_EXTRA_CC_PRE) --chip=$(MP_PROCESSOR_OPTION) -Q -G  --double=24 --float=24 --opt=+asm,+asmfile,-speed,+space,-debug,-local --addrqual=ignore --mode=free -P -N255 --warn=0 --asmlist -DXPRJ_default=$(CND_CONF)  --summary=default,-psect,-class,+mem,-hex,-file --output=default,-inhx032 --runtime=default,+clear,+init,-keep,-no_startup,-osccal,-resetbits,-download,-stackcall,+clib $(COMPARISON_BUILD)  --output=-mcof,+elf:multilocs --stack=compiled:auto:auto "--errformat=%f:%l: error: (%n) %s" "--warnformat=%f:%l: warning: (%n) %s" "--msgformat=%f:%l: advisory: (%n) %s"    -o${OBJECTDIR}/port/portevent.p1  port/portevent.c 
+	@-${MV} ${OBJECTDIR}/port/portevent.d ${OBJECTDIR}/port/portevent.p1.d 
+	@${FIXDEPS} ${OBJECTDIR}/port/portevent.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
+	
+${OBJECTDIR}/port/portserial.p1: port/portserial.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}/port" 
+	@${RM} ${OBJECTDIR}/port/portserial.p1.d 
+	@${RM} ${OBJECTDIR}/port/portserial.p1 
+	${MP_CC} --pass1 $(MP_EXTRA_CC_PRE) --chip=$(MP_PROCESSOR_OPTION) -Q -G  --double=24 --float=24 --opt=+asm,+asmfile,-speed,+space,-debug,-local --addrqual=ignore --mode=free -P -N255 --warn=0 --asmlist -DXPRJ_default=$(CND_CONF)  --summary=default,-psect,-class,+mem,-hex,-file --output=default,-inhx032 --runtime=default,+clear,+init,-keep,-no_startup,-osccal,-resetbits,-download,-stackcall,+clib $(COMPARISON_BUILD)  --output=-mcof,+elf:multilocs --stack=compiled:auto:auto "--errformat=%f:%l: error: (%n) %s" "--warnformat=%f:%l: warning: (%n) %s" "--msgformat=%f:%l: advisory: (%n) %s"    -o${OBJECTDIR}/port/portserial.p1  port/portserial.c 
+	@-${MV} ${OBJECTDIR}/port/portserial.d ${OBJECTDIR}/port/portserial.p1.d 
+	@${FIXDEPS} ${OBJECTDIR}/port/portserial.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
+	
+${OBJECTDIR}/port/porttimer.p1: port/porttimer.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}/port" 
+	@${RM} ${OBJECTDIR}/port/porttimer.p1.d 
+	@${RM} ${OBJECTDIR}/port/porttimer.p1 
+	${MP_CC} --pass1 $(MP_EXTRA_CC_PRE) --chip=$(MP_PROCESSOR_OPTION) -Q -G  --double=24 --float=24 --opt=+asm,+asmfile,-speed,+space,-debug,-local --addrqual=ignore --mode=free -P -N255 --warn=0 --asmlist -DXPRJ_default=$(CND_CONF)  --summary=default,-psect,-class,+mem,-hex,-file --output=default,-inhx032 --runtime=default,+clear,+init,-keep,-no_startup,-osccal,-resetbits,-download,-stackcall,+clib $(COMPARISON_BUILD)  --output=-mcof,+elf:multilocs --stack=compiled:auto:auto "--errformat=%f:%l: error: (%n) %s" "--warnformat=%f:%l: warning: (%n) %s" "--msgformat=%f:%l: advisory: (%n) %s"    -o${OBJECTDIR}/port/porttimer.p1  port/porttimer.c 
+	@-${MV} ${OBJECTDIR}/port/porttimer.d ${OBJECTDIR}/port/porttimer.p1.d 
+	@${FIXDEPS} ${OBJECTDIR}/port/porttimer.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
 	
 endif
 
