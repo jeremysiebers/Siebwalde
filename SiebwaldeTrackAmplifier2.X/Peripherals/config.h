@@ -41,7 +41,7 @@ enum
  * @Example
     SYSTEM_Initialize(void);
  */
-void SYSTEM_Initialize(void);
+extern void SYSTEM_Initialize(void);
 
 /**
  * @Param
@@ -54,7 +54,7 @@ void SYSTEM_Initialize(void);
  * @Example
     OSCILLATOR_Initialize(void);
  */
-void OSCILLATOR_Initialize(void);
+extern void OSCILLATOR_Initialize(void);
 
 #ifdef	__cplusplus
 }

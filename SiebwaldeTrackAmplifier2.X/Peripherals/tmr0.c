@@ -11,7 +11,7 @@ void TMR0_Initialize(void) {
     // Set TMR0 to the options selected in the User Interface
     
     // TMR0 Prescaler (default assigned)
-    OPTION_REGbits.PS = 0b111; //1:256
+    OPTION_REGbits.PS = 0b110; //1:128
     
     OPTION_REGbits.T0CS = 0;
     

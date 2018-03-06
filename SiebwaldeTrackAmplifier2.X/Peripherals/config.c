@@ -25,14 +25,15 @@
 #pragma config BORSEN = OFF     // Brown-out Reset Software Enable bit (Disabled)
 
 void SYSTEM_Initialize(void) {
-    OSCILLATOR_Initialize();
-    PIN_MANAGER_Initialize();
-    TMR0_Initialize();
-    TMR2_Initialize();
-    PWM_Initialize();
-    ausart_Initialize();
+    //OSCILLATOR_Initialize();
+    //PIN_MANAGER_Initialize();
+    //TMR0_Initialize();
+    //TMR2_Initialize();
+    //PWM_Initialize();
+    //ausart_Initialize();
     //INT0_Initialize();
-    INTERRUPT_Initialize();
+    //INTERRUPT_Initialize();
+    
 }
 
 void OSCILLATOR_Initialize(void) {
