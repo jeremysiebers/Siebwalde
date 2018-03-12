@@ -1,5 +1,6 @@
 #include "interrupt_manager.h"
 #include "config.h"
+#include "../modbus/Interrupts.h"
 
 void INTERRUPT_Initialize(void) {
     // If using interrupts in PIC18 High/Low Priority Mode you need to enable the Global High and Low Interrupts
@@ -26,17 +27,19 @@ void interrupt INTERRUPT_InterruptManager(void) {
 //        INT0_ISR();
 //    }
     
-    if (INTCONbits.TMR0IE == 1 && INTCONbits.TMR0IF == 1){
-        TMR0_ISR();
-    }
+//    if (INTCONbits.TMR0IE == 1 && INTCONbits.TMR0IF == 1){
+//        TMR0_ISR();
+//    }
+//    
+//    if (PIE1bits.RCIE == 1 && PIR1bits.RCIF == 1){
+//        ausart_Receive_ISR();
+//    }
+//    
+//    if (PIE1bits.TXIE == 1 && PIR1bits.TXIF == 1){
+//        ausart_Transmit_ISR();
+//    }
     
-    if (PIE1bits.RCIE == 1 && PIR1bits.RCIF == 1){
-        ausart_Receive_ISR();
-    }
-    
-    if (PIE1bits.TXIE == 1 && PIR1bits.TXIF == 1){
-        ausart_Transmit_ISR();
-    }
+    PetitModbusIntHandler();
 }
 
 /**

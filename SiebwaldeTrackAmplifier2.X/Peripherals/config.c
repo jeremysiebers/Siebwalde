@@ -5,11 +5,8 @@
 #include <xc.h>
 #include "config.h"
 
-// #pragma config statements should precede project file includes.
-// Use project enums instead of #define for ON and OFF.
-
 // CONFIG1
-#pragma config FOSC = EC        // Oscillator Selection bits (EXTCLK; port I/O function on OSC2/CLKO/RA6)
+#pragma config FOSC = EXTRCIO   // Oscillator Selection bits (EXTRC oscillator; port I/O function on OSC2/CLKO/RA6)
 #pragma config WDTE = OFF       // Watchdog Timer Enable bit (WDT disabled)
 #pragma config PWRTE = OFF      // Power-up Timer Enable bit (PWRT enabled)
 #pragma config MCLRE = ON       // MCLR/VPP/RE3 Pin Function Select bit (MCLR/VPP/RE3 pin function is MCLR)
@@ -24,16 +21,19 @@
 #pragma config IESO = OFF       // Internal External Switchover bit (Internal External Switchover mode disabled)
 #pragma config BORSEN = OFF     // Brown-out Reset Software Enable bit (Disabled)
 
+// #pragma config statements should precede project file includes.
+// Use project enums instead of #define for ON and OFF.
+
+
 void SYSTEM_Initialize(void) {
-    //OSCILLATOR_Initialize();
-    //PIN_MANAGER_Initialize();
+    OSCILLATOR_Initialize();
+    PIN_MANAGER_Initialize();
     //TMR0_Initialize();
     //TMR2_Initialize();
-    //PWM_Initialize();
+    PWM_Initialize();
     //ausart_Initialize();
     //INT0_Initialize();
-    //INTERRUPT_Initialize();
-    
+    INTERRUPT_Initialize();    
 }
 
 void OSCILLATOR_Initialize(void) {

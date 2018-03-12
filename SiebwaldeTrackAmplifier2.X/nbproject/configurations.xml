@@ -5,27 +5,11 @@
                    displayName="Header Files"
                    projectFiles="true">
       <logicalFolder name="modbus" displayName="modbus" projectFiles="true">
-        <logicalFolder name="ascii" displayName="ascii" projectFiles="true">
-          <itemPath>modbus/ascii/mbascii.h</itemPath>
-        </logicalFolder>
-        <logicalFolder name="functions" displayName="functions" projectFiles="true">
-        </logicalFolder>
-        <logicalFolder name="include" displayName="include" projectFiles="true">
-          <itemPath>modbus/include/mb.h</itemPath>
-          <itemPath>modbus/include/mbconfig.h</itemPath>
-          <itemPath>modbus/include/mbframe.h</itemPath>
-          <itemPath>modbus/include/mbfunc.h</itemPath>
-          <itemPath>modbus/include/mbport.h</itemPath>
-          <itemPath>modbus/include/mbproto.h</itemPath>
-          <itemPath>modbus/include/mbutils.h</itemPath>
-        </logicalFolder>
-        <logicalFolder name="rtu" displayName="rtu" projectFiles="true">
-          <itemPath>modbus/rtu/mbcrc.h</itemPath>
-          <itemPath>modbus/rtu/mbrtu.h</itemPath>
-        </logicalFolder>
-        <logicalFolder name="tcp" displayName="tcp" projectFiles="true">
-          <itemPath>modbus/tcp/mbtcp.h</itemPath>
-        </logicalFolder>
+        <itemPath>modbus/General.h</itemPath>
+        <itemPath>modbus/PetitModbus.h</itemPath>
+        <itemPath>modbus/PetitModbusPort.h</itemPath>
+        <itemPath>modbus/Interrupts.h</itemPath>
+        <itemPath>modbus/Init.h</itemPath>
       </logicalFolder>
       <logicalFolder name="Peripherals" displayName="Peripherals" projectFiles="true">
         <itemPath>Peripherals/config.h</itemPath>
@@ -37,9 +21,6 @@
         <itemPath>Peripherals/pwm.h</itemPath>
         <itemPath>Peripherals/ausart.h</itemPath>
       </logicalFolder>
-      <logicalFolder name="port" displayName="port" projectFiles="true">
-        <itemPath>port/port.h</itemPath>
-      </logicalFolder>
       <itemPath>main.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
@@ -50,28 +31,12 @@
                    displayName="Source Files"
                    projectFiles="true">
       <logicalFolder name="modbus" displayName="modbus" projectFiles="true">
-        <logicalFolder name="ascii" displayName="ascii" projectFiles="true">
-          <itemPath>modbus/ascii/mbascii.c</itemPath>
-        </logicalFolder>
-        <logicalFolder name="functions" displayName="functions" projectFiles="true">
-          <itemPath>modbus/functions/mbfunccoils.c</itemPath>
-          <itemPath>modbus/functions/mbfuncdiag.c</itemPath>
-          <itemPath>modbus/functions/mbfuncdisc.c</itemPath>
-          <itemPath>modbus/functions/mbfuncholding.c</itemPath>
-          <itemPath>modbus/functions/mbfuncinput.c</itemPath>
-          <itemPath>modbus/functions/mbfuncother.c</itemPath>
-          <itemPath>modbus/functions/mbutils.c</itemPath>
-        </logicalFolder>
-        <logicalFolder name="include" displayName="include" projectFiles="true">
-        </logicalFolder>
-        <logicalFolder name="rtu" displayName="rtu" projectFiles="true">
-          <itemPath>modbus/rtu/mbcrc.c</itemPath>
-          <itemPath>modbus/rtu/mbrtu.c</itemPath>
-        </logicalFolder>
-        <logicalFolder name="tcp" displayName="tcp" projectFiles="true">
-          <itemPath>modbus/tcp/mbtcp.c</itemPath>
-        </logicalFolder>
-        <itemPath>modbus/mb.c</itemPath>
+        <itemPath>modbus/General.c</itemPath>
+        <itemPath>modbus/PetitModbus.c</itemPath>
+        <itemPath>modbus/PetitModbusPort.c</itemPath>
+        <itemPath>modbus/PetitRegConstant.c</itemPath>
+        <itemPath>modbus/Interrupts.c</itemPath>
+        <itemPath>modbus/Init.c</itemPath>
       </logicalFolder>
       <logicalFolder name="Peripherals" displayName="Peripherals" projectFiles="true">
         <itemPath>Peripherals/config.c</itemPath>
@@ -82,11 +47,6 @@
         <itemPath>Peripherals/tmr0.c</itemPath>
         <itemPath>Peripherals/pwm.c</itemPath>
         <itemPath>Peripherals/ausart.c</itemPath>
-      </logicalFolder>
-      <logicalFolder name="port" displayName="port" projectFiles="true">
-        <itemPath>port/portevent.c</itemPath>
-        <itemPath>port/portserial.c</itemPath>
-        <itemPath>port/porttimer.c</itemPath>
       </logicalFolder>
       <itemPath>main.c</itemPath>
     </logicalFolder>
@@ -100,6 +60,7 @@
     <Elem>Peripherals</Elem>
     <Elem>port</Elem>
     <Elem>modbus</Elem>
+    <Elem>doc/PetitModbus/PetitModbus.X</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
@@ -142,12 +103,11 @@
         <property key="asmlist" value="true"/>
         <property key="define-macros" value=""/>
         <property key="disable-optimizations" value="false"/>
-        <property key="extra-include-directories"
-                  value="port;modbus\include;modbus\rtu;modbus;modbus\ascii"/>
-        <property key="favor-optimization-for" value="-speed,+space"/>
+        <property key="extra-include-directories" value=""/>
+        <property key="favor-optimization-for" value="+speed,-space"/>
         <property key="identifier-length" value="255"/>
         <property key="local-generation" value="false"/>
-        <property key="operation-mode" value="free"/>
+        <property key="operation-mode" value="pro"/>
         <property key="opt-xc8-compiler-strict_ansi" value="false"/>
         <property key="optimization-assembler" value="true"/>
         <property key="optimization-assembler-files" value="true"/>
@@ -157,7 +117,7 @@
         <property key="optimization-invariant-value" value="16"/>
         <property key="optimization-level" value="9"/>
         <property key="optimization-set" value="default"/>
-        <property key="optimization-speed" value="false"/>
+        <property key="optimization-speed" value="true"/>
         <property key="optimization-stable-enable" value="false"/>
         <property key="preprocess-assembler" value="true"/>
         <property key="undefine-macros" value=""/>

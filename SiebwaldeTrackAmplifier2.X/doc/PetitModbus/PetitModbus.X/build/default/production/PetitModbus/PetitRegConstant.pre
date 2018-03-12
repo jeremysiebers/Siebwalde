@@ -1,0 +1,32 @@
+
+# 1 "PetitModbus/PetitRegConstant.c"
+
+# 27 "PetitModbus/PetitModbus.h"
+extern unsigned char PETITMODBUS_SLAVE_ADDRESS;
+
+typedef struct{
+short ActValue;
+}PetitRegStructure;
+
+extern PetitRegStructure PetitRegisters[11];
+extern volatile unsigned short PetitModbusTimerValue;
+
+
+extern void InitPetitModbus(unsigned char PetitModbusSlaveAddress);
+extern void ProcessPetitModbus(void);
+
+# 19 "PetitModbus/PetitModbusPort.h"
+extern volatile unsigned char PetitReceiveBuffer[(11*2 + 10)];
+extern volatile unsigned char PetitReceiveCounter;
+
+extern void PetitModBus_UART_Initialise(void);
+extern void PetitModBus_TIMER_Initialise(void);
+extern void PetitModBus_UART_Putch(unsigned char c);
+extern unsigned char PetitModBus_UART_String(unsigned char *s, unsigned int Length);
+
+extern void ReceiveInterrupt(unsigned char Data);
+extern void PetitModBus_TimerValues(void);
+
+# 6 "PetitModbus/PetitRegConstant.c"
+PetitRegStructure PetitRegisters [11];
+

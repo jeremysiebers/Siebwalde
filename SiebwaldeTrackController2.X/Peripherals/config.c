@@ -30,8 +30,8 @@
 void SYSTEM_Initialize(void) {
     OSCILLATOR_Initialize();
     PIN_MANAGER_Initialize();
-    TMR0_Initialize();
-    ausart_Initialize();
+    //TMR0_Initialize();
+    //ausart_Initialize();
     //TMR2_Initialize();
     //PWM_Initialize();
     //INT0_Initialize();
@@ -40,9 +40,11 @@ void SYSTEM_Initialize(void) {
 
 void OSCILLATOR_Initialize(void) {
     // SCS FOSC; IDLEN disabled; IRCF 8MHz_HFINTOSC/4; 
-    OSCCON = 0x70;
+    //OSCCON = 0x70;
+    OSCCON = 0;
+    
     // INTSRC disabled; PLLEN disabled; TUN 0x00; 
-    OSCTUNE = 0x00;
+    //OSCTUNE = 0x00;
     // Set the secondary oscillator
 
 }

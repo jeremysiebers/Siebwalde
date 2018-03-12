@@ -1,6 +1,7 @@
 #include "interrupt_manager.h"
 #include "config.h"
-#include "../port/port.h"
+#include "../modbus/Interrupts.h"
+
 
 void INTERRUPT_Initialize(void) {
     // If using interrupts in PIC18 High/Low Priority Mode you need to enable the Global High and Low Interrupts
@@ -26,8 +27,10 @@ void interrupt INTERRUPT_InterruptManager(void) {
 //    if (INTCONbits.INT0IE == 1 && INTCONbits.INT0IF == 1){
 //        INT0_ISR();
 //    }
-    MBIntUartHandler();
-    MBIntTimerHandler();
+    
+    PetitModbusIntHandler();
+
+
     
 //    if (INTCONbits.TMR0IE == 1 && INTCONbits.TMR0IF == 1){
 //        TMR0_ISR();
