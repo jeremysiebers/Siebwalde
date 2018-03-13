@@ -57,17 +57,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=modbus/General.c modbus/PetitModbus.c modbus/PetitModbusPort.c modbus/PetitRegConstant.c modbus/Interrupts.c modbus/Init.c Peripherals/config.c Peripherals/INT0.c Peripherals/interrupt_manager.c Peripherals/pin_manager.c Peripherals/tmr2.c Peripherals/tmr0.c Peripherals/pwm.c Peripherals/ausart.c main.c
+SOURCEFILES_QUOTED_IF_SPACED=modbus/General.c modbus/PetitModbus.c modbus/PetitModbusPort.c modbus/PetitRegConstant.c modbus/Interrupts.c modbus/Init.c Peripherals/config.c Peripherals/interrupt_manager.c Peripherals/pin_manager.c Peripherals/pwm.c main.c
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/modbus/General.p1 ${OBJECTDIR}/modbus/PetitModbus.p1 ${OBJECTDIR}/modbus/PetitModbusPort.p1 ${OBJECTDIR}/modbus/PetitRegConstant.p1 ${OBJECTDIR}/modbus/Interrupts.p1 ${OBJECTDIR}/modbus/Init.p1 ${OBJECTDIR}/Peripherals/config.p1 ${OBJECTDIR}/Peripherals/INT0.p1 ${OBJECTDIR}/Peripherals/interrupt_manager.p1 ${OBJECTDIR}/Peripherals/pin_manager.p1 ${OBJECTDIR}/Peripherals/tmr2.p1 ${OBJECTDIR}/Peripherals/tmr0.p1 ${OBJECTDIR}/Peripherals/pwm.p1 ${OBJECTDIR}/Peripherals/ausart.p1 ${OBJECTDIR}/main.p1
-POSSIBLE_DEPFILES=${OBJECTDIR}/modbus/General.p1.d ${OBJECTDIR}/modbus/PetitModbus.p1.d ${OBJECTDIR}/modbus/PetitModbusPort.p1.d ${OBJECTDIR}/modbus/PetitRegConstant.p1.d ${OBJECTDIR}/modbus/Interrupts.p1.d ${OBJECTDIR}/modbus/Init.p1.d ${OBJECTDIR}/Peripherals/config.p1.d ${OBJECTDIR}/Peripherals/INT0.p1.d ${OBJECTDIR}/Peripherals/interrupt_manager.p1.d ${OBJECTDIR}/Peripherals/pin_manager.p1.d ${OBJECTDIR}/Peripherals/tmr2.p1.d ${OBJECTDIR}/Peripherals/tmr0.p1.d ${OBJECTDIR}/Peripherals/pwm.p1.d ${OBJECTDIR}/Peripherals/ausart.p1.d ${OBJECTDIR}/main.p1.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/modbus/General.p1 ${OBJECTDIR}/modbus/PetitModbus.p1 ${OBJECTDIR}/modbus/PetitModbusPort.p1 ${OBJECTDIR}/modbus/PetitRegConstant.p1 ${OBJECTDIR}/modbus/Interrupts.p1 ${OBJECTDIR}/modbus/Init.p1 ${OBJECTDIR}/Peripherals/config.p1 ${OBJECTDIR}/Peripherals/interrupt_manager.p1 ${OBJECTDIR}/Peripherals/pin_manager.p1 ${OBJECTDIR}/Peripherals/pwm.p1 ${OBJECTDIR}/main.p1
+POSSIBLE_DEPFILES=${OBJECTDIR}/modbus/General.p1.d ${OBJECTDIR}/modbus/PetitModbus.p1.d ${OBJECTDIR}/modbus/PetitModbusPort.p1.d ${OBJECTDIR}/modbus/PetitRegConstant.p1.d ${OBJECTDIR}/modbus/Interrupts.p1.d ${OBJECTDIR}/modbus/Init.p1.d ${OBJECTDIR}/Peripherals/config.p1.d ${OBJECTDIR}/Peripherals/interrupt_manager.p1.d ${OBJECTDIR}/Peripherals/pin_manager.p1.d ${OBJECTDIR}/Peripherals/pwm.p1.d ${OBJECTDIR}/main.p1.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/modbus/General.p1 ${OBJECTDIR}/modbus/PetitModbus.p1 ${OBJECTDIR}/modbus/PetitModbusPort.p1 ${OBJECTDIR}/modbus/PetitRegConstant.p1 ${OBJECTDIR}/modbus/Interrupts.p1 ${OBJECTDIR}/modbus/Init.p1 ${OBJECTDIR}/Peripherals/config.p1 ${OBJECTDIR}/Peripherals/INT0.p1 ${OBJECTDIR}/Peripherals/interrupt_manager.p1 ${OBJECTDIR}/Peripherals/pin_manager.p1 ${OBJECTDIR}/Peripherals/tmr2.p1 ${OBJECTDIR}/Peripherals/tmr0.p1 ${OBJECTDIR}/Peripherals/pwm.p1 ${OBJECTDIR}/Peripherals/ausart.p1 ${OBJECTDIR}/main.p1
+OBJECTFILES=${OBJECTDIR}/modbus/General.p1 ${OBJECTDIR}/modbus/PetitModbus.p1 ${OBJECTDIR}/modbus/PetitModbusPort.p1 ${OBJECTDIR}/modbus/PetitRegConstant.p1 ${OBJECTDIR}/modbus/Interrupts.p1 ${OBJECTDIR}/modbus/Init.p1 ${OBJECTDIR}/Peripherals/config.p1 ${OBJECTDIR}/Peripherals/interrupt_manager.p1 ${OBJECTDIR}/Peripherals/pin_manager.p1 ${OBJECTDIR}/Peripherals/pwm.p1 ${OBJECTDIR}/main.p1
 
 # Source Files
-SOURCEFILES=modbus/General.c modbus/PetitModbus.c modbus/PetitModbusPort.c modbus/PetitRegConstant.c modbus/Interrupts.c modbus/Init.c Peripherals/config.c Peripherals/INT0.c Peripherals/interrupt_manager.c Peripherals/pin_manager.c Peripherals/tmr2.c Peripherals/tmr0.c Peripherals/pwm.c Peripherals/ausart.c main.c
+SOURCEFILES=modbus/General.c modbus/PetitModbus.c modbus/PetitModbusPort.c modbus/PetitRegConstant.c modbus/Interrupts.c modbus/Init.c Peripherals/config.c Peripherals/interrupt_manager.c Peripherals/pin_manager.c Peripherals/pwm.c main.c
 
 
 CFLAGS=
@@ -149,14 +149,6 @@ ${OBJECTDIR}/Peripherals/config.p1: Peripherals/config.c  nbproject/Makefile-${C
 	@-${MV} ${OBJECTDIR}/Peripherals/config.d ${OBJECTDIR}/Peripherals/config.p1.d 
 	@${FIXDEPS} ${OBJECTDIR}/Peripherals/config.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
 	
-${OBJECTDIR}/Peripherals/INT0.p1: Peripherals/INT0.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}/Peripherals" 
-	@${RM} ${OBJECTDIR}/Peripherals/INT0.p1.d 
-	@${RM} ${OBJECTDIR}/Peripherals/INT0.p1 
-	${MP_CC} --pass1 $(MP_EXTRA_CC_PRE) --chip=$(MP_PROCESSOR_OPTION) -Q -G  -D__DEBUG=1 --debugger=pickit3  --double=24 --float=24 --opt=+asm,+asmfile,+speed,-space,-debug,-local --addrqual=ignore --mode=pro -P -N255 --warn=0 --asmlist -DXPRJ_default=$(CND_CONF)  --summary=default,-psect,-class,+mem,-hex,-file --output=default,-inhx032 --runtime=default,+clear,+init,-keep,-no_startup,-osccal,-resetbits,-download,-stackcall,+clib $(COMPARISON_BUILD)  --output=-mcof,+elf:multilocs --stack=compiled:auto:auto "--errformat=%f:%l: error: (%n) %s" "--warnformat=%f:%l: warning: (%n) %s" "--msgformat=%f:%l: advisory: (%n) %s"    -o${OBJECTDIR}/Peripherals/INT0.p1  Peripherals/INT0.c 
-	@-${MV} ${OBJECTDIR}/Peripherals/INT0.d ${OBJECTDIR}/Peripherals/INT0.p1.d 
-	@${FIXDEPS} ${OBJECTDIR}/Peripherals/INT0.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
-	
 ${OBJECTDIR}/Peripherals/interrupt_manager.p1: Peripherals/interrupt_manager.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Peripherals" 
 	@${RM} ${OBJECTDIR}/Peripherals/interrupt_manager.p1.d 
@@ -173,22 +165,6 @@ ${OBJECTDIR}/Peripherals/pin_manager.p1: Peripherals/pin_manager.c  nbproject/Ma
 	@-${MV} ${OBJECTDIR}/Peripherals/pin_manager.d ${OBJECTDIR}/Peripherals/pin_manager.p1.d 
 	@${FIXDEPS} ${OBJECTDIR}/Peripherals/pin_manager.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
 	
-${OBJECTDIR}/Peripherals/tmr2.p1: Peripherals/tmr2.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}/Peripherals" 
-	@${RM} ${OBJECTDIR}/Peripherals/tmr2.p1.d 
-	@${RM} ${OBJECTDIR}/Peripherals/tmr2.p1 
-	${MP_CC} --pass1 $(MP_EXTRA_CC_PRE) --chip=$(MP_PROCESSOR_OPTION) -Q -G  -D__DEBUG=1 --debugger=pickit3  --double=24 --float=24 --opt=+asm,+asmfile,+speed,-space,-debug,-local --addrqual=ignore --mode=pro -P -N255 --warn=0 --asmlist -DXPRJ_default=$(CND_CONF)  --summary=default,-psect,-class,+mem,-hex,-file --output=default,-inhx032 --runtime=default,+clear,+init,-keep,-no_startup,-osccal,-resetbits,-download,-stackcall,+clib $(COMPARISON_BUILD)  --output=-mcof,+elf:multilocs --stack=compiled:auto:auto "--errformat=%f:%l: error: (%n) %s" "--warnformat=%f:%l: warning: (%n) %s" "--msgformat=%f:%l: advisory: (%n) %s"    -o${OBJECTDIR}/Peripherals/tmr2.p1  Peripherals/tmr2.c 
-	@-${MV} ${OBJECTDIR}/Peripherals/tmr2.d ${OBJECTDIR}/Peripherals/tmr2.p1.d 
-	@${FIXDEPS} ${OBJECTDIR}/Peripherals/tmr2.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
-	
-${OBJECTDIR}/Peripherals/tmr0.p1: Peripherals/tmr0.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}/Peripherals" 
-	@${RM} ${OBJECTDIR}/Peripherals/tmr0.p1.d 
-	@${RM} ${OBJECTDIR}/Peripherals/tmr0.p1 
-	${MP_CC} --pass1 $(MP_EXTRA_CC_PRE) --chip=$(MP_PROCESSOR_OPTION) -Q -G  -D__DEBUG=1 --debugger=pickit3  --double=24 --float=24 --opt=+asm,+asmfile,+speed,-space,-debug,-local --addrqual=ignore --mode=pro -P -N255 --warn=0 --asmlist -DXPRJ_default=$(CND_CONF)  --summary=default,-psect,-class,+mem,-hex,-file --output=default,-inhx032 --runtime=default,+clear,+init,-keep,-no_startup,-osccal,-resetbits,-download,-stackcall,+clib $(COMPARISON_BUILD)  --output=-mcof,+elf:multilocs --stack=compiled:auto:auto "--errformat=%f:%l: error: (%n) %s" "--warnformat=%f:%l: warning: (%n) %s" "--msgformat=%f:%l: advisory: (%n) %s"    -o${OBJECTDIR}/Peripherals/tmr0.p1  Peripherals/tmr0.c 
-	@-${MV} ${OBJECTDIR}/Peripherals/tmr0.d ${OBJECTDIR}/Peripherals/tmr0.p1.d 
-	@${FIXDEPS} ${OBJECTDIR}/Peripherals/tmr0.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
-	
 ${OBJECTDIR}/Peripherals/pwm.p1: Peripherals/pwm.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Peripherals" 
 	@${RM} ${OBJECTDIR}/Peripherals/pwm.p1.d 
@@ -196,14 +172,6 @@ ${OBJECTDIR}/Peripherals/pwm.p1: Peripherals/pwm.c  nbproject/Makefile-${CND_CON
 	${MP_CC} --pass1 $(MP_EXTRA_CC_PRE) --chip=$(MP_PROCESSOR_OPTION) -Q -G  -D__DEBUG=1 --debugger=pickit3  --double=24 --float=24 --opt=+asm,+asmfile,+speed,-space,-debug,-local --addrqual=ignore --mode=pro -P -N255 --warn=0 --asmlist -DXPRJ_default=$(CND_CONF)  --summary=default,-psect,-class,+mem,-hex,-file --output=default,-inhx032 --runtime=default,+clear,+init,-keep,-no_startup,-osccal,-resetbits,-download,-stackcall,+clib $(COMPARISON_BUILD)  --output=-mcof,+elf:multilocs --stack=compiled:auto:auto "--errformat=%f:%l: error: (%n) %s" "--warnformat=%f:%l: warning: (%n) %s" "--msgformat=%f:%l: advisory: (%n) %s"    -o${OBJECTDIR}/Peripherals/pwm.p1  Peripherals/pwm.c 
 	@-${MV} ${OBJECTDIR}/Peripherals/pwm.d ${OBJECTDIR}/Peripherals/pwm.p1.d 
 	@${FIXDEPS} ${OBJECTDIR}/Peripherals/pwm.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
-	
-${OBJECTDIR}/Peripherals/ausart.p1: Peripherals/ausart.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}/Peripherals" 
-	@${RM} ${OBJECTDIR}/Peripherals/ausart.p1.d 
-	@${RM} ${OBJECTDIR}/Peripherals/ausart.p1 
-	${MP_CC} --pass1 $(MP_EXTRA_CC_PRE) --chip=$(MP_PROCESSOR_OPTION) -Q -G  -D__DEBUG=1 --debugger=pickit3  --double=24 --float=24 --opt=+asm,+asmfile,+speed,-space,-debug,-local --addrqual=ignore --mode=pro -P -N255 --warn=0 --asmlist -DXPRJ_default=$(CND_CONF)  --summary=default,-psect,-class,+mem,-hex,-file --output=default,-inhx032 --runtime=default,+clear,+init,-keep,-no_startup,-osccal,-resetbits,-download,-stackcall,+clib $(COMPARISON_BUILD)  --output=-mcof,+elf:multilocs --stack=compiled:auto:auto "--errformat=%f:%l: error: (%n) %s" "--warnformat=%f:%l: warning: (%n) %s" "--msgformat=%f:%l: advisory: (%n) %s"    -o${OBJECTDIR}/Peripherals/ausart.p1  Peripherals/ausart.c 
-	@-${MV} ${OBJECTDIR}/Peripherals/ausart.d ${OBJECTDIR}/Peripherals/ausart.p1.d 
-	@${FIXDEPS} ${OBJECTDIR}/Peripherals/ausart.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
 	
 ${OBJECTDIR}/main.p1: main.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}" 
@@ -270,14 +238,6 @@ ${OBJECTDIR}/Peripherals/config.p1: Peripherals/config.c  nbproject/Makefile-${C
 	@-${MV} ${OBJECTDIR}/Peripherals/config.d ${OBJECTDIR}/Peripherals/config.p1.d 
 	@${FIXDEPS} ${OBJECTDIR}/Peripherals/config.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
 	
-${OBJECTDIR}/Peripherals/INT0.p1: Peripherals/INT0.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}/Peripherals" 
-	@${RM} ${OBJECTDIR}/Peripherals/INT0.p1.d 
-	@${RM} ${OBJECTDIR}/Peripherals/INT0.p1 
-	${MP_CC} --pass1 $(MP_EXTRA_CC_PRE) --chip=$(MP_PROCESSOR_OPTION) -Q -G  --double=24 --float=24 --opt=+asm,+asmfile,+speed,-space,-debug,-local --addrqual=ignore --mode=pro -P -N255 --warn=0 --asmlist -DXPRJ_default=$(CND_CONF)  --summary=default,-psect,-class,+mem,-hex,-file --output=default,-inhx032 --runtime=default,+clear,+init,-keep,-no_startup,-osccal,-resetbits,-download,-stackcall,+clib $(COMPARISON_BUILD)  --output=-mcof,+elf:multilocs --stack=compiled:auto:auto "--errformat=%f:%l: error: (%n) %s" "--warnformat=%f:%l: warning: (%n) %s" "--msgformat=%f:%l: advisory: (%n) %s"    -o${OBJECTDIR}/Peripherals/INT0.p1  Peripherals/INT0.c 
-	@-${MV} ${OBJECTDIR}/Peripherals/INT0.d ${OBJECTDIR}/Peripherals/INT0.p1.d 
-	@${FIXDEPS} ${OBJECTDIR}/Peripherals/INT0.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
-	
 ${OBJECTDIR}/Peripherals/interrupt_manager.p1: Peripherals/interrupt_manager.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Peripherals" 
 	@${RM} ${OBJECTDIR}/Peripherals/interrupt_manager.p1.d 
@@ -294,22 +254,6 @@ ${OBJECTDIR}/Peripherals/pin_manager.p1: Peripherals/pin_manager.c  nbproject/Ma
 	@-${MV} ${OBJECTDIR}/Peripherals/pin_manager.d ${OBJECTDIR}/Peripherals/pin_manager.p1.d 
 	@${FIXDEPS} ${OBJECTDIR}/Peripherals/pin_manager.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
 	
-${OBJECTDIR}/Peripherals/tmr2.p1: Peripherals/tmr2.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}/Peripherals" 
-	@${RM} ${OBJECTDIR}/Peripherals/tmr2.p1.d 
-	@${RM} ${OBJECTDIR}/Peripherals/tmr2.p1 
-	${MP_CC} --pass1 $(MP_EXTRA_CC_PRE) --chip=$(MP_PROCESSOR_OPTION) -Q -G  --double=24 --float=24 --opt=+asm,+asmfile,+speed,-space,-debug,-local --addrqual=ignore --mode=pro -P -N255 --warn=0 --asmlist -DXPRJ_default=$(CND_CONF)  --summary=default,-psect,-class,+mem,-hex,-file --output=default,-inhx032 --runtime=default,+clear,+init,-keep,-no_startup,-osccal,-resetbits,-download,-stackcall,+clib $(COMPARISON_BUILD)  --output=-mcof,+elf:multilocs --stack=compiled:auto:auto "--errformat=%f:%l: error: (%n) %s" "--warnformat=%f:%l: warning: (%n) %s" "--msgformat=%f:%l: advisory: (%n) %s"    -o${OBJECTDIR}/Peripherals/tmr2.p1  Peripherals/tmr2.c 
-	@-${MV} ${OBJECTDIR}/Peripherals/tmr2.d ${OBJECTDIR}/Peripherals/tmr2.p1.d 
-	@${FIXDEPS} ${OBJECTDIR}/Peripherals/tmr2.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
-	
-${OBJECTDIR}/Peripherals/tmr0.p1: Peripherals/tmr0.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}/Peripherals" 
-	@${RM} ${OBJECTDIR}/Peripherals/tmr0.p1.d 
-	@${RM} ${OBJECTDIR}/Peripherals/tmr0.p1 
-	${MP_CC} --pass1 $(MP_EXTRA_CC_PRE) --chip=$(MP_PROCESSOR_OPTION) -Q -G  --double=24 --float=24 --opt=+asm,+asmfile,+speed,-space,-debug,-local --addrqual=ignore --mode=pro -P -N255 --warn=0 --asmlist -DXPRJ_default=$(CND_CONF)  --summary=default,-psect,-class,+mem,-hex,-file --output=default,-inhx032 --runtime=default,+clear,+init,-keep,-no_startup,-osccal,-resetbits,-download,-stackcall,+clib $(COMPARISON_BUILD)  --output=-mcof,+elf:multilocs --stack=compiled:auto:auto "--errformat=%f:%l: error: (%n) %s" "--warnformat=%f:%l: warning: (%n) %s" "--msgformat=%f:%l: advisory: (%n) %s"    -o${OBJECTDIR}/Peripherals/tmr0.p1  Peripherals/tmr0.c 
-	@-${MV} ${OBJECTDIR}/Peripherals/tmr0.d ${OBJECTDIR}/Peripherals/tmr0.p1.d 
-	@${FIXDEPS} ${OBJECTDIR}/Peripherals/tmr0.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
-	
 ${OBJECTDIR}/Peripherals/pwm.p1: Peripherals/pwm.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/Peripherals" 
 	@${RM} ${OBJECTDIR}/Peripherals/pwm.p1.d 
@@ -317,14 +261,6 @@ ${OBJECTDIR}/Peripherals/pwm.p1: Peripherals/pwm.c  nbproject/Makefile-${CND_CON
 	${MP_CC} --pass1 $(MP_EXTRA_CC_PRE) --chip=$(MP_PROCESSOR_OPTION) -Q -G  --double=24 --float=24 --opt=+asm,+asmfile,+speed,-space,-debug,-local --addrqual=ignore --mode=pro -P -N255 --warn=0 --asmlist -DXPRJ_default=$(CND_CONF)  --summary=default,-psect,-class,+mem,-hex,-file --output=default,-inhx032 --runtime=default,+clear,+init,-keep,-no_startup,-osccal,-resetbits,-download,-stackcall,+clib $(COMPARISON_BUILD)  --output=-mcof,+elf:multilocs --stack=compiled:auto:auto "--errformat=%f:%l: error: (%n) %s" "--warnformat=%f:%l: warning: (%n) %s" "--msgformat=%f:%l: advisory: (%n) %s"    -o${OBJECTDIR}/Peripherals/pwm.p1  Peripherals/pwm.c 
 	@-${MV} ${OBJECTDIR}/Peripherals/pwm.d ${OBJECTDIR}/Peripherals/pwm.p1.d 
 	@${FIXDEPS} ${OBJECTDIR}/Peripherals/pwm.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
-	
-${OBJECTDIR}/Peripherals/ausart.p1: Peripherals/ausart.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}/Peripherals" 
-	@${RM} ${OBJECTDIR}/Peripherals/ausart.p1.d 
-	@${RM} ${OBJECTDIR}/Peripherals/ausart.p1 
-	${MP_CC} --pass1 $(MP_EXTRA_CC_PRE) --chip=$(MP_PROCESSOR_OPTION) -Q -G  --double=24 --float=24 --opt=+asm,+asmfile,+speed,-space,-debug,-local --addrqual=ignore --mode=pro -P -N255 --warn=0 --asmlist -DXPRJ_default=$(CND_CONF)  --summary=default,-psect,-class,+mem,-hex,-file --output=default,-inhx032 --runtime=default,+clear,+init,-keep,-no_startup,-osccal,-resetbits,-download,-stackcall,+clib $(COMPARISON_BUILD)  --output=-mcof,+elf:multilocs --stack=compiled:auto:auto "--errformat=%f:%l: error: (%n) %s" "--warnformat=%f:%l: warning: (%n) %s" "--msgformat=%f:%l: advisory: (%n) %s"    -o${OBJECTDIR}/Peripherals/ausart.p1  Peripherals/ausart.c 
-	@-${MV} ${OBJECTDIR}/Peripherals/ausart.d ${OBJECTDIR}/Peripherals/ausart.p1.d 
-	@${FIXDEPS} ${OBJECTDIR}/Peripherals/ausart.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
 	
 ${OBJECTDIR}/main.p1: main.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}" 

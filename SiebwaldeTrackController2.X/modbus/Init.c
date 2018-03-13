@@ -24,10 +24,6 @@ void InitUART(void)
     TXSTAbits.SYNC = 0; // Asynchronous mode
     TXSTAbits.BRGH = 1; // Used in sync mode
     
-    
-    SPBRG   = DIVIDER;     	
-    
-    
     PIE1bits.TXIE = 0;
     PIR1bits.RCIF = 0;
     PIE1bits.RCIE = 1;   
@@ -38,7 +34,7 @@ void InitUART(void)
 void InitTMR1(void)
 {    
     // TMR0 Prescaler (default assigned)
-    OPTION_REGbits.PS = 0b100; //1:32
+    OPTION_REGbits.PS = 0b100; //1:32               0b111;//1:128
     
     OPTION_REGbits.T0CS = 0;
     

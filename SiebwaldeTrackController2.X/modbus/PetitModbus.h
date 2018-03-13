@@ -37,6 +37,7 @@ extern volatile unsigned short PetitModbusTimerValue;
 extern void             InitPetitModbus(void);
 extern void             ProcessPetitModbus(void);
 extern void             SendPetitModbus(unsigned char Address, unsigned char Function, unsigned char *DataBuf, unsigned short DataLen);
+extern unsigned char    SendPetitModbusBusyCheck(void);
 
 // Petit Modbus Port Header
 #include "PetitModbusPort.h"

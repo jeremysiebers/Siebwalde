@@ -10,19 +10,20 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#define ADDRESS 3
 
 void main(void) {
     // Initialize the device
     SYSTEM_Initialize();
     
-    InitPetitModbus(2);
+    InitPetitModbus(ADDRESS);
     
     PWM_LoadDutyValue(208);      //416 = 100%
     
     
     while(1)
     {
-        PORTCbits.RC1 = !PORTCbits.RC1;
+        PORTCbits.RC3 = PetitRegisters[0].ActValue;
         
         ProcessPetitModbus();
             
@@ -33,8 +34,6 @@ void main(void) {
             
             PetitRegisters[5].ActValue++;
         }
-        
-        PetitRegisters[10].ActValue = 12345;
         
     }
 }

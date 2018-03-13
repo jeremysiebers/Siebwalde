@@ -13,7 +13,7 @@ void PetitModbusIntHandler(void)
         
         PetitModBus_TimerValues();
         
-        PORTCbits.RC3 = !PORTCbits.RC3;
+        //PORTCbits.RC3 = !PORTCbits.RC3;
     }
     
     if( PIE1bits.RCIE == 1 && PIR1bits.RCIF == 1)
