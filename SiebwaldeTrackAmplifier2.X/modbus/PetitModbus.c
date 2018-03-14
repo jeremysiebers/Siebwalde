@@ -1,3 +1,4 @@
+#include <xc.h>
 #include "PetitModbus.h"
 #include "PetitModbusPort.h"
 
@@ -436,6 +437,8 @@ void ProcessPetitModbus(void)
     {
         if (Petit_Rx_Data.Address == PETITMODBUS_SLAVE_ADDRESS)                 // Is Data for us?
         {
+            
+            
             switch (Petit_Rx_Data.Function)                                     // Data is for us but which function?
             {
                 #if PETITMODBUS_READ_HOLDING_REGISTERS_ENABLED > 0

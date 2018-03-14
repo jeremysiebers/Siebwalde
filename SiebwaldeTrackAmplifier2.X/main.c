@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define ADDRESS 3
+#define ADDRESS 1
 
 void main(void) {
     // Initialize the device

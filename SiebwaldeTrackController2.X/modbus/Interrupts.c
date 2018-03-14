@@ -6,7 +6,7 @@ void PetitModbusIntHandler(void)
     if (INTCONbits.TMR0IE == 1 && INTCONbits.TMR0IF == 1) 
     {
         INTCONbits.TMR0IF      =0;        
-        TMR0        =0x65;
+        TMR0        =0x65; //--> 1kHz/1ms tick
         
         Timer1_Tick_Counter++;
         

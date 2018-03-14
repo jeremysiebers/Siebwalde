@@ -101,7 +101,7 @@ unsigned char Petit_DoSlaveTX(void)
  */
 unsigned char PetitSendMessage(void)
 {
-    if (Petit_Tx_State != PETIT_RXTX_IDLE)
+    if (Petit_Tx_State != PETIT_RXTX_IDLE)        
         return FALSE;
 
     Petit_Tx_Current  =0;
@@ -287,8 +287,13 @@ void Petit_TxRTU(void)
 void ProcessPetitModbus(void)
 {
     if (Petit_Tx_State != PETIT_RXTX_IDLE)                                      // If answer is ready, send it!
+        INTCONbits.TMR0IE = 0;
+    
         Petit_TxRTU();
-
+        INTCONbits.TMR0IF      =0;
+        TMR0        =0x65;
+        INTCONbits.TMR0IE = 1;
+    
     Petit_RxRTU();                                                              // Call this function every cycle
 
     if (Petit_RxDataAvailable())                                                // If data is ready enter this!
@@ -316,7 +321,7 @@ void InitPetitModbus(void)
  * @How to use          : 
  */
 
-void SendPetitModbus(unsigned char Address, unsigned char Function, unsigned char *DataBuf, unsigned short DataLen){
+unsigned char SendPetitModbus(unsigned char Address, unsigned char Function, unsigned char *DataBuf, unsigned short DataLen){
 
     
     // Initialise the output buffer. The first byte in the buffer says how many registers we have read
@@ -330,7 +335,7 @@ void SendPetitModbus(unsigned char Address, unsigned char Function, unsigned cha
         //Petit_CRC16(Petit_Tx_Data.DataBuf[Petit_Tx_Current], &Petit_Tx_CRC16);
     }   
     
-    PetitSendMessage();
+    return (PetitSendMessage());
 }
 
 /******************************************************************************/

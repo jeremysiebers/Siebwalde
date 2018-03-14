@@ -25,6 +25,7 @@ void InitUART(void)
     TXSTAbits.BRGH = 1; // Used in sync mode
     
     PIE1bits.TXIE = 0;
+    
     PIR1bits.RCIF = 0;
     PIE1bits.RCIE = 1;   
     
