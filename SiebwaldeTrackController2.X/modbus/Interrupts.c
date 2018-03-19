@@ -18,6 +18,6 @@ void PetitModbusIntHandler(void)
     if( PIE1bits.RCIE == 1 && PIR1bits.RCIF == 1)
     {
         ReceiveInterrupt(RCREG);
-        PIR1bits.RCIF = 0;
+        PIR1bits.RCIF = 0;        
     }
 }

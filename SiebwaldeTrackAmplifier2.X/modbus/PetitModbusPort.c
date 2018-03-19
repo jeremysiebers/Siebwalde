@@ -21,7 +21,7 @@ void PetitModBus_TIMER_Initialise(void)
 // This is used for send one character
 void PetitModBus_UART_Putch(unsigned char c)
 {
-	while(!TRMT);
+	while(!TXSTAbits.TRMT);
 	TXREG = c;
 }
 

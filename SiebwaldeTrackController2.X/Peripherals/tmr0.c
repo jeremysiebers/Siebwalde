@@ -48,7 +48,7 @@ void TMR0_ISR(){
     
     if (count > 50){
         count = 0;
-        PORTDbits.RD1 = !PORTDbits.RD1;
+        //PORTDbits.RD1 = !PORTDbits.RD1;
     }    
     count++;
     

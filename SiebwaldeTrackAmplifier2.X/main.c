@@ -23,7 +23,7 @@ void main(void) {
     
     while(1)
     {
-        PORTCbits.RC3 = PetitRegisters[0].ActValue;
+        //PORTCbits.RC3 = PetitRegisters[0].ActValue;
         
         ProcessPetitModbus();
             

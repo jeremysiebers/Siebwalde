@@ -6,7 +6,7 @@
 #include "config.h"
 
 // CONFIG1
-#pragma config FOSC = EXTRCIO   // Oscillator Selection bits (EXTRC oscillator; port I/O function on OSC2/CLKO/RA6)
+#pragma config FOSC = HS   // Oscillator Selection bits (EXTRC oscillator; port I/O function on OSC2/CLKO/RA6)
 #pragma config WDTE = OFF       // Watchdog Timer Enable bit (WDT disabled)
 #pragma config PWRTE = OFF      // Power-up Timer Enable bit (PWRT enabled)
 #pragma config MCLRE = ON       // MCLR/VPP/RE3 Pin Function Select bit (MCLR/VPP/RE3 pin function is MCLR)

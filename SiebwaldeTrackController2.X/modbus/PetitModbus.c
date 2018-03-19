@@ -23,6 +23,7 @@
 #define PETIT_ERROR_CODE_03                     0x03                            // Some data values are out of range, invalid number of register
 
 unsigned char PETITMODBUS_SLAVE_ADDRESS         =1;
+unsigned char PETITMODBUS_BROADCAST_ADDRESS     =0;
 
 typedef enum
 {
@@ -69,9 +70,12 @@ volatile unsigned short PetitModbusTimerValue         = 0;
  *                        low?order byte of the field is appended first, 
  *                        followed by the high?order byte. The CRC high?order 
  *                        byte is the last byte to be sent in the message.
+ * @Statistics          : @PIC16F737 @20MHz xc8 free mode
+ *                        Calc      : 64us
+ *                        Lookup    : 23us
  */
 #ifdef CRC_CALC
-void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
+void Petit_CRC16(unsigned char Data, unsigned int* CRC)
 {
     unsigned int i;
 
@@ -85,7 +89,7 @@ void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
     }
 }
 #else
-void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
+void Petit_CRC16(unsigned char Data, unsigned int* CRC)
 {
     unsigned int uchCRCHi = *CRC >> 8;                                          /* high byte of CRC initialized */
     unsigned int uchCRCLo = *CRC & 0x00FF;                                      /* low byte of CRC initialized */
@@ -242,7 +246,7 @@ void Petit_RxRTU(void)
 
     if(Petit_ReceiveBufferControl==PETIT_DATA_READY)
     {
-        //PORTDbits.RD1 ^= 0x01;
+        //PORTDbits.RD2 = 1;
         
         Petit_Rx_Data.Address               =PetitReceiveBuffer[0];
         Petit_Rx_CRC16                      = 0xffff;
@@ -275,6 +279,7 @@ void Petit_RxRTU(void)
         {
             // Valid message!
             Petit_Rx_Data_Available = TRUE;
+            //PORTDbits.RD2 = 0;
         }
 
         Petit_Rx_State = PETIT_RXTX_IDLE;
@@ -318,11 +323,11 @@ void Petit_TxRTU(void)
  */
 void ProcessPetitModbus(void)
 {
-    if (Petit_Tx_State != PETIT_RXTX_IDLE)                                      // If answer is ready, send it!
-        measure timing because RX interrupt is also off!!!
-        ENTER_CRITICAL_SECTION();    
+    if (Petit_Tx_State != PETIT_RXTX_IDLE){                                      // If answer is ready, send it!
+        //PORTDbits.RD1 = 1;
         Petit_TxRTU();
-        EXIT_CRITICAL_SECTION();
+        //PORTDbits.RD1 = 0;        
+    }
     
     Petit_RxRTU();                                                              // Call this function every cycle
 

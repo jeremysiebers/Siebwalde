@@ -11,10 +11,11 @@ void PIN_MANAGER_Initialize(void) {
  
     TRISC = 0xFF;
     
-    TRISCbits.TRISC1 = 0;//Led
+    TRISCbits.TRISC4 = 0;//Led
     TRISCbits.TRISC3 = 0;//Led
     TRISCbits.TRISC2 = 0;//PWM
     TRISCbits.TRISC6 = 0;//TX
+    TRISCbits.TRISC7 = 1;//RX
 
 }
 /**

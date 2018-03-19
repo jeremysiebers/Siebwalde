@@ -23,11 +23,11 @@ void main(void) {
     // Initialize the device
     SYSTEM_Initialize();
 
-    PORTDbits.RD0 = Off;                                                        // Set Slave micro controllers in reset.
+    PORTDbits.RD2 = Off;                                                        // Set Slave micro controllers in reset.
     for(wait = 0xFFFF; wait > 0; wait--){
         for(wait2 = 0x4; wait2 > 0; wait2--);
     }
-    PORTDbits.RD0 = On;                                                         // Release Slave micro controllers from reset.
+    PORTDbits.RD2 = On;                                                         // Release Slave micro controllers from reset.
         
     InitPetitModbus();
     
@@ -35,12 +35,12 @@ void main(void) {
     {        
         ProcessPetitModbus();
         
-        if(Timer1_Tick_Counter>100)
+        if(Timer1_Tick_Counter>200)
         {
             switch(state){
                 case 0 : if (SendPetitModbusBusyCheck()){
                             if(SendPetitModbus(1, 6, temp, 4)){
-                                state = 1;
+                                state = 3;
                                 PORTDbits.RD1 = On;
                             }
                         }
@@ -62,7 +62,7 @@ void main(void) {
                     
                 case 3 : if (SendPetitModbusBusyCheck()){
                             if(SendPetitModbus(1, 6, temp2, 4)){
-                                state = 4;
+                                state = 0;
                                 PORTDbits.RD1 = Off;
                             }
                         }

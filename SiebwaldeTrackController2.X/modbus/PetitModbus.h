@@ -17,8 +17,8 @@
 #define PETITMODBUSWRITE_SINGLE_REGISTER_ENABLED        ( 1 )                   // If you want to use make it 1, or 0
 #define PETITMODBUS_WRITE_MULTIPLE_REGISTERS_ENABLED    ( 1 )                   // If you want to use make it 1, or 0
 
-#define ENTER_CRITICAL_SECTION( )   (INTCONbits.PEIE = 1)
-#define EXIT_CRITICAL_SECTION( )    (INTCONbits.PEIE = 0)
+#define ENTER_CRITICAL_SECTION( )   (INTCONbits.GIE = 0)
+#define EXIT_CRITICAL_SECTION( )    (INTCONbits.GIE = 1)
 
 //#define CRC_CALC                                                                // When commented a CRC lookup table is used for the function void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
 #ifndef CRC_CALC

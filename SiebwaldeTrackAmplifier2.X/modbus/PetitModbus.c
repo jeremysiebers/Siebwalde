@@ -23,6 +23,7 @@
 #define PETIT_ERROR_CODE_03                     0x03                            // Some data values are out of range, invalid number of register
 
 unsigned char PETITMODBUS_SLAVE_ADDRESS         =1;
+unsigned char PETITMODBUS_BROADCAST_ADDRESS     =0;
 
 typedef enum
 {
@@ -64,15 +65,19 @@ volatile unsigned short PetitModbusTimerValue         = 0;
  * @How to use          : First initial data has to be 0xFFFF.
  * @Options             : If CRC_CALC is defined a CRC is calculated else a 
  *                        lookup is done (speed diff)
- *  @Function            : The CRC field is appended to the message as the last 
+ * @Function            : The CRC field is appended to the message as the last 
  *                        field in the message. When this is done, the 
  *                        low?order byte of the field is appended first, 
  *                        followed by the high?order byte. The CRC high?order 
  *                        byte is the last byte to be sent in the message.
+ * @Statistics          : @PIC16F737 @20MHz xc8 free mode
+ *                        Calc      : 64us
+ *                        Lookup    : 23us
  */
 #ifdef CRC_CALC
-void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
+void Petit_CRC16(unsigned char Data, unsigned int* CRC)
 {
+    //PORTCbits.RC3 = 1;
     unsigned int i;
 
     *CRC = *CRC ^(unsigned int) Data;
@@ -83,10 +88,12 @@ void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
         else
             *CRC >>= 1;
     }
+    //PORTCbits.RC3 = 0;
 }
 #else
-void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
+void Petit_CRC16(unsigned char Data, unsigned int* CRC)
 {
+    //PORTCbits.RC3 = 1;
     unsigned int uchCRCHi = *CRC >> 8;                                          /* high byte of CRC initialized */
     unsigned int uchCRCLo = *CRC & 0x00FF;                                      /* low byte of CRC initialized */
     unsigned char uIndex ;                                                      /* will index into CRC lookup table */
@@ -95,6 +102,7 @@ void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
     uchCRCLo = uchCRCHi ^ auchCRCHi[uIndex] ;
     uchCRCHi = auchCRCLo[uIndex] ;
     *CRC = (unsigned int)(uchCRCHi << 8 | uchCRCLo) ;
+    //PORTCbits.RC3 = 0;
 }
 #endif
 /* Data = 0x02
@@ -386,6 +394,8 @@ void Petit_RxRTU(void)
 
     if(Petit_ReceiveBufferControl==PETIT_DATA_READY)
     {
+        //PORTCbits.RC4 = 1;
+                
         Petit_Rx_Data.Address               =PetitReceiveBuffer[0];
         Petit_Rx_CRC16                      = 0xffff;
         Petit_CRC16(Petit_Rx_Data.Address, &Petit_Rx_CRC16);
@@ -417,6 +427,7 @@ void Petit_RxRTU(void)
         {
             // Valid message!
             Petit_Rx_Data_Available = TRUE;
+            //PORTCbits.RC4 = 0;
         }
 
         Petit_Rx_State = PETIT_RXTX_IDLE;
@@ -460,9 +471,12 @@ void Petit_TxRTU(void)
  */
 void ProcessPetitModbus(void)
 {
-    if (Petit_Tx_State != PETIT_RXTX_IDLE)                                      // If answer is ready, send it!
+    if (Petit_Tx_State != PETIT_RXTX_IDLE){                                      // If answer is ready, send it!
+        PORTCbits.RC3 = 1;
         Petit_TxRTU();
-
+        PORTCbits.RC3 = 0;
+    }
+    
     Petit_RxRTU();                                                              // Call this function every cycle
 
     if (Petit_RxDataAvailable())                                                // If data is ready enter this!
