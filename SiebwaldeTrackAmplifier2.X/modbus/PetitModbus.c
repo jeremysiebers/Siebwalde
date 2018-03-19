@@ -62,7 +62,15 @@ volatile unsigned short PetitModbusTimerValue         = 0;
  * @param[in]           : Data  - Data to Calculate CRC
  * @param[in/out]       : CRC   - Anlik CRC degeri
  * @How to use          : First initial data has to be 0xFFFF.
+ * @Options             : If CRC_CALC is defined a CRC is calculated else a 
+ *                        lookup is done (speed diff)
+ *  @Function            : The CRC field is appended to the message as the last 
+ *                        field in the message. When this is done, the 
+ *                        low?order byte of the field is appended first, 
+ *                        followed by the high?order byte. The CRC high?order 
+ *                        byte is the last byte to be sent in the message.
  */
+#ifdef CRC_CALC
 void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
 {
     unsigned int i;
@@ -76,7 +84,31 @@ void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
             *CRC >>= 1;
     }
 }
-
+#else
+void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
+{
+    unsigned int uchCRCHi = *CRC >> 8;                                          /* high byte of CRC initialized */
+    unsigned int uchCRCLo = *CRC & 0x00FF;                                      /* low byte of CRC initialized */
+    unsigned char uIndex ;                                                      /* will index into CRC lookup table */
+    
+    uIndex = uchCRCLo ^ Data;
+    uchCRCLo = uchCRCHi ^ auchCRCHi[uIndex] ;
+    uchCRCHi = auchCRCLo[uIndex] ;
+    *CRC = (unsigned int)(uchCRCHi << 8 | uchCRCLo) ;
+}
+#endif
+/* Data = 0x02
+ * uIndex = 0xFF ^ 0x02 = 0xFD
+ * uchCRCLo = 0xFF ^ 0xC1 = 3E
+ * uchCRCHi = 0x81
+ * CRC = 0x813E
+ * 
+ * Data = 0x07
+ * uIndex = 3E ^ 0x07 = 39
+ * uchCRCLo = 0x81 ^ 0xC0 = 0x41
+ * uchCRCHi = 0x12
+ * CRC = 0x1241
+*/
 /******************************************************************************/
 
 /*

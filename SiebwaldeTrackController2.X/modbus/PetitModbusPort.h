@@ -8,6 +8,7 @@
 #define __PETITMODBUSPORT__H
 
 #include "PetitModbus.h"
+#include <xc.h>
 
 #ifndef TRUE
 #define TRUE  1
