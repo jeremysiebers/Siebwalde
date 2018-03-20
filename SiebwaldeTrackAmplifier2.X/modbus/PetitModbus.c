@@ -22,8 +22,8 @@
 #define PETIT_ERROR_CODE_02                     0x02                            // Register address is not allowed or write-protected
 #define PETIT_ERROR_CODE_03                     0x03                            // Some data values are out of range, invalid number of register
 
-unsigned char PETITMODBUS_SLAVE_ADDRESS         =1;
-unsigned char PETITMODBUS_BROADCAST_ADDRESS     =0;
+unsigned char PETITMODBUS_SLAVE_ADDRESS         = 1;
+unsigned char PETITMODBUS_BROADCAST_ADDRESS     = 0;
 
 typedef enum
 {
@@ -158,11 +158,18 @@ unsigned char PetitSendMessage(void)
  */
 void HandlePetitModbusError(char ErrorCode)
 {
-    // Initialise the output buffer. The first byte in the buffer says how many registers we have read
-    Petit_Tx_Data.Function    = ErrorCode | 0x80;
-    Petit_Tx_Data.Address     = PETITMODBUS_SLAVE_ADDRESS;
-    Petit_Tx_Data.DataLen     = 0;
-    PetitSendMessage();
+    if (Petit_Rx_Data.Address == PETITMODBUS_BROADCAST_ADDRESS)                 // Broadcast cannot process back communication (all slaves would have to respond!)
+    {
+        return;
+    }
+    else
+    {
+        // Initialise the output buffer. The first byte in the buffer says how many registers we have read
+        Petit_Tx_Data.Function    = ErrorCode | 0x80;
+        Petit_Tx_Data.Address     = PETITMODBUS_SLAVE_ADDRESS;
+        Petit_Tx_Data.DataLen     = 0;
+        PetitSendMessage();
+    }
 }
 
 /******************************************************************************/
@@ -184,9 +191,13 @@ void HandlePetitModbusReadHoldingRegisters(void)
     // The message contains the requested start address and number of registers
     Petit_StartAddress        = ((unsigned int) (Petit_Rx_Data.DataBuf[0]) << 8) + (unsigned int) (Petit_Rx_Data.DataBuf[1]);
     Petit_NumberOfRegisters   = ((unsigned int) (Petit_Rx_Data.DataBuf[2]) << 8) + (unsigned int) (Petit_Rx_Data.DataBuf[3]);
-
+    
+    if (Petit_Rx_Data.Address == PETITMODBUS_BROADCAST_ADDRESS)                 // Broadcast cannot process back communication (all slaves would have to respond!)
+    {
+        return;
+    }
     // If it is bigger than RegisterNumber return error to Modbus Master
-    if((Petit_StartAddress+Petit_NumberOfRegisters)>NUMBER_OF_OUTPUT_PETITREGISTERS){
+    else if((Petit_StartAddress+Petit_NumberOfRegisters)>NUMBER_OF_OUTPUT_PETITREGISTERS){
         HandlePetitModbusError(PETIT_ERROR_CODE_02);
     }
     else
@@ -235,7 +246,12 @@ void HandlePetitModbusWriteSingleRegister(void)
     Petit_Tx_Data.Address     = PETITMODBUS_SLAVE_ADDRESS;
     Petit_Tx_Data.DataLen     = 4;
 
-    if(Petit_Address>=NUMBER_OF_OUTPUT_PETITREGISTERS){
+    if (Petit_Rx_Data.Address == PETITMODBUS_BROADCAST_ADDRESS)                 // Broadcast cannot process back communication (all slaves would have to respond!)
+    {
+        PetitRegisters[Petit_Address].ActValue=Petit_Value;
+        return;
+    }
+    else if(Petit_Address>=NUMBER_OF_OUTPUT_PETITREGISTERS){
         HandlePetitModbusError(PETIT_ERROR_CODE_03);
     }
     else
@@ -271,9 +287,18 @@ void HandleMPetitodbusWriteMultipleRegisters(void)
     Petit_NumberOfRegisters   = ((unsigned int) (Petit_Rx_Data.DataBuf[2]) << 8) + (unsigned int) (Petit_Rx_Data.DataBuf[3]);
     Petit_ByteCount           = Petit_Rx_Data.DataBuf[4];
 
-    // If it is bigger than RegisterNumber return error to Modbus Master
-    if((Petit_StartAddress+Petit_NumberOfRegisters)>NUMBER_OF_OUTPUT_PETITREGISTERS){
+    if (Petit_Rx_Data.Address == PETITMODBUS_BROADCAST_ADDRESS)                 // Broadcast cannot process back communication (all slaves would have to respond!)
+    {
+        for (Petit_i = 0; Petit_i <Petit_NumberOfRegisters; Petit_i++)
+        {
+            Petit_Value=(Petit_Rx_Data.DataBuf[5+2*Petit_i]<<8)+(Petit_Rx_Data.DataBuf[6+2*Petit_i]);
+            PetitRegisters[Petit_StartAddress+Petit_i].ActValue=Petit_Value;
+        }
+        return;
+    }
+    else if((Petit_StartAddress+Petit_NumberOfRegisters)>NUMBER_OF_OUTPUT_PETITREGISTERS){
         HandlePetitModbusError(PETIT_ERROR_CODE_03);
+        // If it is bigger than RegisterNumber return error to Modbus Master
     }
     else
     {
@@ -349,7 +374,7 @@ unsigned char CheckPetitModbusBufferComplete(void)
 
     if(PetitReceiveCounter>4)
     {
-        if(PetitReceiveBuffer[0]==PETITMODBUS_SLAVE_ADDRESS)
+        if(PetitReceiveBuffer[0]== PETITMODBUS_SLAVE_ADDRESS || PETITMODBUS_BROADCAST_ADDRESS)
         {
             if(PetitReceiveBuffer[1]==0x01 || PetitReceiveBuffer[1]==0x02 || PetitReceiveBuffer[1]==0x03 || PetitReceiveBuffer[1]==0x04 || PetitReceiveBuffer[1]==0x05 || PetitReceiveBuffer[1]==0x06)  // RHR
             {
@@ -484,7 +509,7 @@ void ProcessPetitModbus(void)
 
     if (Petit_RxDataAvailable())                                                // If data is ready enter this!
     {
-        if (Petit_Rx_Data.Address == PETITMODBUS_SLAVE_ADDRESS)                 // Is Data for us?
+        if (Petit_Rx_Data.Address == PETITMODBUS_SLAVE_ADDRESS || PETITMODBUS_BROADCAST_ADDRESS) // Is Data for us?
         {
             
             
@@ -513,7 +538,7 @@ void ProcessPetitModbus(void)
  */
 void InitPetitModbus(unsigned char PetitModbusSlaveAddress)
 {
-    PETITMODBUS_SLAVE_ADDRESS    =PetitModbusSlaveAddress;
+    PETITMODBUS_SLAVE_ADDRESS    =     PetitModbusSlaveAddress;
     
     PetitModBus_UART_Initialise();
     PetitModBus_TIMER_Initialise();

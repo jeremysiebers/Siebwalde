@@ -30,9 +30,9 @@ unsigned char PetitModBus_UART_String(unsigned char *s, unsigned int Length)
 {
     unsigned short  DummyCounter;
     
-    for(DummyCounter=0;DummyCounter<Length;DummyCounter++)
+    for(DummyCounter=0;DummyCounter<Length;DummyCounter++){
         PetitModBus_UART_Putch(s[DummyCounter]);
-    
+    }
     return TRUE;
 }
 
@@ -44,9 +44,9 @@ void ReceiveInterrupt(unsigned char Data)
     PetitReceiveBuffer[PetitReceiveCounter]   =Data;
     PetitReceiveCounter++;
 
-    if(PetitReceiveCounter>PETITMODBUS_RECEIVE_BUFFER_SIZE)  
+    if(PetitReceiveCounter>PETITMODBUS_RECEIVE_BUFFER_SIZE){
         PetitReceiveCounter=0;
-
+    }
     PetitModbusTimerValue=0;
 }
 

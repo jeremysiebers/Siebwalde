@@ -373,15 +373,3 @@ unsigned char SendPetitModbus(unsigned char Address, unsigned char Function, uns
 }
 
 /******************************************************************************/
-
-/*
- * Function Name        : SendPetitModbus
- * @How to use          : 
- */
-
-unsigned char SendPetitModbusBusyCheck(){
-    if (Petit_Tx_State != PETIT_RXTX_IDLE){
-        return FALSE;
-    }
-    return TRUE;
-}
