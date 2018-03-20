@@ -6,13 +6,15 @@
  */
 
 void TMR2_Initialize(void) {
+    TMR2_StopTimer();
     // Set TMR2 to the options selected in the User Interface
 
-    // TMR2ON off; T2CKPS 1:4; T2OUTPS 1:1; 
-    T2CON = 0x00;
+    // TMR2ON off; T2CKPS 1:16; T2OUTPS 1:8; 
+    T2CONbits.TOUTPS = 0b1111;
+    T2CONbits.T2CKPS = 0b11;
 
-    // PR2 64; 
-    PR2 = 255;
+    // PR2 70 = 90Hz = 3.8ms 
+    PR2 = 70;
 
     // TMR2 0x0; 
     TMR2 = 0x00;

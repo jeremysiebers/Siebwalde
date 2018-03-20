@@ -33,7 +33,7 @@ void SYSTEM_Initialize(void) {
     PIN_MANAGER_Initialize();
     //TMR0_Initialize();
     //ausart_Initialize();
-    //TMR2_Initialize();
+    TMR2_Initialize();
     //PWM_Initialize();
     //INT0_Initialize();
     INTERRUPT_Initialize();

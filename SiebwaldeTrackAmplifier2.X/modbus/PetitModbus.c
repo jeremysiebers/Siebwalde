@@ -392,8 +392,8 @@ unsigned char CheckPetitModbusBufferComplete(void)
         }
         else
         {
-            PetitReceiveCounter=0;
-            return PETIT_FALSE_SLAVE_ADDRESS;
+            PetitReceiveCounter=0;                  // if data is not for this slave, reset the counter, however data is still coming in from the rest of the message, 
+            return PETIT_FALSE_SLAVE_ADDRESS;       // this is deleted by resetting the counter again after the minimum of 3.5 char wait time: PETITMODBUS_TIMEOUTTIMER
         }
     }
     else
@@ -422,8 +422,6 @@ void Petit_RxRTU(void)
 
     if(Petit_ReceiveBufferControl==PETIT_DATA_READY)
     {
-        //PORTCbits.RC4 = 1;
-                
         Petit_Rx_Data.Address               =PetitReceiveBuffer[0];
         Petit_Rx_CRC16                      = 0xffff;
         Petit_CRC16(Petit_Rx_Data.Address, &Petit_Rx_CRC16);
@@ -437,10 +435,11 @@ void Petit_RxRTU(void)
 
         Petit_Rx_State =PETIT_RXTX_DATABUF;
 
-        PetitReceiveCounter=0;
-    }
+        PetitReceiveCounter=0;      
+    }                               
 
-    Petit_CheckRxTimeout();
+    Petit_CheckRxTimeout();         // if data is not for this slave, reset the counter, however data is still coming in from the rest of the message, 
+                                    // this is deleted by resetting the counter again after the minimum of 3.5 char wait time: PETITMODBUS_TIMEOUTTIMER
 
     if ((Petit_Rx_State == PETIT_RXTX_DATABUF) && (Petit_Rx_Data.DataLen >= 2))
     {
@@ -455,7 +454,6 @@ void Petit_RxRTU(void)
         {
             // Valid message!
             Petit_Rx_Data_Available = TRUE;
-            //PORTCbits.RC4 = 0;
         }
 
         Petit_Rx_State = PETIT_RXTX_IDLE;

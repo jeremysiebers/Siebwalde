@@ -6,6 +6,6 @@
 #include "Interrupts.h"
 #include "PetitModbus.h"
 
-extern volatile unsigned short Timer1_Tick_Counter;
+extern volatile unsigned int Timer1_Tick_Counter;
 
 #endif

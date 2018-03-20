@@ -26,16 +26,21 @@ void main(void) {
     
     while(1)
     {
-        //PORTCbits.RC3 = PetitRegisters[0].ActValue;
+        PORTCbits.RC3 = PetitRegisters[0].ActValue;
         
         ProcessPetitModbus();
             
         
-        if(Timer1_Tick_Counter>1000)
-        {
-            Timer1_Tick_Counter=0;
-            
-            PetitRegisters[5].ActValue++;
+//        if(Timer1_Tick_Counter>1000)
+//        {
+//            Timer1_Tick_Counter=0;
+//            
+//            PetitRegisters[5].ActValue++;
+//        }
+        
+        if (RCSTAbits.OERR && RCSTAbits.CREN){
+            RCSTAbits.CREN = 0;
+            PORTCbits.RC4 = 1;
         }
         
     }
