@@ -75,7 +75,7 @@ volatile unsigned short PetitModbusTimerValue         = 0;
  *                        Lookup    : 23us
  */
 #ifdef CRC_CALC
-void Petit_CRC16(unsigned char Data, unsigned int* CRC)
+void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
 {
     //PORTCbits.RC3 = 1;
     unsigned int i;
@@ -91,7 +91,7 @@ void Petit_CRC16(unsigned char Data, unsigned int* CRC)
     //PORTCbits.RC3 = 0;
 }
 #else
-void Petit_CRC16(unsigned char Data, unsigned int* CRC)
+void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
 {
     //PORTCbits.RC3 = 1;
     unsigned int uchCRCHi = *CRC >> 8;                                          /* high byte of CRC initialized */
@@ -141,9 +141,9 @@ unsigned char Petit_DoSlaveTX(void)
  */
 unsigned char PetitSendMessage(void)
 {
-    if (Petit_Tx_State != PETIT_RXTX_IDLE)
+    if (Petit_Tx_State != PETIT_RXTX_IDLE){
         return FALSE;
-
+    }
     Petit_Tx_Current  =0;
     Petit_Tx_State    =PETIT_RXTX_START;
 
@@ -186,8 +186,9 @@ void HandlePetitModbusReadHoldingRegisters(void)
     Petit_NumberOfRegisters   = ((unsigned int) (Petit_Rx_Data.DataBuf[2]) << 8) + (unsigned int) (Petit_Rx_Data.DataBuf[3]);
 
     // If it is bigger than RegisterNumber return error to Modbus Master
-    if((Petit_StartAddress+Petit_NumberOfRegisters)>NUMBER_OF_OUTPUT_PETITREGISTERS)
+    if((Petit_StartAddress+Petit_NumberOfRegisters)>NUMBER_OF_OUTPUT_PETITREGISTERS){
         HandlePetitModbusError(PETIT_ERROR_CODE_02);
+    }
     else
     {
         // Initialise the output buffer. The first byte in the buffer says how many registers we have read
@@ -234,8 +235,9 @@ void HandlePetitModbusWriteSingleRegister(void)
     Petit_Tx_Data.Address     = PETITMODBUS_SLAVE_ADDRESS;
     Petit_Tx_Data.DataLen     = 4;
 
-    if(Petit_Address>=NUMBER_OF_OUTPUT_PETITREGISTERS)
+    if(Petit_Address>=NUMBER_OF_OUTPUT_PETITREGISTERS){
         HandlePetitModbusError(PETIT_ERROR_CODE_03);
+    }
     else
     {
         PetitRegisters[Petit_Address].ActValue=Petit_Value;
@@ -270,8 +272,9 @@ void HandleMPetitodbusWriteMultipleRegisters(void)
     Petit_ByteCount           = Petit_Rx_Data.DataBuf[4];
 
     // If it is bigger than RegisterNumber return error to Modbus Master
-    if((Petit_StartAddress+Petit_NumberOfRegisters)>NUMBER_OF_OUTPUT_PETITREGISTERS)
+    if((Petit_StartAddress+Petit_NumberOfRegisters)>NUMBER_OF_OUTPUT_PETITREGISTERS){
         HandlePetitModbusError(PETIT_ERROR_CODE_03);
+    }
     else
     {
         // Initialise the output buffer. The first byte in the buffer says how many outputs we have set
@@ -459,7 +462,7 @@ void Petit_TxRTU(void)
     Petit_Tx_Buf[Petit_Tx_Buf_Size++] =(Petit_Tx_CRC16 & 0xFF00) >> 8;
 
     Petit_DoSlaveTX();
-
+    
     Petit_Tx_State    =PETIT_RXTX_IDLE;
 }
 

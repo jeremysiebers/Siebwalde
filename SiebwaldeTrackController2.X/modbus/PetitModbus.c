@@ -75,7 +75,7 @@ volatile unsigned short PetitModbusTimerValue         = 0;
  *                        Lookup    : 23us
  */
 #ifdef CRC_CALC
-void Petit_CRC16(unsigned char Data, unsigned int* CRC)
+void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
 {
     unsigned int i;
 
@@ -89,7 +89,7 @@ void Petit_CRC16(unsigned char Data, unsigned int* CRC)
     }
 }
 #else
-void Petit_CRC16(unsigned char Data, unsigned int* CRC)
+void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
 {
     unsigned int uchCRCHi = *CRC >> 8;                                          /* high byte of CRC initialized */
     unsigned int uchCRCLo = *CRC & 0x00FF;                                      /* low byte of CRC initialized */
@@ -137,9 +137,9 @@ unsigned char Petit_DoSlaveTX(void)
  */
 unsigned char PetitSendMessage(void)
 {
-    if (Petit_Tx_State != PETIT_RXTX_IDLE)        
+    if (Petit_Tx_State != PETIT_RXTX_IDLE){        
         return FALSE;
-
+    }
     Petit_Tx_Current  =0;
     Petit_Tx_State    =PETIT_RXTX_START;
 
@@ -311,7 +311,7 @@ void Petit_TxRTU(void)
     Petit_Tx_Buf[Petit_Tx_Buf_Size++] =(Petit_Tx_CRC16 & 0xFF00) >> 8;
 
     Petit_DoSlaveTX();
-
+    
     Petit_Tx_State    =PETIT_RXTX_IDLE;
 }
 
@@ -359,15 +359,14 @@ void InitPetitModbus(void)
 unsigned char SendPetitModbus(unsigned char Address, unsigned char Function, unsigned char *DataBuf, unsigned short DataLen){
 
     
-    // Initialise the output buffer. The first byte in the buffer says how many registers we have read
+    // Initialize the output buffer. The first byte in the buffer says how many registers we have read
     Petit_Tx_Data.Function    = Function;
     Petit_Tx_Data.Address     = Address;
     Petit_Tx_Data.DataLen     = DataLen;
     
     for(Petit_Tx_Current=0; Petit_Tx_Current < Petit_Tx_Data.DataLen; Petit_Tx_Current++)
     {
-        Petit_Tx_Data.DataBuf[Petit_Tx_Current]=DataBuf[Petit_Tx_Current];
-        //Petit_CRC16(Petit_Tx_Data.DataBuf[Petit_Tx_Current], &Petit_Tx_CRC16);
+        Petit_Tx_Data.DataBuf[Petit_Tx_Current]=DataBuf[Petit_Tx_Current];        
     }   
     
     return (PetitSendMessage());
@@ -381,8 +380,8 @@ unsigned char SendPetitModbus(unsigned char Address, unsigned char Function, uns
  */
 
 unsigned char SendPetitModbusBusyCheck(){
-    if (Petit_Tx_State != PETIT_RXTX_IDLE)
+    if (Petit_Tx_State != PETIT_RXTX_IDLE){
         return FALSE;
-    
+    }
     return TRUE;
 }

@@ -1,4 +1,5 @@
 #include "General.h"
+#include "Init.h"
 
 #define DIVIDER ((int)(FOSC/(16UL * BAUD_RATE) -1))
 
@@ -9,9 +10,7 @@ void InitUART(void)
     PIE1bits.RCIE = 0;
     PIE1bits.TXIE = 0;
 
-    // Baud Rate = 19200
     SPBRG = DIVIDER;
-
     
     RCSTAbits.SPEN = 1; // 1 = Serial port enabled (configures RC7/RX/DT and RC6/TX/CK pins as serial port pins)
     RCSTAbits.RX9  = 0; // 0 = Selects 8-bit reception
@@ -19,13 +18,12 @@ void InitUART(void)
     RCSTAbits.CREN = 1; // 1 = Enables continuous receive until enable bit CREN is cleared (CREN overrides SREN)
     RCSTAbits.ADDEN= 0; // 1 = Enables address detection, enables interrupt and load of the receive buffer when RSR<8> is set
         
-    TXSTAbits.CSRC = 1; // Master mode
+    TXSTAbits.CSRC = 0; // Master mode when 1 (in sync mode))
     TXSTAbits.TXEN = 1; // Transmit Enable bit (SREN/CREN overrides TXEN in Sync mode)
     TXSTAbits.SYNC = 0; // Asynchronous mode
-    TXSTAbits.BRGH = 1; // Used in sync mode
+    TXSTAbits.BRGH = 1; // High Baudrate select bit
     
     PIE1bits.TXIE = 0;
-    
     PIR1bits.RCIF = 0;
     PIE1bits.RCIE = 1;   
     

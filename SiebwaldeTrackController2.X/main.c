@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-
+#include "main.h"
 #include "Peripherals/config.h"
 #include "modbus/General.h"
 #include "modbus/PetitModbus.h"
@@ -35,51 +35,39 @@ void main(void) {
     {        
         ProcessPetitModbus();
         
-        if(Timer1_Tick_Counter>200)
+        if(Timer1_Tick_Counter>260)
         {
             switch(state){
-                case 0 : if (SendPetitModbusBusyCheck()){
-                            if(SendPetitModbus(1, 6, temp, 4)){
-                                state = 3;
-                                PORTDbits.RD1 = On;
-                            }
+                case 0: if(SendPetitModbus(1, 6, temp, 4)){
+                            state = 1;
+                            PORTDbits.RD1 = On;
                         }
                         break;
                     
-                case 1: if (SendPetitModbusBusyCheck()){
-                            if(SendPetitModbus(2, 6, temp, 4)){
-                                state = 2;
-                            }
+                case 1: if(SendPetitModbus(2, 6, temp, 4)){
+                            state = 2;
                         }
                         break;
                     
-                case 2: if (SendPetitModbusBusyCheck()){
-                            if(SendPetitModbus(3, 6, temp, 4)){
-                                state = 3;   
-                            }                 
+                case 2: if(SendPetitModbus(3, 6, temp, 4)){
+                            state = 3;   
+                        }                 
+                        break;
+                    
+                case 3: if(SendPetitModbus(1, 6, temp2, 4)){
+                            state = 4;
+                            PORTDbits.RD1 = Off;
                         }
                         break;
                     
-                case 3 : if (SendPetitModbusBusyCheck()){
-                            if(SendPetitModbus(1, 6, temp2, 4)){
-                                state = 0;
-                                PORTDbits.RD1 = Off;
-                            }
+                case 4: if(SendPetitModbus(2, 6, temp2, 4)){
+                            state = 5;
                         }
                         break;
                     
-                case 4: if (SendPetitModbusBusyCheck()){
-                            if(SendPetitModbus(2, 6, temp2, 4)){
-                                state = 5;
-                            }
-                        }
-                        break;
-                    
-                case 5: if (SendPetitModbusBusyCheck()){
-                            if(SendPetitModbus(3, 6, temp2, 4)){
-                                state = 0;  
-                            }                  
-                        }
+                case 5: if(SendPetitModbus(3, 6, temp2, 4)){
+                            state = 0;  
+                        }                  
                         break;
                     
                 default : state = 0;

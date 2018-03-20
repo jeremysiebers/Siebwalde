@@ -5,10 +5,13 @@
  * Created on November 24, 2015, 9:46 PM
  */
 #include <xc.h>
-#include "Peripherals/config.h"
-#include "modbus/General.h"
 #include <stdlib.h>
 #include <stdio.h>
+
+#include "main.h"
+#include "Peripherals/config.h"
+#include "modbus/General.h"
+
 
 #define ADDRESS 1
 
