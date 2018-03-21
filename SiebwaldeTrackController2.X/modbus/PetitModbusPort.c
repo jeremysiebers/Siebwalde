@@ -26,14 +26,25 @@ void PetitModBus_UART_Putch(unsigned char c)
 	TXREG = c;
 }
 
-// This is used for send string, better to use DMA for it ;)
+/*
+ * Function Name        : PetitModBus_UART_String
+ * @param[out]          : TRUE
+ * @How to use          : It is used for send data package over physical layer
+ * @timing              : Full message (address, command, 2 byte data, 2 byte CRC)
+ *                          @1250 kbps  = 74.41us
+ *                          @625  kbps  = 130us
+ *                          @57.6 kbps  = 1.18ms
+ *                          @19.2 kbps  = 3.84ms
+ *                          @9.6  kbps  = 8ms
+ */
 unsigned char PetitModBus_UART_String(unsigned char *s, unsigned int Length)
 {
     unsigned short  DummyCounter;
     
     for(DummyCounter=0;DummyCounter<Length;DummyCounter++){
         PetitModBus_UART_Putch(s[DummyCounter]);
-    }    
+    } 
+        
     return TRUE;
 }
 

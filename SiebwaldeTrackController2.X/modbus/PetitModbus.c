@@ -70,7 +70,7 @@ volatile unsigned short PetitModbusTimerValue         = 0;
  *                        low?order byte of the field is appended first, 
  *                        followed by the high?order byte. The CRC high?order 
  *                        byte is the last byte to be sent in the message.
- * @Statistics          : @PIC16F737 @20MHz xc8 free mode
+ * @Statistics          : @PIC16F737 @20MHz xc8 1.44 free mode (speed optm)
  *                        Calc      : 64us
  *                        Lookup    : 23us
  */
@@ -198,7 +198,7 @@ unsigned char CheckPetitModbusBufferComplete(void)
 
     if(PetitReceiveCounter>4)
     {
-        if(PetitReceiveBuffer[0]==PETITMODBUS_SLAVE_ADDRESS)
+        if(PetitReceiveBuffer[0] > 0)
         {
             if(PetitReceiveBuffer[1]==0x01 || PetitReceiveBuffer[1]==0x02 || PetitReceiveBuffer[1]==0x03 || PetitReceiveBuffer[1]==0x04 || PetitReceiveBuffer[1]==0x05 || PetitReceiveBuffer[1]==0x06)  // RHR
             {
@@ -236,6 +236,9 @@ unsigned char CheckPetitModbusBufferComplete(void)
 /*
  * Function Name        : RxRTU
  * @How to use          : Check for data ready, if it is good return answer
+ * @timing              : @PIC16F737 @20MHz xc8 1.44 free mode (speed optm)
+ *                        230us when data is ready (to be added transmission delay
+ *                        see PetitModBus_UART_String for measurements)
  */
 void Petit_RxRTU(void)
 {
@@ -246,8 +249,6 @@ void Petit_RxRTU(void)
 
     if(Petit_ReceiveBufferControl==PETIT_DATA_READY)
     {
-        //PORTDbits.RD2 = 1;
-        
         Petit_Rx_Data.Address               =PetitReceiveBuffer[0];
         Petit_Rx_CRC16                      = 0xffff;
         Petit_CRC16(Petit_Rx_Data.Address, &Petit_Rx_CRC16);
@@ -280,7 +281,6 @@ void Petit_RxRTU(void)
         {
             // Valid message!
             Petit_Rx_Data_Available = TRUE;
-            //PORTDbits.RD2 = 0;
         }
 
         Petit_Rx_State = PETIT_RXTX_IDLE;
@@ -292,6 +292,10 @@ void Petit_RxRTU(void)
 /*
  * Function Name        : TxRTU
  * @How to use          : If it is ready send answers!
+ * @Timing              : PIC16F777 @20MHz compiler 1.44 Free (speed optm) 
+ *                        measured with interrupt disable ~215.23us (average, 
+ *                        deviation 1us)(measured up to PetitModBus_UART_String 
+ *                        before the FOR loop
  */
 void Petit_TxRTU(void)
 {

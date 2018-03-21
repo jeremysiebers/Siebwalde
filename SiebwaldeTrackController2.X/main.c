@@ -17,6 +17,7 @@
 unsigned char temp[4] = {0, 0, 0, 1};
 unsigned char temp2[4] = {0, 0, 0, 0};
 unsigned char state = 0;
+unsigned char slave = 2;
 unsigned int wait = 0, wait2 = 0;
 
 void main(void) {
@@ -48,12 +49,19 @@ void main(void) {
                         }
                         break;
                     
-                case 1: if(SendPetitModbus(2, 6, temp, 4)){
-                            state = 2;
+                case 1: if(SendPetitModbus(slave, 6, temp, 4)){
+                            if (slave > 48){
+                                slave = 2;
+                                state = 2;
+                            }
+                            else{
+                                slave++;
+                            }
+                            
                         }
                         break;
                     
-                case 2: if(SendPetitModbus(3, 6, temp, 4)){
+                case 2: if(SendPetitModbus(50, 6, temp, 4)){
                             state = 3;                             
                         }                 
                         break;
@@ -64,12 +72,19 @@ void main(void) {
                         }
                         break;
                     
-                case 4: if(SendPetitModbus(2, 6, temp2, 4)){
-                            state = 5;
+                case 4: if(SendPetitModbus(slave, 6, temp2, 4)){
+                            if (slave > 48){
+                                slave = 2;
+                                state = 5;
+                            }
+                            else{
+                                slave++;
+                            }
+                            
                         }
                         break;
                     
-                case 5: if(SendPetitModbus(3, 6, temp2, 4)){
+                case 5: if(SendPetitModbus(50, 6, temp2, 4)){
                             state = 0;  
                         }                  
                         break;

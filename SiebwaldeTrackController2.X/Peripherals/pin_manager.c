@@ -13,9 +13,9 @@ void PIN_MANAGER_Initialize(void) {
     
     TRISD = 0xFF;
     
-    TRISDbits.TRISD0 = 0;//Amplifiers reset
+    TRISDbits.TRISD0 = 0;//Led
     TRISDbits.TRISD1 = 0;//Led
-    TRISDbits.TRISD2 = 0;//Led
+    TRISDbits.TRISD2 = 0;//Amplifiers reset
     
     TRISCbits.TRISC6 = 0;//TX
 
