@@ -53,6 +53,7 @@ void ReceiveInterrupt(unsigned char Data)
 // Call this function into 1ms Interrupt or Event!
 void PetitModBus_TimerValues(void)
 {
-    PetitModbusTimerValue++;
+    //PetitModbusTimerValue++;
+    PetitModbusTimerValue = 3;
 }
 /******************************************************************************/

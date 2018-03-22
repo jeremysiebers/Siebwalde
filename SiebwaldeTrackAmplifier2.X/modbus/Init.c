@@ -48,5 +48,5 @@ void InitTMR1(void)
     TMR0 = 0x00;
     
     // Enable interrupt
-    INTCONbits.TMR0IE = 1;
+    INTCONbits.TMR0IE = 0;
 }

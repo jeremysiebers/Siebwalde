@@ -498,9 +498,9 @@ void Petit_TxRTU(void)
 void ProcessPetitModbus(void)
 {
     if (Petit_Tx_State != PETIT_RXTX_IDLE){                                      // If answer is ready, send it!
-        PORTCbits.RC3 = 1;
+        //PORTCbits.RC3 = 1;
         Petit_TxRTU();
-        PORTCbits.RC3 = 0;
+        //PORTCbits.RC3 = 0;
     }
     
     Petit_RxRTU();                                                              // Call this function every cycle

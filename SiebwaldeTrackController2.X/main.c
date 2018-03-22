@@ -35,12 +35,8 @@ void main(void) {
     while(1)
     {        
         ProcessPetitModbus();
-        
-        /* 
-         * @19200 baud the TX takes 4.1ms and the rest 900 us = 5ms
-         * In order to comply to 3.5 char rest Timer1_Tick_Counter must wait 5
-        */
-        if(TMR2_HasOverflowOccured())
+
+        if(PIR1bits.TMR2IF)
         {
             switch(state){
                 case 0: if(SendPetitModbus(1, 6, temp, 4)){
@@ -93,7 +89,8 @@ void main(void) {
                     break;
             }
             
-            TMR2_HasOverflowOccured();  // reset IF flag if state machine takes too long
+            PIR1bits.TMR2IF = 0;  // reset IF flag if state machine takes too long
+            TMR2 = 0;
         }
     }
 }
