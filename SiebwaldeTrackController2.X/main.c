@@ -33,7 +33,8 @@ void main(void) {
     InitPetitModbus();
     
     while(1)
-    {        
+    { 
+        PORTDbits.RD1 = !PORTDbits.RD1;
         ProcessPetitModbus();
 
         if(PIR1bits.TMR2IF)
@@ -41,7 +42,7 @@ void main(void) {
             switch(state){
                 case 0: if(SendPetitModbus(1, 6, temp, 4)){
                             state = 1;
-                            PORTDbits.RD1 = On;
+                            //PORTDbits.RD1 = On;
                         }
                         break;
                     
@@ -64,7 +65,7 @@ void main(void) {
                     
                 case 3: if(SendPetitModbus(1, 6, temp2, 4)){
                             state = 4;
-                            PORTDbits.RD1 = Off;
+                            //PORTDbits.RD1 = Off;
                         }
                         break;
                     

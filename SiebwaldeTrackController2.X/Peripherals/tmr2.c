@@ -13,8 +13,7 @@ void TMR2_Initialize(void) {
     T2CONbits.TOUTPS = 0b1111;
     T2CONbits.T2CKPS = 0b11;
 
-    // PR2 70 = 90Hz = 3.0ms 
-    PR2 = 17; // 20 --> 480us  // 17 --> 322us
+    PR2 = 75; // 20 --> 480us  // 17 --> 322us // 16 --> 270us
 
     // TMR2 0x0; 
     TMR2 = 0x00;

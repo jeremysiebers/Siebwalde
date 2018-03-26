@@ -5,6 +5,7 @@
         <group>
             <file>file:/C:/Siebwalde-Source/trunk/SiebwaldeTrackController2.X/main.c</file>
             <file>file:/C:/Siebwalde-Source/trunk/SiebwaldeTrackController2.X/Peripherals/tmr2.c</file>
+            <file>file:/C:/Siebwalde-Source/trunk/SiebwaldeTrackController2.X/modbus/Init.h</file>
             <file>file:/C:/Siebwalde-Source/trunk/SiebwaldeTrackController2.X/modbus/PetitModbus.h</file>
             <file>file:/C:/Siebwalde-Source/trunk/SiebwaldeTrackController2.X/modbus/Interrupts.c</file>
             <file>file:/C:/Siebwalde-Source/trunk/SiebwaldeTrackController2.X/modbus/PetitModbus.c</file>

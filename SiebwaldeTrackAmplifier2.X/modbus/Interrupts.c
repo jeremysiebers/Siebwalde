@@ -20,7 +20,7 @@ void PetitModbusIntHandler(void)
     
     if (PIE1bits.RCIE == 1 && PIR1bits.RCIF == 1)
     {
-        TMR0        = 210; // 101 --> 1kHz/1ms tick, 241 --> 101us tick, 210 --> 304us tick
+        TMR0        = 190; // 190 --> 225us tick
         INTCONbits.TMR0IF = 0;
         INTCONbits.TMR0IE = 1;
         //PORTCbits.RC3 = 0;    
