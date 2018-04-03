@@ -33,7 +33,7 @@ void InitUART(void)
 void InitTMR1(void)
 {    
     // TMR0 Prescaler (default assigned)
-    OPTION_REGbits.PS = 0b100; //1:32               0b111;//1:128
+    OPTION_REGbits.PS = 0b011; //1:16               0b111;//1:128
     
     OPTION_REGbits.T0CS = 0;
     

@@ -15,7 +15,7 @@ void PetitModbusIntHandler(void)
         INTCONbits.TMR0IF = 0; 
         //PORTCbits.RC3 = 0;
         
-        PORTCbits.RC4 = 0;
+        //PORTCbits.RC4 = 0;
     }
     
     if (PIE1bits.RCIE == 1 && PIR1bits.RCIF == 1)

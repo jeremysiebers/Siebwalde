@@ -20,6 +20,8 @@ unsigned char state = 0;
 unsigned char slave = 2;
 unsigned int wait = 0, wait2 = 0;
 
+
+
 void main(void) {
     // Initialize the device
     SYSTEM_Initialize();
@@ -34,7 +36,7 @@ void main(void) {
     
     while(1)
     { 
-        PORTDbits.RD1 = !PORTDbits.RD1;
+        //PORTDbits.RD1 = !PORTDbits.RD1;
         ProcessPetitModbus();
 
         if(PIR1bits.TMR2IF)

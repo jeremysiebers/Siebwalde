@@ -56,6 +56,8 @@ PETIT_RXTX_STATE    Petit_Rx_State                = PETIT_RXTX_IDLE;
 unsigned char       Petit_Rx_Data_Available       = FALSE;
 
 volatile unsigned short PetitModbusTimerValue         = 0;
+
+
 /****************End of Slave Transmit and Receive Variables*******************/
 
 /*
@@ -317,7 +319,12 @@ void Petit_TxRTU(void)
 
     Petit_DoSlaveTX();
     
-    Petit_Tx_State    =PETIT_RXTX_IDLE;
+    if (Petit_Tx_Data.Address == PETITMODBUS_BROADCAST_ADDRESS){                // When PETITMODBUS_BROADCAST_ADDRESS then no response will be sent back                                          
+        Petit_Tx_State    =PETIT_RXTX_IDLE;
+    }
+    else{
+        Petit_Tx_State    =PETIT_RXTX_IDLE;//PETIT_RXTX_WAIT_ANSWER;                              // Else Master must wait for answer (see ModBus protocol implementation)
+    }
 }
 
 /******************************************************************************/
@@ -328,7 +335,7 @@ void Petit_TxRTU(void)
  */
 void ProcessPetitModbus(void)
 {
-    if (Petit_Tx_State != PETIT_RXTX_IDLE){                                      // If answer is ready, send it!
+    if (Petit_Tx_State != PETIT_RXTX_IDLE && Petit_Tx_State != PETIT_RXTX_WAIT_ANSWER){   // If answer is ready and not waiting for response, send it!
         //PORTDbits.RD1 = 1;
         Petit_TxRTU();
         //PORTDbits.RD1 = 0;        
@@ -336,9 +343,23 @@ void ProcessPetitModbus(void)
     
     Petit_RxRTU();                                                              // Call this function every cycle
 
-    if (Petit_RxDataAvailable())                                                // If data is ready enter this!
+    if (Petit_RxDataAvailable())                                                // If data is ready after CRC check etc. then enter this!
     {
         
+        
+        switch (Petit_Rx_Data.Function)
+        {
+            
+            case PETITMODBUS_READ_HOLDING_REGISTERS:    {       break;  }
+
+
+            case PETITMODBUS_WRITE_SINGLE_REGISTER:     {    PORTDbits.RD1 = !PORTDbits.RD1;Petit_Tx_State =  PETIT_RXTX_IDLE;  break;  }
+
+
+            case PETITMODBUS_WRITE_MULTIPLE_REGISTERS:  {       break;  }
+
+            default:                                    {       break;  }
+        }
     }
 }
 
