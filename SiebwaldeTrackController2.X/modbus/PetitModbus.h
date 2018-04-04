@@ -13,10 +13,6 @@
                                                                                 // It has to be bigger than 0 (zero)!!
 #define PETITMODBUS_TIMEOUTTIMER                        2                       // Timeout Constant for Petit Modbus RTU Slave [101us tick]
 
-#define PETITMODBUS_READ_HOLDING_REGISTERS_ENABLED      ( 1 )                   // If you want to use make it 1, or 0
-#define PETITMODBUSWRITE_SINGLE_REGISTER_ENABLED        ( 1 )                   // If you want to use make it 1, or 0
-#define PETITMODBUS_WRITE_MULTIPLE_REGISTERS_ENABLED    ( 1 )                   // If you want to use make it 1, or 0
-
 #define ENTER_CRITICAL_SECTION( )   (INTCONbits.GIE = 0)
 #define EXIT_CRITICAL_SECTION( )    (INTCONbits.GIE = 1)
 
@@ -89,6 +85,16 @@ extern volatile unsigned short PetitModbusTimerValue;
 extern void             InitPetitModbus(void);
 extern void             ProcessPetitModbus(void);
 extern unsigned char    SendPetitModbus(unsigned char Address, unsigned char Function, unsigned char *DataBuf, unsigned short DataLen);
+extern unsigned char    SlaveReadBack(void);
+
+typedef enum
+{
+    SLAVE_DATA_BUSY,
+    SLAVE_DATA_OK,
+    SLAVE_DATA_NOK    
+}SLAVE_DATA;
+
+void HandlePetitModbusWriteSingleRegisterSlaveReadback(void);
 
 // Petit Modbus Port Header
 #include "PetitModbusPort.h"

@@ -13,6 +13,11 @@ void PIN_MANAGER_Initialize(void) {
     
     TRISD = 0xFF;
     
+    PORTA = 0;
+    PORTB = 0;
+    PORTC = 0;
+    PORTD = 0;   
+    
     TRISDbits.TRISD0 = 0;//Led
     TRISDbits.TRISD1 = 0;//Led
     TRISDbits.TRISD2 = 0;//Amplifiers reset

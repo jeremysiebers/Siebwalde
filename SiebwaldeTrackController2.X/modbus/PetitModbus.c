@@ -25,6 +25,9 @@
 unsigned char PETITMODBUS_SLAVE_ADDRESS         =1;
 unsigned char PETITMODBUS_BROADCAST_ADDRESS     =0;
 
+
+SLAVE_DATA SLAVE_DATA_VERIFIED;
+
 typedef enum
 {
     PETIT_RXTX_IDLE,
@@ -323,7 +326,7 @@ void Petit_TxRTU(void)
         Petit_Tx_State    =PETIT_RXTX_IDLE;
     }
     else{
-        Petit_Tx_State    =PETIT_RXTX_IDLE;//PETIT_RXTX_WAIT_ANSWER;                              // Else Master must wait for answer (see ModBus protocol implementation)
+        Petit_Tx_State    =PETIT_RXTX_WAIT_ANSWER;                              // Else Master must wait for answer (see ModBus protocol implementation)
     }
 }
 
@@ -338,6 +341,7 @@ void ProcessPetitModbus(void)
     if (Petit_Tx_State != PETIT_RXTX_IDLE && Petit_Tx_State != PETIT_RXTX_WAIT_ANSWER){   // If answer is ready and not waiting for response, send it!
         //PORTDbits.RD1 = 1;
         Petit_TxRTU();
+        SLAVE_DATA_VERIFIED = SLAVE_DATA_BUSY;
         //PORTDbits.RD1 = 0;        
     }
     
@@ -353,7 +357,7 @@ void ProcessPetitModbus(void)
             case PETITMODBUS_READ_HOLDING_REGISTERS:    {       break;  }
 
 
-            case PETITMODBUS_WRITE_SINGLE_REGISTER:     {    PORTDbits.RD1 = !PORTDbits.RD1;Petit_Tx_State =  PETIT_RXTX_IDLE;  break;  }
+            case PETITMODBUS_WRITE_SINGLE_REGISTER:     {    HandlePetitModbusWriteSingleRegisterSlaveReadback(); break;  }
 
 
             case PETITMODBUS_WRITE_MULTIPLE_REGISTERS:  {       break;  }
@@ -396,6 +400,46 @@ unsigned char SendPetitModbus(unsigned char Address, unsigned char Function, uns
     }   
     
     return (PetitSendMessage());
+}
+
+/******************************************************************************/
+
+/*
+ * Function Name        : SlaveReadBack
+ * @How to use          : 
+ */
+unsigned char SlaveReadBack(void){
+    return (SLAVE_DATA_VERIFIED);
+}
+
+/******************************************************************************/
+
+/*
+ * Function Name        : HandleModbusReadInputRegisters
+ * @How to use          : Modbus function 06 - Write single register read back from slave check
+ */
+void HandlePetitModbusWriteSingleRegisterSlaveReadback(void)
+{
+    if(Petit_Tx_Data.Function == Petit_Rx_Data.Function){
+        if(Petit_Tx_Data.Address == Petit_Rx_Data.Address){
+            if(Petit_Tx_Data.DataBuf[0] == Petit_Rx_Data.DataBuf[0]){
+                if(Petit_Tx_Data.DataBuf[1] == Petit_Rx_Data.DataBuf[1]){
+                    if(Petit_Tx_Data.DataBuf[2] == Petit_Rx_Data.DataBuf[2]){
+                        if(Petit_Tx_Data.DataBuf[3] == Petit_Rx_Data.DataBuf[3]){                            
+                            SLAVE_DATA_VERIFIED = SLAVE_DATA_OK;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    else{
+        SLAVE_DATA_VERIFIED = SLAVE_DATA_NOK;
+    }
+    
+    //PORTDbits.RD1 = !PORTDbits.RD1;
+    Petit_Tx_State =  PETIT_RXTX_IDLE;
+
 }
 
 /******************************************************************************/
