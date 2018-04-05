@@ -81,12 +81,6 @@ typedef struct{
 extern PetitRegStructure    PetitRegisters[NUMBER_OF_OUTPUT_PETITREGISTERS];
 extern volatile unsigned short PetitModbusTimerValue;
 
-// Main Functions
-extern void             InitPetitModbus(void);
-extern void             ProcessPetitModbus(void);
-extern unsigned char    SendPetitModbus(unsigned char Address, unsigned char Function, unsigned char *DataBuf, unsigned short DataLen);
-extern unsigned char    SlaveReadBack(void);
-
 typedef enum
 {
     SLAVE_DATA_BUSY,
@@ -94,7 +88,24 @@ typedef enum
     SLAVE_DATA_NOK    
 }SLAVE_DATA;
 
+typedef struct
+{
+    unsigned int        Reg1;
+    unsigned int        Reg2;
+    unsigned int        Reg3;
+    unsigned int        Reg4;
+    unsigned char       CommError;
+}SLAVE_INFO;
+
+// Main Functions
+extern void             InitPetitModbus(unsigned int *location);
+extern void             ProcessPetitModbus(void);
+extern unsigned char    SendPetitModbus(unsigned char Address, unsigned char Function, unsigned char *DataBuf, unsigned short DataLen);
+extern unsigned char    SlaveReadBack(void);
+
 void HandlePetitModbusWriteSingleRegisterSlaveReadback(void);
+void HandlePetitModbusReadHoldingRegistersSlaveReadback(void);
+void HandleMPetitodbusWriteMultipleRegistersSlaveReadback(void);
 
 // Petit Modbus Port Header
 #include "PetitModbusPort.h"

@@ -25,6 +25,8 @@
 unsigned char PETITMODBUS_SLAVE_ADDRESS         =1;
 unsigned char PETITMODBUS_BROADCAST_ADDRESS     =0;
 
+static unsigned int MASTER_SLAVE_DATA = 0;                                             // Holds the address were the received slave data is stored
+
 
 SLAVE_DATA SLAVE_DATA_VERIFIED;
 
@@ -354,13 +356,13 @@ void ProcessPetitModbus(void)
         switch (Petit_Rx_Data.Function)
         {
             
-            case PETITMODBUS_READ_HOLDING_REGISTERS:    {       break;  }
+            case PETITMODBUS_READ_HOLDING_REGISTERS:    {    HandlePetitModbusReadHoldingRegistersSlaveReadback(); break;  }
 
 
             case PETITMODBUS_WRITE_SINGLE_REGISTER:     {    HandlePetitModbusWriteSingleRegisterSlaveReadback(); break;  }
 
 
-            case PETITMODBUS_WRITE_MULTIPLE_REGISTERS:  {       break;  }
+            case PETITMODBUS_WRITE_MULTIPLE_REGISTERS:  {    HandleMPetitodbusWriteMultipleRegistersSlaveReadback(); break;  }
 
             default:                                    {       break;  }
         }
@@ -373,8 +375,9 @@ void ProcessPetitModbus(void)
  * Function Name        : InitPetitModbus
  * @How to use          : Petite ModBus slave initialize
  */
-void InitPetitModbus(void)
+void InitPetitModbus(unsigned int *location)
 {
+    MASTER_SLAVE_DATA      = *location;
     PetitModBus_UART_Initialise();
     PetitModBus_TIMER_Initialise();
 }
@@ -440,6 +443,41 @@ void HandlePetitModbusWriteSingleRegisterSlaveReadback(void)
     //PORTDbits.RD1 = !PORTDbits.RD1;
     Petit_Tx_State =  PETIT_RXTX_IDLE;
 
+}
+
+/******************************************************************************/
+
+/*
+ * Function Name        : HandlePetitModbusReadHoldingRegistersSlaveReadback
+ * @How to use          : Modbus function 03 - Read holding registers
+ */
+
+void HandlePetitModbusReadHoldingRegistersSlaveReadback(void)
+{
+    unsigned int    Petit_NumberOfRegistersBytes   = 0;
+    
+    Petit_NumberOfRegistersBytes = 2*((unsigned int) (Petit_Tx_Data.DataBuf[2]) << 8) + (unsigned int) (Petit_Tx_Data.DataBuf[3]);
+    
+    if(Petit_Tx_Data.Address == Petit_Rx_Data.Address){                         // Function is already checked, but who did send the message
+        if(Petit_NumberOfRegistersBytes == Petit_Rx_Data.DataBuf[0]){ // Check if the amount of data sent back is equal to the requested amount of registers sent
+            
+        }
+    }
+    else{
+        //send back that Petit_Tx_Data.Address has comm error
+    }
+}
+
+/******************************************************************************/
+
+/*
+ * Function Name        : HandleModbusWriteMultipleRegisters
+ * @How to use          : Modbus function 16 - Write multiple registers
+ */
+
+void HandleMPetitodbusWriteMultipleRegistersSlaveReadback(void)
+{
+    
 }
 
 /******************************************************************************/

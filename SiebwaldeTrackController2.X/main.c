@@ -18,16 +18,10 @@
 /*----------------------------------------------------------------------------*/
 #define NUMBER_OF_SLAVES    3
 
-typedef struct
-{
-  unsigned          Occupied :1;
-  unsigned          Thermal  :1;
-}SLAVE_BIT_INFO;
-
-static SLAVE_BIT_INFO   SlaveBitInfo[NUMBER_OF_SLAVES];
-static unsigned int     SlavePwm    [NUMBER_OF_SLAVES];
-static unsigned int     SlaveEmk    [NUMBER_OF_SLAVES];
-static unsigned int     SlaveCurrent[NUMBER_OF_SLAVES];
+static SLAVE_INFO         SlaveInfo[NUMBER_OF_SLAVES];
+//static unsigned int     SlavePwm    [NUMBER_OF_SLAVES];
+//static unsigned int     SlaveEmk    [NUMBER_OF_SLAVES];
+//static unsigned int     SlaveCurrent[NUMBER_OF_SLAVES];
 /*----------------------------------------------------------------------------*/
 
 unsigned char temp[4] = {0, 0, 0, 1};
@@ -52,7 +46,7 @@ void main(void) {
         for(wait2 = 0x4; wait2 > 0; wait2--);
     }
     
-    InitPetitModbus();
+    InitPetitModbus(&SlaveInfo[0].Reg1);
     
     PORTDbits.RD1 = Off;
     
@@ -65,7 +59,8 @@ void main(void) {
         {
             switch(state){
                 case 0: if(SendPetitModbus(1, 6, temp, 4)){
-                            state = 1;                        }
+                            state = 1;                        
+                        }
                         break;
                     
                 case 1: if(SlaveReadBack() == SLAVE_DATA_OK){
