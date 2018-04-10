@@ -16,18 +16,16 @@
 
 
 /*----------------------------------------------------------------------------*/
-#define NUMBER_OF_SLAVES    3
+#define NUMBER_OF_SLAVES    4                                                   
 
 static SLAVE_INFO         SlaveInfo[NUMBER_OF_SLAVES];
-//static unsigned int     SlavePwm    [NUMBER_OF_SLAVES];
-//static unsigned int     SlaveEmk    [NUMBER_OF_SLAVES];
-//static unsigned int     SlaveCurrent[NUMBER_OF_SLAVES];
 /*----------------------------------------------------------------------------*/
 
-unsigned char temp[4] = {0, 0, 0, 1};
+unsigned char temp[4] =  {0, 0, 0, 1};
 unsigned char temp2[4] = {0, 0, 0, 0};
+unsigned char temp3[4] = {0, 1, 0, 3};
 unsigned char state = 0;
-unsigned char slave = 2;
+//unsigned char slave = 2;
 unsigned int wait = 0, wait2 = 0;
 
 
@@ -46,9 +44,11 @@ void main(void) {
         for(wait2 = 0x4; wait2 > 0; wait2--);
     }
     
-    InitPetitModbus(&SlaveInfo[0].Reg1);
+    InitPetitModbus(SlaveInfo);                                                 // Pass address of array of struct for data storage
     
     PORTDbits.RD1 = Off;
+    
+    state = 12;
     
     while(1)
     { 
@@ -63,23 +63,36 @@ void main(void) {
                         }
                         break;
                     
-                case 1: if(SlaveReadBack() == SLAVE_DATA_OK){
-                            state = 2;
+                case 1: if(SlaveInfo[1].CommError == SLAVE_DATA_OK){
+                            state = 12;
                         }
-                        else if(SlaveReadBack() == SLAVE_DATA_NOK){
+                        else if(SlaveInfo[1].CommError == SLAVE_DATA_NOK){
                             PORTDbits.RD1 = On;
                         }
                         break;
+                        
+                case 12: if(SendPetitModbus(1, 3, temp3, 4)){
+                            state = 13;
+                        }
+                        break;
+                        
+                 case 13: if(SlaveInfo[1].CommError == SLAVE_DATA_OK){
+                            state = 2;
+                        }
+                        else if(SlaveInfo[1].CommError == SLAVE_DATA_NOK){
+                            PORTDbits.RD1 = On;
+                        }
+                        break;       
                     
                 case 2: if(SendPetitModbus(2, 6, temp, 4)){
                             state = 3;                             
                         }                 
                         break;
                     
-                case 3: if(SlaveReadBack() == SLAVE_DATA_OK){
+                case 3: if(SlaveInfo[2].CommError == SLAVE_DATA_OK){
                             state = 4;
                         }
-                        else if(SlaveReadBack() == SLAVE_DATA_NOK){
+                        else if(SlaveInfo[2].CommError == SLAVE_DATA_NOK){
                             PORTDbits.RD1 = On;
                         }
                         break;
@@ -89,10 +102,10 @@ void main(void) {
                         }                 
                         break;
                     
-                case 5: if(SlaveReadBack() == SLAVE_DATA_OK){
+                case 5: if(SlaveInfo[3].CommError == SLAVE_DATA_OK){
                             state = 6;
                         }
-                        else if(SlaveReadBack() == SLAVE_DATA_NOK){
+                        else if(SlaveInfo[3].CommError == SLAVE_DATA_NOK){
                             PORTDbits.RD1 = On;
                         }
                         break;
@@ -102,10 +115,10 @@ void main(void) {
                         }
                         break;
                     
-                case 7: if(SlaveReadBack() == SLAVE_DATA_OK){
+                case 7: if(SlaveInfo[1].CommError == SLAVE_DATA_OK){
                             state = 8;
                         }
-                        else if(SlaveReadBack() == SLAVE_DATA_NOK){
+                        else if(SlaveInfo[1].CommError == SLAVE_DATA_NOK){
                             PORTDbits.RD1 = On;
                         }
                         break;
@@ -115,10 +128,10 @@ void main(void) {
                         }                 
                         break;
                     
-                case 9: if(SlaveReadBack() == SLAVE_DATA_OK){
+                case 9: if(SlaveInfo[2].CommError == SLAVE_DATA_OK){
                             state = 10;
                         }
-                        else if(SlaveReadBack() == SLAVE_DATA_NOK){
+                        else if(SlaveInfo[2].CommError == SLAVE_DATA_NOK){
                             PORTDbits.RD1 = On;
                         }
                         break;
@@ -128,10 +141,10 @@ void main(void) {
                         }                 
                         break;
                     
-                case 11: if(SlaveReadBack() == SLAVE_DATA_OK){
+                case 11: if(SlaveInfo[3].CommError == SLAVE_DATA_OK){
                             state = 0;
                         }
-                        else if(SlaveReadBack() == SLAVE_DATA_NOK){
+                        else if(SlaveInfo[3].CommError == SLAVE_DATA_NOK){
                             PORTDbits.RD1 = On;
                         }
                         break;

@@ -8,13 +8,10 @@
 #ifndef __PETITMODBUS__H
 #define __PETITMODBUS__H
 
-#define NUMBER_OF_OUTPUT_PETITREGISTERS                 1                       // Petit Modbus RTU Slave Output Register Number
+#define NUMBER_OF_OUTPUT_PETITREGISTERS                 5                       // Petit Modbus RTU Slave Output Register Number, master has to know how big the slave is
                                                                                 // Have to put a number of registers here
                                                                                 // It has to be bigger than 0 (zero)!!
 #define PETITMODBUS_TIMEOUTTIMER                        2                       // Timeout Constant for Petit Modbus RTU Slave [101us tick]
-
-#define ENTER_CRITICAL_SECTION( )   (INTCONbits.GIE = 0)
-#define EXIT_CRITICAL_SECTION( )    (INTCONbits.GIE = 1)
 
 //#define CRC_CALC                                                                // When uncommented a CRC calculation is used for the function void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
 
@@ -71,37 +68,25 @@ const unsigned char auchCRCLo[] = {
 #define PETITMODBUS_TRANSMIT_BUFFER_SIZE                PETITMODBUS_RECEIVE_BUFFER_SIZE
 #define PETITMODBUS_RXTX_BUFFER_SIZE                    PETITMODBUS_TRANSMIT_BUFFER_SIZE
 
-// Variable for Slave Address
-extern unsigned char PETITMODBUS_SLAVE_ADDRESS;                                 // Petit Modbus RTU Slave icin adres numarasi [0 to 255]
-
-typedef struct{
-            short                     ActValue;
-        }PetitRegStructure;
-
-extern PetitRegStructure    PetitRegisters[NUMBER_OF_OUTPUT_PETITREGISTERS];
 extern volatile unsigned short PetitModbusTimerValue;
 
 typedef enum
 {
-    SLAVE_DATA_BUSY,
-    SLAVE_DATA_OK,
-    SLAVE_DATA_NOK    
+    SLAVE_DATA_BUSY = 1,
+    SLAVE_DATA_OK = 2,
+    SLAVE_DATA_NOK = 3    
 }SLAVE_DATA;
 
 typedef struct
 {
-    unsigned int        Reg1;
-    unsigned int        Reg2;
-    unsigned int        Reg3;
-    unsigned int        Reg4;
+    unsigned int        Reg[3];
     unsigned char       CommError;
 }SLAVE_INFO;
 
 // Main Functions
-extern void             InitPetitModbus(unsigned int *location);
+extern void             InitPetitModbus(SLAVE_INFO *location);
 extern void             ProcessPetitModbus(void);
 extern unsigned char    SendPetitModbus(unsigned char Address, unsigned char Function, unsigned char *DataBuf, unsigned short DataLen);
-extern unsigned char    SlaveReadBack(void);
 
 void HandlePetitModbusWriteSingleRegisterSlaveReadback(void);
 void HandlePetitModbusReadHoldingRegistersSlaveReadback(void);
