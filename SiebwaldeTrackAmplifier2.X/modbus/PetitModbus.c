@@ -127,8 +127,7 @@ void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
 unsigned char Petit_DoSlaveTX(void)
 {  
     PetitModBus_UART_String(Petit_Tx_Buf,Petit_Tx_Buf_Size);
-
-    Petit_Tx_Buf_Size = 0;
+    Petit_Tx_Buf_Size = 0;    
     return TRUE;
 }
 
@@ -164,6 +163,7 @@ void HandlePetitModbusError(char ErrorCode)
     }
     else
     {
+        PetitRegisters[(NUMBER_OF_OUTPUT_PETITREGISTERS - 1)].ActValue += 1;    // Count the amount of transmitted messages
         // Initialise the output buffer. The first byte in the buffer says how many registers we have read
         Petit_Tx_Data.Function    = ErrorCode | 0x80;
         Petit_Tx_Data.Address     = PETITMODBUS_SLAVE_ADDRESS;
@@ -202,6 +202,7 @@ void HandlePetitModbusReadHoldingRegisters(void)
     }
     else
     {
+        PetitRegisters[(NUMBER_OF_OUTPUT_PETITREGISTERS - 1)].ActValue += 1;    // Count the amount of transmitted messages (here so that if the counters are requested this message is also counted already!)
         // Initialise the output buffer. The first byte in the buffer says how many registers we have read
         Petit_Tx_Data.Function    = PETITMODBUS_READ_HOLDING_REGISTERS;
         Petit_Tx_Data.Address     = PETITMODBUS_SLAVE_ADDRESS;
@@ -261,7 +262,8 @@ void HandlePetitModbusWriteSingleRegister(void)
         for (Petit_i = 0; Petit_i < 4; ++Petit_i)
             Petit_Tx_Data.DataBuf[Petit_i] = Petit_Rx_Data.DataBuf[Petit_i];
     }
-
+    PetitRegisters[(NUMBER_OF_OUTPUT_PETITREGISTERS - 1)].ActValue += 1;    // Count the amount of transmitted messages
+    
     PetitSendMessage();
 }
 #endif
@@ -317,7 +319,8 @@ void HandleMPetitodbusWriteMultipleRegisters(void)
             Petit_Value=(Petit_Rx_Data.DataBuf[5+2*Petit_i]<<8)+(Petit_Rx_Data.DataBuf[6+2*Petit_i]);
             PetitRegisters[Petit_StartAddress+Petit_i].ActValue=Petit_Value;
         }
-
+        PetitRegisters[(NUMBER_OF_OUTPUT_PETITREGISTERS - 1)].ActValue += 1;    // Count the amount of transmitted messages
+        
         PetitSendMessage();
     }
 }
@@ -509,7 +512,7 @@ void ProcessPetitModbus(void)
     {
         if (Petit_Rx_Data.Address == PETITMODBUS_SLAVE_ADDRESS || PETITMODBUS_BROADCAST_ADDRESS) // Is Data for us?
         {
-            
+            PetitRegisters[(NUMBER_OF_OUTPUT_PETITREGISTERS - 2)].ActValue += 1;// Count the amount of received messages
             
             switch (Petit_Rx_Data.Function)                                     // Data is for us but which function?
             {

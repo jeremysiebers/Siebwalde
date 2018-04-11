@@ -8,7 +8,7 @@
 #ifndef __PETITMODBUS__H
 #define __PETITMODBUS__H
 
-#define NUMBER_OF_OUTPUT_PETITREGISTERS                 5                       // Petit Modbus RTU Slave Output Register Number, master has to know how big the slave is
+#define NUMBER_OF_OUTPUT_PETITREGISTERS                 7                       // Petit Modbus RTU Slave Output Register Number, master has to know how big the slave is
                                                                                 // Have to put a number of registers here
                                                                                 // It has to be bigger than 0 (zero)!!
 #define PETITMODBUS_TIMEOUTTIMER                        2                       // Timeout Constant for Petit Modbus RTU Slave [101us tick]
@@ -79,8 +79,10 @@ typedef enum
 
 typedef struct
 {
-    unsigned int        Reg[3];
+    unsigned int        Reg[NUMBER_OF_OUTPUT_PETITREGISTERS];
     unsigned char       CommError;
+    unsigned int        ReceiveCounter;
+    unsigned int        SentCounter;
 }SLAVE_INFO;
 
 // Main Functions

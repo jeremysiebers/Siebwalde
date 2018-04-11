@@ -23,7 +23,8 @@ static SLAVE_INFO         SlaveInfo[NUMBER_OF_SLAVES];
 
 unsigned char temp[4] =  {0, 0, 0, 1};
 unsigned char temp2[4] = {0, 0, 0, 0};
-unsigned char temp3[4] = {0, 1, 0, 3};
+unsigned char temp3[4] = {0, 0, 0, 7};
+unsigned char temp4[9] = {0, 2, 0, 2, 4, 0x55, 0xAA, 0x50, 0xA0};
 unsigned char state = 0;
 //unsigned char slave = 2;
 unsigned int wait = 0, wait2 = 0;
@@ -47,8 +48,6 @@ void main(void) {
     InitPetitModbus(SlaveInfo);                                                 // Pass address of array of struct for data storage
     
     PORTDbits.RD1 = Off;
-    
-    state = 12;
     
     while(1)
     { 
@@ -76,13 +75,26 @@ void main(void) {
                         }
                         break;
                         
-                 case 13: if(SlaveInfo[1].CommError == SLAVE_DATA_OK){
+                case 13: if(SlaveInfo[1].CommError == SLAVE_DATA_OK){
                             state = 2;
                         }
                         else if(SlaveInfo[1].CommError == SLAVE_DATA_NOK){
                             PORTDbits.RD1 = On;
                         }
-                        break;       
+                        break;  
+                        
+                case 14: if(SendPetitModbus(1, 16, temp4, 9)){
+                            state = 15;
+                        }
+                        break;
+                        
+                case 15: if(SlaveInfo[1].CommError == SLAVE_DATA_OK){
+                            state = 2;
+                        }
+                        else if(SlaveInfo[1].CommError == SLAVE_DATA_NOK){
+                            PORTDbits.RD1 = On;
+                        }
+                        break; 
                     
                 case 2: if(SendPetitModbus(2, 6, temp, 4)){
                             state = 3;                             
@@ -116,12 +128,25 @@ void main(void) {
                         break;
                     
                 case 7: if(SlaveInfo[1].CommError == SLAVE_DATA_OK){
-                            state = 8;
+                            state = 16;
                         }
                         else if(SlaveInfo[1].CommError == SLAVE_DATA_NOK){
                             PORTDbits.RD1 = On;
                         }
                         break;
+                        
+                case 16: if(SendPetitModbus(1, 3, temp3, 4)){
+                            state = 17;
+                        }
+                        break;
+                        
+                case 17: if(SlaveInfo[1].CommError == SLAVE_DATA_OK){
+                            state = 8;
+                        }
+                        else if(SlaveInfo[1].CommError == SLAVE_DATA_NOK){
+                            PORTDbits.RD1 = On;
+                        }
+                        break;  
                     
                 case 8: if(SendPetitModbus(2, 6, temp2, 4)){
                             state = 9;                             

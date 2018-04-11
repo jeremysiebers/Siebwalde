@@ -24,6 +24,8 @@
 
 #define PETITMODBUS_BROADCAST_ADDRESS           0
 
+static SLAVE_INFO *MASTER_SLAVE_DATA = 0;                                       // Holds the address were the received slave data is stored
+
 typedef enum
 {
     PETIT_RXTX_IDLE,
@@ -201,14 +203,14 @@ unsigned char CheckPetitModbusBufferComplete(void)
     {
         if(PetitReceiveBuffer[0] > 0)
         {
-            if(PetitReceiveBuffer[1]==0x01 || PetitReceiveBuffer[1]==0x02 || PetitReceiveBuffer[1]==0x03 || PetitReceiveBuffer[1]==0x04 || PetitReceiveBuffer[1]==0x05 || PetitReceiveBuffer[1]==0x06)  // RHR
+            if( PetitReceiveBuffer[1]==0x06 || PetitReceiveBuffer[1]==0x10)     // RHR
             {
                 PetitExpectedReceiveCount    =8;
             }
-            else if(PetitReceiveBuffer[1]==0x0F || PetitReceiveBuffer[1]==0x10)
+            else if(PetitReceiveBuffer[1]==0x03)
             {
-                PetitExpectedReceiveCount=PetitReceiveBuffer[6]+9;
-            }
+                PetitExpectedReceiveCount=(PetitReceiveBuffer[2])+5;
+            }            
             else
             {
                 PetitReceiveCounter=0;
@@ -343,9 +345,7 @@ void ProcessPetitModbus(void)
     Petit_RxRTU();                                                              // Call this function every cycle
 
     if (Petit_RxDataAvailable())                                                // If data is ready after CRC check etc. then enter this!
-    {
-        
-        
+    {        
         switch (Petit_Rx_Data.Function)
         {
             
@@ -374,7 +374,6 @@ void ProcessPetitModbus(void)
  *                        When gaps exist, or higher slave address number series,
  *                        a parser and init for it must be realized (offset). 
  */
-static SLAVE_INFO *MASTER_SLAVE_DATA = 0;                                       // Holds the address were the received slave data is stored
 
 void InitPetitModbus(SLAVE_INFO *location)                                  
 {   
@@ -391,6 +390,8 @@ void InitPetitModbus(SLAVE_INFO *location)
  */
 
 unsigned char SendPetitModbus(unsigned char Address, unsigned char Function, unsigned char *DataBuf, unsigned short DataLen){
+    
+    unsigned char return_val = 0;
 
     MASTER_SLAVE_DATA[Address].CommError = SLAVE_DATA_BUSY;                     // When sending a command to a slave, set the CommError register to busy
     
@@ -403,8 +404,13 @@ unsigned char SendPetitModbus(unsigned char Address, unsigned char Function, uns
     {
         Petit_Tx_Data.DataBuf[Petit_Tx_Current]=DataBuf[Petit_Tx_Current];        
     }   
+    return_val = PetitSendMessage();
     
-    return (PetitSendMessage());
+    if (return_val){                                                            // a message has been sent
+        MASTER_SLAVE_DATA[Address].SentCounter += 1;
+    }
+    
+    return (return_val);
 }
 
 /******************************************************************************/
@@ -422,6 +428,7 @@ void HandlePetitModbusWriteSingleRegisterSlaveReadback(void)
                     if(Petit_Tx_Data.DataBuf[2] == Petit_Rx_Data.DataBuf[2]){
                         if(Petit_Tx_Data.DataBuf[3] == Petit_Rx_Data.DataBuf[3]){                            
                             MASTER_SLAVE_DATA[Petit_Rx_Data.Address].CommError = SLAVE_DATA_OK;
+                            MASTER_SLAVE_DATA[Petit_Rx_Data.Address].ReceiveCounter += 1;
                         }
                     }
                 }
@@ -448,6 +455,8 @@ void HandlePetitModbusReadHoldingRegistersSlaveReadback(void)
     unsigned int    Petit_NumberOfRegistersBytes   = 0;
     unsigned int    Petit_NumberOfRegisters        = 0;
     unsigned int    Petit_i                        = 0;
+    unsigned int    BufReadIndex                   = 0;
+    unsigned int    RegData                        = 0;
     
     Petit_StartAddress = ((unsigned int) (Petit_Tx_Data.DataBuf[0]) << 8) + (unsigned int) (Petit_Tx_Data.DataBuf[1]);
     Petit_NumberOfRegisters = ((unsigned int) (Petit_Tx_Data.DataBuf[2]) << 8) + (unsigned int) (Petit_Tx_Data.DataBuf[3]);
@@ -455,14 +464,18 @@ void HandlePetitModbusReadHoldingRegistersSlaveReadback(void)
     
     if(Petit_Tx_Data.Address == Petit_Rx_Data.Address){                         // Function is already checked, but who did send the message
         if(Petit_NumberOfRegistersBytes == Petit_Rx_Data.DataBuf[0]){           // Check if the amount of data sent back is equal to the requested amount of registers sent
-                        
+            
+            //Petit_NumberOfRegisters += 1;                                       // in order to let the FOR loop process all registers that are been read
+            BufReadIndex = 0;
             for (Petit_i = 0; Petit_i < Petit_NumberOfRegisters; Petit_i++)
             {
-                Petit_StartAddress += Petit_i;
-                MASTER_SLAVE_DATA[Petit_Tx_Data.Address].Reg[Petit_StartAddress] = 
-                        ((unsigned int) (Petit_Rx_Data.DataBuf[Petit_i + 1]) << 8) + (unsigned int) (Petit_Rx_Data.DataBuf[Petit_i + 2]);
+                RegData = ((unsigned int) (Petit_Rx_Data.DataBuf[BufReadIndex + 1]) << 8) + (unsigned int) (Petit_Rx_Data.DataBuf[BufReadIndex + 2]);
+                MASTER_SLAVE_DATA[Petit_Tx_Data.Address].Reg[Petit_StartAddress] = RegData;                        
+                Petit_StartAddress += 1;                                        // point to the next register to write
+                BufReadIndex += 2;                                              // jump to the next char pair for the next register read from buffer (2 bytes))
             }
-            
+            MASTER_SLAVE_DATA[Petit_Rx_Data.Address].CommError = SLAVE_DATA_OK;
+            MASTER_SLAVE_DATA[Petit_Rx_Data.Address].ReceiveCounter += 1;
         }
     }
     else{
@@ -491,6 +504,7 @@ void HandleMPetitodbusWriteMultipleRegistersSlaveReadback(void)
         if(Petit_StartAddress == ((unsigned int) (Petit_Rx_Data.DataBuf[0]) << 8) + (unsigned int) (Petit_Rx_Data.DataBuf[1])){  // Check the start address
             if(Petit_NumberOfRegisters == ((unsigned int) (Petit_Rx_Data.DataBuf[2]) << 8) + (unsigned int) (Petit_Rx_Data.DataBuf[3])){  // Check amount of registers that is set
                 MASTER_SLAVE_DATA[Petit_Rx_Data.Address].CommError = SLAVE_DATA_OK;
+                MASTER_SLAVE_DATA[Petit_Rx_Data.Address].ReceiveCounter += 1;
             }
         }
     }
