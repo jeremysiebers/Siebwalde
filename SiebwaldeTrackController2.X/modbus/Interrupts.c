@@ -12,6 +12,8 @@ void PetitModbusIntHandler(void)
         INTCONbits.TMR0IE = 0;
         INTCONbits.TMR0IF = 0; 
         
+        SlaveAnswerTimeoutCounter = 0;
+        
         //TMR0        = 241; // 101 --> 1kHz/1ms tick, 241 --> 101us tick
         //INTCONbits.TMR0IF      =0;
     }
@@ -23,6 +25,7 @@ void PetitModbusIntHandler(void)
         INTCONbits.TMR0IE = 1;
         
         ReceiveInterrupt(RCREG);
-        //PIR1bits.RCIF = 0;        
+        //PIR1bits.RCIF = 0;     
+        SlaveAnswerTimeoutCounter = 0;
     }
 }

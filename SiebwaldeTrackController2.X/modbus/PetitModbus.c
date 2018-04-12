@@ -18,10 +18,6 @@
 #define PETIT_DATA_NOT_READY                    2
 #define PETIT_DATA_READY                        3
 
-#define PETIT_ERROR_CODE_01                     0x01                            // Function code is not supported
-#define PETIT_ERROR_CODE_02                     0x02                            // Register address is not allowed or write-protected
-#define PETIT_ERROR_CODE_03                     0x03                            // Some data values are out of range, invalid number of register
-
 #define PETITMODBUS_BROADCAST_ADDRESS           0
 
 static SLAVE_INFO *MASTER_SLAVE_DATA = 0;                                       // Holds the address were the received slave data is stored
@@ -56,7 +52,9 @@ unsigned int        Petit_Rx_CRC16                = 0xFFFF;
 PETIT_RXTX_STATE    Petit_Rx_State                = PETIT_RXTX_IDLE;
 unsigned char       Petit_Rx_Data_Available       = FALSE;
 
-volatile unsigned short PetitModbusTimerValue         = 0;
+volatile unsigned short PetitModbusTimerValue           = 0;
+volatile unsigned int SlaveAnswerTimeoutCounter         = 0;
+volatile unsigned char EnableSlaveAnswerTimeoutCounter  = 1; 
 
 
 /****************End of Slave Transmit and Receive Variables*******************/
@@ -334,12 +332,26 @@ void Petit_TxRTU(void)
  * Function Name        : ProcessModbus
  * @How to use          : ModBus main core! Call this function into main!
  */
+
 void ProcessPetitModbus(void)
 {
     if (Petit_Tx_State != PETIT_RXTX_IDLE && Petit_Tx_State != PETIT_RXTX_WAIT_ANSWER){   // If answer is ready and not waiting for response, send it!
         //PORTDbits.RD1 = 1;
         Petit_TxRTU();
         //PORTDbits.RD1 = 0;        
+    }
+    else if(Petit_Tx_State == PETIT_RXTX_WAIT_ANSWER){// && EnableSlaveAnswerTimeoutCounter){
+        if (INTCONbits.TMR0IF){
+            SlaveAnswerTimeoutCounter += 1;
+            INTCONbits.TMR0IF = 0;
+            //TMR0        = 190;
+        }
+        if (SlaveAnswerTimeoutCounter > PETITMODBUS_SLAVECOMMTIMEOUTTIMER){
+            MASTER_SLAVE_DATA[Petit_Tx_Data.Address].CommError = SLAVE_DATA_TIMEOUT;
+            Petit_Tx_State = PETIT_RXTX_IDLE;
+            SlaveAnswerTimeoutCounter = 0;
+            EnableSlaveAnswerTimeoutCounter = 0;
+        }
     }
     
     Petit_RxRTU();                                                              // Call this function every cycle
@@ -357,7 +369,7 @@ void ProcessPetitModbus(void)
 
             case PETITMODBUS_WRITE_MULTIPLE_REGISTERS:  {    HandleMPetitodbusWriteMultipleRegistersSlaveReadback(); break;  }
 
-            default:                                    {    Petit_Tx_State =  PETIT_RXTX_IDLE; break;  }
+            default:                                    {    HandleMPetitodbusExceptionCodesSlaveReadback(); break;  }
         }
     }
 }
@@ -511,6 +523,25 @@ void HandleMPetitodbusWriteMultipleRegistersSlaveReadback(void)
     else{
         MASTER_SLAVE_DATA[Petit_Tx_Data.Address].CommError = SLAVE_DATA_NOK;    // the address send did not respond, so set the NOK to that address
     }
+    //PORTDbits.RD1 = !PORTDbits.RD1;
+    Petit_Tx_State =  PETIT_RXTX_IDLE;
+}
+
+/******************************************************************************/
+
+/*
+ * Function Name        : HandleModbusWriteMultipleRegisters
+ * @How to use          : Modbus function 16 - Write multiple registers
+ */
+
+void HandleMPetitodbusExceptionCodesSlaveReadback(void)
+{
+    if (Petit_Rx_Data.Function > 0x80 && Petit_Rx_Data.Function < 0x8C){        // see modbus application_protocol document
+        MASTER_SLAVE_DATA[Petit_Rx_Data.Address].ExceptionCode = Petit_Rx_Data.DataBuf[0];
+    }    
+    MASTER_SLAVE_DATA[Petit_Rx_Data.Address].CommError = SLAVE_DATA_OK;
+    MASTER_SLAVE_DATA[Petit_Rx_Data.Address].ReceiveCounter += 1;
+    
     //PORTDbits.RD1 = !PORTDbits.RD1;
     Petit_Tx_State =  PETIT_RXTX_IDLE;
 }

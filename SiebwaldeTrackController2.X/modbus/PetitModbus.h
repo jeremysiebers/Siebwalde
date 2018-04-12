@@ -12,6 +12,7 @@
                                                                                 // Have to put a number of registers here
                                                                                 // It has to be bigger than 0 (zero)!!
 #define PETITMODBUS_TIMEOUTTIMER                        2                       // Timeout Constant for Petit Modbus RTU Slave [101us tick]
+#define PETITMODBUS_SLAVECOMMTIMEOUTTIMER               5                       // Uses tmr0 IF, 190 to 255 = 65 = 225uS, 1 timer round is 255 = 3.9 x 225us = 882 us this is the factor times the define constant here to wait for answer. 4 is about 5ms (with application jitter added) normal response is in the range of 430 us slave response.
 
 //#define CRC_CALC                                                                // When uncommented a CRC calculation is used for the function void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
 
@@ -69,18 +70,22 @@ const unsigned char auchCRCLo[] = {
 #define PETITMODBUS_RXTX_BUFFER_SIZE                    PETITMODBUS_TRANSMIT_BUFFER_SIZE
 
 extern volatile unsigned short PetitModbusTimerValue;
+extern volatile unsigned int SlaveAnswerTimeoutCounter;
+extern volatile unsigned char EnableSlaveAnswerTimeoutCounter;                  // when waiting for slave respond message the same timer is used as for rx timeout
 
 typedef enum
 {
     SLAVE_DATA_BUSY = 1,
     SLAVE_DATA_OK = 2,
-    SLAVE_DATA_NOK = 3    
+    SLAVE_DATA_NOK = 3,
+    SLAVE_DATA_TIMEOUT = 4
 }SLAVE_DATA;
 
 typedef struct
 {
     unsigned int        Reg[NUMBER_OF_OUTPUT_PETITREGISTERS];
     unsigned char       CommError;
+    unsigned char       ExceptionCode;
     unsigned int        ReceiveCounter;
     unsigned int        SentCounter;
 }SLAVE_INFO;
@@ -93,6 +98,7 @@ extern unsigned char    SendPetitModbus(unsigned char Address, unsigned char Fun
 void HandlePetitModbusWriteSingleRegisterSlaveReadback(void);
 void HandlePetitModbusReadHoldingRegistersSlaveReadback(void);
 void HandleMPetitodbusWriteMultipleRegistersSlaveReadback(void);
+void HandleMPetitodbusExceptionCodesSlaveReadback(void);
 
 // Petit Modbus Port Header
 #include "PetitModbusPort.h"

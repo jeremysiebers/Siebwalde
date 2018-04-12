@@ -155,7 +155,7 @@ unsigned char PetitSendMessage(void)
  * Function Name        : HandleModbusError
  * @How to use          : This function generated errors to Modbus Master
  */
-void HandlePetitModbusError(char ErrorCode)
+void HandlePetitModbusError(unsigned char ErrorCode, unsigned char Function)
 {
     if (Petit_Rx_Data.Address == PETITMODBUS_BROADCAST_ADDRESS)                 // Broadcast cannot process back communication (all slaves would have to respond!)
     {
@@ -165,9 +165,10 @@ void HandlePetitModbusError(char ErrorCode)
     {
         PetitRegisters[(NUMBER_OF_OUTPUT_PETITREGISTERS - 1)].ActValue += 1;    // Count the amount of transmitted messages
         // Initialise the output buffer. The first byte in the buffer says how many registers we have read
-        Petit_Tx_Data.Function    = ErrorCode | 0x80;
+        Petit_Tx_Data.Function    = Function | 0x80;
+        Petit_Tx_Data.DataBuf[0]  = ErrorCode;
         Petit_Tx_Data.Address     = PETITMODBUS_SLAVE_ADDRESS;
-        Petit_Tx_Data.DataLen     = 0;
+        Petit_Tx_Data.DataLen     = 1;
         PetitSendMessage();
     }
 }
@@ -198,7 +199,7 @@ void HandlePetitModbusReadHoldingRegisters(void)
     }
     // If it is bigger than RegisterNumber return error to Modbus Master
     else if((Petit_StartAddress+Petit_NumberOfRegisters)>NUMBER_OF_OUTPUT_PETITREGISTERS){
-        HandlePetitModbusError(PETIT_ERROR_CODE_02);
+        HandlePetitModbusError(PETIT_ERROR_CODE_02, PETITMODBUS_READ_HOLDING_REGISTERS);
     }
     else
     {
@@ -253,7 +254,7 @@ void HandlePetitModbusWriteSingleRegister(void)
         return;
     }
     else if(Petit_Address>=NUMBER_OF_OUTPUT_PETITREGISTERS){
-        HandlePetitModbusError(PETIT_ERROR_CODE_03);
+        HandlePetitModbusError(PETIT_ERROR_CODE_03, PETITMODBUS_WRITE_SINGLE_REGISTER);
     }
     else
     {
@@ -299,7 +300,7 @@ void HandleMPetitodbusWriteMultipleRegisters(void)
         return;
     }
     else if((Petit_StartAddress+Petit_NumberOfRegisters)>NUMBER_OF_OUTPUT_PETITREGISTERS){
-        HandlePetitModbusError(PETIT_ERROR_CODE_03);
+        HandlePetitModbusError(PETIT_ERROR_CODE_03, PETITMODBUS_WRITE_MULTIPLE_REGISTERS);
         // If it is bigger than RegisterNumber return error to Modbus Master
     }
     else
@@ -525,7 +526,7 @@ void ProcessPetitModbus(void)
                 #if PETITMODBUS_WRITE_MULTIPLE_REGISTERS_ENABLED > 0
                 case PETITMODBUS_WRITE_MULTIPLE_REGISTERS:  {   HandleMPetitodbusWriteMultipleRegisters();      break;  }
                 #endif
-                default:                                    {   HandlePetitModbusError(PETIT_ERROR_CODE_01);    break;  }
+                default:                                    {   HandlePetitModbusError(PETIT_ERROR_CODE_01, Petit_Rx_Data.Function);    break;  }
             }
         }
     }

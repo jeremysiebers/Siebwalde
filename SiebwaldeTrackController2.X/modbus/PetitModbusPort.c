@@ -60,6 +60,7 @@ void ReceiveInterrupt(unsigned char Data)
         PetitReceiveCounter=0;
     }
     PetitModbusTimerValue=0;
+    SlaveAnswerTimeoutCounter=0;
 }
 
 // Call this function into 1ms Interrupt or Event!

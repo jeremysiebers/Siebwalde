@@ -62,7 +62,7 @@ void main(void) {
                         }
                         break;
                     
-                case 1: if(SlaveInfo[1].CommError == SLAVE_DATA_OK){
+                case 1: if(SlaveInfo[1].CommError == SLAVE_DATA_OK || SlaveInfo[1].CommError == SLAVE_DATA_TIMEOUT){
                             state = 12;
                         }
                         else if(SlaveInfo[1].CommError == SLAVE_DATA_NOK){
@@ -75,7 +75,7 @@ void main(void) {
                         }
                         break;
                         
-                case 13: if(SlaveInfo[1].CommError == SLAVE_DATA_OK){
+                case 13: if(SlaveInfo[1].CommError == SLAVE_DATA_OK || SlaveInfo[1].CommError == SLAVE_DATA_TIMEOUT){
                             state = 2;
                         }
                         else if(SlaveInfo[1].CommError == SLAVE_DATA_NOK){
@@ -127,7 +127,7 @@ void main(void) {
                         }
                         break;
                     
-                case 7: if(SlaveInfo[1].CommError == SLAVE_DATA_OK){
+                case 7: if(SlaveInfo[1].CommError == SLAVE_DATA_OK || SlaveInfo[1].CommError == SLAVE_DATA_TIMEOUT){
                             state = 16;
                         }
                         else if(SlaveInfo[1].CommError == SLAVE_DATA_NOK){
@@ -140,7 +140,7 @@ void main(void) {
                         }
                         break;
                         
-                case 17: if(SlaveInfo[1].CommError == SLAVE_DATA_OK){
+                case 17: if(SlaveInfo[1].CommError == SLAVE_DATA_OK || SlaveInfo[1].CommError == SLAVE_DATA_TIMEOUT){
                             state = 8;
                         }
                         else if(SlaveInfo[1].CommError == SLAVE_DATA_NOK){
