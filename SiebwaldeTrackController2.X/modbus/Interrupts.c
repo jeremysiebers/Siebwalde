@@ -12,10 +12,16 @@ void PetitModbusIntHandler(void)
         INTCONbits.TMR0IE = 0;
         INTCONbits.TMR0IF = 0; 
         
-        SlaveAnswerTimeoutCounter = 0;
-        
         //TMR0        = 241; // 101 --> 1kHz/1ms tick, 241 --> 101us tick
         //INTCONbits.TMR0IF      =0;
+    }
+    
+    if (PIE1bits.TMR1IE == 1 && PIR1bits.TMR1IF == 1) 
+    {        
+        SlaveAnswerTimeoutCounter = 1;
+        PORTDbits.RD1 = 0;
+        PIE1bits.TMR1IE = 0;
+        PIR1bits.TMR1IF = 0;
     }
     
     if( PIE1bits.RCIE == 1 && PIR1bits.RCIF == 1)
@@ -25,7 +31,10 @@ void PetitModbusIntHandler(void)
         INTCONbits.TMR0IE = 1;
         
         ReceiveInterrupt(RCREG);
-        //PIR1bits.RCIF = 0;     
-        SlaveAnswerTimeoutCounter = 0;
+        //PIR1bits.RCIF = 0;  
+        
+        PIE1bits.TMR1IE = 0;
+        PIR1bits.TMR1IF = 0;
+        PORTDbits.RD1 = 0;
     }
 }

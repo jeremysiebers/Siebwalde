@@ -18,6 +18,7 @@ extern "C" {
 #include <stdbool.h>
 #include "interrupt_manager.h"
 #include "tmr2.h"
+#include "tmr1.h"
 #include "pwm.h"
 #include "tmr0.h"
 #include "ausart.h"

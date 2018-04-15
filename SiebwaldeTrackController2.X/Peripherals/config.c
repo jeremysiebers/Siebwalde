@@ -34,6 +34,7 @@ void SYSTEM_Initialize(void) {
     //TMR0_Initialize();
     //ausart_Initialize();
     TMR2_Initialize();
+    TMR1_Initialize();
     //PWM_Initialize();
     //INT0_Initialize();
     INTERRUPT_Initialize();

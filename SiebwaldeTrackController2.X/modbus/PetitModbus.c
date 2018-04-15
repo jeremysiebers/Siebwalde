@@ -54,7 +54,6 @@ unsigned char       Petit_Rx_Data_Available       = FALSE;
 
 volatile unsigned short PetitModbusTimerValue           = 0;
 volatile unsigned int SlaveAnswerTimeoutCounter         = 0;
-volatile unsigned char EnableSlaveAnswerTimeoutCounter  = 1; 
 
 
 /****************End of Slave Transmit and Receive Variables*******************/
@@ -323,6 +322,9 @@ void Petit_TxRTU(void)
     }
     else{
         Petit_Tx_State    =PETIT_RXTX_WAIT_ANSWER;                              // Else Master must wait for answer (see ModBus protocol implementation)
+        PIR1bits.TMR1IF = 0;   
+        PIE1bits.TMR1IE = 1;                                                    // Enable timeout timer (slave response timeout)        
+        PORTDbits.RD1 = 1;
     }
 }
 
@@ -341,16 +343,10 @@ void ProcessPetitModbus(void)
         //PORTDbits.RD1 = 0;        
     }
     else if(Petit_Tx_State == PETIT_RXTX_WAIT_ANSWER){// && EnableSlaveAnswerTimeoutCounter){
-        if (INTCONbits.TMR0IF){
-            SlaveAnswerTimeoutCounter += 1;
-            INTCONbits.TMR0IF = 0;
-            //TMR0        = 190;
-        }
-        if (SlaveAnswerTimeoutCounter > PETITMODBUS_SLAVECOMMTIMEOUTTIMER){
+        if (SlaveAnswerTimeoutCounter){
             MASTER_SLAVE_DATA[Petit_Tx_Data.Address].CommError = SLAVE_DATA_TIMEOUT;
             Petit_Tx_State = PETIT_RXTX_IDLE;
-            SlaveAnswerTimeoutCounter = 0;
-            EnableSlaveAnswerTimeoutCounter = 0;
+            SlaveAnswerTimeoutCounter = 0;            
         }
     }
     

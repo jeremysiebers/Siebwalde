@@ -71,7 +71,6 @@ const unsigned char auchCRCLo[] = {
 
 extern volatile unsigned short PetitModbusTimerValue;
 extern volatile unsigned int SlaveAnswerTimeoutCounter;
-extern volatile unsigned char EnableSlaveAnswerTimeoutCounter;                  // when waiting for slave respond message the same timer is used as for rx timeout
 
 typedef enum
 {

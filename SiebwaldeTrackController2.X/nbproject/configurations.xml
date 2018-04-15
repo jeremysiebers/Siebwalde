@@ -19,6 +19,7 @@
         <itemPath>Peripherals/tmr0.h</itemPath>
         <itemPath>Peripherals/tmr2.h</itemPath>
         <itemPath>Peripherals/ausart.h</itemPath>
+        <itemPath>Peripherals/tmr1.h</itemPath>
       </logicalFolder>
       <itemPath>main.h</itemPath>
     </logicalFolder>
@@ -45,6 +46,7 @@
         <itemPath>Peripherals/tmr0.c</itemPath>
         <itemPath>Peripherals/tmr2.c</itemPath>
         <itemPath>Peripherals/ausart.c</itemPath>
+        <itemPath>Peripherals/tmr1.c</itemPath>
       </logicalFolder>
       <itemPath>main.c</itemPath>
     </logicalFolder>
@@ -208,6 +210,7 @@
         <property key="ToolFirmwareFilePath"
                   value="Press to browse for a specific firmware version"/>
         <property key="ToolFirmwareOption.UseLatestFirmware" value="true"/>
+        <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="memories.aux" value="false"/>
         <property key="memories.bootflash" value="true"/>
