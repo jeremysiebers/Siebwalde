@@ -20,7 +20,9 @@ void PetitModbusIntHandler(void)
     {        
         SlaveAnswerTimeoutCounter = 1;
         PORTDbits.RD1 = 0;
+        T1CONbits.TMR1ON = 0;
         PIE1bits.TMR1IE = 0;
+        TMR1 = 0x00;
         PIR1bits.TMR1IF = 0;
     }
     
@@ -33,8 +35,8 @@ void PetitModbusIntHandler(void)
         ReceiveInterrupt(RCREG);
         //PIR1bits.RCIF = 0;  
         
-        PIE1bits.TMR1IE = 0;
-        PIR1bits.TMR1IF = 0;
+        T1CONbits.TMR1ON = 0;
+        PIE1bits.TMR1IE = 0;        
         PORTDbits.RD1 = 0;
     }
 }

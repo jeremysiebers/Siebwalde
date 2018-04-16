@@ -83,10 +83,10 @@ typedef enum
 typedef struct
 {
     unsigned int        Reg[NUMBER_OF_OUTPUT_PETITREGISTERS];
-    unsigned char       CommError;
-    unsigned char       ExceptionCode;
-    unsigned int        ReceiveCounter;
-    unsigned int        SentCounter;
+    unsigned char       MbCommError;
+    unsigned char       MbExceptionCode;
+    unsigned int        MbReceiveCounter;
+    unsigned int        MbSentCounter;
 }SLAVE_INFO;
 
 // Main Functions
@@ -97,7 +97,7 @@ extern unsigned char    SendPetitModbus(unsigned char Address, unsigned char Fun
 void HandlePetitModbusWriteSingleRegisterSlaveReadback(void);
 void HandlePetitModbusReadHoldingRegistersSlaveReadback(void);
 void HandleMPetitodbusWriteMultipleRegistersSlaveReadback(void);
-void HandleMPetitodbusExceptionCodesSlaveReadback(void);
+void HandleMPetitodbusMbExceptionCodesSlaveReadback(void);
 
 // Petit Modbus Port Header
 #include "PetitModbusPort.h"
