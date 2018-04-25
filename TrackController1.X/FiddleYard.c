@@ -374,7 +374,7 @@ void Init_Pwm()
 	
 	T2CON = 0x05;			// Postscale 1:1, Timer2 On, Prescaler is 4		
 	
-	PR2=129;				// 129 = 20.03 kHz SYNC signal, 138 = 18.74 kHz SYNC signal to dsPIC   PWM Period TMR2 zelfde voor PWM1(ECCP1) en PWM2(ECCP3)
+	PR2=130;				// 130 = 19.88 kHz SYNC signal, 138 = 18.74 kHz SYNC signal to dsPIC   PWM Period TMR2 zelfde voor PWM1(ECCP1) en PWM2(ECCP3)
 			
 	
 	CCPR3L = 1;             // 1 = 366 ns, 7 = SYNC pulse of 2.67 us to dsPIC     PWM Duty cycle PWM2

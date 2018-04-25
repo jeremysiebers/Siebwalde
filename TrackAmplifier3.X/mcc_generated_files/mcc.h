@@ -50,9 +50,8 @@
 #include "pin_manager.h"
 #include <stdint.h>
 #include <stdbool.h>
-#include "interrupt_manager.h"
-#include "crc.h"
-#include "eusart.h"
+#include "pwm6.h"
+#include "tmr2.h"
 
 #define _XTAL_FREQ  32000000
 

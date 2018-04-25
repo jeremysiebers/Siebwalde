@@ -31,19 +31,19 @@ Version 3.2 HI-TECH Software Intermediate Code
 [v _ODCONB `Vuc ~T0 @X0 0 e@3909 ]
 "34175
 [v _ODCONC `Vuc ~T0 @X0 0 e@3920 ]
-"31513
-[s S1412 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
-[n S1412 . RXPPS0 RXPPS1 RXPPS2 RXPPS3 RXPPS4 ]
-"31520
-[s S1413 :5 `uc 1 ]
-[n S1413 . RXPPS ]
-"31512
-[u S1411 `S1412 1 `S1413 1 ]
-[n S1411 . . . ]
-"31524
-[v _RXPPSbits `VS1411 ~T0 @X0 0 e@3787 ]
-"32711
-[v _RC6PPS `Vuc ~T0 @X0 0 e@3878 ]
+"30013
+[s S1326 :5 `uc 1 ]
+[n S1326 . T2AINPPS ]
+"30016
+[s S1327 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
+[n S1327 . T2AINPPS0 T2AINPPS1 T2AINPPS2 T2AINPPS3 T2AINPPS4 ]
+"30012
+[u S1325 `S1326 1 `S1327 1 ]
+[n S1325 . . . ]
+"30024
+[v _T2AINPPSbits `VS1325 ~T0 @X0 0 e@3740 ]
+"32611
+[v _RC4PPS `Vuc ~T0 @X0 0 e@3876 ]
 [; ;htc.h: 26: extern const char __xc8_OPTIM_SPEED;
 [; ;htc.h: 28: extern double __fpnormalize(double);
 [; ;xc8debug.h: 14: extern void __builtin_software_breakpoint(void);
@@ -13066,8 +13066,8 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;pic.h: 193: extern __bank0 unsigned char __resetbits;
 [; ;pic.h: 194: extern __bank0 __bit __powerdown;
 [; ;pic.h: 195: extern __bank0 __bit __timeout;
-[; ;pin_manager.h: 96: void PIN_MANAGER_Initialize (void);
-[; ;pin_manager.h: 108: void PIN_MANAGER_IOC(void);
+[; ;pin_manager.h: 104: void PIN_MANAGER_Initialize (void);
+[; ;pin_manager.h: 116: void PIN_MANAGER_IOC(void);
 [; ;stdbool.h: 12: typedef unsigned char bool;
 "57 mcc_generated_files/pin_manager.c
 [v _PIN_MANAGER_Initialize `(v ~T0 @X0 1 ef ]
@@ -13092,9 +13092,9 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;pin_manager.c: 70: TRISB = 0xFF;
 "70
 [e = _TRISB -> -> 255 `i `uc ]
-[; ;pin_manager.c: 71: TRISC = 0xBF;
+[; ;pin_manager.c: 71: TRISC = 0xEF;
 "71
-[e = _TRISC -> -> 191 `i `uc ]
+[e = _TRISC -> -> 239 `i `uc ]
 [; ;pin_manager.c: 76: ANSELC = 0x00;
 "76
 [e = _ANSELC -> -> 0 `i `uc ]
@@ -13125,12 +13125,12 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;pin_manager.c: 93: ODCONC = 0x00;
 "93
 [e = _ODCONC -> -> 0 `i `uc ]
-[; ;pin_manager.c: 102: RXPPSbits.RXPPS = 0x17;
+[; ;pin_manager.c: 102: T2AINPPSbits.T2AINPPS = 0x13;
 "102
-[e = . . _RXPPSbits 1 0 -> -> 23 `i `uc ]
-[; ;pin_manager.c: 103: RC6PPS = 0x10;
+[e = . . _T2AINPPSbits 0 0 -> -> 19 `i `uc ]
+[; ;pin_manager.c: 103: RC4PPS = 0x0E;
 "103
-[e = _RC6PPS -> -> 16 `i `uc ]
+[e = _RC4PPS -> -> 14 `i `uc ]
 [; ;pin_manager.c: 104: }
 "104
 [e :UE 1557 ]

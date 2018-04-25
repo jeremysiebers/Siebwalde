@@ -3,6 +3,51 @@
 [d edition pro ]
 [d chip 16F18854 ]
 [d frameptr 6 ]
+"89 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/tmr2.c
+[e E14199 . `uc
+TMR2_ROP_STARTS_TMRON 0
+TMR2_ROP_STARTS_TMRON_ERSHIGH 1
+TMR2_ROP_STARTS_TMRON_ERSLOW 2
+TMR2_ROP_RESETS_ERSBOTHEDGE 3
+TMR2_ROP_RESETS_ERSRISINGEDGE 4
+TMR2_ROP_RESETS_ERSFALLINGEDGE 5
+TMR2_ROP_RESETS_ERSLOW 6
+TMR2_ROP_RESETS_ERSHIGH 7
+TMR2_OS_STARTS_TMRON 8
+TMR2_OS_STARTS_ERSRISINGEDGE 9
+TMR2_OS_STARTS_ERSFALLINGEDGE 10
+TMR2_OS_STARTS_ERSBOTHEDGE 11
+TMR2_OS_STARTS_ERSFIRSTRISINGEDGE 12
+TMR2_OS_STARTS_ERSFIRSTFALLINGEDGE 13
+TMR2_OS_STARTS_ERSRISINGEDGEDETECT 14
+TMR2_OS_STARTS_ERSFALLINGEDGEDETECT 15
+TMR2_OS_STARTS_TMRON_ERSHIGH 22
+TMR2_OS_STARTS_TMRON_ERSLOW 23
+TMR2_MS_STARTS_TMRON_ERSRISINGEDGEDETECT 17
+TMR2_MS_STARTS_TMRON_ERSFALLINGEDGEDETECT 18
+TMR2_MS_STARTS_TMRON_ERSBOTHEDGE 19
+]
+"95
+[e E14222 . `uc
+TMR2_T2INPPS 0
+TMR2_RESERVED 1
+TMR2_T4POSTSCALED 2
+TMR2_T6POSTSCALED 3
+TMR2_CCP1_OUT 4
+TMR2_CCP2_OUT 5
+TMR2_CCP3_OUT 6
+TMR2_CCP4_OUT 7
+TMR2_CCP5_OUT 8
+TMR2_PWM6_OUT 9
+TMR2_PWM7_OUT 10
+TMR2_C1_OUT_SYNC 11
+TMR2_C2_OUT_SYNC 12
+TMR2_ZCD_OUTPUT 13
+TMR2_CLC1_OUT 14
+TMR2_CLC2_OUT 15
+TMR2_CLC3_OUT 16
+TMR2_CLC4_OUT 17
+]
 "62 C:\Program Files (x86)\Microchip\xc8\v1.45\sources\common\float.c
 [v ___ftpack __ftpack `(f  1 e 3 0 ]
 "86 C:\Program Files (x86)\Microchip\xc8\v1.45\sources\common\ftadd.c
@@ -11,36 +56,38 @@
 [v _eecpymem eecpymem `(v  1 e 1 0 ]
 "39
 [v _memcpyee memcpyee `(v  1 e 1 0 ]
-"12 C:\GIT-REPOS\Siebwalde-Source.git\trunk\SiebwaldeTrackAmplifier3\TrackAmplifier3.X\main.c
+"12 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\main.c
 [v _main main `(v  1 e 1 0 ]
-"76 C:\GIT-REPOS\Siebwalde-Source.git\trunk\SiebwaldeTrackAmplifier3\TrackAmplifier3.X\mcc_generated_files/crc.c
-[v _CRC_Initialize CRC_Initialize `(v  1 e 1 0 ]
-"134
-[v _CRC_ReverseValue CRC_ReverseValue `(ui  1 s 2 CRC_ReverseValue ]
-"71 C:\GIT-REPOS\Siebwalde-Source.git\trunk\SiebwaldeTrackAmplifier3\TrackAmplifier3.X\mcc_generated_files/eusart.c
-[v _EUSART_Initialize EUSART_Initialize `(v  1 e 1 0 ]
-"149
-[v _EUSART_Receive_ISR EUSART_Receive_ISR `(v  1 e 1 0 ]
-"170
-[v _EUSART_SetRxInterruptHandler EUSART_SetRxInterruptHandler `(v  1 e 1 0 ]
-"52 C:\GIT-REPOS\Siebwalde-Source.git\trunk\SiebwaldeTrackAmplifier3\TrackAmplifier3.X\mcc_generated_files/interrupt_manager.c
-[v _INTERRUPT_InterruptManager INTERRUPT_InterruptManager `II(v  1 e 1 0 ]
-"50 C:\GIT-REPOS\Siebwalde-Source.git\trunk\SiebwaldeTrackAmplifier3\TrackAmplifier3.X\mcc_generated_files/mcc.c
+"50 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/mcc.c
 [v _SYSTEM_Initialize SYSTEM_Initialize `(v  1 e 1 0 ]
 "59
 [v _OSCILLATOR_Initialize OSCILLATOR_Initialize `(v  1 e 1 0 ]
-"77
+"73
 [v _PMD_Initialize PMD_Initialize `(v  1 e 1 0 ]
-"57 C:\GIT-REPOS\Siebwalde-Source.git\trunk\SiebwaldeTrackAmplifier3\TrackAmplifier3.X\mcc_generated_files/pin_manager.c
+"57 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/pin_manager.c
 [v _PIN_MANAGER_Initialize PIN_MANAGER_Initialize `(v  1 e 1 0 ]
-[s S242 . 1 `uc 1 INTEDG 1 0 :1:0 
+"58 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/pwm6.c
+[v _PWM6_Initialize PWM6_Initialize `(v  1 e 1 0 ]
+"62 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/tmr2.c
+[v _TMR2_Initialize TMR2_Initialize `(v  1 e 1 0 ]
+"100
+[v _TMR2_Start TMR2_Start `(v  1 e 1 0 ]
+"111
+[v _TMR2_Stop TMR2_Stop `(v  1 e 1 0 ]
+"122
+[v _TMR2_Counter8BitGet TMR2_Counter8BitGet `(uc  1 e 1 0 ]
+"136
+[v _TMR2_Counter8BitSet TMR2_Counter8BitSet `(v  1 e 1 0 ]
+"147
+[v _TMR2_Period8BitSet TMR2_Period8BitSet `(v  1 e 1 0 ]
+[s S94 . 1 `uc 1 INTEDG 1 0 :1:0 
 `uc 1 . 1 0 :5:1 
 `uc 1 PEIE 1 0 :1:6 
 `uc 1 GIE 1 0 :1:7 
 ]
 "362 C:\Program Files (x86)\Microchip\xc8\v1.45\include\pic16f18854.h
-[u S247 . 1 `S242 1 . 1 0 ]
-[v _INTCONbits INTCONbits `VES247  1 e 1 @11 ]
+[u S99 . 1 `S94 1 . 1 0 ]
+[v _INTCONbits INTCONbits `VES99  1 e 1 @11 ]
 "589
 [v _TRISA TRISA `VEuc  1 e 1 @17 ]
 "651
@@ -53,89 +100,48 @@
 [v _LATB LATB `VEuc  1 e 1 @23 ]
 "899
 [v _LATC LATC `VEuc  1 e 1 @24 ]
-"3501
-[v _RC1REG RC1REG `VEuc  1 e 1 @281 ]
-"3616
-[v _SP1BRGL SP1BRGL `VEuc  1 e 1 @283 ]
-"3686
-[v _SP1BRGH SP1BRGH `VEuc  1 e 1 @284 ]
-"3740
-[v _RC1STA RC1STA `VEuc  1 e 1 @285 ]
-[s S371 . 1 `uc 1 RX9D 1 0 :1:0 
-`uc 1 OERR 1 0 :1:1 
-`uc 1 FERR 1 0 :1:2 
-`uc 1 ADDEN 1 0 :1:3 
-`uc 1 CREN 1 0 :1:4 
-`uc 1 SREN 1 0 :1:5 
-`uc 1 RX9 1 0 :1:6 
-`uc 1 SPEN 1 0 :1:7 
+[s S120 . 1 `uc 1 C5TSEL 1 0 :2:0 
+`uc 1 P6TSEL 1 0 :2:2 
+`uc 1 P7TSEL 1 0 :2:4 
 ]
-"3766
-[u S380 . 1 `S371 1 . 1 0 ]
-[v _RC1STAbits RC1STAbits `VES380  1 e 1 @285 ]
-"3920
-[v _TX1STA TX1STA `VEuc  1 e 1 @286 ]
-"4100
-[v _BAUD1CON BAUD1CON `VEuc  1 e 1 @287 ]
-"12775
-[v _SCANLADRL SCANLADRL `VEuc  1 e 1 @1036 ]
-"12903
-[v _SCANLADRH SCANLADRH `VEuc  1 e 1 @1037 ]
-"13031
-[v _SCANHADRL SCANHADRL `VEuc  1 e 1 @1038 ]
-"13159
-[v _SCANHADRH SCANHADRH `VEuc  1 e 1 @1039 ]
-"13287
-[v _SCANCON0 SCANCON0 `VEuc  1 e 1 @1040 ]
-"13409
-[v _SCANTRIG SCANTRIG `VEuc  1 e 1 @1041 ]
-"13627
-[v _CRCACCL CRCACCL `VEuc  1 e 1 @1048 ]
-"13689
-[v _CRCACCH CRCACCH `VEuc  1 e 1 @1049 ]
-"13889
-[v _CRCXORL CRCXORL `VEuc  1 e 1 @1052 ]
-"13946
-[v _CRCXORH CRCXORH `VEuc  1 e 1 @1053 ]
-"14008
-[v _CRCCON0 CRCCON0 `VEuc  1 e 1 @1054 ]
-"14068
-[v _CRCCON1 CRCCON1 `VEuc  1 e 1 @1055 ]
-[s S46 . 1 `uc 1 PLEN 1 0 :4:0 
-`uc 1 DLEN 1 0 :4:4 
+"9031
+[s S124 . 1 `uc 1 C5TSEL0 1 0 :1:0 
+`uc 1 C5TSEL1 1 0 :1:1 
+`uc 1 P6TSEL0 1 0 :1:2 
+`uc 1 P6TSEL1 1 0 :1:3 
+`uc 1 P7TSEL0 1 0 :1:4 
+`uc 1 P7TSEL1 1 0 :1:5 
 ]
-"14089
-[s S49 . 1 `uc 1 PLEN0 1 0 :1:0 
-`uc 1 PLEN1 1 0 :1:1 
-`uc 1 PLEN2 1 0 :1:2 
-`uc 1 PLEN3 1 0 :1:3 
-`uc 1 DLEN0 1 0 :1:4 
-`uc 1 DLEN1 1 0 :1:5 
-`uc 1 DLEN2 1 0 :1:6 
-`uc 1 DLEN3 1 0 :1:7 
+[u S131 . 1 `S120 1 . 1 0 `S124 1 . 1 0 ]
+[v _CCPTMRS1bits CCPTMRS1bits `VES131  1 e 1 @543 ]
+"9081
+[v _T2TMR T2TMR `VEuc  1 e 1 @652 ]
+"9119
+[v _T2PR T2PR `VEuc  1 e 1 @653 ]
+"9157
+[v _T2CON T2CON `VEuc  1 e 1 @654 ]
+"9303
+[v _T2HLT T2HLT `VEuc  1 e 1 @655 ]
+"9431
+[v _T2CLKCON T2CLKCON `VEuc  1 e 1 @656 ]
+"9589
+[v _T2RST T2RST `VEuc  1 e 1 @657 ]
+"12171
+[v _PWM6DCL PWM6DCL `VEuc  1 e 1 @908 ]
+"12237
+[v _PWM6DCH PWM6DCH `VEuc  1 e 1 @909 ]
+"12407
+[v _PWM6CON PWM6CON `VEuc  1 e 1 @910 ]
+[s S157 . 1 `uc 1 TMR1IF 1 0 :1:0 
+`uc 1 TMR2IF 1 0 :1:1 
+`uc 1 TMR3IF 1 0 :1:2 
+`uc 1 TMR4IF 1 0 :1:3 
+`uc 1 TMR5IF 1 0 :1:4 
+`uc 1 TMR6IF 1 0 :1:5 
 ]
-[u S58 . 1 `S46 1 . 1 0 `S49 1 . 1 0 ]
-[v _CRCCON1bits CRCCON1bits `VES58  1 e 1 @1055 ]
-[s S272 . 1 `uc 1 SSP1IF 1 0 :1:0 
-`uc 1 BCL1IF 1 0 :1:1 
-`uc 1 SSP2IF 1 0 :1:2 
-`uc 1 BCL2IF 1 0 :1:3 
-`uc 1 TXIF 1 0 :1:4 
-`uc 1 RCIF 1 0 :1:5 
-]
-"21249
-[u S279 . 1 `S272 1 . 1 0 ]
-[v _PIR3bits PIR3bits `VES279  1 e 1 @1807 ]
-[s S255 . 1 `uc 1 SSP1IE 1 0 :1:0 
-`uc 1 BCL1IE 1 0 :1:1 
-`uc 1 SSP2IE 1 0 :1:2 
-`uc 1 BCL2IE 1 0 :1:3 
-`uc 1 TXIE 1 0 :1:4 
-`uc 1 RCIE 1 0 :1:5 
-]
-"21671
-[u S262 . 1 `S255 1 . 1 0 ]
-[v _PIE3bits PIE3bits `VES262  1 e 1 @1817 ]
+"21299
+[u S164 . 1 `S157 1 . 1 0 ]
+[v _PIR4bits PIR4bits `VES164  1 e 1 @1808 ]
 "21973
 [v _PMD0 PMD0 `VEuc  1 e 1 @1942 ]
 "22030
@@ -158,19 +164,19 @@
 [v _OSCTUNE OSCTUNE `VEuc  1 e 1 @2194 ]
 "23670
 [v _OSCFRQ OSCFRQ `VEuc  1 e 1 @2195 ]
-[s S476 . 1 `uc 1 RXPPS0 1 0 :1:0 
-`uc 1 RXPPS1 1 0 :1:1 
-`uc 1 RXPPS2 1 0 :1:2 
-`uc 1 RXPPS3 1 0 :1:3 
-`uc 1 RXPPS4 1 0 :1:4 
+[s S69 . 1 `uc 1 T2AINPPS 1 0 :5:0 
 ]
-"31524
-[s S482 . 1 `uc 1 RXPPS 1 0 :5:0 
+"30024
+[s S71 . 1 `uc 1 T2AINPPS0 1 0 :1:0 
+`uc 1 T2AINPPS1 1 0 :1:1 
+`uc 1 T2AINPPS2 1 0 :1:2 
+`uc 1 T2AINPPS3 1 0 :1:3 
+`uc 1 T2AINPPS4 1 0 :1:4 
 ]
-[u S484 . 1 `S476 1 . 1 0 `S482 1 . 1 0 ]
-[v _RXPPSbits RXPPSbits `VES484  1 e 1 @3787 ]
-"32711
-[v _RC6PPS RC6PPS `VEuc  1 e 1 @3878 ]
+[u S77 . 1 `S69 1 . 1 0 `S71 1 . 1 0 ]
+[v _T2AINPPSbits T2AINPPSbits `VES77  1 e 1 @3740 ]
+"32611
+[v _RC4PPS RC4PPS `VEuc  1 e 1 @3876 ]
 "32811
 [v _ANSELA ANSELA `VEuc  1 e 1 @3896 ]
 "32873
@@ -191,74 +197,38 @@
 [v _ODCONC ODCONC `VEuc  1 e 1 @3920 ]
 "34671
 [v _WPUE WPUE `VEuc  1 e 1 @3941 ]
-"37989
-"37989
-[v _PLLR PLLR `VEb  1 e 0 @17536 ]
-[s S30 . 3 `uc 1 dataWidth 1 0 `uc 1 polyWidth 1 1 `uc 1 seedDirection 1 2 ]
-"69 C:\GIT-REPOS\Siebwalde-Source.git\trunk\SiebwaldeTrackAmplifier3\TrackAmplifier3.X\mcc_generated_files/crc.c
-[v _crcObj crcObj `S30  1 s 3 crcObj ]
-"63 C:\GIT-REPOS\Siebwalde-Source.git\trunk\SiebwaldeTrackAmplifier3\TrackAmplifier3.X\mcc_generated_files/eusart.c
-[v _eusartRxHead eusartRxHead `VEuc  1 e 1 0 ]
-"64
-[v _eusartRxTail eusartRxTail `VEuc  1 e 1 0 ]
-"65
-[v _eusartRxBuffer eusartRxBuffer `VE[8]uc  1 e 8 0 ]
-"66
-[v _eusartRxCount eusartRxCount `VEuc  1 e 1 0 ]
-"85 C:\GIT-REPOS\Siebwalde-Source.git\trunk\SiebwaldeTrackAmplifier3\TrackAmplifier3.X\mcc_generated_files/eusart.h
-[v _EUSART_RxDefaultInterruptHandler EUSART_RxDefaultInterruptHandler `*.37(v  1 e 2 0 ]
-"12 C:\GIT-REPOS\Siebwalde-Source.git\trunk\SiebwaldeTrackAmplifier3\TrackAmplifier3.X\main.c
+"12 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\main.c
 [v _main main `(v  1 e 1 0 ]
 {
-"19
+"22
 } 0
-"50 C:\GIT-REPOS\Siebwalde-Source.git\trunk\SiebwaldeTrackAmplifier3\TrackAmplifier3.X\mcc_generated_files/mcc.c
+"50 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/mcc.c
 [v _SYSTEM_Initialize SYSTEM_Initialize `(v  1 e 1 0 ]
 {
 "57
 } 0
-"77
+"62 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/tmr2.c
+[v _TMR2_Initialize TMR2_Initialize `(v  1 e 1 0 ]
+{
+"86
+} 0
+"58 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/pwm6.c
+[v _PWM6_Initialize PWM6_Initialize `(v  1 e 1 0 ]
+{
+"72
+} 0
+"73 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/mcc.c
 [v _PMD_Initialize PMD_Initialize `(v  1 e 1 0 ]
 {
-"91
+"87
 } 0
-"57 C:\GIT-REPOS\Siebwalde-Source.git\trunk\SiebwaldeTrackAmplifier3\TrackAmplifier3.X\mcc_generated_files/pin_manager.c
+"57 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/pin_manager.c
 [v _PIN_MANAGER_Initialize PIN_MANAGER_Initialize `(v  1 e 1 0 ]
 {
 "104
 } 0
-"59 C:\GIT-REPOS\Siebwalde-Source.git\trunk\SiebwaldeTrackAmplifier3\TrackAmplifier3.X\mcc_generated_files/mcc.c
+"59 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/mcc.c
 [v _OSCILLATOR_Initialize OSCILLATOR_Initialize `(v  1 e 1 0 ]
 {
-"75
-} 0
-"71 C:\GIT-REPOS\Siebwalde-Source.git\trunk\SiebwaldeTrackAmplifier3\TrackAmplifier3.X\mcc_generated_files/eusart.c
-[v _EUSART_Initialize EUSART_Initialize `(v  1 e 1 0 ]
-{
-"101
-} 0
-"170
-[v _EUSART_SetRxInterruptHandler EUSART_SetRxInterruptHandler `(v  1 e 1 0 ]
-{
-[v EUSART_SetRxInterruptHandler@interruptHandler interruptHandler `*.37(v  1 p 2 0 ]
-"172
-} 0
-"76 C:\GIT-REPOS\Siebwalde-Source.git\trunk\SiebwaldeTrackAmplifier3\TrackAmplifier3.X\mcc_generated_files/crc.c
-[v _CRC_Initialize CRC_Initialize `(v  1 e 1 0 ]
-{
-"79
-[v CRC_Initialize@seed seed `ui  1 a 2 2 ]
-"78
-[v CRC_Initialize@poly poly `ui  1 a 2 0 ]
-"113
-} 0
-"52 C:\GIT-REPOS\Siebwalde-Source.git\trunk\SiebwaldeTrackAmplifier3\TrackAmplifier3.X\mcc_generated_files/interrupt_manager.c
-[v _INTERRUPT_InterruptManager INTERRUPT_InterruptManager `II(v  1 e 1 0 ]
-{
-"70
-} 0
-"149 C:\GIT-REPOS\Siebwalde-Source.git\trunk\SiebwaldeTrackAmplifier3\TrackAmplifier3.X\mcc_generated_files/eusart.c
-[v _EUSART_Receive_ISR EUSART_Receive_ISR `(v  1 e 1 0 ]
-{
-"167
+"71
 } 0

@@ -13,6 +13,9 @@ void main(void) {
     
     SYSTEM_Initialize();
     
+    INTCONbits.GIE = 1;
+    INTCONbits.PEIE = 1;
+    
     while(1){
         
     }

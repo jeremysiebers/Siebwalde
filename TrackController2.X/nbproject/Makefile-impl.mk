@@ -24,7 +24,7 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 
 
 # Project Name
-PROJECTNAME=SiebwaldeTrackController2.X
+PROJECTNAME=TrackController2.X
 
 # Active Configuration
 DEFAULTCONF=default

@@ -17271,10 +17271,10 @@ extern __bank0 unsigned char __resetbits;
 extern __bank0 __bit __powerdown;
 extern __bank0 __bit __timeout;
 
-# 96 "mcc_generated_files/pin_manager.h"
+# 104 "mcc_generated_files/pin_manager.h"
 void PIN_MANAGER_Initialize (void);
 
-# 108
+# 116
 void PIN_MANAGER_IOC(void);
 
 # 12 "C:\Program Files (x86)\Microchip\xc8\v1.45\include\stdbool.h"
@@ -17292,7 +17292,7 @@ LATC = 0x00;
 # 69
 TRISA = 0xFF;
 TRISB = 0xFF;
-TRISC = 0xBF;
+TRISC = 0xEF;
 
 # 76
 ANSELC = 0x00;
@@ -17311,8 +17311,8 @@ ODCONB = 0x00;
 ODCONC = 0x00;
 
 # 102
-RXPPSbits.RXPPS = 0x17;
-RC6PPS = 0x10;
+T2AINPPSbits.T2AINPPS = 0x13;
+RC4PPS = 0x0E;
 }
 
 void PIN_MANAGER_IOC(void)

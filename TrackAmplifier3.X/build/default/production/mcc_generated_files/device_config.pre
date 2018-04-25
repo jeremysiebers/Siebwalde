@@ -4,7 +4,7 @@
 
 # 50
 #pragma config FEXTOSC = OFF
-#pragma config RSTOSC = HFINTPLL
+#pragma config RSTOSC = HFINT1
 #pragma config CLKOUTEN = OFF
 #pragma config CSWEN = ON
 #pragma config FCMEN = ON
