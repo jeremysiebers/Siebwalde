@@ -11,12 +11,12 @@
 # All addresses and the length are given in unqualified hexadecimal
 # in delta units.  Any other numeric values are decimal.
 %PSECTS
-$dist/default/production\TrackAmplifier3.X.production.obj
-cinit CODE 0 7A6 7A6 5A 2
-$C:\Users\JEREMY~1\AppData\Local\Temp\s3bo.obj
+$C:\Users\JEREMY~1\AppData\Local\Temp\s5ks.obj
 reset_vec CODE 0 0 0 2 2
 end_init CODE 0 2 2 2 2
 config CONFIG 0 8007 8007 5 2
+$dist/default/production\TrackAmplifier3.X.production.obj
+cinit CODE 0 7A6 7A6 5A 2
 # %UNUSED Section
 # This section enumerates the unused ranges of each CLASS. Each entry
 # is described on a single line as follows:
@@ -98,11 +98,11 @@ STRING 800-FFF 2
 # All other numeric values are in decimal.
 %LINETAB
 $dist/default/production\TrackAmplifier3.X.production.obj
-7A6 cinit CODE >5321:C:\Users\JEREMY~1\AppData\Local\Temp\s3bo.
-7A6 cinit CODE >5324:C:\Users\JEREMY~1\AppData\Local\Temp\s3bo.
-7A6 cinit CODE >5330:C:\Users\JEREMY~1\AppData\Local\Temp\s3bo.
-7A6 cinit CODE >5332:C:\Users\JEREMY~1\AppData\Local\Temp\s3bo.
-7A7 cinit CODE >5333:C:\Users\JEREMY~1\AppData\Local\Temp\s3bo.
+7A6 cinit CODE >5321:C:\Users\JEREMY~1\AppData\Local\Temp\s5ks.
+7A6 cinit CODE >5324:C:\Users\JEREMY~1\AppData\Local\Temp\s5ks.
+7A6 cinit CODE >5330:C:\Users\JEREMY~1\AppData\Local\Temp\s5ks.
+7A6 cinit CODE >5332:C:\Users\JEREMY~1\AppData\Local\Temp\s5ks.
+7A7 cinit CODE >5333:C:\Users\JEREMY~1\AppData\Local\Temp\s5ks.
 7A8 cinit CODE >12:C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\main.c
 7A8 cinit CODE >14:C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\main.c
 7AA cinit CODE >16:C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\main.c
@@ -204,10 +204,10 @@ _WPUA F39 0 ABS 0 - dist/default/production\TrackAmplifier3.X.production.obj
 _WPUB F44 0 ABS 0 - dist/default/production\TrackAmplifier3.X.production.obj
 _WPUC F4F 0 ABS 0 - dist/default/production\TrackAmplifier3.X.production.obj
 _WPUE F65 0 ABS 0 - dist/default/production\TrackAmplifier3.X.production.obj
-___sp 0 0 STACK 2 stack C:\Users\JEREMY~1\AppData\Local\Temp\s3bo.obj
+___sp 0 0 STACK 2 stack C:\Users\JEREMY~1\AppData\Local\Temp\s5ks.obj
 _main F50 0 CODE 0 cinit dist/default/production\TrackAmplifier3.X.production.obj
 btemp 7E 0 ABS 0 - dist/default/production\TrackAmplifier3.X.production.obj
-start 4 0 CODE 0 init C:\Users\JEREMY~1\AppData\Local\Temp\s3bo.obj
+start 4 0 CODE 0 init C:\Users\JEREMY~1\AppData\Local\Temp\s5ks.obj
 __size_of_main 0 0 ABS 0 - dist/default/production\TrackAmplifier3.X.production.obj
 __CFG_SCANE$available 0 0 ABS 0 - dist/default/production\TrackAmplifier3.X.production.obj
 __CFG_DEBUG$OFF 0 0 ABS 0 - dist/default/production\TrackAmplifier3.X.production.obj
@@ -215,12 +215,12 @@ _PWM6_Initialize FC8 0 CODE 0 cinit dist/default/production\TrackAmplifier3.X.pr
 __Hpowerup 0 0 CODE 0 powerup -
 _TMR2_Initialize FE2 0 CODE 0 cinit dist/default/production\TrackAmplifier3.X.production.obj
 __size_of_SYSTEM_Initialize 0 0 ABS 0 - dist/default/production\TrackAmplifier3.X.production.obj
-intlevel0 0 0 ENTRY 0 functab C:\Users\JEREMY~1\AppData\Local\Temp\s3bo.obj
-intlevel1 0 0 ENTRY 0 functab C:\Users\JEREMY~1\AppData\Local\Temp\s3bo.obj
-intlevel2 0 0 ENTRY 0 functab C:\Users\JEREMY~1\AppData\Local\Temp\s3bo.obj
-intlevel3 0 0 ENTRY 0 functab C:\Users\JEREMY~1\AppData\Local\Temp\s3bo.obj
-intlevel4 0 0 ENTRY 0 functab C:\Users\JEREMY~1\AppData\Local\Temp\s3bo.obj
-intlevel5 0 0 ENTRY 0 functab C:\Users\JEREMY~1\AppData\Local\Temp\s3bo.obj
+intlevel0 0 0 ENTRY 0 functab C:\Users\JEREMY~1\AppData\Local\Temp\s5ks.obj
+intlevel1 0 0 ENTRY 0 functab C:\Users\JEREMY~1\AppData\Local\Temp\s5ks.obj
+intlevel2 0 0 ENTRY 0 functab C:\Users\JEREMY~1\AppData\Local\Temp\s5ks.obj
+intlevel3 0 0 ENTRY 0 functab C:\Users\JEREMY~1\AppData\Local\Temp\s5ks.obj
+intlevel4 0 0 ENTRY 0 functab C:\Users\JEREMY~1\AppData\Local\Temp\s5ks.obj
+intlevel5 0 0 ENTRY 0 functab C:\Users\JEREMY~1\AppData\Local\Temp\s5ks.obj
 wtemp0 7E 0 ABS 0 - dist/default/production\TrackAmplifier3.X.production.obj
 __Hfunctab 0 0 ENTRY 0 functab -
 __end_of_PMD_Initialize FC8 0 CODE 0 cinit dist/default/production\TrackAmplifier3.X.production.obj
@@ -244,7 +244,7 @@ __CFG_WDTCPS$WDTCPS_31 0 0 ABS 0 - dist/default/production\TrackAmplifier3.X.pro
 _RC4PPS F24 0 ABS 0 - dist/default/production\TrackAmplifier3.X.production.obj
 __end_of_SYSTEM_Initialize F6C 0 CODE 0 cinit dist/default/production\TrackAmplifier3.X.production.obj
 _T2CLKCON 290 0 ABS 0 - dist/default/production\TrackAmplifier3.X.production.obj
-___int_sp 0 0 STACK 2 stack C:\Users\JEREMY~1\AppData\Local\Temp\s3bo.obj
+___int_sp 0 0 STACK 2 stack C:\Users\JEREMY~1\AppData\Local\Temp\s5ks.obj
 __Hbank0 0 0 ABS 0 bank0 -
 __Hbank1 0 0 ABS 0 bank1 -
 __Hbank2 0 0 ABS 0 bank2 -
@@ -380,7 +380,7 @@ __S3 0 0 ABS 0 - -
 _SYSTEM_Initialize F5A 0 CODE 0 cinit dist/default/production\TrackAmplifier3.X.production.obj
 __CFG_BOREN$ON 0 0 ABS 0 - dist/default/production\TrackAmplifier3.X.production.obj
 __Lintentry 4 0 CODE 0 intentry -
-reset_vec 0 0 CODE 0 reset_vec C:\Users\JEREMY~1\AppData\Local\Temp\s3bo.obj
+reset_vec 0 0 CODE 0 reset_vec C:\Users\JEREMY~1\AppData\Local\Temp\s5ks.obj
 _CCPTMRS1bits 21F 0 ABS 0 - dist/default/production\TrackAmplifier3.X.production.obj
 __CFG_FCMEN$ON 0 0 ABS 0 - dist/default/production\TrackAmplifier3.X.production.obj
 __size_of_PMD_Initialize 0 0 ABS 0 - dist/default/production\TrackAmplifier3.X.production.obj
@@ -415,8 +415,8 @@ __Lcommon 0 0 ABS 0 common -
 __Lconfig 1000E 0 CONFIG 0 config -
 __CFG_CP$OFF 0 0 ABS 0 - dist/default/production\TrackAmplifier3.X.production.obj
 __CFG_WDTE$OFF 0 0 ABS 0 - dist/default/production\TrackAmplifier3.X.production.obj
-stackhi 21EF 0 ABS 0 - C:\Users\JEREMY~1\AppData\Local\Temp\s3bo.obj
-stacklo 2000 0 ABS 0 - C:\Users\JEREMY~1\AppData\Local\Temp\s3bo.obj
+stackhi 21EF 0 ABS 0 - C:\Users\JEREMY~1\AppData\Local\Temp\s5ks.obj
+stacklo 2000 0 ABS 0 - C:\Users\JEREMY~1\AppData\Local\Temp\s5ks.obj
 _OSCCON1 88D 0 ABS 0 - dist/default/production\TrackAmplifier3.X.production.obj
 _OSCCON3 88F 0 ABS 0 - dist/default/production\TrackAmplifier3.X.production.obj
 _OSCTUNE 892 0 ABS 0 - dist/default/production\TrackAmplifier3.X.production.obj

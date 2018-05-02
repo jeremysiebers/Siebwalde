@@ -80,14 +80,14 @@ TMR2_CLC4_OUT 17
 [v _TMR2_Counter8BitSet TMR2_Counter8BitSet `(v  1 e 1 0 ]
 "147
 [v _TMR2_Period8BitSet TMR2_Period8BitSet `(v  1 e 1 0 ]
-[s S94 . 1 `uc 1 INTEDG 1 0 :1:0 
+[s S385 . 1 `uc 1 INTEDG 1 0 :1:0 
 `uc 1 . 1 0 :5:1 
 `uc 1 PEIE 1 0 :1:6 
 `uc 1 GIE 1 0 :1:7 
 ]
 "362 C:\Program Files (x86)\Microchip\xc8\v1.45\include\pic16f18854.h
-[u S99 . 1 `S94 1 . 1 0 ]
-[v _INTCONbits INTCONbits `VES99  1 e 1 @11 ]
+[u S390 . 1 `S385 1 . 1 0 ]
+[v _INTCONbits INTCONbits `VES390  1 e 1 @11 ]
 "589
 [v _TRISA TRISA `VEuc  1 e 1 @17 ]
 "651
@@ -100,20 +100,20 @@ TMR2_CLC4_OUT 17
 [v _LATB LATB `VEuc  1 e 1 @23 ]
 "899
 [v _LATC LATC `VEuc  1 e 1 @24 ]
-[s S120 . 1 `uc 1 C5TSEL 1 0 :2:0 
+[s S96 . 1 `uc 1 C5TSEL 1 0 :2:0 
 `uc 1 P6TSEL 1 0 :2:2 
 `uc 1 P7TSEL 1 0 :2:4 
 ]
 "9031
-[s S124 . 1 `uc 1 C5TSEL0 1 0 :1:0 
+[s S100 . 1 `uc 1 C5TSEL0 1 0 :1:0 
 `uc 1 C5TSEL1 1 0 :1:1 
 `uc 1 P6TSEL0 1 0 :1:2 
 `uc 1 P6TSEL1 1 0 :1:3 
 `uc 1 P7TSEL0 1 0 :1:4 
 `uc 1 P7TSEL1 1 0 :1:5 
 ]
-[u S131 . 1 `S120 1 . 1 0 `S124 1 . 1 0 ]
-[v _CCPTMRS1bits CCPTMRS1bits `VES131  1 e 1 @543 ]
+[u S107 . 1 `S96 1 . 1 0 `S100 1 . 1 0 ]
+[v _CCPTMRS1bits CCPTMRS1bits `VES107  1 e 1 @543 ]
 "9081
 [v _T2TMR T2TMR `VEuc  1 e 1 @652 ]
 "9119
@@ -132,7 +132,7 @@ TMR2_CLC4_OUT 17
 [v _PWM6DCH PWM6DCH `VEuc  1 e 1 @909 ]
 "12407
 [v _PWM6CON PWM6CON `VEuc  1 e 1 @910 ]
-[s S157 . 1 `uc 1 TMR1IF 1 0 :1:0 
+[s S133 . 1 `uc 1 TMR1IF 1 0 :1:0 
 `uc 1 TMR2IF 1 0 :1:1 
 `uc 1 TMR3IF 1 0 :1:2 
 `uc 1 TMR4IF 1 0 :1:3 
@@ -140,8 +140,8 @@ TMR2_CLC4_OUT 17
 `uc 1 TMR6IF 1 0 :1:5 
 ]
 "21299
-[u S164 . 1 `S157 1 . 1 0 ]
-[v _PIR4bits PIR4bits `VES164  1 e 1 @1808 ]
+[u S140 . 1 `S133 1 . 1 0 ]
+[v _PIR4bits PIR4bits `VES140  1 e 1 @1808 ]
 "21973
 [v _PMD0 PMD0 `VEuc  1 e 1 @1942 ]
 "22030
