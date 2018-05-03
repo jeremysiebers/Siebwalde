@@ -59,6 +59,30 @@
 #define PULL_UP_ENABLED      1
 #define PULL_UP_DISABLED     0
 
+// get/set RC0 procedures
+#define RC0_SetHigh()               do { LATCbits.LATC0 = 1; } while(0)
+#define RC0_SetLow()                do { LATCbits.LATC0 = 0; } while(0)
+#define RC0_Toggle()                do { LATCbits.LATC0 = ~LATCbits.LATC0; } while(0)
+#define RC0_GetValue()              PORTCbits.RC0
+#define RC0_SetDigitalInput()       do { TRISCbits.TRISC0 = 1; } while(0)
+#define RC0_SetDigitalOutput()      do { TRISCbits.TRISC0 = 0; } while(0)
+#define RC0_SetPullup()             do { WPUCbits.WPUC0 = 1; } while(0)
+#define RC0_ResetPullup()           do { WPUCbits.WPUC0 = 0; } while(0)
+#define RC0_SetAnalogMode()         do { ANSELCbits.ANSC0 = 1; } while(0)
+#define RC0_SetDigitalMode()        do { ANSELCbits.ANSC0 = 0; } while(0)
+
+// get/set RC1 procedures
+#define RC1_SetHigh()               do { LATCbits.LATC1 = 1; } while(0)
+#define RC1_SetLow()                do { LATCbits.LATC1 = 0; } while(0)
+#define RC1_Toggle()                do { LATCbits.LATC1 = ~LATCbits.LATC1; } while(0)
+#define RC1_GetValue()              PORTCbits.RC1
+#define RC1_SetDigitalInput()       do { TRISCbits.TRISC1 = 1; } while(0)
+#define RC1_SetDigitalOutput()      do { TRISCbits.TRISC1 = 0; } while(0)
+#define RC1_SetPullup()             do { WPUCbits.WPUC1 = 1; } while(0)
+#define RC1_ResetPullup()           do { WPUCbits.WPUC1 = 0; } while(0)
+#define RC1_SetAnalogMode()         do { ANSELCbits.ANSC1 = 1; } while(0)
+#define RC1_SetDigitalMode()        do { ANSELCbits.ANSC1 = 0; } while(0)
+
 // get/set RC3 procedures
 #define RC3_SetHigh()               do { LATCbits.LATC3 = 1; } while(0)
 #define RC3_SetLow()                do { LATCbits.LATC3 = 0; } while(0)
@@ -71,25 +95,17 @@
 #define RC3_SetAnalogMode()         do { ANSELCbits.ANSC3 = 1; } while(0)
 #define RC3_SetDigitalMode()        do { ANSELCbits.ANSC3 = 0; } while(0)
 
-// get/set Led1 aliases
-#define Led1_TRIS                 TRISCbits.TRISC4
-#define Led1_LAT                  LATCbits.LATC4
-#define Led1_PORT                 PORTCbits.RC4
-#define Led1_WPU                  WPUCbits.WPUC4
-#define Led1_OD                   ODCONCbits.ODCC4
-#define Led1_ANS                  ANSELCbits.ANSC4
-#define Led1_SetHigh()            do { LATCbits.LATC4 = 1; } while(0)
-#define Led1_SetLow()             do { LATCbits.LATC4 = 0; } while(0)
-#define Led1_Toggle()             do { LATCbits.LATC4 = ~LATCbits.LATC4; } while(0)
-#define Led1_GetValue()           PORTCbits.RC4
-#define Led1_SetDigitalInput()    do { TRISCbits.TRISC4 = 1; } while(0)
-#define Led1_SetDigitalOutput()   do { TRISCbits.TRISC4 = 0; } while(0)
-#define Led1_SetPullup()          do { WPUCbits.WPUC4 = 1; } while(0)
-#define Led1_ResetPullup()        do { WPUCbits.WPUC4 = 0; } while(0)
-#define Led1_SetPushPull()        do { ODCONCbits.ODCC4 = 0; } while(0)
-#define Led1_SetOpenDrain()       do { ODCONCbits.ODCC4 = 1; } while(0)
-#define Led1_SetAnalogMode()      do { ANSELCbits.ANSC4 = 1; } while(0)
-#define Led1_SetDigitalMode()     do { ANSELCbits.ANSC4 = 0; } while(0)
+// get/set RC4 procedures
+#define RC4_SetHigh()               do { LATCbits.LATC4 = 1; } while(0)
+#define RC4_SetLow()                do { LATCbits.LATC4 = 0; } while(0)
+#define RC4_Toggle()                do { LATCbits.LATC4 = ~LATCbits.LATC4; } while(0)
+#define RC4_GetValue()              PORTCbits.RC4
+#define RC4_SetDigitalInput()       do { TRISCbits.TRISC4 = 1; } while(0)
+#define RC4_SetDigitalOutput()      do { TRISCbits.TRISC4 = 0; } while(0)
+#define RC4_SetPullup()             do { WPUCbits.WPUC4 = 1; } while(0)
+#define RC4_ResetPullup()           do { WPUCbits.WPUC4 = 0; } while(0)
+#define RC4_SetAnalogMode()         do { ANSELCbits.ANSC4 = 1; } while(0)
+#define RC4_SetDigitalMode()        do { ANSELCbits.ANSC4 = 0; } while(0)
 
 /**
    @Param
