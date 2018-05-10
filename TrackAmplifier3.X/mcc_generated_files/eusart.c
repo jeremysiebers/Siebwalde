@@ -59,10 +59,6 @@
 /**
   Section: Global Variables
 */
-volatile uint8_t eusartTxHead = 0;
-volatile uint8_t eusartTxTail = 0;
-volatile uint8_t eusartTxBuffer[EUSART_TX_BUFFER_SIZE];
-volatile uint8_t eusartTxBufferRemaining;
 
 volatile uint8_t eusartRxHead = 0;
 volatile uint8_t eusartRxTail = 0;
@@ -77,8 +73,6 @@ void EUSART_Initialize(void)
     // disable interrupts before changing states
     PIE3bits.RCIE = 0;
     EUSART_SetRxInterruptHandler(EUSART_Receive_ISR);
-    PIE3bits.TXIE = 0;
-    EUSART_SetTxInterruptHandler(EUSART_Transmit_ISR);
     // Set the EUSART module to the options selected in the user interface.
 
     // ABDOVF no_overflow; SCKP Non-Inverted; BRG16 16bit_generator; WUE disabled; ABDEN disabled; 
@@ -97,10 +91,6 @@ void EUSART_Initialize(void)
     SP1BRGH = 0x00;
 
 
-    // initializing the driver state
-    eusartTxHead = 0;
-    eusartTxTail = 0;
-    eusartTxBufferRemaining = sizeof(eusartTxBuffer);
 
     eusartRxHead = 0;
     eusartRxTail = 0;
@@ -110,9 +100,9 @@ void EUSART_Initialize(void)
     PIE3bits.RCIE = 1;
 }
 
-uint8_t EUSART_is_tx_ready(void)
+bool EUSART_is_tx_ready(void)
 {
-    return eusartTxBufferRemaining;
+    return (bool)(PIR3bits.TXIF && TX1STAbits.TXEN);
 }
 
 uint8_t EUSART_is_rx_ready(void)
@@ -147,46 +137,14 @@ uint8_t EUSART_Read(void)
 
 void EUSART_Write(uint8_t txData)
 {
-    while(0 == eusartTxBufferRemaining)
+    while(0 == PIR3bits.TXIF)
     {
     }
 
-    if(0 == PIE3bits.TXIE)
-    {
-        TX1REG = txData;
-    }
-    else
-    {
-        PIE3bits.TXIE = 0;
-        eusartTxBuffer[eusartTxHead++] = txData;
-        if(sizeof(eusartTxBuffer) <= eusartTxHead)
-        {
-            eusartTxHead = 0;
-        }
-        eusartTxBufferRemaining--;
-    }
-    PIE3bits.TXIE = 1;
+    TX1REG = txData;    // Write the data byte to the USART.
 }
 
 
-void EUSART_Transmit_ISR(void)
-{
-
-    // add your EUSART interrupt custom code
-    if(sizeof(eusartTxBuffer) > eusartTxBufferRemaining)
-    {
-        TX1REG = eusartTxBuffer[eusartTxTail++];
-        if(sizeof(eusartTxBuffer) <= eusartTxTail)
-        {
-            eusartTxTail = 0;
-        }
-        eusartTxBufferRemaining++;
-    }
-    else
-    {
-        PIE3bits.TXIE = 0;
-    }
-}
 
 void EUSART_Receive_ISR(void)
 {
@@ -208,9 +166,6 @@ void EUSART_Receive_ISR(void)
     eusartRxCount++;
 }
 
-void EUSART_SetTxInterruptHandler(void (* interruptHandler)(void)){
-    EUSART_TxDefaultInterruptHandler = interruptHandler;
-}
 
 void EUSART_SetRxInterruptHandler(void (* interruptHandler)(void)){
     EUSART_RxDefaultInterruptHandler = interruptHandler;

@@ -1,25 +1,23 @@
 /**
-  Generated Interrupt Manager Source File
+  DAC Generated Driver File
 
-  @Company:
+  @Company
     Microchip Technology Inc.
 
-  @File Name:
-    interrupt_manager.c
+  @File Name
+    dac.c
 
-  @Summary:
-    This is the Interrupt Manager file generated using PIC10 / PIC12 / PIC16 / PIC18 MCUs
+  @Summary
+    This is the generated driver implementation file for the DAC driver using PIC10 / PIC12 / PIC16 / PIC18 MCUs
 
-  @Description:
-    This header file provides implementations for global interrupt handling.
-    For individual peripheral handlers please see the peripheral driver for
-    all modules selected in the GUI.
+  @Description
+    This source file provides APIs for DAC.
     Generation Information :
         Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.65.2
         Device            :  PIC16F18854
-        Driver Version    :  1.03
+        Driver Version    :  2.10
     The generated drivers are tested against the following:
-        Compiler          :  XC8 1.45 or later
+        Compiler          :  XC8 1.45
         MPLAB 	          :  MPLAB X 4.15
 */
 
@@ -46,27 +44,33 @@
     SOFTWARE.
 */
 
-#include "interrupt_manager.h"
-#include "mcc.h"
+/**
+  Section: Included Files
+*/
 
-void interrupt INTERRUPT_InterruptManager (void)
+#include <xc.h>
+#include "dac.h"
+
+/**
+  Section: DAC APIs
+*/
+
+void DAC_Initialize(void)
 {
-    // interrupt handler
-    if(INTCONbits.PEIE == 1)
-    {
-        if(PIE3bits.RCIE == 1 && PIR3bits.RCIF == 1)
-        {
-            EUSART_RxDefaultInterruptHandler();
-        } 
-        else
-        {
-            //Unhandled Interrupt
-        }
-    }      
-    else
-    {
-        //Unhandled Interrupt
-    }
+    // DAC1EN enabled; NSS VSS; PSS FVR_buf2; OE1 disabled; OE2 disabled; 
+    DAC1CON0 = 0x88;
+    // DAC1R 22; 
+    DAC1CON1 = 0x16;
+}
+
+void DAC_SetOutput(uint8_t inputData)
+{
+    DAC1CON1  = inputData;
+}
+
+uint8_t DAC_GetOutput(void)
+{
+    return DAC1CON1;
 }
 /**
  End of File

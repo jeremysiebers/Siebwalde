@@ -1,25 +1,23 @@
 /**
-  Generated Interrupt Manager Source File
+  FVR Generated Driver API Header File
 
-  @Company:
+  @Company
     Microchip Technology Inc.
 
-  @File Name:
-    interrupt_manager.c
+  @File Name
+    fvr.h
 
-  @Summary:
-    This is the Interrupt Manager file generated using PIC10 / PIC12 / PIC16 / PIC18 MCUs
+  @Summary
+    This is the generated header file for the FVR driver using PIC10 / PIC12 / PIC16 / PIC18 MCUs
 
-  @Description:
-    This header file provides implementations for global interrupt handling.
-    For individual peripheral handlers please see the peripheral driver for
-    all modules selected in the GUI.
+  @Description
+    This header file provides APIs for driver for FVR.
     Generation Information :
         Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.65.2
         Device            :  PIC16F18854
-        Driver Version    :  1.03
+        Driver Version    :  2.01
     The generated drivers are tested against the following:
-        Compiler          :  XC8 1.45 or later
+        Compiler          :  XC8 1.45
         MPLAB 	          :  MPLAB X 4.15
 */
 
@@ -46,28 +44,96 @@
     SOFTWARE.
 */
 
-#include "interrupt_manager.h"
-#include "mcc.h"
+#ifndef FVR_H
+#define FVR_H
 
-void interrupt INTERRUPT_InterruptManager (void)
-{
-    // interrupt handler
-    if(INTCONbits.PEIE == 1)
+/**
+  Section: Included Files
+*/
+
+#include <stdbool.h>
+#include <stdint.h>
+
+#ifdef __cplusplus  // Provide C++ Compatibility
+
+    extern "C" {
+
+#endif
+
+/**
+  Section: FVR APIs
+*/
+
+/**
+  @Summary
+    Initializes the FVR
+
+  @Description
+    This routine initializes the FVR.
+    This routine must be called before any other FVR routine is called.
+    This routine should only be called once during system initialization.
+
+  @Preconditions
+    None
+
+  @Param
+    None
+
+  @Returns
+    None
+
+  @Comment
+    
+
+  @Example
+    <code>
+    FVR_Initialize();
+    </code>
+*/
+ void FVR_Initialize(void);
+
+/**
+  @Summary
+    Gets the FVR output ready status.
+
+  @Description
+    This routine gets the FVR output ready status.
+
+  @Preconditions
+    The FVR_Initialize() routine should be called
+    prior to use this routine.
+
+  @Param
+    None
+
+  @Returns
+     true  - FVR module is ready for use.
+     false - FVR module is not ready for use.
+
+  @Example
+    <code>
+    FVR_Initialize();
+
+    if(FVR_IsOutputReady())
     {
-        if(PIE3bits.RCIE == 1 && PIR3bits.RCIF == 1)
-        {
-            EUSART_RxDefaultInterruptHandler();
-        } 
-        else
-        {
-            //Unhandled Interrupt
-        }
-    }      
+          //user code
+    }
     else
     {
-        //Unhandled Interrupt
+          //user code
     }
-}
+    </code>
+*/
+bool FVR_IsOutputReady(void);
+
+#ifdef __cplusplus  // Provide C++ Compatibility
+
+    }
+
+#endif
+
+#endif // FVR_H
 /**
  End of File
 */
+

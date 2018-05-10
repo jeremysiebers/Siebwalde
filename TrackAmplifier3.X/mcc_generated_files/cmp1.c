@@ -1,29 +1,27 @@
-/**
-  Generated Interrupt Manager Source File
+ /**
+   CMP1 Generated Driver File
+ 
+   @Company
+     Microchip Technology Inc.
+ 
+   @File Name
+     cmp1.c
+ 
+   @Summary
+     This is the generated driver implementation file for the CMP1 driver using PIC10 / PIC12 / PIC16 / PIC18 MCUs
+ 
+   @Description
+     This source file provides implementations for driver APIs for CMP1.
+     Generation Information :
+         Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.65.2
+         Device            :  PIC16F18854
+         Driver Version    :  2.01
+     The generated drivers are tested against the following:
+         Compiler          :  XC8 1.45 or later
+         MPLAB             :  MPLAB X 4.15
+ */ 
 
-  @Company:
-    Microchip Technology Inc.
-
-  @File Name:
-    interrupt_manager.c
-
-  @Summary:
-    This is the Interrupt Manager file generated using PIC10 / PIC12 / PIC16 / PIC18 MCUs
-
-  @Description:
-    This header file provides implementations for global interrupt handling.
-    For individual peripheral handlers please see the peripheral driver for
-    all modules selected in the GUI.
-    Generation Information :
-        Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.65.2
-        Device            :  PIC16F18854
-        Driver Version    :  1.03
-    The generated drivers are tested against the following:
-        Compiler          :  XC8 1.45 or later
-        MPLAB 	          :  MPLAB X 4.15
-*/
-
-/*
+ /*
     (c) 2018 Microchip Technology Inc. and its subsidiaries. 
     
     Subject to your compliance with these terms, you may use Microchip software and any 
@@ -45,29 +43,41 @@
     OF FEES, IF ANY, THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS 
     SOFTWARE.
 */
+ 
+ /**
+   Section: Included Files
+ */
 
-#include "interrupt_manager.h"
-#include "mcc.h"
 
-void interrupt INTERRUPT_InterruptManager (void)
+#include <xc.h>
+#include "cmp1.h"
+/**
+  Section: CMP1 APIs
+*/
+
+void CMP1_Initialize(void)
 {
-    // interrupt handler
-    if(INTCONbits.PEIE == 1)
-    {
-        if(PIE3bits.RCIE == 1 && PIR3bits.RCIF == 1)
-        {
-            EUSART_RxDefaultInterruptHandler();
-        } 
-        else
-        {
-            //Unhandled Interrupt
-        }
-    }      
-    else
-    {
-        //Unhandled Interrupt
-    }
+
+	// C1HYS disabled; C1ON enabled; C1POL inverted; C1SYNC asynchronous;                          
+    CM1CON0 = 0x90;
+	
+	// C1INTN no_intFlag; C1INTP no_intFlag;                          
+    CM1CON1 = 0x00;
+	
+	// C1NCH CIN1-;                          
+    CM1NSEL = 0x01;
+	
+	// C1PCH DACOUT;                          
+    CM1PSEL = 0x05;
+	
 }
+
+bool CMP1_GetOutputStatus(void)
+{
+	return (CMOUTbits.MC1OUT);
+}
+
+
 /**
  End of File
 */

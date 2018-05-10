@@ -53,6 +53,10 @@
 #include "interrupt_manager.h"
 #include "pwm6.h"
 #include "tmr2.h"
+#include "cmp1.h"
+#include "adcc.h"
+#include "fvr.h"
+#include "dac.h"
 #include "eusart.h"
 
 #define _XTAL_FREQ  32000000

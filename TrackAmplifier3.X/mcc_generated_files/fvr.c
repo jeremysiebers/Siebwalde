@@ -1,26 +1,24 @@
 /**
-  Generated Interrupt Manager Source File
+  FVR Generated Driver File
 
-  @Company:
+  @Company
     Microchip Technology Inc.
 
-  @File Name:
-    interrupt_manager.c
+  @File Name
+    fvr.c
 
-  @Summary:
-    This is the Interrupt Manager file generated using PIC10 / PIC12 / PIC16 / PIC18 MCUs
+  @Summary
+    This is the generated driver implementation file for the FVR driver using PIC10 / PIC12 / PIC16 / PIC18 MCUs
 
-  @Description:
-    This header file provides implementations for global interrupt handling.
-    For individual peripheral handlers please see the peripheral driver for
-    all modules selected in the GUI.
+  @Description
+    This source file provides APIs for FVR.
     Generation Information :
         Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.65.2
         Device            :  PIC16F18854
-        Driver Version    :  1.03
+        Driver Version    :  2.01
     The generated drivers are tested against the following:
-        Compiler          :  XC8 1.45 or later
-        MPLAB 	          :  MPLAB X 4.15
+        Compiler          :  XC8 1.45
+        MPLAB             :  MPLAB X 4.15
 */
 
 /*
@@ -46,28 +44,28 @@
     SOFTWARE.
 */
 
-#include "interrupt_manager.h"
-#include "mcc.h"
+/**
+  Section: Included Files
+*/
 
-void interrupt INTERRUPT_InterruptManager (void)
+#include <xc.h>
+#include "fvr.h"
+
+/**
+  Section: FVR APIs
+*/
+
+void FVR_Initialize(void)
 {
-    // interrupt handler
-    if(INTCONbits.PEIE == 1)
-    {
-        if(PIE3bits.RCIE == 1 && PIR3bits.RCIF == 1)
-        {
-            EUSART_RxDefaultInterruptHandler();
-        } 
-        else
-        {
-            //Unhandled Interrupt
-        }
-    }      
-    else
-    {
-        //Unhandled Interrupt
-    }
+    // CDAFVR 4x; FVREN enabled; TSRNG Hi_range; ADFVR off; TSEN enabled; 
+    FVRCON = 0xBC;
+}
+
+bool FVR_IsOutputReady(void)
+{
+    return (FVRCONbits.FVRRDY);
 }
 /**
  End of File
 */
+
