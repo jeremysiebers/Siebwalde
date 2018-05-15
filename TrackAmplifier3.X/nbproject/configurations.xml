@@ -18,6 +18,13 @@
         <itemPath>mcc_generated_files/fvr.h</itemPath>
         <itemPath>mcc_generated_files/dac.h</itemPath>
       </logicalFolder>
+      <logicalFolder name="modbus" displayName="modbus" projectFiles="true">
+        <itemPath>modbus/General.h</itemPath>
+        <itemPath>modbus/Init.h</itemPath>
+        <itemPath>modbus/Interrupts.h</itemPath>
+        <itemPath>modbus/PetitModbus.h</itemPath>
+        <itemPath>modbus/PetitModbusPort.h</itemPath>
+      </logicalFolder>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -41,6 +48,14 @@
         <itemPath>mcc_generated_files/fvr.c</itemPath>
         <itemPath>mcc_generated_files/dac.c</itemPath>
       </logicalFolder>
+      <logicalFolder name="modbus" displayName="modbus" projectFiles="true">
+        <itemPath>modbus/General.c</itemPath>
+        <itemPath>modbus/Init.c</itemPath>
+        <itemPath>modbus/Interrupts.c</itemPath>
+        <itemPath>modbus/PetitModbus.c</itemPath>
+        <itemPath>modbus/PetitModbusPort.c</itemPath>
+        <itemPath>modbus/PetitRegConstant.c</itemPath>
+      </logicalFolder>
       <itemPath>main.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
@@ -50,6 +65,9 @@
       <itemPath>MyConfig.mc3</itemPath>
     </logicalFolder>
   </logicalFolder>
+  <sourceRootList>
+    <Elem>modbus</Elem>
+  </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
     <conf name="default" type="2">

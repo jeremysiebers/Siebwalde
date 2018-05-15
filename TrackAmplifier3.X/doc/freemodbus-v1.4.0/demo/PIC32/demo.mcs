@@ -1,0 +1,227 @@
+[Header]
+MagicCookie={0b13fe8c-dfe0-40eb-8900-6712719559a7}
+Version=1.0
+[File000]
+Location=C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\demo.o
+Folder=Intermediary
+DeviceName=PIC32MX460F512L
+LanguageToolSuiteID={14495C23-81F8-43F3-8A44-859C583D7760}
+LanguageToolID={430F471F-7ECB-4852-A80D-DEF9A5C8E751}
+LanguageToolLocation=C:\Program Files\Microchip\MPLAB C32\bin\pic32-gcc.exe
+PPAD=$(BINDIR)||$(TMPDIR)||$(AINDIR)||$(INCDIR)|C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\tcp;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\rtu;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\include;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\functions;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\ascii;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\port;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32||$(LIBDIR)|C:\Program Files\Microchip\MPLAB C32\lib;C:\Program Files\Microchip\MPLAB C32\pic32mx\lib||$(LKRDIR)||
+SOLK=<src>|demo.c|modbus\rtu\mbcrc.c|modbus\rtu\mbrtu.c|modbus\mb.c|modbus\functions\mbfunccoils.c|modbus\functions\mbfuncdiag.c|modbus\functions\mbfuncdisc.c|modbus\functions\mbfuncholding.c|modbus\functions\mbfuncinput.c|modbus\functions\mbfuncother.c|modbus\functions\mbutils.c|port\portevent.c|port\portserial.c|port\porttimer.c|modbus\ascii\mbascii.c||<obj>||<lib>||<lkr>||
+SuiteArgsString=
+ToolArgsString=-g
+TraceCmdString=
+DebugOptions=-D__DEBUG -D__MPLAB_DEBUGGER_PIC32MXSK=1
+[File001]
+Location=C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\mbcrc.o
+Folder=Intermediary
+DeviceName=PIC32MX460F512L
+LanguageToolSuiteID={14495C23-81F8-43F3-8A44-859C583D7760}
+LanguageToolID={430F471F-7ECB-4852-A80D-DEF9A5C8E751}
+LanguageToolLocation=C:\Program Files\Microchip\MPLAB C32\bin\pic32-gcc.exe
+PPAD=$(BINDIR)||$(TMPDIR)||$(AINDIR)||$(INCDIR)|C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\tcp;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\rtu;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\include;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\functions;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\ascii;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\port;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32||$(LIBDIR)|C:\Program Files\Microchip\MPLAB C32\lib;C:\Program Files\Microchip\MPLAB C32\pic32mx\lib||$(LKRDIR)||
+SOLK=<src>|demo.c|modbus\rtu\mbcrc.c|modbus\rtu\mbrtu.c|modbus\mb.c|modbus\functions\mbfunccoils.c|modbus\functions\mbfuncdiag.c|modbus\functions\mbfuncdisc.c|modbus\functions\mbfuncholding.c|modbus\functions\mbfuncinput.c|modbus\functions\mbfuncother.c|modbus\functions\mbutils.c|port\portevent.c|port\portserial.c|port\porttimer.c|modbus\ascii\mbascii.c||<obj>||<lib>||<lkr>||
+SuiteArgsString=
+ToolArgsString=-g
+TraceCmdString=
+DebugOptions=-D__DEBUG -D__MPLAB_DEBUGGER_PIC32MXSK=1
+[File002]
+Location=C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\mbrtu.o
+Folder=Intermediary
+DeviceName=PIC32MX460F512L
+LanguageToolSuiteID={14495C23-81F8-43F3-8A44-859C583D7760}
+LanguageToolID={430F471F-7ECB-4852-A80D-DEF9A5C8E751}
+LanguageToolLocation=C:\Program Files\Microchip\MPLAB C32\bin\pic32-gcc.exe
+PPAD=$(BINDIR)||$(TMPDIR)||$(AINDIR)||$(INCDIR)|C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\tcp;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\rtu;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\include;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\functions;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\ascii;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\port;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32||$(LIBDIR)|C:\Program Files\Microchip\MPLAB C32\lib;C:\Program Files\Microchip\MPLAB C32\pic32mx\lib||$(LKRDIR)||
+SOLK=<src>|demo.c|modbus\rtu\mbcrc.c|modbus\rtu\mbrtu.c|modbus\mb.c|modbus\functions\mbfunccoils.c|modbus\functions\mbfuncdiag.c|modbus\functions\mbfuncdisc.c|modbus\functions\mbfuncholding.c|modbus\functions\mbfuncinput.c|modbus\functions\mbfuncother.c|modbus\functions\mbutils.c|port\portevent.c|port\portserial.c|port\porttimer.c|modbus\ascii\mbascii.c||<obj>||<lib>||<lkr>||
+SuiteArgsString=
+ToolArgsString=-g
+TraceCmdString=
+DebugOptions=-D__DEBUG -D__MPLAB_DEBUGGER_PIC32MXSK=1
+[File003]
+Location=C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\mb.o
+Folder=Intermediary
+DeviceName=PIC32MX460F512L
+LanguageToolSuiteID={14495C23-81F8-43F3-8A44-859C583D7760}
+LanguageToolID={430F471F-7ECB-4852-A80D-DEF9A5C8E751}
+LanguageToolLocation=C:\Program Files\Microchip\MPLAB C32\bin\pic32-gcc.exe
+PPAD=$(BINDIR)||$(TMPDIR)||$(AINDIR)||$(INCDIR)|C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\tcp;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\rtu;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\include;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\functions;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\ascii;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\port;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32||$(LIBDIR)|C:\Program Files\Microchip\MPLAB C32\lib;C:\Program Files\Microchip\MPLAB C32\pic32mx\lib||$(LKRDIR)||
+SOLK=<src>|demo.c|modbus\rtu\mbcrc.c|modbus\rtu\mbrtu.c|modbus\mb.c|modbus\functions\mbfunccoils.c|modbus\functions\mbfuncdiag.c|modbus\functions\mbfuncdisc.c|modbus\functions\mbfuncholding.c|modbus\functions\mbfuncinput.c|modbus\functions\mbfuncother.c|modbus\functions\mbutils.c|port\portevent.c|port\portserial.c|port\porttimer.c|modbus\ascii\mbascii.c||<obj>||<lib>||<lkr>||
+SuiteArgsString=
+ToolArgsString=-g
+TraceCmdString=
+DebugOptions=-D__DEBUG -D__MPLAB_DEBUGGER_PIC32MXSK=1
+[File004]
+Location=C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\mbfunccoils.o
+Folder=Intermediary
+DeviceName=PIC32MX460F512L
+LanguageToolSuiteID={14495C23-81F8-43F3-8A44-859C583D7760}
+LanguageToolID={430F471F-7ECB-4852-A80D-DEF9A5C8E751}
+LanguageToolLocation=C:\Program Files\Microchip\MPLAB C32\bin\pic32-gcc.exe
+PPAD=$(BINDIR)||$(TMPDIR)||$(AINDIR)||$(INCDIR)|C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\tcp;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\rtu;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\include;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\functions;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\ascii;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\port;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32||$(LIBDIR)|C:\Program Files\Microchip\MPLAB C32\lib;C:\Program Files\Microchip\MPLAB C32\pic32mx\lib||$(LKRDIR)||
+SOLK=<src>|demo.c|modbus\rtu\mbcrc.c|modbus\rtu\mbrtu.c|modbus\mb.c|modbus\functions\mbfunccoils.c|modbus\functions\mbfuncdiag.c|modbus\functions\mbfuncdisc.c|modbus\functions\mbfuncholding.c|modbus\functions\mbfuncinput.c|modbus\functions\mbfuncother.c|modbus\functions\mbutils.c|port\portevent.c|port\portserial.c|port\porttimer.c|modbus\ascii\mbascii.c||<obj>||<lib>||<lkr>||
+SuiteArgsString=
+ToolArgsString=-g
+TraceCmdString=
+DebugOptions=-D__DEBUG -D__MPLAB_DEBUGGER_PIC32MXSK=1
+[File005]
+Location=C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\mbfuncdiag.o
+Folder=Intermediary
+DeviceName=PIC32MX460F512L
+LanguageToolSuiteID={14495C23-81F8-43F3-8A44-859C583D7760}
+LanguageToolID={430F471F-7ECB-4852-A80D-DEF9A5C8E751}
+LanguageToolLocation=C:\Program Files\Microchip\MPLAB C32\bin\pic32-gcc.exe
+PPAD=$(BINDIR)||$(TMPDIR)||$(AINDIR)||$(INCDIR)|C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\tcp;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\rtu;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\include;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\functions;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\ascii;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\port;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32||$(LIBDIR)|C:\Program Files\Microchip\MPLAB C32\lib;C:\Program Files\Microchip\MPLAB C32\pic32mx\lib||$(LKRDIR)||
+SOLK=<src>|demo.c|modbus\rtu\mbcrc.c|modbus\rtu\mbrtu.c|modbus\mb.c|modbus\functions\mbfunccoils.c|modbus\functions\mbfuncdiag.c|modbus\functions\mbfuncdisc.c|modbus\functions\mbfuncholding.c|modbus\functions\mbfuncinput.c|modbus\functions\mbfuncother.c|modbus\functions\mbutils.c|port\portevent.c|port\portserial.c|port\porttimer.c|modbus\ascii\mbascii.c||<obj>||<lib>||<lkr>||
+SuiteArgsString=
+ToolArgsString=-g
+TraceCmdString=
+DebugOptions=-D__DEBUG -D__MPLAB_DEBUGGER_PIC32MXSK=1
+[File006]
+Location=C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\mbfuncdisc.o
+Folder=Intermediary
+DeviceName=PIC32MX460F512L
+LanguageToolSuiteID={14495C23-81F8-43F3-8A44-859C583D7760}
+LanguageToolID={430F471F-7ECB-4852-A80D-DEF9A5C8E751}
+LanguageToolLocation=C:\Program Files\Microchip\MPLAB C32\bin\pic32-gcc.exe
+PPAD=$(BINDIR)||$(TMPDIR)||$(AINDIR)||$(INCDIR)|C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\tcp;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\rtu;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\include;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\functions;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\ascii;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\port;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32||$(LIBDIR)|C:\Program Files\Microchip\MPLAB C32\lib;C:\Program Files\Microchip\MPLAB C32\pic32mx\lib||$(LKRDIR)||
+SOLK=<src>|demo.c|modbus\rtu\mbcrc.c|modbus\rtu\mbrtu.c|modbus\mb.c|modbus\functions\mbfunccoils.c|modbus\functions\mbfuncdiag.c|modbus\functions\mbfuncdisc.c|modbus\functions\mbfuncholding.c|modbus\functions\mbfuncinput.c|modbus\functions\mbfuncother.c|modbus\functions\mbutils.c|port\portevent.c|port\portserial.c|port\porttimer.c|modbus\ascii\mbascii.c||<obj>||<lib>||<lkr>||
+SuiteArgsString=
+ToolArgsString=-g
+TraceCmdString=
+DebugOptions=-D__DEBUG -D__MPLAB_DEBUGGER_PIC32MXSK=1
+[File007]
+Location=C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\mbfuncholding.o
+Folder=Intermediary
+DeviceName=PIC32MX460F512L
+LanguageToolSuiteID={14495C23-81F8-43F3-8A44-859C583D7760}
+LanguageToolID={430F471F-7ECB-4852-A80D-DEF9A5C8E751}
+LanguageToolLocation=C:\Program Files\Microchip\MPLAB C32\bin\pic32-gcc.exe
+PPAD=$(BINDIR)||$(TMPDIR)||$(AINDIR)||$(INCDIR)|C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\tcp;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\rtu;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\include;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\functions;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\ascii;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\port;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32||$(LIBDIR)|C:\Program Files\Microchip\MPLAB C32\lib;C:\Program Files\Microchip\MPLAB C32\pic32mx\lib||$(LKRDIR)||
+SOLK=<src>|demo.c|modbus\rtu\mbcrc.c|modbus\rtu\mbrtu.c|modbus\mb.c|modbus\functions\mbfunccoils.c|modbus\functions\mbfuncdiag.c|modbus\functions\mbfuncdisc.c|modbus\functions\mbfuncholding.c|modbus\functions\mbfuncinput.c|modbus\functions\mbfuncother.c|modbus\functions\mbutils.c|port\portevent.c|port\portserial.c|port\porttimer.c|modbus\ascii\mbascii.c||<obj>||<lib>||<lkr>||
+SuiteArgsString=
+ToolArgsString=-g
+TraceCmdString=
+DebugOptions=-D__DEBUG -D__MPLAB_DEBUGGER_PIC32MXSK=1
+[File008]
+Location=C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\mbfuncinput.o
+Folder=Intermediary
+DeviceName=PIC32MX460F512L
+LanguageToolSuiteID={14495C23-81F8-43F3-8A44-859C583D7760}
+LanguageToolID={430F471F-7ECB-4852-A80D-DEF9A5C8E751}
+LanguageToolLocation=C:\Program Files\Microchip\MPLAB C32\bin\pic32-gcc.exe
+PPAD=$(BINDIR)||$(TMPDIR)||$(AINDIR)||$(INCDIR)|C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\tcp;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\rtu;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\include;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\functions;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\ascii;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\port;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32||$(LIBDIR)|C:\Program Files\Microchip\MPLAB C32\lib;C:\Program Files\Microchip\MPLAB C32\pic32mx\lib||$(LKRDIR)||
+SOLK=<src>|demo.c|modbus\rtu\mbcrc.c|modbus\rtu\mbrtu.c|modbus\mb.c|modbus\functions\mbfunccoils.c|modbus\functions\mbfuncdiag.c|modbus\functions\mbfuncdisc.c|modbus\functions\mbfuncholding.c|modbus\functions\mbfuncinput.c|modbus\functions\mbfuncother.c|modbus\functions\mbutils.c|port\portevent.c|port\portserial.c|port\porttimer.c|modbus\ascii\mbascii.c||<obj>||<lib>||<lkr>||
+SuiteArgsString=
+ToolArgsString=-g
+TraceCmdString=
+DebugOptions=-D__DEBUG -D__MPLAB_DEBUGGER_PIC32MXSK=1
+[File009]
+Location=C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\mbfuncother.o
+Folder=Intermediary
+DeviceName=PIC32MX460F512L
+LanguageToolSuiteID={14495C23-81F8-43F3-8A44-859C583D7760}
+LanguageToolID={430F471F-7ECB-4852-A80D-DEF9A5C8E751}
+LanguageToolLocation=C:\Program Files\Microchip\MPLAB C32\bin\pic32-gcc.exe
+PPAD=$(BINDIR)||$(TMPDIR)||$(AINDIR)||$(INCDIR)|C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\tcp;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\rtu;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\include;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\functions;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\ascii;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\port;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32||$(LIBDIR)|C:\Program Files\Microchip\MPLAB C32\lib;C:\Program Files\Microchip\MPLAB C32\pic32mx\lib||$(LKRDIR)||
+SOLK=<src>|demo.c|modbus\rtu\mbcrc.c|modbus\rtu\mbrtu.c|modbus\mb.c|modbus\functions\mbfunccoils.c|modbus\functions\mbfuncdiag.c|modbus\functions\mbfuncdisc.c|modbus\functions\mbfuncholding.c|modbus\functions\mbfuncinput.c|modbus\functions\mbfuncother.c|modbus\functions\mbutils.c|port\portevent.c|port\portserial.c|port\porttimer.c|modbus\ascii\mbascii.c||<obj>||<lib>||<lkr>||
+SuiteArgsString=
+ToolArgsString=-g
+TraceCmdString=
+DebugOptions=-D__DEBUG -D__MPLAB_DEBUGGER_PIC32MXSK=1
+[File010]
+Location=C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\mbutils.o
+Folder=Intermediary
+DeviceName=PIC32MX460F512L
+LanguageToolSuiteID={14495C23-81F8-43F3-8A44-859C583D7760}
+LanguageToolID={430F471F-7ECB-4852-A80D-DEF9A5C8E751}
+LanguageToolLocation=C:\Program Files\Microchip\MPLAB C32\bin\pic32-gcc.exe
+PPAD=$(BINDIR)||$(TMPDIR)||$(AINDIR)||$(INCDIR)|C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\tcp;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\rtu;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\include;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\functions;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\ascii;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\port;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32||$(LIBDIR)|C:\Program Files\Microchip\MPLAB C32\lib;C:\Program Files\Microchip\MPLAB C32\pic32mx\lib||$(LKRDIR)||
+SOLK=<src>|demo.c|modbus\rtu\mbcrc.c|modbus\rtu\mbrtu.c|modbus\mb.c|modbus\functions\mbfunccoils.c|modbus\functions\mbfuncdiag.c|modbus\functions\mbfuncdisc.c|modbus\functions\mbfuncholding.c|modbus\functions\mbfuncinput.c|modbus\functions\mbfuncother.c|modbus\functions\mbutils.c|port\portevent.c|port\portserial.c|port\porttimer.c|modbus\ascii\mbascii.c||<obj>||<lib>||<lkr>||
+SuiteArgsString=
+ToolArgsString=-g
+TraceCmdString=
+DebugOptions=-D__DEBUG -D__MPLAB_DEBUGGER_PIC32MXSK=1
+[File011]
+Location=C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\portevent.o
+Folder=Intermediary
+DeviceName=PIC32MX460F512L
+LanguageToolSuiteID={14495C23-81F8-43F3-8A44-859C583D7760}
+LanguageToolID={430F471F-7ECB-4852-A80D-DEF9A5C8E751}
+LanguageToolLocation=C:\Program Files\Microchip\MPLAB C32\bin\pic32-gcc.exe
+PPAD=$(BINDIR)||$(TMPDIR)||$(AINDIR)||$(INCDIR)|C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\tcp;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\rtu;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\include;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\functions;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\ascii;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\port;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32||$(LIBDIR)|C:\Program Files\Microchip\MPLAB C32\lib;C:\Program Files\Microchip\MPLAB C32\pic32mx\lib||$(LKRDIR)||
+SOLK=<src>|demo.c|modbus\rtu\mbcrc.c|modbus\rtu\mbrtu.c|modbus\mb.c|modbus\functions\mbfunccoils.c|modbus\functions\mbfuncdiag.c|modbus\functions\mbfuncdisc.c|modbus\functions\mbfuncholding.c|modbus\functions\mbfuncinput.c|modbus\functions\mbfuncother.c|modbus\functions\mbutils.c|port\portevent.c|port\portserial.c|port\porttimer.c|modbus\ascii\mbascii.c||<obj>||<lib>||<lkr>||
+SuiteArgsString=
+ToolArgsString=-g
+TraceCmdString=
+DebugOptions=-D__DEBUG -D__MPLAB_DEBUGGER_PIC32MXSK=1
+[File012]
+Location=C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\portserial.o
+Folder=Intermediary
+DeviceName=PIC32MX460F512L
+LanguageToolSuiteID={14495C23-81F8-43F3-8A44-859C583D7760}
+LanguageToolID={430F471F-7ECB-4852-A80D-DEF9A5C8E751}
+LanguageToolLocation=C:\Program Files\Microchip\MPLAB C32\bin\pic32-gcc.exe
+PPAD=$(BINDIR)||$(TMPDIR)||$(AINDIR)||$(INCDIR)|C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\tcp;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\rtu;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\include;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\functions;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\ascii;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\port;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32||$(LIBDIR)|C:\Program Files\Microchip\MPLAB C32\lib;C:\Program Files\Microchip\MPLAB C32\pic32mx\lib||$(LKRDIR)||
+SOLK=<src>|demo.c|modbus\rtu\mbcrc.c|modbus\rtu\mbrtu.c|modbus\mb.c|modbus\functions\mbfunccoils.c|modbus\functions\mbfuncdiag.c|modbus\functions\mbfuncdisc.c|modbus\functions\mbfuncholding.c|modbus\functions\mbfuncinput.c|modbus\functions\mbfuncother.c|modbus\functions\mbutils.c|port\portevent.c|port\portserial.c|port\porttimer.c|modbus\ascii\mbascii.c||<obj>||<lib>||<lkr>||
+SuiteArgsString=
+ToolArgsString=-g
+TraceCmdString=
+DebugOptions=-D__DEBUG -D__MPLAB_DEBUGGER_PIC32MXSK=1
+[File013]
+Location=C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\porttimer.o
+Folder=Intermediary
+DeviceName=PIC32MX460F512L
+LanguageToolSuiteID={14495C23-81F8-43F3-8A44-859C583D7760}
+LanguageToolID={430F471F-7ECB-4852-A80D-DEF9A5C8E751}
+LanguageToolLocation=C:\Program Files\Microchip\MPLAB C32\bin\pic32-gcc.exe
+PPAD=$(BINDIR)||$(TMPDIR)||$(AINDIR)||$(INCDIR)|C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\tcp;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\rtu;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\include;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\functions;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\ascii;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\port;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32||$(LIBDIR)|C:\Program Files\Microchip\MPLAB C32\lib;C:\Program Files\Microchip\MPLAB C32\pic32mx\lib||$(LKRDIR)||
+SOLK=<src>|demo.c|modbus\rtu\mbcrc.c|modbus\rtu\mbrtu.c|modbus\mb.c|modbus\functions\mbfunccoils.c|modbus\functions\mbfuncdiag.c|modbus\functions\mbfuncdisc.c|modbus\functions\mbfuncholding.c|modbus\functions\mbfuncinput.c|modbus\functions\mbfuncother.c|modbus\functions\mbutils.c|port\portevent.c|port\portserial.c|port\porttimer.c|modbus\ascii\mbascii.c||<obj>||<lib>||<lkr>||
+SuiteArgsString=
+ToolArgsString=-g
+TraceCmdString=
+DebugOptions=-D__DEBUG -D__MPLAB_DEBUGGER_PIC32MXSK=1
+[File014]
+Location=C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\mbascii.o
+Folder=Intermediary
+DeviceName=PIC32MX460F512L
+LanguageToolSuiteID={14495C23-81F8-43F3-8A44-859C583D7760}
+LanguageToolID={430F471F-7ECB-4852-A80D-DEF9A5C8E751}
+LanguageToolLocation=C:\Program Files\Microchip\MPLAB C32\bin\pic32-gcc.exe
+PPAD=$(BINDIR)||$(TMPDIR)||$(AINDIR)||$(INCDIR)|C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\tcp;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\rtu;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\include;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\functions;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\ascii;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\port;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32||$(LIBDIR)|C:\Program Files\Microchip\MPLAB C32\lib;C:\Program Files\Microchip\MPLAB C32\pic32mx\lib||$(LKRDIR)||
+SOLK=<src>|demo.c|modbus\rtu\mbcrc.c|modbus\rtu\mbrtu.c|modbus\mb.c|modbus\functions\mbfunccoils.c|modbus\functions\mbfuncdiag.c|modbus\functions\mbfuncdisc.c|modbus\functions\mbfuncholding.c|modbus\functions\mbfuncinput.c|modbus\functions\mbfuncother.c|modbus\functions\mbutils.c|port\portevent.c|port\portserial.c|port\porttimer.c|modbus\ascii\mbascii.c||<obj>||<lib>||<lkr>||
+SuiteArgsString=
+ToolArgsString=-g
+TraceCmdString=
+DebugOptions=-D__DEBUG -D__MPLAB_DEBUGGER_PIC32MXSK=1
+[File015]
+Location=C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\demo.elf
+Folder=Output
+DeviceName=PIC32MX460F512L
+LanguageToolSuiteID={14495C23-81F8-43F3-8A44-859C583D7760}
+LanguageToolID={C68E5105-1196-4333-A0BF-3DC57271E614}
+LanguageToolLocation=C:\Program Files\Microchip\MPLAB C32\bin\pic32-ld.exe
+PPAD=$(BINDIR)||$(TMPDIR)||$(AINDIR)||$(INCDIR)|C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\tcp;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\rtu;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\include;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\functions;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\ascii;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\port;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32||$(LIBDIR)|C:\Program Files\Microchip\MPLAB C32\lib;C:\Program Files\Microchip\MPLAB C32\pic32mx\lib||$(LKRDIR)||
+SOLK=<src>|demo.c|modbus\rtu\mbcrc.c|modbus\rtu\mbrtu.c|modbus\mb.c|modbus\functions\mbfunccoils.c|modbus\functions\mbfuncdiag.c|modbus\functions\mbfuncdisc.c|modbus\functions\mbfuncholding.c|modbus\functions\mbfuncinput.c|modbus\functions\mbfuncother.c|modbus\functions\mbutils.c|port\portevent.c|port\portserial.c|port\porttimer.c|modbus\ascii\mbascii.c||<obj>||<lib>||<lkr>||
+SuiteArgsString=
+ToolArgsString=-Map="$(BINDIR_)$(TARGETBASE).map" -o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)"
+TraceCmdString=
+DebugOptions=--defsym=__MPLAB_DEBUG=1 --defsym=__MPLAB_DEBUGGER_PIC32MXSK=1
+[File016]
+Location=C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\demo.hex
+Folder=Output
+DeviceName=PIC32MX460F512L
+LanguageToolSuiteID={14495C23-81F8-43F3-8A44-859C583D7760}
+LanguageToolID={C68E5105-1196-4333-A0BF-3DC57271E614}
+LanguageToolLocation=C:\Program Files\Microchip\MPLAB C32\bin\pic32-ld.exe
+PPAD=$(BINDIR)||$(TMPDIR)||$(AINDIR)||$(INCDIR)|C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\tcp;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\rtu;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\include;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\functions;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus\ascii;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\modbus;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32\port;C:\Documents and Settings\dbordwell\Desktop\Work\CODE\Modbus\freemodbus-v1.4.0\freemodbus-v1.4.0\demo\PIC32||$(LIBDIR)|C:\Program Files\Microchip\MPLAB C32\lib;C:\Program Files\Microchip\MPLAB C32\pic32mx\lib||$(LKRDIR)||
+SOLK=<src>|demo.c|modbus\rtu\mbcrc.c|modbus\rtu\mbrtu.c|modbus\mb.c|modbus\functions\mbfunccoils.c|modbus\functions\mbfuncdiag.c|modbus\functions\mbfuncdisc.c|modbus\functions\mbfuncholding.c|modbus\functions\mbfuncinput.c|modbus\functions\mbfuncother.c|modbus\functions\mbutils.c|port\portevent.c|port\portserial.c|port\porttimer.c|modbus\ascii\mbascii.c||<obj>||<lib>||<lkr>||
+SuiteArgsString=
+ToolArgsString=-Map="$(BINDIR_)$(TARGETBASE).map" -o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)"
+TraceCmdString=
+DebugOptions=--defsym=__MPLAB_DEBUG=1 --defsym=__MPLAB_DEBUGGER_PIC32MXSK=1
+[TOOL_LOC_STAMPS]
+tool_loc{430F471F-7ECB-4852-A80D-DEF9A5C8E751}=C:\Program Files\Microchip\MPLAB C32\bin\pic32-gcc.exe
+tool_loc{C68E5105-1196-4333-A0BF-3DC57271E614}=C:\Program Files\Microchip\MPLAB C32\bin\pic32-ld.exe
