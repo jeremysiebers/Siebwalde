@@ -13,7 +13,7 @@
 #include "modbus/General.h"
 #include "modbus/PetitModbus.h"
 #include "modbus/PetitModbusPort.h"
-#include "comhandler.h"
+
 
 /*----------------------------------------------------------------------------*/
 #define NUMBER_OF_SLAVES    4                                                                                                  
@@ -42,16 +42,14 @@ void main(void) {
         for(wait2 = 0x4; wait2 > 0; wait2--);
     }
     PORTDbits.RD1 = Off;
-    
-    INITxCOMxHANDLER();
+        
     InitPetitModbus(SlaveInfo);                                                 // Pass address of array of struct for data storage
     
     while(1)
     { 
         //PORTDbits.RD1 = !PORTDbits.RD1;        
         ProcessPetitModbus();
-        PROCESSxCOMxHANDLER(SlaveInfo);
-    
+            
         if(PIR1bits.TMR2IF)
         {
             switch(state){

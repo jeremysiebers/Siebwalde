@@ -1,13 +1,20 @@
  build/default/production/main.d  \
  build/default/production/main.p1:  \
  main.c  \
+modbus/Init.h  \
 mcc_generated_files/fvr.h  \
 mcc_generated_files/cmp1.h  \
 mcc_generated_files/mcc.h  \
 mcc_generated_files/pwm6.h  \
+modbus/General.h  \
+modbus/PetitModbusPort.h  \
 mcc_generated_files/dac.h  \
 mcc_generated_files/interrupt_manager.h  \
+modbus/PetitModbus.h  \
+mcc_generated_files/tmr1.h  \
 mcc_generated_files/tmr2.h  \
+mcc_generated_files/tmr3.h  \
 mcc_generated_files/eusart.h  \
 mcc_generated_files/pin_manager.h  \
+modbus/Interrupts.h  \
 mcc_generated_files/adcc.h 

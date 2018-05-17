@@ -22,7 +22,6 @@
         <itemPath>Peripherals/tmr1.h</itemPath>
       </logicalFolder>
       <itemPath>main.h</itemPath>
-      <itemPath>comhandler.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -50,7 +49,6 @@
         <itemPath>Peripherals/tmr1.c</itemPath>
       </logicalFolder>
       <itemPath>main.c</itemPath>
-      <itemPath>comhandler.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

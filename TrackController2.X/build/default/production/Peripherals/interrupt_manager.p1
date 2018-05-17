@@ -1,5 +1,5 @@
 Version 3.2 HI-TECH Software Intermediate Code
-"476 C:\Localdata\Microchip\xc8\v1.45\include\pic16f777.h
+"476 C:\Program Files (x86)\Microchip\xc8\v1.44\include\pic16f777.h
 [s S18 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
 [n S18 . RBIF INTF TMR0IF RBIE INTE TMR0IE PEIE GIE ]
 "486
@@ -18,7 +18,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;htc.h: 28: extern double __fpnormalize(double);
 [; ;xc8debug.h: 14: extern void __builtin_software_breakpoint(void);
 [; ;pic16f777.h: 50: extern volatile unsigned char INDF @ 0x000;
-"52 C:\Localdata\Microchip\xc8\v1.45\include\pic16f777.h
+"52 C:\Program Files (x86)\Microchip\xc8\v1.44\include\pic16f777.h
 [; ;pic16f777.h: 52: asm("INDF equ 00h");
 [; <" INDF equ 00h ;# ">
 [; ;pic16f777.h: 57: extern volatile unsigned char TMR0 @ 0x001;
@@ -1252,6 +1252,12 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;tmr2.h: 192: void TMR2_WriteTimer(uint8_t timerVal);
 [; ;tmr2.h: 244: void TMR2_LoadPeriodRegister(uint8_t periodVal);
 [; ;tmr2.h: 279: bool TMR2_HasOverflowOccured(void);
+[; ;tmr1.h: 57: void TMR1_Initialize(void);
+[; ;tmr1.h: 86: void TMR1_StartTimer(void);
+[; ;tmr1.h: 118: void TMR1_StopTimer(void);
+[; ;tmr1.h: 153: uint8_t TMR1_ReadTimer(void);
+[; ;tmr1.h: 192: void TMR1_WriteTimer(uint8_t timerVal);
+[; ;tmr1.h: 228: bool TMR1_HasOverflowOccured(void);
 [; ;pwm.h: 50: void PWM_Initialize(void);
 [; ;pwm.h: 77: extern void PWM_LoadDutyValue(uint16_t dutyValue);
 [; ;tmr0.h: 57: void TMR0_Initialize(void);
@@ -1265,12 +1271,12 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;ausart.h: 141: extern void ausart_Write(uint8_t txData);
 [; ;ausart.h: 162: extern void ausart_Transmit_ISR(void);
 [; ;ausart.h: 183: extern void ausart_Receive_ISR(void);
-[; ;config.h: 27: enum
-[; ;config.h: 28: {
-[; ;config.h: 29: On = 1,Off = 0
-[; ;config.h: 30: };
-[; ;config.h: 43: void SYSTEM_Initialize(void);
-[; ;config.h: 56: void OSCILLATOR_Initialize(void);
+[; ;config.h: 28: enum
+[; ;config.h: 29: {
+[; ;config.h: 30: On = 1,Off = 0
+[; ;config.h: 31: };
+[; ;config.h: 44: void SYSTEM_Initialize(void);
+[; ;config.h: 57: void OSCILLATOR_Initialize(void);
 [; ;Interrupts.h: 3: extern void PetitModbusIntHandler(void);
 "5 Peripherals/interrupt_manager.c
 [v _INTERRUPT_Initialize `(v ~T0 @X0 1 ef ]

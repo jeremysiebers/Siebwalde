@@ -13073,9 +13073,9 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;fvr.c: 59: {
 [e :U _FVR_Initialize ]
 [f ]
-[; ;fvr.c: 61: FVRCON = 0xBC;
+[; ;fvr.c: 61: FVRCON = 0xB4;
 "61
-[e = _FVRCON -> -> 188 `i `uc ]
+[e = _FVRCON -> -> 180 `i `uc ]
 [; ;fvr.c: 62: }
 "62
 [e :UE 1557 ]

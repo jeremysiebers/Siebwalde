@@ -1,19 +1,21 @@
 Version 3.2 HI-TECH Software Intermediate Code
-"56 Peripherals/config.h
+"57 Peripherals/config.h
 [v _OSCILLATOR_Initialize `(v ~T0 @X0 0 ef ]
 "24 Peripherals/pin_manager.h
 [v _PIN_MANAGER_Initialize `(v ~T0 @X0 0 ef ]
 "57 Peripherals/tmr2.h
 [v _TMR2_Initialize `(v ~T0 @X0 0 ef ]
+"57 Peripherals/tmr1.h
+[v _TMR1_Initialize `(v ~T0 @X0 0 ef ]
 "62 Peripherals/interrupt_manager.h
 [v _INTERRUPT_Initialize `(v ~T0 @X0 0 ef ]
-"1840 C:\Localdata\Microchip\xc8\v1.45\include\pic16f777.h
+"1840 C:\Program Files (x86)\Microchip\xc8\v1.44\include\pic16f777.h
 [v _OSCCON `Vuc ~T0 @X0 0 e@143 ]
 [; ;htc.h: 26: extern const char __xc8_OPTIM_SPEED;
 [; ;htc.h: 28: extern double __fpnormalize(double);
 [; ;xc8debug.h: 14: extern void __builtin_software_breakpoint(void);
 [; ;pic16f777.h: 50: extern volatile unsigned char INDF @ 0x000;
-"52 C:\Localdata\Microchip\xc8\v1.45\include\pic16f777.h
+"52 C:\Program Files (x86)\Microchip\xc8\v1.44\include\pic16f777.h
 [; ;pic16f777.h: 52: asm("INDF equ 00h");
 [; <" INDF equ 00h ;# ">
 [; ;pic16f777.h: 57: extern volatile unsigned char TMR0 @ 0x001;
@@ -1249,6 +1251,12 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;tmr2.h: 192: void TMR2_WriteTimer(uint8_t timerVal);
 [; ;tmr2.h: 244: void TMR2_LoadPeriodRegister(uint8_t periodVal);
 [; ;tmr2.h: 279: bool TMR2_HasOverflowOccured(void);
+[; ;tmr1.h: 57: void TMR1_Initialize(void);
+[; ;tmr1.h: 86: void TMR1_StartTimer(void);
+[; ;tmr1.h: 118: void TMR1_StopTimer(void);
+[; ;tmr1.h: 153: uint8_t TMR1_ReadTimer(void);
+[; ;tmr1.h: 192: void TMR1_WriteTimer(uint8_t timerVal);
+[; ;tmr1.h: 228: bool TMR1_HasOverflowOccured(void);
 [; ;pwm.h: 50: void PWM_Initialize(void);
 [; ;pwm.h: 77: extern void PWM_LoadDutyValue(uint16_t dutyValue);
 [; ;tmr0.h: 57: void TMR0_Initialize(void);
@@ -1262,12 +1270,12 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;ausart.h: 141: extern void ausart_Write(uint8_t txData);
 [; ;ausart.h: 162: extern void ausart_Transmit_ISR(void);
 [; ;ausart.h: 183: extern void ausart_Receive_ISR(void);
-[; ;config.h: 27: enum
-[; ;config.h: 28: {
-[; ;config.h: 29: On = 1,Off = 0
-[; ;config.h: 30: };
-[; ;config.h: 43: void SYSTEM_Initialize(void);
-[; ;config.h: 56: void OSCILLATOR_Initialize(void);
+[; ;config.h: 28: enum
+[; ;config.h: 29: {
+[; ;config.h: 30: On = 1,Off = 0
+[; ;config.h: 31: };
+[; ;config.h: 44: void SYSTEM_Initialize(void);
+[; ;config.h: 57: void OSCILLATOR_Initialize(void);
 "12 Peripherals/config.c
 [p x FOSC=HS ]
 "13
@@ -1307,23 +1315,26 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;config.c: 36: TMR2_Initialize();
 "36
 [e ( _TMR2_Initialize ..  ]
-[; ;config.c: 39: INTERRUPT_Initialize();
-"39
-[e ( _INTERRUPT_Initialize ..  ]
-[; ;config.c: 40: }
+[; ;config.c: 37: TMR1_Initialize();
+"37
+[e ( _TMR1_Initialize ..  ]
+[; ;config.c: 40: INTERRUPT_Initialize();
 "40
+[e ( _INTERRUPT_Initialize ..  ]
+[; ;config.c: 41: }
+"41
 [e :UE 117 ]
 }
-"42
+"43
 [v _OSCILLATOR_Initialize `(v ~T0 @X0 1 ef ]
 {
-[; ;config.c: 42: void OSCILLATOR_Initialize(void) {
+[; ;config.c: 43: void OSCILLATOR_Initialize(void) {
 [e :U _OSCILLATOR_Initialize ]
 [f ]
-[; ;config.c: 45: OSCCON = 0;
-"45
+[; ;config.c: 46: OSCCON = 0;
+"46
 [e = _OSCCON -> -> 0 `i `uc ]
-[; ;config.c: 51: }
-"51
+[; ;config.c: 52: }
+"52
 [e :UE 118 ]
 }

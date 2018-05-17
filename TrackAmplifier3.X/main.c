@@ -8,6 +8,9 @@
 
 #include <xc.h>
 #include "mcc_generated_files/mcc.h"
+#include "modbus/General.h"
+
+#define MODBUSxADDRESS 1
 
 void main(void) {
     
@@ -16,7 +19,10 @@ void main(void) {
     INTCONbits.GIE = 1;
     INTCONbits.PEIE = 1;
     
+    InitPetitModbus(MODBUSxADDRESS);
+    
     while(1){
-        
+        ProcessPetitModbus();
+        LED_WAR_LAT = ((unsigned int)PetitRegisters[0].ActValue);
     }
 }

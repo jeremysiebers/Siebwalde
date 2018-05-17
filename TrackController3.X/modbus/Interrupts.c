@@ -23,8 +23,8 @@ void PetitModbusIntHandler(void)
     
     if( PIE3bits.RC2IE == 1 && PIR3bits.RC2IF == 1)                             // UART2 for modbus, UART1 for diag
     {
-        TMR3L             = 190; // 190 --> 225us tick
-        TMR3H             = 0;
+        TMR3L             = 0xDA; // --> 225us tick
+        TMR3H             = 0xF7; // --> 225us tick
         PIR2bits.TMR3IF   = 0;
         PIE2bits.TMR3IE   = 1;
         PORTBbits.RB5     = 1;//--> led diag
