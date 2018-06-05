@@ -13068,9 +13068,9 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;dac.c: 61: DAC1CON0 = 0x88;
 "61
 [e = _DAC1CON0 -> -> 136 `i `uc ]
-[; ;dac.c: 63: DAC1CON1 = 0x16;
+[; ;dac.c: 63: DAC1CON1 = 0x01;
 "63
-[e = _DAC1CON1 -> -> 22 `i `uc ]
+[e = _DAC1CON1 -> -> 1 `i `uc ]
 [; ;dac.c: 64: }
 "64
 [e :UE 1557 ]

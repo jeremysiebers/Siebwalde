@@ -1,54 +1,87 @@
 Version 3.2 HI-TECH Software Intermediate Code
-"81 modbus/PetitModbus.h
-[s S1 `ui -> 7 `i `uc 1 `ui 1 `ui 1 ]
-[n S1 . Reg CommError ReceiveCounter SentCounter ]
-"39 modbus/PetitModbus.c
+"84 modbus/PetitModbus.h
+[s S1 `ui -> 7 `i `uc 1 `uc 1 `ui 1 `ui 1 ]
+[n S1 . Reg MbCommError MbExceptionCode MbReceiveCounter MbSentCounter ]
+"35 modbus/PetitModbus.c
 [s S118 `uc 1 `uc 1 `uc + * -> 7 `i -> 2 `i -> 10 `i `us 1 ]
 [n S118 . Address Function DataBuf DataLen ]
-"50
-[c E1340 0 1 2 3 4 .. ]
-[n E1340 . PETIT_RXTX_IDLE PETIT_RXTX_START PETIT_RXTX_DATABUF PETIT_RXTX_WAIT_ANSWER PETIT_RXTX_TIMEOUT  ]
+"46
+[c E1345 0 1 2 3 4 .. ]
+[n E1345 . PETIT_RXTX_IDLE PETIT_RXTX_START PETIT_RXTX_DATABUF PETIT_RXTX_WAIT_ANSWER PETIT_RXTX_TIMEOUT  ]
 "26 modbus/PetitModbusPort.h
 [v _PetitModBus_UART_String `(uc ~T0 @X0 0 ef2`*uc`ui ]
 "21
 [v _PetitReceiveCounter `Vuc ~T0 @X0 0 e ]
 "20
 [v _PetitReceiveBuffer `Vuc ~T0 @X0 -> 0 `x e ]
-"94 modbus/PetitModbus.h
+"674 C:\Program Files (x86)\Microchip\xc8\v1.44\include\pic16f777.h
+[v _TMR1 `Vus ~T0 @X0 0 e@14 ]
+"566
+[s S22 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
+[n S22 . TMR1IF TMR2IF CCP1IF SSPIF TXIF RCIF ADIF PSPIF ]
+"565
+[u S21 `S22 1 ]
+[n S21 . . ]
+"577
+[v _PIR1bits `VS21 ~T0 @X0 0 e@12 ]
+"1692
+[s S65 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
+[n S65 . TMR1IE TMR2IE CCP1IE SSPIE TXIE RCIE ADIE PSPIE ]
+"1691
+[u S64 `S65 1 ]
+[n S64 . . ]
+"1703
+[v _PIE1bits `VS64 ~T0 @X0 0 e@140 ]
+"701
+[s S26 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :2 `uc 1 :1 `uc 1 ]
+[n S26 . TMR1ON TMR1CS nT1SYNC T1OSCEN T1CKPS T1RUN ]
+"709
+[s S27 :2 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
+[n S27 . . T1SYNC . T1CKPS0 T1CKPS1 ]
+"716
+[s S28 :2 `uc 1 :1 `uc 1 ]
+[n S28 . . T1INSYNC ]
+"700
+[u S25 `S26 1 `S27 1 `S28 1 ]
+[n S25 . . . . ]
+"721
+[v _T1CONbits `VS25 ~T0 @X0 0 e@16 ]
+"356
+[s S13 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
+[n S13 . RD0 RD1 RD2 RD3 RD4 RD5 RD6 RD7 ]
+"355
+[u S12 `S13 1 ]
+[n S12 . . ]
+"367
+[v _PORTDbits `VS12 ~T0 @X0 0 e@8 ]
+"350 modbus/PetitModbus.c
+[c E5 1 2 3 4 .. ]
+[n E5 . SLAVE_DATA_BUSY SLAVE_DATA_OK SLAVE_DATA_NOK SLAVE_DATA_TIMEOUT  ]
+"98 modbus/PetitModbus.h
 [v _HandlePetitModbusReadHoldingRegistersSlaveReadback `(v ~T0 @X0 0 ef ]
-"93
+"97
 [v _HandlePetitModbusWriteSingleRegisterSlaveReadback `(v ~T0 @X0 0 ef ]
-"95
+"99
 [v _HandleMPetitodbusWriteMultipleRegistersSlaveReadback `(v ~T0 @X0 0 ef ]
+"100
+[v _HandleMPetitodbusMbExceptionCodesSlaveReadback `(v ~T0 @X0 0 ef ]
 "23 modbus/PetitModbusPort.h
 [v _PetitModBus_UART_Initialise `(v ~T0 @X0 0 ef ]
 "24
 [v _PetitModBus_TIMER_Initialise `(v ~T0 @X0 0 ef ]
-"396 modbus/PetitModbus.c
-[c E4 1 2 3 .. ]
-[n E4 . SLAVE_DATA_BUSY SLAVE_DATA_OK SLAVE_DATA_NOK  ]
-"20 modbus/PetitModbus.h
+"21 modbus/PetitModbus.h
 [v _auchCRCHi `Cuc ~T0 @X0 -> 0 `x e ]
 [i _auchCRCHi
 :U ..
-"21
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
 "22
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
 -> -> 64 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
 -> -> 1 `i `uc
 -> -> 192 `i `uc
 -> -> 128 `i `uc
@@ -56,16 +89,8 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 0 `i `uc
 -> -> 193 `i `uc
 -> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
 "23
--> -> 128 `i `uc
--> -> 65 `i `uc
+-> -> 64 `i `uc
 -> -> 1 `i `uc
 -> -> 192 `i `uc
 -> -> 128 `i `uc
@@ -79,7 +104,11 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 129 `i `uc
 -> -> 64 `i `uc
 -> -> 1 `i `uc
+-> -> 192 `i `uc
 "24
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 1 `i `uc
 -> -> 192 `i `uc
 -> -> 128 `i `uc
 -> -> 65 `i `uc
@@ -87,15 +116,15 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 193 `i `uc
 -> -> 129 `i `uc
 -> -> 64 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
 -> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
 "25
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
 -> -> 0 `i `uc
 -> -> 193 `i `uc
 -> -> 129 `i `uc
@@ -104,14 +133,14 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 192 `i `uc
 -> -> 128 `i `uc
 -> -> 65 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
 "26
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
 -> -> 64 `i `uc
 -> -> 1 `i `uc
 -> -> 192 `i `uc
@@ -121,19 +150,15 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 193 `i `uc
 -> -> 129 `i `uc
 -> -> 64 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
 "27
+-> -> 64 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
 -> -> 128 `i `uc
 -> -> 65 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
 -> -> 0 `i `uc
 -> -> 193 `i `uc
 -> -> 129 `i `uc
@@ -143,10 +168,14 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 128 `i `uc
 -> -> 65 `i `uc
 -> -> 1 `i `uc
+-> -> 192 `i `uc
 "28
--> -> 192 `i `uc
 -> -> 128 `i `uc
 -> -> 65 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
 -> -> 0 `i `uc
 -> -> 193 `i `uc
 -> -> 129 `i `uc
@@ -155,11 +184,11 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 192 `i `uc
 -> -> 128 `i `uc
 -> -> 65 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
+-> -> 1 `i `uc
 "29
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
 -> -> 0 `i `uc
 -> -> 193 `i `uc
 -> -> 129 `i `uc
@@ -168,15 +197,11 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 192 `i `uc
 -> -> 128 `i `uc
 -> -> 65 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
 -> -> 0 `i `uc
 -> -> 193 `i `uc
 -> -> 129 `i `uc
+-> -> 64 `i `uc
 "30
--> -> 64 `i `uc
 -> -> 0 `i `uc
 -> -> 193 `i `uc
 -> -> 129 `i `uc
@@ -185,15 +210,19 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 192 `i `uc
 -> -> 128 `i `uc
 -> -> 65 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
 -> -> 0 `i `uc
 -> -> 193 `i `uc
 -> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
 "31
--> -> 128 `i `uc
--> -> 65 `i `uc
+-> -> 64 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
 -> -> 1 `i `uc
 -> -> 192 `i `uc
 -> -> 128 `i `uc
@@ -202,13 +231,9 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 193 `i `uc
 -> -> 129 `i `uc
 -> -> 64 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
 -> -> 1 `i `uc
+-> -> 192 `i `uc
 "32
--> -> 192 `i `uc
 -> -> 128 `i `uc
 -> -> 65 `i `uc
 -> -> 1 `i `uc
@@ -219,15 +244,19 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 193 `i `uc
 -> -> 129 `i `uc
 -> -> 64 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
 -> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
 "33
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
 -> -> 0 `i `uc
 -> -> 193 `i `uc
 -> -> 129 `i `uc
@@ -236,15 +265,15 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 192 `i `uc
 -> -> 128 `i `uc
 -> -> 65 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
 "34
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
 -> -> 64 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
 -> -> 1 `i `uc
 -> -> 192 `i `uc
 -> -> 128 `i `uc
@@ -252,27 +281,23 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 0 `i `uc
 -> -> 193 `i `uc
 -> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
 "35
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
 -> -> 64 `i `uc
 -> -> 1 `i `uc
 -> -> 192 `i `uc
 -> -> 128 `i `uc
 -> -> 65 `i `uc
 -> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
 "36
--> -> 192 `i `uc
 -> -> 128 `i `uc
 -> -> 65 `i `uc
 -> -> 0 `i `uc
@@ -287,7 +312,24 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 192 `i `uc
 -> -> 128 `i `uc
 -> -> 65 `i `uc
+-> -> 1 `i `uc
 "37
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+"38
 -> -> 0 `i `uc
 -> -> 193 `i `uc
 -> -> 129 `i `uc
@@ -303,35 +345,35 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 0 `i `uc
 -> -> 193 `i `uc
 -> -> 129 `i `uc
-"39
+"40
 -> -> 64 `i `uc
 ..
 ]
-[; ;PetitModbus.h: 20: const unsigned char auchCRCHi[] = {
-[; ;PetitModbus.h: 21: 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
-[; ;PetitModbus.h: 22: 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0,
-[; ;PetitModbus.h: 23: 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01,
-[; ;PetitModbus.h: 24: 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41,
-[; ;PetitModbus.h: 25: 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81,
-[; ;PetitModbus.h: 26: 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0,
-[; ;PetitModbus.h: 27: 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01,
-[; ;PetitModbus.h: 28: 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40,
-[; ;PetitModbus.h: 29: 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
-[; ;PetitModbus.h: 30: 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0,
-[; ;PetitModbus.h: 31: 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01,
-[; ;PetitModbus.h: 32: 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41,
-[; ;PetitModbus.h: 33: 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
-[; ;PetitModbus.h: 34: 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0,
-[; ;PetitModbus.h: 35: 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01,
-[; ;PetitModbus.h: 36: 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41,
-[; ;PetitModbus.h: 37: 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
-[; ;PetitModbus.h: 38: 0x40
-[; ;PetitModbus.h: 39: } ;
-"42
+[; ;PetitModbus.h: 21: const unsigned char auchCRCHi[] = {
+[; ;PetitModbus.h: 22: 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
+[; ;PetitModbus.h: 23: 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0,
+[; ;PetitModbus.h: 24: 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01,
+[; ;PetitModbus.h: 25: 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41,
+[; ;PetitModbus.h: 26: 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81,
+[; ;PetitModbus.h: 27: 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0,
+[; ;PetitModbus.h: 28: 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01,
+[; ;PetitModbus.h: 29: 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40,
+[; ;PetitModbus.h: 30: 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
+[; ;PetitModbus.h: 31: 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0,
+[; ;PetitModbus.h: 32: 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01,
+[; ;PetitModbus.h: 33: 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41,
+[; ;PetitModbus.h: 34: 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
+[; ;PetitModbus.h: 35: 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0,
+[; ;PetitModbus.h: 36: 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01,
+[; ;PetitModbus.h: 37: 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41,
+[; ;PetitModbus.h: 38: 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
+[; ;PetitModbus.h: 39: 0x40
+[; ;PetitModbus.h: 40: } ;
+"43
 [v _auchCRCLo `Cuc ~T0 @X0 -> 0 `x e ]
 [i _auchCRCLo
 :U ..
-"43
+"44
 -> -> 0 `i `uc
 -> -> 192 `i `uc
 -> -> 193 `i `uc
@@ -347,7 +389,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 5 `i `uc
 -> -> 197 `i `uc
 -> -> 196 `i `uc
-"44
+"45
 -> -> 4 `i `uc
 -> -> 204 `i `uc
 -> -> 12 `i `uc
@@ -363,7 +405,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 11 `i `uc
 -> -> 201 `i `uc
 -> -> 9 `i `uc
-"45
+"46
 -> -> 8 `i `uc
 -> -> 200 `i `uc
 -> -> 216 `i `uc
@@ -379,7 +421,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 223 `i `uc
 -> -> 31 `i `uc
 -> -> 221 `i `uc
-"46
+"47
 -> -> 29 `i `uc
 -> -> 28 `i `uc
 -> -> 220 `i `uc
@@ -395,7 +437,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 18 `i `uc
 -> -> 19 `i `uc
 -> -> 211 `i `uc
-"47
+"48
 -> -> 17 `i `uc
 -> -> 209 `i `uc
 -> -> 208 `i `uc
@@ -411,7 +453,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 54 `i `uc
 -> -> 246 `i `uc
 -> -> 247 `i `uc
-"48
+"49
 -> -> 55 `i `uc
 -> -> 245 `i `uc
 -> -> 53 `i `uc
@@ -427,7 +469,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 254 `i `uc
 -> -> 250 `i `uc
 -> -> 58 `i `uc
-"49
+"50
 -> -> 59 `i `uc
 -> -> 251 `i `uc
 -> -> 57 `i `uc
@@ -443,7 +485,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 42 `i `uc
 -> -> 234 `i `uc
 -> -> 238 `i `uc
-"50
+"51
 -> -> 46 `i `uc
 -> -> 47 `i `uc
 -> -> 239 `i `uc
@@ -459,7 +501,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 231 `i `uc
 -> -> 230 `i `uc
 -> -> 38 `i `uc
-"51
+"52
 -> -> 34 `i `uc
 -> -> 226 `i `uc
 -> -> 227 `i `uc
@@ -475,7 +517,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 99 `i `uc
 -> -> 163 `i `uc
 -> -> 162 `i `uc
-"52
+"53
 -> -> 98 `i `uc
 -> -> 102 `i `uc
 -> -> 166 `i `uc
@@ -491,7 +533,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 109 `i `uc
 -> -> 175 `i `uc
 -> -> 111 `i `uc
-"53
+"54
 -> -> 110 `i `uc
 -> -> 174 `i `uc
 -> -> 170 `i `uc
@@ -507,7 +549,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 185 `i `uc
 -> -> 121 `i `uc
 -> -> 187 `i `uc
-"54
+"55
 -> -> 123 `i `uc
 -> -> 122 `i `uc
 -> -> 186 `i `uc
@@ -523,7 +565,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 116 `i `uc
 -> -> 117 `i `uc
 -> -> 181 `i `uc
-"55
+"56
 -> -> 119 `i `uc
 -> -> 183 `i `uc
 -> -> 182 `i `uc
@@ -539,7 +581,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 80 `i `uc
 -> -> 144 `i `uc
 -> -> 145 `i `uc
-"56
+"57
 -> -> 81 `i `uc
 -> -> 147 `i `uc
 -> -> 83 `i `uc
@@ -555,7 +597,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 84 `i `uc
 -> -> 156 `i `uc
 -> -> 92 `i `uc
-"57
+"58
 -> -> 93 `i `uc
 -> -> 157 `i `uc
 -> -> 95 `i `uc
@@ -571,7 +613,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 88 `i `uc
 -> -> 152 `i `uc
 -> -> 136 `i `uc
-"58
+"59
 -> -> 72 `i `uc
 -> -> 73 `i `uc
 -> -> 137 `i `uc
@@ -587,7 +629,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 77 `i `uc
 -> -> 76 `i `uc
 -> -> 140 `i `uc
-"59
+"60
 -> -> 68 `i `uc
 -> -> 132 `i `uc
 -> -> 133 `i `uc
@@ -603,55 +645,59 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 65 `i `uc
 -> -> 129 `i `uc
 -> -> 128 `i `uc
-"61
+"62
 -> -> 64 `i `uc
 ..
 ]
-[; ;PetitModbus.h: 42: const unsigned char auchCRCLo[] = {
-[; ;PetitModbus.h: 43: 0x00, 0xC0, 0xC1, 0x01, 0xC3, 0x03, 0x02, 0xC2, 0xC6, 0x06, 0x07, 0xC7, 0x05, 0xC5, 0xC4,
-[; ;PetitModbus.h: 44: 0x04, 0xCC, 0x0C, 0x0D, 0xCD, 0x0F, 0xCF, 0xCE, 0x0E, 0x0A, 0xCA, 0xCB, 0x0B, 0xC9, 0x09,
-[; ;PetitModbus.h: 45: 0x08, 0xC8, 0xD8, 0x18, 0x19, 0xD9, 0x1B, 0xDB, 0xDA, 0x1A, 0x1E, 0xDE, 0xDF, 0x1F, 0xDD,
-[; ;PetitModbus.h: 46: 0x1D, 0x1C, 0xDC, 0x14, 0xD4, 0xD5, 0x15, 0xD7, 0x17, 0x16, 0xD6, 0xD2, 0x12, 0x13, 0xD3,
-[; ;PetitModbus.h: 47: 0x11, 0xD1, 0xD0, 0x10, 0xF0, 0x30, 0x31, 0xF1, 0x33, 0xF3, 0xF2, 0x32, 0x36, 0xF6, 0xF7,
-[; ;PetitModbus.h: 48: 0x37, 0xF5, 0x35, 0x34, 0xF4, 0x3C, 0xFC, 0xFD, 0x3D, 0xFF, 0x3F, 0x3E, 0xFE, 0xFA, 0x3A,
-[; ;PetitModbus.h: 49: 0x3B, 0xFB, 0x39, 0xF9, 0xF8, 0x38, 0x28, 0xE8, 0xE9, 0x29, 0xEB, 0x2B, 0x2A, 0xEA, 0xEE,
-[; ;PetitModbus.h: 50: 0x2E, 0x2F, 0xEF, 0x2D, 0xED, 0xEC, 0x2C, 0xE4, 0x24, 0x25, 0xE5, 0x27, 0xE7, 0xE6, 0x26,
-[; ;PetitModbus.h: 51: 0x22, 0xE2, 0xE3, 0x23, 0xE1, 0x21, 0x20, 0xE0, 0xA0, 0x60, 0x61, 0xA1, 0x63, 0xA3, 0xA2,
-[; ;PetitModbus.h: 52: 0x62, 0x66, 0xA6, 0xA7, 0x67, 0xA5, 0x65, 0x64, 0xA4, 0x6C, 0xAC, 0xAD, 0x6D, 0xAF, 0x6F,
-[; ;PetitModbus.h: 53: 0x6E, 0xAE, 0xAA, 0x6A, 0x6B, 0xAB, 0x69, 0xA9, 0xA8, 0x68, 0x78, 0xB8, 0xB9, 0x79, 0xBB,
-[; ;PetitModbus.h: 54: 0x7B, 0x7A, 0xBA, 0xBE, 0x7E, 0x7F, 0xBF, 0x7D, 0xBD, 0xBC, 0x7C, 0xB4, 0x74, 0x75, 0xB5,
-[; ;PetitModbus.h: 55: 0x77, 0xB7, 0xB6, 0x76, 0x72, 0xB2, 0xB3, 0x73, 0xB1, 0x71, 0x70, 0xB0, 0x50, 0x90, 0x91,
-[; ;PetitModbus.h: 56: 0x51, 0x93, 0x53, 0x52, 0x92, 0x96, 0x56, 0x57, 0x97, 0x55, 0x95, 0x94, 0x54, 0x9C, 0x5C,
-[; ;PetitModbus.h: 57: 0x5D, 0x9D, 0x5F, 0x9F, 0x9E, 0x5E, 0x5A, 0x9A, 0x9B, 0x5B, 0x99, 0x59, 0x58, 0x98, 0x88,
-[; ;PetitModbus.h: 58: 0x48, 0x49, 0x89, 0x4B, 0x8B, 0x8A, 0x4A, 0x4E, 0x8E, 0x8F, 0x4F, 0x8D, 0x4D, 0x4C, 0x8C,
-[; ;PetitModbus.h: 59: 0x44, 0x84, 0x85, 0x45, 0x87, 0x47, 0x46, 0x86, 0x82, 0x42, 0x43, 0x83, 0x41, 0x81, 0x80,
-[; ;PetitModbus.h: 60: 0x40
-[; ;PetitModbus.h: 61: };
-[; ;PetitModbus.h: 71: extern volatile unsigned short PetitModbusTimerValue;
-[; ;PetitModbus.h: 73: typedef enum
-[; ;PetitModbus.h: 74: {
-[; ;PetitModbus.h: 75: SLAVE_DATA_BUSY = 1,
-[; ;PetitModbus.h: 76: SLAVE_DATA_OK = 2,
-[; ;PetitModbus.h: 77: SLAVE_DATA_NOK = 3
-[; ;PetitModbus.h: 78: }SLAVE_DATA;
-[; ;PetitModbus.h: 80: typedef struct
-[; ;PetitModbus.h: 81: {
-[; ;PetitModbus.h: 82: unsigned int Reg[7];
-[; ;PetitModbus.h: 83: unsigned char CommError;
-[; ;PetitModbus.h: 84: unsigned int ReceiveCounter;
-[; ;PetitModbus.h: 85: unsigned int SentCounter;
-[; ;PetitModbus.h: 86: }SLAVE_INFO;
-[; ;PetitModbus.h: 89: extern void InitPetitModbus(SLAVE_INFO *location);
-[; ;PetitModbus.h: 90: extern void ProcessPetitModbus(void);
-[; ;PetitModbus.h: 91: extern unsigned char SendPetitModbus(unsigned char Address, unsigned char Function, unsigned char *DataBuf, unsigned short DataLen);
-[; ;PetitModbus.h: 93: void HandlePetitModbusWriteSingleRegisterSlaveReadback(void);
-[; ;PetitModbus.h: 94: void HandlePetitModbusReadHoldingRegistersSlaveReadback(void);
-[; ;PetitModbus.h: 95: void HandleMPetitodbusWriteMultipleRegistersSlaveReadback(void);
+[; ;PetitModbus.h: 43: const unsigned char auchCRCLo[] = {
+[; ;PetitModbus.h: 44: 0x00, 0xC0, 0xC1, 0x01, 0xC3, 0x03, 0x02, 0xC2, 0xC6, 0x06, 0x07, 0xC7, 0x05, 0xC5, 0xC4,
+[; ;PetitModbus.h: 45: 0x04, 0xCC, 0x0C, 0x0D, 0xCD, 0x0F, 0xCF, 0xCE, 0x0E, 0x0A, 0xCA, 0xCB, 0x0B, 0xC9, 0x09,
+[; ;PetitModbus.h: 46: 0x08, 0xC8, 0xD8, 0x18, 0x19, 0xD9, 0x1B, 0xDB, 0xDA, 0x1A, 0x1E, 0xDE, 0xDF, 0x1F, 0xDD,
+[; ;PetitModbus.h: 47: 0x1D, 0x1C, 0xDC, 0x14, 0xD4, 0xD5, 0x15, 0xD7, 0x17, 0x16, 0xD6, 0xD2, 0x12, 0x13, 0xD3,
+[; ;PetitModbus.h: 48: 0x11, 0xD1, 0xD0, 0x10, 0xF0, 0x30, 0x31, 0xF1, 0x33, 0xF3, 0xF2, 0x32, 0x36, 0xF6, 0xF7,
+[; ;PetitModbus.h: 49: 0x37, 0xF5, 0x35, 0x34, 0xF4, 0x3C, 0xFC, 0xFD, 0x3D, 0xFF, 0x3F, 0x3E, 0xFE, 0xFA, 0x3A,
+[; ;PetitModbus.h: 50: 0x3B, 0xFB, 0x39, 0xF9, 0xF8, 0x38, 0x28, 0xE8, 0xE9, 0x29, 0xEB, 0x2B, 0x2A, 0xEA, 0xEE,
+[; ;PetitModbus.h: 51: 0x2E, 0x2F, 0xEF, 0x2D, 0xED, 0xEC, 0x2C, 0xE4, 0x24, 0x25, 0xE5, 0x27, 0xE7, 0xE6, 0x26,
+[; ;PetitModbus.h: 52: 0x22, 0xE2, 0xE3, 0x23, 0xE1, 0x21, 0x20, 0xE0, 0xA0, 0x60, 0x61, 0xA1, 0x63, 0xA3, 0xA2,
+[; ;PetitModbus.h: 53: 0x62, 0x66, 0xA6, 0xA7, 0x67, 0xA5, 0x65, 0x64, 0xA4, 0x6C, 0xAC, 0xAD, 0x6D, 0xAF, 0x6F,
+[; ;PetitModbus.h: 54: 0x6E, 0xAE, 0xAA, 0x6A, 0x6B, 0xAB, 0x69, 0xA9, 0xA8, 0x68, 0x78, 0xB8, 0xB9, 0x79, 0xBB,
+[; ;PetitModbus.h: 55: 0x7B, 0x7A, 0xBA, 0xBE, 0x7E, 0x7F, 0xBF, 0x7D, 0xBD, 0xBC, 0x7C, 0xB4, 0x74, 0x75, 0xB5,
+[; ;PetitModbus.h: 56: 0x77, 0xB7, 0xB6, 0x76, 0x72, 0xB2, 0xB3, 0x73, 0xB1, 0x71, 0x70, 0xB0, 0x50, 0x90, 0x91,
+[; ;PetitModbus.h: 57: 0x51, 0x93, 0x53, 0x52, 0x92, 0x96, 0x56, 0x57, 0x97, 0x55, 0x95, 0x94, 0x54, 0x9C, 0x5C,
+[; ;PetitModbus.h: 58: 0x5D, 0x9D, 0x5F, 0x9F, 0x9E, 0x5E, 0x5A, 0x9A, 0x9B, 0x5B, 0x99, 0x59, 0x58, 0x98, 0x88,
+[; ;PetitModbus.h: 59: 0x48, 0x49, 0x89, 0x4B, 0x8B, 0x8A, 0x4A, 0x4E, 0x8E, 0x8F, 0x4F, 0x8D, 0x4D, 0x4C, 0x8C,
+[; ;PetitModbus.h: 60: 0x44, 0x84, 0x85, 0x45, 0x87, 0x47, 0x46, 0x86, 0x82, 0x42, 0x43, 0x83, 0x41, 0x81, 0x80,
+[; ;PetitModbus.h: 61: 0x40
+[; ;PetitModbus.h: 62: };
+[; ;PetitModbus.h: 72: extern volatile unsigned short PetitModbusTimerValue;
+[; ;PetitModbus.h: 73: extern volatile unsigned int SlaveAnswerTimeoutCounter;
+[; ;PetitModbus.h: 75: typedef enum
+[; ;PetitModbus.h: 76: {
+[; ;PetitModbus.h: 77: SLAVE_DATA_BUSY = 1,
+[; ;PetitModbus.h: 78: SLAVE_DATA_OK = 2,
+[; ;PetitModbus.h: 79: SLAVE_DATA_NOK = 3,
+[; ;PetitModbus.h: 80: SLAVE_DATA_TIMEOUT = 4
+[; ;PetitModbus.h: 81: }SLAVE_DATA;
+[; ;PetitModbus.h: 83: typedef struct
+[; ;PetitModbus.h: 84: {
+[; ;PetitModbus.h: 85: unsigned int Reg[7];
+[; ;PetitModbus.h: 86: unsigned char MbCommError;
+[; ;PetitModbus.h: 87: unsigned char MbExceptionCode;
+[; ;PetitModbus.h: 88: unsigned int MbReceiveCounter;
+[; ;PetitModbus.h: 89: unsigned int MbSentCounter;
+[; ;PetitModbus.h: 90: }SLAVE_INFO;
+[; ;PetitModbus.h: 93: extern void InitPetitModbus(SLAVE_INFO *location);
+[; ;PetitModbus.h: 94: extern void ProcessPetitModbus(void);
+[; ;PetitModbus.h: 95: extern unsigned char SendPetitModbus(unsigned char Address, unsigned char Function, unsigned char *DataBuf, unsigned short DataLen);
+[; ;PetitModbus.h: 97: void HandlePetitModbusWriteSingleRegisterSlaveReadback(void);
+[; ;PetitModbus.h: 98: void HandlePetitModbusReadHoldingRegistersSlaveReadback(void);
+[; ;PetitModbus.h: 99: void HandleMPetitodbusWriteMultipleRegistersSlaveReadback(void);
+[; ;PetitModbus.h: 100: void HandleMPetitodbusMbExceptionCodesSlaveReadback(void);
 [; ;htc.h: 26: extern const char __xc8_OPTIM_SPEED;
 [; ;htc.h: 28: extern double __fpnormalize(double);
 [; ;xc8debug.h: 14: extern void __builtin_software_breakpoint(void);
 [; ;pic16f777.h: 50: extern volatile unsigned char INDF @ 0x000;
-"52 C:\Localdata\Microchip\xc8\v1.45\include\pic16f777.h
+"52 C:\Program Files (x86)\Microchip\xc8\v1.44\include\pic16f777.h
 [; ;pic16f777.h: 52: asm("INDF equ 00h");
 [; <" INDF equ 00h ;# ">
 [; ;pic16f777.h: 57: extern volatile unsigned char TMR0 @ 0x001;
@@ -1855,1012 +1901,1095 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;PetitModbusPort.h: 26: extern unsigned char PetitModBus_UART_String(unsigned char *s, unsigned int Length);
 [; ;PetitModbusPort.h: 28: extern void ReceiveInterrupt(unsigned char Data);
 [; ;PetitModbusPort.h: 29: extern void PetitModBus_TimerValues(void);
-"27 modbus/PetitModbus.c
+"23 modbus/PetitModbus.c
 [v _MASTER_SLAVE_DATA `*S1 ~T0 @X0 1 s ]
 [i _MASTER_SLAVE_DATA
 -> -> 0 `i `*S1
 ]
-[; ;PetitModbus.c: 27: static SLAVE_INFO *MASTER_SLAVE_DATA = 0;
-[; ;PetitModbus.c: 29: typedef enum
-[; ;PetitModbus.c: 30: {
-[; ;PetitModbus.c: 31: PETIT_RXTX_IDLE,
-[; ;PetitModbus.c: 32: PETIT_RXTX_START,
-[; ;PetitModbus.c: 33: PETIT_RXTX_DATABUF,
-[; ;PetitModbus.c: 34: PETIT_RXTX_WAIT_ANSWER,
-[; ;PetitModbus.c: 35: PETIT_RXTX_TIMEOUT
-[; ;PetitModbus.c: 36: }PETIT_RXTX_STATE;
-[; ;PetitModbus.c: 38: typedef struct
-[; ;PetitModbus.c: 39: {
-[; ;PetitModbus.c: 40: unsigned char Address;
-[; ;PetitModbus.c: 41: unsigned char Function;
-[; ;PetitModbus.c: 42: unsigned char DataBuf[(7*2 + 10)];
-[; ;PetitModbus.c: 43: unsigned short DataLen;
-[; ;PetitModbus.c: 44: }PETIT_RXTX_DATA;
-"47
+[; ;PetitModbus.c: 23: static SLAVE_INFO *MASTER_SLAVE_DATA = 0;
+[; ;PetitModbus.c: 25: typedef enum
+[; ;PetitModbus.c: 26: {
+[; ;PetitModbus.c: 27: PETIT_RXTX_IDLE,
+[; ;PetitModbus.c: 28: PETIT_RXTX_START,
+[; ;PetitModbus.c: 29: PETIT_RXTX_DATABUF,
+[; ;PetitModbus.c: 30: PETIT_RXTX_WAIT_ANSWER,
+[; ;PetitModbus.c: 31: PETIT_RXTX_TIMEOUT
+[; ;PetitModbus.c: 32: }PETIT_RXTX_STATE;
+[; ;PetitModbus.c: 34: typedef struct
+[; ;PetitModbus.c: 35: {
+[; ;PetitModbus.c: 36: unsigned char Address;
+[; ;PetitModbus.c: 37: unsigned char Function;
+[; ;PetitModbus.c: 38: unsigned char DataBuf[(7*2 + 10)];
+[; ;PetitModbus.c: 39: unsigned short DataLen;
+[; ;PetitModbus.c: 40: }PETIT_RXTX_DATA;
+"43
 [v _Petit_Tx_Data `S118 ~T0 @X0 1 e ]
-[; ;PetitModbus.c: 47: PETIT_RXTX_DATA Petit_Tx_Data;
-"48
+[; ;PetitModbus.c: 43: PETIT_RXTX_DATA Petit_Tx_Data;
+"44
 [v _Petit_Tx_Current `ui ~T0 @X0 1 e ]
 [i _Petit_Tx_Current
 -> -> 0 `i `ui
 ]
-[; ;PetitModbus.c: 48: unsigned int Petit_Tx_Current = 0;
-"49
+[; ;PetitModbus.c: 44: unsigned int Petit_Tx_Current = 0;
+"45
 [v _Petit_Tx_CRC16 `ui ~T0 @X0 1 e ]
 [i _Petit_Tx_CRC16
 -> 65535 `ui
 ]
-[; ;PetitModbus.c: 49: unsigned int Petit_Tx_CRC16 = 0xFFFF;
-"50
-[v _Petit_Tx_State `E1340 ~T0 @X0 1 e ]
+[; ;PetitModbus.c: 45: unsigned int Petit_Tx_CRC16 = 0xFFFF;
+"46
+[v _Petit_Tx_State `E1345 ~T0 @X0 1 e ]
 [i _Petit_Tx_State
-. `E1340 0
+. `E1345 0
 ]
-[; ;PetitModbus.c: 50: PETIT_RXTX_STATE Petit_Tx_State = PETIT_RXTX_IDLE;
-"51
+[; ;PetitModbus.c: 46: PETIT_RXTX_STATE Petit_Tx_State = PETIT_RXTX_IDLE;
+"47
 [v _Petit_Tx_Buf `uc ~T0 @X0 + * -> 7 `i -> 2 `i -> 10 `i e ]
-[; ;PetitModbus.c: 51: unsigned char Petit_Tx_Buf[(7*2 + 10)];
-"52
+[; ;PetitModbus.c: 47: unsigned char Petit_Tx_Buf[(7*2 + 10)];
+"48
 [v _Petit_Tx_Buf_Size `ui ~T0 @X0 1 e ]
 [i _Petit_Tx_Buf_Size
 -> -> 0 `i `ui
 ]
-[; ;PetitModbus.c: 52: unsigned int Petit_Tx_Buf_Size = 0;
-"54
+[; ;PetitModbus.c: 48: unsigned int Petit_Tx_Buf_Size = 0;
+"50
 [v _Petit_Rx_Data `S118 ~T0 @X0 1 e ]
-[; ;PetitModbus.c: 54: PETIT_RXTX_DATA Petit_Rx_Data;
-"55
+[; ;PetitModbus.c: 50: PETIT_RXTX_DATA Petit_Rx_Data;
+"51
 [v _Petit_Rx_CRC16 `ui ~T0 @X0 1 e ]
 [i _Petit_Rx_CRC16
 -> 65535 `ui
 ]
-[; ;PetitModbus.c: 55: unsigned int Petit_Rx_CRC16 = 0xFFFF;
-"56
-[v _Petit_Rx_State `E1340 ~T0 @X0 1 e ]
+[; ;PetitModbus.c: 51: unsigned int Petit_Rx_CRC16 = 0xFFFF;
+"52
+[v _Petit_Rx_State `E1345 ~T0 @X0 1 e ]
 [i _Petit_Rx_State
-. `E1340 0
+. `E1345 0
 ]
-[; ;PetitModbus.c: 56: PETIT_RXTX_STATE Petit_Rx_State = PETIT_RXTX_IDLE;
-"57
+[; ;PetitModbus.c: 52: PETIT_RXTX_STATE Petit_Rx_State = PETIT_RXTX_IDLE;
+"53
 [v _Petit_Rx_Data_Available `uc ~T0 @X0 1 e ]
 [i _Petit_Rx_Data_Available
 -> -> 0 `i `uc
 ]
-[; ;PetitModbus.c: 57: unsigned char Petit_Rx_Data_Available = 0;
-"59
+[; ;PetitModbus.c: 53: unsigned char Petit_Rx_Data_Available = 0;
+"55
 [v _PetitModbusTimerValue `Vus ~T0 @X0 1 e ]
 [i _PetitModbusTimerValue
 -> -> 0 `i `us
 ]
-[; ;PetitModbus.c: 59: volatile unsigned short PetitModbusTimerValue = 0;
-"95
+[; ;PetitModbus.c: 55: volatile unsigned short PetitModbusTimerValue = 0;
+"56
+[v _SlaveAnswerTimeoutCounter `Vui ~T0 @X0 1 e ]
+[i _SlaveAnswerTimeoutCounter
+-> -> 0 `i `ui
+]
+[; ;PetitModbus.c: 56: volatile unsigned int SlaveAnswerTimeoutCounter = 0;
+"92
 [v _Petit_CRC16 `(v ~T0 @X0 1 ef2`Cuc`*ui ]
-"96
+"93
 {
-[; ;PetitModbus.c: 95: void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
-[; ;PetitModbus.c: 96: {
+[; ;PetitModbus.c: 92: void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
+[; ;PetitModbus.c: 93: {
 [e :U _Petit_CRC16 ]
-"95
+"92
 [v _Data `Cuc ~T0 @X0 1 r1 ]
 [v _CRC `*ui ~T0 @X0 1 r2 ]
-"96
+"93
 [f ]
-"97
+"94
 [v _uchCRCHi `ui ~T0 @X0 1 a ]
-[; ;PetitModbus.c: 97: unsigned int uchCRCHi = *CRC >> 8;
+[; ;PetitModbus.c: 94: unsigned int uchCRCHi = *CRC >> 8;
 [e = _uchCRCHi >> *U _CRC -> 8 `i ]
-"98
+"95
 [v _uchCRCLo `ui ~T0 @X0 1 a ]
-[; ;PetitModbus.c: 98: unsigned int uchCRCLo = *CRC & 0x00FF;
+[; ;PetitModbus.c: 95: unsigned int uchCRCLo = *CRC & 0x00FF;
 [e = _uchCRCLo & *U _CRC -> -> 255 `i `ui ]
-"99
+"96
 [v _uIndex `uc ~T0 @X0 1 a ]
-[; ;PetitModbus.c: 99: unsigned char uIndex ;
-[; ;PetitModbus.c: 101: uIndex = uchCRCLo ^ Data;
-"101
+[; ;PetitModbus.c: 96: unsigned char uIndex ;
+[; ;PetitModbus.c: 98: uIndex = uchCRCLo ^ Data;
+"98
 [e = _uIndex -> ^ _uchCRCLo -> _Data `ui `uc ]
-[; ;PetitModbus.c: 102: uchCRCLo = uchCRCHi ^ auchCRCHi[uIndex] ;
-"102
+[; ;PetitModbus.c: 99: uchCRCLo = uchCRCHi ^ auchCRCHi[uIndex] ;
+"99
 [e = _uchCRCLo ^ _uchCRCHi -> *U + &U _auchCRCHi * -> _uIndex `ux -> -> # *U &U _auchCRCHi `ui `ux `ui ]
-[; ;PetitModbus.c: 103: uchCRCHi = auchCRCLo[uIndex] ;
-"103
+[; ;PetitModbus.c: 100: uchCRCHi = auchCRCLo[uIndex] ;
+"100
 [e = _uchCRCHi -> *U + &U _auchCRCLo * -> _uIndex `ux -> -> # *U &U _auchCRCLo `ui `ux `ui ]
-[; ;PetitModbus.c: 104: *CRC = (unsigned int)(uchCRCHi << 8 | uchCRCLo) ;
-"104
+[; ;PetitModbus.c: 101: *CRC = (unsigned int)(uchCRCHi << 8 | uchCRCLo) ;
+"101
 [e = *U _CRC | << _uchCRCHi -> 8 `i _uchCRCLo ]
-[; ;PetitModbus.c: 105: }
-"105
+[; ;PetitModbus.c: 102: }
+"102
 [e :UE 119 ]
 }
-"126
+"123
 [v _Petit_DoSlaveTX `(uc ~T0 @X0 1 ef ]
-"127
+"124
 {
-[; ;PetitModbus.c: 126: unsigned char Petit_DoSlaveTX(void)
-[; ;PetitModbus.c: 127: {
+[; ;PetitModbus.c: 123: unsigned char Petit_DoSlaveTX(void)
+[; ;PetitModbus.c: 124: {
 [e :U _Petit_DoSlaveTX ]
 [f ]
-[; ;PetitModbus.c: 128: PetitModBus_UART_String(Petit_Tx_Buf,Petit_Tx_Buf_Size);
-"128
+[; ;PetitModbus.c: 125: PetitModBus_UART_String(Petit_Tx_Buf,Petit_Tx_Buf_Size);
+"125
 [e ( _PetitModBus_UART_String (2 , &U _Petit_Tx_Buf _Petit_Tx_Buf_Size ]
-[; ;PetitModbus.c: 130: Petit_Tx_Buf_Size = 0;
-"130
+[; ;PetitModbus.c: 127: Petit_Tx_Buf_Size = 0;
+"127
 [e = _Petit_Tx_Buf_Size -> -> 0 `i `ui ]
-[; ;PetitModbus.c: 131: return 1;
-"131
+[; ;PetitModbus.c: 128: return 1;
+"128
 [e ) -> -> 1 `i `uc ]
 [e $UE 120  ]
-[; ;PetitModbus.c: 132: }
-"132
+[; ;PetitModbus.c: 129: }
+"129
 [e :UE 120 ]
 }
-"141
+"138
 [v _PetitSendMessage `(uc ~T0 @X0 1 ef ]
-"142
+"139
 {
-[; ;PetitModbus.c: 141: unsigned char PetitSendMessage(void)
-[; ;PetitModbus.c: 142: {
+[; ;PetitModbus.c: 138: unsigned char PetitSendMessage(void)
+[; ;PetitModbus.c: 139: {
 [e :U _PetitSendMessage ]
 [f ]
-[; ;PetitModbus.c: 143: if (Petit_Tx_State != PETIT_RXTX_IDLE){
-"143
-[e $ ! != -> _Petit_Tx_State `i -> . `E1340 0 `i 122  ]
+[; ;PetitModbus.c: 140: if (Petit_Tx_State != PETIT_RXTX_IDLE){
+"140
+[e $ ! != -> _Petit_Tx_State `i -> . `E1345 0 `i 122  ]
 {
-[; ;PetitModbus.c: 144: return 0;
-"144
+[; ;PetitModbus.c: 141: return 0;
+"141
 [e ) -> -> 0 `i `uc ]
 [e $UE 121  ]
-"145
+"142
 }
 [e :U 122 ]
-[; ;PetitModbus.c: 145: }
-[; ;PetitModbus.c: 146: Petit_Tx_Current =0;
-"146
+[; ;PetitModbus.c: 142: }
+[; ;PetitModbus.c: 143: Petit_Tx_Current =0;
+"143
 [e = _Petit_Tx_Current -> -> 0 `i `ui ]
-[; ;PetitModbus.c: 147: Petit_Tx_State =PETIT_RXTX_START;
-"147
-[e = _Petit_Tx_State . `E1340 1 ]
-[; ;PetitModbus.c: 149: return 1;
-"149
+[; ;PetitModbus.c: 144: Petit_Tx_State =PETIT_RXTX_START;
+"144
+[e = _Petit_Tx_State . `E1345 1 ]
+[; ;PetitModbus.c: 146: return 1;
+"146
 [e ) -> -> 1 `i `uc ]
 [e $UE 121  ]
-[; ;PetitModbus.c: 150: }
-"150
+[; ;PetitModbus.c: 147: }
+"147
 [e :UE 121 ]
 }
-"160
+"157
 [v _Petit_RxDataAvailable `(uc ~T0 @X0 1 ef ]
-"161
+"158
 {
-[; ;PetitModbus.c: 160: unsigned char Petit_RxDataAvailable(void)
-[; ;PetitModbus.c: 161: {
+[; ;PetitModbus.c: 157: unsigned char Petit_RxDataAvailable(void)
+[; ;PetitModbus.c: 158: {
 [e :U _Petit_RxDataAvailable ]
 [f ]
-"162
+"159
 [v _Result `uc ~T0 @X0 1 a ]
-[; ;PetitModbus.c: 162: unsigned char Result = Petit_Rx_Data_Available;
+[; ;PetitModbus.c: 159: unsigned char Result = Petit_Rx_Data_Available;
 [e = _Result _Petit_Rx_Data_Available ]
-[; ;PetitModbus.c: 164: Petit_Rx_Data_Available = 0;
-"164
+[; ;PetitModbus.c: 161: Petit_Rx_Data_Available = 0;
+"161
 [e = _Petit_Rx_Data_Available -> -> 0 `i `uc ]
-[; ;PetitModbus.c: 166: return Result;
-"166
+[; ;PetitModbus.c: 163: return Result;
+"163
 [e ) _Result ]
 [e $UE 123  ]
-[; ;PetitModbus.c: 167: }
-"167
+[; ;PetitModbus.c: 164: }
+"164
 [e :UE 123 ]
 }
-"176
+"173
 [v _Petit_CheckRxTimeout `(uc ~T0 @X0 1 ef ]
-"177
+"174
 {
-[; ;PetitModbus.c: 176: unsigned char Petit_CheckRxTimeout(void)
-[; ;PetitModbus.c: 177: {
+[; ;PetitModbus.c: 173: unsigned char Petit_CheckRxTimeout(void)
+[; ;PetitModbus.c: 174: {
 [e :U _Petit_CheckRxTimeout ]
 [f ]
-[; ;PetitModbus.c: 179: if (PetitModbusTimerValue>= 2)
-"179
+[; ;PetitModbus.c: 176: if (PetitModbusTimerValue>= 2)
+"176
 [e $ ! >= -> _PetitModbusTimerValue `ui -> -> 2 `i `ui 125  ]
-[; ;PetitModbus.c: 180: {
-"180
+[; ;PetitModbus.c: 177: {
+"177
 {
-[; ;PetitModbus.c: 181: PetitModbusTimerValue =0;
-"181
+[; ;PetitModbus.c: 178: PetitModbusTimerValue =0;
+"178
 [e = _PetitModbusTimerValue -> -> 0 `i `us ]
-[; ;PetitModbus.c: 182: PetitReceiveCounter =0;
-"182
+[; ;PetitModbus.c: 179: PetitReceiveCounter =0;
+"179
 [e = _PetitReceiveCounter -> -> 0 `i `uc ]
-[; ;PetitModbus.c: 183: return 1;
-"183
+[; ;PetitModbus.c: 180: return 1;
+"180
 [e ) -> -> 1 `i `uc ]
 [e $UE 124  ]
-"184
+"181
 }
 [e :U 125 ]
-[; ;PetitModbus.c: 184: }
-[; ;PetitModbus.c: 186: return 0;
-"186
+[; ;PetitModbus.c: 181: }
+[; ;PetitModbus.c: 183: return 0;
+"183
 [e ) -> -> 0 `i `uc ]
 [e $UE 124  ]
-[; ;PetitModbus.c: 187: }
-"187
+[; ;PetitModbus.c: 184: }
+"184
 [e :UE 124 ]
 }
-"198
+"195
 [v _CheckPetitModbusBufferComplete `(uc ~T0 @X0 1 ef ]
-"199
+"196
 {
-[; ;PetitModbus.c: 198: unsigned char CheckPetitModbusBufferComplete(void)
-[; ;PetitModbus.c: 199: {
+[; ;PetitModbus.c: 195: unsigned char CheckPetitModbusBufferComplete(void)
+[; ;PetitModbus.c: 196: {
 [e :U _CheckPetitModbusBufferComplete ]
 [f ]
-"200
+"197
 [v _PetitExpectedReceiveCount `i ~T0 @X0 1 a ]
-[; ;PetitModbus.c: 200: int PetitExpectedReceiveCount=0;
+[; ;PetitModbus.c: 197: int PetitExpectedReceiveCount=0;
 [e = _PetitExpectedReceiveCount -> 0 `i ]
-[; ;PetitModbus.c: 202: if(PetitReceiveCounter>4)
-"202
+[; ;PetitModbus.c: 199: if(PetitReceiveCounter>4)
+"199
 [e $ ! > -> _PetitReceiveCounter `i -> 4 `i 127  ]
-[; ;PetitModbus.c: 203: {
-"203
+[; ;PetitModbus.c: 200: {
+"200
 {
-[; ;PetitModbus.c: 204: if(PetitReceiveBuffer[0] > 0)
-"204
+[; ;PetitModbus.c: 201: if(PetitReceiveBuffer[0] > 0)
+"201
 [e $ ! > -> *U + &U _PetitReceiveBuffer * -> -> -> 0 `i `ui `ux -> -> # *U &U _PetitReceiveBuffer `ui `ux `i -> 0 `i 128  ]
-[; ;PetitModbus.c: 205: {
-"205
+[; ;PetitModbus.c: 202: {
+"202
 {
-[; ;PetitModbus.c: 206: if( PetitReceiveBuffer[1]==0x06 || PetitReceiveBuffer[1]==0x10)
-"206
+[; ;PetitModbus.c: 203: if( PetitReceiveBuffer[1]==0x06 || PetitReceiveBuffer[1]==0x10)
+"203
 [e $ ! || == -> *U + &U _PetitReceiveBuffer * -> -> -> 1 `i `ui `ux -> -> # *U &U _PetitReceiveBuffer `ui `ux `i -> 6 `i == -> *U + &U _PetitReceiveBuffer * -> -> -> 1 `i `ui `ux -> -> # *U &U _PetitReceiveBuffer `ui `ux `i -> 16 `i 129  ]
-[; ;PetitModbus.c: 207: {
-"207
+[; ;PetitModbus.c: 204: {
+"204
 {
-[; ;PetitModbus.c: 208: PetitExpectedReceiveCount =8;
-"208
+[; ;PetitModbus.c: 205: PetitExpectedReceiveCount =8;
+"205
 [e = _PetitExpectedReceiveCount -> 8 `i ]
-"209
+"206
 }
-[; ;PetitModbus.c: 209: }
+[; ;PetitModbus.c: 206: }
 [e $U 130  ]
-"210
+"207
 [e :U 129 ]
-[; ;PetitModbus.c: 210: else if(PetitReceiveBuffer[1]==0x03)
+[; ;PetitModbus.c: 207: else if(PetitReceiveBuffer[1]==0x03)
 [e $ ! == -> *U + &U _PetitReceiveBuffer * -> -> -> 1 `i `ui `ux -> -> # *U &U _PetitReceiveBuffer `ui `ux `i -> 3 `i 131  ]
-[; ;PetitModbus.c: 211: {
-"211
+[; ;PetitModbus.c: 208: {
+"208
 {
-[; ;PetitModbus.c: 212: PetitExpectedReceiveCount=(PetitReceiveBuffer[2])+5;
-"212
+[; ;PetitModbus.c: 209: PetitExpectedReceiveCount=(PetitReceiveBuffer[2])+5;
+"209
 [e = _PetitExpectedReceiveCount + -> *U + &U _PetitReceiveBuffer * -> -> -> 2 `i `ui `ux -> -> # *U &U _PetitReceiveBuffer `ui `ux `i -> 5 `i ]
-"213
+"210
 }
-[; ;PetitModbus.c: 213: }
+[; ;PetitModbus.c: 210: }
 [e $U 132  ]
-"214
+"211
 [e :U 131 ]
-[; ;PetitModbus.c: 214: else
-[; ;PetitModbus.c: 215: {
-"215
+[; ;PetitModbus.c: 211: else
+[; ;PetitModbus.c: 212: {
+"212
 {
-[; ;PetitModbus.c: 216: PetitReceiveCounter=0;
-"216
+[; ;PetitModbus.c: 213: PetitReceiveCounter=0;
+"213
 [e = _PetitReceiveCounter -> -> 0 `i `uc ]
-[; ;PetitModbus.c: 217: return 0;
-"217
+[; ;PetitModbus.c: 214: return 0;
+"214
 [e ) -> -> 0 `i `uc ]
 [e $UE 126  ]
-"218
+"215
 }
 [e :U 132 ]
 [e :U 130 ]
-"219
+"216
 }
-[; ;PetitModbus.c: 218: }
-[; ;PetitModbus.c: 219: }
+[; ;PetitModbus.c: 215: }
+[; ;PetitModbus.c: 216: }
 [e $U 133  ]
-"220
+"217
 [e :U 128 ]
-[; ;PetitModbus.c: 220: else
-[; ;PetitModbus.c: 221: {
-"221
+[; ;PetitModbus.c: 217: else
+[; ;PetitModbus.c: 218: {
+"218
 {
-[; ;PetitModbus.c: 222: PetitReceiveCounter=0;
-"222
+[; ;PetitModbus.c: 219: PetitReceiveCounter=0;
+"219
 [e = _PetitReceiveCounter -> -> 0 `i `uc ]
-[; ;PetitModbus.c: 223: return 1;
-"223
+[; ;PetitModbus.c: 220: return 1;
+"220
 [e ) -> -> 1 `i `uc ]
 [e $UE 126  ]
-"224
+"221
 }
 [e :U 133 ]
-"225
+"222
 }
-[; ;PetitModbus.c: 224: }
-[; ;PetitModbus.c: 225: }
+[; ;PetitModbus.c: 221: }
+[; ;PetitModbus.c: 222: }
 [e $U 134  ]
-"226
+"223
 [e :U 127 ]
-[; ;PetitModbus.c: 226: else
-[; ;PetitModbus.c: 227: return 2;
-"227
+[; ;PetitModbus.c: 223: else
+[; ;PetitModbus.c: 224: return 2;
+"224
 [e ) -> -> 2 `i `uc ]
 [e $UE 126  ]
 [e :U 134 ]
-[; ;PetitModbus.c: 229: if(PetitReceiveCounter==PetitExpectedReceiveCount)
-"229
+[; ;PetitModbus.c: 226: if(PetitReceiveCounter==PetitExpectedReceiveCount)
+"226
 [e $ ! == -> _PetitReceiveCounter `i _PetitExpectedReceiveCount 135  ]
-[; ;PetitModbus.c: 230: {
-"230
+[; ;PetitModbus.c: 227: {
+"227
 {
-[; ;PetitModbus.c: 231: return 3;
-"231
+[; ;PetitModbus.c: 228: return 3;
+"228
 [e ) -> -> 3 `i `uc ]
 [e $UE 126  ]
-"232
+"229
 }
 [e :U 135 ]
-[; ;PetitModbus.c: 232: }
-[; ;PetitModbus.c: 234: return 2;
-"234
+[; ;PetitModbus.c: 229: }
+[; ;PetitModbus.c: 231: return 2;
+"231
 [e ) -> -> 2 `i `uc ]
 [e $UE 126  ]
-[; ;PetitModbus.c: 235: }
-"235
+[; ;PetitModbus.c: 232: }
+"232
 [e :UE 126 ]
 }
-"246
+"243
 [v _Petit_RxRTU `(v ~T0 @X0 1 ef ]
-"247
+"244
 {
-[; ;PetitModbus.c: 246: void Petit_RxRTU(void)
-[; ;PetitModbus.c: 247: {
+[; ;PetitModbus.c: 243: void Petit_RxRTU(void)
+[; ;PetitModbus.c: 244: {
 [e :U _Petit_RxRTU ]
 [f ]
-"248
+"245
 [v _Petit_i `uc ~T0 @X0 1 a ]
-"249
+"246
 [v _Petit_ReceiveBufferControl `uc ~T0 @X0 1 a ]
-[; ;PetitModbus.c: 248: unsigned char Petit_i;
-[; ;PetitModbus.c: 249: unsigned char Petit_ReceiveBufferControl=0;
+[; ;PetitModbus.c: 245: unsigned char Petit_i;
+[; ;PetitModbus.c: 246: unsigned char Petit_ReceiveBufferControl=0;
 [e = _Petit_ReceiveBufferControl -> -> 0 `i `uc ]
-[; ;PetitModbus.c: 251: Petit_ReceiveBufferControl =CheckPetitModbusBufferComplete();
-"251
+[; ;PetitModbus.c: 248: Petit_ReceiveBufferControl =CheckPetitModbusBufferComplete();
+"248
 [e = _Petit_ReceiveBufferControl ( _CheckPetitModbusBufferComplete ..  ]
-[; ;PetitModbus.c: 253: if(Petit_ReceiveBufferControl==3)
-"253
+[; ;PetitModbus.c: 250: if(Petit_ReceiveBufferControl==3)
+"250
 [e $ ! == -> _Petit_ReceiveBufferControl `i -> 3 `i 137  ]
-[; ;PetitModbus.c: 254: {
-"254
+[; ;PetitModbus.c: 251: {
+"251
 {
-[; ;PetitModbus.c: 255: Petit_Rx_Data.Address =PetitReceiveBuffer[0];
-"255
+[; ;PetitModbus.c: 252: Petit_Rx_Data.Address =PetitReceiveBuffer[0];
+"252
 [e = . _Petit_Rx_Data 0 *U + &U _PetitReceiveBuffer * -> -> -> 0 `i `ui `ux -> -> # *U &U _PetitReceiveBuffer `ui `ux ]
-[; ;PetitModbus.c: 256: Petit_Rx_CRC16 = 0xffff;
-"256
+[; ;PetitModbus.c: 253: Petit_Rx_CRC16 = 0xffff;
+"253
 [e = _Petit_Rx_CRC16 -> 65535 `ui ]
-[; ;PetitModbus.c: 257: Petit_CRC16(Petit_Rx_Data.Address, &Petit_Rx_CRC16);
-"257
+[; ;PetitModbus.c: 254: Petit_CRC16(Petit_Rx_Data.Address, &Petit_Rx_CRC16);
+"254
 [e ( _Petit_CRC16 (2 , . _Petit_Rx_Data 0 &U _Petit_Rx_CRC16 ]
-[; ;PetitModbus.c: 258: Petit_Rx_Data.Function =PetitReceiveBuffer[1];
-"258
+[; ;PetitModbus.c: 255: Petit_Rx_Data.Function =PetitReceiveBuffer[1];
+"255
 [e = . _Petit_Rx_Data 1 *U + &U _PetitReceiveBuffer * -> -> -> 1 `i `ui `ux -> -> # *U &U _PetitReceiveBuffer `ui `ux ]
-[; ;PetitModbus.c: 259: Petit_CRC16(Petit_Rx_Data.Function, &Petit_Rx_CRC16);
-"259
+[; ;PetitModbus.c: 256: Petit_CRC16(Petit_Rx_Data.Function, &Petit_Rx_CRC16);
+"256
 [e ( _Petit_CRC16 (2 , . _Petit_Rx_Data 1 &U _Petit_Rx_CRC16 ]
-[; ;PetitModbus.c: 261: Petit_Rx_Data.DataLen=0;
-"261
+[; ;PetitModbus.c: 258: Petit_Rx_Data.DataLen=0;
+"258
 [e = . _Petit_Rx_Data 3 -> -> 0 `i `us ]
-[; ;PetitModbus.c: 263: for(Petit_i=2;Petit_i<PetitReceiveCounter;Petit_i++)
-"263
+[; ;PetitModbus.c: 260: for(Petit_i=2;Petit_i<PetitReceiveCounter;Petit_i++)
+"260
 {
 [e = _Petit_i -> -> 2 `i `uc ]
 [e $U 141  ]
-"264
+"261
 [e :U 138 ]
-[; ;PetitModbus.c: 264: Petit_Rx_Data.DataBuf[Petit_Rx_Data.DataLen++]=PetitReceiveBuffer[Petit_i];
+[; ;PetitModbus.c: 261: Petit_Rx_Data.DataBuf[Petit_Rx_Data.DataLen++]=PetitReceiveBuffer[Petit_i];
 [e = *U + &U . _Petit_Rx_Data 2 * -> ++ . _Petit_Rx_Data 3 -> -> 1 `i `us `ux -> -> # *U &U . _Petit_Rx_Data 2 `ui `ux *U + &U _PetitReceiveBuffer * -> _Petit_i `ux -> -> # *U &U _PetitReceiveBuffer `ui `ux ]
-"263
+"260
 [e ++ _Petit_i -> -> 1 `i `uc ]
 [e :U 141 ]
 [e $ < -> _Petit_i `i -> _PetitReceiveCounter `i 138  ]
 [e :U 139 ]
-"264
+"261
 }
-[; ;PetitModbus.c: 266: Petit_Rx_State =PETIT_RXTX_DATABUF;
-"266
-[e = _Petit_Rx_State . `E1340 2 ]
-[; ;PetitModbus.c: 268: PetitReceiveCounter=0;
-"268
+[; ;PetitModbus.c: 263: Petit_Rx_State =PETIT_RXTX_DATABUF;
+"263
+[e = _Petit_Rx_State . `E1345 2 ]
+[; ;PetitModbus.c: 265: PetitReceiveCounter=0;
+"265
 [e = _PetitReceiveCounter -> -> 0 `i `uc ]
-"269
+"266
 }
 [e :U 137 ]
-[; ;PetitModbus.c: 269: }
-[; ;PetitModbus.c: 271: Petit_CheckRxTimeout();
-"271
+[; ;PetitModbus.c: 266: }
+[; ;PetitModbus.c: 268: Petit_CheckRxTimeout();
+"268
 [e ( _Petit_CheckRxTimeout ..  ]
-[; ;PetitModbus.c: 274: if ((Petit_Rx_State == PETIT_RXTX_DATABUF) && (Petit_Rx_Data.DataLen >= 2))
-"274
-[e $ ! && == -> _Petit_Rx_State `i -> . `E1340 2 `i >= -> . _Petit_Rx_Data 3 `ui -> -> 2 `i `ui 142  ]
-[; ;PetitModbus.c: 275: {
-"275
+[; ;PetitModbus.c: 271: if ((Petit_Rx_State == PETIT_RXTX_DATABUF) && (Petit_Rx_Data.DataLen >= 2))
+"271
+[e $ ! && == -> _Petit_Rx_State `i -> . `E1345 2 `i >= -> . _Petit_Rx_Data 3 `ui -> -> 2 `i `ui 142  ]
+[; ;PetitModbus.c: 272: {
+"272
 {
-[; ;PetitModbus.c: 277: Petit_Rx_Data.DataLen -= 2;
-"277
+[; ;PetitModbus.c: 274: Petit_Rx_Data.DataLen -= 2;
+"274
 [e =- . _Petit_Rx_Data 3 -> -> 2 `i `us ]
-[; ;PetitModbus.c: 278: for (Petit_i = 0; Petit_i < Petit_Rx_Data.DataLen; ++Petit_i)
-"278
+[; ;PetitModbus.c: 275: for (Petit_i = 0; Petit_i < Petit_Rx_Data.DataLen; ++Petit_i)
+"275
 {
 [e = _Petit_i -> -> 0 `i `uc ]
 [e $U 146  ]
-"279
+"276
 [e :U 143 ]
-[; ;PetitModbus.c: 279: {
+[; ;PetitModbus.c: 276: {
 {
-[; ;PetitModbus.c: 280: Petit_CRC16(Petit_Rx_Data.DataBuf[Petit_i], &Petit_Rx_CRC16);
-"280
+[; ;PetitModbus.c: 277: Petit_CRC16(Petit_Rx_Data.DataBuf[Petit_i], &Petit_Rx_CRC16);
+"277
 [e ( _Petit_CRC16 (2 , *U + &U . _Petit_Rx_Data 2 * -> _Petit_i `ux -> -> # *U &U . _Petit_Rx_Data 2 `ui `ux &U _Petit_Rx_CRC16 ]
-"281
-}
 "278
+}
+"275
 [e =+ _Petit_i -> -> 1 `i `uc ]
 [e :U 146 ]
 [e $ < -> _Petit_i `ui -> . _Petit_Rx_Data 3 `ui 143  ]
 [e :U 144 ]
-"281
+"278
 }
-[; ;PetitModbus.c: 281: }
-[; ;PetitModbus.c: 283: if (((unsigned int) Petit_Rx_Data.DataBuf[Petit_Rx_Data.DataLen] + ((unsigned int) Petit_Rx_Data.DataBuf[Petit_Rx_Data.DataLen + 1] << 8)) == Petit_Rx_CRC16)
-"283
+[; ;PetitModbus.c: 278: }
+[; ;PetitModbus.c: 280: if (((unsigned int) Petit_Rx_Data.DataBuf[Petit_Rx_Data.DataLen] + ((unsigned int) Petit_Rx_Data.DataBuf[Petit_Rx_Data.DataLen + 1] << 8)) == Petit_Rx_CRC16)
+"280
 [e $ ! == + -> *U + &U . _Petit_Rx_Data 2 * -> . _Petit_Rx_Data 3 `ux -> -> # *U &U . _Petit_Rx_Data 2 `ui `ux `ui << -> *U + &U . _Petit_Rx_Data 2 * -> + -> . _Petit_Rx_Data 3 `ui -> -> 1 `i `ui `ux -> -> # *U &U . _Petit_Rx_Data 2 `ui `ux `ui -> 8 `i _Petit_Rx_CRC16 147  ]
-[; ;PetitModbus.c: 284: {
-"284
+[; ;PetitModbus.c: 281: {
+"281
 {
-[; ;PetitModbus.c: 286: Petit_Rx_Data_Available = 1;
-"286
+[; ;PetitModbus.c: 283: Petit_Rx_Data_Available = 1;
+"283
 [e = _Petit_Rx_Data_Available -> -> 1 `i `uc ]
-"287
+"284
 }
 [e :U 147 ]
-[; ;PetitModbus.c: 287: }
-[; ;PetitModbus.c: 289: Petit_Rx_State = PETIT_RXTX_IDLE;
-"289
-[e = _Petit_Rx_State . `E1340 0 ]
-"290
+[; ;PetitModbus.c: 284: }
+[; ;PetitModbus.c: 286: Petit_Rx_State = PETIT_RXTX_IDLE;
+"286
+[e = _Petit_Rx_State . `E1345 0 ]
+"287
 }
 [e :U 142 ]
-[; ;PetitModbus.c: 290: }
-[; ;PetitModbus.c: 291: }
-"291
+[; ;PetitModbus.c: 287: }
+[; ;PetitModbus.c: 288: }
+"288
 [e :UE 136 ]
 }
-"303
+"300
 [v _Petit_TxRTU `(v ~T0 @X0 1 ef ]
-"304
+"301
 {
-[; ;PetitModbus.c: 303: void Petit_TxRTU(void)
-[; ;PetitModbus.c: 304: {
+[; ;PetitModbus.c: 300: void Petit_TxRTU(void)
+[; ;PetitModbus.c: 301: {
 [e :U _Petit_TxRTU ]
 [f ]
-[; ;PetitModbus.c: 305: Petit_Tx_CRC16 =0xFFFF;
-"305
+[; ;PetitModbus.c: 302: Petit_Tx_CRC16 =0xFFFF;
+"302
 [e = _Petit_Tx_CRC16 -> 65535 `ui ]
-[; ;PetitModbus.c: 306: Petit_Tx_Buf_Size =0;
-"306
+[; ;PetitModbus.c: 303: Petit_Tx_Buf_Size =0;
+"303
 [e = _Petit_Tx_Buf_Size -> -> 0 `i `ui ]
-[; ;PetitModbus.c: 307: Petit_Tx_Buf[Petit_Tx_Buf_Size++] =Petit_Tx_Data.Address;
-"307
+[; ;PetitModbus.c: 304: Petit_Tx_Buf[Petit_Tx_Buf_Size++] =Petit_Tx_Data.Address;
+"304
 [e = *U + &U _Petit_Tx_Buf * -> ++ _Petit_Tx_Buf_Size -> -> 1 `i `ui `ux -> -> # *U &U _Petit_Tx_Buf `ui `ux . _Petit_Tx_Data 0 ]
-[; ;PetitModbus.c: 308: Petit_CRC16(Petit_Tx_Data.Address, &Petit_Tx_CRC16);
-"308
+[; ;PetitModbus.c: 305: Petit_CRC16(Petit_Tx_Data.Address, &Petit_Tx_CRC16);
+"305
 [e ( _Petit_CRC16 (2 , . _Petit_Tx_Data 0 &U _Petit_Tx_CRC16 ]
-[; ;PetitModbus.c: 309: Petit_Tx_Buf[Petit_Tx_Buf_Size++] =Petit_Tx_Data.Function;
-"309
+[; ;PetitModbus.c: 306: Petit_Tx_Buf[Petit_Tx_Buf_Size++] =Petit_Tx_Data.Function;
+"306
 [e = *U + &U _Petit_Tx_Buf * -> ++ _Petit_Tx_Buf_Size -> -> 1 `i `ui `ux -> -> # *U &U _Petit_Tx_Buf `ui `ux . _Petit_Tx_Data 1 ]
-[; ;PetitModbus.c: 310: Petit_CRC16(Petit_Tx_Data.Function, &Petit_Tx_CRC16);
-"310
+[; ;PetitModbus.c: 307: Petit_CRC16(Petit_Tx_Data.Function, &Petit_Tx_CRC16);
+"307
 [e ( _Petit_CRC16 (2 , . _Petit_Tx_Data 1 &U _Petit_Tx_CRC16 ]
-[; ;PetitModbus.c: 312: for(Petit_Tx_Current=0; Petit_Tx_Current < Petit_Tx_Data.DataLen; Petit_Tx_Current++)
-"312
+[; ;PetitModbus.c: 309: for(Petit_Tx_Current=0; Petit_Tx_Current < Petit_Tx_Data.DataLen; Petit_Tx_Current++)
+"309
 {
 [e = _Petit_Tx_Current -> -> 0 `i `ui ]
 [e $U 152  ]
-"313
+"310
 [e :U 149 ]
-[; ;PetitModbus.c: 313: {
+[; ;PetitModbus.c: 310: {
 {
-[; ;PetitModbus.c: 314: Petit_Tx_Buf[Petit_Tx_Buf_Size++]=Petit_Tx_Data.DataBuf[Petit_Tx_Current];
-"314
+[; ;PetitModbus.c: 311: Petit_Tx_Buf[Petit_Tx_Buf_Size++]=Petit_Tx_Data.DataBuf[Petit_Tx_Current];
+"311
 [e = *U + &U _Petit_Tx_Buf * -> ++ _Petit_Tx_Buf_Size -> -> 1 `i `ui `ux -> -> # *U &U _Petit_Tx_Buf `ui `ux *U + &U . _Petit_Tx_Data 2 * -> _Petit_Tx_Current `ux -> -> # *U &U . _Petit_Tx_Data 2 `ui `ux ]
-[; ;PetitModbus.c: 315: Petit_CRC16(Petit_Tx_Data.DataBuf[Petit_Tx_Current], &Petit_Tx_CRC16);
-"315
-[e ( _Petit_CRC16 (2 , *U + &U . _Petit_Tx_Data 2 * -> _Petit_Tx_Current `ux -> -> # *U &U . _Petit_Tx_Data 2 `ui `ux &U _Petit_Tx_CRC16 ]
-"316
-}
+[; ;PetitModbus.c: 312: Petit_CRC16(Petit_Tx_Data.DataBuf[Petit_Tx_Current], &Petit_Tx_CRC16);
 "312
+[e ( _Petit_CRC16 (2 , *U + &U . _Petit_Tx_Data 2 * -> _Petit_Tx_Current `ux -> -> # *U &U . _Petit_Tx_Data 2 `ui `ux &U _Petit_Tx_CRC16 ]
+"313
+}
+"309
 [e ++ _Petit_Tx_Current -> -> 1 `i `ui ]
 [e :U 152 ]
 [e $ < _Petit_Tx_Current -> . _Petit_Tx_Data 3 `ui 149  ]
 [e :U 150 ]
-"316
+"313
 }
-[; ;PetitModbus.c: 316: }
-[; ;PetitModbus.c: 318: Petit_Tx_Buf[Petit_Tx_Buf_Size++] = Petit_Tx_CRC16 & 0x00FF;
-"318
+[; ;PetitModbus.c: 313: }
+[; ;PetitModbus.c: 315: Petit_Tx_Buf[Petit_Tx_Buf_Size++] = Petit_Tx_CRC16 & 0x00FF;
+"315
 [e = *U + &U _Petit_Tx_Buf * -> ++ _Petit_Tx_Buf_Size -> -> 1 `i `ui `ux -> -> # *U &U _Petit_Tx_Buf `ui `ux -> & _Petit_Tx_CRC16 -> -> 255 `i `ui `uc ]
-[; ;PetitModbus.c: 319: Petit_Tx_Buf[Petit_Tx_Buf_Size++] =(Petit_Tx_CRC16 & 0xFF00) >> 8;
-"319
+[; ;PetitModbus.c: 316: Petit_Tx_Buf[Petit_Tx_Buf_Size++] =(Petit_Tx_CRC16 & 0xFF00) >> 8;
+"316
 [e = *U + &U _Petit_Tx_Buf * -> ++ _Petit_Tx_Buf_Size -> -> 1 `i `ui `ux -> -> # *U &U _Petit_Tx_Buf `ui `ux -> >> & _Petit_Tx_CRC16 -> 65280 `ui -> 8 `i `uc ]
-[; ;PetitModbus.c: 321: Petit_DoSlaveTX();
-"321
+[; ;PetitModbus.c: 318: Petit_DoSlaveTX();
+"318
 [e ( _Petit_DoSlaveTX ..  ]
-[; ;PetitModbus.c: 323: if (Petit_Tx_Data.Address == 0){
-"323
+[; ;PetitModbus.c: 320: if (Petit_Tx_Data.Address == 0){
+"320
 [e $ ! == -> . _Petit_Tx_Data 0 `i -> 0 `i 153  ]
 {
-[; ;PetitModbus.c: 324: Petit_Tx_State =PETIT_RXTX_IDLE;
-"324
-[e = _Petit_Tx_State . `E1340 0 ]
-"325
+[; ;PetitModbus.c: 321: Petit_Tx_State =PETIT_RXTX_IDLE;
+"321
+[e = _Petit_Tx_State . `E1345 0 ]
+"322
 }
-[; ;PetitModbus.c: 325: }
+[; ;PetitModbus.c: 322: }
 [e $U 154  ]
-"326
+"323
 [e :U 153 ]
-[; ;PetitModbus.c: 326: else{
+[; ;PetitModbus.c: 323: else{
 {
-[; ;PetitModbus.c: 327: Petit_Tx_State =PETIT_RXTX_WAIT_ANSWER;
+[; ;PetitModbus.c: 324: Petit_Tx_State =PETIT_RXTX_WAIT_ANSWER;
+"324
+[e = _Petit_Tx_State . `E1345 3 ]
+[; ;PetitModbus.c: 325: SlaveAnswerTimeoutCounter = 0;
+"325
+[e = _SlaveAnswerTimeoutCounter -> -> 0 `i `ui ]
+[; ;PetitModbus.c: 326: TMR1 = 0x00;
+"326
+[e = _TMR1 -> -> 0 `i `us ]
+[; ;PetitModbus.c: 327: PIR1bits.TMR1IF = 0;
 "327
-[e = _Petit_Tx_State . `E1340 3 ]
+[e = . . _PIR1bits 0 0 -> -> 0 `i `uc ]
+[; ;PetitModbus.c: 328: PIE1bits.TMR1IE = 1;
 "328
+[e = . . _PIE1bits 0 0 -> -> 1 `i `uc ]
+[; ;PetitModbus.c: 329: T1CONbits.TMR1ON = 1;
+"329
+[e = . . _T1CONbits 0 0 -> -> 1 `i `uc ]
+[; ;PetitModbus.c: 330: PORTDbits.RD1 = 1;
+"330
+[e = . . _PORTDbits 0 1 -> -> 1 `i `uc ]
+"331
 }
 [e :U 154 ]
-[; ;PetitModbus.c: 328: }
-[; ;PetitModbus.c: 329: }
-"329
+[; ;PetitModbus.c: 331: }
+[; ;PetitModbus.c: 332: }
+"332
 [e :UE 148 ]
 }
-"337
+"341
 [v _ProcessPetitModbus `(v ~T0 @X0 1 ef ]
-"338
+"342
 {
-[; ;PetitModbus.c: 337: void ProcessPetitModbus(void)
-[; ;PetitModbus.c: 338: {
+[; ;PetitModbus.c: 341: void ProcessPetitModbus(void)
+[; ;PetitModbus.c: 342: {
 [e :U _ProcessPetitModbus ]
 [f ]
-[; ;PetitModbus.c: 339: if (Petit_Tx_State != PETIT_RXTX_IDLE && Petit_Tx_State != PETIT_RXTX_WAIT_ANSWER){
-"339
-[e $ ! && != -> _Petit_Tx_State `i -> . `E1340 0 `i != -> _Petit_Tx_State `i -> . `E1340 3 `i 156  ]
-{
-[; ;PetitModbus.c: 341: Petit_TxRTU();
-"341
-[e ( _Petit_TxRTU ..  ]
+[; ;PetitModbus.c: 343: if (Petit_Tx_State != PETIT_RXTX_IDLE && Petit_Tx_State != PETIT_RXTX_WAIT_ANSWER){
 "343
-}
-[e :U 156 ]
-[; ;PetitModbus.c: 343: }
-[; ;PetitModbus.c: 345: Petit_RxRTU();
+[e $ ! && != -> _Petit_Tx_State `i -> . `E1345 0 `i != -> _Petit_Tx_State `i -> . `E1345 3 `i 156  ]
+{
+[; ;PetitModbus.c: 345: Petit_TxRTU();
 "345
-[e ( _Petit_RxRTU ..  ]
-[; ;PetitModbus.c: 347: if (Petit_RxDataAvailable())
+[e ( _Petit_TxRTU ..  ]
 "347
-[e $ ! != -> ( _Petit_RxDataAvailable ..  `i -> -> -> 0 `i `uc `i 157  ]
-[; ;PetitModbus.c: 348: {
+}
+[; ;PetitModbus.c: 347: }
+[e $U 157  ]
 "348
+[e :U 156 ]
+[; ;PetitModbus.c: 348: else if(Petit_Tx_State == PETIT_RXTX_WAIT_ANSWER){
+[e $ ! == -> _Petit_Tx_State `i -> . `E1345 3 `i 158  ]
 {
-[; ;PetitModbus.c: 349: switch (Petit_Rx_Data.Function)
+[; ;PetitModbus.c: 349: if (SlaveAnswerTimeoutCounter){
 "349
-[e $U 159  ]
-[; ;PetitModbus.c: 350: {
+[e $ ! != _SlaveAnswerTimeoutCounter -> -> 0 `i `Vui 159  ]
+{
+[; ;PetitModbus.c: 350: MASTER_SLAVE_DATA[Petit_Tx_Data.Address].MbCommError = SLAVE_DATA_TIMEOUT;
 "350
-{
-[; ;PetitModbus.c: 352: case 3: { HandlePetitModbusReadHoldingRegistersSlaveReadback(); break; }
+[e = . *U + _MASTER_SLAVE_DATA * -> . _Petit_Tx_Data 0 `ux -> -> # *U _MASTER_SLAVE_DATA `ui `ux 1 -> . `E5 3 `uc ]
+[; ;PetitModbus.c: 351: Petit_Tx_State = PETIT_RXTX_IDLE;
+"351
+[e = _Petit_Tx_State . `E1345 0 ]
+[; ;PetitModbus.c: 352: SlaveAnswerTimeoutCounter = 0;
 "352
-[e :U 160 ]
-{
-[e ( _HandlePetitModbusReadHoldingRegistersSlaveReadback ..  ]
-[e $U 158  ]
+[e = _SlaveAnswerTimeoutCounter -> -> 0 `i `ui ]
+"353
 }
-[; ;PetitModbus.c: 355: case 6: { HandlePetitModbusWriteSingleRegisterSlaveReadback(); break; }
-"355
-[e :U 161 ]
-{
-[e ( _HandlePetitModbusWriteSingleRegisterSlaveReadback ..  ]
-[e $U 158  ]
+[e :U 159 ]
+"354
 }
-[; ;PetitModbus.c: 358: case 16: { HandleMPetitodbusWriteMultipleRegistersSlaveReadback(); break; }
+[e :U 158 ]
+"356
+[e :U 157 ]
+[; ;PetitModbus.c: 353: }
+[; ;PetitModbus.c: 354: }
+[; ;PetitModbus.c: 356: Petit_RxRTU();
+[e ( _Petit_RxRTU ..  ]
+[; ;PetitModbus.c: 358: if (Petit_RxDataAvailable())
 "358
-[e :U 162 ]
+[e $ ! != -> ( _Petit_RxDataAvailable ..  `i -> -> -> 0 `i `uc `i 160  ]
+[; ;PetitModbus.c: 359: {
+"359
 {
-[e ( _HandleMPetitodbusWriteMultipleRegistersSlaveReadback ..  ]
-[e $U 158  ]
-}
-[; ;PetitModbus.c: 360: default: { Petit_Tx_State = PETIT_RXTX_IDLE; break; }
+[; ;PetitModbus.c: 360: switch (Petit_Rx_Data.Function)
 "360
+[e $U 162  ]
+[; ;PetitModbus.c: 361: {
+"361
+{
+[; ;PetitModbus.c: 363: case 3: { HandlePetitModbusReadHoldingRegistersSlaveReadback(); break; }
+"363
 [e :U 163 ]
 {
-[e = _Petit_Tx_State . `E1340 0 ]
-[e $U 158  ]
+[e ( _HandlePetitModbusReadHoldingRegistersSlaveReadback ..  ]
+[e $U 161  ]
 }
-"361
+[; ;PetitModbus.c: 366: case 6: { HandlePetitModbusWriteSingleRegisterSlaveReadback(); break; }
+"366
+[e :U 164 ]
+{
+[e ( _HandlePetitModbusWriteSingleRegisterSlaveReadback ..  ]
+[e $U 161  ]
 }
-[; ;PetitModbus.c: 361: }
-[e $U 158  ]
-"349
-[e :U 159 ]
-[e [\ . _Petit_Rx_Data 1 , $ -> -> 3 `i `uc 160
- , $ -> -> 6 `i `uc 161
- , $ -> -> 16 `i `uc 162
- 163 ]
-"361
-[e :U 158 ]
-"362
+[; ;PetitModbus.c: 369: case 16: { HandleMPetitodbusWriteMultipleRegistersSlaveReadback(); break; }
+"369
+[e :U 165 ]
+{
+[e ( _HandleMPetitodbusWriteMultipleRegistersSlaveReadback ..  ]
+[e $U 161  ]
 }
-[e :U 157 ]
-[; ;PetitModbus.c: 362: }
-[; ;PetitModbus.c: 363: }
-"363
+[; ;PetitModbus.c: 371: default: { HandleMPetitodbusMbExceptionCodesSlaveReadback(); break; }
+"371
+[e :U 166 ]
+{
+[e ( _HandleMPetitodbusMbExceptionCodesSlaveReadback ..  ]
+[e $U 161  ]
+}
+"372
+}
+[; ;PetitModbus.c: 372: }
+[e $U 161  ]
+"360
+[e :U 162 ]
+[e [\ . _Petit_Rx_Data 1 , $ -> -> 3 `i `uc 163
+ , $ -> -> 6 `i `uc 164
+ , $ -> -> 16 `i `uc 165
+ 166 ]
+"372
+[e :U 161 ]
+"373
+}
+[e :U 160 ]
+[; ;PetitModbus.c: 373: }
+[; ;PetitModbus.c: 374: }
+"374
 [e :UE 155 ]
 }
-"378
+"389
 [v _InitPetitModbus `(v ~T0 @X0 1 ef1`*S1 ]
-"379
+"390
 {
-[; ;PetitModbus.c: 378: void InitPetitModbus(SLAVE_INFO *location)
-[; ;PetitModbus.c: 379: {
+[; ;PetitModbus.c: 389: void InitPetitModbus(SLAVE_INFO *location)
+[; ;PetitModbus.c: 390: {
 [e :U _InitPetitModbus ]
-"378
+"389
 [v _location `*S1 ~T0 @X0 1 r1 ]
-"379
+"390
 [f ]
-[; ;PetitModbus.c: 380: MASTER_SLAVE_DATA = location;
-"380
+[; ;PetitModbus.c: 391: MASTER_SLAVE_DATA = location;
+"391
 [e = _MASTER_SLAVE_DATA _location ]
-[; ;PetitModbus.c: 381: PetitModBus_UART_Initialise();
-"381
-[e ( _PetitModBus_UART_Initialise ..  ]
-[; ;PetitModbus.c: 382: PetitModBus_TIMER_Initialise();
-"382
-[e ( _PetitModBus_TIMER_Initialise ..  ]
-[; ;PetitModbus.c: 383: }
-"383
-[e :UE 164 ]
-}
+[; ;PetitModbus.c: 392: PetitModBus_UART_Initialise();
 "392
+[e ( _PetitModBus_UART_Initialise ..  ]
+[; ;PetitModbus.c: 393: PetitModBus_TIMER_Initialise();
+"393
+[e ( _PetitModBus_TIMER_Initialise ..  ]
+[; ;PetitModbus.c: 394: }
+"394
+[e :UE 167 ]
+}
+"403
 [v _SendPetitModbus `(uc ~T0 @X0 1 ef4`uc`uc`*uc`us ]
 {
-[; ;PetitModbus.c: 392: unsigned char SendPetitModbus(unsigned char Address, unsigned char Function, unsigned char *DataBuf, unsigned short DataLen){
+[; ;PetitModbus.c: 403: unsigned char SendPetitModbus(unsigned char Address, unsigned char Function, unsigned char *DataBuf, unsigned short DataLen){
 [e :U _SendPetitModbus ]
 [v _Address `uc ~T0 @X0 1 r1 ]
 [v _Function `uc ~T0 @X0 1 r2 ]
 [v _DataBuf `*uc ~T0 @X0 1 r3 ]
 [v _DataLen `us ~T0 @X0 1 r4 ]
 [f ]
-"394
+"405
 [v _return_val `uc ~T0 @X0 1 a ]
-[; ;PetitModbus.c: 394: unsigned char return_val = 0;
+[; ;PetitModbus.c: 405: unsigned char return_val = 0;
 [e = _return_val -> -> 0 `i `uc ]
-[; ;PetitModbus.c: 396: MASTER_SLAVE_DATA[Address].CommError = SLAVE_DATA_BUSY;
-"396
-[e = . *U + _MASTER_SLAVE_DATA * -> _Address `ux -> -> # *U _MASTER_SLAVE_DATA `ui `ux 1 -> . `E4 0 `uc ]
-[; ;PetitModbus.c: 399: Petit_Tx_Data.Function = Function;
-"399
+[; ;PetitModbus.c: 407: MASTER_SLAVE_DATA[Address].MbCommError = SLAVE_DATA_BUSY;
+"407
+[e = . *U + _MASTER_SLAVE_DATA * -> _Address `ux -> -> # *U _MASTER_SLAVE_DATA `ui `ux 1 -> . `E5 0 `uc ]
+[; ;PetitModbus.c: 410: Petit_Tx_Data.Function = Function;
+"410
 [e = . _Petit_Tx_Data 1 _Function ]
-[; ;PetitModbus.c: 400: Petit_Tx_Data.Address = Address;
-"400
+[; ;PetitModbus.c: 411: Petit_Tx_Data.Address = Address;
+"411
 [e = . _Petit_Tx_Data 0 _Address ]
-[; ;PetitModbus.c: 401: Petit_Tx_Data.DataLen = DataLen;
-"401
+[; ;PetitModbus.c: 412: Petit_Tx_Data.DataLen = DataLen;
+"412
 [e = . _Petit_Tx_Data 3 _DataLen ]
-[; ;PetitModbus.c: 403: for(Petit_Tx_Current=0; Petit_Tx_Current < Petit_Tx_Data.DataLen; Petit_Tx_Current++)
-"403
+[; ;PetitModbus.c: 414: for(Petit_Tx_Current=0; Petit_Tx_Current < Petit_Tx_Data.DataLen; Petit_Tx_Current++)
+"414
 {
 [e = _Petit_Tx_Current -> -> 0 `i `ui ]
-[e $U 169  ]
-"404
-[e :U 166 ]
-[; ;PetitModbus.c: 404: {
-{
-[; ;PetitModbus.c: 405: Petit_Tx_Data.DataBuf[Petit_Tx_Current]=DataBuf[Petit_Tx_Current];
-"405
-[e = *U + &U . _Petit_Tx_Data 2 * -> _Petit_Tx_Current `ux -> -> # *U &U . _Petit_Tx_Data 2 `ui `ux *U + _DataBuf * -> _Petit_Tx_Current `ux -> -> # *U _DataBuf `ui `ux ]
-"406
-}
-"403
-[e ++ _Petit_Tx_Current -> -> 1 `i `ui ]
+[e $U 172  ]
+"415
 [e :U 169 ]
-[e $ < _Petit_Tx_Current -> . _Petit_Tx_Data 3 `ui 166  ]
-[e :U 167 ]
-"406
-}
-[; ;PetitModbus.c: 406: }
-[; ;PetitModbus.c: 407: return_val = PetitSendMessage();
-"407
-[e = _return_val ( _PetitSendMessage ..  ]
-[; ;PetitModbus.c: 409: if (return_val){
-"409
-[e $ ! != -> _return_val `i -> -> -> 0 `i `uc `i 170  ]
+[; ;PetitModbus.c: 415: {
 {
-[; ;PetitModbus.c: 410: MASTER_SLAVE_DATA[Address].SentCounter += 1;
-"410
-[e =+ . *U + _MASTER_SLAVE_DATA * -> _Address `ux -> -> # *U _MASTER_SLAVE_DATA `ui `ux 3 -> -> 1 `i `ui ]
-"411
+[; ;PetitModbus.c: 416: Petit_Tx_Data.DataBuf[Petit_Tx_Current]=DataBuf[Petit_Tx_Current];
+"416
+[e = *U + &U . _Petit_Tx_Data 2 * -> _Petit_Tx_Current `ux -> -> # *U &U . _Petit_Tx_Data 2 `ui `ux *U + _DataBuf * -> _Petit_Tx_Current `ux -> -> # *U _DataBuf `ui `ux ]
+"417
 }
-[e :U 170 ]
-[; ;PetitModbus.c: 411: }
-[; ;PetitModbus.c: 413: return (return_val);
-"413
-[e ) _return_val ]
-[e $UE 165  ]
-[; ;PetitModbus.c: 414: }
 "414
-[e :UE 165 ]
+[e ++ _Petit_Tx_Current -> -> 1 `i `ui ]
+[e :U 172 ]
+[e $ < _Petit_Tx_Current -> . _Petit_Tx_Data 3 `ui 169  ]
+[e :U 170 ]
+"417
 }
+[; ;PetitModbus.c: 417: }
+[; ;PetitModbus.c: 418: return_val = PetitSendMessage();
+"418
+[e = _return_val ( _PetitSendMessage ..  ]
+[; ;PetitModbus.c: 420: if (return_val){
+"420
+[e $ ! != -> _return_val `i -> -> -> 0 `i `uc `i 173  ]
+{
+[; ;PetitModbus.c: 421: MASTER_SLAVE_DATA[Address].MbSentCounter += 1;
+"421
+[e =+ . *U + _MASTER_SLAVE_DATA * -> _Address `ux -> -> # *U _MASTER_SLAVE_DATA `ui `ux 4 -> -> 1 `i `ui ]
 "422
-[v _HandlePetitModbusWriteSingleRegisterSlaveReadback `(v ~T0 @X0 1 ef ]
-"423
-{
-[; ;PetitModbus.c: 422: void HandlePetitModbusWriteSingleRegisterSlaveReadback(void)
-[; ;PetitModbus.c: 423: {
-[e :U _HandlePetitModbusWriteSingleRegisterSlaveReadback ]
-[f ]
-[; ;PetitModbus.c: 424: if(Petit_Tx_Data.Function == Petit_Rx_Data.Function){
-"424
-[e $ ! == -> . _Petit_Tx_Data 1 `i -> . _Petit_Rx_Data 1 `i 172  ]
-{
-[; ;PetitModbus.c: 425: if(Petit_Tx_Data.Address == Petit_Rx_Data.Address){
-"425
-[e $ ! == -> . _Petit_Tx_Data 0 `i -> . _Petit_Rx_Data 0 `i 173  ]
-{
-[; ;PetitModbus.c: 426: if(Petit_Tx_Data.DataBuf[0] == Petit_Rx_Data.DataBuf[0]){
-"426
-[e $ ! == -> *U + &U . _Petit_Tx_Data 2 * -> -> -> 0 `i `ui `ux -> -> # *U &U . _Petit_Tx_Data 2 `ui `ux `i -> *U + &U . _Petit_Rx_Data 2 * -> -> -> 0 `i `ui `ux -> -> # *U &U . _Petit_Rx_Data 2 `ui `ux `i 174  ]
-{
-[; ;PetitModbus.c: 427: if(Petit_Tx_Data.DataBuf[1] == Petit_Rx_Data.DataBuf[1]){
-"427
-[e $ ! == -> *U + &U . _Petit_Tx_Data 2 * -> -> -> 1 `i `ui `ux -> -> # *U &U . _Petit_Tx_Data 2 `ui `ux `i -> *U + &U . _Petit_Rx_Data 2 * -> -> -> 1 `i `ui `ux -> -> # *U &U . _Petit_Rx_Data 2 `ui `ux `i 175  ]
-{
-[; ;PetitModbus.c: 428: if(Petit_Tx_Data.DataBuf[2] == Petit_Rx_Data.DataBuf[2]){
-"428
-[e $ ! == -> *U + &U . _Petit_Tx_Data 2 * -> -> -> 2 `i `ui `ux -> -> # *U &U . _Petit_Tx_Data 2 `ui `ux `i -> *U + &U . _Petit_Rx_Data 2 * -> -> -> 2 `i `ui `ux -> -> # *U &U . _Petit_Rx_Data 2 `ui `ux `i 176  ]
-{
-[; ;PetitModbus.c: 429: if(Petit_Tx_Data.DataBuf[3] == Petit_Rx_Data.DataBuf[3]){
-"429
-[e $ ! == -> *U + &U . _Petit_Tx_Data 2 * -> -> -> 3 `i `ui `ux -> -> # *U &U . _Petit_Tx_Data 2 `ui `ux `i -> *U + &U . _Petit_Rx_Data 2 * -> -> -> 3 `i `ui `ux -> -> # *U &U . _Petit_Rx_Data 2 `ui `ux `i 177  ]
-{
-[; ;PetitModbus.c: 430: MASTER_SLAVE_DATA[Petit_Rx_Data.Address].CommError = SLAVE_DATA_OK;
-"430
-[e = . *U + _MASTER_SLAVE_DATA * -> . _Petit_Rx_Data 0 `ux -> -> # *U _MASTER_SLAVE_DATA `ui `ux 1 -> . `E4 1 `uc ]
-[; ;PetitModbus.c: 431: MASTER_SLAVE_DATA[Petit_Rx_Data.Address].ReceiveCounter += 1;
-"431
-[e =+ . *U + _MASTER_SLAVE_DATA * -> . _Petit_Rx_Data 0 `ux -> -> # *U _MASTER_SLAVE_DATA `ui `ux 2 -> -> 1 `i `ui ]
-"432
-}
-[e :U 177 ]
-"433
-}
-[e :U 176 ]
-"434
-}
-[e :U 175 ]
-"435
-}
-[e :U 174 ]
-"436
 }
 [e :U 173 ]
-"437
+[; ;PetitModbus.c: 422: }
+[; ;PetitModbus.c: 424: return (return_val);
+"424
+[e ) _return_val ]
+[e $UE 168  ]
+[; ;PetitModbus.c: 425: }
+"425
+[e :UE 168 ]
 }
-[; ;PetitModbus.c: 432: }
-[; ;PetitModbus.c: 433: }
-[; ;PetitModbus.c: 434: }
-[; ;PetitModbus.c: 435: }
-[; ;PetitModbus.c: 436: }
-[; ;PetitModbus.c: 437: }
-[e $U 178  ]
-"438
-[e :U 172 ]
-[; ;PetitModbus.c: 438: else{
+"433
+[v _HandlePetitModbusWriteSingleRegisterSlaveReadback `(v ~T0 @X0 1 ef ]
+"434
 {
-[; ;PetitModbus.c: 439: MASTER_SLAVE_DATA[Petit_Tx_Data.Address].CommError = SLAVE_DATA_NOK;
+[; ;PetitModbus.c: 433: void HandlePetitModbusWriteSingleRegisterSlaveReadback(void)
+[; ;PetitModbus.c: 434: {
+[e :U _HandlePetitModbusWriteSingleRegisterSlaveReadback ]
+[f ]
+[; ;PetitModbus.c: 435: if(Petit_Tx_Data.Function == Petit_Rx_Data.Function){
+"435
+[e $ ! == -> . _Petit_Tx_Data 1 `i -> . _Petit_Rx_Data 1 `i 175  ]
+{
+[; ;PetitModbus.c: 436: if(Petit_Tx_Data.Address == Petit_Rx_Data.Address){
+"436
+[e $ ! == -> . _Petit_Tx_Data 0 `i -> . _Petit_Rx_Data 0 `i 176  ]
+{
+[; ;PetitModbus.c: 437: if(Petit_Tx_Data.DataBuf[0] == Petit_Rx_Data.DataBuf[0]){
+"437
+[e $ ! == -> *U + &U . _Petit_Tx_Data 2 * -> -> -> 0 `i `ui `ux -> -> # *U &U . _Petit_Tx_Data 2 `ui `ux `i -> *U + &U . _Petit_Rx_Data 2 * -> -> -> 0 `i `ui `ux -> -> # *U &U . _Petit_Rx_Data 2 `ui `ux `i 177  ]
+{
+[; ;PetitModbus.c: 438: if(Petit_Tx_Data.DataBuf[1] == Petit_Rx_Data.DataBuf[1]){
+"438
+[e $ ! == -> *U + &U . _Petit_Tx_Data 2 * -> -> -> 1 `i `ui `ux -> -> # *U &U . _Petit_Tx_Data 2 `ui `ux `i -> *U + &U . _Petit_Rx_Data 2 * -> -> -> 1 `i `ui `ux -> -> # *U &U . _Petit_Rx_Data 2 `ui `ux `i 178  ]
+{
+[; ;PetitModbus.c: 439: if(Petit_Tx_Data.DataBuf[2] == Petit_Rx_Data.DataBuf[2]){
 "439
-[e = . *U + _MASTER_SLAVE_DATA * -> . _Petit_Tx_Data 0 `ux -> -> # *U _MASTER_SLAVE_DATA `ui `ux 1 -> . `E4 2 `uc ]
+[e $ ! == -> *U + &U . _Petit_Tx_Data 2 * -> -> -> 2 `i `ui `ux -> -> # *U &U . _Petit_Tx_Data 2 `ui `ux `i -> *U + &U . _Petit_Rx_Data 2 * -> -> -> 2 `i `ui `ux -> -> # *U &U . _Petit_Rx_Data 2 `ui `ux `i 179  ]
+{
+[; ;PetitModbus.c: 440: if(Petit_Tx_Data.DataBuf[3] == Petit_Rx_Data.DataBuf[3]){
 "440
+[e $ ! == -> *U + &U . _Petit_Tx_Data 2 * -> -> -> 3 `i `ui `ux -> -> # *U &U . _Petit_Tx_Data 2 `ui `ux `i -> *U + &U . _Petit_Rx_Data 2 * -> -> -> 3 `i `ui `ux -> -> # *U &U . _Petit_Rx_Data 2 `ui `ux `i 180  ]
+{
+[; ;PetitModbus.c: 441: MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbCommError = SLAVE_DATA_OK;
+"441
+[e = . *U + _MASTER_SLAVE_DATA * -> . _Petit_Rx_Data 0 `ux -> -> # *U _MASTER_SLAVE_DATA `ui `ux 1 -> . `E5 1 `uc ]
+[; ;PetitModbus.c: 442: MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbReceiveCounter += 1;
+"442
+[e =+ . *U + _MASTER_SLAVE_DATA * -> . _Petit_Rx_Data 0 `ux -> -> # *U _MASTER_SLAVE_DATA `ui `ux 3 -> -> 1 `i `ui ]
+"443
+}
+[e :U 180 ]
+"444
+}
+[e :U 179 ]
+"445
 }
 [e :U 178 ]
-[; ;PetitModbus.c: 440: }
-[; ;PetitModbus.c: 442: Petit_Tx_State = PETIT_RXTX_IDLE;
-"442
-[e = _Petit_Tx_State . `E1340 0 ]
+"446
+}
+[e :U 177 ]
+"447
+}
+[e :U 176 ]
+"448
+}
 [; ;PetitModbus.c: 443: }
-"443
-[e :UE 171 ]
-}
-"452
-[v _HandlePetitModbusReadHoldingRegistersSlaveReadback `(v ~T0 @X0 1 ef ]
-"453
+[; ;PetitModbus.c: 444: }
+[; ;PetitModbus.c: 445: }
+[; ;PetitModbus.c: 446: }
+[; ;PetitModbus.c: 447: }
+[; ;PetitModbus.c: 448: }
+[e $U 181  ]
+"449
+[e :U 175 ]
+[; ;PetitModbus.c: 449: else{
 {
-[; ;PetitModbus.c: 452: void HandlePetitModbusReadHoldingRegistersSlaveReadback(void)
-[; ;PetitModbus.c: 453: {
-[e :U _HandlePetitModbusReadHoldingRegistersSlaveReadback ]
-[f ]
-"454
-[v _Petit_StartAddress `ui ~T0 @X0 1 a ]
-[; ;PetitModbus.c: 454: unsigned int Petit_StartAddress = 0;
-[e = _Petit_StartAddress -> -> 0 `i `ui ]
-"455
-[v _Petit_NumberOfRegistersBytes `ui ~T0 @X0 1 a ]
-[; ;PetitModbus.c: 455: unsigned int Petit_NumberOfRegistersBytes = 0;
-[e = _Petit_NumberOfRegistersBytes -> -> 0 `i `ui ]
-"456
-[v _Petit_NumberOfRegisters `ui ~T0 @X0 1 a ]
-[; ;PetitModbus.c: 456: unsigned int Petit_NumberOfRegisters = 0;
-[e = _Petit_NumberOfRegisters -> -> 0 `i `ui ]
-"457
-[v _Petit_i `ui ~T0 @X0 1 a ]
-[; ;PetitModbus.c: 457: unsigned int Petit_i = 0;
-[e = _Petit_i -> -> 0 `i `ui ]
-"458
-[v _BufReadIndex `ui ~T0 @X0 1 a ]
-[; ;PetitModbus.c: 458: unsigned int BufReadIndex = 0;
-[e = _BufReadIndex -> -> 0 `i `ui ]
-"459
-[v _RegData `ui ~T0 @X0 1 a ]
-[; ;PetitModbus.c: 459: unsigned int RegData = 0;
-[e = _RegData -> -> 0 `i `ui ]
-[; ;PetitModbus.c: 461: Petit_StartAddress = ((unsigned int) (Petit_Tx_Data.DataBuf[0]) << 8) + (unsigned int) (Petit_Tx_Data.DataBuf[1]);
-"461
-[e = _Petit_StartAddress + << -> *U + &U . _Petit_Tx_Data 2 * -> -> -> 0 `i `ui `ux -> -> # *U &U . _Petit_Tx_Data 2 `ui `ux `ui -> 8 `i -> *U + &U . _Petit_Tx_Data 2 * -> -> -> 1 `i `ui `ux -> -> # *U &U . _Petit_Tx_Data 2 `ui `ux `ui ]
-[; ;PetitModbus.c: 462: Petit_NumberOfRegisters = ((unsigned int) (Petit_Tx_Data.DataBuf[2]) << 8) + (unsigned int) (Petit_Tx_Data.DataBuf[3]);
-"462
-[e = _Petit_NumberOfRegisters + << -> *U + &U . _Petit_Tx_Data 2 * -> -> -> 2 `i `ui `ux -> -> # *U &U . _Petit_Tx_Data 2 `ui `ux `ui -> 8 `i -> *U + &U . _Petit_Tx_Data 2 * -> -> -> 3 `i `ui `ux -> -> # *U &U . _Petit_Tx_Data 2 `ui `ux `ui ]
-[; ;PetitModbus.c: 463: Petit_NumberOfRegistersBytes = 2* Petit_NumberOfRegisters;
-"463
-[e = _Petit_NumberOfRegistersBytes * -> -> 2 `i `ui _Petit_NumberOfRegisters ]
-[; ;PetitModbus.c: 465: if(Petit_Tx_Data.Address == Petit_Rx_Data.Address){
-"465
-[e $ ! == -> . _Petit_Tx_Data 0 `i -> . _Petit_Rx_Data 0 `i 180  ]
-{
-[; ;PetitModbus.c: 466: if(Petit_NumberOfRegistersBytes == Petit_Rx_Data.DataBuf[0]){
-"466
-[e $ ! == _Petit_NumberOfRegistersBytes -> *U + &U . _Petit_Rx_Data 2 * -> -> -> 0 `i `ui `ux -> -> # *U &U . _Petit_Rx_Data 2 `ui `ux `ui 181  ]
-{
-[; ;PetitModbus.c: 469: BufReadIndex = 0;
-"469
-[e = _BufReadIndex -> -> 0 `i `ui ]
-[; ;PetitModbus.c: 470: for (Petit_i = 0; Petit_i < Petit_NumberOfRegisters; Petit_i++)
-"470
-{
-[e = _Petit_i -> -> 0 `i `ui ]
-[e $U 185  ]
-"471
-[e :U 182 ]
-[; ;PetitModbus.c: 471: {
-{
-[; ;PetitModbus.c: 472: RegData = ((unsigned int) (Petit_Rx_Data.DataBuf[BufReadIndex + 1]) << 8) + (unsigned int) (Petit_Rx_Data.DataBuf[BufReadIndex + 2]);
-"472
-[e = _RegData + << -> *U + &U . _Petit_Rx_Data 2 * -> + _BufReadIndex -> -> 1 `i `ui `ux -> -> # *U &U . _Petit_Rx_Data 2 `ui `ux `ui -> 8 `i -> *U + &U . _Petit_Rx_Data 2 * -> + _BufReadIndex -> -> 2 `i `ui `ux -> -> # *U &U . _Petit_Rx_Data 2 `ui `ux `ui ]
-[; ;PetitModbus.c: 473: MASTER_SLAVE_DATA[Petit_Tx_Data.Address].Reg[Petit_StartAddress] = RegData;
-"473
-[e = *U + &U . *U + _MASTER_SLAVE_DATA * -> . _Petit_Tx_Data 0 `ux -> -> # *U _MASTER_SLAVE_DATA `ui `ux 0 * -> _Petit_StartAddress `ux -> -> # *U &U . *U + _MASTER_SLAVE_DATA * -> . _Petit_Tx_Data 0 `ux -> -> # *U _MASTER_SLAVE_DATA `ui `ux 0 `ui `ux _RegData ]
-[; ;PetitModbus.c: 474: Petit_StartAddress += 1;
-"474
-[e =+ _Petit_StartAddress -> -> 1 `i `ui ]
-[; ;PetitModbus.c: 475: BufReadIndex += 2;
-"475
-[e =+ _BufReadIndex -> -> 2 `i `ui ]
-"476
-}
-"470
-[e ++ _Petit_i -> -> 1 `i `ui ]
-[e :U 185 ]
-[e $ < _Petit_i _Petit_NumberOfRegisters 182  ]
-[e :U 183 ]
-"476
-}
-[; ;PetitModbus.c: 476: }
-[; ;PetitModbus.c: 477: MASTER_SLAVE_DATA[Petit_Rx_Data.Address].CommError = SLAVE_DATA_OK;
-"477
-[e = . *U + _MASTER_SLAVE_DATA * -> . _Petit_Rx_Data 0 `ux -> -> # *U _MASTER_SLAVE_DATA `ui `ux 1 -> . `E4 1 `uc ]
-[; ;PetitModbus.c: 478: MASTER_SLAVE_DATA[Petit_Rx_Data.Address].ReceiveCounter += 1;
-"478
-[e =+ . *U + _MASTER_SLAVE_DATA * -> . _Petit_Rx_Data 0 `ux -> -> # *U _MASTER_SLAVE_DATA `ui `ux 2 -> -> 1 `i `ui ]
-"479
+[; ;PetitModbus.c: 450: MASTER_SLAVE_DATA[Petit_Tx_Data.Address].MbCommError = SLAVE_DATA_NOK;
+"450
+[e = . *U + _MASTER_SLAVE_DATA * -> . _Petit_Tx_Data 0 `ux -> -> # *U _MASTER_SLAVE_DATA `ui `ux 1 -> . `E5 2 `uc ]
+"451
 }
 [e :U 181 ]
-"480
+[; ;PetitModbus.c: 451: }
+[; ;PetitModbus.c: 453: Petit_Tx_State = PETIT_RXTX_IDLE;
+"453
+[e = _Petit_Tx_State . `E1345 0 ]
+[; ;PetitModbus.c: 454: }
+"454
+[e :UE 174 ]
 }
-[; ;PetitModbus.c: 479: }
-[; ;PetitModbus.c: 480: }
-[e $U 186  ]
-"481
-[e :U 180 ]
-[; ;PetitModbus.c: 481: else{
+"463
+[v _HandlePetitModbusReadHoldingRegistersSlaveReadback `(v ~T0 @X0 1 ef ]
+"464
 {
-[; ;PetitModbus.c: 482: MASTER_SLAVE_DATA[Petit_Tx_Data.Address].CommError = SLAVE_DATA_NOK;
-"482
-[e = . *U + _MASTER_SLAVE_DATA * -> . _Petit_Tx_Data 0 `ux -> -> # *U _MASTER_SLAVE_DATA `ui `ux 1 -> . `E4 2 `uc ]
-"483
-}
-[e :U 186 ]
-[; ;PetitModbus.c: 483: }
-[; ;PetitModbus.c: 485: Petit_Tx_State = PETIT_RXTX_IDLE;
-"485
-[e = _Petit_Tx_State . `E1340 0 ]
-[; ;PetitModbus.c: 486: }
-"486
-[e :UE 179 ]
-}
-"495
-[v _HandleMPetitodbusWriteMultipleRegistersSlaveReadback `(v ~T0 @X0 1 ef ]
-"496
-{
-[; ;PetitModbus.c: 495: void HandleMPetitodbusWriteMultipleRegistersSlaveReadback(void)
-[; ;PetitModbus.c: 496: {
-[e :U _HandleMPetitodbusWriteMultipleRegistersSlaveReadback ]
+[; ;PetitModbus.c: 463: void HandlePetitModbusReadHoldingRegistersSlaveReadback(void)
+[; ;PetitModbus.c: 464: {
+[e :U _HandlePetitModbusReadHoldingRegistersSlaveReadback ]
 [f ]
-"497
+"465
 [v _Petit_StartAddress `ui ~T0 @X0 1 a ]
-[; ;PetitModbus.c: 497: unsigned int Petit_StartAddress = 0;
+[; ;PetitModbus.c: 465: unsigned int Petit_StartAddress = 0;
 [e = _Petit_StartAddress -> -> 0 `i `ui ]
-"498
+"466
+[v _Petit_NumberOfRegistersBytes `ui ~T0 @X0 1 a ]
+[; ;PetitModbus.c: 466: unsigned int Petit_NumberOfRegistersBytes = 0;
+[e = _Petit_NumberOfRegistersBytes -> -> 0 `i `ui ]
+"467
 [v _Petit_NumberOfRegisters `ui ~T0 @X0 1 a ]
-[; ;PetitModbus.c: 498: unsigned int Petit_NumberOfRegisters = 0;
+[; ;PetitModbus.c: 467: unsigned int Petit_NumberOfRegisters = 0;
 [e = _Petit_NumberOfRegisters -> -> 0 `i `ui ]
-[; ;PetitModbus.c: 500: Petit_StartAddress = ((unsigned int) (Petit_Tx_Data.DataBuf[0]) << 8) + (unsigned int) (Petit_Tx_Data.DataBuf[1]);
-"500
+"468
+[v _Petit_i `ui ~T0 @X0 1 a ]
+[; ;PetitModbus.c: 468: unsigned int Petit_i = 0;
+[e = _Petit_i -> -> 0 `i `ui ]
+"469
+[v _BufReadIndex `ui ~T0 @X0 1 a ]
+[; ;PetitModbus.c: 469: unsigned int BufReadIndex = 0;
+[e = _BufReadIndex -> -> 0 `i `ui ]
+"470
+[v _RegData `ui ~T0 @X0 1 a ]
+[; ;PetitModbus.c: 470: unsigned int RegData = 0;
+[e = _RegData -> -> 0 `i `ui ]
+[; ;PetitModbus.c: 472: Petit_StartAddress = ((unsigned int) (Petit_Tx_Data.DataBuf[0]) << 8) + (unsigned int) (Petit_Tx_Data.DataBuf[1]);
+"472
 [e = _Petit_StartAddress + << -> *U + &U . _Petit_Tx_Data 2 * -> -> -> 0 `i `ui `ux -> -> # *U &U . _Petit_Tx_Data 2 `ui `ux `ui -> 8 `i -> *U + &U . _Petit_Tx_Data 2 * -> -> -> 1 `i `ui `ux -> -> # *U &U . _Petit_Tx_Data 2 `ui `ux `ui ]
-[; ;PetitModbus.c: 501: Petit_NumberOfRegisters = ((unsigned int) (Petit_Tx_Data.DataBuf[2]) << 8) + (unsigned int) (Petit_Tx_Data.DataBuf[3]);
-"501
+[; ;PetitModbus.c: 473: Petit_NumberOfRegisters = ((unsigned int) (Petit_Tx_Data.DataBuf[2]) << 8) + (unsigned int) (Petit_Tx_Data.DataBuf[3]);
+"473
 [e = _Petit_NumberOfRegisters + << -> *U + &U . _Petit_Tx_Data 2 * -> -> -> 2 `i `ui `ux -> -> # *U &U . _Petit_Tx_Data 2 `ui `ux `ui -> 8 `i -> *U + &U . _Petit_Tx_Data 2 * -> -> -> 3 `i `ui `ux -> -> # *U &U . _Petit_Tx_Data 2 `ui `ux `ui ]
-[; ;PetitModbus.c: 503: if(Petit_Tx_Data.Address == Petit_Rx_Data.Address){
-"503
-[e $ ! == -> . _Petit_Tx_Data 0 `i -> . _Petit_Rx_Data 0 `i 188  ]
+[; ;PetitModbus.c: 474: Petit_NumberOfRegistersBytes = 2* Petit_NumberOfRegisters;
+"474
+[e = _Petit_NumberOfRegistersBytes * -> -> 2 `i `ui _Petit_NumberOfRegisters ]
+[; ;PetitModbus.c: 476: if(Petit_Tx_Data.Address == Petit_Rx_Data.Address){
+"476
+[e $ ! == -> . _Petit_Tx_Data 0 `i -> . _Petit_Rx_Data 0 `i 183  ]
 {
-[; ;PetitModbus.c: 504: if(Petit_StartAddress == ((unsigned int) (Petit_Rx_Data.DataBuf[0]) << 8) + (unsigned int) (Petit_Rx_Data.DataBuf[1])){
-"504
-[e $ ! == _Petit_StartAddress + << -> *U + &U . _Petit_Rx_Data 2 * -> -> -> 0 `i `ui `ux -> -> # *U &U . _Petit_Rx_Data 2 `ui `ux `ui -> 8 `i -> *U + &U . _Petit_Rx_Data 2 * -> -> -> 1 `i `ui `ux -> -> # *U &U . _Petit_Rx_Data 2 `ui `ux `ui 189  ]
+[; ;PetitModbus.c: 477: if(Petit_NumberOfRegistersBytes == Petit_Rx_Data.DataBuf[0]){
+"477
+[e $ ! == _Petit_NumberOfRegistersBytes -> *U + &U . _Petit_Rx_Data 2 * -> -> -> 0 `i `ui `ux -> -> # *U &U . _Petit_Rx_Data 2 `ui `ux `ui 184  ]
 {
-[; ;PetitModbus.c: 505: if(Petit_NumberOfRegisters == ((unsigned int) (Petit_Rx_Data.DataBuf[2]) << 8) + (unsigned int) (Petit_Rx_Data.DataBuf[3])){
-"505
-[e $ ! == _Petit_NumberOfRegisters + << -> *U + &U . _Petit_Rx_Data 2 * -> -> -> 2 `i `ui `ux -> -> # *U &U . _Petit_Rx_Data 2 `ui `ux `ui -> 8 `i -> *U + &U . _Petit_Rx_Data 2 * -> -> -> 3 `i `ui `ux -> -> # *U &U . _Petit_Rx_Data 2 `ui `ux `ui 190  ]
+[; ;PetitModbus.c: 480: BufReadIndex = 0;
+"480
+[e = _BufReadIndex -> -> 0 `i `ui ]
+[; ;PetitModbus.c: 481: for (Petit_i = 0; Petit_i < Petit_NumberOfRegisters; Petit_i++)
+"481
 {
-[; ;PetitModbus.c: 506: MASTER_SLAVE_DATA[Petit_Rx_Data.Address].CommError = SLAVE_DATA_OK;
-"506
-[e = . *U + _MASTER_SLAVE_DATA * -> . _Petit_Rx_Data 0 `ux -> -> # *U _MASTER_SLAVE_DATA `ui `ux 1 -> . `E4 1 `uc ]
-[; ;PetitModbus.c: 507: MASTER_SLAVE_DATA[Petit_Rx_Data.Address].ReceiveCounter += 1;
-"507
-[e =+ . *U + _MASTER_SLAVE_DATA * -> . _Petit_Rx_Data 0 `ux -> -> # *U _MASTER_SLAVE_DATA `ui `ux 2 -> -> 1 `i `ui ]
-"508
+[e = _Petit_i -> -> 0 `i `ui ]
+[e $U 188  ]
+"482
+[e :U 185 ]
+[; ;PetitModbus.c: 482: {
+{
+[; ;PetitModbus.c: 483: RegData = ((unsigned int) (Petit_Rx_Data.DataBuf[BufReadIndex + 1]) << 8) + (unsigned int) (Petit_Rx_Data.DataBuf[BufReadIndex + 2]);
+"483
+[e = _RegData + << -> *U + &U . _Petit_Rx_Data 2 * -> + _BufReadIndex -> -> 1 `i `ui `ux -> -> # *U &U . _Petit_Rx_Data 2 `ui `ux `ui -> 8 `i -> *U + &U . _Petit_Rx_Data 2 * -> + _BufReadIndex -> -> 2 `i `ui `ux -> -> # *U &U . _Petit_Rx_Data 2 `ui `ux `ui ]
+[; ;PetitModbus.c: 484: MASTER_SLAVE_DATA[Petit_Tx_Data.Address].Reg[Petit_StartAddress] = RegData;
+"484
+[e = *U + &U . *U + _MASTER_SLAVE_DATA * -> . _Petit_Tx_Data 0 `ux -> -> # *U _MASTER_SLAVE_DATA `ui `ux 0 * -> _Petit_StartAddress `ux -> -> # *U &U . *U + _MASTER_SLAVE_DATA * -> . _Petit_Tx_Data 0 `ux -> -> # *U _MASTER_SLAVE_DATA `ui `ux 0 `ui `ux _RegData ]
+[; ;PetitModbus.c: 485: Petit_StartAddress += 1;
+"485
+[e =+ _Petit_StartAddress -> -> 1 `i `ui ]
+[; ;PetitModbus.c: 486: BufReadIndex += 2;
+"486
+[e =+ _BufReadIndex -> -> 2 `i `ui ]
+"487
 }
-[e :U 190 ]
-"509
+"481
+[e ++ _Petit_i -> -> 1 `i `ui ]
+[e :U 188 ]
+[e $ < _Petit_i _Petit_NumberOfRegisters 185  ]
+[e :U 186 ]
+"487
+}
+[; ;PetitModbus.c: 487: }
+[; ;PetitModbus.c: 488: MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbCommError = SLAVE_DATA_OK;
+"488
+[e = . *U + _MASTER_SLAVE_DATA * -> . _Petit_Rx_Data 0 `ux -> -> # *U _MASTER_SLAVE_DATA `ui `ux 1 -> . `E5 1 `uc ]
+[; ;PetitModbus.c: 489: MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbReceiveCounter += 1;
+"489
+[e =+ . *U + _MASTER_SLAVE_DATA * -> . _Petit_Rx_Data 0 `ux -> -> # *U _MASTER_SLAVE_DATA `ui `ux 3 -> -> 1 `i `ui ]
+"490
+}
+[e :U 184 ]
+"491
+}
+[; ;PetitModbus.c: 490: }
+[; ;PetitModbus.c: 491: }
+[e $U 189  ]
+"492
+[e :U 183 ]
+[; ;PetitModbus.c: 492: else{
+{
+[; ;PetitModbus.c: 493: MASTER_SLAVE_DATA[Petit_Tx_Data.Address].MbCommError = SLAVE_DATA_NOK;
+"493
+[e = . *U + _MASTER_SLAVE_DATA * -> . _Petit_Tx_Data 0 `ux -> -> # *U _MASTER_SLAVE_DATA `ui `ux 1 -> . `E5 2 `uc ]
+"494
 }
 [e :U 189 ]
-"510
+[; ;PetitModbus.c: 494: }
+[; ;PetitModbus.c: 496: Petit_Tx_State = PETIT_RXTX_IDLE;
+"496
+[e = _Petit_Tx_State . `E1345 0 ]
+[; ;PetitModbus.c: 497: }
+"497
+[e :UE 182 ]
 }
-[; ;PetitModbus.c: 508: }
-[; ;PetitModbus.c: 509: }
-[; ;PetitModbus.c: 510: }
-[e $U 191  ]
-"511
-[e :U 188 ]
-[; ;PetitModbus.c: 511: else{
+"506
+[v _HandleMPetitodbusWriteMultipleRegistersSlaveReadback `(v ~T0 @X0 1 ef ]
+"507
 {
-[; ;PetitModbus.c: 512: MASTER_SLAVE_DATA[Petit_Tx_Data.Address].CommError = SLAVE_DATA_NOK;
+[; ;PetitModbus.c: 506: void HandleMPetitodbusWriteMultipleRegistersSlaveReadback(void)
+[; ;PetitModbus.c: 507: {
+[e :U _HandleMPetitodbusWriteMultipleRegistersSlaveReadback ]
+[f ]
+"508
+[v _Petit_StartAddress `ui ~T0 @X0 1 a ]
+[; ;PetitModbus.c: 508: unsigned int Petit_StartAddress = 0;
+[e = _Petit_StartAddress -> -> 0 `i `ui ]
+"509
+[v _Petit_NumberOfRegisters `ui ~T0 @X0 1 a ]
+[; ;PetitModbus.c: 509: unsigned int Petit_NumberOfRegisters = 0;
+[e = _Petit_NumberOfRegisters -> -> 0 `i `ui ]
+[; ;PetitModbus.c: 511: Petit_StartAddress = ((unsigned int) (Petit_Tx_Data.DataBuf[0]) << 8) + (unsigned int) (Petit_Tx_Data.DataBuf[1]);
+"511
+[e = _Petit_StartAddress + << -> *U + &U . _Petit_Tx_Data 2 * -> -> -> 0 `i `ui `ux -> -> # *U &U . _Petit_Tx_Data 2 `ui `ux `ui -> 8 `i -> *U + &U . _Petit_Tx_Data 2 * -> -> -> 1 `i `ui `ux -> -> # *U &U . _Petit_Tx_Data 2 `ui `ux `ui ]
+[; ;PetitModbus.c: 512: Petit_NumberOfRegisters = ((unsigned int) (Petit_Tx_Data.DataBuf[2]) << 8) + (unsigned int) (Petit_Tx_Data.DataBuf[3]);
 "512
-[e = . *U + _MASTER_SLAVE_DATA * -> . _Petit_Tx_Data 0 `ux -> -> # *U _MASTER_SLAVE_DATA `ui `ux 1 -> . `E4 2 `uc ]
-"513
-}
-[e :U 191 ]
-[; ;PetitModbus.c: 513: }
-[; ;PetitModbus.c: 515: Petit_Tx_State = PETIT_RXTX_IDLE;
+[e = _Petit_NumberOfRegisters + << -> *U + &U . _Petit_Tx_Data 2 * -> -> -> 2 `i `ui `ux -> -> # *U &U . _Petit_Tx_Data 2 `ui `ux `ui -> 8 `i -> *U + &U . _Petit_Tx_Data 2 * -> -> -> 3 `i `ui `ux -> -> # *U &U . _Petit_Tx_Data 2 `ui `ux `ui ]
+[; ;PetitModbus.c: 514: if(Petit_Tx_Data.Address == Petit_Rx_Data.Address){
+"514
+[e $ ! == -> . _Petit_Tx_Data 0 `i -> . _Petit_Rx_Data 0 `i 191  ]
+{
+[; ;PetitModbus.c: 515: if(Petit_StartAddress == ((unsigned int) (Petit_Rx_Data.DataBuf[0]) << 8) + (unsigned int) (Petit_Rx_Data.DataBuf[1])){
 "515
-[e = _Petit_Tx_State . `E1340 0 ]
-[; ;PetitModbus.c: 516: }
+[e $ ! == _Petit_StartAddress + << -> *U + &U . _Petit_Rx_Data 2 * -> -> -> 0 `i `ui `ux -> -> # *U &U . _Petit_Rx_Data 2 `ui `ux `ui -> 8 `i -> *U + &U . _Petit_Rx_Data 2 * -> -> -> 1 `i `ui `ux -> -> # *U &U . _Petit_Rx_Data 2 `ui `ux `ui 192  ]
+{
+[; ;PetitModbus.c: 516: if(Petit_NumberOfRegisters == ((unsigned int) (Petit_Rx_Data.DataBuf[2]) << 8) + (unsigned int) (Petit_Rx_Data.DataBuf[3])){
 "516
-[e :UE 187 ]
+[e $ ! == _Petit_NumberOfRegisters + << -> *U + &U . _Petit_Rx_Data 2 * -> -> -> 2 `i `ui `ux -> -> # *U &U . _Petit_Rx_Data 2 `ui `ux `ui -> 8 `i -> *U + &U . _Petit_Rx_Data 2 * -> -> -> 3 `i `ui `ux -> -> # *U &U . _Petit_Rx_Data 2 `ui `ux `ui 193  ]
+{
+[; ;PetitModbus.c: 517: MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbCommError = SLAVE_DATA_OK;
+"517
+[e = . *U + _MASTER_SLAVE_DATA * -> . _Petit_Rx_Data 0 `ux -> -> # *U _MASTER_SLAVE_DATA `ui `ux 1 -> . `E5 1 `uc ]
+[; ;PetitModbus.c: 518: MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbReceiveCounter += 1;
+"518
+[e =+ . *U + _MASTER_SLAVE_DATA * -> . _Petit_Rx_Data 0 `ux -> -> # *U _MASTER_SLAVE_DATA `ui `ux 3 -> -> 1 `i `ui ]
+"519
+}
+[e :U 193 ]
+"520
+}
+[e :U 192 ]
+"521
+}
+[; ;PetitModbus.c: 519: }
+[; ;PetitModbus.c: 520: }
+[; ;PetitModbus.c: 521: }
+[e $U 194  ]
+"522
+[e :U 191 ]
+[; ;PetitModbus.c: 522: else{
+{
+[; ;PetitModbus.c: 523: MASTER_SLAVE_DATA[Petit_Tx_Data.Address].MbCommError = SLAVE_DATA_NOK;
+"523
+[e = . *U + _MASTER_SLAVE_DATA * -> . _Petit_Tx_Data 0 `ux -> -> # *U _MASTER_SLAVE_DATA `ui `ux 1 -> . `E5 2 `uc ]
+"524
+}
+[e :U 194 ]
+[; ;PetitModbus.c: 524: }
+[; ;PetitModbus.c: 526: Petit_Tx_State = PETIT_RXTX_IDLE;
+"526
+[e = _Petit_Tx_State . `E1345 0 ]
+[; ;PetitModbus.c: 527: }
+"527
+[e :UE 190 ]
+}
+"536
+[v _HandleMPetitodbusMbExceptionCodesSlaveReadback `(v ~T0 @X0 1 ef ]
+"537
+{
+[; ;PetitModbus.c: 536: void HandleMPetitodbusMbExceptionCodesSlaveReadback(void)
+[; ;PetitModbus.c: 537: {
+[e :U _HandleMPetitodbusMbExceptionCodesSlaveReadback ]
+[f ]
+[; ;PetitModbus.c: 538: if (Petit_Rx_Data.Function > 0x80 && Petit_Rx_Data.Function < 0x8C){
+"538
+[e $ ! && > -> . _Petit_Rx_Data 1 `i -> 128 `i < -> . _Petit_Rx_Data 1 `i -> 140 `i 196  ]
+{
+[; ;PetitModbus.c: 539: MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbExceptionCode = Petit_Rx_Data.DataBuf[0];
+"539
+[e = . *U + _MASTER_SLAVE_DATA * -> . _Petit_Rx_Data 0 `ux -> -> # *U _MASTER_SLAVE_DATA `ui `ux 2 *U + &U . _Petit_Rx_Data 2 * -> -> -> 0 `i `ui `ux -> -> # *U &U . _Petit_Rx_Data 2 `ui `ux ]
+"540
+}
+[e :U 196 ]
+[; ;PetitModbus.c: 540: }
+[; ;PetitModbus.c: 541: MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbCommError = SLAVE_DATA_OK;
+"541
+[e = . *U + _MASTER_SLAVE_DATA * -> . _Petit_Rx_Data 0 `ux -> -> # *U _MASTER_SLAVE_DATA `ui `ux 1 -> . `E5 1 `uc ]
+[; ;PetitModbus.c: 542: MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbReceiveCounter += 1;
+"542
+[e =+ . *U + _MASTER_SLAVE_DATA * -> . _Petit_Rx_Data 0 `ux -> -> # *U _MASTER_SLAVE_DATA `ui `ux 3 -> -> 1 `i `ui ]
+[; ;PetitModbus.c: 545: Petit_Tx_State = PETIT_RXTX_IDLE;
+"545
+[e = _Petit_Tx_State . `E1345 0 ]
+[; ;PetitModbus.c: 546: }
+"546
+[e :UE 195 ]
 }

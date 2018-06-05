@@ -43,7 +43,7 @@ void InitTMR(void)
     T3CONbits.RD16      = 0;                                                    // Enables register read/write of Timer3 in two 8-bit operations
     T3CONbits.T3CCP1    = 0;
     T3CONbits.T3CCP2    = 0;    
-    T3CONbits.T3CKPS    = 0b11;                                                 // 1:8 Prescale value
+    T3CONbits.T3CKPS    = 0b00;                                                 // 1:8 Prescale value
     T3CONbits.TMR3CS    = 0;                                                    // Internal clock (FOSC/4)
     TMR3H = 0;
     TMR3L = 0;
@@ -52,7 +52,7 @@ void InitTMR(void)
     T3CONbits.TMR3ON    = 1;
         
     /*Timer4 for slave answer timeout*/
-    T4CONbits.T4OUTPS   = 0b1111;                                               // Timer4 Output Postscale Select bits
+    T4CONbits.T4OUTPS   = 0b1000;                                               // Timer4 Output Postscale Select bits
     T4CONbits.T4CKPS    = 0b11;                                                 // Prescaler is 16 (Internal clock (FOSC/4))
     PR4                 = 0xFF;                                                 // 8-Bit Period register (interrupt on match with TMR4)
     TMR4                = 0x00;                                                 // 8-Bit Timer register

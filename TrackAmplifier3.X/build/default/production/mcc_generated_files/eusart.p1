@@ -11,8 +11,8 @@ Version 3.2 HI-TECH Software Intermediate Code
 [v F14220 `(v ~T0 @X0 0 tf ]
 "337 mcc_generated_files/eusart.h
 [v _EUSART_SetRxInterruptHandler `(v ~T0 @X0 0 ef1`*F14220 ]
-"316
-[v _EUSART_Receive_ISR `(v ~T0 @X0 0 ef ]
+"4 mcc_generated_files/../modbus/Interrupts.h
+[v _PetitModbusIntHandlerRC `(v ~T0 @X0 0 ef ]
 "4100 C:\Program Files (x86)\Microchip\xc8\v1.44\include\pic16f18854.h
 [v _BAUD1CON `Vuc ~T0 @X0 0 e@287 ]
 "3740
@@ -13115,267 +13115,888 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;eusart.h: 294: void EUSART_Write(uint8_t txData);
 [; ;eusart.h: 316: void EUSART_Receive_ISR(void);
 [; ;eusart.h: 337: void EUSART_SetRxInterruptHandler(void (* interruptHandler)(void));
-"63 mcc_generated_files/eusart.c
+[; ;Init.h: 11: extern void InitUART(void);
+[; ;Init.h: 12: extern void InitTMR1(void);
+[; ;Interrupts.h: 3: extern void PetitModbusIntHandlerTMR(void);
+[; ;Interrupts.h: 4: extern void PetitModbusIntHandlerRC(void);
+"26 mcc_generated_files/../modbus/PetitModbus.h
+[v _auchCRCHi `Cuc ~T0 @X0 -> 0 `x e ]
+[i _auchCRCHi
+:U ..
+"27
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+"28
+-> -> 64 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+"29
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
+-> -> 1 `i `uc
+"30
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+"31
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+"32
+-> -> 64 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+"33
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 1 `i `uc
+"34
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
+"35
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+"36
+-> -> 64 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+"37
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
+-> -> 1 `i `uc
+"38
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+"39
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+"40
+-> -> 64 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+"41
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 1 `i `uc
+"42
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+"43
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+"45
+-> -> 64 `i `uc
+..
+]
+[; ;PetitModbus.h: 26: const unsigned char auchCRCHi[] = {
+[; ;PetitModbus.h: 27: 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
+[; ;PetitModbus.h: 28: 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0,
+[; ;PetitModbus.h: 29: 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01,
+[; ;PetitModbus.h: 30: 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41,
+[; ;PetitModbus.h: 31: 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81,
+[; ;PetitModbus.h: 32: 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0,
+[; ;PetitModbus.h: 33: 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01,
+[; ;PetitModbus.h: 34: 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40,
+[; ;PetitModbus.h: 35: 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
+[; ;PetitModbus.h: 36: 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0,
+[; ;PetitModbus.h: 37: 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01,
+[; ;PetitModbus.h: 38: 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41,
+[; ;PetitModbus.h: 39: 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
+[; ;PetitModbus.h: 40: 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0,
+[; ;PetitModbus.h: 41: 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01,
+[; ;PetitModbus.h: 42: 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41,
+[; ;PetitModbus.h: 43: 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
+[; ;PetitModbus.h: 44: 0x40
+[; ;PetitModbus.h: 45: } ;
+"48
+[v _auchCRCLo `Cuc ~T0 @X0 -> 0 `x e ]
+[i _auchCRCLo
+:U ..
+"49
+-> -> 0 `i `uc
+-> -> 192 `i `uc
+-> -> 193 `i `uc
+-> -> 1 `i `uc
+-> -> 195 `i `uc
+-> -> 3 `i `uc
+-> -> 2 `i `uc
+-> -> 194 `i `uc
+-> -> 198 `i `uc
+-> -> 6 `i `uc
+-> -> 7 `i `uc
+-> -> 199 `i `uc
+-> -> 5 `i `uc
+-> -> 197 `i `uc
+-> -> 196 `i `uc
+"50
+-> -> 4 `i `uc
+-> -> 204 `i `uc
+-> -> 12 `i `uc
+-> -> 13 `i `uc
+-> -> 205 `i `uc
+-> -> 15 `i `uc
+-> -> 207 `i `uc
+-> -> 206 `i `uc
+-> -> 14 `i `uc
+-> -> 10 `i `uc
+-> -> 202 `i `uc
+-> -> 203 `i `uc
+-> -> 11 `i `uc
+-> -> 201 `i `uc
+-> -> 9 `i `uc
+"51
+-> -> 8 `i `uc
+-> -> 200 `i `uc
+-> -> 216 `i `uc
+-> -> 24 `i `uc
+-> -> 25 `i `uc
+-> -> 217 `i `uc
+-> -> 27 `i `uc
+-> -> 219 `i `uc
+-> -> 218 `i `uc
+-> -> 26 `i `uc
+-> -> 30 `i `uc
+-> -> 222 `i `uc
+-> -> 223 `i `uc
+-> -> 31 `i `uc
+-> -> 221 `i `uc
+"52
+-> -> 29 `i `uc
+-> -> 28 `i `uc
+-> -> 220 `i `uc
+-> -> 20 `i `uc
+-> -> 212 `i `uc
+-> -> 213 `i `uc
+-> -> 21 `i `uc
+-> -> 215 `i `uc
+-> -> 23 `i `uc
+-> -> 22 `i `uc
+-> -> 214 `i `uc
+-> -> 210 `i `uc
+-> -> 18 `i `uc
+-> -> 19 `i `uc
+-> -> 211 `i `uc
+"53
+-> -> 17 `i `uc
+-> -> 209 `i `uc
+-> -> 208 `i `uc
+-> -> 16 `i `uc
+-> -> 240 `i `uc
+-> -> 48 `i `uc
+-> -> 49 `i `uc
+-> -> 241 `i `uc
+-> -> 51 `i `uc
+-> -> 243 `i `uc
+-> -> 242 `i `uc
+-> -> 50 `i `uc
+-> -> 54 `i `uc
+-> -> 246 `i `uc
+-> -> 247 `i `uc
+"54
+-> -> 55 `i `uc
+-> -> 245 `i `uc
+-> -> 53 `i `uc
+-> -> 52 `i `uc
+-> -> 244 `i `uc
+-> -> 60 `i `uc
+-> -> 252 `i `uc
+-> -> 253 `i `uc
+-> -> 61 `i `uc
+-> -> 255 `i `uc
+-> -> 63 `i `uc
+-> -> 62 `i `uc
+-> -> 254 `i `uc
+-> -> 250 `i `uc
+-> -> 58 `i `uc
+"55
+-> -> 59 `i `uc
+-> -> 251 `i `uc
+-> -> 57 `i `uc
+-> -> 249 `i `uc
+-> -> 248 `i `uc
+-> -> 56 `i `uc
+-> -> 40 `i `uc
+-> -> 232 `i `uc
+-> -> 233 `i `uc
+-> -> 41 `i `uc
+-> -> 235 `i `uc
+-> -> 43 `i `uc
+-> -> 42 `i `uc
+-> -> 234 `i `uc
+-> -> 238 `i `uc
+"56
+-> -> 46 `i `uc
+-> -> 47 `i `uc
+-> -> 239 `i `uc
+-> -> 45 `i `uc
+-> -> 237 `i `uc
+-> -> 236 `i `uc
+-> -> 44 `i `uc
+-> -> 228 `i `uc
+-> -> 36 `i `uc
+-> -> 37 `i `uc
+-> -> 229 `i `uc
+-> -> 39 `i `uc
+-> -> 231 `i `uc
+-> -> 230 `i `uc
+-> -> 38 `i `uc
+"57
+-> -> 34 `i `uc
+-> -> 226 `i `uc
+-> -> 227 `i `uc
+-> -> 35 `i `uc
+-> -> 225 `i `uc
+-> -> 33 `i `uc
+-> -> 32 `i `uc
+-> -> 224 `i `uc
+-> -> 160 `i `uc
+-> -> 96 `i `uc
+-> -> 97 `i `uc
+-> -> 161 `i `uc
+-> -> 99 `i `uc
+-> -> 163 `i `uc
+-> -> 162 `i `uc
+"58
+-> -> 98 `i `uc
+-> -> 102 `i `uc
+-> -> 166 `i `uc
+-> -> 167 `i `uc
+-> -> 103 `i `uc
+-> -> 165 `i `uc
+-> -> 101 `i `uc
+-> -> 100 `i `uc
+-> -> 164 `i `uc
+-> -> 108 `i `uc
+-> -> 172 `i `uc
+-> -> 173 `i `uc
+-> -> 109 `i `uc
+-> -> 175 `i `uc
+-> -> 111 `i `uc
+"59
+-> -> 110 `i `uc
+-> -> 174 `i `uc
+-> -> 170 `i `uc
+-> -> 106 `i `uc
+-> -> 107 `i `uc
+-> -> 171 `i `uc
+-> -> 105 `i `uc
+-> -> 169 `i `uc
+-> -> 168 `i `uc
+-> -> 104 `i `uc
+-> -> 120 `i `uc
+-> -> 184 `i `uc
+-> -> 185 `i `uc
+-> -> 121 `i `uc
+-> -> 187 `i `uc
+"60
+-> -> 123 `i `uc
+-> -> 122 `i `uc
+-> -> 186 `i `uc
+-> -> 190 `i `uc
+-> -> 126 `i `uc
+-> -> 127 `i `uc
+-> -> 191 `i `uc
+-> -> 125 `i `uc
+-> -> 189 `i `uc
+-> -> 188 `i `uc
+-> -> 124 `i `uc
+-> -> 180 `i `uc
+-> -> 116 `i `uc
+-> -> 117 `i `uc
+-> -> 181 `i `uc
+"61
+-> -> 119 `i `uc
+-> -> 183 `i `uc
+-> -> 182 `i `uc
+-> -> 118 `i `uc
+-> -> 114 `i `uc
+-> -> 178 `i `uc
+-> -> 179 `i `uc
+-> -> 115 `i `uc
+-> -> 177 `i `uc
+-> -> 113 `i `uc
+-> -> 112 `i `uc
+-> -> 176 `i `uc
+-> -> 80 `i `uc
+-> -> 144 `i `uc
+-> -> 145 `i `uc
+"62
+-> -> 81 `i `uc
+-> -> 147 `i `uc
+-> -> 83 `i `uc
+-> -> 82 `i `uc
+-> -> 146 `i `uc
+-> -> 150 `i `uc
+-> -> 86 `i `uc
+-> -> 87 `i `uc
+-> -> 151 `i `uc
+-> -> 85 `i `uc
+-> -> 149 `i `uc
+-> -> 148 `i `uc
+-> -> 84 `i `uc
+-> -> 156 `i `uc
+-> -> 92 `i `uc
+"63
+-> -> 93 `i `uc
+-> -> 157 `i `uc
+-> -> 95 `i `uc
+-> -> 159 `i `uc
+-> -> 158 `i `uc
+-> -> 94 `i `uc
+-> -> 90 `i `uc
+-> -> 154 `i `uc
+-> -> 155 `i `uc
+-> -> 91 `i `uc
+-> -> 153 `i `uc
+-> -> 89 `i `uc
+-> -> 88 `i `uc
+-> -> 152 `i `uc
+-> -> 136 `i `uc
+"64
+-> -> 72 `i `uc
+-> -> 73 `i `uc
+-> -> 137 `i `uc
+-> -> 75 `i `uc
+-> -> 139 `i `uc
+-> -> 138 `i `uc
+-> -> 74 `i `uc
+-> -> 78 `i `uc
+-> -> 142 `i `uc
+-> -> 143 `i `uc
+-> -> 79 `i `uc
+-> -> 141 `i `uc
+-> -> 77 `i `uc
+-> -> 76 `i `uc
+-> -> 140 `i `uc
+"65
+-> -> 68 `i `uc
+-> -> 132 `i `uc
+-> -> 133 `i `uc
+-> -> 69 `i `uc
+-> -> 135 `i `uc
+-> -> 71 `i `uc
+-> -> 70 `i `uc
+-> -> 134 `i `uc
+-> -> 130 `i `uc
+-> -> 66 `i `uc
+-> -> 67 `i `uc
+-> -> 131 `i `uc
+-> -> 65 `i `uc
+-> -> 129 `i `uc
+-> -> 128 `i `uc
+"67
+-> -> 64 `i `uc
+..
+]
+[; ;PetitModbus.h: 48: const unsigned char auchCRCLo[] = {
+[; ;PetitModbus.h: 49: 0x00, 0xC0, 0xC1, 0x01, 0xC3, 0x03, 0x02, 0xC2, 0xC6, 0x06, 0x07, 0xC7, 0x05, 0xC5, 0xC4,
+[; ;PetitModbus.h: 50: 0x04, 0xCC, 0x0C, 0x0D, 0xCD, 0x0F, 0xCF, 0xCE, 0x0E, 0x0A, 0xCA, 0xCB, 0x0B, 0xC9, 0x09,
+[; ;PetitModbus.h: 51: 0x08, 0xC8, 0xD8, 0x18, 0x19, 0xD9, 0x1B, 0xDB, 0xDA, 0x1A, 0x1E, 0xDE, 0xDF, 0x1F, 0xDD,
+[; ;PetitModbus.h: 52: 0x1D, 0x1C, 0xDC, 0x14, 0xD4, 0xD5, 0x15, 0xD7, 0x17, 0x16, 0xD6, 0xD2, 0x12, 0x13, 0xD3,
+[; ;PetitModbus.h: 53: 0x11, 0xD1, 0xD0, 0x10, 0xF0, 0x30, 0x31, 0xF1, 0x33, 0xF3, 0xF2, 0x32, 0x36, 0xF6, 0xF7,
+[; ;PetitModbus.h: 54: 0x37, 0xF5, 0x35, 0x34, 0xF4, 0x3C, 0xFC, 0xFD, 0x3D, 0xFF, 0x3F, 0x3E, 0xFE, 0xFA, 0x3A,
+[; ;PetitModbus.h: 55: 0x3B, 0xFB, 0x39, 0xF9, 0xF8, 0x38, 0x28, 0xE8, 0xE9, 0x29, 0xEB, 0x2B, 0x2A, 0xEA, 0xEE,
+[; ;PetitModbus.h: 56: 0x2E, 0x2F, 0xEF, 0x2D, 0xED, 0xEC, 0x2C, 0xE4, 0x24, 0x25, 0xE5, 0x27, 0xE7, 0xE6, 0x26,
+[; ;PetitModbus.h: 57: 0x22, 0xE2, 0xE3, 0x23, 0xE1, 0x21, 0x20, 0xE0, 0xA0, 0x60, 0x61, 0xA1, 0x63, 0xA3, 0xA2,
+[; ;PetitModbus.h: 58: 0x62, 0x66, 0xA6, 0xA7, 0x67, 0xA5, 0x65, 0x64, 0xA4, 0x6C, 0xAC, 0xAD, 0x6D, 0xAF, 0x6F,
+[; ;PetitModbus.h: 59: 0x6E, 0xAE, 0xAA, 0x6A, 0x6B, 0xAB, 0x69, 0xA9, 0xA8, 0x68, 0x78, 0xB8, 0xB9, 0x79, 0xBB,
+[; ;PetitModbus.h: 60: 0x7B, 0x7A, 0xBA, 0xBE, 0x7E, 0x7F, 0xBF, 0x7D, 0xBD, 0xBC, 0x7C, 0xB4, 0x74, 0x75, 0xB5,
+[; ;PetitModbus.h: 61: 0x77, 0xB7, 0xB6, 0x76, 0x72, 0xB2, 0xB3, 0x73, 0xB1, 0x71, 0x70, 0xB0, 0x50, 0x90, 0x91,
+[; ;PetitModbus.h: 62: 0x51, 0x93, 0x53, 0x52, 0x92, 0x96, 0x56, 0x57, 0x97, 0x55, 0x95, 0x94, 0x54, 0x9C, 0x5C,
+[; ;PetitModbus.h: 63: 0x5D, 0x9D, 0x5F, 0x9F, 0x9E, 0x5E, 0x5A, 0x9A, 0x9B, 0x5B, 0x99, 0x59, 0x58, 0x98, 0x88,
+[; ;PetitModbus.h: 64: 0x48, 0x49, 0x89, 0x4B, 0x8B, 0x8A, 0x4A, 0x4E, 0x8E, 0x8F, 0x4F, 0x8D, 0x4D, 0x4C, 0x8C,
+[; ;PetitModbus.h: 65: 0x44, 0x84, 0x85, 0x45, 0x87, 0x47, 0x46, 0x86, 0x82, 0x42, 0x43, 0x83, 0x41, 0x81, 0x80,
+[; ;PetitModbus.h: 66: 0x40
+[; ;PetitModbus.h: 67: };
+[; ;PetitModbus.h: 76: extern unsigned char PETITMODBUS_SLAVE_ADDRESS;
+[; ;PetitModbus.h: 78: typedef struct{
+[; ;PetitModbus.h: 79: short ActValue;
+[; ;PetitModbus.h: 80: }PetitRegStructure;
+[; ;PetitModbus.h: 82: extern PetitRegStructure PetitRegisters[7];
+[; ;PetitModbus.h: 83: extern volatile unsigned short PetitModbusTimerValue;
+[; ;PetitModbus.h: 86: extern void InitPetitModbus(unsigned char PetitModbusSlaveAddress);
+[; ;PetitModbus.h: 87: extern void ProcessPetitModbus(void);
+[; ;PetitModbusPort.h: 19: extern volatile unsigned char PetitReceiveBuffer[(7*2 + 10)];
+[; ;PetitModbusPort.h: 20: extern volatile unsigned char PetitReceiveCounter;
+[; ;PetitModbusPort.h: 22: extern void PetitModBus_UART_Initialise(void);
+[; ;PetitModbusPort.h: 23: extern void PetitModBus_TIMER_Initialise(void);
+[; ;PetitModbusPort.h: 24: extern void PetitModBus_UART_Putch(unsigned char c);
+[; ;PetitModbusPort.h: 25: extern unsigned char PetitModBus_UART_String(unsigned char *s, unsigned int Length);
+[; ;PetitModbusPort.h: 27: extern void ReceiveInterrupt(unsigned char Data);
+[; ;PetitModbusPort.h: 28: extern void PetitModBus_TimerValues(void);
+[; ;General.h: 9: extern volatile unsigned int Timer1_Tick_Counter;
+"64 mcc_generated_files/eusart.c
 [v _eusartRxHead `Vuc ~T0 @X0 1 e ]
 [i _eusartRxHead
 -> -> 0 `i `uc
 ]
-[; ;eusart.c: 63: volatile uint8_t eusartRxHead = 0;
-"64
+[; ;eusart.c: 64: volatile uint8_t eusartRxHead = 0;
+"65
 [v _eusartRxTail `Vuc ~T0 @X0 1 e ]
 [i _eusartRxTail
 -> -> 0 `i `uc
 ]
-[; ;eusart.c: 64: volatile uint8_t eusartRxTail = 0;
-"65
-[v _eusartRxBuffer `Vuc ~T0 @X0 -> 8 `i e ]
-[; ;eusart.c: 65: volatile uint8_t eusartRxBuffer[8];
+[; ;eusart.c: 65: volatile uint8_t eusartRxTail = 0;
 "66
+[v _eusartRxBuffer `Vuc ~T0 @X0 -> 8 `i e ]
+[; ;eusart.c: 66: volatile uint8_t eusartRxBuffer[8];
+"67
 [v _eusartRxCount `Vuc ~T0 @X0 1 e ]
-[; ;eusart.c: 66: volatile uint8_t eusartRxCount;
-"71
-[v _EUSART_Initialize `(v ~T0 @X0 1 ef ]
+[; ;eusart.c: 67: volatile uint8_t eusartRxCount;
 "72
+[v _EUSART_Initialize `(v ~T0 @X0 1 ef ]
+"73
 {
-[; ;eusart.c: 71: void EUSART_Initialize(void)
-[; ;eusart.c: 72: {
+[; ;eusart.c: 72: void EUSART_Initialize(void)
+[; ;eusart.c: 73: {
 [e :U _EUSART_Initialize ]
 [f ]
-[; ;eusart.c: 74: PIE3bits.RCIE = 0;
-"74
-[e = . . _PIE3bits 0 5 -> -> 0 `i `uc ]
-[; ;eusart.c: 75: EUSART_SetRxInterruptHandler(EUSART_Receive_ISR);
+[; ;eusart.c: 75: PIE3bits.RCIE = 0;
 "75
-[e ( _EUSART_SetRxInterruptHandler (1 &U _EUSART_Receive_ISR ]
-[; ;eusart.c: 79: BAUD1CON = 0x08;
-"79
+[e = . . _PIE3bits 0 5 -> -> 0 `i `uc ]
+[; ;eusart.c: 76: EUSART_SetRxInterruptHandler(PetitModbusIntHandlerRC);
+"76
+[e ( _EUSART_SetRxInterruptHandler (1 &U _PetitModbusIntHandlerRC ]
+[; ;eusart.c: 80: BAUD1CON = 0x08;
+"80
 [e = _BAUD1CON -> -> 8 `i `uc ]
-[; ;eusart.c: 82: RC1STA = 0x90;
-"82
+[; ;eusart.c: 83: RC1STA = 0x90;
+"83
 [e = _RC1STA -> -> 144 `i `uc ]
-[; ;eusart.c: 85: TX1STA = 0x24;
-"85
+[; ;eusart.c: 86: TX1STA = 0x24;
+"86
 [e = _TX1STA -> -> 36 `i `uc ]
-[; ;eusart.c: 88: SP1BRGL = 0x3F;
-"88
+[; ;eusart.c: 89: SP1BRGL = 0x3F;
+"89
 [e = _SP1BRGL -> -> 63 `i `uc ]
-[; ;eusart.c: 91: SP1BRGH = 0x00;
-"91
+[; ;eusart.c: 92: SP1BRGH = 0x00;
+"92
 [e = _SP1BRGH -> -> 0 `i `uc ]
-[; ;eusart.c: 95: eusartRxHead = 0;
-"95
-[e = _eusartRxHead -> -> 0 `i `uc ]
-[; ;eusart.c: 96: eusartRxTail = 0;
+[; ;eusart.c: 96: eusartRxHead = 0;
 "96
-[e = _eusartRxTail -> -> 0 `i `uc ]
-[; ;eusart.c: 97: eusartRxCount = 0;
+[e = _eusartRxHead -> -> 0 `i `uc ]
+[; ;eusart.c: 97: eusartRxTail = 0;
 "97
+[e = _eusartRxTail -> -> 0 `i `uc ]
+[; ;eusart.c: 98: eusartRxCount = 0;
+"98
 [e = _eusartRxCount -> -> 0 `i `uc ]
-[; ;eusart.c: 100: PIE3bits.RCIE = 1;
-"100
-[e = . . _PIE3bits 0 5 -> -> 1 `i `uc ]
-[; ;eusart.c: 101: }
+[; ;eusart.c: 101: PIE3bits.RCIE = 1;
 "101
-[e :UE 1557 ]
-}
-"103
-[v _EUSART_is_tx_ready `(uc ~T0 @X0 1 ef ]
-"104
-{
-[; ;eusart.c: 103: bool EUSART_is_tx_ready(void)
-[; ;eusart.c: 104: {
-[e :U _EUSART_is_tx_ready ]
-[f ]
-[; ;eusart.c: 105: return (bool)(PIR3bits.TXIF && TX1STAbits.TXEN);
-"105
-[e ) -> -> && != -> . . _PIR3bits 0 4 `i -> -> -> 0 `i `Vuc `i != -> . . _TX1STAbits 0 5 `i -> -> -> 0 `i `Vuc `i `i `uc ]
-[e $UE 1558  ]
-[; ;eusart.c: 106: }
-"106
+[e = . . _PIE3bits 0 5 -> -> 1 `i `uc ]
+[; ;eusart.c: 102: }
+"102
 [e :UE 1558 ]
 }
-"108
-[v _EUSART_is_rx_ready `(uc ~T0 @X0 1 ef ]
-"109
+"104
+[v _EUSART_is_tx_ready `(uc ~T0 @X0 1 ef ]
+"105
 {
-[; ;eusart.c: 108: uint8_t EUSART_is_rx_ready(void)
-[; ;eusart.c: 109: {
-[e :U _EUSART_is_rx_ready ]
+[; ;eusart.c: 104: bool EUSART_is_tx_ready(void)
+[; ;eusart.c: 105: {
+[e :U _EUSART_is_tx_ready ]
 [f ]
-[; ;eusart.c: 110: return eusartRxCount;
-"110
-[e ) _eusartRxCount ]
+[; ;eusart.c: 106: return (bool)(PIR3bits.TXIF && TX1STAbits.TXEN);
+"106
+[e ) -> -> && != -> . . _PIR3bits 0 4 `i -> -> -> 0 `i `Vuc `i != -> . . _TX1STAbits 0 5 `i -> -> -> 0 `i `Vuc `i `i `uc ]
 [e $UE 1559  ]
-[; ;eusart.c: 111: }
-"111
+[; ;eusart.c: 107: }
+"107
 [e :UE 1559 ]
 }
-"113
-[v _EUSART_is_tx_done `(uc ~T0 @X0 1 ef ]
-"114
+"109
+[v _EUSART_is_rx_ready `(uc ~T0 @X0 1 ef ]
+"110
 {
-[; ;eusart.c: 113: bool EUSART_is_tx_done(void)
-[; ;eusart.c: 114: {
-[e :U _EUSART_is_tx_done ]
+[; ;eusart.c: 109: uint8_t EUSART_is_rx_ready(void)
+[; ;eusart.c: 110: {
+[e :U _EUSART_is_rx_ready ]
 [f ]
-[; ;eusart.c: 115: return TX1STAbits.TRMT;
-"115
-[e ) . . _TX1STAbits 0 1 ]
+[; ;eusart.c: 111: return eusartRxCount;
+"111
+[e ) _eusartRxCount ]
 [e $UE 1560  ]
-[; ;eusart.c: 116: }
-"116
+[; ;eusart.c: 112: }
+"112
 [e :UE 1560 ]
 }
-"118
-[v _EUSART_Read `(uc ~T0 @X0 1 ef ]
-"119
+"114
+[v _EUSART_is_tx_done `(uc ~T0 @X0 1 ef ]
+"115
 {
-[; ;eusart.c: 118: uint8_t EUSART_Read(void)
-[; ;eusart.c: 119: {
-[e :U _EUSART_Read ]
+[; ;eusart.c: 114: bool EUSART_is_tx_done(void)
+[; ;eusart.c: 115: {
+[e :U _EUSART_is_tx_done ]
 [f ]
-"120
-[v _readValue `uc ~T0 @X0 1 a ]
-[; ;eusart.c: 120: uint8_t readValue = 0;
-[e = _readValue -> -> 0 `i `uc ]
-[; ;eusart.c: 122: while(0 == eusartRxCount)
-"122
-[e $U 1562  ]
-[e :U 1563 ]
-[; ;eusart.c: 123: {
-"123
-{
-"124
-}
-[e :U 1562 ]
-"122
-[e $ == -> 0 `i -> _eusartRxCount `i 1563  ]
-[e :U 1564 ]
-[; ;eusart.c: 124: }
-[; ;eusart.c: 126: readValue = eusartRxBuffer[eusartRxTail++];
-"126
-[e = _readValue *U + &U _eusartRxBuffer * -> ++ _eusartRxTail -> -> 1 `i `uc `ux -> -> # *U &U _eusartRxBuffer `ui `ux ]
-[; ;eusart.c: 127: if(sizeof(eusartRxBuffer) <= eusartRxTail)
-"127
-[e $ ! <= -> # _eusartRxBuffer `ui -> _eusartRxTail `ui 1565  ]
-[; ;eusart.c: 128: {
-"128
-{
-[; ;eusart.c: 129: eusartRxTail = 0;
-"129
-[e = _eusartRxTail -> -> 0 `i `uc ]
-"130
-}
-[e :U 1565 ]
-[; ;eusart.c: 130: }
-[; ;eusart.c: 131: PIE3bits.RCIE = 0;
-"131
-[e = . . _PIE3bits 0 5 -> -> 0 `i `uc ]
-[; ;eusart.c: 132: eusartRxCount--;
-"132
-[e -- _eusartRxCount -> -> 1 `i `uc ]
-[; ;eusart.c: 133: PIE3bits.RCIE = 1;
-"133
-[e = . . _PIE3bits 0 5 -> -> 1 `i `uc ]
-[; ;eusart.c: 135: return readValue;
-"135
-[e ) _readValue ]
+[; ;eusart.c: 116: return TX1STAbits.TRMT;
+"116
+[e ) . . _TX1STAbits 0 1 ]
 [e $UE 1561  ]
-[; ;eusart.c: 136: }
-"136
+[; ;eusart.c: 117: }
+"117
 [e :UE 1561 ]
 }
-"138
-[v _EUSART_Write `(v ~T0 @X0 1 ef1`uc ]
-"139
+"119
+[v _EUSART_Read `(uc ~T0 @X0 1 ef ]
+"120
 {
-[; ;eusart.c: 138: void EUSART_Write(uint8_t txData)
-[; ;eusart.c: 139: {
-[e :U _EUSART_Write ]
-"138
-[v _txData `uc ~T0 @X0 1 r1 ]
-"139
+[; ;eusart.c: 119: uint8_t EUSART_Read(void)
+[; ;eusart.c: 120: {
+[e :U _EUSART_Read ]
 [f ]
-[; ;eusart.c: 140: while(0 == PIR3bits.TXIF)
+"121
+[v _readValue `uc ~T0 @X0 1 a ]
+[; ;eusart.c: 121: uint8_t readValue = 0;
+[e = _readValue -> -> 0 `i `uc ]
+[; ;eusart.c: 123: while(0 == eusartRxCount)
+"123
+[e $U 1563  ]
+[e :U 1564 ]
+[; ;eusart.c: 124: {
+"124
+{
+"125
+}
+[e :U 1563 ]
+"123
+[e $ == -> 0 `i -> _eusartRxCount `i 1564  ]
+[e :U 1565 ]
+[; ;eusart.c: 125: }
+[; ;eusart.c: 127: readValue = eusartRxBuffer[eusartRxTail++];
+"127
+[e = _readValue *U + &U _eusartRxBuffer * -> ++ _eusartRxTail -> -> 1 `i `uc `ux -> -> # *U &U _eusartRxBuffer `ui `ux ]
+[; ;eusart.c: 128: if(sizeof(eusartRxBuffer) <= eusartRxTail)
+"128
+[e $ ! <= -> # _eusartRxBuffer `ui -> _eusartRxTail `ui 1566  ]
+[; ;eusart.c: 129: {
+"129
+{
+[; ;eusart.c: 130: eusartRxTail = 0;
+"130
+[e = _eusartRxTail -> -> 0 `i `uc ]
+"131
+}
+[e :U 1566 ]
+[; ;eusart.c: 131: }
+[; ;eusart.c: 132: PIE3bits.RCIE = 0;
+"132
+[e = . . _PIE3bits 0 5 -> -> 0 `i `uc ]
+[; ;eusart.c: 133: eusartRxCount--;
+"133
+[e -- _eusartRxCount -> -> 1 `i `uc ]
+[; ;eusart.c: 134: PIE3bits.RCIE = 1;
+"134
+[e = . . _PIE3bits 0 5 -> -> 1 `i `uc ]
+[; ;eusart.c: 136: return readValue;
+"136
+[e ) _readValue ]
+[e $UE 1562  ]
+[; ;eusart.c: 137: }
+"137
+[e :UE 1562 ]
+}
+"139
+[v _EUSART_Write `(v ~T0 @X0 1 ef1`uc ]
 "140
-[e $U 1567  ]
-[e :U 1568 ]
-[; ;eusart.c: 141: {
+{
+[; ;eusart.c: 139: void EUSART_Write(uint8_t txData)
+[; ;eusart.c: 140: {
+[e :U _EUSART_Write ]
+"139
+[v _txData `uc ~T0 @X0 1 r1 ]
+"140
+[f ]
+[; ;eusart.c: 141: while(0 == PIR3bits.TXIF)
 "141
-{
-"142
-}
-[e :U 1567 ]
-"140
-[e $ == -> 0 `i -> . . _PIR3bits 0 4 `i 1568  ]
+[e $U 1568  ]
 [e :U 1569 ]
-[; ;eusart.c: 142: }
-[; ;eusart.c: 144: TX1REG = txData;
-"144
-[e = _TX1REG _txData ]
-[; ;eusart.c: 145: }
-"145
-[e :UE 1566 ]
-}
-"149
-[v _EUSART_Receive_ISR `(v ~T0 @X0 1 ef ]
-"150
+[; ;eusart.c: 142: {
+"142
 {
-[; ;eusart.c: 149: void EUSART_Receive_ISR(void)
-[; ;eusart.c: 150: {
+"143
+}
+[e :U 1568 ]
+"141
+[e $ == -> 0 `i -> . . _PIR3bits 0 4 `i 1569  ]
+[e :U 1570 ]
+[; ;eusart.c: 143: }
+[; ;eusart.c: 145: TX1REG = txData;
+"145
+[e = _TX1REG _txData ]
+[; ;eusart.c: 146: }
+"146
+[e :UE 1567 ]
+}
+"150
+[v _EUSART_Receive_ISR `(v ~T0 @X0 1 ef ]
+"151
+{
+[; ;eusart.c: 150: void EUSART_Receive_ISR(void)
+[; ;eusart.c: 151: {
 [e :U _EUSART_Receive_ISR ]
 [f ]
-[; ;eusart.c: 152: if(1 == RC1STAbits.OERR)
-"152
-[e $ ! == -> 1 `i -> . . _RC1STAbits 0 1 `i 1571  ]
-[; ;eusart.c: 153: {
+[; ;eusart.c: 153: if(1 == RC1STAbits.OERR)
 "153
+[e $ ! == -> 1 `i -> . . _RC1STAbits 0 1 `i 1572  ]
+[; ;eusart.c: 154: {
+"154
 {
-[; ;eusart.c: 156: RC1STAbits.CREN = 0;
-"156
-[e = . . _RC1STAbits 0 4 -> -> 0 `i `uc ]
-[; ;eusart.c: 157: RC1STAbits.CREN = 1;
+[; ;eusart.c: 157: RC1STAbits.CREN = 0;
 "157
-[e = . . _RC1STAbits 0 4 -> -> 1 `i `uc ]
+[e = . . _RC1STAbits 0 4 -> -> 0 `i `uc ]
+[; ;eusart.c: 158: RC1STAbits.CREN = 1;
 "158
-}
-[e :U 1571 ]
-[; ;eusart.c: 158: }
-[; ;eusart.c: 161: eusartRxBuffer[eusartRxHead++] = RC1REG;
-"161
-[e = *U + &U _eusartRxBuffer * -> ++ _eusartRxHead -> -> 1 `i `uc `ux -> -> # *U &U _eusartRxBuffer `ui `ux _RC1REG ]
-[; ;eusart.c: 162: if(sizeof(eusartRxBuffer) <= eusartRxHead)
-"162
-[e $ ! <= -> # _eusartRxBuffer `ui -> _eusartRxHead `ui 1572  ]
-[; ;eusart.c: 163: {
-"163
-{
-[; ;eusart.c: 164: eusartRxHead = 0;
-"164
-[e = _eusartRxHead -> -> 0 `i `uc ]
-"165
+[e = . . _RC1STAbits 0 4 -> -> 1 `i `uc ]
+"159
 }
 [e :U 1572 ]
-[; ;eusart.c: 165: }
-[; ;eusart.c: 166: eusartRxCount++;
+[; ;eusart.c: 159: }
+[; ;eusart.c: 162: eusartRxBuffer[eusartRxHead++] = RC1REG;
+"162
+[e = *U + &U _eusartRxBuffer * -> ++ _eusartRxHead -> -> 1 `i `uc `ux -> -> # *U &U _eusartRxBuffer `ui `ux _RC1REG ]
+[; ;eusart.c: 163: if(sizeof(eusartRxBuffer) <= eusartRxHead)
+"163
+[e $ ! <= -> # _eusartRxBuffer `ui -> _eusartRxHead `ui 1573  ]
+[; ;eusart.c: 164: {
+"164
+{
+[; ;eusart.c: 165: eusartRxHead = 0;
+"165
+[e = _eusartRxHead -> -> 0 `i `uc ]
 "166
-[e ++ _eusartRxCount -> -> 1 `i `uc ]
-[; ;eusart.c: 167: }
-"167
-[e :UE 1570 ]
 }
-"170
+[e :U 1573 ]
+[; ;eusart.c: 166: }
+[; ;eusart.c: 167: eusartRxCount++;
+"167
+[e ++ _eusartRxCount -> -> 1 `i `uc ]
+[; ;eusart.c: 168: }
+"168
+[e :UE 1571 ]
+}
+"171
 [v _EUSART_SetRxInterruptHandler `(v ~T0 @X0 1 ef1`*F14220 ]
 {
-[; ;eusart.c: 170: void EUSART_SetRxInterruptHandler(void (* interruptHandler)(void)){
+[; ;eusart.c: 171: void EUSART_SetRxInterruptHandler(void (* interruptHandler)(void)){
 [e :U _EUSART_SetRxInterruptHandler ]
-[v F14236 `(v ~T0 @X0 0 tf ]
-[v _interruptHandler `*F14236 ~T0 @X0 1 r1 ]
+[v F14272 `(v ~T0 @X0 0 tf ]
+[v _interruptHandler `*F14272 ~T0 @X0 1 r1 ]
 [f ]
-[; ;eusart.c: 171: EUSART_RxDefaultInterruptHandler = interruptHandler;
-"171
-[e = _EUSART_RxDefaultInterruptHandler _interruptHandler ]
-[; ;eusart.c: 172: }
+[; ;eusart.c: 172: EUSART_RxDefaultInterruptHandler = interruptHandler;
 "172
-[e :UE 1573 ]
+[e = _EUSART_RxDefaultInterruptHandler _interruptHandler ]
+[; ;eusart.c: 173: }
+"173
+[e :UE 1574 ]
 }

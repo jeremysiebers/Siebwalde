@@ -48,6 +48,7 @@
   Section: Included Files
 */
 #include "eusart.h"
+#include "../modbus/General.h"
 
 /**
   Section: Macro Declarations
@@ -72,7 +73,7 @@ void EUSART_Initialize(void)
 {
     // disable interrupts before changing states
     PIE3bits.RCIE = 0;
-    EUSART_SetRxInterruptHandler(EUSART_Receive_ISR);
+    EUSART_SetRxInterruptHandler(PetitModbusIntHandlerRC);
     // Set the EUSART module to the options selected in the user interface.
 
     // ABDOVF no_overflow; SCKP Non-Inverted; BRG16 16bit_generator; WUE disabled; ABDEN disabled; 

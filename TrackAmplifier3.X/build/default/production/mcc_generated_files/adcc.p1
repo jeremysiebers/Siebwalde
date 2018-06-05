@@ -1,5 +1,5 @@
 Version 3.2 HI-TECH Software Intermediate Code
-[v F14364 `(v ~T0 @X0 0 tf ]
+[v F14418 `(v ~T0 @X0 0 tf ]
 "2773 C:\Program Files (x86)\Microchip\xc8\v1.44\include\pic16f18854.h
 [v _ADLTHL `Vuc ~T0 @X0 0 e@270 ]
 "2843
@@ -13219,8 +13219,32 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;pin_manager.h: 512: void PIN_MANAGER_Initialize (void);
 [; ;pin_manager.h: 524: void PIN_MANAGER_IOC(void);
 [; ;interrupt_manager.h: 109: void interrupt INTERRUPT_InterruptManager(void);
+[; ;tmr3.h: 100: void TMR3_Initialize(void);
+[; ;tmr3.h: 129: void TMR3_StartTimer(void);
+[; ;tmr3.h: 161: void TMR3_StopTimer(void);
+[; ;tmr3.h: 196: uint16_t TMR3_ReadTimer(void);
+[; ;tmr3.h: 235: void TMR3_WriteTimer(uint16_t timerVal);
+[; ;tmr3.h: 271: void TMR3_Reload(void);
+[; ;tmr3.h: 310: void TMR3_StartSinglePulseAcquisition(void);
+[; ;tmr3.h: 349: uint8_t TMR3_CheckGateValueStatus(void);
+[; ;tmr3.h: 367: void TMR3_ISR(void);
+[; ;tmr3.h: 385: void TMR3_SetInterruptHandler(void (* InterruptHandler)(void));
+[; ;tmr3.h: 403: extern void (*TMR3_InterruptHandler)(void);
+[; ;tmr3.h: 421: void TMR3_DefaultInterruptHandler(void);
 [; ;pwm6.h: 102: void PWM6_Initialize(void);
 [; ;pwm6.h: 129: void PWM6_LoadDutyValue(uint16_t dutyValue);
+[; ;tmr1.h: 100: void TMR1_Initialize(void);
+[; ;tmr1.h: 129: void TMR1_StartTimer(void);
+[; ;tmr1.h: 161: void TMR1_StopTimer(void);
+[; ;tmr1.h: 196: uint16_t TMR1_ReadTimer(void);
+[; ;tmr1.h: 235: void TMR1_WriteTimer(uint16_t timerVal);
+[; ;tmr1.h: 271: void TMR1_Reload(void);
+[; ;tmr1.h: 310: void TMR1_StartSinglePulseAcquisition(void);
+[; ;tmr1.h: 349: uint8_t TMR1_CheckGateValueStatus(void);
+[; ;tmr1.h: 367: void TMR1_ISR(void);
+[; ;tmr1.h: 385: void TMR1_SetInterruptHandler(void (* InterruptHandler)(void));
+[; ;tmr1.h: 403: extern void (*TMR1_InterruptHandler)(void);
+[; ;tmr1.h: 421: void TMR1_DefaultInterruptHandler(void);
 [; ;tmr2.h: 79: typedef enum
 [; ;tmr2.h: 80: {
 [; ;tmr2.h: 89: TMR2_ROP_STARTS_TMRON,
@@ -13290,7 +13314,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;eusart.h: 78: extern volatile uint8_t eusartTxBufferRemaining;
 [; ;eusart.h: 79: extern volatile uint8_t eusartRxCount;
 "85 mcc_generated_files/eusart.h
-[v _EUSART_RxDefaultInterruptHandler `*F14364 ~T0 @X0 1 e ]
+[v _EUSART_RxDefaultInterruptHandler `*F14418 ~T0 @X0 1 e ]
 [; ;eusart.h: 85: void (*EUSART_RxDefaultInterruptHandler)(void);
 [; ;eusart.h: 107: void EUSART_Initialize(void);
 [; ;eusart.h: 155: bool EUSART_is_tx_ready(void);
@@ -13300,9 +13324,9 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;eusart.h: 294: void EUSART_Write(uint8_t txData);
 [; ;eusart.h: 316: void EUSART_Receive_ISR(void);
 [; ;eusart.h: 337: void EUSART_SetRxInterruptHandler(void (* interruptHandler)(void));
-[; ;mcc.h: 76: void SYSTEM_Initialize(void);
-[; ;mcc.h: 89: void OSCILLATOR_Initialize(void);
-[; ;mcc.h: 102: void PMD_Initialize(void);
+[; ;mcc.h: 78: void SYSTEM_Initialize(void);
+[; ;mcc.h: 91: void OSCILLATOR_Initialize(void);
+[; ;mcc.h: 104: void PMD_Initialize(void);
 "63 mcc_generated_files/adcc.c
 [v _ADCC_Initialize `(v ~T0 @X0 1 ef ]
 "64

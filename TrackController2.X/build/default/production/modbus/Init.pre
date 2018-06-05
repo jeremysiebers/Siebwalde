@@ -1,17 +1,17 @@
 
 # 1 "modbus/Init.c"
 
-# 26 "C:\Localdata\Microchip\xc8\v1.45\include\htc.h"
+# 26 "C:\Program Files (x86)\Microchip\xc8\v1.44\include\htc.h"
 extern const char __xc8_OPTIM_SPEED;
 
 extern double __fpnormalize(double);
 
 
-# 13 "C:\Localdata\Microchip\xc8\v1.45\include\xc8debug.h"
+# 13 "C:\Program Files (x86)\Microchip\xc8\v1.44\include\xc8debug.h"
 #pragma intrinsic(__builtin_software_breakpoint)
 extern void __builtin_software_breakpoint(void);
 
-# 50 "C:\Localdata\Microchip\xc8\v1.45\include\pic16f777.h"
+# 50 "C:\Program Files (x86)\Microchip\xc8\v1.44\include\pic16f777.h"
 extern volatile unsigned char INDF @ 0x000;
 
 asm("INDF equ 00h");
@@ -1695,7 +1695,7 @@ extern volatile __bit nW @ (((unsigned) &SSPSTAT)*8) + 2;
 extern volatile __bit nWRITE @ (((unsigned) &SSPSTAT)*8) + 2;
 
 
-# 28 "C:\Localdata\Microchip\xc8\v1.45\include\pic.h"
+# 28 "C:\Program Files (x86)\Microchip\xc8\v1.44\include\pic.h"
 #pragma intrinsic(__nop)
 extern void __nop(void);
 
@@ -1724,7 +1724,7 @@ extern void InitTMR1(void);
 # 3 "modbus/Interrupts.h"
 extern void PetitModbusIntHandler(void);
 
-# 20 "modbus/PetitModbus.h"
+# 21 "modbus/PetitModbus.h"
 const unsigned char auchCRCHi[] = {
 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0,
@@ -1768,22 +1768,25 @@ const unsigned char auchCRCLo[] = {
 0x40
 };
 
-# 71
+# 72
 extern volatile unsigned short PetitModbusTimerValue;
+extern volatile unsigned int SlaveAnswerTimeoutCounter;
 
 typedef enum
 {
 SLAVE_DATA_BUSY = 1,
 SLAVE_DATA_OK = 2,
-SLAVE_DATA_NOK = 3
+SLAVE_DATA_NOK = 3,
+SLAVE_DATA_TIMEOUT = 4
 }SLAVE_DATA;
 
 typedef struct
 {
 unsigned int Reg[7];
-unsigned char CommError;
-unsigned int ReceiveCounter;
-unsigned int SentCounter;
+unsigned char MbCommError;
+unsigned char MbExceptionCode;
+unsigned int MbReceiveCounter;
+unsigned int MbSentCounter;
 }SLAVE_INFO;
 
 
@@ -1794,6 +1797,7 @@ extern unsigned char SendPetitModbus(unsigned char Address, unsigned char Functi
 void HandlePetitModbusWriteSingleRegisterSlaveReadback(void);
 void HandlePetitModbusReadHoldingRegistersSlaveReadback(void);
 void HandleMPetitodbusWriteMultipleRegistersSlaveReadback(void);
+void HandleMPetitodbusMbExceptionCodesSlaveReadback(void);
 
 # 20 "modbus/PetitModbusPort.h"
 extern volatile unsigned char PetitReceiveBuffer[(7*2 + 10)];

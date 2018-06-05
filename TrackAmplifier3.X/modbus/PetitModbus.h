@@ -20,8 +20,12 @@
 #define ENTER_CRITICAL_SECTION( )   (INTCONbits.PEIE = 1)
 #define EXIT_CRITICAL_SECTION( )    (INTCONbits.PEIE = 0)
 
-//#define CRC_CALC                                                                // When commented a CRC lookup table is used for the function void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
-#ifndef CRC_CALC
+//#define CRC_CALC                                                              // When uncommented a CRC is calculated by the processor
+#define CRC_LOOKUP                                                              // When uncommented a CRC is looked up by the processor in flash
+//#define CRC_HW                                                                  // When uncommented a CRC is calculated by dedicated HW
+
+
+#ifdef CRC_LOOKUP
 /* Table of CRC values for high?order byte */
 const unsigned char auchCRCHi[] = {
 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,

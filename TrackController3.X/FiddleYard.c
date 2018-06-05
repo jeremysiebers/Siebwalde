@@ -76,7 +76,6 @@ unsigned char Enable_State_Machine_Update = 0;
 
 unsigned char temp3[4] = {0, 0, 0, 7};
 
-
 //MAIN ROUTINE///////////////////////////////////////////////////////////////////////////////////////////
 void main()
 {			
@@ -128,7 +127,10 @@ void main()
             Enable_State_Machine_Update = False;  
             SendPetitModbus(1, 3, temp3, 4);
             printf("sent!\n\r");
+
+            
         }
+        
         
         #if defined (USE_TCPIP)
 		/////Announce IP after IP change or power up event////////		

@@ -1,7 +1,7 @@
 
 # 1 "modbus/PetitModbus.c"
 
-# 20 "modbus/PetitModbus.h"
+# 21 "modbus/PetitModbus.h"
 const unsigned char auchCRCHi[] = {
 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0,
@@ -45,22 +45,25 @@ const unsigned char auchCRCLo[] = {
 0x40
 };
 
-# 71
+# 72
 extern volatile unsigned short PetitModbusTimerValue;
+extern volatile unsigned int SlaveAnswerTimeoutCounter;
 
 typedef enum
 {
 SLAVE_DATA_BUSY = 1,
 SLAVE_DATA_OK = 2,
-SLAVE_DATA_NOK = 3
+SLAVE_DATA_NOK = 3,
+SLAVE_DATA_TIMEOUT = 4
 }SLAVE_DATA;
 
 typedef struct
 {
 unsigned int Reg[7];
-unsigned char CommError;
-unsigned int ReceiveCounter;
-unsigned int SentCounter;
+unsigned char MbCommError;
+unsigned char MbExceptionCode;
+unsigned int MbReceiveCounter;
+unsigned int MbSentCounter;
 }SLAVE_INFO;
 
 
@@ -71,18 +74,19 @@ extern unsigned char SendPetitModbus(unsigned char Address, unsigned char Functi
 void HandlePetitModbusWriteSingleRegisterSlaveReadback(void);
 void HandlePetitModbusReadHoldingRegistersSlaveReadback(void);
 void HandleMPetitodbusWriteMultipleRegistersSlaveReadback(void);
+void HandleMPetitodbusMbExceptionCodesSlaveReadback(void);
 
-# 26 "C:\Localdata\Microchip\xc8\v1.45\include\htc.h"
+# 26 "C:\Program Files (x86)\Microchip\xc8\v1.44\include\htc.h"
 extern const char __xc8_OPTIM_SPEED;
 
 extern double __fpnormalize(double);
 
 
-# 13 "C:\Localdata\Microchip\xc8\v1.45\include\xc8debug.h"
+# 13 "C:\Program Files (x86)\Microchip\xc8\v1.44\include\xc8debug.h"
 #pragma intrinsic(__builtin_software_breakpoint)
 extern void __builtin_software_breakpoint(void);
 
-# 50 "C:\Localdata\Microchip\xc8\v1.45\include\pic16f777.h"
+# 50 "C:\Program Files (x86)\Microchip\xc8\v1.44\include\pic16f777.h"
 extern volatile unsigned char INDF @ 0x000;
 
 asm("INDF equ 00h");
@@ -1766,7 +1770,7 @@ extern volatile __bit nW @ (((unsigned) &SSPSTAT)*8) + 2;
 extern volatile __bit nWRITE @ (((unsigned) &SSPSTAT)*8) + 2;
 
 
-# 28 "C:\Localdata\Microchip\xc8\v1.45\include\pic.h"
+# 28 "C:\Program Files (x86)\Microchip\xc8\v1.44\include\pic.h"
 #pragma intrinsic(__nop)
 extern void __nop(void);
 
@@ -1800,7 +1804,7 @@ extern unsigned char PetitModBus_UART_String(unsigned char *s, unsigned int Leng
 extern void ReceiveInterrupt(unsigned char Data);
 extern void PetitModBus_TimerValues(void);
 
-# 27 "modbus/PetitModbus.c"
+# 23 "modbus/PetitModbus.c"
 static SLAVE_INFO *MASTER_SLAVE_DATA = 0;
 
 typedef enum
@@ -1834,8 +1838,9 @@ PETIT_RXTX_STATE Petit_Rx_State = PETIT_RXTX_IDLE;
 unsigned char Petit_Rx_Data_Available = 0;
 
 volatile unsigned short PetitModbusTimerValue = 0;
+volatile unsigned int SlaveAnswerTimeoutCounter = 0;
 
-# 95
+# 92
 void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
 {
 unsigned int uchCRCHi = *CRC >> 8;
@@ -1848,7 +1853,7 @@ uchCRCHi = auchCRCLo[uIndex] ;
 *CRC = (unsigned int)(uchCRCHi << 8 | uchCRCLo) ;
 }
 
-# 126
+# 123
 unsigned char Petit_DoSlaveTX(void)
 {
 PetitModBus_UART_String(Petit_Tx_Buf,Petit_Tx_Buf_Size);
@@ -1857,7 +1862,7 @@ Petit_Tx_Buf_Size = 0;
 return 1;
 }
 
-# 141
+# 138
 unsigned char PetitSendMessage(void)
 {
 if (Petit_Tx_State != PETIT_RXTX_IDLE){
@@ -1869,7 +1874,7 @@ Petit_Tx_State =PETIT_RXTX_START;
 return 1;
 }
 
-# 160
+# 157
 unsigned char Petit_RxDataAvailable(void)
 {
 unsigned char Result = Petit_Rx_Data_Available;
@@ -1879,7 +1884,7 @@ Petit_Rx_Data_Available = 0;
 return Result;
 }
 
-# 176
+# 173
 unsigned char Petit_CheckRxTimeout(void)
 {
 
@@ -1893,7 +1898,7 @@ return 1;
 return 0;
 }
 
-# 198
+# 195
 unsigned char CheckPetitModbusBufferComplete(void)
 {
 int PetitExpectedReceiveCount=0;
@@ -1933,7 +1938,7 @@ return 3;
 return 2;
 }
 
-# 246
+# 243
 void Petit_RxRTU(void)
 {
 unsigned char Petit_i;
@@ -1981,7 +1986,7 @@ Petit_Rx_State = PETIT_RXTX_IDLE;
 }
 }
 
-# 303
+# 300
 void Petit_TxRTU(void)
 {
 Petit_Tx_CRC16 =0xFFFF;
@@ -2007,16 +2012,29 @@ Petit_Tx_State =PETIT_RXTX_IDLE;
 }
 else{
 Petit_Tx_State =PETIT_RXTX_WAIT_ANSWER;
+SlaveAnswerTimeoutCounter = 0;
+TMR1 = 0x00;
+PIR1bits.TMR1IF = 0;
+PIE1bits.TMR1IE = 1;
+T1CONbits.TMR1ON = 1;
+PORTDbits.RD1 = 1;
 }
 }
 
-# 337
+# 341
 void ProcessPetitModbus(void)
 {
 if (Petit_Tx_State != PETIT_RXTX_IDLE && Petit_Tx_State != PETIT_RXTX_WAIT_ANSWER){
 
 Petit_TxRTU();
 
+}
+else if(Petit_Tx_State == PETIT_RXTX_WAIT_ANSWER){
+if (SlaveAnswerTimeoutCounter){
+MASTER_SLAVE_DATA[Petit_Tx_Data.Address].MbCommError = SLAVE_DATA_TIMEOUT;
+Petit_Tx_State = PETIT_RXTX_IDLE;
+SlaveAnswerTimeoutCounter = 0;
+}
 }
 
 Petit_RxRTU();
@@ -2034,12 +2052,12 @@ case 6: { HandlePetitModbusWriteSingleRegisterSlaveReadback(); break; }
 
 case 16: { HandleMPetitodbusWriteMultipleRegistersSlaveReadback(); break; }
 
-default: { Petit_Tx_State = PETIT_RXTX_IDLE; break; }
+default: { HandleMPetitodbusMbExceptionCodesSlaveReadback(); break; }
 }
 }
 }
 
-# 378
+# 389
 void InitPetitModbus(SLAVE_INFO *location)
 {
 MASTER_SLAVE_DATA = location;
@@ -2047,12 +2065,12 @@ PetitModBus_UART_Initialise();
 PetitModBus_TIMER_Initialise();
 }
 
-# 392
+# 403
 unsigned char SendPetitModbus(unsigned char Address, unsigned char Function, unsigned char *DataBuf, unsigned short DataLen){
 
 unsigned char return_val = 0;
 
-MASTER_SLAVE_DATA[Address].CommError = SLAVE_DATA_BUSY;
+MASTER_SLAVE_DATA[Address].MbCommError = SLAVE_DATA_BUSY;
 
 
 Petit_Tx_Data.Function = Function;
@@ -2066,13 +2084,13 @@ Petit_Tx_Data.DataBuf[Petit_Tx_Current]=DataBuf[Petit_Tx_Current];
 return_val = PetitSendMessage();
 
 if (return_val){
-MASTER_SLAVE_DATA[Address].SentCounter += 1;
+MASTER_SLAVE_DATA[Address].MbSentCounter += 1;
 }
 
 return (return_val);
 }
 
-# 422
+# 433
 void HandlePetitModbusWriteSingleRegisterSlaveReadback(void)
 {
 if(Petit_Tx_Data.Function == Petit_Rx_Data.Function){
@@ -2081,8 +2099,8 @@ if(Petit_Tx_Data.DataBuf[0] == Petit_Rx_Data.DataBuf[0]){
 if(Petit_Tx_Data.DataBuf[1] == Petit_Rx_Data.DataBuf[1]){
 if(Petit_Tx_Data.DataBuf[2] == Petit_Rx_Data.DataBuf[2]){
 if(Petit_Tx_Data.DataBuf[3] == Petit_Rx_Data.DataBuf[3]){
-MASTER_SLAVE_DATA[Petit_Rx_Data.Address].CommError = SLAVE_DATA_OK;
-MASTER_SLAVE_DATA[Petit_Rx_Data.Address].ReceiveCounter += 1;
+MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbCommError = SLAVE_DATA_OK;
+MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbReceiveCounter += 1;
 }
 }
 }
@@ -2090,13 +2108,13 @@ MASTER_SLAVE_DATA[Petit_Rx_Data.Address].ReceiveCounter += 1;
 }
 }
 else{
-MASTER_SLAVE_DATA[Petit_Tx_Data.Address].CommError = SLAVE_DATA_NOK;
+MASTER_SLAVE_DATA[Petit_Tx_Data.Address].MbCommError = SLAVE_DATA_NOK;
 }
 
 Petit_Tx_State = PETIT_RXTX_IDLE;
 }
 
-# 452
+# 463
 void HandlePetitModbusReadHoldingRegistersSlaveReadback(void)
 {
 unsigned int Petit_StartAddress = 0;
@@ -2122,18 +2140,18 @@ MASTER_SLAVE_DATA[Petit_Tx_Data.Address].Reg[Petit_StartAddress] = RegData;
 Petit_StartAddress += 1;
 BufReadIndex += 2;
 }
-MASTER_SLAVE_DATA[Petit_Rx_Data.Address].CommError = SLAVE_DATA_OK;
-MASTER_SLAVE_DATA[Petit_Rx_Data.Address].ReceiveCounter += 1;
+MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbCommError = SLAVE_DATA_OK;
+MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbReceiveCounter += 1;
 }
 }
 else{
-MASTER_SLAVE_DATA[Petit_Tx_Data.Address].CommError = SLAVE_DATA_NOK;
+MASTER_SLAVE_DATA[Petit_Tx_Data.Address].MbCommError = SLAVE_DATA_NOK;
 }
 
 Petit_Tx_State = PETIT_RXTX_IDLE;
 }
 
-# 495
+# 506
 void HandleMPetitodbusWriteMultipleRegistersSlaveReadback(void)
 {
 unsigned int Petit_StartAddress = 0;
@@ -2145,14 +2163,27 @@ Petit_NumberOfRegisters = ((unsigned int) (Petit_Tx_Data.DataBuf[2]) << 8) + (un
 if(Petit_Tx_Data.Address == Petit_Rx_Data.Address){
 if(Petit_StartAddress == ((unsigned int) (Petit_Rx_Data.DataBuf[0]) << 8) + (unsigned int) (Petit_Rx_Data.DataBuf[1])){
 if(Petit_NumberOfRegisters == ((unsigned int) (Petit_Rx_Data.DataBuf[2]) << 8) + (unsigned int) (Petit_Rx_Data.DataBuf[3])){
-MASTER_SLAVE_DATA[Petit_Rx_Data.Address].CommError = SLAVE_DATA_OK;
-MASTER_SLAVE_DATA[Petit_Rx_Data.Address].ReceiveCounter += 1;
+MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbCommError = SLAVE_DATA_OK;
+MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbReceiveCounter += 1;
 }
 }
 }
 else{
-MASTER_SLAVE_DATA[Petit_Tx_Data.Address].CommError = SLAVE_DATA_NOK;
+MASTER_SLAVE_DATA[Petit_Tx_Data.Address].MbCommError = SLAVE_DATA_NOK;
 }
+
+Petit_Tx_State = PETIT_RXTX_IDLE;
+}
+
+# 536
+void HandleMPetitodbusMbExceptionCodesSlaveReadback(void)
+{
+if (Petit_Rx_Data.Function > 0x80 && Petit_Rx_Data.Function < 0x8C){
+MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbExceptionCode = Petit_Rx_Data.DataBuf[0];
+}
+MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbCommError = SLAVE_DATA_OK;
+MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbReceiveCounter += 1;
+
 
 Petit_Tx_State = PETIT_RXTX_IDLE;
 }

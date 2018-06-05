@@ -3,6 +3,7 @@
  main.c  \
 Peripherals/tmr0.h  \
 modbus/Init.h  \
+Peripherals/tmr1.h  \
 Peripherals/tmr2.h  \
 main.h  \
 Peripherals/config.h  \

@@ -1,11 +1,11 @@
 Version 3.2 HI-TECH Software Intermediate Code
-"81 modbus/PetitModbus.h
-[s S122 `ui -> 7 `i `uc 1 `ui 1 `ui 1 ]
-[n S122 . Reg CommError ReceiveCounter SentCounter ]
+"84 modbus/PetitModbus.h
+[s S122 `ui -> 7 `i `uc 1 `uc 1 `ui 1 `ui 1 ]
+[n S122 . Reg MbCommError MbExceptionCode MbReceiveCounter MbSentCounter ]
 [p mainexit ]
-"43 Peripherals/config.h
+"44 Peripherals/config.h
 [v _SYSTEM_Initialize `(v ~T0 @X0 0 ef ]
-"356 C:\Localdata\Microchip\xc8\v1.45\include\pic16f777.h
+"356 C:\Program Files (x86)\Microchip\xc8\v1.44\include\pic16f777.h
 [s S12 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
 [n S12 . RD0 RD1 RD2 RD3 RD4 RD5 RD6 RD7 ]
 "355
@@ -13,14 +13,14 @@ Version 3.2 HI-TECH Software Intermediate Code
 [n S11 . . ]
 "367
 [v _PORTDbits `VS11 ~T0 @X0 0 e@8 ]
-"38 main.c
-[c E1552 1 0 .. ]
-[n E1552 . On Off  ]
-"89 modbus/PetitModbus.h
+"35 main.c
+[c E1564 1 0 .. ]
+[n E1564 . On Off  ]
+"93 modbus/PetitModbus.h
 [v _InitPetitModbus `(v ~T0 @X0 0 ef1`*S122 ]
-"90
+"94
 [v _ProcessPetitModbus `(v ~T0 @X0 0 ef ]
-"566 C:\Localdata\Microchip\xc8\v1.45\include\pic16f777.h
+"566 C:\Program Files (x86)\Microchip\xc8\v1.44\include\pic16f777.h
 [s S21 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
 [n S21 . TMR1IF TMR2IF CCP1IF SSPIF TXIF RCIF ADIF PSPIF ]
 "565
@@ -28,18 +28,18 @@ Version 3.2 HI-TECH Software Intermediate Code
 [n S20 . . ]
 "577
 [v _PIR1bits `VS20 ~T0 @X0 0 e@12 ]
-"91 modbus/PetitModbus.h
+"95 modbus/PetitModbus.h
 [v _SendPetitModbus `(uc ~T0 @X0 0 ef4`uc`uc`*uc`us ]
-"65 main.c
-[c E1568 1 2 3 .. ]
-[n E1568 . SLAVE_DATA_BUSY SLAVE_DATA_OK SLAVE_DATA_NOK  ]
-"776 C:\Localdata\Microchip\xc8\v1.45\include\pic16f777.h
+"62 main.c
+[c E1581 1 2 3 4 .. ]
+[n E1581 . SLAVE_DATA_BUSY SLAVE_DATA_OK SLAVE_DATA_NOK SLAVE_DATA_TIMEOUT  ]
+"776 C:\Program Files (x86)\Microchip\xc8\v1.44\include\pic16f777.h
 [v _TMR2 `Vuc ~T0 @X0 0 e@17 ]
 [; ;htc.h: 26: extern const char __xc8_OPTIM_SPEED;
 [; ;htc.h: 28: extern double __fpnormalize(double);
 [; ;xc8debug.h: 14: extern void __builtin_software_breakpoint(void);
 [; ;pic16f777.h: 50: extern volatile unsigned char INDF @ 0x000;
-"52 C:\Localdata\Microchip\xc8\v1.45\include\pic16f777.h
+"52 C:\Program Files (x86)\Microchip\xc8\v1.44\include\pic16f777.h
 [; ;pic16f777.h: 52: asm("INDF equ 00h");
 [; <" INDF equ 00h ;# ">
 [; ;pic16f777.h: 57: extern volatile unsigned char TMR0 @ 0x001;
@@ -1355,6 +1355,12 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;tmr2.h: 192: void TMR2_WriteTimer(uint8_t timerVal);
 [; ;tmr2.h: 244: void TMR2_LoadPeriodRegister(uint8_t periodVal);
 [; ;tmr2.h: 279: bool TMR2_HasOverflowOccured(void);
+[; ;tmr1.h: 57: void TMR1_Initialize(void);
+[; ;tmr1.h: 86: void TMR1_StartTimer(void);
+[; ;tmr1.h: 118: void TMR1_StopTimer(void);
+[; ;tmr1.h: 153: uint8_t TMR1_ReadTimer(void);
+[; ;tmr1.h: 192: void TMR1_WriteTimer(uint8_t timerVal);
+[; ;tmr1.h: 228: bool TMR1_HasOverflowOccured(void);
 [; ;pwm.h: 50: void PWM_Initialize(void);
 [; ;pwm.h: 77: extern void PWM_LoadDutyValue(uint16_t dutyValue);
 [; ;tmr0.h: 57: void TMR0_Initialize(void);
@@ -1368,37 +1374,28 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;ausart.h: 141: extern void ausart_Write(uint8_t txData);
 [; ;ausart.h: 162: extern void ausart_Transmit_ISR(void);
 [; ;ausart.h: 183: extern void ausart_Receive_ISR(void);
-[; ;config.h: 27: enum
-[; ;config.h: 28: {
-[; ;config.h: 29: On = 1,Off = 0
-[; ;config.h: 30: };
-[; ;config.h: 43: void SYSTEM_Initialize(void);
-[; ;config.h: 56: void OSCILLATOR_Initialize(void);
+[; ;config.h: 28: enum
+[; ;config.h: 29: {
+[; ;config.h: 30: On = 1,Off = 0
+[; ;config.h: 31: };
+[; ;config.h: 44: void SYSTEM_Initialize(void);
+[; ;config.h: 57: void OSCILLATOR_Initialize(void);
 [; ;Init.h: 12: extern void InitUART(void);
 [; ;Init.h: 13: extern void InitTMR1(void);
 [; ;Interrupts.h: 3: extern void PetitModbusIntHandler(void);
-"20 modbus/PetitModbus.h
+"21 modbus/PetitModbus.h
 [v _auchCRCHi `Cuc ~T0 @X0 -> 0 `x e ]
 [i _auchCRCHi
 :U ..
-"21
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
 "22
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
 -> -> 64 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
 -> -> 1 `i `uc
 -> -> 192 `i `uc
 -> -> 128 `i `uc
@@ -1406,16 +1403,8 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 0 `i `uc
 -> -> 193 `i `uc
 -> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
 "23
--> -> 128 `i `uc
--> -> 65 `i `uc
+-> -> 64 `i `uc
 -> -> 1 `i `uc
 -> -> 192 `i `uc
 -> -> 128 `i `uc
@@ -1429,7 +1418,11 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 129 `i `uc
 -> -> 64 `i `uc
 -> -> 1 `i `uc
+-> -> 192 `i `uc
 "24
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 1 `i `uc
 -> -> 192 `i `uc
 -> -> 128 `i `uc
 -> -> 65 `i `uc
@@ -1437,15 +1430,15 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 193 `i `uc
 -> -> 129 `i `uc
 -> -> 64 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
 -> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
 "25
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
 -> -> 0 `i `uc
 -> -> 193 `i `uc
 -> -> 129 `i `uc
@@ -1454,14 +1447,14 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 192 `i `uc
 -> -> 128 `i `uc
 -> -> 65 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
 "26
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
 -> -> 64 `i `uc
 -> -> 1 `i `uc
 -> -> 192 `i `uc
@@ -1471,19 +1464,15 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 193 `i `uc
 -> -> 129 `i `uc
 -> -> 64 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
 "27
+-> -> 64 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
 -> -> 128 `i `uc
 -> -> 65 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
 -> -> 0 `i `uc
 -> -> 193 `i `uc
 -> -> 129 `i `uc
@@ -1493,10 +1482,14 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 128 `i `uc
 -> -> 65 `i `uc
 -> -> 1 `i `uc
+-> -> 192 `i `uc
 "28
--> -> 192 `i `uc
 -> -> 128 `i `uc
 -> -> 65 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
 -> -> 0 `i `uc
 -> -> 193 `i `uc
 -> -> 129 `i `uc
@@ -1505,11 +1498,11 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 192 `i `uc
 -> -> 128 `i `uc
 -> -> 65 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
+-> -> 1 `i `uc
 "29
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
 -> -> 0 `i `uc
 -> -> 193 `i `uc
 -> -> 129 `i `uc
@@ -1518,15 +1511,11 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 192 `i `uc
 -> -> 128 `i `uc
 -> -> 65 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
 -> -> 0 `i `uc
 -> -> 193 `i `uc
 -> -> 129 `i `uc
+-> -> 64 `i `uc
 "30
--> -> 64 `i `uc
 -> -> 0 `i `uc
 -> -> 193 `i `uc
 -> -> 129 `i `uc
@@ -1535,15 +1524,19 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 192 `i `uc
 -> -> 128 `i `uc
 -> -> 65 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
 -> -> 0 `i `uc
 -> -> 193 `i `uc
 -> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
 "31
--> -> 128 `i `uc
--> -> 65 `i `uc
+-> -> 64 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
 -> -> 1 `i `uc
 -> -> 192 `i `uc
 -> -> 128 `i `uc
@@ -1552,13 +1545,9 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 193 `i `uc
 -> -> 129 `i `uc
 -> -> 64 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
 -> -> 1 `i `uc
+-> -> 192 `i `uc
 "32
--> -> 192 `i `uc
 -> -> 128 `i `uc
 -> -> 65 `i `uc
 -> -> 1 `i `uc
@@ -1569,15 +1558,19 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 193 `i `uc
 -> -> 129 `i `uc
 -> -> 64 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
 -> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
 "33
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
 -> -> 0 `i `uc
 -> -> 193 `i `uc
 -> -> 129 `i `uc
@@ -1586,15 +1579,15 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 192 `i `uc
 -> -> 128 `i `uc
 -> -> 65 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
 "34
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
 -> -> 64 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
 -> -> 1 `i `uc
 -> -> 192 `i `uc
 -> -> 128 `i `uc
@@ -1602,27 +1595,23 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 0 `i `uc
 -> -> 193 `i `uc
 -> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
 "35
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
 -> -> 64 `i `uc
 -> -> 1 `i `uc
 -> -> 192 `i `uc
 -> -> 128 `i `uc
 -> -> 65 `i `uc
 -> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
 "36
--> -> 192 `i `uc
 -> -> 128 `i `uc
 -> -> 65 `i `uc
 -> -> 0 `i `uc
@@ -1637,7 +1626,24 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 192 `i `uc
 -> -> 128 `i `uc
 -> -> 65 `i `uc
+-> -> 1 `i `uc
 "37
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+"38
 -> -> 0 `i `uc
 -> -> 193 `i `uc
 -> -> 129 `i `uc
@@ -1653,35 +1659,35 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 0 `i `uc
 -> -> 193 `i `uc
 -> -> 129 `i `uc
-"39
+"40
 -> -> 64 `i `uc
 ..
 ]
-[; ;PetitModbus.h: 20: const unsigned char auchCRCHi[] = {
-[; ;PetitModbus.h: 21: 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
-[; ;PetitModbus.h: 22: 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0,
-[; ;PetitModbus.h: 23: 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01,
-[; ;PetitModbus.h: 24: 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41,
-[; ;PetitModbus.h: 25: 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81,
-[; ;PetitModbus.h: 26: 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0,
-[; ;PetitModbus.h: 27: 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01,
-[; ;PetitModbus.h: 28: 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40,
-[; ;PetitModbus.h: 29: 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
-[; ;PetitModbus.h: 30: 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0,
-[; ;PetitModbus.h: 31: 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01,
-[; ;PetitModbus.h: 32: 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41,
-[; ;PetitModbus.h: 33: 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
-[; ;PetitModbus.h: 34: 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0,
-[; ;PetitModbus.h: 35: 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01,
-[; ;PetitModbus.h: 36: 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41,
-[; ;PetitModbus.h: 37: 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
-[; ;PetitModbus.h: 38: 0x40
-[; ;PetitModbus.h: 39: } ;
-"42
+[; ;PetitModbus.h: 21: const unsigned char auchCRCHi[] = {
+[; ;PetitModbus.h: 22: 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
+[; ;PetitModbus.h: 23: 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0,
+[; ;PetitModbus.h: 24: 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01,
+[; ;PetitModbus.h: 25: 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41,
+[; ;PetitModbus.h: 26: 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81,
+[; ;PetitModbus.h: 27: 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0,
+[; ;PetitModbus.h: 28: 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01,
+[; ;PetitModbus.h: 29: 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40,
+[; ;PetitModbus.h: 30: 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
+[; ;PetitModbus.h: 31: 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0,
+[; ;PetitModbus.h: 32: 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01,
+[; ;PetitModbus.h: 33: 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41,
+[; ;PetitModbus.h: 34: 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
+[; ;PetitModbus.h: 35: 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0,
+[; ;PetitModbus.h: 36: 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01,
+[; ;PetitModbus.h: 37: 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41,
+[; ;PetitModbus.h: 38: 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
+[; ;PetitModbus.h: 39: 0x40
+[; ;PetitModbus.h: 40: } ;
+"43
 [v _auchCRCLo `Cuc ~T0 @X0 -> 0 `x e ]
 [i _auchCRCLo
 :U ..
-"43
+"44
 -> -> 0 `i `uc
 -> -> 192 `i `uc
 -> -> 193 `i `uc
@@ -1697,7 +1703,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 5 `i `uc
 -> -> 197 `i `uc
 -> -> 196 `i `uc
-"44
+"45
 -> -> 4 `i `uc
 -> -> 204 `i `uc
 -> -> 12 `i `uc
@@ -1713,7 +1719,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 11 `i `uc
 -> -> 201 `i `uc
 -> -> 9 `i `uc
-"45
+"46
 -> -> 8 `i `uc
 -> -> 200 `i `uc
 -> -> 216 `i `uc
@@ -1729,7 +1735,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 223 `i `uc
 -> -> 31 `i `uc
 -> -> 221 `i `uc
-"46
+"47
 -> -> 29 `i `uc
 -> -> 28 `i `uc
 -> -> 220 `i `uc
@@ -1745,7 +1751,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 18 `i `uc
 -> -> 19 `i `uc
 -> -> 211 `i `uc
-"47
+"48
 -> -> 17 `i `uc
 -> -> 209 `i `uc
 -> -> 208 `i `uc
@@ -1761,7 +1767,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 54 `i `uc
 -> -> 246 `i `uc
 -> -> 247 `i `uc
-"48
+"49
 -> -> 55 `i `uc
 -> -> 245 `i `uc
 -> -> 53 `i `uc
@@ -1777,7 +1783,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 254 `i `uc
 -> -> 250 `i `uc
 -> -> 58 `i `uc
-"49
+"50
 -> -> 59 `i `uc
 -> -> 251 `i `uc
 -> -> 57 `i `uc
@@ -1793,7 +1799,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 42 `i `uc
 -> -> 234 `i `uc
 -> -> 238 `i `uc
-"50
+"51
 -> -> 46 `i `uc
 -> -> 47 `i `uc
 -> -> 239 `i `uc
@@ -1809,7 +1815,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 231 `i `uc
 -> -> 230 `i `uc
 -> -> 38 `i `uc
-"51
+"52
 -> -> 34 `i `uc
 -> -> 226 `i `uc
 -> -> 227 `i `uc
@@ -1825,7 +1831,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 99 `i `uc
 -> -> 163 `i `uc
 -> -> 162 `i `uc
-"52
+"53
 -> -> 98 `i `uc
 -> -> 102 `i `uc
 -> -> 166 `i `uc
@@ -1841,7 +1847,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 109 `i `uc
 -> -> 175 `i `uc
 -> -> 111 `i `uc
-"53
+"54
 -> -> 110 `i `uc
 -> -> 174 `i `uc
 -> -> 170 `i `uc
@@ -1857,7 +1863,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 185 `i `uc
 -> -> 121 `i `uc
 -> -> 187 `i `uc
-"54
+"55
 -> -> 123 `i `uc
 -> -> 122 `i `uc
 -> -> 186 `i `uc
@@ -1873,7 +1879,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 116 `i `uc
 -> -> 117 `i `uc
 -> -> 181 `i `uc
-"55
+"56
 -> -> 119 `i `uc
 -> -> 183 `i `uc
 -> -> 182 `i `uc
@@ -1889,7 +1895,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 80 `i `uc
 -> -> 144 `i `uc
 -> -> 145 `i `uc
-"56
+"57
 -> -> 81 `i `uc
 -> -> 147 `i `uc
 -> -> 83 `i `uc
@@ -1905,7 +1911,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 84 `i `uc
 -> -> 156 `i `uc
 -> -> 92 `i `uc
-"57
+"58
 -> -> 93 `i `uc
 -> -> 157 `i `uc
 -> -> 95 `i `uc
@@ -1921,7 +1927,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 88 `i `uc
 -> -> 152 `i `uc
 -> -> 136 `i `uc
-"58
+"59
 -> -> 72 `i `uc
 -> -> 73 `i `uc
 -> -> 137 `i `uc
@@ -1937,7 +1943,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 77 `i `uc
 -> -> 76 `i `uc
 -> -> 140 `i `uc
-"59
+"60
 -> -> 68 `i `uc
 -> -> 132 `i `uc
 -> -> 133 `i `uc
@@ -1953,50 +1959,54 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 65 `i `uc
 -> -> 129 `i `uc
 -> -> 128 `i `uc
-"61
+"62
 -> -> 64 `i `uc
 ..
 ]
-[; ;PetitModbus.h: 42: const unsigned char auchCRCLo[] = {
-[; ;PetitModbus.h: 43: 0x00, 0xC0, 0xC1, 0x01, 0xC3, 0x03, 0x02, 0xC2, 0xC6, 0x06, 0x07, 0xC7, 0x05, 0xC5, 0xC4,
-[; ;PetitModbus.h: 44: 0x04, 0xCC, 0x0C, 0x0D, 0xCD, 0x0F, 0xCF, 0xCE, 0x0E, 0x0A, 0xCA, 0xCB, 0x0B, 0xC9, 0x09,
-[; ;PetitModbus.h: 45: 0x08, 0xC8, 0xD8, 0x18, 0x19, 0xD9, 0x1B, 0xDB, 0xDA, 0x1A, 0x1E, 0xDE, 0xDF, 0x1F, 0xDD,
-[; ;PetitModbus.h: 46: 0x1D, 0x1C, 0xDC, 0x14, 0xD4, 0xD5, 0x15, 0xD7, 0x17, 0x16, 0xD6, 0xD2, 0x12, 0x13, 0xD3,
-[; ;PetitModbus.h: 47: 0x11, 0xD1, 0xD0, 0x10, 0xF0, 0x30, 0x31, 0xF1, 0x33, 0xF3, 0xF2, 0x32, 0x36, 0xF6, 0xF7,
-[; ;PetitModbus.h: 48: 0x37, 0xF5, 0x35, 0x34, 0xF4, 0x3C, 0xFC, 0xFD, 0x3D, 0xFF, 0x3F, 0x3E, 0xFE, 0xFA, 0x3A,
-[; ;PetitModbus.h: 49: 0x3B, 0xFB, 0x39, 0xF9, 0xF8, 0x38, 0x28, 0xE8, 0xE9, 0x29, 0xEB, 0x2B, 0x2A, 0xEA, 0xEE,
-[; ;PetitModbus.h: 50: 0x2E, 0x2F, 0xEF, 0x2D, 0xED, 0xEC, 0x2C, 0xE4, 0x24, 0x25, 0xE5, 0x27, 0xE7, 0xE6, 0x26,
-[; ;PetitModbus.h: 51: 0x22, 0xE2, 0xE3, 0x23, 0xE1, 0x21, 0x20, 0xE0, 0xA0, 0x60, 0x61, 0xA1, 0x63, 0xA3, 0xA2,
-[; ;PetitModbus.h: 52: 0x62, 0x66, 0xA6, 0xA7, 0x67, 0xA5, 0x65, 0x64, 0xA4, 0x6C, 0xAC, 0xAD, 0x6D, 0xAF, 0x6F,
-[; ;PetitModbus.h: 53: 0x6E, 0xAE, 0xAA, 0x6A, 0x6B, 0xAB, 0x69, 0xA9, 0xA8, 0x68, 0x78, 0xB8, 0xB9, 0x79, 0xBB,
-[; ;PetitModbus.h: 54: 0x7B, 0x7A, 0xBA, 0xBE, 0x7E, 0x7F, 0xBF, 0x7D, 0xBD, 0xBC, 0x7C, 0xB4, 0x74, 0x75, 0xB5,
-[; ;PetitModbus.h: 55: 0x77, 0xB7, 0xB6, 0x76, 0x72, 0xB2, 0xB3, 0x73, 0xB1, 0x71, 0x70, 0xB0, 0x50, 0x90, 0x91,
-[; ;PetitModbus.h: 56: 0x51, 0x93, 0x53, 0x52, 0x92, 0x96, 0x56, 0x57, 0x97, 0x55, 0x95, 0x94, 0x54, 0x9C, 0x5C,
-[; ;PetitModbus.h: 57: 0x5D, 0x9D, 0x5F, 0x9F, 0x9E, 0x5E, 0x5A, 0x9A, 0x9B, 0x5B, 0x99, 0x59, 0x58, 0x98, 0x88,
-[; ;PetitModbus.h: 58: 0x48, 0x49, 0x89, 0x4B, 0x8B, 0x8A, 0x4A, 0x4E, 0x8E, 0x8F, 0x4F, 0x8D, 0x4D, 0x4C, 0x8C,
-[; ;PetitModbus.h: 59: 0x44, 0x84, 0x85, 0x45, 0x87, 0x47, 0x46, 0x86, 0x82, 0x42, 0x43, 0x83, 0x41, 0x81, 0x80,
-[; ;PetitModbus.h: 60: 0x40
-[; ;PetitModbus.h: 61: };
-[; ;PetitModbus.h: 71: extern volatile unsigned short PetitModbusTimerValue;
-[; ;PetitModbus.h: 73: typedef enum
-[; ;PetitModbus.h: 74: {
-[; ;PetitModbus.h: 75: SLAVE_DATA_BUSY = 1,
-[; ;PetitModbus.h: 76: SLAVE_DATA_OK = 2,
-[; ;PetitModbus.h: 77: SLAVE_DATA_NOK = 3
-[; ;PetitModbus.h: 78: }SLAVE_DATA;
-[; ;PetitModbus.h: 80: typedef struct
-[; ;PetitModbus.h: 81: {
-[; ;PetitModbus.h: 82: unsigned int Reg[7];
-[; ;PetitModbus.h: 83: unsigned char CommError;
-[; ;PetitModbus.h: 84: unsigned int ReceiveCounter;
-[; ;PetitModbus.h: 85: unsigned int SentCounter;
-[; ;PetitModbus.h: 86: }SLAVE_INFO;
-[; ;PetitModbus.h: 89: extern void InitPetitModbus(SLAVE_INFO *location);
-[; ;PetitModbus.h: 90: extern void ProcessPetitModbus(void);
-[; ;PetitModbus.h: 91: extern unsigned char SendPetitModbus(unsigned char Address, unsigned char Function, unsigned char *DataBuf, unsigned short DataLen);
-[; ;PetitModbus.h: 93: void HandlePetitModbusWriteSingleRegisterSlaveReadback(void);
-[; ;PetitModbus.h: 94: void HandlePetitModbusReadHoldingRegistersSlaveReadback(void);
-[; ;PetitModbus.h: 95: void HandleMPetitodbusWriteMultipleRegistersSlaveReadback(void);
+[; ;PetitModbus.h: 43: const unsigned char auchCRCLo[] = {
+[; ;PetitModbus.h: 44: 0x00, 0xC0, 0xC1, 0x01, 0xC3, 0x03, 0x02, 0xC2, 0xC6, 0x06, 0x07, 0xC7, 0x05, 0xC5, 0xC4,
+[; ;PetitModbus.h: 45: 0x04, 0xCC, 0x0C, 0x0D, 0xCD, 0x0F, 0xCF, 0xCE, 0x0E, 0x0A, 0xCA, 0xCB, 0x0B, 0xC9, 0x09,
+[; ;PetitModbus.h: 46: 0x08, 0xC8, 0xD8, 0x18, 0x19, 0xD9, 0x1B, 0xDB, 0xDA, 0x1A, 0x1E, 0xDE, 0xDF, 0x1F, 0xDD,
+[; ;PetitModbus.h: 47: 0x1D, 0x1C, 0xDC, 0x14, 0xD4, 0xD5, 0x15, 0xD7, 0x17, 0x16, 0xD6, 0xD2, 0x12, 0x13, 0xD3,
+[; ;PetitModbus.h: 48: 0x11, 0xD1, 0xD0, 0x10, 0xF0, 0x30, 0x31, 0xF1, 0x33, 0xF3, 0xF2, 0x32, 0x36, 0xF6, 0xF7,
+[; ;PetitModbus.h: 49: 0x37, 0xF5, 0x35, 0x34, 0xF4, 0x3C, 0xFC, 0xFD, 0x3D, 0xFF, 0x3F, 0x3E, 0xFE, 0xFA, 0x3A,
+[; ;PetitModbus.h: 50: 0x3B, 0xFB, 0x39, 0xF9, 0xF8, 0x38, 0x28, 0xE8, 0xE9, 0x29, 0xEB, 0x2B, 0x2A, 0xEA, 0xEE,
+[; ;PetitModbus.h: 51: 0x2E, 0x2F, 0xEF, 0x2D, 0xED, 0xEC, 0x2C, 0xE4, 0x24, 0x25, 0xE5, 0x27, 0xE7, 0xE6, 0x26,
+[; ;PetitModbus.h: 52: 0x22, 0xE2, 0xE3, 0x23, 0xE1, 0x21, 0x20, 0xE0, 0xA0, 0x60, 0x61, 0xA1, 0x63, 0xA3, 0xA2,
+[; ;PetitModbus.h: 53: 0x62, 0x66, 0xA6, 0xA7, 0x67, 0xA5, 0x65, 0x64, 0xA4, 0x6C, 0xAC, 0xAD, 0x6D, 0xAF, 0x6F,
+[; ;PetitModbus.h: 54: 0x6E, 0xAE, 0xAA, 0x6A, 0x6B, 0xAB, 0x69, 0xA9, 0xA8, 0x68, 0x78, 0xB8, 0xB9, 0x79, 0xBB,
+[; ;PetitModbus.h: 55: 0x7B, 0x7A, 0xBA, 0xBE, 0x7E, 0x7F, 0xBF, 0x7D, 0xBD, 0xBC, 0x7C, 0xB4, 0x74, 0x75, 0xB5,
+[; ;PetitModbus.h: 56: 0x77, 0xB7, 0xB6, 0x76, 0x72, 0xB2, 0xB3, 0x73, 0xB1, 0x71, 0x70, 0xB0, 0x50, 0x90, 0x91,
+[; ;PetitModbus.h: 57: 0x51, 0x93, 0x53, 0x52, 0x92, 0x96, 0x56, 0x57, 0x97, 0x55, 0x95, 0x94, 0x54, 0x9C, 0x5C,
+[; ;PetitModbus.h: 58: 0x5D, 0x9D, 0x5F, 0x9F, 0x9E, 0x5E, 0x5A, 0x9A, 0x9B, 0x5B, 0x99, 0x59, 0x58, 0x98, 0x88,
+[; ;PetitModbus.h: 59: 0x48, 0x49, 0x89, 0x4B, 0x8B, 0x8A, 0x4A, 0x4E, 0x8E, 0x8F, 0x4F, 0x8D, 0x4D, 0x4C, 0x8C,
+[; ;PetitModbus.h: 60: 0x44, 0x84, 0x85, 0x45, 0x87, 0x47, 0x46, 0x86, 0x82, 0x42, 0x43, 0x83, 0x41, 0x81, 0x80,
+[; ;PetitModbus.h: 61: 0x40
+[; ;PetitModbus.h: 62: };
+[; ;PetitModbus.h: 72: extern volatile unsigned short PetitModbusTimerValue;
+[; ;PetitModbus.h: 73: extern volatile unsigned int SlaveAnswerTimeoutCounter;
+[; ;PetitModbus.h: 75: typedef enum
+[; ;PetitModbus.h: 76: {
+[; ;PetitModbus.h: 77: SLAVE_DATA_BUSY = 1,
+[; ;PetitModbus.h: 78: SLAVE_DATA_OK = 2,
+[; ;PetitModbus.h: 79: SLAVE_DATA_NOK = 3,
+[; ;PetitModbus.h: 80: SLAVE_DATA_TIMEOUT = 4
+[; ;PetitModbus.h: 81: }SLAVE_DATA;
+[; ;PetitModbus.h: 83: typedef struct
+[; ;PetitModbus.h: 84: {
+[; ;PetitModbus.h: 85: unsigned int Reg[7];
+[; ;PetitModbus.h: 86: unsigned char MbCommError;
+[; ;PetitModbus.h: 87: unsigned char MbExceptionCode;
+[; ;PetitModbus.h: 88: unsigned int MbReceiveCounter;
+[; ;PetitModbus.h: 89: unsigned int MbSentCounter;
+[; ;PetitModbus.h: 90: }SLAVE_INFO;
+[; ;PetitModbus.h: 93: extern void InitPetitModbus(SLAVE_INFO *location);
+[; ;PetitModbus.h: 94: extern void ProcessPetitModbus(void);
+[; ;PetitModbus.h: 95: extern unsigned char SendPetitModbus(unsigned char Address, unsigned char Function, unsigned char *DataBuf, unsigned short DataLen);
+[; ;PetitModbus.h: 97: void HandlePetitModbusWriteSingleRegisterSlaveReadback(void);
+[; ;PetitModbus.h: 98: void HandlePetitModbusReadHoldingRegistersSlaveReadback(void);
+[; ;PetitModbus.h: 99: void HandleMPetitodbusWriteMultipleRegistersSlaveReadback(void);
+[; ;PetitModbus.h: 100: void HandleMPetitodbusMbExceptionCodesSlaveReadback(void);
 [; ;PetitModbusPort.h: 20: extern volatile unsigned char PetitReceiveBuffer[(7*2 + 10)];
 [; ;PetitModbusPort.h: 21: extern volatile unsigned char PetitReceiveCounter;
 [; ;PetitModbusPort.h: 23: extern void PetitModBus_UART_Initialise(void);
@@ -2064,7 +2074,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 0 `i `uc
 ]
 [; ;main.c: 28: unsigned char state = 0;
-"30
+"29
 [v _wait `ui ~T0 @X0 1 e ]
 [i _wait
 -> -> 0 `i `ui
@@ -2073,30 +2083,30 @@ Version 3.2 HI-TECH Software Intermediate Code
 [i _wait2
 -> -> 0 `i `ui
 ]
-[; ;main.c: 30: unsigned int wait = 0, wait2 = 0;
+[; ;main.c: 29: unsigned int wait = 0, wait2 = 0;
 [v $root$_main `(v ~T0 @X0 0 e ]
-"34
+"31
 [v _main `(v ~T0 @X0 1 ef ]
 {
-[; ;main.c: 34: void main(void) {
+[; ;main.c: 31: void main(void) {
 [e :U _main ]
 [f ]
-[; ;main.c: 36: SYSTEM_Initialize();
-"36
+[; ;main.c: 33: SYSTEM_Initialize();
+"33
 [e ( _SYSTEM_Initialize ..  ]
-[; ;main.c: 38: PORTDbits.RD2 = Off;
-"38
-[e = . . _PORTDbits 0 2 -> . `E1552 1 `uc ]
-[; ;main.c: 39: for(wait = 0xFFFF; wait > 0; wait--){
-"39
+[; ;main.c: 35: PORTDbits.RD2 = Off;
+"35
+[e = . . _PORTDbits 0 2 -> . `E1564 1 `uc ]
+[; ;main.c: 36: for(wait = 0xFFFF; wait > 0; wait--){
+"36
 {
 [e = _wait -> 65535 `ui ]
 [e $ > _wait -> -> 0 `i `ui 124  ]
 [e $U 125  ]
 [e :U 124 ]
 {
-[; ;main.c: 40: for(wait2 = 0x4; wait2 > 0; wait2--);
-"40
+[; ;main.c: 37: for(wait2 = 0x4; wait2 > 0; wait2--);
+"37
 {
 [e = _wait2 -> -> 4 `i `ui ]
 [e $ > _wait2 -> -> 0 `i `ui 127  ]
@@ -2106,28 +2116,28 @@ Version 3.2 HI-TECH Software Intermediate Code
 [e $ > _wait2 -> -> 0 `i `ui 127  ]
 [e :U 128 ]
 }
-"41
+"38
 }
-"39
+"36
 [e -- _wait -> -> 1 `i `ui ]
 [e $ > _wait -> -> 0 `i `ui 124  ]
 [e :U 125 ]
-"41
+"38
 }
-[; ;main.c: 41: }
-[; ;main.c: 42: PORTDbits.RD2 = On;
-"42
-[e = . . _PORTDbits 0 2 -> . `E1552 0 `uc ]
-[; ;main.c: 44: for(wait = 0xFFFF; wait > 0; wait--){
-"44
+[; ;main.c: 38: }
+[; ;main.c: 39: PORTDbits.RD2 = On;
+"39
+[e = . . _PORTDbits 0 2 -> . `E1564 0 `uc ]
+[; ;main.c: 41: for(wait = 0xFFFF; wait > 0; wait--){
+"41
 {
 [e = _wait -> 65535 `ui ]
 [e $ > _wait -> -> 0 `i `ui 130  ]
 [e $U 131  ]
 [e :U 130 ]
 {
-[; ;main.c: 45: for(wait2 = 0x4; wait2 > 0; wait2--);
-"45
+[; ;main.c: 42: for(wait2 = 0x4; wait2 > 0; wait2--);
+"42
 {
 [e = _wait2 -> -> 4 `i `ui ]
 [e $ > _wait2 -> -> 0 `i `ui 133  ]
@@ -2137,479 +2147,200 @@ Version 3.2 HI-TECH Software Intermediate Code
 [e $ > _wait2 -> -> 0 `i `ui 133  ]
 [e :U 134 ]
 }
-"46
+"43
 }
-"44
+"41
 [e -- _wait -> -> 1 `i `ui ]
 [e $ > _wait -> -> 0 `i `ui 130  ]
 [e :U 131 ]
-"46
+"43
 }
-[; ;main.c: 46: }
-[; ;main.c: 48: InitPetitModbus(SlaveInfo);
-"48
+[; ;main.c: 43: }
+[; ;main.c: 44: PORTDbits.RD1 = Off;
+"44
+[e = . . _PORTDbits 0 1 -> . `E1564 1 `uc ]
+[; ;main.c: 46: InitPetitModbus(SlaveInfo);
+"46
 [e ( _InitPetitModbus (1 &U _SlaveInfo ]
-[; ;main.c: 50: PORTDbits.RD1 = Off;
-"50
-[e = . . _PORTDbits 0 1 -> . `E1552 1 `uc ]
-[; ;main.c: 52: while(1)
-"52
+[; ;main.c: 48: while(1)
+"48
 [e :U 137 ]
-[; ;main.c: 53: {
-"53
+[; ;main.c: 49: {
+"49
 {
-[; ;main.c: 55: ProcessPetitModbus();
-"55
+[; ;main.c: 51: ProcessPetitModbus();
+"51
 [e ( _ProcessPetitModbus ..  ]
-[; ;main.c: 57: if(PIR1bits.TMR2IF)
-"57
+[; ;main.c: 53: if(PIR1bits.TMR2IF)
+"53
 [e $ ! != -> . . _PIR1bits 0 1 `i -> -> -> 0 `i `Vuc `i 139  ]
-[; ;main.c: 58: {
-"58
+[; ;main.c: 54: {
+"54
 {
-[; ;main.c: 59: switch(state){
-"59
+[; ;main.c: 55: switch(state){
+"55
 [e $U 141  ]
 {
-[; ;main.c: 60: case 0: if(SendPetitModbus(1, 6, temp, 4)){
-"60
+[; ;main.c: 57: case 0 :if(SendPetitModbus(1, 3, temp3, 4)){
+"57
 [e :U 142 ]
-[e $ ! != -> ( _SendPetitModbus (4 , , , -> -> 1 `i `uc -> -> 6 `i `uc &U _temp -> -> 4 `i `us `i -> -> -> 0 `i `uc `i 143  ]
+[e $ ! != -> ( _SendPetitModbus (4 , , , -> -> 1 `i `uc -> -> 3 `i `uc &U _temp3 -> -> 4 `i `us `i -> -> -> 0 `i `uc `i 143  ]
 {
-[; ;main.c: 61: state = 1;
-"61
-[e = _state -> -> 1 `i `uc ]
-"62
+[; ;main.c: 58: state += 1;
+"58
+[e =+ _state -> -> 1 `i `uc ]
+"59
 }
 [e :U 143 ]
-[; ;main.c: 62: }
-[; ;main.c: 63: break;
-"63
+[; ;main.c: 59: }
+[; ;main.c: 60: break;
+"60
 [e $U 140  ]
-[; ;main.c: 65: case 1: if(SlaveInfo[1].CommError == SLAVE_DATA_OK){
-"65
+[; ;main.c: 62: case 1 :if(SlaveInfo[1].MbCommError == SLAVE_DATA_OK || SlaveInfo[1].MbCommError == SLAVE_DATA_TIMEOUT){
+"62
 [e :U 144 ]
-[e $ ! == -> . *U + &U _SlaveInfo * -> -> -> 1 `i `ui `ux -> -> # *U &U _SlaveInfo `ui `ux 1 `i -> . `E1568 1 `i 145  ]
+[e $ ! || == -> . *U + &U _SlaveInfo * -> -> -> 1 `i `ui `ux -> -> # *U &U _SlaveInfo `ui `ux 1 `i -> . `E1581 1 `i == -> . *U + &U _SlaveInfo * -> -> -> 1 `i `ui `ux -> -> # *U &U _SlaveInfo `ui `ux 1 `i -> . `E1581 3 `i 145  ]
 {
-[; ;main.c: 66: state = 12;
-"66
-[e = _state -> -> 12 `i `uc ]
+[; ;main.c: 63: state += 1;
+"63
+[e =+ _state -> -> 1 `i `uc ]
+"64
+}
+[; ;main.c: 64: }
+[e $U 146  ]
+"65
+[e :U 145 ]
+[; ;main.c: 65: else if(SlaveInfo[1].MbCommError == SLAVE_DATA_NOK){
+[e $ ! == -> . *U + &U _SlaveInfo * -> -> -> 1 `i `ui `ux -> -> # *U &U _SlaveInfo `ui `ux 1 `i -> . `E1581 2 `i 147  ]
+{
 "67
 }
-[; ;main.c: 67: }
-[e $U 146  ]
-"68
-[e :U 145 ]
-[; ;main.c: 68: else if(SlaveInfo[1].CommError == SLAVE_DATA_NOK){
-[e $ ! == -> . *U + &U _SlaveInfo * -> -> -> 1 `i `ui `ux -> -> # *U &U _SlaveInfo `ui `ux 1 `i -> . `E1568 2 `i 147  ]
-{
-[; ;main.c: 69: PORTDbits.RD1 = On;
-"69
-[e = . . _PORTDbits 0 1 -> . `E1552 0 `uc ]
-"70
-}
 [e :U 147 ]
-"71
+"68
 [e :U 146 ]
-[; ;main.c: 70: }
-[; ;main.c: 71: break;
+[; ;main.c: 67: }
+[; ;main.c: 68: break;
 [e $U 140  ]
-[; ;main.c: 73: case 12: if(SendPetitModbus(1, 3, temp3, 4)){
-"73
+[; ;main.c: 70: case 2 :if(SendPetitModbus(2, 3, temp3, 4)){
+"70
 [e :U 148 ]
-[e $ ! != -> ( _SendPetitModbus (4 , , , -> -> 1 `i `uc -> -> 3 `i `uc &U _temp3 -> -> 4 `i `us `i -> -> -> 0 `i `uc `i 149  ]
+[e $ ! != -> ( _SendPetitModbus (4 , , , -> -> 2 `i `uc -> -> 3 `i `uc &U _temp3 -> -> 4 `i `us `i -> -> -> 0 `i `uc `i 149  ]
 {
-[; ;main.c: 74: state = 13;
-"74
-[e = _state -> -> 13 `i `uc ]
-"75
+[; ;main.c: 71: state += 1;
+"71
+[e =+ _state -> -> 1 `i `uc ]
+"72
 }
 [e :U 149 ]
-[; ;main.c: 75: }
-[; ;main.c: 76: break;
-"76
+[; ;main.c: 72: }
+[; ;main.c: 73: break;
+"73
 [e $U 140  ]
-[; ;main.c: 78: case 13: if(SlaveInfo[1].CommError == SLAVE_DATA_OK){
-"78
+[; ;main.c: 75: case 3 :if(SlaveInfo[2].MbCommError == SLAVE_DATA_OK || SlaveInfo[1].MbCommError == SLAVE_DATA_TIMEOUT){
+"75
 [e :U 150 ]
-[e $ ! == -> . *U + &U _SlaveInfo * -> -> -> 1 `i `ui `ux -> -> # *U &U _SlaveInfo `ui `ux 1 `i -> . `E1568 1 `i 151  ]
+[e $ ! || == -> . *U + &U _SlaveInfo * -> -> -> 2 `i `ui `ux -> -> # *U &U _SlaveInfo `ui `ux 1 `i -> . `E1581 1 `i == -> . *U + &U _SlaveInfo * -> -> -> 1 `i `ui `ux -> -> # *U &U _SlaveInfo `ui `ux 1 `i -> . `E1581 3 `i 151  ]
 {
-[; ;main.c: 79: state = 2;
-"79
-[e = _state -> -> 2 `i `uc ]
+[; ;main.c: 76: state += 1;
+"76
+[e =+ _state -> -> 1 `i `uc ]
+"77
+}
+[; ;main.c: 77: }
+[e $U 152  ]
+"78
+[e :U 151 ]
+[; ;main.c: 78: else if(SlaveInfo[1].MbCommError == SLAVE_DATA_NOK){
+[e $ ! == -> . *U + &U _SlaveInfo * -> -> -> 1 `i `ui `ux -> -> # *U &U _SlaveInfo `ui `ux 1 `i -> . `E1581 2 `i 153  ]
+{
 "80
 }
-[; ;main.c: 80: }
-[e $U 152  ]
-"81
-[e :U 151 ]
-[; ;main.c: 81: else if(SlaveInfo[1].CommError == SLAVE_DATA_NOK){
-[e $ ! == -> . *U + &U _SlaveInfo * -> -> -> 1 `i `ui `ux -> -> # *U &U _SlaveInfo `ui `ux 1 `i -> . `E1568 2 `i 153  ]
-{
-[; ;main.c: 82: PORTDbits.RD1 = On;
-"82
-[e = . . _PORTDbits 0 1 -> . `E1552 0 `uc ]
-"83
-}
 [e :U 153 ]
-"84
+"81
 [e :U 152 ]
-[; ;main.c: 83: }
-[; ;main.c: 84: break;
+[; ;main.c: 80: }
+[; ;main.c: 81: break;
 [e $U 140  ]
-[; ;main.c: 86: case 14: if(SendPetitModbus(1, 16, temp4, 9)){
-"86
+[; ;main.c: 83: case 4 :if(SendPetitModbus(3, 3, temp3, 4)){
+"83
 [e :U 154 ]
-[e $ ! != -> ( _SendPetitModbus (4 , , , -> -> 1 `i `uc -> -> 16 `i `uc &U _temp4 -> -> 9 `i `us `i -> -> -> 0 `i `uc `i 155  ]
+[e $ ! != -> ( _SendPetitModbus (4 , , , -> -> 3 `i `uc -> -> 3 `i `uc &U _temp3 -> -> 4 `i `us `i -> -> -> 0 `i `uc `i 155  ]
 {
-[; ;main.c: 87: state = 15;
-"87
-[e = _state -> -> 15 `i `uc ]
-"88
+[; ;main.c: 84: state += 1;
+"84
+[e =+ _state -> -> 1 `i `uc ]
+"85
 }
 [e :U 155 ]
-[; ;main.c: 88: }
-[; ;main.c: 89: break;
-"89
+[; ;main.c: 85: }
+[; ;main.c: 86: break;
+"86
 [e $U 140  ]
-[; ;main.c: 91: case 15: if(SlaveInfo[1].CommError == SLAVE_DATA_OK){
-"91
+[; ;main.c: 88: case 5 :if(SlaveInfo[3].MbCommError == SLAVE_DATA_OK || SlaveInfo[1].MbCommError == SLAVE_DATA_TIMEOUT){
+"88
 [e :U 156 ]
-[e $ ! == -> . *U + &U _SlaveInfo * -> -> -> 1 `i `ui `ux -> -> # *U &U _SlaveInfo `ui `ux 1 `i -> . `E1568 1 `i 157  ]
+[e $ ! || == -> . *U + &U _SlaveInfo * -> -> -> 3 `i `ui `ux -> -> # *U &U _SlaveInfo `ui `ux 1 `i -> . `E1581 1 `i == -> . *U + &U _SlaveInfo * -> -> -> 1 `i `ui `ux -> -> # *U &U _SlaveInfo `ui `ux 1 `i -> . `E1581 3 `i 157  ]
 {
-[; ;main.c: 92: state = 2;
-"92
-[e = _state -> -> 2 `i `uc ]
+[; ;main.c: 89: state = 0;
+"89
+[e = _state -> -> 0 `i `uc ]
+"90
+}
+[; ;main.c: 90: }
+[e $U 158  ]
+"91
+[e :U 157 ]
+[; ;main.c: 91: else if(SlaveInfo[1].MbCommError == SLAVE_DATA_NOK){
+[e $ ! == -> . *U + &U _SlaveInfo * -> -> -> 1 `i `ui `ux -> -> # *U &U _SlaveInfo `ui `ux 1 `i -> . `E1581 2 `i 159  ]
+{
 "93
 }
-[; ;main.c: 93: }
-[e $U 158  ]
-"94
-[e :U 157 ]
-[; ;main.c: 94: else if(SlaveInfo[1].CommError == SLAVE_DATA_NOK){
-[e $ ! == -> . *U + &U _SlaveInfo * -> -> -> 1 `i `ui `ux -> -> # *U &U _SlaveInfo `ui `ux 1 `i -> . `E1568 2 `i 159  ]
-{
-[; ;main.c: 95: PORTDbits.RD1 = On;
-"95
-[e = . . _PORTDbits 0 1 -> . `E1552 0 `uc ]
-"96
-}
 [e :U 159 ]
-"97
+"94
 [e :U 158 ]
-[; ;main.c: 96: }
-[; ;main.c: 97: break;
+[; ;main.c: 93: }
+[; ;main.c: 94: break;
 [e $U 140  ]
-[; ;main.c: 99: case 2: if(SendPetitModbus(2, 6, temp, 4)){
-"99
+[; ;main.c: 96: default : state = 0;
+"96
 [e :U 160 ]
-[e $ ! != -> ( _SendPetitModbus (4 , , , -> -> 2 `i `uc -> -> 6 `i `uc &U _temp -> -> 4 `i `us `i -> -> -> 0 `i `uc `i 161  ]
-{
-[; ;main.c: 100: state = 3;
-"100
-[e = _state -> -> 3 `i `uc ]
-"101
-}
-[e :U 161 ]
-[; ;main.c: 101: }
-[; ;main.c: 102: break;
-"102
-[e $U 140  ]
-[; ;main.c: 104: case 3: if(SlaveInfo[2].CommError == SLAVE_DATA_OK){
-"104
-[e :U 162 ]
-[e $ ! == -> . *U + &U _SlaveInfo * -> -> -> 2 `i `ui `ux -> -> # *U &U _SlaveInfo `ui `ux 1 `i -> . `E1568 1 `i 163  ]
-{
-[; ;main.c: 105: state = 4;
-"105
-[e = _state -> -> 4 `i `uc ]
-"106
-}
-[; ;main.c: 106: }
-[e $U 164  ]
-"107
-[e :U 163 ]
-[; ;main.c: 107: else if(SlaveInfo[2].CommError == SLAVE_DATA_NOK){
-[e $ ! == -> . *U + &U _SlaveInfo * -> -> -> 2 `i `ui `ux -> -> # *U &U _SlaveInfo `ui `ux 1 `i -> . `E1568 2 `i 165  ]
-{
-[; ;main.c: 108: PORTDbits.RD1 = On;
-"108
-[e = . . _PORTDbits 0 1 -> . `E1552 0 `uc ]
-"109
-}
-[e :U 165 ]
-"110
-[e :U 164 ]
-[; ;main.c: 109: }
-[; ;main.c: 110: break;
-[e $U 140  ]
-[; ;main.c: 112: case 4: if(SendPetitModbus(3, 6, temp, 4)){
-"112
-[e :U 166 ]
-[e $ ! != -> ( _SendPetitModbus (4 , , , -> -> 3 `i `uc -> -> 6 `i `uc &U _temp -> -> 4 `i `us `i -> -> -> 0 `i `uc `i 167  ]
-{
-[; ;main.c: 113: state = 5;
-"113
-[e = _state -> -> 5 `i `uc ]
-"114
-}
-[e :U 167 ]
-[; ;main.c: 114: }
-[; ;main.c: 115: break;
-"115
-[e $U 140  ]
-[; ;main.c: 117: case 5: if(SlaveInfo[3].CommError == SLAVE_DATA_OK){
-"117
-[e :U 168 ]
-[e $ ! == -> . *U + &U _SlaveInfo * -> -> -> 3 `i `ui `ux -> -> # *U &U _SlaveInfo `ui `ux 1 `i -> . `E1568 1 `i 169  ]
-{
-[; ;main.c: 118: state = 6;
-"118
-[e = _state -> -> 6 `i `uc ]
-"119
-}
-[; ;main.c: 119: }
-[e $U 170  ]
-"120
-[e :U 169 ]
-[; ;main.c: 120: else if(SlaveInfo[3].CommError == SLAVE_DATA_NOK){
-[e $ ! == -> . *U + &U _SlaveInfo * -> -> -> 3 `i `ui `ux -> -> # *U &U _SlaveInfo `ui `ux 1 `i -> . `E1568 2 `i 171  ]
-{
-[; ;main.c: 121: PORTDbits.RD1 = On;
-"121
-[e = . . _PORTDbits 0 1 -> . `E1552 0 `uc ]
-"122
-}
-[e :U 171 ]
-"123
-[e :U 170 ]
-[; ;main.c: 122: }
-[; ;main.c: 123: break;
-[e $U 140  ]
-[; ;main.c: 125: case 6: if(SendPetitModbus(1, 6, temp2, 4)){
-"125
-[e :U 172 ]
-[e $ ! != -> ( _SendPetitModbus (4 , , , -> -> 1 `i `uc -> -> 6 `i `uc &U _temp2 -> -> 4 `i `us `i -> -> -> 0 `i `uc `i 173  ]
-{
-[; ;main.c: 126: state = 7;
-"126
-[e = _state -> -> 7 `i `uc ]
-"127
-}
-[e :U 173 ]
-[; ;main.c: 127: }
-[; ;main.c: 128: break;
-"128
-[e $U 140  ]
-[; ;main.c: 130: case 7: if(SlaveInfo[1].CommError == SLAVE_DATA_OK){
-"130
-[e :U 174 ]
-[e $ ! == -> . *U + &U _SlaveInfo * -> -> -> 1 `i `ui `ux -> -> # *U &U _SlaveInfo `ui `ux 1 `i -> . `E1568 1 `i 175  ]
-{
-[; ;main.c: 131: state = 16;
-"131
-[e = _state -> -> 16 `i `uc ]
-"132
-}
-[; ;main.c: 132: }
-[e $U 176  ]
-"133
-[e :U 175 ]
-[; ;main.c: 133: else if(SlaveInfo[1].CommError == SLAVE_DATA_NOK){
-[e $ ! == -> . *U + &U _SlaveInfo * -> -> -> 1 `i `ui `ux -> -> # *U &U _SlaveInfo `ui `ux 1 `i -> . `E1568 2 `i 177  ]
-{
-[; ;main.c: 134: PORTDbits.RD1 = On;
-"134
-[e = . . _PORTDbits 0 1 -> . `E1552 0 `uc ]
-"135
-}
-[e :U 177 ]
-"136
-[e :U 176 ]
-[; ;main.c: 135: }
-[; ;main.c: 136: break;
-[e $U 140  ]
-[; ;main.c: 138: case 16: if(SendPetitModbus(1, 3, temp3, 4)){
-"138
-[e :U 178 ]
-[e $ ! != -> ( _SendPetitModbus (4 , , , -> -> 1 `i `uc -> -> 3 `i `uc &U _temp3 -> -> 4 `i `us `i -> -> -> 0 `i `uc `i 179  ]
-{
-[; ;main.c: 139: state = 17;
-"139
-[e = _state -> -> 17 `i `uc ]
-"140
-}
-[e :U 179 ]
-[; ;main.c: 140: }
-[; ;main.c: 141: break;
-"141
-[e $U 140  ]
-[; ;main.c: 143: case 17: if(SlaveInfo[1].CommError == SLAVE_DATA_OK){
-"143
-[e :U 180 ]
-[e $ ! == -> . *U + &U _SlaveInfo * -> -> -> 1 `i `ui `ux -> -> # *U &U _SlaveInfo `ui `ux 1 `i -> . `E1568 1 `i 181  ]
-{
-[; ;main.c: 144: state = 8;
-"144
-[e = _state -> -> 8 `i `uc ]
-"145
-}
-[; ;main.c: 145: }
-[e $U 182  ]
-"146
-[e :U 181 ]
-[; ;main.c: 146: else if(SlaveInfo[1].CommError == SLAVE_DATA_NOK){
-[e $ ! == -> . *U + &U _SlaveInfo * -> -> -> 1 `i `ui `ux -> -> # *U &U _SlaveInfo `ui `ux 1 `i -> . `E1568 2 `i 183  ]
-{
-[; ;main.c: 147: PORTDbits.RD1 = On;
-"147
-[e = . . _PORTDbits 0 1 -> . `E1552 0 `uc ]
-"148
-}
-[e :U 183 ]
-"149
-[e :U 182 ]
-[; ;main.c: 148: }
-[; ;main.c: 149: break;
-[e $U 140  ]
-[; ;main.c: 151: case 8: if(SendPetitModbus(2, 6, temp2, 4)){
-"151
-[e :U 184 ]
-[e $ ! != -> ( _SendPetitModbus (4 , , , -> -> 2 `i `uc -> -> 6 `i `uc &U _temp2 -> -> 4 `i `us `i -> -> -> 0 `i `uc `i 185  ]
-{
-[; ;main.c: 152: state = 9;
-"152
-[e = _state -> -> 9 `i `uc ]
-"153
-}
-[e :U 185 ]
-[; ;main.c: 153: }
-[; ;main.c: 154: break;
-"154
-[e $U 140  ]
-[; ;main.c: 156: case 9: if(SlaveInfo[2].CommError == SLAVE_DATA_OK){
-"156
-[e :U 186 ]
-[e $ ! == -> . *U + &U _SlaveInfo * -> -> -> 2 `i `ui `ux -> -> # *U &U _SlaveInfo `ui `ux 1 `i -> . `E1568 1 `i 187  ]
-{
-[; ;main.c: 157: state = 10;
-"157
-[e = _state -> -> 10 `i `uc ]
-"158
-}
-[; ;main.c: 158: }
-[e $U 188  ]
-"159
-[e :U 187 ]
-[; ;main.c: 159: else if(SlaveInfo[2].CommError == SLAVE_DATA_NOK){
-[e $ ! == -> . *U + &U _SlaveInfo * -> -> -> 2 `i `ui `ux -> -> # *U &U _SlaveInfo `ui `ux 1 `i -> . `E1568 2 `i 189  ]
-{
-[; ;main.c: 160: PORTDbits.RD1 = On;
-"160
-[e = . . _PORTDbits 0 1 -> . `E1552 0 `uc ]
-"161
-}
-[e :U 189 ]
-"162
-[e :U 188 ]
-[; ;main.c: 161: }
-[; ;main.c: 162: break;
-[e $U 140  ]
-[; ;main.c: 164: case 10: if(SendPetitModbus(3, 6, temp2, 4)){
-"164
-[e :U 190 ]
-[e $ ! != -> ( _SendPetitModbus (4 , , , -> -> 3 `i `uc -> -> 6 `i `uc &U _temp2 -> -> 4 `i `us `i -> -> -> 0 `i `uc `i 191  ]
-{
-[; ;main.c: 165: state = 11;
-"165
-[e = _state -> -> 11 `i `uc ]
-"166
-}
-[e :U 191 ]
-[; ;main.c: 166: }
-[; ;main.c: 167: break;
-"167
-[e $U 140  ]
-[; ;main.c: 169: case 11: if(SlaveInfo[3].CommError == SLAVE_DATA_OK){
-"169
-[e :U 192 ]
-[e $ ! == -> . *U + &U _SlaveInfo * -> -> -> 3 `i `ui `ux -> -> # *U &U _SlaveInfo `ui `ux 1 `i -> . `E1568 1 `i 193  ]
-{
-[; ;main.c: 170: state = 0;
-"170
 [e = _state -> -> 0 `i `uc ]
-"171
-}
-[; ;main.c: 171: }
-[e $U 194  ]
-"172
-[e :U 193 ]
-[; ;main.c: 172: else if(SlaveInfo[3].CommError == SLAVE_DATA_NOK){
-[e $ ! == -> . *U + &U _SlaveInfo * -> -> -> 3 `i `ui `ux -> -> # *U &U _SlaveInfo `ui `ux 1 `i -> . `E1568 2 `i 195  ]
-{
-[; ;main.c: 173: PORTDbits.RD1 = On;
-"173
-[e = . . _PORTDbits 0 1 -> . `E1552 0 `uc ]
-"174
-}
-[e :U 195 ]
-"175
-[e :U 194 ]
-[; ;main.c: 174: }
-[; ;main.c: 175: break;
+[; ;main.c: 97: break;
+"97
 [e $U 140  ]
-[; ;main.c: 177: default : state = 0;
-"177
-[e :U 196 ]
-[e = _state -> -> 0 `i `uc ]
-[; ;main.c: 178: break;
-"178
-[e $U 140  ]
-"179
+"98
 }
-[; ;main.c: 179: }
+[; ;main.c: 98: }
 [e $U 140  ]
-"59
+"55
 [e :U 141 ]
 [e [\ _state , $ -> -> 0 `i `uc 142
  , $ -> -> 1 `i `uc 144
- , $ -> -> 12 `i `uc 148
- , $ -> -> 13 `i `uc 150
- , $ -> -> 14 `i `uc 154
- , $ -> -> 15 `i `uc 156
- , $ -> -> 2 `i `uc 160
- , $ -> -> 3 `i `uc 162
- , $ -> -> 4 `i `uc 166
- , $ -> -> 5 `i `uc 168
- , $ -> -> 6 `i `uc 172
- , $ -> -> 7 `i `uc 174
- , $ -> -> 16 `i `uc 178
- , $ -> -> 17 `i `uc 180
- , $ -> -> 8 `i `uc 184
- , $ -> -> 9 `i `uc 186
- , $ -> -> 10 `i `uc 190
- , $ -> -> 11 `i `uc 192
- 196 ]
-"179
+ , $ -> -> 2 `i `uc 148
+ , $ -> -> 3 `i `uc 150
+ , $ -> -> 4 `i `uc 154
+ , $ -> -> 5 `i `uc 156
+ 160 ]
+"98
 [e :U 140 ]
-[; ;main.c: 181: PIR1bits.TMR2IF = 0;
-"181
+[; ;main.c: 100: PIR1bits.TMR2IF = 0;
+"100
 [e = . . _PIR1bits 0 1 -> -> 0 `i `uc ]
-[; ;main.c: 182: TMR2 = 0;
-"182
+[; ;main.c: 101: TMR2 = 0;
+"101
 [e = _TMR2 -> -> 0 `i `uc ]
-"183
+"102
 }
 [e :U 139 ]
-"184
+"103
 }
 [e :U 136 ]
-"52
+"48
 [e $U 137  ]
 [e :U 138 ]
-[; ;main.c: 183: }
-[; ;main.c: 184: }
-[; ;main.c: 185: }
-"185
+[; ;main.c: 102: }
+[; ;main.c: 103: }
+[; ;main.c: 104: }
+"104
 [e :UE 123 ]
 }

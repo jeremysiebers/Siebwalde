@@ -2,6 +2,7 @@
  build/default/production/Peripherals/interrupt_manager.p1:  \
  Peripherals/interrupt_manager.c  \
 Peripherals/tmr0.h  \
+Peripherals/tmr1.h  \
 Peripherals/tmr2.h  \
 Peripherals/config.h  \
 Peripherals/ausart.h  \

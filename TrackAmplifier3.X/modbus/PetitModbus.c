@@ -90,7 +90,8 @@ void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
     }
     //PORTCbits.RC3 = 0;
 }
-#else
+#endif
+#ifdef CRC_LOOKUP
 void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
 {
     //PORTCbits.RC3 = 1;
@@ -117,6 +118,15 @@ void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
  * uchCRCHi = 0x12
  * CRC = 0x1241
 */
+#ifdef CRC_HW
+void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
+{
+    //PORTCbits.RC3 = 1;
+    
+    //*CRC = 
+    //PORTCbits.RC3 = 0;
+}
+#endif
 /******************************************************************************/
 
 /*

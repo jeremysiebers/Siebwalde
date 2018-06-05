@@ -17374,7 +17374,7 @@ bool FVR_IsOutputReady(void);
 void FVR_Initialize(void)
 {
 
-FVRCON = 0xBC;
+FVRCON = 0xB4;
 }
 
 bool FVR_IsOutputReady(void)

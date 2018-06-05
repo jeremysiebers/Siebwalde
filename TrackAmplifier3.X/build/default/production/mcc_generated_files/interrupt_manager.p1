@@ -1,5 +1,5 @@
 Version 3.2 HI-TECH Software Intermediate Code
-[v F14364 `(v ~T0 @X0 0 tf ]
+[v F14418 `(v ~T0 @X0 0 tf ]
 "355 C:\Program Files (x86)\Microchip\xc8\v1.44\include\pic16f18854.h
 [s S26 :1 `uc 1 :5 `uc 1 :1 `uc 1 :1 `uc 1 ]
 [n S26 . INTEDG . PEIE GIE ]
@@ -24,6 +24,26 @@ Version 3.2 HI-TECH Software Intermediate Code
 [n S961 . . ]
 "21249
 [v _PIR3bits `VS961 ~T0 @X0 0 e@1807 ]
+"21712
+[s S983 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
+[n S983 . TMR1IE TMR2IE TMR3IE TMR4IE TMR5IE TMR6IE ]
+"21711
+[u S982 `S983 1 ]
+[n S982 . . ]
+"21721
+[v _PIE4bits `VS982 ~T0 @X0 0 e@1818 ]
+"21290
+[s S964 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
+[n S964 . TMR1IF TMR2IF TMR3IF TMR4IF TMR5IF TMR6IF ]
+"21289
+[u S963 `S964 1 ]
+[n S963 . . ]
+"21299
+[v _PIR4bits `VS963 ~T0 @X0 0 e@1808 ]
+"367 mcc_generated_files/tmr3.h
+[v _TMR3_ISR `(v ~T0 @X0 0 ef ]
+"367 mcc_generated_files/tmr1.h
+[v _TMR1_ISR `(v ~T0 @X0 0 ef ]
 [; ;interrupt_manager.h: 109: void interrupt INTERRUPT_InterruptManager(void);
 [; ;htc.h: 26: extern const char __xc8_OPTIM_SPEED;
 [; ;htc.h: 28: extern double __fpnormalize(double);
@@ -13078,8 +13098,32 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;stdint.h: 210: typedef int16_t intptr_t;
 [; ;stdint.h: 215: typedef uint16_t uintptr_t;
 [; ;stdbool.h: 12: typedef unsigned char bool;
+[; ;tmr3.h: 100: void TMR3_Initialize(void);
+[; ;tmr3.h: 129: void TMR3_StartTimer(void);
+[; ;tmr3.h: 161: void TMR3_StopTimer(void);
+[; ;tmr3.h: 196: uint16_t TMR3_ReadTimer(void);
+[; ;tmr3.h: 235: void TMR3_WriteTimer(uint16_t timerVal);
+[; ;tmr3.h: 271: void TMR3_Reload(void);
+[; ;tmr3.h: 310: void TMR3_StartSinglePulseAcquisition(void);
+[; ;tmr3.h: 349: uint8_t TMR3_CheckGateValueStatus(void);
+[; ;tmr3.h: 367: void TMR3_ISR(void);
+[; ;tmr3.h: 385: void TMR3_SetInterruptHandler(void (* InterruptHandler)(void));
+[; ;tmr3.h: 403: extern void (*TMR3_InterruptHandler)(void);
+[; ;tmr3.h: 421: void TMR3_DefaultInterruptHandler(void);
 [; ;pwm6.h: 102: void PWM6_Initialize(void);
 [; ;pwm6.h: 129: void PWM6_LoadDutyValue(uint16_t dutyValue);
+[; ;tmr1.h: 100: void TMR1_Initialize(void);
+[; ;tmr1.h: 129: void TMR1_StartTimer(void);
+[; ;tmr1.h: 161: void TMR1_StopTimer(void);
+[; ;tmr1.h: 196: uint16_t TMR1_ReadTimer(void);
+[; ;tmr1.h: 235: void TMR1_WriteTimer(uint16_t timerVal);
+[; ;tmr1.h: 271: void TMR1_Reload(void);
+[; ;tmr1.h: 310: void TMR1_StartSinglePulseAcquisition(void);
+[; ;tmr1.h: 349: uint8_t TMR1_CheckGateValueStatus(void);
+[; ;tmr1.h: 367: void TMR1_ISR(void);
+[; ;tmr1.h: 385: void TMR1_SetInterruptHandler(void (* InterruptHandler)(void));
+[; ;tmr1.h: 403: extern void (*TMR1_InterruptHandler)(void);
+[; ;tmr1.h: 421: void TMR1_DefaultInterruptHandler(void);
 [; ;tmr2.h: 79: typedef enum
 [; ;tmr2.h: 80: {
 [; ;tmr2.h: 89: TMR2_ROP_STARTS_TMRON,
@@ -13190,7 +13234,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;eusart.h: 78: extern volatile uint8_t eusartTxBufferRemaining;
 [; ;eusart.h: 79: extern volatile uint8_t eusartRxCount;
 "85 mcc_generated_files/eusart.h
-[v _EUSART_RxDefaultInterruptHandler `*F14364 ~T0 @X0 1 e ]
+[v _EUSART_RxDefaultInterruptHandler `*F14418 ~T0 @X0 1 e ]
 [; ;eusart.h: 85: void (*EUSART_RxDefaultInterruptHandler)(void);
 [; ;eusart.h: 107: void EUSART_Initialize(void);
 [; ;eusart.h: 155: bool EUSART_is_tx_ready(void);
@@ -13200,9 +13244,9 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;eusart.h: 294: void EUSART_Write(uint8_t txData);
 [; ;eusart.h: 316: void EUSART_Receive_ISR(void);
 [; ;eusart.h: 337: void EUSART_SetRxInterruptHandler(void (* interruptHandler)(void));
-[; ;mcc.h: 76: void SYSTEM_Initialize(void);
-[; ;mcc.h: 89: void OSCILLATOR_Initialize(void);
-[; ;mcc.h: 102: void PMD_Initialize(void);
+[; ;mcc.h: 78: void SYSTEM_Initialize(void);
+[; ;mcc.h: 91: void OSCILLATOR_Initialize(void);
+[; ;mcc.h: 104: void PMD_Initialize(void);
 [v $root$_INTERRUPT_InterruptManager `(v ~T0 @X0 0 e ]
 [v F3 `(v ~T0 @X0 1 tf ]
 "52 mcc_generated_files/interrupt_manager.c
@@ -13234,29 +13278,59 @@ Version 3.2 HI-TECH Software Intermediate Code
 [e $U 1560  ]
 "61
 [e :U 1559 ]
-[; ;interrupt_manager.c: 61: else
+[; ;interrupt_manager.c: 61: else if(PIE4bits.TMR3IE == 1 && PIR4bits.TMR3IF == 1)
+[e $ ! && == -> . . _PIE4bits 0 2 `i -> 1 `i == -> . . _PIR4bits 0 2 `i -> 1 `i 1561  ]
 [; ;interrupt_manager.c: 62: {
 "62
 {
+[; ;interrupt_manager.c: 63: TMR3_ISR();
+"63
+[e ( _TMR3_ISR ..  ]
 "64
 }
-[e :U 1560 ]
-"65
-}
 [; ;interrupt_manager.c: 64: }
-[; ;interrupt_manager.c: 65: }
-[e $U 1561  ]
-"66
-[e :U 1558 ]
-[; ;interrupt_manager.c: 66: else
-[; ;interrupt_manager.c: 67: {
-"67
-{
-"69
-}
+[e $U 1562  ]
+"65
 [e :U 1561 ]
-[; ;interrupt_manager.c: 69: }
-[; ;interrupt_manager.c: 70: }
+[; ;interrupt_manager.c: 65: else if(PIE4bits.TMR1IE == 1 && PIR4bits.TMR1IF == 1)
+[e $ ! && == -> . . _PIE4bits 0 0 `i -> 1 `i == -> . . _PIR4bits 0 0 `i -> 1 `i 1563  ]
+[; ;interrupt_manager.c: 66: {
+"66
+{
+[; ;interrupt_manager.c: 67: TMR1_ISR();
+"67
+[e ( _TMR1_ISR ..  ]
+"68
+}
+[; ;interrupt_manager.c: 68: }
+[e $U 1564  ]
+"69
+[e :U 1563 ]
+[; ;interrupt_manager.c: 69: else
+[; ;interrupt_manager.c: 70: {
 "70
+{
+"72
+}
+[e :U 1564 ]
+[e :U 1562 ]
+[e :U 1560 ]
+"73
+}
+[; ;interrupt_manager.c: 72: }
+[; ;interrupt_manager.c: 73: }
+[e $U 1565  ]
+"74
+[e :U 1558 ]
+[; ;interrupt_manager.c: 74: else
+[; ;interrupt_manager.c: 75: {
+"75
+{
+"77
+}
+[e :U 1565 ]
+[; ;interrupt_manager.c: 77: }
+[; ;interrupt_manager.c: 78: }
+"78
 [e :UE 1557 ]
 }
