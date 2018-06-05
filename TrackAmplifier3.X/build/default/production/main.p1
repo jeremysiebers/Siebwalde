@@ -1,7 +1,7 @@
 Version 3.2 HI-TECH Software Intermediate Code
-[v F14418 `(v ~T0 @X0 0 tf ]
+[v F14440 `(v ~T0 @X0 0 tf ]
 [p mainexit ]
-"78 mcc_generated_files/mcc.h
+"79 mcc_generated_files/mcc.h
 [v _SYSTEM_Initialize `(v ~T0 @X0 0 ef ]
 "355 C:\Program Files (x86)\Microchip\xc8\v1.44\include\pic16f18854.h
 [s S26 :1 `uc 1 :5 `uc 1 :1 `uc 1 :1 `uc 1 ]
@@ -11,9 +11,9 @@ Version 3.2 HI-TECH Software Intermediate Code
 [n S25 . . ]
 "362
 [v _INTCONbits `VS25 ~T0 @X0 0 e@11 ]
-"86 modbus/PetitModbus.h
+"90 modbus/PetitModbus.h
 [v _InitPetitModbus `(v ~T0 @X0 0 ef1`uc ]
-"87
+"91
 [v _ProcessPetitModbus `(v ~T0 @X0 0 ef ]
 "843 C:\Program Files (x86)\Microchip\xc8\v1.44\include\pic16f18854.h
 [s S44 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
@@ -23,10 +23,10 @@ Version 3.2 HI-TECH Software Intermediate Code
 [n S43 . . ]
 "854
 [v _LATBbits `VS43 ~T0 @X0 0 e@23 ]
-"78 modbus/PetitModbus.h
+"82 modbus/PetitModbus.h
 [s S1557 `s 1 ]
 [n S1557 . ActValue ]
-"82
+"86
 [v _PetitRegisters `S1557 ~T0 @X0 -> 0 `x e ]
 [; ;htc.h: 26: extern const char __xc8_OPTIM_SPEED;
 [; ;htc.h: 28: extern double __fpnormalize(double);
@@ -13094,8 +13094,6 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;tmr3.h: 385: void TMR3_SetInterruptHandler(void (* InterruptHandler)(void));
 [; ;tmr3.h: 403: extern void (*TMR3_InterruptHandler)(void);
 [; ;tmr3.h: 421: void TMR3_DefaultInterruptHandler(void);
-[; ;pwm6.h: 102: void PWM6_Initialize(void);
-[; ;pwm6.h: 129: void PWM6_LoadDutyValue(uint16_t dutyValue);
 [; ;tmr1.h: 100: void TMR1_Initialize(void);
 [; ;tmr1.h: 129: void TMR1_StartTimer(void);
 [; ;tmr1.h: 161: void TMR1_StopTimer(void);
@@ -13108,6 +13106,8 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;tmr1.h: 385: void TMR1_SetInterruptHandler(void (* InterruptHandler)(void));
 [; ;tmr1.h: 403: extern void (*TMR1_InterruptHandler)(void);
 [; ;tmr1.h: 421: void TMR1_DefaultInterruptHandler(void);
+[; ;pwm6.h: 102: void PWM6_Initialize(void);
+[; ;pwm6.h: 129: void PWM6_LoadDutyValue(uint16_t dutyValue);
 [; ;tmr2.h: 79: typedef enum
 [; ;tmr2.h: 80: {
 [; ;tmr2.h: 89: TMR2_ROP_STARTS_TMRON,
@@ -13167,8 +13167,20 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;tmr2.h: 728: void TMR2_Period8BitSet(uint8_t periodVal);
 [; ;tmr2.h: 780: void TMR2_LoadPeriodRegister(uint8_t periodVal);
 [; ;tmr2.h: 818: bool TMR2_HasOverflowOccured(void);
+[; ;crc.h: 123: void CRC_Initialize(void);
+[; ;crc.h: 164: void CRC_Start(void);
+[; ;crc.h: 202: bool CRC_16BitDataWrite(uint16_t data);
+[; ;crc.h: 240: uint16_t CRC_CalculatedResultGet(bool reverse, uint16_t xorValue);
+[; ;crc.h: 279: bool CRC_IsBusy(void);
+[; ;crc.h: 319: void CRC_SCAN_StartScanner(void);
+[; ;crc.h: 359: void CRC_SCAN_StopScanner(void);
+[; ;crc.h: 400: void CRC_SCAN_SetAddressLimit(uint16_t startAddr,uint16_t endAddr);
+[; ;crc.h: 444: bool CRC_SCAN_IsScannerBusy(void);
+[; ;crc.h: 485: bool CRC_SCAN_HasScanCompleted(void);
 [; ;cmp1.h: 92: void CMP1_Initialize(void);
 [; ;cmp1.h: 132: bool CMP1_GetOutputStatus(void);
+[; ;fvr.h: 93: void FVR_Initialize(void);
+[; ;fvr.h: 127: bool FVR_IsOutputReady(void);
 [; ;adcc.h: 72: typedef uint16_t adc_result_t;
 [; ;adcc.h: 89: typedef enum
 [; ;adcc.h: 90: {
@@ -13210,15 +13222,13 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;adcc.h: 728: bool ADCC_HasErrorCrossedUpperThreshold(void);
 [; ;adcc.h: 750: bool ADCC_HasErrorCrossedLowerThreshold(void);
 [; ;adcc.h: 772: uint8_t ADCC_GetConversionStageStatus(void);
-[; ;fvr.h: 93: void FVR_Initialize(void);
-[; ;fvr.h: 127: bool FVR_IsOutputReady(void);
 [; ;dac.h: 93: void DAC_Initialize(void);
 [; ;dac.h: 129: void DAC_SetOutput(uint8_t inputData);
 [; ;dac.h: 163: uint8_t DAC_GetOutput(void);
 [; ;eusart.h: 78: extern volatile uint8_t eusartTxBufferRemaining;
 [; ;eusart.h: 79: extern volatile uint8_t eusartRxCount;
 "85 mcc_generated_files/eusart.h
-[v _EUSART_RxDefaultInterruptHandler `*F14418 ~T0 @X0 1 e ]
+[v _EUSART_RxDefaultInterruptHandler `*F14440 ~T0 @X0 1 e ]
 [; ;eusart.h: 85: void (*EUSART_RxDefaultInterruptHandler)(void);
 [; ;eusart.h: 107: void EUSART_Initialize(void);
 [; ;eusart.h: 155: bool EUSART_is_tx_ready(void);
@@ -13228,81 +13238,17 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;eusart.h: 294: void EUSART_Write(uint8_t txData);
 [; ;eusart.h: 316: void EUSART_Receive_ISR(void);
 [; ;eusart.h: 337: void EUSART_SetRxInterruptHandler(void (* interruptHandler)(void));
-[; ;mcc.h: 78: void SYSTEM_Initialize(void);
-[; ;mcc.h: 91: void OSCILLATOR_Initialize(void);
-[; ;mcc.h: 104: void PMD_Initialize(void);
+[; ;mcc.h: 79: void SYSTEM_Initialize(void);
+[; ;mcc.h: 92: void OSCILLATOR_Initialize(void);
+[; ;mcc.h: 105: void PMD_Initialize(void);
 [; ;Init.h: 11: extern void InitUART(void);
 [; ;Init.h: 12: extern void InitTMR1(void);
 [; ;Interrupts.h: 3: extern void PetitModbusIntHandlerTMR(void);
 [; ;Interrupts.h: 4: extern void PetitModbusIntHandlerRC(void);
-"26 modbus/PetitModbus.h
+"30 modbus/PetitModbus.h
 [v _auchCRCHi `Cuc ~T0 @X0 -> 0 `x e ]
 [i _auchCRCHi
 :U ..
-"27
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
-"28
--> -> 64 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
-"29
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 1 `i `uc
-"30
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
 "31
 -> -> 0 `i `uc
 -> -> 193 `i `uc
@@ -13312,10 +13258,10 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 192 `i `uc
 -> -> 128 `i `uc
 -> -> 65 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
 -> -> 0 `i `uc
 -> -> 193 `i `uc
 -> -> 129 `i `uc
@@ -13329,27 +13275,27 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 193 `i `uc
 -> -> 129 `i `uc
 -> -> 64 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
 -> -> 1 `i `uc
 -> -> 192 `i `uc
 "33
 -> -> 128 `i `uc
 -> -> 65 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
 -> -> 1 `i `uc
 -> -> 192 `i `uc
 -> -> 128 `i `uc
 -> -> 65 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
 -> -> 1 `i `uc
 "34
 -> -> 192 `i `uc
@@ -13363,10 +13309,10 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 192 `i `uc
 -> -> 128 `i `uc
 -> -> 65 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
 "35
 -> -> 0 `i `uc
 -> -> 193 `i `uc
@@ -13376,19 +13322,15 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 192 `i `uc
 -> -> 128 `i `uc
 -> -> 65 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
 -> -> 0 `i `uc
 -> -> 193 `i `uc
 -> -> 129 `i `uc
 "36
 -> -> 64 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
 -> -> 1 `i `uc
 -> -> 192 `i `uc
 -> -> 128 `i `uc
@@ -13397,32 +13339,32 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 193 `i `uc
 -> -> 129 `i `uc
 -> -> 64 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
 -> -> 1 `i `uc
 -> -> 192 `i `uc
 "37
 -> -> 128 `i `uc
 -> -> 65 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
 -> -> 1 `i `uc
 -> -> 192 `i `uc
 -> -> 128 `i `uc
 -> -> 65 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
 -> -> 1 `i `uc
 "38
 -> -> 192 `i `uc
 -> -> 128 `i `uc
 -> -> 65 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
 -> -> 0 `i `uc
 -> -> 193 `i `uc
 -> -> 129 `i `uc
@@ -13431,15 +13373,19 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 192 `i `uc
 -> -> 128 `i `uc
 -> -> 65 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
 "39
 -> -> 0 `i `uc
 -> -> 193 `i `uc
 -> -> 129 `i `uc
 -> -> 64 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
 -> -> 1 `i `uc
 -> -> 192 `i `uc
 -> -> 128 `i `uc
@@ -13449,10 +13395,10 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 129 `i `uc
 "40
 -> -> 64 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
 -> -> 1 `i `uc
 -> -> 192 `i `uc
 -> -> 128 `i `uc
@@ -13466,27 +13412,27 @@ Version 3.2 HI-TECH Software Intermediate Code
 "41
 -> -> 128 `i `uc
 -> -> 65 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
 -> -> 1 `i `uc
 -> -> 192 `i `uc
 -> -> 128 `i `uc
 -> -> 65 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
 -> -> 1 `i `uc
 "42
 -> -> 192 `i `uc
 -> -> 128 `i `uc
 -> -> 65 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
 -> -> 0 `i `uc
 -> -> 193 `i `uc
 -> -> 129 `i `uc
@@ -13500,6 +13446,19 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 193 `i `uc
 -> -> 129 `i `uc
 -> -> 64 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+"44
+-> -> 64 `i `uc
 -> -> 1 `i `uc
 -> -> 192 `i `uc
 -> -> 128 `i `uc
@@ -13511,35 +13470,86 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 0 `i `uc
 -> -> 193 `i `uc
 -> -> 129 `i `uc
+-> -> 64 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
 "45
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 1 `i `uc
+"46
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+"47
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+-> -> 64 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 1 `i `uc
+-> -> 192 `i `uc
+-> -> 128 `i `uc
+-> -> 65 `i `uc
+-> -> 0 `i `uc
+-> -> 193 `i `uc
+-> -> 129 `i `uc
+"49
 -> -> 64 `i `uc
 ..
 ]
-[; ;PetitModbus.h: 26: const unsigned char auchCRCHi[] = {
-[; ;PetitModbus.h: 27: 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
-[; ;PetitModbus.h: 28: 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0,
-[; ;PetitModbus.h: 29: 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01,
-[; ;PetitModbus.h: 30: 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41,
-[; ;PetitModbus.h: 31: 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81,
-[; ;PetitModbus.h: 32: 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0,
-[; ;PetitModbus.h: 33: 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01,
-[; ;PetitModbus.h: 34: 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40,
-[; ;PetitModbus.h: 35: 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
-[; ;PetitModbus.h: 36: 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0,
-[; ;PetitModbus.h: 37: 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01,
-[; ;PetitModbus.h: 38: 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41,
-[; ;PetitModbus.h: 39: 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
-[; ;PetitModbus.h: 40: 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0,
-[; ;PetitModbus.h: 41: 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01,
-[; ;PetitModbus.h: 42: 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41,
-[; ;PetitModbus.h: 43: 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
-[; ;PetitModbus.h: 44: 0x40
-[; ;PetitModbus.h: 45: } ;
-"48
+[; ;PetitModbus.h: 30: const unsigned char auchCRCHi[] = {
+[; ;PetitModbus.h: 31: 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
+[; ;PetitModbus.h: 32: 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0,
+[; ;PetitModbus.h: 33: 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01,
+[; ;PetitModbus.h: 34: 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41,
+[; ;PetitModbus.h: 35: 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81,
+[; ;PetitModbus.h: 36: 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0,
+[; ;PetitModbus.h: 37: 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01,
+[; ;PetitModbus.h: 38: 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40,
+[; ;PetitModbus.h: 39: 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
+[; ;PetitModbus.h: 40: 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0,
+[; ;PetitModbus.h: 41: 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01,
+[; ;PetitModbus.h: 42: 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41,
+[; ;PetitModbus.h: 43: 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
+[; ;PetitModbus.h: 44: 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0,
+[; ;PetitModbus.h: 45: 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01,
+[; ;PetitModbus.h: 46: 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41,
+[; ;PetitModbus.h: 47: 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
+[; ;PetitModbus.h: 48: 0x40
+[; ;PetitModbus.h: 49: } ;
+"52
 [v _auchCRCLo `Cuc ~T0 @X0 -> 0 `x e ]
 [i _auchCRCLo
 :U ..
-"49
+"53
 -> -> 0 `i `uc
 -> -> 192 `i `uc
 -> -> 193 `i `uc
@@ -13555,7 +13565,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 5 `i `uc
 -> -> 197 `i `uc
 -> -> 196 `i `uc
-"50
+"54
 -> -> 4 `i `uc
 -> -> 204 `i `uc
 -> -> 12 `i `uc
@@ -13571,7 +13581,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 11 `i `uc
 -> -> 201 `i `uc
 -> -> 9 `i `uc
-"51
+"55
 -> -> 8 `i `uc
 -> -> 200 `i `uc
 -> -> 216 `i `uc
@@ -13587,7 +13597,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 223 `i `uc
 -> -> 31 `i `uc
 -> -> 221 `i `uc
-"52
+"56
 -> -> 29 `i `uc
 -> -> 28 `i `uc
 -> -> 220 `i `uc
@@ -13603,7 +13613,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 18 `i `uc
 -> -> 19 `i `uc
 -> -> 211 `i `uc
-"53
+"57
 -> -> 17 `i `uc
 -> -> 209 `i `uc
 -> -> 208 `i `uc
@@ -13619,7 +13629,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 54 `i `uc
 -> -> 246 `i `uc
 -> -> 247 `i `uc
-"54
+"58
 -> -> 55 `i `uc
 -> -> 245 `i `uc
 -> -> 53 `i `uc
@@ -13635,7 +13645,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 254 `i `uc
 -> -> 250 `i `uc
 -> -> 58 `i `uc
-"55
+"59
 -> -> 59 `i `uc
 -> -> 251 `i `uc
 -> -> 57 `i `uc
@@ -13651,7 +13661,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 42 `i `uc
 -> -> 234 `i `uc
 -> -> 238 `i `uc
-"56
+"60
 -> -> 46 `i `uc
 -> -> 47 `i `uc
 -> -> 239 `i `uc
@@ -13667,7 +13677,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 231 `i `uc
 -> -> 230 `i `uc
 -> -> 38 `i `uc
-"57
+"61
 -> -> 34 `i `uc
 -> -> 226 `i `uc
 -> -> 227 `i `uc
@@ -13683,7 +13693,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 99 `i `uc
 -> -> 163 `i `uc
 -> -> 162 `i `uc
-"58
+"62
 -> -> 98 `i `uc
 -> -> 102 `i `uc
 -> -> 166 `i `uc
@@ -13699,7 +13709,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 109 `i `uc
 -> -> 175 `i `uc
 -> -> 111 `i `uc
-"59
+"63
 -> -> 110 `i `uc
 -> -> 174 `i `uc
 -> -> 170 `i `uc
@@ -13715,7 +13725,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 185 `i `uc
 -> -> 121 `i `uc
 -> -> 187 `i `uc
-"60
+"64
 -> -> 123 `i `uc
 -> -> 122 `i `uc
 -> -> 186 `i `uc
@@ -13731,7 +13741,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 116 `i `uc
 -> -> 117 `i `uc
 -> -> 181 `i `uc
-"61
+"65
 -> -> 119 `i `uc
 -> -> 183 `i `uc
 -> -> 182 `i `uc
@@ -13747,7 +13757,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 80 `i `uc
 -> -> 144 `i `uc
 -> -> 145 `i `uc
-"62
+"66
 -> -> 81 `i `uc
 -> -> 147 `i `uc
 -> -> 83 `i `uc
@@ -13763,7 +13773,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 84 `i `uc
 -> -> 156 `i `uc
 -> -> 92 `i `uc
-"63
+"67
 -> -> 93 `i `uc
 -> -> 157 `i `uc
 -> -> 95 `i `uc
@@ -13779,7 +13789,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 88 `i `uc
 -> -> 152 `i `uc
 -> -> 136 `i `uc
-"64
+"68
 -> -> 72 `i `uc
 -> -> 73 `i `uc
 -> -> 137 `i `uc
@@ -13795,7 +13805,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 77 `i `uc
 -> -> 76 `i `uc
 -> -> 140 `i `uc
-"65
+"69
 -> -> 68 `i `uc
 -> -> 132 `i `uc
 -> -> 133 `i `uc
@@ -13811,38 +13821,38 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 65 `i `uc
 -> -> 129 `i `uc
 -> -> 128 `i `uc
-"67
+"71
 -> -> 64 `i `uc
 ..
 ]
-[; ;PetitModbus.h: 48: const unsigned char auchCRCLo[] = {
-[; ;PetitModbus.h: 49: 0x00, 0xC0, 0xC1, 0x01, 0xC3, 0x03, 0x02, 0xC2, 0xC6, 0x06, 0x07, 0xC7, 0x05, 0xC5, 0xC4,
-[; ;PetitModbus.h: 50: 0x04, 0xCC, 0x0C, 0x0D, 0xCD, 0x0F, 0xCF, 0xCE, 0x0E, 0x0A, 0xCA, 0xCB, 0x0B, 0xC9, 0x09,
-[; ;PetitModbus.h: 51: 0x08, 0xC8, 0xD8, 0x18, 0x19, 0xD9, 0x1B, 0xDB, 0xDA, 0x1A, 0x1E, 0xDE, 0xDF, 0x1F, 0xDD,
-[; ;PetitModbus.h: 52: 0x1D, 0x1C, 0xDC, 0x14, 0xD4, 0xD5, 0x15, 0xD7, 0x17, 0x16, 0xD6, 0xD2, 0x12, 0x13, 0xD3,
-[; ;PetitModbus.h: 53: 0x11, 0xD1, 0xD0, 0x10, 0xF0, 0x30, 0x31, 0xF1, 0x33, 0xF3, 0xF2, 0x32, 0x36, 0xF6, 0xF7,
-[; ;PetitModbus.h: 54: 0x37, 0xF5, 0x35, 0x34, 0xF4, 0x3C, 0xFC, 0xFD, 0x3D, 0xFF, 0x3F, 0x3E, 0xFE, 0xFA, 0x3A,
-[; ;PetitModbus.h: 55: 0x3B, 0xFB, 0x39, 0xF9, 0xF8, 0x38, 0x28, 0xE8, 0xE9, 0x29, 0xEB, 0x2B, 0x2A, 0xEA, 0xEE,
-[; ;PetitModbus.h: 56: 0x2E, 0x2F, 0xEF, 0x2D, 0xED, 0xEC, 0x2C, 0xE4, 0x24, 0x25, 0xE5, 0x27, 0xE7, 0xE6, 0x26,
-[; ;PetitModbus.h: 57: 0x22, 0xE2, 0xE3, 0x23, 0xE1, 0x21, 0x20, 0xE0, 0xA0, 0x60, 0x61, 0xA1, 0x63, 0xA3, 0xA2,
-[; ;PetitModbus.h: 58: 0x62, 0x66, 0xA6, 0xA7, 0x67, 0xA5, 0x65, 0x64, 0xA4, 0x6C, 0xAC, 0xAD, 0x6D, 0xAF, 0x6F,
-[; ;PetitModbus.h: 59: 0x6E, 0xAE, 0xAA, 0x6A, 0x6B, 0xAB, 0x69, 0xA9, 0xA8, 0x68, 0x78, 0xB8, 0xB9, 0x79, 0xBB,
-[; ;PetitModbus.h: 60: 0x7B, 0x7A, 0xBA, 0xBE, 0x7E, 0x7F, 0xBF, 0x7D, 0xBD, 0xBC, 0x7C, 0xB4, 0x74, 0x75, 0xB5,
-[; ;PetitModbus.h: 61: 0x77, 0xB7, 0xB6, 0x76, 0x72, 0xB2, 0xB3, 0x73, 0xB1, 0x71, 0x70, 0xB0, 0x50, 0x90, 0x91,
-[; ;PetitModbus.h: 62: 0x51, 0x93, 0x53, 0x52, 0x92, 0x96, 0x56, 0x57, 0x97, 0x55, 0x95, 0x94, 0x54, 0x9C, 0x5C,
-[; ;PetitModbus.h: 63: 0x5D, 0x9D, 0x5F, 0x9F, 0x9E, 0x5E, 0x5A, 0x9A, 0x9B, 0x5B, 0x99, 0x59, 0x58, 0x98, 0x88,
-[; ;PetitModbus.h: 64: 0x48, 0x49, 0x89, 0x4B, 0x8B, 0x8A, 0x4A, 0x4E, 0x8E, 0x8F, 0x4F, 0x8D, 0x4D, 0x4C, 0x8C,
-[; ;PetitModbus.h: 65: 0x44, 0x84, 0x85, 0x45, 0x87, 0x47, 0x46, 0x86, 0x82, 0x42, 0x43, 0x83, 0x41, 0x81, 0x80,
-[; ;PetitModbus.h: 66: 0x40
-[; ;PetitModbus.h: 67: };
-[; ;PetitModbus.h: 76: extern unsigned char PETITMODBUS_SLAVE_ADDRESS;
-[; ;PetitModbus.h: 78: typedef struct{
-[; ;PetitModbus.h: 79: short ActValue;
-[; ;PetitModbus.h: 80: }PetitRegStructure;
-[; ;PetitModbus.h: 82: extern PetitRegStructure PetitRegisters[7];
-[; ;PetitModbus.h: 83: extern volatile unsigned short PetitModbusTimerValue;
-[; ;PetitModbus.h: 86: extern void InitPetitModbus(unsigned char PetitModbusSlaveAddress);
-[; ;PetitModbus.h: 87: extern void ProcessPetitModbus(void);
+[; ;PetitModbus.h: 52: const unsigned char auchCRCLo[] = {
+[; ;PetitModbus.h: 53: 0x00, 0xC0, 0xC1, 0x01, 0xC3, 0x03, 0x02, 0xC2, 0xC6, 0x06, 0x07, 0xC7, 0x05, 0xC5, 0xC4,
+[; ;PetitModbus.h: 54: 0x04, 0xCC, 0x0C, 0x0D, 0xCD, 0x0F, 0xCF, 0xCE, 0x0E, 0x0A, 0xCA, 0xCB, 0x0B, 0xC9, 0x09,
+[; ;PetitModbus.h: 55: 0x08, 0xC8, 0xD8, 0x18, 0x19, 0xD9, 0x1B, 0xDB, 0xDA, 0x1A, 0x1E, 0xDE, 0xDF, 0x1F, 0xDD,
+[; ;PetitModbus.h: 56: 0x1D, 0x1C, 0xDC, 0x14, 0xD4, 0xD5, 0x15, 0xD7, 0x17, 0x16, 0xD6, 0xD2, 0x12, 0x13, 0xD3,
+[; ;PetitModbus.h: 57: 0x11, 0xD1, 0xD0, 0x10, 0xF0, 0x30, 0x31, 0xF1, 0x33, 0xF3, 0xF2, 0x32, 0x36, 0xF6, 0xF7,
+[; ;PetitModbus.h: 58: 0x37, 0xF5, 0x35, 0x34, 0xF4, 0x3C, 0xFC, 0xFD, 0x3D, 0xFF, 0x3F, 0x3E, 0xFE, 0xFA, 0x3A,
+[; ;PetitModbus.h: 59: 0x3B, 0xFB, 0x39, 0xF9, 0xF8, 0x38, 0x28, 0xE8, 0xE9, 0x29, 0xEB, 0x2B, 0x2A, 0xEA, 0xEE,
+[; ;PetitModbus.h: 60: 0x2E, 0x2F, 0xEF, 0x2D, 0xED, 0xEC, 0x2C, 0xE4, 0x24, 0x25, 0xE5, 0x27, 0xE7, 0xE6, 0x26,
+[; ;PetitModbus.h: 61: 0x22, 0xE2, 0xE3, 0x23, 0xE1, 0x21, 0x20, 0xE0, 0xA0, 0x60, 0x61, 0xA1, 0x63, 0xA3, 0xA2,
+[; ;PetitModbus.h: 62: 0x62, 0x66, 0xA6, 0xA7, 0x67, 0xA5, 0x65, 0x64, 0xA4, 0x6C, 0xAC, 0xAD, 0x6D, 0xAF, 0x6F,
+[; ;PetitModbus.h: 63: 0x6E, 0xAE, 0xAA, 0x6A, 0x6B, 0xAB, 0x69, 0xA9, 0xA8, 0x68, 0x78, 0xB8, 0xB9, 0x79, 0xBB,
+[; ;PetitModbus.h: 64: 0x7B, 0x7A, 0xBA, 0xBE, 0x7E, 0x7F, 0xBF, 0x7D, 0xBD, 0xBC, 0x7C, 0xB4, 0x74, 0x75, 0xB5,
+[; ;PetitModbus.h: 65: 0x77, 0xB7, 0xB6, 0x76, 0x72, 0xB2, 0xB3, 0x73, 0xB1, 0x71, 0x70, 0xB0, 0x50, 0x90, 0x91,
+[; ;PetitModbus.h: 66: 0x51, 0x93, 0x53, 0x52, 0x92, 0x96, 0x56, 0x57, 0x97, 0x55, 0x95, 0x94, 0x54, 0x9C, 0x5C,
+[; ;PetitModbus.h: 67: 0x5D, 0x9D, 0x5F, 0x9F, 0x9E, 0x5E, 0x5A, 0x9A, 0x9B, 0x5B, 0x99, 0x59, 0x58, 0x98, 0x88,
+[; ;PetitModbus.h: 68: 0x48, 0x49, 0x89, 0x4B, 0x8B, 0x8A, 0x4A, 0x4E, 0x8E, 0x8F, 0x4F, 0x8D, 0x4D, 0x4C, 0x8C,
+[; ;PetitModbus.h: 69: 0x44, 0x84, 0x85, 0x45, 0x87, 0x47, 0x46, 0x86, 0x82, 0x42, 0x43, 0x83, 0x41, 0x81, 0x80,
+[; ;PetitModbus.h: 70: 0x40
+[; ;PetitModbus.h: 71: };
+[; ;PetitModbus.h: 80: extern unsigned char PETITMODBUS_SLAVE_ADDRESS;
+[; ;PetitModbus.h: 82: typedef struct{
+[; ;PetitModbus.h: 83: short ActValue;
+[; ;PetitModbus.h: 84: }PetitRegStructure;
+[; ;PetitModbus.h: 86: extern PetitRegStructure PetitRegisters[7];
+[; ;PetitModbus.h: 87: extern volatile unsigned short PetitModbusTimerValue;
+[; ;PetitModbus.h: 90: extern void InitPetitModbus(unsigned char PetitModbusSlaveAddress);
+[; ;PetitModbus.h: 91: extern void ProcessPetitModbus(void);
 [; ;PetitModbusPort.h: 19: extern volatile unsigned char PetitReceiveBuffer[(7*2 + 10)];
 [; ;PetitModbusPort.h: 20: extern volatile unsigned char PetitReceiveCounter;
 [; ;PetitModbusPort.h: 22: extern void PetitModBus_UART_Initialise(void);

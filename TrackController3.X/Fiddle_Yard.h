@@ -2,12 +2,13 @@
 #define _FIDDLE_YARD_H
 
 
-#define Led3						PORTBbits.RB2	//Output
-#define Led2						PORTBbits.RB1	//Output
-#define Led1						PORTBbits.RB0	//Output
-//#define Output_Enable				PORTBbits.RB4	//Output
-//#define IO_Expander_Enable			PORTBbits.RB3	//Output
-//#define To_Externall_WDT_Pulse		PORTBbits.RB5	//Output
+#define Led3						LATBbits.LATB2	//Output
+#define Led2						LATBbits.LATB1	//Output
+#define Led1						LATBbits.LATB0	//Output
+//#define Output_Enable				LATBbits.RB4	//Output
+//#define IO_Expander_Enable			LATBbits.RB3	//Output
+//#define To_Externall_WDT_Pulse		LATBbits.RB5	//Output
+#define Reset_Slaves                LATGbits.LATG3
 
 #define TOP 1
 #define BOTTOM 0

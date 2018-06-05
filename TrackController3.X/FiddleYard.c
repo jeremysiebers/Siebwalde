@@ -54,7 +54,7 @@ static SLAVE_INFO         SlaveInfo[NUMBER_OF_SLAVES];
 
 /*----------------------------------------------------------------------------*/
 
-#define Init_IO()			TRISJ=0x00,TRISH=0x00,TRISG=0x00,TRISF=0x00,TRISE=0x00,TRISD=0x00,TRISC=0x00;TRISA=0x00;TRISB=0x00;// All ports are outputs !!!
+#define Init_IO()			TRISA = 0xFC;TRISB = 0xF8;TRISC = 0xFF;TRISD = 0xFF;TRISE = 0xFF;TRISF = 0xFF;TRISG = 0xF4;TRISH = 0xFF;TRISJ = 0xFF;// All ports are outputs !!!
 #define Leds_Off()			Led1 = Off, Led2 = Off, Led3 = Off;
 
 /********************************** TCP IP INIT *******************************/
@@ -84,6 +84,7 @@ void main()
 	ADCON0 	= 0x00;																														// AD OFF
 	ADCON1 	= 0x0F;																														// All Digital
 	CMCON 	= 0x07;
+    Reset_Slaves = 1;
 	
 	Init_Timers();
     #if defined (USE_TCPIP)

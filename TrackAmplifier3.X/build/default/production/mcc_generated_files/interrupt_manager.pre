@@ -17409,12 +17409,6 @@ extern void (*TMR3_InterruptHandler)(void);
 # 421
 void TMR3_DefaultInterruptHandler(void);
 
-# 102 "mcc_generated_files/pwm6.h"
-void PWM6_Initialize(void);
-
-# 129
-void PWM6_LoadDutyValue(uint16_t dutyValue);
-
 # 100 "mcc_generated_files/tmr1.h"
 void TMR1_Initialize(void);
 
@@ -17450,6 +17444,12 @@ extern void (*TMR1_InterruptHandler)(void);
 
 # 421
 void TMR1_DefaultInterruptHandler(void);
+
+# 102 "mcc_generated_files/pwm6.h"
+void PWM6_Initialize(void);
+
+# 129
+void PWM6_LoadDutyValue(uint16_t dutyValue);
 
 # 79 "mcc_generated_files/tmr2.h"
 typedef enum
@@ -17622,11 +17622,47 @@ void TMR2_LoadPeriodRegister(uint8_t periodVal);
 # 818
 bool TMR2_HasOverflowOccured(void);
 
+# 123 "mcc_generated_files/crc.h"
+void CRC_Initialize(void);
+
+# 164
+void CRC_Start(void);
+
+# 202
+bool CRC_16BitDataWrite(uint16_t data);
+
+# 240
+uint16_t CRC_CalculatedResultGet(bool reverse, uint16_t xorValue);
+
+# 279
+bool CRC_IsBusy(void);
+
+# 319
+void CRC_SCAN_StartScanner(void);
+
+# 359
+void CRC_SCAN_StopScanner(void);
+
+# 400
+void CRC_SCAN_SetAddressLimit(uint16_t startAddr,uint16_t endAddr);
+
+# 444
+bool CRC_SCAN_IsScannerBusy(void);
+
+# 485
+bool CRC_SCAN_HasScanCompleted(void);
+
 # 92 "mcc_generated_files/cmp1.h"
 void CMP1_Initialize(void);
 
 # 132
 bool CMP1_GetOutputStatus(void);
+
+# 93 "mcc_generated_files/fvr.h"
+void FVR_Initialize(void);
+
+# 127
+bool FVR_IsOutputReady(void);
 
 # 72 "mcc_generated_files/adcc.h"
 typedef uint16_t adc_result_t;
@@ -17727,12 +17763,6 @@ bool ADCC_HasErrorCrossedLowerThreshold(void);
 # 772
 uint8_t ADCC_GetConversionStageStatus(void);
 
-# 93 "mcc_generated_files/fvr.h"
-void FVR_Initialize(void);
-
-# 127
-bool FVR_IsOutputReady(void);
-
 # 93 "mcc_generated_files/dac.h"
 void DAC_Initialize(void);
 
@@ -17773,13 +17803,13 @@ void EUSART_Receive_ISR(void);
 # 337
 void EUSART_SetRxInterruptHandler(void (* interruptHandler)(void));
 
-# 78 "mcc_generated_files/mcc.h"
+# 79 "mcc_generated_files/mcc.h"
 void SYSTEM_Initialize(void);
 
-# 91
+# 92
 void OSCILLATOR_Initialize(void);
 
-# 104
+# 105
 void PMD_Initialize(void);
 
 # 52 "mcc_generated_files/interrupt_manager.c"

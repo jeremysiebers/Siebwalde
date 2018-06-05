@@ -1,4 +1,4 @@
-[p PRO_MODE GLOBOPT AUTOSTATIC PIC14 PIC14E SPACEOPT ]
+[p LITE_MODE AUTOSTATIC PIC14 PIC14E ]
 [d version 1.1 ]
 [d edition pro ]
 [d chip 16F18854 ]
@@ -83,6 +83,10 @@ PETIT_RXTX_TIMEOUT 4
 [v _ADCC_Initialize ADCC_Initialize `(v  1 e 1 0 ]
 "58 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/cmp1.c
 [v _CMP1_Initialize CMP1_Initialize `(v  1 e 1 0 ]
+"76 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/crc.c
+[v _CRC_Initialize CRC_Initialize `(v  1 e 1 0 ]
+"135
+[v _CRC_ReverseValue CRC_ReverseValue `(ui  1 s 2 CRC_ReverseValue ]
 "58 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/dac.c
 [v _DAC_Initialize DAC_Initialize `(v  1 e 1 0 ]
 "72 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/eusart.c
@@ -95,9 +99,9 @@ PETIT_RXTX_TIMEOUT 4
 [v _INTERRUPT_InterruptManager INTERRUPT_InterruptManager `II(v  1 e 1 0 ]
 "50 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/mcc.c
 [v _SYSTEM_Initialize SYSTEM_Initialize `(v  1 e 1 0 ]
-"66
+"67
 [v _OSCILLATOR_Initialize OSCILLATOR_Initialize `(v  1 e 1 0 ]
-"80
+"81
 [v _PMD_Initialize PMD_Initialize `(v  1 e 1 0 ]
 "57 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/pin_manager.c
 [v _PIN_MANAGER_Initialize PIN_MANAGER_Initialize `(v  1 e 1 0 ]
@@ -141,33 +145,33 @@ PETIT_RXTX_TIMEOUT 4
 [v _PetitModbusIntHandlerTMR PetitModbusIntHandlerTMR `(v  1 e 1 0 ]
 "11
 [v _PetitModbusIntHandlerRC PetitModbusIntHandlerRC `(v  1 e 1 0 ]
-"94 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbus.c
+"95 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbus.c
 [v _Petit_CRC16 Petit_CRC16 `(v  1 e 1 0 ]
-"127
+"137
 [v _Petit_DoSlaveTX Petit_DoSlaveTX `(uc  1 e 1 0 ]
-"141
+"151
 [v _PetitSendMessage PetitSendMessage `(uc  1 e 1 0 ]
-"158
+"168
 [v _HandlePetitModbusError HandlePetitModbusError `(v  1 e 1 0 ]
-"183
+"193
 [v _HandlePetitModbusReadHoldingRegisters HandlePetitModbusReadHoldingRegisters `(v  1 e 1 0 ]
-"235
+"245
 [v _HandlePetitModbusWriteSingleRegister HandlePetitModbusWriteSingleRegister `(v  1 e 1 0 ]
-"279
+"289
 [v _HandleMPetitodbusWriteMultipleRegisters HandleMPetitodbusWriteMultipleRegisters `(v  1 e 1 0 ]
-"337
+"347
 [v _Petit_RxDataAvailable Petit_RxDataAvailable `(uc  1 e 1 0 ]
-"353
+"363
 [v _Petit_CheckRxTimeout Petit_CheckRxTimeout `(uc  1 e 1 0 ]
-"375
+"385
 [v _CheckPetitModbusBufferComplete CheckPetitModbusBufferComplete `(uc  1 e 1 0 ]
-"420
+"430
 [v _Petit_RxRTU Petit_RxRTU `(v  1 e 1 0 ]
-"473
+"483
 [v _Petit_TxRTU Petit_TxRTU `(v  1 e 1 0 ]
-"502
+"512
 [v _ProcessPetitModbus ProcessPetitModbus `(v  1 e 1 0 ]
-"541
+"551
 [v _InitPetitModbus InitPetitModbus `(v  1 e 1 0 ]
 "10 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbusPort.c
 [v _PetitModBus_UART_Initialise PetitModBus_UART_Initialise `(v  1 e 1 0 ]
@@ -181,14 +185,14 @@ PETIT_RXTX_TIMEOUT 4
 [v _ReceiveInterrupt ReceiveInterrupt `(v  1 e 1 0 ]
 "54
 [v _PetitModBus_TimerValues PetitModBus_TimerValues `(v  1 e 1 0 ]
-[s S1087 . 1 `uc 1 INTEDG 1 0 :1:0 
+[s S1281 . 1 `uc 1 INTEDG 1 0 :1:0 
 `uc 1 . 1 0 :5:1 
 `uc 1 PEIE 1 0 :1:6 
 `uc 1 GIE 1 0 :1:7 
 ]
 "362 C:\Program Files (x86)\Microchip\xc8\v1.44\include\pic16f18854.h
-[u S1092 . 1 `S1087 1 . 1 0 ]
-[v _INTCONbits INTCONbits `VES1092  1 e 1 @11 ]
+[u S1286 . 1 `S1281 1 . 1 0 ]
+[v _INTCONbits INTCONbits `VES1286  1 e 1 @11 ]
 "589
 [v _TRISA TRISA `VEuc  1 e 1 @17 ]
 "651
@@ -199,7 +203,7 @@ PETIT_RXTX_TIMEOUT 4
 [v _LATA LATA `VEuc  1 e 1 @22 ]
 "837
 [v _LATB LATB `VEuc  1 e 1 @23 ]
-[s S1102 . 1 `uc 1 LATB0 1 0 :1:0 
+[s S1214 . 1 `uc 1 LATB0 1 0 :1:0 
 `uc 1 LATB1 1 0 :1:1 
 `uc 1 LATB2 1 0 :1:2 
 `uc 1 LATB3 1 0 :1:3 
@@ -209,20 +213,113 @@ PETIT_RXTX_TIMEOUT 4
 `uc 1 LATB7 1 0 :1:7 
 ]
 "854
-[u S1111 . 1 `S1102 1 . 1 0 ]
-[v _LATBbits LATBbits `VES1111  1 e 1 @23 ]
+[u S1223 . 1 `S1214 1 . 1 0 ]
+[v _LATBbits LATBbits `VES1223  1 e 1 @23 ]
 "899
 [v _LATC LATC `VEuc  1 e 1 @24 ]
+"1536
+[v _ADRESL ADRESL `VEuc  1 e 1 @140 ]
+"1556
+[v _ADRESH ADRESH `VEuc  1 e 1 @141 ]
+"1570
+[v _ADPREVL ADPREVL `VEuc  1 e 1 @142 ]
+"1640
+[v _ADPREVH ADPREVH `VEuc  1 e 1 @143 ]
+"1717
+[v _ADACCL ADACCL `VEuc  1 e 1 @144 ]
+"1787
+[v _ADACCH ADACCH `VEuc  1 e 1 @145 ]
 "1857
 [v _ADCON0 ADCON0 `VEuc  1 e 1 @147 ]
+[s S635 . 1 `uc 1 ADGO 1 0 :1:0 
+`uc 1 . 1 0 :1:1 
+`uc 1 ADFM 1 0 :2:2 
+`uc 1 ADCS 1 0 :1:4 
+`uc 1 . 1 0 :1:5 
+`uc 1 ADCONT 1 0 :1:6 
+`uc 1 ADON 1 0 :1:7 
+]
+"1893
+[s S643 . 1 `uc 1 DONE 1 0 :1:0 
+`uc 1 . 1 0 :1:1 
+`uc 1 ADFRM 1 0 :2:2 
+]
+[s S647 . 1 `uc 1 nDONE 1 0 :1:0 
+]
+[s S649 . 1 `uc 1 GO 1 0 :1:0 
+`uc 1 . 1 0 :1:1 
+`uc 1 ADFM0 1 0 :1:2 
+`uc 1 ADFM1 1 0 :1:3 
+]
+[s S654 . 1 `uc 1 GO_nDONE 1 0 :1:0 
+`uc 1 . 1 0 :1:1 
+`uc 1 ADFRM0 1 0 :1:2 
+`uc 1 ADFRM1 1 0 :1:3 
+]
+[u S659 . 1 `S635 1 . 1 0 `S643 1 . 1 0 `S647 1 . 1 0 `S649 1 . 1 0 `S654 1 . 1 0 ]
+[v _ADCON0bits ADCON0bits `VES659  1 e 1 @147 ]
 "1968
 [v _ADCON1 ADCON1 `VEuc  1 e 1 @148 ]
+[s S787 . 1 `uc 1 ADDSEN 1 0 :1:0 
+`uc 1 . 1 0 :4:1 
+`uc 1 ADGPOL 1 0 :1:5 
+`uc 1 ADIPEN 1 0 :1:6 
+`uc 1 ADPPOL 1 0 :1:7 
+]
+"1982
+[u S793 . 1 `S787 1 . 1 0 ]
+[v _ADCON1bits ADCON1bits `VES793  1 e 1 @148 ]
 "2007
 [v _ADCON2 ADCON2 `VEuc  1 e 1 @149 ]
+[s S723 . 1 `uc 1 ADMD 1 0 :3:0 
+`uc 1 ADACLR 1 0 :1:3 
+`uc 1 ADCRS 1 0 :3:4 
+`uc 1 ADPSIS 1 0 :1:7 
+]
+"2029
+[s S728 . 1 `uc 1 ADMD0 1 0 :1:0 
+`uc 1 ADMD1 1 0 :1:1 
+`uc 1 ADMD2 1 0 :1:2 
+`uc 1 . 1 0 :1:3 
+`uc 1 ADCRS0 1 0 :1:4 
+`uc 1 ADCRS1 1 0 :1:5 
+`uc 1 ADCRS2 1 0 :1:6 
+]
+[u S736 . 1 `S723 1 . 1 0 `S728 1 . 1 0 ]
+[v _ADCON2bits ADCON2bits `VES736  1 e 1 @149 ]
 "2084
 [v _ADCON3 ADCON3 `VEuc  1 e 1 @150 ]
+[s S692 . 1 `uc 1 ADTMD0 1 0 :1:0 
+`uc 1 ADTMD1 1 0 :1:1 
+`uc 1 ADTMD2 1 0 :1:2 
+`uc 1 . 1 0 :1:3 
+`uc 1 ADCALC0 1 0 :1:4 
+`uc 1 ADCALC1 1 0 :1:5 
+`uc 1 ADCALC2 1 0 :1:6 
+]
+"2105
+[s S700 . 1 `uc 1 ADTMD 1 0 :3:0 
+`uc 1 ADSOI 1 0 :1:3 
+`uc 1 ADCALC 1 0 :3:4 
+]
+[u S704 . 1 `S692 1 . 1 0 `S700 1 . 1 0 ]
+[v _ADCON3bits ADCON3bits `VES704  1 e 1 @150 ]
 "2155
 [v _ADSTAT ADSTAT `VEuc  1 e 1 @151 ]
+[s S755 . 1 `uc 1 ADSTAT 1 0 :3:0 
+`uc 1 ADMACT 1 0 :1:3 
+`uc 1 ADMATH 1 0 :1:4 
+`uc 1 ADLTHR 1 0 :1:5 
+`uc 1 ADUTHR 1 0 :1:6 
+`uc 1 ADAOV 1 0 :1:7 
+]
+"2175
+[s S762 . 1 `uc 1 ADSTAT0 1 0 :1:0 
+`uc 1 ADSTAT1 1 0 :1:1 
+`uc 1 ADSTAT2 1 0 :1:2 
+]
+[u S766 . 1 `S755 1 . 1 0 `S762 1 . 1 0 ]
+[v _ADSTATbits ADSTATbits `VES766  1 e 1 @151 ]
 "2225
 [v _ADCLK ADCLK `VEuc  1 e 1 @152 ]
 "2283
@@ -231,8 +328,14 @@ PETIT_RXTX_TIMEOUT 4
 [v _ADREF ADREF `VEuc  1 e 1 @154 ]
 "2376
 [v _ADCAP ADCAP `VEuc  1 e 1 @155 ]
+"2428
+[v _ADPRE ADPRE `VEuc  1 e 1 @156 ]
+"2498
+[v _ADACQ ADACQ `VEuc  1 e 1 @157 ]
 "2568
 [v _ADPCH ADPCH `VEuc  1 e 1 @158 ]
+"2626
+[v _ADCNT ADCNT `VEuc  1 e 1 @268 ]
 "2696
 [v _ADRPT ADRPT `VEuc  1 e 1 @269 ]
 "2773
@@ -247,8 +350,20 @@ PETIT_RXTX_TIMEOUT 4
 [v _ADSTPTL ADSTPTL `VEuc  1 e 1 @274 ]
 "3137
 [v _ADSTPTH ADSTPTH `VEuc  1 e 1 @275 ]
+"3214
+[v _ADFLTRL ADFLTRL `VEuc  1 e 1 @276 ]
+"3284
+[v _ADFLTRH ADFLTRH `VEuc  1 e 1 @277 ]
+"3361
+[v _ADERRL ADERRL `VEuc  1 e 1 @278 ]
+"3431
+[v _ADERRH ADERRH `VEuc  1 e 1 @279 ]
+"3501
+[v _RC1REG RC1REG `VEuc  1 e 1 @281 ]
 "3506
 [v _RCREG RCREG `VEuc  1 e 1 @281 ]
+"3555
+[v _TX1REG TX1REG `VEuc  1 e 1 @282 ]
 "3564
 [v _TXREG TXREG `VEuc  1 e 1 @282 ]
 "3616
@@ -257,9 +372,21 @@ PETIT_RXTX_TIMEOUT 4
 [v _SP1BRGH SP1BRGH `VEuc  1 e 1 @284 ]
 "3740
 [v _RC1STA RC1STA `VEuc  1 e 1 @285 ]
+[s S512 . 1 `uc 1 RX9D 1 0 :1:0 
+`uc 1 OERR 1 0 :1:1 
+`uc 1 FERR 1 0 :1:2 
+`uc 1 ADDEN 1 0 :1:3 
+`uc 1 CREN 1 0 :1:4 
+`uc 1 SREN 1 0 :1:5 
+`uc 1 RX9 1 0 :1:6 
+`uc 1 SPEN 1 0 :1:7 
+]
+"3766
+[u S521 . 1 `S512 1 . 1 0 ]
+[v _RC1STAbits RC1STAbits `VES521  1 e 1 @285 ]
 "3920
 [v _TX1STA TX1STA `VEuc  1 e 1 @286 ]
-[s S486 . 1 `uc 1 TX9D 1 0 :1:0 
+[s S490 . 1 `uc 1 TX9D 1 0 :1:0 
 `uc 1 TRMT 1 0 :1:1 
 `uc 1 BRGH 1 0 :1:2 
 `uc 1 SENDB 1 0 :1:3 
@@ -268,9 +395,11 @@ PETIT_RXTX_TIMEOUT 4
 `uc 1 TX9 1 0 :1:6 
 `uc 1 CSRC 1 0 :1:7 
 ]
+"3946
+[u S499 . 1 `S490 1 . 1 0 ]
+[v _TX1STAbits TX1STAbits `VES499  1 e 1 @286 ]
 "4055
-[u S495 . 1 `S486 1 . 1 0 ]
-[v _TXSTAbits TXSTAbits `VES495  1 e 1 @286 ]
+[v _TXSTAbits TXSTAbits `VES499  1 e 1 @286 ]
 "4100
 [v _BAUD1CON BAUD1CON `VEuc  1 e 1 @287 ]
 "6239
@@ -279,31 +408,53 @@ PETIT_RXTX_TIMEOUT 4
 [v _TMR1H TMR1H `VEuc  1 e 1 @525 ]
 "6529
 [v _T1CON T1CON `VEuc  1 e 1 @526 ]
-[s S1190 . 1 `uc 1 ON 1 0 :1:0 
+[s S950 . 1 `uc 1 ON 1 0 :1:0 
 `uc 1 RD16 1 0 :1:1 
 `uc 1 nSYNC 1 0 :1:2 
 `uc 1 . 1 0 :1:3 
 `uc 1 CKPS 1 0 :2:4 
 ]
 "6560
-[s S1371 . 1 `uc 1 TMR1ON 1 0 :1:0 
+[s S1131 . 1 `uc 1 TMR1ON 1 0 :1:0 
 `uc 1 T1RD16 1 0 :1:1 
 `uc 1 nT1SYNC 1 0 :1:2 
 `uc 1 . 1 0 :1:3 
 `uc 1 T1CKPS0 1 0 :1:4 
 `uc 1 T1CKPS1 1 0 :1:5 
 ]
-[s S1203 . 1 `uc 1 . 1 0 :4:0 
+[s S963 . 1 `uc 1 . 1 0 :4:0 
 `uc 1 CKPS0 1 0 :1:4 
 `uc 1 CKPS1 1 0 :1:5 
 ]
-[s S1382 . 1 `uc 1 . 1 0 :1:0 
+[s S1142 . 1 `uc 1 . 1 0 :1:0 
 `uc 1 RD161 1 0 :1:1 
 ]
-[u S1385 . 1 `S1190 1 . 1 0 `S1371 1 . 1 0 `S1203 1 . 1 0 `S1382 1 . 1 0 ]
-[v _T1CONbits T1CONbits `VES1385  1 e 1 @526 ]
+[u S1145 . 1 `S950 1 . 1 0 `S1131 1 . 1 0 `S963 1 . 1 0 `S1142 1 . 1 0 ]
+[v _T1CONbits T1CONbits `VES1145  1 e 1 @526 ]
 "6625
 [v _T1GCON T1GCON `VEuc  1 e 1 @527 ]
+[s S996 . 1 `uc 1 . 1 0 :2:0 
+`uc 1 GVAL 1 0 :1:2 
+`uc 1 GGO_nDONE 1 0 :1:3 
+`uc 1 GSPM 1 0 :1:4 
+`uc 1 GTM 1 0 :1:5 
+`uc 1 GPOL 1 0 :1:6 
+`uc 1 GE 1 0 :1:7 
+]
+"6659
+[s S1179 . 1 `uc 1 . 1 0 :2:0 
+`uc 1 T1GVAL 1 0 :1:2 
+`uc 1 T1GGO_nDONE 1 0 :1:3 
+`uc 1 T1GSPM 1 0 :1:4 
+`uc 1 T1GTM 1 0 :1:5 
+`uc 1 T1GPOL 1 0 :1:6 
+`uc 1 T1GE 1 0 :1:7 
+]
+[s S1187 . 1 `uc 1 . 1 0 :3:0 
+`uc 1 T1GGO 1 0 :1:3 
+]
+[u S1190 . 1 `S996 1 . 1 0 `S1179 1 . 1 0 `S1187 1 . 1 0 ]
+[v _T1GCONbits T1GCONbits `VES1190  1 e 1 @527 ]
 "6821
 [v _T1GATE T1GATE `VEuc  1 e 1 @528 ]
 "6987
@@ -315,57 +466,232 @@ PETIT_RXTX_TIMEOUT 4
 "7426
 [v _T3CON T3CON `VEuc  1 e 1 @532 ]
 "7457
-[s S1196 . 1 `uc 1 TMR3ON 1 0 :1:0 
+[s S956 . 1 `uc 1 TMR3ON 1 0 :1:0 
 `uc 1 T3RD16 1 0 :1:1 
 `uc 1 nT3SYNC 1 0 :1:2 
 `uc 1 . 1 0 :1:3 
 `uc 1 T3CKPS0 1 0 :1:4 
 `uc 1 T3CKPS1 1 0 :1:5 
 ]
-[s S1207 . 1 `uc 1 . 1 0 :1:0 
+[s S967 . 1 `uc 1 . 1 0 :1:0 
 `uc 1 RD163 1 0 :1:1 
 ]
-[u S1210 . 1 `S1190 1 . 1 0 `S1196 1 . 1 0 `S1203 1 . 1 0 `S1207 1 . 1 0 ]
-[v _T3CONbits T3CONbits `VES1210  1 e 1 @532 ]
+[u S970 . 1 `S950 1 . 1 0 `S956 1 . 1 0 `S963 1 . 1 0 `S967 1 . 1 0 ]
+[v _T3CONbits T3CONbits `VES970  1 e 1 @532 ]
 "7522
 [v _T3GCON T3GCON `VEuc  1 e 1 @533 ]
+"7556
+[s S1004 . 1 `uc 1 . 1 0 :2:0 
+`uc 1 T3GVAL 1 0 :1:2 
+`uc 1 T3GGO_nDONE 1 0 :1:3 
+`uc 1 T3GSPM 1 0 :1:4 
+`uc 1 T3GTM 1 0 :1:5 
+`uc 1 T3GPOL 1 0 :1:6 
+`uc 1 T3GE 1 0 :1:7 
+]
+[s S1012 . 1 `uc 1 . 1 0 :3:0 
+`uc 1 T3GGO 1 0 :1:3 
+]
+[u S1015 . 1 `S996 1 . 1 0 `S1004 1 . 1 0 `S1012 1 . 1 0 ]
+[v _T3GCONbits T3GCONbits `VES1015  1 e 1 @533 ]
 "7718
 [v _T3GATE T3GATE `VEuc  1 e 1 @534 ]
 "7884
 [v _T3CLK T3CLK `VEuc  1 e 1 @535 ]
-[s S148 . 1 `uc 1 C5TSEL 1 0 :2:0 
+[s S152 . 1 `uc 1 C5TSEL 1 0 :2:0 
 `uc 1 P6TSEL 1 0 :2:2 
 `uc 1 P7TSEL 1 0 :2:4 
 ]
 "9031
-[s S152 . 1 `uc 1 C5TSEL0 1 0 :1:0 
+[s S156 . 1 `uc 1 C5TSEL0 1 0 :1:0 
 `uc 1 C5TSEL1 1 0 :1:1 
 `uc 1 P6TSEL0 1 0 :1:2 
 `uc 1 P6TSEL1 1 0 :1:3 
 `uc 1 P7TSEL0 1 0 :1:4 
 `uc 1 P7TSEL1 1 0 :1:5 
 ]
-[u S159 . 1 `S148 1 . 1 0 `S152 1 . 1 0 ]
-[v _CCPTMRS1bits CCPTMRS1bits `VES159  1 e 1 @543 ]
+[u S163 . 1 `S152 1 . 1 0 `S156 1 . 1 0 ]
+[v _CCPTMRS1bits CCPTMRS1bits `VES163  1 e 1 @543 ]
 "9081
 [v _T2TMR T2TMR `VEuc  1 e 1 @652 ]
+"9086
+[v _TMR2 TMR2 `VEuc  1 e 1 @652 ]
 "9119
 [v _T2PR T2PR `VEuc  1 e 1 @653 ]
+"9124
+[v _PR2 PR2 `VEuc  1 e 1 @653 ]
 "9157
 [v _T2CON T2CON `VEuc  1 e 1 @654 ]
+[s S336 . 1 `uc 1 OUTPS 1 0 :4:0 
+`uc 1 CKPS 1 0 :3:4 
+`uc 1 ON 1 0 :1:7 
+]
+"9193
+[s S340 . 1 `uc 1 T2OUTPS 1 0 :4:0 
+`uc 1 T2CKPS 1 0 :3:4 
+`uc 1 T2ON 1 0 :1:7 
+]
+[s S344 . 1 `uc 1 T2OUTPS0 1 0 :1:0 
+`uc 1 T2OUTPS1 1 0 :1:1 
+`uc 1 T2OUTPS2 1 0 :1:2 
+`uc 1 T2OUTPS3 1 0 :1:3 
+`uc 1 T2CKPS0 1 0 :1:4 
+`uc 1 T2CKPS1 1 0 :1:5 
+`uc 1 T2CKPS2 1 0 :1:6 
+]
+[s S352 . 1 `uc 1 OUTPS0 1 0 :1:0 
+`uc 1 OUTPS1 1 0 :1:1 
+`uc 1 OUTPS2 1 0 :1:2 
+`uc 1 OUTPS3 1 0 :1:3 
+`uc 1 CKPS0 1 0 :1:4 
+`uc 1 CKPS1 1 0 :1:5 
+`uc 1 CKPS2 1 0 :1:6 
+`uc 1 TMR2ON 1 0 :1:7 
+]
+[u S361 . 1 `S336 1 . 1 0 `S340 1 . 1 0 `S344 1 . 1 0 `S352 1 . 1 0 ]
+[v _T2CONbits T2CONbits `VES361  1 e 1 @654 ]
 "9303
 [v _T2HLT T2HLT `VEuc  1 e 1 @655 ]
+[s S229 . 1 `uc 1 MODE 1 0 :5:0 
+`uc 1 CKSYNC 1 0 :1:5 
+`uc 1 CKPOL 1 0 :1:6 
+`uc 1 PSYNC 1 0 :1:7 
+]
+"9336
+[s S234 . 1 `uc 1 MODE0 1 0 :1:0 
+`uc 1 MODE1 1 0 :1:1 
+`uc 1 MODE2 1 0 :1:2 
+`uc 1 MODE3 1 0 :1:3 
+`uc 1 MODE4 1 0 :1:4 
+]
+[s S240 . 1 `uc 1 T2MODE 1 0 :5:0 
+`uc 1 T2CKSYNC 1 0 :1:5 
+`uc 1 T2CKPOL 1 0 :1:6 
+`uc 1 T2PSYNC 1 0 :1:7 
+]
+[s S245 . 1 `uc 1 T2MODE0 1 0 :1:0 
+`uc 1 T2MODE1 1 0 :1:1 
+`uc 1 T2MODE2 1 0 :1:2 
+`uc 1 T2MODE3 1 0 :1:3 
+`uc 1 T2MODE4 1 0 :1:4 
+]
+[u S251 . 1 `S229 1 . 1 0 `S234 1 . 1 0 `S240 1 . 1 0 `S245 1 . 1 0 ]
+[v _T2HLTbits T2HLTbits `VES251  1 e 1 @655 ]
 "9436
 [v _T2CLKCON T2CLKCON `VEuc  1 e 1 @656 ]
 "9589
 [v _T2RST T2RST `VEuc  1 e 1 @657 ]
+[s S298 . 1 `uc 1 RSEL 1 0 :5:0 
+]
+"9616
+[s S300 . 1 `uc 1 RSEL0 1 0 :1:0 
+`uc 1 RSEL1 1 0 :1:1 
+`uc 1 RSEL2 1 0 :1:2 
+`uc 1 RSEL3 1 0 :1:3 
+`uc 1 RSEL4 1 0 :1:4 
+]
+[s S306 . 1 `uc 1 T2RSEL 1 0 :5:0 
+]
+[s S308 . 1 `uc 1 T2RSEL0 1 0 :1:0 
+`uc 1 T2RSEL1 1 0 :1:1 
+`uc 1 T2RSEL2 1 0 :1:2 
+`uc 1 T2RSEL3 1 0 :1:3 
+`uc 1 T2RSEL4 1 0 :1:4 
+]
+[u S314 . 1 `S298 1 . 1 0 `S300 1 . 1 0 `S306 1 . 1 0 `S308 1 . 1 0 ]
+[v _T2RSTbits T2RSTbits `VES314  1 e 1 @657 ]
 "12171
 [v _PWM6DCL PWM6DCL `VEuc  1 e 1 @908 ]
 "12237
 [v _PWM6DCH PWM6DCH `VEuc  1 e 1 @909 ]
 "12407
 [v _PWM6CON PWM6CON `VEuc  1 e 1 @910 ]
-[s S469 . 1 `uc 1 SSP1IF 1 0 :1:0 
+"12775
+[v _SCANLADRL SCANLADRL `VEuc  1 e 1 @1036 ]
+"12903
+[v _SCANLADRH SCANLADRH `VEuc  1 e 1 @1037 ]
+"13031
+[v _SCANHADRL SCANHADRL `VEuc  1 e 1 @1038 ]
+"13159
+[v _SCANHADRH SCANHADRH `VEuc  1 e 1 @1039 ]
+"13287
+[v _SCANCON0 SCANCON0 `VEuc  1 e 1 @1040 ]
+[s S1422 . 1 `uc 1 MODE 1 0 :2:0 
+`uc 1 . 1 0 :1:2 
+`uc 1 INTM 1 0 :1:3 
+`uc 1 INVALID 1 0 :1:4 
+`uc 1 BUSY 1 0 :1:5 
+`uc 1 SCANGO 1 0 :1:6 
+`uc 1 EN 1 0 :1:7 
+]
+"13324
+[s S1430 . 1 `uc 1 MODE0 1 0 :1:0 
+`uc 1 MODE1 1 0 :1:1 
+]
+[s S1433 . 1 `uc 1 SCANMODE 1 0 :2:0 
+`uc 1 . 1 0 :1:2 
+`uc 1 SCANINTM 1 0 :1:3 
+`uc 1 SCANINVALID 1 0 :1:4 
+`uc 1 SCANBUSY 1 0 :1:5 
+`uc 1 . 1 0 :1:6 
+`uc 1 SCANEN 1 0 :1:7 
+]
+[s S1441 . 1 `uc 1 SCANMODE0 1 0 :1:0 
+`uc 1 SCANMODE1 1 0 :1:1 
+]
+[s S1444 . 1 `uc 1 . 1 0 :4:0 
+`uc 1 DABORT 1 0 :1:4 
+]
+[u S1447 . 1 `S1422 1 . 1 0 `S1430 1 . 1 0 `S1433 1 . 1 0 `S1441 1 . 1 0 `S1444 1 . 1 0 ]
+[v _SCANCON0bits SCANCON0bits `VES1447  1 e 1 @1040 ]
+"13409
+[v _SCANTRIG SCANTRIG `VEuc  1 e 1 @1041 ]
+"13496
+[v _CRCDATL CRCDATL `VEuc  1 e 1 @1046 ]
+"13558
+[v _CRCDATH CRCDATH `VEuc  1 e 1 @1047 ]
+"13627
+[v _CRCACCL CRCACCL `VEuc  1 e 1 @1048 ]
+"13689
+[v _CRCACCH CRCACCH `VEuc  1 e 1 @1049 ]
+"13889
+[v _CRCXORL CRCXORL `VEuc  1 e 1 @1052 ]
+"13946
+[v _CRCXORH CRCXORH `VEuc  1 e 1 @1053 ]
+"14008
+[v _CRCCON0 CRCCON0 `VEuc  1 e 1 @1054 ]
+[s S1394 . 1 `uc 1 FULL 1 0 :1:0 
+`uc 1 SHIFTM 1 0 :1:1 
+`uc 1 . 1 0 :2:2 
+`uc 1 ACCM 1 0 :1:4 
+`uc 1 BUSY 1 0 :1:5 
+`uc 1 CRCGO 1 0 :1:6 
+`uc 1 EN 1 0 :1:7 
+]
+"14028
+[s S1402 . 1 `uc 1 . 1 0 :7:0 
+`uc 1 CRCEN 1 0 :1:7 
+]
+[u S1405 . 1 `S1394 1 . 1 0 `S1402 1 . 1 0 ]
+[v _CRCCON0bits CRCCON0bits `VES1405  1 e 1 @1054 ]
+"14068
+[v _CRCCON1 CRCCON1 `VEuc  1 e 1 @1055 ]
+[s S1366 . 1 `uc 1 PLEN 1 0 :4:0 
+`uc 1 DLEN 1 0 :4:4 
+]
+"14089
+[s S1369 . 1 `uc 1 PLEN0 1 0 :1:0 
+`uc 1 PLEN1 1 0 :1:1 
+`uc 1 PLEN2 1 0 :1:2 
+`uc 1 PLEN3 1 0 :1:3 
+`uc 1 DLEN0 1 0 :1:4 
+`uc 1 DLEN1 1 0 :1:5 
+`uc 1 DLEN2 1 0 :1:6 
+`uc 1 DLEN3 1 0 :1:7 
+]
+[u S1378 . 1 `S1366 1 . 1 0 `S1369 1 . 1 0 ]
+[v _CRCCON1bits CRCCON1bits `VES1378  1 e 1 @1055 ]
+[s S473 . 1 `uc 1 SSP1IF 1 0 :1:0 
 `uc 1 BCL1IF 1 0 :1:1 
 `uc 1 SSP2IF 1 0 :1:2 
 `uc 1 BCL2IF 1 0 :1:3 
@@ -373,9 +699,9 @@ PETIT_RXTX_TIMEOUT 4
 `uc 1 RCIF 1 0 :1:5 
 ]
 "21249
-[u S476 . 1 `S469 1 . 1 0 ]
-[v _PIR3bits PIR3bits `VES476  1 e 1 @1807 ]
-[s S185 . 1 `uc 1 TMR1IF 1 0 :1:0 
+[u S480 . 1 `S473 1 . 1 0 ]
+[v _PIR3bits PIR3bits `VES480  1 e 1 @1807 ]
+[s S189 . 1 `uc 1 TMR1IF 1 0 :1:0 
 `uc 1 TMR2IF 1 0 :1:1 
 `uc 1 TMR3IF 1 0 :1:2 
 `uc 1 TMR4IF 1 0 :1:3 
@@ -383,9 +709,24 @@ PETIT_RXTX_TIMEOUT 4
 `uc 1 TMR6IF 1 0 :1:5 
 ]
 "21299
-[u S192 . 1 `S185 1 . 1 0 ]
-[v _PIR4bits PIR4bits `VES192  1 e 1 @1808 ]
-[s S437 . 1 `uc 1 SSP1IE 1 0 :1:0 
+[u S196 . 1 `S189 1 . 1 0 ]
+[v _PIR4bits PIR4bits `VES196  1 e 1 @1808 ]
+[s S1479 . 1 `uc 1 CWG1IF 1 0 :1:0 
+`uc 1 CWG2IF 1 0 :1:1 
+`uc 1 CWG3IF 1 0 :1:2 
+`uc 1 . 1 0 :1:3 
+`uc 1 NCO1IF 1 0 :1:4 
+`uc 1 NVMIF 1 0 :1:5 
+`uc 1 CRCIF 1 0 :1:6 
+`uc 1 SCANIF 1 0 :1:7 
+]
+"21456
+[s S1488 . 1 `uc 1 . 1 0 :4:0 
+`uc 1 NCOIF 1 0 :1:4 
+]
+[u S1491 . 1 `S1479 1 . 1 0 `S1488 1 . 1 0 ]
+[v _PIR7bits PIR7bits `VES1491  1 e 1 @1811 ]
+[s S441 . 1 `uc 1 SSP1IE 1 0 :1:0 
 `uc 1 BCL1IE 1 0 :1:1 
 `uc 1 SSP2IE 1 0 :1:2 
 `uc 1 BCL2IE 1 0 :1:3 
@@ -393,9 +734,9 @@ PETIT_RXTX_TIMEOUT 4
 `uc 1 RCIE 1 0 :1:5 
 ]
 "21671
-[u S444 . 1 `S437 1 . 1 0 ]
-[v _PIE3bits PIE3bits `VES444  1 e 1 @1817 ]
-[s S1165 . 1 `uc 1 TMR1IE 1 0 :1:0 
+[u S448 . 1 `S441 1 . 1 0 ]
+[v _PIE3bits PIE3bits `VES448  1 e 1 @1817 ]
+[s S922 . 1 `uc 1 TMR1IE 1 0 :1:0 
 `uc 1 TMR2IE 1 0 :1:1 
 `uc 1 TMR3IE 1 0 :1:2 
 `uc 1 TMR4IE 1 0 :1:3 
@@ -403,8 +744,8 @@ PETIT_RXTX_TIMEOUT 4
 `uc 1 TMR6IE 1 0 :1:5 
 ]
 "21721
-[u S1172 . 1 `S1165 1 . 1 0 ]
-[v _PIE4bits PIE4bits `VES1172  1 e 1 @1818 ]
+[u S929 . 1 `S922 1 . 1 0 ]
+[v _PIE4bits PIE4bits `VES929  1 e 1 @1818 ]
 "21973
 [v _PMD0 PMD0 `VEuc  1 e 1 @1942 ]
 "22030
@@ -429,10 +770,34 @@ PETIT_RXTX_TIMEOUT 4
 [v _OSCFRQ OSCFRQ `VEuc  1 e 1 @2195 ]
 "24044
 [v _FVRCON FVRCON `VEuc  1 e 1 @2316 ]
+[s S864 . 1 `uc 1 ADFVR 1 0 :2:0 
+`uc 1 CDAFVR 1 0 :2:2 
+`uc 1 TSRNG 1 0 :1:4 
+`uc 1 TSEN 1 0 :1:5 
+`uc 1 FVRRDY 1 0 :1:6 
+`uc 1 FVREN 1 0 :1:7 
+]
+"24065
+[s S871 . 1 `uc 1 ADFVR0 1 0 :1:0 
+`uc 1 ADFVR1 1 0 :1:1 
+`uc 1 CDAFVR0 1 0 :1:2 
+`uc 1 CDAFVR1 1 0 :1:3 
+]
+[u S876 . 1 `S864 1 . 1 0 `S871 1 . 1 0 ]
+[v _FVRCONbits FVRCONbits `VES876  1 e 1 @2316 ]
 "24120
 [v _DAC1CON0 DAC1CON0 `VEuc  1 e 1 @2318 ]
 "24221
 [v _DAC1CON1 DAC1CON1 `VEuc  1 e 1 @2319 ]
+[s S586 . 1 `uc 1 MC1OUT 1 0 :1:0 
+`uc 1 MC2OUT 1 0 :1:1 
+]
+"24339
+[s S589 . 1 `uc 1 C1OUT 1 0 :1:0 
+`uc 1 C2OUT 1 0 :1:1 
+]
+[u S592 . 1 `S586 1 . 1 0 `S589 1 . 1 0 ]
+[v _CMOUTbits CMOUTbits `VES592  1 e 1 @2447 ]
 "24397
 [v _CM1CON0 CM1CON0 `VEuc  1 e 1 @2448 ]
 "24483
@@ -441,28 +806,28 @@ PETIT_RXTX_TIMEOUT 4
 [v _CM1NSEL CM1NSEL `VEuc  1 e 1 @2450 ]
 "24591
 [v _CM1PSEL CM1PSEL `VEuc  1 e 1 @2451 ]
-[s S99 . 1 `uc 1 T2AINPPS 1 0 :5:0 
+[s S103 . 1 `uc 1 T2AINPPS 1 0 :5:0 
 ]
 "30024
-[s S101 . 1 `uc 1 T2AINPPS0 1 0 :1:0 
+[s S105 . 1 `uc 1 T2AINPPS0 1 0 :1:0 
 `uc 1 T2AINPPS1 1 0 :1:1 
 `uc 1 T2AINPPS2 1 0 :1:2 
 `uc 1 T2AINPPS3 1 0 :1:3 
 `uc 1 T2AINPPS4 1 0 :1:4 
 ]
-[u S107 . 1 `S99 1 . 1 0 `S101 1 . 1 0 ]
-[v _T2AINPPSbits T2AINPPSbits `VES107  1 e 1 @3740 ]
-[s S119 . 1 `uc 1 RXPPS0 1 0 :1:0 
+[u S111 . 1 `S103 1 . 1 0 `S105 1 . 1 0 ]
+[v _T2AINPPSbits T2AINPPSbits `VES111  1 e 1 @3740 ]
+[s S123 . 1 `uc 1 RXPPS0 1 0 :1:0 
 `uc 1 RXPPS1 1 0 :1:1 
 `uc 1 RXPPS2 1 0 :1:2 
 `uc 1 RXPPS3 1 0 :1:3 
 `uc 1 RXPPS4 1 0 :1:4 
 ]
 "31524
-[s S125 . 1 `uc 1 RXPPS 1 0 :5:0 
+[s S129 . 1 `uc 1 RXPPS 1 0 :5:0 
 ]
-[u S127 . 1 `S119 1 . 1 0 `S125 1 . 1 0 ]
-[v _RXPPSbits RXPPSbits `VES127  1 e 1 @3787 ]
+[u S131 . 1 `S123 1 . 1 0 `S129 1 . 1 0 ]
+[v _RXPPSbits RXPPSbits `VES131  1 e 1 @3787 ]
 "32461
 [v _RC1PPS RC1PPS `VEuc  1 e 1 @3873 ]
 "32611
@@ -487,10 +852,9 @@ PETIT_RXTX_TIMEOUT 4
 [v _ODCONC ODCONC `VEuc  1 e 1 @3920 ]
 "34671
 [v _WPUE WPUE `VEuc  1 e 1 @3941 ]
-"26 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X/modbus/PetitModbus.h
-[v _auchCRCHi auchCRCHi `DC[256]uc  1 e 256 0 ]
-"48
-[v _auchCRCLo auchCRCLo `DC[256]uc  1 e 256 0 ]
+[s S1350 . 3 `uc 1 dataWidth 1 0 `uc 1 polyWidth 1 1 `uc 1 seedDirection 1 2 ]
+"69 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/crc.c
+[v _crcObj crcObj `S1350  1 s 3 crcObj ]
 "64 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/eusart.c
 [v _eusartRxHead eusartRxHead `VEuc  1 e 1 0 ]
 "65
@@ -513,9 +877,11 @@ PETIT_RXTX_TIMEOUT 4
 [v _Timer1_Tick_Counter Timer1_Tick_Counter `VEui  1 e 2 0 ]
 "25 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbus.c
 [v _PETITMODBUS_SLAVE_ADDRESS PETITMODBUS_SLAVE_ADDRESS `uc  1 e 1 0 ]
-[s S925 . 28 `uc 1 Address 1 0 `uc 1 Function 1 1 `[24]uc 1 DataBuf 24 2 `us 1 DataLen 2 26 ]
+"26
+[v _PETITMODBUS_BROADCAST_ADDRESS PETITMODBUS_BROADCAST_ADDRESS `uc  1 e 1 0 ]
+[s S1584 . 28 `uc 1 Address 1 0 `uc 1 Function 1 1 `[24]uc 1 DataBuf 24 2 `us 1 DataLen 2 26 ]
 "46
-[v _Petit_Tx_Data Petit_Tx_Data `S925  1 e 28 0 ]
+[v _Petit_Tx_Data Petit_Tx_Data `S1584  1 e 28 0 ]
 "47
 [v _Petit_Tx_Current Petit_Tx_Current `ui  1 e 2 0 ]
 "48
@@ -527,7 +893,7 @@ PETIT_RXTX_TIMEOUT 4
 "51
 [v _Petit_Tx_Buf_Size Petit_Tx_Buf_Size `ui  1 e 2 0 ]
 "53
-[v _Petit_Rx_Data Petit_Rx_Data `S925  1 e 28 0 ]
+[v _Petit_Rx_Data Petit_Rx_Data `S1584  1 e 28 0 ]
 "54
 [v _Petit_Rx_CRC16 Petit_Rx_CRC16 `ui  1 e 2 0 ]
 "55
@@ -536,13 +902,17 @@ PETIT_RXTX_TIMEOUT 4
 [v _Petit_Rx_Data_Available Petit_Rx_Data_Available `uc  1 e 1 0 ]
 "58
 [v _PetitModbusTimerValue PetitModbusTimerValue `VEus  1 e 2 0 ]
+"30 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbus.h
+[v _auchCRCHi auchCRCHi `DC[256]uc  1 e 256 0 ]
+"52
+[v _auchCRCLo auchCRCLo `DC[256]uc  1 e 256 0 ]
 "6 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbusPort.c
 [v _PetitReceiveBuffer PetitReceiveBuffer `VE[24]uc  1 e 24 0 ]
 "7
 [v _PetitReceiveCounter PetitReceiveCounter `VEuc  1 e 1 0 ]
-[s S942 . 2 `s 1 ActValue 2 0 ]
+[s S1601 . 2 `s 1 ActValue 2 0 ]
 "6 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitRegConstant.c
-[v _PetitRegisters PetitRegisters `[7]S942  1 e 14 0 ]
+[v _PetitRegisters PetitRegisters `[7]S1601  1 e 14 0 ]
 "15 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\main.c
 [v _main main `(v  1 e 1 0 ]
 {
@@ -551,7 +921,7 @@ PETIT_RXTX_TIMEOUT 4
 "50 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/mcc.c
 [v _SYSTEM_Initialize SYSTEM_Initialize `(v  1 e 1 0 ]
 {
-"64
+"65
 } 0
 "65 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/tmr3.c
 [v _TMR3_Initialize TMR3_Initialize `(v  1 e 1 0 ]
@@ -561,7 +931,7 @@ PETIT_RXTX_TIMEOUT 4
 "179
 [v _TMR3_SetInterruptHandler TMR3_SetInterruptHandler `(v  1 e 1 0 ]
 {
-[v TMR3_SetInterruptHandler@InterruptHandler InterruptHandler `*.37(v  1 p 2 2 ]
+[v TMR3_SetInterruptHandler@InterruptHandler InterruptHandler `*.37(v  1 p 2 3 ]
 "181
 } 0
 "62 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/tmr2.c
@@ -577,7 +947,7 @@ PETIT_RXTX_TIMEOUT 4
 "179
 [v _TMR1_SetInterruptHandler TMR1_SetInterruptHandler `(v  1 e 1 0 ]
 {
-[v TMR1_SetInterruptHandler@InterruptHandler InterruptHandler `*.37(v  1 p 2 2 ]
+[v TMR1_SetInterruptHandler@InterruptHandler InterruptHandler `*.37(v  1 p 2 3 ]
 "181
 } 0
 "58 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/pwm6.c
@@ -585,20 +955,20 @@ PETIT_RXTX_TIMEOUT 4
 {
 "72
 } 0
-"80 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/mcc.c
+"81 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/mcc.c
 [v _PMD_Initialize PMD_Initialize `(v  1 e 1 0 ]
 {
-"94
+"95
 } 0
 "57 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/pin_manager.c
 [v _PIN_MANAGER_Initialize PIN_MANAGER_Initialize `(v  1 e 1 0 ]
 {
 "106
 } 0
-"66 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/mcc.c
+"67 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/mcc.c
 [v _OSCILLATOR_Initialize OSCILLATOR_Initialize `(v  1 e 1 0 ]
 {
-"78
+"79
 } 0
 "58 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/fvr.c
 [v _FVR_Initialize FVR_Initialize `(v  1 e 1 0 ]
@@ -613,13 +983,22 @@ PETIT_RXTX_TIMEOUT 4
 "171
 [v _EUSART_SetRxInterruptHandler EUSART_SetRxInterruptHandler `(v  1 e 1 0 ]
 {
-[v EUSART_SetRxInterruptHandler@interruptHandler interruptHandler `*.37(v  1 p 2 2 ]
+[v EUSART_SetRxInterruptHandler@interruptHandler interruptHandler `*.37(v  1 p 2 3 ]
 "173
 } 0
 "58 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/dac.c
 [v _DAC_Initialize DAC_Initialize `(v  1 e 1 0 ]
 {
 "64
+} 0
+"76 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/crc.c
+[v _CRC_Initialize CRC_Initialize `(v  1 e 1 0 ]
+{
+"79
+[v CRC_Initialize@seed seed `ui  1 a 2 6 ]
+"78
+[v CRC_Initialize@poly poly `ui  1 a 2 4 ]
+"113
 } 0
 "58 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/cmp1.c
 [v _CMP1_Initialize CMP1_Initialize `(v  1 e 1 0 ]
@@ -631,32 +1010,32 @@ PETIT_RXTX_TIMEOUT 4
 {
 "102
 } 0
-"502 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbus.c
+"512 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbus.c
 [v _ProcessPetitModbus ProcessPetitModbus `(v  1 e 1 0 ]
 {
-"533
+"543
 } 0
-"473
+"483
 [v _Petit_TxRTU Petit_TxRTU `(v  1 e 1 0 ]
 {
-"494
+"504
 } 0
-"127
+"137
 [v _Petit_DoSlaveTX Petit_DoSlaveTX `(uc  1 e 1 0 ]
 {
-"132
+"142
 } 0
 "29 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbusPort.c
 [v _PetitModBus_UART_String PetitModBus_UART_String `(uc  1 e 1 0 ]
 {
 [v PetitModBus_UART_String@s s `*.5uc  1 a 1 wreg ]
 "31
-[v PetitModBus_UART_String@DummyCounter DummyCounter `us  1 a 2 7 ]
+[v PetitModBus_UART_String@DummyCounter DummyCounter `us  1 a 2 1 ]
 "29
 [v PetitModBus_UART_String@s s `*.5uc  1 a 1 wreg ]
-[v PetitModBus_UART_String@Length Length `ui  1 p 2 3 ]
+[v PetitModBus_UART_String@Length Length `ui  1 p 2 4 ]
 "33
-[v PetitModBus_UART_String@s s `*.5uc  1 a 1 6 ]
+[v PetitModBus_UART_String@s s `*.5uc  1 a 1 0 ]
 "37
 } 0
 "22
@@ -664,114 +1043,116 @@ PETIT_RXTX_TIMEOUT 4
 {
 [v PetitModBus_UART_Putch@c c `uc  1 a 1 wreg ]
 [v PetitModBus_UART_Putch@c c `uc  1 a 1 wreg ]
-[v PetitModBus_UART_Putch@c c `uc  1 a 1 2 ]
+[v PetitModBus_UART_Putch@c c `uc  1 a 1 3 ]
 "26
 } 0
-"420 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbus.c
+"430 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbus.c
 [v _Petit_RxRTU Petit_RxRTU `(v  1 e 1 0 ]
 {
-"422
-[v Petit_RxRTU@Petit_i Petit_i `uc  1 a 1 7 ]
-"423
-[v Petit_RxRTU@Petit_ReceiveBufferControl Petit_ReceiveBufferControl `uc  1 a 1 6 ]
-"465
+"432
+[v Petit_RxRTU@Petit_i Petit_i `uc  1 a 1 1 ]
+"433
+[v Petit_RxRTU@Petit_ReceiveBufferControl Petit_ReceiveBufferControl `uc  1 a 1 0 ]
+"475
 } 0
-"353
+"363
 [v _Petit_CheckRxTimeout Petit_CheckRxTimeout `(uc  1 e 1 0 ]
 {
-"364
+"374
 } 0
-"94
+"95
 [v _Petit_CRC16 Petit_CRC16 `(v  1 e 1 0 ]
 {
 [v Petit_CRC16@Data Data `DCuc  1 a 1 wreg ]
-"98
-[v Petit_CRC16@uchCRCLo uchCRCLo `ui  1 a 2 4 ]
-"97
-[v Petit_CRC16@uchCRCHi uchCRCHi `ui  1 a 2 2 ]
 "99
+[v Petit_CRC16@uchCRCLo uchCRCLo `ui  1 a 2 4 ]
+"98
+[v Petit_CRC16@uchCRCHi uchCRCHi `ui  1 a 2 2 ]
+"100
 [v Petit_CRC16@uIndex uIndex `uc  1 a 1 1 ]
-"94
+"95
 [v Petit_CRC16@Data Data `DCuc  1 a 1 wreg ]
-[v Petit_CRC16@CRC CRC `*.4ui  1 p 1 2 ]
-"97
+[v Petit_CRC16@CRC CRC `*.4ui  1 p 1 3 ]
+"98
 [v Petit_CRC16@Data Data `DCuc  1 a 1 0 ]
-"106
+"107
 } 0
-"375
+"385
 [v _CheckPetitModbusBufferComplete CheckPetitModbusBufferComplete `(uc  1 e 1 0 ]
 {
-"377
-[v CheckPetitModbusBufferComplete@PetitExpectedReceiveCount PetitExpectedReceiveCount `i  1 a 2 4 ]
-"412
+"387
+[v CheckPetitModbusBufferComplete@PetitExpectedReceiveCount PetitExpectedReceiveCount `i  1 a 2 5 ]
+"422
 } 0
-"337
+"347
 [v _Petit_RxDataAvailable Petit_RxDataAvailable `(uc  1 e 1 0 ]
 {
-"339
-[v Petit_RxDataAvailable@Result Result `uc  1 a 1 2 ]
-"344
+"349
+[v Petit_RxDataAvailable@Result Result `uc  1 a 1 4 ]
+"354
 } 0
-"235
+"245
 [v _HandlePetitModbusWriteSingleRegister HandlePetitModbusWriteSingleRegister `(v  1 e 1 0 ]
 {
-"238
-[v HandlePetitModbusWriteSingleRegister@Petit_Address Petit_Address `ui  1 a 2 6 ]
-"239
-[v HandlePetitModbusWriteSingleRegister@Petit_Value Petit_Value `ui  1 a 2 4 ]
-"240
-[v HandlePetitModbusWriteSingleRegister@Petit_i Petit_i `uc  1 a 1 8 ]
-"269
+"248
+[v HandlePetitModbusWriteSingleRegister@Petit_Address Petit_Address `ui  1 a 2 2 ]
+"249
+[v HandlePetitModbusWriteSingleRegister@Petit_Value Petit_Value `ui  1 a 2 0 ]
+"250
+[v HandlePetitModbusWriteSingleRegister@Petit_i Petit_i `uc  1 a 1 4 ]
+"279
 } 0
-"183
+"193
 [v _HandlePetitModbusReadHoldingRegisters HandlePetitModbusReadHoldingRegisters `(v  1 e 1 0 ]
 {
-"215
-[v HandlePetitModbusReadHoldingRegisters@Petit_CurrentData Petit_CurrentData `us  1 a 2 4 ]
-"190
-[v HandlePetitModbusReadHoldingRegisters@Petit_i Petit_i `ui  1 a 2 6 ]
-"189
-[v HandlePetitModbusReadHoldingRegisters@Petit_NumberOfRegisters Petit_NumberOfRegisters `ui  1 a 2 2 ]
-"188
-[v HandlePetitModbusReadHoldingRegisters@Petit_StartAddress Petit_StartAddress `ui  1 a 2 0 ]
 "225
+[v HandlePetitModbusReadHoldingRegisters@Petit_CurrentData Petit_CurrentData `us  1 a 2 0 ]
+"200
+[v HandlePetitModbusReadHoldingRegisters@Petit_i Petit_i `ui  1 a 2 6 ]
+"199
+[v HandlePetitModbusReadHoldingRegisters@Petit_NumberOfRegisters Petit_NumberOfRegisters `ui  1 a 2 4 ]
+"198
+[v HandlePetitModbusReadHoldingRegisters@Petit_StartAddress Petit_StartAddress `ui  1 a 2 2 ]
+"235
 } 0
-"279
+"289
 [v _HandleMPetitodbusWriteMultipleRegisters HandleMPetitodbusWriteMultipleRegisters `(v  1 e 1 0 ]
 {
-"284
-[v HandleMPetitodbusWriteMultipleRegisters@Petit_NumberOfRegisters Petit_NumberOfRegisters `ui  1 a 2 4 ]
-"282
-[v HandleMPetitodbusWriteMultipleRegisters@Petit_StartAddress Petit_StartAddress `ui  1 a 2 2 ]
-"286
-[v HandleMPetitodbusWriteMultipleRegisters@Petit_Value Petit_Value `ui  1 a 2 0 ]
-"285
-[v HandleMPetitodbusWriteMultipleRegisters@Petit_i Petit_i `uc  1 a 1 6 ]
-"327
+"294
+[v HandleMPetitodbusWriteMultipleRegisters@Petit_NumberOfRegisters Petit_NumberOfRegisters `ui  1 a 2 5 ]
+"292
+[v HandleMPetitodbusWriteMultipleRegisters@Petit_StartAddress Petit_StartAddress `ui  1 a 2 3 ]
+"296
+[v HandleMPetitodbusWriteMultipleRegisters@Petit_Value Petit_Value `ui  1 a 2 1 ]
+"295
+[v HandleMPetitodbusWriteMultipleRegisters@Petit_i Petit_i `uc  1 a 1 7 ]
+"293
+[v HandleMPetitodbusWriteMultipleRegisters@Petit_ByteCount Petit_ByteCount `uc  1 a 1 0 ]
+"337
 } 0
-"158
+"168
 [v _HandlePetitModbusError HandlePetitModbusError `(v  1 e 1 0 ]
 {
 [v HandlePetitModbusError@ErrorCode ErrorCode `uc  1 a 1 wreg ]
 [v HandlePetitModbusError@ErrorCode ErrorCode `uc  1 a 1 wreg ]
-[v HandlePetitModbusError@Function Function `uc  1 p 1 2 ]
-"160
-[v HandlePetitModbusError@ErrorCode ErrorCode `uc  1 a 1 3 ]
-"174
+[v HandlePetitModbusError@Function Function `uc  1 p 1 3 ]
+"170
+[v HandlePetitModbusError@ErrorCode ErrorCode `uc  1 a 1 5 ]
+"184
 } 0
-"141
+"151
 [v _PetitSendMessage PetitSendMessage `(uc  1 e 1 0 ]
 {
-"150
+"160
 } 0
-"541
+"551
 [v _InitPetitModbus InitPetitModbus `(v  1 e 1 0 ]
 {
 [v InitPetitModbus@PetitModbusSlaveAddress PetitModbusSlaveAddress `uc  1 a 1 wreg ]
 [v InitPetitModbus@PetitModbusSlaveAddress PetitModbusSlaveAddress `uc  1 a 1 wreg ]
-"543
-[v InitPetitModbus@PetitModbusSlaveAddress PetitModbusSlaveAddress `uc  1 a 1 2 ]
-"547
+"553
+[v InitPetitModbus@PetitModbusSlaveAddress PetitModbusSlaveAddress `uc  1 a 1 4 ]
+"557
 } 0
 "10 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbusPort.c
 [v _PetitModBus_UART_Initialise PetitModBus_UART_Initialise `(v  1 e 1 0 ]
@@ -846,6 +1227,6 @@ PETIT_RXTX_TIMEOUT 4
 [v ReceiveInterrupt@Data Data `uc  1 a 1 wreg ]
 [v ReceiveInterrupt@Data Data `uc  1 a 1 wreg ]
 "44
-[v ReceiveInterrupt@Data Data `uc  1 a 1 0 ]
+[v ReceiveInterrupt@Data Data `uc  1 a 1 1 ]
 "51
 } 0
