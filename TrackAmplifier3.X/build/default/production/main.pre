@@ -17903,6 +17903,12 @@ INTCONbits.PEIE = 1;
 
 InitPetitModbus(1);
 
+LATBbits.LATB3 = 0;
+LATBbits.LATB4 = 0;
+LATBbits.LATB1 = 0;
+LATBbits.LATB2 = 0;
+
+
 while(1){
 ProcessPetitModbus();
 LATBbits.LATB4 = ((unsigned int)PetitRegisters[0].ActValue);

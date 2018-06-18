@@ -13,8 +13,6 @@ Version 3.2 HI-TECH Software Intermediate Code
 [v _INTCONbits `VS25 ~T0 @X0 0 e@11 ]
 "90 modbus/PetitModbus.h
 [v _InitPetitModbus `(v ~T0 @X0 0 ef1`uc ]
-"91
-[v _ProcessPetitModbus `(v ~T0 @X0 0 ef ]
 "843 C:\Program Files (x86)\Microchip\xc8\v1.44\include\pic16f18854.h
 [s S44 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
 [n S44 . LATB0 LATB1 LATB2 LATB3 LATB4 LATB5 LATB6 LATB7 ]
@@ -23,7 +21,9 @@ Version 3.2 HI-TECH Software Intermediate Code
 [n S43 . . ]
 "854
 [v _LATBbits `VS43 ~T0 @X0 0 e@23 ]
-"82 modbus/PetitModbus.h
+"91 modbus/PetitModbus.h
+[v _ProcessPetitModbus `(v ~T0 @X0 0 ef ]
+"82
 [s S1557 `s 1 ]
 [n S1557 . ActValue ]
 "86
@@ -13881,24 +13881,36 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;main.c: 22: InitPetitModbus(1);
 "22
 [e ( _InitPetitModbus (1 -> -> 1 `i `uc ]
-[; ;main.c: 24: while(1){
+[; ;main.c: 24: LATBbits.LATB3 = 0;
 "24
+[e = . . _LATBbits 0 3 -> -> 0 `i `uc ]
+[; ;main.c: 25: LATBbits.LATB4 = 0;
+"25
+[e = . . _LATBbits 0 4 -> -> 0 `i `uc ]
+[; ;main.c: 26: LATBbits.LATB1 = 0;
+"26
+[e = . . _LATBbits 0 1 -> -> 0 `i `uc ]
+[; ;main.c: 27: LATBbits.LATB2 = 0;
+"27
+[e = . . _LATBbits 0 2 -> -> 0 `i `uc ]
+[; ;main.c: 30: while(1){
+"30
 [e :U 1560 ]
 {
-[; ;main.c: 25: ProcessPetitModbus();
-"25
+[; ;main.c: 31: ProcessPetitModbus();
+"31
 [e ( _ProcessPetitModbus ..  ]
-[; ;main.c: 26: LATBbits.LATB4 = ((unsigned int)PetitRegisters[0].ActValue);
-"26
+[; ;main.c: 32: LATBbits.LATB4 = ((unsigned int)PetitRegisters[0].ActValue);
+"32
 [e = . . _LATBbits 0 4 -> -> . *U + &U _PetitRegisters * -> -> -> 0 `i `ui `ux -> -> # *U &U _PetitRegisters `ui `ux 0 `ui `uc ]
-"27
+"33
 }
 [e :U 1559 ]
-"24
+"30
 [e $U 1560  ]
 [e :U 1561 ]
-[; ;main.c: 27: }
-[; ;main.c: 28: }
-"28
+[; ;main.c: 33: }
+[; ;main.c: 34: }
+"34
 [e :UE 1558 ]
 }

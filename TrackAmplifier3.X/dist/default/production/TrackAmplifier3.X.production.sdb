@@ -133,6 +133,8 @@ PETIT_RXTX_TIMEOUT 4
 [v _TMR3_Initialize TMR3_Initialize `(v  1 e 1 0 ]
 "128
 [v _TMR3_WriteTimer TMR3_WriteTimer `(v  1 e 1 0 ]
+"150
+[v _TMR3_Reload TMR3_Reload `(v  1 e 1 0 ]
 "165
 [v _TMR3_ISR TMR3_ISR `(v  1 e 1 0 ]
 "179
@@ -143,7 +145,7 @@ PETIT_RXTX_TIMEOUT 4
 [v _InitTMR1 InitTMR1 `(v  1 e 1 0 ]
 "7 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/Interrupts.c
 [v _PetitModbusIntHandlerTMR PetitModbusIntHandlerTMR `(v  1 e 1 0 ]
-"11
+"13
 [v _PetitModbusIntHandlerRC PetitModbusIntHandlerRC `(v  1 e 1 0 ]
 "95 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbus.c
 [v _Petit_CRC16 Petit_CRC16 `(v  1 e 1 0 ]
@@ -173,17 +175,17 @@ PETIT_RXTX_TIMEOUT 4
 [v _ProcessPetitModbus ProcessPetitModbus `(v  1 e 1 0 ]
 "551
 [v _InitPetitModbus InitPetitModbus `(v  1 e 1 0 ]
-"10 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbusPort.c
+"11 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbusPort.c
 [v _PetitModBus_UART_Initialise PetitModBus_UART_Initialise `(v  1 e 1 0 ]
-"16
+"17
 [v _PetitModBus_TIMER_Initialise PetitModBus_TIMER_Initialise `(v  1 e 1 0 ]
-"22
+"23
 [v _PetitModBus_UART_Putch PetitModBus_UART_Putch `(v  1 e 1 0 ]
-"29
+"30
 [v _PetitModBus_UART_String PetitModBus_UART_String `(uc  1 e 1 0 ]
-"42
+"50
 [v _ReceiveInterrupt ReceiveInterrupt `(v  1 e 1 0 ]
-"54
+"62
 [v _PetitModBus_TimerValues PetitModBus_TimerValues `(v  1 e 1 0 ]
 [s S1281 . 1 `uc 1 INTEDG 1 0 :1:0 
 `uc 1 . 1 0 :5:1 
@@ -217,6 +219,18 @@ PETIT_RXTX_TIMEOUT 4
 [v _LATBbits LATBbits `VES1223  1 e 1 @23 ]
 "899
 [v _LATC LATC `VEuc  1 e 1 @24 ]
+[s S1747 . 1 `uc 1 LATC0 1 0 :1:0 
+`uc 1 LATC1 1 0 :1:1 
+`uc 1 LATC2 1 0 :1:2 
+`uc 1 LATC3 1 0 :1:3 
+`uc 1 LATC4 1 0 :1:4 
+`uc 1 LATC5 1 0 :1:5 
+`uc 1 LATC6 1 0 :1:6 
+`uc 1 LATC7 1 0 :1:7 
+]
+"916
+[u S1756 . 1 `S1747 1 . 1 0 ]
+[v _LATCbits LATCbits `VES1756  1 e 1 @24 ]
 "1536
 [v _ADRESL ADRESL `VEuc  1 e 1 @140 ]
 "1556
@@ -879,9 +893,9 @@ PETIT_RXTX_TIMEOUT 4
 [v _PETITMODBUS_SLAVE_ADDRESS PETITMODBUS_SLAVE_ADDRESS `uc  1 e 1 0 ]
 "26
 [v _PETITMODBUS_BROADCAST_ADDRESS PETITMODBUS_BROADCAST_ADDRESS `uc  1 e 1 0 ]
-[s S1584 . 28 `uc 1 Address 1 0 `uc 1 Function 1 1 `[24]uc 1 DataBuf 24 2 `us 1 DataLen 2 26 ]
+[s S1618 . 28 `uc 1 Address 1 0 `uc 1 Function 1 1 `[24]uc 1 DataBuf 24 2 `us 1 DataLen 2 26 ]
 "46
-[v _Petit_Tx_Data Petit_Tx_Data `S1584  1 e 28 0 ]
+[v _Petit_Tx_Data Petit_Tx_Data `S1618  1 e 28 0 ]
 "47
 [v _Petit_Tx_Current Petit_Tx_Current `ui  1 e 2 0 ]
 "48
@@ -893,7 +907,7 @@ PETIT_RXTX_TIMEOUT 4
 "51
 [v _Petit_Tx_Buf_Size Petit_Tx_Buf_Size `ui  1 e 2 0 ]
 "53
-[v _Petit_Rx_Data Petit_Rx_Data `S1584  1 e 28 0 ]
+[v _Petit_Rx_Data Petit_Rx_Data `S1618  1 e 28 0 ]
 "54
 [v _Petit_Rx_CRC16 Petit_Rx_CRC16 `ui  1 e 2 0 ]
 "55
@@ -906,17 +920,17 @@ PETIT_RXTX_TIMEOUT 4
 [v _auchCRCHi auchCRCHi `DC[256]uc  1 e 256 0 ]
 "52
 [v _auchCRCLo auchCRCLo `DC[256]uc  1 e 256 0 ]
-"6 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbusPort.c
+"7 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbusPort.c
 [v _PetitReceiveBuffer PetitReceiveBuffer `VE[24]uc  1 e 24 0 ]
-"7
+"8
 [v _PetitReceiveCounter PetitReceiveCounter `VEuc  1 e 1 0 ]
-[s S1601 . 2 `s 1 ActValue 2 0 ]
+[s S1635 . 2 `s 1 ActValue 2 0 ]
 "6 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitRegConstant.c
-[v _PetitRegisters PetitRegisters `[7]S1601  1 e 14 0 ]
+[v _PetitRegisters PetitRegisters `[7]S1635  1 e 14 0 ]
 "15 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\main.c
 [v _main main `(v  1 e 1 0 ]
 {
-"28
+"34
 } 0
 "50 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/mcc.c
 [v _SYSTEM_Initialize SYSTEM_Initialize `(v  1 e 1 0 ]
@@ -1025,26 +1039,26 @@ PETIT_RXTX_TIMEOUT 4
 {
 "142
 } 0
-"29 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbusPort.c
+"30 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbusPort.c
 [v _PetitModBus_UART_String PetitModBus_UART_String `(uc  1 e 1 0 ]
 {
 [v PetitModBus_UART_String@s s `*.5uc  1 a 1 wreg ]
-"31
+"32
 [v PetitModBus_UART_String@DummyCounter DummyCounter `us  1 a 2 1 ]
-"29
+"30
 [v PetitModBus_UART_String@s s `*.5uc  1 a 1 wreg ]
 [v PetitModBus_UART_String@Length Length `ui  1 p 2 4 ]
-"33
+"34
 [v PetitModBus_UART_String@s s `*.5uc  1 a 1 0 ]
-"37
+"45
 } 0
-"22
+"23
 [v _PetitModBus_UART_Putch PetitModBus_UART_Putch `(v  1 e 1 0 ]
 {
 [v PetitModBus_UART_Putch@c c `uc  1 a 1 wreg ]
 [v PetitModBus_UART_Putch@c c `uc  1 a 1 wreg ]
 [v PetitModBus_UART_Putch@c c `uc  1 a 1 3 ]
-"26
+"27
 } 0
 "430 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbus.c
 [v _Petit_RxRTU Petit_RxRTU `(v  1 e 1 0 ]
@@ -1154,20 +1168,20 @@ PETIT_RXTX_TIMEOUT 4
 [v InitPetitModbus@PetitModbusSlaveAddress PetitModbusSlaveAddress `uc  1 a 1 4 ]
 "557
 } 0
-"10 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbusPort.c
+"11 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbusPort.c
 [v _PetitModBus_UART_Initialise PetitModBus_UART_Initialise `(v  1 e 1 0 ]
 {
-"13
+"14
 } 0
 "6 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/Init.c
 [v _InitUART InitUART `(v  1 e 1 0 ]
 {
 "11
 } 0
-"16 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbusPort.c
+"17 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbusPort.c
 [v _PetitModBus_TIMER_Initialise PetitModBus_TIMER_Initialise `(v  1 e 1 0 ]
 {
-"19
+"20
 } 0
 "13 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/Init.c
 [v _InitTMR1 InitTMR1 `(v  1 e 1 0 ]
@@ -1184,21 +1198,15 @@ PETIT_RXTX_TIMEOUT 4
 {
 "176
 } 0
-"128
-[v _TMR3_WriteTimer TMR3_WriteTimer `(v  1 e 1 0 ]
-{
-[v TMR3_WriteTimer@timerVal timerVal `ui  1 p 2 0 ]
-"148
-} 0
 "7 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/Interrupts.c
 [v _PetitModbusIntHandlerTMR PetitModbusIntHandlerTMR `(v  1 e 1 0 ]
 {
-"9
+"11
 } 0
-"54 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbusPort.c
+"62 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbusPort.c
 [v _PetitModBus_TimerValues PetitModBus_TimerValues `(v  1 e 1 0 ]
 {
-"58
+"66
 } 0
 "165 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/tmr1.c
 [v _TMR1_ISR TMR1_ISR `(v  1 e 1 0 ]
@@ -1216,17 +1224,28 @@ PETIT_RXTX_TIMEOUT 4
 {
 "187
 } 0
-"11 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/Interrupts.c
+"13 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/Interrupts.c
 [v _PetitModbusIntHandlerRC PetitModbusIntHandlerRC `(v  1 e 1 0 ]
 {
-"13
+"20
 } 0
-"42 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbusPort.c
+"150 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/tmr3.c
+[v _TMR3_Reload TMR3_Reload `(v  1 e 1 0 ]
+{
+"153
+} 0
+"128
+[v _TMR3_WriteTimer TMR3_WriteTimer `(v  1 e 1 0 ]
+{
+[v TMR3_WriteTimer@timerVal timerVal `ui  1 p 2 0 ]
+"148
+} 0
+"50 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbusPort.c
 [v _ReceiveInterrupt ReceiveInterrupt `(v  1 e 1 0 ]
 {
 [v ReceiveInterrupt@Data Data `uc  1 a 1 wreg ]
 [v ReceiveInterrupt@Data Data `uc  1 a 1 wreg ]
-"44
+"52
 [v ReceiveInterrupt@Data Data `uc  1 a 1 1 ]
-"51
+"59
 } 0

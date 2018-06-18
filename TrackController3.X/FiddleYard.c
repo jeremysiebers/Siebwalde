@@ -1,6 +1,6 @@
 /** I N C L U D E S **********************************************************/
 #define THIS_IS_STACK_APPLICATION
-#define USE_TCPIP
+//#define USE_TCPIP
 #define THIS_IS_TRACK_CONTROLLER
 
 #include <p18f97j60.h>			// uProc lib
@@ -54,11 +54,11 @@ static SLAVE_INFO         SlaveInfo[NUMBER_OF_SLAVES];
 
 /*----------------------------------------------------------------------------*/
 
-#define Init_IO()			TRISA = 0xFC;TRISB = 0xF8;TRISC = 0xFF;TRISD = 0xFF;TRISE = 0xFF;TRISF = 0xFF;TRISG = 0xF4;TRISH = 0xFF;TRISJ = 0xFF;// All ports are outputs !!!
+#define Init_IO()			TRISA = 0xFC;TRISB = 0x00;TRISC = 0xFF;TRISD = 0xFF;TRISE = 0xFF;TRISF = 0xFF;TRISG = 0xF4;TRISH = 0xFF;TRISJ = 0xFF;// All ports are outputs !!!
 #define Leds_Off()			Led1 = Off, Led2 = Off, Led3 = Off;
 
 /********************************** TCP IP INIT *******************************/
-
+#if defined (USE_TCPIP)
 // Declare AppConfig structure and some other supporting stack variables
 APP_CONFIG AppConfig;
 BYTE AN0String[8];
@@ -67,7 +67,7 @@ BYTE AN0String[8];
 // These may or may not be present in all applications.
 static void InitAppConfig(void);
 static DWORD dwLastIP = 0;
-
+#endif
 /******************************************************************************/
 
 static void Init_Timers(void);
@@ -106,6 +106,8 @@ void main()
     printf("PIC18f97j60 started up!!!\n\r");                                    // Welcome message
     
     StatexMachinexInit();
+    
+    Reset_Slaves = 0;
         
     while(1)
 	{
@@ -120,8 +122,10 @@ void main()
         ProcessPetitModbus();
         /********************************/
         
+        #if defined (USE_TCPIP)
 	 	Diagnostic();
 	    Command();
+        #endif
 	    
         if (Enable_State_Machine_Update == True)
 		{
@@ -175,11 +179,15 @@ void low_isr()
 {
     PetitModbusIntHandler();
 	
+    #if defined (USE_TCPIP)
 	if (INTCONbits.TMR0IF){
-        #if defined (USE_TCPIP)
+        
 		TickUpdate();
-        #endif
+        
 	}
+    #else
+    INTCONbits.TMR0IF = 0;
+    #endif
 				
 	if (PIR1bits.TMR1IF){	
 		Enable_State_Machine_Update = True;
@@ -283,6 +291,7 @@ void Init_Pwm()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 /*********************************************************************
  * Function:        void InitAppConfig(void)
  *
@@ -306,6 +315,9 @@ void Init_Pwm()
 // at a specific location in program memory.  Uncomment these two pragmas
 // that locate the MAC address at 0x1FFF0.  Syntax below is for MPLAB C 
 // Compiler for PIC18 MCUs. Syntax will vary for other compilers.
+
+/*
+
 //#pragma romdata MACROM=0x1FFF0
 static ROM BYTE SerializedMACAddress[6] = {MY_DEFAULT_MAC_BYTE1, MY_DEFAULT_MAC_BYTE2, MY_DEFAULT_MAC_BYTE3, MY_DEFAULT_MAC_BYTE4, MY_DEFAULT_MAC_BYTE5, MY_DEFAULT_MAC_BYTE6};
 //#pragma romdata
@@ -413,6 +425,7 @@ static void InitAppConfig(void)
 	#endif
 }
 
+
 #if defined(EEPROM_CS_TRIS) || defined(SPIFLASH_CS_TRIS)
 void SaveAppConfig(void)
 {
@@ -436,3 +449,4 @@ void SaveAppConfig(void)
     #endif
 }
 #endif
+ */

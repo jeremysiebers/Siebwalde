@@ -1,6 +1,7 @@
 #include "General.h"
 #include "PetitModbus.h"
 #include "PetitModbusPort.h"
+#include "../mcc_generated_files/mcc.h"
 
 // Modbus RTU Variables
 volatile unsigned char   PetitReceiveBuffer[PETITMODBUS_RECEIVE_BUFFER_SIZE];   // Buffer to collect data from hardware
@@ -21,7 +22,7 @@ void PetitModBus_TIMER_Initialise(void)
 // This is used for send one character
 void PetitModBus_UART_Putch(unsigned char c)
 {
-	while(!TXSTAbits.TRMT);
+    while(!TXSTAbits.TRMT);
 	TXREG = c;
 }
 
@@ -30,9 +31,16 @@ unsigned char PetitModBus_UART_String(unsigned char *s, unsigned int Length)
 {
     unsigned short  DummyCounter;
     
+    TX_ENA_LAT = 1;
+    LED_TX_LAT = 1;
+	    
     for(DummyCounter=0;DummyCounter<Length;DummyCounter++){
         PetitModBus_UART_Putch(s[DummyCounter]);
     }
+    
+    TX_ENA_LAT = 0;
+    LED_TX_LAT = 0;
+    
     return TRUE;
 }
 

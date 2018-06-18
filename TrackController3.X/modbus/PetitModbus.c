@@ -143,10 +143,13 @@ void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
 #else
 void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
 {
-    unsigned int uchCRCHi = *CRC >> 8;                                          /* high byte of CRC initialized */
-    unsigned int uchCRCLo = *CRC & 0x00FF;                                      /* low byte of CRC initialized */
-    unsigned char uIndex ;                                                      /* will index into CRC lookup table */
+    unsigned int uchCRCHi = 0;
+    unsigned int uchCRCLo = 0;
+    unsigned char uIndex ;                                         /* will index into CRC lookup table */
     
+    uchCRCHi = *CRC >> 8;                                          /* high byte of CRC initialized */
+    uchCRCLo = *CRC & 0x00FF;                                      /* low byte of CRC initialized */
+            
     uIndex = uchCRCLo ^ Data;
     uchCRCLo = uchCRCHi ^ auchCRCHi[uIndex] ;
     uchCRCHi = auchCRCLo[uIndex] ;
@@ -208,7 +211,8 @@ unsigned char PetitSendMessage(void)
  */
 unsigned char Petit_RxDataAvailable(void)
 {
-    unsigned char Result    = Petit_Rx_Data_Available;
+    unsigned char Result;
+    Result    = Petit_Rx_Data_Available;
     
     Petit_Rx_Data_Available       = FALSE;
 
@@ -258,7 +262,7 @@ unsigned char CheckPetitModbusBufferComplete(void)
             }
             else if(PetitReceiveBuffer[1]==0x03)
             {
-                PetitExpectedReceiveCount=(PetitReceiveBuffer[2])+5;
+                PetitExpectedReceiveCount=(PetitReceiveBuffer[2])+4;
             }            
             else
             {
@@ -381,7 +385,7 @@ void Petit_TxRTU(void)
         PIR3bits.TMR4IF     = 0;
         PIE3bits.TMR4IE     = 1;                                                // Enable interrupt
         T4CONbits.TMR4ON    = 1;                                                // Enable timeout timer (slave response timeout)
-        PORTBbits.RB7 = 1; //--> led diag on
+        LATBbits.LATB7 = 1; //--> led diag on
         /**********************************************************************/
     }
 }
