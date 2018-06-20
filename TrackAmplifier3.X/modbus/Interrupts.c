@@ -11,12 +11,12 @@ void PetitModbusIntHandlerTMR(void){
 }
 
 void PetitModbusIntHandlerRC(void){ 
-    LED_RX_LAT = 1;
+    
     TMR3_Reload();
     PIR4bits.TMR3IF = 0;
     PIE4bits.TMR3IE = 1;
     ReceiveInterrupt(RCREG);
-    LED_RX_LAT = 0;
+    
 }
 
 /*

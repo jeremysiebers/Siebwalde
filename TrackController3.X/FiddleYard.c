@@ -73,6 +73,8 @@ static DWORD dwLastIP = 0;
 static void Init_Timers(void);
 static void Init_Pwm(void);
 unsigned char Enable_State_Machine_Update = 0;
+unsigned int State_Machine_Update_Counter = 0;
+unsigned char slave = 0;
 
 unsigned char temp3[4] = {0, 0, 0, 7};
 
@@ -129,11 +131,43 @@ void main()
 	    
         if (Enable_State_Machine_Update == True)
 		{
-            Enable_State_Machine_Update = False;  
-            SendPetitModbus(1, 3, temp3, 4);
-            printf("sent!\n\r");
-
+            Enable_State_Machine_Update = False; 
             
+            switch (slave){
+                case 0: if(SendPetitModbus(1, 3, temp3, 4) == False){
+                            //printf("SendPetitModbus slave 1 was NOK!!\n\r");
+                        }
+                        else{
+                            //printf("SendPetitModbus slave 1 was OK!!\n\r");
+                        }
+                        Led1 ^= 1;
+                        slave = 1;
+                break;
+                
+                case 1: if(SendPetitModbus(2, 3, temp3, 4) == False){
+                            //printf("SendPetitModbus slave 2 was NOK!!\n\r");
+                        }
+                        else{
+                            //printf("SendPetitModbus slave 2 was OK!!\n\r");
+                        }
+                        slave = 2;
+                break;
+                
+                case 2: if(SendPetitModbus(3, 3, temp3, 4) == False){
+                            //printf("SendPetitModbus slave 3 was NOK!!\n\r");
+                        }
+                        else{
+                            //printf("SendPetitModbus slave 3 was OK!!\n\r");
+                        }
+                        slave = 0;
+                break;
+                
+                default : slave = 0;
+                break;                
+                
+            }
+            
+                        
         }
         
         
@@ -190,12 +224,18 @@ void low_isr()
     #endif
 				
 	if (PIR1bits.TMR1IF){	
-		Enable_State_Machine_Update = True;
-        Led1 ^= 1; 
-        //T1CONbits.TMR1ON = 0;
-        TMR1H = 0x00;//0xF3	= 3333 Hz, 0x00 = 1587 Hz, 0xF0 = 2439 Hz
+        T1CONbits.TMR1ON = 0;
+        //State_Machine_Update_Counter++;
+        //if(State_Machine_Update_Counter > 50){
+            Enable_State_Machine_Update = True;
+            //Led1 ^= 1; 
+        //    State_Machine_Update_Counter = 0;
+        //}
+        
+        TMR1H = 0xD0;//0xF3	= 3333 Hz, 0x00 = 1587 Hz, 0xF0 = 2439 Hz
 		TMR1L = 0x00;
-        PIR1bits.TMR1IF=False;        	
+        PIR1bits.TMR1IF=False;   
+        T1CONbits.TMR1ON = 1;
 	}	
     
 //    if (PIE3bits.RC2IE == 1 && PIR3bits.RC2IF == 1) {
@@ -260,7 +300,7 @@ void Init_Timers()
 	
 	TMR1H = 0x0;
 	TMR1L = 0x0;
-	T1CON = 0xB1; //0xB1 16 Bit and ON and 1:8 prescale              //T1CON = 0x81;					// 0xB1 = 1:8(40mS), 0xA1 = 1:4(22.5mS), 0x91 = 1:2(11mS), 0x81 = 1:1(5.5mS) 0x81 = 16Bit and enabled
+	T1CON = 0xA1; //0xB1 16 Bit and ON and 1:8 prescale              //T1CON = 0x81;					// 0xB1 = 1:8(40mS), 0xA1 = 1:4(22.5mS), 0x91 = 1:2(11mS), 0x81 = 1:1(5.5mS) 0x81 = 16Bit and enabled
     T4CON = 0x00; //Timer OFF
 }
 

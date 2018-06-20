@@ -23,20 +23,21 @@ void PetitModBus_TIMER_Initialise(void)
 void PetitModBus_UART_Putch(unsigned char c)
 {
     while(!TXSTAbits.TRMT);
-	TXREG = c;
+	TXREG = c;    
 }
 
 // This is used for send string, better to use DMA for it ;)
 unsigned char PetitModBus_UART_String(unsigned char *s, unsigned int Length)
 {
     unsigned short  DummyCounter;
-    
-    TX_ENA_LAT = 1;
     LED_TX_LAT = 1;
-	    
+    TX_ENA_LAT = 1;                                                             // enable the driver of the rs485 as close as possible to the first bit to avoid glitch
+    	    
     for(DummyCounter=0;DummyCounter<Length;DummyCounter++){
         PetitModBus_UART_Putch(s[DummyCounter]);
     }
+    
+    while(!TXSTAbits.TRMT);                                                     // Due to RS485 enable latch, wait until last bit is sent
     
     TX_ENA_LAT = 0;
     LED_TX_LAT = 0;

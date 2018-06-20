@@ -17901,7 +17901,7 @@ SYSTEM_Initialize();
 INTCONbits.GIE = 1;
 INTCONbits.PEIE = 1;
 
-InitPetitModbus(1);
+InitPetitModbus(3);
 
 LATBbits.LATB3 = 0;
 LATBbits.LATB4 = 0;

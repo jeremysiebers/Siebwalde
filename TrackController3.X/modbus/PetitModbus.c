@@ -195,10 +195,12 @@ unsigned char PetitSendMessage(void)
     if (Petit_Tx_State != PETIT_RXTX_IDLE){        
         return FALSE;
     }
-    Petit_Tx_Current  =0;
-    Petit_Tx_State    =PETIT_RXTX_START;
-
-    return TRUE;
+    else{
+        Petit_Tx_Current  =0;
+        Petit_Tx_State    =PETIT_RXTX_START;
+        return TRUE;
+    }
+    
 }
 
 /******************************************************************************/
@@ -262,7 +264,7 @@ unsigned char CheckPetitModbusBufferComplete(void)
             }
             else if(PetitReceiveBuffer[1]==0x03)
             {
-                PetitExpectedReceiveCount=(PetitReceiveBuffer[2])+4;
+                PetitExpectedReceiveCount=(PetitReceiveBuffer[2])+5;
             }            
             else
             {
