@@ -49,7 +49,7 @@ void InitTMR(void)
     TMR3L = 0;
     IPR2bits.TMR3IP     = 0;                                                    // Low priority
     PIE2bits.TMR3IE     = 1;                                                    // Enable interrupt
-    T3CONbits.TMR3ON    = 1;
+    T3CONbits.TMR3ON    = 0;
         
     /*Timer4 for slave answer timeout*/
     T4CONbits.T4OUTPS   = 0b1000;                                               // Timer4 Output Postscale Select bits
@@ -58,5 +58,5 @@ void InitTMR(void)
     TMR4                = 0x00;                                                 // 8-Bit Timer register
     IPR3bits.TMR4IP     = 0;                                                    // Low priority
     PIE3bits.TMR4IE     = 1;                                                    // Enable interrupt
-    T4CONbits.TMR4ON    = 1;
+    T4CONbits.TMR4ON    = 0;
 }

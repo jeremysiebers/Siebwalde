@@ -21,6 +21,12 @@ void main(void) {
     
     InitPetitModbus(MODBUSxADDRESS);
     
+    LED_ERR_LAT = 0;
+    LED_WAR_LAT = 0;
+    LED_TX_LAT = 0;
+    LED_RX_LAT = 0;
+    
+    
     while(1){
         ProcessPetitModbus();
         LED_WAR_LAT = ((unsigned int)PetitRegisters[0].ActValue);

@@ -6,10 +6,17 @@
 */
 void PetitModbusIntHandlerTMR(void){
     PetitModBus_TimerValues();
+    PIE4bits.TMR3IE = 0;
+    PIR4bits.TMR3IF = 0;
 }
 
-void PetitModbusIntHandlerRC(void){
+void PetitModbusIntHandlerRC(void){ 
+    
+    TMR3_Reload();
+    PIR4bits.TMR3IF = 0;
+    PIE4bits.TMR3IE = 1;
     ReceiveInterrupt(RCREG);
+    
 }
 
 /*

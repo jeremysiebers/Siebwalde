@@ -1,6 +1,7 @@
 #include <xc.h>
 #include "PetitModbus.h"
 #include "PetitModbusPort.h"
+#include "../mcc_generated_files/mcc.h"
 
 /*******************************ModBus Functions*******************************/
 #define PETITMODBUS_READ_COILS                  1
@@ -467,6 +468,7 @@ void Petit_RxRTU(void)
         if (((unsigned int) Petit_Rx_Data.DataBuf[Petit_Rx_Data.DataLen] + ((unsigned int) Petit_Rx_Data.DataBuf[Petit_Rx_Data.DataLen + 1] << 8)) == Petit_Rx_CRC16)
         {
             // Valid message!
+            LED_RX_LAT = 1;
             Petit_Rx_Data_Available = TRUE;
         }
 
@@ -538,6 +540,8 @@ void ProcessPetitModbus(void)
                 #endif
                 default:                                    {   HandlePetitModbusError(PETIT_ERROR_CODE_01, Petit_Rx_Data.Function);    break;  }
             }
+            
+            LED_RX_LAT = 0;
         }
     }
 }
