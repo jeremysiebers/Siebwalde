@@ -5,6 +5,7 @@ modbus/Init.h  \
 mcc_generated_files/fvr.h  \
 mcc_generated_files/cmp1.h  \
 mcc_generated_files/mcc.h  \
+main.h  \
 mcc_generated_files/pwm6.h  \
 modbus/General.h  \
 modbus/PetitModbusPort.h  \

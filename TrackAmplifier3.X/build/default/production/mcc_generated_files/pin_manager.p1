@@ -55,8 +55,8 @@ Version 3.2 HI-TECH Software Intermediate Code
 [v _RXPPSbits `VS1411 ~T0 @X0 0 e@3787 ]
 "32461
 [v _RC1PPS `Vuc ~T0 @X0 0 e@3873 ]
-"32611
-[v _RC4PPS `Vuc ~T0 @X0 0 e@3876 ]
+"32711
+[v _RC6PPS `Vuc ~T0 @X0 0 e@3878 ]
 [; ;htc.h: 26: extern const char __xc8_OPTIM_SPEED;
 [; ;htc.h: 28: extern double __fpnormalize(double);
 [; ;xc8debug.h: 14: extern void __builtin_software_breakpoint(void);
@@ -13079,8 +13079,8 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;pic.h: 193: extern __bank0 unsigned char __resetbits;
 [; ;pic.h: 194: extern __bank0 __bit __powerdown;
 [; ;pic.h: 195: extern __bank0 __bit __timeout;
-[; ;pin_manager.h: 512: void PIN_MANAGER_Initialize (void);
-[; ;pin_manager.h: 524: void PIN_MANAGER_IOC(void);
+[; ;pin_manager.h: 520: void PIN_MANAGER_Initialize (void);
+[; ;pin_manager.h: 532: void PIN_MANAGER_IOC(void);
 [; ;stdbool.h: 12: typedef unsigned char bool;
 "57 mcc_generated_files/pin_manager.c
 [v _PIN_MANAGER_Initialize `(v ~T0 @X0 1 ef ]
@@ -13147,9 +13147,9 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;pin_manager.c: 104: RC1PPS = 0x10;
 "104
 [e = _RC1PPS -> -> 16 `i `uc ]
-[; ;pin_manager.c: 105: RC4PPS = 0x0E;
+[; ;pin_manager.c: 105: RC6PPS = 0x0E;
 "105
-[e = _RC4PPS -> -> 14 `i `uc ]
+[e = _RC6PPS -> -> 14 `i `uc ]
 [; ;pin_manager.c: 106: }
 "106
 [e :UE 1557 ]

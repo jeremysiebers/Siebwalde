@@ -13067,8 +13067,8 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;pic.h: 193: extern __bank0 unsigned char __resetbits;
 [; ;pic.h: 194: extern __bank0 __bit __powerdown;
 [; ;pic.h: 195: extern __bank0 __bit __timeout;
-[; ;pin_manager.h: 512: void PIN_MANAGER_Initialize (void);
-[; ;pin_manager.h: 524: void PIN_MANAGER_IOC(void);
+[; ;pin_manager.h: 520: void PIN_MANAGER_Initialize (void);
+[; ;pin_manager.h: 532: void PIN_MANAGER_IOC(void);
 [; ;stdint.h: 13: typedef signed char int8_t;
 [; ;stdint.h: 20: typedef signed int int16_t;
 [; ;stdint.h: 28: typedef signed short long int int24_t;
@@ -13110,6 +13110,8 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;tmr3.h: 385: void TMR3_SetInterruptHandler(void (* InterruptHandler)(void));
 [; ;tmr3.h: 403: extern void (*TMR3_InterruptHandler)(void);
 [; ;tmr3.h: 421: void TMR3_DefaultInterruptHandler(void);
+[; ;pwm6.h: 102: void PWM6_Initialize(void);
+[; ;pwm6.h: 129: void PWM6_LoadDutyValue(uint16_t dutyValue);
 [; ;tmr1.h: 100: void TMR1_Initialize(void);
 [; ;tmr1.h: 129: void TMR1_StartTimer(void);
 [; ;tmr1.h: 161: void TMR1_StopTimer(void);
@@ -13122,8 +13124,6 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;tmr1.h: 385: void TMR1_SetInterruptHandler(void (* InterruptHandler)(void));
 [; ;tmr1.h: 403: extern void (*TMR1_InterruptHandler)(void);
 [; ;tmr1.h: 421: void TMR1_DefaultInterruptHandler(void);
-[; ;pwm6.h: 102: void PWM6_Initialize(void);
-[; ;pwm6.h: 129: void PWM6_LoadDutyValue(uint16_t dutyValue);
 [; ;tmr2.h: 79: typedef enum
 [; ;tmr2.h: 80: {
 [; ;tmr2.h: 89: TMR2_ROP_STARTS_TMRON,
@@ -13183,6 +13183,8 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;tmr2.h: 728: void TMR2_Period8BitSet(uint8_t periodVal);
 [; ;tmr2.h: 780: void TMR2_LoadPeriodRegister(uint8_t periodVal);
 [; ;tmr2.h: 818: bool TMR2_HasOverflowOccured(void);
+[; ;cmp1.h: 92: void CMP1_Initialize(void);
+[; ;cmp1.h: 132: bool CMP1_GetOutputStatus(void);
 [; ;crc.h: 123: void CRC_Initialize(void);
 [; ;crc.h: 164: void CRC_Start(void);
 [; ;crc.h: 202: bool CRC_16BitDataWrite(uint16_t data);
@@ -13193,10 +13195,6 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;crc.h: 400: void CRC_SCAN_SetAddressLimit(uint16_t startAddr,uint16_t endAddr);
 [; ;crc.h: 444: bool CRC_SCAN_IsScannerBusy(void);
 [; ;crc.h: 485: bool CRC_SCAN_HasScanCompleted(void);
-[; ;cmp1.h: 92: void CMP1_Initialize(void);
-[; ;cmp1.h: 132: bool CMP1_GetOutputStatus(void);
-[; ;fvr.h: 93: void FVR_Initialize(void);
-[; ;fvr.h: 127: bool FVR_IsOutputReady(void);
 [; ;adcc.h: 72: typedef uint16_t adc_result_t;
 [; ;adcc.h: 89: typedef enum
 [; ;adcc.h: 90: {
@@ -13238,6 +13236,8 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;adcc.h: 728: bool ADCC_HasErrorCrossedUpperThreshold(void);
 [; ;adcc.h: 750: bool ADCC_HasErrorCrossedLowerThreshold(void);
 [; ;adcc.h: 772: uint8_t ADCC_GetConversionStageStatus(void);
+[; ;fvr.h: 93: void FVR_Initialize(void);
+[; ;fvr.h: 127: bool FVR_IsOutputReady(void);
 [; ;dac.h: 93: void DAC_Initialize(void);
 [; ;dac.h: 129: void DAC_SetOutput(uint8_t inputData);
 [; ;dac.h: 163: uint8_t DAC_GetOutput(void);

@@ -80,7 +80,7 @@ const unsigned char auchCRCLo[] = {
 extern unsigned char PETITMODBUS_SLAVE_ADDRESS;                                 // Petit Modbus RTU Slave icin adres numarasi [0 to 255]
 
 typedef struct{
-            short                     ActValue;
+            unsigned int                     ActValue;
         }PetitRegStructure;
 
 extern PetitRegStructure    PetitRegisters[NUMBER_OF_OUTPUT_PETITREGISTERS];
