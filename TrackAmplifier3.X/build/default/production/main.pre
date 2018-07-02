@@ -17271,10 +17271,13 @@ extern __bank0 unsigned char __resetbits;
 extern __bank0 __bit __powerdown;
 extern __bank0 __bit __timeout;
 
-# 512 "mcc_generated_files/pin_manager.h"
+# 15 "main.h"
+void Get_ID_From_AD (void);
+
+# 520 "mcc_generated_files/pin_manager.h"
 void PIN_MANAGER_Initialize (void);
 
-# 524
+# 532
 void PIN_MANAGER_IOC(void);
 
 # 13 "C:\Program Files (x86)\Microchip\xc8\v1.44\include\stdint.h"
@@ -17409,6 +17412,12 @@ extern void (*TMR3_InterruptHandler)(void);
 # 421
 void TMR3_DefaultInterruptHandler(void);
 
+# 102 "mcc_generated_files/pwm6.h"
+void PWM6_Initialize(void);
+
+# 129
+void PWM6_LoadDutyValue(uint16_t dutyValue);
+
 # 100 "mcc_generated_files/tmr1.h"
 void TMR1_Initialize(void);
 
@@ -17444,12 +17453,6 @@ extern void (*TMR1_InterruptHandler)(void);
 
 # 421
 void TMR1_DefaultInterruptHandler(void);
-
-# 102 "mcc_generated_files/pwm6.h"
-void PWM6_Initialize(void);
-
-# 129
-void PWM6_LoadDutyValue(uint16_t dutyValue);
 
 # 79 "mcc_generated_files/tmr2.h"
 typedef enum
@@ -17622,6 +17625,12 @@ void TMR2_LoadPeriodRegister(uint8_t periodVal);
 # 818
 bool TMR2_HasOverflowOccured(void);
 
+# 92 "mcc_generated_files/cmp1.h"
+void CMP1_Initialize(void);
+
+# 132
+bool CMP1_GetOutputStatus(void);
+
 # 123 "mcc_generated_files/crc.h"
 void CRC_Initialize(void);
 
@@ -17651,18 +17660,6 @@ bool CRC_SCAN_IsScannerBusy(void);
 
 # 485
 bool CRC_SCAN_HasScanCompleted(void);
-
-# 92 "mcc_generated_files/cmp1.h"
-void CMP1_Initialize(void);
-
-# 132
-bool CMP1_GetOutputStatus(void);
-
-# 93 "mcc_generated_files/fvr.h"
-void FVR_Initialize(void);
-
-# 127
-bool FVR_IsOutputReady(void);
 
 # 72 "mcc_generated_files/adcc.h"
 typedef uint16_t adc_result_t;
@@ -17762,6 +17759,12 @@ bool ADCC_HasErrorCrossedLowerThreshold(void);
 
 # 772
 uint8_t ADCC_GetConversionStageStatus(void);
+
+# 93 "mcc_generated_files/fvr.h"
+void FVR_Initialize(void);
+
+# 127
+bool FVR_IsOutputReady(void);
 
 # 93 "mcc_generated_files/dac.h"
 void DAC_Initialize(void);
@@ -17868,7 +17871,7 @@ const unsigned char auchCRCLo[] = {
 extern unsigned char PETITMODBUS_SLAVE_ADDRESS;
 
 typedef struct{
-short ActValue;
+unsigned int ActValue;
 }PetitRegStructure;
 
 extern PetitRegStructure PetitRegisters[7];
@@ -17893,7 +17896,10 @@ extern void PetitModBus_TimerValues(void);
 # 9 "modbus/General.h"
 extern volatile unsigned int Timer1_Tick_Counter;
 
-# 15 "main.c"
+# 14 "main.c"
+unsigned int MODBUS_ADDRESS = 0;
+unsigned int result = 0;
+
 void main(void) {
 
 SYSTEM_Initialize();
@@ -17901,16 +17907,45 @@ SYSTEM_Initialize();
 INTCONbits.GIE = 1;
 INTCONbits.PEIE = 1;
 
-InitPetitModbus(3);
-
-LATBbits.LATB3 = 0;
+LATBbits.LATB5 = 0;
 LATBbits.LATB4 = 0;
+LATBbits.LATB3 = 1;
 LATBbits.LATB1 = 0;
 LATBbits.LATB2 = 0;
 
+Get_ID_From_AD();
+
+InitPetitModbus(MODBUS_ADDRESS);
 
 while(1){
 ProcessPetitModbus();
-LATBbits.LATB4 = ((unsigned int)PetitRegisters[0].ActValue);
+PetitRegisters[0].ActValue = 0;
+}
+}
+
+# 53
+void Get_ID_From_AD(){
+
+result = ADCC_GetSingleConversion(0);
+
+if(result > 80 && result < 96){
+MODBUS_ADDRESS = 1;
+LATBbits.LATB5 = 1;
+LATBbits.LATB3 = 0;
+}
+else if(result > 95 && result < 104){
+MODBUS_ADDRESS = 2;
+LATBbits.LATB5 = 1;
+LATBbits.LATB3 = 0;
+}
+else if(result > 104 && result < 112){
+MODBUS_ADDRESS = 3;
+LATBbits.LATB5 = 1;
+LATBbits.LATB3 = 0;
+}
+else{
+MODBUS_ADDRESS = 0;
+LATBbits.LATB3 = 1;
+while(1){};
 }
 }

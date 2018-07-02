@@ -28,6 +28,7 @@
         <itemPath>modbus/PetitModbus.h</itemPath>
         <itemPath>modbus/PetitModbusPort.h</itemPath>
       </logicalFolder>
+      <itemPath>main.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"

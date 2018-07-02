@@ -102,7 +102,7 @@ void PIN_MANAGER_Initialize(void)
     T2AINPPSbits.T2AINPPS = 0x10;   //RC0->TMR2:T2IN;    
     RXPPSbits.RXPPS = 0x13;   //RC3->EUSART:RX;    
     RC1PPS = 0x10;   //RC1->EUSART:TX;    
-    RC4PPS = 0x0E;   //RC4->PWM6:PWM6OUT;    
+    RC6PPS = 0x0E;   //RC6->PWM6:PWM6OUT;    
 }
   
 void PIN_MANAGER_IOC(void)

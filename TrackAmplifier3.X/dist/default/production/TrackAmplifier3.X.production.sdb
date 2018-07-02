@@ -69,6 +69,19 @@ PETIT_RXTX_DATABUF 2
 PETIT_RXTX_WAIT_ANSWER 3
 PETIT_RXTX_TIMEOUT 4
 ]
+"55 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\main.c
+[e E14364 . `uc
+ID 0
+BMF 2
+VREF 3
+VLM 4
+CURR_SEN 8
+LM_TEMP 23
+channel_VSS 60
+channel_Temp 61
+channel_DAC1 62
+channel_FVR_buf1 63
+]
 "62 C:\Program Files (x86)\Microchip\xc8\v1.44\sources\common\float.c
 [v ___ftpack __ftpack `(f  1 e 3 0 ]
 "86 C:\Program Files (x86)\Microchip\xc8\v1.44\sources\common\ftadd.c
@@ -77,10 +90,14 @@ PETIT_RXTX_TIMEOUT 4
 [v _eecpymem eecpymem `(v  1 e 1 0 ]
 "39
 [v _memcpyee memcpyee `(v  1 e 1 0 ]
-"15 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\main.c
+"17 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\main.c
 [v _main main `(v  1 e 1 0 ]
+"53
+[v _Get_ID_From_AD Get_ID_From_AD `(v  1 e 1 0 ]
 "63 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/adcc.c
 [v _ADCC_Initialize ADCC_Initialize `(v  1 e 1 0 ]
+"128
+[v _ADCC_GetSingleConversion ADCC_GetSingleConversion `(ui  1 e 2 0 ]
 "58 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/cmp1.c
 [v _CMP1_Initialize CMP1_Initialize `(v  1 e 1 0 ]
 "76 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/crc.c
@@ -187,14 +204,14 @@ PETIT_RXTX_TIMEOUT 4
 [v _ReceiveInterrupt ReceiveInterrupt `(v  1 e 1 0 ]
 "63
 [v _PetitModBus_TimerValues PetitModBus_TimerValues `(v  1 e 1 0 ]
-[s S1281 . 1 `uc 1 INTEDG 1 0 :1:0 
+[s S1252 . 1 `uc 1 INTEDG 1 0 :1:0 
 `uc 1 . 1 0 :5:1 
 `uc 1 PEIE 1 0 :1:6 
 `uc 1 GIE 1 0 :1:7 
 ]
 "362 C:\Program Files (x86)\Microchip\xc8\v1.44\include\pic16f18854.h
-[u S1286 . 1 `S1281 1 . 1 0 ]
-[v _INTCONbits INTCONbits `VES1286  1 e 1 @11 ]
+[u S1257 . 1 `S1252 1 . 1 0 ]
+[v _INTCONbits INTCONbits `VES1257  1 e 1 @11 ]
 "589
 [v _TRISA TRISA `VEuc  1 e 1 @17 ]
 "651
@@ -205,7 +222,7 @@ PETIT_RXTX_TIMEOUT 4
 [v _LATA LATA `VEuc  1 e 1 @22 ]
 "837
 [v _LATB LATB `VEuc  1 e 1 @23 ]
-[s S1214 . 1 `uc 1 LATB0 1 0 :1:0 
+[s S1600 . 1 `uc 1 LATB0 1 0 :1:0 
 `uc 1 LATB1 1 0 :1:1 
 `uc 1 LATB2 1 0 :1:2 
 `uc 1 LATB3 1 0 :1:3 
@@ -215,11 +232,11 @@ PETIT_RXTX_TIMEOUT 4
 `uc 1 LATB7 1 0 :1:7 
 ]
 "854
-[u S1223 . 1 `S1214 1 . 1 0 ]
-[v _LATBbits LATBbits `VES1223  1 e 1 @23 ]
+[u S1609 . 1 `S1600 1 . 1 0 ]
+[v _LATBbits LATBbits `VES1609  1 e 1 @23 ]
 "899
 [v _LATC LATC `VEuc  1 e 1 @24 ]
-[s S1761 . 1 `uc 1 LATC0 1 0 :1:0 
+[s S1749 . 1 `uc 1 LATC0 1 0 :1:0 
 `uc 1 LATC1 1 0 :1:1 
 `uc 1 LATC2 1 0 :1:2 
 `uc 1 LATC3 1 0 :1:3 
@@ -229,8 +246,8 @@ PETIT_RXTX_TIMEOUT 4
 `uc 1 LATC7 1 0 :1:7 
 ]
 "916
-[u S1770 . 1 `S1761 1 . 1 0 ]
-[v _LATCbits LATCbits `VES1770  1 e 1 @24 ]
+[u S1758 . 1 `S1749 1 . 1 0 ]
+[v _LATCbits LATCbits `VES1758  1 e 1 @24 ]
 "1536
 [v _ADRESL ADRESL `VEuc  1 e 1 @140 ]
 "1556
@@ -630,7 +647,7 @@ PETIT_RXTX_TIMEOUT 4
 [v _SCANHADRH SCANHADRH `VEuc  1 e 1 @1039 ]
 "13287
 [v _SCANCON0 SCANCON0 `VEuc  1 e 1 @1040 ]
-[s S1422 . 1 `uc 1 MODE 1 0 :2:0 
+[s S1393 . 1 `uc 1 MODE 1 0 :2:0 
 `uc 1 . 1 0 :1:2 
 `uc 1 INTM 1 0 :1:3 
 `uc 1 INVALID 1 0 :1:4 
@@ -639,10 +656,10 @@ PETIT_RXTX_TIMEOUT 4
 `uc 1 EN 1 0 :1:7 
 ]
 "13324
-[s S1430 . 1 `uc 1 MODE0 1 0 :1:0 
+[s S1401 . 1 `uc 1 MODE0 1 0 :1:0 
 `uc 1 MODE1 1 0 :1:1 
 ]
-[s S1433 . 1 `uc 1 SCANMODE 1 0 :2:0 
+[s S1404 . 1 `uc 1 SCANMODE 1 0 :2:0 
 `uc 1 . 1 0 :1:2 
 `uc 1 SCANINTM 1 0 :1:3 
 `uc 1 SCANINVALID 1 0 :1:4 
@@ -650,14 +667,14 @@ PETIT_RXTX_TIMEOUT 4
 `uc 1 . 1 0 :1:6 
 `uc 1 SCANEN 1 0 :1:7 
 ]
-[s S1441 . 1 `uc 1 SCANMODE0 1 0 :1:0 
+[s S1412 . 1 `uc 1 SCANMODE0 1 0 :1:0 
 `uc 1 SCANMODE1 1 0 :1:1 
 ]
-[s S1444 . 1 `uc 1 . 1 0 :4:0 
+[s S1415 . 1 `uc 1 . 1 0 :4:0 
 `uc 1 DABORT 1 0 :1:4 
 ]
-[u S1447 . 1 `S1422 1 . 1 0 `S1430 1 . 1 0 `S1433 1 . 1 0 `S1441 1 . 1 0 `S1444 1 . 1 0 ]
-[v _SCANCON0bits SCANCON0bits `VES1447  1 e 1 @1040 ]
+[u S1418 . 1 `S1393 1 . 1 0 `S1401 1 . 1 0 `S1404 1 . 1 0 `S1412 1 . 1 0 `S1415 1 . 1 0 ]
+[v _SCANCON0bits SCANCON0bits `VES1418  1 e 1 @1040 ]
 "13409
 [v _SCANTRIG SCANTRIG `VEuc  1 e 1 @1041 ]
 "13496
@@ -674,7 +691,7 @@ PETIT_RXTX_TIMEOUT 4
 [v _CRCXORH CRCXORH `VEuc  1 e 1 @1053 ]
 "14008
 [v _CRCCON0 CRCCON0 `VEuc  1 e 1 @1054 ]
-[s S1394 . 1 `uc 1 FULL 1 0 :1:0 
+[s S1365 . 1 `uc 1 FULL 1 0 :1:0 
 `uc 1 SHIFTM 1 0 :1:1 
 `uc 1 . 1 0 :2:2 
 `uc 1 ACCM 1 0 :1:4 
@@ -683,18 +700,18 @@ PETIT_RXTX_TIMEOUT 4
 `uc 1 EN 1 0 :1:7 
 ]
 "14028
-[s S1402 . 1 `uc 1 . 1 0 :7:0 
+[s S1373 . 1 `uc 1 . 1 0 :7:0 
 `uc 1 CRCEN 1 0 :1:7 
 ]
-[u S1405 . 1 `S1394 1 . 1 0 `S1402 1 . 1 0 ]
-[v _CRCCON0bits CRCCON0bits `VES1405  1 e 1 @1054 ]
+[u S1376 . 1 `S1365 1 . 1 0 `S1373 1 . 1 0 ]
+[v _CRCCON0bits CRCCON0bits `VES1376  1 e 1 @1054 ]
 "14068
 [v _CRCCON1 CRCCON1 `VEuc  1 e 1 @1055 ]
-[s S1366 . 1 `uc 1 PLEN 1 0 :4:0 
+[s S1337 . 1 `uc 1 PLEN 1 0 :4:0 
 `uc 1 DLEN 1 0 :4:4 
 ]
 "14089
-[s S1369 . 1 `uc 1 PLEN0 1 0 :1:0 
+[s S1340 . 1 `uc 1 PLEN0 1 0 :1:0 
 `uc 1 PLEN1 1 0 :1:1 
 `uc 1 PLEN2 1 0 :1:2 
 `uc 1 PLEN3 1 0 :1:3 
@@ -703,8 +720,8 @@ PETIT_RXTX_TIMEOUT 4
 `uc 1 DLEN2 1 0 :1:6 
 `uc 1 DLEN3 1 0 :1:7 
 ]
-[u S1378 . 1 `S1366 1 . 1 0 `S1369 1 . 1 0 ]
-[v _CRCCON1bits CRCCON1bits `VES1378  1 e 1 @1055 ]
+[u S1349 . 1 `S1337 1 . 1 0 `S1340 1 . 1 0 ]
+[v _CRCCON1bits CRCCON1bits `VES1349  1 e 1 @1055 ]
 [s S473 . 1 `uc 1 SSP1IF 1 0 :1:0 
 `uc 1 BCL1IF 1 0 :1:1 
 `uc 1 SSP2IF 1 0 :1:2 
@@ -725,7 +742,7 @@ PETIT_RXTX_TIMEOUT 4
 "21299
 [u S196 . 1 `S189 1 . 1 0 ]
 [v _PIR4bits PIR4bits `VES196  1 e 1 @1808 ]
-[s S1479 . 1 `uc 1 CWG1IF 1 0 :1:0 
+[s S1450 . 1 `uc 1 CWG1IF 1 0 :1:0 
 `uc 1 CWG2IF 1 0 :1:1 
 `uc 1 CWG3IF 1 0 :1:2 
 `uc 1 . 1 0 :1:3 
@@ -735,11 +752,11 @@ PETIT_RXTX_TIMEOUT 4
 `uc 1 SCANIF 1 0 :1:7 
 ]
 "21456
-[s S1488 . 1 `uc 1 . 1 0 :4:0 
+[s S1459 . 1 `uc 1 . 1 0 :4:0 
 `uc 1 NCOIF 1 0 :1:4 
 ]
-[u S1491 . 1 `S1479 1 . 1 0 `S1488 1 . 1 0 ]
-[v _PIR7bits PIR7bits `VES1491  1 e 1 @1811 ]
+[u S1462 . 1 `S1450 1 . 1 0 `S1459 1 . 1 0 ]
+[v _PIR7bits PIR7bits `VES1462  1 e 1 @1811 ]
 [s S441 . 1 `uc 1 SSP1IE 1 0 :1:0 
 `uc 1 BCL1IE 1 0 :1:1 
 `uc 1 SSP2IE 1 0 :1:2 
@@ -844,8 +861,8 @@ PETIT_RXTX_TIMEOUT 4
 [v _RXPPSbits RXPPSbits `VES131  1 e 1 @3787 ]
 "32461
 [v _RC1PPS RC1PPS `VEuc  1 e 1 @3873 ]
-"32611
-[v _RC4PPS RC4PPS `VEuc  1 e 1 @3876 ]
+"32711
+[v _RC6PPS RC6PPS `VEuc  1 e 1 @3878 ]
 "32811
 [v _ANSELA ANSELA `VEuc  1 e 1 @3896 ]
 "32873
@@ -866,9 +883,13 @@ PETIT_RXTX_TIMEOUT 4
 [v _ODCONC ODCONC `VEuc  1 e 1 @3920 ]
 "34671
 [v _WPUE WPUE `VEuc  1 e 1 @3941 ]
-[s S1350 . 3 `uc 1 dataWidth 1 0 `uc 1 polyWidth 1 1 `uc 1 seedDirection 1 2 ]
+"14 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\main.c
+[v _MODBUS_ADDRESS MODBUS_ADDRESS `ui  1 e 2 0 ]
+"15
+[v _result result `ui  1 e 2 0 ]
+[s S1321 . 3 `uc 1 dataWidth 1 0 `uc 1 polyWidth 1 1 `uc 1 seedDirection 1 2 ]
 "69 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/crc.c
-[v _crcObj crcObj `S1350  1 s 3 crcObj ]
+[v _crcObj crcObj `S1321  1 s 3 crcObj ]
 "64 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/eusart.c
 [v _eusartRxHead eusartRxHead `VEuc  1 e 1 0 ]
 "65
@@ -893,9 +914,9 @@ PETIT_RXTX_TIMEOUT 4
 [v _PETITMODBUS_SLAVE_ADDRESS PETITMODBUS_SLAVE_ADDRESS `uc  1 e 1 0 ]
 "27
 [v _PETITMODBUS_BROADCAST_ADDRESS PETITMODBUS_BROADCAST_ADDRESS `uc  1 e 1 0 ]
-[s S1607 . 28 `uc 1 Address 1 0 `uc 1 Function 1 1 `[24]uc 1 DataBuf 24 2 `us 1 DataLen 2 26 ]
+[s S1578 . 28 `uc 1 Address 1 0 `uc 1 Function 1 1 `[24]uc 1 DataBuf 24 2 `us 1 DataLen 2 26 ]
 "47
-[v _Petit_Tx_Data Petit_Tx_Data `S1607  1 e 28 0 ]
+[v _Petit_Tx_Data Petit_Tx_Data `S1578  1 e 28 0 ]
 "48
 [v _Petit_Tx_Current Petit_Tx_Current `ui  1 e 2 0 ]
 "49
@@ -907,7 +928,7 @@ PETIT_RXTX_TIMEOUT 4
 "52
 [v _Petit_Tx_Buf_Size Petit_Tx_Buf_Size `ui  1 e 2 0 ]
 "54
-[v _Petit_Rx_Data Petit_Rx_Data `S1607  1 e 28 0 ]
+[v _Petit_Rx_Data Petit_Rx_Data `S1578  1 e 28 0 ]
 "55
 [v _Petit_Rx_CRC16 Petit_Rx_CRC16 `ui  1 e 2 0 ]
 "56
@@ -924,13 +945,13 @@ PETIT_RXTX_TIMEOUT 4
 [v _PetitReceiveBuffer PetitReceiveBuffer `VE[24]uc  1 e 24 0 ]
 "8
 [v _PetitReceiveCounter PetitReceiveCounter `VEuc  1 e 1 0 ]
-[s S1624 . 2 `s 1 ActValue 2 0 ]
+[s S1595 . 2 `ui 1 ActValue 2 0 ]
 "6 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitRegConstant.c
-[v _PetitRegisters PetitRegisters `[7]S1624  1 e 14 0 ]
-"15 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\main.c
+[v _PetitRegisters PetitRegisters `[7]S1595  1 e 14 0 ]
+"17 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\main.c
 [v _main main `(v  1 e 1 0 ]
 {
-"34
+"38
 } 0
 "50 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/mcc.c
 [v _SYSTEM_Initialize SYSTEM_Initialize `(v  1 e 1 0 ]
@@ -1187,6 +1208,20 @@ PETIT_RXTX_TIMEOUT 4
 [v _InitTMR1 InitTMR1 `(v  1 e 1 0 ]
 {
 "16
+} 0
+"53 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\main.c
+[v _Get_ID_From_AD Get_ID_From_AD `(v  1 e 1 0 ]
+{
+"77
+} 0
+"128 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/adcc.c
+[v _ADCC_GetSingleConversion ADCC_GetSingleConversion `(ui  1 e 2 0 ]
+{
+[v ADCC_GetSingleConversion@channel channel `E14200  1 a 1 wreg ]
+[v ADCC_GetSingleConversion@channel channel `E14200  1 a 1 wreg ]
+"131
+[v ADCC_GetSingleConversion@channel channel `E14200  1 a 1 6 ]
+"151
 } 0
 "52 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/interrupt_manager.c
 [v _INTERRUPT_InterruptManager INTERRUPT_InterruptManager `II(v  1 e 1 0 ]

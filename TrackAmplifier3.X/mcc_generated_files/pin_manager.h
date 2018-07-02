@@ -427,17 +427,25 @@
 #define RC3_SetAnalogMode()         do { ANSELCbits.ANSC3 = 1; } while(0)
 #define RC3_SetDigitalMode()        do { ANSELCbits.ANSC3 = 0; } while(0)
 
-// get/set RC4 procedures
-#define RC4_SetHigh()               do { LATCbits.LATC4 = 1; } while(0)
-#define RC4_SetLow()                do { LATCbits.LATC4 = 0; } while(0)
-#define RC4_Toggle()                do { LATCbits.LATC4 = ~LATCbits.LATC4; } while(0)
-#define RC4_GetValue()              PORTCbits.RC4
-#define RC4_SetDigitalInput()       do { TRISCbits.TRISC4 = 1; } while(0)
-#define RC4_SetDigitalOutput()      do { TRISCbits.TRISC4 = 0; } while(0)
-#define RC4_SetPullup()             do { WPUCbits.WPUC4 = 1; } while(0)
-#define RC4_ResetPullup()           do { WPUCbits.WPUC4 = 0; } while(0)
-#define RC4_SetAnalogMode()         do { ANSELCbits.ANSC4 = 1; } while(0)
-#define RC4_SetDigitalMode()        do { ANSELCbits.ANSC4 = 0; } while(0)
+// get/set PWM aliases
+#define PWM_TRIS                 TRISCbits.TRISC4
+#define PWM_LAT                  LATCbits.LATC4
+#define PWM_PORT                 PORTCbits.RC4
+#define PWM_WPU                  WPUCbits.WPUC4
+#define PWM_OD                   ODCONCbits.ODCC4
+#define PWM_ANS                  ANSELCbits.ANSC4
+#define PWM_SetHigh()            do { LATCbits.LATC4 = 1; } while(0)
+#define PWM_SetLow()             do { LATCbits.LATC4 = 0; } while(0)
+#define PWM_Toggle()             do { LATCbits.LATC4 = ~LATCbits.LATC4; } while(0)
+#define PWM_GetValue()           PORTCbits.RC4
+#define PWM_SetDigitalInput()    do { TRISCbits.TRISC4 = 1; } while(0)
+#define PWM_SetDigitalOutput()   do { TRISCbits.TRISC4 = 0; } while(0)
+#define PWM_SetPullup()          do { WPUCbits.WPUC4 = 1; } while(0)
+#define PWM_ResetPullup()        do { WPUCbits.WPUC4 = 0; } while(0)
+#define PWM_SetPushPull()        do { ODCONCbits.ODCC4 = 0; } while(0)
+#define PWM_SetOpenDrain()       do { ODCONCbits.ODCC4 = 1; } while(0)
+#define PWM_SetAnalogMode()      do { ANSELCbits.ANSC4 = 1; } while(0)
+#define PWM_SetDigitalMode()     do { ANSELCbits.ANSC4 = 0; } while(0)
 
 // get/set BRAKE aliases
 #define BRAKE_TRIS                 TRISCbits.TRISC5

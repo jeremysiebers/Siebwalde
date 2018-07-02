@@ -13721,7 +13721,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;PetitModbus.h: 71: };
 [; ;PetitModbus.h: 80: extern unsigned char PETITMODBUS_SLAVE_ADDRESS;
 [; ;PetitModbus.h: 82: typedef struct{
-[; ;PetitModbus.h: 83: short ActValue;
+[; ;PetitModbus.h: 83: unsigned int ActValue;
 [; ;PetitModbus.h: 84: }PetitRegStructure;
 [; ;PetitModbus.h: 86: extern PetitRegStructure PetitRegisters[7];
 [; ;PetitModbus.h: 87: extern volatile unsigned short PetitModbusTimerValue;
