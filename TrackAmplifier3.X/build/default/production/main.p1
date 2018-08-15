@@ -3,7 +3,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 [p mainexit ]
 "79 mcc_generated_files/mcc.h
 [v _SYSTEM_Initialize `(v ~T0 @X0 0 ef ]
-"355 C:\Program Files (x86)\Microchip\xc8\v1.44\include\pic16f18854.h
+"355 C:\Program Files (x86)\Microchip\xc8\v1.45\include\pic16f18854.h
 [s S26 :1 `uc 1 :5 `uc 1 :1 `uc 1 :1 `uc 1 ]
 [n S26 . INTEDG . PEIE GIE ]
 "354
@@ -31,15 +31,15 @@ Version 3.2 HI-TECH Software Intermediate Code
 "86
 [v _PetitRegisters `S1557 ~T0 @X0 -> 0 `x e ]
 "55 main.c
-[c E14364 0 2 3 4 8 23 60 61 62 63 .. ]
-[n E14364 . ID BMF VREF VLM CURR_SEN LM_TEMP channel_VSS channel_Temp channel_DAC1 channel_FVR_buf1  ]
+[c E14368 0 2 3 4 8 23 60 61 62 63 .. ]
+[n E14368 . ID BMF VREF VLM CURR_SEN LM_TEMP channel_VSS channel_Temp channel_DAC1 channel_FVR_buf1  ]
 "258 mcc_generated_files/adcc.h
-[v _ADCC_GetSingleConversion `(ui ~T0 @X0 0 ef1`E14364 ]
+[v _ADCC_GetSingleConversion `(ui ~T0 @X0 0 ef1`E14368 ]
 [; ;htc.h: 26: extern const char __xc8_OPTIM_SPEED;
 [; ;htc.h: 28: extern double __fpnormalize(double);
 [; ;xc8debug.h: 14: extern void __builtin_software_breakpoint(void);
 [; ;pic16f18854.h: 50: extern volatile unsigned char INDF0 @ 0x000;
-"52 C:\Program Files (x86)\Microchip\xc8\v1.44\include\pic16f18854.h
+"52 C:\Program Files (x86)\Microchip\xc8\v1.45\include\pic16f18854.h
 [; ;pic16f18854.h: 52: asm("INDF0 equ 00h");
 [; <" INDF0 equ 00h ;# ">
 [; ;pic16f18854.h: 55: typedef union {
@@ -2869,14 +2869,14 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;pic16f18854.h: 9334: };
 [; ;pic16f18854.h: 9335: } T2HLTbits_t;
 [; ;pic16f18854.h: 9336: extern volatile T2HLTbits_t T2HLTbits @ 0x28F;
-[; ;pic16f18854.h: 9431: extern volatile unsigned char T2CLK @ 0x290;
+[; ;pic16f18854.h: 9431: extern volatile unsigned char T2CLKCON @ 0x290;
 "9433
-[; ;pic16f18854.h: 9433: asm("T2CLK equ 0290h");
-[; <" T2CLK equ 0290h ;# ">
-[; ;pic16f18854.h: 9436: extern volatile unsigned char T2CLKCON @ 0x290;
-"9438
-[; ;pic16f18854.h: 9438: asm("T2CLKCON equ 0290h");
+[; ;pic16f18854.h: 9433: asm("T2CLKCON equ 0290h");
 [; <" T2CLKCON equ 0290h ;# ">
+[; ;pic16f18854.h: 9436: extern volatile unsigned char T2CLK @ 0x290;
+"9438
+[; ;pic16f18854.h: 9438: asm("T2CLK equ 0290h");
+[; <" T2CLK equ 0290h ;# ">
 [; ;pic16f18854.h: 9441: typedef union {
 [; ;pic16f18854.h: 9442: struct {
 [; ;pic16f18854.h: 9443: unsigned CS :4;
@@ -2896,8 +2896,8 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;pic16f18854.h: 9457: unsigned T2CS2 :1;
 [; ;pic16f18854.h: 9458: unsigned T2CS3 :1;
 [; ;pic16f18854.h: 9459: };
-[; ;pic16f18854.h: 9460: } T2CLKbits_t;
-[; ;pic16f18854.h: 9461: extern volatile T2CLKbits_t T2CLKbits @ 0x290;
+[; ;pic16f18854.h: 9460: } T2CLKCONbits_t;
+[; ;pic16f18854.h: 9461: extern volatile T2CLKCONbits_t T2CLKCONbits @ 0x290;
 [; ;pic16f18854.h: 9514: typedef union {
 [; ;pic16f18854.h: 9515: struct {
 [; ;pic16f18854.h: 9516: unsigned CS :4;
@@ -2917,8 +2917,8 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;pic16f18854.h: 9530: unsigned T2CS2 :1;
 [; ;pic16f18854.h: 9531: unsigned T2CS3 :1;
 [; ;pic16f18854.h: 9532: };
-[; ;pic16f18854.h: 9533: } T2CLKCONbits_t;
-[; ;pic16f18854.h: 9534: extern volatile T2CLKCONbits_t T2CLKCONbits @ 0x290;
+[; ;pic16f18854.h: 9533: } T2CLKbits_t;
+[; ;pic16f18854.h: 9534: extern volatile T2CLKbits_t T2CLKbits @ 0x290;
 [; ;pic16f18854.h: 9589: extern volatile unsigned char T2RST @ 0x291;
 "9591
 [; ;pic16f18854.h: 9591: asm("T2RST equ 0291h");
@@ -3055,14 +3055,14 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;pic16f18854.h: 9934: };
 [; ;pic16f18854.h: 9935: } T4HLTbits_t;
 [; ;pic16f18854.h: 9936: extern volatile T4HLTbits_t T4HLTbits @ 0x295;
-[; ;pic16f18854.h: 10031: extern volatile unsigned char T4CLK @ 0x296;
+[; ;pic16f18854.h: 10031: extern volatile unsigned char T4CLKCON @ 0x296;
 "10033
-[; ;pic16f18854.h: 10033: asm("T4CLK equ 0296h");
-[; <" T4CLK equ 0296h ;# ">
-[; ;pic16f18854.h: 10036: extern volatile unsigned char T4CLKCON @ 0x296;
-"10038
-[; ;pic16f18854.h: 10038: asm("T4CLKCON equ 0296h");
+[; ;pic16f18854.h: 10033: asm("T4CLKCON equ 0296h");
 [; <" T4CLKCON equ 0296h ;# ">
+[; ;pic16f18854.h: 10036: extern volatile unsigned char T4CLK @ 0x296;
+"10038
+[; ;pic16f18854.h: 10038: asm("T4CLK equ 0296h");
+[; <" T4CLK equ 0296h ;# ">
 [; ;pic16f18854.h: 10041: typedef union {
 [; ;pic16f18854.h: 10042: struct {
 [; ;pic16f18854.h: 10043: unsigned CS :4;
@@ -3082,8 +3082,8 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;pic16f18854.h: 10057: unsigned T4CS2 :1;
 [; ;pic16f18854.h: 10058: unsigned T4CS3 :1;
 [; ;pic16f18854.h: 10059: };
-[; ;pic16f18854.h: 10060: } T4CLKbits_t;
-[; ;pic16f18854.h: 10061: extern volatile T4CLKbits_t T4CLKbits @ 0x296;
+[; ;pic16f18854.h: 10060: } T4CLKCONbits_t;
+[; ;pic16f18854.h: 10061: extern volatile T4CLKCONbits_t T4CLKCONbits @ 0x296;
 [; ;pic16f18854.h: 10114: typedef union {
 [; ;pic16f18854.h: 10115: struct {
 [; ;pic16f18854.h: 10116: unsigned CS :4;
@@ -3103,8 +3103,8 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;pic16f18854.h: 10130: unsigned T4CS2 :1;
 [; ;pic16f18854.h: 10131: unsigned T4CS3 :1;
 [; ;pic16f18854.h: 10132: };
-[; ;pic16f18854.h: 10133: } T4CLKCONbits_t;
-[; ;pic16f18854.h: 10134: extern volatile T4CLKCONbits_t T4CLKCONbits @ 0x296;
+[; ;pic16f18854.h: 10133: } T4CLKbits_t;
+[; ;pic16f18854.h: 10134: extern volatile T4CLKbits_t T4CLKbits @ 0x296;
 [; ;pic16f18854.h: 10189: extern volatile unsigned char T4RST @ 0x297;
 "10191
 [; ;pic16f18854.h: 10191: asm("T4RST equ 0297h");
@@ -3241,14 +3241,14 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;pic16f18854.h: 10534: };
 [; ;pic16f18854.h: 10535: } T6HLTbits_t;
 [; ;pic16f18854.h: 10536: extern volatile T6HLTbits_t T6HLTbits @ 0x29B;
-[; ;pic16f18854.h: 10631: extern volatile unsigned char T6CLK @ 0x29C;
+[; ;pic16f18854.h: 10631: extern volatile unsigned char T6CLKCON @ 0x29C;
 "10633
-[; ;pic16f18854.h: 10633: asm("T6CLK equ 029Ch");
-[; <" T6CLK equ 029Ch ;# ">
-[; ;pic16f18854.h: 10636: extern volatile unsigned char T6CLKCON @ 0x29C;
-"10638
-[; ;pic16f18854.h: 10638: asm("T6CLKCON equ 029Ch");
+[; ;pic16f18854.h: 10633: asm("T6CLKCON equ 029Ch");
 [; <" T6CLKCON equ 029Ch ;# ">
+[; ;pic16f18854.h: 10636: extern volatile unsigned char T6CLK @ 0x29C;
+"10638
+[; ;pic16f18854.h: 10638: asm("T6CLK equ 029Ch");
+[; <" T6CLK equ 029Ch ;# ">
 [; ;pic16f18854.h: 10641: typedef union {
 [; ;pic16f18854.h: 10642: struct {
 [; ;pic16f18854.h: 10643: unsigned CS :4;
@@ -3268,8 +3268,8 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;pic16f18854.h: 10657: unsigned T6CS2 :1;
 [; ;pic16f18854.h: 10658: unsigned T6CS3 :1;
 [; ;pic16f18854.h: 10659: };
-[; ;pic16f18854.h: 10660: } T6CLKbits_t;
-[; ;pic16f18854.h: 10661: extern volatile T6CLKbits_t T6CLKbits @ 0x29C;
+[; ;pic16f18854.h: 10660: } T6CLKCONbits_t;
+[; ;pic16f18854.h: 10661: extern volatile T6CLKCONbits_t T6CLKCONbits @ 0x29C;
 [; ;pic16f18854.h: 10714: typedef union {
 [; ;pic16f18854.h: 10715: struct {
 [; ;pic16f18854.h: 10716: unsigned CS :4;
@@ -3289,8 +3289,8 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;pic16f18854.h: 10730: unsigned T6CS2 :1;
 [; ;pic16f18854.h: 10731: unsigned T6CS3 :1;
 [; ;pic16f18854.h: 10732: };
-[; ;pic16f18854.h: 10733: } T6CLKCONbits_t;
-[; ;pic16f18854.h: 10734: extern volatile T6CLKCONbits_t T6CLKCONbits @ 0x29C;
+[; ;pic16f18854.h: 10733: } T6CLKbits_t;
+[; ;pic16f18854.h: 10734: extern volatile T6CLKbits_t T6CLKbits @ 0x29C;
 [; ;pic16f18854.h: 10789: extern volatile unsigned char T6RST @ 0x29D;
 "10791
 [; ;pic16f18854.h: 10791: asm("T6RST equ 029Dh");
@@ -12616,10 +12616,10 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;pic16f18854.h: 39495: extern volatile __bit T2CKPS1 @ (((unsigned) &T2CON)*8) + 5;
 [; ;pic16f18854.h: 39497: extern volatile __bit T2CKPS2 @ (((unsigned) &T2CON)*8) + 6;
 [; ;pic16f18854.h: 39499: extern volatile __bit T2CKSYNC @ (((unsigned) &T2HLT)*8) + 5;
-[; ;pic16f18854.h: 39501: extern volatile __bit T2CS0 @ (((unsigned) &T2CLK)*8) + 0;
-[; ;pic16f18854.h: 39503: extern volatile __bit T2CS1 @ (((unsigned) &T2CLK)*8) + 1;
-[; ;pic16f18854.h: 39505: extern volatile __bit T2CS2 @ (((unsigned) &T2CLK)*8) + 2;
-[; ;pic16f18854.h: 39507: extern volatile __bit T2CS3 @ (((unsigned) &T2CLK)*8) + 3;
+[; ;pic16f18854.h: 39501: extern volatile __bit T2CS0 @ (((unsigned) &T2CLKCON)*8) + 0;
+[; ;pic16f18854.h: 39503: extern volatile __bit T2CS1 @ (((unsigned) &T2CLKCON)*8) + 1;
+[; ;pic16f18854.h: 39505: extern volatile __bit T2CS2 @ (((unsigned) &T2CLKCON)*8) + 2;
+[; ;pic16f18854.h: 39507: extern volatile __bit T2CS3 @ (((unsigned) &T2CLKCON)*8) + 3;
 [; ;pic16f18854.h: 39509: extern volatile __bit T2MODE0 @ (((unsigned) &T2HLT)*8) + 0;
 [; ;pic16f18854.h: 39511: extern volatile __bit T2MODE1 @ (((unsigned) &T2HLT)*8) + 1;
 [; ;pic16f18854.h: 39513: extern volatile __bit T2MODE2 @ (((unsigned) &T2HLT)*8) + 2;
@@ -12675,10 +12675,10 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;pic16f18854.h: 39613: extern volatile __bit T4CKPS1 @ (((unsigned) &T4CON)*8) + 5;
 [; ;pic16f18854.h: 39615: extern volatile __bit T4CKPS2 @ (((unsigned) &T4CON)*8) + 6;
 [; ;pic16f18854.h: 39617: extern volatile __bit T4CKSYNC @ (((unsigned) &T4HLT)*8) + 5;
-[; ;pic16f18854.h: 39619: extern volatile __bit T4CS0 @ (((unsigned) &T4CLK)*8) + 0;
-[; ;pic16f18854.h: 39621: extern volatile __bit T4CS1 @ (((unsigned) &T4CLK)*8) + 1;
-[; ;pic16f18854.h: 39623: extern volatile __bit T4CS2 @ (((unsigned) &T4CLK)*8) + 2;
-[; ;pic16f18854.h: 39625: extern volatile __bit T4CS3 @ (((unsigned) &T4CLK)*8) + 3;
+[; ;pic16f18854.h: 39619: extern volatile __bit T4CS0 @ (((unsigned) &T4CLKCON)*8) + 0;
+[; ;pic16f18854.h: 39621: extern volatile __bit T4CS1 @ (((unsigned) &T4CLKCON)*8) + 1;
+[; ;pic16f18854.h: 39623: extern volatile __bit T4CS2 @ (((unsigned) &T4CLKCON)*8) + 2;
+[; ;pic16f18854.h: 39625: extern volatile __bit T4CS3 @ (((unsigned) &T4CLKCON)*8) + 3;
 [; ;pic16f18854.h: 39627: extern volatile __bit T4MODE0 @ (((unsigned) &T4HLT)*8) + 0;
 [; ;pic16f18854.h: 39629: extern volatile __bit T4MODE1 @ (((unsigned) &T4HLT)*8) + 1;
 [; ;pic16f18854.h: 39631: extern volatile __bit T4MODE2 @ (((unsigned) &T4HLT)*8) + 2;
@@ -12734,10 +12734,10 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;pic16f18854.h: 39731: extern volatile __bit T6CKPS1 @ (((unsigned) &T6CON)*8) + 5;
 [; ;pic16f18854.h: 39733: extern volatile __bit T6CKPS2 @ (((unsigned) &T6CON)*8) + 6;
 [; ;pic16f18854.h: 39735: extern volatile __bit T6CKSYNC @ (((unsigned) &T6HLT)*8) + 5;
-[; ;pic16f18854.h: 39737: extern volatile __bit T6CS0 @ (((unsigned) &T6CLK)*8) + 0;
-[; ;pic16f18854.h: 39739: extern volatile __bit T6CS1 @ (((unsigned) &T6CLK)*8) + 1;
-[; ;pic16f18854.h: 39741: extern volatile __bit T6CS2 @ (((unsigned) &T6CLK)*8) + 2;
-[; ;pic16f18854.h: 39743: extern volatile __bit T6CS3 @ (((unsigned) &T6CLK)*8) + 3;
+[; ;pic16f18854.h: 39737: extern volatile __bit T6CS0 @ (((unsigned) &T6CLKCON)*8) + 0;
+[; ;pic16f18854.h: 39739: extern volatile __bit T6CS1 @ (((unsigned) &T6CLKCON)*8) + 1;
+[; ;pic16f18854.h: 39741: extern volatile __bit T6CS2 @ (((unsigned) &T6CLKCON)*8) + 2;
+[; ;pic16f18854.h: 39743: extern volatile __bit T6CS3 @ (((unsigned) &T6CLKCON)*8) + 3;
 [; ;pic16f18854.h: 39745: extern volatile __bit T6MODE0 @ (((unsigned) &T6HLT)*8) + 0;
 [; ;pic16f18854.h: 39747: extern volatile __bit T6MODE1 @ (((unsigned) &T6HLT)*8) + 1;
 [; ;pic16f18854.h: 39749: extern volatile __bit T6MODE2 @ (((unsigned) &T6HLT)*8) + 2;
@@ -13102,8 +13102,6 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;tmr3.h: 385: void TMR3_SetInterruptHandler(void (* InterruptHandler)(void));
 [; ;tmr3.h: 403: extern void (*TMR3_InterruptHandler)(void);
 [; ;tmr3.h: 421: void TMR3_DefaultInterruptHandler(void);
-[; ;pwm6.h: 102: void PWM6_Initialize(void);
-[; ;pwm6.h: 129: void PWM6_LoadDutyValue(uint16_t dutyValue);
 [; ;tmr1.h: 100: void TMR1_Initialize(void);
 [; ;tmr1.h: 129: void TMR1_StartTimer(void);
 [; ;tmr1.h: 161: void TMR1_StopTimer(void);
@@ -13116,6 +13114,8 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;tmr1.h: 385: void TMR1_SetInterruptHandler(void (* InterruptHandler)(void));
 [; ;tmr1.h: 403: extern void (*TMR1_InterruptHandler)(void);
 [; ;tmr1.h: 421: void TMR1_DefaultInterruptHandler(void);
+[; ;pwm6.h: 102: void PWM6_Initialize(void);
+[; ;pwm6.h: 129: void PWM6_LoadDutyValue(uint16_t dutyValue);
 [; ;tmr2.h: 79: typedef enum
 [; ;tmr2.h: 80: {
 [; ;tmr2.h: 89: TMR2_ROP_STARTS_TMRON,
@@ -13179,14 +13179,16 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;cmp1.h: 132: bool CMP1_GetOutputStatus(void);
 [; ;crc.h: 123: void CRC_Initialize(void);
 [; ;crc.h: 164: void CRC_Start(void);
-[; ;crc.h: 202: bool CRC_16BitDataWrite(uint16_t data);
-[; ;crc.h: 240: uint16_t CRC_CalculatedResultGet(bool reverse, uint16_t xorValue);
-[; ;crc.h: 279: bool CRC_IsBusy(void);
-[; ;crc.h: 319: void CRC_SCAN_StartScanner(void);
-[; ;crc.h: 359: void CRC_SCAN_StopScanner(void);
-[; ;crc.h: 400: void CRC_SCAN_SetAddressLimit(uint16_t startAddr,uint16_t endAddr);
-[; ;crc.h: 444: bool CRC_SCAN_IsScannerBusy(void);
-[; ;crc.h: 485: bool CRC_SCAN_HasScanCompleted(void);
+[; ;crc.h: 203: bool CRC_8BitDataWrite(uint8_t data);
+[; ;crc.h: 241: uint16_t CRC_CalculatedResultGet(bool reverse, uint16_t xorValue);
+[; ;crc.h: 280: bool CRC_IsBusy(void);
+[; ;crc.h: 320: void CRC_SCAN_StartScanner(void);
+[; ;crc.h: 360: void CRC_SCAN_StopScanner(void);
+[; ;crc.h: 401: void CRC_SCAN_SetAddressLimit(uint16_t startAddr,uint16_t endAddr);
+[; ;crc.h: 445: bool CRC_SCAN_IsScannerBusy(void);
+[; ;crc.h: 486: bool CRC_SCAN_HasScanCompleted(void);
+[; ;fvr.h: 93: void FVR_Initialize(void);
+[; ;fvr.h: 127: bool FVR_IsOutputReady(void);
 [; ;adcc.h: 72: typedef uint16_t adc_result_t;
 [; ;adcc.h: 89: typedef enum
 [; ;adcc.h: 90: {
@@ -13228,8 +13230,6 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;adcc.h: 728: bool ADCC_HasErrorCrossedUpperThreshold(void);
 [; ;adcc.h: 750: bool ADCC_HasErrorCrossedLowerThreshold(void);
 [; ;adcc.h: 772: uint8_t ADCC_GetConversionStageStatus(void);
-[; ;fvr.h: 93: void FVR_Initialize(void);
-[; ;fvr.h: 127: bool FVR_IsOutputReady(void);
 [; ;dac.h: 93: void DAC_Initialize(void);
 [; ;dac.h: 129: void DAC_SetOutput(uint8_t inputData);
 [; ;dac.h: 163: uint8_t DAC_GetOutput(void);
@@ -13253,606 +13253,6 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;Init.h: 12: extern void InitTMR1(void);
 [; ;Interrupts.h: 3: extern void PetitModbusIntHandlerTMR(void);
 [; ;Interrupts.h: 4: extern void PetitModbusIntHandlerRC(void);
-"30 modbus/PetitModbus.h
-[v _auchCRCHi `Cuc ~T0 @X0 -> 0 `x e ]
-[i _auchCRCHi
-:U ..
-"31
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
-"32
--> -> 64 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
-"33
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 1 `i `uc
-"34
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
-"35
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
-"36
--> -> 64 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
-"37
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 1 `i `uc
-"38
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
-"39
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
-"40
--> -> 64 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
-"41
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 1 `i `uc
-"42
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
-"43
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
-"44
--> -> 64 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
-"45
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 1 `i `uc
-"46
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
-"47
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
--> -> 64 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 1 `i `uc
--> -> 192 `i `uc
--> -> 128 `i `uc
--> -> 65 `i `uc
--> -> 0 `i `uc
--> -> 193 `i `uc
--> -> 129 `i `uc
-"49
--> -> 64 `i `uc
-..
-]
-[; ;PetitModbus.h: 30: const unsigned char auchCRCHi[] = {
-[; ;PetitModbus.h: 31: 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
-[; ;PetitModbus.h: 32: 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0,
-[; ;PetitModbus.h: 33: 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01,
-[; ;PetitModbus.h: 34: 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41,
-[; ;PetitModbus.h: 35: 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81,
-[; ;PetitModbus.h: 36: 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0,
-[; ;PetitModbus.h: 37: 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01,
-[; ;PetitModbus.h: 38: 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40,
-[; ;PetitModbus.h: 39: 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
-[; ;PetitModbus.h: 40: 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0,
-[; ;PetitModbus.h: 41: 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01,
-[; ;PetitModbus.h: 42: 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41,
-[; ;PetitModbus.h: 43: 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
-[; ;PetitModbus.h: 44: 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0,
-[; ;PetitModbus.h: 45: 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01,
-[; ;PetitModbus.h: 46: 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41,
-[; ;PetitModbus.h: 47: 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
-[; ;PetitModbus.h: 48: 0x40
-[; ;PetitModbus.h: 49: } ;
-"52
-[v _auchCRCLo `Cuc ~T0 @X0 -> 0 `x e ]
-[i _auchCRCLo
-:U ..
-"53
--> -> 0 `i `uc
--> -> 192 `i `uc
--> -> 193 `i `uc
--> -> 1 `i `uc
--> -> 195 `i `uc
--> -> 3 `i `uc
--> -> 2 `i `uc
--> -> 194 `i `uc
--> -> 198 `i `uc
--> -> 6 `i `uc
--> -> 7 `i `uc
--> -> 199 `i `uc
--> -> 5 `i `uc
--> -> 197 `i `uc
--> -> 196 `i `uc
-"54
--> -> 4 `i `uc
--> -> 204 `i `uc
--> -> 12 `i `uc
--> -> 13 `i `uc
--> -> 205 `i `uc
--> -> 15 `i `uc
--> -> 207 `i `uc
--> -> 206 `i `uc
--> -> 14 `i `uc
--> -> 10 `i `uc
--> -> 202 `i `uc
--> -> 203 `i `uc
--> -> 11 `i `uc
--> -> 201 `i `uc
--> -> 9 `i `uc
-"55
--> -> 8 `i `uc
--> -> 200 `i `uc
--> -> 216 `i `uc
--> -> 24 `i `uc
--> -> 25 `i `uc
--> -> 217 `i `uc
--> -> 27 `i `uc
--> -> 219 `i `uc
--> -> 218 `i `uc
--> -> 26 `i `uc
--> -> 30 `i `uc
--> -> 222 `i `uc
--> -> 223 `i `uc
--> -> 31 `i `uc
--> -> 221 `i `uc
-"56
--> -> 29 `i `uc
--> -> 28 `i `uc
--> -> 220 `i `uc
--> -> 20 `i `uc
--> -> 212 `i `uc
--> -> 213 `i `uc
--> -> 21 `i `uc
--> -> 215 `i `uc
--> -> 23 `i `uc
--> -> 22 `i `uc
--> -> 214 `i `uc
--> -> 210 `i `uc
--> -> 18 `i `uc
--> -> 19 `i `uc
--> -> 211 `i `uc
-"57
--> -> 17 `i `uc
--> -> 209 `i `uc
--> -> 208 `i `uc
--> -> 16 `i `uc
--> -> 240 `i `uc
--> -> 48 `i `uc
--> -> 49 `i `uc
--> -> 241 `i `uc
--> -> 51 `i `uc
--> -> 243 `i `uc
--> -> 242 `i `uc
--> -> 50 `i `uc
--> -> 54 `i `uc
--> -> 246 `i `uc
--> -> 247 `i `uc
-"58
--> -> 55 `i `uc
--> -> 245 `i `uc
--> -> 53 `i `uc
--> -> 52 `i `uc
--> -> 244 `i `uc
--> -> 60 `i `uc
--> -> 252 `i `uc
--> -> 253 `i `uc
--> -> 61 `i `uc
--> -> 255 `i `uc
--> -> 63 `i `uc
--> -> 62 `i `uc
--> -> 254 `i `uc
--> -> 250 `i `uc
--> -> 58 `i `uc
-"59
--> -> 59 `i `uc
--> -> 251 `i `uc
--> -> 57 `i `uc
--> -> 249 `i `uc
--> -> 248 `i `uc
--> -> 56 `i `uc
--> -> 40 `i `uc
--> -> 232 `i `uc
--> -> 233 `i `uc
--> -> 41 `i `uc
--> -> 235 `i `uc
--> -> 43 `i `uc
--> -> 42 `i `uc
--> -> 234 `i `uc
--> -> 238 `i `uc
-"60
--> -> 46 `i `uc
--> -> 47 `i `uc
--> -> 239 `i `uc
--> -> 45 `i `uc
--> -> 237 `i `uc
--> -> 236 `i `uc
--> -> 44 `i `uc
--> -> 228 `i `uc
--> -> 36 `i `uc
--> -> 37 `i `uc
--> -> 229 `i `uc
--> -> 39 `i `uc
--> -> 231 `i `uc
--> -> 230 `i `uc
--> -> 38 `i `uc
-"61
--> -> 34 `i `uc
--> -> 226 `i `uc
--> -> 227 `i `uc
--> -> 35 `i `uc
--> -> 225 `i `uc
--> -> 33 `i `uc
--> -> 32 `i `uc
--> -> 224 `i `uc
--> -> 160 `i `uc
--> -> 96 `i `uc
--> -> 97 `i `uc
--> -> 161 `i `uc
--> -> 99 `i `uc
--> -> 163 `i `uc
--> -> 162 `i `uc
-"62
--> -> 98 `i `uc
--> -> 102 `i `uc
--> -> 166 `i `uc
--> -> 167 `i `uc
--> -> 103 `i `uc
--> -> 165 `i `uc
--> -> 101 `i `uc
--> -> 100 `i `uc
--> -> 164 `i `uc
--> -> 108 `i `uc
--> -> 172 `i `uc
--> -> 173 `i `uc
--> -> 109 `i `uc
--> -> 175 `i `uc
--> -> 111 `i `uc
-"63
--> -> 110 `i `uc
--> -> 174 `i `uc
--> -> 170 `i `uc
--> -> 106 `i `uc
--> -> 107 `i `uc
--> -> 171 `i `uc
--> -> 105 `i `uc
--> -> 169 `i `uc
--> -> 168 `i `uc
--> -> 104 `i `uc
--> -> 120 `i `uc
--> -> 184 `i `uc
--> -> 185 `i `uc
--> -> 121 `i `uc
--> -> 187 `i `uc
-"64
--> -> 123 `i `uc
--> -> 122 `i `uc
--> -> 186 `i `uc
--> -> 190 `i `uc
--> -> 126 `i `uc
--> -> 127 `i `uc
--> -> 191 `i `uc
--> -> 125 `i `uc
--> -> 189 `i `uc
--> -> 188 `i `uc
--> -> 124 `i `uc
--> -> 180 `i `uc
--> -> 116 `i `uc
--> -> 117 `i `uc
--> -> 181 `i `uc
-"65
--> -> 119 `i `uc
--> -> 183 `i `uc
--> -> 182 `i `uc
--> -> 118 `i `uc
--> -> 114 `i `uc
--> -> 178 `i `uc
--> -> 179 `i `uc
--> -> 115 `i `uc
--> -> 177 `i `uc
--> -> 113 `i `uc
--> -> 112 `i `uc
--> -> 176 `i `uc
--> -> 80 `i `uc
--> -> 144 `i `uc
--> -> 145 `i `uc
-"66
--> -> 81 `i `uc
--> -> 147 `i `uc
--> -> 83 `i `uc
--> -> 82 `i `uc
--> -> 146 `i `uc
--> -> 150 `i `uc
--> -> 86 `i `uc
--> -> 87 `i `uc
--> -> 151 `i `uc
--> -> 85 `i `uc
--> -> 149 `i `uc
--> -> 148 `i `uc
--> -> 84 `i `uc
--> -> 156 `i `uc
--> -> 92 `i `uc
-"67
--> -> 93 `i `uc
--> -> 157 `i `uc
--> -> 95 `i `uc
--> -> 159 `i `uc
--> -> 158 `i `uc
--> -> 94 `i `uc
--> -> 90 `i `uc
--> -> 154 `i `uc
--> -> 155 `i `uc
--> -> 91 `i `uc
--> -> 153 `i `uc
--> -> 89 `i `uc
--> -> 88 `i `uc
--> -> 152 `i `uc
--> -> 136 `i `uc
-"68
--> -> 72 `i `uc
--> -> 73 `i `uc
--> -> 137 `i `uc
--> -> 75 `i `uc
--> -> 139 `i `uc
--> -> 138 `i `uc
--> -> 74 `i `uc
--> -> 78 `i `uc
--> -> 142 `i `uc
--> -> 143 `i `uc
--> -> 79 `i `uc
--> -> 141 `i `uc
--> -> 77 `i `uc
--> -> 76 `i `uc
--> -> 140 `i `uc
-"69
--> -> 68 `i `uc
--> -> 132 `i `uc
--> -> 133 `i `uc
--> -> 69 `i `uc
--> -> 135 `i `uc
--> -> 71 `i `uc
--> -> 70 `i `uc
--> -> 134 `i `uc
--> -> 130 `i `uc
--> -> 66 `i `uc
--> -> 67 `i `uc
--> -> 131 `i `uc
--> -> 65 `i `uc
--> -> 129 `i `uc
--> -> 128 `i `uc
-"71
--> -> 64 `i `uc
-..
-]
-[; ;PetitModbus.h: 52: const unsigned char auchCRCLo[] = {
-[; ;PetitModbus.h: 53: 0x00, 0xC0, 0xC1, 0x01, 0xC3, 0x03, 0x02, 0xC2, 0xC6, 0x06, 0x07, 0xC7, 0x05, 0xC5, 0xC4,
-[; ;PetitModbus.h: 54: 0x04, 0xCC, 0x0C, 0x0D, 0xCD, 0x0F, 0xCF, 0xCE, 0x0E, 0x0A, 0xCA, 0xCB, 0x0B, 0xC9, 0x09,
-[; ;PetitModbus.h: 55: 0x08, 0xC8, 0xD8, 0x18, 0x19, 0xD9, 0x1B, 0xDB, 0xDA, 0x1A, 0x1E, 0xDE, 0xDF, 0x1F, 0xDD,
-[; ;PetitModbus.h: 56: 0x1D, 0x1C, 0xDC, 0x14, 0xD4, 0xD5, 0x15, 0xD7, 0x17, 0x16, 0xD6, 0xD2, 0x12, 0x13, 0xD3,
-[; ;PetitModbus.h: 57: 0x11, 0xD1, 0xD0, 0x10, 0xF0, 0x30, 0x31, 0xF1, 0x33, 0xF3, 0xF2, 0x32, 0x36, 0xF6, 0xF7,
-[; ;PetitModbus.h: 58: 0x37, 0xF5, 0x35, 0x34, 0xF4, 0x3C, 0xFC, 0xFD, 0x3D, 0xFF, 0x3F, 0x3E, 0xFE, 0xFA, 0x3A,
-[; ;PetitModbus.h: 59: 0x3B, 0xFB, 0x39, 0xF9, 0xF8, 0x38, 0x28, 0xE8, 0xE9, 0x29, 0xEB, 0x2B, 0x2A, 0xEA, 0xEE,
-[; ;PetitModbus.h: 60: 0x2E, 0x2F, 0xEF, 0x2D, 0xED, 0xEC, 0x2C, 0xE4, 0x24, 0x25, 0xE5, 0x27, 0xE7, 0xE6, 0x26,
-[; ;PetitModbus.h: 61: 0x22, 0xE2, 0xE3, 0x23, 0xE1, 0x21, 0x20, 0xE0, 0xA0, 0x60, 0x61, 0xA1, 0x63, 0xA3, 0xA2,
-[; ;PetitModbus.h: 62: 0x62, 0x66, 0xA6, 0xA7, 0x67, 0xA5, 0x65, 0x64, 0xA4, 0x6C, 0xAC, 0xAD, 0x6D, 0xAF, 0x6F,
-[; ;PetitModbus.h: 63: 0x6E, 0xAE, 0xAA, 0x6A, 0x6B, 0xAB, 0x69, 0xA9, 0xA8, 0x68, 0x78, 0xB8, 0xB9, 0x79, 0xBB,
-[; ;PetitModbus.h: 64: 0x7B, 0x7A, 0xBA, 0xBE, 0x7E, 0x7F, 0xBF, 0x7D, 0xBD, 0xBC, 0x7C, 0xB4, 0x74, 0x75, 0xB5,
-[; ;PetitModbus.h: 65: 0x77, 0xB7, 0xB6, 0x76, 0x72, 0xB2, 0xB3, 0x73, 0xB1, 0x71, 0x70, 0xB0, 0x50, 0x90, 0x91,
-[; ;PetitModbus.h: 66: 0x51, 0x93, 0x53, 0x52, 0x92, 0x96, 0x56, 0x57, 0x97, 0x55, 0x95, 0x94, 0x54, 0x9C, 0x5C,
-[; ;PetitModbus.h: 67: 0x5D, 0x9D, 0x5F, 0x9F, 0x9E, 0x5E, 0x5A, 0x9A, 0x9B, 0x5B, 0x99, 0x59, 0x58, 0x98, 0x88,
-[; ;PetitModbus.h: 68: 0x48, 0x49, 0x89, 0x4B, 0x8B, 0x8A, 0x4A, 0x4E, 0x8E, 0x8F, 0x4F, 0x8D, 0x4D, 0x4C, 0x8C,
-[; ;PetitModbus.h: 69: 0x44, 0x84, 0x85, 0x45, 0x87, 0x47, 0x46, 0x86, 0x82, 0x42, 0x43, 0x83, 0x41, 0x81, 0x80,
-[; ;PetitModbus.h: 70: 0x40
-[; ;PetitModbus.h: 71: };
 [; ;PetitModbus.h: 80: extern unsigned char PETITMODBUS_SLAVE_ADDRESS;
 [; ;PetitModbus.h: 82: typedef struct{
 [; ;PetitModbus.h: 83: unsigned int ActValue;
@@ -13948,7 +13348,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 [f ]
 [; ;main.c: 55: result = ADCC_GetSingleConversion(0);
 "55
-[e = _result ( _ADCC_GetSingleConversion (1 -> -> 0 `i `E14364 ]
+[e = _result ( _ADCC_GetSingleConversion (1 -> -> 0 `i `E14368 ]
 [; ;main.c: 57: if(result > 80 && result < 96){
 "57
 [e $ ! && > _result -> -> 80 `i `ui < _result -> -> 96 `i `ui 1563  ]

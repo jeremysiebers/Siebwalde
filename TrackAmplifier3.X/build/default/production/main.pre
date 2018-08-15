@@ -1,17 +1,17 @@
 
 # 1 "main.c"
 
-# 26 "C:\Program Files (x86)\Microchip\xc8\v1.44\include\htc.h"
+# 26 "C:\Program Files (x86)\Microchip\xc8\v1.45\include\htc.h"
 extern const char __xc8_OPTIM_SPEED;
 
 extern double __fpnormalize(double);
 
 
-# 13 "C:\Program Files (x86)\Microchip\xc8\v1.44\include\xc8debug.h"
+# 13 "C:\Program Files (x86)\Microchip\xc8\v1.45\include\xc8debug.h"
 #pragma intrinsic(__builtin_software_breakpoint)
 extern void __builtin_software_breakpoint(void);
 
-# 50 "C:\Program Files (x86)\Microchip\xc8\v1.44\include\pic16f18854.h"
+# 50 "C:\Program Files (x86)\Microchip\xc8\v1.45\include\pic16f18854.h"
 extern volatile unsigned char INDF0 @ 0x000;
 
 asm("INDF0 equ 00h");
@@ -3268,39 +3268,16 @@ unsigned T2MODE4 :1;
 extern volatile T2HLTbits_t T2HLTbits @ 0x28F;
 
 # 9431
-extern volatile unsigned char T2CLK @ 0x290;
-
-asm("T2CLK equ 0290h");
-
-
 extern volatile unsigned char T2CLKCON @ 0x290;
 
 asm("T2CLKCON equ 0290h");
 
 
-typedef union {
-struct {
-unsigned CS :4;
-};
-struct {
-unsigned CS0 :1;
-unsigned CS1 :1;
-unsigned CS2 :1;
-unsigned CS3 :1;
-};
-struct {
-unsigned T2CS :4;
-};
-struct {
-unsigned T2CS0 :1;
-unsigned T2CS1 :1;
-unsigned T2CS2 :1;
-unsigned T2CS3 :1;
-};
-} T2CLKbits_t;
-extern volatile T2CLKbits_t T2CLKbits @ 0x290;
+extern volatile unsigned char T2CLK @ 0x290;
 
-# 9514
+asm("T2CLK equ 0290h");
+
+
 typedef union {
 struct {
 unsigned CS :4;
@@ -3322,6 +3299,29 @@ unsigned T2CS3 :1;
 };
 } T2CLKCONbits_t;
 extern volatile T2CLKCONbits_t T2CLKCONbits @ 0x290;
+
+# 9514
+typedef union {
+struct {
+unsigned CS :4;
+};
+struct {
+unsigned CS0 :1;
+unsigned CS1 :1;
+unsigned CS2 :1;
+unsigned CS3 :1;
+};
+struct {
+unsigned T2CS :4;
+};
+struct {
+unsigned T2CS0 :1;
+unsigned T2CS1 :1;
+unsigned T2CS2 :1;
+unsigned T2CS3 :1;
+};
+} T2CLKbits_t;
+extern volatile T2CLKbits_t T2CLKbits @ 0x290;
 
 # 9589
 extern volatile unsigned char T2RST @ 0x291;
@@ -3481,39 +3481,16 @@ unsigned T4MODE4 :1;
 extern volatile T4HLTbits_t T4HLTbits @ 0x295;
 
 # 10031
-extern volatile unsigned char T4CLK @ 0x296;
-
-asm("T4CLK equ 0296h");
-
-
 extern volatile unsigned char T4CLKCON @ 0x296;
 
 asm("T4CLKCON equ 0296h");
 
 
-typedef union {
-struct {
-unsigned CS :4;
-};
-struct {
-unsigned CS0 :1;
-unsigned CS1 :1;
-unsigned CS2 :1;
-unsigned CS3 :1;
-};
-struct {
-unsigned T4CS :4;
-};
-struct {
-unsigned T4CS0 :1;
-unsigned T4CS1 :1;
-unsigned T4CS2 :1;
-unsigned T4CS3 :1;
-};
-} T4CLKbits_t;
-extern volatile T4CLKbits_t T4CLKbits @ 0x296;
+extern volatile unsigned char T4CLK @ 0x296;
 
-# 10114
+asm("T4CLK equ 0296h");
+
+
 typedef union {
 struct {
 unsigned CS :4;
@@ -3535,6 +3512,29 @@ unsigned T4CS3 :1;
 };
 } T4CLKCONbits_t;
 extern volatile T4CLKCONbits_t T4CLKCONbits @ 0x296;
+
+# 10114
+typedef union {
+struct {
+unsigned CS :4;
+};
+struct {
+unsigned CS0 :1;
+unsigned CS1 :1;
+unsigned CS2 :1;
+unsigned CS3 :1;
+};
+struct {
+unsigned T4CS :4;
+};
+struct {
+unsigned T4CS0 :1;
+unsigned T4CS1 :1;
+unsigned T4CS2 :1;
+unsigned T4CS3 :1;
+};
+} T4CLKbits_t;
+extern volatile T4CLKbits_t T4CLKbits @ 0x296;
 
 # 10189
 extern volatile unsigned char T4RST @ 0x297;
@@ -3694,39 +3694,16 @@ unsigned T6MODE4 :1;
 extern volatile T6HLTbits_t T6HLTbits @ 0x29B;
 
 # 10631
-extern volatile unsigned char T6CLK @ 0x29C;
-
-asm("T6CLK equ 029Ch");
-
-
 extern volatile unsigned char T6CLKCON @ 0x29C;
 
 asm("T6CLKCON equ 029Ch");
 
 
-typedef union {
-struct {
-unsigned CS :4;
-};
-struct {
-unsigned CS0 :1;
-unsigned CS1 :1;
-unsigned CS2 :1;
-unsigned CS3 :1;
-};
-struct {
-unsigned T6CS :4;
-};
-struct {
-unsigned T6CS0 :1;
-unsigned T6CS1 :1;
-unsigned T6CS2 :1;
-unsigned T6CS3 :1;
-};
-} T6CLKbits_t;
-extern volatile T6CLKbits_t T6CLKbits @ 0x29C;
+extern volatile unsigned char T6CLK @ 0x29C;
 
-# 10714
+asm("T6CLK equ 029Ch");
+
+
 typedef union {
 struct {
 unsigned CS :4;
@@ -3748,6 +3725,29 @@ unsigned T6CS3 :1;
 };
 } T6CLKCONbits_t;
 extern volatile T6CLKCONbits_t T6CLKCONbits @ 0x29C;
+
+# 10714
+typedef union {
+struct {
+unsigned CS :4;
+};
+struct {
+unsigned CS0 :1;
+unsigned CS1 :1;
+unsigned CS2 :1;
+unsigned CS3 :1;
+};
+struct {
+unsigned T6CS :4;
+};
+struct {
+unsigned T6CS0 :1;
+unsigned T6CS1 :1;
+unsigned T6CS2 :1;
+unsigned T6CS3 :1;
+};
+} T6CLKbits_t;
+extern volatile T6CLKbits_t T6CLKbits @ 0x29C;
 
 # 10789
 extern volatile unsigned char T6RST @ 0x29D;
@@ -16385,13 +16385,13 @@ extern volatile __bit T2CKPS2 @ (((unsigned) &T2CON)*8) + 6;
 
 extern volatile __bit T2CKSYNC @ (((unsigned) &T2HLT)*8) + 5;
 
-extern volatile __bit T2CS0 @ (((unsigned) &T2CLK)*8) + 0;
+extern volatile __bit T2CS0 @ (((unsigned) &T2CLKCON)*8) + 0;
 
-extern volatile __bit T2CS1 @ (((unsigned) &T2CLK)*8) + 1;
+extern volatile __bit T2CS1 @ (((unsigned) &T2CLKCON)*8) + 1;
 
-extern volatile __bit T2CS2 @ (((unsigned) &T2CLK)*8) + 2;
+extern volatile __bit T2CS2 @ (((unsigned) &T2CLKCON)*8) + 2;
 
-extern volatile __bit T2CS3 @ (((unsigned) &T2CLK)*8) + 3;
+extern volatile __bit T2CS3 @ (((unsigned) &T2CLKCON)*8) + 3;
 
 extern volatile __bit T2MODE0 @ (((unsigned) &T2HLT)*8) + 0;
 
@@ -16503,13 +16503,13 @@ extern volatile __bit T4CKPS2 @ (((unsigned) &T4CON)*8) + 6;
 
 extern volatile __bit T4CKSYNC @ (((unsigned) &T4HLT)*8) + 5;
 
-extern volatile __bit T4CS0 @ (((unsigned) &T4CLK)*8) + 0;
+extern volatile __bit T4CS0 @ (((unsigned) &T4CLKCON)*8) + 0;
 
-extern volatile __bit T4CS1 @ (((unsigned) &T4CLK)*8) + 1;
+extern volatile __bit T4CS1 @ (((unsigned) &T4CLKCON)*8) + 1;
 
-extern volatile __bit T4CS2 @ (((unsigned) &T4CLK)*8) + 2;
+extern volatile __bit T4CS2 @ (((unsigned) &T4CLKCON)*8) + 2;
 
-extern volatile __bit T4CS3 @ (((unsigned) &T4CLK)*8) + 3;
+extern volatile __bit T4CS3 @ (((unsigned) &T4CLKCON)*8) + 3;
 
 extern volatile __bit T4MODE0 @ (((unsigned) &T4HLT)*8) + 0;
 
@@ -16621,13 +16621,13 @@ extern volatile __bit T6CKPS2 @ (((unsigned) &T6CON)*8) + 6;
 
 extern volatile __bit T6CKSYNC @ (((unsigned) &T6HLT)*8) + 5;
 
-extern volatile __bit T6CS0 @ (((unsigned) &T6CLK)*8) + 0;
+extern volatile __bit T6CS0 @ (((unsigned) &T6CLKCON)*8) + 0;
 
-extern volatile __bit T6CS1 @ (((unsigned) &T6CLK)*8) + 1;
+extern volatile __bit T6CS1 @ (((unsigned) &T6CLKCON)*8) + 1;
 
-extern volatile __bit T6CS2 @ (((unsigned) &T6CLK)*8) + 2;
+extern volatile __bit T6CS2 @ (((unsigned) &T6CLKCON)*8) + 2;
 
-extern volatile __bit T6CS3 @ (((unsigned) &T6CLK)*8) + 3;
+extern volatile __bit T6CS3 @ (((unsigned) &T6CLKCON)*8) + 3;
 
 extern volatile __bit T6MODE0 @ (((unsigned) &T6HLT)*8) + 0;
 
@@ -17246,18 +17246,18 @@ extern volatile __bit nWRITE1 @ (((unsigned) &SSP1STAT)*8) + 2;
 extern volatile __bit nWRITE2 @ (((unsigned) &SSP2STAT)*8) + 2;
 
 
-# 28 "C:\Program Files (x86)\Microchip\xc8\v1.44\include\pic.h"
+# 28 "C:\Program Files (x86)\Microchip\xc8\v1.45\include\pic.h"
 #pragma intrinsic(__nop)
 extern void __nop(void);
 
-# 114 "C:\Program Files (x86)\Microchip\xc8\v1.44\include\eeprom_routines.h"
+# 114 "C:\Program Files (x86)\Microchip\xc8\v1.45\include\eeprom_routines.h"
 extern void eeprom_write(unsigned char addr, unsigned char value);
 extern unsigned char eeprom_read(unsigned char addr);
 extern void eecpymem(volatile unsigned char *to, __eeprom unsigned char *from, unsigned char size);
 extern void memcpyee(__eeprom unsigned char *to, const unsigned char *from, unsigned char size);
 
 
-# 152 "C:\Program Files (x86)\Microchip\xc8\v1.44\include\pic.h"
+# 152 "C:\Program Files (x86)\Microchip\xc8\v1.45\include\pic.h"
 #pragma intrinsic(_delay)
 extern __nonreentrant void _delay(unsigned long);
 #pragma intrinsic(_delaywdt)
@@ -17280,7 +17280,7 @@ void PIN_MANAGER_Initialize (void);
 # 532
 void PIN_MANAGER_IOC(void);
 
-# 13 "C:\Program Files (x86)\Microchip\xc8\v1.44\include\stdint.h"
+# 13 "C:\Program Files (x86)\Microchip\xc8\v1.45\include\stdint.h"
 typedef signed char int8_t;
 
 # 20
@@ -17370,7 +17370,7 @@ typedef int16_t intptr_t;
 
 typedef uint16_t uintptr_t;
 
-# 12 "C:\Program Files (x86)\Microchip\xc8\v1.44\include\stdbool.h"
+# 12 "C:\Program Files (x86)\Microchip\xc8\v1.45\include\stdbool.h"
 typedef unsigned char bool;
 
 # 109 "mcc_generated_files/interrupt_manager.h"
@@ -17412,12 +17412,6 @@ extern void (*TMR3_InterruptHandler)(void);
 # 421
 void TMR3_DefaultInterruptHandler(void);
 
-# 102 "mcc_generated_files/pwm6.h"
-void PWM6_Initialize(void);
-
-# 129
-void PWM6_LoadDutyValue(uint16_t dutyValue);
-
 # 100 "mcc_generated_files/tmr1.h"
 void TMR1_Initialize(void);
 
@@ -17453,6 +17447,12 @@ extern void (*TMR1_InterruptHandler)(void);
 
 # 421
 void TMR1_DefaultInterruptHandler(void);
+
+# 102 "mcc_generated_files/pwm6.h"
+void PWM6_Initialize(void);
+
+# 129
+void PWM6_LoadDutyValue(uint16_t dutyValue);
 
 # 79 "mcc_generated_files/tmr2.h"
 typedef enum
@@ -17637,29 +17637,35 @@ void CRC_Initialize(void);
 # 164
 void CRC_Start(void);
 
-# 202
-bool CRC_16BitDataWrite(uint16_t data);
+# 203
+bool CRC_8BitDataWrite(uint8_t data);
 
-# 240
+# 241
 uint16_t CRC_CalculatedResultGet(bool reverse, uint16_t xorValue);
 
-# 279
+# 280
 bool CRC_IsBusy(void);
 
-# 319
+# 320
 void CRC_SCAN_StartScanner(void);
 
-# 359
+# 360
 void CRC_SCAN_StopScanner(void);
 
-# 400
+# 401
 void CRC_SCAN_SetAddressLimit(uint16_t startAddr,uint16_t endAddr);
 
-# 444
+# 445
 bool CRC_SCAN_IsScannerBusy(void);
 
-# 485
+# 486
 bool CRC_SCAN_HasScanCompleted(void);
+
+# 93 "mcc_generated_files/fvr.h"
+void FVR_Initialize(void);
+
+# 127
+bool FVR_IsOutputReady(void);
 
 # 72 "mcc_generated_files/adcc.h"
 typedef uint16_t adc_result_t;
@@ -17760,12 +17766,6 @@ bool ADCC_HasErrorCrossedLowerThreshold(void);
 # 772
 uint8_t ADCC_GetConversionStageStatus(void);
 
-# 93 "mcc_generated_files/fvr.h"
-void FVR_Initialize(void);
-
-# 127
-bool FVR_IsOutputReady(void);
-
 # 93 "mcc_generated_files/dac.h"
 void DAC_Initialize(void);
 
@@ -17823,51 +17823,7 @@ extern void InitTMR1(void);
 extern void PetitModbusIntHandlerTMR(void);
 extern void PetitModbusIntHandlerRC(void);
 
-# 30 "modbus/PetitModbus.h"
-const unsigned char auchCRCHi[] = {
-0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
-0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0,
-0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01,
-0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41,
-0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81,
-0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0,
-0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01,
-0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40,
-0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
-0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0,
-0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01,
-0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41,
-0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
-0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0,
-0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01,
-0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41,
-0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
-0x40
-} ;
-
-
-const unsigned char auchCRCLo[] = {
-0x00, 0xC0, 0xC1, 0x01, 0xC3, 0x03, 0x02, 0xC2, 0xC6, 0x06, 0x07, 0xC7, 0x05, 0xC5, 0xC4,
-0x04, 0xCC, 0x0C, 0x0D, 0xCD, 0x0F, 0xCF, 0xCE, 0x0E, 0x0A, 0xCA, 0xCB, 0x0B, 0xC9, 0x09,
-0x08, 0xC8, 0xD8, 0x18, 0x19, 0xD9, 0x1B, 0xDB, 0xDA, 0x1A, 0x1E, 0xDE, 0xDF, 0x1F, 0xDD,
-0x1D, 0x1C, 0xDC, 0x14, 0xD4, 0xD5, 0x15, 0xD7, 0x17, 0x16, 0xD6, 0xD2, 0x12, 0x13, 0xD3,
-0x11, 0xD1, 0xD0, 0x10, 0xF0, 0x30, 0x31, 0xF1, 0x33, 0xF3, 0xF2, 0x32, 0x36, 0xF6, 0xF7,
-0x37, 0xF5, 0x35, 0x34, 0xF4, 0x3C, 0xFC, 0xFD, 0x3D, 0xFF, 0x3F, 0x3E, 0xFE, 0xFA, 0x3A,
-0x3B, 0xFB, 0x39, 0xF9, 0xF8, 0x38, 0x28, 0xE8, 0xE9, 0x29, 0xEB, 0x2B, 0x2A, 0xEA, 0xEE,
-0x2E, 0x2F, 0xEF, 0x2D, 0xED, 0xEC, 0x2C, 0xE4, 0x24, 0x25, 0xE5, 0x27, 0xE7, 0xE6, 0x26,
-0x22, 0xE2, 0xE3, 0x23, 0xE1, 0x21, 0x20, 0xE0, 0xA0, 0x60, 0x61, 0xA1, 0x63, 0xA3, 0xA2,
-0x62, 0x66, 0xA6, 0xA7, 0x67, 0xA5, 0x65, 0x64, 0xA4, 0x6C, 0xAC, 0xAD, 0x6D, 0xAF, 0x6F,
-0x6E, 0xAE, 0xAA, 0x6A, 0x6B, 0xAB, 0x69, 0xA9, 0xA8, 0x68, 0x78, 0xB8, 0xB9, 0x79, 0xBB,
-0x7B, 0x7A, 0xBA, 0xBE, 0x7E, 0x7F, 0xBF, 0x7D, 0xBD, 0xBC, 0x7C, 0xB4, 0x74, 0x75, 0xB5,
-0x77, 0xB7, 0xB6, 0x76, 0x72, 0xB2, 0xB3, 0x73, 0xB1, 0x71, 0x70, 0xB0, 0x50, 0x90, 0x91,
-0x51, 0x93, 0x53, 0x52, 0x92, 0x96, 0x56, 0x57, 0x97, 0x55, 0x95, 0x94, 0x54, 0x9C, 0x5C,
-0x5D, 0x9D, 0x5F, 0x9F, 0x9E, 0x5E, 0x5A, 0x9A, 0x9B, 0x5B, 0x99, 0x59, 0x58, 0x98, 0x88,
-0x48, 0x49, 0x89, 0x4B, 0x8B, 0x8A, 0x4A, 0x4E, 0x8E, 0x8F, 0x4F, 0x8D, 0x4D, 0x4C, 0x8C,
-0x44, 0x84, 0x85, 0x45, 0x87, 0x47, 0x46, 0x86, 0x82, 0x42, 0x43, 0x83, 0x41, 0x81, 0x80,
-0x40
-};
-
-# 80
+# 80 "modbus/PetitModbus.h"
 extern unsigned char PETITMODBUS_SLAVE_ADDRESS;
 
 typedef struct{

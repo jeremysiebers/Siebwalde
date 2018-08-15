@@ -80,8 +80,8 @@ void CRC_Initialize(void)
 
     // SHIFTM shift right; CRCGO disabled; CRCEN enabled; ACCM data augmented with 0's; 
     CRCCON0 = 0x92;
-    // DLEN 15; PLEN 15; 
-    CRCCON1 = (15 << 4) | (15);
+    // DLEN 7; PLEN 15; 
+    CRCCON1 = (7 << 4) | (15);
     // 
     CRCACCL = 0x00;
     // 
@@ -99,12 +99,12 @@ void CRC_Initialize(void)
     // SCANTSEL LFINTOSC; 
     SCANTRIG = 0x00;
 
-    poly = 40961;
+    poly = 32773;
     CRCXORH = poly >> 8;
     CRCXORL = poly;
 
-    seed  = 0;
-    // CRCACC 0
+    seed  = 65535;
+    // CRCACC 65535
     CRCACCH = seed >> 8;
     CRCACCL = seed;
 
@@ -118,17 +118,16 @@ void CRC_Start(void)
     CRCCON0bits.CRCGO = 1;
 }
 
-bool CRC_16BitDataWrite(uint16_t data)
+bool CRC_8BitDataWrite(uint8_t data)
 {
     if(!CRCCON0bits.FULL)
     {
-        CRCDATH = data >> 8;
         CRCDATL = data;
-        return (1);
+        return(1);
     }
     else
     {
-        return (0);
+        return(0);
     }
 }
 

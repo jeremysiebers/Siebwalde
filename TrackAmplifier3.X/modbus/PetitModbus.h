@@ -21,8 +21,8 @@
 #define EXIT_CRITICAL_SECTION( )    (INTCONbits.PEIE = 0)
 
 //#define CRC_CALC                                                              // When uncommented a CRC is calculated by the processor
-#define CRC_LOOKUP                                                              // When uncommented a CRC is looked up by the processor in flash
-//#define CRC_HW                                                                  // When uncommented a CRC is calculated by dedicated HW
+//#define CRC_LOOKUP                                                              // When uncommented a CRC is looked up by the processor in flash
+#define CRC_HW                                                                  // When uncommented a CRC is calculated by dedicated HW
 
 
 #ifdef CRC_LOOKUP

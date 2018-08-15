@@ -26,6 +26,10 @@
 unsigned char PETITMODBUS_SLAVE_ADDRESS         = 1;
 unsigned char PETITMODBUS_BROADCAST_ADDRESS     = 0;
 
+#ifdef  CRC_HW
+uint16_t CRC_ReverseValue(uint16_t crc);                                        // When using HW CRC the result must be reversed after the last calculation
+#endif
+
 typedef enum
 {
     PETIT_RXTX_IDLE,
@@ -71,14 +75,21 @@ volatile unsigned short PetitModbusTimerValue         = 0;
  *                        low?order byte of the field is appended first, 
  *                        followed by the high?order byte. The CRC high?order 
  *                        byte is the last byte to be sent in the message.
- * @Statistics          : @PIC16F737 @20MHz xc8 free mode
- *                        Calc      : 64us
- *                        Lookup    : 23us
+ * @Statistics          : @PIC16F18854 @32MHz  XC8 PRO mode optm. speed + asm
+ *                        Calc      : 31.68us
+ *                        Lookup    : 7.36us
+ *                        HW        : 2.98us (without protection (checking on busy etc) + without jumps (direct register use instead of MCC files)
+ *                                            otherwise Lookup will be faster, HW will then be around 9us!)
+ *                                            secondly, HW takes a reverse CRC at the end taking 36.28us!)
+ *                                            Adding a safety NOP() after the GO takes it to 3.23us.
+ * 
+ * When using HW without protection and after reverse for 9 bytes data it will take 66.08us
+ * When using Lookup for 9 bytes data it will take 66.24 us
  */
 #ifdef CRC_CALC
 void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
 {
-    //PORTCbits.RC3 = 1;
+    LED_WAR_LAT = 1;
     unsigned int i;
 
     *CRC = *CRC ^(unsigned int) Data;
@@ -89,13 +100,13 @@ void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
         else
             *CRC >>= 1;
     }
-    //PORTCbits.RC3 = 0;
+    LED_WAR_LAT = 0;
 }
 #endif
 #ifdef CRC_LOOKUP
 void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
 {
-    //PORTCbits.RC3 = 1;
+    LED_WAR_LAT = 1;
     unsigned int uchCRCHi = *CRC >> 8;                                          /* high byte of CRC initialized */
     unsigned int uchCRCLo = *CRC & 0x00FF;                                      /* low byte of CRC initialized */
     unsigned char uIndex ;                                                      /* will index into CRC lookup table */
@@ -104,7 +115,7 @@ void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
     uchCRCLo = uchCRCHi ^ auchCRCHi[uIndex] ;
     uchCRCHi = auchCRCLo[uIndex] ;
     *CRC = (unsigned int)(uchCRCHi << 8 | uchCRCLo) ;
-    //PORTCbits.RC3 = 0;
+    LED_WAR_LAT = 0;
 }
 #endif
 /* Data = 0x02
@@ -122,11 +133,36 @@ void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
 #ifdef CRC_HW
 void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
 {
-    //PORTCbits.RC3 = 1;
+    //LED_WAR_LAT = 1;
     
-    //*CRC = 
-    //PORTCbits.RC3 = 0;
+    CRCACCH = *CRC >> 8;
+    CRCACCL = *CRC & 0x00FF;
+    
+    CRCDATL = Data;//CRC_8BitDataWrite(Data);//while (!CRC_8BitDataWrite(Data));    
+    CRCCON0bits.CRCGO = 1;//CRC_Start();
+    NOP();
+    //while (CRCCON0bits.BUSY);
+    *CRC = ((uint16_t)CRCACCH << 8)|CRCACCL;//CRC_CalculatedResultGet(false, 0);
+    
+    //LED_WAR_LAT = 0;
 }
+/* 
+ * https://www.microchip.com/forums/m885342.aspx
+ * http://www.tahapaksu.com/crc/
+ * 
+ * Use reflected/reversed Modbus polynominal = 0x8005
+ * 16 bit polynominal Word Width
+ * start with feed: 0xFFFF
+ * Seed method: Direct --> should not matter since we feed our selves
+ * Seed Shift Direction: shift right --> should not matter since we feed our selves
+ * Augmentation Mode: data augmented with 0's
+ * Data Shift Direction: shift right
+ * Data Word Width: 8 bits
+ * Feed all the bytes through the HW CRC calc without reversing
+ * When done, reverse the result --> done.
+ * CRC example in MCC and checked on http://www.tahapaksu.com/crc/ :
+ * 0x6C, 0x93 Reverse and final XOR = 0 --> 0xDD6C
+*/
 #endif
 /******************************************************************************/
 
@@ -438,7 +474,7 @@ void Petit_RxRTU(void)
     if(Petit_ReceiveBufferControl==PETIT_DATA_READY)
     {
         Petit_Rx_Data.Address               =PetitReceiveBuffer[0];
-        Petit_Rx_CRC16                      = 0xffff;
+        Petit_Rx_CRC16                      =0xFFFF;        
         Petit_CRC16(Petit_Rx_Data.Address, &Petit_Rx_CRC16);
         Petit_Rx_Data.Function              =PetitReceiveBuffer[1];
         Petit_CRC16(Petit_Rx_Data.Function, &Petit_Rx_CRC16);
@@ -465,6 +501,12 @@ void Petit_RxRTU(void)
             Petit_CRC16(Petit_Rx_Data.DataBuf[Petit_i], &Petit_Rx_CRC16);
         }
         
+        #ifdef  CRC_HW
+        //LED_WAR_LAT = 1;
+        Petit_Rx_CRC16 = CRC_ReverseValue(Petit_Rx_CRC16);
+        //LED_WAR_LAT = 0;
+        #endif
+        
         if (((unsigned int) Petit_Rx_Data.DataBuf[Petit_Rx_Data.DataLen] + ((unsigned int) Petit_Rx_Data.DataBuf[Petit_Rx_Data.DataLen + 1] << 8)) == Petit_Rx_CRC16)
         {
             // Valid message!
@@ -484,7 +526,7 @@ void Petit_RxRTU(void)
  */
 void Petit_TxRTU(void)
 {
-    Petit_Tx_CRC16                =0xFFFF;
+    Petit_Tx_CRC16                =0xFFFF;    
     Petit_Tx_Buf_Size             =0;
     Petit_Tx_Buf[Petit_Tx_Buf_Size++]   =Petit_Tx_Data.Address;
     Petit_CRC16(Petit_Tx_Data.Address, &Petit_Tx_CRC16);
@@ -496,6 +538,10 @@ void Petit_TxRTU(void)
         Petit_Tx_Buf[Petit_Tx_Buf_Size++]=Petit_Tx_Data.DataBuf[Petit_Tx_Current];
         Petit_CRC16(Petit_Tx_Data.DataBuf[Petit_Tx_Current], &Petit_Tx_CRC16);
     }
+    
+    #ifdef  CRC_HW
+    Petit_Tx_CRC16 = CRC_ReverseValue(Petit_Tx_CRC16);
+    #endif
     
     Petit_Tx_Buf[Petit_Tx_Buf_Size++] = Petit_Tx_CRC16 & 0x00FF;
     Petit_Tx_Buf[Petit_Tx_Buf_Size++] =(Petit_Tx_CRC16 & 0xFF00) >> 8;
@@ -514,9 +560,9 @@ void Petit_TxRTU(void)
 void ProcessPetitModbus(void)
 {
     if (Petit_Tx_State != PETIT_RXTX_IDLE){                                      // If answer is ready, send it!
-        //PORTCbits.RC3 = 1;
+        //LED_WAR_LAT = 1;
         Petit_TxRTU();
-        //PORTCbits.RC3 = 0;
+        //LED_WAR_LAT = 0;
     }
     
     Petit_RxRTU();                                                              // Call this function every cycle
@@ -559,5 +605,35 @@ void InitPetitModbus(unsigned char PetitModbusSlaveAddress)
     PetitModBus_UART_Initialise();
     PetitModBus_TIMER_Initialise();
 }
+
+/******************************************************************************/
+
+/*
+ * Function Name        : CRC_ReverseValue
+ * @How to use          : Feed the last HW calculated result
+ */
+#ifdef  CRC_HW
+
+uint16_t CRC_ReverseValue(uint16_t crc)
+{
+    uint16_t mask;
+    uint16_t reverse;
+
+    mask = 1;
+    mask <<= 15;
+    reverse = 0;
+
+    while(crc)
+    {
+        if(crc & 0x01)
+        {
+            reverse |= mask;
+        }
+        mask >>= 1;
+        crc >>= 1;
+    }
+    return reverse;
+}
+#endif
 
 /******************************************************************************/
