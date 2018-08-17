@@ -84,11 +84,11 @@ extern "C" {
     After the routine is called, the CRC module is ready to calculate the
     CRC of a data buffer.
 
-    Polynomial:             40961
+    Polynomial:             32773
     Polynomial Length - 1:  15
-    Data Length - 1:        15
+    Data Length - 1:        7
     Data Shift:             shift right
-    Seed:                   0
+    Seed:                   65535
 
   @Preconditions
     None.
@@ -165,10 +165,10 @@ void CRC_Start(void);
 
 /**
   @Summary
-    Writes data into CRCDATH/L register pair.
+    Writes data into CRCDATL register pair.
 
   @Description
-    This routine writes data into CRCDATH/L register pair.
+    This routine writes data into CRCDATHL register pair.
 
   @Preconditions
     None.
@@ -190,7 +190,8 @@ void CRC_Start(void);
     // Start CRC
     CRC_Start();
 
-    bool retVal = CRC_16BitDataWrite(0x0055)
+    // write 8-bit data
+    bool retVal = CRC_8BitDataWrite(0x55)
 
     // Check CRC busy?
     while(CRC_IsBusy());
@@ -199,7 +200,7 @@ void CRC_Start(void);
     crcVal = CRC_CalculatedResultGet(NORMAL,0x00);
     </code>
 */
-bool CRC_16BitDataWrite(uint16_t data);
+bool CRC_8BitDataWrite(uint8_t data);
 
 /**
   @Summary
