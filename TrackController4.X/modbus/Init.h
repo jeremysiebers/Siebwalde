@@ -7,7 +7,6 @@
 #define FTMR1               1000                                                // Hz
 #define BAUD_RATE           125000                                              // Baudrate
 
-
 /*-------------------------------DEFINES--------------------------------------*/
 extern void InitUART(void);
 extern void InitTMR1(void);

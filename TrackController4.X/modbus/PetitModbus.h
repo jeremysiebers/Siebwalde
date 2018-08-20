@@ -15,8 +15,11 @@
 #define PETITMODBUS_SLAVECOMMTIMEOUTTIMER               5                       // Uses tmr0 IF, 190 to 255 = 65 = 225uS, 1 timer round is 255 = 3.9 x 225us = 882 us this is the factor times the define constant here to wait for answer. 4 is about 5ms (with application jitter added) normal response is in the range of 430 us slave response.
 
 //#define CRC_CALC                                                                // When uncommented a CRC calculation is used for the function void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
+//#define CRC_LOOKUP                                                              // When uncommented a CRC is looked up by the processor in flash
+#define CRC_HW                                                                  // When uncommented a CRC is calculated by dedicated HW
 
-#ifndef CRC_CALC
+
+#ifdef CRC_LOOKUP
 /* Table of CRC values for high?order byte */
 const unsigned char auchCRCHi[] = {
 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
