@@ -14,7 +14,7 @@
     This header file provides implementations for driver APIs for all modules selected in the GUI.
     Generation Information :
         Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.65.2
-        Device            :  PIC16F18854
+        Device            :  PIC16F18857
         Driver Version    :  2.00
     The generated drivers are tested against the following:
         Compiler          :  XC8 1.45 or later
@@ -52,14 +52,10 @@ void SYSTEM_Initialize(void)
     PMD_Initialize();
     PIN_MANAGER_Initialize();
     OSCILLATOR_Initialize();
-    FVR_Initialize();
-    DAC_Initialize();
+    I2C2_Initialize();
     CRC_Initialize();
-    ADCC_Initialize();
-    TMR2_Initialize();
-    PWM6_Initialize();
-    CMP1_Initialize();
     TMR3_Initialize();
+    TMR2_Initialize();
     TMR1_Initialize();
     EUSART_Initialize();
 }

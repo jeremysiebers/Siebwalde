@@ -383,12 +383,14 @@ void Petit_TxRTU(void)
     }
     else{
         Petit_Tx_State    =PETIT_RXTX_WAIT_ANSWER;                              // Else Master must wait for answer (see ModBus protocol implementation)
-        SlaveAnswerTimeoutCounter = 0;
-        TMR1 = 0x00;
-        PIR1bits.TMR1IF = 0;   
-        PIE1bits.TMR1IE = 1;                                                    // Enable timeout timer (slave response timeout)      
-        T1CONbits.TMR1ON = 1;
-        PORTDbits.RD1 = 1;
+        
+        /* Set and enable slave answer timeout timer */
+        SlaveAnswerTimeoutCounter   = 0;
+        TMR1H                       = 0x00;
+        TMR1L                       = 0x00;
+        PIR4bits.TMR1IF             = 0;
+        PIE4bits.TMR1IE             = 0;
+        T1CONbits.TMR1ON            = 0;        
     }
 }
 
@@ -484,7 +486,7 @@ uint16_t CRC_ReverseValue(uint16_t crc)
 #endif
 
 /******************************************************************************/
- * Function Name        : SendPetitModbus
+/* Function Name        : SendPetitModbus
  * @How to use          : 
  */
 

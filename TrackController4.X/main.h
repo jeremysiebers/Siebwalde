@@ -12,8 +12,8 @@
 extern "C" {
 #endif
 
-void Get_ID_From_AD (void);
-
+#define True 1
+#define False 0
 
 #ifdef	__cplusplus
 }

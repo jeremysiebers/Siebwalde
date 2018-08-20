@@ -9,17 +9,13 @@
                      projectFiles="true">
         <itemPath>mcc_generated_files/mcc.h</itemPath>
         <itemPath>mcc_generated_files/pin_manager.h</itemPath>
-        <itemPath>mcc_generated_files/pwm6.h</itemPath>
         <itemPath>mcc_generated_files/tmr2.h</itemPath>
         <itemPath>mcc_generated_files/eusart.h</itemPath>
-        <itemPath>mcc_generated_files/cmp1.h</itemPath>
-        <itemPath>mcc_generated_files/adcc.h</itemPath>
-        <itemPath>mcc_generated_files/fvr.h</itemPath>
-        <itemPath>mcc_generated_files/dac.h</itemPath>
         <itemPath>mcc_generated_files/tmr3.h</itemPath>
         <itemPath>mcc_generated_files/tmr1.h</itemPath>
         <itemPath>mcc_generated_files/interrupt_manager.h</itemPath>
         <itemPath>mcc_generated_files/crc.h</itemPath>
+        <itemPath>mcc_generated_files/i2c2.h</itemPath>
       </logicalFolder>
       <logicalFolder name="modbus" displayName="modbus" projectFiles="true">
         <itemPath>modbus/General.h</itemPath>
@@ -43,17 +39,13 @@
         <itemPath>mcc_generated_files/mcc.c</itemPath>
         <itemPath>mcc_generated_files/device_config.c</itemPath>
         <itemPath>mcc_generated_files/pin_manager.c</itemPath>
-        <itemPath>mcc_generated_files/pwm6.c</itemPath>
         <itemPath>mcc_generated_files/tmr2.c</itemPath>
         <itemPath>mcc_generated_files/eusart.c</itemPath>
-        <itemPath>mcc_generated_files/cmp1.c</itemPath>
-        <itemPath>mcc_generated_files/adcc.c</itemPath>
-        <itemPath>mcc_generated_files/fvr.c</itemPath>
-        <itemPath>mcc_generated_files/dac.c</itemPath>
         <itemPath>mcc_generated_files/tmr3.c</itemPath>
         <itemPath>mcc_generated_files/tmr1.c</itemPath>
         <itemPath>mcc_generated_files/interrupt_manager.c</itemPath>
         <itemPath>mcc_generated_files/crc.c</itemPath>
+        <itemPath>mcc_generated_files/i2c2.c</itemPath>
       </logicalFolder>
       <logicalFolder name="modbus" displayName="modbus" projectFiles="true">
         <itemPath>modbus/General.c</itemPath>
@@ -80,7 +72,7 @@
     <conf name="default" type="2">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
-        <targetDevice>PIC16F18854</targetDevice>
+        <targetDevice>PIC16F18857</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
         <platformTool>PICkit3PlatformTool</platformTool>

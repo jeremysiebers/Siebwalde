@@ -18,6 +18,8 @@ void main(void) {
     
     SYSTEM_Initialize();
     
+    TMR1_StopTimer();
+    
     INTCONbits.GIE = 1;
     INTCONbits.PEIE = 1;
     

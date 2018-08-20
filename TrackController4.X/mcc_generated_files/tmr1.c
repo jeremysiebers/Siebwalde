@@ -14,7 +14,7 @@
     This source file provides APIs for TMR1.
     Generation Information :
         Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.65.2
-        Device            :  PIC16F18854
+        Device            :  PIC16F18857
         Driver Version    :  2.01
     The generated drivers are tested against the following:
         Compiler          :  XC8 1.45
@@ -50,7 +50,8 @@
 
 #include <xc.h>
 #include "tmr1.h"
-#include "../mcc_generated_files/mcc.h"
+//#include "../mcc_generated_files/mcc.h"
+#include "../modbus/General.h"
 
 /**
   Section: Global Variables Definitions
@@ -75,11 +76,11 @@ void TMR1_Initialize(void)
     //CS FOSC/4; 
     T1CLK = 0x01;
 
-    //TMR1H 0; 
-    TMR1H = 0x00;
+    //TMR1H 252; 
+    TMR1H = 0xFC;
 
-    //TMR1L 0; 
-    TMR1L = 0x00;
+    //TMR1L 24; 
+    TMR1L = 0x18;
 
     // Load the TMR value to reload variable
     timer1ReloadVal=(uint16_t)((TMR1H << 8) | TMR1L);
@@ -91,7 +92,7 @@ void TMR1_Initialize(void)
     PIE4bits.TMR1IE = 1;
 
     // Set Default Interrupt Handler
-    TMR1_SetInterruptHandler(TMR1_DefaultInterruptHandler);
+    TMR1_SetInterruptHandler(PetitModbusIntHandlerSlaveTimeOutTMR);
 
     // CKPS 1:8; nT1SYNC synchronize; TMR1ON enabled; T1RD16 disabled; 
     T1CON = 0x31;
@@ -183,7 +184,6 @@ void TMR1_SetInterruptHandler(void (* InterruptHandler)(void)){
 void TMR1_DefaultInterruptHandler(void){
     // add your TMR1 interrupt custom code
     // or set custom function using TMR1_SetInterruptHandler()
-    
 }
 
 /**
