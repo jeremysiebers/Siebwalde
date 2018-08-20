@@ -11,7 +11,7 @@
 # All addresses and the length are given in unqualified hexadecimal
 # in delta units.  Any other numeric values are decimal.
 %PSECTS
-$C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.obj
+$C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.obj
 reset_vec CODE 0 0 0 2 2
 end_init CODE 0 21 21 2 2
 config CONFIG 0 8007 8007 5 2
@@ -126,38 +126,38 @@ STRING 5A6-FFF 2
 # All other numeric values are in decimal.
 %LINETAB
 $dist/default/production\TrackAmplifier3.X.production.obj
-23 cinit CODE >20014:C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.
-23 cinit CODE >20017:C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.
+23 cinit CODE >20014:C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.
+23 cinit CODE >20017:C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.
 23 cinit CODE >26:C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbus.c
-24 cinit CODE >20115:C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.
+24 cinit CODE >20115:C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.
 25 cinit CODE >59:C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbus.c
-26 cinit CODE >20120:C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.
-27 cinit CODE >20122:C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.
-28 cinit CODE >20124:C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.
-29 cinit CODE >20126:C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.
-2A cinit CODE >20147:C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.
-2B cinit CODE >20143:C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.
-2C cinit CODE >20148:C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.
-2D cinit CODE >20149:C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.
-2E cinit CODE >20150:C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.
-2F cinit CODE >20151:C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.
-30 cinit CODE >20152:C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.
-33 cinit CODE >20156:C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.
-34 cinit CODE >20157:C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.
-35 cinit CODE >20158:C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.
-36 cinit CODE >20159:C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.
-37 cinit CODE >20160:C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.
-38 cinit CODE >20161:C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.
-3B cinit CODE >20165:C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.
-3C cinit CODE >20166:C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.
-3D cinit CODE >20167:C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.
-3E cinit CODE >20168:C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.
-3F cinit CODE >20169:C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.
-40 cinit CODE >20170:C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.
-43 cinit CODE >20176:C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.
-43 cinit CODE >20178:C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.
-44 cinit CODE >20179:C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.
-45 cinit CODE >20180:C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.
+26 cinit CODE >20120:C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.
+27 cinit CODE >20122:C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.
+28 cinit CODE >20124:C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.
+29 cinit CODE >20126:C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.
+2A cinit CODE >20147:C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.
+2B cinit CODE >20143:C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.
+2C cinit CODE >20148:C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.
+2D cinit CODE >20149:C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.
+2E cinit CODE >20150:C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.
+2F cinit CODE >20151:C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.
+30 cinit CODE >20152:C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.
+33 cinit CODE >20156:C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.
+34 cinit CODE >20157:C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.
+35 cinit CODE >20158:C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.
+36 cinit CODE >20159:C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.
+37 cinit CODE >20160:C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.
+38 cinit CODE >20161:C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.
+3B cinit CODE >20165:C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.
+3C cinit CODE >20166:C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.
+3D cinit CODE >20167:C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.
+3E cinit CODE >20168:C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.
+3F cinit CODE >20169:C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.
+40 cinit CODE >20170:C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.
+43 cinit CODE >20176:C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.
+43 cinit CODE >20178:C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.
+44 cinit CODE >20179:C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.
+45 cinit CODE >20180:C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.
 46 cinit CODE >17:C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\main.c
 46 cinit CODE >19:C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\main.c
 48 cinit CODE >21:C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\main.c
@@ -651,14 +651,14 @@ C intentry CODE >59:C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files
 4FA text2 CODE >179:C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/tmr3.c
 4FA text2 CODE >180:C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/tmr3.c
 4FF text2 CODE >181:C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/tmr3.c
-596 clrtext CODE >20132:C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.
-596 clrtext CODE >20133:C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.
-597 clrtext CODE >20134:C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.
-597 clrtext CODE >20135:C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.
-598 clrtext CODE >20136:C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.
-599 clrtext CODE >20137:C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.
-59A clrtext CODE >20138:C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.
-59B clrtext CODE >20139:C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.
+596 clrtext CODE >20132:C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.
+596 clrtext CODE >20133:C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.
+597 clrtext CODE >20134:C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.
+597 clrtext CODE >20135:C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.
+598 clrtext CODE >20136:C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.
+599 clrtext CODE >20137:C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.
+59A clrtext CODE >20138:C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.
+59B clrtext CODE >20139:C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.
 # %SYMTAB Section
 # An enumeration of all symbols in the program.
 # The beginning of the section is indicated by %SYMTAB.
@@ -716,10 +716,10 @@ _WPUA F39 0 ABS 0 - dist/default/production\TrackAmplifier3.X.production.obj
 _WPUB F44 0 ABS 0 - dist/default/production\TrackAmplifier3.X.production.obj
 _WPUC F4F 0 ABS 0 - dist/default/production\TrackAmplifier3.X.production.obj
 _WPUE F65 0 ABS 0 - dist/default/production\TrackAmplifier3.X.production.obj
-___sp 0 0 STACK 2 stack C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.obj
+___sp 0 0 STACK 2 stack C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.obj
 _main 8C 0 CODE 0 cinit dist/default/production\TrackAmplifier3.X.production.obj
 btemp 7E 0 ABS 0 - dist/default/production\TrackAmplifier3.X.production.obj
-start 42 0 CODE 0 init C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.obj
+start 42 0 CODE 0 init C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.obj
 _CRCACCH 419 0 ABS 0 - dist/default/production\TrackAmplifier3.X.production.obj
 _CRCACCL 418 0 ABS 0 - dist/default/production\TrackAmplifier3.X.production.obj
 _CRCCON0 41E 0 ABS 0 - dist/default/production\TrackAmplifier3.X.production.obj
@@ -754,12 +754,12 @@ _Petit_Tx_Current 4C 0 BANK0 1 bssBANK0 dist/default/production\TrackAmplifier3.
 __size_of_SYSTEM_Initialize 0 0 ABS 0 - dist/default/production\TrackAmplifier3.X.production.obj
 __HdataCOMMON 0 0 ABS 0 dataCOMMON -
 PetitModBus_UART_String@s 76 0 COMMON 1 cstackCOMMON dist/default/production\TrackAmplifier3.X.production.obj
-intlevel0 0 0 ENTRY 0 functab C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.obj
-intlevel1 0 0 ENTRY 0 functab C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.obj
-intlevel2 0 0 ENTRY 0 functab C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.obj
-intlevel3 0 0 ENTRY 0 functab C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.obj
-intlevel4 0 0 ENTRY 0 functab C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.obj
-intlevel5 0 0 ENTRY 0 functab C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.obj
+intlevel0 0 0 ENTRY 0 functab C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.obj
+intlevel1 0 0 ENTRY 0 functab C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.obj
+intlevel2 0 0 ENTRY 0 functab C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.obj
+intlevel3 0 0 ENTRY 0 functab C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.obj
+intlevel4 0 0 ENTRY 0 functab C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.obj
+intlevel5 0 0 ENTRY 0 functab C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.obj
 __size_of_HandlePetitModbusError 0 0 ABS 0 - dist/default/production\TrackAmplifier3.X.production.obj
 __LbssCOMMON 0 0 ABS 0 bssCOMMON -
 __end_of_HandleMPetitodbusWriteMultipleRegisters 596 0 CODE 0 cinit dist/default/production\TrackAmplifier3.X.production.obj
@@ -863,7 +863,7 @@ __end_of_ADCC_GetSingleConversion 168 0 CODE 0 cinit dist/default/production\Tra
 __end_of_TMR1_SetInterruptHandler A84 0 CODE 0 text5 dist/default/production\TrackAmplifier3.X.production.obj
 _CRC_Initialize 970 0 CODE 0 text15 dist/default/production\TrackAmplifier3.X.production.obj
 __end_of_ADCC_Initialize 828 0 CODE 0 cinit dist/default/production\TrackAmplifier3.X.production.obj
-___int_sp 0 0 STACK 2 stack C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.obj
+___int_sp 0 0 STACK 2 stack C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.obj
 __size_of_PetitModBus_TimerValues 0 0 ABS 0 - dist/default/production\TrackAmplifier3.X.production.obj
 __end_of_ReceiveInterrupt 870 0 CODE 0 text48 dist/default/production\TrackAmplifier3.X.production.obj
 __Hbank0 0 0 ABS 0 bank0 -
@@ -1045,7 +1045,7 @@ __end_of_PetitModBus_UART_Putch 922 0 CODE 0 text20 dist/default/production\Trac
 __HnvBANK0 0 0 ABS 0 nvBANK0 -
 __HnvBANK1 0 0 ABS 0 nvBANK1 -
 __Lintentry 8 0 CODE 0 intentry -
-reset_vec 0 0 CODE 0 reset_vec C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.obj
+reset_vec 0 0 CODE 0 reset_vec C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.obj
 __end_of_ProcessPetitModbus 1DA 0 CODE 0 cinit dist/default/production\TrackAmplifier3.X.production.obj
 _CCPTMRS1bits 21F 0 ABS 0 - dist/default/production\TrackAmplifier3.X.production.obj
 HandlePetitModbusWriteSingleRegister@Petit_i 78 0 COMMON 1 cstackCOMMON dist/default/production\TrackAmplifier3.X.production.obj
@@ -1161,8 +1161,8 @@ __size_of_CMP1_Initialize 0 0 ABS 0 - dist/default/production\TrackAmplifier3.X.
 _ProcessPetitModbus 172 0 CODE 0 cinit dist/default/production\TrackAmplifier3.X.production.obj
 _PetitModbusIntHandlerTMR B0A 0 CODE 0 text43 dist/default/production\TrackAmplifier3.X.production.obj
 _PetitModBus_TIMER_Initialise 83A 0 CODE 0 cinit dist/default/production\TrackAmplifier3.X.production.obj
-stackhi 21EF 0 ABS 0 - C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.obj
-stacklo 20B8 0 ABS 0 - C:\Users\JEREMY~1\AppData\Local\Temp\s4oc.obj
+stackhi 21EF 0 ABS 0 - C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.obj
+stacklo 20B8 0 ABS 0 - C:\Users\JEREMY~1\AppData\Local\Temp\s8lg.obj
 ReceiveInterrupt@Data 70 0 COMMON 1 cstackCOMMON dist/default/production\TrackAmplifier3.X.production.obj
 _EUSART_SetRxInterruptHandler AB4 0 CODE 0 text12 dist/default/production\TrackAmplifier3.X.production.obj
 _PetitModBus_UART_Initialise 448 0 CODE 0 cinit dist/default/production\TrackAmplifier3.X.production.obj
