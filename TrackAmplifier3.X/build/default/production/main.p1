@@ -3,6 +3,8 @@ Version 3.2 HI-TECH Software Intermediate Code
 [p mainexit ]
 "79 mcc_generated_files/mcc.h
 [v _SYSTEM_Initialize `(v ~T0 @X0 0 ef ]
+"161 mcc_generated_files/tmr1.h
+[v _TMR1_StopTimer `(v ~T0 @X0 0 ef ]
 "355 C:\Program Files (x86)\Microchip\xc8\v1.45\include\pic16f18854.h
 [s S26 :1 `uc 1 :5 `uc 1 :1 `uc 1 :1 `uc 1 ]
 [n S26 . INTEDG . PEIE GIE ]
@@ -30,7 +32,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 [n S1557 . ActValue ]
 "86
 [v _PetitRegisters `S1557 ~T0 @X0 -> 0 `x e ]
-"55 main.c
+"57 main.c
 [c E14368 0 2 3 4 8 23 60 61 62 63 .. ]
 [n E14368 . ID BMF VREF VLM CURR_SEN LM_TEMP channel_VSS channel_Temp channel_DAC1 channel_FVR_buf1  ]
 "258 mcc_generated_files/adcc.h
@@ -13292,141 +13294,144 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;main.c: 19: SYSTEM_Initialize();
 "19
 [e ( _SYSTEM_Initialize ..  ]
-[; ;main.c: 21: INTCONbits.GIE = 1;
+[; ;main.c: 21: TMR1_StopTimer();
 "21
+[e ( _TMR1_StopTimer ..  ]
+[; ;main.c: 23: INTCONbits.GIE = 1;
+"23
 [e = . . _INTCONbits 0 3 -> -> 1 `i `uc ]
-[; ;main.c: 22: INTCONbits.PEIE = 1;
-"22
-[e = . . _INTCONbits 0 2 -> -> 1 `i `uc ]
-[; ;main.c: 24: LATBbits.LATB5 = 0;
+[; ;main.c: 24: INTCONbits.PEIE = 1;
 "24
-[e = . . _LATBbits 0 5 -> -> 0 `i `uc ]
-[; ;main.c: 25: LATBbits.LATB4 = 0;
-"25
-[e = . . _LATBbits 0 4 -> -> 0 `i `uc ]
-[; ;main.c: 26: LATBbits.LATB3 = 1;
+[e = . . _INTCONbits 0 2 -> -> 1 `i `uc ]
+[; ;main.c: 26: LATBbits.LATB5 = 0;
 "26
-[e = . . _LATBbits 0 3 -> -> 1 `i `uc ]
-[; ;main.c: 27: LATBbits.LATB1 = 0;
+[e = . . _LATBbits 0 5 -> -> 0 `i `uc ]
+[; ;main.c: 27: LATBbits.LATB4 = 0;
 "27
-[e = . . _LATBbits 0 1 -> -> 0 `i `uc ]
-[; ;main.c: 28: LATBbits.LATB2 = 0;
+[e = . . _LATBbits 0 4 -> -> 0 `i `uc ]
+[; ;main.c: 28: LATBbits.LATB3 = 1;
 "28
-[e = . . _LATBbits 0 2 -> -> 0 `i `uc ]
-[; ;main.c: 30: Get_ID_From_AD();
+[e = . . _LATBbits 0 3 -> -> 1 `i `uc ]
+[; ;main.c: 29: LATBbits.LATB1 = 0;
+"29
+[e = . . _LATBbits 0 1 -> -> 0 `i `uc ]
+[; ;main.c: 30: LATBbits.LATB2 = 0;
 "30
-[e ( _Get_ID_From_AD ..  ]
-[; ;main.c: 32: InitPetitModbus(MODBUS_ADDRESS);
+[e = . . _LATBbits 0 2 -> -> 0 `i `uc ]
+[; ;main.c: 32: Get_ID_From_AD();
 "32
-[e ( _InitPetitModbus (1 -> _MODBUS_ADDRESS `uc ]
-[; ;main.c: 34: while(1){
+[e ( _Get_ID_From_AD ..  ]
+[; ;main.c: 34: InitPetitModbus(MODBUS_ADDRESS);
 "34
+[e ( _InitPetitModbus (1 -> _MODBUS_ADDRESS `uc ]
+[; ;main.c: 36: while(1){
+"36
 [e :U 1560 ]
 {
-[; ;main.c: 35: ProcessPetitModbus();
-"35
-[e ( _ProcessPetitModbus ..  ]
-[; ;main.c: 36: PetitRegisters[0].ActValue = 0;
-"36
-[e = . *U + &U _PetitRegisters * -> -> -> 0 `i `ui `ux -> -> # *U &U _PetitRegisters `ui `ux 0 -> -> 0 `i `ui ]
+[; ;main.c: 37: ProcessPetitModbus();
 "37
+[e ( _ProcessPetitModbus ..  ]
+[; ;main.c: 38: PetitRegisters[0].ActValue = 0;
+"38
+[e = . *U + &U _PetitRegisters * -> -> -> 0 `i `ui `ux -> -> # *U &U _PetitRegisters `ui `ux 0 -> -> 0 `i `ui ]
+"39
 }
 [e :U 1559 ]
-"34
+"36
 [e $U 1560  ]
 [e :U 1561 ]
-[; ;main.c: 37: }
-[; ;main.c: 38: }
-"38
+[; ;main.c: 39: }
+[; ;main.c: 40: }
+"40
 [e :UE 1558 ]
 }
-"53
+"55
 [v _Get_ID_From_AD `(v ~T0 @X0 1 ef ]
 {
-[; ;main.c: 53: void Get_ID_From_AD(){
+[; ;main.c: 55: void Get_ID_From_AD(){
 [e :U _Get_ID_From_AD ]
 [f ]
-[; ;main.c: 55: result = ADCC_GetSingleConversion(0);
-"55
-[e = _result ( _ADCC_GetSingleConversion (1 -> -> 0 `i `E14368 ]
-[; ;main.c: 57: if(result > 80 && result < 96){
+[; ;main.c: 57: result = ADCC_GetSingleConversion(0);
 "57
+[e = _result ( _ADCC_GetSingleConversion (1 -> -> 0 `i `E14368 ]
+[; ;main.c: 59: if(result > 80 && result < 96){
+"59
 [e $ ! && > _result -> -> 80 `i `ui < _result -> -> 96 `i `ui 1563  ]
 {
-[; ;main.c: 58: MODBUS_ADDRESS = 1;
-"58
-[e = _MODBUS_ADDRESS -> -> 1 `i `ui ]
-[; ;main.c: 59: LATBbits.LATB5 = 1;
-"59
-[e = . . _LATBbits 0 5 -> -> 1 `i `uc ]
-[; ;main.c: 60: LATBbits.LATB3 = 0;
+[; ;main.c: 60: MODBUS_ADDRESS = 1;
 "60
-[e = . . _LATBbits 0 3 -> -> 0 `i `uc ]
+[e = _MODBUS_ADDRESS -> -> 1 `i `ui ]
+[; ;main.c: 61: LATBbits.LATB5 = 1;
 "61
-}
-[; ;main.c: 61: }
-[e $U 1564  ]
+[e = . . _LATBbits 0 5 -> -> 1 `i `uc ]
+[; ;main.c: 62: LATBbits.LATB3 = 0;
 "62
+[e = . . _LATBbits 0 3 -> -> 0 `i `uc ]
+"63
+}
+[; ;main.c: 63: }
+[e $U 1564  ]
+"64
 [e :U 1563 ]
-[; ;main.c: 62: else if(result > 95 && result < 104){
+[; ;main.c: 64: else if(result > 95 && result < 104){
 [e $ ! && > _result -> -> 95 `i `ui < _result -> -> 104 `i `ui 1565  ]
 {
-[; ;main.c: 63: MODBUS_ADDRESS = 2;
-"63
-[e = _MODBUS_ADDRESS -> -> 2 `i `ui ]
-[; ;main.c: 64: LATBbits.LATB5 = 1;
-"64
-[e = . . _LATBbits 0 5 -> -> 1 `i `uc ]
-[; ;main.c: 65: LATBbits.LATB3 = 0;
+[; ;main.c: 65: MODBUS_ADDRESS = 2;
 "65
-[e = . . _LATBbits 0 3 -> -> 0 `i `uc ]
+[e = _MODBUS_ADDRESS -> -> 2 `i `ui ]
+[; ;main.c: 66: LATBbits.LATB5 = 1;
 "66
-}
-[; ;main.c: 66: }
-[e $U 1566  ]
+[e = . . _LATBbits 0 5 -> -> 1 `i `uc ]
+[; ;main.c: 67: LATBbits.LATB3 = 0;
 "67
+[e = . . _LATBbits 0 3 -> -> 0 `i `uc ]
+"68
+}
+[; ;main.c: 68: }
+[e $U 1566  ]
+"69
 [e :U 1565 ]
-[; ;main.c: 67: else if(result > 104 && result < 112){
+[; ;main.c: 69: else if(result > 104 && result < 112){
 [e $ ! && > _result -> -> 104 `i `ui < _result -> -> 112 `i `ui 1567  ]
 {
-[; ;main.c: 68: MODBUS_ADDRESS = 3;
-"68
-[e = _MODBUS_ADDRESS -> -> 3 `i `ui ]
-[; ;main.c: 69: LATBbits.LATB5 = 1;
-"69
-[e = . . _LATBbits 0 5 -> -> 1 `i `uc ]
-[; ;main.c: 70: LATBbits.LATB3 = 0;
+[; ;main.c: 70: MODBUS_ADDRESS = 3;
 "70
-[e = . . _LATBbits 0 3 -> -> 0 `i `uc ]
+[e = _MODBUS_ADDRESS -> -> 3 `i `ui ]
+[; ;main.c: 71: LATBbits.LATB5 = 1;
 "71
-}
-[; ;main.c: 71: }
-[e $U 1568  ]
+[e = . . _LATBbits 0 5 -> -> 1 `i `uc ]
+[; ;main.c: 72: LATBbits.LATB3 = 0;
 "72
-[e :U 1567 ]
-[; ;main.c: 72: else{
-{
-[; ;main.c: 73: MODBUS_ADDRESS = 0;
+[e = . . _LATBbits 0 3 -> -> 0 `i `uc ]
 "73
-[e = _MODBUS_ADDRESS -> -> 0 `i `ui ]
-[; ;main.c: 74: LATBbits.LATB3 = 1;
+}
+[; ;main.c: 73: }
+[e $U 1568  ]
 "74
-[e = . . _LATBbits 0 3 -> -> 1 `i `uc ]
-[; ;main.c: 75: while(1){};
+[e :U 1567 ]
+[; ;main.c: 74: else{
+{
+[; ;main.c: 75: MODBUS_ADDRESS = 0;
 "75
+[e = _MODBUS_ADDRESS -> -> 0 `i `ui ]
+[; ;main.c: 76: LATBbits.LATB3 = 1;
+"76
+[e = . . _LATBbits 0 3 -> -> 1 `i `uc ]
+[; ;main.c: 77: while(1){};
+"77
 [e :U 1570 ]
 {
 }
 [e :U 1569 ]
 [e $U 1570  ]
 [e :U 1571 ]
-"76
+"78
 }
 [e :U 1568 ]
 [e :U 1566 ]
 [e :U 1564 ]
-[; ;main.c: 76: }
-[; ;main.c: 77: }
-"77
+[; ;main.c: 78: }
+[; ;main.c: 79: }
+"79
 [e :UE 1562 ]
 }

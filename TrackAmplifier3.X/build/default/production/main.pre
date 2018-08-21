@@ -17860,6 +17860,8 @@ void main(void) {
 
 SYSTEM_Initialize();
 
+TMR1_StopTimer();
+
 INTCONbits.GIE = 1;
 INTCONbits.PEIE = 1;
 
@@ -17879,7 +17881,7 @@ PetitRegisters[0].ActValue = 0;
 }
 }
 
-# 53
+# 55
 void Get_ID_From_AD(){
 
 result = ADCC_GetSingleConversion(0);
