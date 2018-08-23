@@ -51,7 +51,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "interrupt_manager.h"
-#include "i2c2.h"
+#include "spi1.h"
 #include "tmr3.h"
 #include "tmr1.h"
 #include "tmr2.h"

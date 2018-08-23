@@ -58,25 +58,17 @@ void interrupt INTERRUPT_InterruptManager (void)
         {
             EUSART_RxDefaultInterruptHandler();
         } 
-        else if(PIE3bits.BCL2IE == 1 && PIR3bits.BCL2IF == 1)
-        {
-            I2C2_BusCollisionISR();
-        } 
-        else if(PIE3bits.SSP2IE == 1 && PIR3bits.SSP2IF == 1)
-        {
-            I2C2_ISR();
-        }          
         else if(PIE4bits.TMR3IE == 1 && PIR4bits.TMR3IF == 1)
         {
             TMR3_ISR();
         } 
-        else if(PIE4bits.TMR2IE == 1 && PIR4bits.TMR2IF == 1)
-        {
-            //TMR2_ISR();
-        } 
         else if(PIE4bits.TMR1IE == 1 && PIR4bits.TMR1IF == 1)
         {
-            TMR1_ISR(); /*slave timeout TMR*/
+            TMR1_ISR();
+        } 
+        else if(PIE3bits.SSP1IE == 1 && PIR3bits.SSP1IF == 1)
+        {
+            SPI1_ISR();
         } 
         else
         {

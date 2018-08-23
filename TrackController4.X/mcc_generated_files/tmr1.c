@@ -50,8 +50,6 @@
 
 #include <xc.h>
 #include "tmr1.h"
-//#include "../mcc_generated_files/mcc.h"
-#include "../modbus/General.h"
 
 /**
   Section: Global Variables Definitions
@@ -92,7 +90,7 @@ void TMR1_Initialize(void)
     PIE4bits.TMR1IE = 1;
 
     // Set Default Interrupt Handler
-    TMR1_SetInterruptHandler(PetitModbusIntHandlerSlaveTimeOutTMR);
+    TMR1_SetInterruptHandler(TMR1_DefaultInterruptHandler);
 
     // CKPS 1:8; nT1SYNC synchronize; TMR1ON enabled; T1RD16 disabled; 
     T1CON = 0x31;

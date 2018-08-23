@@ -7,6 +7,6 @@
 
 /*-------------------------------DEFINES--------------------------------------*/
 extern void InitUART(void);
-extern void InitTMR1(void);
+extern void InitTMR(void);
 
 #endif

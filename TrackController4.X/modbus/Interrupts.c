@@ -5,7 +5,8 @@
  * the default interrupt handler is re-routed to the routines here. 
 */
 void PetitModbusIntHandlerTMR(void){
-    PetitModBus_TimerValues();
+    //PetitModBus_TimerValues();
+    PetitModbusTimerValue = 3;                                                  // Between receive interrupts it took to long --> message done
     PIE4bits.TMR3IE = 0;
     PIR4bits.TMR3IF = 0;
 }

@@ -52,7 +52,7 @@ void SYSTEM_Initialize(void)
     PMD_Initialize();
     PIN_MANAGER_Initialize();
     OSCILLATOR_Initialize();
-    I2C2_Initialize();
+    SPI1_Initialize();
     CRC_Initialize();
     TMR3_Initialize();
     TMR2_Initialize();
