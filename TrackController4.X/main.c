@@ -79,67 +79,119 @@ void main(void) {
 }
 
 /*
+ *------------------------------------------------------------------------------
+ * Master communication scheme during OP:
+ * 
+ * 
+ *     |Critical|    |Critical|    |INFO    |     
+ * ----|MESSAGE1|----|MESSAGE2|----|MESSAGE3|-------
+ *     |Reg1 R  |    |Reg1 W  |	   |Reg3 R/W|	
+ *     |Reg2 R  |    |Reg4 W  |    |Reg5 R/W| 
+ *     |Reg4 R  |				   |Reg6 R/W|	
+ *     				   			   |Reg7 R/W|	
+ *                                 |Reg8 R/W|	
+ *                                 |Reg9 R/W|
+ *     
+ * Message 3 consists out of a mailbox were info can be R/W of Reg 3,5,6 - 9 or 
+ * NOP, a maximum amount of 3 registers should be addressed at once.
+ * 
+ *------------------------------------------------------------------------------ 
+ * 
+ * Modbus Track Slave Data Register mapping:
  * 
  * Data register, bit(s)        Function            	R/W     Critical
  * 
  * -----------------------------RUNNING PARAMETERS------------------------------
  * 
- * Reg1, 0 - 9                  PWM set point       	W       Yes				// new PWM setpoint (speed in 0 - 255 km/h)
- * Reg1, 10                     PWM direction       	W       Yes             // Forward / Backward
- * Reg1, 11                     PWM enable          	W       Yes             // enabling of the H-bridge
- * Reg1, 12                                         	W       Yes
- * Reg1, 13                                         	W       Yes
- * Reg1, 14                                         	W       Yes
- * Reg1, 15                     Emo Stop            	W       Yes				// Slave takes action to stop train as fast as possible
+ * Reg1, 0 - 7                  PWM set point       	R/W     No/Yes			// new PWM setpoint (speed in 0 - 255 km/h)
+ * Reg1, 8						PWM direction       	R/W     No/Yes          // Forward / Backward
+ * Reg1, 9                      PWM enable          	R/W     No/Yes          // enabling of the H-bridge
+ * Reg1, 10                     
+ * Reg1, 11                     
+ * Reg1, 12                                         	
+ * Reg1, 13                                         	
+ * Reg1, 14                                         	
+ * Reg1, 15                     Emo Stop            	R/W     No/Yes			// Slave takes action to stop train as fast as possible
  *                                                  	
- * Reg2, 0                      H-bridge over current 	R       Yes				// When over current is detected
- * Reg2, 10                     Occupied				R       Yes             
- * Reg2, 11                     ThermalFlag				R       Yes   			// H-bridge thermal flag output              
- * Reg2, 12 - 13                Status              	R       Yes				// Run / Warning / Error of the amplifier
- * Reg2, 14                                         	R       Yes
- * Reg2, 15                     		            	R       Yes
+ * Reg2, 0 - 9                  Back EMF            	R/-     Yes/-           // Read of back EMF train motor                      
+ * Reg2, 10                     Occupied				R/-     Yes/-          
+ * Reg2, 11                     ThermalFlag				R/-     Yes/-			// H-bridge thermal flag output              
+ * Reg2, 12                     H-bridge over current 	R/-     Yes/-			// When over current is detected
+ * Reg2, 13 - 15                Led Status           	R/-     Yes/-			// Run / Warning / Error Led
  *                                                  	
- * Reg3, 0 - 5                  H-bridge fuse status	R       No              // Voltage over the H-bridge fuse 0 - 63V
- * Reg3, 6 - 14					H-bridge temperature	R		No				// H-bridge temperature 0 - 255 degrees selcius
- * Reg3, 15 
+ * Reg3, 0 - 4                  H-bridge fuse status	R/-	    No/-            // Voltage H-bridge fuse 0 - 31V
+ * Reg3, 5 
+ * Reg3, 6 
+ * Reg3, 7
+ * Reg3, 8 - 15					H-bridge temperature	R/-		No/-			// H-bridge temperature 0 - 255 degrees Celsius
  *                                                  	
- * Reg4, 0 - 9                  Back EMF            	R       No              // Read of back EMF train motor
- * Reg4, 10
- * Reg4, 11
+ * Reg4, 0 - 9                  Set BEMF speed      	R/W     No/No           // Set value of BEMF, this to allow constant speed regulation
+ * Reg4, 10                     Set CSReg             	R/W     No/No           // Enable constant speed regulation
+ * Reg4, 11 					Clear Amp status		R/W 	No/No			// Clear amplifier status
  * Reg4, 12
  * Reg4, 13
  * Reg4, 14
- * Reg4, 15
- *                                                  	
- * Reg5, 0 - 9                  Set BEMF speed      	W       No              // Set value of BEMF, this to allow constant speed regulation
- * Reg5, 10                     Set CSReg             	W       No              // Enable constant speed regulation
- * Reg5, 11 					Clear Amp status		W		No				// Clear amplifier status
- * Reg5, 12
- * Reg5, 13
- * Reg5, 14
- * Reg5, 15
+ * Reg4, 15						Reset Amplifier			-/W		No/-			// Execute an Amplifier reset().
  * 
- * Reg6, 0 - 15                 Amplifier Status        R       No              // Amplifier status list
+ * Reg5, 0 - 15                 Amplifier Status        R/-     No/No           // Amplifier status list + internall temp?
  *
  * 
  * -----------------------------CONFIG PARAMETERS------------------------------- 
  * 
- * Reg7, 0 - 5					Amplifier ID			W		No				// Amplifier ID for Track amp 1 to 50. Backplane config modules have address 51 to 55 
- * Reg7, 6						Single/Double PWM		W		No				// used in single or double sided PWM operation 0 is dual sided PWM, 1 is single sided PWM
- * Reg7, 7
- * Reg7, 8
- * Reg7, 9
- * Reg7, 10
- * Reg7, 11
- * Reg7, 12
- * Reg7, 13
- * Reg7, 14
- * Reg7, 15
+ * Reg6, 0 - 5					Amplifier ID			R/W		No/No           // Amplifier ID for Track amp 1 to 50. Backplane config modules have address 51 to 55 
+ * Reg6, 6						Single/Double PWM		R/W		No/No			// used in single or double sided PWM operation 0 is dual sided PWM, 1 is single sided PWM
+ * Reg6, 7
+ * Reg6, 8
+ * Reg6, 9
+ * Reg6, 10
+ * Reg6, 11
+ * Reg6, 12
+ * Reg6, 13
+ * Reg6, 14
+ * Reg6, 15
  *
- * Reg8, 0 - 7                  Acceleration par    	W       No				// Acceleration number 0 - 255
- * Reg8, 8 - 15                 Deceleration par    	W       No				// Deceleration number 0 - 255
+ * Reg7, 0 - 7                  Acceleration par    	R/W     No/No			// Acceleration number 0 - 255
+ * Reg7, 8 - 15                 Deceleration par    	R/W     No/No			// Deceleration number 0 - 255
  *                      
+ * Reg8, 0 - 15					Messages Received		R/-		No/-			// Slave register of messages Received to Master
+ * Reg9, 0 - 15					Messages Sent			R/-		No/-			// Slave register of messages sent to Master
+ *
+ *
+ *
+ *
+ *------------------------------------------------------------------------------
+ *
+ *
+ *
+ * Modbus Backplane Slave Data Register mapping:
  * 
+ * Data register, bit(s)        Function            	R/W     Critical
+ * 
+ * -----------------------------RUNNING PARAMETERS------------------------------
+ * 
+ * Reg1, 0                  	Slave 1  enable       	R/W     No/Yes			// Enable Slave 1  for configuring
+ * Reg1, 1                  	Slave 2  enable       	R/W     No/Yes			// Enable Slave 2  for configuring 
+ * Reg1, 2                  	Slave 3  enable       	R/W     No/Yes			// Enable Slave 3  for configuring 
+ * Reg1, 3                  	Slave 4  enable       	R/W     No/Yes			// Enable Slave 4  for configuring 
+ * Reg1, 4                  	Slave 5  enable       	R/W     No/Yes			// Enable Slave 5  for configuring 
+ * Reg1, 5                  	Slave 6  enable       	R/W     No/Yes			// Enable Slave 6  for configuring 
+ * Reg1, 6                  	Slave 7  enable       	R/W     No/Yes			// Enable Slave 7  for configuring 
+ * Reg1, 7                  	Slave 8  enable       	R/W     No/Yes			// Enable Slave 8  for configuring 
+ * Reg1, 8						Slave 9  enable       	R/W     No/Yes          // Enable Slave 9  for configuring 
+ * Reg1, 9                      Slave 10 enable       	R/W     No/Yes          // Enable Slave 10 for configuring 
+ * 
+ * Reg2, 13 - 15                Led Status           	R/-     Yes/-			// Run / Warning / Error Led
+ *
+ * Reg4, 11 					Clear ConfigSlave		R/W 	No/No			// Clear amplifier status
+ * Reg4, 15						Reset Amplifier			W/-		No/-			// Execute an Amplifier reset().
+ *
+ * Reg5, 0 - 15                 ConfigSlave Status      R/-     No/No           // ConfigSlave status list + internall temp?
+ *
+ * Reg6, 0 - 5					ConfigSlave ID			R/-		No/-            // ConfigSlave ID for backplane config modules have address 51 to 55 
+ *
+ * Reg8, 0 - 15					Messages Received		R/-		No/-			// Slave register of messages Received to Master
+ * Reg9, 0 - 15					Messages Sent			R/-		No/-			// Slave register of messages sent to Master
+ *
  */
  
  
