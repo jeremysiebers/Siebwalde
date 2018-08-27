@@ -128,7 +128,7 @@ void main(void) {
  * Reg4, 0 - 9                  Set BEMF speed      	R/W     No/No           // Set value of BEMF, this to allow constant speed regulation
  * Reg4, 10                     Set CSReg             	R/W     No/No           // Enable constant speed regulation
  * Reg4, 11 					Clear Amp status		R/W 	No/No			// Clear amplifier status
- * Reg4, 12
+ * Reg4, 12						Clear message buffer	R/W 	No/No			// Clear message buffer registers
  * Reg4, 13
  * Reg4, 14
  * Reg4, 15						Reset Amplifier			-/W		No/-			// Execute an Amplifier reset().

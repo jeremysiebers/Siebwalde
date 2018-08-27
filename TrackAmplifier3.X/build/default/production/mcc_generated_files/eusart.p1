@@ -1,6 +1,6 @@
 Version 3.2 HI-TECH Software Intermediate Code
 [v F14202 `(v ~T0 @X0 0 tf ]
-"21662 C:\Program Files (x86)\Microchip\xc8\v1.45\include\pic16f18854.h
+"21662 C:\Localdata\Microchip\xc8\v1.45\include\pic16f18854.h
 [s S981 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
 [n S981 . SSP1IE BCL1IE SSP2IE BCL2IE TXIE RCIE ]
 "21661
@@ -13,7 +13,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 [v _EUSART_SetRxInterruptHandler `(v ~T0 @X0 0 ef1`*F14220 ]
 "4 mcc_generated_files/../modbus/Interrupts.h
 [v _PetitModbusIntHandlerRC `(v ~T0 @X0 0 ef ]
-"4100 C:\Program Files (x86)\Microchip\xc8\v1.45\include\pic16f18854.h
+"4100 C:\Localdata\Microchip\xc8\v1.45\include\pic16f18854.h
 [v _BAUD1CON `Vuc ~T0 @X0 0 e@287 ]
 "3740
 [v _RC1STA `Vuc ~T0 @X0 0 e@285 ]
@@ -55,7 +55,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;htc.h: 28: extern double __fpnormalize(double);
 [; ;xc8debug.h: 14: extern void __builtin_software_breakpoint(void);
 [; ;pic16f18854.h: 50: extern volatile unsigned char INDF0 @ 0x000;
-"52 C:\Program Files (x86)\Microchip\xc8\v1.45\include\pic16f18854.h
+"52 C:\Localdata\Microchip\xc8\v1.45\include\pic16f18854.h
 [; ;pic16f18854.h: 52: asm("INDF0 equ 00h");
 [; <" INDF0 equ 00h ;# ">
 [; ;pic16f18854.h: 55: typedef union {
@@ -13119,14 +13119,16 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;Init.h: 12: extern void InitTMR1(void);
 [; ;Interrupts.h: 3: extern void PetitModbusIntHandlerTMR(void);
 [; ;Interrupts.h: 4: extern void PetitModbusIntHandlerRC(void);
-[; ;PetitModbus.h: 80: extern unsigned char PETITMODBUS_SLAVE_ADDRESS;
-[; ;PetitModbus.h: 82: typedef struct{
-[; ;PetitModbus.h: 83: unsigned int ActValue;
-[; ;PetitModbus.h: 84: }PetitRegStructure;
-[; ;PetitModbus.h: 86: extern PetitRegStructure PetitRegisters[7];
-[; ;PetitModbus.h: 87: extern volatile unsigned short PetitModbusTimerValue;
-[; ;PetitModbus.h: 90: extern void InitPetitModbus(unsigned char PetitModbusSlaveAddress);
-[; ;PetitModbus.h: 91: extern void ProcessPetitModbus(void);
+[; ;PetitModbus.h: 81: extern unsigned char PETITMODBUS_SLAVE_ADDRESS;
+[; ;PetitModbus.h: 83: typedef struct{
+[; ;PetitModbus.h: 84: unsigned int ActValue;
+[; ;PetitModbus.h: 85: }PetitRegStructure;
+[; ;PetitModbus.h: 87: extern PetitRegStructure PetitHoldingRegisters[7];
+[; ;PetitModbus.h: 88: extern PetitRegStructure PetitInputRegisters[7];
+[; ;PetitModbus.h: 89: extern PetitRegStructure PetitDiagnosticRegisters[7];
+[; ;PetitModbus.h: 90: extern volatile unsigned short PetitModbusTimerValue;
+[; ;PetitModbus.h: 93: extern void InitPetitModbus(unsigned char PetitModbusSlaveAddress);
+[; ;PetitModbus.h: 94: extern void ProcessPetitModbus(void);
 [; ;PetitModbusPort.h: 19: extern volatile unsigned char PetitReceiveBuffer[(7*2 + 10)];
 [; ;PetitModbusPort.h: 20: extern volatile unsigned char PetitReceiveCounter;
 [; ;PetitModbusPort.h: 22: extern void PetitModBus_UART_Initialise(void);
@@ -13390,8 +13392,8 @@ Version 3.2 HI-TECH Software Intermediate Code
 {
 [; ;eusart.c: 171: void EUSART_SetRxInterruptHandler(void (* interruptHandler)(void)){
 [e :U _EUSART_SetRxInterruptHandler ]
-[v F14270 `(v ~T0 @X0 0 tf ]
-[v _interruptHandler `*F14270 ~T0 @X0 1 r1 ]
+[v F14272 `(v ~T0 @X0 0 tf ]
+[v _interruptHandler `*F14272 ~T0 @X0 1 r1 ]
 [f ]
 [; ;eusart.c: 172: EUSART_RxDefaultInterruptHandler = interruptHandler;
 "172

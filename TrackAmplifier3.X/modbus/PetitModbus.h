@@ -7,15 +7,18 @@
 
 #ifndef __PETITMODBUS__H
 #define __PETITMODBUS__H
+                                                                                // 1 register is 16 bits. The largest register is used to determine receive and transmit buffer size!
+#define NUMBER_OF_HOLDING_PETITREGISTERS                 4                      // Petit Modbus RTU Slave Holding Registers (read/write), Have to put a number of registers here It has to be bigger than 0 (zero)!!
+#define NUMBER_OF_INPUT_PETITREGISTERS                   3                      // Number of (read only) input registers)
+#define NUMBER_OF_DIAGNOSTIC_PETITREGISTERS              1                      // Number of diagnostic registers (send/receive counters)
 
-#define NUMBER_OF_OUTPUT_PETITREGISTERS                 7                       // Petit Modbus RTU Slave Output Register Number, last 2 registers are send/receive counters!
-                                                                                // Have to put a number of registers here
-                                                                                // It has to be bigger than 0 (zero)!!
-#define PETITMODBUS_TIMEOUTTIMER                        2                       // Timeout Constant for Petit Modbus RTU Slave [101us tick]
+#define PETITMODBUS_TIMEOUTTIMER                         2                      // Timeout Constant for Petit Modbus RTU Slave [101us tick]
 
 #define PETITMODBUS_READ_HOLDING_REGISTERS_ENABLED      ( 1 )                   // If you want to use make it 1, or 0
 #define PETITMODBUSWRITE_SINGLE_REGISTER_ENABLED        ( 1 )                   // If you want to use make it 1, or 0
 #define PETITMODBUS_WRITE_MULTIPLE_REGISTERS_ENABLED    ( 1 )                   // If you want to use make it 1, or 0
+#define PETITMODBUS_READ_INPUT_REGISTERS_ENABLED        ( 1 )                   // If you want to use make it 1, or 0
+#define PETITMODBUS_DIAGNOSTIC_REGISTERS_ENABLED        ( 1 )                   // If you want to use make it 1, or 0
 
 #define ENTER_CRITICAL_SECTION( )   (INTCONbits.PEIE = 1)
 #define EXIT_CRITICAL_SECTION( )    (INTCONbits.PEIE = 0)
@@ -72,7 +75,7 @@ const unsigned char auchCRCLo[] = {
 #endif
 /****************************Don't Touch This**********************************/
 // Buffers for Petit Modbus RTU Slave
-#define PETITMODBUS_RECEIVE_BUFFER_SIZE                 (NUMBER_OF_OUTPUT_PETITREGISTERS*2 + 10) 
+#define PETITMODBUS_RECEIVE_BUFFER_SIZE                 (NUMBER_OF_HOLDING_PETITREGISTERS*2 + 10) 
 #define PETITMODBUS_TRANSMIT_BUFFER_SIZE                PETITMODBUS_RECEIVE_BUFFER_SIZE
 #define PETITMODBUS_RXTX_BUFFER_SIZE                    PETITMODBUS_TRANSMIT_BUFFER_SIZE
 
@@ -83,7 +86,10 @@ typedef struct{
             unsigned int                     ActValue;
         }PetitRegStructure;
 
-extern PetitRegStructure    PetitRegisters[NUMBER_OF_OUTPUT_PETITREGISTERS];
+extern PetitRegStructure    PetitHoldingRegisters[NUMBER_OF_HOLDING_PETITREGISTERS];
+extern PetitRegStructure    PetitInputRegisters[NUMBER_OF_HOLDING_PETITREGISTERS];
+extern PetitRegStructure    PetitDiagnosticRegisters[NUMBER_OF_HOLDING_PETITREGISTERS];
+
 extern volatile unsigned short PetitModbusTimerValue;
 
 // Main Functions

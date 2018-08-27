@@ -1,6 +1,6 @@
 Version 3.2 HI-TECH Software Intermediate Code
 [v F14440 `(v ~T0 @X0 0 tf ]
-"2773 C:\Program Files (x86)\Microchip\xc8\v1.45\include\pic16f18854.h
+"2773 C:\Localdata\Microchip\xc8\v1.45\include\pic16f18854.h
 [v _ADLTHL `Vuc ~T0 @X0 0 e@270 ]
 "2843
 [v _ADLTHH `Vuc ~T0 @X0 0 e@271 ]
@@ -37,7 +37,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 "105 mcc_generated_files/adcc.c
 [c E14200 0 2 3 4 8 23 60 61 62 63 .. ]
 [n E14200 . ID BMF VREF VLM CURR_SEN LM_TEMP channel_VSS channel_Temp channel_DAC1 channel_FVR_buf1  ]
-"1863 C:\Program Files (x86)\Microchip\xc8\v1.45\include\pic16f18854.h
+"1863 C:\Localdata\Microchip\xc8\v1.45\include\pic16f18854.h
 [s S86 :1 `uc 1 :1 `uc 1 :2 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
 [n S86 . ADGO . ADFM ADCS . ADCONT ADON ]
 "1872
@@ -128,7 +128,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;htc.h: 28: extern double __fpnormalize(double);
 [; ;xc8debug.h: 14: extern void __builtin_software_breakpoint(void);
 [; ;pic16f18854.h: 50: extern volatile unsigned char INDF0 @ 0x000;
-"52 C:\Program Files (x86)\Microchip\xc8\v1.45\include\pic16f18854.h
+"52 C:\Localdata\Microchip\xc8\v1.45\include\pic16f18854.h
 [; ;pic16f18854.h: 52: asm("INDF0 equ 00h");
 [; <" INDF0 equ 00h ;# ">
 [; ;pic16f18854.h: 55: typedef union {

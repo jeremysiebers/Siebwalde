@@ -26,7 +26,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 [v _TMR1_Initialize `(v ~T0 @X0 0 ef ]
 "107 mcc_generated_files/eusart.h
 [v _EUSART_Initialize `(v ~T0 @X0 0 ef ]
-"23324 C:\Program Files (x86)\Microchip\xc8\v1.45\include\pic16f18854.h
+"23324 C:\Localdata\Microchip\xc8\v1.45\include\pic16f18854.h
 [v _OSCCON1 `Vuc ~T0 @X0 0 e@2189 ]
 "23464
 [v _OSCCON3 `Vuc ~T0 @X0 0 e@2191 ]
@@ -52,7 +52,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;htc.h: 28: extern double __fpnormalize(double);
 [; ;xc8debug.h: 14: extern void __builtin_software_breakpoint(void);
 [; ;pic16f18854.h: 50: extern volatile unsigned char INDF0 @ 0x000;
-"52 C:\Program Files (x86)\Microchip\xc8\v1.45\include\pic16f18854.h
+"52 C:\Localdata\Microchip\xc8\v1.45\include\pic16f18854.h
 [; ;pic16f18854.h: 52: asm("INDF0 equ 00h");
 [; <" INDF0 equ 00h ;# ">
 [; ;pic16f18854.h: 55: typedef union {

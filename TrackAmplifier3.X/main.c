@@ -35,7 +35,7 @@ void main(void) {
             
     while(1){
         ProcessPetitModbus();
-        PetitRegisters[0].ActValue = 0;
+        PetitHoldingRegisters[0].ActValue = 0;
     }
 }
 
