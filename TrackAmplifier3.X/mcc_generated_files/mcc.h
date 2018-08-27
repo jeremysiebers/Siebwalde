@@ -57,8 +57,8 @@
 #include "tmr2.h"
 #include "cmp1.h"
 #include "crc.h"
-#include "fvr.h"
 #include "adcc.h"
+#include "fvr.h"
 #include "dac.h"
 #include "eusart.h"
 

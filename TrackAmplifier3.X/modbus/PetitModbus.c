@@ -28,7 +28,7 @@ unsigned char PETITMODBUS_SLAVE_ADDRESS         = 1;
 unsigned char PETITMODBUS_BROADCAST_ADDRESS     = 0;
 
 #ifdef  CRC_HW
-uint16_t CRC_ReverseValue(uint16_t crc);                                        // When using HW CRC the result must be reversed after the last calculation
+//uint16_t CRC_ReverseValue(uint16_t crc);                                        // When using HW CRC the result must be reversed after the last calculation
 #endif
 
 typedef enum
@@ -504,7 +504,7 @@ void Petit_RxRTU(void)
         
         #ifdef  CRC_HW
         //LED_WAR_LAT = 1;
-        Petit_Rx_CRC16 = CRC_ReverseValue(Petit_Rx_CRC16);
+        //Petit_Rx_CRC16 = CRC_ReverseValue(Petit_Rx_CRC16);
         //LED_WAR_LAT = 0;
         #endif
         
@@ -541,7 +541,7 @@ void Petit_TxRTU(void)
     }
     
     #ifdef  CRC_HW
-    Petit_Tx_CRC16 = CRC_ReverseValue(Petit_Tx_CRC16);
+    //Petit_Tx_CRC16 = CRC_ReverseValue(Petit_Tx_CRC16);
     #endif
     
     Petit_Tx_Buf[Petit_Tx_Buf_Size++] = Petit_Tx_CRC16 & 0x00FF;

@@ -24,13 +24,24 @@ unsigned int wait = 0, wait2 = 0;
 
 void main(void) {
     // Initialize the device
-    SYSTEM_Initialize();        
+    SYSTEM_Initialize();
+    
+    LED_RUN_LAT = 0;
+    LED_WAR_LAT = 0;
+    LED_ERR_LAT = 1;    
+    LED_TX_LAT = 0;
+    LED_RX_LAT = 0;
+    
     InitPetitModbus(SlaveInfo);                                                 // Pass address of array of struct for data storage
     TX_ENA_LAT = 1;                                                             // Enable TX, for master TX is always enabled.
     //SPI1_setExchangeHandler();
     
     INTCONbits.GIE = 1;
     INTCONbits.PEIE = 1;
+    
+    LED_RUN_LAT = 1;
+    LED_WAR_LAT = 0;
+    LED_ERR_LAT = 0;   
     
     while(1)
     { 
@@ -45,7 +56,7 @@ void main(void) {
                         else{
                             //printf("SendPetitModbus slave 1 was OK!!\n\r");
                         }
-                        //Led1 ^= 1;
+                        modbus_sync_LAT ^= 1;
                         state = 1;
                 break;
                 

@@ -1,16 +1,15 @@
 #include "General.h"
 #include "Init.h"
+#include "../mcc_generated_files/mcc.h"
 
 #define DIVIDER ((int)(FOSC/(16UL * BAUD_RATE) -1))
 
 void InitUART(void)
 {
-/*****************************UART1 initialize*********************************/
-/*    Done in MCC generated files */
-/**************************End Of UART1 initialize*****************************/
+    EUSART_SetRxInterruptHandler(PetitModbusIntHandlerRC);
 }
 
-void InitTMR1(void)
+void InitTMR(void)
 {    
-    /*    Done in MCC generated files */
+    TMR3_SetInterruptHandler(PetitModbusIntHandlerTMR);                         // MessageTimeoutTimer(e.g. ~4.5 char timeout)
 }

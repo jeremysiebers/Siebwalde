@@ -16,7 +16,7 @@ void PetitModBus_UART_Initialise(void)
 // Timer Initialize for Petit Modbus, 1ms Timer will be good for us!
 void PetitModBus_TIMER_Initialise(void)
 {
-    InitTMR1();
+    InitTMR();
 }
 
 // This is used for send one character

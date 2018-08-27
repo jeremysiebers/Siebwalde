@@ -50,7 +50,6 @@
 
 #include <xc.h>
 #include "tmr1.h"
-#include "../mcc_generated_files/mcc.h"
 
 /**
   Section: Global Variables Definitions
@@ -75,11 +74,11 @@ void TMR1_Initialize(void)
     //CS FOSC/4; 
     T1CLK = 0x01;
 
-    //TMR1H 0; 
-    TMR1H = 0x00;
+    //TMR1H 249; 
+    TMR1H = 0xF9;
 
-    //TMR1L 0; 
-    TMR1L = 0x00;
+    //TMR1L 42; 
+    TMR1L = 0x2A;
 
     // Load the TMR value to reload variable
     timer1ReloadVal=(uint16_t)((TMR1H << 8) | TMR1L);
@@ -183,7 +182,6 @@ void TMR1_SetInterruptHandler(void (* InterruptHandler)(void)){
 void TMR1_DefaultInterruptHandler(void){
     // add your TMR1 interrupt custom code
     // or set custom function using TMR1_SetInterruptHandler()
-    
 }
 
 /**

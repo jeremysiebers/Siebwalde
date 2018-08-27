@@ -50,7 +50,6 @@
 
 #include <xc.h>
 #include "tmr3.h"
-#include "../modbus/General.h"
 
 /**
   Section: Global Variables Definitions
@@ -91,7 +90,7 @@ void TMR3_Initialize(void)
     PIE4bits.TMR3IE = 1;
 
     // Set Default Interrupt Handler
-    TMR3_SetInterruptHandler(PetitModbusIntHandlerTMR);
+    TMR3_SetInterruptHandler(TMR3_DefaultInterruptHandler);
 
     // CKPS 1:1; nT3SYNC synchronize; TMR3ON enabled; T3RD16 disabled; 
     T3CON = 0x01;
