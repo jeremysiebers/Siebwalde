@@ -54,10 +54,10 @@ void InitSlaveCommunication(SLAVE_INFO *location)
 
 typedef enum
 {
-    NrRegLw = 0,
+    NrRegLo = 0,
     NrRegHi = 1,
-    StAdLw  = 2,
-    StAdHi  = 3 
+    StAdLo  = 2,
+    StAdHi  = 3     
 };
 
 typedef enum
@@ -67,9 +67,10 @@ typedef enum
     MESSAGE3 = 3,
     MESSAGE4 = 4 
 };
-unsigned char HoldingRegisters[4] = {0, 0, 0, 0};                               // {start address High, start address Low, number of registers High, number of registers Low
-unsigned char   InputRegisters[4] = {0, 0, 0, 0};
-unsigned char    DiagRegisters[4] = {0, 0, 0, 0};
+unsigned char HoldingRegistersRead [4] = {0, 0, 0, 0};                          // {start address High, start address Low, number of registers High, number of registers Low}
+unsigned char HoldingRegistersWrite[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};           // {start address High, start address Low, number of registers High, number of registers Low, byte count, Register Value Hi, Register Value Lo, Register Value Hi, Register Value Lo} 
+unsigned char   InputRegistersRead [4] = {0, 0, 0, 0};
+unsigned char    DiagRegistersRead [4] = {0, 0, 0, 0};
 
 static unsigned int ProcessSlave = 1;
 static unsigned int Mailbox = 1;
@@ -77,70 +78,82 @@ static unsigned int Message = MESSAGE1;
 
 void ProcessNextSlave(){    
     
-    if (ProcessSlave > NUMBER_OF_SLAVES){
+    if (ProcessSlave > (NUMBER_OF_SLAVES-1)){
         ProcessSlave = 1;
         Mailbox++;
         if (Mailbox > MAILBOX_SIZE){
             Mailbox = 1;
         }
-    }    
+        modbus_sync_LAT ^= 1;
+    }
+
     switch (Message){
         case MESSAGE1:
-            HoldingRegisters[NrRegLw] = 2;
-            HoldingRegisters[NrRegHi] = 0;
-            HoldingRegisters[StAdLw]  = 0;
-            HoldingRegisters[StAdHi]  = 0;
-            SendPetitModbus(ProcessSlave, PETITMODBUS_WRITE_MULTIPLE_REGISTERS, HoldingRegisters, 4);                
+            HoldingRegistersWrite[8]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[0] << 8;
+            HoldingRegistersWrite[7]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[0];
+            HoldingRegistersWrite[6]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[1] << 8;
+            HoldingRegistersWrite[5]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[1];
+            HoldingRegistersWrite[4]  = 4;
+            HoldingRegistersWrite[3]  = 2;
+            HoldingRegistersWrite[2]  = 0;
+            HoldingRegistersWrite[1]  = 0;
+            HoldingRegistersWrite[0]  = 0;
+            SendPetitModbus(ProcessSlave, PETITMODBUS_WRITE_MULTIPLE_REGISTERS, HoldingRegistersWrite, 9);                
             break;
 
+        /*case MESSAGE2:
+            InputRegistersRead[3]  = 2;
+            InputRegistersRead[2]  = 0;
+            InputRegistersRead[1]  = 0;
+            InputRegistersRead[0]  = 0;
+            SendPetitModbus(ProcessSlave, PETITMODBUS_READ_INPUT_REGISTERS, InputRegistersRead, 4);    
+            break;*/
+
         case MESSAGE2:
-            InputRegisters[NrRegLw] = 2;
-            InputRegisters[NrRegHi] = 0;
-            InputRegisters[StAdLw]  = 0;
-            InputRegisters[StAdHi]  = 0;
-            SendPetitModbus(ProcessSlave, PETITMODBUS_READ_INPUT_REGISTERS, InputRegisters, 4);    
+            InputRegistersRead[3]  = 2;
+            InputRegistersRead[2]  = 0;
+            InputRegistersRead[1]  = 0;
+            InputRegistersRead[0]  = 0;
+            SendPetitModbus(ProcessSlave, PETITMODBUS_READ_HOLDING_REGISTERS, InputRegistersRead, 4);    
             break;
 
         case MESSAGE3:
-            HoldingRegisters[NrRegLw] = 2;
-            HoldingRegisters[NrRegHi] = 0;
-            HoldingRegisters[StAdLw]  = 0;
-            HoldingRegisters[StAdHi]  = 0;
-            SendPetitModbus(ProcessSlave, PETITMODBUS_READ_HOLDING_REGISTERS, HoldingRegisters, 4);    
-            break;
-
-        case MESSAGE4:
             switch (Mailbox){
                 case 1:
-                    HoldingRegisters[NrRegLw] = 2;
-                    HoldingRegisters[NrRegHi] = 0;
-                    HoldingRegisters[StAdLw]  = 3;
-                    HoldingRegisters[StAdHi]  = 0;
-                    SendPetitModbus(ProcessSlave, PETITMODBUS_READ_HOLDING_REGISTERS, HoldingRegisters, 4);
+                    HoldingRegistersRead[3]  = 2;
+                    HoldingRegistersRead[2]  = 0;
+                    HoldingRegistersRead[1]  = 2;
+                    HoldingRegistersRead[0]  = 0;
+                    SendPetitModbus(ProcessSlave, PETITMODBUS_READ_HOLDING_REGISTERS, HoldingRegistersRead, 4);
                     break;
                 
                 case 2:
-                    DiagRegisters[NrRegLw] = 2;
-                    DiagRegisters[NrRegHi] = 0;
-                    DiagRegisters[StAdLw]  = 0;
-                    DiagRegisters[StAdHi]  = 0;
-                    SendPetitModbus(ProcessSlave, PETITMODBUS_DIAGNOSTIC_REGISTERS, DiagRegisters, 4);
+                    DiagRegistersRead[3]  = 2;
+                    DiagRegistersRead[2]  = 0;
+                    DiagRegistersRead[1]  = 0;
+                    DiagRegistersRead[0]  = 0;
+                    SendPetitModbus(ProcessSlave, PETITMODBUS_DIAGNOSTIC_REGISTERS, DiagRegistersRead, 4);
                     break;
                 
                 case 3:
-                    HoldingRegisters[NrRegLw] = 2;
-                    HoldingRegisters[NrRegHi] = 0;
-                    HoldingRegisters[StAdLw]  = 3;
-                    HoldingRegisters[StAdHi]  = 0;
-                    SendPetitModbus(ProcessSlave, PETITMODBUS_WRITE_MULTIPLE_REGISTERS, HoldingRegisters, 4);
+                    HoldingRegistersWrite[8]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[2] << 8;
+                    HoldingRegistersWrite[7]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[2];
+                    HoldingRegistersWrite[6]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[3] << 8;
+                    HoldingRegistersWrite[5]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[3];
+                    HoldingRegistersWrite[4]  = 4;
+                    HoldingRegistersWrite[3]  = 2;
+                    HoldingRegistersWrite[2]  = 0;
+                    HoldingRegistersWrite[1]  = 2;
+                    HoldingRegistersWrite[0]  = 0;
+                    SendPetitModbus(ProcessSlave, PETITMODBUS_WRITE_MULTIPLE_REGISTERS, HoldingRegistersWrite, 4);
                     break;
                 
                 case 4:
-                    DiagRegisters[NrRegLw] = 2;
-                    DiagRegisters[NrRegHi] = 0;
-                    DiagRegisters[StAdLw]  = 3;
-                    DiagRegisters[StAdHi]  = 0;
-                    SendPetitModbus(ProcessSlave, PETITMODBUS_DIAGNOSTIC_REGISTERS, DiagRegisters, 4);
+                    DiagRegistersRead[3]  = 2;
+                    DiagRegistersRead[2]  = 0;
+                    DiagRegistersRead[1]  = 2;
+                    DiagRegistersRead[0]  = 0;
+                    SendPetitModbus(ProcessSlave, PETITMODBUS_DIAGNOSTIC_REGISTERS, DiagRegistersRead, 4);
                     break;
                 
                 default:
@@ -179,16 +192,18 @@ void ProcessSlaveCommunication(){
             
         case SLAVE_DATA_NOK:
             // count here how often the slave data is NOK, otherwise stop all slaves with broadcast
+            MASTER_SLAVE_DATA[ProcessSlave].MbCommError = SLAVE_DATA_IDLE;
             Message++;                                                          // process next message
-            if (Message > MESSAGE4){
+            if (Message > MESSAGE3){
                 ProcessSlave++;
                 Message = MESSAGE1;
-            }
+            }            
             break;
             
         case SLAVE_DATA_OK:
+            MASTER_SLAVE_DATA[ProcessSlave].MbCommError = SLAVE_DATA_IDLE;
             Message++;                                                          // process next message
-            if (Message > MESSAGE4){
+            if (Message > MESSAGE3){
                 ProcessSlave++;
                 Message = MESSAGE1;
             }
@@ -196,8 +211,9 @@ void ProcessSlaveCommunication(){
             
         case SLAVE_DATA_TIMEOUT:
             // count here how often the slave data is timeout, otherwise stop all slaves with broadcast
+            MASTER_SLAVE_DATA[ProcessSlave].MbCommError = SLAVE_DATA_IDLE;
             Message++;                                                          // process next message
-            if (Message > MESSAGE4){
+            if (Message > MESSAGE3){
                 ProcessSlave++;
                 Message = MESSAGE1;
             }
@@ -205,14 +221,15 @@ void ProcessSlaveCommunication(){
             
         case SLAVE_DATA_EXCEPTION:
             // count here how often the slave data is timeout, otherwise stop all slaves with broadcast
+            MASTER_SLAVE_DATA[ProcessSlave].MbCommError = SLAVE_DATA_IDLE;
             Message++;                                                          // process next message
-            if (Message > MESSAGE4){
+            if (Message > MESSAGE3){
                 ProcessSlave++;
                 Message = MESSAGE1;
             }
             break;
             
-        default :            
+        default :    // Idle is here        
             break;
     }
 }

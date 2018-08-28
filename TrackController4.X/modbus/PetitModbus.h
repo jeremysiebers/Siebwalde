@@ -38,6 +38,7 @@ extern volatile unsigned int SlaveAnswerTimeoutCounter;
 
 typedef enum
 {
+    SLAVE_DATA_IDLE = 0,
     SLAVE_DATA_BUSY = 1,
     SLAVE_DATA_OK = 2,
     SLAVE_DATA_NOK = 3,

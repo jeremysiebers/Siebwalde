@@ -8,7 +8,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 [v _SYSTEM_Initialize `(v ~T0 @X0 0 ef ]
 "161 mcc_generated_files/tmr1.h
 [v _TMR1_StopTimer `(v ~T0 @X0 0 ef ]
-"357 C:\Localdata\Microchip\xc8\v2.00\pic\include\pic16f18854.h
+"357 C:\Program Files (x86)\Microchip\xc8\v2.00\pic\include\pic16f18854.h
 [s S26 :1 `uc 1 :5 `uc 1 :1 `uc 1 :1 `uc 1 ]
 [n S26 . INTEDG . PEIE GIE ]
 "356
@@ -39,7 +39,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;xc.h: 20: extern double __fpnormalize(double);
 [; ;xc8debug.h: 14: extern void __builtin_software_breakpoint(void);
 [; ;pic16f18854.h: 52: extern volatile unsigned char INDF0 __at(0x000);
-"54 C:\Localdata\Microchip\xc8\v2.00\pic\include\pic16f18854.h
+"54 C:\Program Files (x86)\Microchip\xc8\v2.00\pic\include\pic16f18854.h
 [; ;pic16f18854.h: 54: asm("INDF0 equ 00h");
 [; <" INDF0 equ 00h ;# ">
 [; ;pic16f18854.h: 57: typedef union {
@@ -13276,18 +13276,18 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;PetitModbus.h: 36: unsigned int ActValue;
 [; ;PetitModbus.h: 37: }PetitRegStructure;
 "40 modbus/PetitModbus.h
-[v _PetitHoldingRegisters `S1557 ~T0 @X0 -> 7 `i e ]
-[; ;PetitModbus.h: 40: PetitRegStructure PetitHoldingRegisters[7];
+[v _PetitHoldingRegisters `S1557 ~T0 @X0 -> 4 `i e ]
+[; ;PetitModbus.h: 40: PetitRegStructure PetitHoldingRegisters[4];
 "44
-[v _PetitInputRegisters `S1557 ~T0 @X0 -> 3 `i e ]
-[; ;PetitModbus.h: 44: PetitRegStructure PetitInputRegisters[3];
+[v _PetitInputRegisters `S1557 ~T0 @X0 -> 2 `i e ]
+[; ;PetitModbus.h: 44: PetitRegStructure PetitInputRegisters[2];
 "48
-[v _PetitDiagnosticRegisters `S1557 ~T0 @X0 -> 2 `i e ]
-[; ;PetitModbus.h: 48: PetitRegStructure PetitDiagnosticRegisters[2];
+[v _PetitDiagnosticRegisters `S1557 ~T0 @X0 -> 4 `i e ]
+[; ;PetitModbus.h: 48: PetitRegStructure PetitDiagnosticRegisters[4];
 [; ;PetitModbus.h: 51: extern volatile unsigned short PetitModbusTimerValue;
 [; ;PetitModbus.h: 54: extern void InitPetitModbus(unsigned char PetitModbusSlaveAddress);
 [; ;PetitModbus.h: 55: extern void ProcessPetitModbus(void);
-[; ;PetitModbusPort.h: 19: extern volatile unsigned char PetitReceiveBuffer[(7*2 + 10)];
+[; ;PetitModbusPort.h: 19: extern volatile unsigned char PetitReceiveBuffer[(4*2 + 10)];
 [; ;PetitModbusPort.h: 20: extern volatile unsigned char PetitReceiveCounter;
 [; ;PetitModbusPort.h: 22: extern void PetitModBus_UART_Initialise(void);
 [; ;PetitModbusPort.h: 23: extern void PetitModBus_TIMER_Initialise(void);

@@ -39,6 +39,8 @@ void main(void) {
     LED_WAR_LAT = 0;
     LED_ERR_LAT = 0;
     
+    modbus_sync_LAT = 1;
+    
     while(1)
     {
         ProcessPetitModbus();
