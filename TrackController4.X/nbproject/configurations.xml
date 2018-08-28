@@ -20,13 +20,13 @@
         <itemPath>mcc_generated_files/tmr4.h</itemPath>
       </logicalFolder>
       <logicalFolder name="modbus" displayName="modbus" projectFiles="true">
-        <itemPath>modbus/General.h</itemPath>
         <itemPath>modbus/Init.h</itemPath>
         <itemPath>modbus/Interrupts.h</itemPath>
         <itemPath>modbus/PetitModbus.h</itemPath>
         <itemPath>modbus/PetitModbusPort.h</itemPath>
       </logicalFolder>
       <itemPath>main.h</itemPath>
+      <itemPath>commhandler.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -52,14 +52,13 @@
         <itemPath>mcc_generated_files/tmr4.c</itemPath>
       </logicalFolder>
       <logicalFolder name="modbus" displayName="modbus" projectFiles="true">
-        <itemPath>modbus/General.c</itemPath>
         <itemPath>modbus/Init.c</itemPath>
         <itemPath>modbus/Interrupts.c</itemPath>
         <itemPath>modbus/PetitModbus.c</itemPath>
         <itemPath>modbus/PetitModbusPort.c</itemPath>
-        <itemPath>modbus/PetitRegConstant.c</itemPath>
       </logicalFolder>
       <itemPath>main.c</itemPath>
+      <itemPath>commhandler.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

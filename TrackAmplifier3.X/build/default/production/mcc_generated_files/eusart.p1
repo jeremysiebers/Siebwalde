@@ -1,6 +1,6 @@
 Version 3.2 HI-TECH Software Intermediate Code
 [v F11529 `(v ~T0 @X0 0 tf ]
-"21678 C:\Program Files (x86)\Microchip\xc8\v2.00\pic\include\pic16f18854.h
+"21678 C:\Localdata\Microchip\xc8\v2.00\pic\include\pic16f18854.h
 [s S981 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
 [n S981 . SSP1IE BCL1IE SSP2IE BCL2IE TXIE RCIE ]
 "21677
@@ -13,7 +13,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 [v _EUSART_SetRxInterruptHandler `(v ~T0 @X0 0 ef1`*F11547 ]
 "316
 [v _EUSART_Receive_ISR `(v ~T0 @X0 0 ef ]
-"4102 C:\Program Files (x86)\Microchip\xc8\v2.00\pic\include\pic16f18854.h
+"4102 C:\Localdata\Microchip\xc8\v2.00\pic\include\pic16f18854.h
 [v _BAUD1CON `Vuc ~T0 @X0 0 e@287 ]
 "3742
 [v _RC1STA `Vuc ~T0 @X0 0 e@285 ]
@@ -55,7 +55,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;xc.h: 20: extern double __fpnormalize(double);
 [; ;xc8debug.h: 14: extern void __builtin_software_breakpoint(void);
 [; ;pic16f18854.h: 52: extern volatile unsigned char INDF0 __at(0x000);
-"54 C:\Program Files (x86)\Microchip\xc8\v2.00\pic\include\pic16f18854.h
+"54 C:\Localdata\Microchip\xc8\v2.00\pic\include\pic16f18854.h
 [; ;pic16f18854.h: 54: asm("INDF0 equ 00h");
 [; <" INDF0 equ 00h ;# ">
 [; ;pic16f18854.h: 57: typedef union {

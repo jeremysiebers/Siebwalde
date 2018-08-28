@@ -8,16 +8,75 @@
 #ifndef __PETITMODBUS__H
 #define __PETITMODBUS__H
 
-#define NUMBER_OF_OUTPUT_PETITREGISTERS                 7                       // Petit Modbus RTU Slave Output Register Number, master has to know how big the slave is
-                                                                                // Have to put a number of registers here
-                                                                                // It has to be bigger than 0 (zero)!!
-#define PETITMODBUS_TIMEOUTTIMER                        2                       // Timeout Constant for Petit Modbus RTU Slave [101us tick]
-#define PETITMODBUS_SLAVECOMMTIMEOUTTIMER               5                       // Uses tmr0 IF, 190 to 255 = 65 = 225uS, 1 timer round is 255 = 3.9 x 225us = 882 us this is the factor times the define constant here to wait for answer. 4 is about 5ms (with application jitter added) normal response is in the range of 430 us slave response.
+                                                                                // 1 register is 16 bits. The largest register is used to determine receive and transmit buffer size!
+#define NUMBER_OF_HOLDING_PETITREGISTERS                 4                      // Petit Modbus RTU Slave Holding Registers (read/write), Have to put a number of registers here It has to be bigger than 0 (zero)!!
+#define NUMBER_OF_INPUT_PETITREGISTERS                   2                      // Number of (read only) input registers)
+#define NUMBER_OF_DIAGNOSTIC_PETITREGISTERS              4                      // Number of diagnostic registers (send/receive counters)
 
-//#define CRC_CALC                                                                // When uncommented a CRC calculation is used for the function void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
-//#define CRC_LOOKUP                                                              // When uncommented a CRC is looked up by the processor in flash
+#define PETITMODBUS_TIMEOUTTIMER                         2                      // Timeout Constant for Petit Modbus RTU Slave [101us tick]
+
+/****************************Don't Touch This**********************************/
+// Buffers for Petit Modbus RTU Slave
+#define PETITMODBUS_RECEIVE_BUFFER_SIZE                 (NUMBER_OF_HOLDING_PETITREGISTERS*2 + 10) 
+#define PETITMODBUS_TRANSMIT_BUFFER_SIZE                PETITMODBUS_RECEIVE_BUFFER_SIZE
+#define PETITMODBUS_RXTX_BUFFER_SIZE                    PETITMODBUS_TRANSMIT_BUFFER_SIZE
+
+/*******************************ModBus Functions*******************************/
+#define PETITMODBUS_READ_COILS                  1
+#define PETITMODBUS_READ_DISCRETE_INPUTS        2
+#define PETITMODBUS_READ_HOLDING_REGISTERS      3
+#define PETITMODBUS_READ_INPUT_REGISTERS        4
+#define PETITMODBUS_WRITE_SINGLE_COIL           5
+#define PETITMODBUS_WRITE_SINGLE_REGISTER       6
+#define PETITMODBUS_DIAGNOSTIC_REGISTERS        8
+#define PETITMODBUS_WRITE_MULTIPLE_COILS        15
+#define PETITMODBUS_WRITE_MULTIPLE_REGISTERS    16
+/****************************End of ModBus Functions***************************/
+
+extern volatile unsigned short PetitModbusTimerValue;
+extern volatile unsigned int SlaveAnswerTimeoutCounter;
+
+typedef enum
+{
+    SLAVE_DATA_BUSY = 1,
+    SLAVE_DATA_OK = 2,
+    SLAVE_DATA_NOK = 3,
+    SLAVE_DATA_TIMEOUT = 4,
+    SLAVE_DATA_EXCEPTION = 5
+}SLAVE_DATA;
+
+typedef struct
+{
+    unsigned int        HoldingReg[NUMBER_OF_HOLDING_PETITREGISTERS];
+    unsigned int        InputReg[NUMBER_OF_INPUT_PETITREGISTERS];
+    unsigned int        DiagReg[NUMBER_OF_DIAGNOSTIC_PETITREGISTERS];
+    unsigned int        MbReceiveCounter;
+    unsigned int        MbSentCounter;
+    SLAVE_DATA          MbCommError;
+    unsigned char       MbExceptionCode;
+}SLAVE_INFO;
+
+#define MESSAGE_SEND_REG 1
+#define MESSAGE_RECEIVE_REG 2
+
+// Main Functions
+extern void             InitPetitModbus(SLAVE_INFO *location);
+extern void             ProcessPetitModbus(void);
+extern unsigned char    SendPetitModbus(unsigned char Address, unsigned char Function, unsigned char *DataBuf, unsigned short DataLen);
+
+void HandlePetitModbusWriteSingleRegisterSlaveReadback(void);
+void HandlePetitModbusReadHoldingRegistersSlaveReadback(void);
+void HandleMPetitodbusWriteMultipleRegistersSlaveReadback(void);
+void HandleMPetitodbusMbExceptionCodesSlaveReadback(void);
+void HandlePetitModbusReadInputRegistersSlaveReadback(void);
+void HandleMPetitodbusDiagnosticRegistersSlaveReadback(void);
+
+/****************************CRC stuff*****************************************/
+
+//#define CRC_CALC                                                              // When uncommented a CRC calculation is used for the function void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
+//#define CRC_LOOKUP                                                            // When uncommented a CRC is looked up by the processor in flash
 #define CRC_HW                                                                  // When uncommented a CRC is calculated by dedicated HW
-
+//#define CRC_HW_REVERSE														// In order to comply to Modbus standard a reverse is required, without however CRC is much faster
 
 #ifdef CRC_LOOKUP
 /* Table of CRC values for high?order byte */
@@ -64,43 +123,6 @@ const unsigned char auchCRCLo[] = {
 0x40
 };
 #endif
-
-
-/****************************Don't Touch This**********************************/
-// Buffers for Petit Modbus RTU Slave
-#define PETITMODBUS_RECEIVE_BUFFER_SIZE                 (NUMBER_OF_OUTPUT_PETITREGISTERS*2 + 10) 
-#define PETITMODBUS_TRANSMIT_BUFFER_SIZE                PETITMODBUS_RECEIVE_BUFFER_SIZE
-#define PETITMODBUS_RXTX_BUFFER_SIZE                    PETITMODBUS_TRANSMIT_BUFFER_SIZE
-
-extern volatile unsigned short PetitModbusTimerValue;
-extern volatile unsigned int SlaveAnswerTimeoutCounter;
-
-typedef enum
-{
-    SLAVE_DATA_BUSY = 1,
-    SLAVE_DATA_OK = 2,
-    SLAVE_DATA_NOK = 3,
-    SLAVE_DATA_TIMEOUT = 4
-}SLAVE_DATA;
-
-typedef struct
-{
-    unsigned int        Reg[NUMBER_OF_OUTPUT_PETITREGISTERS];
-    unsigned char       MbCommError;
-    unsigned char       MbExceptionCode;
-    unsigned int        MbReceiveCounter;
-    unsigned int        MbSentCounter;
-}SLAVE_INFO;
-
-// Main Functions
-extern void             InitPetitModbus(SLAVE_INFO *location);
-extern void             ProcessPetitModbus(void);
-extern unsigned char    SendPetitModbus(unsigned char Address, unsigned char Function, unsigned char *DataBuf, unsigned short DataLen);
-
-void HandlePetitModbusWriteSingleRegisterSlaveReadback(void);
-void HandlePetitModbusReadHoldingRegistersSlaveReadback(void);
-void HandleMPetitodbusWriteMultipleRegistersSlaveReadback(void);
-void HandleMPetitodbusMbExceptionCodesSlaveReadback(void);
 
 // Petit Modbus Port Header
 #include "PetitModbusPort.h"

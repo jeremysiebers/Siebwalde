@@ -1,6 +1,6 @@
 Version 3.2 HI-TECH Software Intermediate Code
 [v F11769 `(v ~T0 @X0 0 tf ]
-"85 modbus/PetitModbus.h
+"35 modbus/PetitModbus.h
 [s S1557 `ui 1 ]
 [n S1557 . ActValue ]
 [p mainexit ]
@@ -8,7 +8,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 [v _SYSTEM_Initialize `(v ~T0 @X0 0 ef ]
 "161 mcc_generated_files/tmr1.h
 [v _TMR1_StopTimer `(v ~T0 @X0 0 ef ]
-"357 C:\Program Files (x86)\Microchip\xc8\v2.00\pic\include\pic16f18854.h
+"357 C:\Localdata\Microchip\xc8\v2.00\pic\include\pic16f18854.h
 [s S26 :1 `uc 1 :5 `uc 1 :1 `uc 1 :1 `uc 1 ]
 [n S26 . INTEDG . PEIE GIE ]
 "356
@@ -26,9 +26,9 @@ Version 3.2 HI-TECH Software Intermediate Code
 [v _LATBbits `VS43 ~T0 @X0 0 e@23 ]
 "15 main.h
 [v _Get_ID_From_AD `(v ~T0 @X0 0 ef ]
-"104 modbus/PetitModbus.h
+"54 modbus/PetitModbus.h
 [v _InitPetitModbus `(v ~T0 @X0 0 ef1`uc ]
-"105
+"55
 [v _ProcessPetitModbus `(v ~T0 @X0 0 ef ]
 "57 main.c
 [c E11691 0 2 3 4 8 23 60 61 62 63 .. ]
@@ -39,7 +39,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;xc.h: 20: extern double __fpnormalize(double);
 [; ;xc8debug.h: 14: extern void __builtin_software_breakpoint(void);
 [; ;pic16f18854.h: 52: extern volatile unsigned char INDF0 __at(0x000);
-"54 C:\Program Files (x86)\Microchip\xc8\v2.00\pic\include\pic16f18854.h
+"54 C:\Localdata\Microchip\xc8\v2.00\pic\include\pic16f18854.h
 [; ;pic16f18854.h: 54: asm("INDF0 equ 00h");
 [; <" INDF0 equ 00h ;# ">
 [; ;pic16f18854.h: 57: typedef union {
@@ -13271,22 +13271,22 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;Init.h: 12: extern void InitTMR(void);
 [; ;Interrupts.h: 3: extern void PetitModbusIntHandlerTMR(void);
 [; ;Interrupts.h: 4: extern void PetitModbusIntHandlerRC(void);
-[; ;PetitModbus.h: 83: extern unsigned char PETITMODBUS_SLAVE_ADDRESS;
-[; ;PetitModbus.h: 85: typedef struct{
-[; ;PetitModbus.h: 86: unsigned int ActValue;
-[; ;PetitModbus.h: 87: }PetitRegStructure;
-"90 modbus/PetitModbus.h
+[; ;PetitModbus.h: 33: extern unsigned char PETITMODBUS_SLAVE_ADDRESS;
+[; ;PetitModbus.h: 35: typedef struct{
+[; ;PetitModbus.h: 36: unsigned int ActValue;
+[; ;PetitModbus.h: 37: }PetitRegStructure;
+"40 modbus/PetitModbus.h
 [v _PetitHoldingRegisters `S1557 ~T0 @X0 -> 7 `i e ]
-[; ;PetitModbus.h: 90: PetitRegStructure PetitHoldingRegisters[7];
-"94
+[; ;PetitModbus.h: 40: PetitRegStructure PetitHoldingRegisters[7];
+"44
 [v _PetitInputRegisters `S1557 ~T0 @X0 -> 3 `i e ]
-[; ;PetitModbus.h: 94: PetitRegStructure PetitInputRegisters[3];
-"98
-[v _PetitDiagnosticRegisters `S1557 ~T0 @X0 -> -> 1 `i `ux e ]
-[; ;PetitModbus.h: 98: PetitRegStructure PetitDiagnosticRegisters[1];
-[; ;PetitModbus.h: 101: extern volatile unsigned short PetitModbusTimerValue;
-[; ;PetitModbus.h: 104: extern void InitPetitModbus(unsigned char PetitModbusSlaveAddress);
-[; ;PetitModbus.h: 105: extern void ProcessPetitModbus(void);
+[; ;PetitModbus.h: 44: PetitRegStructure PetitInputRegisters[3];
+"48
+[v _PetitDiagnosticRegisters `S1557 ~T0 @X0 -> 2 `i e ]
+[; ;PetitModbus.h: 48: PetitRegStructure PetitDiagnosticRegisters[2];
+[; ;PetitModbus.h: 51: extern volatile unsigned short PetitModbusTimerValue;
+[; ;PetitModbus.h: 54: extern void InitPetitModbus(unsigned char PetitModbusSlaveAddress);
+[; ;PetitModbus.h: 55: extern void ProcessPetitModbus(void);
 [; ;PetitModbusPort.h: 19: extern volatile unsigned char PetitReceiveBuffer[(7*2 + 10)];
 [; ;PetitModbusPort.h: 20: extern volatile unsigned char PetitReceiveCounter;
 [; ;PetitModbusPort.h: 22: extern void PetitModBus_UART_Initialise(void);

@@ -1,5 +1,5 @@
 Version 3.2 HI-TECH Software Intermediate Code
-"24413 C:\Program Files (x86)\Microchip\xc8\v2.00\pic\include\pic16f18854.h
+"24413 C:\Localdata\Microchip\xc8\v2.00\pic\include\pic16f18854.h
 [v _CM1CON0 `Vuc ~T0 @X0 0 e@2448 ]
 "24499
 [v _CM1CON1 `Vuc ~T0 @X0 0 e@2449 ]
@@ -22,7 +22,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;xc.h: 20: extern double __fpnormalize(double);
 [; ;xc8debug.h: 14: extern void __builtin_software_breakpoint(void);
 [; ;pic16f18854.h: 52: extern volatile unsigned char INDF0 __at(0x000);
-"54 C:\Program Files (x86)\Microchip\xc8\v2.00\pic\include\pic16f18854.h
+"54 C:\Localdata\Microchip\xc8\v2.00\pic\include\pic16f18854.h
 [; ;pic16f18854.h: 54: asm("INDF0 equ 00h");
 [; <" INDF0 equ 00h ;# ">
 [; ;pic16f18854.h: 57: typedef union {

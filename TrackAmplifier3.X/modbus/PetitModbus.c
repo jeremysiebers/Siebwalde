@@ -24,11 +24,11 @@
 #define PETIT_ERROR_CODE_02                     0x02                            // Register address is not allowed or write-protected
 #define PETIT_ERROR_CODE_03                     0x03                            // Some data values are out of range, invalid number of register
 
-unsigned char PETITMODBUS_SLAVE_ADDRESS         = 1;
+unsigned char PETITMODBUS_SLAVE_ADDRESS         = 255;
 unsigned char PETITMODBUS_BROADCAST_ADDRESS     = 0;
 
-#ifdef  CRC_HW
-//uint16_t CRC_ReverseValue(uint16_t crc);                                        // When using HW CRC the result must be reversed after the last calculation
+#ifdef  CRC_HW_REVERSE
+uint16_t CRC_ReverseValue(uint16_t crc);                                        // When using HW CRC the result must be reversed after the last calculation
 #endif
 
 typedef enum
@@ -134,8 +134,6 @@ void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
 #ifdef CRC_HW
 void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
 {
-    //LED_WAR_LAT = 1;
-    
     CRCACCH = *CRC >> 8;
     CRCACCL = *CRC & 0x00FF;
     
@@ -143,9 +141,7 @@ void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
     CRCCON0bits.CRCGO = 1;//CRC_Start();
     NOP();
     //while (CRCCON0bits.BUSY);
-    *CRC = ((uint16_t)CRCACCH << 8)|CRCACCL;//CRC_CalculatedResultGet(false, 0);
-    
-    //LED_WAR_LAT = 0;
+    *CRC = ((uint16_t)CRCACCH << 8)|CRCACCL;//CRC_CalculatedResultGet(false, 0);    
 }
 /* 
  * https://www.microchip.com/forums/m885342.aspx
@@ -191,6 +187,7 @@ unsigned char PetitSendMessage(void)
     if (Petit_Tx_State != PETIT_RXTX_IDLE){
         return FALSE;
     }
+	PetitDiagnosticRegisters[(NUMBER_OF_DIAGNOSTIC_PETITREGISTERS - 1)].ActValue += 1;    // Count the amount of transmitted messages
     Petit_Tx_Current  =0;
     Petit_Tx_State    =PETIT_RXTX_START;
 
@@ -211,7 +208,6 @@ void HandlePetitModbusError(unsigned char ErrorCode, unsigned char Function)
     }
     else
     {
-        PetitHoldingRegisters[(NUMBER_OF_HOLDING_PETITREGISTERS - 1)].ActValue += 1;    // Count the amount of transmitted messages
         // Initialise the output buffer. The first byte in the buffer says how many registers we have read
         Petit_Tx_Data.Function    = Function | 0x80;
         Petit_Tx_Data.DataBuf[0]  = ErrorCode;
@@ -251,7 +247,6 @@ void HandlePetitModbusReadHoldingRegisters(void)
     }
     else
     {
-        PetitHoldingRegisters[(NUMBER_OF_HOLDING_PETITREGISTERS - 1)].ActValue += 1;    // Count the amount of transmitted messages (here so that if the counters are requested this message is also counted already!)
         // Initialise the output buffer. The first byte in the buffer says how many registers we have read
         Petit_Tx_Data.Function    = PETITMODBUS_READ_HOLDING_REGISTERS;
         Petit_Tx_Data.Address     = PETITMODBUS_SLAVE_ADDRESS;
@@ -261,6 +256,55 @@ void HandlePetitModbusReadHoldingRegisters(void)
         for (Petit_i = 0; Petit_i < Petit_NumberOfRegisters; Petit_i++)
         {
             unsigned short Petit_CurrentData = PetitHoldingRegisters[Petit_StartAddress+Petit_i].ActValue;
+
+            Petit_Tx_Data.DataBuf[Petit_Tx_Data.DataLen]        = (unsigned char) ((Petit_CurrentData & 0xFF00) >> 8);
+            Petit_Tx_Data.DataBuf[Petit_Tx_Data.DataLen + 1]    = (unsigned char) (Petit_CurrentData & 0xFF);
+            Petit_Tx_Data.DataLen                        += 2;
+            Petit_Tx_Data.DataBuf[0]                      = Petit_Tx_Data.DataLen - 1;
+        }
+
+        PetitSendMessage();
+    }
+}
+#endif
+
+/******************************************************************************/
+
+/*
+ * Function Name        : HandleModbusReadInputRegisters
+ * @How to use          : Modbus function 04 - Read input registers
+ */
+#if PETITMODBUS_READ_INPUT_REGISTERS_ENABLED > 0
+void HandlePetitModbusReadInputRegisters(void)
+{
+    // Input registers are effectively numerical Inputs that can be read only by the host.
+    unsigned int    Petit_StartAddress        = 0;
+    unsigned int    Petit_NumberOfRegisters   = 0;
+    unsigned int    Petit_i                   = 0;
+
+    // The message contains the requested start address and number of registers
+    Petit_StartAddress        = ((unsigned int) (Petit_Rx_Data.DataBuf[0]) << 8) + (unsigned int) (Petit_Rx_Data.DataBuf[1]);
+    Petit_NumberOfRegisters   = ((unsigned int) (Petit_Rx_Data.DataBuf[2]) << 8) + (unsigned int) (Petit_Rx_Data.DataBuf[3]);
+    
+    if (Petit_Rx_Data.Address == PETITMODBUS_BROADCAST_ADDRESS)                 // Broadcast cannot process back communication (all slaves would have to respond!)
+    {
+        return;
+    }
+    // If it is bigger than RegisterNumber return error to Modbus Master
+    else if((Petit_StartAddress+Petit_NumberOfRegisters)>NUMBER_OF_INPUT_PETITREGISTERS){
+        HandlePetitModbusError(PETIT_ERROR_CODE_02, PETITMODBUS_READ_INPUT_REGISTERS);
+    }
+    else
+    {
+        // Initialise the output buffer. The first byte in the buffer says how many registers we have read
+        Petit_Tx_Data.Function    = PETITMODBUS_READ_INPUT_REGISTERS;
+        Petit_Tx_Data.Address     = PETITMODBUS_SLAVE_ADDRESS;
+        Petit_Tx_Data.DataLen     = 1;
+        Petit_Tx_Data.DataBuf[0]  = 0;
+
+        for (Petit_i = 0; Petit_i < Petit_NumberOfRegisters; Petit_i++)
+        {
+            unsigned short Petit_CurrentData = PetitInputRegisters[Petit_StartAddress+Petit_i].ActValue;
 
             Petit_Tx_Data.DataBuf[Petit_Tx_Data.DataLen]        = (unsigned char) ((Petit_CurrentData & 0xFF00) >> 8);
             Petit_Tx_Data.DataBuf[Petit_Tx_Data.DataLen + 1]    = (unsigned char) (Petit_CurrentData & 0xFF);
@@ -311,9 +355,58 @@ void HandlePetitModbusWriteSingleRegister(void)
         for (Petit_i = 0; Petit_i < 4; ++Petit_i)
             Petit_Tx_Data.DataBuf[Petit_i] = Petit_Rx_Data.DataBuf[Petit_i];
     }
-    PetitHoldingRegisters[(NUMBER_OF_HOLDING_PETITREGISTERS - 1)].ActValue += 1;    // Count the amount of transmitted messages
     
     PetitSendMessage();
+}
+#endif
+
+/******************************************************************************/
+
+/*
+ * Function Name        : HandleModbusReadInputRegisters
+ * @How to use          : Modbus function 08 - Diagnostic registers
+ * At this time only read diagnostic registers
+ */
+#if PETITMODBUS_DIAGNOSTIC_REGISTERS_ENABLED > 0
+void HandleMPetitodbusDiagnosticRegisters(void)
+{
+    // Input registers are effectively numerical Inputs that can be read only by the host.
+    unsigned int    Petit_StartAddress        = 0;
+    unsigned int    Petit_NumberOfRegisters   = 0;
+    unsigned int    Petit_i                   = 0;
+
+    // The message contains the requested start address and number of registers
+    Petit_StartAddress        = ((unsigned int) (Petit_Rx_Data.DataBuf[0]) << 8) + (unsigned int) (Petit_Rx_Data.DataBuf[1]);
+    Petit_NumberOfRegisters   = ((unsigned int) (Petit_Rx_Data.DataBuf[2]) << 8) + (unsigned int) (Petit_Rx_Data.DataBuf[3]);
+    
+    if (Petit_Rx_Data.Address == PETITMODBUS_BROADCAST_ADDRESS)                 // Broadcast cannot process back communication (all slaves would have to respond!)
+    {
+        return;
+    }
+    // If it is bigger than RegisterNumber return error to Modbus Master
+    else if((Petit_StartAddress+Petit_NumberOfRegisters)>NUMBER_OF_DIAGNOSTIC_PETITREGISTERS){
+        HandlePetitModbusError(PETIT_ERROR_CODE_02, PETITMODBUS_DIAGNOSTIC_REGISTERS);
+    }
+    else
+    {
+        // Initialise the output buffer. The first byte in the buffer says how many registers we have read
+        Petit_Tx_Data.Function    = PETITMODBUS_DIAGNOSTIC_REGISTERS;
+        Petit_Tx_Data.Address     = PETITMODBUS_SLAVE_ADDRESS;
+        Petit_Tx_Data.DataLen     = 1;
+        Petit_Tx_Data.DataBuf[0]  = 0;
+
+        for (Petit_i = 0; Petit_i < Petit_NumberOfRegisters; Petit_i++)
+        {
+            unsigned short Petit_CurrentData = PetitDiagnosticRegisters[Petit_StartAddress+Petit_i].ActValue;
+
+            Petit_Tx_Data.DataBuf[Petit_Tx_Data.DataLen]        = (unsigned char) ((Petit_CurrentData & 0xFF00) >> 8);
+            Petit_Tx_Data.DataBuf[Petit_Tx_Data.DataLen + 1]    = (unsigned char) (Petit_CurrentData & 0xFF);
+            Petit_Tx_Data.DataLen                        += 2;
+            Petit_Tx_Data.DataBuf[0]                      = Petit_Tx_Data.DataLen - 1;
+        }
+
+        PetitSendMessage();
+    }
 }
 #endif
 
@@ -368,8 +461,7 @@ void HandleMPetitodbusWriteMultipleRegisters(void)
             Petit_Value=(Petit_Rx_Data.DataBuf[5+2*Petit_i]<<8)+(Petit_Rx_Data.DataBuf[6+2*Petit_i]);
             PetitHoldingRegisters[Petit_StartAddress+Petit_i].ActValue=Petit_Value;
         }
-        PetitHoldingRegisters[(NUMBER_OF_HOLDING_PETITREGISTERS - 1)].ActValue += 1;    // Count the amount of transmitted messages
-        
+		
         PetitSendMessage();
     }
 }
@@ -502,10 +594,8 @@ void Petit_RxRTU(void)
             Petit_CRC16(Petit_Rx_Data.DataBuf[Petit_i], &Petit_Rx_CRC16);
         }
         
-        #ifdef  CRC_HW
-        //LED_WAR_LAT = 1;
-        //Petit_Rx_CRC16 = CRC_ReverseValue(Petit_Rx_CRC16);
-        //LED_WAR_LAT = 0;
+        #ifdef  CRC_HW_REVERSE
+        Petit_Tx_CRC16 = CRC_ReverseValue(Petit_Rx_CRC16);
         #endif
         
         if (((unsigned int) Petit_Rx_Data.DataBuf[Petit_Rx_Data.DataLen] + ((unsigned int) Petit_Rx_Data.DataBuf[Petit_Rx_Data.DataLen + 1] << 8)) == Petit_Rx_CRC16)
@@ -540,8 +630,8 @@ void Petit_TxRTU(void)
         Petit_CRC16(Petit_Tx_Data.DataBuf[Petit_Tx_Current], &Petit_Tx_CRC16);
     }
     
-    #ifdef  CRC_HW
-    //Petit_Tx_CRC16 = CRC_ReverseValue(Petit_Tx_CRC16);
+    #ifdef  CRC_HW_REVERSE
+    Petit_Tx_CRC16 = CRC_ReverseValue(Petit_Tx_CRC16);
     #endif
     
     Petit_Tx_Buf[Petit_Tx_Buf_Size++] = Petit_Tx_CRC16 & 0x00FF;
@@ -561,9 +651,7 @@ void Petit_TxRTU(void)
 void ProcessPetitModbus(void)
 {
     if (Petit_Tx_State != PETIT_RXTX_IDLE){                                      // If answer is ready, send it!
-        //LED_WAR_LAT = 1;
-        Petit_TxRTU();
-        //LED_WAR_LAT = 0;
+        Petit_TxRTU();        
     }
     
     Petit_RxRTU();                                                              // Call this function every cycle
@@ -572,19 +660,26 @@ void ProcessPetitModbus(void)
     {
         if (Petit_Rx_Data.Address == PETITMODBUS_SLAVE_ADDRESS || PETITMODBUS_BROADCAST_ADDRESS) // Is Data for us?
         {
-            PetitHoldingRegisters[(NUMBER_OF_HOLDING_PETITREGISTERS - 2)].ActValue += 1;// Count the amount of received messages
+            PetitDiagnosticRegisters[(NUMBER_OF_DIAGNOSTIC_PETITREGISTERS - 2)].ActValue += 1;// Count the amount of received messages
             
             switch (Petit_Rx_Data.Function)                                     // Data is for us but which function?
             {
                 #if PETITMODBUS_READ_HOLDING_REGISTERS_ENABLED > 0
                 case PETITMODBUS_READ_HOLDING_REGISTERS:    {   HandlePetitModbusReadHoldingRegisters();        break;  }
                 #endif
+                #if PETITMODBUS_READ_INPUT_REGISTERS_ENABLED > 0
+                case PETITMODBUS_READ_INPUT_REGISTERS:      {   HandlePetitModbusReadInputRegisters();          break;  }
+                #endif
                 #if PETITMODBUSWRITE_SINGLE_REGISTER_ENABLED > 0
                 case PETITMODBUS_WRITE_SINGLE_REGISTER:     {   HandlePetitModbusWriteSingleRegister();         break;  }
+                #endif
+                #if PETITMODBUS_DIAGNOSTIC_REGISTERS_ENABLED > 0
+                case PETITMODBUS_DIAGNOSTIC_REGISTERS:      {   HandleMPetitodbusDiagnosticRegisters();         break;  }
                 #endif
                 #if PETITMODBUS_WRITE_MULTIPLE_REGISTERS_ENABLED > 0
                 case PETITMODBUS_WRITE_MULTIPLE_REGISTERS:  {   HandleMPetitodbusWriteMultipleRegisters();      break;  }
                 #endif
+
                 default:                                    {   HandlePetitModbusError(PETIT_ERROR_CODE_01, Petit_Rx_Data.Function);    break;  }
             }
             
@@ -613,7 +708,7 @@ void InitPetitModbus(unsigned char PetitModbusSlaveAddress)
  * Function Name        : CRC_ReverseValue
  * @How to use          : Feed the last HW calculated result
  */
-#ifdef  CRC_HW
+#ifdef  CRC_HW_REVERSE
 
 uint16_t CRC_ReverseValue(uint16_t crc)
 {

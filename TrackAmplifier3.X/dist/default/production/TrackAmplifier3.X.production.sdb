@@ -3,7 +3,7 @@
 [d edition pro ]
 [d chip 16F18854 ]
 [d frameptr 6 ]
-"89 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/tmr2.c
+"89 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/tmr2.c
 [e E11526 . `uc
 TMR2_ROP_STARTS_TMRON 0
 TMR2_ROP_STARTS_TMRON_ERSHIGH 1
@@ -48,7 +48,7 @@ TMR2_CLC2_OUT 15
 TMR2_CLC3_OUT 16
 TMR2_CLC4_OUT 17
 ]
-"105 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/adcc.c
+"105 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/adcc.c
 [e E11527 . `uc
 ID 0
 BMF 2
@@ -61,7 +61,7 @@ channel_Temp 61
 channel_DAC1 62
 channel_FVR_buf1 63
 ]
-"55 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbus.c
+"55 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\modbus/PetitModbus.c
 [e E11821 . `uc
 PETIT_RXTX_IDLE 0
 PETIT_RXTX_START 1
@@ -69,7 +69,7 @@ PETIT_RXTX_DATABUF 2
 PETIT_RXTX_WAIT_ANSWER 3
 PETIT_RXTX_TIMEOUT 4
 ]
-"57 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\main.c
+"57 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\main.c
 [e E11691 . `uc
 ID 0
 BMF 2
@@ -82,51 +82,51 @@ channel_Temp 61
 channel_DAC1 62
 channel_FVR_buf1 63
 ]
-"62 C:\Program Files (x86)\Microchip\xc8\v2.00\pic\sources\c90\common\float.c
+"62 C:\Localdata\Microchip\xc8\v2.00\pic\sources\c90\common\float.c
 [v ___ftpack __ftpack `(f  1 e 3 0 ]
-"86 C:\Program Files (x86)\Microchip\xc8\v2.00\pic\sources\c90\common\ftadd.c
+"86 C:\Localdata\Microchip\xc8\v2.00\pic\sources\c90\common\ftadd.c
 [v ___ftadd __ftadd `(f  1 e 3 0 ]
-"6 C:\Program Files (x86)\Microchip\xc8\v2.00\pic\sources\c90\pic\__eeprom.c
+"6 C:\Localdata\Microchip\xc8\v2.00\pic\sources\c90\pic\__eeprom.c
 [v ___eecpymem __eecpymem `(v  1 e 1 0 ]
 "39
 [v ___memcpyee __memcpyee `(v  1 e 1 0 ]
-"17 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\main.c
+"17 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\main.c
 [v _main main `(v  1 e 1 0 ]
 "55
 [v _Get_ID_From_AD Get_ID_From_AD `(v  1 e 1 0 ]
-"63 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/adcc.c
+"63 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/adcc.c
 [v _ADCC_Initialize ADCC_Initialize `(v  1 e 1 0 ]
 "128
 [v _ADCC_GetSingleConversion ADCC_GetSingleConversion `(ui  1 e 2 0 ]
-"58 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/cmp1.c
+"58 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/cmp1.c
 [v _CMP1_Initialize CMP1_Initialize `(v  1 e 1 0 ]
-"76 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/crc.c
+"76 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/crc.c
 [v _CRC_Initialize CRC_Initialize `(v  1 e 1 0 ]
 "134
-[v crc@CRC_ReverseValue CRC_ReverseValue `(ui  1 s 2 CRC_ReverseValue ]
-"58 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/dac.c
+[v _CRC_ReverseValue CRC_ReverseValue `(ui  1 s 2 CRC_ReverseValue ]
+"58 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/dac.c
 [v _DAC_Initialize DAC_Initialize `(v  1 e 1 0 ]
-"71 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/eusart.c
+"71 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/eusart.c
 [v _EUSART_Initialize EUSART_Initialize `(v  1 e 1 0 ]
 "149
 [v _EUSART_Receive_ISR EUSART_Receive_ISR `(v  1 e 1 0 ]
 "170
 [v _EUSART_SetRxInterruptHandler EUSART_SetRxInterruptHandler `(v  1 e 1 0 ]
-"58 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/fvr.c
+"58 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/fvr.c
 [v _FVR_Initialize FVR_Initialize `(v  1 e 1 0 ]
-"52 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/interrupt_manager.c
+"52 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/interrupt_manager.c
 [v _INTERRUPT_InterruptManager INTERRUPT_InterruptManager `II(v  1 e 1 0 ]
-"50 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/mcc.c
+"50 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/mcc.c
 [v _SYSTEM_Initialize SYSTEM_Initialize `(v  1 e 1 0 ]
 "67
 [v _OSCILLATOR_Initialize OSCILLATOR_Initialize `(v  1 e 1 0 ]
 "81
 [v _PMD_Initialize PMD_Initialize `(v  1 e 1 0 ]
-"57 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/pin_manager.c
+"57 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/pin_manager.c
 [v _PIN_MANAGER_Initialize PIN_MANAGER_Initialize `(v  1 e 1 0 ]
-"58 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/pwm6.c
+"58 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/pwm6.c
 [v _PWM6_Initialize PWM6_Initialize `(v  1 e 1 0 ]
-"64 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/tmr1.c
+"64 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/tmr1.c
 [v _TMR1_Initialize TMR1_Initialize `(v  1 e 1 0 ]
 "105
 [v _TMR1_StopTimer TMR1_StopTimer `(v  1 e 1 0 ]
@@ -138,7 +138,7 @@ channel_FVR_buf1 63
 [v _TMR1_SetInterruptHandler TMR1_SetInterruptHandler `(v  1 e 1 0 ]
 "182
 [v _TMR1_DefaultInterruptHandler TMR1_DefaultInterruptHandler `(v  1 e 1 0 ]
-"62 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/tmr2.c
+"62 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/tmr2.c
 [v _TMR2_Initialize TMR2_Initialize `(v  1 e 1 0 ]
 "100
 [v _TMR2_Start TMR2_Start `(v  1 e 1 0 ]
@@ -150,7 +150,7 @@ channel_FVR_buf1 63
 [v _TMR2_Counter8BitSet TMR2_Counter8BitSet `(v  1 e 1 0 ]
 "147
 [v _TMR2_Period8BitSet TMR2_Period8BitSet `(v  1 e 1 0 ]
-"64 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/tmr3.c
+"64 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/tmr3.c
 [v _TMR3_Initialize TMR3_Initialize `(v  1 e 1 0 ]
 "127
 [v _TMR3_WriteTimer TMR3_WriteTimer `(v  1 e 1 0 ]
@@ -162,43 +162,47 @@ channel_FVR_buf1 63
 [v _TMR3_SetInterruptHandler TMR3_SetInterruptHandler `(v  1 e 1 0 ]
 "182
 [v _TMR3_DefaultInterruptHandler TMR3_DefaultInterruptHandler `(v  1 e 1 0 ]
-"7 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/Init.c
+"7 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\modbus/Init.c
 [v _InitUART InitUART `(v  1 e 1 0 ]
 "12
 [v _InitTMR InitTMR `(v  1 e 1 0 ]
-"7 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/Interrupts.c
+"7 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\modbus/Interrupts.c
 [v _PetitModbusIntHandlerTMR PetitModbusIntHandlerTMR `(v  1 e 1 0 ]
 "14
 [v _PetitModbusIntHandlerRC PetitModbusIntHandlerRC `(v  1 e 1 0 ]
-"135 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbus.c
+"135 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\modbus/PetitModbus.c
 [v _Petit_CRC16 Petit_CRC16 `(v  1 e 1 0 ]
-"175
+"171
 [v _Petit_DoSlaveTX Petit_DoSlaveTX `(uc  1 e 1 0 ]
-"189
+"185
 [v _PetitSendMessage PetitSendMessage `(uc  1 e 1 0 ]
-"206
+"203
 [v _HandlePetitModbusError HandlePetitModbusError `(v  1 e 1 0 ]
-"231
+"227
 [v _HandlePetitModbusReadHoldingRegisters HandlePetitModbusReadHoldingRegisters `(v  1 e 1 0 ]
-"283
-[v _HandlePetitModbusWriteSingleRegister HandlePetitModbusWriteSingleRegister `(v  1 e 1 0 ]
+"278
+[v _HandlePetitModbusReadInputRegisters HandlePetitModbusReadInputRegisters `(v  1 e 1 0 ]
 "327
+[v _HandlePetitModbusWriteSingleRegister HandlePetitModbusWriteSingleRegister `(v  1 e 1 0 ]
+"371
+[v _HandleMPetitodbusDiagnosticRegisters HandleMPetitodbusDiagnosticRegisters `(v  1 e 1 0 ]
+"420
 [v _HandleMPetitodbusWriteMultipleRegisters HandleMPetitodbusWriteMultipleRegisters `(v  1 e 1 0 ]
-"385
+"477
 [v _Petit_RxDataAvailable Petit_RxDataAvailable `(uc  1 e 1 0 ]
-"401
+"493
 [v _Petit_CheckRxTimeout Petit_CheckRxTimeout `(uc  1 e 1 0 ]
-"423
+"515
 [v _CheckPetitModbusBufferComplete CheckPetitModbusBufferComplete `(uc  1 e 1 0 ]
-"468
+"560
 [v _Petit_RxRTU Petit_RxRTU `(v  1 e 1 0 ]
-"528
+"618
 [v _Petit_TxRTU Petit_TxRTU `(v  1 e 1 0 ]
-"561
+"651
 [v _ProcessPetitModbus ProcessPetitModbus `(v  1 e 1 0 ]
-"602
+"697
 [v _InitPetitModbus InitPetitModbus `(v  1 e 1 0 ]
-"11 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbusPort.c
+"11 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\modbus/PetitModbusPort.c
 [v _PetitModBus_UART_Initialise PetitModBus_UART_Initialise `(v  1 e 1 0 ]
 "17
 [v _PetitModBus_TIMER_Initialise PetitModBus_TIMER_Initialise `(v  1 e 1 0 ]
@@ -213,7 +217,7 @@ channel_FVR_buf1 63
 `uc 1 PEIE 1 0 :1:6 
 `uc 1 GIE 1 0 :1:7 
 ]
-"364 C:\Program Files (x86)\Microchip\xc8\v2.00\pic\include\pic16f18854.h
+"364 C:\Localdata\Microchip\xc8\v2.00\pic\include\pic16f18854.h
 [u S1254 . 1 `S1249 1 . 1 0 ]
 [v _INTCONbits INTCONbits `VES1254  1 e 1 @11 ]
 "591
@@ -240,7 +244,7 @@ channel_FVR_buf1 63
 [v _LATBbits LATBbits `VES1646  1 e 1 @23 ]
 "901
 [v _LATC LATC `VEuc  1 e 1 @24 ]
-[s S1790 . 1 `uc 1 LATC0 1 0 :1:0 
+[s S1800 . 1 `uc 1 LATC0 1 0 :1:0 
 `uc 1 LATC1 1 0 :1:1 
 `uc 1 LATC2 1 0 :1:2 
 `uc 1 LATC3 1 0 :1:3 
@@ -250,8 +254,8 @@ channel_FVR_buf1 63
 `uc 1 LATC7 1 0 :1:7 
 ]
 "918
-[u S1799 . 1 `S1790 1 . 1 0 ]
-[v _LATCbits LATCbits `VES1799  1 e 1 @24 ]
+[u S1809 . 1 `S1800 1 . 1 0 ]
+[v _LATCbits LATCbits `VES1809  1 e 1 @24 ]
 "1538
 [v _ADRESL ADRESL `VEuc  1 e 1 @140 ]
 "1558
@@ -885,14 +889,14 @@ channel_FVR_buf1 63
 [v _ODCONC ODCONC `VEuc  1 e 1 @3920 ]
 "34687
 [v _WPUE WPUE `VEuc  1 e 1 @3941 ]
-"14 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\main.c
+"14 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\main.c
 [v _MODBUS_ADDRESS MODBUS_ADDRESS `ui  1 e 2 0 ]
 "15
 [v _result result `ui  1 e 2 0 ]
 [s S1318 . 3 `uc 1 dataWidth 1 0 `uc 1 polyWidth 1 1 `uc 1 seedDirection 1 2 ]
-"69 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/crc.c
+"69 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/crc.c
 [v _crcObj crcObj `S1318  1 s 3 crcObj ]
-"63 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/eusart.c
+"63 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/eusart.c
 [v _eusartRxHead eusartRxHead `VEuc  1 e 1 0 ]
 "64
 [v _eusartRxTail eusartRxTail `VEuc  1 e 1 0 ]
@@ -900,19 +904,19 @@ channel_FVR_buf1 63
 [v _eusartRxBuffer eusartRxBuffer `VE[8]uc  1 e 8 0 ]
 "66
 [v _eusartRxCount eusartRxCount `VEuc  1 e 1 0 ]
-"85 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/eusart.h
+"85 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/eusart.h
 [v _EUSART_RxDefaultInterruptHandler EUSART_RxDefaultInterruptHandler `*.37(v  1 e 2 0 ]
-"57 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/tmr1.c
+"57 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/tmr1.c
 [v _timer1ReloadVal timer1ReloadVal `VEui  1 e 2 0 ]
 "58
 [v _TMR1_InterruptHandler TMR1_InterruptHandler `*.37(v  1 e 2 0 ]
-"57 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/tmr3.c
+"57 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/tmr3.c
 [v _timer3ReloadVal timer3ReloadVal `VEui  1 e 2 0 ]
 "58
 [v _TMR3_InterruptHandler TMR3_InterruptHandler `*.37(v  1 e 2 0 ]
-"3 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/General.c
+"3 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\modbus/General.c
 [v _Timer1_Tick_Counter Timer1_Tick_Counter `VEui  1 e 2 0 ]
-"27 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbus.c
+"27 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\modbus/PetitModbus.c
 [v _PETITMODBUS_SLAVE_ADDRESS PETITMODBUS_SLAVE_ADDRESS `uc  1 e 1 0 ]
 "28
 [v _PETITMODBUS_BROADCAST_ADDRESS PETITMODBUS_BROADCAST_ADDRESS `uc  1 e 1 0 ]
@@ -940,38 +944,42 @@ channel_FVR_buf1 63
 "64
 [v _PetitModbusTimerValue PetitModbusTimerValue `VEus  1 e 2 0 ]
 [s S1528 . 2 `ui 1 ActValue 2 0 ]
-"90 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbus.h
+"40 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\modbus/PetitModbus.h
 [v _PetitHoldingRegisters PetitHoldingRegisters `[7]S1528  1 e 14 0 ]
-"7 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbusPort.c
+"44
+[v _PetitInputRegisters PetitInputRegisters `[3]S1528  1 e 6 0 ]
+"48
+[v _PetitDiagnosticRegisters PetitDiagnosticRegisters `[2]S1528  1 e 4 0 ]
+"7 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\modbus/PetitModbusPort.c
 [v _PetitReceiveBuffer PetitReceiveBuffer `VE[24]uc  1 e 24 0 ]
 "8
 [v _PetitReceiveCounter PetitReceiveCounter `VEuc  1 e 1 0 ]
-"17 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\main.c
+"17 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\main.c
 [v _main main `(v  1 e 1 0 ]
 {
 "40
 } 0
-"105 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/tmr1.c
+"105 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/tmr1.c
 [v _TMR1_StopTimer TMR1_StopTimer `(v  1 e 1 0 ]
 {
 "109
 } 0
-"50 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/mcc.c
+"50 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/mcc.c
 [v _SYSTEM_Initialize SYSTEM_Initialize `(v  1 e 1 0 ]
 {
 "65
 } 0
-"64 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/tmr3.c
+"64 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/tmr3.c
 [v _TMR3_Initialize TMR3_Initialize `(v  1 e 1 0 ]
 {
 "97
 } 0
-"62 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/tmr2.c
+"62 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/tmr2.c
 [v _TMR2_Initialize TMR2_Initialize `(v  1 e 1 0 ]
 {
 "86
 } 0
-"64 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/tmr1.c
+"64 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/tmr1.c
 [v _TMR1_Initialize TMR1_Initialize `(v  1 e 1 0 ]
 {
 "97
@@ -982,42 +990,42 @@ channel_FVR_buf1 63
 [v TMR1_SetInterruptHandler@InterruptHandler InterruptHandler `*.37(v  1 p 2 2 ]
 "180
 } 0
-"58 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/pwm6.c
+"58 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/pwm6.c
 [v _PWM6_Initialize PWM6_Initialize `(v  1 e 1 0 ]
 {
 "72
 } 0
-"81 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/mcc.c
+"81 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/mcc.c
 [v _PMD_Initialize PMD_Initialize `(v  1 e 1 0 ]
 {
 "95
 } 0
-"57 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/pin_manager.c
+"57 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/pin_manager.c
 [v _PIN_MANAGER_Initialize PIN_MANAGER_Initialize `(v  1 e 1 0 ]
 {
 "106
 } 0
-"67 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/mcc.c
+"67 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/mcc.c
 [v _OSCILLATOR_Initialize OSCILLATOR_Initialize `(v  1 e 1 0 ]
 {
 "79
 } 0
-"58 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/fvr.c
+"58 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/fvr.c
 [v _FVR_Initialize FVR_Initialize `(v  1 e 1 0 ]
 {
 "62
 } 0
-"71 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/eusart.c
+"71 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/eusart.c
 [v _EUSART_Initialize EUSART_Initialize `(v  1 e 1 0 ]
 {
 "101
 } 0
-"58 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/dac.c
+"58 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/dac.c
 [v _DAC_Initialize DAC_Initialize `(v  1 e 1 0 ]
 {
 "64
 } 0
-"76 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/crc.c
+"76 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/crc.c
 [v _CRC_Initialize CRC_Initialize `(v  1 e 1 0 ]
 {
 "79
@@ -1026,32 +1034,32 @@ channel_FVR_buf1 63
 [v CRC_Initialize@poly poly `ui  1 a 2 3 ]
 "113
 } 0
-"58 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/cmp1.c
+"58 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/cmp1.c
 [v _CMP1_Initialize CMP1_Initialize `(v  1 e 1 0 ]
 {
 "73
 } 0
-"63 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/adcc.c
+"63 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/adcc.c
 [v _ADCC_Initialize ADCC_Initialize `(v  1 e 1 0 ]
 {
 "102
 } 0
-"561 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbus.c
+"651 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\modbus/PetitModbus.c
 [v _ProcessPetitModbus ProcessPetitModbus `(v  1 e 1 0 ]
 {
-"594
+"689
 } 0
-"528
+"618
 [v _Petit_TxRTU Petit_TxRTU `(v  1 e 1 0 ]
 {
-"553
+"643
 } 0
-"175
+"171
 [v _Petit_DoSlaveTX Petit_DoSlaveTX `(uc  1 e 1 0 ]
 {
-"180
+"176
 } 0
-"30 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbusPort.c
+"30 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\modbus/PetitModbusPort.c
 [v _PetitModBus_UART_String PetitModBus_UART_String `(uc  1 e 1 0 ]
 {
 [v PetitModBus_UART_String@s s `*.5uc  1 a 1 wreg ]
@@ -1072,19 +1080,19 @@ channel_FVR_buf1 63
 [v PetitModBus_UART_Putch@c c `uc  1 a 1 2 ]
 "27
 } 0
-"468 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbus.c
+"560 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\modbus/PetitModbus.c
 [v _Petit_RxRTU Petit_RxRTU `(v  1 e 1 0 ]
 {
-"470
+"562
 [v Petit_RxRTU@Petit_i Petit_i `uc  1 a 1 1 ]
-"471
+"563
 [v Petit_RxRTU@Petit_ReceiveBufferControl Petit_ReceiveBufferControl `uc  1 a 1 0 ]
-"520
+"610
 } 0
-"401
+"493
 [v _Petit_CheckRxTimeout Petit_CheckRxTimeout `(uc  1 e 1 0 ]
 {
-"412
+"504
 } 0
 "135
 [v _Petit_CRC16 Petit_CRC16 `(v  1 e 1 0 ]
@@ -1092,125 +1100,151 @@ channel_FVR_buf1 63
 [v Petit_CRC16@Data Data `DCuc  1 a 1 wreg ]
 [v Petit_CRC16@Data Data `DCuc  1 a 1 wreg ]
 [v Petit_CRC16@CRC CRC `*.4ui  1 p 1 2 ]
-"139
+"137
 [v Petit_CRC16@Data Data `DCuc  1 a 1 5 ]
-"149
+"145
 } 0
-"423
+"515
 [v _CheckPetitModbusBufferComplete CheckPetitModbusBufferComplete `(uc  1 e 1 0 ]
 {
-"425
+"517
 [v CheckPetitModbusBufferComplete@PetitExpectedReceiveCount PetitExpectedReceiveCount `i  1 a 2 4 ]
-"460
+"552
 } 0
-"385
+"477
 [v _Petit_RxDataAvailable Petit_RxDataAvailable `(uc  1 e 1 0 ]
 {
-"387
+"479
 [v Petit_RxDataAvailable@Result Result `uc  1 a 1 3 ]
-"392
-} 0
-"283
-[v _HandlePetitModbusWriteSingleRegister HandlePetitModbusWriteSingleRegister `(v  1 e 1 0 ]
-{
-"286
-[v HandlePetitModbusWriteSingleRegister@Petit_Address Petit_Address `ui  1 a 2 7 ]
-"287
-[v HandlePetitModbusWriteSingleRegister@Petit_Value Petit_Value `ui  1 a 2 5 ]
-"288
-[v HandlePetitModbusWriteSingleRegister@Petit_i Petit_i `uc  1 a 1 9 ]
-"317
-} 0
-"231
-[v _HandlePetitModbusReadHoldingRegisters HandlePetitModbusReadHoldingRegisters `(v  1 e 1 0 ]
-{
-"263
-[v HandlePetitModbusReadHoldingRegisters@Petit_CurrentData Petit_CurrentData `us  1 a 2 5 ]
-"238
-[v HandlePetitModbusReadHoldingRegisters@Petit_i Petit_i `ui  1 a 2 11 ]
-"237
-[v HandlePetitModbusReadHoldingRegisters@Petit_NumberOfRegisters Petit_NumberOfRegisters `ui  1 a 2 9 ]
-"236
-[v HandlePetitModbusReadHoldingRegisters@Petit_StartAddress Petit_StartAddress `ui  1 a 2 7 ]
-"273
+"484
 } 0
 "327
+[v _HandlePetitModbusWriteSingleRegister HandlePetitModbusWriteSingleRegister `(v  1 e 1 0 ]
+{
+"330
+[v HandlePetitModbusWriteSingleRegister@Petit_Address Petit_Address `ui  1 a 2 2 ]
+"331
+[v HandlePetitModbusWriteSingleRegister@Petit_Value Petit_Value `ui  1 a 2 0 ]
+"332
+[v HandlePetitModbusWriteSingleRegister@Petit_i Petit_i `uc  1 a 1 4 ]
+"360
+} 0
+"278
+[v _HandlePetitModbusReadInputRegisters HandlePetitModbusReadInputRegisters `(v  1 e 1 0 ]
+{
+"307
+[v HandlePetitModbusReadInputRegisters@Petit_CurrentData Petit_CurrentData `us  1 a 2 0 ]
+"283
+[v HandlePetitModbusReadInputRegisters@Petit_i Petit_i `ui  1 a 2 6 ]
+"282
+[v HandlePetitModbusReadInputRegisters@Petit_NumberOfRegisters Petit_NumberOfRegisters `ui  1 a 2 4 ]
+"281
+[v HandlePetitModbusReadInputRegisters@Petit_StartAddress Petit_StartAddress `ui  1 a 2 2 ]
+"317
+} 0
+"227
+[v _HandlePetitModbusReadHoldingRegisters HandlePetitModbusReadHoldingRegisters `(v  1 e 1 0 ]
+{
+"258
+[v HandlePetitModbusReadHoldingRegisters@Petit_CurrentData Petit_CurrentData `us  1 a 2 0 ]
+"234
+[v HandlePetitModbusReadHoldingRegisters@Petit_i Petit_i `ui  1 a 2 6 ]
+"233
+[v HandlePetitModbusReadHoldingRegisters@Petit_NumberOfRegisters Petit_NumberOfRegisters `ui  1 a 2 4 ]
+"232
+[v HandlePetitModbusReadHoldingRegisters@Petit_StartAddress Petit_StartAddress `ui  1 a 2 2 ]
+"268
+} 0
+"420
 [v _HandleMPetitodbusWriteMultipleRegisters HandleMPetitodbusWriteMultipleRegisters `(v  1 e 1 0 ]
 {
-"332
-[v HandleMPetitodbusWriteMultipleRegisters@Petit_NumberOfRegisters Petit_NumberOfRegisters `ui  1 a 2 10 ]
-"330
-[v HandleMPetitodbusWriteMultipleRegisters@Petit_StartAddress Petit_StartAddress `ui  1 a 2 8 ]
-"334
-[v HandleMPetitodbusWriteMultipleRegisters@Petit_Value Petit_Value `ui  1 a 2 6 ]
-"333
-[v HandleMPetitodbusWriteMultipleRegisters@Petit_i Petit_i `uc  1 a 1 12 ]
-"331
-[v HandleMPetitodbusWriteMultipleRegisters@Petit_ByteCount Petit_ByteCount `uc  1 a 1 5 ]
-"375
+"425
+[v HandleMPetitodbusWriteMultipleRegisters@Petit_NumberOfRegisters Petit_NumberOfRegisters `ui  1 a 2 5 ]
+"423
+[v HandleMPetitodbusWriteMultipleRegisters@Petit_StartAddress Petit_StartAddress `ui  1 a 2 3 ]
+"427
+[v HandleMPetitodbusWriteMultipleRegisters@Petit_Value Petit_Value `ui  1 a 2 1 ]
+"426
+[v HandleMPetitodbusWriteMultipleRegisters@Petit_i Petit_i `uc  1 a 1 7 ]
+"424
+[v HandleMPetitodbusWriteMultipleRegisters@Petit_ByteCount Petit_ByteCount `uc  1 a 1 0 ]
+"467
 } 0
-"206
+"371
+[v _HandleMPetitodbusDiagnosticRegisters HandleMPetitodbusDiagnosticRegisters `(v  1 e 1 0 ]
+{
+"400
+[v HandleMPetitodbusDiagnosticRegisters@Petit_CurrentData Petit_CurrentData `us  1 a 2 0 ]
+"376
+[v HandleMPetitodbusDiagnosticRegisters@Petit_i Petit_i `ui  1 a 2 6 ]
+"375
+[v HandleMPetitodbusDiagnosticRegisters@Petit_NumberOfRegisters Petit_NumberOfRegisters `ui  1 a 2 4 ]
+"374
+[v HandleMPetitodbusDiagnosticRegisters@Petit_StartAddress Petit_StartAddress `ui  1 a 2 2 ]
+"410
+} 0
+"203
 [v _HandlePetitModbusError HandlePetitModbusError `(v  1 e 1 0 ]
 {
 [v HandlePetitModbusError@ErrorCode ErrorCode `uc  1 a 1 wreg ]
 [v HandlePetitModbusError@ErrorCode ErrorCode `uc  1 a 1 wreg ]
 [v HandlePetitModbusError@Function Function `uc  1 p 1 2 ]
-"208
+"205
 [v HandlePetitModbusError@ErrorCode ErrorCode `uc  1 a 1 4 ]
-"222
+"218
 } 0
-"189
+"185
 [v _PetitSendMessage PetitSendMessage `(uc  1 e 1 0 ]
 {
-"198
+"195
 } 0
-"602
+"697
 [v _InitPetitModbus InitPetitModbus `(v  1 e 1 0 ]
 {
 [v InitPetitModbus@PetitModbusSlaveAddress PetitModbusSlaveAddress `uc  1 a 1 wreg ]
 [v InitPetitModbus@PetitModbusSlaveAddress PetitModbusSlaveAddress `uc  1 a 1 wreg ]
-"604
+"699
 [v InitPetitModbus@PetitModbusSlaveAddress PetitModbusSlaveAddress `uc  1 a 1 5 ]
-"608
+"703
 } 0
-"11 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbusPort.c
+"11 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\modbus/PetitModbusPort.c
 [v _PetitModBus_UART_Initialise PetitModBus_UART_Initialise `(v  1 e 1 0 ]
 {
 "14
 } 0
-"7 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/Init.c
+"7 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\modbus/Init.c
 [v _InitUART InitUART `(v  1 e 1 0 ]
 {
 "10
 } 0
-"170 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/eusart.c
+"170 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/eusart.c
 [v _EUSART_SetRxInterruptHandler EUSART_SetRxInterruptHandler `(v  1 e 1 0 ]
 {
 [v EUSART_SetRxInterruptHandler@interruptHandler interruptHandler `*.37(v  1 p 2 2 ]
 "172
 } 0
-"17 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbusPort.c
+"17 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\modbus/PetitModbusPort.c
 [v _PetitModBus_TIMER_Initialise PetitModBus_TIMER_Initialise `(v  1 e 1 0 ]
 {
 "20
 } 0
-"12 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/Init.c
+"12 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\modbus/Init.c
 [v _InitTMR InitTMR `(v  1 e 1 0 ]
 {
 "15
 } 0
-"178 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/tmr3.c
+"178 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/tmr3.c
 [v _TMR3_SetInterruptHandler TMR3_SetInterruptHandler `(v  1 e 1 0 ]
 {
 [v TMR3_SetInterruptHandler@InterruptHandler InterruptHandler `*.37(v  1 p 2 2 ]
 "180
 } 0
-"55 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\main.c
+"55 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\main.c
 [v _Get_ID_From_AD Get_ID_From_AD `(v  1 e 1 0 ]
 {
 "79
 } 0
-"128 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/adcc.c
+"128 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/adcc.c
 [v _ADCC_GetSingleConversion ADCC_GetSingleConversion `(ui  1 e 2 0 ]
 {
 [v ADCC_GetSingleConversion@channel channel `E11527  1 a 1 wreg ]
@@ -1219,27 +1253,27 @@ channel_FVR_buf1 63
 [v ADCC_GetSingleConversion@channel channel `E11527  1 a 1 5 ]
 "151
 } 0
-"52 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/interrupt_manager.c
+"52 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/interrupt_manager.c
 [v _INTERRUPT_InterruptManager INTERRUPT_InterruptManager `II(v  1 e 1 0 ]
 {
 "78
 } 0
-"164 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/tmr3.c
+"164 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/tmr3.c
 [v _TMR3_ISR TMR3_ISR `(v  1 e 1 0 ]
 {
 "175
 } 0
-"7 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/Interrupts.c
+"7 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\modbus/Interrupts.c
 [v _PetitModbusIntHandlerTMR PetitModbusIntHandlerTMR `(v  1 e 1 0 ]
 {
 "12
 } 0
-"182 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/tmr3.c
+"182 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/tmr3.c
 [v _TMR3_DefaultInterruptHandler TMR3_DefaultInterruptHandler `(v  1 e 1 0 ]
 {
 "185
 } 0
-"164 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/tmr1.c
+"164 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/tmr1.c
 [v _TMR1_ISR TMR1_ISR `(v  1 e 1 0 ]
 {
 "175
@@ -1255,17 +1289,17 @@ channel_FVR_buf1 63
 {
 "185
 } 0
-"149 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/eusart.c
+"149 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/eusart.c
 [v _EUSART_Receive_ISR EUSART_Receive_ISR `(v  1 e 1 0 ]
 {
 "167
 } 0
-"14 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/Interrupts.c
+"14 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\modbus/Interrupts.c
 [v _PetitModbusIntHandlerRC PetitModbusIntHandlerRC `(v  1 e 1 0 ]
 {
 "20
 } 0
-"149 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\mcc_generated_files/tmr3.c
+"149 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\mcc_generated_files/tmr3.c
 [v _TMR3_Reload TMR3_Reload `(v  1 e 1 0 ]
 {
 "152
@@ -1276,7 +1310,7 @@ channel_FVR_buf1 63
 [v TMR3_WriteTimer@timerVal timerVal `ui  1 p 2 0 ]
 "147
 } 0
-"51 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbusPort.c
+"51 C:\Localdata\GIT_REPO\Siebwalde\TrackAmplifier3.X\modbus/PetitModbusPort.c
 [v _ReceiveInterrupt ReceiveInterrupt `(v  1 e 1 0 ]
 {
 [v ReceiveInterrupt@Data Data `uc  1 a 1 wreg ]

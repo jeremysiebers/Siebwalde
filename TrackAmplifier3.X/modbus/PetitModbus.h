@@ -8,9 +8,9 @@
 #ifndef __PETITMODBUS__H
 #define __PETITMODBUS__H
                                                                                 // 1 register is 16 bits. The largest register is used to determine receive and transmit buffer size!
-#define NUMBER_OF_HOLDING_PETITREGISTERS                 7//4                      // Petit Modbus RTU Slave Holding Registers (read/write), Have to put a number of registers here It has to be bigger than 0 (zero)!!
-#define NUMBER_OF_INPUT_PETITREGISTERS                   3                      // Number of (read only) input registers)
-#define NUMBER_OF_DIAGNOSTIC_PETITREGISTERS              1                      // Number of diagnostic registers (send/receive counters)
+#define NUMBER_OF_HOLDING_PETITREGISTERS                 4                      // Petit Modbus RTU Slave Holding Registers (read/write), Have to put a number of registers here It has to be bigger than 0 (zero)!!
+#define NUMBER_OF_INPUT_PETITREGISTERS                   2                      // Number of (read only) input registers)
+#define NUMBER_OF_DIAGNOSTIC_PETITREGISTERS              4                      // Number of diagnostic registers (send/receive counters)
 
 #define PETITMODBUS_TIMEOUTTIMER                         2                      // Timeout Constant for Petit Modbus RTU Slave [101us tick]
 
@@ -23,10 +23,43 @@
 #define ENTER_CRITICAL_SECTION( )   (INTCONbits.PEIE = 1)
 #define EXIT_CRITICAL_SECTION( )    (INTCONbits.PEIE = 0)
 
-//#define CRC_CALC                                                              // When uncommented a CRC is calculated by the processor
-//#define CRC_LOOKUP                                                              // When uncommented a CRC is looked up by the processor in flash
-#define CRC_HW                                                                  // When uncommented a CRC is calculated by dedicated HW
+/****************************Don't Touch This**********************************/
+// Buffers for Petit Modbus RTU Slave
+#define PETITMODBUS_RECEIVE_BUFFER_SIZE                 (NUMBER_OF_HOLDING_PETITREGISTERS*2 + 10) 
+#define PETITMODBUS_TRANSMIT_BUFFER_SIZE                PETITMODBUS_RECEIVE_BUFFER_SIZE
+#define PETITMODBUS_RXTX_BUFFER_SIZE                    PETITMODBUS_TRANSMIT_BUFFER_SIZE
 
+// Variable for Slave Address
+extern unsigned char PETITMODBUS_SLAVE_ADDRESS;                                 // Petit Modbus RTU Slave icin adres numarasi [0 to 255]
+
+typedef struct{
+            unsigned int                     ActValue;
+        }PetitRegStructure;
+
+#if ((PETITMODBUS_READ_HOLDING_REGISTERS_ENABLED > 0)|| (PETITMODBUSWRITE_SINGLE_REGISTER_ENABLED > 0) || (PETITMODBUS_WRITE_MULTIPLE_REGISTERS_ENABLED > 0))
+    PetitRegStructure   PetitHoldingRegisters[NUMBER_OF_HOLDING_PETITREGISTERS];
+#endif
+
+#if (PETITMODBUS_READ_INPUT_REGISTERS_ENABLED > 0)
+    PetitRegStructure   PetitInputRegisters[NUMBER_OF_INPUT_PETITREGISTERS];
+#endif
+    
+#if (PETITMODBUS_DIAGNOSTIC_REGISTERS_ENABLED > 0)
+    PetitRegStructure   PetitDiagnosticRegisters[NUMBER_OF_DIAGNOSTIC_PETITREGISTERS];
+#endif
+
+extern volatile unsigned short PetitModbusTimerValue;
+
+// Main Functions
+extern void             InitPetitModbus(unsigned char PetitModbusSlaveAddress);
+extern void             ProcessPetitModbus(void);
+
+/****************************CRC stuff*****************************************/
+
+//#define CRC_CALC                                                              // When uncommented a CRC is calculated by the processor
+//#define CRC_LOOKUP                                                            // When uncommented a CRC is looked up by the processor in flash
+#define CRC_HW                                                                  // When uncommented a CRC is calculated by dedicated HW
+//#define CRC_HW_REVERSE														// In order to comply to Modbus standard a reverse is required, without however CRC is much faster
 
 #ifdef CRC_LOOKUP
 /* Table of CRC values for high?order byte */
@@ -73,36 +106,6 @@ const unsigned char auchCRCLo[] = {
 0x40
 };
 #endif
-/****************************Don't Touch This**********************************/
-// Buffers for Petit Modbus RTU Slave
-#define PETITMODBUS_RECEIVE_BUFFER_SIZE                 (NUMBER_OF_HOLDING_PETITREGISTERS*2 + 10) 
-#define PETITMODBUS_TRANSMIT_BUFFER_SIZE                PETITMODBUS_RECEIVE_BUFFER_SIZE
-#define PETITMODBUS_RXTX_BUFFER_SIZE                    PETITMODBUS_TRANSMIT_BUFFER_SIZE
-
-// Variable for Slave Address
-extern unsigned char PETITMODBUS_SLAVE_ADDRESS;                                 // Petit Modbus RTU Slave icin adres numarasi [0 to 255]
-
-typedef struct{
-            unsigned int                     ActValue;
-        }PetitRegStructure;
-
-#if ((PETITMODBUS_READ_HOLDING_REGISTERS_ENABLED > 0)|| (PETITMODBUSWRITE_SINGLE_REGISTER_ENABLED > 0) || (PETITMODBUS_WRITE_MULTIPLE_REGISTERS_ENABLED > 0))
-    PetitRegStructure   PetitHoldingRegisters[NUMBER_OF_HOLDING_PETITREGISTERS];
-#endif
-
-#if (PETITMODBUS_READ_INPUT_REGISTERS_ENABLED > 0)
-    PetitRegStructure   PetitInputRegisters[NUMBER_OF_INPUT_PETITREGISTERS];
-#endif
-    
-#if (PETITMODBUS_DIAGNOSTIC_REGISTERS_ENABLED > 0)
-    PetitRegStructure   PetitDiagnosticRegisters[NUMBER_OF_DIAGNOSTIC_PETITREGISTERS];
-#endif
-
-extern volatile unsigned short PetitModbusTimerValue;
-
-// Main Functions
-extern void             InitPetitModbus(unsigned char PetitModbusSlaveAddress);
-extern void             ProcessPetitModbus(void);
 
 // Petit Modbus Port Header
 #include "PetitModbusPort.h"
