@@ -61,7 +61,7 @@ unsigned int        Petit_Rx_CRC16                = 0xFFFF;
 PETIT_RXTX_STATE    Petit_Rx_State                = PETIT_RXTX_IDLE;
 unsigned char       Petit_Rx_Data_Available       = FALSE;
 
-volatile unsigned short PetitModbusTimerValue         = 0;
+unsigned short PetitModbusTimerValue         = 0;
 /****************End of Slave Transmit and Receive Variables*******************/
 
 /*

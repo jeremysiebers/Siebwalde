@@ -48,7 +48,7 @@ typedef struct{
     PetitRegStructure   PetitDiagnosticRegisters[NUMBER_OF_DIAGNOSTIC_PETITREGISTERS];
 #endif
 
-extern volatile unsigned short PetitModbusTimerValue;
+extern unsigned short PetitModbusTimerValue;
 
 // Main Functions
 extern void             InitPetitModbus(unsigned char PetitModbusSlaveAddress);

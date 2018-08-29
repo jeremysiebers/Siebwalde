@@ -17,8 +17,8 @@ unsigned int result = 0;
 void main(void) {
     
     SYSTEM_Initialize();
-    
     TMR1_StopTimer();
+    __delay_ms(1000);
     
     INTCONbits.GIE = 1;
     INTCONbits.PEIE = 1;

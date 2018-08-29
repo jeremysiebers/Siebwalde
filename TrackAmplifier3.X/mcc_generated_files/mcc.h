@@ -55,10 +55,10 @@
 #include "tmr1.h"
 #include "pwm6.h"
 #include "tmr2.h"
-#include "cmp1.h"
 #include "crc.h"
-#include "adcc.h"
+#include "cmp1.h"
 #include "fvr.h"
+#include "adcc.h"
 #include "dac.h"
 #include "eusart.h"
 

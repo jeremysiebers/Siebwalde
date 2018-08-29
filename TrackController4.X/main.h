@@ -14,7 +14,9 @@ extern "C" {
 
 #define True 1
 #define False 0
-
+    
+#define _XTAL_FREQ 32000000                                                     // Fosc  frequency for _delay()  library
+    
 #define NUMBER_OF_SLAVES 4                                                      // 0 is for the master self. 5 backplane slaves + 50 Track slaves = 56  
 
 #ifdef	__cplusplus

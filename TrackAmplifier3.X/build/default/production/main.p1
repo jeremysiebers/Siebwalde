@@ -8,6 +8,10 @@ Version 3.2 HI-TECH Software Intermediate Code
 [v _SYSTEM_Initialize `(v ~T0 @X0 0 ef ]
 "161 mcc_generated_files/tmr1.h
 [v _TMR1_StopTimer `(v ~T0 @X0 0 ef ]
+[v F11487 `(v ~T0 @X0 1 tf1`ul ]
+"92 C:\Program Files (x86)\Microchip\xc8\v2.00\pic\include\pic.h
+[v __delay `JF11487 ~T0 @X0 0 e ]
+[p i __delay ]
 "357 C:\Program Files (x86)\Microchip\xc8\v2.00\pic\include\pic16f18854.h
 [s S26 :1 `uc 1 :5 `uc 1 :1 `uc 1 :1 `uc 1 ]
 [n S26 . INTEDG . PEIE GIE ]
@@ -24,17 +28,17 @@ Version 3.2 HI-TECH Software Intermediate Code
 [n S43 . . ]
 "856
 [v _LATBbits `VS43 ~T0 @X0 0 e@23 ]
-"15 main.h
+"17 main.h
 [v _Get_ID_From_AD `(v ~T0 @X0 0 ef ]
 "54 modbus/PetitModbus.h
 [v _InitPetitModbus `(v ~T0 @X0 0 ef1`uc ]
 "55
 [v _ProcessPetitModbus `(v ~T0 @X0 0 ef ]
 "57 main.c
-[c E11691 0 2 3 4 8 23 60 61 62 63 .. ]
-[n E11691 . ID BMF VREF VLM CURR_SEN LM_TEMP channel_VSS channel_Temp channel_DAC1 channel_FVR_buf1  ]
+[c E11695 0 2 3 4 8 23 60 61 62 63 .. ]
+[n E11695 . ID BMF VREF VLM CURR_SEN LM_TEMP channel_VSS channel_Temp channel_DAC1 channel_FVR_buf1  ]
 "258 mcc_generated_files/adcc.h
-[v _ADCC_GetSingleConversion `(ui ~T0 @X0 0 ef1`E11691 ]
+[v _ADCC_GetSingleConversion `(ui ~T0 @X0 0 ef1`E11695 ]
 [; ;xc.h: 18: extern const char __xc8_OPTIM_SPEED;
 [; ;xc.h: 20: extern double __fpnormalize(double);
 [; ;xc8debug.h: 14: extern void __builtin_software_breakpoint(void);
@@ -13066,7 +13070,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;pic.h: 137: extern __bank0 unsigned char __resetbits;
 [; ;pic.h: 138: extern __bank0 __bit __powerdown;
 [; ;pic.h: 139: extern __bank0 __bit __timeout;
-[; ;main.h: 15: void Get_ID_From_AD (void);
+[; ;main.h: 17: void Get_ID_From_AD (void);
 [; ;pin_manager.h: 520: void PIN_MANAGER_Initialize (void);
 [; ;pin_manager.h: 532: void PIN_MANAGER_IOC(void);
 [; ;stdint.h: 13: typedef signed char int8_t;
@@ -13188,9 +13192,6 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;tmr2.h: 780: void TMR2_LoadPeriodRegister(uint8_t periodVal);
 [; ;tmr2.h: 818: bool TMR2_HasOverflowOccured(void);
 [; ;stdbool.h: 13: typedef unsigned char bool;
-[; ;cmp1.h: 92: void CMP1_Initialize(void);
-[; ;cmp1.h: 132: bool CMP1_GetOutputStatus(void);
-[; ;stdbool.h: 13: typedef unsigned char bool;
 [; ;crc.h: 123: void CRC_Initialize(void);
 [; ;crc.h: 164: void CRC_Start(void);
 [; ;crc.h: 203: bool CRC_8BitDataWrite(uint8_t data);
@@ -13201,6 +13202,12 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;crc.h: 401: void CRC_SCAN_SetAddressLimit(uint16_t startAddr,uint16_t endAddr);
 [; ;crc.h: 445: bool CRC_SCAN_IsScannerBusy(void);
 [; ;crc.h: 486: bool CRC_SCAN_HasScanCompleted(void);
+[; ;stdbool.h: 13: typedef unsigned char bool;
+[; ;cmp1.h: 92: void CMP1_Initialize(void);
+[; ;cmp1.h: 132: bool CMP1_GetOutputStatus(void);
+[; ;stdbool.h: 13: typedef unsigned char bool;
+[; ;fvr.h: 93: void FVR_Initialize(void);
+[; ;fvr.h: 127: bool FVR_IsOutputReady(void);
 [; ;stdbool.h: 13: typedef unsigned char bool;
 [; ;adcc.h: 72: typedef uint16_t adc_result_t;
 [; ;adcc.h: 89: typedef enum
@@ -13244,9 +13251,6 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;adcc.h: 750: bool ADCC_HasErrorCrossedLowerThreshold(void);
 [; ;adcc.h: 772: uint8_t ADCC_GetConversionStageStatus(void);
 [; ;stdbool.h: 13: typedef unsigned char bool;
-[; ;fvr.h: 93: void FVR_Initialize(void);
-[; ;fvr.h: 127: bool FVR_IsOutputReady(void);
-[; ;stdbool.h: 13: typedef unsigned char bool;
 [; ;dac.h: 93: void DAC_Initialize(void);
 [; ;dac.h: 129: void DAC_SetOutput(uint8_t inputData);
 [; ;dac.h: 163: uint8_t DAC_GetOutput(void);
@@ -13284,7 +13288,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 "48
 [v _PetitDiagnosticRegisters `S1557 ~T0 @X0 -> 4 `i e ]
 [; ;PetitModbus.h: 48: PetitRegStructure PetitDiagnosticRegisters[4];
-[; ;PetitModbus.h: 51: extern volatile unsigned short PetitModbusTimerValue;
+[; ;PetitModbus.h: 51: extern unsigned short PetitModbusTimerValue;
 [; ;PetitModbus.h: 54: extern void InitPetitModbus(unsigned char PetitModbusSlaveAddress);
 [; ;PetitModbus.h: 55: extern void ProcessPetitModbus(void);
 [; ;PetitModbusPort.h: 19: extern volatile unsigned char PetitReceiveBuffer[(4*2 + 10)];
@@ -13318,9 +13322,12 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;main.c: 19: SYSTEM_Initialize();
 "19
 [e ( _SYSTEM_Initialize ..  ]
-[; ;main.c: 21: TMR1_StopTimer();
-"21
+[; ;main.c: 20: TMR1_StopTimer();
+"20
 [e ( _TMR1_StopTimer ..  ]
+[; ;main.c: 21: _delay((unsigned long)((1000)*(32000000/4000.0)));
+"21
+[e ( __delay (1 -> * -> -> 1000 `i `d / -> -> 32000000 `l `d .4000.0 `ul ]
 [; ;main.c: 23: INTCONbits.GIE = 1;
 "23
 [e = . . _INTCONbits 0 3 -> -> 1 `i `uc ]
@@ -13377,7 +13384,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 [f ]
 [; ;main.c: 57: result = ADCC_GetSingleConversion(0);
 "57
-[e = _result ( _ADCC_GetSingleConversion (1 -> -> 0 `i `E11691 ]
+[e = _result ( _ADCC_GetSingleConversion (1 -> -> 0 `i `E11695 ]
 [; ;main.c: 59: if(result > 80 && result < 96){
 "59
 [e $ ! && > _result -> -> 80 `i `ui < _result -> -> 96 `i `ui 1563  ]

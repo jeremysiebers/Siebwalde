@@ -13318,9 +13318,6 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;tmr2.h: 780: void TMR2_LoadPeriodRegister(uint8_t periodVal);
 [; ;tmr2.h: 818: bool TMR2_HasOverflowOccured(void);
 [; ;stdbool.h: 13: typedef unsigned char bool;
-[; ;cmp1.h: 92: void CMP1_Initialize(void);
-[; ;cmp1.h: 132: bool CMP1_GetOutputStatus(void);
-[; ;stdbool.h: 13: typedef unsigned char bool;
 [; ;crc.h: 123: void CRC_Initialize(void);
 [; ;crc.h: 164: void CRC_Start(void);
 [; ;crc.h: 203: bool CRC_8BitDataWrite(uint8_t data);
@@ -13331,6 +13328,9 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;crc.h: 401: void CRC_SCAN_SetAddressLimit(uint16_t startAddr,uint16_t endAddr);
 [; ;crc.h: 445: bool CRC_SCAN_IsScannerBusy(void);
 [; ;crc.h: 486: bool CRC_SCAN_HasScanCompleted(void);
+[; ;stdbool.h: 13: typedef unsigned char bool;
+[; ;cmp1.h: 92: void CMP1_Initialize(void);
+[; ;cmp1.h: 132: bool CMP1_GetOutputStatus(void);
 [; ;stdbool.h: 13: typedef unsigned char bool;
 [; ;fvr.h: 93: void FVR_Initialize(void);
 [; ;fvr.h: 127: bool FVR_IsOutputReady(void);

@@ -12,6 +12,8 @@
 extern "C" {
 #endif
 
+#define _XTAL_FREQ 32000000                                                     // Fosc  frequency for _delay()  library
+
 void Get_ID_From_AD (void);
 
 

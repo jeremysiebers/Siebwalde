@@ -70,7 +70,7 @@ PETIT_RXTX_WAIT_ANSWER 3
 PETIT_RXTX_TIMEOUT 4
 ]
 "57 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\main.c
-[e E11691 . `uc
+[e E11695 . `uc
 ID 0
 BMF 2
 VREF 3
@@ -942,7 +942,7 @@ channel_FVR_buf1 63
 "62
 [v _Petit_Rx_Data_Available Petit_Rx_Data_Available `uc  1 e 1 0 ]
 "64
-[v _PetitModbusTimerValue PetitModbusTimerValue `VEus  1 e 2 0 ]
+[v _PetitModbusTimerValue PetitModbusTimerValue `us  1 e 2 0 ]
 [s S1528 . 2 `ui 1 ActValue 2 0 ]
 "40 C:\GIT-REPOS\Siebwalde\TrackAmplifier3.X\modbus/PetitModbus.h
 [v _PetitHoldingRegisters PetitHoldingRegisters `[4]S1528  1 e 8 0 ]

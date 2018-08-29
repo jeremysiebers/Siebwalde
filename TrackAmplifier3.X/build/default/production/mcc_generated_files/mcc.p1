@@ -6,10 +6,10 @@ Version 3.2 HI-TECH Software Intermediate Code
 [v _PIN_MANAGER_Initialize `(v ~T0 @X0 0 ef ]
 "92 mcc_generated_files/mcc.h
 [v _OSCILLATOR_Initialize `(v ~T0 @X0 0 ef ]
-"93 mcc_generated_files/dac.h
-[v _DAC_Initialize `(v ~T0 @X0 0 ef ]
 "93 mcc_generated_files/fvr.h
 [v _FVR_Initialize `(v ~T0 @X0 0 ef ]
+"93 mcc_generated_files/dac.h
+[v _DAC_Initialize `(v ~T0 @X0 0 ef ]
 "123 mcc_generated_files/crc.h
 [v _CRC_Initialize `(v ~T0 @X0 0 ef ]
 "136 mcc_generated_files/adcc.h
@@ -13200,9 +13200,6 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;tmr2.h: 780: void TMR2_LoadPeriodRegister(uint8_t periodVal);
 [; ;tmr2.h: 818: bool TMR2_HasOverflowOccured(void);
 [; ;stdbool.h: 13: typedef unsigned char bool;
-[; ;cmp1.h: 92: void CMP1_Initialize(void);
-[; ;cmp1.h: 132: bool CMP1_GetOutputStatus(void);
-[; ;stdbool.h: 13: typedef unsigned char bool;
 [; ;crc.h: 123: void CRC_Initialize(void);
 [; ;crc.h: 164: void CRC_Start(void);
 [; ;crc.h: 203: bool CRC_8BitDataWrite(uint8_t data);
@@ -13213,6 +13210,12 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;crc.h: 401: void CRC_SCAN_SetAddressLimit(uint16_t startAddr,uint16_t endAddr);
 [; ;crc.h: 445: bool CRC_SCAN_IsScannerBusy(void);
 [; ;crc.h: 486: bool CRC_SCAN_HasScanCompleted(void);
+[; ;stdbool.h: 13: typedef unsigned char bool;
+[; ;cmp1.h: 92: void CMP1_Initialize(void);
+[; ;cmp1.h: 132: bool CMP1_GetOutputStatus(void);
+[; ;stdbool.h: 13: typedef unsigned char bool;
+[; ;fvr.h: 93: void FVR_Initialize(void);
+[; ;fvr.h: 127: bool FVR_IsOutputReady(void);
 [; ;stdbool.h: 13: typedef unsigned char bool;
 [; ;adcc.h: 72: typedef uint16_t adc_result_t;
 [; ;adcc.h: 89: typedef enum
@@ -13256,9 +13259,6 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;adcc.h: 750: bool ADCC_HasErrorCrossedLowerThreshold(void);
 [; ;adcc.h: 772: uint8_t ADCC_GetConversionStageStatus(void);
 [; ;stdbool.h: 13: typedef unsigned char bool;
-[; ;fvr.h: 93: void FVR_Initialize(void);
-[; ;fvr.h: 127: bool FVR_IsOutputReady(void);
-[; ;stdbool.h: 13: typedef unsigned char bool;
 [; ;dac.h: 93: void DAC_Initialize(void);
 [; ;dac.h: 129: void DAC_SetOutput(uint8_t inputData);
 [; ;dac.h: 163: uint8_t DAC_GetOutput(void);
@@ -13296,12 +13296,12 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;mcc.c: 54: OSCILLATOR_Initialize();
 "54
 [e ( _OSCILLATOR_Initialize ..  ]
-[; ;mcc.c: 55: DAC_Initialize();
+[; ;mcc.c: 55: FVR_Initialize();
 "55
-[e ( _DAC_Initialize ..  ]
-[; ;mcc.c: 56: FVR_Initialize();
-"56
 [e ( _FVR_Initialize ..  ]
+[; ;mcc.c: 56: DAC_Initialize();
+"56
+[e ( _DAC_Initialize ..  ]
 [; ;mcc.c: 57: CRC_Initialize();
 "57
 [e ( _CRC_Initialize ..  ]

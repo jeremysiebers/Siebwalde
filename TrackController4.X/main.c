@@ -11,6 +11,7 @@
 #include "modbus/PetitModbus.h"
 #include "commhandler.h"
 
+
 /*----------------------------------------------------------------------------*/
 
 static SLAVE_INFO         SlaveInfo[NUMBER_OF_SLAVES];                          // Array of structs holding the data of all the slaves connected  
@@ -20,6 +21,8 @@ static SLAVE_INFO         SlaveInfo[NUMBER_OF_SLAVES];                          
 void main(void) {
     // Initialize the device
     SYSTEM_Initialize();
+    TMR1_StopTimer();                                                           // prevent timer1 from setting slave timeout to 1.
+    __delay_ms(2000);                                                           // Wait longer then the slaves (1000ms)
     
     LED_RUN_LAT = 0;
     LED_WAR_LAT = 0;

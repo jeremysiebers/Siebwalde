@@ -72,20 +72,21 @@ unsigned char HoldingRegistersWrite[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};           
 unsigned char   InputRegistersRead [4] = {0, 0, 0, 0};
 unsigned char    DiagRegistersRead [4] = {0, 0, 0, 0};
 
-static unsigned int ProcessSlave = 1;
+static unsigned char ProcessSlave = 1;
 static unsigned int Mailbox = 1;
-static unsigned int Message = MESSAGE1;
+static unsigned int Message = MESSAGE2;
 
 void ProcessNextSlave(){    
     
     if (ProcessSlave > (NUMBER_OF_SLAVES-1)){
         ProcessSlave = 1;
-        Mailbox++;
-        if (Mailbox > MAILBOX_SIZE){
+        //Mailbox++;
+        if (Mailbox > 3){
             Mailbox = 1;
-        }
-        modbus_sync_LAT ^= 1;
+        }        
     }
+    //modbus_sync_LAT = 1;
+    modbus_sync_LAT ^= 1;
 
     switch (Message){
         case MESSAGE1:
@@ -98,7 +99,7 @@ void ProcessNextSlave(){
             HoldingRegistersWrite[2]  = 0;
             HoldingRegistersWrite[1]  = 0;
             HoldingRegistersWrite[0]  = 0;
-            SendPetitModbus(ProcessSlave, PETITMODBUS_WRITE_MULTIPLE_REGISTERS, HoldingRegistersWrite, 9);                
+            SendPetitModbus(ProcessSlave, PETITMODBUS_WRITE_MULTIPLE_REGISTERS, HoldingRegistersWrite, 9);
             break;
 
         /*case MESSAGE2:
@@ -110,11 +111,11 @@ void ProcessNextSlave(){
             break;*/
 
         case MESSAGE2:
-            InputRegistersRead[3]  = 2;
-            InputRegistersRead[2]  = 0;
-            InputRegistersRead[1]  = 0;
-            InputRegistersRead[0]  = 0;
-            SendPetitModbus(ProcessSlave, PETITMODBUS_READ_HOLDING_REGISTERS, InputRegistersRead, 4);    
+            HoldingRegistersRead[3]  = 2;
+            HoldingRegistersRead[2]  = 0;
+            HoldingRegistersRead[1]  = 0;
+            HoldingRegistersRead[0]  = 0;
+            SendPetitModbus(ProcessSlave, PETITMODBUS_READ_HOLDING_REGISTERS, HoldingRegistersRead, 4);    
             break;
 
         case MESSAGE3:
@@ -151,7 +152,7 @@ void ProcessNextSlave(){
                 case 4:
                     DiagRegistersRead[3]  = 2;
                     DiagRegistersRead[2]  = 0;
-                    DiagRegistersRead[1]  = 2;
+                    DiagRegistersRead[1]  = 0;
                     DiagRegistersRead[0]  = 0;
                     SendPetitModbus(ProcessSlave, PETITMODBUS_DIAGNOSTIC_REGISTERS, DiagRegistersRead, 4);
                     break;
@@ -187,6 +188,7 @@ void ProcessSlaveCommunication(){
     
     switch (MASTER_SLAVE_DATA[ProcessSlave].MbCommError){
         case SLAVE_DATA_BUSY:
+            NOP();
             // count here how long the Mod-bus stack is busy, otherwise reset/action             
             break;
             
@@ -194,39 +196,43 @@ void ProcessSlaveCommunication(){
             // count here how often the slave data is NOK, otherwise stop all slaves with broadcast
             MASTER_SLAVE_DATA[ProcessSlave].MbCommError = SLAVE_DATA_IDLE;
             Message++;                                                          // process next message
-            if (Message > MESSAGE3){
+            if (Message > MESSAGE2){
                 ProcessSlave++;
                 Message = MESSAGE1;
-            }            
+            } 
+            //modbus_sync_LAT = 0;
             break;
             
         case SLAVE_DATA_OK:
             MASTER_SLAVE_DATA[ProcessSlave].MbCommError = SLAVE_DATA_IDLE;
             Message++;                                                          // process next message
-            if (Message > MESSAGE3){
+            if (Message > MESSAGE2){
                 ProcessSlave++;
                 Message = MESSAGE1;
             }
+            //modbus_sync_LAT = 0;
             break;
             
         case SLAVE_DATA_TIMEOUT:
             // count here how often the slave data is timeout, otherwise stop all slaves with broadcast
             MASTER_SLAVE_DATA[ProcessSlave].MbCommError = SLAVE_DATA_IDLE;
             Message++;                                                          // process next message
-            if (Message > MESSAGE3){
+            if (Message > MESSAGE2){
                 ProcessSlave++;
                 Message = MESSAGE1;
             }
+            //modbus_sync_LAT = 0;
             break;
             
         case SLAVE_DATA_EXCEPTION:
             // count here how often the slave data is timeout, otherwise stop all slaves with broadcast
             MASTER_SLAVE_DATA[ProcessSlave].MbCommError = SLAVE_DATA_IDLE;
             Message++;                                                          // process next message
-            if (Message > MESSAGE3){
+            if (Message > MESSAGE2){
                 ProcessSlave++;
                 Message = MESSAGE1;
             }
+            //modbus_sync_LAT = 0;
             break;
             
         default :    // Idle is here        

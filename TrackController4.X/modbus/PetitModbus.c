@@ -374,12 +374,11 @@ void Petit_TxRTU(void)
         Petit_Tx_State    =PETIT_RXTX_WAIT_ANSWER;                              // Else Master must wait for answer (see ModBus protocol implementation)
         
         /* Set and enable slave answer timeout timer */
-        SlaveAnswerTimeoutCounter   = 0;
-        TMR1H                       = 0x00;
-        TMR1L                       = 0x00;
+        //SlaveAnswerTimeoutCounter   = 0;
+        TMR1_Reload();
         PIR4bits.TMR1IF             = 0;
-        PIE4bits.TMR1IE             = 0;
-        T1CONbits.TMR1ON            = 0;        
+        PIE4bits.TMR1IE             = 1;
+        T1CONbits.TMR1ON            = 1;        
     }
 }
 
@@ -397,7 +396,7 @@ void ProcessPetitModbus(void)
         //PORTDbits.RD1 = 0;        
     }
     else if(Petit_Tx_State == PETIT_RXTX_WAIT_ANSWER){// && EnableSlaveAnswerTimeoutCounter){
-        if (SlaveAnswerTimeoutCounter){
+        if (SlaveAnswerTimeoutCounter != 0){
             MASTER_SLAVE_DATA[Petit_Tx_Data.Address].MbCommError = SLAVE_DATA_TIMEOUT;
             Petit_Tx_State = PETIT_RXTX_IDLE;
             SlaveAnswerTimeoutCounter = 0;            
@@ -686,6 +685,7 @@ void HandleMPetitodbusWriteMultipleRegistersSlaveReadback(void)
         MASTER_SLAVE_DATA[Petit_Tx_Data.Address].MbCommError = SLAVE_DATA_NOK;    // the address send did not respond, so set the NOK to that address
     }
     Petit_Tx_State =  PETIT_RXTX_IDLE;
+    
 }
 
 /******************************************************************************/
