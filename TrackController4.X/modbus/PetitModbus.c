@@ -423,6 +423,8 @@ void ProcessPetitModbus(void)
 
             default:                                    {    HandleMPetitodbusMbExceptionCodesSlaveReadback();          break;  }
         }
+        
+        LED_RX_LAT = 0;
     }
 }
 

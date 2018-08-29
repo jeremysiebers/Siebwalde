@@ -102,7 +102,7 @@ void ProcessNextSlave(){
             break;
 
         /*case MESSAGE2:
-            InputRegistersRead[3]  = 2;
+            InputRegistersRead[3]  = 1;
             InputRegistersRead[2]  = 0;
             InputRegistersRead[1]  = 0;
             InputRegistersRead[0]  = 0;
