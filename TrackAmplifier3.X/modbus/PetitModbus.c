@@ -62,6 +62,8 @@ PETIT_RXTX_STATE    Petit_Rx_State                = PETIT_RXTX_IDLE;
 unsigned char       Petit_Rx_Data_Available       = FALSE;
 
 unsigned short PetitModbusTimerValue         = 0;
+volatile unsigned int LED_TX = 0;
+volatile unsigned int LED_RX = 0;
 /****************End of Slave Transmit and Receive Variables*******************/
 
 /*
@@ -139,8 +141,7 @@ void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
     
     CRCDATL = Data;//CRC_8BitDataWrite(Data);//while (!CRC_8BitDataWrite(Data));    
     CRCCON0bits.CRCGO = 1;//CRC_Start();
-    NOP();
-    //while (CRCCON0bits.BUSY);
+    while (CRCCON0bits.BUSY);
     *CRC = ((uint16_t)CRCACCH << 8)|CRCACCL;//CRC_CalculatedResultGet(false, 0);    
 }
 /* 
@@ -601,8 +602,11 @@ void Petit_RxRTU(void)
         if (((unsigned int) Petit_Rx_Data.DataBuf[Petit_Rx_Data.DataLen] + ((unsigned int) Petit_Rx_Data.DataBuf[Petit_Rx_Data.DataLen + 1] << 8)) == Petit_Rx_CRC16)
         {
             // Valid message!
-            LED_RX_LAT = 1;
+            LED_RX++;
             Petit_Rx_Data_Available = TRUE;
+        }
+        else{
+            NOP();
         }
 
         Petit_Rx_State = PETIT_RXTX_IDLE;
@@ -683,7 +687,7 @@ void ProcessPetitModbus(void)
                 default:                                    {   HandlePetitModbusError(PETIT_ERROR_CODE_01, Petit_Rx_Data.Function);    break;  }
             }
             
-            LED_RX_LAT = 0;
+            LED_RX++;
         }
     }
 }

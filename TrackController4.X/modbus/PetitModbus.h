@@ -35,6 +35,8 @@
 
 extern volatile unsigned short PetitModbusTimerValue;
 extern volatile unsigned int SlaveAnswerTimeoutCounter;
+extern volatile unsigned int LED_TX;
+extern volatile unsigned int LED_RX;
 
 typedef enum
 {

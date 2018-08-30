@@ -54,6 +54,9 @@ extern unsigned short PetitModbusTimerValue;
 extern void             InitPetitModbus(unsigned char PetitModbusSlaveAddress);
 extern void             ProcessPetitModbus(void);
 
+extern volatile unsigned int LED_TX;
+extern volatile unsigned int LED_RX;
+
 /****************************CRC stuff*****************************************/
 
 //#define CRC_CALC                                                              // When uncommented a CRC is calculated by the processor

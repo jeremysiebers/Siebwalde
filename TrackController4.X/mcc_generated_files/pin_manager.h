@@ -59,6 +59,26 @@
 #define PULL_UP_ENABLED      1
 #define PULL_UP_DISABLED     0
 
+// get/set modbus_send aliases
+#define modbus_send_TRIS                 TRISAbits.TRISA7
+#define modbus_send_LAT                  LATAbits.LATA7
+#define modbus_send_PORT                 PORTAbits.RA7
+#define modbus_send_WPU                  WPUAbits.WPUA7
+#define modbus_send_OD                   ODCONAbits.ODCA7
+#define modbus_send_ANS                  ANSELAbits.ANSA7
+#define modbus_send_SetHigh()            do { LATAbits.LATA7 = 1; } while(0)
+#define modbus_send_SetLow()             do { LATAbits.LATA7 = 0; } while(0)
+#define modbus_send_Toggle()             do { LATAbits.LATA7 = ~LATAbits.LATA7; } while(0)
+#define modbus_send_GetValue()           PORTAbits.RA7
+#define modbus_send_SetDigitalInput()    do { TRISAbits.TRISA7 = 1; } while(0)
+#define modbus_send_SetDigitalOutput()   do { TRISAbits.TRISA7 = 0; } while(0)
+#define modbus_send_SetPullup()          do { WPUAbits.WPUA7 = 1; } while(0)
+#define modbus_send_ResetPullup()        do { WPUAbits.WPUA7 = 0; } while(0)
+#define modbus_send_SetPushPull()        do { ODCONAbits.ODCA7 = 0; } while(0)
+#define modbus_send_SetOpenDrain()       do { ODCONAbits.ODCA7 = 1; } while(0)
+#define modbus_send_SetAnalogMode()      do { ANSELAbits.ANSA7 = 1; } while(0)
+#define modbus_send_SetDigitalMode()     do { ANSELAbits.ANSA7 = 0; } while(0)
+
 // get/set SCK1 aliases
 #define SCK1_TRIS                 TRISBbits.TRISB0
 #define SCK1_LAT                  LATBbits.LATB0

@@ -1,10 +1,10 @@
 Version 3.2 HI-TECH Software Intermediate Code
-[v F11769 `(v ~T0 @X0 0 tf ]
+[v F11783 `(v ~T0 @X0 0 tf ]
 "35 modbus/PetitModbus.h
 [s S1557 `ui 1 ]
 [n S1557 . ActValue ]
 [p mainexit ]
-"79 mcc_generated_files/mcc.h
+"80 mcc_generated_files/mcc.h
 [v _SYSTEM_Initialize `(v ~T0 @X0 0 ef ]
 "161 mcc_generated_files/tmr1.h
 [v _TMR1_StopTimer `(v ~T0 @X0 0 ef ]
@@ -34,11 +34,25 @@ Version 3.2 HI-TECH Software Intermediate Code
 [v _InitPetitModbus `(v ~T0 @X0 0 ef1`uc ]
 "55
 [v _ProcessPetitModbus `(v ~T0 @X0 0 ef ]
-"57 main.c
-[c E11695 0 2 3 4 8 23 60 61 62 63 .. ]
-[n E11695 . ID BMF VREF VLM CURR_SEN LM_TEMP channel_VSS channel_Temp channel_DAC1 channel_FVR_buf1  ]
+"21151 C:\Program Files (x86)\Microchip\xc8\v2.00\pic\include\pic16f18854.h
+[s S956 :1 `uc 1 :3 `uc 1 :1 `uc 1 :1 `uc 1 ]
+[n S956 . INTF . IOCIF TMR0IF ]
+"21150
+[u S955 `S956 1 ]
+[n S955 . . ]
+"21158
+[v _PIR0bits `VS955 ~T0 @X0 0 e@1804 ]
+"57 modbus/PetitModbus.h
+[v _LED_TX `Vui ~T0 @X0 0 e ]
+"58
+[v _LED_RX `Vui ~T0 @X0 0 e ]
+"272 mcc_generated_files/tmr0.h
+[v _TMR0_Reload `(v ~T0 @X0 0 ef ]
+"111 main.c
+[c E11709 0 2 3 4 8 23 60 61 62 63 .. ]
+[n E11709 . ID BMF VREF VLM CURR_SEN LM_TEMP channel_VSS channel_Temp channel_DAC1 channel_FVR_buf1  ]
 "258 mcc_generated_files/adcc.h
-[v _ADCC_GetSingleConversion `(ui ~T0 @X0 0 ef1`E11695 ]
+[v _ADCC_GetSingleConversion `(ui ~T0 @X0 0 ef1`E11709 ]
 [; ;xc.h: 18: extern const char __xc8_OPTIM_SPEED;
 [; ;xc.h: 20: extern double __fpnormalize(double);
 [; ;xc8debug.h: 14: extern void __builtin_software_breakpoint(void);
@@ -13116,6 +13130,8 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;tmr3.h: 385: void TMR3_SetInterruptHandler(void (* InterruptHandler)(void));
 [; ;tmr3.h: 403: extern void (*TMR3_InterruptHandler)(void);
 [; ;tmr3.h: 421: void TMR3_DefaultInterruptHandler(void);
+[; ;pwm6.h: 102: void PWM6_Initialize(void);
+[; ;pwm6.h: 129: void PWM6_LoadDutyValue(uint16_t dutyValue);
 [; ;stdbool.h: 13: typedef unsigned char bool;
 [; ;tmr1.h: 100: void TMR1_Initialize(void);
 [; ;tmr1.h: 129: void TMR1_StartTimer(void);
@@ -13129,8 +13145,6 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;tmr1.h: 385: void TMR1_SetInterruptHandler(void (* InterruptHandler)(void));
 [; ;tmr1.h: 403: extern void (*TMR1_InterruptHandler)(void);
 [; ;tmr1.h: 421: void TMR1_DefaultInterruptHandler(void);
-[; ;pwm6.h: 102: void PWM6_Initialize(void);
-[; ;pwm6.h: 129: void PWM6_LoadDutyValue(uint16_t dutyValue);
 [; ;stdbool.h: 13: typedef unsigned char bool;
 [; ;tmr2.h: 79: typedef enum
 [; ;tmr2.h: 80: {
@@ -13192,6 +13206,9 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;tmr2.h: 780: void TMR2_LoadPeriodRegister(uint8_t periodVal);
 [; ;tmr2.h: 818: bool TMR2_HasOverflowOccured(void);
 [; ;stdbool.h: 13: typedef unsigned char bool;
+[; ;cmp1.h: 92: void CMP1_Initialize(void);
+[; ;cmp1.h: 132: bool CMP1_GetOutputStatus(void);
+[; ;stdbool.h: 13: typedef unsigned char bool;
 [; ;crc.h: 123: void CRC_Initialize(void);
 [; ;crc.h: 164: void CRC_Start(void);
 [; ;crc.h: 203: bool CRC_8BitDataWrite(uint8_t data);
@@ -13203,8 +13220,13 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;crc.h: 445: bool CRC_SCAN_IsScannerBusy(void);
 [; ;crc.h: 486: bool CRC_SCAN_HasScanCompleted(void);
 [; ;stdbool.h: 13: typedef unsigned char bool;
-[; ;cmp1.h: 92: void CMP1_Initialize(void);
-[; ;cmp1.h: 132: bool CMP1_GetOutputStatus(void);
+[; ;tmr0.h: 100: void TMR0_Initialize(void);
+[; ;tmr0.h: 129: void TMR0_StartTimer(void);
+[; ;tmr0.h: 161: void TMR0_StopTimer(void);
+[; ;tmr0.h: 197: uint16_t TMR0_ReadTimer(void);
+[; ;tmr0.h: 236: void TMR0_WriteTimer(uint16_t timerVal);
+[; ;tmr0.h: 272: void TMR0_Reload(void);
+[; ;tmr0.h: 310: bool TMR0_HasOverflowOccured(void);
 [; ;stdbool.h: 13: typedef unsigned char bool;
 [; ;fvr.h: 93: void FVR_Initialize(void);
 [; ;fvr.h: 127: bool FVR_IsOutputReady(void);
@@ -13258,7 +13280,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;eusart.h: 78: extern volatile uint8_t eusartTxBufferRemaining;
 [; ;eusart.h: 79: extern volatile uint8_t eusartRxCount;
 "85 mcc_generated_files/eusart.h
-[v _EUSART_RxDefaultInterruptHandler `*F11769 ~T0 @X0 1 e ]
+[v _EUSART_RxDefaultInterruptHandler `*F11783 ~T0 @X0 1 e ]
 [; ;eusart.h: 85: void (*EUSART_RxDefaultInterruptHandler)(void);
 [; ;eusart.h: 107: void EUSART_Initialize(void);
 [; ;eusart.h: 155: bool EUSART_is_tx_ready(void);
@@ -13268,9 +13290,9 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;eusart.h: 294: void EUSART_Write(uint8_t txData);
 [; ;eusart.h: 316: void EUSART_Receive_ISR(void);
 [; ;eusart.h: 337: void EUSART_SetRxInterruptHandler(void (* interruptHandler)(void));
-[; ;mcc.h: 79: void SYSTEM_Initialize(void);
-[; ;mcc.h: 92: void OSCILLATOR_Initialize(void);
-[; ;mcc.h: 105: void PMD_Initialize(void);
+[; ;mcc.h: 80: void SYSTEM_Initialize(void);
+[; ;mcc.h: 93: void OSCILLATOR_Initialize(void);
+[; ;mcc.h: 106: void PMD_Initialize(void);
 [; ;Init.h: 11: extern void InitUART(void);
 [; ;Init.h: 12: extern void InitTMR(void);
 [; ;Interrupts.h: 3: extern void PetitModbusIntHandlerTMR(void);
@@ -13291,6 +13313,8 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;PetitModbus.h: 51: extern unsigned short PetitModbusTimerValue;
 [; ;PetitModbus.h: 54: extern void InitPetitModbus(unsigned char PetitModbusSlaveAddress);
 [; ;PetitModbus.h: 55: extern void ProcessPetitModbus(void);
+[; ;PetitModbus.h: 57: extern volatile unsigned int LED_TX;
+[; ;PetitModbus.h: 58: extern volatile unsigned int LED_RX;
 [; ;PetitModbusPort.h: 19: extern volatile unsigned char PetitReceiveBuffer[(4*2 + 10)];
 [; ;PetitModbusPort.h: 20: extern volatile unsigned char PetitReceiveCounter;
 [; ;PetitModbusPort.h: 22: extern void PetitModBus_UART_Initialise(void);
@@ -13312,157 +13336,331 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 0 `i `ui
 ]
 [; ;main.c: 15: unsigned int result = 0;
-[v $root$_main `(v ~T0 @X0 0 e ]
 "17
+[v _LED_TX_prev `ui ~T0 @X0 1 e ]
+[v _LED_RX_prev `ui ~T0 @X0 1 e ]
+[i _LED_RX_prev
+-> -> 0 `i `ui
+]
+[; ;main.c: 17: unsigned int LED_TX_prev, LED_RX_prev = 0;
+"18
+[v _LED_TX_STATE `ui ~T0 @X0 1 e ]
+[v _LED_RX_STATE `ui ~T0 @X0 1 e ]
+[i _LED_RX_STATE
+-> -> 0 `i `ui
+]
+[; ;main.c: 18: unsigned int LED_TX_STATE, LED_RX_STATE = 0;
+[v $root$_main `(v ~T0 @X0 0 e ]
+"20
 [v _main `(v ~T0 @X0 1 ef ]
 {
-[; ;main.c: 17: void main(void) {
+[; ;main.c: 20: void main(void) {
 [e :U _main ]
 [f ]
-[; ;main.c: 19: SYSTEM_Initialize();
-"19
+[; ;main.c: 22: SYSTEM_Initialize();
+"22
 [e ( _SYSTEM_Initialize ..  ]
-[; ;main.c: 20: TMR1_StopTimer();
-"20
-[e ( _TMR1_StopTimer ..  ]
-[; ;main.c: 21: _delay((unsigned long)((1000)*(32000000/4000.0)));
-"21
-[e ( __delay (1 -> * -> -> 1000 `i `d / -> -> 32000000 `l `d .4000.0 `ul ]
-[; ;main.c: 23: INTCONbits.GIE = 1;
+[; ;main.c: 23: TMR1_StopTimer();
 "23
-[e = . . _INTCONbits 0 3 -> -> 1 `i `uc ]
-[; ;main.c: 24: INTCONbits.PEIE = 1;
+[e ( _TMR1_StopTimer ..  ]
+[; ;main.c: 24: _delay((unsigned long)((100)*(32000000/4000.0)));
 "24
-[e = . . _INTCONbits 0 2 -> -> 1 `i `uc ]
-[; ;main.c: 26: LATBbits.LATB5 = 0;
+[e ( __delay (1 -> * -> -> 100 `i `d / -> -> 32000000 `l `d .4000.0 `ul ]
+[; ;main.c: 26: INTCONbits.GIE = 1;
 "26
-[e = . . _LATBbits 0 5 -> -> 0 `i `uc ]
-[; ;main.c: 27: LATBbits.LATB4 = 0;
+[e = . . _INTCONbits 0 3 -> -> 1 `i `uc ]
+[; ;main.c: 27: INTCONbits.PEIE = 1;
 "27
-[e = . . _LATBbits 0 4 -> -> 0 `i `uc ]
-[; ;main.c: 28: LATBbits.LATB3 = 1;
-"28
-[e = . . _LATBbits 0 3 -> -> 1 `i `uc ]
-[; ;main.c: 29: LATBbits.LATB1 = 0;
+[e = . . _INTCONbits 0 2 -> -> 1 `i `uc ]
+[; ;main.c: 29: LATBbits.LATB5 = 0;
 "29
-[e = . . _LATBbits 0 1 -> -> 0 `i `uc ]
-[; ;main.c: 30: LATBbits.LATB2 = 0;
+[e = . . _LATBbits 0 5 -> -> 0 `i `uc ]
+[; ;main.c: 30: LATBbits.LATB4 = 0;
 "30
-[e = . . _LATBbits 0 2 -> -> 0 `i `uc ]
-[; ;main.c: 32: Get_ID_From_AD();
+[e = . . _LATBbits 0 4 -> -> 0 `i `uc ]
+[; ;main.c: 31: LATBbits.LATB3 = 1;
+"31
+[e = . . _LATBbits 0 3 -> -> 1 `i `uc ]
+[; ;main.c: 32: LATBbits.LATB1 = 0;
 "32
+[e = . . _LATBbits 0 1 -> -> 0 `i `uc ]
+[; ;main.c: 33: LATBbits.LATB2 = 0;
+"33
+[e = . . _LATBbits 0 2 -> -> 0 `i `uc ]
+[; ;main.c: 35: Get_ID_From_AD();
+"35
 [e ( _Get_ID_From_AD ..  ]
-[; ;main.c: 34: InitPetitModbus(MODBUS_ADDRESS);
-"34
+[; ;main.c: 37: InitPetitModbus(MODBUS_ADDRESS);
+"37
 [e ( _InitPetitModbus (1 -> _MODBUS_ADDRESS `uc ]
-[; ;main.c: 36: while(1){
-"36
+[; ;main.c: 39: while(1){
+"39
 [e :U 1560 ]
 {
-[; ;main.c: 37: ProcessPetitModbus();
-"37
-[e ( _ProcessPetitModbus ..  ]
-[; ;main.c: 38: PetitHoldingRegisters[0].ActValue = 0;
-"38
-[e = . *U + &U _PetitHoldingRegisters * -> -> -> 0 `i `ui `ux -> -> # *U &U _PetitHoldingRegisters `ui `ux 0 -> -> 0 `i `ui ]
-"39
-}
-[e :U 1559 ]
-"36
-[e $U 1560  ]
-[e :U 1561 ]
-[; ;main.c: 39: }
-[; ;main.c: 40: }
+[; ;main.c: 40: ProcessPetitModbus();
 "40
-[e :UE 1558 ]
-}
-"55
-[v _Get_ID_From_AD `(v ~T0 @X0 1 ef ]
+[e ( _ProcessPetitModbus ..  ]
+[; ;main.c: 41: PetitHoldingRegisters[0].ActValue = 0;
+"41
+[e = . *U + &U _PetitHoldingRegisters * -> -> -> 0 `i `ui `ux -> -> # *U &U _PetitHoldingRegisters `ui `ux 0 -> -> 0 `i `ui ]
+[; ;main.c: 43: if(PIR0bits.TMR0IF){
+"43
+[e $ ! != -> . . _PIR0bits 0 3 `i -> -> -> 0 `i `Vuc `i 1562  ]
 {
-[; ;main.c: 55: void Get_ID_From_AD(){
-[e :U _Get_ID_From_AD ]
-[f ]
-[; ;main.c: 57: result = ADCC_GetSingleConversion(0);
-"57
-[e = _result ( _ADCC_GetSingleConversion (1 -> -> 0 `i `E11695 ]
-[; ;main.c: 59: if(result > 80 && result < 96){
-"59
-[e $ ! && > _result -> -> 80 `i `ui < _result -> -> 96 `i `ui 1563  ]
-{
-[; ;main.c: 60: MODBUS_ADDRESS = 1;
-"60
-[e = _MODBUS_ADDRESS -> -> 1 `i `ui ]
-[; ;main.c: 61: LATBbits.LATB5 = 1;
-"61
-[e = . . _LATBbits 0 5 -> -> 1 `i `uc ]
-[; ;main.c: 62: LATBbits.LATB3 = 0;
-"62
-[e = . . _LATBbits 0 3 -> -> 0 `i `uc ]
-"63
-}
-[; ;main.c: 63: }
+[; ;main.c: 45: switch(LED_TX_STATE){
+"45
 [e $U 1564  ]
-"64
-[e :U 1563 ]
-[; ;main.c: 64: else if(result > 95 && result < 104){
-[e $ ! && > _result -> -> 95 `i `ui < _result -> -> 104 `i `ui 1565  ]
 {
-[; ;main.c: 65: MODBUS_ADDRESS = 2;
-"65
-[e = _MODBUS_ADDRESS -> -> 2 `i `ui ]
-[; ;main.c: 66: LATBbits.LATB5 = 1;
-"66
-[e = . . _LATBbits 0 5 -> -> 1 `i `uc ]
-[; ;main.c: 67: LATBbits.LATB3 = 0;
-"67
-[e = . . _LATBbits 0 3 -> -> 0 `i `uc ]
-"68
-}
-[; ;main.c: 68: }
-[e $U 1566  ]
-"69
+[; ;main.c: 46: case 0 :
+"46
 [e :U 1565 ]
-[; ;main.c: 69: else if(result > 104 && result < 112){
-[e $ ! && > _result -> -> 104 `i `ui < _result -> -> 112 `i `ui 1567  ]
+[; ;main.c: 47: if (LED_TX > 0){
+"47
+[e $ ! > _LED_TX -> -> 0 `i `ui 1566  ]
 {
-[; ;main.c: 70: MODBUS_ADDRESS = 3;
-"70
-[e = _MODBUS_ADDRESS -> -> 3 `i `ui ]
-[; ;main.c: 71: LATBbits.LATB5 = 1;
-"71
-[e = . . _LATBbits 0 5 -> -> 1 `i `uc ]
-[; ;main.c: 72: LATBbits.LATB3 = 0;
-"72
-[e = . . _LATBbits 0 3 -> -> 0 `i `uc ]
-"73
+[; ;main.c: 48: LATBbits.LATB1 = 1;
+"48
+[e = . . _LATBbits 0 1 -> -> 1 `i `uc ]
+[; ;main.c: 49: LED_TX_prev = LED_TX;
+"49
+[e = _LED_TX_prev _LED_TX ]
+[; ;main.c: 50: LED_TX_STATE = 1;
+"50
+[e = _LED_TX_STATE -> -> 1 `i `ui ]
+"51
 }
-[; ;main.c: 73: }
-[e $U 1568  ]
-"74
+[e :U 1566 ]
+[; ;main.c: 51: }
+[; ;main.c: 52: break;
+"52
+[e $U 1563  ]
+[; ;main.c: 54: case 1 :
+"54
 [e :U 1567 ]
-[; ;main.c: 74: else{
+[; ;main.c: 55: if (LED_TX == LED_TX_prev || LED_TX != LED_TX_prev){
+"55
+[e $ ! || == _LED_TX _LED_TX_prev != _LED_TX _LED_TX_prev 1568  ]
 {
-[; ;main.c: 75: MODBUS_ADDRESS = 0;
-"75
-[e = _MODBUS_ADDRESS -> -> 0 `i `ui ]
-[; ;main.c: 76: LATBbits.LATB3 = 1;
-"76
-[e = . . _LATBbits 0 3 -> -> 1 `i `uc ]
-[; ;main.c: 77: while(1){};
-"77
-[e :U 1570 ]
-{
-}
-[e :U 1569 ]
-[e $U 1570  ]
-[e :U 1571 ]
-"78
+[; ;main.c: 56: LATBbits.LATB1 = 0;
+"56
+[e = . . _LATBbits 0 1 -> -> 0 `i `uc ]
+[; ;main.c: 57: LED_TX_prev = 0;
+"57
+[e = _LED_TX_prev -> -> 0 `i `ui ]
+[; ;main.c: 58: LED_TX = 0;
+"58
+[e = _LED_TX -> -> 0 `i `ui ]
+[; ;main.c: 59: LED_TX_STATE = 0;
+"59
+[e = _LED_TX_STATE -> -> 0 `i `ui ]
+"60
 }
 [e :U 1568 ]
-[e :U 1566 ]
+[; ;main.c: 60: }
+[; ;main.c: 61: break;
+"61
+[e $U 1563  ]
+[; ;main.c: 63: default :
+"63
+[e :U 1569 ]
+[; ;main.c: 64: LED_TX_STATE = 0;
+"64
+[e = _LED_TX_STATE -> -> 0 `i `ui ]
+[; ;main.c: 65: break;
+"65
+[e $U 1563  ]
+"66
+}
+[; ;main.c: 66: }
+[e $U 1563  ]
+"45
 [e :U 1564 ]
-[; ;main.c: 78: }
-[; ;main.c: 79: }
+[e [\ _LED_TX_STATE , $ -> -> 0 `i `ui 1565
+ , $ -> -> 1 `i `ui 1567
+ 1569 ]
+"66
+[e :U 1563 ]
+[; ;main.c: 68: switch(LED_RX_STATE){
+"68
+[e $U 1571  ]
+{
+[; ;main.c: 69: case 0 :
+"69
+[e :U 1572 ]
+[; ;main.c: 70: if (LED_RX > 0){
+"70
+[e $ ! > _LED_RX -> -> 0 `i `ui 1573  ]
+{
+[; ;main.c: 71: LATBbits.LATB2 = 1;
+"71
+[e = . . _LATBbits 0 2 -> -> 1 `i `uc ]
+[; ;main.c: 72: LED_RX_prev = LED_RX;
+"72
+[e = _LED_RX_prev _LED_RX ]
+[; ;main.c: 73: LED_RX_STATE = 1;
+"73
+[e = _LED_RX_STATE -> -> 1 `i `ui ]
+"74
+}
+[e :U 1573 ]
+[; ;main.c: 74: }
+[; ;main.c: 75: break;
+"75
+[e $U 1570  ]
+[; ;main.c: 77: case 1 :
+"77
+[e :U 1574 ]
+[; ;main.c: 78: if (LED_RX == LED_RX_prev || LED_RX != LED_RX_prev){
+"78
+[e $ ! || == _LED_RX _LED_RX_prev != _LED_RX _LED_RX_prev 1575  ]
+{
+[; ;main.c: 79: LATBbits.LATB2 = 0;
 "79
-[e :UE 1562 ]
+[e = . . _LATBbits 0 2 -> -> 0 `i `uc ]
+[; ;main.c: 80: LED_RX_prev = 0;
+"80
+[e = _LED_RX_prev -> -> 0 `i `ui ]
+[; ;main.c: 81: LED_RX = 0;
+"81
+[e = _LED_RX -> -> 0 `i `ui ]
+[; ;main.c: 82: LED_RX_STATE = 0;
+"82
+[e = _LED_RX_STATE -> -> 0 `i `ui ]
+"83
+}
+[e :U 1575 ]
+[; ;main.c: 83: }
+[; ;main.c: 84: break;
+"84
+[e $U 1570  ]
+[; ;main.c: 86: default :
+"86
+[e :U 1576 ]
+[; ;main.c: 87: LED_RX_STATE = 0;
+"87
+[e = _LED_RX_STATE -> -> 0 `i `ui ]
+[; ;main.c: 88: break;
+"88
+[e $U 1570  ]
+"89
+}
+[; ;main.c: 89: }
+[e $U 1570  ]
+"68
+[e :U 1571 ]
+[e [\ _LED_RX_STATE , $ -> -> 0 `i `ui 1572
+ , $ -> -> 1 `i `ui 1574
+ 1576 ]
+"89
+[e :U 1570 ]
+[; ;main.c: 90: PIR0bits.TMR0IF = 0;
+"90
+[e = . . _PIR0bits 0 3 -> -> 0 `i `uc ]
+[; ;main.c: 91: TMR0_Reload();
+"91
+[e ( _TMR0_Reload ..  ]
+"92
+}
+[e :U 1562 ]
+"93
+}
+[e :U 1559 ]
+"39
+[e $U 1560  ]
+[e :U 1561 ]
+[; ;main.c: 92: }
+[; ;main.c: 93: }
+[; ;main.c: 94: }
+"94
+[e :UE 1558 ]
+}
+"109
+[v _Get_ID_From_AD `(v ~T0 @X0 1 ef ]
+{
+[; ;main.c: 109: void Get_ID_From_AD(){
+[e :U _Get_ID_From_AD ]
+[f ]
+[; ;main.c: 111: result = ADCC_GetSingleConversion(0);
+"111
+[e = _result ( _ADCC_GetSingleConversion (1 -> -> 0 `i `E11709 ]
+[; ;main.c: 113: if(result > 80 && result < 96){
+"113
+[e $ ! && > _result -> -> 80 `i `ui < _result -> -> 96 `i `ui 1578  ]
+{
+[; ;main.c: 114: MODBUS_ADDRESS = 1;
+"114
+[e = _MODBUS_ADDRESS -> -> 1 `i `ui ]
+[; ;main.c: 115: LATBbits.LATB5 = 1;
+"115
+[e = . . _LATBbits 0 5 -> -> 1 `i `uc ]
+[; ;main.c: 116: LATBbits.LATB3 = 0;
+"116
+[e = . . _LATBbits 0 3 -> -> 0 `i `uc ]
+"117
+}
+[; ;main.c: 117: }
+[e $U 1579  ]
+"118
+[e :U 1578 ]
+[; ;main.c: 118: else if(result > 95 && result < 104){
+[e $ ! && > _result -> -> 95 `i `ui < _result -> -> 104 `i `ui 1580  ]
+{
+[; ;main.c: 119: MODBUS_ADDRESS = 2;
+"119
+[e = _MODBUS_ADDRESS -> -> 2 `i `ui ]
+[; ;main.c: 120: LATBbits.LATB5 = 1;
+"120
+[e = . . _LATBbits 0 5 -> -> 1 `i `uc ]
+[; ;main.c: 121: LATBbits.LATB3 = 0;
+"121
+[e = . . _LATBbits 0 3 -> -> 0 `i `uc ]
+"122
+}
+[; ;main.c: 122: }
+[e $U 1581  ]
+"123
+[e :U 1580 ]
+[; ;main.c: 123: else if(result > 104 && result < 112){
+[e $ ! && > _result -> -> 104 `i `ui < _result -> -> 112 `i `ui 1582  ]
+{
+[; ;main.c: 124: MODBUS_ADDRESS = 3;
+"124
+[e = _MODBUS_ADDRESS -> -> 3 `i `ui ]
+[; ;main.c: 125: LATBbits.LATB5 = 1;
+"125
+[e = . . _LATBbits 0 5 -> -> 1 `i `uc ]
+[; ;main.c: 126: LATBbits.LATB3 = 0;
+"126
+[e = . . _LATBbits 0 3 -> -> 0 `i `uc ]
+"127
+}
+[; ;main.c: 127: }
+[e $U 1583  ]
+"128
+[e :U 1582 ]
+[; ;main.c: 128: else{
+{
+[; ;main.c: 129: MODBUS_ADDRESS = 0;
+"129
+[e = _MODBUS_ADDRESS -> -> 0 `i `ui ]
+[; ;main.c: 130: LATBbits.LATB3 = 1;
+"130
+[e = . . _LATBbits 0 3 -> -> 1 `i `uc ]
+[; ;main.c: 131: while(1){};
+"131
+[e :U 1585 ]
+{
+}
+[e :U 1584 ]
+[e $U 1585  ]
+[e :U 1586 ]
+"132
+}
+[e :U 1583 ]
+[e :U 1581 ]
+[e :U 1579 ]
+[; ;main.c: 132: }
+[; ;main.c: 133: }
+"133
+[e :UE 1577 ]
 }

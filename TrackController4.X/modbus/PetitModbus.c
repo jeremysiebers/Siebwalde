@@ -3,8 +3,6 @@
 #include "PetitModbusPort.h"
 #include "../mcc_generated_files/mcc.h"
 
-
-
 #define PETIT_FALSE_FUNCTION                    0
 #define PETIT_FALSE_SLAVE_ADDRESS               1
 #define PETIT_DATA_NOT_READY                    2
@@ -39,18 +37,20 @@ typedef struct
 PETIT_RXTX_DATA     Petit_Tx_Data;
 unsigned int        Petit_Tx_Current              = 0;
 unsigned int        Petit_Tx_CRC16                = 0xFFFF;
-PETIT_RXTX_STATE    Petit_Tx_State                = PETIT_RXTX_IDLE;
+volatile static PETIT_RXTX_STATE    Petit_Tx_State                = PETIT_RXTX_IDLE;
 unsigned char       Petit_Tx_Buf[PETITMODBUS_TRANSMIT_BUFFER_SIZE];
 unsigned int        Petit_Tx_Buf_Size             = 0;
 
 PETIT_RXTX_DATA     Petit_Rx_Data;
 unsigned int        Petit_Rx_CRC16                = 0xFFFF;
-PETIT_RXTX_STATE    Petit_Rx_State                = PETIT_RXTX_IDLE;
+volatile static PETIT_RXTX_STATE    Petit_Rx_State                = PETIT_RXTX_IDLE;
 unsigned char       Petit_Rx_Data_Available       = FALSE;
 
 volatile unsigned short PetitModbusTimerValue           = 0;
 volatile unsigned int SlaveAnswerTimeoutCounter         = 0;
 
+volatile unsigned int LED_TX = 0;
+volatile unsigned int LED_RX = 0;
 
 /****************End of Slave Transmit and Receive Variables*******************/
 
@@ -131,8 +131,7 @@ void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
     
     CRCDATL = Data;//CRC_8BitDataWrite(Data);//while (!CRC_8BitDataWrite(Data));    
     CRCCON0bits.CRCGO = 1;//CRC_Start();
-    NOP();
-    //while (CRCCON0bits.BUSY);
+    while (CRCCON0bits.BUSY);
     *CRC = ((uint16_t)CRCACCH << 8)|CRCACCL;//CRC_CalculatedResultGet(false, 0);
     
     //LED_WAR_LAT = 0;
@@ -239,36 +238,38 @@ unsigned char CheckPetitModbusBufferComplete(void)
 
     if(PetitReceiveCounter>4)
     {
+        Petit_Tx_State    =PETIT_RXTX_IDLE;                                     // When bytes if a message are being received, set the TX state to idle
+        
         if(PetitReceiveBuffer[0] > 0)
         {
-            if( PetitReceiveBuffer[1]==0x06 || PetitReceiveBuffer[1]==0x10)     // RHR
+            if( PetitReceiveBuffer[1]==PETITMODBUS_WRITE_SINGLE_REGISTER || PetitReceiveBuffer[1]==PETITMODBUS_WRITE_MULTIPLE_REGISTERS)     // RHR
             {
                 PetitExpectedReceiveCount    =8;
             }
-            else if(PetitReceiveBuffer[1]==0x03)
+            else if(PetitReceiveBuffer[1]==PETITMODBUS_READ_HOLDING_REGISTERS || PetitReceiveBuffer[1]==PETITMODBUS_READ_INPUT_REGISTERS || PetitReceiveBuffer[1]==PETITMODBUS_DIAGNOSTIC_REGISTERS)
             {
                 PetitExpectedReceiveCount=(PetitReceiveBuffer[2])+5;
             }            
             else
             {
-                PetitReceiveCounter=0;
+                PetitReceiveCounter=0;                
                 return PETIT_FALSE_FUNCTION;
             }
         }
         else
-        {
+        {            
             PetitReceiveCounter=0;                  // if data is not for this slave, reset the counter, however data is still coming in from the rest of the message, 
             return PETIT_FALSE_SLAVE_ADDRESS;       // this is deleted by resetting the counter again after the minimum of 3.5 char wait time: PETITMODBUS_TIMEOUTTIMER
         }
     }
-    else
+    else{        
         return PETIT_DATA_NOT_READY;
+    }
 
     if(PetitReceiveCounter==PetitExpectedReceiveCount)
     {
         return PETIT_DATA_READY;
-    }
-
+    }    
     return PETIT_DATA_NOT_READY;
 }
 
@@ -325,12 +326,12 @@ void Petit_RxRTU(void)
         if (((unsigned int) Petit_Rx_Data.DataBuf[Petit_Rx_Data.DataLen] + ((unsigned int) Petit_Rx_Data.DataBuf[Petit_Rx_Data.DataLen + 1] << 8)) == Petit_Rx_CRC16)
         {
             // Valid message!
-            LED_RX_LAT = 1;
+            LED_RX++;
             Petit_Rx_Data_Available = TRUE;
         }
 
         Petit_Rx_State = PETIT_RXTX_IDLE;
-    }
+    }    
 }
 
 /******************************************************************************/
@@ -391,14 +392,13 @@ void Petit_TxRTU(void)
 void ProcessPetitModbus(void)
 {
     if (Petit_Tx_State != PETIT_RXTX_IDLE && Petit_Tx_State != PETIT_RXTX_WAIT_ANSWER){   // If answer is ready and not waiting for response, send it!
-        //PORTDbits.RD1 = 1;
-        Petit_TxRTU();
-        //PORTDbits.RD1 = 0;        
+        Petit_TxRTU();              
     }
     else if(Petit_Tx_State == PETIT_RXTX_WAIT_ANSWER){// && EnableSlaveAnswerTimeoutCounter){
-        if (SlaveAnswerTimeoutCounter != 0){
+        if (SlaveAnswerTimeoutCounter > 0){
             MASTER_SLAVE_DATA[Petit_Tx_Data.Address].MbCommError = SLAVE_DATA_TIMEOUT;
             Petit_Tx_State = PETIT_RXTX_IDLE;
+            modbus_sync_LAT = 0;
             SlaveAnswerTimeoutCounter = 0;            
         }
     }
@@ -423,7 +423,7 @@ void ProcessPetitModbus(void)
             default:                                    {    HandleMPetitodbusMbExceptionCodesSlaveReadback();          break;  }
         }
         
-        LED_RX_LAT = 0;
+        LED_RX++;
     }
 }
 

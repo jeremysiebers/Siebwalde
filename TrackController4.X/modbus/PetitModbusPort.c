@@ -41,12 +41,13 @@ void PetitModBus_UART_Putch(unsigned char c)
 unsigned char PetitModBus_UART_String(unsigned char *s, unsigned int Length)
 {
     unsigned short  DummyCounter;
-    LED_TX_LAT = 1;
-    	    
+    LED_TX++;
+    modbus_send_LAT ^= 1;
+    
     for(DummyCounter=0;DummyCounter<Length;DummyCounter++){
         PetitModBus_UART_Putch(s[DummyCounter]);
     }
-    LED_TX_LAT = 0;
+    LED_TX++;
     
     return TRUE;
 }

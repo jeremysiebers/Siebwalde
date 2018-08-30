@@ -18,17 +18,22 @@ static SLAVE_INFO         SlaveInfo[NUMBER_OF_SLAVES];                          
 
 /*----------------------------------------------------------------------------*/
 
+unsigned int LED_TX_prev, LED_RX_prev = 0;
+unsigned int LED_TX_STATE, LED_RX_STATE = 0;
+
 void main(void) {
     // Initialize the device
     SYSTEM_Initialize();
     TMR1_StopTimer();                                                           // prevent timer1 from setting slave timeout to 1.
-    __delay_ms(2000);                                                           // Wait longer then the slaves (1000ms)
+    __delay_ms(200);                                                            // Wait longer then the slaves (1000ms)
     
     LED_RUN_LAT = 0;
     LED_WAR_LAT = 0;
     LED_ERR_LAT = 1;    
     LED_TX_LAT = 0;
     LED_RX_LAT = 0;
+    
+    TMR0_StartTimer();
     
     InitPetitModbus(SlaveInfo);                                                 // Pass address of array of struct for data storage
     InitSlaveCommunication(SlaveInfo);                                          // Pass address of array of struct for data storage
@@ -42,7 +47,7 @@ void main(void) {
     LED_WAR_LAT = 0;
     LED_ERR_LAT = 0;
     
-    modbus_sync_LAT = 1;
+    modbus_sync_LAT = 0;
     
     while(1)
     {
@@ -55,6 +60,57 @@ void main(void) {
             
             PIR4bits.TMR2IF = 0;
             TMR2 = 0;
+        }
+        
+        if(PIR0bits.TMR0IF){
+            
+            switch(LED_TX_STATE){
+                case 0 : 
+                    if (LED_TX > 0){
+                        LED_TX_LAT = 1;
+                        LED_TX_prev = LED_TX;
+                        LED_TX_STATE = 1;
+                    }
+                    break;
+                    
+                case 1 :
+                    if (LED_TX == LED_TX_prev || LED_TX != LED_TX_prev){
+                        LED_TX_LAT = 0;
+                        LED_TX_prev = 0;
+                        LED_TX = 0;
+                        LED_TX_STATE = 0;
+                    }
+                    break;
+                    
+                default :
+                    LED_TX_STATE = 0;
+                    break;                       
+            }
+            
+            switch(LED_RX_STATE){
+                case 0 : 
+                    if (LED_RX > 0){
+                        LED_RX_LAT = 1;
+                        LED_RX_prev = LED_RX;
+                        LED_RX_STATE = 1;
+                    }
+                    break;
+                    
+                case 1 :
+                    if (LED_RX == LED_RX_prev || LED_RX != LED_RX_prev){
+                        LED_RX_LAT = 0;
+                        LED_RX_prev = 0;
+                        LED_RX = 0;
+                        LED_RX_STATE = 0;
+                    }
+                    break;
+                    
+                default :
+                    LED_RX_STATE = 0;
+                    break;                       
+            }
+            PIR0bits.TMR0IF = 0;
+            TMR0_Reload();
         }
     }
 }

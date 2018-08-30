@@ -14,11 +14,14 @@
 unsigned int MODBUS_ADDRESS = 0;
 unsigned int result = 0;
 
+unsigned int LED_TX_prev, LED_RX_prev = 0;
+unsigned int LED_TX_STATE, LED_RX_STATE = 0;
+
 void main(void) {
     
     SYSTEM_Initialize();
     TMR1_StopTimer();
-    __delay_ms(1000);
+    __delay_ms(100);
     
     INTCONbits.GIE = 1;
     INTCONbits.PEIE = 1;
@@ -36,6 +39,57 @@ void main(void) {
     while(1){
         ProcessPetitModbus();
         PetitHoldingRegisters[0].ActValue = 0;
+        
+        if(PIR0bits.TMR0IF){
+            
+            switch(LED_TX_STATE){
+                case 0 : 
+                    if (LED_TX > 0){
+                        LED_TX_LAT = 1;
+                        LED_TX_prev = LED_TX;
+                        LED_TX_STATE = 1;
+                    }
+                    break;
+                    
+                case 1 :
+                    if (LED_TX == LED_TX_prev || LED_TX != LED_TX_prev){
+                        LED_TX_LAT = 0;
+                        LED_TX_prev = 0;
+                        LED_TX = 0;
+                        LED_TX_STATE = 0;
+                    }
+                    break;
+                    
+                default :
+                    LED_TX_STATE = 0;
+                    break;                       
+            }
+            
+            switch(LED_RX_STATE){
+                case 0 : 
+                    if (LED_RX > 0){
+                        LED_RX_LAT = 1;
+                        LED_RX_prev = LED_RX;
+                        LED_RX_STATE = 1;
+                    }
+                    break;
+                    
+                case 1 :
+                    if (LED_RX == LED_RX_prev || LED_RX != LED_RX_prev){
+                        LED_RX_LAT = 0;
+                        LED_RX_prev = 0;
+                        LED_RX = 0;
+                        LED_RX_STATE = 0;
+                    }
+                    break;
+                    
+                default :
+                    LED_RX_STATE = 0;
+                    break;                       
+            }
+            PIR0bits.TMR0IF = 0;
+            TMR0_Reload();
+        }
     }
 }
 

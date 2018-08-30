@@ -86,7 +86,7 @@ void ProcessNextSlave(){
         }        
     }
     //modbus_sync_LAT = 1;
-    modbus_sync_LAT ^= 1;
+    //modbus_sync_LAT ^= 1;
 
     switch (Message){
         case MESSAGE1:
@@ -195,7 +195,9 @@ void ProcessSlaveCommunication(){
         case SLAVE_DATA_NOK:
             // count here how often the slave data is NOK, otherwise stop all slaves with broadcast
             MASTER_SLAVE_DATA[ProcessSlave].MbCommError = SLAVE_DATA_IDLE;
-            Message++;                                                          // process next message
+            //Message++;                                                        // process next message
+            ProcessSlave++;
+            
             if (Message > MESSAGE2){
                 ProcessSlave++;
                 Message = MESSAGE1;
@@ -205,7 +207,8 @@ void ProcessSlaveCommunication(){
             
         case SLAVE_DATA_OK:
             MASTER_SLAVE_DATA[ProcessSlave].MbCommError = SLAVE_DATA_IDLE;
-            Message++;                                                          // process next message
+            //Message++;                                                          // process next message
+            ProcessSlave++;
             if (Message > MESSAGE2){
                 ProcessSlave++;
                 Message = MESSAGE1;
@@ -216,7 +219,8 @@ void ProcessSlaveCommunication(){
         case SLAVE_DATA_TIMEOUT:
             // count here how often the slave data is timeout, otherwise stop all slaves with broadcast
             MASTER_SLAVE_DATA[ProcessSlave].MbCommError = SLAVE_DATA_IDLE;
-            Message++;                                                          // process next message
+            //Message++;                                                          // process next message
+            ProcessSlave++;
             if (Message > MESSAGE2){
                 ProcessSlave++;
                 Message = MESSAGE1;
@@ -227,7 +231,8 @@ void ProcessSlaveCommunication(){
         case SLAVE_DATA_EXCEPTION:
             // count here how often the slave data is timeout, otherwise stop all slaves with broadcast
             MASTER_SLAVE_DATA[ProcessSlave].MbCommError = SLAVE_DATA_IDLE;
-            Message++;                                                          // process next message
+            //Message++;                                                          // process next message
+            ProcessSlave++;
             if (Message > MESSAGE2){
                 ProcessSlave++;
                 Message = MESSAGE1;
