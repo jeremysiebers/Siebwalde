@@ -9,6 +9,7 @@
 #include <string.h>				// string lib
 #include <delays.h>				// delay routines
 #include <pwm.h>				// Pwm routines
+#include "Spi/spi.h"
 #include <adc.h>				// ADC lib
 #include "Microchip/Include/TCPIP Stack/TCPIP.h"
 #include "Command_Machine.h"	// serial commands received
@@ -20,10 +21,6 @@
 #include "eusart2.h"            // EUSART2 lib 
 #include "State_Machine.h"      // Trackamplifier state machine
 //#include <IO_Expander.h>		// IO Expander extra IO
-
-#include "modbus/General.h"
-#include "modbus/PetitModbus.h"
-#include "modbus/PetitModbusPort.h"
 
 //CONFIGURATION BITS//
 #pragma config DEBUG = OFF
@@ -48,7 +45,16 @@
 //DECLARATIONS//
 
 /*----------------------------------------------------------------------------*/
-#define NUMBER_OF_SLAVES    4                                                                                                  
+#define NUMBER_OF_SLAVES    4   
+
+typedef struct
+{
+    unsigned int        Reg[4];
+    unsigned char       MbCommError;
+    unsigned char       MbExceptionCode;
+    unsigned int        MbReceiveCounter;
+    unsigned int        MbSentCounter;
+}SLAVE_INFO;
 
 static SLAVE_INFO         SlaveInfo[NUMBER_OF_SLAVES];    
 
@@ -72,11 +78,11 @@ static DWORD dwLastIP = 0;
 
 static void Init_Timers(void);
 static void Init_Pwm(void);
+static void Init_Spi(void);
 unsigned char Enable_State_Machine_Update = 0;
 unsigned int State_Machine_Update_Counter = 0;
 unsigned char slave = 0;
 
-unsigned char temp3[4] = {0, 0, 0, 7};
 
 //MAIN ROUTINE///////////////////////////////////////////////////////////////////////////////////////////
 void main()
@@ -98,11 +104,8 @@ void main()
 	Init_IO();	
 	Leds_Off();	
     EUSART1_Initialize();
-    
-    /************ Init ModBus ************/
-    InitPetitModbus(SlaveInfo);                                                 // Pass address of array of struct for data storage
-    /*************************************/
-    
+    Init_Spi();
+       
     printf("PIC18f97j60 started up!!!\n\r");
     printf("\f");                                                               // Clear terminal (printf("\033[2J");)
     printf("PIC18f97j60 started up!!!\n\r");                                    // Welcome message
@@ -120,10 +123,7 @@ void main()
         #endif
         /********************************/
         
-        /************ ModBus ************/
-        ProcessPetitModbus();
-        /********************************/
-        
+                
         #if defined (USE_TCPIP)
 	 	Diagnostic();
 	    Command();
@@ -133,40 +133,7 @@ void main()
 		{
             Enable_State_Machine_Update = False; 
             
-            switch (slave){
-                case 0: if(SendPetitModbus(1, 3, temp3, 4) == False){
-                            //printf("SendPetitModbus slave 1 was NOK!!\n\r");
-                        }
-                        else{
-                            //printf("SendPetitModbus slave 1 was OK!!\n\r");
-                        }
-                        Led1 ^= 1;
-                        slave = 1;
-                break;
-                
-                case 1: if(SendPetitModbus(2, 3, temp3, 4) == False){
-                            //printf("SendPetitModbus slave 2 was NOK!!\n\r");
-                        }
-                        else{
-                            //printf("SendPetitModbus slave 2 was OK!!\n\r");
-                        }
-                        slave = 2;
-                break;
-                
-                case 2: if(SendPetitModbus(3, 3, temp3, 4) == False){
-                            //printf("SendPetitModbus slave 3 was NOK!!\n\r");
-                        }
-                        else{
-                            //printf("SendPetitModbus slave 3 was OK!!\n\r");
-                        }
-                        slave = 0;
-                break;
-                
-                default : slave = 0;
-                break;                
-                
-            }
-            
+                       
                         
         }
         
@@ -210,9 +177,7 @@ void interrupt_at_low_vector (void)
 #pragma code
 #pragma interrupt low_isr
 void low_isr()
-{
-    PetitModbusIntHandler();
-	
+{	
     #if defined (USE_TCPIP)
 	if (INTCONbits.TMR0IF){
         
@@ -305,7 +270,7 @@ void Init_Timers()
 }
 
 /******************************************************************************
- * Function:        Init_Timers
+ * Function:        Init_Pwm
  *
  * PreCondition:    None
  *
@@ -322,12 +287,31 @@ void Init_Pwm()
 {
 	// PWM setup using 25mA outputs to drive opto's ECCP 3 and 1 are chosen for PWM
     // Timer 2 used for PWM/SYNC output
-	T2CON = 0x05;			// Postscale 1:1, Timer2 On, Prescaler is 4		
-	PR2=130;				// 130 = 19.88 kHz SYNC signal, 138 = 18.74 kHz SYNC signal to dsPIC   PWM Period TMR2 zelfde voor PWM1(ECCP1) en PWM2(ECCP3)
+	//T2CON = 0x05;			// Postscale 1:1, Timer2 On, Prescaler is 4		
+	//PR2=130;				// 130 = 19.88 kHz SYNC signal, 138 = 18.74 kHz SYNC signal to dsPIC   PWM Period TMR2 zelfde voor PWM1(ECCP1) en PWM2(ECCP3)
 	
-	CCPR3L = 1;             // 1 = 366 ns, 7 = SYNC pulse of 2.67 us to dsPIC     PWM Duty cycle PWM2
-	CCP3CON = 0x0C;			// PWM Mode
+	//CCPR3L = 1;             // 1 = 366 ns, 7 = SYNC pulse of 2.67 us to dsPIC     PWM Duty cycle PWM2
+	//CCP3CON = 0x0C;			// PWM Mode
 
+}
+
+/******************************************************************************
+ * Function:        Init_Pwm
+ *
+ * PreCondition:    None
+ *
+ * Input:           None
+ *
+ * Output:          None
+ *
+ * Side Effects:    None
+ *
+ * Overview:        None
+ *****************************************************************************/
+void Init_Spi(){
+    TRISCbits.TRISC5 = 0; // SDO1 Output]
+    TRISCbits.TRISC3 = 0; //Master mode clock1 output
+    OpenSPI1()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

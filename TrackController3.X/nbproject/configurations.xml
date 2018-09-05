@@ -75,12 +75,8 @@
           <itemPath>Microchip/Include/uart2.h</itemPath>
         </logicalFolder>
       </logicalFolder>
-      <logicalFolder name="modbus" displayName="modbus" projectFiles="true">
-        <itemPath>modbus/General.h</itemPath>
-        <itemPath>modbus/Init.h</itemPath>
-        <itemPath>modbus/Interrupts.h</itemPath>
-        <itemPath>modbus/PetitModbus.h</itemPath>
-        <itemPath>modbus/PetitModbusPort.h</itemPath>
+      <logicalFolder name="f2" displayName="Spi" projectFiles="true">
+        <itemPath>Spi/spi.h</itemPath>
       </logicalFolder>
       <itemPath>Command_Machine.h</itemPath>
       <itemPath>Diagnostic_ret.h</itemPath>
@@ -198,13 +194,28 @@
           <itemPath>Microchip/TCPIPStack/UDPPerformanceTest.c</itemPath>
         </logicalFolder>
       </logicalFolder>
-      <logicalFolder name="modbus" displayName="modbus" projectFiles="true">
-        <itemPath>modbus/General.c</itemPath>
-        <itemPath>modbus/Init.c</itemPath>
-        <itemPath>modbus/Interrupts.c</itemPath>
-        <itemPath>modbus/PetitModbus.c</itemPath>
-        <itemPath>modbus/PetitModbusPort.c</itemPath>
-        <itemPath>modbus/PetitRegConstant.c</itemPath>
+      <logicalFolder name="Spi" displayName="Spi" projectFiles="true">
+        <itemPath>Spi/spi1clos.c</itemPath>
+        <itemPath>Spi/spi1dtrd.c</itemPath>
+        <itemPath>Spi/spi1gets.c</itemPath>
+        <itemPath>Spi/spi1open.c</itemPath>
+        <itemPath>Spi/spi1puts.c</itemPath>
+        <itemPath>Spi/spi1read.c</itemPath>
+        <itemPath>Spi/spi1writ.c</itemPath>
+        <itemPath>Spi/spi2clos.c</itemPath>
+        <itemPath>Spi/spi2dtrd.c</itemPath>
+        <itemPath>Spi/spi2gets.c</itemPath>
+        <itemPath>Spi/spi2open.c</itemPath>
+        <itemPath>Spi/spi2puts.c</itemPath>
+        <itemPath>Spi/spi2read.c</itemPath>
+        <itemPath>Spi/spi2writ.c</itemPath>
+        <itemPath>Spi/spi_clos.c</itemPath>
+        <itemPath>Spi/spi_dtrd.c</itemPath>
+        <itemPath>Spi/spi_gets.c</itemPath>
+        <itemPath>Spi/spi_open.c</itemPath>
+        <itemPath>Spi/spi_puts.c</itemPath>
+        <itemPath>Spi/spi_read.c</itemPath>
+        <itemPath>Spi/spi_writ.c</itemPath>
       </logicalFolder>
       <itemPath>Command_Machine.c</itemPath>
       <itemPath>Diagnostic_ret.c</itemPath>
@@ -229,7 +240,6 @@
   <sourceRootList>
     <Elem>.</Elem>
     <Elem>../../../../../../Program Files (x86)/Microchip/mplabc18/v3.47/bin/LKR</Elem>
-    <Elem>../SiebwaldeTrackAmplifier.X</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
@@ -290,7 +300,7 @@
         <property key="enable-ou" value="false"/>
         <property key="enable-ow" value="true"/>
         <property key="extra-include-directories"
-                  value=".;Microchip\Include\TCPIP Stack;Microchip\Include\PIC18Salloc;Microchip\Include;Microchip\TCPIPStack;Microchip;I2c2"/>
+                  value=".;Microchip\Include\TCPIP Stack;Microchip\Include\PIC18Salloc;Microchip\Include;Microchip\TCPIPStack;Microchip;I2c2;Spi"/>
         <property key="optimization-master" value="Disable all"/>
         <property key="preprocessor-macros" value=""/>
         <property key="procedural-abstraction-passes" value="4"/>
@@ -467,7 +477,7 @@
         <property key="enable-ou" value="false"/>
         <property key="enable-ow" value="true"/>
         <property key="extra-include-directories"
-                  value=".;Microchip\Include\TCPIP Stack;Microchip\Include\PIC18Salloc;Microchip\Include;Microchip\TCPIPStack;Microchip;I2c2"/>
+                  value=".;Microchip\Include\TCPIP Stack;Microchip\Include\PIC18Salloc;Microchip\Include;Microchip\TCPIPStack;Microchip;I2c2;Spi"/>
         <property key="optimization-master" value="Disable all"/>
         <property key="preprocessor-macros" value=""/>
         <property key="procedural-abstraction-passes" value="4"/>
