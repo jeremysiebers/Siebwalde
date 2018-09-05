@@ -37,13 +37,13 @@ typedef struct
 PETIT_RXTX_DATA     Petit_Tx_Data;
 unsigned int        Petit_Tx_Current              = 0;
 unsigned int        Petit_Tx_CRC16                = 0xFFFF;
-volatile static PETIT_RXTX_STATE    Petit_Tx_State                = PETIT_RXTX_IDLE;
+PETIT_RXTX_STATE    Petit_Tx_State                = PETIT_RXTX_IDLE;
 unsigned char       Petit_Tx_Buf[PETITMODBUS_TRANSMIT_BUFFER_SIZE];
 unsigned int        Petit_Tx_Buf_Size             = 0;
 
 PETIT_RXTX_DATA     Petit_Rx_Data;
 unsigned int        Petit_Rx_CRC16                = 0xFFFF;
-volatile static PETIT_RXTX_STATE    Petit_Rx_State                = PETIT_RXTX_IDLE;
+PETIT_RXTX_STATE    Petit_Rx_State                = PETIT_RXTX_IDLE;
 unsigned char       Petit_Rx_Data_Available       = FALSE;
 
 volatile unsigned short PetitModbusTimerValue           = 0;
@@ -238,7 +238,7 @@ unsigned char CheckPetitModbusBufferComplete(void)
 
     if(PetitReceiveCounter>4)
     {
-        Petit_Tx_State    =PETIT_RXTX_IDLE;                                     // When bytes if a message are being received, set the TX state to idle
+        Petit_Tx_State    =PETIT_RXTX_IDLE;                                     // When bytes of a message are being received, set the TX state to idle
         
         if(PetitReceiveBuffer[0] > 0)
         {

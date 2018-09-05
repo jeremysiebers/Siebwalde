@@ -521,7 +521,7 @@ unsigned char CheckPetitModbusBufferComplete(void)
     {
         if(PetitReceiveBuffer[0]== PETITMODBUS_SLAVE_ADDRESS || PETITMODBUS_BROADCAST_ADDRESS)
         {
-            if(PetitReceiveBuffer[1]==0x01 || PetitReceiveBuffer[1]==0x02 || PetitReceiveBuffer[1]==0x03 || PetitReceiveBuffer[1]==0x04 || PetitReceiveBuffer[1]==0x05 || PetitReceiveBuffer[1]==0x06)  // RHR
+            if(PetitReceiveBuffer[1]==0x01 || PetitReceiveBuffer[1]==0x02 || PetitReceiveBuffer[1]==0x03 || PetitReceiveBuffer[1]==0x04 || PetitReceiveBuffer[1]==0x05 || PetitReceiveBuffer[1]==0x06 || PetitReceiveBuffer[1]==0x08)  // RHR
             {
                 PetitExpectedReceiveCount    =8;
             }

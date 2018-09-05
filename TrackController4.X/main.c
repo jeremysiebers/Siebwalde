@@ -20,6 +20,7 @@ static SLAVE_INFO         SlaveInfo[NUMBER_OF_SLAVES];                          
 
 unsigned int LED_TX_prev, LED_RX_prev = 0;
 unsigned int LED_TX_STATE, LED_RX_STATE = 0;
+unsigned int UpdateNextSlave = false;
 
 void main(void) {
     // Initialize the device
@@ -53,14 +54,18 @@ void main(void) {
     {
         ProcessPetitModbus();
         ProcessSlaveCommunication();
-            
-        if(PIR4bits.TMR2IF)
+        
+        if (UpdateNextSlave == true){
+            ProcessNextSlave();
+            UpdateNextSlave = false;
+        }
+        /*if(PIR4bits.TMR2IF)
         {
             ProcessNextSlave();  
             
             PIR4bits.TMR2IF = 0;
             TMR2 = 0;
-        }
+        }*/
         
         if(PIR0bits.TMR0IF){
             

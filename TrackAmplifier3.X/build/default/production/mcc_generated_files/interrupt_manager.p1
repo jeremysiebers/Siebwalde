@@ -1,5 +1,8 @@
 Version 3.2 HI-TECH Software Intermediate Code
 [v F11781 `(v ~T0 @X0 0 tf ]
+"35 mcc_generated_files/../modbus/PetitModbus.h
+[s S1557 `ui 1 ]
+[n S1557 . ActValue ]
 "357 C:\Program Files (x86)\Microchip\xc8\v2.00\pic\include\pic16f18854.h
 [s S26 :1 `uc 1 :5 `uc 1 :1 `uc 1 :1 `uc 1 ]
 [n S26 . INTEDG . PEIE GIE ]
@@ -24,6 +27,16 @@ Version 3.2 HI-TECH Software Intermediate Code
 [n S961 . . ]
 "21265
 [v _PIR3bits `VS961 ~T0 @X0 0 e@1807 ]
+"271 mcc_generated_files/tmr3.h
+[v _TMR3_Reload `(v ~T0 @X0 0 ef ]
+"21306 C:\Program Files (x86)\Microchip\xc8\v2.00\pic\include\pic16f18854.h
+[s S964 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
+[n S964 . TMR1IF TMR2IF TMR3IF TMR4IF TMR5IF TMR6IF ]
+"21305
+[u S963 `S964 1 ]
+[n S963 . . ]
+"21315
+[v _PIR4bits `VS963 ~T0 @X0 0 e@1808 ]
 "21728
 [s S983 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
 [n S983 . TMR1IE TMR2IE TMR3IE TMR4IE TMR5IE TMR6IE ]
@@ -32,16 +45,12 @@ Version 3.2 HI-TECH Software Intermediate Code
 [n S982 . . ]
 "21737
 [v _PIE4bits `VS982 ~T0 @X0 0 e@1818 ]
-"21306
-[s S964 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
-[n S964 . TMR1IF TMR2IF TMR3IF TMR4IF TMR5IF TMR6IF ]
-"21305
-[u S963 `S964 1 ]
-[n S963 . . ]
-"21315
-[v _PIR4bits `VS963 ~T0 @X0 0 e@1808 ]
-"367 mcc_generated_files/tmr3.h
-[v _TMR3_ISR `(v ~T0 @X0 0 ef ]
+"27 mcc_generated_files/../modbus/PetitModbusPort.h
+[v _ReceiveInterrupt `(v ~T0 @X0 0 ef1`uc ]
+"3508 C:\Program Files (x86)\Microchip\xc8\v2.00\pic\include\pic16f18854.h
+[v _RCREG `Vuc ~T0 @X0 0 e@281 ]
+"51 mcc_generated_files/../modbus/PetitModbus.h
+[v _PetitModbusTimerValue `us ~T0 @X0 0 e ]
 "367 mcc_generated_files/tmr1.h
 [v _TMR1_ISR `(v ~T0 @X0 0 ef ]
 [; ;interrupt_manager.h: 109: void interrupt INTERRUPT_InterruptManager(void);
@@ -13120,8 +13129,6 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;tmr3.h: 385: void TMR3_SetInterruptHandler(void (* InterruptHandler)(void));
 [; ;tmr3.h: 403: extern void (*TMR3_InterruptHandler)(void);
 [; ;tmr3.h: 421: void TMR3_DefaultInterruptHandler(void);
-[; ;pwm6.h: 102: void PWM6_Initialize(void);
-[; ;pwm6.h: 129: void PWM6_LoadDutyValue(uint16_t dutyValue);
 [; ;stdbool.h: 13: typedef unsigned char bool;
 [; ;tmr1.h: 100: void TMR1_Initialize(void);
 [; ;tmr1.h: 129: void TMR1_StartTimer(void);
@@ -13135,6 +13142,8 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;tmr1.h: 385: void TMR1_SetInterruptHandler(void (* InterruptHandler)(void));
 [; ;tmr1.h: 403: extern void (*TMR1_InterruptHandler)(void);
 [; ;tmr1.h: 421: void TMR1_DefaultInterruptHandler(void);
+[; ;pwm6.h: 102: void PWM6_Initialize(void);
+[; ;pwm6.h: 129: void PWM6_LoadDutyValue(uint16_t dutyValue);
 [; ;stdbool.h: 13: typedef unsigned char bool;
 [; ;tmr2.h: 79: typedef enum
 [; ;tmr2.h: 80: {
@@ -13218,9 +13227,6 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;tmr0.h: 272: void TMR0_Reload(void);
 [; ;tmr0.h: 310: bool TMR0_HasOverflowOccured(void);
 [; ;stdbool.h: 13: typedef unsigned char bool;
-[; ;fvr.h: 93: void FVR_Initialize(void);
-[; ;fvr.h: 127: bool FVR_IsOutputReady(void);
-[; ;stdbool.h: 13: typedef unsigned char bool;
 [; ;adcc.h: 72: typedef uint16_t adc_result_t;
 [; ;adcc.h: 89: typedef enum
 [; ;adcc.h: 90: {
@@ -13263,6 +13269,9 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;adcc.h: 750: bool ADCC_HasErrorCrossedLowerThreshold(void);
 [; ;adcc.h: 772: uint8_t ADCC_GetConversionStageStatus(void);
 [; ;stdbool.h: 13: typedef unsigned char bool;
+[; ;fvr.h: 93: void FVR_Initialize(void);
+[; ;fvr.h: 127: bool FVR_IsOutputReady(void);
+[; ;stdbool.h: 13: typedef unsigned char bool;
 [; ;dac.h: 93: void DAC_Initialize(void);
 [; ;dac.h: 129: void DAC_SetOutput(uint8_t inputData);
 [; ;dac.h: 163: uint8_t DAC_GetOutput(void);
@@ -13283,90 +13292,136 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;mcc.h: 80: void SYSTEM_Initialize(void);
 [; ;mcc.h: 93: void OSCILLATOR_Initialize(void);
 [; ;mcc.h: 106: void PMD_Initialize(void);
+[; ;Init.h: 11: extern void InitUART(void);
+[; ;Init.h: 12: extern void InitTMR(void);
+[; ;Interrupts.h: 3: extern void PetitModbusIntHandlerTMR(void);
+[; ;Interrupts.h: 4: extern void PetitModbusIntHandlerRC(void);
+[; ;PetitModbus.h: 33: extern unsigned char PETITMODBUS_SLAVE_ADDRESS;
+[; ;PetitModbus.h: 35: typedef struct{
+[; ;PetitModbus.h: 36: unsigned int ActValue;
+[; ;PetitModbus.h: 37: }PetitRegStructure;
+"40 mcc_generated_files/../modbus/PetitModbus.h
+[v _PetitHoldingRegisters `S1557 ~T0 @X0 -> 4 `i e ]
+[; ;PetitModbus.h: 40: PetitRegStructure PetitHoldingRegisters[4];
+"44
+[v _PetitInputRegisters `S1557 ~T0 @X0 -> 2 `i e ]
+[; ;PetitModbus.h: 44: PetitRegStructure PetitInputRegisters[2];
+"48
+[v _PetitDiagnosticRegisters `S1557 ~T0 @X0 -> 4 `i e ]
+[; ;PetitModbus.h: 48: PetitRegStructure PetitDiagnosticRegisters[4];
+[; ;PetitModbus.h: 51: extern unsigned short PetitModbusTimerValue;
+[; ;PetitModbus.h: 54: extern void InitPetitModbus(unsigned char PetitModbusSlaveAddress);
+[; ;PetitModbus.h: 55: extern void ProcessPetitModbus(void);
+[; ;PetitModbus.h: 57: extern volatile unsigned int LED_TX;
+[; ;PetitModbus.h: 58: extern volatile unsigned int LED_RX;
+[; ;PetitModbusPort.h: 19: extern volatile unsigned char PetitReceiveBuffer[(4*2 + 10)];
+[; ;PetitModbusPort.h: 20: extern volatile unsigned char PetitReceiveCounter;
+[; ;PetitModbusPort.h: 22: extern void PetitModBus_UART_Initialise(void);
+[; ;PetitModbusPort.h: 23: extern void PetitModBus_TIMER_Initialise(void);
+[; ;PetitModbusPort.h: 24: extern void PetitModBus_UART_Putch(unsigned char c);
+[; ;PetitModbusPort.h: 25: extern unsigned char PetitModBus_UART_String(unsigned char *s, unsigned int Length);
+[; ;PetitModbusPort.h: 27: extern void ReceiveInterrupt(unsigned char Data);
+[; ;PetitModbusPort.h: 28: extern void PetitModBus_TimerValues(void);
+[; ;General.h: 9: extern volatile unsigned int Timer1_Tick_Counter;
 [v $root$_INTERRUPT_InterruptManager `(v ~T0 @X0 0 e ]
 [v F3 `(v ~T0 @X0 1 tf ]
-"52 mcc_generated_files/interrupt_manager.c
+"53 mcc_generated_files/interrupt_manager.c
 [v _INTERRUPT_InterruptManager `IF3 ~T0 @X0 1 e ]
-"53
+"54
 {
-[; ;interrupt_manager.c: 52: void interrupt INTERRUPT_InterruptManager (void)
-[; ;interrupt_manager.c: 53: {
+[; ;interrupt_manager.c: 53: void interrupt INTERRUPT_InterruptManager (void)
+[; ;interrupt_manager.c: 54: {
 [e :U _INTERRUPT_InterruptManager ]
 [f ]
-[; ;interrupt_manager.c: 55: if(INTCONbits.PEIE == 1)
-"55
-[e $ ! == -> . . _INTCONbits 0 2 `i -> 1 `i 1558  ]
-[; ;interrupt_manager.c: 56: {
+[; ;interrupt_manager.c: 56: if(INTCONbits.PEIE == 1)
 "56
-{
-[; ;interrupt_manager.c: 57: if(PIE3bits.RCIE == 1 && PIR3bits.RCIF == 1)
+[e $ ! == -> . . _INTCONbits 0 2 `i -> 1 `i 1559  ]
+[; ;interrupt_manager.c: 57: {
 "57
-[e $ ! && == -> . . _PIE3bits 0 5 `i -> 1 `i == -> . . _PIR3bits 0 5 `i -> 1 `i 1559  ]
-[; ;interrupt_manager.c: 58: {
+{
+[; ;interrupt_manager.c: 58: if(PIE3bits.RCIE == 1 && PIR3bits.RCIF == 1)
 "58
-{
-[; ;interrupt_manager.c: 59: EUSART_RxDefaultInterruptHandler();
+[e $ ! && == -> . . _PIE3bits 0 5 `i -> 1 `i == -> . . _PIR3bits 0 5 `i -> 1 `i 1560  ]
+[; ;interrupt_manager.c: 59: {
 "59
-[e ( *U _EUSART_RxDefaultInterruptHandler ..  ]
-"60
-}
-[; ;interrupt_manager.c: 60: }
-[e $U 1560  ]
+{
+[; ;interrupt_manager.c: 61: TMR3_Reload();
 "61
-[e :U 1559 ]
-[; ;interrupt_manager.c: 61: else if(PIE4bits.TMR3IE == 1 && PIR4bits.TMR3IF == 1)
-[e $ ! && == -> . . _PIE4bits 0 2 `i -> 1 `i == -> . . _PIR4bits 0 2 `i -> 1 `i 1561  ]
-[; ;interrupt_manager.c: 62: {
+[e ( _TMR3_Reload ..  ]
+[; ;interrupt_manager.c: 62: PIR4bits.TMR3IF = 0;
 "62
-{
-[; ;interrupt_manager.c: 63: TMR3_ISR();
+[e = . . _PIR4bits 0 2 -> -> 0 `i `uc ]
+[; ;interrupt_manager.c: 63: PIE4bits.TMR3IE = 1;
 "63
-[e ( _TMR3_ISR ..  ]
+[e = . . _PIE4bits 0 2 -> -> 1 `i `uc ]
+[; ;interrupt_manager.c: 64: ReceiveInterrupt(RCREG);
 "64
-}
-[; ;interrupt_manager.c: 64: }
-[e $U 1562  ]
+[e ( _ReceiveInterrupt (1 _RCREG ]
 "65
-[e :U 1561 ]
-[; ;interrupt_manager.c: 65: else if(PIE4bits.TMR1IE == 1 && PIR4bits.TMR1IF == 1)
-[e $ ! && == -> . . _PIE4bits 0 0 `i -> 1 `i == -> . . _PIR4bits 0 0 `i -> 1 `i 1563  ]
-[; ;interrupt_manager.c: 66: {
-"66
-{
-[; ;interrupt_manager.c: 67: TMR1_ISR();
-"67
-[e ( _TMR1_ISR ..  ]
-"68
 }
-[; ;interrupt_manager.c: 68: }
-[e $U 1564  ]
-"69
-[e :U 1563 ]
-[; ;interrupt_manager.c: 69: else
-[; ;interrupt_manager.c: 70: {
-"70
+[; ;interrupt_manager.c: 65: }
+[e $U 1561  ]
+"66
+[e :U 1560 ]
+[; ;interrupt_manager.c: 66: else if(PIE4bits.TMR3IE == 1 && PIR4bits.TMR3IF == 1)
+[e $ ! && == -> . . _PIE4bits 0 2 `i -> 1 `i == -> . . _PIR4bits 0 2 `i -> 1 `i 1562  ]
+[; ;interrupt_manager.c: 67: {
+"67
 {
+[; ;interrupt_manager.c: 69: PetitModbusTimerValue = 3;
+"69
+[e = _PetitModbusTimerValue -> -> 3 `i `us ]
+[; ;interrupt_manager.c: 70: PIE4bits.TMR3IE = 0;
+"70
+[e = . . _PIE4bits 0 2 -> -> 0 `i `uc ]
+[; ;interrupt_manager.c: 71: PIR4bits.TMR3IF = 0;
+"71
+[e = . . _PIR4bits 0 2 -> -> 0 `i `uc ]
 "72
 }
-[e :U 1564 ]
-[e :U 1562 ]
-[e :U 1560 ]
-"73
-}
 [; ;interrupt_manager.c: 72: }
-[; ;interrupt_manager.c: 73: }
-[e $U 1565  ]
+[e $U 1563  ]
+"73
+[e :U 1562 ]
+[; ;interrupt_manager.c: 73: else if(PIE4bits.TMR1IE == 1 && PIR4bits.TMR1IF == 1)
+[e $ ! && == -> . . _PIE4bits 0 0 `i -> 1 `i == -> . . _PIR4bits 0 0 `i -> 1 `i 1564  ]
+[; ;interrupt_manager.c: 74: {
 "74
-[e :U 1558 ]
-[; ;interrupt_manager.c: 74: else
-[; ;interrupt_manager.c: 75: {
-"75
 {
+[; ;interrupt_manager.c: 75: TMR1_ISR();
+"75
+[e ( _TMR1_ISR ..  ]
+"76
+}
+[; ;interrupt_manager.c: 76: }
+[e $U 1565  ]
 "77
+[e :U 1564 ]
+[; ;interrupt_manager.c: 77: else
+[; ;interrupt_manager.c: 78: {
+"78
+{
+"80
 }
 [e :U 1565 ]
-[; ;interrupt_manager.c: 77: }
-[; ;interrupt_manager.c: 78: }
-"78
-[e :UE 1557 ]
+[e :U 1563 ]
+[e :U 1561 ]
+"81
+}
+[; ;interrupt_manager.c: 80: }
+[; ;interrupt_manager.c: 81: }
+[e $U 1566  ]
+"82
+[e :U 1559 ]
+[; ;interrupt_manager.c: 82: else
+[; ;interrupt_manager.c: 83: {
+"83
+{
+"85
+}
+[e :U 1566 ]
+[; ;interrupt_manager.c: 85: }
+[; ;interrupt_manager.c: 86: }
+"86
+[e :UE 1558 ]
 }

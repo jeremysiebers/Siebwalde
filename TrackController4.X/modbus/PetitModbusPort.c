@@ -42,7 +42,6 @@ unsigned char PetitModBus_UART_String(unsigned char *s, unsigned int Length)
 {
     unsigned short  DummyCounter;
     LED_TX++;
-    modbus_send_LAT ^= 1;
     
     for(DummyCounter=0;DummyCounter<Length;DummyCounter++){
         PetitModBus_UART_Putch(s[DummyCounter]);

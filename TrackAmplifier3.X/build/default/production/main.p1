@@ -49,10 +49,10 @@ Version 3.2 HI-TECH Software Intermediate Code
 "272 mcc_generated_files/tmr0.h
 [v _TMR0_Reload `(v ~T0 @X0 0 ef ]
 "111 main.c
-[c E11709 0 2 3 4 8 23 60 61 62 63 .. ]
-[n E11709 . ID BMF VREF VLM CURR_SEN LM_TEMP channel_VSS channel_Temp channel_DAC1 channel_FVR_buf1  ]
+[c E11705 0 2 3 4 8 23 60 61 62 63 .. ]
+[n E11705 . ID BMF VREF VLM CURR_SEN LM_TEMP channel_VSS channel_Temp channel_DAC1 channel_FVR_buf1  ]
 "258 mcc_generated_files/adcc.h
-[v _ADCC_GetSingleConversion `(ui ~T0 @X0 0 ef1`E11709 ]
+[v _ADCC_GetSingleConversion `(ui ~T0 @X0 0 ef1`E11705 ]
 [; ;xc.h: 18: extern const char __xc8_OPTIM_SPEED;
 [; ;xc.h: 20: extern double __fpnormalize(double);
 [; ;xc8debug.h: 14: extern void __builtin_software_breakpoint(void);
@@ -13130,8 +13130,6 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;tmr3.h: 385: void TMR3_SetInterruptHandler(void (* InterruptHandler)(void));
 [; ;tmr3.h: 403: extern void (*TMR3_InterruptHandler)(void);
 [; ;tmr3.h: 421: void TMR3_DefaultInterruptHandler(void);
-[; ;pwm6.h: 102: void PWM6_Initialize(void);
-[; ;pwm6.h: 129: void PWM6_LoadDutyValue(uint16_t dutyValue);
 [; ;stdbool.h: 13: typedef unsigned char bool;
 [; ;tmr1.h: 100: void TMR1_Initialize(void);
 [; ;tmr1.h: 129: void TMR1_StartTimer(void);
@@ -13145,6 +13143,8 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;tmr1.h: 385: void TMR1_SetInterruptHandler(void (* InterruptHandler)(void));
 [; ;tmr1.h: 403: extern void (*TMR1_InterruptHandler)(void);
 [; ;tmr1.h: 421: void TMR1_DefaultInterruptHandler(void);
+[; ;pwm6.h: 102: void PWM6_Initialize(void);
+[; ;pwm6.h: 129: void PWM6_LoadDutyValue(uint16_t dutyValue);
 [; ;stdbool.h: 13: typedef unsigned char bool;
 [; ;tmr2.h: 79: typedef enum
 [; ;tmr2.h: 80: {
@@ -13228,9 +13228,6 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;tmr0.h: 272: void TMR0_Reload(void);
 [; ;tmr0.h: 310: bool TMR0_HasOverflowOccured(void);
 [; ;stdbool.h: 13: typedef unsigned char bool;
-[; ;fvr.h: 93: void FVR_Initialize(void);
-[; ;fvr.h: 127: bool FVR_IsOutputReady(void);
-[; ;stdbool.h: 13: typedef unsigned char bool;
 [; ;adcc.h: 72: typedef uint16_t adc_result_t;
 [; ;adcc.h: 89: typedef enum
 [; ;adcc.h: 90: {
@@ -13272,6 +13269,9 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;adcc.h: 728: bool ADCC_HasErrorCrossedUpperThreshold(void);
 [; ;adcc.h: 750: bool ADCC_HasErrorCrossedLowerThreshold(void);
 [; ;adcc.h: 772: uint8_t ADCC_GetConversionStageStatus(void);
+[; ;stdbool.h: 13: typedef unsigned char bool;
+[; ;fvr.h: 93: void FVR_Initialize(void);
+[; ;fvr.h: 127: bool FVR_IsOutputReady(void);
 [; ;stdbool.h: 13: typedef unsigned char bool;
 [; ;dac.h: 93: void DAC_Initialize(void);
 [; ;dac.h: 129: void DAC_SetOutput(uint8_t inputData);
@@ -13582,7 +13582,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 [f ]
 [; ;main.c: 111: result = ADCC_GetSingleConversion(0);
 "111
-[e = _result ( _ADCC_GetSingleConversion (1 -> -> 0 `i `E11709 ]
+[e = _result ( _ADCC_GetSingleConversion (1 -> -> 0 `i `E11705 ]
 [; ;main.c: 113: if(result > 80 && result < 96){
 "113
 [e $ ! && > _result -> -> 80 `i `ui < _result -> -> 96 `i `ui 1578  ]

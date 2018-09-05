@@ -48,6 +48,7 @@
 
 #include "interrupt_manager.h"
 #include "mcc.h"
+#include "../modbus/General.h"
 
 void interrupt INTERRUPT_InterruptManager (void)
 {
@@ -56,11 +57,18 @@ void interrupt INTERRUPT_InterruptManager (void)
     {
         if(PIE3bits.RCIE == 1 && PIR3bits.RCIF == 1)
         {
-            EUSART_RxDefaultInterruptHandler();
+            //EUSART_RxDefaultInterruptHandler();
+            TMR3_Reload();
+            PIR4bits.TMR3IF = 0;
+            PIE4bits.TMR3IE = 1;
+            ReceiveInterrupt(RCREG);
         } 
         else if(PIE4bits.TMR3IE == 1 && PIR4bits.TMR3IF == 1)
         {
-            TMR3_ISR();
+            //TMR3_ISR();
+            PetitModbusTimerValue = 3;                                                  // Between receive interrupts it took to long --> message done
+            PIE4bits.TMR3IE = 0;
+            PIR4bits.TMR3IF = 0;
         } 
         else if(PIE4bits.TMR1IE == 1 && PIR4bits.TMR1IF == 1)
         {

@@ -19,6 +19,8 @@ extern "C" {
     
 #define NUMBER_OF_SLAVES 4                                                      // 0 is for the master self. 5 backplane slaves + 50 Track slaves = 56  
 
+    extern unsigned int UpdateNextSlave;
+    
 #ifdef	__cplusplus
 }
 #endif
