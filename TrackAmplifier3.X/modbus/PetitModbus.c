@@ -210,7 +210,7 @@ void HandlePetitModbusError(unsigned char ErrorCode, unsigned char Function)
     else
     {
         // Initialise the output buffer. The first byte in the buffer says how many registers we have read
-        Petit_Tx_Data.Function    = Function | 0x80;
+        Petit_Tx_Data.Function    = (unsigned int)Function | 0x80;
         Petit_Tx_Data.DataBuf[0]  = ErrorCode;
         Petit_Tx_Data.Address     = PETITMODBUS_SLAVE_ADDRESS;
         Petit_Tx_Data.DataLen     = 1;
@@ -422,9 +422,9 @@ void HandleMPetitodbusWriteMultipleRegisters(void)
 {
     // Write single numerical output
     unsigned int    Petit_StartAddress            =0;
-    unsigned char   Petit_ByteCount               =0;
+    unsigned int    Petit_ByteCount               =0;
     unsigned int    Petit_NumberOfRegisters       =0;
-    unsigned char   Petit_i                       =0;
+    unsigned int    Petit_i                       =0;
     unsigned int	Petit_Value                   =0;
 
     // The message contains the requested start address and number of registers
@@ -436,7 +436,7 @@ void HandleMPetitodbusWriteMultipleRegisters(void)
     {
         for (Petit_i = 0; Petit_i <Petit_NumberOfRegisters; Petit_i++)
         {
-            Petit_Value=(Petit_Rx_Data.DataBuf[5+2*Petit_i]<<8)+(Petit_Rx_Data.DataBuf[6+2*Petit_i]);
+            Petit_Value = ((unsigned int)Petit_Rx_Data.DataBuf[5+2*Petit_i]<<8)+((unsigned int)Petit_Rx_Data.DataBuf[6+2*Petit_i]);
             PetitHoldingRegisters[Petit_StartAddress+Petit_i].ActValue=Petit_Value;
         }
         return;
@@ -459,7 +459,7 @@ void HandleMPetitodbusWriteMultipleRegisters(void)
         // Output data buffer is exact copy of input buffer
         for (Petit_i = 0; Petit_i <Petit_NumberOfRegisters; Petit_i++)
         {
-            Petit_Value=(Petit_Rx_Data.DataBuf[5+2*Petit_i]<<8)+(Petit_Rx_Data.DataBuf[6+2*Petit_i]);
+            Petit_Value = ((unsigned int)Petit_Rx_Data.DataBuf[5+2*Petit_i]<<8) + ((unsigned int)Petit_Rx_Data.DataBuf[6+2*Petit_i]);
             PetitHoldingRegisters[Petit_StartAddress+Petit_i].ActValue=Petit_Value;
         }
 		
