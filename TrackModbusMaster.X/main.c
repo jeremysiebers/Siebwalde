@@ -23,6 +23,10 @@ unsigned int LED_TX_STATE, LED_RX_STATE = 0;
 unsigned int UpdateNextSlave = false;
 
 void main(void) {
+    // Initialize the SLAVE_INFO struct with slave numebers
+    for (char i = 0; i <NUMBER_OF_SLAVES; i++){
+        SlaveInfo[i].SlaveNumber = i;
+    }
     // Initialize the device
     SYSTEM_Initialize();
     TMR1_StopTimer();                                                           // prevent timer1 from setting slave timeout to 1.
@@ -34,7 +38,7 @@ void main(void) {
     LED_TX_LAT = 0;
     LED_RX_LAT = 0;
     
-    TMR0_StartTimer();
+    TMR0_StartTimer();                                                          // TX/RX led timer
     
     InitPetitModbus(SlaveInfo);                                                 // Pass address of array of struct for data storage
     InitSlaveCommunication(SlaveInfo);                                          // Pass address of array of struct for data storage
@@ -53,19 +57,15 @@ void main(void) {
     while(1)
     {
         ProcessPetitModbus();
-        ProcessSlaveCommunication();
+        if (ProcessSlaveCommunication() == true){
+            modbus_sync_LAT = 1;                        
+        }
         
         if (UpdateNextSlave == true){
             ProcessNextSlave();
             UpdateNextSlave = false;
+            modbus_sync_LAT = 0;
         }
-        /*if(PIR4bits.TMR2IF)
-        {
-            ProcessNextSlave();  
-            
-            PIR4bits.TMR2IF = 0;
-            TMR2 = 0;
-        }*/
         
         if(PIR0bits.TMR0IF){
             

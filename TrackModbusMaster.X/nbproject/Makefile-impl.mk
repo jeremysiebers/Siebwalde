@@ -24,7 +24,7 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 
 
 # Project Name
-PROJECTNAME=TrackController4.X
+PROJECTNAME=TrackModbusMaster.X
 
 # Active Configuration
 DEFAULTCONF=default

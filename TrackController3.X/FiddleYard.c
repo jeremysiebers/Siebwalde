@@ -46,14 +46,26 @@
 
 /*----------------------------------------------------------------------------*/
 #define NUMBER_OF_SLAVES    4   
+typedef enum
+{
+    SLAVE_DATA_IDLE = 0,
+    SLAVE_DATA_BUSY = 1,
+    SLAVE_DATA_OK = 2,
+    SLAVE_DATA_NOK = 3,
+    SLAVE_DATA_TIMEOUT = 4,
+    SLAVE_DATA_EXCEPTION = 5
+}SLAVE_DATA;
 
 typedef struct
 {
-    unsigned int        Reg[4];
-    unsigned char       MbCommError;
-    unsigned char       MbExceptionCode;
+    unsigned int        HoldingReg[4];
+    unsigned int        InputReg[2];
+    unsigned int        DiagReg[4];
     unsigned int        MbReceiveCounter;
     unsigned int        MbSentCounter;
+    SLAVE_DATA          MbCommError;
+    unsigned char       MbExceptionCode;
+    unsigned char       SlaveNumber;
 }SLAVE_INFO;
 
 static SLAVE_INFO         SlaveInfo[NUMBER_OF_SLAVES];    
@@ -203,16 +215,23 @@ void low_isr()
         T1CONbits.TMR1ON = 1;
 	}	
     
+    else if (PIE1bits.SSP1IE == 1 && PIR1bits.SSP1IF == 1){
+        
+        
+        
+        PIR1bits.SSP1IF = 0;
+    }
+    
 //    if (PIE3bits.RC2IE == 1 && PIR3bits.RC2IF == 1) {
 //        EUSART2_Receive_ISR();
 //    } 
 //    if (PIE3bits.TX2IE == 1 && PIR3bits.TX2IF == 1) {
 //        EUSART2_Transmit_ISR();
 //    } 
-    if (PIE1bits.RC1IE == 1 && PIR1bits.RC1IF == 1) {
+    else if (PIE1bits.RC1IE == 1 && PIR1bits.RC1IF == 1) {
         EUSART1_Receive_ISR();
     } 
-    if (PIE1bits.TX1IE == 1 && PIR1bits.TX1IF == 1) {
+    else if (PIE1bits.TX1IE == 1 && PIR1bits.TX1IF == 1) {
         EUSART1_Transmit_ISR();
     }
 }
@@ -309,9 +328,18 @@ void Init_Pwm()
  * Overview:        None
  *****************************************************************************/
 void Init_Spi(){
-    TRISCbits.TRISC5 = 0; // SDO1 Output]
-    TRISCbits.TRISC3 = 0; //Master mode clock1 output
-    OpenSPI1()
+    TRISCbits.TRISC5 = 0; // SDO1 Output
+    TRISCbits.TRISC4 = 1; // SDI1 Input
+    TRISCbits.TRISC3 = 1; // Slave mode clock1 input
+    TRISFbits.TRISF7 = 1; // define /SS1 pin as input
+    
+    SetPriorityIntSPI1(0);
+    
+    OpenSPI1(SLV_SSON, MODE_11, SMPMID);
+    SPI1_Clear_Recv_OV();
+    SPI1_Clear_Intr_Status_Bit();
+    EnableIntSPI1();
+    
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

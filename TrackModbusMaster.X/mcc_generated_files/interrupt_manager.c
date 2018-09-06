@@ -58,26 +58,24 @@ void interrupt INTERRUPT_InterruptManager (void)
     {
         if(PIE3bits.RCIE == 1 && PIR3bits.RCIF == 1)
         {
-            //EUSART_RxDefaultInterruptHandler();
             TMR3_Reload();
             PIR4bits.TMR3IF   = 0;
             PIE4bits.TMR3IE   = 1;
-            T1CONbits.TMR1ON  = 0;                                                      // Data received stop answer timeout timer
+            T1CONbits.TMR1ON  = 0;                                              // Data received stop answer timeout timer
             PIE4bits.TMR1IE   = 0;        
             PIR4bits.TMR1IF   = 0;
             ReceiveInterrupt(RCREG);  
         } 
         else if(PIE4bits.TMR3IE == 1 && PIR4bits.TMR3IF == 1)
         {
-            //TMR3_ISR();
-            PetitModbusTimerValue = 3;                                                  // Between receive interrupts it took to long --> message done
+            //modbus_send_LAT ^= 1;
+            PetitModbusTimerValue = 3;                                          // Between receive interrupts it took to long --> message done
             PIE4bits.TMR3IE = 0;
             PIR4bits.TMR3IF = 0;
         } 
         else if(PIE4bits.TMR1IE == 1 && PIR4bits.TMR1IF == 1)
         {
-            //TMR1_ISR();
-            modbus_sync_LAT = 1;
+            //modbus_sync_LAT = 1;
             SlaveAnswerTimeoutCounter   = 1;
             T1CONbits.TMR1ON            = 0;
             PIE4bits.TMR1IE             = 0;
@@ -85,16 +83,11 @@ void interrupt INTERRUPT_InterruptManager (void)
         } 
         else if(PIE4bits.TMR2IE == 1 && PIR4bits.TMR2IF == 1)
         {
-            //TMR2_ISR();
             modbus_send_LAT ^= 1;
             UpdateNextSlave = true;
             PIR4bits.TMR2IF = 0;
             TMR2 = 0;
-        }
-        else if(PIE3bits.SSP1IE == 1 && PIR3bits.SSP1IF == 1)
-        {
-            SPI1_ISR();
-        }
+        }        
         else
         {
             //Unhandled Interrupt

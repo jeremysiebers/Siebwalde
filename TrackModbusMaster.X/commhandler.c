@@ -12,6 +12,8 @@
 
 #define MAILBOX_SIZE 4                                                          // How many messages are non-critical
 
+void SendDataToEthernet(void);
+
 /*#--------------------------------------------------------------------------#*/
 /*  Description: InitSlaveCommunication(SLAVE_INFO *location)
  *
@@ -86,14 +88,6 @@ void ProcessNextSlave(){
         }        
     }
     
-    
-    /*if (ProcessSlave == 1){
-        modbus_send_LAT = 1;
-    }
-    else{
-        modbus_send_LAT = 0;
-    }*/
-
     switch (Message){
         case MESSAGE1:
             HoldingRegistersWrite[8]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[0] << 8;
@@ -190,11 +184,13 @@ void ProcessNextSlave(){
  *  Notes      : Keeps track of communication with a slave
  */
 /*#--------------------------------------------------------------------------#*/
-void ProcessSlaveCommunication(){
+unsigned int ProcessSlaveCommunication(){
+    
+    unsigned int Return_Val = false;
     
     switch (MASTER_SLAVE_DATA[ProcessSlave].MbCommError){
         case SLAVE_DATA_BUSY:
-            NOP();
+            Return_Val = false;
             // count here how long the Mod-bus stack is busy, otherwise reset/action             
             break;
             
@@ -206,7 +202,7 @@ void ProcessSlaveCommunication(){
                 ProcessSlave++;
                 Message = MESSAGE1;
             } 
-            //modbus_sync_LAT = 0;
+            Return_Val = true;
             break;
             
         case SLAVE_DATA_OK:
@@ -216,7 +212,7 @@ void ProcessSlaveCommunication(){
                 ProcessSlave++;
                 Message = MESSAGE1;
             }
-            //modbus_sync_LAT = 0;
+            Return_Val = true;
             break;
             
         case SLAVE_DATA_TIMEOUT:
@@ -227,7 +223,7 @@ void ProcessSlaveCommunication(){
                 ProcessSlave++;
                 Message = MESSAGE1;
             }
-            //modbus_sync_LAT = 0;
+            Return_Val = true;
             break;
             
         case SLAVE_DATA_EXCEPTION:
@@ -238,12 +234,58 @@ void ProcessSlaveCommunication(){
                 ProcessSlave++;
                 Message = MESSAGE1;
             }
-            //modbus_sync_LAT = 0;
+            Return_Val = true;
             break;
             
         default :    // Idle is here        
             break;
     }
+    
+    if (Return_Val == true){
+        //__delay_us(60);
+        SendDataToEthernet();
+    }
+    
+    return (Return_Val);
+}
+
+/*#--------------------------------------------------------------------------#*/
+/*  Description: SendDataToEthernet()
+ *
+ *  Input(s)   : 
+ *
+ *  Output(s)  :
+ *
+ *  Returns    :
+ *
+ *  Pre.Cond.  :
+ *
+ *  Post.Cond. :
+ *
+ *  Notes      : Keeps track of communication with a slave
+ */
+/*#--------------------------------------------------------------------------#*/
+static unsigned int DataFromSlave = 0;
+static unsigned char length = sizeof(MASTER_SLAVE_DATA[0]);
+
+void SendDataToEthernet(){
+
+    SS1_LAT = 1;
+    SPI1_Exchange8bitBuffer((char*)MASTER_SLAVE_DATA[DataFromSlave].HoldingReg, length, 0);//&MASTER_SLAVE_DATA[DataFromSlave].HoldingReg[0]);
+    SS1_LAT = 0; 
+    DataFromSlave++;
+    if (DataFromSlave > NUMBER_OF_SLAVES-1){
+        DataFromSlave = 0;
+    }
+    /*
+    SS1_LAT = 1;
+    SPI1_Exchange8bitBuffer((char*)MASTER_SLAVE_DATA[DataFromSlave].HoldingReg, length, 0);//&MASTER_SLAVE_DATA[DataFromSlave].HoldingReg[0]);
+    SS1_LAT = 0; 
+    DataFromSlave++;
+    if (DataFromSlave > NUMBER_OF_SLAVES-1){
+        DataFromSlave = 0;
+    } 
+    */           
 }
 
 /*

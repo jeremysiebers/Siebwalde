@@ -1,5 +1,5 @@
 /**
-  SPI1 Generated Driver File
+  MSSP1 Generated Driver File
 
   @Company
     Microchip Technology Inc.
@@ -8,17 +8,18 @@
     spi1.c
 
   @Summary
-    This is the generated driver implementation file for the SPI1 driver using PIC10 / PIC12 / PIC16 / PIC18 MCUs
+    This is the generated driver implementation file for the MSSP1 driver using 
+    PIC10 / PIC12 / PIC16 / PIC18 MCUs
 
   @Description
-    This source file provides APIs for SPI1.
+    This source file provides APIs SPI1.
     Generation Information :
         Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.65.2
         Device            :  PIC16F18857
-        Driver Version    :  1.01
+        Driver Version    :  2.01
     The generated drivers are tested against the following:
         Compiler          :  XC8 1.45
-        MPLAB 	          :  MPLAB X 4.15	
+        MPLAB 	          :  MPLAB X 4.15
 */
 
 /*
@@ -51,8 +52,12 @@
 #include <xc.h>
 #include "spi1.h"
 
+/**
+  Section: Macro Declarations
+*/
 
-uint8_t (*SPI1_xchgHandler)(uint8_t);
+#define SPI_RX_IN_PROGRESS 0x0
+
 /**
   Section: Module APIs
 */
@@ -60,41 +65,84 @@ uint8_t (*SPI1_xchgHandler)(uint8_t);
 void SPI1_Initialize(void)
 {
     // Set the SPI1 module to the options selected in the User Interface
-
-    // SMP High Speed; CKE Idle to Active; 
+    
+    // SMP Middle; CKE Idle to Active; 
     SSP1STAT = 0x00;
-
-    // SSPEN enabled; CKP Idle:Low, Active:High; SSPM SCKx_nSSxenabled; 
-    SSP1CON1 = 0x24;
-
-    // SBCDE disabled; BOEN disabled; SCIE disabled; PCIE disabled; DHEN disabled; SDAHT 100ns; AHEN disabled; 
-    SSP1CON3 = 0x00;
-	
-	SSP1BUF = DUMMY_DATA;
-	SPI1_setExchangeHandler(SPI1_DefaultExchangeHandler);
-	
-	PIE3bits.SSP1IE = 1;
+    
+    // SSPEN enabled; CKP Idle:High, Active:Low; SSPM FOSC/4; 
+    SSP1CON1 = 0x30;
+    
+    // SSPADD 0; 
+    SSP1ADD = 0x00;
 }
 
-
-void SPI1_ISR(void)
+uint8_t SPI1_Exchange8bit(uint8_t data)
 {
-        SSP1BUF = SPI1_xchgHandler(SSP1BUF);
+    // Clear the Write Collision flag, to allow writing
+    SSP1CON1bits.WCOL = 0;
+
+    SSP1BUF = data;
+
+    while(SSP1STATbits.BF == SPI_RX_IN_PROGRESS)
+    {
+    }
+
+    return (SSP1BUF);
 }
 
+uint8_t SPI1_Exchange8bitBuffer(uint8_t *dataIn, uint8_t bufLen, uint8_t *dataOut)
+{
+    uint8_t bytesWritten = 0;
 
-void SPI1_setExchangeHandler(uint8_t (* InterruptHandler)(uint8_t)){
-    SPI1_xchgHandler = InterruptHandler;
+    if(bufLen != 0)
+    {
+        if(dataIn != NULL)
+        {
+            while(bytesWritten < bufLen)
+            {
+                if(dataOut == NULL)
+                {
+                    SPI1_Exchange8bit(dataIn[bytesWritten]);
+                }
+                else
+                {
+                    dataOut[bytesWritten] = SPI1_Exchange8bit(dataIn[bytesWritten]);
+                }
+
+                bytesWritten++;
+            }
+        }
+        else
+        {
+            if(dataOut != NULL)
+            {
+                while(bytesWritten < bufLen )
+                {
+                    dataOut[bytesWritten] = SPI1_Exchange8bit(DUMMY_DATA);
+
+                    bytesWritten++;
+                }
+            }
+        }
+    }
+
+    return bytesWritten;
 }
 
-
-
-uint8_t SPI1_DefaultExchangeHandler(uint8_t byte){
-    // add your SPI1 interrupt custom code
-    // or set custom function using SPI1_setExchangeHandler()
-    return byte;
+bool SPI1_IsBufferFull(void)
+{
+    return (SSP1STATbits.BF);
 }
 
+bool SPI1_HasWriteCollisionOccured(void)
+{
+    return (SSP1CON1bits.WCOL);
+}
+
+void SPI1_ClearWriteCollisionStatus(void)
+{
+    SSP1CON1bits.WCOL = 0;
+}
 /**
  End of File
 */

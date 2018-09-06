@@ -57,6 +57,7 @@ typedef struct
     unsigned int        MbSentCounter;
     SLAVE_DATA          MbCommError;
     unsigned char       MbExceptionCode;
+    unsigned char       SlaveNumber;
 }SLAVE_INFO;
 
 #define MESSAGE_SEND_REG 1

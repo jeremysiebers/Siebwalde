@@ -398,7 +398,7 @@ void ProcessPetitModbus(void)
         if (SlaveAnswerTimeoutCounter > 0){
             MASTER_SLAVE_DATA[Petit_Tx_Data.Address].MbCommError = SLAVE_DATA_TIMEOUT;
             Petit_Tx_State = PETIT_RXTX_IDLE;
-            modbus_sync_LAT = 0;
+            //modbus_sync_LAT = 0;
             SlaveAnswerTimeoutCounter = 0;            
         }
     }
