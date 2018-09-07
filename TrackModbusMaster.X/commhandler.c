@@ -271,7 +271,7 @@ static unsigned char length = sizeof(MASTER_SLAVE_DATA[0]);
 void SendDataToEthernet(){
 
     SS1_LAT = 1;
-    SPI1_Exchange8bitBuffer((char*)MASTER_SLAVE_DATA[DataFromSlave].HoldingReg, length, 0);//&MASTER_SLAVE_DATA[DataFromSlave].HoldingReg[0]);
+    SPI1_Exchange8bitBuffer(&(MASTER_SLAVE_DATA[DataFromSlave].SlaveNumber), length, 0);//&MASTER_SLAVE_DATA[DataFromSlave].HoldingReg[0]);
     SS1_LAT = 0; 
     DataFromSlave++;
     if (DataFromSlave > NUMBER_OF_SLAVES-1){

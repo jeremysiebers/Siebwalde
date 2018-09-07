@@ -76,7 +76,7 @@ void TMR0_Initialize(void)
     TMR0L = 0xCB;
 
     // Load TMR0 value to the 16-bit reload variable
-    timer0ReloadVal16bit = (TMR0H << 8) | TMR0L;
+    timer0ReloadVal16bit = (uint16_t)(TMR0H << 8) | TMR0L;
 
     // Clearing IF flag
     PIR0bits.TMR0IF = 0;

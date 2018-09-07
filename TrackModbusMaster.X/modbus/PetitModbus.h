@@ -50,6 +50,7 @@ typedef enum
 
 typedef struct
 {
+    unsigned char       SlaveNumber;
     unsigned int        HoldingReg[NUMBER_OF_HOLDING_PETITREGISTERS];
     unsigned int        InputReg[NUMBER_OF_INPUT_PETITREGISTERS];
     unsigned int        DiagReg[NUMBER_OF_DIAGNOSTIC_PETITREGISTERS];
@@ -57,7 +58,7 @@ typedef struct
     unsigned int        MbSentCounter;
     SLAVE_DATA          MbCommError;
     unsigned char       MbExceptionCode;
-    unsigned char       SlaveNumber;
+    
 }SLAVE_INFO;
 
 #define MESSAGE_SEND_REG 1

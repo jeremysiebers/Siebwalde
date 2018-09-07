@@ -3,7 +3,7 @@
     <type>com.microchip.mplab.nbide.embedded.makeproject</type>
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/make-project/1">
-            <name>SiebwaldeTrackController</name>
+            <name>TrackController3</name>
             <creation-uuid>13f28ed6-4d05-4582-b7d0-781c56df5218</creation-uuid>
             <make-project-type>0</make-project-type>
             <c-extensions>c</c-extensions>

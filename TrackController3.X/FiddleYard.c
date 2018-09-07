@@ -336,9 +336,7 @@ void Init_Spi(){
     SetPriorityIntSPI1(0);
     
     OpenSPI1(SLV_SSON, MODE_11, SMPMID);
-    SPI1_Clear_Recv_OV();
-    SPI1_Clear_Intr_Status_Bit();
-    EnableIntSPI1();
+    PIE1bits.SSP1IE = 1;
     
 }
 
