@@ -113,6 +113,17 @@
 #define SS1_SetDigitalInput()    do { TRISFbits.TRISF7 = 1; } while(0)
 #define SS1_SetDigitalOutput()   do { TRISFbits.TRISF7 = 0; } while(0)
 
+// get/set ModbusReset aliases
+#define ModbusReset_TRIS                 TRISGbits.TRISG3
+#define ModbusReset_LAT                  LATGbits.LATG3
+#define ModbusReset_PORT                 PORTGbits.RG3
+#define ModbusReset_SetHigh()            do { LATGbits.LATG3 = 1; } while(0)
+#define ModbusReset_SetLow()             do { LATGbits.LATG3 = 0; } while(0)
+#define ModbusReset_Toggle()             do { LATGbits.LATG3 = ~LATGbits.LATG3; } while(0)
+#define ModbusReset_GetValue()           PORTGbits.RG3
+#define ModbusReset_SetDigitalInput()    do { TRISGbits.TRISG3 = 1; } while(0)
+#define ModbusReset_SetDigitalOutput()   do { TRISGbits.TRISG3 = 0; } while(0)
+
 
 /**
    @Param

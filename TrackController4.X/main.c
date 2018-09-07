@@ -40,17 +40,29 @@
     OF FEES, IF ANY, THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS 
     SOFTWARE.
 */
-
+#include "main.h"
 #include "mcc_generated_files/mcc.h"
+#include "spicommhandler.h"
 
 /*
                          Main application
  */
+
+/*----------------------------------------------------------------------------*/
+static SLAVE_INFO         SlaveInfo[NUMBER_OF_SLAVES];   
+
+/*----------------------------------------------------------------------------*/
+
+unsigned char ReadDummyData = 0;
+
 void main(void)
 {
     // Initialize the device
     SYSTEM_Initialize();
-
+    InitSlaveCommunication(SlaveInfo);
+    
+    ModbusReset_LAT = 1;
+    
     // If using interrupts in PIC18 High/Low Priority Mode you need to enable the Global High and Low Interrupts
     // If using interrupts in PIC Mid-Range Compatibility Mode you need to enable the Global and Peripheral Interrupts
     // Use the following macros to:
@@ -66,10 +78,15 @@ void main(void)
 
     // Disable the Peripheral Interrupts
     //INTERRUPT_PeripheralInterruptDisable();
+    
+    ModbusReset_LAT = 0;
 
+    ReadDummyData = SSP1BUF;
+    
     while (1)
     {
-        Network_Manage();
+        //Network_Manage();
+        ProcessSpiData();
     }
 }
 /**

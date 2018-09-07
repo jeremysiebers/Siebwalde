@@ -242,7 +242,7 @@ unsigned int ProcessSlaveCommunication(){
     }
     
     if (Return_Val == true){
-        //__delay_us(60);
+        __delay_us(60);                                                         // when debugging is required on oscilloscope, waittime till tmr3 is done
         SendDataToEthernet();
     }
     
@@ -270,9 +270,9 @@ static unsigned char length = sizeof(MASTER_SLAVE_DATA[0]);
 
 void SendDataToEthernet(){
 
-    SS1_LAT = 1;
+    SS1_LAT = 0;
     SPI1_Exchange8bitBuffer(&(MASTER_SLAVE_DATA[DataFromSlave].SlaveNumber), length, 0);//&MASTER_SLAVE_DATA[DataFromSlave].HoldingReg[0]);
-    SS1_LAT = 0; 
+    SS1_LAT = 1; 
     DataFromSlave++;
     if (DataFromSlave > NUMBER_OF_SLAVES-1){
         DataFromSlave = 0;

@@ -48,6 +48,7 @@
 
 #include "interrupt_manager.h"
 #include "mcc.h"
+#include "../spicommhandler.h"
 
 void  INTERRUPT_Initialize (void)
 {
@@ -74,7 +75,8 @@ void interrupt INTERRUPT_InterruptManager (void)
         } 
         else if(PIE1bits.SSP1IE == 1 && PIR1bits.SSP1IF == 1)
         {
-            SPI1_ISR();
+            SpiCommDataRaw(SSP1BUF); 
+            SSP1BUF = 0;
         } 
         else
         {
