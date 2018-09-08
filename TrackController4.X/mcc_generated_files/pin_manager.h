@@ -61,6 +61,17 @@
 #define PULL_UP_ENABLED      1
 #define PULL_UP_DISABLED     0
 
+// get/set SS1_Check aliases
+#define SS1_Check_TRIS                 TRISBbits.TRISB0
+#define SS1_Check_LAT                  LATBbits.LATB0
+#define SS1_Check_PORT                 PORTBbits.RB0
+#define SS1_Check_SetHigh()            do { LATBbits.LATB0 = 1; } while(0)
+#define SS1_Check_SetLow()             do { LATBbits.LATB0 = 0; } while(0)
+#define SS1_Check_Toggle()             do { LATBbits.LATB0 = ~LATBbits.LATB0; } while(0)
+#define SS1_Check_GetValue()           PORTBbits.RB0
+#define SS1_Check_SetDigitalInput()    do { TRISBbits.TRISB0 = 1; } while(0)
+#define SS1_Check_SetDigitalOutput()   do { TRISBbits.TRISB0 = 0; } while(0)
+
 // get/set SCK1 aliases
 #define SCK1_TRIS                 TRISCbits.TRISC3
 #define SCK1_LAT                  LATCbits.LATC3

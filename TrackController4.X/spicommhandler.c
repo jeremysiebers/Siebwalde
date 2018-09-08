@@ -41,6 +41,9 @@ void InitSlaveCommunication(SLAVE_INFO *location)
  *  Notes      :
  */
 /*#--------------------------------------------------------------------------#*/
+/*
+ 
+ 
 static unsigned char ReceivedDataRaw[sizeof(MASTER_SLAVE_DATA[0])];
 static unsigned char AllDataCompleet = sizeof(MASTER_SLAVE_DATA[0]);
 static unsigned char DataCount = 0;
@@ -63,7 +66,7 @@ unsigned char SpiCommDataRaw(unsigned char data){
     }       
     return (0x00);
 }
-
+*/
 /*#--------------------------------------------------------------------------#*/
 /*  Description: ProcessSpiData()
  *
@@ -81,14 +84,16 @@ unsigned char SpiCommDataRaw(unsigned char data){
  */
 /*#--------------------------------------------------------------------------#*/
 
+unsigned char *pSlaveData;
+static unsigned char AllDataCompleet = sizeof(MASTER_SLAVE_DATA[0]);
+
 void ProcessSpiData(){
-    
-    
-    if (PORTFbits.RF7 == 1){
-        DataCount = 0; 
-    }
-    else{
-        NOP();
-    }
-    
+        
+    if(DataReady){
+        pSlaveData = &(MASTER_SLAVE_DATA[ReceivedDataRaw[0]].SlaveNumber);
+        for(char i = 0; i < AllDataCompleet; i++){
+            *pSlaveData = ReceivedDataRaw[i];
+            pSlaveData += 1;
+        }
+    }         
 }

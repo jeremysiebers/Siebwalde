@@ -54,6 +54,7 @@ static SLAVE_INFO         SlaveInfo[NUMBER_OF_SLAVES];
 /*----------------------------------------------------------------------------*/
 
 unsigned char ReadDummyData = 0;
+unsigned char SS1_prev = 0;
 
 void main(void)
 {
@@ -83,10 +84,12 @@ void main(void)
 
     ReadDummyData = SSP1BUF;
     
+    //TMR1_StopTimer();
+    
     while (1)
     {
-        //Network_Manage();
-        ProcessSpiData();
+        NOP();
+        ProcessSpiData();        
     }
 }
 /**

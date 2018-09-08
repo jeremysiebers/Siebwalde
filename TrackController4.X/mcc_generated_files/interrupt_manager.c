@@ -50,6 +50,10 @@
 #include "mcc.h"
 #include "../spicommhandler.h"
 
+volatile unsigned char ReceivedDataRaw[27];
+volatile unsigned char DataReady = 0;
+static unsigned char DataCount = 0;
+
 void  INTERRUPT_Initialize (void)
 {
     // Disable Interrupt Priority Vectors (16CXXX Compatibility Mode)
@@ -74,9 +78,18 @@ void interrupt INTERRUPT_InterruptManager (void)
             EUSART1_RxDefaultInterruptHandler();
         } 
         else if(PIE1bits.SSP1IE == 1 && PIR1bits.SSP1IF == 1)
-        {
-            SpiCommDataRaw(SSP1BUF); 
-            SSP1BUF = 0;
+        {            
+            SS1_Check_LAT = 1;
+            ReceivedDataRaw[DataCount] = SSP1BUF;    
+            DataCount++;
+            DataReady = 0;
+            if (DataCount >= 27){
+               DataCount = 0;
+               DataReady = 1;
+            }
+            SSP1BUF = 0x55;//SpiCommDataRaw(SSP1BUF);            
+            PIR1bits.SSP1IF = 0;
+            SS1_Check_LAT = 0;
         } 
         else
         {

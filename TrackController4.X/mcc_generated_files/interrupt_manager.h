@@ -120,6 +120,9 @@ void interrupt INTERRUPT_InterruptManager(void);
  */
 void INTERRUPT_Initialize (void);
 
+extern volatile unsigned char ReceivedDataRaw[27];
+extern volatile unsigned char DataReady;
+
 #endif  // INTERRUPT_MANAGER_H
 /**
  End of File
