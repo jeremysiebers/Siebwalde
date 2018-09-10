@@ -20,4 +20,4 @@ It contains sources for:
 - SiebwaldeTrackAmplifier2.X --> development of track amplifiers; 1 PIC per amplifier (test setup with PIC16F737)(PetitModbus)*
 - SiebwaldeTrackAmplifier3.X --> development of track amplifiers; 1 PIC per amplifier (final setup with PIC16F18854)(PetitModbus)*
 
-*PetitModbus derived from https://github.com/FxDev/PetitModbus
+*PetitModbus derived from https://github.com/FxDev/PetitModbus 
