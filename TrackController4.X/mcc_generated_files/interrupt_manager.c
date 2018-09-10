@@ -46,56 +46,88 @@
     SOFTWARE.
 */
 
+#include "../main.h"
 #include "interrupt_manager.h"
 #include "mcc.h"
 #include "../spicommhandler.h"
 
-volatile unsigned char ReceivedDataRaw[27];
-volatile unsigned char DataReady = 0;
-static unsigned char DataCount = 0;
+volatile unsigned char RECEIVEDxDATAxRAW[DATAxSTRUCTxLENGTH];
+volatile unsigned char SENDxDATAxRAW[DATAxSTRUCTxLENGTH];
+volatile unsigned char DATAxREADY = 0;
+volatile unsigned char DATAxCOUNTxRECEIVED = 0;
+volatile unsigned char DATAxCOUNTxSEND = 1;
 
 void  INTERRUPT_Initialize (void)
 {
-    // Disable Interrupt Priority Vectors (16CXXX Compatibility Mode)
-    RCONbits.IPEN = 0;
+    // Enable Interrupt Priority Vectors
+    RCONbits.IPEN = 1;
+
+    // Assign peripheral interrupt priority vectors
+
+    // SSPI - high priority
+    IPR1bits.SSP1IP = 1;
+
+
+    // TMRI - low priority
+    IPR1bits.TMR1IP = 0;    
+
+    // TXI - low priority
+    IPR1bits.TX1IP = 0;    
+
+    // RCI - low priority
+    IPR1bits.RC1IP = 0;    
+
 }
 
-void interrupt INTERRUPT_InterruptManager (void)
+void interrupt INTERRUPT_InterruptManagerHigh (void)
 {
     // interrupt handler
-    if(INTCONbits.PEIE == 1)
+    if(PIE1bits.SSP1IE == 1 && PIR1bits.SSP1IF == 1)
     {
+        SS1_Check_LAT = 1;
+        DATAxREADY = 0;
+        
+        RECEIVEDxDATAxRAW[DATAxCOUNTxRECEIVED] = SSP1BUF; 
+        DATAxCOUNTxRECEIVED++;
+        if (DATAxCOUNTxRECEIVED > DATAxSTRUCTxLENGTH - 1){
+           DATAxCOUNTxRECEIVED = 0;
+           DATAxREADY = 1;               
+        }
+                
+        if (DATAxCOUNTxSEND < DATAxSTRUCTxLENGTH){
+           SSP1BUF = SENDxDATAxRAW[DATAxCOUNTxSEND];
+           DATAxCOUNTxSEND++;            
+        }
+        else{
+            DATAxCOUNTxSEND = 0;
+        }
+                
+        SS1_Check_LAT = 0;
+        PIR1bits.SSP1IF = 0;
+    }
+    else
+    {
+        //Unhandled Interrupt
+    }
+}
+
+void interrupt low_priority INTERRUPT_InterruptManagerLow (void)
+{
+    // interrupt handler
         if(PIE1bits.TMR1IE == 1 && PIR1bits.TMR1IF == 1)
         {
-            TMR1_ISR();
+            //TMR1_ISR();
+            UPDATExTERMINAL = 1;            
+            PIR1bits.TMR1IF = 0;
         } 
         else if(PIE1bits.TX1IE == 1 && PIR1bits.TX1IF == 1)
         {
-            EUSART1_TxDefaultInterruptHandler();
+            EUSART1_Transmit_ISR();
         } 
         else if(PIE1bits.RC1IE == 1 && PIR1bits.RC1IF == 1)
         {
-            EUSART1_RxDefaultInterruptHandler();
+            EUSART1_Receive_ISR();
         } 
-        else if(PIE1bits.SSP1IE == 1 && PIR1bits.SSP1IF == 1)
-        {            
-            SS1_Check_LAT = 1;
-            ReceivedDataRaw[DataCount] = SSP1BUF;    
-            DataCount++;
-            DataReady = 0;
-            if (DataCount >= 27){
-               DataCount = 0;
-               DataReady = 1;
-            }
-            SSP1BUF = 0x55;//SpiCommDataRaw(SSP1BUF);            
-            PIR1bits.SSP1IF = 0;
-            SS1_Check_LAT = 0;
-        } 
-        else
-        {
-            //Unhandled Interrupt
-        }
-    }      
     else
     {
         //Unhandled Interrupt

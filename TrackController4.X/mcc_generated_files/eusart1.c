@@ -82,13 +82,13 @@ void EUSART1_Initialize(void)
     // Set the EUSART1 module to the options selected in the user interface.
 
     // ABDOVF no_overflow; SCKP async_noninverted_sync_fallingedge; BRG16 16bit_generator; WUE disabled; ABDEN disabled; RXDTP not_inverted; 
-    BAUDCON1 = 0x08;
+    BAUDCON1 = 0x48;
 
     // SPEN enabled; RX9 8-bit; CREN enabled; ADDEN disabled; SREN disabled; 
     RCSTA1 = 0x90;
 
     // TX9 8-bit; TX9D 0; SENDB sync_break_complete; TXEN enabled; SYNC asynchronous; BRGH hi_speed; CSRC slave_mode; 
-    TXSTA1 = 0x24;
+    TXSTA1 = 0x26;
 
     // 
     SPBRG1 = 0x1E;

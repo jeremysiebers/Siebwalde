@@ -120,8 +120,13 @@ void interrupt INTERRUPT_InterruptManager(void);
  */
 void INTERRUPT_Initialize (void);
 
-extern volatile unsigned char ReceivedDataRaw[27];
-extern volatile unsigned char DataReady;
+#include "../main.h"
+
+extern volatile unsigned char RECEIVEDxDATAxRAW[DATAxSTRUCTxLENGTH];
+extern volatile unsigned char SENDxDATAxRAW[DATAxSTRUCTxLENGTH];
+extern volatile unsigned char DATAxREADY;
+extern volatile unsigned char DATAxCOUNTxRECEIVED;
+extern volatile unsigned char DATAxCOUNTxSEND;
 
 #endif  // INTERRUPT_MANAGER_H
 /**

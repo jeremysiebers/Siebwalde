@@ -60,10 +60,10 @@ void SYSTEM_Initialize(void)
 
 void OSCILLATOR_Initialize(void)
 {
-    // SCS Primary_OSC; OSTS intosc; IDLEN disabled; 
-    OSCCON = 0x02;
-    // PLLEN enabled; PPST0 disabled; PPRE divide_by_3; PPST1 divide_by_2; 
-    OSCTUNE = 0xC0;
+    // SCS Primary_or_INTOSC; OSTS intosc; IDLEN disabled; 
+    OSCCON = 0x00;
+    // PLLEN enabled; PPST0 disabled; PPRE divide_by_3; PPST1 divide_by_3; 
+    OSCTUNE = 0x40;
 }
 
 

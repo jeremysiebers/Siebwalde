@@ -72,6 +72,17 @@
 #define SS1_Check_SetDigitalInput()    do { TRISBbits.TRISB0 = 1; } while(0)
 #define SS1_Check_SetDigitalOutput()   do { TRISBbits.TRISB0 = 0; } while(0)
 
+// get/set Read_Check aliases
+#define Read_Check_TRIS                 TRISBbits.TRISB1
+#define Read_Check_LAT                  LATBbits.LATB1
+#define Read_Check_PORT                 PORTBbits.RB1
+#define Read_Check_SetHigh()            do { LATBbits.LATB1 = 1; } while(0)
+#define Read_Check_SetLow()             do { LATBbits.LATB1 = 0; } while(0)
+#define Read_Check_Toggle()             do { LATBbits.LATB1 = ~LATBbits.LATB1; } while(0)
+#define Read_Check_GetValue()           PORTBbits.RB1
+#define Read_Check_SetDigitalInput()    do { TRISBbits.TRISB1 = 1; } while(0)
+#define Read_Check_SetDigitalOutput()   do { TRISBbits.TRISB1 = 0; } while(0)
+
 // get/set SCK1 aliases
 #define SCK1_TRIS                 TRISCbits.TRISC3
 #define SCK1_LAT                  LATCbits.LATC3

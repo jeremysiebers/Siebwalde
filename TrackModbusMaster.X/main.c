@@ -58,13 +58,13 @@ void main(void) {
     {
         ProcessPetitModbus();
         if (ProcessSlaveCommunication() == true){
-            modbus_sync_LAT = 1;                        
+            //modbus_sync_LAT = 1;                        
         }
         
         if (UpdateNextSlave == true){
             ProcessNextSlave();
             UpdateNextSlave = false;
-            modbus_sync_LAT = 0;
+            //modbus_sync_LAT = 0;
         }
         
         if(PIR0bits.TMR0IF){

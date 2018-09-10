@@ -68,7 +68,7 @@ void interrupt INTERRUPT_InterruptManager (void)
         } 
         else if(PIE4bits.TMR3IE == 1 && PIR4bits.TMR3IF == 1)
         {
-            //modbus_send_LAT ^= 1;
+            modbus_sync_LAT ^= 1;
             PetitModbusTimerValue = 3;                                          // Between receive interrupts it took to long --> message done
             PIE4bits.TMR3IE = 0;
             PIR4bits.TMR3IF = 0;
