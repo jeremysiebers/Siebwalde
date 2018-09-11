@@ -30,11 +30,29 @@ void SendDataToEthernet(void);
  *  Notes      :
  */
 /*#--------------------------------------------------------------------------#*/
-static SLAVE_INFO *MASTER_SLAVE_DATA = 0;                                       // Holds the address were the received slave data is stored
+static SLAVE_INFO   *MASTER_SLAVE_DATA = 0;                                     // Holds the address were the received slave data is stored
+static SLAVE_INFO   SlaveInfoReadMask;                                          // Read mask for slave data from EhternetTarget
+unsigned char       *pSlaveDataReceived, *pSlaveInfoReadMask;
 
 void InitSlaveCommunication(SLAVE_INFO *location)                                  
 {   
     MASTER_SLAVE_DATA  =  location;
+    
+    SlaveInfoReadMask.SlaveNumber      = 0x00;                                  // Mask for data write to local MASTER_SLAVE_DATA from EthernetTarget
+    SlaveInfoReadMask.HoldingReg[0]    = 0xFFFF;
+    SlaveInfoReadMask.HoldingReg[1]    = 0xFFFF;
+    SlaveInfoReadMask.HoldingReg[2]    = 0xFFFF;
+    SlaveInfoReadMask.HoldingReg[3]    = 0xFFFF;
+    SlaveInfoReadMask.InputReg[0]      = 0x0000;
+    SlaveInfoReadMask.InputReg[1]      = 0x0000;
+    SlaveInfoReadMask.DiagReg[0]       = 0x0000;
+    SlaveInfoReadMask.DiagReg[1]       = 0x0000;
+    SlaveInfoReadMask.DiagReg[2]       = 0x0000;
+    SlaveInfoReadMask.DiagReg[3]       = 0x0000;
+    SlaveInfoReadMask.MbReceiveCounter = 0x0000;
+    SlaveInfoReadMask.MbSentCounter    = 0x0000;
+    SlaveInfoReadMask.MbCommError      = 0x0000;
+    SlaveInfoReadMask.MbExceptionCode  = 0x00;
 }
 
 /*#--------------------------------------------------------------------------#*/
@@ -242,8 +260,8 @@ unsigned int ProcessSlaveCommunication(){
     }
     
     if (Return_Val == true){
-        //__delay_us(60);                                                         // when debugging is required on oscilloscope, waittime till tmr3 is done
-        while (T2TMR < 0xD0){
+        //__delay_us(60);                                                       // when debugging is required on oscilloscope, waittime till tmr3 is done
+        while (T2TMR < 0xD0){                                                   // Send SPI data on a defined moment in time within the 2ms TMR2 interrupt
             
         }
         SendDataToEthernet();
@@ -269,15 +287,25 @@ unsigned int ProcessSlaveCommunication(){
  */
 /*#--------------------------------------------------------------------------#*/
 static unsigned int DataFromSlave = 0;
-const unsigned char length = sizeof(MASTER_SLAVE_DATA[0]);
-unsigned int ReceivedData[length];
+const unsigned char DATAxSTRUCTxLENGTH = sizeof(MASTER_SLAVE_DATA[0]);
+unsigned char RECEIVEDxDATAxRAW[DATAxSTRUCTxLENGTH];
 
 void SendDataToEthernet(){
 
     SS1_LAT = 0;
-    __delay_us(4);
-    SPI1_Exchange8bitBuffer(&(MASTER_SLAVE_DATA[DataFromSlave].SlaveNumber), length, 0);//(char*)ReceivedData);
+    __delay_us(4);                                                              // Give EthernetTarget time to sample the SS1 signal and to be ready
     
+    SPI1_Exchange8bitBuffer(&(MASTER_SLAVE_DATA[DataFromSlave].SlaveNumber), DATAxSTRUCTxLENGTH, &(RECEIVEDxDATAxRAW[0])); // SPI send/receive data
+    
+    pSlaveDataReceived = &(MASTER_SLAVE_DATA[RECEIVEDxDATAxRAW[0]].SlaveNumber);// set the pointer to the first element of the received slave number in RECEIVEDxDATAxRAW[0]    
+    pSlaveInfoReadMask = &(SlaveInfoReadMask.SlaveNumber);                      // set the pointer to the first element of the SlaveInfoReadMask
+    for(char i = 0; i < DATAxSTRUCTxLENGTH; i++){
+        if(*pSlaveInfoReadMask){
+            *pSlaveDataReceived = RECEIVEDxDATAxRAW[i];                         // for DATAxSTRUCTxLENGTH set every byte into RECEIVEDxDATAxRAW array according to read mask
+        }        
+        pSlaveDataReceived += 1;                                                // Increment pointer
+        pSlaveInfoReadMask += 1;                                                // Increment pointer        
+    }    
     SS1_LAT = 1;     
     DataFromSlave++;
     if (DataFromSlave > NUMBER_OF_SLAVES-1){
@@ -356,7 +384,7 @@ void SendDataToEthernet(){
  *
  * DiagnosticReg3, 0 - 15       Amplifier Status        R/-     No/-            // Amplifier status list
  *
- * DiagnosticReg4, 0 - 7		Slave Internall temp	R/-		No/-			// Internall processor temperature 0 - 255 degrees Celsius
+ * DiagnosticReg4, 0 - 7		Slave Internal temp	R/-		No/-                // Internal processor temperature 0 - 255 degrees Celsius
  * 
  * -----------------------------CONFIG PARAMETERS------------------------------- 
  * 
@@ -379,7 +407,7 @@ void SendDataToEthernet(){
  *
  *
  *
- * Modbus Backplane Slave Data Register mapping:
+ * Modbus Backplane Slave Data Register mapping(using the same amount of registers as the amplifier slaves):
  * 
  * Data register, bit(s)        Function            	R/W     Critical
  * 

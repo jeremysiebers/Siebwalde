@@ -20,6 +20,7 @@ extern "C" {
 extern void InitSlaveCommunication(SLAVE_INFO *location);
 unsigned char SpiCommDataRaw(unsigned char data);
 void ProcessSpiData(void);
+void CheckSpiStart(void);
 
 #ifdef	__cplusplus
 }

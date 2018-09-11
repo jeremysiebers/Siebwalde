@@ -112,7 +112,7 @@ void main(void)
     
     while (1)
     {
-        ProcessSpiData();
+        CheckSpiStart();
                 
         if(UPDATExTERMINAL){
                         
@@ -198,10 +198,10 @@ void main(void)
                     break;
                     
                 case 10:
-                    WriteData(SlaveInfo[0].MbCommError, 8, 20 );
-                    WriteData(SlaveInfo[1].MbCommError, 8, 50 );
-                    WriteData(SlaveInfo[2].MbCommError, 8, 80 );
-                    WriteData(SlaveInfo[3].MbCommError, 8, 110);                     
+                    WriteData((char)(SlaveInfo[0].MbCommError), 8, 20 );
+                    WriteData((char)(SlaveInfo[1].MbCommError), 8, 50 );
+                    WriteData((char)(SlaveInfo[2].MbCommError), 8, 80 );
+                    WriteData((char)(SlaveInfo[3].MbCommError), 8, 110);                     
                     terminal ++;
                     break;
                     

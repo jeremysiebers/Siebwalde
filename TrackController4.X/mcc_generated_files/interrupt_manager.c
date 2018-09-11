@@ -91,7 +91,8 @@ void interrupt INTERRUPT_InterruptManagerHigh (void)
         DATAxCOUNTxRECEIVED++;
         if (DATAxCOUNTxRECEIVED > DATAxSTRUCTxLENGTH - 1){
            DATAxCOUNTxRECEIVED = 0;
-           DATAxREADY = 1;               
+           DATAxREADY = 1;    
+           ProcessSpiData();
         }
                 
         if (DATAxCOUNTxSEND < DATAxSTRUCTxLENGTH){
