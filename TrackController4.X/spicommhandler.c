@@ -46,10 +46,10 @@ void InitSlaveCommunication(SLAVE_INFO *location)
     SlaveInfoReadMask.MbExceptionCode  	= 0xFF;
     
     SlaveInfoWriteMask.SlaveNumber      = 0xFF;                                 // Mask for data write to Modbus Master from local MASTER_SLAVE_DATA
-    SlaveInfoWriteMask.HoldingReg[0]    = 0xFFFF;
-    SlaveInfoWriteMask.HoldingReg[1]    = 0xFFFF;
-    SlaveInfoWriteMask.HoldingReg[2]    = 0xFFFF;
-    SlaveInfoWriteMask.HoldingReg[3]    = 0xFFFF;
+    SlaveInfoWriteMask.HoldingReg[0]    = 0x0000;
+    SlaveInfoWriteMask.HoldingReg[1]    = 0x0000;
+    SlaveInfoWriteMask.HoldingReg[2]    = 0x0000;
+    SlaveInfoWriteMask.HoldingReg[3]    = 0x0000;
     SlaveInfoWriteMask.InputReg[0]      = 0x0000;
     SlaveInfoWriteMask.InputReg[1]      = 0x0000;
     SlaveInfoWriteMask.DiagReg[0]       = 0x0000;

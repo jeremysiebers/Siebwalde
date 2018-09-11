@@ -38,16 +38,17 @@ void main(void) {
             
     while(1){
         ProcessPetitModbus();
-        PetitHoldingRegisters[0].ActValue = 0;
-        
+                
         if(PIR0bits.TMR0IF){
+            
+            PetitInputRegisters[0].ActValue += 1;
             
             switch(LED_TX_STATE){
                 case 0 : 
                     if (LED_TX > 0){
                         LED_TX_LAT = 1;
                         LED_TX_prev = LED_TX;
-                        LED_TX_STATE = 1;
+                        LED_TX_STATE = 1;                        
                     }
                     break;
                     
@@ -56,7 +57,7 @@ void main(void) {
                         LED_TX_LAT = 0;
                         LED_TX_prev = 0;
                         LED_TX = 0;
-                        LED_TX_STATE = 0;
+                        LED_TX_STATE = 0;                        
                     }
                     break;
                     

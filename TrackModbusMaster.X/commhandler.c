@@ -292,7 +292,7 @@ unsigned char RECEIVEDxDATAxRAW[DATAxSTRUCTxLENGTH];
 
 void SendDataToEthernet(){
 
-    SS1_LAT = 0;
+    SS1_LAT = 0;                                                                // Activate slave
     __delay_us(4);                                                              // Give EthernetTarget time to sample the SS1 signal and to be ready
     
     SPI1_Exchange8bitBuffer(&(MASTER_SLAVE_DATA[DataFromSlave].SlaveNumber), DATAxSTRUCTxLENGTH, &(RECEIVEDxDATAxRAW[0])); // SPI send/receive data
@@ -306,11 +306,13 @@ void SendDataToEthernet(){
         pSlaveDataReceived += 1;                                                // Increment pointer
         pSlaveInfoReadMask += 1;                                                // Increment pointer        
     }    
-    SS1_LAT = 1;     
+       
     DataFromSlave++;
     if (DataFromSlave > NUMBER_OF_SLAVES-1){
         DataFromSlave = 0;
-    }            
+    }  
+    
+    SS1_LAT = 1;                                                                // De-Activate slave 
 }
 
 /*
