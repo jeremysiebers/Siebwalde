@@ -32,7 +32,8 @@ typedef enum
 typedef struct
 {
     unsigned char       SlaveNumber;
-    unsigned int        HoldingReg[4];
+    unsigned int        HoldingRegRdSl[4];
+    unsigned int        HoldingRegWrSl[4];
     unsigned int        InputReg[2];
     unsigned int        DiagReg[4];
     unsigned int        MbReceiveCounter;

@@ -30,26 +30,34 @@ void InitSlaveCommunication(SLAVE_INFO *location)
     MASTER_SLAVE_DATA  =  location;
     
     SlaveInfoReadMask.SlaveNumber      	= 0x00;                                 // Mask for data read from Modbus Master to written to local MASTER_SLAVE_DATA
-    SlaveInfoReadMask.HoldingReg[0]    	= 0xFFFF;
-    SlaveInfoReadMask.HoldingReg[1]    	= 0xFFFF;
-    SlaveInfoReadMask.HoldingReg[2]    	= 0xFFFF;
-    SlaveInfoReadMask.HoldingReg[3]    	= 0xFFFF;
-    SlaveInfoReadMask.InputReg[0]      	= 0xFFFF;
-    SlaveInfoReadMask.InputReg[1]      	= 0xFFFF;
-    SlaveInfoReadMask.DiagReg[0]       	= 0xFFFF;
-    SlaveInfoReadMask.DiagReg[1]       	= 0xFFFF;
-    SlaveInfoReadMask.DiagReg[2]       	= 0xFFFF;
-    SlaveInfoReadMask.DiagReg[3]       	= 0xFFFF;
-    SlaveInfoReadMask.MbReceiveCounter 	= 0xFFFF;
-    SlaveInfoReadMask.MbSentCounter    	= 0xFFFF;
-    SlaveInfoReadMask.MbCommError      	= 0xFFFF;
-    SlaveInfoReadMask.MbExceptionCode  	= 0xFF;
+    SlaveInfoReadMask.HoldingRegRdSl[0]= 0xFFFF;
+    SlaveInfoReadMask.HoldingRegRdSl[1]= 0xFFFF;
+    SlaveInfoReadMask.HoldingRegRdSl[2]= 0xFFFF;
+    SlaveInfoReadMask.HoldingRegRdSl[3]= 0xFFFF;
+    SlaveInfoReadMask.HoldingRegWrSl[0]= 0x0000;
+    SlaveInfoReadMask.HoldingRegWrSl[1]= 0x0000;
+    SlaveInfoReadMask.HoldingRegWrSl[2]= 0x0000;
+    SlaveInfoReadMask.HoldingRegWrSl[3]= 0x0000;
+    SlaveInfoReadMask.InputReg[0]      = 0xFFFF;
+    SlaveInfoReadMask.InputReg[1]      = 0xFFFF;
+    SlaveInfoReadMask.DiagReg[0]       = 0xFFFF;
+    SlaveInfoReadMask.DiagReg[1]       = 0xFFFF;
+    SlaveInfoReadMask.DiagReg[2]       = 0xFFFF;
+    SlaveInfoReadMask.DiagReg[3]       = 0xFFFF;
+    SlaveInfoReadMask.MbReceiveCounter = 0xFFFF;
+    SlaveInfoReadMask.MbSentCounter    = 0xFFFF;
+    SlaveInfoReadMask.MbCommError      = 0xFF;
+    SlaveInfoReadMask.MbExceptionCode  = 0xFF;
     
     SlaveInfoWriteMask.SlaveNumber      = 0xFF;                                 // Mask for data write to Modbus Master from local MASTER_SLAVE_DATA
-    SlaveInfoWriteMask.HoldingReg[0]    = 0x0000;
-    SlaveInfoWriteMask.HoldingReg[1]    = 0x0000;
-    SlaveInfoWriteMask.HoldingReg[2]    = 0x0000;
-    SlaveInfoWriteMask.HoldingReg[3]    = 0x0000;
+    SlaveInfoWriteMask.HoldingRegRdSl[0]= 0x0000;
+    SlaveInfoWriteMask.HoldingRegRdSl[1]= 0x0000;
+    SlaveInfoWriteMask.HoldingRegRdSl[2]= 0x0000;
+    SlaveInfoWriteMask.HoldingRegRdSl[3]= 0x0000;
+    SlaveInfoWriteMask.HoldingRegWrSl[0]= 0xFFFF;
+    SlaveInfoWriteMask.HoldingRegWrSl[1]= 0xFFFF;
+    SlaveInfoWriteMask.HoldingRegWrSl[2]= 0xFFFF;
+    SlaveInfoWriteMask.HoldingRegWrSl[3]= 0xFFFF;
     SlaveInfoWriteMask.InputReg[0]      = 0x0000;
     SlaveInfoWriteMask.InputReg[1]      = 0x0000;
     SlaveInfoWriteMask.DiagReg[0]       = 0x0000;
@@ -58,7 +66,7 @@ void InitSlaveCommunication(SLAVE_INFO *location)
     SlaveInfoWriteMask.DiagReg[3]       = 0x0000;
     SlaveInfoWriteMask.MbReceiveCounter = 0x0000;
     SlaveInfoWriteMask.MbSentCounter    = 0x0000;
-    SlaveInfoWriteMask.MbCommError      = 0x0000;
+    SlaveInfoWriteMask.MbCommError      = 0x00;
     SlaveInfoWriteMask.MbExceptionCode  = 0x00;
     
     /*
@@ -134,7 +142,7 @@ void ProcessSpiData(){
 /*#--------------------------------------------------------------------------#*/
 
 void CheckSpiStart(){
-    if (SS1_PORT && SS1_PORT_prev){                                             // When SPI is idle, already provide the first byte of the message to send to the ModbusMaster
+    if (SS1_PORT == 1 && SS1_PORT_prev == 1){                                   // When SPI is idle, already provide the first byte of the message to send to the ModbusMaster
         Read_Check_LAT = 1;
         DATAxCOUNTxRECEIVED = 0;
         SSP1BUF = SENDxDATAxRAW[DATAxCOUNTxSEND];                               // load first byte[0] (DATAxCOUNTxSEND==0 is set in interrupt)
@@ -142,7 +150,7 @@ void CheckSpiStart(){
         SS1_PORT_prev = 0;
         Read_Check_LAT = 0;
     }
-    else if(!SS1_PORT && !SS1_PORT_prev){
+    else if(SS1_PORT == 0 && SS1_PORT_prev == 0){
         SS1_PORT_prev = 1;        
     }
 }

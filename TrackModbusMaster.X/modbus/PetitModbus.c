@@ -326,6 +326,9 @@ void Petit_RxRTU(void)
         if (((unsigned int) Petit_Rx_Data.DataBuf[Petit_Rx_Data.DataLen] + ((unsigned int) Petit_Rx_Data.DataBuf[Petit_Rx_Data.DataLen + 1] << 8)) == Petit_Rx_CRC16)
         {
             // Valid message!
+            PIE4bits.TMR3IE = 0;                                                // valid message so stop timer3 for nice SPI comm
+            PIR4bits.TMR3IF = 0;                                                // valid message so stop timer3 for nice SPI comm
+            modbus_sync_LAT ^= 1;
             LED_RX++;
             Petit_Rx_Data_Available = TRUE;
         }
@@ -534,7 +537,7 @@ void HandlePetitModbusReadHoldingRegistersSlaveReadback(void)
             for (Petit_i = 0; Petit_i < Petit_NumberOfRegisters; Petit_i++)
             {
                 RegData = ((unsigned int) (Petit_Rx_Data.DataBuf[BufReadIndex + 1]) << 8) + (unsigned int) (Petit_Rx_Data.DataBuf[BufReadIndex + 2]);
-                MASTER_SLAVE_DATA[Petit_Tx_Data.Address].HoldingReg[Petit_StartAddress] = RegData;                        
+                MASTER_SLAVE_DATA[Petit_Tx_Data.Address].HoldingRegRdSl[Petit_StartAddress] = RegData;                        
                 Petit_StartAddress += 1;                                        // point to the next register to write
                 BufReadIndex += 2;                                              // jump to the next char pair for the next register read from buffer (2 bytes))
             }

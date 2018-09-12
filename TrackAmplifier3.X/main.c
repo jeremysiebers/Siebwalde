@@ -41,7 +41,7 @@ void main(void) {
                 
         if(PIR0bits.TMR0IF){
             
-            PetitInputRegisters[0].ActValue += 1;
+            LED_WAR_LAT = PetitHoldingRegisters[0].ActValue;
             
             switch(LED_TX_STATE){
                 case 0 : 

@@ -39,10 +39,14 @@ void InitSlaveCommunication(SLAVE_INFO *location)
     MASTER_SLAVE_DATA  =  location;
     
     SlaveInfoReadMask.SlaveNumber      = 0x00;                                  // Mask for data write to local MASTER_SLAVE_DATA from EthernetTarget
-    SlaveInfoReadMask.HoldingReg[0]    = 0xFFFF;
-    SlaveInfoReadMask.HoldingReg[1]    = 0xFFFF;
-    SlaveInfoReadMask.HoldingReg[2]    = 0xFFFF;
-    SlaveInfoReadMask.HoldingReg[3]    = 0xFFFF;
+    SlaveInfoReadMask.HoldingRegRdSl[0]= 0x0000;
+    SlaveInfoReadMask.HoldingRegRdSl[1]= 0x0000;
+    SlaveInfoReadMask.HoldingRegRdSl[2]= 0x0000;
+    SlaveInfoReadMask.HoldingRegRdSl[3]= 0x0000;
+    SlaveInfoReadMask.HoldingRegWrSl[0]= 0xFFFF;                                // only new setpoints/settings are allowed to be read which need to be written to modbus slaves
+    SlaveInfoReadMask.HoldingRegWrSl[1]= 0xFFFF;
+    SlaveInfoReadMask.HoldingRegWrSl[2]= 0xFFFF;
+    SlaveInfoReadMask.HoldingRegWrSl[3]= 0xFFFF;
     SlaveInfoReadMask.InputReg[0]      = 0x0000;
     SlaveInfoReadMask.InputReg[1]      = 0x0000;
     SlaveInfoReadMask.DiagReg[0]       = 0x0000;
@@ -108,10 +112,10 @@ void ProcessNextSlave(){
     
     switch (Message){
         case MESSAGE1:
-            HoldingRegistersWrite[8]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[0] << 8;
-            HoldingRegistersWrite[7]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[0];
-            HoldingRegistersWrite[6]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[1] << 8;
-            HoldingRegistersWrite[5]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[1];
+            HoldingRegistersWrite[8]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingRegWrSl[1];
+            HoldingRegistersWrite[7]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingRegWrSl[1] << 8;
+            HoldingRegistersWrite[6]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingRegWrSl[0];
+            HoldingRegistersWrite[5]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingRegWrSl[0] << 8;
             HoldingRegistersWrite[4]  = 4;
             HoldingRegistersWrite[3]  = 2;
             HoldingRegistersWrite[2]  = 0;
@@ -155,10 +159,10 @@ void ProcessNextSlave(){
                     break;
                 
                 case 3:
-                    HoldingRegistersWrite[8]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[2] << 8;
-                    HoldingRegistersWrite[7]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[2];
-                    HoldingRegistersWrite[6]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[3] << 8;
-                    HoldingRegistersWrite[5]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[3];
+                    HoldingRegistersWrite[8]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingRegWrSl[3];
+                    HoldingRegistersWrite[7]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingRegWrSl[3] << 8;
+                    HoldingRegistersWrite[6]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingRegWrSl[2];
+                    HoldingRegistersWrite[5]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingRegWrSl[2] << 8;
                     HoldingRegistersWrite[4]  = 4;
                     HoldingRegistersWrite[3]  = 2;
                     HoldingRegistersWrite[2]  = 0;
@@ -261,9 +265,9 @@ unsigned int ProcessSlaveCommunication(){
     
     if (Return_Val == true){
         //__delay_us(60);                                                       // when debugging is required on oscilloscope, waittime till tmr3 is done
-        while (T2TMR < 0xD0){                                                   // Send SPI data on a defined moment in time within the 2ms TMR2 interrupt
+        //while (T2TMR < 0xC0){                                                   // Send SPI data on a defined moment in time within the 2ms TMR2 interrupt
             
-        }
+        //}
         SendDataToEthernet();
     }
     
@@ -297,6 +301,8 @@ void SendDataToEthernet(){
     
     SPI1_Exchange8bitBuffer(&(MASTER_SLAVE_DATA[DataFromSlave].SlaveNumber), DATAxSTRUCTxLENGTH, &(RECEIVEDxDATAxRAW[0])); // SPI send/receive data
     
+    SS1_LAT = 1;                                                                // De-Activate slave 
+    
     pSlaveDataReceived = &(MASTER_SLAVE_DATA[RECEIVEDxDATAxRAW[0]].SlaveNumber);// set the pointer to the first element of the received slave number in RECEIVEDxDATAxRAW[0]    
     pSlaveInfoReadMask = &(SlaveInfoReadMask.SlaveNumber);                      // set the pointer to the first element of the SlaveInfoReadMask
     for(char i = 0; i < DATAxSTRUCTxLENGTH; i++){
@@ -310,9 +316,7 @@ void SendDataToEthernet(){
     DataFromSlave++;
     if (DataFromSlave > NUMBER_OF_SLAVES-1){
         DataFromSlave = 0;
-    }  
-    
-    SS1_LAT = 1;                                                                // De-Activate slave 
+    }
 }
 
 /*
