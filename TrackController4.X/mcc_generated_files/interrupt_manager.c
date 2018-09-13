@@ -1,11 +1,11 @@
 /**
-  Generated Interrupt Manager Source File
+  Generated Interrupt Manager Header File
 
   @Company:
     Microchip Technology Inc.
 
   @File Name:
-    interrupt_manager.c
+    interrupt_manager.h
 
   @Summary:
     This is the Interrupt Manager file generated using PIC10 / PIC12 / PIC16 / PIC18 MCUs
@@ -64,6 +64,8 @@ void  INTERRUPT_Initialize (void)
 
     // Assign peripheral interrupt priority vectors
 
+    // Interrupt INT0I has no priority bit. It will always be called from the High Interrupt Vector
+
     // SSPI - high priority
     IPR1bits.SSP1IP = 1;
 
@@ -82,7 +84,17 @@ void  INTERRUPT_Initialize (void)
 void interrupt INTERRUPT_InterruptManagerHigh (void)
 {
     // interrupt handler
-    if(PIE1bits.SSP1IE == 1 && PIR1bits.SSP1IF == 1)
+    if(INTCONbits.INT0IE == 1 && INTCONbits.INT0IF == 1)
+    {
+        Read_Check_LAT = 1;
+        DATAxCOUNTxRECEIVED = 0;                                                // Force reset counter to prevent half received messages
+        DATAxCOUNTxSEND = 0;                                                    // set first byte for as soon as the master starts clocking
+        SSP1BUF = SENDxDATAxRAW[DATAxCOUNTxSEND];                               // load first byte[0] (DATAxCOUNTxSEND==0 is set in interrupt)
+        DATAxCOUNTxSEND = 1;                                                    // set second byte as soon as the master starts clocking
+        INTCONbits.INT0IF = 0;
+        Read_Check_LAT = 0;
+    }
+    else if(PIE1bits.SSP1IE == 1 && PIR1bits.SSP1IF == 1)
     {
         SS1_Check_LAT = 1;
         DATAxREADY = 0;
@@ -103,8 +115,8 @@ void interrupt INTERRUPT_InterruptManagerHigh (void)
             DATAxCOUNTxSEND = 0;
         }
                 
-        SS1_Check_LAT = 0;
         PIR1bits.SSP1IF = 0;
+        SS1_Check_LAT = 0;        
     }
     else
     {

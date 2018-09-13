@@ -52,6 +52,7 @@
 #include <stdbool.h>
 #include "interrupt_manager.h"
 #include "spi1.h"
+#include "ext_int.h"
 #include "tmr1.h"
 #include "eusart1.h"
 

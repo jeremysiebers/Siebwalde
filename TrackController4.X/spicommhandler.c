@@ -142,15 +142,18 @@ void ProcessSpiData(){
 /*#--------------------------------------------------------------------------#*/
 
 void CheckSpiStart(){
+    /*
     if (SS1_PORT == 1 && SS1_PORT_prev == 1){                                   // When SPI is idle, already provide the first byte of the message to send to the ModbusMaster
         Read_Check_LAT = 1;
-        DATAxCOUNTxRECEIVED = 0;
+        DATAxCOUNTxRECEIVED = 0;                                                // Force reset counter to prevent half received messages
+        DATAxCOUNTxSEND = 0;                                                    // set first byte for as soon as the master starts clocking
         SSP1BUF = SENDxDATAxRAW[DATAxCOUNTxSEND];                               // load first byte[0] (DATAxCOUNTxSEND==0 is set in interrupt)
-        DATAxCOUNTxSEND = 1;                                                    // set that first byte is sent already as soon as the master starts clocking
+        DATAxCOUNTxSEND = 1;                                                    // set second byte as soon as the master starts clocking
         SS1_PORT_prev = 0;
         Read_Check_LAT = 0;
     }
     else if(SS1_PORT == 0 && SS1_PORT_prev == 0){
         SS1_PORT_prev = 1;        
     }
+    */
 }

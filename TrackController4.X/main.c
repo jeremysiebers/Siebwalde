@@ -61,7 +61,7 @@ unsigned char terminal = 0;
 
 void main(void)
 {
-    // Initialize the SLAVE_INFO struct with slave numbers
+    // Initialize the SLAVE_INFO struct with slave numbers(fixed))
     for (char i = 0; i <NUMBER_OF_SLAVES; i++){
         SlaveInfo[i].SlaveNumber = i;
     }
@@ -71,7 +71,7 @@ void main(void)
     
     ModbusReset_LAT = 1;                                                        // Hold the ModbusMaster in reset
     
-    InitSlaveCommunication(SlaveInfo);
+    InitSlaveCommunication(SlaveInfo);                                          // Init SPI slave - master registers
     
     // If using interrupts in PIC18 High/Low Priority Mode you need to enable the Global High and Low Interrupts
     // If using interrupts in PIC Mid-Range Compatibility Mode you need to enable the Global and Peripheral Interrupts
@@ -107,10 +107,16 @@ void main(void)
     
     while (1)
     {
-        CheckSpiStart();
+        //CheckSpiStart();
         
         if(EUSART1_is_rx_ready()){
             switch(EUSART1_Read()){
+                case 0x30:
+                    printf("\f");                                               // Clear terminal (printf("\033[2J");)
+                    __delay_ms(10);
+                    terminal = 0;                                               // Re-print whole table to terminal
+                    break;
+                    
                 case 0x31:
                     (unsigned int)SlaveInfo[1].HoldingRegWrSl[0] = 1;
                     break;
