@@ -61,16 +61,16 @@
 #define PULL_UP_ENABLED      1
 #define PULL_UP_DISABLED     0
 
-// get/set SS1_INT aliases
-#define SS1_INT_TRIS                 TRISBbits.TRISB0
-#define SS1_INT_LAT                  LATBbits.LATB0
-#define SS1_INT_PORT                 PORTBbits.RB0
-#define SS1_INT_SetHigh()            do { LATBbits.LATB0 = 1; } while(0)
-#define SS1_INT_SetLow()             do { LATBbits.LATB0 = 0; } while(0)
-#define SS1_INT_Toggle()             do { LATBbits.LATB0 = ~LATBbits.LATB0; } while(0)
-#define SS1_INT_GetValue()           PORTBbits.RB0
-#define SS1_INT_SetDigitalInput()    do { TRISBbits.TRISB0 = 1; } while(0)
-#define SS1_INT_SetDigitalOutput()   do { TRISBbits.TRISB0 = 0; } while(0)
+// get/set SS1_Check aliases
+#define SS1_Check_TRIS                 TRISBbits.TRISB0
+#define SS1_Check_LAT                  LATBbits.LATB0
+#define SS1_Check_PORT                 PORTBbits.RB0
+#define SS1_Check_SetHigh()            do { LATBbits.LATB0 = 1; } while(0)
+#define SS1_Check_SetLow()             do { LATBbits.LATB0 = 0; } while(0)
+#define SS1_Check_Toggle()             do { LATBbits.LATB0 = ~LATBbits.LATB0; } while(0)
+#define SS1_Check_GetValue()           PORTBbits.RB0
+#define SS1_Check_SetDigitalInput()    do { TRISBbits.TRISB0 = 1; } while(0)
+#define SS1_Check_SetDigitalOutput()   do { TRISBbits.TRISB0 = 0; } while(0)
 
 // get/set Read_Check aliases
 #define Read_Check_TRIS                 TRISBbits.TRISB1
@@ -82,17 +82,6 @@
 #define Read_Check_GetValue()           PORTBbits.RB1
 #define Read_Check_SetDigitalInput()    do { TRISBbits.TRISB1 = 1; } while(0)
 #define Read_Check_SetDigitalOutput()   do { TRISBbits.TRISB1 = 0; } while(0)
-
-// get/set SS1_Check aliases
-#define SS1_Check_TRIS                 TRISBbits.TRISB2
-#define SS1_Check_LAT                  LATBbits.LATB2
-#define SS1_Check_PORT                 PORTBbits.RB2
-#define SS1_Check_SetHigh()            do { LATBbits.LATB2 = 1; } while(0)
-#define SS1_Check_SetLow()             do { LATBbits.LATB2 = 0; } while(0)
-#define SS1_Check_Toggle()             do { LATBbits.LATB2 = ~LATBbits.LATB2; } while(0)
-#define SS1_Check_GetValue()           PORTBbits.RB2
-#define SS1_Check_SetDigitalInput()    do { TRISBbits.TRISB2 = 1; } while(0)
-#define SS1_Check_SetDigitalOutput()   do { TRISBbits.TRISB2 = 0; } while(0)
 
 // get/set SCK1 aliases
 #define SCK1_TRIS                 TRISCbits.TRISC3

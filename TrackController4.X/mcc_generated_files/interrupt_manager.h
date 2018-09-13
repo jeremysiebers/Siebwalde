@@ -124,9 +124,9 @@ void INTERRUPT_Initialize (void);
 
 extern volatile unsigned char RECEIVEDxDATAxRAW[DATAxSTRUCTxLENGTH];
 extern volatile unsigned char SENDxDATAxRAW[DATAxSTRUCTxLENGTH];
-extern volatile unsigned char DATAxREADY;
 extern volatile unsigned char DATAxCOUNTxRECEIVED;
 extern volatile unsigned char DATAxCOUNTxSEND;
+extern volatile unsigned char DATAxREADY;
 
 #endif  // INTERRUPT_MANAGER_H
 /**

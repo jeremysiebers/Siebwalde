@@ -17,7 +17,7 @@
     Generation Information :
         Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.65.2
         Device            :  PIC18F97J60
-        Driver Version    :  1.03
+        Driver Version    :  1.02
     The generated drivers are tested against the following:
         Compiler          :  XC8 1.45 or later
         MPLAB 	          :  MPLAB X 4.15
@@ -51,11 +51,11 @@
 #include "mcc.h"
 #include "../spicommhandler.h"
 
-volatile unsigned char RECEIVEDxDATAxRAW[DATAxSTRUCTxLENGTH];
+volatile unsigned char RECEIVEDxDATAxRAW[DATAxSTRUCTxLENGTH+1];                 // One dummy byte extra (SPI master will send extra byte to receive last byte from slave)
 volatile unsigned char SENDxDATAxRAW[DATAxSTRUCTxLENGTH];
-volatile unsigned char DATAxREADY = 0;
 volatile unsigned char DATAxCOUNTxRECEIVED = 0;
-volatile unsigned char DATAxCOUNTxSEND = 1;
+volatile unsigned char DATAxCOUNTxSEND = 0;
+volatile unsigned char DATAxREADY = 0;
 
 void  INTERRUPT_Initialize (void)
 {
@@ -63,8 +63,6 @@ void  INTERRUPT_Initialize (void)
     RCONbits.IPEN = 1;
 
     // Assign peripheral interrupt priority vectors
-
-    // Interrupt INT0I has no priority bit. It will always be called from the High Interrupt Vector
 
     // SSPI - high priority
     IPR1bits.SSP1IP = 1;
@@ -84,39 +82,10 @@ void  INTERRUPT_Initialize (void)
 void interrupt INTERRUPT_InterruptManagerHigh (void)
 {
     // interrupt handler
-    if(INTCONbits.INT0IE == 1 && INTCONbits.INT0IF == 1)
+    if(PIE1bits.SSP1IE == 1 && PIR1bits.SSP1IF == 1)
     {
-        Read_Check_LAT = 1;
-        DATAxCOUNTxRECEIVED = 0;                                                // Force reset counter to prevent half received messages
-        DATAxCOUNTxSEND = 0;                                                    // set first byte for as soon as the master starts clocking
-        SSP1BUF = SENDxDATAxRAW[DATAxCOUNTxSEND];                               // load first byte[0] (DATAxCOUNTxSEND==0 is set in interrupt)
-        DATAxCOUNTxSEND = 1;                                                    // set second byte as soon as the master starts clocking
-        INTCONbits.INT0IF = 0;
-        Read_Check_LAT = 0;
-    }
-    else if(PIE1bits.SSP1IE == 1 && PIR1bits.SSP1IF == 1)
-    {
-        SS1_Check_LAT = 1;
-        DATAxREADY = 0;
-        
-        RECEIVEDxDATAxRAW[DATAxCOUNTxRECEIVED] = SSP1BUF; 
-        DATAxCOUNTxRECEIVED++;
-        if (DATAxCOUNTxRECEIVED > DATAxSTRUCTxLENGTH - 1){
-           DATAxCOUNTxRECEIVED = 0;
-           DATAxREADY = 1;    
-           ProcessSpiData();
-        }
-                
-        if (DATAxCOUNTxSEND < DATAxSTRUCTxLENGTH){
-           SSP1BUF = SENDxDATAxRAW[DATAxCOUNTxSEND];
-           DATAxCOUNTxSEND++;            
-        }
-        else{
-            DATAxCOUNTxSEND = 0;
-        }
-                
+        ProcessSpiInterrupt();
         PIR1bits.SSP1IF = 0;
-        SS1_Check_LAT = 0;        
     }
     else
     {

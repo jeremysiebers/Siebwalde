@@ -26,6 +26,8 @@ void main(void) {
     // Initialize the SLAVE_INFO struct with slave numebers
     for (char i = 0; i <NUMBER_OF_SLAVES; i++){
         SlaveInfo[i].SlaveNumber = i;
+        SlaveInfo[i].Header = 0xAA;
+        SlaveInfo[i].Footer = 0x55;
     }
     // Initialize the device
     SYSTEM_Initialize();

@@ -64,6 +64,8 @@ void main(void)
     // Initialize the SLAVE_INFO struct with slave numbers(fixed))
     for (char i = 0; i <NUMBER_OF_SLAVES; i++){
         SlaveInfo[i].SlaveNumber = i;
+        SlaveInfo[i].Header = 0xAA;
+        SlaveInfo[i].Footer = 0x55;
     }
     
     // Initialize the device
@@ -112,9 +114,11 @@ void main(void)
         if(EUSART1_is_rx_ready()){
             switch(EUSART1_Read()){
                 case 0x30:
+                    ModbusReset_LAT = 1;
                     printf("\f");                                               // Clear terminal (printf("\033[2J");)
                     __delay_ms(10);
                     terminal = 0;                                               // Re-print whole table to terminal
+                    ModbusReset_LAT = 0;
                     break;
                     
                 case 0x31:

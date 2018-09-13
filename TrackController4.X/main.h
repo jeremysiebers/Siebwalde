@@ -31,6 +31,7 @@ typedef enum
 
 typedef struct
 {
+    unsigned char       Header;
     unsigned char       SlaveNumber;
     unsigned int        HoldingRegRdSl[4];
     unsigned int        HoldingRegWrSl[4];
@@ -40,7 +41,7 @@ typedef struct
     unsigned int        MbSentCounter;
     SLAVE_DATA          MbCommError;
     unsigned char       MbExceptionCode;
-
+    unsigned char       Footer;
 }SLAVE_INFO;
 
 const unsigned char DATAxSTRUCTxLENGTH = sizeof(SLAVE_INFO);
