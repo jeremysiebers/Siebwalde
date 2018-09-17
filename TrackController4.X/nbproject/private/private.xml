@@ -4,10 +4,9 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/C:/GIT-REPOS/Siebwalde/TrackController4.X/spicommhandler.c</file>
+            <file>file:/C:/Program%20Files%20(x86)/Microchip/xc8/v1.45/sources/common/lwdiv.c</file>
             <file>file:/C:/GIT-REPOS/Siebwalde/TrackController4.X/mcc_generated_files/interrupt_manager.h</file>
             <file>file:/C:/GIT-REPOS/Siebwalde/TrackController4.X/main.c</file>
-            <file>file:/C:/GIT-REPOS/Siebwalde/TrackController4.X/spicommhandler.h</file>
-            <file>file:/C:/GIT-REPOS/Siebwalde/TrackController4.X/mcc_generated_files/eusart1.c</file>
             <file>file:/C:/GIT-REPOS/Siebwalde/TrackController4.X/mcc_generated_files/interrupt_manager.c</file>
             <file>file:/C:/GIT-REPOS/Siebwalde/TrackController4.X/main.h</file>
         </group>

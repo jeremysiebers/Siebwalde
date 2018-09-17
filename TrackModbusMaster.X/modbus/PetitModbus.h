@@ -60,6 +60,7 @@ typedef struct
     unsigned int        MbSentCounter;
     SLAVE_DATA          MbCommError;
     unsigned char       MbExceptionCode;
+    unsigned int        SpiCommErrorCounter;
     unsigned char       Footer;
     
 }SLAVE_INFO;

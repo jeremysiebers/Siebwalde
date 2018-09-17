@@ -51,12 +51,6 @@
 #include "mcc.h"
 #include "../spicommhandler.h"
 
-volatile unsigned char RECEIVEDxDATAxRAW[DATAxSTRUCTxLENGTH+1];                 // One dummy byte extra (SPI master will send extra byte to receive last byte from slave)
-volatile unsigned char SENDxDATAxRAW[DATAxSTRUCTxLENGTH];
-volatile unsigned char DATAxCOUNTxRECEIVED = 0;
-volatile unsigned char DATAxCOUNTxSEND = 0;
-volatile unsigned char DATAxREADY = 0;
-
 void  INTERRUPT_Initialize (void)
 {
     // Enable Interrupt Priority Vectors

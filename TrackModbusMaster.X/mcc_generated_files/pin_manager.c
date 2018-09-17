@@ -99,6 +99,7 @@ void PIN_MANAGER_Initialize(void)
    
     
 	
+    T2AINPPSbits.T2AINPPS = 0x13;   //RC3->TMR2:T2IN;    
     RC0PPS = 0x0E;   //RC0->PWM6:PWM6OUT;    
     SSP1CLKPPSbits.SSP1CLKPPS = 0x08;   //RB0->MSSP1:SCK1;    
     SSP1DATPPSbits.SSP1DATPPS = 0x14;   //RC4->MSSP1:SDI1;    

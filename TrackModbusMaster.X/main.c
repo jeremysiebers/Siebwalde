@@ -63,6 +63,10 @@ void main(void) {
             //modbus_sync_LAT = 1;                        
         }
         
+        if(SlaveInfo[0].SpiCommErrorCounter > 512){
+            NOP();
+        }
+        
         if (UpdateNextSlave == true){
             ProcessNextSlave();
             UpdateNextSlave = false;

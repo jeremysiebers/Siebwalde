@@ -57,6 +57,7 @@ void InitSlaveCommunication(SLAVE_INFO *location)
     SlaveInfoReadMask.MbSentCounter    = 0x0000;
     SlaveInfoReadMask.MbCommError      = 0x0000;
     SlaveInfoReadMask.MbExceptionCode  = 0x00;
+    SlaveInfoReadMask.SpiCommErrorCounter = 0x0000;
     SlaveInfoReadMask.Footer           = 0x00;
 }
 
@@ -297,12 +298,14 @@ unsigned char RECEIVEDxDATAxRAW[DATAxSTRUCTxLENGTH];                            
 
 void SendDataToEthernet(){
 
-    SS1_LAT = 0;                                                                // Activate slave        
-    SPI1_Exchange8bitBuffer(&(MASTER_SLAVE_DATA[DataFromSlave].Header), DATAxSTRUCTxLENGTH, &(RECEIVEDxDATAxRAW[0])); // SPI send/receive data    
+    SS1_LAT = 0;                                                                // Activate slave
+    SPI1_Exchange8bitBuffer(&(MASTER_SLAVE_DATA[DataFromSlave].Header), 
+            DATAxSTRUCTxLENGTH, &(RECEIVEDxDATAxRAW[0]));                       // SPI send/receive data    
     SS1_LAT = 1;                                                                // De-Activate slave    
     
-    if(RECEIVEDxDATAxRAW[2] < NUMBER_OF_SLAVES && RECEIVEDxDATAxRAW[1]==0xAA && RECEIVEDxDATAxRAW[DATAxSTRUCTxLENGTH-1]==0x55){                                // Check if received slave number is valid(during debugging sometimes wrong number received)
-        pSlaveDataReceived = &(MASTER_SLAVE_DATA[RECEIVEDxDATAxRAW[2]].Header);// set the pointer to the first element of the received slave number in RECEIVEDxDATAxRAW[1](first element is dummy byte)    
+    if(RECEIVEDxDATAxRAW[2] < NUMBER_OF_SLAVES && RECEIVEDxDATAxRAW[1]==0xAA && 
+            RECEIVEDxDATAxRAW[DATAxSTRUCTxLENGTH-1]==0x55){                                // Check if received slave number is valid(during debugging sometimes wrong number received)
+        pSlaveDataReceived = &(MASTER_SLAVE_DATA[RECEIVEDxDATAxRAW[2]].Header); // set the pointer to the first element of the received slave number in RECEIVEDxDATAxRAW[1](first element is dummy byte)    
         pSlaveInfoReadMask = &(SlaveInfoReadMask.Header);                       // set the pointer to the first element of the SlaveInfoReadMask
         for(char i = 1; i < DATAxSTRUCTxLENGTH-1; i++){
             if(*pSlaveInfoReadMask){
@@ -310,13 +313,16 @@ void SendDataToEthernet(){
             }        
             pSlaveDataReceived += 1;                                            // Increment pointer
             pSlaveInfoReadMask += 1;                                            // Increment pointer        
-        }    
-
-        DataFromSlave++;
-        if (DataFromSlave > NUMBER_OF_SLAVES-1){
-            DataFromSlave = 0;
-        }
-    }    
+        }   
+    } 
+    else{
+        MASTER_SLAVE_DATA[0].SpiCommErrorCounter += 1;                          // Count error SPI messages 
+    }
+    
+    DataFromSlave++;                                                            // send data from next slave
+    if (DataFromSlave > NUMBER_OF_SLAVES-1){
+        DataFromSlave = 0;
+    }
 }
 
 /*
