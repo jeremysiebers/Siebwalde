@@ -45,9 +45,6 @@ typedef struct
     unsigned char       Footer;
 }SLAVE_INFO;
 
-volatile unsigned int SpiSlaveCommErrorCounter;
-
-
 extern unsigned char UPDATExTERMINAL;
 
 #ifdef	__cplusplus

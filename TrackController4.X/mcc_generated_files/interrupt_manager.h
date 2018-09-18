@@ -120,9 +120,6 @@ void interrupt INTERRUPT_InterruptManager(void);
  */
 void INTERRUPT_Initialize (void);
 
-#include "../main.h"
-
-
 #endif  // INTERRUPT_MANAGER_H
 /**
  End of File

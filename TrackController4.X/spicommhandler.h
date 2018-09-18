@@ -18,10 +18,10 @@ extern "C" {
 #endif /* __cplusplus */
 
 extern void InitSlaveCommunication(SLAVE_INFO *location);
-unsigned char SpiCommDataRaw(unsigned char data);
 extern void ProcessSpiData(void);
 extern void ProcessSpiInterrupt();
 extern void CheckSpiStart(void);
+extern unsigned int SpiSlaveCommErrorCounter;
 
 #ifdef	__cplusplus
 }

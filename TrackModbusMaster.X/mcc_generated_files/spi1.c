@@ -111,7 +111,7 @@ uint8_t SPI1_Exchange8bitBuffer(uint8_t *dataIn, uint8_t bufLen, uint8_t *dataOu
                 }
 
                 bytesWritten++;
-                __delay_us(50);
+                __delay_us(50);//extra delay for debugging
             }
         }
         else
@@ -123,7 +123,7 @@ uint8_t SPI1_Exchange8bitBuffer(uint8_t *dataIn, uint8_t bufLen, uint8_t *dataOu
                     dataOut[bytesWritten] = SPI1_Exchange8bit(DUMMY_DATA);
 
                     bytesWritten++;
-                    __delay_us(50);
+                    __delay_us(50);//extra delay for debugging
                 }
             }
         }
