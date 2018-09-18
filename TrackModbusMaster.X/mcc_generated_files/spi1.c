@@ -51,7 +51,6 @@
 
 #include <xc.h>
 #include "spi1.h"
-#include "mcc.h"
 
 /**
   Section: Macro Declarations
@@ -70,8 +69,8 @@ void SPI1_Initialize(void)
     // SMP Middle; CKE Idle to Active; 
     SSP1STAT = 0x00;
     
-    // SSPEN enabled; CKP Idle:High, Active:Low; SSPM FOSC/64; 
-    SSP1CON1 = 0x32;
+    // SSPEN enabled; CKP Idle:Low, Active:High; SSPM FOSC/64; 
+    SSP1CON1 = 0x22;
     
     // SSPADD 0; 
     SSP1ADD = 0x00;
@@ -111,7 +110,6 @@ uint8_t SPI1_Exchange8bitBuffer(uint8_t *dataIn, uint8_t bufLen, uint8_t *dataOu
                 }
 
                 bytesWritten++;
-                __delay_us(50);//extra delay for debugging
             }
         }
         else
@@ -123,7 +121,6 @@ uint8_t SPI1_Exchange8bitBuffer(uint8_t *dataIn, uint8_t bufLen, uint8_t *dataOu
                     dataOut[bytesWritten] = SPI1_Exchange8bit(DUMMY_DATA);
 
                     bytesWritten++;
-                    __delay_us(50);//extra delay for debugging
                 }
             }
         }

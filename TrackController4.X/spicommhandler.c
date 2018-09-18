@@ -19,19 +19,20 @@
  *  Notes      :
  */
 /*#--------------------------------------------------------------------------#*/
-#define DATAxSTRUCTxLENGTH sizeof(SLAVE_INFO)
+//#define DATAxSTRUCTxLENGTH sizeof(SLAVE_INFO)
 
 static SLAVE_INFO *MASTER_SLAVE_DATA = 0;                                       // Holds the address were the received slave data is stored
 static SLAVE_INFO SlaveInfoReadMask, SlaveInfoWriteMask = 0;                    // Read and write mask for slave data from and to ModbusMaster
-unsigned char   *pSlaveDataReceived, *pSlaveDataSend, 
+static unsigned char   *pSlaveDataReceived, *pSlaveDataSend, 
                 *pSlaveInfoReadMask, *pSlaveInfoWriteMask;
-static unsigned char SS1_PORT_prev = 1;
+
 static unsigned char DataFromSlaveSend = 1;                                     // Data to send counter
 static unsigned char DataReceivedOk = 0;
 
-//const unsigned char DATAxSTRUCTxLENGTH = sizeof(SLAVE_INFO);
+const unsigned char DATAxSTRUCTxLENGTH = sizeof(SLAVE_INFO);
+//const unsigned char DATAxSTRUCTxLENGTH = sizeof(MASTER_SLAVE_DATA[0]);
 
-static unsigned char RECEIVEDxDATAxRAW[DATAxSTRUCTxLENGTH+1];                 // One dummy byte extra (SPI master will send extra byte to receive last byte from slave)
+static unsigned char RECEIVEDxDATAxRAW[DATAxSTRUCTxLENGTH+1];                   // One dummy byte extra (SPI master will send extra byte to receive last byte from slave)
 static unsigned char SENDxDATAxRAW[DATAxSTRUCTxLENGTH];
 static unsigned int DATAxCOUNTxRECEIVED = 0;
 static unsigned int DATAxCOUNTxSEND = 0;
@@ -118,37 +119,34 @@ void InitSlaveCommunication(SLAVE_INFO *location)
  *  Notes      :
  */
 /*#--------------------------------------------------------------------------#*/
-#pragma interrupt_level 1
-#pragma interrupt_level 2
+
 void ProcessSpiInterrupt(){
     SS1_Check_LAT = 1;   
     
     DATAxREADY = 0;
-    RECEIVEDxDATAxRAW[DATAxCOUNTxRECEIVED] = SSP1BUF;                       
+    RECEIVEDxDATAxRAW[DATAxCOUNTxRECEIVED] = SSP2BUF;                       
     DATAxCOUNTxRECEIVED++;
 
     if (DATAxCOUNTxRECEIVED > DATAxSTRUCTxLENGTH){                              // Count 1 more to receive the extra send dummy byte in order that this slave can send all bytes
-        //NOP();
-        ProcessSpiData();   
-        SSP1BUF = 0;
+        //NOP();        
         DATAxREADY = 1;
         DATAxCOUNTxRECEIVED = 0; 
         DATAxCOUNTxSEND     = 0;
+        ProcessSpiData();   
+        SSP2BUF = 0;
     }
 
     if ((DATAxCOUNTxSEND < DATAxSTRUCTxLENGTH) && DATAxREADY == 0){
-       SSP1BUF = SENDxDATAxRAW[DATAxCOUNTxSEND];
+       SSP2BUF = SENDxDATAxRAW[DATAxCOUNTxSEND];
        DATAxCOUNTxSEND++;           
     }           
     SS1_Check_LAT = 0;  
 }
 
-#pragma interrupt_level 1
-#pragma interrupt_level 2
 void ProcessSpiData(){        
     
     Read_Check_LAT = 1;
-    pSlaveDataReceived = &(MASTER_SLAVE_DATA[RECEIVEDxDATAxRAW[1]].Header);// set the pointer to the first element of the received slave number in RECEIVEDxDATAxRAW[1]([0]==header)
+    pSlaveDataReceived = &(MASTER_SLAVE_DATA[RECEIVEDxDATAxRAW[1]].Header);// set the pointer to the first element of the received slave number in RECEIVEDxDATAxRAW[2]([1]==header)
     pSlaveDataSend = &(MASTER_SLAVE_DATA[DataFromSlaveSend].Header);       // set the pointer to the first element of the MASTER_SLAVE_DATA according to the DataFromSlaveSend counter
     pSlaveInfoReadMask = &(SlaveInfoReadMask.Header);                      // set the pointer to the first element of the SlaveInfoReadMask
     pSlaveInfoWriteMask = &(SlaveInfoWriteMask.Header);                    // set the pointer to the first element of the SlaveInfoWriteMask
@@ -161,10 +159,10 @@ void ProcessSpiData(){
         SpiSlaveCommErrorCounter += 1;
     }
     
-    for(unsigned int i = 0; i < DATAxSTRUCTxLENGTH; i++){                                // last received dummy byte is not used/checked
+    for(unsigned int i = 0; i < DATAxSTRUCTxLENGTH; i++){                       // last received dummy byte is not used/checked
         
         if(*pSlaveInfoReadMask && DataReceivedOk){                              // If data received is OK and mask approves a write then process
-            *pSlaveDataReceived = RECEIVEDxDATAxRAW[i];                         // for DATAxSTRUCTxLENGTH set every byte into RECEIVEDxDATAxRAW array according to read mask
+            *pSlaveDataReceived = RECEIVEDxDATAxRAW[i];                       // for DATAxSTRUCTxLENGTH set every byte into RECEIVEDxDATAxRAW array according to read mask
         }
         SENDxDATAxRAW[i] = (unsigned char)(*pSlaveDataSend  & *pSlaveInfoWriteMask);// for DATAxSTRUCTxLENGTH set every byte into SENDxDATAxRAW+ array according to write mask
         pSlaveDataReceived  += 1;                                               // Increment pointer

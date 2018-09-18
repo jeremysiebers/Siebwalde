@@ -59,7 +59,7 @@ void  INTERRUPT_Initialize (void)
     // Assign peripheral interrupt priority vectors
 
     // SSPI - high priority
-    IPR1bits.SSP1IP = 1;
+    IPR3bits.SSP2IP = 1;
 
 
     // TMRI - low priority
@@ -76,10 +76,10 @@ void  INTERRUPT_Initialize (void)
 void interrupt INTERRUPT_InterruptManagerHigh (void)
 {
     // interrupt handler
-    if(PIE1bits.SSP1IE == 1 && PIR1bits.SSP1IF == 1)
+    if(PIE3bits.SSP2IE == 1 && PIR3bits.SSP2IF == 1)
     {
         ProcessSpiInterrupt();
-        PIR1bits.SSP1IF = 0;
+        PIR3bits.SSP2IF = 0;
     }
     else
     {

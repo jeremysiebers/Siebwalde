@@ -53,7 +53,7 @@ void SYSTEM_Initialize(void)
     INTERRUPT_Initialize();
     PIN_MANAGER_Initialize();
     OSCILLATOR_Initialize();
-    SPI1_Initialize();
+    SPI2_Initialize();
     TMR1_Initialize();
     EUSART1_Initialize();
 }

@@ -83,39 +83,6 @@
 #define Read_Check_SetDigitalInput()    do { TRISBbits.TRISB1 = 1; } while(0)
 #define Read_Check_SetDigitalOutput()   do { TRISBbits.TRISB1 = 0; } while(0)
 
-// get/set SCK1 aliases
-#define SCK1_TRIS                 TRISCbits.TRISC3
-#define SCK1_LAT                  LATCbits.LATC3
-#define SCK1_PORT                 PORTCbits.RC3
-#define SCK1_SetHigh()            do { LATCbits.LATC3 = 1; } while(0)
-#define SCK1_SetLow()             do { LATCbits.LATC3 = 0; } while(0)
-#define SCK1_Toggle()             do { LATCbits.LATC3 = ~LATCbits.LATC3; } while(0)
-#define SCK1_GetValue()           PORTCbits.RC3
-#define SCK1_SetDigitalInput()    do { TRISCbits.TRISC3 = 1; } while(0)
-#define SCK1_SetDigitalOutput()   do { TRISCbits.TRISC3 = 0; } while(0)
-
-// get/set SDI1 aliases
-#define SDI1_TRIS                 TRISCbits.TRISC4
-#define SDI1_LAT                  LATCbits.LATC4
-#define SDI1_PORT                 PORTCbits.RC4
-#define SDI1_SetHigh()            do { LATCbits.LATC4 = 1; } while(0)
-#define SDI1_SetLow()             do { LATCbits.LATC4 = 0; } while(0)
-#define SDI1_Toggle()             do { LATCbits.LATC4 = ~LATCbits.LATC4; } while(0)
-#define SDI1_GetValue()           PORTCbits.RC4
-#define SDI1_SetDigitalInput()    do { TRISCbits.TRISC4 = 1; } while(0)
-#define SDI1_SetDigitalOutput()   do { TRISCbits.TRISC4 = 0; } while(0)
-
-// get/set SDO1 aliases
-#define SDO1_TRIS                 TRISCbits.TRISC5
-#define SDO1_LAT                  LATCbits.LATC5
-#define SDO1_PORT                 PORTCbits.RC5
-#define SDO1_SetHigh()            do { LATCbits.LATC5 = 1; } while(0)
-#define SDO1_SetLow()             do { LATCbits.LATC5 = 0; } while(0)
-#define SDO1_Toggle()             do { LATCbits.LATC5 = ~LATCbits.LATC5; } while(0)
-#define SDO1_GetValue()           PORTCbits.RC5
-#define SDO1_SetDigitalInput()    do { TRISCbits.TRISC5 = 1; } while(0)
-#define SDO1_SetDigitalOutput()   do { TRISCbits.TRISC5 = 0; } while(0)
-
 // get/set RC6 procedures
 #define RC6_SetHigh()               do { LATCbits.LATC6 = 1; } while(0)
 #define RC6_SetLow()                do { LATCbits.LATC6 = 0; } while(0)
@@ -124,16 +91,49 @@
 #define RC6_SetDigitalInput()       do { TRISCbits.TRISC6 = 1; } while(0)
 #define RC6_SetDigitalOutput()      do { TRISCbits.TRISC6 = 0; } while(0)
 
-// get/set SS1 aliases
-#define SS1_TRIS                 TRISFbits.TRISF7
-#define SS1_LAT                  LATFbits.LATF7
-#define SS1_PORT                 PORTFbits.RF7
-#define SS1_SetHigh()            do { LATFbits.LATF7 = 1; } while(0)
-#define SS1_SetLow()             do { LATFbits.LATF7 = 0; } while(0)
-#define SS1_Toggle()             do { LATFbits.LATF7 = ~LATFbits.LATF7; } while(0)
-#define SS1_GetValue()           PORTFbits.RF7
-#define SS1_SetDigitalInput()    do { TRISFbits.TRISF7 = 1; } while(0)
-#define SS1_SetDigitalOutput()   do { TRISFbits.TRISF7 = 0; } while(0)
+// get/set SDO2 aliases
+#define SDO2_TRIS                 TRISDbits.TRISD4
+#define SDO2_LAT                  LATDbits.LATD4
+#define SDO2_PORT                 PORTDbits.RD4
+#define SDO2_SetHigh()            do { LATDbits.LATD4 = 1; } while(0)
+#define SDO2_SetLow()             do { LATDbits.LATD4 = 0; } while(0)
+#define SDO2_Toggle()             do { LATDbits.LATD4 = ~LATDbits.LATD4; } while(0)
+#define SDO2_GetValue()           PORTDbits.RD4
+#define SDO2_SetDigitalInput()    do { TRISDbits.TRISD4 = 1; } while(0)
+#define SDO2_SetDigitalOutput()   do { TRISDbits.TRISD4 = 0; } while(0)
+
+// get/set SDI2 aliases
+#define SDI2_TRIS                 TRISDbits.TRISD5
+#define SDI2_LAT                  LATDbits.LATD5
+#define SDI2_PORT                 PORTDbits.RD5
+#define SDI2_SetHigh()            do { LATDbits.LATD5 = 1; } while(0)
+#define SDI2_SetLow()             do { LATDbits.LATD5 = 0; } while(0)
+#define SDI2_Toggle()             do { LATDbits.LATD5 = ~LATDbits.LATD5; } while(0)
+#define SDI2_GetValue()           PORTDbits.RD5
+#define SDI2_SetDigitalInput()    do { TRISDbits.TRISD5 = 1; } while(0)
+#define SDI2_SetDigitalOutput()   do { TRISDbits.TRISD5 = 0; } while(0)
+
+// get/set SCK2 aliases
+#define SCK2_TRIS                 TRISDbits.TRISD6
+#define SCK2_LAT                  LATDbits.LATD6
+#define SCK2_PORT                 PORTDbits.RD6
+#define SCK2_SetHigh()            do { LATDbits.LATD6 = 1; } while(0)
+#define SCK2_SetLow()             do { LATDbits.LATD6 = 0; } while(0)
+#define SCK2_Toggle()             do { LATDbits.LATD6 = ~LATDbits.LATD6; } while(0)
+#define SCK2_GetValue()           PORTDbits.RD6
+#define SCK2_SetDigitalInput()    do { TRISDbits.TRISD6 = 1; } while(0)
+#define SCK2_SetDigitalOutput()   do { TRISDbits.TRISD6 = 0; } while(0)
+
+// get/set SS2 aliases
+#define SS2_TRIS                 TRISDbits.TRISD7
+#define SS2_LAT                  LATDbits.LATD7
+#define SS2_PORT                 PORTDbits.RD7
+#define SS2_SetHigh()            do { LATDbits.LATD7 = 1; } while(0)
+#define SS2_SetLow()             do { LATDbits.LATD7 = 0; } while(0)
+#define SS2_Toggle()             do { LATDbits.LATD7 = ~LATDbits.LATD7; } while(0)
+#define SS2_GetValue()           PORTDbits.RD7
+#define SS2_SetDigitalInput()    do { TRISDbits.TRISD7 = 1; } while(0)
+#define SS2_SetDigitalOutput()   do { TRISDbits.TRISD7 = 0; } while(0)
 
 // get/set ModbusReset aliases
 #define ModbusReset_TRIS                 TRISGbits.TRISG3
