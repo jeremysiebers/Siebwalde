@@ -121,31 +121,46 @@ void InitSlaveCommunication(SLAVE_INFO *location)
 /*#--------------------------------------------------------------------------#*/
 
 void ProcessSpiInterrupt(){
-    SS1_Check_LAT = 1;   
+    SS1_Check_LAT = 1; 
+    RECEIVEDxDATAxRAW[DATAxCOUNTxRECEIVED] = SSP2BUF;                       
+    DATAxCOUNTxRECEIVED++;            
+
+    SSP2BUF = SENDxDATAxRAW[DATAxCOUNTxSEND];
+    DATAxCOUNTxSEND++;
+    SS1_Check_LAT = 0;
+    
+    while(!DATAxREADY){
+        if (SSP2STATbits.BF){
+            SS1_Check_LAT = 1;
+            
+            RECEIVEDxDATAxRAW[DATAxCOUNTxRECEIVED] = SSP2BUF;                       
+            DATAxCOUNTxRECEIVED++;            
+            
+            SSP2BUF = SENDxDATAxRAW[DATAxCOUNTxSEND];
+            DATAxCOUNTxSEND++;
+            
+            if (DATAxCOUNTxRECEIVED > DATAxSTRUCTxLENGTH){
+                DATAxREADY = 1;
+            }
+            
+            SS1_Check_LAT = 0;        
+        }
+    }
+    
+    SS1_Check_LAT = 1;
     
     DATAxREADY = 0;
-    RECEIVEDxDATAxRAW[DATAxCOUNTxRECEIVED] = SSP2BUF;                       
-    DATAxCOUNTxRECEIVED++;
-
-    if (DATAxCOUNTxRECEIVED > DATAxSTRUCTxLENGTH){                              // Count 1 more to receive the extra send dummy byte in order that this slave can send all bytes
-        //NOP();        
-        DATAxREADY = 1;
-        DATAxCOUNTxRECEIVED = 0; 
-        DATAxCOUNTxSEND     = 0;
-        ProcessSpiData();   
-        SSP2BUF = 0;
-    }
-
-    if ((DATAxCOUNTxSEND < DATAxSTRUCTxLENGTH) && DATAxREADY == 0){
-       SSP2BUF = SENDxDATAxRAW[DATAxCOUNTxSEND];
-       DATAxCOUNTxSEND++;           
-    }           
+    DATAxCOUNTxRECEIVED = 0; 
+    DATAxCOUNTxSEND     = 0;
+    ProcessSpiData();   
+    SSP2BUF = 0;
+                 
     SS1_Check_LAT = 0;  
 }
 
 void ProcessSpiData(){        
     
-    Read_Check_LAT = 1;
+    
     pSlaveDataReceived = &(MASTER_SLAVE_DATA[RECEIVEDxDATAxRAW[1]].Header);// set the pointer to the first element of the received slave number in RECEIVEDxDATAxRAW[2]([1]==header)
     pSlaveDataSend = &(MASTER_SLAVE_DATA[DataFromSlaveSend].Header);       // set the pointer to the first element of the MASTER_SLAVE_DATA according to the DataFromSlaveSend counter
     pSlaveInfoReadMask = &(SlaveInfoReadMask.Header);                      // set the pointer to the first element of the SlaveInfoReadMask
@@ -175,7 +190,7 @@ void ProcessSpiData(){
     if(DataFromSlaveSend > (NUMBER_OF_SLAVES - 1)){
         DataFromSlaveSend = 0;
     }
-    Read_Check_LAT = 0;        
+    
 }
 
 /*#--------------------------------------------------------------------------#*/

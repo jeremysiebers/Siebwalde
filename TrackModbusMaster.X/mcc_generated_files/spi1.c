@@ -69,11 +69,11 @@ void SPI1_Initialize(void)
     // SMP Middle; CKE Idle to Active; 
     SSP1STAT = 0x00;
     
-    // SSPEN enabled; CKP Idle:Low, Active:High; SSPM FOSC/64; 
-    SSP1CON1 = 0x22;
+    // SSPEN enabled; CKP Idle:Low, Active:High; SSPM FOSC/4_SSPxADD; 
+    SSP1CON1 = 0x2A;
     
-    // SSPADD 0; 
-    SSP1ADD = 0x00;
+    // SSPADD 1; 
+    SSP1ADD = 0x01;
 }
 
 uint8_t SPI1_Exchange8bit(uint8_t data)

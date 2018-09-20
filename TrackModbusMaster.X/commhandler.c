@@ -293,15 +293,30 @@ unsigned int ProcessSlaveCommunication(){
  */
 /*#--------------------------------------------------------------------------#*/
 static unsigned int DataFromSlave = 0;
-const unsigned char DATAxSTRUCTxLENGTH = sizeof(MASTER_SLAVE_DATA[0]) + 1;      // add one byte to send dummy
-unsigned char RECEIVEDxDATAxRAW[DATAxSTRUCTxLENGTH];                            // One dummy byte extra (SPI master will send extra byte to receive last byte from slave)
+const unsigned char DATAxSTRUCTxLENGTH = sizeof(SLAVE_INFO) + 1;      // add one byte to send dummy
+static unsigned char RECEIVEDxDATAxRAW[DATAxSTRUCTxLENGTH];                            // One dummy byte extra (SPI master will send extra byte to receive last byte from slave)
+uint8_t bytesWritten = 0;
+uint8_t *dataIn, *dataOut;
 
 void SendDataToEthernet(){
-
+    //modbus_sync_LAT = 1;
+    //SPI1_Exchange8bitBuffer(&(MASTER_SLAVE_DATA[DataFromSlave].Header), 
+    //        DATAxSTRUCTxLENGTH, &(RECEIVEDxDATAxRAW[0]));                       // SPI send/receive data    
+    
+    dataIn  = &(MASTER_SLAVE_DATA[DataFromSlave].Header);
+    dataOut = &(RECEIVEDxDATAxRAW[0]);
     SS1_LAT = 0;                                                                // Activate slave
-    SPI1_Exchange8bitBuffer(&(MASTER_SLAVE_DATA[DataFromSlave].Header), 
-            DATAxSTRUCTxLENGTH, &(RECEIVEDxDATAxRAW[0]));                       // SPI send/receive data    
+    while(bytesWritten < DATAxSTRUCTxLENGTH){
+        SSP1CON1bits.WCOL = 0;
+        SSP1BUF = dataIn[bytesWritten];
+        while(SSP1STATbits.BF == 0){
+        }
+        dataOut[bytesWritten] = SSP1BUF;
+        bytesWritten++;
+    }
     SS1_LAT = 1;                                                                // De-Activate slave    
+    bytesWritten = 0;
+    
     
     if(RECEIVEDxDATAxRAW[2] < NUMBER_OF_SLAVES && RECEIVEDxDATAxRAW[1]==0xAA && 
             RECEIVEDxDATAxRAW[DATAxSTRUCTxLENGTH-1]==0x55){                                // Check if received slave number is valid(during debugging sometimes wrong number received)
@@ -323,6 +338,7 @@ void SendDataToEthernet(){
     if (DataFromSlave > NUMBER_OF_SLAVES-1){
         DataFromSlave = 0;
     }
+    //modbus_sync_LAT = 0;
 }
 
 /*

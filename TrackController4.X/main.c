@@ -505,16 +505,16 @@ void WriteData(unsigned int Data, unsigned int Ln, unsigned int Col){
     char padding[6];
     
          if(Data <10000){
-        strcpy(padding, "  ");
-    }
-    else if(Data <1000){
         strcpy(padding, "   ");
     }
-    else if(Data <100){
+    else if(Data <1000){
         strcpy(padding, "    ");
     }
-    else if(Data < 10){
+    else if(Data <100){
         strcpy(padding, "     ");
+    }
+    else if(Data < 10){
+        strcpy(padding, "      ");
     }
     else{
         strcpy(padding, "");
