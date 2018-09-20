@@ -8,6 +8,8 @@
 #ifndef __PETITMODBUS__H
 #define __PETITMODBUS__H
 
+#include <xc.h>
+
                                                                                 // 1 register is 16 bits. The largest register is used to determine receive and transmit buffer size!
 #define NUMBER_OF_HOLDING_PETITREGISTERS                 4                      // Petit Modbus RTU Slave Holding Registers (read/write), Have to put a number of registers here It has to be bigger than 0 (zero)!!
 #define NUMBER_OF_INPUT_PETITREGISTERS                   2                      // Number of (read only) input registers)
@@ -56,8 +58,8 @@ typedef struct
     unsigned int        HoldingRegWrSl[NUMBER_OF_HOLDING_PETITREGISTERS];
     unsigned int        InputReg[NUMBER_OF_INPUT_PETITREGISTERS];
     unsigned int        DiagReg[NUMBER_OF_DIAGNOSTIC_PETITREGISTERS];
-    unsigned int        MbReceiveCounter;
-    unsigned int        MbSentCounter;
+    unsigned long int   MbReceiveCounter;
+    unsigned long int   MbSentCounter;
     SLAVE_DATA          MbCommError;
     unsigned char       MbExceptionCode;
     unsigned int        SpiCommErrorCounter;

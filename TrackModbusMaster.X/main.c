@@ -61,11 +61,7 @@ void main(void) {
         ProcessPetitModbus();
         if (ProcessSlaveCommunication() == true){
             //modbus_sync_LAT = 1;                        
-        }
-        
-        if(SlaveInfo[0].SpiCommErrorCounter > 512){
-            NOP();
-        }
+        }        
         
         if (UpdateNextSlave == true){
             ProcessNextSlave();

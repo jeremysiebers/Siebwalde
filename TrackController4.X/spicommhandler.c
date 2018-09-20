@@ -158,8 +158,7 @@ void ProcessSpiInterrupt(){
     SS1_Check_LAT = 0;  
 }
 
-void ProcessSpiData(){        
-    
+void ProcessSpiData(){
     
     pSlaveDataReceived = &(MASTER_SLAVE_DATA[RECEIVEDxDATAxRAW[1]].Header);// set the pointer to the first element of the received slave number in RECEIVEDxDATAxRAW[2]([1]==header)
     pSlaveDataSend = &(MASTER_SLAVE_DATA[DataFromSlaveSend].Header);       // set the pointer to the first element of the MASTER_SLAVE_DATA according to the DataFromSlaveSend counter

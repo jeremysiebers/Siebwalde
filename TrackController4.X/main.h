@@ -37,8 +37,8 @@ typedef struct
     unsigned int        HoldingRegWrSl[4];
     unsigned int        InputReg[2];
     unsigned int        DiagReg[4];
-    unsigned int        MbReceiveCounter;
-    unsigned int        MbSentCounter;
+    unsigned long int   MbReceiveCounter;
+    unsigned long int   MbSentCounter;
     SLAVE_DATA          MbCommError;
     unsigned char       MbExceptionCode;
     unsigned int        SpiCommErrorCounter;

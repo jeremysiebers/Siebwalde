@@ -267,9 +267,9 @@ unsigned int ProcessSlaveCommunication(){
     
     if (Return_Val == true){
         //__delay_us(60);                                                       // when debugging is required on oscilloscope, waittime till tmr3 is done
-        //while (T2TMR < 0xC0){                                                   // Send SPI data on a defined moment in time within the 2ms TMR2 interrupt
+        while (T2TMR < 0xC0){                                                   // Send SPI data on a defined moment in time within the 2ms TMR2 interrupt
             
-        //}
+        }
         SendDataToEthernet();
     }
     
@@ -295,14 +295,14 @@ unsigned int ProcessSlaveCommunication(){
 static unsigned int DataFromSlave = 0;
 const unsigned char DATAxSTRUCTxLENGTH = sizeof(SLAVE_INFO) + 1;      // add one byte to send dummy
 static unsigned char RECEIVEDxDATAxRAW[DATAxSTRUCTxLENGTH];                            // One dummy byte extra (SPI master will send extra byte to receive last byte from slave)
-uint8_t bytesWritten = 0;
-uint8_t *dataIn, *dataOut;
+static uint8_t bytesWritten = 0;
+static uint8_t *dataIn, *dataOut;
 
 void SendDataToEthernet(){
     //modbus_sync_LAT = 1;
     //SPI1_Exchange8bitBuffer(&(MASTER_SLAVE_DATA[DataFromSlave].Header), 
     //        DATAxSTRUCTxLENGTH, &(RECEIVEDxDATAxRAW[0]));                       // SPI send/receive data    
-    
+    bytesWritten = 0;
     dataIn  = &(MASTER_SLAVE_DATA[DataFromSlave].Header);
     dataOut = &(RECEIVEDxDATAxRAW[0]);
     SS1_LAT = 0;                                                                // Activate slave
@@ -314,9 +314,7 @@ void SendDataToEthernet(){
         dataOut[bytesWritten] = SSP1BUF;
         bytesWritten++;
     }
-    SS1_LAT = 1;                                                                // De-Activate slave    
-    bytesWritten = 0;
-    
+    SS1_LAT = 1;   
     
     if(RECEIVEDxDATAxRAW[2] < NUMBER_OF_SLAVES && RECEIVEDxDATAxRAW[1]==0xAA && 
             RECEIVEDxDATAxRAW[DATAxSTRUCTxLENGTH-1]==0x55){                                // Check if received slave number is valid(during debugging sometimes wrong number received)
