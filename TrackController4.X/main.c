@@ -45,18 +45,22 @@
 #include "mcc_generated_files/mcc.h"
 #include "spicommhandler.h"
 
+#define COLUMNS 4
+
+#define LNxSTART 3
+
 #define COL0	0
-#define COL1	33
-#define COL2	66
-#define COL3	99
+#define COL1	30
+#define COL2	60
+#define COL3	90
 
 #define COL0D	COL0 + 20
 #define COL1D	COL1 + 20
 #define COL2D	COL2 + 20
 #define COL3D	COL3 + 20
 
-void WriteText(unsigned char *Text, unsigned int Ln, unsigned int Col);
-void WriteData(unsigned long int Data, unsigned int Ln, unsigned int Col);
+void WriteText(unsigned char *Text);
+void WriteData(unsigned long int Data);
 
 /*
                          Main application
@@ -69,6 +73,13 @@ static SLAVE_INFO         SlaveInfo[NUMBER_OF_SLAVES];
 
 unsigned char UPDATExTERMINAL;
 unsigned char terminal = 0;
+
+static unsigned int Ln       = LNxSTART;
+static unsigned int Col      = COL0;
+static unsigned int ColCount = 0;
+
+static unsigned int LnD  = LNxSTART;
+static unsigned int ColD = COL0D;
 
 void main(void)
 {
@@ -107,21 +118,19 @@ void main(void)
 
     // Disable the Peripheral Interrupts
     //INTERRUPT_PeripheralInterruptDisable();
-    
+        
     printf("PIC18f97j60 started up!!!\n\r");
     __delay_ms(10);
     printf("\f");                                                               // Clear terminal (printf("\033[2J");)
     __delay_ms(10);
     printf("\033[?25h");
-    __delay_ms(10);
+    __delay_ms(10);   
     printf("PIC18f97j60 started up!!!\n\r");                                    // Welcome message
     
     ModbusReset_LAT = 0;                                                        // as last release the ModbusMaster.
     
     while (1)
     {
-        //CheckSpiStart();
-        
         if(EUSART1_is_rx_ready()){
             switch(EUSART1_Read()){
                 case 0x30:
@@ -135,27 +144,27 @@ void main(void)
                     break;
                     
                 case 0x31:
-                    (unsigned int)SlaveInfo[1].HoldingRegWrSl[0] = 1;
+                    (unsigned int)SlaveInfo[1].HoldingReg[0] = 1;
                     break;
                         
                 case 0x32:
-                    (unsigned int)SlaveInfo[2].HoldingRegWrSl[0] = 1;
+                    (unsigned int)SlaveInfo[2].HoldingReg[0] = 1;
                     break;
                 
                 case 0x33:
-                    (unsigned int)SlaveInfo[3].HoldingRegWrSl[0] = 1;
+                    (unsigned int)SlaveInfo[3].HoldingReg[0] = 1;
                     break;
                     
                 case 0x34:
-                    (unsigned int)SlaveInfo[1].HoldingRegWrSl[0] = 0;
+                    (unsigned int)SlaveInfo[1].HoldingReg[0] = 0;
                     break;
                         
                 case 0x35:
-                    (unsigned int)SlaveInfo[2].HoldingRegWrSl[0] = 0;
+                    (unsigned int)SlaveInfo[2].HoldingReg[0] = 0;
                     break;
                 
                 case 0x36:
-                    (unsigned int)SlaveInfo[3].HoldingRegWrSl[0] = 0;
+                    (unsigned int)SlaveInfo[3].HoldingReg[0] = 0;
                     break;
                     
                 default:
@@ -167,330 +176,311 @@ void main(void)
                         
             switch(terminal){
                 case 0:             //"SpiCommErrorCount "//
-                    WriteText((char *)"ModBus_Master:", 2, COL0);
-                    WriteText((char *)"ModBus_Slave1:", 2, COL1);
-                    WriteText((char *)"ModBus_Slave2:", 2, COL2);
-                    WriteText((char *)"ModBus_Slave3:", 2, COL3);                    
+                    WriteText((char *)"ModBus_Master:");
+                    WriteText((char *)"ModBus_Slave:");
+                    WriteText((char *)"ModBus_Slave:");
+                    WriteText((char *)"ModBus_Slave:");                    
                     terminal++;
-                    //break;                   
+                    break;                   
                 
                 case 1:
-                    WriteText((char *)"HoldingRegRdSl0:", 3, COL0);
-                    WriteText((char *)"HoldingRegRdSl0:", 3, COL1);
-                    WriteText((char *)"HoldingRegRdSl0:", 3, COL2);
-                    WriteText((char *)"HoldingRegRdSl0:", 3, COL3);                    
+                    WriteText((char *)"HoldingReg0:");
+                    WriteText((char *)"HoldingReg0:");
+                    WriteText((char *)"HoldingReg0:");
+                    WriteText((char *)"HoldingReg0:");                    
                     terminal++;                       
-                    //break;                            
+                    break;                            
                                                       
                 case 2:                               
-                    WriteText((char *)"HoldingRegRdSl1:", 4, COL0);
-                    WriteText((char *)"HoldingRegRdSl1:", 4, COL1);
-                    WriteText((char *)"HoldingRegRdSl1:", 4, COL2);
-                    WriteText((char *)"HoldingRegRdSl1:", 4, COL3);                    
+                    WriteText((char *)"HoldingReg1:");
+                    WriteText((char *)"HoldingReg1:");
+                    WriteText((char *)"HoldingReg1:");
+                    WriteText((char *)"HoldingReg1:");                    
                     terminal++;                       
-                    //break;                            
+                    break;                            
                                                       
                 case 3:                               
-                    WriteText((char *)"HoldingRegRdSl2:", 5, COL0);
-                    WriteText((char *)"HoldingRegRdSl2:", 5, COL1);
-                    WriteText((char *)"HoldingRegRdSl2:", 5, COL2);
-                    WriteText((char *)"HoldingRegRdSl2:", 5, COL3);                    
+                    WriteText((char *)"HoldingReg2:");
+                    WriteText((char *)"HoldingReg2:");
+                    WriteText((char *)"HoldingReg2:");
+                    WriteText((char *)"HoldingReg2:");                    
                     terminal++;                       
                     break;                            
                                                       
                 case 4:                               
-                    WriteText((char *)"HoldingRegRdSl3:", 6, COL0);
-                    WriteText((char *)"HoldingRegRdSl3:", 6, COL1);
-                    WriteText((char *)"HoldingRegRdSl3:", 6, COL2);
-                    WriteText((char *)"HoldingRegRdSl3:", 6, COL3);                    
+                    WriteText((char *)"HoldingReg3:");
+                    WriteText((char *)"HoldingReg3:");
+                    WriteText((char *)"HoldingReg3:");
+                    WriteText((char *)"HoldingReg3:");                    
                     terminal++;                       
                     //break;                            
                                                       
-                case 5:                               
-                    WriteText((char *)"HoldingRegWrSl0:", 7, COL0);
-                    WriteText((char *)"HoldingRegWrSl0:", 7, COL1);
-                    WriteText((char *)"HoldingRegWrSl0:", 7, COL2);
-                    WriteText((char *)"HoldingRegWrSl0:", 7, COL3);                    
-                    terminal++;                       
-                    //break;                           
-                                                      
-                case 6:                               
-                    WriteText((char *)"HoldingRegWrSl1:", 8, COL0);
-                    WriteText((char *)"HoldingRegWrSl1:", 8, COL1);
-                    WriteText((char *)"HoldingRegWrSl1:", 8, COL2);
-                    WriteText((char *)"HoldingRegWrSl1:", 8, COL3);                    
-                    terminal++;                       
-                    //break;                            
-                                                      
-                case 7:                               
-                    WriteText((char *)"HoldingRegWrSl2:", 9, COL0);
-                    WriteText((char *)"HoldingRegWrSl2:", 9, COL1);
-                    WriteText((char *)"HoldingRegWrSl2:", 9, COL2);
-                    WriteText((char *)"HoldingRegWrSl2:", 9, COL3);                    
-                    terminal++;                       
-                    break;                            
-                                                      
-                case 8:                               
-                    WriteText((char *)"HoldingRegWrSl3:", 10, COL0);
-                    WriteText((char *)"HoldingRegWrSl3:", 10, COL1);
-                    WriteText((char *)"HoldingRegWrSl3:", 10, COL2);
-                    WriteText((char *)"HoldingRegWrSl3:", 10, COL3);                    
+                case 5:
+                    WriteText((char *)"InputReg0:");
+                    WriteText((char *)"InputReg0:");
+                    WriteText((char *)"InputReg0:");
+                    WriteText((char *)"InputReg0:");                    
+                    terminal++;
+                    //break;
+                    
+                case 6:
+                    WriteText((char *)"InputReg1:");
+                    WriteText((char *)"InputReg1:");
+                    WriteText((char *)"InputReg1:");
+                    WriteText((char *)"InputReg1:");                    
+                    terminal++;
+                    //break;
+                    
+                case 7:
+                    WriteText((char *)"InputReg2:");
+                    WriteText((char *)"InputReg2:");
+                    WriteText((char *)"InputReg2:");
+                    WriteText((char *)"InputReg2:");                    
+                    terminal++;
+                    //break;
+                    
+                case 8:
+                    WriteText((char *)"InputReg3:");
+                    WriteText((char *)"InputReg3:");
+                    WriteText((char *)"InputReg3:");
+                    WriteText((char *)"InputReg3:");                    
                     terminal++;
                     //break;
                     
                 case 9:
-                    WriteText((char *)"InputReg0:", 11, COL0);
-                    WriteText((char *)"InputReg0:", 11, COL1);
-                    WriteText((char *)"InputReg0:", 11, COL2);
-                    WriteText((char *)"InputReg0:", 11, COL3);                    
+                    WriteText((char *)"InputReg4:");
+                    WriteText((char *)"InputReg4:");
+                    WriteText((char *)"InputReg4:");
+                    WriteText((char *)"InputReg4:");                    
                     terminal++;
                     //break;
                     
                 case 10:
-                    WriteText((char *)"InputReg1:", 12, COL0);
-                    WriteText((char *)"InputReg1:", 12, COL1);
-                    WriteText((char *)"InputReg1:", 12, COL2);
-                    WriteText((char *)"InputReg1:", 12, COL3);                    
+                    WriteText((char *)"InputReg5:");
+                    WriteText((char *)"InputReg5:");
+                    WriteText((char *)"InputReg5:");
+                    WriteText((char *)"InputReg5:");                    
                     terminal++;
                     //break;
                     
                 case 11:
-                    WriteText((char *)"DiagReg0:", 13, COL0);
-                    WriteText((char *)"DiagReg0:", 13, COL1);
-                    WriteText((char *)"DiagReg0:", 13, COL2);
-                    WriteText((char *)"DiagReg0:", 13, COL3);                    
+                    WriteText((char *)"DiagReg0:");
+                    WriteText((char *)"DiagReg0:");
+                    WriteText((char *)"DiagReg0:");
+                    WriteText((char *)"DiagReg0:");                    
                     terminal++;                
                     break;                     
                                                
                 case 12:                       
-                    WriteText((char *)"DiagReg1:", 14, COL0);
-                    WriteText((char *)"DiagReg1:", 14, COL1);
-                    WriteText((char *)"DiagReg1:", 14, COL2);
-                    WriteText((char *)"DiagReg1:", 14, COL3);                    
+                    WriteText((char *)"DiagReg1:");
+                    WriteText((char *)"DiagReg1:");
+                    WriteText((char *)"DiagReg1:");
+                    WriteText((char *)"DiagReg1:");                    
                     terminal++;                
                     //break;                     
                                                
-                case 13:                       
-                    WriteText((char *)"DiagReg2:", 15, COL0);
-                    WriteText((char *)"DiagReg2:", 15, COL1);
-                    WriteText((char *)"DiagReg2:", 15, COL2);
-                    WriteText((char *)"DiagReg2:", 15, COL3);                    
+                case 13:
+                    WriteText((char *)"MbReceiveCounter:");
+                    WriteText((char *)"MbReceiveCounter:");
+                    WriteText((char *)"MbReceiveCounter:");
+                    WriteText((char *)"MbReceiveCounter:");                    
                     terminal++;
-                    //break;
+                    break;
                     
                 case 14:
-                    WriteText((char *)"DiagReg3:", 16, COL0);
-                    WriteText((char *)"DiagReg3:", 16, COL1);
-                    WriteText((char *)"DiagReg3:", 16, COL2);
-                    WriteText((char *)"DiagReg3:", 16, COL3);                    
+                    WriteText((char *)"MbSentCounter:");
+                    WriteText((char *)"MbSentCounter:");
+                    WriteText((char *)"MbSentCounter:");
+                    WriteText((char *)"MbSentCounter:");                    
                     terminal++;
                     //break;
                     
                 case 15:
-                    WriteText((char *)"MbReceiveCounter:", 17, COL0);
-                    WriteText((char *)"MbReceiveCounter:", 17, COL1);
-                    WriteText((char *)"MbReceiveCounter:", 17, COL2);
-                    WriteText((char *)"MbReceiveCounter:", 17, COL3);                    
-                    terminal++;
-                    break;
-                    
-                case 16:
-                    WriteText((char *)"MbSentCounter:", 18, COL0);
-                    WriteText((char *)"MbSentCounter:", 18, COL1);
-                    WriteText((char *)"MbSentCounter:", 18, COL2);
-                    WriteText((char *)"MbSentCounter:", 18, COL3);                    
+                    WriteText((char *)"MbCommError:");
+                    WriteText((char *)"MbCommError:");
+                    WriteText((char *)"MbCommError:");
+                    WriteText((char *)"MbCommError:");                    
                     terminal++;
                     //break;
                     
+                case 16:
+                    WriteText((char *)"MbExceptionCode:");
+                    WriteText((char *)"MbExceptionCode:");
+                    WriteText((char *)"MbExceptionCode:");
+                    WriteText((char *)"MbExceptionCode:");                    
+                    terminal++;
+                    break;
+                    
                 case 17:
-                    WriteText((char *)"MbCommError:", 19, COL0);
-                    WriteText((char *)"MbCommError:", 19, COL1);
-                    WriteText((char *)"MbCommError:", 19, COL2);
-                    WriteText((char *)"MbCommError:", 19, COL3);                    
+                    WriteText((char *)"SpiCommErrorCount:");
+                    WriteText((char *)"SpiCommErrorCount:");
+                    WriteText((char *)"SpiCommErrorCount:");
+                    WriteText((char *)"SpiCommErrorCount:");
                     terminal++;
                     //break;
                     
                 case 18:
-                    WriteText((char *)"MbExceptionCode:", 20, COL0);
-                    WriteText((char *)"MbExceptionCode:", 20, COL1);
-                    WriteText((char *)"MbExceptionCode:", 20, COL2);
-                    WriteText((char *)"MbExceptionCode:", 20, COL3);                    
+					WriteText((char *)"SpiSLCommErrCnt:"); 
+					WriteText((char *)" ");
+					WriteText((char *)" ");
+					WriteText((char *)" ");
                     terminal++;
-                    //break;
-                    
-                case 19:
-                    WriteText((char *)"SpiCommErrorCount:", 21, COL0);
-                    WriteText((char *)"SpiCommErrorCount:", 21, COL1);
-                    WriteText((char *)"SpiCommErrorCount:", 21, COL2);
-                    WriteText((char *)"SpiCommErrorCount:", 21, COL3);
-                    WriteText((char *)"Ethernet Target SPI Slave:", 23, COL0);
-                    WriteText((char *)"SpiSLCommErrCnt:", 24, COL0);                    
-                    terminal++;
-                    break;
+                    break;                    
 /*------------------------------------------------------------------------------------------*/                    
-                case 20:
-                    WriteData(SlaveInfo[0].SlaveNumber, 2, COL0D );
-                    WriteData(SlaveInfo[1].SlaveNumber, 2, COL1D );
-                    WriteData(SlaveInfo[2].SlaveNumber, 2, COL2D );
-                    WriteData(SlaveInfo[3].SlaveNumber, 2, COL3D);                     
+                case 19:
+                    WriteData(SlaveInfo[0].SlaveNumber);
+                    WriteData(SlaveInfo[1].SlaveNumber);
+                    WriteData(SlaveInfo[2].SlaveNumber);
+                    WriteData(SlaveInfo[3].SlaveNumber);                     
                     terminal++;
                     //break;
                     
-                case 21:
-                    WriteData(SlaveInfo[0].HoldingRegRdSl[0], 3, COL0D );
-                    WriteData(SlaveInfo[1].HoldingRegRdSl[0], 3, COL1D );
-                    WriteData(SlaveInfo[2].HoldingRegRdSl[0], 3, COL2D );
-                    WriteData(SlaveInfo[3].HoldingRegRdSl[0], 3, COL3D);                     
+                case 20:
+                    WriteData(SlaveInfo[0].HoldingReg[0]);
+                    WriteData(SlaveInfo[1].HoldingReg[0]);
+                    WriteData(SlaveInfo[2].HoldingReg[0]);
+                    WriteData(SlaveInfo[3].HoldingReg[0]);                     
+                    terminal++;
+                    //break;
+					
+				case 21:
+                    WriteData(SlaveInfo[0].HoldingReg[1]);
+                    WriteData(SlaveInfo[1].HoldingReg[1]);
+                    WriteData(SlaveInfo[2].HoldingReg[1]);
+                    WriteData(SlaveInfo[3].HoldingReg[1]);                     
                     terminal++;
                     //break;
 					
 				case 22:
-                    WriteData(SlaveInfo[0].HoldingRegRdSl[1], 4, COL0D );
-                    WriteData(SlaveInfo[1].HoldingRegRdSl[1], 4, COL1D );
-                    WriteData(SlaveInfo[2].HoldingRegRdSl[1], 4, COL2D );
-                    WriteData(SlaveInfo[3].HoldingRegRdSl[1], 4, COL3D);                     
-                    terminal++;
-                    //break;
-					
-				case 23:
-                    WriteData(SlaveInfo[0].HoldingRegRdSl[2], 5, COL0D );
-                    WriteData(SlaveInfo[1].HoldingRegRdSl[2], 5, COL1D );
-                    WriteData(SlaveInfo[2].HoldingRegRdSl[2], 5, COL2D );
-                    WriteData(SlaveInfo[3].HoldingRegRdSl[2], 5, COL3D);                     
+                    WriteData(SlaveInfo[0].HoldingReg[2]);
+                    WriteData(SlaveInfo[1].HoldingReg[2]);
+                    WriteData(SlaveInfo[2].HoldingReg[2]);
+                    WriteData(SlaveInfo[3].HoldingReg[2]);                     
                     terminal++;
                     break;
 					
+				case 23:
+                    WriteData(SlaveInfo[0].HoldingReg[3]);
+                    WriteData(SlaveInfo[1].HoldingReg[3]);
+                    WriteData(SlaveInfo[2].HoldingReg[3]);
+                    WriteData(SlaveInfo[3].HoldingReg[3]);                     
+                    terminal++;
+                    //break;
+					
 				case 24:
-                    WriteData(SlaveInfo[0].HoldingRegRdSl[3], 6, COL0D );
-                    WriteData(SlaveInfo[1].HoldingRegRdSl[3], 6, COL1D );
-                    WriteData(SlaveInfo[2].HoldingRegRdSl[3], 6, COL2D );
-                    WriteData(SlaveInfo[3].HoldingRegRdSl[3], 6, COL3D);                     
+                    WriteData(SlaveInfo[0].InputReg[0]);
+                    WriteData(SlaveInfo[1].InputReg[0]);
+                    WriteData(SlaveInfo[2].InputReg[0]);
+                    WriteData(SlaveInfo[3].InputReg[0]);                     
                     terminal++;
                     //break;
 					
 				case 25:
-                    WriteData(SlaveInfo[0].HoldingRegWrSl[0], 7, COL0D );
-                    WriteData(SlaveInfo[1].HoldingRegWrSl[0], 7, COL1D );
-                    WriteData(SlaveInfo[2].HoldingRegWrSl[0], 7, COL2D );
-                    WriteData(SlaveInfo[3].HoldingRegWrSl[0], 7, COL3D);                     
+                    WriteData(SlaveInfo[0].InputReg[1]);
+                    WriteData(SlaveInfo[1].InputReg[1]);
+                    WriteData(SlaveInfo[2].InputReg[1]);
+                    WriteData(SlaveInfo[3].InputReg[1]);                     
                     terminal++;
                     //break;
 					
 				case 26:
-                    WriteData(SlaveInfo[0].HoldingRegWrSl[1], 8, COL0D );
-                    WriteData(SlaveInfo[1].HoldingRegWrSl[1], 8, COL1D );
-                    WriteData(SlaveInfo[2].HoldingRegWrSl[1], 8, COL2D );
-                    WriteData(SlaveInfo[3].HoldingRegWrSl[1], 8, COL3D);                     
-                    terminal++;
-                    //break;
-					
-				case 27:
-                    WriteData(SlaveInfo[0].HoldingRegWrSl[2], 9, COL0D );
-                    WriteData(SlaveInfo[1].HoldingRegWrSl[2], 9, COL1D );
-                    WriteData(SlaveInfo[2].HoldingRegWrSl[2], 9, COL2D );
-                    WriteData(SlaveInfo[3].HoldingRegWrSl[2], 9, COL3D);                     
+                    WriteData(SlaveInfo[0].InputReg[2]);
+                    WriteData(SlaveInfo[1].InputReg[2]);
+                    WriteData(SlaveInfo[2].InputReg[2]);
+                    WriteData(SlaveInfo[3].InputReg[2]);                     
                     terminal++;
                     break;
 					
+				case 27:
+                    WriteData(SlaveInfo[0].InputReg[3]);
+                    WriteData(SlaveInfo[1].InputReg[3]);
+                    WriteData(SlaveInfo[2].InputReg[3]);
+                    WriteData(SlaveInfo[3].InputReg[3]);                     
+                    terminal++;
+                    //break;
+					
 				case 28:
-                    WriteData(SlaveInfo[0].HoldingRegWrSl[3], 10, COL0D );
-                    WriteData(SlaveInfo[1].HoldingRegWrSl[3], 10, COL1D );
-                    WriteData(SlaveInfo[2].HoldingRegWrSl[3], 10, COL2D );
-                    WriteData(SlaveInfo[3].HoldingRegWrSl[3], 10, COL3D);                     
+                    WriteData(SlaveInfo[0].InputReg[4]);
+                    WriteData(SlaveInfo[1].InputReg[4]);
+                    WriteData(SlaveInfo[2].InputReg[4]);
+                    WriteData(SlaveInfo[3].InputReg[4]);                     
                     terminal++;
                     //break;
 					
 				case 29:
-                    WriteData(SlaveInfo[0].InputReg[0], 11, COL0D );
-                    WriteData(SlaveInfo[1].InputReg[0], 11, COL1D );
-                    WriteData(SlaveInfo[2].InputReg[0], 11, COL2D );
-                    WriteData(SlaveInfo[3].InputReg[0], 11, COL3D);                     
+                    WriteData(SlaveInfo[0].InputReg[5]);
+                    WriteData(SlaveInfo[1].InputReg[5]);
+                    WriteData(SlaveInfo[2].InputReg[5]);
+                    WriteData(SlaveInfo[3].InputReg[5]);                     
                     terminal++;
                     //break;
 					
 				case 30:
-                    WriteData(SlaveInfo[0].InputReg[1], 12, COL0D );
-                    WriteData(SlaveInfo[1].InputReg[1], 12, COL1D );
-                    WriteData(SlaveInfo[2].InputReg[1], 12, COL2D );
-                    WriteData(SlaveInfo[3].InputReg[1], 12, COL3D);                     
-                    terminal++;
-                    //break;
-					
-				case 31:
-                    WriteData(SlaveInfo[0].DiagReg[0], 13, COL0D );
-                    WriteData(SlaveInfo[1].DiagReg[0], 13, COL1D );
-                    WriteData(SlaveInfo[2].DiagReg[0], 13, COL2D );
-                    WriteData(SlaveInfo[3].DiagReg[0], 13, COL3D);                     
+                    WriteData(SlaveInfo[0].DiagReg[0]);
+                    WriteData(SlaveInfo[1].DiagReg[0]);
+                    WriteData(SlaveInfo[2].DiagReg[0]);
+                    WriteData(SlaveInfo[3].DiagReg[0]);                     
                     terminal++;
                     break;
 					
+				case 31:
+                    WriteData(SlaveInfo[0].DiagReg[1]);
+                    WriteData(SlaveInfo[1].DiagReg[1]);
+                    WriteData(SlaveInfo[2].DiagReg[1]);
+                    WriteData(SlaveInfo[3].DiagReg[1]);                     
+                    terminal++;
+                    //break;
+					
 				case 32:
-                    WriteData(SlaveInfo[0].DiagReg[1], 14, COL0D );
-                    WriteData(SlaveInfo[1].DiagReg[1], 14, COL1D );
-                    WriteData(SlaveInfo[2].DiagReg[1], 14, COL2D );
-                    WriteData(SlaveInfo[3].DiagReg[1], 14, COL3D);                     
+                    WriteData(SlaveInfo[0].MbReceiveCounter);
+                    WriteData(SlaveInfo[1].MbReceiveCounter);
+                    WriteData(SlaveInfo[2].MbReceiveCounter);
+                    WriteData(SlaveInfo[3].MbReceiveCounter);                     
                     terminal++;
                     //break;
-					
-				case 33:
-                    WriteData(SlaveInfo[0].DiagReg[2], 15, COL0D );
-                    WriteData(SlaveInfo[1].DiagReg[2], 15, COL1D );
-                    WriteData(SlaveInfo[2].DiagReg[2], 15, COL2D );
-                    WriteData(SlaveInfo[3].DiagReg[2], 15, COL3D);                     
+                    
+                case 33:
+                    WriteData(SlaveInfo[0].MbSentCounter);
+                    WriteData(SlaveInfo[1].MbSentCounter);
+                    WriteData(SlaveInfo[2].MbSentCounter);
+                    WriteData(SlaveInfo[3].MbSentCounter);                     
                     terminal++;
                     //break;
-					
-				case 34:
-                    WriteData(SlaveInfo[0].DiagReg[3], 16, COL0D );
-                    WriteData(SlaveInfo[1].DiagReg[3], 16, COL1D );
-                    WriteData(SlaveInfo[2].DiagReg[3], 16, COL2D );
-                    WriteData(SlaveInfo[3].DiagReg[3], 16, COL3D);                     
-                    terminal++;
-                    //break;
-					
-				case 35:
-                    WriteData(SlaveInfo[0].MbReceiveCounter, 17, COL0D );
-                    WriteData(SlaveInfo[1].MbReceiveCounter, 17, COL1D );
-                    WriteData(SlaveInfo[2].MbReceiveCounter, 17, COL2D );
-                    WriteData(SlaveInfo[3].MbReceiveCounter, 17, COL3D);                     
+                    
+                case 34:
+                    WriteData((char)(SlaveInfo[0].MbCommError));
+                    WriteData((char)(SlaveInfo[1].MbCommError));
+                    WriteData((char)(SlaveInfo[2].MbCommError));
+                    WriteData((char)(SlaveInfo[3].MbCommError));                     
                     terminal++;
                     break;
                     
+                case 35:
+                    WriteData(SlaveInfo[0].MbExceptionCode);
+                    WriteData(SlaveInfo[1].MbExceptionCode);
+                    WriteData(SlaveInfo[2].MbExceptionCode);
+                    WriteData(SlaveInfo[3].MbExceptionCode);                     
+                    terminal++;
+                    //break;
+                    
                 case 36:
-                    WriteData(SlaveInfo[0].MbSentCounter, 18, COL0D );
-                    WriteData(SlaveInfo[1].MbSentCounter, 18, COL1D );
-                    WriteData(SlaveInfo[2].MbSentCounter, 18, COL2D );
-                    WriteData(SlaveInfo[3].MbSentCounter, 18, COL3D);                     
-                    terminal ++;
+                    WriteData(SlaveInfo[0].SpiCommErrorCounter);
+                    WriteData(SlaveInfo[1].SpiCommErrorCounter);
+                    WriteData(SlaveInfo[2].SpiCommErrorCounter);
+                    WriteData(SlaveInfo[3].SpiCommErrorCounter);
+                    terminal++;
                     //break;
                     
                 case 37:
-                    WriteData((char)(SlaveInfo[0].MbCommError), 19, COL0D );
-                    WriteData((char)(SlaveInfo[1].MbCommError), 19, COL1D );
-                    WriteData((char)(SlaveInfo[2].MbCommError), 19, COL2D );
-                    WriteData((char)(SlaveInfo[3].MbCommError), 19, COL3D);                     
-                    terminal ++;
-                    //break;
-                    
-                case 38:
-                    WriteData(SlaveInfo[0].MbExceptionCode, 20, COL0D );
-                    WriteData(SlaveInfo[1].MbExceptionCode, 20, COL1D );
-                    WriteData(SlaveInfo[2].MbExceptionCode, 20, COL2D );
-                    WriteData(SlaveInfo[3].MbExceptionCode, 20, COL3D);                     
-                    terminal++;
-                    //break;
-                    
-                case 39:
-                    WriteData(SlaveInfo[0].SpiCommErrorCounter, 21, COL0D );
-                    WriteData(SlaveInfo[1].SpiCommErrorCounter, 21, COL1D );
-                    WriteData(SlaveInfo[2].SpiCommErrorCounter, 21, COL2D );
-                    WriteData(SlaveInfo[3].SpiCommErrorCounter, 21, COL3D);   
-                    WriteData(SpiSlaveCommErrorCounter, 24, COL0D);
-                    terminal = 20;
+					WriteData(SpiSlaveCommErrorCounter);
+					WriteData(0);
+					WriteData(0);
+					WriteData(0);
+					terminal = 19;
                     break;
                     
                 default :
-                    terminal = 20;
+                    terminal = 19;
                     break;
             }             
             UPDATExTERMINAL = 0;
@@ -503,48 +493,86 @@ void main(void)
 
 //printf("PWM1 BLock 1A: %d, PWM1 Setpoint: %d\r\n",PDC1,API[PWM1_SETPOINT] * 24);
 
-void WriteText(unsigned char *Text, unsigned int Ln, unsigned int Col){
-    //   [{ROW};{COLUMN}f    
-    printf("\033[%u;%uf", Ln, Col);
+
+
+
+void WriteText(unsigned char *Text){
     
-    printf(Text); 
+    //   [{ROW};{COLUMN}f    
+    printf("\033[%u;%uf", Ln, Col);    
+    printf(Text);
+    
+    ColCount++;
+    switch(ColCount){
+        case 0  : Col = COL0;break;
+        case 1  : Col = COL1;break;
+        case 2  : Col = COL2;break;
+        case 3  : Col = COL3;break;
+        default : Col = COL0;break;
+    }
+    
+    if(ColCount > (COLUMNS-1)){
+       Ln++;
+       Col = COL0;
+       ColCount = 0;
+    }
 }
 
-void WriteData(unsigned long int Data, unsigned int Ln, unsigned int Col){
+
+
+void WriteData(unsigned long int Data){
     
     char padding[10];
     
-         if(Data <1000000000){
-        strcpy(padding, " ");
+         if(Data < 10){
+        strcpy(padding, "    ");
     }
-    else if(Data <100000000){
-        strcpy(padding, "  ");
-    }
-    else if(Data <10000000){
+    else if(Data <100){
         strcpy(padding, "   ");
     }
-    else if(Data <1000000){
-        strcpy(padding, "    ");
+    else if(Data <1000){
+        strcpy(padding, "  ");
+    }
+    else if(Data <10000){
+        strcpy(padding, " ");
     }
     else if(Data <100000){
         strcpy(padding, "     ");
     }
-    else if(Data <10000){
-        strcpy(padding, "      ");
+    else if(Data <1000000){
+        strcpy(padding, "    ");
     }
-    else if(Data <1000){
-        strcpy(padding, "       ");
+    else if(Data <10000000){
+        strcpy(padding, "   ");
     }
-    else if(Data <100){
-        strcpy(padding, "        ");
+    else if(Data <100000000){
+        strcpy(padding, "  ");
     }
-    else if(Data < 10){
-        strcpy(padding, "         ");
+    else if(Data <1000000000){
+        strcpy(padding, " ");
     }
     else{
         strcpy(padding, "");
     }
     
-    printf("\033[%u;%uf", Ln, Col);
+    printf("\033[%u;%uf", LnD, ColD);
     printf("%lu%s", Data, padding);
+    
+    ColCount++;
+    switch(ColCount){
+        case 0  : ColD = COL0D;break;
+        case 1  : ColD = COL1D;break;
+        case 2  : ColD = COL2D;break;
+        case 3  : ColD = COL3D;break;
+        default : ColD = COL0D;break;
+    }
+    
+    if(ColCount > (COLUMNS-1)){
+       LnD++;
+       Col = COL0D;
+       ColCount = 0;
+       if(LnD >= Ln){
+           LnD = LNxSTART;
+       }
+    }
 }

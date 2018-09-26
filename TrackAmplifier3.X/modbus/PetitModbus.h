@@ -9,8 +9,8 @@
 #define __PETITMODBUS__H
                                                                                 // 1 register is 16 bits. The largest register is used to determine receive and transmit buffer size!
 #define NUMBER_OF_HOLDING_PETITREGISTERS                 4                      // Petit Modbus RTU Slave Holding Registers (read/write), Have to put a number of registers here It has to be bigger than 0 (zero)!!
-#define NUMBER_OF_INPUT_PETITREGISTERS                   2                      // Number of (read only) input registers)
-#define NUMBER_OF_DIAGNOSTIC_PETITREGISTERS              4                      // Number of diagnostic registers (send/receive counters)
+#define NUMBER_OF_INPUT_PETITREGISTERS                   6                      // Number of (read only) input registers)
+#define NUMBER_OF_DIAGNOSTIC_PETITREGISTERS              2                      // Number of diagnostic registers (send/receive counters)
 
 #define PETITMODBUS_TIMEOUTTIMER                         2                      // Timeout Constant for Petit Modbus RTU Slave [101us tick]
 

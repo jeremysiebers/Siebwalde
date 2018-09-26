@@ -1,4 +1,5 @@
 #include <xc.h>
+#include <string.h>
 #include "main.h"
 #include "mcc_generated_files/mcc.h"
 #include "spicommhandler.h"
@@ -25,6 +26,7 @@ static SLAVE_INFO *MASTER_SLAVE_DATA = 0;                                       
 static SLAVE_INFO SlaveInfoReadMask, SlaveInfoWriteMask = 0;                    // Read and write mask for slave data from and to ModbusMaster
 static unsigned char   *pSlaveDataReceived, *pSlaveDataSend, 
                 *pSlaveInfoReadMask, *pSlaveInfoWriteMask;
+                //*pSlaveInforReadRaw;
 
 static unsigned char DataFromSlaveSend = 1;                                     // Data to send counter
 static unsigned char DataReceivedOk = 0;
@@ -45,21 +47,19 @@ void InitSlaveCommunication(SLAVE_INFO *location)
     MASTER_SLAVE_DATA  =  location;
     
     SlaveInfoReadMask.Header           = 0x00;
-    SlaveInfoReadMask.SlaveNumber      = 0x00;                                  // Mask for data read from Modbus Master to written to local MASTER_SLAVE_DATA
-    SlaveInfoReadMask.HoldingRegRdSl[0]= 0xFFFF;
-    SlaveInfoReadMask.HoldingRegRdSl[1]= 0xFFFF;
-    SlaveInfoReadMask.HoldingRegRdSl[2]= 0xFFFF;
-    SlaveInfoReadMask.HoldingRegRdSl[3]= 0xFFFF;
-    SlaveInfoReadMask.HoldingRegWrSl[0]= 0x0000;
-    SlaveInfoReadMask.HoldingRegWrSl[1]= 0x0000;
-    SlaveInfoReadMask.HoldingRegWrSl[2]= 0x0000;
-    SlaveInfoReadMask.HoldingRegWrSl[3]= 0x0000;
+    SlaveInfoReadMask.SlaveNumber      = 0x00;                                  // Mask for data read from Modbus Master written to local MASTER_SLAVE_DATA
+    SlaveInfoReadMask.HoldingReg[0]    = 0xFFFF;
+    SlaveInfoReadMask.HoldingReg[1]    = 0xFFFF;
+    SlaveInfoReadMask.HoldingReg[2]    = 0xFFFF;
+    SlaveInfoReadMask.HoldingReg[3]    = 0xFFFF;
     SlaveInfoReadMask.InputReg[0]      = 0xFFFF;
     SlaveInfoReadMask.InputReg[1]      = 0xFFFF;
+    SlaveInfoReadMask.InputReg[2]      = 0xFFFF;
+    SlaveInfoReadMask.InputReg[3]      = 0xFFFF;
+    SlaveInfoReadMask.InputReg[4]      = 0xFFFF;
+    SlaveInfoReadMask.InputReg[5]      = 0xFFFF;
     SlaveInfoReadMask.DiagReg[0]       = 0xFFFF;
     SlaveInfoReadMask.DiagReg[1]       = 0xFFFF;
-    SlaveInfoReadMask.DiagReg[2]       = 0xFFFF;
-    SlaveInfoReadMask.DiagReg[3]       = 0xFFFF;
     SlaveInfoReadMask.MbReceiveCounter = 0xFFFF;
     SlaveInfoReadMask.MbSentCounter    = 0xFFFF;
     SlaveInfoReadMask.MbCommError      = 0xFF;
@@ -69,20 +69,18 @@ void InitSlaveCommunication(SLAVE_INFO *location)
     
     SlaveInfoWriteMask.Header           = 0xFF;
     SlaveInfoWriteMask.SlaveNumber      = 0xFF;                                 // Mask for data write to Modbus Master from local MASTER_SLAVE_DATA
-    SlaveInfoWriteMask.HoldingRegRdSl[0]= 0x0000;
-    SlaveInfoWriteMask.HoldingRegRdSl[1]= 0x0000;
-    SlaveInfoWriteMask.HoldingRegRdSl[2]= 0x0000;
-    SlaveInfoWriteMask.HoldingRegRdSl[3]= 0x0000;
-    SlaveInfoWriteMask.HoldingRegWrSl[0]= 0xFFFF;
-    SlaveInfoWriteMask.HoldingRegWrSl[1]= 0xFFFF;
-    SlaveInfoWriteMask.HoldingRegWrSl[2]= 0xFFFF;
-    SlaveInfoWriteMask.HoldingRegWrSl[3]= 0xFFFF;
+    SlaveInfoWriteMask.HoldingReg[0]    = 0xFFFF;
+    SlaveInfoWriteMask.HoldingReg[1]    = 0xFFFF;
+    SlaveInfoWriteMask.HoldingReg[2]    = 0xFFFF;
+    SlaveInfoWriteMask.HoldingReg[3]    = 0xFFFF;
     SlaveInfoWriteMask.InputReg[0]      = 0x0000;
     SlaveInfoWriteMask.InputReg[1]      = 0x0000;
+    SlaveInfoWriteMask.InputReg[2]      = 0x0000;
+    SlaveInfoWriteMask.InputReg[3]      = 0x0000;
+    SlaveInfoWriteMask.InputReg[4]      = 0x0000;
+    SlaveInfoWriteMask.InputReg[5]      = 0x0000;
     SlaveInfoWriteMask.DiagReg[0]       = 0x0000;
     SlaveInfoWriteMask.DiagReg[1]       = 0x0000;
-    SlaveInfoWriteMask.DiagReg[2]       = 0x0000;
-    SlaveInfoWriteMask.DiagReg[3]       = 0x0000;
     SlaveInfoWriteMask.MbReceiveCounter = 0x0000;
     SlaveInfoWriteMask.MbSentCounter    = 0x0000;
     SlaveInfoWriteMask.MbCommError      = 0x00;
@@ -157,6 +155,34 @@ void ProcessSpiInterrupt(){
                  
     SS1_Check_LAT = 0;  
 }
+
+/*
+void ProcessSpiData(){
+    
+    pSlaveDataReceived = &(MASTER_SLAVE_DATA[RECEIVEDxDATAxRAW[1]].Header);// set the pointer to the first element of the received slave number in RECEIVEDxDATAxRAW[2]([1]==header)
+    pSlaveDataSend = &(MASTER_SLAVE_DATA[DataFromSlaveSend].Header);       // set the pointer to the first element of the MASTER_SLAVE_DATA according to the DataFromSlaveSend counter
+        
+    pSlaveInforReadRaw = (RECEIVEDxDATAxRAW);
+
+    if(RECEIVEDxDATAxRAW[1] < NUMBER_OF_SLAVES && RECEIVEDxDATAxRAW[0]==0xAA && RECEIVEDxDATAxRAW[DATAxSTRUCTxLENGTH-1]==0x55){        
+        pSlaveInforReadRaw+2;
+        pSlaveDataReceived+2;
+        memcpy(pSlaveDataReceived, RECEIVEDxDATAxRAW, 8);
+        pSlaveInforReadRaw+16;
+        pSlaveDataReceived+16;
+        memcpy(pSlaveDataReceived, RECEIVEDxDATAxRAW, 39);
+    }
+    else{
+        SpiSlaveCommErrorCounter += 1;
+    }    
+    memcpy(SENDxDATAxRAW, pSlaveDataSend, DATAxSTRUCTxLENGTH);
+
+    DataFromSlaveSend++;                                                        // Count down the slaves of which the info still need to be send
+    if(DataFromSlaveSend > (NUMBER_OF_SLAVES - 1)){
+        DataFromSlaveSend = 0;
+    }    
+}
+*/
 
 void ProcessSpiData(){
     

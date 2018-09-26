@@ -12,8 +12,8 @@
 
                                                                                 // 1 register is 16 bits. The largest register is used to determine receive and transmit buffer size!
 #define NUMBER_OF_HOLDING_PETITREGISTERS                 4                      // Petit Modbus RTU Slave Holding Registers (read/write), Have to put a number of registers here It has to be bigger than 0 (zero)!!
-#define NUMBER_OF_INPUT_PETITREGISTERS                   2                      // Number of (read only) input registers)
-#define NUMBER_OF_DIAGNOSTIC_PETITREGISTERS              4                      // Number of diagnostic registers (send/receive counters)
+#define NUMBER_OF_INPUT_PETITREGISTERS                   6                      // Number of (read only) input registers)
+#define NUMBER_OF_DIAGNOSTIC_PETITREGISTERS              2                      // Number of diagnostic registers (send/receive counters)
 
 #define PETITMODBUS_TIMEOUTTIMER                         2                      // Timeout Constant for Petit Modbus RTU Slave [101us tick]
 
@@ -54,21 +54,17 @@ typedef struct
 {
     unsigned char       Header;
     unsigned char       SlaveNumber;
-    unsigned int        HoldingRegRdSl[NUMBER_OF_HOLDING_PETITREGISTERS];
-    unsigned int        HoldingRegWrSl[NUMBER_OF_HOLDING_PETITREGISTERS];
+    unsigned int        HoldingReg[NUMBER_OF_HOLDING_PETITREGISTERS];
     unsigned int        InputReg[NUMBER_OF_INPUT_PETITREGISTERS];
     unsigned int        DiagReg[NUMBER_OF_DIAGNOSTIC_PETITREGISTERS];
-    unsigned long int   MbReceiveCounter;
-    unsigned long int   MbSentCounter;
+    unsigned int        MbReceiveCounter;
+    unsigned int        MbSentCounter;
     SLAVE_DATA          MbCommError;
     unsigned char       MbExceptionCode;
     unsigned int        SpiCommErrorCounter;
     unsigned char       Footer;
     
 }SLAVE_INFO;
-
-#define MESSAGE_SEND_REG 1
-#define MESSAGE_RECEIVE_REG 2
 
 // Main Functions
 extern void             InitPetitModbus(SLAVE_INFO *location);

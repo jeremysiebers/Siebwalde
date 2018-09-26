@@ -33,16 +33,16 @@ typedef struct
 {
     unsigned char       Header;
     unsigned char       SlaveNumber;
-    unsigned int        HoldingRegRdSl[4];
-    unsigned int        HoldingRegWrSl[4];
-    unsigned int        InputReg[2];
-    unsigned int        DiagReg[4];
-    unsigned long int   MbReceiveCounter;
-    unsigned long int   MbSentCounter;
+    unsigned int        HoldingReg[4];
+    unsigned int        InputReg[6];
+    unsigned int        DiagReg[2];
+    unsigned int        MbReceiveCounter;
+    unsigned int        MbSentCounter;
     SLAVE_DATA          MbCommError;
     unsigned char       MbExceptionCode;
     unsigned int        SpiCommErrorCounter;
     unsigned char       Footer;
+    
 }SLAVE_INFO;
 
 extern unsigned char UPDATExTERMINAL;

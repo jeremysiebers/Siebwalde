@@ -10,6 +10,7 @@
 #include "main.h"
 #include "mcc_generated_files/mcc.h"
 #include "modbus/General.h"
+#include "processio.h"
 
 unsigned int MODBUS_ADDRESS = 0;
 unsigned int result = 0;
@@ -38,10 +39,9 @@ void main(void) {
             
     while(1){
         ProcessPetitModbus();
+        ProcessIO();
                 
         if(PIR0bits.TMR0IF){
-            
-            LED_WAR_LAT = PetitHoldingRegisters[0].ActValue;
             
             switch(LED_TX_STATE){
                 case 0 : 
@@ -121,7 +121,7 @@ void Get_ID_From_AD(){
         LED_RUN_LAT = 1;
         LED_ERR_LAT = 0;
     }
-    else if(result > 104 && result < 112){
+    else if(result > 104 && result < 115){
         MODBUS_ADDRESS = 3;
         LED_RUN_LAT = 1;
         LED_ERR_LAT = 0;
@@ -131,4 +131,5 @@ void Get_ID_From_AD(){
         LED_ERR_LAT = 1;
         while(1){};
     }
+    //PetitHoldingRegisters[2].ActValue |= (unsigned int)(MODBUS_ADDRESS);
 }
