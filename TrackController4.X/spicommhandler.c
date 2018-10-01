@@ -48,10 +48,10 @@ void InitSlaveCommunication(SLAVE_INFO *location)
     
     SlaveInfoReadMask.Header           = 0x00;
     SlaveInfoReadMask.SlaveNumber      = 0x00;                                  // Mask for data read from Modbus Master written to local MASTER_SLAVE_DATA
-    SlaveInfoReadMask.HoldingReg[0]    = 0xFFFF;
-    SlaveInfoReadMask.HoldingReg[1]    = 0xFFFF;
-    SlaveInfoReadMask.HoldingReg[2]    = 0xFFFF;
-    SlaveInfoReadMask.HoldingReg[3]    = 0xFFFF;
+    SlaveInfoReadMask.HoldingReg[0]    = 0x0000;
+    SlaveInfoReadMask.HoldingReg[1]    = 0x0000;
+    SlaveInfoReadMask.HoldingReg[2]    = 0x0000;
+    SlaveInfoReadMask.HoldingReg[3]    = 0x0000;
     SlaveInfoReadMask.InputReg[0]      = 0xFFFF;
     SlaveInfoReadMask.InputReg[1]      = 0xFFFF;
     SlaveInfoReadMask.InputReg[2]      = 0xFFFF;

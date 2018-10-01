@@ -58,8 +58,8 @@
  void PWM6_Initialize(void)
  {
     // Set the PWM to the options selected in the PIC10 / PIC12 / PIC16 / PIC18 MCUs.
-    // PWM6POL active_hi; PWM6EN enabled; 
-    PWM6CON = 0x80;   
+    // PWM6POL active_hi; PWM6EN disabled; 
+    PWM6CON = 0x00;   
 
     // DC 99; 
     PWM6DCH = 0x63;   

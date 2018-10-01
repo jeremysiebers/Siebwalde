@@ -9,8 +9,10 @@
 #include <xc.h>
 #include "main.h"
 #include "mcc_generated_files/mcc.h"
+#include "mcc_generated_files/adcc.h"
 #include "modbus/General.h"
 #include "processio.h"
+#include "regulator.h"
 
 unsigned int MODBUS_ADDRESS = 0;
 unsigned int result = 0;
@@ -22,26 +24,34 @@ void main(void) {
     
     SYSTEM_Initialize();
     TMR1_StopTimer();
-    __delay_ms(100);
+    LED_RUN_LAT     = 0;
+    LED_WAR_LAT     = 0;
+    LED_ERR_LAT     = 1;    
+    LED_TX_LAT      = 0;
+    LED_RX_LAT      = 0; 
+    
+    LM_DIR_LAT      = 0;
+    LM_PWM_LAT      = 0;
+    LM_BRAKE_LAT    = 1;
+    
+    __delay_ms(10);
     
     INTCONbits.GIE = 1;
     INTCONbits.PEIE = 1;
     
-    LED_RUN_LAT = 0;
-    LED_WAR_LAT = 0;
-    LED_ERR_LAT = 1;    
-    LED_TX_LAT = 0;
-    LED_RX_LAT = 0;
-    
     Get_ID_From_AD();
     
     InitPetitModbus(MODBUS_ADDRESS);
+    Regulator_Init();    
             
     while(1){
         ProcessPetitModbus();
-        ProcessIO();
+        
+        Regulator();
                 
         if(PIR0bits.TMR0IF){
+            
+            ProcessIO();
             
             switch(LED_TX_STATE){
                 case 0 : 
@@ -109,7 +119,7 @@ void main(void) {
  *****************************************************************************/
 void Get_ID_From_AD(){
     
-    result = ADCC_GetSingleConversion(0);
+    result = ADCC_GetSingleConversion(ID);
     
     if(result > 80 && result < 96){
         MODBUS_ADDRESS = 1;

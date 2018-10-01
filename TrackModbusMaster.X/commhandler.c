@@ -113,9 +113,9 @@ void ProcessNextSlave(){
     switch (Message){
         case MESSAGE1:
             HoldingRegistersWrite[8]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[1];
-            HoldingRegistersWrite[7]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[1] << 8;
+            HoldingRegistersWrite[7]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[1] >> 8;
             HoldingRegistersWrite[6]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[0];
-            HoldingRegistersWrite[5]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[0] << 8;
+            HoldingRegistersWrite[5]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[0] >> 8;
             HoldingRegistersWrite[4]  = 4;
             HoldingRegistersWrite[3]  = 2;
             HoldingRegistersWrite[2]  = 0;
@@ -136,9 +136,9 @@ void ProcessNextSlave(){
             switch (Mailbox){
                 case 1:
                     HoldingRegistersWrite[8]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[3];
-                    HoldingRegistersWrite[7]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[3] << 8;
+                    HoldingRegistersWrite[7]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[3] >> 8;
                     HoldingRegistersWrite[6]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[2];
-                    HoldingRegistersWrite[5]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[2] << 8;
+                    HoldingRegistersWrite[5]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[2] >> 8;
                     HoldingRegistersWrite[4]  = 4;
                     HoldingRegistersWrite[3]  = 2;
                     HoldingRegistersWrite[2]  = 0;
@@ -364,7 +364,7 @@ void SendDataToEthernet(){
  * 
  * HoldingReg0, 0 - 9           PWM set point       	R/W     No/Yes			// new PWM setpoint (speed in 0 - 255 km/h)
  * HoldingReg0, 10				PWM direction       	R/W     No/Yes          // Forward / Backward
- * HoldingReg0, 11              PWM enable          	R/W     No/Yes          // enabling of the H-bridge
+ * HoldingReg0, 11              PWM brake            	R/W     No/Yes          // enabling of the H-bridge outputs
  * HoldingReg0, 12                                  	
  * HoldingReg0, 13                                  	
  * HoldingReg0, 14                                  	
@@ -386,13 +386,13 @@ void SendDataToEthernet(){
  * InputReg0, 14
  * InputReg0, 15
  * 
- * InputReg1, 0 - 15            Amplifier Status        R/-     No/-            // Amplifier status list
+ * InputReg4, 0 - 15            Amplifier Status        R/-     No/-            // Amplifier status list
  *                                                  	
- * InputReg2, 0 - 9          	H-bridge fuse status	R/-	    No/-            // Voltage H-bridge fuse 0 - 31V
+ * InputReg1, 0 - 9          	H-bridge fuse status	R/-	    No/-            // Voltage H-bridge fuse 0 - 31V
  * 
- * InputReg3, 0 - 9          	H-bridge temperature	R/-		No/-			// H-bridge temperature 0 - 255 degrees Celsius
+ * InputReg2, 0 - 9          	H-bridge temperature	R/-		No/-			// H-bridge temperature 0 - 255 degrees Celsius
  * 
- * InputReg4, 0 - 9          	H-bridge current     	R/-		No/-			// H-bridge current A
+ * InputReg3, 0 - 9          	H-bridge current     	R/-		No/-			// H-bridge current A
  * 
  * InputReg5, 0 - 9          	                                           		// Spare
  * 

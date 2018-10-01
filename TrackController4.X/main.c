@@ -88,6 +88,9 @@ void main(void)
         SlaveInfo[i].SlaveNumber = i;
         SlaveInfo[i].Header = 0xAA;
         SlaveInfo[i].Footer = 0x55;
+        if (i > 0){
+            SlaveInfo[i].HoldingReg[0] = 0x818F;                                    // Set all EMO an 50%
+        }
     }
     
     // Initialize the device
@@ -129,6 +132,8 @@ void main(void)
     
     ModbusReset_LAT = 0;                                                        // as last release the ModbusMaster.
     
+    
+    
     while (1)
     {
         if(EUSART1_is_rx_ready()){
@@ -144,27 +149,57 @@ void main(void)
                     break;
                     
                 case 0x31:
-                    (unsigned int)SlaveInfo[1].HoldingReg[0] = 1;
+                    (unsigned int)SlaveInfo[1].HoldingReg[0] &= 0x0FFF; 
+                    if((SlaveInfo[1].HoldingReg[0] & 0x31F) > 0){               // PWM On and 50% duty
+                        (unsigned int)SlaveInfo[1].HoldingReg[0]-= 50;          
+                    }          
                     break;
                         
                 case 0x32:
-                    (unsigned int)SlaveInfo[2].HoldingReg[0] = 1;
+                    (unsigned int)SlaveInfo[2].HoldingReg[0] &= 0x0FFF; 
+                    if((SlaveInfo[2].HoldingReg[0] & 0x31F) > 0){               // PWM On and 50% duty
+                        (unsigned int)SlaveInfo[2].HoldingReg[0]-= 50;          
+                    }
                     break;
                 
                 case 0x33:
-                    (unsigned int)SlaveInfo[3].HoldingReg[0] = 1;
+                    (unsigned int)SlaveInfo[3].HoldingReg[0] &= 0x0FFF; 
+                    if((SlaveInfo[3].HoldingReg[0] & 0x31F) > 0){               // PWM On and 50% duty
+                        (unsigned int)SlaveInfo[3].HoldingReg[0]-= 50;          
+                    }
                     break;
                     
                 case 0x34:
-                    (unsigned int)SlaveInfo[1].HoldingReg[0] = 0;
+                    (unsigned int)SlaveInfo[1].HoldingReg[0] = 0x8000;          // EMO               
                     break;
                         
                 case 0x35:
-                    (unsigned int)SlaveInfo[2].HoldingReg[0] = 0;
+                    (unsigned int)SlaveInfo[2].HoldingReg[0] = 0x8000;
                     break;
                 
                 case 0x36:
-                    (unsigned int)SlaveInfo[3].HoldingReg[0] = 0;
+                    (unsigned int)SlaveInfo[3].HoldingReg[0] = 0x8000;
+                    break;
+                    
+                case 0x37:
+                    (unsigned int)SlaveInfo[1].HoldingReg[0] &= 0x0FFF; 
+                    if((SlaveInfo[1].HoldingReg[0] & 0x31F) < 0x31F){
+                        (unsigned int)SlaveInfo[1].HoldingReg[0]+= 50;          
+                    }
+                    break;
+                        
+                case 0x38:
+                    (unsigned int)SlaveInfo[2].HoldingReg[0] &= 0x0FFF; 
+                    if((SlaveInfo[2].HoldingReg[0] & 0x31F) < 0x31F){
+                        (unsigned int)SlaveInfo[2].HoldingReg[0]+= 50; 
+                    }
+                    break;
+                
+                case 0x39:
+                    (unsigned int)SlaveInfo[3].HoldingReg[0] &= 0x0FFF; 
+                    if((SlaveInfo[3].HoldingReg[0] & 0x31F) < 0x31F){
+                        (unsigned int)SlaveInfo[3].HoldingReg[0]+= 50; 
+                    }
                     break;
                     
                 default:
@@ -328,6 +363,8 @@ void main(void)
                     break;                    
 /*------------------------------------------------------------------------------------------*/                    
                 case 19:
+                    LnD  = LNxSTART;
+                    ColD = COL0D;
                     WriteData(SlaveInfo[0].SlaveNumber);
                     WriteData(SlaveInfo[1].SlaveNumber);
                     WriteData(SlaveInfo[2].SlaveNumber);
@@ -336,6 +373,8 @@ void main(void)
                     //break;
                     
                 case 20:
+                    LnD  = LNxSTART+1;
+                    ColD = COL0D;
                     WriteData(SlaveInfo[0].HoldingReg[0]);
                     WriteData(SlaveInfo[1].HoldingReg[0]);
                     WriteData(SlaveInfo[2].HoldingReg[0]);
@@ -344,6 +383,8 @@ void main(void)
                     //break;
 					
 				case 21:
+                    LnD  = LNxSTART+2;
+                    ColD = COL0D;
                     WriteData(SlaveInfo[0].HoldingReg[1]);
                     WriteData(SlaveInfo[1].HoldingReg[1]);
                     WriteData(SlaveInfo[2].HoldingReg[1]);
@@ -352,6 +393,8 @@ void main(void)
                     //break;
 					
 				case 22:
+                    LnD  = LNxSTART+3;
+                    ColD = COL0D;
                     WriteData(SlaveInfo[0].HoldingReg[2]);
                     WriteData(SlaveInfo[1].HoldingReg[2]);
                     WriteData(SlaveInfo[2].HoldingReg[2]);
@@ -360,6 +403,8 @@ void main(void)
                     break;
 					
 				case 23:
+                    LnD  = LNxSTART+4;
+                    ColD = COL0D;
                     WriteData(SlaveInfo[0].HoldingReg[3]);
                     WriteData(SlaveInfo[1].HoldingReg[3]);
                     WriteData(SlaveInfo[2].HoldingReg[3]);
@@ -368,6 +413,8 @@ void main(void)
                     //break;
 					
 				case 24:
+                    LnD  = LNxSTART+5;
+                    ColD = COL0D;
                     WriteData(SlaveInfo[0].InputReg[0]);
                     WriteData(SlaveInfo[1].InputReg[0]);
                     WriteData(SlaveInfo[2].InputReg[0]);
@@ -376,6 +423,8 @@ void main(void)
                     //break;
 					
 				case 25:
+                    LnD  = LNxSTART+6;
+                    ColD = COL0D;
                     WriteData(SlaveInfo[0].InputReg[1]);
                     WriteData(SlaveInfo[1].InputReg[1]);
                     WriteData(SlaveInfo[2].InputReg[1]);
@@ -384,6 +433,8 @@ void main(void)
                     //break;
 					
 				case 26:
+                    LnD  = LNxSTART+7;
+                    ColD = COL0D;
                     WriteData(SlaveInfo[0].InputReg[2]);
                     WriteData(SlaveInfo[1].InputReg[2]);
                     WriteData(SlaveInfo[2].InputReg[2]);
@@ -392,6 +443,8 @@ void main(void)
                     break;
 					
 				case 27:
+                    LnD  = LNxSTART+8;
+                    ColD = COL0D;
                     WriteData(SlaveInfo[0].InputReg[3]);
                     WriteData(SlaveInfo[1].InputReg[3]);
                     WriteData(SlaveInfo[2].InputReg[3]);
@@ -400,6 +453,8 @@ void main(void)
                     //break;
 					
 				case 28:
+                    LnD  = LNxSTART+9;
+                    ColD = COL0D;
                     WriteData(SlaveInfo[0].InputReg[4]);
                     WriteData(SlaveInfo[1].InputReg[4]);
                     WriteData(SlaveInfo[2].InputReg[4]);
@@ -408,6 +463,8 @@ void main(void)
                     //break;
 					
 				case 29:
+                    LnD  = LNxSTART+10;
+                    ColD = COL0D;
                     WriteData(SlaveInfo[0].InputReg[5]);
                     WriteData(SlaveInfo[1].InputReg[5]);
                     WriteData(SlaveInfo[2].InputReg[5]);
@@ -416,6 +473,8 @@ void main(void)
                     //break;
 					
 				case 30:
+                    LnD  = LNxSTART+11;
+                    ColD = COL0D;
                     WriteData(SlaveInfo[0].DiagReg[0]);
                     WriteData(SlaveInfo[1].DiagReg[0]);
                     WriteData(SlaveInfo[2].DiagReg[0]);
@@ -424,6 +483,8 @@ void main(void)
                     break;
 					
 				case 31:
+                    LnD  = LNxSTART+12;
+                    ColD = COL0D;
                     WriteData(SlaveInfo[0].DiagReg[1]);
                     WriteData(SlaveInfo[1].DiagReg[1]);
                     WriteData(SlaveInfo[2].DiagReg[1]);
@@ -432,6 +493,8 @@ void main(void)
                     //break;
 					
 				case 32:
+                    LnD  = LNxSTART+13;
+                    ColD = COL0D;
                     WriteData(SlaveInfo[0].MbReceiveCounter);
                     WriteData(SlaveInfo[1].MbReceiveCounter);
                     WriteData(SlaveInfo[2].MbReceiveCounter);
@@ -440,6 +503,8 @@ void main(void)
                     //break;
                     
                 case 33:
+                    LnD  = LNxSTART+14;
+                    ColD = COL0D;
                     WriteData(SlaveInfo[0].MbSentCounter);
                     WriteData(SlaveInfo[1].MbSentCounter);
                     WriteData(SlaveInfo[2].MbSentCounter);
@@ -448,6 +513,8 @@ void main(void)
                     //break;
                     
                 case 34:
+                    LnD  = LNxSTART+15;
+                    ColD = COL0D;
                     WriteData((char)(SlaveInfo[0].MbCommError));
                     WriteData((char)(SlaveInfo[1].MbCommError));
                     WriteData((char)(SlaveInfo[2].MbCommError));
@@ -456,6 +523,8 @@ void main(void)
                     break;
                     
                 case 35:
+                    LnD  = LNxSTART+16;
+                    ColD = COL0D;
                     WriteData(SlaveInfo[0].MbExceptionCode);
                     WriteData(SlaveInfo[1].MbExceptionCode);
                     WriteData(SlaveInfo[2].MbExceptionCode);
@@ -464,6 +533,8 @@ void main(void)
                     //break;
                     
                 case 36:
+                    LnD  = LNxSTART+17;
+                    ColD = COL0D;
                     WriteData(SlaveInfo[0].SpiCommErrorCounter);
                     WriteData(SlaveInfo[1].SpiCommErrorCounter);
                     WriteData(SlaveInfo[2].SpiCommErrorCounter);
@@ -472,6 +543,8 @@ void main(void)
                     //break;
                     
                 case 37:
+                    LnD  = LNxSTART+18;
+                    ColD = COL0D;
 					WriteData(SpiSlaveCommErrorCounter);
 					WriteData(0);
 					WriteData(0);

@@ -11,6 +11,7 @@
 #include "modbus/PetitModbus.h"
 #include "commhandler.h"
 
+#define ALLxSLAVESxDATA ((unsigned int)((NUMBER_OF_SLAVES-1)*3) * 4)
 
 /*----------------------------------------------------------------------------*/
 
@@ -21,6 +22,7 @@ static SLAVE_INFO         SlaveInfo[NUMBER_OF_SLAVES];                          
 unsigned int LED_TX_prev, LED_RX_prev = 0;
 unsigned int LED_TX_STATE, LED_RX_STATE = 0;
 unsigned int UpdateNextSlave = false;
+unsigned int AllSlavesReadAllDataCounter = 1;
 
 void main(void) {
     // Initialize the SLAVE_INFO struct with slave numebers
@@ -32,13 +34,14 @@ void main(void) {
     // Initialize the device
     SYSTEM_Initialize();
     TMR1_StopTimer();                                                           // prevent timer1 from setting slave timeout to 1.
-    __delay_ms(200);                                                            // Wait longer then the slaves (1000ms)
     
     LED_RUN_LAT = 0;
     LED_WAR_LAT = 0;
     LED_ERR_LAT = 1;    
     LED_TX_LAT = 0;
     LED_RX_LAT = 0;
+    
+    __delay_ms(50);                                                            // Wait longer then the slaves (1000ms)
     
     TMR0_StartTimer();                                                          // TX/RX led timer
     
@@ -66,7 +69,10 @@ void main(void) {
         if (UpdateNextSlave == true){
             ProcessNextSlave();
             UpdateNextSlave = false;
-            //modbus_sync_LAT = 0;
+            AllSlavesReadAllDataCounter++;
+            if (AllSlavesReadAllDataCounter > ALLxSLAVESxDATA){
+                AllSlavesReadAllDataCounter = 1;
+            }
         }
         
         if(PIR0bits.TMR0IF){
