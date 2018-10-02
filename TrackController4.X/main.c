@@ -140,64 +140,59 @@ void main(void)
             switch(EUSART1_Read()){
                 case 0x30:
                     ModbusReset_LAT = 1;
-                    RESET();
-                    SpiSlaveCommErrorCounter = 0;
-                    printf("\f");                                               // Clear terminal (printf("\033[2J");)
-                    __delay_ms(10);
-                    terminal = 0;                                               // Re-print whole table to terminal
-                    ModbusReset_LAT = 0;
+                    RESET();                    
                     break;
                     
                 case 0x31:
                     (unsigned int)SlaveInfo[1].HoldingReg[0] &= 0x0FFF; 
-                    if((SlaveInfo[1].HoldingReg[0] & 0x31F) > 0){               // PWM On and 50% duty
+                    if((SlaveInfo[1].HoldingReg[0] & 0x3FF) > 60){               // PWM On and 50% duty
                         (unsigned int)SlaveInfo[1].HoldingReg[0]-= 50;          
                     }          
                     break;
                         
                 case 0x32:
                     (unsigned int)SlaveInfo[2].HoldingReg[0] &= 0x0FFF; 
-                    if((SlaveInfo[2].HoldingReg[0] & 0x31F) > 0){               // PWM On and 50% duty
+                    if((SlaveInfo[2].HoldingReg[0] & 0x3FF) > 60){               // PWM On and 50% duty
                         (unsigned int)SlaveInfo[2].HoldingReg[0]-= 50;          
                     }
                     break;
                 
                 case 0x33:
                     (unsigned int)SlaveInfo[3].HoldingReg[0] &= 0x0FFF; 
-                    if((SlaveInfo[3].HoldingReg[0] & 0x31F) > 0){               // PWM On and 50% duty
+                    if((SlaveInfo[3].HoldingReg[0] & 0x3FF) > 60){               // PWM On and 50% duty
                         (unsigned int)SlaveInfo[3].HoldingReg[0]-= 50;          
                     }
                     break;
                     
                 case 0x34:
-                    (unsigned int)SlaveInfo[1].HoldingReg[0] = 0x8000;          // EMO               
+                    (unsigned int)SlaveInfo[1].HoldingReg[0] = 0x018F;          // 50%              
                     break;
                         
                 case 0x35:
-                    (unsigned int)SlaveInfo[2].HoldingReg[0] = 0x8000;
+                    (unsigned int)SlaveInfo[2].HoldingReg[0] = 0x018F;
                     break;
                 
                 case 0x36:
-                    (unsigned int)SlaveInfo[3].HoldingReg[0] = 0x8000;
+                    (unsigned int)SlaveInfo[3].HoldingReg[0] = 0x018F;
                     break;
                     
                 case 0x37:
                     (unsigned int)SlaveInfo[1].HoldingReg[0] &= 0x0FFF; 
-                    if((SlaveInfo[1].HoldingReg[0] & 0x31F) < 0x31F){
+                    if((SlaveInfo[1].HoldingReg[0] & 0x3FF) < 720){
                         (unsigned int)SlaveInfo[1].HoldingReg[0]+= 50;          
                     }
                     break;
                         
                 case 0x38:
                     (unsigned int)SlaveInfo[2].HoldingReg[0] &= 0x0FFF; 
-                    if((SlaveInfo[2].HoldingReg[0] & 0x31F) < 0x31F){
+                    if((SlaveInfo[2].HoldingReg[0] & 0x3FF) < 720){
                         (unsigned int)SlaveInfo[2].HoldingReg[0]+= 50; 
                     }
                     break;
                 
                 case 0x39:
                     (unsigned int)SlaveInfo[3].HoldingReg[0] &= 0x0FFF; 
-                    if((SlaveInfo[3].HoldingReg[0] & 0x31F) < 0x31F){
+                    if((SlaveInfo[3].HoldingReg[0] & 0x3FF) < 720){
                         (unsigned int)SlaveInfo[3].HoldingReg[0]+= 50; 
                     }
                     break;

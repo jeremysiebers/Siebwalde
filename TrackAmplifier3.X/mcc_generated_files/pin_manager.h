@@ -151,25 +151,17 @@
 #define LM_V_SetAnalogMode()      do { ANSELAbits.ANSA4 = 1; } while(0)
 #define LM_V_SetDigitalMode()     do { ANSELAbits.ANSA4 = 0; } while(0)
 
-// get/set NC_1 aliases
-#define NC_1_TRIS                 TRISAbits.TRISA5
-#define NC_1_LAT                  LATAbits.LATA5
-#define NC_1_PORT                 PORTAbits.RA5
-#define NC_1_WPU                  WPUAbits.WPUA5
-#define NC_1_OD                   ODCONAbits.ODCA5
-#define NC_1_ANS                  ANSELAbits.ANSA5
-#define NC_1_SetHigh()            do { LATAbits.LATA5 = 1; } while(0)
-#define NC_1_SetLow()             do { LATAbits.LATA5 = 0; } while(0)
-#define NC_1_Toggle()             do { LATAbits.LATA5 = ~LATAbits.LATA5; } while(0)
-#define NC_1_GetValue()           PORTAbits.RA5
-#define NC_1_SetDigitalInput()    do { TRISAbits.TRISA5 = 1; } while(0)
-#define NC_1_SetDigitalOutput()   do { TRISAbits.TRISA5 = 0; } while(0)
-#define NC_1_SetPullup()          do { WPUAbits.WPUA5 = 1; } while(0)
-#define NC_1_ResetPullup()        do { WPUAbits.WPUA5 = 0; } while(0)
-#define NC_1_SetPushPull()        do { ODCONAbits.ODCA5 = 0; } while(0)
-#define NC_1_SetOpenDrain()       do { ODCONAbits.ODCA5 = 1; } while(0)
-#define NC_1_SetAnalogMode()      do { ANSELAbits.ANSA5 = 1; } while(0)
-#define NC_1_SetDigitalMode()     do { ANSELAbits.ANSA5 = 0; } while(0)
+// get/set RA5 procedures
+#define RA5_SetHigh()               do { LATAbits.LATA5 = 1; } while(0)
+#define RA5_SetLow()                do { LATAbits.LATA5 = 0; } while(0)
+#define RA5_Toggle()                do { LATAbits.LATA5 = ~LATAbits.LATA5; } while(0)
+#define RA5_GetValue()              PORTAbits.RA5
+#define RA5_SetDigitalInput()       do { TRISAbits.TRISA5 = 1; } while(0)
+#define RA5_SetDigitalOutput()      do { TRISAbits.TRISA5 = 0; } while(0)
+#define RA5_SetPullup()             do { WPUAbits.WPUA5 = 1; } while(0)
+#define RA5_ResetPullup()           do { WPUAbits.WPUA5 = 0; } while(0)
+#define RA5_SetAnalogMode()         do { ANSELAbits.ANSA5 = 1; } while(0)
+#define RA5_SetDigitalMode()        do { ANSELAbits.ANSA5 = 0; } while(0)
 
 // get/set NC_2 aliases
 #define NC_2_TRIS                 TRISAbits.TRISA6

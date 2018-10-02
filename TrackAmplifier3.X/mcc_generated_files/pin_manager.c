@@ -66,7 +66,7 @@ void PIN_MANAGER_Initialize(void)
     /**
     TRISx registers
     */
-    TRISA = 0xFF;
+    TRISA = 0xDF;
     TRISB = 0xC1;
     TRISC = 0x89;
 
@@ -102,6 +102,7 @@ void PIN_MANAGER_Initialize(void)
     T2AINPPSbits.T2AINPPS = 0x10;   //RC0->TMR2:T2IN;    
     RXPPSbits.RXPPS = 0x13;   //RC3->EUSART:RX;    
     RC1PPS = 0x10;   //RC1->EUSART:TX;    
+    RA5PPS = 0x12;   //RA5->CMP1:C1OUT;    
     RC6PPS = 0x0E;   //RC6->PWM6:PWM6OUT;    
 }
   
