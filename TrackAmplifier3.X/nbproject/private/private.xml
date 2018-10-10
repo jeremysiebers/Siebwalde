@@ -5,7 +5,9 @@
         <group>
             <file>file:/C:/GIT-REPOS/Siebwalde/TrackAmplifier3.X/main.c</file>
             <file>file:/C:/GIT-REPOS/Siebwalde/TrackAmplifier3.X/regulator.c</file>
+            <file>file:/C:/GIT-REPOS/Siebwalde/TrackAmplifier3.X/modbus/PetitModbus.h</file>
             <file>file:/C:/GIT-REPOS/Siebwalde/TrackAmplifier3.X/processio.c</file>
+            <file>file:/C:/GIT-REPOS/Siebwalde/TrackAmplifier3.X/modbus/PetitModbus.c</file>
         </group>
     </open-files>
 </project-private>

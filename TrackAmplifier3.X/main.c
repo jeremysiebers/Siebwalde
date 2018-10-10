@@ -48,6 +48,8 @@ void main(void) {
         ProcessPetitModbus();
         
         Regulator();
+        
+        LED_ERR_LAT = PORTAbits.RA5;                                            // This must be the Occupied signal LED (output of comparator 1 coupled to RA5) to be added in the final design!!!
                 
         if(PIR0bits.TMR0IF){
             
@@ -121,12 +123,12 @@ void Get_ID_From_AD(){
     
     result = ADCC_GetSingleConversion(ID);
     
-    if(result > 80 && result < 96){
+    if(result > 80 && result < 98){
         MODBUS_ADDRESS = 1;
         LED_RUN_LAT = 1;
         LED_ERR_LAT = 0;
     }
-    else if(result > 95 && result < 104){
+    else if(result > 97 && result < 104){
         MODBUS_ADDRESS = 2;
         LED_RUN_LAT = 1;
         LED_ERR_LAT = 0;

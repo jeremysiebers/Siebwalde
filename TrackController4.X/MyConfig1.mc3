@@ -21,12 +21,12 @@
          <string>class com.microchip.mcc.mcu8.modules.mssp_v2.MSSP_v2</string>
       </entry>
       <entry>
-         <string>EUSART1</string>
-         <string>class com.microchip.mcc.mcu8.modules.eusart.EUSART</string>
-      </entry>
-      <entry>
          <string>RESET</string>
          <string>class com.microchip.mcc.mcu8.systemManager.reset.RESET</string>
+      </entry>
+      <entry>
+         <string>EUSART1</string>
+         <string>class com.microchip.mcc.mcu8.modules.eusart.EUSART</string>
       </entry>
       <entry>
          <string>Interrupt Module</string>
@@ -126,12 +126,12 @@
          <value>191</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="MSSP2" name="sdapin"/>
-         <value>enabled</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="EUSART1" registerAlias="TXSTA" settingAlias="CSRC"/>
          <value>slave_mode</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="MSSP2" name="sdapin"/>
+         <value>enabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="TMR1" registerAlias="TCON" settingAlias="nTSYNC" alias="do_not_synchronize"/>
@@ -258,12 +258,12 @@
          <value>disabled</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="MSSP2" registerAlias="SSPCON1" settingAlias="SSPEN" alias="disabled"/>
-         <value>0</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="EUSART1" registerAlias="BAUDCON"/>
          <value>8</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="MSSP2" registerAlias="SSPCON1" settingAlias="SSPEN" alias="disabled"/>
+         <value>0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="iocUserSet RE3"/>
@@ -459,7 +459,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="Pin Module" registerAlias="TRISD"/>
-         <value>239</value>
+         <value>231</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="MSSP2" registerAlias="SSPI" settingAlias="order"/>
@@ -1447,7 +1447,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="Pin Module" registerAlias="TRISG"/>
-         <value>247</value>
+         <value>255</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="Pin Module" registerAlias="TRISC" settingAlias="TRISC6" alias="output"/>
@@ -1518,12 +1518,12 @@
          <value>0</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="MSSP2" registerAlias="SSPCON2" settingAlias="PEN" alias="disabled"/>
-         <value>0</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="EUSART1" registerAlias="RCI" settingAlias="enable"/>
          <value>enabled</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="MSSP2" registerAlias="SSPCON2" settingAlias="PEN" alias="disabled"/>
+         <value>0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="Pin Module" registerAlias="anselRH7" settingAlias="anselRH7" alias="analog"/>
@@ -1710,12 +1710,12 @@
          <value>48</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="MSSP2" registerAlias="SSPSTAT" settingAlias="D_nA"/>
-         <value>lastbyte_address</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="EUSART1" name="EUSART1_TXIISRFunction"/>
          <value>TxDefaultInterruptHandler</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="MSSP2" registerAlias="SSPSTAT" settingAlias="D_nA"/>
+         <value>lastbyte_address</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="System Module" registerAlias="CONFIG3L" settingAlias="EASHFT"/>
@@ -2578,12 +2578,12 @@
          <value>ON</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="MSSP2" registerAlias="SSPCON2" settingAlias="RCEN"/>
-         <value>disabled</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="EUSART1" registerAlias="RCSTA" settingAlias="RX9" alias="9-bit"/>
          <value>1</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="MSSP2" registerAlias="SSPCON2" settingAlias="RCEN"/>
+         <value>disabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="trisUserSetRJ3"/>
@@ -2723,7 +2723,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="Custom Name RG3"/>
-         <value>ModbusReset</value>
+         <value/>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="Pin Module" registerAlias="LATB" settingAlias="LATB7" alias="clear"/>
@@ -3055,7 +3055,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="Pin Module" registerAlias="TRISD" settingAlias="TRISD3"/>
-         <value>input</value>
+         <value>output</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="Pin Module" registerAlias="LATD" settingAlias="LATD4" alias="clear"/>
@@ -3327,7 +3327,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="Custom Name RD3"/>
-         <value/>
+         <value>ModbusReset</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="Pin Module" registerAlias="LATB" settingAlias="LATB6" alias="clear"/>
@@ -3398,12 +3398,12 @@
          <value/>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="MSSP2" registerAlias="SSPSTAT" settingAlias="D_nA" alias="lastbyte_address"/>
-         <value>0</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="EUSART1" registerAlias="TXSTA" settingAlias="BRGH"/>
          <value>hi_speed</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="MSSP2" registerAlias="SSPSTAT" settingAlias="D_nA" alias="lastbyte_address"/>
+         <value>0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TMR1" name="timerPeriod"/>
@@ -3667,7 +3667,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="Pin Module" registerAlias="TRISG" settingAlias="TRISG3"/>
-         <value>output</value>
+         <value>input</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="System Module" registerAlias="CONFIG1H"/>
@@ -3926,11 +3926,11 @@
          <value>0</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="MSSP2" registerAlias="SSPCON2" settingAlias="RCEN" alias="disabled"/>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="EUSART1" registerAlias="TXSTA" settingAlias="CSRC" alias="slave_mode"/>
          <value>0</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="EUSART1" registerAlias="TXSTA" settingAlias="CSRC" alias="slave_mode"/>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="MSSP2" registerAlias="SSPCON2" settingAlias="RCEN" alias="disabled"/>
          <value>0</value>
       </entry>
       <entry>
@@ -4295,7 +4295,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="customNameUserSet RD3"/>
-         <value>disabled</value>
+         <value>enabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="customNameUserSet RD4"/>
@@ -4467,7 +4467,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="customNameUserSet RG3"/>
-         <value>enabled</value>
+         <value>disabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="customNameUserSet RG4"/>
@@ -4630,12 +4630,12 @@
          <value>1</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="TMR1" registerAlias="TCON" settingAlias="nTSYNC"/>
-         <value>synchronize</value>
-      </entry>
-      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="EUSART1" registerAlias="TXSTA" settingAlias="CSRC" alias="master_mode"/>
          <value>1</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="TMR1" registerAlias="TCON" settingAlias="nTSYNC"/>
+         <value>synchronize</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="EUSART1" registerAlias="BAUDCON" settingAlias="WUE"/>
@@ -5287,7 +5287,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="RG3"/>
-         <value>output</value>
+         <value>disabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="Pin Module" registerAlias="LATE" settingAlias="LATE0" alias="clear"/>
@@ -5359,7 +5359,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="RD3"/>
-         <value>disabled</value>
+         <value>output</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="RD2"/>

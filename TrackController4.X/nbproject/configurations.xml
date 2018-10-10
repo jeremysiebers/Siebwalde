@@ -53,7 +53,7 @@
         <targetDevice>PIC18F97J60</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool>pk4hybrid</platformTool>
+        <platformTool>PICkit2PlatformTool</platformTool>
         <languageToolchain>XC8</languageToolchain>
         <languageToolchainVersion>1.45</languageToolchainVersion>
         <platform>3</platform>
@@ -195,6 +195,13 @@
         <property key="programoptions.uselvpprogramming" value="false"/>
         <property key="voltagevalue" value="3.25"/>
       </ICD3PlatformTool>
+      <PICkit2PlatformTool>
+        <property key="pk2settings.3state" value="false"/>
+        <property key="pk2settings.preserveee" value="false"/>
+        <property key="pk2settings.setvddvoltage" value=""/>
+        <property key="pk2settings.userpgmexec" value="true"/>
+        <property key="pk2settings.usetargetpower" value="false"/>
+      </PICkit2PlatformTool>
       <PICkit3PlatformTool>
         <property key="AutoSelectMemRanges" value="auto"/>
         <property key="Freeze Peripherals" value="true"/>
