@@ -59,6 +59,26 @@
 #define PULL_UP_ENABLED      1
 #define PULL_UP_DISABLED     0
 
+// get/set modbus_sync aliases
+#define modbus_sync_TRIS                 TRISAbits.TRISA6
+#define modbus_sync_LAT                  LATAbits.LATA6
+#define modbus_sync_PORT                 PORTAbits.RA6
+#define modbus_sync_WPU                  WPUAbits.WPUA6
+#define modbus_sync_OD                   ODCONAbits.ODCA6
+#define modbus_sync_ANS                  ANSELAbits.ANSA6
+#define modbus_sync_SetHigh()            do { LATAbits.LATA6 = 1; } while(0)
+#define modbus_sync_SetLow()             do { LATAbits.LATA6 = 0; } while(0)
+#define modbus_sync_Toggle()             do { LATAbits.LATA6 = ~LATAbits.LATA6; } while(0)
+#define modbus_sync_GetValue()           PORTAbits.RA6
+#define modbus_sync_SetDigitalInput()    do { TRISAbits.TRISA6 = 1; } while(0)
+#define modbus_sync_SetDigitalOutput()   do { TRISAbits.TRISA6 = 0; } while(0)
+#define modbus_sync_SetPullup()          do { WPUAbits.WPUA6 = 1; } while(0)
+#define modbus_sync_ResetPullup()        do { WPUAbits.WPUA6 = 0; } while(0)
+#define modbus_sync_SetPushPull()        do { ODCONAbits.ODCA6 = 0; } while(0)
+#define modbus_sync_SetOpenDrain()       do { ODCONAbits.ODCA6 = 1; } while(0)
+#define modbus_sync_SetAnalogMode()      do { ANSELAbits.ANSA6 = 1; } while(0)
+#define modbus_sync_SetDigitalMode()     do { ANSELAbits.ANSA6 = 0; } while(0)
+
 // get/set modbus_send aliases
 #define modbus_send_TRIS                 TRISAbits.TRISA7
 #define modbus_send_LAT                  LATAbits.LATA7
@@ -354,26 +374,6 @@
 #define SS1_SetOpenDrain()       do { ODCONCbits.ODCC6 = 1; } while(0)
 #define SS1_SetAnalogMode()      do { ANSELCbits.ANSC6 = 1; } while(0)
 #define SS1_SetDigitalMode()     do { ANSELCbits.ANSC6 = 0; } while(0)
-
-// get/set modbus_sync aliases
-#define modbus_sync_TRIS                 TRISCbits.TRISC7
-#define modbus_sync_LAT                  LATCbits.LATC7
-#define modbus_sync_PORT                 PORTCbits.RC7
-#define modbus_sync_WPU                  WPUCbits.WPUC7
-#define modbus_sync_OD                   ODCONCbits.ODCC7
-#define modbus_sync_ANS                  ANSELCbits.ANSC7
-#define modbus_sync_SetHigh()            do { LATCbits.LATC7 = 1; } while(0)
-#define modbus_sync_SetLow()             do { LATCbits.LATC7 = 0; } while(0)
-#define modbus_sync_Toggle()             do { LATCbits.LATC7 = ~LATCbits.LATC7; } while(0)
-#define modbus_sync_GetValue()           PORTCbits.RC7
-#define modbus_sync_SetDigitalInput()    do { TRISCbits.TRISC7 = 1; } while(0)
-#define modbus_sync_SetDigitalOutput()   do { TRISCbits.TRISC7 = 0; } while(0)
-#define modbus_sync_SetPullup()          do { WPUCbits.WPUC7 = 1; } while(0)
-#define modbus_sync_ResetPullup()        do { WPUCbits.WPUC7 = 0; } while(0)
-#define modbus_sync_SetPushPull()        do { ODCONCbits.ODCC7 = 0; } while(0)
-#define modbus_sync_SetOpenDrain()       do { ODCONCbits.ODCC7 = 1; } while(0)
-#define modbus_sync_SetAnalogMode()      do { ANSELCbits.ANSC7 = 1; } while(0)
-#define modbus_sync_SetDigitalMode()     do { ANSELCbits.ANSC7 = 0; } while(0)
 
 /**
    @Param

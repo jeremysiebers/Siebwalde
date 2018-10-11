@@ -39,7 +39,8 @@ void main(void) {
     INTCONbits.GIE = 1;
     INTCONbits.PEIE = 1;
     
-    Get_ID_From_AD();
+    //Get_ID_From_AD();
+    MODBUS_ADDRESS = 1;
     
     InitPetitModbus(MODBUS_ADDRESS);
     Regulator_Init();    

@@ -91,6 +91,17 @@
 #define RC6_SetDigitalInput()       do { TRISCbits.TRISC6 = 1; } while(0)
 #define RC6_SetDigitalOutput()      do { TRISCbits.TRISC6 = 0; } while(0)
 
+// get/set ModbusReset aliases
+#define ModbusReset_TRIS                 TRISDbits.TRISD3
+#define ModbusReset_LAT                  LATDbits.LATD3
+#define ModbusReset_PORT                 PORTDbits.RD3
+#define ModbusReset_SetHigh()            do { LATDbits.LATD3 = 1; } while(0)
+#define ModbusReset_SetLow()             do { LATDbits.LATD3 = 0; } while(0)
+#define ModbusReset_Toggle()             do { LATDbits.LATD3 = ~LATDbits.LATD3; } while(0)
+#define ModbusReset_GetValue()           PORTDbits.RD3
+#define ModbusReset_SetDigitalInput()    do { TRISDbits.TRISD3 = 1; } while(0)
+#define ModbusReset_SetDigitalOutput()   do { TRISDbits.TRISD3 = 0; } while(0)
+
 // get/set SDO2 aliases
 #define SDO2_TRIS                 TRISDbits.TRISD4
 #define SDO2_LAT                  LATDbits.LATD4
@@ -134,17 +145,6 @@
 #define SS2_GetValue()           PORTDbits.RD7
 #define SS2_SetDigitalInput()    do { TRISDbits.TRISD7 = 1; } while(0)
 #define SS2_SetDigitalOutput()   do { TRISDbits.TRISD7 = 0; } while(0)
-
-// get/set ModbusReset aliases
-#define ModbusReset_TRIS                 TRISGbits.TRISG3
-#define ModbusReset_LAT                  LATGbits.LATG3
-#define ModbusReset_PORT                 PORTGbits.RG3
-#define ModbusReset_SetHigh()            do { LATGbits.LATG3 = 1; } while(0)
-#define ModbusReset_SetLow()             do { LATGbits.LATG3 = 0; } while(0)
-#define ModbusReset_Toggle()             do { LATGbits.LATG3 = ~LATGbits.LATG3; } while(0)
-#define ModbusReset_GetValue()           PORTGbits.RG3
-#define ModbusReset_SetDigitalInput()    do { TRISGbits.TRISG3 = 1; } while(0)
-#define ModbusReset_SetDigitalOutput()   do { TRISGbits.TRISG3 = 0; } while(0)
 
 
 /**
