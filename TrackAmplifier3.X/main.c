@@ -51,12 +51,12 @@ void main(void) {
         Regulator();
         
         LED_ERR_LAT = PORTAbits.RA5;                                            // This must be the Occupied signal LED (output of comparator 1 coupled to RA5) to be added in the final design!!!
-                
+              
+        ProcessIO();
+        
         if(PIR0bits.TMR0IF){
             
-            ProcessIO();
-            
-            switch(LED_TX_STATE){
+           switch(LED_TX_STATE){
                 case 0 : 
                     if (LED_TX > 0){
                         LED_TX_LAT = 1;
