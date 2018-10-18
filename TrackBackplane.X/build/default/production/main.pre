@@ -17586,7 +17586,7 @@ extern void PetitModBus_TimerValues(void);
 extern volatile unsigned int Timer1_Tick_Counter;
 
 # 14 "main.c"
-unsigned int MODBUS_ADDRESS = 50;
+unsigned int MODBUS_ADDRESS = 0;
 unsigned int result = 0;
 
 unsigned int LED_TX_prev, LED_RX_prev = 0;
@@ -17670,5 +17670,15 @@ TMR0_Reload();
 # 108
 void Get_ID(){
 
+MODBUS_ADDRESS = (unsigned int)50 + (unsigned int)((PORTA & 0xE0)>> 5);
 
+if(MODBUS_ADDRESS > 50 && MODBUS_ADDRESS < 60){
+LATBbits.LATB5 = 1;
+LATBbits.LATB3 = 0;
+}
+else{
+LATBbits.LATB5 = 0;
+LATBbits.LATB3 = 1;
+while(1);
+}
 }

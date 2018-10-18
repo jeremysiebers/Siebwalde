@@ -3,6 +3,10 @@
  * Author: Jeremy Siebers
  *
  * Created on April 16, 2018, 10:06 PM
+ * 
+ * orange = TX
+ * yellow = RX
+ * black = gnd
  */
 
 
@@ -11,7 +15,7 @@
 #include "mcc_generated_files/mcc.h"
 #include "modbus/General.h"
 
-unsigned int MODBUS_ADDRESS = 50;
+unsigned int MODBUS_ADDRESS = 0;
 unsigned int result = 0;
 
 unsigned int LED_TX_prev, LED_RX_prev = 0;
@@ -107,5 +111,15 @@ void main(void) {
  *****************************************************************************/
 void Get_ID(){
     
+    MODBUS_ADDRESS = (unsigned int)50 + (unsigned int)((PORTA & 0xE0)>> 5);
     
+    if(MODBUS_ADDRESS > 50 && MODBUS_ADDRESS < 60){
+        LED_RUN_LAT = 1;
+        LED_ERR_LAT = 0;
+    }
+    else{
+        LED_RUN_LAT = 0;
+        LED_ERR_LAT = 1;
+        while(1);
+    }
 }

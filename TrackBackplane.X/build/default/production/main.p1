@@ -48,6 +48,8 @@ Version 3.2 HI-TECH Software Intermediate Code
 [v _LED_RX `Vui ~T0 @X0 0 e ]
 "272 mcc_generated_files/tmr0.h
 [v _TMR0_Reload `(v ~T0 @X0 0 ef ]
+"388 C:\Program Files (x86)\Microchip\xc8\v1.45\include\pic16f18857.h
+[v _PORTA `Vuc ~T0 @X0 0 e@12 ]
 [; ;htc.h: 26: extern const char __xc8_OPTIM_SPEED;
 [; ;htc.h: 28: extern double __fpnormalize(double);
 [; ;xc8debug.h: 14: extern void __builtin_software_breakpoint(void);
@@ -13192,9 +13194,9 @@ Version 3.2 HI-TECH Software Intermediate Code
 "14 main.c
 [v _MODBUS_ADDRESS `ui ~T0 @X0 1 e ]
 [i _MODBUS_ADDRESS
--> -> 50 `i `ui
+-> -> 0 `i `ui
 ]
-[; ;main.c: 14: unsigned int MODBUS_ADDRESS = 50;
+[; ;main.c: 14: unsigned int MODBUS_ADDRESS = 0;
 "15
 [v _result `ui ~T0 @X0 1 e ]
 [i _result
@@ -13442,7 +13444,44 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;main.c: 108: void Get_ID(){
 [e :U _Get_ID ]
 [f ]
-[; ;main.c: 111: }
-"111
+[; ;main.c: 110: MODBUS_ADDRESS = (unsigned int)50 + (unsigned int)((PORTA & 0xE0)>> 5);
+"110
+[e = _MODBUS_ADDRESS + -> -> 50 `i `ui -> >> & -> _PORTA `i -> 224 `i -> 5 `i `ui ]
+[; ;main.c: 112: if(MODBUS_ADDRESS > 50 && MODBUS_ADDRESS < 60){
+"112
+[e $ ! && > _MODBUS_ADDRESS -> -> 50 `i `ui < _MODBUS_ADDRESS -> -> 60 `i `ui 1578  ]
+{
+[; ;main.c: 113: LATBbits.LATB5 = 1;
+"113
+[e = . . _LATBbits 0 5 -> -> 1 `i `uc ]
+[; ;main.c: 114: LATBbits.LATB3 = 0;
+"114
+[e = . . _LATBbits 0 3 -> -> 0 `i `uc ]
+"115
+}
+[; ;main.c: 115: }
+[e $U 1579  ]
+"116
+[e :U 1578 ]
+[; ;main.c: 116: else{
+{
+[; ;main.c: 117: LATBbits.LATB5 = 0;
+"117
+[e = . . _LATBbits 0 5 -> -> 0 `i `uc ]
+[; ;main.c: 118: LATBbits.LATB3 = 1;
+"118
+[e = . . _LATBbits 0 3 -> -> 1 `i `uc ]
+[; ;main.c: 119: while(1);
+"119
+[e :U 1581 ]
+[e :U 1580 ]
+[e $U 1581  ]
+[e :U 1582 ]
+"120
+}
+[e :U 1579 ]
+[; ;main.c: 120: }
+[; ;main.c: 121: }
+"121
 [e :UE 1577 ]
 }

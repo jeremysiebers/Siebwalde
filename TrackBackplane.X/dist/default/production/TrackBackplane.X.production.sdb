@@ -129,6 +129,8 @@ PETIT_RXTX_TIMEOUT 4
 "368 C:\Program Files (x86)\Microchip\xc8\v1.45\include\pic16f18857.h
 [u S607 . 1 `S602 1 . 1 0 ]
 [v _INTCONbits INTCONbits `VES607  1 e 1 @11 ]
+"388
+[v _PORTA PORTA `VEuc  1 e 1 @12 ]
 "595
 [v _TRISA TRISA `VEuc  1 e 1 @17 ]
 "657
@@ -431,7 +433,9 @@ PETIT_RXTX_TIMEOUT 4
 [v _ODCONC ODCONC `VEuc  1 e 1 @8016 ]
 "34639
 [v _WPUE WPUE `VEuc  1 e 1 @8037 ]
-"17 C:\GIT-REPOS\Siebwalde\TrackBackplane.X\main.c
+"14 C:\GIT-REPOS\Siebwalde\TrackBackplane.X\main.c
+[v _MODBUS_ADDRESS MODBUS_ADDRESS `ui  1 e 2 0 ]
+"17
 [v _LED_TX_prev LED_TX_prev `ui  1 e 2 0 ]
 [v _LED_RX_prev LED_RX_prev `ui  1 e 2 0 ]
 "18
@@ -768,7 +772,7 @@ PETIT_RXTX_TIMEOUT 4
 "108 C:\GIT-REPOS\Siebwalde\TrackBackplane.X\main.c
 [v _Get_ID Get_ID `(v  1 e 1 0 ]
 {
-"111
+"121
 } 0
 "52 C:\GIT-REPOS\Siebwalde\TrackBackplane.X\mcc_generated_files/interrupt_manager.c
 [v _INTERRUPT_InterruptManager INTERRUPT_InterruptManager `II(v  1 e 1 0 ]
