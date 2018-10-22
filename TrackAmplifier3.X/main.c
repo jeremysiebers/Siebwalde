@@ -36,14 +36,17 @@ void main(void) {
     
     __delay_ms(10);
     
+    LED_RUN_LAT     = 1;
+    LED_ERR_LAT     = 0;   
+    
     INTCONbits.GIE = 1;
     INTCONbits.PEIE = 1;
     
     //Get_ID_From_AD();
-    MODBUS_ADDRESS = 1;
+    MODBUS_ADDRESS = 4;
     
     InitPetitModbus(MODBUS_ADDRESS);
-    Regulator_Init();    
+    //Regulator_Init();    
             
     while(1){
         ProcessPetitModbus();

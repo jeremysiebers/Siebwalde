@@ -135,7 +135,8 @@ void main(void)
                 case 0x31:
                     (unsigned int)SlaveInfo[1].HoldingReg[0] &= 0x0FFF; 
                     if((SlaveInfo[1].HoldingReg[0] & 0x3FF) > 60){               // PWM On and 50% duty
-                        (unsigned int)SlaveInfo[1].HoldingReg[0]-= 50;          
+                        (unsigned int)SlaveInfo[1].HoldingReg[0]-= 50; 
+                        SlaveInfo[4].HoldingReg[0] = SlaveInfo[1].HoldingReg[0];
                     }          
                     break;
                         
@@ -154,7 +155,8 @@ void main(void)
                     break;
                     
                 case 0x34:
-                    (unsigned int)SlaveInfo[1].HoldingReg[0] = 0x018F;          // 50%              
+                    (unsigned int)SlaveInfo[1].HoldingReg[0] = 0x018F;          // 50%     
+                    SlaveInfo[4].HoldingReg[0] = SlaveInfo[1].HoldingReg[0];
                     break;
                         
                 case 0x35:
@@ -168,7 +170,8 @@ void main(void)
                 case 0x37:
                     (unsigned int)SlaveInfo[1].HoldingReg[0] &= 0x0FFF; 
                     if((SlaveInfo[1].HoldingReg[0] & 0x3FF) < 720){
-                        (unsigned int)SlaveInfo[1].HoldingReg[0]+= 50;          
+                        (unsigned int)SlaveInfo[1].HoldingReg[0]+= 50;    
+                        SlaveInfo[4].HoldingReg[0] = SlaveInfo[1].HoldingReg[0];
                     }
                     break;
                         

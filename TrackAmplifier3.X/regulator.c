@@ -4,6 +4,7 @@
 #include "modbus/General.h"
 
 static unsigned int PwmDutyCyclePrev = 0;
+static unsigned int test = 0;
 
 /*#--------------------------------------------------------------------------#*/
 /*  Description: Regulator_Init()
@@ -59,13 +60,15 @@ void Regulator(){
     else if (0 == PWM6CON){                                                     // When no EMO, check if PWM is initialized
         Regulator_Init();                                                       // Init PWM if not initialized
     }
+    else{
     
-    //LM_DIR_LAT      =  PetitHoldingRegisters[0].ActValue & 0x0400;            // load direction from register only when single sided PWM
-    LM_BRAKE_LAT    =  PetitHoldingRegisters[0].ActValue & 0x0800;              // load brake from register
-    
-    if (PwmDutyCyclePrev != PetitHoldingRegisters[0].ActValue & 0x03FF){
-        PWM6_LoadDutyValue(PetitHoldingRegisters[0].ActValue & 0x03FF);         // load duty cycle from register
-        PwmDutyCyclePrev = PetitHoldingRegisters[0].ActValue & 0x03FF;
+        //LM_DIR_LAT =  PetitHoldingRegisters[0].ActValue & 0x0400;               // load direction from register only when single sided PWM
+        LM_BRAKE_LAT = PetitHoldingRegisters[0].ActValue & 0x0800;              // load brake from register
+        
+        if (PwmDutyCyclePrev != PetitHoldingRegisters[0].ActValue & 0x03FF){
+            PWM6_LoadDutyValue(PetitHoldingRegisters[0].ActValue & 0x03FF);     // load duty cycle from register
+            PwmDutyCyclePrev = PetitHoldingRegisters[0].ActValue & 0x03FF;
+        }
     }
 }
 

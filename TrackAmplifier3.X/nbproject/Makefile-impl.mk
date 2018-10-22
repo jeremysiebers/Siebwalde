@@ -27,11 +27,11 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 PROJECTNAME=TrackAmplifier3.X
 
 # Active Configuration
-DEFAULTCONF=default
+DEFAULTCONF=16F18854
 CONF=${DEFAULTCONF}
 
 # All Configurations
-ALLCONFS=default 
+ALLCONFS=16F18857 16F18854 
 
 
 # build
@@ -45,13 +45,15 @@ ALLCONFS=default
 
 # clobber
 .clobber-impl: .clobber-pre .depcheck-impl
-	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=default clean
+	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=16F18857 clean
+	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=16F18854 clean
 
 
 
 # all
 .all-impl: .all-pre .depcheck-impl
-	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=default build
+	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=16F18857 build
+	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=16F18854 build
 
 
 

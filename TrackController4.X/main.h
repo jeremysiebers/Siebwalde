@@ -17,7 +17,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#define NUMBER_OF_SLAVES    4   
+#define NUMBER_OF_SLAVES    5   
 
 typedef enum
 {
