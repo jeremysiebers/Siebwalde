@@ -17280,9 +17280,9 @@ void PIN_MANAGER_Initialize(void)
 {
 
 # 62
-LATA = 0x00;
-LATB = 0x00;
-LATC = 0x00;
+LATA = 0x1F;
+LATB = 0x01;
+LATC = 0xF0;
 
 # 69
 TRISA = 0xE0;

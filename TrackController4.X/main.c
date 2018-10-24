@@ -85,7 +85,7 @@ void main(void)
     // Initialize the device
     SYSTEM_Initialize();
     
-    ModbusReset_LAT = 1;                                                        // Hold the ModbusMaster in reset
+    //ModbusReset_LAT = 1;                                                        // Hold the ModbusMaster in reset
     
     InitSlaveCommunication(SlaveInfo);                                          // Init SPI slave - master registers
     
@@ -120,7 +120,7 @@ void main(void)
     printf("PIC18f97j60 started up!!!\n\r");                                    // Welcome message
     
     ModbusReset_LAT = 0;                                                        // as last release the ModbusMaster.
-    
+    TRISDbits.RD3 = 0;                                                          // set the Pin here to output!
     
     
     while (1)

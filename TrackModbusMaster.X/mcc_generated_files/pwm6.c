@@ -61,8 +61,8 @@
     // PWM6POL active_hi; PWM6EN enabled; 
     PWM6CON = 0x80;   
 
-    // DC 1; 
-    PWM6DCH = 0x01;   
+    // DC 9; 
+    PWM6DCH = 0x09;   
 
     // DC 3; 
     PWM6DCL = 0xC0;   

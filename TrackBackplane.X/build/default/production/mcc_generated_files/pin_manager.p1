@@ -13075,15 +13075,15 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;pin_manager.c: 58: {
 [e :U _PIN_MANAGER_Initialize ]
 [f ]
-[; ;pin_manager.c: 62: LATA = 0x00;
+[; ;pin_manager.c: 62: LATA = 0x1F;
 "62
-[e = _LATA -> -> 0 `i `uc ]
-[; ;pin_manager.c: 63: LATB = 0x00;
+[e = _LATA -> -> 31 `i `uc ]
+[; ;pin_manager.c: 63: LATB = 0x01;
 "63
-[e = _LATB -> -> 0 `i `uc ]
-[; ;pin_manager.c: 64: LATC = 0x00;
+[e = _LATB -> -> 1 `i `uc ]
+[; ;pin_manager.c: 64: LATC = 0xF0;
 "64
-[e = _LATC -> -> 0 `i `uc ]
+[e = _LATC -> -> 240 `i `uc ]
 [; ;pin_manager.c: 69: TRISA = 0xE0;
 "69
 [e = _TRISA -> -> 224 `i `uc ]

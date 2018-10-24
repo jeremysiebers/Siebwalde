@@ -104,10 +104,16 @@ void ProcessNextSlave(){
     
     if (ProcessSlave > (NUMBER_OF_SLAVES-1)){
         ProcessSlave = 1;
-        Mailbox++;
-        if (Mailbox > 4){
-            Mailbox = 1;
-        }        
+        
+        Message++;
+        if (Message > MESSAGE3){
+            Message = MESSAGE1;
+            
+            Mailbox++;
+            if (Mailbox > 4){
+                Mailbox = 1;
+            }
+        }                
     }
     
     switch (Message){
@@ -210,45 +216,33 @@ unsigned int ProcessSlaveCommunication(){
             
         case SLAVE_DATA_NOK:
             // count here how often the slave data is NOK, otherwise stop all slaves with broadcast
-            MASTER_SLAVE_DATA[ProcessSlave].MbCommError = SLAVE_DATA_IDLE;
-            Message++;                                                        // process next message
-            if (Message > MESSAGE3){
-                ProcessSlave++;
-                Message = MESSAGE1;
-            } 
+            MASTER_SLAVE_DATA[ProcessSlave].MbCommError = SLAVE_DATA_IDLE;            
+            ProcessSlave++;         
             Return_Val = true;
+            LED_ERR_LAT ^= 1;
             break;
             
         case SLAVE_DATA_OK:
-            MASTER_SLAVE_DATA[ProcessSlave].MbCommError = SLAVE_DATA_IDLE;
-            Message++;                                                          // process next message
-            if (Message > MESSAGE3){
-                ProcessSlave++;
-                Message = MESSAGE1;
-            }
+            MASTER_SLAVE_DATA[ProcessSlave].MbCommError = SLAVE_DATA_IDLE;            
+            ProcessSlave++;         
             Return_Val = true;
-            break;
+            LED_ERR_LAT = 0;
+            break;            
             
         case SLAVE_DATA_TIMEOUT:
             // count here how often the slave data is timeout, otherwise stop all slaves with broadcast
-            MASTER_SLAVE_DATA[ProcessSlave].MbCommError = SLAVE_DATA_IDLE;
-            Message++;                                                          // process next message
-            if (Message > MESSAGE3){
-                ProcessSlave++;
-                Message = MESSAGE1;
-            }
+            MASTER_SLAVE_DATA[ProcessSlave].MbCommError = SLAVE_DATA_IDLE;            
+            ProcessSlave++;         
             Return_Val = true;
+            LED_ERR_LAT ^= 1;
             break;
             
         case SLAVE_DATA_EXCEPTION:
             // count here how often the slave data is timeout, otherwise stop all slaves with broadcast
-            MASTER_SLAVE_DATA[ProcessSlave].MbCommError = SLAVE_DATA_IDLE;
-            Message++;                                                          // process next message
-            if (Message > MESSAGE3){
-                ProcessSlave++;
-                Message = MESSAGE1;
-            }
+            MASTER_SLAVE_DATA[ProcessSlave].MbCommError = SLAVE_DATA_IDLE;            
+            ProcessSlave++;         
             Return_Val = true;
+            LED_ERR_LAT ^= 1;
             break;
             
         default :    // Idle is here        

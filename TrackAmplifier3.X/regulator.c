@@ -27,6 +27,9 @@ void Regulator_Init(){
     LM_PWM_LAT      = 1;
     LM_BRAKE_LAT    = 0;
     PWM6CON         = 0x80;
+    TRISCbits.TRISC4 = 0;
+    TRISCbits.TRISC5 = 0;
+    TRISCbits.TRISC6 = 0;
     
     PwmDutyCyclePrev = ((unsigned int)(PWM6DCH << 2)) + 
                        ((unsigned int)(PWM6DCL >> 6));    

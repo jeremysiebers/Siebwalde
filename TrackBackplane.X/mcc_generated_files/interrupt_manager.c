@@ -56,6 +56,13 @@ void interrupt INTERRUPT_InterruptManager (void)
     {
         if(PIE3bits.RCIE == 1 && PIR3bits.RCIF == 1)
         {
+            if(1 == RC1STAbits.OERR)
+            {
+                // EUSART error - restart
+
+                RC1STAbits.CREN = 0;
+                RC1STAbits.CREN = 1;
+            }
             EUSART_RxDefaultInterruptHandler();
         } 
         else if(PIE4bits.TMR3IE == 1 && PIR4bits.TMR3IF == 1)
