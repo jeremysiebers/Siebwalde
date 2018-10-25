@@ -3,7 +3,7 @@
 #include "mcc_generated_files/mcc.h"
 #include "mcc_generated_files/adcc.h"
 
-uint8_t sequence = 6;
+uint8_t sequence = 0;
 
 void ProcessIO (){
     //PetitInputRegisters[0].ActValue |= (unsigned int)(THFLG_PORT << 11);
@@ -53,11 +53,11 @@ void ProcessIO (){
         case 7:
             if (ADCON0bits.ADGO==0){
                 PetitInputRegisters[3].ActValue = ADCC_GetConversionResult();
-                sequence = 6;
+                sequence = 0;
             }            
             break;
             
-        default: sequence = 6;
+        default: sequence = 0;
             break;
     }
 }
