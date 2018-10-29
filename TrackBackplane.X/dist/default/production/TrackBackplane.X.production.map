@@ -1,13 +1,13 @@
-Microchip MPLAB XC8 Compiler V1.45 ()
+Microchip MPLAB XC8 Compiler V1.44 ()
 
 Linker command line:
 
--W-3 --edf=C:\Program Files (x86)\Microchip\xc8\v1.45\dat\en_msgs.txt -cs \
+-W-3 --edf=C:\Program Files (x86)\Microchip\xc8\v1.44\dat\en_msgs.txt -cs \
   -h+dist/default/production\TrackBackplane.X.production.sym \
   --cmf=dist/default/production\TrackBackplane.X.production.cmf -z \
-  -Q16F18857 -oC:\Users\JEREMY~1\AppData\Local\Temp\sabg.2 \
+  -Q16F18857 -oC:\Users\jerem\AppData\Local\Temp\s61s.2 \
   -Mdist/default/production/TrackBackplane.X.production.map -E1 -ver=XC8 \
-  -ASTACK=020ACh-02fefh -pstack=STACK -ACODE=00h-07FFhx16 \
+  -ASTACK=020BCh-02fefh -pstack=STACK -ACODE=00h-07FFhx16 \
   -ASTRCODE=00h-07FFFh -ASTRING=00h-0FFhx128 -ACONST=00h-0FFhx128 \
   -AENTRY=00h-0FFhx128 -ACOMMON=070h-07Fh -ABANK0=020h-06Fh \
   -ABANK1=0A0h-0EFh -ABANK2=0120h-016Fh -ABANK3=01A0h-01EFh \
@@ -54,7 +54,7 @@ Linker command line:
   -pfunctab=ENTRY -ACONFIG=08007h-0800Bh -pconfig=CONFIG -DCONFIG=2 \
   -AIDLOC=08000h-08003h -pidloc=IDLOC -DIDLOC=2 -AEEDATA=00h-0FFh/0F000h \
   -peeprom_data=EEDATA -DEEDATA=2 -DCODE=2 -DSTRCODE=2 -DSTRING=2 -DCONST=2 \
-  -DENTRY=2 -k C:\Users\JEREMY~1\AppData\Local\Temp\sabg.obj \
+  -DENTRY=2 -k C:\Users\jerem\AppData\Local\Temp\s61s.obj \
   dist/default/production\TrackBackplane.X.production.obj 
 
 Object code version is 3.11
@@ -64,54 +64,140 @@ Machine type is 16F18857
 
 
                 Name                               Link     Load   Length Selector   Space Scale
-C:\Users\JEREMY~1\AppData\Local\Temp\sabg.obj
-                end_init                             26       26        2        8       0
+C:\Users\jerem\AppData\Local\Temp\s61s.obj
+                end_init                             2C       2C        2        8       0
                 reset_vec                             0        0        2        0       0
                 config                             8007     8007        5    1000E       0
 dist/default/production\TrackBackplane.X.production.obj
-                cinit                                28       28      3F7        8       0
-                intentry                              4        4       22        8       0
-                text46                              592      592       3F        8       0
-                text45                              627      627       13        8       0
-                text44                              648      648        1        8       0
-                text42                              605      605       22        8       0
-                text41                              647      647        1        8       0
-                text40                              63A      63A        7        8       0
-                text32                              41F      41F       E2        8       0
-                text23                              501      501       49        8       0
-                text21                              54A      54A       48        8       0
-                text15                              5D1      5D1       34        8       0
-                cstackBANK0                          64       64        8       20       1
-                cstackCOMMON                         70       70        9       70       1
-                cstackBANK1                          EA       EA        1       A0       1
-                clrtext                             641      641        6        8       0
-                bssBANK2                            120      120        C      120       1
-                bssBANK1                             A0       A0       4A       A0       1
+                cinit                                2E       2E       31        8       0
+                intentry                              4        4       28        8       0
+                text50                              7CA      7CA       15        8       0
+                text49                              FE2      FE2        F     1FC4       0
+                text48                              F8A      F8A        8     1F14       0
+                text47                              FB4      FB4        B     1F68       0
+                text46                              754      754       1B        8       0
+                text45                                2        2        1        0       0
+                text44                              FF1      FF1        F     1FE2       0
+                text43                              7B5      7B5       15        8       0
+                text42                                3        3        1        6       0
+                text41                              FA2      FA2        9     1F44       0
+                text40                              7A0      7A0       15        8       0
+                text38                              699      699       27        8       0
+                text37                              F57      F57        6     1EAE       0
+                text36                              F75      F75        7     1EEA       0
+                text35                              F4A      F4A        3     1E94       0
+                text34                              F5D      F5D        6     1EBA       0
+                text33                              F7C      F7C        7     1EF8       0
+                text32                              F4D      F4D        3     1E9A       0
+                text31                              FBF      FBF        B     1F7E       0
+                text30                              7F0      7F0        F        8       0
+                text29                              739      739       1B        8       0
+                text28                              3A9      3A9       8E        8       0
+                text27                               5F       5F       F7        8       0
+                text26                              31B      31B       8E        8       0
+                text25                              28D      28D       8E        8       0
+                text24                              4BF      4BF       76        8       0
+                text23                              F92      F92        8     1F24       0
+                text22                              591      591       58        8       0
+                text21                              71C      71C       1D        8       0
+                text20                              FCA      FCA        C     1F94       0
+                text19                              156      156       9F        8       0
+                text18                              F83      F83        7     1F06       0
+                text17                              66D      66D       2C        8       0
+                text16                              FD6      FD6        C     1FAC       0
+                text15                              437      437       88        8       0
+                text14                              5E9      5E9       55        8       0
+                text13                              63E      63E       2F        8       0
+                text12                              76F      76F       19        8       0
+                text11                              FAB      FAB        9     1F56       0
+                text10                              6C0      6C0       22        8       0
+                text9                               F9A      F9A        8     1F34       0
+                text8                               7DF      7DF       11        8       0
+                text7                               F63      F63        6     1EC6       0
+                text6                               6FF      6FF       1D        8       0
+                text5                               6E2      6E2       1D        8       0
+                text4                               788      788       18        8       0
+                text3                               535      535       5C        8       0
+                text2                               F69      F69        6     1ED2       0
+                text1                               F50      F50        3     1EA0       0
+                maintext                            1F5      1F5       98        8       0
+                cstackBANK0                          57       57        D       20       1
+                cstackCOMMON                         70       70        8       70       1
+                cstackBANK1                          EC       EC        2       A0       1
+                cstackBANK2                         132      132        A      120       1
+                clrtext                             F6F      F6F        6     1EDE       0
+                bssBANK2                            120      120       12      120       1
+                bssBANK1                             A0       A0       48       A0       1
                 dataBANK0                            6C       6C        4       20       1
-                bssBANK0                             20       20       38       20       1
-                dataCOMMON                           7B       7B        1       70       1
-                bssCOMMON                            79       79        2       70       1
-                nvBANK0                              58       58        C       20       1
+                bssBANK0                             20       20       37       20       1
+                dataCOMMON                           7A       7A        1       70       1
+                bssCOMMON                            78       78        2       70       1
+                nvBANK1                              E8       E8        4       A0       1
+                nvBANK0                              64       64        8       20       1
+                idataBANK0                          F53      F53        4     1EA6       0
+                idataCOMMON                         7FF      7FF        1        8       0
 
 TOTAL           Name                               Link     Load   Length     Space
         CLASS   STACK          
 
         CLASS   CODE           
-                end_init                             26       26        2         0
-                cinit                                28       28      3F7         0
-                intentry                              4        4       22         0
+                end_init                             2C       2C        2         0
+                cinit                                2E       2E       31         0
+                intentry                              4        4       28         0
                 reset_vec                             0        0        2         0
-                text46                              592      592       3F         0
-                text45                              627      627       13         0
-                text44                              648      648        1         0
-                text42                              605      605       22         0
-                text41                              647      647        1         0
-                text40                              63A      63A        7         0
-                text32                              41F      41F       E2         0
-                text23                              501      501       49         0
-                text21                              54A      54A       48         0
-                text15                              5D1      5D1       34         0
-                clrtext                             641      641        6         0
+                text50                              7CA      7CA       15         0
+                text49                              FE2      FE2        F         0
+                text48                              F8A      F8A        8         0
+                text47                              FB4      FB4        B         0
+                text46                              754      754       1B         0
+                text45                                2        2        1         0
+                text44                              FF1      FF1        F         0
+                text43                              7B5      7B5       15         0
+                text42                                3        3        1         0
+                text41                              FA2      FA2        9         0
+                text40                              7A0      7A0       15         0
+                text38                              699      699       27         0
+                text37                              F57      F57        6         0
+                text36                              F75      F75        7         0
+                text35                              F4A      F4A        3         0
+                text34                              F5D      F5D        6         0
+                text33                              F7C      F7C        7         0
+                text32                              F4D      F4D        3         0
+                text31                              FBF      FBF        B         0
+                text30                              7F0      7F0        F         0
+                text29                              739      739       1B         0
+                text28                              3A9      3A9       8E         0
+                text27                               5F       5F       F7         0
+                text26                              31B      31B       8E         0
+                text25                              28D      28D       8E         0
+                text24                              4BF      4BF       76         0
+                text23                              F92      F92        8         0
+                text22                              591      591       58         0
+                text21                              71C      71C       1D         0
+                text20                              FCA      FCA        C         0
+                text19                              156      156       9F         0
+                text18                              F83      F83        7         0
+                text17                              66D      66D       2C         0
+                text16                              FD6      FD6        C         0
+                text15                              437      437       88         0
+                text14                              5E9      5E9       55         0
+                text13                              63E      63E       2F         0
+                text12                              76F      76F       19         0
+                text11                              FAB      FAB        9         0
+                text10                              6C0      6C0       22         0
+                text9                               F9A      F9A        8         0
+                text8                               7DF      7DF       11         0
+                text7                               F63      F63        6         0
+                text6                               6FF      6FF       1D         0
+                text5                               6E2      6E2       1D         0
+                text4                               788      788       18         0
+                text3                               535      535       5C         0
+                text2                               F69      F69        6         0
+                text1                               F50      F50        3         0
+                maintext                            1F5      1F5       98         0
+                clrtext                             F6F      F6F        6         0
+                idataBANK0                          F53      F53        4         0
+                idataCOMMON                         7FF      7FF        1         0
 
         CLASS   STRCODE        
 
@@ -122,22 +208,24 @@ TOTAL           Name                               Link     Load   Length     Sp
         CLASS   ENTRY          
 
         CLASS   COMMON         
-                cstackCOMMON                         70       70        9         1
-                dataCOMMON                           7B       7B        1         1
-                bssCOMMON                            79       79        2         1
+                cstackCOMMON                         70       70        8         1
+                dataCOMMON                           7A       7A        1         1
+                bssCOMMON                            78       78        2         1
 
         CLASS   BANK0          
-                cstackBANK0                          64       64        8         1
+                cstackBANK0                          57       57        D         1
                 dataBANK0                            6C       6C        4         1
-                bssBANK0                             20       20       38         1
-                nvBANK0                              58       58        C         1
+                bssBANK0                             20       20       37         1
+                nvBANK0                              64       64        8         1
 
         CLASS   BANK1          
-                cstackBANK1                          EA       EA        1         1
-                bssBANK1                             A0       A0       4A         1
+                cstackBANK1                          EC       EC        2         1
+                bssBANK1                             A0       A0       48         1
+                nvBANK1                              E8       E8        4         1
 
         CLASS   BANK2          
-                bssBANK2                            120      120        C         1
+                cstackBANK2                         132      132        A         1
+                bssBANK2                            120      120       12         1
 
         CLASS   BANK3          
 
@@ -407,19 +495,43 @@ TOTAL           Name                               Link     Load   Length     Sp
 
 SEGMENTS        Name                           Load    Length   Top    Selector   Space  Class     Delta
 
-                reset_vec                      000000  000002  000002         0       0  CODE        2
-                intentry                       000004  000645  000649         8       0  CODE        2
+                reset_vec                      000000  000003  000003         0       0  CODE        2
+                text42                         000003  000001  000004         6       0  CODE        2
+                intentry                       000004  0007FC  000800         8       0  CODE        2
                 bssBANK0                       000020  000050  000070        20       1  BANK0       1
-                cstackCOMMON                   000070  00000C  00007C        70       1  COMMON      1
-                bssBANK1                       0000A0  00004B  0000EB        A0       1  BANK1       1
-                bssBANK2                       000120  00000C  00012C       120       1  BANK2       1
+                cstackCOMMON                   000070  00000B  00007B        70       1  COMMON      1
+                bssBANK1                       0000A0  00004E  0000EE        A0       1  BANK1       1
+                bssBANK2                       000120  00001C  00013C       120       1  BANK2       1
+                text35                         000F4A  000003  000F4D      1E94       0  CODE        2
+                text32                         000F4D  000003  000F50      1E9A       0  CODE        2
+                text1                          000F50  000003  000F53      1EA0       0  CODE        2
+                idataBANK0                     000F53  000004  000F57      1EA6       0  CODE        2
+                text37                         000F57  000006  000F5D      1EAE       0  CODE        2
+                text34                         000F5D  000006  000F63      1EBA       0  CODE        2
+                text7                          000F63  000006  000F69      1EC6       0  CODE        2
+                text2                          000F69  000006  000F6F      1ED2       0  CODE        2
+                clrtext                        000F6F  000006  000F75      1EDE       0  CODE        2
+                text36                         000F75  000007  000F7C      1EEA       0  CODE        2
+                text33                         000F7C  000007  000F83      1EF8       0  CODE        2
+                text18                         000F83  000007  000F8A      1F06       0  CODE        2
+                text48                         000F8A  000008  000F92      1F14       0  CODE        2
+                text23                         000F92  000008  000F9A      1F24       0  CODE        2
+                text9                          000F9A  000008  000FA2      1F34       0  CODE        2
+                text41                         000FA2  000009  000FAB      1F44       0  CODE        2
+                text11                         000FAB  000009  000FB4      1F56       0  CODE        2
+                text47                         000FB4  00000B  000FBF      1F68       0  CODE        2
+                text31                         000FBF  00000B  000FCA      1F7E       0  CODE        2
+                text20                         000FCA  00000C  000FD6      1F94       0  CODE        2
+                text16                         000FD6  00000C  000FE2      1FAC       0  CODE        2
+                text49                         000FE2  00000F  000FF1      1FC4       0  CODE        2
+                text44                         000FF1  00000F  001000      1FE2       0  CODE        2
                 config                         008007  000005  00800C     1000E       0  CONFIG      2
 
 
 UNUSED ADDRESS RANGES
 
         Name                Unused          Largest block    Delta
-        BANK1            000EB-000EF               5           1
+        BANK1            000EE-000EF               2           1
         BANK10           00520-0056F              50           1
         BANK11           005A0-005EF              50           1
         BANK12           00620-0066F              50           1
@@ -430,7 +542,7 @@ UNUSED ADDRESS RANGES
         BANK17           008A0-008EF              50           1
         BANK18           00920-0096F              50           1
         BANK19           009A0-009EF              50           1
-        BANK2            0012C-0016F              44           1
+        BANK2            0013C-0016F              34           1
         BANK20           00A20-00A6F              50           1
         BANK21           00AA0-00AEF              50           1
         BANK22           00B20-00B6F              50           1
@@ -470,17 +582,17 @@ UNUSED ADDRESS RANGES
         BANK8            00420-0046F              50           1
         BANK9            004A0-004EF              50           1
         BIGRAM           02000-02FEF             FF0           1
-        CODE             00002-00003               2           2
-                         00649-07FFF             800
-        COMMON           0007C-0007D               2           1
-        CONST            00002-00003               2           2
-                         00649-07FFF             100
+        CODE             00800-00F49             74A           2
+                         01000-07FFF             800
+        COMMON           0007B-0007D               3           1
+        CONST            00800-00F49             100           2
+                         01000-07FFF             100
         EEDATA           0F000-0F0FF             100           2
-        ENTRY            00002-00003               2           2
-                         00649-07FFF             100
+        ENTRY            00800-00F49             100           2
+                         01000-07FFF             100
         IDLOC            08000-08003               4           2
-        RAM              000EB-000EF               5           1
-                         0012C-0016F              44
+        RAM              000EE-000EF               2           1
+                         0013C-0016F              34
                          001A0-001EF              50
                          00220-0026F              50
                          002A0-002EF              50
@@ -593,53 +705,54 @@ UNUSED ADDRESS RANGES
         SFR7             00380-0039F              20           1
         SFR8             00400-0041F              20           1
         SFR9             00480-0049F              20           1
-        STACK            020AC-02FEF             F44           1
-        STRCODE          00002-00003               2           2
-                         00649-07FFF            79B7
-        STRING           00002-00003               2           2
-                         00649-07FFF             100
+        STACK            020BC-02FEF             F34           1
+        STRCODE          00800-00F49             74A           2
+                         01000-07FFF            7000
+        STRING           00800-00F49             100           2
+                         01000-07FFF             100
 
                                   Symbol Table
 
-CRC_Initialize@poly                                             cstackCOMMON 00072
-CRC_Initialize@seed                                             cstackCOMMON 00074
-CheckPetitModbusBufferComplete@PetitExpectedReceiveCount        cstackCOMMON 00074
-EUSART_SetRxInterruptHandler@interruptHandler                   cstackCOMMON 00072
-HandleMPetitodbusDiagnosticRegisters@Petit_CurrentData          cstackBANK0  00068
-HandleMPetitodbusDiagnosticRegisters@Petit_NumberOfRegisters    cstackBANK0  00066
-HandleMPetitodbusDiagnosticRegisters@Petit_StartAddress         cstackBANK0  00064
-HandleMPetitodbusDiagnosticRegisters@Petit_i                    cstackBANK0  0006A
-HandleMPetitodbusWriteMultipleRegisters@Petit_NumberOfRegisters cstackBANK0  00068
-HandleMPetitodbusWriteMultipleRegisters@Petit_StartAddress      cstackBANK0  00066
-HandleMPetitodbusWriteMultipleRegisters@Petit_Value             cstackBANK0  00064
-HandleMPetitodbusWriteMultipleRegisters@Petit_i                 cstackBANK0  0006A
-HandlePetitModbusError@ErrorCode                                cstackCOMMON 00073
-HandlePetitModbusError@Function                                 cstackCOMMON 00072
-HandlePetitModbusReadHoldingRegisters@Petit_CurrentData         cstackBANK0  00068
-HandlePetitModbusReadHoldingRegisters@Petit_NumberOfRegisters   cstackBANK0  00066
-HandlePetitModbusReadHoldingRegisters@Petit_StartAddress        cstackBANK0  00064
-HandlePetitModbusReadHoldingRegisters@Petit_i                   cstackBANK0  0006A
-HandlePetitModbusReadInputRegisters@Petit_CurrentData           cstackBANK0  00068
-HandlePetitModbusReadInputRegisters@Petit_NumberOfRegisters     cstackBANK0  00066
-HandlePetitModbusReadInputRegisters@Petit_StartAddress          cstackBANK0  00064
-HandlePetitModbusReadInputRegisters@Petit_i                     cstackBANK0  0006A
-HandlePetitModbusWriteSingleRegister@Petit_Address              cstackCOMMON 00076
-HandlePetitModbusWriteSingleRegister@Petit_Value                cstackCOMMON 00074
-HandlePetitModbusWriteSingleRegister@Petit_i                    cstackCOMMON 00078
-InitPetitModbus@PetitModbusSlaveAddress                         cstackCOMMON 00074
-PetitModBus_UART_Putch@c                                        cstackCOMMON 00072
-PetitModBus_UART_String@DummyCounter                            cstackCOMMON 00077
-PetitModBus_UART_String@Length                                  cstackCOMMON 00073
-PetitModBus_UART_String@s                                       cstackCOMMON 00076
-Petit_CRC16@CRC                                                 cstackCOMMON 00072
-Petit_CRC16@Data                                                cstackCOMMON 00075
-Petit_RxDataAvailable@Result                                    cstackCOMMON 00072
-Petit_RxRTU@Petit_ReceiveBufferControl                          cstackBANK0  00064
-Petit_RxRTU@Petit_i                                             cstackBANK0  00065
-ReceiveInterrupt@Data                                           cstackCOMMON 00070
-TMR1_SetInterruptHandler@InterruptHandler                       cstackCOMMON 00072
+CRC_Initialize@poly                                             cstackCOMMON 00074
+CRC_Initialize@seed                                             cstackCOMMON 00076
+CheckPetitModbusBufferComplete@PetitExpectedReceiveCount        cstackCOMMON 00075
+EUSART_SetRxInterruptHandler@interruptHandler                   cstackCOMMON 00073
+HandleMPetitodbusDiagnosticRegisters@Petit_CurrentData          cstackBANK0  0005C
+HandleMPetitodbusDiagnosticRegisters@Petit_NumberOfRegisters    cstackBANK0  00060
+HandleMPetitodbusDiagnosticRegisters@Petit_StartAddress         cstackBANK0  0005E
+HandleMPetitodbusDiagnosticRegisters@Petit_i                    cstackBANK0  00062
+HandleMPetitodbusWriteMultipleRegisters@Petit_ByteCount         cstackBANK2  00132
+HandleMPetitodbusWriteMultipleRegisters@Petit_NumberOfRegisters cstackBANK2  00138
+HandleMPetitodbusWriteMultipleRegisters@Petit_StartAddress      cstackBANK2  00136
+HandleMPetitodbusWriteMultipleRegisters@Petit_Value             cstackBANK2  00134
+HandleMPetitodbusWriteMultipleRegisters@Petit_i                 cstackBANK2  0013A
+HandlePetitModbusError@ErrorCode                                cstackCOMMON 00075
+HandlePetitModbusError@Function                                 cstackCOMMON 00073
+HandlePetitModbusReadHoldingRegisters@Petit_CurrentData         cstackBANK0  0005C
+HandlePetitModbusReadHoldingRegisters@Petit_NumberOfRegisters   cstackBANK0  00060
+HandlePetitModbusReadHoldingRegisters@Petit_StartAddress        cstackBANK0  0005E
+HandlePetitModbusReadHoldingRegisters@Petit_i                   cstackBANK0  00062
+HandlePetitModbusReadInputRegisters@Petit_CurrentData           cstackBANK0  0005C
+HandlePetitModbusReadInputRegisters@Petit_NumberOfRegisters     cstackBANK0  00060
+HandlePetitModbusReadInputRegisters@Petit_StartAddress          cstackBANK0  0005E
+HandlePetitModbusReadInputRegisters@Petit_i                     cstackBANK0  00062
+HandlePetitModbusWriteSingleRegister@Petit_Address              cstackBANK0  0005E
+HandlePetitModbusWriteSingleRegister@Petit_Value                cstackBANK0  0005C
+HandlePetitModbusWriteSingleRegister@Petit_i                    cstackBANK0  00060
+InitPetitModbus@PetitModbusSlaveAddress                         cstackCOMMON 00076
+PetitModBus_UART_Putch@c                                        cstackCOMMON 00073
+PetitModBus_UART_String@DummyCounter                            cstackBANK0  00058
+PetitModBus_UART_String@Length                                  cstackCOMMON 00074
+PetitModBus_UART_String@s                                       cstackBANK0  00057
+Petit_CRC16@CRC                                                 cstackCOMMON 00073
+Petit_CRC16@Data                                                cstackCOMMON 00076
+Petit_RxDataAvailable@Result                                    cstackCOMMON 00074
+Petit_RxRTU@Petit_ReceiveBufferControl                          cstackBANK0  00059
+Petit_RxRTU@Petit_i                                             cstackBANK0  0005A
+ReceiveInterrupt@Data                                           cstackCOMMON 00071
+TMR1_SetInterruptHandler@InterruptHandler                       cstackCOMMON 00073
 TMR1_WriteTimer@timerVal                                        cstackCOMMON 00070
-TMR3_SetInterruptHandler@InterruptHandler                       cstackCOMMON 00072
+TMR3_SetInterruptHandler@InterruptHandler                       cstackCOMMON 00073
 TMR3_WriteTimer@timerVal                                        cstackCOMMON 00070
 _ANSELA                                                         (abs)        01F38
 _ANSELB                                                         (abs)        01F43
@@ -654,36 +767,37 @@ _CRCCON1bits                                                    (abs)        004
 _CRCDATL                                                        (abs)        00416
 _CRCXORH                                                        (abs)        0041D
 _CRCXORL                                                        (abs)        0041C
-_CRC_Initialize                                                 text32       00433
-_CheckPetitModbusBufferComplete                                 text21       0054A
-_EUSART_Initialize                                              text32       004CB
-_EUSART_Receive_ISR                                             text45       00627
-_EUSART_RxDefaultInterruptHandler                               nvBANK0      00062
-_EUSART_SetRxInterruptHandler                                   text32       004F5
-_Get_ID                                                         cinit        000D4
-_HandleMPetitodbusDiagnosticRegisters                           cinit        00249
-_HandleMPetitodbusWriteMultipleRegisters                        cinit        002B4
-_HandlePetitModbusError                                         cinit        00239
-_HandlePetitModbusReadHoldingRegisters                          cinit        00340
-_HandlePetitModbusReadInputRegisters                            cinit        0039F
-_HandlePetitModbusWriteSingleRegister                           text23       00501
+_CRC_Initialize                                                 text13       0063E
+_CheckPetitModbusBufferComplete                                 text22       00591
+_EUSART_Initialize                                              text12       0076F
+_EUSART_Receive_ISR                                             text46       00754
+_EUSART_RxDefaultInterruptHandler                               nvBANK1      000EA
+_EUSART_SetRxInterruptHandler                                   text34       00F5D
+_Get_ID                                                         text38       00699
+_HandleMPetitodbusDiagnosticRegisters                           text28       003A9
+_HandleMPetitodbusWriteMultipleRegisters                        text27       0005F
+_HandlePetitModbusError                                         text29       00739
+_HandlePetitModbusReadHoldingRegisters                          text26       0031B
+_HandlePetitModbusReadInputRegisters                            text25       0028D
+_HandlePetitModbusWriteSingleRegister                           text24       004BF
 _INTCONbits                                                     (abs)        0000B
 _INTERRUPT_InterruptManager                                     intentry     00004
-_InitPetitModbus                                                cinit        000F7
-_InitTMR                                                        cinit        00419
-_InitUART                                                       text32       0041F
+_InitPetitModbus                                                text31       00FBF
+_InitTMR                                                        text36       00F75
+_InitUART                                                       text33       00F7C
 _LATA                                                           (abs)        00016
+_LATAbits                                                       (abs)        00016
 _LATB                                                           (abs)        00017
 _LATBbits                                                       (abs)        00017
 _LATC                                                           (abs)        00018
 _LATCbits                                                       (abs)        00018
-_LED_RX                                                         bssBANK0     00044
-_LED_RX_STATE                                                   bssBANK0     0003A
-_LED_RX_prev                                                    bssBANK0     0003E
-_LED_TX                                                         bssBANK0     00046
-_LED_TX_STATE                                                   bssBANK0     0003C
-_LED_TX_prev                                                    bssBANK0     00040
-_MODBUS_ADDRESS                                                 bssBANK0     00042
+_LED_RX                                                         bssBANK0     00042
+_LED_RX_STATE                                                   bssBANK0     00036
+_LED_RX_prev                                                    bssBANK0     0003A
+_LED_TX                                                         bssBANK0     00044
+_LED_TX_STATE                                                   bssBANK0     00038
+_LED_TX_prev                                                    bssBANK0     0003C
+_MODBUS_ADDRESS                                                 bssBANK0     00040
 _ODCONA                                                         (abs)        01F3A
 _ODCONB                                                         (abs)        01F45
 _ODCONC                                                         (abs)        01F50
@@ -691,61 +805,64 @@ _OSCCON1                                                        (abs)        008
 _OSCCON3                                                        (abs)        0088F
 _OSCEN                                                          (abs)        00891
 _OSCFRQ                                                         (abs)        00893
-_OSCILLATOR_Initialize                                          text32       00459
+_OSCILLATOR_Initialize                                          text11       00FAB
 _OSCTUNE                                                        (abs)        00892
-_PETITMODBUS_SLAVE_ADDRESS                                      dataCOMMON   0007B
+_PETITMODBUS_BROADCAST_ADDRESS                                  bssCOMMON    00078
+_PETITMODBUS_SLAVE_ADDRESS                                      dataCOMMON   0007A
 _PIE3bits                                                       (abs)        00719
 _PIE4bits                                                       (abs)        0071A
-_PIN_MANAGER_Initialize                                         text32       00462
+_PIN_MANAGER_Initialize                                         text10       006C0
 _PIR0bits                                                       (abs)        0070C
 _PIR3bits                                                       (abs)        0070F
 _PIR4bits                                                       (abs)        00710
+_PIR7bits                                                       (abs)        00713
 _PMD0                                                           (abs)        00796
 _PMD1                                                           (abs)        00797
 _PMD2                                                           (abs)        00798
 _PMD3                                                           (abs)        00799
 _PMD4                                                           (abs)        0079A
 _PMD5                                                           (abs)        0079B
-_PMD_Initialize                                                 text32       00484
+_PMD_Initialize                                                 text9        00F9A
 _PORTA                                                          (abs)        0000C
-_PetitDiagnosticRegisters                                       bssBANK0     00036
-_PetitHoldingRegisters                                          bssBANK1     000C8
-_PetitInputRegisters                                            bssBANK2     00120
-_PetitModBus_TIMER_Initialise                                   cinit        00418
-_PetitModBus_UART_Initialise                                    cinit        00237
-_PetitModBus_UART_Putch                                         text15       005FE
-_PetitModBus_UART_String                                        text15       005DA
-_PetitModbusIntHandlerRC                                        text46       00592
-_PetitModbusIntHandlerTMR                                       text40       0063A
-_PetitModbusTimerValue                                          bssBANK0     0004C
+_PetitDiagnosticRegisters                                       bssBANK1     000E4
+_PetitHoldingRegisters                                          bssBANK1     000D4
+_PetitInputRegisters                                            bssBANK1     000C8
+_PetitModBus_TIMER_Initialise                                   text35       00F4A
+_PetitModBus_UART_Initialise                                    text32       00F4D
+_PetitModBus_UART_Putch                                         text18       00F83
+_PetitModBus_UART_String                                        text17       0066D
+_PetitModbusIntHandlerRC                                        text47       00FB4
+_PetitModbusIntHandlerTMR                                       text41       00FA2
+_PetitModbusTimerValue                                          bssBANK0     0004A
 _PetitReceiveBuffer                                             bssBANK1     000B6
 _PetitReceiveCounter                                            bssCOMMON    00079
-_PetitSendMessage                                               cinit        002A8
-_Petit_CRC16                                                    cinit        0021C
-_Petit_CheckRxTimeout                                           cinit        00404
-_Petit_DoSlaveTX                                                text15       005D1
-_Petit_RxDataAvailable                                          cinit        00400
-_Petit_RxRTU                                                    cinit        001A1
+_PetitSendMessage                                               text30       007F0
+_Petit_CRC16                                                    text21       0071C
+_Petit_CheckRxTimeout                                           text20       00FCA
+_Petit_DoSlaveTX                                                text16       00FD6
+_Petit_RxDataAvailable                                          text23       00F92
+_Petit_RxRTU                                                    text19       00156
 _Petit_Rx_CRC16                                                 dataBANK0    0006C
 _Petit_Rx_Data                                                  bssBANK0     00020
-_Petit_Rx_Data_Available                                        bssBANK0     00050
-_Petit_Rx_State                                                 bssBANK0     00051
-_Petit_TxRTU                                                    cinit        0013C
-_Petit_Tx_Buf                                                   bssBANK1     000D8
-_Petit_Tx_Buf_Size                                              bssBANK0     00048
+_Petit_Rx_Data_Available                                        bssBANK0     0004E
+_Petit_Rx_State                                                 bssBANK0     0004F
+_Petit_TxRTU                                                    text15       00437
+_Petit_Tx_Buf                                                   bssBANK2     00120
+_Petit_Tx_Buf_Size                                              bssBANK0     00046
 _Petit_Tx_CRC16                                                 dataBANK0    0006E
-_Petit_Tx_Current                                               bssBANK0     0004A
+_Petit_Tx_Current                                               bssBANK0     00048
 _Petit_Tx_Data                                                  bssBANK1     000A0
-_Petit_Tx_State                                                 bssBANK0     00052
-_ProcessPetitModbus                                             cinit        000FC
+_Petit_Tx_State                                                 bssBANK0     00050
+_ProcessPetitModbus                                             text14       005E9
 _RC1PPS                                                         (abs)        01F21
 _RC1REG                                                         (abs)        00119
 _RC1STA                                                         (abs)        0011D
 _RC1STAbits                                                     (abs)        0011D
 _RCREG                                                          (abs)        00119
 _RXPPSbits                                                      (abs)        01ECB
-_ReceiveInterrupt                                               text46       0059A
+_ReceiveInterrupt                                               text50       007CA
 _SCANCON0                                                       (abs)        00410
+_SCANCON0bits                                                   (abs)        00410
 _SCANHADRH                                                      (abs)        0040F
 _SCANHADRL                                                      (abs)        0040E
 _SCANLADRH                                                      (abs)        0040D
@@ -753,48 +870,54 @@ _SCANLADRL                                                      (abs)        004
 _SCANTRIG                                                       (abs)        00411
 _SP1BRGH                                                        (abs)        0011C
 _SP1BRGL                                                        (abs)        0011B
-_SYSTEM_Initialize                                              text32       00424
+_SYSTEM_Initialize                                              text4        00788
+_Set_Amplifier                                                  text3        00535
 _T0CON0                                                         (abs)        0001E
+_T0CON0bits                                                     (abs)        0001E
 _T0CON1                                                         (abs)        0001F
 _T1CLK                                                          (abs)        00211
 _T1CON                                                          (abs)        0020E
 _T1CONbits                                                      (abs)        0020E
 _T1GATE                                                         (abs)        00210
 _T1GCON                                                         (abs)        0020F
+_T1GCONbits                                                     (abs)        0020F
 _T3CLK                                                          (abs)        00217
 _T3CON                                                          (abs)        00214
 _T3CONbits                                                      (abs)        00214
 _T3GATE                                                         (abs)        00216
 _T3GCON                                                         (abs)        00215
+_T3GCONbits                                                     (abs)        00215
 _TMR0H                                                          (abs)        0001D
 _TMR0L                                                          (abs)        0001C
-_TMR0_Initialize                                                text32       004E3
-_TMR0_Reload                                                    cinit        0040F
+_TMR0_Initialize                                                text8        007DF
+_TMR0_Reload                                                    text2        00F69
 _TMR1H                                                          (abs)        0020D
 _TMR1L                                                          (abs)        0020C
-_TMR1_DefaultInterruptHandler                                   text44       00648
-_TMR1_ISR                                                       text42       00605
-_TMR1_Initialize                                                text32       0048C
-_TMR1_InterruptHandler                                          nvBANK0      0005A
-_TMR1_SetInterruptHandler                                       text32       004FB
-_TMR1_StopTimer                                                 cinit        00415
-_TMR1_WriteTimer                                                text42       00618
+_TMR1_DefaultInterruptHandler                                   text45       00002
+_TMR1_ISR                                                       text43       007B5
+_TMR1_Initialize                                                text6        006FF
+_TMR1_InterruptHandler                                          nvBANK1      000E8
+_TMR1_SetInterruptHandler                                       text7        00F63
+_TMR1_StopTimer                                                 text1        00F50
+_TMR1_WriteTimer                                                text44       00FF1
 _TMR3H                                                          (abs)        00213
 _TMR3L                                                          (abs)        00212
-_TMR3_DefaultInterruptHandler                                   text41       00647
-_TMR3_ISR                                                       text46       005AF
-_TMR3_Initialize                                                text32       004A8
-_TMR3_InterruptHandler                                          nvBANK0      0005E
-_TMR3_Reload                                                    text46       005AA
-_TMR3_SetInterruptHandler                                       text32       004C5
-_TMR3_WriteTimer                                                text46       005C2
+_TMR3_DefaultInterruptHandler                                   text42       00003
+_TMR3_ISR                                                       text40       007A0
+_TMR3_Initialize                                                text5        006E2
+_TMR3_InterruptHandler                                          nvBANK0      00068
+_TMR3_Reload                                                    text48       00F8A
+_TMR3_SetInterruptHandler                                       text37       00F57
+_TMR3_WriteTimer                                                text49       00FE2
 _TRISA                                                          (abs)        00011
 _TRISB                                                          (abs)        00012
 _TRISC                                                          (abs)        00013
+_TX1REG                                                         (abs)        0011A
 _TX1STA                                                         (abs)        0011E
+_TX1STAbits                                                     (abs)        0011E
 _TXREG                                                          (abs)        0011A
 _TXSTAbits                                                      (abs)        0011E
-_Timer1_Tick_Counter                                            bssBANK0     0004E
+_Timer1_Tick_Counter                                            bssBANK0     0004C
 _WPUA                                                           (abs)        01F39
 _WPUB                                                           (abs)        01F44
 _WPUC                                                           (abs)        01F4F
@@ -892,27 +1015,28 @@ __HbssBANK0                                                     bssBANK0     000
 __HbssBANK1                                                     bssBANK1     00000
 __HbssBANK2                                                     bssBANK2     00000
 __HbssCOMMON                                                    bssCOMMON    00000
-__Hcinit                                                        cinit        0041F
+__Hcinit                                                        cinit        0005F
 __Hclrtext                                                      clrtext      00000
 __Hcode                                                         code         00000
 __Hcommon                                                       common       00000
 __Hconfig                                                       config       0800C
 __HcstackBANK0                                                  cstackBANK0  00000
 __HcstackBANK1                                                  cstackBANK1  00000
+__HcstackBANK2                                                  cstackBANK2  00000
 __HcstackCOMMON                                                 cstackCOMMON 00000
 __HdataBANK0                                                    dataBANK0    00000
 __HdataCOMMON                                                   dataCOMMON   00000
 __Heeprom_data                                                  eeprom_data  00000
-__Hend_init                                                     end_init     00028
+__Hend_init                                                     end_init     0002E
 __Hfunctab                                                      functab      00000
 __HidataBANK0                                                   idataBANK0   00000
 __HidataCOMMON                                                  idataCOMMON  00000
 __Hidloc                                                        idloc        00000
-__Hinit                                                         init         00026
-__Hintentry                                                     intentry     00026
+__Hinit                                                         init         0002C
+__Hintentry                                                     intentry     0002C
 __Hmaintext                                                     maintext     00000
 __HnvBANK0                                                      nvBANK0      00000
-__Hpa_nodes0                                                    pa_nodes0    00000
+__HnvBANK1                                                      nvBANK1      00000
 __Hpowerup                                                      powerup      00000
 __Hram                                                          ram          00000
 __Hreset_vec                                                    reset_vec    00002
@@ -981,7 +1105,7 @@ __Hsfr7                                                         sfr7         000
 __Hsfr8                                                         sfr8         00000
 __Hsfr9                                                         sfr9         00000
 __Hspace_0                                                      (abs)        0800C
-__Hspace_1                                                      (abs)        0012C
+__Hspace_1                                                      (abs)        0013C
 __Hspace_2                                                      (abs)        00000
 __Hspace_3                                                      (abs)        00000
 __Hstack                                                        stack        00000
@@ -1057,27 +1181,28 @@ __LbssBANK0                                                     bssBANK0     000
 __LbssBANK1                                                     bssBANK1     00000
 __LbssBANK2                                                     bssBANK2     00000
 __LbssCOMMON                                                    bssCOMMON    00000
-__Lcinit                                                        cinit        00028
+__Lcinit                                                        cinit        0002E
 __Lclrtext                                                      clrtext      00000
 __Lcode                                                         code         00000
 __Lcommon                                                       common       00000
 __Lconfig                                                       config       08007
 __LcstackBANK0                                                  cstackBANK0  00000
 __LcstackBANK1                                                  cstackBANK1  00000
+__LcstackBANK2                                                  cstackBANK2  00000
 __LcstackCOMMON                                                 cstackCOMMON 00000
 __LdataBANK0                                                    dataBANK0    00000
 __LdataCOMMON                                                   dataCOMMON   00000
 __Leeprom_data                                                  eeprom_data  00000
-__Lend_init                                                     end_init     00026
+__Lend_init                                                     end_init     0002C
 __Lfunctab                                                      functab      00000
 __LidataBANK0                                                   idataBANK0   00000
 __LidataCOMMON                                                  idataCOMMON  00000
 __Lidloc                                                        idloc        00000
-__Linit                                                         init         00026
+__Linit                                                         init         0002C
 __Lintentry                                                     intentry     00004
 __Lmaintext                                                     maintext     00000
 __LnvBANK0                                                      nvBANK0      00000
-__Lpa_nodes0                                                    pa_nodes0    00000
+__LnvBANK1                                                      nvBANK1      00000
 __Lpowerup                                                      powerup      00000
 __Lram                                                          ram          00000
 __Lreset_vec                                                    reset_vec    00000
@@ -1153,126 +1278,130 @@ __Lstack                                                        stack        000
 __Lstrings                                                      strings      00000
 __Ltext                                                         text         00000
 __S0                                                            (abs)        0800C
-__S1                                                            (abs)        0012C
+__S1                                                            (abs)        0013C
 __S2                                                            (abs)        00000
 __S3                                                            (abs)        00000
 ___int_sp                                                       stack        00000
 ___latbits                                                      (abs)        00004
 ___sp                                                           stack        00000
-__end_of_CRC_Initialize                                         text32       00459
-__end_of_CheckPetitModbusBufferComplete                         text21       00592
-__end_of_EUSART_Initialize                                      text32       004E3
-__end_of_EUSART_Receive_ISR                                     text45       0063A
-__end_of_EUSART_SetRxInterruptHandler                           text32       004FB
-__end_of_Get_ID                                                 cinit        000F7
-__end_of_HandleMPetitodbusDiagnosticRegisters                   cinit        002A8
-__end_of_HandleMPetitodbusWriteMultipleRegisters                cinit        00340
-__end_of_HandlePetitModbusError                                 cinit        00249
-__end_of_HandlePetitModbusReadHoldingRegisters                  cinit        0039F
-__end_of_HandlePetitModbusReadInputRegisters                    cinit        00400
-__end_of_HandlePetitModbusWriteSingleRegister                   text23       0054A
-__end_of_INTERRUPT_InterruptManager                             intentry     00026
-__end_of_InitPetitModbus                                        cinit        000FC
-__end_of_InitTMR                                                cinit        0041F
-__end_of_InitUART                                               text32       00424
-__end_of_OSCILLATOR_Initialize                                  text32       00462
-__end_of_PIN_MANAGER_Initialize                                 text32       00484
-__end_of_PMD_Initialize                                         text32       0048C
-__end_of_PetitModBus_TIMER_Initialise                           cinit        00419
-__end_of_PetitModBus_UART_Initialise                            cinit        00239
-__end_of_PetitModBus_UART_Putch                                 text15       00605
-__end_of_PetitModBus_UART_String                                text15       005FE
-__end_of_PetitModbusIntHandlerRC                                text46       0059A
-__end_of_PetitModbusIntHandlerTMR                               text40       00641
-__end_of_PetitSendMessage                                       cinit        002B4
-__end_of_Petit_CRC16                                            cinit        00237
-__end_of_Petit_CheckRxTimeout                                   cinit        0040F
-__end_of_Petit_DoSlaveTX                                        text15       005DA
-__end_of_Petit_RxDataAvailable                                  cinit        00404
-__end_of_Petit_RxRTU                                            cinit        0021C
-__end_of_Petit_TxRTU                                            cinit        001A1
-__end_of_ProcessPetitModbus                                     cinit        0013C
-__end_of_ReceiveInterrupt                                       text46       005AA
-__end_of_SYSTEM_Initialize                                      text32       00433
-__end_of_TMR0_Initialize                                        text32       004F5
-__end_of_TMR0_Reload                                            cinit        00415
-__end_of_TMR1_DefaultInterruptHandler                           text44       00649
-__end_of_TMR1_ISR                                               text42       00618
-__end_of_TMR1_Initialize                                        text32       004A8
-__end_of_TMR1_SetInterruptHandler                               text32       00501
-__end_of_TMR1_StopTimer                                         cinit        00418
-__end_of_TMR1_WriteTimer                                        text42       00627
-__end_of_TMR3_DefaultInterruptHandler                           text41       00648
-__end_of_TMR3_ISR                                               text46       005C2
-__end_of_TMR3_Initialize                                        text32       004C5
-__end_of_TMR3_Reload                                            text46       005AF
-__end_of_TMR3_SetInterruptHandler                               text32       004CB
-__end_of_TMR3_WriteTimer                                        text46       005D1
-__end_of__initialization                                        cinit        00048
-__end_of_main                                                   cinit        000D4
-__initialization                                                cinit        00028
+__end_of_CRC_Initialize                                         text13       0066D
+__end_of_CheckPetitModbusBufferComplete                         text22       005E9
+__end_of_EUSART_Initialize                                      text12       00788
+__end_of_EUSART_Receive_ISR                                     text46       0076F
+__end_of_EUSART_SetRxInterruptHandler                           text34       00F63
+__end_of_Get_ID                                                 text38       006C0
+__end_of_HandleMPetitodbusDiagnosticRegisters                   text28       00437
+__end_of_HandleMPetitodbusWriteMultipleRegisters                text27       00156
+__end_of_HandlePetitModbusError                                 text29       00754
+__end_of_HandlePetitModbusReadHoldingRegisters                  text26       003A9
+__end_of_HandlePetitModbusReadInputRegisters                    text25       0031B
+__end_of_HandlePetitModbusWriteSingleRegister                   text24       00535
+__end_of_INTERRUPT_InterruptManager                             intentry     0002C
+__end_of_InitPetitModbus                                        text31       00FCA
+__end_of_InitTMR                                                text36       00F7C
+__end_of_InitUART                                               text33       00F83
+__end_of_OSCILLATOR_Initialize                                  text11       00FB4
+__end_of_PIN_MANAGER_Initialize                                 text10       006E2
+__end_of_PMD_Initialize                                         text9        00FA2
+__end_of_PetitModBus_TIMER_Initialise                           text35       00F4D
+__end_of_PetitModBus_UART_Initialise                            text32       00F50
+__end_of_PetitModBus_UART_Putch                                 text18       00F8A
+__end_of_PetitModBus_UART_String                                text17       00699
+__end_of_PetitModbusIntHandlerRC                                text47       00FBF
+__end_of_PetitModbusIntHandlerTMR                               text41       00FAB
+__end_of_PetitSendMessage                                       text30       007FF
+__end_of_Petit_CRC16                                            text21       00739
+__end_of_Petit_CheckRxTimeout                                   text20       00FD6
+__end_of_Petit_DoSlaveTX                                        text16       00FE2
+__end_of_Petit_RxDataAvailable                                  text23       00F9A
+__end_of_Petit_RxRTU                                            text19       001F5
+__end_of_Petit_TxRTU                                            text15       004BF
+__end_of_ProcessPetitModbus                                     text14       0063E
+__end_of_ReceiveInterrupt                                       text50       007DF
+__end_of_SYSTEM_Initialize                                      text4        007A0
+__end_of_Set_Amplifier                                          text3        00591
+__end_of_TMR0_Initialize                                        text8        007F0
+__end_of_TMR0_Reload                                            text2        00F6F
+__end_of_TMR1_DefaultInterruptHandler                           text45       00003
+__end_of_TMR1_ISR                                               text43       007CA
+__end_of_TMR1_Initialize                                        text6        0071C
+__end_of_TMR1_SetInterruptHandler                               text7        00F69
+__end_of_TMR1_StopTimer                                         text1        00F53
+__end_of_TMR1_WriteTimer                                        text44       01000
+__end_of_TMR3_DefaultInterruptHandler                           text42       00004
+__end_of_TMR3_ISR                                               text40       007B5
+__end_of_TMR3_Initialize                                        text5        006FF
+__end_of_TMR3_Reload                                            text48       00F92
+__end_of_TMR3_SetInterruptHandler                               text37       00F5D
+__end_of_TMR3_WriteTimer                                        text49       00FF1
+__end_of__initialization                                        cinit        0005B
+__end_of_main                                                   maintext     0028D
+__initialization                                                cinit        0002E
 __pbssBANK0                                                     bssBANK0     00020
 __pbssBANK1                                                     bssBANK1     000A0
 __pbssBANK2                                                     bssBANK2     00120
-__pbssCOMMON                                                    bssCOMMON    00079
-__pcstackBANK0                                                  cstackBANK0  00064
-__pcstackBANK1                                                  cstackBANK1  000EA
+__pbssCOMMON                                                    bssCOMMON    00078
+__pcstackBANK0                                                  cstackBANK0  00057
+__pcstackBANK1                                                  cstackBANK1  000EC
+__pcstackBANK2                                                  cstackBANK2  00132
 __pcstackCOMMON                                                 cstackCOMMON 00070
 __pdataBANK0                                                    dataBANK0    0006C
-__pdataCOMMON                                                   dataCOMMON   0007B
-__pidataBANK0                                                   idataBANK0   00000
-__pidataCOMMON                                                  idataCOMMON  00000
+__pdataCOMMON                                                   dataCOMMON   0007A
+__pidataBANK0                                                   idataBANK0   00F53
+__pidataCOMMON                                                  idataCOMMON  007FF
 __pintentry                                                     intentry     00004
-__pmaintext                                                     cinit        0004B
-__pnvBANK0                                                      nvBANK0      00058
-__ptext1                                                        cinit        00415
-__ptext10                                                       text32       00459
-__ptext11                                                       text32       004CB
-__ptext12                                                       text32       00433
-__ptext13                                                       cinit        000FC
-__ptext14                                                       cinit        0013C
-__ptext15                                                       text15       005D1
-__ptext16                                                       text15       005DA
-__ptext17                                                       text15       005FE
-__ptext18                                                       cinit        001A1
-__ptext19                                                       cinit        00404
-__ptext2                                                        cinit        0040F
-__ptext20                                                       cinit        0021C
-__ptext21                                                       text21       0054A
-__ptext22                                                       cinit        00400
-__ptext23                                                       text23       00501
-__ptext24                                                       cinit        0039F
-__ptext25                                                       cinit        00340
-__ptext26                                                       cinit        002B4
-__ptext27                                                       cinit        00249
-__ptext28                                                       cinit        00239
-__ptext29                                                       cinit        002A8
-__ptext3                                                        text32       00424
-__ptext30                                                       cinit        000F7
-__ptext31                                                       cinit        00237
-__ptext32                                                       text32       0041F
-__ptext33                                                       text32       004F5
-__ptext34                                                       cinit        00418
-__ptext35                                                       cinit        00419
-__ptext36                                                       text32       004C5
-__ptext37                                                       cinit        000D4
-__ptext39                                                       text46       005AF
-__ptext4                                                        text32       004A8
-__ptext40                                                       text40       0063A
-__ptext41                                                       text41       00647
-__ptext42                                                       text42       00605
-__ptext43                                                       text42       00618
-__ptext44                                                       text44       00648
-__ptext45                                                       text45       00627
-__ptext46                                                       text46       00592
-__ptext47                                                       text46       005AA
-__ptext48                                                       text46       005C2
-__ptext49                                                       text46       0059A
-__ptext5                                                        text32       0048C
-__ptext6                                                        text32       004FB
-__ptext7                                                        text32       004E3
-__ptext8                                                        text32       00484
-__ptext9                                                        text32       00462
+__pmaintext                                                     maintext     001F5
+__pnvBANK0                                                      nvBANK0      00064
+__pnvBANK1                                                      nvBANK1      000E8
+__ptext1                                                        text1        00F50
+__ptext10                                                       text10       006C0
+__ptext11                                                       text11       00FAB
+__ptext12                                                       text12       0076F
+__ptext13                                                       text13       0063E
+__ptext14                                                       text14       005E9
+__ptext15                                                       text15       00437
+__ptext16                                                       text16       00FD6
+__ptext17                                                       text17       0066D
+__ptext18                                                       text18       00F83
+__ptext19                                                       text19       00156
+__ptext2                                                        text2        00F69
+__ptext20                                                       text20       00FCA
+__ptext21                                                       text21       0071C
+__ptext22                                                       text22       00591
+__ptext23                                                       text23       00F92
+__ptext24                                                       text24       004BF
+__ptext25                                                       text25       0028D
+__ptext26                                                       text26       0031B
+__ptext27                                                       text27       0005F
+__ptext28                                                       text28       003A9
+__ptext29                                                       text29       00739
+__ptext3                                                        text3        00535
+__ptext30                                                       text30       007F0
+__ptext31                                                       text31       00FBF
+__ptext32                                                       text32       00F4D
+__ptext33                                                       text33       00F7C
+__ptext34                                                       text34       00F5D
+__ptext35                                                       text35       00F4A
+__ptext36                                                       text36       00F75
+__ptext37                                                       text37       00F57
+__ptext38                                                       text38       00699
+__ptext4                                                        text4        00788
+__ptext40                                                       text40       007A0
+__ptext41                                                       text41       00FA2
+__ptext42                                                       text42       00003
+__ptext43                                                       text43       007B5
+__ptext44                                                       text44       00FF1
+__ptext45                                                       text45       00002
+__ptext46                                                       text46       00754
+__ptext47                                                       text47       00FB4
+__ptext48                                                       text48       00F8A
+__ptext49                                                       text49       00FE2
+__ptext5                                                        text5        006E2
+__ptext50                                                       text50       007CA
+__ptext6                                                        text6        006FF
+__ptext7                                                        text7        00F63
+__ptext8                                                        text8        007DF
+__ptext9                                                        text9        00F9A
 __size_of_CRC_Initialize                                        (abs)        00000
 __size_of_CheckPetitModbusBufferComplete                        (abs)        00000
 __size_of_EUSART_Initialize                                     (abs)        00000
@@ -1308,6 +1437,7 @@ __size_of_Petit_TxRTU                                           (abs)        000
 __size_of_ProcessPetitModbus                                    (abs)        00000
 __size_of_ReceiveInterrupt                                      (abs)        00000
 __size_of_SYSTEM_Initialize                                     (abs)        00000
+__size_of_Set_Amplifier                                         (abs)        00000
 __size_of_TMR0_Initialize                                       (abs)        00000
 __size_of_TMR0_Reload                                           (abs)        00000
 __size_of_TMR1_DefaultInterruptHandler                          (abs)        00000
@@ -1323,18 +1453,18 @@ __size_of_TMR3_Reload                                           (abs)        000
 __size_of_TMR3_SetInterruptHandler                              (abs)        00000
 __size_of_TMR3_WriteTimer                                       (abs)        00000
 __size_of_main                                                  (abs)        00000
-_crcObj                                                         bssBANK0     00055
-_eusartRxBuffer                                                 bssBANK1     000D0
-_eusartRxCount                                                  bssBANK0     00053
-_eusartRxHead                                                   bssCOMMON    0007A
-_eusartRxTail                                                   bssBANK0     00054
-_main                                                           cinit        0004B
-_timer0ReloadVal16bit                                           nvBANK0      00058
-_timer1ReloadVal                                                nvBANK0      0005C
-_timer3ReloadVal                                                nvBANK0      00060
+_crcObj                                                         bssBANK0     00054
+_eusartRxBuffer                                                 bssBANK1     000DC
+_eusartRxCount                                                  bssBANK0     00051
+_eusartRxHead                                                   bssBANK0     00053
+_eusartRxTail                                                   bssBANK0     00052
+_main                                                           maintext     001F5
+_timer0ReloadVal16bit                                           nvBANK0      00064
+_timer1ReloadVal                                                nvBANK0      00066
+_timer3ReloadVal                                                nvBANK0      0006A
 btemp                                                           (abs)        0007E
-clear_ram0                                                      clrtext      00641
-end_of_initialization                                           cinit        00048
+clear_ram0                                                      clrtext      00F6F
+end_of_initialization                                           cinit        0005B
 int$flags                                                       (abs)        0007E
 intlevel0                                                       functab      00000
 intlevel1                                                       functab      00000
@@ -1344,9 +1474,9 @@ intlevel4                                                       functab      000
 intlevel5                                                       functab      00000
 reset_vec                                                       reset_vec    00000
 stackhi                                                         (abs)        02FEF
-stacklo                                                         (abs)        020AC
-start                                                           init         00026
-start_initialization                                            cinit        00028
+stacklo                                                         (abs)        020BC
+start                                                           init         0002C
+start_initialization                                            cinit        0002E
 wtemp0                                                          (abs)        0007E
 
 
@@ -1379,6 +1509,7 @@ Total ram usage:        1 bytes
 		_InitPetitModbus
 		_ProcessPetitModbus
 		_SYSTEM_Initialize
+		_Set_Amplifier
 		_TMR0_Reload
 		_TMR1_StopTimer
  This function is called by:
@@ -1426,7 +1557,37 @@ Total ram usage:        0 bytes
  Return value:  Size  Location     Type
                   1    wreg      void 
  Registers used:
-		wreg
+		wreg, status,2
+ Tracked objects:
+		On entry : 
+		On exit  : 
+		Unchanged: 
+ Data sizes:     COMMON   BANK0   BANK1   BANK2   BANK3   BANK4   BANK5   BANK6   BANK7   BANK8   BANK9  BANK10  BANK11  BANK12  BANK13  BANK14  BANK15  BANK16  BANK17  BANK18  BANK19  BANK20  BANK21  BANK22  BANK23  BANK24  BANK25  BANK26  BANK27  BANK28  BANK29  BANK30  BANK31  BANK32  BANK33  BANK34  BANK35  BANK36  BANK37  BANK38  BANK39  BANK40  BANK41  BANK42  BANK43  BANK44  BANK45  BANK46  BANK47  BANK48  BANK49  BANK50
+      Params:         0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
+      Locals:         0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
+      Temps:          0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
+      Totals:         0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
+Total ram usage:        0 bytes
+ Hardware stack levels used:    1
+ Hardware stack levels required when called:    4
+ This function calls:
+		Nothing
+ This function is called by:
+		_main
+ This function uses a non-reentrant model
+
+
+ *************** function _Set_Amplifier *****************
+ Defined at:
+		line 142 in file "main.c"
+ Parameters:    Size  Location     Type
+		None
+ Auto vars:     Size  Location     Type
+		None
+ Return value:  Size  Location     Type
+                  1    wreg      void 
+ Registers used:
+		wreg, fsr0l, fsr0h, status,2, status,0
  Tracked objects:
 		On entry : 
 		On exit  : 
@@ -1547,7 +1708,7 @@ Total ram usage:        0 bytes
  Defined at:
 		line 178 in file "mcc_generated_files/tmr1.c"
  Parameters:    Size  Location     Type
-  InterruptHan    2    2[COMMON] PTR FTN()void 
+  InterruptHan    2    3[COMMON] PTR FTN()void 
 		 -> TMR1_DefaultInterruptHandler(1), 
  Auto vars:     Size  Location     Type
 		None
@@ -1730,8 +1891,8 @@ Total ram usage:        0 bytes
  Parameters:    Size  Location     Type
 		None
  Auto vars:     Size  Location     Type
-  seed            2    4[COMMON] unsigned int 
-  poly            2    2[COMMON] unsigned int 
+  seed            2    6[COMMON] unsigned int 
+  poly            2    4[COMMON] unsigned int 
  Return value:  Size  Location     Type
                   1    wreg      void 
  Registers used:
@@ -1743,9 +1904,9 @@ Total ram usage:        0 bytes
  Data sizes:     COMMON   BANK0   BANK1   BANK2   BANK3   BANK4   BANK5   BANK6   BANK7   BANK8   BANK9  BANK10  BANK11  BANK12  BANK13  BANK14  BANK15  BANK16  BANK17  BANK18  BANK19  BANK20  BANK21  BANK22  BANK23  BANK24  BANK25  BANK26  BANK27  BANK28  BANK29  BANK30  BANK31  BANK32  BANK33  BANK34  BANK35  BANK36  BANK37  BANK38  BANK39  BANK40  BANK41  BANK42  BANK43  BANK44  BANK45  BANK46  BANK47  BANK48  BANK49  BANK50
       Params:         0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
       Locals:         4       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-      Temps:          0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-      Totals:         4       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-Total ram usage:        4 bytes
+      Temps:          1       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
+      Totals:         5       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
+Total ram usage:        5 bytes
  Hardware stack levels used:    1
  Hardware stack levels required when called:    4
  This function calls:
@@ -1773,9 +1934,9 @@ Total ram usage:        4 bytes
  Data sizes:     COMMON   BANK0   BANK1   BANK2   BANK3   BANK4   BANK5   BANK6   BANK7   BANK8   BANK9  BANK10  BANK11  BANK12  BANK13  BANK14  BANK15  BANK16  BANK17  BANK18  BANK19  BANK20  BANK21  BANK22  BANK23  BANK24  BANK25  BANK26  BANK27  BANK28  BANK29  BANK30  BANK31  BANK32  BANK33  BANK34  BANK35  BANK36  BANK37  BANK38  BANK39  BANK40  BANK41  BANK42  BANK43  BANK44  BANK45  BANK46  BANK47  BANK48  BANK49  BANK50
       Params:         0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
       Locals:         0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-      Temps:          0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-      Totals:         0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-Total ram usage:        0 bytes
+      Temps:          0       0       1       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
+      Totals:         0       0       1       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
+Total ram usage:        1 bytes
  Hardware stack levels used:    1
  Hardware stack levels required when called:    8
  This function calls:
@@ -1803,7 +1964,7 @@ Total ram usage:        0 bytes
  Return value:  Size  Location     Type
                   1    wreg      void 
  Registers used:
-		wreg, fsr0l, fsr0h, fsr1l, fsr1h, status,2, status,0, pclath, cstack
+		wreg, fsr1l, fsr1h, status,2, status,0, pclath, cstack
  Tracked objects:
 		On entry : 
 		On exit  : 
@@ -1811,9 +1972,9 @@ Total ram usage:        0 bytes
  Data sizes:     COMMON   BANK0   BANK1   BANK2   BANK3   BANK4   BANK5   BANK6   BANK7   BANK8   BANK9  BANK10  BANK11  BANK12  BANK13  BANK14  BANK15  BANK16  BANK17  BANK18  BANK19  BANK20  BANK21  BANK22  BANK23  BANK24  BANK25  BANK26  BANK27  BANK28  BANK29  BANK30  BANK31  BANK32  BANK33  BANK34  BANK35  BANK36  BANK37  BANK38  BANK39  BANK40  BANK41  BANK42  BANK43  BANK44  BANK45  BANK46  BANK47  BANK48  BANK49  BANK50
       Params:         0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
       Locals:         0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-      Temps:          0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-      Totals:         0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-Total ram usage:        0 bytes
+      Temps:          1       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
+      Totals:         1       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
+Total ram usage:        1 bytes
  Hardware stack levels used:    1
  Hardware stack levels required when called:    7
  This function calls:
@@ -1860,11 +2021,11 @@ Total ram usage:        0 bytes
  Parameters:    Size  Location     Type
   s               1    wreg     PTR unsigned char 
 		 -> Petit_Tx_Buf(18), 
-  Length          2    3[COMMON] unsigned int 
+  Length          2    4[COMMON] unsigned int 
  Auto vars:     Size  Location     Type
-  s               1    6[COMMON] PTR unsigned char 
+  s               1    0[BANK0 ] PTR unsigned char 
 		 -> Petit_Tx_Buf(18), 
-  DummyCounter    2    7[COMMON] unsigned short 
+  DummyCounter    2    1[BANK0 ] unsigned short 
  Return value:  Size  Location     Type
                   1    wreg      unsigned char 
  Registers used:
@@ -1875,9 +2036,9 @@ Total ram usage:        0 bytes
 		Unchanged: 
  Data sizes:     COMMON   BANK0   BANK1   BANK2   BANK3   BANK4   BANK5   BANK6   BANK7   BANK8   BANK9  BANK10  BANK11  BANK12  BANK13  BANK14  BANK15  BANK16  BANK17  BANK18  BANK19  BANK20  BANK21  BANK22  BANK23  BANK24  BANK25  BANK26  BANK27  BANK28  BANK29  BANK30  BANK31  BANK32  BANK33  BANK34  BANK35  BANK36  BANK37  BANK38  BANK39  BANK40  BANK41  BANK42  BANK43  BANK44  BANK45  BANK46  BANK47  BANK48  BANK49  BANK50
       Params:         2       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-      Locals:         3       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
+      Locals:         0       3       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
       Temps:          1       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-      Totals:         6       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
+      Totals:         3       3       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
 Total ram usage:        6 bytes
  Hardware stack levels used:    1
  Hardware stack levels required when called:    5
@@ -1894,7 +2055,7 @@ Total ram usage:        6 bytes
  Parameters:    Size  Location     Type
   c               1    wreg     unsigned char 
  Auto vars:     Size  Location     Type
-  c               1    2[COMMON] unsigned char 
+  c               1    3[COMMON] unsigned char 
  Return value:  Size  Location     Type
                   1    wreg      void 
  Registers used:
@@ -1924,8 +2085,8 @@ Total ram usage:        1 bytes
  Parameters:    Size  Location     Type
 		None
  Auto vars:     Size  Location     Type
-  Petit_i         1    1[BANK0 ] unsigned char 
-  Petit_Receiv    1    0[BANK0 ] unsigned char 
+  Petit_i         1    3[BANK0 ] unsigned char 
+  Petit_Receiv    1    2[BANK0 ] unsigned char 
  Return value:  Size  Location     Type
                   1    wreg      void 
  Registers used:
@@ -1937,8 +2098,8 @@ Total ram usage:        1 bytes
  Data sizes:     COMMON   BANK0   BANK1   BANK2   BANK3   BANK4   BANK5   BANK6   BANK7   BANK8   BANK9  BANK10  BANK11  BANK12  BANK13  BANK14  BANK15  BANK16  BANK17  BANK18  BANK19  BANK20  BANK21  BANK22  BANK23  BANK24  BANK25  BANK26  BANK27  BANK28  BANK29  BANK30  BANK31  BANK32  BANK33  BANK34  BANK35  BANK36  BANK37  BANK38  BANK39  BANK40  BANK41  BANK42  BANK43  BANK44  BANK45  BANK46  BANK47  BANK48  BANK49  BANK50
       Params:         0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
       Locals:         0       2       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-      Temps:          2       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-      Totals:         2       2       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
+      Temps:          0       2       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
+      Totals:         0       4       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
 Total ram usage:        4 bytes
  Hardware stack levels used:    1
  Hardware stack levels required when called:    5
@@ -1986,14 +2147,14 @@ Total ram usage:        0 bytes
 		line 137 in file "modbus/PetitModbus.c"
  Parameters:    Size  Location     Type
   Data            1    wreg     const unsigned char 
-  CRC             1    2[COMMON] PTR unsigned int 
+  CRC             1    3[COMMON] PTR unsigned int 
 		 -> Petit_Tx_CRC16(2), Petit_Rx_CRC16(2), 
  Auto vars:     Size  Location     Type
-  Data            1    5[COMMON] const unsigned char 
+  Data            1    6[COMMON] const unsigned char 
  Return value:  Size  Location     Type
                   1    wreg      void 
  Registers used:
-		wreg, fsr1l, fsr1h
+		wreg, fsr1l, fsr1h, status,2
  Tracked objects:
 		On entry : 
 		On exit  : 
@@ -2020,7 +2181,7 @@ Total ram usage:        4 bytes
  Parameters:    Size  Location     Type
 		None
  Auto vars:     Size  Location     Type
-  PetitExpecte    2    4[COMMON] int 
+  PetitExpecte    2    5[COMMON] int 
  Return value:  Size  Location     Type
                   1    wreg      unsigned char 
  Registers used:
@@ -2050,7 +2211,7 @@ Total ram usage:        4 bytes
  Parameters:    Size  Location     Type
 		None
  Auto vars:     Size  Location     Type
-  Result          1    2[COMMON] unsigned char 
+  Result          1    4[COMMON] unsigned char 
  Return value:  Size  Location     Type
                   1    wreg      unsigned char 
  Registers used:
@@ -2062,9 +2223,9 @@ Total ram usage:        4 bytes
  Data sizes:     COMMON   BANK0   BANK1   BANK2   BANK3   BANK4   BANK5   BANK6   BANK7   BANK8   BANK9  BANK10  BANK11  BANK12  BANK13  BANK14  BANK15  BANK16  BANK17  BANK18  BANK19  BANK20  BANK21  BANK22  BANK23  BANK24  BANK25  BANK26  BANK27  BANK28  BANK29  BANK30  BANK31  BANK32  BANK33  BANK34  BANK35  BANK36  BANK37  BANK38  BANK39  BANK40  BANK41  BANK42  BANK43  BANK44  BANK45  BANK46  BANK47  BANK48  BANK49  BANK50
       Params:         0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
       Locals:         1       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-      Temps:          0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-      Totals:         1       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-Total ram usage:        1 bytes
+      Temps:          1       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
+      Totals:         2       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
+Total ram usage:        2 bytes
  Hardware stack levels used:    1
  Hardware stack levels required when called:    4
  This function calls:
@@ -2080,23 +2241,23 @@ Total ram usage:        1 bytes
  Parameters:    Size  Location     Type
 		None
  Auto vars:     Size  Location     Type
-  Petit_Addres    2    6[COMMON] unsigned int 
-  Petit_Value     2    4[COMMON] unsigned int 
-  Petit_i         1    8[COMMON] unsigned char 
+  Petit_Addres    2    7[BANK0 ] unsigned int 
+  Petit_Value     2    5[BANK0 ] unsigned int 
+  Petit_i         1    9[BANK0 ] unsigned char 
  Return value:  Size  Location     Type
                   1    wreg      void 
  Registers used:
-		wreg, fsr0l, fsr0h, fsr1l, fsr1h, status,2, status,0, pclath, cstack
+		wreg, fsr1l, fsr1h, status,2, status,0, pclath, cstack
  Tracked objects:
 		On entry : 
 		On exit  : 
 		Unchanged: 
  Data sizes:     COMMON   BANK0   BANK1   BANK2   BANK3   BANK4   BANK5   BANK6   BANK7   BANK8   BANK9  BANK10  BANK11  BANK12  BANK13  BANK14  BANK15  BANK16  BANK17  BANK18  BANK19  BANK20  BANK21  BANK22  BANK23  BANK24  BANK25  BANK26  BANK27  BANK28  BANK29  BANK30  BANK31  BANK32  BANK33  BANK34  BANK35  BANK36  BANK37  BANK38  BANK39  BANK40  BANK41  BANK42  BANK43  BANK44  BANK45  BANK46  BANK47  BANK48  BANK49  BANK50
       Params:         0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-      Locals:         5       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-      Temps:          0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-      Totals:         5       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-Total ram usage:        5 bytes
+      Locals:         0       5       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
+      Temps:          0       5       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
+      Totals:         0      10       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
+Total ram usage:       10 bytes
  Hardware stack levels used:    1
  Hardware stack levels required when called:    6
  This function calls:
@@ -2113,10 +2274,10 @@ Total ram usage:        5 bytes
  Parameters:    Size  Location     Type
 		None
  Auto vars:     Size  Location     Type
-  Petit_Curren    2    4[BANK0 ] unsigned short 
-  Petit_i         2    6[BANK0 ] unsigned int 
-  Petit_Number    2    2[BANK0 ] unsigned int 
-  Petit_StartA    2    0[BANK0 ] unsigned int 
+  Petit_Curren    2    5[BANK0 ] unsigned short 
+  Petit_i         2   11[BANK0 ] unsigned int 
+  Petit_Number    2    9[BANK0 ] unsigned int 
+  Petit_StartA    2    7[BANK0 ] unsigned int 
  Return value:  Size  Location     Type
                   1    wreg      void 
  Registers used:
@@ -2128,9 +2289,9 @@ Total ram usage:        5 bytes
  Data sizes:     COMMON   BANK0   BANK1   BANK2   BANK3   BANK4   BANK5   BANK6   BANK7   BANK8   BANK9  BANK10  BANK11  BANK12  BANK13  BANK14  BANK15  BANK16  BANK17  BANK18  BANK19  BANK20  BANK21  BANK22  BANK23  BANK24  BANK25  BANK26  BANK27  BANK28  BANK29  BANK30  BANK31  BANK32  BANK33  BANK34  BANK35  BANK36  BANK37  BANK38  BANK39  BANK40  BANK41  BANK42  BANK43  BANK44  BANK45  BANK46  BANK47  BANK48  BANK49  BANK50
       Params:         0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
       Locals:         0       8       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-      Temps:          3       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-      Totals:         3       8       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-Total ram usage:       11 bytes
+      Temps:          0       5       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
+      Totals:         0      13       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
+Total ram usage:       13 bytes
  Hardware stack levels used:    1
  Hardware stack levels required when called:    6
  This function calls:
@@ -2147,10 +2308,10 @@ Total ram usage:       11 bytes
  Parameters:    Size  Location     Type
 		None
  Auto vars:     Size  Location     Type
-  Petit_Curren    2    4[BANK0 ] unsigned short 
-  Petit_i         2    6[BANK0 ] unsigned int 
-  Petit_Number    2    2[BANK0 ] unsigned int 
-  Petit_StartA    2    0[BANK0 ] unsigned int 
+  Petit_Curren    2    5[BANK0 ] unsigned short 
+  Petit_i         2   11[BANK0 ] unsigned int 
+  Petit_Number    2    9[BANK0 ] unsigned int 
+  Petit_StartA    2    7[BANK0 ] unsigned int 
  Return value:  Size  Location     Type
                   1    wreg      void 
  Registers used:
@@ -2162,9 +2323,9 @@ Total ram usage:       11 bytes
  Data sizes:     COMMON   BANK0   BANK1   BANK2   BANK3   BANK4   BANK5   BANK6   BANK7   BANK8   BANK9  BANK10  BANK11  BANK12  BANK13  BANK14  BANK15  BANK16  BANK17  BANK18  BANK19  BANK20  BANK21  BANK22  BANK23  BANK24  BANK25  BANK26  BANK27  BANK28  BANK29  BANK30  BANK31  BANK32  BANK33  BANK34  BANK35  BANK36  BANK37  BANK38  BANK39  BANK40  BANK41  BANK42  BANK43  BANK44  BANK45  BANK46  BANK47  BANK48  BANK49  BANK50
       Params:         0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
       Locals:         0       8       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-      Temps:          3       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-      Totals:         3       8       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-Total ram usage:       11 bytes
+      Temps:          0       5       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
+      Totals:         0      13       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
+Total ram usage:       13 bytes
  Hardware stack levels used:    1
  Hardware stack levels required when called:    6
  This function calls:
@@ -2181,25 +2342,25 @@ Total ram usage:       11 bytes
  Parameters:    Size  Location     Type
 		None
  Auto vars:     Size  Location     Type
-  Petit_i         2    6[BANK0 ] unsigned int 
-  Petit_Number    2    4[BANK0 ] unsigned int 
-  Petit_StartA    2    2[BANK0 ] unsigned int 
-  Petit_Value     2    0[BANK0 ] unsigned int 
-  Petit_ByteCo    2    0        unsigned int 
+  Petit_i         2    8[BANK2 ] unsigned int 
+  Petit_Number    2    6[BANK2 ] unsigned int 
+  Petit_StartA    2    4[BANK2 ] unsigned int 
+  Petit_Value     2    2[BANK2 ] unsigned int 
+  Petit_ByteCo    2    0[BANK2 ] unsigned int 
  Return value:  Size  Location     Type
                   1    wreg      void 
  Registers used:
-		wreg, fsr0l, fsr0h, fsr1l, fsr1h, status,2, status,0, pclath, cstack
+		wreg, fsr1l, fsr1h, status,2, status,0, pclath, cstack
  Tracked objects:
 		On entry : 
 		On exit  : 
 		Unchanged: 
  Data sizes:     COMMON   BANK0   BANK1   BANK2   BANK3   BANK4   BANK5   BANK6   BANK7   BANK8   BANK9  BANK10  BANK11  BANK12  BANK13  BANK14  BANK15  BANK16  BANK17  BANK18  BANK19  BANK20  BANK21  BANK22  BANK23  BANK24  BANK25  BANK26  BANK27  BANK28  BANK29  BANK30  BANK31  BANK32  BANK33  BANK34  BANK35  BANK36  BANK37  BANK38  BANK39  BANK40  BANK41  BANK42  BANK43  BANK44  BANK45  BANK46  BANK47  BANK48  BANK49  BANK50
       Params:         0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-      Locals:         0       8       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-      Temps:          3       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-      Totals:         3       8       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-Total ram usage:       11 bytes
+      Locals:         0       0       0      10       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
+      Temps:          0       5       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
+      Totals:         0       5       0      10       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
+Total ram usage:       15 bytes
  Hardware stack levels used:    1
  Hardware stack levels required when called:    6
  This function calls:
@@ -2216,10 +2377,10 @@ Total ram usage:       11 bytes
  Parameters:    Size  Location     Type
 		None
  Auto vars:     Size  Location     Type
-  Petit_Curren    2    4[BANK0 ] unsigned short 
-  Petit_i         2    6[BANK0 ] unsigned int 
-  Petit_Number    2    2[BANK0 ] unsigned int 
-  Petit_StartA    2    0[BANK0 ] unsigned int 
+  Petit_Curren    2    5[BANK0 ] unsigned short 
+  Petit_i         2   11[BANK0 ] unsigned int 
+  Petit_Number    2    9[BANK0 ] unsigned int 
+  Petit_StartA    2    7[BANK0 ] unsigned int 
  Return value:  Size  Location     Type
                   1    wreg      void 
  Registers used:
@@ -2231,9 +2392,9 @@ Total ram usage:       11 bytes
  Data sizes:     COMMON   BANK0   BANK1   BANK2   BANK3   BANK4   BANK5   BANK6   BANK7   BANK8   BANK9  BANK10  BANK11  BANK12  BANK13  BANK14  BANK15  BANK16  BANK17  BANK18  BANK19  BANK20  BANK21  BANK22  BANK23  BANK24  BANK25  BANK26  BANK27  BANK28  BANK29  BANK30  BANK31  BANK32  BANK33  BANK34  BANK35  BANK36  BANK37  BANK38  BANK39  BANK40  BANK41  BANK42  BANK43  BANK44  BANK45  BANK46  BANK47  BANK48  BANK49  BANK50
       Params:         0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
       Locals:         0       8       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-      Temps:          3       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-      Totals:         3       8       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-Total ram usage:       11 bytes
+      Temps:          0       5       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
+      Totals:         0      13       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
+Total ram usage:       13 bytes
  Hardware stack levels used:    1
  Hardware stack levels required when called:    6
  This function calls:
@@ -2249,9 +2410,9 @@ Total ram usage:       11 bytes
 		line 204 in file "modbus/PetitModbus.c"
  Parameters:    Size  Location     Type
   ErrorCode       1    wreg     unsigned char 
-  Function        1    2[COMMON] unsigned char 
+  Function        1    3[COMMON] unsigned char 
  Auto vars:     Size  Location     Type
-  ErrorCode       1    3[COMMON] unsigned char 
+  ErrorCode       1    5[COMMON] unsigned char 
  Return value:  Size  Location     Type
                   1    wreg      void 
  Registers used:
@@ -2263,9 +2424,9 @@ Total ram usage:       11 bytes
  Data sizes:     COMMON   BANK0   BANK1   BANK2   BANK3   BANK4   BANK5   BANK6   BANK7   BANK8   BANK9  BANK10  BANK11  BANK12  BANK13  BANK14  BANK15  BANK16  BANK17  BANK18  BANK19  BANK20  BANK21  BANK22  BANK23  BANK24  BANK25  BANK26  BANK27  BANK28  BANK29  BANK30  BANK31  BANK32  BANK33  BANK34  BANK35  BANK36  BANK37  BANK38  BANK39  BANK40  BANK41  BANK42  BANK43  BANK44  BANK45  BANK46  BANK47  BANK48  BANK49  BANK50
       Params:         1       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
       Locals:         1       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-      Temps:          0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-      Totals:         2       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-Total ram usage:        2 bytes
+      Temps:          1       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
+      Totals:         3       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
+Total ram usage:        3 bytes
  Hardware stack levels used:    1
  Hardware stack levels required when called:    5
  This function calls:
@@ -2321,7 +2482,7 @@ Total ram usage:        0 bytes
  Parameters:    Size  Location     Type
   PetitModbusS    1    wreg     unsigned char 
  Auto vars:     Size  Location     Type
-  PetitModbusS    1    4[COMMON] unsigned char 
+  PetitModbusS    1    6[COMMON] unsigned char 
  Return value:  Size  Location     Type
                   1    wreg      void 
  Registers used:
@@ -2333,9 +2494,9 @@ Total ram usage:        0 bytes
  Data sizes:     COMMON   BANK0   BANK1   BANK2   BANK3   BANK4   BANK5   BANK6   BANK7   BANK8   BANK9  BANK10  BANK11  BANK12  BANK13  BANK14  BANK15  BANK16  BANK17  BANK18  BANK19  BANK20  BANK21  BANK22  BANK23  BANK24  BANK25  BANK26  BANK27  BANK28  BANK29  BANK30  BANK31  BANK32  BANK33  BANK34  BANK35  BANK36  BANK37  BANK38  BANK39  BANK40  BANK41  BANK42  BANK43  BANK44  BANK45  BANK46  BANK47  BANK48  BANK49  BANK50
       Params:         0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
       Locals:         1       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-      Temps:          0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-      Totals:         1       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-Total ram usage:        1 bytes
+      Temps:          1       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
+      Totals:         2       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
+Total ram usage:        2 bytes
  Hardware stack levels used:    1
  Hardware stack levels required when called:    7
  This function calls:
@@ -2410,7 +2571,7 @@ Total ram usage:        0 bytes
  Defined at:
 		line 170 in file "mcc_generated_files/eusart.c"
  Parameters:    Size  Location     Type
-  interruptHan    2    2[COMMON] PTR FTN()void 
+  interruptHan    2    3[COMMON] PTR FTN()void 
 		 -> PetitModbusIntHandlerRC(1), EUSART_Receive_ISR(1), 
  Auto vars:     Size  Location     Type
 		None
@@ -2502,7 +2663,7 @@ Total ram usage:        0 bytes
  Defined at:
 		line 178 in file "mcc_generated_files/tmr3.c"
  Parameters:    Size  Location     Type
-  InterruptHan    2    2[COMMON] PTR FTN()void 
+  InterruptHan    2    3[COMMON] PTR FTN()void 
 		 -> PetitModbusIntHandlerTMR(1), TMR3_DefaultInterruptHandler(1), 
  Auto vars:     Size  Location     Type
 		None
@@ -2532,7 +2693,7 @@ Total ram usage:        2 bytes
 
  *************** function _Get_ID *****************
  Defined at:
-		line 112 in file "main.c"
+		line 114 in file "main.c"
  Parameters:    Size  Location     Type
 		None
  Auto vars:     Size  Location     Type
@@ -2548,9 +2709,9 @@ Total ram usage:        2 bytes
  Data sizes:     COMMON   BANK0   BANK1   BANK2   BANK3   BANK4   BANK5   BANK6   BANK7   BANK8   BANK9  BANK10  BANK11  BANK12  BANK13  BANK14  BANK15  BANK16  BANK17  BANK18  BANK19  BANK20  BANK21  BANK22  BANK23  BANK24  BANK25  BANK26  BANK27  BANK28  BANK29  BANK30  BANK31  BANK32  BANK33  BANK34  BANK35  BANK36  BANK37  BANK38  BANK39  BANK40  BANK41  BANK42  BANK43  BANK44  BANK45  BANK46  BANK47  BANK48  BANK49  BANK50
       Params:         0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
       Locals:         0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-      Temps:          1       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-      Totals:         1       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-Total ram usage:        1 bytes
+      Temps:          3       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
+      Totals:         3       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
+Total ram usage:        3 bytes
  Hardware stack levels used:    1
  Hardware stack levels required when called:    4
  This function calls:
@@ -2578,9 +2739,9 @@ Total ram usage:        1 bytes
  Data sizes:     COMMON   BANK0   BANK1   BANK2   BANK3   BANK4   BANK5   BANK6   BANK7   BANK8   BANK9  BANK10  BANK11  BANK12  BANK13  BANK14  BANK15  BANK16  BANK17  BANK18  BANK19  BANK20  BANK21  BANK22  BANK23  BANK24  BANK25  BANK26  BANK27  BANK28  BANK29  BANK30  BANK31  BANK32  BANK33  BANK34  BANK35  BANK36  BANK37  BANK38  BANK39  BANK40  BANK41  BANK42  BANK43  BANK44  BANK45  BANK46  BANK47  BANK48  BANK49  BANK50
       Params:         0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
       Locals:         0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-      Temps:          0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-      Totals:         0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-Total ram usage:        0 bytes
+      Temps:          1       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
+      Totals:         1       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
+Total ram usage:        1 bytes
  Hardware stack levels used:    1
  Hardware stack levels required when called:    3
  This function calls:
@@ -2729,7 +2890,7 @@ Total ram usage:        0 bytes
  Return value:  Size  Location     Type
                   1    wreg      void 
  Registers used:
-		wreg
+		wreg, status,2
  Tracked objects:
 		On entry : 
 		On exit  : 
@@ -2745,6 +2906,7 @@ Total ram usage:        2 bytes
 		Nothing
  This function is called by:
 		_TMR1_ISR
+		_TMR1_Reload
  This function uses a non-reentrant model
 
 
@@ -2796,9 +2958,9 @@ Total ram usage:        0 bytes
  Data sizes:     COMMON   BANK0   BANK1   BANK2   BANK3   BANK4   BANK5   BANK6   BANK7   BANK8   BANK9  BANK10  BANK11  BANK12  BANK13  BANK14  BANK15  BANK16  BANK17  BANK18  BANK19  BANK20  BANK21  BANK22  BANK23  BANK24  BANK25  BANK26  BANK27  BANK28  BANK29  BANK30  BANK31  BANK32  BANK33  BANK34  BANK35  BANK36  BANK37  BANK38  BANK39  BANK40  BANK41  BANK42  BANK43  BANK44  BANK45  BANK46  BANK47  BANK48  BANK49  BANK50
       Params:         0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
       Locals:         0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-      Temps:          0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-      Totals:         0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-Total ram usage:        0 bytes
+      Temps:          1       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
+      Totals:         1       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
+Total ram usage:        1 bytes
  Hardware stack levels used:    1
  This function calls:
 		Nothing
@@ -2880,7 +3042,7 @@ Total ram usage:        0 bytes
  Return value:  Size  Location     Type
                   1    wreg      void 
  Registers used:
-		wreg
+		wreg, status,2
  Tracked objects:
 		On entry : 
 		On exit  : 
@@ -2906,7 +3068,7 @@ Total ram usage:        2 bytes
  Parameters:    Size  Location     Type
   Data            1    wreg     unsigned char 
  Auto vars:     Size  Location     Type
-  Data            1    0[COMMON] unsigned char 
+  Data            1    1[COMMON] unsigned char 
  Return value:  Size  Location     Type
                   1    wreg      void 
  Registers used:
@@ -2918,9 +3080,9 @@ Total ram usage:        2 bytes
  Data sizes:     COMMON   BANK0   BANK1   BANK2   BANK3   BANK4   BANK5   BANK6   BANK7   BANK8   BANK9  BANK10  BANK11  BANK12  BANK13  BANK14  BANK15  BANK16  BANK17  BANK18  BANK19  BANK20  BANK21  BANK22  BANK23  BANK24  BANK25  BANK26  BANK27  BANK28  BANK29  BANK30  BANK31  BANK32  BANK33  BANK34  BANK35  BANK36  BANK37  BANK38  BANK39  BANK40  BANK41  BANK42  BANK43  BANK44  BANK45  BANK46  BANK47  BANK48  BANK49  BANK50
       Params:         0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
       Locals:         1       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-      Temps:          0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-      Totals:         1       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
-Total ram usage:        1 bytes
+      Temps:          1       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
+      Totals:         2       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0       0
+Total ram usage:        2 bytes
  Hardware stack levels used:    1
  This function calls:
 		Nothing
@@ -2934,109 +3096,110 @@ MODULE INFORMATION
 
 Module		Function		Class		Link	Load	Size
 modbus/Interrupts.c
-		_PetitModbusIntHandlerTMR		CODE           	063A	0000	8
-		_PetitModbusIntHandlerRC		CODE           	0592	0000	9
+		_PetitModbusIntHandlerTMR		CODE           	0FA2	0000	10
+		_PetitModbusIntHandlerRC		CODE           	0FB4	0000	12
 
-modbus/Interrupts.c estimated size: 17
+modbus/Interrupts.c estimated size: 22
 
 mcc_generated_files/interrupt_manager.c
-		_INTERRUPT_InterruptManager		CODE           	0004	0000	35
+		_INTERRUPT_InterruptManager		CODE           	0004	0000	41
 
-mcc_generated_files/interrupt_manager.c estimated size: 35
+mcc_generated_files/interrupt_manager.c estimated size: 41
 
 mcc_generated_files/tmr0.c
-		_TMR0_Reload   		CODE           	040F	0000	7
-		_TMR0_Initialize		CODE           	04E3	0000	19
+		_TMR0_Reload   		CODE           	0F69	0000	7
+		_TMR0_Initialize		CODE           	07DF	0000	18
 
-mcc_generated_files/tmr0.c estimated size: 26
+mcc_generated_files/tmr0.c estimated size: 25
 
 mcc_generated_files/pin_manager.c
-		_PIN_MANAGER_Initialize		CODE           	0462	0000	35
+		_PIN_MANAGER_Initialize		CODE           	06C0	0000	35
 
 mcc_generated_files/pin_manager.c estimated size: 35
 
 modbus/Init.c
-		_InitTMR       		CODE           	0419	0000	7
-		_InitUART      		CODE           	041F	0000	6
+		_InitTMR       		CODE           	0F75	0000	8
+		_InitUART      		CODE           	0F7C	0000	8
 
-modbus/Init.c estimated size: 13
+modbus/Init.c estimated size: 16
 
 mcc_generated_files/crc.c
-		_CRC_Initialize		CODE           	0433	0000	39
+		_CRC_Initialize		CODE           	063E	0000	48
 
-mcc_generated_files/crc.c estimated size: 39
+mcc_generated_files/crc.c estimated size: 48
 
 shared
-		__initialization		CODE           	0028	0000	33
+		__initialization		CODE           	002E	0000	46
 
-shared estimated size: 33
+shared estimated size: 46
 
 mcc_generated_files/mcc.c
-		_PMD_Initialize		CODE           	0484	0000	9
-		_OSCILLATOR_Initialize		CODE           	0459	0000	10
-		_SYSTEM_Initialize		CODE           	0424	0000	16
+		_PMD_Initialize		CODE           	0F9A	0000	9
+		_OSCILLATOR_Initialize		CODE           	0FAB	0000	10
+		_SYSTEM_Initialize		CODE           	0788	0000	25
 
-mcc_generated_files/mcc.c estimated size: 35
+mcc_generated_files/mcc.c estimated size: 44
 
 mcc_generated_files/tmr3.c
-		_TMR3_ISR      		CODE           	05AF	0000	20
-		_TMR3_Initialize		CODE           	04A8	0000	30
-		_TMR3_SetInterruptHandler		CODE           	04C5	0000	7
-		_TMR3_Reload   		CODE           	05AA	0000	6
-		_TMR3_DefaultInterruptHandler		CODE           	0647	0000	2
-		_TMR3_WriteTimer		CODE           	05C2	0000	16
+		_TMR3_ISR      		CODE           	07A0	0000	22
+		_TMR3_Initialize		CODE           	06E2	0000	30
+		_TMR3_SetInterruptHandler		CODE           	0F57	0000	7
+		_TMR3_Reload   		CODE           	0F8A	0000	9
+		_TMR3_DefaultInterruptHandler		CODE           	0003	0000	2
+		_TMR3_WriteTimer		CODE           	0FE2	0000	16
 
-mcc_generated_files/tmr3.c estimated size: 81
+mcc_generated_files/tmr3.c estimated size: 86
 
 mcc_generated_files/tmr1.c
-		_TMR1_Initialize		CODE           	048C	0000	29
-		_TMR1_SetInterruptHandler		CODE           	04FB	0000	7
-		_TMR1_StopTimer		CODE           	0415	0000	4
-		_TMR1_DefaultInterruptHandler		CODE           	0648	0000	2
-		_TMR1_WriteTimer		CODE           	0618	0000	16
-		_TMR1_ISR      		CODE           	0605	0000	20
+		_TMR1_Initialize		CODE           	06FF	0000	30
+		_TMR1_SetInterruptHandler		CODE           	0F63	0000	7
+		_TMR1_StopTimer		CODE           	0F50	0000	4
+		_TMR1_DefaultInterruptHandler		CODE           	0002	0000	2
+		_TMR1_WriteTimer		CODE           	0FF1	0000	16
+		_TMR1_ISR      		CODE           	07B5	0000	22
 
-mcc_generated_files/tmr1.c estimated size: 78
+mcc_generated_files/tmr1.c estimated size: 81
 
 mcc_generated_files/eusart.c
-		_EUSART_SetRxInterruptHandler		CODE           	04F5	0000	7
-		_EUSART_Initialize		CODE           	04CB	0000	25
-		_EUSART_Receive_ISR		CODE           	0627	0000	20
+		_EUSART_SetRxInterruptHandler		CODE           	0F5D	0000	7
+		_EUSART_Initialize		CODE           	076F	0000	26
+		_EUSART_Receive_ISR		CODE           	0754	0000	28
 
-mcc_generated_files/eusart.c estimated size: 52
+mcc_generated_files/eusart.c estimated size: 61
 
 main.c
-		_Get_ID        		CODE           	00D4	0000	36
-		_main          		CODE           	004B	0000	138
+		_Get_ID        		CODE           	0699	0000	40
+		_Set_Amplifier 		CODE           	0535	0000	93
+		_main          		CODE           	01F5	0000	153
 
-main.c estimated size: 174
+main.c estimated size: 286
 
 modbus/PetitModbus.c
-		_Petit_DoSlaveTX		CODE           	05D1	0000	10
-		_HandlePetitModbusReadInputRegisters		CODE           	039F	0000	98
-		_Petit_RxRTU   		CODE           	01A1	0000	124
-		_PetitSendMessage		CODE           	02A8	0000	13
-		_Petit_RxDataAvailable		CODE           	0400	0000	5
-		_Petit_CheckRxTimeout		CODE           	0404	0000	12
-		_HandleMPetitodbusWriteMultipleRegisters		CODE           	02B4	0000	141
-		_HandlePetitModbusError		CODE           	0239	0000	17
-		_ProcessPetitModbus		CODE           	00FC	0000	65
-		_HandlePetitModbusReadHoldingRegisters		CODE           	0340	0000	96
-		_Petit_TxRTU   		CODE           	013C	0000	102
-		_HandleMPetitodbusDiagnosticRegisters		CODE           	0249	0000	96
-		_HandlePetitModbusWriteSingleRegister		CODE           	0501	0000	74
-		_InitPetitModbus		CODE           	00F7	0000	6
-		_CheckPetitModbusBufferComplete		CODE           	054A	0000	73
-		_Petit_CRC16   		CODE           	021C	0000	28
+		_Petit_DoSlaveTX		CODE           	0FD6	0000	13
+		_HandlePetitModbusReadInputRegisters		CODE           	028D	0000	143
+		_Petit_RxRTU   		CODE           	0156	0000	160
+		_PetitSendMessage		CODE           	07F0	0000	16
+		_Petit_RxDataAvailable		CODE           	0F92	0000	9
+		_Petit_CheckRxTimeout		CODE           	0FCA	0000	13
+		_HandleMPetitodbusWriteMultipleRegisters		CODE           	005F	0000	248
+		_HandlePetitModbusError		CODE           	0739	0000	28
+		_ProcessPetitModbus		CODE           	05E9	0000	86
+		_HandlePetitModbusReadHoldingRegisters		CODE           	031B	0000	143
+		_Petit_TxRTU   		CODE           	0437	0000	137
+		_HandleMPetitodbusDiagnosticRegisters		CODE           	03A9	0000	143
+		_HandlePetitModbusWriteSingleRegister		CODE           	04BF	0000	119
+		_InitPetitModbus		CODE           	0FBF	0000	12
+		_CheckPetitModbusBufferComplete		CODE           	0591	0000	89
+		_Petit_CRC16   		CODE           	071C	0000	30
 
-modbus/PetitModbus.c estimated size: 960
+modbus/PetitModbus.c estimated size: 1389
 
 modbus/PetitModbusPort.c
-		_PetitModBus_UART_String		CODE           	05DA	0000	37
-		_PetitModBus_UART_Putch		CODE           	05FE	0000	8
-		_ReceiveInterrupt		CODE           	059A	0000	17
-		_PetitModBus_TIMER_Initialise		CODE           	0418	0000	2
-		_PetitModBus_UART_Initialise		CODE           	0237	0000	3
+		_PetitModBus_UART_String		CODE           	066D	0000	45
+		_PetitModBus_UART_Putch		CODE           	0F83	0000	8
+		_ReceiveInterrupt		CODE           	07CA	0000	22
+		_PetitModBus_TIMER_Initialise		CODE           	0F4A	0000	4
+		_PetitModBus_UART_Initialise		CODE           	0F4D	0000	4
 
-modbus/PetitModbusPort.c estimated size: 67
+modbus/PetitModbusPort.c estimated size: 83
 

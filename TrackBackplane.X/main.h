@@ -15,6 +15,7 @@ extern "C" {
 #define _XTAL_FREQ 32000000                                                     // Fosc  frequency for _delay()  library
 
 void Get_ID (void);
+void Set_Amplifier (void);
 
 
 #ifdef	__cplusplus

@@ -7,7 +7,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 [v _InitUART `(v ~T0 @X0 0 ef ]
 "12
 [v _InitTMR `(v ~T0 @X0 0 ef ]
-"4038 C:\Program Files (x86)\Microchip\xc8\v1.45\include\pic16f18857.h
+"4038 C:\Program Files (x86)\Microchip\xc8\v1.44\include\pic16f18857.h
 [s S196 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
 [n S196 . TX9D TRMT BRGH SENDB SYNC TXEN TX9 CSRC ]
 "4037
@@ -19,7 +19,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 [v _TXREG `Vuc ~T0 @X0 0 e@282 ]
 "57 modbus/PetitModbus.h
 [v _LED_TX `Vui ~T0 @X0 0 e ]
-"911 C:\Program Files (x86)\Microchip\xc8\v1.45\include\pic16f18857.h
+"911 C:\Program Files (x86)\Microchip\xc8\v1.44\include\pic16f18857.h
 [s S46 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
 [n S46 . LATC0 LATC1 LATC2 LATC3 LATC4 LATC5 LATC6 LATC7 ]
 "910
@@ -33,7 +33,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;htc.h: 28: extern double __fpnormalize(double);
 [; ;xc8debug.h: 14: extern void __builtin_software_breakpoint(void);
 [; ;pic16f18857.h: 50: extern volatile unsigned char INDF0 @ 0x000;
-"52 C:\Program Files (x86)\Microchip\xc8\v1.45\include\pic16f18857.h
+"52 C:\Program Files (x86)\Microchip\xc8\v1.44\include\pic16f18857.h
 [; ;pic16f18857.h: 52: asm("INDF0 equ 00h");
 [; <" INDF0 equ 00h ;# ">
 [; ;pic16f18857.h: 55: typedef union {
@@ -2862,14 +2862,14 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;pic16f18857.h: 9328: };
 [; ;pic16f18857.h: 9329: } T2HLTbits_t;
 [; ;pic16f18857.h: 9330: extern volatile T2HLTbits_t T2HLTbits @ 0x28F;
-[; ;pic16f18857.h: 9425: extern volatile unsigned char T2CLKCON @ 0x290;
+[; ;pic16f18857.h: 9425: extern volatile unsigned char T2CLK @ 0x290;
 "9427
-[; ;pic16f18857.h: 9427: asm("T2CLKCON equ 0290h");
-[; <" T2CLKCON equ 0290h ;# ">
-[; ;pic16f18857.h: 9430: extern volatile unsigned char T2CLK @ 0x290;
-"9432
-[; ;pic16f18857.h: 9432: asm("T2CLK equ 0290h");
+[; ;pic16f18857.h: 9427: asm("T2CLK equ 0290h");
 [; <" T2CLK equ 0290h ;# ">
+[; ;pic16f18857.h: 9430: extern volatile unsigned char T2CLKCON @ 0x290;
+"9432
+[; ;pic16f18857.h: 9432: asm("T2CLKCON equ 0290h");
+[; <" T2CLKCON equ 0290h ;# ">
 [; ;pic16f18857.h: 9435: typedef union {
 [; ;pic16f18857.h: 9436: struct {
 [; ;pic16f18857.h: 9437: unsigned CS :4;
@@ -2889,8 +2889,8 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;pic16f18857.h: 9451: unsigned T2CS2 :1;
 [; ;pic16f18857.h: 9452: unsigned T2CS3 :1;
 [; ;pic16f18857.h: 9453: };
-[; ;pic16f18857.h: 9454: } T2CLKCONbits_t;
-[; ;pic16f18857.h: 9455: extern volatile T2CLKCONbits_t T2CLKCONbits @ 0x290;
+[; ;pic16f18857.h: 9454: } T2CLKbits_t;
+[; ;pic16f18857.h: 9455: extern volatile T2CLKbits_t T2CLKbits @ 0x290;
 [; ;pic16f18857.h: 9508: typedef union {
 [; ;pic16f18857.h: 9509: struct {
 [; ;pic16f18857.h: 9510: unsigned CS :4;
@@ -2910,8 +2910,8 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;pic16f18857.h: 9524: unsigned T2CS2 :1;
 [; ;pic16f18857.h: 9525: unsigned T2CS3 :1;
 [; ;pic16f18857.h: 9526: };
-[; ;pic16f18857.h: 9527: } T2CLKbits_t;
-[; ;pic16f18857.h: 9528: extern volatile T2CLKbits_t T2CLKbits @ 0x290;
+[; ;pic16f18857.h: 9527: } T2CLKCONbits_t;
+[; ;pic16f18857.h: 9528: extern volatile T2CLKCONbits_t T2CLKCONbits @ 0x290;
 [; ;pic16f18857.h: 9583: extern volatile unsigned char T2RST @ 0x291;
 "9585
 [; ;pic16f18857.h: 9585: asm("T2RST equ 0291h");
@@ -3048,14 +3048,14 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;pic16f18857.h: 9928: };
 [; ;pic16f18857.h: 9929: } T4HLTbits_t;
 [; ;pic16f18857.h: 9930: extern volatile T4HLTbits_t T4HLTbits @ 0x295;
-[; ;pic16f18857.h: 10025: extern volatile unsigned char T4CLKCON @ 0x296;
+[; ;pic16f18857.h: 10025: extern volatile unsigned char T4CLK @ 0x296;
 "10027
-[; ;pic16f18857.h: 10027: asm("T4CLKCON equ 0296h");
-[; <" T4CLKCON equ 0296h ;# ">
-[; ;pic16f18857.h: 10030: extern volatile unsigned char T4CLK @ 0x296;
-"10032
-[; ;pic16f18857.h: 10032: asm("T4CLK equ 0296h");
+[; ;pic16f18857.h: 10027: asm("T4CLK equ 0296h");
 [; <" T4CLK equ 0296h ;# ">
+[; ;pic16f18857.h: 10030: extern volatile unsigned char T4CLKCON @ 0x296;
+"10032
+[; ;pic16f18857.h: 10032: asm("T4CLKCON equ 0296h");
+[; <" T4CLKCON equ 0296h ;# ">
 [; ;pic16f18857.h: 10035: typedef union {
 [; ;pic16f18857.h: 10036: struct {
 [; ;pic16f18857.h: 10037: unsigned CS :4;
@@ -3075,8 +3075,8 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;pic16f18857.h: 10051: unsigned T4CS2 :1;
 [; ;pic16f18857.h: 10052: unsigned T4CS3 :1;
 [; ;pic16f18857.h: 10053: };
-[; ;pic16f18857.h: 10054: } T4CLKCONbits_t;
-[; ;pic16f18857.h: 10055: extern volatile T4CLKCONbits_t T4CLKCONbits @ 0x296;
+[; ;pic16f18857.h: 10054: } T4CLKbits_t;
+[; ;pic16f18857.h: 10055: extern volatile T4CLKbits_t T4CLKbits @ 0x296;
 [; ;pic16f18857.h: 10108: typedef union {
 [; ;pic16f18857.h: 10109: struct {
 [; ;pic16f18857.h: 10110: unsigned CS :4;
@@ -3096,8 +3096,8 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;pic16f18857.h: 10124: unsigned T4CS2 :1;
 [; ;pic16f18857.h: 10125: unsigned T4CS3 :1;
 [; ;pic16f18857.h: 10126: };
-[; ;pic16f18857.h: 10127: } T4CLKbits_t;
-[; ;pic16f18857.h: 10128: extern volatile T4CLKbits_t T4CLKbits @ 0x296;
+[; ;pic16f18857.h: 10127: } T4CLKCONbits_t;
+[; ;pic16f18857.h: 10128: extern volatile T4CLKCONbits_t T4CLKCONbits @ 0x296;
 [; ;pic16f18857.h: 10183: extern volatile unsigned char T4RST @ 0x297;
 "10185
 [; ;pic16f18857.h: 10185: asm("T4RST equ 0297h");
@@ -3234,14 +3234,14 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;pic16f18857.h: 10528: };
 [; ;pic16f18857.h: 10529: } T6HLTbits_t;
 [; ;pic16f18857.h: 10530: extern volatile T6HLTbits_t T6HLTbits @ 0x29B;
-[; ;pic16f18857.h: 10625: extern volatile unsigned char T6CLKCON @ 0x29C;
+[; ;pic16f18857.h: 10625: extern volatile unsigned char T6CLK @ 0x29C;
 "10627
-[; ;pic16f18857.h: 10627: asm("T6CLKCON equ 029Ch");
-[; <" T6CLKCON equ 029Ch ;# ">
-[; ;pic16f18857.h: 10630: extern volatile unsigned char T6CLK @ 0x29C;
-"10632
-[; ;pic16f18857.h: 10632: asm("T6CLK equ 029Ch");
+[; ;pic16f18857.h: 10627: asm("T6CLK equ 029Ch");
 [; <" T6CLK equ 029Ch ;# ">
+[; ;pic16f18857.h: 10630: extern volatile unsigned char T6CLKCON @ 0x29C;
+"10632
+[; ;pic16f18857.h: 10632: asm("T6CLKCON equ 029Ch");
+[; <" T6CLKCON equ 029Ch ;# ">
 [; ;pic16f18857.h: 10635: typedef union {
 [; ;pic16f18857.h: 10636: struct {
 [; ;pic16f18857.h: 10637: unsigned CS :4;
@@ -3261,8 +3261,8 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;pic16f18857.h: 10651: unsigned T6CS2 :1;
 [; ;pic16f18857.h: 10652: unsigned T6CS3 :1;
 [; ;pic16f18857.h: 10653: };
-[; ;pic16f18857.h: 10654: } T6CLKCONbits_t;
-[; ;pic16f18857.h: 10655: extern volatile T6CLKCONbits_t T6CLKCONbits @ 0x29C;
+[; ;pic16f18857.h: 10654: } T6CLKbits_t;
+[; ;pic16f18857.h: 10655: extern volatile T6CLKbits_t T6CLKbits @ 0x29C;
 [; ;pic16f18857.h: 10708: typedef union {
 [; ;pic16f18857.h: 10709: struct {
 [; ;pic16f18857.h: 10710: unsigned CS :4;
@@ -3282,8 +3282,8 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;pic16f18857.h: 10724: unsigned T6CS2 :1;
 [; ;pic16f18857.h: 10725: unsigned T6CS3 :1;
 [; ;pic16f18857.h: 10726: };
-[; ;pic16f18857.h: 10727: } T6CLKbits_t;
-[; ;pic16f18857.h: 10728: extern volatile T6CLKbits_t T6CLKbits @ 0x29C;
+[; ;pic16f18857.h: 10727: } T6CLKCONbits_t;
+[; ;pic16f18857.h: 10728: extern volatile T6CLKCONbits_t T6CLKCONbits @ 0x29C;
 [; ;pic16f18857.h: 10783: extern volatile unsigned char T6RST @ 0x29D;
 "10785
 [; ;pic16f18857.h: 10785: asm("T6RST equ 029Dh");
@@ -12609,10 +12609,10 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;pic16f18857.h: 39483: extern volatile __bit T2CKPS1 @ (((unsigned) &T2CON)*8) + 5;
 [; ;pic16f18857.h: 39485: extern volatile __bit T2CKPS2 @ (((unsigned) &T2CON)*8) + 6;
 [; ;pic16f18857.h: 39487: extern volatile __bit T2CKSYNC @ (((unsigned) &T2HLT)*8) + 5;
-[; ;pic16f18857.h: 39489: extern volatile __bit T2CS0 @ (((unsigned) &T2CLKCON)*8) + 0;
-[; ;pic16f18857.h: 39491: extern volatile __bit T2CS1 @ (((unsigned) &T2CLKCON)*8) + 1;
-[; ;pic16f18857.h: 39493: extern volatile __bit T2CS2 @ (((unsigned) &T2CLKCON)*8) + 2;
-[; ;pic16f18857.h: 39495: extern volatile __bit T2CS3 @ (((unsigned) &T2CLKCON)*8) + 3;
+[; ;pic16f18857.h: 39489: extern volatile __bit T2CS0 @ (((unsigned) &T2CLK)*8) + 0;
+[; ;pic16f18857.h: 39491: extern volatile __bit T2CS1 @ (((unsigned) &T2CLK)*8) + 1;
+[; ;pic16f18857.h: 39493: extern volatile __bit T2CS2 @ (((unsigned) &T2CLK)*8) + 2;
+[; ;pic16f18857.h: 39495: extern volatile __bit T2CS3 @ (((unsigned) &T2CLK)*8) + 3;
 [; ;pic16f18857.h: 39497: extern volatile __bit T2MODE0 @ (((unsigned) &T2HLT)*8) + 0;
 [; ;pic16f18857.h: 39499: extern volatile __bit T2MODE1 @ (((unsigned) &T2HLT)*8) + 1;
 [; ;pic16f18857.h: 39501: extern volatile __bit T2MODE2 @ (((unsigned) &T2HLT)*8) + 2;
@@ -12668,10 +12668,10 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;pic16f18857.h: 39601: extern volatile __bit T4CKPS1 @ (((unsigned) &T4CON)*8) + 5;
 [; ;pic16f18857.h: 39603: extern volatile __bit T4CKPS2 @ (((unsigned) &T4CON)*8) + 6;
 [; ;pic16f18857.h: 39605: extern volatile __bit T4CKSYNC @ (((unsigned) &T4HLT)*8) + 5;
-[; ;pic16f18857.h: 39607: extern volatile __bit T4CS0 @ (((unsigned) &T4CLKCON)*8) + 0;
-[; ;pic16f18857.h: 39609: extern volatile __bit T4CS1 @ (((unsigned) &T4CLKCON)*8) + 1;
-[; ;pic16f18857.h: 39611: extern volatile __bit T4CS2 @ (((unsigned) &T4CLKCON)*8) + 2;
-[; ;pic16f18857.h: 39613: extern volatile __bit T4CS3 @ (((unsigned) &T4CLKCON)*8) + 3;
+[; ;pic16f18857.h: 39607: extern volatile __bit T4CS0 @ (((unsigned) &T4CLK)*8) + 0;
+[; ;pic16f18857.h: 39609: extern volatile __bit T4CS1 @ (((unsigned) &T4CLK)*8) + 1;
+[; ;pic16f18857.h: 39611: extern volatile __bit T4CS2 @ (((unsigned) &T4CLK)*8) + 2;
+[; ;pic16f18857.h: 39613: extern volatile __bit T4CS3 @ (((unsigned) &T4CLK)*8) + 3;
 [; ;pic16f18857.h: 39615: extern volatile __bit T4MODE0 @ (((unsigned) &T4HLT)*8) + 0;
 [; ;pic16f18857.h: 39617: extern volatile __bit T4MODE1 @ (((unsigned) &T4HLT)*8) + 1;
 [; ;pic16f18857.h: 39619: extern volatile __bit T4MODE2 @ (((unsigned) &T4HLT)*8) + 2;
@@ -12727,10 +12727,10 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;pic16f18857.h: 39719: extern volatile __bit T6CKPS1 @ (((unsigned) &T6CON)*8) + 5;
 [; ;pic16f18857.h: 39721: extern volatile __bit T6CKPS2 @ (((unsigned) &T6CON)*8) + 6;
 [; ;pic16f18857.h: 39723: extern volatile __bit T6CKSYNC @ (((unsigned) &T6HLT)*8) + 5;
-[; ;pic16f18857.h: 39725: extern volatile __bit T6CS0 @ (((unsigned) &T6CLKCON)*8) + 0;
-[; ;pic16f18857.h: 39727: extern volatile __bit T6CS1 @ (((unsigned) &T6CLKCON)*8) + 1;
-[; ;pic16f18857.h: 39729: extern volatile __bit T6CS2 @ (((unsigned) &T6CLKCON)*8) + 2;
-[; ;pic16f18857.h: 39731: extern volatile __bit T6CS3 @ (((unsigned) &T6CLKCON)*8) + 3;
+[; ;pic16f18857.h: 39725: extern volatile __bit T6CS0 @ (((unsigned) &T6CLK)*8) + 0;
+[; ;pic16f18857.h: 39727: extern volatile __bit T6CS1 @ (((unsigned) &T6CLK)*8) + 1;
+[; ;pic16f18857.h: 39729: extern volatile __bit T6CS2 @ (((unsigned) &T6CLK)*8) + 2;
+[; ;pic16f18857.h: 39731: extern volatile __bit T6CS3 @ (((unsigned) &T6CLK)*8) + 3;
 [; ;pic16f18857.h: 39733: extern volatile __bit T6MODE0 @ (((unsigned) &T6HLT)*8) + 0;
 [; ;pic16f18857.h: 39735: extern volatile __bit T6MODE1 @ (((unsigned) &T6HLT)*8) + 1;
 [; ;pic16f18857.h: 39737: extern volatile __bit T6MODE2 @ (((unsigned) &T6HLT)*8) + 2;
