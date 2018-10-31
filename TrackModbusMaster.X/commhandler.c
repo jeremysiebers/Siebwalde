@@ -187,7 +187,6 @@ void ProcessNextSlave(){
     }  
 }
 
-
 /*#--------------------------------------------------------------------------#*/
 /*  Description: ProcessSlaveCommunication()
  *
@@ -245,7 +244,7 @@ unsigned int ProcessSlaveCommunication(){
             LED_ERR_LAT ^= 1;
             break;
             
-        default :    // Idle is here        
+        default : Return_Val = true;                                            // Idle is here, still send data over SPI to Ethernet Target        
             break;
     }
     
@@ -301,7 +300,7 @@ void SendDataToEthernet(){
     SS1_LAT = 1;   
     
     if(RECEIVEDxDATAxRAW[2] < NUMBER_OF_SLAVES && RECEIVEDxDATAxRAW[1]==0xAA && 
-            RECEIVEDxDATAxRAW[DATAxSTRUCTxLENGTH-1]==0x55){                                // Check if received slave number is valid(during debugging sometimes wrong number received)
+            RECEIVEDxDATAxRAW[DATAxSTRUCTxLENGTH-1]==0x55){                     // Check if received slave number is valid(during debugging sometimes wrong number received)
         pSlaveDataReceived = &(MASTER_SLAVE_DATA[RECEIVEDxDATAxRAW[2]].Header); // set the pointer to the first element of the received slave number in RECEIVEDxDATAxRAW[1](first element is dummy byte)    
         pSlaveInfoReadMask = &(SlaveInfoReadMask.Header);                       // set the pointer to the first element of the SlaveInfoReadMask
         for(char i = 1; i < DATAxSTRUCTxLENGTH-1; i++){
@@ -322,87 +321,3 @@ void SendDataToEthernet(){
     }
     //modbus_sync_LAT = 0;
 }
-
-/*
- *------------------------------------------------------------------------------
- * Master communication scheme during OP:
- * 
- *     |Slave n       |    |Slave n     |	 |Broadcast     |    |Slave n + 1   |    |Slave n + 1 |    |Slave x      |
- *     |Critical      |    |Critical    |    |Critical      |    |Critical      |    |Critical    |    |INFO         |     
- * ----|MESSAGE1      |----|MESSAGE2    |----|MESSAGE3      |----|MESSAGE4      |----|MESSAGE5    |----|MESSAGE6     |
- *     |HoldingReg0 W |    |InputReg0 R |    |RegisterX R/W |    |HoldingReg0 W |    |InputReg0 R |	   |RegisterX R/W|	
- *     |HoldingReg1 W |    |InputReg1 R |    |RegisterX R/W |    |HoldingReg1 W |    |InputReg1 R |    |RegisterX R/W| 
- *     		             		   							     
- *     
- * Message 6 consists out of a mailbox were info can be R/W or
- * NOP, a maximum amount of 2 registers should be addressed at once
- * (NOP operation would be a read from a register)
- *
- * 4 Holding registers
- * 5 Input registers
- * 2 Diagnostic registers
- *
- * Mailbox: 50x 
- * 1x read HoldingReg3 and HoldingReg4
- * 1x read DiagnosticReg1 and DiagnosticReg2
- * 1x write HoldingReg2 and HoldingReg3
- * 1x read DiagnosticReg3 and DiagnosticReg4
- * 
- *------------------------------------------------------------------------------ 
- * 
- * Modbus Track Slave Data Register mapping:
- * 
- * Data register, bit(s)        Function            	R/W     Critical
- * 
- * -----------------------------RUNNING PARAMETERS------------------------------
- * 
- * HoldingReg0, 0 - 9           PWM set point       	R/W     No/Yes			// new PWM setpoint (speed in 0 - 255 km/h)
- * HoldingReg0, 10				PWM direction       	R/W     No/Yes          // Forward / Backward
- * HoldingReg0, 11              PWM brake            	R/W     No/Yes          // enabling of the H-bridge outputs
- * HoldingReg0, 12                                  	
- * HoldingReg0, 13                                  	
- * HoldingReg0, 14                                  	
- * HoldingReg0, 15              Emo Stop            	R/W     No/Yes			// Slave takes action to stop train as fast as possible
- *  
- * HoldingReg1, 0 - 9           Set BEMF speed      	R/W     No/No           // Set value of BEMF, this to allow constant speed regulation
- * HoldingReg1, 10              Set CSReg             	R/W     No/No           // Enable constant speed regulation
- * HoldingReg1, 11 				Clear Amp status		R/W 	No/No			// Clear amplifier status
- * HoldingReg1, 12				Clear message buffer	R/W 	No/No			// Clear message buffer registers
- * HoldingReg1, 13
- * HoldingReg1, 14
- * HoldingReg1, 15				Reset Amplifier			R/W		No/No			// Execute an Amplifier reset().
- 
- * InputReg0, 0 - 9             Read Back EMF         	R/-     Yes/-           // Read of back EMF train motor                      
- * InputReg0, 10                Occupied				R/-     Yes/-          
- * InputReg0, 11                ThermalFlag				R/-     Yes/-			// H-bridge thermal flag output              
- * InputReg0, 12                H-bridge over current 	R/-     Yes/-			// When over current is detected
- * InputReg0, 13                Amplifier ID set		R/-		No/-			// Indicates that the amplifier ID is set by master
- * InputReg0, 14
- * InputReg0, 15
- * 
- * InputReg4, 0 - 15            Amplifier Status        R/-     No/-            // Amplifier status list
- *                                                  	
- * InputReg1, 0 - 9          	H-bridge fuse status	R/-	    No/-            // Voltage H-bridge fuse 0 - 31V
- * 
- * InputReg2, 0 - 9          	H-bridge temperature	R/-		No/-			// H-bridge temperature 0 - 255 degrees Celsius
- * 
- * InputReg3, 0 - 9          	H-bridge current     	R/-		No/-			// H-bridge current A
- * 
- * InputReg5, 0 - 9          	                                           		// Spare
- * 
- * DiagnosticReg0, 0 - 15		Messages Received		R/-		No/-			// Slave register of messages Received to Master
- *
- * DiagnosticReg1, 0 - 15		Messages Sent			R/-		No/-			// Slave register of messages sent to Master
- *
- * 
- * -----------------------------CONFIG PARAMETERS------------------------------- 
- * 
- * HoldingReg2, 0 - 5			Amplifier ID			R/W		No/No           // Amplifier ID for Track amp 1 to 50. Backplane config modules have address 51 to 55 
- * HoldingReg2, 6				Single/Double PWM		R/W		No/No			// used in single or double sided PWM operation 0 is dual sided PWM, 1 is single sided PWM
- * HoldingReg2, 7
- *
- * HoldingReg3, 0 - 7           Acceleration par    	R/W     No/No			// Acceleration number 0 - 255
- * HoldingReg3, 8 - 15          Deceleration par    	R/W     No/No			// Deceleration number 0 - 255
- *
- *------------------------------------------------------------------------------
- */

@@ -17,7 +17,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern void InitSlaveCommunication(SLAVE_INFO *location);
+extern void INITxSPIxCOMMxHANDLER(SLAVE_INFO *location);
 extern void ProcessSpiData(void);
 extern void ProcessSpiInterrupt();
 extern void CheckSpiStart(void);

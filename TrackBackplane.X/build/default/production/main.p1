@@ -1,5 +1,5 @@
 Version 3.2 HI-TECH Software Intermediate Code
-[v F14298 `(v ~T0 @X0 0 tf ]
+[v F14300 `(v ~T0 @X0 0 tf ]
 "35 modbus/PetitModbus.h
 [s S1557 `ui 1 ]
 [n S1557 . ActValue ]
@@ -36,20 +36,8 @@ Version 3.2 HI-TECH Software Intermediate Code
 [v _ProcessPetitModbus `(v ~T0 @X0 0 ef ]
 "18 main.h
 [v _Set_Amplifier `(v ~T0 @X0 0 ef ]
-"21109 C:\Program Files (x86)\Microchip\xc8\v1.44\include\pic16f18857.h
-[s S956 :1 `uc 1 :3 `uc 1 :1 `uc 1 :1 `uc 1 ]
-[n S956 . INTF . IOCIF TMR0IF ]
-"21108
-[u S955 `S956 1 ]
-[n S955 . . ]
-"21116
-[v _PIR0bits `VS955 ~T0 @X0 0 e@1804 ]
-"57 modbus/PetitModbus.h
-[v _LED_TX `Vui ~T0 @X0 0 e ]
-"58
-[v _LED_RX `Vui ~T0 @X0 0 e ]
-"272 mcc_generated_files/tmr0.h
-[v _TMR0_Reload `(v ~T0 @X0 0 ef ]
+"19
+[v _Led_Blink `(v ~T0 @X0 0 ef ]
 "388 C:\Program Files (x86)\Microchip\xc8\v1.44\include\pic16f18857.h
 [v _PORTA `Vuc ~T0 @X0 0 e@12 ]
 "911
@@ -68,6 +56,20 @@ Version 3.2 HI-TECH Software Intermediate Code
 [n S41 . . ]
 "798
 [v _LATAbits `VS41 ~T0 @X0 0 e@22 ]
+"21109
+[s S956 :1 `uc 1 :3 `uc 1 :1 `uc 1 :1 `uc 1 ]
+[n S956 . INTF . IOCIF TMR0IF ]
+"21108
+[u S955 `S956 1 ]
+[n S955 . . ]
+"21116
+[v _PIR0bits `VS955 ~T0 @X0 0 e@1804 ]
+"57 modbus/PetitModbus.h
+[v _LED_TX `Vui ~T0 @X0 0 e ]
+"58
+[v _LED_RX `Vui ~T0 @X0 0 e ]
+"272 mcc_generated_files/tmr0.h
+[v _TMR0_Reload `(v ~T0 @X0 0 ef ]
 [; ;htc.h: 26: extern const char __xc8_OPTIM_SPEED;
 [; ;htc.h: 28: extern double __fpnormalize(double);
 [; ;xc8debug.h: 14: extern void __builtin_software_breakpoint(void);
@@ -13090,6 +13092,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;pic.h: 195: extern __bank0 __bit __timeout;
 [; ;main.h: 17: void Get_ID (void);
 [; ;main.h: 18: void Set_Amplifier (void);
+[; ;main.h: 19: void Led_Blink (void);
 [; ;pin_manager.h: 536: void PIN_MANAGER_Initialize (void);
 [; ;pin_manager.h: 548: void PIN_MANAGER_IOC(void);
 [; ;stdint.h: 13: typedef signed char int8_t;
@@ -13166,7 +13169,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;eusart.h: 78: extern volatile uint8_t eusartTxBufferRemaining;
 [; ;eusart.h: 79: extern volatile uint8_t eusartRxCount;
 "85 mcc_generated_files/eusart.h
-[v _EUSART_RxDefaultInterruptHandler `*F14298 ~T0 @X0 1 e ]
+[v _EUSART_RxDefaultInterruptHandler `*F14300 ~T0 @X0 1 e ]
 [; ;eusart.h: 85: void (*EUSART_RxDefaultInterruptHandler)(void);
 [; ;eusart.h: 107: void EUSART_Initialize(void);
 [; ;eusart.h: 155: bool EUSART_is_tx_ready(void);
@@ -13236,368 +13239,398 @@ Version 3.2 HI-TECH Software Intermediate Code
 -> -> 0 `i `ui
 ]
 [; ;main.c: 22: unsigned int LED_TX_STATE, LED_RX_STATE = 0;
-[v $root$_main `(v ~T0 @X0 0 e ]
 "24
+[v _ActValue_prev `ui ~T0 @X0 1 e ]
+[i _ActValue_prev
+-> -> 0 `i `ui
+]
+[; ;main.c: 24: unsigned int ActValue_prev = 0;
+[v $root$_main `(v ~T0 @X0 0 e ]
+"26
 [v _main `(v ~T0 @X0 1 ef ]
 {
-[; ;main.c: 24: void main(void) {
+[; ;main.c: 26: void main(void) {
 [e :U _main ]
 [f ]
-[; ;main.c: 26: SYSTEM_Initialize();
-"26
-[e ( _SYSTEM_Initialize ..  ]
-[; ;main.c: 27: TMR1_StopTimer();
-"27
-[e ( _TMR1_StopTimer ..  ]
-[; ;main.c: 28: LATBbits.LATB5 = 0;
+[; ;main.c: 28: SYSTEM_Initialize();
 "28
-[e = . . _LATBbits 0 5 -> -> 0 `i `uc ]
-[; ;main.c: 29: LATBbits.LATB4 = 0;
+[e ( _SYSTEM_Initialize ..  ]
+[; ;main.c: 29: TMR1_StopTimer();
 "29
-[e = . . _LATBbits 0 4 -> -> 0 `i `uc ]
-[; ;main.c: 30: LATBbits.LATB3 = 1;
+[e ( _TMR1_StopTimer ..  ]
+[; ;main.c: 30: LATBbits.LATB5 = 0;
 "30
-[e = . . _LATBbits 0 3 -> -> 1 `i `uc ]
-[; ;main.c: 31: LATBbits.LATB1 = 0;
+[e = . . _LATBbits 0 5 -> -> 0 `i `uc ]
+[; ;main.c: 31: LATBbits.LATB4 = 0;
 "31
-[e = . . _LATBbits 0 1 -> -> 0 `i `uc ]
-[; ;main.c: 32: LATBbits.LATB2 = 0;
+[e = . . _LATBbits 0 4 -> -> 0 `i `uc ]
+[; ;main.c: 32: LATBbits.LATB3 = 1;
 "32
-[e = . . _LATBbits 0 2 -> -> 0 `i `uc ]
-[; ;main.c: 34: _delay((unsigned long)((10)*(32000000/4000.0)));
+[e = . . _LATBbits 0 3 -> -> 1 `i `uc ]
+[; ;main.c: 33: LATBbits.LATB1 = 0;
+"33
+[e = . . _LATBbits 0 1 -> -> 0 `i `uc ]
+[; ;main.c: 34: LATBbits.LATB2 = 0;
 "34
-[e ( __delay (1 -> * -> -> 10 `i `d / -> -> 32000000 `l `d .4000.0 `ul ]
-[; ;main.c: 36: INTCONbits.GIE = 1;
+[e = . . _LATBbits 0 2 -> -> 0 `i `uc ]
+[; ;main.c: 36: _delay((unsigned long)((10)*(32000000/4000.0)));
 "36
+[e ( __delay (1 -> * -> -> 10 `i `d / -> -> 32000000 `l `d .4000.0 `ul ]
+[; ;main.c: 38: INTCONbits.GIE = 1;
+"38
 [e = . . _INTCONbits 0 3 -> -> 1 `i `uc ]
-[; ;main.c: 37: INTCONbits.PEIE = 1;
-"37
-[e = . . _INTCONbits 0 2 -> -> 1 `i `uc ]
-[; ;main.c: 39: Get_ID();
+[; ;main.c: 39: INTCONbits.PEIE = 1;
 "39
-[e ( _Get_ID ..  ]
-[; ;main.c: 41: InitPetitModbus(MODBUS_ADDRESS);
+[e = . . _INTCONbits 0 2 -> -> 1 `i `uc ]
+[; ;main.c: 41: Get_ID();
 "41
-[e ( _InitPetitModbus (1 -> _MODBUS_ADDRESS `uc ]
-[; ;main.c: 43: while(1){
+[e ( _Get_ID ..  ]
+[; ;main.c: 43: InitPetitModbus(MODBUS_ADDRESS);
 "43
+[e ( _InitPetitModbus (1 -> _MODBUS_ADDRESS `uc ]
+[; ;main.c: 45: while(1){
+"45
 [e :U 1560 ]
 {
-[; ;main.c: 44: ProcessPetitModbus();
-"44
-[e ( _ProcessPetitModbus ..  ]
-[; ;main.c: 46: Set_Amplifier();
+[; ;main.c: 46: ProcessPetitModbus();
 "46
-[e ( _Set_Amplifier ..  ]
-[; ;main.c: 48: if(PIR0bits.TMR0IF){
+[e ( _ProcessPetitModbus ..  ]
+[; ;main.c: 48: Set_Amplifier();
 "48
-[e $ ! != -> . . _PIR0bits 0 3 `i -> -> -> 0 `i `Vuc `i 1562  ]
-{
-[; ;main.c: 50: switch(LED_TX_STATE){
+[e ( _Set_Amplifier ..  ]
+[; ;main.c: 50: Led_Blink();
 "50
-[e $U 1564  ]
-{
-[; ;main.c: 51: case 0 :
+[e ( _Led_Blink ..  ]
 "51
-[e :U 1565 ]
-[; ;main.c: 52: if (LED_TX > 0){
-"52
-[e $ ! > _LED_TX -> -> 0 `i `ui 1566  ]
-{
-[; ;main.c: 53: LATBbits.LATB1 = 1;
-"53
-[e = . . _LATBbits 0 1 -> -> 1 `i `uc ]
-[; ;main.c: 54: LED_TX_prev = LED_TX;
-"54
-[e = _LED_TX_prev _LED_TX ]
-[; ;main.c: 55: LED_TX_STATE = 1;
-"55
-[e = _LED_TX_STATE -> -> 1 `i `ui ]
-"56
-}
-[e :U 1566 ]
-[; ;main.c: 56: }
-[; ;main.c: 57: break;
-"57
-[e $U 1563  ]
-[; ;main.c: 59: case 1 :
-"59
-[e :U 1567 ]
-[; ;main.c: 60: if (LED_TX == LED_TX_prev || LED_TX != LED_TX_prev){
-"60
-[e $ ! || == _LED_TX _LED_TX_prev != _LED_TX _LED_TX_prev 1568  ]
-{
-[; ;main.c: 61: LATBbits.LATB1 = 0;
-"61
-[e = . . _LATBbits 0 1 -> -> 0 `i `uc ]
-[; ;main.c: 62: LED_TX_prev = 0;
-"62
-[e = _LED_TX_prev -> -> 0 `i `ui ]
-[; ;main.c: 63: LED_TX = 0;
-"63
-[e = _LED_TX -> -> 0 `i `ui ]
-[; ;main.c: 64: LED_TX_STATE = 0;
-"64
-[e = _LED_TX_STATE -> -> 0 `i `ui ]
-"65
-}
-[e :U 1568 ]
-[; ;main.c: 65: }
-[; ;main.c: 66: break;
-"66
-[e $U 1563  ]
-[; ;main.c: 68: default :
-"68
-[e :U 1569 ]
-[; ;main.c: 69: LED_TX_STATE = 0;
-"69
-[e = _LED_TX_STATE -> -> 0 `i `ui ]
-[; ;main.c: 70: break;
-"70
-[e $U 1563  ]
-"71
-}
-[; ;main.c: 71: }
-[e $U 1563  ]
-"50
-[e :U 1564 ]
-[e [\ _LED_TX_STATE , $ -> -> 0 `i `ui 1565
- , $ -> -> 1 `i `ui 1567
- 1569 ]
-"71
-[e :U 1563 ]
-[; ;main.c: 73: switch(LED_RX_STATE){
-"73
-[e $U 1571  ]
-{
-[; ;main.c: 74: case 0 :
-"74
-[e :U 1572 ]
-[; ;main.c: 75: if (LED_RX > 0){
-"75
-[e $ ! > _LED_RX -> -> 0 `i `ui 1573  ]
-{
-[; ;main.c: 76: LATBbits.LATB2 = 1;
-"76
-[e = . . _LATBbits 0 2 -> -> 1 `i `uc ]
-[; ;main.c: 77: LED_RX_prev = LED_RX;
-"77
-[e = _LED_RX_prev _LED_RX ]
-[; ;main.c: 78: LED_RX_STATE = 1;
-"78
-[e = _LED_RX_STATE -> -> 1 `i `ui ]
-"79
-}
-[e :U 1573 ]
-[; ;main.c: 79: }
-[; ;main.c: 80: break;
-"80
-[e $U 1570  ]
-[; ;main.c: 82: case 1 :
-"82
-[e :U 1574 ]
-[; ;main.c: 83: if (LED_RX == LED_RX_prev || LED_RX != LED_RX_prev){
-"83
-[e $ ! || == _LED_RX _LED_RX_prev != _LED_RX _LED_RX_prev 1575  ]
-{
-[; ;main.c: 84: LATBbits.LATB2 = 0;
-"84
-[e = . . _LATBbits 0 2 -> -> 0 `i `uc ]
-[; ;main.c: 85: LED_RX_prev = 0;
-"85
-[e = _LED_RX_prev -> -> 0 `i `ui ]
-[; ;main.c: 86: LED_RX = 0;
-"86
-[e = _LED_RX -> -> 0 `i `ui ]
-[; ;main.c: 87: LED_RX_STATE = 0;
-"87
-[e = _LED_RX_STATE -> -> 0 `i `ui ]
-"88
-}
-[e :U 1575 ]
-[; ;main.c: 88: }
-[; ;main.c: 89: break;
-"89
-[e $U 1570  ]
-[; ;main.c: 91: default :
-"91
-[e :U 1576 ]
-[; ;main.c: 92: LED_RX_STATE = 0;
-"92
-[e = _LED_RX_STATE -> -> 0 `i `ui ]
-[; ;main.c: 93: break;
-"93
-[e $U 1570  ]
-"94
-}
-[; ;main.c: 94: }
-[e $U 1570  ]
-"73
-[e :U 1571 ]
-[e [\ _LED_RX_STATE , $ -> -> 0 `i `ui 1572
- , $ -> -> 1 `i `ui 1574
- 1576 ]
-"94
-[e :U 1570 ]
-[; ;main.c: 95: PIR0bits.TMR0IF = 0;
-"95
-[e = . . _PIR0bits 0 3 -> -> 0 `i `uc ]
-[; ;main.c: 96: TMR0_Reload();
-"96
-[e ( _TMR0_Reload ..  ]
-"97
-}
-[e :U 1562 ]
-"98
 }
 [e :U 1559 ]
-"43
+"45
 [e $U 1560  ]
 [e :U 1561 ]
-[; ;main.c: 97: }
-[; ;main.c: 98: }
-[; ;main.c: 99: }
-"99
+[; ;main.c: 51: }
+[; ;main.c: 52: }
+"52
 [e :UE 1558 ]
 }
-"114
+"67
 [v _Get_ID `(v ~T0 @X0 1 ef ]
 {
-[; ;main.c: 114: void Get_ID(){
+[; ;main.c: 67: void Get_ID(){
 [e :U _Get_ID ]
 [f ]
-[; ;main.c: 116: MODBUS_ADDRESS = (unsigned int)50 + (unsigned int)((PORTA & 0xE0)>> 5);
-"116
+[; ;main.c: 69: MODBUS_ADDRESS = (unsigned int)50 + (unsigned int)((PORTA & 0xE0)>> 5);
+"69
 [e = _MODBUS_ADDRESS + -> -> 50 `i `ui -> >> & -> _PORTA `i -> 224 `i -> 5 `i `ui ]
-[; ;main.c: 118: if(MODBUS_ADDRESS > 50 && MODBUS_ADDRESS < 60){
-"118
-[e $ ! && > _MODBUS_ADDRESS -> -> 50 `i `ui < _MODBUS_ADDRESS -> -> 60 `i `ui 1578  ]
+[; ;main.c: 71: if(MODBUS_ADDRESS > 50 && MODBUS_ADDRESS < 60){
+"71
+[e $ ! && > _MODBUS_ADDRESS -> -> 50 `i `ui < _MODBUS_ADDRESS -> -> 60 `i `ui 1563  ]
 {
-[; ;main.c: 119: LATBbits.LATB5 = 1;
-"119
+[; ;main.c: 72: LATBbits.LATB5 = 1;
+"72
 [e = . . _LATBbits 0 5 -> -> 1 `i `uc ]
-[; ;main.c: 120: LATBbits.LATB3 = 0;
-"120
+[; ;main.c: 73: LATBbits.LATB3 = 0;
+"73
 [e = . . _LATBbits 0 3 -> -> 0 `i `uc ]
-"121
+"74
 }
-[; ;main.c: 121: }
-[e $U 1579  ]
-"122
-[e :U 1578 ]
-[; ;main.c: 122: else{
+[; ;main.c: 74: }
+[e $U 1564  ]
+"75
+[e :U 1563 ]
+[; ;main.c: 75: else{
 {
-[; ;main.c: 123: LATBbits.LATB5 = 0;
-"123
+[; ;main.c: 76: LATBbits.LATB5 = 0;
+"76
 [e = . . _LATBbits 0 5 -> -> 0 `i `uc ]
-[; ;main.c: 124: LATBbits.LATB3 = 1;
-"124
+[; ;main.c: 77: LATBbits.LATB3 = 1;
+"77
 [e = . . _LATBbits 0 3 -> -> 1 `i `uc ]
-[; ;main.c: 125: while(1);
-"125
-[e :U 1581 ]
-[e :U 1580 ]
-[e $U 1581  ]
-[e :U 1582 ]
-"126
+[; ;main.c: 78: while(1);
+"78
+[e :U 1566 ]
+[e :U 1565 ]
+[e $U 1566  ]
+[e :U 1567 ]
+"79
 }
-[e :U 1579 ]
-[; ;main.c: 126: }
-[; ;main.c: 127: }
-"127
-[e :UE 1577 ]
+[e :U 1564 ]
+[; ;main.c: 79: }
+[; ;main.c: 80: }
+"80
+[e :UE 1562 ]
 }
-"142
+"95
 [v _Set_Amplifier `(v ~T0 @X0 1 ef ]
 {
-[; ;main.c: 142: void Set_Amplifier(){
+[; ;main.c: 95: void Set_Amplifier(){
 [e :U _Set_Amplifier ]
 [f ]
-[; ;main.c: 144: switch(PetitHoldingRegisters[0].ActValue){
-"144
-[e $U 1585  ]
+[; ;main.c: 97: if (ActValue_prev != PetitHoldingRegisters[0].ActValue){
+"97
+[e $ ! != _ActValue_prev . *U + &U _PetitHoldingRegisters * -> -> -> 0 `i `ui `ux -> -> # *U &U _PetitHoldingRegisters `ui `ux 0 1569  ]
 {
-[; ;main.c: 145: case 0x1 : LATBbits.LATB0 = 0; break;
-"145
-[e :U 1586 ]
-[e = . . _LATBbits 0 0 -> -> 0 `i `uc ]
-[e $U 1584  ]
-[; ;main.c: 146: case 0x2 : LATCbits.LATC7 = 0; break;
-"146
-[e :U 1587 ]
-[e = . . _LATCbits 0 7 -> -> 0 `i `uc ]
-[e $U 1584  ]
-[; ;main.c: 147: case 0x4 : LATCbits.LATC6 = 0; break;
-"147
-[e :U 1588 ]
-[e = . . _LATCbits 0 6 -> -> 0 `i `uc ]
-[e $U 1584  ]
-[; ;main.c: 148: case 0x8 : LATCbits.LATC5 = 0; break;
-"148
-[e :U 1589 ]
-[e = . . _LATCbits 0 5 -> -> 0 `i `uc ]
-[e $U 1584  ]
-[; ;main.c: 149: case 0x10 : LATCbits.LATC4 = 0; break;
-"149
-[e :U 1590 ]
-[e = . . _LATCbits 0 4 -> -> 0 `i `uc ]
-[e $U 1584  ]
-[; ;main.c: 150: case 0x20 : LATAbits.LATA4 = 0; break;
-"150
-[e :U 1591 ]
-[e = . . _LATAbits 0 4 -> -> 0 `i `uc ]
-[e $U 1584  ]
-[; ;main.c: 151: case 0x40 : LATAbits.LATA3 = 0; break;
-"151
-[e :U 1592 ]
-[e = . . _LATAbits 0 3 -> -> 0 `i `uc ]
-[e $U 1584  ]
-[; ;main.c: 152: case 0x80 : LATAbits.LATA2 = 0; break;
-"152
-[e :U 1593 ]
-[e = . . _LATAbits 0 2 -> -> 0 `i `uc ]
-[e $U 1584  ]
-[; ;main.c: 153: case 0x100 : LATAbits.LATA1 = 0; break;
-"153
-[e :U 1594 ]
-[e = . . _LATAbits 0 1 -> -> 0 `i `uc ]
-[e $U 1584  ]
-[; ;main.c: 154: case 0x200 : LATAbits.LATA0 = 0; break;
-"154
-[e :U 1595 ]
-[e = . . _LATAbits 0 0 -> -> 0 `i `uc ]
-[e $U 1584  ]
-[; ;main.c: 155: default : LATBbits.LATB0, LATCbits.LATC7, LATCbits.LATC6,
-"155
-[e :U 1596 ]
-[; ;main.c: 156: LATCbits.LATC5, LATCbits.LATC4, LATAbits.LATA4,
-[; ;main.c: 157: LATAbits.LATA3, LATAbits.LATA2, LATAbits.LATA1,
-[; ;main.c: 158: LATAbits.LATA0 = 1;
-"158
-[e ; ; ; ; ; ; ; ; ; . . _LATBbits 0 0 . . _LATCbits 0 7 . . _LATCbits 0 6 . . _LATCbits 0 5 . . _LATCbits 0 4 . . _LATAbits 0 4 . . _LATAbits 0 3 . . _LATAbits 0 2 . . _LATAbits 0 1 = . . _LATAbits 0 0 -> -> 1 `i `uc ]
-[; ;main.c: 159: break;
-"159
-[e $U 1584  ]
-"160
+[; ;main.c: 98: ActValue_prev = PetitHoldingRegisters[0].ActValue;
+"98
+[e = _ActValue_prev . *U + &U _PetitHoldingRegisters * -> -> -> 0 `i `ui `ux -> -> # *U &U _PetitHoldingRegisters `ui `ux 0 ]
+"99
 }
-[; ;main.c: 160: }
-[e $U 1584  ]
+[e :U 1569 ]
+[; ;main.c: 99: }
+[; ;main.c: 101: switch(PetitHoldingRegisters[0].ActValue){
+"101
+[e $U 1571  ]
+{
+[; ;main.c: 102: case 0x1 : LATBbits.LATB0 = 0; break;
+"102
+[e :U 1572 ]
+[e = . . _LATBbits 0 0 -> -> 0 `i `uc ]
+[e $U 1570  ]
+[; ;main.c: 103: case 0x2 : LATCbits.LATC7 = 0; break;
+"103
+[e :U 1573 ]
+[e = . . _LATCbits 0 7 -> -> 0 `i `uc ]
+[e $U 1570  ]
+[; ;main.c: 104: case 0x4 : LATCbits.LATC6 = 0; break;
+"104
+[e :U 1574 ]
+[e = . . _LATCbits 0 6 -> -> 0 `i `uc ]
+[e $U 1570  ]
+[; ;main.c: 105: case 0x8 : LATCbits.LATC5 = 0; break;
+"105
+[e :U 1575 ]
+[e = . . _LATCbits 0 5 -> -> 0 `i `uc ]
+[e $U 1570  ]
+[; ;main.c: 106: case 0x10 : LATCbits.LATC4 = 0; break;
+"106
+[e :U 1576 ]
+[e = . . _LATCbits 0 4 -> -> 0 `i `uc ]
+[e $U 1570  ]
+[; ;main.c: 107: case 0x20 : LATAbits.LATA4 = 0; break;
+"107
+[e :U 1577 ]
+[e = . . _LATAbits 0 4 -> -> 0 `i `uc ]
+[e $U 1570  ]
+[; ;main.c: 108: case 0x40 : LATAbits.LATA3 = 0; break;
+"108
+[e :U 1578 ]
+[e = . . _LATAbits 0 3 -> -> 0 `i `uc ]
+[e $U 1570  ]
+[; ;main.c: 109: case 0x80 : LATAbits.LATA2 = 0; break;
+"109
+[e :U 1579 ]
+[e = . . _LATAbits 0 2 -> -> 0 `i `uc ]
+[e $U 1570  ]
+[; ;main.c: 110: case 0x100 : LATAbits.LATA1 = 0; break;
+"110
+[e :U 1580 ]
+[e = . . _LATAbits 0 1 -> -> 0 `i `uc ]
+[e $U 1570  ]
+[; ;main.c: 111: case 0x200 : LATAbits.LATA0 = 0; break;
+"111
+[e :U 1581 ]
+[e = . . _LATAbits 0 0 -> -> 0 `i `uc ]
+[e $U 1570  ]
+[; ;main.c: 112: default : LATBbits.LATB0 = LATCbits.LATC7 = LATCbits.LATC6 =
+"112
+[e :U 1582 ]
+[; ;main.c: 113: LATCbits.LATC5 = LATCbits.LATC4 = LATAbits.LATA4 =
+[; ;main.c: 114: LATAbits.LATA3 = LATAbits.LATA2 = LATAbits.LATA1 =
+[; ;main.c: 115: LATAbits.LATA0 = 1;
+"115
+[e = . . _LATBbits 0 0 = . . _LATCbits 0 7 = . . _LATCbits 0 6 = . . _LATCbits 0 5 = . . _LATCbits 0 4 = . . _LATAbits 0 4 = . . _LATAbits 0 3 = . . _LATAbits 0 2 = . . _LATAbits 0 1 = . . _LATAbits 0 0 -> -> 1 `i `uc ]
+[; ;main.c: 116: break;
+"116
+[e $U 1570  ]
+"117
+}
+[; ;main.c: 117: }
+[e $U 1570  ]
+"101
+[e :U 1571 ]
+[e [\ . *U + &U _PetitHoldingRegisters * -> -> -> 0 `i `ui `ux -> -> # *U &U _PetitHoldingRegisters `ui `ux 0 , $ -> -> 1 `i `ui 1572
+ , $ -> -> 2 `i `ui 1573
+ , $ -> -> 4 `i `ui 1574
+ , $ -> -> 8 `i `ui 1575
+ , $ -> -> 16 `i `ui 1576
+ , $ -> -> 32 `i `ui 1577
+ , $ -> -> 64 `i `ui 1578
+ , $ -> -> 128 `i `ui 1579
+ , $ -> -> 256 `i `ui 1580
+ , $ -> -> 512 `i `ui 1581
+ 1582 ]
+"117
+[e :U 1570 ]
+[; ;main.c: 118: }
+"118
+[e :UE 1568 ]
+}
+"120
+[v _Led_Blink `(v ~T0 @X0 1 ef ]
+{
+[; ;main.c: 120: void Led_Blink (){
+[e :U _Led_Blink ]
+[f ]
+[; ;main.c: 121: if(PIR0bits.TMR0IF){
+"121
+[e $ ! != -> . . _PIR0bits 0 3 `i -> -> -> 0 `i `Vuc `i 1584  ]
+{
+[; ;main.c: 123: switch(LED_TX_STATE){
+"123
+[e $U 1586  ]
+{
+[; ;main.c: 124: case 0 :
+"124
+[e :U 1587 ]
+[; ;main.c: 125: if (LED_TX > 0){
+"125
+[e $ ! > _LED_TX -> -> 0 `i `ui 1588  ]
+{
+[; ;main.c: 126: LATBbits.LATB1 = 1;
+"126
+[e = . . _LATBbits 0 1 -> -> 1 `i `uc ]
+[; ;main.c: 127: LED_TX_prev = LED_TX;
+"127
+[e = _LED_TX_prev _LED_TX ]
+[; ;main.c: 128: LED_TX_STATE = 1;
+"128
+[e = _LED_TX_STATE -> -> 1 `i `ui ]
+"129
+}
+[e :U 1588 ]
+[; ;main.c: 129: }
+[; ;main.c: 130: break;
+"130
+[e $U 1585  ]
+[; ;main.c: 132: case 1 :
+"132
+[e :U 1589 ]
+[; ;main.c: 133: if (LED_TX == LED_TX_prev || LED_TX != LED_TX_prev){
+"133
+[e $ ! || == _LED_TX _LED_TX_prev != _LED_TX _LED_TX_prev 1590  ]
+{
+[; ;main.c: 134: LATBbits.LATB1 = 0;
+"134
+[e = . . _LATBbits 0 1 -> -> 0 `i `uc ]
+[; ;main.c: 135: LED_TX_prev = 0;
+"135
+[e = _LED_TX_prev -> -> 0 `i `ui ]
+[; ;main.c: 136: LED_TX = 0;
+"136
+[e = _LED_TX -> -> 0 `i `ui ]
+[; ;main.c: 137: LED_TX_STATE = 0;
+"137
+[e = _LED_TX_STATE -> -> 0 `i `ui ]
+"138
+}
+[e :U 1590 ]
+[; ;main.c: 138: }
+[; ;main.c: 139: break;
+"139
+[e $U 1585  ]
+[; ;main.c: 141: default :
+"141
+[e :U 1591 ]
+[; ;main.c: 142: LED_TX_STATE = 0;
+"142
+[e = _LED_TX_STATE -> -> 0 `i `ui ]
+[; ;main.c: 143: break;
+"143
+[e $U 1585  ]
+"144
+}
+[; ;main.c: 144: }
+[e $U 1585  ]
+"123
+[e :U 1586 ]
+[e [\ _LED_TX_STATE , $ -> -> 0 `i `ui 1587
+ , $ -> -> 1 `i `ui 1589
+ 1591 ]
 "144
 [e :U 1585 ]
-[e [\ . *U + &U _PetitHoldingRegisters * -> -> -> 0 `i `ui `ux -> -> # *U &U _PetitHoldingRegisters `ui `ux 0 , $ -> -> 1 `i `ui 1586
- , $ -> -> 2 `i `ui 1587
- , $ -> -> 4 `i `ui 1588
- , $ -> -> 8 `i `ui 1589
- , $ -> -> 16 `i `ui 1590
- , $ -> -> 32 `i `ui 1591
- , $ -> -> 64 `i `ui 1592
- , $ -> -> 128 `i `ui 1593
- , $ -> -> 256 `i `ui 1594
- , $ -> -> 512 `i `ui 1595
- 1596 ]
+[; ;main.c: 146: switch(LED_RX_STATE){
+"146
+[e $U 1593  ]
+{
+[; ;main.c: 147: case 0 :
+"147
+[e :U 1594 ]
+[; ;main.c: 148: if (LED_RX > 0){
+"148
+[e $ ! > _LED_RX -> -> 0 `i `ui 1595  ]
+{
+[; ;main.c: 149: LATBbits.LATB2 = 1;
+"149
+[e = . . _LATBbits 0 2 -> -> 1 `i `uc ]
+[; ;main.c: 150: LED_RX_prev = LED_RX;
+"150
+[e = _LED_RX_prev _LED_RX ]
+[; ;main.c: 151: LED_RX_STATE = 1;
+"151
+[e = _LED_RX_STATE -> -> 1 `i `ui ]
+"152
+}
+[e :U 1595 ]
+[; ;main.c: 152: }
+[; ;main.c: 153: break;
+"153
+[e $U 1592  ]
+[; ;main.c: 155: case 1 :
+"155
+[e :U 1596 ]
+[; ;main.c: 156: if (LED_RX == LED_RX_prev || LED_RX != LED_RX_prev){
+"156
+[e $ ! || == _LED_RX _LED_RX_prev != _LED_RX _LED_RX_prev 1597  ]
+{
+[; ;main.c: 157: LATBbits.LATB2 = 0;
+"157
+[e = . . _LATBbits 0 2 -> -> 0 `i `uc ]
+[; ;main.c: 158: LED_RX_prev = 0;
+"158
+[e = _LED_RX_prev -> -> 0 `i `ui ]
+[; ;main.c: 159: LED_RX = 0;
+"159
+[e = _LED_RX -> -> 0 `i `ui ]
+[; ;main.c: 160: LED_RX_STATE = 0;
 "160
-[e :U 1584 ]
-[; ;main.c: 161: }
+[e = _LED_RX_STATE -> -> 0 `i `ui ]
 "161
+}
+[e :U 1597 ]
+[; ;main.c: 161: }
+[; ;main.c: 162: break;
+"162
+[e $U 1592  ]
+[; ;main.c: 164: default :
+"164
+[e :U 1598 ]
+[; ;main.c: 165: LED_RX_STATE = 0;
+"165
+[e = _LED_RX_STATE -> -> 0 `i `ui ]
+[; ;main.c: 166: break;
+"166
+[e $U 1592  ]
+"167
+}
+[; ;main.c: 167: }
+[e $U 1592  ]
+"146
+[e :U 1593 ]
+[e [\ _LED_RX_STATE , $ -> -> 0 `i `ui 1594
+ , $ -> -> 1 `i `ui 1596
+ 1598 ]
+"167
+[e :U 1592 ]
+[; ;main.c: 168: PIR0bits.TMR0IF = 0;
+"168
+[e = . . _PIR0bits 0 3 -> -> 0 `i `uc ]
+[; ;main.c: 169: TMR0_Reload();
+"169
+[e ( _TMR0_Reload ..  ]
+"170
+}
+[e :U 1584 ]
+[; ;main.c: 170: }
+[; ;main.c: 171: }
+"171
 [e :UE 1583 ]
 }

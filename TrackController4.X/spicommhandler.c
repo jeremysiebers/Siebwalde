@@ -42,7 +42,7 @@ static unsigned int DATAxREADY = 0;
 
 unsigned int SpiSlaveCommErrorCounter;
 
-void InitSlaveCommunication(SLAVE_INFO *location)                                  
+void INITxSPIxCOMMxHANDLER(SLAVE_INFO *location)                                  
 {   
     MASTER_SLAVE_DATA  =  location;
     

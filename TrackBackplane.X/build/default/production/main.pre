@@ -17269,6 +17269,7 @@ extern __bank0 __bit __timeout;
 # 17 "main.h"
 void Get_ID (void);
 void Set_Amplifier (void);
+void Led_Blink (void);
 
 # 536 "mcc_generated_files/pin_manager.h"
 void PIN_MANAGER_Initialize (void);
@@ -17593,6 +17594,8 @@ unsigned int result = 0;
 unsigned int LED_TX_prev, LED_RX_prev = 0;
 unsigned int LED_TX_STATE, LED_RX_STATE = 0;
 
+unsigned int ActValue_prev = 0;
+
 void main(void) {
 
 SYSTEM_Initialize();
@@ -17617,6 +17620,53 @@ ProcessPetitModbus();
 
 Set_Amplifier();
 
+Led_Blink();
+}
+}
+
+# 67
+void Get_ID(){
+
+MODBUS_ADDRESS = (unsigned int)50 + (unsigned int)((PORTA & 0xE0)>> 5);
+
+if(MODBUS_ADDRESS > 50 && MODBUS_ADDRESS < 60){
+LATBbits.LATB5 = 1;
+LATBbits.LATB3 = 0;
+}
+else{
+LATBbits.LATB5 = 0;
+LATBbits.LATB3 = 1;
+while(1);
+}
+}
+
+# 95
+void Set_Amplifier(){
+
+if (ActValue_prev != PetitHoldingRegisters[0].ActValue){
+ActValue_prev = PetitHoldingRegisters[0].ActValue;
+}
+
+switch(PetitHoldingRegisters[0].ActValue){
+case 0x1 : LATBbits.LATB0 = 0; break;
+case 0x2 : LATCbits.LATC7 = 0; break;
+case 0x4 : LATCbits.LATC6 = 0; break;
+case 0x8 : LATCbits.LATC5 = 0; break;
+case 0x10 : LATCbits.LATC4 = 0; break;
+case 0x20 : LATAbits.LATA4 = 0; break;
+case 0x40 : LATAbits.LATA3 = 0; break;
+case 0x80 : LATAbits.LATA2 = 0; break;
+case 0x100 : LATAbits.LATA1 = 0; break;
+case 0x200 : LATAbits.LATA0 = 0; break;
+default : LATBbits.LATB0 = LATCbits.LATC7 = LATCbits.LATC6 =
+LATCbits.LATC5 = LATCbits.LATC4 = LATAbits.LATA4 =
+LATAbits.LATA3 = LATAbits.LATA2 = LATAbits.LATA1 =
+LATAbits.LATA0 = 1;
+break;
+}
+}
+
+void Led_Blink (){
 if(PIR0bits.TMR0IF){
 
 switch(LED_TX_STATE){
@@ -17666,45 +17716,6 @@ break;
 }
 PIR0bits.TMR0IF = 0;
 TMR0_Reload();
-}
-}
-}
-
-# 114
-void Get_ID(){
-
-MODBUS_ADDRESS = (unsigned int)50 + (unsigned int)((PORTA & 0xE0)>> 5);
-
-if(MODBUS_ADDRESS > 50 && MODBUS_ADDRESS < 60){
-LATBbits.LATB5 = 1;
-LATBbits.LATB3 = 0;
-}
-else{
-LATBbits.LATB5 = 0;
-LATBbits.LATB3 = 1;
-while(1);
-}
-}
-
-# 142
-void Set_Amplifier(){
-
-switch(PetitHoldingRegisters[0].ActValue){
-case 0x1 : LATBbits.LATB0 = 0; break;
-case 0x2 : LATCbits.LATC7 = 0; break;
-case 0x4 : LATCbits.LATC6 = 0; break;
-case 0x8 : LATCbits.LATC5 = 0; break;
-case 0x10 : LATCbits.LATC4 = 0; break;
-case 0x20 : LATAbits.LATA4 = 0; break;
-case 0x40 : LATAbits.LATA3 = 0; break;
-case 0x80 : LATAbits.LATA2 = 0; break;
-case 0x100 : LATAbits.LATA1 = 0; break;
-case 0x200 : LATAbits.LATA0 = 0; break;
-default : LATBbits.LATB0, LATCbits.LATC7, LATCbits.LATC6,
-LATCbits.LATC5, LATCbits.LATC4, LATAbits.LATA4,
-LATAbits.LATA3, LATAbits.LATA2, LATAbits.LATA1,
-LATAbits.LATA0 = 1;
-break;
 }
 }
 

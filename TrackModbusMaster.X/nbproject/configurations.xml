@@ -67,6 +67,7 @@
                    projectFiles="false">
       <itemPath>Makefile</itemPath>
       <itemPath>MyConfig.mc3</itemPath>
+      <itemPath>../Common_Files/ModBusSlaveMasterMappings/ModBusSlaveMapping.txt</itemPath>
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>
@@ -220,7 +221,7 @@
         <property key="programoptions.programuserotp" value="false"/>
         <property key="programoptions.testmodeentrymethod" value="VDDFirst"/>
         <property key="programoptions.usehighvoltageonmclr" value="false"/>
-        <property key="programoptions.uselvpprogramming" value="false"/>
+        <property key="programoptions.uselvpprogramming" value="true"/>
         <property key="voltagevalue" value="5.0"/>
       </ICD3PlatformTool>
       <PICkit3PlatformTool>

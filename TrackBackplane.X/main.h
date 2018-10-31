@@ -16,7 +16,7 @@ extern "C" {
 
 void Get_ID (void);
 void Set_Amplifier (void);
-
+void Led_Blink (void);
 
 #ifdef	__cplusplus
 }
