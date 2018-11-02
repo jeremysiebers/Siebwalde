@@ -13,7 +13,7 @@ extern "C" {
 #endif
 
 void ProcessIO (void);
-
+void ProcessBMF (void);
 
 #ifdef	__cplusplus
 }

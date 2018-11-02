@@ -184,9 +184,7 @@ void ToFromTerminal(){
     if(EUSART1_is_rx_ready()){
         switch(EUSART1_Read()){
             case 0x2E:
-                if (StateMachine == 0){
-                    StateMachine = 1;
-                }
+                SlaveInfo[1].HoldingReg[3] ^= 0x0001;
                 break;
                 
             case 0x30:
