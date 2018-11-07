@@ -49,7 +49,7 @@
 
 void ToFromTerminal(void);
 void WriteText(unsigned char *Text, unsigned int Ln, unsigned int Col);
-void WriteData(unsigned long int Data, unsigned int Ln, unsigned int Col);
+void WriteData(unsigned int Data, unsigned int Ln, unsigned int Col);
 
 /*
                          Main application
@@ -304,7 +304,7 @@ void ToFromTerminal(){
 
             case 5:
                 WriteText((char *)"InputReg0:",7, COL0);
-                WriteText((char *)"InputReg0:",7, COL1);
+                WriteText((char *)"BEMF     :",7, COL1);
                 WriteText((char *)"InputReg0:",7, COL2);
                 WriteText((char *)"InputReg0:",7, COL3);  
                 WriteText((char *)"InputReg0:",7, COL4);  
@@ -313,7 +313,7 @@ void ToFromTerminal(){
 
             case 6:
                 WriteText((char *)"InputReg1:",8, COL0);
-                WriteText((char *)"InputReg1:",8, COL1);
+                WriteText((char *)"kp       :",8, COL1);
                 WriteText((char *)"InputReg1:",8, COL2);
                 WriteText((char *)"InputReg1:",8, COL3); 
                 WriteText((char *)"InputReg1:",8, COL4);
@@ -322,7 +322,7 @@ void ToFromTerminal(){
 
             case 7:
                 WriteText((char *)"InputReg2:",9, COL0);
-                WriteText((char *)"InputReg2:",9, COL1);
+                WriteText((char *)"plant    :",9, COL1);
                 WriteText((char *)"InputReg2:",9, COL2);
                 WriteText((char *)"InputReg2:",9, COL3);  
                 WriteText((char *)"InputReg2:",9, COL4);
@@ -331,7 +331,7 @@ void ToFromTerminal(){
 
             case 8:
                 WriteText((char *)"InputReg3:",10, COL0);
-                WriteText((char *)"InputReg3:",10, COL1);
+                WriteText((char *)"error    :",10, COL1);
                 WriteText((char *)"InputReg3:",10, COL2);
                 WriteText((char *)"InputReg3:",10, COL3); 
                 WriteText((char *)"InputReg3:",10, COL4);  
@@ -340,7 +340,7 @@ void ToFromTerminal(){
 
             case 9:
                 WriteText((char *)"InputReg4:",11, COL0);
-                WriteText((char *)"InputReg4:",11, COL1);
+                WriteText((char *)"output   :",11, COL1);
                 WriteText((char *)"InputReg4:",11, COL2);
                 WriteText((char *)"InputReg4:",11, COL3);    
                 WriteText((char *)"InputReg4:",11, COL4);
@@ -349,7 +349,7 @@ void ToFromTerminal(){
 
             case 10:
                 WriteText((char *)"InputReg5:",12, COL0);
-                WriteText((char *)"InputReg5:",12, COL1);
+                WriteText((char *)"pwm setp.:",12, COL1);
                 WriteText((char *)"InputReg5:",12, COL2);
                 WriteText((char *)"InputReg5:",12, COL3);  
                 WriteText((char *)"InputReg5:",12, COL4);
@@ -649,7 +649,7 @@ void WriteText(unsigned char *Text, unsigned int Ln, unsigned int Col){
  *  Notes      :
  */
 /*#--------------------------------------------------------------------------#*/
-void WriteData(unsigned long int Data, unsigned int Ln, unsigned int Col){
+void WriteData(unsigned int Data, unsigned int Ln, unsigned int Col){
     
     char padding[10];
     
@@ -685,5 +685,5 @@ void WriteData(unsigned long int Data, unsigned int Ln, unsigned int Col){
     }
     
     printf("\033[%u;%uf", Ln, Col);
-    printf("%lu%s", Data, padding);   
+    printf("%d%s", Data, padding);   
 }

@@ -3,7 +3,7 @@
 #include "mcc_generated_files/mcc.h"
 #include "mcc_generated_files/adcc.h"
 
-uint8_t sequence = 0;
+uint8_t sequence = 2;
 uint8_t Sequence_Bmf = 0;
 
 void ProcessBMF (){
@@ -19,7 +19,7 @@ void ProcessBMF (){
                 if (ADCON0bits.ADGO==0){
                     PetitInputRegisters[0].ActValue = ADCC_GetConversionResult();
                     Sequence_Bmf = 0;
-                    PORTAbits.RA6 = 0;
+                    //PORTAbits.RA6 = 0;
                 }
                 break;
 
@@ -31,8 +31,10 @@ void ProcessBMF (){
 
 void ProcessIO (){
     //PetitInputRegisters[0].ActValue |= (unsigned int)(THFLG_PORT << 11);
-    if (ADCON0bits.ADGO==0){
+    if (ADCON0bits.ADGO==0){                                                    // extra check if conversion is done
+    
         switch(sequence){
+            /*
             case 0:
                 ADCC_StartConversion(BMF);
                 sequence++;
@@ -44,7 +46,7 @@ void ProcessIO (){
                     sequence++;
                 }
                 break;
-
+*/
             case 2:
                 ADCC_StartConversion(LM_V);
                 sequence++;
@@ -77,7 +79,7 @@ void ProcessIO (){
             case 7:
                 if (ADCON0bits.ADGO==0){
                     PetitInputRegisters[3].ActValue = ADCC_GetConversionResult();
-                    sequence = 0;
+                    sequence = 2;
                 }            
                 break;
 

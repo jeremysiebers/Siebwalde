@@ -72,6 +72,7 @@ extern "C" {
     
     void Regulator          (void);
     void Regulator_Init     (void);
+    extern unsigned int UPDATExPID;
 
 #ifdef	__cplusplus
 }

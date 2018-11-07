@@ -16,7 +16,6 @@ extern "C" {
 
 void Led_Blink (void);
 
-
 #ifdef	__cplusplus
 }
 #endif
