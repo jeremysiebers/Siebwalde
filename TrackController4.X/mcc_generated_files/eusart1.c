@@ -53,7 +53,7 @@
   Section: Macro Declarations
 */
 
-#define EUSART1_TX_BUFFER_SIZE 64
+#define EUSART1_TX_BUFFER_SIZE 128
 #define EUSART1_RX_BUFFER_SIZE 64
 
 /**
@@ -91,7 +91,7 @@ void EUSART1_Initialize(void)
     TXSTA1 = 0x24;
 
     // 
-    SPBRG1 = 0x52;
+    SPBRG1 = 0x13;
 
     // 
     SPBRGH1 = 0x00;

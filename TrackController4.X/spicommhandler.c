@@ -23,9 +23,11 @@
 //#define DATAxSTRUCTxLENGTH sizeof(SLAVE_INFO)
 
 static SLAVE_INFO *MASTER_SLAVE_DATA = 0;                                       // Holds the address were the received slave data is stored
-static SLAVE_INFO SlaveInfoReadMask, SlaveInfoWriteMask = 0;                    // Read and write mask for slave data from and to ModbusMaster
+static SLAVE_INFO SlaveInfoReadMask = 0;                                        // Read mask for slave data from and to ModbusMaster
+static SLAVE_INFO SlaveInfoWriteMask = 0;                                       // Write mask for slave data from and to ModbusMaster
+static SLAVE_INFO SlaveInfoTraceMask = 0;                                       // Trace mask for slave data from and to ModbusMaster
 static unsigned char   *pSlaveDataReceived, *pSlaveDataSend, 
-                *pSlaveInfoReadMask, *pSlaveInfoWriteMask;
+                *pSlaveInfoReadMask, *pSlaveInfoWriteMask, *pSlaveInfoTraceMask;
                 //*pSlaveInforReadRaw;
 
 static unsigned char DataFromSlaveSend = 1;                                     // Data to send counter
@@ -87,6 +89,27 @@ void INITxSPIxCOMMxHANDLER(SLAVE_INFO *location)
     SlaveInfoWriteMask.MbExceptionCode  = 0x00;
     SlaveInfoWriteMask.SpiCommErrorCounter = 0x0000;
     SlaveInfoWriteMask.Footer           = 0xFF;
+	
+	SlaveInfoTraceMask.Header           = 0x00;
+    SlaveInfoTraceMask.SlaveNumber      = 0x00;                                  // Mask for data read from Modbus Master written to local MASTER_SLAVE_DATA
+    SlaveInfoTraceMask.HoldingReg[0]    = 0x0000;
+    SlaveInfoTraceMask.HoldingReg[1]    = 0x0000;
+    SlaveInfoTraceMask.HoldingReg[2]    = 0x0000;
+    SlaveInfoTraceMask.HoldingReg[3]    = 0x0000;
+    SlaveInfoTraceMask.InputReg[0]      = 0xFFFF;
+    SlaveInfoTraceMask.InputReg[1]      = 0xFFFF;
+    SlaveInfoTraceMask.InputReg[2]      = 0xFFFF;
+    SlaveInfoTraceMask.InputReg[3]      = 0xFFFF;
+    SlaveInfoTraceMask.InputReg[4]      = 0xFFFF;
+    SlaveInfoTraceMask.InputReg[5]      = 0xFFFF;
+    SlaveInfoTraceMask.DiagReg[0]       = 0x00;
+    SlaveInfoTraceMask.DiagReg[1]       = 0x00;
+    SlaveInfoTraceMask.MbReceiveCounter = 0x00;
+    SlaveInfoTraceMask.MbSentCounter    = 0x00;
+    SlaveInfoTraceMask.MbCommError      = 0x00;
+    SlaveInfoTraceMask.MbExceptionCode  = 0x00;
+    SlaveInfoTraceMask.SpiCommErrorCounter = 0x00;
+    SlaveInfoTraceMask.Footer           = 0x00;
     
     SpiSlaveCommErrorCounter = 0;
     /*
@@ -154,6 +177,7 @@ void ProcessSpiInterrupt(){
     SSP2BUF = 0;
                  
     SS1_Check_LAT = 0;  
+
 }
 
 /*
@@ -186,13 +210,18 @@ void ProcessSpiData(){
 
 void ProcessSpiData(){
     
-    pSlaveDataReceived = &(MASTER_SLAVE_DATA[RECEIVEDxDATAxRAW[1]].Header);// set the pointer to the first element of the received slave number in RECEIVEDxDATAxRAW[2]([1]==header)
+    pSlaveDataReceived = &(MASTER_SLAVE_DATA[RECEIVEDxDATAxRAW[1]].Header);// set the pointer to the first element of the received slave number in RECEIVEDxDATAxRAW[1]
     pSlaveDataSend = &(MASTER_SLAVE_DATA[DataFromSlaveSend].Header);       // set the pointer to the first element of the MASTER_SLAVE_DATA according to the DataFromSlaveSend counter
     pSlaveInfoReadMask = &(SlaveInfoReadMask.Header);                      // set the pointer to the first element of the SlaveInfoReadMask
     pSlaveInfoWriteMask = &(SlaveInfoWriteMask.Header);                    // set the pointer to the first element of the SlaveInfoWriteMask
-
+    pSlaveInfoTraceMask = &(SlaveInfoTraceMask.Header);                    // set the pointer to the first element of the SlaveInfoWriteMask
+    
     if(RECEIVEDxDATAxRAW[1] < NUMBER_OF_SLAVES && RECEIVEDxDATAxRAW[0]==0xAA && RECEIVEDxDATAxRAW[DATAxSTRUCTxLENGTH-1]==0x55){
         DataReceivedOk = 1;
+        if(disable_trace == 0 && RECEIVEDxDATAxRAW[1] == 1){
+            EUSART1_Write(0xAA);
+            Read_Check_LAT ^= 1;
+        }
     }
     else{
         DataReceivedOk = 0;
@@ -202,13 +231,22 @@ void ProcessSpiData(){
     for(unsigned int i = 0; i < DATAxSTRUCTxLENGTH; i++){                       // last received dummy byte is not used/checked
         
         if(*pSlaveInfoReadMask && DataReceivedOk){                              // If data received is OK and mask approves a write then process
-            *pSlaveDataReceived = RECEIVEDxDATAxRAW[i];                       // for DATAxSTRUCTxLENGTH set every byte into RECEIVEDxDATAxRAW array according to read mask
+            *pSlaveDataReceived = RECEIVEDxDATAxRAW[i];                         // for DATAxSTRUCTxLENGTH set every byte into RECEIVEDxDATAxRAW array according to read mask
+            
+            if(disable_trace == 0 && RECEIVEDxDATAxRAW[1] == 1 && *pSlaveInfoTraceMask){// output trace data from slave 1 only
+                Read_Check_LAT ^= 1;
+                EUSART1_Write(RECEIVEDxDATAxRAW[i]);            
+            }
         }
+        
+        
+        
         SENDxDATAxRAW[i] = (unsigned char)(*pSlaveDataSend  & *pSlaveInfoWriteMask);// for DATAxSTRUCTxLENGTH set every byte into SENDxDATAxRAW+ array according to write mask
         pSlaveDataReceived  += 1;                                               // Increment pointer
         pSlaveInfoReadMask  += 1;                                               // Increment pointer
         pSlaveDataSend      += 1;                                               // Increment pointer
         pSlaveInfoWriteMask += 1;                                               // Increment pointer
+        pSlaveInfoTraceMask += 1;                                               // Increment pointer
     }
 
     DataFromSlaveSend++;                                                        // Count down the slaves of which the info still need to be send
@@ -216,6 +254,11 @@ void ProcessSpiData(){
         DataFromSlaveSend = 0;
     }
     
+    if(disable_trace == 0 && RECEIVEDxDATAxRAW[1] == 1){
+        Read_Check_LAT ^= 1;
+        EUSART1_Write(0x55);
+        Read_Check_LAT = 0;
+    }
 }
 
 /*#--------------------------------------------------------------------------#*/

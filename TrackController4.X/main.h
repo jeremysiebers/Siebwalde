@@ -19,6 +19,8 @@ extern "C" {
 
 #define NUMBER_OF_SLAVES    5   
 
+extern unsigned int disable_trace;
+
 typedef enum
 {
     SLAVE_DATA_IDLE = 0,
