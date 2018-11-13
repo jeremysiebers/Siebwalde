@@ -3,8 +3,10 @@
 import serial
 import csv
 import sys
+import io
 
-ser = serial.Serial('COM3', 520832, timeout=0, parity=serial.PARITY_NONE)
+ser = serial.Serial('COM5', 250000, timeout=0, parity=serial.PARITY_NONE)
+sio = io.TextIOWrapper(io.BufferedRWPair(ser, ser))
 
 try:
     f = open('dump.csv', 'w')
@@ -22,24 +24,20 @@ out = csv.writer(f, lineterminator='\n', delimiter=',', quotechar='\"', quoting=
 # Output a set of rows for a header providing general information
 out.writerow(['sample', 'BEMF', 'kp', 'plant', 'error', 'output_reg', 'pwm_setpoint'])
 
-s = ser.read(10)
 sample = 0
 run = True
 
 while run:
 
     try:    
-        s = ser.read(1)
+        s = sio.readline()
         
         if (len(s) > 0):
-            if (s[0] == 170):
-                s = ser.read(30)
-                if (s[12] == 85):
-                    out.writerow([str(sample), str(s[0] + s[1] << 8), str(s[2] + s[3] << 8), str(s[4] + s[5] << 8), str(s[6] + s[7] << 8), str(s[8] + s[1] << 8), str(s[10] + s[11] << 8)]) 
-                    sample = sample + 1
+            out.writerow([str(sample), str(s[0] + s[1] << 8)]) 
+            sample = sample + 1
                     
         
-        if (sample > 1000):
+        if (sample > 10):
             run = False
             
     except:
