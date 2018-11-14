@@ -88,7 +88,6 @@ typedef signed short long int int24_t;
 
 typedef enum
 {
-    ID =  0x0,
     BMF =  0x2,
     VREF =  0x3,
     LM_V =  0x4,

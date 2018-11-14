@@ -23,17 +23,27 @@ except IOError:
 out = csv.writer(f, lineterminator='\n', delimiter=',', quotechar='\"', quoting=csv.QUOTE_MINIMAL)
 
 # Output a set of rows for a header providing general information
-out.writerow(['sample', 'BEMF', 'kp', 'plant', 'error', 'output_reg', 'pwm_setpoint'])
+out.writerow(['sample', 'BEMF', 'kp', 'plant', 'error', 'output_reg', 'pwm_setpoint', 'BEMF_setpoint', 'output_sat'])
 
 sample = 0
 run = True
 
-setpoint = 300
+setpoint = 512
 error = 0
-output = 200
-kp = 2
-pwm = 150
+output = 0
+kp = 3
+pwm = 399
+pwm_prev = 399
 plant = 15
+output_sat = 4
+
+DRIVE_SETPOINT= 400
+TOTAL_SAMPLES = 300
+
+OUTPUT_SAT_P = output_sat * 1
+OUTPUT_SAT_M = output_sat * -1
+PWM_MAX = 600
+PWM_MIN = 200
 direction = ''
 
 if(pwm < 400):
@@ -47,8 +57,8 @@ ser.write(struct.pack('>B', (pwm & 0x00FF)))
 ser.write(b'\n')
 ser.write(b'\r')
 
-print( struct.pack('>B', (pwm>> 8))  )
-print( struct.pack('>B', (pwm & 0x00FF))  )
+#print( struct.pack('>B', (pwm>> 8))  )
+#print( struct.pack('>B', (pwm & 0x00FF))  )
 
 #print((pwm>> 8).to_bytes(1, byteorder='big'))
 #print((pwm & 0x00FF).to_bytes(1, byteorder='big'))
@@ -63,47 +73,67 @@ while run:
     s = ser.readline()
             
     if (len(s) > 2):
-        
-        print('sample:', str(sample))
+        print('---------------------------------------------------------------------------------')
+        print('sample:' + str(sample))
         
         data = s[0] + (s[1] << 8)
-        print(data)
+        print('Data:'+ str(data))
                 
         ######################################################
+        print('setpoint:'+ str(setpoint))
         
         error = setpoint - data;
+        
+        print('error:'+ str(error))
     
         output = int((kp * error * plant) / 100);
+        
+        print('output_calc:'+ str(output))
+        
+        if(output > OUTPUT_SAT_P):
+            output = OUTPUT_SAT_P
+        elif(output < OUTPUT_SAT_M):
+            output = OUTPUT_SAT_M
+            
+        print('output_sat:'+ str(output))
     
         if(output < 0):
-            pwm = pwm + output; #When the error is negative (measured BEMF number is higher then setpoint BEMF(300)) the PWM dutycycle needs to be increased hence adding the negative number
-        
+            pwm = pwm_prev - abs(output); #When the error is negative (measured BEMF number is higher then setpoint BEMF(300)) the PWM dutycycle needs to be increased hence adding the negative number
         elif(output > 0):
-            pwm = pwm - output;
+            pwm = pwm_prev + output;
+        
             
-        if (direction == "CCW" and pwm > 780):
-            pwm = 780
+        if (direction == "CCW" and pwm > PWM_MAX):
+            pwm = PWM_MAX
         elif(direction == "CCW" and pwm < 400):
             pwm = 400
-        elif(direction == "CW" and pwm < 20):
-            pwm = 20
+        elif(direction == "CW" and pwm < PWM_MIN):
+            pwm = PWM_MIN
         elif(direction == "CW" and pwm > 399):
             pwm = 399
                 
         print('PWM: ' + str(pwm))
         
-        ser.write(b'\xAA')
-        ser.write(struct.pack('>B', (pwm>> 8)))
-        ser.write(struct.pack('>B', (pwm & 0x00FF)))
-        ser.write(b'\n')
-        ser.write(b'\r')
         
-        out.writerow([str(sample), str(data), str(kp), str(plant), str(error), str(output), str(pwm)]) 
+        if(pwm_prev != pwm):
+            ser.write(b'\xAA')
+            ser.write(struct.pack('>B', (pwm>> 8)))
+            ser.write(struct.pack('>B', (pwm & 0x00FF)))
+            ser.write(b'\n')
+            ser.write(b'\r')
+            pwm_prev = pwm
+        
+        out.writerow([str(sample), str(data), str(kp), str(plant), str(error), str(output), str(pwm), str(setpoint), str(output_sat)]) 
         
         sample = sample + 1
         
+        if(sample > 5):
+            setpoint = DRIVE_SETPOINT
+        
+        if (sample > TOTAL_SAMPLES - 100):
+            setpoint = 512
             
-    if (sample > 499):
+    if (sample > TOTAL_SAMPLES):
         run = False
         
     

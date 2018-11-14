@@ -11,6 +11,7 @@ void ProcessBMF (){
     
         switch(Sequence_Bmf){
             case 0:
+                PORTAbits.RA6 = 1;
                 ADCC_StartConversion(BMF);
                 Sequence_Bmf++;
                 break;
@@ -18,12 +19,8 @@ void ProcessBMF (){
             case 1:
                 if (ADCON0bits.ADGO==0){
                     PetitInputRegisters[0].ActValue = ADCC_GetConversionResult();
-                    EUSART_Write(PetitInputRegisters[0].ActValue);
-                    EUSART_Write(PetitInputRegisters[0].ActValue >> 8);
-                    EUSART_Write(0xA);
-                    //EUSART_Write(0xD);
                     Sequence_Bmf = 0;
-                    //PORTAbits.RA6 = 0;
+                    PORTAbits.RA6 = 0;
                 }
                 break;
 

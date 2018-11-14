@@ -90,58 +90,42 @@ void Regulator(){
         }
     }
     
+    if(UPDATExPID){
+        ProcessBMF();
+    }
+    
     if (PIR4bits.TMR1IF){
         MeausureBemfCnt++;
-        if (MeausureBemfCnt > 499){                                             // disable H bridge every 100ms
+        if (MeausureBemfCnt > 249){                                             // disable H bridge every 50ms
             MeausureBemfCnt = 0;
             TRISCbits.TRISC4 = 1;
             TRISCbits.TRISC5 = 1;
             TRISCbits.TRISC6 = 1;
             UpdatePID = true;                                                   // set update PID
         }
-        if (MeausureBemfCnt > 14){                                              // after 3ms enable H bridge again
+        if (MeausureBemfCnt > 9){                                              // after 3ms enable H bridge again
             TRISCbits.TRISC4 = 0;
             TRISCbits.TRISC5 = 0;
             TRISCbits.TRISC6 = 0;                
         }
 
-        if (MeausureBemfCnt > 10 && MeausureBemfCnt < 15){                      // Read back EMF as late as possible
+        if (MeausureBemfCnt > 7 && MeausureBemfCnt < 9){                      // Read back EMF as late as possible
             //PORTAbits.RA6 = 1;
-            ProcessBMF();
-            UPDATExPID = false;                                                 // wait on modbus
+            //ProcessBMF();
+            UPDATExPID = true;                                                  // wait on modbus
         }
         else{
-            //PORTAbits.RA6 = 0;
+            PORTAbits.RA6 = 0;
+            if(UPDATExPID){
+                PORTAbits.RA6 = 1;
+                EUSART_Write(PetitInputRegisters[0].ActValue);
+                EUSART_Write(PetitInputRegisters[0].ActValue >> 8);
+                EUSART_Write(0xA);
+            }
+            UPDATExPID = false;
             //ProcessIO();
         }
-
-        if (MeausureBemfCnt > 14 && UpdatePID && UPDATExPID && PetitHoldingRegisters[3].ActValue == 0x0001){  // after 3ms calculate PID
-            PORTAbits.RA6 = 1;
-
-            UpdatePID = false;
-            UPDATExPID = false;
-
-            input = PetitInputRegisters[0].ActValue;
-
-            error = setpoint - input;
-
-            output = (kp * error * plant) / 100;
-
-            if(output < 0){
-                pwm = (int)PwmDutyCyclePrev - output;
-            }
-            else{
-                pwm = (int)PwmDutyCyclePrev + output;
-            }
-
-            PetitInputRegisters[1].ActValue = (unsigned int)kp;
-            PetitInputRegisters[2].ActValue = (unsigned int)plant;
-            PetitInputRegisters[3].ActValue = (unsigned int)error;
-            PetitInputRegisters[4].ActValue = (unsigned int)output;
-            PetitInputRegisters[5].ActValue = (unsigned int)pwm;
-
-            PORTAbits.RA6 = 0;
-        }
+        
         PIR4bits.TMR1IF = 0;
         TMR1_Reload();
     }
