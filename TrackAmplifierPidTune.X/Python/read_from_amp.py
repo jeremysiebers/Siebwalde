@@ -5,9 +5,9 @@ import csv
 import sys
 import io
 import time
+import struct
 
 ser = serial.Serial('COM5', 250000, timeout=0, parity=serial.PARITY_NONE)
-sio = io.TextIOWrapper(io.BufferedRWPair(ser, ser))
 
 try:
     f = open('dump.csv', 'w')
@@ -34,14 +34,28 @@ output = 200
 kp = 2
 pwm = 150
 plant = 15
+direction = ''
+
+if(pwm < 400):
+    direction = "CW"
+elif(pwm > 399):
+    direction = "CCW"
 
 ser.write(b'\xAA')
-ser.write((pwm>> 8).to_bytes(1, byteorder='big'))
-ser.write((pwm & 0x00FF).to_bytes(1, byteorder='big'))
+ser.write(struct.pack('>B', (pwm>> 8)))
+ser.write(struct.pack('>B', (pwm & 0x00FF)))
 ser.write(b'\n')
 ser.write(b'\r')
 
+print( struct.pack('>B', (pwm>> 8))  )
+print( struct.pack('>B', (pwm & 0x00FF))  )
+
+#print((pwm>> 8).to_bytes(1, byteorder='big'))
+#print((pwm & 0x00FF).to_bytes(1, byteorder='big'))
+
 time.sleep(2)
+
+
 
 while run:
 
@@ -62,21 +76,25 @@ while run:
         output = int((kp * error * plant) / 100);
     
         if(output < 0):
+            pwm = pwm + output; #When the error is negative (measured BEMF number is higher then setpoint BEMF(300)) the PWM dutycycle needs to be increased hence adding the negative number
+        
+        elif(output > 0):
             pwm = pwm - output;
-        
-        else:
-            pwm = pwm + output;
             
-        if (pwm > 750):
-            pwm = 750
-        if (pwm < 50):
-            pwm = 50
-        
-        print('PWM: ' + str(pwm))            
+        if (direction == "CCW" and pwm > 780):
+            pwm = 780
+        elif(direction == "CCW" and pwm < 400):
+            pwm = 400
+        elif(direction == "CW" and pwm < 20):
+            pwm = 20
+        elif(direction == "CW" and pwm > 399):
+            pwm = 399
+                
+        print('PWM: ' + str(pwm))
         
         ser.write(b'\xAA')
-        ser.write((pwm>> 8).to_bytes(1, byteorder='big'))
-        ser.write((pwm & 0x00FF).to_bytes(1, byteorder='big'))
+        ser.write(struct.pack('>B', (pwm>> 8)))
+        ser.write(struct.pack('>B', (pwm & 0x00FF)))
         ser.write(b'\n')
         ser.write(b'\r')
         
