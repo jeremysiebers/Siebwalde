@@ -64,7 +64,6 @@ void Regulator_Init(){
  *  Notes      : 
  */
 /*#--------------------------------------------------------------------------#*/
-
 void Regulator(){
     
     if (PetitHoldingRegisters[0].ActValue & 0x8000){                            // If EMO command active kill PWM
@@ -96,20 +95,20 @@ void Regulator(){
     
     if (PIR4bits.TMR1IF){
         MeausureBemfCnt++;
-        if (MeausureBemfCnt > 249){                                             // disable H bridge every 50ms
+        if (MeausureBemfCnt > 32){                                              // disable H bridge (67))
             MeausureBemfCnt = 0;
             TRISCbits.TRISC4 = 1;
             TRISCbits.TRISC5 = 1;
             TRISCbits.TRISC6 = 1;
             UpdatePID = true;                                                   // set update PID
         }
-        if (MeausureBemfCnt > 9){                                              // after 3ms enable H bridge again
+        if (MeausureBemfCnt > 2){                                               // after 620us enable H bridge again
             TRISCbits.TRISC4 = 0;
             TRISCbits.TRISC5 = 0;
             TRISCbits.TRISC6 = 0;                
         }
 
-        if (MeausureBemfCnt > 7 && MeausureBemfCnt < 9){                      // Read back EMF as late as possible
+        if (MeausureBemfCnt > 1 && MeausureBemfCnt < 3){                        // Read back EMF as late as possible
             //PORTAbits.RA6 = 1;
             //ProcessBMF();
             UPDATExPID = true;                                                  // wait on modbus
@@ -118,9 +117,11 @@ void Regulator(){
             PORTAbits.RA6 = 0;
             if(UPDATExPID){
                 PORTAbits.RA6 = 1;
-                EUSART_Write(PetitInputRegisters[0].ActValue);
-                EUSART_Write(PetitInputRegisters[0].ActValue >> 8);
-                EUSART_Write(0xA);
+                EUSART_Write(PetitInputRegisters[0].ActValue  & 0x000F);
+                EUSART_Write((PetitInputRegisters[0].ActValue & 0x00F0) >> 4);
+                EUSART_Write((PetitInputRegisters[0].ActValue & 0x0F00) >> 8);
+                EUSART_Write((PetitInputRegisters[0].ActValue & 0xF000) >> 12);
+                EUSART_Write(0xAA);
             }
             UPDATExPID = false;
             //ProcessIO();
