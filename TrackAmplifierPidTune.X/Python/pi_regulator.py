@@ -28,17 +28,24 @@ out.writerow(['sample', 'BEMF', 'kp', 'plant', 'error', 'output_reg', 'pwm_setpo
 sample = 0
 run = True
 
+
+sat = 0
+
+
 setpoint = 512
 error = 0
 output = 0
-kp = 5
+kp = 3
+ki = 2
+dt = 
+ki2 = ki * dt
 pwm = 399
 pwm_prev = 399
 plant = 15
-output_sat = 5
+output_sat = 2
 
-DRIVE_SETPOINT= 475
-TOTAL_SAMPLES = 1000000
+DRIVE_SETPOINT= 400
+TOTAL_SAMPLES = 1000
 
 OUTPUT_SAT_P = output_sat * 1
 OUTPUT_SAT_M = output_sat * -1
@@ -80,13 +87,13 @@ while run:
                 print('---------------------------------------------------------------------------------')
                 print('sample:' + str(sample))
                 
-                data = (s[0] + (s[1] << 4) + (s[2] << 8) + (s[3] << 12)) #+ 25 # subtract/add the offset from the analog filter
-                print('Data:'+ str(data))
+                input_data = (s[0] + (s[1] << 4) + (s[2] << 8) + (s[3] << 12)) #+ 25 # subtract/add the offset from the analog filter
+                print('Data:'+ str(input_data))
                        
                 ######################################################
                 print('setpoint:'+ str(setpoint))
                 
-                error = setpoint - data;
+                error = setpoint - input_data;
                 
                 print('error:'+ str(error))
                 
@@ -127,7 +134,7 @@ while run:
                     ser.write(b'\r')
                     pwm_prev = pwm
                 
-                out.writerow([str(sample), str(data), str(kp), str(plant), str(error), str(output), str(pwm), str(setpoint), str(output_sat)]) 
+                out.writerow([str(sample), str(input_data), str(kp), str(plant), str(error), str(output), str(pwm), str(setpoint), str(output_sat)]) 
                 
                 sample = sample + 1
                 
