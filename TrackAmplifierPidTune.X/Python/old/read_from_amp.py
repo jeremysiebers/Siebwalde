@@ -7,7 +7,7 @@ import io
 import time
 import struct
 
-ser = serial.Serial('COM5', 250000, parity=serial.PARITY_NONE, timeout=1)
+ser = serial.Serial('COM6', 250000, parity=serial.PARITY_NONE, timeout=1)
 
 try:
     f = open('dump.csv', 'w')
@@ -31,14 +31,14 @@ run = True
 setpoint = 512
 error = 0
 output = 0
-kp = 5
+kp = 1
 pwm = 399
 pwm_prev = 399
 plant = 15
 output_sat = 5
 
 DRIVE_SETPOINT= 475
-TOTAL_SAMPLES = 1000000
+TOTAL_SAMPLES = 2000
 
 OUTPUT_SAT_P = output_sat * 1
 OUTPUT_SAT_M = output_sat * -1
@@ -69,13 +69,18 @@ s = []
 
 ser.flush()
 
+b = 0
+while (b != 0xAA):
+    c = ser.read ()
+    b = struct.unpack ("B", c)[0]
+
 while run:
 
     for c in ser.read():
-        s.append(c)
-            
-        if (c == 170):
-            if(len(s) > 2 and s[4] == 170):
+        b=struct.unpack ("B", c)[0]
+        s.append(b)
+        if (b == 0xaa):
+            if(len(s) == 5 and s[4] == 170):
                 
                 print('---------------------------------------------------------------------------------')
                 print('sample:' + str(sample))

@@ -1,0 +1,9 @@
+#!wing
+#!version=5.0
+##################################################################
+# Wing IDE project file                                          #
+##################################################################
+[project attributes]
+proj.file-list = [loc('pi_regulator.py'),
+                  loc('read_from_amp.py')]
+proj.file-type = 'shared'
