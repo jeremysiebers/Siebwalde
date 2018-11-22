@@ -47,6 +47,14 @@ void Communications(){
                     }
                 }
             }
+            else if(Data[0] == 0x55){
+                if (Data[3] == 0xA){
+                    if (Data[4] == 0xD){
+                        PetitHoldingRegisters[1].ActValue = Data[2];
+                        PetitHoldingRegisters[1].ActValue |= (Data[1] << 8);
+                    }
+                }
+            }
             DataCnt = 0;
         }
         

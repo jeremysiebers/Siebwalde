@@ -117,11 +117,13 @@ void Regulator(){
             PORTAbits.RA6 = 0;
             if(UPDATExPID){
                 PORTAbits.RA6 = 1;
-                EUSART_Write(PetitInputRegisters[0].ActValue  & 0x000F);
-                EUSART_Write((PetitInputRegisters[0].ActValue & 0x00F0) >> 4);
-                EUSART_Write((PetitInputRegisters[0].ActValue & 0x0F00) >> 8);
-                EUSART_Write((PetitInputRegisters[0].ActValue & 0xF000) >> 12);
-                EUSART_Write(0xAA);
+                if(PetitHoldingRegisters[1].ActValue > 0){
+                    EUSART_Write(PetitInputRegisters[0].ActValue  & 0x000F);
+                    EUSART_Write((PetitInputRegisters[0].ActValue & 0x00F0) >> 4);
+                    EUSART_Write((PetitInputRegisters[0].ActValue & 0x0F00) >> 8);
+                    EUSART_Write((PetitInputRegisters[0].ActValue & 0xF000) >> 12);
+                    EUSART_Write(0xAA);
+                }
             }
             UPDATExPID = false;
             //ProcessIO();

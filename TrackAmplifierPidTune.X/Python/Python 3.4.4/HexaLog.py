@@ -37,23 +37,23 @@ Options:
 #-----------------------------------------------------------------------------#
 import os, os.path, sys, subprocess
 
-print '\nPython version:', sys.version
+print ('\nPython version:', sys.version)
 
 # we may need to load different application specific modules depending on the platform we're running on
 try:
     # this only works on windows...
-    print '\nChecking system...'
+    print ('\nChecking system...')
     MAJOR, MINOR, BUILD, PLATFORM, TEXT = sys.getwindowsversion ()
-    print '...windows: major =', MAJOR, 'minor =', MINOR, 'build =', BUILD, 'platform =', PLATFORM, 'text =', TEXT
+    print ('...windows: major =', MAJOR, 'minor =', MINOR, 'build =', BUILD, 'platform =', PLATFORM, 'text =', TEXT)
 except:
     # assumption Linux/Unix
-    print '...Not windows'
+    print ('...Not windows')
     PLATFORM = None
 
-print '\nLoading modules...'
+print ('\nLoading modules...')
 sys.stdout.flush ()
 
-print '...python system'
+print ('...python system')
 import string
 import time
 import socket
@@ -61,7 +61,7 @@ import struct
 import types
 import serial
 
-print '...matplotlib'
+print ('...matplotlib')
 #import pylab
 #from matplotlib.widgets import Cursor
 #from matplotlib import mlab
@@ -70,17 +70,17 @@ print '...matplotlib'
 import matplotlib
 matplotlib.use ("TkAgg")
 
-print '...tkinter related'
-import Tkinter
-import tkFileDialog
-import tkSimpleDialog
-import tkMessageBox
+print ('...tkinter related')
+import tkinter
+import tkinter.filedialog
+import tkinter.simpledialog
+import tkinter.messagebox
 
-print '...application specific'
+print ('...application specific')
 import HexaLog_Widgets as widgets
 import HexaLog_TabSheets as tabsheets
 
-print '\nDone'
+print ('\nDone')
 sys.stdout.flush ()
 
 # optimize interpreter performance
@@ -111,7 +111,7 @@ PWM_MIN = 200
 #-----------------------------------------------------------------------------#
 #                       Class definition for main GUI                         #
 #-----------------------------------------------------------------------------#
-class clsHexaLog (Tkinter.Frame):
+class clsHexaLog (tkinter.Frame):
     #-----
     # some class global data
     GEOMETRY         = "1240x800"       # just an initial dimension of the GUI
@@ -146,7 +146,7 @@ class clsHexaLog (Tkinter.Frame):
         # initialise some local stuff and create widgets
         self._master = master
         self._master.geometry (self.GEOMETRY)
-        Tkinter.Frame.__init__ (self, master)
+        tkinter.Frame.__init__ (self, master)
         self.pack ()
         
         # create local variables
@@ -175,11 +175,11 @@ class clsHexaLog (Tkinter.Frame):
             #    r = self._ser.read ()
                 
             # we should do some handshaking to make sure we are connected to HexaLog
-            print "TODO"
+            print ("TODO")
         except:
-            print "Could not open serial port:", sys.exc_info ()[0]
-            print "Make sure correct port is set and not occupied"
-            print ""
+            print ("Could not open serial port:", sys.exc_info ()[0])
+            print ("Make sure correct port is set and not occupied")
+            print ("")
             self._ser = None                    # so we can do some tests we don't need the serial port for...
         
         # set a handler for the close system button
@@ -223,47 +223,47 @@ class clsHexaLog (Tkinter.Frame):
     # create all the widgets
     def _create_widgets (self):
         # create a left pane for some buttons
-        self._button_frame = Tkinter.Frame (self._master, bd = 2, relief = Tkinter.GROOVE)
-        self._button_frame.pack (side = "left", anchor = "w", expand = 0, fill = Tkinter.Y)
+        self._button_frame = tkinter.Frame (self._master, bd = 2, relief = tkinter.GROOVE)
+        self._button_frame.pack (side = "left", anchor = "w", expand = 0, fill = tkinter.Y)
         
         # create a right pane to hold the data
-        self._main_frame = Tkinter.Frame (self._master, bd = 2, relief = Tkinter.GROOVE)
-        self._main_frame.pack (side = "left", anchor = "w", expand = 1, fill = Tkinter.BOTH)
+        self._main_frame = tkinter.Frame (self._master, bd = 2, relief = tkinter.GROOVE)
+        self._main_frame.pack (side = "left", anchor = "w", expand = 1, fill = tkinter.BOTH)
         
         # really at the bottom we put a statusbar
         self._sbar = widgets.clsStatusBar (self._main_frame, self._master)
-        self._sbar.pack (side = "bottom", fill = Tkinter.X)
+        self._sbar.pack (side = "bottom", fill = tkinter.X)
         
         # and in the middle we put a frame where we put our tabbed notebook on (the "notebooks" will contain the data we're interested in)
-        self._data_frame = Tkinter.Frame (self._main_frame, bd = 2, relief = Tkinter.GROOVE)
-        self._data_frame.pack (side = "top", anchor = "w", expand = 1, fill = Tkinter.BOTH)
+        self._data_frame = tkinter.Frame (self._main_frame, bd = 2, relief = tkinter.GROOVE)
+        self._data_frame.pack (side = "top", anchor = "w", expand = 1, fill = tkinter.BOTH)
         
         # create the notebook itself
-        self._nb = widgets.clsNotebook (self._data_frame, Tkinter.TOP, frame_width = 2)
+        self._nb = widgets.clsNotebook (self._data_frame, tkinter.TOP, frame_width = 2)
         
         # Setup: modify application settings
-        self._settings_button = Tkinter.Button (self._button_frame, width = self.BUTTON_WIDTH)
+        self._settings_button = tkinter.Button (self._button_frame, width = self.BUTTON_WIDTH)
         self._settings_button ["text"]    = "Setup"
         self._settings_button ["fg"]      = "black"
         self._settings_button ["command"] = self._edit_settings
         self._settings_button.pack (side = "top", anchor = "w")
         
         # freeze: freeze/unfreeze the updates
-        self._freeze_button = Tkinter.Button (self._button_frame, width = self.BUTTON_WIDTH)
+        self._freeze_button = tkinter.Button (self._button_frame, width = self.BUTTON_WIDTH)
         self._freeze_button ["text"]    = "Freeze"
         self._freeze_button ["fg"]      = "black"
         self._freeze_button ["command"] = self._toggle_freeze
         self._freeze_button.pack (side = "top", anchor = "w")
         
         # about: show version information
-        self._about_button = Tkinter.Button (self._button_frame, width = self.BUTTON_WIDTH)
+        self._about_button = tkinter.Button (self._button_frame, width = self.BUTTON_WIDTH)
         self._about_button ["text"]    = "About"
         self._about_button ["fg"]      = "black"
         self._about_button ["command"] = self._about
         self._about_button.pack (side = "top", anchor = "w")
         
         # quit: end application
-        self._quit_button = Tkinter.Button (self._button_frame, width = self.BUTTON_WIDTH)
+        self._quit_button = tkinter.Button (self._button_frame, width = self.BUTTON_WIDTH)
         self._quit_button ["text"]    = "Quit"
         self._quit_button ["fg"]      = "black"
         self._quit_button ["command"] = self._quit
@@ -318,7 +318,7 @@ class clsHexaLog (Tkinter.Frame):
             self._restart_periodic_update ()
         else:
             # com port is not open...
-            print "Com port not open, command request ignored"
+            print ("Com port not open, command request ignored")
             
     #-----
     # receive data
@@ -337,7 +337,7 @@ class clsHexaLog (Tkinter.Frame):
             self._restart_periodic_update ()
         else:
             # we have no way of knowing how much data was requested, so we always reply with an empty string
-            print "Com port not open, replying with empty string"
+            print ("Com port not open, replying with empty string")
             repl = ''
             
         return repl
@@ -387,7 +387,7 @@ class clsHexaLog (Tkinter.Frame):
             self._setup_page    = new_settings ["last_screen"]
             self._setup_setname = new_settings ["setname"]
             
-        print "ToDo: on change, check what variables have changed, if needed to update (eg comport)"
+        print ("ToDo: on change, check what variables have changed, if needed to update (eg comport)")
         
     #-----
     # freeze or unfreeze the update
@@ -444,7 +444,7 @@ class clsHexaLog (Tkinter.Frame):
 #-----------------------------------------------------------------------------#
 if (__name__ == "__main__"):
     # create root widget and start application
-    root = Tkinter.Tk ()
+    root = tkinter.Tk ()
     if (PLATFORM == None):
         # on unix we need to set another font to make it all fit
         root.option_add ("*Font", "roman 10")

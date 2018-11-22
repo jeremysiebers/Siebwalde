@@ -30,10 +30,10 @@ import os, sys
 import time
 import types
 import struct
-import Tkinter
-import tkFileDialog
-import tkMessageBox
-import tkSimpleDialog
+import tkinter
+import tkinter.filedialog
+import tkinter.simpledialog
+import tkinter.messagebox
 
 import numpy                    # for array handling
 import scipy.io                 # for savemat and loadmat
@@ -97,7 +97,7 @@ except NameError:
 if os.path.isdir (_icondir):
     ICONDIR = _icondir
 elif not os.path.isdir (ICONDIR):
-    raise RuntimeError, "can't find icon directory (%r)" % (ICONDIR,)
+    raise RuntimeError( "can't find icon directory (%r)" % (ICONDIR,))
 
 #-----------------------------------------------------------------------------#
 #                        Status tabsheet base class                           #
@@ -135,91 +135,91 @@ class clsStatusTabSheet:
     # build widgets for configuration tabsheet
     def _create_widgets (self):
         # create a frame and a canvas to put widgets on
-        self._status_frame = Tkinter.Frame (self._master._nb ())
-        self._status_canvas = Tkinter.Canvas (self._status_frame)
-        self._status_canvas.pack (side = "top", expand = 1, fill = Tkinter.BOTH)
+        self._status_frame = tkinter.Frame (self._master._nb ())
+        self._status_canvas = tkinter.Canvas (self._status_frame)
+        self._status_canvas.pack (side = "top", expand = 1, fill = tkinter.BOTH)
         
         # show the sample rate
-        self._samplerate_lbl = Tkinter.Label (self._status_canvas, text = "Sample rate [Hz]", anchor = 'w')
+        self._samplerate_lbl = tkinter.Label (self._status_canvas, text = "Sample rate [Hz]", anchor = 'w')
         self._status_canvas.create_window ((self.BASE_X_POS, self._pos_y), anchor = 'w', width = 200, window = self._samplerate_lbl)
-        self._samplerate_var = Tkinter.StringVar ()
-        self._samplerate_edt = Tkinter.Entry (self._status_canvas, textvariable = self._samplerate_var, state = Tkinter.DISABLED)
+        self._samplerate_var = tkinter.StringVar ()
+        self._samplerate_edt = tkinter.Entry (self._status_canvas, textvariable = self._samplerate_var, state = tkinter.DISABLED)
         self._status_canvas.create_window ((self.X_DATA1_INDENT, self._pos_y), anchor = 'w', width = self.ENTRY_WIDTH, window = self._samplerate_edt)
         self._pos_y = self._pos_y + self.DELTA_Y
         
         # show the CSR register as a raw value
-        self._csr_lbl = Tkinter.Label (self._status_canvas, text = "CSR raw value", anchor = 'w')
+        self._csr_lbl = tkinter.Label (self._status_canvas, text = "CSR raw value", anchor = 'w')
         self._status_canvas.create_window ((self.BASE_X_POS, self._pos_y), anchor = 'w', width = 200, window = self._csr_lbl)
-        self._csr_var = Tkinter.StringVar ()
-        self._csr_edt = Tkinter.Entry (self._status_canvas, textvariable = self._csr_var, state = Tkinter.DISABLED)
+        self._csr_var = tkinter.StringVar ()
+        self._csr_edt = tkinter.Entry (self._status_canvas, textvariable = self._csr_var, state = tkinter.DISABLED)
         self._status_canvas.create_window ((self.X_DATA1_INDENT, self._pos_y), anchor = 'w', width = self.ENTRY_WIDTH, window = self._csr_edt)
         self._pos_y = self._pos_y + self.DELTA_Y
         
         # has a trigger been defined yes or no
-        self._tr_def_lbl = Tkinter.Label (self._status_canvas, text = "Trigger defined y/n", anchor = 'w')
+        self._tr_def_lbl = tkinter.Label (self._status_canvas, text = "Trigger defined y/n", anchor = 'w')
         self._status_canvas.create_window ((self.BASE_X_POS + self.X_POS_INDENT, self._pos_y), anchor = 'w', width = 200, window = self._tr_def_lbl)
-        self._tr_def_var = Tkinter.StringVar ()
-        self._tr_def_edt = Tkinter.Entry (self._status_canvas, textvariable = self._tr_def_var, state = Tkinter.DISABLED)
+        self._tr_def_var = tkinter.StringVar ()
+        self._tr_def_edt = tkinter.Entry (self._status_canvas, textvariable = self._tr_def_var, state = tkinter.DISABLED)
         self._status_canvas.create_window ((self.X_DATA1_INDENT, self._pos_y), anchor = 'w', width = self.ENTRY_WIDTH, window = self._tr_def_edt)
         self._pos_y = self._pos_y + self.DELTA_Y
         
         # is the logger running
-        self._run_lbl = Tkinter.Label (self._status_canvas, text = "In running state y/n", anchor = 'w')
+        self._run_lbl = tkinter.Label (self._status_canvas, text = "In running state y/n", anchor = 'w')
         self._status_canvas.create_window ((self.BASE_X_POS + self.X_POS_INDENT, self._pos_y), anchor = 'w', width = 200, window = self._run_lbl)
-        self._log_run_var = Tkinter.StringVar ()
-        self._log_run_edt = Tkinter.Entry (self._status_canvas, textvariable = self._log_run_var, state = Tkinter.DISABLED)
+        self._log_run_var = tkinter.StringVar ()
+        self._log_run_edt = tkinter.Entry (self._status_canvas, textvariable = self._log_run_var, state = tkinter.DISABLED)
         self._status_canvas.create_window ((self.X_DATA1_INDENT, self._pos_y), anchor = 'w', width = self.ENTRY_WIDTH, window = self._log_run_edt)
         self._pos_y = self._pos_y + self.DELTA_Y
         
         # is the logger waiting for a trigger
-        self._wait_tr_lbl = Tkinter.Label (self._status_canvas, text = "Waiting for trigger y/n", anchor = 'w')
+        self._wait_tr_lbl = tkinter.Label (self._status_canvas, text = "Waiting for trigger y/n", anchor = 'w')
         self._status_canvas.create_window ((self.BASE_X_POS + self.X_POS_INDENT, self._pos_y), anchor = 'w', width = 200, window = self._wait_tr_lbl)
-        self._wait_tr_var = Tkinter.StringVar ()
-        self._wait_tr_edt = Tkinter.Entry (self._status_canvas, textvariable = self._wait_tr_var, state = Tkinter.DISABLED)
+        self._wait_tr_var = tkinter.StringVar ()
+        self._wait_tr_edt = tkinter.Entry (self._status_canvas, textvariable = self._wait_tr_var, state = tkinter.DISABLED)
         self._status_canvas.create_window ((self.X_DATA1_INDENT, self._pos_y), anchor = 'w', width = self.ENTRY_WIDTH, window = self._wait_tr_edt)
         self._pos_y = self._pos_y + self.DELTA_Y
         
         # is the logger in the stopping state
-        self._stopping_lbl = Tkinter.Label (self._status_canvas, text = "Stopping after trigger y/n", anchor = 'w')
+        self._stopping_lbl = tkinter.Label (self._status_canvas, text = "Stopping after trigger y/n", anchor = 'w')
         self._status_canvas.create_window ((self.BASE_X_POS + self.X_POS_INDENT, self._pos_y), anchor = 'w', width = 200, window = self._stopping_lbl)
-        self._stopping_var = Tkinter.StringVar ()
-        self._stopping_edt = Tkinter.Entry (self._status_canvas, textvariable = self._stopping_var, state = Tkinter.DISABLED)
+        self._stopping_var = tkinter.StringVar ()
+        self._stopping_edt = tkinter.Entry (self._status_canvas, textvariable = self._stopping_var, state = tkinter.DISABLED)
         self._status_canvas.create_window ((self.X_DATA1_INDENT, self._pos_y), anchor = 'w', width = self.ENTRY_WIDTH, window = self._stopping_edt)
         self._pos_y = self._pos_y + self.DELTA_Y
         
         # has the logger stopped
-        self._stopped_lbl = Tkinter.Label (self._status_canvas, text = "Stopped y/n", anchor = 'w')
+        self._stopped_lbl = tkinter.Label (self._status_canvas, text = "Stopped y/n", anchor = 'w')
         self._status_canvas.create_window ((self.BASE_X_POS + self.X_POS_INDENT, self._pos_y), anchor = 'w', width = 200, window = self._stopped_lbl)
-        self._stopped_var = Tkinter.StringVar ()
-        self._stopped_edt = Tkinter.Entry (self._status_canvas, textvariable = self._stopped_var, state = Tkinter.DISABLED)
+        self._stopped_var = tkinter.StringVar ()
+        self._stopped_edt = tkinter.Entry (self._status_canvas, textvariable = self._stopped_var, state = tkinter.DISABLED)
         self._status_canvas.create_window ((self.X_DATA1_INDENT, self._pos_y), anchor = 'w', width = self.ENTRY_WIDTH, window = self._stopped_edt)
         self._pos_y = self._pos_y + self.DELTA_Y
         
         # has the logger seen a trigger
-        self._trig_occur_lbl = Tkinter.Label (self._status_canvas, text = "Trigger occurred y/n", anchor = 'w')
+        self._trig_occur_lbl = tkinter.Label (self._status_canvas, text = "Trigger occurred y/n", anchor = 'w')
         self._status_canvas.create_window ((self.BASE_X_POS + self.X_POS_INDENT, self._pos_y), anchor = 'w', width = 200, window = self._trig_occur_lbl)
-        self._trig_occur_var = Tkinter.StringVar ()
-        self._trig_occur_edt = Tkinter.Entry (self._status_canvas, textvariable = self._trig_occur_var, state = Tkinter.DISABLED)
+        self._trig_occur_var = tkinter.StringVar ()
+        self._trig_occur_edt = tkinter.Entry (self._status_canvas, textvariable = self._trig_occur_var, state = tkinter.DISABLED)
         self._status_canvas.create_window ((self.X_DATA1_INDENT, self._pos_y), anchor = 'w', width = self.ENTRY_WIDTH, window = self._trig_occur_edt)
         self._pos_y = self._pos_y + self.DELTA_Y
         
         # was there a wrap around on the DDR-3 address
-        self._wrap_around_lbl = Tkinter.Label (self._status_canvas, text = "DDR-3 wrap-around y/n", anchor = 'w')
+        self._wrap_around_lbl = tkinter.Label (self._status_canvas, text = "DDR-3 wrap-around y/n", anchor = 'w')
         self._status_canvas.create_window ((self.BASE_X_POS + self.X_POS_INDENT, self._pos_y), anchor = 'w', width = 200, window = self._wrap_around_lbl)
-        self._wrap_around_var = Tkinter.StringVar ()
-        self._wrap_around_edt = Tkinter.Entry (self._status_canvas, textvariable = self._wrap_around_var, state = Tkinter.DISABLED)
+        self._wrap_around_var = tkinter.StringVar ()
+        self._wrap_around_edt = tkinter.Entry (self._status_canvas, textvariable = self._wrap_around_var, state = tkinter.DISABLED)
         self._status_canvas.create_window ((self.X_DATA1_INDENT, self._pos_y), anchor = 'w', width = self.ENTRY_WIDTH, window = self._wrap_around_edt)
         self._pos_y = self._pos_y + self.DELTA_Y
         
         # show the absolute DDR-3 address where the trigger occurred
-        self._trigger_lbl = Tkinter.Label (self._status_canvas, text = "DDR-3 address for trigger", anchor = 'w')
+        self._trigger_lbl = tkinter.Label (self._status_canvas, text = "DDR-3 address for trigger", anchor = 'w')
         self._status_canvas.create_window ((self.BASE_X_POS, self._pos_y), anchor = 'w', width = 200, window = self._trigger_lbl)
-        self._trigger_var = Tkinter.StringVar ()
-        self._trigger_edt = Tkinter.Entry (self._status_canvas, textvariable = self._trigger_var, state = Tkinter.DISABLED)
+        self._trigger_var = tkinter.StringVar ()
+        self._trigger_edt = tkinter.Entry (self._status_canvas, textvariable = self._trigger_var, state = tkinter.DISABLED)
         self._status_canvas.create_window ((self.X_DATA1_INDENT, self._pos_y), anchor = 'w', width = self.ENTRY_WIDTH, window = self._trigger_edt)
         
         # on the same row we show a label variable that indicates the approximate number of bytes in the trace
-        self._num_in_trace_lbl = Tkinter.Label (self._status_canvas, text = "(approx. 0 bytes in trace)", anchor = 'w')
+        self._num_in_trace_lbl = tkinter.Label (self._status_canvas, text = "(approx. 0 bytes in trace)", anchor = 'w')
         self._status_canvas.create_window ((self.X_DATA2_INDENT, self._pos_y), anchor = 'w', width = 200, window = self._num_in_trace_lbl)
         self._pos_y = self._pos_y + self.DELTA_Y
         
@@ -358,75 +358,75 @@ class clsConfigTabSheet:
     # build widgets for status tabsheet
     def _create_widgets (self):
         # create a frame and a canvas to put widgets on
-        self._config_frame = Tkinter.Frame (self._master._nb ())
-        self._config_canvas = Tkinter.Canvas (self._config_frame)
-        self._config_canvas.pack (side = "top", expand = 1, fill = Tkinter.BOTH)
+        self._config_frame = tkinter.Frame (self._master._nb ())
+        self._config_canvas = tkinter.Canvas (self._config_frame)
+        self._config_canvas.pack (side = "top", expand = 1, fill = tkinter.BOTH)
         
         # tell what these checkboxes are for
         self._pos_y = self.BASE_Y_POS
-        self._enabled_lbl = Tkinter.Label (self._config_canvas, text = "Regulator settings", anchor = 'w')
+        self._enabled_lbl = tkinter.Label (self._config_canvas, text = "Regulator settings", anchor = 'w')
         self._config_canvas.create_window ((self.BASE_X_POS, self._pos_y), anchor = 'w', width = 200, window = self._enabled_lbl)
         
         # show the settings we can change
         self._pos_y = self.BASE_Y_POS + self.DELTA_Y
         
         # show the drive setpoint
-        self._drivesetp_lbl = Tkinter.Label (self._config_canvas, text = "Drive setpoint", anchor = 'w')
+        self._drivesetp_lbl = tkinter.Label (self._config_canvas, text = "Drive setpoint", anchor = 'w')
         self._config_canvas.create_window ((self.BASE_X_POS, self._pos_y), anchor = 'w', width = 200, window = self._drivesetp_lbl)
-        self._drivesetp_var = Tkinter.IntVar ()
-        self._drivesetp_edt = Tkinter.Entry (self._config_canvas, textvariable = self._drivesetp_var)
+        self._drivesetp_var = tkinter.IntVar ()
+        self._drivesetp_edt = tkinter.Entry (self._config_canvas, textvariable = self._drivesetp_var)
         self._config_canvas.create_window ((self.X_DATA1_INDENT, self._pos_y), anchor = 'w', width = self.ENTRY_WIDTH, window = self._drivesetp_edt)
         self._drivesetp_var.set (self._master._settings ["DRIVE_SETP"]["value"])
         self._pos_y = self._pos_y + self.DELTA_Y
         
         # show the total samples
-        self._totalsample_lbl = Tkinter.Label (self._config_canvas, text = "Total Samples", anchor = 'w')
+        self._totalsample_lbl = tkinter.Label (self._config_canvas, text = "Total Samples", anchor = 'w')
         self._config_canvas.create_window ((self.BASE_X_POS, self._pos_y), anchor = 'w', width = 200, window = self._totalsample_lbl)
-        self._totalsample_var = Tkinter.IntVar ()
-        self._totalsample_edt = Tkinter.Entry (self._config_canvas, textvariable = self._totalsample_var)
+        self._totalsample_var = tkinter.IntVar ()
+        self._totalsample_edt = tkinter.Entry (self._config_canvas, textvariable = self._totalsample_var)
         self._config_canvas.create_window ((self.X_DATA1_INDENT, self._pos_y), anchor = 'w', width = self.ENTRY_WIDTH, window = self._totalsample_edt)
         self._totalsample_var.set (self._master._settings ["TOTAL_SAMPLES"]["value"])
         self._pos_y = self._pos_y + self.DELTA_Y
         
         # show the output saturation P
-        self._outsat_p_lbl = Tkinter.Label (self._config_canvas, text = "Output Saturation P", anchor = 'w')
+        self._outsat_p_lbl = tkinter.Label (self._config_canvas, text = "Output Saturation P", anchor = 'w')
         self._config_canvas.create_window ((self.BASE_X_POS, self._pos_y), anchor = 'w', width = 200, window = self._outsat_p_lbl)
-        self._outsat_p_var = Tkinter.IntVar ()
-        self._outsat_p_edt = Tkinter.Entry (self._config_canvas, textvariable = self._outsat_p_var)
+        self._outsat_p_var = tkinter.IntVar ()
+        self._outsat_p_edt = tkinter.Entry (self._config_canvas, textvariable = self._outsat_p_var)
         self._config_canvas.create_window ((self.X_DATA1_INDENT, self._pos_y), anchor = 'w', width = self.ENTRY_WIDTH, window = self._outsat_p_edt)
         self._outsat_p_var.set (self._master._settings ["OUTSAT_P"]["value"])
         self._pos_y = self._pos_y + self.DELTA_Y
         
         # show the output saturation M
-        self._outsat_n_lbl = Tkinter.Label (self._config_canvas, text = "Output Saturation N", anchor = 'w')
+        self._outsat_n_lbl = tkinter.Label (self._config_canvas, text = "Output Saturation N", anchor = 'w')
         self._config_canvas.create_window ((self.BASE_X_POS, self._pos_y), anchor = 'w', width = 200, window = self._outsat_n_lbl)
-        self._outsat_n_var = Tkinter.IntVar ()
-        self._outsat_n_edt = Tkinter.Entry (self._config_canvas, textvariable = self._outsat_n_var)
+        self._outsat_n_var = tkinter.IntVar ()
+        self._outsat_n_edt = tkinter.Entry (self._config_canvas, textvariable = self._outsat_n_var)
         self._config_canvas.create_window ((self.X_DATA1_INDENT, self._pos_y), anchor = 'w', width = self.ENTRY_WIDTH, window = self._outsat_n_edt)
         self._outsat_n_var.set (self._master._settings ["OUTSAT_M"]["value"])
         self._pos_y = self._pos_y + self.DELTA_Y
         
         # show the PWM Max
-        self._pwm_max_lbl = Tkinter.Label (self._config_canvas, text = "PWM Max", anchor = 'w')
+        self._pwm_max_lbl = tkinter.Label (self._config_canvas, text = "PWM Max", anchor = 'w')
         self._config_canvas.create_window ((self.BASE_X_POS, self._pos_y), anchor = 'w', width = 200, window = self._pwm_max_lbl)
-        self._pwm_max_var = Tkinter.IntVar ()
-        self._pwm_max_edt = Tkinter.Entry (self._config_canvas, textvariable = self._pwm_max_var)
+        self._pwm_max_var = tkinter.IntVar ()
+        self._pwm_max_edt = tkinter.Entry (self._config_canvas, textvariable = self._pwm_max_var)
         self._config_canvas.create_window ((self.X_DATA1_INDENT, self._pos_y), anchor = 'w', width = self.ENTRY_WIDTH, window = self._pwm_max_edt)
         self._pwm_max_var.set (self._master._settings ["PWM_MAX"]["value"])
         self._pos_y = self._pos_y + self.DELTA_Y
         
         # show the PWM Min
-        self._pwm_min_lbl = Tkinter.Label (self._config_canvas, text = "PWM Min", anchor = 'w')
+        self._pwm_min_lbl = tkinter.Label (self._config_canvas, text = "PWM Min", anchor = 'w')
         self._config_canvas.create_window ((self.BASE_X_POS, self._pos_y), anchor = 'w', width = 200, window = self._pwm_min_lbl)
-        self._pwm_min_var = Tkinter.IntVar ()
-        self._pwm_min_edt = Tkinter.Entry (self._config_canvas, textvariable = self._pwm_min_var)
+        self._pwm_min_var = tkinter.IntVar ()
+        self._pwm_min_edt = tkinter.Entry (self._config_canvas, textvariable = self._pwm_min_var)
         self._config_canvas.create_window ((self.X_DATA1_INDENT, self._pos_y), anchor = 'w', width = self.ENTRY_WIDTH, window = self._pwm_min_edt)
         self._pwm_min_var.set (self._master._settings ["PWM_MIN"]["value"])
         self._pos_y = self._pos_y + self.DELTA_Y
         
         # add a button to apply this to the graph
         self._pos_y = self._pos_y + self.DELTA_Y
-        self._set_apply_button = Tkinter.Button (self._config_canvas, width = self.BUTTON_WIDTH)
+        self._set_apply_button = tkinter.Button (self._config_canvas, width = self.BUTTON_WIDTH)
         self._set_apply_button ["text"]    = "Apply"
         self._set_apply_button ["fg"]      = "black"
         self._set_apply_button ["command"] = self._apply
@@ -499,29 +499,29 @@ class clsGraphTabSheet:
     # build widgets for capture graphics tabsheet
     def _create_widgets (self):
         # create a frame and a canvas to put widgets on
-        self._graph_frame = Tkinter.Frame (self._master._nb ())
-        self._graph_canvas = Tkinter.Canvas (self._graph_frame)
-        self._graph_canvas.pack (side = "top", expand = 1, fill = Tkinter.BOTH)
+        self._graph_frame = tkinter.Frame (self._master._nb ())
+        self._graph_canvas = tkinter.Canvas (self._graph_frame)
+        self._graph_canvas.pack (side = "top", expand = 1, fill = tkinter.BOTH)
         
         # we create 2 additional frames: one on the bottom to hold buttons
         # and one on top to hold the capture graphs
-        self._capture_button_frame = Tkinter.Frame (self._graph_canvas, bd = 2, relief = Tkinter.GROOVE)
-        self._capture_button_frame.pack (side = "bottom", anchor = 'w', expand = 0, fill = Tkinter.X)
-        self._capture_data_frame = Tkinter.Frame (self._graph_canvas, bd = 2, relief = Tkinter.GROOVE)
-        self._capture_data_frame.pack (side = "top", anchor = 'w', expand = 1, fill = Tkinter.BOTH)
+        self._capture_button_frame = tkinter.Frame (self._graph_canvas, bd = 2, relief = tkinter.GROOVE)
+        self._capture_button_frame.pack (side = "bottom", anchor = 'w', expand = 0, fill = tkinter.X)
+        self._capture_data_frame = tkinter.Frame (self._graph_canvas, bd = 2, relief = tkinter.GROOVE)
+        self._capture_data_frame.pack (side = "top", anchor = 'w', expand = 1, fill = tkinter.BOTH)
         
         # put button widgets on the button canvas
-        self._upload_button = Tkinter.Button (self._capture_button_frame, width = self.BUTTON_WIDTH)
+        self._upload_button = tkinter.Button (self._capture_button_frame, width = self.BUTTON_WIDTH)
         self._upload_button ["text"]    = "Measure"
         self._upload_button ["fg"]      = "black"
         self._upload_button ["command"] = self._measure
         self._upload_button.pack (side = "left", anchor = 'w')
         
-        self._save_button = Tkinter.Button (self._capture_button_frame, width = self.BUTTON_WIDTH)
+        self._save_button = tkinter.Button (self._capture_button_frame, width = self.BUTTON_WIDTH)
         self._save_button ["text"]    = "Save"
         self._save_button ["fg"]      = "black"
         self._save_button ["command"] = self._save_data
-        self._save_button ["state"]   = Tkinter.DISABLED
+        self._save_button ["state"]   = tkinter.DISABLED
         self._save_button.pack (side = "left", anchor = 'w')
         
         # add graphs: top for ADC-0, 8 channels, bottom for ADC-1, 8 channels
@@ -566,7 +566,7 @@ class clsGraphTabSheet:
         self._master.send_request (b'\x00')
         self._master.send_request (b'\x01')
         self._master.send_request (b'\n')
-        self._master.send_request (b'\r')
+        self._master.send_request (b'\r')        
         
         # determine initial direction
         if(self._master._settings ["DRIVE_SETP"]["value"] < 512):
@@ -576,17 +576,17 @@ class clsGraphTabSheet:
         
         # wait until we see 0xAA so we are in sync with whatever is coming from the micro
         b = 0
-        while (b != 0xAA):
-            c = self._master.receive_reply ()
-            b = struct.unpack ("B", c)[0]
+        while (b != b'\xAA'):
+            b = self._master.receive_reply ()
+            #b = struct.unpack ('B', c)[0]
             
         # now we are in sync, start collecting data
         while run:
         
             for c in self._master.receive_reply ():
-                b=struct.unpack ("B", c)[0]
-                s.append(b)
-                if (b == 0xaa):
+                #b = struct.unpack ('B', c)[0]
+                s.append(c)
+                if (c == 170):
                     if(len(s) == 5 and s[4] == 170):
                         data = (s[0] + (s[1] << 4) + (s[2] << 8) + (s[3] << 12)) #+ 25 # subtract/add the offset from the analog filter
                         error = setpoint - data;
@@ -654,12 +654,12 @@ class clsGraphTabSheet:
         self._master.send_request (struct.pack('>B', 0))
         self._master.send_request (struct.pack('>B', 0))
         self._master.send_request (b'\n')
-        self._master.send_request (b'\r')
+        self._master.send_request (b'\r')        
         
         # we're out of the loop, see if we have data and update the graph
         if (len (samples) > 1):
             self._capture_graph.update_capture (samples, datas, kps, plants, errors, outputs, pwms, setpoints, output_sats)
-            self._save_button ["state"]  = Tkinter.NORMAL
+            self._save_button ["state"]  = tkinter.NORMAL
             
             # copy data to local arrays so we can save it
             self._tb = samples
@@ -672,19 +672,8 @@ class clsGraphTabSheet:
             self._adc0.append (pwms)
             self._adc0.append (setpoints)
             self._adc0.append (output_sats)
-            
-            self._matlab_dic = {}
-            self._matlab_dic ['sample'] = samples
-            self._matlab_dic ['data'] = datas
-            self._matlab_dic ['kp'] = kps
-            self._matlab_dic ['plant'] = plants
-            self._matlab_dic ['error'] = errors
-            self._matlab_dic ['outputs'] = outputs
-            self._matlab_dic ['pwms'] = pwms
-            self._matlab_dic ['setpoints'] = setpoints
-            self._matlab_dic ['output_sats'] = output_sats
         else:
-            print "No samples..."
+            print ("No samples...")
 
     #-----
     # save the data retrieved from the logger as .csv or .xls format
@@ -692,7 +681,7 @@ class clsGraphTabSheet:
         # open a file dialog to get a file name
         fname = tkFileDialog.asksaveasfilename (**self._file_dlg_opt)
         
-        # now... depending on the version of Tkinter (python related) the return is either a string or a
+        # now... depending on the version of tkinter (python related) the return is either a string or a
         # tuple or list with one element, so see what it is and make the correct filename
         if ( (type (fname) == types.TupleType) or (type (fname) == types.ListType) ):
             # python version that returns a tuple, returns an empty tuple if cancel is pressed
@@ -711,7 +700,7 @@ class clsGraphTabSheet:
             name, ext = os.path.splitext (fname.lower ())
             if (ext == ".xlsx"):
                 # excel
-                print "Todo: excel"
+                print ("Todo: excel")
             elif (ext == ".csv"):
                 # comma separated value; note that the data we keep globally for the graphs are row oriented, so before we can save as
                 # csv, which we define as column oriented, we need to transpose the global data
@@ -730,10 +719,10 @@ class clsGraphTabSheet:
                 fptr.close ()
             elif (ext == ".mat"):
                 # matlab
-                scipy.io.savemat (fname, {"sample" : self._tb, "Regulator" : self._matlab_dic})
+                scipy.io.savemat (fname, {"sample" : self._tb, "Regulator" : self._adc0})
             elif (ext == ".bin"):
                 # raw binary
-                print "Todo: raw binary"
+                print ("Todo: raw binary")
             else:
                 message  = "Unknown file type: %s\n"%ext
                 message += "No data saved"
