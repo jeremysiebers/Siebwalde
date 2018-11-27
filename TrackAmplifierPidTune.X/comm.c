@@ -53,6 +53,9 @@ void Communications(){
                         PetitHoldingRegisters[1].ActValue = Data[2];
                         PetitHoldingRegisters[1].ActValue |= (Data[1] << 8);
                     }
+                    if(PetitHoldingRegisters[1].ActValue == 0){
+                        PetitHoldingRegisters[0].ActValue |= 0x8000;
+                    }
                 }
             }
             DataCnt = 0;

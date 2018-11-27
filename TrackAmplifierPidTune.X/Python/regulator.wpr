@@ -5,7 +5,9 @@
 ##################################################################
 [project attributes]
 proj.directory-list = [{'dirloc': loc('.'),
-                        'excludes': [u'old'],
+                        'excludes': [u'dump.csv',
+                                     u'Python 3.4.4',
+                                     u'old'],
                         'filter': '*',
                         'include_hidden': False,
                         'recursive': True,

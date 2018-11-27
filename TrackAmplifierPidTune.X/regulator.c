@@ -44,6 +44,8 @@ void Regulator_Init(){
     TRISCbits.TRISC5 = 0;
     TRISCbits.TRISC6 = 0;
     
+    PWM6_LoadDutyValue(399);
+    
     PwmDutyCyclePrev = ((unsigned int)(PWM6DCH << 2)) + 
                        ((unsigned int)(PWM6DCL >> 6));    
 }
@@ -123,7 +125,7 @@ void Regulator(){
                     EUSART_Write((PetitInputRegisters[0].ActValue & 0x0F00) >> 8);
                     EUSART_Write((PetitInputRegisters[0].ActValue & 0xF000) >> 12);
                     EUSART_Write(0xAA);
-                }
+                }                
             }
             UPDATExPID = false;
             //ProcessIO();

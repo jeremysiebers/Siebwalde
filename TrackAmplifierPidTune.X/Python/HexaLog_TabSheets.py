@@ -424,6 +424,24 @@ class clsConfigTabSheet:
         self._pwm_min_var.set (self._master._settings ["PWM_MIN"]["value"])
         self._pos_y = self._pos_y + self.DELTA_Y
         
+        # show the Kp
+        self._kp_lbl = Tkinter.Label (self._config_canvas, text = "Kp", anchor = 'w')
+        self._config_canvas.create_window ((self.BASE_X_POS, self._pos_y), anchor = 'w', width = 200, window = self._kp_lbl)
+        self._kp_var = Tkinter.IntVar ()
+        self._kp_edt = Tkinter.Entry (self._config_canvas, textvariable = self._kp_var)
+        self._config_canvas.create_window ((self.X_DATA1_INDENT, self._pos_y), anchor = 'w', width = self.ENTRY_WIDTH, window = self._kp_edt)
+        self._kp_var.set (self._master._settings ["KP"]["value"])
+        self._pos_y = self._pos_y + self.DELTA_Y
+        
+        # show the Acceleration
+        self._acceleration_lbl = Tkinter.Label (self._config_canvas, text = "Acceleration", anchor = 'w')
+        self._config_canvas.create_window ((self.BASE_X_POS, self._pos_y), anchor = 'w', width = 200, window = self._acceleration_lbl)
+        self._acceleration_var = Tkinter.IntVar ()
+        self._acceleration_edt = Tkinter.Entry (self._config_canvas, textvariable = self._acceleration_var)
+        self._config_canvas.create_window ((self.X_DATA1_INDENT, self._pos_y), anchor = 'w', width = self.ENTRY_WIDTH, window = self._acceleration_edt)
+        self._acceleration_var.set (self._master._settings ["ACCELERATION"]["value"])
+        self._pos_y = self._pos_y + self.DELTA_Y
+        
         # add a button to apply this to the graph
         self._pos_y = self._pos_y + self.DELTA_Y
         self._set_apply_button = Tkinter.Button (self._config_canvas, width = self.BUTTON_WIDTH)
@@ -441,7 +459,12 @@ class clsConfigTabSheet:
         # change values based on input
         self._master._settings ["TOTAL_SAMPLES"]["value"] = self._totalsample_var.get ()
         self._master._settings ["DRIVE_SETP"]["value"] = self._drivesetp_var.get ()
-        
+        self._master._settings ["OUTSAT_P"]["value"] = self._outsat_p_var.get()
+        self._master._settings ["OUTSAT_M"]["value"] = self._outsat_n_var.get()
+        self._master._settings ["PWM_MAX"]["value"] = self._pwm_max_var.get()
+        self._master._settings ["PWM_MIN"]["value"] = self._pwm_min_var.get()
+        self._master._settings ["KP"]["value"] = self._kp_var.get()
+        self._master._settings ["ACCELERATION"]["value"] = self._acceleration_var.get()
     #-----
     # resize the graph
     def resize (self, width, height):
@@ -551,15 +574,20 @@ class clsGraphTabSheet:
         run = True
         sample = 0
         setpoint = 512
+        setpoint_new = 512
         error = 0
         output = 0
-        kp = 1
+        kp = 15
         pwm = 399
         pwm_prev = 399
         plant = 15
         output_sat = 5
         direction = ''
         s = []
+        acceleration = 5
+        acc_count = 0
+        jerk = 1
+        sample_rate = 150
         
         #enable amplifier to send data
         self._master.send_request (b'\x55')
@@ -569,9 +597,9 @@ class clsGraphTabSheet:
         self._master.send_request (b'\r')
         
         # determine initial direction
-        if(self._master._settings ["DRIVE_SETP"]["value"] < 512):
+        if(self._master._settings ["DRIVE_SETP"]["value"] < 400):
             direction = "CW"
-        elif(self._master._settings ["DRIVE_SETP"]["value"] > 512):
+        elif(self._master._settings ["DRIVE_SETP"]["value"] > 399):
             direction = "CCW"
         
         # wait until we see 0xAA so we are in sync with whatever is coming from the micro
@@ -590,7 +618,7 @@ class clsGraphTabSheet:
                     if(len(s) == 5 and s[4] == 170):
                         data = (s[0] + (s[1] << 4) + (s[2] << 8) + (s[3] << 12)) #+ 25 # subtract/add the offset from the analog filter
                         error = setpoint - data;
-                        output = int((kp * error * plant) / 100);
+                        output = int((self._master._settings ["KP"]["value"] * error * plant) / 1000);
                         
                         if(output > self._master._settings ["OUTSAT_P"]["value"]):
                             output = self._master._settings ["OUTSAT_P"]["value"]
@@ -602,24 +630,6 @@ class clsGraphTabSheet:
                         elif(output > 0):
                             pwm = pwm_prev + output;
                         
-                        
-                        if (direction == "CCW" and pwm > self._master._settings ["PWM_MAX"]["value"]):
-                            pwm = self._master._settings ["PWM_MAX"]["value"]
-                        elif(direction == "CCW" and pwm < 400):
-                            pwm = 400
-                        elif(direction == "CW" and pwm < self._master._settings ["PWM_MIN"]["value"]):
-                            pwm = self._master._settings ["PWM_MIN"]["value"]
-                        elif(direction == "CW" and pwm > 399):
-                            pwm = 399
-                            
-                        if(pwm_prev != pwm):
-                            self._master.send_request (b'\xAA')
-                            self._master.send_request (struct.pack('>B', (pwm>> 8)))
-                            self._master.send_request (struct.pack('>B', (pwm & 0x00FF)))
-                            self._master.send_request (b'\n')
-                            self._master.send_request (b'\r')
-                            pwm_prev = pwm
-                        
                         samples.append (sample)
                         datas.append (data)
                         kps.append (kp)
@@ -628,15 +638,57 @@ class clsGraphTabSheet:
                         outputs.append (output)
                         pwms.append (pwm)
                         setpoints.append (setpoint)
-                        output_sats.append (output_sat)
+                        output_sats.append (self._master._settings ["OUTSAT_P"]["value"])
                         
                         sample = sample + 1
                         
-                        if(sample > 5):
-                            setpoint = self._master._settings ["DRIVE_SETP"]["value"]
+                        if(sample > 0 and sample < self._master._settings ["TOTAL_SAMPLES"]["value"]):
+                            setpoint_new = self._master._settings ["DRIVE_SETP"]["value"]
                         
-                        if (sample > self._master._settings ["TOTAL_SAMPLES"]["value"] - 100):
-                            setpoint = 512
+                        if (sample > self._master._settings ["TOTAL_SAMPLES"]["value"]):
+                            setpoint_new = 512
+                        
+                        # determine initial direction
+                        if(setpoint < 512):
+                            direction = "CW"
+                        elif(setpoint > 511):
+                            direction = "CCW"
+                        
+                        acc_count += 1
+                        if(acc_count > (self._master._settings ["ACCELERATION"]["value"])):
+                            acc_count = 0
+                            if(direction == "CW" and setpoint_new > setpoint and setpoint_new != setpoint):
+                                setpoint += jerk
+                                #pwm = (pwm * 10 + 10)/10
+                            elif(direction == "CW" and setpoint_new < setpoint and setpoint_new != setpoint):
+                                setpoint -= jerk
+                                #pwm = (pwm * 10 - 10)/10
+                            elif(direction == "CCW" and setpoint_new < setpoint and setpoint_new != setpoint):
+                                setpoint -= jerk
+                                #pwm = (pwm * 10 - 10)/10
+                            elif(direction == "CCW" and setpoint_new > setpoint and setpoint_new != setpoint):
+                                setpoint += jerk
+                                #pwm = (pwm * 10 + 10)/10
+                        
+                        if (direction == "CCW" and pwm > self._master._settings ["PWM_MAX"]["value"]):
+                            pwm = self._master._settings ["PWM_MAX"]["value"]
+                        elif(direction == "CCW" and pwm < 400):
+                            pwm = 400
+                        elif(direction == "CW" and pwm < self._master._settings ["PWM_MIN"]["value"]):
+                            pwm = self._master._settings ["PWM_MIN"]["value"]
+                        elif(direction == "CW" and pwm > 399):
+                            pwm = 399                        
+                        
+                        if(pwm_prev != pwm):
+                            self._master.send_request (b'\xAA')
+                            self._master.send_request (struct.pack('>B', (pwm>> 8)))
+                            self._master.send_request (struct.pack('>B', (pwm & 0x00FF)))
+                            self._master.send_request (b'\n')
+                            self._master.send_request (b'\r')
+                            pwm_prev = pwm
+                        
+                        
+                        
                         s = []
                         
                         # update idle tasks to keep the GUI 'alive'
@@ -646,7 +698,7 @@ class clsGraphTabSheet:
                         print('Data corrupt......')
                         s = []
                         
-                if (sample > self._master._settings ["TOTAL_SAMPLES"]["value"]):
+                if (sample > (self._master._settings ["TOTAL_SAMPLES"]["value"] + ((512 - 400) * (acceleration + 1)))):
                     run = False
         
         # Disable amplifier of sending data

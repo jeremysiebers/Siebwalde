@@ -101,12 +101,14 @@ VERSION_BUILD          = '0'            # build version
 VERSION_STRING         = VERSION_TYPE + ' ' + VERSION_MAJOR + '.' + VERSION_MINOR + '.' + VERSION_BUILD
 
 # controller basic settings
-DRIVE_SETPOINT= 300
-TOTAL_SAMPLES = 2000
-OUTPUT_SAT_P = 5            # origineel: output_sat * 1
-OUTPUT_SAT_M = -5           # origineel: output_sat * -1
+DRIVE_SETPOINT= 450
+TOTAL_SAMPLES = 500
+OUTPUT_SAT_P = 20            # origineel: output_sat * 1
+OUTPUT_SAT_M = -20           # origineel: output_sat * -1
 PWM_MAX = 600
 PWM_MIN = 200
+KP = 10
+ACCELERATION = 5
 
 #-----------------------------------------------------------------------------#
 #                       Class definition for main GUI                         #
@@ -137,7 +139,9 @@ class clsHexaLog (Tkinter.Frame):
         "OUTSAT_P"              : {"text" : "Output saturation P",                      "value" : OUTPUT_SAT_P},
         "OUTSAT_M"              : {"text" : "Output saturation M",                      "value" : OUTPUT_SAT_M},
         "PWM_MAX"               : {"text" : "PWM Max",                                  "value" : PWM_MAX},
-        "PWM_MIN"               : {"text" : "PWM Min",                                  "value" : PWM_MIN}
+        "PWM_MIN"               : {"text" : "PWM Min",                                  "value" : PWM_MIN},
+        "KP"                    : {"text" : "Kp",                                       "value" : KP},
+        "ACCELERATION"          : {"text" : "Acceleration",                             "value" : ACCELERATION}
     }
     
     #-----
