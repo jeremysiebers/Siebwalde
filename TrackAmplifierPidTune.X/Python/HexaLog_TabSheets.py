@@ -573,14 +573,14 @@ class clsGraphTabSheet:
         
         run = True
         sample = 0
-        setpoint = 512
-        setpoint_new = 512
+        setpoint = 399
+        setpoint_new = 399
         error = 0
         output = 0
         kp = 15
         pwm = 399
         pwm_prev = 399
-        plant = 15
+        plant = 10
         output_sat = 5
         direction = ''
         s = []
@@ -588,6 +588,7 @@ class clsGraphTabSheet:
         acc_count = 0
         jerk = 1
         sample_rate = 150
+        state = 'init'
         
         #enable amplifier to send data
         self._master.send_request (b'\x55')
@@ -599,8 +600,10 @@ class clsGraphTabSheet:
         # determine initial direction
         if(self._master._settings ["DRIVE_SETP"]["value"] < 400):
             direction = "CW"
+            setpoint = 300 # pre-load pwm value for feedforward
         elif(self._master._settings ["DRIVE_SETP"]["value"] > 399):
             direction = "CCW"
+            setpoint = 500 # pre-load pwm value for feedforward
         
         # wait until we see 0xAA so we are in sync with whatever is coming from the micro
         b = 0
@@ -616,59 +619,106 @@ class clsGraphTabSheet:
                 s.append(b)
                 if (b == 0xaa):
                     if(len(s) == 5 and s[4] == 170):
-                        data = (s[0] + (s[1] << 4) + (s[2] << 8) + (s[3] << 12)) #+ 25 # subtract/add the offset from the analog filter
-                        error = setpoint - data;
-                        output = int((self._master._settings ["KP"]["value"] * error * plant) / 1000);
+                        data = (s[0] + (s[1] << 4) + (s[2] << 8) + (s[3] << 12))
                         
-                        if(output > self._master._settings ["OUTSAT_P"]["value"]):
-                            output = self._master._settings ["OUTSAT_P"]["value"]
-                        elif(output < self._master._settings ["OUTSAT_M"]["value"]):
-                            output = self._master._settings ["OUTSAT_M"]["value"]
-                        
-                        if(output < 0):
-                            pwm = pwm_prev - abs(output); #When the error is negative (measured BEMF number is higher then setpoint BEMF(300)) the PWM dutycycle needs to be increased hence adding the negative number
-                        elif(output > 0):
-                            pwm = pwm_prev + output;
-                        
-                        samples.append (sample)
-                        datas.append (data)
-                        kps.append (kp)
-                        plants.append (plant)
-                        errors.append (error)
-                        outputs.append (output)
-                        pwms.append (pwm)
-                        setpoints.append (setpoint)
-                        output_sats.append (self._master._settings ["OUTSAT_P"]["value"])
-                        
-                        sample = sample + 1
-                        
-                        if(sample > 0 and sample < self._master._settings ["TOTAL_SAMPLES"]["value"]):
-                            setpoint_new = self._master._settings ["DRIVE_SETP"]["value"]
-                        
-                        if (sample > self._master._settings ["TOTAL_SAMPLES"]["value"]):
-                            setpoint_new = 512
-                        
-                        # determine initial direction
-                        if(setpoint < 512):
-                            direction = "CW"
-                        elif(setpoint > 511):
-                            direction = "CCW"
-                        
-                        acc_count += 1
-                        if(acc_count > (self._master._settings ["ACCELERATION"]["value"])):
-                            acc_count = 0
-                            if(direction == "CW" and setpoint_new > setpoint and setpoint_new != setpoint):
-                                setpoint += jerk
-                                #pwm = (pwm * 10 + 10)/10
-                            elif(direction == "CW" and setpoint_new < setpoint and setpoint_new != setpoint):
-                                setpoint -= jerk
-                                #pwm = (pwm * 10 - 10)/10
-                            elif(direction == "CCW" and setpoint_new < setpoint and setpoint_new != setpoint):
-                                setpoint -= jerk
-                                #pwm = (pwm * 10 - 10)/10
-                            elif(direction == "CCW" and setpoint_new > setpoint and setpoint_new != setpoint):
-                                setpoint += jerk
-                                #pwm = (pwm * 10 + 10)/10
+                        if(state == 'init'):
+                            
+                            sample = sample + 1
+                            
+                            if(sample > 0 and sample < self._master._settings ["TOTAL_SAMPLES"]["value"]):
+                                setpoint_new = self._master._settings ["DRIVE_SETP"]["value"]
+                            
+                            if (sample > self._master._settings ["TOTAL_SAMPLES"]["value"]):
+                                setpoint_new = 399                            
+                            
+                            # determine direction
+                            if(setpoint_new < 400):
+                                direction = "CW"
+                            elif(setpoint_new > 399):
+                                direction = "CCW"
+                            
+                            acc_count += 1
+                            if(acc_count > self._master._settings ["ACCELERATION"]["value"] and self._master._settings ["ACCELERATION"]["value"] > 0):
+                                acc_count = 0
+                                if(direction == "CW" and setpoint_new > setpoint and setpoint_new != setpoint):
+                                    setpoint += jerk                                   
+                                elif(direction == "CW" and setpoint_new < setpoint and setpoint_new != setpoint):
+                                    setpoint -= jerk                                    
+                                elif(direction == "CCW" and setpoint_new < setpoint and setpoint_new != setpoint):
+                                    setpoint -= jerk                                    
+                                elif(direction == "CCW" and setpoint_new > setpoint and setpoint_new != setpoint):
+                                    setpoint += jerk
+
+                                if(setpoint_new == setpoint):
+                                    state = 'run'
+                                    setpoint_new = data
+                                    setpoint = data
+                                    print 'run'
+                                else:
+                                    pwm = setpoint
+                                    
+                                print str(setpoint)
+                                
+                            elif(self._master._settings ["ACCELERATION"]["value"] == 0):
+                                setpoint = setpoint_new
+                                acc_count += 1
+                                if(acc_count > 500):
+                                    state = 'run'
+                                    acc_count = 0
+                                    setpoint_new = data
+                                    setpoint = data
+                                else:
+                                    pwm = setpoint
+
+
+                        elif(state == 'run'):
+                            error = setpoint - data;
+                            output = int((self._master._settings ["KP"]["value"] * error * plant) / 1000);
+                            
+                            if(output > self._master._settings ["OUTSAT_P"]["value"]):
+                                output = self._master._settings ["OUTSAT_P"]["value"]
+                            elif(output < self._master._settings ["OUTSAT_M"]["value"]):
+                                output = self._master._settings ["OUTSAT_M"]["value"]
+                            
+                            if(output < 0):
+                                pwm = pwm_prev - abs(output); #When the error is negative (measured BEMF number is higher then setpoint BEMF(300)) the PWM dutycycle needs to be increased hence adding the negative number
+                            elif(output > 0):
+                                pwm = pwm_prev + output;
+                            
+                            sample = sample + 1
+                            
+                            #if(sample > 0 and sample < self._master._settings ["TOTAL_SAMPLES"]["value"]):
+                            #    setpoint_new = self._master._settings ["DRIVE_SETP"]["value"]
+                            
+                            if (sample > self._master._settings ["TOTAL_SAMPLES"]["value"]):
+                                setpoint_new = 512
+                            
+                            # determine direction
+                            if(setpoint < 512):
+                                direction = "CW"
+                            elif(setpoint > 511):
+                                direction = "CCW"
+                            
+                            acc_count += 1
+                            if(acc_count > self._master._settings ["ACCELERATION"]["value"] and self._master._settings ["ACCELERATION"]["value"] > 0):
+                                acc_count = 0
+                                if(direction == "CW" and setpoint_new > setpoint and setpoint_new != setpoint):
+                                    setpoint += jerk
+                                    #pwm = (pwm * 10 + 10)/10
+                                elif(direction == "CW" and setpoint_new < setpoint and setpoint_new != setpoint):
+                                    setpoint -= jerk
+                                    #pwm = (pwm * 10 - 10)/10
+                                elif(direction == "CCW" and setpoint_new < setpoint and setpoint_new != setpoint):
+                                    setpoint -= jerk
+                                    #pwm = (pwm * 10 - 10)/10
+                                elif(direction == "CCW" and setpoint_new > setpoint and setpoint_new != setpoint):
+                                    setpoint += jerk
+                                    #pwm = (pwm * 10 + 10)/10
+                                print str(setpoint)
+                                    
+                            elif(self._master._settings ["ACCELERATION"]["value"] == 0):
+                                setpoint = setpoint_new
+                                acc_count = 0
                         
                         if (direction == "CCW" and pwm > self._master._settings ["PWM_MAX"]["value"]):
                             pwm = self._master._settings ["PWM_MAX"]["value"]
@@ -681,25 +731,36 @@ class clsGraphTabSheet:
                         
                         if(pwm_prev != pwm):
                             self._master.send_request (b'\xAA')
-                            self._master.send_request (struct.pack('>B', (pwm>> 8)))
-                            self._master.send_request (struct.pack('>B', (pwm & 0x00FF)))
+                            self._master.send_request (struct.pack('>B', (int(pwm>> 8))))
+                            self._master.send_request (struct.pack('>B', (int(pwm & 0x00FF))))
                             self._master.send_request (b'\n')
                             self._master.send_request (b'\r')
                             pwm_prev = pwm
                         
                         
+                        samples.append (sample)
+                        datas.append (data)
+                        kps.append (kp)
+                        plants.append (plant)
+                        errors.append (error)
+                        outputs.append (output)
+                        pwms.append (pwm)
+                        setpoints.append (setpoint)
+                        output_sats.append (self._master._settings ["OUTSAT_P"]["value"])                        
                         
                         s = []
                         
                         # update idle tasks to keep the GUI 'alive'
                         self._master.update ()
                         
+                                                
+                        
                     else:
                         print('Data corrupt......')
                         s = []
                         
-                if (sample > (self._master._settings ["TOTAL_SAMPLES"]["value"] + ((512 - 400) * (acceleration + 1)))):
-                    run = False
+                if (sample > (self._master._settings ["TOTAL_SAMPLES"]["value"] + 200 * (acceleration + 1))):
+                    run = False                
         
         # Disable amplifier of sending data
         self._master.send_request (b'\x55')

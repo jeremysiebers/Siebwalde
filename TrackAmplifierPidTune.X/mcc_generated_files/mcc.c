@@ -52,8 +52,8 @@ void SYSTEM_Initialize(void)
     PMD_Initialize();
     PIN_MANAGER_Initialize();
     OSCILLATOR_Initialize();
-    FVR_Initialize();
     DAC_Initialize();
+    FVR_Initialize();
     CRC_Initialize();
     ADCC_Initialize();
     TMR2_Initialize();

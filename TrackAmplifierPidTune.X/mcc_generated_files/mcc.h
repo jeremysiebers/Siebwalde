@@ -51,14 +51,14 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "interrupt_manager.h"
-#include "tmr1.h"
 #include "pwm6.h"
+#include "tmr1.h"
 #include "tmr2.h"
 #include "crc.h"
 #include "cmp1.h"
 #include "tmr0.h"
-#include "fvr.h"
 #include "adcc.h"
+#include "fvr.h"
 #include "dac.h"
 #include "eusart.h"
 

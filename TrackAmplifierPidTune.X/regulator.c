@@ -97,20 +97,20 @@ void Regulator(){
     
     if (PIR4bits.TMR1IF){
         MeausureBemfCnt++;
-        if (MeausureBemfCnt > 32){                                              // disable H bridge (67))
+        if (MeausureBemfCnt > 99){                                              // disable H bridge (67))
             MeausureBemfCnt = 0;
             TRISCbits.TRISC4 = 1;
             TRISCbits.TRISC5 = 1;
             TRISCbits.TRISC6 = 1;
             UpdatePID = true;                                                   // set update PID
         }
-        if (MeausureBemfCnt > 2){                                               // after 620us enable H bridge again
+        if (MeausureBemfCnt > 8){                                               // after 600us enable H bridge again
             TRISCbits.TRISC4 = 0;
             TRISCbits.TRISC5 = 0;
             TRISCbits.TRISC6 = 0;                
         }
 
-        if (MeausureBemfCnt > 1 && MeausureBemfCnt < 3){                        // Read back EMF as late as possible
+        if (MeausureBemfCnt > 6 && MeausureBemfCnt < 8){                        // Read back EMF as late as possible
             //PORTAbits.RA6 = 1;
             //ProcessBMF();
             UPDATExPID = true;                                                  // wait on modbus
