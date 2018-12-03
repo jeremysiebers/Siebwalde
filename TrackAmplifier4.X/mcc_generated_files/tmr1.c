@@ -14,8 +14,8 @@
     This source file provides APIs for TMR1.
     Generation Information :
         Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.65.2
-        Device            :  PIC16F18854
-        Driver Version    :  2.01
+        Device            :  PIC18F25K40
+        Driver Version    :  2.11
     The generated drivers are tested against the following:
         Compiler          :  XC8 1.45
         MPLAB 	          :  MPLAB X 4.15
@@ -73,11 +73,11 @@ void TMR1_Initialize(void)
     //CS FOSC/4; 
     T1CLK = 0x01;
 
-    //TMR1H 255; 
-    TMR1H = 0xFF;
+    //TMR1H 254; 
+    TMR1H = 0xFE;
 
-    //TMR1L 56; 
-    TMR1L = 0x38;
+    //TMR1L 112; 
+    TMR1L = 0x70;
 
     // Load the TMR value to reload variable
     timer1ReloadVal=(uint16_t)((TMR1H << 8) | TMR1L);

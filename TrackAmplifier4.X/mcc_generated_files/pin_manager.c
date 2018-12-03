@@ -14,8 +14,8 @@
     This header file provides implementations for pin APIs for all pins selected in the GUI.
     Generation Information :
         Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.65.2
-        Device            :  PIC16F18854
-        Driver Version    :  2.01
+        Device            :  PIC18F25K40
+        Driver Version    :  2.11
     The generated drivers are tested against the following:
         Compiler          :  XC8 1.45
         MPLAB             :  MPLAB X 4.15
@@ -92,6 +92,13 @@ void PIN_MANAGER_Initialize(void)
     ODCONB = 0x00;
     ODCONC = 0x00;
 
+    /**
+    SLRCONx registers
+    */
+    SLRCONA = 0xFF;
+    SLRCONB = 0xFF;
+    SLRCONC = 0xFF;
+
 
 
 
@@ -99,11 +106,10 @@ void PIN_MANAGER_Initialize(void)
    
     
 	
-    T2AINPPSbits.T2AINPPS = 0x10;   //RC0->TMR2:T2IN;    
-    RXPPSbits.RXPPS = 0x13;   //RC3->EUSART:RX;    
-    RC1PPS = 0x10;   //RC1->EUSART:TX;    
-    RA5PPS = 0x12;   //RA5->CMP1:C1OUT;    
-    RC6PPS = 0x0E;   //RC6->PWM6:PWM6OUT;    
+    RXPPS = 0x13;   //RC3->EUSART:RX;    
+    RC1PPS = 0x09;   //RC1->EUSART:TX;    
+    T2INPPS = 0x10;   //RC0->TMR2:T2IN;    
+    RA5PPS = 0x0B;   //RA5->CMP1:C1OUT;    
 }
   
 void PIN_MANAGER_IOC(void)

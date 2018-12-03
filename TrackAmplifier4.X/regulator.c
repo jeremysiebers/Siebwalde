@@ -39,13 +39,13 @@ void Regulator_Init(){
     LM_DIR_LAT      = 0;
     LM_PWM_LAT      = 1;
     LM_BRAKE_LAT    = 0;
-    PWM6CON         = 0x80;
+    PWM3CON         = 0x80;
     TRISCbits.TRISC4 = 0;
     TRISCbits.TRISC5 = 0;
     TRISCbits.TRISC6 = 0;
     
-    PwmDutyCyclePrev = ((unsigned int)(PWM6DCH << 2)) + 
-                       ((unsigned int)(PWM6DCL >> 6));    
+    PwmDutyCyclePrev = ((unsigned int)(PWM3DCH << 2)) + 
+                       ((unsigned int)(PWM3DCL >> 6));    
 }
 
 /*#--------------------------------------------------------------------------#*/
@@ -68,12 +68,12 @@ void Regulator_Init(){
 void Regulator(){
     
     if (PetitHoldingRegisters[0].ActValue & 0x8000){                            // If EMO command active kill PWM
-        PWM6CON         = 0x00;
+        PWM3CON         = 0x00;
         LM_DIR_LAT      = 0;
         LM_PWM_LAT      = 0;
         LM_BRAKE_LAT    = 1;        
     }
-    else if (0 == PWM6CON){                                                     // When no EMO, check if PWM is initialized
+    else if (0 == PWM3CON){                                                     // When no EMO, check if PWM is initialized
         Regulator_Init();                                                       // Init PWM if not initialized
     }
     else{
@@ -82,11 +82,11 @@ void Regulator(){
         LM_BRAKE_LAT = PetitHoldingRegisters[0].ActValue & 0x0800;              // load brake from register
         
         if ((PwmDutyCyclePrev != PetitHoldingRegisters[0].ActValue & 0x03FF) && PetitHoldingRegisters[3].ActValue == 0x0000){
-            PWM6_LoadDutyValue(PetitHoldingRegisters[0].ActValue & 0x03FF);     // load duty cycle from register
+            PWM3_LoadDutyValue(PetitHoldingRegisters[0].ActValue & 0x03FF);     // load duty cycle from register
             PwmDutyCyclePrev = PetitHoldingRegisters[0].ActValue & 0x03FF;
         }
         else if(PwmDutyCyclePrev != (unsigned int)pwm && PetitHoldingRegisters[3].ActValue == 0x0001){
-            PWM6_LoadDutyValue((unsigned int)pwm);
+            PWM3_LoadDutyValue((unsigned int)pwm);
         }
     }
     

@@ -14,8 +14,8 @@
     This source file provides implementations for driver APIs for ADCC.
     Generation Information :
         Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.65.2
-        Device            :  PIC16F18854
-        Driver Version    :  2.01
+        Device            :  PIC18F25K40
+        Driver Version    :  2.13
     The generated drivers are tested against the following:
         Compiler          :  XC8 1.45
         MPLAB             :  MPLAB X 4.15
@@ -50,7 +50,6 @@
 
 #include <xc.h>
 #include "adcc.h"
-#include "mcc.h"
 
 /**
   Section: ADCC Module Variables
@@ -75,16 +74,16 @@ void ADCC_Initialize(void)
     ADSTPTL = 0x00;
     // ADSTPTH 0; 
     ADSTPTH = 0x00;
-    // ADRPT 10; 
-    ADRPT = 0x0A;
+    // ADRPT 0; 
+    ADRPT = 0x00;
     // ADPCH ANA0; 
     ADPCH = 0x00;
     // ADCAP Additional uC disabled; 
     ADCAP = 0x00;
     // ADDSEN disabled; ADGPOL digital_low; ADIPEN disabled; ADPPOL VSS; 
     ADCON1 = 0x00;
-    // ADCRS 5; ADMD Average_mode; ADACLR disabled; ADPSIS ADRES; 
-    ADCON2 = 0x52;
+    // ADCRS 0; ADMD Average_mode; ADACLR disabled; ADPSIS ADRES; 
+    ADCON2 = 0x02;
     // ADCALC First derivative of Single measurement; ADTMD disabled; ADSOI ADGO not cleared; 
     ADCON3 = 0x00;
     // ADAOV ACC or ADERR not Overflowed; 
@@ -93,10 +92,12 @@ void ADCC_Initialize(void)
     ADREF = 0x00;
     // ADACT disabled; 
     ADACT = 0x00;
-    // ADCCS FOSC/128; 
+    // ADCS FOSC/128; 
     ADCLK = 0x3F;
     // ADGO stop; ADFM right; ADON enabled; ADCONT disabled; ADCS FOSC/ADCLK; 
     ADCON0 = 0x84;
+    // ADACQ 255; 
+    ADACQ = 0xFF;
     
 
 }
@@ -165,7 +166,7 @@ void ADCC_SetStopOnInterrupt(void)
 void ADCC_DischargeSampleCapacitor(void)
 {
     //Set the ADC channel to AVss.
-    ADPCH = 0x3C;   
+    ADPCH = 0x3c;   
 }
 
 void ADCC_LoadAcquisitionRegister(uint8_t acquisitionValue)
