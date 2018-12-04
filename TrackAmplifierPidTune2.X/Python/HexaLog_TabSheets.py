@@ -573,8 +573,10 @@ class clsGraphTabSheet:
         
         run = True
         sample = 0
+        init_samples = 0
         setpoint = 399
         setpoint_new = 399
+        org_setpoint_new = 0
         error = 0
         output = 0
         kp = 15
@@ -586,9 +588,10 @@ class clsGraphTabSheet:
         s = []
         acceleration = 5
         acc_count = 0
-        jerk = 1
+        jerk = 5
         sample_rate = 150
         state = 'init'
+        print '<><><><><><><><>< init ><><><><><><><><>'
         
         #enable amplifier to send data
         self._master.send_request (b'\x55')
@@ -600,10 +603,10 @@ class clsGraphTabSheet:
         # determine initial direction
         if(self._master._settings ["DRIVE_SETP"]["value"] < 400):
             direction = "CW"
-            setpoint = 300 # pre-load pwm value for feedforward
+            setpoint = 399 #300 # pre-load pwm value for feedforward
         elif(self._master._settings ["DRIVE_SETP"]["value"] > 399):
             direction = "CCW"
-            setpoint = 500 # pre-load pwm value for feedforward
+            setpoint = 399 #500 # pre-load pwm value for feedforward
         
         # wait until we see 0xAA so we are in sync with whatever is coming from the micro
         b = 0
@@ -625,11 +628,8 @@ class clsGraphTabSheet:
                             
                             sample = sample + 1
                             
-                            if(sample > 0 and sample < self._master._settings ["TOTAL_SAMPLES"]["value"]):
-                                setpoint_new = self._master._settings ["DRIVE_SETP"]["value"]
-                            
-                            if (sample > self._master._settings ["TOTAL_SAMPLES"]["value"]):
-                                setpoint_new = 399                            
+                            setpoint_new = self._master._settings ["DRIVE_SETP"]["value"]
+                            org_setpoint_new = self._master._settings ["DRIVE_SETP"]["value"]
                             
                             # determine direction
                             if(setpoint_new < 400):
@@ -640,20 +640,24 @@ class clsGraphTabSheet:
                             acc_count += 1
                             if(acc_count > self._master._settings ["ACCELERATION"]["value"] and self._master._settings ["ACCELERATION"]["value"] > 0):
                                 acc_count = 0
-                                if(direction == "CW" and setpoint_new > setpoint and setpoint_new != setpoint):
+                                if(direction == "CW"    and setpoint_new > (setpoint+jerk) and setpoint_new != setpoint):
                                     setpoint += jerk                                   
-                                elif(direction == "CW" and setpoint_new < setpoint and setpoint_new != setpoint):
+                                elif(direction == "CW"  and setpoint_new < (setpoint-jerk) and setpoint_new != setpoint):
                                     setpoint -= jerk                                    
-                                elif(direction == "CCW" and setpoint_new < setpoint and setpoint_new != setpoint):
+                                elif(direction == "CCW" and setpoint_new < (setpoint-jerk) and setpoint_new != setpoint):
                                     setpoint -= jerk                                    
-                                elif(direction == "CCW" and setpoint_new > setpoint and setpoint_new != setpoint):
+                                elif(direction == "CCW" and setpoint_new > (setpoint+jerk) and setpoint_new != setpoint):
                                     setpoint += jerk
 
-                                if(setpoint_new == setpoint):
+                                if(setpoint_new >= (setpoint-jerk) and setpoint_new <= (setpoint+jerk)):
                                     state = 'run'
                                     setpoint_new = data
                                     setpoint = data
-                                    print 'run'
+                                    init_samples = sample
+                                    self._master._config_tab._drivesetp_var.set(setpoint)
+                                    self._master.update ()
+                                    self._master._settings ["DRIVE_SETP"]["value"] = self._master._config_tab._drivesetp_var.get ()
+                                    print '<><><><><><><><>< run ><><><><><><><><>'
                                 else:
                                     pwm = setpoint
                                     
@@ -662,18 +666,22 @@ class clsGraphTabSheet:
                             elif(self._master._settings ["ACCELERATION"]["value"] == 0):
                                 setpoint = setpoint_new
                                 acc_count += 1
-                                if(acc_count > 500):
+                                if(acc_count > 200):
                                     state = 'run'
+                                    print '<><><><><><><><>< run ><><><><><><><><>'
                                     acc_count = 0
                                     setpoint_new = data
                                     setpoint = data
+                                    init_samples = sample
                                 else:
                                     pwm = setpoint
 
 
                         elif(state == 'run'):
-                            error = setpoint - data;
-                            output = int((self._master._settings ["KP"]["value"] * error * plant) / 1000);
+                            setpoint_new = self._master._settings ["DRIVE_SETP"]["value"]
+                            
+                            error = setpoint - data
+                            output = int((self._master._settings ["KP"]["value"] * error) / 100) # * plant ) / 1000
                             
                             if(output > self._master._settings ["OUTSAT_P"]["value"]):
                                 output = self._master._settings ["OUTSAT_P"]["value"]
@@ -687,12 +695,6 @@ class clsGraphTabSheet:
                             
                             sample = sample + 1
                             
-                            #if(sample > 0 and sample < self._master._settings ["TOTAL_SAMPLES"]["value"]):
-                            #    setpoint_new = self._master._settings ["DRIVE_SETP"]["value"]
-                            
-                            if (sample > self._master._settings ["TOTAL_SAMPLES"]["value"]):
-                                setpoint_new = 512
-                            
                             # determine direction
                             if(setpoint < 512):
                                 direction = "CW"
@@ -701,24 +703,58 @@ class clsGraphTabSheet:
                             
                             acc_count += 1
                             if(acc_count > self._master._settings ["ACCELERATION"]["value"] and self._master._settings ["ACCELERATION"]["value"] > 0):
-                                acc_count = 0
-                                if(direction == "CW" and setpoint_new > setpoint and setpoint_new != setpoint):
+                                acc_count = 100
+                                if(direction == "CW"    and setpoint_new > (setpoint+jerk) and setpoint_new != setpoint):
+                                    setpoint += jerk                                   
+                                elif(direction == "CW"  and setpoint_new < (setpoint-jerk) and setpoint_new != setpoint):
+                                    setpoint -= jerk                                    
+                                elif(direction == "CCW" and setpoint_new < (setpoint-jerk) and setpoint_new != setpoint):
+                                    setpoint -= jerk                                    
+                                elif(direction == "CCW" and setpoint_new > (setpoint+jerk) and setpoint_new != setpoint):
                                     setpoint += jerk
-                                    #pwm = (pwm * 10 + 10)/10
-                                elif(direction == "CW" and setpoint_new < setpoint and setpoint_new != setpoint):
-                                    setpoint -= jerk
-                                    #pwm = (pwm * 10 - 10)/10
-                                elif(direction == "CCW" and setpoint_new < setpoint and setpoint_new != setpoint):
-                                    setpoint -= jerk
-                                    #pwm = (pwm * 10 - 10)/10
-                                elif(direction == "CCW" and setpoint_new > setpoint and setpoint_new != setpoint):
-                                    setpoint += jerk
-                                    #pwm = (pwm * 10 + 10)/10
-                                print str(setpoint)
+                                print str(setpoint) + ' ' + str(output)
                                     
                             elif(self._master._settings ["ACCELERATION"]["value"] == 0):
                                 setpoint = setpoint_new
                                 acc_count = 0
+                                
+                            if (sample > (self._master._settings ["TOTAL_SAMPLES"]["value"] + init_samples)):
+                                state = 'stop'
+                                print '<><><><><><><><>< stop ><><><><><><><><>'
+                                setpoint_new = 399
+                                setpoint = pwm_prev
+                                self._master._config_tab._drivesetp_var.set(org_setpoint_new)
+                                self._master.update ()
+                        
+                        elif(state == 'stop'):
+                            sample = sample + 1
+                            
+                            # determine direction
+                            if(setpoint_new < 400):
+                                direction = "CW"
+                            elif(setpoint_new > 399):
+                                direction = "CCW"
+                            
+                            acc_count += 1
+                            if(acc_count > self._master._settings ["ACCELERATION"]["value"] and self._master._settings ["ACCELERATION"]["value"] > 0):
+                                acc_count = 0
+                                if(direction == "CW"    and setpoint_new > (setpoint+jerk) and setpoint_new != setpoint):
+                                    setpoint += jerk                                   
+                                elif(direction == "CW"  and setpoint_new < (setpoint-jerk) and setpoint_new != setpoint):
+                                    setpoint -= jerk                                    
+                                elif(direction == "CCW" and setpoint_new < (setpoint-jerk) and setpoint_new != setpoint):
+                                    setpoint -= jerk                                    
+                                elif(direction == "CCW" and setpoint_new > (setpoint+jerk) and setpoint_new != setpoint):
+                                    setpoint += jerk
+
+                                if(pwm_prev >= (399-jerk) and pwm_prev <= (399+jerk)):
+                                    run = False
+                                    print '<><><><><><><><>< done ><><><><><><><><>'
+                                else:
+                                    pwm = setpoint
+                                    
+                                print str(setpoint)
+                            
                         
                         if (direction == "CCW" and pwm > self._master._settings ["PWM_MAX"]["value"]):
                             pwm = self._master._settings ["PWM_MAX"]["value"]
@@ -759,8 +795,8 @@ class clsGraphTabSheet:
                         print('Data corrupt......')
                         s = []
                         
-                if (sample > (self._master._settings ["TOTAL_SAMPLES"]["value"] + 200 * (acceleration + 1))):
-                    run = False                
+                #if (sample > (self._master._settings ["TOTAL_SAMPLES"]["value"] + 200 * (acceleration + 1))):
+                    #run = False                
         
         # Disable amplifier of sending data
         self._master.send_request (b'\x55')
