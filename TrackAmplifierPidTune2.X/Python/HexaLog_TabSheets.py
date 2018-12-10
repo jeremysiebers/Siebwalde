@@ -603,12 +603,12 @@ class clsGraphTabSheet:
         # determine initial direction
         if(self._master._settings ["DRIVE_SETP"]["value"] < 512):
             direction = "CW"
-            pwm_prev = 350 #300 # pre-load pwm value for feedforward
-            pwm = 350
+            pwm_prev = 399#350 #300 # pre-load pwm value for feedforward
+            pwm = 399#350
         elif(self._master._settings ["DRIVE_SETP"]["value"] > 512):
             direction = "CCW"
-            pwm_prev = 450 #500 # pre-load pwm value for feedforward
-            pwm = 450
+            pwm_prev = 399#450 #500 # pre-load pwm value for feedforward
+            pwm = 399#450
         
         # wait until we see 0xAA so we are in sync with whatever is coming from the micro
         b = 0
@@ -689,7 +689,7 @@ class clsGraphTabSheet:
                                 print '<><><><><><><><>< stop ><><><><><><><><>'
                                 setpoint_new = 511
                                 
-                            print str(setpoint) + ' ' + str(output)    
+                            print str(setpoint) + ' ' + str(output) + ' ' + str(pwm)    
                         
                         elif(state == 'stop'):
                             
@@ -740,7 +740,7 @@ class clsGraphTabSheet:
                             else:
                                 pwm = setpoint
                                 
-                            print str(setpoint) + ' ' + str(output)
+                            print str(setpoint) + ' ' + str(output) + ' ' + str(pwm)
                             
                         
                         if (direction == "CCW" and pwm > self._master._settings ["PWM_MAX"]["value"]):
