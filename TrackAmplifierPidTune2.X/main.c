@@ -76,7 +76,7 @@ void main(void) {
 /*----------------------------------------------------------------------------*/
 void Led_Blink (){
     if(PIR0bits.TMR0IF){
-        
+        LED_WAR_LAT = PORTAbits.RA5;
         switch(LED_WAR_STATE){
             case 0 : 
                 if (LED_WAR > 0){

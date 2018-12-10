@@ -639,6 +639,7 @@ class clsGraphTabSheet:
                             elif(setpoint_new > 511):
                                 direction = "CCW"
                             
+                            print str(setpoint_new) + ' ' + str(setpoint) + ' ' + str(output) + ' ' + str(pwm) + ' ' + str(sample)
                             state = 'run'
                             print '<><><><><><><><>< run ><><><><><><><><>'
 
@@ -685,11 +686,12 @@ class clsGraphTabSheet:
                                 acc_count = 0
                                 
                             if (sample > (self._master._settings ["TOTAL_SAMPLES"]["value"] + init_samples)):
+                                acc_count = 0
                                 state = 'stop'
                                 print '<><><><><><><><>< stop ><><><><><><><><>'
                                 setpoint_new = 511
                                 
-                            print str(setpoint) + ' ' + str(output) + ' ' + str(pwm)    
+                            print str(setpoint_new) + ' ' + str(setpoint) + ' ' + str(output) + ' ' + str(pwm) + ' ' + str(sample)  
                         
                         elif(state == 'stop'):
                             
@@ -728,20 +730,30 @@ class clsGraphTabSheet:
                                 elif(direction == "CCW" and setpoint_new > (setpoint+jerk) and setpoint_new != setpoint):
                                     setpoint += jerk
                                 
-                                    
-                            elif(self._master._settings ["ACCELERATION"]["value"] == 0):
-                                setpoint = setpoint_new
+                            
+                            if(setpoint > 509 and setpoint < 513):
+                                #run = False
                                 acc_count = 0
+                                state = 'stop_pwm'                                
+                                print '<><><><><><><><>< stop_pwm ><><><><><><><><>'                            
                                 
-                            
-                            if(data > 506 and data < 518):
-                                run = False
-                                print '<><><><><><><><>< done ><><><><><><><><>'
-                            else:
-                                pwm = setpoint
-                                
-                            print str(setpoint) + ' ' + str(output) + ' ' + str(pwm)
-                            
+                            print str(setpoint_new) + ' ' + str(setpoint) + ' ' + str(output) + ' ' + str(pwm) + ' ' + str(sample)
+                        
+                        elif(state == 'stop_pwm'):
+                            sample = sample + 1
+                            acc_count += 1
+                            if(acc_count > (self._master._settings ["ACCELERATION"]["value"] * 1) and self._master._settings ["ACCELERATION"]["value"] > 0):
+                                acc_count = 0
+                                if(pwm < 399):
+                                    pwm += 1
+                                elif(pwm > 399):
+                                    pwm -= 1
+                                elif(pwm == 399):
+                                    run = False
+                                    print '<><><><><><><><>< run = False ><><><><><><><><>'
+                                    acc_count = 0     
+                                    
+                            print str(setpoint_new) + ' ' + str(setpoint) + ' ' + str(output) + ' ' + str(pwm) + ' ' + str(sample)
                         
                         if (direction == "CCW" and pwm > self._master._settings ["PWM_MAX"]["value"]):
                             pwm = self._master._settings ["PWM_MAX"]["value"]
