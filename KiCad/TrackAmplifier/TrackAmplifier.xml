@@ -1,0 +1,1924 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<export version="D">
+  <design>
+    <source>C:\Localdata\GIT_REPO\Miscellaneous\KiCad\TrackAmplifier\TrackAmplifier.sch</source>
+    <date>15-5-2018 12:21:26</date>
+    <tool>Eeschema (5.0.0-rc2-dev-444-g2974a2c10)</tool>
+    <sheet number="1" name="/" tstamps="/">
+      <title_block>
+        <title/>
+        <company/>
+        <rev/>
+        <date/>
+        <source>TrackAmplifier.sch</source>
+        <comment number="1" value=""/>
+        <comment number="2" value=""/>
+        <comment number="3" value=""/>
+        <comment number="4" value=""/>
+      </title_block>
+    </sheet>
+  </design>
+  <components>
+    <comp ref="J1">
+      <value>DB15_Male_MountingHoles</value>
+      <footprint>Connector_Dsub:DSUB-15_Male_Horizontal_P2.77x2.84mm_EdgePinOffset4.94mm_Housed_MountingHolesOffset7.48mm</footprint>
+      <datasheet>-</datasheet>
+      <fields>
+        <field name="Farnell">2294292</field>
+        <field name="Manufacturer nr">182-015-113R531</field>
+      </fields>
+      <libsource lib="TrackAmplifier-rescue" part="DB15_Male_MountingHoles"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5ABE3833</tstamp>
+    </comp>
+    <comp ref="C7">
+      <value>100n</value>
+      <footprint>Capacitor_SMD:C_1206_3216Metric</footprint>
+      <datasheet>http://www.farnell.com/datasheets/2049140.pdf?_ga=2.261496907.792852979.1526285019-1651149783.1519657816</datasheet>
+      <fields>
+        <field name="Farnell">2395785</field>
+        <field name="Manufacturer nr">VJ1206Y104KXBAT</field>
+      </fields>
+      <libsource lib="TrackAmplifier-rescue" part="C"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5ABE3B27</tstamp>
+    </comp>
+    <comp ref="U1">
+      <value>ST485EBDR</value>
+      <footprint>Package_SO:SOIC-8_3.9x4.9mm_P1.27mm</footprint>
+      <datasheet>http://www.st.com/resource/en/datasheet/st485eb.pdf</datasheet>
+      <fields>
+        <field name="Farnell">1467755</field>
+        <field name="Manufacturer nr">ST485EBDR</field>
+      </fields>
+      <libsource lib="TrackAmplifier-rescue" part="ST485EBDR-Interface_UART"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AE19840</tstamp>
+    </comp>
+    <comp ref="U3">
+      <value>LM78M05_TO252</value>
+      <footprint>Package_TO_SOT_SMD:TO-252-2</footprint>
+      <datasheet>http://www.fairchildsemi.com/ds/LM/LM78M05.pdf</datasheet>
+      <fields>
+        <field name="Farnell">2854542</field>
+        <field name="Manufacturer nr">LM78M05CDTX/NOPB</field>
+      </fields>
+      <libsource lib="Regulator_Linear" part="LM78M05_TO252"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AE1A916</tstamp>
+    </comp>
+    <comp ref="C5">
+      <value>2.2u</value>
+      <footprint>Capacitor_SMD:C_1206_3216Metric</footprint>
+      <datasheet>http://www.farnell.com/datasheets/1901289.pdf?_ga=2.182791910.1588585681.1526323724-1626853455.1515011571</datasheet>
+      <fields>
+        <field name="Farnell">1759451</field>
+        <field name="Manufacturer nr">MC1206F225Z250CT</field>
+      </fields>
+      <libsource lib="TrackAmplifier-rescue" part="C"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AE1AF47</tstamp>
+    </comp>
+    <comp ref="C10">
+      <value>100n</value>
+      <footprint>Capacitor_SMD:C_1206_3216Metric</footprint>
+      <datasheet>http://www.farnell.com/datasheets/2049140.pdf?_ga=2.50946415.792852979.1526285019-1651149783.1519657816</datasheet>
+      <fields>
+        <field name="Farnell">2395785</field>
+        <field name="Manufacturer nr">VJ1206Y104KXBAT</field>
+      </fields>
+      <libsource lib="TrackAmplifier-rescue" part="C"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AE1AF69</tstamp>
+    </comp>
+    <comp ref="C13">
+      <value>2.2u</value>
+      <footprint>Capacitor_SMD:C_1206_3216Metric</footprint>
+      <datasheet>http://www.farnell.com/datasheets/1901289.pdf?_ga=2.182791910.1588585681.1526323724-1626853455.1515011571</datasheet>
+      <fields>
+        <field name="Farnell">1759451</field>
+        <field name="Manufacturer nr">MC1206F225Z250CT</field>
+      </fields>
+      <libsource lib="TrackAmplifier-rescue" part="C"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AE1AFA5</tstamp>
+    </comp>
+    <comp ref="C16">
+      <value>220u</value>
+      <footprint>Capacitor_THT:CP_Radial_D6.3mm_P2.50mm</footprint>
+      <datasheet>http://www.farnell.com/datasheets/2321433.pdf?_ga=2.88550747.1588585681.1526323724-1626853455.1515011571</datasheet>
+      <fields>
+        <field name="Farnell">2346568</field>
+        <field name="Manufacturer nr">16PX220MEFC6.3X11</field>
+      </fields>
+      <libsource lib="Device" part="CP"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AE1CE9B</tstamp>
+    </comp>
+    <comp ref="C3">
+      <value>100n</value>
+      <footprint>Capacitor_SMD:C_1206_3216Metric</footprint>
+      <libsource lib="TrackAmplifier-rescue" part="C"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AE23D01</tstamp>
+    </comp>
+    <comp ref="C1">
+      <value>2.2u</value>
+      <footprint>Capacitor_SMD:C_1206_3216Metric</footprint>
+      <libsource lib="TrackAmplifier-rescue" part="C"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AE23D39</tstamp>
+    </comp>
+    <comp ref="R1">
+      <value>10E</value>
+      <footprint>Resistor_SMD:R_1206_3216Metric</footprint>
+      <libsource lib="Device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AE3F1D3</tstamp>
+    </comp>
+    <comp ref="U2">
+      <value>ST485EBDR</value>
+      <footprint>Package_SO:SOIC-8_3.9x4.9mm_P1.27mm</footprint>
+      <datasheet>http://www.st.com/resource/en/datasheet/st485eb.pdf</datasheet>
+      <fields>
+        <field name="Farnell">1467755</field>
+        <field name="Manufacturer nr">ST485EBDR</field>
+      </fields>
+      <libsource lib="TrackAmplifier-rescue" part="ST485EBDR-Interface_UART"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AE58D1D</tstamp>
+    </comp>
+    <comp ref="C4">
+      <value>100n</value>
+      <footprint>Capacitor_SMD:C_1206_3216Metric</footprint>
+      <libsource lib="TrackAmplifier-rescue" part="C"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AE58D24</tstamp>
+    </comp>
+    <comp ref="C2">
+      <value>2.2u</value>
+      <footprint>Capacitor_SMD:C_1206_3216Metric</footprint>
+      <libsource lib="TrackAmplifier-rescue" part="C"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AE58D2B</tstamp>
+    </comp>
+    <comp ref="R2">
+      <value>10E</value>
+      <footprint>Resistor_SMD:R_1206_3216Metric</footprint>
+      <libsource lib="Device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AE58D3E</tstamp>
+    </comp>
+    <comp ref="U6">
+      <value>ST485EBDR</value>
+      <footprint>Package_SO:SOIC-8_3.9x4.9mm_P1.27mm</footprint>
+      <datasheet>http://www.st.com/resource/en/datasheet/st485eb.pdf</datasheet>
+      <fields>
+        <field name="Farnell">1467755</field>
+        <field name="Manufacturer nr">ST485EBDR</field>
+      </fields>
+      <libsource lib="TrackAmplifier-rescue" part="ST485EBDR-Interface_UART"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AE5B3FC</tstamp>
+    </comp>
+    <comp ref="C15">
+      <value>100n</value>
+      <footprint>Capacitor_SMD:C_1206_3216Metric</footprint>
+      <libsource lib="TrackAmplifier-rescue" part="C"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AE5B403</tstamp>
+    </comp>
+    <comp ref="C12">
+      <value>2.2u</value>
+      <footprint>Capacitor_SMD:C_1206_3216Metric</footprint>
+      <libsource lib="TrackAmplifier-rescue" part="C"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AE5B40A</tstamp>
+    </comp>
+    <comp ref="R10">
+      <value>10E</value>
+      <footprint>Resistor_SMD:R_1206_3216Metric</footprint>
+      <libsource lib="Device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AE5B41D</tstamp>
+    </comp>
+    <comp ref="U5">
+      <value>ST485EBDR</value>
+      <footprint>Package_SO:SOIC-8_3.9x4.9mm_P1.27mm</footprint>
+      <datasheet>http://www.st.com/resource/en/datasheet/st485eb.pdf</datasheet>
+      <fields>
+        <field name="Farnell">1467755</field>
+        <field name="Manufacturer nr">ST485EBDR</field>
+      </fields>
+      <libsource lib="TrackAmplifier-rescue" part="ST485EBDR-Interface_UART"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AE5F184</tstamp>
+    </comp>
+    <comp ref="C14">
+      <value>100n</value>
+      <footprint>Capacitor_SMD:C_1206_3216Metric</footprint>
+      <libsource lib="TrackAmplifier-rescue" part="C"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AE5F18B</tstamp>
+    </comp>
+    <comp ref="C11">
+      <value>2.2u</value>
+      <footprint>Capacitor_SMD:C_1206_3216Metric</footprint>
+      <libsource lib="TrackAmplifier-rescue" part="C"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AE5F192</tstamp>
+    </comp>
+    <comp ref="R9">
+      <value>10E</value>
+      <footprint>Resistor_SMD:R_1206_3216Metric</footprint>
+      <libsource lib="Device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AE5F1A5</tstamp>
+    </comp>
+    <comp ref="U4">
+      <value>LMD18200</value>
+      <footprint>Package_TO_SOT_THT:TO-220-11_20.02x17.50mm_P3.4x5.08mm_StaggerOdd_Lead8.45mm_Tab-Down</footprint>
+      <datasheet>http://www.ti.com/lit/ds/symlink/lmd18200.pdf</datasheet>
+      <fields>
+        <field name="Farnell">1468979</field>
+        <field name="Manufacturer nr">LMD18200T</field>
+      </fields>
+      <libsource lib="TrackAmplifier-rescue" part="LMD18200-Driver_Motor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AE92F98</tstamp>
+    </comp>
+    <comp ref="U9">
+      <value>PIC16F18854-SO</value>
+      <footprint>Package_SO:SOIC-28W_7.5x17.9mm_P1.27mm</footprint>
+      <datasheet>http://ww1.microchip.com/downloads/en/DeviceDoc/PIC16(L)F18854%20Data%20Sheet_DS40001826C.pdf</datasheet>
+      <fields>
+        <field name="Farnell">2696647</field>
+        <field name="Manufacturer nr">PIC16F18854-I/SO</field>
+      </fields>
+      <libsource lib="TrackAmplifier-rescue" part="PIC16F18854-SO-MCU_Microchip_PIC16"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AEBDEF2</tstamp>
+    </comp>
+    <comp ref="C27">
+      <value>100n</value>
+      <footprint>Capacitor_SMD:C_1206_3216Metric</footprint>
+      <libsource lib="TrackAmplifier-rescue" part="C"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AEC3F8E</tstamp>
+    </comp>
+    <comp ref="C26">
+      <value>2.2u</value>
+      <footprint>Capacitor_SMD:C_1206_3216Metric</footprint>
+      <libsource lib="TrackAmplifier-rescue" part="C"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AEC3F95</tstamp>
+    </comp>
+    <comp ref="R22">
+      <value>10E</value>
+      <footprint>Resistor_SMD:R_1206_3216Metric</footprint>
+      <libsource lib="Device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AEC3FA8</tstamp>
+    </comp>
+    <comp ref="J2">
+      <value>Conn_01x06</value>
+      <footprint>Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical</footprint>
+      <datasheet>http://www.farnell.com/datasheets/32535.pdf?_ga=2.160907771.792852979.1526285019-1651149783.1519657816</datasheet>
+      <fields>
+        <field name="Farnell">3418327</field>
+        <field name="Manufacturer nr">826629-6</field>
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_01x06"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AF2B4EA</tstamp>
+    </comp>
+    <comp ref="C9">
+      <value>100n</value>
+      <footprint>Capacitor_SMD:C_1206_3216Metric</footprint>
+      <libsource lib="TrackAmplifier-rescue" part="C"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AF826A4</tstamp>
+    </comp>
+    <comp ref="C8">
+      <value>2.2u</value>
+      <footprint>Capacitor_SMD:C_1206_3216Metric</footprint>
+      <libsource lib="TrackAmplifier-rescue" part="C"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AF82746</tstamp>
+    </comp>
+    <comp ref="C6">
+      <value>470u</value>
+      <footprint>Capacitor_THT:CP_Radial_D10.0mm_P5.00mm</footprint>
+      <datasheet>http://www.farnell.com/datasheets/2280829.pdf?_ga=2.252145225.1588585681.1526323724-1626853455.1515011571</datasheet>
+      <fields>
+        <field name="Farnell">2750201</field>
+      </fields>
+      <libsource lib="Device" part="CP"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AF827EA</tstamp>
+    </comp>
+    <comp ref="C17">
+      <value>10n</value>
+      <footprint>Capacitor_SMD:C_1206_3216Metric</footprint>
+      <datasheet>http://www.farnell.com/datasheets/1723231.pdf?_ga=2.151530105.1588585681.1526323724-1626853455.1515011571</datasheet>
+      <fields>
+        <field name="Farnell">9406549</field>
+        <field name="Manufacturer nr">MCU1206R103KCT</field>
+      </fields>
+      <libsource lib="TrackAmplifier-rescue" part="C"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B006269</tstamp>
+    </comp>
+    <comp ref="C18">
+      <value>10n</value>
+      <footprint>Capacitor_SMD:C_1206_3216Metric</footprint>
+      <datasheet>http://www.farnell.com/datasheets/1723231.pdf?_ga=2.151530105.1588585681.1526323724-1626853455.1515011571</datasheet>
+      <fields>
+        <field name="Farnell">9406549</field>
+        <field name="Manufacturer nr">MCU1206R103KCT</field>
+      </fields>
+      <libsource lib="TrackAmplifier-rescue" part="C"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B0062DB</tstamp>
+    </comp>
+    <comp ref="R6">
+      <value>4k7</value>
+      <footprint>Resistor_SMD:R_1206_3216Metric</footprint>
+      <libsource lib="Device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B19F40D</tstamp>
+    </comp>
+    <comp ref="R4">
+      <value>4k7</value>
+      <footprint>Resistor_SMD:R_1206_3216Metric</footprint>
+      <libsource lib="Device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B1DAA4F</tstamp>
+    </comp>
+    <comp ref="R7">
+      <value>4k7</value>
+      <footprint>Resistor_SMD:R_1206_3216Metric</footprint>
+      <libsource lib="Device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B2635CD</tstamp>
+    </comp>
+    <comp ref="R14">
+      <value>4k7</value>
+      <footprint>Resistor_SMD:R_1206_3216Metric</footprint>
+      <libsource lib="Device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B2BF8D7</tstamp>
+    </comp>
+    <comp ref="R32">
+      <value>10K</value>
+      <footprint>Resistor_SMD:R_1206_3216Metric</footprint>
+      <libsource lib="Device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B2F5C72</tstamp>
+    </comp>
+    <comp ref="C31">
+      <value>100n</value>
+      <footprint>Capacitor_SMD:C_1206_3216Metric</footprint>
+      <libsource lib="TrackAmplifier-rescue" part="C"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B3110C1</tstamp>
+    </comp>
+    <comp ref="Q1">
+      <value>2N7002</value>
+      <footprint>Package_TO_SOT_SMD:SOT-23</footprint>
+      <datasheet>https://www.fairchildsemi.com/datasheets/2N/2N7002.pdf</datasheet>
+      <fields>
+        <field name="Farnell">2317616</field>
+        <field name="Manufacturer nr">2N7002ET1G</field>
+      </fields>
+      <libsource lib="Transistor_FET" part="2N7002"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B357979</tstamp>
+    </comp>
+    <comp ref="R8">
+      <value>100E</value>
+      <footprint>Resistor_SMD:R_1206_3216Metric</footprint>
+      <datasheet>http://www.farnell.com/datasheets/2310790.pdf?_ga=2.153896696.1588585681.1526323724-1626853455.1515011571</datasheet>
+      <fields>
+        <field name="Farnell">2616760</field>
+        <field name="Manufacturer nr">CRCW1206100RJNEA</field>
+      </fields>
+      <libsource lib="Device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B357D23</tstamp>
+    </comp>
+    <comp ref="D7">
+      <value>1n4148</value>
+      <footprint>Diode_SMD:D_1206_3216Metric</footprint>
+      <datasheet>http://www.farnell.com/datasheets/2182681.pdf?_ga=2.208013010.1588585681.1526323724-1626853455.1515011571</datasheet>
+      <fields>
+        <field name="Farnell">2677464</field>
+      </fields>
+      <libsource lib="Device" part="D"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B3F6022</tstamp>
+    </comp>
+    <comp ref="U7">
+      <value>INA326</value>
+      <footprint>Package_SO:MSOP-8_3x3mm_P0.65mm</footprint>
+      <datasheet>http://www.ti.com/lit/ds/symlink/ina326.pdf</datasheet>
+      <fields>
+        <field name="Farnell">2764750</field>
+        <field name="Manufacturer nr">INA326EA/2K5</field>
+      </fields>
+      <libsource lib="Amplifier_Instrumentation" part="INA326"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B58EFF0</tstamp>
+    </comp>
+    <comp ref="FL1">
+      <value>EMI_Filter_CMode</value>
+      <footprint>Inductor_THT:Choke_EPCOS_B82722-A2302-N1-22.3x22.7mm</footprint>
+      <datasheet>http://www.farnell.com/datasheets/1860373.pdf?_ga=2.174943842.1588585681.1526323724-1626853455.1515011571</datasheet>
+      <fields>
+        <field name="Farnell">1223076</field>
+        <field name="Manufacturer nr">B82722A2202N001</field>
+      </fields>
+      <libsource lib="Device" part="EMI_Filter_CommonMode"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B58F25D</tstamp>
+    </comp>
+    <comp ref="R33">
+      <value>402k</value>
+      <footprint>Resistor_SMD:R_1206_3216Metric</footprint>
+      <libsource lib="Device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B63D4D3</tstamp>
+    </comp>
+    <comp ref="C30">
+      <value>100n</value>
+      <footprint>Capacitor_SMD:C_1206_3216Metric</footprint>
+      <libsource lib="TrackAmplifier-rescue" part="C"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B65E3B2</tstamp>
+    </comp>
+    <comp ref="R30">
+      <value>1k</value>
+      <footprint>Resistor_SMD:R_1206_3216Metric</footprint>
+      <libsource lib="Device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B6A0D19</tstamp>
+    </comp>
+    <comp ref="D5">
+      <value>1n4148</value>
+      <footprint>Diode_SMD:D_1206_3216Metric</footprint>
+      <datasheet>http://www.farnell.com/datasheets/2182681.pdf?_ga=2.239085891.1588585681.1526323724-1626853455.1515011571</datasheet>
+      <fields>
+        <field name="Farnell">2677464</field>
+      </fields>
+      <libsource lib="Device" part="D"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B6B1C9C</tstamp>
+    </comp>
+    <comp ref="D6">
+      <value>1n4148</value>
+      <footprint>Diode_SMD:D_1206_3216Metric</footprint>
+      <datasheet>http://www.farnell.com/datasheets/2182681.pdf?_ga=2.239085891.1588585681.1526323724-1626853455.1515011571</datasheet>
+      <fields>
+        <field name="Farnell">2677464</field>
+      </fields>
+      <libsource lib="Device" part="D"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B6E441C</tstamp>
+    </comp>
+    <comp ref="C20">
+      <value>100n</value>
+      <footprint>Capacitor_SMD:C_1206_3216Metric</footprint>
+      <libsource lib="TrackAmplifier-rescue" part="C"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B7814F9</tstamp>
+    </comp>
+    <comp ref="C19">
+      <value>2.2u</value>
+      <footprint>Capacitor_SMD:C_1206_3216Metric</footprint>
+      <libsource lib="TrackAmplifier-rescue" part="C"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B781500</tstamp>
+    </comp>
+    <comp ref="R12">
+      <value>10E</value>
+      <footprint>Resistor_SMD:R_1206_3216Metric</footprint>
+      <libsource lib="Device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B781513</tstamp>
+    </comp>
+    <comp ref="R13">
+      <value>402k</value>
+      <footprint>Resistor_SMD:R_1206_3216Metric</footprint>
+      <datasheet>http://www.farnell.com/datasheets/2310790.pdf?_ga=2.210134357.1588585681.1526323724-1626853455.1515011571</datasheet>
+      <fields>
+        <field name="Farnell">2139646</field>
+        <field name="Manufacturer nr">CRCW1206402KFKEA</field>
+      </fields>
+      <libsource lib="Device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B7BBAAE</tstamp>
+    </comp>
+    <comp ref="R15">
+      <value>39k</value>
+      <footprint>Resistor_SMD:R_1206_3216Metric</footprint>
+      <datasheet>http://www.farnell.com/datasheets/2310790.pdf?_ga=2.246359748.1588585681.1526323724-1626853455.1515011571</datasheet>
+      <fields>
+        <field name="Farnell">2139553</field>
+        <field name="Manufacturer nr">CRCW120639K0FKEA</field>
+      </fields>
+      <libsource lib="Device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B7BBBFA</tstamp>
+    </comp>
+    <comp ref="R18">
+      <value>100E</value>
+      <footprint>Resistor_SMD:R_1206_3216Metric</footprint>
+      <libsource lib="Device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B860263</tstamp>
+    </comp>
+    <comp ref="C22">
+      <value>100n</value>
+      <footprint>Capacitor_SMD:C_1206_3216Metric</footprint>
+      <libsource lib="TrackAmplifier-rescue" part="C"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B860337</tstamp>
+    </comp>
+    <comp ref="C21">
+      <value>np</value>
+      <footprint>Capacitor_SMD:C_1206_3216Metric</footprint>
+      <libsource lib="TrackAmplifier-rescue" part="C"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B86044C</tstamp>
+    </comp>
+    <comp ref="U8">
+      <value>INA326</value>
+      <footprint>Package_SO:MSOP-8_3x3mm_P0.65mm</footprint>
+      <datasheet>http://www.ti.com/lit/ds/symlink/ina326.pdf</datasheet>
+      <fields>
+        <field name="Farnell">2764750</field>
+        <field name="Manufacturer nr">INA326EA/2K5</field>
+      </fields>
+      <libsource lib="Amplifier_Instrumentation" part="INA326"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5BAED109</tstamp>
+    </comp>
+    <comp ref="C24">
+      <value>100n</value>
+      <footprint>Capacitor_SMD:C_1206_3216Metric</footprint>
+      <libsource lib="TrackAmplifier-rescue" part="C"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5BAED110</tstamp>
+    </comp>
+    <comp ref="C23">
+      <value>2.2u</value>
+      <footprint>Capacitor_SMD:C_1206_3216Metric</footprint>
+      <libsource lib="TrackAmplifier-rescue" part="C"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5BAED117</tstamp>
+    </comp>
+    <comp ref="R19">
+      <value>10E</value>
+      <footprint>Resistor_SMD:R_1206_3216Metric</footprint>
+      <libsource lib="Device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5BAED12A</tstamp>
+    </comp>
+    <comp ref="R20">
+      <value>2k00</value>
+      <footprint>Resistor_SMD:R_1206_3216Metric</footprint>
+      <datasheet>http://www.farnell.com/datasheets/2310790.pdf?_ga=2.246418116.1588585681.1526323724-1626853455.1515011571</datasheet>
+      <fields>
+        <field name="Farnell">1469985</field>
+        <field name="Manufacturer nr">CRCW12062K00FKEA</field>
+      </fields>
+      <libsource lib="Device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5BAED147</tstamp>
+    </comp>
+    <comp ref="R21">
+      <value>5M11</value>
+      <footprint>Resistor_SMD:R_1206_3216Metric</footprint>
+      <datasheet>http://www.farnell.com/datasheets/2310790.pdf?_ga=2.154944504.1588585681.1526323724-1626853455.1515011571</datasheet>
+      <fields>
+        <field name="Farnell">2139776</field>
+        <field name="Manufacturer nr">CRCW12065M11FKEA</field>
+      </fields>
+      <libsource lib="Device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5BAED14E</tstamp>
+    </comp>
+    <comp ref="R23">
+      <value>100E</value>
+      <footprint>Resistor_SMD:R_1206_3216Metric</footprint>
+      <libsource lib="Device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5BAED160</tstamp>
+    </comp>
+    <comp ref="C28">
+      <value>100n</value>
+      <footprint>Capacitor_SMD:C_1206_3216Metric</footprint>
+      <libsource lib="TrackAmplifier-rescue" part="C"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5BAED167</tstamp>
+    </comp>
+    <comp ref="C25">
+      <value>np</value>
+      <footprint>Capacitor_SMD:C_1206_3216Metric</footprint>
+      <libsource lib="TrackAmplifier-rescue" part="C"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5BAED16E</tstamp>
+    </comp>
+    <comp ref="R24">
+      <value>3K3</value>
+      <footprint>Resistor_SMD:R_1206_3216Metric</footprint>
+      <datasheet>http://www.farnell.com/datasheets/2310790.pdf?_ga=2.243101122.1588585681.1526323724-1626853455.1515011571</datasheet>
+      <fields>
+        <field name="Farnell">1653122</field>
+        <field name="Manufacturer nr">CRCW12063K30FKEA</field>
+      </fields>
+      <libsource lib="Device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5BEC31FD</tstamp>
+    </comp>
+    <comp ref="R25">
+      <value>4k7</value>
+      <footprint>Resistor_SMD:R_1206_3216Metric</footprint>
+      <libsource lib="Device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5BF9A128</tstamp>
+    </comp>
+    <comp ref="C29">
+      <value>100n</value>
+      <footprint>Capacitor_SMD:C_1206_3216Metric</footprint>
+      <libsource lib="TrackAmplifier-rescue" part="C"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5BFB89D8</tstamp>
+    </comp>
+    <comp ref="R26">
+      <value>301E</value>
+      <footprint>Resistor_SMD:R_1206_3216Metric</footprint>
+      <datasheet>http://www.farnell.com/datasheets/2310790.pdf?_ga=2.18263423.792852979.1526285019-1651149783.1519657816</datasheet>
+      <fields>
+        <field name="Farnell">2139391</field>
+        <field name="Manufacturer nr">CRCW1206301RFKEA</field>
+      </fields>
+      <libsource lib="Device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5C055174</tstamp>
+    </comp>
+    <comp ref="D1">
+      <value>LED</value>
+      <footprint>LED_SMD:LED_1206_3216Metric</footprint>
+      <datasheet>http://www.farnell.com/datasheets/1671528.pdf?_ga=2.256265547.1588585681.1526323724-1626853455.1515011571</datasheet>
+      <fields>
+        <field name="Farnell">1581232</field>
+        <field name="Manufacturer nr">MCL-S250GC</field>
+      </fields>
+      <libsource lib="Device" part="LED"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5C0558FC</tstamp>
+    </comp>
+    <comp ref="R27">
+      <value>301E</value>
+      <footprint>Resistor_SMD:R_1206_3216Metric</footprint>
+      <datasheet>http://www.farnell.com/datasheets/2310790.pdf?_ga=2.55968109.792852979.1526285019-1651149783.1519657816</datasheet>
+      <fields>
+        <field name="Farnell">2139391</field>
+        <field name="Manufacturer nr">CRCW1206301RFKEA</field>
+      </fields>
+      <libsource lib="Device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5C136087</tstamp>
+    </comp>
+    <comp ref="R28">
+      <value>330E</value>
+      <footprint>Resistor_SMD:R_1206_3216Metric</footprint>
+      <datasheet>http://www.farnell.com/datasheets/2310790.pdf?_ga=2.55968109.792852979.1526285019-1651149783.1519657816</datasheet>
+      <fields>
+        <field name="Farnell">1470008</field>
+        <field name="Manufacturer nr">CRCW1206330RFKEA</field>
+      </fields>
+      <libsource lib="Device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5C136135</tstamp>
+    </comp>
+    <comp ref="D2">
+      <value>LED</value>
+      <footprint>LED_SMD:LED_1206_3216Metric</footprint>
+      <datasheet>http://www.farnell.com/datasheets/1671526.pdf?_ga=2.256265547.1588585681.1526323724-1626853455.1515011571</datasheet>
+      <fields>
+        <field name="Farnell">1581231</field>
+        <field name="Manufacturer nr">MCL-S250YC</field>
+      </fields>
+      <libsource lib="Device" part="LED"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5C1363EF</tstamp>
+    </comp>
+    <comp ref="D3">
+      <value>LED</value>
+      <footprint>LED_SMD:LED_1206_3216Metric</footprint>
+      <datasheet>http://www.farnell.com/datasheets/2278533.pdf?_ga=2.246819396.1588585681.1526323724-1626853455.1515011571</datasheet>
+      <fields>
+        <field name="Farnell">1581229</field>
+        <field name="Manufacturer nr">MCL-S250SRC</field>
+      </fields>
+      <libsource lib="Device" part="LED"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5C136953</tstamp>
+    </comp>
+    <comp ref="R31">
+      <value>100K</value>
+      <footprint>Resistor_SMD:R_1206_3216Metric</footprint>
+      <datasheet>http://www.farnell.com/datasheets/2310790.pdf?_ga=2.147220983.1588585681.1526323724-1626853455.1515011571</datasheet>
+      <fields>
+        <field name="Farnell">1469975</field>
+        <field name="Manufacturer nr">CRCW1206100KFKEA</field>
+      </fields>
+      <libsource lib="Device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5C33103C</tstamp>
+    </comp>
+    <comp ref="R29">
+      <value>162E</value>
+      <footprint>Resistor_SMD:R_1206_3216Metric</footprint>
+      <datasheet>http://www.farnell.com/datasheets/2310790.pdf?_ga=2.48325984.792852979.1526285019-1651149783.1519657816</datasheet>
+      <fields>
+        <field name="Farnell">2139367</field>
+        <field name="Manufacturer nr">CRCW1206162RFKEA</field>
+      </fields>
+      <libsource lib="Device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5C599BC7</tstamp>
+    </comp>
+    <comp ref="D4">
+      <value>LED</value>
+      <footprint>LED_SMD:LED_1206_3216Metric</footprint>
+      <datasheet>http://www.farnell.com/datasheets/1671530.pdf?_ga=2.242502210.1588585681.1526323724-1626853455.1515011571</datasheet>
+      <fields>
+        <field name="Farnell">1581233</field>
+        <field name="Manufacturer nr">MCL-S250SBLC</field>
+      </fields>
+      <libsource lib="Device" part="LED"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5C5DCFB1</tstamp>
+    </comp>
+    <comp ref="R5">
+      <value>10E</value>
+      <footprint>Resistor_SMD:R_1206_3216Metric</footprint>
+      <libsource lib="Device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AEE904B</tstamp>
+    </comp>
+    <comp ref="R3">
+      <value>10E</value>
+      <footprint>Resistor_SMD:R_1206_3216Metric</footprint>
+      <datasheet>http://www.farnell.com/datasheets/2310790.pdf?_ga=2.157221117.792852979.1526285019-1651149783.1519657816</datasheet>
+      <fields>
+        <field name="Farnell">1653053</field>
+        <field name="Manufacturer nr">CRCW120610R0FKEB</field>
+      </fields>
+      <libsource lib="Device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AEE9174</tstamp>
+    </comp>
+    <comp ref="MK1">
+      <value>Mounting_Hole</value>
+      <footprint>MountingHole:MountingHole_3.7mm_Pad_Via</footprint>
+      <datasheet>-</datasheet>
+      <fields>
+        <field name="Farnell">-</field>
+        <field name="Manufacturer nr">-</field>
+      </fields>
+      <libsource lib="Mechanical" part="Mounting_Hole"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AED960F</tstamp>
+    </comp>
+    <comp ref="U10">
+      <value>REF3025</value>
+      <footprint>Package_TO_SOT_SMD:SOT-23</footprint>
+      <datasheet>http://www.ti.com/lit/ds/symlink/ref3033.pdf</datasheet>
+      <fields>
+        <field name="Farnell">1234684</field>
+        <field name="Manufacturer nr">REF3025AIDBZTG4</field>
+      </fields>
+      <libsource lib="Reference_Voltage" part="REF3025"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B4E4160</tstamp>
+    </comp>
+    <comp ref="R34">
+      <value>10E</value>
+      <footprint>Resistor_SMD:R_1206_3216Metric</footprint>
+      <libsource lib="Device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B4E4661</tstamp>
+    </comp>
+    <comp ref="C32">
+      <value>2.2u</value>
+      <footprint>Capacitor_SMD:C_1206_3216Metric</footprint>
+      <libsource lib="TrackAmplifier-rescue" part="C"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B4E484C</tstamp>
+    </comp>
+    <comp ref="C33">
+      <value>100n</value>
+      <footprint>Capacitor_SMD:C_1206_3216Metric</footprint>
+      <libsource lib="TrackAmplifier-rescue" part="C"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B4E4A3A</tstamp>
+    </comp>
+    <comp ref="R35">
+      <value>162E</value>
+      <footprint>Resistor_SMD:R_1206_3216Metric</footprint>
+      <datasheet>http://www.farnell.com/datasheets/2310790.pdf?_ga=2.48325984.792852979.1526285019-1651149783.1519657816</datasheet>
+      <fields>
+        <field name="Farnell">2139367</field>
+        <field name="Manufacturer nr">CRCW1206162RFKEA</field>
+      </fields>
+      <libsource lib="Device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B8B9949</tstamp>
+    </comp>
+    <comp ref="D8">
+      <value>LED</value>
+      <footprint>LED_SMD:LED_1206_3216Metric</footprint>
+      <datasheet>http://www.farnell.com/datasheets/1671530.pdf?_ga=2.242502210.1588585681.1526323724-1626853455.1515011571</datasheet>
+      <fields>
+        <field name="Farnell">1581233</field>
+        <field name="Manufacturer nr">MCL-S250SBLC</field>
+      </fields>
+      <libsource lib="Device" part="LED"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B8B9950</tstamp>
+    </comp>
+    <comp ref="C35">
+      <value>100n</value>
+      <footprint>Capacitor_SMD:C_1206_3216Metric</footprint>
+      <libsource lib="TrackAmplifier-rescue" part="C"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AEECD74</tstamp>
+    </comp>
+    <comp ref="C34">
+      <value>2.2u</value>
+      <footprint>Capacitor_SMD:C_1206_3216Metric</footprint>
+      <libsource lib="TrackAmplifier-rescue" part="C"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AEECD7B</tstamp>
+    </comp>
+    <comp ref="R11">
+      <value>10E</value>
+      <footprint>Resistor_SMD:R_1206_3216Metric</footprint>
+      <libsource lib="Device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AEECD8E</tstamp>
+    </comp>
+    <comp ref="U11">
+      <value>LM35-LP</value>
+      <footprint>Package_TO_SOT_THT:TO-92</footprint>
+      <datasheet>http://www.ti.com/lit/ds/symlink/lm35.pdf</datasheet>
+      <fields>
+        <field name="Farnell">1469236</field>
+        <field name="Manufacturer nr">LM35DZ/NOPB</field>
+      </fields>
+      <libsource lib="Sensor_Temperature" part="LM35-LP"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AEEC2F8</tstamp>
+    </comp>
+    <comp ref="FL2">
+      <value>EMI_Filter_CMode</value>
+      <footprint>Inductor_THT:Choke_EPCOS_B82722-A2302-N1-22.3x22.7mm</footprint>
+      <datasheet>http://www.farnell.com/datasheets/1860373.pdf?_ga=2.174943842.1588585681.1526323724-1626853455.1515011571</datasheet>
+      <fields>
+        <field name="Farnell">1223076</field>
+        <field name="Manufacturer nr">B82722A2202N001</field>
+      </fields>
+      <libsource lib="Device" part="EMI_Filter_CommonMode"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AFC22EA</tstamp>
+    </comp>
+    <comp ref="R36">
+      <value>10K</value>
+      <footprint>Resistor_SMD:R_1206_3216Metric</footprint>
+      <datasheet>http://www.farnell.com/datasheets/2310790.pdf?_ga=2.174924386.1588585681.1526323724-1626853455.1515011571</datasheet>
+      <fields>
+        <field name="Farnell">1469970</field>
+        <field name="Manufacturer nr">CRCW120610K0FKEA</field>
+      </fields>
+      <libsource lib="Device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B1A1FDD</tstamp>
+    </comp>
+    <comp ref="R37">
+      <value>10E</value>
+      <footprint>Resistor_SMD:R_1206_3216Metric</footprint>
+      <libsource lib="Device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AF19CD4</tstamp>
+    </comp>
+    <comp ref="R16">
+      <value>0.025E</value>
+      <footprint>Resistor_SMD:R_Shunt_2512_6332Metric_0.005-0.2</footprint>
+      <datasheet>http://www.farnell.com/datasheets/2050716.pdf?_ga=2.150801142.1588585681.1526323724-1626853455.1515011571</datasheet>
+      <fields>
+        <field name="Farnell">1107432</field>
+        <field name="Manufacturer nr">WSK2512R0250FEA</field>
+      </fields>
+      <libsource lib="Device" part="R_Shunt"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AFB3E95</tstamp>
+    </comp>
+    <comp ref="F1">
+      <value>2.5A</value>
+      <footprint>Fuse:Fuse_Bourns_MF-SM_7.98x5.44mm</footprint>
+      <datasheet>http://www.farnell.com/datasheets/2038620.pdf?_ga=2.252661071.792852979.1526285019-1651149783.1519657816</datasheet>
+      <fields>
+        <field name="Farnell">9350268</field>
+        <field name="Manufacturer nr">MF-SM250-2</field>
+      </fields>
+      <libsource lib="Device" part="Polyfuse"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AF3A43B</tstamp>
+    </comp>
+    <comp ref="R38">
+      <value>10E</value>
+      <footprint>Resistor_SMD:R_1206_3216Metric</footprint>
+      <libsource lib="Device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AFB301E</tstamp>
+    </comp>
+    <comp ref="C36">
+      <value>2.2u</value>
+      <footprint>Capacitor_SMD:C_1206_3216Metric</footprint>
+      <libsource lib="TrackAmplifier-rescue" part="C"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B1E8513</tstamp>
+    </comp>
+    <comp ref="D9">
+      <value>1n4148</value>
+      <footprint>Diode_SMD:D_1206_3216Metric</footprint>
+      <datasheet>http://www.farnell.com/datasheets/2182681.pdf?_ga=2.208013010.1588585681.1526323724-1626853455.1515011571</datasheet>
+      <fields>
+        <field name="Farnell">2677464</field>
+      </fields>
+      <libsource lib="Device" part="D"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B1E8528</tstamp>
+    </comp>
+    <comp ref="D10">
+      <value>1n4148</value>
+      <footprint>Diode_SMD:D_1206_3216Metric</footprint>
+      <datasheet>http://www.farnell.com/datasheets/2182681.pdf?_ga=2.208013010.1588585681.1526323724-1626853455.1515011571</datasheet>
+      <fields>
+        <field name="Farnell">2677464</field>
+      </fields>
+      <libsource lib="Device" part="D"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B1E852F</tstamp>
+    </comp>
+    <comp ref="R17">
+      <value>4k99</value>
+      <footprint>Resistor_SMD:R_1206_3216Metric</footprint>
+      <datasheet>http://www.farnell.com/datasheets/2310790.pdf?_ga=2.212766420.1588585681.1526323724-1626853455.1515011571</datasheet>
+      <fields>
+        <field name="Farnell">1470015</field>
+        <field name="Manufacturer nr">CRCW12064K99FKEA</field>
+      </fields>
+      <libsource lib="Device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B2136D1</tstamp>
+    </comp>
+    <comp ref="R39">
+      <value>1k</value>
+      <footprint>Resistor_SMD:R_1206_3216Metric</footprint>
+      <datasheet>http://www.farnell.com/datasheets/2310790.pdf?_ga=2.180317540.1588585681.1526323724-1626853455.1515011571</datasheet>
+      <fields>
+        <field name="Farnell">1653077</field>
+        <field name="Manufacturer nr">CRCW12061K00JNEA</field>
+      </fields>
+      <libsource lib="Device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AF71650</tstamp>
+    </comp>
+    <comp ref="R40">
+      <value>4k7</value>
+      <footprint>Resistor_SMD:R_1206_3216Metric</footprint>
+      <datasheet>http://www.farnell.com/datasheets/2310790.pdf?_ga=2.142446194.1588585681.1526323724-1626853455.1515011571</datasheet>
+      <fields>
+        <field name="Farnell">1470014</field>
+        <field name="Manufacturer nr">CRCW12064K75FKEA</field>
+      </fields>
+      <libsource lib="Device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AFAD0DF</tstamp>
+    </comp>
+    <comp ref="C37">
+      <value>100n</value>
+      <footprint>Capacitor_SMD:C_1206_3216Metric</footprint>
+      <libsource lib="TrackAmplifier-rescue" part="C"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B05E585</tstamp>
+    </comp>
+    <comp ref="C38">
+      <value>2.2u</value>
+      <footprint>Capacitor_SMD:C_1206_3216Metric</footprint>
+      <libsource lib="TrackAmplifier-rescue" part="C"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B022B32</tstamp>
+    </comp>
+  </components>
+  <libparts>
+    <libpart lib="Transistor_FET" part="BSS138">
+      <aliases>
+        <alias>2N7002</alias>
+        <alias>MMBF170</alias>
+      </aliases>
+      <description>50V Vds, 0.22A Id, N-channel MOSFET, SOT-23</description>
+      <docs>https://www.fairchildsemi.com/datasheets/BS/BSS138.pdf</docs>
+      <footprints>
+        <fp>SOT?23*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">Q</field>
+        <field name="Value">BSS138</field>
+        <field name="Footprint">Package_TO_SOT_SMD:SOT-23</field>
+      </fields>
+      <pins>
+        <pin num="1" name="G" type="input"/>
+        <pin num="2" name="S" type="passive"/>
+        <pin num="3" name="D" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="TrackAmplifier-rescue" part="C">
+      <footprints>
+        <fp>*:C_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">C</field>
+        <field name="Value">C</field>
+      </fields>
+      <pins>
+        <pin num="1" name="~" type="passive"/>
+        <pin num="2" name="~" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="CP">
+      <description>Polarised capacitor</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>*:CP_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">C</field>
+        <field name="Value">CP</field>
+      </fields>
+      <pins>
+        <pin num="1" name="~" type="passive"/>
+        <pin num="2" name="~" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Connector_Generic" part="Conn_01x06">
+      <description>Generic connector, single row, 01x06, script generated (kicad-library-utils/schlib/autogen/connector/)</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>Connector*:*_1x??_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">Conn_01x06</field>
+      </fields>
+      <pins>
+        <pin num="1" name="Pin_1" type="passive"/>
+        <pin num="2" name="Pin_2" type="passive"/>
+        <pin num="3" name="Pin_3" type="passive"/>
+        <pin num="4" name="Pin_4" type="passive"/>
+        <pin num="5" name="Pin_5" type="passive"/>
+        <pin num="6" name="Pin_6" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="D">
+      <description>Diode</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>TO-???*</fp>
+        <fp>*SingleDiode</fp>
+        <fp>*_Diode_*</fp>
+        <fp>*SingleDiode*</fp>
+        <fp>*:D_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">D</field>
+        <field name="Value">D</field>
+      </fields>
+      <pins>
+        <pin num="1" name="K" type="passive"/>
+        <pin num="2" name="A" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="TrackAmplifier-rescue" part="DB15_Male_MountingHoles">
+      <footprints>
+        <fp>DB*M*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">DB15_Male_MountingHoles</field>
+      </fields>
+      <pins>
+        <pin num="0" name="PAD" type="passive"/>
+        <pin num="1" name="1" type="passive"/>
+        <pin num="2" name="2" type="passive"/>
+        <pin num="3" name="3" type="passive"/>
+        <pin num="4" name="4" type="passive"/>
+        <pin num="5" name="5" type="passive"/>
+        <pin num="6" name="6" type="passive"/>
+        <pin num="7" name="7" type="passive"/>
+        <pin num="8" name="8" type="passive"/>
+        <pin num="9" name="P9" type="passive"/>
+        <pin num="10" name="P10" type="passive"/>
+        <pin num="11" name="P111" type="passive"/>
+        <pin num="12" name="P12" type="passive"/>
+        <pin num="13" name="P13" type="passive"/>
+        <pin num="14" name="P14" type="passive"/>
+        <pin num="15" name="P15" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="EMI_Filter_LL">
+      <aliases>
+        <alias>EMI_Filter_CommonMode</alias>
+      </aliases>
+      <description>EMI 2-inductor-filter</description>
+      <docs>http://www.murata.com/~/media/webrenewal/support/library/catalog/products/emc/emifil/c30e.ashx?la=en-gb</docs>
+      <footprints>
+        <fp>*:L_*</fp>
+        <fp>L_CommonMode*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">FL</field>
+        <field name="Value">EMI_Filter_LL</field>
+      </fields>
+      <pins>
+        <pin num="1" name="1" type="passive"/>
+        <pin num="2" name="2" type="passive"/>
+        <pin num="3" name="3" type="passive"/>
+        <pin num="4" name="4" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Amplifier_Instrumentation" part="INA326">
+      <description>Precision, Rail-to-Rail I/O Instrumentation Amplifier, MSOP-8 package</description>
+      <docs>http://www.ti.com/lit/ds/symlink/ina326.pdf</docs>
+      <footprints>
+        <fp>MSOP*3x3mm*P0.65mm*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">INA326</field>
+        <field name="Footprint">Package_SO:MSOP-8_3x3mm_P0.65mm</field>
+      </fields>
+      <pins>
+        <pin num="1" name="R1" type="passive"/>
+        <pin num="2" name="-" type="input"/>
+        <pin num="3" name="+" type="input"/>
+        <pin num="4" name="V-" type="power_in"/>
+        <pin num="5" name="R2" type="input"/>
+        <pin num="6" name="~" type="output"/>
+        <pin num="7" name="V+" type="power_in"/>
+        <pin num="8" name="R1" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="LED">
+      <description>LED generic</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>LED*</fp>
+        <fp>LED_SMD:*</fp>
+        <fp>LED_THT:*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">D</field>
+        <field name="Value">LED</field>
+      </fields>
+      <pins>
+        <pin num="1" name="K" type="passive"/>
+        <pin num="2" name="A" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Sensor_Temperature" part="LM35-LP">
+      <description>Precision centigrade temperature sensor, TO-92</description>
+      <docs>http://www.ti.com/lit/ds/symlink/lm35.pdf</docs>
+      <footprints>
+        <fp>TO?92*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">LM35-LP</field>
+      </fields>
+      <pins>
+        <pin num="1" name="+VS" type="power_in"/>
+        <pin num="2" name="Vout" type="output"/>
+        <pin num="3" name="GND" type="power_in"/>
+      </pins>
+    </libpart>
+    <libpart lib="Regulator_Linear" part="LM78M05_TO252">
+      <aliases>
+        <alias>MC78M05_TO252</alias>
+        <alias>KA78M05_TO252</alias>
+        <alias>LF15_TO252</alias>
+        <alias>LF18_TO252</alias>
+        <alias>LF25_TO252</alias>
+        <alias>LF33_TO252</alias>
+        <alias>LF50_TO252</alias>
+        <alias>LF60_TO252</alias>
+        <alias>LF80_TO252</alias>
+        <alias>LF85_TO252</alias>
+        <alias>LF120_TO252</alias>
+        <alias>LP2950-3.0_TO252</alias>
+        <alias>LP2950-3.3_TO252</alias>
+        <alias>LP2950-5.0_TO252</alias>
+        <alias>LF47_TO252</alias>
+        <alias>LF90_TO252</alias>
+      </aliases>
+      <description>Positive 500mA 35V Linear Regulator, Fixed Output 5V, TO-252 (D-PAK)</description>
+      <docs>http://www.fairchildsemi.com/ds/LM/LM78M05.pdf</docs>
+      <footprints>
+        <fp>TO?252*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">LM78M05_TO252</field>
+        <field name="Footprint">Package_TO_SOT_SMD:TO-252-2</field>
+      </fields>
+      <pins>
+        <pin num="1" name="VI" type="power_in"/>
+        <pin num="2" name="GND" type="power_in"/>
+        <pin num="3" name="VO" type="power_out"/>
+      </pins>
+    </libpart>
+    <libpart lib="TrackAmplifier-rescue" part="LMD18200-Driver_Motor">
+      <footprints>
+        <fp>TO?220*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">LMD18200-Driver_Motor</field>
+        <field name="Footprint">Package_TO_SOT_THT:TO-220-11_Vertical_StaggeredType1_Py5.08mm</field>
+      </fields>
+      <pins>
+        <pin num="1" name="BOOTSTRAP1" type="passive"/>
+        <pin num="2" name="OUTPUT1" type="output"/>
+        <pin num="3" name="DIRECTION" type="input"/>
+        <pin num="4" name="BRAKE" type="input"/>
+        <pin num="5" name="PWM" type="input"/>
+        <pin num="6" name="VS" type="power_in"/>
+        <pin num="7" name="GND" type="power_in"/>
+        <pin num="8" name="CURRENT_SENSE_OUTPUT" type="output"/>
+        <pin num="9" name="~THERMAL_FLAG_OUTPUT" type="openCol"/>
+        <pin num="10" name="OUTPUT2" type="output"/>
+        <pin num="11" name="BOOTSTRAP2" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Mechanical" part="Mounting_Hole">
+      <description>Mounting Hole without connection</description>
+      <footprints>
+        <fp>Mounting?Hole*</fp>
+        <fp>Hole*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">MK</field>
+        <field name="Value">Mounting_Hole</field>
+      </fields>
+    </libpart>
+    <libpart lib="TrackAmplifier-rescue" part="PIC16F18854-SO-MCU_Microchip_PIC16">
+      <footprints>
+        <fp>SOIC*W?7.5x17.9mm*P1.27mm*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">PIC16F18854-SO-MCU_Microchip_PIC16</field>
+        <field name="Footprint">Package_SO:SOIC-28W_7.5x17.9mm_P1.27mm</field>
+      </fields>
+      <pins>
+        <pin num="1" name="VPP/~MCLR/RE3" type="BiDi"/>
+        <pin num="2" name="RA0" type="BiDi"/>
+        <pin num="3" name="RA1" type="BiDi"/>
+        <pin num="4" name="RA2" type="BiDi"/>
+        <pin num="5" name="RA3" type="BiDi"/>
+        <pin num="6" name="RA4" type="BiDi"/>
+        <pin num="7" name="RA5" type="BiDi"/>
+        <pin num="8" name="VSS" type="passive"/>
+        <pin num="9" name="RA7" type="BiDi"/>
+        <pin num="10" name="RA6" type="BiDi"/>
+        <pin num="11" name="RC0" type="BiDi"/>
+        <pin num="12" name="RC1" type="BiDi"/>
+        <pin num="13" name="RC2" type="BiDi"/>
+        <pin num="14" name="RC3" type="BiDi"/>
+        <pin num="15" name="RC4" type="BiDi"/>
+        <pin num="16" name="RC5" type="BiDi"/>
+        <pin num="17" name="RC6" type="BiDi"/>
+        <pin num="18" name="RC7" type="BiDi"/>
+        <pin num="19" name="VSS" type="power_in"/>
+        <pin num="20" name="VDD" type="power_in"/>
+        <pin num="21" name="RB0" type="BiDi"/>
+        <pin num="22" name="RB1" type="BiDi"/>
+        <pin num="23" name="RB2" type="BiDi"/>
+        <pin num="24" name="RB3" type="BiDi"/>
+        <pin num="25" name="RB4" type="BiDi"/>
+        <pin num="26" name="RB5" type="BiDi"/>
+        <pin num="27" name="RB6" type="BiDi"/>
+        <pin num="28" name="RB7" type="BiDi"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="Polyfuse">
+      <description>resettable fuse, polymeric positive temperature coefficient (PPTC)</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>*polyfuse*</fp>
+        <fp>*PTC*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">F</field>
+        <field name="Value">Polyfuse</field>
+      </fields>
+      <pins>
+        <pin num="1" name="~" type="passive"/>
+        <pin num="2" name="~" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="R">
+      <description>Resistor</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>*:R_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">R</field>
+        <field name="Value">R</field>
+      </fields>
+      <pins>
+        <pin num="1" name="~" type="passive"/>
+        <pin num="2" name="~" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Reference_Voltage" part="REF3012">
+      <aliases>
+        <alias>REF3020</alias>
+        <alias>REF3025</alias>
+        <alias>REF3030</alias>
+        <alias>REF3033</alias>
+        <alias>REF3040</alias>
+      </aliases>
+      <description>1.25V 50-ppm/°C Max, 50-μA, CMOS Voltage Reference, SOT-23-3</description>
+      <docs>http://www.ti.com/lit/ds/symlink/ref3033.pdf</docs>
+      <footprints>
+        <fp>SOT?23*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">REF3012</field>
+        <field name="Footprint">Package_TO_SOT_SMD:SOT-23</field>
+      </fields>
+      <pins>
+        <pin num="1" name="IN" type="power_in"/>
+        <pin num="2" name="OUT" type="power_out"/>
+        <pin num="3" name="GND" type="power_in"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="R_Shunt">
+      <description>Shunt Resistor</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>R_*Shunt*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">R</field>
+        <field name="Value">R_Shunt</field>
+      </fields>
+      <pins>
+        <pin num="1" name="1" type="passive"/>
+        <pin num="2" name="2" type="passive"/>
+        <pin num="3" name="3" type="passive"/>
+        <pin num="4" name="4" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="TrackAmplifier-rescue" part="ST485EBDR-Interface_UART">
+      <footprints>
+        <fp>SOIC*3.9x4.9mm*P1.27mm*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">ST485EBDR-Interface_UART</field>
+        <field name="Footprint">Package_SO:SOIC-8_3.9x4.9mm_P1.27mm</field>
+      </fields>
+      <pins>
+        <pin num="1" name="RO" type="output"/>
+        <pin num="2" name="~RE" type="input"/>
+        <pin num="3" name="DE" type="input"/>
+        <pin num="4" name="DI" type="input"/>
+        <pin num="5" name="GND" type="power_in"/>
+        <pin num="6" name="A" type="BiDi"/>
+        <pin num="7" name="B" type="BiDi"/>
+        <pin num="8" name="VCC" type="power_in"/>
+      </pins>
+    </libpart>
+  </libparts>
+  <libraries>
+    <library logical="Amplifier_Instrumentation">
+      <uri>C:/Localdata/GIT_REPO/kicad-symbols-Merged/Amplifier_Instrumentation.lib</uri>
+    </library>
+    <library logical="Connector_Generic">
+      <uri>C:/Localdata/GIT_REPO/kicad-symbols-Merged/Connector_Generic.lib</uri>
+    </library>
+    <library logical="Device">
+      <uri>C:/Localdata/GIT_REPO/kicad-symbols-Merged/Device.lib</uri>
+    </library>
+    <library logical="Mechanical">
+      <uri>C:/Localdata/GIT_REPO/kicad-symbols-Merged/Mechanical.lib</uri>
+    </library>
+    <library logical="Reference_Voltage">
+      <uri>C:/Localdata/GIT_REPO/kicad-symbols-Merged/Reference_Voltage.lib</uri>
+    </library>
+    <library logical="Regulator_Linear">
+      <uri>C:/Localdata/GIT_REPO/kicad-symbols-Merged/Regulator_Linear.lib</uri>
+    </library>
+    <library logical="Sensor_Temperature">
+      <uri>C:/Localdata/GIT_REPO/kicad-symbols-Merged/Sensor_Temperature.lib</uri>
+    </library>
+    <library logical="TrackAmplifier-rescue">
+      <uri>C:\Localdata\GIT_REPO\Miscellaneous\KiCad\TrackAmplifier/TrackAmplifier-rescue.lib</uri>
+    </library>
+    <library logical="Transistor_FET">
+      <uri>C:/Localdata/GIT_REPO/kicad-symbols-Merged/Transistor_FET.lib</uri>
+    </library>
+  </libraries>
+  <nets>
+    <net code="1" name="OCC">
+      <node ref="R23" pin="1"/>
+      <node ref="U9" pin="3"/>
+      <node ref="C28" pin="2"/>
+    </net>
+    <net code="2" name="GND">
+      <node ref="C2" pin="1"/>
+      <node ref="C12" pin="1"/>
+      <node ref="C15" pin="1"/>
+      <node ref="U6" pin="5"/>
+      <node ref="U6" pin="4"/>
+      <node ref="U6" pin="3"/>
+      <node ref="U6" pin="2"/>
+      <node ref="C4" pin="1"/>
+      <node ref="R36" pin="2"/>
+      <node ref="C29" pin="1"/>
+      <node ref="U5" pin="5"/>
+      <node ref="C11" pin="1"/>
+      <node ref="C14" pin="1"/>
+      <node ref="C38" pin="1"/>
+      <node ref="C37" pin="1"/>
+      <node ref="C36" pin="1"/>
+      <node ref="R39" pin="1"/>
+      <node ref="D10" pin="2"/>
+      <node ref="FL2" pin="4"/>
+      <node ref="U11" pin="3"/>
+      <node ref="D8" pin="1"/>
+      <node ref="C34" pin="1"/>
+      <node ref="C35" pin="1"/>
+      <node ref="C6" pin="2"/>
+      <node ref="R14" pin="1"/>
+      <node ref="U7" pin="4"/>
+      <node ref="R6" pin="1"/>
+      <node ref="R7" pin="1"/>
+      <node ref="C1" pin="1"/>
+      <node ref="U4" pin="7"/>
+      <node ref="C8" pin="1"/>
+      <node ref="C9" pin="1"/>
+      <node ref="J2" pin="3"/>
+      <node ref="C3" pin="1"/>
+      <node ref="C26" pin="1"/>
+      <node ref="C27" pin="1"/>
+      <node ref="U9" pin="8"/>
+      <node ref="U9" pin="19"/>
+      <node ref="Q1" pin="2"/>
+      <node ref="C31" pin="1"/>
+      <node ref="U1" pin="3"/>
+      <node ref="U1" pin="2"/>
+      <node ref="C7" pin="1"/>
+      <node ref="C16" pin="2"/>
+      <node ref="U1" pin="4"/>
+      <node ref="C13" pin="1"/>
+      <node ref="U2" pin="5"/>
+      <node ref="U2" pin="4"/>
+      <node ref="U2" pin="3"/>
+      <node ref="U2" pin="2"/>
+      <node ref="C10" pin="1"/>
+      <node ref="C5" pin="1"/>
+      <node ref="U3" pin="2"/>
+      <node ref="U1" pin="5"/>
+      <node ref="R31" pin="2"/>
+      <node ref="C23" pin="1"/>
+      <node ref="C22" pin="1"/>
+      <node ref="C21" pin="1"/>
+      <node ref="C25" pin="1"/>
+      <node ref="C28" pin="1"/>
+      <node ref="C30" pin="1"/>
+      <node ref="D6" pin="2"/>
+      <node ref="C20" pin="1"/>
+      <node ref="C19" pin="1"/>
+      <node ref="U8" pin="4"/>
+      <node ref="D1" pin="1"/>
+      <node ref="D4" pin="1"/>
+      <node ref="C24" pin="1"/>
+      <node ref="C32" pin="1"/>
+      <node ref="R24" pin="1"/>
+      <node ref="D3" pin="1"/>
+      <node ref="C33" pin="1"/>
+      <node ref="U10" pin="3"/>
+      <node ref="D2" pin="1"/>
+    </net>
+    <net code="3" name="CSEN">
+      <node ref="U4" pin="8"/>
+      <node ref="R24" pin="2"/>
+      <node ref="R25" pin="1"/>
+    </net>
+    <net code="4" name="CSEN_FLT">
+      <node ref="U9" pin="21"/>
+      <node ref="R25" pin="2"/>
+      <node ref="C29" pin="2"/>
+    </net>
+    <net code="5" name="Net-(R26-Pad1)">
+      <node ref="R26" pin="1"/>
+      <node ref="U9" pin="26"/>
+    </net>
+    <net code="6" name="OCC1">
+      <node ref="R16" pin="2"/>
+      <node ref="U8" pin="3"/>
+    </net>
+    <net code="7" name="Net-(R20-Pad1)">
+      <node ref="U8" pin="1"/>
+      <node ref="R20" pin="1"/>
+    </net>
+    <net code="8" name="Net-(R20-Pad2)">
+      <node ref="R20" pin="2"/>
+      <node ref="U8" pin="8"/>
+    </net>
+    <net code="9" name="OCC2">
+      <node ref="R16" pin="3"/>
+      <node ref="U8" pin="2"/>
+    </net>
+    <net code="10" name="Net-(D1-Pad2)">
+      <node ref="R26" pin="2"/>
+      <node ref="D1" pin="2"/>
+    </net>
+    <net code="11" name="Net-(R23-Pad2)">
+      <node ref="R23" pin="2"/>
+      <node ref="U8" pin="6"/>
+    </net>
+    <net code="12" name="Net-(R29-Pad1)">
+      <node ref="R29" pin="1"/>
+      <node ref="U9" pin="22"/>
+    </net>
+    <net code="13" name="Net-(D8-Pad2)">
+      <node ref="D8" pin="2"/>
+      <node ref="R29" pin="2"/>
+    </net>
+    <net code="14" name="Net-(D4-Pad2)">
+      <node ref="R35" pin="1"/>
+      <node ref="D4" pin="2"/>
+    </net>
+    <net code="15" name="Net-(R3-Pad2)">
+      <node ref="R3" pin="2"/>
+      <node ref="R5" pin="1"/>
+    </net>
+    <net code="16" name="Vbus_flt">
+      <node ref="FL2" pin="2"/>
+      <node ref="R3" pin="1"/>
+      <node ref="F1" pin="2"/>
+    </net>
+    <net code="17" name="Net-(R27-Pad1)">
+      <node ref="R27" pin="1"/>
+      <node ref="U9" pin="25"/>
+    </net>
+    <net code="18" name="Net-(R28-Pad1)">
+      <node ref="R28" pin="1"/>
+      <node ref="U9" pin="24"/>
+    </net>
+    <net code="19" name="SYNC">
+      <node ref="U2" pin="1"/>
+      <node ref="U9" pin="11"/>
+    </net>
+    <net code="20" name="+5V">
+      <node ref="C13" pin="2"/>
+      <node ref="R40" pin="1"/>
+      <node ref="R34" pin="1"/>
+      <node ref="C16" pin="1"/>
+      <node ref="D9" pin="1"/>
+      <node ref="R4" pin="2"/>
+      <node ref="R9" pin="2"/>
+      <node ref="R1" pin="2"/>
+      <node ref="R19" pin="1"/>
+      <node ref="D5" pin="1"/>
+      <node ref="R2" pin="2"/>
+      <node ref="R12" pin="1"/>
+      <node ref="R33" pin="1"/>
+      <node ref="R11" pin="2"/>
+      <node ref="C10" pin="2"/>
+      <node ref="R22" pin="1"/>
+      <node ref="R10" pin="2"/>
+      <node ref="U3" pin="3"/>
+      <node ref="J2" pin="2"/>
+      <node ref="R32" pin="1"/>
+    </net>
+    <net code="21" name="Net-(D2-Pad2)">
+      <node ref="R27" pin="2"/>
+      <node ref="D2" pin="2"/>
+    </net>
+    <net code="22" name="Net-(D3-Pad2)">
+      <node ref="R28" pin="2"/>
+      <node ref="D3" pin="2"/>
+    </net>
+    <net code="23" name="+15V">
+      <node ref="C5" pin="2"/>
+      <node ref="U3" pin="1"/>
+      <node ref="R5" pin="2"/>
+      <node ref="C7" pin="2"/>
+    </net>
+    <net code="24" name="Net-(C31-Pad2)">
+      <node ref="R31" pin="1"/>
+      <node ref="D7" pin="2"/>
+      <node ref="C31" pin="2"/>
+      <node ref="R32" pin="2"/>
+    </net>
+    <net code="25" name="Net-(C19-Pad2)">
+      <node ref="C20" pin="2"/>
+      <node ref="U7" pin="7"/>
+      <node ref="R12" pin="2"/>
+      <node ref="C19" pin="2"/>
+    </net>
+    <net code="26" name="Net-(R13-Pad1)">
+      <node ref="U7" pin="1"/>
+      <node ref="R13" pin="1"/>
+    </net>
+    <net code="27" name="Net-(R13-Pad2)">
+      <node ref="R13" pin="2"/>
+      <node ref="U7" pin="8"/>
+    </net>
+    <net code="28" name="ID">
+      <node ref="D6" pin="1"/>
+      <node ref="D5" pin="2"/>
+      <node ref="R30" pin="2"/>
+      <node ref="U9" pin="2"/>
+      <node ref="C30" pin="2"/>
+    </net>
+    <net code="29" name="Net-(C23-Pad2)">
+      <node ref="R19" pin="2"/>
+      <node ref="C23" pin="2"/>
+      <node ref="C24" pin="2"/>
+      <node ref="U8" pin="7"/>
+    </net>
+    <net code="30" name="Net-(R18-Pad2)">
+      <node ref="R18" pin="2"/>
+      <node ref="U7" pin="6"/>
+    </net>
+    <net code="31" name="PWM1">
+      <node ref="U4" pin="2"/>
+      <node ref="R16" pin="1"/>
+      <node ref="C17" pin="2"/>
+      <node ref="U7" pin="3"/>
+    </net>
+    <net code="32" name="PWM2">
+      <node ref="U4" pin="10"/>
+      <node ref="C18" pin="1"/>
+      <node ref="U7" pin="2"/>
+      <node ref="FL1" pin="3"/>
+    </net>
+    <net code="33" name="Net-(C32-Pad2)">
+      <node ref="U10" pin="1"/>
+      <node ref="C32" pin="2"/>
+      <node ref="R34" pin="2"/>
+      <node ref="C33" pin="2"/>
+    </net>
+    <net code="34" name="BMF">
+      <node ref="U9" pin="4"/>
+      <node ref="C22" pin="2"/>
+      <node ref="R18" pin="1"/>
+    </net>
+    <net code="35" name="Vlm">
+      <node ref="R39" pin="2"/>
+      <node ref="D10" pin="1"/>
+      <node ref="D9" pin="2"/>
+      <node ref="C36" pin="2"/>
+      <node ref="U9" pin="6"/>
+      <node ref="R17" pin="1"/>
+    </net>
+    <net code="36" name="Net-(FL1-Pad1)">
+      <node ref="R16" pin="4"/>
+      <node ref="FL1" pin="1"/>
+    </net>
+    <net code="37" name="THFLG">
+      <node ref="U9" pin="9"/>
+      <node ref="U4" pin="9"/>
+      <node ref="R40" pin="2"/>
+    </net>
+    <net code="38" name="VREF">
+      <node ref="R15" pin="1"/>
+      <node ref="R21" pin="1"/>
+      <node ref="R38" pin="1"/>
+      <node ref="U10" pin="2"/>
+    </net>
+    <net code="39" name="ID_R">
+      <node ref="J1" pin="7"/>
+      <node ref="R33" pin="2"/>
+      <node ref="R30" pin="1"/>
+    </net>
+    <net code="40" name="Net-(R38-Pad2)">
+      <node ref="U9" pin="5"/>
+      <node ref="R38" pin="2"/>
+    </net>
+    <net code="41" name="Net-(C34-Pad2)">
+      <node ref="U11" pin="1"/>
+      <node ref="R11" pin="1"/>
+      <node ref="C34" pin="2"/>
+      <node ref="C35" pin="2"/>
+    </net>
+    <net code="42" name="Net-(U9-Pad7)">
+      <node ref="U9" pin="7"/>
+    </net>
+    <net code="43" name="Net-(U9-Pad10)">
+      <node ref="U9" pin="10"/>
+    </net>
+    <net code="44" name="Net-(U5-Pad1)">
+      <node ref="U5" pin="1"/>
+    </net>
+    <net code="45" name="Net-(J2-Pad6)">
+      <node ref="J2" pin="6"/>
+    </net>
+    <net code="46" name="Net-(R35-Pad2)">
+      <node ref="R35" pin="2"/>
+      <node ref="U9" pin="23"/>
+    </net>
+    <net code="47" name="Net-(C25-Pad2)">
+      <node ref="C25" pin="2"/>
+      <node ref="R21" pin="2"/>
+      <node ref="U8" pin="5"/>
+    </net>
+    <net code="48" name="Net-(R37-Pad1)">
+      <node ref="R37" pin="1"/>
+      <node ref="U11" pin="2"/>
+    </net>
+    <net code="49" name="TEMP">
+      <node ref="U9" pin="18"/>
+      <node ref="R37" pin="2"/>
+      <node ref="C38" pin="2"/>
+    </net>
+    <net code="50" name="Net-(C21-Pad2)">
+      <node ref="C21" pin="2"/>
+      <node ref="U7" pin="5"/>
+      <node ref="R15" pin="2"/>
+    </net>
+    <net code="51" name="Net-(C17-Pad1)">
+      <node ref="U4" pin="1"/>
+      <node ref="C17" pin="1"/>
+    </net>
+    <net code="52" name="Net-(C18-Pad2)">
+      <node ref="C18" pin="2"/>
+      <node ref="U4" pin="11"/>
+    </net>
+    <net code="53" name="Net-(FL2-Pad1)">
+      <node ref="FL2" pin="1"/>
+      <node ref="J1" pin="10"/>
+      <node ref="J1" pin="15"/>
+    </net>
+    <net code="54" name="GNDD">
+      <node ref="FL2" pin="3"/>
+      <node ref="J1" pin="2"/>
+      <node ref="J1" pin="8"/>
+      <node ref="J1" pin="0"/>
+    </net>
+    <net code="55" name="Net-(C12-Pad2)">
+      <node ref="U6" pin="8"/>
+      <node ref="R10" pin="1"/>
+      <node ref="C15" pin="2"/>
+      <node ref="C12" pin="2"/>
+    </net>
+    <net code="56" name="RX_B">
+      <node ref="U6" pin="7"/>
+      <node ref="J1" pin="4"/>
+    </net>
+    <net code="57" name="Net-(C2-Pad2)">
+      <node ref="R2" pin="1"/>
+      <node ref="C2" pin="2"/>
+      <node ref="C4" pin="2"/>
+      <node ref="U2" pin="8"/>
+    </net>
+    <net code="58" name="Sync_B">
+      <node ref="J1" pin="5"/>
+      <node ref="U2" pin="7"/>
+    </net>
+    <net code="59" name="Sync_A">
+      <node ref="J1" pin="13"/>
+      <node ref="U2" pin="6"/>
+    </net>
+    <net code="60" name="Net-(C11-Pad2)">
+      <node ref="R9" pin="1"/>
+      <node ref="U5" pin="2"/>
+      <node ref="C11" pin="2"/>
+      <node ref="C14" pin="2"/>
+      <node ref="U5" pin="8"/>
+    </net>
+    <net code="61" name="RX_A">
+      <node ref="J1" pin="12"/>
+      <node ref="U6" pin="6"/>
+    </net>
+    <net code="62" name="Reset_B">
+      <node ref="U1" pin="7"/>
+      <node ref="J1" pin="6"/>
+    </net>
+    <net code="63" name="Reset_A">
+      <node ref="J1" pin="14"/>
+      <node ref="U1" pin="6"/>
+    </net>
+    <net code="64" name="TX_B">
+      <node ref="U5" pin="7"/>
+      <node ref="J1" pin="3"/>
+    </net>
+    <net code="65" name="Net-(C1-Pad2)">
+      <node ref="U1" pin="8"/>
+      <node ref="C3" pin="2"/>
+      <node ref="C1" pin="2"/>
+      <node ref="R1" pin="1"/>
+    </net>
+    <net code="66" name="DIR">
+      <node ref="U9" pin="17"/>
+      <node ref="U4" pin="3"/>
+      <node ref="R7" pin="2"/>
+    </net>
+    <net code="67" name="BRK">
+      <node ref="U9" pin="16"/>
+      <node ref="U4" pin="4"/>
+      <node ref="R4" pin="1"/>
+    </net>
+    <net code="68" name="TX_ENA">
+      <node ref="R14" pin="2"/>
+      <node ref="U5" pin="3"/>
+      <node ref="U9" pin="13"/>
+    </net>
+    <net code="69" name="Net-(C6-Pad1)">
+      <node ref="U4" pin="6"/>
+      <node ref="C9" pin="2"/>
+      <node ref="C6" pin="1"/>
+      <node ref="F1" pin="1"/>
+      <node ref="C8" pin="2"/>
+      <node ref="R17" pin="2"/>
+    </net>
+    <net code="70" name="PWM">
+      <node ref="U4" pin="5"/>
+      <node ref="U9" pin="15"/>
+      <node ref="R6" pin="2"/>
+    </net>
+    <net code="71" name="PWMO1">
+      <node ref="FL1" pin="2"/>
+      <node ref="J1" pin="9"/>
+    </net>
+    <net code="72" name="PWMO2">
+      <node ref="J1" pin="1"/>
+      <node ref="FL1" pin="4"/>
+    </net>
+    <net code="73" name="Net-(R8-Pad1)">
+      <node ref="R8" pin="1"/>
+      <node ref="U1" pin="1"/>
+    </net>
+    <net code="74" name="Net-(C37-Pad2)">
+      <node ref="R8" pin="2"/>
+      <node ref="C37" pin="2"/>
+      <node ref="R36" pin="1"/>
+      <node ref="Q1" pin="1"/>
+    </net>
+    <net code="75" name="TX_A">
+      <node ref="U5" pin="6"/>
+      <node ref="J1" pin="11"/>
+    </net>
+    <net code="76" name="RST">
+      <node ref="Q1" pin="3"/>
+      <node ref="U9" pin="1"/>
+      <node ref="D7" pin="1"/>
+      <node ref="J2" pin="1"/>
+    </net>
+    <net code="77" name="ICSPDAT">
+      <node ref="U9" pin="28"/>
+      <node ref="J2" pin="4"/>
+    </net>
+    <net code="78" name="ICSPCLK">
+      <node ref="J2" pin="5"/>
+      <node ref="U9" pin="27"/>
+    </net>
+    <net code="79" name="Net-(C26-Pad2)">
+      <node ref="U9" pin="20"/>
+      <node ref="C26" pin="2"/>
+      <node ref="C27" pin="2"/>
+      <node ref="R22" pin="2"/>
+    </net>
+    <net code="80" name="RX">
+      <node ref="U6" pin="1"/>
+      <node ref="U9" pin="14"/>
+    </net>
+    <net code="81" name="TX">
+      <node ref="U9" pin="12"/>
+      <node ref="U5" pin="4"/>
+    </net>
+  </nets>
+</export>

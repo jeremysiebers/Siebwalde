@@ -1,0 +1,3 @@
+(sym_lib_table
+  (lib (name BackplanePCB_solder-rescue)(type Legacy)(uri ${KIPRJMOD}/BackplanePCB_solder-rescue.lib)(options "")(descr ""))
+)

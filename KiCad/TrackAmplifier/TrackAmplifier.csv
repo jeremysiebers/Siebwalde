@@ -1,0 +1,158 @@
+Source:,C:\Localdata\GIT_REPO\Miscellaneous\KiCad\TrackAmplifier\TrackAmplifier.sch,,,,,,,,,,
+Date:,15-5-2018 12:21,,,,,,,,,,
+Tool:,Eeschema (5.0.0-rc2-dev-444-g2974a2c10),,,,,,,,,,
+Generator:,C:\Localdata\GIT_REPO\KiCad\bin\scripting\plugins/bom_csv_grouped_by_value.py,,,,,,,,,,
+Component Count:,106,,,,,,,,,,
+,,,,,,,,,,,
+Individual Components:,,,,,,,,,,,
+,,,,,,,,,,,
+Item,Qty,Reference(s),Value,LibPart,Footprint,Datasheet,Farnell,Manufacturer nr,,,
+,,C1,2.2u,TrackAmplifier-rescue:C,Capacitor_SMD:C_1206_3216Metric,,,,,,
+,,C2,2.2u,TrackAmplifier-rescue:C,Capacitor_SMD:C_1206_3216Metric,,,,,,
+,,C3,100n,TrackAmplifier-rescue:C,Capacitor_SMD:C_1206_3216Metric,,,,,,
+,,C4,100n,TrackAmplifier-rescue:C,Capacitor_SMD:C_1206_3216Metric,,,,,,
+,,C5,2.2u,TrackAmplifier-rescue:C,Capacitor_SMD:C_1206_3216Metric,http://www.farnell.com/datasheets/1901289.pdf?_ga=2.182791910.1588585681.1526323724-1626853455.1515011571,1759451,MC1206F225Z250CT,,,
+,,C6,470u,Device:CP,Capacitor_THT:CP_Radial_D10.0mm_P5.00mm,http://www.farnell.com/datasheets/2280829.pdf?_ga=2.252145225.1588585681.1526323724-1626853455.1515011571,2750201,,,,
+,,C7,100n,TrackAmplifier-rescue:C,Capacitor_SMD:C_1206_3216Metric,http://www.farnell.com/datasheets/2049140.pdf?_ga=2.261496907.792852979.1526285019-1651149783.1519657816,2395785,VJ1206Y104KXBAT,,,
+,,C8,2.2u,TrackAmplifier-rescue:C,Capacitor_SMD:C_1206_3216Metric,,,,,,
+,,C9,100n,TrackAmplifier-rescue:C,Capacitor_SMD:C_1206_3216Metric,,,,,,
+,,C10,100n,TrackAmplifier-rescue:C,Capacitor_SMD:C_1206_3216Metric,http://www.farnell.com/datasheets/2049140.pdf?_ga=2.50946415.792852979.1526285019-1651149783.1519657816,2395785,VJ1206Y104KXBAT,,,
+,,C11,2.2u,TrackAmplifier-rescue:C,Capacitor_SMD:C_1206_3216Metric,,,,,,
+,,C12,2.2u,TrackAmplifier-rescue:C,Capacitor_SMD:C_1206_3216Metric,,,,,,
+,,C13,2.2u,TrackAmplifier-rescue:C,Capacitor_SMD:C_1206_3216Metric,http://www.farnell.com/datasheets/1901289.pdf?_ga=2.182791910.1588585681.1526323724-1626853455.1515011571,1759451,MC1206F225Z250CT,,,
+,,C14,100n,TrackAmplifier-rescue:C,Capacitor_SMD:C_1206_3216Metric,,,,,,
+,,C15,100n,TrackAmplifier-rescue:C,Capacitor_SMD:C_1206_3216Metric,,,,,,
+,,C16,220u,Device:CP,Capacitor_THT:CP_Radial_D6.3mm_P2.50mm,http://www.farnell.com/datasheets/2321433.pdf?_ga=2.88550747.1588585681.1526323724-1626853455.1515011571,2346568,16PX220MEFC6.3X11,,,
+,,C17,10n,TrackAmplifier-rescue:C,Capacitor_SMD:C_1206_3216Metric,http://www.farnell.com/datasheets/1723231.pdf?_ga=2.151530105.1588585681.1526323724-1626853455.1515011571,9406549,MCU1206R103KCT,,,
+,,C18,10n,TrackAmplifier-rescue:C,Capacitor_SMD:C_1206_3216Metric,http://www.farnell.com/datasheets/1723231.pdf?_ga=2.151530105.1588585681.1526323724-1626853455.1515011571,9406549,MCU1206R103KCT,,,
+,,C19,2.2u,TrackAmplifier-rescue:C,Capacitor_SMD:C_1206_3216Metric,,,,,,
+,,C20,100n,TrackAmplifier-rescue:C,Capacitor_SMD:C_1206_3216Metric,,,,,,
+,,C21,np,TrackAmplifier-rescue:C,Capacitor_SMD:C_1206_3216Metric,,,,,,
+,,C22,100n,TrackAmplifier-rescue:C,Capacitor_SMD:C_1206_3216Metric,,,,,,
+,,C23,2.2u,TrackAmplifier-rescue:C,Capacitor_SMD:C_1206_3216Metric,,,,,,
+,,C24,100n,TrackAmplifier-rescue:C,Capacitor_SMD:C_1206_3216Metric,,,,,,
+,,C25,np,TrackAmplifier-rescue:C,Capacitor_SMD:C_1206_3216Metric,,,,,,
+,,C26,2.2u,TrackAmplifier-rescue:C,Capacitor_SMD:C_1206_3216Metric,,,,,,
+,,C27,100n,TrackAmplifier-rescue:C,Capacitor_SMD:C_1206_3216Metric,,,,,,
+,,C28,100n,TrackAmplifier-rescue:C,Capacitor_SMD:C_1206_3216Metric,,,,,,
+,,C29,100n,TrackAmplifier-rescue:C,Capacitor_SMD:C_1206_3216Metric,,,,,,
+,,C30,100n,TrackAmplifier-rescue:C,Capacitor_SMD:C_1206_3216Metric,,,,,,
+,,C31,100n,TrackAmplifier-rescue:C,Capacitor_SMD:C_1206_3216Metric,,,,,,
+,,C32,2.2u,TrackAmplifier-rescue:C,Capacitor_SMD:C_1206_3216Metric,,,,,,
+,,C33,100n,TrackAmplifier-rescue:C,Capacitor_SMD:C_1206_3216Metric,,,,,,
+,,C34,2.2u,TrackAmplifier-rescue:C,Capacitor_SMD:C_1206_3216Metric,,,,,,
+,,C35,100n,TrackAmplifier-rescue:C,Capacitor_SMD:C_1206_3216Metric,,,,,,
+,,C36,2.2u,TrackAmplifier-rescue:C,Capacitor_SMD:C_1206_3216Metric,,,,,,
+,,C37,100n,TrackAmplifier-rescue:C,Capacitor_SMD:C_1206_3216Metric,,,,,,
+,,C38,2.2u,TrackAmplifier-rescue:C,Capacitor_SMD:C_1206_3216Metric,,,,,,
+,,D1,LED,Device:LED,LED_SMD:LED_1206_3216Metric,http://www.farnell.com/datasheets/1671528.pdf?_ga=2.256265547.1588585681.1526323724-1626853455.1515011571,1581232,MCL-S250GC,,,
+,,D2,LED,Device:LED,LED_SMD:LED_1206_3216Metric,http://www.farnell.com/datasheets/1671526.pdf?_ga=2.256265547.1588585681.1526323724-1626853455.1515011571,1581231,MCL-S250YC,,,
+,,D3,LED,Device:LED,LED_SMD:LED_1206_3216Metric,http://www.farnell.com/datasheets/2278533.pdf?_ga=2.246819396.1588585681.1526323724-1626853455.1515011571,1581229,MCL-S250SRC,,,
+,,D4,LED,Device:LED,LED_SMD:LED_1206_3216Metric,http://www.farnell.com/datasheets/1671530.pdf?_ga=2.242502210.1588585681.1526323724-1626853455.1515011571,1581233,MCL-S250SBLC,,,
+,,D5,1n4148,Device:D,Diode_SMD:D_1206_3216Metric,http://www.farnell.com/datasheets/2182681.pdf?_ga=2.239085891.1588585681.1526323724-1626853455.1515011571,2677464,,,,
+,,D6,1n4148,Device:D,Diode_SMD:D_1206_3216Metric,http://www.farnell.com/datasheets/2182681.pdf?_ga=2.239085891.1588585681.1526323724-1626853455.1515011571,2677464,,,,
+,,D7,1n4148,Device:D,Diode_SMD:D_1206_3216Metric,http://www.farnell.com/datasheets/2182681.pdf?_ga=2.208013010.1588585681.1526323724-1626853455.1515011571,2677464,,,,
+,,D8,LED,Device:LED,LED_SMD:LED_1206_3216Metric,http://www.farnell.com/datasheets/1671530.pdf?_ga=2.242502210.1588585681.1526323724-1626853455.1515011571,1581233,MCL-S250SBLC,,,
+,,D9,1n4148,Device:D,Diode_SMD:D_1206_3216Metric,http://www.farnell.com/datasheets/2182681.pdf?_ga=2.208013010.1588585681.1526323724-1626853455.1515011571,2677464,,,,
+,,D10,1n4148,Device:D,Diode_SMD:D_1206_3216Metric,http://www.farnell.com/datasheets/2182681.pdf?_ga=2.208013010.1588585681.1526323724-1626853455.1515011571,2677464,,,,
+,,F1,2.5A,Device:Polyfuse,Fuse:Fuse_Bourns_MF-SM_7.98x5.44mm,http://www.farnell.com/datasheets/2038620.pdf?_ga=2.252661071.792852979.1526285019-1651149783.1519657816,9350268,MF-SM250-2,,,
+,,FL1,EMI_Filter_CMode,Device:EMI_Filter_CommonMode,Inductor_THT:Choke_EPCOS_B82722-A2302-N1-22.3x22.7mm,http://www.farnell.com/datasheets/1860373.pdf?_ga=2.174943842.1588585681.1526323724-1626853455.1515011571,1223076,B82722A2202N001,,,
+,,FL2,EMI_Filter_CMode,Device:EMI_Filter_CommonMode,Inductor_THT:Choke_EPCOS_B82722-A2302-N1-22.3x22.7mm,http://www.farnell.com/datasheets/1860373.pdf?_ga=2.174943842.1588585681.1526323724-1626853455.1515011571,1223076,B82722A2202N001,,,
+,,J1,DB15_Male_MountingHoles,TrackAmplifier-rescue:DB15_Male_MountingHoles,Connector_Dsub:DSUB-15_Male_Horizontal_P2.77x2.84mm_EdgePinOffset4.94mm_Housed_MountingHolesOffset7.48mm,-,2294292,182-015-113R531,,,
+,,J2,Conn_01x06,Connector_Generic:Conn_01x06,Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical,http://www.farnell.com/datasheets/32535.pdf?_ga=2.160907771.792852979.1526285019-1651149783.1519657816,3418327,826629-6,,,
+,,MK1,Mounting_Hole,Mechanical:Mounting_Hole,MountingHole:MountingHole_3.7mm_Pad_Via,-,-,-,,,
+,,Q1,2N7002,Transistor_FET:2N7002,Package_TO_SOT_SMD:SOT-23,https://www.fairchildsemi.com/datasheets/2N/2N7002.pdf,2317616,2N7002ET1G,,,
+,,R1,10E,Device:R,Resistor_SMD:R_1206_3216Metric,,,,,,
+,,R2,10E,Device:R,Resistor_SMD:R_1206_3216Metric,,,,,,
+,,R3,10E,Device:R,Resistor_SMD:R_1206_3216Metric,http://www.farnell.com/datasheets/2310790.pdf?_ga=2.157221117.792852979.1526285019-1651149783.1519657816,1653053,CRCW120610R0FKEB,,,
+,,R4,4k7,Device:R,Resistor_SMD:R_1206_3216Metric,,,,,,
+,,R5,10E,Device:R,Resistor_SMD:R_1206_3216Metric,,,,,,
+,,R6,4k7,Device:R,Resistor_SMD:R_1206_3216Metric,,,,,,
+,,R7,4k7,Device:R,Resistor_SMD:R_1206_3216Metric,,,,,,
+,,R8,100E,Device:R,Resistor_SMD:R_1206_3216Metric,http://www.farnell.com/datasheets/2310790.pdf?_ga=2.153896696.1588585681.1526323724-1626853455.1515011571,2616760,CRCW1206100RJNEA,,,
+,,R9,10E,Device:R,Resistor_SMD:R_1206_3216Metric,,,,,,
+,,R10,10E,Device:R,Resistor_SMD:R_1206_3216Metric,,,,,,
+,,R11,10E,Device:R,Resistor_SMD:R_1206_3216Metric,,,,,,
+,,R12,10E,Device:R,Resistor_SMD:R_1206_3216Metric,,,,,,
+,,R13,402k,Device:R,Resistor_SMD:R_1206_3216Metric,http://www.farnell.com/datasheets/2310790.pdf?_ga=2.210134357.1588585681.1526323724-1626853455.1515011571,2139646,CRCW1206402KFKEA,,,
+,,R14,4k7,Device:R,Resistor_SMD:R_1206_3216Metric,,,,,,
+,,R15,39k,Device:R,Resistor_SMD:R_1206_3216Metric,http://www.farnell.com/datasheets/2310790.pdf?_ga=2.246359748.1588585681.1526323724-1626853455.1515011571,2139553,CRCW120639K0FKEA,,,
+,,R16,0.025E,Device:R_Shunt,Resistor_SMD:R_Shunt_2512_6332Metric_0.005-0.2,http://www.farnell.com/datasheets/2050716.pdf?_ga=2.150801142.1588585681.1526323724-1626853455.1515011571,1107432,WSK2512R0250FEA,,,
+,,R17,4k99,Device:R,Resistor_SMD:R_1206_3216Metric,http://www.farnell.com/datasheets/2310790.pdf?_ga=2.212766420.1588585681.1526323724-1626853455.1515011571,1470015,CRCW12064K99FKEA,,,
+,,R18,100E,Device:R,Resistor_SMD:R_1206_3216Metric,,,,,,
+,,R19,10E,Device:R,Resistor_SMD:R_1206_3216Metric,,,,,,
+,,R20,2k00,Device:R,Resistor_SMD:R_1206_3216Metric,http://www.farnell.com/datasheets/2310790.pdf?_ga=2.246418116.1588585681.1526323724-1626853455.1515011571,1469985,CRCW12062K00FKEA,,,
+,,R21,5M11,Device:R,Resistor_SMD:R_1206_3216Metric,http://www.farnell.com/datasheets/2310790.pdf?_ga=2.154944504.1588585681.1526323724-1626853455.1515011571,2139776,CRCW12065M11FKEA,,,
+,,R22,10E,Device:R,Resistor_SMD:R_1206_3216Metric,,,,,,
+,,R23,100E,Device:R,Resistor_SMD:R_1206_3216Metric,,,,,,
+,,R24,3K3,Device:R,Resistor_SMD:R_1206_3216Metric,http://www.farnell.com/datasheets/2310790.pdf?_ga=2.243101122.1588585681.1526323724-1626853455.1515011571,1653122,CRCW12063K30FKEA,,,
+,,R25,4k7,Device:R,Resistor_SMD:R_1206_3216Metric,,,,,,
+,,R26,301E,Device:R,Resistor_SMD:R_1206_3216Metric,http://www.farnell.com/datasheets/2310790.pdf?_ga=2.18263423.792852979.1526285019-1651149783.1519657816,2139391,CRCW1206301RFKEA,,,
+,,R27,301E,Device:R,Resistor_SMD:R_1206_3216Metric,http://www.farnell.com/datasheets/2310790.pdf?_ga=2.55968109.792852979.1526285019-1651149783.1519657816,2139391,CRCW1206301RFKEA,,,
+,,R28,330E,Device:R,Resistor_SMD:R_1206_3216Metric,http://www.farnell.com/datasheets/2310790.pdf?_ga=2.55968109.792852979.1526285019-1651149783.1519657816,1470008,CRCW1206330RFKEA,,,
+,,R29,162E,Device:R,Resistor_SMD:R_1206_3216Metric,http://www.farnell.com/datasheets/2310790.pdf?_ga=2.48325984.792852979.1526285019-1651149783.1519657816,2139367,CRCW1206162RFKEA,,,
+,,R30,1k,Device:R,Resistor_SMD:R_1206_3216Metric,,,,,,
+,,R31,100K,Device:R,Resistor_SMD:R_1206_3216Metric,http://www.farnell.com/datasheets/2310790.pdf?_ga=2.147220983.1588585681.1526323724-1626853455.1515011571,1469975,CRCW1206100KFKEA,,,
+,,R32,10K,Device:R,Resistor_SMD:R_1206_3216Metric,,,,,,
+,,R33,402k,Device:R,Resistor_SMD:R_1206_3216Metric,,,,,,
+,,R34,10E,Device:R,Resistor_SMD:R_1206_3216Metric,,,,,,
+,,R35,162E,Device:R,Resistor_SMD:R_1206_3216Metric,http://www.farnell.com/datasheets/2310790.pdf?_ga=2.48325984.792852979.1526285019-1651149783.1519657816,2139367,CRCW1206162RFKEA,,,
+,,R36,10K,Device:R,Resistor_SMD:R_1206_3216Metric,http://www.farnell.com/datasheets/2310790.pdf?_ga=2.174924386.1588585681.1526323724-1626853455.1515011571,1469970,CRCW120610K0FKEA,,,
+,,R37,10E,Device:R,Resistor_SMD:R_1206_3216Metric,,,,,,
+,,R38,10E,Device:R,Resistor_SMD:R_1206_3216Metric,,,,,,
+,,R39,1k,Device:R,Resistor_SMD:R_1206_3216Metric,http://www.farnell.com/datasheets/2310790.pdf?_ga=2.180317540.1588585681.1526323724-1626853455.1515011571,1653077,CRCW12061K00JNEA,,,
+,,R40,4k7,Device:R,Resistor_SMD:R_1206_3216Metric,http://www.farnell.com/datasheets/2310790.pdf?_ga=2.142446194.1588585681.1526323724-1626853455.1515011571,1470014,CRCW12064K75FKEA,,,
+,,U1,ST485EBDR,TrackAmplifier-rescue:ST485EBDR-Interface_UART,Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,http://www.st.com/resource/en/datasheet/st485eb.pdf,1467755,ST485EBDR,,,
+,,U2,ST485EBDR,TrackAmplifier-rescue:ST485EBDR-Interface_UART,Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,http://www.st.com/resource/en/datasheet/st485eb.pdf,1467755,ST485EBDR,,,
+,,U3,LM78M05_TO252,Regulator_Linear:LM78M05_TO252,Package_TO_SOT_SMD:TO-252-2,http://www.fairchildsemi.com/ds/LM/LM78M05.pdf,2854542,LM78M05CDTX/NOPB,,,
+,,U4,LMD18200,TrackAmplifier-rescue:LMD18200-Driver_Motor,Package_TO_SOT_THT:TO-220-11_20.02x17.50mm_P3.4x5.08mm_StaggerOdd_Lead8.45mm_Tab-Down,http://www.ti.com/lit/ds/symlink/lmd18200.pdf,1468979,LMD18200T,,,
+,,U5,ST485EBDR,TrackAmplifier-rescue:ST485EBDR-Interface_UART,Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,http://www.st.com/resource/en/datasheet/st485eb.pdf,1467755,ST485EBDR,,,
+,,U6,ST485EBDR,TrackAmplifier-rescue:ST485EBDR-Interface_UART,Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,http://www.st.com/resource/en/datasheet/st485eb.pdf,1467755,ST485EBDR,,,
+,,U7,INA326,Amplifier_Instrumentation:INA326,Package_SO:MSOP-8_3x3mm_P0.65mm,http://www.ti.com/lit/ds/symlink/ina326.pdf,2764750,INA326EA/2K5,,,
+,,U8,INA326,Amplifier_Instrumentation:INA326,Package_SO:MSOP-8_3x3mm_P0.65mm,http://www.ti.com/lit/ds/symlink/ina326.pdf,2764750,INA326EA/2K5,,,
+,,U9,PIC16F18854-SO,TrackAmplifier-rescue:PIC16F18854-SO-MCU_Microchip_PIC16,Package_SO:SOIC-28W_7.5x17.9mm_P1.27mm,http://ww1.microchip.com/downloads/en/DeviceDoc/PIC16(L)F18854%20Data%20Sheet_DS40001826C.pdf,2696647,PIC16F18854-I/SO,,,
+,,U10,REF3025,Reference_Voltage:REF3025,Package_TO_SOT_SMD:SOT-23,http://www.ti.com/lit/ds/symlink/ref3033.pdf,1234684,REF3025AIDBZTG4,,,
+,,U11,LM35-LP,Sensor_Temperature:LM35-LP,Package_TO_SOT_THT:TO-92,http://www.ti.com/lit/ds/symlink/lm35.pdf,1469236,LM35DZ/NOPB,,,
+,,,,,,,,,,,
+,,,,,,,,,,,
+,,,,,,,,,,,
+Collated Components:,,,,,,,,,,,
+,,,,,,,,,,,
+Item,Qty,Reference(s),Value,LibPart,Footprint,Datasheet,Farnell,Manufacturer nr,,50 pieces,3 pieces
+1,14,"C1, C2, C5, C8, C11, C12, C13, C19, C23, C26, C32, C34, C36, C38",2.2u,TrackAmplifier-rescue:C,Capacitor_SMD:C_1206_3216Metric,http://www.farnell.com/datasheets/1901289.pdf?_ga=2.182791910.1588585681.1526323724-1626853455.1515011571,1759451,MC1206F225Z250CT,,700,42
+2,18,"C3, C4, C7, C9, C10, C14, C15, C20, C22, C24, C27, C28, C29, C30, C31, C33, C35, C37",100n,TrackAmplifier-rescue:C,Capacitor_SMD:C_1206_3216Metric,http://www.farnell.com/datasheets/2049140.pdf?_ga=2.261496907.792852979.1526285019-1651149783.1519657816,2395785,VJ1206Y104KXBAT,,900,54
+3,1,C6,470u,Device:CP,Capacitor_THT:CP_Radial_D10.0mm_P5.00mm,http://www.farnell.com/datasheets/2280829.pdf?_ga=2.252145225.1588585681.1526323724-1626853455.1515011571,2750201,,,50,3
+4,1,C16,220u,Device:CP,Capacitor_THT:CP_Radial_D6.3mm_P2.50mm,http://www.farnell.com/datasheets/2321433.pdf?_ga=2.88550747.1588585681.1526323724-1626853455.1515011571,2346568,16PX220MEFC6.3X11,,50,3
+5,2,"C17, C18",10n,TrackAmplifier-rescue:C,Capacitor_SMD:C_1206_3216Metric,http://www.farnell.com/datasheets/1723231.pdf?_ga=2.151530105.1588585681.1526323724-1626853455.1515011571,9406549,MCU1206R103KCT,,100,6
+6,2,"C21, C25",np,TrackAmplifier-rescue:C,Capacitor_SMD:C_1206_3216Metric,,,,,100,6
+7,5,"D1, D2, D3, D4, D8",LED,Device:LED,LED_SMD:LED_1206_3216Metric,http://www.farnell.com/datasheets/1671528.pdf?_ga=2.256265547.1588585681.1526323724-1626853455.1515011571,1581232,MCL-S250GC,,250,15
+8,5,"D5, D6, D7, D9, D10",1n4148,Device:D,Diode_SMD:D_1206_3216Metric,http://www.farnell.com/datasheets/2182681.pdf?_ga=2.239085891.1588585681.1526323724-1626853455.1515011571,2677464,,,250,15
+9,1,F1,2.5A,Device:Polyfuse,Fuse:Fuse_Bourns_MF-SM_7.98x5.44mm,http://www.farnell.com/datasheets/2038620.pdf?_ga=2.252661071.792852979.1526285019-1651149783.1519657816,9350268,MF-SM250-2,,50,3
+10,2,"FL1, FL2",EMI_Filter_CMode,Device:EMI_Filter_CommonMode,Inductor_THT:Choke_EPCOS_B82722-A2302-N1-22.3x22.7mm,http://www.farnell.com/datasheets/1860373.pdf?_ga=2.174943842.1588585681.1526323724-1626853455.1515011571,1223076,B82722A2202N001,,100,6
+11,1,J1,DB15_Male_MountingHoles,TrackAmplifier-rescue:DB15_Male_MountingHoles,Connector_Dsub:DSUB-15_Male_Horizontal_P2.77x2.84mm_EdgePinOffset4.94mm_Housed_MountingHolesOffset7.48mm,-,2294292,182-015-113R531,,50,3
+12,1,J2,Conn_01x06,Connector_Generic:Conn_01x06,Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical,http://www.farnell.com/datasheets/32535.pdf?_ga=2.160907771.792852979.1526285019-1651149783.1519657816,3418327,826629-6,,50,3
+13,1,MK1,Mounting_Hole,Mechanical:Mounting_Hole,MountingHole:MountingHole_3.7mm_Pad_Via,-,-,-,,50,3
+14,1,Q1,BVSS123LT1G,Transistor_FET:2N7002,Package_TO_SOT_SMD:SOT-23,https://www.fairchildsemi.com/datasheets/2N/2N7002.pdf,2727944,BVSS123LT1G,,50,3
+15,13,"R1, R2, R3, R5, R9, R10, R11, R12, R19, R22, R34, R37, R38",10E,Device:R,Resistor_SMD:R_1206_3216Metric,http://www.farnell.com/datasheets/2310790.pdf?_ga=2.157221117.792852979.1526285019-1651149783.1519657816,1653053,CRCW120610R0FKEB,,650,39
+16,6,"R4, R6, R7, R14, R25, R40",4k7,Device:R,Resistor_SMD:R_1206_3216Metric,http://www.farnell.com/datasheets/2310790.pdf?_ga=2.142446194.1588585681.1526323724-1626853455.1515011571,1470014,CRCW12064K75FKEA,,300,18
+17,3,"R8, R18, R23",100E,Device:R,Resistor_SMD:R_1206_3216Metric,http://www.farnell.com/datasheets/2310790.pdf?_ga=2.153896696.1588585681.1526323724-1626853455.1515011571,2616760,CRCW1206100RJNEA,,150,9
+18,2,"R13, R33",402k,Device:R,Resistor_SMD:R_1206_3216Metric,http://www.farnell.com/datasheets/2310790.pdf?_ga=2.210134357.1588585681.1526323724-1626853455.1515011571,2139646,CRCW1206402KFKEA,,100,6
+19,1,R15,39k,Device:R,Resistor_SMD:R_1206_3216Metric,http://www.farnell.com/datasheets/2310790.pdf?_ga=2.246359748.1588585681.1526323724-1626853455.1515011571,2139553,CRCW120639K0FKEA,,50,3
+20,1,R16,0.025E,Device:R_Shunt,Resistor_SMD:R_Shunt_2512_6332Metric_0.005-0.2,http://www.farnell.com/datasheets/2050716.pdf?_ga=2.150801142.1588585681.1526323724-1626853455.1515011571,1107432,WSK2512R0250FEA,,50,3
+21,1,R17,4k99,Device:R,Resistor_SMD:R_1206_3216Metric,http://www.farnell.com/datasheets/2310790.pdf?_ga=2.212766420.1588585681.1526323724-1626853455.1515011571,1470015,CRCW12064K99FKEA,,50,3
+22,1,R20,2k00,Device:R,Resistor_SMD:R_1206_3216Metric,http://www.farnell.com/datasheets/2310790.pdf?_ga=2.246418116.1588585681.1526323724-1626853455.1515011571,1469985,CRCW12062K00FKEA,,50,3
+23,1,R21,5M11,Device:R,Resistor_SMD:R_1206_3216Metric,http://www.farnell.com/datasheets/2310790.pdf?_ga=2.154944504.1588585681.1526323724-1626853455.1515011571,2139776,CRCW12065M11FKEA,,50,3
+24,1,R24,3K3,Device:R,Resistor_SMD:R_1206_3216Metric,http://www.farnell.com/datasheets/2310790.pdf?_ga=2.243101122.1588585681.1526323724-1626853455.1515011571,1653122,CRCW12063K30FKEA,,50,3
+25,2,"R26, R27",301E,Device:R,Resistor_SMD:R_1206_3216Metric,http://www.farnell.com/datasheets/2310790.pdf?_ga=2.18263423.792852979.1526285019-1651149783.1519657816,2139391,CRCW1206301RFKEA,,100,6
+26,1,R28,330E,Device:R,Resistor_SMD:R_1206_3216Metric,http://www.farnell.com/datasheets/2310790.pdf?_ga=2.55968109.792852979.1526285019-1651149783.1519657816,1470008,CRCW1206330RFKEA,,50,3
+27,2,"R29, R35",162E,Device:R,Resistor_SMD:R_1206_3216Metric,http://www.farnell.com/datasheets/2310790.pdf?_ga=2.48325984.792852979.1526285019-1651149783.1519657816,2139367,CRCW1206162RFKEA,,100,6
+28,2,"R30, R39",1k,Device:R,Resistor_SMD:R_1206_3216Metric,http://www.farnell.com/datasheets/2310790.pdf?_ga=2.180317540.1588585681.1526323724-1626853455.1515011571,1653077,CRCW12061K00JNEA,,100,6
+29,1,R31,100K,Device:R,Resistor_SMD:R_1206_3216Metric,http://www.farnell.com/datasheets/2310790.pdf?_ga=2.147220983.1588585681.1526323724-1626853455.1515011571,1469975,CRCW1206100KFKEA,,50,3
+30,2,"R32, R36",10K,Device:R,Resistor_SMD:R_1206_3216Metric,http://www.farnell.com/datasheets/2310790.pdf?_ga=2.174924386.1588585681.1526323724-1626853455.1515011571,1469970,CRCW120610K0FKEA,,100,6
+31,4,"U1, U2, U5, U6",ST485EBDR,TrackAmplifier-rescue:ST485EBDR-Interface_UART,Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,http://www.st.com/resource/en/datasheet/st485eb.pdf,1467755,ST485EBDR,,200,12
+32,1,U3,LM78M05_TO252,Regulator_Linear:LM78M05_TO252,Package_TO_SOT_SMD:TO-252-2,http://www.fairchildsemi.com/ds/LM/LM78M05.pdf,2854542,LM78M05CDTX/NOPB,,50,3
+33,1,U4,LMD18200,TrackAmplifier-rescue:LMD18200-Driver_Motor,Package_TO_SOT_THT:TO-220-11_20.02x17.50mm_P3.4x5.08mm_StaggerOdd_Lead8.45mm_Tab-Down,http://www.ti.com/lit/ds/symlink/lmd18200.pdf,1468979,LMD18200T,,50,3
+34,2,"U7, U8",INA326,Amplifier_Instrumentation:INA326,Package_SO:MSOP-8_3x3mm_P0.65mm,http://www.ti.com/lit/ds/symlink/ina326.pdf,2764750,INA326EA/2K5,,100,6
+35,1,U9,PIC16F18854-SO,TrackAmplifier-rescue:PIC16F18854-SO-MCU_Microchip_PIC16,Package_SO:SOIC-28W_7.5x17.9mm_P1.27mm,http://ww1.microchip.com/downloads/en/DeviceDoc/PIC16(L)F18854%20Data%20Sheet_DS40001826C.pdf,2696647,PIC16F18854-I/SO,,50,3
+36,1,U10,REF3025,Reference_Voltage:REF3025,Package_TO_SOT_SMD:SOT-23,http://www.ti.com/lit/ds/symlink/ref3033.pdf,1234684,REF3025AIDBZTG4,,50,3
+37,1,U11,LM35-LP,Sensor_Temperature:LM35-LP,Package_TO_SOT_THT:TO-92,http://www.ti.com/lit/ds/symlink/lm35.pdf,1469236,LM35DZ/NOPB,,50,3

@@ -1,0 +1,309 @@
+EESchema-LIBRARY Version 2.4
+#encoding utf-8
+#
+# ClockDistrTest-rescue:+5V-ClockDistrTest-rescue
+#
+DEF ClockDistrTest-rescue:+5V-ClockDistrTest-rescue #PWR 0 0 Y Y 1 F P
+F0 "#PWR" 0 -150 50 H I C CNN
+F1 "ClockDistrTest-rescue:+5V-ClockDistrTest-rescue" 0 140 50 H V C CNN
+F2 "" 0 0 50 H I C CNN
+F3 "" 0 0 50 H I C CNN
+DRAW
+P 2 0 1 0 -30 50 0 100 N
+P 2 0 1 0 0 0 0 100 N
+P 2 0 1 0 0 100 30 50 N
+X +5V 1 0 0 0 U 50 50 1 1 W N
+ENDDRAW
+ENDDEF
+#
+# ClockDistrTest-rescue:4049-ClockDistrTest-rescue
+#
+DEF ClockDistrTest-rescue:4049-ClockDistrTest-rescue U 0 40 Y Y 7 L N
+F0 "U" 0 50 50 H V C CNN
+F1 "ClockDistrTest-rescue:4049-ClockDistrTest-rescue" 0 -50 50 H V C CNN
+F2 "" 0 0 50 H I C CNN
+F3 "" 0 0 50 H I C CNN
+$FPLIST
+ DIP?16*
+$ENDFPLIST
+DRAW
+S -200 300 200 -300 7 1 10 f
+P 4 1 0 10 -150 150 -150 -150 150 0 -150 150 f
+P 4 2 0 10 -150 150 -150 -150 150 0 -150 150 f
+P 4 3 0 10 -150 150 -150 -150 150 0 -150 150 f
+P 4 4 0 10 -150 150 -150 -150 150 0 -150 150 f
+P 4 5 0 10 -150 150 -150 -150 150 0 -150 150 f
+P 4 6 0 10 -150 150 -150 -150 150 0 -150 150 f
+X ~ 2 300 0 150 L 50 50 1 0 O I
+X ~ 3 -300 0 150 R 50 50 1 0 I
+X ~ 4 300 0 150 L 50 50 2 0 O I
+X ~ 5 -300 0 150 R 50 50 2 0 I
+X ~ 6 300 0 150 L 50 50 3 0 O I
+X ~ 7 -300 0 150 R 50 50 3 0 I
+X ~ 10 300 0 150 L 50 50 4 0 O I
+X ~ 9 -300 0 150 R 50 50 4 0 I
+X ~ 11 -300 0 150 R 50 50 5 0 I
+X ~ 12 300 0 150 L 50 50 5 0 O I
+X ~ 14 -300 0 150 R 50 50 6 0 I
+X ~ 15 300 0 150 L 50 50 6 0 O I
+X VCC 1 0 500 200 D 50 50 7 0 W
+X VSS 8 0 -500 200 U 50 50 7 0 W
+ENDDRAW
+ENDDEF
+#
+# ClockDistrTest-rescue:C-ClockDistrTest-rescue
+#
+DEF ClockDistrTest-rescue:C-ClockDistrTest-rescue C 0 10 N Y 1 F N
+F0 "C" 25 100 50 H V L CNN
+F1 "ClockDistrTest-rescue:C-ClockDistrTest-rescue" 25 -100 50 H V L CNN
+F2 "" 38 -150 50 H I C CNN
+F3 "" 0 0 50 H I C CNN
+$FPLIST
+ *:C_*
+$ENDFPLIST
+DRAW
+P 2 0 1 20 -80 -30 80 -30 N
+P 2 0 1 20 -80 30 80 30 N
+X ~ 1 0 150 110 D 50 50 1 1 P
+X ~ 2 0 -150 110 U 50 50 1 1 P
+ENDDRAW
+ENDDEF
+#
+# ClockDistrTest-rescue:Conn_01x02_Male-ClockDistrTest-rescue
+#
+DEF ClockDistrTest-rescue:Conn_01x02_Male-ClockDistrTest-rescue J 0 40 Y N 1 F N
+F0 "J" 0 100 50 H V C CNN
+F1 "ClockDistrTest-rescue:Conn_01x02_Male-ClockDistrTest-rescue" 0 -200 50 H V C CNN
+F2 "" 0 0 50 H I C CNN
+F3 "" 0 0 50 H I C CNN
+$FPLIST
+ Connector*:*_1x??_*
+$ENDFPLIST
+DRAW
+S 34 -95 0 -105 1 1 6 F
+S 34 5 0 -5 1 1 6 F
+P 2 1 1 6 50 -100 34 -100 N
+P 2 1 1 6 50 0 34 0 N
+X Pin_1 1 200 0 150 L 50 50 1 1 P
+X Pin_2 2 200 -100 150 L 50 50 1 1 P
+ENDDRAW
+ENDDEF
+#
+# ClockDistrTest-rescue:Crystal-ClockDistrTest-rescue
+#
+DEF ClockDistrTest-rescue:Crystal-ClockDistrTest-rescue Y 0 40 N N 1 F N
+F0 "Y" 0 150 50 H V C CNN
+F1 "ClockDistrTest-rescue:Crystal-ClockDistrTest-rescue" 0 -150 50 H V C CNN
+F2 "" 0 0 50 H I C CNN
+F3 "" 0 0 50 H I C CNN
+$FPLIST
+ Crystal*
+$ENDFPLIST
+DRAW
+S -45 100 45 -100 0 1 12 N
+P 2 0 1 0 -100 0 -75 0 N
+P 2 0 1 20 -75 -50 -75 50 N
+P 2 0 1 20 75 -50 75 50 N
+P 2 0 1 0 100 0 75 0 N
+X 1 1 -150 0 50 R 50 50 1 1 P
+X 2 2 150 0 50 L 50 50 1 1 P
+ENDDRAW
+ENDDEF
+#
+# ClockDistrTest-rescue:GND-ClockDistrTest-rescue
+#
+DEF ClockDistrTest-rescue:GND-ClockDistrTest-rescue #PWR 0 0 Y Y 1 F P
+F0 "#PWR" 0 -250 50 H I C CNN
+F1 "ClockDistrTest-rescue:GND-ClockDistrTest-rescue" 0 -150 50 H V C CNN
+F2 "" 0 0 50 H I C CNN
+F3 "" 0 0 50 H I C CNN
+DRAW
+P 6 0 1 0 0 0 0 -50 50 -50 0 -100 -50 -50 0 -50 N
+X GND 1 0 0 0 D 50 50 1 1 W N
+ENDDRAW
+ENDDEF
+#
+# ClockDistrTest-rescue:LM7805_TO220-ClockDistrTest-rescue
+#
+DEF ClockDistrTest-rescue:LM7805_TO220-ClockDistrTest-rescue U 0 10 Y Y 1 F N
+F0 "U" -150 125 50 H V C CNN
+F1 "ClockDistrTest-rescue:LM7805_TO220-ClockDistrTest-rescue" 0 125 50 H V L CNN
+F2 "Package_TO_SOT_THT:TO-220-3_Vertical" 0 225 50 H I C CIN
+F3 "" 0 -50 50 H I C CNN
+$FPLIST
+ TO?220*
+$ENDFPLIST
+DRAW
+S -200 75 200 -200 0 1 10 f
+X VI 1 -300 0 100 R 50 50 1 1 W
+X GND 2 0 -300 100 U 50 50 1 1 W
+X VO 3 300 0 100 L 50 50 1 1 w
+ENDDRAW
+ENDDEF
+#
+# ClockDistrTest-rescue:NB3N511-ClockDistrTest-rescue
+#
+DEF ClockDistrTest-rescue:NB3N511-ClockDistrTest-rescue U 0 20 Y Y 1 F N
+F0 "U" 100 700 50 H V L CNN
+F1 "ClockDistrTest-rescue:NB3N511-ClockDistrTest-rescue" 100 600 50 H V L CNN
+F2 "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm" 50 -750 50 H I C CNN
+F3 "" 50 -850 50 H I C CNN
+$FPLIST
+ SOIC*P1.27mm*
+$ENDFPLIST
+DRAW
+S -300 500 300 -400 0 1 10 f
+X X1/CLK 1 -500 200 200 R 50 50 1 1 I
+X Vdd 2 0 700 200 D 50 50 1 1 W
+X GND 3 0 -600 200 U 50 50 1 1 w
+X S1 4 -500 -100 200 R 50 50 1 1 I
+X CLKOUT 5 500 0 200 L 50 50 1 1 O
+X S0 6 -500 0 200 R 50 50 1 1 I
+X OE 7 -500 -200 200 R 50 50 1 1 I
+X X2 8 -500 100 200 R 50 50 1 1 I
+ENDDRAW
+ENDDEF
+#
+# ClockDistrTest-rescue:R-ClockDistrTest-rescue
+#
+DEF ClockDistrTest-rescue:R-ClockDistrTest-rescue R 0 0 N Y 1 F N
+F0 "R" 80 0 50 V V C CNN
+F1 "ClockDistrTest-rescue:R-ClockDistrTest-rescue" 0 0 50 V V C CNN
+F2 "" -70 0 50 V I C CNN
+F3 "" 0 0 50 H I C CNN
+$FPLIST
+ *:R_*
+$ENDFPLIST
+DRAW
+S -40 -100 40 100 0 1 10 N
+X ~ 1 0 150 50 D 50 50 1 1 P
+X ~ 2 0 -150 50 U 50 50 1 1 P
+ENDDRAW
+ENDDEF
+#
+# ClockDistrTest-rescue:SG-531-ClockDistrTest-rescue
+#
+DEF ClockDistrTest-rescue:SG-531-ClockDistrTest-rescue X 0 10 Y Y 1 F N
+F0 "X" -200 250 50 H V L CNN
+F1 "ClockDistrTest-rescue:SG-531-ClockDistrTest-rescue" 50 -250 50 H V L CNN
+F2 "Oscillator:Oscillator_SeikoEpson_SG-8002DC" 450 -350 50 H I C CNN
+F3 "" -100 0 50 H I C CNN
+$FPLIST
+ *:Oscillator*SeikoEpson*SG?8002DC*
+$ENDFPLIST
+DRAW
+S -200 200 200 -200 0 1 10 f
+P 9 0 1 0 -75 -25 -50 -25 -50 25 -25 25 -25 -25 0 -25 0 25 25 25 25 -25 N
+X OE 1 -300 0 100 R 50 50 1 1 I
+X GND 4 0 -300 100 U 50 50 1 1 W
+X OUT 5 300 0 100 L 50 50 1 1 O
+X Vcc 8 0 300 100 D 50 50 1 1 W
+ENDDRAW
+ENDDEF
+#
+# Device:LED
+#
+DEF Device:LED D 0 40 Y N 1 F N
+F0 "D" 0 100 50 H V C CNN
+F1 "Device:LED" 0 -100 50 H V C CNN
+F2 "" 0 0 50 H I C CNN
+F3 "" 0 0 50 H I C CNN
+$FPLIST
+ LED*
+ LED_SMD:*
+ LED_THT:*
+$ENDFPLIST
+DRAW
+P 2 0 1 8 -50 -50 -50 50 N
+P 2 0 1 0 -50 0 50 0 N
+P 4 0 1 8 50 -50 50 50 -50 0 50 -50 N
+P 5 0 1 0 -120 -30 -180 -90 -150 -90 -180 -90 -180 -60 N
+P 5 0 1 0 -70 -30 -130 -90 -100 -90 -130 -90 -130 -60 N
+X K 1 -150 0 100 R 50 50 1 1 P
+X A 2 150 0 100 L 50 50 1 1 P
+ENDDRAW
+ENDDEF
+#
+# Interface_UART:MAX14783E
+#
+DEF Interface_UART:MAX14783E U 0 40 Y Y 1 F N
+F0 "U" -240 450 50 H V C CNN
+F1 "Interface_UART:MAX14783E" 30 450 50 H V L CNN
+F2 "" 0 -700 50 H I C CNN
+F3 "" 0 50 50 H I C CNN
+ALIAS MAX483E MAX485E MAX487E MAX1487E MAX3485 MAX3483 MAX3486 MAX14783E
+$FPLIST
+ DIP*W7.62mm*
+ SOIC*3.9x4.9mm*P1.27mm*
+$ENDFPLIST
+DRAW
+C -12 -145 14 0 1 10 F
+C -1 59 14 0 1 10 F
+C 65 75 14 0 1 10 F
+S -300 400 300 -500 0 1 10 f
+S 50 125 50 125 0 1 0 N
+P 2 0 1 10 -125 -200 -75 -200 N
+P 2 0 1 10 -125 100 -50 100 N
+P 2 0 1 10 -50 -126 -50 -136 N
+P 2 0 1 10 -25 -200 200 -200 N
+P 3 0 1 10 -125 -100 -50 -100 -50 -125 N
+P 3 0 1 10 0 50 0 0 -125 0 N
+P 3 0 1 10 50 125 150 125 150 -200 N
+P 3 0 1 10 100 75 100 -150 0 -150 N
+P 4 0 1 10 -75 -125 -75 -225 25 -175 -75 -125 N
+P 4 0 1 10 -50 100 50 150 50 50 -50 100 N
+P 4 0 1 10 75 75 175 75 175 100 200 100 N
+X RO 1 -400 100 100 R 50 50 1 1 O
+X ~RE 2 -400 0 100 R 50 50 1 1 I
+X DE 3 -400 -100 100 R 50 50 1 1 I
+X DI 4 -400 -200 100 R 50 50 1 1 I
+X GND 5 0 -600 100 U 50 50 1 1 W
+X A 6 400 -200 100 L 50 50 1 1 B
+X B 7 400 100 100 L 50 50 1 1 B
+X VCC 8 0 500 100 D 50 50 1 1 W
+ENDDRAW
+ENDDEF
+#
+# Interface_UART:MAX3284E
+#
+DEF Interface_UART:MAX3284E U 0 20 Y Y 1 F N
+F0 "U" -300 400 50 H V C CNN
+F1 "Interface_UART:MAX3284E" 200 400 50 H V L CNN
+F2 "Package_TO_SOT_SMD:SOT-23-6" 0 -700 50 H I C CNN
+F3 "" -10 -40 50 H I C CNN
+$FPLIST
+ SOT?23?6*
+$ENDFPLIST
+DRAW
+C -75 -15 14 0 1 10 F
+S -300 300 300 -300 0 1 10 f
+S -60 35 -60 35 0 1 0 N
+P 2 0 1 10 115 10 40 10 N
+P 4 0 1 10 -75 -15 -125 -15 -125 -100 -170 -100 N
+P 4 0 1 10 -60 35 -125 35 -125 95 -170 95 N
+P 4 0 1 10 40 10 -60 60 -60 -40 40 10 N
+X VCC 1 -100 400 100 D 50 50 1 1 W
+X GND 2 0 -400 100 U 50 50 1 1 W
+X RO 3 400 0 100 L 50 50 1 1 O
+X B 4 -400 -100 100 R 50 50 1 1 I
+X Vl 5 100 400 100 D 50 50 1 1 W
+X A 6 -400 100 100 R 50 50 1 1 I
+ENDDRAW
+ENDDEF
+#
+# pspice:DIODE
+#
+DEF pspice:DIODE D 0 40 Y N 1 F N
+F0 "D" 0 150 50 H V C CNN
+F1 "pspice:DIODE" 0 -175 50 H V C CNN
+F2 "" 0 0 50 H I C CNN
+F3 "" 0 0 50 H I C CNN
+DRAW
+P 2 0 1 0 75 100 75 -100 N
+P 3 0 1 0 -75 100 -75 -100 75 0 F
+X K 1 -200 0 150 R 50 50 1 1 I
+X A 2 200 0 150 L 50 50 1 1 I
+ENDDRAW
+ENDDEF
+#
+#End Library

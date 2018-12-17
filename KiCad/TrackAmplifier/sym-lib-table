@@ -1,0 +1,5 @@
+(sym_lib_table
+  (lib (name TrackAmplifier-rescue)(type Legacy)(uri ${KIPRJMOD}/TrackAmplifier-rescue.lib)(options "")(descr ""))
+  (lib (name MCU_MICROCHIP_PIC16)(type Legacy)(uri ${KIPRJMOD}/MCU_MICROCHIP_PIC16.lib)(options "")(descr ""))
+  (lib (name lmd18200d)(type Legacy)(uri ${KIPRJMOD}/lmd18200d.lib)(options "")(descr ""))
+)

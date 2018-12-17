@@ -1,0 +1,360 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<export version="D">
+  <design>
+    <source>C:\Localdata\GIT_REPO\Miscellaneous\KiCad\ModeltrainWagonLight2\Modelwagonlight.sch</source>
+    <date>12-12-2018 14:47:18</date>
+    <tool>Eeschema (5.0.0)</tool>
+    <sheet number="1" name="/" tstamps="/">
+      <title_block>
+        <title/>
+        <company/>
+        <rev/>
+        <date/>
+        <source>Modelwagonlight.sch</source>
+        <comment number="1" value=""/>
+        <comment number="2" value=""/>
+        <comment number="3" value=""/>
+        <comment number="4" value=""/>
+      </title_block>
+    </sheet>
+  </design>
+  <components>
+    <comp ref="D1">
+      <value>STPS0540Z</value>
+      <footprint>Diodes_SMD:D_SOD-123</footprint>
+      <datasheet>http://www.farnell.com/datasheets/2307147.pdf?_ga=2.156369662.418749504.1544431297-523844734.1542029203&amp;_gac=1.55988569.1544607905.Cj0KCQiAgMPgBRDDARIsAOh3uyLPfvJVUZkf7WxE18rn4hxFId_d7BLsoZhKQT-s5UnN8AQpoENdC_QaAjuvEALw_wcB</datasheet>
+      <fields>
+        <field name="Farnell">1175677</field>
+        <field name="Manufacturer nr">STPS0540Z</field>
+      </fields>
+      <libsource lib="device" part="D" description="Diode"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5A9520CA</tstamp>
+    </comp>
+    <comp ref="R1">
+      <value>47E</value>
+      <footprint>Resistors_SMD:R_1206</footprint>
+      <datasheet>http://www.farnell.com/datasheets/2331353.pdf?_ga=2.124196682.13702668.1544197496-523844734.1542029203&amp;_gac=1.140706310.1543322461.EAIaIQobChMIof7Tlcz03gIVkuJ3Ch1UVwqwEAAYASAAEgK8PvD_BwE</datasheet>
+      <fields>
+        <field name="Farnell">1100156</field>
+        <field name="Manufacturer nr">WCR1206-47RFI</field>
+      </fields>
+      <libsource lib="device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5A952272</tstamp>
+    </comp>
+    <comp ref="R4">
+      <value>470E</value>
+      <footprint>Resistors_SMD:R_1206</footprint>
+      <datasheet>http://www.farnell.com/datasheets/2331353.pdf?_ga=2.192410474.13702668.1544197496-523844734.1542029203&amp;_gac=1.212666656.1543322461.EAIaIQobChMIof7Tlcz03gIVkuJ3Ch1UVwqwEAAYASAAEgK8PvD_BwE</datasheet>
+      <fields>
+        <field name="Farnell">1100183</field>
+        <field name="Manufacturer nr">WCR1206-470RFI</field>
+      </fields>
+      <libsource lib="device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AB3A528</tstamp>
+    </comp>
+    <comp ref="R5">
+      <value>NP</value>
+      <footprint>Resistors_SMD:R_1206</footprint>
+      <libsource lib="device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5ABB5CE8</tstamp>
+    </comp>
+    <comp ref="R6">
+      <value>NP</value>
+      <footprint>Resistors_SMD:R_1206</footprint>
+      <libsource lib="device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5ABB5D36</tstamp>
+    </comp>
+    <comp ref="C1">
+      <value>22uF</value>
+      <footprint>Capacitors_THT:CP_Radial_D6.3mm_P2.50mm</footprint>
+      <datasheet>http://www.farnell.com/datasheets/1662440.pdf?_ga=2.122364238.418749504.1544431297-523844734.1542029203&amp;_gac=1.125792376.1544607905.Cj0KCQiAgMPgBRDDARIsAOh3uyLPfvJVUZkf7WxE18rn4hxFId_d7BLsoZhKQT-s5UnN8AQpoENdC_QaAjuvEALw_wcB</datasheet>
+      <fields>
+        <field name="Farnell">9452397</field>
+        <field name="Manufacturer nr">MCUMHR35V226M6.3X5</field>
+      </fields>
+      <libsource lib="device" part="CP" description="Polarised capacitor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5ABB8BA8</tstamp>
+    </comp>
+    <comp ref="J1">
+      <value>Conn_01x01</value>
+      <footprint>Contact_fingers:Pin_Header_Straight_1x01_Pitch1.00mm</footprint>
+      <libsource lib="Modelwagonlight-rescue" part="Conn_01x01" description=""/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5ABBBE6F</tstamp>
+    </comp>
+    <comp ref="J2">
+      <value>Conn_01x01</value>
+      <footprint>Contact_fingers:Pin_Header_Straight_1x01_Pitch1.00mm</footprint>
+      <libsource lib="Modelwagonlight-rescue" part="Conn_01x01" description=""/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5ABBBEC0</tstamp>
+    </comp>
+    <comp ref="J3">
+      <value>Conn_01x01</value>
+      <footprint>Contact_fingers:Pin_Header_Straight_1x01_Pitch1.00mm</footprint>
+      <libsource lib="Modelwagonlight-rescue" part="Conn_01x01" description=""/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5ABBC0DE</tstamp>
+    </comp>
+    <comp ref="J4">
+      <value>Conn_01x01</value>
+      <footprint>Contact_fingers:Pin_Header_Straight_1x01_Pitch1.00mm</footprint>
+      <libsource lib="Modelwagonlight-rescue" part="Conn_01x01" description=""/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5ABBC139</tstamp>
+    </comp>
+    <comp ref="U1">
+      <value>LP2951DR</value>
+      <footprint>SMD_Packages:SOIC-8-N</footprint>
+      <datasheet>http://www.ti.com/general/docs/lit/getliterature.tsp?genericPartNumber=LP2951&amp;fileType=pdf</datasheet>
+      <fields>
+        <field name="Farnell">2781769</field>
+        <field name="Manufacturer nr">LP2951DR</field>
+      </fields>
+      <libsource lib="LP2951DR-SOIC8" part="LP2951DR" description="LP2951 Adjustable Micropower Voltage Regulators with Shutdown"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AC38140</tstamp>
+    </comp>
+    <comp ref="C3">
+      <value>100n</value>
+      <footprint>Capacitors_SMD:C_1206</footprint>
+      <datasheet>http://www.farnell.com/datasheets/1901289.pdf?_ga=2.262491141.804204398.1540810031-466615820.1533907205&amp;_gac=1.154756810.1540810031.CjwKCAjw39reBRBJEiwAO1m0OUdqKKSX6YgNsFqfn4kAD7vSQS5JfvsNobbwGFQV72towt0oHUutJhoC7b8QAvD_BwE</datasheet>
+      <fields>
+        <field name="Farnell">2896646</field>
+        <field name="Manufacturer nr">VJ1206Y104KXXPW1BC</field>
+      </fields>
+      <libsource lib="device" part="C" description="Unpolarized capacitor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5AC4A12F</tstamp>
+    </comp>
+    <comp ref="C2">
+      <value>22uF</value>
+      <footprint>Capacitors_THT:CP_Radial_D6.3mm_P2.50mm</footprint>
+      <datasheet>http://www.farnell.com/datasheets/1662440.pdf?_ga=2.122364238.418749504.1544431297-523844734.1542029203&amp;_gac=1.125792376.1544607905.Cj0KCQiAgMPgBRDDARIsAOh3uyLPfvJVUZkf7WxE18rn4hxFId_d7BLsoZhKQT-s5UnN8AQpoENdC_QaAjuvEALw_wcB</datasheet>
+      <fields>
+        <field name="Farnell">9452397</field>
+        <field name="Manufacturer nr">MCUMHR35V226M6.3X5</field>
+      </fields>
+      <libsource lib="device" part="CP" description="Polarised capacitor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5C10E3DF</tstamp>
+    </comp>
+    <comp ref="C4">
+      <value>100n</value>
+      <footprint>Capacitors_SMD:C_1206</footprint>
+      <datasheet>http://www.farnell.com/datasheets/1901289.pdf?_ga=2.262491141.804204398.1540810031-466615820.1533907205&amp;_gac=1.154756810.1540810031.CjwKCAjw39reBRBJEiwAO1m0OUdqKKSX6YgNsFqfn4kAD7vSQS5JfvsNobbwGFQV72towt0oHUutJhoC7b8QAvD_BwE</datasheet>
+      <fields>
+        <field name="Farnell">2896646</field>
+        <field name="Manufacturer nr">VJ1206Y104KXXPW1BC</field>
+      </fields>
+      <libsource lib="device" part="C" description="Unpolarized capacitor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5C10E574</tstamp>
+    </comp>
+    <comp ref="D2">
+      <value>STPS0540Z</value>
+      <footprint>Diodes_SMD:D_SOD-123</footprint>
+      <datasheet>http://www.farnell.com/datasheets/2307147.pdf?_ga=2.156369662.418749504.1544431297-523844734.1542029203&amp;_gac=1.55988569.1544607905.Cj0KCQiAgMPgBRDDARIsAOh3uyLPfvJVUZkf7WxE18rn4hxFId_d7BLsoZhKQT-s5UnN8AQpoENdC_QaAjuvEALw_wcB</datasheet>
+      <fields>
+        <field name="Farnell">1175677</field>
+        <field name="Manufacturer nr">STPS0540Z</field>
+      </fields>
+      <libsource lib="device" part="D" description="Diode"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5C10E997</tstamp>
+    </comp>
+    <comp ref="D3">
+      <value>STPS0540Z</value>
+      <footprint>Diodes_SMD:D_SOD-123</footprint>
+      <datasheet>http://www.farnell.com/datasheets/2307147.pdf?_ga=2.156369662.418749504.1544431297-523844734.1542029203&amp;_gac=1.55988569.1544607905.Cj0KCQiAgMPgBRDDARIsAOh3uyLPfvJVUZkf7WxE18rn4hxFId_d7BLsoZhKQT-s5UnN8AQpoENdC_QaAjuvEALw_wcB</datasheet>
+      <fields>
+        <field name="Farnell">1175677</field>
+        <field name="Manufacturer nr">STPS0540Z</field>
+      </fields>
+      <libsource lib="device" part="D" description="Diode"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5C10E9F9</tstamp>
+    </comp>
+    <comp ref="D4">
+      <value>STPS0540Z</value>
+      <footprint>Diodes_SMD:D_SOD-123</footprint>
+      <datasheet>http://www.farnell.com/datasheets/2307147.pdf?_ga=2.156369662.418749504.1544431297-523844734.1542029203&amp;_gac=1.55988569.1544607905.Cj0KCQiAgMPgBRDDARIsAOh3uyLPfvJVUZkf7WxE18rn4hxFId_d7BLsoZhKQT-s5UnN8AQpoENdC_QaAjuvEALw_wcB</datasheet>
+      <fields>
+        <field name="Farnell">1175677</field>
+        <field name="Manufacturer nr">STPS0540Z</field>
+      </fields>
+      <libsource lib="device" part="D" description="Diode"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5C10EA75</tstamp>
+    </comp>
+  </components>
+  <libparts>
+    <libpart lib="LP2951DR-SOIC8" part="LP2951DR">
+      <description>LP2951 Adjustable Micropower Voltage Regulators with Shutdown</description>
+      <docs>http://www.ti.com/lit/ds/symlink/lp2951.pdf</docs>
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">LP2951DR</field>
+      </fields>
+      <pins>
+        <pin num="1" name="Output" type="output"/>
+        <pin num="2" name="Sense" type="input"/>
+        <pin num="3" name="Shutdown" type="input"/>
+        <pin num="4" name="Gnd" type="power_in"/>
+        <pin num="5" name="~Error" type="output"/>
+        <pin num="6" name="Vtap" type="output"/>
+        <pin num="7" name="Feedback" type="input"/>
+        <pin num="8" name="Input" type="input"/>
+      </pins>
+    </libpart>
+    <libpart lib="Modelwagonlight-rescue" part="Conn_01x01">
+      <footprints>
+        <fp>Connector*:*_??x*mm*</fp>
+        <fp>Connector*:*1x??x*mm*</fp>
+        <fp>Pin?Header?Straight?1X*</fp>
+        <fp>Pin?Header?Angled?1X*</fp>
+        <fp>Socket?Strip?Straight?1X*</fp>
+        <fp>Socket?Strip?Angled?1X*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">Conn_01x01</field>
+      </fields>
+      <pins>
+        <pin num="1" name="Pin_1" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="device" part="C">
+      <description>Unpolarized capacitor</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>C_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">C</field>
+        <field name="Value">C</field>
+      </fields>
+      <pins>
+        <pin num="1" name="~" type="passive"/>
+        <pin num="2" name="~" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="device" part="CP">
+      <description>Polarised capacitor</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>CP_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">C</field>
+        <field name="Value">CP</field>
+      </fields>
+      <pins>
+        <pin num="1" name="~" type="passive"/>
+        <pin num="2" name="~" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="device" part="D">
+      <description>Diode</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>TO-???*</fp>
+        <fp>*_Diode_*</fp>
+        <fp>*SingleDiode*</fp>
+        <fp>D_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">D</field>
+        <field name="Value">D</field>
+      </fields>
+      <pins>
+        <pin num="1" name="K" type="passive"/>
+        <pin num="2" name="A" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="device" part="R">
+      <description>Resistor</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>R_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">R</field>
+        <field name="Value">R</field>
+      </fields>
+      <pins>
+        <pin num="1" name="~" type="passive"/>
+        <pin num="2" name="~" type="passive"/>
+      </pins>
+    </libpart>
+  </libparts>
+  <libraries>
+    <library logical="LP2951DR-SOIC8">
+      <uri>C:\Localdata\GIT_REPO\Miscellaneous\KiCad\ModeltrainWagonLight2/LP2951DR-SOIC8.lib</uri>
+    </library>
+    <library logical="Modelwagonlight-rescue">
+      <uri>C:\Localdata\GIT_REPO\Miscellaneous\KiCad\ModeltrainWagonLight2/Modelwagonlight-rescue.lib</uri>
+    </library>
+    <library logical="device">
+      <uri>C:\Localdata\KiCad\share\kicad\library/device.lib</uri>
+    </library>
+  </libraries>
+  <nets>
+    <net code="1" name="Net-(C3-Pad1)">
+      <node ref="U1" pin="8"/>
+      <node ref="J4" pin="1"/>
+      <node ref="C3" pin="1"/>
+    </net>
+    <net code="2" name="Net-(C1-Pad2)">
+      <node ref="C2" pin="2"/>
+      <node ref="C4" pin="2"/>
+      <node ref="R5" pin="1"/>
+      <node ref="U1" pin="5"/>
+      <node ref="R6" pin="1"/>
+      <node ref="C1" pin="2"/>
+      <node ref="C3" pin="2"/>
+      <node ref="R4" pin="1"/>
+      <node ref="U1" pin="2"/>
+      <node ref="U1" pin="6"/>
+      <node ref="U1" pin="3"/>
+      <node ref="U1" pin="4"/>
+      <node ref="D4" pin="2"/>
+      <node ref="D3" pin="2"/>
+    </net>
+    <net code="3" name="Net-(C1-Pad1)">
+      <node ref="C1" pin="1"/>
+      <node ref="D1" pin="1"/>
+      <node ref="D2" pin="1"/>
+      <node ref="J3" pin="1"/>
+    </net>
+    <net code="4" name="Net-(D2-Pad2)">
+      <node ref="J2" pin="1"/>
+      <node ref="D4" pin="1"/>
+      <node ref="D2" pin="2"/>
+    </net>
+    <net code="5" name="Net-(D1-Pad2)">
+      <node ref="D3" pin="1"/>
+      <node ref="D1" pin="2"/>
+      <node ref="R1" pin="2"/>
+    </net>
+    <net code="6" name="Net-(J1-Pad1)">
+      <node ref="R1" pin="1"/>
+      <node ref="J1" pin="1"/>
+    </net>
+    <net code="7" name="Net-(C2-Pad1)">
+      <node ref="C2" pin="1"/>
+      <node ref="C4" pin="1"/>
+      <node ref="U1" pin="7"/>
+      <node ref="U1" pin="1"/>
+      <node ref="R4" pin="2"/>
+      <node ref="R6" pin="2"/>
+      <node ref="R5" pin="2"/>
+    </net>
+  </nets>
+</export>

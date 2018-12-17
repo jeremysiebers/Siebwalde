@@ -1,0 +1,147 @@
+EESchema Schematic File Version 4
+EELAYER 26 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 1
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L Connector:8P8C J1
+U 1 1 5AF57A5E
+P 1600 1450
+F 0 "J1" H 1655 2117 50  0000 C CNN
+F 1 "8P8C" H 1655 2026 50  0000 C CNN
+F 2 "Connector_RJ:RJ45_8" V 1600 1475 50  0001 C CNN
+F 3 "~" V 1600 1475 50  0001 C CNN
+	1    1600 1450
+	1    0    0    -1  
+$EndComp
+$Comp
+L Connector:8P8C J2
+U 1 1 5AF57ACA
+P 7150 1450
+F 0 "J2" H 6820 1546 50  0000 R CNN
+F 1 "8P8C" H 6820 1455 50  0000 R CNN
+F 2 "Connector_RJ:RJ45_8" V 7150 1475 50  0001 C CNN
+F 3 "~" V 7150 1475 50  0001 C CNN
+	1    7150 1450
+	-1   0    0    -1  
+$EndComp
+Wire Wire Line
+	2000 1750 6750 1750
+Wire Wire Line
+	2000 1650 2200 1650
+Wire Wire Line
+	2000 1050 2200 1050
+Wire Wire Line
+	2000 1150 6750 1150
+$Comp
+L Device:R R?
+U 1 1 5AF58E69
+P 2100 2350
+F 0 "R?" H 2170 2396 50  0000 L CNN
+F 1 "10E" H 2170 2305 50  0000 L CNN
+F 2 "Resistor_THT:R_Axial_DIN0204_L3.6mm_D1.6mm_P7.62mm_Horizontal" V 2030 2350 50  0001 C CNN
+F 3 "~" H 2100 2350 50  0001 C CNN
+	1    2100 2350
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R?
+U 1 1 5AF58FDB
+P 2100 2700
+F 0 "R?" H 2170 2746 50  0000 L CNN
+F 1 "10E" H 2170 2655 50  0000 L CNN
+F 2 "Resistor_THT:R_Axial_DIN0204_L3.6mm_D1.6mm_P7.62mm_Horizontal" V 2030 2700 50  0001 C CNN
+F 3 "~" H 2100 2700 50  0001 C CNN
+	1    2100 2700
+	1    0    0    -1  
+$EndComp
+$Comp
+L 74xx:74HC595 U?
+U 1 1 5AF5907B
+P 4500 3400
+F 0 "U?" H 4500 4278 50  0000 C CNN
+F 1 "74HC595" H 4500 4187 50  0000 C CNN
+F 2 "" H 4500 3400 50  0001 C CNN
+F 3 "http://www.nxp.com/documents/data_sheet/74HC_HCT595.pdf" H 4500 3400 50  0001 C CNN
+	1    4500 3400
+	1    0    0    -1  
+$EndComp
+$Comp
+L Regulator_Linear:LM78L05_TO92 U?
+U 1 1 5AF5918B
+P 2550 3400
+F 0 "U?" H 2550 3642 50  0000 C CNN
+F 1 "LM78L05_TO92" H 2550 3551 50  0000 C CNN
+F 2 "Package_TO_SOT_THT:TO-92_Inline" H 2550 3625 50  0001 C CIN
+F 3 "http://www.fairchildsemi.com/ds/LM/LM78L05A.pdf" H 2550 3350 50  0001 C CNN
+	1    2550 3400
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 5AF591F6
+P 2200 1900
+F 0 "#PWR?" H 2200 1650 50  0001 C CNN
+F 1 "GND" H 2205 1727 50  0000 C CNN
+F 2 "" H 2200 1900 50  0001 C CNN
+F 3 "" H 2200 1900 50  0001 C CNN
+	1    2200 1900
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2000 1450 2200 1450
+Wire Wire Line
+	2000 1250 2200 1250
+Wire Wire Line
+	2200 1900 2200 1650
+Connection ~ 2200 1650
+Wire Wire Line
+	2200 1650 6750 1650
+Wire Wire Line
+	2200 1450 2200 1650
+Connection ~ 2200 1450
+Wire Wire Line
+	2200 1450 6750 1450
+Wire Wire Line
+	2200 1250 2200 1450
+Connection ~ 2200 1250
+Wire Wire Line
+	2200 1050 2200 1250
+Connection ~ 2200 1050
+Wire Wire Line
+	2200 1050 6750 1050
+$Comp
+L power:+5V #PWR?
+U 1 1 5AF595AC
+P 2450 950
+F 0 "#PWR?" H 2450 800 50  0001 C CNN
+F 1 "+5V" H 2465 1123 50  0000 C CNN
+F 2 "" H 2450 950 50  0001 C CNN
+F 3 "" H 2450 950 50  0001 C CNN
+	1    2450 950 
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2000 1350 6750 1350
+Wire Wire Line
+	2200 1250 6750 1250
+Wire Wire Line
+	6750 1550 2450 1550
+Wire Wire Line
+	2450 1550 2450 950 
+Connection ~ 2450 1550
+Wire Wire Line
+	2000 1550 2450 1550
+Text GLabel 3100 800  0    50   Input ~ 0
+SER
+$EndSCHEMATC
