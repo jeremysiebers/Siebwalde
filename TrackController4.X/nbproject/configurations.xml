@@ -264,6 +264,12 @@
         <property key="user-pack-device-support" value=""/>
       </XC8-config-global>
       <item path="main_tracer.c" ex="true" overriding="false">
+        <HI-TECH-COMP>
+        </HI-TECH-COMP>
+        <HI-TECH-LINK>
+        </HI-TECH-LINK>
+        <XC8-config-global>
+        </XC8-config-global>
       </item>
       <pk4hybrid>
         <property key="AutoSelectMemRanges" value="auto"/>
@@ -522,6 +528,12 @@
         <property key="user-pack-device-support" value=""/>
       </XC8-config-global>
       <item path="main.c" ex="true" overriding="false">
+        <HI-TECH-COMP>
+        </HI-TECH-COMP>
+        <HI-TECH-LINK>
+        </HI-TECH-LINK>
+        <XC8-config-global>
+        </XC8-config-global>
       </item>
       <pk4hybrid>
         <property key="AutoSelectMemRanges" value="auto"/>

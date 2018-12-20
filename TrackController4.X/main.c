@@ -60,6 +60,7 @@ static SLAVE_INFO         SlaveInfo[NUMBER_OF_SLAVES];
 
 unsigned int StateMachine = 1;
 unsigned int _Delay = 0;
+unsigned int disable_trace = 1;
 /*----------------------------------------------------------------------------*/
 
 void main(void)
