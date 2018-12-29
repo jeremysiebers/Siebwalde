@@ -267,7 +267,7 @@ Wire Wire Line
 Wire Wire Line
 	6600 4100 6800 4100
 Wire Wire Line
-	6450 4650 6800 4650
+	6450 4650 6700 4650
 $Comp
 L device:C C4
 U 1 1 5C10E574
@@ -346,4 +346,20 @@ F 5 "GRM31CR61E226ME15L" H 8700 4250 50  0001 C CNN "Manufacturer nr"
 	1    8700 4250
 	1    0    0    -1  
 $EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 5C1839A0
+P 6700 4900
+F 0 "#PWR?" H 6700 4650 50  0001 C CNN
+F 1 "GND" H 6705 4727 50  0000 C CNN
+F 2 "" H 6700 4900 50  0001 C CNN
+F 3 "" H 6700 4900 50  0001 C CNN
+	1    6700 4900
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6700 4900 6700 4650
+Connection ~ 6700 4650
+Wire Wire Line
+	6700 4650 6800 4650
 $EndSCHEMATC

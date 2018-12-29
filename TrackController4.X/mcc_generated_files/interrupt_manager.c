@@ -99,7 +99,7 @@ void interrupt low_priority INTERRUPT_InterruptManagerLow (void)
             PIR1bits.TMR1IF = 0;
             
             
-            
+            /*
             switch(out){
                 case 0 : PORTE = 0  ;out += 1;
                 break;
@@ -122,7 +122,7 @@ void interrupt low_priority INTERRUPT_InterruptManagerLow (void)
                 default : out = 0;
                 break;                
             }
-            PORTE |= PORTF;
+            PORTE |= PORTF;*/
         } 
         else if(PIE1bits.TX1IE == 1 && PIR1bits.TX1IF == 1)
         {
