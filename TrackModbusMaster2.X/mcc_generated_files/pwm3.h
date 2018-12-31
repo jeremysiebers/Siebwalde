@@ -1,20 +1,20 @@
  /**
-   PWM6 Generated Driver API Header File
+   PWM3 Generated Driver API Header File
  
    @Company
      Microchip Technology Inc. 
 
    @File Name
-    pwm6.h
+    pwm3.h
 
    @Summary
-     This is the generated header file for the PWM6 driver using PIC10 / PIC12 / PIC16 / PIC18 MCUs
+     This is the generated header file for the PWM3 driver using PIC10 / PIC12 / PIC16 / PIC18 MCUs
  
    @Description
-     This header file provides APIs for driver for PWM6.
+     This header file provides APIs for driver for PWM3.
      Generation Information :
          Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.65.2
-         Device            :  PIC16F18857
+         Device            :  PIC18F25K40
          Driver Version    :  2.01
      The generated drivers are tested against the following:
          Compiler          :  XC8 1.45 or later
@@ -44,8 +44,8 @@
     SOFTWARE.
 */
 
-#ifndef PWM6_H
- #define PWM6_H
+#ifndef PWM3_H
+ #define PWM3_H
  
  /**
    Section: Included Files
@@ -64,7 +64,7 @@
    Section: Macro Declarations
  */
 
- #define PWM6_INITIALIZE_DUTY_VALUE    39
+ #define PWM3_INITIALIZE_DUTY_VALUE    39
 
  /**
    Section: PWM Module APIs
@@ -72,11 +72,11 @@
 
  /**
    @Summary
-     Initializes the PWM6
+     Initializes the PWM3
 
    @Description
-     This routine initializes the EPWM6_Initialize
-     This routine must be called before any other PWM6 routine is called.
+     This routine initializes the EPWM3_Initialize
+     This routine must be called before any other PWM3 routine is called.
      This routine should only be called once during system initialization.
 
    @Preconditions
@@ -95,11 +95,11 @@
      <code>
      uint16_t dutycycle;
 
-     PWM6_Initialize();
-     PWM6_LoadDutyValue(dutycycle);
+     PWM3_Initialize();
+     PWM3_LoadDutyValue(dutycycle);
      </code>
   */
- void PWM6_Initialize(void);
+ void PWM3_Initialize(void);
 
  /**
    @Summary
@@ -109,7 +109,7 @@
      This routine loads the 16 bit duty cycle value.
 
    @Preconditions
-     PWM6_Initialize() function should have been called 
+     PWM3_Initialize() function should have been called 
          before calling this function.
 
    @Param
@@ -122,11 +122,11 @@
      <code>
      uint16_t dutycycle;
 
-     PWM6_Initialize();
-     PWM6_LoadDutyValue(dutycycle);
+     PWM3_Initialize();
+     PWM3_LoadDutyValue(dutycycle);
      </code>
  */
- void PWM6_LoadDutyValue(uint16_t dutyValue);
+ void PWM3_LoadDutyValue(uint16_t dutyValue);
 
  
  #ifdef __cplusplus  // Provide C++ Compatibility
@@ -135,7 +135,7 @@
 
  #endif
 
- #endif	//PWM6_H
+ #endif	//PWM3_H
  /**
   End of File
  */

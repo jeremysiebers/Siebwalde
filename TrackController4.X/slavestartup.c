@@ -150,7 +150,7 @@ unsigned int ConfigureSlave(unsigned int TrackBackPlaneID, unsigned int Amplifie
     
     switch(StartupMachine){
         case 0:
-            MASTER_SLAVE_DATA[0].HoldingReg[1] = TrackBackPlaneID;           // Set address to TrackBackplane slave 51
+            MASTER_SLAVE_DATA[0].HoldingReg[1] = TrackBackPlaneID;              // Set address to TrackBackplane slave 51
             MASTER_SLAVE_DATA[0].HoldingReg[2] = AmplifierLatchSet;             // Data = Set AMP_ID5_SET_LAT 0x10 in TrackBackplaneSlave
             MASTER_SLAVE_DATA[0].HoldingReg[3] = 0;                             // Register number to write to
             MASTER_SLAVE_DATA[0].HoldingReg[0] = MODE_MAN & WRITE & HOLDINGREG & EXEC;
@@ -192,7 +192,7 @@ unsigned int ConfigureSlave(unsigned int TrackBackPlaneID, unsigned int Amplifie
             break;    
 
         case 6:
-            MASTER_SLAVE_DATA[0].HoldingReg[1] = TrackBackPlaneID;           // Set address to TrackBackplane slave 55
+            MASTER_SLAVE_DATA[0].HoldingReg[1] = TrackBackPlaneID;              // Set address to TrackBackplane slave 55
             MASTER_SLAVE_DATA[0].HoldingReg[2] = 0xFFFF;                        // Data = Release all select lines
             MASTER_SLAVE_DATA[0].HoldingReg[3] = 0;                             // Register number to write to
             MASTER_SLAVE_DATA[0].HoldingReg[0] = MODE_MAN & WRITE & HOLDINGREG & EXEC;
@@ -201,7 +201,7 @@ unsigned int ConfigureSlave(unsigned int TrackBackPlaneID, unsigned int Amplifie
 
         case 7:
             if(MASTER_SLAVE_DATA[0].InputReg[0] == OK){
-                MASTER_SLAVE_DATA[0].HoldingReg[0] = MODE_MAN & WRITE & HOLDINGREG & HALT; // Remove the execute command and set to auto
+                MASTER_SLAVE_DATA[0].HoldingReg[0] = MODE_MAN & WRITE & HOLDINGREG & HALT; // Remove the execute command
                 StartupMachine = 8;
             }
             break;

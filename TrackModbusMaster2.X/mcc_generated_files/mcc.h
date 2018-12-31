@@ -14,7 +14,7 @@
     This header file provides implementations for driver APIs for all modules selected in the GUI.
     Generation Information :
         Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.65.2
-        Device            :  PIC16F18857
+        Device            :  PIC18F25K40
         Driver Version    :  2.00
     The generated drivers are tested against the following:
         Compiler          :  XC8 1.45 or later
@@ -47,6 +47,7 @@
 #ifndef MCC_H
 #define	MCC_H
 #include <xc.h>
+#include "device_config.h"
 #include "pin_manager.h"
 #include <stdint.h>
 #include <stdbool.h>
@@ -54,14 +55,13 @@
 #include "spi1.h"
 #include "tmr3.h"
 #include "tmr4.h"
-#include "pwm6.h"
 #include "tmr1.h"
 #include "tmr2.h"
 #include "crc.h"
 #include "tmr0.h"
+#include "pwm3.h"
 #include "eusart.h"
 
-#define _XTAL_FREQ  32000000
 
 
 /**

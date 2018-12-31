@@ -96,33 +96,7 @@ void interrupt low_priority INTERRUPT_InterruptManagerLow (void)
         {
             //TMR1_ISR();
             UPDATExTERMINAL = 1;            
-            PIR1bits.TMR1IF = 0;
-            
-            
-            /*
-            switch(out){
-                case 0 : PORTE = 0  ;out += 1;
-                break;
-                case 1 : PORTE = 0x1;out += 1;
-                break;
-                case 2 : PORTE = 0x2;out += 1;
-                break;
-                case 3 : PORTE = 0x4;out += 1;
-                break;
-                case 4 : PORTE = 0x8;out += 1;
-                break;
-                case 5 : PORTE = 0x10;out += 1;
-                break;
-                case 6 : PORTE = 0x20;out += 1;
-                break;
-                case 7 : PORTE = 0x40;out += 1;
-                break;
-                case 8 : PORTE = 0x80;out = 0;
-                break;
-                default : out = 0;
-                break;                
-            }
-            PORTE |= PORTF;*/
+            PIR1bits.TMR1IF = 0;            
         } 
         else if(PIE1bits.TX1IE == 1 && PIR1bits.TX1IF == 1)
         {

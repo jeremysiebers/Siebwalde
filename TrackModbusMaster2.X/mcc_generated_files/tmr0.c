@@ -14,8 +14,8 @@
     This source file provides APIs for TMR0.
     Generation Information :
         Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.65.2
-        Device            :  PIC16F18857
-        Driver Version    :  3.00
+        Device            :  PIC18F25K40
+        Driver Version    :  3.10
     The generated drivers are tested against the following:
         Compiler          :  XC8 1.45
         MPLAB 	          :  MPLAB X 4.15
@@ -66,8 +66,8 @@ void TMR0_Initialize(void)
 {
     // Set TMR0 to the options selected in the User Interface
 
-    // T0CS FOSC/4; T0CKPS 1:256; T0ASYNC synchronised; 
-    T0CON1 = 0x48;
+    // T0CS FOSC/4; T0CKPS 1:512; T0ASYNC synchronised; 
+    T0CON1 = 0x49;
 
     // TMR0H 243; 
     TMR0H = 0xF3;
@@ -76,7 +76,7 @@ void TMR0_Initialize(void)
     TMR0L = 0xCB;
 
     // Load TMR0 value to the 16-bit reload variable
-    timer0ReloadVal16bit = (uint16_t)(TMR0H << 8) | TMR0L;
+    timer0ReloadVal16bit = (TMR0H << 8) | TMR0L;
 
     // Clearing IF flag
     PIR0bits.TMR0IF = 0;

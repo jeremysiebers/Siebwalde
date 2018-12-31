@@ -14,8 +14,8 @@
     This source file provides APIs for CRC.
     Generation Information :
         Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.65.2
-        Device            :  PIC16F18857
-        Driver Version    :  2.00
+        Device            :  PIC18F25K40
+        Driver Version    :  2.10
     The generated drivers are tested against the following:
         Compiler          :  XC8 1.45
         MPLAB             :  MPLAB X 4.15
@@ -398,7 +398,7 @@ void CRC_SCAN_StopScanner(void);
     crcVal = CRC_CalculatedResultGet(NORMAL,0x00);
     </code>
 */
-void CRC_SCAN_SetAddressLimit(uint16_t startAddr,uint16_t endAddr);
+void CRC_SCAN_SetAddressLimit(uint32_t startAddr, uint32_t endAddr);
 
 /**
   @Summary

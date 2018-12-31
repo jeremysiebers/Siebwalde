@@ -17,5 +17,6 @@ void InitUART(void)
 void InitTMR(void)
 {    
     TMR3_SetInterruptHandler(PetitModbusIntHandlerTMR);                         // MessageTimeoutTimer(e.g. ~4.5 char timeout)
-    TMR1_SetInterruptHandler(PetitModbusIntHandlerSlaveTimeOutTMR);             // SlaveAnswerTimeoutTimer (Master required timer)
+    //TMR1_SetInterruptHandler(PetitModbusIntHandlerSlaveTimeOutTMR);             // SlaveAnswerTimeoutTimer (Master required timer)
+    //basically all interrupt handlers are not used anymore
 }

@@ -16,8 +16,8 @@
     all modules selected in the GUI.
     Generation Information :
         Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.65.2
-        Device            :  PIC16F18857
-        Driver Version    :  1.03
+        Device            :  PIC18F25K40
+        Driver Version    :  2.03
     The generated drivers are tested against the following:
         Compiler          :  XC8 1.45 or later
         MPLAB 	          :  MPLAB X 4.15
@@ -96,18 +96,18 @@
     INTERRUPT_PeripheralInterruptDisable();
  */
 #define INTERRUPT_PeripheralInterruptDisable() (INTCONbits.PEIE = 0)
+
 /**
  * @Param
     none
  * @Returns
     none
  * @Description
-    Main interrupt service routine. Calls module interrupt handlers.
+    Initializes PIC18 peripheral interrupt priorities; enables/disables priority vectors
  * @Example
-    INTERRUPT_InterruptManager();
+    INTERRUPT_Initialize();
  */
-void interrupt INTERRUPT_InterruptManager(void);
-
+void INTERRUPT_Initialize (void);
 
 #endif  // INTERRUPT_MANAGER_H
 /**

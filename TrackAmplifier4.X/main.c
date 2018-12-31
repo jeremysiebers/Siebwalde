@@ -51,11 +51,6 @@ void main(void) {
     LM_PWM_LAT      = 0;
     LM_BRAKE_LAT    = 1;
     
-    __delay_ms(10);       
-    
-    INTCONbits.GIE = 1;
-    INTCONbits.PEIE = 1;
-    
     MODBUS_ADDRESS = 0xAA;                                                      // Address to listen to get configured when ID pin is pulled low 170 dec.    
     InitPetitModbus(MODBUS_ADDRESS);
 /*----------------------------------------------------------------------------*/

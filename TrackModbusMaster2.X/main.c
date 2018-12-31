@@ -43,7 +43,11 @@ unsigned char HoldingRegisterWrite[7] = {0, 0, 0, 1, 2, 0, 0};                  
                                                                                 // number of registers High, number of registers Low, 
                                                                                 // byte count, Register Value Hi, Register Value Lo} 
 
-void main(void) {
+/*
+                         Main application
+ */
+void main(void)
+{
     // Initialize the SLAVE_INFO struct with slave numbers
     for (char i = 0; i <NUMBER_OF_SLAVES; i++){
         SlaveInfo[i].SlaveNumber = i;
@@ -54,24 +58,37 @@ void main(void) {
     // Initialize the device
     SYSTEM_Initialize();
     TMR1_StopTimer();                                                           // prevent timer1 from setting slave timeout to 1.
-    
+
+    // If using interrupts in PIC18 High/Low Priority Mode you need to enable the Global High and Low Interrupts
+    // If using interrupts in PIC Mid-Range Compatibility Mode you need to enable the Global and Peripheral Interrupts
+    // Use the following macros to:
+
+    // Enable the Global Interrupts
+    INTERRUPT_GlobalInterruptEnable();
+
+    // Disable the Global Interrupts
+    //INTERRUPT_GlobalInterruptDisable();
+
+    // Enable the Peripheral Interrupts
+    INTERRUPT_PeripheralInterruptEnable();
+
+    // Disable the Peripheral Interrupts
+    //INTERRUPT_PeripheralInterruptDisable();
+
     LED_RUN_LAT = 0;
     LED_WAR_LAT = 0;
     LED_ERR_LAT = 1;    
     LED_TX_LAT = 0;
     LED_RX_LAT = 0;
     
-    __delay_ms(50);                                                            // Wait longer then the slaves (1000ms)
+    __delay_ms(50);                                                             // Wait longer then the slaves (1000ms)
     
     TMR0_StartTimer();                                                          // TX/RX led timer
     
     InitPetitModbus(SlaveInfo);                                                 // Pass address of array of struct for data storage
     InitSlaveCommunication(SlaveInfo);                                          // Pass address of array of struct for data storage
     TX_ENA_LAT = 1;                                                             // Enable TX, master TX is always enabled.
-    
-    INTCONbits.GIE = 1;
-    INTCONbits.PEIE = 1;
-    
+        
     LED_RUN_LAT = 1;
     LED_WAR_LAT = 0;
     LED_ERR_LAT = 0;
@@ -80,6 +97,8 @@ void main(void) {
     
     while(1)
     {
+        ProcessPetitModbus();
+        
         switch((SlaveInfo[0].HoldingReg[0] & 0x01)){
             case 0:                
                 switch(CommandMachine){
@@ -155,8 +174,8 @@ void main(void) {
                 
             case 1:
                 if (UpdateNextSlave == true){
-                    ProcessNextSlave();
                     UpdateNextSlave = false;
+                    ProcessNextSlave();                    
                     AllSlavesReadAllDataCounter++;
                     if (AllSlavesReadAllDataCounter > ALLxSLAVESxDATA){
                         AllSlavesReadAllDataCounter = 1;
@@ -168,10 +187,21 @@ void main(void) {
                 break;
         }
         
-        ProcessPetitModbus();
+//        if (UpdateNextSlave == true){
+//            ProcessNextSlave();
+//            UpdateNextSlave = false;
+//            AllSlavesReadAllDataCounter++;
+//            if (AllSlavesReadAllDataCounter > ALLxSLAVESxDATA){
+//                AllSlavesReadAllDataCounter = 1;
+//            }
+//        }
         
-        if (ProcessSlaveCommunication() == true){                       // check if modbus communication is running/finished/failed
-            //modbus_sync_LAT = 1;                        
+        if (((SlaveInfo[0].HoldingReg[0] & 0x01) == 0) && UpdateNextSlave == true){
+            ProcessSlaveCommunication(true);
+            UpdateNextSlave = false;
+        }
+        else{
+            ProcessSlaveCommunication(false);
         }
          
         Led_Blink();
@@ -230,3 +260,6 @@ void Led_Blink (){
         TMR0_Reload();
     }
 }
+/**
+ End of File
+*/

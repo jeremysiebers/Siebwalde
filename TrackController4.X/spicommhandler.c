@@ -151,20 +151,23 @@ void ProcessSpiInterrupt(){
     SS1_Check_LAT = 0;
     
     while(!DATAxREADY){
-        if (SSP2STATbits.BF){
-            SS1_Check_LAT = 1;
+        
+        
+        if (SSP2STATbits.BF){  
             
-            RECEIVEDxDATAxRAW[DATAxCOUNTxRECEIVED] = SSP2BUF;                       
-            DATAxCOUNTxRECEIVED++;            
+            SS1_Check_LAT = 1; 
             
+            RECEIVEDxDATAxRAW[DATAxCOUNTxRECEIVED] = SSP2BUF; 
             SSP2BUF = SENDxDATAxRAW[DATAxCOUNTxSEND];
+            
+            SS1_Check_LAT = 0;
+            
+            DATAxCOUNTxRECEIVED++;
             DATAxCOUNTxSEND++;
             
             if (DATAxCOUNTxRECEIVED > DATAxSTRUCTxLENGTH){
                 DATAxREADY = 1;
-            }
-            
-            SS1_Check_LAT = 0;        
+            }      
         }
     }
     
@@ -217,11 +220,7 @@ void ProcessSpiData(){
     pSlaveInfoTraceMask = &(SlaveInfoTraceMask.Header);                    // set the pointer to the first element of the SlaveInfoWriteMask
     
     if(RECEIVEDxDATAxRAW[1] < NUMBER_OF_SLAVES && RECEIVEDxDATAxRAW[0]==0xAA && RECEIVEDxDATAxRAW[DATAxSTRUCTxLENGTH-1]==0x55){
-        DataReceivedOk = 1;
-        if(disable_trace == 0 && RECEIVEDxDATAxRAW[1] == 1){
-            EUSART1_Write(0xAA);
-            Read_Check_LAT ^= 1;
-        }
+        DataReceivedOk = 1;        
     }
     else{
         DataReceivedOk = 0;
@@ -231,12 +230,7 @@ void ProcessSpiData(){
     for(unsigned int i = 0; i < DATAxSTRUCTxLENGTH; i++){                       // last received dummy byte is not used/checked
         
         if(*pSlaveInfoReadMask && DataReceivedOk){                              // If data received is OK and mask approves a write then process
-            *pSlaveDataReceived = RECEIVEDxDATAxRAW[i];                         // for DATAxSTRUCTxLENGTH set every byte into RECEIVEDxDATAxRAW array according to read mask
-            
-            if(disable_trace == 0 && RECEIVEDxDATAxRAW[1] == 1 && *pSlaveInfoTraceMask){// output trace data from slave 1 only
-                Read_Check_LAT ^= 1;
-                EUSART1_Write(RECEIVEDxDATAxRAW[i]);            
-            }
+            *pSlaveDataReceived = RECEIVEDxDATAxRAW[i];                         // for DATAxSTRUCTxLENGTH set every byte into RECEIVEDxDATAxRAW array according to read mask                        
         }
         
         
@@ -252,12 +246,6 @@ void ProcessSpiData(){
     DataFromSlaveSend++;                                                        // Count down the slaves of which the info still need to be send
     if(DataFromSlaveSend > (NUMBER_OF_SLAVES - 1)){
         DataFromSlaveSend = 0;
-    }
-    
-    if(disable_trace == 0 && RECEIVEDxDATAxRAW[1] == 1){
-        Read_Check_LAT ^= 1;
-        EUSART1_Write(0x55);
-        Read_Check_LAT = 0;
     }
 }
 

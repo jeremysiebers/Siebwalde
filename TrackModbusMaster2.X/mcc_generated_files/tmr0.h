@@ -14,8 +14,8 @@
     This header file provides APIs for TMR0.
     Generation Information :
         Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.65.2
-        Device            :  PIC16F18857
-        Driver Version    :  3.00
+        Device            :  PIC18F25K40
+        Driver Version    :  3.10
     The generated drivers are tested against the following:
         Compiler          :  XC8 1.45
         MPLAB 	          :  MPLAB X 4.15

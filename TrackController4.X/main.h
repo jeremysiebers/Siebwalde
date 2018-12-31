@@ -17,9 +17,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#define NUMBER_OF_SLAVES    5   
-
-extern unsigned int disable_trace;
+#define NUMBER_OF_SLAVES    5
 
 typedef enum
 {

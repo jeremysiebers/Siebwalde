@@ -14,8 +14,8 @@
     This header file provides implementations for pin APIs for all pins selected in the GUI.
     Generation Information :
         Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.65.2
-        Device            :  PIC16F18857
-        Driver Version    :  2.01
+        Device            :  PIC18F25K40
+        Driver Version    :  2.11
     The generated drivers are tested against the following:
         Compiler          :  XC8 1.45
         MPLAB             :  MPLAB X 4.15
@@ -73,9 +73,9 @@ void PIN_MANAGER_Initialize(void)
     /**
     ANSELx registers
     */
-    ANSELC = 0x00;
+    ANSELC = 0x80;
     ANSELB = 0x00;
-    ANSELA = 0x1F;
+    ANSELA = 0x3F;
 
     /**
     WPUx registers
@@ -92,6 +92,13 @@ void PIN_MANAGER_Initialize(void)
     ODCONB = 0x00;
     ODCONC = 0x00;
 
+    /**
+    SLRCONx registers
+    */
+    SLRCONA = 0xFF;
+    SLRCONB = 0xFF;
+    SLRCONC = 0xFF;
+
 
 
 
@@ -99,14 +106,13 @@ void PIN_MANAGER_Initialize(void)
    
     
 	
-    T2AINPPSbits.T2AINPPS = 0x13;   //RC3->TMR2:T2IN;    
-    RC0PPS = 0x0E;   //RC0->PWM6:PWM6OUT;    
-    SSP1CLKPPSbits.SSP1CLKPPS = 0x08;   //RB0->MSSP1:SCK1;    
-    SSP1DATPPSbits.SSP1DATPPS = 0x14;   //RC4->MSSP1:SDI1;    
-    RXPPSbits.RXPPS = 0x13;   //RC3->EUSART:RX;    
-    RB0PPS = 0x14;   //RB0->MSSP1:SCK1;    
-    RC1PPS = 0x10;   //RC1->EUSART:TX;    
-    RC5PPS = 0x15;   //RC5->MSSP1:SDO1;    
+    RC0PPS = 0x07;   //RC0->PWM3:PWM3;    
+    RXPPS = 0x13;   //RC3->EUSART:RX;    
+    SSP1CLKPPS = 0x08;   //RB0->MSSP1:SCK1;    
+    RB0PPS = 0x0D;   //RB0->MSSP1:SCK1;    
+    RC1PPS = 0x09;   //RC1->EUSART:TX;    
+    RC5PPS = 0x0E;   //RC5->MSSP1:SDO1;    
+    SSP1DATPPS = 0x14;   //RC4->MSSP1:SDI1;    
 }
   
 void PIN_MANAGER_IOC(void)

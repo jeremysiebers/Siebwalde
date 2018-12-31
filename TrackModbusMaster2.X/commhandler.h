@@ -17,8 +17,8 @@ extern "C" {
 #endif /* __cplusplus */
     
 extern void InitSlaveCommunication(SLAVE_INFO *location);
-void ProcessNextSlave(void);
-unsigned int ProcessSlaveCommunication(void);
+extern void ProcessNextSlave(void);
+extern unsigned int ProcessSlaveCommunication(unsigned int ForceSpiUpdate);
 
 #ifdef	__cplusplus
 }

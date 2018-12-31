@@ -14,8 +14,8 @@
     This source file provides APIs for TMR4.
     Generation Information :
         Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.65.2
-        Device            :  PIC16F18857
-        Driver Version    :  2.01
+        Device            :  PIC18F25K40
+        Driver Version    :  2.11
     The generated drivers are tested against the following:
         Compiler          :  XC8 1.45 
         MPLAB 	          :  MPLAB X 4.15
@@ -81,8 +81,8 @@ void TMR4_Initialize(void)
     // Clearing IF flag.
     PIR4bits.TMR4IF = 0;
 
-    // T4CKPS 1:2; T4OUTPS 1:1; TMR4ON on; 
-    T4CON = 0x90;
+    // T4CKPS 1:4; T4OUTPS 1:1; TMR4ON on; 
+    T4CON = 0xA0;
 }
 
 void TMR4_ModeSet(TMR4_HLT_MODE mode)

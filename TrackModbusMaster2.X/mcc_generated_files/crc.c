@@ -14,8 +14,8 @@
     This source file provides APIs for CRC.
     Generation Information :
         Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.65.2
-        Device            :  PIC16F18857
-        Driver Version    :  2.00
+        Device            :  PIC18F25K40
+        Driver Version    :  2.10
     The generated drivers are tested against the following:
         Compiler          :  XC8 1.45
         MPLAB             :  MPLAB X 4.15
@@ -88,13 +88,17 @@ void CRC_Initialize(void)
     CRCACCH = 0x00;
     // SCANINTM not affected; SCANGO disabled; SCANEN disabled; SCANMODE Concurrent mode; 
     SCANCON0 = 0x00;
-    // LADRH 0; 
+    // LADR 0; 
+    SCANLADRU = 0x00;
+    // LADR 0; 
     SCANLADRH = 0x00;
-    // LADRL 0; 
+    // LADR 0; 
     SCANLADRL = 0x00;
-    // HADRH 255; 
+    // HADR 63; 
+    SCANHADRU = 0x3F;
+    // HADR 255; 
     SCANHADRH = 0xFF;
-    // HADRL 255; 
+    // HADR 255; 
     SCANHADRL = 0xFF;
     // SCANTSEL LFINTOSC; 
     SCANTRIG = 0x00;
@@ -197,14 +201,16 @@ void CRC_SCAN_StopScanner(void)
     CRCCON0bits.CRCGO = 0;
 }
 
-void CRC_SCAN_SetAddressLimit(uint16_t startAddr, uint16_t endAddr)
+void CRC_SCAN_SetAddressLimit(uint32_t startAddr, uint32_t endAddr)
 {
     // Load end address limit
+	SCANHADRU = 0x3F & (endAddr >> 16);
 	SCANHADRH = 0xFF & (endAddr >> 8);
 	SCANHADRL = 0xFF & endAddr;
 	
     // Load start address limit
-	SCANLADRH = 0xFF & (startAddr >>8);
+	SCANLADRU = 0x3F & (startAddr >> 16);
+	SCANLADRH = 0xFF & (startAddr >> 8);
 	SCANLADRL = 0xFF & startAddr;
 }
 

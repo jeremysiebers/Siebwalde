@@ -1,20 +1,20 @@
  /**
-   PWM6 Generated Driver File
+   PWM3 Generated Driver File
  
    @Company
      Microchip Technology Inc.
  
    @File Name
-     pwm6.c
+     pwm3.c
  
    @Summary
-     This is the generated driver implementation file for the PWM6 driver using PIC10 / PIC12 / PIC16 / PIC18 MCUs
+     This is the generated driver implementation file for the PWM3 driver using PIC10 / PIC12 / PIC16 / PIC18 MCUs
  
    @Description
-     This source file provides implementations for driver APIs for PWM6.
+     This source file provides implementations for driver APIs for PWM3.
      Generation Information :
          Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.65.2
-         Device            :  PIC16F18857
+         Device            :  PIC18F25K40
          Driver Version    :  2.01
      The generated drivers are tested against the following:
          Compiler          :  XC8 1.45 or later
@@ -49,35 +49,35 @@
  */
 
  #include <xc.h>
- #include "pwm6.h"
+ #include "pwm3.h"
 
  /**
    Section: PWM Module APIs
  */
 
- void PWM6_Initialize(void)
+ void PWM3_Initialize(void)
  {
     // Set the PWM to the options selected in the PIC10 / PIC12 / PIC16 / PIC18 MCUs.
-    // PWM6POL active_hi; PWM6EN enabled; 
-    PWM6CON = 0x80;   
+    // PWM3POL active_hi; PWM3EN enabled; 
+    PWM3CON = 0x80;   
 
     // DC 9; 
-    PWM6DCH = 0x09;   
+    PWM3DCH = 0x09;   
 
     // DC 3; 
-    PWM6DCL = 0xC0;   
+    PWM3DCL = 0xC0;   
 
     // Select timer
-    CCPTMRS1bits.P6TSEL = 2;
+    CCPTMRSbits.P3TSEL = 2;
  }
 
- void PWM6_LoadDutyValue(uint16_t dutyValue)
+ void PWM3_LoadDutyValue(uint16_t dutyValue)
  {
      // Writing to 8 MSBs of PWM duty cycle in PWMDCH register
-     PWM6DCH = (dutyValue & 0x03FC)>>2;
+     PWM3DCH = (dutyValue & 0x03FC)>>2;
      
      // Writing to 2 LSBs of PWM duty cycle in PWMDCL register
-     PWM6DCL = (dutyValue & 0x0003)<<6;
+     PWM3DCL = (dutyValue & 0x0003)<<6;
  }
  /**
   End of File

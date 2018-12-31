@@ -14,8 +14,8 @@
     This header file provides APIs for driver for TMR2.
     Generation Information :
         Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.65.2
-        Device            :  PIC16F18857
-        Driver Version    :  2.01
+        Device            :  PIC18F25K40
+        Driver Version    :  2.11
     The generated drivers are tested against the following:
         Compiler          :  XC8 1.45 
         MPLAB 	          :  MPLAB X 4.15
@@ -242,25 +242,13 @@ typedef enum
      */
     TMR2_CCP2_OUT,
 
-     /* CCP3_OUT is the Timer external reset source 
+    /* PWM3_out is the Timer external reset source 
      */
-    TMR2_CCP3_OUT,
+    TMR2_PWM3_OUT,
 
-    /* CCP4_OUT is the Timer external reset source 
+     /* PWM4_out is the Timer external reset source 
      */
-    TMR2_CCP4_OUT,
-
-    /* CCP5_OUT is the Timer external reset source 
-     */
-    TMR2_CCP5_OUT,
-
-    /* PWM6_out is the Timer external reset source 
-     */
-    TMR2_PWM6_OUT,
-
-     /* PWM7_out is the Timer external reset source 
-     */
-    TMR2_PWM7_OUT,
+    TMR2_PWM4_OUT,
 
     /* C1_OUT_SYNC is the Timer external reset source 
      */
@@ -272,23 +260,7 @@ typedef enum
 
     /* ZCD_Output is the Timer external reset source 
      */
-    TMR2_ZCD_OUTPUT,
-
-    /* CLC1_out is the Timer external reset source 
-     */
-    TMR2_CLC1_OUT,
-         
-    /* CLC2_out is the Timer external reset source 
-     */
-    TMR2_CLC2_OUT,
-            
-    /* CLC3_out is the Timer external reset source 
-     */
-    TMR2_CLC3_OUT,
-
-    /* CLC4_out is the Timer external reset source 
-     */
-    TMR2_CLC4_OUT
+    TMR2_ZCD_OUTPUT
 
 } TMR2_HLT_EXT_RESET_SOURCE;
 

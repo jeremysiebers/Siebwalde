@@ -14,8 +14,8 @@
     This source file provides APIs for TMR3.
     Generation Information :
         Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.65.2
-        Device            :  PIC16F18857
-        Driver Version    :  2.01
+        Device            :  PIC18F25K40
+        Driver Version    :  2.11
     The generated drivers are tested against the following:
         Compiler          :  XC8 1.45
         MPLAB 	          :  MPLAB X 4.15
@@ -74,11 +74,11 @@ void TMR3_Initialize(void)
     //CS FOSC/4; 
     T3CLK = 0x01;
 
-    //TMR3H 249; 
-    TMR3H = 0xF9;
+    //TMR3H 243; 
+    TMR3H = 0xF3;
 
-    //TMR3L 192; 
-    TMR3L = 0xC0;
+    //TMR3L 128; 
+    TMR3L = 0x80;
 
     // Load the TMR value to reload variable
     timer3ReloadVal=(uint16_t)((TMR3H << 8) | TMR3L);

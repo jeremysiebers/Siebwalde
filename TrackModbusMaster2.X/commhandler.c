@@ -203,12 +203,15 @@ void ProcessNextSlave(){
  *  Notes      : Keeps track of communication with a slave
  */
 /*#--------------------------------------------------------------------------#*/
-unsigned int ProcessSlaveCommunication(){
+static unsigned int SpiUpdate = false;
+
+unsigned int ProcessSlaveCommunication(unsigned int ForceSpiUpdate){
     
     unsigned int Return_Val = false;
     
     switch (MASTER_SLAVE_DATA[ProcessSlave].MbCommError){
         case SLAVE_DATA_BUSY:
+            SpiUpdate = true;
             Return_Val = false;
             // count here how long the Mod-bus stack is busy, otherwise reset/action             
             break;
@@ -248,11 +251,12 @@ unsigned int ProcessSlaveCommunication(){
             break;
     }
     
-    if (Return_Val == true){
-        //__delay_us(60);                                                       // when debugging is required on oscilloscope, waittime till tmr3 is done
-        while (T2TMR < 0xD0){                                                   // Send SPI data on a defined moment in time within the 2ms TMR2 interrupt
-            
-        }
+    if (Return_Val == true && (SpiUpdate == true || ForceSpiUpdate == true)){
+        SpiUpdate = false;
+//        __delay_us(60);                                                         // when debugging is required on oscilloscope, wait time till tmr3 is done
+//        while (T2TMR < 0xE8){                                                   // Send SPI data on a defined moment in time within the 2ms TMR2 interrupt
+//            
+//        }
         SendDataToEthernet();
     }
     
@@ -296,6 +300,15 @@ void SendDataToEthernet(){
         }
         dataOut[bytesWritten] = SSP1BUF;
         bytesWritten++;
+//        NOP();                                                                  // give SPI slave time to process the data NOP() is 3 cycles delay ~288ns
+//        NOP();
+//        NOP();
+//        NOP();
+//        NOP();
+//        NOP();
+//        NOP();
+//        NOP();
+        __delay_us(1);
     }
     SS1_LAT = 1;   
     
