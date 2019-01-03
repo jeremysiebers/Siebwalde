@@ -74,11 +74,11 @@ void TMR3_Initialize(void)
     //CS FOSC/4; 
     T3CLK = 0x01;
 
-    //TMR3H 249; 
-    TMR3H = 0xF9;
+    //TMR3H 254; 
+    TMR3H = 0xFE;
 
-    //TMR3L 32; 
-    TMR3L = 0x20;
+    //TMR3L 112; 
+    TMR3L = 0x70;
 
     // Load the TMR value to reload variable
     timer3ReloadVal=(uint16_t)((TMR3H << 8) | TMR3L);
@@ -92,8 +92,8 @@ void TMR3_Initialize(void)
     // Set Default Interrupt Handler
     TMR3_SetInterruptHandler(TMR3_DefaultInterruptHandler);
 
-    // CKPS 1:2; nT3SYNC synchronize; TMR3ON enabled; T3RD16 disabled; 
-    T3CON = 0x11;
+    // CKPS 1:1; nT3SYNC synchronize; TMR3ON enabled; T3RD16 disabled; 
+    T3CON = 0x01;
 }
 
 void TMR3_StartTimer(void)

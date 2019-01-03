@@ -144,9 +144,8 @@ void INITxSPIxCOMMxHANDLER(SLAVE_INFO *location)
 void ProcessSpiInterrupt(){
     SS1_Check_LAT = 1; 
     RECEIVEDxDATAxRAW[DATAxCOUNTxRECEIVED] = SSP2BUF;                       
-    DATAxCOUNTxRECEIVED++;            
-
     SSP2BUF = SENDxDATAxRAW[DATAxCOUNTxSEND];
+    DATAxCOUNTxRECEIVED++;
     DATAxCOUNTxSEND++;
     SS1_Check_LAT = 0;
     

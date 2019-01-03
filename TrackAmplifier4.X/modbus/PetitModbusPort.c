@@ -29,10 +29,13 @@ void PetitModBus_UART_Putch(unsigned char c)
 // This is used for send string, better to use DMA for it ;)
 unsigned char PetitModBus_UART_String(unsigned char *s, unsigned int Length)
 {
-    unsigned short  DummyCounter;
+    unsigned short  DummyCounter = 0;
     LED_TX++;
-    TX_ENA_LAT = 1;                                                             // enable the driver of the rs485 as close as possible to the first bit to avoid glitch, levels are corrected with bias resistors!
-    	    
+        	    
+    TX_ENA_LAT = 1;                                                             // enable the driver of the rs485
+    __delay_us(2);                                                              // Wait 2 us to ensure that the driver is enabled before sending first bit
+    
+    
     for(DummyCounter=0;DummyCounter<Length;DummyCounter++){
         PetitModBus_UART_Putch(s[DummyCounter]);
     }

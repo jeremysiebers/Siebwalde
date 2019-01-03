@@ -41,7 +41,7 @@ void main(void) {
 
     // Disable the Peripheral Interrupts
     //INTERRUPT_PeripheralInterruptDisable();
-    TMR1_StopTimer();
+
     LED_RUN_LAT     = 0;
     LED_WAR_LAT     = 0;
     LED_ERR_LAT     = 1;    

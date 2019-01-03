@@ -64,6 +64,8 @@ void __interrupt() INTERRUPT_InterruptManager (void)
     {
         if(PIE3bits.RCIE == 1 && PIR3bits.RCIF == 1)
         {
+            ReceiveInterrupt(RCREG);                                            // Read first read character from buffer
+            
             if(1 == RC1STAbits.OERR)
             {
                 // EUSART error - restart
@@ -71,19 +73,20 @@ void __interrupt() INTERRUPT_InterruptManager (void)
                 RC1STAbits.CREN = 0;
                 RC1STAbits.CREN = 1;
             }
-            //EUSART_RxDefaultInterruptHandler();
             TMR3_Reload();
             PIR4bits.TMR3IF = 0;
             PIE4bits.TMR3IE = 1;
-            ReceiveInterrupt(RCREG);
+
+            if (PIR3bits.RCIF == 1){                                            // If the buffer contains more characters do read again
+                ReceiveInterrupt(RCREG);
+            }
         } 
         else if(PIE4bits.TMR3IE == 1 && PIR4bits.TMR3IF == 1)
         {
-            //TMR3_ISR();
-            PetitModbusTimerValue = 3;                                                  // Between receive interrupts it took to long --> message done
+            PetitModbusTimerValue = 3;                                          // Between receive interrupts it took to long --> message done
             PIE4bits.TMR3IE = 0;
             PIR4bits.TMR3IF = 0;
-            UPDATExPID = true;
+            //UPDATExPID = true;                                                  // Start the other tasks like the regulator etc
         } 
         else
         {

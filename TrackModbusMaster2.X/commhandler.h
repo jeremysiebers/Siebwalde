@@ -18,7 +18,8 @@ extern "C" {
     
 extern void InitSlaveCommunication(SLAVE_INFO *location);
 extern void ProcessNextSlave(void);
-extern unsigned int ProcessSlaveCommunication(unsigned int ForceSpiUpdate);
+extern unsigned int ProcessSlaveCommunication();
+extern void SendDataToEthernet(void);
 
 #ifdef	__cplusplus
 }

@@ -81,66 +81,38 @@ void Regulator(){
         //LM_DIR_LAT =  PetitHoldingRegisters[0].ActValue & 0x0400;               // load direction from register only when single sided PWM
         LM_BRAKE_LAT = PetitHoldingRegisters[0].ActValue & 0x0800;              // load brake from register
         
-        if ((PwmDutyCyclePrev != PetitHoldingRegisters[0].ActValue & 0x03FF) && PetitHoldingRegisters[3].ActValue == 0x0000){
+        if ((PwmDutyCyclePrev != PetitHoldingRegisters[0].ActValue & 0x03FF)){
             PWM3_LoadDutyValue(PetitHoldingRegisters[0].ActValue & 0x03FF);     // load duty cycle from register
             PwmDutyCyclePrev = PetitHoldingRegisters[0].ActValue & 0x03FF;
-        }
-        else if(PwmDutyCyclePrev != (unsigned int)pwm && PetitHoldingRegisters[3].ActValue == 0x0001){
-            PWM3_LoadDutyValue((unsigned int)pwm);
-        }
+        }        
+    }
+    
+    if(UPDATExPID){
+        ProcessBMF();
     }
     
     if (PIR4bits.TMR1IF){
         MeausureBemfCnt++;
-        if (MeausureBemfCnt > 499){                                         // disable H bridge every 100ms
+        if (MeausureBemfCnt > 99){                                              // disable H bridge every 10ms
             MeausureBemfCnt = 0;
             TRISCbits.TRISC4 = 1;
             TRISCbits.TRISC5 = 1;
             TRISCbits.TRISC6 = 1;
-            UpdatePID = true;                                               // set update PID
+            UpdatePID = true;                                                   // set update PID
         }
-        if (MeausureBemfCnt > 14){                                          // after 3ms enable H bridge again
+        if (MeausureBemfCnt > 8){                                               // after 800us enable H bridge again
             TRISCbits.TRISC4 = 0;
             TRISCbits.TRISC5 = 0;
             TRISCbits.TRISC6 = 0;                
         }
 
-        if (MeausureBemfCnt > 10 && MeausureBemfCnt < 15){                  // Read back EMF as late as possible
+        if (MeausureBemfCnt > 6 && MeausureBemfCnt < 8){                        // Read back EMF as late as possible
             //PORTAbits.RA6 = 1;
-            ProcessBMF();
-            UPDATExPID = false;                                             // wait on modbus
+            UPDATExPID = true;                                                  // wait on modbus
         }
         else{
-            //PORTAbits.RA6 = 0;
-            //ProcessIO();
-        }
-
-        if (MeausureBemfCnt > 14 && UpdatePID && UPDATExPID && PetitHoldingRegisters[3].ActValue == 0x0001){  // after 3ms calculate PID
-            PORTAbits.RA6 = 1;
-
-            UpdatePID = false;
             UPDATExPID = false;
-
-            input = PetitInputRegisters[0].ActValue;
-
-            error = setpoint - input;
-
-            output = (kp * error * plant) / 100;
-
-            if(output < 0){
-                pwm = (int)PwmDutyCyclePrev - output;
-            }
-            else{
-                pwm = (int)PwmDutyCyclePrev + output;
-            }
-
-            PetitInputRegisters[1].ActValue = (unsigned int)kp;
-            PetitInputRegisters[2].ActValue = (unsigned int)plant;
-            PetitInputRegisters[3].ActValue = (unsigned int)error;
-            PetitInputRegisters[4].ActValue = (unsigned int)output;
-            PetitInputRegisters[5].ActValue = (unsigned int)pwm;
-
-            PORTAbits.RA6 = 0;
+            //ProcessIO();
         }
         PIR4bits.TMR1IF = 0;
         TMR1_Reload();

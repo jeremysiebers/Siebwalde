@@ -12,7 +12,7 @@ void PetitModbusIntHandlerTMR(void){
 }
 
 void PetitModbusIntHandlerSlaveTimeOutTMR(void){
-    modbus_sync_LAT = 1;
+    //modbus_sync_LAT = 1;
     SlaveAnswerTimeoutCounter   = 1;
     T1CONbits.TMR1ON            = 0;
     PIE4bits.TMR1IE             = 0;

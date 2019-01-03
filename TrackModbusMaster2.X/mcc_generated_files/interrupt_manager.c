@@ -50,6 +50,7 @@
 #include "mcc.h"
 #include "../modbus/General.h"
 #include "../main.h"
+#include "../commhandler.h"
 
 void  INTERRUPT_Initialize (void)
 {
@@ -64,10 +65,11 @@ void __interrupt() INTERRUPT_InterruptManager (void)
     {
         if(PIE3bits.RCIE == 1 && PIR3bits.RCIF == 1)
         {
+            ReceiveInterrupt(RCREG);                                            // Read first read character from buffer
+
             if(1 == RC1STAbits.OERR)
             {
-                // EUSART error - restart
-
+                //modbus_sync_LAT = 1;
                 RC1STAbits.CREN = 0;
                 RC1STAbits.CREN = 1;
             }
@@ -77,7 +79,10 @@ void __interrupt() INTERRUPT_InterruptManager (void)
             T1CONbits.TMR1ON  = 0;                                              // Data received stop answer timeout timer
             PIE4bits.TMR1IE   = 0;        
             PIR4bits.TMR1IF   = 0;
-            ReceiveInterrupt(RCREG);  
+            
+            if (PIR3bits.RCIF == 1){                                            // If the buffer contains more characters do read again
+                ReceiveInterrupt(RCREG);
+            }
         } 
         else if(PIE4bits.TMR3IE == 1 && PIR4bits.TMR3IF == 1)
         {
@@ -89,17 +94,18 @@ void __interrupt() INTERRUPT_InterruptManager (void)
         else if(PIE4bits.TMR1IE == 1 && PIR4bits.TMR1IF == 1)
         {
             //modbus_sync_LAT = 1;
-            SlaveAnswerTimeoutCounter   = 1;
+            SlaveAnswerTimeoutCounter   = 1;                                    // Data received answer timeout timer
             T1CONbits.TMR1ON            = 0;
             PIE4bits.TMR1IE             = 0;
             PIR4bits.TMR1IF             = 0;
         } 
         else if(PIE4bits.TMR2IE == 1 && PIR4bits.TMR2IF == 1)
         {
-            modbus_send_LAT ^= 1;
-            UpdateNextSlave = true;
             PIR4bits.TMR2IF = 0;
             TMR2 = 0;
+            modbus_send_LAT ^= 1;
+            UpdateNextSlave = true;
+            SendDataToEthernet();                                               // This is the first action in a new cycle, hence it is in the interrupt file            
         }        
         else
         {

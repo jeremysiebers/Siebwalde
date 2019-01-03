@@ -88,9 +88,9 @@ void main(void)
     printf("PIC18f97j60 started up!!!\n\r");                                    // Welcome message
     
     ModbusReset_LAT = 0;                                                        // as last release the ModbusMaster.
-    TRISDbits.RD3 = 0;                                                          // set the Pin direction here to output to avoid power-on reset pulses to slaves!
+    ModbusReset_SetDigitalOutput();                                             // set the Pin direction here to output to avoid power-on reset pulses to slaves!
     
-    __delay_ms(500);                                                            // wait 0.5 second to gather all slave data via SPI (update of SlaveInfo)
+    __delay_ms(100);                                                            // wait 0.5 second to gather all slave data via SPI (update of SlaveInfo)
     
 /*----------------------------------------------------------------------------*/
     

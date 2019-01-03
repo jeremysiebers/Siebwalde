@@ -97,7 +97,6 @@ void main(void)
     
     while(1)
     {
-        ProcessPetitModbus();
         
         switch((SlaveInfo[0].HoldingReg[0] & 0x01)){
             case 0:                
@@ -181,29 +180,15 @@ void main(void)
                         AllSlavesReadAllDataCounter = 1;
                     }
                 }
+                ProcessSlaveCommunication();
                 break;
                 
             default :
                 break;
         }
+              
+        ProcessPetitModbus();
         
-//        if (UpdateNextSlave == true){
-//            ProcessNextSlave();
-//            UpdateNextSlave = false;
-//            AllSlavesReadAllDataCounter++;
-//            if (AllSlavesReadAllDataCounter > ALLxSLAVESxDATA){
-//                AllSlavesReadAllDataCounter = 1;
-//            }
-//        }
-        
-        if (((SlaveInfo[0].HoldingReg[0] & 0x01) == 0) && UpdateNextSlave == true){
-            ProcessSlaveCommunication(true);
-            UpdateNextSlave = false;
-        }
-        else{
-            ProcessSlaveCommunication(false);
-        }
-         
         Led_Blink();
     }
 }

@@ -324,13 +324,16 @@ void Petit_RxRTU(void)
         #endif
         
         if (((unsigned int) Petit_Rx_Data.DataBuf[Petit_Rx_Data.DataLen] + ((unsigned int) Petit_Rx_Data.DataBuf[Petit_Rx_Data.DataLen + 1] << 8)) == Petit_Rx_CRC16)
-        {
+        {            
             // Valid message!
             PIE4bits.TMR3IE = 0;                                                // valid message so stop timer3 for nice SPI comm
             PIR4bits.TMR3IF = 0;                                                // valid message so stop timer3 for nice SPI comm
-            modbus_sync_LAT ^= 1;
             LED_RX++;
-            Petit_Rx_Data_Available = TRUE;
+            Petit_Rx_Data_Available = TRUE;            
+        }
+        else{
+            modbus_sync_LAT = 1;
+            modbus_sync_LAT = 0;
         }
 
         Petit_Rx_State = PETIT_RXTX_IDLE;

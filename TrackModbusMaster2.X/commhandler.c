@@ -12,8 +12,6 @@
 
 #define MAILBOX_SIZE 4                                                          // How many messages are non-critical
 
-void SendDataToEthernet(void);
-
 /*#--------------------------------------------------------------------------#*/
 /*  Description: InitSlaveCommunication(SLAVE_INFO *location)
  *
@@ -203,15 +201,12 @@ void ProcessNextSlave(){
  *  Notes      : Keeps track of communication with a slave
  */
 /*#--------------------------------------------------------------------------#*/
-static unsigned int SpiUpdate = false;
-
-unsigned int ProcessSlaveCommunication(unsigned int ForceSpiUpdate){
+unsigned int ProcessSlaveCommunication(){
     
     unsigned int Return_Val = false;
     
     switch (MASTER_SLAVE_DATA[ProcessSlave].MbCommError){
         case SLAVE_DATA_BUSY:
-            SpiUpdate = true;
             Return_Val = false;
             // count here how long the Mod-bus stack is busy, otherwise reset/action             
             break;
@@ -247,18 +242,22 @@ unsigned int ProcessSlaveCommunication(unsigned int ForceSpiUpdate){
             LED_ERR_LAT ^= 1;
             break;
             
-        default : Return_Val = true;                                            // Idle is here, still send data over SPI to Ethernet Target        
+        case SLAVE_DATA_IDLE:
+            Return_Val = true;
+            break;
+            
+        default : Return_Val = true;                                            
             break;
     }
     
-    if (Return_Val == true && (SpiUpdate == true || ForceSpiUpdate == true)){
-        SpiUpdate = false;
-//        __delay_us(60);                                                         // when debugging is required on oscilloscope, wait time till tmr3 is done
-//        while (T2TMR < 0xE8){                                                   // Send SPI data on a defined moment in time within the 2ms TMR2 interrupt
-//            
-//        }
-        SendDataToEthernet();
-    }
+//    if (Return_Val == true && (SpiUpdate == true || ForceSpiUpdate == true)){
+//        SpiUpdate = false;
+////        __delay_us(60);                                                         // when debugging is required on oscilloscope, wait time till tmr3 is done
+////        while (T2TMR < 0xE8){                                                   // Send SPI data on a defined moment in time within the 2ms TMR2 interrupt
+////            
+////        }
+//        SendDataToEthernet();
+//    }
     
     return (Return_Val);
 }
