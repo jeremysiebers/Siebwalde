@@ -102,7 +102,7 @@ void __interrupt() INTERRUPT_InterruptManager (void)
         else if(PIE4bits.TMR2IE == 1 && PIR4bits.TMR2IF == 1)
         {
             PIR4bits.TMR2IF = 0;
-            TMR2 = 0;
+            T2TMR = 0;
             modbus_send_LAT ^= 1;
             UpdateNextSlave = true;
             SendDataToEthernet();                                               // This is the first action in a new cycle, hence it is in the interrupt file            

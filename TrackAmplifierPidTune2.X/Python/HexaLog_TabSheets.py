@@ -588,7 +588,7 @@ class clsGraphTabSheet:
         s = []
         acceleration = 5
         acc_count = 0
-        jerk = 1
+        jerk = 5
         sample_rate = 150
         state = 'init'
         print '<><><><><><><><>< init ><><><><><><><><>'

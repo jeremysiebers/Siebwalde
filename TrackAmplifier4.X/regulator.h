@@ -70,8 +70,8 @@ extern "C" {
     // TODO If C++ is being used, regular C code needs function names to have C 
     // linkage so the functions can be used by the c code. 
     
-    void Regulator          (void);
-    void Regulator_Init     (void);
+    unsigned int        REGULATORxUPDATE   (void);
+    void                REGULATORxINIT     (void);
     extern unsigned int UPDATExPID;
 
 #ifdef	__cplusplus

@@ -56,6 +56,7 @@ void SYSTEM_Initialize(void)
     FVR_Initialize();
     CRC_Initialize();
     ADCC_Initialize();
+    TMR4_Initialize();
     TMR2_Initialize();
     TMR0_Initialize();
     CMP1_Initialize();

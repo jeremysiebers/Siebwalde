@@ -43,9 +43,12 @@ unsigned char PetitModBus_UART_String(unsigned char *s, unsigned int Length)
     unsigned short  DummyCounter;
     LED_TX++;
     
+    while(T2TMR < 8);                                                           // send data after clock wait time to incorporate message length, scope measurements are nicer now
+    
     for(DummyCounter=0;DummyCounter<Length;DummyCounter++){
         PetitModBus_UART_Putch(s[DummyCounter]);
     }
+    
     LED_TX++;
     
     return TRUE;

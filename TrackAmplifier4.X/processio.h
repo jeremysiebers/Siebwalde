@@ -4,7 +4,7 @@
  *
  * Created on September 22, 2018, 2:44 PM
  */
-
+#include <stdint.h>
 #ifndef PROCESSIO_H
 #define	PROCESSIO_H
 
@@ -12,8 +12,8 @@
 extern "C" {
 #endif
 
-void ProcessIO (void);
-void ProcessBMF (void);
+    uint16_t            MEASURExBMF (void);
+    uint16_t            ADCxIO      (void);
 
 #ifdef	__cplusplus
 }

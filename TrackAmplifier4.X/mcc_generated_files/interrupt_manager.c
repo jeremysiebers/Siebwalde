@@ -48,8 +48,8 @@
 
 #include "interrupt_manager.h"
 #include "mcc.h"
+#include "../main.h"
 #include "../modbus/General.h"
-#include "../regulator.h"
 
 void  INTERRUPT_Initialize (void)
 {
@@ -65,6 +65,8 @@ void __interrupt() INTERRUPT_InterruptManager (void)
         if(PIE3bits.RCIE == 1 && PIR3bits.RCIF == 1)
         {
             ReceiveInterrupt(RCREG);                                            // Read first read character from buffer
+            
+            T4CON = 0x80;                                                       // Enable Timer4 for PID sync to modbus messages
             
             if(1 == RC1STAbits.OERR)
             {
@@ -86,8 +88,15 @@ void __interrupt() INTERRUPT_InterruptManager (void)
             PetitModbusTimerValue = 3;                                          // Between receive interrupts it took to long --> message done
             PIE4bits.TMR3IE = 0;
             PIR4bits.TMR3IF = 0;
-            //UPDATExPID = true;                                                  // Start the other tasks like the regulator etc
-        } 
+            
+        }
+        else if(PIE4bits.TMR4IE == 1 && PIR4bits.TMR4IF == 1)
+        {
+            T4CON = 0x00;
+            T4TMR = 0x00;
+            PIR4bits.TMR4IF = 0;
+            Update_Amplifier = true;                                                  // Start the other tasks like the regulator etc
+        }
         else
         {
             //Unhandled Interrupt

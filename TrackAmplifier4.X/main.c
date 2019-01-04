@@ -7,6 +7,7 @@
 
 
 #include <xc.h>
+#include <stdint.h>
 #include "main.h"
 #include "mcc_generated_files/mcc.h"
 #include "mcc_generated_files/adcc.h"
@@ -14,12 +15,14 @@
 #include "processio.h"
 #include "regulator.h"
 
-unsigned int MODBUS_ADDRESS = 0;
-unsigned int LED_TX_prev, LED_RX_prev, LED_ERR_prev, LED_WAR_prev = 0;
-unsigned int LED_TX_STATE, LED_RX_STATE, LED_ERR_STATE, LED_WAR_STATE = 0;
-unsigned int LED_ERR, LED_WAR = 0;
-unsigned int Config = 1;
-unsigned int Startup_Machine = 0;
+static unsigned int MODBUS_ADDRESS = 0;
+static unsigned int LED_TX_prev, LED_RX_prev, LED_ERR_prev, LED_WAR_prev = 0;
+static unsigned int LED_TX_STATE, LED_RX_STATE, LED_ERR_STATE, LED_WAR_STATE = 0;
+static unsigned int LED_ERR, LED_WAR = 0;
+static unsigned int Config = 1;
+static unsigned int Startup_Machine = 0;
+unsigned int Update_Amplifier = 0;
+static unsigned int Sequencer = 0;
 
 
 /*----------------------------------------------------------------------------*/
@@ -103,8 +106,7 @@ void main(void) {
         }
     }
         
-    Regulator_Init(); 
-    TRISAbits.TRISA6 = 0;
+    REGULATORxINIT();
 /*----------------------------------------------------------------------------*/
     
     while(1){
@@ -112,7 +114,42 @@ void main(void) {
         ProcessPetitModbus();
         Led_Blink();
         
-        Regulator();
+        if (Update_Amplifier){
+            
+            switch(Sequencer){
+                case 0:
+                    if(MEASURExBMF() == true){
+                        Sequencer++;
+                        Update_Amplifier = false;  
+                    }
+                    break;
+                    
+                case 1:
+                    if(REGULATORxUPDATE() == true){
+                        Sequencer++;
+                        Update_Amplifier = false;
+                    }
+                    break;
+                    
+                case 2:
+                    if(ADCxIO() == true){
+                        Sequencer++;
+                        Update_Amplifier = false;
+                    }
+                    break;
+                    
+                case 3:
+                    Sequencer = 0;
+                    Update_Amplifier = false;
+                    break;
+                    
+                default:
+                    Sequencer = 0;
+                    Update_Amplifier = false;
+                    break;
+            }            
+            
+        }
         
     }
 }
