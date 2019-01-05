@@ -30,7 +30,7 @@ static unsigned char   *pSlaveDataReceived, *pSlaveDataSend,
                 *pSlaveInfoReadMask, *pSlaveInfoWriteMask, *pSlaveInfoTraceMask;
                 //*pSlaveInforReadRaw;
 
-static unsigned char DataFromSlaveSend = 1;                                     // Data to send counter
+static unsigned char DataFromSlaveSend = 2;                                     // Data to send counter
 static unsigned char DataReceivedOk = 0;
 
 const unsigned char DATAxSTRUCTxLENGTH = sizeof(SLAVE_INFO);
@@ -115,8 +115,8 @@ void INITxSPIxCOMMxHANDLER(SLAVE_INFO *location)
     /*
      * Init SPI first byte to send
     */
-    pSlaveDataSend = &(MASTER_SLAVE_DATA[0].Header);                       // set the pointer to the first element of the slave number
-    pSlaveInfoWriteMask = &(SlaveInfoWriteMask.Header);                    // Set the write mask pointer
+    pSlaveDataSend = &(MASTER_SLAVE_DATA[1].Header);                            // set the pointer to the first element of the slave number
+    pSlaveInfoWriteMask = &(SlaveInfoWriteMask.Header);                         // Set the write mask pointer
     for(unsigned int i = 0; i < DATAxSTRUCTxLENGTH; i++){
         SENDxDATAxRAW[i] = (unsigned char)(*pSlaveDataSend  & *pSlaveInfoWriteMask);// for DATAxSTRUCTxLENGTH set every byte into SENDxDATAxRAW+ array according to write mask
         pSlaveDataSend += 1;                                                    // Increment pointer

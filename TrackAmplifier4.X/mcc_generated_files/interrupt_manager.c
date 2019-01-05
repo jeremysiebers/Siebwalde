@@ -66,7 +66,7 @@ void __interrupt() INTERRUPT_InterruptManager (void)
         {
             ReceiveInterrupt(RCREG);                                            // Read first read character from buffer
             
-            T4CON = 0x80;                                                       // Enable Timer4 for PID sync to modbus messages
+            T4CONbits.TMR4ON = 1;                                               // Enable Timer4 for PID sync to modbus messages
             
             if(1 == RC1STAbits.OERR)
             {
@@ -92,10 +92,10 @@ void __interrupt() INTERRUPT_InterruptManager (void)
         }
         else if(PIE4bits.TMR4IE == 1 && PIR4bits.TMR4IF == 1)
         {
-            T4CON = 0x00;
+            T4CONbits.TMR4ON = 0;
             T4TMR = 0x00;
             PIR4bits.TMR4IF = 0;
-            Update_Amplifier = true;                                                  // Start the other tasks like the regulator etc
+            Update_Amplifier = true;                                            // Start the other tasks like the regulator etc
         }
         else
         {

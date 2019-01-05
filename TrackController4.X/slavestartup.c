@@ -208,7 +208,7 @@ unsigned int ConfigureSlave(unsigned int TrackBackPlaneID, unsigned int Amplifie
 
         case 8:
             if(MASTER_SLAVE_DATA[0].InputReg[0] == IDLE){
-                if (Mode == true){
+                if (Mode == true){                                              // When the last slave is configured, release all amplifiers into regular communication
                     MASTER_SLAVE_DATA[0].HoldingReg[0] = MODE_AUTO & WRITE & HOLDINGREG & HALT;
                 }
                 StartupMachine = 9;
@@ -245,16 +245,46 @@ unsigned int ConfigureSlave(unsigned int TrackBackPlaneID, unsigned int Amplifie
 unsigned int ENABLExAMPLIFIER(void){
     unsigned int return_val = false;
     
+    /*
     if (PIR2bits.TMR3IF){
         _Delay++;
         PIR2bits.TMR3IF = 0;
     }
     if (_Delay > 20){
         for (unsigned int i = 1; i <NUMBER_OF_SLAVES; i++){
-            MASTER_SLAVE_DATA[i].HoldingReg[1] |= 0x8000;
+            MASTER_SLAVE_DATA[i].HoldingReg[1] |= 0x8000;                       // Enable each amplifier (serially)
         }
         _Delay = 0;
         return_val = true;
     }
+    */
+    
+    switch(StartupMachine){
+        case 0:
+            MASTER_SLAVE_DATA[0].HoldingReg[1] = 0;                             // Address  = broadcast address
+            MASTER_SLAVE_DATA[0].HoldingReg[2] = 0x8000;                        // Data     = Set AMP_ID5_SET_LAT 0x10 in TrackBackplaneSlave
+            MASTER_SLAVE_DATA[0].HoldingReg[3] = 1;                             // Register = number to write to
+            MASTER_SLAVE_DATA[0].HoldingReg[0] = MODE_AUTO & WRITE & HOLDINGREG & EXEC;
+            StartupMachine = 1;
+            break;
+
+        case 1:
+            if(MASTER_SLAVE_DATA[0].InputReg[0] == OK){
+                MASTER_SLAVE_DATA[0].HoldingReg[0] = MODE_AUTO & WRITE & HOLDINGREG & HALT; // Remove the execute command
+                StartupMachine = 2;
+            }
+            break;
+
+        case 2:
+            if(MASTER_SLAVE_DATA[0].InputReg[0] == IDLE){
+                StartupMachine = 0;
+                return_val = true;
+            }
+            break;
+            
+        default:
+            break;
+    }
+    
     return (return_val);
 }

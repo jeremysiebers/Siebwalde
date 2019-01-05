@@ -491,8 +491,10 @@ uint16_t CRC_ReverseValue(uint16_t crc)
 unsigned char SendPetitModbus(unsigned char Address, unsigned char Function, unsigned char *DataBuf, unsigned short DataLen){
     
     unsigned char return_val = 0;
-
-    MASTER_SLAVE_DATA[Address].MbCommError = SLAVE_DATA_BUSY;                   // When sending a command to a slave, set the MbCommError register to busy
+    
+    if(Address != PETITMODBUS_BROADCAST_ADDRESS){
+        MASTER_SLAVE_DATA[Address].MbCommError = SLAVE_DATA_BUSY;                   // When sending a command to a slave, set the MbCommError register to busy. When broadcast do not set.
+    }
     
     // Initialize the output buffer. The first byte in the buffer says how many registers we have read
     Petit_Tx_Data.Function    = Function;

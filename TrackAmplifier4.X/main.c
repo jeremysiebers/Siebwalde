@@ -62,7 +62,7 @@ void main(void) {
         
         switch(Startup_Machine){
             case 0 :
-                if (ID_PORT == 0){
+                if (ID_PORT == 0){                                              // When ID_PORT is pulled low the amplifier will be configured
                     Startup_Machine = 1;
                 }
                 break;
@@ -71,7 +71,7 @@ void main(void) {
                 ProcessPetitModbus();
                 LED_ERR++;                
                 Led_Blink();
-                if (ID_PORT){
+                if (ID_PORT){                                                   // When the ID_PORT is released, check if a new ID is set, otherwise go back to initial state
                     if((PetitHoldingRegisters[2].ActValue & 0x1F)!= 0 ){
                         LED_ERR         = 0; 
                         LED_ERR_LAT     = 0;                        
@@ -92,7 +92,7 @@ void main(void) {
                 ProcessPetitModbus();
                 LED_WAR++;
                 Led_Blink();
-                if ((PetitHoldingRegisters[1].ActValue & 0x8000)!= 0){
+                if ((PetitHoldingRegisters[1].ActValue & 0x8000)!= 0){          // Wait until the amplifier is enabled by the Master
                     Startup_Machine = 0;
                     Config          = 0;
                     LED_WAR         = 0;

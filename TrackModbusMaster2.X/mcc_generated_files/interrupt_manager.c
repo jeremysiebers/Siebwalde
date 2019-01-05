@@ -86,14 +86,12 @@ void __interrupt() INTERRUPT_InterruptManager (void)
         } 
         else if(PIE4bits.TMR3IE == 1 && PIR4bits.TMR3IF == 1)
         {
-            //modbus_sync_LAT ^= 1;
             PetitModbusTimerValue = 3;                                          // Between receive interrupts it took to long --> message done
             PIE4bits.TMR3IE = 0;
             PIR4bits.TMR3IF = 0;
         } 
         else if(PIE4bits.TMR1IE == 1 && PIR4bits.TMR1IF == 1)
         {
-            //modbus_sync_LAT = 1;
             SlaveAnswerTimeoutCounter   = 1;                                    // Data received answer timeout timer
             T1CONbits.TMR1ON            = 0;
             PIE4bits.TMR1IE             = 0;

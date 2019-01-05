@@ -16,10 +16,11 @@
 extern "C" {
 #endif /* __cplusplus */
     
-extern void InitSlaveCommunication(SLAVE_INFO *location);
-extern void ProcessNextSlave(void);
-extern unsigned int ProcessSlaveCommunication();
-extern void SendDataToEthernet(void);
+extern void             InitSlaveCommunication(SLAVE_INFO *location);
+extern void             ProcessNextSlave(void);
+extern unsigned int     ProcessSlaveCommunication();
+extern void             SendDataToEthernet(void);
+extern void             SLAVExCOMMANDxHANDLER(uint16_t State);
 
 #ifdef	__cplusplus
 }

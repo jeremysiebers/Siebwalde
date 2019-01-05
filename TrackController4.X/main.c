@@ -90,7 +90,7 @@ void main(void)
     ModbusReset_LAT = 0;                                                        // as last release the ModbusMaster.
     ModbusReset_SetDigitalOutput();                                             // set the Pin direction here to output to avoid power-on reset pulses to slaves!
     
-    __delay_ms(100);                                                            // wait 0.5 second to gather all slave data via SPI (update of SlaveInfo)
+    //__delay_ms(100);                                                            // wait 0.5 second to gather all slave data via SPI (update of SlaveInfo)
     
 /*----------------------------------------------------------------------------*/
     
