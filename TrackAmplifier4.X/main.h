@@ -16,6 +16,8 @@ extern "C" {
 
 void Led_Blink (void);
 extern unsigned int Update_Amplifier;
+uint8_t     Led_Disco       (void);
+void        Led_Convert     (uint8_t Number);
 
 #ifdef	__cplusplus
 }

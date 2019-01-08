@@ -8,6 +8,8 @@
 #ifndef MAIN_H
 #define	MAIN_H
 
+#include <stdint.h>
+
 #ifdef	__cplusplus
 extern "C" {
 #endif
@@ -15,10 +17,13 @@ extern "C" {
 #define True 1
 #define False 0
     
-#define NUMBER_OF_SLAVES 5                                                      // 0 is for the master self. 5 backplane slaves + 50 Track slaves => 56  
+#define NUMBER_OF_SLAVES 2                                                      // The number of slave registers to initiate on this master for communication with SPI slave (Ethernet Traget))
+#define NUMBER_OF_MODBUS_SLAVES 5                                               // 0 is for the master self. 5 backplane slaves + 50 Track slaves => 56  
 
-    extern unsigned int UpdateNextSlave;
-    void Led_Blink (void);
+extern unsigned int UpdateNextSlave;
+void Led_Blink (void);
+uint8_t     Led_Disco       (void);
+void        Led_Convert     (uint8_t Number);
     
 #ifdef	__cplusplus
 }

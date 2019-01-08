@@ -5,15 +5,13 @@
  * Created on April 16, 2018, 10:06 PM
  */
 #include <xc.h>
+#include <stdint.h>
 #include "main.h"
 #include "mcc_generated_files/mcc.h"
-#include "modbus/Interrupts.h"
 #include "modbus/PetitModbus.h"
 #include "commhandler.h"
 
-#define ALLxSLAVESxDATA ((unsigned int)((NUMBER_OF_SLAVES-1)*3) * 4)
-
-
+#define ALLxSLAVESxDATA ((unsigned int)((NUMBER_OF_MODBUS_SLAVES-1)*3) * 4)
 
 /*----------------------------------------------------------------------------*/
 
@@ -25,21 +23,14 @@ unsigned int LED_TX_prev, LED_RX_prev = 0;
 unsigned int LED_TX_STATE, LED_RX_STATE = 0;
 unsigned int UpdateNextSlave = false;
 unsigned int AllSlavesReadAllDataCounter = 1;
+unsigned int InitDone = false;
 /*
                          Main application
  */
 void main(void)
 {
-    // Initialize the SLAVE_INFO struct with slave numbers
-    for (char i = 0; i <NUMBER_OF_SLAVES; i++){
-        SlaveInfo[i].SlaveNumber = i;
-        SlaveInfo[i].Header = 0xAA;
-        SlaveInfo[i].Footer = 0x55;
-    }
-    
     // Initialize the device
     SYSTEM_Initialize();
-    TMR1_StopTimer();                                                           // prevent timer1 from setting slave timeout to 1.
 
     // If using interrupts in PIC18 High/Low Priority Mode you need to enable the Global High and Low Interrupts
     // If using interrupts in PIC Mid-Range Compatibility Mode you need to enable the Global and Peripheral Interrupts
@@ -57,15 +48,17 @@ void main(void)
     // Disable the Peripheral Interrupts
     //INTERRUPT_PeripheralInterruptDisable();
 
-    LED_RUN_LAT = 0;
-    LED_WAR_LAT = 0;
-    LED_ERR_LAT = 1;    
-    LED_TX_LAT = 0;
-    LED_RX_LAT = 0;
+    /* Test the onboard Led's */
+    while(Led_Disco() == false);
     
     __delay_ms(50);                                                             // Wait longer then the slaves (1000ms)
     
-    TMR0_StartTimer();                                                          // TX/RX led timer
+    // Initialize the SLAVE_INFO struct with slave numbers
+    for (char i = 0; i <NUMBER_OF_SLAVES; i++){
+        SlaveInfo[i].SlaveNumber = i;
+        SlaveInfo[i].Header = 0xAA;
+        SlaveInfo[i].Footer = 0x55;
+    }
     
     InitPetitModbus(SlaveInfo);                                                 // Pass address of array of struct for data storage
     InitSlaveCommunication(SlaveInfo);                                          // Pass address of array of struct for data storage
@@ -77,21 +70,32 @@ void main(void)
     
     modbus_sync_LAT = 0;
     
+    /* Start the message communication here as last 
+       to prevent early communication while initializing
+     */
+    TMR2_Start();
+    
+    /* Wait till all slave data is send to SPI master from SPI slave */
+    __delay_ms(100);
+    
     while(1)
     {
-        if ((SlaveInfo[0].HoldingReg[0] & 0x01) == 0){                          // Initialization starts here, after init of all slaves, the regular updates can take place
+        if (SlaveInfo[0].SlaveNumber == 0 && (SlaveInfo[0].HoldingReg[0] & 0x01) == 0){                          // Initialization starts here, after init of all slaves, the regular updates can take place
             SLAVExCOMMANDxHANDLER(false);
         }
-        else if ((SlaveInfo[0].HoldingReg[0] & 0x01) == 1){                                                                   // Regular slave communication
-            if (UpdateNextSlave == true){
-                UpdateNextSlave = false;
-                ProcessNextSlave();                    
-                AllSlavesReadAllDataCounter++;
-                if (AllSlavesReadAllDataCounter > ALLxSLAVESxDATA){
-                    AllSlavesReadAllDataCounter = 1;
-                }
+        else if (SlaveInfo[0].SlaveNumber == 0 && (SlaveInfo[0].HoldingReg[0] & 0x01) == 1){                                                                   // Regular slave communication
+            InitDone = true;
+        }
+        if (InitDone == true && UpdateNextSlave == true){
+            UpdateNextSlave = false;
+            ProcessNextSlave();                    
+            AllSlavesReadAllDataCounter++;
+            if (AllSlavesReadAllDataCounter > ALLxSLAVESxDATA){
+                AllSlavesReadAllDataCounter = 1;
             }
-            ProcessSlaveCommunication();
+        }
+        else if(InitDone == true){
+            ProcessSlaveCommunication();            
         }
         
         ProcessPetitModbus();
@@ -150,6 +154,122 @@ void Led_Blink (){
         }
         PIR0bits.TMR0IF = 0;
         TMR0_Reload();
+    }
+}
+/******************************************************************************
+ * Function: Led_Disco()   
+ *
+ * PreCondition:    
+ *
+ * Input:           
+ *
+ * Output:          
+ *
+ * Side Effects:    
+ *
+ * Overview:       Test led's onboard 
+ *****************************************************************************/
+uint8_t     Disco   = 0;
+uint8_t     Count   = 0;
+uint16_t    Out     = 0;
+uint8_t     Loop    = 0;
+uint8_t Led_Disco (){
+    
+    uint8_t Return_Val = false;
+    
+    if(PIR0bits.TMR0IF){
+        
+        Count++;
+        if(Count > 5){
+           Disco++; 
+           Count    = 0;
+           Out      = 5;
+        }
+        
+        switch (Disco){
+            case 0:
+                Led_Convert(Out);
+                Out++;
+                break;
+
+            case 1:
+                Led_Convert(Out);
+                Out--;
+                break;
+                
+            case 2:
+                Loop++;
+                if(Loop > 2){
+                    Return_Val = true;
+                }
+                else{
+                    Disco   = 0;
+                    Out     = 1;
+                    Count   = 0;
+                }
+                break;
+
+            default :
+                break;
+        }
+        PIR0bits.TMR0IF = 0;
+        TMR0_Reload();
+    }
+    return(Return_Val);
+}
+
+/******************************************************************************
+ * Function: Led_Convert(uint8_t Number)
+ *
+ * PreCondition:    
+ *
+ * Input:           
+ *
+ * Output:          
+ *
+ * Side Effects:    
+ *
+ * Overview:       Test led's onboard 
+ *****************************************************************************/
+void Led_Convert(uint8_t Number){
+    switch (Number){
+        case 1:
+            LED_RUN_LAT     = 1;
+            LED_WAR_LAT     = 0;
+            LED_ERR_LAT     = 0; 
+            LED_RX_LAT      = 0; 
+            LED_TX_LAT      = 0;
+            break;
+        case 2:
+            LED_RUN_LAT     = 0;
+            LED_WAR_LAT     = 1;
+            LED_ERR_LAT     = 0; 
+            LED_RX_LAT      = 0; 
+            LED_TX_LAT      = 0;
+            break;
+        case 3:
+            LED_RUN_LAT     = 0;
+            LED_WAR_LAT     = 0;
+            LED_ERR_LAT     = 1; 
+            LED_RX_LAT      = 0; 
+            LED_TX_LAT      = 0;
+            break;
+        case 4:
+            LED_RUN_LAT     = 0;
+            LED_WAR_LAT     = 0;
+            LED_ERR_LAT     = 0; 
+            LED_RX_LAT      = 1; 
+            LED_TX_LAT      = 0;
+            break;
+        case 5:
+            LED_RUN_LAT     = 0;
+            LED_WAR_LAT     = 0;
+            LED_ERR_LAT     = 0; 
+            LED_RX_LAT      = 0; 
+            LED_TX_LAT      = 1;
+            break;
+        default:            
+            break;
     }
 }
 /**

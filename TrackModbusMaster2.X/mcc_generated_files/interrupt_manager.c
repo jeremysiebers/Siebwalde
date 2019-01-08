@@ -103,7 +103,7 @@ void __interrupt() INTERRUPT_InterruptManager (void)
             T2TMR = 0;
             modbus_send_LAT ^= 1;
             UpdateNextSlave = true;
-            SendDataToEthernet();                                               // This is the first action in a new cycle, hence it is in the interrupt file            
+            SendDataToEthernet();                                               // This is the first action in a new cycle, hence it is in the interrupt file. Also SPI comm is required before ModBus!!.            
         }        
         else
         {

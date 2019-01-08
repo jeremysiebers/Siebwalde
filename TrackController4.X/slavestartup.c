@@ -95,6 +95,32 @@ unsigned int SLAVExINITxANDxCONFIG(){
                     
                 case 3:
                     if (ConfigureSlave(TRACKBACKPLANE1, SLOT10, 4, true) == true){
+                    //if (ConfigureSlave(TRACKBACKPLANE1, SLOT10, 4, true) == false){
+                        RunSlaveConfig++;
+                        return_val = true;
+                    }
+                    break;
+                    
+                case 4:
+                    if (ConfigureSlave(TRACKBACKPLANE2, SLOT1, 1, false) == true){
+                        RunSlaveConfig++;
+                    }
+                    break;
+                    
+                case 5:
+                    if (ConfigureSlave(TRACKBACKPLANE3, SLOT2, 2, false) == true){
+                        RunSlaveConfig++;
+                    }
+                    break;
+                    
+                case 6:
+                    if (ConfigureSlave(TRACKBACKPLANE4, SLOT3, 3, false) == true){
+                        RunSlaveConfig++;
+                    }
+                    break;
+                    
+                case 7:
+                    if (ConfigureSlave(TRACKBACKPLANE5, SLOT4, 4, true) == true){
                         RunSlaveConfig++;
                         return_val = true;
                     }

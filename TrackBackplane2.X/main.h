@@ -12,11 +12,11 @@
 extern "C" {
 #endif
 
-//#define _XTAL_FREQ 32000000                                                     // Fosc  frequency for _delay()  library
-
-void Get_ID (void);
-void Set_Amplifier (void);
-void Led_Blink (void);
+void        Get_ID          (void);
+void        Set_Amplifier   (void);
+void        Led_Blink       (void);
+uint8_t     Led_Disco       (void);
+void        Led_Convert     (uint8_t Number);
 
 #ifdef	__cplusplus
 }
