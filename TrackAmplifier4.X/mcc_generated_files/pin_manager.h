@@ -151,17 +151,25 @@
 #define LM_V_SetAnalogMode()      do { ANSELAbits.ANSELA4 = 1; } while(0)
 #define LM_V_SetDigitalMode()     do { ANSELAbits.ANSELA4 = 0; } while(0)
 
-// get/set RA5 procedures
-#define RA5_SetHigh()            do { LATAbits.LATA5 = 1; } while(0)
-#define RA5_SetLow()             do { LATAbits.LATA5 = 0; } while(0)
-#define RA5_Toggle()             do { LATAbits.LATA5 = ~LATAbits.LATA5; } while(0)
-#define RA5_GetValue()              PORTAbits.RA5
-#define RA5_SetDigitalInput()    do { TRISAbits.TRISA5 = 1; } while(0)
-#define RA5_SetDigitalOutput()   do { TRISAbits.TRISA5 = 0; } while(0)
-#define RA5_SetPullup()             do { WPUAbits.WPUA5 = 1; } while(0)
-#define RA5_ResetPullup()           do { WPUAbits.WPUA5 = 0; } while(0)
-#define RA5_SetAnalogMode()         do { ANSELAbits.ANSELA5 = 1; } while(0)
-#define RA5_SetDigitalMode()        do { ANSELAbits.ANSELA5 = 0; } while(0)
+// get/set LED_OCC aliases
+#define LED_OCC_TRIS                 TRISAbits.TRISA5
+#define LED_OCC_LAT                  LATAbits.LATA5
+#define LED_OCC_PORT                 PORTAbits.RA5
+#define LED_OCC_WPU                  WPUAbits.WPUA5
+#define LED_OCC_OD                   ODCONAbits.ODCA5
+#define LED_OCC_ANS                  ANSELAbits.ANSELA5
+#define LED_OCC_SetHigh()            do { LATAbits.LATA5 = 1; } while(0)
+#define LED_OCC_SetLow()             do { LATAbits.LATA5 = 0; } while(0)
+#define LED_OCC_Toggle()             do { LATAbits.LATA5 = ~LATAbits.LATA5; } while(0)
+#define LED_OCC_GetValue()           PORTAbits.RA5
+#define LED_OCC_SetDigitalInput()    do { TRISAbits.TRISA5 = 1; } while(0)
+#define LED_OCC_SetDigitalOutput()   do { TRISAbits.TRISA5 = 0; } while(0)
+#define LED_OCC_SetPullup()          do { WPUAbits.WPUA5 = 1; } while(0)
+#define LED_OCC_ResetPullup()        do { WPUAbits.WPUA5 = 0; } while(0)
+#define LED_OCC_SetPushPull()        do { ODCONAbits.ODCA5 = 0; } while(0)
+#define LED_OCC_SetOpenDrain()       do { ODCONAbits.ODCA5 = 1; } while(0)
+#define LED_OCC_SetAnalogMode()      do { ANSELAbits.ANSELA5 = 1; } while(0)
+#define LED_OCC_SetDigitalMode()     do { ANSELAbits.ANSELA5 = 0; } while(0)
 
 // get/set NC_2 aliases
 #define NC_2_TRIS                 TRISAbits.TRISA6

@@ -30,7 +30,7 @@ static unsigned char   *pSlaveDataReceived, *pSlaveDataSend,
                 *pSlaveInfoReadMask, *pSlaveInfoWriteMask;
                 //*pSlaveInforReadRaw;
 
-static unsigned char DataFromSlaveSend = 2;                                     // Data to send counter
+static unsigned char DataFromSlaveSend = 0;                                     // Data to send counter
 static unsigned char DataReceivedOk = 0;
 
 const unsigned char DATAxSTRUCTxLENGTH = sizeof(SLAVE_INFO);
@@ -43,6 +43,7 @@ static unsigned int DATAxCOUNTxSEND = 0;
 static unsigned int DATAxREADY = 0;
 
 unsigned int SpiSlaveCommErrorCounter;
+unsigned bool InitPhase = false;
 
 void INITxSPIxCOMMxHANDLER(SLAVE_INFO *location)                                  
 {   
@@ -237,11 +238,17 @@ void ProcessSpiData(){
         pSlaveDataSend      += 1;                                               // Increment pointer
         pSlaveInfoWriteMask += 1;                                               // Increment pointer
     }
-
-    DataFromSlaveSend++;                                                        // Count down the slaves of which the info still need to be send
-    if(DataFromSlaveSend > (NUMBER_OF_SLAVES - 1)){
+    
+    if (InitPhase == false){                                                     // When init phase is done, communicate data to all slaves
+        DataFromSlaveSend++;                                                    // Count down the slaves of which the info still need to be send
+        if(DataFromSlaveSend > (NUMBER_OF_SLAVES - 1)){
+            DataFromSlaveSend = 0;
+        }
+    }
+    else{
         DataFromSlaveSend = 0;
     }
+    
 }
 
 /*#--------------------------------------------------------------------------#*/

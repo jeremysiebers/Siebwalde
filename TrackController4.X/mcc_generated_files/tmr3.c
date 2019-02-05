@@ -64,11 +64,11 @@ void TMR3_Initialize(void)
 {
     //Set the Timer to the options selected in the GUI
 	
-	// TMR3H 1; 
-		TMR3H = 0x01;
+	// TMR3H 205; 
+		TMR3H = 0xCD;
 	
-	// TMR3L 175; 
-		TMR3L = 0xAF;
+	// TMR3L 35; 
+		TMR3L = 0x23;
 
     // Load the TMR value to reload variable
     timer3ReloadVal=TMR3;

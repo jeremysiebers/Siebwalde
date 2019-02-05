@@ -63,7 +63,9 @@ typedef enum
 };
 unsigned int _Delay = 0;
 unsigned int RunSlaveConfig = 0;
-
+unsigned int ProgramSlave = 1;
+unsigned int ShiftSlot = 0;
+/*
 unsigned int SLAVExINITxANDxCONFIG(){
     
     unsigned return_val = false;
@@ -76,52 +78,169 @@ unsigned int SLAVExINITxANDxCONFIG(){
             
             switch(RunSlaveConfig){
                 case 0:
-                    if (ConfigureSlave(TRACKBACKPLANE1, SLOT5, 1, false) == true){
+                    if (ConfigureSlave(TRACKBACKPLANE1, SLOT5, 2, true) == true){
+                        RunSlaveConfig = 0;
+                        return_val = true;
+                    }
+                    break;
+                    
+                default :
+                    break;
+            }
+        }
+    }
+    return (return_val);
+}
+*/
+
+unsigned int SLAVExINITxANDxCONFIG(){
+    
+    unsigned return_val = false;
+    
+    if (1){//PIR2bits.TMR3IF){                                                       // Update rate 50ms
+        _Delay++;
+            
+        if (_Delay > 0){
+            _Delay = 0;
+            
+            switch(RunSlaveConfig){
+                case 0:
+                    if(ProgramSlave > 10){
+                        RunSlaveConfig++;
+                        ShiftSlot = 0;
+                    }
+                    else if (ConfigureSlave(TRACKBACKPLANE1, SLOT1 << ShiftSlot, ProgramSlave, false) == true){
+                        ShiftSlot++;
+                        ProgramSlave++;
+                    }
+                    break;
+                    
+                case 1:
+                    if(ProgramSlave > 20){
+                        RunSlaveConfig++;
+                        ShiftSlot = 0;
+                    }
+                    else if (ConfigureSlave(TRACKBACKPLANE2, SLOT1 << ShiftSlot, ProgramSlave, false) == true){
+                        ShiftSlot++;
+                        ProgramSlave++;                        
+                    }
+                    break;
+                    
+                case 2:
+                    if(ProgramSlave > 30){
+                        RunSlaveConfig++;
+                        ShiftSlot = 0;
+                    }
+                    else if (ConfigureSlave(TRACKBACKPLANE3, SLOT1 << ShiftSlot, ProgramSlave, false) == true){
+                        ShiftSlot++;
+                        ProgramSlave++;
+                    }
+                    break;
+                    
+                case 3:
+                    if(ProgramSlave > 40){
+                        RunSlaveConfig++;
+                        ShiftSlot = 0;
+                    }
+                    else if (ConfigureSlave(TRACKBACKPLANE4, SLOT1 << ShiftSlot, ProgramSlave, false) == true){
+                        ShiftSlot++;
+                        ProgramSlave++;
+                    }
+                    break;
+                    
+                case 4:
+                    if(ProgramSlave > 49){
+                        if (ConfigureSlave(TRACKBACKPLANE5, SLOT1 << ShiftSlot, ProgramSlave, true) == true){
+                            RunSlaveConfig = 0;
+                            return_val = true;
+                        }
+                    }
+                    else if (ConfigureSlave(TRACKBACKPLANE5, SLOT1 << ShiftSlot, ProgramSlave, false) == true){
+                        ShiftSlot++;
+                        ProgramSlave++;
+                    }
+                    break;
+                    
+                default :
+                    break;
+            }          
+        }
+        PIR2bits.TMR3IF = 0;
+    }
+    return (return_val);
+}
+/*
+unsigned int SLAVExINITxANDxCONFIG(){
+    
+    unsigned return_val = false;
+    
+    if (PIR2bits.TMR3IF){                                                       // Update rate 50ms
+        _Delay++;
+            
+        if (_Delay > 0){
+            _Delay = 0;
+            
+            switch(RunSlaveConfig){
+                case 0:
+                    if (ConfigureSlave(TRACKBACKPLANE1, SLOT1, 1, false) == true){
                         RunSlaveConfig++;
                     }
                     break;
                     
                 case 1:
-                    if (ConfigureSlave(TRACKBACKPLANE1, SLOT7, 2, false) == true){
+                    if (ConfigureSlave(TRACKBACKPLANE1, SLOT2, 2, false) == true){
                         RunSlaveConfig++;
                     }
                     break;
                     
                 case 2:
-                    if (ConfigureSlave(TRACKBACKPLANE1, SLOT8, 3, false) == true){
+                    if (ConfigureSlave(TRACKBACKPLANE1, SLOT3, 3, false) == true){
                         RunSlaveConfig++;
                     }
                     break;
                     
                 case 3:
-                    if (ConfigureSlave(TRACKBACKPLANE1, SLOT10, 4, true) == true){
-                    //if (ConfigureSlave(TRACKBACKPLANE1, SLOT10, 4, true) == false){
+                    if (ConfigureSlave(TRACKBACKPLANE1, SLOT4, 4, false) == true){
                         RunSlaveConfig++;
-                        return_val = true;
                     }
                     break;
                     
                 case 4:
-                    if (ConfigureSlave(TRACKBACKPLANE2, SLOT1, 1, false) == true){
+                    if (ConfigureSlave(TRACKBACKPLANE1, SLOT5, 5, false) == true){
                         RunSlaveConfig++;
                     }
                     break;
                     
                 case 5:
-                    if (ConfigureSlave(TRACKBACKPLANE3, SLOT2, 2, false) == true){
-                        RunSlaveConfig++;
+                    if (ConfigureSlave(TRACKBACKPLANE1, SLOT6, 6, true) == true){
+                        RunSlaveConfig++;return_val = true;
                     }
                     break;
                     
                 case 6:
-                    if (ConfigureSlave(TRACKBACKPLANE4, SLOT3, 3, false) == true){
+                    if (ConfigureSlave(TRACKBACKPLANE1, SLOT7, 7, false) == true){
                         RunSlaveConfig++;
                     }
                     break;
                     
                 case 7:
-                    if (ConfigureSlave(TRACKBACKPLANE5, SLOT4, 4, true) == true){
+                    if (ConfigureSlave(TRACKBACKPLANE1, SLOT8, 8, false) == true){
                         RunSlaveConfig++;
+                    }
+                    break;
+                    
+                case 8:
+                    if (ConfigureSlave(TRACKBACKPLANE1, SLOT9, 9, true) == true){
+                        RunSlaveConfig++;
+                        RunSlaveConfig = 0;
+                        return_val = true;
+                    }
+                    break;
+                    
+                case 9:
+                    if (ConfigureSlave(TRACKBACKPLANE1, SLOT10, 10, true) == true){
+                    //if (ConfigureSlave(TRACKBACKPLANE1, SLOT10, 4, true) == false){
+                        RunSlaveConfig = 0;
                         return_val = true;
                     }
                     break;
@@ -134,6 +253,7 @@ unsigned int SLAVExINITxANDxCONFIG(){
     }
     return (return_val);
 }
+*/
 
 /*#--------------------------------------------------------------------------#*/
 /*  Description: unsigned int ConfigureSlave(unsigned int TrackBackPlaneID, 
@@ -284,32 +404,40 @@ unsigned int ENABLExAMPLIFIER(void){
         return_val = true;
     }
     */
-    
-    switch(StartupMachine){
-        case 0:
-            MASTER_SLAVE_DATA[0].HoldingReg[1] = 0;                             // Address  = broadcast address
-            MASTER_SLAVE_DATA[0].HoldingReg[2] = 0x8000;                        // Data     = Set AMP_ID5_SET_LAT 0x10 in TrackBackplaneSlave
-            MASTER_SLAVE_DATA[0].HoldingReg[3] = 1;                             // Register = number to write to
-            MASTER_SLAVE_DATA[0].HoldingReg[0] = MODE_AUTO & WRITE & HOLDINGREG & EXEC;
-            StartupMachine = 1;
-            break;
-
-        case 1:
-            if(MASTER_SLAVE_DATA[0].InputReg[0] == OK){
-                MASTER_SLAVE_DATA[0].HoldingReg[0] = MODE_AUTO & WRITE & HOLDINGREG & HALT; // Remove the execute command
-                StartupMachine = 2;
-            }
-            break;
-
-        case 2:
-            if(MASTER_SLAVE_DATA[0].InputReg[0] == IDLE){
-                StartupMachine = 0;
-                return_val = true;
-            }
-            break;
+    if (PIR2bits.TMR3IF){                                                       // Update rate 10ms
+        _Delay++;
             
-        default:
-            break;
+        if (_Delay > 30){
+            _Delay = 0;
+            switch(StartupMachine){
+                case 0:
+                    MASTER_SLAVE_DATA[0].HoldingReg[1] = 0;                             // Address  = broadcast address
+                    MASTER_SLAVE_DATA[0].HoldingReg[2] = 0x8000;                        // Data     = Set AMP_ID5_SET_LAT 0x10 in TrackBackplaneSlave
+                    MASTER_SLAVE_DATA[0].HoldingReg[3] = 1;                             // Register = number to write to
+                    MASTER_SLAVE_DATA[0].HoldingReg[0] = MODE_AUTO & WRITE & HOLDINGREG & EXEC;
+                    StartupMachine = 1;
+                    break;
+
+                case 1:
+                    if(MASTER_SLAVE_DATA[0].InputReg[0] == OK){
+                        MASTER_SLAVE_DATA[0].HoldingReg[0] = MODE_AUTO & WRITE & HOLDINGREG & HALT; // Remove the execute command
+                        StartupMachine = 0;
+                        return_val = true;
+                    }
+                    break;
+
+                case 2:
+                    if(MASTER_SLAVE_DATA[0].InputReg[0] == IDLE){
+                        StartupMachine = 0;
+                        return_val = true;
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+        }
+        PIR2bits.TMR3IF = 0;
     }
     
     return (return_val);

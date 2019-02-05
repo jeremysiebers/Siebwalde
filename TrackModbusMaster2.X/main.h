@@ -18,7 +18,7 @@ extern "C" {
 #define False 0
     
 #define NUMBER_OF_SLAVES 2                                                      // The number of slave registers to initiate on this master for communication with SPI slave (Ethernet Traget))
-#define NUMBER_OF_MODBUS_SLAVES 5                                               // 0 is for the master self. 5 backplane slaves + 50 Track slaves => 56  
+#define NUMBER_OF_MODBUS_SLAVES 51                                              // 0 is for the master self. 50 Track slaves => 51  
 
 extern unsigned int UpdateNextSlave;
 void Led_Blink (void);

@@ -108,6 +108,7 @@ void main(void)
                 
             case 2:
                 if(ENABLExAMPLIFIER() == true){
+                    InitPhase = false;
                     StateMachine = 3;
                 }
                 break;

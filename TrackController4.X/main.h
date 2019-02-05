@@ -17,7 +17,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#define NUMBER_OF_SLAVES    5
+#define NUMBER_OF_SLAVES    51                                                  // 0 is for the master self. 50 Track slaves => 51  
 
 typedef enum
 {

@@ -174,7 +174,7 @@ void ProcessNextSlave(){
     }
     
     if(MASTER_SLAVE_DATA[0].SlaveNumber == 0){
-        SLAVExCOMMANDxHANDLER(true);        
+        SLAVExCOMMANDxHANDLER(true);                                            // process special communication messages via master register, else regular read/write update      
     }
     else{
     
@@ -455,6 +455,7 @@ void SLAVExCOMMANDxHANDLER (uint16_t State){
     
     switch(CommandMachine){
         case 0:
+            MASTER_SLAVE_DATA[1].InputReg[0] = IDLE;                            // reset status register for readback of execution towards ethernet target
             if (MASTER_SLAVE_DATA[0].HoldingReg[0] & EXEC){                     // if execute is set
 
                 if((MASTER_SLAVE_DATA[0].HoldingReg[0] & 0x1C) == HOLDINGREG){ 
@@ -522,7 +523,7 @@ void SLAVExCOMMANDxHANDLER (uint16_t State){
         case 50:
             if ((MASTER_SLAVE_DATA[0].HoldingReg[0] & EXEC) == 0){              // Remove execute command before returning
                 CommandMachine = 0; 
-                MASTER_SLAVE_DATA[1].InputReg[0] = IDLE;                        // reset status register for readback of execution towards ethernet target
+                //MASTER_SLAVE_DATA[1].InputReg[0] = IDLE;                        // reset status register for readback of execution towards ethernet target
             }
 //            if(State == true){
 //                ProcessSlave++;                                                 // If the master is handling broadcast messages and processing through these states, a ProcessSlave++ is required to ensure the nextslave is handled

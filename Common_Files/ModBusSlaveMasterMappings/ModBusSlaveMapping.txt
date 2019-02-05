@@ -104,6 +104,8 @@
  * HoldingReg2, 0 - 15          Data to be written
  * 
  * HoldingReg3, 0 - 15          Register to be written/read
+ *
+ * HoldingReg4, 0 - 15          Amount of slaves to communicate to
  * 
  * InputReg0,   0               Modbus Master busy
  * InputReg0,   1               Command execution OK

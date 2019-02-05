@@ -22,6 +22,7 @@ extern void ProcessSpiData(void);
 extern void ProcessSpiInterrupt();
 extern void CheckSpiStart(void);
 extern unsigned int SpiSlaveCommErrorCounter;
+extern unsigned bool InitPhase;
 
 #ifdef	__cplusplus
 }

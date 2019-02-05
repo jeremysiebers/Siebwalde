@@ -58,11 +58,11 @@ void SYSTEM_Initialize(void)
     ADCC_Initialize();
     TMR4_Initialize();
     TMR2_Initialize();
-    TMR0_Initialize();
+    TMR6_Initialize();
     CMP1_Initialize();
     TMR3_Initialize();
-    PWM3_Initialize();
     DAC1_Initialize();
+    PWM3_Initialize();
     TMR1_Initialize();
     EUSART_Initialize();
 }

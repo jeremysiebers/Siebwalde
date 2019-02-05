@@ -223,7 +223,7 @@ uint8_t Led_Disco (){
                 
             case 2:
                 Loop++;
-                if(Loop > 2){
+                if(Loop > 1){
                     Return_Val = true;
                 }
                 else{

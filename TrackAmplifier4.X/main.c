@@ -65,6 +65,7 @@ void main(void) {
                 if (ID_PORT == 0){                                              // When ID_PORT is pulled low the amplifier will be configured
                     Startup_Machine = 1;
                 }
+                Led_Blink();
                 break;
                 
             case 1 :
@@ -72,10 +73,10 @@ void main(void) {
                 LED_ERR++;                
                 Led_Blink();
                 if (ID_PORT){                                                   // When the ID_PORT is released, check if a new ID is set, otherwise go back to initial state
-                    if((PetitHoldingRegisters[2].ActValue & 0x1F)!= 0 ){
+                    if((PetitHoldingRegisters[2].ActValue & 0x3F)!= 0 ){
                         LED_ERR         = 0; 
                         LED_ERR_LAT     = 0;                        
-                        MODBUS_ADDRESS = (PetitHoldingRegisters[2].ActValue & 0x1F);
+                        MODBUS_ADDRESS = (PetitHoldingRegisters[2].ActValue & 0x3F);
                         InitPetitModbus(MODBUS_ADDRESS);
                         Startup_Machine = 2;
                    }  
@@ -156,7 +157,8 @@ void main(void) {
 
 /*----------------------------------------------------------------------------*/
 void Led_Blink (){
-    if(PIR0bits.TMR0IF){
+    if(PIR4bits.TMR6IF){
+        PIR4bits.TMR6IF = 0;
         
         switch(LED_WAR_STATE){
             case 0 : 
@@ -249,8 +251,7 @@ void Led_Blink (){
                 LED_RX_STATE = 0;
                 break;                       
         }
-        PIR0bits.TMR0IF = 0;
-        TMR0_Reload();
+        //TMR0_Reload();
     }
 }
 /******************************************************************************
@@ -274,7 +275,8 @@ uint8_t Led_Disco (){
     
     uint8_t Return_Val = false;
     
-    if(PIR0bits.TMR0IF){
+    if(PIR4bits.TMR6IF){
+        PIR4bits.TMR6IF = 0;
         
         Count++;
         if(Count > 5){
@@ -296,7 +298,7 @@ uint8_t Led_Disco (){
                 
             case 2:
                 Loop++;
-                if(Loop > 2){
+                if(Loop > 1){
                     Return_Val = true;
                 }
                 else{
@@ -309,8 +311,6 @@ uint8_t Led_Disco (){
             default :
                 break;
         }
-        PIR0bits.TMR0IF = 0;
-        TMR0_Reload();
     }
     return(Return_Val);
 }
@@ -336,6 +336,7 @@ void Led_Convert(uint8_t Number){
             LED_ERR_LAT     = 0; 
             LED_RX_LAT      = 0; 
             LED_TX_LAT      = 0;
+            LED_OCC_LAT     = 0;
             break;
         case 2:
             LED_RUN_LAT     = 0;
@@ -343,6 +344,7 @@ void Led_Convert(uint8_t Number){
             LED_ERR_LAT     = 0; 
             LED_RX_LAT      = 0; 
             LED_TX_LAT      = 0;
+            LED_OCC_LAT     = 0;
             break;
         case 3:
             LED_RUN_LAT     = 0;
@@ -350,6 +352,7 @@ void Led_Convert(uint8_t Number){
             LED_ERR_LAT     = 1; 
             LED_RX_LAT      = 0; 
             LED_TX_LAT      = 0;
+            LED_OCC_LAT     = 0;
             break;
         case 4:
             LED_RUN_LAT     = 0;
@@ -357,6 +360,7 @@ void Led_Convert(uint8_t Number){
             LED_ERR_LAT     = 0; 
             LED_RX_LAT      = 1; 
             LED_TX_LAT      = 0;
+            LED_OCC_LAT     = 0;
             break;
         case 5:
             LED_RUN_LAT     = 0;
@@ -364,6 +368,7 @@ void Led_Convert(uint8_t Number){
             LED_ERR_LAT     = 0; 
             LED_RX_LAT      = 0; 
             LED_TX_LAT      = 1;
+            LED_OCC_LAT     = 1;
             break;
         default:            
             break;

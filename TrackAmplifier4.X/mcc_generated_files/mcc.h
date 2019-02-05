@@ -52,13 +52,13 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "interrupt_manager.h"
+#include "tmr6.h"
 #include "tmr3.h"
 #include "tmr4.h"
 #include "tmr1.h"
 #include "tmr2.h"
-#include "cmp1.h"
 #include "crc.h"
-#include "tmr0.h"
+#include "cmp1.h"
 #include "fvr.h"
 #include "adcc.h"
 #include "pwm3.h"
