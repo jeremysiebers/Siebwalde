@@ -96,24 +96,23 @@ void main(void)
     
     while (1)
     {
-        ToFromTerminal();
         
         
         switch(StateMachine){
             case 1:
                 if(SLAVExINITxANDxCONFIG() == true){
+                    InitPhase = false;
                     StateMachine = 2;
                 }
                 break;
                 
             case 2:
                 if(ENABLExAMPLIFIER() == true){
-                    InitPhase = false;
                     StateMachine = 3;
                 }
                 break;
                 
-            default :
+            default : ToFromTerminal();
                 break;
         }
     }

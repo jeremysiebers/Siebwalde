@@ -33,35 +33,13 @@ void             SLAVExCOMMANDxHANDLER(uint16_t State);
 /*#--------------------------------------------------------------------------#*/
 static SLAVE_INFO   *MASTER_SLAVE_DATA = 0;                                     // Holds the address were the received slave data is stored
 static SLAVE_INFO   SlaveInfoReadMask;                                          // Read mask for slave data from EhternetTarget
-unsigned char       *pSlaveDataReceived, *pSlaveInfoReadMask, *pSlaveDataCopy;
+unsigned char       *pSlaveDataReceived, *pSlaveInfoReadMask;
 
 void InitSlaveCommunication(SLAVE_INFO *location)                                  
-{
-//    MASTER_SLAVE_DATA  =  location;
-//    SlaveInfoReadMask.Header           = 0x00;
-//    SlaveInfoReadMask.SlaveNumber      = 0x00;                                  // Mask for data write to local MASTER_SLAVE_DATA from EthernetTarget
-//    SlaveInfoReadMask.HoldingReg[0]    = 0xFFFF;                                // only new setpoints/settings are allowed to be read which need to be written to modbus slaves
-//    SlaveInfoReadMask.HoldingReg[1]    = 0xFFFF;
-//    SlaveInfoReadMask.HoldingReg[2]    = 0xFFFF;
-//    SlaveInfoReadMask.HoldingReg[3]    = 0xFFFF;
-//    SlaveInfoReadMask.InputReg[0]      = 0x0000;
-//    SlaveInfoReadMask.InputReg[1]      = 0x0000;
-//    SlaveInfoReadMask.InputReg[2]      = 0x0000;
-//    SlaveInfoReadMask.InputReg[3]      = 0x0000;
-//    SlaveInfoReadMask.InputReg[4]      = 0x0000;
-//    SlaveInfoReadMask.InputReg[5]      = 0x0000;
-//    SlaveInfoReadMask.DiagReg[0]       = 0x0000;
-//    SlaveInfoReadMask.DiagReg[1]       = 0x0000;
-//    SlaveInfoReadMask.MbReceiveCounter = 0x0000;
-//    SlaveInfoReadMask.MbSentCounter    = 0x0000;
-//    SlaveInfoReadMask.MbCommError      = 0x0000;
-//    SlaveInfoReadMask.MbExceptionCode  = 0x00;
-//    SlaveInfoReadMask.SpiCommErrorCounter = 0x0000;
-//    SlaveInfoReadMask.Footer           = 0x00;
-    
+{   
     MASTER_SLAVE_DATA  =  location;
     SlaveInfoReadMask.Header           = 0x00;
-    SlaveInfoReadMask.SlaveNumber      = 0xFF;                                  // Mask for data write to local MASTER_SLAVE_DATA from EthernetTarget
+    SlaveInfoReadMask.SlaveNumber      = 0x00;                                  // Mask for data write to local MASTER_SLAVE_DATA from EthernetTarget
     SlaveInfoReadMask.HoldingReg[0]    = 0xFFFF;                                // only new setpoints/settings are allowed to be read which need to be written to modbus slaves
     SlaveInfoReadMask.HoldingReg[1]    = 0xFFFF;
     SlaveInfoReadMask.HoldingReg[2]    = 0xFFFF;
@@ -80,28 +58,6 @@ void InitSlaveCommunication(SLAVE_INFO *location)
     SlaveInfoReadMask.MbExceptionCode  = 0x00;
     SlaveInfoReadMask.SpiCommErrorCounter = 0x0000;
     SlaveInfoReadMask.Footer           = 0x00;
-    
-//    MASTER_SLAVE_DATA  =  location;
-//    SlaveInfoReadMask.Header           = 0x00;
-//    SlaveInfoReadMask.SlaveNumber      = 0xFF;                                  // Mask for data write to local MASTER_SLAVE_DATA from EthernetTarget
-//    SlaveInfoReadMask.HoldingReg[0]    = 0xFFFF;                                // only new setpoints/settings are allowed to be read which need to be written to modbus slaves
-//    SlaveInfoReadMask.HoldingReg[1]    = 0xFFFF;
-//    SlaveInfoReadMask.HoldingReg[2]    = 0xFFFF;
-//    SlaveInfoReadMask.HoldingReg[3]    = 0xFFFF;
-//    SlaveInfoReadMask.InputReg[0]      = 0xFFFF;
-//    SlaveInfoReadMask.InputReg[1]      = 0xFFFF;
-//    SlaveInfoReadMask.InputReg[2]      = 0xFFFF;
-//    SlaveInfoReadMask.InputReg[3]      = 0xFFFF;
-//    SlaveInfoReadMask.InputReg[4]      = 0xFFFF;
-//    SlaveInfoReadMask.InputReg[5]      = 0xFFFF;
-//    SlaveInfoReadMask.DiagReg[0]       = 0xFFFF;
-//    SlaveInfoReadMask.DiagReg[1]       = 0xFFFF;
-//    SlaveInfoReadMask.MbReceiveCounter = 0xFFFF;
-//    SlaveInfoReadMask.MbSentCounter    = 0xFFFF;
-//    SlaveInfoReadMask.MbCommError      = 0xFFFF;
-//    SlaveInfoReadMask.MbExceptionCode  = 0xFF;
-//    SlaveInfoReadMask.SpiCommErrorCounter = 0xFFFF;
-//    SlaveInfoReadMask.Footer           = 0x00;
 }
 
 /*#--------------------------------------------------------------------------#*/
@@ -141,26 +97,14 @@ unsigned char HoldingRegistersWrite[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};           
 unsigned char   InputRegistersRead [4] = {0, 0, 0, 0};
 unsigned char    DiagRegistersRead [4] = {0, 0, 0, 0};
 
-//static unsigned char ProcessSlave = 1;
+static unsigned char ProcessSlave = 1;
 static unsigned int Mailbox = 1;
-static unsigned int Message = 0;
+static unsigned int Message = MESSAGE1;
 
 void ProcessNextSlave(){    
     
-//    if (ProcessSlave > (NUMBER_OF_SLAVES-1)){
-//        ProcessSlave = 0;
-//        
-//        Message++;
-//        if (Message > MESSAGE3){
-//            Message = MESSAGE1;
-//            
-//            Mailbox++;
-//            if (Mailbox > 4){
-//                Mailbox = 1;
-//            }
-//        }                
-//    }
-    if (MASTER_SLAVE_DATA[0].SlaveNumber == 0){
+    if (ProcessSlave > (NUMBER_OF_SLAVES-1)){
+        ProcessSlave = 0;
         
         Message++;
         if (Message > MESSAGE3){
@@ -173,23 +117,23 @@ void ProcessNextSlave(){
         }                
     }
     
-    if(MASTER_SLAVE_DATA[0].SlaveNumber == 0){
+    if(ProcessSlave == 0){
         SLAVExCOMMANDxHANDLER(true);        
     }
     else{
     
         switch (Message){
             case MESSAGE1:
-                HoldingRegistersWrite[8]  = MASTER_SLAVE_DATA[0].HoldingReg[1];
-                HoldingRegistersWrite[7]  = MASTER_SLAVE_DATA[0].HoldingReg[1] >> 8;
-                HoldingRegistersWrite[6]  = MASTER_SLAVE_DATA[0].HoldingReg[0];
-                HoldingRegistersWrite[5]  = MASTER_SLAVE_DATA[0].HoldingReg[0] >> 8;
+                HoldingRegistersWrite[8]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[1];
+                HoldingRegistersWrite[7]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[1] >> 8;
+                HoldingRegistersWrite[6]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[0];
+                HoldingRegistersWrite[5]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[0] >> 8;
                 HoldingRegistersWrite[4]  = 4;
                 HoldingRegistersWrite[3]  = 2;
                 HoldingRegistersWrite[2]  = 0;
                 HoldingRegistersWrite[1]  = 0;
                 HoldingRegistersWrite[0]  = 0;
-                SendPetitModbus(MASTER_SLAVE_DATA[0].SlaveNumber, PETITMODBUS_WRITE_MULTIPLE_REGISTERS, HoldingRegistersWrite, 9, 1);
+                SendPetitModbus(ProcessSlave, PETITMODBUS_WRITE_MULTIPLE_REGISTERS, HoldingRegistersWrite, 9);
                 break;
 
             case MESSAGE2:
@@ -197,22 +141,22 @@ void ProcessNextSlave(){
                 InputRegistersRead[2]  = 0;
                 InputRegistersRead[1]  = 0;
                 InputRegistersRead[0]  = 0;
-                SendPetitModbus(MASTER_SLAVE_DATA[0].SlaveNumber, PETITMODBUS_READ_INPUT_REGISTERS, InputRegistersRead, 4, 1);    
+                SendPetitModbus(ProcessSlave, PETITMODBUS_READ_INPUT_REGISTERS, InputRegistersRead, 4);    
                 break;
 
             case MESSAGE3:
                 switch (Mailbox){
                     case 1:
-                        HoldingRegistersWrite[8]  = MASTER_SLAVE_DATA[0].HoldingReg[3];
-                        HoldingRegistersWrite[7]  = MASTER_SLAVE_DATA[0].HoldingReg[3] >> 8;
-                        HoldingRegistersWrite[6]  = MASTER_SLAVE_DATA[0].HoldingReg[2];
-                        HoldingRegistersWrite[5]  = MASTER_SLAVE_DATA[0].HoldingReg[2] >> 8;
+                        HoldingRegistersWrite[8]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[3];
+                        HoldingRegistersWrite[7]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[3] >> 8;
+                        HoldingRegistersWrite[6]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[2];
+                        HoldingRegistersWrite[5]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[2] >> 8;
                         HoldingRegistersWrite[4]  = 4;
                         HoldingRegistersWrite[3]  = 2;
                         HoldingRegistersWrite[2]  = 0;
                         HoldingRegistersWrite[1]  = 2;
                         HoldingRegistersWrite[0]  = 0;
-                        SendPetitModbus(MASTER_SLAVE_DATA[0].SlaveNumber, PETITMODBUS_WRITE_MULTIPLE_REGISTERS, HoldingRegistersWrite, 9, 1);
+                        SendPetitModbus(ProcessSlave, PETITMODBUS_WRITE_MULTIPLE_REGISTERS, HoldingRegistersWrite, 9);
                         break;
 
                     case 2:
@@ -220,7 +164,7 @@ void ProcessNextSlave(){
                         DiagRegistersRead[2]  = 0;
                         DiagRegistersRead[1]  = 0;
                         DiagRegistersRead[0]  = 0;
-                        SendPetitModbus(MASTER_SLAVE_DATA[0].SlaveNumber, PETITMODBUS_DIAGNOSTIC_REGISTERS, DiagRegistersRead, 4, 1);
+                        SendPetitModbus(ProcessSlave, PETITMODBUS_DIAGNOSTIC_REGISTERS, DiagRegistersRead, 4);
                         break;
 
                     case 3:
@@ -228,7 +172,7 @@ void ProcessNextSlave(){
                         InputRegistersRead[2]  = 0;
                         InputRegistersRead[1]  = 2;
                         InputRegistersRead[0]  = 0;
-                        SendPetitModbus(MASTER_SLAVE_DATA[0].SlaveNumber, PETITMODBUS_READ_INPUT_REGISTERS, InputRegistersRead, 4, 1);  
+                        SendPetitModbus(ProcessSlave, PETITMODBUS_READ_INPUT_REGISTERS, InputRegistersRead, 4);  
                         break;
 
                     case 4:
@@ -236,7 +180,7 @@ void ProcessNextSlave(){
                         InputRegistersRead[2]  = 0;
                         InputRegistersRead[1]  = 4;
                         InputRegistersRead[0]  = 0;
-                        SendPetitModbus(MASTER_SLAVE_DATA[0].SlaveNumber, PETITMODBUS_READ_INPUT_REGISTERS, InputRegistersRead, 4, 1);  
+                        SendPetitModbus(ProcessSlave, PETITMODBUS_READ_INPUT_REGISTERS, InputRegistersRead, 4);  
                         break;
 
                     default:
@@ -270,7 +214,7 @@ unsigned int ProcessSlaveCommunication(){
     
     unsigned int Return_Val = false;
     
-    switch (MASTER_SLAVE_DATA[1].MbCommError){
+    switch (MASTER_SLAVE_DATA[ProcessSlave].MbCommError){
         case SLAVE_DATA_BUSY:
             Return_Val = false;
             // count here how long the Mod-bus stack is busy, otherwise reset/action             
@@ -278,29 +222,32 @@ unsigned int ProcessSlaveCommunication(){
             
         case SLAVE_DATA_NOK:
             // count here how often the slave data is NOK, otherwise stop all slaves with broadcast
-            MASTER_SLAVE_DATA[1].MbCommError = SLAVE_DATA_IDLE;            
+            MASTER_SLAVE_DATA[ProcessSlave].MbCommError = SLAVE_DATA_IDLE;            
+            ProcessSlave++;         
             Return_Val = true;
-            LED_ERR_LAT ^= 1;
+            LED_ERR++;
             break;
             
         case SLAVE_DATA_OK:
-            MASTER_SLAVE_DATA[1].MbCommError = SLAVE_DATA_IDLE;            
+            MASTER_SLAVE_DATA[ProcessSlave].MbCommError = SLAVE_DATA_IDLE;            
+            ProcessSlave++;         
             Return_Val = true;
-            LED_ERR_LAT = 0;
             break;            
             
         case SLAVE_DATA_TIMEOUT:
             // count here how often the slave data is timeout, otherwise stop all slaves with broadcast
-            MASTER_SLAVE_DATA[1].MbCommError = SLAVE_DATA_IDLE;            
+            MASTER_SLAVE_DATA[ProcessSlave].MbCommError = SLAVE_DATA_IDLE;            
+            ProcessSlave++;         
             Return_Val = true;
-            LED_ERR_LAT ^= 1;
+            LED_ERR++;
             break;
             
         case SLAVE_DATA_EXCEPTION:
             // count here how often the slave data is timeout, otherwise stop all slaves with broadcast
-            MASTER_SLAVE_DATA[1].MbCommError = SLAVE_DATA_IDLE;            
+            MASTER_SLAVE_DATA[ProcessSlave].MbCommError = SLAVE_DATA_IDLE;            
+            ProcessSlave++;         
             Return_Val = true;
-            LED_ERR_LAT ^= 1;
+            LED_ERR++;
             break;
             
         case SLAVE_DATA_IDLE:
@@ -309,7 +256,7 @@ unsigned int ProcessSlaveCommunication(){
             
         default : Return_Val = true;                                            
             break;
-    }
+    }    
     return (Return_Val);
 }
 
@@ -336,7 +283,9 @@ static uint8_t bytesWritten = 0;
 static uint8_t *dataIn, *dataOut;
 
 void SendDataToEthernet(){
-    /*
+    //modbus_sync_LAT = 1;
+    //SPI1_Exchange8bitBuffer(&(MASTER_SLAVE_DATA[DataFromSlave].Header), 
+    //        DATAxSTRUCTxLENGTH, &(RECEIVEDxDATAxRAW[0]));                       // SPI send/receive data    
     bytesWritten = 0;
     dataIn  = &(MASTER_SLAVE_DATA[DataFromSlave].Header);                       // Data to Ethernet Target
     dataOut = &(RECEIVEDxDATAxRAW[0]);                                          // Data from Ethernet Target
@@ -348,8 +297,8 @@ void SendDataToEthernet(){
         }
         dataOut[bytesWritten] = SSP1BUF;
         bytesWritten++;
-//        NOP();                                                                  
-        __delay_us(1);                                                          // give SPI slave time to process the data NOP() is 3 cycles delay ~288ns
+//        NOP();                                                                // give SPI slave time to process the data NOP() is 3 cycles delay ~288ns
+        __delay_us(1);
     }
     SS1_LAT = 1;   
     
@@ -366,51 +315,29 @@ void SendDataToEthernet(){
         }   
     } 
     else{
-        MASTER_SLAVE_DATA[0].SpiCommErrorCounter += 1;                          // Count error SPI messages 
+        MASTER_SLAVE_DATA[0].SpiCommErrorCounter += 1;                          // Count error SPI messages
+        LED_ERR++;
     }
     
-    DataFromSlave++;                                                            // send data from next slave
+    /*
+     * send data from next slave
+     */
+    DataFromSlave++;                                                            
+    
+    /*
+     * If init is not done yet, keep communicating data from master only
+     */
+    if (InitDone == false){
+        DataFromSlave = 0;                                                      
+    }
+    
+    /*
+     * Check if all slaves are handled, if so reset counter
+     */
     if (DataFromSlave > NUMBER_OF_SLAVES-1){
         DataFromSlave = 0;
     }
-    */
-    
-    bytesWritten = 0;
-    dataIn  = &(MASTER_SLAVE_DATA[1].Header);                                   // Data to Ethernet Target
-    dataOut = &(RECEIVEDxDATAxRAW[0]);                                          // Data from Ethernet Target
-    SS1_LAT = 0;                                                                // Activate slave
-    while(bytesWritten < DATAxSTRUCTxLENGTH){
-        SSP1CON1bits.WCOL = 0;
-        SSP1BUF = dataIn[bytesWritten];
-        while(SSP1STATbits.BF == 0){
-        }
-        dataOut[bytesWritten] = SSP1BUF;
-        bytesWritten++;
-//        NOP();                                                                  
-        __delay_us(1);                                                          // give SPI slave time to process the data NOP() is 3 cycles delay ~288ns
-    }
-    SS1_LAT = 1;   
-    
-    if(RECEIVEDxDATAxRAW[2] < NUMBER_OF_MODBUS_SLAVES && RECEIVEDxDATAxRAW[1]==0xAA && 
-            RECEIVEDxDATAxRAW[DATAxSTRUCTxLENGTH-1]==0x55){                     // Check if received slave number is valid(during debugging sometimes wrong number received)
-        pSlaveDataReceived = &(MASTER_SLAVE_DATA[0].Header);                    // set the pointer to the first element of the received slave number in RECEIVEDxDATAxRAW[1](first element is dummy byte)    
-        pSlaveDataCopy     = &(MASTER_SLAVE_DATA[1].Header);                    // set the pointer to the first element of the received slave number in RECEIVEDxDATAxRAW[1](first element is dummy byte) of data to be copied to the output struct   
-        pSlaveInfoReadMask = &(SlaveInfoReadMask.Header);                       // set the pointer to the first element of the SlaveInfoReadMask
-        for(char i = 1; i < DATAxSTRUCTxLENGTH-1; i++){
-            if(*pSlaveInfoReadMask){
-                *pSlaveDataReceived = RECEIVEDxDATAxRAW[i];                     // for DATAxSTRUCTxLENGTH set every byte into RECEIVEDxDATAxRAW array according to read mask                
-            }   
-            *pSlaveDataCopy     = RECEIVEDxDATAxRAW[i];                         // for DATAxSTRUCTxLENGTH set every byte into RECEIVEDxDATAxRAW array to prepare struct for output to SPI slave and to hold the old data because the SPI slave has the previous data, the SPI master does not have!!!
-            
-            pSlaveDataReceived += 1;                                            // Increment pointer
-            pSlaveInfoReadMask += 1;                                            // Increment pointer 
-            pSlaveDataCopy     += 1;                                            // Increment pointer 
-        }
-        //MASTER_SLAVE_DATA[1].SlaveNumber = MASTER_SLAVE_DATA[0].SlaveNumber;    // When sending data back, the correct slave number must be reported of which slave the data is sent back
-    } 
-    else{
-        MASTER_SLAVE_DATA[1].SpiCommErrorCounter += 1;                          // Count error SPI messages, data send to Ethernet target is in slaveinfo[1]]
-    }
+    //modbus_sync_LAT = 0;
 }
 
 /*#--------------------------------------------------------------------------#*/
@@ -455,54 +382,53 @@ void SLAVExCOMMANDxHANDLER (uint16_t State){
     
     switch(CommandMachine){
         case 0:
-            MASTER_SLAVE_DATA[1].InputReg[0] = IDLE;                            // reset status register for readback of execution towards ethernet target
             if (MASTER_SLAVE_DATA[0].HoldingReg[0] & EXEC){                     // if execute is set
 
                 if((MASTER_SLAVE_DATA[0].HoldingReg[0] & 0x1C) == HOLDINGREG){ 
                     if(MASTER_SLAVE_DATA[0].HoldingReg[0] & WRITE){             // if write is set
-                        MASTER_SLAVE_DATA[1].InputReg[0] = BUSY;
+                        MASTER_SLAVE_DATA[0].InputReg[0] = BUSY;
                         HoldingRegisterWrite[1] = MASTER_SLAVE_DATA[0].HoldingReg[3];       // Register address to write to
                         HoldingRegisterWrite[6] = MASTER_SLAVE_DATA[0].HoldingReg[2];       // low char data
                         HoldingRegisterWrite[5] = MASTER_SLAVE_DATA[0].HoldingReg[2]>> 8;   // high char data
-                        SendPetitModbus(MASTER_SLAVE_DATA[0].HoldingReg[1], PETITMODBUS_WRITE_MULTIPLE_REGISTERS, HoldingRegisterWrite, 7, 1);
+                        SendPetitModbus(MASTER_SLAVE_DATA[0].HoldingReg[1], PETITMODBUS_WRITE_MULTIPLE_REGISTERS, HoldingRegisterWrite, 7);
                         
-//                        if(MASTER_SLAVE_DATA[0].HoldingReg[1] == BROADCAST_ADDRESS){
-//                            ProcessSlave++;                                     // because this message is a broadcast, no timeout will be generated so increment ProcessSlave here!
-//                        }
+                        if(MASTER_SLAVE_DATA[0].HoldingReg[1] == BROADCAST_ADDRESS){
+                            ProcessSlave++;                                     // because this message is a broadcast, no timeout will be generated so increment ProcessSlave here!
+                        }
                         CommandMachine = 40;
                     }
                     else{
-                        MASTER_SLAVE_DATA[1].InputReg[0] = NOK;   
+                        MASTER_SLAVE_DATA[0].InputReg[0] = NOK;   
                         CommandMachine = 50;
                     }                                
                 }
                 else if((MASTER_SLAVE_DATA[0].HoldingReg[0] & 0x1C) == INPUTREG){
                     if(MASTER_SLAVE_DATA[0].HoldingReg[0] & WRITE){             // if write is set
-                        MASTER_SLAVE_DATA[1].InputReg[0] = NOK;
+                        MASTER_SLAVE_DATA[0].InputReg[0] = NOK;
                         CommandMachine = 50;
                     }
                     else{
-                        MASTER_SLAVE_DATA[1].InputReg[0] = BUSY;
+                        MASTER_SLAVE_DATA[0].InputReg[0] = BUSY;
                         CommandMachine = 20;
                     }
                 }
                 else if((MASTER_SLAVE_DATA[0].HoldingReg[0] & 0x1C) == DIAGREG){
                     if(MASTER_SLAVE_DATA[0].HoldingReg[0] & WRITE){             // if write is set
-                        MASTER_SLAVE_DATA[1].InputReg[0] = NOK;
+                        MASTER_SLAVE_DATA[0].InputReg[0] = NOK;
                         CommandMachine = 50;
                     }
                     else{
-                        MASTER_SLAVE_DATA[1].InputReg[0] = BUSY;
+                        MASTER_SLAVE_DATA[0].InputReg[0] = BUSY;
                         CommandMachine = 30;
                     }
                 }                            
             }
             else if(State == true){                                             // Always send message during normal run operation to ensure triggering of slaves on received data     
-//                HoldingRegisterWrite[1] = 0;
-//                HoldingRegisterWrite[6] = 0;
-//                HoldingRegisterWrite[5] = 0;                
-                SendPetitModbus(MASTER_SLAVE_DATA[0].SlaveNumber, PETITMODBUS_READ_HOLDING_REGISTERS, HoldingRegisterRead, 4, 1);
-                //ProcessSlave++;                                                 // because this message is a broadcast on a read, no timeout will be generated so increment ProcessSlave here!
+                HoldingRegisterWrite[1] = 0;                                    // clear write registers, needed?
+                HoldingRegisterWrite[6] = 0;
+                HoldingRegisterWrite[5] = 0;                
+                SendPetitModbus(BROADCAST_ADDRESS, PETITMODBUS_READ_HOLDING_REGISTERS, HoldingRegisterRead, 4);
+                ProcessSlave++;                                                 // because this message is a broadcast on a read, no timeout will be generated so increment ProcessSlave here!
             }
             break;
     //----------------------------------------------------------------------------------------------------------------------//                              
@@ -513,21 +439,21 @@ void SLAVExCOMMANDxHANDLER (uint16_t State){
 
     //----------------------------------------------------------------------------------------------------------------------//                        
         case 40:
-            MASTER_SLAVE_DATA[1].InputReg[0] = OK;
+            MASTER_SLAVE_DATA[0].InputReg[0] = OK;
             CommandMachine = 50; 
-//            if(State == true){
-//                //ProcessSlave++;                                                 // If the master is handling broadcast messages and processing through these states, a ProcessSlave++ is required to ensure the nextslave is handled
-//            }
+            if(State == true){
+                ProcessSlave++;                                                 // If the master is handling broadcast messages and processing through these states, a ProcessSlave++ is required to ensure the nextslave is handled
+            }
             break;
 
         case 50:
             if ((MASTER_SLAVE_DATA[0].HoldingReg[0] & EXEC) == 0){              // Remove execute command before returning
                 CommandMachine = 0; 
-                //MASTER_SLAVE_DATA[1].InputReg[0] = IDLE;                        // reset status register for readback of execution towards ethernet target
+                MASTER_SLAVE_DATA[0].InputReg[0] = IDLE;                        // reset status register for readback of execution towards ethernet target
             }
-//            if(State == true){
-//                ProcessSlave++;                                                 // If the master is handling broadcast messages and processing through these states, a ProcessSlave++ is required to ensure the nextslave is handled
-//            }
+            if(State == true){
+                ProcessSlave++;                                                 // If the master is handling broadcast messages and processing through these states, a ProcessSlave++ is required to ensure the nextslave is handled
+            }
             break;
 
         default :

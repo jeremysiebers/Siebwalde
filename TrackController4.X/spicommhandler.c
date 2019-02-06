@@ -43,7 +43,7 @@ static unsigned int DATAxCOUNTxSEND = 0;
 static unsigned int DATAxREADY = 0;
 
 unsigned int SpiSlaveCommErrorCounter;
-unsigned bool InitPhase = false;
+unsigned bool InitPhase = true;
 
 void INITxSPIxCOMMxHANDLER(SLAVE_INFO *location)                                  
 {   

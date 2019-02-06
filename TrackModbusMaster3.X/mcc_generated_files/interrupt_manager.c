@@ -93,9 +93,8 @@ void __interrupt() INTERRUPT_InterruptManager (void)
         else if(PIE4bits.TMR1IE == 1 && PIR4bits.TMR1IF == 1)
         {
             SlaveAnswerTimeoutCounter   = 1;                                    // Data received answer timeout timer
-            T1CONbits.TMR1ON            = 0;
-            PIE4bits.TMR1IE             = 0;
             PIR4bits.TMR1IF             = 0;
+            TMR1_Reload();                                                      // Timer is stoped when the SlaveAnswerTimeoutCounter > 0 is seen by modbus handler
         } 
         else if(PIE4bits.TMR2IE == 1 && PIR4bits.TMR2IF == 1)
         {

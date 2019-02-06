@@ -5,13 +5,15 @@
  * Created on April 16, 2018, 10:06 PM
  */
 #include <xc.h>
-#include <stdint.h>
 #include "main.h"
 #include "mcc_generated_files/mcc.h"
+#include "modbus/Interrupts.h"
 #include "modbus/PetitModbus.h"
 #include "commhandler.h"
 
-#define ALLxSLAVESxDATA ((unsigned int)((NUMBER_OF_MODBUS_SLAVES-1)*3) * 4)
+#define ALLxSLAVESxDATA ((unsigned int)((NUMBER_OF_SLAVES-1)*3) * 4)
+
+
 
 /*----------------------------------------------------------------------------*/
 
@@ -19,8 +21,9 @@ static SLAVE_INFO         SlaveInfo[NUMBER_OF_SLAVES];                          
 
 /*----------------------------------------------------------------------------*/
 
-unsigned int LED_TX_prev, LED_RX_prev = 0;
-unsigned int LED_TX_STATE, LED_RX_STATE = 0;
+unsigned int LED_TX_prev, LED_RX_prev, LED_ERR_prev = 0;
+unsigned int LED_TX_STATE, LED_RX_STATE, LED_ERR_STATE = 0;
+volatile unsigned int LED_ERR = 0;
 unsigned int UpdateNextSlave = false;
 unsigned int AllSlavesReadAllDataCounter = 1;
 unsigned int InitDone = false;
@@ -28,7 +31,7 @@ unsigned int InitDone = false;
                          Main application
  */
 void main(void)
-{
+{    
     // Initialize the device
     SYSTEM_Initialize();
 
@@ -51,7 +54,7 @@ void main(void)
     /* Test the onboard Led's */
     while(Led_Disco() == false);
     
-    __delay_ms(50);                                                             // Wait longer then the slaves (1000ms)
+    __delay_ms(100);                                                             // Wait longer then the slaves (1000ms)
     
     // Initialize the SLAVE_INFO struct with slave numbers
     for (char i = 0; i <NUMBER_OF_SLAVES; i++){
@@ -76,26 +79,25 @@ void main(void)
     TMR2_Start();
     
     /* Wait till all slave data is send to SPI master from SPI slave */
-    __delay_ms(100);
+    __delay_ms(1000);
     
     while(1)
     {
-        if (SlaveInfo[0].SlaveNumber == 0 && (SlaveInfo[0].HoldingReg[0] & 0x01) == 0){                          // Initialization starts here, after init of all slaves, the regular updates can take place
+        if ((SlaveInfo[0].HoldingReg[0] & 0x01) == 0){                          // Initialization starts here, after init of all slaves, the regular updates can take place
             SLAVExCOMMANDxHANDLER(false);
+            InitDone = false;
         }
-        else if (SlaveInfo[0].SlaveNumber == 0 && (SlaveInfo[0].HoldingReg[0] & 0x01) == 1){                                                                   // Regular slave communication
+        else if ((SlaveInfo[0].HoldingReg[0] & 0x01) == 1){                     // Regular slave communication
             InitDone = true;
-        }
-        if (InitDone == true && UpdateNextSlave == true){
-            UpdateNextSlave = false;
-            ProcessNextSlave();                    
-            AllSlavesReadAllDataCounter++;
-            if (AllSlavesReadAllDataCounter > ALLxSLAVESxDATA){
-                AllSlavesReadAllDataCounter = 1;
+            if (UpdateNextSlave == true){
+                UpdateNextSlave = false;
+                ProcessNextSlave();                    
+                AllSlavesReadAllDataCounter++;
+                if (AllSlavesReadAllDataCounter > ALLxSLAVESxDATA){
+                    AllSlavesReadAllDataCounter = 1;
+                }
             }
-        }
-        else if(InitDone == true){
-            ProcessSlaveCommunication();            
+            ProcessSlaveCommunication();
         }
         
         ProcessPetitModbus();
@@ -152,6 +154,30 @@ void Led_Blink (){
                 LED_RX_STATE = 0;
                 break;                       
         }
+        
+        switch(LED_ERR_STATE){
+            case 0 : 
+                if (LED_ERR > 0){
+                    LED_ERR_LAT = 1;
+                    LED_ERR_prev = LED_ERR;
+                    LED_ERR_STATE = 1;                        
+                }
+                break;
+
+            case 1 :
+                if (LED_ERR == LED_ERR_prev || LED_ERR != LED_ERR_prev){
+                    LED_ERR_LAT = 0;
+                    LED_ERR_prev = 0;
+                    LED_ERR = 0;
+                    LED_ERR_STATE = 0;                        
+                }
+                break;
+
+            default :
+                LED_ERR_STATE = 0;
+                break;                       
+        }
+        
         PIR0bits.TMR0IF = 0;
         TMR0_Reload();
     }
@@ -173,6 +199,7 @@ uint8_t     Disco   = 0;
 uint8_t     Count   = 0;
 uint16_t    Out     = 0;
 uint8_t     Loop    = 0;
+
 uint8_t Led_Disco (){
     
     uint8_t Return_Val = false;

@@ -17,9 +17,6 @@
 
 #define PETITMODBUS_TIMEOUTTIMER                         2                      // Timeout Constant for Petit Modbus RTU Slave [101us tick]
 
-#define PASS_THROUGH_MODBUS
-//#define NORMAL_MODBUS
-
 /****************************Don't Touch This**********************************/
 // Buffers for Petit Modbus RTU Slave
 #define PETITMODBUS_RECEIVE_BUFFER_SIZE                 (NUMBER_OF_HOLDING_PETITREGISTERS*2 + 10) 
@@ -72,14 +69,7 @@ typedef struct
 // Main Functions
 extern void             InitPetitModbus(SLAVE_INFO *location);
 extern void             ProcessPetitModbus(void);
-
-#ifdef NORMAL_MODBUS
-extern unsigned char SendPetitModbus(unsigned char Address, unsigned char Function, unsigned char *DataBuf, unsigned short DataLen);
-#endif
-#ifdef PASS_THROUGH_MODBUS
-extern unsigned char SendPetitModbus(unsigned char Address, unsigned char Function, unsigned char *DataBuf, unsigned short DataLen, unsigned char StorageLocation);
-#endif
-
+extern unsigned char    SendPetitModbus(unsigned char Address, unsigned char Function, unsigned char *DataBuf, unsigned short DataLen);
 
 void HandlePetitModbusWriteSingleRegisterSlaveReadback(void);
 void HandlePetitModbusReadHoldingRegistersSlaveReadback(void);

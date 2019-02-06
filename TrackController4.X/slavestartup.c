@@ -97,76 +97,76 @@ unsigned int SLAVExINITxANDxCONFIG(){
     
     unsigned return_val = false;
     
-    if (1){//PIR2bits.TMR3IF){                                                       // Update rate 50ms
-        _Delay++;
+//    if (1){//PIR2bits.TMR3IF){                                                       // Update rate 50ms
+//        _Delay++;
+//            
+//        if (_Delay > 0){
+//            _Delay = 0;
             
-        if (_Delay > 0){
-            _Delay = 0;
-            
-            switch(RunSlaveConfig){
-                case 0:
-                    if(ProgramSlave > 10){
-                        RunSlaveConfig++;
-                        ShiftSlot = 0;
-                    }
-                    else if (ConfigureSlave(TRACKBACKPLANE1, SLOT1 << ShiftSlot, ProgramSlave, false) == true){
-                        ShiftSlot++;
-                        ProgramSlave++;
-                    }
-                    break;
-                    
-                case 1:
-                    if(ProgramSlave > 20){
-                        RunSlaveConfig++;
-                        ShiftSlot = 0;
-                    }
-                    else if (ConfigureSlave(TRACKBACKPLANE2, SLOT1 << ShiftSlot, ProgramSlave, false) == true){
-                        ShiftSlot++;
-                        ProgramSlave++;                        
-                    }
-                    break;
-                    
-                case 2:
-                    if(ProgramSlave > 30){
-                        RunSlaveConfig++;
-                        ShiftSlot = 0;
-                    }
-                    else if (ConfigureSlave(TRACKBACKPLANE3, SLOT1 << ShiftSlot, ProgramSlave, false) == true){
-                        ShiftSlot++;
-                        ProgramSlave++;
-                    }
-                    break;
-                    
-                case 3:
-                    if(ProgramSlave > 40){
-                        RunSlaveConfig++;
-                        ShiftSlot = 0;
-                    }
-                    else if (ConfigureSlave(TRACKBACKPLANE4, SLOT1 << ShiftSlot, ProgramSlave, false) == true){
-                        ShiftSlot++;
-                        ProgramSlave++;
-                    }
-                    break;
-                    
-                case 4:
-                    if(ProgramSlave > 49){
-                        if (ConfigureSlave(TRACKBACKPLANE5, SLOT1 << ShiftSlot, ProgramSlave, true) == true){
-                            RunSlaveConfig = 0;
-                            return_val = true;
-                        }
-                    }
-                    else if (ConfigureSlave(TRACKBACKPLANE5, SLOT1 << ShiftSlot, ProgramSlave, false) == true){
-                        ShiftSlot++;
-                        ProgramSlave++;
-                    }
-                    break;
-                    
-                default :
-                    break;
-            }          
-        }
-        PIR2bits.TMR3IF = 0;
-    }
+    switch(RunSlaveConfig){
+        case 0:
+            if(ProgramSlave > 10){
+                RunSlaveConfig++;
+                ShiftSlot = 0;
+            }
+            else if (ConfigureSlave(TRACKBACKPLANE1, SLOT1 << ShiftSlot, ProgramSlave, false) == true){
+                ShiftSlot++;
+                ProgramSlave++;
+            }
+            break;
+
+        case 1:
+            if(ProgramSlave > 20){
+                RunSlaveConfig++;
+                ShiftSlot = 0;
+            }
+            else if (ConfigureSlave(TRACKBACKPLANE2, SLOT1 << ShiftSlot, ProgramSlave, false) == true){
+                ShiftSlot++;
+                ProgramSlave++;                        
+            }
+            break;
+
+        case 2:
+            if(ProgramSlave > 30){
+                RunSlaveConfig++;
+                ShiftSlot = 0;
+            }
+            else if (ConfigureSlave(TRACKBACKPLANE3, SLOT1 << ShiftSlot, ProgramSlave, false) == true){
+                ShiftSlot++;
+                ProgramSlave++;
+            }
+            break;
+
+        case 3:
+            if(ProgramSlave > 40){
+                RunSlaveConfig++;
+                ShiftSlot = 0;
+            }
+            else if (ConfigureSlave(TRACKBACKPLANE4, SLOT1 << ShiftSlot, ProgramSlave, false) == true){
+                ShiftSlot++;
+                ProgramSlave++;
+            }
+            break;
+
+        case 4:
+            if(ProgramSlave > 49){
+                if (ConfigureSlave(TRACKBACKPLANE5, SLOT1 << ShiftSlot, ProgramSlave, true) == true){
+                    RunSlaveConfig = 0;
+                    return_val = true;
+                }
+            }
+            else if (ConfigureSlave(TRACKBACKPLANE5, SLOT1 << ShiftSlot, ProgramSlave, false) == true){
+                ShiftSlot++;
+                ProgramSlave++;
+            }
+            break;
+
+        default :
+            break;
+    }          
+//        }
+//        PIR2bits.TMR3IF = 0;
+//    }
     return (return_val);
 }
 /*

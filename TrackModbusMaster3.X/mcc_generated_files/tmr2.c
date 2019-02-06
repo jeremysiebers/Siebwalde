@@ -89,8 +89,8 @@ void TMR2_Initialize(void)
     // Set Default Interrupt Handler
     TMR2_SetInterruptHandler(TMR2_DefaultInterruptHandler);
 
-    // T2CKPS 1:1; T2OUTPS 1:1; TMR2ON on; 
-    T2CON = 0x80;
+    // T2CKPS 1:1; T2OUTPS 1:1; TMR2ON off; 
+    T2CON = 0x00;
 }
 
 void TMR2_ModeSet(TMR2_HLT_MODE mode)
