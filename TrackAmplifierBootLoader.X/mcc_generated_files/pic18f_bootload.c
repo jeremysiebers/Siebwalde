@@ -31,9 +31,9 @@
 //   |               |
 //   |  Boot Block   |   (this program)
 //   |               |
-//   |    0x500     |   Re-mapped Reset Vector (Actual address
-//   |    0x508     |   Re-mapped High Priority Interrupt Vector
-//   |    0x518     |   Re-mapped Low Priority Interrupt Vector
+//   |    0x800     |   Re-mapped Reset Vector (Actual address
+//   |    0x808     |   Re-mapped High Priority Interrupt Vector
+//   |    0x818     |   Re-mapped Low Priority Interrupt Vector
 //   |       |       |
 //   |               |
 //   |  Code Space   |   User program space
@@ -87,16 +87,15 @@ bool     Bootload_Required (void);
 // *****************************************************************************
 #define	MINOR_VERSION	0x00       // Version
 #define	MAJOR_VERSION	0x01
-#define APPLICATION_VALID  0x55
 #define ERROR_ADDRESS_OUT_OF_RANGE   0xFE
 #define ERROR_INVALID_COMMAND        0xFF
 #define COMMAND_SUCCESS              0x01
 
 // To be device independent, these are set by mcc in memory.h
 #define  LAST_WORD_MASK              (WRITE_FLASH_BLOCKSIZE - 1)
-#define  NEW_RESET_VECTOR            0x500
-#define  NEW_INTERRUPT_VECTOR_HIGH   0x508
-#define  NEW_INTERRUPT_VECTOR_LOW    0x518
+#define  NEW_RESET_VECTOR            0x800
+#define  NEW_INTERRUPT_VECTOR_HIGH   0x808
+#define  NEW_INTERRUPT_VECTOR_LOW    0x818
 
 #define _str(x)  #x
 #define str(x)  _str(x)
@@ -135,31 +134,56 @@ frame_t  frame;
 // *****************************************************************************
 void BOOTLOADER_Initialize ()
 {
-    BOOTLOADER_INDICATOR = BL_INDICATOR_ON;
+    LATAbits.LATA5 = LATBbits.LATB1 = LATBbits.LATB2
+    = LATBbits.LATB3 = LATBbits.LATB4 = LATBbits.LATB5
+    = BL_INDICATOR_ON;
     if (Bootload_Required () == true)
     {
         Run_Bootloader ();     // generic comms layer
     }
     STKPTR = 0x00;
-	BOOTLOADER_INDICATOR = BL_INDICATOR_OFF;
+	LATAbits.LATA5 = LATBbits.LATB1 = LATBbits.LATB2
+    = LATBbits.LATB3 = LATBbits.LATB4 = LATBbits.LATB5
+    = BL_INDICATOR_OFF;
     asm ("goto  "  str(NEW_RESET_VECTOR));
 }
 
 // *****************************************************************************
 bool Bootload_Required ()
 {
+// ******************************************************************
+//  Check an IO pin to force entry into bootloader
+// ******************************************************************
 
-// ******************************************************************
-//  Check a variable in flash to initiate bootloader
-// ******************************************************************
-    // This section reads the last location in
-    // memory to see if the location is 0x55.
-    // if it's 0x55, it runs the application.
-    // Any other value runs the bootloader.
-    TBLPTR = END_FLASH - 1;
-	NVMCON1 = 0x80;
+#info  "You may need to additional delay here between enabling weak pullups and testing the pin."
+    //for (uint8_t i = 0; i != 0xFF; i++) NOP();
+    __delay_ms(500);
+
+    if (IO_PIN_ENTRY_PORT_PIN == IO_PIN_ENTRY_RUN_BL)
+    {
+        return (true);
+    }
+
+// **************************************************************************************
+//  Calculate a checksum over the application area and compare to pre-calculated checksum
+// **************************************************************************************
+    uint16_t  Stored_Checksum;
+
+    frame.address_L = (uint8_t)  (NEW_RESET_VECTOR & 0x0000FF);
+    frame.address_H = (uint8_t) ((NEW_RESET_VECTOR & 0x00FF00) >> 8);
+    frame.address_U = (uint8_t) ((NEW_RESET_VECTOR & 0xFF0000) >> 16);
+    frame.data_length = (END_FLASH - NEW_RESET_VECTOR - 2);
+#if END_FLASH > 0xFFFF
+    frame.EE_key_1 = ((END_FLASH - NEW_RESET_VECTOR - 2) & 0xFF0000) >> 16;
+#endif 
+    Calc_Checksum ();
+    TBLPTR = (END_FLASH - 2);
     asm("TBLRD *+");
-    if (((uint16_t)TABLAT) != APPLICATION_VALID)
+    Stored_Checksum = TABLAT;
+    asm("TBLRD *+");
+    Stored_Checksum += ((uint16_t)TABLAT) << 8;
+
+    if (Stored_Checksum != check_sum)
     {
         return (true);
     }
@@ -179,11 +203,20 @@ uint8_t  ProcessBootBuffer()
     case    READ_VERSION:
         len = Get_Version_Data();
         break;
+    case    READ_FLASH:
+        len = Read_Flash();
+        break;
     case    WRITE_FLASH:
         len = Write_Flash();
         break;
     case    ERASE_FLASH:
         len = Erase_Flash();
+        break;
+    case    READ_EE_DATA:
+        len = Read_EE_Data();
+        break;
+    case    WRITE_EE_DATA:
+        len = Write_EE_Data();
         break;
     case    READ_CONFIG:
         len = Read_Config();
@@ -247,6 +280,26 @@ uint8_t  Get_Version_Data()
     return  25;   // total length to send back 9 byte header + 16 byte payload
 }
 
+// *****************************************************************************
+// Read Flash
+//        Cmd     Length----------------   Address---------------  Data ---------
+// In:   [<0x01> <0x00><0x00><0x00><0x00> <0x00><0x00><0x00><0x00>]
+// OUT:  [<0x01> <0x00><0x00><0x00><0x00> <0x00><0x00><0x00><0x00> <Data>..<data>]
+// *****************************************************************************
+uint8_t Read_Flash()
+{
+    TBLPTRL = frame.address_L;
+    TBLPTRH = frame.address_H;
+    TBLPTRU = frame.address_U;
+    NVMCON1 = 0x80;
+    for (uint16_t i = 0; i < frame.data_length; i ++)
+    {
+        asm("TBLRD *+");
+        frame.data[i]  = TABLAT;
+    }
+
+    return (frame.data_length + 9);
+}
 
 
 // *****************************************************************************
@@ -313,6 +366,47 @@ uint8_t Erase_Flash ()
     return (10);
 }
 
+// **************************************************************************************
+// Read_EE_Data
+//
+//        Cmd     Length-----              Address---------------  Data ---------
+// In:   [<0x04> <0x00><0x00><0x00><0x00> <0x00><0x00><0x00><0x00>]
+// OUT:  [<0x04> <0x00><0x00><0x00><0x00> <0x00><0x00><0x00><0x00> <Data>..<data>]
+//
+// *****************************************************************************
+uint8_t Read_EE_Data()
+{
+    NVMADR  = frame.address_L;
+	NVMCON1 = 0;
+    for (uint8_t  i = 0; i < frame.data_length; i++)
+    {
+        NVMCON1bits.RD = 1;
+        frame.data[i] = NVMDAT;
+        ++ NVMADR;
+    }
+    return (frame.data_length+9);
+}
+// *****************************************************************************
+// Write_EE_Data
+//
+//        Cmd     Length-----              Address---------------  Data ---------
+// In:   [<0x05> <0x00><0x00><0x55><0xAA> <0x00><0x00><0x00><0x00> <Data>..<data>]
+// OUT:  [<0x05> <0x00><0x00><0x00><0x00> <0x00><0x00><0x00><0x00> <0x01>]
+// *****************************************************************************
+uint8_t  Write_EE_Data()
+{
+    NVMADR  = frame.address_L;
+	NVMCON1 = 0x04;  //   b'00000100';     // Setup for EEData
+    for (uint8_t i = 0; i < frame.data_length; i++)
+    {
+        while (NVMCON1bits.WR == 1);  // wait until previous write complete
+        ++ NVMADR;
+        NVMDAT = frame.data[i];
+        StartWrite ();
+    }
+    frame.data[0] = COMMAND_SUCCESS;
+    return 10;
+}
 
 // *****************************************************************************
 // Read Config Words
@@ -426,18 +520,6 @@ void Check_Device_Reset ()
 {
     if (reset_pending == true)
     {
-    // This section writes last location in
-    // memory to the application valid value.
-    // indicating a valid application is loaded.
-        TBLPTR  = END_FLASH - 1;
-        NVMCON1 = 0x84;
-        TABLAT = APPLICATION_VALID;
-        asm("TBLWT *");
-        NVMCON2 = 0x55;
-        NVMCON2 = 0xAA;
-        NVMCON1bits.WR = 1;
-        NOP();
-        NOP();
         BOOTLOADER_INDICATOR = BL_INDICATOR_OFF;
         RESET();
     }

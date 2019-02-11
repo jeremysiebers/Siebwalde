@@ -63,8 +63,8 @@ void TMR6_Initialize(void)
 {
     // Set TMR6 to the options selected in the User Interface
 
-    // T6CS T6CKIPPS pin; 
-    T6CLKCON = 0x00;
+    // T6CS LFINTOSC; 
+    T6CLKCON = 0x04;
 
     // T6PSYNC Not Synchronized; T6MODE Software control; T6CKPOL Rising Edge; T6CKSYNC Not Synchronized; 
     T6HLT = 0x00;
@@ -72,8 +72,8 @@ void TMR6_Initialize(void)
     // T6RSEL T6CKIPPS pin; 
     T6RST = 0x00;
 
-    // PR6 255; 
-    T6PR = 0xFF;
+    // PR6 23; 
+    T6PR = 0x17;
 
     // TMR6 0; 
     T6TMR = 0x00;
@@ -81,8 +81,8 @@ void TMR6_Initialize(void)
     // Clearing IF flag.
     PIR4bits.TMR6IF = 0;
 
-    // T6CKPS 1:8; T6OUTPS 1:1; TMR6ON on; 
-    T6CON = 0xB0;
+    // T6CKPS 1:128; T6OUTPS 1:1; TMR6ON on; 
+    T6CON = 0xF0;
 }
 
 void TMR6_ModeSet(TMR6_HLT_MODE mode)

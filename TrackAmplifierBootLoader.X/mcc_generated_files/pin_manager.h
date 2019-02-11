@@ -59,6 +59,18 @@
 #define PULL_UP_ENABLED      1
 #define PULL_UP_DISABLED     0
 
+// get/set RA0 procedures
+#define RA0_SetHigh()            do { LATAbits.LATA0 = 1; } while(0)
+#define RA0_SetLow()             do { LATAbits.LATA0 = 0; } while(0)
+#define RA0_Toggle()             do { LATAbits.LATA0 = ~LATAbits.LATA0; } while(0)
+#define RA0_GetValue()              PORTAbits.RA0
+#define RA0_SetDigitalInput()    do { TRISAbits.TRISA0 = 1; } while(0)
+#define RA0_SetDigitalOutput()   do { TRISAbits.TRISA0 = 0; } while(0)
+#define RA0_SetPullup()             do { WPUAbits.WPUA0 = 1; } while(0)
+#define RA0_ResetPullup()           do { WPUAbits.WPUA0 = 0; } while(0)
+#define RA0_SetAnalogMode()         do { ANSELAbits.ANSELA0 = 1; } while(0)
+#define RA0_SetDigitalMode()        do { ANSELAbits.ANSELA0 = 0; } while(0)
+
 // get/set RA5 procedures
 #define RA5_SetHigh()            do { LATAbits.LATA5 = 1; } while(0)
 #define RA5_SetLow()             do { LATAbits.LATA5 = 0; } while(0)
@@ -70,6 +82,106 @@
 #define RA5_ResetPullup()           do { WPUAbits.WPUA5 = 0; } while(0)
 #define RA5_SetAnalogMode()         do { ANSELAbits.ANSELA5 = 1; } while(0)
 #define RA5_SetDigitalMode()        do { ANSELAbits.ANSELA5 = 0; } while(0)
+
+// get/set IO_RB1 aliases
+#define IO_RB1_TRIS                 TRISBbits.TRISB1
+#define IO_RB1_LAT                  LATBbits.LATB1
+#define IO_RB1_PORT                 PORTBbits.RB1
+#define IO_RB1_WPU                  WPUBbits.WPUB1
+#define IO_RB1_OD                   ODCONBbits.ODCB1
+#define IO_RB1_ANS                  ANSELBbits.ANSELB1
+#define IO_RB1_SetHigh()            do { LATBbits.LATB1 = 1; } while(0)
+#define IO_RB1_SetLow()             do { LATBbits.LATB1 = 0; } while(0)
+#define IO_RB1_Toggle()             do { LATBbits.LATB1 = ~LATBbits.LATB1; } while(0)
+#define IO_RB1_GetValue()           PORTBbits.RB1
+#define IO_RB1_SetDigitalInput()    do { TRISBbits.TRISB1 = 1; } while(0)
+#define IO_RB1_SetDigitalOutput()   do { TRISBbits.TRISB1 = 0; } while(0)
+#define IO_RB1_SetPullup()          do { WPUBbits.WPUB1 = 1; } while(0)
+#define IO_RB1_ResetPullup()        do { WPUBbits.WPUB1 = 0; } while(0)
+#define IO_RB1_SetPushPull()        do { ODCONBbits.ODCB1 = 0; } while(0)
+#define IO_RB1_SetOpenDrain()       do { ODCONBbits.ODCB1 = 1; } while(0)
+#define IO_RB1_SetAnalogMode()      do { ANSELBbits.ANSELB1 = 1; } while(0)
+#define IO_RB1_SetDigitalMode()     do { ANSELBbits.ANSELB1 = 0; } while(0)
+
+// get/set IO_RB2 aliases
+#define IO_RB2_TRIS                 TRISBbits.TRISB2
+#define IO_RB2_LAT                  LATBbits.LATB2
+#define IO_RB2_PORT                 PORTBbits.RB2
+#define IO_RB2_WPU                  WPUBbits.WPUB2
+#define IO_RB2_OD                   ODCONBbits.ODCB2
+#define IO_RB2_ANS                  ANSELBbits.ANSELB2
+#define IO_RB2_SetHigh()            do { LATBbits.LATB2 = 1; } while(0)
+#define IO_RB2_SetLow()             do { LATBbits.LATB2 = 0; } while(0)
+#define IO_RB2_Toggle()             do { LATBbits.LATB2 = ~LATBbits.LATB2; } while(0)
+#define IO_RB2_GetValue()           PORTBbits.RB2
+#define IO_RB2_SetDigitalInput()    do { TRISBbits.TRISB2 = 1; } while(0)
+#define IO_RB2_SetDigitalOutput()   do { TRISBbits.TRISB2 = 0; } while(0)
+#define IO_RB2_SetPullup()          do { WPUBbits.WPUB2 = 1; } while(0)
+#define IO_RB2_ResetPullup()        do { WPUBbits.WPUB2 = 0; } while(0)
+#define IO_RB2_SetPushPull()        do { ODCONBbits.ODCB2 = 0; } while(0)
+#define IO_RB2_SetOpenDrain()       do { ODCONBbits.ODCB2 = 1; } while(0)
+#define IO_RB2_SetAnalogMode()      do { ANSELBbits.ANSELB2 = 1; } while(0)
+#define IO_RB2_SetDigitalMode()     do { ANSELBbits.ANSELB2 = 0; } while(0)
+
+// get/set IO_RB3 aliases
+#define IO_RB3_TRIS                 TRISBbits.TRISB3
+#define IO_RB3_LAT                  LATBbits.LATB3
+#define IO_RB3_PORT                 PORTBbits.RB3
+#define IO_RB3_WPU                  WPUBbits.WPUB3
+#define IO_RB3_OD                   ODCONBbits.ODCB3
+#define IO_RB3_ANS                  ANSELBbits.ANSELB3
+#define IO_RB3_SetHigh()            do { LATBbits.LATB3 = 1; } while(0)
+#define IO_RB3_SetLow()             do { LATBbits.LATB3 = 0; } while(0)
+#define IO_RB3_Toggle()             do { LATBbits.LATB3 = ~LATBbits.LATB3; } while(0)
+#define IO_RB3_GetValue()           PORTBbits.RB3
+#define IO_RB3_SetDigitalInput()    do { TRISBbits.TRISB3 = 1; } while(0)
+#define IO_RB3_SetDigitalOutput()   do { TRISBbits.TRISB3 = 0; } while(0)
+#define IO_RB3_SetPullup()          do { WPUBbits.WPUB3 = 1; } while(0)
+#define IO_RB3_ResetPullup()        do { WPUBbits.WPUB3 = 0; } while(0)
+#define IO_RB3_SetPushPull()        do { ODCONBbits.ODCB3 = 0; } while(0)
+#define IO_RB3_SetOpenDrain()       do { ODCONBbits.ODCB3 = 1; } while(0)
+#define IO_RB3_SetAnalogMode()      do { ANSELBbits.ANSELB3 = 1; } while(0)
+#define IO_RB3_SetDigitalMode()     do { ANSELBbits.ANSELB3 = 0; } while(0)
+
+// get/set IO_RB4 aliases
+#define IO_RB4_TRIS                 TRISBbits.TRISB4
+#define IO_RB4_LAT                  LATBbits.LATB4
+#define IO_RB4_PORT                 PORTBbits.RB4
+#define IO_RB4_WPU                  WPUBbits.WPUB4
+#define IO_RB4_OD                   ODCONBbits.ODCB4
+#define IO_RB4_ANS                  ANSELBbits.ANSELB4
+#define IO_RB4_SetHigh()            do { LATBbits.LATB4 = 1; } while(0)
+#define IO_RB4_SetLow()             do { LATBbits.LATB4 = 0; } while(0)
+#define IO_RB4_Toggle()             do { LATBbits.LATB4 = ~LATBbits.LATB4; } while(0)
+#define IO_RB4_GetValue()           PORTBbits.RB4
+#define IO_RB4_SetDigitalInput()    do { TRISBbits.TRISB4 = 1; } while(0)
+#define IO_RB4_SetDigitalOutput()   do { TRISBbits.TRISB4 = 0; } while(0)
+#define IO_RB4_SetPullup()          do { WPUBbits.WPUB4 = 1; } while(0)
+#define IO_RB4_ResetPullup()        do { WPUBbits.WPUB4 = 0; } while(0)
+#define IO_RB4_SetPushPull()        do { ODCONBbits.ODCB4 = 0; } while(0)
+#define IO_RB4_SetOpenDrain()       do { ODCONBbits.ODCB4 = 1; } while(0)
+#define IO_RB4_SetAnalogMode()      do { ANSELBbits.ANSELB4 = 1; } while(0)
+#define IO_RB4_SetDigitalMode()     do { ANSELBbits.ANSELB4 = 0; } while(0)
+
+// get/set IO_RB5 aliases
+#define IO_RB5_TRIS                 TRISBbits.TRISB5
+#define IO_RB5_LAT                  LATBbits.LATB5
+#define IO_RB5_PORT                 PORTBbits.RB5
+#define IO_RB5_WPU                  WPUBbits.WPUB5
+#define IO_RB5_OD                   ODCONBbits.ODCB5
+#define IO_RB5_ANS                  ANSELBbits.ANSELB5
+#define IO_RB5_SetHigh()            do { LATBbits.LATB5 = 1; } while(0)
+#define IO_RB5_SetLow()             do { LATBbits.LATB5 = 0; } while(0)
+#define IO_RB5_Toggle()             do { LATBbits.LATB5 = ~LATBbits.LATB5; } while(0)
+#define IO_RB5_GetValue()           PORTBbits.RB5
+#define IO_RB5_SetDigitalInput()    do { TRISBbits.TRISB5 = 1; } while(0)
+#define IO_RB5_SetDigitalOutput()   do { TRISBbits.TRISB5 = 0; } while(0)
+#define IO_RB5_SetPullup()          do { WPUBbits.WPUB5 = 1; } while(0)
+#define IO_RB5_ResetPullup()        do { WPUBbits.WPUB5 = 0; } while(0)
+#define IO_RB5_SetPushPull()        do { ODCONBbits.ODCB5 = 0; } while(0)
+#define IO_RB5_SetOpenDrain()       do { ODCONBbits.ODCB5 = 1; } while(0)
+#define IO_RB5_SetAnalogMode()      do { ANSELBbits.ANSELB5 = 1; } while(0)
+#define IO_RB5_SetDigitalMode()     do { ANSELBbits.ANSELB5 = 0; } while(0)
 
 // get/set RC1 procedures
 #define RC1_SetHigh()            do { LATCbits.LATC1 = 1; } while(0)

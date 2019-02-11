@@ -37,6 +37,9 @@ void 	Check_Device_Reset (void);
 #define  BL_INDICATOR_ON         1
 #define  BL_INDICATOR_OFF        0
 
+#define  IO_PIN_ENTRY_PORT_PIN   PORTAbits.RA0
+#define  IO_PIN_ENTRY_RUN_APP    1
+#define  IO_PIN_ENTRY_RUN_BL     0
 
 // *****************************************************************************
 // Frame Format

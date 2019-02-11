@@ -107,7 +107,6 @@ void PIN_MANAGER_Initialize(void)
     
 	
     RXPPS = 0x13;   //RC3->EUSART:RX;    
-    T6INPPS = 0x10;   //RC0->TMR6:T6IN;    
     RC1PPS = 0x09;   //RC1->EUSART:TX;    
     T2INPPS = 0x10;   //RC0->TMR2:T2IN;    
     RC6PPS = 0x07;   //RC6->PWM3:PWM3;    

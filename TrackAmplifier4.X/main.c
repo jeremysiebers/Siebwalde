@@ -23,6 +23,9 @@ static unsigned int Startup_Machine = 0;
 unsigned int Update_Amplifier = 0;
 static unsigned int Sequencer = 0;
 
+//const unsigned int SW_VER @ 0x7FFE = 0x0055;
+
+uint16_t read = 0;
 
 /*----------------------------------------------------------------------------*/
 void main(void) {
@@ -65,7 +68,7 @@ void main(void) {
                 if (ID_PORT == 0){                                              // When ID_PORT is pulled low the amplifier will be configured
                     Startup_Machine = 1;
                 }
-                Led_Blink();
+                //Led_Blink();
                 break;
                 
             case 1 :
@@ -84,9 +87,34 @@ void main(void) {
                         Startup_Machine = 0;
                         Config          = 1;
                         LED_ERR         = 0;
-                        LED_ERR_LAT     = 1;    
+                        LED_ERR_LAT     = 1;
+                        LED_RUN_LAT     = 0;
+                        LED_WAR_LAT     = 0;
+                        LED_TX_LAT      = 0;
+                        LED_RX_LAT      = 0;
                     }
-                }                
+                }
+                if ((PetitHoldingRegisters[2].ActValue & 0x8000) != 0){
+                    
+                    TBLPTR = 0x008000 - 1;
+                    NVMCON1 = 0x80;
+                    asm("TBLRD *+");
+                    read = (uint16_t)TABLAT;
+                    if (read == 0x55)
+                    {
+                        TBLPTR  = 0x008000 - 1;
+                        NVMCON1 = 0x84;
+                        TABLAT = 0xAA;
+                        asm("TBLWT *");
+                        NVMCON2 = 0x55;
+                        NVMCON2 = 0xAA;
+                        NVMCON1bits.WR = 1;
+                        NOP();
+                        NOP();
+//                        RESET();
+//                        PetitHoldingRegisters[2].ActValue &= 0x0FFF;
+                    }                    
+                }
                 break;
                 
             case 2 :

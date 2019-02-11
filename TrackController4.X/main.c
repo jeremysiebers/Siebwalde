@@ -23,6 +23,7 @@
 
 
 void ToFromTerminal(void);
+void Communications(void);
 void WriteText(unsigned char *Text, unsigned int Ln, unsigned int Col);
 void WriteData(unsigned int Data, unsigned int Ln, unsigned int Col);
 
@@ -112,14 +113,86 @@ void main(void)
                 }
                 break;
                 
-            default : ToFromTerminal();
+            default :   //ToFromTerminal();
+                        Communications();
                 break;
         }
     }
 }
-/*----------------------------------------------------------------------------*/
+
+/*#--------------------------------------------------------------------------#*/
+/*  Description: Communications()
+ *
+ *  Input(s)   : 
+ *
+ *  Output(s)  : 
+ *
+ *  Returns    : 
+ *
+ *  Pre.Cond.  :
+ *
+ *  Post.Cond. :
+ *
+ *  Notes      :
+ */
+/*#--------------------------------------------------------------------------#*/
+uint8_t Received_data = 0;
+uint8_t Transmit_data = 0;
+uint8_t Data[20];
+uint8_t DataCnt = 0;
+uint16_t SizeOfStruct = sizeof(SLAVE_INFO);
+static uint8_t *pSlaveDataSend;
+static uint8_t DataFromSlaveSend = 0;
+
+void Communications(){
+    
+    Received_data = EUSART1_is_rx_ready();
+    
+    if(Received_data > 0){
+        
+        Data[DataCnt] = EUSART1_Read();
+        DataCnt++;
+        
+        if(DataCnt > 4){
+            if(Data[0] == 0xAA){
+                if (Data[3] == 0xA){
+                    if (Data[4] == 0xD){
+                        
+                    }
+                }
+            }
+            DataCnt = 0;
+        }
+    }
+    
+    if(UPDATExTERMINAL){
+        SizeOfStruct = sizeof(SLAVE_INFO);
+        Transmit_data = EUSART1_is_tx_ready();
+
+        pSlaveDataSend = &(SlaveInfo[DataFromSlaveSend].Header);
+
+        if(Transmit_data >= 40){
+
+            for(unsigned int i = 0; i < SizeOfStruct; i++){                       // last received dummy byte is not used/checked
 
 
+                EUSART1_Write((unsigned char)(*pSlaveDataSend));                        // for DATAxSTRUCTxLENGTH set every byte into SENDxDATAxRAW+ array according to write mask    
+                pSlaveDataSend      += 1;                                               // Increment pointer        
+            }
+
+            if (InitPhase == false){                                                     // When init phase is done, communicate data to all slaves
+                DataFromSlaveSend++;                                                    // Count down the slaves of which the info still need to be send
+                if(DataFromSlaveSend > (NUMBER_OF_SLAVES - 1)){
+                    DataFromSlaveSend = 0;
+                }
+            }
+            else{
+                DataFromSlaveSend = 0;
+            }
+        }
+        UPDATExTERMINAL = 0;
+    }
+}
 
 
 /*#--------------------------------------------------------------------------#*/
