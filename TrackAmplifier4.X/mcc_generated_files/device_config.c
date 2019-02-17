@@ -85,7 +85,7 @@
 
 // CONFIG4H
 #pragma config WRTC = OFF    // Configuration Register Write Protection bit->Configuration registers (300000-30000Bh) not write-protected
-#pragma config WRTB = OFF    // Boot Block Write Protection bit->Boot Block (000000-0007FFh) not write-protected
+#pragma config WRTB = ON    // Boot Block Write Protection bit->Boot Block (000000-0007FFh) write-protected
 #pragma config WRTD = OFF    // Data EEPROM Write Protection bit->Data EEPROM not write-protected
 #pragma config SCANE = ON    // ->Scanner module is available for use, SCANMD bit can control the module
 #pragma config LVP = ON    // Low Voltage Programming Enable bit->Low voltage programming enabled. MCLR/VPP pin function is MCLR. MCLRE configuration bit is ignored
