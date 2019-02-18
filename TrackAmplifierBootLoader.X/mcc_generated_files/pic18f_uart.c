@@ -70,18 +70,20 @@ void Run_Bootloader()
 // *****************************************************************************
 // Hardware AutoBaud
 // *****************************************************************************
-        BAUDCONbits.ABDEN = 1;    // start auto baud
-        while (BAUDCONbits.ABDEN == 1)
-        {
-            if (BAUDCONbits.ABDOVF == 1)
-            {
-                BAUDCONbits.ABDEN = 0;    // abort auto baud
-                BAUDCONbits.ABDOVF = 0;    // start auto baud
-                BAUDCONbits.ABDEN = 1;    // restart auto baud
-            }
-        }
-
+//        BAUDCONbits.ABDEN = 1;    // start auto baud
+//        while (BAUDCONbits.ABDEN == 1)
+//        {
+//            if (BAUDCONbits.ABDOVF == 1)
+//            {
+//                BAUDCONbits.ABDEN = 0;    // abort auto baud
+//                BAUDCONbits.ABDOVF = 0;    // start auto baud
+//                BAUDCONbits.ABDEN = 1;    // restart auto baud
+//            }
+//        }
+//
         index = EUSART_Read();  // required to clear RCIF
+        
+        if(index == 0x55){
 
 // *****************************************************************************
 
@@ -116,6 +118,8 @@ void Run_Bootloader()
         while (index < msg_length)
         {
             EUSART_Write (frame.buffer [index++]);
+        }
+        
         }
     }
 }

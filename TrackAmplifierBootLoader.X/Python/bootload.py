@@ -1,8 +1,12 @@
+from __future__ import print_function
 import serial   
 import sys
 import struct
 import ctypes
+import time
+import progressbar
 
+start_time = time.time()
 
 COMMAND_SUCCESSFUL = 0x01 # – Command Successful
 COMMAND_UNSUPPORTED = 0xFF # – Command Unsupported
@@ -12,13 +16,13 @@ COMMAND_UNSUCCESSFUL = 0xfd # - Command unSuccessful
 try:
     file_object  = open(sys.argv[1], 'rb')
 except:
-    print 'failed to open file !!!! \n'
+    print('failed to open file !!!! \n')
 
 
 # open the serial port
 try:
     # open the com port
-    ser = serial.Serial (port = "COM6", baudrate = 500000, timeout = 300)
+    ser = serial.Serial (port = "COM5", baudrate = 2000000, timeout = 300)
     
     # flush the buffer
     #r = self._ser.read ()
@@ -26,11 +30,11 @@ try:
     #    r = self._ser.read ()
         
     # we should do some handshaking to make sure we are connected to HexaLog
-    print "Port opened!\n"
+    print("Port opened!\n")
 except:
-    print "Could not open serial port:", sys.exc_info ()[0]
-    print "Make sure correct port is set and not occupied"
-    print ""
+    print("Could not open serial port:", sys.exc_info ()[0])
+    print("Make sure correct port is set and not occupied")
+    print("")
     self._ser = None
     
 #---------------------------------------------------------------------------------------------------------------------------#
@@ -45,29 +49,29 @@ def GetBootloaderVersion():
     received = []
     
     if(rx == ''):
-        print 'Get bootloader version nok, no answer from target!\n'
+        print('Get bootloader version nok, no answer from target!\n')
         return
     
     for ch in rx:
-        #print ord(ch), " ",
+        #print ord(ch), ")",
         received.append(ord(ch))
         
-    print 'Bootloader Version: ', hex(received[11]) , '  ' , hex(received[10]), '\n'
-    print 'Max Packet size   : ', hex(received[13]) , '  ' , hex(received[12]), '\n'
-    print 'Not Used          : ', hex(received[15]) , '  ' , hex(received[14]), '\n'
-    print 'Device ID         : ', hex(received[17]) , ' ' , hex(received[16]), '\n'
-    print 'Not Used          : ', hex(received[19]) , '  ' , hex(received[18]), '\n'
-    print 'Erase Row Size    : ', hex(received[20]) , '\n'
-    print 'Write Latches     : ', hex(received[21]) , '\n'
-    print 'Config Words      : ', hex(received[25]) , ' ' , hex(received[24]), ' ' , hex(received[23]), ' ' , hex(received[22]), '\n'
+    print('Bootloader Version: ', hex(received[11]) , ' ', hex(received[10]), '\n')
+    print('Max Packet size   : ', hex(received[13]) , ' ', hex(received[12]), '\n')
+    print('Not Used          : ', hex(received[15]) , ' ', hex(received[14]), '\n')
+    print('Device ID         : ', hex(received[17]) , ' ', hex(received[16]), '\n')
+    print('Not Used          : ', hex(received[19]) , ' ', hex(received[18]), '\n')
+    print('Erase Row Size    : ', hex(received[20]) , '\n')
+    print('Write Latches     : ', hex(received[21]) , '\n')
+    print('Config Words      : ', hex(received[25]) , ' ', hex(received[24]), ' ', hex(received[23]), ' ', hex(received[22]), '\n')
     
 
 #---------------------------------------------------------------------------------------------------------------------------#
 def EraseFlash(bootloader_offset, program_mem_size):
     
     print("------------- Erase Flash: ------------------------\n")
-    print 'Bootloader offset: ', hex(bootloader_offset), '\n'
-    print 'program Mem size: ', hex(program_mem_size), '\n'
+    print('Bootloader offset: ', hex(bootloader_offset), '\n')
+    print('program Mem size: ', hex(program_mem_size), '\n')
     
     EraseFlash = 3
     RowWidth = 128
@@ -76,7 +80,7 @@ def EraseFlash(bootloader_offset, program_mem_size):
     tx = struct.pack('<BBBBBBIBB', 0x55, EraseFlash, EraseRows, 0, 0x55, 0xAA, bootloader_offset, 0x00, 0x00)
     
     #for ch in tx:
-       #print ord(ch), " ",
+       #print ord(ch), ")",
     
     ser.write(tx)
     
@@ -84,7 +88,7 @@ def EraseFlash(bootloader_offset, program_mem_size):
     received = []
     
     if(rx == ''):
-        print 'Erase flash nok, no answer from target!\n'
+        print('Erase flash nok, no answer from target!\n')
         return(COMMAND_UNSUCCESSFUL)
     
     for ch in rx:
@@ -93,10 +97,10 @@ def EraseFlash(bootloader_offset, program_mem_size):
     SuccessCode = (received[9] << 8) + received[10]
         
     if(SuccessCode != COMMAND_SUCCESSFUL):
-        print 'Erase flash nok, target returned error on erasing!\n'
+        print('Erase flash nok, target returned error on erasing!\n')
         return(COMMAND_UNSUCCESSFUL)            
     
-    print 'Erase flash successful'
+    print('Erase flash successful')
     
     return(COMMAND_SUCCESSFUL)
 
@@ -107,7 +111,7 @@ def WriteFlash(bootloader_offset, program_mem_size):
     print("------------- Write to flash started...------------\n")
     
     if (file_object == ''):
-        print 'Write flash nok, no file loaded/found!\n'
+        print('Write flash nok, no file loaded/found!\n')
         return(COMMAND_UNSUCCESSFUL)
     
     HexRowWidth = 16 #bytes
@@ -122,10 +126,10 @@ def WriteFlash(bootloader_offset, program_mem_size):
         address = buff[3:7]
         
         if(int(address, 16) < bootloader_offset):
-            print 'Write flash nok, first address to write is within bootloader block!\n'
+            print('Write flash nok, first address to write is within bootloader block!\n')
             return(COMMAND_UNSUCCESSFUL)            
         if(int(address, 16) > program_mem_size):
-            print 'Write flash nok, address to write is greater then memory size!\n'
+            print('Write flash nok, address to write is greater then memory size!\n')
             return(COMMAND_UNSUCCESSFUL)
         
         data = buff[9:41]
@@ -144,37 +148,44 @@ def WriteFlash(bootloader_offset, program_mem_size):
     
     run = True
     jumpsize = 4
-    iteration = ProcessLines / jumpsize
+    iteration = ProcessLines - jumpsize
     leftover  = ProcessLines % jumpsize
     i = 0
     cmd_returnval = 0
+    time_seg = (100.0 / (iteration/jumpsize))
+    time_calc = 0
+    bar = progressbar.ProgressBar(maxval=101, widgets=[progressbar.Bar('=', '[', ']'), ' ' , progressbar.Percentage()])
+    bar.start()
     
     while (run == True):
-        
         cmd_returnval = _WriteLinesOfFlash(i, jumpsize, ByteArray)
         if(cmd_returnval != COMMAND_SUCCESSFUL):
-            print 'Write flash nok received stopping write flash!\n'
+            print('Write flash nok received stopping write flash!\n')
             return COMMAND_UNSUCCESSFUL, 0          
         
-        i += jumpsize
-        
+        #print('>> Writing %d%%' % time_calc, end='\r')
+        time_calc = time_calc + time_seg
+        bar.update(time_calc)
+                
         if( i == iteration):
             if(leftover == 0):
                 run = False
-                print 'Checksum of sent data : ', hex(CalcChecksumFile)
-                print 'Write to flash successful\n'
+                print('Checksum of sent data : ', hex(CalcChecksumFile))
+                print('Write to flash successful\n')
                 return COMMAND_SUCCESSFUL, CalcChecksumFile               
             else:
                 if(_WriteLinesOfFlash(i, leftover, ByteArray)['cmd'] != COMMAND_SUCCESSFUL):
-                    print 'Write flash nok received, stopping write flash!\n'
+                    print('Write flash nok received, stopping write flash!\n')
                     return COMMAND_UNSUCCESSFUL, 0
                 
                 else:
                     run = False
-                    print 'Checksum of sent data : ', hex(CalcChecksumFile)
-                    print 'Write to flash successful\n'
+                    print('Checksum of sent data : ', hex(CalcChecksumFile))
+                    print('Write to flash successful\n')
                     return COMMAND_SUCCESSFUL, CalcChecksumFile
-                
+
+        i += jumpsize        
+        
 #---------------------------------------------------------------------------------------------------------------------------#
 
 def _WriteLinesOfFlash(line, incr, array):
@@ -184,7 +195,7 @@ def _WriteLinesOfFlash(line, incr, array):
     
     tx = struct.pack('<6BBB2B', 0x55, WriteFlash, byteslength, 0, 0x55, 0xAA, array[line][0][1], array[line][0][0], 0, 0)
     
-    #print 'line = ' ,str(line), '\n'
+    #print('line = '),str(line), '\n')
     
     for j in range(line, (line + incr)):
         for val in array[j][1]:
@@ -199,7 +210,7 @@ def _WriteLinesOfFlash(line, incr, array):
     received = []
     
     if(rx == ''):
-        print 'Write flash nok, no answer from target!\n'
+        print('Write flash nok, no answer from target!\n')
         return COMMAND_UNSUCCESSFUL
     
     for ch in rx:
@@ -207,10 +218,10 @@ def _WriteLinesOfFlash(line, incr, array):
     
     SuccessCode = (received[9] << 8) + received[10]
     
-    #print 'Success Code      : ', str(hex(SuccessCode)), '\n'
+    #print('Success Code      : ', str(hex(SuccessCode)), '\n')
     
     if(SuccessCode != COMMAND_SUCCESSFUL):
-        print 'Write flash nok, target returned error on writing!\n'
+        print('Write flash nok, target returned error on writing!\n')
         return COMMAND_UNSUCCESSFUL
     
     return COMMAND_SUCCESSFUL
@@ -250,7 +261,7 @@ def WriteConfig():
     received = []
     
     if(rx == ''):
-        print 'Write flash nok, no answer from target!\n'
+        print('Write flash nok, no answer from target!\n')
         return COMMAND_UNSUCCESSFUL
     
     for ch in rx:
@@ -258,13 +269,13 @@ def WriteConfig():
     
     SuccessCode = (received[9] << 8) + received[10]
     
-    #print 'Success Code      : ', str(hex(SuccessCode)), '\n'
+    #print('Success Code      : ', str(hex(SuccessCode)), '\n')
     
     if(SuccessCode != COMMAND_SUCCESSFUL):
-        print 'Write config nok, target returned error on writing!\n'
+        print('Write config nok, target returned error on writing!\n')
         return COMMAND_UNSUCCESSFUL
     
-    print 'Write config ok!\n'
+    print('Write config ok!\n')
     return COMMAND_SUCCESSFUL
 
 #---------------------------------------------------------------------------------------------------------------------------#
@@ -273,8 +284,8 @@ def RequestChecksum(bootloader_offset, program_mem_size):
     
     print("------------- Request checksum...------------------\n")
     
-    print 'Bootloader offset: ', hex(bootloader_offset), '\n'
-    print 'program Mem size: ', hex(program_mem_size), '\n'
+    print('Bootloader offset: ', hex(bootloader_offset), '\n')
+    print('program Mem size: ', hex(program_mem_size), '\n')
     
     DataLength = program_mem_size - bootloader_offset - 2
     Checksum = 0x0000
@@ -288,7 +299,7 @@ def RequestChecksum(bootloader_offset, program_mem_size):
     received = []
     
     if(rx == ''):
-        print 'Erase flash nok, no answer from target!\n'
+        print('Erase flash nok, no answer from target!\n')
         return(COMMAND_UNSUCCESSFUL)
     
     for ch in rx:
@@ -296,7 +307,7 @@ def RequestChecksum(bootloader_offset, program_mem_size):
        
     Checksum = (received[11] << 8) + received[10]
     
-    print 'Checksum received : ', hex(Checksum), '\n'
+    print('Checksum received : ', hex(Checksum), '\n')
         
     return(Checksum)    
 
@@ -316,10 +327,10 @@ def ResetDevice():
     received = []
     
     if(rx == ''):
-        print 'Reset target cmd readback nok, no answer from target!\n'
+        print('Reset target cmd readback nok, no answer from target!\n')
         return(COMMAND_UNSUCCESSFUL)
     
-    print 'Reset target sent!\n'
+    print('Reset target sent!\n')
     return COMMAND_SUCCESSFUL    
 
 #---------------------------------------------------------------------------------------------------------------------------#
@@ -330,29 +341,29 @@ ChecksumRequest = 0
 
 GetBootloaderVersion()
 
-if(EraseFlash(0x800, 0x8000) == COMMAND_SUCCESSFUL):
-    
+if(EraseFlash(0x800, 0x8000) == COMMAND_SUCCESSFUL):    
     cmd_returnval, CalcChecksumFile = WriteFlash(0x800, 0x8000)
     if(cmd_returnval == COMMAND_SUCCESSFUL):        
         if(WriteConfig() == COMMAND_SUCCESSFUL): 
-            GetBootloaderVersion()
             ChecksumRequest = RequestChecksum(0x800, 0x8000)
             if(CalcChecksumFile == ChecksumRequest):
-                print 'Checksum match between file and PIC!\n'
-                GetBootloaderVersion()
+                print('Checksum match between file and PIC!\n')
                 if(ResetDevice() == COMMAND_SUCCESSFUL):
                     print("------------- Done...------------------------------\n")
-                    print 'Programming device done closing program'
+                    print('Programming device done closing program')
                 else:
-                    print 'Reset device error, closing program'
+                    print('Reset device error, closing program')
             else:
-                print 'Checksum mismatch between file and PIC, programming stopped!\n'
+                print('Checksum mismatch between file and PIC, programming stopped!\n')
         else:
-            print 'Writing config words to device failed!\n'
+            print('Writing config words to device failed!\n')
     else:
-        print 'Programming stopped!\n'
+        print('Programming stopped!\n')
         
 else:
-    print 'Programming stopped!\n'
+    print('Programming stopped!\n')
 
 file_object.close()
+
+elapsed_time = time.time() - start_time
+print('Programming time : ', str('%.2f'% elapsed_time) , 'seconds! \n')
