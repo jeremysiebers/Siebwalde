@@ -154,9 +154,10 @@ void Communications(){
         DataCnt++;
         
         if(DataCnt > 9){
+            NOP();
             if(Data[0] == 0xAA){
                 if (Data[9] == 0x55){
-                    
+                    NOP();
                 }
             }
             DataCnt = 0;
@@ -177,7 +178,7 @@ void Communications(){
                 EUSART1_Write((unsigned char)(*pSlaveDataSend));                        // for DATAxSTRUCTxLENGTH set every byte into SENDxDATAxRAW+ array according to write mask    
                 pSlaveDataSend      += 1;                                               // Increment pointer        
             }
-            EUSART1_Write(0xA);
+            //EUSART1_Write(0xA);
 
             if (InitPhase == false){                                                     // When init phase is done, communicate data to all slaves
                 DataFromSlaveSend++;                                                    // Count down the slaves of which the info still need to be send
