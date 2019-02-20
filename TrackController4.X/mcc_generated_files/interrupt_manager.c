@@ -82,7 +82,7 @@ void interrupt INTERRUPT_InterruptManagerHigh (void)
     {
         ProcessSpiInterrupt();
         PIR3bits.SSP2IF = 0;
-        UPDATExTERMINAL = 1;
+        //UPDATExTERMINAL = 1;
     }
     else
     {
@@ -96,7 +96,7 @@ void interrupt low_priority INTERRUPT_InterruptManagerLow (void)
         if(PIE1bits.TMR1IE == 1 && PIR1bits.TMR1IF == 1)
         {
             //TMR1_ISR();
-            //UPDATExTERMINAL = 1;            
+            UPDATExTERMINAL = 1;            
             PIR1bits.TMR1IF = 0;            
         } 
         else if(PIE1bits.TX1IE == 1 && PIR1bits.TX1IF == 1)

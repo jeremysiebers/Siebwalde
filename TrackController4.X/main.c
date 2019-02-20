@@ -24,6 +24,9 @@
 
 void ToFromTerminal(void);
 void Communications(void);
+void SlaveAndIoData(void);
+void BootLoaderData(void);
+
 void WriteText(unsigned char *Text, unsigned int Ln, unsigned int Col);
 void WriteData(unsigned int Data, unsigned int Ln, unsigned int Col);
 
@@ -136,10 +139,13 @@ void main(void)
  *  Notes      :
  */
 /*#--------------------------------------------------------------------------#*/
+uint8_t SendOperation = 0;
+
 uint8_t Received_data = 0;
 uint8_t Transmit_data = 0;
-uint8_t Data[20];
+uint8_t Data[80];
 uint8_t DataCnt = 0;
+uint8_t msg_length = 0;
 uint16_t SizeOfStruct = sizeof(SLAVE_INFO);
 static uint8_t *pSlaveDataSend;
 static uint8_t DataFromSlaveSend = 0;
@@ -153,8 +159,15 @@ void Communications(){
         Data[DataCnt] = EUSART1_Read();
         DataCnt++;
         
-        if(DataCnt > 9){
-            NOP();
+        if(DataCnt == 1){
+            if(Data[DataCnt] == 0){
+                msg_length = 7;
+            }
+            else if(Data[DataCnt] == 1){
+                msg_length = 7;
+            }
+            
+            
             if(Data[0] == 0xAA){
                 if (Data[9] == 0x55){
                     NOP();
@@ -165,35 +178,68 @@ void Communications(){
     }
     
     if(UPDATExTERMINAL){
-        SizeOfStruct = sizeof(SLAVE_INFO);
-        Transmit_data = EUSART1_is_tx_ready();
+        
+        switch(SendOperation){
+            
+            case 0:
+                SlaveAndIoData();
+                break;
+                
+            case 1:
+                BootLoaderData();
+                break;
+                
+            default:
+                break;
+        }
+                
+    }
+    UPDATExTERMINAL = 0;    
+}
 
-        pSlaveDataSend = &(SlaveInfo[DataFromSlaveSend].Header);
+void SlaveAndIoData(){
+    SizeOfStruct = sizeof(SLAVE_INFO);
+    Transmit_data = EUSART1_is_tx_ready();
 
-        if(Transmit_data >= 40){
+    pSlaveDataSend = &(SlaveInfo[DataFromSlaveSend].Header);
 
-            for(unsigned int i = 0; i < SizeOfStruct; i++){                       // last received dummy byte is not used/checked
+    if(Transmit_data >= 40){
+        
+        EUSART1_Write((unsigned char)(*pSlaveDataSend));                        // First send the header 0xAA
+        pSlaveDataSend      += 1;                                               // Increment pointer
+        EUSART1_Write((unsigned char)(0x00));                                   // send the Data Type
+        
+        for(unsigned int i = 1; i < SizeOfStruct; i++){                         //Send the data self                        
 
 
-                EUSART1_Write((unsigned char)(*pSlaveDataSend));                        // for DATAxSTRUCTxLENGTH set every byte into SENDxDATAxRAW+ array according to write mask    
-                pSlaveDataSend      += 1;                                               // Increment pointer        
-            }
-            //EUSART1_Write(0xA);
+            EUSART1_Write((unsigned char)(*pSlaveDataSend));                    // for DATAxSTRUCTxLENGTH set every byte into SENDxDATAxRAW+ array according to write mask    
+            pSlaveDataSend      += 1;                                           // Increment pointer        
+        }
+        //EUSART1_Write(0xA);
 
-            if (InitPhase == false){                                                     // When init phase is done, communicate data to all slaves
-                DataFromSlaveSend++;                                                    // Count down the slaves of which the info still need to be send
-                if(DataFromSlaveSend > (NUMBER_OF_SLAVES - 1)){
-                    DataFromSlaveSend = 0;
-                }
-            }
-            else{
+        if (InitPhase == false){                                                // When init phase is done, communicate data to all slaves
+            DataFromSlaveSend++;                                                // Count down the slaves of which the info still need to be send
+            if(DataFromSlaveSend > (NUMBER_OF_SLAVES - 1)){
                 DataFromSlaveSend = 0;
             }
         }
-        UPDATExTERMINAL = 0;
+        else{
+            DataFromSlaveSend = 0;
+        }
     }
 }
 
+uint16_t SizeOfBootLoaderData = 73;
+
+void BootLoaderData(){
+    
+    EUSART1_Write((unsigned char)(0xAA));
+    EUSART1_Write((unsigned char)(0x01));
+    for(unsigned int i = 0; i < SizeOfBootLoaderData; i++){                     //Send the data self                        
+        EUSART1_Write((unsigned char)(i));               
+    }
+    EUSART1_Write((unsigned char)(0x55));
+}
 
 /*#--------------------------------------------------------------------------#*/
 /*  Description: ToFromTerminal()
