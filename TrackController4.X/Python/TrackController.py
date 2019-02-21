@@ -1,32 +1,46 @@
 #!/usr/bin/env python
 import time
 import struct
-from Comm import DataAquisition, ModBusMasterReg
+from Comm import DataAquisition
 from StateMachines import State
-
+from Enum import *
 
 class MAIN():
     def __init__(self):
         self.Amplifiers = DataAquisition(51)
-        self.ModbusMaster = ModBusMasterReg()
-        self.StateMachine = State()
-        self.cnt = 0        
+        self.StateMachine = State(self.Amplifiers)
+        self.cnt = 0  
+        self.state = EnumStateMachine.InitTrackamplifiers
 
     def start(self):
         while True:
+            self.Amplifiers.ReadSerial()
             
+            if(self.state == EnumStateMachine.InitTrackamplifiers):
+                returned = self.StateMachine.RunFunction(EnumStateMachine.InitTrackamplifiers)
+                if(returned == EnumStateMachine.ok):
+                    self.state = EnumStateMachine.run
+             
+            
+            
+            
+            
+            
+            
+            
+            
+            '''
             #time.sleep(0.001)
             self.cnt = self.cnt + 1
             
-            self.Amplifiers.ReadSerial()
-            
             #print(Amplifiers.Trackamplifiers[1].MbReceiveCounter, "\n",)
             
-            if (self.cnt > 5000):
+            if (self.cnt > 50):
                 print("Send data to PIC")
-                TX = struct.pack("<10B", 0xAA, 1, 2, 3, 4, 5, 6, 7, 8, 0x55)
+                TX = struct.pack("<11B", 0xAA, 0, 1, 2, 3, 4, 5, 6, 7, 8, 0x55)
                 self.Amplifiers.WriteSerial(TX)
-                self.cnt = 0    
+                self.cnt = 0  
+            '''
 
 
 

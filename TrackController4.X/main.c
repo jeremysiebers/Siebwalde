@@ -37,7 +37,7 @@ void WriteData(unsigned int Data, unsigned int Ln, unsigned int Col);
 /*----------------------------------------------------------------------------*/
 static SLAVE_INFO         SlaveInfo[NUMBER_OF_SLAVES];   
 
-unsigned int StateMachine = 1;
+unsigned int StateMachine = 3;
 unsigned int _Delay = 0;
 /*----------------------------------------------------------------------------*/
 
@@ -82,7 +82,7 @@ void main(void)
 
     // Disable the Peripheral Interrupts
     //INTERRUPT_PeripheralInterruptDisable();
-        
+    /*    
     printf("PIC18f97j60 started up!!!\n\r");
     __delay_ms(10);
     printf("\f");                                                               // Clear terminal (printf("\033[2J");)
@@ -90,7 +90,7 @@ void main(void)
     printf("\033[?25h");
     __delay_ms(10);   
     printf("PIC18f97j60 started up!!!\n\r");                                    // Welcome message
-    
+    */
     ModbusReset_LAT = 0;                                                        // as last release the ModbusMaster.
     ModbusReset_SetDigitalOutput();                                             // set the Pin direction here to output to avoid power-on reset pulses to slaves!
     
@@ -145,7 +145,7 @@ uint8_t Received_data = 0;
 uint8_t Transmit_data = 0;
 uint8_t Data[80];
 uint8_t DataCnt = 0;
-uint8_t msg_length = 0;
+uint8_t msg_length = 11;
 uint16_t SizeOfStruct = sizeof(SLAVE_INFO);
 static uint8_t *pSlaveDataSend;
 static uint8_t DataFromSlaveSend = 0;
@@ -161,20 +161,33 @@ void Communications(){
         
         if(DataCnt == 1){
             if(Data[DataCnt] == 0){
-                msg_length = 7;
+                msg_length = 11;
             }
             else if(Data[DataCnt] == 1){
-                msg_length = 7;
+                msg_length = 13;
             }
-            
-            
-            if(Data[0] == 0xAA){
-                if (Data[9] == 0x55){
-                    NOP();
-                }
-            }
-            DataCnt = 0;
         }
+        
+        if(msg_length == 13){
+            if(DataCnt == 3){
+                if(Data[DataCnt] == 2){
+                msg_length = 77;
+                }
+                else if(Data[DataCnt] == 7){
+                msg_length = 37;
+                }                
+            }             
+        }
+    }
+    
+    if(msg_length == DataCnt){
+        if(Data[0] == 0xAA && Data[1] == 0x00 && Data[DataCnt-1] == 0x55){
+            SlaveInfo[0].HoldingReg[1] = (Data[5]<<8) + Data[4];
+            SlaveInfo[0].HoldingReg[2] = (Data[7]<<8) + Data[6];
+            SlaveInfo[0].HoldingReg[3] = (Data[9]<<8) + Data[8];
+            SlaveInfo[0].HoldingReg[0] = (Data[3]<<8) + Data[2];
+        }
+        DataCnt = 0;
     }
     
     if(UPDATExTERMINAL){

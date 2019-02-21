@@ -35,7 +35,7 @@ class DataAquisition:
         self.footer          = 'U'
         self.message_found   = False
         self.data            = []
-                
+        
         for i in range(AmountOfAmplifiers):
             self.Trackamplifiers.append(TrackAmplifier())    
     
@@ -49,7 +49,20 @@ class DataAquisition:
     def StopSerialReadThread(self):
         self.thread1.stop()    
     
-    def WriteSerial(self, tx):
+    def WriteSerial(self, command, data):
+        
+        if(command == 0x00):
+            send = [0,0,0,0,0,0,0,0]
+            j = 0
+            k = 1
+            for i in range(0,4,1):
+                send[j] = (data.HoldingReg[i] & 0xFF)
+                send[k] = ((data.HoldingReg[i] & 0xFF00) >> 8) 
+                j += 2
+                k += 2                
+            
+            tx = struct.pack("<11B", 0xAA, command, send[0], send[1], send[2], send[3], send[4], send[5], send[6], send[7], 0x55)
+        
         self.ser.write(tx)
     
     def ReadSerial(self):

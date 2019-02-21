@@ -5,12 +5,19 @@ Commands to Ethernet Target
   
 Command 	= command to be executed by Ethernet target
 0 (default) = write to mod-bus master, [Data] contains commands and data for the mod-bus master
+
+			= [0xAA][0x00][Holdingreg0_LOW, Holdingreg0_HGH, Holdingreg1_LOW, Holdingreg1_HGH, Holdingreg2_LOW, Holdingreg2_HGH, Holdingreg3_LOW, Holdingreg3_HGH][0x55]
+
+
 1			= write to boot loader [Data] contains commands and data for the boot loader
-2			=
 
-Data Length = 2 Bytes [Low][high]
+			= [0xAA][0x01][<boot loader protocol>][0x55]
 
-Data		= 0 - 255 Byes - based upon [Data Length] (boot loader commands + flash write 4 rows need to fit in this minimal)
+2			= write to Ethernet Target, [Data] contains command/data for Ethernet target
+
+			= [0xAA][0x01][<Ethernet target protocol>][0x55]
+
+Data		= 0 - 255 Byes - based upon type (boot loader commands + flash write 4 rows need to fit in this minimal)
 
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -23,10 +30,15 @@ Data from Ethernet Target
   B			B			x       B
 
 Data Type 	= Type of data return belonging to active state of sub states/functions
-0 (default) = data from all slaves (including mod-bus master)
-1			= data from boot loader
-2			=
+0 (default) = data from all slaves (including mod-bus master) 	
+				3 + slave data length
+				
+1			= data from boot loader								
+				13 for 9 byte messages (command), 
+				77 for 74 byte messages(flash write 0x2), 
+				37 for 34 byte messages(write config 0x7)
 
-Data Length = 2 Bytes [Low][high]
+2			= data from Ethernet target
 
-Data		= 0 - 255 Byes - based upon [Data Length] (boot loader commands + flash read 4 rows need to fit in this minimal)
+
+Data		= 0 - 255 Byes - based upon type (boot loader commands + flash read 4 rows need to fit in this minimal)
