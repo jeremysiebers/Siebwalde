@@ -1,0 +1,170 @@
+Version 3.2 HI-TECH Software Intermediate Code
+[; ;stdint.h: 13: typedef signed char int8_t;
+[; ;stdint.h: 20: typedef signed int int16_t;
+[; ;stdint.h: 38: typedef signed long int int32_t;
+[; ;stdint.h: 45: typedef unsigned char uint8_t;
+[; ;stdint.h: 51: typedef unsigned int uint16_t;
+[; ;stdint.h: 67: typedef unsigned long int uint32_t;
+[; ;stdint.h: 75: typedef signed char int_least8_t;
+[; ;stdint.h: 82: typedef signed int int_least16_t;
+[; ;stdint.h: 104: typedef signed long int int_least32_t;
+[; ;stdint.h: 111: typedef unsigned char uint_least8_t;
+[; ;stdint.h: 117: typedef unsigned int uint_least16_t;
+[; ;stdint.h: 136: typedef unsigned long int uint_least32_t;
+[; ;stdint.h: 145: typedef signed char int_fast8_t;
+[; ;stdint.h: 152: typedef signed int int_fast16_t;
+[; ;stdint.h: 174: typedef signed long int int_fast32_t;
+[; ;stdint.h: 181: typedef unsigned char uint_fast8_t;
+[; ;stdint.h: 187: typedef unsigned int uint_fast16_t;
+[; ;stdint.h: 206: typedef unsigned long int uint_fast32_t;
+[; ;stdint.h: 212: typedef int32_t intmax_t;
+[; ;stdint.h: 217: typedef uint32_t uintmax_t;
+[; ;stdint.h: 222: typedef int16_t intptr_t;
+[; ;stdint.h: 227: typedef uint16_t uintptr_t;
+[; ;lfsr.h: 5: typedef uint8_t lfsr_t;
+[; ;lfsr.h: 6: int lfsr_getSequenceCount(void);
+[; ;lfsr.h: 7: lfsr_t lfsr_getSequence(void);
+[; ;lfsr.h: 8: void lfsr_reset(void);
+[; ;lfsr.h: 9: void lfsr_setSequence(int s);
+[; ;lfsr.h: 10: lfsr_t lfsr(void);
+"6 mcc_generated_files/TCPIPLibrary/lfsr.c
+[v _sequenceIndex `uc ~T0 @X0 1 e ]
+[i _sequenceIndex
+-> -> 0 `i `uc
+]
+[; ;lfsr.c: 6: char sequenceIndex = 0;
+"7
+[v _xorSequences `Cuc ~T0 @X0 -> 0 `x e ]
+[i _xorSequences
+:U ..
+-> -> 65 `i `uc
+-> -> 68 `i `uc
+-> -> 71 `i `uc
+-> -> 72 `i `uc
+-> -> 78 `i `uc
+-> -> 83 `i `uc
+-> -> 85 `i `uc
+-> -> 92 `i `uc
+-> -> 95 `i `uc
+-> -> 96 `i `uc
+-> -> 101 `i `uc
+-> -> 105 `i `uc
+-> -> 106 `i `uc
+-> -> 114 `i `uc
+-> -> 119 `i `uc
+-> -> 120 `i `uc
+-> -> 123 `i `uc
+-> -> 126 `i `uc
+..
+]
+[; ;lfsr.c: 7: const lfsr_t xorSequences[] = {0x41,0x44,0x47,0x48,0x4E,0x53,0x55,0x5C,0x5F,0x60,0x65,0x69,0x6A,0x72,0x77,0x78,0x7B,0x7E};
+"8
+[v _xor_mask `uc ~T0 @X0 1 e ]
+[i _xor_mask
+-> -> 65 `i `uc
+]
+[; ;lfsr.c: 8: lfsr_t xor_mask = 0x41;
+"9
+[v _lfsr_value `uc ~T0 @X0 1 e ]
+[i _lfsr_value
+-> -> 64 `i `uc
+]
+[; ;lfsr.c: 9: lfsr_t lfsr_value = 0x40;
+"11
+[v _lfsr_getSequence `(uc ~T0 @X0 1 ef ]
+"12
+{
+[; ;lfsr.c: 11: lfsr_t lfsr_getSequence(void)
+[; ;lfsr.c: 12: {
+[e :U _lfsr_getSequence ]
+[f ]
+[; ;lfsr.c: 13: return xorSequences[sequenceIndex];
+"13
+[e ) *U + &U _xorSequences * -> _sequenceIndex `ux -> -> # *U &U _xorSequences `ui `ux ]
+[e $UE 1  ]
+[; ;lfsr.c: 14: }
+"14
+[e :UE 1 ]
+}
+"16
+[v _lfsr_getSequenceCount `(i ~T0 @X0 1 ef ]
+"17
+{
+[; ;lfsr.c: 16: int lfsr_getSequenceCount(void)
+[; ;lfsr.c: 17: {
+[e :U _lfsr_getSequenceCount ]
+[f ]
+[; ;lfsr.c: 18: return sizeof(xorSequences)/sizeof(*xorSequences);
+"18
+[e ) -> / -> # _xorSequences `ui -> # *U &U _xorSequences `ui `i ]
+[e $UE 2  ]
+[; ;lfsr.c: 19: }
+"19
+[e :UE 2 ]
+}
+"21
+[v _lfsr_reset `(v ~T0 @X0 1 ef ]
+"22
+{
+[; ;lfsr.c: 21: void lfsr_reset(void)
+[; ;lfsr.c: 22: {
+[e :U _lfsr_reset ]
+[f ]
+[; ;lfsr.c: 23: lfsr_value = 0x40;
+"23
+[e = _lfsr_value -> -> 64 `i `uc ]
+[; ;lfsr.c: 24: }
+"24
+[e :UE 3 ]
+}
+"26
+[v _lfsr_setSequence `(v ~T0 @X0 1 ef1`i ]
+"27
+{
+[; ;lfsr.c: 26: void lfsr_setSequence(int s)
+[; ;lfsr.c: 27: {
+[e :U _lfsr_setSequence ]
+"26
+[v _s `i ~T0 @X0 1 r1 ]
+"27
+[f ]
+[; ;lfsr.c: 28: s %= sizeof(xorSequences)/sizeof(*xorSequences);
+"28
+[e =% _s / -> # _xorSequences `ui -> # *U &U _xorSequences `ui ]
+[; ;lfsr.c: 29: xor_mask = xorSequences[s];
+"29
+[e = _xor_mask *U + &U _xorSequences * -> -> _s `ui `ux -> -> # *U &U _xorSequences `ui `ux ]
+[; ;lfsr.c: 30: }
+"30
+[e :UE 4 ]
+}
+"32
+[v _lfsr `(uc ~T0 @X0 1 ef ]
+"33
+{
+[; ;lfsr.c: 32: lfsr_t lfsr(void)
+[; ;lfsr.c: 33: {
+[e :U _lfsr ]
+[f ]
+"34
+[v _lsb `uc ~T0 @X0 1 a ]
+[; ;lfsr.c: 34: char lsb = lfsr_value & 1;
+[e = _lsb -> & -> _lfsr_value `i -> 1 `i `uc ]
+[; ;lfsr.c: 35: lfsr_value >>= 1;
+"35
+[e =>> _lfsr_value -> 1 `i ]
+[; ;lfsr.c: 36: if (lsb)
+"36
+[e $ ! != -> _lsb `i -> -> -> 0 `i `uc `i 6  ]
+[; ;lfsr.c: 37: lfsr_value ^= xor_mask;
+"37
+[e =^ _lfsr_value _xor_mask ]
+[e :U 6 ]
+[; ;lfsr.c: 38: return lfsr_value & 0x7f;
+"38
+[e ) -> & -> _lfsr_value `i -> 127 `i `uc ]
+[e $UE 5  ]
+[; ;lfsr.c: 39: }
+"39
+[e :UE 5 ]
+}

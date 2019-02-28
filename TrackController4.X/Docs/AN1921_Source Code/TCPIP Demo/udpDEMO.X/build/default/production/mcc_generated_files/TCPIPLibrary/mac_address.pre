@@ -1,0 +1,101 @@
+
+# 1 "mcc_generated_files/TCPIPLibrary/mac_address.c"
+
+# 58 "mcc_generated_files/TCPIPLibrary/tcpip_config.h"
+const char dhcpName[] = "PIC16F18346 Ethernet";
+
+# 13 "C:\Program Files (x86)\Microchip\xc8\v1.42\include\stdint.h"
+typedef signed char int8_t;
+
+# 20
+typedef signed int int16_t;
+
+# 38
+typedef signed long int int32_t;
+
+# 45
+typedef unsigned char uint8_t;
+
+# 51
+typedef unsigned int uint16_t;
+
+# 67
+typedef unsigned long int uint32_t;
+
+# 75
+typedef signed char int_least8_t;
+
+# 82
+typedef signed int int_least16_t;
+
+# 104
+typedef signed long int int_least32_t;
+
+# 111
+typedef unsigned char uint_least8_t;
+
+# 117
+typedef unsigned int uint_least16_t;
+
+# 136
+typedef unsigned long int uint_least32_t;
+
+# 145
+typedef signed char int_fast8_t;
+
+# 152
+typedef signed int int_fast16_t;
+
+# 174
+typedef signed long int int_fast32_t;
+
+# 181
+typedef unsigned char uint_fast8_t;
+
+# 187
+typedef unsigned int uint_fast16_t;
+
+# 206
+typedef unsigned long int uint_fast32_t;
+
+# 212
+typedef int32_t intmax_t;
+
+
+
+
+typedef uint32_t uintmax_t;
+
+
+
+
+typedef int16_t intptr_t;
+
+
+
+
+typedef uint16_t uintptr_t;
+
+# 51 "mcc_generated_files/TCPIPLibrary/mac_address.h"
+typedef union
+{
+uint8_t mac_array[6];
+struct { uint8_t byte1,byte2,byte3,byte4,byte5,byte6; } s;
+} mac48Address_t;
+
+extern const mac48Address_t broadcastMAC;
+extern const mac48Address_t macAddress;
+extern mac48Address_t hostMacAddress;
+
+const mac48Address_t *MAC_getAddress(void);
+
+# 42 "mcc_generated_files/TCPIPLibrary/mac_address.c"
+const mac48Address_t macAddress = {0x02,0x00,0x00,0x00,0x00,0x01};
+const mac48Address_t broadcastMAC = {0xff,0xff,0xff,0xff,0xff,0xff};
+
+
+const mac48Address_t *MAC_getAddress(void)
+{
+return &macAddress;
+}
+

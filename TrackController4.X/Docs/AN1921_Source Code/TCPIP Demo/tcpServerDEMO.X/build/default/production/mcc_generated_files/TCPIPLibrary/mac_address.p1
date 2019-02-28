@@ -1,0 +1,88 @@
+Version 3.2 HI-TECH Software Intermediate Code
+"54 mcc_generated_files/TCPIPLibrary/mac_address.h
+[s S2 `uc 1 `uc 1 `uc 1 `uc 1 `uc 1 `uc 1 ]
+[n S2 . byte1 byte2 byte3 byte4 byte5 byte6 ]
+"52
+[u S1 `uc -> 6 `i `S2 1 ]
+[n S1 . mac_array s ]
+[; ;stdint.h: 13: typedef signed char int8_t;
+[; ;stdint.h: 20: typedef signed int int16_t;
+[; ;stdint.h: 38: typedef signed long int int32_t;
+[; ;stdint.h: 45: typedef unsigned char uint8_t;
+[; ;stdint.h: 51: typedef unsigned int uint16_t;
+[; ;stdint.h: 67: typedef unsigned long int uint32_t;
+[; ;stdint.h: 75: typedef signed char int_least8_t;
+[; ;stdint.h: 82: typedef signed int int_least16_t;
+[; ;stdint.h: 104: typedef signed long int int_least32_t;
+[; ;stdint.h: 111: typedef unsigned char uint_least8_t;
+[; ;stdint.h: 117: typedef unsigned int uint_least16_t;
+[; ;stdint.h: 136: typedef unsigned long int uint_least32_t;
+[; ;stdint.h: 145: typedef signed char int_fast8_t;
+[; ;stdint.h: 152: typedef signed int int_fast16_t;
+[; ;stdint.h: 174: typedef signed long int int_fast32_t;
+[; ;stdint.h: 181: typedef unsigned char uint_fast8_t;
+[; ;stdint.h: 187: typedef unsigned int uint_fast16_t;
+[; ;stdint.h: 206: typedef unsigned long int uint_fast32_t;
+[; ;stdint.h: 212: typedef int32_t intmax_t;
+[; ;stdint.h: 217: typedef uint32_t uintmax_t;
+[; ;stdint.h: 222: typedef int16_t intptr_t;
+[; ;stdint.h: 227: typedef uint16_t uintptr_t;
+[; ;mac_address.h: 51: typedef union
+[; ;mac_address.h: 52: {
+[; ;mac_address.h: 53: uint8_t mac_array[6];
+[; ;mac_address.h: 54: struct { uint8_t byte1,byte2,byte3,byte4,byte5,byte6; } s;
+[; ;mac_address.h: 55: } mac48Address_t;
+[; ;mac_address.h: 57: extern const mac48Address_t broadcastMAC;
+[; ;mac_address.h: 58: extern const mac48Address_t macAddress;
+[; ;mac_address.h: 59: extern mac48Address_t hostMacAddress;
+[; ;mac_address.h: 61: const mac48Address_t *MAC_getAddress(void);
+"42 mcc_generated_files/TCPIPLibrary/mac_address.c
+[v _macAddress `CS1 ~T0 @X0 1 e ]
+[i _macAddress
+:U ..
+:U ..
+:U ..
+-> -> 2 `i `uc
+-> -> 0 `i `uc
+-> -> 0 `i `uc
+-> -> 0 `i `uc
+-> -> 0 `i `uc
+-> -> 1 `i `uc
+..
+..
+..
+]
+[; ;mac_address.c: 42: const mac48Address_t macAddress = {0x02,0x00,0x00,0x00,0x00,0x01};
+"43
+[v _broadcastMAC `CS1 ~T0 @X0 1 e ]
+[i _broadcastMAC
+:U ..
+:U ..
+:U ..
+-> -> 255 `i `uc
+-> -> 255 `i `uc
+-> -> 255 `i `uc
+-> -> 255 `i `uc
+-> -> 255 `i `uc
+-> -> 255 `i `uc
+..
+..
+..
+]
+[; ;mac_address.c: 43: const mac48Address_t broadcastMAC = {0xff,0xff,0xff,0xff,0xff,0xff};
+"46
+[v _MAC_getAddress `(*CS1 ~T0 @X0 1 ef ]
+"47
+{
+[; ;mac_address.c: 46: const mac48Address_t *MAC_getAddress(void)
+[; ;mac_address.c: 47: {
+[e :U _MAC_getAddress ]
+[f ]
+[; ;mac_address.c: 48: return &macAddress;
+"48
+[e ) &U _macAddress ]
+[e $UE 3  ]
+[; ;mac_address.c: 49: }
+"49
+[e :UE 3 ]
+}

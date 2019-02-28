@@ -53,6 +53,8 @@
 #include "interrupt_manager.h"
 #include "spi2.h"
 #include "tmr1.h"
+#include "tmr0.h"
+#include "eusart1.h"
 #include "TCPIPLibrary/network.h"
 
 #define _XTAL_FREQ  41666666.6667

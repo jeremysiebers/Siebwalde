@@ -11,7 +11,7 @@
 #define	XC_HEADER_TEMPLATE_H
 
 #include <xc.h> // include processor files - each processor file is guarded.  
-
+#include <stdint.h>
 
 #ifdef	__cplusplus
 extern "C" {
@@ -46,6 +46,15 @@ typedef struct
 }SLAVE_INFO;
 
 extern unsigned char UPDATExTERMINAL;
+
+typedef struct
+{
+    uint32_t destinationAddress;
+    uint16_t sourcePortNumber;
+    uint16_t destinationPortNumber;    
+}udpStart_t;
+
+void UDP_DEMO_Recv(void);
 
 #ifdef	__cplusplus
 }

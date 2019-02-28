@@ -55,6 +55,8 @@ void SYSTEM_Initialize(void)
     OSCILLATOR_Initialize();
     SPI2_Initialize();
     TMR1_Initialize();
+    TMR0_Initialize();
+    EUSART1_Initialize();
     Network_Init();
 }
 

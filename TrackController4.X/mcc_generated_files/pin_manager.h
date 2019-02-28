@@ -111,6 +111,47 @@
 #define Read_Check_SetDigitalInput()    do { TRISBbits.TRISB1 = 1; } while(0)
 #define Read_Check_SetDigitalOutput()   do { TRISBbits.TRISB1 = 0; } while(0)
 
+// get/set LED1 aliases
+#define LED1_TRIS                 TRISBbits.TRISB2
+#define LED1_LAT                  LATBbits.LATB2
+#define LED1_PORT                 PORTBbits.RB2
+#define LED1_SetHigh()            do { LATBbits.LATB2 = 1; } while(0)
+#define LED1_SetLow()             do { LATBbits.LATB2 = 0; } while(0)
+#define LED1_Toggle()             do { LATBbits.LATB2 = ~LATBbits.LATB2; } while(0)
+#define LED1_GetValue()           PORTBbits.RB2
+#define LED1_SetDigitalInput()    do { TRISBbits.TRISB2 = 1; } while(0)
+#define LED1_SetDigitalOutput()   do { TRISBbits.TRISB2 = 0; } while(0)
+
+// get/set LED2 aliases
+#define LED2_TRIS                 TRISBbits.TRISB3
+#define LED2_LAT                  LATBbits.LATB3
+#define LED2_PORT                 PORTBbits.RB3
+#define LED2_SetHigh()            do { LATBbits.LATB3 = 1; } while(0)
+#define LED2_SetLow()             do { LATBbits.LATB3 = 0; } while(0)
+#define LED2_Toggle()             do { LATBbits.LATB3 = ~LATBbits.LATB3; } while(0)
+#define LED2_GetValue()           PORTBbits.RB3
+#define LED2_SetDigitalInput()    do { TRISBbits.TRISB3 = 1; } while(0)
+#define LED2_SetDigitalOutput()   do { TRISBbits.TRISB3 = 0; } while(0)
+
+// get/set SEND_UDP aliases
+#define SEND_UDP_TRIS                 TRISBbits.TRISB7
+#define SEND_UDP_LAT                  LATBbits.LATB7
+#define SEND_UDP_PORT                 PORTBbits.RB7
+#define SEND_UDP_SetHigh()            do { LATBbits.LATB7 = 1; } while(0)
+#define SEND_UDP_SetLow()             do { LATBbits.LATB7 = 0; } while(0)
+#define SEND_UDP_Toggle()             do { LATBbits.LATB7 = ~LATBbits.LATB7; } while(0)
+#define SEND_UDP_GetValue()           PORTBbits.RB7
+#define SEND_UDP_SetDigitalInput()    do { TRISBbits.TRISB7 = 1; } while(0)
+#define SEND_UDP_SetDigitalOutput()   do { TRISBbits.TRISB7 = 0; } while(0)
+
+// get/set RC6 procedures
+#define RC6_SetHigh()               do { LATCbits.LATC6 = 1; } while(0)
+#define RC6_SetLow()                do { LATCbits.LATC6 = 0; } while(0)
+#define RC6_Toggle()                do { LATCbits.LATC6 = ~LATCbits.LATC6; } while(0)
+#define RC6_GetValue()              PORTCbits.RC6
+#define RC6_SetDigitalInput()       do { TRISCbits.TRISC6 = 1; } while(0)
+#define RC6_SetDigitalOutput()      do { TRISCbits.TRISC6 = 0; } while(0)
+
 // get/set ModbusReset aliases
 #define ModbusReset_TRIS                 TRISDbits.TRISD3
 #define ModbusReset_LAT                  LATDbits.LATD3
