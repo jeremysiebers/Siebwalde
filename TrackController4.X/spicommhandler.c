@@ -143,24 +143,24 @@ void INITxSPIxCOMMxHANDLER(SLAVE_INFO *location)
 /*#--------------------------------------------------------------------------#*/
 
 void ProcessSpiInterrupt(){
-    SS1_Check_LAT = 1; 
+    //SS1_Check_LAT = 1; 
     RECEIVEDxDATAxRAW[DATAxCOUNTxRECEIVED] = SSP2BUF;                       
     SSP2BUF = SENDxDATAxRAW[DATAxCOUNTxSEND];
     DATAxCOUNTxRECEIVED++;
     DATAxCOUNTxSEND++;
-    SS1_Check_LAT = 0;
+    //SS1_Check_LAT = 0;
     
     while(!DATAxREADY){
         
         
         if (SSP2STATbits.BF){  
             
-            SS1_Check_LAT = 1; 
+            //SS1_Check_LAT = 1; 
             
             RECEIVEDxDATAxRAW[DATAxCOUNTxRECEIVED] = SSP2BUF; 
             SSP2BUF = SENDxDATAxRAW[DATAxCOUNTxSEND];
             
-            SS1_Check_LAT = 0;
+            //SS1_Check_LAT = 0;
             
             DATAxCOUNTxRECEIVED++;
             DATAxCOUNTxSEND++;
@@ -171,7 +171,7 @@ void ProcessSpiInterrupt(){
         }
     }
     
-    SS1_Check_LAT = 1;
+    //SS1_Check_LAT = 1;
     
     DATAxREADY = 0;
     DATAxCOUNTxRECEIVED = 0; 
@@ -179,7 +179,7 @@ void ProcessSpiInterrupt(){
     ProcessSpiData();   
     SSP2BUF = 0;
                  
-    SS1_Check_LAT = 0;  
+    //SS1_Check_LAT = 0;  
 
 }
 

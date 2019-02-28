@@ -10,13 +10,19 @@ class MAIN():
         self.Amplifiers = DataAquisition(51)
         self.StateMachine = State(self.Amplifiers)
         self.cnt = 0  
-        self.state = EnumStateMachine.InitTrackamplifiers
+        self.state = EnumStateMachine.ResetAllSlaves
 
     def start(self):
         while True:
             self.Amplifiers.ReadSerial()
             
-            if(self.state == EnumStateMachine.InitTrackamplifiers):
+            
+            if(self.state == EnumStateMachine.ResetAllSlaves):
+                returned = self.StateMachine.RunFunction(EnumStateMachine.ResetAllSlaves)
+                if(returned == EnumStateMachine.ok):
+                    self.state = EnumStateMachine.InitTrackamplifiers
+
+            elif(self.state == EnumStateMachine.InitTrackamplifiers):
                 returned = self.StateMachine.RunFunction(EnumStateMachine.InitTrackamplifiers)
                 if(returned == EnumStateMachine.ok):
                     self.state = EnumStateMachine.run

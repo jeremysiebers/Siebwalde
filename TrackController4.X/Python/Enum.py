@@ -4,7 +4,8 @@ class EnumStateMachine:
     ok    = 'ok'
     nok   = 'nok'
     
-    InitTrackamplifiers  = 'InitTrackamplifiers'
+    ResetAllSlaves        = 'ResetAllSlaves'
+    InitTrackamplifiers   = 'InitTrackamplifiers'
     run                   = 'run'
     
 class EnumSlaveInit:
@@ -24,8 +25,7 @@ class EnumSlaveInit:
     TRACKBACKPLANE4 = 54
     TRACKBACKPLANE5 = 55
     
-class EnumSlaveConfig:
-    COMMAND     = 0x00
+class EnumSlaveConfig:    
     OK          = 0x02 
     NOK         = 0x04 
     _BUSY       = 0x01
@@ -39,3 +39,16 @@ class EnumSlaveConfig:
     DIAGREG     = 0b1111111111110011
     EXEC        = 0b1111111111111111
     HALT        = 0b1111111111011111    
+
+class EnumCommand:
+    MODBUS      = 0x00
+    BOOTLOADER  = 0x01
+    ETHERNET_T  = 0x02
+    
+class EnumEthernetT:
+    ResetAll    = 0xFF
+    ReleaseAll  = 0xFE
+    OK          = 0x82
+    NOK         = 0x83
+    BUSY        = 0x81
+    IDLE        = 0x80

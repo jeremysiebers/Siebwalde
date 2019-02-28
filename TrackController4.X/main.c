@@ -36,9 +36,12 @@ void WriteData(unsigned int Data, unsigned int Ln, unsigned int Col);
 
 /*----------------------------------------------------------------------------*/
 static SLAVE_INFO         SlaveInfo[NUMBER_OF_SLAVES];   
+static SLAVE_INFO         EthernetTarget[1];
 
-unsigned int StateMachine = 3;
+unsigned int StateMachine = 1;
 unsigned int _Delay = 0;
+
+unsigned char UPDATExTERMINAL;
 /*----------------------------------------------------------------------------*/
 
 void main(void)
@@ -53,6 +56,11 @@ void main(void)
             SlaveInfo[i].HoldingReg[2] = i;                                     // Set address of slave
         }
     }
+    
+    EthernetTarget[0].SlaveNumber = NUMBER_OF_SLAVES;
+    EthernetTarget[0].Header = 0xAA;
+    EthernetTarget[0].Footer = 0x55;
+    
 /*----------------------------------------------------------------------------*/
     
     // Initialize the device
@@ -117,8 +125,17 @@ void main(void)
                 break;
                 
             default :   //ToFromTerminal();
-                        Communications();
+                        //Communications();
                 break;
+        }
+        
+        if(UPDATExTERMINAL){
+
+            Read_Check_LAT = 1;
+            Network_Manage();
+            UPDATExTERMINAL = 0;
+            Read_Check_LAT = 0;
+            
         }
     }
 }
@@ -146,9 +163,32 @@ uint8_t Transmit_data = 0;
 uint8_t Data[80];
 uint8_t DataCnt = 0;
 uint8_t msg_length = 11;
+uint8_t Command = 0;
 uint16_t SizeOfStruct = sizeof(SLAVE_INFO);
 static uint8_t *pSlaveDataSend;
 static uint8_t DataFromSlaveSend = 0;
+
+typedef enum
+{
+    MODBUS_CMD          = 0x00,
+    BOOTLOAD_CMD        = 0x01,
+    ETHERNET_CMD        = 0x02,
+    BOOTLOAD_CONFIG     = 0x07,
+    BOOTLOAD_FLASH      = 0x02,
+            
+    SEND_SLAVEIODATA    = 0x00,
+    SEND_BOOTLOADER     = 0x01,
+    RELEASE_ALL         = 0xFE,
+    RESET_ALL           = 0xFF,
+};
+
+typedef enum 
+{
+    ETH_OK          = 0x82, 
+    ETH_NOK         = 0x83, 
+    ETH_BUSY        = 0x81,
+    ETH_IDLE        = 0x80,    
+};
 
 void Communications(){
     
@@ -157,35 +197,97 @@ void Communications(){
     if(Received_data > 0){
         
         Data[DataCnt] = EUSART1_Read();
-        DataCnt++;
         
         if(DataCnt == 1){
-            if(Data[DataCnt] == 0){
+            /*
+             * Check if data is for Modbus master
+             */
+            if(Data[DataCnt] == MODBUS_CMD){
+                Command = MODBUS_CMD;
                 msg_length = 11;
             }
-            else if(Data[DataCnt] == 1){
+            /*
+             * Check if data is for Bootloader
+             */
+            else if(Data[DataCnt] == BOOTLOAD_CMD){
+                Command = BOOTLOAD_CMD;
                 msg_length = 13;
+            }
+            /*
+             * Check if data is for Ethernet Target
+             */
+            else if(Data[DataCnt] == ETHERNET_CMD){
+                Command = ETHERNET_CMD;
+                msg_length = 4;
             }
         }
         
+        DataCnt++;
+        
+        /*
+         * Check if command is sent for bootloader
+         */
         if(msg_length == 13){
+            /*
+             * Check if data is bootloader data
+             */
             if(DataCnt == 3){
-                if(Data[DataCnt] == 2){
+                /*
+                 * Check if bootloader command is write flash (2)
+                 */
+                if(Data[DataCnt] == BOOTLOAD_FLASH){
                 msg_length = 77;
                 }
-                else if(Data[DataCnt] == 7){
+                /*
+                 * Check if bootloader command is write config (7)
+                 */
+                else if(Data[DataCnt] == BOOTLOAD_CONFIG){
                 msg_length = 37;
                 }                
             }             
         }
     }
     
-    if(msg_length == DataCnt){
+    if(msg_length == DataCnt && Command == MODBUS_CMD){
         if(Data[0] == 0xAA && Data[1] == 0x00 && Data[DataCnt-1] == 0x55){
             SlaveInfo[0].HoldingReg[1] = (Data[5]<<8) + Data[4];
             SlaveInfo[0].HoldingReg[2] = (Data[7]<<8) + Data[6];
             SlaveInfo[0].HoldingReg[3] = (Data[9]<<8) + Data[8];
             SlaveInfo[0].HoldingReg[0] = (Data[3]<<8) + Data[2];
+        }
+        DataCnt = 0;
+    }
+    else if(msg_length == DataCnt && Command == ETHERNET_CMD){
+        if(Data[0] == 0xAA && Data[1] == ETHERNET_CMD && Data[DataCnt-1] == 0x55){
+            switch(Data[2]){
+                case RESET_ALL:
+                    ModbusReset_LAT = 1;
+                    __delay_ms(10);
+                    ModbusReset_LAT = 0;
+                    __delay_ms(4000);
+                    EthernetTarget[0].InputReg[0] = ETH_OK;
+                    break;
+                    
+                case RELEASE_ALL:
+                    ModbusReset_LAT = 0;
+                    EthernetTarget[0].InputReg[0] = ETH_IDLE;
+                    break;
+                    
+                case SEND_SLAVEIODATA:
+                   SendOperation = 0;
+                   break;
+                   
+                case SEND_BOOTLOADER:
+                    SendOperation = 1;
+                    break;
+                    
+                case ETH_IDLE:
+                    EthernetTarget[0].InputReg[0] = ETH_IDLE;
+                    break;
+                    
+                default :
+                    break;
+            }
         }
         DataCnt = 0;
     }
@@ -214,14 +316,25 @@ void SlaveAndIoData(){
     SizeOfStruct = sizeof(SLAVE_INFO);
     Transmit_data = EUSART1_is_tx_ready();
 
-    pSlaveDataSend = &(SlaveInfo[DataFromSlaveSend].Header);
+    if(DataFromSlaveSend == NUMBER_OF_SLAVES){
+        pSlaveDataSend = &(EthernetTarget[0].Header);
+    }
+    else{
+        pSlaveDataSend = &(SlaveInfo[DataFromSlaveSend].Header);
+    }
 
     if(Transmit_data >= 40){
         
         EUSART1_Write((unsigned char)(*pSlaveDataSend));                        // First send the header 0xAA
         pSlaveDataSend      += 1;                                               // Increment pointer
-        EUSART1_Write((unsigned char)(0x00));                                   // send the Data Type
         
+        if(DataFromSlaveSend == NUMBER_OF_SLAVES){
+            EUSART1_Write((unsigned char)(ETHERNET_CMD));                       // send the Data Type
+        }
+        else{
+            EUSART1_Write((unsigned char)(MODBUS_CMD));                         // send the Data Type
+        }
+                
         for(unsigned int i = 1; i < SizeOfStruct; i++){                         //Send the data self                        
 
 
@@ -232,12 +345,17 @@ void SlaveAndIoData(){
 
         if (InitPhase == false){                                                // When init phase is done, communicate data to all slaves
             DataFromSlaveSend++;                                                // Count down the slaves of which the info still need to be send
-            if(DataFromSlaveSend > (NUMBER_OF_SLAVES - 1)){
+            if(DataFromSlaveSend > (NUMBER_OF_SLAVES)){
                 DataFromSlaveSend = 0;
             }
         }
         else{
-            DataFromSlaveSend = 0;
+            if (DataFromSlaveSend == 0){
+                DataFromSlaveSend = NUMBER_OF_SLAVES;
+            }
+            else if(DataFromSlaveSend == NUMBER_OF_SLAVES){
+                DataFromSlaveSend = 0;
+            }            
         }
     }
 }
@@ -283,7 +401,7 @@ void BootLoaderData(){
 #define COL3D	COL3 + 20
 #define COL4D	COL4 + 20
 
-unsigned char UPDATExTERMINAL;
+
 unsigned char terminal = 0;
 
 void ToFromTerminal(){

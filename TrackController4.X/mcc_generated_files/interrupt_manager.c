@@ -46,12 +46,10 @@
     SOFTWARE.
 */
 
-#include "../main.h"
 #include "interrupt_manager.h"
 #include "mcc.h"
+#include "mcc.h"
 #include "../spicommhandler.h"
-
-static unsigned int out = 0;
 
 void  INTERRUPT_Initialize (void)
 {
@@ -67,22 +65,18 @@ void  INTERRUPT_Initialize (void)
     // TMRI - low priority
     IPR1bits.TMR1IP = 0;    
 
-    // TXI - low priority
-    IPR1bits.TX1IP = 0;    
-
-    // RCI - low priority
-    IPR1bits.RC1IP = 0;    
-
 }
 
 void interrupt INTERRUPT_InterruptManagerHigh (void)
 {
-    // interrupt handler
+   // interrupt handler
     if(PIE3bits.SSP2IE == 1 && PIR3bits.SSP2IF == 1)
     {
+        SS1_Check_LAT = 1;
         ProcessSpiInterrupt();
         PIR3bits.SSP2IF = 0;
-        //UPDATExTERMINAL = 1;
+        UPDATExTERMINAL = 1;
+        SS1_Check_LAT = 0;
     }
     else
     {
@@ -93,20 +87,10 @@ void interrupt INTERRUPT_InterruptManagerHigh (void)
 void interrupt low_priority INTERRUPT_InterruptManagerLow (void)
 {
     // interrupt handler
-        if(PIE1bits.TMR1IE == 1 && PIR1bits.TMR1IF == 1)
-        {
-            //TMR1_ISR();
-            UPDATExTERMINAL = 1;            
-            PIR1bits.TMR1IF = 0;            
-        } 
-        else if(PIE1bits.TX1IE == 1 && PIR1bits.TX1IF == 1)
-        {
-            EUSART1_Transmit_ISR();
-        } 
-        else if(PIE1bits.RC1IE == 1 && PIR1bits.RC1IF == 1)
-        {
-            EUSART1_Receive_ISR();
-        } 
+    if(PIE1bits.TMR1IE == 1 && PIR1bits.TMR1IF == 1)
+    {
+        TMR1_ISR();
+    }
     else
     {
         //Unhandled Interrupt

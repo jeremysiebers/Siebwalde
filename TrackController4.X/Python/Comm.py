@@ -3,6 +3,7 @@ import serial
 import struct
 import time
 import copy
+from Enum import *
 
 class TrackAmplifier:
     def __init__(self):
@@ -17,7 +18,7 @@ class TrackAmplifier:
 
 class Bootloader:
     def __init__(self):
-        self.rx_data         = []
+        self.rx_data         = [] 
 
 
 class DataAquisition:
@@ -27,7 +28,8 @@ class DataAquisition:
         self.ser.port = 'COM3'
         self.ser.open()        
         self.Trackamplifiers = list()
-        self.bootloader      = Bootloader()
+        self.Bootloader      = Bootloader()
+        self.EthernetTarget  = TrackAmplifier()
         self.line            = ''
         self.run             = True
         self.header          = '\xaa'
@@ -35,9 +37,10 @@ class DataAquisition:
         self.footer          = 'U'
         self.message_found   = False
         self.data            = []
+        self.TxData          = []
         
         for i in range(AmountOfAmplifiers):
-            self.Trackamplifiers.append(TrackAmplifier())    
+            self.Trackamplifiers.append(TrackAmplifier())
     
 
     def GetData(self):
@@ -51,7 +54,7 @@ class DataAquisition:
     
     def WriteSerial(self, command, data):
         
-        if(command == 0x00):
+        if(command == EnumCommand.MODBUS):
             send = [0,0,0,0,0,0,0,0]
             j = 0
             k = 1
@@ -63,11 +66,18 @@ class DataAquisition:
             
             tx = struct.pack("<11B", 0xAA, command, send[0], send[1], send[2], send[3], send[4], send[5], send[6], send[7], 0x55)
         
-        self.ser.write(tx)
+        if(command == EnumCommand.ETHERNET_T):
+            tx = struct.pack("<4B", 0xAA, command, data, 0x55)
+        
+        self.TxData.append(tx)
     
     def ReadSerial(self):
                     
         self.line += self.ser.read(80)
+        
+        if(self.TxData):
+            self.ser.write(self.TxData[0])
+            self.TxData.pop(0)
         
         while (len(self.line) > 75):        
         
@@ -90,7 +100,7 @@ class DataAquisition:
             
             if(len(self.line) > 35):
                 # Check if data is amplifier data
-                if (self.data[0] == 170 and self.data[1] == 0):
+                if (self.data[0] == 170 and self.data[1] == EnumCommand.MODBUS):
                     self.data = struct.unpack ("<3B4H6H2H2HBBHB", self.line[:36])
                     if(self.data[0] == 170 and self.data[20] == 85):
                         self.Trackamplifiers[self.data[2]].SlaveNumber          = self.data[2]
@@ -116,10 +126,37 @@ class DataAquisition:
                         print ('Bad data received!\n')
                         
                     self.line = self.line[36:]
+                
+                elif (self.data[0] == 170 and self.data[1] == EnumCommand.ETHERNET_T):
+                    self.data = struct.unpack ("<3B4H6H2H2HBBHB", self.line[:36])
+                    if(self.data[0] == 170 and self.data[20] == 85):
+                        self.EthernetTarget.SlaveNumber          = self.data[2]
+                        self.EthernetTarget.HoldingReg[0]        = self.data[3]
+                        self.EthernetTarget.HoldingReg[1]        = self.data[4]
+                        self.EthernetTarget.HoldingReg[2]        = self.data[5]
+                        self.EthernetTarget.HoldingReg[3]        = self.data[6]
+                        self.EthernetTarget.InputReg[0]          = self.data[7]
+                        self.EthernetTarget.InputReg[1]          = self.data[8]
+                        self.EthernetTarget.InputReg[2]          = self.data[9]
+                        self.EthernetTarget.InputReg[3]          = self.data[10]
+                        self.EthernetTarget.InputReg[4]          = self.data[11]
+                        self.EthernetTarget.InputReg[5]          = self.data[12]
+                        self.EthernetTarget.DiagReg[0]           = self.data[13]
+                        self.EthernetTarget.DiagReg[1]           = self.data[14]                
+                        self.EthernetTarget.MbReceiveCounter     = self.data[15]
+                        self.EthernetTarget.MbSentCounter        = self.data[16]
+                        self.EthernetTarget.MbCommError          = self.data[17]
+                        self.EthernetTarget.MbExceptionCode      = self.data[18]
+                        self.EthernetTarget.SpiCommErrorCounter  = self.data[19]
+                        #print("data received for amp: " + str(self.data[1]) + "\n")
+                    else:
+                        print ('Bad data received!\n')
+                        
+                    self.line = self.line[36:]
             
             if(len(self.line) > 75):    
                 # Check if data is bootloader data
-                if (self.data[0] == 170 and self.data[1] == 1):
+                if (self.data[0] == 170 and self.data[1] == EnumCommand.BOOTLOADER):
                     self.data = struct.unpack ("<76B", self.line[:76])
                     if(self.data[0] == 170 and self.data[1] == 1 and self.data[75] == 85):
                         #print("Bootloader block received")

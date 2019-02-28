@@ -404,41 +404,41 @@ unsigned int ENABLExAMPLIFIER(void){
         return_val = true;
     }
     */
-    if (PIR2bits.TMR3IF){                                                       // Update rate 10ms
-        _Delay++;
-            
-        if (_Delay > 30){
-            _Delay = 0;
-            switch(StartupMachine){
-                case 0:
-                    MASTER_SLAVE_DATA[0].HoldingReg[1] = 0;                             // Address  = broadcast address
-                    MASTER_SLAVE_DATA[0].HoldingReg[2] = 0x8000;                        // Data     = Set AMP_ID5_SET_LAT 0x10 in TrackBackplaneSlave
-                    MASTER_SLAVE_DATA[0].HoldingReg[3] = 1;                             // Register = number to write to
-                    MASTER_SLAVE_DATA[0].HoldingReg[0] = MODE_AUTO & WRITE & HOLDINGREG & EXEC;
-                    StartupMachine = 1;
-                    break;
+    //if (PIR2bits.TMR3IF){                                                       // Update rate 10ms
+    _Delay++;
 
-                case 1:
-                    if(MASTER_SLAVE_DATA[0].InputReg[0] == OK){
-                        MASTER_SLAVE_DATA[0].HoldingReg[0] = MODE_AUTO & WRITE & HOLDINGREG & HALT; // Remove the execute command
-                        StartupMachine = 0;
-                        return_val = true;
-                    }
-                    break;
+    if (_Delay > 30){
+        _Delay = 0;
+        switch(StartupMachine){
+            case 0:
+                MASTER_SLAVE_DATA[0].HoldingReg[1] = 0;                             // Address  = broadcast address
+                MASTER_SLAVE_DATA[0].HoldingReg[2] = 0x8000;                        // Data     = Set AMP_ID5_SET_LAT 0x10 in TrackBackplaneSlave
+                MASTER_SLAVE_DATA[0].HoldingReg[3] = 1;                             // Register = number to write to
+                MASTER_SLAVE_DATA[0].HoldingReg[0] = MODE_AUTO & WRITE & HOLDINGREG & EXEC;
+                StartupMachine = 1;
+                break;
 
-                case 2:
-                    if(MASTER_SLAVE_DATA[0].InputReg[0] == IDLE){
-                        StartupMachine = 0;
-                        return_val = true;
-                    }
-                    break;
+            case 1:
+                if(MASTER_SLAVE_DATA[0].InputReg[0] == OK){
+                    MASTER_SLAVE_DATA[0].HoldingReg[0] = MODE_AUTO & WRITE & HOLDINGREG & HALT; // Remove the execute command
+                    StartupMachine = 0;
+                    return_val = true;
+                }
+                break;
 
-                default:
-                    break;
-            }
+            case 2:
+                if(MASTER_SLAVE_DATA[0].InputReg[0] == IDLE){
+                    StartupMachine = 0;
+                    return_val = true;
+                }
+                break;
+
+            default:
+                break;
         }
-        PIR2bits.TMR3IF = 0;
     }
+        //PIR2bits.TMR3IF = 0;
+    //}
     
     return (return_val);
 }
