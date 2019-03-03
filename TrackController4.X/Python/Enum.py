@@ -6,24 +6,26 @@ class EnumStateMachine:
     
     ResetAllSlaves        = 'ResetAllSlaves'
     InitTrackamplifiers   = 'InitTrackamplifiers'
+    EnableTrackamplifiers = 'EnableTrackamplifiers'
     run                   = 'run'
     
 class EnumSlaveInit:
-    SLOT1           = 0x1
-    SLOT2           = 0x2
-    SLOT3           = 0x4
-    SLOT4           = 0x8
-    SLOT5           = 0x10
-    SLOT6           = 0x20
-    SLOT7           = 0x40
-    SLOT8           = 0x80
-    SLOT9           = 0x100
-    SLOT10          = 0x200
-    TRACKBACKPLANE1 = 51
-    TRACKBACKPLANE2 = 52
-    TRACKBACKPLANE3 = 53
-    TRACKBACKPLANE4 = 54
-    TRACKBACKPLANE5 = 55
+    SLOT1             = 0x1
+    SLOT2             = 0x2
+    SLOT3             = 0x4
+    SLOT4             = 0x8
+    SLOT5             = 0x10
+    SLOT6             = 0x20
+    SLOT7             = 0x40
+    SLOT8             = 0x80
+    SLOT9             = 0x100
+    SLOT10            = 0x200
+    TRACKBACKPLANE1   = 51
+    TRACKBACKPLANE2   = 52
+    TRACKBACKPLANE3   = 53
+    TRACKBACKPLANE4   = 54
+    TRACKBACKPLANE5   = 55
+    DEFAULTMODBUSADDR = 0xAA
     
 class EnumSlaveConfig:    
     OK          = 0x02 
@@ -41,9 +43,9 @@ class EnumSlaveConfig:
     HALT        = 0b1111111111011111    
 
 class EnumCommand:
-    MODBUS      = 0x00
-    BOOTLOADER  = 0x01
-    ETHERNET_T  = 0x02
+    MODBUS      = 0xFF
+    BOOTLOADER  = 0xFE
+    ETHERNET_T  = 0xFD
     
 class EnumEthernetT:
     ResetAll    = 0xFF

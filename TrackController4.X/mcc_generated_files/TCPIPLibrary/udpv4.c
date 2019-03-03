@@ -131,6 +131,10 @@ error_msg UDP_Receive(uint16_t udpcksm) // catch all UDP packets and dispatch th
         destPort = ntohs(udpHeader.srcPort);
         udpHeader.length = ntohs(udpHeader.length);
         ret = PORT_NOT_AVAILABLE;
+        
+//        printf("udpHeader.dstPort: %u\n\r" , udpHeader.dstPort);
+//        printf("Port number reversed: %u\n\r" , destPort);
+        
         // scan the udp port handlers and find a match.
         // call the port handler callback on a match
         hptr = udp_table_getIterator();
@@ -138,9 +142,11 @@ error_msg UDP_Receive(uint16_t udpcksm) // catch all UDP packets and dispatch th
         while(hptr != NULL)
         {
             if(hptr->portNumber == udpHeader.dstPort)
-            {          
+            {
+//                printf("port matched lookup table\n\r");
                 if(udpHeader.length == IPV4_GetDatagramLength())
                 {
+//                    printf("length = ok\n\r");
                     hptr->callBack(udpHeader.length - sizeof(udpHeader));                    
                 }
                 ret = SUCCESS;

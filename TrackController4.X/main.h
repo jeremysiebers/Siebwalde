@@ -45,7 +45,8 @@ typedef struct
     
 }SLAVE_INFO;
 
-extern unsigned char UPDATExTERMINAL;
+extern uint8_t UPDATE_TERMINAL;
+extern uint8_t UPDATE_SLAVE_TOxUDP;
 
 typedef struct
 {
@@ -54,7 +55,7 @@ typedef struct
     uint16_t destinationPortNumber;    
 }udpStart_t;
 
-void UDP_DEMO_Recv(void);
+void UDP_DATA_RECV(int length);
 
 #ifdef	__cplusplus
 }

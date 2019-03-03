@@ -317,7 +317,7 @@ unsigned int ConfigureSlave(unsigned int TrackBackPlaneID, unsigned int Amplifie
             break;
 
         case 3:
-            MASTER_SLAVE_DATA[0].HoldingReg[1] = 0xAA;                          // Set address to first Trackamplifier in config mode 0xAA selected by trackbackplane
+            MASTER_SLAVE_DATA[0].HoldingReg[1] = 0xAA;                          // Set address to first Trackamplifier in config mode, default modbus address = 0xAA
             MASTER_SLAVE_DATA[0].HoldingReg[2] = TrackAmplifierId;              // Data = Set ID 
             MASTER_SLAVE_DATA[0].HoldingReg[3] = 2;                             // Register number to write to
             MASTER_SLAVE_DATA[0].HoldingReg[0] = MODE_MAN & WRITE & HOLDINGREG & EXEC;

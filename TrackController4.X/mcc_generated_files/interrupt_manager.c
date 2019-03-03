@@ -65,6 +65,9 @@ void  INTERRUPT_Initialize (void)
     // TMRI - low priority
     IPR1bits.TMR1IP = 0;    
 
+    // TMRI - low priority
+    INTCON2bits.TMR0IP = 0;    
+
     // RCI - low priority
     IPR1bits.RC1IP = 0;    
 
@@ -81,7 +84,10 @@ void interrupt INTERRUPT_InterruptManagerHigh (void)
         SS1_Check_LAT = 1;
         ProcessSpiInterrupt();
         PIR3bits.SSP2IF = 0;
-        UPDATExTERMINAL = 1;
+        UPDATE_TERMINAL = 1;
+        UPDATE_SLAVE_TOxUDP++;
+        TMR0_Reload();
+        T0CONbits.TMR0ON = 1;
         SS1_Check_LAT = 0;
     }
     else
@@ -96,6 +102,12 @@ void interrupt low_priority INTERRUPT_InterruptManagerLow (void)
     if(PIE1bits.TMR1IE == 1 && PIR1bits.TMR1IF == 1)
     {
         TMR1_ISR();
+    }
+    else if(INTCONbits.TMR0IE == 1 && INTCONbits.TMR0IF == 1)
+    {
+        T0CONbits.TMR0ON = 0;
+        UPDATE_TERMINAL = 0;
+        INTCONbits.TMR0IF = 0;
     }
     else if(PIE1bits.RC1IE == 1 && PIR1bits.RC1IF == 1)
     {
