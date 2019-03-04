@@ -16,7 +16,7 @@ class MAIN():
         while True:
             self.Amplifiers.ReadSerial()
             
-            '''
+            
             if(self.state == EnumStateMachine.ResetAllSlaves):
                 returned = self.StateMachine.RunFunction(EnumStateMachine.ResetAllSlaves)
                 if(returned == EnumStateMachine.ok):
@@ -32,7 +32,7 @@ class MAIN():
                 if(returned == EnumStateMachine.ok):
                     self.state = EnumStateMachine.run
              
-            '''
+            
             
             
             

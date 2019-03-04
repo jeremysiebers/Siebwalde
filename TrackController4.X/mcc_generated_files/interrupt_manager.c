@@ -85,7 +85,7 @@ void interrupt INTERRUPT_InterruptManagerHigh (void)
         ProcessSpiInterrupt();
         PIR3bits.SSP2IF = 0;
         UPDATE_TERMINAL = 1;
-        UPDATE_SLAVE_TOxUDP++;
+        UPDATE_SLAVE_TOxUDP = 1;
         TMR0_Reload();
         T0CONbits.TMR0ON = 1;
         SS1_Check_LAT = 0;

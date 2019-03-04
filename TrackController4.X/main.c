@@ -50,10 +50,9 @@ uint16_t SizeOfStruct = sizeof(SLAVE_INFO);
 static uint8_t DataFromSlaveSend = 0;
 bool Init_UDP = true;
 uint16_t count = 0;
-uint8_t division = 5;
+uint8_t division = 0;
 uint8_t SlaveDataTx[77];
 uint8_t *pSlaveDataSend;
-uint8_t cnt = 0;
 
 unsigned int StateMachine = 0;
 unsigned int _Delay = 0;
@@ -228,48 +227,34 @@ void main(void)
             Read_Check_LAT = 0;                        
         }
         
-        if(UPDATE_SLAVE_TOxUDP > (division - 1) && SEND_UDP_PORT == 1){
+        if(UPDATE_SLAVE_TOxUDP == 1 && SEND_UDP_PORT == 1){
             UPDATE_SLAVE_TOxUDP = 0;
-            LED1_LAT = 1;
+            LED1_LAT = 1;            
             ret = UDP_Start(udpPacket.destinationAddress, udpPacket.sourcePortNumber, udpPacket.destinationPortNumber);
             if(ret == SUCCESS)
             { 
-                LED2_LAT = 1;
-                
+                LED2_LAT = 1;                
+                SlaveDataTx[0] = HEADER;
                 if(DataFromSlaveSend == NUMBER_OF_SLAVES){
                     pSlaveDataSend = &(EthernetTarget.Header);
-                    SlaveDataTx[0] = HEADER;
                     SlaveDataTx[1] = ETHERNET_CMD;                              // send the Data Type
-                    for(cnt=2; cnt < (SizeOfStruct); cnt++){
-                        SlaveDataTx[cnt] = *pSlaveDataSend;
-                        pSlaveDataSend++;
-                    }
-                    UDP_WriteBlock(SlaveDataTx,(SizeOfStruct + 2));
-                    UDP_Send();
                 }
                 else{
                     pSlaveDataSend = &(SlaveInfo[DataFromSlaveSend].Header);
-                    SlaveDataTx[0] = HEADER;
                     SlaveDataTx[1] = MODBUS_CMD;                                // send the Data Type
-                    for(cnt=2; cnt < (SizeOfStruct * division); cnt++){
-                        SlaveDataTx[cnt] = *pSlaveDataSend;
-                        pSlaveDataSend++;
-                    }
-                    UDP_WriteBlock(SlaveDataTx,((SizeOfStruct * division) + 2));
-                    UDP_Send();
+                }                
+                for(uint8_t i=2; i < (SizeOfStruct + 2); i++){
+                    SlaveDataTx[i] = *pSlaveDataSend;
+                    pSlaveDataSend++;
                 }
-                                                                                
+                UDP_WriteBlock(SlaveDataTx,(SizeOfStruct + 2));
+                UDP_Send();
+                
                 if (InitPhase == false){                                        // When init phase is done, communicate data to all slaves
-                    
-                    if(DataFromSlaveSend == NUMBER_OF_SLAVES){
+                    DataFromSlaveSend++;   
+                    if(DataFromSlaveSend > NUMBER_OF_SLAVES){                   // Defined are 51 slaves --> 51 == Ethernet target
                         DataFromSlaveSend = 0;
-                    }
-                    else{                    
-                        DataFromSlaveSend+= division;   
-                        if(DataFromSlaveSend > (NUMBER_OF_SLAVES-division + 1)){    // Defined are 51 slaves --> + 1
-                            DataFromSlaveSend = 0;
-                        }
-                    }
+                    }                    
                 }
                 else{
                     if (DataFromSlaveSend == 0){

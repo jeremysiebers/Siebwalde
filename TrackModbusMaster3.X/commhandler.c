@@ -297,7 +297,7 @@ void SendDataToEthernet(){
         }
         dataOut[bytesWritten] = SSP1BUF;
         bytesWritten++;
-//        NOP();                                                                // give SPI slave time to process the data NOP() is 3 cycles delay ~288ns
+//        NOP();                                                                // give SPI slave time to process the data, NOP() is 3 cycles delay ~288ns
         __delay_us(1);
     }
     SS1_LAT = 1;   
