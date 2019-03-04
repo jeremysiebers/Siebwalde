@@ -70,6 +70,8 @@ typedef enum
             
     SEND_SLAVEIODATA    = 0x00,
     SEND_BOOTLOADER     = 0x01,
+    INIT_PHASE_TRUE     = 0xFC,
+    INIT_PHASE_FALSE    = 0xFD,
     RELEASE_ALL         = 0xFE,
     RESET_ALL           = 0xFF,
 };
@@ -227,9 +229,9 @@ void main(void)
             Read_Check_LAT = 0;                        
         }
         
-        if(UPDATE_SLAVE_TOxUDP == 1 && SEND_UDP_PORT == 1){
+        if((UPDATE_SLAVE_TOxUDP == 1) && (TMR0L > 25)){
             UPDATE_SLAVE_TOxUDP = 0;
-            LED1_LAT = 1;            
+            LED1_LAT = 1;  
             ret = UDP_Start(udpPacket.destinationAddress, udpPacket.sourcePortNumber, udpPacket.destinationPortNumber);
             if(ret == SUCCESS)
             { 
@@ -298,7 +300,7 @@ void UDP_DATA_RECV(int length)
 //    printf("data[8 ]: %02X\n\r"            , udpRecv.data[8 ]);
 //    printf("data[9 ]: %02X\n\r"            , udpRecv.data[9 ]);
 //    printf("data[10]: %02X\n\r"            , udpRecv.data[10]);
-//	printf("data[11]: %02X\n\r"            , udpRecv.data[11]);
+//	  printf("data[11]: %02X\n\r"            , udpRecv.data[11]);
 //    printf("data[12]: %02X\n\r"            , udpRecv.data[12]);
     
     
@@ -309,10 +311,10 @@ void UDP_DATA_RECV(int length)
             case MODBUS_CMD:
                 if(udpRecv.data[8] == FOOTER){
                     //printf("MODBUS_CMD received.\n\r");
-                    SlaveInfo[0].HoldingReg[1] = (udpRecv.data[3]<<8) + udpRecv.data[2];
-                    SlaveInfo[0].HoldingReg[2] = (udpRecv.data[5]<<8) + udpRecv.data[4];
-                    SlaveInfo[0].HoldingReg[3] = (udpRecv.data[7]<<8) + udpRecv.data[6];
-                    SlaveInfo[0].HoldingReg[0] = (udpRecv.data[1]<<8) + udpRecv.data[0];
+                    SlaveInfo[0].HoldingReg[1] = ((uint16_t)udpRecv.data[3]<<8) + udpRecv.data[2];
+                    SlaveInfo[0].HoldingReg[2] = ((uint16_t)udpRecv.data[5]<<8) + udpRecv.data[4];
+                    SlaveInfo[0].HoldingReg[3] = ((uint16_t)udpRecv.data[7]<<8) + udpRecv.data[6];
+                    SlaveInfo[0].HoldingReg[0] = ((uint16_t)udpRecv.data[1]<<8) + udpRecv.data[0];
                 }
                 break;
                 
@@ -345,6 +347,14 @@ void UDP_DATA_RECV(int length)
                         case ETH_IDLE:
                             EthernetTarget.InputReg[0] = ETH_IDLE;
                             //printf("EthernetTarget == ETH_IDLE\n\r");
+                            break;
+                            
+                        case INIT_PHASE_TRUE:
+                            InitPhase = true;
+                            break;
+                            
+                        case INIT_PHASE_FALSE:
+                            InitPhase = false;
                             break;
 
                         default :

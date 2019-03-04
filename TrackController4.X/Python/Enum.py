@@ -7,6 +7,7 @@ class EnumStateMachine:
     ResetAllSlaves        = 'ResetAllSlaves'
     InitTrackamplifiers   = 'InitTrackamplifiers'
     EnableTrackamplifiers = 'EnableTrackamplifiers'
+    CheckAmpSwVersion     = 'CheckAmpSwVersion'
     run                   = 'run'
     
 class EnumSlaveInit:
@@ -48,9 +49,11 @@ class EnumCommand:
     ETHERNET_T  = 0xFD
     
 class EnumEthernetT:
-    ResetAll    = 0xFF
-    ReleaseAll  = 0xFE
-    OK          = 0x82
-    NOK         = 0x83
-    BUSY        = 0x81
-    IDLE        = 0x80
+    ResetAll          = 0xFF
+    ReleaseAll        = 0xFE
+    INIT_PHASE_FALSE  = 0xFD
+    INIT_PHASE_TRUE   = 0xFC
+    OK                = 0x82
+    NOK               = 0x83
+    BUSY              = 0x81
+    IDLE              = 0x80

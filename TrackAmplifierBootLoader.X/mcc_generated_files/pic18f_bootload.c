@@ -157,7 +157,7 @@ bool Bootload_Required ()
 
 #info  "You may need to additional delay here between enabling weak pullups and testing the pin."
     //for (uint8_t i = 0; i != 0xFF; i++) NOP();
-    __delay_ms(500);
+    __delay_ms(1000);
 
     if (IO_PIN_ENTRY_PORT_PIN == IO_PIN_ENTRY_RUN_BL)
     {

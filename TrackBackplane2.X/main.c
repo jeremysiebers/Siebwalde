@@ -44,9 +44,9 @@ void main(void) {
     //INTERRUPT_PeripheralInterruptDisable();
     
     /* Test the onboard Led's */
-    while(Led_Disco() == false);
+    //while(Led_Disco() == false);
 
-    __delay_ms(10);
+    //__delay_ms(10);
     
     Get_ID();
     

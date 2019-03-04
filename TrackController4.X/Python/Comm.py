@@ -49,6 +49,7 @@ class DataAquisition:
         self.message_found   = False
         self.data            = []
         self.TxData          = []
+        self.UpdateTick      = False
         
         for i in range(AmountOfAmplifiers):
             self.Trackamplifiers.append(TrackAmplifier())
@@ -149,6 +150,7 @@ class DataAquisition:
                         self.EthernetTarget.MbExceptionCode      = self.data[19]
                         self.EthernetTarget.SpiCommErrorCounter  = self.data[20]
                         #print("data received for amp: " + str(self.data[1]) + "\n")
+                        self.UpdateTick = not self.UpdateTick
                     else:
                         print ('Bad data received!\n')
                         

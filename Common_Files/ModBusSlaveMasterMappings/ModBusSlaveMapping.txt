@@ -63,7 +63,8 @@
  * 
  * InputReg3, 0 - 9          	H-bridge current     	R/-		No/-			// H-bridge current A
  * 
- * InputReg5, 0 - 9          	                                           		// Spare
+ * InputReg5, 0 - 15            HEX Checksum                                    // Software version
+ *           	                                           		
  * 
  * DiagnosticReg0, 0 - 15		Messages Received		R/-		No/-			// Slave register of messages Received to Master
  *
@@ -74,7 +75,7 @@
  * 
  * HoldingReg2, 0 - 5			Amplifier ID			R/W		No/No           // Amplifier ID for Track amp 1 to 50. Backplane config modules have address 51 to 55 
  * HoldingReg2, 6				Single/Double PWM		R/W		No/No			// used in single or double sided PWM operation 0 is dual sided PWM, 1 is single sided PWM
- * HoldingReg2, 7               Request_Bootloader      R/W     No/No           // When this section of register is set to 1, a special functions writes to the last position in flash and overwrites the value 0x55. During startup the bootloader will see this value and compares it to 0x55. If no match the bootloader will keep running.
+ * HoldingReg2, 15              Reset Slave             R/W     No/No           // Software reset slave, used for invoking bootloader.
  *
  * HoldingReg3, 0 - 7           Acceleration par    	R/W     No/No			// Acceleration number 0 - 255
  * HoldingReg3, 8 - 15          Deceleration par    	R/W     No/No			// Deceleration number 0 - 255

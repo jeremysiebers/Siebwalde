@@ -376,7 +376,8 @@ unsigned char HoldingRegisterWrite[7] = {0, 0, 0, 1, 2, 0, 0};                  
                                                                                 // byte count, Register Value Hi, Register Value Lo} 
 unsigned char HoldingRegisterRead[4] = {0, 0, 0, 1};                            // {start address High, start address Low, 
                                                                                 // number of registers High, number of registers Low, 
- 
+static uint8_t AmpId = 0; 
+static uint8_t RegId = 0;
 
 void SLAVExCOMMANDxHANDLER (uint16_t State){
     
@@ -409,6 +410,13 @@ void SLAVExCOMMANDxHANDLER (uint16_t State){
                     }
                     else{
                         MASTER_SLAVE_DATA[0].InputReg[0] = BUSY;
+                        InputRegistersRead[3]  = MASTER_SLAVE_DATA[0].HoldingReg[2];    //2  // number of registers Low
+                        InputRegistersRead[2]  = 0;//MASTER_SLAVE_DATA[0].HoldingReg[2]>>8; //0  // number of registers High
+                        InputRegistersRead[1]  = MASTER_SLAVE_DATA[0].HoldingReg[3];    //4  // start address Low
+                        InputRegistersRead[0]  = 0;//MASTER_SLAVE_DATA[0].HoldingReg[3]>>8; //0  // start address High
+                        SendPetitModbus(MASTER_SLAVE_DATA[0].HoldingReg[1], PETITMODBUS_READ_INPUT_REGISTERS, InputRegistersRead, 4);  
+                        AmpId = MASTER_SLAVE_DATA[0].HoldingReg[1];
+                        RegId = MASTER_SLAVE_DATA[0].HoldingReg[3];
                         CommandMachine = 20;
                     }
                 }
@@ -432,7 +440,14 @@ void SLAVExCOMMANDxHANDLER (uint16_t State){
             }
             break;
     //----------------------------------------------------------------------------------------------------------------------//                              
-        
+        case 20:
+            if(ProcessSlaveCommunication() == true){//              |--address of slave that responded--|---input register number that was read-----|
+                MASTER_SLAVE_DATA[0].InputReg[1] = MASTER_SLAVE_DATA[AmpId].InputReg[RegId];
+                AmpId = 0;
+                RegId = 0;
+                CommandMachine = 40;
+            }
+            break;
     //----------------------------------------------------------------------------------------------------------------------//
 
     //----------------------------------------------------------------------------------------------------------------------//
@@ -450,6 +465,7 @@ void SLAVExCOMMANDxHANDLER (uint16_t State){
             if ((MASTER_SLAVE_DATA[0].HoldingReg[0] & EXEC) == 0){              // Remove execute command before returning
                 CommandMachine = 0; 
                 MASTER_SLAVE_DATA[0].InputReg[0] = IDLE;                        // reset status register for readback of execution towards ethernet target
+                MASTER_SLAVE_DATA[0].InputReg[1] = 0;                           // reset input register read value
             }
             if(State == true){
                 ProcessSlave++;                                                 // If the master is handling broadcast messages and processing through these states, a ProcessSlave++ is required to ensure the nextslave is handled
