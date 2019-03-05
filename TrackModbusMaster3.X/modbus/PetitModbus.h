@@ -42,12 +42,12 @@ extern volatile unsigned int LED_RX;
 
 typedef enum
 {
-    SLAVE_DATA_IDLE = 0,
-    SLAVE_DATA_BUSY = 1,
-    SLAVE_DATA_OK = 2,
-    SLAVE_DATA_NOK = 3,
-    SLAVE_DATA_TIMEOUT = 4,
-    SLAVE_DATA_EXCEPTION = 5
+    SLAVE_DATA_IDLE = 0x00,
+    SLAVE_DATA_BUSY = 0x01,
+    SLAVE_DATA_OK = 0x02,
+    SLAVE_DATA_NOK = 0x03,
+    SLAVE_DATA_TIMEOUT = 0x04,
+    SLAVE_DATA_EXCEPTION = 0x05
 }SLAVE_DATA;
 
 typedef struct
@@ -67,7 +67,7 @@ typedef struct
 }SLAVE_INFO;
 
 // Main Functions
-extern void             InitPetitModbus(SLAVE_INFO *location);
+extern void             InitPetitModbus(SLAVE_INFO *location, SLAVE_INFO *Dump, unsigned char AmountOfSlaves);
 extern void             ProcessPetitModbus(void);
 extern unsigned char    SendPetitModbus(unsigned char Address, unsigned char Function, unsigned char *DataBuf, unsigned short DataLen);
 

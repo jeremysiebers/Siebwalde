@@ -66,7 +66,7 @@ void main(void) {
                 if (ID_PORT == 0){                                              // When ID_PORT is pulled low the amplifier will be configured
                     Startup_Machine = 1;
                 }
-                //Led_Blink();
+				LED_ERR_LAT     = 1;
                 break;
                 
             case 1 :

@@ -10,7 +10,9 @@
 
 #define PETITMODBUS_BROADCAST_ADDRESS           0
 
-static SLAVE_INFO *MASTER_SLAVE_DATA = 0;                                       // Holds the address were the received slave data is stored
+static SLAVE_INFO *MASTER_SLAVE_DATA;                                           // Holds the address were the received slave data is stored
+static SLAVE_INFO *DUMP_SLAVE_DATA;                                             // When data is read on a default high modbus address outside of defined number of slaves
+static unsigned char SlaveAmount = 0;
 
 #ifdef  CRC_HW_REVERSE
 uint16_t CRC_ReverseValue(uint16_t crc);                                        // When using HW CRC the result must be reversed after the last calculation
@@ -448,9 +450,11 @@ void ProcessPetitModbus(void)
  *                        a parser and init for it must be realized (offset). 
  */
 
-void InitPetitModbus(SLAVE_INFO *location)                                  
+void InitPetitModbus(SLAVE_INFO *location, SLAVE_INFO *Dump, unsigned char AmountOfSlaves)                                  
 {   
-    MASTER_SLAVE_DATA  =  location;    
+    MASTER_SLAVE_DATA  =  location; 
+    DUMP_SLAVE_DATA    = Dump;
+    SlaveAmount        = AmountOfSlaves;
     PetitModBus_UART_Initialise();
     PetitModBus_TIMER_Initialise();
 }
@@ -495,7 +499,12 @@ unsigned char SendPetitModbus(unsigned char Address, unsigned char Function, uns
     unsigned char return_val = 0;
     
     if(Address != PETITMODBUS_BROADCAST_ADDRESS){
-        MASTER_SLAVE_DATA[Address].MbCommError = SLAVE_DATA_BUSY;                   // When sending a command to a slave, set the MbCommError register to busy. When broadcast do not set.
+        if(Address > SlaveAmount){
+            DUMP_SLAVE_DATA[0].MbCommError = SLAVE_DATA_BUSY;
+        }
+        else{
+            MASTER_SLAVE_DATA[Address].MbCommError = SLAVE_DATA_BUSY;           // When sending a command to a slave, set the MbCommError register to busy. When broadcast do not set.
+        }
     }
     
     // Initialize the output buffer. The first byte in the buffer says how many registers we have read
@@ -510,9 +519,13 @@ unsigned char SendPetitModbus(unsigned char Address, unsigned char Function, uns
     return_val = PetitSendMessage();
     
     if (return_val){                                                            // a message has been sent
-        MASTER_SLAVE_DATA[Address].MbSentCounter += 1;
-    }
-    
+        if(Petit_Rx_Data.Address > SlaveAmount){
+            DUMP_SLAVE_DATA[0].MbSentCounter += 1;
+        }
+        else{
+            MASTER_SLAVE_DATA[Address].MbSentCounter += 1;
+        }        
+    }    
     return (return_val);
 }
 
@@ -571,7 +584,9 @@ void HandlePetitModbusReadInputRegistersSlaveReadback(void)
     unsigned int    Petit_NumberOfRegisters        = 0;
     unsigned int    Petit_i                        = 0;
     unsigned int    BufReadIndex                   = 0;
-    unsigned int    RegData                        = 0;
+    unsigned int    RegData                        = 0;  
+    
+    //dataIn  = &(MASTER_SLAVE_DATA[DataFromSlave].Header);
     
     Petit_StartAddress = ((unsigned int) (Petit_Tx_Data.DataBuf[0]) << 8) + (unsigned int) (Petit_Tx_Data.DataBuf[1]);
     Petit_NumberOfRegisters = ((unsigned int) (Petit_Tx_Data.DataBuf[2]) << 8) + (unsigned int) (Petit_Tx_Data.DataBuf[3]);
@@ -580,21 +595,35 @@ void HandlePetitModbusReadInputRegistersSlaveReadback(void)
     if(Petit_Tx_Data.Address == Petit_Rx_Data.Address){                         // Function is already checked, but who did send the message
         if(Petit_NumberOfRegistersBytes == Petit_Rx_Data.DataBuf[0]){           // Check if the amount of data sent back is equal to the requested amount of registers sent
             
-            //Petit_NumberOfRegisters += 1;                                       // in order to let the FOR loop process all registers that are been read
             BufReadIndex = 0;
             for (Petit_i = 0; Petit_i < Petit_NumberOfRegisters; Petit_i++)
             {
                 RegData = ((unsigned int) (Petit_Rx_Data.DataBuf[BufReadIndex + 1]) << 8) + (unsigned int) (Petit_Rx_Data.DataBuf[BufReadIndex + 2]);
-                MASTER_SLAVE_DATA[Petit_Tx_Data.Address].InputReg[Petit_StartAddress] = RegData;                        
+                if(Petit_Rx_Data.Address > SlaveAmount){
+                    DUMP_SLAVE_DATA[0].InputReg[Petit_StartAddress] = RegData;
+                }
+                else{ MASTER_SLAVE_DATA[Petit_Tx_Data.Address].InputReg[Petit_StartAddress] = RegData; }
                 Petit_StartAddress += 1;                                        // point to the next register to write
                 BufReadIndex += 2;                                              // jump to the next char pair for the next register read from buffer (2 bytes))
             }
-            MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbCommError = SLAVE_DATA_OK;
-            MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbReceiveCounter += 1;
+            if(Petit_Rx_Data.Address > SlaveAmount){
+                DUMP_SLAVE_DATA[0].MbCommError = SLAVE_DATA_OK;
+                DUMP_SLAVE_DATA[0].MbReceiveCounter += 1;
+            }
+            else{
+                MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbCommError = SLAVE_DATA_OK;
+                MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbReceiveCounter += 1;
+            }
         }
     }
     else{
-        MASTER_SLAVE_DATA[Petit_Tx_Data.Address].MbCommError = SLAVE_DATA_NOK;    // the address send did not respond, so set the NOK to that address
+        if(Petit_Rx_Data.Address > SlaveAmount){
+            DUMP_SLAVE_DATA[0].MbCommError = SLAVE_DATA_NOK;
+        }
+        else{
+            MASTER_SLAVE_DATA[Petit_Tx_Data.Address].MbCommError = SLAVE_DATA_NOK;    // the address send did not respond, so set the NOK to that address
+        }
+        
     }
     Petit_Tx_State =  PETIT_RXTX_IDLE;
 }

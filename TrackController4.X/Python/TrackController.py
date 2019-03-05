@@ -24,7 +24,7 @@ class MAIN():
                 self.Amplifiers.UpdateTick = False
                 self.UpdateTickCount += 1
                 
-            if(self.UpdateTickCount > 10):
+            if(self.UpdateTickCount > 0):
                 self.UpdateTickCount = 0                
                 
                 ######################

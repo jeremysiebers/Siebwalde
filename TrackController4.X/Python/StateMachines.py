@@ -151,6 +151,7 @@ class State:
                     print("RunInitSlave --> TRACKBACKPLANE5 finished.")
                     self.RunInitSlave = 0
                     self.ShiftSlot = 0
+                    self.ProgramSlave = 1
                     return EnumStateMachine.ok
             
             elif(self.ConfigureSlave(EnumSlaveInit.TRACKBACKPLANE5, (EnumSlaveInit.SLOT1 << self.ShiftSlot), self.ProgramSlave, False) == EnumStateMachine.ok):
@@ -405,6 +406,7 @@ class State:
                 print("AmpSwCheck --> TRACKBACKPLANE5 finished.")
                 self.AmpSwCheck = 0
                 self.ShiftSlot = 0
+                self.ProgramSlave = 1
                 return EnumStateMachine.ok
             
             elif(self.SwVersionReadSlave(EnumSlaveInit.TRACKBACKPLANE5, (EnumSlaveInit.SLOT1 << self.ShiftSlot), self.ProgramSlave, False) == EnumStateMachine.ok):
@@ -476,7 +478,7 @@ class State:
         if(self.RunSwSlaveConfig == 4):
             if(self.Amplifiers.Trackamplifiers[0].InputReg[0] == EnumSlaveConfig.OK):
                 self.TrackAmpUpateList.append([TrackAmplifierId,self.Amplifiers.Trackamplifiers[0].InputReg[1]])
-                print("RunSwSlaveConfig==6 --> TrackAmp " + str(TrackAmplifierId) + " has checksum 0x" + str(self.Amplifiers.Trackamplifiers[0].InputReg[1]))
+                print("RunSwSlaveConfig==6 --> TrackAmp " + str(TrackAmplifierId) + " has checksum " + str(hex(self.Amplifiers.Trackamplifiers[0].InputReg[1])))
                 print("RunSwSlaveConfig==4 --> EnumSlaveConfig.OK")
                 self.ModbusMaster.HoldingReg[0] = EnumSlaveConfig.MODE_MAN & EnumSlaveConfig.WRITE & EnumSlaveConfig.HOLDINGREG & EnumSlaveConfig.HALT
                 self.Amplifiers.WriteSerial(EnumCommand.MODBUS, self.ModbusMaster)

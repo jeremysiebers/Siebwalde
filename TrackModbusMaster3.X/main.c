@@ -18,6 +18,7 @@
 /*----------------------------------------------------------------------------*/
 
 static SLAVE_INFO         SlaveInfo[NUMBER_OF_SLAVES];                          // Array of structs holding the data of all the slaves connected  
+static SLAVE_INFO         SlaveDump[1];
 
 /*----------------------------------------------------------------------------*/
 
@@ -63,8 +64,8 @@ void main(void)
         SlaveInfo[i].Footer = 0x55;
     }
     
-    InitPetitModbus(SlaveInfo);                                                 // Pass address of array of struct for data storage
-    InitSlaveCommunication(SlaveInfo);                                          // Pass address of array of struct for data storage
+    InitPetitModbus(SlaveInfo, SlaveDump, (NUMBER_OF_SLAVES + 5));                    // Pass address of array of struct for data storage
+    InitSlaveCommunication(SlaveInfo, SlaveDump);                                          // Pass address of array of struct for data storage
     TX_ENA_LAT = 1;                                                             // Enable TX, master TX is always enabled.
         
     LED_RUN_LAT = 1;

@@ -16,7 +16,7 @@
 extern "C" {
 #endif /* __cplusplus */
     
-extern void             InitSlaveCommunication(SLAVE_INFO *location);
+extern void             InitSlaveCommunication(SLAVE_INFO *location, SLAVE_INFO *Dump);
 extern void             ProcessNextSlave(void);
 extern unsigned int     ProcessSlaveCommunication();
 extern void             SendDataToEthernet(void);

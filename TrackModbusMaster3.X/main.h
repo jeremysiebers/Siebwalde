@@ -14,8 +14,8 @@
 extern "C" {
 #endif
 
-#define True 1
-#define False 0
+//#define True 1
+//#define False 0
     
 #define NUMBER_OF_SLAVES 51                                                     // 0 is for the master self. 50 Track slaves => 51  
 

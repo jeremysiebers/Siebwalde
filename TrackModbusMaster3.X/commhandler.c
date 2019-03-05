@@ -31,13 +31,16 @@ void             SLAVExCOMMANDxHANDLER(uint16_t State);
  *  Notes      :
  */
 /*#--------------------------------------------------------------------------#*/
-static SLAVE_INFO   *MASTER_SLAVE_DATA = 0;                                     // Holds the address were the received slave data is stored
+static SLAVE_INFO   *MASTER_SLAVE_DATA;                                         // Holds the address were the received slave data is stored
+static SLAVE_INFO   *DUMP_SLAVE_DATA;
 static SLAVE_INFO   SlaveInfoReadMask;                                          // Read mask for slave data from EhternetTarget
 unsigned char       *pSlaveDataReceived, *pSlaveInfoReadMask;
 
-void InitSlaveCommunication(SLAVE_INFO *location)                                  
-{   
+void InitSlaveCommunication(SLAVE_INFO *location, SLAVE_INFO *Dump)                                  
+{ 
+    DUMP_SLAVE_DATA    =  Dump; 
     MASTER_SLAVE_DATA  =  location;
+    
     SlaveInfoReadMask.Header           = 0x00;
     SlaveInfoReadMask.SlaveNumber      = 0x00;                                  // Mask for data write to local MASTER_SLAVE_DATA from EthernetTarget
     SlaveInfoReadMask.HoldingReg[0]    = 0xFFFF;                                // only new setpoints/settings are allowed to be read which need to be written to modbus slaves
@@ -375,8 +378,7 @@ unsigned char HoldingRegisterWrite[7] = {0, 0, 0, 1, 2, 0, 0};                  
                                                                                 // number of registers High, number of registers Low, 
                                                                                 // byte count, Register Value Hi, Register Value Lo} 
 unsigned char HoldingRegisterRead[4] = {0, 0, 0, 1};                            // {start address High, start address Low, 
-                                                                                // number of registers High, number of registers Low, 
-static uint8_t AmpId = 0; 
+                                                                                // number of registers High, number of registers Low,  
 static uint8_t RegId = 0;
 
 void SLAVExCOMMANDxHANDLER (uint16_t State){
@@ -415,7 +417,6 @@ void SLAVExCOMMANDxHANDLER (uint16_t State){
                         InputRegistersRead[1]  = MASTER_SLAVE_DATA[0].HoldingReg[3];    //4  // start address Low
                         InputRegistersRead[0]  = 0;//MASTER_SLAVE_DATA[0].HoldingReg[3]>>8; //0  // start address High
                         SendPetitModbus(MASTER_SLAVE_DATA[0].HoldingReg[1], PETITMODBUS_READ_INPUT_REGISTERS, InputRegistersRead, 4);  
-                        AmpId = MASTER_SLAVE_DATA[0].HoldingReg[1];
                         RegId = MASTER_SLAVE_DATA[0].HoldingReg[3];
                         CommandMachine = 20;
                     }
@@ -441,10 +442,10 @@ void SLAVExCOMMANDxHANDLER (uint16_t State){
             break;
     //----------------------------------------------------------------------------------------------------------------------//                              
         case 20:
-            if(ProcessSlaveCommunication() == true){//              |--address of slave that responded--|---input register number that was read-----|
-                MASTER_SLAVE_DATA[0].InputReg[1] = MASTER_SLAVE_DATA[AmpId].InputReg[RegId];
-                AmpId = 0;
+            if(DUMP_SLAVE_DATA[0].MbCommError != SLAVE_DATA_BUSY){
+                MASTER_SLAVE_DATA[0].InputReg[1] = DUMP_SLAVE_DATA[0].InputReg[RegId];
                 RegId = 0;
+                DUMP_SLAVE_DATA[0].MbCommError = SLAVE_DATA_IDLE;
                 CommandMachine = 40;
             }
             break;
