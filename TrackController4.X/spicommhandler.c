@@ -141,6 +141,38 @@ void INITxSPIxCOMMxHANDLER(SLAVE_INFO *location)
  *  Notes      :
  */
 /*#--------------------------------------------------------------------------#*/
+void RESETxSPIxCOMMxHANDLER(){
+    
+    DATAxCOUNTxRECEIVED         =   0;
+    DATAxCOUNTxSEND             =   0;
+    DATAxREADY                  =   0;
+    
+    DataFromSlaveSend           =   0;
+    SpiSlaveCommErrorCounter    =   0;
+    
+    MASTER_SLAVE_DATA[0].HoldingReg[0] = 0;
+    MASTER_SLAVE_DATA[0].HoldingReg[1] = 0;
+    MASTER_SLAVE_DATA[0].HoldingReg[2] = 0;
+    MASTER_SLAVE_DATA[0].HoldingReg[3] = 0;
+    
+}
+
+/*#--------------------------------------------------------------------------#*/
+/*  Description: ProcessSpiData()
+ *
+ *  Input(s)   : 
+ *
+ *  Output(s)  :
+ *
+ *  Returns    :
+ *
+ *  Pre.Cond.  :
+ *
+ *  Post.Cond. :
+ *
+ *  Notes      :
+ */
+/*#--------------------------------------------------------------------------#*/
 
 void ProcessSpiInterrupt(){
     //SS1_Check_LAT = 1; 

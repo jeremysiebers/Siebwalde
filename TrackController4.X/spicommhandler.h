@@ -18,6 +18,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 extern void INITxSPIxCOMMxHANDLER(SLAVE_INFO *location);
+extern void RESETxSPIxCOMMxHANDLER(void);
 extern void ProcessSpiData(void);
 extern void ProcessSpiInterrupt();
 extern void CheckSpiStart(void);

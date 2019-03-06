@@ -53,9 +53,9 @@ void main(void)
     //INTERRUPT_PeripheralInterruptDisable();
 
     /* Test the onboard Led's */
-    while(Led_Disco() == false);
+    //while(Led_Disco() == false);
     
-    __delay_ms(100);                                                             // Wait longer then the slaves (1000ms)
+    //__delay_ms(2000);                                                           // Wait longer then the slaves (1000ms)
     
     // Initialize the SLAVE_INFO struct with slave numbers
     for (char i = 0; i <NUMBER_OF_SLAVES; i++){
@@ -80,7 +80,7 @@ void main(void)
     TMR2_Start();
     
     /* Wait till all slave data is send to SPI master from SPI slave */
-    __delay_ms(1000);
+    //__delay_ms(1000);
     
     while(1)
     {

@@ -52,7 +52,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>PICkit3PlatformTool</platformTool>
         <languageToolchain>XC8</languageToolchain>
-        <languageToolchainVersion>1.44</languageToolchainVersion>
+        <languageToolchainVersion>2.05</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <packs>
@@ -197,8 +197,8 @@
       </PICkit3PlatformTool>
       <XC8-config-global>
         <property key="advanced-elf" value="true"/>
-        <property key="gcc-opt-driver-new" value="false"/>
-        <property key="gcc-opt-std" value="--std=c89"/>
+        <property key="gcc-opt-driver-new" value="true"/>
+        <property key="gcc-opt-std" value="-std=c90"/>
         <property key="gcc-output-file-format" value="dwarf-3"/>
         <property key="omit-pack-options" value="false"/>
         <property key="output-file-format" value="-mcof,+elf"/>
@@ -217,7 +217,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>PICkit3PlatformTool</platformTool>
         <languageToolchain>XC8</languageToolchain>
-        <languageToolchainVersion>1.44</languageToolchainVersion>
+        <languageToolchainVersion>2.05</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <packs>
@@ -362,8 +362,8 @@
       </PICkit3PlatformTool>
       <XC8-config-global>
         <property key="advanced-elf" value="true"/>
-        <property key="gcc-opt-driver-new" value="false"/>
-        <property key="gcc-opt-std" value="--std=c89"/>
+        <property key="gcc-opt-driver-new" value="true"/>
+        <property key="gcc-opt-std" value="-std=c90"/>
         <property key="gcc-output-file-format" value="dwarf-3"/>
         <property key="omit-pack-options" value="false"/>
         <property key="output-file-format" value="-mcof,+elf"/>

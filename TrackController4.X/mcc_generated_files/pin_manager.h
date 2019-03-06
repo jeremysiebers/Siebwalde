@@ -133,6 +133,17 @@
 #define LED2_SetDigitalInput()    do { TRISBbits.TRISB3 = 1; } while(0)
 #define LED2_SetDigitalOutput()   do { TRISBbits.TRISB3 = 0; } while(0)
 
+// get/set LED3 aliases
+#define LED3_TRIS                 TRISBbits.TRISB4
+#define LED3_LAT                  LATBbits.LATB4
+#define LED3_PORT                 PORTBbits.RB4
+#define LED3_SetHigh()            do { LATBbits.LATB4 = 1; } while(0)
+#define LED3_SetLow()             do { LATBbits.LATB4 = 0; } while(0)
+#define LED3_Toggle()             do { LATBbits.LATB4 = ~LATBbits.LATB4; } while(0)
+#define LED3_GetValue()           PORTBbits.RB4
+#define LED3_SetDigitalInput()    do { TRISBbits.TRISB4 = 1; } while(0)
+#define LED3_SetDigitalOutput()   do { TRISBbits.TRISB4 = 0; } while(0)
+
 // get/set SEND_UDP aliases
 #define SEND_UDP_TRIS                 TRISBbits.TRISB7
 #define SEND_UDP_LAT                  LATBbits.LATB7

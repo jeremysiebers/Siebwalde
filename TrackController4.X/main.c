@@ -177,6 +177,7 @@ void main(void)
 
     //TMR0_StartTimer();
     SEND_UDP_SetDigitalInput();
+    LED3_SetDigitalOutput();
 /*----------------------------------------------------------------------------*/
     
     while (1)
@@ -197,8 +198,8 @@ void main(void)
                 Network_Manage();
                 Read_Check_LAT = 0;
 //                if(DHCP_BOUND()){
-                    ModbusReset_LAT = 0;                                                        // as last release the ModbusMaster.
-                    ModbusReset_SetDigitalOutput();                                             // set the Pin direction here to output to avoid power-on reset pulses to slaves!
+                    ModbusReset_LAT = 0;                                        // as last release the ModbusMaster.
+                    ModbusReset_SetDigitalOutput();                             // set the Pin direction here to output to avoid power-on reset pulses to slaves!
                     StateMachine = 4;
 //                }
                 break;
@@ -302,8 +303,10 @@ typedef struct
 }udpDemoRecv_t;
 
 void UDP_DATA_RECV(int length)
-{
+{    
     udpDemoRecv_t udpRecv;
+    
+    LED3_LAT = 1;
     
     UDP_ReadBlock(&udpRecv,sizeof(udpDemoRecv_t));
     
@@ -343,12 +346,15 @@ void UDP_DATA_RECV(int length)
                     switch(udpRecv.data[0]){
                         case RESET_ALL:
                             //printf("Reset All slaves...\n\r");
-                            RESET();
-//                            ModbusReset_LAT = 1;
-//                            __delay_ms(10);
-//                            ModbusReset_LAT = 0;
-//                            //__delay_ms(4000);
-//                            EthernetTarget.InputReg[0] = ETH_OK;
+//                            RESET();
+                            InitPhase = true;
+                            DataFromSlaveSend = 0;
+                            RESETxSPIxCOMMxHANDLER();
+                            ModbusReset_LAT = 1;
+                            __delay_us(1000);
+                            ModbusReset_LAT = 0;
+                            //__delay_ms(4000);
+                            EthernetTarget.InputReg[0] = ETH_OK;
                             break;
 
                         case RELEASE_ALL:
@@ -391,4 +397,5 @@ void UDP_DATA_RECV(int length)
                 break;
         }
     }
+    LED3_LAT = 0;
 }

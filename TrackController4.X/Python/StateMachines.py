@@ -37,9 +37,9 @@ class State:
         if(self.RunResetAll == 0):
             self.Amplifiers.WriteSerial(EnumCommand.ETHERNET_T, EnumEthernetT.ResetAll)
             self.RunResetAll += 1
-            print("ResetAllSlaves --> reset all slaves sent... --> sleep 5 seconds")
-            time.sleep(5)
-            return EnumStateMachine.ok
+            print("ResetAllSlaves --> reset all slaves sent... --> sleep 3 seconds")
+            time.sleep(3)
+            return EnumStateMachine.busy
 
         '''
         case 1

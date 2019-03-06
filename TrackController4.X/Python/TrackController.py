@@ -17,6 +17,7 @@ class MAIN():
         while True:
             self.Amplifiers.ReadSerial()
             
+            '''
             ##################################
             ## Wait till all I/O is updated ##
             ##################################            
@@ -26,38 +27,38 @@ class MAIN():
                 
             if(self.UpdateTickCount > 0):
                 self.UpdateTickCount = 0                
-                
-                ######################
-                ## Reset the slaves ##
-                ######################
-                if(self.state == EnumStateMachine.ResetAllSlaves):
-                    returned = self.StateMachine.RunFunction(EnumStateMachine.ResetAllSlaves)
-                    if(returned == EnumStateMachine.ok):
-                        self.state = EnumStateMachine.CheckAmpSwVersion
-                
-                ######################
-                ## Check SW version ##
-                ######################        
-                elif(self.state == EnumStateMachine.CheckAmpSwVersion):
-                    returned = self.StateMachine.RunFunction(EnumStateMachine.CheckAmpSwVersion)
-                    if(returned == EnumStateMachine.ok):
-                        self.state = EnumStateMachine.InitTrackamplifiers
-                
-                ######################
-                ## Init  the slaves ##
-                ######################
-                elif(self.state == EnumStateMachine.InitTrackamplifiers):
-                    returned = self.StateMachine.RunFunction(EnumStateMachine.InitTrackamplifiers)
-                    if(returned == EnumStateMachine.ok):
-                        self.state = EnumStateMachine.EnableTrackamplifiers
-                
-                #######################
-                ## Enable the slaves ##
-                #######################
-                elif(self.state == EnumStateMachine.EnableTrackamplifiers):
-                    returned = self.StateMachine.RunFunction(EnumStateMachine.EnableTrackamplifiers)
-                    if(returned == EnumStateMachine.ok):
-                        self.state = EnumStateMachine.run
+            '''    
+            ######################
+            ## Reset the slaves ##
+            ######################
+            if(self.state == EnumStateMachine.ResetAllSlaves):
+                returned = self.StateMachine.RunFunction(EnumStateMachine.ResetAllSlaves)
+                if(returned == EnumStateMachine.ok):
+                    self.state = EnumStateMachine.CheckAmpSwVersion
+            
+            ######################
+            ## Check SW version ##
+            ######################        
+            elif(self.state == EnumStateMachine.CheckAmpSwVersion):
+                returned = self.StateMachine.RunFunction(EnumStateMachine.CheckAmpSwVersion)
+                if(returned == EnumStateMachine.ok):
+                    self.state = EnumStateMachine.InitTrackamplifiers
+            
+            ######################
+            ## Init  the slaves ##
+            ######################
+            elif(self.state == EnumStateMachine.InitTrackamplifiers):
+                returned = self.StateMachine.RunFunction(EnumStateMachine.InitTrackamplifiers)
+                if(returned == EnumStateMachine.ok):
+                    self.state = EnumStateMachine.EnableTrackamplifiers
+            
+            #######################
+            ## Enable the slaves ##
+            #######################
+            elif(self.state == EnumStateMachine.EnableTrackamplifiers):
+                returned = self.StateMachine.RunFunction(EnumStateMachine.EnableTrackamplifiers)
+                if(returned == EnumStateMachine.ok):
+                    self.state = EnumStateMachine.run
              
             
             
