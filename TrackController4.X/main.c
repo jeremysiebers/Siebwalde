@@ -51,7 +51,7 @@ static uint8_t DataFromSlaveSend = 0;
 bool Init_UDP = true;
 uint16_t count = 0;
 uint8_t division = 0;
-uint8_t SlaveDataTx[77];
+uint8_t SlaveDataTx[2] = {HEADER, 0};
 uint8_t *pSlaveDataSend;
 
 unsigned int StateMachine = 0;
@@ -115,11 +115,8 @@ void main(void)
     // If using interrupts in PIC Mid-Range Compatibility Mode you need to enable the Global and Peripheral Interrupts
     // Use the following macros to:
 
-    // Enable the Global Interrupts
-    INTERRUPT_GlobalInterruptEnable();
-
-    // Disable the Global Interrupts
-    //INTERRUPT_GlobalInterruptDisable();
+    INTERRUPT_GlobalInterruptHighEnable();
+    INTERRUPT_GlobalInterruptLowEnable();
 
     // Disable high priority global interrupts
     //INTERRUPT_GlobalInterruptHighDisable();
@@ -229,13 +226,14 @@ void main(void)
             Read_Check_LAT = 0;                        
         }
         
-        if((UPDATE_SLAVE_TOxUDP == 1) && (TMR0L > 25)){
+        if((UPDATE_SLAVE_TOxUDP == 1) && (TMR0L > 50)){
             UPDATE_SLAVE_TOxUDP = 0;
             LED1_LAT = 1;  
             ret = UDP_Start(udpPacket.destinationAddress, udpPacket.sourcePortNumber, udpPacket.destinationPortNumber);
             if(ret == SUCCESS)
             { 
-                LED2_LAT = 1;                
+                LED2_LAT = 1;
+                /*
                 SlaveDataTx[0] = HEADER;
                 if(DataFromSlaveSend == NUMBER_OF_SLAVES){
                     pSlaveDataSend = &(EthernetTarget.Header);
@@ -250,6 +248,20 @@ void main(void)
                     pSlaveDataSend++;
                 }
                 UDP_WriteBlock(SlaveDataTx,(SizeOfStruct + 2));
+                UDP_Send();
+                 */
+                if(DataFromSlaveSend == NUMBER_OF_SLAVES){
+                    pSlaveDataSend = &(EthernetTarget.Header);
+                    SlaveDataTx[1] = ETHERNET_CMD;                              // send the Data Type
+                    UDP_WriteBlock(SlaveDataTx, 2);
+                    UDP_WriteBlock(pSlaveDataSend, SizeOfStruct);
+                }
+                else{
+                    pSlaveDataSend = &(SlaveInfo[DataFromSlaveSend].Header);
+                    SlaveDataTx[1] = MODBUS_CMD;                                // send the Data Type
+                    UDP_WriteBlock(SlaveDataTx, 2);
+                    UDP_WriteBlock(pSlaveDataSend, SizeOfStruct);
+                }
                 UDP_Send();
                 
                 if (InitPhase == false){                                        // When init phase is done, communicate data to all slaves
@@ -267,6 +279,14 @@ void main(void)
                     }            
                 }
                 LED2_LAT = 0;
+            }
+            else{
+                printf("ret: %02X\n\r", ret);
+                if(ret == BUFFER_BUSY){
+                    printf("Flush and reset.");
+                    UDP_FlushTXPackets();
+                    UDP_FlushRxdPacket(); 
+                }                
             }
             LED1_LAT = 0;
             //UPDATE_TERMINAL     = 0;

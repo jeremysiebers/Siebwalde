@@ -62,17 +62,17 @@ void  INTERRUPT_Initialize (void)
     IPR3bits.SSP2IP = 1;
 
 
-    // TMRI - low priority
-    IPR1bits.TMR1IP = 0;    
-
-    // TMRI - low priority
-    INTCON2bits.TMR0IP = 0;    
+    // TXI - low priority
+    IPR1bits.TX1IP = 0;    
 
     // RCI - low priority
     IPR1bits.RC1IP = 0;    
 
-    // TXI - low priority
-    IPR1bits.TX1IP = 0;    
+    // TMRI - low priority
+    INTCON2bits.TMR0IP = 0;    
+
+    // TMRI - low priority
+    IPR1bits.TMR1IP = 0;    
 
 }
 

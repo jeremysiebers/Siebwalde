@@ -10,7 +10,6 @@
         <logicalFolder name="TCPIPLibrary"
                        displayName="TCPIPLibrary"
                        projectFiles="true">
-          <itemPath>mcc_generated_files/TCPIPLibrary/icmp.h</itemPath>
           <itemPath>mcc_generated_files/TCPIPLibrary/log_syslog.h</itemPath>
           <itemPath>mcc_generated_files/TCPIPLibrary/ip_database.h</itemPath>
           <itemPath>mcc_generated_files/TCPIPLibrary/lfsr.h</itemPath>
@@ -54,7 +53,6 @@
                        projectFiles="true">
           <itemPath>mcc_generated_files/TCPIPLibrary/log_syslog.c</itemPath>
           <itemPath>mcc_generated_files/TCPIPLibrary/ip_database.c</itemPath>
-          <itemPath>mcc_generated_files/TCPIPLibrary/icmp.c</itemPath>
           <itemPath>mcc_generated_files/TCPIPLibrary/lfsr.c</itemPath>
           <itemPath>mcc_generated_files/TCPIPLibrary/network.c</itemPath>
           <itemPath>mcc_generated_files/TCPIPLibrary/arpv4.c</itemPath>
@@ -98,7 +96,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>PICkit3PlatformTool</platformTool>
         <languageToolchain>XC8</languageToolchain>
-        <languageToolchainVersion>1.44</languageToolchainVersion>
+        <languageToolchainVersion>1.45</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <packs>
@@ -254,7 +252,6 @@
                   value="Press to browse for a specific firmware version"/>
         <property key="ToolFirmwareOption.UseLatestFirmware" value="true"/>
         <property key="debugoptions.useswbreakpoints" value="false"/>
-        <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="memories.aux" value="false"/>
         <property key="memories.bootflash" value="true"/>

@@ -1,5 +1,5 @@
 /**
-  Generated Interrupt Manager Header File
+  Generated Interrupt Manager Source File
 
   @Company:
     Microchip Technology Inc.
@@ -17,7 +17,7 @@
     Generation Information :
         Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.65.2
         Device            :  PIC18F97J60
-        Driver Version    :  1.03
+        Driver Version    :  1.02
     The generated drivers are tested against the following:
         Compiler          :  XC8 1.45 or later
         MPLAB 	          :  MPLAB X 4.15
@@ -56,11 +56,11 @@
  * @Returns
     none
  * @Description
-    This macro will enable global interrupts.
+    This macro will enable high priority global interrupts.
  * @Example
-    INTERRUPT_GlobalInterruptEnable();
+    INTERRUPT_GlobalInterruptHighEnable();
  */
-#define INTERRUPT_GlobalInterruptEnable() (INTCONbits.GIE = 1)
+#define INTERRUPT_GlobalInterruptHighEnable() (INTCONbits.GIEH = 1)
 
 /**
  * @Param
@@ -68,11 +68,35 @@
  * @Returns
     none
  * @Description
-    This macro will disable global interrupts.
+    This macro will disable high priority global interrupts.
  * @Example
-    INTERRUPT_GlobalInterruptDisable();
+    INTERRUPT_GlobalInterruptHighDisable();
  */
-#define INTERRUPT_GlobalInterruptDisable() (INTCONbits.GIE = 0)
+#define INTERRUPT_GlobalInterruptHighDisable() (INTCONbits.GIEH = 0)
+
+/**
+ * @Param
+    none
+ * @Returns
+    none
+ * @Description
+    This macro will enable low priority global interrupts.
+ * @Example
+    INTERRUPT_GlobalInterruptLowEnable();
+ */
+#define INTERRUPT_GlobalInterruptLowEnable() (INTCONbits.GIEL = 1)
+
+/**
+ * @Param
+    none
+ * @Returns
+    none
+ * @Description
+    This macro will disable low priority global interrupts.
+ * @Example
+    INTERRUPT_GlobalInterruptLowDisable();
+ */
+#define INTERRUPT_GlobalInterruptLowDisable() (INTCONbits.GIEL = 0)
 /**
  * @Param
     none
@@ -102,11 +126,11 @@
  * @Returns
     none
  * @Description
-    Main interrupt service routine. Calls module interrupt handlers.
+    Initializes PIC18 peripheral interrupt priorities; enables/disables priority vectors
  * @Example
-    INTERRUPT_InterruptManager();
+    INTERRUPT_Initialize();
  */
-void interrupt INTERRUPT_InterruptManager(void);
+void INTERRUPT_Initialize (void);
 
 /**
  * @Param
@@ -114,12 +138,23 @@ void interrupt INTERRUPT_InterruptManager(void);
  * @Returns
     none
  * @Description
-    Initializes PIC18 peripheral interrupt priorities; enables/disables priority vectors
+    High priority interrupt service routine. Calls module interrupt handlers.
  * @Example
-    INTERRUPT_Initialize();
+    INTERRUPT_InterruptManagerHigh();
  */
-void INTERRUPT_Initialize (void);
+void interrupt INTERRUPT_InterruptManagerHigh (void);
 
+/**
+ * @Param
+    none
+ * @Returns
+    none
+ * @Description
+    Low priority interrupt service routine. Calls module interrupt handlers.
+ * @Example
+    INTERRUPT_InterruptManagerLow();
+ */
+void interrupt low_priority INTERRUPT_InterruptManagerLow (void);
 #endif  // INTERRUPT_MANAGER_H
 /**
  End of File

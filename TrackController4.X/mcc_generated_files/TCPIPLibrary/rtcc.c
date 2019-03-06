@@ -123,11 +123,15 @@ void rtcc_handler(void)
 
 void rtcc_set(time_t *t)
 {
-    bool gie_val;
-    gie_val = (bool)GIE;
-    INTERRUPT_GlobalInterruptDisable();
+    bool gieh_val;
+    bool giel_val;
+    giel_val = INTCONbits.GIEL;
+    gieh_val = INTCONbits.GIEH;
+    INTERRUPT_GlobalInterruptHighDisable();
+    INTERRUPT_GlobalInterruptLowDisable();
     deviceTime = *t;
-    GIE = gie_val;
+    INTCONbits.GIEH = gieh_val;
+    INTCONbits.GIEL = giel_val;
 }
 
 /****************************************************************************
@@ -160,13 +164,17 @@ void rtcc_set(time_t *t)
 /* time.h does not implment time as it is application dependent */
 time_t time(time_t *t)
 {
-    bool   gie_val;
+    bool gieh_val;
+    bool giel_val;
     time_t  the_time;
     
-    gie_val = (bool)GIE;  //jira: CAE_MCU8-5647
-    INTERRUPT_GlobalInterruptDisable();
+    giel_val = INTCONbits.GIEL;
+    gieh_val = INTCONbits.GIEH;  //jira: CAE_MCU8-5647
+    INTERRUPT_GlobalInterruptHighDisable();
+    INTERRUPT_GlobalInterruptLowDisable();
     the_time = deviceTime;
-    GIE = gie_val;
+    INTCONbits.GIEH = gieh_val;
+    INTCONbits.GIEL = giel_val;
 
     if(t)
     {

@@ -42,7 +42,6 @@ MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE OF THESE TER
 #include <stddef.h>
 #include "network.h"
 #include "ipv4.h"
-#include "icmp.h"
 #include "arpv4.h"
 #include "udpv4.h"
 #include "udpv4_port_handler_table.h"
@@ -161,29 +160,6 @@ error_msg IPV4_Packet(void)
         
         switch((ipProtocolNumbers)ipv4Header.protocol)
         {
-            case ICMP_TCPIP:
-                {
-                    // calculate and check the ICMP checksum
-                    logMsg("IPv4 RX ICMP", LOG_INFO, LOG_DEST_CONSOLE);
-                    if((ipv4Header.dstIpAddress == IPV4_ZERO_ADDRESS))
-                    {
-                        return DEST_IP_NOT_MATCHED;
-                    }
-                    length = ipv4Header.length - hdrLen;
-                    cksm = ETH_RxComputeChecksum(length, 0);
-
-                    if (cksm == 0)
-                    {
-                        ICMP_Receive(&ipv4Header);
-                    }
-                    else
-                    {
-                        sprintf(msg, "icmp wrong cksm : %x",cksm);
-                        logMsg(msg, LOG_INFO, LOG_DEST_CONSOLE);
-                        return ICMP_CHECKSUM_FAILS;
-                    }
-                }
-                break;
             case UDP_TCPIP:
                 // check the UDP header checksum                
                 logMsg("IPv4 RX UDP", LOG_INFO, LOG_DEST_CONSOLE);
