@@ -49,6 +49,7 @@
 #ifndef INTERRUPT_MANAGER_H
 #define INTERRUPT_MANAGER_H
 
+#include <stdint.h>
 
 /**
  * @Param
@@ -108,6 +109,8 @@
     INTERRUPT_Initialize();
  */
 void INTERRUPT_Initialize (void);
+
+extern uint8_t COMM_MODE_BOOTLOAD;
 
 #endif  // INTERRUPT_MANAGER_H
 /**

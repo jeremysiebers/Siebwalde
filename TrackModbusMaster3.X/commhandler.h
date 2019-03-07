@@ -19,8 +19,11 @@ extern "C" {
 extern void             InitSlaveCommunication(SLAVE_INFO *location, SLAVE_INFO *Dump);
 extern void             ProcessNextSlave(void);
 extern unsigned int     ProcessSlaveCommunication();
-extern void             SendDataToEthernet(void);
+extern void             SENDxDATAxTOxETHERNET(void);
+extern void             BOOTxLOADxTOxETHERNET(void);
 extern void             SLAVExCOMMANDxHANDLER(uint16_t State);
+extern void             BOOTxLOADxHANDLER(void);
+extern bool             BOOT_LOAD_DATA_READY;
 
 #ifdef	__cplusplus
 }

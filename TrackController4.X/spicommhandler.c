@@ -174,7 +174,7 @@ void RESETxSPIxCOMMxHANDLER(){
  */
 /*#--------------------------------------------------------------------------#*/
 
-void ProcessSpiInterrupt(){
+void PROCESSxSPIxMODBUS(){
     //SS1_Check_LAT = 1; 
     RECEIVEDxDATAxRAW[DATAxCOUNTxRECEIVED] = SSP2BUF;                       
     SSP2BUF = SENDxDATAxRAW[DATAxCOUNTxSEND];
@@ -208,7 +208,7 @@ void ProcessSpiInterrupt(){
     DATAxREADY = 0;
     DATAxCOUNTxRECEIVED = 0; 
     DATAxCOUNTxSEND     = 0;
-    ProcessSpiData();   
+    ProcessModbusData();   
     SSP2BUF = 0;
                  
     //SS1_Check_LAT = 0;  
@@ -284,7 +284,7 @@ void ProcessSpiData(){
 }
 
 /*#--------------------------------------------------------------------------#*/
-/*  Description: 
+/*  Description: PROCESSxSPIxBOOTLOAD()
  *
  *  Input(s)   : 
  *
@@ -299,3 +299,69 @@ void ProcessSpiData(){
  *  Notes      :
  */
 /*#--------------------------------------------------------------------------#*/
+
+uint8_t ReceivedBootloadData[76];
+uint8_t SendBootloadData[76];
+uint8_t BootloadDataCounterReceived = 0;
+uint8_t BootloadDataCounterSend = 0;
+uint8_t BootloadDataReady = 0;
+
+void PROCESSxSPIxBOOTLOAD(){
+    //SS1_Check_LAT = 1; 
+    ReceivedBootloadData[BootloadDataCounterReceived] = SSP2BUF;                       
+    SSP2BUF = SendBootloadData[BootloadDataCounterSend];
+    BootloadDataCounterReceived++;
+    BootloadDataCounterSend++;
+    //SS1_Check_LAT = 0;
+    
+    while(!BootloadDataReady){
+        
+        
+        if (SSP2STATbits.BF){  
+            
+            //SS1_Check_LAT = 1; 
+            
+            ReceivedBootloadData[BootloadDataCounterReceived] = SSP2BUF; 
+            SSP2BUF = SendBootloadData[BootloadDataCounterSend];
+            
+            //SS1_Check_LAT = 0;
+            
+            BootloadDataCounterReceived++;
+            BootloadDataCounterSend++;
+            
+            if (BootloadDataCounterReceived > 75){
+                BootloadDataReady = 1;
+            }      
+        }
+    }
+    
+    //SS1_Check_LAT = 1;
+    
+    BootloadDataReady = 0;
+    BootloadDataCounterReceived = 0; 
+    BootloadDataCounterSend     = 0;
+    //ProcessBootloadData();   
+    SSP2BUF = 0;
+                 
+    //SS1_Check_LAT = 0;
+}
+
+/*#--------------------------------------------------------------------------#*/
+/*  Description: ProcessBootloadData()
+ *
+ *  Input(s)   : 
+ *
+ *  Output(s)  :
+ *
+ *  Returns    :
+ *
+ *  Pre.Cond.  :
+ *
+ *  Post.Cond. :
+ *
+ *  Notes      :
+ */
+/*#--------------------------------------------------------------------------#*/
+void ProcessBootloadData(){
+    
+}

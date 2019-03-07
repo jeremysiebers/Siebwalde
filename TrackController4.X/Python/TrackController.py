@@ -44,6 +44,14 @@ class MAIN():
                 if(returned == EnumStateMachine.ok):
                     self.state = EnumStateMachine.InitTrackamplifiers
             
+            
+            
+            
+            
+            
+            
+            
+            
             ######################
             ## Init  the slaves ##
             ######################

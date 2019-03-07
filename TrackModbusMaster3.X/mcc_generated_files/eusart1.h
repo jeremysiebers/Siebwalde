@@ -82,6 +82,7 @@ extern volatile uint8_t eusart1RxCount;
   Section: EUSART1 APIs
 */
 
+void (*EUSART1_TxDefaultInterruptHandler)(void);
 void (*EUSART1_RxDefaultInterruptHandler)(void);
 
 /**
@@ -108,11 +109,11 @@ void EUSART1_Initialize(void);
 
 /**
   @Summary
-    Checks if the EUSART1 transmitter is ready to transmit data
+    Checks if the EUSART1 transmitter is ready
 
   @Description
-    This routine checks if EUSART1 transmitter is ready 
-    to accept and transmit data byte
+    This routine checks if EUSART1 transmitter is empty and ready
+    for next transmission
 
   @Preconditions
     EUSART1_Initialize() function should have been called
@@ -124,9 +125,8 @@ void EUSART1_Initialize(void);
     None
 
   @Returns
-    Status of EUSART1 transmitter
-    TRUE: EUSART1 transmitter is ready
-    FALSE: EUSART1 transmitter is not ready
+    The number of available bytes that EUSART1 has remaining in 
+    its transmit buffer
     
   @Example
     <code>
@@ -137,6 +137,12 @@ void EUSART1_Initialize(void);
         // Initialize the device
         SYSTEM_Initialize();
         
+        // Enable the Global Interrupts
+        INTERRUPT_GlobalInterruptEnable();
+
+        // Enable the Peripheral Interrupts
+        INTERRUPT_PeripheralInterruptEnable();
+        
         while(1)
         {
             // Logic to echo received data
@@ -145,14 +151,14 @@ void EUSART1_Initialize(void);
                 rxData = UART1_Read();
                 if(EUSART1_is_tx_ready())
                 {
-                    EUSART1Write(rxData);
+                    EUSART1_Write(rxData);
                 }
             }
         }
     }
     </code>
 */
-bool EUSART1_is_tx_ready(void);
+uint8_t EUSART1_is_tx_ready(void);
 
 /**
   @Summary
@@ -293,6 +299,26 @@ uint8_t EUSART1_Read(void);
 */
 void EUSART1_Write(uint8_t txData);
 
+/**
+  @Summary
+    Maintains the driver's transmitter state machine and implements its ISR.
+
+  @Description
+    This routine is used to maintain the driver's internal transmitter state
+    machine.This interrupt service routine is called when the state of the
+    transmitter needs to be maintained in a non polled manner.
+
+  @Preconditions
+    EUSART1_Initialize() function should have been called
+    for the ISR to execute correctly.
+
+  @Param
+    None
+
+  @Returns
+    None
+*/
+void EUSART1_Transmit_ISR(void);
 
 /**
   @Summary
@@ -315,6 +341,25 @@ void EUSART1_Write(uint8_t txData);
 */
 void EUSART1_Receive_ISR(void);
 
+/**
+  @Summary
+    Sets the transmit handler function to be called by the interrupt service
+
+  @Description
+    Calling this function will set a new custom function that will be 
+    called when the transmit interrupt needs servicing.
+
+  @Preconditions
+    EUSART1_Initialize() function should have been called
+    for the ISR to execute correctly.
+
+  @Param
+    A pointer to the new function
+
+  @Returns
+    None
+*/
+void EUSART1_SetTxInterruptHandler(void (* interruptHandler)(void));
 
 /**
   @Summary

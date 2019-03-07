@@ -51,6 +51,8 @@
 #include "mcc.h"
 #include "../spicommhandler.h"
 
+uint8_t COMM_MODE_BOOTLOAD = false;
+
 void  INTERRUPT_Initialize (void)
 {
     // Enable Interrupt Priority Vectors
@@ -80,15 +82,16 @@ void interrupt INTERRUPT_InterruptManagerHigh (void)
 {
    // interrupt handler
     if(PIE3bits.SSP2IE == 1 && PIR3bits.SSP2IF == 1)
-    {
+    {        
         SS1_Check_LAT = 1;
-        ProcessSpiInterrupt();
+        if (COMM_MODE_BOOTLOAD == false){ PROCESSxSPIxMODBUS(); }
+        else{ PROCESSxSPIxBOOTLOAD(); }
         PIR3bits.SSP2IF = 0;
         UPDATE_TERMINAL = 1;
         UPDATE_SLAVE_TOxUDP = 1;
         TMR0_Reload();
         T0CONbits.TMR0ON = 1;
-        SS1_Check_LAT = 0;
+        SS1_Check_LAT = 0;        
     }
     else
     {

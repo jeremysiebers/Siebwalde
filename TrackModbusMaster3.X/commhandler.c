@@ -13,7 +13,8 @@
 #define MAILBOX_SIZE 4                                                          // How many messages are non-critical
 #define BROADCAST_ADDRESS 0
 
-void             SLAVExCOMMANDxHANDLER(uint16_t State);
+void SLAVExCOMMANDxHANDLER(uint16_t State);
+void BOOTxLOADxHANDLER(void);
 
 /*#--------------------------------------------------------------------------#*/
 /*  Description: InitSlaveCommunication(SLAVE_INFO *location)
@@ -280,12 +281,12 @@ unsigned int ProcessSlaveCommunication(){
  */
 /*#--------------------------------------------------------------------------#*/
 static unsigned int DataFromSlave = 0;
-const unsigned char DATAxSTRUCTxLENGTH = sizeof(SLAVE_INFO) + 1;      // add one byte to send dummy
-static unsigned char RECEIVEDxDATAxRAW[DATAxSTRUCTxLENGTH];                            // One dummy byte extra (SPI master will send extra byte to receive last byte from slave)
+const unsigned char DATAxSTRUCTxLENGTH = sizeof(SLAVE_INFO) + 1;                // add one byte to send dummy
+static unsigned char RECEIVEDxDATAxRAW[DATAxSTRUCTxLENGTH];                     // One dummy byte extra (SPI master will send extra byte to receive last byte from slave)
 static uint8_t bytesWritten = 0;
 static uint8_t *dataIn, *dataOut;
 
-void SendDataToEthernet(){
+void SENDxDATAxTOxETHERNET(){
     //modbus_sync_LAT = 1;
     //SPI1_Exchange8bitBuffer(&(MASTER_SLAVE_DATA[DataFromSlave].Header), 
     //        DATAxSTRUCTxLENGTH, &(RECEIVEDxDATAxRAW[0]));                       // SPI send/receive data    
@@ -344,6 +345,121 @@ void SendDataToEthernet(){
 }
 
 /*#--------------------------------------------------------------------------#*/
+/*  Description: BOOTxLOADxTOxETHERNET()
+ *
+ *  Input(s)   : 
+ *
+ *  Output(s)  :
+ *
+ *  Returns    :
+ *
+ *  Pre.Cond.  :
+ *
+ *  Post.Cond. :
+ *
+ *  Notes      : Keeps track of bootloader comm with ethernet target
+ */
+/*#--------------------------------------------------------------------------#*/
+
+static unsigned char BOOT_DATA_TO_SLAVE[76];                                    // One dummy byte extra (SPI master will send extra byte to receive last byte from slave)
+static unsigned char BOOT_DATA_TO_ETHERNET[76];                                 // One dummy byte extra (SPI master will send extra byte to receive last byte from slave)
+static uint8_t *dataIn, *dataOut;
+bool BOOT_LOAD_DATA_READY = false;
+
+void BOOTxLOADxTOxETHERNET(){
+    bytesWritten = 0;
+    dataIn  = &(BOOT_DATA_TO_ETHERNET[0]);                                      // Data to Ethernet Target
+    dataOut = &(BOOT_DATA_TO_SLAVE[0]);                                         // Data from Ethernet Target
+    SS1_LAT = 0;                                                                // Activate slave
+    while(bytesWritten < 76){
+        SSP1CON1bits.WCOL = 0;
+        SSP1BUF = dataIn[bytesWritten];
+        while(SSP1STATbits.BF == 0){
+        }
+        dataOut[bytesWritten] = SSP1BUF;
+        bytesWritten++;
+//        NOP();                                                                // give SPI slave time to process the data, NOP() is 3 cycles delay ~288ns
+        __delay_us(1);
+    }
+    SS1_LAT = 1;   
+    
+    if(BOOT_DATA_TO_SLAVE[1] == 0x55 && BOOT_LOAD_DATA_READY == false){         // Check if received slave number is valid(during debugging sometimes wrong number received)
+        BOOT_LOAD_DATA_READY = true;
+    } 
+    else if(BOOT_DATA_TO_SLAVE[1] == 0x00 && BOOT_LOAD_DATA_READY == false){
+        BOOT_LOAD_DATA_READY = false;
+    }
+    else if(BOOT_DATA_TO_SLAVE[1] != 0x00 && BOOT_LOAD_DATA_READY == false){
+        BOOT_LOAD_DATA_READY = false;
+        LED_ERR++;
+    }       
+}
+
+/*#--------------------------------------------------------------------------#*/
+/*  Description: BOOTxLOADxHANDLER()
+ *
+ *  Input(s)   : 
+ *
+ *  Output(s)  :
+ *
+ *  Returns    :
+ *
+ *  Pre.Cond.  :
+ *
+ *  Post.Cond. :
+ *
+ *  Notes      : Keeps track of bootloader communication with a slave
+ */
+/*#--------------------------------------------------------------------------#*/
+
+typedef enum
+{
+    READ_VERSION  = 0x00, 
+    READ_FLASH    = 0x01,
+    WRITE_FLASH   = 0x02, 
+    ERASE_FLASH   = 0x03,
+    READ_EE_DATA  = 0x04,
+    WRITE_EE_DATA = 0x05,
+    READ_CONFIG   = 0x06,
+    WRITE_CONFIG  = 0x07,
+    CALC_CHECKSUM = 0x08,
+    RESET_DEVICE  = 0x09,
+    NEXT_TRANSMISSION = 0xFF
+};
+
+static uint8_t BytesToSent = 0;
+static uint8_t BytesToReceive = 0;
+
+void BOOTxLOADxHANDLER(){
+    if(BOOT_LOAD_DATA_READY){
+        switch(BOOT_DATA_TO_SLAVE[2]){
+            case 0   : BytesToSent = 10;   BytesToReceive = 26; break;
+            case 1   : BytesToSent = 0;    BytesToReceive = 0;  break;
+            case 2   : BytesToSent = 75;   BytesToReceive = 11; break;
+            case 3   : BytesToSent = 10;   BytesToReceive = 11; break;
+            case 4   : BytesToSent = 0;    BytesToReceive = 0;  break;
+            case 5   : BytesToSent = 0;    BytesToReceive = 0;  break;
+            case 6   : BytesToSent = 0;    BytesToReceive = 0;  break;
+            case 7   : BytesToSent = 10;   BytesToReceive = 11; break;
+            case 8   : BytesToSent = 10;   BytesToReceive = 12; break;
+            case 9   : BytesToSent = 10;   BytesToReceive = 11; break;
+            case 0xFF: BytesToSent = 0;    BytesToReceive = 0; 
+                       BOOT_LOAD_DATA_READY = false;            break;
+            default:                                            break;            
+        }
+        
+        for(uint8_t i = 0; i < BytesToSent; i++){
+            EUSART1_Write(BOOT_DATA_TO_SLAVE[i]);
+        }
+    }
+    else if(EUSART1_is_rx_ready() > (BytesToReceive - 1)){
+        for(uint8_t i = 0; i < BytesToReceive; i++){
+            BOOT_DATA_TO_ETHERNET[i] = EUSART1_Read();
+        }        
+    }    
+}
+
+/*#--------------------------------------------------------------------------#*/
 /*  Description: SLAVExCOMMANDxHANDLER()
  *
  *  Input(s)   : 
@@ -370,7 +486,8 @@ typedef enum
     HOLDINGREG  = 0x04,
     INPUTREG    = 0x08,
     DIAGREG     = 0x10,
-    EXEC        = 0x20
+    EXEC        = 0x20,
+    BOOTLOAD    = 0x40
 };
 
 unsigned int CommandMachine = 0;
@@ -430,7 +547,16 @@ void SLAVExCOMMANDxHANDLER (uint16_t State){
                         MASTER_SLAVE_DATA[0].InputReg[0] = BUSY;
                         CommandMachine = 30;
                     }
-                }                            
+                }
+                else if(((MASTER_SLAVE_DATA[0].HoldingReg[0] & 0x1C) == BOOTLOAD) &&
+                         (State == false)){                                     // Going to bootload only possible in startup fase
+                    COMM_MODE_BOOTLOAD = true;
+                    MASTER_SLAVE_DATA[0].InputReg[0] = IDLE;                    // reset status register for readback of execution towards ethernet target
+                    MASTER_SLAVE_DATA[0].HoldingReg[0] = 0;
+                    CommandMachine = 0;
+                }
+                
+                
             }
             else if(State == true){                                             // Always send message during normal run operation to ensure triggering of slaves on received data     
                 HoldingRegisterWrite[1] = 0;                                    // clear write registers, needed?

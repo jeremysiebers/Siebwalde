@@ -51,10 +51,7 @@ void main(void)
 
     // Disable the Peripheral Interrupts
     //INTERRUPT_PeripheralInterruptDisable();
-
-    /* Test the onboard Led's */
-    //while(Led_Disco() == false);
-    
+        
     //__delay_ms(2000);                                                           // Wait longer then the slaves (1000ms)
     
     // Initialize the SLAVE_INFO struct with slave numbers
@@ -84,24 +81,27 @@ void main(void)
     
     while(1)
     {
-        if ((SlaveInfo[0].HoldingReg[0] & 0x01) == 0){                          // Initialization starts here, after init of all slaves, the regular updates can take place
-            SLAVExCOMMANDxHANDLER(false);
-            InitDone = false;
-        }
-        else if ((SlaveInfo[0].HoldingReg[0] & 0x01) == 1){                     // Regular slave communication
-            InitDone = true;
-            if (UpdateNextSlave == true){
-                UpdateNextSlave = false;
-                ProcessNextSlave();                    
-                AllSlavesReadAllDataCounter++;
-                if (AllSlavesReadAllDataCounter > ALLxSLAVESxDATA){
-                    AllSlavesReadAllDataCounter = 1;
-                }
+        if(COMM_MODE_BOOTLOAD == false){
+            if ((SlaveInfo[0].HoldingReg[0] & 0x01) == 0){                          // Initialization starts here, after init of all slaves, the regular updates can take place
+                SLAVExCOMMANDxHANDLER(false);
+                InitDone = false;
             }
-            ProcessSlaveCommunication();
-        }
-        
-        ProcessPetitModbus();
+            else if ((SlaveInfo[0].HoldingReg[0] & 0x01) == 1){                     // Regular slave communication
+                InitDone = true;
+                if (UpdateNextSlave == true){
+                    UpdateNextSlave = false;
+                    ProcessNextSlave();                    
+                    AllSlavesReadAllDataCounter++;
+                    if (AllSlavesReadAllDataCounter > ALLxSLAVESxDATA){
+                        AllSlavesReadAllDataCounter = 1;
+                    }
+                }
+                ProcessSlaveCommunication();
+            }
+
+            ProcessPetitModbus();            
+        }        
+        else{ BOOTxLOADxHANDLER(); }
         
         Led_Blink();
     }
@@ -183,123 +183,7 @@ void Led_Blink (){
         TMR0_Reload();
     }
 }
-/******************************************************************************
- * Function: Led_Disco()   
- *
- * PreCondition:    
- *
- * Input:           
- *
- * Output:          
- *
- * Side Effects:    
- *
- * Overview:       Test led's onboard 
- *****************************************************************************/
-uint8_t     Disco   = 0;
-uint8_t     Count   = 0;
-uint16_t    Out     = 0;
-uint8_t     Loop    = 0;
 
-uint8_t Led_Disco (){
-    
-    uint8_t Return_Val = false;
-    
-    if(PIR0bits.TMR0IF){
-        
-        Count++;
-        if(Count > 5){
-           Disco++; 
-           Count    = 0;
-           Out      = 5;
-        }
-        
-        switch (Disco){
-            case 0:
-                Led_Convert(Out);
-                Out++;
-                break;
-
-            case 1:
-                Led_Convert(Out);
-                Out--;
-                break;
-                
-            case 2:
-                Loop++;
-                if(Loop > 1){
-                    Return_Val = true;
-                }
-                else{
-                    Disco   = 0;
-                    Out     = 1;
-                    Count   = 0;
-                }
-                break;
-
-            default :
-                break;
-        }
-        PIR0bits.TMR0IF = 0;
-        TMR0_Reload();
-    }
-    return(Return_Val);
-}
-
-/******************************************************************************
- * Function: Led_Convert(uint8_t Number)
- *
- * PreCondition:    
- *
- * Input:           
- *
- * Output:          
- *
- * Side Effects:    
- *
- * Overview:       Test led's onboard 
- *****************************************************************************/
-void Led_Convert(uint8_t Number){
-    switch (Number){
-        case 1:
-            LED_RUN_LAT     = 1;
-            LED_WAR_LAT     = 0;
-            LED_ERR_LAT     = 0; 
-            LED_RX_LAT      = 0; 
-            LED_TX_LAT      = 0;
-            break;
-        case 2:
-            LED_RUN_LAT     = 0;
-            LED_WAR_LAT     = 1;
-            LED_ERR_LAT     = 0; 
-            LED_RX_LAT      = 0; 
-            LED_TX_LAT      = 0;
-            break;
-        case 3:
-            LED_RUN_LAT     = 0;
-            LED_WAR_LAT     = 0;
-            LED_ERR_LAT     = 1; 
-            LED_RX_LAT      = 0; 
-            LED_TX_LAT      = 0;
-            break;
-        case 4:
-            LED_RUN_LAT     = 0;
-            LED_WAR_LAT     = 0;
-            LED_ERR_LAT     = 0; 
-            LED_RX_LAT      = 1; 
-            LED_TX_LAT      = 0;
-            break;
-        case 5:
-            LED_RUN_LAT     = 0;
-            LED_WAR_LAT     = 0;
-            LED_ERR_LAT     = 0; 
-            LED_RX_LAT      = 0; 
-            LED_TX_LAT      = 1;
-            break;
-        default:            
-            break;
-    }
-}
 /**
  End of File
 */

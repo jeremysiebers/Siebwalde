@@ -79,6 +79,7 @@
       <itemPath>Makefile</itemPath>
       <itemPath>MyConfig.mc3</itemPath>
       <itemPath>../Common_Files/ModBusSlaveMasterMappings/ModBusSlaveMapping.txt</itemPath>
+      <itemPath>../Common_Files/ModBusSlaveMasterMappings/EthernetTargetCmd.txt</itemPath>
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>

@@ -19,11 +19,14 @@ extern "C" {
 
 extern void INITxSPIxCOMMxHANDLER(SLAVE_INFO *location);
 extern void RESETxSPIxCOMMxHANDLER(void);
-extern void ProcessSpiData(void);
-extern void ProcessSpiInterrupt();
-extern void CheckSpiStart(void);
+extern void PROCESSxSPIxMODBUS();
+extern void PROCESSxSPIxBOOTLOAD();
+
 extern unsigned int SpiSlaveCommErrorCounter;
 extern unsigned bool InitPhase;
+
+void ProcessModbusData(void);
+void ProcessBootloadData(void);
 
 #ifdef	__cplusplus
 }

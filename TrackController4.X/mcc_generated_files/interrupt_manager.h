@@ -48,7 +48,7 @@
 
 #ifndef INTERRUPT_MANAGER_H
 #define INTERRUPT_MANAGER_H
-
+#include <stdint.h>
 
 /**
  * @Param
@@ -155,6 +155,9 @@ void interrupt INTERRUPT_InterruptManagerHigh (void);
     INTERRUPT_InterruptManagerLow();
  */
 void interrupt low_priority INTERRUPT_InterruptManagerLow (void);
+
+extern uint8_t COMM_MODE_BOOTLOAD;
+
 #endif  // INTERRUPT_MANAGER_H
 /**
  End of File
