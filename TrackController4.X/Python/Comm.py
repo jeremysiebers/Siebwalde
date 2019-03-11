@@ -48,6 +48,7 @@ class DataAquisition:
         self.footer          = 'U'
         self.message_found   = False
         self.data            = []
+        self.bootloader_data = []
         self.TxData          = []
         self.UpdateTick      = False
         
@@ -77,11 +78,15 @@ class DataAquisition:
                 k += 2                
             
             tx = struct.pack("<11B", 0xAA, command, send[0], send[1], send[2], send[3], send[4], send[5], send[6], send[7], 0x55)
+            self.sock_trans.send(tx)
         
         if(command == EnumCommand.ETHERNET_T):
             tx = struct.pack("<4B", 0xAA, command, data, 0x55)
+            self.sock_trans.send(tx)
         
-        self.sock_trans.send(tx)
+        if(command == EnumCommand.BOOTLOADER):
+            self.sock_trans.send(tx)
+    
     
     def ReadSerial(self):
         
@@ -95,7 +100,10 @@ class DataAquisition:
                 self.line = self.line[self.header_index:]
                 print ("header found at " + str(self.header_index))            
             
-            self.data = struct.unpack ("<4B", self.line[:4])
+            try:
+                self.data = struct.unpack ("<4B", self.line[:4])
+            except:
+                return
             
             #print(self.data[1])
                         
@@ -156,17 +164,15 @@ class DataAquisition:
                         
                     self.line = self.line[37:]
             
-            if(len(self.line) == 77):    
+            if(len(self.line) > 36):    
                 # Check if data is bootloader data
                 if (self.data[0] == 170 and self.data[1] == EnumCommand.BOOTLOADER):
-                    self.data = struct.unpack ("<76B", self.line[:76])
-                    if(self.data[0] == 170 and self.data[1] == 1 and self.data[75] == 85):
-                        #print("Bootloader block received")
-                        self.bootloader.rx_data = copy.copy(self.data[2:75])
-                        self.line = self.line[76:]
+                    self.data = struct.unpack ("<37B", self.line[:37])
+                    self.bootloader_data = copy.copy(self.data)
+                    self.line = self.line[37:]
             
             else:
-                self.line = self.line[36:]
+                self.line = self.line[37:]
 
 
 

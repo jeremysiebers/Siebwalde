@@ -85,13 +85,15 @@ void interrupt INTERRUPT_InterruptManagerHigh (void)
     {        
         SS1_Check_LAT = 1;
         if (COMM_MODE_BOOTLOAD == false){ PROCESSxSPIxMODBUS(); }
-        else{ PROCESSxSPIxBOOTLOAD(); }
-        PIR3bits.SSP2IF = 0;
+        else{ 
+            PROCESSxSPIxBOOTLOAD(); 
+        }
         UPDATE_TERMINAL = 1;
         UPDATE_SLAVE_TOxUDP = 1;
         TMR0_Reload();
         T0CONbits.TMR0ON = 1;
         SS1_Check_LAT = 0;        
+        PIR3bits.SSP2IF = 0;
     }
     else
     {

@@ -20,7 +20,7 @@ extern "C" {
 #define NUMBER_OF_SLAVES 51                                                     // 0 is for the master self. 50 Track slaves => 51  
 
 extern unsigned int UpdateNextSlave;
-extern volatile unsigned int LED_ERR;
+extern uint16_t LED_ERR;
 extern unsigned int InitDone;
 void Led_Blink (void);
 uint8_t     Led_Disco       (void);

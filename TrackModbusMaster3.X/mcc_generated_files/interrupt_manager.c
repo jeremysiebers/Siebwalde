@@ -131,7 +131,8 @@ void __interrupt() INTERRUPT_InterruptManager (void)
                 PIR4bits.TMR2IF = 0;
                 T2TMR = 0;
                 modbus_send_LAT ^= 1;
-                BOOTxLOADxTOxETHERNET();                                           // This is the first action in a new cycle, hence it is in the interrupt file. Also SPI comm is required before ModBus!!.            
+                BOOTxLOADxTOxETHERNET();                                        
+                BOOTxLOADxHANDLER();
             }
         }
     }      

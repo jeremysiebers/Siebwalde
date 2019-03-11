@@ -76,7 +76,6 @@
       </logicalFolder>
       <itemPath>main.c</itemPath>
       <itemPath>spicommhandler.c</itemPath>
-      <itemPath>slavestartup.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -138,7 +137,7 @@
         <property key="opt-xc8-compiler-strict_ansi" value="false"/>
         <property key="optimization-assembler" value="true"/>
         <property key="optimization-assembler-files" value="true"/>
-        <property key="optimization-debug" value="false"/>
+        <property key="optimization-debug" value="true"/>
         <property key="optimization-invariant-enable" value="false"/>
         <property key="optimization-invariant-value" value="16"/>
         <property key="optimization-level" value="-O3"/>
@@ -196,7 +195,6 @@
         <property key="opt-xc8-linker-link_startup" value="false"/>
         <property key="opt-xc8-linker-serial" value=""/>
         <property key="program-the-device-with-default-config-words" value="true"/>
-        <appendMe value="--msgdisable=520"/>
       </HI-TECH-LINK>
       <ICD3PlatformTool>
         <property key="AutoSelectMemRanges" value="auto"/>

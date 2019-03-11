@@ -42,15 +42,15 @@ class MAIN():
             elif(self.state == EnumStateMachine.CheckAmpSwVersion):
                 returned = self.StateMachine.RunFunction(EnumStateMachine.CheckAmpSwVersion)
                 if(returned == EnumStateMachine.ok):
+                    self.state = EnumStateMachine.FlashTrackamplifiers
+            
+            ######################
+            ## Flash new SW     ##
+            ######################        
+            elif(self.state == EnumStateMachine.FlashTrackamplifiers):
+                returned = self.StateMachine.RunFunction(EnumStateMachine.FlashTrackamplifiers)
+                if(returned == EnumStateMachine.ok):
                     self.state = EnumStateMachine.InitTrackamplifiers
-            
-            
-            
-            
-            
-            
-            
-            
             
             ######################
             ## Init  the slaves ##
@@ -70,27 +70,6 @@ class MAIN():
              
             
             
-            
-            
-            
-            
-            
-            
-            '''
-            #time.sleep(0.001)
-            self.cnt = self.cnt + 1
-            
-            #print(Amplifiers.Trackamplifiers[1].MbReceiveCounter, "\n",)
-            
-            if (self.cnt > 50):
-                print("Send data to PIC")
-                TX = struct.pack("<11B", 0xAA, 0, 1, 2, 3, 4, 5, 6, 7, 8, 0x55)
-                self.Amplifiers.WriteSerial(TX)
-                self.cnt = 0  
-            '''
-
-
-
 
 if __name__ == '__main__':
     # execute only if run as the entry point into the program

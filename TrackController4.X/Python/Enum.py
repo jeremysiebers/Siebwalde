@@ -8,6 +8,7 @@ class EnumStateMachine:
     InitTrackamplifiers   = 'InitTrackamplifiers'
     EnableTrackamplifiers = 'EnableTrackamplifiers'
     CheckAmpSwVersion     = 'CheckAmpSwVersion'
+    FlashTrackamplifiers  = 'FlashTrackamplifiers'
     run                   = 'run'
     
 class EnumSlaveInit:
@@ -34,14 +35,17 @@ class EnumSlaveConfig:
     _BUSY       = 0x01
     IDLE        = 0x00
     MODE_MAN    = 0b1111111111111110
-    MODE_AUTO   = 0b1111111111111111    
+    MODE_AUTO   = 0b1111111111111111
+    
     WRITE       = 0b1111111111111111
     READ        = 0b1111111111111101
-    HOLDINGREG  = 0b1111111111100111
-    INPUTREG    = 0b1111111111101011
-    DIAGREG     = 0b1111111111110011
+    
+    HOLDINGREG  = 0b1111111111000111
+    INPUTREG    = 0b1111111111001011
+    DIAGREG     = 0b1111111111010011        
+    BOOTLOAD    = 0b1111111111100011
     EXEC        = 0b1111111111111111
-    HALT        = 0b1111111111011111    
+    HALT        = 0b0111111111111111    
 
 class EnumCommand:
     MODBUS      = 0xFF
@@ -57,3 +61,11 @@ class EnumEthernetT:
     NOK               = 0x83
     BUSY              = 0x81
     IDLE              = 0x80
+    SEND_BOOTLOADER   = 0x01
+    SEND_SLAVEIODATA  = 0x00
+    
+class EnumBootloader:
+    COMMAND_SUCCESSFUL   = 0x01 # Command Successful
+    COMMAND_UNSUPPORTED  = 0xFF # Command Unsupported
+    ADDRESS_ERROR        = 0Xfe # Address Error
+    COMMAND_UNSUCCESSFUL = 0xfd # Command unSuccessful 

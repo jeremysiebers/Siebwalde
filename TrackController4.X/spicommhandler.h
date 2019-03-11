@@ -16,6 +16,8 @@
 #ifdef	__cplusplus
 extern "C" {
 #endif /* __cplusplus */
+    
+const uint8_t DATAxSTRUCTxLENGTH = sizeof(SLAVE_INFO);
 
 extern void INITxSPIxCOMMxHANDLER(SLAVE_INFO *location);
 extern void RESETxSPIxCOMMxHANDLER(void);
@@ -27,6 +29,10 @@ extern unsigned bool InitPhase;
 
 void ProcessModbusData(void);
 void ProcessBootloadData(void);
+
+extern uint8_t RECEIVED_BOOT_LOAD_DATA[DATAxSTRUCTxLENGTH+1];
+extern uint8_t SEND_BOOT_LOAD_DATA[DATAxSTRUCTxLENGTH];
+extern uint8_t *pSEND_BOOT_LOAD_DATA;
 
 #ifdef	__cplusplus
 }

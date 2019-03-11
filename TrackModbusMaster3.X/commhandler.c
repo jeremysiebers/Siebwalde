@@ -37,6 +37,12 @@ static SLAVE_INFO   *DUMP_SLAVE_DATA;
 static SLAVE_INFO   SlaveInfoReadMask;                                          // Read mask for slave data from EhternetTarget
 unsigned char       *pSlaveDataReceived, *pSlaveInfoReadMask;
 
+const  uint8_t DATAxSTRUCTxLENGTH = sizeof(SLAVE_INFO);                         
+static uint8_t RECEIVEDxDATAxRAW[DATAxSTRUCTxLENGTH + 1];                       // One dummy byte extra (SPI master will send extra byte to receive last byte from slave)
+const  uint8_t DATAxSTRUCTxLENGTH2 = 43;                                        // add one byte to send dummy
+static uint8_t BOOT_DATA_TO_SLAVE[DATAxSTRUCTxLENGTH2 + 1];                     // One dummy byte extra (SPI master will send extra byte to receive last byte from slave)
+static uint8_t BOOT_DATA_TO_ETHERNET[DATAxSTRUCTxLENGTH2]; 
+
 void InitSlaveCommunication(SLAVE_INFO *location, SLAVE_INFO *Dump)                                  
 { 
     DUMP_SLAVE_DATA    =  Dump; 
@@ -62,6 +68,11 @@ void InitSlaveCommunication(SLAVE_INFO *location, SLAVE_INFO *Dump)
     SlaveInfoReadMask.MbExceptionCode  = 0x00;
     SlaveInfoReadMask.SpiCommErrorCounter = 0x0000;
     SlaveInfoReadMask.Footer           = 0x00;
+    
+    
+    BOOT_DATA_TO_ETHERNET[0] = 0xAA;
+    BOOT_DATA_TO_ETHERNET[42] = 0x55;
+    
 }
 
 /*#--------------------------------------------------------------------------#*/
@@ -280,9 +291,7 @@ unsigned int ProcessSlaveCommunication(){
  *  Notes      : Keeps track of communication with a slave
  */
 /*#--------------------------------------------------------------------------#*/
-static unsigned int DataFromSlave = 0;
-const unsigned char DATAxSTRUCTxLENGTH = sizeof(SLAVE_INFO) + 1;                // add one byte to send dummy
-static unsigned char RECEIVEDxDATAxRAW[DATAxSTRUCTxLENGTH];                     // One dummy byte extra (SPI master will send extra byte to receive last byte from slave)
+static uint16_t DataFromSlave = 0;
 static uint8_t bytesWritten = 0;
 static uint8_t *dataIn, *dataOut;
 
@@ -294,7 +303,7 @@ void SENDxDATAxTOxETHERNET(){
     dataIn  = &(MASTER_SLAVE_DATA[DataFromSlave].Header);                       // Data to Ethernet Target
     dataOut = &(RECEIVEDxDATAxRAW[0]);                                          // Data from Ethernet Target
     SS1_LAT = 0;                                                                // Activate slave
-    while(bytesWritten < DATAxSTRUCTxLENGTH){
+    while(bytesWritten < DATAxSTRUCTxLENGTH + 1){
         SSP1CON1bits.WCOL = 0;
         SSP1BUF = dataIn[bytesWritten];
         while(SSP1STATbits.BF == 0){
@@ -307,10 +316,10 @@ void SENDxDATAxTOxETHERNET(){
     SS1_LAT = 1;   
     
     if(RECEIVEDxDATAxRAW[2] < NUMBER_OF_SLAVES && RECEIVEDxDATAxRAW[1]==0xAA && 
-            RECEIVEDxDATAxRAW[DATAxSTRUCTxLENGTH-1]==0x55){                     // Check if received slave number is valid(during debugging sometimes wrong number received)
+            RECEIVEDxDATAxRAW[DATAxSTRUCTxLENGTH]==0x55){                     // Check if received slave number is valid(during debugging sometimes wrong number received)
         pSlaveDataReceived = &(MASTER_SLAVE_DATA[RECEIVEDxDATAxRAW[2]].Header); // set the pointer to the first element of the received slave number in RECEIVEDxDATAxRAW[1](first element is dummy byte)    
         pSlaveInfoReadMask = &(SlaveInfoReadMask.Header);                       // set the pointer to the first element of the SlaveInfoReadMask
-        for(char i = 1; i < DATAxSTRUCTxLENGTH-1; i++){
+        for(char i = 1; i < DATAxSTRUCTxLENGTH; i++){
             if(*pSlaveInfoReadMask){
                 *pSlaveDataReceived = RECEIVEDxDATAxRAW[i];                     // for DATAxSTRUCTxLENGTH set every byte into RECEIVEDxDATAxRAW array according to read mask
             }        
@@ -361,17 +370,15 @@ void SENDxDATAxTOxETHERNET(){
  */
 /*#--------------------------------------------------------------------------#*/
 
-static unsigned char BOOT_DATA_TO_SLAVE[76];                                    // One dummy byte extra (SPI master will send extra byte to receive last byte from slave)
-static unsigned char BOOT_DATA_TO_ETHERNET[76];                                 // One dummy byte extra (SPI master will send extra byte to receive last byte from slave)
-static uint8_t *dataIn, *dataOut;
 bool BOOT_LOAD_DATA_READY = false;
+bool BOOT_LOAD_DATA_SENT = false;
 
 void BOOTxLOADxTOxETHERNET(){
     bytesWritten = 0;
     dataIn  = &(BOOT_DATA_TO_ETHERNET[0]);                                      // Data to Ethernet Target
     dataOut = &(BOOT_DATA_TO_SLAVE[0]);                                         // Data from Ethernet Target
     SS1_LAT = 0;                                                                // Activate slave
-    while(bytesWritten < 76){
+    while(bytesWritten < DATAxSTRUCTxLENGTH2 + 1){
         SSP1CON1bits.WCOL = 0;
         SSP1BUF = dataIn[bytesWritten];
         while(SSP1STATbits.BF == 0){
@@ -385,11 +392,12 @@ void BOOTxLOADxTOxETHERNET(){
     
     if(BOOT_DATA_TO_SLAVE[1] == 0x55 && BOOT_LOAD_DATA_READY == false){         // Check if received slave number is valid(during debugging sometimes wrong number received)
         BOOT_LOAD_DATA_READY = true;
+        BOOT_LOAD_DATA_SENT = false;
     } 
-    else if(BOOT_DATA_TO_SLAVE[1] == 0x00 && BOOT_LOAD_DATA_READY == false){
+    else if(BOOT_DATA_TO_SLAVE[1] == 0xAA && BOOT_LOAD_DATA_READY == false){
         BOOT_LOAD_DATA_READY = false;
     }
-    else if(BOOT_DATA_TO_SLAVE[1] != 0x00 && BOOT_LOAD_DATA_READY == false){
+    else if(BOOT_LOAD_DATA_READY == false){
         BOOT_LOAD_DATA_READY = false;
         LED_ERR++;
     }       
@@ -431,25 +439,28 @@ static uint8_t BytesToSent = 0;
 static uint8_t BytesToReceive = 0;
 
 void BOOTxLOADxHANDLER(){
-    if(BOOT_LOAD_DATA_READY){
+    if(BOOT_LOAD_DATA_READY == true){
         switch(BOOT_DATA_TO_SLAVE[2]){
-            case 0   : BytesToSent = 10;   BytesToReceive = 26; break;
-            case 1   : BytesToSent = 0;    BytesToReceive = 0;  break;
-            case 2   : BytesToSent = 75;   BytesToReceive = 11; break;
-            case 3   : BytesToSent = 10;   BytesToReceive = 11; break;
-            case 4   : BytesToSent = 0;    BytesToReceive = 0;  break;
-            case 5   : BytesToSent = 0;    BytesToReceive = 0;  break;
-            case 6   : BytesToSent = 0;    BytesToReceive = 0;  break;
-            case 7   : BytesToSent = 10;   BytesToReceive = 11; break;
-            case 8   : BytesToSent = 10;   BytesToReceive = 12; break;
-            case 9   : BytesToSent = 10;   BytesToReceive = 11; break;
-            case 0xFF: BytesToSent = 0;    BytesToReceive = 0; 
-                       BOOT_LOAD_DATA_READY = false;            break;
-            default:                                            break;            
+            case READ_VERSION       : BytesToSent = 10;   BytesToReceive = 26; break;
+            case READ_FLASH         : BytesToSent = 0;    BytesToReceive = 0;  break;
+            case WRITE_FLASH        : BytesToSent = 75;   BytesToReceive = 11; break;
+            case ERASE_FLASH        : BytesToSent = 10;   BytesToReceive = 11; break;
+            case READ_EE_DATA       : BytesToSent = 0;    BytesToReceive = 0;  break;
+            case WRITE_EE_DATA      : BytesToSent = 0;    BytesToReceive = 0;  break;
+            case READ_CONFIG        : BytesToSent = 0;    BytesToReceive = 0;  break;
+            case WRITE_CONFIG       : BytesToSent = 10;   BytesToReceive = 11; break;
+            case CALC_CHECKSUM      : BytesToSent = 10;   BytesToReceive = 12; break;
+            case RESET_DEVICE       : BytesToSent = 10;   BytesToReceive = 11; break;
+            case NEXT_TRANSMISSION  : BytesToSent = 0;    BytesToReceive = 0; 
+                                      BOOT_LOAD_DATA_READY = false;            break;
+            default:                                                           break;            
         }
         
-        for(uint8_t i = 0; i < BytesToSent; i++){
-            EUSART1_Write(BOOT_DATA_TO_SLAVE[i]);
+        if(BOOT_LOAD_DATA_SENT == false){
+            for(uint8_t i = 0; i < BytesToSent; i++){
+                EUSART1_Write(BOOT_DATA_TO_SLAVE[i]);
+            }
+            BOOT_LOAD_DATA_SENT = true;
         }
     }
     else if(EUSART1_is_rx_ready() > (BytesToReceive - 1)){
@@ -481,13 +492,14 @@ typedef enum
     NOK         = 0x04, 
     BUSY        = 0x01,
     IDLE        = 0x00,
+            
     MODE        = 0x01,
     WRITE       = 0x02,
     HOLDINGREG  = 0x04,
     INPUTREG    = 0x08,
-    DIAGREG     = 0x10,
-    EXEC        = 0x20,
-    BOOTLOAD    = 0x40
+    DIAGREG     = 0x10,    
+    BOOTLOAD    = 0x20,
+    EXEC        = 0x8000
 };
 
 unsigned int CommandMachine = 0;
@@ -504,7 +516,7 @@ void SLAVExCOMMANDxHANDLER (uint16_t State){
         case 0:
             if (MASTER_SLAVE_DATA[0].HoldingReg[0] & EXEC){                     // if execute is set
 
-                if((MASTER_SLAVE_DATA[0].HoldingReg[0] & 0x1C) == HOLDINGREG){ 
+                if((MASTER_SLAVE_DATA[0].HoldingReg[0] & 0x3C) == HOLDINGREG){ 
                     if(MASTER_SLAVE_DATA[0].HoldingReg[0] & WRITE){             // if write is set
                         MASTER_SLAVE_DATA[0].InputReg[0] = BUSY;
                         HoldingRegisterWrite[1] = MASTER_SLAVE_DATA[0].HoldingReg[3];       // Register address to write to
@@ -522,7 +534,7 @@ void SLAVExCOMMANDxHANDLER (uint16_t State){
                         CommandMachine = 50;
                     }                                
                 }
-                else if((MASTER_SLAVE_DATA[0].HoldingReg[0] & 0x1C) == INPUTREG){
+                else if((MASTER_SLAVE_DATA[0].HoldingReg[0] & 0x3C) == INPUTREG){
                     if(MASTER_SLAVE_DATA[0].HoldingReg[0] & WRITE){             // if write is set
                         MASTER_SLAVE_DATA[0].InputReg[0] = NOK;
                         CommandMachine = 50;
@@ -538,7 +550,7 @@ void SLAVExCOMMANDxHANDLER (uint16_t State){
                         CommandMachine = 20;
                     }
                 }
-                else if((MASTER_SLAVE_DATA[0].HoldingReg[0] & 0x1C) == DIAGREG){
+                else if((MASTER_SLAVE_DATA[0].HoldingReg[0] & 0x3C) == DIAGREG){
                     if(MASTER_SLAVE_DATA[0].HoldingReg[0] & WRITE){             // if write is set
                         MASTER_SLAVE_DATA[0].InputReg[0] = NOK;
                         CommandMachine = 50;
@@ -548,11 +560,13 @@ void SLAVExCOMMANDxHANDLER (uint16_t State){
                         CommandMachine = 30;
                     }
                 }
-                else if(((MASTER_SLAVE_DATA[0].HoldingReg[0] & 0x1C) == BOOTLOAD) &&
+                else if(((MASTER_SLAVE_DATA[0].HoldingReg[0] & 0x3C) == BOOTLOAD) &&
                          (State == false)){                                     // Going to bootload only possible in startup fase
                     COMM_MODE_BOOTLOAD = true;
-                    MASTER_SLAVE_DATA[0].InputReg[0] = IDLE;                    // reset status register for readback of execution towards ethernet target
+                    MASTER_SLAVE_DATA[0].InputReg[0] = OK;                      // reset status register for readback of execution towards ethernet target
                     MASTER_SLAVE_DATA[0].HoldingReg[0] = 0;
+                    //T2PR = 0x3B;
+                    //PR2  = 0x3B;
                     CommandMachine = 0;
                 }
                 

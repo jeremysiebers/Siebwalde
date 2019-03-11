@@ -12,6 +12,7 @@ Command 	= command to be executed by Ethernet target
 1			= write to boot loader [Data] contains commands and data for the boot loader
 
 			= [0xAA][0x01][<boot loader protocol>][0x55]
+			
 
 2			= write to Ethernet Target, [Data] contains command/data for Ethernet target
 

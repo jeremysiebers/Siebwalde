@@ -22,12 +22,13 @@ static SLAVE_INFO         SlaveDump[1];
 
 /*----------------------------------------------------------------------------*/
 
-unsigned int LED_TX_prev, LED_RX_prev, LED_ERR_prev = 0;
-unsigned int LED_TX_STATE, LED_RX_STATE, LED_ERR_STATE = 0;
-volatile unsigned int LED_ERR = 0;
-unsigned int UpdateNextSlave = false;
-unsigned int AllSlavesReadAllDataCounter = 1;
-unsigned int InitDone = false;
+static uint16_t LED_TX_prev, LED_RX_prev, LED_ERR_prev, LED_WAR_prev = 0;
+static uint16_t LED_TX_STATE, LED_RX_STATE, LED_ERR_STATE, LED_WAR_STATE = 0;
+uint16_t LED_ERR = 0;
+static uint16_t LED_WAR = 0;
+uint16_t UpdateNextSlave = false;
+uint16_t AllSlavesReadAllDataCounter = 1;
+uint16_t InitDone = false;
 /*
                          Main application
  */
@@ -77,7 +78,9 @@ void main(void)
     TMR2_Start();
     
     /* Wait till all slave data is send to SPI master from SPI slave */
-    //__delay_ms(1000);
+    __delay_ms(100);
+    
+    COMM_MODE_BOOTLOAD = false;
     
     while(1)
     {
@@ -100,8 +103,10 @@ void main(void)
             }
 
             ProcessPetitModbus();            
-        }        
-        else{ BOOTxLOADxHANDLER(); }
+        }
+        else{
+            LED_WAR++;
+        }
         
         Led_Blink();
     }
@@ -176,6 +181,29 @@ void Led_Blink (){
 
             default :
                 LED_ERR_STATE = 0;
+                break;                       
+        }
+        
+        switch(LED_WAR_STATE){
+            case 0 : 
+                if (LED_WAR > 0){
+                    LED_WAR_LAT = 1;
+                    LED_WAR_prev = LED_WAR;
+                    LED_WAR_STATE = 1;                        
+                }
+                break;
+
+            case 1 :
+                if (LED_WAR == LED_WAR_prev || LED_WAR != LED_WAR_prev){
+                    LED_WAR_LAT = 0;
+                    LED_WAR_prev = 0;
+                    LED_WAR = 0;
+                    LED_WAR_STATE = 0;                        
+                }
+                break;
+
+            default :
+                LED_WAR_STATE = 0;
                 break;                       
         }
         

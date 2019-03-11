@@ -46,7 +46,6 @@ static SLAVE_INFO         SlaveInfo[NUMBER_OF_SLAVES];
 static SLAVE_INFO         EthernetTarget;
 
 static udpStart_t udpPacket;
-uint16_t SizeOfStruct = sizeof(SLAVE_INFO);
 static uint8_t DataFromSlaveSend = 0;
 bool Init_UDP = true;
 uint16_t count = 0;
@@ -68,8 +67,6 @@ typedef enum
     MODBUS_CMD          = 0xFF,
     BOOTLOAD_CMD        = 0xFE,
     ETHERNET_CMD        = 0xFD,
-    BOOTLOAD_CONFIG     = 0x07,
-    BOOTLOAD_FLASH      = 0x02,
             
     SEND_SLAVEIODATA    = 0x00,
     SEND_BOOTLOADER     = 0x01,
@@ -112,8 +109,7 @@ void main(void)
     SYSTEM_Initialize();
     
     INITxSPIxCOMMxHANDLER(SlaveInfo);                                           // Init SPI slave - master registers
-    INITxSLAVExSTARTUP(SlaveInfo);                                              // Init Slave startup 
-    
+        
     // If using interrupts in PIC18 High/Low Priority Mode you need to enable the Global High and Low Interrupts
     // If using interrupts in PIC Mid-Range Compatibility Mode you need to enable the Global and Peripheral Interrupts
     // Use the following macros to:
@@ -207,19 +203,6 @@ void main(void)
 //                }
                 break;
                 
-            case 2:
-                if(SLAVExINITxANDxCONFIG() == true){
-                    InitPhase = false;
-                    StateMachine = 3;
-                }
-                break;
-                
-            case 3:
-                if(ENABLExAMPLIFIER() == true){
-                    StateMachine = 4;
-                }
-                break;
-                
             default :   
                 break;
         }
@@ -242,13 +225,13 @@ void main(void)
                         pSlaveDataSend = &(EthernetTarget.Header);
                         SlaveDataTx[1] = ETHERNET_CMD;                              // send the Data Type
                         UDP_WriteBlock(SlaveDataTx, 2);
-                        UDP_WriteBlock(pSlaveDataSend, SizeOfStruct);
+                        UDP_WriteBlock(pSlaveDataSend, DATAxSTRUCTxLENGTH);
                     }
                     else{
                         pSlaveDataSend = &(SlaveInfo[DataFromSlaveSend].Header);
                         SlaveDataTx[1] = MODBUS_CMD;                                // send the Data Type
                         UDP_WriteBlock(SlaveDataTx, 2);
-                        UDP_WriteBlock(pSlaveDataSend, SizeOfStruct);
+                        UDP_WriteBlock(pSlaveDataSend, DATAxSTRUCTxLENGTH);
                     }
                     UDP_Send();
 
@@ -286,9 +269,15 @@ void main(void)
                 if(ret == SUCCESS)
                 { 
                     LED2_LAT = 1;
+//                    UDP_Write16(0xC0DE);
+//                    UDP_Send();
                     
+                    //pSlaveDataSend = &(RECEIVED_BOOT_LOAD_DATA[0]);
+                    SlaveDataTx[1] = BOOTLOAD_CMD;                              // send the Data Type
+                    UDP_WriteBlock(SlaveDataTx, 2);
+                    UDP_WriteBlock(&(RECEIVED_BOOT_LOAD_DATA[0]), DATAxSTRUCTxLENGTH);
                     UDP_Send();
-                    
+                                      
                     LED2_LAT = 0;
                 }
                 else{
@@ -305,11 +294,28 @@ void main(void)
     }
 }
 
+/*#--------------------------------------------------------------------------#*/
+/*  Description: UDP_DATA_RECV()
+ *
+ *  Input(s)   : 
+ *
+ *  Output(s)  :
+ *
+ *  Returns    :
+ *
+ *  Pre.Cond.  :
+ *
+ *  Post.Cond. :
+ *
+ *  Notes      : 
+ */
+/*#--------------------------------------------------------------------------#*/
+
 typedef struct
 {
     uint8_t header;
     uint8_t command;
-    uint8_t data[77]; 
+    uint8_t data[DATAxSTRUCTxLENGTH]; 
 }udpDemoRecv_t;
 
 void UDP_DATA_RECV(int length)
@@ -357,11 +363,12 @@ void UDP_DATA_RECV(int length)
                         case RESET_ALL:
                             //printf("Reset All slaves...\n\r");
 //                            RESET();
+                            COMM_MODE_BOOTLOAD = false;
                             InitPhase = true;
                             DataFromSlaveSend = 0;
                             RESETxSPIxCOMMxHANDLER();
                             ModbusReset_LAT = 1;
-                            __delay_ms(1);
+                            __delay_ms(500);
                             ModbusReset_LAT = 0;
                             //__delay_ms(4000);
                             EthernetTarget.InputReg[0] = ETH_OK;
@@ -399,24 +406,9 @@ void UDP_DATA_RECV(int length)
                 }
                 break;
                 
-            case BOOTLOAD_CMD:
-                if(udpRecv.data[0] == FOOTER){
-                    switch(udpRecv.data[1]){
-                        case 0   : BytesToSent = 10;   BytesToReceive = 26; break;
-                        case 1   : BytesToSent = 0;    BytesToReceive = 0;  break;
-                        case 2   : BytesToSent = 75;   BytesToReceive = 11; break;
-                        case 3   : BytesToSent = 10;   BytesToReceive = 11; break;
-                        case 4   : BytesToSent = 0;    BytesToReceive = 0;  break;
-                        case 5   : BytesToSent = 0;    BytesToReceive = 0;  break;
-                        case 6   : BytesToSent = 0;    BytesToReceive = 0;  break;
-                        case 7   : BytesToSent = 10;   BytesToReceive = 11; break;
-                        case 8   : BytesToSent = 10;   BytesToReceive = 12; break;
-                        case 9   : BytesToSent = 10;   BytesToReceive = 11; break;
-                        case 0xFF: BytesToSent = 10;   BytesToReceive = 11; 
-                                   BOOT_LOAD_DATA_READY = false;            break;
-                        default:                                            break;            
-                    }
-                }
+            case BOOTLOAD_CMD:                
+                *pSEND_BOOT_LOAD_DATA = udpRecv.data[0];
+                printf("BOOTLOAD_CMD received!\n\r");
                 break;      
                 
             default:
