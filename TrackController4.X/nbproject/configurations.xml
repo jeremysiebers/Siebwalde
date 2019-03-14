@@ -10,7 +10,6 @@
         <logicalFolder name="TCPIPLibrary"
                        displayName="TCPIPLibrary"
                        projectFiles="true">
-          <itemPath>mcc_generated_files/TCPIPLibrary/log_syslog.h</itemPath>
           <itemPath>mcc_generated_files/TCPIPLibrary/ip_database.h</itemPath>
           <itemPath>mcc_generated_files/TCPIPLibrary/lfsr.h</itemPath>
           <itemPath>mcc_generated_files/TCPIPLibrary/network.h</itemPath>
@@ -19,12 +18,11 @@
           <itemPath>mcc_generated_files/TCPIPLibrary/udpv4_port_handler_table.h</itemPath>
           <itemPath>mcc_generated_files/TCPIPLibrary/arpv4.h</itemPath>
           <itemPath>mcc_generated_files/TCPIPLibrary/tcpip_types.h</itemPath>
-          <itemPath>mcc_generated_files/TCPIPLibrary/log.h</itemPath>
           <itemPath>mcc_generated_files/TCPIPLibrary/ethernet_driver.h</itemPath>
           <itemPath>mcc_generated_files/TCPIPLibrary/rtcc.h</itemPath>
           <itemPath>mcc_generated_files/TCPIPLibrary/udpv4.h</itemPath>
           <itemPath>mcc_generated_files/TCPIPLibrary/tcpip_config.h</itemPath>
-          <itemPath>mcc_generated_files/TCPIPLibrary/log_console.h</itemPath>
+          <itemPath>mcc_generated_files/TCPIPLibrary/syslog.h</itemPath>
         </logicalFolder>
         <itemPath>mcc_generated_files/mcc.h</itemPath>
         <itemPath>mcc_generated_files/interrupt_manager.h</itemPath>
@@ -51,7 +49,6 @@
         <logicalFolder name="TCPIPLibrary"
                        displayName="TCPIPLibrary"
                        projectFiles="true">
-          <itemPath>mcc_generated_files/TCPIPLibrary/log_syslog.c</itemPath>
           <itemPath>mcc_generated_files/TCPIPLibrary/ip_database.c</itemPath>
           <itemPath>mcc_generated_files/TCPIPLibrary/lfsr.c</itemPath>
           <itemPath>mcc_generated_files/TCPIPLibrary/network.c</itemPath>
@@ -60,10 +57,9 @@
           <itemPath>mcc_generated_files/TCPIPLibrary/mac_address.c</itemPath>
           <itemPath>mcc_generated_files/TCPIPLibrary/ETHxxJ6x_driver.c</itemPath>
           <itemPath>mcc_generated_files/TCPIPLibrary/rtcc.c</itemPath>
-          <itemPath>mcc_generated_files/TCPIPLibrary/log_console.c</itemPath>
-          <itemPath>mcc_generated_files/TCPIPLibrary/log.c</itemPath>
           <itemPath>mcc_generated_files/TCPIPLibrary/udpv4.c</itemPath>
           <itemPath>mcc_generated_files/TCPIPLibrary/ipv4.c</itemPath>
+          <itemPath>mcc_generated_files/TCPIPLibrary/syslog.c</itemPath>
         </logicalFolder>
         <itemPath>mcc_generated_files/mcc.c</itemPath>
         <itemPath>mcc_generated_files/device_config.c</itemPath>
@@ -99,7 +95,7 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC18F-J_DFP" vendor="Microchip" version="1.0.8"/>
+        <pack name="PIC18F-J_DFP" vendor="Microchip" version="1.0.10"/>
       </packs>
       <compileType>
         <linkerTool>

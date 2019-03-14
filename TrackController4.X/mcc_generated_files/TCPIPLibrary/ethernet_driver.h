@@ -46,32 +46,26 @@ MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE OF THESE TER
 #include <stdint.h>
 #include "mac_address.h"
 
-
-typedef union
+typedef struct
 {
-    uint8_t v[4];
-    struct
-    {
-        uint16_t byteCount;
-        unsigned long_drop_event:1;
-        unsigned :1;
-        unsigned excessCarrierEvent:1;
-        unsigned :1;
-        unsigned crcError:1;
-        unsigned lengthCheckError:1;
-        unsigned lengthLongError:1;
-        unsigned rxOK:1;
-        unsigned rxMulticast:1;
-        unsigned rxBroadcast:1;
-        unsigned dribbleNibble:1;
-        unsigned controlFrame:1;
-        unsigned pauseControlFrame:1;
-        unsigned unknownContrlFrame:1;
-        unsigned vlanTagPresent:1;
-        unsigned zero:1;
-    };
+    uint16_t byteCount;
+    unsigned long_drop_event:1;
+    unsigned :1;
+    unsigned excessCarrierEvent:1;
+    unsigned :1;
+    unsigned crcError:1;
+    unsigned lengthCheckError:1;
+    unsigned lengthLongError:1;
+    unsigned rxOK:1;
+    unsigned rxMulticast:1;
+    unsigned rxBroadcast:1;
+    unsigned dribbleNibble:1;
+    unsigned controlFrame:1;
+    unsigned pauseControlFrame:1;
+    unsigned unknownContrlFrame:1;
+    unsigned vlanTagPresent:1;
+    unsigned zero:1;
 }receiveStatusVector_t;
-
 
 typedef struct 
 {
@@ -102,6 +96,8 @@ extern volatile ethernetDriver_t ethData;
 #define ETH_linkCheck()   ethData.up
 #define ETH_linkChanged() ethData.linkChange
 
+void ETH_CloseSPI(void);           // Release SPI Bus
+void ETH_OpenSPI(void);            // Open SPI Bus
 
 void ETH_Init(void);            // setup the ethernet and get it running
 void ETH_EventHandler(void);    // Manage the MAC events.  Poll this or put it in the ISR

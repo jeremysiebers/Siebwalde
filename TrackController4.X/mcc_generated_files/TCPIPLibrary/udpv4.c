@@ -87,6 +87,11 @@ error_msg UDP_Start(uint32_t destIP, uint16_t srcPort, uint16_t dstPort)
         ETH_Write16(0);
 
     }
+    else
+    {
+        UDP_DumpPacketInCreation();
+    }
+    
     return ret;
 }
 
@@ -121,6 +126,7 @@ error_msg UDP_Receive(uint16_t udpcksm) // catch all UDP packets and dispatch th
 {
     error_msg ret = ERROR;
     udp_table_iterator_t  hptr;
+    uint16_t x;
 
     ETH_ReadBlock((char *)&udpHeader,sizeof(udpHeader));
 

@@ -40,9 +40,9 @@ MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE OF THESE TER
 #include "lfsr.h"
 
 #define lfsr_seed  0x40
-#define lfsrOutputMask  0x7fu          //jira: CAE_MCU8-5647
+#define lfsrOutputMask  0x7f
 
-static uint8_t sequenceIndex = 0;      //jira: CAE_MCU8-5647
+static int sequenceIndex = 0;
 const lfsr_t xorSequences[] = {0x41,0x44,0x47,0x48,0x4E,0x53,0x55,0x5C,0x5F,0x60,0x65,0x69,0x6A,0x72,0x77,0x78,0x7B,0x7E};
 lfsr_t xor_mask = 0x41;  // note this comes from the first entry in the sequence list
 lfsr_t lfsr_value = lfsr_seed;
@@ -62,7 +62,7 @@ void lfsr_reset(void)
 	lfsr_value = lfsr_seed;
 }
 
-void lfsr_setSequence(uint16_t s)           //jira: CAE_MCU8-5647
+void lfsr_setSequence(int s)
 {
 	s %= sizeof(xorSequences)/sizeof(*xorSequences);
 	xor_mask = xorSequences[s];
@@ -70,8 +70,8 @@ void lfsr_setSequence(uint16_t s)           //jira: CAE_MCU8-5647
 
 lfsr_t lfsr(void)
 {
-	unsigned char lsb = lfsr_value & 1u;     //jira: CAE_MCU8-5647
-	lfsr_value >>= 1u;                       //jira: CAE_MCU8-5647
+	char lsb = lfsr_value & 1;
+	lfsr_value >>= 1;
 	if (lsb)
 		lfsr_value ^= xor_mask;
 	return lfsr_value & lfsrOutputMask;
@@ -79,8 +79,9 @@ lfsr_t lfsr(void)
 
 lfsr_t lfsrWithSeed(uint8_t lfsrSeed)
 {
-    lfsr_value = lfsrSeed;  
-	unsigned char lsb = lfsr_value & 1u;     //jira: CAE_MCU8-5647
+    lfsr_value = lfsrSeed;
+    
+	char lsb = lfsr_value & 1;
 	lfsr_value >>= 1;
 	if (lsb)
 		lfsr_value ^= xor_mask;

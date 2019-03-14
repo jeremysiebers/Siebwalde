@@ -36,14 +36,12 @@ THE AMOUNT OF FEES, IF ANY, THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS SO
 MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE OF THESE TERMS. 
 
 */
-#include <xc.h>
-#include <stdio.h>
-#include <stdint.h>
+#include "tcpip_config.h"
 #include "mac_address.h"
-
 
 mac48Address_t macAddress = MAC_ADDRESS;
 const mac48Address_t broadcastMAC = {0xff,0xff,0xff,0xff,0xff,0xff};
+
 
 const mac48Address_t *MAC_getAddress(void)
 {

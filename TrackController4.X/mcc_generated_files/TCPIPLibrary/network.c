@@ -37,14 +37,8 @@ MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE OF THESE TER
 
 */
 
-/**
- Section: Included Files
- */
-
-#include <xc.h>
 #include <stdio.h>
 #include <stdbool.h>
-#include <string.h>
 #include <time.h>
 #include "network.h"
 #include "tcpip_types.h"
@@ -52,25 +46,11 @@ MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE OF THESE TER
 #include "ipv4.h"
 #include "rtcc.h"
 #include "ethernet_driver.h"
-#include "log.h"
 #include "ip_database.h"
-#ifdef ENABLE_NETWORK_DEBUG
-#define logMsg(msg, msgSeverity, msgLogDest)    logMessage(msg, LOG_KERN, msgSeverity, msgLogDest) 
-#else
-#define logMsg(msg, msgSeverity, msgLogDest)
-#endif
 
 time_t arpTimer;
 static void Network_SaveStartPosition(void);
 uint16_t networkStartPosition;
-
-const char *network_errors[] = { "ERROR","SUCCESS","LINK_NOT_FOUND","BUFFER_BUSY",
-                             "TX_LOGIC_NOT_IDLE","MAC_NOT_FOUND",
-                             "IP_WRONG_VERSION","IPV4_CHECKSUM_FAILS",
-                             "DEST_IP_NOT_MATCHED","ICMP_CHECKSUM_FAILS",
-                             "UDP_CHECKSUM_FAILS","TCP_CHECKSUM_FAILS",
-                             "DMA_TIMEOUT","PORT_NOT_AVAILABLE",
-                             "ARP_IP_NOT_MATCHED","EAPol_PACKET_FAILURE"};
 
 void Network_Init(void)
 {
@@ -80,7 +60,6 @@ void Network_Init(void)
     rtcc_init();
     Network_WaitForLink();  
     timersInit();
-    LOG_Init();
 }
 
 void timersInit()
@@ -91,7 +70,7 @@ void timersInit()
 
 void Network_WaitForLink(void)
 {
-    while(!ETH_CheckLinkUp()) NOP();
+    while(!ETH_CheckLinkUp()); 
 }
 
 void Network_Manage(void)
@@ -107,11 +86,12 @@ void Network_Manage(void)
     if(now >= arpTimer)
     {
         ARPV4_Update();
-        arpTimer = now + 10;
-    }    
+        arpTimer += 10;
+    }
     if(now > nowPv) // at least 1 second has elapsed
     {
         // is defined as a minimum of 1 seconds in RFC973
+
     }
     nowPv = now;
 }
@@ -130,31 +110,16 @@ void Network_Read(void)
         switch (header.id.type)
         {
             case ETHERTYPE_VLAN:
-                logMsg("VLAN Packet Dropped", LOG_INFO, (LOG_DEST_CONSOLE|LOG_DEST_ETHERNET));
                 break;
             case ETHERTYPE_ARP:
-                logMsg("RX ARPV4 Packet", LOG_INFO, (LOG_DEST_CONSOLE|LOG_DEST_ETHERNET));
                 ARPV4_Packet();
                 break;
             case ETHERTYPE_IPV4:
-                logMsg("RX IPV4 Packet", LOG_INFO, (LOG_DEST_CONSOLE|LOG_DEST_ETHERNET));
                 IPV4_Packet();
                 break;
             case ETHERTYPE_IPV6:
-                logMsg("RX IPV6 Packet Dropped", LOG_INFO, (LOG_DEST_CONSOLE|LOG_DEST_ETHERNET));
                 break;
             default:
-                {
-                    long t = header.id.type;
-                    if(t < 0x05dc) // this is a length field
-                    {
-                        sprintf(debug_str,"802.3 length 0x%04lX",t);                    
-                    }
-                    else
-                        sprintf(debug_str,"802.3 type 0x%04lX",t);
-
-                    logMsg(debug_str, LOG_INFO, (LOG_DEST_CONSOLE|LOG_DEST_ETHERNET));
-                }
                 break;
         }        
         ETH_Flush();

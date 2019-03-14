@@ -40,8 +40,6 @@ MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE OF THESE TER
 #ifndef TCPIP_CONFIG_H
 #define	TCPIP_CONFIG_H
 
-
-
 /**
   Section: Included Files
 */
@@ -53,10 +51,8 @@ MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE OF THESE TER
 /* Build the IPv4 Address*/
 #define MAKE_IPV4_ADDRESS(a,b,c,d) ((uint32_t)(((uint32_t)a << 24) | ((uint32_t)b<<16) | ((uint32_t)c << 8) | (uint32_t)d))
 
-
 /******************************** ARP Protocol Defines *********************************/
 #define ARP_MAP_SIZE 8
-
 
 
 
@@ -77,7 +73,6 @@ MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE OF THESE TER
 #define LOCAL_TCP_PORT_START_NUMBER     (1024u)             // define the lower port number to be used as a local port
 #define LOCAL_TCP_PORT_END_NUMBER       (65535u)            // define the highest port number to be used as a local port
 
-/************************ Neighbor Discovery Protocol Defines **************************/
 
 /******************************** TCP/IP stack debug Defines *********************************/
 

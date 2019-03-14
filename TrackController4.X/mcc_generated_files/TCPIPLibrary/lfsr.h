@@ -45,7 +45,7 @@ typedef uint8_t lfsr_t;
 int lfsr_getSequenceCount(void);
 lfsr_t lfsr_getSequence(void);
 void lfsr_reset(void);
-void lfsr_setSequence(uint16_t s);  //jira: CAE_MCU8-5647
+void lfsr_setSequence(int s);
 lfsr_t lfsr(void);
 lfsr_t lfsrWithSeed(uint8_t lfsrSeed);
 

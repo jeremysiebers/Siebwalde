@@ -4,6 +4,8 @@
 #include "mcc_generated_files/mcc.h"
 #include "spicommhandler.h"
 
+#define DATAxSTRUCTxLENGTH2  43
+
 /*#--------------------------------------------------------------------------#*/
 /*  Description: InitSlaveCommunication(SLAVE_INFO *location)
  *
@@ -20,7 +22,7 @@
  *  Notes      :
  */
 /*#--------------------------------------------------------------------------#*/
-const uint8_t DATAxSTRUCTxLENGTH2 = 43;
+//const uint8_t DATAxSTRUCTxLENGTH2 = 43;
 
 static SLAVE_INFO *MASTER_SLAVE_DATA = 0;                                       // Holds the address were the received slave data is stored
 static SLAVE_INFO SlaveInfoReadMask = 0;                                        // Read mask for slave data from and to ModbusMaster
@@ -47,9 +49,8 @@ unsigned bool InitPhase = true;
 /*
  * Variables of PROCESSxSPIxBOOTLOAD()
  */
-uint8_t RECEIVED_BOOT_LOAD_DATA[DATAxSTRUCTxLENGTH2+1];                         // One dummy byte extra (SPI master will send extra byte to receive last byte from slave)
-uint8_t SEND_BOOT_LOAD_DATA[DATAxSTRUCTxLENGTH2];
-uint8_t *pSEND_BOOT_LOAD_DATA;
+static uint8_t RECEIVED_BOOT_LOAD_DATA[DATAxSTRUCTxLENGTH2+1];                  // One dummy byte extra (SPI master will send extra byte to receive last byte from slave)
+static uint8_t SEND_BOOT_LOAD_DATA[DATAxSTRUCTxLENGTH2];
 static uint8_t BootloadDataCounterReceived = 0;
 static uint8_t BootloadDataCounterSend = 0;
 static uint8_t BootloadDataReady = 0;
@@ -141,11 +142,11 @@ void INITxSPIxCOMMxHANDLER(SLAVE_INFO *location)
      * Bootloader init
      */
     
-    for(unsigned int i = 0; i < DATAxSTRUCTxLENGTH2; i++){
+    for(uint8_t i = 0; i < DATAxSTRUCTxLENGTH2; i++){
         SEND_BOOT_LOAD_DATA[i] = i;                                               // Increment pointer
-    } 
-    
-    pSEND_BOOT_LOAD_DATA =  &(SEND_BOOT_LOAD_DATA[0]);
+    }
+    SEND_BOOT_LOAD_DATA[0] = 0xEE;
+    SEND_BOOT_LOAD_DATA[DATAxSTRUCTxLENGTH2 - 1] = 0x55;
 }
 
 /*#--------------------------------------------------------------------------#*/
@@ -181,7 +182,6 @@ void RESETxSPIxCOMMxHANDLER(){
     /*
      * Reset variables of PROCESSxSPIxBOOTLOAD()
      */
-    *pSEND_BOOT_LOAD_DATA       = SEND_BOOT_LOAD_DATA[0];
     BootloadDataCounterReceived = 0;
     BootloadDataCounterSend     = 0;
     BootloadDataReady           = 0;
@@ -205,24 +205,24 @@ void RESETxSPIxCOMMxHANDLER(){
 /*#--------------------------------------------------------------------------#*/
 
 void PROCESSxSPIxMODBUS(){
-    //SS1_Check_LAT = 1; 
+    SS1_Check_LAT = 1; 
     RECEIVEDxDATAxRAW[DATAxCOUNTxRECEIVED] = SSP2BUF;                       
     SSP2BUF = SENDxDATAxRAW[DATAxCOUNTxSEND];
     DATAxCOUNTxRECEIVED++;
     DATAxCOUNTxSEND++;
-    //SS1_Check_LAT = 0;
+    SS1_Check_LAT = 0;
     
     while(!DATAxREADY){
         
         
         if (SSP2STATbits.BF){  
             
-            //SS1_Check_LAT = 1; 
+            SS1_Check_LAT = 1; 
             
             RECEIVEDxDATAxRAW[DATAxCOUNTxRECEIVED] = SSP2BUF; 
             SSP2BUF = SENDxDATAxRAW[DATAxCOUNTxSEND];
             
-            //SS1_Check_LAT = 0;
+            SS1_Check_LAT = 0;
             
             DATAxCOUNTxRECEIVED++;
             DATAxCOUNTxSEND++;
@@ -233,15 +233,14 @@ void PROCESSxSPIxMODBUS(){
         }
     }
     
-    //SS1_Check_LAT = 1;
+    SS1_Check_LAT = 1;
     
     DATAxREADY = 0;
     DATAxCOUNTxRECEIVED = 0; 
     DATAxCOUNTxSEND     = 0;
-    ProcessModbusData();   
     SSP2BUF = 0;
                  
-    //SS1_Check_LAT = 0;  
+    SS1_Check_LAT = 0;  
 
 }
 
@@ -273,7 +272,7 @@ void ProcessSpiData(){
 }
 */
 
-void ProcessModbusData(){
+void PROCESSxMODBUSxDATA(){
     
     pSlaveDataReceived = &(MASTER_SLAVE_DATA[RECEIVEDxDATAxRAW[1]].Header);// set the pointer to the first element of the received slave number in RECEIVEDxDATAxRAW[1]
     pSlaveDataSend = &(MASTER_SLAVE_DATA[DataFromSlaveSend].Header);       // set the pointer to the first element of the MASTER_SLAVE_DATA according to the DataFromSlaveSend counter
@@ -333,24 +332,20 @@ void ProcessModbusData(){
 
 
 void PROCESSxSPIxBOOTLOAD(){
-    //SS1_Check_LAT = 1; 
+    SS1_Check_LAT = 1; 
     RECEIVED_BOOT_LOAD_DATA[BootloadDataCounterReceived] = SSP2BUF;                       
-    SSP2BUF = pSEND_BOOT_LOAD_DATA[BootloadDataCounterSend];
+    SSP2BUF = SEND_BOOT_LOAD_DATA[BootloadDataCounterSend];
     BootloadDataCounterReceived++;
     BootloadDataCounterSend++;
-    //SS1_Check_LAT = 0;
+    SS1_Check_LAT = 0;
     
     while(!BootloadDataReady){
-        
-        
         if (SSP2STATbits.BF){  
             
-            //SS1_Check_LAT = 1; 
-            
+            SS1_Check_LAT = 1;
             RECEIVED_BOOT_LOAD_DATA[BootloadDataCounterReceived] = SSP2BUF; 
-            SSP2BUF = pSEND_BOOT_LOAD_DATA[BootloadDataCounterSend];
-            
-            //SS1_Check_LAT = 0;
+            SSP2BUF = SEND_BOOT_LOAD_DATA[BootloadDataCounterSend];
+            SS1_Check_LAT = 0;
             
             BootloadDataCounterReceived++;
             BootloadDataCounterSend++;
@@ -358,20 +353,16 @@ void PROCESSxSPIxBOOTLOAD(){
             if (BootloadDataCounterReceived > DATAxSTRUCTxLENGTH2){
                 BootloadDataReady = 1;
             }      
+            
         }
     }
     
-    //SS1_Check_LAT = 1;
-    
-    BootloadDataReady = 0;
+    SS1_Check_LAT = 1;
     BootloadDataCounterReceived = 0;    
     BootloadDataCounterSend     = 0;
-    
-    
-    //ProcessBootloadData();   
+    BootloadDataReady = 0;
     SSP2BUF = 0;
-                 
-    //SS1_Check_LAT = 0;
+    SS1_Check_LAT = 0;
 }
 
 /*#--------------------------------------------------------------------------#*/

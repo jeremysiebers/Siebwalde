@@ -1,3 +1,5 @@
+// rtcc.c
+
 /*********************************************************************
 * Software License Agreement:
 *
@@ -24,15 +26,15 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "rtcc.h"
-#include "../mcc.h"
+#include "../tmr1.h"
 
 #warning USING TIMER1 FOR TIMEBASE
 
-volatile time_t deviceTime;
-volatile bool dirtyTime;
+volatile time_t device_time;
 
-volatile uint16_t seconds_counter;
-/******************************************************************************
+/****************************************************************************
+  Function:
+    void rtcc_init(void)
 
   Summary:
     Initialize the clock calendar driver.
@@ -59,7 +61,7 @@ volatile uint16_t seconds_counter;
   ***************************************************************************/
 void rtcc_init(void)
 {
-    deviceTime = 1293861600;
+    device_time = 1293861600; // Jan 1 2011
     TMR1_SetInterruptHandler(rtcc_handler);
 }
 
@@ -68,10 +70,10 @@ void rtcc_init(void)
     void rtcc_handler(void) (TMR1 version)
 
   Summary:
-    maintain deviceTime (seconds) using the LCDIF flag/interrupt.
+    maintain device_time (seconds) using the LCDIF flag/interrupt.
 
   Description:
-    This function decrements seconds_counter until 0 and then increments deviceTime.
+    This function decrements seconds_counter until 0 and then increments device_time.
     seconds_counter reloads with CLOCK_PER_SEC.
     This version of the function uses Timer 1 as the time base.
     Timer 1 is reloaded with 0x8000 to cause TMR1IF to overflow every second.
@@ -92,7 +94,7 @@ void rtcc_init(void)
 
 void rtcc_handler(void)
 {
-	deviceTime++;
+        device_time++;
 }
 
 
@@ -123,15 +125,11 @@ void rtcc_handler(void)
 
 void rtcc_set(time_t *t)
 {
-    bool gieh_val;
-    bool giel_val;
-    giel_val = INTCONbits.GIEL;
-    gieh_val = INTCONbits.GIEH;
-    INTERRUPT_GlobalInterruptHighDisable();
-    INTERRUPT_GlobalInterruptLowDisable();
-    deviceTime = *t;
-    INTCONbits.GIEH = gieh_val;
-    INTCONbits.GIEL = giel_val;
+    bool gie_val;
+    gie_val = GIE;
+    GIE = 0;
+    device_time = *t;
+    GIE = gie_val;
 }
 
 /****************************************************************************
@@ -164,17 +162,13 @@ void rtcc_set(time_t *t)
 /* time.h does not implment time as it is application dependent */
 time_t time(time_t *t)
 {
-    bool gieh_val;
-    bool giel_val;
+    bool   gie_val;
     time_t  the_time;
     
-    giel_val = INTCONbits.GIEL;
-    gieh_val = INTCONbits.GIEH;  //jira: CAE_MCU8-5647
-    INTERRUPT_GlobalInterruptHighDisable();
-    INTERRUPT_GlobalInterruptLowDisable();
-    the_time = deviceTime;
-    INTCONbits.GIEH = gieh_val;
-    INTCONbits.GIEL = giel_val;
+    gie_val = GIE;
+    GIE = 0;
+    the_time = device_time;
+    GIE = gie_val;
 
     if(t)
     {
@@ -183,5 +177,3 @@ time_t time(time_t *t)
 
     return (the_time);
 }
-
-

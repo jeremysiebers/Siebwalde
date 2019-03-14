@@ -39,9 +39,12 @@ MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE OF THESE TER
 
 #include <xc.h>
 #include <stdio.h>
-#include "tcpip_config.h"
+#include "tcpip_types.h"
 #include "udpv4_port_handler_table.h"
+#include "tcpip_config.h"
 #include "../../main.h"
+
+#define SOURCEPORT_DEV_REG  65521
 
 const udp_handler_t UDP_CallBackTable[] = \
 {
@@ -57,8 +60,12 @@ udp_table_iterator_t udp_table_getIterator(void)
 
 udp_table_iterator_t udp_table_nextEntry(udp_table_iterator_t i)
 {
+    static udp_table_iterator_t j;
+    
+    j = udp_table_getIterator() +sizeof(UDP_CallBackTable);
+    
     i ++;
-    if(i < UDP_CallBackTable + sizeof(UDP_CallBackTable))
+    if(i < j )
     {
         return (udp_table_iterator_t) i;
     }

@@ -72,12 +72,11 @@ extern ipv4Header_t ipv4Header; // re evaluate this dependancy sometime
 #define   UDP_WriteBlock(data,length) ETH_WriteBlock(data,length)
 #define   UDP_WriteString(data)       ETH_WriteString(data)
 #define   UDP_GetDestPort()           (destPort)
-#define   UDP_GetSrcPort()            (udpHeader.dstPort)
 #define   UDP_GetDestIP()             (ipv4Header.srcIpAddress)
 #define   UDP_GetSrcIP()              (ipv4Header.dstIpAddress)
 #define   UDP_DataLength()            ((udpHeader.length) - 8)
-#define   UDP_FlushTXPackets()        ETH_TxReset()
-#define   UDP_FlushRxdPacket()        ETH_Flush()
+#define   UDP_DumpPacketInCreation()  ETH_TxReset()
+#define   UDP_FlushRxdPacket()        ETH_Flush();
 
 error_msg UDP_Start(uint32_t destIP, uint16_t srcPort, uint16_t dstPort);
 error_msg UDP_Send();

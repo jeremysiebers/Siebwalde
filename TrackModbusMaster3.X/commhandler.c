@@ -303,6 +303,7 @@ void SENDxDATAxTOxETHERNET(){
     dataIn  = &(MASTER_SLAVE_DATA[DataFromSlave].Header);                       // Data to Ethernet Target
     dataOut = &(RECEIVEDxDATAxRAW[0]);                                          // Data from Ethernet Target
     SS1_LAT = 0;                                                                // Activate slave
+    __delay_us(1);
     while(bytesWritten < DATAxSTRUCTxLENGTH + 1){
         SSP1CON1bits.WCOL = 0;
         SSP1BUF = dataIn[bytesWritten];
@@ -378,6 +379,7 @@ void BOOTxLOADxTOxETHERNET(){
     dataIn  = &(BOOT_DATA_TO_ETHERNET[0]);                                      // Data to Ethernet Target
     dataOut = &(BOOT_DATA_TO_SLAVE[0]);                                         // Data from Ethernet Target
     SS1_LAT = 0;                                                                // Activate slave
+    __delay_us(1);
     while(bytesWritten < DATAxSTRUCTxLENGTH2 + 1){
         SSP1CON1bits.WCOL = 0;
         SSP1BUF = dataIn[bytesWritten];

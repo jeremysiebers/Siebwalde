@@ -52,18 +52,10 @@ MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE OF THESE TER
 #define byteReverse24(a) (((((uint32_t)a & (uint32_t)0x00FF00) >> 8) | (((uint32_t)a & (uint32_t)0x0000FF) << 8)) << 8 | (uint32_t)a >> 0x10)
 
 // host to network & network to host macros
-#ifndef htons
 #define htons(a) byteSwap16(a)
-#endif
-#ifndef ntohs
 #define ntohs(a) byteSwap16(a)
-#endif
-#ifndef htonl
 #define htonl(a) byteReverse32(a)
-#endif
-#ifndef ntohl
 #define ntohl(a) byteReverse32(a)
-#endif
 
 #define convert_hton24(a)  byteReverse24(a)
 

@@ -115,13 +115,9 @@ error_msg ARPV4_Packet(void)
         mergeFlag = false;
         entryPointer = arpMap;
         // searching the arp table for a matching ip & protocol
-        if (htons(header.htype) != INETADDRESSTYPE_IPV4) return ARP_WRONG_HARDWARE_ADDR_TYPE;            //jira: CAE_MCU8-5739
-        if (htons(header.ptype) != ETHERTYPE_IPV4) return ARP_WRONG_PROTOCOL_TYPE;                          //jira: CAE_MCU8-5740
-        if (header.hlen != ETHERNET_ADDR_LEN) return ARP_WRONG_HARDWARE_ADDR_LEN;                        //jira: CAE_MCU8-5741
-        if (header.plen != IP_ADDR_LEN) return ARP_WRONG_PROTOCOL_LEN;                                   //jira: CAE_MCU8-5742
         for(uint8_t x=ARP_MAP_SIZE; x > 0; x--)
         {
-            if( (ntohl(header.spa) == entryPointer->ipAddress) && (header.ptype == entryPointer->protocolType))
+            if( (header.spa == entryPointer->ipAddress) && (header.ptype == entryPointer->protocolType) )
             {
                 entryPointer->age = 0; // reset the age
                 entryPointer->macAddress.s = header.sha.s;

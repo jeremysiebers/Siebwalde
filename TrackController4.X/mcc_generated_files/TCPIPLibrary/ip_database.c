@@ -49,7 +49,7 @@ uint32_t makeStrToIpv4Address(char *str)
     pch = strtok(str,".");
     while((pch != NULL))
     {        
-       ((uint8_t *)&ip_addr)[x]= (uint16_t)atoi((const char*)pch); //jira: CAE_MCU8-5647
+       ((uint8_t *)&ip_addr)[x]= atoi(pch);
         x--;     
         pch = strtok (NULL,".");
     }

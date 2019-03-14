@@ -39,8 +39,8 @@ MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE OF THESE TER
 */
 
 
-#ifndef TCPIP_TYPES_H
-#define TCPIP_TYPES_H
+#ifndef TCPIP_TCPIP_TYPES_H
+#define TCPIP_TCPIP_TYPES_H
 
 
 
@@ -75,6 +75,8 @@ typedef struct
     // 32 bit checksum goes here
 } ethernetFrame_t;
 
+uint8_t Control_Byte = 0x00;
+
 #define ETHERTYPE_IPV4      0x0800
 #define ETHERTYPE_ARP       0x0806
 #define ETHERTYPE_IPV6      0x86DD
@@ -87,8 +89,6 @@ typedef struct
 #define INETADDRESSTYPE_IPV6   2
 #define INETADDRESSTYPE_DNS    16
 
-#define ETHERNET_ADDR_LEN 6                     //jira: CAE_MCU8-5741
-#define IP_ADDR_LEN  4                          //jira: CAE_MCU8-5742																	 															 
 
 /********* From RFC 3493 **********/
 /* Supported address families. */
@@ -174,6 +174,20 @@ typedef struct
     uint16_t checksum;
 } icmpHeader_t;
 
+
+typedef struct
+{
+    union
+    {
+        uint16_t typeCode;
+        struct
+        {
+            uint8_t code;
+            uint8_t type;
+        };
+    };
+    uint16_t checksum;
+} icmpv6Header_t;
 
 // ICMP Types and Codes
 typedef enum
@@ -261,6 +275,20 @@ typedef struct
     // data follows
 } tcpHeader_t;
 
+typedef struct
+{
+    uint16_t version:4;
+    uint16_t trafficClass:8;// this is a problem
+    uint16_t flowLabel1stNibble:4;
+
+    uint16_t flowLabelRest;
+    uint16_t payloadLength;
+    uint8_t nextHeader;
+    uint8_t hopLimit;
+    uint8_t srcAddress[16];
+    uint8_t dstAddress[16];
+    // payload goes here
+} ipv6Header_t;
 
 // List from RFC5237 http://www.iana.org/assignments/protocol-numbers/protocol-numbers.txt
 typedef enum
@@ -405,13 +433,31 @@ typedef struct
     };
 }inAddr_t;
 
+typedef struct
+{
+   union {
+        uint8_t  s6_u8[16];
+        uint16_t s6_u16[8];
+        uint32_t s6_u32[4];
+    } s6;
+#define s6_addr                 s6.s6_u8
+#define s6_addr16               s6.s6_u16
+#define s6_addr32               s6.s6_u32
+}in6Addr_t;
 
 typedef struct
 {
     uint16_t port;
     inAddr_t addr;
-}sockaddr_in4_t;
+}sockaddr_in_t;
 
+typedef struct {
+//    sa_family_t         in6_family;           /* AF_INET6 */
+    uint16_t            in6_port;            /* transport layer port # */
+    uint32_t            in6_flowinfo;        /* IPv6 flow information */
+    in6Addr_t           in6_addr;            /* IPv6 address */
+    uint32_t            in6_scope_id;        /* set of interfaces for a scope */
+}sockaddr_in6_t;
 
 extern const char *network_errors[];
 
@@ -435,17 +481,7 @@ typedef enum
     EAPoL_PACKET_FAILURE,
     INCORRECT_IPV4_HLEN,
     IPV4_NO_OPTIONS,
-    TX_QUEUED,
-    IPV6_CHECKSUM_FAILS,
-    IPV6_LOCAL_ADDR_RESOLVE,
-    IPV6_LOCAL_ADDR_INVALID,
-    NO_GATEWAY,
-    ADDRESS_RESOLUTION,
-    GLOBAL_DESTINATION,
-    ARP_WRONG_HARDWARE_ADDR_TYPE,          //jiar: CAE_MCU8-5739
-    ARP_WRONG_PROTOCOL_TYPE,               //jiar: CAE_MCU8-5740
-    ARP_WRONG_HARDWARE_ADDR_LEN,           //jiar: CAE_MCU8-5741
-    ARP_WRONG_PROTOCOL_LEN                 //jiar: CAE_MCU8-5742											
+    TX_QUEUED
 }error_msg;
 
 typedef struct
@@ -456,6 +492,74 @@ typedef struct
 // used to count up to 256 sockets numbers
 typedef int8_t socklistsize_t;
 
-typedef void (*ip_receive_function_ptr)(int16_t); // parameter is the bytes available for this payload
+typedef void (*ip_receive_function_ptr)(int); // parameter is the bytes available for this payload
 
-#endif  /* TCPIP_TYPES_H */
+
+/*
+ * Address Testing Macros
+ */
+
+
+/*
+ * netint/in.h
+ */
+
+/* Test the type of an address:
+ * return true if the address is of the specified type, or false otherwise
+ */
+#define in6IsAddrUnspecified(a) \
+    (((const uint32_t *) (a))[0] == 0                   \
+     && ((const uint32_t *) (a))[1] == 0				    \
+     && ((const uint32_t *) (a))[2] == 0				    \
+     && ((const uint32_t *) (a))[3] == 0)
+
+#define in6IsAddrLoopback(a) \
+    (((const uint32_t *) (a))[0] == 0                   \
+     && ((const uint32_t *) (a))[1] == 0				    \
+     && ((const uint32_t *) (a))[2] == 0				    \
+     && ((const uint32_t *) (a))[3] == htonl (1))
+
+#define in6IsAddrMulticast(a) (((const uint8_t *) (a))[0] == 0xff)
+
+#define in6IsAddrLinkLocal(a) \
+    ((((const uint32_t *) (a))[0] & htonl (0xffc00000))	\
+     == htonl (0xfe800000))
+
+#define in6IsAddrV4Mapped(a) \
+    ((((const uint32_t *) (a))[0] == 0)             \
+     && (((const uint32_t *) (a))[1] == 0)			    \
+     && (((const uint32_t *) (a))[2] == htonl (0xffff)))
+
+#define in6AreAddrEqual(a,b) \
+    ((((const uint32_t *) (a))[0] == ((const uint32_t *) (b))[0])   \
+     && (((const uint32_t *) (a))[1] == ((const uint32_t *) (b))[1])    \
+     && (((const uint32_t *) (a))[2] == ((const uint32_t *) (b))[2])    \
+     && (((const uint32_t *) (a))[3] == ((const uint32_t *) (b))[3]))
+
+/* Test the scope of a multicast address:
+ * return true if the address is a multicast address of the specified scope
+ * or false if the address is either not a multicast address
+ * or not of the specified scope
+ */
+#define in6IsAddrMcNodeLocal(a) \
+    (in6IsAddrMulticast(a)                           \
+     && ((((const uint8_t *) (a))[1] & 0xf) == 0x1))
+
+#define in6IsAddrMcLinkLocal(a) \
+    (in6IsAddrMulticast(a)                           \
+     && ((((const uint8_t *) (a))[1] & 0xf) == 0x2))
+
+#define in6IsAddrMcSiteLocal(a) \
+    (in6IsAddrMulticast(a)                           \
+     && ((((const uint8_t *) (a))[1] & 0xf) == 0x5))
+
+#define in6IsAddrMcOrgLocal(a) \
+    (in6IsAddrMulticast(a)                           \
+     && ((((const uint8_t *) (a))[1] & 0xf) == 0x8))
+
+#define in6IsAddrMcGlobal(a) \
+    (in6IsAddrMulticast(a)                           \
+     && ((((const uint8_t *) (a))[1] & 0xf) == 0xe))
+
+
+#endif  /*TCPIP_TCPIP_TYPES_H*/

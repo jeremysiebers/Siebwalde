@@ -166,7 +166,16 @@ void ETH_Init(void)
     // wait for phy ready (can take 1ms)
     while(!ESTATbits.PHYRDY);
 
-#ifdef J60_USE_HALF_DUPLEX
+#ifdef J60_USE_FULL_DUPLEX
+    // initialize the MAC for Full Duplex
+    MACON1  = 0b00001101; NOP(); // Full duplex value (with flow control)
+    MACON3  = 0b10110011; NOP(); // Byte stuffing for short packets, Normal frames and headers.  Full duplex
+    MACON4  = 0b00000000; NOP(); // Full Duplex - Ignored
+    MABBIPG = 0x15;       NOP(); // correct gap for full duplex
+    MAIPG   = 0x0012;     NOP(); // correct gap for full duplex
+    phycon1_value = 0x0100;      // setup for full duplex in the phy
+
+#else
     // Intialize the MAC for Half Duplex
     MACON1  = 0x01;       NOP(); // Half duplex value (no flow control)
     MACON3  = 0b10110010; NOP();
@@ -175,15 +184,6 @@ void ETH_Init(void)
     MAIPG   = 0x0C12;     NOP(); // correct gap for half duplex
     EFLOCON = 0x00;              // half duplex flow control off.
     phycon1_value = 0x0000;   // PHY is half duplex
-#else
-    // initialize the MAC for Full Duplex
-    MACON1  = 0b00001101; NOP(); // Full duplex value (with flow control)
-    MACON3  = 0b11110011; NOP(); // Byte stuffing for short packets, Normal frames and headers.  Full duplex   //jira: CAE_MCU8-5776 update from 0b10110011 to 0b11110011, 64 Byte ethernet framing enabled
-    MACON4  = 0b00000000; NOP(); // Full Duplex - Ignored
-    MABBIPG = 0x15;       NOP(); // correct gap for full duplex
-    MAIPG   = 0x0012;     NOP(); // correct gap for full duplex
-    phycon1_value = 0x0100;      // setup for full duplex in the phy
-
 #endif
 
 
@@ -230,13 +230,14 @@ void ETH_Init(void)
     // configure ETHERNET IRQ's
     EIE = 0b01011001;
     PHY_Write(PHIE,0x0012);
+
 }
 
 bool ETH_CheckLinkUp()
 {
     uint32_t value;
     // check for a preexisting link
-    value = (uint32_t)PHY_Read(PHSTAT2);  //jira: CAE_MCU8-5647
+    value = PHY_Read(PHSTAT2);
     if(value & 0x0400)
     {
         ethData.up = true;
@@ -323,7 +324,7 @@ void ETH_NextPacketUpdate()
 
 void ETH_ResetReceiver(void)
 {
-    ECON1 = (unsigned char)RXRST;  //jira: CAE_MCU8-5647
+    ECON1 = RXRST;
 }
 
 void ETH_SendSystemReset(void)
@@ -459,7 +460,7 @@ uint16_t ETH_Read16(void)
  */
 uint32_t ETH_Read24(void)
 {
-    uint32_t ret = 0;  // Resized from uint16_t MCCV3XX-6709
+    uint16_t ret = 0;
     if(rxPacketStatusVector.byteCount >= sizeof(ret))
     {
         ((uint8_t *)&ret)[2] = ETH_EdataRead();
@@ -715,7 +716,7 @@ error_msg ETH_Send(void)
 
     if( (ECON1bits.TXRTS) || (ethListSize > 1) )
     {
-        return TX_QUEUED;
+        return ETH_TX_QUEUED;
     }
 
     return ETH_SendQueued();
@@ -788,7 +789,7 @@ void ETH_Flush(void)
 {
     ethData.pktReady = false;
     // Need to decrement the packet counter
-    ECON2 = ECON2 | 0x40u; // PKTDEC  //jira: CAE_MCU8-5647
+    ECON2 = ECON2 | 0x40; // PKTDEC
 
     // Set the RX Packet Limit to the beginning of the next unprocessed packet
     // ERXRDPT = nextPacketPointer;
@@ -969,7 +970,7 @@ static uint16_t ETH_ComputeChecksum(uint16_t len, uint16_t seed)
     cksm = ~cksm;
 
     // Return the resulting checksum
-    return (uint16_t)cksm;
+    return cksm;
 }
 
 /**
@@ -982,7 +983,7 @@ static uint16_t ETH_ComputeChecksum(uint16_t len, uint16_t seed)
 uint16_t ETH_TxComputeChecksum(uint16_t position, uint16_t len, uint16_t seed)
 {
     uint16_t rxptr;
-    uint16_t cksm;
+    uint32_t cksm;
 
     // Save the read pointer starting address
     rxptr = ERDPT;
@@ -1020,8 +1021,7 @@ uint16_t ETH_RxComputeChecksum(uint16_t len, uint16_t seed)
     ERDPT = rxptr;
     
     // Return the resulting checksum
-    cksm = ((cksm & 0xFF00) >> 8) | ((cksm & 0x00FF) << 8);
-    return (uint16_t)cksm;
+    return ((cksm & 0xFF00) >> 8) | ((cksm & 0x00FF) << 8);
 }
 
 /**

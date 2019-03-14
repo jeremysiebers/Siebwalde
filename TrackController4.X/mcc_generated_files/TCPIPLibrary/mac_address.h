@@ -42,8 +42,11 @@ MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE OF THESE TER
 
 #include <stdint.h>
 
+
 /******************************** MAC Address *********************************/
+
 #define MAC_ADDRESS {0x02,0x00,0x00,0x00,0x00,0x01}
+
 
 typedef union
 {
@@ -51,13 +54,8 @@ typedef union
     struct { uint8_t byte1,byte2,byte3,byte4,byte5,byte6; } s;
 } mac48Address_t;
 
-typedef union
-{
-    uint8_t mac_array[8];
-    struct { uint8_t byte1,byte2,byte3,byte4,byte5,byte6,byte7,byte8; } s;
-} mac64Address_t;
-
 extern const mac48Address_t broadcastMAC;
+extern mac48Address_t macAddress;
 extern mac48Address_t hostMacAddress;
 
 const mac48Address_t *MAC_getAddress(void);

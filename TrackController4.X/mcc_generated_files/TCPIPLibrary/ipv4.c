@@ -47,19 +47,11 @@ MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE OF THESE TER
 #include "udpv4_port_handler_table.h"
 #include "tcpip_types.h"
 #include "ethernet_driver.h"
-#include "log.h"
 #include "ip_database.h"
 
-
-#ifdef ENABLE_NETWORK_DEBUG
-#define logMsg(msg, msgSeverity, msgLogDest)    logMessage(msg, LOG_KERN, msgSeverity, msgLogDest)  
-#else
-#define logMsg(msg, msgSeverity, msgLogDest)
-#endif
-
+uint32_t remoteIpv4Address;
 ipv4Header_t ipv4Header;
 
-static uint8_t getHeaderLen(void);   //jira: CAE_MCU8-5737
 
 void IPV4_Init(void)
 {
@@ -80,7 +72,7 @@ uint16_t IPV4_PseudoHeaderChecksum(uint16_t payloadLen)
     tmp.length        = payloadLen;
 
     len = sizeof(tmp);
-    len = (uint8_t)(len >> 1);
+    len = len >> 1;
 
     v = (uint16_t *) &tmp;
 
@@ -98,18 +90,6 @@ uint16_t IPV4_PseudoHeaderChecksum(uint16_t payloadLen)
     return cksm;
 }
 
-//jira: CAE_MCU8-5737
-static uint8_t getHeaderLen(void)
-{
-    uint16_t rxptr;
-    uint8_t  header_len = 0;
-    rxptr = ETH_GetReadPtr();
-    header_len = ETH_Read8() & 0x0fu;
-    ETH_SetRxByteCount(ETH_GetRxByteCount()+1);
-    ETH_SetReadPtr(rxptr);
-    return (uint8_t)(header_len<<2) ;
-    
-}
 error_msg IPV4_Packet(void)
 {
     uint16_t cksm = 0;
@@ -118,8 +98,7 @@ error_msg IPV4_Packet(void)
     uint8_t hdrLen;
 
     //calculate the IPv4 checksum
-    hdrLen = getHeaderLen();                                 //jira: CAE_MCU8-5737
-    cksm = ETH_RxComputeChecksum(hdrLen, 0);
+    cksm = ETH_RxComputeChecksum(sizeof(ipv4Header_t), 0);
     if (cksm != 0)
     {
         return IPV4_CHECKSUM_FAILS;
@@ -152,17 +131,17 @@ error_msg IPV4_Packet(void)
         if(ipv4Header.ihl < 5)
             return INCORRECT_IPV4_HLEN;
 
-        if (ipv4Header.ihl > 5)                                      //jira: CAE_MCU8-5737
+        if (ipv4Header.ihl > 5)
         {
             //Do not process the IPv4 Options field
             ETH_Dump((uint16_t)(hdrLen - sizeof(ipv4Header_t)));
+            return IPV4_NO_OPTIONS;
         }
         
         switch((ipProtocolNumbers)ipv4Header.protocol)
         {
             case UDP_TCPIP:
-                // check the UDP header checksum                
-                logMsg("IPv4 RX UDP", LOG_INFO, LOG_DEST_CONSOLE);
+                // check the UDP header checksum
                 length = ipv4Header.length - hdrLen;
                 cksm = IPV4_PseudoHeaderChecksum(length);//Calculate pseudo header checksum
                 cksm = ETH_RxComputeChecksum(length, cksm); //1's complement of pseudo header checksum + 1's complement of UDP header, data
@@ -184,7 +163,7 @@ error_msg IPv4_Start(uint32_t destAddress, ipProtocolNumbers protocol)
 {
     error_msg ret = ERROR;
     // get the dest mac address
-    const mac48Address_t *destMacAddress; // Renamed from macAddress per CAE_MCU8-5648
+    const mac48Address_t *macAddress;
     uint32_t targetAddress;
 
     // Check if we have a valid IPadress and if it's different then 127.0.0.1
@@ -204,8 +183,8 @@ error_msg IPv4_Start(uint32_t destAddress, ipProtocolNumbers protocol)
             {
                 targetAddress = ipdb_getRouter();
             }
-            destMacAddress= ARPV4_Lookup(targetAddress);
-            if(destMacAddress == 0)
+            macAddress= ARPV4_Lookup(targetAddress);
+            if(macAddress == 0)
             {
                 ret = ARPV4_Request(targetAddress); // schedule an arp request
                 return ret;
@@ -213,9 +192,9 @@ error_msg IPv4_Start(uint32_t destAddress, ipProtocolNumbers protocol)
         }
         else
         {
-            destMacAddress = &broadcastMAC;
+            macAddress = &broadcastMAC;
         }
-        ret = ETH_WriteStart(destMacAddress, ETHERTYPE_IPV4);
+        ret = ETH_WriteStart(macAddress, ETHERTYPE_IPV4);
         if(ret == SUCCESS)
         {
             ETH_Write16(0x4500); // VERSION, IHL, DSCP, ECN
@@ -260,3 +239,4 @@ uint16_t IPV4_GetDatagramLength(void)
 {
     return ((ipv4Header.length) - sizeof(ipv4Header_t));
 }
+

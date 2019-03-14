@@ -47,6 +47,7 @@ typedef struct
 
 extern uint8_t UPDATE_TERMINAL;
 extern uint8_t UPDATE_SLAVE_TOxUDP;
+extern uint8_t UPDATE_MODBUS_DATA;
 
 typedef struct
 {

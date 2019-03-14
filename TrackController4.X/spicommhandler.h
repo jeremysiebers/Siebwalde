@@ -27,12 +27,11 @@ extern void PROCESSxSPIxBOOTLOAD();
 extern unsigned int SpiSlaveCommErrorCounter;
 extern unsigned bool InitPhase;
 
-void ProcessModbusData(void);
+extern void PROCESSxMODBUSxDATA(void);
 void ProcessBootloadData(void);
 
-extern uint8_t RECEIVED_BOOT_LOAD_DATA[DATAxSTRUCTxLENGTH+1];
-extern uint8_t SEND_BOOT_LOAD_DATA[DATAxSTRUCTxLENGTH];
-extern uint8_t *pSEND_BOOT_LOAD_DATA;
+//extern uint8_t RECEIVED_BOOT_LOAD_DATA[DATAxSTRUCTxLENGTH+1];
+//extern uint8_t SEND_BOOT_LOAD_DATA[DATAxSTRUCTxLENGTH];
 
 #ifdef	__cplusplus
 }

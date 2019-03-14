@@ -14,6 +14,26 @@
             <make-dep-projects>
                 <make-dep-project>../TrackAmplifierBootLoader.X</make-dep-project>
             </make-dep-projects>
+            <sourceRootList>
+                <sourceRootElem>modbus</sourceRootElem>
+            </sourceRootList>
+            <confList>
+                <confElem>
+                    <name>Stand_Alone</name>
+                    <type>2</type>
+                </confElem>
+                <confElem>
+                    <name>Offset</name>
+                    <type>2</type>
+                </confElem>
+                <confElem>
+                    <name>Combined</name>
+                    <type>2</type>
+                </confElem>
+            </confList>
+            <formatting>
+                <project-formatting-style>false</project-formatting-style>
+            </formatting>
         </data>
     </configuration>
 </project>

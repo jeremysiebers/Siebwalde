@@ -48,19 +48,15 @@ static SLAVE_INFO         EthernetTarget;
 static udpStart_t udpPacket;
 static uint8_t DataFromSlaveSend = 0;
 bool Init_UDP = true;
-uint16_t count = 0;
 uint8_t division = 0;
 uint8_t SlaveDataTx[2] = {HEADER, 0};
 uint8_t *pSlaveDataSend;
 
 unsigned int StateMachine = 0;
-unsigned int _Delay = 0;
 
-uint8_t UPDATE_TERMINAL;
-uint8_t UPDATE_SLAVE_TOxUDP; 
-
-static uint8_t BytesToSent = 0;
-static uint8_t BytesToReceive = 0;
+uint8_t UPDATE_TERMINAL     = false;
+uint8_t UPDATE_SLAVE_TOxUDP = false; 
+uint8_t UPDATE_MODBUS_DATA  = false;
 
 typedef enum
 {
@@ -83,6 +79,17 @@ typedef enum
     ETH_BUSY        = 0x81,
     ETH_IDLE        = 0x80,    
 };
+
+typedef struct
+{
+    uint8_t header;
+    uint8_t command;
+    uint8_t data[DATAxSTRUCTxLENGTH]; 
+}udpDemoRecv_t;
+
+udpDemoRecv_t udpRecv;
+
+uint8_t ProcessEthData = false;
 
 /*----------------------------------------------------------------------------*/
 
@@ -137,35 +144,7 @@ void main(void)
     udpPacket.destinationPortNumber = 65531;
 
     error_msg ret = ERROR;
-    
-    /**************** Step 1 - Start UDP Packet ****************************
-     * @Param1 - Destination Address
-     * @Param2 - Source Port Number
-     * @Param3 - Destination Port Number
-     **********************************************************************/
-    /*
-    while(Init_UDP){
-        Read_Check_LAT = 1;
-        Network_Manage();
-        Read_Check_LAT = 0;
-        
-        count++;
-        
-        if(count > 65530){
-            LED1_LAT ^= 1;
-            ret = UDP_Start(udpPacket.destinationAddress, udpPacket.sourcePortNumber, udpPacket.destinationPortNumber);
-            if(ret == SUCCESS)
-            {
-                LED2_LAT ^= 1;
-                UDP_Write16(0xDEAD);
-                UDP_Send();
-                Init_UDP = false;
-            }
-            count = 0;
-        }
-    }
-    */
-        
+                
     printf("PIC18f97j60 started up!!!\n\r");
     __delay_ms(10);
     printf("\f");                                                               // Clear terminal (printf("\033[2J");)
@@ -207,33 +186,43 @@ void main(void)
                 break;
         }
         
-        if(UPDATE_TERMINAL == 1){
+        if(UPDATE_MODBUS_DATA == true){
+            UPDATE_MODBUS_DATA = false;
+            LED1_LAT = true;
+            PROCESSxMODBUSxDATA();
+            LED1_LAT = false;
+        }
+        
+//        if(UPDATE_TERMINAL == true){
             Read_Check_LAT = 1;
             Network_Manage();
             Read_Check_LAT = 0;                        
-        }
+//        }
         
-        if((UPDATE_SLAVE_TOxUDP == 1) && (TMR0L > 50)){
+        if((UPDATE_SLAVE_TOxUDP == true) && (TMR0L > 50)){
+            UPDATE_SLAVE_TOxUDP = false;
             if(COMM_MODE_BOOTLOAD == false){
-                UPDATE_SLAVE_TOxUDP = 0;
                 LED1_LAT = 1;  
                 ret = UDP_Start(udpPacket.destinationAddress, udpPacket.sourcePortNumber, udpPacket.destinationPortNumber);
                 if(ret == SUCCESS)
                 { 
                     LED2_LAT = 1;
+                    Network_Manage();
                     if(DataFromSlaveSend == NUMBER_OF_SLAVES){
-                        pSlaveDataSend = &(EthernetTarget.Header);
+                        //pSlaveDataSend = &(EthernetTarget.Header);
                         SlaveDataTx[1] = ETHERNET_CMD;                              // send the Data Type
                         UDP_WriteBlock(SlaveDataTx, 2);
-                        UDP_WriteBlock(pSlaveDataSend, DATAxSTRUCTxLENGTH);
+                        UDP_WriteBlock(&(EthernetTarget.Header), DATAxSTRUCTxLENGTH);
                     }
                     else{
-                        pSlaveDataSend = &(SlaveInfo[DataFromSlaveSend].Header);
+                        //pSlaveDataSend = &(SlaveInfo[DataFromSlaveSend].Header);
                         SlaveDataTx[1] = MODBUS_CMD;                                // send the Data Type
                         UDP_WriteBlock(SlaveDataTx, 2);
-                        UDP_WriteBlock(pSlaveDataSend, DATAxSTRUCTxLENGTH);
+                        UDP_WriteBlock(&(SlaveInfo[DataFromSlaveSend].Header), DATAxSTRUCTxLENGTH);
                     }
+                    Network_Manage();
                     UDP_Send();
+                    Network_Manage();
 
                     if (InitPhase == false){                                        // When init phase is done, communicate data to all slaves
                         DataFromSlaveSend++;   
@@ -255,7 +244,7 @@ void main(void)
                     printf("ret: %02X\n\r", ret);
                     if(ret == BUFFER_BUSY){
                         printf("Flush and reset.");
-                        UDP_FlushTXPackets();
+                        //UDP_FlushTXPackets();
                         UDP_FlushRxdPacket(); 
                     }                
                 }
@@ -263,33 +252,113 @@ void main(void)
             }
         
             else{
-                UPDATE_SLAVE_TOxUDP = 0;
                 LED1_LAT = 1;  
                 ret = UDP_Start(udpPacket.destinationAddress, udpPacket.sourcePortNumber, udpPacket.destinationPortNumber);
                 if(ret == SUCCESS)
                 { 
                     LED2_LAT = 1;
+                    Network_Manage();
 //                    UDP_Write16(0xC0DE);
 //                    UDP_Send();
                     
                     //pSlaveDataSend = &(RECEIVED_BOOT_LOAD_DATA[0]);
                     SlaveDataTx[1] = BOOTLOAD_CMD;                              // send the Data Type
                     UDP_WriteBlock(SlaveDataTx, 2);
-                    UDP_WriteBlock(&(RECEIVED_BOOT_LOAD_DATA[0]), DATAxSTRUCTxLENGTH);
+//                    UDP_WriteBlock(&(RECEIVED_BOOT_LOAD_DATA[0]), DATAxSTRUCTxLENGTH2);
+                    UDP_WriteBlock(&(EthernetTarget.Header), DATAxSTRUCTxLENGTH);
+                    Network_Manage();
                     UDP_Send();
-                                      
+                    Network_Manage();                  
                     LED2_LAT = 0;
                 }
                 else{
                     printf("ret: %02X\n\r", ret);
                     if(ret == BUFFER_BUSY){
                         printf("Flush and reset.");
-                        UDP_FlushTXPackets();
+                        //UDP_FlushTXPackets();
                         UDP_FlushRxdPacket(); 
                     }                
                 }
                 LED1_LAT = 0;
             }
+        }
+        
+        if(ProcessEthData == true){
+            ProcessEthData = false;
+            LED1_LAT = 1;
+            if(udpRecv.header == HEADER)
+            {
+                switch(udpRecv.command)
+                {
+                    case MODBUS_CMD:
+                        if(udpRecv.data[8] == FOOTER){
+                            //printf("MODBUS_CMD received.\n\r");
+                            SlaveInfo[0].HoldingReg[1] = ((uint16_t)udpRecv.data[3]<<8) + udpRecv.data[2];
+                            SlaveInfo[0].HoldingReg[2] = ((uint16_t)udpRecv.data[5]<<8) + udpRecv.data[4];
+                            SlaveInfo[0].HoldingReg[3] = ((uint16_t)udpRecv.data[7]<<8) + udpRecv.data[6];
+                            SlaveInfo[0].HoldingReg[0] = ((uint16_t)udpRecv.data[1]<<8) + udpRecv.data[0];
+                        }
+                        break;
+
+                    case ETHERNET_CMD:
+                        if(udpRecv.data[1] == FOOTER){
+                            switch(udpRecv.data[0]){
+                                case RESET_ALL:
+                                    //printf("Reset All slaves...\n\r");
+        //                            RESET();
+                                    COMM_MODE_BOOTLOAD = false;
+                                    InitPhase = true;
+                                    DataFromSlaveSend = 0;
+                                    RESETxSPIxCOMMxHANDLER();
+                                    ModbusReset_LAT = 1;
+                                    __delay_ms(500);
+                                    ModbusReset_LAT = 0;
+                                    //__delay_ms(4000);
+                                    EthernetTarget.InputReg[0] = ETH_OK;
+                                    break;
+
+                                case RELEASE_ALL:
+                                    Read_Check_LAT ^= 1;
+                                    EthernetTarget.InputReg[0] = ETH_IDLE;
+                                    break;
+
+                                case SEND_SLAVEIODATA:
+                                   COMM_MODE_BOOTLOAD = false;
+                                   break;
+
+                                case SEND_BOOTLOADER:
+                                    COMM_MODE_BOOTLOAD = true;
+                                    break;
+
+                                case ETH_IDLE:
+                                    EthernetTarget.InputReg[0] = ETH_IDLE;
+                                    //printf("EthernetTarget == ETH_IDLE\n\r");
+                                    break;
+
+                                case INIT_PHASE_TRUE:
+                                    InitPhase = true;
+                                    break;
+
+                                case INIT_PHASE_FALSE:
+                                    InitPhase = false;
+                                    break;
+
+                                default :
+                                    break;
+                            }
+                        }
+                        break;
+
+                    case BOOTLOAD_CMD:                
+                        //*pSEND_BOOT_LOAD_DATA = udpRecv.data[0];
+                        printf("BOOTLOAD_CMD received!\n\r");
+                        break;      
+
+                    default:
+                        break;
+                }
+            }
+            LED1_LAT = 0;
         }
     }
 }
@@ -311,20 +380,13 @@ void main(void)
  */
 /*#--------------------------------------------------------------------------#*/
 
-typedef struct
-{
-    uint8_t header;
-    uint8_t command;
-    uint8_t data[DATAxSTRUCTxLENGTH]; 
-}udpDemoRecv_t;
+
 
 void UDP_DATA_RECV(int length)
 {    
-    udpDemoRecv_t udpRecv;
-    
-    LED3_LAT = 1;
-    
     UDP_ReadBlock(&udpRecv,sizeof(udpDemoRecv_t));
+    ProcessEthData = true;
+}
     
 //    printf("header received: %02X\n\r"    , udpRecv.header);
 //    printf("command received: %02X\n\r"   , udpRecv.command);
@@ -343,77 +405,3 @@ void UDP_DATA_RECV(int length)
 //    printf("data[12]: %02X\n\r"            , udpRecv.data[12]);
     
     
-    if(udpRecv.header == HEADER)
-    {
-        switch(udpRecv.command)
-        {
-            case MODBUS_CMD:
-                if(udpRecv.data[8] == FOOTER){
-                    //printf("MODBUS_CMD received.\n\r");
-                    SlaveInfo[0].HoldingReg[1] = ((uint16_t)udpRecv.data[3]<<8) + udpRecv.data[2];
-                    SlaveInfo[0].HoldingReg[2] = ((uint16_t)udpRecv.data[5]<<8) + udpRecv.data[4];
-                    SlaveInfo[0].HoldingReg[3] = ((uint16_t)udpRecv.data[7]<<8) + udpRecv.data[6];
-                    SlaveInfo[0].HoldingReg[0] = ((uint16_t)udpRecv.data[1]<<8) + udpRecv.data[0];
-                }
-                break;
-                
-            case ETHERNET_CMD:
-                if(udpRecv.data[1] == FOOTER){
-                    switch(udpRecv.data[0]){
-                        case RESET_ALL:
-                            //printf("Reset All slaves...\n\r");
-//                            RESET();
-                            COMM_MODE_BOOTLOAD = false;
-                            InitPhase = true;
-                            DataFromSlaveSend = 0;
-                            RESETxSPIxCOMMxHANDLER();
-                            ModbusReset_LAT = 1;
-                            __delay_ms(500);
-                            ModbusReset_LAT = 0;
-                            //__delay_ms(4000);
-                            EthernetTarget.InputReg[0] = ETH_OK;
-                            break;
-
-                        case RELEASE_ALL:
-                            Read_Check_LAT ^= 1;
-                            EthernetTarget.InputReg[0] = ETH_IDLE;
-                            break;
-
-                        case SEND_SLAVEIODATA:
-                           COMM_MODE_BOOTLOAD = false;
-                           break;
-
-                        case SEND_BOOTLOADER:
-                            COMM_MODE_BOOTLOAD = true;
-                            break;
-
-                        case ETH_IDLE:
-                            EthernetTarget.InputReg[0] = ETH_IDLE;
-                            //printf("EthernetTarget == ETH_IDLE\n\r");
-                            break;
-                            
-                        case INIT_PHASE_TRUE:
-                            InitPhase = true;
-                            break;
-                            
-                        case INIT_PHASE_FALSE:
-                            InitPhase = false;
-                            break;
-
-                        default :
-                            break;
-                    }
-                }
-                break;
-                
-            case BOOTLOAD_CMD:                
-                *pSEND_BOOT_LOAD_DATA = udpRecv.data[0];
-                printf("BOOTLOAD_CMD received!\n\r");
-                break;      
-                
-            default:
-                break;
-        }
-    }
-    LED3_LAT = 0;
-}
