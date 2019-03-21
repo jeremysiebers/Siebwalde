@@ -596,7 +596,7 @@ void Petit_RxRTU(void)
         }
         
         #ifdef  CRC_HW_REVERSE
-        Petit_Tx_CRC16 = CRC_ReverseValue(Petit_Rx_CRC16);
+        Petit_Rx_CRC16 = CRC_ReverseValue(Petit_Rx_CRC16);
         #endif
         
         if (((unsigned int) Petit_Rx_Data.DataBuf[Petit_Rx_Data.DataLen] + ((unsigned int) Petit_Rx_Data.DataBuf[Petit_Rx_Data.DataLen + 1] << 8)) == Petit_Rx_CRC16)

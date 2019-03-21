@@ -49,10 +49,10 @@ void main(void)
     //INTERRUPT_PeripheralInterruptDisable();
 
     /* Test the onboard Led's */
-    while(Led_Disco() == false);
+    //while(Led_Disco() == false);
     
-    __delay_ms(50);                                                             // Wait longer then the slaves (1000ms)
-    
+    //__delay_ms(50);                                                             // Wait longer then the slaves (1000ms)
+    /*
     // Initialize the SLAVE_INFO struct with slave numbers
     for (char i = 0; i <NUMBER_OF_SLAVES; i++){
         SlaveInfo[i].SlaveNumber = i;
@@ -62,6 +62,8 @@ void main(void)
     
     InitPetitModbus(SlaveInfo);                                                 // Pass address of array of struct for data storage
     InitSlaveCommunication(SlaveInfo);                                          // Pass address of array of struct for data storage
+    
+    */
     TX_ENA_LAT = 1;                                                             // Enable TX, master TX is always enabled.
         
     LED_RUN_LAT = 1;
@@ -69,6 +71,8 @@ void main(void)
     LED_ERR_LAT = 0;
     
     modbus_sync_LAT = 0;
+    
+    while(1);
     
     /* Start the message communication here as last 
        to prevent early communication while initializing

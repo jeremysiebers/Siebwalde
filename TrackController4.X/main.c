@@ -311,7 +311,7 @@ void main(void)
                                     DataFromSlaveSend = 0;
                                     RESETxSPIxCOMMxHANDLER();
                                     ModbusReset_LAT = 1;
-                                    __delay_ms(500);
+                                    __delay_ms(10);
                                     ModbusReset_LAT = 0;
                                     //__delay_ms(4000);
                                     EthernetTarget.InputReg[0] = ETH_OK;

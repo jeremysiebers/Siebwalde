@@ -229,7 +229,8 @@ uint8_t  ProcessBootBuffer()
         break;
     case    RESET_DEVICE:
         reset_pending = true;
-        len = 9;
+        frame.data[0] = COMMAND_SUCCESS;
+        len = 10;
         break;
     default:
         frame.data[0] = ERROR_INVALID_COMMAND;

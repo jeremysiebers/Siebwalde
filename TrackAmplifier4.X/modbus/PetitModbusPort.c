@@ -34,8 +34,7 @@ unsigned char PetitModBus_UART_String(unsigned char *s, unsigned int Length)
         	    
     TX_ENA_LAT = 1;                                                             // enable the driver of the rs485
     __delay_us(2);                                                              // Wait 2 us to ensure that the driver is enabled before sending first bit
-    
-    
+        
     for(DummyCounter=0;DummyCounter<Length;DummyCounter++){
         PetitModBus_UART_Putch(s[DummyCounter]);
     }

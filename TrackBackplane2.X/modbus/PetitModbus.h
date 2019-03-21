@@ -62,7 +62,7 @@ extern volatile unsigned int LED_RX;
 //#define CRC_CALC                                                              // When uncommented a CRC is calculated by the processor
 //#define CRC_LOOKUP                                                            // When uncommented a CRC is looked up by the processor in flash
 #define CRC_HW                                                                  // When uncommented a CRC is calculated by dedicated HW
-//#define CRC_HW_REVERSE														// In order to comply to Modbus standard a reverse is required, without however CRC is much faster
+//#define CRC_HW_REVERSE                                                          // In order to comply to Modbus standard a reverse is required, without however CRC is much faster
 
 #ifdef CRC_LOOKUP
 /* Table of CRC values for high?order byte */

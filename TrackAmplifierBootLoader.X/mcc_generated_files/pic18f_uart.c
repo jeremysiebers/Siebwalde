@@ -89,36 +89,36 @@ void Run_Bootloader()
 
 // *****************************************************************************
 // Read and parse the data.
-        index = 0;       // Point to the buffer
-        msg_length = 9;  // message has 9 bytes of overhead (Opcode + Length + Address)
-        uint8_t  ch;
+            index = 0;       // Point to the buffer
+            msg_length = 9;  // message has 9 bytes of overhead (Opcode + Length + Address)
+            uint8_t  ch;
 
-        while (index < msg_length)
-        {
-            ch = EUSART_Read();          // Get the data
-            frame.buffer [index ++] = ch;
-            if (index == 4)
+            while (index < msg_length)
             {
-                if ((frame.command == WRITE_FLASH)
-                 || (frame.command == WRITE_EE_DATA)
-                 || (frame.command == WRITE_CONFIG))
+                ch = EUSART_Read();          // Get the data
+                frame.buffer [index ++] = ch;
+                if (index == 4)
                 {
-                    msg_length += frame.data_length;
+                    if ((frame.command == WRITE_FLASH)
+                     || (frame.command == WRITE_EE_DATA)
+                     || (frame.command == WRITE_CONFIG))
+                    {
+                        msg_length += frame.data_length;
+                    }
                 }
             }
-        }
 
-        msg_length = ProcessBootBuffer ();
+            msg_length = ProcessBootBuffer ();
 
 // *****************************************************************************
 // Send the data buffer back.
 // *****************************************************************************
-        EUSART_Write(STX);
-        index = 0;
-        while (index < msg_length)
-        {
-            EUSART_Write (frame.buffer [index++]);
-        }
+            EUSART_Write(STX);
+            index = 0;
+            while (index < msg_length)
+            {
+                EUSART_Write (frame.buffer [index++]);
+            }
         
         }
     }

@@ -22,7 +22,8 @@ static unsigned int Config = 1;
 static unsigned int Startup_Machine = 0;
 unsigned int Update_Amplifier = 0;
 static unsigned int Sequencer = 0;
-
+const uint8_t test = 0xAA;
+static uint8_t test2 = 0;
 /*----------------------------------------------------------------------------*/
 void main(void) {
     
@@ -60,6 +61,11 @@ void main(void) {
 /*----------------------------------------------------------------------------*/
     
     while(Config){
+        
+        test2++;
+        if (test2 > test){
+            test2 = 0;
+        }
         
         switch(Startup_Machine){
             case 0 :
@@ -399,7 +405,7 @@ void Led_Convert(uint8_t Number){
 uint16_t  Stored_Checksum;
 
 uint16_t ReadFlashChecksum(){
-    TBLPTR = (0x7FFF - 2);
+    TBLPTR = (0x008000 - 2);
     asm("TBLRD *+");
     Stored_Checksum = TABLAT;
     asm("TBLRD *+");

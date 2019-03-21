@@ -21,6 +21,10 @@
                     <name>default</name>
                     <type>2</type>
                 </confElem>
+                <confElem>
+                    <name>Proto_Backplane</name>
+                    <type>2</type>
+                </confElem>
             </confList>
             <formatting>
                 <project-formatting-style>false</project-formatting-style>
