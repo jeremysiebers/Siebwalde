@@ -22,8 +22,7 @@ static unsigned int Config = 1;
 static unsigned int Startup_Machine = 0;
 unsigned int Update_Amplifier = 0;
 static unsigned int Sequencer = 0;
-const uint8_t test = 0xAA;
-static uint8_t test2 = 0;
+
 /*----------------------------------------------------------------------------*/
 void main(void) {
     
@@ -61,11 +60,6 @@ void main(void) {
 /*----------------------------------------------------------------------------*/
     
     while(Config){
-        
-        test2++;
-        if (test2 > test){
-            test2 = 0;
-        }
         
         switch(Startup_Machine){
             case 0 :
@@ -154,7 +148,7 @@ void main(void) {
                     break;
                     
                 case 3:
-                    Sequencer = 0;
+                    Sequencer = 200;
                     Update_Amplifier = false;
                     break;
                     

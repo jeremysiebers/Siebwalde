@@ -11,7 +11,7 @@ ADDRESS_ERROR        = 0Xfe # Address Error
 COMMAND_UNSUCCESSFUL = 0xfd # Command unSuccessful 
 
 try:
-    file_object  = open("./TrackAmplifier4.X.production.hex", 'r')
+    file_object  = open("C:\GIT-REPOS\Siebwalde\TrackAmplifier4.X\dist\Offset\production\TrackAmplifier4.X.production.hex", 'r')
 except:
     print('failed to open file !!!! \n')
 
@@ -107,22 +107,12 @@ class BootLoader:
         print('program Mem size: ', hex(program_mem_size), '\n')
         
         EraseFlash = 3
-        RowWidth = 64 #erasing in the PIC is only done with 32 bytes = 2 rows of program memory!
+        RowWidth = 128
         EraseRows = int((program_mem_size - bootloader_offset)/RowWidth)
         
-        EraseRowsLOW = (EraseRows & 0x00FF)
-        EraseRowsHIGH= (EraseRows >>8) & 0x00FF
+        tx = struct.pack('<BBBBBBIBB', 0x55, EraseFlash, EraseRows, 0, 0x55, 0xAA, bootloader_offset, 0x00, 0x00)
         
-        BootOffLOW  = (bootloader_offset & 0x00FF)
-        BootOffHIGH = (bootloader_offset >>8) & 0x00FF
-        
-        tx = struct.pack('<10B', 0x55, EraseFlash, EraseRowsLOW, EraseRowsHIGH, 0x55, 0xAA, BootOffLOW, BootOffHIGH, 0x00, 0x00)
-           
-        time.sleep(0.1)
-           
         self.DataCommunication.ModbusInterface.WriteBootloadData(tx)
-        
-        time.sleep(0.5)
         
         rx = self.DataCommunication.ModbusInterface.ReadBootloadData(11)
         

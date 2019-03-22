@@ -470,7 +470,6 @@ class State:
                 self.FlashNewSwHandler = 0
                 self.ShiftSlot = 0
                 self.ProgramSlave = 1
-                time.sleep(5.0)
                 return EnumStateMachine.ok
             
             elif(self.FlashCaller(EnumSlaveInit.TRACKBACKPLANE5, (EnumSlaveInit.SLOT1 << self.ShiftSlot), self.ProgramSlave) == EnumStateMachine.ok):
@@ -505,14 +504,12 @@ class State:
             
             #print("RunSwFlash==0 --> TrackAmplifierId: " + str(TrackAmplifierId) + " checksum = " + str(hex(self.TrackAmpUpateList[TrackAmplifierId - 1][1])) + " file checksum = " + str(hex(self.file_checksum)) + " starting flash")
             
-            #print("RunSwFlash==0 --> ResetAll slaves")
             self.DataCommunication.WriteUDP(EnumCommand.ETHERNET_T, EnumEthernetT.ResetAll)
             time.sleep(0.5)
             
             try:
                 self.DataCommunication.ModbusInterface.WriteHoldingRegisters(TrackBackPlaneID, 0x0000, 1, [AmplifierLatchSet])
             except:
-                #print("RunSwFlash==0 --> Write to TrackBackPlane gave not a response, passing")
                 pass
             
             self.RunSwFlash += 1
@@ -527,7 +524,7 @@ class State:
             self.Bootloader.FlashAuto()
             #print("RunSwFlash==1 --> bootloader flash program done.")            
             self.DataCommunication.WriteUDP(EnumCommand.ETHERNET_T, EnumEthernetT.ResetAll)
-            time.sleep(0.5) 
+            time.sleep(1)            
             self.RunSwFlash = 0
             return EnumStateMachine.ok
         
@@ -641,13 +638,13 @@ class State:
         case 1
         '''        
         if(self.ReadTrackampHandler == 1):
-            #self.start_time = time.time()
+            self.start_time = time.time()
             data =  self.DataCommunication.ModbusInterface.ReadInputRegisters(TrackAmplifierId, 0x0, 2)
-            #elapsed_time = time.time() - self.start_time
-            ##print('Updaterate = ', str('%.9f'% elapsed_time) , 'seconds! \n')            
+            elapsed_time = time.time() - self.start_time
+            print('Updaterate = ', str('%.9f'% elapsed_time) , 'seconds! \n')            
             self.DataCommunication.Trackamplifiers[TrackAmplifierId-1].InputReg[0] = data[0]
             self.DataCommunication.Trackamplifiers[TrackAmplifierId-1].InputReg[1] = data[1] 
-            ##print("ReadTrackampHandler==1 --> TrackAmplifierId: " + str(TrackAmplifierId) + " ReadInputRegisters 0 and 1")
+            #print("ReadTrackampHandler==1 --> TrackAmplifierId: " + str(TrackAmplifierId) + " ReadInputRegisters 0 and 1")
             if(TrackAmplifierId == self.DataCommunication.AmountOfAmplifiers):
                 self.ReadTrackampHandler += 1
             return EnumStateMachine.ok

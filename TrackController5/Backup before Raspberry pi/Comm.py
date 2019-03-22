@@ -37,7 +37,7 @@ class DataAquisition:
         self.sock_trans = socket.socket(socket.AF_INET, socket.SOCK_DGRAM,0)
         self.sock_trans.connect((self.UDP_IP_TRANS, self.UDP_PORT_TRANS))
                 
-        self.ModbusInterface = TemComIf ('/dev/ttyAMA0')
+        self.ModbusInterface = TemComIf ('COM3')
         
         self.Trackamplifiers = list()
         self.Bootloader      = Bootloader()

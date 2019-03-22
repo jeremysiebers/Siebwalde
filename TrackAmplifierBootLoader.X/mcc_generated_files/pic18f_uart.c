@@ -119,7 +119,6 @@ void Run_Bootloader()
             {
                 EUSART_Write (frame.buffer [index++]);
             }
-        
         }
     }
 }

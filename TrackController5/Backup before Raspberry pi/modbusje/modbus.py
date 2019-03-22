@@ -16,9 +16,6 @@ from __future__ import with_statement
 
 import struct
 import threading
-import sys
-
-sys.path.append('./modbusje')
 
 from modbusje import LOGGER
 from modbusje import defines

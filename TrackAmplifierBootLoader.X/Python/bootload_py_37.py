@@ -4,17 +4,18 @@ import sys
 import struct
 import ctypes
 import time
-import progressbar
+
+print(sys.version)
+
+COMMAND_SUCCESSFUL = 0x01
+COMMAND_UNSUPPORTED = 0xff
+COMMAND_ERROR = 0x0fe
+COMMAND_UNSUCCESSFUL = 0xfd
 
 start_time = time.time()
 
-COMMAND_SUCCESSFUL = 0x01 # – Command Successful
-COMMAND_UNSUPPORTED = 0xFF # – Command Unsupported
-ADDRESS_ERROR = 0Xfe # – Address Error
-COMMAND_UNSUCCESSFUL = 0xfd # - Command unSuccessful
-
 try:
-    file_object  = open("C:\GIT-REPOS\Siebwalde\TrackAmplifier4.X\dist\Offset\production\TrackAmplifier4.X.production.hex", 'rb')
+    file_object  = open("C:\GIT-REPOS\Siebwalde\TrackAmplifier4.X\dist\Offset\production\TrackAmplifier4.X.production.hex", 'r')
 except:
     print('failed to open file !!!! \n')
 
@@ -54,7 +55,8 @@ def GetBootloaderVersion():
     
     for ch in rx:
         #print ord(ch), ")",
-        received.append(ord(ch))
+        #received.append(ord(ch))
+        received.append(ch)
         
     print('Bootloader Version: ', hex(received[11]) , ' ', hex(received[10]), '\n')
     print('Max Packet size   : ', hex(received[13]) , ' ', hex(received[12]), '\n')
@@ -85,20 +87,26 @@ def EraseFlash(bootloader_offset, program_mem_size):
     
     tx = struct.pack('<10B', 0x55, EraseFlash, EraseRowsLOW, EraseRowsHIGH, 0x55, 0xAA, BootOffLOW, BootOffHIGH, 0x00, 0x00)
     
+    
     #for ch in tx:
        #print ord(ch), ")",
+    start_erase_time = time.time()
     
     ser.write(tx)
     
     rx = ser.read(11)
     received = []
     
+    elapsed_time = time.time() - start_erase_time
+    print('Flash erase time : %.2f'% elapsed_time + 'seconds! \n')    
+    
     if(rx == ''):
         print('Erase flash nok, no answer from target!\n')
         return(COMMAND_UNSUCCESSFUL)
     
     for ch in rx:
-        received.append(ord(ch))
+        #received.append(ord(ch))
+        received.append(ch)
        
     SuccessCode = (received[9] << 8) + received[10]
         
@@ -125,7 +133,7 @@ def WriteFlash(bootloader_offset, program_mem_size):
     ByteArray = []
     ByteArrayChecksum = []
     
-    ProcessLines = (program_mem_size - bootloader_offset) / HexRowWidth
+    ProcessLines = int((program_mem_size - bootloader_offset) / HexRowWidth)
     
     for i in range(ProcessLines):        
         buff = file_object.readline()
@@ -158,23 +166,15 @@ def WriteFlash(bootloader_offset, program_mem_size):
     leftover  = ProcessLines % jumpsize
     i = 0
     cmd_returnval = 0
-    time_seg = (100.0 / (iteration/jumpsize))
-    time_calc = 0
-    bar = progressbar.ProgressBar(maxval=101, widgets=[progressbar.Bar('=', '[', ']'), ' ' , progressbar.Percentage()])
-    bar.start()
-    
+        
     while (run == True):
         cmd_returnval = _WriteLinesOfFlash(i, jumpsize, ByteArray)
         if(cmd_returnval != COMMAND_SUCCESSFUL):
             print('Write flash nok received stopping write flash!\n')
             return COMMAND_UNSUCCESSFUL, 0          
         
-        #print('>> Writing %d%%' % time_calc, end='\r')
-        time_calc = time_calc + time_seg
-        bar.update(time_calc)
-                
+        
         if( i == iteration):
-            time.sleep(1)
             if(leftover == 0):
                 run = False
                 print('Checksum of sent data : ', hex(CalcChecksumFile))
@@ -208,6 +208,8 @@ def _WriteLinesOfFlash(line, incr, array):
         for val in array[j][1]:
             #print val
             tx += struct.pack('<B', val)
+
+    #print tx
     
     ser.write(tx)
     
@@ -219,7 +221,8 @@ def _WriteLinesOfFlash(line, incr, array):
         return COMMAND_UNSUCCESSFUL
     
     for ch in rx:
-        received.append(ord(ch))
+        #received.append(ord(ch))
+        received.append(ch)
     
     SuccessCode = (received[9] << 8) + received[10]
     
@@ -270,7 +273,7 @@ def WriteConfig():
         return COMMAND_UNSUCCESSFUL
     
     for ch in rx:
-        received.append(ord(ch))
+        received.append(ch)
     
     SuccessCode = (received[9] << 8) + received[10]
     
@@ -308,7 +311,7 @@ def RequestChecksum(bootloader_offset, program_mem_size):
         return(COMMAND_UNSUCCESSFUL)
     
     for ch in rx:
-        received.append(ord(ch))
+        received.append(ch)
        
     Checksum = (received[11] << 8) + received[10]
     

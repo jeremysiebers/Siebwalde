@@ -134,16 +134,18 @@ frame_t  frame;
 // *****************************************************************************
 void BOOTLOADER_Initialize ()
 {
-    LATAbits.LATA5 = LATBbits.LATB1 = LATBbits.LATB2
-    = LATBbits.LATB3 = LATBbits.LATB4 = LATBbits.LATB5
-    = BL_INDICATOR_ON;
+//    LATAbits.LATA5 = LATBbits.LATB1 = LATBbits.LATB2
+//    = LATBbits.LATB3 = LATBbits.LATB4 = LATBbits.LATB5
+//    = BL_INDICATOR_ON;
+    BOOTLOADER_INDICATOR = BL_INDICATOR_ON;
     if (Bootload_Required () == true)
     {
+        LED_RUN_LAT = BL_INDICATOR_ON;
         Run_Bootloader ();     // generic comms layer
     }
     STKPTR = 0x00;
-	LATAbits.LATA5 = LATBbits.LATB1 = LATBbits.LATB2
-    = LATBbits.LATB3 = LATBbits.LATB4 = LATBbits.LATB5
+	LED_RUN_LAT = LED_WAR_LAT = LED_ERR_LAT
+    = LED_TX_LAT = LED_RX_LAT = BOOTLOADER_INDICATOR
     = BL_INDICATOR_OFF;
     asm ("goto  "  str(NEW_RESET_VECTOR));
 }
@@ -161,6 +163,7 @@ bool Bootload_Required ()
 
     if (IO_PIN_ENTRY_PORT_PIN == IO_PIN_ENTRY_RUN_BL)
     {
+        LED_WAR_LAT = BL_INDICATOR_ON;
         return (true);
     }
 
@@ -185,6 +188,7 @@ bool Bootload_Required ()
 
     if (Stored_Checksum != check_sum)
     {
+        LED_ERR_LAT = BL_INDICATOR_ON;
         return (true);
     }
 	return (false);
@@ -521,7 +525,9 @@ void Check_Device_Reset ()
 {
     if (reset_pending == true)
     {
-        BOOTLOADER_INDICATOR = BL_INDICATOR_OFF;
+        LED_RUN_LAT = LED_WAR_LAT = LED_ERR_LAT
+        = LED_TX_LAT = LED_RX_LAT = BOOTLOADER_INDICATOR
+        = BL_INDICATOR_OFF;
         RESET();
     }
     return;

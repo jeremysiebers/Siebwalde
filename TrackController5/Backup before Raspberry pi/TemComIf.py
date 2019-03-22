@@ -84,7 +84,7 @@ class TemComIf(object):
         self.interface = serial.Serial(port=port, baudrate=2000000, bytesize=8, parity='N', stopbits=1, xonxoff=0)
         # Initialize MODBUS master.
         self.master = modbus_rtu.RtuMaster(self.interface)
-        self.master.set_timeout(0.5)
+        self.master.set_timeout(0.05)
         self.master.open()
 
     def __del__ (self):
@@ -124,8 +124,6 @@ class TemComIf(object):
 
     # Write raw serial data for bootloader
     def WriteBootloadData(self, TX):
-        #self.interface.reset_input_buffer()
-        #self.interface.reset_output_buffer()
         self.interface.write(TX)
     
     def ReadBootloadData(self, Bytes):

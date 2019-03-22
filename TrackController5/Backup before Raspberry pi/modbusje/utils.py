@@ -15,7 +15,7 @@ import threading
 import logging
 import socket
 import select
-from modbusje import LOGGER
+from modbus_tk import LOGGER
 
 PY2 = sys.version_info[0] == 2
 PY3 = sys.version_info[0] == 3
