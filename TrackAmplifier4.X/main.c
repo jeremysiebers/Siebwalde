@@ -148,7 +148,7 @@ void main(void) {
                     break;
                     
                 case 3:
-                    Sequencer = 200;
+                    Sequencer = 0;
                     Update_Amplifier = false;
                     break;
                     
