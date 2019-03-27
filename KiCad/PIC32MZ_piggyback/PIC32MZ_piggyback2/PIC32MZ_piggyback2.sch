@@ -1,4 +1,5 @@
 EESchema Schematic File Version 4
+LIBS:PIC32MZ_piggyback2-cache
 EELAYER 26 0
 EELAYER END
 $Descr A4 11693 8268
@@ -1161,6 +1162,52 @@ Wire Wire Line
 	7450 3950 6650 3950
 Wire Wire Line
 	6650 3850 7450 3850
+Text Label 7050 4650 0    50   ~ 0
+VCC
+Text Label 9250 4050 0    50   ~ 0
+VCC
+Text Label 10450 3950 0    50   ~ 0
+VCC
+Text Label 10450 4350 0    50   ~ 0
+VCC
+Text Label 9300 1650 0    50   ~ 0
+VCC
+Text Label 9300 2450 0    50   ~ 0
+VCC
+Text Label 10450 1750 0    50   ~ 0
+VCC
+Text Notes 6950 3350 0    50   ~ 0
+Jx-1 = outside dubbel row connector\nJx-2 = inside dubbel row connector
+Text Label 7050 1250 0    50   ~ 0
+VCC
+Text Label 7050 1750 0    50   ~ 0
+VCC
+Text Label 7050 4550 0    50   ~ 0
+GND
+Text Label 10450 4050 0    50   ~ 0
+GND
+Text Label 9250 4350 0    50   ~ 0
+GND
+Text Label 9250 4550 0    50   ~ 0
+GND
+Text Label 10450 1650 0    50   ~ 0
+GND
+Text Label 10450 2250 0    50   ~ 0
+GND
+Text Label 9300 1950 0    50   ~ 0
+GND
+Text Label 8200 1350 0    50   ~ 0
+GND
+Text Label 8200 1650 0    50   ~ 0
+GND
+Text Label 7050 1550 0    50   ~ 0
+GND
+Text Label 7050 4450 0    50   ~ 0
+MCLR
+Text Label 9300 1550 0    50   ~ 0
+RB7
+Text Label 9300 2050 0    50   ~ 0
+RB6
 Wire Bus Line
 	3950 5750 6850 5750
 Wire Bus Line
@@ -1193,52 +1240,144 @@ Wire Bus Line
 	11000 3150 11000 5750
 Wire Bus Line
 	8800 3150 8800 5750
-Text Label 7050 4650 0    50   ~ 0
-VCC
-Text Label 9250 4050 0    50   ~ 0
-VCC
-Text Label 10450 3950 0    50   ~ 0
-VCC
-Text Label 10450 4350 0    50   ~ 0
-VCC
-Text Label 9300 1650 0    50   ~ 0
-VCC
-Text Label 9300 2450 0    50   ~ 0
-VCC
-Text Label 10450 1750 0    50   ~ 0
-VCC
-Text Notes 6950 3350 0    50   ~ 0
-Jx-1 = outside dubbel row connector\nJx-2 = inside dubbel row connector
-Text Label 7050 1250 0    50   ~ 0
-VCC
-Text Label 7050 1750 0    50   ~ 0
-VCC
+Text Label 8200 1250 0    50   ~ 0
+TXN
+Text Label 9300 2350 0    50   ~ 0
+RXN
+Text Label 7050 1350 0    50   ~ 0
+TXP
+Text Label 10450 2350 0    50   ~ 0
+RXP
+Text Label 7050 2450 0    50   ~ 0
+RB0
+Text Label 7050 2350 0    50   ~ 0
+RB2
+Text Label 7050 2250 0    50   ~ 0
+RB4
+Text Label 7050 2150 0    50   ~ 0
+RE9
+Text Label 7050 2050 0    50   ~ 0
+RA0
+Text Label 7050 1950 0    50   ~ 0
+RG7
+Text Label 7050 1850 0    50   ~ 0
+RC4
+Text Label 7050 1650 0    50   ~ 0
+RC2
+Text Label 7050 1450 0    50   ~ 0
+RE7
+Text Label 8200 2450 0    50   ~ 0
+RB1
+Text Label 8200 2350 0    50   ~ 0
+RB3
+Text Label 8200 2250 0    50   ~ 0
+RB5
+Text Label 8200 2150 0    50   ~ 0
+RE8
+Text Label 8200 2050 0    50   ~ 0
+RG9
+Text Label 8200 1950 0    50   ~ 0
+RG8
+Text Label 8200 1850 0    50   ~ 0
+RG6
+Text Label 8200 1750 0    50   ~ 0
+RC3
+Text Label 8200 1550 0    50   ~ 0
+RC1
 Text Label 8200 1450 0    50   ~ 0
 VCC
-Text Label 7050 4550 0    50   ~ 0
-GND
-Text Label 10450 4050 0    50   ~ 0
-GND
-Text Label 9250 4350 0    50   ~ 0
-GND
-Text Label 9250 4550 0    50   ~ 0
-GND
-Text Label 10450 1650 0    50   ~ 0
-GND
-Text Label 10450 2250 0    50   ~ 0
-GND
-Text Label 9300 1950 0    50   ~ 0
-GND
-Text Label 8200 1350 0    50   ~ 0
-GND
-Text Label 8200 1650 0    50   ~ 0
-GND
-Text Label 7050 1550 0    50   ~ 0
-GND
-Text Label 7050 4450 0    50   ~ 0
-MCLR
-Text Label 9300 1550 0    50   ~ 0
-RB7
-Text Label 9300 2050 0    50   ~ 0
-RB6
+Text Label 9250 4250 0    50   ~ 0
+LED1
+Text Label 10450 4250 0    50   ~ 0
+LED2
+Text Label 7050 5050 0    50   ~ 0
+RF4
+Text Label 7050 4950 0    50   ~ 0
+RD14
+Text Label 7050 4850 0    50   ~ 0
+RB14
+Text Label 7050 4750 0    50   ~ 0
+RB12
+Text Label 7050 4350 0    50   ~ 0
+RB10
+Text Label 7050 4250 0    50   ~ 0
+RB8
+Text Label 7050 4150 0    50   ~ 0
+RA9
+Text Label 8150 5050 0    50   ~ 0
+RF5
+Text Label 8150 4950 0    50   ~ 0
+RB15
+Text Label 8150 4850 0    50   ~ 0
+RB13
+Text Label 8150 4750 0    50   ~ 0
+RF12
+Text Label 8150 4650 0    50   ~ 0
+RA1
+Text Label 8150 4550 0    50   ~ 0
+RB11
+Text Label 8150 4450 0    50   ~ 0
+RB9
+Text Label 8150 4350 0    50   ~ 0
+RA10
+Text Label 9250 5050 0    50   ~ 0
+RD0
+Text Label 9250 4950 0    50   ~ 0
+RD10
+Text Label 9250 4850 0    50   ~ 0
+RA14
+Text Label 9250 4750 0    50   ~ 0
+RA4
+Text Label 9250 4450 0    50   ~ 0
+RA2
+Text Label 9250 4150 0    50   ~ 0
+MCU_MISO
+Text Label 10450 5050 0    50   ~ 0
+RD9
+Text Label 10450 4950 0    50   ~ 0
+RA15
+Text Label 10450 4850 0    50   ~ 0
+RA5
+Text Label 10450 4750 0    50   ~ 0
+RA3
+Text Label 10450 4650 0    50   ~ 0
+MCU_MOSI
+Text Label 10450 4550 0    50   ~ 0
+MCU_SCK
+Text Label 10450 4450 0    50   ~ 0
+RF3
+Text Label 9300 1250 0    50   ~ 0
+RD1
+Text Label 9300 1350 0    50   ~ 0
+RD3
+Text Label 9300 1450 0    50   ~ 0
+RD12
+Text Label 9300 1750 0    50   ~ 0
+RD4
+Text Label 9300 1850 0    50   ~ 0
+RF1
+Text Label 9300 2150 0    50   ~ 0
+RG12
+Text Label 9300 2250 0    50   ~ 0
+RE2
+Text Label 10450 1250 0    50   ~ 0
+RD2
+Text Label 10450 1350 0    50   ~ 0
+RD13
+Text Label 10450 1550 0    50   ~ 0
+RD5
+Text Label 10450 1850 0    50   ~ 0
+RD7
+Text Label 10450 1950 0    50   ~ 0
+RF0
+Text Label 10450 2050 0    50   ~ 0
+RE0
+Text Label 10450 2150 0    50   ~ 0
+RG14
+Text Label 10450 2450 0    50   ~ 0
+RE3
+Text Label 7050 3950 0    50   ~ 0
+LED1
+Text Label 7050 4050 0    50   ~ 0
+LED2
 $EndSCHEMATC
