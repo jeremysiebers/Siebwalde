@@ -406,4 +406,108 @@ Text Label 1750 2350 0    50   ~ 0
 RXN
 Text Label 4350 3200 0    50   ~ 0
 TXP
+Text Label 1750 2050 0    50   ~ 0
+RB6
+Text Label 1750 1550 0    50   ~ 0
+RB7
+Text Label 1750 3200 0    50   ~ 0
+LED1
+Text Label 1750 3300 0    50   ~ 0
+LED2
+Text Label 1750 3400 0    50   ~ 0
+RA9
+Text Label 1750 3500 0    50   ~ 0
+RB8
+Text Label 1750 3600 0    50   ~ 0
+RB10
+Text Label 1750 4000 0    50   ~ 0
+RB12
+Text Label 1750 4100 0    50   ~ 0
+RB14
+Text Label 1750 4200 0    50   ~ 0
+RD14
+Text Label 1750 4300 0    50   ~ 0
+RF4
+Text Label 2700 3600 0    50   ~ 0
+RA10
+Text Label 2700 3700 0    50   ~ 0
+RB9
+Text Label 2700 3800 0    50   ~ 0
+RB11
+Text Label 2700 3900 0    50   ~ 0
+RA1
+Text Label 2700 4000 0    50   ~ 0
+RF12
+Text Label 2700 4100 0    50   ~ 0
+RB13
+Text Label 2700 4200 0    50   ~ 0
+RB15
+Text Label 2700 4300 0    50   ~ 0
+RF5
+Text Label 4350 3300 0    50   ~ 0
+RE7
+Text Label 4350 3500 0    50   ~ 0
+RC2
+Text Label 4350 3700 0    50   ~ 0
+RC4
+Text Label 4350 3800 0    50   ~ 0
+RG7
+Text Label 4350 3900 0    50   ~ 0
+RA0
+Text Label 4350 4000 0    50   ~ 0
+RE9
+Text Label 4350 4100 0    50   ~ 0
+RB4
+Text Label 4350 4200 0    50   ~ 0
+RB2
+Text Label 4350 4300 0    50   ~ 0
+RB0
+Text Label 5250 3400 0    50   ~ 0
+RC1
+Text Label 5250 3600 0    50   ~ 0
+RC3
+Text Label 5250 3700 0    50   ~ 0
+RG6
+Text Label 5250 3800 0    50   ~ 0
+RG8
+Text Label 5250 3900 0    50   ~ 0
+RG9
+Text Label 5250 4000 0    50   ~ 0
+RE8
+Text Label 5250 4100 0    50   ~ 0
+RB5
+Text Label 5250 4200 0    50   ~ 0
+RB3
+Text Label 5250 4300 0    50   ~ 0
+RB1
+Text Label 4300 1550 0    50   ~ 0
+MCU_MISO
+Text Label 4300 1650 0    50   ~ 0
+LED1
+Text Label 4300 1850 0    50   ~ 0
+RA2
+Text Label 4350 2150 0    50   ~ 0
+RA4
+Text Label 4350 2250 0    50   ~ 0
+RA14
+Text Label 4350 2350 0    50   ~ 0
+RD10
+Text Label 4350 2450 0    50   ~ 0
+RD0
+Text Label 5250 1650 0    50   ~ 0
+LED2
+Text Label 5250 1850 0    50   ~ 0
+RF3
+Text Label 5250 1950 0    50   ~ 0
+MCU_SCK
+Text Label 5250 2050 0    50   ~ 0
+MCU_MOSI
+Text Label 5250 2150 0    50   ~ 0
+RA3
+Text Label 5250 2250 0    50   ~ 0
+RA5
+Text Label 5250 2350 0    50   ~ 0
+RA15
+Text Label 5250 2450 0    50   ~ 0
+RD9
 $EndSCHEMATC
