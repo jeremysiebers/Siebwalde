@@ -221,8 +221,8 @@ $Comp
 L Connector_Generic:Conn_02x13_Odd_Even J1
 U 1 1 5C9B0ADF
 P 4850 3700
-F 0 "J1" H 4900 4517 50  0000 C CNN
-F 1 "Conn_02x13_Odd_Even" H 4900 4426 50  0000 C CNN
+F 0 "J1" H 4900 4600 50  0000 C CNN
+F 1 "Conn_02x13_Odd_Even" H 4750 4550 50  0000 C CNN
 F 2 "Connector_PinHeader_2.54mm:PinHeader_2x13_P2.54mm_Vertical" H 4850 3700 50  0001 C CNN
 F 3 "~" H 4850 3700 50  0001 C CNN
 	1    4850 3700
@@ -232,8 +232,8 @@ $Comp
 L Connector:Conn_01x13_Male J1-2
 U 1 1 5C9B0AE6
 P 5650 3700
-F 0 "J1-2" H 5756 4478 50  0000 C CNN
-F 1 "Conn_01x13_Male" H 5756 4387 50  0000 C CNN
+F 0 "J1-2" H 5750 4600 50  0000 C CNN
+F 1 "Conn_01x13_Male" H 5750 4550 50  0000 C CNN
 F 2 "Connector_PinHeader_2.54mm:PinHeader_1x13_P2.54mm_Vertical" H 5650 3700 50  0001 C CNN
 F 3 "~" H 5650 3700 50  0001 C CNN
 	1    5650 3700
@@ -374,4 +374,40 @@ Text Label 2700 2250 0    50   ~ 0
 GND
 Text Label 2700 1650 0    50   ~ 0
 GND
+Text Notes 3100 2750 0    50   ~ 0
+Jx-1 = outside dubbel row connector\nJx-2 = inside dubbel row connector
+Text Label 1750 3700 0    50   ~ 0
+MCLR
+Text Label 1750 3900 0    50   ~ 0
+VCC
+Text Label 5250 1350 0    50   ~ 0
+VCC
+Text Label 5250 1750 0    50   ~ 0
+VCC
+Text Label 4300 1450 0    50   ~ 0
+VCC
+Text Label 1750 2450 0    50   ~ 0
+VCC
+Text Label 1750 1650 0    50   ~ 0
+VCC
+Text Label 2700 1750 0    50   ~ 0
+VCC
+Text Label 4350 3600 0    50   ~ 0
+VCC
+Text Label 4350 3100 0    50   ~ 0
+VCC
+Text Label 5250 3300 0    50   ~ 0
+VCC
+Text Label 5250 3100 0    50   ~ 0
+TXN
+Text Label 2700 2350 0    50   ~ 0
+RXP
+Text Label 1750 2350 0    50   ~ 0
+RXN
+Text Label 4350 3200 0    50   ~ 0
+TXP
+Text Label 1750 2050 0    50   ~ 0
+RB6
+Text Label 1750 1550 0    50   ~ 0
+RB7
 $EndSCHEMATC
