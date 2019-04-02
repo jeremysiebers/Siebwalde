@@ -84,31 +84,28 @@ void main(void)
     
     while(1)
     {
-        if(COMM_MODE_BOOTLOAD == false){
-            if ((SlaveInfo[0].HoldingReg[0] & 0x01) == 0){                          // Initialization starts here, after init of all slaves, the regular updates can take place
-                SLAVExCOMMANDxHANDLER(false);
-                InitDone = false;
-            }
-            else if ((SlaveInfo[0].HoldingReg[0] & 0x01) == 1){                     // Regular slave communication
-                InitDone = true;
-                if (UpdateNextSlave == true){
-                    UpdateNextSlave = false;
-                    ProcessNextSlave();                    
-                    AllSlavesReadAllDataCounter++;
-                    if (AllSlavesReadAllDataCounter > ALLxSLAVESxDATA){
-                        AllSlavesReadAllDataCounter = 1;
-                    }
-                }
-                ProcessSlaveCommunication();
-            }
-
-            ProcessPetitModbus();            
+        if ((SlaveInfo[0].HoldingReg[0] & 0x01) == 0){                          // Initialization starts here, after init of all slaves, the regular updates can take place
+            SLAVExCOMMANDxHANDLER(false);
+            InitDone = false;
         }
-        else{
+        else if ((SlaveInfo[0].HoldingReg[0] & 0x01) == 1){                     // Regular slave communication
+            InitDone = true;
+            if (UpdateNextSlave == true){
+                UpdateNextSlave = false;
+                ProcessNextSlave();                    
+                AllSlavesReadAllDataCounter++;
+                if (AllSlavesReadAllDataCounter > ALLxSLAVESxDATA){
+                    AllSlavesReadAllDataCounter = 1;
+                }
+            }
+            ProcessSlaveCommunication();
+        }
+        ProcessPetitModbus();   
+        Led_Blink();
+        
+        if(COMM_MODE_BOOTLOAD == true){
             LED_WAR++;
         }
-        
-        Led_Blink();
     }
 }
 

@@ -28,6 +28,7 @@ class DataAquisition:
         self.UDP_PORT_RECV = 65531  
         self.sock_recv = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock_recv.bind((self.UDP_IP_RECV, self.UDP_PORT_RECV)) 
+        self.sock_recv.setblocking(0)
         
         self.UDP_IP_TRANS = '192.168.1.95'
         self.UDP_PORT_TRANS = 60000
@@ -85,12 +86,17 @@ class DataAquisition:
             self.sock_trans.send(tx)
         
         if(command == EnumCommand.BOOTLOADER):
+            tx = struct.pack("<2B", 0xAA, command)
+            tx = tx + data
             self.sock_trans.send(tx)
     
     
     def ReadSerial(self):
         
-        self.line, addr = self.sock_recv.recvfrom(100)
+        try:
+            self.line, addr = self.sock_recv.recvfrom(100)
+        except:
+            pass
         
         while (len(self.line) > 0):        
         

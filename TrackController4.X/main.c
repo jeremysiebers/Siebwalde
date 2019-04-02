@@ -58,11 +58,31 @@ uint8_t UPDATE_TERMINAL     = false;
 uint8_t UPDATE_SLAVE_TOxUDP = false; 
 uint8_t UPDATE_MODBUS_DATA  = false;
 
+uint8_t DUMMY[3] = {0xAA,0xEE,0x55};
+typedef enum
+{
+    READ_VERSION  = 0x00, 
+    READ_FLASH    = 0x01,
+    WRITE_FLASH   = 0x02, 
+    ERASE_FLASH   = 0x03,
+    READ_EE_DATA  = 0x04,
+    WRITE_EE_DATA = 0x05,
+    READ_CONFIG   = 0x06,
+    WRITE_CONFIG  = 0x07,
+    CALC_CHECKSUM = 0x08,
+    RESET_DEVICE  = 0x09,
+    NEXT_TRANSMISSION = 0xFF
+};
+
+static uint8_t BytesToSent = 0;
+static uint8_t BytesToReceive = 63;
+
 typedef enum
 {
     MODBUS_CMD          = 0xFF,
     BOOTLOAD_CMD        = 0xFE,
     ETHERNET_CMD        = 0xFD,
+    DUMMY_CMD           = 0xFC,
             
     SEND_SLAVEIODATA    = 0x00,
     SEND_BOOTLOADER     = 0x01,
@@ -84,7 +104,7 @@ typedef struct
 {
     uint8_t header;
     uint8_t command;
-    uint8_t data[DATAxSTRUCTxLENGTH]; 
+    uint8_t data[80]; 
 }udpDemoRecv_t;
 
 udpDemoRecv_t udpRecv;
@@ -144,7 +164,7 @@ void main(void)
     udpPacket.destinationPortNumber = 65531;
 
     error_msg ret = ERROR;
-                
+    /*            
     printf("PIC18f97j60 started up!!!\n\r");
     __delay_ms(10);
     printf("\f");                                                               // Clear terminal (printf("\033[2J");)
@@ -152,7 +172,7 @@ void main(void)
     printf("\033[?25h");
     __delay_ms(10);   
     printf("PIC18f97j60 started up!!!\n\r");                                    // Welcome message
-
+    */
     //TMR0_StartTimer();
     SEND_UDP_SetDigitalInput();
     LED3_SetDigitalOutput();
@@ -241,9 +261,9 @@ void main(void)
                     LED2_LAT = 0;
                 }
                 else{
-                    printf("ret: %02X\n\r", ret);
+                    //printf("ret: %02X\n\r", ret);
                     if(ret == BUFFER_BUSY){
-                        printf("Flush and reset.");
+                        //printf("Flush and reset.");
                         //UDP_FlushTXPackets();
                         UDP_FlushRxdPacket(); 
                     }                
@@ -251,36 +271,36 @@ void main(void)
                 LED1_LAT = 0;
             }
         
-            else{
-                LED1_LAT = 1;  
-                ret = UDP_Start(udpPacket.destinationAddress, udpPacket.sourcePortNumber, udpPacket.destinationPortNumber);
-                if(ret == SUCCESS)
-                { 
-                    LED2_LAT = 1;
-                    Network_Manage();
-//                    UDP_Write16(0xC0DE);
+//            else{
+//                LED1_LAT = 1;  
+//                ret = UDP_Start(udpPacket.destinationAddress, udpPacket.sourcePortNumber, udpPacket.destinationPortNumber);
+//                if(ret == SUCCESS)
+//                { 
+//                    LED2_LAT = 1;
+//                    Network_Manage();
+////                    UDP_Write16(0xC0DE);
+////                    UDP_Send();
+//                    
+//                    //pSlaveDataSend = &(RECEIVED_BOOT_LOAD_DATA[0]);
+//                    SlaveDataTx[1] = BOOTLOAD_CMD;                              // send the Data Type
+//                    UDP_WriteBlock(SlaveDataTx, 2);
+////                    UDP_WriteBlock(&(RECEIVED_BOOT_LOAD_DATA[0]), DATAxSTRUCTxLENGTH2);
+//                    UDP_WriteBlock(&(EthernetTarget.Header), DATAxSTRUCTxLENGTH);
+//                    Network_Manage();
 //                    UDP_Send();
-                    
-                    //pSlaveDataSend = &(RECEIVED_BOOT_LOAD_DATA[0]);
-                    SlaveDataTx[1] = BOOTLOAD_CMD;                              // send the Data Type
-                    UDP_WriteBlock(SlaveDataTx, 2);
-//                    UDP_WriteBlock(&(RECEIVED_BOOT_LOAD_DATA[0]), DATAxSTRUCTxLENGTH2);
-                    UDP_WriteBlock(&(EthernetTarget.Header), DATAxSTRUCTxLENGTH);
-                    Network_Manage();
-                    UDP_Send();
-                    Network_Manage();                  
-                    LED2_LAT = 0;
-                }
-                else{
-                    printf("ret: %02X\n\r", ret);
-                    if(ret == BUFFER_BUSY){
-                        printf("Flush and reset.");
-                        //UDP_FlushTXPackets();
-                        UDP_FlushRxdPacket(); 
-                    }                
-                }
-                LED1_LAT = 0;
-            }
+//                    Network_Manage();                  
+//                    LED2_LAT = 0;
+//                }
+//                else{
+//                    printf("ret: %02X\n\r", ret);
+//                    if(ret == BUFFER_BUSY){
+//                        printf("Flush and reset.");
+//                        //UDP_FlushTXPackets();
+//                        UDP_FlushRxdPacket(); 
+//                    }                
+//                }
+//                LED1_LAT = 0;
+//            }
         }
         
         if(ProcessEthData == true){
@@ -307,6 +327,9 @@ void main(void)
                                     //printf("Reset All slaves...\n\r");
         //                            RESET();
                                     COMM_MODE_BOOTLOAD = false;
+                                    RCSTA1 = 0x00;
+                                    PIE1bits.RC1IE = 0;
+                                    PIE3bits.SSP2IE = 1;
                                     InitPhase = true;
                                     DataFromSlaveSend = 0;
                                     RESETxSPIxCOMMxHANDLER();
@@ -323,10 +346,15 @@ void main(void)
                                     break;
 
                                 case SEND_SLAVEIODATA:
+                                   PIE3bits.SSP2IE = 1;
                                    COMM_MODE_BOOTLOAD = false;
                                    break;
 
                                 case SEND_BOOTLOADER:
+                                    PIE3bits.SSP2IE = 0;
+                                    // enable receive interrupt
+                                    RCSTA1 = 0x90;
+                                    PIE1bits.RC1IE = 1;
                                     COMM_MODE_BOOTLOAD = true;
                                     break;
 
@@ -349,9 +377,24 @@ void main(void)
                         }
                         break;
 
-                    case BOOTLOAD_CMD:                
-                        //*pSEND_BOOT_LOAD_DATA = udpRecv.data[0];
-                        printf("BOOTLOAD_CMD received!\n\r");
+                    case BOOTLOAD_CMD: 
+                        NOP();                        
+                        switch(udpRecv.data[1]){
+                            case READ_VERSION       : BytesToSent = 10;   BytesToReceive = 26; break;
+                            case READ_FLASH         : BytesToSent = 0;    BytesToReceive = 0;  break;
+                            case WRITE_FLASH        : BytesToSent = 75;   BytesToReceive = 11; break;
+                            case ERASE_FLASH        : BytesToSent = 10;   BytesToReceive = 11; break;
+                            case READ_EE_DATA       : BytesToSent = 0;    BytesToReceive = 0;  break;
+                            case WRITE_EE_DATA      : BytesToSent = 0;    BytesToReceive = 0;  break;
+                            case READ_CONFIG        : BytesToSent = 0;    BytesToReceive = 0;  break;
+                            case WRITE_CONFIG       : BytesToSent = 10;   BytesToReceive = 11; break;
+                            case CALC_CHECKSUM      : BytesToSent = 10;   BytesToReceive = 12; break;
+                            case RESET_DEVICE       : BytesToSent = 10;   BytesToReceive = 11; break;                            
+                            default:                                                           break;            
+                        }                        
+                        for(uint8_t i = 0; i < BytesToSent; i++){
+                            EUSART1_Write(udpRecv.data[i]);
+                        }
                         break;      
 
                     default:
@@ -360,9 +403,99 @@ void main(void)
             }
             LED1_LAT = 0;
         }
+            
+        if(COMM_MODE_BOOTLOAD == true){
+            if(EUSART1_is_rx_ready() == BytesToReceive){
+                
+                LED1_LAT = 1;  
+                ret = UDP_Start(udpPacket.destinationAddress, udpPacket.sourcePortNumber, udpPacket.destinationPortNumber);
+                if(ret == SUCCESS)
+                { 
+                    LED2_LAT = 1;
+                    Network_Manage();
+                    SlaveDataTx[1] = BOOTLOAD_CMD;                              // send the Data Type
+                    UDP_WriteBlock(SlaveDataTx, 2);
+                    //UDP_WriteBlock(&(eusart1RxBuffer), EUSART1_RX_BUFFER_SIZE);
+                    for(uint8_t i = 0; i < EUSART1_is_rx_ready(); i++){
+                        UDP_Write8(EUSART1_Read());
+                    }
+                    Network_Manage();
+                    UDP_Send();
+                    Network_Manage();                  
+                    LED2_LAT = 0;
+                }
+                else{
+                    //printf("ret: %02X\n\r", ret);
+                    if(ret == BUFFER_BUSY){
+                        //printf("Flush and reset.");
+                        //UDP_FlushTXPackets();
+                        UDP_FlushRxdPacket(); 
+                    }                
+                }
+                LED1_LAT = 0;
+            }
+//            else{
+//                LED1_LAT = 1;  
+//                ret = UDP_Start(udpPacket.destinationAddress, udpPacket.sourcePortNumber, udpPacket.destinationPortNumber);
+//                if(ret == SUCCESS)
+//                { 
+//                    LED2_LAT = 1;
+//                    Network_Manage();
+//                    SlaveDataTx[1] = DUMMY_CMD;                              // send the Data Type
+//                    UDP_WriteBlock(SlaveDataTx, 2);
+//                    UDP_WriteBlock(DUMMY, 3);
+//                    Network_Manage();
+//                    UDP_Send();
+//                    Network_Manage();                  
+//                    LED2_LAT = 0;
+//                }
+//                else{
+//                    //printf("ret: %02X\n\r", ret);
+//                    if(ret == BUFFER_BUSY){
+//                        //printf("Flush and reset.");
+//                        //UDP_FlushTXPackets();
+//                        UDP_FlushRxdPacket(); 
+//                    }                
+//                }
+//                LED1_LAT = 0;
+//            }
+        }
     }
 }
 
+/*
+void BOOTxLOADxHANDLER(){
+    if(BOOT_LOAD_DATA_READY == true){
+        switch(BOOT_DATA_TO_SLAVE[2]){
+            case READ_VERSION       : BytesToSent = 10;   BytesToReceive = 26; break;
+            case READ_FLASH         : BytesToSent = 0;    BytesToReceive = 0;  break;
+            case WRITE_FLASH        : BytesToSent = 75;   BytesToReceive = 11; break;
+            case ERASE_FLASH        : BytesToSent = 10;   BytesToReceive = 11; break;
+            case READ_EE_DATA       : BytesToSent = 0;    BytesToReceive = 0;  break;
+            case WRITE_EE_DATA      : BytesToSent = 0;    BytesToReceive = 0;  break;
+            case READ_CONFIG        : BytesToSent = 0;    BytesToReceive = 0;  break;
+            case WRITE_CONFIG       : BytesToSent = 10;   BytesToReceive = 11; break;
+            case CALC_CHECKSUM      : BytesToSent = 10;   BytesToReceive = 12; break;
+            case RESET_DEVICE       : BytesToSent = 10;   BytesToReceive = 11; break;
+            case NEXT_TRANSMISSION  : BytesToSent = 0;    BytesToReceive = 0; 
+                                      BOOT_LOAD_DATA_READY = false;            break;
+            default:                                                           break;            
+        }
+        
+        if(BOOT_LOAD_DATA_SENT == false){
+            for(uint8_t i = 0; i < BytesToSent; i++){
+                EUSART1_Write(BOOT_DATA_TO_SLAVE[i]);
+            }
+            BOOT_LOAD_DATA_SENT = true;
+        }
+    }
+    else if(EUSART1_is_rx_ready() > (BytesToReceive - 1)){
+        for(uint8_t i = 0; i < BytesToReceive; i++){
+            BOOT_DATA_TO_ETHERNET[i] = EUSART1_Read();
+        }        
+    }    
+}
+*/
 /*#--------------------------------------------------------------------------#*/
 /*  Description: UDP_DATA_RECV()
  *

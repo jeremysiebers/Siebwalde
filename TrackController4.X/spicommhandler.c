@@ -46,17 +46,6 @@ static unsigned int DATAxREADY = 0;
 unsigned int SpiSlaveCommErrorCounter;
 unsigned bool InitPhase = true;
 
-/*
- * Variables of PROCESSxSPIxBOOTLOAD()
- */
-static uint8_t RECEIVED_BOOT_LOAD_DATA[DATAxSTRUCTxLENGTH2+1];                  // One dummy byte extra (SPI master will send extra byte to receive last byte from slave)
-static uint8_t SEND_BOOT_LOAD_DATA[DATAxSTRUCTxLENGTH2];
-static uint8_t BootloadDataCounterReceived = 0;
-static uint8_t BootloadDataCounterSend = 0;
-static uint8_t BootloadDataReady = 0;
-/*
- * 
- */
 
 void INITxSPIxCOMMxHANDLER(SLAVE_INFO *location)                                  
 {   
@@ -137,18 +126,7 @@ void INITxSPIxCOMMxHANDLER(SLAVE_INFO *location)
         pSlaveInfoWriteMask += 1;                                               // Increment pointer
     } 
     
-    
-    /*
-     * Bootloader init
-     */
-    
-    for(uint8_t i = 0; i < DATAxSTRUCTxLENGTH2; i++){
-        SEND_BOOT_LOAD_DATA[i] = i;                                               // Increment pointer
-    }
-    SEND_BOOT_LOAD_DATA[0] = 0xEE;
-    SEND_BOOT_LOAD_DATA[DATAxSTRUCTxLENGTH2 - 1] = 0x55;
 }
-
 /*#--------------------------------------------------------------------------#*/
 /*  Description: ProcessSpiData()
  *
@@ -179,12 +157,6 @@ void RESETxSPIxCOMMxHANDLER(){
     MASTER_SLAVE_DATA[0].HoldingReg[2] = 0;
     MASTER_SLAVE_DATA[0].HoldingReg[3] = 0;
     
-    /*
-     * Reset variables of PROCESSxSPIxBOOTLOAD()
-     */
-    BootloadDataCounterReceived = 0;
-    BootloadDataCounterSend     = 0;
-    BootloadDataReady           = 0;
 }
 
 /*#--------------------------------------------------------------------------#*/
@@ -309,78 +281,5 @@ void PROCESSxMODBUSxDATA(){
     else{
         DataFromSlaveSend = 0;
     }
-    
-}
-
-/*#--------------------------------------------------------------------------#*/
-/*  Description: PROCESSxSPIxBOOTLOAD()
- *
- *  Input(s)   : 
- *
- *  Output(s)  :
- *
- *  Returns    :
- *
- *  Pre.Cond.  :
- *
- *  Post.Cond. :
- *
- *  Notes      :
- */
-/*#--------------------------------------------------------------------------#*/
-
-
-
-void PROCESSxSPIxBOOTLOAD(){
-    SS1_Check_LAT = 1; 
-    RECEIVED_BOOT_LOAD_DATA[BootloadDataCounterReceived] = SSP2BUF;                       
-    SSP2BUF = SEND_BOOT_LOAD_DATA[BootloadDataCounterSend];
-    BootloadDataCounterReceived++;
-    BootloadDataCounterSend++;
-    SS1_Check_LAT = 0;
-    
-    while(!BootloadDataReady){
-        if (SSP2STATbits.BF){  
-            
-            SS1_Check_LAT = 1;
-            RECEIVED_BOOT_LOAD_DATA[BootloadDataCounterReceived] = SSP2BUF; 
-            SSP2BUF = SEND_BOOT_LOAD_DATA[BootloadDataCounterSend];
-            SS1_Check_LAT = 0;
-            
-            BootloadDataCounterReceived++;
-            BootloadDataCounterSend++;
-            
-            if (BootloadDataCounterReceived > DATAxSTRUCTxLENGTH2){
-                BootloadDataReady = 1;
-            }      
-            
-        }
-    }
-    
-    SS1_Check_LAT = 1;
-    BootloadDataCounterReceived = 0;    
-    BootloadDataCounterSend     = 0;
-    BootloadDataReady = 0;
-    SSP2BUF = 0;
-    SS1_Check_LAT = 0;
-}
-
-/*#--------------------------------------------------------------------------#*/
-/*  Description: ProcessBootloadData()
- *
- *  Input(s)   : 
- *
- *  Output(s)  :
- *
- *  Returns    :
- *
- *  Pre.Cond.  :
- *
- *  Post.Cond. :
- *
- *  Notes      :
- */
-/*#--------------------------------------------------------------------------#*/
-void ProcessBootloadData(){
     
 }

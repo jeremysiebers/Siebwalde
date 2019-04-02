@@ -1,0 +1,13 @@
+https://nl.farnell.com/microchip/dm320007/dev-board-mcu-fpu/dp/2493393?st=PIC32MZ
+
+DM320007
+
+PIC32MZ2048EFH144
+
+
+
+https://nl.farnell.com/mikroelektronika/mikroe-2714/daughter-board-32bit-pic32mz-mcu/dp/2858100?st=PIC32MZ
+
+MIKROE-2714
+
+MIKROE-2714 -  Add-On Board, EasyPIC FUSION v7 ETH, PIC32MZ MCU, Plug-In Module

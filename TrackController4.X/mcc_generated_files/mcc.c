@@ -64,8 +64,8 @@ void OSCILLATOR_Initialize(void)
 {
     // SCS Primary_or_INTOSC; OSTS intosc; IDLEN disabled; 
     OSCCON = 0x00;
-    // PLLEN enabled; PPST0 disabled; PPRE divide_by_3; PPST1 divide_by_3; 
-    OSCTUNE = 0x40;
+    // PLLEN enabled; PPST0 disabled; PPRE divide_by_3; PPST1 divide_by_2; 
+    OSCTUNE = 0xC0;
 }
 
 

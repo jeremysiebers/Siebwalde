@@ -51,6 +51,7 @@ class EnumCommand:
     MODBUS      = 0xFF
     BOOTLOADER  = 0xFE
     ETHERNET_T  = 0xFD
+    DUMMY_CMD   = 0xFC
     
 class EnumEthernetT:
     ResetAll          = 0xFF

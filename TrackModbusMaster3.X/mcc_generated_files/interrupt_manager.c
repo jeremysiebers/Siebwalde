@@ -66,74 +66,51 @@ void __interrupt() INTERRUPT_InterruptManager (void)
 {
     // interrupt handler
     if(INTCONbits.PEIE == 1)
-    {
-        if (COMM_MODE_BOOTLOAD == false){
-            if(PIE3bits.RC1IE == 1 && PIR3bits.RC1IF == 1)
-            {
-                ReceiveInterrupt(RCREG1);                                            // Read first read character from buffer
+    {        
+        if(PIE3bits.RC1IE == 1 && PIR3bits.RC1IF == 1)
+        {
+            ReceiveInterrupt(RCREG1);                                            // Read first read character from buffer
 
-                if(1 == RC1STAbits.OERR)
-                {
-                    //modbus_sync_LAT = 1;
-                    RC1STAbits.CREN = 0;
-                    RC1STAbits.CREN = 1;
-                }
-                TMR3_Reload();
-                PIR4bits.TMR3IF   = 0;
-                PIE4bits.TMR3IE   = 1;
-                T1CONbits.TMR1ON  = 0;                                              // Data received stop answer timeout timer
-                PIE4bits.TMR1IE   = 0;        
-                PIR4bits.TMR1IF   = 0;
+            if(1 == RC1STAbits.OERR)
+            {
+                //modbus_sync_LAT = 1;
+                RC1STAbits.CREN = 0;
+                RC1STAbits.CREN = 1;
+            }
+            TMR3_Reload();
+            PIR4bits.TMR3IF   = 0;
+            PIE4bits.TMR3IE   = 1;
+            T1CONbits.TMR1ON  = 0;                                              // Data received stop answer timeout timer
+            PIE4bits.TMR1IE   = 0;        
+            PIR4bits.TMR1IF   = 0;
 
-                if (PIR3bits.RC1IF == 1){                                            // If the buffer contains more characters do read again
-                    ReceiveInterrupt(RCREG1);
-                }
-            } 
-            else if(PIE4bits.TMR3IE == 1 && PIR4bits.TMR3IF == 1)
-            {
-                PetitModbusTimerValue = 3;                                          // Between receive interrupts it took to long --> message done
-                PIE4bits.TMR3IE = 0;
-                PIR4bits.TMR3IF = 0;
-            } 
-            else if(PIE4bits.TMR1IE == 1 && PIR4bits.TMR1IF == 1)
-            {
-                SlaveAnswerTimeoutCounter   = 1;                                    // Data received answer timeout timer
-                PIR4bits.TMR1IF             = 0;
-                TMR1_Reload();                                                      // Timer is stoped when the SlaveAnswerTimeoutCounter > 0 is seen by modbus handler
-            } 
-            else if(PIE4bits.TMR2IE == 1 && PIR4bits.TMR2IF == 1)
-            {
-                PIR4bits.TMR2IF = 0;
-                T2TMR = 0;
-                modbus_send_LAT ^= 1;
-                UpdateNextSlave = true;
-                SENDxDATAxTOxETHERNET();                                               // This is the first action in a new cycle, hence it is in the interrupt file. Also SPI comm is required before ModBus!!.            
-            }        
-            else
-            {
-                //Unhandled Interrupt
+            if (PIR3bits.RC1IF == 1){                                            // If the buffer contains more characters do read again
+                ReceiveInterrupt(RCREG1);
             }
-        }
-        else{
-            
-            if(PIE3bits.RC1IE == 1 && PIR3bits.RC1IF == 1)
-            {
-                EUSART1_RxDefaultInterruptHandler();
-                LED_RX++;
-            }
-            else if(PIE3bits.TX1IE == 1 && PIR3bits.TX1IF == 1)
-            {
-                EUSART1_TxDefaultInterruptHandler();
-                LED_TX++;
-            }
-            else if(PIE4bits.TMR2IE == 1 && PIR4bits.TMR2IF == 1)
-            {
-                PIR4bits.TMR2IF = 0;
-                T2TMR = 0;
-                modbus_send_LAT ^= 1;
-                BOOTxLOADxTOxETHERNET();                                        
-                BOOTxLOADxHANDLER();
-            }
+        } 
+        else if(PIE4bits.TMR3IE == 1 && PIR4bits.TMR3IF == 1)
+        {
+            PetitModbusTimerValue = 3;                                          // Between receive interrupts it took to long --> message done
+            PIE4bits.TMR3IE = 0;
+            PIR4bits.TMR3IF = 0;
+        } 
+        else if(PIE4bits.TMR1IE == 1 && PIR4bits.TMR1IF == 1)
+        {
+            SlaveAnswerTimeoutCounter   = 1;                                    // Data received answer timeout timer
+            PIR4bits.TMR1IF             = 0;
+            TMR1_Reload();                                                      // Timer is stoped when the SlaveAnswerTimeoutCounter > 0 is seen by modbus handler
+        } 
+        else if(PIE4bits.TMR2IE == 1 && PIR4bits.TMR2IF == 1)
+        {
+            PIR4bits.TMR2IF = 0;
+            T2TMR = 0;
+            modbus_send_LAT ^= 1;
+            UpdateNextSlave = true;
+            SENDxDATAxTOxETHERNET();                                               // This is the first action in a new cycle, hence it is in the interrupt file. Also SPI comm is required before ModBus!!.            
+        }        
+        else
+        {
+            //Unhandled Interrupt
         }
     }      
     else

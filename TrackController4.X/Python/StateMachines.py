@@ -702,8 +702,9 @@ class State:
             self.ModbusMaster.HoldingReg[3] = 0
             self.ModbusMaster.HoldingReg[0] = EnumSlaveConfig.MODE_MAN & EnumSlaveConfig.READ & EnumSlaveConfig.BOOTLOAD & EnumSlaveConfig.EXEC
             self.Amplifiers.WriteSerial(EnumCommand.MODBUS, self.ModbusMaster)
+            time.sleep(0.5)
             self.RunSwFlash += 1
-            print("RunSwFlash==3 --> Set ModbusMaster in Bootloader communication mode")
+            print("RunSwFlash==3 --> Set ModbusMaster in silent (bootloader) mode")
             return EnumStateMachine.busy
         
         '''
@@ -713,58 +714,18 @@ class State:
             print("RunSwFlash==4 --> Set Ethernet Target in Bootloader communication mode")
             self.Amplifiers.WriteSerial(EnumCommand.ETHERNET_T, EnumEthernetT.SEND_BOOTLOADER)
             self.RunSwFlash += 1
-            if(self.Amplifiers.Trackamplifiers[0].InputReg[0] == EnumSlaveConfig.OK):
-                
-                print("RunSwFlash==6 --> TrackAmp " + str(TrackAmplifierId) + " has checksum " + str(hex(self.Amplifiers.Trackamplifiers[0].InputReg[1])))
-                print("RunSwFlash==4 --> EnumSlaveConfig.OK")
-                self.ModbusMaster.HoldingReg[0] = EnumSlaveConfig.MODE_MAN & EnumSlaveConfig.WRITE & EnumSlaveConfig.HOLDINGREG & EnumSlaveConfig.HALT
-                self.Amplifiers.WriteSerial(EnumCommand.MODBUS, self.ModbusMaster)
-                self.RunSwFlash += 1
-                return EnumStateMachine.busy
+            return EnumStateMachine.busy
         
         '''
         case 5
         '''        
         if(self.RunSwFlash == 5):
-            if(self.Amplifiers.Trackamplifiers[0].InputReg[0] == EnumSlaveConfig.IDLE):
-                print("RunSwFlash==5 --> EnumSlaveConfig.IDLE")
-                self.RunSwFlash += 1
-                return EnumStateMachine.busy        
+            #print("RunSwFlash==1 --> Starting bootloader flash program.")
+            self.Bootloader.FlashAuto()
+            #print("RunSwFlash==1 --> bootloader flash program done.")            
+            self.DataCommunication.WriteUDP(EnumCommand.ETHERNET_T, EnumEthernetT.ResetAll)
+            time.sleep(0.5) 
+            self.RunSwFlash = 0
+            return EnumStateMachine.ok
         
-        
-        '''
-        case 6
-        '''        
-        if(self.RunSwFlash == 6):
-            '''
-            self.ModbusMaster.HoldingReg[1] = TrackBackPlaneID
-            self.ModbusMaster.HoldingReg[2] = 0xFFFF;
-            self.ModbusMaster.HoldingReg[3] = 0
-            self.ModbusMaster.HoldingReg[0] = EnumSlaveConfig.MODE_MAN & EnumSlaveConfig.WRITE & EnumSlaveConfig.HOLDINGREG & EnumSlaveConfig.EXEC
-            self.Amplifiers.WriteSerial(EnumCommand.MODBUS, self.ModbusMaster)
-            self.RunSwFlash += 1
-            print("RunSwFlash==6 --> TrackBackPlaneID: " + str(TrackBackPlaneID) + " AmplifierLatchSet: Release amplifier select line")
-            '''
-            return EnumStateMachine.busy
-        
-        '''
-        case 7
-        '''        
-        if(self.RunSwFlash == 7):
-            if(self.Amplifiers.Trackamplifiers[0].InputReg[0] == EnumSlaveConfig.OK):
-                print("RunSwFlash==7 --> EnumSlaveConfig.OK")
-                self.ModbusMaster.HoldingReg[0] = EnumSlaveConfig.MODE_MAN & EnumSlaveConfig.WRITE & EnumSlaveConfig.HOLDINGREG & EnumSlaveConfig.HALT
-                self.Amplifiers.WriteSerial(EnumCommand.MODBUS, self.ModbusMaster)
-                self.RunSwFlash += 1
-                return EnumStateMachine.busy
-        
-        '''
-        case 8
-        '''        
-        if(self.RunSwFlash == 8):
-            if(self.Amplifiers.Trackamplifiers[0].InputReg[0] == EnumSlaveConfig.IDLE):
-                print("RunSwFlash==8 --> EnumSlaveConfig.IDLE")                
-                self.RunSwFlash = 0
-                return EnumStateMachine.ok        
-            
         return EnumStateMachine.busy          

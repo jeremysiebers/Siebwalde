@@ -22,13 +22,11 @@ const uint8_t DATAxSTRUCTxLENGTH = sizeof(SLAVE_INFO);
 extern void INITxSPIxCOMMxHANDLER(SLAVE_INFO *location);
 extern void RESETxSPIxCOMMxHANDLER(void);
 extern void PROCESSxSPIxMODBUS();
-extern void PROCESSxSPIxBOOTLOAD();
 
 extern unsigned int SpiSlaveCommErrorCounter;
 extern unsigned bool InitPhase;
 
 extern void PROCESSxMODBUSxDATA(void);
-void ProcessBootloadData(void);
 
 //extern uint8_t RECEIVED_BOOT_LOAD_DATA[DATAxSTRUCTxLENGTH+1];
 //extern uint8_t SEND_BOOT_LOAD_DATA[DATAxSTRUCTxLENGTH];

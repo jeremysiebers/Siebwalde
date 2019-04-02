@@ -63,12 +63,12 @@ void  INTERRUPT_Initialize (void)
     // SSPI - high priority
     IPR3bits.SSP2IP = 1;
 
+    // RCI - high priority
+    IPR1bits.RC1IP = 1;
 
-    // TXI - low priority
-    IPR1bits.TX1IP = 0;    
+    // TXI - high priority
+    IPR1bits.TX1IP = 1;
 
-    // RCI - low priority
-    IPR1bits.RC1IP = 0;    
 
     // TMRI - low priority
     INTCON2bits.TMR0IP = 0;    
@@ -88,15 +88,20 @@ void interrupt INTERRUPT_InterruptManagerHigh (void)
             PROCESSxSPIxMODBUS(); 
             UPDATE_MODBUS_DATA = true;
         }
-        else{ 
-            PROCESSxSPIxBOOTLOAD(); 
-        }
         UPDATE_TERMINAL = true;
         UPDATE_SLAVE_TOxUDP = true;
         TMR0_Reload();
         T0CONbits.TMR0ON = 1;
         SS1_Check_LAT = 0;        
         PIR3bits.SSP2IF = 0;
+    }
+    else if(PIE1bits.RC1IE == 1 && PIR1bits.RC1IF == 1)
+    {
+        EUSART1_RxDefaultInterruptHandler();
+    }
+    else if(PIE1bits.TX1IE == 1 && PIR1bits.TX1IF == 1)
+    {
+        EUSART1_TxDefaultInterruptHandler();
     }
     else
     {
@@ -116,14 +121,6 @@ void interrupt low_priority INTERRUPT_InterruptManagerLow (void)
         T0CONbits.TMR0ON = 0;
         UPDATE_TERMINAL = 0;
         INTCONbits.TMR0IF = 0;
-    }
-    else if(PIE1bits.RC1IE == 1 && PIR1bits.RC1IF == 1)
-    {
-        EUSART1_RxDefaultInterruptHandler();
-    }
-    else if(PIE1bits.TX1IE == 1 && PIR1bits.TX1IF == 1)
-    {
-        EUSART1_TxDefaultInterruptHandler();
     }
     else
     {

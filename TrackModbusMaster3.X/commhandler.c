@@ -355,124 +355,6 @@ void SENDxDATAxTOxETHERNET(){
 }
 
 /*#--------------------------------------------------------------------------#*/
-/*  Description: BOOTxLOADxTOxETHERNET()
- *
- *  Input(s)   : 
- *
- *  Output(s)  :
- *
- *  Returns    :
- *
- *  Pre.Cond.  :
- *
- *  Post.Cond. :
- *
- *  Notes      : Keeps track of bootloader comm with ethernet target
- */
-/*#--------------------------------------------------------------------------#*/
-
-bool BOOT_LOAD_DATA_READY = false;
-bool BOOT_LOAD_DATA_SENT = false;
-
-void BOOTxLOADxTOxETHERNET(){
-    bytesWritten = 0;
-    dataIn  = &(BOOT_DATA_TO_ETHERNET[0]);                                      // Data to Ethernet Target
-    dataOut = &(BOOT_DATA_TO_SLAVE[0]);                                         // Data from Ethernet Target
-    SS1_LAT = 0;                                                                // Activate slave
-    __delay_us(1);
-    while(bytesWritten < DATAxSTRUCTxLENGTH2 + 1){
-        SSP1CON1bits.WCOL = 0;
-        SSP1BUF = dataIn[bytesWritten];
-        while(SSP1STATbits.BF == 0){
-        }
-        dataOut[bytesWritten] = SSP1BUF;
-        bytesWritten++;
-//        NOP();                                                                // give SPI slave time to process the data, NOP() is 3 cycles delay ~288ns
-        __delay_us(1);
-    }
-    SS1_LAT = 1;   
-    
-    if(BOOT_DATA_TO_SLAVE[1] == 0x55 && BOOT_LOAD_DATA_READY == false){         // Check if received slave number is valid(during debugging sometimes wrong number received)
-        BOOT_LOAD_DATA_READY = true;
-        BOOT_LOAD_DATA_SENT = false;
-    } 
-    else if(BOOT_DATA_TO_SLAVE[1] == 0xAA && BOOT_LOAD_DATA_READY == false){
-        BOOT_LOAD_DATA_READY = false;
-    }
-    else if(BOOT_LOAD_DATA_READY == false){
-        BOOT_LOAD_DATA_READY = false;
-        LED_ERR++;
-    }       
-}
-
-/*#--------------------------------------------------------------------------#*/
-/*  Description: BOOTxLOADxHANDLER()
- *
- *  Input(s)   : 
- *
- *  Output(s)  :
- *
- *  Returns    :
- *
- *  Pre.Cond.  :
- *
- *  Post.Cond. :
- *
- *  Notes      : Keeps track of bootloader communication with a slave
- */
-/*#--------------------------------------------------------------------------#*/
-
-typedef enum
-{
-    READ_VERSION  = 0x00, 
-    READ_FLASH    = 0x01,
-    WRITE_FLASH   = 0x02, 
-    ERASE_FLASH   = 0x03,
-    READ_EE_DATA  = 0x04,
-    WRITE_EE_DATA = 0x05,
-    READ_CONFIG   = 0x06,
-    WRITE_CONFIG  = 0x07,
-    CALC_CHECKSUM = 0x08,
-    RESET_DEVICE  = 0x09,
-    NEXT_TRANSMISSION = 0xFF
-};
-
-static uint8_t BytesToSent = 0;
-static uint8_t BytesToReceive = 0;
-
-void BOOTxLOADxHANDLER(){
-    if(BOOT_LOAD_DATA_READY == true){
-        switch(BOOT_DATA_TO_SLAVE[2]){
-            case READ_VERSION       : BytesToSent = 10;   BytesToReceive = 26; break;
-            case READ_FLASH         : BytesToSent = 0;    BytesToReceive = 0;  break;
-            case WRITE_FLASH        : BytesToSent = 75;   BytesToReceive = 11; break;
-            case ERASE_FLASH        : BytesToSent = 10;   BytesToReceive = 11; break;
-            case READ_EE_DATA       : BytesToSent = 0;    BytesToReceive = 0;  break;
-            case WRITE_EE_DATA      : BytesToSent = 0;    BytesToReceive = 0;  break;
-            case READ_CONFIG        : BytesToSent = 0;    BytesToReceive = 0;  break;
-            case WRITE_CONFIG       : BytesToSent = 10;   BytesToReceive = 11; break;
-            case CALC_CHECKSUM      : BytesToSent = 10;   BytesToReceive = 12; break;
-            case RESET_DEVICE       : BytesToSent = 10;   BytesToReceive = 11; break;
-            case NEXT_TRANSMISSION  : BytesToSent = 0;    BytesToReceive = 0; 
-                                      BOOT_LOAD_DATA_READY = false;            break;
-            default:                                                           break;            
-        }
-        
-        if(BOOT_LOAD_DATA_SENT == false){
-            for(uint8_t i = 0; i < BytesToSent; i++){
-                EUSART1_Write(BOOT_DATA_TO_SLAVE[i]);
-            }
-            BOOT_LOAD_DATA_SENT = true;
-        }
-    }
-    else if(EUSART1_is_rx_ready() > (BytesToReceive - 1)){
-        for(uint8_t i = 0; i < BytesToReceive; i++){
-            BOOT_DATA_TO_ETHERNET[i] = EUSART1_Read();
-        }        
-    }    
-}
-
-/*#--------------------------------------------------------------------------#*/
 /*  Description: SLAVExCOMMANDxHANDLER()
  *
  *  Input(s)   : 
@@ -569,7 +451,14 @@ void SLAVExCOMMANDxHANDLER (uint16_t State){
                     MASTER_SLAVE_DATA[0].HoldingReg[0] = 0;
                     //T2PR = 0x3B;
                     //PR2  = 0x3B;
-                    CommandMachine = 0;
+                    CommandMachine   = 0;
+                    PIE3bits.RC1IE   = 0;
+                    PIE4bits.TMR3IE  = 0;
+                    PIE4bits.TMR1IE  = 0;
+                    TX1STA           = 0;
+                    RC1STA           = 0;
+                    PORTCbits.RC1    = 0;
+                    RC1_SetDigitalInput();
                 }
                 
                 

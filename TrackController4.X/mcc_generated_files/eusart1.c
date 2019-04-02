@@ -53,8 +53,8 @@
   Section: Macro Declarations
 */
 
-#define EUSART1_TX_BUFFER_SIZE 64
-#define EUSART1_RX_BUFFER_SIZE 64
+#define EUSART1_TX_BUFFER_SIZE 77
+#define EUSART1_RX_BUFFER_SIZE 30
 
 /**
   Section: Global Variables
@@ -85,16 +85,16 @@ void EUSART1_Initialize(void)
     BAUDCON1 = 0x08;
 
     // SPEN enabled; RX9 8-bit; CREN enabled; ADDEN disabled; SREN disabled; 
-    RCSTA1 = 0x90;
+    RCSTA1 = 0x00;//0x90;
 
     // TX9 8-bit; TX9D 0; SENDB sync_break_complete; TXEN enabled; SYNC asynchronous; BRGH hi_speed; CSRC slave_mode; 
     TXSTA1 = 0x24;
 
     // 
-    SPBRG1 = 0x3C;
+    SPBRG1 = 0x04;
 
     // 
-    SPBRGH1 = 0x04;
+    SPBRGH1 = 0x00;
 
 
     // initializing the driver state
@@ -107,7 +107,7 @@ void EUSART1_Initialize(void)
     eusart1RxCount = 0;
 
     // enable receive interrupt
-    PIE1bits.RC1IE = 1;
+    PIE1bits.RC1IE = 0;
 }
 
 uint8_t EUSART1_is_tx_ready(void)
@@ -168,15 +168,6 @@ void EUSART1_Write(uint8_t txData)
     PIE1bits.TX1IE = 1;
 }
 
-char getch(void)
-{
-    return EUSART1_Read();
-}
-
-void putch(char txData)
-{
-    EUSART1_Write(txData);
-}
 
 void EUSART1_Transmit_ISR(void)
 {
