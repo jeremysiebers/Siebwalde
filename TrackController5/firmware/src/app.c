@@ -142,6 +142,10 @@ void APP_Tasks ( void )
         case APP_STATE_INIT:
         {
             bool appInitialized = true;
+            
+            DRV_USART0_WriteByte('A');
+            DRV_USART0_WriteByte('P');
+            DRV_USART0_WriteByte('P');
        
         
             if (appInitialized)
@@ -154,7 +158,7 @@ void APP_Tasks ( void )
 
         case APP_STATE_SERVICE_TASKS:
         {
-        
+            
             break;
         }
 
@@ -169,9 +173,6 @@ void APP_Tasks ( void )
         }
     }
 }
-
- 
-
 /*******************************************************************************
  End of File
  */

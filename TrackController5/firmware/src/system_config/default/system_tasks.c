@@ -72,10 +72,19 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 void SYS_Tasks ( void )
 {
     /* Maintain system services */
+    SYS_CONSOLE_Tasks(sysObj.sysConsole0);
+    /* SYS_TMR Device layer tasks routine */ 
+    SYS_TMR_Tasks(sysObj.sysTmr);
 
     /* Maintain Device Drivers */
+    DRV_MIIM_Tasks (sysObj.drvMiim);
+    DRV_USART_TasksTransmit(sysObj.drvUsart0);
+    DRV_USART_TasksError (sysObj.drvUsart0);
+    DRV_USART_TasksReceive(sysObj.drvUsart0);
 
     /* Maintain Middleware & Other Libraries */
+    /* Maintain the TCP/IP Stack*/
+    TCPIP_STACK_Task(sysObj.tcpip);
 
     /* Maintain the application's state machine. */
     APP_Tasks();
