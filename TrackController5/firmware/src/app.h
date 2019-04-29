@@ -108,6 +108,9 @@ typedef enum
     Application strings and buffers are be defined outside this structure.
  */
 
+void Led_Blink (void);
+void hoer (void);
+
 typedef struct
 {
     /* The application's current state */
@@ -117,6 +120,9 @@ typedef struct
 
 } APP_DATA;
 
+#define NUMBER_OF_SLAVES 51                                                     // 0 is for the master self. 50 Track slaves => 51  
+
+extern uint16_t LED_ERR;
 
 // *****************************************************************************
 // *****************************************************************************

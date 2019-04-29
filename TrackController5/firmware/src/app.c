@@ -54,6 +54,9 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 
 #include "app.h"
+#include "modbus/PetitModbus.h"
+#include "modbus/PetitModbusPort.h"
+#include "commhandler.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -77,6 +80,20 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 */
 
 APP_DATA appData;
+
+/* 
+ * Array of structs holding the data of all the slaves connected  
+ */
+static SLAVE_INFO         SlaveInfo[NUMBER_OF_SLAVES];
+static SLAVE_INFO         SlaveDump[1];
+
+static uint16_t LED_TX_prev, LED_RX_prev, LED_ERR_prev, LED_WAR_prev = 0;
+static uint16_t LED_TX_STATE, LED_RX_STATE, LED_ERR_STATE, LED_WAR_STATE = 0;
+uint16_t LED_ERR = 0;
+static uint16_t LED_WAR = 0;
+uint16_t UpdateNextSlave = false;
+uint16_t AllSlavesReadAllDataCounter = 1;
+uint16_t InitDone = false;
 
 // *****************************************************************************
 // *****************************************************************************
@@ -116,11 +133,12 @@ void APP_Initialize ( void )
 {
     /* Place the App state machine in its initial state. */
     appData.state = APP_STATE_INIT;
-
+    hoer();
     
-    /* TODO: Initialize your application's state machine and other
-     * parameters.
-     */
+    /* Pass address of array of struct for data storage. */
+    //InitPetitModbus(SlaveInfo, SlaveDump, (NUMBER_OF_SLAVES + 5));
+    /* Pass address of array of struct for data storage. */
+    //InitSlaveCommunication(SlaveInfo, SlaveDump);
 }
 
 
@@ -134,23 +152,34 @@ void APP_Initialize ( void )
 
 void APP_Tasks ( void )
 {
-
+    uint8_t i = 0;
+    
     /* Check the application's current state. */
     switch ( appData.state )
     {
         /* Application's initial state. */
         case APP_STATE_INIT:
         {
+            hoer();
+            /* Initialize the SLAVE_INFO struct with slave numbers. */
+            for (i = 0; i <NUMBER_OF_SLAVES; i++){
+                hoer();
+                SlaveInfo[i].SlaveNumber = i;
+                SlaveInfo[i].Header = 0xAA;
+                SlaveInfo[i].Footer = 0x55;
+            }
+            
             bool appInitialized = true;
             
             DRV_USART0_WriteByte('A');
             DRV_USART0_WriteByte('P');
             DRV_USART0_WriteByte('P');
-       
-        
+            
+            hoer();            
+               
             if (appInitialized)
             {
-            
+                DRV_TMR1_Start();
                 appData.state = APP_STATE_SERVICE_TASKS;
             }
             break;
@@ -158,11 +187,10 @@ void APP_Tasks ( void )
 
         case APP_STATE_SERVICE_TASKS:
         {
-            
+            //Led1Toggle();
             break;
         }
 
-        /* TODO: implement your application state machine.*/
         
 
         /* The default state should never be executed. */
@@ -173,6 +201,111 @@ void APP_Tasks ( void )
         }
     }
 }
+
+void hoer(){
+    Led1Toggle();
+}
+
+/*
+void Led_Blink (){
+    if(PIR0bits.TMR0IF){
+            
+        switch(LED_TX_STATE){
+            case 0 : 
+                if (LED_TX > 0){
+                    LED_TX_LAT = 1;
+                    LED_TX_prev = LED_TX;
+                    LED_TX_STATE = 1;
+                }
+                break;
+
+            case 1 :
+                if (LED_TX == LED_TX_prev || LED_TX != LED_TX_prev){
+                    LED_TX_LAT = 0;
+                    LED_TX_prev = 0;
+                    LED_TX = 0;
+                    LED_TX_STATE = 0;
+                }
+                break;
+
+            default :
+                LED_TX_STATE = 0;
+                break;                       
+        }
+
+        switch(LED_RX_STATE){
+            case 0 : 
+                if (LED_RX > 0){
+                    LED_RX_LAT = 1;
+                    LED_RX_prev = LED_RX;
+                    LED_RX_STATE = 1;
+                }
+                break;
+
+            case 1 :
+                if (LED_RX == LED_RX_prev || LED_RX != LED_RX_prev){
+                    LED_RX_LAT = 0;
+                    LED_RX_prev = 0;
+                    LED_RX = 0;
+                    LED_RX_STATE = 0;
+                }
+                break;
+
+            default :
+                LED_RX_STATE = 0;
+                break;                       
+        }
+        
+        switch(LED_ERR_STATE){
+            case 0 : 
+                if (LED_ERR > 0){
+                    LED_ERR_LAT = 1;
+                    LED_ERR_prev = LED_ERR;
+                    LED_ERR_STATE = 1;                        
+                }
+                break;
+
+            case 1 :
+                if (LED_ERR == LED_ERR_prev || LED_ERR != LED_ERR_prev){
+                    LED_ERR_LAT = 0;
+                    LED_ERR_prev = 0;
+                    LED_ERR = 0;
+                    LED_ERR_STATE = 0;                        
+                }
+                break;
+
+            default :
+                LED_ERR_STATE = 0;
+                break;                       
+        }
+        
+        switch(LED_WAR_STATE){
+            case 0 : 
+                if (LED_WAR > 0){
+                    LED_WAR_LAT = 1;
+                    LED_WAR_prev = LED_WAR;
+                    LED_WAR_STATE = 1;                        
+                }
+                break;
+
+            case 1 :
+                if (LED_WAR == LED_WAR_prev || LED_WAR != LED_WAR_prev){
+                    LED_WAR_LAT = 0;
+                    LED_WAR_prev = 0;
+                    LED_WAR = 0;
+                    LED_WAR_STATE = 0;                        
+                }
+                break;
+
+            default :
+                LED_WAR_STATE = 0;
+                break;                       
+        }
+        
+        PIR0bits.TMR0IF = 0;
+        TMR0_Reload();
+    }
+}*/
 /*******************************************************************************
  End of File
  */

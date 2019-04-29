@@ -68,12 +68,42 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // Section: System Interrupt Vector Functions
 // *****************************************************************************
 // *****************************************************************************
+ 
+void __ISR(_UART1_TX_VECTOR, ipl1AUTO) _IntHandlerDrvUsartTransmitInstance0(void)
+{
+    DRV_USART_TasksTransmit(sysObj.drvUsart0);
+}
+void __ISR(_UART1_RX_VECTOR, ipl7AUTO) _IntHandlerDrvUsartReceiveInstance0(void)
+{
+    DRV_USART_TasksReceive(sysObj.drvUsart0);
+}
+void __ISR(_UART1_FAULT_VECTOR, ipl7AUTO) _IntHandlerDrvUsartErrorInstance0(void)
+{
+    DRV_USART_TasksError(sysObj.drvUsart0);
+}
+ 
+ 
 
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+ 
  
 
 void __ISR(_TIMER_1_VECTOR, ipl1AUTO) IntHandlerDrvTmrInstance0(void)
 {
-    DRV_TMR_Tasks(sysObj.drvTmr0);
+    PLIB_INT_SourceFlagClear(INT_ID_0,INT_SOURCE_TIMER_1);
+}
+void __ISR(_TIMER_4_VECTOR, ipl1AUTO) IntHandlerDrvTmrInstance1(void)
+{
+    hoer();
+    PLIB_INT_SourceFlagClear(INT_ID_0,INT_SOURCE_TIMER_4);
 }
  void __ISR(_ETHERNET_VECTOR, ipl5AUTO) _IntHandler_ETHMAC(void)
 {
