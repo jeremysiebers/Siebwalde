@@ -94,6 +94,7 @@ static uint16_t LED_WAR = 0;
 uint16_t UpdateNextSlave = false;
 uint16_t AllSlavesReadAllDataCounter = 1;
 uint16_t InitDone = false;
+uint16_t stop = false;
 
 // *****************************************************************************
 // *****************************************************************************
@@ -133,12 +134,14 @@ void APP_Initialize ( void )
 {
     /* Place the App state machine in its initial state. */
     appData.state = APP_STATE_INIT;
-    hoer();
+    //Slaves_Disable_On();
     
     /* Pass address of array of struct for data storage. */
-    //InitPetitModbus(SlaveInfo, SlaveDump, (NUMBER_OF_SLAVES + 5));
+    InitPetitModbus(SlaveInfo, SlaveDump, (NUMBER_OF_SLAVES + 0));
     /* Pass address of array of struct for data storage. */
-    //InitSlaveCommunication(SlaveInfo, SlaveDump);
+    InitSlaveCommunication(SlaveInfo, SlaveDump);
+    DRV_USART1_Initialize();
+    PLIB_INT_SourceEnable(INT_ID_0, INT_SOURCE_TIMER_4);
 }
 
 
@@ -160,26 +163,25 @@ void APP_Tasks ( void )
         /* Application's initial state. */
         case APP_STATE_INIT:
         {
-            hoer();
             /* Initialize the SLAVE_INFO struct with slave numbers. */
             for (i = 0; i <NUMBER_OF_SLAVES; i++){
-                hoer();
                 SlaveInfo[i].SlaveNumber = i;
                 SlaveInfo[i].Header = 0xAA;
                 SlaveInfo[i].Footer = 0x55;
             }
             
+            
+            
             bool appInitialized = true;
             
             DRV_USART0_WriteByte('A');
             DRV_USART0_WriteByte('P');
-            DRV_USART0_WriteByte('P');
-            
-            hoer();            
+            DRV_USART0_WriteByte('P');            
                
             if (appInitialized)
             {
-                DRV_TMR1_Start();
+                Slaves_Disable_Off();
+                DRV_TMR1_Start(); // used for Ethernet
                 appData.state = APP_STATE_SERVICE_TASKS;
             }
             break;
@@ -187,7 +189,15 @@ void APP_Tasks ( void )
 
         case APP_STATE_SERVICE_TASKS:
         {
+            if(UpdateNextSlave == true && stop == false){
+                ProcessNextSlave(); 
+                stop = true;
+            }
+            ProcessSlaveCommunication();
             //Led1Toggle();
+            //Led1On();
+            ProcessPetitModbus();
+            //Led1Off();
             break;
         }
 
@@ -202,8 +212,19 @@ void APP_Tasks ( void )
     }
 }
 
-void hoer(){
+void ModbusCommCycle(){
     Led1Toggle();
+    UpdateNextSlave = true;
+}
+
+void ModbusCharacterTimeout(){
+    PetitModbusTimerValue = 3;                                                  // Between receive interrupts it took to long --> message done
+}
+
+void ModbusReceiveTimeout(){
+    SlaveAnswerTimeoutCounter   = 1;                                            // Data received answer timeout timer
+    DRV_TMR3_Stop();
+    PLIB_TMR_Counter16BitClear(TMR_ID_8);
 }
 
 /*

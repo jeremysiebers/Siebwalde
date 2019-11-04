@@ -1,5 +1,6 @@
 #include "PetitModbus.h"
 #include "PetitModbusPort.h"
+#include "app.h"
 
 #define PETIT_FALSE_FUNCTION                    0
 #define PETIT_FALSE_SLAVE_ADDRESS               1
@@ -374,6 +375,7 @@ void Petit_RxRTU(void)
             // Valid message!
             //PIE4bits.TMR3IE = 0;                                                // valid message so stop timer3 for nice SPI comm
             //PIR4bits.TMR3IF = 0;                                                // valid message so stop timer3 for nice SPI comm
+            DRV_TMR2_Stop();
             LED_RX++;
             Petit_Rx_Data_Available = TRUE;            
         }
@@ -431,7 +433,9 @@ void Petit_TxRTU(void)
         //TMR1_Reload();
         //PIR4bits.TMR1IF             = 0;
         //PIE4bits.TMR1IE             = 1;
-        //T1CONbits.TMR1ON            = 1;        
+        //T1CONbits.TMR1ON            = 1;   
+        PLIB_TMR_Counter16BitClear(TMR_ID_8);
+        DRV_TMR3_Start();
     }
 }
 
@@ -454,6 +458,7 @@ void ProcessPetitModbus(void)
             //T1CONbits.TMR1ON            = 0;                                    // timer stops here due to strange hangs when comm is nok.
             //PIE4bits.TMR1IE             = 0;
             //PIR4bits.TMR1IF             = 0;
+            DRV_TMR3_Stop();
         }
     }
     

@@ -1,3 +1,5 @@
+#include "system_config.h"
+#include "system_definitions.h"
 #include "PetitModbus.h"
 #include "PetitModbusPort.h"
 
@@ -8,8 +10,10 @@ volatile unsigned char   PetitReceiveCounter=0;                                 
 // This is used for send one character
 void PetitModBus_UART_Putch(unsigned char c)
 {
-	//while(!TXSTA1bits.TRMT);
-	//TXREG1 = c;
+	// make sure the transmit buffer is not full before trying to write byte 
+    //while((DRV_USART_TRANSFER_STATUS_TRANSMIT_FULL & DRV_USART1_TransferStatus()) );
+    DRV_USART1_WriteByte(c);  // send modified byte        
+    
 }
 
 /*

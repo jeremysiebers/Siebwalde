@@ -118,8 +118,8 @@ extern "C" {
 #define SYS_PORT_C_CNEN         0x0000
 
 #define SYS_PORT_D_ANSEL        0xC100
-#define SYS_PORT_D_TRIS         0xFFFB
-#define SYS_PORT_D_LAT          0x0000
+#define SYS_PORT_D_TRIS         0xFFF9
+#define SYS_PORT_D_LAT          0x0002
 #define SYS_PORT_D_ODC          0x0000
 #define SYS_PORT_D_CNPU         0x0000
 #define SYS_PORT_D_CNPD         0x0000
@@ -244,6 +244,31 @@ extern "C" {
 
 #define DRV_TMR_ASYNC_WRITE_ENABLE_IDX1     false
 #define DRV_TMR_POWER_STATE_IDX1            
+/*** Timer Driver 2 Configuration ***/
+#define DRV_TMR_PERIPHERAL_ID_IDX2          TMR_ID_6
+#define DRV_TMR_INTERRUPT_SOURCE_IDX2       INT_SOURCE_TIMER_6
+#define DRV_TMR_INTERRUPT_VECTOR_IDX2       INT_VECTOR_T6
+#define DRV_TMR_ISR_VECTOR_IDX2             _TIMER_6_VECTOR
+#define DRV_TMR_INTERRUPT_PRIORITY_IDX2     INT_PRIORITY_LEVEL1
+#define DRV_TMR_INTERRUPT_SUB_PRIORITY_IDX2 INT_SUBPRIORITY_LEVEL0
+#define DRV_TMR_CLOCK_SOURCE_IDX2           DRV_TMR_CLKSOURCE_INTERNAL
+#define DRV_TMR_PRESCALE_IDX2               TMR_PRESCALE_VALUE_256
+#define DRV_TMR_OPERATION_MODE_IDX2         DRV_TMR_OPERATION_MODE_16_BIT
+#define DRV_TMR_ASYNC_WRITE_ENABLE_IDX2     false
+#define DRV_TMR_POWER_STATE_IDX2            
+/*** Timer Driver 3 Configuration ***/
+#define DRV_TMR_PERIPHERAL_ID_IDX3          TMR_ID_8
+#define DRV_TMR_INTERRUPT_SOURCE_IDX3       INT_SOURCE_TIMER_8
+#define DRV_TMR_INTERRUPT_VECTOR_IDX3       INT_VECTOR_T8
+#define DRV_TMR_ISR_VECTOR_IDX3             _TIMER_8_VECTOR
+#define DRV_TMR_INTERRUPT_PRIORITY_IDX3     INT_PRIORITY_LEVEL1
+#define DRV_TMR_INTERRUPT_SUB_PRIORITY_IDX3 INT_SUBPRIORITY_LEVEL0
+#define DRV_TMR_CLOCK_SOURCE_IDX3           DRV_TMR_CLKSOURCE_INTERNAL
+#define DRV_TMR_PRESCALE_IDX3               TMR_PRESCALE_VALUE_256
+#define DRV_TMR_OPERATION_MODE_IDX3         DRV_TMR_OPERATION_MODE_16_BIT
+#define DRV_TMR_ASYNC_WRITE_ENABLE_IDX3     false
+#define DRV_TMR_POWER_STATE_IDX3            
+
 
  // *****************************************************************************
 /* USART Driver Configuration Options
@@ -333,6 +358,9 @@ extern "C" {
 
 
 
+/*** ICMPv4 Server Configuration ***/
+#define TCPIP_STACK_USE_ICMP_SERVER
+#define TCPIP_ICMP_ECHO_ALLOW_BROADCASTS    false
 
 /*** ICMPv4 Client Configuration ***/
 #define TCPIP_STACK_USE_ICMP_CLIENT
@@ -442,7 +470,7 @@ extern "C" {
 #define TCPIP_IF_PIC32INT
 #define TCPIP_NETWORK_DEFAULT_HOST_NAME_IDX0				"TRACKCONTROL"
 #define TCPIP_NETWORK_DEFAULT_MAC_ADDR_IDX0				0
-#define TCPIP_NETWORK_DEFAULT_IP_ADDRESS_IDX0			"192.168.1.150"
+#define TCPIP_NETWORK_DEFAULT_IP_ADDRESS_IDX0			"192.168.1.220"
 #define TCPIP_NETWORK_DEFAULT_IP_MASK_IDX0				"255.255.255.0"
 #define TCPIP_NETWORK_DEFAULT_GATEWAY_IDX0				"192.168.1.1"
 #define TCPIP_NETWORK_DEFAULT_DNS_IDX0					"192.168.1.1"
@@ -463,6 +491,13 @@ extern "C" {
 // *****************************************************************************
 // *****************************************************************************
 /*** Application Defined Pins ***/
+
+/*** Functions for Slaves_Disable_ pin ***/
+#define Slaves_Disable_Toggle() PLIB_PORTS_PinToggle(PORTS_ID_0, PORT_CHANNEL_D, PORTS_BIT_POS_1)
+#define Slaves_Disable_On() PLIB_PORTS_PinSet(PORTS_ID_0, PORT_CHANNEL_D, PORTS_BIT_POS_1)
+#define Slaves_Disable_Off() PLIB_PORTS_PinClear(PORTS_ID_0, PORT_CHANNEL_D, PORTS_BIT_POS_1)
+#define Slaves_Disable_StateGet() PLIB_PORTS_PinGetLatched(PORTS_ID_0, PORT_CHANNEL_D, PORTS_BIT_POS_1)
+#define Slaves_Disable_StateSet(Value) PLIB_PORTS_PinWrite(PORTS_ID_0, PORT_CHANNEL_D, PORTS_BIT_POS_1, Value)
 
 /*** Functions for Led1 pin ***/
 #define Led1Toggle() PLIB_PORTS_PinToggle(PORTS_ID_0, PORT_CHANNEL_D, PORTS_BIT_POS_2)

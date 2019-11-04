@@ -107,7 +107,7 @@ static uint32_t Message = MESSAGE1;
 void ProcessNextSlave(){    
     
     if (ProcessSlave > (NUMBER_OF_SLAVES-1)){
-        ProcessSlave = 0;
+        ProcessSlave = 1;
         
         Message++;
         if (Message > MESSAGE3){
@@ -120,81 +120,77 @@ void ProcessNextSlave(){
         }                
     }
     
-    if(ProcessSlave == 0){
-        SLAVExCOMMANDxHANDLER(true);        
-    }
-    else{
-    
-        switch (Message){
-            case MESSAGE1:
-                HoldingRegistersWrite[8]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[1];
-                HoldingRegistersWrite[7]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[1] >> 8;
-                HoldingRegistersWrite[6]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[0];
-                HoldingRegistersWrite[5]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[0] >> 8;
-                HoldingRegistersWrite[4]  = 4;
-                HoldingRegistersWrite[3]  = 2;
-                HoldingRegistersWrite[2]  = 0;
-                HoldingRegistersWrite[1]  = 0;
-                HoldingRegistersWrite[0]  = 0;
-                SendPetitModbus(ProcessSlave, PETITMODBUS_WRITE_MULTIPLE_REGISTERS, HoldingRegistersWrite, 9);
-                break;
+   
+    switch (Message){
+        case MESSAGE1:
+            HoldingRegistersWrite[8]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[1];
+            HoldingRegistersWrite[7]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[1] >> 8;
+            HoldingRegistersWrite[6]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[0];
+            HoldingRegistersWrite[5]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[0] >> 8;
+            HoldingRegistersWrite[4]  = 4;
+            HoldingRegistersWrite[3]  = 2;
+            HoldingRegistersWrite[2]  = 0;
+            HoldingRegistersWrite[1]  = 0;
+            HoldingRegistersWrite[0]  = 0;
+            SendPetitModbus(ProcessSlave, PETITMODBUS_WRITE_MULTIPLE_REGISTERS, HoldingRegistersWrite, 9);
+            break;
 
-            case MESSAGE2:
-                InputRegistersRead[3]  = 2;
-                InputRegistersRead[2]  = 0;
-                InputRegistersRead[1]  = 0;
-                InputRegistersRead[0]  = 0;
-                SendPetitModbus(ProcessSlave, PETITMODBUS_READ_INPUT_REGISTERS, InputRegistersRead, 4);    
-                break;
+        case MESSAGE2:
+            InputRegistersRead[3]  = 2;
+            InputRegistersRead[2]  = 0;
+            InputRegistersRead[1]  = 0;
+            InputRegistersRead[0]  = 0;
+            SendPetitModbus(ProcessSlave, PETITMODBUS_READ_INPUT_REGISTERS, InputRegistersRead, 4);    
+            break;
 
-            case MESSAGE3:
-                switch (Mailbox){
-                    case 1:
-                        HoldingRegistersWrite[8]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[3];
-                        HoldingRegistersWrite[7]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[3] >> 8;
-                        HoldingRegistersWrite[6]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[2];
-                        HoldingRegistersWrite[5]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[2] >> 8;
-                        HoldingRegistersWrite[4]  = 4;
-                        HoldingRegistersWrite[3]  = 2;
-                        HoldingRegistersWrite[2]  = 0;
-                        HoldingRegistersWrite[1]  = 2;
-                        HoldingRegistersWrite[0]  = 0;
-                        SendPetitModbus(ProcessSlave, PETITMODBUS_WRITE_MULTIPLE_REGISTERS, HoldingRegistersWrite, 9);
-                        break;
+        case MESSAGE3:
+            switch (Mailbox){
+                case 1:
+                    HoldingRegistersWrite[8]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[3];
+                    HoldingRegistersWrite[7]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[3] >> 8;
+                    HoldingRegistersWrite[6]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[2];
+                    HoldingRegistersWrite[5]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[2] >> 8;
+                    HoldingRegistersWrite[4]  = 4;
+                    HoldingRegistersWrite[3]  = 2;
+                    HoldingRegistersWrite[2]  = 0;
+                    HoldingRegistersWrite[1]  = 2;
+                    HoldingRegistersWrite[0]  = 0;
+                    SendPetitModbus(ProcessSlave, PETITMODBUS_WRITE_MULTIPLE_REGISTERS, HoldingRegistersWrite, 9);
+                    break;
 
-                    case 2:
-                        DiagRegistersRead[3]  = 2;
-                        DiagRegistersRead[2]  = 0;
-                        DiagRegistersRead[1]  = 0;
-                        DiagRegistersRead[0]  = 0;
-                        SendPetitModbus(ProcessSlave, PETITMODBUS_DIAGNOSTIC_REGISTERS, DiagRegistersRead, 4);
-                        break;
+                case 2:
+                    DiagRegistersRead[3]  = 2;
+                    DiagRegistersRead[2]  = 0;
+                    DiagRegistersRead[1]  = 0;
+                    DiagRegistersRead[0]  = 0;
+                    SendPetitModbus(ProcessSlave, PETITMODBUS_DIAGNOSTIC_REGISTERS, DiagRegistersRead, 4);
+                    break;
 
-                    case 3:
-                        InputRegistersRead[3]  = 2;
-                        InputRegistersRead[2]  = 0;
-                        InputRegistersRead[1]  = 2;
-                        InputRegistersRead[0]  = 0;
-                        SendPetitModbus(ProcessSlave, PETITMODBUS_READ_INPUT_REGISTERS, InputRegistersRead, 4);  
-                        break;
+                case 3:
+                    InputRegistersRead[3]  = 2;
+                    InputRegistersRead[2]  = 0;
+                    InputRegistersRead[1]  = 2;
+                    InputRegistersRead[0]  = 0;
+                    SendPetitModbus(ProcessSlave, PETITMODBUS_READ_INPUT_REGISTERS, InputRegistersRead, 4);  
+                    break;
 
-                    case 4:
-                        InputRegistersRead[3]  = 2;
-                        InputRegistersRead[2]  = 0;
-                        InputRegistersRead[1]  = 4;
-                        InputRegistersRead[0]  = 0;
-                        SendPetitModbus(ProcessSlave, PETITMODBUS_READ_INPUT_REGISTERS, InputRegistersRead, 4);  
-                        break;
+                case 4:
+                    InputRegistersRead[3]  = 2;
+                    InputRegistersRead[2]  = 0;
+                    InputRegistersRead[1]  = 4;
+                    InputRegistersRead[0]  = 0;
+                    SendPetitModbus(ProcessSlave, PETITMODBUS_READ_INPUT_REGISTERS, InputRegistersRead, 4);  
+                    break;
 
-                    default:
-                        break;                
-                }
-                break;
+                default:
+                    break;                
+            }
+            break;
 
-            default :
-                break;
-        } 
-    }
+        default :
+            break;
+    } 
+
 }
 
 /*#--------------------------------------------------------------------------#*/

@@ -109,7 +109,9 @@ typedef enum
  */
 
 void Led_Blink (void);
-void hoer (void);
+void ModbusCommCycle (void);
+void ModbusCharacterTimeout (void);
+void ModbusReceiveTimeout (void);
 
 typedef struct
 {
@@ -120,9 +122,10 @@ typedef struct
 
 } APP_DATA;
 
-#define NUMBER_OF_SLAVES 51                                                     // 0 is for the master self. 50 Track slaves => 51  
+#define NUMBER_OF_SLAVES 1                                                     // 0 is for the master self. 50 Track slaves => 51  
 
 extern uint16_t LED_ERR;
+
 
 // *****************************************************************************
 // *****************************************************************************

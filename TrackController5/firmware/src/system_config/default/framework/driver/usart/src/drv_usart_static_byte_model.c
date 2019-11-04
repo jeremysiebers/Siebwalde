@@ -78,8 +78,6 @@ uint8_t DRV_USART0_ReadByte(void)
 
 void DRV_USART0_WriteByte(const uint8_t byte)
 {
-    /* Wait till TX buffer is available as blocking operation is selected */
-    while(PLIB_USART_TransmitterBufferIsFull(USART_ID_1));
     /* Send one byte */
     PLIB_USART_TransmitterByteSend(USART_ID_1, byte);
     SYS_INT_SourceEnable(INT_SOURCE_USART_1_TRANSMIT);
@@ -105,6 +103,53 @@ bool DRV_USART0_TransmitBufferIsFull(void)
 {
     /* Check the status of transmitter buffer */
     return(PLIB_USART_TransmitterBufferIsFull(USART_ID_1));
+}
+
+extern DRV_USART_OBJ  gDrvUSART1Obj ;
+
+// *****************************************************************************
+// *****************************************************************************
+// Section: Instance 1 static driver functions
+// *****************************************************************************
+// *****************************************************************************
+
+uint8_t DRV_USART1_ReadByte(void)
+{
+    uint8_t readValue;
+	
+    /* Receive one byte */
+    readValue = PLIB_USART_ReceiverByteReceive(USART_ID_2);
+
+    return readValue;
+}
+
+void DRV_USART1_WriteByte(const uint8_t byte)
+{
+    /* Send one byte */
+    PLIB_USART_TransmitterByteSend(USART_ID_2, byte);
+    SYS_INT_SourceEnable(INT_SOURCE_USART_2_TRANSMIT);
+}
+
+unsigned int DRV_USART1_ReceiverBufferSizeGet(void)
+{
+    return 8;
+}
+
+unsigned int DRV_USART1_TransmitBufferSizeGet(void)
+{
+    return 8;
+}
+
+bool DRV_USART1_ReceiverBufferIsEmpty( void )
+{
+    /* Check the status of receiver buffer */
+    return(!PLIB_USART_ReceiverDataIsAvailable(USART_ID_2));
+}
+
+bool DRV_USART1_TransmitBufferIsFull(void)
+{
+    /* Check the status of transmitter buffer */
+    return(PLIB_USART_TransmitterBufferIsFull(USART_ID_2));
 }
 
 /*******************************************************************************
