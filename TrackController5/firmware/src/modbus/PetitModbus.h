@@ -80,6 +80,6 @@ void HandleMPetitodbusDiagnosticRegistersSlaveReadback(void);
 //#define CRC_CALC                                                              // When uncommented a CRC calculation is used for the function void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
 #define CRC_LOOKUP                                                            // When uncommented a CRC is looked up by the processor in flash
 //#define CRC_HW                                                                  // When uncommented a CRC is calculated by dedicated HW
-//#define CRC_HW_REVERSE														// In order to comply to Modbus standard a reverse is required, without however CRC is much faster
+#define CRC_HW_REVERSE														// In order to comply to Modbus standard a reverse is required, without however CRC is much faster
 
 #endif

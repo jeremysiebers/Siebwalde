@@ -119,8 +119,6 @@ void ProcessNextSlave(){
             }
         }                
     }
-    
-   
     switch (Message){
         case MESSAGE1:
             HoldingRegistersWrite[8]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[1];

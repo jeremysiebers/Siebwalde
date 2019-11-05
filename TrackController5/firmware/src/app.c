@@ -140,8 +140,31 @@ void APP_Initialize ( void )
     InitPetitModbus(SlaveInfo, SlaveDump, (NUMBER_OF_SLAVES + 0));
     /* Pass address of array of struct for data storage. */
     InitSlaveCommunication(SlaveInfo, SlaveDump);
+    
+    /* Initialize the SLAVE_INFO struct with slave numbers. */
+    uint8_t i = 0;
+    for (i = 0; i <NUMBER_OF_SLAVES; i++){
+        SlaveInfo[i].SlaveNumber = i;
+        SlaveInfo[i].Header = 0xAA;
+        SlaveInfo[i].Footer = 0x55;
+    }
+    
     DRV_USART1_Initialize();
     PLIB_INT_SourceEnable(INT_ID_0, INT_SOURCE_TIMER_4);
+    Slaves_Disable_Off();
+    DRV_TMR1_Start(); // used for Ethernet
+    
+    DRV_USART0_WriteByte('A');
+    DRV_USART0_WriteByte('P');
+    DRV_USART0_WriteByte('P');
+    DRV_USART0_WriteByte('_');
+    DRV_USART0_WriteByte('I');
+    DRV_USART0_WriteByte('N');
+    DRV_USART0_WriteByte('I');
+    DRV_USART0_WriteByte('T');
+    DRV_USART0_WriteByte('!');
+    DRV_USART0_WriteByte(0xa);
+    DRV_USART0_WriteByte(0xd);
 }
 
 
@@ -155,33 +178,21 @@ void APP_Initialize ( void )
 
 void APP_Tasks ( void )
 {
-    uint8_t i = 0;
-    
     /* Check the application's current state. */
     switch ( appData.state )
     {
         /* Application's initial state. */
         case APP_STATE_INIT:
         {
-            /* Initialize the SLAVE_INFO struct with slave numbers. */
-            for (i = 0; i <NUMBER_OF_SLAVES; i++){
-                SlaveInfo[i].SlaveNumber = i;
-                SlaveInfo[i].Header = 0xAA;
-                SlaveInfo[i].Footer = 0x55;
-            }
-            
             
             
             bool appInitialized = true;
             
-            DRV_USART0_WriteByte('A');
-            DRV_USART0_WriteByte('P');
-            DRV_USART0_WriteByte('P');            
+                        
                
             if (appInitialized)
             {
-                Slaves_Disable_Off();
-                DRV_TMR1_Start(); // used for Ethernet
+                
                 appData.state = APP_STATE_SERVICE_TASKS;
             }
             break;
@@ -189,9 +200,9 @@ void APP_Tasks ( void )
 
         case APP_STATE_SERVICE_TASKS:
         {
-            if(UpdateNextSlave == true && stop == false){
+            if(UpdateNextSlave == true){
                 ProcessNextSlave(); 
-                stop = true;
+                UpdateNextSlave = false;
             }
             ProcessSlaveCommunication();
             //Led1Toggle();
@@ -213,7 +224,7 @@ void APP_Tasks ( void )
 }
 
 void ModbusCommCycle(){
-    Led1Toggle();
+    //Led1Toggle();
     UpdateNextSlave = true;
 }
 

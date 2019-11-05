@@ -11,7 +11,7 @@ volatile unsigned char   PetitReceiveCounter=0;                                 
 void PetitModBus_UART_Putch(unsigned char c)
 {
 	// make sure the transmit buffer is not full before trying to write byte 
-    //while((DRV_USART_TRANSFER_STATUS_TRANSMIT_FULL & DRV_USART1_TransferStatus()) );
+    while(DRV_USART1_TransmitBufferIsFull() );
     DRV_USART1_WriteByte(c);  // send modified byte        
     
 }
@@ -31,6 +31,8 @@ unsigned char PetitModBus_UART_String(unsigned char *s, unsigned int Length)
 {
     unsigned short  DummyCounter;
     LED_TX++;
+    
+    Led1Toggle();
     
     //while(T2TMR < 8);                                                           // send data after clock wait time to incorporate message length, scope measurements are nicer now
     
