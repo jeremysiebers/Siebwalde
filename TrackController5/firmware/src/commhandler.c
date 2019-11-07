@@ -11,6 +11,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
+#include "commhandler.h"
 
 #define MAILBOX_SIZE 4                                                          // How many messages are non-critical
 #define BROADCAST_ADDRESS 0
@@ -19,7 +20,7 @@ void SLAVExCOMMANDxHANDLER(uint16_t State);
 void BOOTxLOADxHANDLER(void);
 
 /*#--------------------------------------------------------------------------#*/
-/*  Description: InitSlaveCommunication(SLAVE_INFO *location)
+/*  Description: INITXSLAVEXCOMMUNICATION(SLAVE_INFO *location)
  *
  *  Input(s)   : location of stored data array of struct
  *
@@ -45,7 +46,7 @@ static uint8_t RECEIVEDxDATAxRAW[127];                                          
 //static uint8_t BOOT_DATA_TO_SLAVE[DATAxSTRUCTxLENGTH2 + 1];                     // One dummy byte extra (SPI master will send extra byte to receive last byte from slave)
 //static uint8_t BOOT_DATA_TO_ETHERNET[DATAxSTRUCTxLENGTH2]; 
 
-void InitSlaveCommunication(SLAVE_INFO *location, SLAVE_INFO *Dump)                                  
+void INITXSLAVEXCOMMUNICATION(SLAVE_INFO *location, SLAVE_INFO *Dump)                                  
 { 
     DUMP_SLAVE_DATA    =  Dump; 
     MASTER_SLAVE_DATA  =  location;
@@ -56,14 +57,14 @@ void InitSlaveCommunication(SLAVE_INFO *location, SLAVE_INFO *Dump)
     SlaveInfoReadMask.HoldingReg[1]    = 0xFFFF;
     SlaveInfoReadMask.HoldingReg[2]    = 0xFFFF;
     SlaveInfoReadMask.HoldingReg[3]    = 0xFFFF;
-    SlaveInfoReadMask.InputReg[0]      = 0x0000;
-    SlaveInfoReadMask.InputReg[1]      = 0x0000;
-    SlaveInfoReadMask.InputReg[2]      = 0x0000;
-    SlaveInfoReadMask.InputReg[3]      = 0x0000;
-    SlaveInfoReadMask.InputReg[4]      = 0x0000;
-    SlaveInfoReadMask.InputReg[5]      = 0x0000;
-    SlaveInfoReadMask.DiagReg[0]       = 0x0000;
-    SlaveInfoReadMask.DiagReg[1]       = 0x0000;
+    SlaveInfoReadMask.HoldingReg[4]    = 0x0000;
+    SlaveInfoReadMask.HoldingReg[5]    = 0x0000;
+    SlaveInfoReadMask.HoldingReg[6]    = 0x0000;
+    SlaveInfoReadMask.HoldingReg[7]    = 0x0000;
+    SlaveInfoReadMask.HoldingReg[8]    = 0x0000;
+    SlaveInfoReadMask.HoldingReg[9]    = 0x0000;
+    SlaveInfoReadMask.HoldingReg[10]   = 0x0000;
+    SlaveInfoReadMask.HoldingReg[11]   = 0x0000;
     SlaveInfoReadMask.MbReceiveCounter = 0x0000;
     SlaveInfoReadMask.MbSentCounter    = 0x0000;
     SlaveInfoReadMask.MbCommError      = 0x0000;
@@ -74,7 +75,7 @@ void InitSlaveCommunication(SLAVE_INFO *location, SLAVE_INFO *Dump)
 }
 
 /*#--------------------------------------------------------------------------#*/
-/*  Description: ProcessNextSlave()
+/*  Description: PROCESSxNEXTxSLAVE()
  *
  *  Input(s)   : 
  *
@@ -95,16 +96,14 @@ void InitSlaveCommunication(SLAVE_INFO *location, SLAVE_INFO *Dump)
 #define MESSAGE3 3
 #define MESSAGE4 4
 
-unsigned char HoldingRegistersRead [4] = {0, 0, 0, 0};                          // {start address High, start address Low, number of registers High, number of registers Low}
-unsigned char HoldingRegistersWrite[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};           // {start address High, start address Low, number of registers High, number of registers Low, byte count, Register Value Hi, Register Value Lo, Register Value Hi, Register Value Lo} 
-unsigned char   InputRegistersRead [4] = {0, 0, 0, 0};
-unsigned char    DiagRegistersRead [4] = {0, 0, 0, 0};
-
+unsigned char HoldingRegistersRead [4] = {0, 0, 0, 0};                      // {start address High, start address Low, number of registers High, number of registers Low}
+unsigned char HoldingRegistersWrite[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};       // {start address High, start address Low, number of registers High, number of registers Low, 
+                                                                            //  byte count, Register Value Hi, Register Value Lo, Register Value Hi, Register Value Lo} 
 static unsigned char ProcessSlave = 1;
 static unsigned int Mailbox = 1;
 static uint32_t Message = MESSAGE1;
 
-void ProcessNextSlave(){    
+void PROCESSxNEXTxSLAVE(){    
     
     if (ProcessSlave > (NUMBER_OF_SLAVES-1)){
         ProcessSlave = 1;
@@ -130,15 +129,15 @@ void ProcessNextSlave(){
             HoldingRegistersWrite[2]  = 0;
             HoldingRegistersWrite[1]  = 0;
             HoldingRegistersWrite[0]  = 0;
-            SendPetitModbus(ProcessSlave, PETITMODBUS_WRITE_MULTIPLE_REGISTERS, HoldingRegistersWrite, 9);
+            SENDxPETITxMODBUS(ProcessSlave, PETITMODBUS_WRITE_MULTIPLE_REGISTERS, HoldingRegistersWrite, 9);
             break;
 
         case MESSAGE2:
-            InputRegistersRead[3]  = 2;
-            InputRegistersRead[2]  = 0;
-            InputRegistersRead[1]  = 0;
-            InputRegistersRead[0]  = 0;
-            SendPetitModbus(ProcessSlave, PETITMODBUS_READ_INPUT_REGISTERS, InputRegistersRead, 4);    
+            HoldingRegistersRead[3]  = 2;
+            HoldingRegistersRead[2]  = 0;
+            HoldingRegistersRead[1]  = 0;
+            HoldingRegistersRead[0]  = 0;
+            SENDxPETITxMODBUS(ProcessSlave, PETITMODBUS_READ_HOLDING_REGISTERS, HoldingRegistersRead, 4);    
             break;
 
         case MESSAGE3:
@@ -153,31 +152,31 @@ void ProcessNextSlave(){
                     HoldingRegistersWrite[2]  = 0;
                     HoldingRegistersWrite[1]  = 2;
                     HoldingRegistersWrite[0]  = 0;
-                    SendPetitModbus(ProcessSlave, PETITMODBUS_WRITE_MULTIPLE_REGISTERS, HoldingRegistersWrite, 9);
+                    SENDxPETITxMODBUS(ProcessSlave, PETITMODBUS_WRITE_MULTIPLE_REGISTERS, HoldingRegistersWrite, 9);
                     break;
 
                 case 2:
-                    DiagRegistersRead[3]  = 2;
-                    DiagRegistersRead[2]  = 0;
-                    DiagRegistersRead[1]  = 0;
-                    DiagRegistersRead[0]  = 0;
-                    SendPetitModbus(ProcessSlave, PETITMODBUS_DIAGNOSTIC_REGISTERS, DiagRegistersRead, 4);
+                    HoldingRegistersRead[3]  = 2;
+                    HoldingRegistersRead[2]  = 0;
+                    HoldingRegistersRead[1]  = 0;
+                    HoldingRegistersRead[0]  = 0;
+                    SENDxPETITxMODBUS(ProcessSlave, PETITMODBUS_READ_HOLDING_REGISTERS, HoldingRegistersRead, 4);
                     break;
 
                 case 3:
-                    InputRegistersRead[3]  = 2;
-                    InputRegistersRead[2]  = 0;
-                    InputRegistersRead[1]  = 2;
-                    InputRegistersRead[0]  = 0;
-                    SendPetitModbus(ProcessSlave, PETITMODBUS_READ_INPUT_REGISTERS, InputRegistersRead, 4);  
+                    HoldingRegistersRead[3]  = 2;
+                    HoldingRegistersRead[2]  = 0;
+                    HoldingRegistersRead[1]  = 2;
+                    HoldingRegistersRead[0]  = 0;
+                    SENDxPETITxMODBUS(ProcessSlave, PETITMODBUS_READ_HOLDING_REGISTERS, HoldingRegistersRead, 4);  
                     break;
 
                 case 4:
-                    InputRegistersRead[3]  = 2;
-                    InputRegistersRead[2]  = 0;
-                    InputRegistersRead[1]  = 4;
-                    InputRegistersRead[0]  = 0;
-                    SendPetitModbus(ProcessSlave, PETITMODBUS_READ_INPUT_REGISTERS, InputRegistersRead, 4);  
+                    HoldingRegistersRead[3]  = 2;
+                    HoldingRegistersRead[2]  = 0;
+                    HoldingRegistersRead[1]  = 4;
+                    HoldingRegistersRead[0]  = 0;
+                    SENDxPETITxMODBUS(ProcessSlave, PETITMODBUS_READ_HOLDING_REGISTERS, HoldingRegistersRead, 4);  
                     break;
 
                 default:
@@ -192,7 +191,7 @@ void ProcessNextSlave(){
 }
 
 /*#--------------------------------------------------------------------------#*/
-/*  Description: ProcessSlaveCommunication()
+/*  Description: PROCESSxSLAVExCOMMUNICATION()
  *
  *  Input(s)   : 
  *
@@ -207,11 +206,11 @@ void ProcessNextSlave(){
  *  Notes      : Keeps track of communication with a slave
  */
 /*#--------------------------------------------------------------------------#*/
-unsigned int ProcessSlaveCommunication(){
+bool PROCESSxSLAVExCOMMUNICATION(uint8_t SlaveAddress){
     
-    unsigned int Return_Val = false;
+    bool Return_Val = false;
     
-    switch (MASTER_SLAVE_DATA[ProcessSlave].MbCommError){
+    switch (MASTER_SLAVE_DATA[SlaveAddress].MbCommError){
         case SLAVE_DATA_BUSY:
             Return_Val = false;
             // count here how long the Mod-bus stack is busy, otherwise reset/action             
@@ -219,30 +218,26 @@ unsigned int ProcessSlaveCommunication(){
             
         case SLAVE_DATA_NOK:
             // count here how often the slave data is NOK, otherwise stop all slaves with broadcast
-            MASTER_SLAVE_DATA[ProcessSlave].MbCommError = SLAVE_DATA_IDLE;            
-            ProcessSlave++;         
+            MASTER_SLAVE_DATA[SlaveAddress].MbCommError = SLAVE_DATA_IDLE;            
             Return_Val = true;
             LED_ERR++;
             break;
             
         case SLAVE_DATA_OK:
-            MASTER_SLAVE_DATA[ProcessSlave].MbCommError = SLAVE_DATA_IDLE;            
-            ProcessSlave++;         
+            MASTER_SLAVE_DATA[SlaveAddress].MbCommError = SLAVE_DATA_IDLE;   
             Return_Val = true;
             break;            
             
         case SLAVE_DATA_TIMEOUT:
             // count here how often the slave data is timeout, otherwise stop all slaves with broadcast
-            MASTER_SLAVE_DATA[ProcessSlave].MbCommError = SLAVE_DATA_IDLE;            
-            ProcessSlave++;         
+            MASTER_SLAVE_DATA[SlaveAddress].MbCommError = SLAVE_DATA_IDLE;      
             Return_Val = true;
             LED_ERR++;
             break;
             
         case SLAVE_DATA_EXCEPTION:
             // count here how often the slave data is timeout, otherwise stop all slaves with broadcast
-            MASTER_SLAVE_DATA[ProcessSlave].MbCommError = SLAVE_DATA_IDLE;            
-            ProcessSlave++;         
+            MASTER_SLAVE_DATA[SlaveAddress].MbCommError = SLAVE_DATA_IDLE;     
             Return_Val = true;
             LED_ERR++;
             break;
@@ -257,8 +252,9 @@ unsigned int ProcessSlaveCommunication(){
     return (Return_Val);
 }
 
+
 /*#--------------------------------------------------------------------------#*/
-/*  Description: SLAVExCOMMANDxHANDLER()
+/*  Description: SLAVExCOMMUNICATIONxHANDLER()
  *
  *  Input(s)   : 
  *
@@ -270,144 +266,15 @@ unsigned int ProcessSlaveCommunication(){
  *
  *  Post.Cond. :
  *
- *  Notes      : Keeps track of communication with a slave
+ *  Notes      : Handles requests for writing and reading to slaves.
  */
 /*#--------------------------------------------------------------------------#*/
-enum CMD
-{
-    OK          = 0x02, 
-    NOK         = 0x04, 
-    BUSY        = 0x01,
-    IDLE        = 0x00,
-            
-    MODE        = 0x01,
-    WRITE       = 0x02,
-    HOLDINGREG  = 0x04,
-    INPUTREG    = 0x08,
-    DIAGREG     = 0x10,    
-    BOOTLOAD    = 0x20,
-    EXEC        = 0x8000
-};
-
-unsigned int CommandMachine = 0;
-unsigned char HoldingRegisterWrite[7] = {0, 0, 0, 1, 2, 0, 0};                  // {start address High, start address Low, 
-                                                                                // number of registers High, number of registers Low, 
-                                                                                // byte count, Register Value Hi, Register Value Lo} 
-unsigned char HoldingRegisterRead[4] = {0, 0, 0, 1};                            // {start address High, start address Low, 
-                                                                                // number of registers High, number of registers Low,  
-static uint8_t RegId = 0;
-
-void SLAVExCOMMANDxHANDLER (uint16_t State){
+void SLAVExCOMMUNICATIONxHANDLER(uint8_t SlaveAddress, uint8_t Register, uint8_t WriteRead, uint8_t *Data, uint8_t length){
+    if(WriteRead == Write){
+        
+    }
     
-    switch(CommandMachine){
-        case 0:
-            if (MASTER_SLAVE_DATA[0].HoldingReg[0] & EXEC){                     // if execute is set
-
-                if((MASTER_SLAVE_DATA[0].HoldingReg[0] & 0x3C) == HOLDINGREG){ 
-                    if(MASTER_SLAVE_DATA[0].HoldingReg[0] & WRITE){             // if write is set
-                        MASTER_SLAVE_DATA[0].InputReg[0] = BUSY;
-                        HoldingRegisterWrite[1] = MASTER_SLAVE_DATA[0].HoldingReg[3];       // Register address to write to
-                        HoldingRegisterWrite[6] = MASTER_SLAVE_DATA[0].HoldingReg[2];       // low char data
-                        HoldingRegisterWrite[5] = MASTER_SLAVE_DATA[0].HoldingReg[2]>> 8;   // high char data
-                        SendPetitModbus(MASTER_SLAVE_DATA[0].HoldingReg[1], PETITMODBUS_WRITE_MULTIPLE_REGISTERS, HoldingRegisterWrite, 7);
-                        
-                        if(MASTER_SLAVE_DATA[0].HoldingReg[1] == BROADCAST_ADDRESS){
-                            ProcessSlave++;                                     // because this message is a broadcast, no timeout will be generated so increment ProcessSlave here!
-                        }
-                        CommandMachine = 40;
-                    }
-                    else{
-                        MASTER_SLAVE_DATA[0].InputReg[0] = NOK;   
-                        CommandMachine = 50;
-                    }                                
-                }
-                else if((MASTER_SLAVE_DATA[0].HoldingReg[0] & 0x3C) == INPUTREG){
-                    if(MASTER_SLAVE_DATA[0].HoldingReg[0] & WRITE){             // if write is set
-                        MASTER_SLAVE_DATA[0].InputReg[0] = NOK;
-                        CommandMachine = 50;
-                    }
-                    else{
-                        MASTER_SLAVE_DATA[0].InputReg[0] = BUSY;
-                        InputRegistersRead[3]  = MASTER_SLAVE_DATA[0].HoldingReg[2];    //2  // number of registers Low
-                        InputRegistersRead[2]  = 0;//MASTER_SLAVE_DATA[0].HoldingReg[2]>>8; //0  // number of registers High
-                        InputRegistersRead[1]  = MASTER_SLAVE_DATA[0].HoldingReg[3];    //4  // start address Low
-                        InputRegistersRead[0]  = 0;//MASTER_SLAVE_DATA[0].HoldingReg[3]>>8; //0  // start address High
-                        SendPetitModbus(MASTER_SLAVE_DATA[0].HoldingReg[1], PETITMODBUS_READ_INPUT_REGISTERS, InputRegistersRead, 4);  
-                        RegId = MASTER_SLAVE_DATA[0].HoldingReg[3];
-                        CommandMachine = 20;
-                    }
-                }
-                else if((MASTER_SLAVE_DATA[0].HoldingReg[0] & 0x3C) == DIAGREG){
-                    if(MASTER_SLAVE_DATA[0].HoldingReg[0] & WRITE){             // if write is set
-                        MASTER_SLAVE_DATA[0].InputReg[0] = NOK;
-                        CommandMachine = 50;
-                    }
-                    else{
-                        MASTER_SLAVE_DATA[0].InputReg[0] = BUSY;
-                        CommandMachine = 30;
-                    }
-                }
-                else if(((MASTER_SLAVE_DATA[0].HoldingReg[0] & 0x3C) == BOOTLOAD) &&
-                         (State == false)){                                     // Going to bootload only possible in startup fase
-                    //COMM_MODE_BOOTLOAD = true;
-                    MASTER_SLAVE_DATA[0].InputReg[0] = OK;                      // reset status register for readback of execution towards ethernet target
-                    MASTER_SLAVE_DATA[0].HoldingReg[0] = 0;
-                    //T2PR = 0x3B;
-                    //PR2  = 0x3B;
-                    CommandMachine   = 0;/*
-                    PIE3bits.RC1IE   = 0;
-                    PIE4bits.TMR3IE  = 0;
-                    PIE4bits.TMR1IE  = 0;
-                    TX1STA           = 0;
-                    RC1STA           = 0;
-                    PORTCbits.RC1    = 0;
-                    RC1_SetDigitalInput();*/
-                }
-                
-                
-            }
-            else if(State == true){                                             // Always send message during normal run operation to ensure triggering of slaves on received data     
-                HoldingRegisterWrite[1] = 0;                                    // clear write registers, needed?
-                HoldingRegisterWrite[6] = 0;
-                HoldingRegisterWrite[5] = 0;                
-                SendPetitModbus(BROADCAST_ADDRESS, PETITMODBUS_READ_HOLDING_REGISTERS, HoldingRegisterRead, 4);
-                ProcessSlave++;                                                 // because this message is a broadcast on a read, no timeout will be generated so increment ProcessSlave here!
-            }
-            break;
-    //----------------------------------------------------------------------------------------------------------------------//                              
-        case 20:
-            if(DUMP_SLAVE_DATA[0].MbCommError != SLAVE_DATA_BUSY){
-                MASTER_SLAVE_DATA[0].InputReg[1] = DUMP_SLAVE_DATA[0].InputReg[RegId];
-                RegId = 0;
-                DUMP_SLAVE_DATA[0].MbCommError = SLAVE_DATA_IDLE;
-                CommandMachine = 40;
-            }
-            break;
-    //----------------------------------------------------------------------------------------------------------------------//
-
-    //----------------------------------------------------------------------------------------------------------------------//
-
-    //----------------------------------------------------------------------------------------------------------------------//                        
-        case 40:
-            MASTER_SLAVE_DATA[0].InputReg[0] = OK;
-            CommandMachine = 50; 
-            if(State == true){
-                ProcessSlave++;                                                 // If the master is handling broadcast messages and processing through these states, a ProcessSlave++ is required to ensure the nextslave is handled
-            }
-            break;
-
-        case 50:
-            if ((MASTER_SLAVE_DATA[0].HoldingReg[0] & EXEC) == 0){              // Remove execute command before returning
-                CommandMachine = 0; 
-                MASTER_SLAVE_DATA[0].InputReg[0] = IDLE;                        // reset status register for readback of execution towards ethernet target
-                MASTER_SLAVE_DATA[0].InputReg[1] = 0;                           // reset input register read value
-            }
-            if(State == true){
-                ProcessSlave++;                                                 // If the master is handling broadcast messages and processing through these states, a ProcessSlave++ is required to ensure the nextslave is handled
-            }
-            break;
-
-        default :
-            break;
+    if(WriteRead == Read){
+        SENDxPETITxMODBUS(SlaveAddress, PETITMODBUS_READ_HOLDING_REGISTERS, Data, length);
     }
 }

@@ -445,7 +445,7 @@ void Petit_TxRTU(void)
  * Function Name        : ProcessModbus
  * @How to use          : ModBus main core! Call this function into main!
  */
-void ProcessPetitModbus(void)
+void PROCESSxPETITxMODBUS(void)
 {
     if (Petit_Tx_State != PETIT_RXTX_IDLE && Petit_Tx_State != PETIT_RXTX_WAIT_ANSWER){   // If answer is ready and not waiting for response, send it!
         Petit_TxRTU();              
@@ -468,16 +468,25 @@ void ProcessPetitModbus(void)
     {        
         switch (Petit_Rx_Data.Function)
         {
-            
+            #ifdef PETITMODBUS_IN_USE_READ_HOLDING_REGISTERS
             case PETITMODBUS_READ_HOLDING_REGISTERS:    {    HandlePetitModbusReadHoldingRegistersSlaveReadback();      break;  }
+            #endif
             
+            #ifdef PETITMODBUS_IN_USE_READ_INPUT_REGISTERS
             case PETITMODBUS_READ_INPUT_REGISTERS:      {    HandlePetitModbusReadInputRegistersSlaveReadback();        break;  }
+            #endif
 
+            #ifdef PETITMODBUS_IN_USE_WRITE_SINGLE_REGISTER
             case PETITMODBUS_WRITE_SINGLE_REGISTER:     {    HandlePetitModbusWriteSingleRegisterSlaveReadback();       break;  }
+            #endif 
             
+            #ifdef PETITMODBUS_IN_USE_DIAGNOSTIC_REGISTERS
             case PETITMODBUS_DIAGNOSTIC_REGISTERS:      {    HandleMPetitodbusDiagnosticRegistersSlaveReadback();       break;  }
+            #endif
 
+            #ifdef PETITMODBUS_IN_USE_WRITE_MULTIPLE_REGISTERS
             case PETITMODBUS_WRITE_MULTIPLE_REGISTERS:  {    HandleMPetitodbusWriteMultipleRegistersSlaveReadback();    break;  }
+            #endif
 
             default:                                    {    HandleMPetitodbusMbExceptionCodesSlaveReadback();          break;  }
         }
@@ -489,7 +498,7 @@ void ProcessPetitModbus(void)
 /******************************************************************************/
 
 /*
- * Function Name        : InitPetitModbus
+ * Function Name        : INITxPETITXMODBUS
  * @How to use          : Petite ModBus slave initialize
  *                        Pass the location of the first array element,
  *                        take into account that modbus master expects slaves
@@ -499,7 +508,7 @@ void ProcessPetitModbus(void)
  *                        a parser and init for it must be realized (offset). 
  */
 
-void InitPetitModbus(SLAVE_INFO *location, SLAVE_INFO *Dump, unsigned char AmountOfSlaves)                                  
+void INITxPETITXMODBUS(SLAVE_INFO *location, SLAVE_INFO *Dump, unsigned char AmountOfSlaves)                                  
 {   
     MASTER_SLAVE_DATA  =  location; 
     DUMP_SLAVE_DATA    = Dump;
@@ -537,11 +546,11 @@ uint16_t CRC_ReverseValue(uint16_t crc)
 #endif
 
 /******************************************************************************/
-/* Function Name        : SendPetitModbus
+/* Function Name        : SENDxPETITxMODBUS
  * @How to use          : 
  */
 
-unsigned char SendPetitModbus(unsigned char Address, unsigned char Function, unsigned char *DataBuf, unsigned short DataLen){
+unsigned char SENDxPETITxMODBUS(unsigned char Address, unsigned char Function, unsigned char *DataBuf, unsigned short DataLen){
     
     unsigned char return_val = 0;
     
@@ -583,6 +592,8 @@ unsigned char SendPetitModbus(unsigned char Address, unsigned char Function, uns
  * @How to use          : Modbus function 03 - Read holding registers
  */
 
+#ifdef PETITMODBUS_IN_USE_READ_HOLDING_REGISTERS
+
 void HandlePetitModbusReadHoldingRegistersSlaveReadback(void)
 {
     unsigned int    Petit_StartAddress             = 0;
@@ -617,12 +628,15 @@ void HandlePetitModbusReadHoldingRegistersSlaveReadback(void)
     }
     Petit_Tx_State =  PETIT_RXTX_IDLE;
 }
+
+#endif
 /******************************************************************************/
 
 /*
  * Function Name        : HandlePetitModbusReadInputRegistersSlaveReadback
  * @How to use          : Modbus function 04 - Read input registers
  */
+#ifdef PETITMODBUS_IN_USE_READ_INPUT_REGISTERS
 
 void HandlePetitModbusReadInputRegistersSlaveReadback(void)
 {
@@ -674,12 +688,15 @@ void HandlePetitModbusReadInputRegistersSlaveReadback(void)
     }
     Petit_Tx_State =  PETIT_RXTX_IDLE;
 }
+#endif
 /******************************************************************************/
 
 /*
  * Function Name        : HandleModbusReadInputRegisters
  * @How to use          : Modbus function 06 - Write single register read back from slave check
  */
+#ifdef PETITMODBUS_IN_USE_WRITE_SINGLE_REGISTER
+
 void HandlePetitModbusWriteSingleRegisterSlaveReadback(void)
 {
     if(Petit_Tx_Data.Function == Petit_Rx_Data.Function){
@@ -687,9 +704,17 @@ void HandlePetitModbusWriteSingleRegisterSlaveReadback(void)
             if(Petit_Tx_Data.DataBuf[0] == Petit_Rx_Data.DataBuf[0]){
                 if(Petit_Tx_Data.DataBuf[1] == Petit_Rx_Data.DataBuf[1]){
                     if(Petit_Tx_Data.DataBuf[2] == Petit_Rx_Data.DataBuf[2]){
-                        if(Petit_Tx_Data.DataBuf[3] == Petit_Rx_Data.DataBuf[3]){                            
-                            MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbCommError = SLAVE_DATA_OK;
-                            MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbReceiveCounter += 1;
+                        if(Petit_Tx_Data.DataBuf[3] == Petit_Rx_Data.DataBuf[3]){
+                            if(Petit_Rx_Data.Address > SlaveAmount){
+                                DUMP_SLAVE_DATA[0].MbCommError = SLAVE_DATA_OK;
+                                DUMP_SLAVE_DATA[0].MbReceiveCounter += 1;
+                            }
+                            else{
+                                MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbCommError = SLAVE_DATA_OK;
+                                MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbReceiveCounter += 1;
+                            }
+                            
+                            
                         }
                     }
                 }
@@ -697,18 +722,25 @@ void HandlePetitModbusWriteSingleRegisterSlaveReadback(void)
         }
     }
     else{
-        MASTER_SLAVE_DATA[Petit_Tx_Data.Address].MbCommError = SLAVE_DATA_NOK;    // the address send did not respond, so set the NOK to that address
+        if(Petit_Rx_Data.Address > SlaveAmount){
+            DUMP_SLAVE_DATA[0].MbCommError = SLAVE_DATA_NOK;
+        }
+        else{
+            MASTER_SLAVE_DATA[Petit_Tx_Data.Address].MbCommError = SLAVE_DATA_NOK;    // the address send did not respond, so set the NOK to that address
+        }
     }
+        
     //PORTDbits.RD1 = !PORTDbits.RD1;
     Petit_Tx_State =  PETIT_RXTX_IDLE;
 }
-
+#endif
 /******************************************************************************/
 
 /*
  * Function Name        : HandlePetitModbusReadInputRegistersSlaveReadback
  * @How to use          : Modbus function 08 - Read diagnostic registers
  */
+#ifdef PETITMODBUS_IN_USE_DIAGNOSTIC_REGISTERS
 
 void HandleMPetitodbusDiagnosticRegistersSlaveReadback(void)
 {
@@ -744,12 +776,14 @@ void HandleMPetitodbusDiagnosticRegistersSlaveReadback(void)
     }
     Petit_Tx_State =  PETIT_RXTX_IDLE;
 }
+#endif
 /******************************************************************************/
 
 /*
  * Function Name        : HandleModbusWriteMultipleRegisters
  * @How to use          : Modbus function 16 - Write multiple registers
  */
+#ifdef PETITMODBUS_IN_USE_WRITE_MULTIPLE_REGISTERS
 
 void HandleMPetitodbusWriteMultipleRegistersSlaveReadback(void)
 {
@@ -773,7 +807,7 @@ void HandleMPetitodbusWriteMultipleRegistersSlaveReadback(void)
     Petit_Tx_State =  PETIT_RXTX_IDLE;
     
 }
-
+#endif
 /******************************************************************************/
 
 /*

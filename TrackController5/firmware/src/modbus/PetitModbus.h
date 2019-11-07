@@ -8,9 +8,9 @@
 #ifndef __PETITMODBUS__H
 #define __PETITMODBUS__H
                                                                                 // 1 register is 16 bits. The largest register is used to determine receive and transmit buffer size!
-#define NUMBER_OF_HOLDING_PETITREGISTERS                 4                      // Petit Modbus RTU Slave Holding Registers (read/write), Have to put a number of registers here It has to be bigger than 0 (zero)!!
-#define NUMBER_OF_INPUT_PETITREGISTERS                   6                      // Number of (read only) input registers)
-#define NUMBER_OF_DIAGNOSTIC_PETITREGISTERS              2                      // Number of diagnostic registers (send/receive counters)
+#define NUMBER_OF_HOLDING_PETITREGISTERS                 12                     // Petit Modbus RTU Slave Holding Registers (read/write), Have to put a number of registers here It has to be bigger than 0 (zero)!!
+#define NUMBER_OF_INPUT_PETITREGISTERS                   0                      // Number of (read only) input registers)
+#define NUMBER_OF_DIAGNOSTIC_PETITREGISTERS              0                      // Number of diagnostic registers (send/receive counters)
 
 #define PETITMODBUS_TIMEOUTTIMER                         2                      // Timeout Constant for Petit Modbus RTU Slave [101us tick]
 
@@ -23,13 +23,25 @@
 /*******************************ModBus Functions*******************************/
 #define PETITMODBUS_READ_COILS                  1
 #define PETITMODBUS_READ_DISCRETE_INPUTS        2
-#define PETITMODBUS_READ_HOLDING_REGISTERS      3
+#define PETITMODBUS_READ_HOLDING_REGISTERS      3  // used
 #define PETITMODBUS_READ_INPUT_REGISTERS        4
 #define PETITMODBUS_WRITE_SINGLE_COIL           5
-#define PETITMODBUS_WRITE_SINGLE_REGISTER       6
+#define PETITMODBUS_WRITE_SINGLE_REGISTER       6  // used
 #define PETITMODBUS_DIAGNOSTIC_REGISTERS        8
 #define PETITMODBUS_WRITE_MULTIPLE_COILS        15
-#define PETITMODBUS_WRITE_MULTIPLE_REGISTERS    16
+#define PETITMODBUS_WRITE_MULTIPLE_REGISTERS    16 // used
+/****************************End of ModBus Functions***************************/
+
+/*******************************ModBus Functions in use ***********************/
+//#define PETITMODBUS_IN_USE_READ_COILS                  1
+//#define PETITMODBUS_IN_USE_READ_DISCRETE_INPUTS        2
+#define PETITMODBUS_IN_USE_READ_HOLDING_REGISTERS      3  // used
+//#define PETITMODBUS_IN_USE_READ_INPUT_REGISTERS        4
+//#define PETITMODBUS_IN_USE_WRITE_SINGLE_COIL           5
+#define PETITMODBUS_IN_USE_WRITE_SINGLE_REGISTER       6  // used
+//#define PETITMODBUS_IN_USE_DIAGNOSTIC_REGISTERS        8
+//#define PETITMODBUS_IN_USE_WRITE_MULTIPLE_COILS        15
+#define PETITMODBUS_IN_USE_WRITE_MULTIPLE_REGISTERS    16 // used
 /****************************End of ModBus Functions***************************/
 
 extern volatile unsigned short PetitModbusTimerValue;
@@ -51,9 +63,8 @@ typedef struct
 {
     unsigned char       Header;
     unsigned char       SlaveNumber;
+    unsigned char       SlaveDetected;
     unsigned int        HoldingReg[NUMBER_OF_HOLDING_PETITREGISTERS];
-    unsigned int        InputReg[NUMBER_OF_INPUT_PETITREGISTERS];
-    unsigned int        DiagReg[NUMBER_OF_DIAGNOSTIC_PETITREGISTERS];
     unsigned int        MbReceiveCounter;
     unsigned int        MbSentCounter;
     SLAVE_DATA          MbCommError;
@@ -64,9 +75,9 @@ typedef struct
 }SLAVE_INFO;
 
 // Main Functions
-extern void             InitPetitModbus(SLAVE_INFO *location, SLAVE_INFO *Dump, unsigned char AmountOfSlaves);
-extern void             ProcessPetitModbus(void);
-extern unsigned char    SendPetitModbus(unsigned char Address, unsigned char Function, unsigned char *DataBuf, unsigned short DataLen);
+extern void             INITxPETITXMODBUS(SLAVE_INFO *location, SLAVE_INFO *Dump, unsigned char AmountOfSlaves);
+extern void             PROCESSxPETITxMODBUS(void);
+extern unsigned char    SENDxPETITxMODBUS(unsigned char Address, unsigned char Function, unsigned char *DataBuf, unsigned short DataLen);
 
 void HandlePetitModbusWriteSingleRegisterSlaveReadback(void);
 void HandlePetitModbusReadHoldingRegistersSlaveReadback(void);

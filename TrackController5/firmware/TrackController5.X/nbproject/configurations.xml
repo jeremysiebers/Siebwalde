@@ -38,6 +38,7 @@
         </logicalFolder>
         <itemPath>../src/app.h</itemPath>
         <itemPath>../src/commhandler.h</itemPath>
+        <itemPath>../src/slavestartup.h</itemPath>
       </logicalFolder>
       <logicalFolder name="f1" displayName="framework" projectFiles="true">
         <logicalFolder name="f6" displayName="crypto" projectFiles="true">
@@ -367,6 +368,7 @@
         <itemPath>../src/app.c</itemPath>
         <itemPath>../src/main.c</itemPath>
         <itemPath>../src/commhandler.c</itemPath>
+        <itemPath>../src/slavestartup.c</itemPath>
       </logicalFolder>
       <logicalFolder name="f1" displayName="framework" projectFiles="true">
         <logicalFolder name="f1" displayName="driver" projectFiles="true">

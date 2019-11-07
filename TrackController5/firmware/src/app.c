@@ -134,12 +134,14 @@ void APP_Initialize ( void )
 {
     /* Place the App state machine in its initial state. */
     appData.state = APP_STATE_INIT;
-    //Slaves_Disable_On();
+    
+    DRV_TMR1_Start(); // used for Ethernet
     
     /* Pass address of array of struct for data storage. */
-    InitPetitModbus(SlaveInfo, SlaveDump, (NUMBER_OF_SLAVES + 0));
+    INITxPETITXMODBUS(SlaveInfo, SlaveDump, NUMBER_OF_SLAVES);
     /* Pass address of array of struct for data storage. */
-    InitSlaveCommunication(SlaveInfo, SlaveDump);
+    INITXSLAVEXCOMMUNICATION(SlaveInfo, SlaveDump);
+    INITxSLAVExSTARTUP(SlaveInfo);
     
     /* Initialize the SLAVE_INFO struct with slave numbers. */
     uint8_t i = 0;
@@ -148,11 +150,6 @@ void APP_Initialize ( void )
         SlaveInfo[i].Header = 0xAA;
         SlaveInfo[i].Footer = 0x55;
     }
-    
-    DRV_USART1_Initialize();
-    PLIB_INT_SourceEnable(INT_ID_0, INT_SOURCE_TIMER_4);
-    Slaves_Disable_Off();
-    DRV_TMR1_Start(); // used for Ethernet
     
     DRV_USART0_WriteByte('A');
     DRV_USART0_WriteByte('P');
@@ -184,15 +181,34 @@ void APP_Tasks ( void )
         /* Application's initial state. */
         case APP_STATE_INIT:
         {
+            //Slaves_Disable_On();
+    
+            DRV_USART1_Initialize();
+            PLIB_INT_SourceEnable(INT_ID_0, INT_SOURCE_TIMER_4);
+            Slaves_Disable_Off();
             
+            appData.state = APP_STATE_SLAVE_DETECT;
             
-            bool appInitialized = true;
+            break;
+        }
+        
+        case APP_STATE_SLAVE_DETECT:
+        {
+            appData.state = APP_STATE_MODBUS_INIT;
+            break;
+        }
+        
+        case APP_STATE_MODBUS_INIT:
+        {            
             
-                        
-               
-            if (appInitialized)
-            {
-                
+            appData.state = APP_STATE_SLAVE_INIT;
+            break;
+        }
+        
+        case APP_STATE_SLAVE_INIT:
+        {              
+            if (SLAVExINITxANDxCONFIG())
+            {                
                 appData.state = APP_STATE_SERVICE_TASKS;
             }
             break;
@@ -201,14 +217,10 @@ void APP_Tasks ( void )
         case APP_STATE_SERVICE_TASKS:
         {
             if(UpdateNextSlave == true){
-                ProcessNextSlave(); 
+                PROCESSxNEXTxSLAVE(); 
                 UpdateNextSlave = false;
             }
-            ProcessSlaveCommunication();
-            //Led1Toggle();
-            //Led1On();
-            ProcessPetitModbus();
-            //Led1Off();
+            
             break;
         }
 
@@ -221,6 +233,8 @@ void APP_Tasks ( void )
             break;
         }
     }
+    
+    PROCESSxPETITxMODBUS();                
 }
 
 void ModbusCommCycle(){
