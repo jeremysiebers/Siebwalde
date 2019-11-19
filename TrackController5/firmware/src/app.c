@@ -84,7 +84,7 @@ APP_DATA appData;
 /* 
  * Array of structs holding the data of all the slaves connected  
  */
-static SLAVE_INFO         SlaveInfo[NUMBER_OF_SLAVES];
+static SLAVE_INFO         SlaveInfo[NUMBER_OF_SLAVES_SIZE];
 static SLAVE_INFO         SlaveDump[1];
 
 static uint16_t LED_TX_prev, LED_RX_prev, LED_ERR_prev, LED_WAR_prev = 0;
@@ -132,25 +132,29 @@ uint16_t stop = false;
 
 void APP_Initialize ( void )
 {
+    Slaves_Disable_Off();
+    
     /* Place the App state machine in its initial state. */
     appData.state = APP_STATE_INIT;
     
     DRV_TMR1_Start(); // used for Ethernet
     
     /* Pass address of array of struct for data storage. */
-    INITxPETITXMODBUS(SlaveInfo, SlaveDump, NUMBER_OF_SLAVES);
+    INITxPETITXMODBUS(SlaveInfo, SlaveDump, NUMBER_OF_SLAVES_SIZE);
     /* Pass address of array of struct for data storage. */
     INITXSLAVEXCOMMUNICATION(SlaveInfo, SlaveDump);
-    INITxSLAVExSTARTUP(SlaveInfo);
+    INITxSLAVExSTARTUP(SlaveInfo, SlaveDump);
     
     /* Initialize the SLAVE_INFO struct with slave numbers. */
     uint8_t i = 0;
-    for (i = 0; i <NUMBER_OF_SLAVES; i++){
+    for (i = 0; i <NUMBER_OF_SLAVES_SIZE; i++){
         SlaveInfo[i].SlaveNumber = i;
         SlaveInfo[i].Header = 0xAA;
         SlaveInfo[i].Footer = 0x55;
     }
     
+    
+    /*
     DRV_USART0_WriteByte('A');
     DRV_USART0_WriteByte('P');
     DRV_USART0_WriteByte('P');
@@ -161,7 +165,7 @@ void APP_Initialize ( void )
     DRV_USART0_WriteByte('T');
     DRV_USART0_WriteByte('!');
     DRV_USART0_WriteByte(0xa);
-    DRV_USART0_WriteByte(0xd);
+    DRV_USART0_WriteByte(0xd);*/
 }
 
 
@@ -185,8 +189,7 @@ void APP_Tasks ( void )
     
             DRV_USART1_Initialize();
             PLIB_INT_SourceEnable(INT_ID_0, INT_SOURCE_TIMER_4);
-            Slaves_Disable_Off();
-            
+                       
             appData.state = APP_STATE_SLAVE_DETECT;
             
             break;
@@ -194,7 +197,9 @@ void APP_Tasks ( void )
         
         case APP_STATE_SLAVE_DETECT:
         {
-            appData.state = APP_STATE_MODBUS_INIT;
+            if (SLAVExDETECT()){
+                appData.state = APP_STATE_MODBUS_INIT;
+            }
             break;
         }
         

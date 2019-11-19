@@ -106,24 +106,29 @@ void Set_Amplifier(){
     
     if (ActValue_prev != PetitHoldingRegisters[0].ActValue){
         ActValue_prev = PetitHoldingRegisters[0].ActValue;
-    }
     
-    switch(PetitHoldingRegisters[0].ActValue){
-        case 0x1   : AMP_ID1_SET_LAT  = 0; break;
-        case 0x2   : AMP_ID2_SET_LAT  = 0; break;
-        case 0x4   : AMP_ID3_SET_LAT  = 0; break;
-        case 0x8   : AMP_ID4_SET_LAT  = 0; break;
-        case 0x10  : AMP_ID5_SET_LAT  = 0; break;
-        case 0x20  : AMP_ID6_SET_LAT  = 0; break;
-        case 0x40  : AMP_ID7_SET_LAT  = 0; break;
-        case 0x80  : AMP_ID8_SET_LAT  = 0; break;
-        case 0x100 : AMP_ID9_SET_LAT  = 0; break;
-        case 0x200 : AMP_ID10_SET_LAT = 0; break;
-        default    : AMP_ID1_SET_LAT = AMP_ID2_SET_LAT = AMP_ID3_SET_LAT =
-                     AMP_ID4_SET_LAT = AMP_ID5_SET_LAT = AMP_ID6_SET_LAT =
-                     AMP_ID7_SET_LAT = AMP_ID8_SET_LAT = AMP_ID9_SET_LAT =
-                     AMP_ID10_SET_LAT = 1;
-        break;        
+        AMP_ID1_SET_LAT = AMP_ID2_SET_LAT = AMP_ID3_SET_LAT =
+        AMP_ID4_SET_LAT = AMP_ID5_SET_LAT = AMP_ID6_SET_LAT =
+        AMP_ID7_SET_LAT = AMP_ID8_SET_LAT = AMP_ID9_SET_LAT =
+        AMP_ID10_SET_LAT = 1;
+    
+        switch(PetitHoldingRegisters[0].ActValue){
+            case 0x1   : AMP_ID1_SET_LAT  = 0; break;
+            case 0x2   : AMP_ID2_SET_LAT  = 0; break;
+            case 0x4   : AMP_ID3_SET_LAT  = 0; break;
+            case 0x8   : AMP_ID4_SET_LAT  = 0; break;
+            case 0x10  : AMP_ID5_SET_LAT  = 0; break;
+            case 0x20  : AMP_ID6_SET_LAT  = 0; break;
+            case 0x40  : AMP_ID7_SET_LAT  = 0; break;
+            case 0x80  : AMP_ID8_SET_LAT  = 0; break;
+            case 0x100 : AMP_ID9_SET_LAT  = 0; break;
+            case 0x200 : AMP_ID10_SET_LAT = 0; break;
+            default    : AMP_ID1_SET_LAT = AMP_ID2_SET_LAT = AMP_ID3_SET_LAT =
+                         AMP_ID4_SET_LAT = AMP_ID5_SET_LAT = AMP_ID6_SET_LAT =
+                         AMP_ID7_SET_LAT = AMP_ID8_SET_LAT = AMP_ID9_SET_LAT =
+                         AMP_ID10_SET_LAT = 1;
+            break;        
+        }
     }
 }
 

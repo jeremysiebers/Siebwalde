@@ -428,12 +428,7 @@ void Petit_TxRTU(void)
     else{
         Petit_Tx_State    =PETIT_RXTX_WAIT_ANSWER;                              // Else Master must wait for answer (see ModBus protocol implementation)
         
-        /* Set and enable slave answer timeout timer */
-        //SlaveAnswerTimeoutCounter   = 0;
-        //TMR1_Reload();
-        //PIR4bits.TMR1IF             = 0;
-        //PIE4bits.TMR1IE             = 1;
-        //T1CONbits.TMR1ON            = 1;   
+        /* Set and enable slave answer timeout timer */  
         PLIB_TMR_Counter16BitClear(TMR_ID_8);
         DRV_TMR3_Start();
     }
@@ -452,12 +447,13 @@ void PROCESSxPETITxMODBUS(void)
     }
     else if(Petit_Tx_State == PETIT_RXTX_WAIT_ANSWER){// && EnableSlaveAnswerTimeoutCounter){
         if (SlaveAnswerTimeoutCounter != 0){
-            MASTER_SLAVE_DATA[Petit_Tx_Data.Address].MbCommError = SLAVE_DATA_TIMEOUT;
+            if(Petit_Tx_Data.Address > SlaveAmount){
+                DUMP_SLAVE_DATA[0].MbCommError = SLAVE_DATA_TIMEOUT;
+            }
+            else{
+                MASTER_SLAVE_DATA[Petit_Tx_Data.Address].MbCommError = SLAVE_DATA_TIMEOUT;}
             Petit_Tx_State = PETIT_RXTX_IDLE;
-            SlaveAnswerTimeoutCounter = 0;            
-            //T1CONbits.TMR1ON            = 0;                                    // timer stops here due to strange hangs when comm is nok.
-            //PIE4bits.TMR1IE             = 0;
-            //PIR4bits.TMR1IF             = 0;
+            SlaveAnswerTimeoutCounter = 0;
             DRV_TMR3_Stop();
         }
     }
@@ -602,7 +598,7 @@ void HandlePetitModbusReadHoldingRegistersSlaveReadback(void)
     unsigned int    Petit_i                        = 0;
     unsigned int    BufReadIndex                   = 0;
     unsigned int    RegData                        = 0;
-    
+            
     Petit_StartAddress = ((unsigned int) (Petit_Tx_Data.DataBuf[0]) << 8) + (unsigned int) (Petit_Tx_Data.DataBuf[1]);
     Petit_NumberOfRegisters = ((unsigned int) (Petit_Tx_Data.DataBuf[2]) << 8) + (unsigned int) (Petit_Tx_Data.DataBuf[3]);
     Petit_NumberOfRegistersBytes = 2* Petit_NumberOfRegisters;
@@ -615,16 +611,31 @@ void HandlePetitModbusReadHoldingRegistersSlaveReadback(void)
             for (Petit_i = 0; Petit_i < Petit_NumberOfRegisters; Petit_i++)
             {
                 RegData = ((unsigned int) (Petit_Rx_Data.DataBuf[BufReadIndex + 1]) << 8) + (unsigned int) (Petit_Rx_Data.DataBuf[BufReadIndex + 2]);
-                MASTER_SLAVE_DATA[Petit_Tx_Data.Address].HoldingReg[Petit_StartAddress] = RegData;                        
+                if(Petit_Tx_Data.Address > SlaveAmount){
+                    DUMP_SLAVE_DATA[0].HoldingReg[Petit_StartAddress] = RegData;
+                }
+                else{                
+                    MASTER_SLAVE_DATA[Petit_Tx_Data.Address].HoldingReg[Petit_StartAddress] = RegData;}
                 Petit_StartAddress += 1;                                        // point to the next register to write
                 BufReadIndex += 2;                                              // jump to the next char pair for the next register read from buffer (2 bytes))
             }
-            MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbCommError = SLAVE_DATA_OK;
-            MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbReceiveCounter += 1;
+            if(Petit_Tx_Data.Address > SlaveAmount){
+                    DUMP_SLAVE_DATA[0].MbCommError = SLAVE_DATA_OK;
+                    DUMP_SLAVE_DATA[0].MbReceiveCounter += 1;
+            }
+            else{
+                MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbCommError = SLAVE_DATA_OK;
+                MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbReceiveCounter += 1;
+            }
         }
     }
     else{
-        MASTER_SLAVE_DATA[Petit_Tx_Data.Address].MbCommError = SLAVE_DATA_NOK;    // the address send did not respond, so set the NOK to that address
+        if(Petit_Tx_Data.Address > SlaveAmount){
+            DUMP_SLAVE_DATA[0].MbCommError = SLAVE_DATA_NOK;
+        }
+        else{
+            MASTER_SLAVE_DATA[Petit_Tx_Data.Address].MbCommError = SLAVE_DATA_NOK;    // the address send did not respond, so set the NOK to that address
+        }
     }
     Petit_Tx_State =  PETIT_RXTX_IDLE;
 }
@@ -763,7 +774,11 @@ void HandleMPetitodbusDiagnosticRegistersSlaveReadback(void)
             for (Petit_i = 0; Petit_i < Petit_NumberOfRegisters; Petit_i++)
             {
                 RegData = ((unsigned int) (Petit_Rx_Data.DataBuf[BufReadIndex + 1]) << 8) + (unsigned int) (Petit_Rx_Data.DataBuf[BufReadIndex + 2]);
-                MASTER_SLAVE_DATA[Petit_Tx_Data.Address].DiagReg[Petit_StartAddress] = RegData;                        
+                if(Petit_Tx_Data.Address > SlaveAmount){
+                    DUMP_SLAVE_DATA[0].HoldingReg[Petit_StartAddress] = RegData;
+                }
+                else{                
+                    MASTER_SLAVE_DATA[Petit_Tx_Data.Address].DiagReg[Petit_StartAddress] = RegData;}
                 Petit_StartAddress += 1;                                        // point to the next register to write
                 BufReadIndex += 2;                                              // jump to the next char pair for the next register read from buffer (2 bytes))
             }

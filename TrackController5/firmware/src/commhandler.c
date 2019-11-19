@@ -271,7 +271,12 @@ bool PROCESSxSLAVExCOMMUNICATION(uint8_t SlaveAddress){
 /*#--------------------------------------------------------------------------#*/
 void SLAVExCOMMUNICATIONxHANDLER(uint8_t SlaveAddress, uint8_t Register, uint8_t WriteRead, uint8_t *Data, uint8_t length){
     if(WriteRead == Write){
-        
+        if(length > 4){ // write multiple reg
+            SENDxPETITxMODBUS(SlaveAddress, PETITMODBUS_WRITE_MULTIPLE_REGISTERS, Data, length);
+        }
+        if(length == 4){ // write single reg
+            SENDxPETITxMODBUS(SlaveAddress, PETITMODBUS_WRITE_SINGLE_REGISTER, Data, length);
+        }
     }
     
     if(WriteRead == Read){

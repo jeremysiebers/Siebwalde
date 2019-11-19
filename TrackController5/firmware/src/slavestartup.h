@@ -18,7 +18,7 @@ extern "C" {
 
     // TODO If C++ is being used, regular C code needs function names to have C 
     // linkage so the functions can be used by the c code. 
-    extern void INITxSLAVExSTARTUP(SLAVE_INFO *location);
+    extern void INITxSLAVExSTARTUP(SLAVE_INFO *location, SLAVE_INFO *Dump);
     extern bool SLAVExINITxANDxCONFIG(void);
     extern unsigned int ENABLExAMPLIFIER(void);
 

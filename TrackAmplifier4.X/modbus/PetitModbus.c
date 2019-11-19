@@ -109,7 +109,7 @@ void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
 #ifdef CRC_LOOKUP
 void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
 {
-    LED_WAR_LAT = 1;
+    //LED_WAR_LAT = 1;
     unsigned int uchCRCHi = *CRC >> 8;                                          /* high byte of CRC initialized */
     unsigned int uchCRCLo = *CRC & 0x00FF;                                      /* low byte of CRC initialized */
     unsigned char uIndex ;                                                      /* will index into CRC lookup table */
@@ -118,7 +118,7 @@ void Petit_CRC16(const unsigned char Data, unsigned int* CRC)
     uchCRCLo = uchCRCHi ^ auchCRCHi[uIndex] ;
     uchCRCHi = auchCRCLo[uIndex] ;
     *CRC = (unsigned int)(uchCRCHi << 8 | uchCRCLo) ;
-    LED_WAR_LAT = 0;
+    //LED_WAR_LAT = 0;
 }
 #endif
 /* Data = 0x02

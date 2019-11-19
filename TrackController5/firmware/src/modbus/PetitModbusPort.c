@@ -7,6 +7,8 @@
 volatile unsigned char   PetitReceiveBuffer[PETITMODBUS_RECEIVE_BUFFER_SIZE];   // Buffer to collect data from hardware
 volatile unsigned char   PetitReceiveCounter=0;                                 // Collected data number
 
+static uint8_t DummyCounter;
+
 // This is used for send one character
 void PetitModBus_UART_Putch(unsigned char c)
 {
@@ -29,18 +31,16 @@ void PetitModBus_UART_Putch(unsigned char c)
  */
 unsigned char PetitModBus_UART_String(unsigned char *s, unsigned int Length)
 {
-    unsigned short  DummyCounter;
+    Led1On(); 
     LED_TX++;
     
-    Led1Toggle();
-    
-    //while(T2TMR < 8);                                                           // send data after clock wait time to incorporate message length, scope measurements are nicer now
-    
     for(DummyCounter=0;DummyCounter<Length;DummyCounter++){
-        PetitModBus_UART_Putch(s[DummyCounter]);
+        PetitModBus_UART_Putch(s[DummyCounter]);        
     }
     
     LED_TX++;
+    
+    Led1Off();
     
     return TRUE;
 }

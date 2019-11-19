@@ -49,8 +49,7 @@ void main(void) {
     //while(Led_Disco() == false);
     
     LED_RUN_LAT     = 0;
-    LED_ERR_LAT     = 1;
-    
+    LED_ERR_LAT     = 1;    
     LM_DIR_LAT      = 0;
     LM_PWM_LAT      = 0;
     LM_BRAKE_LAT    = 1;
@@ -122,7 +121,7 @@ void main(void) {
     
         ProcessPetitModbus();
         Led_Blink();
-        
+        /*
         if (Update_Amplifier){
             
             switch(Sequencer){
@@ -158,7 +157,7 @@ void main(void) {
                     break;
             }            
             
-        }
+        }*/
         
     }
 }
