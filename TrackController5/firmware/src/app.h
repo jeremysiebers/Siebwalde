@@ -88,9 +88,9 @@ typedef enum
 {
 	/* Application's state machine's initial state. */
 	APP_STATE_INIT=0,
-    APP_STATE_SLAVE_DETECT,
-    APP_STATE_MODBUS_INIT,
-    APP_STATE_SLAVE_INIT,            
+    APP_STATE_SLAVE_DETECT,    
+    APP_STATE_SLAVE_INIT,
+    APP_STATE_SLAVE_ENABLE,
 	APP_STATE_SERVICE_TASKS,
 
 	/* TODO: Define states used by the application state machine. */
@@ -127,6 +127,7 @@ typedef struct
 
 #define NUMBER_OF_SLAVES 55                                                     // 0 is for the master self. 50 Track slaves and 5 backplane slaves => 55
 #define NUMBER_OF_SLAVES_SIZE (NUMBER_OF_SLAVES + 1)
+#define NUMBER_OF_AMPLIFIERS (NUMBER_OF_SLAVES - 5)
 extern uint16_t LED_ERR;
 
 

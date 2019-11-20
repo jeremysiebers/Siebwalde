@@ -5,10 +5,8 @@
 #include <stdlib.h>
 #include "app.h"
 #include "commhandler.h"
-#include "modbus/PetitModbus.h"
 
-uint8_t CheckModbusCommStatus(uint8_t SlaveId, bool OverWrite);
-bool    ConfigureSlave       (uint8_t TrackBackPlaneID, uint8_t AmplifierLatchSet, uint8_t TrackAmplifierId, uint8_t Mode);
+bool    ConfigureSlave       (uint8_t TrackBackPlaneID, uint16_t AmplifierLatchSet, uint8_t TrackAmplifierId, uint8_t Mode);
 bool    DetectSlave          (uint8_t SlaveId);
 
 uint8_t WriteData2Registers[7] = {0, 0, 0, 1, 2, 0, 0};                         // {start address High, start address Low, 
@@ -21,6 +19,9 @@ uint8_t WriteData1Register[4] = {0, 0, 0, 0};                                   
 uint8_t ReadData[4] = {0, 0, 0, 2};                                             // {start address High, start address Low, 
                                                                                 // number of registers High, number of registers Low, 
 
+static uint8_t GoToCase            = 0;
+static uint16_t WaitCounter        = 0;
+/*
 enum ADDR
 {
     SLOT1  = 0x1,
@@ -43,7 +44,7 @@ enum ADDR
     SLAVEOK   = 100,
     SLAVENOK  = 101,
     SLAVEBUSY = 102,
-};
+};*/
 
 /*#--------------------------------------------------------------------------#*/
 /*  Description: INITxSLAVExSTARTUP(SLAVE_INFO *location)
@@ -136,9 +137,9 @@ bool SLAVExDETECT(){
 /*#--------------------------------------------------------------------------#*/
 static uint8_t RunSlaveDetect      = 0;
 static uint8_t BackplaneId         = 0;    // Used when slaves are checked
-static uint8_t ShiftSlot           = 0;
-static uint16_t WaitCounter        = 0;
-static uint8_t GoToCase            = 0;
+static uint8_t PrevBackplaneId     = 0;    // Used to point to first slot again
+static uint8_t ShiftSlot2          = 0;
+uint16_t       ShiftSlotNr         = 0;
 
 bool DetectSlave(uint8_t SlaveId){
     bool return_val = false;
@@ -164,7 +165,7 @@ bool DetectSlave(uint8_t SlaveId){
         /* Verify communication was OK */
         case 2:
             
-            switch(CheckModbusCommStatus(SlaveId, true)){
+            switch(CHECKxMODBUSxCOMMxSTATUS(SlaveId, true)){
                 case SLAVEOK:  
                     MASTER_SLAVE_DATA[SlaveId].SlaveDetected = true;
                     RunSlaveDetect = 0;
@@ -178,23 +179,6 @@ bool DetectSlave(uint8_t SlaveId){
                 case SLAVEBUSY: break;
                 default : break;
             }
-            /*
-            if(MASTER_SLAVE_DATA[SlaveId].MbCommError != SLAVE_DATA_BUSY &&
-               MASTER_SLAVE_DATA[SlaveId].MbCommError != SLAVE_DATA_OK){
-               MASTER_SLAVE_DATA[SlaveId].SlaveDetected = false;
-               MASTER_SLAVE_DATA[SlaveId].MbCommError = SLAVE_DATA_IDLE;
-               RunSlaveDetect = 0;
-               return_val = true;
-            }
-            else if 
-              (MASTER_SLAVE_DATA[SlaveId].MbCommError != SLAVE_DATA_BUSY &&
-               MASTER_SLAVE_DATA[SlaveId].MbCommError == SLAVE_DATA_OK){
-               MASTER_SLAVE_DATA[SlaveId].SlaveDetected = true;
-               MASTER_SLAVE_DATA[SlaveId].MbCommError = SLAVE_DATA_IDLE;
-               RunSlaveDetect = 0;
-               return_val = true;
-            }
-            */
             break;
             
         /* ------------------------------------------------------------------ */
@@ -212,13 +196,19 @@ bool DetectSlave(uint8_t SlaveId){
             else if(SlaveId > 40 && SlaveId < 51){
                 BackplaneId = 55;}
             
+            if(PrevBackplaneId != BackplaneId){
+                PrevBackplaneId = BackplaneId;
+                ShiftSlot2 = 0;
+            }
+            
             if (MASTER_SLAVE_DATA[BackplaneId].SlaveDetected == true){
+                ShiftSlotNr = (SLOT1 << ShiftSlot2);
                 WriteData1Register[0] = 0; // start address High,                                                                                 
                 WriteData1Register[1] = 0; // start address Low,
-                WriteData1Register[2] = 0; // Register Value Hi,
-                WriteData1Register[3] = (SLOT1 << ShiftSlot); // Register Value Lo.
+                WriteData1Register[2] = (ShiftSlotNr & 0xFF00) >> 8; // Register Value Hi,
+                WriteData1Register[3] = (ShiftSlotNr & 0xFF); // Register Value Lo.
                 SLAVExCOMMUNICATIONxHANDLER(BackplaneId, HoldingReg0, Write, WriteData1Register, 4);
-                ShiftSlot++;
+                ShiftSlot2++;
                 RunSlaveDetect++;
                 //DRV_USART0_WriteByte('3');
             }
@@ -231,7 +221,7 @@ bool DetectSlave(uint8_t SlaveId){
         /* Verify communication was OK with backplane, if not flag backplane 
            SlaveDetected to false to indicate backplane comm error */
         case 4:
-            switch(CheckModbusCommStatus(BackplaneId, false)){                  // --> do not overwrite otherwise diagnostics are gone
+            switch(CHECKxMODBUSxCOMMxSTATUS(BackplaneId, false)){                  // --> do not overwrite otherwise diagnostics are gone
                 case SLAVEOK:  
                     GoToCase = RunSlaveDetect + 1;
                     RunSlaveDetect = WAIT;                    
@@ -245,25 +235,7 @@ bool DetectSlave(uint8_t SlaveId){
                     break;
                 case SLAVEBUSY: break;
                 default : break;
-            }            
-            /*
-            if( MASTER_SLAVE_DATA[BackplaneId].MbCommError != SLAVE_DATA_BUSY &&
-                MASTER_SLAVE_DATA[BackplaneId].MbCommError != SLAVE_DATA_OK){
-                MASTER_SLAVE_DATA[BackplaneId].SlaveDetected = false;
-                //MASTER_SLAVE_DATA[BackplaneId].MbCommError = SLAVE_DATA_IDLE; --> do not overwrite otherwise diagnostics are gone
-                RunSlaveDetect = 0;
-                return_val = true;
-                //DRV_USART0_WriteByte('4');
             }
-            else if 
-              ( MASTER_SLAVE_DATA[BackplaneId].MbCommError != SLAVE_DATA_BUSY &&
-                MASTER_SLAVE_DATA[BackplaneId].MbCommError == SLAVE_DATA_OK){               
-                MASTER_SLAVE_DATA[BackplaneId].MbCommError = SLAVE_DATA_IDLE;
-                GoToCase = RunSlaveDetect + 1;
-                RunSlaveDetect = WAIT;
-                //DRV_USART0_WriteByte('4');
-            }
-            */
             break;
         
         /* Try to read the applicable amplifier slave */
@@ -275,77 +247,50 @@ bool DetectSlave(uint8_t SlaveId){
             
         /* Verify communication was OK */
         case 6:
-            switch(CheckModbusCommStatus(SLAVE_INITIAL_ADDR, true)){
+            switch(CHECKxMODBUSxCOMMxSTATUS(SLAVE_INITIAL_ADDR, true)){
                 case SLAVEOK:  
                     MASTER_SLAVE_DATA[SlaveId].SlaveDetected = true;
-                    RunSlaveDetect = 0;
-                    return_val = true;
+                    RunSlaveDetect++;                    
                     //DRV_USART0_WriteByte('6');
                     break;                    
                 case SLAVENOK: 
                     MASTER_SLAVE_DATA[SlaveId].SlaveDetected = false;
-                    RunSlaveDetect = 0;
-                    return_val = true;
+                    RunSlaveDetect++;
                     //DRV_USART0_WriteByte('6');
                     break;
                 case SLAVEBUSY: break;
                 default : break;
             }
-            /*
-            if( DUMP_SLAVE_DATA[0].MbCommError != SLAVE_DATA_BUSY &&
-                DUMP_SLAVE_DATA[0].MbCommError == SLAVE_DATA_OK){
-                MASTER_SLAVE_DATA[SlaveId].SlaveDetected = true;
-                DUMP_SLAVE_DATA[0].MbCommError = SLAVE_DATA_IDLE;       // Write Idle back for next communication towards this slave!
-                //RunSlaveDetect++;
-                RunSlaveDetect = 0;
-                return_val = true;
-                //DRV_USART0_WriteByte('6');
-            }
-            else if( DUMP_SLAVE_DATA[0].MbCommError != SLAVE_DATA_BUSY &&
-                DUMP_SLAVE_DATA[0].MbCommError != SLAVE_DATA_OK){
-                MASTER_SLAVE_DATA[SlaveId].SlaveDetected = false;
-                DUMP_SLAVE_DATA[0].MbCommError = SLAVE_DATA_IDLE;        // Write Idle back for next communication towards this slave!
-                //RunSlaveDetect++;
-                RunSlaveDetect = 0;
-                return_val = true;
-                //DRV_USART0_WriteByte('6');
-            }
-            */ 
             break;
-        
-        /* Command backplane slave to deselect a amplifier slave */ /*
+            
+        /* Command backplane slave to select no amplifier slave */
         case 7:
             WriteData1Register[0] = 0; // start address High,                                                                                 
             WriteData1Register[1] = 0; // start address Low,
             WriteData1Register[2] = 0; // Register Value Hi,
             WriteData1Register[3] = 0; // Register Value Lo.
-            SLAVExCOMMUNICATIONxHANDLER(BackplaneId, HoldingReg0, Write, WriteData1Register, 4);
+            SLAVExCOMMUNICATIONxHANDLER(BackplaneId, HoldingReg0, Write, WriteData1Register, 4);            
             RunSlaveDetect++;
-            //DRV_USART0_WriteByte('7');
-            break;*/
+            break;
             
         /* Verify communication was OK with backplane, if not flag backplane 
-           SlaveDetected to false to indicate backplane comm error */ /*
+           SlaveDetected to false to indicate backplane comm error */
         case 8:
-            if( MASTER_SLAVE_DATA[BackplaneId].MbCommError != SLAVE_DATA_BUSY &&
-                MASTER_SLAVE_DATA[BackplaneId].MbCommError != SLAVE_DATA_OK){
-                MASTER_SLAVE_DATA[BackplaneId].SlaveDetected = false;
-                MASTER_SLAVE_DATA[BackplaneId].MbCommError = SLAVE_DATA_IDLE;
-                RunSlaveDetect = 0;
-                return_val = true;
-                //DRV_USART0_WriteByte('8');
+            switch(CHECKxMODBUSxCOMMxSTATUS(BackplaneId, true)){
+                case SLAVEOK:  
+                    RunSlaveDetect = 0;
+                    return_val = true;                    
+                    //DRV_USART0_WriteByte('4');
+                    break;                    
+                case SLAVENOK: 
+                    RunSlaveDetect = 0;
+                    return_val = true;
+                    //DRV_USART0_WriteByte('4');
+                    break;
+                case SLAVEBUSY: break;
+                default : break;
             }
-            else if 
-              ( MASTER_SLAVE_DATA[BackplaneId].MbCommError != SLAVE_DATA_BUSY &&
-                MASTER_SLAVE_DATA[BackplaneId].MbCommError == SLAVE_DATA_OK){               
-                MASTER_SLAVE_DATA[BackplaneId].MbCommError = SLAVE_DATA_IDLE;
-                //RunSlaveDetect = 0;
-                return_val = true;
-                GoToCase = 0;
-                RunSlaveDetect = WAIT;
-                //DRV_USART0_WriteByte('8');
-            }
-            break;*/
+            break;
             
         case WAIT:
             WaitCounter++;
@@ -361,57 +306,6 @@ bool DetectSlave(uint8_t SlaveId){
     
     return (return_val);
 }    
-
-/*#--------------------------------------------------------------------------#*/
-/*  Description: uint8_t CheckModbusCommStatus(uint8_t SlaveId)
- *
- *  Input(s)   : 
- *
- *  Output(s)  : 
- *
- *  Returns    : Slave comm status from modbus
- *
- *  Pre.Cond.  :
- *
- *  Post.Cond. :
- *
- *  Notes      : 
- */
-/*#--------------------------------------------------------------------------#*/
-uint8_t CheckModbusCommStatus(uint8_t SlaveId, bool OverWrite){
-    uint8_t return_val = SLAVEBUSY;
-    
-    if (SlaveId > NUMBER_OF_SLAVES){
-        if( DUMP_SLAVE_DATA[0].MbCommError != SLAVE_DATA_BUSY &&
-            DUMP_SLAVE_DATA[0].MbCommError == SLAVE_DATA_OK){
-            return_val = SLAVEOK;
-        }
-        else if( DUMP_SLAVE_DATA[0].MbCommError != SLAVE_DATA_BUSY &&
-                 DUMP_SLAVE_DATA[0].MbCommError != SLAVE_DATA_OK){
-            return_val = SLAVENOK;
-        }
-    }
-    else{
-        if( MASTER_SLAVE_DATA[SlaveId].MbCommError != SLAVE_DATA_BUSY &&
-            MASTER_SLAVE_DATA[SlaveId].MbCommError == SLAVE_DATA_OK){
-            return_val = SLAVEOK;
-        }
-        else if( MASTER_SLAVE_DATA[SlaveId].MbCommError != SLAVE_DATA_BUSY &&
-                 MASTER_SLAVE_DATA[SlaveId].MbCommError != SLAVE_DATA_OK){
-            return_val = SLAVENOK;
-        }
-    }
-    
-    if (return_val != SLAVEBUSY && OverWrite == true){
-        if(SlaveId > NUMBER_OF_SLAVES){
-            DUMP_SLAVE_DATA[0].MbCommError = SLAVE_DATA_IDLE;
-        }
-        else{
-            MASTER_SLAVE_DATA[SlaveId].MbCommError = SLAVE_DATA_IDLE;
-        }
-    }
-    return (return_val);
-}
 
 /*#--------------------------------------------------------------------------#*/
 /*  Description: bool SLAVExINITxANDxCONFIG()
@@ -432,8 +326,8 @@ uint8_t CheckModbusCommStatus(uint8_t SlaveId, bool OverWrite){
 
 
 uint8_t RunSlaveConfig = 0;
-uint8_t ProgramSlave = 1;
-//uint8_t ShiftSlot = 0;
+uint8_t ProgramSlave   = 1;
+uint8_t ShiftSlot      = 0;
 
 bool SLAVExINITxANDxCONFIG(){
     
@@ -518,102 +412,116 @@ bool SLAVExINITxANDxCONFIG(){
  *               slaves.
  */
 /*#--------------------------------------------------------------------------#*/
-enum checkers
-{
-    OK          = 0x02, 
-    
-    
-};
 
 uint8_t StartupMachine = 0;
 
-bool ConfigureSlave(uint8_t TrackBackPlaneID, uint8_t AmplifierLatchSet, uint8_t TrackAmplifierId, uint8_t Mode){
+bool ConfigureSlave(uint8_t TrackBackPlaneID, uint16_t AmplifierLatchSet, uint8_t TrackAmplifierId, uint8_t Mode){
     bool return_val = false;
     
     switch(StartupMachine){
         case 0:
             if (MASTER_SLAVE_DATA[TrackBackPlaneID].SlaveDetected == true && 
                 MASTER_SLAVE_DATA[TrackAmplifierId].SlaveDetected == true){
-                StartupMachine = 1;
+                StartupMachine++;
             }
             else{
                 return_val = true;
                 StartupMachine = 0;
             }
             break;
-            
+        
+        /* Command backplane slave to select a amplifier slave */
         case 1:
             WriteData1Register[0] = 0; // start address High,                                                                                 
             WriteData1Register[1] = 0; // start address Low,
-            WriteData1Register[2] = 0; // Register Value Hi,
-            WriteData1Register[3] = AmplifierLatchSet; // Register Value Lo.
+            WriteData1Register[2] = (AmplifierLatchSet & 0xFF00) >> 8; // Register Value Hi,
+            WriteData1Register[3] = (AmplifierLatchSet & 0xFF); // Register Value Lo.
             SLAVExCOMMUNICATIONxHANDLER(TrackBackPlaneID, HoldingReg0, Write, WriteData1Register, 4);            
-            StartupMachine = 2;
+            StartupMachine++;
             break;
-
-        /*case 1:
-            if(MASTER_SLAVE_DATA[0].InputReg[0] == OK){
-                MASTER_SLAVE_DATA[0].HoldingReg[0] = MODE_MAN & WRITE & HOLDINGREG & HALT; // Remove the execute command
-                StartupMachine = 2;
-            }
-            break;
-
+            
+        /* Verify communication was OK with backplane, if not flag backplane 
+           SlaveDetected to false to indicate backplane comm error */
         case 2:
-            if(MASTER_SLAVE_DATA[0].InputReg[0] == IDLE){
-                StartupMachine = 3;
+            switch(CHECKxMODBUSxCOMMxSTATUS(TrackBackPlaneID, true)){
+                case SLAVEOK:  
+                    GoToCase = StartupMachine + 1;
+                    StartupMachine = WAIT;                    
+                    //DRV_USART0_WriteByte('4');
+                    break;                    
+                case SLAVENOK: 
+                    StartupMachine = 5;
+                    //DRV_USART0_WriteByte('4');
+                    break;
+                case SLAVEBUSY: break;
+                default : break;
             }
             break;
-
+            
+        /* Program new SlaveId to slave */
         case 3:
-            MASTER_SLAVE_DATA[0].HoldingReg[1] = 0xAA;                          // Set address to first Trackamplifier in config mode, default modbus address = 0xAA
-            MASTER_SLAVE_DATA[0].HoldingReg[2] = TrackAmplifierId;              // Data = Set ID 
-            MASTER_SLAVE_DATA[0].HoldingReg[3] = 2;                             // Register number to write to
-            MASTER_SLAVE_DATA[0].HoldingReg[0] = MODE_MAN & WRITE & HOLDINGREG & EXEC;
-            StartupMachine = 4;
+            WriteData1Register[0] = 0;                  // start address High,                                                                                 
+            WriteData1Register[1] = HoldingReg2;        // start address Low,
+            WriteData1Register[2] = 0;                  // Register Value Hi,
+            WriteData1Register[3] = TrackAmplifierId;   // Register Value Lo.
+            SLAVExCOMMUNICATIONxHANDLER(SLAVE_INITIAL_ADDR, 0, Write, WriteData1Register, 4);            
+            StartupMachine++;
             break;
-
+            
+        /* Verify communication was OK with slave */
         case 4:
-            if(MASTER_SLAVE_DATA[0].InputReg[0] == OK){
-                MASTER_SLAVE_DATA[0].HoldingReg[0] = MODE_MAN & WRITE & HOLDINGREG & HALT; // Remove the execute command
-                StartupMachine = 5;
+            switch(CHECKxMODBUSxCOMMxSTATUS(SLAVE_INITIAL_ADDR, true)){
+                case SLAVEOK:  
+                    StartupMachine++;
+                    //DRV_USART0_WriteByte('4');
+                    break;                    
+                case SLAVENOK: 
+                    StartupMachine++;
+                    //DRV_USART0_WriteByte('4');
+                    break;
+                case SLAVEBUSY: break;
+                default : break;
             }
             break;
-
+            
+        /* Command backplane slave to select no amplifier slave */
         case 5:
-            if(MASTER_SLAVE_DATA[0].InputReg[0] == IDLE){
-                StartupMachine = 6;
-            }
-            break;    
-
+            WriteData1Register[0] = 0; // start address High,                                                                                 
+            WriteData1Register[1] = 0; // start address Low,
+            WriteData1Register[2] = 0; // Register Value Hi,
+            WriteData1Register[3] = 0; // Register Value Lo.
+            SLAVExCOMMUNICATIONxHANDLER(TrackBackPlaneID, HoldingReg0, Write, WriteData1Register, 4);            
+            StartupMachine++;
+            break;
+            
+        /* Verify communication was OK with backplane, if not flag backplane 
+           SlaveDetected to false to indicate backplane comm error */
         case 6:
-            MASTER_SLAVE_DATA[0].HoldingReg[1] = TrackBackPlaneID;              // Set address to TrackBackplane slave 55
-            MASTER_SLAVE_DATA[0].HoldingReg[2] = 0xFFFF;                        // Data = Release all select lines
-            MASTER_SLAVE_DATA[0].HoldingReg[3] = 0;                             // Register number to write to
-            MASTER_SLAVE_DATA[0].HoldingReg[0] = MODE_MAN & WRITE & HOLDINGREG & EXEC;
-            StartupMachine = 7;
-            break;
-
-        case 7:
-            if(MASTER_SLAVE_DATA[0].InputReg[0] == OK){
-                MASTER_SLAVE_DATA[0].HoldingReg[0] = MODE_MAN & WRITE & HOLDINGREG & HALT; // Remove the execute command
-                StartupMachine = 8;
+            switch(CHECKxMODBUSxCOMMxSTATUS(TrackBackPlaneID, true)){
+                case SLAVEOK:  
+                    StartupMachine = 0;
+                    return_val = true;                    
+                    //DRV_USART0_WriteByte('4');
+                    break;                    
+                case SLAVENOK: 
+                    StartupMachine = 0;
+                    return_val = true;
+                    //DRV_USART0_WriteByte('4');
+                    break;
+                case SLAVEBUSY: break;
+                default : break;
             }
             break;
-
-        case 8:
-            if(MASTER_SLAVE_DATA[0].InputReg[0] == IDLE){
-                if (Mode == true){                                              // When the last slave is configured, release all amplifiers into regular communication
-                    MASTER_SLAVE_DATA[0].HoldingReg[0] = MODE_AUTO & WRITE & HOLDINGREG & HALT;
-                }
-                StartupMachine = 9;
-            }
+            
+        case WAIT:
+            WaitCounter++;
+            if (WaitCounter > 50000){
+                WaitCounter = 0;
+                StartupMachine = GoToCase;
+                //DRV_USART0_WriteByte('W');
+            }            
             break;
-
-        case 9:
-            return_val = true;
-            StartupMachine = 0;
-            break;*/
-
+            
         default :                
             break;
     }
@@ -636,56 +544,38 @@ bool ConfigureSlave(uint8_t TrackBackPlaneID, uint8_t AmplifierLatchSet, uint8_t
  *  Notes      : Enables all slaves amplifiers
  */
 /*#--------------------------------------------------------------------------#*/
-unsigned int _Delay = 0;
+uint8_t EnableMachine = 0;
 
 bool ENABLExAMPLIFIER(void){
     bool return_val = false;
-    
-    /*
-    if (PIR2bits.TMR3IF){
-        _Delay++;
-        PIR2bits.TMR3IF = 0;
+        
+    switch(EnableMachine){
+        case 0:
+            WriteData1Register[0] = 0;                  // start address High,                                                                                 
+            WriteData1Register[1] = HoldingReg1;        // start address Low,
+            WriteData1Register[2] = 0x80;               // Register Value Hi,
+            WriteData1Register[3] = 0x00;               // Register Value Lo.
+            SLAVExCOMMUNICATIONxHANDLER(BROADCAST_ADDRESS, 0, Write, WriteData1Register, 4); 
+            GoToCase = 1;
+            EnableMachine = WAIT;
+            break;
+
+        case 1:
+            return_val = true;
+            EnableMachine = 0;
+            break;
+            
+        case WAIT:
+            WaitCounter++;
+            if (WaitCounter > 50000){
+                WaitCounter = 0;
+                EnableMachine = GoToCase;
+                //DRV_USART0_WriteByte('W');
+            }            
+            break;
+
+        default:
+            break;
     }
-    if (_Delay > 20){
-        for (unsigned int i = 1; i <NUMBER_OF_SLAVES; i++){
-            MASTER_SLAVE_DATA[i].HoldingReg[1] |= 0x8000;                       // Enable each amplifier (serially)
-        }
-        _Delay = 0;
-        return_val = true;
-    }
-    */
-    //if (PIR2bits.TMR3IF){                                                       // Update rate 10ms
-    _Delay++;
-
-    if (_Delay > 30){
-        _Delay = 0;
-        switch(StartupMachine){
-            case 0:
-                MASTER_SLAVE_DATA[0].HoldingReg[1] = 0;                             // Address  = broadcast address
-                MASTER_SLAVE_DATA[0].HoldingReg[2] = 0x8000;                        // Data     = Set AMP_ID5_SET_LAT 0x10 in TrackBackplaneSlave
-                MASTER_SLAVE_DATA[0].HoldingReg[3] = 1;                             // Register = number to write to
-                //MASTER_SLAVE_DATA[0].HoldingReg[0] = MODE_AUTO & WRITE & HOLDINGREG & EXEC;
-                StartupMachine = 1;
-                break;
-
-            case 1:/*
-                if(MASTER_SLAVE_DATA[0].InputReg[0] == OK){
-                    MASTER_SLAVE_DATA[0].HoldingReg[0] = MODE_AUTO & WRITE & HOLDINGREG & HALT; // Remove the execute command
-                    StartupMachine = 0;
-                    return_val = true;
-                }*/
-                break;
-
-            case 2:/*
-                if(MASTER_SLAVE_DATA[0].InputReg[0] == IDLE){
-                    StartupMachine = 0;
-                    return_val = true;
-                }*/
-                break;
-
-            default:
-                break;
-        }
-    }   
     return (return_val);
 }

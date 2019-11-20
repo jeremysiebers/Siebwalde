@@ -57,6 +57,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "modbus/PetitModbus.h"
 #include "modbus/PetitModbusPort.h"
 #include "commhandler.h"
+#include "slavestartup.h"
+#include "slavehandler.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -95,6 +97,7 @@ uint16_t UpdateNextSlave = false;
 uint16_t AllSlavesReadAllDataCounter = 1;
 uint16_t InitDone = false;
 uint16_t stop = false;
+uint32_t DelayCount = 0;
 
 // *****************************************************************************
 // *****************************************************************************
@@ -114,6 +117,7 @@ uint16_t stop = false;
 
 /* TODO:  Add any necessary local functions.
 */
+uint32_t ReadCoreTimer(void);
 
 
 // *****************************************************************************
@@ -132,8 +136,6 @@ uint16_t stop = false;
 
 void APP_Initialize ( void )
 {
-    Slaves_Disable_Off();
-    
     /* Place the App state machine in its initial state. */
     appData.state = APP_STATE_INIT;
     
@@ -142,8 +144,9 @@ void APP_Initialize ( void )
     /* Pass address of array of struct for data storage. */
     INITxPETITXMODBUS(SlaveInfo, SlaveDump, NUMBER_OF_SLAVES_SIZE);
     /* Pass address of array of struct for data storage. */
-    INITXSLAVEXCOMMUNICATION(SlaveInfo, SlaveDump);
+    INITxCOMMxHANDLER(SlaveInfo, SlaveDump);
     INITxSLAVExSTARTUP(SlaveInfo, SlaveDump);
+    INITxSLAVExHANDLER(SlaveInfo, SlaveDump);
     
     /* Initialize the SLAVE_INFO struct with slave numbers. */
     uint8_t i = 0;
@@ -153,7 +156,8 @@ void APP_Initialize ( void )
         SlaveInfo[i].Footer = 0x55;
     }
     
-    
+    Slaves_Disable_Off();
+    DelayCount = ReadCoreTimer();
     /*
     DRV_USART0_WriteByte('A');
     DRV_USART0_WriteByte('P');
@@ -185,28 +189,20 @@ void APP_Tasks ( void )
         /* Application's initial state. */
         case APP_STATE_INIT:
         {
-            //Slaves_Disable_On();
-    
-            DRV_USART1_Initialize();
-            PLIB_INT_SourceEnable(INT_ID_0, INT_SOURCE_TIMER_4);
+            if ((ReadCoreTimer() - DelayCount) > 126000000 ){
+                DRV_USART1_Initialize();
+                PLIB_INT_SourceEnable(INT_ID_0, INT_SOURCE_TIMER_4);
                        
-            appData.state = APP_STATE_SLAVE_DETECT;
-            
+                appData.state = APP_STATE_SLAVE_DETECT;
+            }
             break;
         }
         
         case APP_STATE_SLAVE_DETECT:
         {
             if (SLAVExDETECT()){
-                appData.state = APP_STATE_MODBUS_INIT;
+                appData.state = APP_STATE_SLAVE_INIT;
             }
-            break;
-        }
-        
-        case APP_STATE_MODBUS_INIT:
-        {            
-            
-            appData.state = APP_STATE_SLAVE_INIT;
             break;
         }
         
@@ -214,18 +210,27 @@ void APP_Tasks ( void )
         {              
             if (SLAVExINITxANDxCONFIG())
             {                
-                appData.state = APP_STATE_SERVICE_TASKS;
+                appData.state = APP_STATE_SLAVE_ENABLE;
             }
+            break;
+        }
+        
+        case APP_STATE_SLAVE_ENABLE:
+        {            
+            if (ENABLExAMPLIFIER()){
+                appData.state = APP_STATE_SERVICE_TASKS;
+            }            
             break;
         }
 
         case APP_STATE_SERVICE_TASKS:
         {
             if(UpdateNextSlave == true){
-                PROCESSxNEXTxSLAVE(); 
-                UpdateNextSlave = false;
+                if (PROCESSxNEXTxSLAVE()){
+                    UpdateNextSlave = false;
+                }                
             }
-            
+            PROCESSxSLAVExCOMMUNICATION();
             break;
         }
 
@@ -255,6 +260,13 @@ void ModbusReceiveTimeout(){
     SlaveAnswerTimeoutCounter   = 1;                                            // Data received answer timeout timer
     DRV_TMR3_Stop();
     PLIB_TMR_Counter16BitClear(TMR_ID_8);
+}
+
+uint32_t ReadCoreTimer(void)
+{
+    uint32_t count;
+    asm volatile("mfc0 %0, $9" : "=r"(count));
+    return(count);
 }
 
 /*
