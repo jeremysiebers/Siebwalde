@@ -429,7 +429,7 @@ void Petit_TxRTU(void)
         Petit_Tx_State    =PETIT_RXTX_WAIT_ANSWER;                              // Else Master must wait for answer (see ModBus protocol implementation)
         
         /* Set and enable slave answer timeout timer */  
-        PLIB_TMR_Counter16BitClear(TMR_ID_8);
+        DRV_TMR3_CounterClear();
         DRV_TMR3_Start();
     }
 }
@@ -447,14 +447,15 @@ void PROCESSxPETITxMODBUS(void)
     }
     else if(Petit_Tx_State == PETIT_RXTX_WAIT_ANSWER){// && EnableSlaveAnswerTimeoutCounter){
         if (SlaveAnswerTimeoutCounter != 0){
+            DRV_TMR3_Stop();
+            SlaveAnswerTimeoutCounter = 0;
+            
             if(Petit_Tx_Data.Address > SlaveAmount){
                 DUMP_SLAVE_DATA[0].MbCommError = SLAVE_DATA_TIMEOUT;
             }
             else{
                 MASTER_SLAVE_DATA[Petit_Tx_Data.Address].MbCommError = SLAVE_DATA_TIMEOUT;}
-            Petit_Tx_State = PETIT_RXTX_IDLE;
-            SlaveAnswerTimeoutCounter = 0;
-            DRV_TMR3_Stop();
+            Petit_Tx_State = PETIT_RXTX_IDLE;                        
         }
     }
     

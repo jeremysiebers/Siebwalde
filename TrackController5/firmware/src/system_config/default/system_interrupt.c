@@ -95,13 +95,13 @@ void __ISR(_UART2_RX_VECTOR, ipl1AUTO) _IntHandlerDrvUsartReceiveInstance1(void)
     DRV_USART_TasksReceive(sysObj.drvUsart1);
     
     /* Reset and start TMR2 (timer_6) for inter character timeout 25us */
-    PLIB_INT_SourceFlagClear(INT_ID_0,INT_SOURCE_TIMER_8);
-    PLIB_TMR_Counter16BitClear(TMR_ID_6);
+    PLIB_INT_SourceFlagClear(INT_ID_0,INT_SOURCE_TIMER_6);
+    DRV_TMR2_CounterClear();
     DRV_TMR2_Start();
     
     /* Stop and reset TMR3 (timer_8) for message receive timeout 250us */
     DRV_TMR3_Stop();
-    PLIB_TMR_Counter16BitClear(TMR_ID_8);
+    DRV_TMR3_CounterClear();    
     PLIB_INT_SourceFlagClear(INT_ID_0,INT_SOURCE_TIMER_8);
 }
 void __ISR(_UART2_FAULT_VECTOR, ipl1AUTO) _IntHandlerDrvUsartErrorInstance1(void)
@@ -133,6 +133,7 @@ void __ISR(_TIMER_4_VECTOR, ipl1AUTO) IntHandlerDrvTmrInstance1(void)
 void __ISR(_TIMER_6_VECTOR, ipl1AUTO) IntHandlerDrvTmrInstance2(void)
 {
     ModbusCharacterTimeout();
+    DRV_TMR2_Stop();
     PLIB_INT_SourceFlagClear(INT_ID_0,INT_SOURCE_TIMER_6);
 }
 void __ISR(_TIMER_8_VECTOR, ipl1AUTO) IntHandlerDrvTmrInstance3(void)

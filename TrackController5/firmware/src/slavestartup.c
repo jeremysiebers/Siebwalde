@@ -21,30 +21,12 @@ uint8_t ReadData[4] = {0, 0, 0, 2};                                             
 
 static uint8_t GoToCase            = 0;
 static uint16_t WaitCounter        = 0;
-/*
+
 enum ADDR
-{
-    SLOT1  = 0x1,
-    SLOT2  = 0x2,
-    SLOT3  = 0x4,
-    SLOT4  = 0x8,
-    SLOT5  = 0x10,
-    SLOT6  = 0x20,
-    SLOT7  = 0x40,
-    SLOT8  = 0x80,
-    SLOT9  = 0x100,
-    SLOT10 = 0x200,
-    TRACKBACKPLANE1 = 51,
-    TRACKBACKPLANE2 = 52,
-    TRACKBACKPLANE3 = 53,
-    TRACKBACKPLANE4 = 54,
-    TRACKBACKPLANE5 = 55,
-    SLAVE_INITIAL_ADDR = 0xAA,
-    WAIT      = 99,
-    SLAVEOK   = 100,
-    SLAVENOK  = 101,
-    SLAVEBUSY = 102,
-};*/
+{    
+    WAIT_TIME  = 1000,
+    WAIT_TIME2 = 65000,
+};
 
 /*#--------------------------------------------------------------------------#*/
 /*  Description: INITxSLAVExSTARTUP(SLAVE_INFO *location)
@@ -294,7 +276,7 @@ bool DetectSlave(uint8_t SlaveId){
             
         case WAIT:
             WaitCounter++;
-            if (WaitCounter > 50000){
+            if (WaitCounter > WAIT_TIME){
                 WaitCounter = 0;
                 RunSlaveDetect = GoToCase;
                 //DRV_USART0_WriteByte('W');
@@ -515,7 +497,7 @@ bool ConfigureSlave(uint8_t TrackBackPlaneID, uint16_t AmplifierLatchSet, uint8_
             
         case WAIT:
             WaitCounter++;
-            if (WaitCounter > 50000){
+            if (WaitCounter > WAIT_TIME){
                 WaitCounter = 0;
                 StartupMachine = GoToCase;
                 //DRV_USART0_WriteByte('W');
@@ -551,23 +533,27 @@ bool ENABLExAMPLIFIER(void){
         
     switch(EnableMachine){
         case 0:
-            WriteData1Register[0] = 0;                  // start address High,                                                                                 
-            WriteData1Register[1] = HoldingReg1;        // start address Low,
-            WriteData1Register[2] = 0x80;               // Register Value Hi,
-            WriteData1Register[3] = 0x00;               // Register Value Lo.
-            SLAVExCOMMUNICATIONxHANDLER(BROADCAST_ADDRESS, 0, Write, WriteData1Register, 4); 
             GoToCase = 1;
             EnableMachine = WAIT;
             break;
 
         case 1:
+            WriteData1Register[0] = 0;                  // start address High,                                                                                 
+            WriteData1Register[1] = HoldingReg1;        // start address Low,
+            WriteData1Register[2] = 0x80;               // Register Value Hi,
+            WriteData1Register[3] = 0x00;               // Register Value Lo.
+            SLAVExCOMMUNICATIONxHANDLER(BROADCAST_ADDRESS, 0, Write, WriteData1Register, 4);
+            EnableMachine++;
+            break;
+        
+        case 2:
             return_val = true;
             EnableMachine = 0;
             break;
             
         case WAIT:
             WaitCounter++;
-            if (WaitCounter > 50000){
+            if (WaitCounter > WAIT_TIME2){
                 WaitCounter = 0;
                 EnableMachine = GoToCase;
                 //DRV_USART0_WriteByte('W');

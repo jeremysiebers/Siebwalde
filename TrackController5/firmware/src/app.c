@@ -139,7 +139,8 @@ void APP_Initialize ( void )
     /* Place the App state machine in its initial state. */
     appData.state = APP_STATE_INIT;
     
-    DRV_TMR1_Start(); // used for Ethernet
+    DRV_TMR1_Stop(); // used for cyclic modbus communication
+    
     
     /* Pass address of array of struct for data storage. */
     INITxPETITXMODBUS(SlaveInfo, SlaveDump, NUMBER_OF_SLAVES_SIZE);
@@ -189,10 +190,9 @@ void APP_Tasks ( void )
         /* Application's initial state. */
         case APP_STATE_INIT:
         {
-            if ((ReadCoreTimer() - DelayCount) > 126000000 ){
+            if ((ReadCoreTimer() - DelayCount) > 150000000 ){
                 DRV_USART1_Initialize();
-                PLIB_INT_SourceEnable(INT_ID_0, INT_SOURCE_TIMER_4);
-                       
+                //PLIB_INT_SourceEnable(INT_ID_0, INT_SOURCE_TIMER_4);                       
                 appData.state = APP_STATE_SLAVE_DETECT;
             }
             break;
@@ -218,6 +218,7 @@ void APP_Tasks ( void )
         case APP_STATE_SLAVE_ENABLE:
         {            
             if (ENABLExAMPLIFIER()){
+                DRV_TMR1_Start();
                 appData.state = APP_STATE_SERVICE_TASKS;
             }            
             break;
@@ -258,8 +259,7 @@ void ModbusCharacterTimeout(){
 
 void ModbusReceiveTimeout(){
     SlaveAnswerTimeoutCounter   = 1;                                            // Data received answer timeout timer
-    DRV_TMR3_Stop();
-    PLIB_TMR_Counter16BitClear(TMR_ID_8);
+    DRV_TMR3_CounterClear();
 }
 
 uint32_t ReadCoreTimer(void)
