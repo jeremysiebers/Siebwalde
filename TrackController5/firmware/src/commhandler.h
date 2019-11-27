@@ -16,28 +16,40 @@
 #ifdef	__cplusplus
 extern "C" {
 #endif /* __cplusplus */
+
+typedef struct
+{
+    uint8_t  SlaveAddress;
+    uint8_t  Direction;
+    uint8_t  NoOfRegisters;    
+    uint8_t  StartRegister;
+    uint16_t RegData0;
+    uint16_t RegData1;    
+}REGISTER_PROCESSING;
+
+REGISTER_PROCESSING        Data;
     
 extern void             INITxCOMMxHANDLER(SLAVE_INFO *location, SLAVE_INFO *Dump);
-extern void             SLAVExCOMMUNICATIONxHANDLER(uint8_t SlaveAddress, uint8_t Register, uint8_t WriteRead, uint8_t *Data, uint8_t length);
+extern void             SLAVExCOMMUNICATIONxHANDLER(void);
 extern uint8_t          CHECKxMODBUSxCOMMxSTATUS(uint8_t SlaveId, bool OverWrite);
 
 enum reg
 {
-    HoldingReg0          = 0, 
-    HoldingReg1          = 1, 
-    HoldingReg2          = 2, 
-    HoldingReg3          = 3, 
-    HoldingReg4          = 4, 
-    HoldingReg5          = 5, 
-    HoldingReg6          = 6, 
-    HoldingReg7          = 7, 
-    HoldingReg8          = 8, 
-    HoldingReg9          = 9, 
-    HoldingReg10         = 10, 
-    HoldingReg11         = 11, 
-    HoldingReg12         = 12,
-    Read                 = 0x55,
-    Write                = 0xAA,
+    HOLDINGREG0         = 0, 
+    HOLDINGREG1         = 1, 
+    HOLDINGREG2         = 2, 
+    HOLDINGREG3         = 3, 
+    HOLDINGREG4         = 4, 
+    HOLDINGREG5         = 5, 
+    HOLDINGREG6         = 6, 
+    HOLDINGREG7         = 7, 
+    HOLDINGREG8         = 8, 
+    HOLDINGREG9         = 9, 
+    HOLDINGREG10        = 10,
+    HOLDINGREG11        = 11,
+    HOLDINGREG12        = 12,
+    READ                 = 0x55,    
+    WRITE                = 0xAA,
             
     SLOT1  = 0x1,
     SLOT2  = 0x2,

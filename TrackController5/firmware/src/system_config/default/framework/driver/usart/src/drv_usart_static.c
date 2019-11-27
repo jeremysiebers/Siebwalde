@@ -55,8 +55,6 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 
 #include "system_config.h"
 #include "system_definitions.h"
-#include "../TrackController5.X/../../modbus/General.h"
-#include "../../commhandler.h"
 
 
 // *****************************************************************************
@@ -490,11 +488,9 @@ void DRV_USART1_TasksReceive(void)
     /* Reading the receive interrupt flag */
     if(SYS_INT_SourceStatusGet(INT_SOURCE_USART_2_RECEIVE))
     {
-        ReceiveInterrupt(DRV_USART1_ReadByte());                                // read received byte into modbus buffer;
 
         /* Clear up the interrupt flag */
         SYS_INT_SourceStatusClear(INT_SOURCE_USART_2_RECEIVE);
-        
     }
 }
 

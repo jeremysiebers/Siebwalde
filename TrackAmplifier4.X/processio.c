@@ -160,7 +160,7 @@ void ADC_BMF (){
 
             case 1:
                 if (ADCON0bits.ADGO==0){
-                    PetitInputRegisters[0].ActValue = ADCC_GetConversionResult();
+                    PetitHoldingRegisters[8].ActValue = ADCC_GetConversionResult();
                     Sequence_Bmf = 0;
                     //NC_2_LAT = true;
                 }
@@ -218,7 +218,7 @@ uint16_t ADCxIO (){
 
             case 3:
                 if (ADCON0bits.ADGO==0){
-                    PetitInputRegisters[1].ActValue = ADCC_GetConversionResult();
+                    PetitHoldingRegisters[7].ActValue = ADCC_GetConversionResult();
                     sequence++;
                     Return_Val = true;
                 }            
@@ -231,7 +231,7 @@ uint16_t ADCxIO (){
 
             case 5: 
                 if (ADCON0bits.ADGO==0){
-                    PetitInputRegisters[2].ActValue = ADCC_GetConversionResult();
+                    PetitHoldingRegisters[6].ActValue = ADCC_GetConversionResult();
                     sequence++;
                     Return_Val = true;
                 }            
@@ -244,7 +244,7 @@ uint16_t ADCxIO (){
 
             case 7:
                 if (ADCON0bits.ADGO==0){
-                    PetitInputRegisters[3].ActValue = ADCC_GetConversionResult();
+                    PetitHoldingRegisters[5].ActValue = ADCC_GetConversionResult();
                     sequence = 2;
                     Return_Val = true;
                 }            

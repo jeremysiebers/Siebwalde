@@ -222,10 +222,6 @@ const TCPIP_DHCP_MODULE_CONFIG tcpipDHCPInitData =
 };
 
 
-/*** ICMP Server Initialization Data ***/
-const TCPIP_ICMP_MODULE_CONFIG tcpipICMPInitData = 
-{
-};
 
 /*** NBNS Server Initialization Data ***/
 const TCPIP_NBNS_MODULE_CONFIG tcpipNBNSInitData =

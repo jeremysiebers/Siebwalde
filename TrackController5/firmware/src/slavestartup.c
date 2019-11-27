@@ -9,22 +9,22 @@
 bool    ConfigureSlave       (uint8_t TrackBackPlaneID, uint16_t AmplifierLatchSet, uint8_t TrackAmplifierId, uint8_t Mode);
 bool    DetectSlave          (uint8_t SlaveId);
 
-uint8_t WriteData2Registers[7] = {0, 0, 0, 1, 2, 0, 0};                         // {start address High, start address Low, 
-                                                                                // number of registers High, number of registers Low, 
-                                                                                // byte count, Register Value Hi, Register Value Lo} 
-
-uint8_t WriteData1Register[4] = {0, 0, 0, 0};                                   // {start address High, start address Low, 
-                                                                                // Register Value Hi, Register Value Lo} 
-
-uint8_t ReadData[4] = {0, 0, 0, 2};                                             // {start address High, start address Low, 
-                                                                                // number of registers High, number of registers Low, 
+//uint8_t WriteData2Registers[7] = {0, 0, 0, 1, 2, 0, 0};                         // {start address High, start address Low, 
+//                                                                                // number of registers High, number of registers Low, 
+//                                                                                // byte count, Register Value Hi, Register Value Lo} 
+//
+//uint8_t WriteData1Register[4] = {0, 0, 0, 0};                                   // {start address High, start address Low, 
+//                                                                                // Register Value Hi, Register Value Lo} 
+//
+//uint8_t ReadData[4] = {0, 0, 0, 2};                                             // {start address High, start address Low, 
+//                                                                                // number of registers High, number of registers Low, 
 
 static uint8_t GoToCase            = 0;
 static uint16_t WaitCounter        = 0;
 
 enum ADDR
 {    
-    WAIT_TIME  = 1000,
+    WAIT_TIME  = 20000,
     WAIT_TIME2 = 65000,
 };
 
@@ -140,7 +140,11 @@ bool DetectSlave(uint8_t SlaveId){
             
         /* Try to read the applicable backplane slave */
         case 1:
-            SLAVExCOMMUNICATIONxHANDLER(SlaveId, HoldingReg0, Read, ReadData, 4);
+            Data.SlaveAddress  = SlaveId;
+            Data.Direction     = READ;
+            Data.NoOfRegisters = 1;
+            Data.StartRegister = HOLDINGREG0;
+            SLAVExCOMMUNICATIONxHANDLER();
             RunSlaveDetect++;
             break;
             
@@ -185,11 +189,18 @@ bool DetectSlave(uint8_t SlaveId){
             
             if (MASTER_SLAVE_DATA[BackplaneId].SlaveDetected == true){
                 ShiftSlotNr = (SLOT1 << ShiftSlot2);
-                WriteData1Register[0] = 0; // start address High,                                                                                 
-                WriteData1Register[1] = 0; // start address Low,
-                WriteData1Register[2] = (ShiftSlotNr & 0xFF00) >> 8; // Register Value Hi,
-                WriteData1Register[3] = (ShiftSlotNr & 0xFF); // Register Value Lo.
-                SLAVExCOMMUNICATIONxHANDLER(BackplaneId, HoldingReg0, Write, WriteData1Register, 4);
+//                WriteData1Register[0] = 0; // start address High,                                                                                 
+//                WriteData1Register[1] = 0; // start address Low,
+//                WriteData1Register[2] = (ShiftSlotNr & 0xFF00) >> 8; // Register Value Hi,
+//                WriteData1Register[3] = (ShiftSlotNr & 0xFF); // Register Value Lo.
+//                SLAVExCOMMUNICATIONxHANDLER(BackplaneId, HoldingReg0, Write, WriteData1Register, 4);                
+                Data.SlaveAddress  = BackplaneId;
+                Data.Direction     = WRITE;
+                Data.NoOfRegisters = 1;
+                Data.StartRegister = HOLDINGREG0;
+                Data.RegData0      = ShiftSlotNr;
+                SLAVExCOMMUNICATIONxHANDLER();
+                
                 ShiftSlot2++;
                 RunSlaveDetect++;
                 //DRV_USART0_WriteByte('3');
@@ -221,8 +232,13 @@ bool DetectSlave(uint8_t SlaveId){
             break;
         
         /* Try to read the applicable amplifier slave */
-        case 5:
-            SLAVExCOMMUNICATIONxHANDLER(SLAVE_INITIAL_ADDR, HoldingReg0, Read, ReadData, 4);
+        case 5:            
+            Data.SlaveAddress  = SLAVE_INITIAL_ADDR;
+            Data.Direction     = READ;
+            Data.NoOfRegisters = 1;
+            Data.StartRegister = HOLDINGREG11;
+            SLAVExCOMMUNICATIONxHANDLER();
+//            SLAVExCOMMUNICATIONxHANDLERxREAD(SLAVE_INITIAL_ADDR, HoldingReg11, ReadSingle);
             RunSlaveDetect++;
             //DRV_USART0_WriteByte('5');
             break;
@@ -232,6 +248,7 @@ bool DetectSlave(uint8_t SlaveId){
             switch(CHECKxMODBUSxCOMMxSTATUS(SLAVE_INITIAL_ADDR, true)){
                 case SLAVEOK:  
                     MASTER_SLAVE_DATA[SlaveId].SlaveDetected = true;
+                    MASTER_SLAVE_DATA[SlaveId].HoldingReg[HOLDINGREG11] = DUMP_SLAVE_DATA[0].HoldingReg[HOLDINGREG11]; // store the read FW version
                     RunSlaveDetect++;                    
                     //DRV_USART0_WriteByte('6');
                     break;                    
@@ -247,11 +264,17 @@ bool DetectSlave(uint8_t SlaveId){
             
         /* Command backplane slave to select no amplifier slave */
         case 7:
-            WriteData1Register[0] = 0; // start address High,                                                                                 
-            WriteData1Register[1] = 0; // start address Low,
-            WriteData1Register[2] = 0; // Register Value Hi,
-            WriteData1Register[3] = 0; // Register Value Lo.
-            SLAVExCOMMUNICATIONxHANDLER(BackplaneId, HoldingReg0, Write, WriteData1Register, 4);            
+            Data.SlaveAddress  = BackplaneId;
+            Data.Direction     = WRITE;
+            Data.NoOfRegisters = 1;
+            Data.StartRegister = HOLDINGREG0;
+            Data.RegData0      = 0;
+            SLAVExCOMMUNICATIONxHANDLER();
+//            WriteData1Register[0] = 0; // start address High,                                                                                 
+//            WriteData1Register[1] = 0; // start address Low,
+//            WriteData1Register[2] = 0; // Register Value Hi,
+//            WriteData1Register[3] = 0; // Register Value Lo.
+//            SLAVExCOMMUNICATIONxHANDLER(BackplaneId, HoldingReg0, Write, WriteData1Register, 4);            
             RunSlaveDetect++;
             break;
             
@@ -397,12 +420,12 @@ bool SLAVExINITxANDxCONFIG(){
 
 uint8_t StartupMachine = 0;
 
-bool ConfigureSlave(uint8_t TrackBackPlaneID, uint16_t AmplifierLatchSet, uint8_t TrackAmplifierId, uint8_t Mode){
+bool ConfigureSlave(uint8_t BackplaneId, uint16_t AmplifierLatchSet, uint8_t TrackAmplifierId, uint8_t Mode){
     bool return_val = false;
     
     switch(StartupMachine){
         case 0:
-            if (MASTER_SLAVE_DATA[TrackBackPlaneID].SlaveDetected == true && 
+            if (MASTER_SLAVE_DATA[BackplaneId].SlaveDetected == true && 
                 MASTER_SLAVE_DATA[TrackAmplifierId].SlaveDetected == true){
                 StartupMachine++;
             }
@@ -414,18 +437,24 @@ bool ConfigureSlave(uint8_t TrackBackPlaneID, uint16_t AmplifierLatchSet, uint8_
         
         /* Command backplane slave to select a amplifier slave */
         case 1:
-            WriteData1Register[0] = 0; // start address High,                                                                                 
-            WriteData1Register[1] = 0; // start address Low,
-            WriteData1Register[2] = (AmplifierLatchSet & 0xFF00) >> 8; // Register Value Hi,
-            WriteData1Register[3] = (AmplifierLatchSet & 0xFF); // Register Value Lo.
-            SLAVExCOMMUNICATIONxHANDLER(TrackBackPlaneID, HoldingReg0, Write, WriteData1Register, 4);            
+            Data.SlaveAddress  = BackplaneId;
+            Data.Direction     = WRITE;
+            Data.NoOfRegisters = 1;
+            Data.StartRegister = HOLDINGREG0;
+            Data.RegData0      = AmplifierLatchSet;
+            SLAVExCOMMUNICATIONxHANDLER();
+//            WriteData1Register[0] = 0; // start address High,                                                                                 
+//            WriteData1Register[1] = 0; // start address Low,
+//            WriteData1Register[2] = (AmplifierLatchSet & 0xFF00) >> 8; // Register Value Hi,
+//            WriteData1Register[3] = (AmplifierLatchSet & 0xFF); // Register Value Lo.
+//            SLAVExCOMMUNICATIONxHANDLER(TrackBackPlaneID, HoldingReg0, Write, WriteData1Register, 4);            
             StartupMachine++;
             break;
             
         /* Verify communication was OK with backplane, if not flag backplane 
            SlaveDetected to false to indicate backplane comm error */
         case 2:
-            switch(CHECKxMODBUSxCOMMxSTATUS(TrackBackPlaneID, true)){
+            switch(CHECKxMODBUSxCOMMxSTATUS(BackplaneId, true)){
                 case SLAVEOK:  
                     GoToCase = StartupMachine + 1;
                     StartupMachine = WAIT;                    
@@ -442,11 +471,17 @@ bool ConfigureSlave(uint8_t TrackBackPlaneID, uint16_t AmplifierLatchSet, uint8_
             
         /* Program new SlaveId to slave */
         case 3:
-            WriteData1Register[0] = 0;                  // start address High,                                                                                 
-            WriteData1Register[1] = HoldingReg2;        // start address Low,
-            WriteData1Register[2] = 0;                  // Register Value Hi,
-            WriteData1Register[3] = TrackAmplifierId;   // Register Value Lo.
-            SLAVExCOMMUNICATIONxHANDLER(SLAVE_INITIAL_ADDR, 0, Write, WriteData1Register, 4);            
+            Data.SlaveAddress  = SLAVE_INITIAL_ADDR;
+            Data.Direction     = WRITE;
+            Data.NoOfRegisters = 1;
+            Data.StartRegister = HOLDINGREG2;
+            Data.RegData0      = TrackAmplifierId;
+            SLAVExCOMMUNICATIONxHANDLER();
+//            WriteData1Register[0] = 0;                  // start address High,                                                                                 
+//            WriteData1Register[1] = HoldingReg2;        // start address Low,
+//            WriteData1Register[2] = 0;                  // Register Value Hi,
+//            WriteData1Register[3] = TrackAmplifierId;   // Register Value Lo.
+//            SLAVExCOMMUNICATIONxHANDLER(SLAVE_INITIAL_ADDR, 0, Write, WriteData1Register, 4);            
             StartupMachine++;
             break;
             
@@ -468,18 +503,24 @@ bool ConfigureSlave(uint8_t TrackBackPlaneID, uint16_t AmplifierLatchSet, uint8_
             
         /* Command backplane slave to select no amplifier slave */
         case 5:
-            WriteData1Register[0] = 0; // start address High,                                                                                 
-            WriteData1Register[1] = 0; // start address Low,
-            WriteData1Register[2] = 0; // Register Value Hi,
-            WriteData1Register[3] = 0; // Register Value Lo.
-            SLAVExCOMMUNICATIONxHANDLER(TrackBackPlaneID, HoldingReg0, Write, WriteData1Register, 4);            
+            Data.SlaveAddress  = BackplaneId;
+            Data.Direction     = WRITE;
+            Data.NoOfRegisters = 1;
+            Data.StartRegister = HOLDINGREG0;
+            Data.RegData0      = 0;
+            SLAVExCOMMUNICATIONxHANDLER();
+//            WriteData1Register[0] = 0; // start address High,                                                                                 
+//            WriteData1Register[1] = 0; // start address Low,
+//            WriteData1Register[2] = 0; // Register Value Hi,
+//            WriteData1Register[3] = 0; // Register Value Lo.
+//            SLAVExCOMMUNICATIONxHANDLER(TrackBackPlaneID, HoldingReg0, Write, WriteData1Register, 4);            
             StartupMachine++;
             break;
             
         /* Verify communication was OK with backplane, if not flag backplane 
            SlaveDetected to false to indicate backplane comm error */
         case 6:
-            switch(CHECKxMODBUSxCOMMxSTATUS(TrackBackPlaneID, true)){
+            switch(CHECKxMODBUSxCOMMxSTATUS(BackplaneId, true)){
                 case SLAVEOK:  
                     StartupMachine = 0;
                     return_val = true;                    
@@ -538,11 +579,17 @@ bool ENABLExAMPLIFIER(void){
             break;
 
         case 1:
-            WriteData1Register[0] = 0;                  // start address High,                                                                                 
-            WriteData1Register[1] = HoldingReg1;        // start address Low,
-            WriteData1Register[2] = 0x80;               // Register Value Hi,
-            WriteData1Register[3] = 0x00;               // Register Value Lo.
-            SLAVExCOMMUNICATIONxHANDLER(BROADCAST_ADDRESS, 0, Write, WriteData1Register, 4);
+            Data.SlaveAddress  = BROADCAST_ADDRESS;
+            Data.Direction     = WRITE;
+            Data.NoOfRegisters = 1;
+            Data.StartRegister = HOLDINGREG1;
+            Data.RegData0      = 0x8000;
+            SLAVExCOMMUNICATIONxHANDLER();
+//            WriteData1Register[0] = 0;                  // start address High,                                                                                 
+//            WriteData1Register[1] = HoldingReg1;        // start address Low,
+//            WriteData1Register[2] = 0x80;               // Register Value Hi,
+//            WriteData1Register[3] = 0x00;               // Register Value Lo.
+//            SLAVExCOMMUNICATIONxHANDLER(BROADCAST_ADDRESS, 0, Write, WriteData1Register, 4);
             EnableMachine++;
             break;
         

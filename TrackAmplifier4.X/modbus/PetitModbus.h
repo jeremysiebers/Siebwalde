@@ -8,17 +8,17 @@
 #ifndef __PETITMODBUS__H
 #define __PETITMODBUS__H
                                                                                 // 1 register is 16 bits. The largest register is used to determine receive and transmit buffer size!
-#define NUMBER_OF_HOLDING_PETITREGISTERS                 4                      // Petit Modbus RTU Slave Holding Registers (read/write), Have to put a number of registers here It has to be bigger than 0 (zero)!!
-#define NUMBER_OF_INPUT_PETITREGISTERS                   6                      // Number of (read only) input registers)
-#define NUMBER_OF_DIAGNOSTIC_PETITREGISTERS              2                      // Number of diagnostic registers (send/receive counters)
+#define NUMBER_OF_HOLDING_PETITREGISTERS                 12                     // Petit Modbus RTU Slave Holding Registers (read/write), Have to put a number of registers here It has to be bigger than 0 (zero)!!
+#define NUMBER_OF_INPUT_PETITREGISTERS                   0                      // Number of (read only) input registers)
+#define NUMBER_OF_DIAGNOSTIC_PETITREGISTERS              0                      // Number of diagnostic registers (send/receive counters)
 
 #define PETITMODBUS_TIMEOUTTIMER                         2                      // Timeout Constant for Petit Modbus RTU Slave [101us tick]
 
 #define PETITMODBUS_READ_HOLDING_REGISTERS_ENABLED      ( 1 )                   // If you want to use make it 1, or 0
 #define PETITMODBUSWRITE_SINGLE_REGISTER_ENABLED        ( 1 )                   // If you want to use make it 1, or 0
 #define PETITMODBUS_WRITE_MULTIPLE_REGISTERS_ENABLED    ( 1 )                   // If you want to use make it 1, or 0
-#define PETITMODBUS_READ_INPUT_REGISTERS_ENABLED        ( 1 )                   // If you want to use make it 1, or 0
-#define PETITMODBUS_DIAGNOSTIC_REGISTERS_ENABLED        ( 1 )                   // If you want to use make it 1, or 0
+#define PETITMODBUS_READ_INPUT_REGISTERS_ENABLED        ( 0 )                   // If you want to use make it 1, or 0
+#define PETITMODBUS_DIAGNOSTIC_REGISTERS_ENABLED        ( 0 )                   // If you want to use make it 1, or 0
 
 #define ENTER_CRITICAL_SECTION( )   (INTCONbits.PEIE = 1)
 #define EXIT_CRITICAL_SECTION( )    (INTCONbits.PEIE = 0)

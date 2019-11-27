@@ -188,7 +188,7 @@ unsigned char PetitSendMessage(void)
     if (Petit_Tx_State != PETIT_RXTX_IDLE){
         return FALSE;
     }
-	PetitDiagnosticRegisters[(NUMBER_OF_DIAGNOSTIC_PETITREGISTERS - 1)].ActValue += 1;    // Count the amount of transmitted messages
+	PetitHoldingRegisters[9].ActValue += 1;    // Count the amount of transmitted messages
     Petit_Tx_Current  =0;
     Petit_Tx_State    =PETIT_RXTX_START;
 
@@ -665,7 +665,7 @@ void ProcessPetitModbus(void)
         if ((Petit_Rx_Data.Address == PETITMODBUS_SLAVE_ADDRESS) || (Petit_Rx_Data.Address == PETITMODBUS_BROADCAST_ADDRESS)) // Is Data for us?
         {
             if (Petit_Rx_Data.Address == PETITMODBUS_SLAVE_ADDRESS){
-                PetitDiagnosticRegisters[(NUMBER_OF_DIAGNOSTIC_PETITREGISTERS - 2)].ActValue += 1;// Count the amount of received messages, not the broadcast messages
+                PetitHoldingRegisters[10].ActValue += 1;// Count the amount of received messages, not the broadcast messages
             }
             
             switch (Petit_Rx_Data.Function)                                     // Data is for us but which function?

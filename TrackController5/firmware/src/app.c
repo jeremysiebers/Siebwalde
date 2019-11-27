@@ -59,6 +59,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "commhandler.h"
 #include "slavestartup.h"
 #include "slavehandler.h"
+#include "slavefwhandler.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -138,8 +139,8 @@ void APP_Initialize ( void )
 {
     /* Place the App state machine in its initial state. */
     appData.state = APP_STATE_INIT;
-    
-    DRV_TMR1_Stop(); // used for cyclic modbus communication
+    DRV_TMR0_Start();       // used for ethernet
+    DRV_TMR1_Stop();        // used for cyclic modbus communication
     
     
     /* Pass address of array of struct for data storage. */
@@ -170,7 +171,8 @@ void APP_Initialize ( void )
     DRV_USART0_WriteByte('T');
     DRV_USART0_WriteByte('!');
     DRV_USART0_WriteByte(0xa);
-    DRV_USART0_WriteByte(0xd);*/
+    DRV_USART0_WriteByte(0xd);
+     */
 }
 
 
@@ -192,7 +194,6 @@ void APP_Tasks ( void )
         {
             if ((ReadCoreTimer() - DelayCount) > 150000000 ){
                 DRV_USART1_Initialize();
-                //PLIB_INT_SourceEnable(INT_ID_0, INT_SOURCE_TIMER_4);                       
                 appData.state = APP_STATE_SLAVE_DETECT;
             }
             break;
@@ -201,6 +202,14 @@ void APP_Tasks ( void )
         case APP_STATE_SLAVE_DETECT:
         {
             if (SLAVExDETECT()){
+                appData.state = APP_STATE_SLAVE_FW_DOWNLOAD;
+            }
+            break;
+        }
+        
+        case APP_STATE_SLAVE_FW_DOWNLOAD:
+        {
+            if (SLAVExFWxHANDLER()){
                 appData.state = APP_STATE_SLAVE_INIT;
             }
             break;
@@ -245,7 +254,8 @@ void APP_Tasks ( void )
         }
     }
     
-    PROCESSxPETITxMODBUS();                
+    PROCESSxPETITxMODBUS();
+    
 }
 
 void ModbusCommCycle(){

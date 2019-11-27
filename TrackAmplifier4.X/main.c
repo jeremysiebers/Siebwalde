@@ -31,7 +31,7 @@ void main(void) {
     // If using interrupts in PIC Mid-Range Compatibility Mode you need to enable the Global and Peripheral Interrupts
     // Use the following macros to:
     
-    PetitInputRegisters[NUMBER_OF_INPUT_PETITREGISTERS-1].ActValue = ReadFlashChecksum();
+    PetitHoldingRegisters[11].ActValue = ReadFlashChecksum();
 
     // Enable the Global Interrupts
     INTERRUPT_GlobalInterruptEnable();

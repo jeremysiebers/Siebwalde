@@ -62,6 +62,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "system/common/sys_common.h"
 #include "app.h"
 #include "system_definitions.h"
+#include "../TrackController5.X/../../modbus/General.h"
+#include "../../commhandler.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -91,6 +93,8 @@ void __ISR(_UART2_TX_VECTOR, ipl0AUTO) _IntHandlerDrvUsartTransmitInstance1(void
 }
 void __ISR(_UART2_RX_VECTOR, ipl1AUTO) _IntHandlerDrvUsartReceiveInstance1(void)
 {
+    /* Handle received char */
+    ReceiveInterrupt(DRV_USART1_ReadByte());                                    // read received byte into modbus buffer;
     /* Handle received char */
     DRV_USART_TasksReceive(sysObj.drvUsart1);
     

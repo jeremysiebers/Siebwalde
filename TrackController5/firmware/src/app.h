@@ -88,7 +88,8 @@ typedef enum
 {
 	/* Application's state machine's initial state. */
 	APP_STATE_INIT=0,
-    APP_STATE_SLAVE_DETECT,    
+    APP_STATE_SLAVE_DETECT,
+    APP_STATE_SLAVE_FW_DOWNLOAD,
     APP_STATE_SLAVE_INIT,
     APP_STATE_SLAVE_ENABLE,
 	APP_STATE_SERVICE_TASKS,

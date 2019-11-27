@@ -70,9 +70,8 @@ void INITxSLAVExHANDLER(SLAVE_INFO *location, SLAVE_INFO *Dump){
  *  Notes      : Handles communication message to all slaves
  */
 /*#--------------------------------------------------------------------------#*/
-
-static uint8_t ProcessSlave = 1;
-static uint8_t State = 0;
+static uint8_t      ProcessSlave = 1;
+static uint8_t      State = 0;
 
 bool PROCESSxNEXTxSLAVE(){    
     
@@ -158,8 +157,8 @@ bool PROCESSxSLAVExCOMMUNICATION(){
  *  Notes      : Keeps track of communication with a slave
  */
 /*#--------------------------------------------------------------------------#*/
-uint8_t HoldingRegistersRead [4] = {0, 0, 0, 0};                                // {start address High, start address Low, number of registers High, number of registers Low}
-uint8_t HoldingRegistersWrite[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};                 // {start address High, start address Low, number of registers High, number of registers Low, 
+//uint8_t HoldingRegistersRead [4] = {0, 0, 0, 0};                                // {start address High, start address Low, number of registers High, number of registers Low}
+//uint8_t HoldingRegistersWrite[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};                 // {start address High, start address Low, number of registers High, number of registers Low, 
                                                                                 //  byte count, Register Value Hi, Register Value Lo, Register Value Hi, Register Value Lo} 
 
 static uint8_t Mailbox = 1;
@@ -183,69 +182,103 @@ void SendNextMessage(){
     
     switch (Message){
         case MESSAGE1:
-            HoldingRegistersWrite[8]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[1];
-            HoldingRegistersWrite[7]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[1] >> 8;
-            HoldingRegistersWrite[6]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[0];
-            HoldingRegistersWrite[5]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[0] >> 8;
-            HoldingRegistersWrite[4]  = 4;
-            HoldingRegistersWrite[3]  = 2;
-            HoldingRegistersWrite[2]  = 0;
-            HoldingRegistersWrite[1]  = 0;
-            HoldingRegistersWrite[0]  = 0;
-            SLAVExCOMMUNICATIONxHANDLER(ProcessSlave, HoldingReg0, Write, HoldingRegistersWrite, 9);
+            Data.SlaveAddress  = ProcessSlave;
+            Data.Direction     = WRITE;
+            Data.NoOfRegisters = 2;
+            Data.StartRegister = HOLDINGREG0;
+            Data.RegData0      = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[0];
+            Data.RegData1      = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[1];
+            SLAVExCOMMUNICATIONxHANDLER();            
+//            HoldingRegistersWrite[8]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[1];
+//            HoldingRegistersWrite[7]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[1] >> 8;
+//            HoldingRegistersWrite[6]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[0];
+//            HoldingRegistersWrite[5]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[0] >> 8;
+//            HoldingRegistersWrite[4]  = 4;
+//            HoldingRegistersWrite[3]  = 2;
+//            HoldingRegistersWrite[2]  = 0;
+//            HoldingRegistersWrite[1]  = 0;
+//            HoldingRegistersWrite[0]  = 0;
+//            SLAVExCOMMUNICATIONxHANDLER(ProcessSlave, HoldingReg0, Write, HoldingRegistersWrite, 9);
             //SENDxPETITxMODBUS(ProcessSlave, PETITMODBUS_WRITE_MULTIPLE_REGISTERS, HoldingRegistersWrite, 9);
             break;
 
         case MESSAGE2:
-            HoldingRegistersRead[3]  = 2;
-            HoldingRegistersRead[2]  = 0;
-            HoldingRegistersRead[1]  = 0;
-            HoldingRegistersRead[0]  = 0;
-            SLAVExCOMMUNICATIONxHANDLER(ProcessSlave, HoldingReg0, Read, HoldingRegistersRead, 4);
+            Data.SlaveAddress  = ProcessSlave;
+            Data.Direction     = READ;
+            Data.NoOfRegisters = 2;
+            Data.StartRegister = HOLDINGREG2;
+            SLAVExCOMMUNICATIONxHANDLER();
+//            HoldingRegistersRead[3]  = 2;
+//            HoldingRegistersRead[2]  = 0;
+//            HoldingRegistersRead[1]  = 0;
+//            HoldingRegistersRead[0]  = 0;
+//            SLAVExCOMMUNICATIONxHANDLER(ProcessSlave, HoldingReg0, Read, HoldingRegistersRead, 4);
             //SENDxPETITxMODBUS(ProcessSlave, PETITMODBUS_READ_HOLDING_REGISTERS, HoldingRegistersRead, 4);    
             break;
 
         case MESSAGE3:
             switch (Mailbox){
                 case 1:
-                    HoldingRegistersWrite[8]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[3];
-                    HoldingRegistersWrite[7]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[3] >> 8;
-                    HoldingRegistersWrite[6]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[2];
-                    HoldingRegistersWrite[5]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[2] >> 8;
-                    HoldingRegistersWrite[4]  = 4;
-                    HoldingRegistersWrite[3]  = 2;
-                    HoldingRegistersWrite[2]  = 0;
-                    HoldingRegistersWrite[1]  = 2;
-                    HoldingRegistersWrite[0]  = 0;
-                    SLAVExCOMMUNICATIONxHANDLER(ProcessSlave, HoldingReg0, Write, HoldingRegistersWrite, 9);
+                    Data.SlaveAddress  = ProcessSlave;
+                    Data.Direction     = WRITE;
+                    Data.NoOfRegisters = 2;
+                    Data.StartRegister = HOLDINGREG9;
+                    Data.RegData0      = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[9];
+                    Data.RegData1      = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[10];
+                    SLAVExCOMMUNICATIONxHANDLER();
+//                    HoldingRegistersWrite[8]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[3];
+//                    HoldingRegistersWrite[7]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[3] >> 8;
+//                    HoldingRegistersWrite[6]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[2];
+//                    HoldingRegistersWrite[5]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[2] >> 8;
+//                    HoldingRegistersWrite[4]  = 4;
+//                    HoldingRegistersWrite[3]  = 2;
+//                    HoldingRegistersWrite[2]  = 0;
+//                    HoldingRegistersWrite[1]  = 2;
+//                    HoldingRegistersWrite[0]  = 0;
+//                    SLAVExCOMMUNICATIONxHANDLER(ProcessSlave, HoldingReg0, Write, HoldingRegistersWrite, 9);
                     //SENDxPETITxMODBUS(ProcessSlave, PETITMODBUS_WRITE_MULTIPLE_REGISTERS, HoldingRegistersWrite, 9);
                     break;
 
                 case 2:
-                    HoldingRegistersRead[3]  = 2;
-                    HoldingRegistersRead[2]  = 0;
-                    HoldingRegistersRead[1]  = 0;
-                    HoldingRegistersRead[0]  = 0;
-                    SLAVExCOMMUNICATIONxHANDLER(ProcessSlave, HoldingReg0, Read, HoldingRegistersRead, 4);
+                    Data.SlaveAddress  = ProcessSlave;
+                    Data.Direction     = READ;
+                    Data.NoOfRegisters = 2;
+                    Data.StartRegister = HOLDINGREG4;
+                    SLAVExCOMMUNICATIONxHANDLER();
+//                    HoldingRegistersRead[3]  = 2;
+//                    HoldingRegistersRead[2]  = 0;
+//                    HoldingRegistersRead[1]  = 0;
+//                    HoldingRegistersRead[0]  = 0;
+//                    SLAVExCOMMUNICATIONxHANDLER(ProcessSlave, HoldingReg0, Read, HoldingRegistersRead, 4);
                     //SENDxPETITxMODBUS(ProcessSlave, PETITMODBUS_READ_HOLDING_REGISTERS, HoldingRegistersRead, 4);
                     break;
 
                 case 3:
-                    HoldingRegistersRead[3]  = 2;
-                    HoldingRegistersRead[2]  = 0;
-                    HoldingRegistersRead[1]  = 2;
-                    HoldingRegistersRead[0]  = 0;
-                    SLAVExCOMMUNICATIONxHANDLER(ProcessSlave, HoldingReg0, Read, HoldingRegistersRead, 4);
+                    Data.SlaveAddress  = ProcessSlave;
+                    Data.Direction     = READ;
+                    Data.NoOfRegisters = 2;
+                    Data.StartRegister = HOLDINGREG6;
+                    SLAVExCOMMUNICATIONxHANDLER();
+//                    HoldingRegistersRead[3]  = 2;
+//                    HoldingRegistersRead[2]  = 0;
+//                    HoldingRegistersRead[1]  = 2;
+//                    HoldingRegistersRead[0]  = 0;
+//                    SLAVExCOMMUNICATIONxHANDLER(ProcessSlave, HoldingReg0, Read, HoldingRegistersRead, 4);
                     //SENDxPETITxMODBUS(ProcessSlave, PETITMODBUS_READ_HOLDING_REGISTERS, HoldingRegistersRead, 4);  
                     break;
 
                 case 4:
-                    HoldingRegistersRead[3]  = 2;
-                    HoldingRegistersRead[2]  = 0;
-                    HoldingRegistersRead[1]  = 4;
-                    HoldingRegistersRead[0]  = 0;
-                    SLAVExCOMMUNICATIONxHANDLER(ProcessSlave, HoldingReg0, Read, HoldingRegistersRead, 4);
-                    //SENDxPETITxMODBUS(ProcessSlave, PETITMODBUS_READ_HOLDING_REGISTERS, HoldingRegistersRead, 4);  
+                    Data.SlaveAddress  = ProcessSlave;
+                    Data.Direction     = READ;
+                    Data.NoOfRegisters = 2;
+                    Data.StartRegister = HOLDINGREG8;
+                    SLAVExCOMMUNICATIONxHANDLER();
+//                    HoldingRegistersRead[3]  = 2;
+//                    HoldingRegistersRead[2]  = 0;
+//                    HoldingRegistersRead[1]  = 4;
+//                    HoldingRegistersRead[0]  = 0;
+//                    SLAVExCOMMUNICATIONxHANDLER(ProcessSlave, HoldingReg0, Read, HoldingRegistersRead, 4);
+//                    SENDxPETITxMODBUS(ProcessSlave, PETITMODBUS_READ_HOLDING_REGISTERS, HoldingRegistersRead, 4);  
                     break;
 
                 default:

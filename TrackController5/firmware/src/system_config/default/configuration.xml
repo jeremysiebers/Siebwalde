@@ -882,24 +882,22 @@
       <Template dnOrder="8">
         <Name dnOrder="0">drv_usart_static_byte_model.c</Name>
         <Path dnOrder="1">Source&amp;#160;Files/app/system_config/default/framework/driver/usart/src</Path>
-        <Checksum dnOrder="2">539421AE87B166EBCBCB58B776053FE7</Checksum>
+        <Checksum dnOrder="2">B2F3B37587660037243A66B111900E28</Checksum>
       </Template>
       <Template dnOrder="9">
         <Name dnOrder="0">system_interrupt.c</Name>
         <Path dnOrder="1">Source&amp;#160;Files/app/system_config/default</Path>
         <Checksum dnOrder="2">9C0491543DEBEDD63A7FDD0389025D7A</Checksum>
-        <ProjectFileChecksum dnOrder="3">609DF4E256B5EF6FD8176346C68E9AFE</ProjectFileChecksum>
       </Template>
       <Template dnOrder="10">
         <Name dnOrder="0">drv_usart_static.c</Name>
         <Path dnOrder="1">Source&amp;#160;Files/app/system_config/default/framework/driver/usart/src</Path>
         <Checksum dnOrder="2">BC007F05557B1F4A38D794EF804DFAB2</Checksum>
-        <ProjectFileChecksum dnOrder="3">7706523E7C8590F6241F5E6F2627DC0D</ProjectFileChecksum>
       </Template>
       <Template dnOrder="11">
         <Name dnOrder="0">system_init.c</Name>
         <Path dnOrder="1">Source&amp;#160;Files/app/system_config/default</Path>
-        <Checksum dnOrder="2">E6FA8A5F7627B3575BC92874F78E8FBC</Checksum>
+        <Checksum dnOrder="2">4705190539C65DB719B05E3A1DDE6A45</Checksum>
       </Template>
       <Template dnOrder="12">
         <Name dnOrder="0">main.c</Name>
@@ -947,7 +945,7 @@
       <Template dnOrder="21">
         <Name dnOrder="0">system_config.h</Name>
         <Path dnOrder="1">Header&amp;#160;Files/app/system_config/default</Path>
-        <Checksum dnOrder="2">708FE72650ACF2C8AC15880D9B2109F0</Checksum>
+        <Checksum dnOrder="2">77FBF4FB9AE1587851D8565D2DBD84FC</Checksum>
       </Template>
       <Template dnOrder="22">
         <Name dnOrder="0">app.h</Name>

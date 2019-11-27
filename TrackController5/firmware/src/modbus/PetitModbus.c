@@ -812,13 +812,23 @@ void HandleMPetitodbusWriteMultipleRegistersSlaveReadback(void)
     if(Petit_Tx_Data.Address == Petit_Rx_Data.Address){                         // Function is already checked, but who did send the message
         if(Petit_StartAddress == ((unsigned int) (Petit_Rx_Data.DataBuf[0]) << 8) + (unsigned int) (Petit_Rx_Data.DataBuf[1])){  // Check the start address
             if(Petit_NumberOfRegisters == ((unsigned int) (Petit_Rx_Data.DataBuf[2]) << 8) + (unsigned int) (Petit_Rx_Data.DataBuf[3])){  // Check amount of registers that is set
-                MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbCommError = SLAVE_DATA_OK;
-                MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbReceiveCounter += 1;
+                if(Petit_Tx_Data.Address > SlaveAmount){
+                    DUMP_SLAVE_DATA[0].MbCommError = SLAVE_DATA_OK;
+                    DUMP_SLAVE_DATA[0].MbReceiveCounter += 1;
+                }
+                else{                
+                    MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbCommError = SLAVE_DATA_OK;
+                    MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbReceiveCounter += 1;}
             }
         }
     }
     else{
-        MASTER_SLAVE_DATA[Petit_Tx_Data.Address].MbCommError = SLAVE_DATA_NOK;    // the address send did not respond, so set the NOK to that address
+        if(Petit_Tx_Data.Address > SlaveAmount){
+            DUMP_SLAVE_DATA[0].MbCommError = SLAVE_DATA_NOK;
+        }
+        else{
+            MASTER_SLAVE_DATA[Petit_Tx_Data.Address].MbCommError = SLAVE_DATA_NOK;    // the address send did not respond, so set the NOK to that address
+        }        
     }
     Petit_Tx_State =  PETIT_RXTX_IDLE;
     
