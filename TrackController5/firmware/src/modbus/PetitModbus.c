@@ -373,9 +373,7 @@ void Petit_RxRTU(void)
         if (((unsigned int) Petit_Rx_Data.DataBuf[Petit_Rx_Data.DataLen] + ((unsigned int) Petit_Rx_Data.DataBuf[Petit_Rx_Data.DataLen + 1] << 8)) == Petit_Rx_CRC16)
         {            
             // Valid message!
-            //PIE4bits.TMR3IE = 0;                                                // valid message so stop timer3 for nice SPI comm
-            //PIR4bits.TMR3IF = 0;                                                // valid message so stop timer3 for nice SPI comm
-            DRV_TMR2_Stop();
+            DRV_TMR_Stop(appData.ModbusCharacterTimeoutHandle);
             LED_RX++;
             Petit_Rx_Data_Available = TRUE;            
         }
@@ -428,9 +426,9 @@ void Petit_TxRTU(void)
     else{
         Petit_Tx_State    =PETIT_RXTX_WAIT_ANSWER;                              // Else Master must wait for answer (see ModBus protocol implementation)
         
-        /* Set and enable slave answer timeout timer */  
-        DRV_TMR3_CounterClear();
-        DRV_TMR3_Start();
+        /* Set and enable slave answer timeout timer */
+        DRV_TMR_CounterClear(appData.ModbusReceiveTimeoutHandle);
+        DRV_TMR_Start(appData.ModbusReceiveTimeoutHandle);
     }
 }
 
@@ -447,7 +445,7 @@ void PROCESSxPETITxMODBUS(void)
     }
     else if(Petit_Tx_State == PETIT_RXTX_WAIT_ANSWER){// && EnableSlaveAnswerTimeoutCounter){
         if (SlaveAnswerTimeoutCounter != 0){
-            DRV_TMR3_Stop();
+            DRV_TMR_Stop(appData.ModbusReceiveTimeoutHandle);
             SlaveAnswerTimeoutCounter = 0;
             
             if(Petit_Tx_Data.Address > SlaveAmount){

@@ -82,7 +82,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
     Application strings and buffers are be defined outside this structure.
 */
 
-APP_DATA appData;
+
 
 /* 
  * Array of structs holding the data of all the slaves connected  
@@ -106,8 +106,24 @@ uint32_t DelayCount = 0;
 // *****************************************************************************
 // *****************************************************************************
 
-/* TODO:  Add any necessary callback functions.
-*/
+void ModbusCommCycleCallBack(uintptr_t context, uint32_t alarmCount);
+void ModbusCharacterTimeoutCallBack(uintptr_t context, uint32_t alarmCount);
+void ModbusReceiveTimeoutCallBack(uintptr_t context, uint32_t alarmCount);
+
+void ModbusCommCycleCallBack(uintptr_t context, uint32_t alarmCount){         // ModbusCommCycle(){
+    //Led1Toggle();
+    UpdateNextSlave = true;
+}
+
+void ModbusCharacterTimeoutCallBack(uintptr_t context, uint32_t alarmCount){  // ModbusCharacterTimeout(){
+    PetitModbusTimerValue = 3;                                                  // Between receive interrupts it took to long --> message done
+    DRV_TMR_Stop(appData.ModbusCharacterTimeoutHandle);
+}
+
+void ModbusReceiveTimeoutCallBack(uintptr_t context, uint32_t alarmCount){    // ModbusReceiveTimeout(){
+    SlaveAnswerTimeoutCounter   = 1;                                            // Data received answer timeout timer
+    //DRV_TMR_CounterClear(appData.ModbusReceiveTimeoutHandle);
+}
 
 // *****************************************************************************
 // *****************************************************************************
@@ -139,8 +155,8 @@ void APP_Initialize ( void )
 {
     /* Place the App state machine in its initial state. */
     appData.state = APP_STATE_INIT;
-    DRV_TMR0_Start();       // used for ethernet
-    DRV_TMR1_Stop();        // used for cyclic modbus communication
+    //DRV_TMR0_Start();       // used for ethernet
+    //DRV_TMR1_Stop();        // used for cyclic modbus communication
     
     
     /* Pass address of array of struct for data storage. */
@@ -160,21 +176,10 @@ void APP_Initialize ( void )
     
     Slaves_Disable_Off();
     DelayCount = ReadCoreTimer();
-    /*
-    DRV_USART0_WriteByte('A');
-    DRV_USART0_WriteByte('P');
-    DRV_USART0_WriteByte('P');
-    DRV_USART0_WriteByte('_');
-    DRV_USART0_WriteByte('I');
-    DRV_USART0_WriteByte('N');
-    DRV_USART0_WriteByte('I');
-    DRV_USART0_WriteByte('T');
-    DRV_USART0_WriteByte('!');
-    DRV_USART0_WriteByte(0xa);
-    DRV_USART0_WriteByte(0xd);
-     */
-}
 
+    SYS_MESSAGE("\033[2J\033[1;1H");//clear terminal
+    SYS_MESSAGE("Starting Siebwalde TrackController...\n\r");
+}
 
 /******************************************************************************
   Function:
@@ -193,8 +198,64 @@ void APP_Tasks ( void )
         case APP_STATE_INIT:
         {
             if ((ReadCoreTimer() - DelayCount) > 150000000 ){
+                
+                uint32_t actualFrequency;
+                uint32_t divider;
+                
                 DRV_USART1_Initialize();
+                
+                appData.ModbusCommCycleHandle = DRV_TMR_Open(DRV_TMR_INDEX_1 , DRV_IO_INTENT_EXCLUSIVE);
+                appData.ModbusCharacterTimeoutHandle = DRV_TMR_Open(DRV_TMR_INDEX_2 , DRV_IO_INTENT_EXCLUSIVE);
+                appData.ModbusReceiveTimeoutHandle = DRV_TMR_Open(DRV_TMR_INDEX_3 , DRV_IO_INTENT_EXCLUSIVE);
+                
+                if ( DRV_HANDLE_INVALID == appData.ModbusCommCycleHandle )
+                {
+                    // Unable to open the driver
+                    SYS_MESSAGE("Failed to open appData.ModbusCommCycleHandle.\n\r");
+                }
+                if ( DRV_HANDLE_INVALID == appData.ModbusCharacterTimeoutHandle )
+                {
+                    // Unable to open the driver
+                    SYS_MESSAGE("Failed to open appData.ModbusCharacterTimeoutHandle.\n\r");
+                }
+                if ( DRV_HANDLE_INVALID == appData.ModbusReceiveTimeoutHandle )
+                {
+                    // Unable to open the driver
+                    SYS_MESSAGE("Failed to open appData.ModbusReceiveTimeoutHandle.\n\r");
+                }
+                
+                
+                actualFrequency = DRV_TMR_CounterFrequencyGet(appData.ModbusCommCycleHandle);
+                divider = actualFrequency/(uint32_t)832; // cacluate divider value
+                //DRV_TMR_AlarmRegister(appData.ModbusCommCycleHandle, 394,true, (uintptr_t)&appData, appData.ModbusCommCycleCallBack);
+                if (DRV_TMR_AlarmRegister(appData.ModbusCommCycleHandle, 394,true, 0, ModbusCommCycleCallBack) == true){
+                    _nop();
+                    //DRV_TMR_AlarmEnable(appData.ModbusCommCycleHandle, true);
+                    SYS_MESSAGE("Register appData.ModbusCommCycleCallBack success.\n\r");
+                }
+                
+                actualFrequency = DRV_TMR_CounterFrequencyGet(appData.ModbusCharacterTimeoutHandle);
+                divider = actualFrequency/(uint32_t)41015; // cacluate divider value
+                if (DRV_TMR_AlarmRegister(appData.ModbusCharacterTimeoutHandle, 8,true, 0, ModbusCharacterTimeoutCallBack) == true){
+                    _nop();
+                    //DRV_TMR_AlarmEnable(appData.ModbusCharacterTimeoutHandle, true);
+                    SYS_MESSAGE("Register appData.ModbusCharacterTimeoutCallBack success.\n\r");
+                }
+                
+                actualFrequency = DRV_TMR_CounterFrequencyGet(appData.ModbusReceiveTimeoutHandle);
+                divider = actualFrequency/(uint32_t)4002; // cacluate divider value
+                if (DRV_TMR_AlarmRegister(appData.ModbusReceiveTimeoutHandle, 82,true, 0, ModbusReceiveTimeoutCallBack) == true){
+                    _nop();
+                    //DRV_TMR_AlarmEnable(appData.ModbusReceiveTimeoutHandle, true);
+                    SYS_MESSAGE("Register appData.ModbusReceiveTimeoutCallBack success.\n\r");
+                }
+                
+                //DRV_TMR_Stop(appData.ModbusCommCycleHandle);
+                //DRV_TMR_Stop(appData.ModbusCharacterTimeoutHandle);
+                //DRV_TMR_Stop(appData.ModbusReceiveTimeoutHandle);
+                
                 appData.state = APP_STATE_SLAVE_DETECT;
+
             }
             break;
         }
@@ -227,7 +288,7 @@ void APP_Tasks ( void )
         case APP_STATE_SLAVE_ENABLE:
         {            
             if (ENABLExAMPLIFIER()){
-                DRV_TMR1_Start();
+                DRV_TMR_Start(appData.ModbusCommCycleHandle);//DRV_TMR1_Start();
                 appData.state = APP_STATE_SERVICE_TASKS;
             }            
             break;
@@ -258,19 +319,7 @@ void APP_Tasks ( void )
     
 }
 
-void ModbusCommCycle(){
-    //Led1Toggle();
-    UpdateNextSlave = true;
-}
 
-void ModbusCharacterTimeout(){
-    PetitModbusTimerValue = 3;                                                  // Between receive interrupts it took to long --> message done
-}
-
-void ModbusReceiveTimeout(){
-    SlaveAnswerTimeoutCounter   = 1;                                            // Data received answer timeout timer
-    DRV_TMR3_CounterClear();
-}
 
 uint32_t ReadCoreTimer(void)
 {

@@ -71,7 +71,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 // *****************************************************************************
  
-void __ISR(_UART1_TX_VECTOR, ipl2AUTO) _IntHandlerDrvUsartTransmitInstance0(void)
+void __ISR(_UART1_TX_VECTOR, ipl1AUTO) _IntHandlerDrvUsartTransmitInstance0(void)
 {
     DRV_USART_TasksTransmit(sysObj.drvUsart0);
 }
@@ -99,14 +99,14 @@ void __ISR(_UART2_RX_VECTOR, ipl1AUTO) _IntHandlerDrvUsartReceiveInstance1(void)
     DRV_USART_TasksReceive(sysObj.drvUsart1);
     
     /* Reset and start TMR2 (timer_6) for inter character timeout 25us */
-    PLIB_INT_SourceFlagClear(INT_ID_0,INT_SOURCE_TIMER_6);
-    DRV_TMR2_CounterClear();
-    DRV_TMR2_Start();
+    DRV_TMR_Stop(appData.ModbusCharacterTimeoutHandle);
+    DRV_TMR_CounterClear(appData.ModbusCharacterTimeoutHandle);
+    DRV_TMR_Start(appData.ModbusCharacterTimeoutHandle);
     
     /* Stop and reset TMR3 (timer_8) for message receive timeout 250us */
-    DRV_TMR3_Stop();
-    DRV_TMR3_CounterClear();    
-    PLIB_INT_SourceFlagClear(INT_ID_0,INT_SOURCE_TIMER_8);
+    DRV_TMR_Stop(appData.ModbusReceiveTimeoutHandle);
+    DRV_TMR_CounterClear(appData.ModbusReceiveTimeoutHandle);
+    
 }
 void __ISR(_UART2_FAULT_VECTOR, ipl1AUTO) _IntHandlerDrvUsartErrorInstance1(void)
 {
@@ -127,23 +127,19 @@ void __ISR(_UART2_FAULT_VECTOR, ipl1AUTO) _IntHandlerDrvUsartErrorInstance1(void
 
 void __ISR(_TIMER_1_VECTOR, ipl1AUTO) IntHandlerDrvTmrInstance0(void)
 {
-    PLIB_INT_SourceFlagClear(INT_ID_0,INT_SOURCE_TIMER_1);
+    DRV_TMR_Tasks(sysObj.drvTmr0);
 }
-void __ISR(_TIMER_4_VECTOR, ipl1AUTO) IntHandlerDrvTmrInstance1(void)
+void __ISR(_TIMER_3_VECTOR, ipl1AUTO) IntHandlerDrvTmrInstance1(void)
 {
-    ModbusCommCycle();
-    PLIB_INT_SourceFlagClear(INT_ID_0,INT_SOURCE_TIMER_4);
+    DRV_TMR_Tasks(sysObj.drvTmr1);
 }
-void __ISR(_TIMER_6_VECTOR, ipl1AUTO) IntHandlerDrvTmrInstance2(void)
+void __ISR(_TIMER_5_VECTOR, ipl1AUTO) IntHandlerDrvTmrInstance2(void)
 {
-    ModbusCharacterTimeout();
-    DRV_TMR2_Stop();
-    PLIB_INT_SourceFlagClear(INT_ID_0,INT_SOURCE_TIMER_6);
+    DRV_TMR_Tasks(sysObj.drvTmr2);
 }
-void __ISR(_TIMER_8_VECTOR, ipl1AUTO) IntHandlerDrvTmrInstance3(void)
+void __ISR(_TIMER_7_VECTOR, ipl1AUTO) IntHandlerDrvTmrInstance3(void)
 {
-    ModbusReceiveTimeout();
-    PLIB_INT_SourceFlagClear(INT_ID_0,INT_SOURCE_TIMER_8);
+    DRV_TMR_Tasks(sysObj.drvTmr3);
 }
  void __ISR(_ETHERNET_VECTOR, ipl5AUTO) _IntHandler_ETHMAC(void)
 {

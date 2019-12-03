@@ -113,7 +113,7 @@ typedef enum
  */
 
 void Led_Blink (void);
-void ModbusCommCycle (void);
+//void ModbusCommCycle(uintptr_t context, uint32_t **alarmCount);
 void ModbusCharacterTimeout (void);
 void ModbusReceiveTimeout (void);
 
@@ -121,6 +121,12 @@ typedef struct
 {
     /* The application's current state */
     APP_STATES state;
+    DRV_HANDLE ModbusCommCycleHandle;
+    //DRV_TMR_CALLBACK ModbusCommCycleCallBack;
+    DRV_HANDLE ModbusCharacterTimeoutHandle;
+    //DRV_TMR_CALLBACK ModbusCharacterTimeoutCallBack;
+    DRV_HANDLE ModbusReceiveTimeoutHandle;//SYS_MODULE_OBJ
+    //DRV_TMR_CALLBACK ModbusReceiveTimeoutCallBack;
 
     /* TODO: Define any additional data used by the application. */
 
@@ -131,6 +137,7 @@ typedef struct
 #define NUMBER_OF_AMPLIFIERS (NUMBER_OF_SLAVES - 5)
 extern uint16_t LED_ERR;
 
+APP_DATA appData;
 
 // *****************************************************************************
 // *****************************************************************************
