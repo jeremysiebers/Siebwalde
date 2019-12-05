@@ -84,7 +84,8 @@ void SYS_Tasks ( void )
     TCPIP_STACK_Task(sysObj.tcpip);
 
     /* Maintain the application's state machine. */
-    APP_Tasks();
+    MBUS_Tasks();
+    ETHERNET_Tasks();
 }
 
 

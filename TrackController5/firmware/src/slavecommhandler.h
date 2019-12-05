@@ -7,8 +7,8 @@
 
 // This is a guard condition so that contents of this file are not included
 // more than once.  
-#ifndef COMMHANDLER_H
-#define	COMMHANDLER_H
+#ifndef SLAVECOMMHANDLER_H
+#define	SLAVECOMMHANDLER_H
 
 #include <xc.h> // include processor files - each processor file is guarded.  
 #include "modbus/PetitModbus.h"

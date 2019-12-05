@@ -60,10 +60,11 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 
 #include "system/common/sys_common.h"
-#include "app.h"
+#include "mbus.h"
+#include "ethernet.h"
 #include "system_definitions.h"
 #include "../TrackController5.X/../../modbus/General.h"
-#include "../../commhandler.h"
+#include "../../slavecommhandler.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -99,13 +100,13 @@ void __ISR(_UART2_RX_VECTOR, ipl1AUTO) _IntHandlerDrvUsartReceiveInstance1(void)
     DRV_USART_TasksReceive(sysObj.drvUsart1);
     
     /* Reset and start TMR2 (timer_6) for inter character timeout 25us */
-    DRV_TMR_Stop(appData.ModbusCharacterTimeoutHandle);
-    DRV_TMR_CounterClear(appData.ModbusCharacterTimeoutHandle);
-    DRV_TMR_Start(appData.ModbusCharacterTimeoutHandle);
+    DRV_TMR_Stop(mbusData.ModbusCharacterTimeoutHandle);
+    DRV_TMR_CounterClear(mbusData.ModbusCharacterTimeoutHandle);
+    DRV_TMR_Start(mbusData.ModbusCharacterTimeoutHandle);
     
     /* Stop and reset TMR3 (timer_8) for message receive timeout 250us */
-    DRV_TMR_Stop(appData.ModbusReceiveTimeoutHandle);
-    DRV_TMR_CounterClear(appData.ModbusReceiveTimeoutHandle);
+    DRV_TMR_Stop(mbusData.ModbusReceiveTimeoutHandle);
+    DRV_TMR_CounterClear(mbusData.ModbusReceiveTimeoutHandle);
     
 }
 void __ISR(_UART2_FAULT_VECTOR, ipl1AUTO) _IntHandlerDrvUsartErrorInstance1(void)

@@ -488,7 +488,8 @@ void SYS_Initialize ( void* data )
     SYS_INT_Enable();
 
     /* Initialize the Application */
-    APP_Initialize();
+    MBUS_Initialize();
+    ETHERNET_Initialize();
 }
 
 

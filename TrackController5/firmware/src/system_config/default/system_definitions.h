@@ -62,7 +62,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "tcpip/tcpip.h"
 #include "driver/ethmac/drv_ethmac.h"
 #include "driver/miim/drv_miim.h"
-#include "app.h"
+#include "mbus.h"
+#include "ethernet.h"
 
 
 // DOM-IGNORE-BEGIN

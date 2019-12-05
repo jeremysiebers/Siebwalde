@@ -1,5 +1,5 @@
 /*
- * File:   commhandler.c
+ * File:   slavecommhandler.c
  * Author: Jeremy Siebers
  *
  * Created on aug 28, 2018, 14:15 PM
@@ -10,7 +10,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
-#include "commhandler.h"
+#include "slavecommhandler.h"
 
 enum SLAVE{
     MAILBOX_SIZE = 4,                                                           // How many messages are non-critical    

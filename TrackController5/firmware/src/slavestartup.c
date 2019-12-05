@@ -4,7 +4,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include "app.h"
-#include "commhandler.h"
+#include "slavecommhandler.h"
 
 bool    ConfigureSlave       (uint8_t TrackBackPlaneID, uint16_t AmplifierLatchSet, uint8_t TrackAmplifierId, uint8_t Mode);
 bool    DetectSlave          (uint8_t SlaveId);
