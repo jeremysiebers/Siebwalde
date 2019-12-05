@@ -60,6 +60,9 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "slavestartup.h"
 #include "slavehandler.h"
 #include "slavefwhandler.h"
+#include "tcpip/tcpip.h"
+
+#define SERVER_PORT 9760
 
 // *****************************************************************************
 // *****************************************************************************
@@ -99,6 +102,15 @@ uint16_t AllSlavesReadAllDataCounter = 1;
 uint16_t InitDone = false;
 uint16_t stop = false;
 uint32_t DelayCount = 0;
+
+/*
+ * TCP/IP variables
+ */
+const char          *netName, *netBiosName;
+static IPV4_ADDR    dwLastIP[2] = { {-1}, {-1} };
+IPV4_ADDR           ipAddr;
+int                 i, nNets;
+TCPIP_NET_HANDLE    netH;
 
 // *****************************************************************************
 // *****************************************************************************
@@ -197,7 +209,7 @@ void APP_Tasks ( void )
         /* Application's initial state. */
         case APP_STATE_INIT:
         {
-            if ((ReadCoreTimer() - DelayCount) > 150000000 ){
+            if ((ReadCoreTimer() - DelayCount) > 200000000 ){
                 
                 uint32_t actualFrequency;
                 uint32_t divider;
@@ -250,13 +262,98 @@ void APP_Tasks ( void )
                     SYS_MESSAGE("Register appData.ModbusReceiveTimeoutCallBack success.\n\r");
                 }
                 
-                //DRV_TMR_Stop(appData.ModbusCommCycleHandle);
-                //DRV_TMR_Stop(appData.ModbusCharacterTimeoutHandle);
-                //DRV_TMR_Stop(appData.ModbusReceiveTimeoutHandle);
-                
-                appData.state = APP_STATE_SLAVE_DETECT;
+                appData.tcpipStat = TCPIP_STACK_Status(sysObj.tcpip);
+                if(appData.tcpipStat < 0)
+                {   // some error occurred
+                    SYS_MESSAGE(" APP: TCP/IP stack initialization failed!\r\n");
+                    appData.state = APP_TCPIP_ERROR;
+                }
+                else if (appData.tcpipStat == SYS_STATUS_READY){
+                    // now that the stack is ready we can check the 
+                    // available interfaces 
+                    nNets = TCPIP_STACK_NumberOfNetworksGet();
+                    for(i = 0; i < nNets; i++)
+                    {
+
+                        netH = TCPIP_STACK_IndexToNet(i);
+                        netName = TCPIP_STACK_NetNameGet(netH);
+                        netBiosName = TCPIP_STACK_NetBIOSName(netH);
+
+    #if defined(TCPIP_STACK_USE_NBNS)
+                        SYS_PRINT("    Interface %s on host %s - NBNS enabled\r\n", netName, netBiosName);
+    #else
+                        SYS_PRINT("    Interface %s on host %s - NBNS disabled\r\n", netName, netBiosName);
+    #endif  // defined(TCPIP_STACK_USE_NBNS)
+
+                    }
+                    appData.state = APP_TCPIP_WAIT_FOR_IP;
+                }
+                //appData.state = APP_STATE_SLAVE_DETECT;
 
             }
+            break;
+        }
+        
+        case APP_TCPIP_WAIT_FOR_IP:
+
+            // if the IP address of an interface has changed
+            // display the new value on the system console
+            nNets = TCPIP_STACK_NumberOfNetworksGet();
+
+            for (i = 0; i < nNets; i++)
+            {
+                netH = TCPIP_STACK_IndexToNet(i);
+                
+				if(!TCPIP_STACK_NetIsReady(netH))
+				{
+					return; // interface not ready yet!
+				}
+							
+				ipAddr.Val = TCPIP_STACK_NetAddress(netH);
+                if(dwLastIP[i].Val != ipAddr.Val)
+                {
+                    dwLastIP[i].Val = ipAddr.Val;
+
+                    SYS_MESSAGE(TCPIP_STACK_NetNameGet(netH));
+                    SYS_MESSAGE(" IP Address: ");
+                    SYS_PRINT("%d.%d.%d.%d \r\n", ipAddr.v[0], ipAddr.v[1], ipAddr.v[2], ipAddr.v[3]);                                     
+                }
+            }
+			// all interfaces ready. Could start transactions!!!
+			appData.state = APP_TCPIP_OPENING_SERVER;  
+            break;
+			
+        case APP_TCPIP_OPENING_SERVER:
+        {
+            SYS_PRINT("Waiting for Client Connection on port: %d\r\n", SERVER_PORT);
+            appData.socket = TCPIP_UDP_ServerOpen(IP_ADDRESS_TYPE_IPV4, SERVER_PORT, 0);
+            if (appData.socket == INVALID_SOCKET)
+            {
+                SYS_MESSAGE("Couldn't open server socket\r\n");
+                break;
+            }
+            appData.state = APP_TCPIP_WAIT_FOR_CONNECTION;
+        }
+        break;
+
+        case APP_TCPIP_WAIT_FOR_CONNECTION:
+        {
+            if (!TCPIP_UDP_IsConnected(appData.socket))
+            {
+                return;
+            }
+            else
+            {
+                // We got a connection
+                appData.state = APP_TCPIP_SERVING_CONNECTION;
+                SYS_MESSAGE("Received a connection\r\n");
+            }
+        }
+        break;
+
+        case APP_TCPIP_SERVING_CONNECTION:
+        {
+            appData.state = APP_STATE_SLAVE_DETECT;
             break;
         }
         

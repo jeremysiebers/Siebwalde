@@ -58,6 +58,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include <stdlib.h>
 #include "system_config.h"
 #include "system_definitions.h"
+#include "tcpip/tcpip.h"
 
 // DOM-IGNORE-BEGIN
 #ifdef __cplusplus  // Provide C++ Compatibility
@@ -93,7 +94,11 @@ typedef enum
     APP_STATE_SLAVE_INIT,
     APP_STATE_SLAVE_ENABLE,
 	APP_STATE_SERVICE_TASKS,
-
+    APP_TCPIP_WAIT_FOR_IP,
+    APP_TCPIP_OPENING_SERVER,
+    APP_TCPIP_WAIT_FOR_CONNECTION,
+    APP_TCPIP_SERVING_CONNECTION,
+    APP_TCPIP_ERROR,
 	/* TODO: Define states used by the application state machine. */
 
 } APP_STATES;
@@ -121,13 +126,11 @@ typedef struct
 {
     /* The application's current state */
     APP_STATES state;
-    DRV_HANDLE ModbusCommCycleHandle;
-    //DRV_TMR_CALLBACK ModbusCommCycleCallBack;
+    DRV_HANDLE ModbusCommCycleHandle;    
     DRV_HANDLE ModbusCharacterTimeoutHandle;
-    //DRV_TMR_CALLBACK ModbusCharacterTimeoutCallBack;
-    DRV_HANDLE ModbusReceiveTimeoutHandle;//SYS_MODULE_OBJ
-    //DRV_TMR_CALLBACK ModbusReceiveTimeoutCallBack;
-
+    DRV_HANDLE ModbusReceiveTimeoutHandle;
+    SYS_STATUS tcpipStat;
+    UDP_SOCKET socket;
     /* TODO: Define any additional data used by the application. */
 
 } APP_DATA;
