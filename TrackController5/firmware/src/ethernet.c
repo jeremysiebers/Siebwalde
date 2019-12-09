@@ -77,7 +77,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
     
     Application strings and buffers are be defined outside this structure.
 */
-#define SERVER_PORT 9760
+#define SERVER_PORT 10000
 
 ETHERNET_DATA ethernetData;
 
@@ -262,7 +262,7 @@ void ETHERNET_Tasks ( void )
                 wMaxGet = wMaxPut;
             }
 
-            SYS_CONSOLE_PRINT("RX Buffer has %d bytes in it\n", wMaxGet);
+            SYS_PRINT("RX Buffer has %d bytes in it\n", wMaxGet);
 
             // Process all bytes that we can
             // This is implemented as a loop, processing up to sizeof(AppBuffer) bytes at a time.
@@ -277,7 +277,7 @@ void ETHERNET_Tasks ( void )
                 // Transfer the data out of the TCP RX FIFO and into our local processing buffer.
                 int rxed = TCPIP_UDP_ArrayGet(ethernetData.socket, AppBuffer, sizeof(AppBuffer));
 
-                SYS_CONSOLE_PRINT("\tReceived a message of '%s' and length %d\r\n", AppBuffer, rxed);
+                SYS_PRINT("\tReceived a message of '%s' and length %d\r\n", AppBuffer, rxed);
 
                 // Perform the "ToUpper" operation on each data byte
                 for(w2 = 0; w2 < wCurrentChunk; w2++)
@@ -294,7 +294,9 @@ void ETHERNET_Tasks ( void )
                     }
                 }
 
-                SYS_CONSOLE_PRINT("\tSending a messages '%s'\r\n", AppBuffer);
+                SYS_PRINT("\tSending a messages '%s'\r\n", AppBuffer);
+                
+                TCPIP_UDP_DestinationPortSet(ethernetData.socket, 10001);
 
                 // Transfer the data out of our local processing buffer and into the TCP TX FIFO.
                 TCPIP_UDP_ArrayPut(ethernetData.socket, AppBuffer, wCurrentChunk);

@@ -27,16 +27,16 @@ class DataAquisition:
         IPAddr = socket.gethostbyname('TRACKCONTROL') 
         
         self.UDP_IP_RECV = ''
-        self.UDP_PORT_RECV = 9760  
+        self.UDP_PORT_RECV = 10000  
         self.sock_recv = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock_recv.bind((self.UDP_IP_RECV, self.UDP_PORT_RECV)) 
-        #self.sock_recv.setblocking(0)
+        self.sock_recv.setblocking(0)
                 
         self.UDP_IP_TRANS = IPAddr
         self.UDP_PORT_TRANS = 9760
         self.sock_trans = socket.socket(socket.AF_INET, socket.SOCK_DGRAM,0)
         self.sock_trans.bind(('0.0.0.0', 9760))
-        #self.sock_trans.connect((self.UDP_IP_TRANS, self.UDP_PORT_TRANS))
+        self.sock_trans.connect((self.UDP_IP_TRANS, self.UDP_PORT_TRANS))
 
         self.Trackamplifiers = list()
         self.Bootloader      = Bootloader()
@@ -90,20 +90,13 @@ class DataAquisition:
             self.sock_trans.send(tx)
             
         if(command == EnumCommand.DUMMY_CMD):
-            self.sock_trans.bind(('0.0.0.0', 9760))
-            self.sock_trans.connect((self.UDP_IP_TRANS, self.UDP_PORT_TRANS))            
-            self.sock_trans.send(data)
-            self.sock_trans.close()
+            self.sock_trans.send(data)            
     
     
     def ReadSerial(self):
         
         try:
-            self.sock_recv = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            self.sock_recv.bind((self.UDP_IP_RECV, self.UDP_PORT_RECV)) 
-            self.sock_recv.setblocking(0)
-            self.line, addr = self.sock_recv.recvfrom(32)
-            self.sock_recv.close()
+            self.line, addr = self.sock_recv.recvfrom(32)            
         except:
             pass
         
