@@ -74,6 +74,8 @@ typedef struct
     
 }SLAVE_INFO;
 
+#define SLAVE_INFO_STRUCT_LENGTH sizeof(SLAVE_INFO)
+
 // Main Functions
 extern void             INITxPETITXMODBUS(SLAVE_INFO *location, SLAVE_INFO *Dump, unsigned char AmountOfSlaves);
 extern void             PROCESSxPETITxMODBUS(void);

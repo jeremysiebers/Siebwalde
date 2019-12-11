@@ -62,6 +62,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "system/common/sys_common.h"
 #include "mbus.h"
 #include "ethernet.h"
+#include "controller.h"
 #include "system_definitions.h"
 #include "../TrackController5.X/../../modbus/General.h"
 #include "../../slavecommhandler.h"

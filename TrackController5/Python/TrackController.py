@@ -12,7 +12,7 @@ class MAIN():
         self.cnt = 0  
         self.state = EnumStateMachine.ResetAllSlaves
         self.UpdateTickCount = 0
-        self.Amplifiers.WriteSerial(EnumCommand.DUMMY_CMD, 'abcdefghijklmnopqrstuvwxyz')
+        #self.Amplifiers.WriteSerial(EnumCommand.DUMMY_CMD, 'abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz')
 
     def start(self):
         while True:

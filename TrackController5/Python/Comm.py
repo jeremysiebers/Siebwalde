@@ -27,15 +27,15 @@ class DataAquisition:
         IPAddr = socket.gethostbyname('TRACKCONTROL') 
         
         self.UDP_IP_RECV = ''
-        self.UDP_PORT_RECV = 10000  
+        self.UDP_PORT_RECV = 10001 
         self.sock_recv = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock_recv.bind((self.UDP_IP_RECV, self.UDP_PORT_RECV)) 
         self.sock_recv.setblocking(0)
                 
         self.UDP_IP_TRANS = IPAddr
-        self.UDP_PORT_TRANS = 9760
+        self.UDP_PORT_TRANS = 10000
         self.sock_trans = socket.socket(socket.AF_INET, socket.SOCK_DGRAM,0)
-        self.sock_trans.bind(('0.0.0.0', 9760))
+        self.sock_trans.bind(('0.0.0.0', self.UDP_PORT_TRANS))
         self.sock_trans.connect((self.UDP_IP_TRANS, self.UDP_PORT_TRANS))
 
         self.Trackamplifiers = list()

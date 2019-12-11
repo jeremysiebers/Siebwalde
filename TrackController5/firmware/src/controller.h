@@ -5,7 +5,7 @@
     Microchip Technology Inc.
 
   File Name:
-    ethernet.h
+    controller.h
 
   Summary:
     This header file provides prototypes and definitions for the application.
@@ -43,8 +43,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
  *******************************************************************************/
 //DOM-IGNORE-END
 
-#ifndef _ETHERNET_H
-#define _ETHERNET_H
+#ifndef _CONTROLLER_H
+#define _CONTROLLER_H
 
 // *****************************************************************************
 // *****************************************************************************
@@ -58,8 +58,6 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include <stdlib.h>
 #include "system_config.h"
 #include "system_definitions.h"
-#include "tcpip/tcpip.h"
-#include "modbus/PetitModbus.h"
 
 // DOM-IGNORE-BEGIN
 #ifdef __cplusplus  // Provide C++ Compatibility
@@ -89,17 +87,12 @@ extern "C" {
 typedef enum
 {
 	/* Application's state machine's initial state. */
-	ETHERNET_TCPIP_WAIT_INIT,        
-    ETHERNET_TCPIP_WAIT_FOR_IP,
-    ETHERNET_TCPIP_OPENING_SERVER,
-    ETHERNET_TCPIP_WAIT_FOR_CONNECTION,
-    ETHERNET_TCPIP_SERVING_CONNECTION,
-    ETHERNET_TCPIP_SENDING_DATA,
-    ETHERNET_TCPIP_ERROR,
-
+	CONTROLLER_STATE_INIT=0,
+	CONTROLLER_STATE_IDLE,
+    CONTROLLER_STATE_HANDLE_COMM_DATA,
 	/* TODO: Define states used by the application state machine. */
 
-} ETHERNET_STATES;
+} CONTROLLER_STATES;
 
 
 // *****************************************************************************
@@ -118,15 +111,35 @@ typedef enum
 typedef struct
 {
     /* The application's current state */
-    ETHERNET_STATES state;
-    SYS_STATUS tcpipStat;
-    UDP_SOCKET recvsocket;
-    UDP_SOCKET transsocket;
-    uint8_t sendbuffer[SLAVE_INFO_STRUCT_LENGTH];
+    CONTROLLER_STATES state;
 
-} ETHERNET_DATA;
+    /* TODO: Define any additional data used by the application. */
 
+} CONTROLLER_DATA;
 
+typedef struct
+{
+    uint8_t header;
+    uint8_t command;
+    uint8_t data[80]; 
+}udpRecv_t;
+
+bool    NewData;
+
+udpRecv_t udpRecv;
+
+enum
+{	
+    EXEC_MBUS_STATE_SLAVES_ON=0,
+    EXEC_SLAVE_DETECT,
+    EXEC_MBUS_STATE_SLAVES_BOOT_WAIT,
+    EXEC_MBUS_STATE_SLAVE_DETECT,
+    EXEC_MBUS_STATE_SLAVE_FW_DOWNLOAD,
+    EXEC_MBUS_STATE_SLAVE_INIT,
+    EXEC_MBUS_STATE_SLAVE_ENABLE,
+    EXEC_MBUS_STATE_RESET,
+
+} CONTROLLER_COMMANDS;
 // *****************************************************************************
 // *****************************************************************************
 // Section: Application Callback Routines
@@ -143,7 +156,7 @@ typedef struct
 
 /*******************************************************************************
   Function:
-    void ETHERNET_Initialize ( void )
+    void CONTROLLER_Initialize ( void )
 
   Summary:
      MPLAB Harmony application initialization routine.
@@ -165,19 +178,19 @@ typedef struct
 
   Example:
     <code>
-    ETHERNET_Initialize();
+    CONTROLLER_Initialize();
     </code>
 
   Remarks:
     This routine must be called from the SYS_Initialize function.
 */
 
-void ETHERNET_Initialize ( void );
+void CONTROLLER_Initialize ( void );
 
 
 /*******************************************************************************
   Function:
-    void ETHERNET_Tasks ( void )
+    void CONTROLLER_Tasks ( void )
 
   Summary:
     MPLAB Harmony Demo application tasks function
@@ -198,76 +211,17 @@ void ETHERNET_Initialize ( void );
 
   Example:
     <code>
-    ETHERNET_Tasks();
+    CONTROLLER_Tasks();
     </code>
 
   Remarks:
     This routine must be called from SYS_Tasks() routine.
  */
 
-void ETHERNET_Tasks( void );
+void CONTROLLER_Tasks( void );
 
-/*******************************************************************************
-  Function:
-    void ETHERNETxSENDxMESSAGE( void )
 
-  Summary:
-    
-
-  Description:
-    
-
-  Precondition:
-    The system and application initialization ("SYS_Initialize") should be
-    called before calling this.
-
-  Parameters:
-    None.
-
-  Returns:
-    None.
-
-  Example:    
-
-  Remarks:
-    
- */
-
-void SETxETHERNETxSENDxMESSAGE( void );
-
-/*******************************************************************************
-  Function:
-    uint32_t GETxETHERNETxSTATE (void)
-
-  Summary:
-    MPLAB Harmony Demo application tasks function
-
-  Description:
-    This routine is the Harmony Demo application's tasks function.  It
-    defines the application's state machine and core logic.
-
-  Precondition:
-    The system and application initialization ("SYS_Initialize") should be
-    called before calling this.
-
-  Parameters:
-    None.
-
-  Returns:
-    None.
-
-  Example:
-    <code>
-    MBUS_Tasks();
-    </code>
-
-  Remarks:
-    This routine must be called from SYS_Tasks() routine.
- */
-
-uint32_t GETxETHERNETxSTATE (void);
-
-#endif /* _ETHERNET_H */
+#endif /* _CONTROLLER_H */
 
 //DOM-IGNORE-BEGIN
 #ifdef __cplusplus

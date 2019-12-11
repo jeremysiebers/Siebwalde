@@ -510,6 +510,8 @@ extern "C" {
 
 /*** Application Instance 1 Configuration ***/
 
+/*** Application Instance 2 Configuration ***/
+
 //DOM-IGNORE-BEGIN
 #ifdef __cplusplus
 }

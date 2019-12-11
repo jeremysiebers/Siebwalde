@@ -64,6 +64,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "driver/miim/drv_miim.h"
 #include "mbus.h"
 #include "ethernet.h"
+#include "controller.h"
 
 
 // DOM-IGNORE-BEGIN

@@ -490,6 +490,7 @@ void SYS_Initialize ( void* data )
     /* Initialize the Application */
     MBUS_Initialize();
     ETHERNET_Initialize();
+    CONTROLLER_Initialize();
 }
 
 

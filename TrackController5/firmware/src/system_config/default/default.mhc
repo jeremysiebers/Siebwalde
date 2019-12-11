@@ -6,9 +6,9 @@
 #     Harmony version: 2.06
 #
 #
-# from C:\GIT-REPOS\Siebwalde\TrackController5\firmware\TrackController5.hconfig
+# from C:\GIT_REPOS\Siebwalde-Source\TrackController5\firmware\TrackController5.hconfig
 #
-CONFIG_APP_INSTANCES=2
+CONFIG_APP_INSTANCES=3
 #
 # from $HARMONY_VERSION_PATH\utilities\mhc\config\app_name_idx_gencode.ftl
 #
@@ -18,8 +18,11 @@ CONFIG_APP_AUTO_GENERATE_CODE0=n
 CONFIG_APP_MENU_IDX1=y
 CONFIG_APP_NAME_1="ethernet"
 CONFIG_APP_AUTO_GENERATE_CODE1=n
+CONFIG_APP_MENU_IDX2=y
+CONFIG_APP_NAME_2="controller"
+CONFIG_APP_AUTO_GENERATE_CODE2=n
 #
-# from C:\GIT-REPOS\Siebwalde\TrackController5\firmware\TrackController5.hconfig
+# from C:\GIT_REPOS\Siebwalde-Source\TrackController5\firmware\TrackController5.hconfig
 #
 CONFIG_USE_EXCEPTION_HANDLER=y
 CONFIG_EXCEPTION_USE_SYS_DEBUG=y

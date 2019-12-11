@@ -256,7 +256,7 @@ void MBUS_Tasks ( void )
         
         case MBUS_STATE_SLAVES_ON:
         {
-            Slaves_Disable_On();
+            Slaves_Disable_Off();
             DelayCount = ReadCoreTimer();
             mbusData.state = MBUS_STATE_SLAVES_BOOT_WAIT;
             break;
@@ -336,12 +336,40 @@ void MBUS_Tasks ( void )
     }
 }
 
+/******************************************************************************
+  Function:
+    uint32_t ReadCoreTimer(void)
+
+  Remarks:
+    See prototype in mbus.h.
+ */
+
 uint32_t ReadCoreTimer(void)
 {
     uint32_t count;
     asm volatile("mfc0 %0, $9" : "=r"(count));
     return(count);
 } 
+
+/******************************************************************************
+  Function:
+    uint32_t GETxMBUSxSTATE (void)
+
+  Remarks:
+    See prototype in mbus.h.
+ */
+
+uint32_t GETxMBUSxSTATE (void){
+    return (mbusData.state);
+}
+
+/******************************************************************************
+  Function:
+    void MBUS_Tasks ( void )
+
+  Remarks:
+    See prototype in mbus.h.
+ */
 
 /*
 void Led_Blink (){

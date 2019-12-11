@@ -86,6 +86,7 @@ void SYS_Tasks ( void )
     /* Maintain the application's state machine. */
     MBUS_Tasks();
     ETHERNET_Tasks();
+    CONTROLLER_Tasks();
 }
 
 
