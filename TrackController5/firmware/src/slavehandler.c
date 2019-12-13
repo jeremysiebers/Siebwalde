@@ -72,6 +72,7 @@ void INITxSLAVExHANDLER(SLAVE_INFO *location, SLAVE_INFO *Dump){
 /*#--------------------------------------------------------------------------#*/
 static uint8_t      ProcessSlave = 1;
 static uint8_t      State = 0;
+static uint8_t      loopcount = 0;
 
 bool PROCESSxNEXTxSLAVE(){    
     
@@ -83,6 +84,12 @@ bool PROCESSxNEXTxSLAVE(){
                 ProcessSlave++; 
                 if (ProcessSlave > (NUMBER_OF_AMPLIFIERS)){
                     ProcessSlave = 1;
+                    loopcount++;
+                }
+                if(loopcount > 2){
+                    loopcount = 0;
+                    ProcessSlave = 1;
+                    break;
                 }
             }
             State++;            

@@ -95,10 +95,19 @@ typedef enum
     MBUS_STATE_SLAVE_FW_DOWNLOAD,
     MBUS_STATE_SLAVE_INIT,
     MBUS_STATE_SLAVE_ENABLE,
+    MBUS_STATE_START_DATA_UPLOAD,
 	MBUS_STATE_SERVICE_TASKS,
     MBUS_STATE_RESET,
 } MBUS_STATES;
 
+typedef enum
+{
+	/* Application's state machine's initial state. */
+    UPLOAD_STATE_WAIT=0,
+    UPLOAD_STATE_ALL,
+    UPLOAD_STATE_SLAVES,
+    
+} MBUS_DATA_UPLOAD_STATES;
 
 // *****************************************************************************
 /* Application Data
@@ -116,10 +125,11 @@ typedef enum
 typedef struct
 {
     /* The application's current state */
-    MBUS_STATES state;
-    DRV_HANDLE ModbusCommCycleHandle;    
-    DRV_HANDLE ModbusCharacterTimeoutHandle;
-    DRV_HANDLE ModbusReceiveTimeoutHandle;
+    MBUS_STATES                 state;
+    MBUS_DATA_UPLOAD_STATES     upload;
+    DRV_HANDLE                  ModbusCommCycleHandle;    
+    DRV_HANDLE                  ModbusCharacterTimeoutHandle;
+    DRV_HANDLE                  ModbusReceiveTimeoutHandle;
 
 } MBUS_DATA;
 
@@ -243,6 +253,40 @@ void MBUS_Tasks( void );
  */
 
 uint32_t GETxMBUSxSTATE (void);
+
+/*******************************************************************************
+  Function:
+    void SETxMBUSxSTATE (uint32_t state);
+
+  Summary:
+    MPLAB Harmony Demo application tasks function
+
+  Description:
+    This routine is the Harmony Demo application's tasks function.  It
+    defines the application's state machine and core logic.
+
+  Precondition:
+    The system and application initialization ("SYS_Initialize") should be
+    called before calling this.
+
+  Parameters:
+    None.
+
+  Returns:
+    None.
+
+  Example:
+    <code>
+    MBUS_Tasks();
+    </code>
+
+  Remarks:
+    This routine must be called from SYS_Tasks() routine.
+ */
+
+void SETxMBUSxSTATE (MBUS_STATES state);
+
+
 
 #endif /* _MBUS_H */
 

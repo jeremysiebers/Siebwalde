@@ -79,6 +79,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 */
 
 CONTROLLER_DATA controllerData;
+uint8_t ControllerCommand;
 
 // *****************************************************************************
 // *****************************************************************************
@@ -143,53 +144,61 @@ void CONTROLLER_Tasks ( void )
         /* Application's initial state. */
         case CONTROLLER_STATE_INIT:
         {
-            if (GETxMBUSxSTATE() == MBUS_STATE_WAIT && GETxETHERNETxSTATE() == ETHERNET_TCPIP_WAIT_FOR_CONNECTION){
+            if (GETxMBUSxSTATE() == MBUS_STATE_WAIT && GETxETHERNETxSTATE() == ETHERNET_TCPIP_DATA_RX){
                 SYS_MESSAGE("MBUS and ETHERNET states ready.\n\r");
                 controllerData.state = CONTROLLER_STATE_IDLE;
+                SETxMBUSxSTATE(MBUS_STATE_START_DATA_UPLOAD);
             }            
             break;
         }
 
         case CONTROLLER_STATE_IDLE:
         {
-            if (NewData && udpRecv.header == 0xAA){
-                controllerData.state = CONTROLLER_STATE_HANDLE_COMM_DATA;
-                NewData = false;
-                udpRecv.header = 0x00;
-            }
-            else if(NewData){
-                NewData = false;
-                udpRecv.header = 0x00;
-                SYS_MESSAGE("Controller detected incorrect message.\n\r");
-            }            
+//            if (EthernetNewData && udpRecv.header == 0xAA){
+//                controllerData.state = CONTROLLER_STATE_HANDLE_COMM_DATA;
+//                EthernetNewData = false;
+//                udpRecv.header = 0x00;
+//                ControllerCommand = udpRecv.command;
+//            }
+//            else if(EthernetNewData){
+//                EthernetNewData = false;
+//                udpRecv.header = 0x00;
+//                SYS_MESSAGE("Controller detected incorrect message.\n\r");
+//            }            
             break;
         }
         
         case CONTROLLER_STATE_HANDLE_COMM_DATA:
         {
-            switch(udpRecv.command){
+            switch(ControllerCommand){
                 case EXEC_MBUS_STATE_SLAVES_ON:
                 {
+                    SETxMBUSxSTATE(MBUS_STATE_SLAVES_ON);
                     break;
                 }
                 case EXEC_MBUS_STATE_SLAVE_DETECT:
                 {
+                    SETxMBUSxSTATE(MBUS_STATE_SLAVE_DETECT);
                     break;
                 }
                 case EXEC_MBUS_STATE_SLAVE_FW_DOWNLOAD:
                 {
+                    SETxMBUSxSTATE(MBUS_STATE_SLAVE_FW_DOWNLOAD);
                     break;
                 }
                 case EXEC_MBUS_STATE_SLAVE_INIT:
                 {
+                    SETxMBUSxSTATE(MBUS_STATE_SLAVE_INIT);
                     break;
                 }
                 case EXEC_MBUS_STATE_SLAVE_ENABLE:
                 {
+                    SETxMBUSxSTATE(MBUS_STATE_SLAVE_ENABLE);
                     break;
                 }
                 case EXEC_MBUS_STATE_RESET:
                 {
+                    SETxMBUSxSTATE(MBUS_STATE_RESET);
                     break;
                 }
                 

@@ -60,6 +60,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "slavestartup.h"
 #include "slavehandler.h"
 #include "slavefwhandler.h"
+#include "ethernet.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -88,15 +89,20 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 static SLAVE_INFO         SlaveInfo[NUMBER_OF_SLAVES_SIZE];
 static SLAVE_INFO         SlaveDump[1];
 
-uint32_t DelayCount = 0;
-static uint16_t LED_TX_prev, LED_RX_prev, LED_ERR_prev, LED_WAR_prev = 0;
-static uint16_t LED_TX_STATE, LED_RX_STATE, LED_ERR_STATE, LED_WAR_STATE = 0;
-uint16_t LED_ERR = 0;
-static uint16_t LED_WAR = 0;
-uint16_t UpdateNextSlave = false;
-uint16_t AllSlavesReadAllDataCounter = 1;
-uint16_t InitDone = false;
-uint16_t stop = false;
+            uint32_t DelayCount = 0;
+static      uint16_t LED_TX_prev, LED_RX_prev, LED_ERR_prev, LED_WAR_prev = 0;
+static      uint16_t LED_TX_STATE, LED_RX_STATE, LED_ERR_STATE, LED_WAR_STATE = 0;
+            uint16_t LED_ERR = 0;
+static      uint16_t LED_WAR = 0;
+volatile    uint16_t UpdateNextSlave = false;
+volatile    uint16_t UploadSlaveData = false;
+static      uint16_t NextSlaveCounter = 1;
+static      uint16_t MaxSlaveUploadCount = 55;
+
+
+//uint16_t AllSlavesReadAllDataCounter = 1;
+//uint16_t InitDone = false;
+//uint16_t stop = false;
 
 // *****************************************************************************
 // *****************************************************************************
@@ -111,6 +117,7 @@ void ModbusReceiveTimeoutCallBack(uintptr_t context, uint32_t alarmCount);
 void ModbusCommCycleCallBack(uintptr_t context, uint32_t alarmCount){           // ModbusCommCycle(){
     //Led1Toggle();
     UpdateNextSlave = true;
+    UploadSlaveData = true;
 }
 
 void ModbusCharacterTimeoutCallBack(uintptr_t context, uint32_t alarmCount){    // ModbusCharacterTimeout(){
@@ -300,11 +307,19 @@ void MBUS_Tasks ( void )
         
         case MBUS_STATE_SLAVE_ENABLE:
         {            
-            if (ENABLExAMPLIFIER()){
-                DRV_TMR_Start(mbusData.ModbusCommCycleHandle);
+            if (ENABLExAMPLIFIER()){                
                 mbusData.state = MBUS_STATE_SERVICE_TASKS;
+                MaxSlaveUploadCount = 50;                                       // limit the upload to slave data only (cyclic))
             }
             PROCESSxPETITxMODBUS();
+            break;
+        }
+        
+        case MBUS_STATE_START_DATA_UPLOAD:
+        {
+            DRV_TMR_Start(mbusData.ModbusCommCycleHandle);
+            mbusData.state  = MBUS_STATE_WAIT;
+            mbusData.upload = UPLOAD_STATE_ALL;
             break;
         }
 
@@ -324,6 +339,7 @@ void MBUS_Tasks ( void )
         {
             DRV_TMR_Stop(mbusData.ModbusCommCycleHandle);
             Slaves_Disable_On();
+            mbusData.state = MBUS_STATE_WAIT;
             break;
         }
 
@@ -331,6 +347,71 @@ void MBUS_Tasks ( void )
         default:
         {
             /* TODO: Handle error in application's state machine. */
+            break;
+        }
+    }
+    
+    
+    switch ( mbusData.upload )
+    {
+        /* Application's initial state. */
+        case UPLOAD_STATE_WAIT:
+        {
+            break;
+        }
+        
+        case UPLOAD_STATE_ALL:
+        {
+            udpTrans_t data;
+            
+            /* Every timer interrupt data is send to Ethernet PC client if available*/
+            if (UploadSlaveData){
+                UploadSlaveData = false;
+                data.header = HEADER;
+                data.command = SLAVEINFO;
+                memcpy(&data.data, &(SlaveInfo[NextSlaveCounter].Header), sizeof(SLAVE_INFO));
+                PUTxDATAxINxSENDxMAILxBOX(data);                
+                NextSlaveCounter++;
+                if(NextSlaveCounter > MaxSlaveUploadCount){
+                    NextSlaveCounter = 1;
+                }
+            }
+            break;
+        }
+        
+        case UPLOAD_STATE_SLAVES:
+        {
+            uint16_t loopcount = 0;
+            udpTrans_t data;
+            /* Every timer interrupt data is send to Ethernet PC client if available*/
+            if (UploadSlaveData){
+                UploadSlaveData = false;
+                
+                while (SlaveInfo[NextSlaveCounter].SlaveDetected == false){
+                    NextSlaveCounter++; 
+                    if (NextSlaveCounter > (MaxSlaveUploadCount)){
+                        NextSlaveCounter = 1;
+                        loopcount++;
+                    }
+                    if(loopcount > 2){
+                        loopcount = 0;
+                        NextSlaveCounter = 1;
+                        break;
+                    }
+                }                                
+                memcpy(&data, &(SlaveInfo[NextSlaveCounter].Header), sizeof(SLAVE_INFO));
+                PUTxDATAxINxSENDxMAILxBOX(data);
+                
+                NextSlaveCounter++;
+                if(NextSlaveCounter > MaxSlaveUploadCount){
+                    NextSlaveCounter = 1;
+                }
+            }
+            break;
+        }
+        
+        default:
+        {
             break;
         }
     }
@@ -361,6 +442,18 @@ uint32_t ReadCoreTimer(void)
 
 uint32_t GETxMBUSxSTATE (void){
     return (mbusData.state);
+}
+
+/******************************************************************************
+  Function:
+    void SETxMBUSxSTATE (uint32_t state)
+
+  Remarks:
+    See prototype in mbus.h.
+ */
+
+void SETxMBUSxSTATE (MBUS_STATES state){
+    mbusData.state = state;
 }
 
 /******************************************************************************

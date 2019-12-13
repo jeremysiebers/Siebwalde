@@ -81,7 +81,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #define SERVER_PORT 10000
 #define CLIENT_PORT 10001
 
-ETHERNET_DATA ethernetData;
+static  ETHERNET_DATA ethernetData;
 UDP_SOCKET_INFO SocketInfo;
 IP_MULTI_ADDRESS IpAddress;
 
@@ -91,7 +91,15 @@ IPV4_ADDR           ipAddr;
 int                 i, nNets;
 TCPIP_NET_HANDLE    netH;
 
-static bool DataToBeSend = false;
+static bool         TransSocketReady = false;
+
+static udpTrans_t   *M_Box_Eth_Recv_Ptr;
+static udpTrans_t   *M_Box_Eth_Recv_Ptr_prev;
+static udpTrans_t   *M_Box_Eth_Send_Ptr;
+static udpTrans_t   *M_Box_Eth_Send_Ptr_next;
+
+static udpTrans_t   udpRecvBox[MAILBOXSIZE];
+static udpTrans_t   udpTransBox[MAILBOXSIZE];
 
 // *****************************************************************************
 // *****************************************************************************
@@ -109,8 +117,8 @@ static bool DataToBeSend = false;
 // *****************************************************************************
 
 
-/* TODO:  Add any necessary local functions.
-*/
+void        PutDataInReceiveMailBox (udpTrans_t data);
+udpTrans_t  GetDataFromSendMailBox  ();
 
 
 // *****************************************************************************
@@ -132,21 +140,19 @@ void ETHERNET_Initialize ( void )
     /* Place the App state machine in its initial state. */
     ethernetData.state = ETHERNET_TCPIP_WAIT_INIT;
     
+    /* For internal use to put new data into receive mailbox*/
+    M_Box_Eth_Recv_Ptr      = &udpRecvBox[0];
+    /* For external use to check for new data in receive mailbox*/
+    M_Box_Eth_Recv_Ptr_prev = &udpRecvBox[0];
+    /* For internal use to get new data to be send from mailbox*/
+    M_Box_Eth_Send_Ptr      = &udpTransBox[0];
+    /* For external use to set new data to be send from send mailbox*/
+    M_Box_Eth_Send_Ptr_next = &udpTransBox[0];
+    
     SYS_MESSAGE("\033[2J\033[1;1H");//clear terminal
     SYS_MESSAGE("Starting Siebwalde TrackController...\n\r");
 }
 
-
-/******************************************************************************
-  Function:
-    void ETHERNETxSENDxMESSAGE(uint8_t *data, uint8_t length)
-
-  Remarks:
-    See prototype in ethernet.h.
- */
-void SETxETHERNETxSENDxMESSAGE(){
-    DataToBeSend = true;
-}
 
 /******************************************************************************
   Function:
@@ -232,11 +238,11 @@ void ETHERNET_Tasks ( void )
                 SYS_MESSAGE("Couldn't open server recvsocket\r\n");
                 break;
             }
-            ethernetData.state = ETHERNET_TCPIP_WAIT_FOR_CONNECTION;
+            ethernetData.state = ETHERNET_TCPIP_DATA_RX;
         }
         break;
 
-        case ETHERNET_TCPIP_WAIT_FOR_CONNECTION:
+        case ETHERNET_TCPIP_DATA_RX:
         {
             if (TCPIP_UDP_IsConnected(ethernetData.recvsocket))
             {
@@ -244,26 +250,29 @@ void ETHERNET_Tasks ( void )
                 ethernetData.state = ETHERNET_TCPIP_SERVING_CONNECTION;
                 SYS_MESSAGE("Received a connection\r\n");
                 
-                if (!TCPIP_UDP_IsConnected(ethernetData.transsocket)){
+                if (!TransSocketReady){//TCPIP_UDP_IsConnected(ethernetData.transsocket)){
                     TCPIP_UDP_SocketInfoGet(ethernetData.recvsocket, &SocketInfo);                
                     IpAddress = SocketInfo.remoteIPaddress;                
                     ethernetData.transsocket = TCPIP_UDP_ClientOpen(IP_ADDRESS_TYPE_IPV4, CLIENT_PORT, &SocketInfo.remoteIPaddress);
                     if (ethernetData.transsocket == INVALID_SOCKET)
                     {
                         SYS_MESSAGE("Couldn't open client transsocket\r\n");
-                        ethernetData.state = ETHERNET_TCPIP_WAIT_FOR_CONNECTION;
                         TCPIP_UDP_Discard(ethernetData.recvsocket);
                         TCPIP_UDP_Discard(ethernetData.transsocket);
+                        TransSocketReady = false;
                         break;
+                    }
+                    else{
+                        TransSocketReady = true;
                     }
                 }
             }
-            else if (DataToBeSend){
-                ethernetData.state = ETHERNET_TCPIP_SENDING_DATA;
-                DataToBeSend = false;
-            }
+//            else if (DataToBeSend && TCPIP_UDP_IsConnected(ethernetData.transsocket)){
+//                ethernetData.state = ETHERNET_TCPIP_DATA_TX;
+//                DataToBeSend = false;
+//            }
             else{
-                return;
+                ethernetData.state = ETHERNET_TCPIP_DATA_TX;
             }
         }
         break;
@@ -272,45 +281,55 @@ void ETHERNET_Tasks ( void )
         {
             if (!TCPIP_UDP_IsConnected(ethernetData.recvsocket))
             {
-                ethernetData.state = ETHERNET_TCPIP_WAIT_FOR_CONNECTION;
+                ethernetData.state = ETHERNET_TCPIP_DATA_RX;
                 SYS_MESSAGE("Connection was closed\r\n");
                 break;
             }
             
             int16_t wMaxGet, wMaxPut;
-            memset(&udpRecv, 0, sizeof(udpRecv_t));
+            udpTrans_t udpRecv;
+            memset(&udpRecv, 0, sizeof(udpTrans_t));
                         
             // Figure out how many bytes have been received and how many we can transmit.
             wMaxGet = TCPIP_UDP_GetIsReady(ethernetData.recvsocket);	// Get UDP RX FIFO byte count
-            wMaxPut = TCPIP_UDP_PutIsReady(ethernetData.recvsocket);
+            wMaxPut = TCPIP_UDP_PutIsReady(ethernetData.transsocket);
 
             //SYS_CONSOLE_PRINT("\t%d bytes are available.\r\n", wMaxGet);
             if (wMaxGet == 0)
             {
+                TCPIP_UDP_Discard(ethernetData.recvsocket);
+                ethernetData.state = ETHERNET_TCPIP_DATA_TX;
                 break;
             }
             
             // Transfer the data out of the TCP RX FIFO and into our local processing buffer.
-            int32_t rxed = TCPIP_UDP_ArrayGet(ethernetData.recvsocket, (char *)&udpRecv, sizeof(udpRecv_t));
-            NewData = true;
-            SYS_PRINT("\tReceived a message of '%x' and length %d\r\n", udpRecv.command, rxed);
-            ethernetData.state = ETHERNET_TCPIP_WAIT_FOR_CONNECTION;
+            int32_t rxed = TCPIP_UDP_ArrayGet(ethernetData.recvsocket, (char *)&udpRecv, sizeof(udpTrans_t));
+            PutDataInReceiveMailBox(udpRecv);
+            SYS_PRINT("\tReceived a message command '%x' and length %d\r\n", udpRecv.command, rxed);
             TCPIP_UDP_Discard(ethernetData.recvsocket);
+            ethernetData.state = ETHERNET_TCPIP_DATA_TX;
         }
         break;
         
-        case ETHERNET_TCPIP_SENDING_DATA:
+        case ETHERNET_TCPIP_DATA_TX:
         {
-            if (!TCPIP_UDP_IsConnected(ethernetData.transsocket))
+            if (!TCPIP_UDP_IsConnected(ethernetData.transsocket) || !TransSocketReady)
             {
-                ethernetData.state = ETHERNET_TCPIP_WAIT_FOR_CONNECTION;
-                SYS_MESSAGE("No transsocket connected\r\n");
+                ethernetData.state = ETHERNET_TCPIP_DATA_RX;
+                TransSocketReady = false;
+                //SYS_MESSAGE("No transsocket connected\r\n");
                 break;
             }
             
-            TCPIP_UDP_ArrayPut(ethernetData.transsocket, ethernetData.sendbuffer, SLAVE_INFO_STRUCT_LENGTH);
-            TCPIP_UDP_Flush(ethernetData.transsocket);
-            ethernetData.state = ETHERNET_TCPIP_WAIT_FOR_CONNECTION;
+            udpTrans_t udpSend;
+            
+            udpSend = GetDataFromSendMailBox();
+            
+            if (udpSend.header != 0){
+                TCPIP_UDP_ArrayPut(ethernetData.transsocket, &udpSend.header, sizeof(udpSend));
+                TCPIP_UDP_Flush(ethernetData.transsocket);
+                ethernetData.state = ETHERNET_TCPIP_DATA_RX;
+            }
         }
         break;
         
@@ -321,6 +340,89 @@ void ETHERNET_Tasks ( void )
             break;
         }
     }
+}
+
+/******************************************************************************
+  Function:
+    void PutDataInReceiveMailBox (udpTrans_t data)
+
+  Remarks:
+    See prototype in mbus.h.
+ */
+
+void PutDataInReceiveMailBox (udpTrans_t data){
+    
+    if(data.header == HEADER){
+        *M_Box_Eth_Recv_Ptr = data;
+        M_Box_Eth_Recv_Ptr++;
+        if(M_Box_Eth_Recv_Ptr >= &udpRecvBox[MAILBOXSIZE]){
+            M_Box_Eth_Recv_Ptr = &udpRecvBox[0];
+        }
+    }    
+}
+
+/******************************************************************************
+  Function:
+    udpTrans_t GETxDATAxFROMxRECEIVExMAILxBOX()
+
+  Remarks:
+    See prototype in mbus.h.
+ */
+
+udpTrans_t GETxDATAxFROMxRECEIVExMAILxBOX(){
+    
+    udpTrans_t data;
+    
+    if (M_Box_Eth_Recv_Ptr != M_Box_Eth_Recv_Ptr_prev){
+        
+        M_Box_Eth_Recv_Ptr_prev++;
+        if(M_Box_Eth_Recv_Ptr_prev >= &udpRecvBox[MAILBOXSIZE]){
+            M_Box_Eth_Recv_Ptr_prev = &udpRecvBox[0];
+        }        
+        memcpy(&data, M_Box_Eth_Recv_Ptr_prev, sizeof(data));
+    }
+    return (data);     
+}
+
+/******************************************************************************
+  Function:
+    udpTrans_t GetDataFromSendMailBox ()
+
+  Remarks:
+    See prototype in mbus.h.
+ */
+
+udpTrans_t GetDataFromSendMailBox (){
+    
+    udpTrans_t data;
+    
+    if (M_Box_Eth_Send_Ptr != M_Box_Eth_Send_Ptr_next){
+        
+        M_Box_Eth_Send_Ptr++;
+        if(M_Box_Eth_Send_Ptr >= &udpTransBox[MAILBOXSIZE]){
+            M_Box_Eth_Send_Ptr = &udpTransBox[0];
+        }        
+        memcpy(&data, M_Box_Eth_Send_Ptr, sizeof(data));
+    }
+    return (data);      
+}
+
+/******************************************************************************
+  Function:
+    void PUTxDATAxINxSENDxMAILxBOX (udpTrans_t data)
+
+  Remarks:
+    See prototype in mbus.h.
+ */
+
+void PUTxDATAxINxSENDxMAILxBOX (udpTrans_t data){
+    
+    *M_Box_Eth_Send_Ptr = data;
+    M_Box_Eth_Send_Ptr++;
+    
+    if(M_Box_Eth_Send_Ptr >= &udpTransBox[MAILBOXSIZE]){
+        M_Box_Eth_Send_Ptr = &udpTransBox[0];
+    } 
 }
 
 /******************************************************************************
@@ -342,7 +444,7 @@ uint32_t GETxETHERNETxSTATE (void){
 /*
  if (!TCPIP_UDP_IsConnected(ethernetData.recvsocket))
             {
-                ethernetData.state = ETHERNET_TCPIP_WAIT_FOR_CONNECTION;
+                ethernetData.state = ETHERNET_TCPIP_DATA_RX;
                 SYS_MESSAGE("Connection was closed\r\n");
                 break;
             }
@@ -406,7 +508,7 @@ uint32_t GETxETHERNETxSTATE (void){
 
                 TCPIP_UDP_Flush(ethernetData.recvsocket);
 
-                ethernetData.state = ETHERNET_TCPIP_WAIT_FOR_CONNECTION;
+                ethernetData.state = ETHERNET_TCPIP_DATA_RX;
             }
             TCPIP_UDP_Discard(ethernetData.recvsocket);
  */

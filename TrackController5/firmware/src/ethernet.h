@@ -92,9 +92,9 @@ typedef enum
 	ETHERNET_TCPIP_WAIT_INIT,        
     ETHERNET_TCPIP_WAIT_FOR_IP,
     ETHERNET_TCPIP_OPENING_SERVER,
-    ETHERNET_TCPIP_WAIT_FOR_CONNECTION,
+    ETHERNET_TCPIP_DATA_RX,
     ETHERNET_TCPIP_SERVING_CONNECTION,
-    ETHERNET_TCPIP_SENDING_DATA,
+    ETHERNET_TCPIP_DATA_TX,
     ETHERNET_TCPIP_ERROR,
 
 	/* TODO: Define states used by the application state machine. */
@@ -114,6 +114,17 @@ typedef enum
   Remarks:
     Application strings and buffers are be defined outside this structure.
  */
+#define MAILBOXSIZE 5
+#define HEADER 0xAA
+#define FOOTER 0x55
+#define SLAVEINFO 0x01
+
+typedef struct
+{
+    uint8_t header;
+    uint8_t command;
+    uint8_t data[80]; 
+}udpTrans_t;
 
 typedef struct
 {
@@ -122,10 +133,8 @@ typedef struct
     SYS_STATUS tcpipStat;
     UDP_SOCKET recvsocket;
     UDP_SOCKET transsocket;
-    uint8_t sendbuffer[SLAVE_INFO_STRUCT_LENGTH];
 
 } ETHERNET_DATA;
-
 
 // *****************************************************************************
 // *****************************************************************************
@@ -209,7 +218,7 @@ void ETHERNET_Tasks( void );
 
 /*******************************************************************************
   Function:
-    void ETHERNETxSENDxMESSAGE( void )
+    udpTrans_t GETxDATAxFROMxRECEIVExMAILxBOX()
 
   Summary:
     
@@ -233,7 +242,36 @@ void ETHERNET_Tasks( void );
     
  */
 
-void SETxETHERNETxSENDxMESSAGE( void );
+udpTrans_t GETxDATAxFROMxRECEIVExMAILxBOX();
+
+
+/*******************************************************************************
+  Function:
+    void PUTxDATAxINxSENDxMAILxBOX (udpTrans_t data)
+
+  Summary:
+    
+
+  Description:
+    
+
+  Precondition:
+    The system and application initialization ("SYS_Initialize") should be
+    called before calling this.
+
+  Parameters:
+    None.
+
+  Returns:
+    None.
+
+  Example:    
+
+  Remarks:
+    
+ */
+
+void PUTxDATAxINxSENDxMAILxBOX (udpTrans_t data);
 
 /*******************************************************************************
   Function:

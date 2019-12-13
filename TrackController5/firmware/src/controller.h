@@ -117,16 +117,7 @@ typedef struct
 
 } CONTROLLER_DATA;
 
-typedef struct
-{
-    uint8_t header;
-    uint8_t command;
-    uint8_t data[80]; 
-}udpRecv_t;
 
-bool    NewData;
-
-udpRecv_t udpRecv;
 
 enum
 {	
