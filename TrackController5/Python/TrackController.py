@@ -7,12 +7,12 @@ from Enum import *
 
 class MAIN():
     def __init__(self):
-        self.Amplifiers = DataAquisition(51)
+        self.Amplifiers = DataAquisition(56)
         self.StateMachine = State(self.Amplifiers)
         self.cnt = 0  
         self.state = EnumStateMachine.ResetAllSlaves
         self.UpdateTickCount = 0
-        #self.Amplifiers.WriteSerial(EnumCommand.DUMMY_CMD, 'abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz')
+        self.Amplifiers.WriteSerial(EnumCommand.DUMMY_CMD, 'start')
 
     def start(self):
         while True:

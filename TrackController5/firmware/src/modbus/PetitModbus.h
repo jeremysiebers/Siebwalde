@@ -4,6 +4,10 @@
  *  
  *  Tips    :   If you want to use RS485 you have to use RX-Pull-Up Resistor!
  */
+#include <stdint.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdlib.h>
 
 #ifndef __PETITMODBUS__H
 #define __PETITMODBUS__H
@@ -61,16 +65,16 @@ typedef enum
 
 typedef struct
 {
-    unsigned char       Header;
-    unsigned char       SlaveNumber;
-    unsigned char       SlaveDetected;
-    unsigned int        HoldingReg[NUMBER_OF_HOLDING_PETITREGISTERS];
-    unsigned int        MbReceiveCounter;
-    unsigned int        MbSentCounter;
-    SLAVE_DATA          MbCommError;
-    unsigned char       MbExceptionCode;
-    unsigned int        SpiCommErrorCounter;
-    unsigned char       Footer;
+    uint8_t       Header;
+    uint8_t       SlaveNumber;
+    uint8_t       SlaveDetected;
+    uint16_t      HoldingReg[NUMBER_OF_HOLDING_PETITREGISTERS];
+    uint16_t      MbReceiveCounter;
+    uint16_t      MbSentCounter;
+    SLAVE_DATA    MbCommError;
+    uint8_t       MbExceptionCode;
+    uint8_t       SpiCommErrorCounter;
+    uint8_t       Footer;
     
 }SLAVE_INFO;
 

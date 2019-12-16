@@ -144,7 +144,7 @@ void CONTROLLER_Tasks ( void )
         /* Application's initial state. */
         case CONTROLLER_STATE_INIT:
         {
-            if (GETxMBUSxSTATE() == MBUS_STATE_WAIT && GETxETHERNETxSTATE() == ETHERNET_TCPIP_DATA_RX){
+            if (GETxMBUSxSTATE() == MBUS_STATE_WAIT && GETxETHERNETxSTATE() == ETHERNET_TCPIP_WAIT_FOR_CONNECTION){
                 SYS_MESSAGE("MBUS and ETHERNET states ready.\n\r");
                 controllerData.state = CONTROLLER_STATE_IDLE;
                 SETxMBUSxSTATE(MBUS_STATE_START_DATA_UPLOAD);

@@ -98,6 +98,7 @@ volatile    uint16_t UpdateNextSlave = false;
 volatile    uint16_t UploadSlaveData = false;
 static      uint16_t NextSlaveCounter = 1;
 static      uint16_t MaxSlaveUploadCount = 55;
+static      uint32_t SizeOfSlaveInfo = sizeof(SlaveInfo[0]);
 
 
 //uint16_t AllSlavesReadAllDataCounter = 1;
@@ -369,7 +370,7 @@ void MBUS_Tasks ( void )
                 UploadSlaveData = false;
                 data.header = HEADER;
                 data.command = SLAVEINFO;
-                memcpy(&data.data, &(SlaveInfo[NextSlaveCounter].Header), sizeof(SLAVE_INFO));
+                memcpy(&data.data, &(SlaveInfo[NextSlaveCounter].Header), SizeOfSlaveInfo);
                 PUTxDATAxINxSENDxMAILxBOX(data);                
                 NextSlaveCounter++;
                 if(NextSlaveCounter > MaxSlaveUploadCount){
