@@ -124,7 +124,7 @@ typedef enum
 
 typedef struct
 {
-    /* The application's current state */
+    /* The application's data */
     MBUS_STATES                 state;
     MBUS_DATA_UPLOAD_STATES     upload;
     DRV_HANDLE                  ModbusCommCycleHandle;    
@@ -135,9 +135,7 @@ typedef struct
 
 MBUS_DATA mbusData;
 
-#define NUMBER_OF_SLAVES 55                                                     // 0 is for the master self. 50 Track slaves and 5 backplane slaves => 55
-#define NUMBER_OF_SLAVES_SIZE (NUMBER_OF_SLAVES + 1)
-#define NUMBER_OF_AMPLIFIERS (NUMBER_OF_SLAVES - 5)
+
 extern uint16_t LED_ERR;
 
 // *****************************************************************************

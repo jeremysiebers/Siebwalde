@@ -56,6 +56,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "controller.h"
 #include "ethernet.h"
 #include "mbus.h"
+#include "enums.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -78,8 +79,9 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
     Application strings and buffers are be defined outside this structure.
 */
 
-CONTROLLER_DATA controllerData;
-uint8_t ControllerCommand;
+        CONTROLLER_DATA controllerData;
+        uint8_t         ControllerCommand;
+static  udpTrans_t      EthernetRecvData;
 
 // *****************************************************************************
 // *****************************************************************************
@@ -145,32 +147,28 @@ void CONTROLLER_Tasks ( void )
         case CONTROLLER_STATE_INIT:
         {
             if (GETxMBUSxSTATE() == MBUS_STATE_WAIT && GETxETHERNETxSTATE() == ETHERNET_TCPIP_WAIT_FOR_CONNECTION){
-                SYS_MESSAGE("MBUS and ETHERNET states ready.\n\r");
+                SYS_MESSAGE("MBUS and ETHERNET ready, controller going to IDLE state.\n\r");
                 controllerData.state = CONTROLLER_STATE_IDLE;
-                SETxMBUSxSTATE(MBUS_STATE_START_DATA_UPLOAD);
             }            
             break;
         }
 
         case CONTROLLER_STATE_IDLE:
         {
-//            if (EthernetNewData && udpRecv.header == 0xAA){
-//                controllerData.state = CONTROLLER_STATE_HANDLE_COMM_DATA;
-//                EthernetNewData = false;
-//                udpRecv.header = 0x00;
-//                ControllerCommand = udpRecv.command;
-//            }
-//            else if(EthernetNewData){
-//                EthernetNewData = false;
-//                udpRecv.header = 0x00;
-//                SYS_MESSAGE("Controller detected incorrect message.\n\r");
-//            }            
+            if(CHECKxDATAxINxRECEIVExMAILxBOX){
+                EthernetRecvData = GETxDATAxFROMxRECEIVExMAILxBOX();
+                
+                if(EthernetRecvData.header = 0xAA){
+                    controllerData.state = CONTROLLER_STATE_HANDLE_COMM_DATA;                    
+                    PUTxDATAxINxSENDxMAILxBOX(EthernetRecvData);                // communicate back to indicate received command
+                }
+            }
             break;
         }
         
         case CONTROLLER_STATE_HANDLE_COMM_DATA:
         {
-            switch(ControllerCommand){
+            switch(EthernetRecvData.command){
                 case EXEC_MBUS_STATE_SLAVES_ON:
                 {
                     SETxMBUSxSTATE(MBUS_STATE_SLAVES_ON);
@@ -196,12 +194,32 @@ void CONTROLLER_Tasks ( void )
                     SETxMBUSxSTATE(MBUS_STATE_SLAVE_ENABLE);
                     break;
                 }
+                case EXEC_MBUS_STATE_START_DATA_UPLOAD:
+                {
+                    SETxMBUSxSTATE(MBUS_STATE_START_DATA_UPLOAD);
+                    break;
+                }
                 case EXEC_MBUS_STATE_RESET:
                 {
                     SETxMBUSxSTATE(MBUS_STATE_RESET);
                     break;
                 }
                 
+                default:
+                {
+                    CREATExTASKxSTATUSxMESSAGE((uint8_t)CONTROLLER, (uint8_t)COMMAND, (uint8_t)ERROR);
+                    controllerData.state = CONTROLLER_STATE_IDLE;
+                    break;
+                }
+                
+            }
+            break;
+        }
+        
+        case CONTROLLER_STATE_CHECK_MBUS_STATE:
+        {
+            if (GETxMBUSxSTATE() == MBUS_STATE_WAIT){
+                controllerData.state = CONTROLLER_STATE_IDLE;                
             }
             break;
         }

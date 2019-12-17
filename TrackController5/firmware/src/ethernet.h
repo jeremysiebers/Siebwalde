@@ -59,7 +59,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "system_config.h"
 #include "system_definitions.h"
 #include "tcpip/tcpip.h"
-#include "modbus/PetitModbus.h"
+#include "enums.h"
 
 // DOM-IGNORE-BEGIN
 #ifdef __cplusplus  // Provide C++ Compatibility
@@ -114,21 +114,10 @@ typedef enum
   Remarks:
     Application strings and buffers are be defined outside this structure.
  */
-#define MAILBOXSIZE 5
-#define HEADER 0xAA
-#define FOOTER 0x55
-#define SLAVEINFO 0xFF
 
 typedef struct
 {
-    uint8_t header;
-    uint8_t command;
-    uint8_t data[80]; 
-}udpTrans_t;
-
-typedef struct
-{
-    /* The application's current state */
+    /* The application's data */
     ETHERNET_STATES state;
     SYS_STATUS tcpipStat;
     UDP_SOCKET recvsocket;
@@ -304,6 +293,68 @@ void PUTxDATAxINxSENDxMAILxBOX (udpTrans_t data);
  */
 
 uint32_t GETxETHERNETxSTATE (void);
+
+/*******************************************************************************
+  Function:
+    bool CHECKxDATAxINxRECEIVExMAILxBOX()
+
+  Summary:
+    MPLAB Harmony Demo application tasks function
+
+  Description:
+    This routine is the Harmony Demo application's tasks function.  It
+    defines the application's state machine and core logic.
+
+  Precondition:
+    The system and application initialization ("SYS_Initialize") should be
+    called before calling this.
+
+  Parameters:
+    None.
+
+  Returns:
+    None.
+
+  Example:
+    <code>
+    MBUS_Tasks();
+    </code>
+
+  Remarks:
+    This routine must be called from SYS_Tasks() routine.
+ */
+bool CHECKxDATAxINxRECEIVExMAILxBOX();
+
+/*******************************************************************************
+  Function:
+    void CREATExTASKxSTATUSxMESSAGE(uint8_t taskid, uint8_t taskstate, uint8_t feedback)
+
+  Summary:
+    MPLAB Harmony Demo application tasks function
+
+  Description:
+    This routine is the Harmony Demo application's tasks function.  It
+    defines the application's state machine and core logic.
+
+  Precondition:
+    The system and application initialization ("SYS_Initialize") should be
+    called before calling this.
+
+  Parameters:
+    None.
+
+  Returns:
+    None.
+
+  Example:
+    <code>
+    MBUS_Tasks();
+    </code>
+
+  Remarks:
+    This routine must be called from SYS_Tasks() routine.
+ */
+void CREATExTASKxSTATUSxMESSAGE(uint8_t taskid, uint8_t taskstate, uint8_t feedback);
 
 #endif /* _ETHERNET_H */
 

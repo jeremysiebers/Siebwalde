@@ -55,8 +55,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 
 #include "ethernet.h"
 #include "tcpip/tcpip.h"
-#include "mbus.h"
-#include "controller.h"
+#include "enums.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -119,6 +118,7 @@ static udpTrans_t   udpTransBox[MAILBOXSIZE];
 
 void        PutDataInReceiveMailBox (udpTrans_t data);
 udpTrans_t  GetDataFromSendMailBox  ();
+bool        CheckDataInSendMailBox ();
 
 
 // *****************************************************************************
@@ -321,15 +321,12 @@ void ETHERNET_Tasks ( void )
                 break;
             }
             
-            udpTrans_t udpSend;
-            
-            udpSend = GetDataFromSendMailBox();
-            
-            if (udpSend.header != 0){
+            if (CheckDataInSendMailBox){
+                udpTrans_t udpSend;
+                udpSend = GetDataFromSendMailBox();
                 TCPIP_UDP_ArrayPut(ethernetData.transsocket, &udpSend.header, sizeof(udpSend));
                 TCPIP_UDP_Flush(ethernetData.transsocket);                
-            }
-            
+            }            
             ethernetData.state = ETHERNET_TCPIP_DATA_RX;
         }
         break;
@@ -390,6 +387,25 @@ udpTrans_t GETxDATAxFROMxRECEIVExMAILxBOX(){
 
 /******************************************************************************
   Function:
+    udpTrans_t GETxDATAxFROMxRECEIVExMAILxBOX()
+
+  Remarks:
+    See prototype in mbus.h.
+ */
+
+bool CHECKxDATAxINxRECEIVExMAILxBOX(){
+    
+    if (M_Box_Eth_Recv_Ptr != M_Box_Eth_Recv_Ptr_prev){
+        
+        return (true);
+    }
+    else{
+        return (false);
+    }
+}
+
+/******************************************************************************
+  Function:
     udpTrans_t GetDataFromSendMailBox ()
 
   Remarks:
@@ -412,6 +428,25 @@ udpTrans_t GetDataFromSendMailBox (){
         data.header = 0x00;
     }
     return (data);      
+}
+
+/******************************************************************************
+  Function:
+    udpTrans_t GetDataFromSendMailBox ()
+
+  Remarks:
+    See prototype in mbus.h.
+ */
+
+bool CheckDataInSendMailBox (){
+    
+    if (M_Box_Eth_Send_Ptr != M_Box_Eth_Send_Ptr_next){
+        
+        return(true);
+    }
+    else{
+        return (false);
+    }  
 }
 
 /******************************************************************************
@@ -442,6 +477,36 @@ void PUTxDATAxINxSENDxMAILxBOX (udpTrans_t data){
 
 uint32_t GETxETHERNETxSTATE (void){
     return (ethernetData.state);
+}
+
+/******************************************************************************
+  Function:
+    void CREATExTASKxSTATUSxMESSAGE(uint8_t taskid, uint8_t taskstate, uint8_t feedback)
+
+  Remarks:
+    See prototype in mbus.h.
+ */
+
+void CREATExTASKxSTATUSxMESSAGE(uint8_t taskid, uint8_t taskstate, uint8_t feedback){
+    udpTrans_t data;
+    
+    data.header = HEADER;
+    data.command = taskid;
+    
+    uint8_t i;
+    
+    for(i=0; i < sizeof(data.command); i++){
+        if(i = 0){
+            data.data[i] = taskstate;
+        }
+        else if(i = 1){
+            data.data[i] = feedback;
+        }
+        else{
+            data.data[i] = 0;
+        }
+    }
+    PUTxDATAxINxSENDxMAILxBOX(data);
 }
 
 /*******************************************************************************

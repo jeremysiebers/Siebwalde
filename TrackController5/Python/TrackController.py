@@ -12,19 +12,18 @@ class MAIN():
         self.cnt = 0  
         self.state = EnumStateMachine.ResetAllSlaves
         self.UpdateTickCount = 0
-        self.Amplifiers.WriteSerial(EnumCommand.DUMMY_CMD, 'start')
 
     def start(self):
         while True:
             self.Amplifiers.ReadSerial()
   
-#            ######################
-#            ## Reset the slaves ##
-#            ######################
-#            if(self.state == EnumStateMachine.ResetAllSlaves):
-#                returned = self.StateMachine.RunFunction(EnumStateMachine.ResetAllSlaves)
-#                if(returned == EnumStateMachine.ok):
-#                    self.state = EnumStateMachine.CheckAmpSwVersion
+            ######################
+            ## Reset the slaves ##
+            ######################
+            if(self.state == EnumStateMachine.ResetAllSlaves):
+                returned = self.StateMachine.RunFunction(EnumStateMachine.ResetAllSlaves)
+                if(returned == EnumStateMachine.ok):
+                    self.state = EnumStateMachine.CheckAmpSwVersion
 #            
 #            ######################
 #            ## Check SW version ##

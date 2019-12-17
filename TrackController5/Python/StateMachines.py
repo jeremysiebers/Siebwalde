@@ -44,8 +44,7 @@ class State:
         case 0
         '''
         if(self.RunResetAll == 0):
-            self.ModbusMaster.HoldingReg[0] = 0xFFFF
-            self.Amplifiers.WriteSerial(EnumCommand.ETHERNET_T, EnumEthernetT.ResetAll)
+            self.Amplifiers.WriteSerial(EnumCommand.EXEC_MBUS_STATE_RESET, 0)
             self.RunResetAll += 1
             print("ResetAllSlaves --> reset all slaves sent... --> sleep 3 seconds")
             time.sleep(3)

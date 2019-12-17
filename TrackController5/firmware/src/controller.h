@@ -90,6 +90,7 @@ typedef enum
 	CONTROLLER_STATE_INIT=0,
 	CONTROLLER_STATE_IDLE,
     CONTROLLER_STATE_HANDLE_COMM_DATA,
+    CONTROLLER_STATE_CHECK_MBUS_STATE,
 	/* TODO: Define states used by the application state machine. */
 
 } CONTROLLER_STATES;
@@ -117,20 +118,6 @@ typedef struct
 
 } CONTROLLER_DATA;
 
-
-
-enum
-{	
-    EXEC_MBUS_STATE_SLAVES_ON=0,
-    EXEC_SLAVE_DETECT,
-    EXEC_MBUS_STATE_SLAVES_BOOT_WAIT,
-    EXEC_MBUS_STATE_SLAVE_DETECT,
-    EXEC_MBUS_STATE_SLAVE_FW_DOWNLOAD,
-    EXEC_MBUS_STATE_SLAVE_INIT,
-    EXEC_MBUS_STATE_SLAVE_ENABLE,
-    EXEC_MBUS_STATE_RESET,
-
-} CONTROLLER_COMMANDS;
 // *****************************************************************************
 // *****************************************************************************
 // Section: Application Callback Routines

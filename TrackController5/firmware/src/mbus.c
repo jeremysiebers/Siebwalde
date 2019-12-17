@@ -61,6 +61,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "slavehandler.h"
 #include "slavefwhandler.h"
 #include "ethernet.h"
+#include "enums.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -89,16 +90,18 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 static SLAVE_INFO         SlaveInfo[NUMBER_OF_SLAVES_SIZE];
 static SLAVE_INFO         SlaveDump[1];
 
-            uint32_t DelayCount = 0;
-static      uint16_t LED_TX_prev, LED_RX_prev, LED_ERR_prev, LED_WAR_prev = 0;
-static      uint16_t LED_TX_STATE, LED_RX_STATE, LED_ERR_STATE, LED_WAR_STATE = 0;
-            uint16_t LED_ERR = 0;
-static      uint16_t LED_WAR = 0;
-volatile    uint16_t UpdateNextSlave = false;
-volatile    uint16_t UploadSlaveData = false;
-static      uint16_t NextSlaveCounter = 1;
-static      uint16_t MaxSlaveUploadCount = 55;
-static      uint32_t SizeOfSlaveInfo = sizeof(SlaveInfo[0]);
+            uint32_t    DelayCount = 0;
+static      uint16_t    LED_TX_prev, LED_RX_prev, LED_ERR_prev, LED_WAR_prev = 0;
+static      uint16_t    LED_TX_STATE, LED_RX_STATE, LED_ERR_STATE, LED_WAR_STATE = 0;
+            uint16_t    LED_ERR = 0;
+static      uint16_t    LED_WAR = 0;
+volatile    uint16_t    UpdateNextSlave = false;
+volatile    uint16_t    UploadSlaveData = false;
+static      uint16_t    NextSlaveCounter = 1;
+static      uint16_t    MaxSlaveUploadCount = 55;
+static      uint32_t    SizeOfSlaveInfo = sizeof(SlaveInfo[0]);
+
+            udpTrans_t  EthernetSendData;
 
 
 //uint16_t AllSlavesReadAllDataCounter = 1;
@@ -138,7 +141,7 @@ void ModbusReceiveTimeoutCallBack(uintptr_t context, uint32_t alarmCount){      
 // *****************************************************************************
 
 
-uint32_t ReadCoreTimer(void);
+uint32_t    ReadCoreTimer(void);
 
 
 // *****************************************************************************
@@ -274,6 +277,7 @@ void MBUS_Tasks ( void )
         {
             if((ReadCoreTimer() - DelayCount) > 200000000){
                 mbusData.state = MBUS_STATE_WAIT;
+                CREATExTASKxSTATUSxMESSAGE((uint8_t)MBUS, (uint8_t)MBUS_STATE_SLAVES_ON, (uint8_t)DONE);
             }            
             break;
         }
@@ -282,6 +286,7 @@ void MBUS_Tasks ( void )
         {
             if (SLAVExDETECT()){
                 mbusData.state = MBUS_STATE_WAIT;
+                CREATExTASKxSTATUSxMESSAGE((uint8_t)MBUS, (uint8_t)MBUS_STATE_SLAVE_DETECT, (uint8_t)DONE);
             }
             PROCESSxPETITxMODBUS();
             break;
@@ -291,6 +296,7 @@ void MBUS_Tasks ( void )
         {
             if (SLAVExFWxHANDLER()){
                 mbusData.state = MBUS_STATE_WAIT;
+                CREATExTASKxSTATUSxMESSAGE((uint8_t)MBUS, (uint8_t)MBUS_STATE_SLAVE_FW_DOWNLOAD, (uint8_t)DONE);
             }
             PROCESSxPETITxMODBUS();
             break;
@@ -301,6 +307,7 @@ void MBUS_Tasks ( void )
             if (SLAVExINITxANDxCONFIG())
             {                
                 mbusData.state = MBUS_STATE_WAIT;
+                CREATExTASKxSTATUSxMESSAGE((uint8_t)MBUS, (uint8_t)MBUS_STATE_SLAVE_INIT, (uint8_t)DONE);
             }
             PROCESSxPETITxMODBUS();
             break;
@@ -311,6 +318,7 @@ void MBUS_Tasks ( void )
             if (ENABLExAMPLIFIER()){                
                 mbusData.state = MBUS_STATE_SERVICE_TASKS;
                 MaxSlaveUploadCount = 50;                                       // limit the upload to slave data only (cyclic))
+                CREATExTASKxSTATUSxMESSAGE((uint8_t)MBUS, (uint8_t)MBUS_STATE_SLAVE_ENABLE, (uint8_t)DONE);
             }
             PROCESSxPETITxMODBUS();
             break;
@@ -321,6 +329,7 @@ void MBUS_Tasks ( void )
             DRV_TMR_Start(mbusData.ModbusCommCycleHandle);
             mbusData.state  = MBUS_STATE_WAIT;
             mbusData.upload = UPLOAD_STATE_ALL;
+            CREATExTASKxSTATUSxMESSAGE((uint8_t)MBUS, (uint8_t)MBUS_STATE_START_DATA_UPLOAD, (uint8_t)DONE);
             break;
         }
 
@@ -341,6 +350,8 @@ void MBUS_Tasks ( void )
             DRV_TMR_Stop(mbusData.ModbusCommCycleHandle);
             Slaves_Disable_On();
             mbusData.state = MBUS_STATE_WAIT;
+            MaxSlaveUploadCount = 55;
+            CREATExTASKxSTATUSxMESSAGE((uint8_t)MBUS, (uint8_t)MBUS_STATE_RESET, (uint8_t)DONE);
             break;
         }
 
@@ -456,14 +467,6 @@ uint32_t GETxMBUSxSTATE (void){
 void SETxMBUSxSTATE (MBUS_STATES state){
     mbusData.state = state;
 }
-
-/******************************************************************************
-  Function:
-    void MBUS_Tasks ( void )
-
-  Remarks:
-    See prototype in mbus.h.
- */
 
 /*
 void Led_Blink (){

@@ -48,25 +48,12 @@ class EnumSlaveConfig:
     HALT        = 0b0111111111111111    
 
 class EnumCommand:
-    MODBUS      = 0xFF
-    BOOTLOADER  = 0xFE
-    ETHERNET_T  = 0xFD
-    DUMMY_CMD   = 0xFC
-    
-class EnumEthernetT:
-    ResetAll          = 0xFF
-    ReleaseAll        = 0xFE
-    INIT_PHASE_FALSE  = 0xFD
-    INIT_PHASE_TRUE   = 0xFC
-    OK                = 0x82
-    NOK               = 0x83
-    BUSY              = 0x81
-    IDLE              = 0x80
-    SEND_BOOTLOADER   = 0x01
-    SEND_SLAVEIODATA  = 0x00
-    
-class EnumBootloader:
-    COMMAND_SUCCESSFUL   = 0x01 # Command Successful
-    COMMAND_UNSUPPORTED  = 0xFF # Command Unsupported
-    ADDRESS_ERROR        = 0Xfe # Address Error
-    COMMAND_UNSUCCESSFUL = 0xfd # Command unSuccessful 
+    EXEC_MBUS_STATE_SLAVES_ON           = 0x01
+    EXEC_SLAVE_DETECT                   = 0x02
+    EXEC_MBUS_STATE_SLAVES_BOOT_WAIT    = 0x03
+    EXEC_MBUS_STATE_SLAVE_DETECT        = 0x04
+    EXEC_MBUS_STATE_SLAVE_FW_DOWNLOAD   = 0x05
+    EXEC_MBUS_STATE_SLAVE_INIT          = 0x06
+    EXEC_MBUS_STATE_SLAVE_ENABLE        = 0x07
+    EXEC_MBUS_STATE_START_DATA_UPLOAD   = 0x08
+    EXEC_MBUS_STATE_RESET               = 0x09
