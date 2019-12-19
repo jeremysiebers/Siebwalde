@@ -10,21 +10,61 @@ class MAIN():
         self.Amplifiers = DataAquisition(56)
         self.StateMachine = State(self.Amplifiers)
         self.cnt = 0  
-        self.state = EnumStateMachine.ResetAllSlaves
+        self.state = EnumStateMachine.ConnectToEthernetTarget
         self.UpdateTickCount = 0
 
     def start(self):
         while True:
-            self.Amplifiers.ReadSerial()
-  
+            self.Amplifiers.ReadSerial() 
+            
+            ######################
+            ## Connect          ##
+            ######################
+            if(self.state == EnumStateMachine.ConnectToEthernetTarget):
+                returned = self.StateMachine.RunFunction(EnumStateMachine.ConnectToEthernetTarget)
+                if(returned == EnumStateMachine.ok):
+                    self.state = EnumStateMachine.ResetAllSlaves            
+            
             ######################
             ## Reset the slaves ##
             ######################
-            if(self.state == EnumStateMachine.ResetAllSlaves):
+            elif(self.state == EnumStateMachine.ResetAllSlaves):
                 returned = self.StateMachine.RunFunction(EnumStateMachine.ResetAllSlaves)
                 if(returned == EnumStateMachine.ok):
-                    self.state = EnumStateMachine.CheckAmpSwVersion
-#            
+                    self.state = EnumStateMachine.DataUploadStart
+            
+            ######################
+            ## DataUploadStart  ##
+            ######################
+            elif(self.state == EnumStateMachine.DataUploadStart):
+                returned = self.StateMachine.RunFunction(EnumStateMachine.DataUploadStart)
+                if(returned == EnumStateMachine.ok):
+                    self.state = EnumStateMachine.DetectSlaves
+            
+            ######################
+            ## Detect the slaves##
+            ######################
+            elif(self.state == EnumStateMachine.DetectSlaves):
+                returned = self.StateMachine.RunFunction(EnumStateMachine.DetectSlaves)
+                if(returned == EnumStateMachine.ok):
+                    self.state = EnumStateMachine.InitTrackamplifiers
+            
+            ######################
+            ## Init  the slaves ##
+            ######################
+            elif(self.state == EnumStateMachine.InitTrackamplifiers):
+                returned = self.StateMachine.RunFunction(EnumStateMachine.InitTrackamplifiers)
+                if(returned == EnumStateMachine.ok):
+                    self.state = EnumStateMachine.EnableTrackamplifiers
+            
+            #######################
+            ## Enable the slaves ##
+            #######################
+            elif(self.state == EnumStateMachine.EnableTrackamplifiers):
+                returned = self.StateMachine.RunFunction(EnumStateMachine.EnableTrackamplifiers)
+                if(returned == EnumStateMachine.ok):
+                    self.state = EnumStateMachine.run
+            
 #            ######################
 #            ## Check SW version ##
 #            ######################        
@@ -41,21 +81,9 @@ class MAIN():
 #                if(returned == EnumStateMachine.ok):
 #                    self.state = EnumStateMachine.InitTrackamplifiers
 #            
-#            ######################
-#            ## Init  the slaves ##
-#            ######################
-#            elif(self.state == EnumStateMachine.InitTrackamplifiers):
-#                returned = self.StateMachine.RunFunction(EnumStateMachine.InitTrackamplifiers)
-#                if(returned == EnumStateMachine.ok):
-#                    self.state = EnumStateMachine.EnableTrackamplifiers
 #            
-#            #######################
-#            ## Enable the slaves ##
-#            #######################
-#            elif(self.state == EnumStateMachine.EnableTrackamplifiers):
-#                returned = self.StateMachine.RunFunction(EnumStateMachine.EnableTrackamplifiers)
-#                if(returned == EnumStateMachine.ok):
-#                    self.state = EnumStateMachine.run
+#            
+
 
 
 

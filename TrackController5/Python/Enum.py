@@ -4,12 +4,15 @@ class EnumStateMachine:
     ok    = 'ok'
     nok   = 'nok'
     
-    ResetAllSlaves        = 'ResetAllSlaves'
-    InitTrackamplifiers   = 'InitTrackamplifiers'
-    EnableTrackamplifiers = 'EnableTrackamplifiers'
-    CheckAmpSwVersion     = 'CheckAmpSwVersion'
-    FlashTrackamplifiers  = 'FlashTrackamplifiers'
-    run                   = 'run'
+    ConnectToEthernetTarget = 'ConnectToEthernetTarget'
+    ResetAllSlaves          = 'ResetAllSlaves'
+    DataUploadStart         = 'DataUploadStart'
+    DetectSlaves            = 'DetectSlaves'
+    InitTrackamplifiers     = 'InitTrackamplifiers'
+    EnableTrackamplifiers   = 'EnableTrackamplifiers'
+    CheckAmpSwVersion       = 'CheckAmpSwVersion'
+    FlashTrackamplifiers    = 'FlashTrackamplifiers'
+    run                     = 'run'
     
 class EnumSlaveInit:
     SLOT1             = 0x1
@@ -55,8 +58,26 @@ class EnumCommand:
     EXEC_MBUS_STATE_SLAVE_INIT          = 0x05
     EXEC_MBUS_STATE_SLAVE_ENABLE        = 0x06
     EXEC_MBUS_STATE_START_DATA_UPLOAD   = 0x07
-    EXEC_MBUS_STATE_RESET               = 0x08
+    EXEC_MBUS_STATE_RESET               = 0x08      
     
+    MODBUS                              = 0xFF
+    ETHERNET_T                          = 0x10
+    BOOTLOADER                          = 0x11
+    DUMMY_CMD                           = 0x12
+    
+    
+class EnumStatusMessages:
+    CONTROLLER                          = 0x80
+    MBUS                                = 0x81
+    CONNECTED                           = 0xFB
+    DONE                                = 0xFC
+    COMMAND                             = 0xFD
+    ERROR                               = 0xFE    
+    
+class EnumClientCommands:
+    CLIENT_CONNECTION_REQUEST           = 0x09
+    
+class EnumMbusStatus:
     MBUS_STATE_INIT                     = 0x00
     MBUS_STATE_WAIT                     = 0x01
     MBUS_STATE_SLAVES_ON                = 0x02
@@ -67,14 +88,4 @@ class EnumCommand:
     MBUS_STATE_SLAVE_ENABLE             = 0x07
     MBUS_STATE_START_DATA_UPLOAD        = 0x08
     MBUS_STATE_SERVICE_TASKS            = 0x09
-    MBUS_STATE_RESET                    = 0x0A    
-    
-    MODBUS                              = 0x09
-    ETHERNET_T                          = 0x10
-    BOOTLOADER                          = 0x11
-    DUMMY_CMD                           = 0x12
-    CONTROLLER                          = 0x80
-    MBUS                                = 0x81
-    DONE                                = 0xFC
-    COMMAND                             = 0xFD
-    ERROR                               = 0xFE
+    MBUS_STATE_RESET                    = 0x0A     

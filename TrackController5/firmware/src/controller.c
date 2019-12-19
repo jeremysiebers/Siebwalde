@@ -81,7 +81,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 
         CONTROLLER_DATA controllerData;
         uint8_t         ControllerCommand;
-static  udpTrans_t      EthernetRecvData;
+        udpTrans_t      *EthernetRecvData;
 
 // *****************************************************************************
 // *****************************************************************************
@@ -147,9 +147,29 @@ void CONTROLLER_Tasks ( void )
         case CONTROLLER_STATE_INIT:
         {
             if (GETxMBUSxSTATE() == MBUS_STATE_WAIT && GETxETHERNETxSTATE() == ETHERNET_TCPIP_WAIT_FOR_CONNECTION){
-                SYS_MESSAGE("MBUS and ETHERNET ready, controller going to IDLE state.\n\r");
-                controllerData.state = CONTROLLER_STATE_IDLE;
+                SYS_MESSAGE("MBUS and ETHERNET ready, controller waiting for client.\n\r");
+                controllerData.state = CONTROLLER_STATE_WAITING_FOR_CLIENT;
             }            
+            break;
+        }
+        
+        case CONTROLLER_STATE_WAITING_FOR_CLIENT:
+        {
+            if(CHECKxDATAxINxRECEIVExMAILxBOX()){
+                EthernetRecvData = GETxDATAxFROMxRECEIVExMAILxBOX();
+
+                if(EthernetRecvData->header == HEADER && 
+                        EthernetRecvData->command == CLIENT_CONNECTION_REQUEST){
+                    controllerData.state = CONTROLLER_STATE_IDLE;
+                    SYS_MESSAGE("Client connected, controller going to Idle state.\n\r");
+                    CREATExTASKxSTATUSxMESSAGE((uint8_t)CONTROLLER, (uint8_t)CONNECTED, (uint8_t)DONE);
+                }
+                else{
+                    DISCONNECTxCLIENT();
+                    controllerData.state = CONTROLLER_STATE_INIT;
+                    SYS_MESSAGE("Received wrong handshake, resetting Ethernet sockets.\n\r");
+                }
+            }
             break;
         }
 
@@ -158,7 +178,7 @@ void CONTROLLER_Tasks ( void )
             if(CHECKxDATAxINxRECEIVExMAILxBOX()){
                 EthernetRecvData = GETxDATAxFROMxRECEIVExMAILxBOX();
                 
-                if(EthernetRecvData.header == HEADER){
+                if(EthernetRecvData->header == HEADER){
                     controllerData.state = CONTROLLER_STATE_HANDLE_COMM_DATA;                                        
                 }
             }
@@ -167,7 +187,14 @@ void CONTROLLER_Tasks ( void )
         
         case CONTROLLER_STATE_HANDLE_COMM_DATA:
         {
-            switch(EthernetRecvData.command){
+            switch(EthernetRecvData->command){
+                case CLIENT_CONNECTION_REQUEST:
+                {
+                    CREATExTASKxSTATUSxMESSAGE((uint8_t)CONTROLLER, (uint8_t)CONNECTED, (uint8_t)DONE); // assume same client is connecting again
+                    SYS_MESSAGE("Client re-connected, controller going to Idle state.\n\r");
+                    break;
+                }
+                
                 case EXEC_MBUS_STATE_SLAVES_ON:
                 {
                     SETxMBUSxSTATE(MBUS_STATE_SLAVES_ON);
@@ -220,7 +247,7 @@ void CONTROLLER_Tasks ( void )
         
         case CONTROLLER_STATE_CHECK_MBUS_STATE:
         {
-            if (GETxMBUSxSTATE() == MBUS_STATE_WAIT){
+            if (GETxMBUSxSTATE() == MBUS_STATE_WAIT || GETxMBUSxSTATE() == MBUS_STATE_SERVICE_TASKS){
                 controllerData.state = CONTROLLER_STATE_IDLE;                
             }
             break;

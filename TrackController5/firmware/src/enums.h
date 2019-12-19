@@ -119,12 +119,13 @@ typedef struct
 
 typedef enum
 {
+    CONNECTED                       = 0xFB,
     DONE                            = 0xFC,
     COMMAND                         = 0xFD,
     ERROR                           = 0xFE,
     CONTROLLER                      = 0x80,
     MBUS                            = 0x81,
-} MBUS_STATES_DONE;
+} STATUS_MESSAGES;
 
 
 enum
@@ -136,8 +137,13 @@ enum
     EXEC_MBUS_STATE_SLAVE_INIT          = 0x05,
     EXEC_MBUS_STATE_SLAVE_ENABLE        = 0x06,
     EXEC_MBUS_STATE_START_DATA_UPLOAD   = 0x07,
-    EXEC_MBUS_STATE_RESET               = 0x08,
+    EXEC_MBUS_STATE_RESET               = 0x08,    
 } CONTROLLER_COMMANDS;
+
+
+enum{
+    CLIENT_CONNECTION_REQUEST           = 0x09,
+} CLIENT_COMMANDS;
 
     /* Provide C++ Compatibility */
 #ifdef __cplusplus

@@ -24,7 +24,7 @@ static uint16_t WaitCounter        = 0;
 
 enum ADDR
 {    
-    WAIT_TIME  = 20000,
+    WAIT_TIME  = 5000,
     WAIT_TIME2 = 65000,
 };
 
@@ -91,7 +91,7 @@ bool SLAVExDETECT(){
             }
             if (SlaveId > (NUMBER_OF_SLAVES - 5)){
                 SlaveDetect = 0;
-                SlaveId = 1;
+                SlaveId = 51;
                 return_val = true;
             }
             break;
@@ -386,7 +386,9 @@ bool SLAVExINITxANDxCONFIG(){
             if(ProgramSlave > 49){
                 if (ConfigureSlave(TRACKBACKPLANE5, SLOT1 << ShiftSlot, ProgramSlave, true) == true){
                     RunSlaveConfig = 0;
-                    return_val = true;
+                    ProgramSlave   = 1;
+                    ShiftSlot      = 0;
+                    return_val     = true;
                 }
             }
             else if (ConfigureSlave(TRACKBACKPLANE5, SLOT1 << ShiftSlot, ProgramSlave, false) == true){
@@ -590,7 +592,8 @@ bool ENABLExAMPLIFIER(void){
 //            WriteData1Register[2] = 0x80;               // Register Value Hi,
 //            WriteData1Register[3] = 0x00;               // Register Value Lo.
 //            SLAVExCOMMUNICATIONxHANDLER(BROADCAST_ADDRESS, 0, Write, WriteData1Register, 4);
-            EnableMachine++;
+            GoToCase = 2;
+            EnableMachine = WAIT;
             break;
         
         case 2:

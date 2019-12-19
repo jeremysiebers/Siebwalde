@@ -79,6 +79,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 */
 #define SERVER_PORT 10000
 #define CLIENT_PORT 10001
+#define CMD2ASCII   10
 
 ETHERNET_DATA ethernetData;
 UDP_SOCKET_INFO SocketInfo;
@@ -99,6 +100,19 @@ static udpTrans_t   *M_Box_Eth_Send_Ptr_prev;
 
 static udpTrans_t   udpRecvBox[MAILBOXSIZE];
 static udpTrans_t   udpTransBox[MAILBOXSIZE];
+
+const unsigned char *Cmd2Ascii[CMD2ASCII] = {
+    "NOP",
+    "EXEC_MBUS_STATE_SLAVES_ON",        
+    "EXEC_MBUS_STATE_SLAVE_DETECT",     
+    "EXEC_MBUS_STATE_SLAVES_BOOT_WAIT", 
+    "EXEC_MBUS_STATE_SLAVE_FW_DOWNLOAD",
+    "EXEC_MBUS_STATE_SLAVE_INIT",       
+    "EXEC_MBUS_STATE_SLAVE_ENABLE",     
+    "EXEC_MBUS_STATE_START_DATA_UPLOAD",
+    "EXEC_MBUS_STATE_RESET",
+    "CLIENT_CONNECTION_REQUEST"
+};
 
 // *****************************************************************************
 // *****************************************************************************
@@ -189,7 +203,7 @@ void ETHERNET_Tasks ( void )
                     netBiosName = TCPIP_STACK_NetBIOSName(netH);
 
 #if defined(TCPIP_STACK_USE_NBNS)
-                    SYS_PRINT("    Interface %s on host %s - NBNS enabled\r\n", netName, netBiosName);
+                    SYS_PRINT("Interface %s on host %s - NBNS enabled\r\n", netName, netBiosName);
 #else
                     SYS_PRINT("    Interface %s on host %s - NBNS disabled\r\n", netName, netBiosName);
 #endif  // defined(TCPIP_STACK_USE_NBNS)
@@ -257,7 +271,8 @@ void ETHERNET_Tasks ( void )
                 if (!TransSocketReady){//TCPIP_UDP_IsConnected(ethernetData.transsocket)){
                     TCPIP_UDP_SocketInfoGet(ethernetData.recvsocket, &SocketInfo);                
                     IpAddress = SocketInfo.remoteIPaddress;                
-                    ethernetData.transsocket = TCPIP_UDP_ClientOpen(IP_ADDRESS_TYPE_IPV4, CLIENT_PORT, &SocketInfo.remoteIPaddress);
+                    ethernetData.transsocket = TCPIP_UDP_ClientOpen(IP_ADDRESS_TYPE_IPV4, 
+                            CLIENT_PORT, &SocketInfo.remoteIPaddress);
                     if (ethernetData.transsocket == INVALID_SOCKET)
                     {
                         SYS_MESSAGE("Couldn't open client transsocket\r\n");
@@ -305,7 +320,11 @@ void ETHERNET_Tasks ( void )
             // Transfer the data out of the TCP RX FIFO and into our local processing buffer.
             int32_t rxed = TCPIP_UDP_ArrayGet(ethernetData.recvsocket, (char *)&udpRecv, sizeof(udpTrans_t));
             PutDataInReceiveMailBox(udpRecv);
-            SYS_PRINT("\tReceived a message command '%x' and length %d\r\n", udpRecv.command, rxed);
+            if(udpRecv.command < CMD2ASCII){
+                unsigned char *ptr = Cmd2Ascii[udpRecv.command];
+                SYS_PRINT("Received command: '%s' (length %d)\r\n", ptr, rxed);
+            }
+            
             
             ethernetData.state = ETHERNET_TCPIP_DATA_TX;
         }
@@ -324,7 +343,7 @@ void ETHERNET_Tasks ( void )
             if (CheckDataInSendMailBox()){
                 udpTrans_t *udpSend;
                 udpSend = GetDataFromSendMailBox();
-                TCPIP_UDP_ArrayPut(ethernetData.transsocket, &udpSend->header, sizeof(udpSend));
+                TCPIP_UDP_ArrayPut(ethernetData.transsocket, &udpSend->header, sizeof(udpTrans_t));
                 TCPIP_UDP_Flush(ethernetData.transsocket);                
             }            
             ethernetData.state = ETHERNET_TCPIP_DATA_RX;
@@ -345,7 +364,7 @@ void ETHERNET_Tasks ( void )
     void PutDataInReceiveMailBox (udpTrans_t data)
 
   Remarks:
-    See prototype in mbus.h.
+    See prototype in ethernet.h.
  */
 
 void PutDataInReceiveMailBox (udpTrans_t data){
@@ -364,23 +383,22 @@ void PutDataInReceiveMailBox (udpTrans_t data){
     udpTrans_t GETxDATAxFROMxRECEIVExMAILxBOX()
 
   Remarks:
-    See prototype in mbus.h.
+    See prototype in ethernet.h.
  */
 
-udpTrans_t GETxDATAxFROMxRECEIVExMAILxBOX(){
+udpTrans_t *GETxDATAxFROMxRECEIVExMAILxBOX(){
     
-    udpTrans_t data;
+    udpTrans_t *data;
     
     if (M_Box_Eth_Recv_Ptr != M_Box_Eth_Recv_Ptr_prev){
         
+        data = M_Box_Eth_Recv_Ptr_prev;
+        //memcpy(&data, M_Box_Eth_Recv_Ptr_prev, sizeof(data));
+        
+        M_Box_Eth_Recv_Ptr_prev++;        
         if(M_Box_Eth_Recv_Ptr_prev >= &udpRecvBox[MAILBOXSIZE]){
             M_Box_Eth_Recv_Ptr_prev = &udpRecvBox[0];
-        }        
-        memcpy(&data, M_Box_Eth_Recv_Ptr_prev, sizeof(data));
-        M_Box_Eth_Recv_Ptr_prev++;
-    }
-    else{
-        data.header = 0x00;
+        }
     }
     return (data);     
 }
@@ -390,7 +408,7 @@ udpTrans_t GETxDATAxFROMxRECEIVExMAILxBOX(){
     udpTrans_t GETxDATAxFROMxRECEIVExMAILxBOX()
 
   Remarks:
-    See prototype in mbus.h.
+    See prototype in ethernet.h.
  */
 
 bool CHECKxDATAxINxRECEIVExMAILxBOX(){
@@ -409,7 +427,7 @@ bool CHECKxDATAxINxRECEIVExMAILxBOX(){
     udpTrans_t GetDataFromSendMailBox ()
 
   Remarks:
-    See prototype in mbus.h.
+    See prototype in ethernet.h.
  */
 
 udpTrans_t *GetDataFromSendMailBox (){
@@ -435,7 +453,7 @@ udpTrans_t *GetDataFromSendMailBox (){
     udpTrans_t GetDataFromSendMailBox ()
 
   Remarks:
-    See prototype in mbus.h.
+    See prototype in ethernet.h.
  */
 
 bool CheckDataInSendMailBox (){
@@ -454,7 +472,7 @@ bool CheckDataInSendMailBox (){
     void PUTxDATAxINxSENDxMAILxBOX (udpTrans_t *data)
 
   Remarks:
-    See prototype in mbus.h.
+    See prototype in ethernet.h.
  */
 
 void PUTxDATAxINxSENDxMAILxBOX (udpTrans_t *data){
@@ -484,7 +502,7 @@ uint32_t GETxETHERNETxSTATE (void){
     void CREATExTASKxSTATUSxMESSAGE(uint8_t taskid, uint8_t taskstate, uint8_t feedback)
 
   Remarks:
-    See prototype in mbus.h.
+    See prototype in ethernet.h.
  */
 //static 
 
@@ -503,6 +521,25 @@ void CREATExTASKxSTATUSxMESSAGE(uint8_t taskid, uint8_t taskstate, uint8_t feedb
         StatusMessage.data[i] = 0;
     }
     PUTxDATAxINxSENDxMAILxBOX(&StatusMessage);
+}
+
+/******************************************************************************
+  Function:
+    void DISCONNECTxCLIENT()
+
+  Remarks:
+    See prototype in ethernet.h.
+ */
+//static 
+
+void DISCONNECTxCLIENT(){
+    
+    TCPIP_UDP_Discard(ethernetData.recvsocket);
+    TCPIP_UDP_Close(ethernetData.recvsocket);
+    TCPIP_UDP_Discard(ethernetData.transsocket);
+    TCPIP_UDP_Close(ethernetData.transsocket);
+    ethernetData.state = ETHERNET_TCPIP_OPENING_SERVER;
+    SYS_MESSAGE("Connection was closed\r\n");    
 }
 
 /*******************************************************************************

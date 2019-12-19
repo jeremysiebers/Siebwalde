@@ -349,9 +349,19 @@ void MBUS_Tasks ( void )
         {
             DRV_TMR_Stop(mbusData.ModbusCommCycleHandle);
             Slaves_Disable_On();
-            mbusData.state = MBUS_STATE_WAIT;
+            mbusData.state  = MBUS_STATE_RESET_WAIT;
+            mbusData.upload = UPLOAD_STATE_WAIT;
             MaxSlaveUploadCount = 55;
-            CREATExTASKxSTATUSxMESSAGE((uint8_t)MBUS, (uint8_t)MBUS_STATE_RESET, (uint8_t)DONE);
+            DelayCount = ReadCoreTimer();            
+            break;
+        }
+        
+        case MBUS_STATE_RESET_WAIT:
+        {
+            if((ReadCoreTimer() - DelayCount) > 100000000){
+                mbusData.state = MBUS_STATE_WAIT;
+                CREATExTASKxSTATUSxMESSAGE((uint8_t)MBUS, (uint8_t)MBUS_STATE_RESET, (uint8_t)DONE);
+            }            
             break;
         }
 
@@ -381,7 +391,8 @@ void MBUS_Tasks ( void )
                 UploadSlaveData = false;
                 data.header = HEADER;
                 data.command = SLAVEINFO;
-                memcpy(&data.data, &(SlaveInfo[NextSlaveCounter].Header), SizeOfSlaveInfo);
+                memcpy(&data.data, &(SlaveInfo[NextSlaveCounter].Header), sizeof(SLAVE_INFO));
+                //data.data[0] &= SlaveInfo[NextSlaveCounter].Header;
                 PUTxDATAxINxSENDxMAILxBOX(&data);                
                 NextSlaveCounter++;
                 if(NextSlaveCounter > MaxSlaveUploadCount){

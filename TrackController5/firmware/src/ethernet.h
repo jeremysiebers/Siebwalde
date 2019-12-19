@@ -231,7 +231,7 @@ void ETHERNET_Tasks( void );
     
  */
 
-udpTrans_t GETxDATAxFROMxRECEIVExMAILxBOX();
+udpTrans_t *GETxDATAxFROMxRECEIVExMAILxBOX();
 
 
 /*******************************************************************************
@@ -355,6 +355,37 @@ bool CHECKxDATAxINxRECEIVExMAILxBOX();
     This routine must be called from SYS_Tasks() routine.
  */
 void CREATExTASKxSTATUSxMESSAGE(uint8_t taskid, uint8_t taskstate, uint8_t feedback);
+
+/*******************************************************************************
+  Function:
+    void DISCONNECTxCLIENT(void)
+
+  Summary:
+    MPLAB Harmony Demo application tasks function
+
+  Description:
+    This routine is the Harmony Demo application's tasks function.  It
+    defines the application's state machine and core logic.
+
+  Precondition:
+    The system and application initialization ("SYS_Initialize") should be
+    called before calling this.
+
+  Parameters:
+    None.
+
+  Returns:
+    None.
+
+  Example:
+    <code>
+    MBUS_Tasks();
+    </code>
+
+  Remarks:
+    This routine must be called from SYS_Tasks() routine.
+ */
+void DISCONNECTxCLIENT(void);
 
 #endif /* _ETHERNET_H */
 
