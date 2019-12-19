@@ -382,7 +382,7 @@ void MBUS_Tasks ( void )
                 data.header = HEADER;
                 data.command = SLAVEINFO;
                 memcpy(&data.data, &(SlaveInfo[NextSlaveCounter].Header), SizeOfSlaveInfo);
-                PUTxDATAxINxSENDxMAILxBOX(data);                
+                PUTxDATAxINxSENDxMAILxBOX(&data);                
                 NextSlaveCounter++;
                 if(NextSlaveCounter > MaxSlaveUploadCount){
                     NextSlaveCounter = 1;
@@ -412,7 +412,7 @@ void MBUS_Tasks ( void )
                     }
                 }                                
                 memcpy(&data, &(SlaveInfo[NextSlaveCounter].Header), sizeof(SLAVE_INFO));
-                PUTxDATAxINxSENDxMAILxBOX(data);
+                PUTxDATAxINxSENDxMAILxBOX(&data);
                 
                 NextSlaveCounter++;
                 if(NextSlaveCounter > MaxSlaveUploadCount){

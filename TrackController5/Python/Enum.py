@@ -49,11 +49,32 @@ class EnumSlaveConfig:
 
 class EnumCommand:
     EXEC_MBUS_STATE_SLAVES_ON           = 0x01
-    EXEC_SLAVE_DETECT                   = 0x02
+    EXEC_MBUS_STATE_SLAVE_DETECT        = 0x02
     EXEC_MBUS_STATE_SLAVES_BOOT_WAIT    = 0x03
-    EXEC_MBUS_STATE_SLAVE_DETECT        = 0x04
-    EXEC_MBUS_STATE_SLAVE_FW_DOWNLOAD   = 0x05
-    EXEC_MBUS_STATE_SLAVE_INIT          = 0x06
-    EXEC_MBUS_STATE_SLAVE_ENABLE        = 0x07
-    EXEC_MBUS_STATE_START_DATA_UPLOAD   = 0x08
-    EXEC_MBUS_STATE_RESET               = 0x09
+    EXEC_MBUS_STATE_SLAVE_FW_DOWNLOAD   = 0x04
+    EXEC_MBUS_STATE_SLAVE_INIT          = 0x05
+    EXEC_MBUS_STATE_SLAVE_ENABLE        = 0x06
+    EXEC_MBUS_STATE_START_DATA_UPLOAD   = 0x07
+    EXEC_MBUS_STATE_RESET               = 0x08
+    
+    MBUS_STATE_INIT                     = 0x00
+    MBUS_STATE_WAIT                     = 0x01
+    MBUS_STATE_SLAVES_ON                = 0x02
+    MBUS_STATE_SLAVES_BOOT_WAIT         = 0x03
+    MBUS_STATE_SLAVE_DETECT             = 0x04
+    MBUS_STATE_SLAVE_FW_DOWNLOAD        = 0x05
+    MBUS_STATE_SLAVE_INIT               = 0x06
+    MBUS_STATE_SLAVE_ENABLE             = 0x07
+    MBUS_STATE_START_DATA_UPLOAD        = 0x08
+    MBUS_STATE_SERVICE_TASKS            = 0x09
+    MBUS_STATE_RESET                    = 0x0A    
+    
+    MODBUS                              = 0x09
+    ETHERNET_T                          = 0x10
+    BOOTLOADER                          = 0x11
+    DUMMY_CMD                           = 0x12
+    CONTROLLER                          = 0x80
+    MBUS                                = 0x81
+    DONE                                = 0xFC
+    COMMAND                             = 0xFD
+    ERROR                               = 0xFE

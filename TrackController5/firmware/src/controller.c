@@ -155,12 +155,11 @@ void CONTROLLER_Tasks ( void )
 
         case CONTROLLER_STATE_IDLE:
         {
-            if(CHECKxDATAxINxRECEIVExMAILxBOX){
+            if(CHECKxDATAxINxRECEIVExMAILxBOX()){
                 EthernetRecvData = GETxDATAxFROMxRECEIVExMAILxBOX();
                 
-                if(EthernetRecvData.header = 0xAA){
-                    controllerData.state = CONTROLLER_STATE_HANDLE_COMM_DATA;                    
-                    PUTxDATAxINxSENDxMAILxBOX(EthernetRecvData);                // communicate back to indicate received command
+                if(EthernetRecvData.header == HEADER){
+                    controllerData.state = CONTROLLER_STATE_HANDLE_COMM_DATA;                                        
                 }
             }
             break;
@@ -213,6 +212,9 @@ void CONTROLLER_Tasks ( void )
                 }
                 
             }
+                        
+            controllerData.state = CONTROLLER_STATE_CHECK_MBUS_STATE;
+            
             break;
         }
         

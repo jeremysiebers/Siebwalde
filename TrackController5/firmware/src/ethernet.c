@@ -95,7 +95,7 @@ static bool         TransSocketReady = false;
 static udpTrans_t   *M_Box_Eth_Recv_Ptr;
 static udpTrans_t   *M_Box_Eth_Recv_Ptr_prev;
 static udpTrans_t   *M_Box_Eth_Send_Ptr;
-static udpTrans_t   *M_Box_Eth_Send_Ptr_next;
+static udpTrans_t   *M_Box_Eth_Send_Ptr_prev;
 
 static udpTrans_t   udpRecvBox[MAILBOXSIZE];
 static udpTrans_t   udpTransBox[MAILBOXSIZE];
@@ -117,7 +117,7 @@ static udpTrans_t   udpTransBox[MAILBOXSIZE];
 
 
 void        PutDataInReceiveMailBox (udpTrans_t data);
-udpTrans_t  GetDataFromSendMailBox  ();
+udpTrans_t *GetDataFromSendMailBox ();
 bool        CheckDataInSendMailBox ();
 
 
@@ -147,7 +147,7 @@ void ETHERNET_Initialize ( void )
     /* For internal use to get new data to be send from mailbox*/
     M_Box_Eth_Send_Ptr      = &udpTransBox[0];
     /* For external use to set new data to be send from send mailbox*/
-    M_Box_Eth_Send_Ptr_next = &udpTransBox[0];
+    M_Box_Eth_Send_Ptr_prev = &udpTransBox[0];
     
     SYS_MESSAGE("\033[2J\033[1;1H");//clear terminal
     SYS_MESSAGE("Starting Siebwalde TrackController...\n\r");
@@ -321,10 +321,10 @@ void ETHERNET_Tasks ( void )
                 break;
             }
             
-            if (CheckDataInSendMailBox){
-                udpTrans_t udpSend;
+            if (CheckDataInSendMailBox()){
+                udpTrans_t *udpSend;
                 udpSend = GetDataFromSendMailBox();
-                TCPIP_UDP_ArrayPut(ethernetData.transsocket, &udpSend.header, sizeof(udpSend));
+                TCPIP_UDP_ArrayPut(ethernetData.transsocket, &udpSend->header, sizeof(udpSend));
                 TCPIP_UDP_Flush(ethernetData.transsocket);                
             }            
             ethernetData.state = ETHERNET_TCPIP_DATA_RX;
@@ -373,11 +373,11 @@ udpTrans_t GETxDATAxFROMxRECEIVExMAILxBOX(){
     
     if (M_Box_Eth_Recv_Ptr != M_Box_Eth_Recv_Ptr_prev){
         
-        M_Box_Eth_Recv_Ptr_prev++;
         if(M_Box_Eth_Recv_Ptr_prev >= &udpRecvBox[MAILBOXSIZE]){
             M_Box_Eth_Recv_Ptr_prev = &udpRecvBox[0];
         }        
         memcpy(&data, M_Box_Eth_Recv_Ptr_prev, sizeof(data));
+        M_Box_Eth_Recv_Ptr_prev++;
     }
     else{
         data.header = 0x00;
@@ -412,20 +412,20 @@ bool CHECKxDATAxINxRECEIVExMAILxBOX(){
     See prototype in mbus.h.
  */
 
-udpTrans_t GetDataFromSendMailBox (){
+udpTrans_t *GetDataFromSendMailBox (){
     
-    udpTrans_t data;
+    udpTrans_t *data;
     
-    if (M_Box_Eth_Send_Ptr != M_Box_Eth_Send_Ptr_next){
+    if (M_Box_Eth_Send_Ptr != M_Box_Eth_Send_Ptr_prev){
         
-        M_Box_Eth_Send_Ptr_next++;
-        if(M_Box_Eth_Send_Ptr_next >= &udpTransBox[MAILBOXSIZE]){
-            M_Box_Eth_Send_Ptr_next = &udpTransBox[0];
-        }        
-        memcpy(&data, M_Box_Eth_Send_Ptr_next, sizeof(data));
-    }
-    else{
-        data.header = 0x00;
+        //memcpy(&data, M_Box_Eth_Send_Ptr_prev, sizeof(data));
+        data = M_Box_Eth_Send_Ptr_prev;
+        
+        M_Box_Eth_Send_Ptr_prev++;
+        if(M_Box_Eth_Send_Ptr_prev >= &udpTransBox[MAILBOXSIZE]){
+            M_Box_Eth_Send_Ptr_prev = &udpTransBox[0];
+        }
+        
     }
     return (data);      
 }
@@ -440,7 +440,7 @@ udpTrans_t GetDataFromSendMailBox (){
 
 bool CheckDataInSendMailBox (){
     
-    if (M_Box_Eth_Send_Ptr != M_Box_Eth_Send_Ptr_next){
+    if (M_Box_Eth_Send_Ptr != M_Box_Eth_Send_Ptr_prev){
         
         return(true);
     }
@@ -451,15 +451,15 @@ bool CheckDataInSendMailBox (){
 
 /******************************************************************************
   Function:
-    void PUTxDATAxINxSENDxMAILxBOX (udpTrans_t data)
+    void PUTxDATAxINxSENDxMAILxBOX (udpTrans_t *data)
 
   Remarks:
     See prototype in mbus.h.
  */
 
-void PUTxDATAxINxSENDxMAILxBOX (udpTrans_t data){
+void PUTxDATAxINxSENDxMAILxBOX (udpTrans_t *data){
     
-    *M_Box_Eth_Send_Ptr = data;
+    *M_Box_Eth_Send_Ptr = *data;
     M_Box_Eth_Send_Ptr++;
     
     if(M_Box_Eth_Send_Ptr >= &udpTransBox[MAILBOXSIZE]){
@@ -486,27 +486,23 @@ uint32_t GETxETHERNETxSTATE (void){
   Remarks:
     See prototype in mbus.h.
  */
+//static 
 
 void CREATExTASKxSTATUSxMESSAGE(uint8_t taskid, uint8_t taskstate, uint8_t feedback){
-    udpTrans_t data;
     
-    data.header = HEADER;
-    data.command = taskid;
+    udpTrans_t StatusMessage;
     
-    uint8_t i;
+    StatusMessage.header = HEADER;
+    StatusMessage.command = taskid;
+    StatusMessage.data[0] = taskstate;
+    StatusMessage.data[1] = feedback;
     
-    for(i=0; i < sizeof(data.command); i++){
-        if(i = 0){
-            data.data[i] = taskstate;
-        }
-        else if(i = 1){
-            data.data[i] = feedback;
-        }
-        else{
-            data.data[i] = 0;
-        }
+    uint8_t i=0;
+    
+    for(i=2; i < sizeof(StatusMessage.data); i++){
+        StatusMessage.data[i] = 0;
     }
-    PUTxDATAxINxSENDxMAILxBOX(data);
+    PUTxDATAxINxSENDxMAILxBOX(&StatusMessage);
 }
 
 /*******************************************************************************

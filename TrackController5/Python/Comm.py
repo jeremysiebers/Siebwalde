@@ -19,6 +19,17 @@ class TrackAmplifier:
         self.SpiCommErrorCounter = 0
         self.MbFooter            = 0
 
+class EtherNetFeedBack:
+    def __init__(self):
+        self.taskid              = 0
+        self.taskstate           = 0
+        self.feedback            = 0
+    
+    def ClearOldData(self):
+        self.taskid              = 0
+        self.taskstate           = 0
+        self.feedback            = 0        
+
 class Bootloader:
     def __init__(self):
         self.rx_data         = [] 
@@ -42,8 +53,8 @@ class DataAquisition:
 
         self.Trackamplifiers = list()
         self.Bootloader      = Bootloader()
-        self.EthernetTarget  = TrackAmplifier()
-        self.line            = ''
+        self.EthernetTarget  = EtherNetFeedBack()
+        self.line            = 0
         self.run             = True
         self.header          = 170
         self.header_index    = 0
@@ -67,9 +78,9 @@ class DataAquisition:
     def StopSerialReadThread(self):
         self.thread1.stop()    
     
-    def WriteSerial(self, command, data):
+    def WriteSerial(self, function, command, data):
         
-        if(command == EnumCommand.MODBUS):
+        if(function == EnumCommand.MODBUS):
             send = [0,0,0,0,0,0,0,0]
             j = 0
             k = 1
@@ -79,113 +90,96 @@ class DataAquisition:
                 j += 2
                 k += 2                
             
-            tx = struct.pack("<11B", 0xAA, command, send[0], send[1], send[2], send[3], send[4], send[5], send[6], send[7], 0x55)
+            tx = struct.pack("<11B", 0xAA, function, send[0], send[1], send[2], send[3], send[4], send[5], send[6], send[7], 0x55)
             self.sock_trans.send(tx)
         
-        if(command == EnumCommand.ETHERNET_T):
+        if(function == EnumCommand.ETHERNET_T):
             tx = struct.pack("<4B", 0xAA, command, data, 0x55)
             self.sock_trans.send(tx)
         
-        if(command == EnumCommand.BOOTLOADER):
-            tx = struct.pack("<2B", 0xAA, command)
+        if(function == EnumCommand.BOOTLOADER):
+            tx = struct.pack("<2B", 0xAA, function)
             tx = tx + data
             self.sock_trans.send(tx)
             
-        if(command == EnumCommand.DUMMY_CMD):
+        if(function == EnumCommand.DUMMY_CMD):
             self.sock_trans.send(data.encode())           
     
     
     def ReadSerial(self):
         
         try:
-            self.line, addr = self.sock_recv.recvfrom(82)            
+            self.line, addr = self.sock_recv.recvfrom(200)            
         except:
             pass
         
-        while (len(self.line) > 0):
-        
-            self.header_index = self.line.find(self.header)
-                        
-            if(self.header_index != 0):
-                self.line = self.line[self.header_index:]
-                print ("header found at " + str(self.header_index))            
+        try:
+            while (len(self.line) > 0):
             
-            try:
-                self.data = struct.unpack ("<4B", self.line[:4])
-            except:
-                return
-            
-            #print(self.data[1])
-                        
-            if(len(self.line) > 74):
-                # Check if data is amplifier data
-                if (self.data[0] == 170 and self.data[1] == EnumCommand.MODBUS):
-                    self.data = struct.unpack ("<5B12H2HLHBB", self.line[:41]) #seems that from IPstack from PIC some padding is added after L!
-                    if(self.data[2] == 170 and self.data[22] == 85):
-                        self.Trackamplifiers[self.data[3]].MbHeader             = self.data[2 ]
-                        self.Trackamplifiers[self.data[3]].SlaveNumber          = self.data[3 ]
-                        self.Trackamplifiers[self.data[3]].SlaveDetected        = self.data[4 ]
-                        self.Trackamplifiers[self.data[3]].HoldingReg[0]        = self.data[5 ]
-                        self.Trackamplifiers[self.data[3]].HoldingReg[1]        = self.data[6 ]
-                        self.Trackamplifiers[self.data[3]].HoldingReg[2]        = self.data[7 ]
-                        self.Trackamplifiers[self.data[3]].HoldingReg[3]        = self.data[8 ]
-                        self.Trackamplifiers[self.data[3]].HoldingReg[4]        = self.data[9 ]
-                        self.Trackamplifiers[self.data[3]].HoldingReg[5]        = self.data[10]
-                        self.Trackamplifiers[self.data[3]].HoldingReg[6]        = self.data[11]
-                        self.Trackamplifiers[self.data[3]].HoldingReg[7]        = self.data[12]
-                        self.Trackamplifiers[self.data[3]].HoldingReg[8]        = self.data[13]
-                        self.Trackamplifiers[self.data[3]].HoldingReg[9]        = self.data[14]
-                        self.Trackamplifiers[self.data[3]].HoldingReg[10]       = self.data[15]
-                        self.Trackamplifiers[self.data[3]].HoldingReg[11]       = self.data[16]                
-                        self.Trackamplifiers[self.data[3]].MbReceiveCounter     = self.data[17]
-                        self.Trackamplifiers[self.data[3]].MbSentCounter        = self.data[18]
-                        self.Trackamplifiers[self.data[3]].MbCommError          = self.data[19]
-                        self.Trackamplifiers[self.data[3]].MbExceptionCode      = self.data[20]
-                        self.Trackamplifiers[self.data[3]].SpiCommErrorCounter  = self.data[21]
-                        self.Trackamplifiers[self.data[3]].MbFooter             = self.data[22]
-                        #print("data received for amp: " + str(self.data[1]) + "\n")
-                    else:
-                        print ('Bad data received!\n')
-                        
+                self.header_index = self.line.find(self.header)
+                            
+                if(self.header_index != 0):
+                    self.line = self.line[self.header_index:]
+                    print ("header found at " + str(self.header_index))            
+                
+                try:
+                    self.data = struct.unpack ("<4B", self.line[:4])
+                except:
+                    return
+                
+                #print(self.data[1])
+
+                if(len(self.line) > 81):
+                    # Check if data is amplifier data
+                    if (self.data[0] == 170 and self.data[1] == EnumCommand.MODBUS):
+                        self.data = struct.unpack ("<5B12H2HLHBB", self.line[:41]) #seems that from IPstack from PIC some padding is added after L!
+                        if(self.data[2] == 170 and self.data[22] == 85):
+                            self.Trackamplifiers[self.data[3]].MbHeader             = self.data[2 ]
+                            self.Trackamplifiers[self.data[3]].SlaveNumber          = self.data[3 ]
+                            self.Trackamplifiers[self.data[3]].SlaveDetected        = self.data[4 ]
+                            self.Trackamplifiers[self.data[3]].HoldingReg[0]        = self.data[5 ]
+                            self.Trackamplifiers[self.data[3]].HoldingReg[1]        = self.data[6 ]
+                            self.Trackamplifiers[self.data[3]].HoldingReg[2]        = self.data[7 ]
+                            self.Trackamplifiers[self.data[3]].HoldingReg[3]        = self.data[8 ]
+                            self.Trackamplifiers[self.data[3]].HoldingReg[4]        = self.data[9 ]
+                            self.Trackamplifiers[self.data[3]].HoldingReg[5]        = self.data[10]
+                            self.Trackamplifiers[self.data[3]].HoldingReg[6]        = self.data[11]
+                            self.Trackamplifiers[self.data[3]].HoldingReg[7]        = self.data[12]
+                            self.Trackamplifiers[self.data[3]].HoldingReg[8]        = self.data[13]
+                            self.Trackamplifiers[self.data[3]].HoldingReg[9]        = self.data[14]
+                            self.Trackamplifiers[self.data[3]].HoldingReg[10]       = self.data[15]
+                            self.Trackamplifiers[self.data[3]].HoldingReg[11]       = self.data[16]                
+                            self.Trackamplifiers[self.data[3]].MbReceiveCounter     = self.data[17]
+                            self.Trackamplifiers[self.data[3]].MbSentCounter        = self.data[18]
+                            self.Trackamplifiers[self.data[3]].MbCommError          = self.data[19]
+                            self.Trackamplifiers[self.data[3]].MbExceptionCode      = self.data[20]
+                            self.Trackamplifiers[self.data[3]].SpiCommErrorCounter  = self.data[21]
+                            self.Trackamplifiers[self.data[3]].MbFooter             = self.data[22]
+                            #print("data received for amp: " + str(self.data[1]) + "\n")
+                        else:
+                            print ('Bad data received!\n')
+                                    
+                    elif (self.data[0] == 170 and self.data[1] == EnumCommand.BOOTLOADER):
+                        self.data = struct.unpack ("<37B", self.line[:37])
+                        self.bootloader_data = copy.copy(self.data)
+                    
                     self.line = self.line[82:]
                 
-                elif (self.data[0] == 170 and self.data[1] == EnumCommand.ETHERNET_T):
-                    self.data = struct.unpack ("<4B4H6H2H2HBBHB", self.line[:37])
-                    if(self.data[2] == 170 and self.data[21] == 85):
-                        self.EthernetTarget.SlaveNumber          = self.data[3 ]
-                        self.EthernetTarget.HoldingReg[0]        = self.data[4 ]
-                        self.EthernetTarget.HoldingReg[1]        = self.data[5 ]
-                        self.EthernetTarget.HoldingReg[2]        = self.data[6 ]
-                        self.EthernetTarget.HoldingReg[3]        = self.data[7 ]
-                        self.EthernetTarget.InputReg[0]          = self.data[8 ]
-                        self.EthernetTarget.InputReg[1]          = self.data[9 ]
-                        self.EthernetTarget.InputReg[2]          = self.data[10]
-                        self.EthernetTarget.InputReg[3]          = self.data[11]
-                        self.EthernetTarget.InputReg[4]          = self.data[12]
-                        self.EthernetTarget.InputReg[5]          = self.data[13]
-                        self.EthernetTarget.DiagReg[0]           = self.data[14]
-                        self.EthernetTarget.DiagReg[1]           = self.data[15]                
-                        self.EthernetTarget.MbReceiveCounter     = self.data[16]
-                        self.EthernetTarget.MbSentCounter        = self.data[17]
-                        self.EthernetTarget.MbCommError          = self.data[18]
-                        self.EthernetTarget.MbExceptionCode      = self.data[19]
-                        self.EthernetTarget.SpiCommErrorCounter  = self.data[20]
-                        #print("data received for amp: " + str(self.data[1]) + "\n")
-                        self.UpdateTick = not self.UpdateTick
-                    else:
-                        print ('Bad data received!\n')
-                        
-                    self.line = self.line[37:]
-            
-            if(len(self.line) > 36):    
-                # Check if data is bootloader data
-                if (self.data[0] == 170 and self.data[1] == EnumCommand.BOOTLOADER):
-                    self.data = struct.unpack ("<37B", self.line[:37])
-                    self.bootloader_data = copy.copy(self.data)
-                    self.line = self.line[37:]
-            
-            else:
-                self.line = self.line[37:]
+                elif(len(self.line) == 4):
+                    # Check if data command feedback
+                    self.data = struct.unpack ("<4B", self.line[:4])
+                    if(self.data[0] == 170):
+                        self.EthernetTarget.taskid               = self.data[1 ]
+                        self.EthernetTarget.taskstate            = self.data[2 ]
+                        self.EthernetTarget.feedback             = self.data[3 ]
+                    
+                    self.line = 0
+                
+                else:
+                    self.line = 0
+    
+        except:
+            pass        
 
 
 

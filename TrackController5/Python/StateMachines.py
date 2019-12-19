@@ -44,29 +44,35 @@ class State:
         case 0
         '''
         if(self.RunResetAll == 0):
-            self.Amplifiers.WriteSerial(EnumCommand.EXEC_MBUS_STATE_RESET, 0)
+            self.Amplifiers.WriteSerial(EnumCommand.ETHERNET_T, EnumCommand.EXEC_MBUS_STATE_RESET, 0)
             self.RunResetAll += 1
-            print("ResetAllSlaves --> reset all slaves sent... --> sleep 3 seconds")
-            time.sleep(3)
+            print("ResetAllSlaves --> EXEC_MBUS_STATE_RESET --> sleep 1 seconds")
+            time.sleep(1)
             return EnumStateMachine.busy
 
         '''
         case 1
         '''
         if(self.RunResetAll == 1):
-            if(self.Amplifiers.EthernetTarget.InputReg[0] == EnumEthernetT.OK):
-                self.Amplifiers.WriteSerial(EnumCommand.ETHERNET_T, EnumEthernetT.IDLE)
+            if(self.Amplifiers.EthernetTarget.taskid == EnumCommand.MBUS and self.Amplifiers.EthernetTarget.taskstate == EnumCommand.MBUS_STATE_RESET and 
+               self.Amplifiers.EthernetTarget.feedback == EnumCommand.DONE):
+                print("ResetAllSlaves --> EXEC_MBUS_STATE_RESET --> done.")
+                self.Amplifiers.EthernetTarget.ClearOldData()
+                self.Amplifiers.WriteSerial(EnumCommand.ETHERNET_T, EnumCommand.EXEC_MBUS_STATE_SLAVES_ON, 0)
                 self.RunResetAll += 1
-                print("ResetAllSlaves --> EthernetTarget.InputReg[0] == EnumEthernetT.OK --> sent goto to IDLE state")
+                print("ResetAllSlaves --> EXEC_MBUS_STATE_SLAVES_ON")
                 return EnumStateMachine.busy
 
         '''
         case 2
         '''
         if(self.RunResetAll == 2):
-            if(self.Amplifiers.EthernetTarget.InputReg[0] == EnumEthernetT.IDLE):
+            if(self.Amplifiers.EthernetTarget.taskid == EnumCommand.MBUS and self.Amplifiers.EthernetTarget.taskstate == EnumCommand.MBUS_STATE_SLAVES_ON and 
+               self.Amplifiers.EthernetTarget.feedback == EnumCommand.DONE):
+                print("ResetAllSlaves --> EXEC_MBUS_STATE_SLAVES_ON --> done.")
+                self.Amplifiers.EthernetTarget.ClearOldData()
                 self.RunResetAll = 0
-                print("ResetAllSlaves --> EthernetTarget.InputReg[0] == EnumEthernetT.IDLE --> return OK.\n")
+                print("ResetAllSlaves --> return OK.\n")
                 return EnumStateMachine.ok
     
         return EnumStateMachine.busy    

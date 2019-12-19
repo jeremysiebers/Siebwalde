@@ -236,7 +236,7 @@ udpTrans_t GETxDATAxFROMxRECEIVExMAILxBOX();
 
 /*******************************************************************************
   Function:
-    void PUTxDATAxINxSENDxMAILxBOX (udpTrans_t data)
+    void PUTxDATAxINxSENDxMAILxBOX (udpTrans_t *data)
 
   Summary:
     
@@ -260,7 +260,7 @@ udpTrans_t GETxDATAxFROMxRECEIVExMAILxBOX();
     
  */
 
-void PUTxDATAxINxSENDxMAILxBOX (udpTrans_t data);
+void PUTxDATAxINxSENDxMAILxBOX (udpTrans_t *data);
 
 /*******************************************************************************
   Function:
