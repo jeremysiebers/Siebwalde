@@ -193,8 +193,7 @@ void CONTROLLER_Tasks ( void )
                     CREATExTASKxSTATUSxMESSAGE((uint8_t)CONTROLLER, (uint8_t)CONNECTED, (uint8_t)DONE); // assume same client is connecting again
                     SYS_MESSAGE("Client re-connected, controller going to Idle state.\n\r");
                     break;
-                }
-                
+                }                
                 case EXEC_MBUS_STATE_SLAVES_ON:
                 {
                     SETxMBUSxSTATE(MBUS_STATE_SLAVES_ON);
@@ -234,14 +233,12 @@ void CONTROLLER_Tasks ( void )
                 default:
                 {
                     CREATExTASKxSTATUSxMESSAGE((uint8_t)CONTROLLER, (uint8_t)COMMAND, (uint8_t)ERROR);
+                    SYS_MESSAGE("Controller command error, received command invalid.\n\r");
                     controllerData.state = CONTROLLER_STATE_IDLE;
                     break;
-                }
-                
-            }
-                        
-            controllerData.state = CONTROLLER_STATE_CHECK_MBUS_STATE;
-            
+                }                
+            }                        
+            controllerData.state = CONTROLLER_STATE_CHECK_MBUS_STATE;            
             break;
         }
         

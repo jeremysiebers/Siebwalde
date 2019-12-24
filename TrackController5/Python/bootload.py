@@ -6,7 +6,7 @@ import ctypes
 import time
 
 try:
-    file_object  = open(".\TrackAmplifier4.X.production.hex", 'rb')
+    file_object  = open(".\TrackAmplifier4.X.production.hex", 'r')
 except:
     print('failed to open file !!!! \n')
 
@@ -137,6 +137,42 @@ class BootLoader:
         return(EnumBootloader.COMMAND_SUCCESSFUL)
 
     #---------------------------------------------------------------------------------------------------------------------------#
+    
+    def ReadHexFileToBuf(self, bootloader_offset, program_mem_size):
+        print("------------- ReadHexFileToBuf ------------\n")
+
+        if (file_object == ''):
+            print('Write flash nok, no file loaded/found!\n')
+            return(COMMAND_UNSUCCESSFUL)
+
+        HexRowWidth = 16 #bytes
+
+        ByteArray = []
+        ByteArrayChecksum = []
+
+        ProcessLines = int((program_mem_size - bootloader_offset) / HexRowWidth)
+
+        file_object.seek(0)
+
+        for i in range(ProcessLines):        
+            buff = file_object.readline()
+            address = buff[3:7]
+
+            if(int(address, 16) < bootloader_offset):
+                print('Write flash nok, first address to write is within bootloader block!\n')
+                return(COMMAND_UNSUCCESSFUL)            
+            if(int(address, 16) > program_mem_size):
+                print('Write flash nok, address to write is greater then memory size!\n')
+                return(COMMAND_UNSUCCESSFUL)
+
+            data = buff[9:41]
+            ByteArray.append([bytearray.fromhex(address), bytearray.fromhex(data)])
+            ByteArrayChecksum.append([bytearray.fromhex(data)])
+        
+        return ByteArrayChecksum
+        
+    
+    #---------------------------------------------------------------------------------------------------------------------------#    
 
     def WriteFlash(self, bootloader_offset, program_mem_size):
 

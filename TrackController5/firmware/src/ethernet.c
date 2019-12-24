@@ -101,7 +101,7 @@ static udpTrans_t   *M_Box_Eth_Send_Ptr_prev;
 static udpTrans_t   udpRecvBox[MAILBOXSIZE];
 static udpTrans_t   udpTransBox[MAILBOXSIZE];
 
-const unsigned char *Cmd2Ascii[CMD2ASCII] = {
+unsigned char *Cmd2Ascii[] = {
     "NOP",
     "EXEC_MBUS_STATE_SLAVES_ON",        
     "EXEC_MBUS_STATE_SLAVE_DETECT",     
@@ -111,6 +111,10 @@ const unsigned char *Cmd2Ascii[CMD2ASCII] = {
     "EXEC_MBUS_STATE_SLAVE_ENABLE",     
     "EXEC_MBUS_STATE_START_DATA_UPLOAD",
     "EXEC_MBUS_STATE_RESET",
+    "EXEC_FW_STATE_RECEIVE_FW_FILE",
+    "EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY",
+    "EXEC_FW_STATE_FW_DATA",
+    "EXEC_FW_STATE_FW_DATA_DOWNLOAD_DONE",
     "CLIENT_CONNECTION_REQUEST"
 };
 

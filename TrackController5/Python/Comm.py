@@ -37,7 +37,12 @@ class Bootloader:
 
 class DataAquisition:
     def __init__(self, AmountOfAmplifiers):
-        self.IPAddr = socket.gethostbyname('TRACKCONTROL') 
+        try:
+            self.IPAddr = socket.gethostbyname('TRACKCONTROL') 
+            print("Ip address of TRACKCONTROL found: " + str(self.IPAddr))
+        except:
+            print('Ip address not found, assuming 192.168.1.100...')
+            self.IPAddr = '192.168.1.100'
         
         self.UDP_IP_RECV = ''
         self.UDP_PORT_RECV = 10001 
@@ -94,8 +99,12 @@ class DataAquisition:
             self.sock_trans.send(tx)
         
         if(function == EnumCommand.ETHERNET_T):
-            tx = struct.pack("<4B", 0xAA, command, data, 0x55)
-            self.sock_trans.send(tx)
+            if(data == 0):
+                tx = struct.pack("<4B", 0xAA, command, data, 0x55)
+                self.sock_trans.send(tx)
+            else:
+                self.sock_trans.send(data)                
+            
         
         if(function == EnumCommand.BOOTLOADER):
             tx = struct.pack("<2B", 0xAA, function)
@@ -163,7 +172,10 @@ class DataAquisition:
                         self.data = struct.unpack ("<37B", self.line[:37])
                         self.bootloader_data = copy.copy(self.data)
                     
-                    elif (self.data[0] == 170 and (self.data[1] == EnumStatusMessages.CONTROLLER or self.data[1] == EnumStatusMessages.MBUS)):
+                    elif (self.data[0] == 170 and 
+                          (self.data[1] == EnumStatusMessages.CONTROLLER or 
+                           self.data[1] == EnumStatusMessages.MBUS or
+                           self.data[1] == EnumStatusMessages.FWHANDLER)):
                         self.data = struct.unpack ("<4B", self.line[:4])
                         self.EthernetTarget.taskid               = self.data[1 ]
                         self.EthernetTarget.taskstate            = self.data[2 ]

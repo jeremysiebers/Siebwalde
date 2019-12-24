@@ -278,6 +278,7 @@ void MBUS_Tasks ( void )
             if((ReadCoreTimer() - DelayCount) > 200000000){
                 mbusData.state = MBUS_STATE_WAIT;
                 CREATExTASKxSTATUSxMESSAGE((uint8_t)MBUS, (uint8_t)MBUS_STATE_SLAVES_ON, (uint8_t)DONE);
+                SYS_MESSAGE("MBUS_STATE_SLAVES_BOOT_WAIT done.\n\r");
             }            
             break;
         }
@@ -287,6 +288,7 @@ void MBUS_Tasks ( void )
             if (SLAVExDETECT()){
                 mbusData.state = MBUS_STATE_WAIT;
                 CREATExTASKxSTATUSxMESSAGE((uint8_t)MBUS, (uint8_t)MBUS_STATE_SLAVE_DETECT, (uint8_t)DONE);
+                SYS_MESSAGE("MBUS_STATE_SLAVE_DETECT done.\n\r");
             }
             PROCESSxPETITxMODBUS();
             break;
@@ -297,8 +299,8 @@ void MBUS_Tasks ( void )
             if (SLAVExFWxHANDLER()){
                 mbusData.state = MBUS_STATE_WAIT;
                 CREATExTASKxSTATUSxMESSAGE((uint8_t)MBUS, (uint8_t)MBUS_STATE_SLAVE_FW_DOWNLOAD, (uint8_t)DONE);
+                SYS_MESSAGE("MBUS_STATE_SLAVE_FW_DOWNLOAD done.\n\r");
             }
-            PROCESSxPETITxMODBUS();
             break;
         }
         
@@ -308,6 +310,7 @@ void MBUS_Tasks ( void )
             {                
                 mbusData.state = MBUS_STATE_WAIT;
                 CREATExTASKxSTATUSxMESSAGE((uint8_t)MBUS, (uint8_t)MBUS_STATE_SLAVE_INIT, (uint8_t)DONE);
+                SYS_MESSAGE("MBUS_STATE_SLAVE_INIT done.\n\r");
             }
             PROCESSxPETITxMODBUS();
             break;
@@ -319,6 +322,7 @@ void MBUS_Tasks ( void )
                 mbusData.state = MBUS_STATE_SERVICE_TASKS;
                 MaxSlaveUploadCount = 50;                                       // limit the upload to slave data only (cyclic))
                 CREATExTASKxSTATUSxMESSAGE((uint8_t)MBUS, (uint8_t)MBUS_STATE_SLAVE_ENABLE, (uint8_t)DONE);
+                SYS_MESSAGE("MBUS_STATE_SLAVE_ENABLE done.\n\r");
             }
             PROCESSxPETITxMODBUS();
             break;
@@ -330,6 +334,7 @@ void MBUS_Tasks ( void )
             mbusData.state  = MBUS_STATE_WAIT;
             mbusData.upload = UPLOAD_STATE_ALL;
             CREATExTASKxSTATUSxMESSAGE((uint8_t)MBUS, (uint8_t)MBUS_STATE_START_DATA_UPLOAD, (uint8_t)DONE);
+            SYS_MESSAGE("MBUS_STATE_START_DATA_UPLOAD done.\n\r");
             break;
         }
 
@@ -361,6 +366,7 @@ void MBUS_Tasks ( void )
             if((ReadCoreTimer() - DelayCount) > 100000000){
                 mbusData.state = MBUS_STATE_WAIT;
                 CREATExTASKxSTATUSxMESSAGE((uint8_t)MBUS, (uint8_t)MBUS_STATE_RESET, (uint8_t)DONE);
+                SYS_MESSAGE("MBUS_STATE_RESET_WAIT done.\n\r");
             }            
             break;
         }

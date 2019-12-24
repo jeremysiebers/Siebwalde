@@ -11,11 +11,29 @@
 #define	SLAVEFWHANDLER_H
 
 #include <xc.h> // include processor files - each processor file is guarded.  
+#include "enums.h"
 
 #ifdef	__cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
+    typedef enum
+    {
+        /* Application's state machine's initial state. */
+        FW_STATE_INIT=0,
+        FW_STATE_WAITING_FOR_COMMAND,
+        FW_STATE_COMMAND_HANDLING,
+    } FW_HANDLER_STATES;
+    
+    typedef struct
+    {
+        /* The application's data */
+        FW_HANDLER_STATES           state;
+        uint32_t                    command;
+    } FW_DATA;
+
+    FW_DATA fwData;
+    
     // TODO If C++ is being used, regular C code needs function names to have C 
     // linkage so the functions can be used by the c code. 
     extern void INITxSLAVExFWxHANDLER(SLAVE_INFO *location, SLAVE_INFO *Dump);

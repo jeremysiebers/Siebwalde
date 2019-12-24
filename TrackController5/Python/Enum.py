@@ -58,7 +58,12 @@ class EnumCommand:
     EXEC_MBUS_STATE_SLAVE_INIT          = 0x05
     EXEC_MBUS_STATE_SLAVE_ENABLE        = 0x06
     EXEC_MBUS_STATE_START_DATA_UPLOAD   = 0x07
-    EXEC_MBUS_STATE_RESET               = 0x08      
+    EXEC_MBUS_STATE_RESET               = 0x08
+    
+    EXEC_FW_STATE_RECEIVE_FW_FILE           = 0x09
+    EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY   = 0x0A
+    EXEC_FW_STATE_FW_DATA                   = 0x0B
+    EXEC_FW_STATE_FW_DATA_DOWNLOAD_DONE     = 0x0C   
     
     MODBUS                              = 0xFF
     ETHERNET_T                          = 0x10
@@ -69,13 +74,14 @@ class EnumCommand:
 class EnumStatusMessages:
     CONTROLLER                          = 0x80
     MBUS                                = 0x81
+    FWHANDLER                           = 0x82
     CONNECTED                           = 0xFB
     DONE                                = 0xFC
     COMMAND                             = 0xFD
     ERROR                               = 0xFE    
     
 class EnumClientCommands:
-    CLIENT_CONNECTION_REQUEST           = 0x09
+    CLIENT_CONNECTION_REQUEST           = 0x0D
     
 class EnumMbusStatus:
     MBUS_STATE_INIT                     = 0x00
@@ -88,4 +94,10 @@ class EnumMbusStatus:
     MBUS_STATE_SLAVE_ENABLE             = 0x07
     MBUS_STATE_START_DATA_UPLOAD        = 0x08
     MBUS_STATE_SERVICE_TASKS            = 0x09
-    MBUS_STATE_RESET                    = 0x0A     
+    MBUS_STATE_RESET                    = 0x0A
+
+class EnumBootloader:
+    COMMAND_SUCCESSFUL   = 0x01 # Command Successful
+    COMMAND_UNSUPPORTED  = 0xFF # Command Unsupported
+    ADDRESS_ERROR        = 0Xfe # Address Error
+    COMMAND_UNSUCCESSFUL = 0xfd # Command unSuccessful 

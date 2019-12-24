@@ -47,7 +47,18 @@ class MAIN():
             elif(self.state == EnumStateMachine.DetectSlaves):
                 returned = self.StateMachine.RunFunction(EnumStateMachine.DetectSlaves)
                 if(returned == EnumStateMachine.ok):
+                    self.state = EnumStateMachine.FlashTrackamplifiers
+            
+            ######################
+            ## Flash new SW     ##
+            ######################        
+            elif(self.state == EnumStateMachine.FlashTrackamplifiers):
+                returned = self.StateMachine.RunFunction(EnumStateMachine.FlashTrackamplifiers)
+                if(returned == EnumStateMachine.ok):
                     self.state = EnumStateMachine.InitTrackamplifiers
+                elif(returned == EnumStateMachine.nok):
+                    while True:
+                        pass
             
             ######################
             ## Init  the slaves ##

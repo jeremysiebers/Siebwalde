@@ -114,9 +114,6 @@ typedef struct
     uint8_t data[80]; 
 }udpTrans_t;
 
-
-
-
 typedef enum
 {
     CONNECTED                       = 0xFB,
@@ -125,6 +122,7 @@ typedef enum
     ERROR                           = 0xFE,
     CONTROLLER                      = 0x80,
     MBUS                            = 0x81,
+    FWHANDLER                       = 0x82,
 } STATUS_MESSAGES;
 
 
@@ -140,9 +138,18 @@ enum
     EXEC_MBUS_STATE_RESET               = 0x08,    
 } CONTROLLER_COMMANDS;
 
+typedef enum
+{	
+    EXEC_FW_STATE_RECEIVE_FW_FILE           = 0x09,
+    EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY   = 0x0A,
+    EXEC_FW_STATE_FW_DATA                   = 0x0B,
+    EXEC_FW_STATE_FW_DATA_DOWNLOAD_DONE     = 0x0C,
+    
+    
+} FWHANDLER_COMMANDS;
 
 enum{
-    CLIENT_CONNECTION_REQUEST           = 0x09,
+    CLIENT_CONNECTION_REQUEST           = 0x0D,
 } CLIENT_COMMANDS;
 
     /* Provide C++ Compatibility */
