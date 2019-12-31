@@ -144,7 +144,8 @@ typedef enum
     EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY   = 0x0A,
     EXEC_FW_STATE_FW_DATA                   = 0x0B,
     EXEC_FW_STATE_FW_DATA_DOWNLOAD_DONE     = 0x0C,
-    
+    EXEC_FW_STATE_FW_CHECKSUM               = 0x0D,
+    EXEC_FW_STATE_FLASH_SLAVES              = 0x0E
     
 } FWHANDLER_COMMANDS;
 

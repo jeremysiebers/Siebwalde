@@ -2,6 +2,7 @@ from Enum import *
 from Comm import DataAquisition, ModBusMasterReg
 from bootload import BootLoader
 import time
+import struct
 
 class State:
     def __init__(self, amplifiers):
@@ -232,6 +233,8 @@ class State:
         '''
         if(self.FlashNewSwHandler == 0):
             
+            self.Count = 0
+            
             if(self.file_checksum == 0):
                 returncode, self.file_checksum = self.Bootloader.GetFileCheckSum(self.bootloader_offset, self.program_mem_size)
                 if(returncode != EnumBootloader.COMMAND_SUCCESSFUL):
@@ -283,21 +286,66 @@ class State:
         case 3
         '''
         if(self.FlashNewSwHandler == 3):
+            if( self.Count > self.iteration):
+                print("FlashTrackamplifiers --> EXEC_FW_STATE_RECEIVE_FW_FILE done.")
+                self.Count = 0
+                self.FlashNewSwHandler = 5
+                return EnumStateMachine.busy
+            else:
+                
+                data = struct.pack("<2B", 0xAA, EnumCommand.EXEC_FW_STATE_FW_DATA)
+                
+                for j in range(self.Count, (self.Count + self.jumpsize)):
+                    #print("j = " + str(j))
+                    for val in self.ByteArray[j][0]:
+                        #print (str(val))
+                        data += struct.pack('<B', val)
+                
+                self.Amplifiers.WriteSerial(EnumCommand.ETHERNET_T, EnumCommand.EXEC_FW_STATE_FW_DATA, data)
+                
+                self.Count += self.jumpsize
+                
+                self.FlashNewSwHandler = 4
             
-            
-            
-            
-            
-            
-            
-            
-            
-            self.Amplifiers.WriteSerial(EnumCommand.ETHERNET_T, EnumCommand.EXEC_FW_STATE_FW_DATA, 0)
             return EnumStateMachine.busy
-        
-        
-        
             
+        '''
+        case 4
+        '''
+        if(self.FlashNewSwHandler == 4):            
+                if(self.Amplifiers.EthernetTarget.taskid == EnumStatusMessages.FWHANDLER and (self.Amplifiers.EthernetTarget.taskstate == EnumCommand.EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY or 
+                                                                                              self.Amplifiers.EthernetTarget.taskstate == EnumCommand.EXEC_FW_STATE_FW_DATA_DOWNLOAD_DONE) and 
+                    self.Amplifiers.EthernetTarget.feedback == EnumStatusMessages.DONE):
+                    print("FlashTrackamplifiers --> EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY --> self.Count = " + str(self.Count) + ".")
+                    self.Amplifiers.EthernetTarget.ClearOldData()
+                    self.FlashNewSwHandler = 3
+        
+        
+        '''
+        case 5
+        '''
+        if(self.FlashNewSwHandler == 5):
+                if(self.Amplifiers.EthernetTarget.taskid == EnumStatusMessages.FWHANDLER and self.Amplifiers.EthernetTarget.taskstate == EnumCommand.EXEC_FW_STATE_FW_CHECKSUM and 
+                       self.Amplifiers.EthernetTarget.feedback == EnumStatusMessages.DONE):                    
+                    print("FlashTrackamplifiers --> EXEC_FW_STATE_FW_CHECKSUM --> checksum of received data is ok.")
+                    self.Amplifiers.EthernetTarget.ClearOldData()
+                    self.FlashNewSwHandler = 6               
+                    return EnumStateMachine.busy
+                elif(self.Amplifiers.EthernetTarget.taskid == EnumStatusMessages.FWHANDLER and self.Amplifiers.EthernetTarget.taskstate == EnumCommand.EXEC_FW_STATE_FW_CHECKSUM and 
+                       self.Amplifiers.EthernetTarget.feedback == EnumStatusMessages.ERROR):                    
+                    print("FlashTrackamplifiers --> EXEC_FW_STATE_FW_CHECKSUM --> checksum of received data is NOK, try again.")
+                    self.Amplifiers.EthernetTarget.ClearOldData()
+                    self.Amplifiers.WriteSerial(EnumCommand.ETHERNET_T, EnumCommand.EXEC_FW_STATE_RECEIVE_FW_FILE, 0)
+                    self.FlashNewSwHandler = 2               
+                    return EnumStateMachine.busy
+                
+        '''
+        case 6
+        '''
+        if(self.FlashNewSwHandler == 6):
+            
+            return EnumStateMachine.busy
+                    
         return EnumStateMachine.busy
 
 #    ######################################################################################
