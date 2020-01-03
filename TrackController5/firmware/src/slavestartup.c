@@ -3,8 +3,9 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
-#include "app.h"
-#include "slavecommhandler.h"
+#include "../TrackController5.X/../../mbus.h"
+#include "../TrackController5.X/../../slavecommhandler.h"
+#include "../TrackController5.X/../../enums.h"
 
 bool    ConfigureSlave       (uint8_t TrackBackPlaneID, uint16_t AmplifierLatchSet, uint8_t TrackAmplifierId, uint8_t Mode);
 bool    DetectSlave          (uint8_t SlaveId);
@@ -21,12 +22,6 @@ bool    DetectSlave          (uint8_t SlaveId);
 
 static uint8_t GoToCase            = 0;
 static uint16_t WaitCounter        = 0;
-
-enum ADDR
-{    
-    WAIT_TIME  = 5000,
-    WAIT_TIME2 = 65000,
-};
 
 /*#--------------------------------------------------------------------------#*/
 /*  Description: INITxSLAVExSTARTUP(SLAVE_INFO *location)
@@ -224,7 +219,7 @@ bool DetectSlave(uint8_t SlaveId){
                     MASTER_SLAVE_DATA[BackplaneId].SlaveDetected = false;
                     RunSlaveDetect = 0;
                     return_val = true;
-                    //DRV_USART0_WriteByte('4');
+                    DRV_USART0_WriteByte('4');
                     break;
                 case SLAVEBUSY: break;
                 default : break;
@@ -290,7 +285,7 @@ bool DetectSlave(uint8_t SlaveId){
                 case SLAVENOK: 
                     RunSlaveDetect = 0;
                     return_val = true;
-                    //DRV_USART0_WriteByte('4');
+                    DRV_USART0_WriteByte('4');
                     break;
                 case SLAVEBUSY: break;
                 default : break;
@@ -464,7 +459,7 @@ bool ConfigureSlave(uint8_t BackplaneId, uint16_t AmplifierLatchSet, uint8_t Tra
                     break;                    
                 case SLAVENOK: 
                     StartupMachine = 5;
-                    //DRV_USART0_WriteByte('4');
+                    DRV_USART0_WriteByte('4');
                     break;
                 case SLAVEBUSY: break;
                 default : break;
@@ -531,7 +526,7 @@ bool ConfigureSlave(uint8_t BackplaneId, uint16_t AmplifierLatchSet, uint8_t Tra
                 case SLAVENOK: 
                     StartupMachine = 0;
                     return_val = true;
-                    //DRV_USART0_WriteByte('4');
+                    DRV_USART0_WriteByte('4');
                     break;
                 case SLAVEBUSY: break;
                 default : break;

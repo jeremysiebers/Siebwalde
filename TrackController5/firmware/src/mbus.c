@@ -141,8 +141,6 @@ void ModbusReceiveTimeoutCallBack(uintptr_t context, uint32_t alarmCount){      
 // *****************************************************************************
 
 
-uint32_t    ReadCoreTimer(void);
-
 
 // *****************************************************************************
 // *****************************************************************************
@@ -169,6 +167,7 @@ void MBUS_Initialize ( void )
     INITxCOMMxHANDLER(SlaveInfo, SlaveDump);
     INITxSLAVExSTARTUP(SlaveInfo, SlaveDump);
     INITxSLAVExHANDLER(SlaveInfo, SlaveDump);
+    INITxSLAVExFWxHANDLER(SlaveInfo, SlaveDump);
     
     /* Initialize the SLAVE_INFO struct with slave numbers. */
     uint8_t i = 0;
@@ -268,14 +267,14 @@ void MBUS_Tasks ( void )
         case MBUS_STATE_SLAVES_ON:
         {
             Slaves_Disable_Off();
-            DelayCount = ReadCoreTimer();
+            DelayCount = READxCORExTIMER();
             mbusData.state = MBUS_STATE_SLAVES_BOOT_WAIT;
             break;
         }
         
         case MBUS_STATE_SLAVES_BOOT_WAIT:
         {
-            if((ReadCoreTimer() - DelayCount) > 200000000){
+            if((READxCORExTIMER() - DelayCount) > 200000000){
                 mbusData.state = MBUS_STATE_WAIT;
                 CREATExTASKxSTATUSxMESSAGE((uint8_t)MBUS, (uint8_t)MBUS_STATE_SLAVES_ON, (uint8_t)DONE);
                 SYS_MESSAGE("MBUS_STATE_SLAVES_BOOT_WAIT done.\n\r");
@@ -301,6 +300,7 @@ void MBUS_Tasks ( void )
                 CREATExTASKxSTATUSxMESSAGE((uint8_t)MBUS, (uint8_t)MBUS_STATE_SLAVE_FW_DOWNLOAD, (uint8_t)DONE);
                 SYS_MESSAGE("MBUS_STATE_SLAVE_FW_DOWNLOAD done.\n\r");
             }
+            PROCESSxPETITxMODBUS();
             break;
         }
         
@@ -357,13 +357,13 @@ void MBUS_Tasks ( void )
             mbusData.state  = MBUS_STATE_RESET_WAIT;
             mbusData.upload = UPLOAD_STATE_WAIT;
             MaxSlaveUploadCount = 55;
-            DelayCount = ReadCoreTimer();            
+            DelayCount = READxCORExTIMER();            
             break;
         }
         
         case MBUS_STATE_RESET_WAIT:
         {
-            if((ReadCoreTimer() - DelayCount) > 100000000){
+            if((READxCORExTIMER() - DelayCount) > 100000000){
                 mbusData.state = MBUS_STATE_WAIT;
                 CREATExTASKxSTATUSxMESSAGE((uint8_t)MBUS, (uint8_t)MBUS_STATE_RESET, (uint8_t)DONE);
                 SYS_MESSAGE("MBUS_STATE_RESET_WAIT done.\n\r");
@@ -448,21 +448,6 @@ void MBUS_Tasks ( void )
 
 /******************************************************************************
   Function:
-    uint32_t ReadCoreTimer(void)
-
-  Remarks:
-    See prototype in mbus.h.
- */
-
-uint32_t ReadCoreTimer(void)
-{
-    uint32_t count;
-    asm volatile("mfc0 %0, $9" : "=r"(count));
-    return(count);
-} 
-
-/******************************************************************************
-  Function:
     uint32_t GETxMBUSxSTATE (void)
 
   Remarks:
@@ -484,6 +469,21 @@ uint32_t GETxMBUSxSTATE (void){
 void SETxMBUSxSTATE (MBUS_STATES state){
     mbusData.state = state;
 }
+
+/******************************************************************************
+  Function:
+    uint32_t READxCORExTIMER(void)
+
+  Remarks:
+    See prototype in mbus.h.
+ */
+
+uint32_t READxCORExTIMER(void)
+{
+    uint32_t count;
+    asm volatile("mfc0 %0, $9" : "=r"(count));
+    return(count);
+} 
 
 /*
 void Led_Blink (){

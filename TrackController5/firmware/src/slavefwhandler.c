@@ -3,16 +3,17 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
-#include "app.h"
-#include "slavecommhandler.h"
-#include "enums.h"
-#include "slavefwhandler.h"
-#include "ethernet.h"
+#include "../TrackController5.X/../../mbus.h"
+#include "../TrackController5.X/../../slavecommhandler.h"
+#include "../TrackController5.X/../../enums.h"
+#include "../TrackController5.X/../../slavefwhandler.h"
+#include "../TrackController5.X/../../ethernet.h"
 
 bool FwFileDownload(void);
 bool FlashSlaves   (void);
+bool FlashSequencer(uint8_t SlaveId);
 
-static uint8_t FwFile[30720];
+static uint8_t      FwFile[SLAVE_FLASH_SIZE]; //[30720];
 
 /*#--------------------------------------------------------------------------#*/
 /*  Description: INITxSLAVExFWxHANDLER(SLAVE_INFO *location)
@@ -36,8 +37,35 @@ static SLAVE_INFO *DUMP_SLAVE_DATA   = 0;                                       
 void INITxSLAVExFWxHANDLER(SLAVE_INFO *location, SLAVE_INFO *Dump){
     MASTER_SLAVE_DATA  =  location;
     DUMP_SLAVE_DATA    =  Dump;
+    fwData.fwchecksum  =  0;
+    fwData.state       = FW_STATE_INIT;
+}
+
+/*#--------------------------------------------------------------------------#*/
+/*  Description: void SLAVExBOOTLOADERxDATAxRETURNED(uint8_t *buffer)
+ *
+ *  Input(s)   : location of stored data array of struct
+ *
+ *  Output(s)  :
+ *
+ *  Returns    :
+ *
+ *  Pre.Cond.  :
+ *
+ *  Post.Cond. :
+ *
+ *  Notes      :
+ */
+/*#--------------------------------------------------------------------------#*/
+void SLAVExBOOTLOADERxDATAxRETURN(uint8_t data){
+        
+    fwData.buffer[fwData.datacount] = data;
+    fwData.datacount++;
     
-    fwData.state = FW_STATE_INIT;
+    if(fwData.datacount > sizeof(fwData.buffer)){
+        fwData.datacount = 0;
+        fwData.bootloader_receive_error = true;
+    }
 }
 
 /*#--------------------------------------------------------------------------#*/
@@ -161,7 +189,7 @@ bool SLAVExFWxHANDLER(){
  */
 /*#--------------------------------------------------------------------------#*/
 
-uint8_t     sequence        = 0;
+uint8_t     iFwFileDownload = 0;
 uint8_t     *ptr_FwData     = 0;
 uint16_t    FwLineCount     = 0;
 
@@ -177,14 +205,15 @@ bool FwFileDownload(){
     
     bool return_val = false;
     
-    switch (sequence){
+    switch (iFwFileDownload){
         
         case 0:
         {
             CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY, (uint8_t)DONE);
             ptr_FwData = &FwFile[0];
             FwLineCount = 0;
-            sequence++;
+            fwData.fwchecksum = 0;
+            iFwFileDownload++;
             break;
         }
         
@@ -200,7 +229,7 @@ bool FwFileDownload(){
                     FwLineCount +=   4;
                                 
                     if(FwLineCount > 1916){
-                        sequence++;
+                        iFwFileDownload++;
                         FwLineCount = 0;                    
                         CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_FW_DATA_DOWNLOAD_DONE, (uint8_t)DONE);
                         SYS_MESSAGE("FW handler EXEC_FW_STATE_RECEIVE_FW_FILE received a FW file.\n\r");
@@ -211,7 +240,7 @@ bool FwFileDownload(){
                 }
                 else{
                     SYS_MESSAGE("EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY received wrong command stopping FW Handler.\n\r");
-                    sequence = 0;
+                    iFwFileDownload = 0;
                     fwData.state = FW_STATE_WAITING_FOR_COMMAND;
                     return_val = true;
                 }
@@ -241,6 +270,7 @@ bool FwFileDownload(){
             data2 = (uint8_t)((checksum & 0xFF00) >> 8);
             
             if(data1 == *pFw1 && data2 == *pFw2){
+                fwData.fwchecksum = checksum;
                 CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_FW_CHECKSUM, (uint8_t)DONE);
                 SYS_MESSAGE("FW handler EXEC_FW_STATE_RECEIVE_FW_FILE checksum is OK.\n\r");
             }
@@ -248,7 +278,7 @@ bool FwFileDownload(){
                 CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_FW_CHECKSUM, (uint8_t)ERROR);
                 SYS_MESSAGE("FW handler EXEC_FW_STATE_RECEIVE_FW_FILE checksum is NOK.\n\r");
             }
-            sequence = 0;
+            iFwFileDownload = 0;
             return_val = true;
             break;
         }
@@ -270,17 +300,201 @@ bool FwFileDownload(){
  *
  *  Returns    : Init done
  *
- *  Pre.Cond.  :
+ *  Pre.Cond.  : Checksum calculated from new FW file
  *
  *  Post.Cond. :
  *
- *  Notes      : Sets all the addresses to the slaves according to location
+ *  Notes      :  
  */
 /*#--------------------------------------------------------------------------#*/
+
+static uint8_t iFlashSlaves    = 0;
+static uint8_t SlaveId1        = 1;
+
 bool FlashSlaves(){
     bool return_val = false;
     
+    switch(iFlashSlaves){
+        case 0:
+        {
+            if(fwData.fwchecksum > 0){
+                iFlashSlaves++;
+            }
+            else{
+                SYS_MESSAGE("FW handler FlashSlaves checksum is empty, stopping FW flash.\n\r");
+                return_val = true;
+            }
+            break;
+        }
+        
+        case 1:
+        {
+            if((MASTER_SLAVE_DATA[SlaveId1].SlaveDetected == true) && (MASTER_SLAVE_DATA[SlaveId1].HoldingReg[11] != fwData.fwchecksum)){
+                iFlashSlaves++;
+            }
+            else{
+                SlaveId1++;
+                
+                if (SlaveId1 > NUMBER_OF_AMPLIFIERS){
+                    SYS_MESSAGE("FW handler FlashSlaves done.\n\r");
+                    SlaveId1      = 0;
+                    iFlashSlaves = 0;                    
+                    return_val   = true;
+                }
+            }
+            break;
+        }
+        
+        case 2:
+        {
+            if(FlashSequencer(SlaveId1)){
+                iFlashSlaves = 1;
+            }            
+            break;
+        }
+        
+        default:
+        {
+            break;
+        }
+    }
     
+    return (return_val);
+}
+
+/*#--------------------------------------------------------------------------#*/
+/*  Description: bool FlashSequencer(uint8_t SlaveId)
+ *
+ *  Input(s)   : 
+ *
+ *  Output(s)  : 
+ *
+ *  Returns    : Init done
+ *
+ *  Pre.Cond.  : 
+ *
+ *  Post.Cond. :
+ *
+ *  Notes      :  
+ */
+/*#--------------------------------------------------------------------------#*/
+
+static uint8_t  iFlashSequencer = 0;
+static uint8_t  BackplaneId     = 0;
+static uint8_t  PrevBackplaneId = 0;
+static uint8_t  ShiftSlot1      = 0;
+static uint8_t  GoToCase        = 0;
+static uint16_t WaitCounter     = 0;
+static uint32_t DelayCount1     = 0;
+
+bool FlashSequencer(uint8_t SlaveId){
+    bool return_val = false;
+    
+    switch(iFlashSequencer){
+        case 0:
+        {
+            Slaves_Disable_On();
+            DelayCount1 = READxCORExTIMER();
+            iFlashSequencer = 1;
+            break;
+        }
+        
+        case 1:
+        {
+            if((READxCORExTIMER() - DelayCount1) > (10 * MILISECONDS)){
+                iFlashSequencer = 2;
+            }  
+            break;
+        }
+        
+        case 2:
+        {
+            Slaves_Disable_Off();
+            DelayCount1 = READxCORExTIMER();
+            iFlashSequencer = 3;
+            break;
+        }
+        
+        case 3:
+        {
+            if((READxCORExTIMER() - DelayCount1) > (1 * SECONDS)){
+                iFlashSequencer = 4;
+            }  
+            break;
+        }
+        
+        case 4:                                                                 // select first a slave amplifier by selecting one via a backplane slave
+        {
+            if(     SlaveId > 0  && SlaveId < 10){
+                BackplaneId = 51;}
+            else if(SlaveId > 10 && SlaveId < 21){
+                BackplaneId = 52;}
+            else if(SlaveId > 20 && SlaveId < 31){
+                BackplaneId = 53;}
+            else if(SlaveId > 30 && SlaveId < 41){
+                BackplaneId = 54;}
+            else if(SlaveId > 40 && SlaveId < 51){
+                BackplaneId = 55;}
+            
+            if(PrevBackplaneId != BackplaneId){
+                PrevBackplaneId = BackplaneId;
+                ShiftSlot1 = 0;
+            }
+            
+            Data.SlaveAddress  = BackplaneId;
+            Data.Direction     = WRITE;
+            Data.NoOfRegisters = 1;
+            Data.StartRegister = HOLDINGREG0;
+            Data.RegData0      = (SLOT1 << ShiftSlot1);
+            SLAVExCOMMUNICATIONxHANDLER();
+            //PROCESSxPETITxMODBUS();
+            ShiftSlot1++;
+            iFlashSequencer++;
+            break;
+        }
+        
+        /* Verify communication was OK with backplane */
+        case 5:
+            //PROCESSxPETITxMODBUS();
+            switch(CHECKxMODBUSxCOMMxSTATUS(BackplaneId, false)){               
+                case SLAVEOK:
+                    fwData.SlaveBootloaderHandlingActive = true;
+                    GoToCase = iFlashSequencer + 1;
+                    iFlashSequencer = WAIT;
+                    break;                    
+                case SLAVENOK: 
+                    iFlashSequencer = 0;
+                     ShiftSlot1 = 0;
+                    BackplaneId = 0;
+                    PrevBackplaneId = 0;
+                    return_val = true;
+                    break;
+                case SLAVEBUSY: break;
+                default : break;
+            }
+            break;
+            
+        case 6:
+        {
+            _nop();
+            break;
+        }
+        
+        
+        case WAIT:
+        {
+            WaitCounter++;
+            if (WaitCounter > WAIT_TIME){
+                WaitCounter = 0;
+                iFlashSequencer = GoToCase;
+            } 
+        }
+        
+        default:
+        {
+            break;
+        }
+    }
     
     return (return_val);
 }

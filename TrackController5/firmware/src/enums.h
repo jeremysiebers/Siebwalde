@@ -73,6 +73,12 @@ extern "C" {
 #define NUMBER_OF_SLAVES 55                                                     // 0 is for the master self. 50 Track slaves and 5 backplane slaves => 55
 #define NUMBER_OF_SLAVES_SIZE (NUMBER_OF_SLAVES + 1)
 #define NUMBER_OF_AMPLIFIERS (NUMBER_OF_SLAVES - 5)
+    
+#define SLAVE_FLASH_SIZE (0x8000 - 0x800)
+    
+#define SECONDS (126000000)
+#define MILISECONDS (SECONDS / 1000)
+#define MICROSECONDS (SECONDS / 1000000)
 
     // *****************************************************************************
     // *****************************************************************************
@@ -152,6 +158,53 @@ typedef enum
 enum{
     CLIENT_CONNECTION_REQUEST           = 0x0D,
 } CLIENT_COMMANDS;
+
+enum ADDR
+{    
+    WAIT_TIME  = 5000,
+    WAIT_TIME2 = 65000,
+};
+
+enum reg
+{
+    HOLDINGREG0         = 0, 
+    HOLDINGREG1         = 1, 
+    HOLDINGREG2         = 2, 
+    HOLDINGREG3         = 3, 
+    HOLDINGREG4         = 4, 
+    HOLDINGREG5         = 5, 
+    HOLDINGREG6         = 6, 
+    HOLDINGREG7         = 7, 
+    HOLDINGREG8         = 8, 
+    HOLDINGREG9         = 9, 
+    HOLDINGREG10        = 10,
+    HOLDINGREG11        = 11,
+    HOLDINGREG12        = 12,
+    READ                 = 0x55,    
+    WRITE                = 0xAA,
+            
+    SLOT1  = 0x1,
+    SLOT2  = 0x2,
+    SLOT3  = 0x4,
+    SLOT4  = 0x8,
+    SLOT5  = 0x10,
+    SLOT6  = 0x20,
+    SLOT7  = 0x40,
+    SLOT8  = 0x80,
+    SLOT9  = 0x100,
+    SLOT10 = 0x200,
+    TRACKBACKPLANE1 = 51,
+    TRACKBACKPLANE2 = 52,
+    TRACKBACKPLANE3 = 53,
+    TRACKBACKPLANE4 = 54,
+    TRACKBACKPLANE5 = 55,
+    SLAVE_INITIAL_ADDR = 0xAA,
+    BROADCAST_ADDRESS = 0,
+    WAIT      = 99,
+    SLAVEOK   = 100,
+    SLAVENOK  = 101,
+    SLAVEBUSY = 102,
+};
 
     /* Provide C++ Compatibility */
 #ifdef __cplusplus

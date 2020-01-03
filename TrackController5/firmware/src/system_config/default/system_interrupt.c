@@ -60,12 +60,10 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 
 #include "system/common/sys_common.h"
-#include "mbus.h"
-#include "ethernet.h"
-#include "controller.h"
 #include "system_definitions.h"
 #include "../TrackController5.X/../../modbus/General.h"
-#include "../../slavecommhandler.h"
+#include "../TrackController5.X/../../mbus.h"
+#include "../TrackController5.X/../../slavefwhandler.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -95,19 +93,24 @@ void __ISR(_UART2_TX_VECTOR, ipl0AUTO) _IntHandlerDrvUsartTransmitInstance1(void
 }
 void __ISR(_UART2_RX_VECTOR, ipl1AUTO) _IntHandlerDrvUsartReceiveInstance1(void)
 {
-    /* Handle received char */
-    ReceiveInterrupt(DRV_USART1_ReadByte());                                    // read received byte into modbus buffer;
-    /* Handle received char */
-    DRV_USART_TasksReceive(sysObj.drvUsart1);
+    if(!fwData.SlaveBootloaderHandlingActive){
+        /* Handle received char */
+        ReceiveInterrupt(DRV_USART1_ReadByte());                                    // read received byte into modbus buffer;
+        
+        /* Reset and start TMR2 (timer_6) for inter character timeout 25us */
+        DRV_TMR_Stop(mbusData.ModbusCharacterTimeoutHandle);
+        DRV_TMR_CounterClear(mbusData.ModbusCharacterTimeoutHandle);
+        DRV_TMR_Start(mbusData.ModbusCharacterTimeoutHandle);
+
+        /* Stop and reset TMR3 (timer_8) for message receive timeout 250us */
+        DRV_TMR_Stop(mbusData.ModbusReceiveTimeoutHandle);
+        DRV_TMR_CounterClear(mbusData.ModbusReceiveTimeoutHandle);
+    }
+    else{
+        SLAVExBOOTLOADERxDATAxRETURN(DRV_USART1_ReadByte());
+    }
     
-    /* Reset and start TMR2 (timer_6) for inter character timeout 25us */
-    DRV_TMR_Stop(mbusData.ModbusCharacterTimeoutHandle);
-    DRV_TMR_CounterClear(mbusData.ModbusCharacterTimeoutHandle);
-    DRV_TMR_Start(mbusData.ModbusCharacterTimeoutHandle);
-    
-    /* Stop and reset TMR3 (timer_8) for message receive timeout 250us */
-    DRV_TMR_Stop(mbusData.ModbusReceiveTimeoutHandle);
-    DRV_TMR_CounterClear(mbusData.ModbusReceiveTimeoutHandle);
+    DRV_USART_TasksReceive(sysObj.drvUsart1);    
     
 }
 void __ISR(_UART2_FAULT_VECTOR, ipl1AUTO) _IntHandlerDrvUsartErrorInstance1(void)

@@ -329,6 +329,7 @@ class State:
                        self.Amplifiers.EthernetTarget.feedback == EnumStatusMessages.DONE):                    
                     print("FlashTrackamplifiers --> EXEC_FW_STATE_FW_CHECKSUM --> checksum of received data is ok.")
                     self.Amplifiers.EthernetTarget.ClearOldData()
+                    self.Amplifiers.WriteSerial(EnumCommand.ETHERNET_T, EnumCommand.EXEC_FW_STATE_FLASH_SLAVES, 0)
                     self.FlashNewSwHandler = 6               
                     return EnumStateMachine.busy
                 elif(self.Amplifiers.EthernetTarget.taskid == EnumStatusMessages.FWHANDLER and self.Amplifiers.EthernetTarget.taskstate == EnumCommand.EXEC_FW_STATE_FW_CHECKSUM and 

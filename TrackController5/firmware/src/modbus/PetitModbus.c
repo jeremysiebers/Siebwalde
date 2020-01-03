@@ -1,6 +1,6 @@
 #include "PetitModbus.h"
 #include "PetitModbusPort.h"
-#include "app.h"
+#include "../TrackController5.X/../../mbus.h"
 
 #define PETIT_FALSE_FUNCTION                    0
 #define PETIT_FALSE_SLAVE_ADDRESS               1
@@ -426,8 +426,10 @@ void Petit_TxRTU(void)
     else{
         Petit_Tx_State    =PETIT_RXTX_WAIT_ANSWER;                              // Else Master must wait for answer (see ModBus protocol implementation)
         
-        /* Set and enable slave answer timeout timer */
+        /* Reset and enable slave answer timeout timer */
+        DRV_TMR_Stop(mbusData.ModbusReceiveTimeoutHandle);
         DRV_TMR_CounterClear(mbusData.ModbusReceiveTimeoutHandle);
+        SlaveAnswerTimeoutCounter = 0;
         DRV_TMR_Start(mbusData.ModbusReceiveTimeoutHandle);
     }
 }
