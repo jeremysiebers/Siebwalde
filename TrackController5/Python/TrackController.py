@@ -31,7 +31,7 @@ class MAIN():
             elif(self.state == EnumStateMachine.ResetAllSlaves):
                 returned = self.StateMachine.RunFunction(EnumStateMachine.ResetAllSlaves)
                 if(returned == EnumStateMachine.ok):
-                    self.state = EnumStateMachine.DataUploadStart
+                    self.state = EnumStateMachine.FlashTrackamplifiers
             
             ######################
             ## DataUploadStart  ##

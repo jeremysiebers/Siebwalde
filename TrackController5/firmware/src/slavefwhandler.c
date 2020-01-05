@@ -3,17 +3,19 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
-#include "../TrackController5.X/../../mbus.h"
-#include "../TrackController5.X/../../slavecommhandler.h"
-#include "../TrackController5.X/../../enums.h"
-#include "../TrackController5.X/../../slavefwhandler.h"
-#include "../TrackController5.X/../../ethernet.h"
+#include "mbus.h"
+#include "slavecommhandler.h"
+#include "enums.h"
+#include "slavefwhandler.h"
+#include "ethernet.h"
 
 bool FwFileDownload(void);
+bool ConfigWordDownload(void);
 bool FlashSlaves   (void);
 bool FlashSequencer(uint8_t SlaveId);
 
 static uint8_t      FwFile[SLAVE_FLASH_SIZE]; //[30720];
+static uint8_t      FwConfigWord[14];
 
 /*#--------------------------------------------------------------------------#*/
 /*  Description: INITxSLAVExFWxHANDLER(SLAVE_INFO *location)
@@ -41,32 +43,7 @@ void INITxSLAVExFWxHANDLER(SLAVE_INFO *location, SLAVE_INFO *Dump){
     fwData.state       = FW_STATE_INIT;
 }
 
-/*#--------------------------------------------------------------------------#*/
-/*  Description: void SLAVExBOOTLOADERxDATAxRETURNED(uint8_t *buffer)
- *
- *  Input(s)   : location of stored data array of struct
- *
- *  Output(s)  :
- *
- *  Returns    :
- *
- *  Pre.Cond.  :
- *
- *  Post.Cond. :
- *
- *  Notes      :
- */
-/*#--------------------------------------------------------------------------#*/
-void SLAVExBOOTLOADERxDATAxRETURN(uint8_t data){
-        
-    fwData.buffer[fwData.datacount] = data;
-    fwData.datacount++;
-    
-    if(fwData.datacount > sizeof(fwData.buffer)){
-        fwData.datacount = 0;
-        fwData.bootloader_receive_error = true;
-    }
-}
+
 
 /*#--------------------------------------------------------------------------#*/
 /*  Description: bool SLAVExFWxHANDLER()
@@ -129,6 +106,16 @@ bool SLAVExFWxHANDLER(){
                     if(FwFileDownload()){
                         CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_RECEIVE_FW_FILE, (uint8_t)DONE);
                         SYS_MESSAGE("FW handler EXEC_FW_STATE_RECEIVE_FW_FILE done.\n\r");
+                        fwData.state = FW_STATE_WAITING_FOR_COMMAND;
+                    }
+                    break;
+                }
+                
+                case EXEC_FW_STATE_RECEIVE_CONFIG_WORD:
+                {
+                    if(ConfigWordDownload()){
+                        CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_RECEIVE_CONFIG_WORD, (uint8_t)DONE);
+                        SYS_MESSAGE("FW handler EXEC_FW_STATE_RECEIVE_CONFIG_WORD done.\n\r");
                         fwData.state = FW_STATE_WAITING_FOR_COMMAND;
                     }
                     break;
@@ -292,6 +279,125 @@ bool FwFileDownload(){
 }
 
 /*#--------------------------------------------------------------------------#*/
+/*  Description: bool FwFileDownload()
+ *
+ *  Input(s)   : 
+ *
+ *  Output(s)  : 
+ *
+ *  Returns    : Init done
+ *
+ *  Pre.Cond.  :
+ *
+ *  Post.Cond. :
+ *
+ *  Notes      : Sets all the addresses to the slaves according to location
+ */
+/*#--------------------------------------------------------------------------#*/
+
+//uint8_t     iConfigWordDownload = 0;
+//uint8_t     *ptr_FwData     = 0;
+//uint16_t    FwLineCount     = 0;
+//
+//uint16_t    count           = 0;
+//uint16_t    limit           = 0;
+//uint16_t    checksum        = 0;
+//uint8_t     data1           = 0;
+//uint8_t     data2           = 0;
+//uint8_t     *pFw1           = 0;
+//uint8_t     *pFw2           = 0;
+
+bool ConfigWordDownload(){
+    
+    bool return_val = false;
+    
+//    switch (iFwFileDownload){
+//        
+//        case 0:
+//        {
+//            CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_RECEIVE_CONFIG_WORD_STANDBY, (uint8_t)DONE);
+//            ptr_FwData = &FwFile[0];
+//            FwLineCount = 0;
+//            fwData.fwchecksum = 0;
+//            iFwFileDownload++;
+//            break;
+//        }
+//        
+//        case 1:
+//        {
+//            if(CHECKxDATAxINxRECEIVExMAILxBOX()){
+//                EthernetRecvData = GETxDATAxFROMxRECEIVExMAILxBOX();
+//                
+//                if(EthernetRecvData->command == EXEC_FW_STATE_FW_DATA){
+//                    //*ptr_FwData = EthernetRecvData->data;
+//                    memcpy(ptr_FwData, &(EthernetRecvData->data), 64);
+//                    ptr_FwData  +=  64;
+//                    FwLineCount +=   4;
+//                                
+//                    if(FwLineCount > 1916){
+//                        iFwFileDownload++;
+//                        FwLineCount = 0;                    
+//                        CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_FW_DATA_DOWNLOAD_DONE, (uint8_t)DONE);
+//                        SYS_MESSAGE("FW handler EXEC_FW_STATE_RECEIVE_FW_FILE received a FW file.\n\r");
+//                    }
+//                    else{
+//                        CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY, (uint8_t)DONE);
+//                    }
+//                }
+//                else{
+//                    SYS_MESSAGE("EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY received wrong command stopping FW Handler.\n\r");
+//                    iFwFileDownload = 0;
+//                    fwData.state = FW_STATE_WAITING_FOR_COMMAND;
+//                    return_val = true;
+//                }
+//            }
+//            break;
+//        }
+//        
+//        case 2:
+//        {
+//            pFw1 = &FwFile[0];
+//            pFw2 = &FwFile[1];
+//            limit = sizeof(FwFile)- 2;
+//            data1 = 0;
+//            data2 = 0;
+//            count = 0;
+//            checksum = 0;
+//            
+//            for (count = 0; count < limit; count = count + 2)
+//            {                
+//                checksum += (uint16_t)*pFw1;
+//                checksum += (uint16_t)*pFw2 << 8;
+//                pFw1 += 2;
+//                pFw2 += 2;                
+//            }            
+//            
+//            data1 = (uint8_t) (checksum & 0x00FF);
+//            data2 = (uint8_t)((checksum & 0xFF00) >> 8);
+//            
+//            if(data1 == *pFw1 && data2 == *pFw2){
+//                fwData.fwchecksum = checksum;
+//                CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_FW_CHECKSUM, (uint8_t)DONE);
+//                SYS_MESSAGE("FW handler EXEC_FW_STATE_RECEIVE_FW_FILE checksum is OK.\n\r");
+//            }
+//            else{
+//                CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_FW_CHECKSUM, (uint8_t)ERROR);
+//                SYS_MESSAGE("FW handler EXEC_FW_STATE_RECEIVE_FW_FILE checksum is NOK.\n\r");
+//            }
+//            iFwFileDownload = 0;
+//            return_val = true;
+//            break;
+//        }
+//        
+//        default:
+//        {
+//            break;
+//        }
+//    }
+    return (return_val);
+}
+
+/*#--------------------------------------------------------------------------#*/
 /*  Description: bool FlashSlaves()
  *
  *  Input(s)   : 
@@ -318,7 +424,7 @@ bool FlashSlaves(){
         case 0:
         {
             if(fwData.fwchecksum > 0){
-                iFlashSlaves++;
+                iFlashSlaves = 2;//iFlashSlaves++;
             }
             else{
                 SYS_MESSAGE("FW handler FlashSlaves checksum is empty, stopping FW flash.\n\r");
@@ -347,6 +453,7 @@ bool FlashSlaves(){
         
         case 2:
         {
+            SYS_PRINT("FW handler EXEC_FW_STATE_FLASH_SLAVES start flash slave sequence on ID %d.\n\r", SlaveId1);
             if(FlashSequencer(SlaveId1)){
                 iFlashSlaves = 1;
             }            
@@ -417,7 +524,7 @@ bool FlashSequencer(uint8_t SlaveId){
         
         case 3:
         {
-            if((READxCORExTIMER() - DelayCount1) > (1 * SECONDS)){
+            if((READxCORExTIMER() - DelayCount1) > (10 * MILISECONDS)){
                 iFlashSequencer = 4;
             }  
             break;
@@ -447,39 +554,91 @@ bool FlashSequencer(uint8_t SlaveId){
             Data.StartRegister = HOLDINGREG0;
             Data.RegData0      = (SLOT1 << ShiftSlot1);
             SLAVExCOMMUNICATIONxHANDLER();
-            //PROCESSxPETITxMODBUS();
-            ShiftSlot1++;
+            ShiftSlot1++;            
+            DelayCount1 = READxCORExTIMER();
             iFlashSequencer++;
             break;
         }
         
-        /* Verify communication was OK with backplane */
+        /* Verify communication was OK with backplane --> due to reset of all 
+         * slaves the rx line is hampered and the feedback of modbus from the 
+         * backplane slave is missed, therefore for now selecting a slave for
+         * bootloader is done blind. To solve this, the routine has to be 
+         * executed without resetting all slaves but a slave has to be commanded
+         * to reset itself by SW reset in order to invoke the bootloader. */
+        
         case 5:
-            //PROCESSxPETITxMODBUS();
-            switch(CHECKxMODBUSxCOMMxSTATUS(BackplaneId, false)){               
-                case SLAVEOK:
-                    fwData.SlaveBootloaderHandlingActive = true;
-                    GoToCase = iFlashSequencer + 1;
-                    iFlashSequencer = WAIT;
-                    break;                    
-                case SLAVENOK: 
-                    iFlashSequencer = 0;
-                     ShiftSlot1 = 0;
-                    BackplaneId = 0;
-                    PrevBackplaneId = 0;
-                    return_val = true;
-                    break;
-                case SLAVEBUSY: break;
-                default : break;
-            }
+        {
+            if((READxCORExTIMER() - DelayCount1) > (1 * SECONDS)){
+                iFlashSequencer++;
+                fwData.SlaveBootloaderHandlingActive = true;
+            }            
             break;
+        }
             
         case 6:
         {
-            _nop();
+            switch(GETxBOOTxLOADERxVERSION()){
+                case DONE:
+                {
+                    SYS_MESSAGE("FW handler EXEC_FW_STATE_FLASH_SLAVES bootloader version read done.\n\r");
+                    iFlashSequencer++;
+                    break;
+                }
+                case ERROR:
+                {
+                    // --------> decide what to do here
+                    break;
+                }
+                default:
+                {
+                    break;
+                }
+            }
             break;
         }
         
+        case 7:
+        {
+            switch(ERASExFLASH(SLAVE_BOOT_LOADER_OFFSET, SLAVE_FLASH_END)){
+                case DONE:
+                {
+                    SYS_MESSAGE("FW handler EXEC_FW_STATE_FLASH_SLAVES slave flash erase done.\n\r");
+                    iFlashSequencer++;
+                    break;
+                }
+                case ERROR:
+                {
+                    
+                }
+                default:
+                {
+                    break;
+                }
+            }
+            break;
+        }
+        
+        case 8:
+        {
+            switch(ERASExFLASH(SLAVE_BOOT_LOADER_OFFSET, SLAVE_FLASH_END)){
+                case DONE:
+                {
+                    SYS_MESSAGE("FW handler EXEC_FW_STATE_FLASH_SLAVES slave flash erase successful.\n\r");
+                    iFlashSequencer++;
+                    break;
+                }
+                case ERROR:
+                {
+                    
+                }
+                default:
+                {
+                    break;
+                }
+            }
+            break;
+        }
         
         case WAIT:
         {

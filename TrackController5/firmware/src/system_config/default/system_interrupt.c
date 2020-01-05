@@ -96,6 +96,7 @@ void __ISR(_UART2_RX_VECTOR, ipl1AUTO) _IntHandlerDrvUsartReceiveInstance1(void)
     if(!fwData.SlaveBootloaderHandlingActive){
         /* Handle received char */
         ReceiveInterrupt(DRV_USART1_ReadByte());                                    // read received byte into modbus buffer;
+        DRV_USART_TasksReceive(sysObj.drvUsart1);
         
         /* Reset and start TMR2 (timer_6) for inter character timeout 25us */
         DRV_TMR_Stop(mbusData.ModbusCharacterTimeoutHandle);
@@ -108,9 +109,8 @@ void __ISR(_UART2_RX_VECTOR, ipl1AUTO) _IntHandlerDrvUsartReceiveInstance1(void)
     }
     else{
         SLAVExBOOTLOADERxDATAxRETURN(DRV_USART1_ReadByte());
+        DRV_USART_TasksReceive(sysObj.drvUsart1);
     }
-    
-    DRV_USART_TasksReceive(sysObj.drvUsart1);    
     
 }
 void __ISR(_UART2_FAULT_VECTOR, ipl1AUTO) _IntHandlerDrvUsartErrorInstance1(void)

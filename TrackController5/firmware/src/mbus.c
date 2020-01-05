@@ -300,7 +300,9 @@ void MBUS_Tasks ( void )
                 CREATExTASKxSTATUSxMESSAGE((uint8_t)MBUS, (uint8_t)MBUS_STATE_SLAVE_FW_DOWNLOAD, (uint8_t)DONE);
                 SYS_MESSAGE("MBUS_STATE_SLAVE_FW_DOWNLOAD done.\n\r");
             }
-            PROCESSxPETITxMODBUS();
+            if(fwData.SlaveBootloaderHandlingActive == false){
+                PROCESSxPETITxMODBUS();
+            }            
             break;
         }
         

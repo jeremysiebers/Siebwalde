@@ -131,7 +131,6 @@ typedef struct
     DRV_HANDLE                  ModbusCommCycleHandle;    
     DRV_HANDLE                  ModbusCharacterTimeoutHandle;
     DRV_HANDLE                  ModbusReceiveTimeoutHandle;
-    bool                        SlaveBootloaderHandlingActive;
 } MBUS_DATA;
 
 MBUS_DATA mbusData;

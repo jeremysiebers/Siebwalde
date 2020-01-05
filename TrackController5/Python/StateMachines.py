@@ -235,13 +235,15 @@ class State:
             
             self.Count = 0
             
+            self.Bootloader.WriteConfig()
+            
             if(self.file_checksum == 0):
                 returncode, self.file_checksum = self.Bootloader.GetFileCheckSum(self.bootloader_offset, self.program_mem_size)
                 if(returncode != EnumBootloader.COMMAND_SUCCESSFUL):
                     print("Getting Checksum from file failed!!!!\n")
                     return EnumStateMachine.nok
             
-            FwFlashRequired = False
+            FwFlashRequired = True#False
             
             for x in range(1, 51):
                 if ((self.Amplifiers.Trackamplifiers[x].HoldingReg[11] != self.file_checksum) and 

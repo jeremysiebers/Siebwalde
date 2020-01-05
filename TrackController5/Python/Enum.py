@@ -65,7 +65,8 @@ class EnumCommand:
     EXEC_FW_STATE_FW_DATA                   = 0x0B
     EXEC_FW_STATE_FW_DATA_DOWNLOAD_DONE     = 0x0C
     EXEC_FW_STATE_FW_CHECKSUM               = 0x0D
-    EXEC_FW_STATE_FLASH_SLAVES              = 0x0E
+    EXEC_FW_STATE_RECEIVE_CONFIG_WORD       = 0x0E
+    EXEC_FW_STATE_FLASH_SLAVES              = 0x0F
     
     MODBUS                              = 0xFF
     ETHERNET_T                          = 0x10

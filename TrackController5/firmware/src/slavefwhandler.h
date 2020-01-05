@@ -29,10 +29,7 @@ extern "C" {
     {
         /* The application's data */
         FW_HANDLER_STATES           state;
-        uint32_t                    command;
-        uint8_t                     datacount;
-        uint8_t                     buffer[32];
-        bool                        bootloader_receive_error;
+        uint32_t                    command;        
         uint16_t                    fwchecksum;
         bool                        SlaveBootloaderHandlingActive;
     } FW_DATA;
@@ -43,7 +40,7 @@ extern "C" {
     // linkage so the functions can be used by the c code. 
     extern void INITxSLAVExFWxHANDLER(SLAVE_INFO *location, SLAVE_INFO *Dump);
     extern bool SLAVExFWxHANDLER(void);
-    extern void SLAVExBOOTLOADERxDATAxRETURN(uint8_t data);
+    
 
 #ifdef	__cplusplus
 }

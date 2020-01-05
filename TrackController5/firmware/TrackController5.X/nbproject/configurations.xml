@@ -42,6 +42,7 @@
         <itemPath>../src/slavecommhandler.h</itemPath>
         <itemPath>../src/controller.h</itemPath>
         <itemPath>../src/enums.h</itemPath>
+        <itemPath>../src/slavebootloaderroutines.h</itemPath>
       </logicalFolder>
       <logicalFolder name="f1" displayName="framework" projectFiles="true">
         <logicalFolder name="f6" displayName="crypto" projectFiles="true">
@@ -372,6 +373,7 @@
         <itemPath>../src/mbus.c</itemPath>
         <itemPath>../src/slavecommhandler.c</itemPath>
         <itemPath>../src/controller.c</itemPath>
+        <itemPath>../src/slavebootloaderroutines.c</itemPath>
       </logicalFolder>
       <logicalFolder name="f1" displayName="framework" projectFiles="true">
         <logicalFolder name="f1" displayName="driver" projectFiles="true">

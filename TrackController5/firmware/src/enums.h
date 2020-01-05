@@ -74,7 +74,10 @@ extern "C" {
 #define NUMBER_OF_SLAVES_SIZE (NUMBER_OF_SLAVES + 1)
 #define NUMBER_OF_AMPLIFIERS (NUMBER_OF_SLAVES - 5)
     
-#define SLAVE_FLASH_SIZE (0x8000 - 0x800)
+#define SLAVE_BOOT_LOADER_OFFSET 0x800
+#define SLAVE_FLASH_END 0x8000
+#define SLAVE_FLASH_SIZE (SLAVE_FLASH_END - SLAVE_BOOT_LOADER_OFFSET)
+#define ROWWIDTH  64                                                            // erasing in the PIC is only done with 32 bytes = 2 rows of program memory!
     
 #define SECONDS (126000000)
 #define MILISECONDS (SECONDS / 1000)
@@ -122,6 +125,7 @@ typedef struct
 
 typedef enum
 {
+    BUSY                            = 0xFA,
     CONNECTED                       = 0xFB,
     DONE                            = 0xFC,
     COMMAND                         = 0xFD,
@@ -146,12 +150,14 @@ enum
 
 typedef enum
 {	
-    EXEC_FW_STATE_RECEIVE_FW_FILE           = 0x09,
-    EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY   = 0x0A,
-    EXEC_FW_STATE_FW_DATA                   = 0x0B,
-    EXEC_FW_STATE_FW_DATA_DOWNLOAD_DONE     = 0x0C,
-    EXEC_FW_STATE_FW_CHECKSUM               = 0x0D,
-    EXEC_FW_STATE_FLASH_SLAVES              = 0x0E
+    EXEC_FW_STATE_RECEIVE_FW_FILE               = 0x09,
+    EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY       = 0x0A,
+    EXEC_FW_STATE_FW_DATA                       = 0x0B,
+    EXEC_FW_STATE_FW_DATA_DOWNLOAD_DONE         = 0x0C,
+    EXEC_FW_STATE_FW_CHECKSUM                   = 0x0D,
+    EXEC_FW_STATE_RECEIVE_CONFIG_WORD           = 0x0E,
+    EXEC_FW_STATE_RECEIVE_CONFIG_WORD_STANDBY   = 0x0F,
+    EXEC_FW_STATE_FLASH_SLAVES                  = 0x10
     
 } FWHANDLER_COMMANDS;
 
