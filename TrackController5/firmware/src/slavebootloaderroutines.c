@@ -33,7 +33,7 @@ void ClearOldData           (void);
  */
 /*#--------------------------------------------------------------------------#*/
 
-uint8_t GETxBOOTxLOADERxVERSION(){
+TASK_STATE GETxBOOTxLOADERxVERSION(){
     uint32_t return_val = BUSY;
     
     switch(btldrData.sequence){
@@ -75,7 +75,7 @@ uint8_t GETxBOOTxLOADERxVERSION(){
             break;
         }
         
-        deafult:
+        default:
         {
             btldrData.sequence = 0;
             break;
@@ -102,10 +102,10 @@ uint8_t GETxBOOTxLOADERxVERSION(){
  */
 /*#--------------------------------------------------------------------------#*/
 
-uint8_t ERASExFLASH(uint16_t flash_bootloader_offset, uint16_t flash_end_address){
+TASK_STATE ERASExFLASH(uint16_t flash_bootloader_offset, uint16_t flash_end_address){
     uint32_t return_val = BUSY;
     
-    uint16_t EraseRows = ((flash_end_address - flash_bootloader_offset)/ROWWIDTH);
+    uint16_t EraseRows = ((flash_end_address - flash_bootloader_offset)/BLOCKWIDTH);
     
     switch(btldrData.sequence){
         case 0:
@@ -145,7 +145,231 @@ uint8_t ERASExFLASH(uint16_t flash_bootloader_offset, uint16_t flash_end_address
             break;
         }
         
-        deafult:
+        default:
+        {
+            btldrData.sequence = 0;
+            break;
+        }
+    }
+    
+    return (return_val);
+}
+
+/*#--------------------------------------------------------------------------#*/
+/*  Description: uint8_t WRITExFLASH(uint16_t flash_bootloader_offset, uint16_t 
+ *                                   flash_end_address, uint8_t *fwfile)
+ *
+ *  Input(s)   :
+ *
+ *  Output(s)  :
+ *
+ *  Returns    :
+ *
+ *  Pre.Cond.  :
+ *
+ *  Post.Cond. :
+ *
+ *  Notes      :
+ */
+/*#--------------------------------------------------------------------------#*/
+
+static uint16_t FlashRows       = 0;
+static uint16_t FlashAddress    = 0;
+
+TASK_STATE WRITExFLASH(uint16_t flash_bootloader_offset, uint16_t flash_end_address, uint8_t *fwfile){
+    uint32_t return_val = BUSY;
+
+    FlashRows = (flash_end_address - flash_bootloader_offset);
+    
+    FlashAddress = flash_bootloader_offset + btldrData.flashrowcounter;
+    
+    switch(btldrData.sequence){
+        case 0:
+        {
+            btldrDataSend.bootloader_start_byte = 0x55;
+            btldrDataSend.command               = (uint8_t)WRITE_FLASH;
+            btldrDataSend.data_length_high      = 0;
+            btldrDataSend.data_length_low       = 0x40;
+            btldrDataSend.unlock_hgh            = 0xAA;
+            btldrDataSend.unlock_low            = 0x55;
+            btldrDataSend.address_low           = (FlashAddress & 0x00FF);
+            btldrDataSend.address_hgh           = (FlashAddress >> 8) & 0x00FF;
+            btldrDataSend.address_upp           = 0x00;
+            btldrDataSend.address_ext           = 0x00;
+            memcpy(btldrDataSend.data, &(fwfile[btldrData.flashrowcounter]), BLOCKWIDTH);
+
+            SendDataToBootloader((BTDR_SEND_DATA_FORMAT *)&btldrDataSend);
+            btldrData.sequence++;
+            btldrData.flashrowcounter += BLOCKWIDTH; // for bytes = *2
+            break;
+        }
+        
+        case 1:
+        {
+            if(btldrData.btldr_datacount > 10){
+                if(btldrDataReceive.bootloader_start_byte == 0x55 &&
+                        btldrDataReceive.status[0] == 1){
+                    if (btldrData.flashrowcounter >= FlashRows){
+                        return_val          = DONE;
+                        ClearOldData();
+                    }
+                    else{
+                        btldrData.sequence = 0;
+                    }
+                }
+                else{
+                    return_val              = ERROR;
+                    ClearOldData();
+                }                
+            }
+            else if(btldrData.btldr_receive_error){
+                return_val                      = ERROR;
+                ClearOldData();
+            }
+            break;
+        }
+        
+        default:
+        {
+            btldrData.sequence = 0;
+            break;
+        }
+    }
+    
+    return (return_val);
+}
+
+/*#--------------------------------------------------------------------------#*/
+/*  Description: uint8_t WRITExCONFIG(uint8_t *config_data)
+ *
+ *  Input(s)   :
+ *
+ *  Output(s)  :
+ *
+ *  Returns    :
+ *
+ *  Pre.Cond.  :
+ *
+ *  Post.Cond. :
+ *
+ *  Notes      :
+ */
+/*#--------------------------------------------------------------------------#*/
+TASK_STATE WRITExCONFIG(uint8_t *config_data){
+    uint32_t return_val = BUSY;
+            
+    switch(btldrData.sequence){
+        case 0:
+        {
+            btldrDataSend.bootloader_start_byte = 0x55;
+            btldrDataSend.command               = (uint8_t)WRITE_CONFIG;
+            btldrDataSend.data_length_high      = 0;
+            btldrDataSend.data_length_low       = 0x0C;
+            btldrDataSend.unlock_hgh            = 0xAA;
+            btldrDataSend.unlock_low            = 0x55;
+            btldrDataSend.address_low           = 0x00;
+            btldrDataSend.address_hgh           = 0x00;
+            btldrDataSend.address_upp           = 0x30;
+            btldrDataSend.address_ext           = 0x00;
+            memcpy(btldrDataSend.data, &(config_data[0]), 0x0C);
+
+            SendDataToBootloader((BTDR_SEND_DATA_FORMAT *)&btldrDataSend);
+            btldrData.sequence++;
+            break;
+        }
+        
+        case 1:
+        {
+            if(btldrData.btldr_datacount > 10){
+                if(btldrDataReceive.bootloader_start_byte == 0x55 &&
+                        btldrDataReceive.status[0] == 1){
+                    return_val              = DONE;
+                }
+                else{
+                    return_val              = ERROR;
+                }
+                ClearOldData();
+            }
+            else if(btldrData.btldr_receive_error){
+                return_val                  = ERROR;
+                ClearOldData();
+            }
+            break;
+        }
+        
+        default:
+        {
+            btldrData.sequence = 0;
+            break;
+        }
+    }
+    
+    return (return_val);
+}
+
+/*#--------------------------------------------------------------------------#*/
+/*  Description: uint8_t WRITExCONFIG(uint8_t *config_data)
+ *
+ *  Input(s)   :
+ *
+ *  Output(s)  :
+ *
+ *  Returns    :
+ *
+ *  Pre.Cond.  :
+ *
+ *  Post.Cond. :
+ *
+ *  Notes      :
+ */
+/*#--------------------------------------------------------------------------#*/
+TASK_STATE CHECKxCHECKSUM(uint16_t flash_bootloader_offset, uint16_t flash_end_address, 
+        uint16_t file_checksum){
+    
+    uint32_t return_val = BUSY;
+    
+    uint16_t ChecksumLength = ((flash_end_address - flash_bootloader_offset)- 2);
+            
+    switch(btldrData.sequence){
+        case 0:
+        {
+            btldrDataSend.bootloader_start_byte = 0x55;
+            btldrDataSend.command               = (uint8_t)CALC_CHECKSUM;
+            btldrDataSend.data_length_high      = (ChecksumLength >> 8) & 0x00FF;
+            btldrDataSend.data_length_low       = (ChecksumLength & 0x00FF);
+            btldrDataSend.unlock_hgh            = 0xAA;
+            btldrDataSend.unlock_low            = 0x55;
+            btldrDataSend.address_low           = (flash_bootloader_offset & 0x00FF);
+            btldrDataSend.address_hgh           = (flash_bootloader_offset >> 8) & 0x00FF;
+            btldrDataSend.address_upp           = 0x00;
+            btldrDataSend.address_ext           = 0x00;
+            
+            SendDataToBootloader((BTDR_SEND_DATA_FORMAT *)&btldrDataSend);
+            btldrData.sequence++;
+            break;
+        }
+        
+        case 1:
+        {
+            if(btldrData.btldr_datacount > 11){
+                if(btldrDataReceive.bootloader_start_byte == 0x55 &&
+                        btldrDataReceive.status[0] == (file_checksum & 0x00FF) &&
+                        btldrDataReceive.status[1] == ((file_checksum >> 8) & 0x00FF)){
+                    return_val              = DONE;
+                }
+                else{
+                    return_val              = ERROR;
+                }
+                ClearOldData();
+            }
+            else if(btldrData.btldr_receive_error){
+                return_val                  = ERROR;
+                ClearOldData();
+            }
+            break;
+        }
+        
+        default:
         {
             btldrData.sequence = 0;
             break;
@@ -187,7 +411,10 @@ bool SendDataToBootloader(BTDR_SEND_DATA_FORMAT *btldrDataSend)
         Length = 10;
     }
     else if(btldrDataSend->command == WRITE_FLASH){
-        Length = sizeof(btldrDataSend);
+        Length = 74;//sizeof(BTDR_SEND_DATA_FORMAT);
+    }
+    else if(btldrDataSend->command == WRITE_CONFIG){
+        Length = 22;
     }
     else{
         while(1);   // ---> implement dynamic length regarding eeprom etc
@@ -260,6 +487,7 @@ void ClearOldData(){
     btldrData.btldr_sequence        = 0;
     btldrData.btldr_datacount       = 0;
     btldrData.btldr_receive_error   = 0;
+    btldrData.flashrowcounter       = 0;
 }
 /* *****************************************************************************
  End of File

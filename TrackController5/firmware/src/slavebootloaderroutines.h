@@ -28,7 +28,7 @@
 /* This section lists the other files that are included in this file.
  */
 
-/* TODO:  Include other files here if needed. */
+#include "enums.h"
 
 
 /* Provide C++ Compatibility */
@@ -88,9 +88,12 @@ extern "C" {
   Remarks:
     This routine must be called from SYS_Tasks() routine.
  */
-extern uint8_t  GETxBOOTxLOADERxVERSION         (void);
-extern void     SLAVExBOOTLOADERxDATAxRETURN    (uint8_t data);
-extern uint8_t  ERASExFLASH                     (uint16_t flash_start_address, uint16_t flash_end_address);
+TASK_STATE      GETxBOOTxLOADERxVERSION         (void);
+void            SLAVExBOOTLOADERxDATAxRETURN    (uint8_t data);
+TASK_STATE      ERASExFLASH                     (uint16_t flash_start_address, uint16_t flash_end_address);
+TASK_STATE      WRITExFLASH                     (uint16_t flash_bootloader_offset, uint16_t flash_end_address, uint8_t *fwfile);
+TASK_STATE      WRITExCONFIG                    (uint8_t *config_data);
+TASK_STATE      CHECKxCHECKSUM                  (uint16_t flash_bootloader_offset, uint16_t flash_end_address, uint16_t file_checksum);
 
 typedef struct
 {
@@ -99,6 +102,7 @@ typedef struct
     uint8_t         btldr_datacount;
     uint8_t         *p_btldr;
     bool            btldr_receive_error;
+    uint16_t        flashrowcounter;
 } BTLDR_DATA;
 
 BTLDR_DATA btldrData;

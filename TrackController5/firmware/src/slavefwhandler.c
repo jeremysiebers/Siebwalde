@@ -8,6 +8,7 @@
 #include "enums.h"
 #include "slavefwhandler.h"
 #include "ethernet.h"
+#include "slavebootloaderroutines.h"
 
 bool FwFileDownload(void);
 bool ConfigWordDownload(void);
@@ -16,6 +17,7 @@ bool FlashSequencer(uint8_t SlaveId);
 
 static uint8_t      FwFile[SLAVE_FLASH_SIZE]; //[30720];
 static uint8_t      FwConfigWord[14];
+static uint16_t     checksum        = 0;
 
 /*#--------------------------------------------------------------------------#*/
 /*  Description: INITxSLAVExFWxHANDLER(SLAVE_INFO *location)
@@ -182,7 +184,6 @@ uint16_t    FwLineCount     = 0;
 
 uint16_t    count           = 0;
 uint16_t    limit           = 0;
-uint16_t    checksum        = 0;
 uint8_t     data1           = 0;
 uint8_t     data2           = 0;
 uint8_t     *pFw1           = 0;
@@ -380,6 +381,7 @@ bool FlashSlaves(){
         case 1:
         {
             if((MASTER_SLAVE_DATA[SlaveId1].SlaveDetected == true) && (MASTER_SLAVE_DATA[SlaveId1].HoldingReg[11] != fwData.fwchecksum)){
+                SYS_PRINT("FW handler EXEC_FW_STATE_FLASH_SLAVES start flash slave sequence on ID %d.\n\r", SlaveId1);
                 iFlashSlaves++;
             }
             else{
@@ -397,7 +399,6 @@ bool FlashSlaves(){
         
         case 2:
         {
-            SYS_PRINT("FW handler EXEC_FW_STATE_FLASH_SLAVES start flash slave sequence on ID %d.\n\r", SlaveId1);
             if(FlashSequencer(SlaveId1)){
                 iFlashSlaves = 1;
             }            
@@ -513,7 +514,7 @@ bool FlashSequencer(uint8_t SlaveId){
         
         case 5:
         {
-            if((READxCORExTIMER() - DelayCount1) > (1 * SECONDS)){
+            if((READxCORExTIMER() - DelayCount1) > (2 * SECONDS)){
                 iFlashSequencer++;
                 fwData.SlaveBootloaderHandlingActive = true;
             }            
@@ -525,13 +526,14 @@ bool FlashSequencer(uint8_t SlaveId){
             switch(GETxBOOTxLOADERxVERSION()){
                 case DONE:
                 {
-                    SYS_MESSAGE("FW handler EXEC_FW_STATE_FLASH_SLAVES bootloader version read done.\n\r");
+                    SYS_MESSAGE("FW handler EXEC_FW_STATE_FLASH_SLAVES GETxBOOTxLOADERxVERSION done.\n\r");
                     iFlashSequencer++;
                     break;
                 }
                 case ERROR:
                 {
                     // --------> decide what to do here
+                    SYS_MESSAGE("FW handler EXEC_FW_STATE_FLASH_SLAVES GETxBOOTxLOADERxVERSION error.\n\r");
                     break;
                 }
                 default:
@@ -547,13 +549,14 @@ bool FlashSequencer(uint8_t SlaveId){
             switch(ERASExFLASH(SLAVE_BOOT_LOADER_OFFSET, SLAVE_FLASH_END)){
                 case DONE:
                 {
-                    SYS_MESSAGE("FW handler EXEC_FW_STATE_FLASH_SLAVES slave flash erase done.\n\r");
+                    SYS_MESSAGE("FW handler EXEC_FW_STATE_FLASH_SLAVES ERASExFLASH done.\n\r");
                     iFlashSequencer++;
                     break;
                 }
                 case ERROR:
                 {
                     // --------> decide what to do here
+                    SYS_MESSAGE("FW handler EXEC_FW_STATE_FLASH_SLAVES ERASExFLASH error.\n\r");
                 }
                 default:
                 {
@@ -565,16 +568,17 @@ bool FlashSequencer(uint8_t SlaveId){
         
         case 8:
         {
-            switch(WRITExFLASH(SLAVE_BOOT_LOADER_OFFSET, SLAVE_FLASH_END)){
+            switch(WRITExFLASH(SLAVE_BOOT_LOADER_OFFSET, SLAVE_FLASH_END, &FwFile[0])){
                 case DONE:
                 {
-                    SYS_MESSAGE("FW handler EXEC_FW_STATE_FLASH_SLAVES slave flash erase successful.\n\r");
+                    SYS_MESSAGE("FW handler EXEC_FW_STATE_FLASH_SLAVES WRITExFLASH done.\n\r");
                     iFlashSequencer++;
                     break;
                 }
                 case ERROR:
                 {
                     // --------> decide what to do here
+                    SYS_MESSAGE("FW handler EXEC_FW_STATE_FLASH_SLAVES WRITExFLASH error.\n\r");
                 }
                 default:
                 {
@@ -586,16 +590,17 @@ bool FlashSequencer(uint8_t SlaveId){
 		
 		case 9:
         {
-            switch(WRITExCONFIG(FwConfigWord)){
+            switch(WRITExCONFIG(&FwConfigWord[0])){
                 case DONE:
                 {
-                    SYS_MESSAGE("FW handler EXEC_FW_STATE_FLASH_SLAVES slave flash erase successful.\n\r");
+                    SYS_MESSAGE("FW handler EXEC_FW_STATE_FLASH_SLAVES WRITExCONFIG done.\n\r");
                     iFlashSequencer++;
                     break;
                 }
                 case ERROR:
                 {
                     // --------> decide what to do here
+                    SYS_MESSAGE("FW handler EXEC_FW_STATE_FLASH_SLAVES WRITExCONFIG error.\n\r");
                 }
                 default:
                 {
@@ -607,10 +612,10 @@ bool FlashSequencer(uint8_t SlaveId){
 		
 		case 10:
         {
-            switch(CHECKxCHECKSUM()){
+            switch(CHECKxCHECKSUM(SLAVE_BOOT_LOADER_OFFSET, SLAVE_FLASH_END, checksum)){
                 case DONE:
                 {
-                    SYS_MESSAGE("FW handler EXEC_FW_STATE_FLASH_SLAVES slave flash erase successful.\n\r");
+                    SYS_MESSAGE("FW handler EXEC_FW_STATE_FLASH_SLAVES CHECKxCHECKSUM done.\n\r");
 					fwData.SlaveBootloaderHandlingActive = false;
                     iFlashSequencer++;
                     break;
@@ -618,6 +623,8 @@ bool FlashSequencer(uint8_t SlaveId){
                 case ERROR:
                 {
                     // --------> decide what to do here
+                    SYS_MESSAGE("FW handler EXEC_FW_STATE_FLASH_SLAVES CHECKxCHECKSUM error.\n\r");
+                    _nop();
                 }
                 default:
                 {

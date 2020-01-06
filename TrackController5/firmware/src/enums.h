@@ -77,7 +77,8 @@ extern "C" {
 #define SLAVE_BOOT_LOADER_OFFSET 0x800
 #define SLAVE_FLASH_END 0x8000
 #define SLAVE_FLASH_SIZE (SLAVE_FLASH_END - SLAVE_BOOT_LOADER_OFFSET)
-#define ROWWIDTH  64                                                            // erasing in the PIC is only done with 32 bytes = 2 rows of program memory!
+#define BLOCKWIDTH  64                                                            // erasing in the PIC is only done with 32 bytes = 2 rows of program memory!
+#define LINEWIDTH 16
     
 #define SECONDS (126000000)
 #define MILISECONDS (SECONDS / 1000)
@@ -133,7 +134,7 @@ typedef enum
     CONTROLLER                      = 0x80,
     MBUS                            = 0x81,
     FWHANDLER                       = 0x82,
-} STATUS_MESSAGES;
+} TASK_STATE;
 
 
 enum

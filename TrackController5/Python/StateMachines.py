@@ -298,7 +298,7 @@ class State:
                 
                 for j in range(self.Count, (self.Count + self.jumpsize)):
                     #print("j = " + str(j))
-                    for val in self.ByteArray[j][0]:
+                    for val in self.ByteArray[j][1]:
                         #print (str(val))
                         data += struct.pack('<B', val)
                 
@@ -360,7 +360,7 @@ class State:
         '''
         if(self.FlashNewSwHandler == 7):
             data = struct.pack("<2B", 0xAA, EnumCommand.EXEC_FW_STATE_CONFIG_DATA)
-            for val in self.ByteArray[j][0]:
+            for val in self.ConfigDataArray[0]:
                 #print (str(val))
                 data += struct.pack('<B', val)
         

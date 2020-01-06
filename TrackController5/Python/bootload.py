@@ -6,7 +6,7 @@ import ctypes
 import time
 
 try:
-    file_object  = open(".\..\..\TrackAmplifierBootLoader.X\dist\With_Configurations\production\TrackAmplifierBootLoader.X.production.hex", 'r')
+    file_object  = open(".\..\..\TrackAmplifier4.X\dist\Offset\production\TrackAmplifier4.X.production.hex", 'r')
 except:
     print('failed to open file !!!! \n')
 
