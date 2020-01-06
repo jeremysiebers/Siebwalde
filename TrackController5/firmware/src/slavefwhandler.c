@@ -295,105 +295,49 @@ bool FwFileDownload(){
  */
 /*#--------------------------------------------------------------------------#*/
 
-//uint8_t     iConfigWordDownload = 0;
-//uint8_t     *ptr_FwData     = 0;
-//uint16_t    FwLineCount     = 0;
-//
-//uint16_t    count           = 0;
-//uint16_t    limit           = 0;
-//uint16_t    checksum        = 0;
-//uint8_t     data1           = 0;
-//uint8_t     data2           = 0;
-//uint8_t     *pFw1           = 0;
-//uint8_t     *pFw2           = 0;
+uint8_t     iConfigWordDownload = 0;
 
 bool ConfigWordDownload(){
     
     bool return_val = false;
     
-//    switch (iFwFileDownload){
-//        
-//        case 0:
-//        {
-//            CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_RECEIVE_CONFIG_WORD_STANDBY, (uint8_t)DONE);
-//            ptr_FwData = &FwFile[0];
-//            FwLineCount = 0;
-//            fwData.fwchecksum = 0;
-//            iFwFileDownload++;
-//            break;
-//        }
-//        
-//        case 1:
-//        {
-//            if(CHECKxDATAxINxRECEIVExMAILxBOX()){
-//                EthernetRecvData = GETxDATAxFROMxRECEIVExMAILxBOX();
-//                
-//                if(EthernetRecvData->command == EXEC_FW_STATE_FW_DATA){
-//                    //*ptr_FwData = EthernetRecvData->data;
-//                    memcpy(ptr_FwData, &(EthernetRecvData->data), 64);
-//                    ptr_FwData  +=  64;
-//                    FwLineCount +=   4;
-//                                
-//                    if(FwLineCount > 1916){
-//                        iFwFileDownload++;
-//                        FwLineCount = 0;                    
-//                        CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_FW_DATA_DOWNLOAD_DONE, (uint8_t)DONE);
-//                        SYS_MESSAGE("FW handler EXEC_FW_STATE_RECEIVE_FW_FILE received a FW file.\n\r");
-//                    }
-//                    else{
-//                        CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY, (uint8_t)DONE);
-//                    }
-//                }
-//                else{
-//                    SYS_MESSAGE("EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY received wrong command stopping FW Handler.\n\r");
-//                    iFwFileDownload = 0;
-//                    fwData.state = FW_STATE_WAITING_FOR_COMMAND;
-//                    return_val = true;
-//                }
-//            }
-//            break;
-//        }
-//        
-//        case 2:
-//        {
-//            pFw1 = &FwFile[0];
-//            pFw2 = &FwFile[1];
-//            limit = sizeof(FwFile)- 2;
-//            data1 = 0;
-//            data2 = 0;
-//            count = 0;
-//            checksum = 0;
-//            
-//            for (count = 0; count < limit; count = count + 2)
-//            {                
-//                checksum += (uint16_t)*pFw1;
-//                checksum += (uint16_t)*pFw2 << 8;
-//                pFw1 += 2;
-//                pFw2 += 2;                
-//            }            
-//            
-//            data1 = (uint8_t) (checksum & 0x00FF);
-//            data2 = (uint8_t)((checksum & 0xFF00) >> 8);
-//            
-//            if(data1 == *pFw1 && data2 == *pFw2){
-//                fwData.fwchecksum = checksum;
-//                CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_FW_CHECKSUM, (uint8_t)DONE);
-//                SYS_MESSAGE("FW handler EXEC_FW_STATE_RECEIVE_FW_FILE checksum is OK.\n\r");
-//            }
-//            else{
-//                CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_FW_CHECKSUM, (uint8_t)ERROR);
-//                SYS_MESSAGE("FW handler EXEC_FW_STATE_RECEIVE_FW_FILE checksum is NOK.\n\r");
-//            }
-//            iFwFileDownload = 0;
-//            return_val = true;
-//            break;
-//        }
-//        
-//        default:
-//        {
-//            break;
-//        }
-//    }
+    switch (iConfigWordDownload){
+        
+        case 0:
+        {
+            CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_RECEIVE_CONFIG_WORD_STANDBY, (uint8_t)DONE);
+            ptr_FwData = &FwConfigWord[0];
+            iConfigWordDownload++;
+            break;
+        }
+		
+        case 1:
+        {
+            if(CHECKxDATAxINxRECEIVExMAILxBOX()){
+                EthernetRecvData = GETxDATAxFROMxRECEIVExMAILxBOX();
+                
+                if(EthernetRecvData->command == EXEC_FW_STATE_CONFIG_DATA){
+                    memcpy(ptr_FwData, &(EthernetRecvData->data), 14);
+                    CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_CONFIG_DATA_DOWNLOAD_DONE, (uint8_t)DONE);
+                    SYS_MESSAGE("FW handler EXEC_FW_STATE_RECEIVE_CONFIG_WORD received config data.\n\r");
+					iConfigWordDownload = 0;
+					return_val = true;
+                }
+                else{
+                    SYS_MESSAGE("EXEC_FW_STATE_RECEIVE_CONFIG_WORD_STANDBY received wrong command stopping FW Handler.\n\r");
+                    iConfigWordDownload = 0;
+                    fwData.state = FW_STATE_WAITING_FOR_COMMAND;
+                    return_val = true;
+                }
+            }
+            break;
+        }
+        
+        default:
+        {
+            break;
+        }
+    }
     return (return_val);
 }
 
@@ -609,7 +553,7 @@ bool FlashSequencer(uint8_t SlaveId){
                 }
                 case ERROR:
                 {
-                    
+                    // --------> decide what to do here
                 }
                 default:
                 {
@@ -621,7 +565,7 @@ bool FlashSequencer(uint8_t SlaveId){
         
         case 8:
         {
-            switch(ERASExFLASH(SLAVE_BOOT_LOADER_OFFSET, SLAVE_FLASH_END)){
+            switch(WRITExFLASH(SLAVE_BOOT_LOADER_OFFSET, SLAVE_FLASH_END)){
                 case DONE:
                 {
                     SYS_MESSAGE("FW handler EXEC_FW_STATE_FLASH_SLAVES slave flash erase successful.\n\r");
@@ -630,13 +574,78 @@ bool FlashSequencer(uint8_t SlaveId){
                 }
                 case ERROR:
                 {
-                    
+                    // --------> decide what to do here
                 }
                 default:
                 {
                     break;
                 }
             }
+            break;
+        }
+		
+		case 9:
+        {
+            switch(WRITExCONFIG(FwConfigWord)){
+                case DONE:
+                {
+                    SYS_MESSAGE("FW handler EXEC_FW_STATE_FLASH_SLAVES slave flash erase successful.\n\r");
+                    iFlashSequencer++;
+                    break;
+                }
+                case ERROR:
+                {
+                    // --------> decide what to do here
+                }
+                default:
+                {
+                    break;
+                }
+            }
+            break;
+        }
+		
+		case 10:
+        {
+            switch(CHECKxCHECKSUM()){
+                case DONE:
+                {
+                    SYS_MESSAGE("FW handler EXEC_FW_STATE_FLASH_SLAVES slave flash erase successful.\n\r");
+					fwData.SlaveBootloaderHandlingActive = false;
+                    iFlashSequencer++;
+                    break;
+                }
+                case ERROR:
+                {
+                    // --------> decide what to do here
+                }
+                default:
+                {
+                    break;
+                }
+            }
+            break;
+        }
+		
+		case 11:
+		{
+			Data.SlaveAddress  = BackplaneId;
+            Data.Direction     = WRITE;
+            Data.NoOfRegisters = 1;
+            Data.StartRegister = HOLDINGREG0;
+            Data.RegData0      = 0;
+            SLAVExCOMMUNICATIONxHANDLER();          
+            DelayCount1 = READxCORExTIMER();
+            iFlashSequencer++;
+            break;
+		}
+		
+		case 12:
+        {
+            if((READxCORExTIMER() - DelayCount1) > (10 * MILISECONDS)){
+                iFlashSequencer = 0;
+                return_val = true;
+            }            
             break;
         }
         

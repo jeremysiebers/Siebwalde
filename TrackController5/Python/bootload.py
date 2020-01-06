@@ -6,7 +6,7 @@ import ctypes
 import time
 
 try:
-    file_object  = open(".\TrackAmplifier4.X.production.hex", 'r')
+    file_object  = open(".\..\..\TrackAmplifierBootLoader.X\dist\With_Configurations\production\TrackAmplifierBootLoader.X.production.hex", 'r')
 except:
     print('failed to open file !!!! \n')
 
@@ -137,7 +137,7 @@ class BootLoader:
         return(EnumBootloader.COMMAND_SUCCESSFUL)
 
     #---------------------------------------------------------------------------------------------------------------------------#
-    
+
     def ReadHexFileToBuf(self, bootloader_offset, program_mem_size):
         print("------------- ReadHexFileToBuf ------------\n")
 
@@ -148,7 +148,6 @@ class BootLoader:
         HexRowWidth = 16 #bytes
 
         ByteArray = []
-        ByteArrayChecksum = []
 
         ProcessLines = int((program_mem_size - bootloader_offset) / HexRowWidth)
 
@@ -167,11 +166,10 @@ class BootLoader:
 
             data = buff[9:41]
             ByteArray.append([bytearray.fromhex(address), bytearray.fromhex(data)])
-            ByteArrayChecksum.append([bytearray.fromhex(data)])
-        
-        return ByteArrayChecksum
-        
-    
+
+        return ByteArray
+
+
     #---------------------------------------------------------------------------------------------------------------------------#    
 
     def WriteFlash(self, bootloader_offset, program_mem_size):
@@ -332,6 +330,28 @@ class BootLoader:
 
         print('Write config ok!\n')
         return COMMAND_SUCCESSFUL
+
+    #---------------------------------------------------------------------------------------------------------------------------#
+
+    def GetConfigData(self):
+        print("------------- Get Config Words...----------------\n")
+
+        ByteArray = [0]
+
+        run = True
+
+        while(run):
+
+            buff = file_object.readline()
+            config = buff[2:3]
+
+            if(int(config, 16) == 0x0C):
+                run = False
+
+        data = buff[9:33]
+        #ByteArray.append([bytearray.fromhex(data)])
+        ByteArray[0] = bytearray.fromhex(data)
+        return (ByteArray)
 
     #---------------------------------------------------------------------------------------------------------------------------#
 

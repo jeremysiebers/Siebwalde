@@ -157,7 +157,9 @@ typedef enum
     EXEC_FW_STATE_FW_CHECKSUM                   = 0x0D,
     EXEC_FW_STATE_RECEIVE_CONFIG_WORD           = 0x0E,
     EXEC_FW_STATE_RECEIVE_CONFIG_WORD_STANDBY   = 0x0F,
-    EXEC_FW_STATE_FLASH_SLAVES                  = 0x10
+    EXEC_FW_STATE_FLASH_SLAVES                  = 0x10,
+	EXEC_FW_STATE_CONFIG_DATA                   = 0x11,
+	EXEC_FW_STATE_CONFIG_DATA_DOWNLOAD_DONE     = 0x12,
     
 } FWHANDLER_COMMANDS;
 
