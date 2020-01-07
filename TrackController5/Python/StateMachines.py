@@ -242,7 +242,7 @@ class State:
                     print("Getting Checksum from file failed!!!!\n")
                     return EnumStateMachine.nok
             
-            FwFlashRequired = True#False
+            FwFlashRequired = False
             
             for x in range(1, 51):
                 if ((self.Amplifiers.Trackamplifiers[x].HoldingReg[11] != self.file_checksum) and 
@@ -253,6 +253,7 @@ class State:
                 self.ByteArray = self.Bootloader.ReadHexFileToBuf(self.bootloader_offset, self.program_mem_size)
                 self.FlashNewSwHandler += 1
                 self.Amplifiers.WriteSerial(EnumCommand.ETHERNET_T, EnumCommand.EXEC_MBUS_STATE_SLAVE_FW_DOWNLOAD, 0)
+                print("FlashTrackamplifiers some slaves require flashing!!\n")
                 print("FlashTrackamplifiers --> EXEC_MBUS_STATE_SLAVE_FW_DOWNLOAD")
                 return EnumStateMachine.busy
             else:
@@ -317,7 +318,7 @@ class State:
                 if(self.Amplifiers.EthernetTarget.taskid == EnumStatusMessages.FWHANDLER and (self.Amplifiers.EthernetTarget.taskstate == EnumCommand.EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY or 
                                                                                               self.Amplifiers.EthernetTarget.taskstate == EnumCommand.EXEC_FW_STATE_FW_DATA_DOWNLOAD_DONE) and 
                     self.Amplifiers.EthernetTarget.feedback == EnumStatusMessages.DONE):
-                    print("FlashTrackamplifiers --> EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY --> self.Count = " + str(self.Count) + ".")
+                    #print("FlashTrackamplifiers --> EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY --> self.Count = " + str(self.Count) + ".")
                     self.Amplifiers.EthernetTarget.ClearOldData()
                     self.FlashNewSwHandler = 3
         
@@ -331,6 +332,7 @@ class State:
                     print("FlashTrackamplifiers --> EXEC_FW_STATE_FW_CHECKSUM --> checksum of received data is ok.")
                     self.Amplifiers.EthernetTarget.ClearOldData()
                     self.ConfigDataArray = self.Bootloader.GetConfigData()
+                    self.Bootloader.file_object.close()
                     self.Amplifiers.WriteSerial(EnumCommand.ETHERNET_T, EnumCommand.EXEC_FW_STATE_RECEIVE_CONFIG_WORD, 0)
                     print("FlashTrackamplifiers --> EXEC_FW_STATE_RECEIVE_CONFIG_WORD")
                     self.FlashNewSwHandler = 6               

@@ -99,6 +99,7 @@ typedef struct
 {
     uint8_t         sequence;
     uint8_t         btldr_sequence;
+    uint8_t         btldr_data_return_sequence;
     uint8_t         btldr_datacount;
     uint8_t         *p_btldr;
     bool            btldr_receive_error;

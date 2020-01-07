@@ -23,6 +23,8 @@ static unsigned int Startup_Machine = 0;
 unsigned int Update_Amplifier = 0;
 static unsigned int Sequencer = 0;
 
+static uint8_t test[1000];
+
 /*----------------------------------------------------------------------------*/
 void main(void) {
     
@@ -59,6 +61,8 @@ void main(void) {
 /*----------------------------------------------------------------------------*/
     
     while(Config){
+        
+        test[0] = 1;
         
         switch(Startup_Machine){
             case 0 :
@@ -121,6 +125,13 @@ void main(void) {
     
         ProcessPetitModbus();
         Led_Blink();
+        
+//        test[0]++;
+//        
+//        if(test[0] > 50){
+//            test[0] = 0;
+//        }
+        
         /*
         if (Update_Amplifier){
             

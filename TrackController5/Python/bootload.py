@@ -5,12 +5,6 @@ import struct
 import ctypes
 import time
 
-try:
-    file_object  = open(".\..\..\TrackAmplifier4.X\dist\Offset\production\TrackAmplifier4.X.production.hex", 'r')
-except:
-    print('failed to open file !!!! \n')
-
-
 class BootLoader:
     def __init__(self, data_communication):
         self.DataCommunication          = data_communication        
@@ -20,7 +14,12 @@ class BootLoader:
 
         self.cmd_returnval              = 0
         self.CalcChecksumFile           = 0
-        self.ChecksumRequest            = 0         
+        self.ChecksumRequest            = 0
+        
+        try:
+            self.file_object  = open(".\..\..\TrackAmplifier4.X\dist\Offset\production\TrackAmplifier4.X.production.hex", 'r')
+        except:
+            print('failed to open file !!!! \n')        
 
 
     #---------------------------------------------------------------------------------------------------------------------------#
@@ -31,7 +30,7 @@ class BootLoader:
         ProcessLines = int(((program_mem_size - bootloader_offset) / HexRowWidth)  + 1)
 
         for i in range(ProcessLines):        
-            buff = file_object.readline()
+            buff = self.file_object.readline()
             address = buff[3:7]
 
             if(int(address, 16) != 0):                
@@ -141,7 +140,7 @@ class BootLoader:
     def ReadHexFileToBuf(self, bootloader_offset, program_mem_size):
         print("------------- ReadHexFileToBuf ------------\n")
 
-        if (file_object == ''):
+        if (self.file_object == ''):
             print('Write flash nok, no file loaded/found!\n')
             return(COMMAND_UNSUCCESSFUL)
 
@@ -151,10 +150,10 @@ class BootLoader:
 
         ProcessLines = int((program_mem_size - bootloader_offset) / HexRowWidth)
 
-        file_object.seek(0)
+        self.file_object.seek(0)
 
         for i in range(ProcessLines):        
-            buff = file_object.readline()
+            buff = self.file_object.readline()
             address = buff[3:7]
 
             if(int(address, 16) < bootloader_offset):
@@ -176,7 +175,7 @@ class BootLoader:
 
         print("------------- Write to flash started...------------\n")
 
-        if (file_object == ''):
+        if (self.file_object == ''):
             print('Write flash nok, no file loaded/found!\n')
             return(COMMAND_UNSUCCESSFUL)
 
@@ -187,10 +186,10 @@ class BootLoader:
 
         ProcessLines = int((program_mem_size - bootloader_offset) / HexRowWidth)
 
-        file_object.seek(0)
+        self.file_object.seek(0)
 
         for i in range(ProcessLines):        
-            buff = file_object.readline()
+            buff = self.file_object.readline()
             address = buff[3:7]
 
             if(int(address, 16) < bootloader_offset):
@@ -295,7 +294,7 @@ class BootLoader:
 
         while(run):
 
-            buff = file_object.readline()
+            buff = self.file_object.readline()
             config = buff[2:3]
 
             if(int(config, 16) == 0x0C):
@@ -342,7 +341,7 @@ class BootLoader:
 
         while(run):
 
-            buff = file_object.readline()
+            buff = self.file_object.readline()
             config = buff[2:3]
 
             if(int(config, 16) == 0x0C):

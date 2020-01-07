@@ -31,7 +31,7 @@ class MAIN():
             elif(self.state == EnumStateMachine.ResetAllSlaves):
                 returned = self.StateMachine.RunFunction(EnumStateMachine.ResetAllSlaves)
                 if(returned == EnumStateMachine.ok):
-                    self.state = EnumStateMachine.FlashTrackamplifiers
+                    self.state = EnumStateMachine.DataUploadStart
             
             ######################
             ## DataUploadStart  ##
@@ -74,26 +74,7 @@ class MAIN():
             elif(self.state == EnumStateMachine.EnableTrackamplifiers):
                 returned = self.StateMachine.RunFunction(EnumStateMachine.EnableTrackamplifiers)
                 if(returned == EnumStateMachine.ok):
-                    self.state = EnumStateMachine.run
-            
-#            ######################
-#            ## Check SW version ##
-#            ######################        
-#            elif(self.state == EnumStateMachine.CheckAmpSwVersion):
-#                returned = self.StateMachine.RunFunction(EnumStateMachine.CheckAmpSwVersion)
-#                if(returned == EnumStateMachine.ok):
-#                    self.state = EnumStateMachine.FlashTrackamplifiers
-#            
-#            ######################
-#            ## Flash new SW     ##
-#            ######################        
-#            elif(self.state == EnumStateMachine.FlashTrackamplifiers):
-#                returned = self.StateMachine.RunFunction(EnumStateMachine.FlashTrackamplifiers)
-#                if(returned == EnumStateMachine.ok):
-#                    self.state = EnumStateMachine.InitTrackamplifiers
-#            
-#            
-#            
+                    self.state = EnumStateMachine.run  
 
 
 

@@ -18,6 +18,7 @@ bool FlashSequencer(uint8_t SlaveId);
 static uint8_t      FwFile[SLAVE_FLASH_SIZE]; //[30720];
 static uint8_t      FwConfigWord[14];
 static uint16_t     checksum        = 0;
+static uint32_t     DelayCount1     = 0;
 
 /*#--------------------------------------------------------------------------#*/
 /*  Description: INITxSLAVExFWxHANDLER(SLAVE_INFO *location)
@@ -369,7 +370,7 @@ bool FlashSlaves(){
         case 0:
         {
             if(fwData.fwchecksum > 0){
-                iFlashSlaves = 2;//iFlashSlaves++;
+                iFlashSlaves++;
             }
             else{
                 SYS_MESSAGE("FW handler FlashSlaves checksum is empty, stopping FW flash.\n\r");
@@ -380,28 +381,62 @@ bool FlashSlaves(){
         
         case 1:
         {
-            if((MASTER_SLAVE_DATA[SlaveId1].SlaveDetected == true) && (MASTER_SLAVE_DATA[SlaveId1].HoldingReg[11] != fwData.fwchecksum)){
-                SYS_PRINT("FW handler EXEC_FW_STATE_FLASH_SLAVES start flash slave sequence on ID %d.\n\r", SlaveId1);
-                iFlashSlaves++;
+            if (SlaveId1 > NUMBER_OF_AMPLIFIERS){
+                SYS_MESSAGE("FW handler FlashSlaves done.\n\r");
+                SlaveId1        = 1;
+                iFlashSlaves    = 3;                    
             }
             else{
-                SlaveId1++;
-                
-                if (SlaveId1 > NUMBER_OF_AMPLIFIERS){
-                    SYS_MESSAGE("FW handler FlashSlaves done.\n\r");
-                    SlaveId1      = 0;
-                    iFlashSlaves = 0;                    
-                    return_val   = true;
+                if((MASTER_SLAVE_DATA[SlaveId1].SlaveDetected == true) && (MASTER_SLAVE_DATA[SlaveId1].HoldingReg[11] != fwData.fwchecksum)){
+                    SYS_PRINT("FW handler EXEC_FW_STATE_FLASH_SLAVES start flash slave sequence on SlaveID %d.\n\r", SlaveId1);
+                    iFlashSlaves++;
                 }
+                else{
+                    SlaveId1++;
+                }
+                break;
             }
-            break;
         }
         
         case 2:
         {
             if(FlashSequencer(SlaveId1)){
+                SlaveId1++;
                 iFlashSlaves = 1;
             }            
+            break;
+        }
+        
+        case 3:
+        {
+            Slaves_Disable_On();
+            DelayCount1 = READxCORExTIMER();
+            iFlashSlaves = 4;
+            break;
+        }
+        
+        case 4:
+        {
+            if((READxCORExTIMER() - DelayCount1) > (10 * MILISECONDS)){
+                iFlashSlaves = 5;
+            }  
+            break;
+        }
+        
+        case 5:
+        {
+            Slaves_Disable_Off();
+            DelayCount1 = READxCORExTIMER();
+            iFlashSlaves = 6;
+            break;
+        }
+        
+        case 6:
+        {
+            if((READxCORExTIMER() - DelayCount1) > (50 * MILISECONDS)){
+                iFlashSlaves    = 0;
+                return_val      = true;
+            }  
             break;
         }
         
@@ -437,9 +472,8 @@ static uint8_t  PrevBackplaneId = 0;
 static uint8_t  ShiftSlot1      = 0;
 static uint8_t  GoToCase        = 0;
 static uint16_t WaitCounter     = 0;
-static uint32_t DelayCount1     = 0;
 
-bool FlashSequencer(uint8_t SlaveId){
+bool FlashSequencer(uint8_t Slave){
     bool return_val = false;
     
     switch(iFlashSequencer){
@@ -477,29 +511,28 @@ bool FlashSequencer(uint8_t SlaveId){
         
         case 4:                                                                 // select first a slave amplifier by selecting one via a backplane slave
         {
-            if(     SlaveId > 0  && SlaveId < 10){
-                BackplaneId = 51;}
-            else if(SlaveId > 10 && SlaveId < 21){
-                BackplaneId = 52;}
-            else if(SlaveId > 20 && SlaveId < 31){
-                BackplaneId = 53;}
-            else if(SlaveId > 30 && SlaveId < 41){
-                BackplaneId = 54;}
-            else if(SlaveId > 40 && SlaveId < 51){
-                BackplaneId = 55;}
-            
-            if(PrevBackplaneId != BackplaneId){
-                PrevBackplaneId = BackplaneId;
-                ShiftSlot1 = 0;
-            }
+            if(     Slave > 0  && Slave < 11){
+                BackplaneId = 51;
+                ShiftSlot1  = Slave - 1;}
+            else if(Slave > 10 && Slave < 21){
+                BackplaneId = 52;
+                ShiftSlot1  = Slave - 11;}
+            else if(Slave > 20 && Slave < 31){
+                BackplaneId = 53;
+                ShiftSlot1  = Slave - 21;}
+            else if(Slave > 30 && Slave < 41){
+                BackplaneId = 54;
+                ShiftSlot1  = Slave - 31;}
+            else if(Slave > 40 && Slave < 51){
+                BackplaneId = 55;
+                ShiftSlot1  = Slave - 41;}
             
             Data.SlaveAddress  = BackplaneId;
             Data.Direction     = WRITE;
             Data.NoOfRegisters = 1;
             Data.StartRegister = HOLDINGREG0;
             Data.RegData0      = (SLOT1 << ShiftSlot1);
-            SLAVExCOMMUNICATIONxHANDLER();
-            ShiftSlot1++;            
+            SLAVExCOMMUNICATIONxHANDLER();           
             DelayCount1 = READxCORExTIMER();
             iFlashSequencer++;
             break;
@@ -514,9 +547,10 @@ bool FlashSequencer(uint8_t SlaveId){
         
         case 5:
         {
-            if((READxCORExTIMER() - DelayCount1) > (2 * SECONDS)){
-                iFlashSequencer++;
+            if((READxCORExTIMER() - DelayCount1) > (50 * MILISECONDS)){
+                iFlashSequencer = 7;
                 fwData.SlaveBootloaderHandlingActive = true;
+                MASTER_SLAVE_DATA[BackplaneId].MbCommError = SLAVE_DATA_OK;     // since the slave answer is lost???
             }            
             break;
         }
@@ -650,6 +684,7 @@ bool FlashSequencer(uint8_t SlaveId){
 		case 12:
         {
             if((READxCORExTIMER() - DelayCount1) > (10 * MILISECONDS)){
+                MASTER_SLAVE_DATA[BackplaneId].MbCommError = SLAVE_DATA_OK;     // since the slave answer is lost???
                 iFlashSequencer = 0;
                 return_val = true;
             }            
