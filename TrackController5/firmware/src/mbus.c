@@ -210,17 +210,17 @@ void MBUS_Tasks ( void )
             if ( DRV_HANDLE_INVALID == mbusData.ModbusCommCycleHandle )
             {
                 // Unable to open the driver
-                SYS_MESSAGE("Failed to open mbusData.ModbusCommCycleHandle.\n\r");
+                SYS_MESSAGE("Mbus handler\t: Failed to open mbusData.ModbusCommCycleHandle.\n\r");
             }
             if ( DRV_HANDLE_INVALID == mbusData.ModbusCharacterTimeoutHandle )
             {
                 // Unable to open the driver
-                SYS_MESSAGE("Failed to open mbusData.ModbusCharacterTimeoutHandle.\n\r");
+                SYS_MESSAGE("Mbus handler\t: Failed to open mbusData.ModbusCharacterTimeoutHandle.\n\r");
             }
             if ( DRV_HANDLE_INVALID == mbusData.ModbusReceiveTimeoutHandle )
             {
                 // Unable to open the driver
-                SYS_MESSAGE("Failed to open mbusData.ModbusReceiveTimeoutHandle.\n\r");
+                SYS_MESSAGE("Mbus handler\t: Failed to open mbusData.ModbusReceiveTimeoutHandle.\n\r");
             }
 
 
@@ -232,7 +232,7 @@ void MBUS_Tasks ( void )
                 
             }
             else{
-                SYS_MESSAGE("Register mbusData.ModbusCommCycleCallBack failed.\n\r");
+                SYS_MESSAGE("Mbus handler\t: Register mbusData.ModbusCommCycleCallBack failed.\n\r");
             }
 
             actualFrequency = DRV_TMR_CounterFrequencyGet(mbusData.ModbusCharacterTimeoutHandle);
@@ -242,7 +242,7 @@ void MBUS_Tasks ( void )
                 
             }
             else{
-                SYS_MESSAGE("Register mbusData.ModbusCharacterTimeoutCallBack failed.\n\r");
+                SYS_MESSAGE("Mbus handler\t: Register mbusData.ModbusCharacterTimeoutCallBack failed.\n\r");
             }
 
             actualFrequency = DRV_TMR_CounterFrequencyGet(mbusData.ModbusReceiveTimeoutHandle);
@@ -252,7 +252,7 @@ void MBUS_Tasks ( void )
                 
             }
             else{
-                SYS_MESSAGE("Register mbusData.ModbusReceiveTimeoutCallBack failed.\n\r");
+                SYS_MESSAGE("Mbus handler\t: Register mbusData.ModbusReceiveTimeoutCallBack failed.\n\r");
             }
             
             mbusData.state = MBUS_STATE_WAIT;            
@@ -277,7 +277,7 @@ void MBUS_Tasks ( void )
             if((READxCORExTIMER() - DelayCount) > 200000000){
                 mbusData.state = MBUS_STATE_WAIT;
                 CREATExTASKxSTATUSxMESSAGE((uint8_t)MBUS, (uint8_t)MBUS_STATE_SLAVES_ON, (uint8_t)DONE);
-                SYS_MESSAGE("MBUS_STATE_SLAVES_BOOT_WAIT done.\n\r");
+                SYS_MESSAGE("Mbus handler\t: MBUS_STATE_SLAVES_BOOT_WAIT done.\n\r");
             }            
             break;
         }
@@ -287,18 +287,18 @@ void MBUS_Tasks ( void )
             if (SLAVExDETECT()){
                 mbusData.state = MBUS_STATE_WAIT;
                 CREATExTASKxSTATUSxMESSAGE((uint8_t)MBUS, (uint8_t)MBUS_STATE_SLAVE_DETECT, (uint8_t)DONE);
-                SYS_MESSAGE("MBUS_STATE_SLAVE_DETECT done.\n\r");
+                SYS_MESSAGE("Mbus handler\t: MBUS_STATE_SLAVE_DETECT done.\n\r");
             }
             PROCESSxPETITxMODBUS();
             break;
         }
         
-        case MBUS_STATE_SLAVE_FW_DOWNLOAD:
+        case MBUS_STATE_SLAVE_FW_FLASH:
         {
             if (SLAVExFWxHANDLER()){
                 mbusData.state = MBUS_STATE_WAIT;
-                CREATExTASKxSTATUSxMESSAGE((uint8_t)MBUS, (uint8_t)MBUS_STATE_SLAVE_FW_DOWNLOAD, (uint8_t)DONE);
-                SYS_MESSAGE("MBUS_STATE_SLAVE_FW_DOWNLOAD done.\n\r");
+                CREATExTASKxSTATUSxMESSAGE((uint8_t)MBUS, (uint8_t)MBUS_STATE_SLAVE_FW_FLASH, (uint8_t)DONE);
+                SYS_MESSAGE("Mbus handler\t: MBUS_STATE_SLAVE_FW_FLASH done.\n\r");
             }
             if(fwData.SlaveBootloaderHandlingActive == false){
                 PROCESSxPETITxMODBUS();
@@ -312,7 +312,7 @@ void MBUS_Tasks ( void )
             {                
                 mbusData.state = MBUS_STATE_WAIT;
                 CREATExTASKxSTATUSxMESSAGE((uint8_t)MBUS, (uint8_t)MBUS_STATE_SLAVE_INIT, (uint8_t)DONE);
-                SYS_MESSAGE("MBUS_STATE_SLAVE_INIT done.\n\r");
+                SYS_MESSAGE("Mbus handler\t: MBUS_STATE_SLAVE_INIT done.\n\r");
             }
             PROCESSxPETITxMODBUS();
             break;
@@ -324,7 +324,7 @@ void MBUS_Tasks ( void )
                 mbusData.state = MBUS_STATE_SERVICE_TASKS;
                 MaxSlaveUploadCount = 50;                                       // limit the upload to slave data only (cyclic))
                 CREATExTASKxSTATUSxMESSAGE((uint8_t)MBUS, (uint8_t)MBUS_STATE_SLAVE_ENABLE, (uint8_t)DONE);
-                SYS_MESSAGE("MBUS_STATE_SLAVE_ENABLE done.\n\r");
+                SYS_MESSAGE("Mbus handler\t: MBUS_STATE_SLAVE_ENABLE done.\n\r");
             }
             PROCESSxPETITxMODBUS();
             break;
@@ -336,7 +336,7 @@ void MBUS_Tasks ( void )
             mbusData.state  = MBUS_STATE_WAIT;
             mbusData.upload = UPLOAD_STATE_ALL;
             CREATExTASKxSTATUSxMESSAGE((uint8_t)MBUS, (uint8_t)MBUS_STATE_START_DATA_UPLOAD, (uint8_t)DONE);
-            SYS_MESSAGE("MBUS_STATE_START_DATA_UPLOAD done.\n\r");
+            SYS_MESSAGE("Mbus handler\t: MBUS_STATE_START_DATA_UPLOAD done.\n\r");
             break;
         }
 
@@ -368,7 +368,7 @@ void MBUS_Tasks ( void )
             if((READxCORExTIMER() - DelayCount) > 100000000){
                 mbusData.state = MBUS_STATE_WAIT;
                 CREATExTASKxSTATUSxMESSAGE((uint8_t)MBUS, (uint8_t)MBUS_STATE_RESET, (uint8_t)DONE);
-                SYS_MESSAGE("MBUS_STATE_RESET_WAIT done.\n\r");
+                SYS_MESSAGE("Mbus handler\t: MBUS_STATE_RESET_WAIT done.\n\r");
             }            
             break;
         }
@@ -479,7 +479,6 @@ void SETxMBUSxSTATE (MBUS_STATES state){
   Remarks:
     See prototype in mbus.h.
  */
-
 uint32_t READxCORExTIMER(void)
 {
     uint32_t count;

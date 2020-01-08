@@ -126,11 +126,11 @@ void main(void) {
         ProcessPetitModbus();
         Led_Blink();
         
-//        test[0]++;
-//        
-//        if(test[0] > 50){
-//            test[0] = 0;
-//        }
+        test[0]++;
+        
+        if(test[0] > 50){
+            test[0] = 0;
+        }
         
         /*
         if (Update_Amplifier){

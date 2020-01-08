@@ -74,7 +74,8 @@ class MAIN():
             elif(self.state == EnumStateMachine.EnableTrackamplifiers):
                 returned = self.StateMachine.RunFunction(EnumStateMachine.EnableTrackamplifiers)
                 if(returned == EnumStateMachine.ok):
-                    self.state = EnumStateMachine.run  
+                    self.state = EnumStateMachine.run
+                    exit()
 
 
 

@@ -109,10 +109,7 @@ class DataAquisition:
         if(function == EnumCommand.BOOTLOADER):
             tx = struct.pack("<2B", 0xAA, function)
             tx = tx + data
-            self.sock_trans.send(tx)
-            
-        if(function == EnumCommand.DUMMY_CMD):
-            self.sock_trans.send(data.encode())           
+            self.sock_trans.send(tx)          
     
     
     def ReadSerial(self):
@@ -173,9 +170,9 @@ class DataAquisition:
                         self.bootloader_data = copy.copy(self.data)
                     
                     elif (self.data[0] == 170 and 
-                          (self.data[1] == EnumStatusMessages.CONTROLLER or 
-                           self.data[1] == EnumStatusMessages.MBUS or
-                           self.data[1] == EnumStatusMessages.FWHANDLER)):
+                          (self.data[1] == EnumTaskId.CONTROLLER or 
+                           self.data[1] == EnumTaskId.MBUS or
+                           self.data[1] == EnumTaskId.FWHANDLER)):
                         self.data = struct.unpack ("<4B", self.line[:4])
                         self.EthernetTarget.taskid               = self.data[1 ]
                         self.EthernetTarget.taskstate            = self.data[2 ]

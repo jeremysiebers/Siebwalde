@@ -92,7 +92,7 @@ typedef enum
     MBUS_STATE_SLAVES_ON,
     MBUS_STATE_SLAVES_BOOT_WAIT,
     MBUS_STATE_SLAVE_DETECT,
-    MBUS_STATE_SLAVE_FW_DOWNLOAD,
+    MBUS_STATE_SLAVE_FW_FLASH,
     MBUS_STATE_SLAVE_INIT,
     MBUS_STATE_SLAVE_ENABLE,
     MBUS_STATE_START_DATA_UPLOAD,
@@ -314,6 +314,68 @@ void SETxMBUSxSTATE (MBUS_STATES state);
     This routine must be called from SYS_Tasks() routine.
  */
 uint32_t READxCORExTIMER(void);
+
+/*******************************************************************************
+  Function:
+    void TERMxMESSAGE       (const char* message);
+
+  Summary:
+    MPLAB Harmony Demo application tasks function
+
+  Description:
+    This routine is the Harmony Demo application's tasks function.  It
+    defines the application's state machine and core logic.
+
+  Precondition:
+    The system and application initialization ("SYS_Initialize") should be
+    called before calling this.
+
+  Parameters:
+    None.
+
+  Returns:
+    None.
+
+  Example:
+    <code>
+    MBUS_Tasks();
+    </code>
+
+  Remarks:
+    This routine must be called from SYS_Tasks() routine.
+ */
+void TERMxMESSAGE       (const char* id, const char* message);
+
+/*******************************************************************************
+  Function:
+    void TERMxMESSAGExFMT   (const char* format, ...);
+
+  Summary:
+    MPLAB Harmony Demo application tasks function
+
+  Description:
+    This routine is the Harmony Demo application's tasks function.  It
+    defines the application's state machine and core logic.
+
+  Precondition:
+    The system and application initialization ("SYS_Initialize") should be
+    called before calling this.
+
+  Parameters:
+    None.
+
+  Returns:
+    None.
+
+  Example:
+    <code>
+    MBUS_Tasks();
+    </code>
+
+  Remarks:
+    This routine must be called from SYS_Tasks() routine.
+ */
+void TERMxMESSAGExFMT   (const char* id, const char* format, ...);
 
 #endif /* _MBUS_H */
 

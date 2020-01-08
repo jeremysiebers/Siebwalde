@@ -10,8 +10,8 @@
 #include "ethernet.h"
 #include "slavebootloaderroutines.h"
 
-bool FwFileDownload(void);
-bool ConfigWordDownload(void);
+TASK_STATE FwFileDownload(void);
+TASK_STATE ConfigWordDownload(void);
 bool FlashSlaves   (void);
 bool FlashSequencer(uint8_t SlaveId);
 
@@ -75,7 +75,7 @@ bool SLAVExFWxHANDLER(){
         case FW_STATE_INIT:
         {
             CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)CONNECTED, (uint8_t)DONE);
-            SYS_MESSAGE("FW handler started.\n\r");
+            SYS_MESSAGE("Fw handler\t: Started.\n\r");
             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
             break;
         }
@@ -93,7 +93,7 @@ bool SLAVExFWxHANDLER(){
                 else{
                     
                     fwData.state = FW_STATE_WAITING_FOR_COMMAND;
-                    SYS_MESSAGE("FW handler received wrong HEADER, stay in wait state.\n\r");
+                    SYS_MESSAGE("Fw handler\t: received wrong HEADER, stay in wait state.\n\r");
                     CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)COMMAND, (uint8_t)ERROR);
                 }
             }
@@ -106,20 +106,61 @@ bool SLAVExFWxHANDLER(){
                 
                 case EXEC_FW_STATE_RECEIVE_FW_FILE:
                 {
-                    if(FwFileDownload()){
-                        CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_RECEIVE_FW_FILE, (uint8_t)DONE);
-                        SYS_MESSAGE("FW handler EXEC_FW_STATE_RECEIVE_FW_FILE done.\n\r");
-                        fwData.state = FW_STATE_WAITING_FOR_COMMAND;
+                    switch(FwFileDownload()){
+                        case BUSY:
+                        {
+                            break;
+                        }
+                        case DONE:
+                        {
+                            CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_RECEIVE_FW_FILE, (uint8_t)DONE);
+                            SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_RECEIVE_FW_FILE done.\n\r");
+                            fwData.state = FW_STATE_WAITING_FOR_COMMAND;
+                            break;
+                        }
+                        case ABORT:
+                        {
+                            CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_RECEIVE_FW_FILE, (uint8_t)ABORT);
+                            SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_RECEIVE_FW_FILE ABORT.\n\r");
+                            fwData.state = FW_STATE_WAITING_FOR_COMMAND;
+                            break;
+                        }
+                        default:
+                        {
+                            return_val = ABORT;
+                            break;
+                        }
                     }
                     break;
                 }
                 
                 case EXEC_FW_STATE_RECEIVE_CONFIG_WORD:
                 {
-                    if(ConfigWordDownload()){
-                        CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_RECEIVE_CONFIG_WORD, (uint8_t)DONE);
-                        SYS_MESSAGE("FW handler EXEC_FW_STATE_RECEIVE_CONFIG_WORD done.\n\r");
-                        fwData.state = FW_STATE_WAITING_FOR_COMMAND;
+                    switch(ConfigWordDownload()){
+                        case BUSY:
+                        {
+                            break;
+                        }
+                        case DONE:
+                        {
+                            CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_RECEIVE_CONFIG_WORD, (uint8_t)DONE);
+                            SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_RECEIVE_CONFIG_WORD done.\n\r");
+                            fwData.state = FW_STATE_WAITING_FOR_COMMAND;
+                            break;
+                        }
+                        case ABORT:
+                        {
+                            CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_RECEIVE_CONFIG_WORD, (uint8_t)ABORT);
+                            SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_RECEIVE_CONFIG_WORD ABORT.\n\r");
+                            fwData.state = FW_STATE_WAITING_FOR_COMMAND;
+                            break;
+                        }
+                        default:
+                        {
+                            return_val = ABORT;
+                            break;
+                        }
+                        
                     }
                     break;
                 }
@@ -128,7 +169,7 @@ bool SLAVExFWxHANDLER(){
                 {
                     if(FlashSlaves()){
                         CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_FLASH_SLAVES, (uint8_t)DONE);
-                        SYS_MESSAGE("FW handler EXEC_FW_STATE_FLASH_SLAVES done.\n\r");
+                        SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_FLASH_SLAVES done.\n\r");
                         fwData.state = FW_STATE_INIT;
                         return_val = true;
                     }
@@ -142,9 +183,16 @@ bool SLAVExFWxHANDLER(){
                     break;
                 }
                 
+                case ABORT:
+                {
+                    fwData.state = FW_STATE_INIT;
+                    return_val = true;
+                    break;
+                }
+                
                 default:
                 {
-                    SYS_MESSAGE("FW handler received wrong command, stay in wait state.\n\r");
+                    SYS_MESSAGE("Fw handler\t: received wrong command, stay in wait state.\n\r");
                     CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)COMMAND, (uint8_t)ERROR);
                     fwData.state = FW_STATE_WAITING_FOR_COMMAND;
                     break;
@@ -190,9 +238,9 @@ uint8_t     data2           = 0;
 uint8_t     *pFw1           = 0;
 uint8_t     *pFw2           = 0;
 
-bool FwFileDownload(){
+TASK_STATE FwFileDownload(){
     
-    bool return_val = false;
+    TASK_STATE return_val = BUSY;
     
     switch (iFwFileDownload){
         
@@ -212,7 +260,6 @@ bool FwFileDownload(){
                 EthernetRecvData = GETxDATAxFROMxRECEIVExMAILxBOX();
                 
                 if(EthernetRecvData->command == EXEC_FW_STATE_FW_DATA){
-                    //*ptr_FwData = EthernetRecvData->data;
                     memcpy(ptr_FwData, &(EthernetRecvData->data), 64);
                     ptr_FwData  +=  64;
                     FwLineCount +=   4;
@@ -221,17 +268,17 @@ bool FwFileDownload(){
                         iFwFileDownload++;
                         FwLineCount = 0;                    
                         CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_FW_DATA_DOWNLOAD_DONE, (uint8_t)DONE);
-                        SYS_MESSAGE("FW handler EXEC_FW_STATE_RECEIVE_FW_FILE received a FW file.\n\r");
+                        SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_RECEIVE_FW_FILE received a FW file.\n\r");
                     }
                     else{
                         CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY, (uint8_t)DONE);
                     }
                 }
                 else{
-                    SYS_MESSAGE("EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY received wrong command stopping FW Handler.\n\r");
+                    SYS_MESSAGE("EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY received wrong command stopping FW download.\n\r");
                     iFwFileDownload = 0;
                     fwData.state = FW_STATE_WAITING_FOR_COMMAND;
-                    return_val = true;
+                    return_val = ABORT;
                 }
             }
             break;
@@ -261,14 +308,14 @@ bool FwFileDownload(){
             if(data1 == *pFw1 && data2 == *pFw2){
                 fwData.fwchecksum = checksum;
                 CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_FW_CHECKSUM, (uint8_t)DONE);
-                SYS_MESSAGE("FW handler EXEC_FW_STATE_RECEIVE_FW_FILE checksum is OK.\n\r");
+                SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_RECEIVE_FW_FILE checksum is OK.\n\r");
             }
             else{
                 CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_FW_CHECKSUM, (uint8_t)ERROR);
-                SYS_MESSAGE("FW handler EXEC_FW_STATE_RECEIVE_FW_FILE checksum is NOK.\n\r");
+                SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_RECEIVE_FW_FILE checksum is NOK.\n\r");
             }
             iFwFileDownload = 0;
-            return_val = true;
+            return_val = DONE;
             break;
         }
         
@@ -299,9 +346,9 @@ bool FwFileDownload(){
 
 uint8_t     iConfigWordDownload = 0;
 
-bool ConfigWordDownload(){
+TASK_STATE ConfigWordDownload(){
     
-    bool return_val = false;
+    TASK_STATE return_val = BUSY;
     
     switch (iConfigWordDownload){
         
@@ -321,15 +368,15 @@ bool ConfigWordDownload(){
                 if(EthernetRecvData->command == EXEC_FW_STATE_CONFIG_DATA){
                     memcpy(ptr_FwData, &(EthernetRecvData->data), 14);
                     CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_CONFIG_DATA_DOWNLOAD_DONE, (uint8_t)DONE);
-                    SYS_MESSAGE("FW handler EXEC_FW_STATE_RECEIVE_CONFIG_WORD received config data.\n\r");
+                    SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_RECEIVE_CONFIG_WORD received config data.\n\r");
 					iConfigWordDownload = 0;
-					return_val = true;
+					return_val = DONE;
                 }
                 else{
                     SYS_MESSAGE("EXEC_FW_STATE_RECEIVE_CONFIG_WORD_STANDBY received wrong command stopping FW Handler.\n\r");
                     iConfigWordDownload = 0;
                     fwData.state = FW_STATE_WAITING_FOR_COMMAND;
-                    return_val = true;
+                    return_val = ABORT;
                 }
             }
             break;
@@ -373,7 +420,7 @@ bool FlashSlaves(){
                 iFlashSlaves++;
             }
             else{
-                SYS_MESSAGE("FW handler FlashSlaves checksum is empty, stopping FW flash.\n\r");
+                SYS_MESSAGE("Fw handler\t: FlashSlaves checksum is empty, stopping FW flash.\n\r");
                 return_val = true;
             }
             break;
@@ -382,13 +429,12 @@ bool FlashSlaves(){
         case 1:
         {
             if (SlaveId1 > NUMBER_OF_AMPLIFIERS){
-                SYS_MESSAGE("FW handler FlashSlaves done.\n\r");
                 SlaveId1        = 1;
                 iFlashSlaves    = 3;                    
             }
             else{
                 if((MASTER_SLAVE_DATA[SlaveId1].SlaveDetected == true) && (MASTER_SLAVE_DATA[SlaveId1].HoldingReg[11] != fwData.fwchecksum)){
-                    SYS_PRINT("FW handler EXEC_FW_STATE_FLASH_SLAVES start flash slave sequence on SlaveID %d.\n\r", SlaveId1);
+                    SYS_PRINT("Fw handler\t: EXEC_FW_STATE_FLASH_SLAVES Start flash sequence for SlaveID %d.\n\r", SlaveId1);
                     iFlashSlaves++;
                 }
                 else{
@@ -560,14 +606,14 @@ bool FlashSequencer(uint8_t Slave){
             switch(GETxBOOTxLOADERxVERSION()){
                 case DONE:
                 {
-                    SYS_MESSAGE("FW handler EXEC_FW_STATE_FLASH_SLAVES GETxBOOTxLOADERxVERSION done.\n\r");
+                    SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_FLASH_SLAVES GETxBOOTxLOADERxVERSION done.\n\r");
                     iFlashSequencer++;
                     break;
                 }
                 case ERROR:
                 {
                     // --------> decide what to do here
-                    SYS_MESSAGE("FW handler EXEC_FW_STATE_FLASH_SLAVES GETxBOOTxLOADERxVERSION error.\n\r");
+                    SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_FLASH_SLAVES GETxBOOTxLOADERxVERSION error.\n\r");
                     break;
                 }
                 default:
@@ -583,14 +629,14 @@ bool FlashSequencer(uint8_t Slave){
             switch(ERASExFLASH(SLAVE_BOOT_LOADER_OFFSET, SLAVE_FLASH_END)){
                 case DONE:
                 {
-                    SYS_MESSAGE("FW handler EXEC_FW_STATE_FLASH_SLAVES ERASExFLASH done.\n\r");
+                    SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_FLASH_SLAVES ERASExFLASH done.\n\r");
                     iFlashSequencer++;
                     break;
                 }
                 case ERROR:
                 {
                     // --------> decide what to do here
-                    SYS_MESSAGE("FW handler EXEC_FW_STATE_FLASH_SLAVES ERASExFLASH error.\n\r");
+                    SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_FLASH_SLAVES ERASExFLASH error.\n\r");
                 }
                 default:
                 {
@@ -605,14 +651,14 @@ bool FlashSequencer(uint8_t Slave){
             switch(WRITExFLASH(SLAVE_BOOT_LOADER_OFFSET, SLAVE_FLASH_END, &FwFile[0])){
                 case DONE:
                 {
-                    SYS_MESSAGE("FW handler EXEC_FW_STATE_FLASH_SLAVES WRITExFLASH done.\n\r");
+                    SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_FLASH_SLAVES WRITExFLASH done.\n\r");
                     iFlashSequencer++;
                     break;
                 }
                 case ERROR:
                 {
                     // --------> decide what to do here
-                    SYS_MESSAGE("FW handler EXEC_FW_STATE_FLASH_SLAVES WRITExFLASH error.\n\r");
+                    SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_FLASH_SLAVES WRITExFLASH error.\n\r");
                 }
                 default:
                 {
@@ -627,14 +673,14 @@ bool FlashSequencer(uint8_t Slave){
             switch(WRITExCONFIG(&FwConfigWord[0])){
                 case DONE:
                 {
-                    SYS_MESSAGE("FW handler EXEC_FW_STATE_FLASH_SLAVES WRITExCONFIG done.\n\r");
+                    SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_FLASH_SLAVES WRITExCONFIG done.\n\r");
                     iFlashSequencer++;
                     break;
                 }
                 case ERROR:
                 {
                     // --------> decide what to do here
-                    SYS_MESSAGE("FW handler EXEC_FW_STATE_FLASH_SLAVES WRITExCONFIG error.\n\r");
+                    SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_FLASH_SLAVES WRITExCONFIG error.\n\r");
                 }
                 default:
                 {
@@ -649,7 +695,7 @@ bool FlashSequencer(uint8_t Slave){
             switch(CHECKxCHECKSUM(SLAVE_BOOT_LOADER_OFFSET, SLAVE_FLASH_END, checksum)){
                 case DONE:
                 {
-                    SYS_MESSAGE("FW handler EXEC_FW_STATE_FLASH_SLAVES CHECKxCHECKSUM done.\n\r");
+                    SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_FLASH_SLAVES CHECKxCHECKSUM done.\n\r");
 					fwData.SlaveBootloaderHandlingActive = false;
                     iFlashSequencer++;
                     break;
@@ -657,7 +703,7 @@ bool FlashSequencer(uint8_t Slave){
                 case ERROR:
                 {
                     // --------> decide what to do here
-                    SYS_MESSAGE("FW handler EXEC_FW_STATE_FLASH_SLAVES CHECKxCHECKSUM error.\n\r");
+                    SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_FLASH_SLAVES CHECKxCHECKSUM error.\n\r");
                     _nop();
                 }
                 default:

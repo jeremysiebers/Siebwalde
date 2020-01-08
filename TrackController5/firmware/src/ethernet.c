@@ -80,6 +80,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #define SERVER_PORT 10000
 #define CLIENT_PORT 10001
 #define CMD2ASCII   10
+#define MAILBOXSIZE 8
 
 ETHERNET_DATA ethernetData;
 UDP_SOCKET_INFO SocketInfo;
@@ -101,22 +102,22 @@ static udpTrans_t   *M_Box_Eth_Send_Ptr_prev;
 static udpTrans_t   udpRecvBox[MAILBOXSIZE];
 static udpTrans_t   udpTransBox[MAILBOXSIZE];
 
-unsigned char *Cmd2Ascii[] = {
-    "NOP",
-    "EXEC_MBUS_STATE_SLAVES_ON",        
-    "EXEC_MBUS_STATE_SLAVE_DETECT",     
-    "EXEC_MBUS_STATE_SLAVES_BOOT_WAIT", 
-    "EXEC_MBUS_STATE_SLAVE_FW_DOWNLOAD",
-    "EXEC_MBUS_STATE_SLAVE_INIT",       
-    "EXEC_MBUS_STATE_SLAVE_ENABLE",     
-    "EXEC_MBUS_STATE_START_DATA_UPLOAD",
-    "EXEC_MBUS_STATE_RESET",
-    "EXEC_FW_STATE_RECEIVE_FW_FILE",
-    "EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY",
-    "EXEC_FW_STATE_FW_DATA",
-    "EXEC_FW_STATE_FW_DATA_DOWNLOAD_DONE",
-    "CLIENT_CONNECTION_REQUEST"
-};
+//unsigned char *Cmd2Ascii[] = {
+//    "NOP",
+//    "EXEC_MBUS_STATE_SLAVES_ON",        
+//    "EXEC_MBUS_STATE_SLAVE_DETECT",     
+//    "EXEC_MBUS_STATE_SLAVES_BOOT_WAIT", 
+//    "EXEC_MBUS_STATE_SLAVE_FW_FLASH",
+//    "EXEC_MBUS_STATE_SLAVE_INIT",       
+//    "EXEC_MBUS_STATE_SLAVE_ENABLE",     
+//    "EXEC_MBUS_STATE_START_DATA_UPLOAD",
+//    "EXEC_MBUS_STATE_RESET",
+//    "EXEC_FW_STATE_RECEIVE_FW_FILE",
+//    "EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY",
+//    "EXEC_FW_STATE_FW_DATA",
+//    "EXEC_FW_STATE_FW_DATA_DOWNLOAD_DONE",
+//    "CLIENT_CONNECTION_REQUEST"
+//};
 
 // *****************************************************************************
 // *****************************************************************************
@@ -192,7 +193,7 @@ void ETHERNET_Tasks ( void )
             ethernetData.tcpipStat = TCPIP_STACK_Status(sysObj.tcpip);
             if(ethernetData.tcpipStat < 0)
             {   // some error occurred
-                SYS_MESSAGE(" ETHERNET: TCP/IP stack initialization failed!\r\n");
+                SYS_MESSAGE("Ethernet\t: TCP/IP stack initialization failed!\r\n");
                 ethernetData.state = ETHERNET_TCPIP_ERROR;
             }
             else if (ethernetData.tcpipStat == SYS_STATUS_READY){
@@ -207,7 +208,7 @@ void ETHERNET_Tasks ( void )
                     netBiosName = TCPIP_STACK_NetBIOSName(netH);
 
 #if defined(TCPIP_STACK_USE_NBNS)
-                    SYS_PRINT("Interface %s on host %s - NBNS enabled\r\n", netName, netBiosName);
+                    SYS_PRINT("Ethernet\t: Interface %s on host %s - NBNS enabled\r\n", netName, netBiosName);
 #else
                     SYS_PRINT("    Interface %s on host %s - NBNS disabled\r\n", netName, netBiosName);
 #endif  // defined(TCPIP_STACK_USE_NBNS)
@@ -237,7 +238,7 @@ void ETHERNET_Tasks ( void )
                 if(dwLastIP[i].Val != ipAddr.Val)
                 {
                     dwLastIP[i].Val = ipAddr.Val;
-
+                    SYS_MESSAGE("Ethernet\t: ");
                     SYS_MESSAGE(TCPIP_STACK_NetNameGet(netH));
                     SYS_MESSAGE(" IP Address: ");
                     SYS_PRINT("%d.%d.%d.%d \r\n", ipAddr.v[0], ipAddr.v[1], ipAddr.v[2], ipAddr.v[3]);                                     
@@ -249,11 +250,11 @@ void ETHERNET_Tasks ( void )
 			
         case ETHERNET_TCPIP_OPENING_SERVER:
         {
-            SYS_PRINT("Waiting for Client Connection on port: %d\r\n", SERVER_PORT);
+            SYS_PRINT("Ethernet\t: Waiting for Client Connection on port: %d\r\n", SERVER_PORT);
             ethernetData.recvsocket = TCPIP_UDP_ServerOpen(IP_ADDRESS_TYPE_IPV4, SERVER_PORT, 0);
             if (ethernetData.recvsocket == INVALID_SOCKET)
             {
-                SYS_MESSAGE("Couldn't open server recvsocket\r\n");
+                SYS_MESSAGE("Ethernet\t: Couldn't open server recvsocket\r\n");
                 break;
             }
             ethernetData.state = ETHERNET_TCPIP_WAIT_FOR_CONNECTION;
@@ -270,7 +271,7 @@ void ETHERNET_Tasks ( void )
             {                
                 // We got a connection
                 ethernetData.state = ETHERNET_TCPIP_DATA_RX;
-                SYS_MESSAGE("Received a connection\r\n");
+                SYS_MESSAGE("Ethernet\t: Received a connection\r\n");
 
                 if (!TransSocketReady){//TCPIP_UDP_IsConnected(ethernetData.transsocket)){
                     TCPIP_UDP_SocketInfoGet(ethernetData.recvsocket, &SocketInfo);                
@@ -279,7 +280,7 @@ void ETHERNET_Tasks ( void )
                             CLIENT_PORT, &SocketInfo.remoteIPaddress);
                     if (ethernetData.transsocket == INVALID_SOCKET)
                     {
-                        SYS_MESSAGE("Couldn't open client transsocket\r\n");
+                        SYS_MESSAGE("Ethernet\t: Couldn't open client transsocket\r\n");
                         TCPIP_UDP_Discard(ethernetData.recvsocket);
                         TCPIP_UDP_Discard(ethernetData.transsocket);
                         TransSocketReady = false;
@@ -301,7 +302,7 @@ void ETHERNET_Tasks ( void )
                 TCPIP_UDP_Discard(ethernetData.recvsocket);
                 TCPIP_UDP_Close(ethernetData.recvsocket);
                 ethernetData.state = ETHERNET_TCPIP_OPENING_SERVER;
-                SYS_MESSAGE("Connection was closed\r\n");
+                SYS_MESSAGE("Ethernet\t: Connection was closed\r\n");
                 break;
             }
             
@@ -324,12 +325,10 @@ void ETHERNET_Tasks ( void )
             // Transfer the data out of the TCP RX FIFO and into our local processing buffer.
             int32_t rxed = TCPIP_UDP_ArrayGet(ethernetData.recvsocket, (char *)&udpRecv, sizeof(udpTrans_t));
             PutDataInReceiveMailBox(udpRecv);
-            if(udpRecv.command < CMD2ASCII){
-                unsigned char *ptr = Cmd2Ascii[udpRecv.command];
-                SYS_PRINT("Received command: '%s' (length %d)\r\n", ptr, rxed);
-            }
-            
-            
+//            if(udpRecv.command < CMD2ASCII){
+//                unsigned char *ptr = Cmd2Ascii[udpRecv.command];
+//                SYS_PRINT("Received command: '%s' (length %d)\r\n", ptr, rxed);
+//            }
             ethernetData.state = ETHERNET_TCPIP_DATA_TX;
         }
         break;
@@ -543,81 +542,9 @@ void DISCONNECTxCLIENT(){
     TCPIP_UDP_Discard(ethernetData.transsocket);
     TCPIP_UDP_Close(ethernetData.transsocket);
     ethernetData.state = ETHERNET_TCPIP_OPENING_SERVER;
-    SYS_MESSAGE("Connection was closed\r\n");    
+    SYS_MESSAGE(" Ethernet:    Connection was closed\r\n");    
 }
 
 /*******************************************************************************
  End of File
- */
-
-/*
- if (!TCPIP_UDP_IsConnected(ethernetData.recvsocket))
-            {
-                ethernetData.state = ETHERNET_TCPIP_WAIT_FOR_CONNECTION;
-                SYS_MESSAGE("Connection was closed\r\n");
-                break;
-            }
-            int16_t wMaxGet, wMaxPut, wCurrentChunk;
-            uint16_t w, w2;
-            uint8_t AppBuffer[32];
-            memset(AppBuffer, 0, 32);
-            // Figure out how many bytes have been received and how many we can transmit.
-            wMaxGet = TCPIP_UDP_GetIsReady(ethernetData.recvsocket);	// Get UDP RX FIFO byte count
-            wMaxPut = TCPIP_UDP_PutIsReady(ethernetData.recvsocket);
-
-            //SYS_CONSOLE_PRINT("\t%d bytes are available.\r\n", wMaxGet);
-            if (wMaxGet == 0)
-            {
-                break;
-            }
-
-            if (wMaxPut < wMaxGet)
-            {
-                wMaxGet = wMaxPut;
-            }
-
-            SYS_PRINT("RX Buffer has %d bytes in it\n", wMaxGet);
-
-            // Process all bytes that we can
-            // This is implemented as a loop, processing up to sizeof(AppBuffer) bytes at a time.
-            // This limits memory usage while maximizing performance.  Single byte Gets and Puts are a lot slower than multibyte GetArrays and PutArrays.
-            wCurrentChunk = sizeof(AppBuffer);
-            for(w = 0; w < wMaxGet; w += sizeof(AppBuffer))
-            {
-                // Make sure the last chunk, which will likely be smaller than sizeof(AppBuffer), is treated correctly.
-                if(w + sizeof(AppBuffer) > wMaxGet)
-                    wCurrentChunk = wMaxGet - w;
-
-                // Transfer the data out of the TCP RX FIFO and into our local processing buffer.
-                int rxed = TCPIP_UDP_ArrayGet(ethernetData.recvsocket, AppBuffer, sizeof(AppBuffer));
-
-                SYS_PRINT("\tReceived a message of '%s' and length %d\r\n", AppBuffer, rxed);
-
-                // Perform the "ToUpper" operation on each data byte
-                for(w2 = 0; w2 < wCurrentChunk; w2++)
-                {
-                    i = AppBuffer[w2];
-                    if(i >= 'a' && i <= 'z')
-                    {
-                            i -= ('a' - 'A');
-                            AppBuffer[w2] = i;
-                    }
-                    else if(i == '\e')   //escape
-                    {
-                        SYS_MESSAGE("Connection was closed\r\n");
-                    }
-                }
-
-                SYS_PRINT("\tSending a messages '%s'\r\n", AppBuffer);
-                
-                TCPIP_UDP_DestinationPortSet(ethernetData.recvsocket, 10001);
-
-                // Transfer the data out of our local processing buffer and into the TCP TX FIFO.
-                TCPIP_UDP_ArrayPut(ethernetData.recvsocket, AppBuffer, wCurrentChunk);
-
-                TCPIP_UDP_Flush(ethernetData.recvsocket);
-
-                ethernetData.state = ETHERNET_TCPIP_WAIT_FOR_CONNECTION;
-            }
-            TCPIP_UDP_Discard(ethernetData.recvsocket);
  */

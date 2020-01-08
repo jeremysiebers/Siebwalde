@@ -65,7 +65,6 @@ extern "C" {
       @Remarks
         Any additional remarks
      */
-#define MAILBOXSIZE 5
 #define HEADER 0xAA
 #define FOOTER 0x55
 #define SLAVEINFO 0xFF
@@ -126,31 +125,39 @@ typedef struct
 
 typedef enum
 {
-    BUSY                            = 0xFA,
-    CONNECTED                       = 0xFB,
-    DONE                            = 0xFC,
-    COMMAND                         = 0xFD,
-    ERROR                           = 0xFE,
-    CONTROLLER                      = 0x80,
-    MBUS                            = 0x81,
-    FWHANDLER                       = 0x82,
-} TASK_STATE;
-
-
-enum
-{	
-    EXEC_MBUS_STATE_SLAVES_ON           = 0x01,
-    EXEC_MBUS_STATE_SLAVE_DETECT        = 0x02,
-    EXEC_MBUS_STATE_SLAVES_BOOT_WAIT    = 0x03,
-    EXEC_MBUS_STATE_SLAVE_FW_DOWNLOAD   = 0x04,
-    EXEC_MBUS_STATE_SLAVE_INIT          = 0x05,
-    EXEC_MBUS_STATE_SLAVE_ENABLE        = 0x06,
-    EXEC_MBUS_STATE_START_DATA_UPLOAD   = 0x07,
-    EXEC_MBUS_STATE_RESET               = 0x08,    
-} CONTROLLER_COMMANDS;
+    CONTROLLER                                  = 0x80,
+    MBUS                                        = 0x81,
+    FWHANDLER                                   = 0x82,
+} TASK_ID;
 
 typedef enum
-{	
+{
+    ABORT                                       = 0xF9,
+    BUSY                                        = 0xFA,
+    CONNECTED                                   = 0xFB,
+    DONE                                        = 0xFC,
+    COMMAND                                     = 0xFD,
+    ERROR                                       = 0xFE,
+} TASK_STATE;
+
+typedef enum
+{
+    test = 0,
+} TASK_MESSAGES;
+
+typedef enum
+{
+    /* MBUS COMMANDS */
+    EXEC_MBUS_STATE_SLAVES_ON                   = 0x01,
+    EXEC_MBUS_STATE_SLAVE_DETECT                = 0x02,
+    EXEC_MBUS_STATE_SLAVES_BOOT_WAIT            = 0x03,
+    EXEC_MBUS_STATE_SLAVE_FW_FLASH              = 0x04,
+    EXEC_MBUS_STATE_SLAVE_INIT                  = 0x05,
+    EXEC_MBUS_STATE_SLAVE_ENABLE                = 0x06,
+    EXEC_MBUS_STATE_START_DATA_UPLOAD           = 0x07,
+    EXEC_MBUS_STATE_RESET                       = 0x08,
+            
+	/* FWHANDLER COMMANDS */
     EXEC_FW_STATE_RECEIVE_FW_FILE               = 0x09,
     EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY       = 0x0A,
     EXEC_FW_STATE_FW_DATA                       = 0x0B,
@@ -162,58 +169,59 @@ typedef enum
 	EXEC_FW_STATE_CONFIG_DATA                   = 0x11,
 	EXEC_FW_STATE_CONFIG_DATA_DOWNLOAD_DONE     = 0x12,
     
-} FWHANDLER_COMMANDS;
+} COMMANDS;
 
-enum{
-    CLIENT_CONNECTION_REQUEST           = 0x0D,
+typedef enum{
+    CLIENT_CONNECTION_REQUEST                   = 0x80,
+    
 } CLIENT_COMMANDS;
 
-enum ADDR
+typedef enum
 {    
     WAIT_TIME  = 5000,
     WAIT_TIME2 = 65000,
-};
+} WAIT_TYPES;
 
-enum reg
+typedef enum
 {
-    HOLDINGREG0         = 0, 
-    HOLDINGREG1         = 1, 
-    HOLDINGREG2         = 2, 
-    HOLDINGREG3         = 3, 
-    HOLDINGREG4         = 4, 
-    HOLDINGREG5         = 5, 
-    HOLDINGREG6         = 6, 
-    HOLDINGREG7         = 7, 
-    HOLDINGREG8         = 8, 
-    HOLDINGREG9         = 9, 
-    HOLDINGREG10        = 10,
-    HOLDINGREG11        = 11,
-    HOLDINGREG12        = 12,
-    READ                 = 0x55,    
-    WRITE                = 0xAA,
+    WRITE                                       = 0xAA,
+    READ                                        = 0x55,
+    HOLDINGREG0                                 = 0, 
+    HOLDINGREG1                                 = 1, 
+    HOLDINGREG2                                 = 2, 
+    HOLDINGREG3                                 = 3, 
+    HOLDINGREG4                                 = 4, 
+    HOLDINGREG5                                 = 5, 
+    HOLDINGREG6                                 = 6, 
+    HOLDINGREG7                                 = 7, 
+    HOLDINGREG8                                 = 8, 
+    HOLDINGREG9                                 = 9, 
+    HOLDINGREG10                                = 10,
+    HOLDINGREG11                                = 11,
+    HOLDINGREG12                                = 12,
+    SLOT1                                       = 0x1,
+    SLOT2                                       = 0x2,
+    SLOT3                                       = 0x4,
+    SLOT4                                       = 0x8,
+    SLOT5                                       = 0x10,
+    SLOT6                                       = 0x20,
+    SLOT7                                       = 0x40,
+    SLOT8                                       = 0x80,
+    SLOT9                                       = 0x100,
+    SLOT10                                      = 0x200,
+    TRACKBACKPLANE1                             = 51,
+    TRACKBACKPLANE2                             = 52,
+    TRACKBACKPLANE3                             = 53,
+    TRACKBACKPLANE4                             = 54,
+    TRACKBACKPLANE5                             = 55,
+    SLAVE_INITIAL_ADDR                          = 0xAA,
+    BROADCAST_ADDRESS                           = 0,
+    WAIT                                        = 99,
+    SLAVEOK                                     = 100,
+    SLAVENOK                                    = 101,
+    SLAVEBUSY                                   = 102,
             
-    SLOT1  = 0x1,
-    SLOT2  = 0x2,
-    SLOT3  = 0x4,
-    SLOT4  = 0x8,
-    SLOT5  = 0x10,
-    SLOT6  = 0x20,
-    SLOT7  = 0x40,
-    SLOT8  = 0x80,
-    SLOT9  = 0x100,
-    SLOT10 = 0x200,
-    TRACKBACKPLANE1 = 51,
-    TRACKBACKPLANE2 = 52,
-    TRACKBACKPLANE3 = 53,
-    TRACKBACKPLANE4 = 54,
-    TRACKBACKPLANE5 = 55,
-    SLAVE_INITIAL_ADDR = 0xAA,
-    BROADCAST_ADDRESS = 0,
-    WAIT      = 99,
-    SLAVEOK   = 100,
-    SLAVENOK  = 101,
-    SLAVEBUSY = 102,
-};
+} MISC;
 
     /* Provide C++ Compatibility */
 #ifdef __cplusplus

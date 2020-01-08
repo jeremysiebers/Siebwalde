@@ -38,8 +38,8 @@ extern "C" {
     
     // TODO If C++ is being used, regular C code needs function names to have C 
     // linkage so the functions can be used by the c code. 
-    extern void INITxSLAVExFWxHANDLER(SLAVE_INFO *location, SLAVE_INFO *Dump);
-    extern bool SLAVExFWxHANDLER(void);
+    void INITxSLAVExFWxHANDLER(SLAVE_INFO *location, SLAVE_INFO *Dump);
+    bool SLAVExFWxHANDLER(void);
     
 
 #ifdef	__cplusplus

@@ -138,7 +138,7 @@ class BootLoader:
     #---------------------------------------------------------------------------------------------------------------------------#
 
     def ReadHexFileToBuf(self, bootloader_offset, program_mem_size):
-        print("------------- ReadHexFileToBuf ------------\n")
+        print("Bootloader --> ReadHexFileToBuf.\n")
 
         if (self.file_object == ''):
             print('Write flash nok, no file loaded/found!\n')
@@ -333,7 +333,7 @@ class BootLoader:
     #---------------------------------------------------------------------------------------------------------------------------#
 
     def GetConfigData(self):
-        print("------------- Get Config Words...----------------\n")
+        print("Bootloader --> GetConfigData.\n")
 
         ByteArray = [0]
 
