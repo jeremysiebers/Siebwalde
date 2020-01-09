@@ -10,7 +10,7 @@
 #include "ethernet.h"
 #include "slavebootloaderroutines.h"
 
-TASK_STATE FwFileDownload(void);
+RETURN_STATUS FwFileDownload    (TASK_ID task_id);
 TASK_STATE ConfigWordDownload(void);
 bool FlashSlaves   (void);
 bool FlashSequencer(uint8_t SlaveId);
@@ -68,7 +68,10 @@ void INITxSLAVExFWxHANDLER(SLAVE_INFO *location, SLAVE_INFO *Dump){
 udpTrans_t      *EthernetRecvData;
 
 bool SLAVExFWxHANDLER(){
-    bool return_val = false;
+    bool        return_val  = false;
+    uint32_t    task_id     = FWHANDLER;
+    
+    RETURN_STATUS result;
     
     switch (fwData.state){
         
@@ -95,6 +98,11 @@ bool SLAVExFWxHANDLER(){
                     fwData.state = FW_STATE_WAITING_FOR_COMMAND;
                     SYS_MESSAGE("Fw handler\t: received wrong HEADER, stay in wait state.\n\r");
                     CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)COMMAND, (uint8_t)ERROR);
+//                    CREATExTASKxSTATUSxMESSAGE(
+//                                        FWHANDLER,
+//                                        FW_STATE_WAITING_FOR_COMMAND,
+//                                        RECEIVED_WRONG_COMMAND, 
+//                                        ERROR);
                 }
             }
             break;
@@ -106,21 +114,37 @@ bool SLAVExFWxHANDLER(){
                 
                 case EXEC_FW_STATE_RECEIVE_FW_FILE:
                 {
-                    switch(FwFileDownload()){
+                    result = FwFileDownload(task_id);
+                    switch(result.task_state){
                         case BUSY:
                         {
+                            if(result.task_message != NONE){
+                                CREATExTASKxSTATUSxMESSAGE(
+                                        result.task_id,
+                                        result.task_state,
+                                        result.task_command, 
+                                        result.task_message);
+                            }
                             break;
                         }
                         case DONE:
                         {
-                            CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_RECEIVE_FW_FILE, (uint8_t)DONE);
+                            CREATExTASKxSTATUSxMESSAGE(
+                                    result.task_id,
+                                    result.task_state,
+                                    EXEC_FW_STATE_RECEIVE_FW_FILE, 
+                                    NONE);
                             SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_RECEIVE_FW_FILE done.\n\r");
                             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
                             break;
                         }
                         case ABORT:
                         {
-                            CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_RECEIVE_FW_FILE, (uint8_t)ABORT);
+                            CREATExTASKxSTATUSxMESSAGE(
+                                    result.task_id,
+                                    result.task_state,
+                                    result.task_command, 
+                                    result.task_message);
                             SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_RECEIVE_FW_FILE ABORT.\n\r");
                             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
                             break;
@@ -211,7 +235,7 @@ bool SLAVExFWxHANDLER(){
 }
 
 /*#--------------------------------------------------------------------------#*/
-/*  Description: bool FwFileDownload()
+/*  Description: RETURN_STATUS FwFileDownload(TASK_ID task_id, TASK_COMMAND task_command)
  *
  *  Input(s)   : 
  *
@@ -238,15 +262,23 @@ uint8_t     data2           = 0;
 uint8_t     *pFw1           = 0;
 uint8_t     *pFw2           = 0;
 
-TASK_STATE FwFileDownload(){
+//RETURN_STATUS return_status
+
+RETURN_STATUS FwFileDownload(TASK_ID task_id){
     
-    TASK_STATE return_val = BUSY;
-    
+    RETURN_STATUS return_val;
+    return_val.task_id      = task_id;
+    return_val.task_command = NONE;
+    return_val.task_state   = BUSY;
+    return_val.task_message = NONE;
+        
     switch (iFwFileDownload){
         
         case 0:
         {
-            CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY, (uint8_t)DONE);
+            //CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY, (uint8_t)DONE);
+            return_val.task_command = EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY;
+            return_val.task_message = DONE;
             ptr_FwData = &FwFile[0];
             FwLineCount = 0;
             fwData.fwchecksum = 0;
@@ -267,18 +299,23 @@ TASK_STATE FwFileDownload(){
                     if(FwLineCount > 1916){
                         iFwFileDownload++;
                         FwLineCount = 0;                    
-                        CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_FW_DATA_DOWNLOAD_DONE, (uint8_t)DONE);
+                        //CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_FW_DATA_DOWNLOAD_DONE, (uint8_t)DONE);
+                        return_val.task_command = EXEC_FW_STATE_FW_DATA_DOWNLOAD_DONE;
+                        return_val.task_message = DONE;
                         SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_RECEIVE_FW_FILE received a FW file.\n\r");
                     }
                     else{
-                        CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY, (uint8_t)DONE);
+                        //CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY, (uint8_t)DONE);
+                        return_val.task_command = EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY;
+                        return_val.task_message = DONE;
                     }
                 }
                 else{
                     SYS_MESSAGE("EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY received wrong command stopping FW download.\n\r");
-                    iFwFileDownload = 0;
-                    fwData.state = FW_STATE_WAITING_FOR_COMMAND;
-                    return_val = ABORT;
+                    iFwFileDownload = 0;                    
+                    return_val.task_state   = ABORT;
+                    return_val.task_command = EXEC_FW_STATE_FW_DATA
+                    return_val.task_message = RECEIVED_WRONG_COMMAND;
                 }
             }
             break;
@@ -306,16 +343,22 @@ TASK_STATE FwFileDownload(){
             data2 = (uint8_t)((checksum & 0xFF00) >> 8);
             
             if(data1 == *pFw1 && data2 == *pFw2){
-                fwData.fwchecksum = checksum;
-                CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_FW_CHECKSUM, (uint8_t)DONE);
+                fwData.fwchecksum       = checksum;
+                return_val.task_state   = DONE;
+                return_val.task_message = RECEIVED_CHECKSUM_OK;
+                return_val.task_command = EXEC_FW_STATE_FW_CHECKSUM;
+                //CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_FW_CHECKSUM, (uint8_t)DONE);
                 SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_RECEIVE_FW_FILE checksum is OK.\n\r");
             }
             else{
-                CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_FW_CHECKSUM, (uint8_t)ERROR);
+                fwData.fwchecksum       = 0;
+                return_val.task_state   = ABORT;
+                return_val.task_message = RECEIVED_CHECKSUM_NOK;
+                return_val.task_command = EXEC_FW_STATE_FW_CHECKSUM;
+                //CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_FW_CHECKSUM, (uint8_t)ERROR);
                 SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_RECEIVE_FW_FILE checksum is NOK.\n\r");
             }
-            iFwFileDownload = 0;
-            return_val = DONE;
+            iFwFileDownload = 0;            
             break;
         }
         

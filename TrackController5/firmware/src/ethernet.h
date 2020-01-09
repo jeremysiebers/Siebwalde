@@ -327,7 +327,10 @@ bool CHECKxDATAxINxRECEIVExMAILxBOX();
 
 /*******************************************************************************
   Function:
-    void CREATExTASKxSTATUSxMESSAGE(uint8_t taskid, uint8_t taskstate, uint8_t feedback)
+    void CREATExTASKxSTATUSxMESSAGE(TASK_ID task_id, 
+                                TASK_STATE task_state, 
+                                TASK_COMMAND task_command, 
+                                TASK_MESSAGES task_messages);
 
   Summary:
     MPLAB Harmony Demo application tasks function
@@ -354,7 +357,10 @@ bool CHECKxDATAxINxRECEIVExMAILxBOX();
   Remarks:
     This routine must be called from SYS_Tasks() routine.
  */
-void CREATExTASKxSTATUSxMESSAGE(uint8_t taskid, uint8_t taskstate, uint8_t feedback);
+void CREATExTASKxSTATUSxMESSAGE(TASK_ID task_id, 
+                                TASK_STATE task_state, 
+                                TASK_COMMAND task_command, 
+                                TASK_MESSAGES task_messages);
 
 /*******************************************************************************
   Function:

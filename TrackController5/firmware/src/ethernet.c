@@ -509,18 +509,20 @@ uint32_t GETxETHERNETxSTATE (void){
  */
 //static 
 
-void CREATExTASKxSTATUSxMESSAGE(uint8_t taskid, uint8_t taskstate, uint8_t feedback){
+//void CREATExTASKxSTATUSxMESSAGE(uint8_t taskid, uint8_t taskstate, uint8_t feedback){
+void CREATExTASKxSTATUSxMESSAGE(TASK_ID task_id, TASK_STATE task_state, TASK_COMMAND task_command, TASK_MESSAGES task_messages){
     
     udpTrans_t StatusMessage;
     
-    StatusMessage.header = HEADER;
-    StatusMessage.command = taskid;
-    StatusMessage.data[0] = taskstate;
-    StatusMessage.data[1] = feedback;
+    StatusMessage.header  = (uint8_t)HEADER;
+    StatusMessage.command = (uint8_t)task_id;
+    StatusMessage.data[0] = (uint8_t)task_state;
+    StatusMessage.data[1] = (uint8_t)task_command;
+    StatusMessage.data[2] = (uint8_t)task_messages;
     
     uint8_t i=0;
     
-    for(i=2; i < sizeof(StatusMessage.data); i++){
+    for(i=3; i < sizeof(StatusMessage.data); i++){
         StatusMessage.data[i] = 0;
     }
     PUTxDATAxINxSENDxMAILxBOX(&StatusMessage);

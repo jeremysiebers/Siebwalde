@@ -115,13 +115,6 @@ extern "C" {
         Describe enumeration elements and structure and union members above each 
         element or member.
      */
-    
-typedef struct
-{
-    uint8_t header;
-    uint8_t command;
-    uint8_t data[80]; 
-}udpTrans_t;
 
 typedef enum
 {
@@ -142,7 +135,10 @@ typedef enum
 
 typedef enum
 {
-    test = 0,
+    NONE                                        = 0x00,
+    RECEIVED_WRONG_COMMAND                      = 0x01,
+    RECEIVED_CHECKSUM_OK                        = 0x02,
+    RECEIVED_CHECKSUM_NOK                       = 0x03,
 } TASK_MESSAGES;
 
 typedef enum
@@ -169,7 +165,16 @@ typedef enum
 	EXEC_FW_STATE_CONFIG_DATA                   = 0x11,
 	EXEC_FW_STATE_CONFIG_DATA_DOWNLOAD_DONE     = 0x12,
     
-} COMMANDS;
+} TASK_COMMAND;
+
+
+typedef struct{
+    TASK_ID         task_id;
+    TASK_COMMAND    task_command;
+    TASK_STATE      task_state;
+    TASK_MESSAGES   task_message;
+} RETURN_STATUS;
+
 
 typedef enum{
     CLIENT_CONNECTION_REQUEST                   = 0x80,
@@ -222,6 +227,15 @@ typedef enum
     SLAVEBUSY                                   = 102,
             
 } MISC;
+    
+typedef struct
+{
+    uint8_t header;
+    uint8_t command;
+    uint8_t data[80]; 
+}udpTrans_t;
+
+
 
     /* Provide C++ Compatibility */
 #ifdef __cplusplus
