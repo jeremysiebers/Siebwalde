@@ -139,7 +139,8 @@ void CONTROLLER_Initialize ( void )
 
 void CONTROLLER_Tasks ( void )
 {
-
+    uint32_t    task_id     = CONTROLLER;
+    
     /* Check the application's current state. */
     switch ( controllerData.state )
     {
@@ -162,7 +163,7 @@ void CONTROLLER_Tasks ( void )
                         EthernetRecvData->command == CLIENT_CONNECTION_REQUEST){
                     controllerData.state = CONTROLLER_STATE_IDLE;
                     SYS_MESSAGE("Controller\t: Client connected, controller going to Idle state.\n\r");
-                    CREATExTASKxSTATUSxMESSAGE((uint8_t)CONTROLLER, (uint8_t)CONNECTED, (uint8_t)DONE);
+                    CREATExTASKxSTATUSxMESSAGE(task_id, controllerData.state, CONNECTED, DONE);
                 }
                 else{
                     DISCONNECTxCLIENT();
@@ -190,7 +191,7 @@ void CONTROLLER_Tasks ( void )
             switch(EthernetRecvData->command){
                 case CLIENT_CONNECTION_REQUEST:
                 {
-                    CREATExTASKxSTATUSxMESSAGE((uint8_t)CONTROLLER, (uint8_t)CONNECTED, (uint8_t)DONE); // assume same client is connecting again
+                    CREATExTASKxSTATUSxMESSAGE(task_id, controllerData.state, CONNECTED, DONE); // assume same client is connecting again
                     SYS_MESSAGE("Controller\t: Client re-connected, controller going to Idle state.\n\r");
                     break;
                 }                
@@ -239,7 +240,7 @@ void CONTROLLER_Tasks ( void )
                 
                 default:
                 {
-                    CREATExTASKxSTATUSxMESSAGE((uint8_t)CONTROLLER, (uint8_t)COMMAND, (uint8_t)ERROR);
+                    CREATExTASKxSTATUSxMESSAGE(task_id, controllerData.state, RECEIVED_UNKNOWN_COMMAND, ERROR);
                     SYS_MESSAGE("Controller\t: command error, received command invalid.\n\r");
                     controllerData.state = CONTROLLER_STATE_IDLE;
                     break;

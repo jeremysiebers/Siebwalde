@@ -374,6 +374,7 @@
         <itemPath>../src/slavecommhandler.c</itemPath>
         <itemPath>../src/controller.c</itemPath>
         <itemPath>../src/slavebootloaderroutines.c</itemPath>
+        <itemPath>../src/enums.c</itemPath>
       </logicalFolder>
       <logicalFolder name="f1" displayName="framework" projectFiles="true">
         <logicalFolder name="f1" displayName="driver" projectFiles="true">

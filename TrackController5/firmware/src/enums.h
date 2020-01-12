@@ -93,28 +93,29 @@ extern "C" {
         banner.
      */
 
-
     // *****************************************************************************
-
-    /** Descriptive Data Type Name
-
-      @Summary
-        Brief one-line summary of the data type.
     
-      @Description
-        Full description, explaining the purpose and usage of the data type.
-        <p>
-        Additional description in consecutive paragraphs separated by HTML 
-        paragraph breaks, as necessary.
-        <p>
-        Type "JavaDoc" in the "How Do I?" IDE toolbar for more information on tags.
+// *****************************************************************************
 
-      @Remarks
-        Any additional remarks
-        <p>
-        Describe enumeration elements and structure and union members above each 
-        element or member.
-     */
+/** Descriptive Data Type Name
+
+  @Summary
+    Brief one-line summary of the data type.
+
+  @Description
+    Full description, explaining the purpose and usage of the data type.
+    <p>
+    Additional description in consecutive paragraphs separated by HTML 
+    paragraph breaks, as necessary.
+    <p>
+    Type "JavaDoc" in the "How Do I?" IDE toolbar for more information on tags.
+
+  @Remarks
+    Any additional remarks
+    <p>
+    Describe enumeration elements and structure and union members above each 
+    element or member.
+ */
 
 typedef enum
 {
@@ -137,8 +138,10 @@ typedef enum
 {
     NONE                                        = 0x00,
     RECEIVED_WRONG_COMMAND                      = 0x01,
-    RECEIVED_CHECKSUM_OK                        = 0x02,
-    RECEIVED_CHECKSUM_NOK                       = 0x03,
+    RECEIVED_UNKNOWN_COMMAND                    = 0x02,
+    RECEIVED_CHECKSUM_OK                        = 0x03,
+    RECEIVED_CHECKSUM_NOK                       = 0x04,
+    SWITCH_OUT_OF_BOUNDS                        = 0x05,
 } TASK_MESSAGES;
 
 typedef enum
@@ -236,6 +239,13 @@ typedef struct
 }udpTrans_t;
 
 
+// *****************************************************************************
+// Section: Application Callback Routines
+// *****************************************************************************
+// *****************************************************************************
+/* These routines are called by drivers when certain events occur.
+*/
+extern bool RETURNEDxRESULTxHANDLER (RETURN_STATUS result, TASK_COMMAND task_command);
 
     /* Provide C++ Compatibility */
 #ifdef __cplusplus
