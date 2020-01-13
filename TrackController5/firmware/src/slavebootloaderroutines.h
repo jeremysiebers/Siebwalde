@@ -88,12 +88,12 @@ extern "C" {
   Remarks:
     This routine must be called from SYS_Tasks() routine.
  */
-TASK_STATE      GETxBOOTxLOADERxVERSION         (void);
-void            SLAVExBOOTLOADERxDATAxRETURN    (uint8_t data);
-TASK_STATE      ERASExFLASH                     (uint16_t flash_start_address, uint16_t flash_end_address);
-TASK_STATE      WRITExFLASH                     (uint16_t flash_bootloader_offset, uint16_t flash_end_address, uint8_t *fwfile);
-TASK_STATE      WRITExCONFIG                    (uint8_t *config_data);
-TASK_STATE      CHECKxCHECKSUM                  (uint16_t flash_bootloader_offset, uint16_t flash_end_address, uint16_t file_checksum);
+uint32_t      GETxBOOTxLOADERxVERSION         (void);
+void          SLAVExBOOTLOADERxDATAxRETURN    (uint8_t data);
+uint32_t      ERASExFLASH                     (uint16_t flash_start_address, uint16_t flash_end_address);
+uint32_t      WRITExFLASH                     (uint16_t flash_bootloader_offset, uint16_t flash_end_address, uint8_t *fwfile);
+uint32_t      WRITExCONFIG                    (uint8_t *config_data);
+uint32_t      CHECKxCHECKSUM                  (uint16_t flash_bootloader_offset, uint16_t flash_end_address, uint16_t file_checksum);
 
 typedef struct
 {
@@ -144,16 +144,16 @@ BTDR_RECEIVED_DATA_FORMAT btldrDataReceive;
 
 typedef enum
 {
-    READ_VERSION       = 0x00,
-    READ_FLASH         = 0x01,
-    WRITE_FLASH        = 0x02,
-    ERASE_FLASH        = 0x03,
-    READ_EE_DATA       = 0x04,
-    WRITE_EE_DATA      = 0x05,
-    READ_CONFIG        = 0x06,
-    WRITE_CONFIG       = 0x07,
-    CALC_CHECKSUM      = 0x08,
-    RESET_DEVICE       = 0x09
+    CMD_READ_VERSION       = 0x00,
+    CMD_READ_FLASH         = 0x01,
+    CMD_WRITE_FLASH        = 0x02,
+    CMD_ERASE_FLASH        = 0x03,
+    CMD_READ_EE_DATA       = 0x04,
+    CMD_WRITE_EE_DATA      = 0x05,
+    CMD_READ_CONFIG        = 0x06,
+    CMD_WRITE_CONFIG       = 0x07,
+    CMD_CALC_CHECKSUM      = 0x08,
+    CMD_RESET_DEVICE       = 0x09
     
 } BOOTLOADER_COMMAND_SET;
 

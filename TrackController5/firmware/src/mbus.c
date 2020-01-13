@@ -473,20 +473,6 @@ void SETxMBUSxSTATE (MBUS_STATES state){
     mbusData.state = state;
 }
 
-/******************************************************************************
-  Function:
-    uint32_t READxCORExTIMER(void)
-
-  Remarks:
-    See prototype in mbus.h.
- */
-uint32_t READxCORExTIMER(void)
-{
-    uint32_t count;
-    asm volatile("mfc0 %0, $9" : "=r"(count));
-    return(count);
-} 
-
 /*
 void Led_Blink (){
     if(PIR0bits.TMR0IF){

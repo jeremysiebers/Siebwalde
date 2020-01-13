@@ -286,37 +286,6 @@ void SETxMBUSxSTATE (MBUS_STATES state);
 
 /*******************************************************************************
   Function:
-    uint32_t READxCORExTIMER(void);
-
-  Summary:
-    MPLAB Harmony Demo application tasks function
-
-  Description:
-    This routine is the Harmony Demo application's tasks function.  It
-    defines the application's state machine and core logic.
-
-  Precondition:
-    The system and application initialization ("SYS_Initialize") should be
-    called before calling this.
-
-  Parameters:
-    None.
-
-  Returns:
-    None.
-
-  Example:
-    <code>
-    MBUS_Tasks();
-    </code>
-
-  Remarks:
-    This routine must be called from SYS_Tasks() routine.
- */
-uint32_t READxCORExTIMER(void);
-
-/*******************************************************************************
-  Function:
     void TERMxMESSAGE       (const char* message);
 
   Summary:

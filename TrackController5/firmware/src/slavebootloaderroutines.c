@@ -17,6 +17,8 @@ bool SendDataToBootloader           (BTDR_SEND_DATA_FORMAT *btldrDataSend);
 void ClearOldBtldrData              (void);
 void ClearOldBtldrReceiveData       (void);
 
+static uint32_t     DelayCount = 0;
+
 /*#--------------------------------------------------------------------------#*/
 /*  Description: uint8_t GETxBOOTxLOADERxVERSION()
  *
@@ -34,14 +36,14 @@ void ClearOldBtldrReceiveData       (void);
  */
 /*#--------------------------------------------------------------------------#*/
 
-TASK_STATE GETxBOOTxLOADERxVERSION(){
+uint32_t GETxBOOTxLOADERxVERSION(){
     uint32_t return_val = BUSY;
     
     switch(btldrData.sequence){
         case 0:
         {
             btldrDataSend.bootloader_start_byte = 0x55;
-            btldrDataSend.command               = (uint8_t)READ_VERSION;
+            btldrDataSend.command               = (uint8_t)CMD_READ_VERSION;
             btldrDataSend.data_length_high      = 0x00;
             btldrDataSend.data_length_low       = 0x00;
             btldrDataSend.unlock_hgh            = 0x00;
@@ -52,6 +54,7 @@ TASK_STATE GETxBOOTxLOADERxVERSION(){
             btldrDataSend.address_ext           = 0x00;
 
             SendDataToBootloader((BTDR_SEND_DATA_FORMAT *)&btldrDataSend);
+            DelayCount                          = READxCORExTIMER();
             btldrData.sequence++;
             break;
         }
@@ -59,19 +62,58 @@ TASK_STATE GETxBOOTxLOADERxVERSION(){
         case 1:
         {
             if(btldrData.btldr_datacount > 25){
-                if(btldrDataReceive.bootloader_start_byte == 0x55 &&
-                        btldrDataReceive.status[0] == 0 &&
+                if(btldrDataReceive.bootloader_start_byte == 0x55){
+                    if(btldrDataReceive.status[0] == 0 &&
                         btldrDataReceive.status[1] == 1){
-                    return_val              = DONE;
+                        CREATExTASKxSTATUSxMESSAGE(
+                            GET_BOOTLOADER_VERSION,                             // TASK_ID
+                            DONE,                                               // TASK_STATE
+                            GET_BOOTLOADER_VERSION_OK,                          // TASK_COMMAND
+                            NONE);                                              // TASK_MESSAGE
+                        SYS_MESSAGE("Fw handler\t: GET_BOOTLOADER_VERSION GET_BOOTLOADER_VERSION_OK.\n\r");
+                        return_val          = DONE;
+                    }
+                    else{
+                        CREATExTASKxSTATUSxMESSAGE(
+                            GET_BOOTLOADER_VERSION,                             // TASK_ID
+                            ERROR,                                              // TASK_STATE
+                            GET_BOOTLOADER_VERSION_NOK,                         // TASK_COMMAND
+                            NONE);                                              // TASK_MESSAGE
+                        SYS_MESSAGE("Fw handler\t: GET_BOOTLOADER_VERSION GET_BOOTLOADER_VERSION_NOK.\n\r");
+                    return_val              = ERROR;
+                    }
                 }
                 else{
+                    CREATExTASKxSTATUSxMESSAGE(
+                        GET_BOOTLOADER_VERSION,                                 // TASK_ID
+                        ERROR,                                                  // TASK_STATE
+                        BOOTLOADER_START_BYTE_ERROR,                            // TASK_COMMAND
+                        NONE);                                                  // TASK_MESSAGE
+                    SYS_MESSAGE("Fw handler\t: GET_BOOTLOADER_VERSION BOOTLOADER_START_BYTE_ERROR.\n\r");
                     return_val              = ERROR;
                 }
                 ClearOldBtldrData();
                 ClearOldBtldrReceiveData();
             }
             else if(btldrData.btldr_receive_error){
-                return_val                      = ERROR;
+                CREATExTASKxSTATUSxMESSAGE(
+                    GET_BOOTLOADER_VERSION,                                     // TASK_ID
+                    ERROR,                                                      // TASK_STATE
+                    BOOTLOADER_DATA_RECEIVE_ERROR,                              // TASK_COMMAND
+                    NONE);                                                      // TASK_MESSAGE
+                SYS_MESSAGE("Fw handler\t: GET_BOOTLOADER_VERSION BOOTLOADER_DATA_RECEIVE_ERROR.\n\r");
+                return_val                  = ERROR;
+                ClearOldBtldrData();
+                ClearOldBtldrReceiveData();
+            }
+            else if((READxCORExTIMER() - DelayCount) > (100 * MILISECONDS)){
+                CREATExTASKxSTATUSxMESSAGE(
+                    GET_BOOTLOADER_VERSION,                                     // TASK_ID
+                    ERROR,                                                      // TASK_STATE
+                    GET_BOOTLOADER_VERSION_RECEIVE_DATA_TIMEOUT,                // TASK_COMMAND
+                    NONE);                                                      // TASK_MESSAGE
+                SYS_MESSAGE("Fw handler\t: GET_BOOTLOADER_VERSION BOOTLOADER_DATA_RECEIVE_ERROR.\n\r");
+                return_val                  = ERROR;
                 ClearOldBtldrData();
                 ClearOldBtldrReceiveData();
             }
@@ -105,7 +147,7 @@ TASK_STATE GETxBOOTxLOADERxVERSION(){
  */
 /*#--------------------------------------------------------------------------#*/
 
-TASK_STATE ERASExFLASH(uint16_t flash_bootloader_offset, uint16_t flash_end_address){
+uint32_t ERASExFLASH(uint16_t flash_bootloader_offset, uint16_t flash_end_address){
     uint32_t return_val = BUSY;
     
     uint16_t EraseRows = ((flash_end_address - flash_bootloader_offset)/BLOCKWIDTH);
@@ -114,7 +156,7 @@ TASK_STATE ERASExFLASH(uint16_t flash_bootloader_offset, uint16_t flash_end_addr
         case 0:
         {
             btldrDataSend.bootloader_start_byte = 0x55;
-            btldrDataSend.command               = (uint8_t)ERASE_FLASH;
+            btldrDataSend.command               = (uint8_t)CMD_ERASE_FLASH;
             btldrDataSend.data_length_high      = (EraseRows >> 8) & 0x00FF;
             btldrDataSend.data_length_low       = (EraseRows & 0x00FF);
             btldrDataSend.unlock_hgh            = 0xAA;
@@ -125,6 +167,7 @@ TASK_STATE ERASExFLASH(uint16_t flash_bootloader_offset, uint16_t flash_end_addr
             btldrDataSend.address_ext           = 0x00;
 
             SendDataToBootloader((BTDR_SEND_DATA_FORMAT *)&btldrDataSend);
+            DelayCount                          = READxCORExTIMER();
             btldrData.sequence++;
             break;
         }
@@ -132,18 +175,57 @@ TASK_STATE ERASExFLASH(uint16_t flash_bootloader_offset, uint16_t flash_end_addr
         case 1:
         {
             if(btldrData.btldr_datacount > 10){
-                if(btldrDataReceive.bootloader_start_byte == 0x55 &&
-                        btldrDataReceive.status[0] == 1){
-                    return_val              = DONE;
+                if(btldrDataReceive.bootloader_start_byte == 0x55){
+                    if(btldrDataReceive.status[0] == 1){
+                        CREATExTASKxSTATUSxMESSAGE(
+                            ERASE_FLASH,                                        // TASK_ID
+                            DONE,                                               // TASK_STATE
+                            ERASE_FLASH_RETURNED_OK,                            // TASK_COMMAND
+                            NONE);                                              // TASK_MESSAGE
+                        SYS_MESSAGE("Fw handler\t: ERASE_FLASH ERASE_FLASH_RETURNED_OK.\n\r");
+                        return_val          = DONE;
+                    }
+                    else{
+                        CREATExTASKxSTATUSxMESSAGE(
+                            ERASE_FLASH,                                        // TASK_ID
+                            ERROR,                                              // TASK_STATE
+                            ERASE_FLASH_RETURNED_NOK,                           // TASK_COMMAND
+                            NONE);                                              // TASK_MESSAGE
+                        SYS_MESSAGE("Fw handler\t: ERASE_FLASH ERASE_FLASH_RETURNED_NOK.\n\r");
+                    return_val              = ERROR;
+                    }
                 }
                 else{
+                    CREATExTASKxSTATUSxMESSAGE(
+                        ERASE_FLASH,                                            // TASK_ID
+                        ERROR,                                                  // TASK_STATE
+                        BOOTLOADER_START_BYTE_ERROR,                            // TASK_COMMAND
+                        NONE);                                                  // TASK_MESSAGE
+                    SYS_MESSAGE("Fw handler\t: ERASE_FLASH BOOTLOADER_START_BYTE_ERROR.\n\r");
                     return_val              = ERROR;
                 }
                 ClearOldBtldrData();
                 ClearOldBtldrReceiveData();
             }
             else if(btldrData.btldr_receive_error){
-                return_val                      = ERROR;
+                CREATExTASKxSTATUSxMESSAGE(
+                    ERASE_FLASH,                                                // TASK_ID
+                    ERROR,                                                      // TASK_STATE
+                    BOOTLOADER_DATA_RECEIVE_ERROR,                              // TASK_COMMAND
+                    NONE);                                                      // TASK_MESSAGE
+                SYS_MESSAGE("Fw handler\t: ERASE_FLASH BOOTLOADER_DATA_RECEIVE_ERROR.\n\r");
+                return_val                  = ERROR;
+                ClearOldBtldrData();
+                ClearOldBtldrReceiveData();
+            }
+            else if((READxCORExTIMER() - DelayCount) > (100 * MILISECONDS)){
+                CREATExTASKxSTATUSxMESSAGE(
+                    ERASE_FLASH,                                                // TASK_ID
+                    ERROR,                                                      // TASK_STATE
+                    ERASE_FLASH_RECEIVE_DATA_TIMEOUT,                           // TASK_COMMAND
+                    NONE);                                                      // TASK_MESSAGE
+                SYS_MESSAGE("Fw handler\t: ERASE_FLASH ERASE_FLASH_RECEIVE_DATA_TIMEOUT.\n\r");
+                return_val                  = ERROR;
                 ClearOldBtldrData();
                 ClearOldBtldrReceiveData();
             }
@@ -181,7 +263,7 @@ TASK_STATE ERASExFLASH(uint16_t flash_bootloader_offset, uint16_t flash_end_addr
 static uint16_t FlashRows       = 0;
 static uint16_t FlashAddress    = 0;
 
-TASK_STATE WRITExFLASH(uint16_t flash_bootloader_offset, uint16_t flash_end_address, uint8_t *fwfile){
+uint32_t WRITExFLASH(uint16_t flash_bootloader_offset, uint16_t flash_end_address, uint8_t *fwfile){
     uint32_t return_val = BUSY;
     
     FlashRows = (flash_end_address - flash_bootloader_offset);
@@ -192,7 +274,7 @@ TASK_STATE WRITExFLASH(uint16_t flash_bootloader_offset, uint16_t flash_end_addr
             FlashAddress = flash_bootloader_offset + btldrData.flashrowcounter;
     
             btldrDataSend.bootloader_start_byte = 0x55;
-            btldrDataSend.command               = (uint8_t)WRITE_FLASH;
+            btldrDataSend.command               = (uint8_t)CMD_WRITE_FLASH;
             btldrDataSend.data_length_high      = 0;
             btldrDataSend.data_length_low       = BLOCKWIDTH;
             btldrDataSend.unlock_hgh            = 0xAA;
@@ -204,6 +286,7 @@ TASK_STATE WRITExFLASH(uint16_t flash_bootloader_offset, uint16_t flash_end_addr
             memcpy(btldrDataSend.data, &(fwfile[btldrData.flashrowcounter]), BLOCKWIDTH);
 
             SendDataToBootloader((BTDR_SEND_DATA_FORMAT *)&btldrDataSend);
+            DelayCount                          = READxCORExTIMER();
             btldrData.sequence++;
             btldrData.flashrowcounter += BLOCKWIDTH; // for bytes = *2
             break;
@@ -212,98 +295,65 @@ TASK_STATE WRITExFLASH(uint16_t flash_bootloader_offset, uint16_t flash_end_addr
         case 1:
         {
             if(btldrData.btldr_datacount > 10){
-                if(btldrDataReceive.bootloader_start_byte == 0x55 &&
-                        btldrDataReceive.status[0] == 1){
-                    if (btldrData.flashrowcounter >= FlashRows){
-//                        SYS_PRINT("flashrowcounter 0x%x\n\r", btldrData.flashrowcounter);
-//                        SYS_PRINT("FlashRows 0x%x\n\r"      , FlashRows);
-//                        SYS_PRINT("FlashAddress 0x%x\n\r"   , FlashAddress);
-                        return_val          = DONE;
-                        ClearOldBtldrData();
+                if(btldrDataReceive.bootloader_start_byte == 0x55){
+                    if(btldrDataReceive.status[0] == 1){                        
+                        if (btldrData.flashrowcounter >= FlashRows){
+                            CREATExTASKxSTATUSxMESSAGE(
+                                WRITE_FLASH,                                    // TASK_ID
+                                DONE,                                           // TASK_STATE
+                                WRITE_FLASH_RETURNED_OK,                        // TASK_COMMAND
+                                NONE);                                          // TASK_MESSAGE
+                            SYS_MESSAGE("Fw handler\t: WRITE_FLASH WRITE_FLASH_RETURNED_OK.\n\r");
+                            return_val          = DONE;
+                            ClearOldBtldrData();
+                            
+                        }
+                        else{
+                            btldrData.sequence = 0;
+                            btldrData.btldr_datacount = 0;
+                        }
+                        ClearOldBtldrReceiveData();
                     }
                     else{
-                        btldrData.sequence = 0;
-                        btldrData.btldr_datacount = 0;
+                        CREATExTASKxSTATUSxMESSAGE(
+                            WRITE_FLASH,                                        // TASK_ID
+                            ERROR,                                              // TASK_STATE
+                            WRITE_FLASH_RETURNED_NOK,                           // TASK_COMMAND
+                            NONE);                                              // TASK_MESSAGE
+                        SYS_MESSAGE("Fw handler\t: WRITE_FLASH WRITE_FLASH_RETURNED_NOK.\n\r");
+                    return_val              = ERROR;
                     }
-                    ClearOldBtldrReceiveData();
                 }
                 else{
-                    return_val              = ERROR;
-                    ClearOldBtldrData();
-                    ClearOldBtldrReceiveData();
-                }                
-            }
-            else if(btldrData.btldr_receive_error){
-                return_val                      = ERROR;
-                ClearOldBtldrData();
-                ClearOldBtldrReceiveData();
-            }
-            break;
-        }
-        
-        default:
-        {
-            btldrData.sequence = 0;
-            break;
-        }
-    }
-    
-    return (return_val);
-}
-
-/*#--------------------------------------------------------------------------#*/
-/*  Description: uint8_t WRITExCONFIG(uint8_t *config_data)
- *
- *  Input(s)   :
- *
- *  Output(s)  :
- *
- *  Returns    :
- *
- *  Pre.Cond.  :
- *
- *  Post.Cond. :
- *
- *  Notes      :
- */
-/*#--------------------------------------------------------------------------#*/
-TASK_STATE WRITExCONFIG(uint8_t *config_data){
-    uint32_t return_val = BUSY;
-            
-    switch(btldrData.sequence){
-        case 0:
-        {
-            btldrDataSend.bootloader_start_byte = 0x55;
-            btldrDataSend.command               = (uint8_t)WRITE_CONFIG;
-            btldrDataSend.data_length_high      = 0;
-            btldrDataSend.data_length_low       = 0x0C;
-            btldrDataSend.unlock_hgh            = 0xAA;
-            btldrDataSend.unlock_low            = 0x55;
-            btldrDataSend.address_low           = 0x00;
-            btldrDataSend.address_hgh           = 0x00;
-            btldrDataSend.address_upp           = 0x30;
-            btldrDataSend.address_ext           = 0x00;
-            memcpy(btldrDataSend.data, &(config_data[0]), 0x0C);
-
-            SendDataToBootloader((BTDR_SEND_DATA_FORMAT *)&btldrDataSend);
-            btldrData.sequence++;
-            break;
-        }
-        
-        case 1:
-        {
-            if(btldrData.btldr_datacount > 10){
-                if(btldrDataReceive.bootloader_start_byte == 0x55 &&
-                        btldrDataReceive.status[0] == 1){
-                    return_val              = DONE;
-                }
-                else{
+                    CREATExTASKxSTATUSxMESSAGE(
+                        WRITE_FLASH,                                            // TASK_ID
+                        ERROR,                                                  // TASK_STATE
+                        BOOTLOADER_START_BYTE_ERROR,                            // TASK_COMMAND
+                        NONE);                                                  // TASK_MESSAGE
+                    SYS_MESSAGE("Fw handler\t: WRITE_FLASH BOOTLOADER_START_BYTE_ERROR.\n\r");
                     return_val              = ERROR;
                 }
                 ClearOldBtldrData();
                 ClearOldBtldrReceiveData();
             }
             else if(btldrData.btldr_receive_error){
+                CREATExTASKxSTATUSxMESSAGE(
+                    WRITE_FLASH,                                                // TASK_ID
+                    ERROR,                                                      // TASK_STATE
+                    BOOTLOADER_DATA_RECEIVE_ERROR,                              // TASK_COMMAND
+                    NONE);                                                      // TASK_MESSAGE
+                SYS_MESSAGE("Fw handler\t: WRITE_FLASH BOOTLOADER_DATA_RECEIVE_ERROR.\n\r");
+                return_val                  = ERROR;
+                ClearOldBtldrData();
+                ClearOldBtldrReceiveData();
+            }
+            else if((READxCORExTIMER() - DelayCount) > (100 * MILISECONDS)){
+                CREATExTASKxSTATUSxMESSAGE(
+                    WRITE_FLASH,                                                // TASK_ID
+                    ERROR,                                                      // TASK_STATE
+                    WRITE_FLASH_RECEIVE_DATA_TIMEOUT,                           // TASK_COMMAND
+                    NONE);                                                      // TASK_MESSAGE
+                SYS_MESSAGE("Fw handler\t: WRITE_FLASH WRITE_FLASH_RECEIVE_DATA_TIMEOUT.\n\r");
                 return_val                  = ERROR;
                 ClearOldBtldrData();
                 ClearOldBtldrReceiveData();
@@ -337,7 +387,119 @@ TASK_STATE WRITExCONFIG(uint8_t *config_data){
  *  Notes      :
  */
 /*#--------------------------------------------------------------------------#*/
-TASK_STATE CHECKxCHECKSUM(uint16_t flash_bootloader_offset, uint16_t flash_end_address, 
+uint32_t WRITExCONFIG(uint8_t *config_data){
+    uint32_t return_val = BUSY;
+            
+    switch(btldrData.sequence){
+        case 0:
+        {
+            btldrDataSend.bootloader_start_byte = 0x55;
+            btldrDataSend.command               = (uint8_t)CMD_WRITE_CONFIG;
+            btldrDataSend.data_length_high      = 0;
+            btldrDataSend.data_length_low       = 0x0C;
+            btldrDataSend.unlock_hgh            = 0xAA;
+            btldrDataSend.unlock_low            = 0x55;
+            btldrDataSend.address_low           = 0x00;
+            btldrDataSend.address_hgh           = 0x00;
+            btldrDataSend.address_upp           = 0x30;
+            btldrDataSend.address_ext           = 0x00;
+            memcpy(btldrDataSend.data, &(config_data[0]), 0x0C);
+
+            SendDataToBootloader((BTDR_SEND_DATA_FORMAT *)&btldrDataSend);
+            DelayCount                          = READxCORExTIMER();
+            btldrData.sequence++;
+            break;
+        }
+        
+        case 1:
+        {
+            if(btldrData.btldr_datacount > 10){
+                if(btldrDataReceive.bootloader_start_byte == 0x55){
+                    if(btldrDataReceive.status[0] == 1){                        
+                        CREATExTASKxSTATUSxMESSAGE(
+                            WRITE_CONFIG,                                       // TASK_ID
+                            DONE,                                               // TASK_STATE
+                            WRITE_CONFIG_RETURNED_OK,                           // TASK_COMMAND
+                            NONE);                                              // TASK_MESSAGE
+                        SYS_MESSAGE("Fw handler\t: WRITE_CONFIG WRITE_CONFIG_RETURNED_OK.\n\r");
+                        return_val          = DONE;                        
+                    }
+                    else{
+                        CREATExTASKxSTATUSxMESSAGE(
+                            WRITE_CONFIG,                                       // TASK_ID
+                            ERROR,                                              // TASK_STATE
+                            WRITE_CONFIG_RETURNED_NOK,                          // TASK_COMMAND
+                            NONE);                                              // TASK_MESSAGE
+                        SYS_MESSAGE("Fw handler\t: WRITE_CONFIG WRITE_CONFIG_RETURNED_NOK.\n\r");
+                    return_val              = ERROR;
+                    }
+                    ClearOldBtldrData();
+                    ClearOldBtldrReceiveData();
+                }
+                else{
+                    CREATExTASKxSTATUSxMESSAGE(
+                        WRITE_CONFIG,                                           // TASK_ID
+                        ERROR,                                                  // TASK_STATE
+                        BOOTLOADER_START_BYTE_ERROR,                            // TASK_COMMAND
+                        NONE);                                                  // TASK_MESSAGE
+                    SYS_MESSAGE("Fw handler\t: WRITE_CONFIG BOOTLOADER_START_BYTE_ERROR.\n\r");
+                    return_val              = ERROR;
+                }
+                ClearOldBtldrData();
+                ClearOldBtldrReceiveData();
+            }
+            else if(btldrData.btldr_receive_error){
+                CREATExTASKxSTATUSxMESSAGE(
+                    WRITE_CONFIG,                                               // TASK_ID
+                    ERROR,                                                      // TASK_STATE
+                    BOOTLOADER_DATA_RECEIVE_ERROR,                              // TASK_COMMAND
+                    NONE);                                                      // TASK_MESSAGE
+                SYS_MESSAGE("Fw handler\t: WRITE_CONFIG BOOTLOADER_DATA_RECEIVE_ERROR.\n\r");
+                return_val                  = ERROR;
+                ClearOldBtldrData();
+                ClearOldBtldrReceiveData();
+            }
+            else if((READxCORExTIMER() - DelayCount) > (100 * MILISECONDS)){
+                CREATExTASKxSTATUSxMESSAGE(
+                    WRITE_CONFIG,                                               // TASK_ID
+                    ERROR,                                                      // TASK_STATE
+                    WRITE_FLASH_RECEIVE_DATA_TIMEOUT,                           // TASK_COMMAND
+                    NONE);                                                      // TASK_MESSAGE
+                SYS_MESSAGE("Fw handler\t: WRITE_CONFIG WRITE_CONFIG_RECEIVE_DATA_TIMEOUT.\n\r");
+                return_val                  = ERROR;
+                ClearOldBtldrData();
+                ClearOldBtldrReceiveData();
+            }
+            break;
+        }
+        
+        default:
+        {
+            btldrData.sequence = 0;
+            break;
+        }
+    }
+    
+    return (return_val);
+}
+
+/*#--------------------------------------------------------------------------#*/
+/*  Description: uint8_t WRITExCONFIG(uint8_t *config_data)
+ *
+ *  Input(s)   :
+ *
+ *  Output(s)  :
+ *
+ *  Returns    :
+ *
+ *  Pre.Cond.  :
+ *
+ *  Post.Cond. :
+ *
+ *  Notes      :
+ */
+/*#--------------------------------------------------------------------------#*/
+uint32_t CHECKxCHECKSUM(uint16_t flash_bootloader_offset, uint16_t flash_end_address, 
         uint16_t file_checksum){
     
     uint32_t return_val = BUSY;
@@ -348,7 +510,7 @@ TASK_STATE CHECKxCHECKSUM(uint16_t flash_bootloader_offset, uint16_t flash_end_a
         case 0:
         {
             btldrDataSend.bootloader_start_byte = 0x55;
-            btldrDataSend.command               = (uint8_t)CALC_CHECKSUM;
+            btldrDataSend.command               = (uint8_t)CMD_CALC_CHECKSUM;
             btldrDataSend.data_length_high      = (ChecksumLength >> 8) & 0x00FF;
             btldrDataSend.data_length_low       = (ChecksumLength & 0x00FF);
             btldrDataSend.unlock_hgh            = 0xAA;
@@ -359,6 +521,7 @@ TASK_STATE CHECKxCHECKSUM(uint16_t flash_bootloader_offset, uint16_t flash_end_a
             btldrDataSend.address_ext           = 0x00;
             
             SendDataToBootloader((BTDR_SEND_DATA_FORMAT *)&btldrDataSend);
+            DelayCount                          = READxCORExTIMER();
             btldrData.sequence++;
             break;
         }
@@ -366,18 +529,59 @@ TASK_STATE CHECKxCHECKSUM(uint16_t flash_bootloader_offset, uint16_t flash_end_a
         case 1:
         {
             if(btldrData.btldr_datacount > 11){
-                if(btldrDataReceive.bootloader_start_byte == 0x55 &&
-                        btldrDataReceive.status[0] == (file_checksum & 0x00FF) &&
-                        btldrDataReceive.status[1] == ((file_checksum >> 8) & 0x00FF)){
-                    return_val              = DONE;
+                if(btldrDataReceive.bootloader_start_byte == 0x55){
+                    if(btldrDataReceive.status[0] == (file_checksum & 0x00FF) &&
+                       btldrDataReceive.status[1] == ((file_checksum >> 8) & 0x00FF)){
+                        CREATExTASKxSTATUSxMESSAGE(
+                            CHECK_CHECKSUM_CONFIG,                              // TASK_ID
+                            DONE,                                               // TASK_STATE
+                            CHECK_CHECKSUM_CONFIG_RETURNED_OK,                  // TASK_COMMAND
+                            NONE);                                              // TASK_MESSAGE
+                        SYS_MESSAGE("Fw handler\t: CHECK_CHECKSUM_CONFIG CHECK_CHECKSUM_CONFIG_RETURNED_OK.\n\r");
+                        return_val          = DONE;                        
+                    }
+                    else{
+                        CREATExTASKxSTATUSxMESSAGE(
+                            CHECK_CHECKSUM_CONFIG,                              // TASK_ID
+                            ERROR,                                              // TASK_STATE
+                            CHECK_CHECKSUM_CONFIG_RETURNED_NOK,                 // TASK_COMMAND
+                            NONE);                                              // TASK_MESSAGE
+                        SYS_MESSAGE("Fw handler\t: CHECK_CHECKSUM_CONFIG CHECK_CHECKSUM_CONFIG_RETURNED_NOK.\n\r");
+                    return_val              = ERROR;
+                    }
+                    ClearOldBtldrData();
+                    ClearOldBtldrReceiveData();
                 }
                 else{
+                    CREATExTASKxSTATUSxMESSAGE(
+                        CHECK_CHECKSUM_CONFIG,                                  // TASK_ID
+                        ERROR,                                                  // TASK_STATE
+                        BOOTLOADER_START_BYTE_ERROR,                            // TASK_COMMAND
+                        NONE);                                                  // TASK_MESSAGE
+                    SYS_MESSAGE("Fw handler\t: CHECK_CHECKSUM_CONFIG BOOTLOADER_START_BYTE_ERROR.\n\r");
                     return_val              = ERROR;
                 }
                 ClearOldBtldrData();
                 ClearOldBtldrReceiveData();
             }
             else if(btldrData.btldr_receive_error){
+                CREATExTASKxSTATUSxMESSAGE(
+                    CHECK_CHECKSUM_CONFIG,                                      // TASK_ID
+                    ERROR,                                                      // TASK_STATE
+                    BOOTLOADER_DATA_RECEIVE_ERROR,                              // TASK_COMMAND
+                    NONE);                                                      // TASK_MESSAGE
+                SYS_MESSAGE("Fw handler\t: CHECK_CHECKSUM_CONFIG BOOTLOADER_DATA_RECEIVE_ERROR.\n\r");
+                return_val                  = ERROR;
+                ClearOldBtldrData();
+                ClearOldBtldrReceiveData();
+            }
+            else if((READxCORExTIMER() - DelayCount) > (100 * MILISECONDS)){
+                CREATExTASKxSTATUSxMESSAGE(
+                    CHECK_CHECKSUM_CONFIG,                                      // TASK_ID
+                    ERROR,                                                      // TASK_STATE
+                    CHECK_CHECKSUM_CONFIG_RECEIVE_DATA_TIMEOUT,                 // TASK_COMMAND
+                    NONE);                                                      // TASK_MESSAGE
+                SYS_MESSAGE("Fw handler\t: CHECK_CHECKSUM_CONFIG CHECK_CHECKSUM_CONFIG_RECEIVE_DATA_TIMEOUT.\n\r");
                 return_val                  = ERROR;
                 ClearOldBtldrData();
                 ClearOldBtldrReceiveData();
@@ -417,23 +621,24 @@ bool SendDataToBootloader(BTDR_SEND_DATA_FORMAT *btldrDataSend)
     uint8_t Length = 0;
     uint8_t *btldr_p;
     
-    if(btldrDataSend->command == READ_VERSION  || 
-       btldrDataSend->command == READ_FLASH    || 
-       btldrDataSend->command == ERASE_FLASH   || 
-       btldrDataSend->command == READ_EE_DATA  || 
-       btldrDataSend->command == READ_CONFIG   || 
-       btldrDataSend->command == CALC_CHECKSUM
+    if(btldrDataSend->command == CMD_READ_VERSION  || 
+       btldrDataSend->command == CMD_READ_FLASH    || 
+       btldrDataSend->command == CMD_ERASE_FLASH   || 
+       btldrDataSend->command == CMD_READ_EE_DATA  || 
+       btldrDataSend->command == CMD_READ_CONFIG   || 
+       btldrDataSend->command == CMD_CALC_CHECKSUM
        ){
         Length = 10;
     }
-    else if(btldrDataSend->command == WRITE_FLASH){
+    else if(btldrDataSend->command == CMD_WRITE_FLASH){
         Length = 74;//sizeof(BTDR_SEND_DATA_FORMAT);
     }
-    else if(btldrDataSend->command == WRITE_CONFIG){
+    else if(btldrDataSend->command == CMD_WRITE_CONFIG){
         Length = 22;
     }
     else{
-        while(1);   // ---> implement dynamic length regarding eeprom etc
+        SYS_MESSAGE("BOOTLOADER\t: Bootloader command not implemented!.\n\r");
+        return false;        
     }
     
     btldr_p = &btldrDataSend->bootloader_start_byte;

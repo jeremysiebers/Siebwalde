@@ -126,6 +126,8 @@ typedef enum
     FWHANDLER                                   				= 300,
 	FWFILEDOWNLOAD												= 301,
 	FWCONFIGWORDDOWNLOAD										= 302,
+    FWFLASHSLAVES                                               = 303,
+    FWFLASHSEQUENCER                                            = 304,
 } TASK_ID;				
 				
 typedef enum				
@@ -166,6 +168,47 @@ typedef enum
 	CONFIGWORDDOWNLOAD_STATE_FW_CONFIG_WORD_RECEIVE       		= 1301,
 	CONFIGWORDDOWNLOAD_STATE_FW_CONFIG_WORD_DOWNLOAD_DONE 		= 1302,
     
+    /* FWFLASHSLAVES */
+    FWFLASHSLAVES_STATE_CHECK_CHECKSUM                          = 1401,
+    FWFLASHSLAVES_STATE_SLAVE_FLASH                             = 1402,
+    
+    /* FWFLASHSEQUENCER */
+    FWFLASHSEQUENCER_STATE_FLASHED_SLAVE                        = 1500,
+    FWFLASHSEQUENCER_STATE_GET_BOOTLOADER_VERSION               = 1501,
+    FWFLASHSEQUENCER_STATE_ERASE_FLASH                          = 1502,
+    FWFLASHSEQUENCER_STATE_WRITE_FLASH                          = 1503,
+    FWFLASHSEQUENCER_STATE_WRITE_CONFIG                         = 1504,
+    FWFLASHSEQUENCER_STATE_CHECK_CHECKSUM                       = 1505,
+    
+    /* SLAVEBOOTLOADERROUTINES */
+    BOOTLOADER_DATA_RECEIVE_ERROR                               = 1600,
+    BOOTLOADER_START_BYTE_ERROR                                 = 1601,
+    
+    GET_BOOTLOADER_VERSION                                      = 1602,
+    GET_BOOTLOADER_VERSION_RECEIVE_DATA_TIMEOUT                 = 1603,
+    GET_BOOTLOADER_VERSION_OK                                   = 1604,
+    GET_BOOTLOADER_VERSION_NOK                                  = 1605,
+    
+    ERASE_FLASH                                                 = 1610,
+    ERASE_FLASH_RECEIVE_DATA_TIMEOUT                            = 1611,
+    ERASE_FLASH_RETURNED_OK                                     = 1612,
+    ERASE_FLASH_RETURNED_NOK                                    = 1613,
+    
+    WRITE_FLASH                                                 = 1620,
+    WRITE_FLASH_RECEIVE_DATA_TIMEOUT                            = 1621,
+    WRITE_FLASH_RETURNED_OK                                     = 1622,
+    WRITE_FLASH_RETURNED_NOK                                    = 1623,
+    
+    WRITE_CONFIG                                                = 1630,
+    WRITE_CONFIG_RECEIVE_DATA_TIMEOUT                           = 1631,
+    WRITE_CONFIG_RETURNED_OK                                    = 1632,
+    WRITE_CONFIG_RETURNED_NOK                                   = 1633,
+    
+    CHECK_CHECKSUM_CONFIG                                       = 1730,
+    CHECK_CHECKSUM_CONFIG_RECEIVE_DATA_TIMEOUT                  = 1731,
+    CHECK_CHECKSUM_CONFIG_RETURNED_OK                           = 1732,
+    CHECK_CHECKSUM_CONFIG_RETURNED_NOK                          = 1733,
+    
 } TASK_COMMAND;
 
 typedef enum
@@ -180,12 +223,12 @@ typedef enum
 } TASK_MESSAGES;				
 				
 				
-typedef struct{				
-    TASK_ID         task_id;				
-    TASK_COMMAND    task_command;				
-    TASK_STATE      task_state;				
-    TASK_MESSAGES   task_message;				
-} RETURN_STATUS;				
+//typedef struct{				
+//    TASK_ID         task_id;				
+//    TASK_COMMAND    task_command;				
+//    TASK_STATE      task_state;				
+//    TASK_MESSAGES   task_message;				
+//} RETURN_STATUS;				
 				
 				
 typedef enum{				
@@ -247,6 +290,36 @@ typedef struct
     uint8_t data[80]; 
 }udpTrans_t;
 
+/*******************************************************************************
+  Function:
+    uint32_t READxCORExTIMER(void);
+
+  Summary:
+    MPLAB Harmony Demo application tasks function
+
+  Description:
+    This routine is the Harmony Demo application's tasks function.  It
+    defines the application's state machine and core logic.
+
+  Precondition:
+    The system and application initialization ("SYS_Initialize") should be
+    called before calling this.
+
+  Parameters:
+    None.
+
+  Returns:
+    None.
+
+  Example:
+    <code>
+    MBUS_Tasks();
+    </code>
+
+  Remarks:
+    This routine must be called from SYS_Tasks() routine.
+ */
+uint32_t READxCORExTIMER(void);
 
 // *****************************************************************************
 // Section: Application Callback Routines
@@ -254,7 +327,7 @@ typedef struct
 // *****************************************************************************
 /* These routines are called by drivers when certain events occur.
 */
-extern bool RETURNEDxRESULTxHANDLER (RETURN_STATUS result, TASK_COMMAND task_command);
+//extern bool RETURNEDxRESULTxHANDLER (RETURN_STATUS result, TASK_COMMAND task_command);
 
     /* Provide C++ Compatibility */
 #ifdef __cplusplus
