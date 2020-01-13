@@ -119,115 +119,124 @@ extern "C" {
 
 typedef enum
 {
-    CONTROLLER                                  = 0x80,
-    MBUS                                        = 0x81,
-    FWHANDLER                                   = 0x82,
-} TASK_ID;
-
-typedef enum
-{
-    ABORT                                       = 0xF9,
-    BUSY                                        = 0xFA,
-    CONNECTED                                   = 0xFB,
-    DONE                                        = 0xFC,
-    COMMAND                                     = 0xFD,
-    ERROR                                       = 0xFE,
-} TASK_STATE;
-
-typedef enum
-{
-    NONE                                        = 0x00,
-    RECEIVED_WRONG_COMMAND                      = 0x01,
-    RECEIVED_UNKNOWN_COMMAND                    = 0x02,
-    RECEIVED_CHECKSUM_OK                        = 0x03,
-    RECEIVED_CHECKSUM_NOK                       = 0x04,
-    SWITCH_OUT_OF_BOUNDS                        = 0x05,
-} TASK_MESSAGES;
-
-typedef enum
-{
-    /* MBUS COMMANDS */
-    EXEC_MBUS_STATE_SLAVES_ON                   = 0x01,
-    EXEC_MBUS_STATE_SLAVE_DETECT                = 0x02,
-    EXEC_MBUS_STATE_SLAVES_BOOT_WAIT            = 0x03,
-    EXEC_MBUS_STATE_SLAVE_FW_FLASH              = 0x04,
-    EXEC_MBUS_STATE_SLAVE_INIT                  = 0x05,
-    EXEC_MBUS_STATE_SLAVE_ENABLE                = 0x06,
-    EXEC_MBUS_STATE_START_DATA_UPLOAD           = 0x07,
-    EXEC_MBUS_STATE_RESET                       = 0x08,
-            
-	/* FWHANDLER COMMANDS */
-    EXEC_FW_STATE_RECEIVE_FW_FILE               = 0x09,
-    EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY       = 0x0A,
-    EXEC_FW_STATE_FW_DATA                       = 0x0B,
-    EXEC_FW_STATE_FW_DATA_DOWNLOAD_DONE         = 0x0C,
-    EXEC_FW_STATE_FW_CHECKSUM                   = 0x0D,
-    EXEC_FW_STATE_RECEIVE_CONFIG_WORD           = 0x0E,
-    EXEC_FW_STATE_RECEIVE_CONFIG_WORD_STANDBY   = 0x0F,
-    EXEC_FW_STATE_FLASH_SLAVES                  = 0x10,
-	EXEC_FW_STATE_CONFIG_DATA                   = 0x11,
-	EXEC_FW_STATE_CONFIG_DATA_DOWNLOAD_DONE     = 0x12,
+    CONTROLLER                                  				= 100,
+					
+    MBUS                                        				= 200,
+					
+    FWHANDLER                                   				= 300,
+	FWFILEDOWNLOAD												= 301,
+	FWCONFIGWORDDOWNLOAD										= 302,
+} TASK_ID;				
+				
+typedef enum				
+{				
+    ABORT                                       				= 10,
+    BUSY                                        				= 20,
+    CONNECTED                                   				= 30,
+    DONE                                        				= 40,
+    COMMAND                                     				= 50,
+    ERROR                                       				= 60,
+} TASK_STATE;		
+		
+typedef enum		
+{		
+    /* MBUS COMMANDS */											/* case states cannot have high numbers! */		
+	EXEC_MBUS_STATE_SLAVES_ON                   				= 0,
+	EXEC_MBUS_STATE_SLAVE_DETECT                				= 1,
+	EXEC_MBUS_STATE_SLAVES_BOOT_WAIT            				= 2,
+	EXEC_MBUS_STATE_SLAVE_FW_FLASH              				= 3,
+	EXEC_MBUS_STATE_SLAVE_INIT                  				= 4,
+	EXEC_MBUS_STATE_SLAVE_ENABLE                				= 5,
+	EXEC_MBUS_STATE_START_DATA_UPLOAD           				= 6,
+	EXEC_MBUS_STATE_RESET                       				= 7,
+						
+	/* FWHANDLER COMMANDS */						
+    EXEC_FW_STATE_RECEIVE_FW_FILE         						= 1100,
+	EXEC_FW_STATE_RECEIVE_CONFIG_WORD							= 1101,
+    EXEC_FW_STATE_FLASH_SLAVES            						= 1102,
+			
+	/* FWFILEDOWNLOAD COMMANDS */		
+	FILEDOWNLOAD_STATE_RECEIVE_FW_FILE_STANDBY					= 1200,
+	FILEDOWNLOAD_STATE_FW_DATA_RECEIVE       					= 1201,
+	FILEDOWNLOAD_STATE_FW_DATA_DOWNLOAD_DONE 					= 1202,
+	FILEDOWNLOAD_STATE_FW_CHECKSUM								= 1203,
+	
+	/* FWCONFIGWORDDOWNLOAD COMMANDS */								
+	CONFIGWORDDOWNLOAD_STATE_RECEIVE_CONFIG_WORD_STANDBY		= 1300,
+	CONFIGWORDDOWNLOAD_STATE_FW_CONFIG_WORD_RECEIVE       		= 1301,
+	CONFIGWORDDOWNLOAD_STATE_FW_CONFIG_WORD_DOWNLOAD_DONE 		= 1302,
     
 } TASK_COMMAND;
 
-
-typedef struct{
-    TASK_ID         task_id;
-    TASK_COMMAND    task_command;
-    TASK_STATE      task_state;
-    TASK_MESSAGES   task_message;
-} RETURN_STATUS;
-
-
-typedef enum{
-    CLIENT_CONNECTION_REQUEST                   = 0x80,
-    
-} CLIENT_COMMANDS;
-
-typedef enum
-{    
-    WAIT_TIME  = 5000,
-    WAIT_TIME2 = 65000,
-} WAIT_TYPES;
-
 typedef enum
 {
-    WRITE                                       = 0xAA,
-    READ                                        = 0x55,
-    HOLDINGREG0                                 = 0, 
-    HOLDINGREG1                                 = 1, 
-    HOLDINGREG2                                 = 2, 
-    HOLDINGREG3                                 = 3, 
-    HOLDINGREG4                                 = 4, 
-    HOLDINGREG5                                 = 5, 
-    HOLDINGREG6                                 = 6, 
-    HOLDINGREG7                                 = 7, 
-    HOLDINGREG8                                 = 8, 
-    HOLDINGREG9                                 = 9, 
-    HOLDINGREG10                                = 10,
-    HOLDINGREG11                                = 11,
-    HOLDINGREG12                                = 12,
-    SLOT1                                       = 0x1,
-    SLOT2                                       = 0x2,
-    SLOT3                                       = 0x4,
-    SLOT4                                       = 0x8,
-    SLOT5                                       = 0x10,
-    SLOT6                                       = 0x20,
-    SLOT7                                       = 0x40,
-    SLOT8                                       = 0x80,
-    SLOT9                                       = 0x100,
-    SLOT10                                      = 0x200,
-    TRACKBACKPLANE1                             = 51,
-    TRACKBACKPLANE2                             = 52,
-    TRACKBACKPLANE3                             = 53,
-    TRACKBACKPLANE4                             = 54,
-    TRACKBACKPLANE5                             = 55,
-    SLAVE_INITIAL_ADDR                          = 0xAA,
-    BROADCAST_ADDRESS                           = 0,
-    WAIT                                        = 99,
-    SLAVEOK                                     = 100,
-    SLAVENOK                                    = 101,
-    SLAVEBUSY                                   = 102,
+    NONE                                        				= 10000,
+    RECEIVED_WRONG_COMMAND                      				= 10001,
+    RECEIVED_UNKNOWN_COMMAND                    				= 10002,
+	RECEIVED_BAD_COMMAND										= 10003,
+    RECEIVED_CHECKSUM_OK                        				= 10004,
+    RECEIVED_CHECKSUM_NOK                       				= 10005,
+    SWITCH_OUT_OF_BOUNDS                        				= 10006,
+} TASK_MESSAGES;				
+				
+				
+typedef struct{				
+    TASK_ID         task_id;				
+    TASK_COMMAND    task_command;				
+    TASK_STATE      task_state;				
+    TASK_MESSAGES   task_message;				
+} RETURN_STATUS;				
+				
+				
+typedef enum{				
+    CLIENT_CONNECTION_REQUEST                   				= 0x80,
+					
+} CLIENT_COMMANDS;				
+				
+typedef enum				
+{    				
+    WAIT_TIME  = 5000,				
+    WAIT_TIME2 = 65000,				
+} WAIT_TYPES;				
+				
+typedef enum				
+{				
+    WRITE                                       				= 0xAA,
+    READ                                        				= 0x55,
+    HOLDINGREG0                                 				= 0, 
+    HOLDINGREG1                                 				= 1, 
+    HOLDINGREG2                                 				= 2, 
+    HOLDINGREG3                                 				= 3, 
+    HOLDINGREG4                                 				= 4, 
+    HOLDINGREG5                                 				= 5, 
+    HOLDINGREG6                                 				= 6, 
+    HOLDINGREG7                                 				= 7, 
+    HOLDINGREG8                                 				= 8, 
+    HOLDINGREG9                                 				= 9, 
+    HOLDINGREG10                                				= 10,
+    HOLDINGREG11                                				= 11,
+    HOLDINGREG12                                				= 12,
+    SLOT1                                       				= 0x1,
+    SLOT2                                       				= 0x2,
+    SLOT3                                       				= 0x4,
+    SLOT4                                       				= 0x8,
+    SLOT5                                       				= 0x10,
+    SLOT6                                       				= 0x20,
+    SLOT7                                       				= 0x40,
+    SLOT8                                       				= 0x80,
+    SLOT9                                       				= 0x100,
+    SLOT10                                      				= 0x200,
+    TRACKBACKPLANE1                             				= 51,
+    TRACKBACKPLANE2                             				= 52,
+    TRACKBACKPLANE3                             				= 53,
+    TRACKBACKPLANE4                             				= 54,
+    TRACKBACKPLANE5                             				= 55,
+    SLAVE_INITIAL_ADDR                          				= 0xAA,
+    BROADCAST_ADDRESS                           				= 0,
+    WAIT                                        				= 99,
+    SLAVEOK                                     				= 100,
+    SLAVENOK                                    				= 101,
+    SLAVEBUSY                                   				= 102,
             
 } MISC;
     

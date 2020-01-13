@@ -10,8 +10,8 @@
 #include "ethernet.h"
 #include "slavebootloaderroutines.h"
 
-RETURN_STATUS   FwFileDownload      (TASK_ID task_id, TASK_COMMAND task_command);
-RETURN_STATUS   ConfigWordDownload  (TASK_ID task_id, TASK_COMMAND task_command);
+uint32_t        FwFileDownload      (void);
+uint32_t        ConfigWordDownload  (void);
 bool            FlashSlaves         (void);
 bool            FlashSequencer      (uint8_t SlaveId);
 
@@ -69,15 +69,13 @@ udpTrans_t      *EthernetRecvData;
 
 bool SLAVExFWxHANDLER(){
     bool        return_val  = false;
-    uint32_t    task_id     = FWHANDLER;
-    
-    RETURN_STATUS result;
+    uint32_t    result      = 0;
     
     switch (fwData.state){
         
         case FW_STATE_INIT:
         {
-            CREATExTASKxSTATUSxMESSAGE(task_id, fwData.state, CONNECTED, DONE);
+            CREATExTASKxSTATUSxMESSAGE(FWHANDLER, FW_STATE_INIT, CONNECTED, DONE);
             SYS_MESSAGE("Fw handler\t: Started.\n\r");
             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
             break;
@@ -96,7 +94,7 @@ bool SLAVExFWxHANDLER(){
                     
                     fwData.state = FW_STATE_WAITING_FOR_COMMAND;
                     SYS_MESSAGE("Fw handler\t: received wrong HEADER, stay in wait state.\n\r");
-                    CREATExTASKxSTATUSxMESSAGE(task_id, fwData.state, RECEIVED_WRONG_COMMAND, ERROR);
+                    CREATExTASKxSTATUSxMESSAGE(FWHANDLER, FW_STATE_WAITING_FOR_COMMAND, RECEIVED_BAD_COMMAND, ERROR);
                 }
             }
             break;
@@ -108,28 +106,65 @@ bool SLAVExFWxHANDLER(){
                 
                 case EXEC_FW_STATE_RECEIVE_FW_FILE:
                 {
-                    result = FwFileDownload(task_id, fwData.command);                    
-                    if (RETURNEDxRESULTxHANDLER(result, fwData.command)){
-                        fwData.state = FW_STATE_WAITING_FOR_COMMAND;
-                        SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_RECEIVE_FW_FILE done.\n\r");
+                    result = FwFileDownload();
+                    switch (result){
+                        case DONE: fwData.state = FW_STATE_WAITING_FOR_COMMAND;
+                                    CREATExTASKxSTATUSxMESSAGE(
+                                        FWHANDLER,                              // TASK_ID
+                                        DONE,                                   // TASK_STATE
+                                        EXEC_FW_STATE_RECEIVE_FW_FILE,          // TASK_COMMAND
+                                        NONE);                                  // TASK_MESSAGE
+                                    SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_RECEIVE_FW_FILE DONE.\n\r");
+                                    break;
+                        case ABORT: fwData.state = FW_STATE_WAITING_FOR_COMMAND;
+                                    CREATExTASKxSTATUSxMESSAGE(
+                                        FWHANDLER,                              // TASK_ID
+                                        ABORT,                                  // TASK_STATE
+                                        EXEC_FW_STATE_RECEIVE_FW_FILE,          // TASK_COMMAND
+                                        NONE);                                  // TASK_MESSAGE
+                                    SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_RECEIVE_FW_FILE ABORT.\n\r");
+                                    break;
+                        case BUSY : break;
+                        default   : SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_RECEIVE_FW_FILE default case not allowed.\n\r");
                     }
                     break;
                 }
                 
                 case EXEC_FW_STATE_RECEIVE_CONFIG_WORD:
                 {
-                    result = ConfigWordDownload(task_id, fwData.command);
-                    if (RETURNEDxRESULTxHANDLER(result, fwData.command)){
-                        fwData.state = FW_STATE_WAITING_FOR_COMMAND;
-                        SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_RECEIVE_CONFIG_WORD done.\n\r");
-                    }                    
+                    result = ConfigWordDownload();
+                    switch (result){
+                        case DONE:  fwData.state = FW_STATE_WAITING_FOR_COMMAND;
+                                    CREATExTASKxSTATUSxMESSAGE(
+                                        FWHANDLER,                              // TASK_ID
+                                        DONE,                                   // TASK_STATE
+                                        EXEC_FW_STATE_RECEIVE_CONFIG_WORD,      // TASK_COMMAND
+                                        NONE);                                  // TASK_MESSAGE
+                                    SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_RECEIVE_CONFIG_WORD DONE.\n\r");
+                                    break;
+                        case ABORT: fwData.state = FW_STATE_WAITING_FOR_COMMAND;
+                                    CREATExTASKxSTATUSxMESSAGE(
+                                        FWHANDLER,                              // TASK_ID
+                                        ABORT,                                  // TASK_STATE
+                                        EXEC_FW_STATE_RECEIVE_CONFIG_WORD,      // TASK_COMMAND
+                                        NONE);                                  // TASK_MESSAGE
+                                    SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_RECEIVE_CONFIG_WORD ABORT.\n\r");
+                                    break;
+                        case BUSY : break;
+                        default   : SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_RECEIVE_CONFIG_WORD default case not allowed.\n\r");
+                    }                  
                     break;
                 }
                 
                 case EXEC_FW_STATE_FLASH_SLAVES:
                 {
                     if(FlashSlaves()){
-                        CREATExTASKxSTATUSxMESSAGE(task_id, fwData.state, EXEC_FW_STATE_FLASH_SLAVES, DONE);
+                        //CREATExTASKxSTATUSxMESSAGE(task_id, fwData.state, EXEC_FW_STATE_FLASH_SLAVES, DONE);
+                        CREATExTASKxSTATUSxMESSAGE(
+                            FWHANDLER,                                          // TASK_ID
+                            DONE,                                               // TASK_STATE
+                            EXEC_FW_STATE_FLASH_SLAVES,                         // TASK_COMMAND
+                            NONE);                                              // TASK_MESSAGE
                         SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_FLASH_SLAVES done.\n\r");
                         fwData.state = FW_STATE_INIT;
                         return_val = true;
@@ -153,8 +188,8 @@ bool SLAVExFWxHANDLER(){
                 
                 default:
                 {
-                    SYS_MESSAGE("Fw handler\t: received wrong command, stay in wait state.\n\r");
-                    CREATExTASKxSTATUSxMESSAGE(task_id, fwData.state, RECEIVED_UNKNOWN_COMMAND, ERROR);
+                    SYS_MESSAGE("Fw handler\t: received unknown command, stay in wait state.\n\r");
+                    CREATExTASKxSTATUSxMESSAGE(FWHANDLER, FW_STATE_COMMAND_HANDLING, RECEIVED_UNKNOWN_COMMAND, ERROR);
                     fwData.state = FW_STATE_WAITING_FOR_COMMAND;
                     break;
                 }
@@ -172,7 +207,7 @@ bool SLAVExFWxHANDLER(){
 }
 
 /*#--------------------------------------------------------------------------#*/
-/*  Description: RETURN_STATUS FwFileDownload(TASK_ID task_id, TASK_COMMAND task_command)
+/*  Description: uint32_t FwFileDownload(TASK_ID task_id, TASK_COMMAND task_command)
  *
  *  Input(s)   : 
  *
@@ -199,23 +234,19 @@ uint8_t     data2           = 0;
 uint8_t     *pFw1           = 0;
 uint8_t     *pFw2           = 0;
 
-//RETURN_STATUS return_status
-
-RETURN_STATUS FwFileDownload(TASK_ID task_id, TASK_COMMAND task_command){
+uint32_t FwFileDownload(){
     
-    RETURN_STATUS return_val;
-    return_val.task_id      = task_id;
-    return_val.task_command = task_command;
-    return_val.task_state   = BUSY;
-    return_val.task_message = NONE;
+    uint32_t return_val = BUSY;
         
     switch (iFwFileDownload){
         
         case 0:
         {
-            //CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY, (uint8_t)DONE);
-            return_val.task_command = EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY;
-            return_val.task_message = DONE;
+            CREATExTASKxSTATUSxMESSAGE(
+                        FWFILEDOWNLOAD,                                         // TASK_ID
+                        BUSY,                                                   // TASK_STATE
+                        FILEDOWNLOAD_STATE_RECEIVE_FW_FILE_STANDBY,             // TASK_COMMAND
+                        DONE);                                                  // TASK_MESSAGE
             ptr_FwData = &FwFile[0];
             FwLineCount = 0;
             fwData.fwchecksum = 0;
@@ -228,31 +259,38 @@ RETURN_STATUS FwFileDownload(TASK_ID task_id, TASK_COMMAND task_command){
             if(CHECKxDATAxINxRECEIVExMAILxBOX()){
                 EthernetRecvData = GETxDATAxFROMxRECEIVExMAILxBOX();
                 
-                if(EthernetRecvData->command == EXEC_FW_STATE_FW_DATA){
+                if(EthernetRecvData->command == FILEDOWNLOAD_STATE_FW_DATA_RECEIVE){
                     memcpy(ptr_FwData, &(EthernetRecvData->data), 64);
                     ptr_FwData  +=  64;
                     FwLineCount +=   4;
                                 
                     if(FwLineCount > 1916){
                         iFwFileDownload++;
-                        FwLineCount = 0;                    
-                        //CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_FW_DATA_DOWNLOAD_DONE, (uint8_t)DONE);
-                        return_val.task_command = EXEC_FW_STATE_FW_DATA_DOWNLOAD_DONE;
-                        return_val.task_message = DONE;
+                        FwLineCount = 0;                        
+                        CREATExTASKxSTATUSxMESSAGE(                                
+                                FWFILEDOWNLOAD,                                 // TASK_ID
+                                BUSY,                                           // TASK_STATE
+                                FILEDOWNLOAD_STATE_FW_DATA_DOWNLOAD_DONE,       // TASK_COMMAND
+                                DONE);                                          // TASK_MESSAGE
                         SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_RECEIVE_FW_FILE received a FW file.\n\r");
                     }
                     else{
-                        //CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY, (uint8_t)DONE);
-                        return_val.task_command = EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY;
-                        return_val.task_message = DONE;
+                        CREATExTASKxSTATUSxMESSAGE(                                
+                                FWFILEDOWNLOAD,                                 // TASK_ID
+                                BUSY,                                           // TASK_STATE
+                                FILEDOWNLOAD_STATE_RECEIVE_FW_FILE_STANDBY,     // TASK_COMMAND
+                                DONE);                                          // TASK_MESSAGE
                     }
                 }
                 else{
                     SYS_MESSAGE("EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY received wrong command stopping FW download.\n\r");
-                    iFwFileDownload = 0;                    
-                    return_val.task_state   = ABORT;
-                    return_val.task_command = EXEC_FW_STATE_FW_DATA;
-                    return_val.task_message = RECEIVED_WRONG_COMMAND;
+                    iFwFileDownload = 0;
+                    return_val = ABORT;
+                    CREATExTASKxSTATUSxMESSAGE(                                
+                            FWFILEDOWNLOAD,                                     // TASK_ID
+                            ABORT,                                              // TASK_STATE
+                            FILEDOWNLOAD_STATE_RECEIVE_FW_FILE_STANDBY,         // TASK_COMMAND
+                            RECEIVED_WRONG_COMMAND);                            // TASK_MESSAGE
                 }
             }
             break;
@@ -281,33 +319,31 @@ RETURN_STATUS FwFileDownload(TASK_ID task_id, TASK_COMMAND task_command){
             
             if(data1 == *pFw1 && data2 == *pFw2){
                 fwData.fwchecksum       = checksum;
-                return_val.task_state   = BUSY;
-                return_val.task_message = RECEIVED_CHECKSUM_OK;
-                return_val.task_command = EXEC_FW_STATE_FW_CHECKSUM;
-                //CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_FW_CHECKSUM, (uint8_t)DONE);
+                return_val              = DONE;
+                CREATExTASKxSTATUSxMESSAGE(
+                        FWFILEDOWNLOAD,                                         // TASK_ID
+                        DONE,                                                   // TASK_STATE
+                        FILEDOWNLOAD_STATE_FW_CHECKSUM,                         // TASK_COMMAND
+                        RECEIVED_CHECKSUM_OK);                                  // TASK_MESSAGE
                 SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_RECEIVE_FW_FILE checksum is OK.\n\r");
             }
             else{
                 fwData.fwchecksum       = 0;
-                return_val.task_state   = ABORT;
-                return_val.task_message = RECEIVED_CHECKSUM_NOK;
-                return_val.task_command = EXEC_FW_STATE_FW_CHECKSUM;
-                //CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_FW_CHECKSUM, (uint8_t)ERROR);
+                return_val              = ABORT;
+                CREATExTASKxSTATUSxMESSAGE(
+                        FWFILEDOWNLOAD,                                         // TASK_ID
+                        ABORT,                                                  // TASK_STATE
+                        FILEDOWNLOAD_STATE_FW_CHECKSUM,                         // TASK_COMMAND
+                        RECEIVED_CHECKSUM_NOK);                                 // TASK_MESSAGE
                 SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_RECEIVE_FW_FILE checksum is NOK.\n\r");
             }
-            iFwFileDownload = 3;            
-            break;
-        }
-        
-        case 3:
-        {
-            return_val.task_state   = DONE;
             iFwFileDownload = 0;
             break;
         }
         
         default:
         {
+            iFwFileDownload = 0;
             break;
         }
     }
@@ -333,21 +369,20 @@ RETURN_STATUS FwFileDownload(TASK_ID task_id, TASK_COMMAND task_command){
 
 uint8_t     iConfigWordDownload = 0;
 
-RETURN_STATUS   ConfigWordDownload  (TASK_ID task_id, TASK_COMMAND task_command){
+uint32_t   ConfigWordDownload  (){
     
-    RETURN_STATUS return_val;
-    return_val.task_id      = task_id;
-    return_val.task_command = task_command;
-    return_val.task_state   = BUSY;
-    return_val.task_message = NONE;
+    uint32_t return_val = BUSY;
     
     switch (iConfigWordDownload){
         
         case 0:
         {
             //CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_RECEIVE_CONFIG_WORD_STANDBY, (uint8_t)DONE);
-            return_val.task_command = EXEC_FW_STATE_RECEIVE_CONFIG_WORD_STANDBY;
-            return_val.task_message = DONE;
+            CREATExTASKxSTATUSxMESSAGE(
+                        FWCONFIGWORDDOWNLOAD,                                   // TASK_ID
+                        BUSY,                                                   // TASK_STATE
+                        CONFIGWORDDOWNLOAD_STATE_RECEIVE_CONFIG_WORD_STANDBY,   // TASK_COMMAND
+                        DONE);                                                  // TASK_MESSAGE
             ptr_FwData = &FwConfigWord[0];
             iConfigWordDownload++;
             break;
@@ -358,36 +393,31 @@ RETURN_STATUS   ConfigWordDownload  (TASK_ID task_id, TASK_COMMAND task_command)
             if(CHECKxDATAxINxRECEIVExMAILxBOX()){
                 EthernetRecvData = GETxDATAxFROMxRECEIVExMAILxBOX();
                 
-                if(EthernetRecvData->command == EXEC_FW_STATE_CONFIG_DATA){
+                if(EthernetRecvData->command == CONFIGWORDDOWNLOAD_STATE_FW_CONFIG_WORD_RECEIVE){
                     memcpy(ptr_FwData, &(EthernetRecvData->data), 14);
                     //CREATExTASKxSTATUSxMESSAGE((uint8_t)FWHANDLER, (uint8_t)EXEC_FW_STATE_CONFIG_DATA_DOWNLOAD_DONE, (uint8_t)DONE);
-                    return_val.task_command = EXEC_FW_STATE_CONFIG_DATA_DOWNLOAD_DONE;
-                    return_val.task_message = DONE;
+                    CREATExTASKxSTATUSxMESSAGE(
+                        FWCONFIGWORDDOWNLOAD,                                   // TASK_ID
+                        DONE,                                                   // TASK_STATE
+                        CONFIGWORDDOWNLOAD_STATE_FW_CONFIG_WORD_DOWNLOAD_DONE,  // TASK_COMMAND
+                        DONE);                                                  // TASK_MESSAGE
                     SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_RECEIVE_CONFIG_WORD received config data.\n\r");
                 }
                 else{
-                    return_val.task_state   = ABORT;                    
-                    return_val.task_command = EXEC_FW_STATE_CONFIG_DATA_DOWNLOAD_DONE;
-                    return_val.task_message = ERROR;
+                    CREATExTASKxSTATUSxMESSAGE(
+                        FWCONFIGWORDDOWNLOAD,                                   // TASK_ID
+                        ABORT,                                                  // TASK_STATE
+                        CONFIGWORDDOWNLOAD_STATE_FW_CONFIG_WORD_DOWNLOAD_DONE,  // TASK_COMMAND
+                        RECEIVED_WRONG_COMMAND);                                // TASK_MESSAGE
                     SYS_MESSAGE("EXEC_FW_STATE_RECEIVE_CONFIG_WORD_STANDBY received wrong command stopping FW Handler.\n\r");
                 }
-                iConfigWordDownload++;
+                iConfigWordDownload = 0;
             }
-            break;
-        }
-        
-        case 2:
-        {
-            return_val.task_state   = DONE;
-            iConfigWordDownload     = 0;
             break;
         }
         
         default:
         {
-            return_val.task_state   = ABORT;                    
-            return_val.task_command = SWITCH_OUT_OF_BOUNDS;
-            return_val.task_message = ERROR;
             iConfigWordDownload     = 0;
             break;
         }
