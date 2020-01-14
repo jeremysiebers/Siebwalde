@@ -218,7 +218,7 @@ uint32_t ERASExFLASH(uint16_t flash_bootloader_offset, uint16_t flash_end_addres
                 ClearOldBtldrData();
                 ClearOldBtldrReceiveData();
             }
-            else if((READxCORExTIMER() - DelayCount) > (100 * MILISECONDS)){
+            else if((READxCORExTIMER() - DelayCount) > (1 * SECONDS)){
                 CREATExTASKxSTATUSxMESSAGE(
                     ERASE_FLASH,                                                // TASK_ID
                     ERASE_FLASH_RECEIVE_DATA_TIMEOUT,                           // TASK_COMMAND
@@ -332,9 +332,9 @@ uint32_t WRITExFLASH(uint16_t flash_bootloader_offset, uint16_t flash_end_addres
                         NONE);                                                  // TASK_MESSAGE
                     SYS_MESSAGE("Fw handler\t: WRITE_FLASH BOOTLOADER_START_BYTE_ERROR.\n\r");
                     return_val              = ERROR;
-                }
-                ClearOldBtldrData();
-                ClearOldBtldrReceiveData();
+                    ClearOldBtldrData();
+                    ClearOldBtldrReceiveData();
+                }                
             }
             else if(btldrData.btldr_receive_error){
                 CREATExTASKxSTATUSxMESSAGE(
@@ -347,7 +347,7 @@ uint32_t WRITExFLASH(uint16_t flash_bootloader_offset, uint16_t flash_end_addres
                 ClearOldBtldrData();
                 ClearOldBtldrReceiveData();
             }
-            else if((READxCORExTIMER() - DelayCount) > (100 * MILISECONDS)){
+            else if((READxCORExTIMER() - DelayCount) > (1 * SECONDS)){
                 CREATExTASKxSTATUSxMESSAGE(
                     WRITE_FLASH,                                                // TASK_ID
                     WRITE_FLASH_RECEIVE_DATA_TIMEOUT,                           // TASK_COMMAND
@@ -459,7 +459,7 @@ uint32_t WRITExCONFIG(uint8_t *config_data){
                 ClearOldBtldrData();
                 ClearOldBtldrReceiveData();
             }
-            else if((READxCORExTIMER() - DelayCount) > (100 * MILISECONDS)){
+            else if((READxCORExTIMER() - DelayCount) > (1 * SECONDS)){
                 CREATExTASKxSTATUSxMESSAGE(
                     WRITE_CONFIG,                                               // TASK_ID
                     WRITE_FLASH_RECEIVE_DATA_TIMEOUT,                           // TASK_COMMAND
@@ -575,7 +575,7 @@ uint32_t CHECKxCHECKSUM(uint16_t flash_bootloader_offset, uint16_t flash_end_add
                 ClearOldBtldrData();
                 ClearOldBtldrReceiveData();
             }
-            else if((READxCORExTIMER() - DelayCount) > (100 * MILISECONDS)){
+            else if((READxCORExTIMER() - DelayCount) > (1 * SECONDS)){
                 CREATExTASKxSTATUSxMESSAGE(
                     CHECK_CHECKSUM_CONFIG,                                      // TASK_ID
                     CHECK_CHECKSUM_CONFIG_RECEIVE_DATA_TIMEOUT,                 // TASK_COMMAND

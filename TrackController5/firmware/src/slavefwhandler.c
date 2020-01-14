@@ -77,7 +77,7 @@ bool SLAVExFWxHANDLER(){
         
         case FW_STATE_INIT:
         {
-            CREATExTASKxSTATUSxMESSAGE(FWHANDLER, FW_STATE_INIT, CONNECTED, NONE);
+            CREATExTASKxSTATUSxMESSAGE(FWHANDLER, FWHANDLERINIT, CONNECTED, NONE);
             SYS_MESSAGE("Fw handler\t: Started.\n\r");
             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
             break;
@@ -435,16 +435,16 @@ uint32_t FwFileDownload(){
                         CREATExTASKxSTATUSxMESSAGE(                                
                                 FWFILEDOWNLOAD,                                 // TASK_ID
                                 FILEDOWNLOAD_STATE_FW_DATA_DOWNLOAD_DONE,       // TASK_COMMAND
-                                BUSY,                                           // TASK_STATE
-                                DONE);                                          // TASK_MESSAGE
+                                DONE,                                           // TASK_STATE
+                                NONE);                                          // TASK_MESSAGE
                         SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_RECEIVE_FW_FILE received a FW file.\n\r");
                     }
                     else{
                         CREATExTASKxSTATUSxMESSAGE(                                
                                 FWFILEDOWNLOAD,                                 // TASK_ID
                                 FILEDOWNLOAD_STATE_RECEIVE_FW_FILE_STANDBY,     // TASK_COMMAND
-                                BUSY,                                           // TASK_STATE
-                                DONE);                                          // TASK_MESSAGE
+                                DONE,                                           // TASK_STATE
+                                NONE);                                          // TASK_MESSAGE
                     }
                 }
                 else{
@@ -567,6 +567,7 @@ uint32_t   ConfigWordDownload  (){
                         DONE,                                                   // TASK_STATE
                         NONE);                                                  // TASK_MESSAGE
                     SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_RECEIVE_CONFIG_WORD received config data.\n\r");
+                    return_val = DONE;
                 }
                 else{
                     CREATExTASKxSTATUSxMESSAGE(
@@ -575,6 +576,7 @@ uint32_t   ConfigWordDownload  (){
                         ERROR,                                                  // TASK_STATE
                         RECEIVED_WRONG_COMMAND);                                // TASK_MESSAGE
                     SYS_MESSAGE("EXEC_FW_STATE_RECEIVE_CONFIG_WORD_STANDBY received wrong command stopping FW Handler.\n\r");
+                    return_val = ERROR;
                 }
                 iConfigWordDownload = 0;
             }
@@ -640,7 +642,7 @@ uint32_t FlashAllSlavesAuto(){
             }
             else{
                 if((MASTER_SLAVE_DATA[SlaveId1].SlaveDetected == true) && (MASTER_SLAVE_DATA[SlaveId1].HoldingReg[11] != fwData.fwchecksum)){
-                    SYS_PRINT("Fw handler\t: EXEC_FW_STATE_FLASH_ALL_SLAVES Start flash sequence for SlaveID %d.\n\r", SlaveId1);
+                    SYS_PRINT("Fw handler\t: EXEC_FW_STATE_FLASH_ALL_SLAVES flash Slave ID %d.\n\r", SlaveId1);
                     iFlashSlaves++;
                 }
                 else{

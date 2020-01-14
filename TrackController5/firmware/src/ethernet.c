@@ -510,7 +510,7 @@ uint32_t GETxETHERNETxSTATE (void){
 //static 
 
 //void CREATExTASKxSTATUSxMESSAGE(uint8_t taskid, uint8_t taskstate, uint8_t feedback){
-void CREATExTASKxSTATUSxMESSAGE(uint32_t task_id, uint32_t task_state, uint32_t task_command, uint32_t task_messages){
+void CREATExTASKxSTATUSxMESSAGE(uint32_t task_id, uint32_t task_command, uint32_t task_state, uint32_t task_messages){
     
     udpTrans_t StatusMessage;
     

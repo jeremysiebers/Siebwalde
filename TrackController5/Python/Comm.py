@@ -131,7 +131,7 @@ class DataAquisition:
                     print ("header found at " + str(self.header_index))            
                 
                 try:
-                    self.data = struct.unpack ("<4B", self.line[:4])
+                    self.data = struct.unpack ("<5B", self.line[:5])
                 except:
                     return
                 
@@ -171,10 +171,7 @@ class DataAquisition:
                         self.data = struct.unpack ("<37B", self.line[:37])
                         self.bootloader_data = copy.copy(self.data)
                     
-                    elif (self.data[0] == 170 and 
-                          (self.data[1] == EnumTaskId.CONTROLLER or 
-                           self.data[1] == EnumTaskId.MBUS or
-                           self.data[1] == EnumTaskId.FWHANDLER)):
+                    elif (self.data[0] == 170):
                         self.data = struct.unpack ("<5B", self.line[:5])
                         self.EthernetTarget.taskid               = self.data[1 ]
                         self.EthernetTarget.taskcommand          = self.data[2 ]

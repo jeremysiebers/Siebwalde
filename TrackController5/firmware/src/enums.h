@@ -119,15 +119,9 @@ extern "C" {
 
 typedef enum
 {
-    CONTROLLER                                  				= 10,
-					
-    MBUS                                        				= 20,
-					
-    FWHANDLER                                   				= 30,
-	FWFILEDOWNLOAD												= 31,
-	FWCONFIGWORDDOWNLOAD										= 32,
-    FWFLASHSLAVES                                               = 33,
-    FWFLASHSEQUENCER                                            = 34,
+    CONTROLLER                                  				= 10,					
+    MBUS                                        				= 20,					
+    FWHANDLER                                   				= 30,	
 } TASK_ID;				
 				
 typedef enum				
@@ -141,7 +135,14 @@ typedef enum
 } TASK_STATE;		
 		
 typedef enum		
-{		
+{	
+    /* FW HANDLER COMMANDS */
+    FWHANDLERINIT                                 				= 31,
+    FWFILEDOWNLOAD												= 32,
+	FWCONFIGWORDDOWNLOAD										= 33,
+    FWFLASHSLAVES                                               = 34,
+    FWFLASHSEQUENCER                                            = 35,
+            
     /* MBUS COMMANDS */											/* case states cannot have high numbers! */		
 	EXEC_MBUS_STATE_SLAVES_ON                   				= 100,
 	EXEC_MBUS_STATE_SLAVE_DETECT                				= 101,

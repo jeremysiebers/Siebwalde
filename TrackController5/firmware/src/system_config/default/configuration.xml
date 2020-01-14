@@ -897,8 +897,8 @@
       <Template dnOrder="10">
         <Name dnOrder="0">system_interrupt.c</Name>
         <Path dnOrder="1">Source&amp;#160;Files/app/system_config/default</Path>
-        <Checksum dnOrder="2">9DD80EF30EFD66814C1237DA9082FA29</Checksum>
-        <ProjectFileChecksum dnOrder="3">D4C232BE1D104E7E13AD7CC3A94C8A10</ProjectFileChecksum>
+        <Checksum dnOrder="2">C11AD9E6AB799C008CECDB842A75A091</Checksum>
+        <ProjectFileChecksum dnOrder="3">609DF4E256B5EF6FD8176346C68E9AFE</ProjectFileChecksum>
       </Template>
       <Template dnOrder="11">
         <Name dnOrder="0">mbus.c</Name>
@@ -915,12 +915,12 @@
       <Template dnOrder="14">
         <Name dnOrder="0">drv_usart_static.c</Name>
         <Path dnOrder="1">Source&amp;#160;Files/app/system_config/default/framework/driver/usart/src</Path>
-        <Checksum dnOrder="2">BC007F05557B1F4A38D794EF804DFAB2</Checksum>
+        <Checksum dnOrder="2">31617721EFE5848288CBFC7AFA2AD940</Checksum>
       </Template>
       <Template dnOrder="15">
         <Name dnOrder="0">system_init.c</Name>
         <Path dnOrder="1">Source&amp;#160;Files/app/system_config/default</Path>
-        <Checksum dnOrder="2">ABFDEC6D2EA33A659F52AF1E9B146938</Checksum>
+        <Checksum dnOrder="2">16F660137A7371ECB95DB4564BC8D2C6</Checksum>
       </Template>
       <Template dnOrder="16">
         <Name dnOrder="0">main.c</Name>
@@ -964,7 +964,7 @@
       <Template dnOrder="24">
         <Name dnOrder="0">system_config.h</Name>
         <Path dnOrder="1">Header&amp;#160;Files/app/system_config/default</Path>
-        <Checksum dnOrder="2">56C1EAB4B4CB32DBE361A7446BFC3F3E</Checksum>
+        <Checksum dnOrder="2">996CDD47DB4340E134DB04A07C11A36B</Checksum>
       </Template>
       <Template dnOrder="25">
         <Name dnOrder="0">sys_clk_pic32mz.c</Name>
@@ -979,11 +979,11 @@
     </Templates>
     <CompilerItems dnOrder="2">
       <C32 dnOrder="0">
-        <Include dnOrder="0" value="C:\GIT_REPOS\Siebwalde-Source\TrackController5\firmware\src"/>
-        <Include dnOrder="1" value="C:\GIT_REPOS\Siebwalde-Source\TrackController5\firmware\src\system_config\default"/>
-        <Include dnOrder="2" value="C:\GIT_REPOS\Siebwalde-Source\TrackController5\firmware\src\default"/>
+        <Include dnOrder="0" value="C:\GIT-REPOS\Siebwalde\TrackController5\firmware\src"/>
+        <Include dnOrder="1" value="C:\GIT-REPOS\Siebwalde\TrackController5\firmware\src\system_config\default"/>
+        <Include dnOrder="2" value="C:\GIT-REPOS\Siebwalde\TrackController5\firmware\src\default"/>
         <Include dnOrder="3" value="C:\microchip\harmony\v2_06\framework"/>
-        <Include dnOrder="4" value="C:\GIT_REPOS\Siebwalde-Source\TrackController5\firmware\src\system_config\default\framework"/>
+        <Include dnOrder="4" value="C:\GIT-REPOS\Siebwalde\TrackController5\firmware\src\system_config\default\framework"/>
       </C32>
     </CompilerItems>
     <Libraries dnOrder="3">

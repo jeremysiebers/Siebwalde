@@ -275,8 +275,10 @@ class State:
         case 1
         '''
         if(self.FlashNewSwHandler == 1):
-            if(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.FWHANDLER and self.Amplifiers.EthernetTarget.taskstate == EnumTaskStates.DONE and 
-                       self.Amplifiers.EthernetTarget.taskcommand == EnumTaskStates.CONNECTED):
+            if(self.Amplifiers.EthernetTarget.taskid      == EnumTaskId.FWHANDLER and 
+               self.Amplifiers.EthernetTarget.taskstate   == EnumTaskStates.CONNECTED and 
+               self.Amplifiers.EthernetTarget.taskcommand == EnumCommand.FWHANDLERINIT):
+                
                 print("FlashTrackamplifiers --> EXEC_MBUS_STATE_SLAVE_FW_FLASH --> connected.")
                 self.Amplifiers.EthernetTarget.ClearOldData()
                 self.Amplifiers.WriteSerial(EnumCommand.ETHERNET_T, EnumCommand.EXEC_FW_STATE_RECEIVE_FW_FILE, 0)
@@ -288,9 +290,11 @@ class State:
         case 2
         '''
         if(self.FlashNewSwHandler == 2):
-            if(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.FWHANDLER and self.Amplifiers.EthernetTarget.taskstate == EnumTaskStates.DONE and 
-                       self.Amplifiers.EthernetTarget.taskcommand == EnumCommand.EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY):
-                print("FlashTrackamplifiers --> EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY --> waiting for data.")
+            if(self.Amplifiers.EthernetTarget.taskid   == EnumCommand.FWFILEDOWNLOAD and 
+            self.Amplifiers.EthernetTarget.taskstate   == EnumTaskStates.DONE and 
+            self.Amplifiers.EthernetTarget.taskcommand == EnumCommand.FILEDOWNLOAD_STATE_RECEIVE_FW_FILE_STANDBY):
+                
+                print("FlashTrackamplifiers --> FILEDOWNLOAD_STATE_RECEIVE_FW_FILE_STANDBY --> waiting for data.")
                 self.Amplifiers.EthernetTarget.ClearOldData()
                 self.FlashNewSwHandler += 1                
                 return EnumStateMachine.busy
@@ -306,7 +310,7 @@ class State:
                 return EnumStateMachine.busy
             else:
                 
-                data = struct.pack("<2B", 0xAA, EnumCommand.EXEC_FW_STATE_FW_DATA)
+                data = struct.pack("<2B", 0xAA, EnumCommand.FILEDOWNLOAD_STATE_FW_DATA_RECEIVE)
                 
                 for j in range(self.Count, (self.Count + self.jumpsize)):
                     #print("j = " + str(j))
@@ -314,7 +318,7 @@ class State:
                         #print (str(val))
                         data += struct.pack('<B', val)
                 
-                self.Amplifiers.WriteSerial(EnumCommand.ETHERNET_T, EnumCommand.EXEC_FW_STATE_FW_DATA, data)
+                self.Amplifiers.WriteSerial(EnumCommand.ETHERNET_T, 0, data)
                 
                 self.Count += self.jumpsize
                 
@@ -326,9 +330,11 @@ class State:
         case 4
         '''
         if(self.FlashNewSwHandler == 4):            
-                if(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.FWHANDLER and (self.Amplifiers.EthernetTarget.taskcommand == EnumCommand.EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY or 
-                                                                                      self.Amplifiers.EthernetTarget.taskcommand == EnumCommand.EXEC_FW_STATE_FW_DATA_DOWNLOAD_DONE) and 
-                    self.Amplifiers.EthernetTarget.taskstate == EnumTaskStates.DONE):
+                if( self.Amplifiers.EthernetTarget.taskid      == EnumCommand.FWFILEDOWNLOAD and 
+                   (self.Amplifiers.EthernetTarget.taskcommand == EnumCommand.FILEDOWNLOAD_STATE_RECEIVE_FW_FILE_STANDBY or 
+                    self.Amplifiers.EthernetTarget.taskcommand == EnumCommand.FILEDOWNLOAD_STATE_FW_DATA_DOWNLOAD_DONE) and                     
+                    self.Amplifiers.EthernetTarget.taskstate   == EnumTaskStates.DONE):
+                    
                     #print("FlashTrackamplifiers --> EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY --> self.Count = " + str(self.Count) + ".")
                     self.Amplifiers.EthernetTarget.ClearOldData()
                     self.FlashNewSwHandler = 3
@@ -338,20 +344,22 @@ class State:
         case 5
         '''
         if(self.FlashNewSwHandler == 5):
-                if(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.FWHANDLER and self.Amplifiers.EthernetTarget.taskstate == EnumTaskStates.DONE and 
-                       self.Amplifiers.EthernetTarget.taskcommand == EnumCommand.EXEC_FW_STATE_FW_CHECKSUM):                    
-                    print("FlashTrackamplifiers --> EXEC_FW_STATE_FW_CHECKSUM --> checksum of received data is ok.\n")
+                if(self.Amplifiers.EthernetTarget.taskid      == EnumCommand.FWFILEDOWNLOAD and 
+                   self.Amplifiers.EthernetTarget.taskcommand == EnumCommand.FILEDOWNLOAD_STATE_FW_CHECKSUM and
+                   self.Amplifiers.EthernetTarget.taskstate   == EnumTaskStates.DONE and 
+                   self.Amplifiers.EthernetTarget.taskmessage == EnumTaskMessages.RECEIVED_CHECKSUM_OK):                    
+                    
+                    print("FlashTrackamplifiers --> FILEDOWNLOAD_STATE_FW_CHECKSUM --> RECEIVED_CHECKSUM_OK.\n")
                     self.Amplifiers.EthernetTarget.ClearOldData()
-                    self.ConfigDataArray = self.Bootloader.GetConfigData()
-                    self.Bootloader.file_object.close()
-                    self.Amplifiers.WriteSerial(EnumCommand.ETHERNET_T, EnumCommand.EXEC_FW_STATE_RECEIVE_CONFIG_WORD, 0)
-                    print("FlashTrackamplifiers --> EXEC_FW_STATE_RECEIVE_CONFIG_WORD")
                     self.FlashNewSwHandler = 6               
                     return EnumStateMachine.busy
                 
-                elif(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.FWHANDLER and self.Amplifiers.EthernetTarget.taskstate == EnumTaskStates.ERROR and 
-                       self.Amplifiers.EthernetTarget.taskcommand == EnumCommand.EXEC_FW_STATE_FW_CHECKSUM):                    
-                    print("FlashTrackamplifiers --> EXEC_FW_STATE_FW_CHECKSUM --> checksum of received data is NOK, try again.")
+                elif(self.Amplifiers.EthernetTarget.taskid      == EnumCommand.FWFILEDOWNLOAD and 
+                     self.Amplifiers.EthernetTarget.taskcommand == EnumCommand.FILEDOWNLOAD_STATE_FW_CHECKSUM and
+                     self.Amplifiers.EthernetTarget.taskstate   == EnumTaskStates.DONE and 
+                     self.Amplifiers.EthernetTarget.taskmessage == EnumTaskMessages.RECEIVED_CHECKSUM_NOK):
+                    
+                    print("FlashTrackamplifiers --> FILEDOWNLOAD_STATE_FW_CHECKSUM --> RECEIVED_CHECKSUM_NOK, try again.")
                     self.Amplifiers.EthernetTarget.ClearOldData()
                     self.Amplifiers.WriteSerial(EnumCommand.ETHERNET_T, EnumCommand.EXEC_FW_STATE_RECEIVE_FW_FILE, 0)
                     self.FlashNewSwHandler = 2               
@@ -360,49 +368,56 @@ class State:
         '''
         case 6
         '''
-        if(self.FlashNewSwHandler == 6):
-            if(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.FWHANDLER and self.Amplifiers.EthernetTarget.taskstate == EnumTaskStates.DONE and 
-               self.Amplifiers.EthernetTarget.taskcommand == EnumCommand.EXEC_FW_STATE_RECEIVE_CONFIG_WORD_STANDBY):
-                print("FlashTrackamplifiers --> EXEC_FW_STATE_RECEIVE_CONFIG_WORD_STANDBY --> waiting for data.")
+        if(self.FlashNewSwHandler == 6):            
+            if(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.FWHANDLER and 
+               self.Amplifiers.EthernetTarget.taskstate == EnumTaskStates.DONE and 
+               self.Amplifiers.EthernetTarget.taskcommand == EnumCommand.EXEC_FW_STATE_RECEIVE_FW_FILE):
+                
+                print("FlashTrackamplifiers --> EXEC_FW_STATE_RECEIVE_FW_FILE done.")
                 self.Amplifiers.EthernetTarget.ClearOldData()
-                self.FlashNewSwHandler += 1                
-                return EnumStateMachine.busy              
+                self.ConfigDataArray = self.Bootloader.GetConfigData()
+                self.Bootloader.file_object.close()
+                self.Amplifiers.WriteSerial(EnumCommand.ETHERNET_T, EnumCommand.EXEC_FW_STATE_RECEIVE_CONFIG_WORD, 0)
+                print("FlashTrackamplifiers --> EXEC_FW_STATE_RECEIVE_CONFIG_WORD")
+                self.FlashNewSwHandler += 1
+                return EnumStateMachine.busy        
         
         '''
         case 7
         '''
         if(self.FlashNewSwHandler == 7):
-            data = struct.pack("<2B", 0xAA, EnumCommand.EXEC_FW_STATE_CONFIG_DATA)
-            for val in self.ConfigDataArray[0]:
-                #print (str(val))
-                data += struct.pack('<B', val)
-        
-            self.Amplifiers.WriteSerial(EnumCommand.ETHERNET_T, EnumCommand.EXEC_FW_STATE_CONFIG_DATA, data)            
-            self.FlashNewSwHandler += 1
-            return EnumStateMachine.busy
+            if(self.Amplifiers.EthernetTarget.taskid == EnumCommand.FWCONFIGWORDDOWNLOAD and 
+               self.Amplifiers.EthernetTarget.taskstate == EnumTaskStates.DONE and 
+               self.Amplifiers.EthernetTarget.taskcommand == EnumCommand.CONFIGWORDDOWNLOAD_STATE_RECEIVE_CONFIG_WORD_STANDBY):
+                
+                print("FlashTrackamplifiers --> CONFIGWORDDOWNLOAD_STATE_RECEIVE_CONFIG_WORD_STANDBY --> waiting for data.")
+                self.Amplifiers.EthernetTarget.ClearOldData()
+                self.FlashNewSwHandler += 1                
+                return EnumStateMachine.busy              
         
         '''
         case 8
         '''
-        if(self.FlashNewSwHandler == 8):            
-            if(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.FWHANDLER and self.Amplifiers.EthernetTarget.taskstate == EnumTaskStates.DONE and 
-               self.Amplifiers.EthernetTarget.taskcommand == EnumCommand.EXEC_FW_STATE_CONFIG_DATA_DOWNLOAD_DONE):
-                print("FlashTrackamplifiers --> EXEC_FW_STATE_CONFIG_DATA_DOWNLOAD_DONE done.")
-                self.Amplifiers.EthernetTarget.ClearOldData()
-                self.FlashNewSwHandler += 1
-                return EnumStateMachine.busy
-            
+        if(self.FlashNewSwHandler == 8):
+            data = struct.pack("<2B", 0xAA, EnumCommand.CONFIGWORDDOWNLOAD_STATE_FW_CONFIG_WORD_RECEIVE)
+            for val in self.ConfigDataArray[0]:
+                #print (str(val))
+                data += struct.pack('<B', val)
+        
+            self.Amplifiers.WriteSerial(EnumCommand.ETHERNET_T, 0, data)            
+            self.FlashNewSwHandler += 1
+            return EnumStateMachine.busy
+        
         '''
         case 9
         '''
         if(self.FlashNewSwHandler == 9):            
-            if(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.FWHANDLER and self.Amplifiers.EthernetTarget.taskstate == EnumTaskStates.DONE and 
-               self.Amplifiers.EthernetTarget.taskcommand == EnumCommand.EXEC_FW_STATE_RECEIVE_CONFIG_WORD):
-                print("FlashTrackamplifiers --> EXEC_FW_STATE_RECEIVE_CONFIG_WORD done.")
+            if(self.Amplifiers.EthernetTarget.taskid == EnumCommand.FWCONFIGWORDDOWNLOAD and 
+               self.Amplifiers.EthernetTarget.taskstate == EnumTaskStates.DONE and 
+               self.Amplifiers.EthernetTarget.taskcommand == EnumCommand.CONFIGWORDDOWNLOAD_STATE_FW_CONFIG_WORD_DOWNLOAD_DONE):
+                
+                print("FlashTrackamplifiers --> CONFIGWORDDOWNLOAD_STATE_FW_CONFIG_WORD_DOWNLOAD_DONE.")
                 self.Amplifiers.EthernetTarget.ClearOldData()
-                self.Amplifiers.WriteSerial(EnumCommand.ETHERNET_T, EnumCommand.EXEC_FW_STATE_FLASH_SLAVES, 0)
-                self.start_time = time.time()
-                print("FlashTrackamplifiers --> EXEC_FW_STATE_FLASH_SLAVES")
                 self.FlashNewSwHandler += 1
                 return EnumStateMachine.busy
             
@@ -410,12 +425,53 @@ class State:
         case 10
         '''
         if(self.FlashNewSwHandler == 10):            
-            if(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.FWHANDLER and self.Amplifiers.EthernetTarget.taskstate == EnumTaskStates.DONE and 
-               self.Amplifiers.EthernetTarget.taskcommand == EnumCommand.EXEC_FW_STATE_FLASH_SLAVES):
+            if(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.FWHANDLER and 
+               self.Amplifiers.EthernetTarget.taskstate == EnumTaskStates.DONE and 
+               self.Amplifiers.EthernetTarget.taskcommand == EnumCommand.EXEC_FW_STATE_RECEIVE_CONFIG_WORD):
+                
+                print("FlashTrackamplifiers --> EXEC_FW_STATE_RECEIVE_CONFIG_WORD done.")
+                self.Amplifiers.EthernetTarget.ClearOldData()
+                self.Amplifiers.WriteSerial(EnumCommand.ETHERNET_T, EnumCommand.EXEC_FW_STATE_FLASH_ALL_SLAVES, 0)
+                self.start_time = time.time()
+                print("FlashTrackamplifiers --> EXEC_FW_STATE_FLASH_ALL_SLAVES")
+                self.FlashNewSwHandler += 1
+                return EnumStateMachine.busy
+            
+        '''
+        case 11
+        '''
+        if(self.FlashNewSwHandler == 11):            
+            if(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.FWHANDLER and 
+               self.Amplifiers.EthernetTarget.taskstate == EnumTaskStates.DONE and 
+               self.Amplifiers.EthernetTarget.taskcommand == EnumCommand.EXEC_FW_STATE_FLASH_ALL_SLAVES):
+                
                 elapsed_time = time.time() - self.start_time
-                print("FlashTrackamplifiers --> EXEC_FW_STATE_FLASH_SLAVES done.")
+                print("FlashTrackamplifiers --> EXEC_FW_STATE_FLASH_ALL_SLAVES done.")
                 print("Flashing took: " + str('%.2f'% elapsed_time)  + " seconds, that is on average "+ str('%.2f'% (elapsed_time / self.FwFlashRequired)) + " seconds per slave.")
                 self.Amplifiers.EthernetTarget.ClearOldData()
                 return EnumStateMachine.ok
+
+            elif(self.Amplifiers.EthernetTarget.taskid      != 0 and 
+                 self.Amplifiers.EthernetTarget.taskstate   != 0 and 
+                 self.Amplifiers.EthernetTarget.taskcommand != 0):
+                print("FlashTrackamplifiers --> EXEC_FW_STATE_FLASH_ALL_SLAVES received message:")
+                
+                try:                    
+                    name = next(name for name, value in vars(EnumCommand).items() if value == self.Amplifiers.EthernetTarget.taskid)
+                    print("taskid               --> " +  name + ".")
+                    name = next(name for name, value in vars(EnumCommand).items() if value == self.Amplifiers.EthernetTarget.taskcommand)
+                    print("taskcommand          --> " +  name + ".")
+                    name = next(name for name, value in vars(EnumTaskStates).items() if value == self.Amplifiers.EthernetTarget.taskstate)
+                    print("taskstate            --> " +  name + ".")
+                    name = next(name for name, value in vars(EnumTaskMessages).items() if value == self.Amplifiers.EthernetTarget.taskmessage)
+                    print("taskmessage          --> " +  name + ".")
                     
+                except:
+                    print("taskid               --> " + str(self.Amplifiers.EthernetTarget.taskid)      + ".")
+                    print("taskcommand          --> " + str(self.Amplifiers.EthernetTarget.taskcommand) + ".")
+                    print("taskstate            --> " + str(self.Amplifiers.EthernetTarget.taskstate)   + ".")
+                    print("taskmessage          --> " + str(self.Amplifiers.EthernetTarget.taskmessage) + ".")
+                
+                self.Amplifiers.EthernetTarget.ClearOldData()
+                
         return EnumStateMachine.busy

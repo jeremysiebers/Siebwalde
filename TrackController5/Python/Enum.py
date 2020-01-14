@@ -16,14 +16,8 @@ class EnumStateMachine:
 
 class EnumTaskId:
     CONTROLLER                                  				= 10
-
     MBUS                                        				= 20
-
-    FWHANDLER                                   				= 30
-    FWFILEDOWNLOAD								= 31
-    FWCONFIGWORDDOWNLOAD                                                        = 32
-    FWFLASHSLAVES                                                               = 33
-    FWFLASHSEQUENCER                                                            = 34
+    FWHANDLER                                   				= 30   
 
 class EnumTaskStates:    
     ABORT                                       				= 4
@@ -34,7 +28,14 @@ class EnumTaskStates:
     ERROR                                       				= 9
 
 class EnumCommand:
-    #/* MBUS COMMANDS */											/* case states cannot have high numbers! */		
+    #/* FW HANDLER TASK COMMANDS */
+    FWHANDLERINIT                                                               = 31
+    FWFILEDOWNLOAD								= 32
+    FWCONFIGWORDDOWNLOAD                                                        = 33
+    FWFLASHSLAVES                                                               = 34
+    FWFLASHSEQUENCER                                                            = 35    
+    
+    #/* MBUS COMMANDS */							/* case states cannot have high numbers! */		
     EXEC_MBUS_STATE_SLAVES_ON                   				= 100
     EXEC_MBUS_STATE_SLAVE_DETECT                				= 101
     EXEC_MBUS_STATE_SLAVES_BOOT_WAIT            				= 102
