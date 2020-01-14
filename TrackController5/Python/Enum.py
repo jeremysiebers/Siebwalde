@@ -15,89 +15,98 @@ class EnumStateMachine:
     run                     = 'run'
 
 class EnumTaskId:
-    CONTROLLER                                  				= 100
+    CONTROLLER                                  				= 10
 
-    MBUS                                        				= 200
+    MBUS                                        				= 20
 
-    FWHANDLER                                   				= 300
-    FWFILEDOWNLOAD								= 301
-    FWCONFIGWORDDOWNLOAD							= 302
+    FWHANDLER                                   				= 30
+    FWFILEDOWNLOAD								= 31
+    FWCONFIGWORDDOWNLOAD                                                        = 32
+    FWFLASHSLAVES                                                               = 33
+    FWFLASHSEQUENCER                                                            = 34
 
 class EnumTaskStates:    
-    ABORT                                       				= 10
-    BUSY                                        				= 20
-    CONNECTED                                   				= 30
-    DONE                                        				= 40
-    COMMAND                                     				= 50
-    ERROR                                       				= 60
+    ABORT                                       				= 4
+    BUSY                                        				= 5
+    CONNECTED                                   				= 6
+    DONE                                        				= 7
+    COMMAND                                     				= 8
+    ERROR                                       				= 9
 
 class EnumCommand:
     #/* MBUS COMMANDS */											/* case states cannot have high numbers! */		
-    EXEC_MBUS_STATE_SLAVES_ON                   				= 0
-    EXEC_MBUS_STATE_SLAVE_DETECT                				= 1
-    EXEC_MBUS_STATE_SLAVES_BOOT_WAIT            				= 2
-    EXEC_MBUS_STATE_SLAVE_FW_FLASH              				= 3
-    EXEC_MBUS_STATE_SLAVE_INIT                  				= 4
-    EXEC_MBUS_STATE_SLAVE_ENABLE                				= 5
-    EXEC_MBUS_STATE_START_DATA_UPLOAD           				= 6
-    EXEC_MBUS_STATE_RESET                       				= 7
-
+    EXEC_MBUS_STATE_SLAVES_ON                   				= 100
+    EXEC_MBUS_STATE_SLAVE_DETECT                				= 101
+    EXEC_MBUS_STATE_SLAVES_BOOT_WAIT            				= 102
+    EXEC_MBUS_STATE_SLAVE_FW_FLASH              				= 103
+    EXEC_MBUS_STATE_SLAVE_INIT                  				= 104
+    EXEC_MBUS_STATE_SLAVE_ENABLE                				= 105
+    EXEC_MBUS_STATE_START_DATA_UPLOAD           				= 106
+    EXEC_MBUS_STATE_RESET                       				= 107
+    					
     #/* FWHANDLER COMMANDS */						
-    EXEC_FW_STATE_RECEIVE_FW_FILE         					= 1100
-    EXEC_FW_STATE_RECEIVE_CONFIG_WORD						= 1101
-    EXEC_FW_STATE_FLASH_SLAVES            					= 1102
-			
+    EXEC_FW_STATE_RECEIVE_FW_FILE         					= 120
+    EXEC_FW_STATE_RECEIVE_CONFIG_WORD						= 121
+    EXEC_FW_STATE_FLASH_ALL_SLAVES            				        = 122
+    EXEC_FW_STATE_SELECT_SLAVE                                                  = 123
+    EXEC_FW_STATE_GET_BOOTLOADER_VERSION            			        = 124
+    EXEC_FW_STATE_ERASE_FLASH            					= 125
+    EXEC_FW_STATE_WRITE_FLASH            					= 126
+    EXEC_FW_STATE_WRITE_CONFIG            					= 127
+    EXEC_FW_STATE_CHECK_CHECKSUM            					= 128
+    EXEC_FW_STATE_DESELECT_SLAVE                                                = 129
+    		
     #/* FWFILEDOWNLOAD COMMANDS */		
-    FILEDOWNLOAD_STATE_RECEIVE_FW_FILE_STANDBY					= 1200
-    FILEDOWNLOAD_STATE_FW_DATA_RECEIVE       					= 1201
-    FILEDOWNLOAD_STATE_FW_DATA_DOWNLOAD_DONE 					= 1202
-    FILEDOWNLOAD_STATE_FW_CHECKSUM						= 1203
+    FILEDOWNLOAD_STATE_RECEIVE_FW_FILE_STANDBY					= 140
+    FILEDOWNLOAD_STATE_FW_DATA_RECEIVE       					= 141
+    FILEDOWNLOAD_STATE_FW_DATA_DOWNLOAD_DONE 					= 142
+    FILEDOWNLOAD_STATE_FW_CHECKSUM						= 143
     
     #/* FWCONFIGWORDDOWNLOAD COMMANDS */								
-    CONFIGWORDDOWNLOAD_STATE_RECEIVE_CONFIG_WORD_STANDBY		        = 1300
-    CONFIGWORDDOWNLOAD_STATE_FW_CONFIG_WORD_RECEIVE       		        = 1301
-    CONFIGWORDDOWNLOAD_STATE_FW_CONFIG_WORD_DOWNLOAD_DONE 		        = 1302
+    CONFIGWORDDOWNLOAD_STATE_RECEIVE_CONFIG_WORD_STANDBY		        = 150
+    CONFIGWORDDOWNLOAD_STATE_FW_CONFIG_WORD_RECEIVE       		        = 151
+    CONFIGWORDDOWNLOAD_STATE_FW_CONFIG_WORD_DOWNLOAD_DONE 		        = 152
     
     #/* FWFLASHSLAVES */
-    FWFLASHSLAVES_STATE_CHECK_CHECKSUM                                          = 1401
-    FWFLASHSLAVES_STATE_SLAVE_FLASH                                             = 1402
-
+    FWFLASHSLAVES_STATE_CHECK_CHECKSUM                                          = 161
+    FWFLASHSLAVES_STATE_SLAVE_FLASH                                             = 162
+                                                                                
     #/* FWFLASHSEQUENCER */                                                     
-    FWFLASHSEQUENCER_STATE_FLASHED_SLAVE                                        = 1500
-    FWFLASHSEQUENCER_STATE_GET_BOOTLOADER_VERSION                               = 1501
-    FWFLASHSEQUENCER_STATE_ERASE_FLASH                                          = 1502
-    FWFLASHSEQUENCER_STATE_WRITE_FLASH                                          = 1503
-    FWFLASHSEQUENCER_STATE_WRITE_CONFIG                                         = 1504
-    FWFLASHSEQUENCER_STATE_CHECK_CHECKSUM                                       = 1505
-
+    FWFLASHSEQUENCER_STATE_FLASHED_SLAVE                                        = 170
+    FWFLASHSEQUENCER_STATE_GET_BOOTLOADER_VERSION                               = 171
+    FWFLASHSEQUENCER_STATE_ERASE_FLASH                                          = 172
+    FWFLASHSEQUENCER_STATE_WRITE_FLASH                                          = 173
+    FWFLASHSEQUENCER_STATE_WRITE_CONFIG                                         = 174
+    FWFLASHSEQUENCER_STATE_CHECK_CHECKSUM                                       = 175
+                                                                                
     #/* SLAVEBOOTLOADERROUTINES */                                              
-    BOOTLOADER_DATA_RECEIVE_ERROR                                               = 1600
-    BOOTLOADER_START_BYTE_ERROR                                                 = 1601
-
-    GET_BOOTLOADER_VERSION                                                      = 1602
-    GET_BOOTLOADER_VERSION_RECEIVE_DATA_TIMEOUT                                 = 1603
-    GET_BOOTLOADER_VERSION_OK                                                   = 1604
-    GET_BOOTLOADER_VERSION_NOK                                                  = 1605
-
-    ERASE_FLASH                                                                 = 1610
-    ERASE_FLASH_RECEIVE_DATA_TIMEOUT                                            = 1611
-    ERASE_FLASH_RETURNED_OK                                                     = 1612
-    ERASE_FLASH_RETURNED_NOK                                                    = 1613
-
-    WRITE_FLASH                                                                 = 1620
-    WRITE_FLASH_RECEIVE_DATA_TIMEOUT                                            = 1621
-    WRITE_FLASH_RETURNED_OK                                                     = 1622
-    WRITE_FLASH_RETURNED_NOK                                                    = 1623
-
-    WRITE_CONFIG                                                                = 1630
-    WRITE_CONFIG_RECEIVE_DATA_TIMEOUT                                           = 1631
-    WRITE_CONFIG_RETURNED_OK                                                    = 1632
-    WRITE_CONFIG_RETURNED_NOK                                                   = 1633
-
-    CHECK_CHECKSUM_CONFIG                                                       = 1730
-    CHECK_CHECKSUM_CONFIG_RECEIVE_DATA_TIMEOUT                                  = 1731
-    CHECK_CHECKSUM_CONFIG_RETURNED_OK                                           = 1732
-    CHECK_CHECKSUM_CONFIG_RETURNED_NOK                                          = 1733
+    BOOTLOADER_DATA_RECEIVE_ERROR                                               = 180
+    BOOTLOADER_START_BYTE_ERROR                                                 = 181
+                                                                                
+    GET_BOOTLOADER_VERSION                                                      = 192
+    GET_BOOTLOADER_VERSION_RECEIVE_DATA_TIMEOUT                                 = 193
+    GET_BOOTLOADER_VERSION_OK                                                   = 194
+    GET_BOOTLOADER_VERSION_NOK                                                  = 195
+                                                                                
+    ERASE_FLASH                                                                 = 200
+    ERASE_FLASH_RECEIVE_DATA_TIMEOUT                                            = 201
+    ERASE_FLASH_RETURNED_OK                                                     = 202
+    ERASE_FLASH_RETURNED_NOK                                                    = 203
+                                                                                
+    WRITE_FLASH                                                                 = 210
+    WRITE_FLASH_RECEIVE_DATA_TIMEOUT                                            = 211
+    WRITE_FLASH_RETURNED_OK                                                     = 212
+    WRITE_FLASH_RETURNED_NOK                                                    = 213
+                                                                                
+    WRITE_CONFIG                                                                = 220
+    WRITE_CONFIG_RECEIVE_DATA_TIMEOUT                                           = 221
+    WRITE_CONFIG_RETURNED_OK                                                    = 222
+    WRITE_CONFIG_RETURNED_NOK                                                   = 223
+                                                                                
+    CHECK_CHECKSUM_CONFIG                                                       = 230
+    CHECK_CHECKSUM_CONFIG_RECEIVE_DATA_TIMEOUT                                  = 231
+    CHECK_CHECKSUM_CONFIG_RETURNED_OK                                           = 232
+    CHECK_CHECKSUM_CONFIG_RETURNED_NOK                                          = 233
 
 #class Enum
     MODBUS                              				        = 0xFF
@@ -105,17 +114,17 @@ class EnumCommand:
     BOOTLOADER                          					= 0x11
 
 class EnumTaskMessages:
-    NONE                                        				= 10000
-    RECEIVED_WRONG_COMMAND                      				= 10001
-    RECEIVED_UNKNOWN_COMMAND                    				= 10002
-    RECEIVED_BAD_COMMAND							= 10003
-    RECEIVED_CHECKSUM_OK                        				= 10004
-    RECEIVED_CHECKSUM_NOK                       				= 10005
-    SWITCH_OUT_OF_BOUNDS                        				= 10006
-
-
+    NONE                                        				= 100
+    RECEIVED_WRONG_COMMAND                      				= 101 
+    RECEIVED_UNKNOWN_COMMAND                    				= 102 
+    RECEIVED_BAD_COMMAND							= 103 
+    RECEIVED_CHECKSUM_OK                        				= 104 
+    RECEIVED_CHECKSUM_NOK                       				= 105 
+    SWITCH_OUT_OF_BOUNDS                        				= 106 
+    SLAVE_ID_OUT_OF_BOUNDS                                                      = 107 
+    
 class EnumClientCommands:	
-    CLIENT_CONNECTION_REQUEST           	                                = 0x80
+    CLIENT_CONNECTION_REQUEST           	                                = 250
 
 class EnumMbusStatus:	                                                        
     MBUS_STATE_INIT                     	                                = 0x00
@@ -131,5 +140,5 @@ class EnumMbusStatus:
     MBUS_STATE_RESET                    	                                = 0x0A
 
 class EnumBootloader:                                           
-    COMMAND_SUCCESSFUL   					                    = 0x01 # Command Successful
-    COMMAND_UNSUCCESSFUL 					                    = 0xfd # Command unSuccessful 
+    COMMAND_SUCCESSFUL   					                = 0x01 # Command Successful
+    COMMAND_UNSUCCESSFUL 					                = 0xfd # Command unSuccessful 

@@ -67,8 +67,8 @@ uint32_t GETxBOOTxLOADERxVERSION(){
                         btldrDataReceive.status[1] == 1){
                         CREATExTASKxSTATUSxMESSAGE(
                             GET_BOOTLOADER_VERSION,                             // TASK_ID
-                            DONE,                                               // TASK_STATE
                             GET_BOOTLOADER_VERSION_OK,                          // TASK_COMMAND
+                            DONE,                                               // TASK_STATE
                             NONE);                                              // TASK_MESSAGE
                         SYS_MESSAGE("Fw handler\t: GET_BOOTLOADER_VERSION GET_BOOTLOADER_VERSION_OK.\n\r");
                         return_val          = DONE;
@@ -76,8 +76,8 @@ uint32_t GETxBOOTxLOADERxVERSION(){
                     else{
                         CREATExTASKxSTATUSxMESSAGE(
                             GET_BOOTLOADER_VERSION,                             // TASK_ID
-                            ERROR,                                              // TASK_STATE
                             GET_BOOTLOADER_VERSION_NOK,                         // TASK_COMMAND
+                            ERROR,                                              // TASK_STATE
                             NONE);                                              // TASK_MESSAGE
                         SYS_MESSAGE("Fw handler\t: GET_BOOTLOADER_VERSION GET_BOOTLOADER_VERSION_NOK.\n\r");
                     return_val              = ERROR;
@@ -86,8 +86,8 @@ uint32_t GETxBOOTxLOADERxVERSION(){
                 else{
                     CREATExTASKxSTATUSxMESSAGE(
                         GET_BOOTLOADER_VERSION,                                 // TASK_ID
-                        ERROR,                                                  // TASK_STATE
                         BOOTLOADER_START_BYTE_ERROR,                            // TASK_COMMAND
+                        ERROR,                                                  // TASK_STATE
                         NONE);                                                  // TASK_MESSAGE
                     SYS_MESSAGE("Fw handler\t: GET_BOOTLOADER_VERSION BOOTLOADER_START_BYTE_ERROR.\n\r");
                     return_val              = ERROR;
@@ -98,8 +98,8 @@ uint32_t GETxBOOTxLOADERxVERSION(){
             else if(btldrData.btldr_receive_error){
                 CREATExTASKxSTATUSxMESSAGE(
                     GET_BOOTLOADER_VERSION,                                     // TASK_ID
-                    ERROR,                                                      // TASK_STATE
                     BOOTLOADER_DATA_RECEIVE_ERROR,                              // TASK_COMMAND
+                    ERROR,                                                      // TASK_STATE
                     NONE);                                                      // TASK_MESSAGE
                 SYS_MESSAGE("Fw handler\t: GET_BOOTLOADER_VERSION BOOTLOADER_DATA_RECEIVE_ERROR.\n\r");
                 return_val                  = ERROR;
@@ -109,8 +109,8 @@ uint32_t GETxBOOTxLOADERxVERSION(){
             else if((READxCORExTIMER() - DelayCount) > (100 * MILISECONDS)){
                 CREATExTASKxSTATUSxMESSAGE(
                     GET_BOOTLOADER_VERSION,                                     // TASK_ID
-                    ERROR,                                                      // TASK_STATE
                     GET_BOOTLOADER_VERSION_RECEIVE_DATA_TIMEOUT,                // TASK_COMMAND
+                    ERROR,                                                      // TASK_STATE
                     NONE);                                                      // TASK_MESSAGE
                 SYS_MESSAGE("Fw handler\t: GET_BOOTLOADER_VERSION BOOTLOADER_DATA_RECEIVE_ERROR.\n\r");
                 return_val                  = ERROR;
@@ -179,8 +179,8 @@ uint32_t ERASExFLASH(uint16_t flash_bootloader_offset, uint16_t flash_end_addres
                     if(btldrDataReceive.status[0] == 1){
                         CREATExTASKxSTATUSxMESSAGE(
                             ERASE_FLASH,                                        // TASK_ID
-                            DONE,                                               // TASK_STATE
                             ERASE_FLASH_RETURNED_OK,                            // TASK_COMMAND
+                            DONE,                                               // TASK_STATE
                             NONE);                                              // TASK_MESSAGE
                         SYS_MESSAGE("Fw handler\t: ERASE_FLASH ERASE_FLASH_RETURNED_OK.\n\r");
                         return_val          = DONE;
@@ -188,8 +188,8 @@ uint32_t ERASExFLASH(uint16_t flash_bootloader_offset, uint16_t flash_end_addres
                     else{
                         CREATExTASKxSTATUSxMESSAGE(
                             ERASE_FLASH,                                        // TASK_ID
-                            ERROR,                                              // TASK_STATE
                             ERASE_FLASH_RETURNED_NOK,                           // TASK_COMMAND
+                            ERROR,                                              // TASK_STATE
                             NONE);                                              // TASK_MESSAGE
                         SYS_MESSAGE("Fw handler\t: ERASE_FLASH ERASE_FLASH_RETURNED_NOK.\n\r");
                     return_val              = ERROR;
@@ -198,8 +198,8 @@ uint32_t ERASExFLASH(uint16_t flash_bootloader_offset, uint16_t flash_end_addres
                 else{
                     CREATExTASKxSTATUSxMESSAGE(
                         ERASE_FLASH,                                            // TASK_ID
-                        ERROR,                                                  // TASK_STATE
                         BOOTLOADER_START_BYTE_ERROR,                            // TASK_COMMAND
+                        ERROR,                                                  // TASK_STATE
                         NONE);                                                  // TASK_MESSAGE
                     SYS_MESSAGE("Fw handler\t: ERASE_FLASH BOOTLOADER_START_BYTE_ERROR.\n\r");
                     return_val              = ERROR;
@@ -210,8 +210,8 @@ uint32_t ERASExFLASH(uint16_t flash_bootloader_offset, uint16_t flash_end_addres
             else if(btldrData.btldr_receive_error){
                 CREATExTASKxSTATUSxMESSAGE(
                     ERASE_FLASH,                                                // TASK_ID
-                    ERROR,                                                      // TASK_STATE
                     BOOTLOADER_DATA_RECEIVE_ERROR,                              // TASK_COMMAND
+                    ERROR,                                                      // TASK_STATE
                     NONE);                                                      // TASK_MESSAGE
                 SYS_MESSAGE("Fw handler\t: ERASE_FLASH BOOTLOADER_DATA_RECEIVE_ERROR.\n\r");
                 return_val                  = ERROR;
@@ -221,8 +221,8 @@ uint32_t ERASExFLASH(uint16_t flash_bootloader_offset, uint16_t flash_end_addres
             else if((READxCORExTIMER() - DelayCount) > (100 * MILISECONDS)){
                 CREATExTASKxSTATUSxMESSAGE(
                     ERASE_FLASH,                                                // TASK_ID
-                    ERROR,                                                      // TASK_STATE
                     ERASE_FLASH_RECEIVE_DATA_TIMEOUT,                           // TASK_COMMAND
+                    ERROR,                                                      // TASK_STATE
                     NONE);                                                      // TASK_MESSAGE
                 SYS_MESSAGE("Fw handler\t: ERASE_FLASH ERASE_FLASH_RECEIVE_DATA_TIMEOUT.\n\r");
                 return_val                  = ERROR;
@@ -300,8 +300,8 @@ uint32_t WRITExFLASH(uint16_t flash_bootloader_offset, uint16_t flash_end_addres
                         if (btldrData.flashrowcounter >= FlashRows){
                             CREATExTASKxSTATUSxMESSAGE(
                                 WRITE_FLASH,                                    // TASK_ID
-                                DONE,                                           // TASK_STATE
                                 WRITE_FLASH_RETURNED_OK,                        // TASK_COMMAND
+                                DONE,                                           // TASK_STATE
                                 NONE);                                          // TASK_MESSAGE
                             SYS_MESSAGE("Fw handler\t: WRITE_FLASH WRITE_FLASH_RETURNED_OK.\n\r");
                             return_val          = DONE;
@@ -317,8 +317,8 @@ uint32_t WRITExFLASH(uint16_t flash_bootloader_offset, uint16_t flash_end_addres
                     else{
                         CREATExTASKxSTATUSxMESSAGE(
                             WRITE_FLASH,                                        // TASK_ID
-                            ERROR,                                              // TASK_STATE
                             WRITE_FLASH_RETURNED_NOK,                           // TASK_COMMAND
+                            ERROR,                                              // TASK_STATE
                             NONE);                                              // TASK_MESSAGE
                         SYS_MESSAGE("Fw handler\t: WRITE_FLASH WRITE_FLASH_RETURNED_NOK.\n\r");
                     return_val              = ERROR;
@@ -327,8 +327,8 @@ uint32_t WRITExFLASH(uint16_t flash_bootloader_offset, uint16_t flash_end_addres
                 else{
                     CREATExTASKxSTATUSxMESSAGE(
                         WRITE_FLASH,                                            // TASK_ID
-                        ERROR,                                                  // TASK_STATE
                         BOOTLOADER_START_BYTE_ERROR,                            // TASK_COMMAND
+                        ERROR,                                                  // TASK_STATE
                         NONE);                                                  // TASK_MESSAGE
                     SYS_MESSAGE("Fw handler\t: WRITE_FLASH BOOTLOADER_START_BYTE_ERROR.\n\r");
                     return_val              = ERROR;
@@ -339,8 +339,8 @@ uint32_t WRITExFLASH(uint16_t flash_bootloader_offset, uint16_t flash_end_addres
             else if(btldrData.btldr_receive_error){
                 CREATExTASKxSTATUSxMESSAGE(
                     WRITE_FLASH,                                                // TASK_ID
-                    ERROR,                                                      // TASK_STATE
                     BOOTLOADER_DATA_RECEIVE_ERROR,                              // TASK_COMMAND
+                    ERROR,                                                      // TASK_STATE
                     NONE);                                                      // TASK_MESSAGE
                 SYS_MESSAGE("Fw handler\t: WRITE_FLASH BOOTLOADER_DATA_RECEIVE_ERROR.\n\r");
                 return_val                  = ERROR;
@@ -350,8 +350,8 @@ uint32_t WRITExFLASH(uint16_t flash_bootloader_offset, uint16_t flash_end_addres
             else if((READxCORExTIMER() - DelayCount) > (100 * MILISECONDS)){
                 CREATExTASKxSTATUSxMESSAGE(
                     WRITE_FLASH,                                                // TASK_ID
-                    ERROR,                                                      // TASK_STATE
                     WRITE_FLASH_RECEIVE_DATA_TIMEOUT,                           // TASK_COMMAND
+                    ERROR,                                                      // TASK_STATE
                     NONE);                                                      // TASK_MESSAGE
                 SYS_MESSAGE("Fw handler\t: WRITE_FLASH WRITE_FLASH_RECEIVE_DATA_TIMEOUT.\n\r");
                 return_val                  = ERROR;
@@ -418,8 +418,8 @@ uint32_t WRITExCONFIG(uint8_t *config_data){
                     if(btldrDataReceive.status[0] == 1){                        
                         CREATExTASKxSTATUSxMESSAGE(
                             WRITE_CONFIG,                                       // TASK_ID
-                            DONE,                                               // TASK_STATE
                             WRITE_CONFIG_RETURNED_OK,                           // TASK_COMMAND
+                            DONE,                                               // TASK_STATE
                             NONE);                                              // TASK_MESSAGE
                         SYS_MESSAGE("Fw handler\t: WRITE_CONFIG WRITE_CONFIG_RETURNED_OK.\n\r");
                         return_val          = DONE;                        
@@ -427,8 +427,8 @@ uint32_t WRITExCONFIG(uint8_t *config_data){
                     else{
                         CREATExTASKxSTATUSxMESSAGE(
                             WRITE_CONFIG,                                       // TASK_ID
-                            ERROR,                                              // TASK_STATE
                             WRITE_CONFIG_RETURNED_NOK,                          // TASK_COMMAND
+                            ERROR,                                              // TASK_STATE
                             NONE);                                              // TASK_MESSAGE
                         SYS_MESSAGE("Fw handler\t: WRITE_CONFIG WRITE_CONFIG_RETURNED_NOK.\n\r");
                     return_val              = ERROR;
@@ -439,8 +439,8 @@ uint32_t WRITExCONFIG(uint8_t *config_data){
                 else{
                     CREATExTASKxSTATUSxMESSAGE(
                         WRITE_CONFIG,                                           // TASK_ID
-                        ERROR,                                                  // TASK_STATE
                         BOOTLOADER_START_BYTE_ERROR,                            // TASK_COMMAND
+                        ERROR,                                                  // TASK_STATE
                         NONE);                                                  // TASK_MESSAGE
                     SYS_MESSAGE("Fw handler\t: WRITE_CONFIG BOOTLOADER_START_BYTE_ERROR.\n\r");
                     return_val              = ERROR;
@@ -451,8 +451,8 @@ uint32_t WRITExCONFIG(uint8_t *config_data){
             else if(btldrData.btldr_receive_error){
                 CREATExTASKxSTATUSxMESSAGE(
                     WRITE_CONFIG,                                               // TASK_ID
-                    ERROR,                                                      // TASK_STATE
                     BOOTLOADER_DATA_RECEIVE_ERROR,                              // TASK_COMMAND
+                    ERROR,                                                      // TASK_STATE
                     NONE);                                                      // TASK_MESSAGE
                 SYS_MESSAGE("Fw handler\t: WRITE_CONFIG BOOTLOADER_DATA_RECEIVE_ERROR.\n\r");
                 return_val                  = ERROR;
@@ -462,8 +462,8 @@ uint32_t WRITExCONFIG(uint8_t *config_data){
             else if((READxCORExTIMER() - DelayCount) > (100 * MILISECONDS)){
                 CREATExTASKxSTATUSxMESSAGE(
                     WRITE_CONFIG,                                               // TASK_ID
-                    ERROR,                                                      // TASK_STATE
                     WRITE_FLASH_RECEIVE_DATA_TIMEOUT,                           // TASK_COMMAND
+                    ERROR,                                                      // TASK_STATE
                     NONE);                                                      // TASK_MESSAGE
                 SYS_MESSAGE("Fw handler\t: WRITE_CONFIG WRITE_CONFIG_RECEIVE_DATA_TIMEOUT.\n\r");
                 return_val                  = ERROR;
@@ -534,8 +534,8 @@ uint32_t CHECKxCHECKSUM(uint16_t flash_bootloader_offset, uint16_t flash_end_add
                        btldrDataReceive.status[1] == ((file_checksum >> 8) & 0x00FF)){
                         CREATExTASKxSTATUSxMESSAGE(
                             CHECK_CHECKSUM_CONFIG,                              // TASK_ID
-                            DONE,                                               // TASK_STATE
                             CHECK_CHECKSUM_CONFIG_RETURNED_OK,                  // TASK_COMMAND
+                            DONE,                                               // TASK_STATE
                             NONE);                                              // TASK_MESSAGE
                         SYS_MESSAGE("Fw handler\t: CHECK_CHECKSUM_CONFIG CHECK_CHECKSUM_CONFIG_RETURNED_OK.\n\r");
                         return_val          = DONE;                        
@@ -543,8 +543,8 @@ uint32_t CHECKxCHECKSUM(uint16_t flash_bootloader_offset, uint16_t flash_end_add
                     else{
                         CREATExTASKxSTATUSxMESSAGE(
                             CHECK_CHECKSUM_CONFIG,                              // TASK_ID
-                            ERROR,                                              // TASK_STATE
                             CHECK_CHECKSUM_CONFIG_RETURNED_NOK,                 // TASK_COMMAND
+                            ERROR,                                              // TASK_STATE
                             NONE);                                              // TASK_MESSAGE
                         SYS_MESSAGE("Fw handler\t: CHECK_CHECKSUM_CONFIG CHECK_CHECKSUM_CONFIG_RETURNED_NOK.\n\r");
                     return_val              = ERROR;
@@ -555,8 +555,8 @@ uint32_t CHECKxCHECKSUM(uint16_t flash_bootloader_offset, uint16_t flash_end_add
                 else{
                     CREATExTASKxSTATUSxMESSAGE(
                         CHECK_CHECKSUM_CONFIG,                                  // TASK_ID
-                        ERROR,                                                  // TASK_STATE
                         BOOTLOADER_START_BYTE_ERROR,                            // TASK_COMMAND
+                        ERROR,                                                  // TASK_STATE
                         NONE);                                                  // TASK_MESSAGE
                     SYS_MESSAGE("Fw handler\t: CHECK_CHECKSUM_CONFIG BOOTLOADER_START_BYTE_ERROR.\n\r");
                     return_val              = ERROR;
@@ -567,8 +567,8 @@ uint32_t CHECKxCHECKSUM(uint16_t flash_bootloader_offset, uint16_t flash_end_add
             else if(btldrData.btldr_receive_error){
                 CREATExTASKxSTATUSxMESSAGE(
                     CHECK_CHECKSUM_CONFIG,                                      // TASK_ID
-                    ERROR,                                                      // TASK_STATE
                     BOOTLOADER_DATA_RECEIVE_ERROR,                              // TASK_COMMAND
+                    ERROR,                                                      // TASK_STATE
                     NONE);                                                      // TASK_MESSAGE
                 SYS_MESSAGE("Fw handler\t: CHECK_CHECKSUM_CONFIG BOOTLOADER_DATA_RECEIVE_ERROR.\n\r");
                 return_val                  = ERROR;
@@ -578,8 +578,8 @@ uint32_t CHECKxCHECKSUM(uint16_t flash_bootloader_offset, uint16_t flash_end_add
             else if((READxCORExTIMER() - DelayCount) > (100 * MILISECONDS)){
                 CREATExTASKxSTATUSxMESSAGE(
                     CHECK_CHECKSUM_CONFIG,                                      // TASK_ID
-                    ERROR,                                                      // TASK_STATE
                     CHECK_CHECKSUM_CONFIG_RECEIVE_DATA_TIMEOUT,                 // TASK_COMMAND
+                    ERROR,                                                      // TASK_STATE
                     NONE);                                                      // TASK_MESSAGE
                 SYS_MESSAGE("Fw handler\t: CHECK_CHECKSUM_CONFIG CHECK_CHECKSUM_CONFIG_RECEIVE_DATA_TIMEOUT.\n\r");
                 return_val                  = ERROR;

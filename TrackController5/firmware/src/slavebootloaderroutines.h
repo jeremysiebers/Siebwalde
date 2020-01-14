@@ -88,8 +88,9 @@ extern "C" {
   Remarks:
     This routine must be called from SYS_Tasks() routine.
  */
-uint32_t      GETxBOOTxLOADERxVERSION         (void);
+
 void          SLAVExBOOTLOADERxDATAxRETURN    (uint8_t data);
+uint32_t      GETxBOOTxLOADERxVERSION         (void);
 uint32_t      ERASExFLASH                     (uint16_t flash_start_address, uint16_t flash_end_address);
 uint32_t      WRITExFLASH                     (uint16_t flash_bootloader_offset, uint16_t flash_end_address, uint8_t *fwfile);
 uint32_t      WRITExCONFIG                    (uint8_t *config_data);

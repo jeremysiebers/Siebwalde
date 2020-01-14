@@ -23,12 +23,14 @@ class EtherNetFeedBack:
     def __init__(self):
         self.taskid              = 0
         self.taskstate           = 0
-        self.feedback            = 0
+        self.taskcommand         = 0
+        self.taskmessage         = 0
     
     def ClearOldData(self):
         self.taskid              = 0
         self.taskstate           = 0
-        self.feedback            = 0        
+        self.taskcommand         = 0
+        self.taskmessage         = 0     
 
 class Bootloader:
     def __init__(self):
@@ -173,21 +175,22 @@ class DataAquisition:
                           (self.data[1] == EnumTaskId.CONTROLLER or 
                            self.data[1] == EnumTaskId.MBUS or
                            self.data[1] == EnumTaskId.FWHANDLER)):
-                        self.data = struct.unpack ("<4B", self.line[:4])
+                        self.data = struct.unpack ("<5B", self.line[:5])
                         self.EthernetTarget.taskid               = self.data[1 ]
-                        self.EthernetTarget.taskstate            = self.data[2 ]
-                        self.EthernetTarget.feedback             = self.data[3 ]                        
+                        self.EthernetTarget.taskcommand          = self.data[2 ]
+                        self.EthernetTarget.taskstate            = self.data[3 ]
+                        self.EthernetTarget.taskmessage          = self.data[4 ]
                     
                     self.line = 0
                 
-                elif(len(self.line) == 4):
+                elif(len(self.line) == 5):
                     # Check if data command feedback
-                    self.data = struct.unpack ("<4B", self.line[:4])
+                    self.data = struct.unpack ("<5B", self.line[:5])
                     if(self.data[0] == 170):
                         self.EthernetTarget.taskid               = self.data[1 ]
-                        self.EthernetTarget.taskstate            = self.data[2 ]
-                        self.EthernetTarget.feedback             = self.data[3 ]
-                    
+                        self.EthernetTarget.taskcommand          = self.data[2 ]
+                        self.EthernetTarget.taskstate            = self.data[3 ]
+                        self.EthernetTarget.taskmessage          = self.data[4 ]
                     self.line = 0
                 
                 else:

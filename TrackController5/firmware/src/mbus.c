@@ -277,7 +277,7 @@ void MBUS_Tasks ( void )
         {
             if((READxCORExTIMER() - DelayCount) > 200000000){
                 mbusData.state = MBUS_STATE_WAIT;
-                CREATExTASKxSTATUSxMESSAGE(task_id, mbusData.state, MBUS_STATE_SLAVES_ON, DONE);
+                CREATExTASKxSTATUSxMESSAGE(task_id, MBUS_STATE_SLAVES_ON, DONE, NONE);
                 SYS_MESSAGE("Mbus handler\t: MBUS_STATE_SLAVES_BOOT_WAIT done.\n\r");
             }            
             break;
@@ -287,7 +287,7 @@ void MBUS_Tasks ( void )
         {
             if (SLAVExDETECT()){
                 mbusData.state = MBUS_STATE_WAIT;
-                CREATExTASKxSTATUSxMESSAGE(task_id, mbusData.state, MBUS_STATE_SLAVE_DETECT, DONE);
+                CREATExTASKxSTATUSxMESSAGE(task_id, MBUS_STATE_SLAVE_DETECT, DONE, NONE);
                 SYS_MESSAGE("Mbus handler\t: MBUS_STATE_SLAVE_DETECT done.\n\r");
             }
             PROCESSxPETITxMODBUS();
@@ -298,7 +298,7 @@ void MBUS_Tasks ( void )
         {
             if (SLAVExFWxHANDLER()){
                 mbusData.state = MBUS_STATE_WAIT;
-                CREATExTASKxSTATUSxMESSAGE(task_id, mbusData.state, MBUS_STATE_SLAVE_FW_FLASH, DONE);
+                CREATExTASKxSTATUSxMESSAGE(task_id, MBUS_STATE_SLAVE_FW_FLASH, DONE, NONE);
                 SYS_MESSAGE("Mbus handler\t: MBUS_STATE_SLAVE_FW_FLASH done.\n\r");
             }
             if(fwData.SlaveBootloaderHandlingActive == false){
@@ -312,7 +312,7 @@ void MBUS_Tasks ( void )
             if (SLAVExINITxANDxCONFIG())
             {                
                 mbusData.state = MBUS_STATE_WAIT;
-                CREATExTASKxSTATUSxMESSAGE(task_id, mbusData.state, MBUS_STATE_SLAVE_INIT, DONE);
+                CREATExTASKxSTATUSxMESSAGE(task_id, MBUS_STATE_SLAVE_INIT, DONE, NONE);
                 SYS_MESSAGE("Mbus handler\t: MBUS_STATE_SLAVE_INIT done.\n\r");
             }
             PROCESSxPETITxMODBUS();
@@ -324,7 +324,7 @@ void MBUS_Tasks ( void )
             if (ENABLExAMPLIFIER()){                
                 mbusData.state = MBUS_STATE_SERVICE_TASKS;
                 MaxSlaveUploadCount = 50;                                       // limit the upload to slave data only (cyclic))
-                CREATExTASKxSTATUSxMESSAGE(task_id, mbusData.state, MBUS_STATE_SLAVE_ENABLE, DONE);
+                CREATExTASKxSTATUSxMESSAGE(task_id, MBUS_STATE_SLAVE_ENABLE, DONE, NONE);
                 SYS_MESSAGE("Mbus handler\t: MBUS_STATE_SLAVE_ENABLE done.\n\r");
             }
             PROCESSxPETITxMODBUS();
@@ -336,7 +336,7 @@ void MBUS_Tasks ( void )
             DRV_TMR_Start(mbusData.ModbusCommCycleHandle);
             mbusData.state  = MBUS_STATE_WAIT;
             mbusData.upload = UPLOAD_STATE_ALL;
-            CREATExTASKxSTATUSxMESSAGE(task_id, mbusData.state, MBUS_STATE_START_DATA_UPLOAD, DONE);
+            CREATExTASKxSTATUSxMESSAGE(task_id, MBUS_STATE_START_DATA_UPLOAD, DONE, NONE);
             SYS_MESSAGE("Mbus handler\t: MBUS_STATE_START_DATA_UPLOAD done.\n\r");
             break;
         }
@@ -368,7 +368,7 @@ void MBUS_Tasks ( void )
         {
             if((READxCORExTIMER() - DelayCount) > 100000000){
                 mbusData.state = MBUS_STATE_WAIT;
-                CREATExTASKxSTATUSxMESSAGE(task_id, mbusData.state, MBUS_STATE_RESET, DONE);
+                CREATExTASKxSTATUSxMESSAGE(task_id, MBUS_STATE_RESET, DONE, NONE);
                 SYS_MESSAGE("Mbus handler\t: MBUS_STATE_RESET_WAIT done.\n\r");
             }            
             break;

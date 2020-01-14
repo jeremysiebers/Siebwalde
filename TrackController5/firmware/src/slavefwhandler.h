@@ -29,7 +29,8 @@ extern "C" {
     {
         /* The application's data */
         FW_HANDLER_STATES           state;
-        uint32_t                    command;        
+        uint32_t                    command;
+        uint8_t                     data;
         uint16_t                    fwchecksum;
         bool                        SlaveBootloaderHandlingActive;
     } FW_DATA;

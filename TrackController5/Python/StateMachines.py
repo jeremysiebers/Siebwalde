@@ -57,8 +57,8 @@ class State:
         case 1
         '''
         if(self.ConnectToEth == 1):
-            if(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.CONTROLLER and self.Amplifiers.EthernetTarget.taskstate == EnumTaskStates.CONNECTED and 
-               self.Amplifiers.EthernetTarget.feedback == EnumTaskStates.DONE):
+            if(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.CONTROLLER and self.Amplifiers.EthernetTarget.taskstate == EnumTaskStates.DONE and 
+               self.Amplifiers.EthernetTarget.taskcommand == EnumTaskStates.CONNECTED):
                 print("Connected to: " + self.Amplifiers.IPAddr + '\n')
                 self.Amplifiers.EthernetTarget.ClearOldData()
                 self.ConnectToEth = 0
@@ -86,8 +86,8 @@ class State:
         case 1
         '''
         if(self.RunResetAll == 1):
-            if(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.MBUS and self.Amplifiers.EthernetTarget.taskstate == EnumMbusStatus.MBUS_STATE_RESET and 
-               self.Amplifiers.EthernetTarget.feedback == EnumTaskStates.DONE):
+            if(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.MBUS and self.Amplifiers.EthernetTarget.taskstate == EnumTaskStates.DONE and 
+               self.Amplifiers.EthernetTarget.taskcommand == EnumMbusStatus.MBUS_STATE_RESET):
                 print("ResetAllSlaves --> EXEC_MBUS_STATE_RESET --> done.")
                 self.Amplifiers.EthernetTarget.ClearOldData()
                 self.Amplifiers.WriteSerial(EnumCommand.ETHERNET_T, EnumCommand.EXEC_MBUS_STATE_SLAVES_ON, 0)
@@ -99,8 +99,8 @@ class State:
         case 2
         '''
         if(self.RunResetAll == 2):
-            if(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.MBUS and self.Amplifiers.EthernetTarget.taskstate == EnumMbusStatus.MBUS_STATE_SLAVES_ON and 
-               self.Amplifiers.EthernetTarget.feedback == EnumTaskStates.DONE):
+            if(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.MBUS and self.Amplifiers.EthernetTarget.taskstate == EnumTaskStates.DONE and 
+               self.Amplifiers.EthernetTarget.taskcommand == EnumMbusStatus.MBUS_STATE_SLAVES_ON):
                 print("ResetAllSlaves --> EXEC_MBUS_STATE_SLAVES_ON --> done.")
                 self.Amplifiers.EthernetTarget.ClearOldData()
                 self.RunResetAll = 0
@@ -129,8 +129,8 @@ class State:
         case 1
         '''
         if(self.UploadData == 1):
-            if(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.MBUS and self.Amplifiers.EthernetTarget.taskstate == EnumMbusStatus.MBUS_STATE_START_DATA_UPLOAD and 
-               self.Amplifiers.EthernetTarget.feedback == EnumTaskStates.DONE):
+            if(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.MBUS and self.Amplifiers.EthernetTarget.taskstate == EnumTaskStates.DONE and 
+               self.Amplifiers.EthernetTarget.taskcommand == EnumMbusStatus.MBUS_STATE_START_DATA_UPLOAD):
                 print("DataUploadStart --> EXEC_MBUS_STATE_START_DATA_UPLOAD --> done.\n")
                 self.Amplifiers.EthernetTarget.ClearOldData()                
                 self.UploadData = 0                
@@ -157,8 +157,8 @@ class State:
         case 1
         '''
         if(self.SlaveDetect == 1):
-            if(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.MBUS and self.Amplifiers.EthernetTarget.taskstate == EnumMbusStatus.MBUS_STATE_SLAVE_DETECT and 
-               self.Amplifiers.EthernetTarget.feedback == EnumTaskStates.DONE):
+            if(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.MBUS and self.Amplifiers.EthernetTarget.taskstate == EnumTaskStates.DONE and 
+               self.Amplifiers.EthernetTarget.taskcommand == EnumMbusStatus.MBUS_STATE_SLAVE_DETECT):
                 print("DetectSlaves --> EXEC_MBUS_STATE_SLAVE_DETECT --> done.\n")
                 self.Amplifiers.EthernetTarget.ClearOldData() 
                 self.start_time = time.time()
@@ -193,8 +193,8 @@ class State:
         case 1
         '''
         if(self.TrackamplifiersInit == 1):
-            if(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.MBUS and self.Amplifiers.EthernetTarget.taskstate == EnumMbusStatus.MBUS_STATE_SLAVE_INIT and 
-               self.Amplifiers.EthernetTarget.feedback == EnumTaskStates.DONE):
+            if(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.MBUS and self.Amplifiers.EthernetTarget.taskstate == EnumTaskStates.DONE and 
+               self.Amplifiers.EthernetTarget.taskcommand == EnumMbusStatus.MBUS_STATE_SLAVE_INIT):
                 print("TrackamplifiersInit --> EXEC_MBUS_STATE_SLAVE_INIT --> done.\n")
                 self.Amplifiers.EthernetTarget.ClearOldData()                
                 self.TrackamplifiersInit = 0                
@@ -222,8 +222,8 @@ class State:
         case 1
         '''
         if(self.TrackamplifiersEnable == 1):
-            if(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.MBUS and self.Amplifiers.EthernetTarget.taskstate == EnumMbusStatus.MBUS_STATE_SLAVE_ENABLE and 
-               self.Amplifiers.EthernetTarget.feedback == EnumTaskStates.DONE):
+            if(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.MBUS and self.Amplifiers.EthernetTarget.taskstate == EnumTaskStates.DONE and 
+               self.Amplifiers.EthernetTarget.taskcommand == EnumMbusStatus.MBUS_STATE_SLAVE_ENABLE):
                 print("TrackamplifiersEnable --> EXEC_MBUS_STATE_SLAVE_ENABLE --> done.\n")
                 self.Amplifiers.EthernetTarget.ClearOldData()                
                 self.TrackamplifiersEnable = 0                
@@ -275,8 +275,8 @@ class State:
         case 1
         '''
         if(self.FlashNewSwHandler == 1):
-            if(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.FWHANDLER and self.Amplifiers.EthernetTarget.taskstate == EnumTaskStates.CONNECTED and 
-                       self.Amplifiers.EthernetTarget.feedback == EnumTaskStates.DONE):
+            if(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.FWHANDLER and self.Amplifiers.EthernetTarget.taskstate == EnumTaskStates.DONE and 
+                       self.Amplifiers.EthernetTarget.taskcommand == EnumTaskStates.CONNECTED):
                 print("FlashTrackamplifiers --> EXEC_MBUS_STATE_SLAVE_FW_FLASH --> connected.")
                 self.Amplifiers.EthernetTarget.ClearOldData()
                 self.Amplifiers.WriteSerial(EnumCommand.ETHERNET_T, EnumCommand.EXEC_FW_STATE_RECEIVE_FW_FILE, 0)
@@ -288,8 +288,8 @@ class State:
         case 2
         '''
         if(self.FlashNewSwHandler == 2):
-            if(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.FWHANDLER and self.Amplifiers.EthernetTarget.taskstate == EnumCommand.EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY and 
-                       self.Amplifiers.EthernetTarget.feedback == EnumTaskStates.DONE):
+            if(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.FWHANDLER and self.Amplifiers.EthernetTarget.taskstate == EnumTaskStates.DONE and 
+                       self.Amplifiers.EthernetTarget.taskcommand == EnumCommand.EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY):
                 print("FlashTrackamplifiers --> EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY --> waiting for data.")
                 self.Amplifiers.EthernetTarget.ClearOldData()
                 self.FlashNewSwHandler += 1                
@@ -326,9 +326,9 @@ class State:
         case 4
         '''
         if(self.FlashNewSwHandler == 4):            
-                if(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.FWHANDLER and (self.Amplifiers.EthernetTarget.taskstate == EnumCommand.EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY or 
-                                                                                              self.Amplifiers.EthernetTarget.taskstate == EnumCommand.EXEC_FW_STATE_FW_DATA_DOWNLOAD_DONE) and 
-                    self.Amplifiers.EthernetTarget.feedback == EnumTaskStates.DONE):
+                if(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.FWHANDLER and (self.Amplifiers.EthernetTarget.taskcommand == EnumCommand.EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY or 
+                                                                                      self.Amplifiers.EthernetTarget.taskcommand == EnumCommand.EXEC_FW_STATE_FW_DATA_DOWNLOAD_DONE) and 
+                    self.Amplifiers.EthernetTarget.taskstate == EnumTaskStates.DONE):
                     #print("FlashTrackamplifiers --> EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY --> self.Count = " + str(self.Count) + ".")
                     self.Amplifiers.EthernetTarget.ClearOldData()
                     self.FlashNewSwHandler = 3
@@ -338,8 +338,8 @@ class State:
         case 5
         '''
         if(self.FlashNewSwHandler == 5):
-                if(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.FWHANDLER and self.Amplifiers.EthernetTarget.taskstate == EnumCommand.EXEC_FW_STATE_FW_CHECKSUM and 
-                       self.Amplifiers.EthernetTarget.feedback == EnumTaskStates.DONE):                    
+                if(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.FWHANDLER and self.Amplifiers.EthernetTarget.taskstate == EnumTaskStates.DONE and 
+                       self.Amplifiers.EthernetTarget.taskcommand == EnumCommand.EXEC_FW_STATE_FW_CHECKSUM):                    
                     print("FlashTrackamplifiers --> EXEC_FW_STATE_FW_CHECKSUM --> checksum of received data is ok.\n")
                     self.Amplifiers.EthernetTarget.ClearOldData()
                     self.ConfigDataArray = self.Bootloader.GetConfigData()
@@ -349,8 +349,8 @@ class State:
                     self.FlashNewSwHandler = 6               
                     return EnumStateMachine.busy
                 
-                elif(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.FWHANDLER and self.Amplifiers.EthernetTarget.taskstate == EnumCommand.EXEC_FW_STATE_FW_CHECKSUM and 
-                       self.Amplifiers.EthernetTarget.feedback == EnumTaskStates.ERROR):                    
+                elif(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.FWHANDLER and self.Amplifiers.EthernetTarget.taskstate == EnumTaskStates.ERROR and 
+                       self.Amplifiers.EthernetTarget.taskcommand == EnumCommand.EXEC_FW_STATE_FW_CHECKSUM):                    
                     print("FlashTrackamplifiers --> EXEC_FW_STATE_FW_CHECKSUM --> checksum of received data is NOK, try again.")
                     self.Amplifiers.EthernetTarget.ClearOldData()
                     self.Amplifiers.WriteSerial(EnumCommand.ETHERNET_T, EnumCommand.EXEC_FW_STATE_RECEIVE_FW_FILE, 0)
@@ -361,8 +361,8 @@ class State:
         case 6
         '''
         if(self.FlashNewSwHandler == 6):
-            if(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.FWHANDLER and self.Amplifiers.EthernetTarget.taskstate == EnumCommand.EXEC_FW_STATE_RECEIVE_CONFIG_WORD_STANDBY and 
-               self.Amplifiers.EthernetTarget.feedback == EnumTaskStates.DONE):
+            if(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.FWHANDLER and self.Amplifiers.EthernetTarget.taskstate == EnumTaskStates.DONE and 
+               self.Amplifiers.EthernetTarget.taskcommand == EnumCommand.EXEC_FW_STATE_RECEIVE_CONFIG_WORD_STANDBY):
                 print("FlashTrackamplifiers --> EXEC_FW_STATE_RECEIVE_CONFIG_WORD_STANDBY --> waiting for data.")
                 self.Amplifiers.EthernetTarget.ClearOldData()
                 self.FlashNewSwHandler += 1                
@@ -385,8 +385,8 @@ class State:
         case 8
         '''
         if(self.FlashNewSwHandler == 8):            
-            if(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.FWHANDLER and self.Amplifiers.EthernetTarget.taskstate == EnumCommand.EXEC_FW_STATE_CONFIG_DATA_DOWNLOAD_DONE and 
-               self.Amplifiers.EthernetTarget.feedback == EnumTaskStates.DONE):
+            if(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.FWHANDLER and self.Amplifiers.EthernetTarget.taskstate == EnumTaskStates.DONE and 
+               self.Amplifiers.EthernetTarget.taskcommand == EnumCommand.EXEC_FW_STATE_CONFIG_DATA_DOWNLOAD_DONE):
                 print("FlashTrackamplifiers --> EXEC_FW_STATE_CONFIG_DATA_DOWNLOAD_DONE done.")
                 self.Amplifiers.EthernetTarget.ClearOldData()
                 self.FlashNewSwHandler += 1
@@ -396,8 +396,8 @@ class State:
         case 9
         '''
         if(self.FlashNewSwHandler == 9):            
-            if(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.FWHANDLER and self.Amplifiers.EthernetTarget.taskstate == EnumCommand.EXEC_FW_STATE_RECEIVE_CONFIG_WORD and 
-               self.Amplifiers.EthernetTarget.feedback == EnumTaskStates.DONE):
+            if(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.FWHANDLER and self.Amplifiers.EthernetTarget.taskstate == EnumTaskStates.DONE and 
+               self.Amplifiers.EthernetTarget.taskcommand == EnumCommand.EXEC_FW_STATE_RECEIVE_CONFIG_WORD):
                 print("FlashTrackamplifiers --> EXEC_FW_STATE_RECEIVE_CONFIG_WORD done.")
                 self.Amplifiers.EthernetTarget.ClearOldData()
                 self.Amplifiers.WriteSerial(EnumCommand.ETHERNET_T, EnumCommand.EXEC_FW_STATE_FLASH_SLAVES, 0)
@@ -410,8 +410,8 @@ class State:
         case 10
         '''
         if(self.FlashNewSwHandler == 10):            
-            if(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.FWHANDLER and self.Amplifiers.EthernetTarget.taskstate == EnumCommand.EXEC_FW_STATE_FLASH_SLAVES and 
-               self.Amplifiers.EthernetTarget.feedback == EnumTaskStates.DONE):
+            if(self.Amplifiers.EthernetTarget.taskid == EnumTaskId.FWHANDLER and self.Amplifiers.EthernetTarget.taskstate == EnumTaskStates.DONE and 
+               self.Amplifiers.EthernetTarget.taskcommand == EnumCommand.EXEC_FW_STATE_FLASH_SLAVES):
                 elapsed_time = time.time() - self.start_time
                 print("FlashTrackamplifiers --> EXEC_FW_STATE_FLASH_SLAVES done.")
                 print("Flashing took: " + str('%.2f'% elapsed_time)  + " seconds, that is on average "+ str('%.2f'% (elapsed_time / self.FwFlashRequired)) + " seconds per slave.")
