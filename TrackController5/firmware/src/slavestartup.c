@@ -20,8 +20,10 @@ bool    DetectSlave          (uint8_t SlaveId);
 //uint8_t ReadData[4] = {0, 0, 0, 2};                                             // {start address High, start address Low, 
 //                                                                                // number of registers High, number of registers Low, 
 
-static uint8_t GoToCase            = 0;
-static uint16_t WaitCounter        = 0;
+static uint8_t      GoToCase        = 0;
+static uint16_t     WaitCounter     = 0;
+static uint32_t     DelayCount1     = 0;
+static uint32_t     DelayCount2     = 0;
 
 /*#--------------------------------------------------------------------------#*/
 /*  Description: INITxSLAVExSTARTUP(SLAVE_INFO *location)
@@ -127,6 +129,7 @@ bool DetectSlave(uint8_t SlaveId){
             if(SlaveId > 50){
                 GoToCase = 1;
                 RunSlaveDetect = WAIT;
+                DelayCount1 = READxCORExTIMER();
             }
             else if (SlaveId > 0 && SlaveId < 51){
                 RunSlaveDetect = 3; // Slaves have to be selected before they react to address 0xAA
@@ -214,8 +217,8 @@ bool DetectSlave(uint8_t SlaveId){
             switch(CHECKxMODBUSxCOMMxSTATUS(BackplaneId, false)){                  // --> do not overwrite otherwise diagnostics are gone
                 case SLAVEOK:  
                     GoToCase = RunSlaveDetect + 1;
-                    RunSlaveDetect = WAIT;                    
-                    //DRV_USART0_WriteByte('4');
+                    RunSlaveDetect = WAIT;
+                    DelayCount1 = READxCORExTIMER();                    
                     break;                    
                 case SLAVENOK: 
                     MASTER_SLAVE_DATA[BackplaneId].SlaveDetected = false;
@@ -298,12 +301,21 @@ bool DetectSlave(uint8_t SlaveId){
             break;
             
         case WAIT:
-            WaitCounter++;
-            if (WaitCounter > WAIT_TIME){
-                WaitCounter = 0;
+//            Led1On();
+//            WaitCounter++;
+//            if (WaitCounter > WAIT_TIME){
+//                WaitCounter = 0;
+//                Led1Off();
+//                RunSlaveDetect = GoToCase;
+//                //DRV_USART0_WriteByte('W');
+//            }
+            DelayCount2 = READxCORExTIMER();
+            if((DelayCount2 - DelayCount1) > (WAIT_TIME1 * MILISECONDS)){
                 RunSlaveDetect = GoToCase;
-                //DRV_USART0_WriteByte('W');
-            }            
+            }
+            else if((DelayCount1 > DelayCount2) && ((0xFFFFFFFF - DelayCount1 + DelayCount2) > (WAIT_TIME1 * MILISECONDS) )){
+                RunSlaveDetect = GoToCase;                
+            }
             break; 
             
         default : break;
@@ -459,8 +471,8 @@ bool ConfigureSlave(uint8_t BackplaneId, uint16_t AmplifierLatchSet, uint8_t Tra
             switch(CHECKxMODBUSxCOMMxSTATUS(BackplaneId, true)){
                 case SLAVEOK:  
                     GoToCase = StartupMachine + 1;
-                    StartupMachine = WAIT;                    
-                    //DRV_USART0_WriteByte('4');
+                    StartupMachine = WAIT;
+                    DelayCount1 = READxCORExTIMER();
                     break;                    
                 case SLAVENOK: 
                     StartupMachine = 5;
@@ -539,12 +551,21 @@ bool ConfigureSlave(uint8_t BackplaneId, uint16_t AmplifierLatchSet, uint8_t Tra
             break;
             
         case WAIT:
-            WaitCounter++;
-            if (WaitCounter > WAIT_TIME){
-                WaitCounter = 0;
+//            Led1On();
+//            WaitCounter++;
+//            if (WaitCounter > WAIT_TIME){
+//                WaitCounter = 0;
+//                Led1Off();
+//                StartupMachine = GoToCase;
+//                //DRV_USART0_WriteByte('W');
+//            }
+            DelayCount2 = READxCORExTIMER();
+            if((DelayCount2 - DelayCount1) > (WAIT_TIME1 * MILISECONDS)){
                 StartupMachine = GoToCase;
-                //DRV_USART0_WriteByte('W');
-            }            
+            }
+            else if((DelayCount1 > DelayCount2) && ((0xFFFFFFFF - DelayCount1 + DelayCount2) > (WAIT_TIME1 * MILISECONDS) )){
+                StartupMachine = GoToCase;                
+            }
             break;
             
         default :                
@@ -578,6 +599,7 @@ bool ENABLExAMPLIFIER(void){
         case 0:
             GoToCase = 1;
             EnableMachine = WAIT;
+            DelayCount1 = READxCORExTIMER();
             break;
 
         case 1:
@@ -594,6 +616,7 @@ bool ENABLExAMPLIFIER(void){
 //            SLAVExCOMMUNICATIONxHANDLER(BROADCAST_ADDRESS, 0, Write, WriteData1Register, 4);
             GoToCase = 2;
             EnableMachine = WAIT;
+            DelayCount1 = READxCORExTIMER();
             break;
         
         case 2:
@@ -602,12 +625,19 @@ bool ENABLExAMPLIFIER(void){
             break;
             
         case WAIT:
-            WaitCounter++;
-            if (WaitCounter > WAIT_TIME2){
-                WaitCounter = 0;
+//            WaitCounter++;
+//            if (WaitCounter > WAIT_TIME2){
+//                WaitCounter = 0;
+//                EnableMachine = GoToCase;
+//                //DRV_USART0_WriteByte('W');
+//            }  
+            DelayCount2 = READxCORExTIMER();
+            if((DelayCount2 - DelayCount1) > (WAIT_TIME2 * MILISECONDS)){
                 EnableMachine = GoToCase;
-                //DRV_USART0_WriteByte('W');
-            }            
+            }
+            else if((DelayCount1 > DelayCount2) && ((0xFFFFFFFF - DelayCount1 + DelayCount2) > (WAIT_TIME2 * MILISECONDS) )){
+                EnableMachine = GoToCase;                
+            }
             break;
 
         default:

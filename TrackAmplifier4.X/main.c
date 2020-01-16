@@ -28,7 +28,7 @@ static uint8_t test[1000];
 /*----------------------------------------------------------------------------*/
 void main(void) {
     
-    bool result = false;
+    unsigned int result = 0;
     
     SYSTEM_Initialize();
     // If using interrupts in PIC18 High/Low Priority Mode you need to enable the Global High and Low Interrupts
@@ -84,7 +84,7 @@ void main(void) {
                         LED_ERR_LAT     = 0;                        
                         MODBUS_ADDRESS = (PetitHoldingRegisters[2].ActValue & 0x3F);
                         InitPetitModbus(MODBUS_ADDRESS);
-                        Startup_Machine = 2;
+                        Startup_Machine = 5;
                    }  
                     else{
                         Startup_Machine = 0;
@@ -97,12 +97,29 @@ void main(void) {
                         LED_RX_LAT      = 0;
                     }
                 }
-                if(PetitHoldingRegisters[11].ActValue == 0 && result == true){
-                    RESET();                                                    // Called for bootloader invoking
+                if(PetitHoldingRegisters[11].ActValue == 0){
+                    Startup_Machine = 2;
+                    //RESET();                                                    // Called for bootloader invoking
                 }
                 break;
                 
             case 2 :
+            {
+                if(ProcessPetitModbus() == 2){
+                    Startup_Machine = 3;
+                }
+                break;
+            }
+            
+            case 3 :
+            {
+                if(ProcessPetitModbus() == 1){
+                    RESET();                                                    // Called for bootloader invoking
+                }
+                break;
+            }
+                
+            case 5 :
                 ProcessPetitModbus();
                 LED_WAR++;
                 Led_Blink();

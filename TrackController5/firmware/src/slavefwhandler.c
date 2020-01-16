@@ -79,7 +79,7 @@ bool SLAVExFWxHANDLER(){
         case FW_STATE_INIT:
         {
             CREATExTASKxSTATUSxMESSAGE(FWHANDLER, FWHANDLERINIT, CONNECTED, NONE);
-            SYS_MESSAGE("Fw handler\t: Started.\n\r");
+            SYS_MESSAGE("Fw handler\t: FW_STATE_INIT done.\n\r");
             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
             break;
         }
@@ -620,7 +620,7 @@ uint32_t FlashAllSlavesAuto(){
     
     switch(iFlashSlaves){
         case 0:
-        {
+        {            
             if(fwData.fwchecksum > 0){
                 iFlashSlaves++;
             }
@@ -731,7 +731,7 @@ uint32_t FlashAllSlavesAuto(){
  */
 /*#--------------------------------------------------------------------------#*/
 
-static uint8_t  iFlashSequencer = 4;
+static uint8_t  iFlashSequencer = 2;
 static uint8_t  BackplaneId     = 0;
 static uint8_t  GoToCase        = 0;
 static uint16_t WaitCounter     = 0;
@@ -796,7 +796,8 @@ uint32_t FlashSequencer(uint8_t Slave){
         }
         
         case 4:                                                                 // select first a slave amplifier by selecting one via a backplane slave
-        {
+        {            
+            fwData.SlaveBootloaderHandlingActive = false;
             if(     Slave > 0  && Slave < 11){
                 BackplaneId = 51;
                 ShiftSlot1  = Slave - 1;}
@@ -819,7 +820,7 @@ uint32_t FlashSequencer(uint8_t Slave){
             Data.StartRegister = HOLDINGREG0;
             Data.RegData0      = (SLOT1 << ShiftSlot1);
             SLAVExCOMMUNICATIONxHANDLER();
-            iFlashSequencer++;
+            iFlashSequencer = 5;            
             break;
         }
         
@@ -828,15 +829,14 @@ uint32_t FlashSequencer(uint8_t Slave){
         case 5:
             switch(CHECKxMODBUSxCOMMxSTATUS(BackplaneId, false)){               // --> do not overwrite otherwise diagnostics are gone
                 case SLAVEOK:  
-                    GoToCase        = iFlashSequencer + 1;
+                    GoToCase        = 6;//iFlashSequencer + 1;
                     iFlashSequencer = WAIT;
+                    DelayCount1 = READxCORExTIMER();
                     break;                    
                 case SLAVENOK: 
                     SYS_MESSAGE("Fw handler\t: FWFLASHSEQUENCER SLAVENOK returned in case 5.\n\r");
-//                    iFlashSequencer = 4;
-//                    return_val = ERROR;
-                    GoToCase        = iFlashSequencer + 1;
-                    iFlashSequencer = WAIT;
+                    iFlashSequencer = 2;
+                    return_val = ERROR;
                     break;
                 case SLAVEBUSY: break;
                 default : break;
@@ -855,23 +855,21 @@ uint32_t FlashSequencer(uint8_t Slave){
             Data.StartRegister = HOLDINGREG11;                                  
             Data.RegData0      = 0;
             SLAVExCOMMUNICATIONxHANDLER();
-            DelayCount1 = READxCORExTIMER();
-            iFlashSequencer++;
+            iFlashSequencer = 7;
             break;
         }
         
         case 7:
             switch(CHECKxMODBUSxCOMMxSTATUS(SLAVE_INITIAL_ADDR, false)){
                 case SLAVEOK:
-                    GoToCase        = iFlashSequencer + 1;
+                    GoToCase        = 8;//iFlashSequencer + 1;
                     iFlashSequencer = WAIT;
+                    DelayCount1 = READxCORExTIMER();
                     break;                    
                 case SLAVENOK: 
                     SYS_MESSAGE("Fw handler\t: FWFLASHSEQUENCER SLAVENOK returned in case 7.\n\r");
-//                    iFlashSequencer = 4;
-//                    return_val = ERROR;
-                    GoToCase        = iFlashSequencer + 1;
-                    iFlashSequencer = WAIT;
+                    iFlashSequencer = 2;
+                    return_val = ERROR;
                     break;
                 case SLAVEBUSY: break;
                 default : break;
@@ -889,9 +887,8 @@ uint32_t FlashSequencer(uint8_t Slave){
             Data.NoOfRegisters = 1;
             Data.StartRegister = HOLDINGREG0;
             Data.RegData0      = 0;
-            SLAVExCOMMUNICATIONxHANDLER();          
-            DelayCount1 = READxCORExTIMER();
-            iFlashSequencer++;
+            SLAVExCOMMUNICATIONxHANDLER();
+            iFlashSequencer = 9;
             break;
 		}
 		
@@ -901,21 +898,18 @@ uint32_t FlashSequencer(uint8_t Slave){
             switch(CHECKxMODBUSxCOMMxSTATUS(BackplaneId, false)){               // --> do not overwrite otherwise diagnostics are gone
                 case SLAVEOK:  
                     fwData.SlaveBootloaderHandlingActive = true;                    // disable modbus
-                    GoToCase        = iFlashSequencer + 1;
+                    GoToCase        = 10;//iFlashSequencer + 1;
                     iFlashSequencer = WAIT;
+                    DelayCount1 = READxCORExTIMER();
                     break;                    
                 case SLAVENOK:
                     SYS_MESSAGE("Fw handler\t: FWFLASHSEQUENCER SLAVENOK returned in case 9.\n\r");
-//                    return_val = ERROR;
-//                    iFlashSequencer = 4;
-                    fwData.SlaveBootloaderHandlingActive = true;
-                    GoToCase        = iFlashSequencer + 1;
-                    iFlashSequencer = WAIT;
+                    return_val = ERROR;
+                    iFlashSequencer = 2;
                     break;
                 case SLAVEBUSY: break;
                 default : break;
             }
-            DelayCount1 = READxCORExTIMER();
             break;
         
 		case 10:
@@ -1008,12 +1002,12 @@ uint32_t FlashSequencer(uint8_t Slave){
             result = RESETxSLAVE();
             switch (result){
                 case DONE:  SYS_MESSAGE("Fw handler\t: FWFLASHSEQUENCER_STATE_RESET_SLAVE DONE.\n\r");
-                            iFlashSequencer = 4;
+                            iFlashSequencer = 2;
                             fwData.SlaveBootloaderHandlingActive = false;       // enable modbus again
                             return_val      = DONE;
                             break;
                 case ERROR: SYS_MESSAGE("Fw handler\t: FWFLASHSEQUENCER_STATE_RESET_SLAVE ERROR.\n\r");
-                            iFlashSequencer = 4;
+                            iFlashSequencer = 2;
                             fwData.SlaveBootloaderHandlingActive = false;       // enable modbus again
                             return_val      = ERROR;
                             break;
@@ -1023,17 +1017,25 @@ uint32_t FlashSequencer(uint8_t Slave){
             break;
         }
         
-        case WAIT:
-            WaitCounter++;
-            if (WaitCounter > WAIT_TIME){
-                WaitCounter = 0;
+        case WAIT:            
+//            WaitCounter++;
+//            if (WaitCounter > WAIT_TIME){
+//                WaitCounter = 0;
+//                Led1Off();
+//                iFlashSequencer = GoToCase;
+//            }
+            DelayCount2 = READxCORExTIMER();
+            if((DelayCount2 - DelayCount1) > (WAIT_TIME1 * MILISECONDS)){
                 iFlashSequencer = GoToCase;
-            }            
+            }
+            else if((DelayCount1 > DelayCount2) && ((0xFFFFFFFF - DelayCount1 + DelayCount2) > (WAIT_TIME1 * MILISECONDS) )){
+                iFlashSequencer = GoToCase;               
+            }
             break;
         
         default:
         {
-            iFlashSequencer = 4;
+            iFlashSequencer = 2;
             break;
         }
     }

@@ -654,13 +654,14 @@ void Petit_TxRTU(void)
  */
 unsigned int ProcessPetitModbus(void)
 {
-    unsigned int return_val = false;
+    unsigned int return_val = 0;
     
     if (Petit_Tx_State != PETIT_RXTX_IDLE){                                      // If answer is ready, send it!
         Petit_TxRTU();        
+        return_val  = 2;
     }
     else{
-        return_val  = true;
+        return_val  = 1;
     }
     
     Petit_RxRTU();                                                              // Call this function every cycle

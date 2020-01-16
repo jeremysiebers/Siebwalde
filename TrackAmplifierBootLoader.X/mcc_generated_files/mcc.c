@@ -51,7 +51,7 @@ void SYSTEM_Initialize(void)
 {
     PMD_Initialize();
     PIN_MANAGER_Initialize();
-    OSCILLATOR_Initialize();
+    OSCILLATOR_Initialize();    
     EUSART_Initialize();
     BOOTLOADER_Initialize();
 }

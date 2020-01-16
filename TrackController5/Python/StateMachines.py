@@ -163,6 +163,8 @@ class State:
                 
                 count = 0
                 
+                time.sleep(2) # wait to have all data from slaves updated!
+                
                 for x in range(1, 51):
                     if (self.Amplifiers.Trackamplifiers[x].SlaveDetected == True):
                         count += 1

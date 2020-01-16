@@ -252,9 +252,9 @@ typedef enum{
 } CLIENT_COMMANDS;				
 				
 typedef enum				
-{    				
-    WAIT_TIME  = 5000,				
-    WAIT_TIME2 = 65000,				
+{				
+    WAIT_TIME1 = 15,    // used to give software in slaves enough time to react (ms)
+    WAIT_TIME2 = 500,   // used to give human feedback of switching ON the amps (ms) 
 } WAIT_TYPES;				
 				
 typedef enum				

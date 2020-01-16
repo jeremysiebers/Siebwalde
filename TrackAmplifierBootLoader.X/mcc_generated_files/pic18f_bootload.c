@@ -139,8 +139,16 @@ void BOOTLOADER_Initialize ()
 //    = BL_INDICATOR_ON;
     BOOTLOADER_INDICATOR = BL_INDICATOR_ON;
     if (Bootload_Required () == true)
-    {
+    {        
+        /*wait with bootloader until slave select is let go, after this the 
+         * eusart can be initialized in order to prevent eusart clashing,
+         * also take extra wait time into account for backplane feedback.
+         * Then enable the TX driver to take control of the RS485 bus!
+         */
+        while(IO_PIN_ENTRY_PORT_PIN == IO_PIN_ENTRY_RUN_BL);
+        __delay_us(300);
         LED_RUN_LAT = BL_INDICATOR_ON;
+        LATCbits.LATC2 = 1;     // enable the TX driver
         Run_Bootloader ();     // generic comms layer
     }
     STKPTR = 0x00;

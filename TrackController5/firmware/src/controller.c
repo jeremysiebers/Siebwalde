@@ -183,6 +183,7 @@ void CONTROLLER_Tasks ( void )
                     controllerData.state = CONTROLLER_STATE_HANDLE_COMM_DATA;                                        
                 }
             }
+            Led1Off();
             break;
         }
         
