@@ -187,6 +187,7 @@ typedef enum
     FWFLASHSEQUENCER_STATE_WRITE_FLASH                          = 173,
     FWFLASHSEQUENCER_STATE_WRITE_CONFIG                         = 174,
     FWFLASHSEQUENCER_STATE_CHECK_CHECKSUM                       = 175,
+    FWFLASHSEQUENCER_STATE_RESET_SLAVE                          = 176,
     
     /* SLAVEBOOTLOADERROUTINES */
     BOOTLOADER_DATA_RECEIVE_ERROR                               = 180,
@@ -216,6 +217,11 @@ typedef enum
     CHECK_CHECKSUM_CONFIG_RECEIVE_DATA_TIMEOUT                  = 231,
     CHECK_CHECKSUM_CONFIG_RETURNED_OK                           = 232,
     CHECK_CHECKSUM_CONFIG_RETURNED_NOK                          = 233,
+    
+    RESET_SLAVE                                                 = 240,
+    RESET_SLAVE_DATA_TIMEOUT                                    = 241,
+    RESET_SLAVE_OK                                              = 242,
+    RESET_SLAVE_NOK                                             = 243,
     
 } TASK_COMMAND;
 

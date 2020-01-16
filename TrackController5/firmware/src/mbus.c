@@ -289,6 +289,7 @@ void MBUS_Tasks ( void )
                 mbusData.state = MBUS_STATE_WAIT;
                 CREATExTASKxSTATUSxMESSAGE(task_id, MBUS_STATE_SLAVE_DETECT, DONE, NONE);
                 SYS_MESSAGE("Mbus handler\t: MBUS_STATE_SLAVE_DETECT done.\n\r");
+                MaxSlaveUploadCount = 50;                                       // limit the upload to slave data only (cyclic))
             }
             PROCESSxPETITxMODBUS();
             break;
@@ -322,8 +323,7 @@ void MBUS_Tasks ( void )
         case MBUS_STATE_SLAVE_ENABLE:
         {            
             if (ENABLExAMPLIFIER()){                
-                mbusData.state = MBUS_STATE_SERVICE_TASKS;
-                MaxSlaveUploadCount = 50;                                       // limit the upload to slave data only (cyclic))
+                mbusData.state = MBUS_STATE_SERVICE_TASKS;                
                 CREATExTASKxSTATUSxMESSAGE(task_id, MBUS_STATE_SLAVE_ENABLE, DONE, NONE);
                 SYS_MESSAGE("Mbus handler\t: MBUS_STATE_SLAVE_ENABLE done.\n\r");
             }
@@ -366,7 +366,7 @@ void MBUS_Tasks ( void )
         
         case MBUS_STATE_RESET_WAIT:
         {
-            if((READxCORExTIMER() - DelayCount) > 100000000){
+            if((READxCORExTIMER() - DelayCount) > (1* SECONDS)){
                 mbusData.state = MBUS_STATE_WAIT;
                 CREATExTASKxSTATUSxMESSAGE(task_id, MBUS_STATE_RESET, DONE, NONE);
                 SYS_MESSAGE("Mbus handler\t: MBUS_STATE_RESET_WAIT done.\n\r");
@@ -413,32 +413,32 @@ void MBUS_Tasks ( void )
         
         case UPLOAD_STATE_SLAVES:
         {
-            uint16_t loopcount = 0;
-            udpTrans_t data;
-            /* Every timer interrupt data is send to Ethernet PC client if available*/
-            if (UploadSlaveData){
-                UploadSlaveData = false;
-                
-                while (SlaveInfo[NextSlaveCounter].SlaveDetected == false){
-                    NextSlaveCounter++; 
-                    if (NextSlaveCounter > (MaxSlaveUploadCount)){
-                        NextSlaveCounter = 1;
-                        loopcount++;
-                    }
-                    if(loopcount > 2){
-                        loopcount = 0;
-                        NextSlaveCounter = 1;
-                        break;
-                    }
-                }                                
-                memcpy(&data, &(SlaveInfo[NextSlaveCounter].Header), sizeof(SLAVE_INFO));
-                PUTxDATAxINxSENDxMAILxBOX(&data);
-                
-                NextSlaveCounter++;
-                if(NextSlaveCounter > MaxSlaveUploadCount){
-                    NextSlaveCounter = 1;
-                }
-            }
+//            uint16_t loopcount = 0;
+//            udpTrans_t data;
+//            /* Every timer interrupt data is send to Ethernet PC client if available*/
+//            if (UploadSlaveData){
+//                UploadSlaveData = false;
+//                
+//                while (SlaveInfo[NextSlaveCounter].SlaveDetected == false){
+//                    NextSlaveCounter++; 
+//                    if (NextSlaveCounter > (MaxSlaveUploadCount)){
+//                        NextSlaveCounter = 1;
+//                        loopcount++;
+//                    }
+//                    if(loopcount > 2){
+//                        loopcount = 0;
+//                        NextSlaveCounter = 1;
+//                        break;
+//                    }
+//                }                                
+//                memcpy(&data, &(SlaveInfo[NextSlaveCounter].Header), sizeof(SLAVE_INFO));
+//                PUTxDATAxINxSENDxMAILxBOX(&data);
+//                
+//                NextSlaveCounter++;
+//                if(NextSlaveCounter > MaxSlaveUploadCount){
+//                    NextSlaveCounter = 1;
+//                }
+//            }
             break;
         }
         

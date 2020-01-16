@@ -28,6 +28,8 @@ static uint8_t test[1000];
 /*----------------------------------------------------------------------------*/
 void main(void) {
     
+    bool result = false;
+    
     SYSTEM_Initialize();
     // If using interrupts in PIC18 High/Low Priority Mode you need to enable the Global High and Low Interrupts
     // If using interrupts in PIC Mid-Range Compatibility Mode you need to enable the Global and Peripheral Interrupts
@@ -73,7 +75,7 @@ void main(void) {
                 break;
                 
             case 1 :
-                ProcessPetitModbus();
+                result = ProcessPetitModbus();
                 LED_ERR++;                
                 Led_Blink();
                 if (ID_PORT){                                                   // When the ID_PORT is released, check if a new ID is set, otherwise go back to initial state
@@ -95,7 +97,7 @@ void main(void) {
                         LED_RX_LAT      = 0;
                     }
                 }
-                if((PetitHoldingRegisters[2].ActValue & 0x8000)!= 0){
+                if(PetitHoldingRegisters[11].ActValue == 0 && result == true){
                     RESET();                                                    // Called for bootloader invoking
                 }
                 break;
@@ -126,11 +128,11 @@ void main(void) {
         ProcessPetitModbus();
         Led_Blink();
         
-        test[0]++;
-        
-        if(test[0] > 50){
-            test[0] = 0;
-        }
+//        test[0]++;
+//        
+//        if(test[0] > 50){
+//            test[0] = 0;
+//        }
         
         /*
         if (Update_Amplifier){

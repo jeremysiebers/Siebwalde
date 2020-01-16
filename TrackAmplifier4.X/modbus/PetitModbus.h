@@ -52,7 +52,7 @@ extern unsigned short PetitModbusTimerValue;
 
 // Main Functions
 extern void             InitPetitModbus(unsigned char PetitModbusSlaveAddress);
-extern void             ProcessPetitModbus(void);
+unsigned int            ProcessPetitModbus(void);
 
 extern volatile unsigned int LED_TX;
 extern volatile unsigned int LED_RX;

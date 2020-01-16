@@ -652,10 +652,15 @@ void Petit_TxRTU(void)
  * Function Name        : ProcessModbus
  * @How to use          : ModBus main core! Call this function into main!
  */
-void ProcessPetitModbus(void)
+unsigned int ProcessPetitModbus(void)
 {
+    unsigned int return_val = false;
+    
     if (Petit_Tx_State != PETIT_RXTX_IDLE){                                      // If answer is ready, send it!
         Petit_TxRTU();        
+    }
+    else{
+        return_val  = true;
     }
     
     Petit_RxRTU();                                                              // Call this function every cycle
@@ -692,6 +697,7 @@ void ProcessPetitModbus(void)
             LED_RX++;
         }
     }
+    return (return_val);
 }
 
 /******************************************************************************/

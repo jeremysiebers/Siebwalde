@@ -21,6 +21,7 @@ static uint8_t      FwFile[SLAVE_FLASH_SIZE];                                   
 static uint8_t      FwConfigWord[14];
 static uint16_t     checksum        = 0;
 static uint32_t     DelayCount1     = 0;
+static uint32_t     DelayCount2     = 0;
 
 /*#--------------------------------------------------------------------------#*/
 /*  Description: INITxSLAVExFWxHANDLER(SLAVE_INFO *location)
@@ -177,6 +178,7 @@ bool SLAVExFWxHANDLER(){
                                     return_val = true;
                                     break;
                         case ERROR: fwData.state = FW_STATE_WAITING_FOR_COMMAND;
+                                    fwData.SlaveBootloaderHandlingActive = false;
                                     CREATExTASKxSTATUSxMESSAGE(
                                         FWHANDLER,                              // TASK_ID
                                         EXEC_FW_STATE_FLASH_ALL_SLAVES,         // TASK_COMMAND
@@ -729,13 +731,26 @@ uint32_t FlashAllSlavesAuto(){
  */
 /*#--------------------------------------------------------------------------#*/
 
-static uint8_t  iFlashSequencer = 0;
+static uint8_t  iFlashSequencer = 4;
 static uint8_t  BackplaneId     = 0;
+static uint8_t  GoToCase        = 0;
+static uint16_t WaitCounter     = 0;
 
 uint32_t FlashSequencer(uint8_t Slave){
     uint32_t return_val = BUSY;
     uint32_t result     = 0;
     uint8_t  ShiftSlot1 = 0;
+    
+    if(Slave > 0  && Slave < 11){
+        BackplaneId = 51;}
+    else if(Slave > 10 && Slave < 21){
+        BackplaneId = 52;}
+    else if(Slave > 20 && Slave < 31){
+        BackplaneId = 53;}
+    else if(Slave > 30 && Slave < 41){
+        BackplaneId = 54;}
+    else if(Slave > 40 && Slave < 51){
+        BackplaneId = 55;}
     
     switch(iFlashSequencer){
         case 0:
@@ -748,9 +763,14 @@ uint32_t FlashSequencer(uint8_t Slave){
         
         case 1:
         {
-            if((READxCORExTIMER() - DelayCount1) > (10 * MILISECONDS)){
+            DelayCount2 = READxCORExTIMER();
+            if((DelayCount2 - DelayCount1) > (100 * MILISECONDS)){
                 iFlashSequencer = 2;
-            }  
+            }
+            else if((DelayCount1 > DelayCount2) && ((0xFFFFFFFF - DelayCount1 + DelayCount2) > (100 * MILISECONDS) )){
+                iFlashSequencer = 2;
+                SYS_MESSAGE("Fw handler\t: overflow READxCORExTIMER() detected");
+            }
             break;
         }
         
@@ -764,8 +784,13 @@ uint32_t FlashSequencer(uint8_t Slave){
         
         case 3:
         {
-            if((READxCORExTIMER() - DelayCount1) > (10 * MILISECONDS)){
+            DelayCount2 = READxCORExTIMER();
+            if((DelayCount2 - DelayCount1) > (10 * MILISECONDS)){
                 iFlashSequencer = 4;
+            }
+            else if((DelayCount1 > DelayCount2) && ((0xFFFFFFFF - DelayCount1 + DelayCount2) > (10 * MILISECONDS) )){
+                iFlashSequencer = 4;
+                SYS_MESSAGE("Fw handler\t: overflow READxCORExTIMER() detected");
             }  
             break;
         }
@@ -793,30 +818,107 @@ uint32_t FlashSequencer(uint8_t Slave){
             Data.NoOfRegisters = 1;
             Data.StartRegister = HOLDINGREG0;
             Data.RegData0      = (SLOT1 << ShiftSlot1);
-            SLAVExCOMMUNICATIONxHANDLER();           
+            SLAVExCOMMUNICATIONxHANDLER();
+            iFlashSequencer++;
+            break;
+        }
+        
+        /* Verify communication was OK with backplane, if not flag backplane 
+           SlaveDetected to false to indicate backplane comm error */
+        case 5:
+            switch(CHECKxMODBUSxCOMMxSTATUS(BackplaneId, false)){               // --> do not overwrite otherwise diagnostics are gone
+                case SLAVEOK:  
+                    GoToCase        = iFlashSequencer + 1;
+                    iFlashSequencer = WAIT;
+                    break;                    
+                case SLAVENOK: 
+                    SYS_MESSAGE("Fw handler\t: FWFLASHSEQUENCER SLAVENOK returned in case 5.\n\r");
+//                    iFlashSequencer = 4;
+//                    return_val = ERROR;
+                    GoToCase        = iFlashSequencer + 1;
+                    iFlashSequencer = WAIT;
+                    break;
+                case SLAVEBUSY: break;
+                default : break;
+            }
+            DelayCount1 = READxCORExTIMER();
+            break;
+        
+        case 6:
+        {
+            /* Writing the read checksum to 0 will call a reset on the slave, 
+             * since we already selected it, it will instantly go into bootloader :-) 
+             */
+            Data.SlaveAddress  = SLAVE_INITIAL_ADDR;
+            Data.Direction     = WRITE;
+            Data.NoOfRegisters = 1;
+            Data.StartRegister = HOLDINGREG11;                                  
+            Data.RegData0      = 0;
+            SLAVExCOMMUNICATIONxHANDLER();
             DelayCount1 = READxCORExTIMER();
             iFlashSequencer++;
             break;
         }
         
-        /* Verify communication was OK with backplane --> due to reset of all 
-         * slaves the rx line is hampered and the feedback of modbus from the 
-         * backplane slave is missed, therefore for now selecting a slave for
-         * bootloader is done blind. To solve this, the routine has to be 
-         * executed without resetting all slaves but a slave has to be commanded
-         * to reset itself by SW reset in order to invoke the bootloader. */
-        
-        case 5:
-        {
-            if((READxCORExTIMER() - DelayCount1) > (50 * MILISECONDS)){
-                iFlashSequencer = 7;
-                fwData.SlaveBootloaderHandlingActive = true;
-                MASTER_SLAVE_DATA[BackplaneId].MbCommError = SLAVE_DATA_OK;     // since the slave answer is lost???
-            }            
+        case 7:
+            switch(CHECKxMODBUSxCOMMxSTATUS(SLAVE_INITIAL_ADDR, false)){
+                case SLAVEOK:
+                    GoToCase        = iFlashSequencer + 1;
+                    iFlashSequencer = WAIT;
+                    break;                    
+                case SLAVENOK: 
+                    SYS_MESSAGE("Fw handler\t: FWFLASHSEQUENCER SLAVENOK returned in case 7.\n\r");
+//                    iFlashSequencer = 4;
+//                    return_val = ERROR;
+                    GoToCase        = iFlashSequencer + 1;
+                    iFlashSequencer = WAIT;
+                    break;
+                case SLAVEBUSY: break;
+                default : break;
+            }
+            DelayCount1 = READxCORExTIMER();
             break;
-        }
-            
-        case 6:
+        
+        case 8:
+		{
+            /* Let the slave select go already, so that after e reset is send to 
+             * the slave, it will not go into bootloader again! 
+             */
+            Data.SlaveAddress  = BackplaneId;
+            Data.Direction     = WRITE;
+            Data.NoOfRegisters = 1;
+            Data.StartRegister = HOLDINGREG0;
+            Data.RegData0      = 0;
+            SLAVExCOMMUNICATIONxHANDLER();          
+            DelayCount1 = READxCORExTIMER();
+            iFlashSequencer++;
+            break;
+		}
+		
+        /* Verify communication was OK with backplane, if not flag backplane 
+           SlaveDetected to false to indicate backplane comm error */
+        case 9:
+            switch(CHECKxMODBUSxCOMMxSTATUS(BackplaneId, false)){               // --> do not overwrite otherwise diagnostics are gone
+                case SLAVEOK:  
+                    fwData.SlaveBootloaderHandlingActive = true;                    // disable modbus
+                    GoToCase        = iFlashSequencer + 1;
+                    iFlashSequencer = WAIT;
+                    break;                    
+                case SLAVENOK:
+                    SYS_MESSAGE("Fw handler\t: FWFLASHSEQUENCER SLAVENOK returned in case 9.\n\r");
+//                    return_val = ERROR;
+//                    iFlashSequencer = 4;
+                    fwData.SlaveBootloaderHandlingActive = true;
+                    GoToCase        = iFlashSequencer + 1;
+                    iFlashSequencer = WAIT;
+                    break;
+                case SLAVEBUSY: break;
+                default : break;
+            }
+            DelayCount1 = READxCORExTIMER();
+            break;
+        
+		case 10:
         {
             result = GETxBOOTxLOADERxVERSION();
             switch (result){
@@ -833,7 +935,7 @@ uint32_t FlashSequencer(uint8_t Slave){
             break;
         }
         
-        case 7:
+        case 11:
         {
             result = ERASExFLASH(SLAVE_BOOT_LOADER_OFFSET, SLAVE_FLASH_END);
             switch (result){
@@ -850,7 +952,7 @@ uint32_t FlashSequencer(uint8_t Slave){
             break;
         }
         
-        case 8:
+        case 12:
         {
             result = WRITExFLASH(SLAVE_BOOT_LOADER_OFFSET, SLAVE_FLASH_END, &FwFile[0]);
             switch (result){
@@ -867,7 +969,7 @@ uint32_t FlashSequencer(uint8_t Slave){
             break;
         }
 		
-		case 9:
+		case 13:
         {
             result = WRITExCONFIG(&FwConfigWord[0]);
             switch (result){
@@ -884,12 +986,11 @@ uint32_t FlashSequencer(uint8_t Slave){
             break;
         }
 		
-		case 10:
+		case 14:
         {
             result = CHECKxCHECKSUM(SLAVE_BOOT_LOADER_OFFSET, SLAVE_FLASH_END, checksum);
             switch (result){
                 case DONE:  SYS_MESSAGE("Fw handler\t: FWFLASHSEQUENCER_STATE_CHECK_CHECKSUM DONE.\n\r");
-                            fwData.SlaveBootloaderHandlingActive = false;
                             iFlashSequencer++;
                             break;
                 case ERROR: SYS_MESSAGE("Fw handler\t: FWFLASHSEQUENCER_STATE_CHECK_CHECKSUM ERROR.\n\r");
@@ -901,32 +1002,38 @@ uint32_t FlashSequencer(uint8_t Slave){
             }
             break;
         }
-		
-		case 11:
-		{
-			Data.SlaveAddress  = BackplaneId;
-            Data.Direction     = WRITE;
-            Data.NoOfRegisters = 1;
-            Data.StartRegister = HOLDINGREG0;
-            Data.RegData0      = 0;
-            SLAVExCOMMUNICATIONxHANDLER();          
-            DelayCount1 = READxCORExTIMER();
-            iFlashSequencer++;
-            break;
-		}
-		
-		case 12:
+        
+        case 15:
         {
-            if((READxCORExTIMER() - DelayCount1) > (10 * MILISECONDS)){
-                MASTER_SLAVE_DATA[BackplaneId].MbCommError = SLAVE_DATA_OK;     // since the slave answer is lost???
-                iFlashSequencer = 0;
-                return_val = DONE;
-            }            
+            result = RESETxSLAVE();
+            switch (result){
+                case DONE:  SYS_MESSAGE("Fw handler\t: FWFLASHSEQUENCER_STATE_RESET_SLAVE DONE.\n\r");
+                            iFlashSequencer = 4;
+                            fwData.SlaveBootloaderHandlingActive = false;       // enable modbus again
+                            return_val      = DONE;
+                            break;
+                case ERROR: SYS_MESSAGE("Fw handler\t: FWFLASHSEQUENCER_STATE_RESET_SLAVE ERROR.\n\r");
+                            iFlashSequencer = 4;
+                            fwData.SlaveBootloaderHandlingActive = false;       // enable modbus again
+                            return_val      = ERROR;
+                            break;
+                case BUSY : break;
+                default   : SYS_MESSAGE("Fw handler\t: FWFLASHSEQUENCER_STATE_RESET_SLAVE default case not allowed.\n\r");
+            }
             break;
         }
         
+        case WAIT:
+            WaitCounter++;
+            if (WaitCounter > WAIT_TIME){
+                WaitCounter = 0;
+                iFlashSequencer = GoToCase;
+            }            
+            break;
+        
         default:
         {
+            iFlashSequencer = 4;
             break;
         }
     }
@@ -950,7 +1057,7 @@ uint32_t FlashSequencer(uint8_t Slave){
  *  Notes      :  
  */
 /*#--------------------------------------------------------------------------#*/
-static uint8_t  iSelectSlaveSequencer = 0;
+static uint8_t  iSelectSlaveSequencer = 4;
 
 uint32_t        SelectSlave         (uint8_t SlaveId){
     uint32_t    return_val  = BUSY;
@@ -1009,7 +1116,7 @@ uint32_t        SelectSlave         (uint8_t SlaveId){
         
         case 3:
         {
-            if((READxCORExTIMER() - DelayCount1) > (10 * MILISECONDS)){
+            if((READxCORExTIMER() - DelayCount1) > (5 * MILISECONDS)){
                 iSelectSlaveSequencer = 4;
             }  
             break;
@@ -1037,18 +1144,42 @@ uint32_t        SelectSlave         (uint8_t SlaveId){
         
         case 5:
         {
-            if((READxCORExTIMER() - DelayCount1) > (50 * MILISECONDS)){
-                iSelectSlaveSequencer = 0;
-                return_val = DONE;
-                fwData.SlaveBootloaderHandlingActive = true;
+            if((READxCORExTIMER() - DelayCount1) > (10 * MILISECONDS)){
+                iSelectSlaveSequencer++;
+                //fwData.SlaveBootloaderHandlingActive = true;
                 MASTER_SLAVE_DATA[BackplaneId].MbCommError = SLAVE_DATA_OK;     // since the slave answer is lost???
+            }            
+            break;
+        }
+        
+        case 6:
+        {
+            /* Writing the read checksum to 0 will call a reset on the slave, 
+             * since we already selected it, it will instantly go into bootloader :-) 
+             */
+            Data.SlaveAddress  = SLAVE_INITIAL_ADDR;
+            Data.Direction     = WRITE;
+            Data.NoOfRegisters = 1;
+            Data.StartRegister = HOLDINGREG11;
+            Data.RegData0      = 0;
+            SLAVExCOMMUNICATIONxHANDLER();
+            DelayCount1 = READxCORExTIMER();
+            iSelectSlaveSequencer++;
+            break;
+        }
+        
+        case 7:
+        {
+            if((READxCORExTIMER() - DelayCount1) > (10 * MILISECONDS)){
+                iSelectSlaveSequencer = 4;
+                fwData.SlaveBootloaderHandlingActive = true;                
             }            
             break;
         }
         
         default: 
         {
-            iSelectSlaveSequencer = 0;
+            iSelectSlaveSequencer = 4;
             break;
         }
     }

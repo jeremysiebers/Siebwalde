@@ -79,35 +79,41 @@ class EnumCommand:
     FWFLASHSEQUENCER_STATE_WRITE_FLASH                                          = 173
     FWFLASHSEQUENCER_STATE_WRITE_CONFIG                                         = 174
     FWFLASHSEQUENCER_STATE_CHECK_CHECKSUM                                       = 175
-                                                                                
+    FWFLASHSEQUENCER_STATE_RESET_SLAVE                                          = 176
+
     #/* SLAVEBOOTLOADERROUTINES */                                              
     BOOTLOADER_DATA_RECEIVE_ERROR                                               = 180
     BOOTLOADER_START_BYTE_ERROR                                                 = 181
-                                                                                
+
     GET_BOOTLOADER_VERSION                                                      = 192
     GET_BOOTLOADER_VERSION_RECEIVE_DATA_TIMEOUT                                 = 193
     GET_BOOTLOADER_VERSION_OK                                                   = 194
     GET_BOOTLOADER_VERSION_NOK                                                  = 195
-                                                                                
+
     ERASE_FLASH                                                                 = 200
     ERASE_FLASH_RECEIVE_DATA_TIMEOUT                                            = 201
     ERASE_FLASH_RETURNED_OK                                                     = 202
     ERASE_FLASH_RETURNED_NOK                                                    = 203
-                                                                                
+
     WRITE_FLASH                                                                 = 210
     WRITE_FLASH_RECEIVE_DATA_TIMEOUT                                            = 211
     WRITE_FLASH_RETURNED_OK                                                     = 212
     WRITE_FLASH_RETURNED_NOK                                                    = 213
-                                                                                
+
     WRITE_CONFIG                                                                = 220
     WRITE_CONFIG_RECEIVE_DATA_TIMEOUT                                           = 221
     WRITE_CONFIG_RETURNED_OK                                                    = 222
     WRITE_CONFIG_RETURNED_NOK                                                   = 223
-                                                                                
+
     CHECK_CHECKSUM_CONFIG                                                       = 230
     CHECK_CHECKSUM_CONFIG_RECEIVE_DATA_TIMEOUT                                  = 231
     CHECK_CHECKSUM_CONFIG_RETURNED_OK                                           = 232
     CHECK_CHECKSUM_CONFIG_RETURNED_NOK                                          = 233
+    
+    RESET_SLAVE                                                                 = 240
+    RESET_SLAVE_DATA_TIMEOUT                                                    = 241
+    RESET_SLAVE_OK                                                              = 242
+    RESET_SLAVE_NOK                                                             = 243    
 
 #class Enum
     MODBUS                              				        = 0xFF

@@ -600,6 +600,116 @@ uint32_t CHECKxCHECKSUM(uint16_t flash_bootloader_offset, uint16_t flash_end_add
 }
 
 /*#--------------------------------------------------------------------------#*/
+/*  Description: uint8_t RESETxSLAVE()
+ *
+ *  Input(s)   :
+ *
+ *  Output(s)  :
+ *
+ *  Returns    :
+ *
+ *  Pre.Cond.  :
+ *
+ *  Post.Cond. :
+ *
+ *  Notes      :
+ */
+/*#--------------------------------------------------------------------------#*/
+
+uint32_t RESETxSLAVE(){
+    uint32_t return_val = BUSY;
+    
+    switch(btldrData.sequence){
+        case 0:
+        {
+            btldrDataSend.bootloader_start_byte = 0x55;
+            btldrDataSend.command               = (uint8_t)CMD_RESET_DEVICE;
+            btldrDataSend.data_length_high      = 0x00;
+            btldrDataSend.data_length_low       = 0x00;
+            btldrDataSend.unlock_hgh            = 0x00;
+            btldrDataSend.unlock_low            = 0x00;
+            btldrDataSend.address_low           = 0x00;
+            btldrDataSend.address_hgh           = 0x00;
+            btldrDataSend.address_upp           = 0x00;
+            btldrDataSend.address_ext           = 0x00;
+
+            SendDataToBootloader((BTDR_SEND_DATA_FORMAT *)&btldrDataSend);
+            DelayCount                          = READxCORExTIMER();
+            btldrData.sequence++;
+            break;
+        }
+        
+        case 1:
+        {
+            if(btldrData.btldr_datacount > 10){
+                if(btldrDataReceive.bootloader_start_byte == 0x55){
+                    if(btldrDataReceive.status[0] == 1){
+                        CREATExTASKxSTATUSxMESSAGE(
+                            RESET_SLAVE,                                        // TASK_ID
+                            RESET_SLAVE_OK,                                     // TASK_COMMAND
+                            DONE,                                               // TASK_STATE
+                            NONE);                                              // TASK_MESSAGE
+                        SYS_MESSAGE("Fw handler\t: RESET_SLAVE RESET_SLAVE_OK.\n\r");
+                        return_val          = DONE;
+                    }
+                    else{
+                        CREATExTASKxSTATUSxMESSAGE(
+                            RESET_SLAVE,                                        // TASK_ID
+                            RESET_SLAVE_NOK,                                    // TASK_COMMAND
+                            ERROR,                                              // TASK_STATE
+                            NONE);                                              // TASK_MESSAGE
+                        SYS_MESSAGE("Fw handler\t: RESET_SLAVE RESET_SLAVE_NOK.\n\r");
+                    return_val              = ERROR;
+                    }
+                }
+                else{
+                    CREATExTASKxSTATUSxMESSAGE(
+                        RESET_SLAVE,                                            // TASK_ID
+                        BOOTLOADER_START_BYTE_ERROR,                            // TASK_COMMAND
+                        ERROR,                                                  // TASK_STATE
+                        NONE);                                                  // TASK_MESSAGE
+                    SYS_MESSAGE("Fw handler\t: RESET_SLAVE BOOTLOADER_START_BYTE_ERROR.\n\r");
+                    return_val              = ERROR;
+                }
+                ClearOldBtldrData();
+                ClearOldBtldrReceiveData();
+            }
+            else if(btldrData.btldr_receive_error){
+                CREATExTASKxSTATUSxMESSAGE(
+                    RESET_SLAVE,                                                // TASK_ID
+                    BOOTLOADER_DATA_RECEIVE_ERROR,                              // TASK_COMMAND
+                    ERROR,                                                      // TASK_STATE
+                    NONE);                                                      // TASK_MESSAGE
+                SYS_MESSAGE("Fw handler\t: RESET_SLAVE BOOTLOADER_DATA_RECEIVE_ERROR.\n\r");
+                return_val                  = ERROR;
+                ClearOldBtldrData();
+                ClearOldBtldrReceiveData();
+            }
+            else if((READxCORExTIMER() - DelayCount) > (100 * MILISECONDS)){
+                CREATExTASKxSTATUSxMESSAGE(
+                    RESET_SLAVE,                                                // TASK_ID
+                    RESET_SLAVE_DATA_TIMEOUT,                                   // TASK_COMMAND
+                    ERROR,                                                      // TASK_STATE
+                    NONE);                                                      // TASK_MESSAGE
+                SYS_MESSAGE("Fw handler\t: RESET_SLAVE RESET_SLAVE_DATA_TIMEOUT.\n\r");
+                return_val                  = ERROR;
+                ClearOldBtldrData();
+                ClearOldBtldrReceiveData();
+            }
+            break;
+        }
+        
+        default:
+        {
+            btldrData.sequence = 0;
+            break;
+        }
+    }
+    
+    return (return_val);
+}
+
+/*#--------------------------------------------------------------------------#*/
 /*  Description: bool SendDataToBootloader(uint8_t *data, uint8_t Length)
  *
  *  Input(s)   : 
@@ -626,7 +736,8 @@ bool SendDataToBootloader(BTDR_SEND_DATA_FORMAT *btldrDataSend)
        btldrDataSend->command == CMD_ERASE_FLASH   || 
        btldrDataSend->command == CMD_READ_EE_DATA  || 
        btldrDataSend->command == CMD_READ_CONFIG   || 
-       btldrDataSend->command == CMD_CALC_CHECKSUM
+       btldrDataSend->command == CMD_CALC_CHECKSUM ||
+       btldrDataSend->command == CMD_RESET_DEVICE
        ){
         Length = 10;
     }
