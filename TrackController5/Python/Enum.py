@@ -55,7 +55,8 @@ class EnumCommand:
     EXEC_FW_STATE_WRITE_FLASH            					= 126
     EXEC_FW_STATE_WRITE_CONFIG            					= 127
     EXEC_FW_STATE_CHECK_CHECKSUM            					= 128
-    EXEC_FW_STATE_DESELECT_SLAVE                                                = 129
+    EXEC_FW_STATE_SLAVE_RESET                                                   = 129
+    EXIT_SLAVExFWxHANDLER                                                       = 130
     		
     #/* FWFILEDOWNLOAD COMMANDS */		
     FILEDOWNLOAD_STATE_RECEIVE_FW_FILE_STANDBY					= 140

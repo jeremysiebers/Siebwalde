@@ -227,8 +227,9 @@ void MBUS_Tasks ( void )
 
             actualFrequency = DRV_TMR_CounterFrequencyGet(mbusData.ModbusCommCycleHandle);
             divider = actualFrequency/(uint32_t)832; // cacluate divider value
-            //DRV_TMR_AlarmRegister(mbusData.ModbusCommCycleHandle, 394,true, (uintptr_t)&mbusData, mbusData.ModbusCommCycleCallBack);
-            if (DRV_TMR_AlarmRegister(mbusData.ModbusCommCycleHandle, 394,true, 0, ModbusCommCycleCallBack) == true){
+//            SYS_PRINT("Mbus handler\t: ModbusCommCycleHandle divider is %d.\r\n", divider);
+//            if (DRV_TMR_AlarmRegister(mbusData.ModbusCommCycleHandle, 394,true, 0, ModbusCommCycleCallBack) == true){
+            if (DRV_TMR_AlarmRegister(mbusData.ModbusCommCycleHandle, divider,true, 0, ModbusCommCycleCallBack) == true){
                 _nop();
                 
             }
@@ -238,7 +239,9 @@ void MBUS_Tasks ( void )
 
             actualFrequency = DRV_TMR_CounterFrequencyGet(mbusData.ModbusCharacterTimeoutHandle);
             divider = actualFrequency/(uint32_t)41015; // cacluate divider value
-            if (DRV_TMR_AlarmRegister(mbusData.ModbusCharacterTimeoutHandle, 8,true, 0, ModbusCharacterTimeoutCallBack) == true){
+//            SYS_PRINT("Mbus handler\t: ModbusCharacterTimeoutHandle divider is %d.\r\n", divider);
+//            if (DRV_TMR_AlarmRegister(mbusData.ModbusCharacterTimeoutHandle, 8,true, 0, ModbusCharacterTimeoutCallBack) == true){
+            if (DRV_TMR_AlarmRegister(mbusData.ModbusCharacterTimeoutHandle, divider,true, 0, ModbusCharacterTimeoutCallBack) == true){
                 _nop();
                 
             }
@@ -248,7 +251,9 @@ void MBUS_Tasks ( void )
 
             actualFrequency = DRV_TMR_CounterFrequencyGet(mbusData.ModbusReceiveTimeoutHandle);
             divider = actualFrequency/(uint32_t)4002; // cacluate divider value
-            if (DRV_TMR_AlarmRegister(mbusData.ModbusReceiveTimeoutHandle, 82,true, 0, ModbusReceiveTimeoutCallBack) == true){
+//            SYS_PRINT("Mbus handler\t: ModbusReceiveTimeoutHandle divider is %d.\r\n", divider);
+//            if (DRV_TMR_AlarmRegister(mbusData.ModbusReceiveTimeoutHandle, 82,true, 0, ModbusReceiveTimeoutCallBack) == true){
+            if (DRV_TMR_AlarmRegister(mbusData.ModbusReceiveTimeoutHandle, divider,true, 0, ModbusReceiveTimeoutCallBack) == true){
                 _nop();
                 
             }

@@ -167,9 +167,6 @@ void ETHERNET_Initialize ( void )
     M_Box_Eth_Send_Ptr      = &udpTransBox[0];
     /* For external use to set new data to be send from send mailbox*/
     M_Box_Eth_Send_Ptr_prev = &udpTransBox[0];
-    
-    SYS_MESSAGE("\033[2J\033[1;1H");//clear terminal
-    SYS_MESSAGE("Starting Siebwalde TrackController...\n\r");
 }
 
 

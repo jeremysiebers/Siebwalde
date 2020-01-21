@@ -126,6 +126,10 @@ void CONTROLLER_Initialize ( void )
     /* TODO: Initialize your application's state machine and other
      * parameters.
      */
+    SYS_MESSAGE("\033[2J\033[1;1H");//clear terminal
+    SYS_MESSAGE("---------------------------------------------------------------------------------\n\r");    
+    SYS_MESSAGE("Controller\t: Starting Siebwalde TrackController.\n\r");
+    SYS_MESSAGE("Controller\t: Application created " __DATE__ " " __TIME__ ".\n\r");
 }
 
 

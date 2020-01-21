@@ -15,7 +15,6 @@ uint32_t        ConfigWordDownload  (void);
 uint32_t        FlashAllSlavesAuto  (void);
 uint32_t        FlashSequencer      (uint8_t SlaveId);
 uint32_t        SelectSlave         (uint8_t SlaveId);
-uint32_t        DeselectSlave       (uint8_t SlaveId);
 
 static uint8_t      FwFile[SLAVE_FLASH_SIZE];                                   //[30720];
 static uint8_t      FwConfigWord[14];
@@ -94,8 +93,7 @@ bool SLAVExFWxHANDLER(){
                     fwData.command  = EthernetRecvData->command;
                     fwData.data     = EthernetRecvData->data[0];
                 }
-                else{
-                    
+                else{                    
                     fwData.state = FW_STATE_WAITING_FOR_COMMAND;
                     SYS_MESSAGE("Fw handler\t: received wrong HEADER, stay in wait state.\n\r");
                     CREATExTASKxSTATUSxMESSAGE(
@@ -169,6 +167,7 @@ bool SLAVExFWxHANDLER(){
                     result = FlashAllSlavesAuto();
                     switch (result){
                         case DONE:  fwData.state = FW_STATE_INIT;
+                                    fwData.SlaveBootloaderHandlingActive = false;
                                     CREATExTASKxSTATUSxMESSAGE(
                                         FWHANDLER,                              // TASK_ID
                                         EXEC_FW_STATE_FLASH_ALL_SLAVES,        // TASK_COMMAND
@@ -216,18 +215,21 @@ bool SLAVExFWxHANDLER(){
                 
                 case EXEC_FW_STATE_GET_BOOTLOADER_VERSION:
                 {
+                    fwData.SlaveBootloaderHandlingActive = true;                // disable modbus
                     result = GETxBOOTxLOADERxVERSION();
                     switch (result){
                         case DONE:
                         {
                             SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_GET_BOOTLOADER_VERSION DONE.\n\r");
                             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
+                            fwData.SlaveBootloaderHandlingActive = false;        // enable modbus
                             break;
                         }
                         case ERROR: 
                         {
                             SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_GET_BOOTLOADER_VERSION ERROR.\n\r");
                             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
+                            fwData.SlaveBootloaderHandlingActive = false;        // enable modbus
                             break;
                         }
                         case BUSY : {break;}
@@ -238,18 +240,21 @@ bool SLAVExFWxHANDLER(){
                 
                 case EXEC_FW_STATE_ERASE_FLASH:
                 {
+                    fwData.SlaveBootloaderHandlingActive = true;                // disable modbus
                     result = ERASExFLASH(SLAVE_BOOT_LOADER_OFFSET, SLAVE_FLASH_END);
                     switch (result){
                         case DONE:
                         {
                             SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_ERASE_FLASH DONE.\n\r");
                             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
+                            fwData.SlaveBootloaderHandlingActive = false;        // enable modbus
                             break;
                         }
                         case ERROR: 
                         {
                             SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_ERASE_FLASH ERROR.\n\r");
                             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
+                            fwData.SlaveBootloaderHandlingActive = false;        // enable modbus
                             break;
                         }
                         case BUSY : {break;}
@@ -260,18 +265,21 @@ bool SLAVExFWxHANDLER(){
                 
                 case EXEC_FW_STATE_WRITE_FLASH:
                 {
+                    fwData.SlaveBootloaderHandlingActive = true;                // disable modbus
                     result = WRITExFLASH(SLAVE_BOOT_LOADER_OFFSET, SLAVE_FLASH_END, &FwFile[0]);
                     switch (result){
                         case DONE:
                         {
                             SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_WRITE_FLASH DONE.\n\r");
                             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
+                            fwData.SlaveBootloaderHandlingActive = false;        // enable modbus
                             break;
                         }
                         case ERROR: 
                         {
                             SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_WRITE_FLASH ERROR.\n\r");
                             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
+                            fwData.SlaveBootloaderHandlingActive = false;        // enable modbus
                             break;
                         }
                         case BUSY : {break;}
@@ -282,18 +290,21 @@ bool SLAVExFWxHANDLER(){
                 
                 case EXEC_FW_STATE_WRITE_CONFIG:
                 {
+                    fwData.SlaveBootloaderHandlingActive = true;                // disable modbus
                     result = WRITExCONFIG(&FwConfigWord[0]);
                     switch (result){
                         case DONE:
                         {
                             SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_WRITE_CONFIG DONE.\n\r");
                             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
+                            fwData.SlaveBootloaderHandlingActive = false;        // enable modbus
                             break;
                         }
                         case ERROR: 
                         {
                             SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_WRITE_CONFIG ERROR.\n\r");
                             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
+                            fwData.SlaveBootloaderHandlingActive = false;        // enable modbus
                             break;
                         }
                         case BUSY : {break;}
@@ -304,18 +315,21 @@ bool SLAVExFWxHANDLER(){
                 
                 case EXEC_FW_STATE_CHECK_CHECKSUM:
                 {
+                    fwData.SlaveBootloaderHandlingActive = true;                // disable modbus
                     result = CHECKxCHECKSUM(SLAVE_BOOT_LOADER_OFFSET, SLAVE_FLASH_END, checksum);
                     switch (result){
                         case DONE:
                         {
                             SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_CHECK_CHECKSUM DONE.\n\r");
                             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
+                            fwData.SlaveBootloaderHandlingActive = false;        // enable modbus
                             break;
                         }
                         case ERROR: 
                         {
                             SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_CHECK_CHECKSUM ERROR.\n\r");
                             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
+                            fwData.SlaveBootloaderHandlingActive = false;        // enable modbus
                             break;
                         }
                         case BUSY : {break;}
@@ -324,30 +338,42 @@ bool SLAVExFWxHANDLER(){
                     break;
                 }
                 
-                case EXEC_FW_STATE_DESELECT_SLAVE:
+                case EXEC_FW_STATE_SLAVE_RESET:
                 {
-                    result = DeselectSlave(fwData.data);
+                    fwData.SlaveBootloaderHandlingActive = true;                // disable modbus
+                    result = RESETxSLAVE();
                     switch (result){
                         case DONE:
                         {
-                            SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_DESELECT_SLAVE DONE.\n\r");
+                            SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_SLAVE_RESET DONE.\n\r");
                             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
+                            fwData.SlaveBootloaderHandlingActive = false;        // enable modbus
                             break;
                         }
                         case ERROR: 
                         {
-                            SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_DESELECT_SLAVE ERROR.\n\r");
+                            SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_SLAVE_RESET ERROR.\n\r");
                             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
+                            fwData.SlaveBootloaderHandlingActive = false;        // enable modbus
                             break;
                         }
                         case BUSY : {break;}
-                        default   : {SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_DESELECT_SLAVE default case not allowed.\n\r");}
+                        default   : {SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_SLAVE_RESET default case not allowed.\n\r");}
                     }
+                    break;
+                }
+                
+                case EXIT_SLAVExFWxHANDLER:
+                {
+                    fwData.SlaveBootloaderHandlingActive = false;               // enable modbus
+                    fwData.state = FW_STATE_INIT;
+                    return_val = true;
                     break;
                 }
                                 
                 case CLIENT_CONNECTION_REQUEST:
-                {                    
+                {
+                    fwData.SlaveBootloaderHandlingActive = false;               // enable modbus                    
                     fwData.state = FW_STATE_INIT;
                     return_val = true;
                     break;
@@ -753,27 +779,6 @@ uint32_t FlashSequencer(uint8_t Slave){
         BackplaneId = 55;}
     
     switch(iFlashSequencer){
-        case 0:
-        {
-            Slaves_Disable_On();
-            DelayCount1 = READxCORExTIMER();
-            iFlashSequencer = 1;
-            break;
-        }
-        
-        case 1:
-        {
-            DelayCount2 = READxCORExTIMER();
-            if((DelayCount2 - DelayCount1) > (100 * MILISECONDS)){
-                iFlashSequencer = 2;
-            }
-            else if((DelayCount1 > DelayCount2) && ((0xFFFFFFFF - DelayCount1 + DelayCount2) > (100 * MILISECONDS) )){
-                iFlashSequencer = 2;
-                SYS_MESSAGE("Fw handler\t: overflow READxCORExTIMER() detected");
-            }
-            break;
-        }
-        
         case 2:
         {
             Slaves_Disable_Off();
@@ -1059,7 +1064,7 @@ uint32_t FlashSequencer(uint8_t Slave){
  *  Notes      :  
  */
 /*#--------------------------------------------------------------------------#*/
-static uint8_t  iSelectSlaveSequencer = 4;
+static uint8_t  iSelectSlaveSequencer = 0;
 
 uint32_t        SelectSlave         (uint8_t SlaveId){
     uint32_t    return_val  = BUSY;
@@ -1094,7 +1099,7 @@ uint32_t        SelectSlave         (uint8_t SlaveId){
     switch(iSelectSlaveSequencer){
         case 0:
         {
-            Slaves_Disable_On();
+            Slaves_Disable_Off();
             DelayCount1 = READxCORExTIMER();
             iSelectSlaveSequencer = 1;
             break;
@@ -1102,59 +1107,51 @@ uint32_t        SelectSlave         (uint8_t SlaveId){
         
         case 1:
         {
-            if((READxCORExTIMER() - DelayCount1) > (10 * MILISECONDS)){
+            DelayCount2 = READxCORExTIMER();
+            if((DelayCount2 - DelayCount1) > (10 * MILISECONDS)){
                 iSelectSlaveSequencer = 2;
+            }
+            else if((DelayCount1 > DelayCount2) && ((0xFFFFFFFF - DelayCount1 + DelayCount2) > (10 * MILISECONDS) )){
+                iSelectSlaveSequencer = 2;
+                SYS_MESSAGE("Fw handler\t: overflow READxCORExTIMER() detected");
             }  
             break;
         }
         
-        case 2:
-        {
-            Slaves_Disable_Off();
-            DelayCount1 = READxCORExTIMER();
-            iSelectSlaveSequencer = 3;
-            break;
-        }
-        
-        case 3:
-        {
-            if((READxCORExTIMER() - DelayCount1) > (5 * MILISECONDS)){
-                iSelectSlaveSequencer = 4;
-            }  
-            break;
-        }
-        
-        case 4:                                                                 // select first a slave amplifier by selecting one via a backplane slave
-        {
+        case 2:                                                                 // select first a slave amplifier by selecting one via a backplane slave
+        {            
+            fwData.SlaveBootloaderHandlingActive = false;
             Data.SlaveAddress  = BackplaneId;
             Data.Direction     = WRITE;
             Data.NoOfRegisters = 1;
             Data.StartRegister = HOLDINGREG0;
             Data.RegData0      = (SLOT1 << ShiftSlot1);
-            SLAVExCOMMUNICATIONxHANDLER();           
+            SLAVExCOMMUNICATIONxHANDLER();
+            iSelectSlaveSequencer = 3;            
+            break;
+        }
+        
+        /* Verify communication was OK with backplane, if not flag backplane 
+           SlaveDetected to false to indicate backplane comm error */
+        case 3:
+            switch(CHECKxMODBUSxCOMMxSTATUS(BackplaneId, false)){               // --> do not overwrite otherwise diagnostics are gone
+                case SLAVEOK:  
+                    GoToCase        = 4;//iFlashSequencer + 1;
+                    iSelectSlaveSequencer = WAIT;
+                    DelayCount1 = READxCORExTIMER();
+                    break;                    
+                case SLAVENOK: 
+                    SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_SELECT_SLAVE SLAVENOK returned in case 3.\n\r");
+                    iSelectSlaveSequencer = 0;
+                    return_val = ERROR;
+                    break;
+                case SLAVEBUSY: break;
+                default : break;
+            }
             DelayCount1 = READxCORExTIMER();
-            iSelectSlaveSequencer++;
             break;
-        }
         
-        /* Verify communication was OK with backplane --> due to reset of all 
-         * slaves the rx line is hampered and the feedback of modbus from the 
-         * backplane slave is missed, therefore for now selecting a slave for
-         * bootloader is done blind. To solve this, the routine has to be 
-         * executed without resetting all slaves but a slave has to be commanded
-         * to reset itself by SW reset in order to invoke the bootloader. */
-        
-        case 5:
-        {
-            if((READxCORExTIMER() - DelayCount1) > (10 * MILISECONDS)){
-                iSelectSlaveSequencer++;
-                //fwData.SlaveBootloaderHandlingActive = true;
-                MASTER_SLAVE_DATA[BackplaneId].MbCommError = SLAVE_DATA_OK;     // since the slave answer is lost???
-            }            
-            break;
-        }
-        
-        case 6:
+        case 4:
         {
             /* Writing the read checksum to 0 will call a reset on the slave, 
              * since we already selected it, it will instantly go into bootloader :-) 
@@ -1162,103 +1159,85 @@ uint32_t        SelectSlave         (uint8_t SlaveId){
             Data.SlaveAddress  = SLAVE_INITIAL_ADDR;
             Data.Direction     = WRITE;
             Data.NoOfRegisters = 1;
-            Data.StartRegister = HOLDINGREG11;
+            Data.StartRegister = HOLDINGREG11;                                  
             Data.RegData0      = 0;
             SLAVExCOMMUNICATIONxHANDLER();
+            iSelectSlaveSequencer = 5;
+            break;
+        }
+        
+        case 5:
+            switch(CHECKxMODBUSxCOMMxSTATUS(SLAVE_INITIAL_ADDR, false)){
+                case SLAVEOK:
+                    GoToCase        = 6;//iFlashSequencer + 1;
+                    iSelectSlaveSequencer = WAIT;
+                    DelayCount1 = READxCORExTIMER();
+                    break;                    
+                case SLAVENOK: 
+                    SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_SELECT_SLAVE SLAVENOK returned in case 5.\n\r");
+                    iSelectSlaveSequencer = 0;
+                    return_val = ERROR;
+                    break;
+                case SLAVEBUSY: break;
+                default : break;
+            }
             DelayCount1 = READxCORExTIMER();
-            iSelectSlaveSequencer++;
             break;
-        }
         
-        case 7:
-        {
-            if((READxCORExTIMER() - DelayCount1) > (10 * MILISECONDS)){
-                iSelectSlaveSequencer = 4;
-                fwData.SlaveBootloaderHandlingActive = true;                
-            }            
-            break;
-        }
-        
-        default: 
-        {
-            iSelectSlaveSequencer = 4;
-            break;
-        }
-    }
-    return (return_val);
-}
-
-/*#--------------------------------------------------------------------------#*/
-/*  Description: uint32_t        DeselectSlave       ()
- *
- *  Input(s)   : 
- *
- *  Output(s)  : 
- *
- *  Returns    : Init done
- *
- *  Pre.Cond.  : 
- *
- *  Post.Cond. :
- *
- *  Notes      :  
- */
-/*#--------------------------------------------------------------------------#*/
-static uint8_t  iDeselectSlaveSequencer = 0;
-
-uint32_t        DeselectSlave       (uint8_t SlaveId){
-    uint32_t    return_val  = BUSY;
-    uint8_t     BackplaneId = 0;
-    
-    if(     SlaveId > 0  && SlaveId < 11){
-        BackplaneId = 51;}
-    else if(SlaveId > 10 && SlaveId < 21){
-        BackplaneId = 52;}
-    else if(SlaveId > 20 && SlaveId < 31){
-        BackplaneId = 53;}
-    else if(SlaveId > 30 && SlaveId < 41){
-        BackplaneId = 54;}
-    else if(SlaveId > 40 && SlaveId < 51){
-        BackplaneId = 55;}
-    else{
-        CREATExTASKxSTATUSxMESSAGE(                
-                FWHANDLER,                                                      // TASK_ID
-                EXEC_FW_STATE_DESELECT_SLAVE,                                   // TASK_COMMAND
-                ERROR,                                                          // TASK_STATE
-                SLAVE_ID_OUT_OF_BOUNDS);                                        // TASK_MESSAGE
-        SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_DESELECT_SLAVE SLAVE_ID_OUT_OF_BOUNDS ERROR.\n\r");
-        return (ERROR);
-    }
-    
-    switch(iDeselectSlaveSequencer){
-        case 0:
-        {
-            fwData.SlaveBootloaderHandlingActive = false;
-            
+        case 6:
+		{
+            /* Let the slave select go already, so that after e reset is send to 
+             * the slave, it will not go into bootloader again! 
+             */
             Data.SlaveAddress  = BackplaneId;
             Data.Direction     = WRITE;
             Data.NoOfRegisters = 1;
             Data.StartRegister = HOLDINGREG0;
             Data.RegData0      = 0;
-            SLAVExCOMMUNICATIONxHANDLER();          
-            DelayCount1 = READxCORExTIMER();
-            iDeselectSlaveSequencer++;
+            SLAVExCOMMUNICATIONxHANDLER();
+            iSelectSlaveSequencer = 7;
             break;
-        }
+		}
 		
-		case 1:
+        /* Verify communication was OK with backplane, if not flag backplane 
+           SlaveDetected to false to indicate backplane comm error */
+        case 7:
+            switch(CHECKxMODBUSxCOMMxSTATUS(BackplaneId, false)){               // --> do not overwrite otherwise diagnostics are gone
+                case SLAVEOK:  
+                    GoToCase        = 8;//iSelectSlaveSequencer + 1;
+                    iSelectSlaveSequencer = WAIT;
+                    DelayCount1 = READxCORExTIMER();
+                    break;                    
+                case SLAVENOK:
+                    SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_SELECT_SLAVE SLAVENOK returned in case 7.\n\r");
+                    return_val = ERROR;
+                    iSelectSlaveSequencer = 0;
+                    break;
+                case SLAVEBUSY: break;
+                default : break;
+            }
+            break;
+        
+        case 8:
         {
-            if((READxCORExTIMER() - DelayCount1) > (10 * MILISECONDS)){
-                MASTER_SLAVE_DATA[BackplaneId].MbCommError = SLAVE_DATA_OK;     // since the slave answer is lost???
-                iDeselectSlaveSequencer = 0;
-                return_val = DONE;
-            }            
+            return_val = DONE;
+            iSelectSlaveSequencer = 0;
             break;
         }
-        
-        default:
+            
+        case WAIT:
+        DelayCount2 = READxCORExTIMER();
+        if((DelayCount2 - DelayCount1) > (WAIT_TIME1 * MILISECONDS)){
+            iSelectSlaveSequencer = GoToCase;
+        }
+        else if((DelayCount1 > DelayCount2) && ((0xFFFFFFFF - DelayCount1 + DelayCount2) > (WAIT_TIME1 * MILISECONDS) )){
+            iSelectSlaveSequencer = GoToCase;               
+        }
+        break;
+            
+        default: 
         {
-            iDeselectSlaveSequencer = 0;
+            iSelectSlaveSequencer = 0;
             break;
         }
     }

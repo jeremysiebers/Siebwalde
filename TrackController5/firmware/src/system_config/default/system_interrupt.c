@@ -115,6 +115,14 @@ void __ISR(_UART2_RX_VECTOR, ipl1AUTO) _IntHandlerDrvUsartReceiveInstance1(void)
 }
 void __ISR(_UART2_FAULT_VECTOR, ipl1AUTO) _IntHandlerDrvUsartErrorInstance1(void)
 {
+    if(PLIB_USART_ReceiverFramingErrorHasOccurred(USART_ID_2)){
+        SYS_MESSAGE("UART2_FAULT_VECTOR\t: PLIB_USART_ReceiverFramingErrorHasOccurred.\n\r");
+    }
+    if(PLIB_USART_ReceiverOverrunHasOccurred(USART_ID_2))
+    {
+        PLIB_USART_ReceiverOverrunErrorClear(USART_ID_2);
+        SYS_MESSAGE("UART2_FAULT_VECTOR\t: PLIB_USART_ReceiverOverrunHasOccurred.\n\r");
+    }
     DRV_USART_TasksError(sysObj.drvUsart1);
 }
  
