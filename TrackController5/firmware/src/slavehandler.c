@@ -12,23 +12,27 @@
 #include <stdlib.h>
 #include "slavecommhandler.h"
 
-enum SLAVE{
-    MAILBOX_SIZE = 4,                                                           // How many messages are non-critical    
-    MESSAGE1 = 1,
-    MESSAGE2 = 2,
-    MESSAGE3 = 3,
-    MESSAGE4 = 4,
-};
-/*
-#define MAILBOX_SIZE 4                                                          // How many messages are non-critical
-#define BROADCAST_ADDRESS 0
-#define MESSAGE1 1
-#define MESSAGE2 2
-#define MESSAGE3 3
-#define MESSAGE4 4
-*/
+#define MAILBOXRCD 100
 
-void SendNextMessage(void);
+enum SLAVE{
+    
+    MESSAGEBOXSIZE  = 3,
+    MESSAGE1        = 1,
+    MESSAGE2        = 2,
+    MESSAGE3        = 3,
+    
+    SIPBOXSIZE      = 4,                                                        // How many messages are non-critical
+    SIP1            = 1,
+    SIP2            = 2,
+    SIP3            = 3,
+    SIP4            = 4,    
+};
+
+static REGISTER_PROCESSING          Rcd[MAILBOXRCD];                            // message mailbox
+static REGISTER_PROCESSING          *Rcd_Ptr;                                   // points to actual mailbox location that is filled
+static REGISTER_PROCESSING          *Rcd_Ptr_prev;                              // points to last read out mailbox location
+
+bool SendNextMessage(void);
 
 /*#--------------------------------------------------------------------------#*/
 /*  Description: INITxSLAVExHANDLER(SLAVE_INFO *location)
@@ -52,6 +56,9 @@ static SLAVE_INFO *DUMP_SLAVE_DATA   = 0;                                       
 void INITxSLAVExHANDLER(SLAVE_INFO *location, SLAVE_INFO *Dump){
     MASTER_SLAVE_DATA  =  location;
     DUMP_SLAVE_DATA    =  Dump;
+    
+    Rcd_Ptr         = &Rcd[0];
+    Rcd_Ptr_prev    = &Rcd[0];
 }
 
 /*#--------------------------------------------------------------------------#*/
@@ -63,49 +70,195 @@ void INITxSLAVExHANDLER(SLAVE_INFO *location, SLAVE_INFO *Dump){
  *
  *  Returns    :
  *
- *  Pre.Cond.  :
+ *  Pre.Cond.  : called every Modbus update cycle
  *
  *  Post.Cond. :
  *
  *  Notes      : Handles communication message to all slaves
  */
 /*#--------------------------------------------------------------------------#*/
-static uint8_t      ProcessSlave = 1;
-static uint8_t      State = 0;
-static uint8_t      loopcount = 0;
+static uint8_t      ProcessSlave        = 0;
+static uint8_t      State               = 0;
+static uint8_t      loopcount           = 0;
+static uint8_t      SlaveInfoProcessor  = 1;
+static uint8_t      Message             = MESSAGE1;
 
 bool PROCESSxNEXTxSLAVE(){    
     
-    bool return_Val = false;
+    bool return_val = false;
     
     switch (State){
         case 0:
+            /* Scan trough all the slaves until a detected slave is found,
+             * the Master is always found and signals that all slaves
+             * were checked. */
             while (MASTER_SLAVE_DATA[ProcessSlave].SlaveDetected == false){
-                ProcessSlave++; 
+                ProcessSlave++;
+                /* when the current slave to be precessed is outside the no of
+                 * amplifiers, start over with the Master again and increase
+                 * the Message and SlaveInfoProcessor. */
                 if (ProcessSlave > (NUMBER_OF_AMPLIFIERS)){
-                    ProcessSlave = 1;
-                    loopcount++;
-                }
-                if(loopcount > 2){
-                    loopcount = 0;
-                    ProcessSlave = 1;
-                    break;
+                    ProcessSlave = 0;
                 }
             }
             State++;            
             break;
             
         case 1:            
-            SendNextMessage();
-            ProcessSlave++;
-            State = 0;
-            return_Val = true;            
+            if(SendNextMessage()){
+                ProcessSlave++;
+                /* when the current slave to be precessed is outside the no of
+                 * amplifiers, start over with the Master again and increase
+                 * the Message and SlaveInfoProcessor. */
+                if (ProcessSlave > (NUMBER_OF_AMPLIFIERS)){
+                    ProcessSlave = 0;
+                    Message++;
+                    if (Message > MESSAGEBOXSIZE){
+                        Message = MESSAGE1;
+
+                        SlaveInfoProcessor++;
+                        if (SlaveInfoProcessor > SIPBOXSIZE){
+                            SlaveInfoProcessor = 1;
+                        }
+                    }
+                    break;
+//                    loopcount++;
+                }
+                State = 0;                
+            }
+            return_val = true;
             break;
             
         default :
+            State = 0;
             break;
     }     
-    return(return_Val);
+    return(return_val);
+}
+
+/*#--------------------------------------------------------------------------#*/
+/*  Description: SendNextMessage()
+ *
+ *  Input(s)   : 
+ *
+ *  Output(s)  :
+ *
+ *  Returns    :
+ *
+ *  Pre.Cond.  :
+ *
+ *  Post.Cond. :
+ *
+ *  Notes      : Keeps track of communication with a slave
+ */
+/*#--------------------------------------------------------------------------#*/
+//uint8_t HoldingRegistersRead [4] = {0, 0, 0, 0};                                // {start address High, start address Low, number of registers High, number of registers Low}
+//uint8_t HoldingRegistersWrite[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};                 // {start address High, start address Low, number of registers High, number of registers Low, 
+
+uint8_t MasterMessageCounter = 0;
+
+bool SendNextMessage(){
+    bool return_val = false;
+    
+    /* Messaged to be send to slaves */
+    if (ProcessSlave > 0){
+        switch (Message){
+            case MESSAGE1:
+                Data.SlaveAddress  = ProcessSlave;
+                Data.Direction     = WRITE;
+                Data.NoOfRegisters = 2;
+                Data.StartRegister = HOLDINGREG0;
+                Data.RegData0      = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[0];
+                Data.RegData1      = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[1];
+                SLAVExCOMMUNICATIONxHANDLER();
+                break;
+
+            case MESSAGE2:
+                Data.SlaveAddress  = ProcessSlave;
+                Data.Direction     = READ;
+                Data.NoOfRegisters = 2;
+                Data.StartRegister = HOLDINGREG2;
+                SLAVExCOMMUNICATIONxHANDLER();
+                break;
+
+            case MESSAGE3:
+                switch (SlaveInfoProcessor){
+                    case SIP1:
+                        Data.SlaveAddress  = ProcessSlave;
+                        Data.Direction     = WRITE;
+                        Data.NoOfRegisters = 2;
+                        Data.StartRegister = HOLDINGREG9;
+                        Data.RegData0      = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[9];
+                        Data.RegData1      = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[10];
+                        SLAVExCOMMUNICATIONxHANDLER();
+
+                    case SIP2:
+                        Data.SlaveAddress  = ProcessSlave;
+                        Data.Direction     = READ;
+                        Data.NoOfRegisters = 2;
+                        Data.StartRegister = HOLDINGREG4;
+                        SLAVExCOMMUNICATIONxHANDLER();
+                        break;
+
+                    case SIP3:
+                        Data.SlaveAddress  = ProcessSlave;
+                        Data.Direction     = READ;
+                        Data.NoOfRegisters = 2;
+                        Data.StartRegister = HOLDINGREG6;
+                        SLAVExCOMMUNICATIONxHANDLER(); 
+                        break;
+
+                    case SIP4:
+                        Data.SlaveAddress  = ProcessSlave;
+                        Data.Direction     = READ;
+                        Data.NoOfRegisters = 2;
+                        Data.StartRegister = HOLDINGREG8;
+                        SLAVExCOMMUNICATIONxHANDLER(); 
+                        break;
+
+                    default:
+                        break;                
+                }
+                break;
+
+            default :
+                break;
+        }
+        return_val = true;
+    }
+    /* Messages directly to the slaves from the PC.*/
+    else{
+        /* Next counter takes care that max number of messages sent by master does not
+         * exceed 50 like the normal message sequence 
+         */
+        MasterMessageCounter++;
+        if (MasterMessageCounter    > 50){
+            MasterMessageCounter    = 0;
+            return_val              = true;
+        }
+        else{
+            if (Rcd_Ptr_prev != Rcd_Ptr){
+                Rcd_Ptr_prev++;
+                if(Rcd_Ptr_prev >= &Rcd[MAILBOXRCD]){
+                    Rcd_Ptr_prev = &Rcd[0];
+                }
+                Data.SlaveAddress  = Rcd_Ptr_prev->SlaveAddress;
+                Data.Direction     = Rcd_Ptr_prev->Direction;
+                Data.NoOfRegisters = Rcd_Ptr_prev->NoOfRegisters;
+                Data.StartRegister = Rcd_Ptr_prev->StartRegister;
+                Data.RegData0      = Rcd_Ptr_prev->RegData0;
+                Data.RegData1      = Rcd_Ptr_prev->RegData1;
+                SLAVExCOMMUNICATIONxHANDLER();
+            }
+            else{
+                /* Stop the master processing as soon as there are no more
+                 * messages to be processed */
+                MasterMessageCounter    = 0;
+                return_val              = true;
+            }
+        }                  
+    }
+    return (return_val);        
 }
 
 /*#--------------------------------------------------------------------------#*/
@@ -149,7 +302,7 @@ bool PROCESSxSLAVExCOMMUNICATION(){
 }
 
 /*#--------------------------------------------------------------------------#*/
-/*  Description: SendNextMessage()
+/*  Description: ADDxNEWxSLAVExDATAxCMDxTOxMAILBOX(uint8_t *data)
  *
  *  Input(s)   : 
  *
@@ -161,139 +314,44 @@ bool PROCESSxSLAVExCOMMUNICATION(){
  *
  *  Post.Cond. :
  *
- *  Notes      : Keeps track of communication with a slave
+ *  Notes      : Stores messages into mailbox that have to go directly to slaves
  */
 /*#--------------------------------------------------------------------------#*/
-//uint8_t HoldingRegistersRead [4] = {0, 0, 0, 0};                                // {start address High, start address Low, number of registers High, number of registers Low}
-//uint8_t HoldingRegistersWrite[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};                 // {start address High, start address Low, number of registers High, number of registers Low, 
-                                                                                //  byte count, Register Value Hi, Register Value Lo, Register Value Hi, Register Value Lo} 
 
-static uint8_t Mailbox = 1;
-static uint8_t Message = MESSAGE1;
+static bool FirstMessage = true;
 
-void SendNextMessage(){
+void ADDxNEWxSLAVExDATAxCMDxTOxMAILBOX(uint8_t *data){    
     
-    if (ProcessSlave > (NUMBER_OF_AMPLIFIERS)){
-        ProcessSlave = 1;
+    if(FirstMessage == false && Rcd_Ptr == Rcd_Ptr_prev){
+    
+        CREATExTASKxSTATUSxMESSAGE(
+            MBUS,                                   // TASK_ID
+            EXEC_MBUS_SLAVE_DATA_EXCH,              // TASK_COMMAND
+            ERROR,                                  // TASK_STATE
+            MESSAGE_BUFFER_FULL);                   // TASK_MESSAGE
+        SYS_MESSAGE("Mbus handler\t: EXEC_MBUS_SLAVE_DATA_EXCH ERROR MESSAGE_BUFFER_FULL.\n\r");
+    }
+    else{
+        Rcd_Ptr->SlaveAddress   = data[0];
+        Rcd_Ptr->Direction      = data[1];
+        Rcd_Ptr->NoOfRegisters  = data[2];
+        Rcd_Ptr->StartRegister  = data[3];
+        Rcd_Ptr->RegData0       = data[4];
+        Rcd_Ptr->RegData1       = data[5];
 
-        Message++;
-        if (Message > MESSAGE3){
-            Message = MESSAGE1;
+        Rcd_Ptr++;
 
-            Mailbox++;
-            if (Mailbox > 4){
-                Mailbox = 1;
-            }
-        }                
+        if(Rcd_Ptr >= &Rcd[MAILBOXRCD]){
+            Rcd_Ptr = &Rcd[0];
+        }
+        
+        CREATExTASKxSTATUSxMESSAGE(
+            MBUS,                                   // TASK_ID
+            EXEC_MBUS_SLAVE_DATA_EXCH,              // TASK_COMMAND
+            DONE,                                   // TASK_STATE
+            NONE);                                  // TASK_MESSAGE
     }
     
-    switch (Message){
-        case MESSAGE1:
-            Data.SlaveAddress  = ProcessSlave;
-            Data.Direction     = WRITE;
-            Data.NoOfRegisters = 2;
-            Data.StartRegister = HOLDINGREG0;
-            Data.RegData0      = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[0];
-            Data.RegData1      = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[1];
-            SLAVExCOMMUNICATIONxHANDLER();            
-//            HoldingRegistersWrite[8]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[1];
-//            HoldingRegistersWrite[7]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[1] >> 8;
-//            HoldingRegistersWrite[6]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[0];
-//            HoldingRegistersWrite[5]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[0] >> 8;
-//            HoldingRegistersWrite[4]  = 4;
-//            HoldingRegistersWrite[3]  = 2;
-//            HoldingRegistersWrite[2]  = 0;
-//            HoldingRegistersWrite[1]  = 0;
-//            HoldingRegistersWrite[0]  = 0;
-//            SLAVExCOMMUNICATIONxHANDLER(ProcessSlave, HoldingReg0, Write, HoldingRegistersWrite, 9);
-            //SENDxPETITxMODBUS(ProcessSlave, PETITMODBUS_WRITE_MULTIPLE_REGISTERS, HoldingRegistersWrite, 9);
-            break;
-
-        case MESSAGE2:
-            Data.SlaveAddress  = ProcessSlave;
-            Data.Direction     = READ;
-            Data.NoOfRegisters = 2;
-            Data.StartRegister = HOLDINGREG2;
-            SLAVExCOMMUNICATIONxHANDLER();
-//            HoldingRegistersRead[3]  = 2;
-//            HoldingRegistersRead[2]  = 0;
-//            HoldingRegistersRead[1]  = 0;
-//            HoldingRegistersRead[0]  = 0;
-//            SLAVExCOMMUNICATIONxHANDLER(ProcessSlave, HoldingReg0, Read, HoldingRegistersRead, 4);
-            //SENDxPETITxMODBUS(ProcessSlave, PETITMODBUS_READ_HOLDING_REGISTERS, HoldingRegistersRead, 4);    
-            break;
-
-        case MESSAGE3:
-            switch (Mailbox){
-                case 1:
-                    Data.SlaveAddress  = ProcessSlave;
-                    Data.Direction     = WRITE;
-                    Data.NoOfRegisters = 2;
-                    Data.StartRegister = HOLDINGREG9;
-                    Data.RegData0      = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[9];
-                    Data.RegData1      = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[10];
-                    SLAVExCOMMUNICATIONxHANDLER();
-//                    HoldingRegistersWrite[8]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[3];
-//                    HoldingRegistersWrite[7]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[3] >> 8;
-//                    HoldingRegistersWrite[6]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[2];
-//                    HoldingRegistersWrite[5]  = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[2] >> 8;
-//                    HoldingRegistersWrite[4]  = 4;
-//                    HoldingRegistersWrite[3]  = 2;
-//                    HoldingRegistersWrite[2]  = 0;
-//                    HoldingRegistersWrite[1]  = 2;
-//                    HoldingRegistersWrite[0]  = 0;
-//                    SLAVExCOMMUNICATIONxHANDLER(ProcessSlave, HoldingReg0, Write, HoldingRegistersWrite, 9);
-                    //SENDxPETITxMODBUS(ProcessSlave, PETITMODBUS_WRITE_MULTIPLE_REGISTERS, HoldingRegistersWrite, 9);
-                    break;
-
-                case 2:
-                    Data.SlaveAddress  = ProcessSlave;
-                    Data.Direction     = READ;
-                    Data.NoOfRegisters = 2;
-                    Data.StartRegister = HOLDINGREG4;
-                    SLAVExCOMMUNICATIONxHANDLER();
-//                    HoldingRegistersRead[3]  = 2;
-//                    HoldingRegistersRead[2]  = 0;
-//                    HoldingRegistersRead[1]  = 0;
-//                    HoldingRegistersRead[0]  = 0;
-//                    SLAVExCOMMUNICATIONxHANDLER(ProcessSlave, HoldingReg0, Read, HoldingRegistersRead, 4);
-                    //SENDxPETITxMODBUS(ProcessSlave, PETITMODBUS_READ_HOLDING_REGISTERS, HoldingRegistersRead, 4);
-                    break;
-
-                case 3:
-                    Data.SlaveAddress  = ProcessSlave;
-                    Data.Direction     = READ;
-                    Data.NoOfRegisters = 2;
-                    Data.StartRegister = HOLDINGREG6;
-                    SLAVExCOMMUNICATIONxHANDLER();
-//                    HoldingRegistersRead[3]  = 2;
-//                    HoldingRegistersRead[2]  = 0;
-//                    HoldingRegistersRead[1]  = 2;
-//                    HoldingRegistersRead[0]  = 0;
-//                    SLAVExCOMMUNICATIONxHANDLER(ProcessSlave, HoldingReg0, Read, HoldingRegistersRead, 4);
-                    //SENDxPETITxMODBUS(ProcessSlave, PETITMODBUS_READ_HOLDING_REGISTERS, HoldingRegistersRead, 4);  
-                    break;
-
-                case 4:
-                    Data.SlaveAddress  = ProcessSlave;
-                    Data.Direction     = READ;
-                    Data.NoOfRegisters = 2;
-                    Data.StartRegister = HOLDINGREG8;
-                    SLAVExCOMMUNICATIONxHANDLER();
-//                    HoldingRegistersRead[3]  = 2;
-//                    HoldingRegistersRead[2]  = 0;
-//                    HoldingRegistersRead[1]  = 4;
-//                    HoldingRegistersRead[0]  = 0;
-//                    SLAVExCOMMUNICATIONxHANDLER(ProcessSlave, HoldingReg0, Read, HoldingRegistersRead, 4);
-//                    SENDxPETITxMODBUS(ProcessSlave, PETITMODBUS_READ_HOLDING_REGISTERS, HoldingRegistersRead, 4);  
-                    break;
-
-                default:
-                    break;                
-            }
-            break;
-
-        default :
-            break;
-    }
+    /* Only 1 time required to be true */
+    FirstMessage = false;
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Drawing;
+using System.Collections;
 
 namespace Siebwalde_Application
 {
@@ -335,7 +336,7 @@ namespace Siebwalde_Application
     }
 
 
-/*#--------------------------------------------------------------------------#*/
+    /*#--------------------------------------------------------------------------#*/
     /*  Description: Collor class interface 
      *               to push coller settings to Application
      *               
@@ -417,6 +418,180 @@ namespace Siebwalde_Application
                 this.m_color = NewColorValue;
                 m_OnChangedAction(this.m_color, this.LogString);
             }            
+        }
+
+    }
+
+    /*#--------------------------------------------------------------------------#*/
+    /*  Description: TrackAmplifier class interface 
+     *               to set TrackAmplifier info received from target
+     *               
+     *               
+     *
+     *  Input(s)   :
+     *
+     *  Output(s)  :
+     *
+     *  Returns    :
+     *
+     *  Pre.Cond.  :
+     *
+     *  Post.Cond. :
+     *
+     *  Notes      :
+     */
+    /*#--------------------------------------------------------------------------#*/
+    public abstract class FTrackAmplifier
+    {
+
+        public delegate void StatusUpdate(UInt16 MbHeader, UInt16 SlaveNumber, UInt16 SlaveDetected, UInt16[] HoldingReg,
+            UInt16 MbReceiveCounter, UInt16 MbSentCounter, UInt32 MbCommError, UInt16 MbExceptionCode,
+            UInt16 SpiCommErrorCounter, UInt16 MbFooter);
+        public event StatusUpdate OnStatusUpdate = null;
+
+
+        public void Attach(TrackAmplifier TrackAmplifierUpdate)
+        {
+            OnStatusUpdate += new StatusUpdate(TrackAmplifierUpdate.Update);
+        }
+
+        public void Detach(TrackAmplifier TrackAmplifierUpdate)
+        {
+            OnStatusUpdate -= new StatusUpdate(TrackAmplifierUpdate.Update);
+
+        }
+
+        public void Notify(UInt16 MbHeader, UInt16 SlaveNumber, UInt16 SlaveDetected, UInt16[] HoldingReg,
+            UInt16 MbReceiveCounter, UInt16 MbSentCounter, UInt32 MbCommError, UInt16 MbExceptionCode,
+            UInt16 SpiCommErrorCounter, UInt16 MbFooter)
+        {
+            if (OnStatusUpdate != null)
+            {
+                OnStatusUpdate(MbHeader, SlaveNumber, SlaveDetected, HoldingReg,
+            MbReceiveCounter, MbSentCounter, MbCommError, MbExceptionCode,
+            SpiCommErrorCounter, MbFooter);
+            }
+        }
+    }
+
+    public class TrackAmplifierUpdater : FTrackAmplifier
+    {
+        public void UpdateTrackAmplifier(UInt16 MbHeader, UInt16 SlaveNumber, UInt16 SlaveDetected, UInt16[] HoldingReg,
+            UInt16 MbReceiveCounter, UInt16 MbSentCounter, UInt32 MbCommError, UInt16 MbExceptionCode,
+            UInt16 SpiCommErrorCounter, UInt16 MbFooter)
+        {
+            Notify(MbHeader, SlaveNumber, SlaveDetected, HoldingReg,
+            MbReceiveCounter, MbSentCounter, MbCommError, MbExceptionCode,
+            SpiCommErrorCounter, MbFooter);
+        }
+    }
+
+    interface TrackAmplifierUpdate
+    {
+        void Update(UInt16 MbHeader, UInt16 SlaveNumber, UInt16 SlaveDetected, UInt16[] HoldingReg,
+            UInt16 MbReceiveCounter, UInt16 MbSentCounter, UInt32 MbCommError, UInt16 MbExceptionCode,
+            UInt16 SpiCommErrorCounter, UInt16 MbFooter);
+    }
+
+    public class TrackAmplifier : TrackAmplifierUpdate
+    {
+        UInt16 MbHeader;
+        UInt16 SlaveNumber;
+        UInt16 SlaveDetected;
+        UInt16[] HoldingReg = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, };
+        UInt16 MbReceiveCounter;
+        UInt16 MbSentCounter;
+        UInt32 MbCommError;
+        UInt16 MbExceptionCode;
+        UInt16 SpiCommErrorCounter;
+        UInt16 MbFooter;
+
+        //When variable has changed generate an event
+        Action<UInt16, UInt16, UInt16, UInt16[], UInt16, UInt16, UInt32, UInt16, UInt16, UInt16> m_OnChangedAction;
+
+        public TrackAmplifier(UInt16 MbHeader, UInt16 SlaveNumber, UInt16 SlaveDetected, UInt16[] HoldingReg, 
+            UInt16 MbReceiveCounter, UInt16 MbSentCounter, UInt32 MbCommError, UInt16 MbExceptionCode, 
+            UInt16 SpiCommErrorCounter, UInt16 MbFooter, 
+            Action<UInt16, UInt16, UInt16, UInt16[], UInt16, UInt16, UInt32, UInt16, UInt16, UInt16> OnChangedAction)
+        {
+            this.MbHeader = MbHeader;
+            this.SlaveNumber = SlaveNumber;
+            this.SlaveDetected = SlaveDetected;
+            Array.Copy(HoldingReg, 0, this.HoldingReg, 0, HoldingReg.Length);
+            this.MbReceiveCounter = MbReceiveCounter;
+            this.MbSentCounter = MbSentCounter;
+            this.MbCommError = MbCommError;
+            this.MbExceptionCode = MbExceptionCode;
+            this.SpiCommErrorCounter = SpiCommErrorCounter;
+            this.MbFooter = MbFooter;
+            m_OnChangedAction = OnChangedAction;
+        }
+
+        public void Update(UInt16 MbHeader, UInt16 SlaveNumber, UInt16 SlaveDetected, UInt16[] HoldingReg,
+            UInt16 MbReceiveCounter, UInt16 MbSentCounter, UInt32 MbCommError, UInt16 MbExceptionCode,
+            UInt16 SpiCommErrorCounter, UInt16 MbFooter)
+        {
+            bool SentNotification = false;
+            IStructuralEquatable se1 = this.HoldingReg;
+
+            if (this.MbHeader != MbHeader)
+            {
+                this.MbHeader = MbHeader;
+                SentNotification = true;
+                
+            }
+            if (this.SlaveNumber != SlaveNumber)
+            {
+                this.SlaveNumber = SlaveNumber;
+                SentNotification = true;
+            }
+            if (this.SlaveDetected != SlaveDetected)
+            {
+                this.SlaveDetected = SlaveDetected;
+                SentNotification = true;
+            }
+            if (false == se1.Equals(HoldingReg, StructuralComparisons.StructuralEqualityComparer))
+            {
+                Array.Copy(HoldingReg, 0, this.HoldingReg, 0, HoldingReg.Length);
+                SentNotification = true;
+            }
+            if (this.MbReceiveCounter != MbReceiveCounter)
+            {
+                this.MbReceiveCounter = MbReceiveCounter;
+                SentNotification = true;
+            }
+            if (this.MbSentCounter != MbSentCounter)
+            {
+                this.MbSentCounter = MbSentCounter;
+                SentNotification = true;
+            }
+            if (this.MbCommError != MbCommError)
+            {
+                this.MbCommError = MbCommError;
+                SentNotification = true;
+            }
+            if (this.MbExceptionCode != MbExceptionCode)
+            {
+                this.MbExceptionCode = MbExceptionCode;
+                SentNotification = true;
+            }
+            if (this.SpiCommErrorCounter != SpiCommErrorCounter)
+            {
+                this.SpiCommErrorCounter = SpiCommErrorCounter;
+                SentNotification = true;
+            }
+            if (this.MbFooter != MbFooter)
+            {
+                this.MbFooter = MbFooter;
+                SentNotification = true;
+            }
+
+            if(true == SentNotification)
+            {
+                m_OnChangedAction(this.MbHeader, this.SlaveNumber, this.SlaveDetected, this.HoldingReg,
+                    this.MbReceiveCounter, this.MbSentCounter, this.MbCommError, this.MbExceptionCode,
+                    this.SpiCommErrorCounter, this.MbFooter);
+            }
         }
 
     }

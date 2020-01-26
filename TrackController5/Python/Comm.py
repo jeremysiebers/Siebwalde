@@ -11,7 +11,7 @@ class TrackAmplifier:
         self.MbHeader            = 0
         self.SlaveNumber         = 0
         self.SlaveDetected       = 0
-        self.HoldingReg          = [0,0,0,0,0,0,0,0,0,0,0,0]        
+        self.HoldingReg          = [0,0,0,0,0,0,0,0,0,0,0,0]
         self.MbReceiveCounter    = 0
         self.MbSentCounter       = 0
         self.MbCommError         = 0

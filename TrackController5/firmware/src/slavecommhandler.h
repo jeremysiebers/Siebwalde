@@ -12,22 +12,13 @@
 
 #include <xc.h> // include processor files - each processor file is guarded.  
 #include "modbus/PetitModbus.h"
+#include "enums.h"
 
 #ifdef	__cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-typedef struct
-{
-    uint8_t  SlaveAddress;
-    uint8_t  Direction;
-    uint8_t  NoOfRegisters;    
-    uint8_t  StartRegister;
-    uint16_t RegData0;
-    uint16_t RegData1;    
-}REGISTER_PROCESSING;
-
-REGISTER_PROCESSING        Data;
+REGISTER_PROCESSING     Data;
     
 extern void             INITxCOMMxHANDLER(SLAVE_INFO *location, SLAVE_INFO *Dump);
 extern void             SLAVExCOMMUNICATIONxHANDLER(void);

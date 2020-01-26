@@ -17,11 +17,12 @@ namespace Siebwalde_Application
         public const int SEND_DELAY = 10;
         public FiddleYardIOHandle FYIOHandleTOP;
         public FiddleYardIOHandle FYIOHandleBOT;
-        public const string Target = "FIDDLEYARD";
-        public Sender FYSender = new Sender(Target);
+        public const string FYTarget = "FIDDLEYARD";
+        public Sender FYSender = new Sender(FYTarget);
         private Receiver FYReceiver;
         public PingTarget m_PingTarget = new PingTarget { };
         private int m_FYReceivingPort = 0;
+        private int m_FYSendingPort   = 0;
         private bool FYSimulatorActive = false;        
         private byte[,] m_macAddr;
         private byte[,] m_ipAddr;
@@ -55,10 +56,11 @@ namespace Siebwalde_Application
          *  Notes      :
          */
         /*#--------------------------------------------------------------------------#*/
-        public FiddleYardController(iMain iMainCtrl, byte[,] macAddr, byte[,] ipAddr, int FYReceivingPort)
+        public FiddleYardController(iMain iMainCtrl, byte[,] macAddr, byte[,] ipAddr, int FYReceivingPort, int FYSendingPort)
         {
             m_iMain = iMainCtrl;                        // connect to Main interface for application text logging and link activity update, save interface in variable
             m_FYReceivingPort = FYReceivingPort;
+            m_FYSendingPort   = FYSendingPort;
             m_macAddr = macAddr;
             m_ipAddr = ipAddr;
             FYReceiver = new Receiver(m_FYReceivingPort);
@@ -133,13 +135,13 @@ namespace Siebwalde_Application
             try
             {
                 m_iMain.SiebwaldeAppLogging("FYCTRL: Pinging FIDDLEYARD target...");
-                PingReturn = m_PingTarget.TargetFound(Target);
+                PingReturn = m_PingTarget.TargetFound(FYTarget);
                 if (PingReturn == "targetfound")
                 {
                     m_iMain.SiebwaldeAppLogging("FYCTRL: Ping successfull.");
 
                     m_iMain.SiebwaldeAppLogging("FYCTRL: FiddleYard Connecting...");
-                    FYSender.ConnectUdp();
+                    FYSender.ConnectUdp(m_FYSendingPort);
 
                     m_iMain.SiebwaldeAppLogging("FYCTRL: FiddleYard Connected.");
                     m_iMain.SiebwaldeAppLogging("FYCTRL: FiddleYard Send MAC and IP...");

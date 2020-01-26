@@ -152,6 +152,7 @@ typedef enum
 	EXEC_MBUS_STATE_SLAVE_ENABLE                				= 105,
 	EXEC_MBUS_STATE_START_DATA_UPLOAD           				= 106,
 	EXEC_MBUS_STATE_RESET                       				= 107,
+    EXEC_MBUS_SLAVE_DATA_EXCH                                   = 108,
 						
 	/* FWHANDLER COMMANDS */						
     EXEC_FW_STATE_RECEIVE_FW_FILE         						= 120,
@@ -236,6 +237,7 @@ typedef enum
     RECEIVED_CHECKSUM_NOK                       				= 105,
     SWITCH_OUT_OF_BOUNDS                        				= 106,
     SLAVE_ID_OUT_OF_BOUNDS                                      = 107,
+    MESSAGE_BUFFER_FULL                                         = 108,
 } TASK_MESSAGES;				
 				
 				
@@ -296,6 +298,16 @@ typedef struct
     uint8_t command;
     uint8_t data[80]; 
 }udpTrans_t;
+
+typedef struct
+{
+    uint8_t  SlaveAddress;
+    uint8_t  Direction;
+    uint8_t  NoOfRegisters;    
+    uint8_t  StartRegister;
+    uint16_t RegData0;
+    uint16_t RegData1;    
+}REGISTER_PROCESSING;
 
 /*******************************************************************************
   Function:

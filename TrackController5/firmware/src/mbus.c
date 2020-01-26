@@ -84,6 +84,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
     Application strings and buffers are be defined outside this structure.
 */
 
+#define MASTER 0
+
 /* 
  * Array of structs holding the data of all the slaves connected  
  */
@@ -176,6 +178,8 @@ void MBUS_Initialize ( void )
         SlaveInfo[i].Header = 0xAA;
         SlaveInfo[i].Footer = 0x55;
     }
+    /* set Master to detected */
+    SlaveInfo[MASTER].SlaveDetected = true;
     
     Slaves_Disable_On();
 }
@@ -349,7 +353,7 @@ void MBUS_Tasks ( void )
         case MBUS_STATE_SERVICE_TASKS:
         {
             if(UpdateNextSlave == true){
-                if (PROCESSxNEXTxSLAVE()){
+                if (true == PROCESSxNEXTxSLAVE()){
                     UpdateNextSlave = false;
                 }                
             }

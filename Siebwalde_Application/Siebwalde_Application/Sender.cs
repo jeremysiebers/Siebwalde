@@ -17,14 +17,14 @@ namespace Siebwalde_Application
             sendingUdpClient.Send(send, send.Length);
         }
 
-        public void ConnectUdp()
+        public void ConnectUdp(int port)
         {
-            sendingUdpClient.Connect(_target , 28671);
+            sendingUdpClient.Connect(_target, port);// 28671);
         }
 
-        public void ConnectUdpLocalHost()
+        public void ConnectUdpLocalHost(int port)
         {
-            sendingUdpClient.Connect("LocalHost", 28671);
+            sendingUdpClient.Connect("LocalHost", port);// 28671);
         }
 
         public void CloseUdp()

@@ -30,7 +30,7 @@ namespace Siebwalde_Application
     {
         public FiddleYardController FYcontroller;
         public FiddleYardSettingsForm FYSettingsForm;
-        public FiddleYardController MTcontroller;
+        public TrackApplication.TrackController MTcontroller;
         public FiddleYardController YDcontroller;
         public MAC_IP_Conditioner MACIPConditioner = new MAC_IP_Conditioner { };
 
@@ -86,7 +86,7 @@ namespace Siebwalde_Application
             StartFYController();
 
             /// start MT CONTROLLER ///
-            //StartMTController();
+            StartMTController();
 
             /// start YARD CONTROLLER ///
             //StartYARDController();
@@ -94,8 +94,9 @@ namespace Siebwalde_Application
 
         private void StartFYController()
         {
+            int FYSendingport = 28671;
             int FYReceivingport = 0x7000; // Port on which the PC will receive data from the FiddleYard   
-            FYcontroller = new FiddleYardController(this, MACIPConditioner.MAC(), MACIPConditioner.IP(), FYReceivingport);            
+            FYcontroller = new FiddleYardController(this, MACIPConditioner.MAC(), MACIPConditioner.IP(), FYReceivingport, FYSendingport);            
             SiebwaldeAppLogging("Main: FiddleYard Controller starting...");
             FYcontroller.Start();
             FiddleYardFormTop.Visible = true;
@@ -107,17 +108,19 @@ namespace Siebwalde_Application
 
         private void StartMTController()
         {
-            int MTReceivingport = 28673;
-            MTcontroller = new FiddleYardController(this, MACIPConditioner.MAC(), MACIPConditioner.IP(), MTReceivingport);
-            //MTcontroller.start();
+            int TrackControllerSendingport = 10000;
+            int TrackControllerReceivingport = 10001;
+            MTcontroller = new TrackApplication.TrackController(this, TrackControllerReceivingport, TrackControllerSendingport);
+            MTcontroller.Start();
             MaintrackForm.Visible = true;
             SiebwaldeAppLogging("Main: Track Controller started.");
         }
 
         private void StartYARDController()
         {
+            int YDSendingport = 28673;
             int YDReceivingport = 28674;
-            YDcontroller = new FiddleYardController(this, MACIPConditioner.MAC(), MACIPConditioner.IP(), YDReceivingport);
+            YDcontroller = new FiddleYardController(this, MACIPConditioner.MAC(), MACIPConditioner.IP(), YDReceivingport, YDSendingport);
             //YDcontroller.start();
             YardForm.Visible = true;
             SiebwaldeAppLogging("Main: Yard Controller started.");
@@ -227,7 +230,7 @@ namespace Siebwalde_Application
             }
             if (MTcontroller != null)
             {
-                MTcontroller.ReConnect();
+                //MTcontroller.ReConnect();
             }
             if (YDcontroller != null)
             {

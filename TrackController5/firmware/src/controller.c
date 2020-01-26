@@ -56,6 +56,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "controller.h"
 #include "ethernet.h"
 #include "mbus.h"
+#include "slavehandler.h"
 #include "enums.h"
 
 // *****************************************************************************
@@ -240,6 +241,12 @@ void CONTROLLER_Tasks ( void )
                 {
                     SYS_MESSAGE("Controller\t: EXEC_MBUS_STATE_RESET.\n\r");
                     SETxMBUSxSTATE(MBUS_STATE_RESET);
+                    break;
+                }
+                
+                case EXEC_MBUS_SLAVE_DATA_EXCH:
+                {
+                    ADDxNEWxSLAVExDATAxCMDxTOxMAILBOX(EthernetRecvData->data);
                     break;
                 }
                 

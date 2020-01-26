@@ -13,9 +13,7 @@
  * NOP, a maximum amount of 2 registers should be addressed at once
  * (NOP operation would be a read from a register)
  *
- * 4 Holding registers
- * 5 Input registers
- * 2 Diagnostic registers
+ * 12 Holding registers
  *
  * Mailbox: 50x 
  * 1x read HoldingReg3 and HoldingReg4
@@ -77,7 +75,7 @@
  * HoldingReg10, 0 - 7          Acceleration par    	R/W     No/No			// Acceleration number 0 - 255
  * HoldingReg10, 8 - 15         Deceleration par    	R/W     No/No			// Deceleration number 0 - 255
  *
- * HoldingReg11,                HEX Checksum                                    // Software version
+ * HoldingReg11,                HEX Checksum                                    // Software version used for flash-checking
  *------------------------------------------------------------------------------ 
  */
  

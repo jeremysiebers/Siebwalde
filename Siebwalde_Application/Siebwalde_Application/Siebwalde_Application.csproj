@@ -83,7 +83,7 @@
     <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>Siebwalde_Application_TemporaryKey.pfx</AssemblyOriginatorKeyFile>
@@ -151,6 +151,8 @@
     <Compile Include="Main.Designer.cs">
       <DependentUpon>Main.cs</DependentUpon>
     </Compile>
+    <Compile Include="TrackApplication\TrackApplication.cs" />
+    <Compile Include="TrackApplication\TrackController.cs" />
     <Compile Include="PingTarget.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -164,6 +166,8 @@
     <Compile Include="SenActCmdMes.cs" />
     <Compile Include="Sender.cs" />
     <Compile Include="Settings.cs" />
+    <Compile Include="TrackApplication\TrackIOHandle.cs" />
+    <Compile Include="TrackApplication\TrackIOHandleVariables.cs" />
     <EmbeddedResource Include="AboutBox1.resx">
       <DependentUpon>AboutBox1.cs</DependentUpon>
       <SubType>Designer</SubType>
