@@ -99,6 +99,15 @@ bool PROCESSxNEXTxSLAVE(){
                  * the Message and SlaveInfoProcessor. */
                 if (ProcessSlave > (NUMBER_OF_AMPLIFIERS)){
                     ProcessSlave = 0;
+                    Message++;
+                    if (Message > MESSAGEBOXSIZE){
+                        Message = MESSAGE1;
+
+                        SlaveInfoProcessor++;
+                        if (SlaveInfoProcessor > SIPBOXSIZE){
+                            SlaveInfoProcessor = 1;
+                        }
+                    }
                 }
             }
             State++;            
@@ -121,8 +130,6 @@ bool PROCESSxNEXTxSLAVE(){
                             SlaveInfoProcessor = 1;
                         }
                     }
-                    break;
-//                    loopcount++;
                 }
                 State = 0;                
             }
@@ -165,11 +172,11 @@ bool SendNextMessage(){
         switch (Message){
             case MESSAGE1:
                 Data.SlaveAddress  = ProcessSlave;
-                Data.Direction     = WRITE;
+                Data.Direction     = READ;
                 Data.NoOfRegisters = 2;
                 Data.StartRegister = HOLDINGREG0;
-                Data.RegData0      = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[0];
-                Data.RegData1      = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[1];
+//                Data.RegData0      = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[0];
+//                Data.RegData1      = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[1];
                 SLAVExCOMMUNICATIONxHANDLER();
                 break;
 
@@ -185,18 +192,16 @@ bool SendNextMessage(){
                 switch (SlaveInfoProcessor){
                     case SIP1:
                         Data.SlaveAddress  = ProcessSlave;
-                        Data.Direction     = WRITE;
+                        Data.Direction     = READ;
                         Data.NoOfRegisters = 2;
-                        Data.StartRegister = HOLDINGREG9;
-                        Data.RegData0      = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[9];
-                        Data.RegData1      = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[10];
+                        Data.StartRegister = HOLDINGREG4;
                         SLAVExCOMMUNICATIONxHANDLER();
 
                     case SIP2:
                         Data.SlaveAddress  = ProcessSlave;
                         Data.Direction     = READ;
                         Data.NoOfRegisters = 2;
-                        Data.StartRegister = HOLDINGREG4;
+                        Data.StartRegister = HOLDINGREG6;
                         SLAVExCOMMUNICATIONxHANDLER();
                         break;
 
@@ -204,7 +209,7 @@ bool SendNextMessage(){
                         Data.SlaveAddress  = ProcessSlave;
                         Data.Direction     = READ;
                         Data.NoOfRegisters = 2;
-                        Data.StartRegister = HOLDINGREG6;
+                        Data.StartRegister = HOLDINGREG8;
                         SLAVExCOMMUNICATIONxHANDLER(); 
                         break;
 
@@ -212,7 +217,7 @@ bool SendNextMessage(){
                         Data.SlaveAddress  = ProcessSlave;
                         Data.Direction     = READ;
                         Data.NoOfRegisters = 2;
-                        Data.StartRegister = HOLDINGREG8;
+                        Data.StartRegister = HOLDINGREG10;
                         SLAVExCOMMUNICATIONxHANDLER(); 
                         break;
 

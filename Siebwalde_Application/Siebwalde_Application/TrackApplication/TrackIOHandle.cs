@@ -18,8 +18,8 @@ namespace Siebwalde_Application.TrackApplication
         public iTrackController m_iMTCtrl; // connect variable to TrackController class for defined interfaces
 
         public TrackAmplifierUpdater[] TrackAmplifierInt;
-
         public TrackAmplifier[] TrackAmplifiers;
+        public EthernetTargetMessageUpdater EthTargetMessage;
 
         /*#--------------------------------------------------------------------------#*/
         /*  Description: TrackIOHandle
@@ -66,12 +66,11 @@ namespace Siebwalde_Application.TrackApplication
                 TrackAmplifierInt[i].Attach(TrackAmplifiers[i]);
             }
 
-            //for (UInt16 i = 0; i < 56; i++)
-            //{
-            //    MTIOHandleVar.TrackAmplifierInt[i].Attach(TrackAmplifiers[i]);
-            //}
+            EthTargetMessage = new EthernetTargetMessageUpdater();
+            EthernetTargetMessage EthTargetMessages = new EthernetTargetMessage(0, 0, 0, 0, (taskid, taskcommand, taskstate, taskmessage) => test2(taskid, taskcommand, taskstate, taskmessage));
+            EthTargetMessage.Attach(EthTargetMessages);
         }
-
+        
         /*#--------------------------------------------------------------------------#*/
         /*  Description: IO Handle start
          *               to  Couple  real target to application to get real sensor feedback
@@ -150,7 +149,7 @@ namespace Siebwalde_Application.TrackApplication
             var reader = new BinaryReader(stream);
 
             UInt16 Header = reader.ReadByte();
-            UInt16 Sender = reader.ReadByte();
+            UInt16 Sender = reader.ReadByte(); // and is also taskid
             if (Header == TrackIOHandleVariables.HEADER && Sender == TrackIOHandleVariables.SLAVEINFO)
             {
                 UInt16 MbHeader = reader.ReadByte();
@@ -176,6 +175,14 @@ namespace Siebwalde_Application.TrackApplication
                 TrackAmplifierInt[SlaveNumber].UpdateTrackAmplifier(MbHeader, SlaveNumber, SlaveDetected, HoldingReg, 
                 MbReceiveCounter, MbSentCounter, MbCommError, MbExceptionCode, SpiCommErrorCounter, MbFooter);
             }
+            else if (Header == TrackIOHandleVariables.HEADER)
+            {
+                UInt16 taskcommand = reader.ReadByte();
+                UInt16 taskstate = reader.ReadByte();
+                UInt16 taskmessage = reader.ReadByte();
+
+                EthTargetMessage.UpdateEthernetTargetMessage(Sender, taskcommand, taskstate, taskmessage);
+            }
             
             //m_iMTCtrl.MTLinkActivityUpdate();
         }
@@ -183,6 +190,11 @@ namespace Siebwalde_Application.TrackApplication
         public void test(ushort mbHeader, ushort slaveNumber, ushort slaveDetected, ushort[] holdingReg, ushort mbReceiveCounter, ushort mbSentCounter, uint mbCommError, ushort mbExceptionCode, ushort spiCommErrorCounter, ushort mbFooter)
         {
             //Console.WriteLine("Slave number " + slaveNumber.ToString() + " updated.");
+        }
+
+        public void test2(UInt16 taskid, UInt16 taskcommand, UInt16 taskstate, UInt16 taskmessage)
+        {
+            //
         }
     }    
 }

@@ -151,7 +151,7 @@ void main(void) {
 //            test[0] = 0;
 //        }
         
-        /*
+        
         if (Update_Amplifier){
             
             switch(Sequencer){
@@ -187,7 +187,7 @@ void main(void) {
                     break;
             }            
             
-        }*/
+        }
         
     }
 }

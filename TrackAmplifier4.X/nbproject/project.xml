@@ -11,6 +11,9 @@
             <header-extensions>h</header-extensions>
             <asminc-extensions/>
             <sourceEncoding>ISO-8859-1</sourceEncoding>
+            <make-dep-projects>
+                <make-dep-project>../TrackAmplifierBootLoader.X</make-dep-project>
+            </make-dep-projects>
             <sourceRootList>
                 <sourceRootElem>modbus</sourceRootElem>
             </sourceRootList>
@@ -31,9 +34,6 @@
             <formatting>
                 <project-formatting-style>false</project-formatting-style>
             </formatting>
-            <make-dep-projects>
-                <make-dep-project>../TrackAmplifierBootLoader.X</make-dep-project>
-            </make-dep-projects>
         </data>
     </configuration>
 </project>

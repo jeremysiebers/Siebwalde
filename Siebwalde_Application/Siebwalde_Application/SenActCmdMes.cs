@@ -595,4 +595,117 @@ namespace Siebwalde_Application
         }
 
     }
+
+    /*#--------------------------------------------------------------------------#*/
+    /*  Description: EthernetTarget class interface 
+     *               to receive messages from Ethernet target
+     *               
+     *               
+     *
+     *  Input(s)   :
+     *
+     *  Output(s)  :
+     *
+     *  Returns    :
+     *
+     *  Pre.Cond.  :
+     *
+     *  Post.Cond. :
+     *
+     *  Notes      :
+     */
+    /*#--------------------------------------------------------------------------#*/
+    public abstract class GEthernetTargetMessage
+    {
+
+        public delegate void StatusUpdate(UInt16 taskid, UInt16 taskcommand, UInt16 taskstate, UInt16 taskmessage);
+        public event StatusUpdate OnStatusUpdate = null;
+
+
+        public void Attach(EthernetTargetMessage EthernetTargetMessageUpdate)
+        {
+            OnStatusUpdate += new StatusUpdate(EthernetTargetMessageUpdate.Update);
+        }
+
+        public void Detach(EthernetTargetMessage EthernetTargetMessageUpdate)
+        {
+            OnStatusUpdate -= new StatusUpdate(EthernetTargetMessageUpdate.Update);
+
+        }
+
+        public void Notify(UInt16 taskid, UInt16 taskcommand, UInt16 taskstate, UInt16 taskmessage)
+        {
+            if (OnStatusUpdate != null)
+            {
+                OnStatusUpdate(taskid, taskcommand, taskstate, taskmessage);
+            }
+        }
+    }
+
+    public class EthernetTargetMessageUpdater : GEthernetTargetMessage
+    {
+        public void UpdateEthernetTargetMessage(UInt16 taskid, UInt16 taskcommand, UInt16 taskstate, UInt16 taskmessage)
+        {
+            Notify(taskid, taskcommand, taskstate, taskmessage);
+        }
+    }
+
+    interface EthernetTargetMessageUpdate
+    {
+        void Update(UInt16 taskid, UInt16 taskcommand, UInt16 taskstate, UInt16 taskmessage);
+    }
+
+    public class EthernetTargetMessage : EthernetTargetMessageUpdate
+    {
+        UInt16 taskid;
+        UInt16 taskcommand;
+        UInt16 taskstate;
+        UInt16 taskmessage;
+
+        //When variable has changed generate an event
+        Action<UInt16, UInt16, UInt16, UInt16> m_OnChangedAction;
+
+        public EthernetTargetMessage(UInt16 taskid, UInt16 taskcommand, UInt16 taskstate, UInt16 taskmessage,
+            Action<UInt16, UInt16, UInt16, UInt16> OnChangedAction)
+        {
+            this.taskid = taskid;
+            this.taskcommand = taskcommand;
+            this.taskstate = taskstate;
+            this.taskmessage = taskmessage;            
+            m_OnChangedAction = OnChangedAction;
+        }
+
+        public void Update(UInt16 taskid, UInt16 taskcommand, UInt16 taskstate, UInt16 taskmessage)
+        {
+            bool SentNotification = false;
+
+            if (this.taskid != taskid)
+            {
+                this.taskid = taskid;
+                SentNotification = true;
+
+            }
+            if (this.taskcommand != taskcommand)
+            {
+                this.taskcommand = taskcommand;
+                SentNotification = true;
+            }
+            if (this.taskstate != taskstate)
+            {
+                this.taskstate = taskstate;
+                SentNotification = true;
+            }
+            if (this.taskmessage != taskmessage)
+            {
+                this.taskmessage = taskmessage;
+                SentNotification = true;
+            }
+            
+            if (true == SentNotification)
+            {
+                m_OnChangedAction(this.taskid, this.taskcommand, this.taskstate, this.taskmessage);
+            }
+        }
+
+    }
 }
