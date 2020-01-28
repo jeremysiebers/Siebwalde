@@ -1,25 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
-using System.Timers;
-using System.Net.Sockets;
-using System.IO;
-using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Management;
-using System.Net.NetworkInformation;
-using System.Globalization;
+using System.Windows.Forms.Integration;
 
 namespace Siebwalde_Application
-{    
+{
     public delegate void ToggleCommLinkCallback();
-
+    
     public interface iMain
     {
         void SiebwaldeAppLogging(string text);
@@ -113,7 +100,7 @@ namespace Siebwalde_Application
             MTcontroller = new TrackApplication.TrackController(this, TrackControllerReceivingport, TrackControllerSendingport);
             MTcontroller.Start();
             MaintrackForm.Visible = true;
-            SiebwaldeAppLogging("Main: Track Controller started.");
+            SiebwaldeAppLogging("Main: Track Controller started.");            
         }
 
         private void StartYARDController()
@@ -185,6 +172,13 @@ namespace Siebwalde_Application
         private void MaintrackForm_Click(object sender, EventArgs e)
         {
             SiebwaldeAppLogging("Main: Show Main Track interface");
+            ElementHost host = new ElementHost();
+            host.Dock = DockStyle.Fill;
+
+            TrackApplication.HmiTrackControl HMI = new TrackApplication.HmiTrackControl();
+            host.Child = HMI;
+            this.Controls.Add(host);
+            //host.Show();
         }
 
         private void YardForm_Click(object sender, EventArgs e)

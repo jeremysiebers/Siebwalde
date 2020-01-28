@@ -78,7 +78,7 @@ void INITxSLAVExHANDLER(SLAVE_INFO *location, SLAVE_INFO *Dump){
  */
 /*#--------------------------------------------------------------------------#*/
 static uint8_t      ProcessSlave        = 0;
-static uint8_t      State               = 0;
+static uint8_t      iProcessNextSlave   = 0;
 static uint8_t      loopcount           = 0;
 static uint8_t      SlaveInfoProcessor  = 1;
 static uint8_t      Message             = MESSAGE1;
@@ -87,7 +87,7 @@ bool PROCESSxNEXTxSLAVE(){
     
     bool return_val = false;
     
-    switch (State){
+    switch (iProcessNextSlave){
         case 0:
             /* Scan trough all the slaves until a detected slave is found,
              * the Master is always found and signals that all slaves
@@ -110,7 +110,7 @@ bool PROCESSxNEXTxSLAVE(){
                     }
                 }
             }
-            State++;            
+            iProcessNextSlave++;            
             break;
             
         case 1:            
@@ -131,13 +131,13 @@ bool PROCESSxNEXTxSLAVE(){
                         }
                     }
                 }
-                State = 0;                
-            }
-            return_val = true;
+                iProcessNextSlave = 0;
+                return_val = true;
+            }            
             break;
             
         default :
-            State = 0;
+            iProcessNextSlave = 0;
             break;
     }     
     return(return_val);
@@ -259,7 +259,9 @@ bool SendNextMessage(){
                 /* Stop the master processing as soon as there are no more
                  * messages to be processed */
                 MasterMessageCounter    = 0;
-                return_val              = true;
+                //return_val              = true;
+                iProcessNextSlave       = 0; // reuse this cycle to actually do something else
+                ProcessSlave++;              // also tell to go to the next slave
             }
         }                  
     }
