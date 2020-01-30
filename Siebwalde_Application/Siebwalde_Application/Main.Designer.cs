@@ -72,13 +72,13 @@
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(35, 20);
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "File";
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(103, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(93, 22);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click_1);
             // 
@@ -90,20 +90,20 @@
             this.resetToolStripMenuItem,
             this.fiddleYardSettingsToolStripMenuItem});
             this.fToolStripMenuItem.Name = "fToolStripMenuItem";
-            this.fToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
+            this.fToolStripMenuItem.Size = new System.Drawing.Size(39, 20);
             this.fToolStripMenuItem.Text = "Edit";
             // 
             // reConnectFiddleYardToolStripMenuItem
             // 
             this.reConnectFiddleYardToolStripMenuItem.Name = "reConnectFiddleYardToolStripMenuItem";
-            this.reConnectFiddleYardToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
+            this.reConnectFiddleYardToolStripMenuItem.Size = new System.Drawing.Size(212, 22);
             this.reConnectFiddleYardToolStripMenuItem.Text = "Re-Connect to Fiddle Yard";
             this.reConnectFiddleYardToolStripMenuItem.Click += new System.EventHandler(this.reConnectFiddleYardToolStripMenuItem_Click);
             // 
             // clearEventLoggersToolStripMenuItem
             // 
             this.clearEventLoggersToolStripMenuItem.Name = "clearEventLoggersToolStripMenuItem";
-            this.clearEventLoggersToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
+            this.clearEventLoggersToolStripMenuItem.Size = new System.Drawing.Size(212, 22);
             this.clearEventLoggersToolStripMenuItem.Text = "Clear Event Loggers";
             this.clearEventLoggersToolStripMenuItem.Click += new System.EventHandler(this.clearEventLoggersToolStripMenuItem_Click);
             // 
@@ -112,20 +112,20 @@
             this.resetToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.hardResetFiddleYardToolStripMenuItem});
             this.resetToolStripMenuItem.Name = "resetToolStripMenuItem";
-            this.resetToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
+            this.resetToolStripMenuItem.Size = new System.Drawing.Size(212, 22);
             this.resetToolStripMenuItem.Text = "Reset";
             // 
             // hardResetFiddleYardToolStripMenuItem
             // 
             this.hardResetFiddleYardToolStripMenuItem.Name = "hardResetFiddleYardToolStripMenuItem";
-            this.hardResetFiddleYardToolStripMenuItem.Size = new System.Drawing.Size(195, 22);
+            this.hardResetFiddleYardToolStripMenuItem.Size = new System.Drawing.Size(192, 22);
             this.hardResetFiddleYardToolStripMenuItem.Text = "Hard Reset Fiddle Yard";
             this.hardResetFiddleYardToolStripMenuItem.Click += new System.EventHandler(this.hardResetFiddleYardToolStripMenuItem_Click);
             // 
             // fiddleYardSettingsToolStripMenuItem
             // 
             this.fiddleYardSettingsToolStripMenuItem.Name = "fiddleYardSettingsToolStripMenuItem";
-            this.fiddleYardSettingsToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
+            this.fiddleYardSettingsToolStripMenuItem.Size = new System.Drawing.Size(212, 22);
             this.fiddleYardSettingsToolStripMenuItem.Text = "Fiddle Yard Settings";
             this.fiddleYardSettingsToolStripMenuItem.Click += new System.EventHandler(this.fiddleYardSettingsToolStripMenuItem_Click);
             // 
@@ -134,13 +134,13 @@
             this.aboutToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.aboutToolStripMenuItem1});
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(40, 20);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
             this.aboutToolStripMenuItem.Text = "Help";
             // 
             // aboutToolStripMenuItem1
             // 
             this.aboutToolStripMenuItem1.Name = "aboutToolStripMenuItem1";
-            this.aboutToolStripMenuItem1.Size = new System.Drawing.Size(114, 22);
+            this.aboutToolStripMenuItem1.Size = new System.Drawing.Size(107, 22);
             this.aboutToolStripMenuItem1.Text = "About";
             this.aboutToolStripMenuItem1.Click += new System.EventHandler(this.aboutToolStripMenuItem1_Click);
             // 

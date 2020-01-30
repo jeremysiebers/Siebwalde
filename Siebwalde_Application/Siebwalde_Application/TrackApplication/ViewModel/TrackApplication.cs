@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Siebwalde_Application.TrackApplication
+namespace Siebwalde_Application.TrackApplication.Model
 {
     public interface iTrackApplication
     {
@@ -12,8 +12,7 @@ namespace Siebwalde_Application.TrackApplication
 
     public class TrackApplication : iTrackApplication
     {
-        private TrackIOHandleVariables m_MTIOHandleVar;
-        private iTrackIOHandle m_iMTIOH;
+        
 
         /*#--------------------------------------------------------------------------#*/
         /*  Description: TrackApplication constructor
@@ -32,10 +31,9 @@ namespace Siebwalde_Application.TrackApplication
          *  
          */
         /*#--------------------------------------------------------------------------#*/
-        public TrackApplication(TrackIOHandleVariables MTIOHandleVar, iTrackIOHandle iMTIOH)
+        public TrackApplication()
         {
-            m_MTIOHandleVar = MTIOHandleVar;
-            m_iMTIOH = iMTIOH;
+            
         }
     }
 }

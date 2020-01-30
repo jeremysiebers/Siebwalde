@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Siebwalde_Application.TrackApplication.View;
+using System;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Windows.Forms.Integration;
@@ -17,16 +18,17 @@ namespace Siebwalde_Application
     {
         public FiddleYardController FYcontroller;
         public FiddleYardSettingsForm FYSettingsForm;
-        public TrackApplication.TrackController MTcontroller;
+        public TrackApplication.Model.TrackController MTcontroller;
         public FiddleYardController YDcontroller;
         public MAC_IP_Conditioner MACIPConditioner = new MAC_IP_Conditioner { };
+        public HmiTrackControlForm hmiTrack;
 
         private const int LINKACTMAX = 100;
         private string path = @"c:\localdata\Siebwalde\"+ DateTime.Now.Day + "-"+ DateTime.Now.Month + "-"+ DateTime.Now.Year + "_SiebwaldeApplicationMain.txt"; //  different logging file per target, this is default
         public Log2LoggingFile SiebwaldeApplicationMainLogging;
 
         private bool ViewTop = true;
-        private bool ViewBot = true;        
+        private bool ViewBot = true;
 
         public Main()
         {
@@ -52,16 +54,11 @@ namespace Siebwalde_Application
             FYLinkActivity.Value = 0;
             FYLinkActivity.Location = new System.Drawing.Point(this.Width - FYLinkActivity.Width - 20, 1);
             LFYLinkActivity.Location = new System.Drawing.Point(this.Width - FYLinkActivity.Width - 20 - LFYLinkActivity.Width, 6);
-                        
+
         }
 
         private void StartApplication_Click(object sender, EventArgs e)
         {
-            SiebwaldeAppLogging("########################################################################");
-            SiebwaldeAppLogging("#                                                                      #");
-            SiebwaldeAppLogging("#                   Siebwalde Application started.                     #");
-            SiebwaldeAppLogging("#                                                                      #");
-            SiebwaldeAppLogging("########################################################################");
             SiebwaldeAppLogging("Siebwalde Application started.");
             SiebwaldeAppLogging("Main: PC MAC adress is: " + MACIPConditioner.MACstring());
             SiebwaldeAppLogging("Main: PC IP adress is: " + MACIPConditioner.IPstring());
@@ -97,7 +94,7 @@ namespace Siebwalde_Application
         {
             int TrackControllerSendingport = 10000;
             int TrackControllerReceivingport = 10001;
-            MTcontroller = new TrackApplication.TrackController(this, TrackControllerReceivingport, TrackControllerSendingport);
+            MTcontroller = new TrackApplication.Model.TrackController(this, TrackControllerReceivingport, TrackControllerSendingport);
             MTcontroller.Start();
             MaintrackForm.Visible = true;
             SiebwaldeAppLogging("Main: Track Controller started.");            
@@ -151,7 +148,7 @@ namespace Siebwalde_Application
 
         private void FiddleYardFormBot_Click(object sender, EventArgs e)
         {
-            bool autoscroll = false;            
+            bool autoscroll;
             if (this.Height < 1200 || this.Width < 1920)
                 autoscroll = true;
             else { autoscroll = false; }
@@ -171,14 +168,35 @@ namespace Siebwalde_Application
 
         private void MaintrackForm_Click(object sender, EventArgs e)
         {
-            SiebwaldeAppLogging("Main: Show Main Track interface");
-            ElementHost host = new ElementHost();
-            host.Dock = DockStyle.Fill;
-
-            TrackApplication.HmiTrackControl HMI = new TrackApplication.HmiTrackControl();
-            host.Child = HMI;
-            this.Controls.Add(host);
-            //host.Show();
+            if(hmiTrack != null && hmiTrack.IsDisposed != true)
+            {
+                if (hmiTrack.Visible)
+                {
+                    SiebwaldeAppLogging("Main: Hide Main Track interface");
+                    hmiTrack.Hide();
+                }
+                else
+                {
+                    SiebwaldeAppLogging("Main: Show Main Track interface");
+                    //FYFORM.Location = new System.Drawing.Point(LocX + 6, LocY + 80);
+                    hmiTrack.Location = new Point(Location.X, Location.Y + 80);
+                    hmiTrack.Width = Width;
+                    hmiTrack.Height = Height - 80;
+                    hmiTrack.Show();
+                    hmiTrack.TopLevel = true;
+                    hmiTrack.BringToFront();
+                }
+            }
+            else
+            {
+                hmiTrack = new HmiTrackControlForm();
+                hmiTrack.Show();
+                hmiTrack.Location = new Point(Location.X, Location.Y + 80);
+                hmiTrack.Width = Width;
+                hmiTrack.Height = Height - 80;
+                hmiTrack.TopLevel = true;
+                hmiTrack.BringToFront();
+            }
         }
 
         private void YardForm_Click(object sender, EventArgs e)

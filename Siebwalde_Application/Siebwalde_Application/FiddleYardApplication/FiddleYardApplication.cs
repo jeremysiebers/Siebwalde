@@ -152,17 +152,17 @@ namespace Siebwalde_Application
         public void FYFORMShow(bool autoscroll, int height, int width, int LocX, int LocY, bool View)
         {
 
-            FYFORM.Height = height - 60 - 27;
+            FYFORM.Height = height - 60 - 20;// 27;
             if (autoscroll == true)
             {
-                FYFORM.Width = width / 2 - 6;
+                FYFORM.Width = width / 2;// - 6;
             }
             else
             {
                 FYFORM.Width = width / 2;
             }
             if (m_instance == "TOP")
-                FYFORM.Location = new System.Drawing.Point(LocX + 6, LocY + 80);
+                FYFORM.Location = new System.Drawing.Point(LocX + 0, LocY + 80); //(LocX + 6, LocY + 80);
             else if (m_instance == "BOT")
                 FYFORM.Location = new System.Drawing.Point(LocX + width / 2, LocY + 80);  //960
             FYFORM.AutoScroll = autoscroll;

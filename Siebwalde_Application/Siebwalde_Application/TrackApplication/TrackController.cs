@@ -4,37 +4,25 @@ using System.Linq;
 using System.Text;
 using System.Net;
 
-namespace Siebwalde_Application.TrackApplication
+namespace Siebwalde_Application.TrackApplication.Model
 {
-    public interface iTrackController
-    {
-        //void FYLinkActivityUpdate();                // Update Link activity in main form
-        void ClearEventLoggers();                   // Clear event loggers interface to form eventloggers for clearing
-        //void ReConnect();                           // Re-connect to target
-        Sender GetMTSender();                       // interface to MTSender
-        Receiver GetMTReceiver();                   // interface to MTReceiver        
-    }
 
-    public class TrackController : iTrackController
+    public class TrackController
     {
-        public iMain m_iMain;                                       // connect variable to connect to FYController class to Main for application logging
-        public const string TrackTarget = "TRACKCONTROL";
-        public Sender MTSender = new Sender(TrackTarget);
-        private Receiver MTReceiver;
+        /* connect variable to connect to FYController class to Main for application logging */
+        public iMain m_iMain;
+        
         public PingTarget m_PingTarget = new PingTarget { };
-        private int m_MTReceivingPort = 0;
-        private int m_MTSendingPort   = 0;
-        public TrackIOHandle MTIOHandle;
 
-        public Sender GetMTSender()
-        {
-            return MTSender;
-        }
+        /* Public Enums */
+        public Services.PublicEnums mPublicEnums;
+        /* Model */
+        public TrackApplicationVariables mTrackApplicationVariables;
+        /* ViewModel */
+        public TrackApplication mTrackApplication;
 
-        public Receiver GetMTReceiver()
-        {
-            return MTReceiver;
-        }
+        public int mTrackSendingPort;
+        public int mTrackReceivingPort;
 
         /*#--------------------------------------------------------------------------#*/
         /*  Description: MainTrackController
@@ -55,13 +43,35 @@ namespace Siebwalde_Application.TrackApplication
          *  Notes      :
          */
         /*#--------------------------------------------------------------------------#*/
-        public TrackController(iMain iMainCtrl, int MTReceivingPort, int MTSendingPort)
+        public TrackController(iMain iMainCtrl, int TrackReceivingPort, int TrackSendingPort)
         {
-            m_iMain = iMainCtrl;                        // connect to Main interface for application text logging and link activity update, save interface in variable
-            m_MTReceivingPort = MTReceivingPort;
-            m_MTSendingPort = MTSendingPort;
-            MTReceiver = new Receiver(m_MTReceivingPort);
-            MTIOHandle = new TrackIOHandle(this);
+            /*
+             * connect to Main interface for application text logging and link activity 
+             * update, save interface in variable.
+             */
+            m_iMain = iMainCtrl;
+            mTrackReceivingPort = TrackReceivingPort;
+            mTrackSendingPort = TrackSendingPort;
+
+            /*
+             * Public ENUM init and pass to all
+             */
+            mPublicEnums = new Services.PublicEnums();
+
+            /*
+             * Init the Model
+             */
+            mTrackApplicationVariables = new TrackApplicationVariables(mPublicEnums, mTrackReceivingPort, mTrackSendingPort);
+            
+            /*
+             * Init the ViewModel
+             */
+            mTrackApplication = new TrackApplication();
+
+            /*
+             * Init the View
+             */
+            // VIEW is started via MAIN FORM button event.
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -84,15 +94,13 @@ namespace Siebwalde_Application.TrackApplication
         {
             if (ConnectTrackConntroller() == true) // when connection was succesfull and target was found and is connected
             {
-                m_iMain.SiebwaldeAppLogging("MTCTRL: Track uController target in real mode");
-                MTReceiver.Start();
+                m_iMain.SiebwaldeAppLogging("MTCTRL: Track uController target in real mode.");
+                mTrackApplicationVariables.Start();
             }
             else
             {
-                m_iMain.SiebwaldeAppLogging("MTCTRL: Track uController target in simulator mode");                
+                m_iMain.SiebwaldeAppLogging("MTCTRL: Track uController target in simulator mode, not started!");                
             }
-            MTIOHandle.Start();
-
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -118,13 +126,13 @@ namespace Siebwalde_Application.TrackApplication
             try
             {
                 m_iMain.SiebwaldeAppLogging("MTCTRL: Pinging Track controller target...");
-                PingReturn = m_PingTarget.TargetFound(TrackTarget);                
+                PingReturn = m_PingTarget.TargetFound(mPublicEnums.TrackTarget());                
                 if (PingReturn == "targetfound")
                 {
                     m_iMain.SiebwaldeAppLogging("MTCTRL: Ping successfull.");
 
                     m_iMain.SiebwaldeAppLogging("MTCTRL: Track controller Connecting...");
-                    MTSender.ConnectUdp(m_MTSendingPort);
+                    //MTSender.ConnectUdp(m_MTSendingPort);
 
                     m_iMain.SiebwaldeAppLogging("MTCTRL: Track controller Connected.");
                     m_iMain.SiebwaldeAppLogging("MTCTRL: Track controller Send MAC and IP...");
@@ -133,12 +141,12 @@ namespace Siebwalde_Application.TrackApplication
                 }
                 else
                 {
-                    var address = Dns.GetHostEntry(TrackTarget).AddressList.First();
+                    var address = Dns.GetHostEntry(mPublicEnums.TrackTarget()).AddressList.First();
                     if (address != null)
                     {
                         m_iMain.SiebwaldeAppLogging("MTCTRL: Dns.GetHostEntry successfull.");
                         m_iMain.SiebwaldeAppLogging("MTCTRL: Track controller Connecting...");
-                        MTSender.ConnectUdp(m_MTSendingPort);
+                        //MTSender.ConnectUdp(m_MTSendingPort);
                         m_iMain.SiebwaldeAppLogging("MTCTRL: Track controller Connected.");
                         return true; // connection succesfull to FIDDLEYARD
                     }

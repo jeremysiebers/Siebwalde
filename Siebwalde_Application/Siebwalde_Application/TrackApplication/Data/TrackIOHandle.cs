@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace Siebwalde_Application.TrackApplication
+namespace Siebwalde_Application.TrackApplication.Data
 {
     public interface iTrackIOHandle
     {
@@ -12,14 +12,14 @@ namespace Siebwalde_Application.TrackApplication
     }
 
     public class TrackIOHandle : iTrackIOHandle
-    {
-        public TrackIOHandleVariables MTIOHandleVar;
-        public TrackApplication MTApp;
-        public iTrackController m_iMTCtrl; // connect variable to TrackController class for defined interfaces
+    {   
+        public Sender mTrackSender;
+        public Receiver mTrackReceiver;
+        public Services.PublicEnums mPublicEnums;
+        public Model.TrackApplicationVariables mTrackApplicationVariables;
 
-        public TrackAmplifierUpdater[] TrackAmplifierInt;
-        public TrackAmplifier[] TrackAmplifiers;
-        public EthernetTargetMessageUpdater EthTargetMessage;
+        public int mTrackSendingPort;
+        public int mTrackReceivingPort;
 
         /*#--------------------------------------------------------------------------#*/
         /*  Description: TrackIOHandle
@@ -40,35 +40,15 @@ namespace Siebwalde_Application.TrackApplication
          *  Notes      :
          */
         /*#--------------------------------------------------------------------------#*/
-        public TrackIOHandle(iTrackController iMTCtrl)
+        public TrackIOHandle(Services.PublicEnums publicEnums, int TrackReceivingPort, int TrackSendingPort, Model.TrackApplicationVariables trackApplicationVariables)
         {
-            m_iMTCtrl = iMTCtrl;                            // connect to MTController interface, save interface in variable
-            MTIOHandleVar = new TrackIOHandleVariables();            
-            MTApp = new TrackApplication(MTIOHandleVar, this);
+            mPublicEnums = publicEnums;
+            mTrackReceivingPort = TrackReceivingPort;
+            mTrackSendingPort = TrackSendingPort;
+            mTrackApplicationVariables = trackApplicationVariables;
 
-            UInt16[] HoldingRegInit = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-
-            TrackAmplifiers = new TrackAmplifier[56];
-                       
-            TrackAmplifierInt = new TrackAmplifierUpdater[56];
-            
-            for (UInt16 i = 0; i < 56; i++)
-            {
-                TrackAmplifierInt[i] = new TrackAmplifierUpdater();
-            }
-            
-            for (UInt16 i = 0; i < 56; i++)
-            {
-                TrackAmplifiers[i] = new TrackAmplifier(TrackIOHandleVariables.HEADER, i, 0, HoldingRegInit, 0, 0, 0, 0, 0, TrackIOHandleVariables.FOOTER,
-                    (MbHeader, SlaveNumber, SlaveDetected, HoldingReg, MbReceiveCounter, MbSentCounter, MbCommError, MbExceptionCode,
-                    SpiCommErrorCounter, MbFooter) => test(MbHeader, SlaveNumber, SlaveDetected, HoldingReg, MbReceiveCounter, MbSentCounter, MbCommError, MbExceptionCode,
-                    SpiCommErrorCounter, MbFooter));
-                TrackAmplifierInt[i].Attach(TrackAmplifiers[i]);
-            }
-
-            EthTargetMessage = new EthernetTargetMessageUpdater();
-            EthernetTargetMessage EthTargetMessages = new EthernetTargetMessage(0, 0, 0, 0, (taskid, taskcommand, taskstate, taskmessage) => test2(taskid, taskcommand, taskstate, taskmessage));
-            EthTargetMessage.Attach(EthTargetMessages);
+            mTrackReceiver = new Receiver(mTrackReceivingPort);
+            mTrackSender = new Sender(mPublicEnums.TrackTarget());
         }
         
         /*#--------------------------------------------------------------------------#*/
@@ -94,8 +74,10 @@ namespace Siebwalde_Application.TrackApplication
         /*#--------------------------------------------------------------------------#*/
 
         public void Start()
-        {        
-            m_iMTCtrl.GetMTReceiver().NewData += HandleNewData;            
+        {            
+            mTrackSender.ConnectUdp(mTrackSendingPort);
+            mTrackReceiver.NewData += HandleNewData;
+            mTrackReceiver.Start();
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -119,7 +101,7 @@ namespace Siebwalde_Application.TrackApplication
         /*#--------------------------------------------------------------------------#*/
         public void ActuatorCmd(string name, string cmd)
         {
-            m_iMTCtrl.GetMTSender().SendUdp(Encoding.ASCII.GetBytes(cmd));            
+            mTrackSender.SendUdp(Encoding.ASCII.GetBytes(cmd));            
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -150,7 +132,7 @@ namespace Siebwalde_Application.TrackApplication
 
             UInt16 Header = reader.ReadByte();
             UInt16 Sender = reader.ReadByte(); // and is also taskid
-            if (Header == TrackIOHandleVariables.HEADER && Sender == TrackIOHandleVariables.SLAVEINFO)
+            if (Header == mPublicEnums.Header() && Sender == mPublicEnums.SlaveInfo())
             {
                 UInt16 MbHeader = reader.ReadByte();
                 UInt16 SlaveNumber = reader.ReadByte();
@@ -172,29 +154,20 @@ namespace Siebwalde_Application.TrackApplication
                 UInt16 SpiCommErrorCounter = reader.ReadByte();
                 UInt16 MbFooter = reader.ReadByte();
 
-                TrackAmplifierInt[SlaveNumber].UpdateTrackAmplifier(MbHeader, SlaveNumber, SlaveDetected, HoldingReg, 
+                mTrackApplicationVariables.TrackAmplifierInt[SlaveNumber].UpdateTrackAmplifier(MbHeader, SlaveNumber, SlaveDetected, HoldingReg, 
                 MbReceiveCounter, MbSentCounter, MbCommError, MbExceptionCode, SpiCommErrorCounter, MbFooter);
             }
-            else if (Header == TrackIOHandleVariables.HEADER)
+            else if (Header == mPublicEnums.Header())
             {
                 UInt16 taskcommand = reader.ReadByte();
                 UInt16 taskstate = reader.ReadByte();
                 UInt16 taskmessage = reader.ReadByte();
 
-                EthTargetMessage.UpdateEthernetTargetMessage(Sender, taskcommand, taskstate, taskmessage);
+                mTrackApplicationVariables.EthTargetMessage.UpdateEthernetTargetMessage(Sender, taskcommand, taskstate, taskmessage);
             }
             
             //m_iMTCtrl.MTLinkActivityUpdate();
         }
-
-        public void test(ushort mbHeader, ushort slaveNumber, ushort slaveDetected, ushort[] holdingReg, ushort mbReceiveCounter, ushort mbSentCounter, uint mbCommError, ushort mbExceptionCode, ushort spiCommErrorCounter, ushort mbFooter)
-        {
-            //Console.WriteLine("Slave number " + slaveNumber.ToString() + " updated.");
-        }
-
-        public void test2(UInt16 taskid, UInt16 taskcommand, UInt16 taskstate, UInt16 taskmessage)
-        {
-            //
-        }
+                
     }    
 }
