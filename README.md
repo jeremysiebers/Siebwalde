@@ -15,8 +15,6 @@ Windows Application (C#)
 uCOntrollers (C):
 
 - FiddleYard                --> Embedded ethernet uController, controlling the FiddleYard PIC18F97j60
-    
-- KiCad                     --> All Siebwalde related KiCad (PCB) designs
 
 - ServoController.X         --> Embedded uController for RC servo driving
 
@@ -25,5 +23,10 @@ uCOntrollers (C):
 - TrackBackplane2.X         --> development of track backplane slave; track amplifier slave select slave for initialization (final setup with PIC18F25K40)(PetitModbus)*
 
 - TrackController5.X        --> development of track controller; PIC32MZ2048EFH144 Ethernet Target + ModBus Master(build upon PetitModbus)*
+
+PCB Files (KiCad):
+
+- KiCad                     --> All Siebwalde related KiCad (PCB) designs
+
 
 *PetitModbus derived from https://github.com/FxDev/PetitModbus 
