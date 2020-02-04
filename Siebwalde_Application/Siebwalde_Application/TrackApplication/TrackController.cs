@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Net;
 
-namespace Siebwalde_Application.TrackApplication.Model
+namespace Siebwalde_Application
 {
 
     public class TrackController
@@ -14,12 +12,14 @@ namespace Siebwalde_Application.TrackApplication.Model
         
         public PingTarget m_PingTarget = new PingTarget { };
 
+        /* Data */
+        public TrackIOHandle trackIOHandle;
         /* Public Enums */
-        public Services.PublicEnums mPublicEnums;
+        public PublicEnums mPublicEnums;
         /* Model */
-        public TrackApplicationVariables mTrackApplicationVariables;
-        /* ViewModel */
-        public TrackApplication mTrackApplication;
+        //public TrackApplicationVariables mTrackApplicationVariables;
+        /* ViewModel */        
+        public TrackAmplifiersViewModel mTrackAmplifiersViewModel;
 
         public int mTrackSendingPort;
         public int mTrackReceivingPort;
@@ -56,21 +56,14 @@ namespace Siebwalde_Application.TrackApplication.Model
             /*
              * Public ENUM init and pass to all
              */
-            mPublicEnums = new Services.PublicEnums();
-
-            /*
-             * Init the Model
-             */
-            mTrackApplicationVariables = new TrackApplicationVariables(mPublicEnums, mTrackReceivingPort, mTrackSendingPort);
             
-            /*
-             * Init the ViewModel
-             */
-            mTrackApplication = new TrackApplication();
+            trackIOHandle = new TrackIOHandle(mTrackReceivingPort, mTrackSendingPort);
 
-            /*
-             * Init the View
-             */
+            //mTrackApplicationVariables = new TrackApplicationVariables(mPublicEnums, mTrackReceivingPort, mTrackSendingPort);
+
+
+            //mTrackAmplifiersViewModel = new TrackAmplifiersViewModel(mTrackApplicationVariables);
+            
             // VIEW is started via MAIN FORM button event.
         }
 
@@ -95,7 +88,8 @@ namespace Siebwalde_Application.TrackApplication.Model
             if (ConnectTrackConntroller() == true) // when connection was succesfull and target was found and is connected
             {
                 m_iMain.SiebwaldeAppLogging("MTCTRL: Track uController target in real mode.");
-                mTrackApplicationVariables.Start();
+                //mTrackApplicationVariables.Start();
+                trackIOHandle.Start();
             }
             else
             {

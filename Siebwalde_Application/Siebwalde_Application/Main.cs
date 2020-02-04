@@ -18,7 +18,7 @@ namespace Siebwalde_Application
     {
         public FiddleYardController FYcontroller;
         public FiddleYardSettingsForm FYSettingsForm;
-        public TrackApplication.Model.TrackController MTcontroller;
+        public TrackController MTcontroller;
         public FiddleYardController YDcontroller;
         public MAC_IP_Conditioner MACIPConditioner = new MAC_IP_Conditioner { };
         public HmiTrackControlForm hmiTrack;
@@ -94,7 +94,7 @@ namespace Siebwalde_Application
         {
             int TrackControllerSendingport = 10000;
             int TrackControllerReceivingport = 10001;
-            MTcontroller = new TrackApplication.Model.TrackController(this, TrackControllerReceivingport, TrackControllerSendingport);
+            MTcontroller = new TrackController(this, TrackControllerReceivingport, TrackControllerSendingport);
             MTcontroller.Start();
             MaintrackForm.Visible = true;
             SiebwaldeAppLogging("Main: Track Controller started.");            

@@ -23,9 +23,7 @@ namespace Siebwalde_Application.TrackApplication.View
         {
             InitializeComponent();
             this.DataContext = this;
-        }
-        public string Title { get; set; }
 
-        public int MaxLength { get; set; }
+        }
     }
 }

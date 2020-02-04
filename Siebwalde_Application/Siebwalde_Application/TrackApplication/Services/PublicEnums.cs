@@ -1,6 +1,4 @@
-﻿
-
-namespace Siebwalde_Application.TrackApplication.Services
+﻿namespace Siebwalde_Application
 {
     public class PublicEnums
     {

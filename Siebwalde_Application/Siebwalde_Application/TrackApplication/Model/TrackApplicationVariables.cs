@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-namespace Siebwalde_Application.TrackApplication.Model
-{
+namespace Siebwalde_Application
+{ 
     public class TrackApplicationVariables
     {
-        public Services.PublicEnums mPublicEnums;
-        public Data.TrackIOHandle mTrackIoHandle;
+        public PublicEnums mPublicEnums;
+        public TrackIOHandle mTrackIoHandle;
 
         /*#--------------------------------------------------------------------------#*/
         /*  Description: Track Application variables
@@ -51,7 +48,7 @@ namespace Siebwalde_Application.TrackApplication.Model
          *  
          */
         /*#--------------------------------------------------------------------------#*/
-        public TrackApplicationVariables(Services.PublicEnums publicEnums, int TrackReceivingPort, int TrackSendingPort)
+        public TrackApplicationVariables(PublicEnums publicEnums, int TrackReceivingPort, int TrackSendingPort)
         {
             mPublicEnums = publicEnums;
             mTrackReceivingPort = TrackReceivingPort;
@@ -59,7 +56,7 @@ namespace Siebwalde_Application.TrackApplication.Model
             /*
              * Init the Data
              */
-            mTrackIoHandle = new Data.TrackIOHandle(mPublicEnums, mTrackReceivingPort, mTrackSendingPort, this);
+            //mTrackIoHandle = new TrackIOHandle(mPublicEnums, mTrackReceivingPort, mTrackSendingPort);
 
             /*
              * Init the variables
@@ -84,9 +81,14 @@ namespace Siebwalde_Application.TrackApplication.Model
                 TrackAmplifierInt[i].Attach(TrackAmplifiers[i]);
             }
 
+
+
             EthTargetMessage = new EthernetTargetMessageUpdater();
             EthernetTargetMessage EthTargetMessages = new EthernetTargetMessage(0, 0, 0, 0, (taskid, taskcommand, taskstate, taskmessage) => Test2(taskid, taskcommand, taskstate, taskmessage));
             EthTargetMessage.Attach(EthTargetMessages);
+
+
+
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -110,7 +112,7 @@ namespace Siebwalde_Application.TrackApplication.Model
         {
             mTrackIoHandle.Start();
         }
-
+        
         /*#--------------------------------------------------------------------------#*/
         /*  Description: TrackVariables Methods
          * 

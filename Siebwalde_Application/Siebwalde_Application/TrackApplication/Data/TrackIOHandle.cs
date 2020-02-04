@@ -1,51 +1,53 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 
-namespace Siebwalde_Application.TrackApplication.Data
+namespace Siebwalde_Application
 {
-    public interface iTrackIOHandle
-    {
-        void ActuatorCmd(string name, string cmd);
-    }
-
-    public class TrackIOHandle : iTrackIOHandle
+    /// <summary>
+    /// Get data from Ethernet Target
+    /// </summary>
+    public class TrackIOHandle
     {   
         public Sender mTrackSender;
         public Receiver mTrackReceiver;
-        public Services.PublicEnums mPublicEnums;
-        public Model.TrackApplicationVariables mTrackApplicationVariables;
+        public PublicEnums mPublicEnums;
 
         public int mTrackSendingPort;
         public int mTrackReceivingPort;
 
-        /*#--------------------------------------------------------------------------#*/
-        /*  Description: TrackIOHandle
-         *               Constructor
-         *              
-         *               
-         *
-         *  Input(s)   :
-         *
-         *  Output(s)  :
-         *
-         *  Returns    :
-         *
-         *  Pre.Cond.  :
-         *
-         *  Post.Cond. :
-         *
-         *  Notes      :
-         */
-        /*#--------------------------------------------------------------------------#*/
-        public TrackIOHandle(Services.PublicEnums publicEnums, int TrackReceivingPort, int TrackSendingPort, Model.TrackApplicationVariables trackApplicationVariables)
+        public TrackAmpItem[] trackAmpItem;
+
+        /// <summary>
+        /// TrackIoHandle Constructor
+        /// </summary>
+        /// <param name="publicEnums"></param>
+        /// <param name="TrackReceivingPort"></param>
+        /// <param name="TrackSendingPort"></param>
+        /// <param name="trackApplicationVariables"></param>
+        public TrackIOHandle(int TrackReceivingPort, int TrackSendingPort)
         {
-            mPublicEnums = publicEnums;
             mTrackReceivingPort = TrackReceivingPort;
             mTrackSendingPort = TrackSendingPort;
-            mTrackApplicationVariables = trackApplicationVariables;
+
+            mPublicEnums = new PublicEnums();
+
+            UInt16[] HoldingRegInit = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+            for (UInt16 i = 0; i < 56; i++)
+            {
+                trackAmpItem[i] = new TrackAmpItem
+                {
+                    SlaveNumber = i,
+                    SlaveDetected = 0,
+                    HoldingReg = HoldingRegInit,
+                    MbReceiveCounter = 0,
+                    MbSentCounter = 0,
+                    MbCommError = 0,
+                    MbExceptionCode = 0,
+                    SpiCommErrorCounter = 0
+                };
+            }           
 
             mTrackReceiver = new Receiver(mTrackReceivingPort);
             mTrackSender = new Sender(mPublicEnums.TrackTarget());
@@ -154,8 +156,16 @@ namespace Siebwalde_Application.TrackApplication.Data
                 UInt16 SpiCommErrorCounter = reader.ReadByte();
                 UInt16 MbFooter = reader.ReadByte();
 
-                mTrackApplicationVariables.TrackAmplifierInt[SlaveNumber].UpdateTrackAmplifier(MbHeader, SlaveNumber, SlaveDetected, HoldingReg, 
-                MbReceiveCounter, MbSentCounter, MbCommError, MbExceptionCode, SpiCommErrorCounter, MbFooter);
+                trackAmpItem[SlaveNumber].SlaveDetected = SlaveDetected;
+                trackAmpItem[SlaveNumber].HoldingReg = HoldingReg;
+                trackAmpItem[SlaveNumber].MbReceiveCounter = MbReceiveCounter;
+                trackAmpItem[SlaveNumber].MbSentCounter = MbSentCounter;
+                trackAmpItem[SlaveNumber].MbCommError = MbCommError;
+                trackAmpItem[SlaveNumber].MbExceptionCode = MbExceptionCode;
+                trackAmpItem[SlaveNumber].SpiCommErrorCounter = SpiCommErrorCounter;
+
+                //mTrackApplicationVariables.TrackAmplifierInt[SlaveNumber].UpdateTrackAmplifier(MbHeader, SlaveNumber, SlaveDetected, HoldingReg, 
+                //MbReceiveCounter, MbSentCounter, MbCommError, MbExceptionCode, SpiCommErrorCounter, MbFooter);
             }
             else if (Header == mPublicEnums.Header())
             {
@@ -163,7 +173,7 @@ namespace Siebwalde_Application.TrackApplication.Data
                 UInt16 taskstate = reader.ReadByte();
                 UInt16 taskmessage = reader.ReadByte();
 
-                mTrackApplicationVariables.EthTargetMessage.UpdateEthernetTargetMessage(Sender, taskcommand, taskstate, taskmessage);
+                //mTrackApplicationVariables.EthTargetMessage.UpdateEthernetTargetMessage(Sender, taskcommand, taskstate, taskmessage);
             }
             
             //m_iMTCtrl.MTLinkActivityUpdate();

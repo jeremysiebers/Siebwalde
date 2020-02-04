@@ -495,16 +495,16 @@ namespace Siebwalde_Application
 
     public class TrackAmplifier : TrackAmplifierUpdate
     {
-        UInt16 MbHeader;
-        UInt16 SlaveNumber;
-        UInt16 SlaveDetected;
-        UInt16[] HoldingReg = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, };
-        UInt16 MbReceiveCounter;
-        UInt16 MbSentCounter;
-        UInt32 MbCommError;
-        UInt16 MbExceptionCode;
-        UInt16 SpiCommErrorCounter;
-        UInt16 MbFooter;
+        public UInt16 MbHeader { get; set; }
+        public UInt16 SlaveNumber { get; set; }
+        public UInt16 SlaveDetected { get; set; }
+        public UInt16[] HoldingReg = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, };
+        public UInt16 MbReceiveCounter { get; set; }
+        public UInt16 MbSentCounter { get; set; }
+        public UInt32 MbCommError { get; set; }
+        public UInt16 MbExceptionCode { get; set; }
+        public UInt16 SpiCommErrorCounter { get; set; }
+        public UInt16 MbFooter { get; set; }
 
         //When variable has changed generate an event
         Action<UInt16, UInt16, UInt16, UInt16[], UInt16, UInt16, UInt32, UInt16, UInt16, UInt16> m_OnChangedAction;
@@ -592,8 +592,7 @@ namespace Siebwalde_Application
                     this.MbReceiveCounter, this.MbSentCounter, this.MbCommError, this.MbExceptionCode,
                     this.SpiCommErrorCounter, this.MbFooter);
             }
-        }
-
+        }        
     }
 
     /*#--------------------------------------------------------------------------#*/

@@ -7,7 +7,11 @@
              mc:Ignorable="d" 
              d:DesignHeight="542" d:DesignWidth="1081">
     <Grid>
-        <TextBox HorizontalAlignment="Left" Height="23" Margin="35,23,0,0" TextWrapping="Wrap" Text="empty" VerticalAlignment="Top" Width="120"/>
-        <Button Content="Button" HorizontalAlignment="Left" Margin="35,74,0,0" VerticalAlignment="Top" Width="75"/>        
+        <DataGrid x:Name="ViewTrackamplifiers" HorizontalAlignment="Left" Height="480" Margin="28,22,0,0" VerticalAlignment="Top" Width="988"
+                  ItemsSource="{Binding trackAmplifiers}" AutoGenerateColumns="False">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Slave No" Binding="{Binding SlaveNumber}"/>
+            </DataGrid.Columns>
+        </DataGrid>
     </Grid>
 </UserControl>
