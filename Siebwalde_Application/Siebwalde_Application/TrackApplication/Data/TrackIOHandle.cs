@@ -16,7 +16,7 @@ namespace Siebwalde_Application
         public int mTrackSendingPort;
         public int mTrackReceivingPort;
 
-        public TrackAmpItem[] trackAmpItem;
+        public TrackAmplifierItem[] trackAmpItem;
 
         /// <summary>
         /// TrackIoHandle Constructor
@@ -32,11 +32,11 @@ namespace Siebwalde_Application
 
             mPublicEnums = new PublicEnums();
 
-            UInt16[] HoldingRegInit = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            ushort[] HoldingRegInit = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
-            for (UInt16 i = 0; i < 56; i++)
+            for (ushort i = 0; i < 56; i++)
             {
-                trackAmpItem[i] = new TrackAmpItem
+                trackAmpItem[i] = new TrackAmplifierItem
                 {
                     SlaveNumber = i,
                     SlaveDetected = 0,

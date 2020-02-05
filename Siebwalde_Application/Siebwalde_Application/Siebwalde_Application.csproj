@@ -170,7 +170,7 @@
     <Compile Include="TrackApplication\Model\TrackAmplifierDataModel.cs" />
     <Compile Include="TrackApplication\Services\PublicEnums.cs" />
     <Compile Include="TrackApplication\Services\TrackAmplifierStructure.cs" />
-    <Compile Include="TrackApplication\ViewModel\TrackAmplifiersViewModel.cs" />
+    <Compile Include="TrackApplication\ViewModel\BaseViewModel.cs" />
     <Compile Include="TrackApplication\TrackController.cs" />
     <Compile Include="PingTarget.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -186,7 +186,9 @@
     <Compile Include="Settings.cs" />
     <Compile Include="TrackApplication\Data\TrackIOHandle.cs" />
     <Compile Include="TrackApplication\Model\TrackApplicationVariables.cs" />
-    <Compile Include="TrackApplication\ViewModel\ViewModelHelpers.cs" />
+    <Compile Include="TrackApplication\ViewModel\RelayCommand.cs" />
+    <Compile Include="TrackApplication\ViewModel\TrackAmplifierCollectionViewModel.cs" />
+    <Compile Include="TrackApplication\ViewModel\TrackAmplifierItemViewModel.cs" />
     <Compile Include="TrackApplication\View\HmiTrackControl.xaml.cs">
       <DependentUpon>HmiTrackControl.xaml</DependentUpon>
     </Compile>
@@ -237,6 +239,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="favicon.ico" />
+    <Content Include="FodyWeavers.xml" />
     <Resource Include="FiddleYardApplication\HalfTrainWithWagon.ico" />
     <Resource Include="FiddleYardApplication\HalfWagon.ico" />
     <Resource Include="FiddleYardApplication\Arrow.ico" />

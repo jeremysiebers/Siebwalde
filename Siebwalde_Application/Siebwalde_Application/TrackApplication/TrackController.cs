@@ -16,10 +16,8 @@ namespace Siebwalde_Application
         public TrackIOHandle trackIOHandle;
         /* Public Enums */
         public PublicEnums mPublicEnums;
-        /* Model */
-        //public TrackApplicationVariables mTrackApplicationVariables;
-        /* ViewModel */        
-        public TrackAmplifiersViewModel mTrackAmplifiersViewModel;
+        /* ViewModel */
+        public TrackAmplifierItemViewModel TrackAmplifierItemViewModel;
 
         public int mTrackSendingPort;
         public int mTrackReceivingPort;
@@ -59,12 +57,7 @@ namespace Siebwalde_Application
             
             trackIOHandle = new TrackIOHandle(mTrackReceivingPort, mTrackSendingPort);
 
-            //mTrackApplicationVariables = new TrackApplicationVariables(mPublicEnums, mTrackReceivingPort, mTrackSendingPort);
-
-
-            //mTrackAmplifiersViewModel = new TrackAmplifiersViewModel(mTrackApplicationVariables);
-            
-            // VIEW is started via MAIN FORM button event.
+            TrackAmplifierItemViewModel = new TrackAmplifierItemViewModel(trackIOHandle);
         }
 
         /*#--------------------------------------------------------------------------#*/

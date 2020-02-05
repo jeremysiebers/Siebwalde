@@ -21,7 +21,7 @@ namespace Siebwalde_Application
         public TrackController MTcontroller;
         public FiddleYardController YDcontroller;
         public MAC_IP_Conditioner MACIPConditioner = new MAC_IP_Conditioner { };
-        public HmiTrackControlForm hmiTrack;
+        public HmiTrackControlForm hmiTrackForm;
 
         private const int LINKACTMAX = 100;
         private string path = @"c:\localdata\Siebwalde\"+ DateTime.Now.Day + "-"+ DateTime.Now.Month + "-"+ DateTime.Now.Year + "_SiebwaldeApplicationMain.txt"; //  different logging file per target, this is default
@@ -168,34 +168,34 @@ namespace Siebwalde_Application
 
         private void MaintrackForm_Click(object sender, EventArgs e)
         {
-            if(hmiTrack != null && hmiTrack.IsDisposed != true)
+            if(hmiTrackForm != null && hmiTrackForm.IsDisposed != true)
             {
-                if (hmiTrack.Visible)
+                if (hmiTrackForm.Visible)
                 {
                     SiebwaldeAppLogging("Main: Hide Main Track interface");
-                    hmiTrack.Hide();
+                    hmiTrackForm.Hide();
                 }
                 else
                 {
                     SiebwaldeAppLogging("Main: Show Main Track interface");
                     //FYFORM.Location = new System.Drawing.Point(LocX + 6, LocY + 80);
-                    hmiTrack.Location = new Point(Location.X, Location.Y + 80);
-                    hmiTrack.Width = Width;
-                    hmiTrack.Height = Height - 80;
-                    hmiTrack.Show();
-                    hmiTrack.TopLevel = true;
-                    hmiTrack.BringToFront();
+                    hmiTrackForm.Location = new Point(Location.X, Location.Y + 80);
+                    hmiTrackForm.Width = Width;
+                    hmiTrackForm.Height = Height - 80;
+                    hmiTrackForm.Show();
+                    hmiTrackForm.TopLevel = true;
+                    hmiTrackForm.BringToFront();
                 }
             }
             else
             {
-                hmiTrack = new HmiTrackControlForm();
-                hmiTrack.Show();
-                hmiTrack.Location = new Point(Location.X, Location.Y + 80);
-                hmiTrack.Width = Width;
-                hmiTrack.Height = Height - 80;
-                hmiTrack.TopLevel = true;
-                hmiTrack.BringToFront();
+                hmiTrackForm = new HmiTrackControlForm();
+                hmiTrackForm.Show();
+                hmiTrackForm.Location = new Point(Location.X, Location.Y + 80);
+                hmiTrackForm.Width = Width;
+                hmiTrackForm.Height = Height - 80;
+                hmiTrackForm.TopLevel = true;
+                hmiTrackForm.BringToFront();
             }
         }
 
