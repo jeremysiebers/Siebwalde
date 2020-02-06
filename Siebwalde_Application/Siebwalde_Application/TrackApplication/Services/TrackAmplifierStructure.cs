@@ -16,11 +16,11 @@ namespace Siebwalde_Application
             // Creat empty list
             var items = new List<TrackAmplifierItem>();
 
-            var arryLength = trackIOHandle.trackAmpItem.Length;
+            var arryLength = trackIOHandle.trackAmpItems.Count;
 
             for(int i=0; i< arryLength; i++)
             {
-                items.Add(trackIOHandle.trackAmpItem[i]);
+                items.Add(trackIOHandle.trackAmpItems[i]);
             }
 
             return items;

@@ -9,7 +9,7 @@ namespace Siebwalde_Application
     {
         /* connect variable to connect to FYController class to Main for application logging */
         public iMain m_iMain;
-        
+
         public PingTarget m_PingTarget = new PingTarget { };
 
         /* Data */
@@ -51,10 +51,12 @@ namespace Siebwalde_Application
             mTrackReceivingPort = TrackReceivingPort;
             mTrackSendingPort = TrackSendingPort;
 
+            mPublicEnums = new PublicEnums();
+
             /*
              * Public ENUM init and pass to all
              */
-            
+
             trackIOHandle = new TrackIOHandle(mTrackReceivingPort, mTrackSendingPort);
 
             TrackAmplifierItemViewModel = new TrackAmplifierItemViewModel(trackIOHandle);

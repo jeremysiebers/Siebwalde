@@ -556,7 +556,7 @@ guimgr.overall-gui-state = {'windowing-policy': 'combined-window',
                  'user_data': {}},
         'window-alloc': (4434,
                          0,
-                         1267,
+                         1281,
                          1091)}]}
 guimgr.recent-documents = [loc('Comm.py'),
                            loc('bootload.py'),

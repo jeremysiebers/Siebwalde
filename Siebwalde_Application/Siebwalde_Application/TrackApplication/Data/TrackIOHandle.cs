@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
@@ -16,7 +17,8 @@ namespace Siebwalde_Application
         public int mTrackSendingPort;
         public int mTrackReceivingPort;
 
-        public TrackAmplifierItem[] trackAmpItem;
+        public List<TrackAmplifierItem> trackAmpItems;
+        private TrackAmplifierItem trackAmp;
 
         /// <summary>
         /// TrackIoHandle Constructor
@@ -34,9 +36,11 @@ namespace Siebwalde_Application
 
             ushort[] HoldingRegInit = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
+            trackAmpItems = new List<TrackAmplifierItem>();
+
             for (ushort i = 0; i < 56; i++)
             {
-                trackAmpItem[i] = new TrackAmplifierItem
+                trackAmpItems.Add(trackAmp = new TrackAmplifierItem
                 {
                     SlaveNumber = i,
                     SlaveDetected = 0,
@@ -46,7 +50,7 @@ namespace Siebwalde_Application
                     MbCommError = 0,
                     MbExceptionCode = 0,
                     SpiCommErrorCounter = 0
-                };
+                });
             }           
 
             mTrackReceiver = new Receiver(mTrackReceivingPort);
@@ -156,16 +160,13 @@ namespace Siebwalde_Application
                 UInt16 SpiCommErrorCounter = reader.ReadByte();
                 UInt16 MbFooter = reader.ReadByte();
 
-                trackAmpItem[SlaveNumber].SlaveDetected = SlaveDetected;
-                trackAmpItem[SlaveNumber].HoldingReg = HoldingReg;
-                trackAmpItem[SlaveNumber].MbReceiveCounter = MbReceiveCounter;
-                trackAmpItem[SlaveNumber].MbSentCounter = MbSentCounter;
-                trackAmpItem[SlaveNumber].MbCommError = MbCommError;
-                trackAmpItem[SlaveNumber].MbExceptionCode = MbExceptionCode;
-                trackAmpItem[SlaveNumber].SpiCommErrorCounter = SpiCommErrorCounter;
-
-                //mTrackApplicationVariables.TrackAmplifierInt[SlaveNumber].UpdateTrackAmplifier(MbHeader, SlaveNumber, SlaveDetected, HoldingReg, 
-                //MbReceiveCounter, MbSentCounter, MbCommError, MbExceptionCode, SpiCommErrorCounter, MbFooter);
+                trackAmpItems[SlaveNumber].SlaveDetected = SlaveDetected;                
+                trackAmpItems[SlaveNumber].HoldingReg = HoldingReg;
+                trackAmpItems[SlaveNumber].MbReceiveCounter = MbReceiveCounter;
+                trackAmpItems[SlaveNumber].MbSentCounter = MbSentCounter;
+                trackAmpItems[SlaveNumber].MbCommError = MbCommError;
+                trackAmpItems[SlaveNumber].MbExceptionCode = MbExceptionCode;
+                trackAmpItems[SlaveNumber].SpiCommErrorCounter = SpiCommErrorCounter;
             }
             else if (Header == mPublicEnums.Header())
             {

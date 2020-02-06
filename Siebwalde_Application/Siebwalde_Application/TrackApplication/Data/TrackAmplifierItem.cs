@@ -1,45 +1,196 @@
 ﻿using System;
+using System.Collections;
+using System.ComponentModel;
 
 namespace Siebwalde_Application
 {
     /// <summary>
     /// Information about a Trackamplifier
     /// </summary>
-    public class TrackAmplifierItem : BaseViewModel
+    public class TrackAmplifierItem : INotifyPropertyChanged
     {
-        public ushort SlaveNumber { get; set; }
+        /// <summary>
+        /// The event that is fired when any child property changes it value
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged = (Sender, e) => { };
 
-        public ushort SlaveDetected { get; set; }
+        #region Private Variables
 
-        public ushort[] HoldingReg { get; set; }
+        private ushort mSlaveNumber;
+        private ushort[] mHoldingReg = new ushort[12];
+        private ushort mMbReceiveCounter;
+        private ushort mSlaveDetected;
+        private ushort mSpiCommErrorCounter;
+        private ushort mMbExceptionCode;
+        private uint mMbCommError;
+        private ushort mMbSentCounter;
 
-        public ushort MbReceiveCounter { get; set; }
+        #endregion
 
-        public ushort MbSentCounter { get; set; }
+        #region Public Methods
 
-        public UInt32 MbCommError { get; set; }
+        /// <summary>
+        /// Get/Set and generate event for SlaveNumber
+        /// </summary>
+        public ushort SlaveNumber {
+            get => mSlaveNumber;            
+            set
+            {
+                if (value == mSlaveNumber)
+                {
+                    return;
+                }
+                else
+                {
+                    mSlaveNumber = value;
+                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(SlaveNumber)));
+                }                               
+            } 
+        }
 
-        public ushort MbExceptionCode { get; set; }
+        /// <summary>
+        /// Get/Set and generate event for SlaveDetected
+        /// </summary>
+        public ushort SlaveDetected
+        {
+            get => mSlaveDetected;
+            set
+            {
+                if (value == mSlaveDetected)
+                {
+                    return;
+                }
+                else
+                {
+                    mSlaveDetected = value;
+                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(SlaveDetected)));
+                }                
+            }
+        }
 
-        public ushort SpiCommErrorCounter { get; set; }
+        /// <summary>
+        /// Get/Set and generate event for HoldingReg
+        /// </summary>
+        
+        public ushort[] HoldingReg
+        {
+            get => mHoldingReg;
+            set
+            {
+                if (((IStructuralEquatable)mHoldingReg).Equals(value, StructuralComparisons.StructuralEqualityComparer))
+                //if (value == mHoldingReg)
+                {
+                    return;                    
+                }
+                else
+                {
+                    //mHoldingReg = value;
+                    Array.Copy(value, 0, mHoldingReg, 0, value.Length);
+                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(HoldingReg)));
+                }           
+            }
+        }
+
+        /// <summary>
+        /// Get/Set and generate event for MbReceiveCounter
+        /// </summary>
+        public ushort MbReceiveCounter
+        {
+            get => mMbReceiveCounter;
+            set
+            {
+                if (value == mMbReceiveCounter)
+                {
+                    return;
+                }
+                else
+                {
+                    mMbReceiveCounter = value;
+                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(MbReceiveCounter)));
+                }                
+            }
+        }
+
+        /// <summary>
+        /// Get/Set and generate event for MbReceiveCounter
+        /// </summary>
+        public ushort MbSentCounter
+        {
+            get => mMbSentCounter;
+            set
+            {
+                if (value == mMbSentCounter)
+                {
+                    return;
+                }
+                else
+                {
+                    mMbSentCounter = value;
+                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(MbSentCounter)));
+                }                
+            }
+        }
+
+        /// <summary>
+        /// Get/Set and generate event for MbReceiveCounter
+        /// </summary>
+        public UInt32 MbCommError
+        {
+            get => mMbCommError;
+            set
+            {
+                if (value == mMbCommError)
+                {
+                    return;
+                }
+                else
+                {
+                    mMbCommError = value;
+                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(MbCommError)));
+                }                
+            }
+        }
+
+        /// <summary>
+        /// Get/Set and generate event for MbReceiveCounter
+        /// </summary>
+        public ushort MbExceptionCode
+        {
+            get => mMbExceptionCode;
+            set
+            {
+                if (value == mMbExceptionCode)
+                {
+                    return;
+                }
+                else
+                {
+                    mMbExceptionCode = value;
+                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(MbExceptionCode)));
+                }                
+            }
+        }
+
+        /// <summary>
+        /// Get/Set and generate event for MbReceiveCounter
+        /// </summary>
+        public ushort SpiCommErrorCounter
+        {
+            get => mSpiCommErrorCounter;
+            set
+            {
+                if (value == mSpiCommErrorCounter)
+                {
+                    return;
+                }
+                else
+                {
+                    mSpiCommErrorCounter = value;
+                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(SpiCommErrorCounter)));
+                }                
+            }
+        }
+
+        #endregion
     }
-
-    //public struct TrackAmpItem
-    //{
-    //    public ushort SlaveNumber, SlaveDetected, MbReceiveCounter, MbSentCounter, MbExceptionCode, SpiCommErrorCounter;
-    //    public UInt32 MbCommError;
-    //    public ushort[] HoldingReg;
-
-    //    public TrackAmpItem(ushort SlaveNumber, ushort SlaveDetected, ushort[] HoldingReg, ushort MbReceiveCounter, ushort MbSentCounter, UInt32 MbCommError, ushort MbExceptionCode, ushort SpiCommErrorCounter)
-    //    {
-    //        this.SlaveNumber = SlaveNumber;
-    //        this.SlaveDetected = SlaveDetected;
-    //        this.HoldingReg = HoldingReg;
-    //        this.MbReceiveCounter = MbReceiveCounter;
-    //        this.MbSentCounter = MbSentCounter;
-    //        this.MbCommError = MbCommError;
-    //        this.MbExceptionCode = MbExceptionCode;
-    //        this.SpiCommErrorCounter = SpiCommErrorCounter;
-    //    }
-    //}
 }
