@@ -20,6 +20,9 @@ namespace Siebwalde_Application
         public List<TrackAmplifierItem> trackAmpItems;
         private TrackAmplifierItem trackAmp;
 
+        public bool mTrackRealMode { get; set; }
+        public EthernetTargetDataSimulator mEthernetTargetDataSimulator;
+
         /// <summary>
         /// TrackIoHandle Constructor
         /// </summary>
@@ -55,35 +58,33 @@ namespace Siebwalde_Application
 
             mTrackReceiver = new Receiver(mTrackReceivingPort);
             mTrackSender = new Sender(mPublicEnums.TrackTarget());
+            mEthernetTargetDataSimulator = new EthernetTargetDataSimulator();
         }
         
-        /*#--------------------------------------------------------------------------#*/
-        /*  Description: IO Handle start
-         *               to  Couple  real target to application to get real sensor feedback
-         *               or to  Couple  simulator output back to application
-         *               Also reset target/simulator to achieve known startup, target
-         *               maybe already be running/initialized
-         *               
-         *
-         *  Input(s)   :
-         *
-         *  Output(s)  :
-         *
-         *  Returns    :
-         *
-         *  Pre.Cond.  :
-         *
-         *  Post.Cond. :
-         *
-         *  Notes      :
-         */
-        /*#--------------------------------------------------------------------------#*/
+        
+        /// <summary>
+        /// Start the TrackIoHandle and check if simulator is active
+        /// </summary>
+        /// <param name="tracksimulator"></param>
+        public void Start(bool trackrealmode)
+        {
 
-        public void Start()
-        {            
-            mTrackSender.ConnectUdp(mTrackSendingPort);
-            mTrackReceiver.NewData += HandleNewData;
-            mTrackReceiver.Start();
+            mTrackRealMode = trackrealmode;
+
+            if (mTrackRealMode == true)
+            {
+                mEthernetTargetDataSimulator.NewData -= HandleNewData;
+                mTrackSender.ConnectUdp(mTrackSendingPort);
+                mTrackReceiver.NewData += HandleNewData;
+                mTrackReceiver.Start();
+            }
+            else if (mTrackRealMode == false)
+            {
+                mTrackReceiver.NewData -= HandleNewData;
+                mEthernetTargetDataSimulator.Start();
+                mEthernetTargetDataSimulator.NewData += HandleNewData;                
+            }
+
         }
 
         /*#--------------------------------------------------------------------------#*/

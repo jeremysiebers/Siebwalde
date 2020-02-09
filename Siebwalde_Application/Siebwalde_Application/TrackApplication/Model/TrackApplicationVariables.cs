@@ -110,7 +110,7 @@ namespace Siebwalde_Application
         /*#--------------------------------------------------------------------------#*/
         public void Start()
         {
-            mTrackIoHandle.Start();
+            mTrackIoHandle.Start(false);
         }
         
         /*#--------------------------------------------------------------------------#*/

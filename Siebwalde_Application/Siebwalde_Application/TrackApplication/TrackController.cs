@@ -14,6 +14,7 @@ namespace Siebwalde_Application
 
         /* Data */
         public TrackIOHandle trackIOHandle;
+        
         /* Public Enums */
         public PublicEnums mPublicEnums;
         /* ViewModel */
@@ -80,15 +81,16 @@ namespace Siebwalde_Application
         /*#--------------------------------------------------------------------------#*/
         public void Start()
         {
-            if (ConnectTrackConntroller() == true) // when connection was succesfull and target was found and is connected
+            bool TrackRealMode = ConnectTrackConntroller();
+            trackIOHandle.Start(TrackRealMode);
+
+            if (TrackRealMode) // when connection was succesfull and target was found and is connected
             {
-                m_iMain.SiebwaldeAppLogging("MTCTRL: Track uController target in real mode.");
-                //mTrackApplicationVariables.Start();
-                trackIOHandle.Start();
+                m_iMain.SiebwaldeAppLogging("MTCTRL: Track uController target in real mode.");                
             }
             else
             {
-                m_iMain.SiebwaldeAppLogging("MTCTRL: Track uController target in simulator mode, not started!");                
+                m_iMain.SiebwaldeAppLogging("MTCTRL: Track uController target in simulator mode!");
             }
         }
 

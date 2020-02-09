@@ -166,6 +166,7 @@
     <Compile Include="TrackApplication\Model\TrackAmplifierDataModel.cs" />
     <Compile Include="TrackApplication\Services\PublicEnums.cs" />
     <Compile Include="TrackApplication\Services\TrackAmplifierStructure.cs" />
+    <Compile Include="TrackApplication\Simulator\EthernetTargetDataSimulator.cs" />
     <Compile Include="TrackApplication\ViewModel\BaseViewModel.cs" />
     <Compile Include="TrackApplication\TrackController.cs" />
     <Compile Include="PingTarget.cs" />
@@ -267,12 +268,12 @@
   <ItemGroup>
     <PublishFile Include="Microsoft.VisualStudio.DebuggerVisualizers">
       <Visible>False</Visible>
+      <PublishState>Exclude</PublishState>
+      <IncludeHash>True</IncludeHash>
       <Group>
       </Group>
       <TargetPath>
       </TargetPath>
-      <PublishState>Exclude</PublishState>
-      <IncludeHash>True</IncludeHash>
       <FileType>Assembly</FileType>
     </PublishFile>
   </ItemGroup>
