@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PropertyChanged;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -20,6 +21,7 @@ namespace Siebwalde_Application
         public List<TrackAmplifierItem> trackAmpItems;
         private TrackAmplifierItem trackAmp;
 
+        [DoNotNotify]
         public bool mTrackRealMode { get; set; }
         public EthernetTargetDataSimulator mEthernetTargetDataSimulator;
 
@@ -61,7 +63,11 @@ namespace Siebwalde_Application
             mEthernetTargetDataSimulator = new EthernetTargetDataSimulator(mPublicEnums);
         }
         
-        
+        public List<TrackAmplifierItem> GetAmplifierListing()
+        {
+            return trackAmpItems;
+        }
+
         /// <summary>
         /// Start the TrackIoHandle and check if simulator is active
         /// </summary>

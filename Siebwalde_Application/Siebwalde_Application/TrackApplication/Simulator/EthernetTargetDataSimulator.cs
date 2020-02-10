@@ -13,13 +13,14 @@ namespace Siebwalde_Application
         private TrackAmplifierItem trackAmp;
         private PublicEnums mPublicEnums;
 
-        private ushort UpdateTrackAmpNo, SendTrackAmpNo;
-        private UInt16[] HoldingReg;
+        private int AmplifiersPresent;
+        //private ushort UpdateTrackAmpNo, SendTrackAmpNo;
+        //private UInt16[] HoldingReg;
+        private readonly Random rand = new Random();
 
         // Create a timer
         private System.Timers.Timer UpdateToTrackIoHandleTimer = new System.Timers.Timer();
         private System.Timers.Timer InternallUpdateDataTimer = new System.Timers.Timer();
-        private Random rng;
 
         // Create event for new data handling towards TrackIoHandle
         public Action<byte[]> NewData;
@@ -31,9 +32,9 @@ namespace Siebwalde_Application
         {
             mPublicEnums = PublicEnums;
 
-            Random rng = new Random();
+            //Random rng = new Random();
 
-            int AmplifiersPresent = rng.Next(1, 56);
+            AmplifiersPresent = rand.Next(1, 51);
 
             trackAmpItems = new List<TrackAmplifierItem>();
 
@@ -44,7 +45,7 @@ namespace Siebwalde_Application
                 trackAmpItems.Add(trackAmp = new TrackAmplifierItem
                 {
                     SlaveNumber = i,
-                    SlaveDetected = i <= AmplifiersPresent && i < 51 ? (ushort)1 : (ushort)0,
+                    SlaveDetected = (i <= AmplifiersPresent) && (i < 51) && (i > 0) ? (ushort)1 : (ushort)0,
                     HoldingReg = HoldingRegInit,
                     MbReceiveCounter = 0,
                     MbSentCounter = 0,
@@ -75,8 +76,8 @@ namespace Siebwalde_Application
                 trackAmpItems[55].SlaveDetected = 1;
             }
 
-            UpdateTrackAmpNo = SendTrackAmpNo = 1;
-            UInt16[] HoldingReg = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, };
+            //UpdateTrackAmpNo = SendTrackAmpNo = 1;
+            //UInt16[] HoldingReg = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, };
         }
 
         /// <summary>
@@ -87,7 +88,7 @@ namespace Siebwalde_Application
             // Event to TrackIoHandleData
             UpdateToTrackIoHandleTimer.Elapsed += new ElapsedEventHandler(UpdateToTrackIoHandle);
             // Set the Interval to [x] miliseconds.
-            UpdateToTrackIoHandleTimer.Interval = 200;
+            UpdateToTrackIoHandleTimer.Interval = 50;
             UpdateToTrackIoHandleTimer.AutoReset = true;
             // Enable the timer
             UpdateToTrackIoHandleTimer.Enabled = true;
@@ -95,7 +96,7 @@ namespace Siebwalde_Application
             // update the simulator data
             InternallUpdateDataTimer.Elapsed += new ElapsedEventHandler(UpdateTrackIoHandleData);
             // Set the Interval to [x] miliseconds.
-            InternallUpdateDataTimer.Interval = 190;
+            InternallUpdateDataTimer.Interval = 10;
             InternallUpdateDataTimer.AutoReset = true;
             // Enable the timer
             InternallUpdateDataTimer.Enabled = true;
@@ -104,7 +105,7 @@ namespace Siebwalde_Application
         }
 
         /// <summary>
-        /// When the timer expires create a new data event to TrackIoHandle
+        /// When the timer expires create a new data event per amplifier to TrackIoHandle
         /// </summary>
         /// <param name="source"></param>
         /// <param name="e"></param>
@@ -113,44 +114,50 @@ namespace Siebwalde_Application
             UpdateToTrackIoHandleTimer.Stop();
             byte[] data = new byte[45];
 
-            data[0] = Convert.ToByte(mPublicEnums.Header());
-            data[1] = Convert.ToByte(mPublicEnums.SlaveInfo());
-            data[2] = Convert.ToByte(mPublicEnums.Header());
-            data[3] = Convert.ToByte(trackAmpItems[SendTrackAmpNo].SlaveNumber);
-            data[4] = Convert.ToByte(trackAmpItems[SendTrackAmpNo].SlaveDetected);
-            data[5] = 0; //Padding byte
-
-            UInt16 j = 0;
-
-            for (UInt16 i = 6; i < 30; i += 2)
+            foreach(TrackAmplifierItem Amp in trackAmpItems)
             {
-                data[i] = Convert.ToByte((trackAmpItems[SendTrackAmpNo].HoldingReg[j] & 0xFF00) >> 8);
-                data[i + 1] = Convert.ToByte(trackAmpItems[SendTrackAmpNo].HoldingReg[j] & 0x00FF);
-                j += 1;
+                if(Amp.SlaveNumber < 51 && Amp.SlaveDetected != 0)
+                {
+                    data[0] = Convert.ToByte(mPublicEnums.Header());
+                    data[1] = Convert.ToByte(mPublicEnums.SlaveInfo());
+                    data[2] = Convert.ToByte(mPublicEnums.Header());
+                    data[3] = Convert.ToByte(Amp.SlaveNumber);
+                    data[4] = Convert.ToByte(Amp.SlaveDetected);
+                    data[5] = 0; //Padding byte
+
+                    UInt16 j = 0;
+
+                    for (UInt16 i = 6; i < 30; i += 2)
+                    {
+                        data[i] = Convert.ToByte(Amp.HoldingReg[j] & 0x00FF);
+                        data[i + 1] = Convert.ToByte((Amp.HoldingReg[j] & 0xFF00) >> 8);
+                        j += 1;
+                    }
+
+                    data[30] = Convert.ToByte(Amp.MbReceiveCounter & 0x00FF);
+                    data[31] = Convert.ToByte((Amp.MbReceiveCounter & 0xFF00) >> 8);
+                    data[32] = Convert.ToByte(Amp.MbSentCounter & 0x00FF);
+                    data[33] = Convert.ToByte((Amp.MbSentCounter & 0xFF00) >> 8);
+
+                    data[34] = Convert.ToByte(Amp.MbCommError & 0x000000FF);
+                    data[35] = Convert.ToByte((Amp.MbCommError & 0x0000FF00) >> 8);
+                    data[36] = Convert.ToByte((Amp.MbCommError & 0x00FF0000) >> 16);
+                    data[37] = Convert.ToByte((Amp.MbCommError & 0xFF000000) >> 24);
+
+                    data[38] = Convert.ToByte(Amp.MbExceptionCode);
+                    data[39] = Convert.ToByte(Amp.SpiCommErrorCounter);
+                    data[40] = Convert.ToByte(mPublicEnums.Footer());
+
+                    NewData(data);
+                }
             }
-                        
-            data[32] = Convert.ToByte((trackAmpItems[SendTrackAmpNo].MbReceiveCounter & 0xFF00) >> 8);
-            data[33] = Convert.ToByte(trackAmpItems[SendTrackAmpNo].MbReceiveCounter & 0x00FF);
-            data[34] = Convert.ToByte((trackAmpItems[SendTrackAmpNo].MbSentCounter & 0xFF00) >> 8);
-            data[35] = Convert.ToByte(trackAmpItems[SendTrackAmpNo].MbSentCounter & 0x00FF);
 
-            data[36] = Convert.ToByte((trackAmpItems[SendTrackAmpNo].MbCommError & 0xFF000000) >> 24);
-            data[37] = Convert.ToByte((trackAmpItems[SendTrackAmpNo].MbCommError & 0x00FF0000) >> 16);
-            data[38] = Convert.ToByte((trackAmpItems[SendTrackAmpNo].MbCommError & 0x0000FF00) >> 8);
-            data[39] = Convert.ToByte(trackAmpItems[SendTrackAmpNo].MbCommError & 0x000000FF);
+            //SendTrackAmpNo++;
 
-            data[40] = Convert.ToByte(trackAmpItems[SendTrackAmpNo].MbExceptionCode);
-            data[41] = Convert.ToByte(trackAmpItems[SendTrackAmpNo].SpiCommErrorCounter);
-            data[42] = Convert.ToByte(mPublicEnums.Footer());
-
-            NewData(data);
-
-            SendTrackAmpNo++;
-
-            if (SendTrackAmpNo > 50)
-            {
-                SendTrackAmpNo = 1;
-            }
+            //if (SendTrackAmpNo > 50)
+            //{
+            //    SendTrackAmpNo = 1;
+            //}
 
             UpdateToTrackIoHandleTimer.Start();
         }
@@ -167,25 +174,43 @@ namespace Siebwalde_Application
         {
             InternallUpdateDataTimer.Stop();
 
-            //Reference to HoldingReg
-            UInt16[] HoldingReg = trackAmpItems[UpdateTrackAmpNo].HoldingReg;
-            //Simulate trackamplifier sent/receive counter
-            HoldingReg[8] += 1;
-            HoldingReg[9] += 1;
-
-            //trackAmpItems[UpdateTrackAmpNo].HoldingReg = HoldingReg;
-            trackAmpItems[UpdateTrackAmpNo].MbReceiveCounter += 1;
-            trackAmpItems[UpdateTrackAmpNo].MbSentCounter += 1;
-            trackAmpItems[UpdateTrackAmpNo].MbCommError = 0;
-            trackAmpItems[UpdateTrackAmpNo].MbExceptionCode = 0;
-            trackAmpItems[UpdateTrackAmpNo].SpiCommErrorCounter = 0;
-
-            UpdateTrackAmpNo++;
-
-            if(UpdateTrackAmpNo > 50)
+            foreach (TrackAmplifierItem Amp in trackAmpItems)
             {
-                UpdateTrackAmpNo = 1;
+                if (Amp.SlaveNumber < 51 || Convert.ToBoolean(Amp.SlaveDetected) == true)
+                {
+                    //Reference to HoldingReg
+                    UInt16[] HoldingReg = Amp.HoldingReg;
+
+                    HoldingReg[0] = Convert.ToUInt16(rand.Next(0, 0xFFFF));
+                    HoldingReg[1] = Convert.ToUInt16(rand.Next(0, 0xFFFF));
+                    HoldingReg[2] = Convert.ToUInt16(rand.Next(0, 0xFFFF));
+                    HoldingReg[3] = Convert.ToUInt16(rand.Next(0, 0xFFFF));
+                    HoldingReg[4] = Convert.ToUInt16(rand.Next(0, 0xFFFF));
+                    HoldingReg[5] = Convert.ToUInt16(rand.Next(0, 0xFFFF));
+                    HoldingReg[6] = Convert.ToUInt16(rand.Next(0, 0xFFFF));
+                    HoldingReg[7] = Convert.ToUInt16(rand.Next(0, 0xFFFF));
+                    HoldingReg[8] = Convert.ToUInt16(rand.Next(0, 0xFFFF));
+                    HoldingReg[11] = Convert.ToUInt16(rand.Next(0, 0xFFFF));
+
+                    //Simulate trackamplifier sent/receive counter
+                    HoldingReg[9] += 1;
+                    HoldingReg[10] += 1;
+
+                    //trackAmpItems[UpdateTrackAmpNo].HoldingReg = HoldingReg;
+                    Amp.MbReceiveCounter += 1;
+                    Amp.MbSentCounter += 1;
+                    Amp.MbCommError = 0;
+                    Amp.MbExceptionCode = 0;
+                    Amp.SpiCommErrorCounter = 0;
+                }
             }
+
+            //UpdateTrackAmpNo++;
+
+            //if(UpdateTrackAmpNo > 50)
+            //{
+            //    UpdateTrackAmpNo = 1;
+            //}
 
             InternallUpdateDataTimer.Start();
         }

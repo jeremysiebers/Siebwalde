@@ -7,10 +7,19 @@
              mc:Ignorable="d" 
              d:DesignHeight="542" d:DesignWidth="1081">
     <Grid>
-        <DataGrid x:Name="ViewTrackamplifiers" HorizontalAlignment="Left" Height="480" Margin="28,22,0,0" VerticalAlignment="Top" Width="988"
-                  ItemsSource="{Binding trackAmplifiers}" AutoGenerateColumns="False">
+        <DataGrid x:Name="ViewTrackamplifiers" HorizontalAlignment="Left" Margin="28,22,0,0" VerticalAlignment="Top"
+                  ItemsSource="{Binding Amps}" AutoGenerateColumns="False">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Slave No" Binding="{Binding SlaveNumber}"/>
+                <DataGridTextColumn Header="Slave Detected" Binding="{Binding SlaveDetected}"/>
+                <DataGridTextColumn Header="Holding Register 0" Binding="{Binding Path=HoldingReg[0]}"/>
+                <DataGridTextColumn Header="Holding Register 9" Binding="{Binding Path=HoldingReg[9]}"/>
+                <DataGridTextColumn Header="Holding Register 10" Binding="{Binding Path=HoldingReg[10]}"/>
+                <DataGridTextColumn Header="Modbus Master Data Received Counter" Binding="{Binding MbReceiveCounter}"/>
+                <DataGridTextColumn Header="Modbus Master Data Sent Counter" Binding="{Binding MbSentCounter}"/>
+                <DataGridTextColumn Header="Modbus Communication Error" Binding="{Binding MbCommError}"/>
+                <DataGridTextColumn Header="Modbus ExceptionCode" Binding="{Binding MbExceptionCode}"/>
+                <DataGridTextColumn Header="SpiCommErrorCounter" Binding="{Binding SpiCommErrorCounter}"/>
             </DataGrid.Columns>
         </DataGrid>
     </Grid>
