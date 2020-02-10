@@ -58,7 +58,7 @@ namespace Siebwalde_Application
 
             mTrackReceiver = new Receiver(mTrackReceivingPort);
             mTrackSender = new Sender(mPublicEnums.TrackTarget());
-            mEthernetTargetDataSimulator = new EthernetTargetDataSimulator();
+            mEthernetTargetDataSimulator = new EthernetTargetDataSimulator(mPublicEnums);
         }
         
         
