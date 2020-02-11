@@ -192,10 +192,10 @@ namespace Siebwalde_Application
                 m_iFYCtrl.GetFYReceiver().NewData += HandleNewData;                
             }
             else if (m_FYSimulatorActive == true)
-            {
-                FYSimulator.Start();
+            {                
                 m_iFYCtrl.GetFYReceiver().NewData -= HandleNewData;
-                FYSimulator.NewData += HandleNewData;                
+                FYSimulator.NewData += HandleNewData;
+                FYSimulator.Start();
             }
 
             //ActuatorCmd("Reset", Layer + "J\r");            // Reset Fiddle Yard layer to reset target in order to sync C# application and C embedded software --> not required due to all intelligence to FY application

@@ -23,7 +23,7 @@ namespace Siebwalde_Application.TrackApplication.View
         {
             UInt16[] HoldingRegInit = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
             InitializeComponent();
-            this.DataContext = new TrackAmplifierItemViewModel(main, 0, 0, HoldingRegInit, 0, 0, 0, 0, 0);
+            this.DataContext = new TrackAmplifierItemViewModel(main, 0, "", HoldingRegInit, 0, 0, 0, 0, 0);
 
         }
     }

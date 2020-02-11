@@ -34,7 +34,7 @@ namespace Siebwalde_Application
 
             //Random rng = new Random();
 
-            AmplifiersPresent = rand.Next(1, 51);
+            AmplifiersPresent = 50;// rand.Next(1, 51);
 
             trackAmpItems = new List<TrackAmplifierItem>();
 
@@ -88,7 +88,7 @@ namespace Siebwalde_Application
             // Event to TrackIoHandleData
             UpdateToTrackIoHandleTimer.Elapsed += new ElapsedEventHandler(UpdateToTrackIoHandle);
             // Set the Interval to [x] miliseconds.
-            UpdateToTrackIoHandleTimer.Interval = 50;
+            UpdateToTrackIoHandleTimer.Interval = 500;
             UpdateToTrackIoHandleTimer.AutoReset = true;
             // Enable the timer
             UpdateToTrackIoHandleTimer.Enabled = true;
@@ -96,7 +96,7 @@ namespace Siebwalde_Application
             // update the simulator data
             InternallUpdateDataTimer.Elapsed += new ElapsedEventHandler(UpdateTrackIoHandleData);
             // Set the Interval to [x] miliseconds.
-            InternallUpdateDataTimer.Interval = 10;
+            InternallUpdateDataTimer.Interval = 100;
             InternallUpdateDataTimer.AutoReset = true;
             // Enable the timer
             InternallUpdateDataTimer.Enabled = true;

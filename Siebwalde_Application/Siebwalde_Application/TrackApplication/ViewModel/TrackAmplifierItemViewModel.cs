@@ -32,7 +32,7 @@ namespace Siebwalde_Application
         /// </summary>
         public TrackAmplifierItemViewModel(Main main,
             ushort slaveNumber,
-            ushort slaveDetected,
+            string slaveDetected,
             ushort[] holdingReg,
             ushort mbReceiveCounter,
             ushort mbSentCounter,
@@ -98,7 +98,7 @@ namespace Siebwalde_Application
 
             switch (e.PropertyName.ToString())
             {
-                case "SlaveDetected": { EventFrom.SlaveDetected = Convert.ToUInt16(sender.GetType().GetProperty("SlaveDetected").GetValue(sender)); break;}
+                case "SlaveDetected": { EventFrom.SlaveDetected = Convert.ToBoolean(sender.GetType().GetProperty("SlaveDetected").GetValue(sender)) ? ("Yes") : ("No"); break;}
                 case "HoldingReg":
                     {
                         var array = sender.GetType().GetProperty("HoldingReg").GetValue(sender);
@@ -129,7 +129,7 @@ namespace Siebwalde_Application
             this.Amps = new ObservableCollection<TrackAmplifierItemViewModel>(amps.Select(content => new TrackAmplifierItemViewModel
             (null,
             content.SlaveNumber,
-            content.SlaveDetected,
+            Convert.ToBoolean(content.SlaveDetected) ? ("Yes") : ("No"),
             content.HoldingReg,
             content.MbReceiveCounter,
             content.MbSentCounter,
@@ -153,7 +153,7 @@ namespace Siebwalde_Application
         /// <summary>
         /// If a slave is detected by the master
         /// </summary>
-        public ushort SlaveDetected { get; set; }
+        public string SlaveDetected { get; set; }
 
         /// <summary>
         /// If a slave is detected by the master
