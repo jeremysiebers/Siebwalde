@@ -35,7 +35,7 @@
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
-    <ApplicationRevision>10</ApplicationRevision>
+    <ApplicationRevision>12</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -79,7 +79,7 @@
     <GenerateManifests>true</GenerateManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <TargetZone>Internet</TargetZone>
+    <TargetZone>LocalIntranet</TargetZone>
   </PropertyGroup>
   <PropertyGroup />
   <PropertyGroup>
@@ -94,6 +94,9 @@
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>Siebwalde_Application_TemporaryKey.pfx</AssemblyOriginatorKeyFile>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>Siebwalde_Application.Program</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -103,6 +106,7 @@
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -122,7 +126,7 @@
     <Compile Include="AboutBox1.Designer.cs">
       <DependentUpon>AboutBox1.cs</DependentUpon>
     </Compile>
-    <Compile Include="CropBitmap.cs" />
+    <Compile Include="Services\CropBitmap.cs" />
     <Compile Include="FiddleYardApplication\FiddleYardApplicationVariables.cs" />
     <Compile Include="FiddleYardApplication\FiddleYardAppRun.cs" />
     <Compile Include="FiddleYardApplication\FiddleYardAppTrainDrive.cs" />
@@ -150,8 +154,8 @@
     <Compile Include="FiddleYardSimulator\FiddleYardSimulator.cs" />
     <Compile Include="FiddleYardApplication\FiddleYardIOHandle.cs" />
     <Compile Include="FiddleYardSimulator\FiddleYardSimulatorVariables.cs" />
-    <Compile Include="Log2LoggingFile.cs" />
-    <Compile Include="MAC_IP_Conditioner.cs" />
+    <Compile Include="Services\Log2LoggingFile.cs" />
+    <Compile Include="Services\MAC_IP_Conditioner.cs" />
     <Compile Include="FiddleYardApplication\FiddleYardController.cs" />
     <Compile Include="FiddleYardApplication\FiddleYardForm.cs">
       <SubType>Form</SubType>
@@ -173,18 +177,18 @@
     <Compile Include="TrackApplication\Simulator\EthernetTargetDataSimulator.cs" />
     <Compile Include="TrackApplication\ViewModel\BaseViewModel.cs" />
     <Compile Include="TrackApplication\TrackController.cs" />
-    <Compile Include="PingTarget.cs" />
+    <Compile Include="Services\PingTarget.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Receiver.cs" />
-    <Compile Include="ScaleBitmap.cs" />
-    <Compile Include="SenActCmdMes.cs" />
-    <Compile Include="Sender.cs" />
-    <Compile Include="Settings.cs" />
+    <Compile Include="Services\Receiver.cs" />
+    <Compile Include="Services\ScaleBitmap.cs" />
+    <Compile Include="Services\SenActCmdMes.cs" />
+    <Compile Include="Services\Sender.cs" />
+    <Compile Include="Services\Settings.cs" />
     <Compile Include="TrackApplication\Data\TrackIOHandle.cs" />
     <Compile Include="TrackApplication\Model\TrackApplicationVariables.cs" />
     <Compile Include="TrackApplication\ViewModel\RelayCommand.cs" />
