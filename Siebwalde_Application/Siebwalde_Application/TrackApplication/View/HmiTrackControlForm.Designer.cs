@@ -26,11 +26,11 @@
         /// Required method for Designer support - do not modify
         /// the contents of this method with the code editor.
         /// </summary>
-        private void InitializeComponent(Main main)
+        private void InitializeComponent(TrackController trackController)
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(HmiTrackControlForm));
             this.HmiTrackControl = new System.Windows.Forms.Integration.ElementHost();
-            this.hmiTrackControl1 = new Siebwalde_Application.TrackApplication.View.HmiTrackControl(main);
+            this.hmiTrackControl1 = new Siebwalde_Application.TrackApplication.View.HmiTrackControl(trackController);
             this.SuspendLayout();
             // 
             // HmiTrackControl

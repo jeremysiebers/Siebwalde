@@ -15,8 +15,7 @@ namespace Siebwalde_Application
         #region variables
 
         private TrackController MTcontroller;
-        private TrackIOHandle trackIOHandle;
-        private Main mMain;
+        //private TrackIOHandle trackIOHandle;
 
         /// <summary>
         /// A list of all children contained inside this item
@@ -30,7 +29,7 @@ namespace Siebwalde_Application
         /// <summary>
         /// Construct all related classes as shown in MVVM examples
         /// </summary>
-        public TrackAmplifierItemViewModel(Main main,
+        public TrackAmplifierItemViewModel(TrackController trackController,
             ushort slaveNumber,
             string slaveDetected,
             ushort[] holdingReg,
@@ -40,13 +39,22 @@ namespace Siebwalde_Application
             ushort mbExceptionCode,
             ushort spiCommErrorCounter)
         {
-            mMain = main;
-            if(mMain != null)
+            
+            if(trackController != null)//mMain != null)
             {
-                int TrackControllerSendingport = 10000;
-                int TrackControllerReceivingport = 10001;
-                MTcontroller = new TrackController(this, TrackControllerReceivingport, TrackControllerSendingport, mMain);
-                MTcontroller.Start();
+                MTcontroller = trackController;
+
+                foreach (TrackAmplifierItem amplifier in MTcontroller.trackIOHandle.trackAmpItems)//this.trackIOHandle.trackAmpItems)
+                {
+                    amplifier.PropertyChanged += new PropertyChangedEventHandler(Amplifier_PropertyChanged);
+                }
+
+                FillTheCollection();
+
+                //    //int TrackControllerSendingport = 10000;
+                //    //int TrackControllerReceivingport = 10001;
+                //    //MTcontroller = new TrackController(this, TrackControllerReceivingport, TrackControllerSendingport, mMain);
+                //    //MTcontroller.Start();
             }
             if(slaveNumber != 0)
             {
@@ -58,8 +66,7 @@ namespace Siebwalde_Application
                 MbCommError = mbCommError;
                 MbExceptionCode = mbExceptionCode;
                 SpiCommErrorCounter = spiCommErrorCounter;
-            }
-            
+            }            
         }
 
         #endregion
@@ -70,17 +77,17 @@ namespace Siebwalde_Application
         /// Hookup the TrackIoHandle which is intantiated via the TrackController (at this time)
         /// </summary>
         /// <param name="trackIOHandle"></param>
-        public void TrackAmplifierItemViewModelPassTrackIoHandle(TrackIOHandle trackIOHandle)
-        {
-            this.trackIOHandle = trackIOHandle;
+        //public void TrackAmplifierItemViewModelPassTrackIoHandle(TrackIOHandle trackIOHandle)
+        //{
+        //    this.trackIOHandle = trackIOHandle;
 
-            foreach (TrackAmplifierItem amplifier in this.trackIOHandle.trackAmpItems)
-            {
-                amplifier.PropertyChanged += new PropertyChangedEventHandler(Amplifier_PropertyChanged);
-            }
+        //    foreach (TrackAmplifierItem amplifier in this.trackIOHandle.trackAmpItems)
+        //    {
+        //        amplifier.PropertyChanged += new PropertyChangedEventHandler(Amplifier_PropertyChanged);
+        //    }
 
-            FillTheCollection();
-        }
+        //    FillTheCollection();
+        //}
 
         /// <summary>
         /// Property changed event handler of slaves proprties in the data model pass to viewmodel ObservableCollection of TrackAmplifierItemViewModel
@@ -125,7 +132,7 @@ namespace Siebwalde_Application
         /// </summary>
         private void FillTheCollection()
         {
-            var amps = this.trackIOHandle.GetAmplifierListing();
+            var amps = MTcontroller.trackIOHandle.GetAmplifierListing(); // this.trackIOHandle.GetAmplifierListing();
             this.Amps = new ObservableCollection<TrackAmplifierItemViewModel>(amps.Select(content => new TrackAmplifierItemViewModel
             (null,
             content.SlaveNumber,
@@ -184,6 +191,15 @@ namespace Siebwalde_Application
         /// The recieved mod bus messages counted by the master
         /// </summary>
         public ushort SpiCommErrorCounter { get; set; }
+
+        #endregion
+
+        #region Closing event handler
+
+        public void OnWindowClosing(object sender, CancelEventArgs e)
+        {
+           
+        }
 
         #endregion
 

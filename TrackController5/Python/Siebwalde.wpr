@@ -21,10 +21,6 @@ proj.file-list = [loc('bootload.py'),
 proj.file-type = 'normal'
 proj.main-file = loc('TrackController.py')
 [user attributes]
-debug.breakpoints = {loc('StateMachines.py'): {590L: (0,
-        None,
-        1,
-        0)}}
 debug.err-values = {loc('Comm.py'): {},
                     loc('TrackController.py'): {}}
 debug.show-args-dialog = {loc('Comm.py'): False,
@@ -543,10 +539,10 @@ guimgr.overall-gui-state = {'windowing-policy': 'combined-window',
          loc('Enum.py'),
          loc('StateMachines.py'),
          loc('TrackController.py')]),
-                               'open_files': [u'Enum.py',
+                               'open_files': [u'Comm.py',
+        u'Enum.py',
         u'TrackController.py',
         u'bootload.py',
-        u'Comm.py',
         u'StateMachines.py']},
         'saved_notebook_display': None,
         'split_percents': {0: 0.2960698689956332},
@@ -563,8 +559,8 @@ guimgr.overall-gui-state = {'windowing-policy': 'combined-window',
                          1295,
                          1091)}]}
 guimgr.recent-documents = [loc('StateMachines.py'),
-                           loc('Comm.py'),
                            loc('bootload.py'),
+                           loc('Comm.py'),
                            loc('Enum.py'),
                            loc('TrackController.py')]
 guimgr.visual-state = {loc('../../TrackAmplifierBootLoader.X/Python/bootload.py'): {'a'\

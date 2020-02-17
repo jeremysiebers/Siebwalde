@@ -92,20 +92,20 @@ namespace Siebwalde_Application
 
         private void StartMTController()
         {
-            //int TrackControllerSendingport = 10000;
-            //int TrackControllerReceivingport = 10001;
-            //MTcontroller = new TrackController(this, TrackControllerReceivingport, TrackControllerSendingport);
-            //MTcontroller.Start();
+            int TrackControllerSendingport = 10000;
+            int TrackControllerReceivingport = 10001;
+            MTcontroller = new TrackController(this, TrackControllerReceivingport, TrackControllerSendingport);
+            MTcontroller.Start();
             MaintrackForm.Visible = true;
             SiebwaldeAppLogging("Main: Track Controller started.");
 
-            hmiTrackForm = new HmiTrackControlForm(this);
-            hmiTrackForm.Show();
-            hmiTrackForm.Location = new Point(Location.X, Location.Y + 80);
-            hmiTrackForm.Width = Width;
-            hmiTrackForm.Height = Height - 80;
-            hmiTrackForm.TopLevel = true;
-            hmiTrackForm.BringToFront();
+            //hmiTrackForm = new HmiTrackControlForm(MTcontroller);
+            //hmiTrackForm.Show();
+            //hmiTrackForm.Location = new Point(Location.X, Location.Y + 80);
+            //hmiTrackForm.Width = Width;
+            //hmiTrackForm.Height = Height - 80;
+            //hmiTrackForm.TopLevel = true;
+            //hmiTrackForm.BringToFront();
         }
 
         private void StartYARDController()
@@ -196,7 +196,7 @@ namespace Siebwalde_Application
             }
             else
             {
-                hmiTrackForm = new HmiTrackControlForm(this);
+                hmiTrackForm = new HmiTrackControlForm(MTcontroller);
                 hmiTrackForm.Show();
                 hmiTrackForm.Location = new Point(Location.X, Location.Y + 80);
                 hmiTrackForm.Width = Width;

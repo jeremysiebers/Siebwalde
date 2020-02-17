@@ -154,7 +154,7 @@
             this.FiddleYardFormTop.Name = "FiddleYardFormTop";
             this.FiddleYardFormTop.Size = new System.Drawing.Size(150, 23);
             this.FiddleYardFormTop.TabIndex = 26;
-            this.FiddleYardFormTop.Text = "Show Fiddle Yard";
+            this.FiddleYardFormTop.Text = "Fiddle Yard Interface";
             this.FiddleYardFormTop.UseVisualStyleBackColor = true;
             this.FiddleYardFormTop.Click += new System.EventHandler(this.FiddleYardFormTop_Click);
             // 

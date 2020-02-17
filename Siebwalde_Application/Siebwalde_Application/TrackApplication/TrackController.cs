@@ -18,7 +18,7 @@ namespace Siebwalde_Application
         /* Public Enums */
         public PublicEnums mPublicEnums;
         /* ViewModel */
-        public TrackAmplifierItemViewModel mTrackAmplifierItemViewModel;
+        //public TrackAmplifierItemViewModel mTrackAmplifierItemViewModel;
 
         public int mTrackSendingPort;
         public int mTrackReceivingPort;
@@ -42,7 +42,7 @@ namespace Siebwalde_Application
          *  Notes      :
          */
         /*#--------------------------------------------------------------------------#*/
-        public TrackController(TrackAmplifierItemViewModel trackAmplifierItemViewModel ,int TrackReceivingPort, int TrackSendingPort, Main main)
+        public TrackController(Main main, int TrackReceivingPort, int TrackSendingPort)
         {
             /*
              * connect to Main interface for application text logging and link activity 
@@ -51,7 +51,6 @@ namespace Siebwalde_Application
             //mMain = iMainCtrl;
             mTrackReceivingPort = TrackReceivingPort;
             mTrackSendingPort = TrackSendingPort;
-            mTrackAmplifierItemViewModel = trackAmplifierItemViewModel;
             mMain = main;
 
             mPublicEnums = new PublicEnums();
@@ -61,7 +60,7 @@ namespace Siebwalde_Application
              */
 
             trackIOHandle = new TrackIOHandle(mTrackReceivingPort, mTrackSendingPort);
-            mTrackAmplifierItemViewModel.TrackAmplifierItemViewModelPassTrackIoHandle(trackIOHandle);
+            //mTrackAmplifierItemViewModel.TrackAmplifierItemViewModelPassTrackIoHandle(trackIOHandle);
 
             //TrackAmplifierItemViewModel = new TrackAmplifierItemViewModel(trackIOHandle);
 

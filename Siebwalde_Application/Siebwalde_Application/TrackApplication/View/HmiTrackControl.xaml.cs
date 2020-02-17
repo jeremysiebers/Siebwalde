@@ -19,11 +19,23 @@ namespace Siebwalde_Application.TrackApplication.View
     /// </summary>
     public partial class HmiTrackControl : UserControl
     {
-        public HmiTrackControl(Main main)
+        /// <summary>
+        /// Hold the TrackController instance
+        /// </summary>
+        private TrackController mTrackController;
+        private TrackAmplifierItemViewModel trackAmplifierItemViewModel;
+
+        public HmiTrackControl(TrackController trackController)
         {
+            mTrackController = trackController;
+
             UInt16[] HoldingRegInit = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
             InitializeComponent();
-            this.DataContext = new TrackAmplifierItemViewModel(main, 0, "", HoldingRegInit, 0, 0, 0, 0, 0);
+
+            trackAmplifierItemViewModel = new TrackAmplifierItemViewModel(mTrackController, 0, "", HoldingRegInit, 0, 0, 0, 0, 0);
+
+            this.DataContext = trackAmplifierItemViewModel;           
         }
     }
 }
