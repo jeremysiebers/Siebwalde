@@ -183,7 +183,12 @@ namespace Siebwalde_Application
 
                 //mTrackApplicationVariables.EthTargetMessage.UpdateEthernetTargetMessage(Sender, taskcommand, taskstate, taskmessage);
             }
-            
+
+
+            // dispose of object data
+            reader.Dispose();
+            stream.Dispose();
+
             //m_iMTCtrl.MTLinkActivityUpdate();
         }
                 

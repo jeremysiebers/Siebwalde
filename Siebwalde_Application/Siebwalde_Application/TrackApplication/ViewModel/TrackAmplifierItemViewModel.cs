@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Windows.Input;
 
 namespace Siebwalde_Application
 {
@@ -16,6 +17,11 @@ namespace Siebwalde_Application
 
         private TrackController MTcontroller;
         //private TrackIOHandle trackIOHandle;
+
+        /// <summary>
+        /// Binding variable to couple to window closing interaction
+        /// </summary>
+        public ICommand OnWindowClosingCommand { get; set; }
 
         /// <summary>
         /// A list of all children contained inside this item
@@ -44,17 +50,18 @@ namespace Siebwalde_Application
             {
                 MTcontroller = trackController;
 
+                // create new relaycommand called WindowClosingCommand and run OnWindowClosing() when called from XAML
+                this.OnWindowClosingCommand = new RelayCommand(OnWindowClosing);
+
+                // Subscribe every trackAmpItem to the propertyChanged method of amplifier
                 foreach (TrackAmplifierItem amplifier in MTcontroller.trackIOHandle.trackAmpItems)//this.trackIOHandle.trackAmpItems)
                 {
                     amplifier.PropertyChanged += new PropertyChangedEventHandler(Amplifier_PropertyChanged);
                 }
 
+                // call funciton to create the observable collection
                 FillTheCollection();
 
-                //    //int TrackControllerSendingport = 10000;
-                //    //int TrackControllerReceivingport = 10001;
-                //    //MTcontroller = new TrackController(this, TrackControllerReceivingport, TrackControllerSendingport, mMain);
-                //    //MTcontroller.Start();
             }
             if(slaveNumber != 0)
             {
@@ -72,23 +79,7 @@ namespace Siebwalde_Application
         #endregion
 
         #region Couple and Subscribe to Model property changed events
-
-        /// <summary>
-        /// Hookup the TrackIoHandle which is intantiated via the TrackController (at this time)
-        /// </summary>
-        /// <param name="trackIOHandle"></param>
-        //public void TrackAmplifierItemViewModelPassTrackIoHandle(TrackIOHandle trackIOHandle)
-        //{
-        //    this.trackIOHandle = trackIOHandle;
-
-        //    foreach (TrackAmplifierItem amplifier in this.trackIOHandle.trackAmpItems)
-        //    {
-        //        amplifier.PropertyChanged += new PropertyChangedEventHandler(Amplifier_PropertyChanged);
-        //    }
-
-        //    FillTheCollection();
-        //}
-
+                
         /// <summary>
         /// Property changed event handler of slaves proprties in the data model pass to viewmodel ObservableCollection of TrackAmplifierItemViewModel
         /// </summary>
@@ -195,10 +186,16 @@ namespace Siebwalde_Application
         #endregion
 
         #region Closing event handler
-
-        public void OnWindowClosing(object sender, CancelEventArgs e)
+        /// <summary>
+        /// On window close event unregister property changed events and clear the ObservableCollection
+        /// </summary>
+        public void OnWindowClosing()
         {
-           
+            foreach (TrackAmplifierItem amplifier in MTcontroller.trackIOHandle.trackAmpItems)//this.trackIOHandle.trackAmpItems)
+            {
+                amplifier.PropertyChanged -= new PropertyChangedEventHandler(Amplifier_PropertyChanged);
+            }
+            this.Amps.Clear();
         }
 
         #endregion

@@ -1,16 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace Siebwalde_Application.TrackApplication.View
 {
@@ -23,6 +14,7 @@ namespace Siebwalde_Application.TrackApplication.View
         /// Hold the TrackController instance
         /// </summary>
         private TrackController mTrackController;
+
         private TrackAmplifierItemViewModel trackAmplifierItemViewModel;
 
         public HmiTrackControl(TrackController trackController)
@@ -35,7 +27,12 @@ namespace Siebwalde_Application.TrackApplication.View
 
             trackAmplifierItemViewModel = new TrackAmplifierItemViewModel(mTrackController, 0, "", HoldingRegInit, 0, 0, 0, 0, 0);
 
-            this.DataContext = trackAmplifierItemViewModel;           
+            this.DataContext = trackAmplifierItemViewModel;
+        }
+
+        void DataWindow_Closing(object sender, RoutedEventArgs e)
+        {
+            trackAmplifierItemViewModel.OnWindowClosing();
         }
     }
 }

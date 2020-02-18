@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 using System.Timers;
-
+using System.Windows.Forms;
 
 namespace Siebwalde_Application
 {
@@ -166,7 +166,19 @@ namespace Siebwalde_Application
             else if (m_instance == "BOT")
                 FYFORM.Location = new System.Drawing.Point(LocX + width / 2, LocY + 80);  //960
             FYFORM.AutoScroll = autoscroll;
-            FYFORM.FYFORMShow(View);
+
+            if (View && FYFORM.WindowState != FormWindowState.Minimized)
+            {
+                FYFORM.FYFORMShow(View);                               
+            }
+            else if (!View && FYFORM.WindowState != FormWindowState.Minimized)
+            {
+                FYFORM.FYFORMShow(View);
+            }
+            else
+            {
+                FYFORM.WindowState = FormWindowState.Normal;
+            }
         }
 
         /*#--------------------------------------------------------------------------#*/

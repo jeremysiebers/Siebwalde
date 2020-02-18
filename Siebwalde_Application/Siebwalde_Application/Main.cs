@@ -136,7 +136,7 @@ namespace Siebwalde_Application
                 SiebwaldeAppLogging("Main: Hide Fiddle Yard Top Layer interface");
                 FiddleYardFormTop.Text = "Show Fiddle Yard"; 
             }
-                        
+            
             if (this.Height < 1200 || this.Width < 1920)
                 autoscroll = true;
             else { autoscroll = false; }
@@ -154,6 +154,7 @@ namespace Siebwalde_Application
             }
         }
 
+        // no used
         private void FiddleYardFormBot_Click(object sender, EventArgs e)
         {
             bool autoscroll;
@@ -178,7 +179,7 @@ namespace Siebwalde_Application
         {
             if(hmiTrackForm != null && hmiTrackForm.IsDisposed != true)
             {
-                if (hmiTrackForm.Visible)
+                if (hmiTrackForm.Visible && hmiTrackForm.WindowState != FormWindowState.Minimized)
                 {
                     SiebwaldeAppLogging("Main: Hide Main Track interface");
                     hmiTrackForm.Hide();
@@ -192,6 +193,11 @@ namespace Siebwalde_Application
                     hmiTrackForm.Show();
                     hmiTrackForm.TopLevel = true;
                     hmiTrackForm.BringToFront();
+
+                    if(hmiTrackForm.WindowState == FormWindowState.Minimized)
+                    {
+                        hmiTrackForm.WindowState = FormWindowState.Normal;
+                    }
                 }
             }
             else
