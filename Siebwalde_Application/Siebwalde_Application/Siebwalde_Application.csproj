@@ -112,12 +112,18 @@
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="Prism, Version=7.2.0.1422, Culture=neutral, PublicKeyToken=40ee6c3a2184dc59, processorArchitecture=MSIL">
+      <HintPath>..\packages\Prism.Core.7.2.0.1422\lib\net45\Prism.dll</HintPath>
+    </Reference>
     <Reference Include="PropertyChanged, Version=3.2.6.0, Culture=neutral, PublicKeyToken=ee3ee20bcf148ddd, processorArchitecture=MSIL">
       <HintPath>..\packages\PropertyChanged.Fody.3.2.6\lib\net40\PropertyChanged.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
+    </Reference>
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\MvvmLightLibs.5.4.1.1\lib\net45\System.Windows.Interactivity.dll</HintPath>
@@ -185,10 +191,9 @@
       <DependentUpon>Main.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
-    <Compile Include="TrackApplication\Data\TrackAmplifierItem.cs" />
-    <Compile Include="TrackApplication\Model\TrackAmplifierDataModel.cs" />
+    <Compile Include="TrackApplication\Controller\TrackControlMain.cs" />
+    <Compile Include="TrackApplication\Model\TrackAmplifierItem.cs" />
     <Compile Include="TrackApplication\Services\PublicEnums.cs" />
-    <Compile Include="TrackApplication\Services\TrackAmplifierStructure.cs" />
     <Compile Include="TrackApplication\Simulator\EthernetTargetDataSimulator.cs" />
     <Compile Include="TrackApplication\ViewModel\BaseViewModel.cs" />
     <Compile Include="TrackApplication\TrackController.cs" />
@@ -205,7 +210,8 @@
     <Compile Include="Services\Sender.cs" />
     <Compile Include="Services\Settings.cs" />
     <Compile Include="TrackApplication\Data\TrackIOHandle.cs" />
-    <Compile Include="TrackApplication\Model\TrackApplicationVariables.cs" />
+    <Compile Include="TrackApplication\Data\TrackApplicationVariables.cs" />
+    <Compile Include="TrackApplication\ViewModel\HmiTrackControlViewModel.cs" />
     <Compile Include="TrackApplication\ViewModel\RelayCommand.cs" />
     <Compile Include="TrackApplication\ViewModel\TrackAmplifierItemViewModel.cs" />
     <Compile Include="TrackApplication\View\HmiTrackControl.xaml.cs">
@@ -216,6 +222,9 @@
     </Compile>
     <Compile Include="TrackApplication\View\HmiTrackControlForm.Designer.cs">
       <DependentUpon>HmiTrackControlForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="TrackApplication\View\TrackAmplifierItemView.xaml.cs">
+      <DependentUpon>TrackAmplifierItemView.xaml</DependentUpon>
     </Compile>
     <EmbeddedResource Include="AboutBox1.resx">
       <DependentUpon>AboutBox1.cs</DependentUpon>
@@ -303,6 +312,10 @@
   <ItemGroup />
   <ItemGroup>
     <Page Include="TrackApplication\View\HmiTrackControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="TrackApplication\View\TrackAmplifierItemView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

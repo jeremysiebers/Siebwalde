@@ -10,13 +10,15 @@ namespace Siebwalde_Application
     /// Get data from Ethernet Target
     /// </summary>
     public class TrackIOHandle
-    {   
-        public Sender mTrackSender;
-        public Receiver mTrackReceiver;
-        public PublicEnums mPublicEnums;
+    {
+        private Sender mTrackSender;
+        private Receiver mTrackReceiver;
+        private PublicEnums mPublicEnums;
+        /* connect variable to connect to FYController class to Main for application logging */
+        private Main mMain;
 
-        public int mTrackSendingPort;
-        public int mTrackReceivingPort;
+        private int mTrackSendingPort;
+        private int mTrackReceivingPort;
 
         public List<TrackAmplifierItem> trackAmpItems;
         private TrackAmplifierItem trackAmp;
@@ -32,8 +34,9 @@ namespace Siebwalde_Application
         /// <param name="TrackReceivingPort"></param>
         /// <param name="TrackSendingPort"></param>
         /// <param name="trackApplicationVariables"></param>
-        public TrackIOHandle(int TrackReceivingPort, int TrackSendingPort)
+        public TrackIOHandle(Main main, int TrackReceivingPort, int TrackSendingPort)
         {
+            mMain = main;
             mTrackReceivingPort = TrackReceivingPort;
             mTrackSendingPort = TrackSendingPort;
 
@@ -80,15 +83,18 @@ namespace Siebwalde_Application
             if (mTrackRealMode == true)
             {
                 mEthernetTargetDataSimulator.NewData -= HandleNewData;
+                mMain.SiebwaldeAppLogging("MTCTRL: Track controller Connecting...");
                 mTrackSender.ConnectUdp(mTrackSendingPort);
                 mTrackReceiver.NewData += HandleNewData;
+                mMain.SiebwaldeAppLogging("MTCTRL: Track controller Connected.");
                 mTrackReceiver.Start();
             }
             else if (mTrackRealMode == false)
             {
                 mTrackReceiver.NewData -= HandleNewData;
                 mEthernetTargetDataSimulator.Start();
-                mEthernetTargetDataSimulator.NewData += HandleNewData;                
+                mEthernetTargetDataSimulator.NewData += HandleNewData;
+                mMain.SiebwaldeAppLogging("MTCTRL: Track controller Simulator started.");
             }
 
         }

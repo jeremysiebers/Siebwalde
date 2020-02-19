@@ -6,7 +6,7 @@
 #     Harmony version: 2.06
 #
 #
-# from C:\GIT_REPOS\Siebwalde-Source\TrackController5\firmware\TrackController5.hconfig
+# from C:\GIT-REPOS\Siebwalde\TrackController5\firmware\TrackController5.hconfig
 #
 CONFIG_APP_INSTANCES=3
 #
@@ -22,7 +22,7 @@ CONFIG_APP_MENU_IDX2=y
 CONFIG_APP_NAME_2="controller"
 CONFIG_APP_AUTO_GENERATE_CODE2=n
 #
-# from C:\GIT_REPOS\Siebwalde-Source\TrackController5\firmware\TrackController5.hconfig
+# from C:\GIT-REPOS\Siebwalde\TrackController5\firmware\TrackController5.hconfig
 #
 CONFIG_USE_EXCEPTION_HANDLER=y
 CONFIG_EXCEPTION_USE_SYS_DEBUG=y
@@ -4698,11 +4698,9 @@ CONFIG_TCPIP_USE_DDNS=n
 # from $HARMONY_VERSION_PATH\framework\tcpip\config\icmp.hconfig
 #
 CONFIG_TCPIP_STACK_USE_ICMPV4=y
-CONFIG_TCPIP_STACK_USE_ICMP_SERVER=n
-CONFIG_TCPIP_STACK_USE_ICMP_CLIENT=y
-CONFIG_TCPIP_ICMP_CLIENT_USER_NOTIFICATION=y
-CONFIG_TCPIP_ICMP_ECHO_REQUEST_TIMEOUT=500
-CONFIG_TCPIP_ICMP_TASK_TICK_RATE=33
+CONFIG_TCPIP_STACK_USE_ICMP_SERVER=y
+CONFIG_TCPIP_STACK_USE_ICMP_CLIENT=n
+CONFIG_TCPIP_ICMP_ECHO_BROADCASTS=n
 #
 # from $HARMONY_VERSION_PATH\framework\tcpip\config\nbns.hconfig
 #

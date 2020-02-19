@@ -4,92 +4,77 @@ using System.Net;
 
 namespace Siebwalde_Application
 {
-
+    /// <summary>
+    /// TrackController instantiates all drivers related to Trackcontrol functionality
+    /// </summary>
     public class TrackController
     {
-        /* connect variable to connect to FYController class to Main for application logging */
+        #region variables
+
+        // connect variable to connect to FYController class to Main for application logging
         private Main mMain;
 
-        public PingTarget m_PingTarget = new PingTarget { };
+        // Ping instance
+        private PingTarget m_PingTarget = new PingTarget { };
 
-        /* Data */
+        // Data
         public TrackIOHandle trackIOHandle;
-        
-        /* Public Enums */
-        public PublicEnums mPublicEnums;
-        /* ViewModel */
-        //public TrackAmplifierItemViewModel mTrackAmplifierItemViewModel;
 
-        public int mTrackSendingPort;
-        public int mTrackReceivingPort;
+        //Controller
+        public TrackControlMain trackControlMain;
 
-        /*#--------------------------------------------------------------------------#*/
-        /*  Description: MainTrackController
-         *               Constructor
-         *              
-         *               
-         *
-         *  Input(s)   : MacAddress, IPAddress, Receiving port for main trak controller
-         *
-         *  Output(s)  :
-         *
-         *  Returns    :
-         *
-         *  Pre.Cond.  :
-         *
-         *  Post.Cond. :
-         *
-         *  Notes      :
-         */
-        /*#--------------------------------------------------------------------------#*/
+        // Public variables
+        public TrackApplicationVariables trackApplicationVariables;
+
+        //Public Enums
+        private PublicEnums mPublicEnums;
+
+        // Sending and receiving port variable
+        private int mTrackSendingPort;
+        private int mTrackReceivingPort;
+
+        #endregion
+
+        #region Constructor
+
+        /// <summary>
+        /// Constructor for TrackController
+        /// </summary>
+        /// <param name="main"></param>
+        /// <param name="TrackReceivingPort"></param>
+        /// <param name="TrackSendingPort"></param>
         public TrackController(Main main, int TrackReceivingPort, int TrackSendingPort)
-        {
-            /*
-             * connect to Main interface for application text logging and link activity 
-             * update, save interface in variable.
-             */
-            //mMain = iMainCtrl;
+        {            
+            mMain = main;
             mTrackReceivingPort = TrackReceivingPort;
             mTrackSendingPort = TrackSendingPort;
-            mMain = main;
-
+            
+            // create public enums instance
             mPublicEnums = new PublicEnums();
+            
+            // create new instance of TrackIOHandle
+            trackIOHandle = new TrackIOHandle(mMain ,mTrackReceivingPort, mTrackSendingPort);
 
-            /*
-             * Public ENUM init and pass to all
-             */
+            // create new instance of trackApplicationVariables
+            trackApplicationVariables = new TrackApplicationVariables();
 
-            trackIOHandle = new TrackIOHandle(mTrackReceivingPort, mTrackSendingPort);
-            //mTrackAmplifierItemViewModel.TrackAmplifierItemViewModelPassTrackIoHandle(trackIOHandle);
-
-            //TrackAmplifierItemViewModel = new TrackAmplifierItemViewModel(trackIOHandle);
-
+            // create new instance of trackControlMain
+            trackControlMain = new TrackControlMain(mMain, mPublicEnums, trackIOHandle, trackApplicationVariables);
         }
 
-        /*#--------------------------------------------------------------------------#*/
-        /*  Description: MainTrackController start
-         *
-         *  Input(s)   :
-         *
-         *  Output(s)  :
-         *
-         *  Returns    :
-         *
-         *  Pre.Cond.  :
-         *
-         *  Post.Cond. :
-         *
-         *  Notes      :
-         */
-        /*#--------------------------------------------------------------------------#*/
+        #endregion
+
+        #region Start method
+
+        /// <summary>
+        /// Starting Method of TrackController
+        /// </summary>
         public void Start()
         {
             bool TrackRealMode = ConnectTrackConntroller();
 
             //force if required
             //TrackRealMode = false;
-
-            trackIOHandle.Start(TrackRealMode);
 
             if (TrackRealMode) // when connection was succesfull and target was found and is connected
             {
@@ -99,96 +84,48 @@ namespace Siebwalde_Application
             {
                 mMain.SiebwaldeAppLogging("MTCTRL: Track uController target in simulator mode!");
             }
+
+            trackIOHandle.Start(TrackRealMode);
         }
 
-        /*#--------------------------------------------------------------------------#*/
-        /*  Description: FiddleYardController ConnectFiddleYard
-         *               
-         *
-         *  Input(s)   : macAddr, ipAddr
-         *
-         *  Output(s)  : FYSimulatorActive
-         *
-         *  Returns    : ConnectFiddleYard
-         *
-         *  Pre.Cond.  :
-         *
-         *  Post.Cond. :
-         *
-         *  Notes      :
-         */
-        /*#--------------------------------------------------------------------------#*/
+        #endregion
+
+        #region Ping/Connect Ethernet target
+
+        /// <summary>
+        /// Try to connect/ping the Ethernet TrackTarget 
+        /// </summary>
+        /// <returns></returns>
         private bool ConnectTrackConntroller()
         {
             string PingReturn = "";
             try
             {
                 mMain.SiebwaldeAppLogging("MTCTRL: Pinging Track controller target...");
-                PingReturn = m_PingTarget.TargetFound(mPublicEnums.TrackTarget());                
+                PingReturn = m_PingTarget.TargetFound(mPublicEnums.TrackTarget());
                 if (PingReturn == "targetfound")
                 {
                     mMain.SiebwaldeAppLogging("MTCTRL: Ping successfull.");
-
-                    mMain.SiebwaldeAppLogging("MTCTRL: Track controller Connecting...");
-                    //MTSender.ConnectUdp(m_MTSendingPort);
-
-                    mMain.SiebwaldeAppLogging("MTCTRL: Track controller Connected.");
-                    mMain.SiebwaldeAppLogging("MTCTRL: Track controller Send MAC and IP...");
-                                        
                     return true; // connection succesfull to FIDDLEYARD
                 }
                 else
                 {
-                    var address = Dns.GetHostEntry(mPublicEnums.TrackTarget()).AddressList.First();
-                    if (address != null)
-                    {
-                        mMain.SiebwaldeAppLogging("MTCTRL: Dns.GetHostEntry successfull.");
-                        mMain.SiebwaldeAppLogging("MTCTRL: Track controller Connecting...");
-                        //MTSender.ConnectUdp(m_MTSendingPort);
-                        mMain.SiebwaldeAppLogging("MTCTRL: Track controller Connected.");
-                        return true; // connection succesfull to FIDDLEYARD
-                    }
-                    else
-                    {
-                        mMain.SiebwaldeAppLogging("MTCTRL: " + PingReturn);
-                        return false; // ping was unsuccessfull
-                    }
-                     
+                    mMain.SiebwaldeAppLogging("MTCTRL: " + PingReturn);
+                    return false; // ping was unsuccessfull
                 }
-
             }
             catch (Exception)
             {
-                mMain.SiebwaldeAppLogging("MTCTRL: TrackController failed to connect.");                
+                mMain.SiebwaldeAppLogging("MTCTRL: TrackController failed to ping.");                
                 return false; // ping was successfull but connecting failed
             }
         }
 
-        public void Stop()
-        {
-
-        }
-
-        /*#--------------------------------------------------------------------------#*/
-        /*  Description: FiddleYardController ClearEventLoggers
-         *               
-         *
-         *  Input(s)   :
-         *
-         *  Output(s)  :
-         *
-         *  Returns    :
-         *
-         *  Pre.Cond.  :
-         *
-         *  Post.Cond. :
-         *
-         *  Notes      :
-         */
-        /*#--------------------------------------------------------------------------#*/
-        public void ClearEventLoggers()
+        internal void Stop()
         {
             
         }
+
+        #endregion
     }
 }

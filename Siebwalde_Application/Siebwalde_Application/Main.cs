@@ -272,11 +272,11 @@ namespace Siebwalde_Application
             }
             if (MTcontroller != null)
             {
-                MTcontroller.ClearEventLoggers();
+                //MTcontroller.ClearEventLoggers();
             }
             if (YDcontroller != null)
             {
-                YDcontroller.ClearEventLoggers();
+                //YDcontroller.ClearEventLoggers();
             }
         }
 
