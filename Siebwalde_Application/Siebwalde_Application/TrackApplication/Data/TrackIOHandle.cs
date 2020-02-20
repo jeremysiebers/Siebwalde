@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using static Siebwalde_Application.PublicEnums;
 
 namespace Siebwalde_Application
 {
@@ -13,15 +14,16 @@ namespace Siebwalde_Application
     {
         private Sender mTrackSender;
         private Receiver mTrackReceiver;
-        private PublicEnums mPublicEnums;
+        //private PublicEnums mPublicEnums;
+        private TrackApplicationVariables mTrackApplicationVariables;
         /* connect variable to connect to FYController class to Main for application logging */
         private Main mMain;
 
         private int mTrackSendingPort;
         private int mTrackReceivingPort;
 
-        public List<TrackAmplifierItem> trackAmpItems;
-        private TrackAmplifierItem trackAmp;
+        //public List<TrackAmplifierItem> trackAmpItems;
+        //private TrackAmplifierItem trackAmp;
 
         [DoNotNotify]
         public bool mTrackRealMode { get; set; }
@@ -34,42 +36,43 @@ namespace Siebwalde_Application
         /// <param name="TrackReceivingPort"></param>
         /// <param name="TrackSendingPort"></param>
         /// <param name="trackApplicationVariables"></param>
-        public TrackIOHandle(Main main, int TrackReceivingPort, int TrackSendingPort)
+        public TrackIOHandle(Main main, TrackApplicationVariables trackApplicationVariables, int TrackReceivingPort, int TrackSendingPort)
         {
             mMain = main;
+            mTrackApplicationVariables = trackApplicationVariables;
             mTrackReceivingPort = TrackReceivingPort;
             mTrackSendingPort = TrackSendingPort;
 
-            mPublicEnums = new PublicEnums();
+            //mPublicEnums = new PublicEnums();
 
-            ushort[] HoldingRegInit = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            //ushort[] HoldingRegInit = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
-            trackAmpItems = new List<TrackAmplifierItem>();
+            //trackAmpItems = new List<TrackAmplifierItem>();
 
-            for (ushort i = 0; i < 56; i++)
-            {
-                trackAmpItems.Add(trackAmp = new TrackAmplifierItem
-                {
-                    SlaveNumber = i,
-                    SlaveDetected = 0,
-                    HoldingReg = HoldingRegInit,
-                    MbReceiveCounter = 0,
-                    MbSentCounter = 0,
-                    MbCommError = 0,
-                    MbExceptionCode = 0,
-                    SpiCommErrorCounter = 0
-                });
-            }           
+            //for (ushort i = 0; i < 56; i++)
+            //{
+            //    trackAmpItems.Add(trackAmp = new TrackAmplifierItem
+            //    {
+            //        SlaveNumber = i,
+            //        SlaveDetected = 0,
+            //        HoldingReg = HoldingRegInit,
+            //        MbReceiveCounter = 0,
+            //        MbSentCounter = 0,
+            //        MbCommError = 0,
+            //        MbExceptionCode = 0,
+            //        SpiCommErrorCounter = 0
+            //    });
+            //}           
 
             mTrackReceiver = new Receiver(mTrackReceivingPort);
-            mTrackSender = new Sender(mPublicEnums.TrackTarget());
-            mEthernetTargetDataSimulator = new EthernetTargetDataSimulator(mPublicEnums);
+            mTrackSender = new Sender(TRACKTARGET);
+            mEthernetTargetDataSimulator = new EthernetTargetDataSimulator();
         }
         
-        public List<TrackAmplifierItem> GetAmplifierListing()
-        {
-            return trackAmpItems;
-        }
+        //public List<TrackAmplifierItem> GetAmplifierListing()
+        //{
+        //    return trackAmpItems;
+        //}
 
         /// <summary>
         /// Start the TrackIoHandle and check if simulator is active
@@ -99,49 +102,20 @@ namespace Siebwalde_Application
 
         }
 
-        /*#--------------------------------------------------------------------------#*/
-        /*  Description: ActuatorCmd
-         *               Sends all commands from FYApplication to real target or
-         *               to simulator.
-         *               
-         *
-         *  Input(s)   :
-         *
-         *  Output(s)  : 
-         *
-         *  Returns    :
-         *
-         *  Pre.Cond.  :
-         *
-         *  Post.Cond. :
-         *
-         *  Notes      : Kicked by this application
-         */
-        /*#--------------------------------------------------------------------------#*/
+        /// <summary>
+        /// Actuator command to send command to Ethernet Target
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="cmd"></param>
         public void ActuatorCmd(string name, string cmd)
         {
             mTrackSender.SendUdp(Encoding.ASCII.GetBytes(cmd));            
         }
 
-        /*#--------------------------------------------------------------------------#*/
-        /*  Description: HandleNewData
-         *               to handle new data from target or from simulator
-         *               
-         *               
-         *
-         *  Input(s)   :
-         *
-         *  Output(s)  :
-         *
-         *  Returns    :
-         *
-         *  Pre.Cond.  :
-         *
-         *  Post.Cond. :
-         *
-         *  Notes      :
-         */
-        /*#--------------------------------------------------------------------------#*/
+        /// <summary>
+        /// Handle new received data from Track Ethernet Target
+        /// </summary>
+        /// <param name="b"></param>
         public void HandleNewData(byte[] b)
         {
             string _b = Encoding.UTF8.GetString(b, 0, b.Length);        // convert received byte array to string array 
@@ -151,7 +125,7 @@ namespace Siebwalde_Application
 
             UInt16 Header = reader.ReadByte();
             UInt16 Sender = reader.ReadByte(); // and is also taskid
-            if (Header == mPublicEnums.Header() && Sender == mPublicEnums.SlaveInfo())
+            if (Header == HEADER && Sender == SLAVEINFO)
             {
                 UInt16 MbHeader = reader.ReadByte();
                 UInt16 SlaveNumber = reader.ReadByte();
@@ -173,15 +147,15 @@ namespace Siebwalde_Application
                 UInt16 SpiCommErrorCounter = reader.ReadByte();
                 UInt16 MbFooter = reader.ReadByte();
 
-                trackAmpItems[SlaveNumber].SlaveDetected = SlaveDetected;                
-                trackAmpItems[SlaveNumber].HoldingReg = HoldingReg;
-                trackAmpItems[SlaveNumber].MbReceiveCounter = MbReceiveCounter;
-                trackAmpItems[SlaveNumber].MbSentCounter = MbSentCounter;
-                trackAmpItems[SlaveNumber].MbCommError = MbCommError;
-                trackAmpItems[SlaveNumber].MbExceptionCode = MbExceptionCode;
-                trackAmpItems[SlaveNumber].SpiCommErrorCounter = SpiCommErrorCounter;
+                mTrackApplicationVariables.trackAmpItems[SlaveNumber].SlaveDetected = SlaveDetected;                
+                mTrackApplicationVariables.trackAmpItems[SlaveNumber].HoldingReg = HoldingReg;
+                mTrackApplicationVariables.trackAmpItems[SlaveNumber].MbReceiveCounter = MbReceiveCounter;
+                mTrackApplicationVariables.trackAmpItems[SlaveNumber].MbSentCounter = MbSentCounter;
+                mTrackApplicationVariables.trackAmpItems[SlaveNumber].MbCommError = MbCommError;
+                mTrackApplicationVariables.trackAmpItems[SlaveNumber].MbExceptionCode = MbExceptionCode;
+                mTrackApplicationVariables.trackAmpItems[SlaveNumber].SpiCommErrorCounter = SpiCommErrorCounter;
             }
-            else if (Header == mPublicEnums.Header())
+            else if (Header == HEADER)
             {
                 UInt16 taskcommand = reader.ReadByte();
                 UInt16 taskstate = reader.ReadByte();

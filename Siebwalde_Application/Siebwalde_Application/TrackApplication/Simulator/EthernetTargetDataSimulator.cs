@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Timers;
+using static Siebwalde_Application.PublicEnums;
 
 namespace Siebwalde_Application
 {
@@ -11,7 +12,6 @@ namespace Siebwalde_Application
     {
         private List<TrackAmplifierItem> trackAmpItems;
         private TrackAmplifierItem trackAmp;
-        private PublicEnums mPublicEnums;
 
         private int AmplifiersPresent;
         //private ushort UpdateTrackAmpNo, SendTrackAmpNo;
@@ -28,10 +28,8 @@ namespace Siebwalde_Application
         /// <summary>
         /// Constructor, construct local variables
         /// </summary>
-        public EthernetTargetDataSimulator(PublicEnums PublicEnums)
+        public EthernetTargetDataSimulator()
         {
-            mPublicEnums = PublicEnums;
-
             //Random rng = new Random();
 
             AmplifiersPresent = 50;// rand.Next(1, 51);
@@ -118,9 +116,9 @@ namespace Siebwalde_Application
             {
                 if(Amp.SlaveNumber < 51 && Amp.SlaveDetected != 0)
                 {
-                    data[0] = Convert.ToByte(mPublicEnums.Header());
-                    data[1] = Convert.ToByte(mPublicEnums.SlaveInfo());
-                    data[2] = Convert.ToByte(mPublicEnums.Header());
+                    data[0] = Convert.ToByte(HEADER);
+                    data[1] = Convert.ToByte(SLAVEINFO);
+                    data[2] = Convert.ToByte(HEADER);
                     data[3] = Convert.ToByte(Amp.SlaveNumber);
                     data[4] = Convert.ToByte(Amp.SlaveDetected);
                     data[5] = 0; //Padding byte
@@ -146,7 +144,7 @@ namespace Siebwalde_Application
 
                     data[38] = Convert.ToByte(Amp.MbExceptionCode);
                     data[39] = Convert.ToByte(Amp.SpiCommErrorCounter);
-                    data[40] = Convert.ToByte(mPublicEnums.Footer());
+                    data[40] = Convert.ToByte(FOOTER);
 
                     NewData(data);
                 }

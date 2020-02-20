@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Linq;
-using System.Net;
+using static Siebwalde_Application.PublicEnums;
 
 namespace Siebwalde_Application
 {
@@ -26,9 +25,6 @@ namespace Siebwalde_Application
         // Public variables
         public TrackApplicationVariables trackApplicationVariables;
 
-        //Public Enums
-        private PublicEnums mPublicEnums;
-
         // Sending and receiving port variable
         private int mTrackSendingPort;
         private int mTrackReceivingPort;
@@ -48,18 +44,15 @@ namespace Siebwalde_Application
             mMain = main;
             mTrackReceivingPort = TrackReceivingPort;
             mTrackSendingPort = TrackSendingPort;
-            
-            // create public enums instance
-            mPublicEnums = new PublicEnums();
-            
-            // create new instance of TrackIOHandle
-            trackIOHandle = new TrackIOHandle(mMain ,mTrackReceivingPort, mTrackSendingPort);
 
-            // create new instance of trackApplicationVariables
+            // create new instance of trackApplicationVariables (DATA)
             trackApplicationVariables = new TrackApplicationVariables();
 
+            // create new instance of TrackIOHandle (communication layer with EthernetTarget
+            trackIOHandle = new TrackIOHandle(mMain, trackApplicationVariables, mTrackReceivingPort, mTrackSendingPort);
+
             // create new instance of trackControlMain
-            trackControlMain = new TrackControlMain(mMain, mPublicEnums, trackIOHandle, trackApplicationVariables);
+            trackControlMain = new TrackControlMain(mMain, trackIOHandle, trackApplicationVariables);
         }
 
         #endregion
@@ -102,7 +95,7 @@ namespace Siebwalde_Application
             try
             {
                 mMain.SiebwaldeAppLogging("MTCTRL: Pinging Track controller target...");
-                PingReturn = m_PingTarget.TargetFound(mPublicEnums.TrackTarget());
+                PingReturn = m_PingTarget.TargetFound(TRACKTARGET);
                 if (PingReturn == "targetfound")
                 {
                     mMain.SiebwaldeAppLogging("MTCTRL: Ping successfull.");
