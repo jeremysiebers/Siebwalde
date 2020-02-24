@@ -191,8 +191,11 @@
       <DependentUpon>Main.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
+    <Compile Include="TrackApplication\Controller\TrackAmplifierInitializers\TrackAmplifierBootloaderHelpers.cs" />
+    <Compile Include="TrackApplication\Controller\TrackAmplifierInitializers\TrackAmplifierInitalizationSequencer.cs" />
     <Compile Include="TrackApplication\Controller\TrackControlMain.cs" />
     <Compile Include="TrackApplication\Model\TrackAmplifierItem.cs" />
+    <Compile Include="TrackApplication\Model\TrackControllerCommands.cs" />
     <Compile Include="TrackApplication\Services\PublicEnums.cs" />
     <Compile Include="TrackApplication\Simulator\EthernetTargetDataSimulator.cs" />
     <Compile Include="TrackApplication\ViewModel\BaseViewModel.cs" />

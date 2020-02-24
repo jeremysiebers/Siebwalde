@@ -4,7 +4,7 @@ using static Siebwalde_Application.PublicEnums;
 namespace Siebwalde_Application
 {
     /// <summary>
-    /// TrackController instantiates all drivers related to Trackcontrol functionality
+    /// TrackController instantiates all drivers related to Trackcontrol functionality and trackapplication
     /// </summary>
     public class TrackController
     {

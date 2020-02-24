@@ -157,11 +157,15 @@ namespace Siebwalde_Application
             }
             else if (Header == HEADER)
             {
+                UInt16 taskid = reader.ReadByte();
                 UInt16 taskcommand = reader.ReadByte();
                 UInt16 taskstate = reader.ReadByte();
                 UInt16 taskmessage = reader.ReadByte();
 
-                //mTrackApplicationVariables.EthTargetMessage.UpdateEthernetTargetMessage(Sender, taskcommand, taskstate, taskmessage);
+                mTrackApplicationVariables.trackControllerCommands.TaskId = taskid;
+                mTrackApplicationVariables.trackControllerCommands.TaskId = taskcommand;
+                mTrackApplicationVariables.trackControllerCommands.TaskId = taskstate;
+                mTrackApplicationVariables.trackControllerCommands.TaskId = taskmessage;
             }
 
 

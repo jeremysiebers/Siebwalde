@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Windows.Input;
 
@@ -135,7 +133,7 @@ namespace Siebwalde_Application
             content.MbExceptionCode,
             content.SpiCommErrorCounter)));
 
-            this.Amps.Remove(Amps[0]); //update is not working probably negative offset is required
+            this.Amps.Remove(Amps[0]); //update is not working probably negative offset is required --> -1 
         }
 
         #endregion

@@ -1,5 +1,7 @@
 ﻿using Prism.Commands;
+using Siebwalde_Application.TrackApplication.View;
 using System;
+using System.Windows;
 
 namespace Siebwalde_Application
 {
@@ -12,7 +14,7 @@ namespace Siebwalde_Application
         /// Hold the TrackController instance
         /// </summary>
         private TrackController mTrackController;
-
+                
         /// <summary>
         /// Binding variable to couple to window closing interaction
         /// </summary>
@@ -29,16 +31,22 @@ namespace Siebwalde_Application
         {
             mTrackController = trackController;
 
+            // Binding element for the start init button
             OnStartInitTrackAmpplifiers = new DelegateCommand(InitTrackAmps, CanInitTrackAmps).ObservesProperty(() => ButtonEnabled);
 
-            ButtonEnabled = true;
+            // check if init already was executed
+            ButtonEnabled = !mTrackController.trackApplicationVariables.trackControllerCommands.StartInitializeTrackAmplifiers;
 
         }
 
         private void InitTrackAmps()
         {
-            Console.WriteLine("button clicked");
+            Console.WriteLine("Button pressed: StartInitializeTrackAmplifiers");
             ButtonEnabled = false;
+            mTrackController.trackApplicationVariables.trackControllerCommands.StartInitializeTrackAmplifiers = true;
+            //Window w = new Window();
+            //w.Content = new TrackAmplifierItemView(mTrackController);
+            //w.Show();
         }
 
         private bool CanInitTrackAmps()

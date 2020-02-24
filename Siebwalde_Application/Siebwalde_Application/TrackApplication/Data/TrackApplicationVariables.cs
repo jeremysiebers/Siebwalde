@@ -1,18 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Siebwalde_Application
-{ 
+{
     public class TrackApplicationVariables
     {
+        #region Variabels
+
         /// <summary>
         /// Variables of this class
         /// </summary>
         public List<TrackAmplifierItem> trackAmpItems;
         private TrackAmplifierItem trackAmp;
-        
+        public TrackControllerCommands trackControllerCommands;
+
+        #endregion
+
+        #region Constructor
+
         /// <summary>
-        /// Constructor to instantiate all varaibles used for trackcontrol
+        /// Constructor to instantiate all variables used for trackcontrol
         /// </summary>
         public TrackApplicationVariables()
         {
@@ -38,7 +44,16 @@ namespace Siebwalde_Application
             }
 
             #endregion
+
+            #region Instantiate TrackControllerCommands
+
+            // TrackControllerCommands
+            trackControllerCommands = new TrackControllerCommands();
+
+            #endregion
         }
+
+        #endregion
 
         #region Method GetAmplifierListing()
 
