@@ -2,6 +2,22 @@
 
 namespace Siebwalde_Application
 {
+    public struct ReceivedMessage
+    {
+        public ushort TaskId;
+        public ushort Taskcommand;
+        public ushort Taskstate;
+        public ushort Taskmessage;
+
+        public ReceivedMessage(ushort taskid, ushort taskcommand, ushort taskstate, ushort taskmessage)
+        {
+            TaskId = taskid;
+            Taskcommand = taskcommand;
+            Taskstate = taskstate;
+            Taskmessage = taskmessage;
+        }
+    }
+
     public static class PublicEnums
     {
         public const byte HEADER = 0xAA;

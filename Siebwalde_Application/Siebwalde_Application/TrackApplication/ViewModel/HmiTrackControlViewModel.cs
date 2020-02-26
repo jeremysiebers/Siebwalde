@@ -35,7 +35,7 @@ namespace Siebwalde_Application
             OnStartInitTrackAmpplifiers = new DelegateCommand(InitTrackAmps, CanInitTrackAmps).ObservesProperty(() => ButtonEnabled);
 
             // check if init already was executed
-            ButtonEnabled = !mTrackController.trackApplicationVariables.trackControllerCommands.StartInitializeTrackAmplifiers;
+            ButtonEnabled = !mTrackController.mTrackApplicationVariables.trackControllerCommands.StartInitializeTrackAmplifiers;
 
         }
 
@@ -43,7 +43,7 @@ namespace Siebwalde_Application
         {
             Console.WriteLine("Button pressed: StartInitializeTrackAmplifiers");
             ButtonEnabled = false;
-            mTrackController.trackApplicationVariables.trackControllerCommands.StartInitializeTrackAmplifiers = true;
+            mTrackController.mTrackApplicationVariables.trackControllerCommands.StartInitializeTrackAmplifiers = true;
             //Window w = new Window();
             //w.Content = new TrackAmplifierItemView(mTrackController);
             //w.Show();

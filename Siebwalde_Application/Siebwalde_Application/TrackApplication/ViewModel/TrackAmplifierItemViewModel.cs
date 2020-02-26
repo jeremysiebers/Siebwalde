@@ -52,7 +52,7 @@ namespace Siebwalde_Application
                 this.OnWindowClosingCommand = new RelayCommand(OnWindowClosing);
 
                 // Subscribe every trackAmpItem to the propertyChanged method of amplifier
-                foreach (TrackAmplifierItem amplifier in MTcontroller.trackApplicationVariables.trackAmpItems)//this.trackIOHandle.trackAmpItems)
+                foreach (TrackAmplifierItem amplifier in MTcontroller.mTrackApplicationVariables.trackAmpItems)//this.trackIOHandle.trackAmpItems)
                 {
                     amplifier.PropertyChanged += new PropertyChangedEventHandler(Amplifier_PropertyChanged);
                 }
@@ -121,7 +121,7 @@ namespace Siebwalde_Application
         /// </summary>
         private void FillTheCollection()
         {
-            var amps = MTcontroller.trackApplicationVariables.GetAmplifierListing(); // this.trackIOHandle.GetAmplifierListing();
+            var amps = MTcontroller.mTrackApplicationVariables.GetAmplifierListing(); // this.trackIOHandle.GetAmplifierListing();
             this.Amps = new ObservableCollection<TrackAmplifierItemViewModel>(amps.Select(content => new TrackAmplifierItemViewModel
             (null,
             content.SlaveNumber,
@@ -189,7 +189,7 @@ namespace Siebwalde_Application
         /// </summary>
         public void OnWindowClosing()
         {
-            foreach (TrackAmplifierItem amplifier in MTcontroller.trackApplicationVariables.trackAmpItems)//this.trackIOHandle.trackAmpItems)
+            foreach (TrackAmplifierItem amplifier in MTcontroller.mTrackApplicationVariables.trackAmpItems)//this.trackIOHandle.trackAmpItems)
             {
                 amplifier.PropertyChanged -= new PropertyChangedEventHandler(Amplifier_PropertyChanged);
             }

@@ -4,9 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Siebwalde_Application.TrackApplication.Controller.TrackAmplifierInitializers
+namespace Siebwalde_Application
 {
-    class TrackAmplifierInitalizationSequencer
+    public class TrackAmplifierInitalizationSequencer
     {
+        private TrackApplicationVariables mTrackApplicationVariables;
+
+        public TrackAmplifierInitalizationSequencer(Log2LoggingFile trackApplicationLogging, TrackApplicationVariables trackApplicationVariables)
+        {
+            mTrackApplicationVariables = trackApplicationVariables;
+        }
     }
 }

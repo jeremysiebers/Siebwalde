@@ -1,4 +1,6 @@
-﻿namespace Siebwalde_Application
+﻿using System.ComponentModel;
+
+namespace Siebwalde_Application
 {
     /// <summary>
     /// TrackDataItems uses BaseViewModel for proprty notified events only. This class is data only!
@@ -14,15 +16,14 @@
 
         #endregion
 
-        #region Ethernet Target received answer Methods
+        #region Ethernet Target received message Method
 
-        /// <summary>
-        /// Received answers from Ethernet Target
-        /// </summary>
-        public ushort TaskId { get; set; }
-        public ushort Taskcommand { get; set; }
-        public ushort Taskstate { get; set; }
-        public ushort Taskmessage { get; set; }
+        private ReceivedMessage EthernetTargetRecv;
+        public ReceivedMessage ReceivedMessages
+        {
+            get { return EthernetTargetRecv; }
+            set { EthernetTargetRecv = value; }
+        }
 
         #endregion
 
@@ -33,7 +34,8 @@
         /// </summary>
         public TrackControllerCommands()
         {
-
+            //public ReceivedMessage EthernetTarget = new ReceivedMessage();
+            EthernetTargetRecv = new ReceivedMessage(0, 0, 0, 0);
         }
 
         #endregion

@@ -21,13 +21,15 @@ namespace Siebwalde_Application
 
         private int mTrackSendingPort;
         private int mTrackReceivingPort;
+                
+        private ReceivedMessage mReceivedMessage;
 
         //public List<TrackAmplifierItem> trackAmpItems;
         //private TrackAmplifierItem trackAmp;
 
         [DoNotNotify]
         public bool mTrackRealMode { get; set; }
-        public EthernetTargetDataSimulator mEthernetTargetDataSimulator;
+        public EthernetTargetDataSimulator mEthernetTargetDataSimulator;        
 
         /// <summary>
         /// TrackIoHandle Constructor
@@ -41,39 +43,13 @@ namespace Siebwalde_Application
             mMain = main;
             mTrackApplicationVariables = trackApplicationVariables;
             mTrackReceivingPort = TrackReceivingPort;
-            mTrackSendingPort = TrackSendingPort;
-
-            //mPublicEnums = new PublicEnums();
-
-            //ushort[] HoldingRegInit = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-
-            //trackAmpItems = new List<TrackAmplifierItem>();
-
-            //for (ushort i = 0; i < 56; i++)
-            //{
-            //    trackAmpItems.Add(trackAmp = new TrackAmplifierItem
-            //    {
-            //        SlaveNumber = i,
-            //        SlaveDetected = 0,
-            //        HoldingReg = HoldingRegInit,
-            //        MbReceiveCounter = 0,
-            //        MbSentCounter = 0,
-            //        MbCommError = 0,
-            //        MbExceptionCode = 0,
-            //        SpiCommErrorCounter = 0
-            //    });
-            //}           
-
+            mTrackSendingPort = TrackSendingPort;            
             mTrackReceiver = new Receiver(mTrackReceivingPort);
             mTrackSender = new Sender(TRACKTARGET);
             mEthernetTargetDataSimulator = new EthernetTargetDataSimulator();
+            mReceivedMessage = new ReceivedMessage(0,0,0,0);
         }
         
-        //public List<TrackAmplifierItem> GetAmplifierListing()
-        //{
-        //    return trackAmpItems;
-        //}
-
         /// <summary>
         /// Start the TrackIoHandle and check if simulator is active
         /// </summary>
@@ -111,6 +87,7 @@ namespace Siebwalde_Application
         {
             mTrackSender.SendUdp(Encoding.ASCII.GetBytes(cmd));            
         }
+
 
         /// <summary>
         /// Handle new received data from Track Ethernet Target
@@ -157,17 +134,14 @@ namespace Siebwalde_Application
             }
             else if (Header == HEADER)
             {
-                UInt16 taskid = reader.ReadByte();
-                UInt16 taskcommand = reader.ReadByte();
-                UInt16 taskstate = reader.ReadByte();
-                UInt16 taskmessage = reader.ReadByte();
+                
+                mReceivedMessage.TaskId = reader.ReadByte();
+                mReceivedMessage.Taskcommand = reader.ReadByte();
+                mReceivedMessage.Taskstate = reader.ReadByte();
+                mReceivedMessage.Taskmessage = reader.ReadByte();
 
-                mTrackApplicationVariables.trackControllerCommands.TaskId = taskid;
-                mTrackApplicationVariables.trackControllerCommands.TaskId = taskcommand;
-                mTrackApplicationVariables.trackControllerCommands.TaskId = taskstate;
-                mTrackApplicationVariables.trackControllerCommands.TaskId = taskmessage;
+                mTrackApplicationVariables.trackControllerCommands.ReceivedMessages = mReceivedMessage;
             }
-
 
             // dispose of object data
             reader.Dispose();

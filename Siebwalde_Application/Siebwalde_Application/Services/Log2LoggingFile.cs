@@ -1,26 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using System.Timers;
-using System.Net.Sockets;
 using System.IO;
-using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Management;
-using System.Net.NetworkInformation;
-using System.Globalization;
 
 namespace Siebwalde_Application
 {
     public class Log2LoggingFile
     {
-        string m_path = "null";        
+        string m_path = "null";
         private object writelock = new object();
         private string fmt = "000";
 
@@ -66,7 +53,7 @@ namespace Siebwalde_Application
         {
 
             lock (writelock)
-            {                
+            {
                 int m_Millisecond = DateTime.Now.Millisecond;
                 string m_text = DateTime.Now + ":" + m_Millisecond.ToString(fmt) + " " + text + " " + Environment.NewLine;
 
@@ -81,9 +68,21 @@ namespace Siebwalde_Application
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message);                    
+                    MessageBox.Show(ex.Message);
                 }
             }
-        }        
+        }
+
+        /// <summary>
+        /// Provide name of the class calling the logging function to prevent additional typing of the callers name
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="text"></param>
+        public void Log(string sender, string text)
+        {
+            string mText = "[" + sender + "]" + "\t" + " " + text;
+
+            StoreText(mText);
+        }
     }
 }

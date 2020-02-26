@@ -17,17 +17,21 @@ namespace Siebwalde_Application
         private PingTarget m_PingTarget = new PingTarget { };
 
         // Data
-        public TrackIOHandle trackIOHandle;
+        public TrackIOHandle mTrackIOHandle;
 
         //Controller
-        public TrackControlMain trackControlMain;
+        public TrackControlMain mTrackControlMain;
 
         // Public variables
-        public TrackApplicationVariables trackApplicationVariables;
+        public TrackApplicationVariables mTrackApplicationVariables;
 
         // Sending and receiving port variable
         private int mTrackSendingPort;
         private int mTrackReceivingPort;
+
+        // logging local variables
+        private Log2LoggingFile mTrackApplicationLogging;
+        private string path = "null";
 
         #endregion
 
@@ -45,14 +49,19 @@ namespace Siebwalde_Application
             mTrackReceivingPort = TrackReceivingPort;
             mTrackSendingPort = TrackSendingPort;
 
-            // create new instance of trackApplicationVariables (DATA)
-            trackApplicationVariables = new TrackApplicationVariables();
+            // create logging instance for Track application
+            path = @"c:\localdata\Siebwalde\" + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_TrackApplicationMain.txt";
+            mTrackApplicationLogging = new Log2LoggingFile(path);
 
-            // create new instance of TrackIOHandle (communication layer with EthernetTarget
-            trackIOHandle = new TrackIOHandle(mMain, trackApplicationVariables, mTrackReceivingPort, mTrackSendingPort);
+
+            // create new instance of trackApplicationVariables (DATA)
+            mTrackApplicationVariables = new TrackApplicationVariables();
+
+            // create new instance of TrackIOHandle (communication layer with EthernetTarget)
+            mTrackIOHandle = new TrackIOHandle(mMain, mTrackApplicationVariables, mTrackReceivingPort, mTrackSendingPort);
 
             // create new instance of trackControlMain
-            trackControlMain = new TrackControlMain(mMain, trackIOHandle, trackApplicationVariables);
+            mTrackControlMain = new TrackControlMain(mMain, mTrackApplicationLogging,  mTrackIOHandle, mTrackApplicationVariables);
         }
 
         #endregion
@@ -65,7 +74,6 @@ namespace Siebwalde_Application
         public void Start()
         {
             bool TrackRealMode = ConnectTrackConntroller();
-
             //force if required
             //TrackRealMode = false;
 
@@ -78,7 +86,16 @@ namespace Siebwalde_Application
                 mMain.SiebwaldeAppLogging("MTCTRL: Track uController target in simulator mode!");
             }
 
-            trackIOHandle.Start(TrackRealMode);
+            // Log real/simulator to Track controller main application log
+            mTrackApplicationLogging.Log(GetType().Name, "Track Control application started in " + ((TrackRealMode == true) ? ("Real mode") : ("Sim mode")) + ".");
+
+            // start listening to data from ethernet target
+            mTrackApplicationLogging.Log(GetType().Name, "Start Track I/O Handle.");
+            mTrackIOHandle.Start(TrackRealMode);
+
+            // start the Track controller main application
+            mTrackApplicationLogging.Log(GetType().Name, "Start Track Application.");
+            mTrackControlMain.Start();
         }
 
         #endregion
