@@ -18,6 +18,12 @@ namespace Siebwalde_Application
         private System.Timers.Timer AppUpdateTimer = new System.Timers.Timer();
         private Log2LoggingFile mTrackApplicationLogging;
         private object ExecuteLock = new object();
+        
+        /// <summary>
+        /// This enum holds all the possible states of the TrackControlMain statemachine
+        /// </summary>
+        private enum State { Idle, Reset, Cmd, StartInitializeTrackAmplifiers };
+        private State State_Machine;
 
         #endregion
 
@@ -109,36 +115,27 @@ namespace Siebwalde_Application
 
         private void TrackApplicationUpdate(string source, Int32 value)
         {
+            // stop the timer to prevent re-starting during execution of code
+            AppUpdateTimer.Stop();
+
             // Lock the execution since multiple events may arrive
             lock (ExecuteLock)
             {
-                // stop the timer to prevent re-starting during execution of code
-                AppUpdateTimer.Stop();
 
-                //if (kickapplication == " Start ")                             // FYFORM Start FiddleYard button command
-                //{
-                //    FYAppVar.FiddleYardAutoModeStart.UpdateMessage();//FYFORM.SetMessage("FYApp FYStart", "FiddleYard Auto mode Start");
-                //    State_Machine = State.Start;
-                //    FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Start");
-                //    FYAppVar.FiddleYardInit.UpdateMessage();//FYFORM.SetMessage("FYApp FYStart", "FiddleYard init...");
-                //}
-                //else if (kickapplication == " Reset ")                        // FYFORM Reset FiddleYard button command
-                //{
-                //    FiddleYardApplicationLogging.StoreText("FYApp kickapplication == Reset");
-                //    State_Machine = State.Reset;
-                //    FiddleYardApplicationLogging.StoreText("FYApp State_Machine = State.Reset");
-                //}
-                //else if (kickapplication == " Stop ")                        // FYFORM Reset FiddleYard button command
-                //{
-                //    StopApplication = "Stop";
-                //    FiddleYardApplicationLogging.StoreText("FYApp StopApplication = Stop");
-                //    FYAppVar.FiddleYardAutoModeIsGoingToStop.UpdateMessage();//FYFORM.SetMessage("FYApp FYStop", "FiddleYard Auto mode is going to stop...");
-                //}
-
-                StateMachineUpdate(source, value);
-
-                AppUpdateTimer.Start();//-------------------------------------------------------------------- Start the timer until event from target
+                // If StartInitializeTrackAmplifiers is set to true
+                if (source == "StartInitializeTrackAmplifiers")
+                {
+                    mTrackApplicationLogging.Log(GetType().Name, "Start Initialize Track Amplifiers.");
+                    State_Machine = State.StartInitializeTrackAmplifiers;
+                    mTrackApplicationLogging.Log(GetType().Name, "State_Machine = State.StartInitializeTrackAmplifiers.");
+                    mTrackApplicationVariables.trackControllerCommands.UserMessage = "Start initialize Track Amplifiers.";
+                }
+                
+                StateMachineUpdate(source, value);                
             }
+
+            // Start the timer again
+            AppUpdateTimer.Start();
         }
 
         #endregion
@@ -152,9 +149,46 @@ namespace Siebwalde_Application
         /// <param name="value"></param>
         private void StateMachineUpdate(string source, Int32 value)
         {
-            
-        }
+            switch (State_Machine)
+            {
+                case State.Reset:
+                    // Here all sub classes reset methods are called in case of a forced reset
+                    break;
 
+                case State.Idle:
+                    // Here all manual commands are handled from the user
+                    break;
+
+                case State.StartInitializeTrackAmplifiers:
+                    {
+                        switch (mTrackAmplifierInitalizationSequencer.InitSequence())
+                        {
+                            case "Busy":
+                                {
+                                    break;
+                                }
+                            case "Finished":
+                                {
+                                    break;
+                                }
+                            case "Error":
+                                {
+                                    break;
+                                }
+                            default:
+                                {
+                                    break;
+                                }
+                        }
+                        break;
+                    }
+                    
+                default:
+                    break;
+            }
+
+        }
         #endregion
     }
+
 }

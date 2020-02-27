@@ -16,6 +16,14 @@ namespace Siebwalde_Application
 
         #endregion
 
+        #region
+        /// <summary>
+        /// User message that can be shown on some user interface
+        /// </summary>
+        public string UserMessage { get; set; }
+
+        #endregion
+
         #region Ethernet Target received message Method
 
         private ReceivedMessage EthernetTargetRecv;
