@@ -22,7 +22,7 @@ namespace Siebwalde_Application
         /// <summary>
         /// This enum holds all the possible states of the TrackControlMain statemachine
         /// </summary>
-        private enum State { Idle, Reset, Cmd, StartInitializeTrackAmplifiers };
+        private enum State { Idle, Reset, Cmd, InitializeTrackAmplifiers };
         private State State_Machine;
 
         #endregion
@@ -72,14 +72,39 @@ namespace Siebwalde_Application
         }
 
         /// <summary>
-        /// Property changes event handler on TrackControllerCommands these will be coming typically from the Gui via the viewModel
+        /// Property changes event handler on TrackControllerCommands these will be coming typically from the Gui via the viewModel or
+        /// from subclasses sending commands to the Ethernet target
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void TrackControllerCommands_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            Console.WriteLine("Command received: " + e.PropertyName +" set to: " + sender.GetType().GetProperty(e.PropertyName).GetValue(sender).ToString() );
-            TrackApplicationUpdate(e.PropertyName, Convert.ToInt32(sender.GetType().GetProperty(e.PropertyName).GetValue(sender)));
+            switch(e.PropertyName)
+            {
+                case "UserMessage":
+                    {
+                        break;
+                    }
+
+                case "SendMessage":
+                    {
+                        mTrackIOHandle.ActuatorCmd(mTrackApplicationVariables.trackControllerCommands.SendMessage);
+                        break;
+                    }
+
+                case "ReceivedMessage":
+                    {
+                        TrackApplicationUpdate("ReceivedMessage", 0);
+                        break;
+                    }
+
+                default:
+                    {
+                        Console.WriteLine("Command received: " + e.PropertyName + " set to: " + sender.GetType().GetProperty(e.PropertyName).GetValue(sender).ToString());
+                        TrackApplicationUpdate(e.PropertyName, Convert.ToInt32(sender.GetType().GetProperty(e.PropertyName).GetValue(sender)));
+                        break;
+                    }
+            }
         }
 
         /// <summary>
@@ -115,27 +140,28 @@ namespace Siebwalde_Application
 
         private void TrackApplicationUpdate(string source, Int32 value)
         {
-            // stop the timer to prevent re-starting during execution of code
-            AppUpdateTimer.Stop();
-
             // Lock the execution since multiple events may arrive
             lock (ExecuteLock)
             {
+                // stop the timer to prevent re-starting during execution of code
+                AppUpdateTimer.Stop();
 
                 // If StartInitializeTrackAmplifiers is set to true
                 if (source == "StartInitializeTrackAmplifiers")
                 {
                     mTrackApplicationLogging.Log(GetType().Name, "Start Initialize Track Amplifiers.");
-                    State_Machine = State.StartInitializeTrackAmplifiers;
+                    State_Machine = State.InitializeTrackAmplifiers;
                     mTrackApplicationLogging.Log(GetType().Name, "State_Machine = State.StartInitializeTrackAmplifiers.");
                     mTrackApplicationVariables.trackControllerCommands.UserMessage = "Start initialize Track Amplifiers.";
                 }
+                else if(source == "TimerEvent" || source == "ReceivedMessage")
+                {
+                    StateMachineUpdate(source, value);
+                }
                 
-                StateMachineUpdate(source, value);                
-            }
-
-            // Start the timer again
-            AppUpdateTimer.Start();
+                // Start the timer again
+                AppUpdateTimer.Start();
+            }                        
         }
 
         #endregion
@@ -159,9 +185,9 @@ namespace Siebwalde_Application
                     // Here all manual commands are handled from the user
                     break;
 
-                case State.StartInitializeTrackAmplifiers:
+                case State.InitializeTrackAmplifiers:
                     {
-                        switch (mTrackAmplifierInitalizationSequencer.InitSequence())
+                        switch (mTrackAmplifierInitalizationSequencer.InitSequence(source, value))
                         {
                             case Enums.Busy:
                                 {
@@ -169,6 +195,7 @@ namespace Siebwalde_Application
                                 }
                             case Enums.Finished:
                                 {
+                                    mTrackApplicationLogging.Log(GetType().Name, "State.StartInitializeTrackAmplifiers == Finished.");
                                     State_Machine = State.Idle;
                                     break;
                                 }

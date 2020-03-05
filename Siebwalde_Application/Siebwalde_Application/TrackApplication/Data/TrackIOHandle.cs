@@ -1,6 +1,5 @@
 ﻿using PropertyChanged;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using static Siebwalde_Application.Enums;
@@ -29,7 +28,7 @@ namespace Siebwalde_Application
 
         [DoNotNotify]
         public bool mTrackRealMode { get; set; }
-        public EthernetTargetDataSimulator mEthernetTargetDataSimulator;        
+        private EthernetTargetDataSimulator mEthernetTargetDataSimulator;        
 
         /// <summary>
         /// TrackIoHandle Constructor
@@ -83,9 +82,14 @@ namespace Siebwalde_Application
         /// </summary>
         /// <param name="name"></param>
         /// <param name="cmd"></param>
-        public void ActuatorCmd(string name, string cmd)
+        public void ActuatorCmd(SendMessage sendMessage)
         {
-            mTrackSender.SendUdp(Encoding.ASCII.GetBytes(cmd));            
+            byte[] datatosend = new byte[sendMessage.Data.Length + 3];
+            datatosend[0] = HEADER;
+            datatosend[1] = sendMessage.Command;
+            datatosend[sendMessage.Data.Length + 2] = FOOTER;
+            Buffer.BlockCopy(sendMessage.Data, 0, datatosend, 2, sendMessage.Data.Length);
+            mTrackSender.SendUdp(datatosend);            
         }
 
 
@@ -133,14 +137,13 @@ namespace Siebwalde_Application
                 mTrackApplicationVariables.trackAmpItems[SlaveNumber].SpiCommErrorCounter = SpiCommErrorCounter;
             }
             else if (Header == HEADER)
-            {
-                
-                mReceivedMessage.TaskId = reader.ReadByte();
+            {                
+                mReceivedMessage.TaskId = Sender;
                 mReceivedMessage.Taskcommand = reader.ReadByte();
                 mReceivedMessage.Taskstate = reader.ReadByte();
                 mReceivedMessage.Taskmessage = reader.ReadByte();
 
-                mTrackApplicationVariables.trackControllerCommands.ReceivedMessages = mReceivedMessage;
+                mTrackApplicationVariables.trackControllerCommands.ReceivedMessage = mReceivedMessage;
             }
 
             // dispose of object data

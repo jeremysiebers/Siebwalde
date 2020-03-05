@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-
-namespace Siebwalde_Application
+﻿namespace Siebwalde_Application
 {
     /// <summary>
     /// TrackDataItems uses BaseViewModel for proprty notified events only. This class is data only!
@@ -13,6 +11,10 @@ namespace Siebwalde_Application
         /// Holds the start init track amplifier command state
         /// </summary>
         public bool StartInitializeTrackAmplifiers { get; set; }
+        /// <summary>
+        /// Holds the Ethernet Target connected state
+        /// </summary>
+        public bool EthernetTargetConnected { get; set; }
 
         #endregion
 
@@ -27,10 +29,21 @@ namespace Siebwalde_Application
         #region Ethernet Target received message Method
 
         private ReceivedMessage EthernetTargetRecv;
-        public ReceivedMessage ReceivedMessages
+        public ReceivedMessage ReceivedMessage
         {
             get { return EthernetTargetRecv; }
             set { EthernetTargetRecv = value; }
+        }
+
+        #endregion
+
+        #region Ethernet Target Message to Send Method
+
+        private SendMessage EthernetTargetSend;
+        public SendMessage SendMessage
+        {
+            get { return EthernetTargetSend; }
+            set { EthernetTargetSend = value; }
         }
 
         #endregion
@@ -44,6 +57,9 @@ namespace Siebwalde_Application
         {
             //public ReceivedMessage EthernetTarget = new ReceivedMessage();
             EthernetTargetRecv = new ReceivedMessage(0, 0, 0, 0);
+
+            byte[] DummyData = new byte[80];
+            EthernetTargetSend = new SendMessage(0, DummyData);
         }
 
         #endregion
