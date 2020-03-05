@@ -163,20 +163,23 @@ namespace Siebwalde_Application
                     {
                         switch (mTrackAmplifierInitalizationSequencer.InitSequence())
                         {
-                            case "Busy":
+                            case Enums.Busy:
                                 {
                                     break;
                                 }
-                            case "Finished":
+                            case Enums.Finished:
                                 {
+                                    State_Machine = State.Idle;
                                     break;
                                 }
-                            case "Error":
+                            case Enums.Error:
                                 {
+                                    State_Machine = State.Idle;
                                     break;
                                 }
                             default:
                                 {
+                                    State_Machine = State.Idle;
                                     break;
                                 }
                         }

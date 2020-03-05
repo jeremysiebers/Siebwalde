@@ -16,7 +16,7 @@ namespace Siebwalde_Application
 
         #endregion
 
-        #region
+        #region Usermessage
         /// <summary>
         /// User message that can be shown on some user interface
         /// </summary>

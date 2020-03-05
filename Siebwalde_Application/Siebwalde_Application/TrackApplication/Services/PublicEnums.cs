@@ -18,7 +18,7 @@ namespace Siebwalde_Application
         }
     }
 
-    public static class PublicEnums
+    public static class Enums
     {
         public const byte HEADER = 0xAA;
         public const byte FOOTER = 0x55;
@@ -26,6 +26,11 @@ namespace Siebwalde_Application
         public const byte SLAVEINFO = 0xFF;
 
         public const string TRACKTARGET = "TRACKCONTROL";
+
+        public const uint Busy = 0;
+        public const uint Finished = 1;
+        public const uint Error = 11;
+
     }
 
     public static class TaskId

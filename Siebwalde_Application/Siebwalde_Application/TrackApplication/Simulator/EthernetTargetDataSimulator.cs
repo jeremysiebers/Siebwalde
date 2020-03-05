@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Timers;
-using static Siebwalde_Application.PublicEnums;
+using static Siebwalde_Application.Enums;
 
 namespace Siebwalde_Application
 {

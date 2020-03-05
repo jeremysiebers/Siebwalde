@@ -7,6 +7,10 @@ using System.Collections;
 
 namespace Siebwalde_Application
 {
+    /// <summary>
+    /// Observer patterns
+    /// </summary>
+
     /*#--------------------------------------------------------------------------#*/
     /*  Description: ASensor class interface 
      *               to set sensors received from target

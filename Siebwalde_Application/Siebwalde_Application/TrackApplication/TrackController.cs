@@ -1,5 +1,5 @@
 ﻿using System;
-using static Siebwalde_Application.PublicEnums;
+using static Siebwalde_Application.Enums;
 
 namespace Siebwalde_Application
 {

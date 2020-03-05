@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using static Siebwalde_Application.PublicEnums;
+using static Siebwalde_Application.Enums;
 
 namespace Siebwalde_Application
 {
@@ -14,7 +14,7 @@ namespace Siebwalde_Application
     {
         private Sender mTrackSender;
         private Receiver mTrackReceiver;
-        //private PublicEnums mPublicEnums;
+        //private Enums mEnums;
         private TrackApplicationVariables mTrackApplicationVariables;
         /* connect variable to connect to FYController class to Main for application logging */
         private Main mMain;
@@ -34,7 +34,7 @@ namespace Siebwalde_Application
         /// <summary>
         /// TrackIoHandle Constructor
         /// </summary>
-        /// <param name="publicEnums"></param>
+        /// <param name="Enums"></param>
         /// <param name="TrackReceivingPort"></param>
         /// <param name="TrackSendingPort"></param>
         /// <param name="trackApplicationVariables"></param>
