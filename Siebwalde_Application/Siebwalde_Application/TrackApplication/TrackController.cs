@@ -50,7 +50,7 @@ namespace Siebwalde_Application
             mTrackSendingPort = TrackSendingPort;
 
             // create logging instance for Track application
-            path = @"c:\localdata\Siebwalde\" + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_TrackApplicationMain.txt";
+            path = Enums.HOMEPATH + Enums.LOGGING + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_TrackApplicationMain.txt";
             mTrackApplicationLogging = new Log2LoggingFile(path);
 
 

@@ -74,12 +74,12 @@ namespace Siebwalde_Application
 
             if ("TOP" == m_instance)
             {
-                path = @"c:\localdata\Siebwalde\" + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_FiddleYardSimulatorTOP.txt"; //  different logging file per target, this is default
+                path = Enums.HOMEPATH + Enums.LOGGING + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_FiddleYardSimulatorTOP.txt"; //  different logging file per target, this is default
                 FiddleYardSimulatorLogging = new Log2LoggingFile(path);
             }
             else if ("BOT" == m_instance)
             {
-                path = @"c:\localdata\Siebwalde\" + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_FiddleYardSimulatorBOT.txt"; //  different logging file per target, this is default
+                path = Enums.HOMEPATH + Enums.LOGGING + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_FiddleYardSimulatorBOT.txt"; //  different logging file per target, this is default
                 FiddleYardSimulatorLogging = new Log2LoggingFile(path);
             }
 

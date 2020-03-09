@@ -37,12 +37,22 @@ namespace Siebwalde_Application
 
         public const byte SLAVEINFO = 0xFF;
 
+        public const string HOMEPATH = @"c:\localdata\Siebwalde\";
+        public const string LOGGING = "Logging\\";
         public const string TRACKTARGET = "TRACKCONTROL";
+        public const string SLAVEHEXFILE = "TrackAmplifier4.X.production.hex";
 
         public const uint Busy = 0;
         public const uint Finished = 1;
         public const uint Error = 11;
-        
+
+        /// <summary>
+        /// Bootloader ENUMS
+        /// </summary>
+        public const ushort PROGMEMSIZE = 0x8000;
+        public const ushort BOOTLOADEROFFSET = 0x800;
+        public const ushort HEXROWWIDTH = 16;
+
     }
 
     public static class TaskId

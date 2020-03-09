@@ -16,8 +16,10 @@ namespace Siebwalde_Application
 
         private TrackApplicationVariables mTrackApplicationVariables;
         private Log2LoggingFile mTrackApplicationLogging;
+        private TrackAmplifierBootloaderHelpers mTrackAmplifierBootloaderHelpers;
         private SendMessage mSendMessage;
         private ReceivedMessage mReceivedMessage;
+        private ushort Checksum;
 
         /// <summary>
         /// This enum holds all the possible states of the TrackAmplifierInitalizationSequencer statemachine
@@ -36,6 +38,7 @@ namespace Siebwalde_Application
         {
             mTrackApplicationVariables = trackApplicationVariables;
             mTrackApplicationLogging = trackApplicationLogging;
+            mTrackAmplifierBootloaderHelpers = new TrackAmplifierBootloaderHelpers(Enums.HOMEPATH + Enums.SLAVEHEXFILE);
 
             StateMachine = State.ConnectToEthernetTarget;
             SubMethodState = 0;
@@ -43,6 +46,7 @@ namespace Siebwalde_Application
             byte[] DummyData = new byte[80];
             mSendMessage = new SendMessage(0, DummyData);
             mReceivedMessage = new ReceivedMessage(0, 0, 0, 0);
+            mTrackAmplifierBootloaderHelpers.Start();
         }
 
         #endregion
@@ -472,7 +476,9 @@ namespace Siebwalde_Application
                                     returnval = Enums.Error;
                                     break;
                                 }
-
+                                
+                                // then align the call funcitons with the flash slaves function to have 1 common flash program
+                                
                                 mSendMessage.Command = TrackCommand.EXEC_FW_STATE_ERASE_FLASH;
                                 mTrackApplicationVariables.trackControllerCommands.SendMessage = mSendMessage;
                                 SubMethodState += 1;
@@ -491,7 +497,7 @@ namespace Siebwalde_Application
                                 mReceivedMessage.Taskstate == TaskStates.DONE)
                             {
                                 mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaves => ERASE_FLASH_RETURNED_OK.");
-                                x
+                                //x
                             }
                         }
                         break;

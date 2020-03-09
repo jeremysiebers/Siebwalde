@@ -1,6 +1,7 @@
 ﻿using Siebwalde_Application.TrackApplication.View;
 using System;
 using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
 using System.Windows.Forms.Integration;
 
@@ -24,7 +25,7 @@ namespace Siebwalde_Application
         public HmiTrackControlForm hmiTrackForm;
 
         private const int LINKACTMAX = 100;
-        private string path = @"c:\localdata\Siebwalde\"+ DateTime.Now.Day + "-"+ DateTime.Now.Month + "-"+ DateTime.Now.Year + "_SiebwaldeApplicationMain.txt"; //  different logging file per target, this is default
+        private string path = Enums.HOMEPATH + Enums.LOGGING + DateTime.Now.Day + "-"+ DateTime.Now.Month + "-"+ DateTime.Now.Year + "_SiebwaldeApplicationMain.txt"; //  different logging file per target, this is default
         public Log2LoggingFile SiebwaldeApplicationMainLogging;
 
         private bool ViewTop = true;
@@ -59,6 +60,19 @@ namespace Siebwalde_Application
 
         private void StartApplication_Click(object sender, EventArgs e)
         {
+
+            try
+            {                
+                if (!Directory.Exists(Enums.HOMEPATH + Enums.LOGGING))
+                {
+                    Directory.CreateDirectory(Enums.HOMEPATH + Enums.LOGGING);
+                }                
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
             SiebwaldeAppLogging("Siebwalde Application started.");
             SiebwaldeAppLogging("Main: PC MAC adress is: " + MACIPConditioner.MACstring());
             SiebwaldeAppLogging("Main: PC IP adress is: " + MACIPConditioner.IPstring());
