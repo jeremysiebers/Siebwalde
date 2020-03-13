@@ -18,7 +18,9 @@ namespace Siebwalde_Application
         private System.Timers.Timer AppUpdateTimer = new System.Timers.Timer();
         private Log2LoggingFile mTrackApplicationLogging;
         private object ExecuteLock = new object();
-        
+
+        private ReceivedMessage dummymessage;
+
         /// <summary>
         /// This enum holds all the possible states of the TrackControlMain statemachine
         /// </summary>
@@ -53,7 +55,9 @@ namespace Siebwalde_Application
             }
 
             // subscribe to commands set in the TrackControllerCommands class
-            trackApplicationVariables.trackControllerCommands.PropertyChanged += new PropertyChangedEventHandler(TrackControllerCommands_PropertyChanged);
+            mTrackApplicationVariables.trackControllerCommands.PropertyChanged += new PropertyChangedEventHandler(TrackControllerCommands_PropertyChanged);
+
+            dummymessage = new ReceivedMessage(0, 0, 0, 0);
         }
 
         #endregion
@@ -94,7 +98,6 @@ namespace Siebwalde_Application
 
                 case "ReceivedMessage":
                     {
-                        TrackApplicationUpdate("ReceivedMessage", 0);
                         break;
                     }
 
@@ -187,7 +190,7 @@ namespace Siebwalde_Application
 
                 case State.InitializeTrackAmplifiers:
                     {
-                        switch (mTrackAmplifierInitalizationSequencer.InitSequence(source, value))
+                        switch (mTrackAmplifierInitalizationSequencer.InitSequence(dummymessage))
                         {
                             case Enums.Busy:
                                 {

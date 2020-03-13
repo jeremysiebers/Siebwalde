@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -18,7 +19,6 @@ namespace Siebwalde_Application
         private Log2LoggingFile mTrackApplicationLogging;
         private TrackAmplifierBootloaderHelpers mTrackAmplifierBootloaderHelpers;
         private SendMessage mSendMessage;
-        private ReceivedMessage mReceivedMessage;
         private ushort Checksum;
 
         /// <summary>
@@ -45,18 +45,46 @@ namespace Siebwalde_Application
 
             byte[] DummyData = new byte[80];
             mSendMessage = new SendMessage(0, DummyData);
-            mReceivedMessage = new ReceivedMessage(0, 0, 0, 0);
             mTrackAmplifierBootloaderHelpers.Start();
+
+            // subscribe to commands set in the TrackControllerCommands class
+            mTrackApplicationVariables.trackControllerCommands.PropertyChanged += new PropertyChangedEventHandler(TrackControllerCommands_PropertyChanged);
+        }
+
+        #endregion
+
+        #region TrackControllerCommands_PropertyChanged
+        /// <summary>
+        /// Property changes event handler on TrackControllerCommands these will be coming typically from the Gui via the viewModel or
+        /// from subclasses sending commands to the Ethernet target
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void TrackControllerCommands_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case "ReceivedMessage":
+                    {
+                        InitSequence((ReceivedMessage)sender.GetType().GetProperty(e.PropertyName).GetValue(sender));
+                        break;
+                    }
+
+                default:
+                    {
+                        break;
+                    }                                      
+            }
         }
 
         #endregion
 
         #region Internal statemachine
 
-        internal uint InitSequence(string source, Int32 value)
+        internal uint InitSequence(ReceivedMessage receivedMessage)
         {
             uint returnval = Enums.Busy;
-
+           
             switch (StateMachine)
             {
                 case State.Reset:
@@ -66,7 +94,7 @@ namespace Siebwalde_Application
 
                 case State.ConnectToEthernetTarget:
                     {
-                        switch (ConnectToEthernetTarget(source, value))
+                        switch (ConnectToEthernetTarget(receivedMessage))
                         {
                             case Enums.Busy:
                                 {
@@ -96,7 +124,7 @@ namespace Siebwalde_Application
 
                 case State.ResetAllSlaves:
                     {
-                        switch (ResetAllSlaves(source, value))
+                        switch (ResetAllSlaves(receivedMessage))
                         {
                             case Enums.Busy:
                                 {
@@ -126,7 +154,7 @@ namespace Siebwalde_Application
 
                 case State.DataUploadStart:
                     {
-                        switch (DataUploadStart(source, value))
+                        switch (DataUploadStart(receivedMessage))
                         {
                             case Enums.Busy:
                                 {
@@ -156,7 +184,7 @@ namespace Siebwalde_Application
 
                 case State.DetectSlaves:
                     {
-                        switch (DetectSlaves(source, value))
+                        switch (DetectSlaves(receivedMessage))
                         {
                             case Enums.Busy:
                                 {
@@ -183,7 +211,7 @@ namespace Siebwalde_Application
                         }
                         break;
                     }
-
+                    
                 default:
                     break;
             }
@@ -200,7 +228,7 @@ namespace Siebwalde_Application
         /// Method for setting up connection with EthernetTarget
         /// </summary>
         /// <returns></returns>
-        private uint ConnectToEthernetTarget(string source, Int32 value)
+        private uint ConnectToEthernetTarget(ReceivedMessage receivedMessage)
         {
             uint returnval = Enums.Busy;
 
@@ -216,12 +244,12 @@ namespace Siebwalde_Application
                     }
                 case 1:
                     {
-                        if(source == "ReceivedMessage")
-                        {
-                            mReceivedMessage = mTrackApplicationVariables.trackControllerCommands.ReceivedMessage;
-                            if(mReceivedMessage.TaskId == TaskId.CONTROLLER &&
-                                mReceivedMessage.Taskcommand == TaskStates.CONNECTED &&
-                                mReceivedMessage.Taskstate == TaskStates.DONE)
+                        //if(source == "ReceivedMessage")
+                        //{
+                            //mReceivedMessage = mTrackApplicationVariables.trackControllerCommands.ReceivedMessage;
+                            if(receivedMessage.TaskId == TaskId.CONTROLLER &&
+                                receivedMessage.Taskcommand == TaskStates.CONNECTED &&
+                                receivedMessage.Taskstate == TaskStates.DONE)
                             {
                                 SubMethodState = 0;
                                 returnval = Enums.Finished;
@@ -229,7 +257,7 @@ namespace Siebwalde_Application
                                 mTrackApplicationVariables.trackControllerCommands.EthernetTargetConnected = true;
                                 mTrackApplicationLogging.Log(GetType().Name, "State.ConnectToEthernetTarget => CLIENT_CONNECTED.");
                             }
-                        }
+                        //}
                         break;
                     }
                 default:
@@ -243,7 +271,7 @@ namespace Siebwalde_Application
         #endregion
 
         #region ResetAllSlaves
-        private uint ResetAllSlaves(string source, Int32 value)
+        private uint ResetAllSlaves(ReceivedMessage receivedMessage)
         {
             uint returnval = Enums.Busy;
 
@@ -259,36 +287,28 @@ namespace Siebwalde_Application
                     }
                 case 1:
                     {
-                        if (source == "ReceivedMessage")
+                        if (receivedMessage.TaskId == TaskId.MBUS &&
+                            receivedMessage.Taskcommand == EnumMbusStatus.MBUS_STATE_RESET &&
+                            receivedMessage.Taskstate == TaskStates.DONE)
                         {
-                            mReceivedMessage = mTrackApplicationVariables.trackControllerCommands.ReceivedMessage;
-                            if (mReceivedMessage.TaskId == TaskId.MBUS &&
-                                mReceivedMessage.Taskcommand == EnumMbusStatus.MBUS_STATE_RESET &&
-                                mReceivedMessage.Taskstate == TaskStates.DONE)
-                            {
-                                mTrackApplicationLogging.Log(GetType().Name, "State.ResetAllSlaves => MBUS_STATE_RESET.");
-                                mSendMessage.Command = TrackCommand.EXEC_MBUS_STATE_SLAVES_ON;
-                                mTrackApplicationVariables.trackControllerCommands.SendMessage = mSendMessage;
-                                SubMethodState += 1;                                
-                                mTrackApplicationLogging.Log(GetType().Name, "State.ResetAllSlaves => EXEC_MBUS_STATE_SLAVES_ON.");
-                            }
-                        }
+                            mTrackApplicationLogging.Log(GetType().Name, "State.ResetAllSlaves => MBUS_STATE_RESET.");
+                            mSendMessage.Command = TrackCommand.EXEC_MBUS_STATE_SLAVES_ON;
+                            mTrackApplicationVariables.trackControllerCommands.SendMessage = mSendMessage;
+                            SubMethodState += 1;                                
+                            mTrackApplicationLogging.Log(GetType().Name, "State.ResetAllSlaves => EXEC_MBUS_STATE_SLAVES_ON.");
+                        }                        
                         break;
                     }
                 case 2:
                     {
-                        if (source == "ReceivedMessage")
+                        if (receivedMessage.TaskId == TaskId.MBUS &&
+                            receivedMessage.Taskcommand == EnumMbusStatus.MBUS_STATE_SLAVES_ON &&
+                            receivedMessage.Taskstate == TaskStates.DONE)
                         {
-                            mReceivedMessage = mTrackApplicationVariables.trackControllerCommands.ReceivedMessage;
-                            if (mReceivedMessage.TaskId == TaskId.MBUS &&
-                                mReceivedMessage.Taskcommand == EnumMbusStatus.MBUS_STATE_SLAVES_ON &&
-                                mReceivedMessage.Taskstate == TaskStates.DONE)
-                            {
-                                mTrackApplicationLogging.Log(GetType().Name, "State.ResetAllSlaves => MBUS_STATE_SLAVES_ON.");
-                                SubMethodState = 0;
-                                returnval = Enums.Finished;
-                            }
-                        }
+                            mTrackApplicationLogging.Log(GetType().Name, "State.ResetAllSlaves => MBUS_STATE_SLAVES_ON.");
+                            SubMethodState = 0;
+                            returnval = Enums.Finished;
+                        }                        
                         break;
                     }
                 default:
@@ -302,7 +322,7 @@ namespace Siebwalde_Application
         #endregion
 
         #region DataUploadStart
-        private uint DataUploadStart(string source, Int32 value)
+        private uint DataUploadStart(ReceivedMessage receivedMessage)
         {
             uint returnval = Enums.Busy;
 
@@ -318,17 +338,13 @@ namespace Siebwalde_Application
                     }
                 case 1:
                     {
-                        if (source == "ReceivedMessage")
+                        if (receivedMessage.TaskId == TaskId.MBUS &&
+                            receivedMessage.Taskcommand == EnumMbusStatus.MBUS_STATE_START_DATA_UPLOAD &&
+                            receivedMessage.Taskstate == TaskStates.DONE)
                         {
-                            mReceivedMessage = mTrackApplicationVariables.trackControllerCommands.ReceivedMessage;
-                            if (mReceivedMessage.TaskId == TaskId.MBUS &&
-                                mReceivedMessage.Taskcommand == EnumMbusStatus.MBUS_STATE_START_DATA_UPLOAD &&
-                                mReceivedMessage.Taskstate == TaskStates.DONE)
-                            {
-                                mTrackApplicationLogging.Log(GetType().Name, "State.DataUploadStart => MBUS_STATE_START_DATA_UPLOAD.");
-                                SubMethodState = 0;
-                                returnval = Enums.Finished;
-                            }
+                            mTrackApplicationLogging.Log(GetType().Name, "State.DataUploadStart => MBUS_STATE_START_DATA_UPLOAD.");
+                            SubMethodState = 0;
+                            returnval = Enums.Finished;
                         }
                         break;
                     }                
@@ -344,7 +360,7 @@ namespace Siebwalde_Application
         #region DetectSlaves
         private uint loopcounter = 1;
         private static uint attemptmax = 3;
-        private uint DetectSlaves(string source, Int32 value)
+        private uint DetectSlaves(ReceivedMessage receivedMessage)
         {
             uint returnval = Enums.Busy;
 
@@ -360,54 +376,50 @@ namespace Siebwalde_Application
                     }
                 case 1:
                     {
-                        if (source == "ReceivedMessage")
+                        if (receivedMessage.TaskId == TaskId.MBUS &&
+                            receivedMessage.Taskcommand == EnumMbusStatus.MBUS_STATE_SLAVE_DETECT &&
+                            receivedMessage.Taskstate == TaskStates.DONE)
                         {
-                            mReceivedMessage = mTrackApplicationVariables.trackControllerCommands.ReceivedMessage;
-                            if (mReceivedMessage.TaskId == TaskId.MBUS &&
-                                mReceivedMessage.Taskcommand == EnumMbusStatus.MBUS_STATE_SLAVE_DETECT &&
-                                mReceivedMessage.Taskstate == TaskStates.DONE)
+                            mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaves => MBUS_STATE_SLAVE_DETECT.");
+
+                            Thread.Sleep(2000);
+
+                            uint count = 0;
+
+                            foreach(TrackAmplifierItem amplifier in mTrackApplicationVariables.trackAmpItems)
                             {
-                                mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaves => MBUS_STATE_SLAVE_DETECT.");
-
-                                Thread.Sleep(2000);
-
-                                uint count = 0;
-
-                                foreach(TrackAmplifierItem amplifier in mTrackApplicationVariables.trackAmpItems)
+                                if (amplifier.SlaveDetected == 1)
                                 {
-                                    if (amplifier.SlaveDetected == 1)
-                                    {
-                                        count++;
-                                        Console.WriteLine("DetectSlaves --> slave " + amplifier.SlaveNumber.ToString() + " detected.");
-                                        mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaves => slave " + amplifier.SlaveNumber.ToString() + " detected.");
-                                    }
+                                    count++;
+                                    Console.WriteLine("DetectSlaves --> slave " + amplifier.SlaveNumber.ToString() + " detected.");
+                                    mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaves => slave " + amplifier.SlaveNumber.ToString() + " detected.");
                                 }
-
-                                Console.WriteLine("DetectSlaves --> " + count.ToString() + " slaves in total detected.");
-                                mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaves => " + count.ToString() + " slaves in total detected.");
-
-                                if (count > 3)
-                                {
-                                    Thread.Sleep(1000);
-                                    SubMethodState = 0;
-                                    returnval = Enums.Finished;
-                                }
-                                else if (loopcounter > attemptmax)
-                                {
-                                    Console.WriteLine("DetectSlaves --> more then " + loopcounter.ToString() + " recovery attempts, stopping program!");
-                                    mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaves => more then " + loopcounter.ToString() + " recovery attempts, stopping program!");
-                                    SubMethodState = 0;
-                                    returnval = Enums.Error;
-                                }
-                                else
-                                {
-                                    Console.WriteLine("DetectSlaves --> Start checking if one slave is stuck in bootloader mode, attempt " + 
-                                        loopcounter.ToString() + " of " + attemptmax.ToString() + ".");
-                                    mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaves => Start checking if one slave is stuck in bootloader mode, attempt " +
-                                        loopcounter.ToString() + " of " + attemptmax.ToString() + ".");
-                                    SubMethodState = 2;
-                                }                                
                             }
+
+                            Console.WriteLine("DetectSlaves --> " + count.ToString() + " slaves in total detected.");
+                            mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaves => " + count.ToString() + " slaves in total detected.");
+
+                            if (count > 3)
+                            {
+                                Thread.Sleep(1000);
+                                SubMethodState = 0;
+                                returnval = Enums.Finished;
+                            }
+                            else if (loopcounter > attemptmax)
+                            {
+                                Console.WriteLine("DetectSlaves --> more then " + loopcounter.ToString() + " recovery attempts, stopping program!");
+                                mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaves => more then " + loopcounter.ToString() + " recovery attempts, stopping program!");
+                                SubMethodState = 0;
+                                returnval = Enums.Error;
+                            }
+                            else
+                            {
+                                Console.WriteLine("DetectSlaves --> Start checking if one slave is stuck in bootloader mode, attempt " + 
+                                    loopcounter.ToString() + " of " + attemptmax.ToString() + ".");
+                                mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaves => Start checking if one slave is stuck in bootloader mode, attempt " +
+                                    loopcounter.ToString() + " of " + attemptmax.ToString() + ".");
+                                SubMethodState = 2;
+                            }                                
                         }
                         break;
                     }
@@ -421,84 +433,72 @@ namespace Siebwalde_Application
                     }
                 case 3:
                     {
-                        if (source == "ReceivedMessage")
+                        if (receivedMessage.TaskId == TaskId.FWHANDLER &&
+                            receivedMessage.Taskcommand == TrackCommand.FWHANDLERINIT &&
+                            receivedMessage.Taskstate == TaskStates.CONNECTED)
                         {
-                            mReceivedMessage = mTrackApplicationVariables.trackControllerCommands.ReceivedMessage;
-                            if (mReceivedMessage.TaskId == TaskId.FWHANDLER &&
-                                mReceivedMessage.Taskcommand == TrackCommand.FWHANDLERINIT &&
-                                mReceivedMessage.Taskstate == TaskStates.CONNECTED)
-                            {
-                                mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaves => FWHANDLER CONNECTED.");
-                                mSendMessage.Command = TrackCommand.EXEC_FW_STATE_GET_BOOTLOADER_VERSION;
-                                mTrackApplicationVariables.trackControllerCommands.SendMessage = mSendMessage;
-                                SubMethodState += 1;
-                                mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaves => EXEC_FW_STATE_GET_BOOTLOADER_VERSION.");
-                            }
+                            mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaves => FWHANDLER CONNECTED.");
+                            mSendMessage.Command = TrackCommand.EXEC_FW_STATE_GET_BOOTLOADER_VERSION;
+                            mTrackApplicationVariables.trackControllerCommands.SendMessage = mSendMessage;
+                            SubMethodState += 1;
+                            mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaves => EXEC_FW_STATE_GET_BOOTLOADER_VERSION.");
                         }
                         break;
                     }
                 case 4:
                     {
-                        if (source == "ReceivedMessage")
+                        if (receivedMessage.TaskId == TrackCommand.GET_BOOTLOADER_VERSION &&
+                            (receivedMessage.Taskcommand == TrackCommand.GET_BOOTLOADER_VERSION_OK ||
+                                receivedMessage.Taskcommand == TrackCommand.GET_BOOTLOADER_VERSION_NOK ||
+                                receivedMessage.Taskcommand == TrackCommand.BOOTLOADER_START_BYTE_ERROR ||
+                                receivedMessage.Taskcommand == TrackCommand.GET_BOOTLOADER_VERSION_RECEIVE_DATA_TIMEOUT) &&
+                            (receivedMessage.Taskstate == TaskStates.DONE ||
+                                receivedMessage.Taskstate == TaskStates.ERROR))
                         {
-                            mReceivedMessage = mTrackApplicationVariables.trackControllerCommands.ReceivedMessage;
-                            if (mReceivedMessage.TaskId == TrackCommand.GET_BOOTLOADER_VERSION &&
-                                (mReceivedMessage.Taskcommand == TrackCommand.GET_BOOTLOADER_VERSION_OK ||
-                                 mReceivedMessage.Taskcommand == TrackCommand.GET_BOOTLOADER_VERSION_NOK ||
-                                 mReceivedMessage.Taskcommand == TrackCommand.BOOTLOADER_START_BYTE_ERROR ||
-                                 mReceivedMessage.Taskcommand == TrackCommand.GET_BOOTLOADER_VERSION_RECEIVE_DATA_TIMEOUT) &&
-                                (mReceivedMessage.Taskstate == TaskStates.DONE ||
-                                 mReceivedMessage.Taskstate == TaskStates.ERROR))
+                            if (receivedMessage.Taskcommand == TrackCommand.GET_BOOTLOADER_VERSION_OK &&
+                                receivedMessage.Taskstate == TaskStates.DONE)
                             {
-                                if (mReceivedMessage.Taskcommand == TrackCommand.GET_BOOTLOADER_VERSION_OK &&
-                                    mReceivedMessage.Taskstate == TaskStates.DONE)
-                                {
-                                    mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaves => GET_BOOTLOADER_VERSION_OK.");
-                                    mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaves => Found a slave in bootloader mode!");
-                                    mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaves => Start flash sequence for this slave only.");
-                                }
-                                else if ((mReceivedMessage.Taskcommand == TrackCommand.GET_BOOTLOADER_VERSION_NOK ||
-                                          mReceivedMessage.Taskcommand == TrackCommand.BOOTLOADER_START_BYTE_ERROR ||
-                                          mReceivedMessage.Taskcommand == TrackCommand.GET_BOOTLOADER_VERSION_RECEIVE_DATA_TIMEOUT) &&
-                                         mReceivedMessage.Taskstate == TaskStates.ERROR)
-                                {
-                                    mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaves => GET_BOOTLOADER_VERSION_NOK.");
-                                    mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaves => No slave found, stopping slave detection.");
-                                    SubMethodState = 0;
-                                    returnval = Enums.Error;
-                                    break;
-                                }
-                                else
-                                {
-                                    mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaves => GET_BOOTLOADER_VERSION_NOK.");
-                                    mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaves => No slave found, stopping slave detection.");
-                                    SubMethodState = 0;
-                                    returnval = Enums.Error;
-                                    break;
-                                }
-                                
-                                // then align the call funcitons with the flash slaves function to have 1 common flash program
-                                
-                                mSendMessage.Command = TrackCommand.EXEC_FW_STATE_ERASE_FLASH;
-                                mTrackApplicationVariables.trackControllerCommands.SendMessage = mSendMessage;
-                                SubMethodState += 1;
-                                mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaves => EXEC_FW_STATE_ERASE_FLASH.");
+                                mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaves => GET_BOOTLOADER_VERSION_OK.");
+                                mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaves => Found a slave in bootloader mode!");
+                                mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaves => Start flash sequence for this slave only.");
                             }
+                            else if ((receivedMessage.Taskcommand == TrackCommand.GET_BOOTLOADER_VERSION_NOK ||
+                                        receivedMessage.Taskcommand == TrackCommand.BOOTLOADER_START_BYTE_ERROR ||
+                                        receivedMessage.Taskcommand == TrackCommand.GET_BOOTLOADER_VERSION_RECEIVE_DATA_TIMEOUT) &&
+                                        receivedMessage.Taskstate == TaskStates.ERROR)
+                            {
+                                mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaves => GET_BOOTLOADER_VERSION_NOK.");
+                                mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaves => No slave found, stopping slave detection.");
+                                SubMethodState = 0;
+                                returnval = Enums.Error;
+                                break;
+                            }
+                            else
+                            {
+                                mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaves => GET_BOOTLOADER_VERSION_NOK.");
+                                mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaves => No slave found, stopping slave detection.");
+                                SubMethodState = 0;
+                                returnval = Enums.Error;
+                                break;
+                            }
+                                
+                            // then align the call funcitons with the flash slaves function to have 1 common flash program
+                                
+                            mSendMessage.Command = TrackCommand.EXEC_FW_STATE_ERASE_FLASH;
+                            mTrackApplicationVariables.trackControllerCommands.SendMessage = mSendMessage;
+                            SubMethodState += 1;
+                            mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaves => EXEC_FW_STATE_ERASE_FLASH.");
                         }
                         break;
                     }
                 case 5:
                     {
-                        if (source == "ReceivedMessage")
+                        if (receivedMessage.TaskId == TrackCommand.ERASE_FLASH &&
+                            receivedMessage.Taskcommand == TrackCommand.ERASE_FLASH_RETURNED_OK &&
+                            receivedMessage.Taskstate == TaskStates.DONE)
                         {
-                            mReceivedMessage = mTrackApplicationVariables.trackControllerCommands.ReceivedMessage;
-                            if (mReceivedMessage.TaskId == TrackCommand.ERASE_FLASH &&
-                                mReceivedMessage.Taskcommand == TrackCommand.ERASE_FLASH_RETURNED_OK &&
-                                mReceivedMessage.Taskstate == TaskStates.DONE)
-                            {
-                                mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaves => ERASE_FLASH_RETURNED_OK.");
-                                //x
-                            }
+                            mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaves => ERASE_FLASH_RETURNED_OK.");
+                            //x
                         }
                         break;
                     }
@@ -513,4 +513,5 @@ namespace Siebwalde_Application
 
         #endregion
     }
+    
 }

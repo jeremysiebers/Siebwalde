@@ -1,5 +1,4 @@
-﻿using PropertyChanged;
-using System;
+﻿using System;
 using System.IO;
 using System.Text;
 using static Siebwalde_Application.Enums;
@@ -26,7 +25,6 @@ namespace Siebwalde_Application
         //public List<TrackAmplifierItem> trackAmpItems;
         //private TrackAmplifierItem trackAmp;
 
-        [DoNotNotify]
         public bool mTrackRealMode { get; set; }
         private EthernetTargetDataSimulator mEthernetTargetDataSimulator;        
 

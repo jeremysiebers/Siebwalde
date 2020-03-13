@@ -1,5 +1,4 @@
-﻿using PropertyChanged;
-using System;
+﻿using System;
 using System.Collections;
 using System.ComponentModel;
 
@@ -33,7 +32,6 @@ namespace Siebwalde_Application
         /// <summary>
         /// Get/Set and generate event for SlaveNumber
         /// </summary>
-        [DoNotNotify]
         public ushort SlaveNumber {
             get => mSlaveNumber;            
             set
@@ -53,7 +51,6 @@ namespace Siebwalde_Application
         /// <summary>
         /// Get/Set and generate event for SlaveDetected
         /// </summary>
-        [DoNotNotify]
         public ushort SlaveDetected
         {
             get => mSlaveDetected;
@@ -74,7 +71,6 @@ namespace Siebwalde_Application
         /// <summary>
         /// Get/Set and generate event for HoldingReg
         /// </summary>
-        [DoNotNotify]
         public ushort[] HoldingReg
         {
             get => mHoldingReg;
@@ -97,7 +93,6 @@ namespace Siebwalde_Application
         /// <summary>
         /// Get/Set and generate event for MbReceiveCounter
         /// </summary>
-        [DoNotNotify]
         public ushort MbReceiveCounter
         {
             get => mMbReceiveCounter;
@@ -118,7 +113,6 @@ namespace Siebwalde_Application
         /// <summary>
         /// Get/Set and generate event for MbSentCounter
         /// </summary>
-        [DoNotNotify]
         public ushort MbSentCounter
         {
             get => mMbSentCounter;
@@ -139,7 +133,6 @@ namespace Siebwalde_Application
         /// <summary>
         /// Get/Set and generate event for MbCommError
         /// </summary>
-        [DoNotNotify]
         public UInt32 MbCommError
         {
             get => mMbCommError;
@@ -160,7 +153,6 @@ namespace Siebwalde_Application
         /// <summary>
         /// Get/Set and generate event for MbExceptionCode
         /// </summary>
-        [DoNotNotify]
         public ushort MbExceptionCode
         {
             get => mMbExceptionCode;
@@ -181,7 +173,6 @@ namespace Siebwalde_Application
         /// <summary>
         /// Get/Set and generate event for SpiCommErrorCounter
         /// </summary>
-        [DoNotNotify]
         public ushort SpiCommErrorCounter
         {
             get => mSpiCommErrorCounter;

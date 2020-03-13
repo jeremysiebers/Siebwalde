@@ -16,6 +16,16 @@ namespace Siebwalde_Application
             Taskstate = taskstate;
             Taskmessage = taskmessage;
         }
+
+        public static bool operator ==(ReceivedMessage c1, ReceivedMessage c2)
+        {
+            return c1.Equals(c2);
+        }
+
+        public static bool operator !=(ReceivedMessage c1, ReceivedMessage c2)
+        {
+            return !c1.Equals(c2);
+        }
     }
 
     public struct SendMessage
@@ -27,6 +37,16 @@ namespace Siebwalde_Application
         {
             Command = command;
             Data = data;
+        }
+
+        public static bool operator ==(SendMessage c1, SendMessage c2)
+        {
+            return c1.Equals(c2);
+        }
+
+        public static bool operator !=(SendMessage c1, SendMessage c2)
+        {
+            return !c1.Equals(c2);
         }
     }
 

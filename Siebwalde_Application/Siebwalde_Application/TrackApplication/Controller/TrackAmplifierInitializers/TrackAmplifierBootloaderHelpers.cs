@@ -27,7 +27,14 @@ namespace Siebwalde_Application
         public TrackAmplifierBootloaderHelpers(string path)
         {
             PathToFile = path;
-            StreamReader sr = new StreamReader(PathToFile);
+            try
+            {
+                StreamReader sr = new StreamReader(PathToFile);
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message);
+            }
         }
 
         #endregion
