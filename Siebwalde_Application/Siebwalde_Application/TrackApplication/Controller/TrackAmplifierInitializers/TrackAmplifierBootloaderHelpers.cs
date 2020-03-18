@@ -12,20 +12,23 @@ namespace Siebwalde_Application
 
         #region Local variables
 
+        private Log2LoggingFile mTrackApplicationLogging;
         private string PathToFile = null;
         private StreamReader sr;
-        private ushort FileCheckSum = 0;
-        private List<byte[][]>HexData = new List<byte[][]> { };
+        private bool ConfigWordReadSuccessful;
+        private byte[] mGetConfigWord;
 
         #endregion
 
         #region Constructor
 
         /// <summary>
-        /// 
+        /// constructor
         /// </summary>
-        public TrackAmplifierBootloaderHelpers(string path)
+        public TrackAmplifierBootloaderHelpers(string path, Log2LoggingFile trackApplicationLogging)
         {
+            mTrackApplicationLogging = trackApplicationLogging;
+            ConfigWordReadSuccessful = false;
             PathToFile = path;
             try
             {
@@ -44,11 +47,32 @@ namespace Siebwalde_Application
         /// <summary>
         /// Get the HexFileData
         /// </summary>
-        public List<byte[][]>GetHexFileData { get { return HexData; } }
+        public List<byte[][]> GetHexFileData { get; } = new List<byte[][]> { };
+
         /// <summary>
         /// Get the File CheckSum
         /// </summary>
-        public ushort GetFileCheckSum { get { return FileCheckSum; } }
+        public ushort GetFileCheckSum { get; private set; } = 0;
+
+        /// <summary>
+        /// Get the config word
+        /// </summary>
+        public byte[] GetConfigWord 
+        {
+            get
+            {
+                return (byte[])mGetConfigWord.Clone();
+            }
+            private set
+            {
+                mGetConfigWord = value;
+            } 
+        }
+
+        /// <summary>
+        /// Get the File CheckSum
+        /// </summary>
+        public bool HexFileReadSuccessful { get; private set; } = false;
 
         /// <summary>
         /// Start the reading process and get all the info
@@ -59,14 +83,13 @@ namespace Siebwalde_Application
             string line;
             string buffer;
             // INTEL HEX format + address of used PIC is not bigger then 4 bytes
-            byte[] address = new byte[4];
-            byte[] data = new byte[32];
+            HexFileReadSuccessful = false;
 
             try
             {
-                //byte[] HexFile = File.ReadAllBytes(@"c:\localdata\Siebwalde\TrackAmplifier4.X.production.hex");
                 if (File.Exists(PathToFile))
                 {
+                    mTrackApplicationLogging.Log(GetType().Name, "Hex file " + PathToFile + " found, start reading...");
                     // Getting the HexData of the source file
                     using (StreamReader sr = new StreamReader(PathToFile))
                     {
@@ -74,18 +97,45 @@ namespace Siebwalde_Application
                         {
                             line = sr.ReadLine();
                             buffer = line.Substring(3, 4);
-                            address = StringToByteArray(buffer);
+                            byte[] address = StringToByteArray(buffer);
                             buffer = line.Substring(9, 32);
-                            data = StringToByteArray(buffer);
-                            //Array.Copy(line, 3, address, 0, 4);
-                            //Array.Copy(line, 9, data, 0, 32);
-                            HexData.Add(new byte[][] { address, data });
+                            byte[] data = StringToByteArray(buffer);
+                            GetHexFileData.Add(new byte[][] { address, data });
                         }
+                        mTrackApplicationLogging.Log(GetType().Name, "Hex file slave FW data aquired, read config word...");
+
+                        uint loopcounter = 0;
+                        bool run = true;
+                        while (run)
+                        {
+                            loopcounter++;
+
+                            line = sr.ReadLine();
+                            buffer = line.Substring(1, 2);
+                            //Console.WriteLine(buffer.ToCharArray());
+                            if (buffer == "0C")
+                            {
+                                run = false;
+                                buffer = line.Substring(9, 24);
+                                //Console.WriteLine(buffer.ToCharArray());
+                                GetConfigWord = StringToByteArray(buffer);
+                                ConfigWordReadSuccessful = true;
+                            }
+
+                            if(loopcounter > 1000)
+                            {
+                                mTrackApplicationLogging.Log(GetType().Name, "Failed to aquire Config word.");
+                                ConfigWordReadSuccessful = false;
+                                run = false;
+                            }
+                        }
+                        mTrackApplicationLogging.Log(GetType().Name, "Config word aquired, calculating checksum on slave FW data...");
+
                     }
 
                     // Getting the Checksum of the source file
                     uint count = 0;
-                    foreach (byte[][] field in HexData)
+                    foreach (byte[][] field in GetHexFileData)
                     {
                         count++;
                         for (uint i = 0; i < 16; i+=2)
@@ -93,27 +143,37 @@ namespace Siebwalde_Application
                             // Checksum does not include the checksum location itself to be added, therefore skip the last 2 bytes.
                             if(!(count == ProcessLines && i == 14))
                             {
-                                FileCheckSum = Convert.ToUInt16((field[1][i] + (field[1][i + 1] << 8) + FileCheckSum) & 0xFFFF);
+                                GetFileCheckSum = Convert.ToUInt16((field[1][i] + (field[1][i + 1] << 8) + GetFileCheckSum) & 0xFFFF);
                             }
                             else
                             {
-                                FileCheckSum = Convert.ToUInt16(FileCheckSum & 0xFFFF);
+                                GetFileCheckSum = Convert.ToUInt16(GetFileCheckSum & 0xFFFF);
                             }
                         }                        
                     }
+                    mTrackApplicationLogging.Log(GetType().Name, "Checksum of slave FW data aquired.");
                 }
                 else
                 {
                     MessageBox.Show(GetType().Name + "The expected Slave firmware file " + PathToFile + " could not be found!");
+                    mTrackApplicationLogging.Log(GetType().Name, "The expected Slave firmware file " + PathToFile + " could not be found!");
+                    HexFileReadSuccessful = false;
                     return Enums.Error;
                 }
             }
             catch (Exception e)
             {
+                mTrackApplicationLogging.Log(GetType().Name, "Exception occured within this program!");
+                HexFileReadSuccessful = false;
                 MessageBox.Show(e.Message);
                 return Enums.Error;
             }
 
+            if(ConfigWordReadSuccessful && GetFileCheckSum != 0)
+            {
+                HexFileReadSuccessful = true;
+                mTrackApplicationLogging.Log(GetType().Name, "HexFileReadSuccessful > Finished.");
+            }            
             return Enums.Finished;
         }
 

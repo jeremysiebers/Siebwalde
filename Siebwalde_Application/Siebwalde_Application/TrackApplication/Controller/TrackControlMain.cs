@@ -135,6 +135,8 @@ namespace Siebwalde_Application
             // Enable the timer
             AppUpdateTimer.Enabled = true;
             mTrackApplicationLogging.Log(GetType().Name, "Track Application started.");
+            mTrackApplicationLogging.Log(GetType().Name, "TrackAmplifierInitalizationSequencer.Start().");
+            mTrackAmplifierInitalizationSequencer.Start();
         }
 
         #endregion

@@ -10,6 +10,7 @@ namespace Siebwalde_Application
         string m_path = "null";
         private object writelock = new object();
         private string fmt = "000";
+        private int SpaceLength = 40;
 
         /*#--------------------------------------------------------------------------#*/
         /*  Description: StoreText
@@ -80,8 +81,9 @@ namespace Siebwalde_Application
         /// <param name="text"></param>
         public void Log(string sender, string text)
         {
-            string mText = "[" + sender + "]" + "\t" + " " + text;
-
+            string mText = "[" + sender + "]"; // + "\t\t\t" + " " + text;
+            string EmptyString = new string(' ', SpaceLength - mText.Length);
+            mText = mText + EmptyString + " " + text;
             StoreText(mText);
         }
     }

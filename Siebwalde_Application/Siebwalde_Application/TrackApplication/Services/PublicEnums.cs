@@ -64,6 +64,7 @@ namespace Siebwalde_Application
 
         public const uint Busy = 0;
         public const uint Finished = 1;
+        public const uint Next = 2;
         public const uint Error = 11;
 
         /// <summary>
@@ -72,6 +73,7 @@ namespace Siebwalde_Application
         public const ushort PROGMEMSIZE = 0x8000;
         public const ushort BOOTLOADEROFFSET = 0x800;
         public const ushort HEXROWWIDTH = 16;
+        public const ushort JUMPSIZE = 4;
 
     }
 
