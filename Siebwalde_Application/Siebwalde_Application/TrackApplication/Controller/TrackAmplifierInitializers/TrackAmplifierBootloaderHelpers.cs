@@ -102,7 +102,7 @@ namespace Siebwalde_Application
                             byte[] data = StringToByteArray(buffer);
                             GetHexFileData.Add(new byte[][] { address, data });
                         }
-                        mTrackApplicationLogging.Log(GetType().Name, "Hex file slave FW data aquired, read config word...");
+                        mTrackApplicationLogging.Log(GetType().Name, "Hex file slave FW data acquired, read config word...");
 
                         uint loopcounter = 0;
                         bool run = true;
@@ -129,7 +129,7 @@ namespace Siebwalde_Application
                                 run = false;
                             }
                         }
-                        mTrackApplicationLogging.Log(GetType().Name, "Config word aquired, calculating checksum on slave FW data...");
+                        mTrackApplicationLogging.Log(GetType().Name, "Config word acquired, calculating checksum on slave FW data...");
 
                     }
 
@@ -151,7 +151,7 @@ namespace Siebwalde_Application
                             }
                         }                        
                     }
-                    mTrackApplicationLogging.Log(GetType().Name, "Checksum of slave FW data aquired.");
+                    mTrackApplicationLogging.Log(GetType().Name, "Checksum of slave FW data acquired.");
                 }
                 else
                 {

@@ -1,6 +1,4 @@
-﻿using System;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
+﻿using System.ComponentModel;
 
 namespace Siebwalde_Application
 {
@@ -46,7 +44,7 @@ namespace Siebwalde_Application
 
         #region Usermessage
         /// <summary>
-        /// User message that can be shown on some user interface
+        /// User message that can be shown on user interface
         /// </summary>
         public string UserMessage { get; set; }
 
@@ -60,15 +58,9 @@ namespace Siebwalde_Application
             get { return EthernetTargetRecv; }
             set
             {
-                if (value == EthernetTargetRecv)
-                {
-                    return;
-                }
-                else
-                {
-                    EthernetTargetRecv = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(ReceivedMessage)));
-                }
+                // Messages could be the same, downloading fw data for instance
+                EthernetTargetRecv = value;
+                PropertyChanged(this, new PropertyChangedEventArgs(nameof(ReceivedMessage)));
             }
         }
 
@@ -111,17 +103,5 @@ namespace Siebwalde_Application
         }
 
         #endregion
-
-        #region OnPropertyChanged
-
-        // Create the OnPropertyChanged method to raise the event
-        // The calling member's name will be used as the parameter.
-        //protected void OnPropertyChanged([CallerMemberName] string name = null)
-        //{
-        //    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-        //}
-
-        #endregion
-
     }
 }

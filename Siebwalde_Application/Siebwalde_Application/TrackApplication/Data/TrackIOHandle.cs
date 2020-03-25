@@ -82,10 +82,10 @@ namespace Siebwalde_Application
         /// <param name="cmd"></param>
         public void ActuatorCmd(SendMessage sendMessage)
         {
-            byte[] datatosend = new byte[sendMessage.Data.Length + 3];
+            byte[] datatosend = new byte[sendMessage.Data.Length + 2];
             datatosend[0] = HEADER;
             datatosend[1] = sendMessage.Command;
-            datatosend[sendMessage.Data.Length + 2] = FOOTER;
+            //datatosend[sendMessage.Data.Length + 2] = FOOTER;
             Buffer.BlockCopy(sendMessage.Data, 0, datatosend, 2, sendMessage.Data.Length);
             mTrackSender.SendUdp(datatosend);            
         }
@@ -142,11 +142,17 @@ namespace Siebwalde_Application
                 mReceivedMessage.Taskmessage = reader.ReadByte();
 
                 mTrackApplicationVariables.trackControllerCommands.ReceivedMessage = mReceivedMessage;
+
+                //Console.WriteLine("Received message: TaskId = " +
+                //mReceivedMessage.TaskId.ToString() + ", Taskcommand = " +
+                //mReceivedMessage.Taskcommand.ToString() + ", Taskstate = " +
+                //mReceivedMessage.Taskstate.ToString() + ", Taskmessage = " +
+                //mReceivedMessage.Taskmessage.ToString() + ".");
             }
 
             // dispose of object data
-            reader.Dispose();
-            stream.Dispose();
+            //reader.Dispose();
+            //stream.Dispose();
 
             //m_iMTCtrl.MTLinkActivityUpdate();
         }

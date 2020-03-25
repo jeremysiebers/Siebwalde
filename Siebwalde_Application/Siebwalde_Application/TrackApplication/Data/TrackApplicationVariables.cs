@@ -4,7 +4,7 @@ namespace Siebwalde_Application
 {
     public class TrackApplicationVariables
     {
-        #region Variabels
+        #region Variables
 
         /// <summary>
         /// Variables of this class

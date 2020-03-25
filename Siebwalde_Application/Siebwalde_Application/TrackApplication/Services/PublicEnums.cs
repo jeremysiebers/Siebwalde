@@ -65,6 +65,7 @@ namespace Siebwalde_Application
         public const uint Busy = 0;
         public const uint Finished = 1;
         public const uint Next = 2;
+        public const uint Standby = 2;
         public const uint Error = 11;
 
         /// <summary>
