@@ -51,7 +51,6 @@
             this.YardForm = new System.Windows.Forms.Button();
             this.StartApplication = new System.Windows.Forms.Button();
             this.LStartApplication = new System.Windows.Forms.Label();
-            this.FiddleYardFormBot = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -200,7 +199,7 @@
             this.MaintrackForm.Name = "MaintrackForm";
             this.MaintrackForm.Size = new System.Drawing.Size(150, 23);
             this.MaintrackForm.TabIndex = 32;
-            this.MaintrackForm.Text = "Main Track Interface";
+            this.MaintrackForm.Text = "Siebwalde Control Panel";
             this.MaintrackForm.UseVisualStyleBackColor = true;
             this.MaintrackForm.Click += new System.EventHandler(this.MaintrackForm_Click);
             // 
@@ -233,17 +232,6 @@
             this.LStartApplication.TabIndex = 35;
             this.LStartApplication.Text = "StartApplication";
             // 
-            // FiddleYardFormBot
-            // 
-            this.FiddleYardFormBot.Location = new System.Drawing.Point(472, 25);
-            this.FiddleYardFormBot.Name = "FiddleYardFormBot";
-            this.FiddleYardFormBot.Size = new System.Drawing.Size(150, 23);
-            this.FiddleYardFormBot.TabIndex = 27;
-            this.FiddleYardFormBot.Text = "Show Fiddle Yard Bot";
-            this.FiddleYardFormBot.UseVisualStyleBackColor = true;
-            this.FiddleYardFormBot.Visible = false;
-            this.FiddleYardFormBot.Click += new System.EventHandler(this.FiddleYardFormBot_Click);
-            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -252,7 +240,6 @@
             this.ClientSize = new System.Drawing.Size(1081, 566);
             this.Controls.Add(this.YardForm);
             this.Controls.Add(this.MaintrackForm);
-            this.Controls.Add(this.FiddleYardFormBot);
             this.Controls.Add(this.FiddleYardFormTop);
             this.Controls.Add(this.LStartApplication);
             this.Controls.Add(this.StartApplication);
@@ -298,7 +285,6 @@
         private System.Windows.Forms.Button StartApplication;
         private System.Windows.Forms.Label LStartApplication;
         private System.Windows.Forms.ToolStripMenuItem fiddleYardSettingsToolStripMenuItem;
-        private System.Windows.Forms.Button FiddleYardFormBot;
     }
 }
 

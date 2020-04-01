@@ -11,12 +11,9 @@ namespace Siebwalde_Application.TrackApplication.View
 {
     public partial class HmiTrackControlForm : Form
     {
-        private TrackController mTrackController;
-
-        public HmiTrackControlForm(TrackController trackController)
+        public HmiTrackControlForm()
         {
-            mTrackController = trackController;
-            InitializeComponent(mTrackController);
+            InitializeComponent();
         }
     }
 }

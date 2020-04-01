@@ -11,13 +11,14 @@ namespace Siebwalde_Application
         /// The event that is fired when any child property changes it value
         /// </summary>
         public event PropertyChangedEventHandler PropertyChanged = (Sender, e) => { };
-        
+
         #region TrackController Commands Methods
 
-        private bool mStartInitializeTrackAmplifiers;
+
         /// <summary>
         /// Holds the start init track amplifier command state
         /// </summary>
+        private bool mStartInitializeTrackAmplifiers;
         public bool StartInitializeTrackAmplifiers
         {
             get => mStartInitializeTrackAmplifiers;
@@ -34,7 +35,29 @@ namespace Siebwalde_Application
                 }
             }
         }
-        
+
+        /// <summary>
+        /// Bool to start the main HmiTrackControlForm
+        /// </summary>
+        private bool mStartHmiTrackControlForm;
+        public bool StartHmiTrackControlForm
+        {
+            get => mStartHmiTrackControlForm;
+            set
+            {
+                if (value == mStartHmiTrackControlForm)
+                {
+                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(StartHmiTrackControlForm)));
+                    return;
+                }
+                else
+                {
+                    mStartHmiTrackControlForm = value;
+                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(StartHmiTrackControlForm)));
+                }
+            }
+        }
+
         /// <summary>
         /// Holds the Ethernet Target connected state
         /// </summary>

@@ -191,10 +191,13 @@
     <Compile Include="TrackApplication\Controller\TrackAmplifierInitializers\TrackAmplifierBootloaderHelpers.cs" />
     <Compile Include="TrackApplication\Controller\TrackAmplifierInitializers\TrackAmplifierInitalizationSequencer.cs" />
     <Compile Include="TrackApplication\Controller\TrackControlMain.cs" />
+    <Compile Include="TrackApplication\Model\ApplicationPage.cs" />
     <Compile Include="TrackApplication\Model\TrackAmplifierItem.cs" />
     <Compile Include="TrackApplication\Model\TrackControllerCommands.cs" />
     <Compile Include="TrackApplication\Services\PublicEnums.cs" />
     <Compile Include="TrackApplication\Simulator\EthernetTargetDataSimulator.cs" />
+    <Compile Include="TrackApplication\ValueConverters\ApplicationPageValueConverter.cs" />
+    <Compile Include="TrackApplication\ValueConverters\BaseValueConverters.cs" />
     <Compile Include="TrackApplication\ViewModel\BaseViewModel.cs" />
     <Compile Include="TrackApplication\TrackController.cs" />
     <Compile Include="Services\PingTarget.cs" />
@@ -214,6 +217,7 @@
     <Compile Include="TrackApplication\ViewModel\HmiTrackControlViewModel.cs" />
     <Compile Include="TrackApplication\ViewModel\RelayCommand.cs" />
     <Compile Include="TrackApplication\ViewModel\TrackAmplifierItemViewModel.cs" />
+    <Compile Include="TrackApplication\ViewModel\TrackAmplifierManualControlViewModel.cs" />
     <Compile Include="TrackApplication\View\HmiTrackControl.xaml.cs">
       <DependentUpon>HmiTrackControl.xaml</DependentUpon>
     </Compile>
@@ -225,6 +229,9 @@
     </Compile>
     <Compile Include="TrackApplication\View\TrackAmplifierItemView.xaml.cs">
       <DependentUpon>TrackAmplifierItemView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="TrackApplication\View\TrackAmplifierManualControlView.xaml.cs">
+      <DependentUpon>TrackAmplifierManualControlView.xaml</DependentUpon>
     </Compile>
     <EmbeddedResource Include="AboutBox1.resx">
       <DependentUpon>AboutBox1.cs</DependentUpon>
@@ -323,6 +330,13 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="TrackApplication\View\TrackAmplifierManualControlView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

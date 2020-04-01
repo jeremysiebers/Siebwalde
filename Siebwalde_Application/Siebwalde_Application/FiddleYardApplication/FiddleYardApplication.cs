@@ -164,7 +164,7 @@ namespace Siebwalde_Application
             if (m_instance == "TOP")
                 FYFORM.Location = new System.Drawing.Point(LocX + 0, LocY + 80); //(LocX + 6, LocY + 80);
             else if (m_instance == "BOT")
-                FYFORM.Location = new System.Drawing.Point(LocX + width / 2, LocY + 80);  //960
+                FYFORM.Location = new System.Drawing.Point(LocX + 960, LocY + 80);//(LocX + width / 2, LocY + 80);  //960
             FYFORM.AutoScroll = autoscroll;
 
             if (View && FYFORM.WindowState != FormWindowState.Minimized)

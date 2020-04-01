@@ -1,23 +1,15 @@
 ﻿using System.Windows.Controls;
 
-namespace Siebwalde_Application.TrackApplication.View
-{
+namespace Siebwalde_Application
+{ 
     /// <summary>
     /// Interaction logic for HmiTrackControl.xaml
     /// </summary>
     public partial class HmiTrackControl : UserControl
     {
-        /// <summary>
-        /// Hold the TrackController instance
-        /// </summary>
-        private TrackController mTrackController;
-
-        public HmiTrackControl(TrackController trackController)
+        public HmiTrackControl()
         {
-            mTrackController = trackController;
-
             InitializeComponent();
-            DataContext = new HmiTrackControlViewModel(mTrackController);
         }
     }
 }

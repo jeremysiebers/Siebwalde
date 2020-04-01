@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace Siebwalde_Application.TrackApplication.View
+namespace Siebwalde_Application
 {
     /// <summary>
     /// Interaction logic for TrackAmplifierItemView.xaml
@@ -13,26 +13,27 @@ namespace Siebwalde_Application.TrackApplication.View
         /// <summary>
         /// Hold the TrackController instance
         /// </summary>
-        private TrackController mTrackController;
+        //private TrackController mTrackController;
 
-        private TrackAmplifierItemViewModel trackAmplifierItemViewModel;
+        //private TrackAmplifierItemViewModel trackAmplifierItemViewModel;
 
-        public TrackAmplifierItemView(TrackController trackController)
+        //public TrackAmplifierItemView(TrackController trackController)
+        public TrackAmplifierItemView()
         {
-            mTrackController = trackController;
+            //mTrackController = trackController;
 
-            UInt16[] HoldingRegInit = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            //UInt16[] HoldingRegInit = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
             InitializeComponent();
 
-            trackAmplifierItemViewModel = new TrackAmplifierItemViewModel(mTrackController, 0, "", HoldingRegInit, 0, 0, 0, 0, 0);
+            //trackAmplifierItemViewModel = new TrackAmplifierItemViewModel(mTrackController, 0, "", HoldingRegInit, 0, 0, 0, 0, 0);
 
-            this.DataContext = trackAmplifierItemViewModel;
+            //this.DataContext = trackAmplifierItemViewModel;
         }
 
         void DataWindow_Closing(object sender, RoutedEventArgs e)
         {
-            trackAmplifierItemViewModel.OnWindowClosing();
+            //trackAmplifierItemViewModel.OnWindowClosing();
         }
     }
 }

@@ -43,7 +43,6 @@ namespace Siebwalde_Application
             StartApplication.Visible = true;
             LStartApplication.Visible = true;
             FiddleYardFormTop.Visible = false;
-            FiddleYardFormBot.Visible = false;
             MaintrackForm.Visible = false;
             YardForm.Visible = false;
 
@@ -98,7 +97,6 @@ namespace Siebwalde_Application
             SiebwaldeAppLogging("Main: FiddleYard Controller starting...");
             FYcontroller.Start();
             FiddleYardFormTop.Visible = true;
-            FiddleYardFormBot.Visible = false;
             FYLinkActivity.Visible = true;
             LFYLinkActivity.Visible = true;
             SiebwaldeAppLogging("Main: FiddleYard Controller started.");
@@ -135,95 +133,68 @@ namespace Siebwalde_Application
         private void FiddleYardFormTop_Click(object sender, EventArgs e)
         {
             bool autoscroll = false;            
-            if (this.Height < 1200 || this.Width < 1920)
-                autoscroll = true;
-            else { autoscroll = false; }
+            //if (this.Height < 1200 || this.Width < 1920)
+            //    autoscroll = true;
+            //else { autoscroll = false; }
             FYcontroller.FYTOPShow(autoscroll, this.Height, this.Width, this.Location.X, this.Location.Y, ViewTop);
             ViewTop = !ViewTop;
             if (!ViewTop)
             {
                 SiebwaldeAppLogging("Main: Show Fiddle Yard Top Layer interface");
-                FiddleYardFormTop.Text = "Hide Fiddle Yard";
+                FiddleYardFormTop.Text = "Hide Fiddle Yard Interface";
             }
             else 
             {
                 SiebwaldeAppLogging("Main: Hide Fiddle Yard Top Layer interface");
-                FiddleYardFormTop.Text = "Show Fiddle Yard"; 
+                FiddleYardFormTop.Text = "Show Fiddle Yard Interface"; 
             }
             
-            if (this.Height < 1200 || this.Width < 1920)
-                autoscroll = true;
-            else { autoscroll = false; }
+            //if (this.Height < 1200 || this.Width < 1920)
+            //    autoscroll = true;
+            //else { autoscroll = false; }
             FYcontroller.FYBOTShow(autoscroll, this.Height, this.Width, this.Location.X, this.Location.Y, ViewBot);
-            ViewBot = !ViewBot;
-            if (!ViewBot)
-            {
-                SiebwaldeAppLogging("Main: Show Fiddle Yard Bottom Layer interface");
-                FiddleYardFormBot.Text = "Hide Fiddle Yard Bot";
-            }
-            else
-            {
-                SiebwaldeAppLogging("Main: Hide Fiddle Yard Bottom Layer interface");
-                FiddleYardFormBot.Text = "Show Fiddle Yard Bot";
-            }
-        }
-
-        // no used
-        private void FiddleYardFormBot_Click(object sender, EventArgs e)
-        {
-            bool autoscroll;
-            if (this.Height < 1200 || this.Width < 1920)
-                autoscroll = true;
-            else { autoscroll = false; }
-            FYcontroller.FYBOTShow(autoscroll, this.Height, this.Width, this.Location.X, this.Location.Y, ViewBot);
-            ViewBot = !ViewBot;
-            if (!ViewBot)
-            {
-                SiebwaldeAppLogging("Main: Show Fiddle Yard Bottom Layer interface");
-                FiddleYardFormBot.Text = "Hide Fiddle Yard Bot";
-            }
-            else 
-            {
-                SiebwaldeAppLogging("Main: Hide Fiddle Yard Bottom Layer interface");
-                FiddleYardFormBot.Text = "Show Fiddle Yard Bot"; 
-            }
-        }
+            ViewBot = !ViewBot;            
+        }       
 
         private void MaintrackForm_Click(object sender, EventArgs e)
         {
-            if(hmiTrackForm != null && hmiTrackForm.IsDisposed != true)
-            {
-                if (hmiTrackForm.Visible && hmiTrackForm.WindowState != FormWindowState.Minimized)
-                {
-                    SiebwaldeAppLogging("Main: Hide Main Track interface");
-                    hmiTrackForm.Hide();
-                }
-                else
-                {
-                    SiebwaldeAppLogging("Main: Show Main Track interface");
-                    hmiTrackForm.Location = new Point(Location.X, Location.Y + 80);
-                    hmiTrackForm.Width = Width;
-                    hmiTrackForm.Height = Height - 80;
-                    hmiTrackForm.Show();
-                    hmiTrackForm.TopLevel = true;
-                    hmiTrackForm.BringToFront();
+            // Start and show the StartHmiTrackControlForm
+            MTcontroller.mTrackApplicationVariables.trackControllerCommands.StartHmiTrackControlForm = true;
 
-                    if(hmiTrackForm.WindowState == FormWindowState.Minimized)
-                    {
-                        hmiTrackForm.WindowState = FormWindowState.Normal;
-                    }
-                }
-            }
-            else
-            {
-                hmiTrackForm = new HmiTrackControlForm(MTcontroller);
-                hmiTrackForm.Show();
-                hmiTrackForm.Location = new Point(Location.X, Location.Y + 80);
-                hmiTrackForm.Width = Width;
-                hmiTrackForm.Height = Height - 80;
-                hmiTrackForm.TopLevel = true;
-                hmiTrackForm.BringToFront();
-            }
+
+            //if(hmiTrackForm != null && hmiTrackForm.IsDisposed != true)
+            //{
+            //    if (hmiTrackForm.Visible && hmiTrackForm.WindowState != FormWindowState.Minimized)
+            //    {
+            //        SiebwaldeAppLogging("Main: Hide Main Track interface");
+            //        hmiTrackForm.Hide();
+            //    }
+            //    else
+            //    {
+            //        SiebwaldeAppLogging("Main: Show Main Track interface");
+            //        hmiTrackForm.Location = new Point(Location.X, Location.Y + 80);
+            //        hmiTrackForm.Width = Width;
+            //        hmiTrackForm.Height = Height - 80;
+            //        hmiTrackForm.Show();
+            //        hmiTrackForm.TopLevel = true;
+            //        hmiTrackForm.BringToFront();
+
+            //        if(hmiTrackForm.WindowState == FormWindowState.Minimized)
+            //        {
+            //            hmiTrackForm.WindowState = FormWindowState.Normal;
+            //        }
+            //    }
+            //}
+            //else
+            //{
+            //    hmiTrackForm = new HmiTrackControlForm(MTcontroller);
+            //    hmiTrackForm.Show();
+            //    hmiTrackForm.Location = new Point(Location.X, Location.Y + 80);
+            //    hmiTrackForm.Width = Width;
+            //    hmiTrackForm.Height = Height - 80;
+            //    hmiTrackForm.TopLevel = true;
+            //    hmiTrackForm.BringToFront();
+            //}
         }
 
         private void YardForm_Click(object sender, EventArgs e)

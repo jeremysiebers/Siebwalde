@@ -26,11 +26,11 @@
         /// Required method for Designer support - do not modify
         /// the contents of this method with the code editor.
         /// </summary>
-        private void InitializeComponent(TrackController trackController)
+        private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(HmiTrackControlForm));
             this.HmiTrackControl = new System.Windows.Forms.Integration.ElementHost();
-            this.hmiTrackControl1 = new Siebwalde_Application.TrackApplication.View.HmiTrackControl(trackController);
+            this.hmiTrackControl1 = new Siebwalde_Application.HmiTrackControl();
             this.SuspendLayout();
             // 
             // HmiTrackControl
@@ -51,7 +51,7 @@
             this.Controls.Add(this.HmiTrackControl);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "HmiTrackControlForm";
-            this.Text = "Track Controller";
+            this.Text = "Siebwalde Control Panel";
             this.ResumeLayout(false);
 
         }

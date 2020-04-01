@@ -78,6 +78,8 @@
             this.automaticModeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.manualModeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.quitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.editToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.mIP50SettingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.alwaysOnTopToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.AutomaticMode = new System.Windows.Forms.GroupBox();
@@ -144,8 +146,6 @@
             this.PB_Bk8A_Train = new System.Windows.Forms.PictureBox();
             this.PB_Bk6_Train = new System.Windows.Forms.PictureBox();
             this.PB_Bk7_Train = new System.Windows.Forms.PictureBox();
-            this.editToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.mIP50SettingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.Nuo_Track_No_TOP)).BeginInit();
             this.menuStrip1.SuspendLayout();
             this.AutomaticMode.SuspendLayout();
@@ -553,6 +553,19 @@
             this.quitToolStripMenuItem.Name = "quitToolStripMenuItem";
             resources.ApplyResources(this.quitToolStripMenuItem, "quitToolStripMenuItem");
             this.quitToolStripMenuItem.Click += new System.EventHandler(this.quitToolStripMenuItem_Click);
+            // 
+            // editToolStripMenuItem1
+            // 
+            this.editToolStripMenuItem1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mIP50SettingsToolStripMenuItem});
+            this.editToolStripMenuItem1.Name = "editToolStripMenuItem1";
+            resources.ApplyResources(this.editToolStripMenuItem1, "editToolStripMenuItem1");
+            // 
+            // mIP50SettingsToolStripMenuItem
+            // 
+            this.mIP50SettingsToolStripMenuItem.Name = "mIP50SettingsToolStripMenuItem";
+            resources.ApplyResources(this.mIP50SettingsToolStripMenuItem, "mIP50SettingsToolStripMenuItem");
+            this.mIP50SettingsToolStripMenuItem.Click += new System.EventHandler(this.mIP50SettingsToolStripMenuItem_Click);
             // 
             // editToolStripMenuItem
             // 
@@ -1038,7 +1051,7 @@
             this.PB_Bk8A_Train.BackColor = System.Drawing.Color.Transparent;
             resources.ApplyResources(this.PB_Bk8A_Train, "PB_Bk8A_Train");
             this.PB_Bk8A_Train.Name = "PB_Bk8A_Train";
-            this.PB_Bk8A_Train.TabStop = false;            
+            this.PB_Bk8A_Train.TabStop = false;
             // 
             // PB_Bk6_Train
             // 
@@ -1053,19 +1066,6 @@
             resources.ApplyResources(this.PB_Bk7_Train, "PB_Bk7_Train");
             this.PB_Bk7_Train.Name = "PB_Bk7_Train";
             this.PB_Bk7_Train.TabStop = false;
-            // 
-            // editToolStripMenuItem1
-            // 
-            this.editToolStripMenuItem1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.mIP50SettingsToolStripMenuItem});
-            this.editToolStripMenuItem1.Name = "editToolStripMenuItem1";
-            resources.ApplyResources(this.editToolStripMenuItem1, "editToolStripMenuItem1");
-            // 
-            // mIP50SettingsToolStripMenuItem
-            // 
-            this.mIP50SettingsToolStripMenuItem.Name = "mIP50SettingsToolStripMenuItem";
-            resources.ApplyResources(this.mIP50SettingsToolStripMenuItem, "mIP50SettingsToolStripMenuItem");
-            this.mIP50SettingsToolStripMenuItem.Click += new System.EventHandler(this.mIP50SettingsToolStripMenuItem_Click);
             // 
             // FiddleYardForm
             // 

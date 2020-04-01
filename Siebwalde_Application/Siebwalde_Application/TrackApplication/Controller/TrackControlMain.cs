@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Siebwalde_Application.TrackApplication;
+using System;
 using System.ComponentModel;
 using System.Timers;
 
@@ -15,6 +16,7 @@ namespace Siebwalde_Application
         private TrackIOHandle mTrackIOHandle;
         private TrackApplicationVariables mTrackApplicationVariables;
         private TrackAmplifierInitalizationSequencer mTrackAmplifierInitalizationSequencer;
+        private HmiTrackControlViewModel mHmiTrackControlViewModel;
         private System.Timers.Timer AppUpdateTimer = new System.Timers.Timer();
         private Log2LoggingFile mTrackApplicationLogging;
         private object ExecuteLock = new object();
@@ -46,6 +48,7 @@ namespace Siebwalde_Application
             mTrackApplicationLogging = TrackApplicationLogging;
 
             // instantiate sub classes
+            mHmiTrackControlViewModel = new HmiTrackControlViewModel(mTrackApplicationVariables);
             mTrackAmplifierInitalizationSequencer = new TrackAmplifierInitalizationSequencer(mTrackApplicationLogging, mTrackApplicationVariables, mTrackIOHandle);
             
             // subscribe to trackamplifier data changed events
@@ -92,7 +95,7 @@ namespace Siebwalde_Application
 
                 case "SendMessage":
                     {
-                        mTrackIOHandle.ActuatorCmd(mTrackApplicationVariables.trackControllerCommands.SendMessage);
+                        //mTrackIOHandle.ActuatorCmd(mTrackApplicationVariables.trackControllerCommands.SendMessage);
                         break;
                     }
 
