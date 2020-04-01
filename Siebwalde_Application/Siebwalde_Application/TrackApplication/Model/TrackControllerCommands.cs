@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using PropertyChanged;
 
 namespace Siebwalde_Application
 {
@@ -31,32 +32,12 @@ namespace Siebwalde_Application
                 else
                 {
                     mStartInitializeTrackAmplifiers = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(StartInitializeTrackAmplifiers)));
+                    //PropertyChanged(this, new PropertyChangedEventArgs(nameof(StartInitializeTrackAmplifiers)));
                 }
             }
         }
 
-        /// <summary>
-        /// Bool to start the main HmiTrackControlForm
-        /// </summary>
-        private bool mStartHmiTrackControlForm;
-        public bool StartHmiTrackControlForm
-        {
-            get => mStartHmiTrackControlForm;
-            set
-            {
-                if (value == mStartHmiTrackControlForm)
-                {
-                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(StartHmiTrackControlForm)));
-                    return;
-                }
-                else
-                {
-                    mStartHmiTrackControlForm = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(StartHmiTrackControlForm)));
-                }
-            }
-        }
+        public bool StartHmiTrackControlForm { get; set; }
 
         /// <summary>
         /// Holds the Ethernet Target connected state
@@ -83,7 +64,7 @@ namespace Siebwalde_Application
             {
                 // Messages could be the same, downloading fw data for instance
                 EthernetTargetRecv = value;
-                PropertyChanged(this, new PropertyChangedEventArgs(nameof(ReceivedMessage)));
+                //PropertyChanged(this, new PropertyChangedEventArgs(nameof(ReceivedMessage)));
             }
         }
 
@@ -104,7 +85,7 @@ namespace Siebwalde_Application
                 else
                 {
                     EthernetTargetSend = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(SendMessage)));
+                    //PropertyChanged(this, new PropertyChangedEventArgs(nameof(SendMessage)));
                 }
             }
         }

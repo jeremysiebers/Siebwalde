@@ -1,7 +1,8 @@
-﻿using Siebwalde_Application.TrackApplication;
+﻿using Siebwalde_Application.TrackApplication.View;
 using System;
 using System.ComponentModel;
 using System.Timers;
+using System.Windows.Forms;
 
 namespace Siebwalde_Application
 {
@@ -16,12 +17,16 @@ namespace Siebwalde_Application
         private TrackIOHandle mTrackIOHandle;
         private TrackApplicationVariables mTrackApplicationVariables;
         private TrackAmplifierInitalizationSequencer mTrackAmplifierInitalizationSequencer;
-        private HmiTrackControlViewModel mHmiTrackControlViewModel;
         private System.Timers.Timer AppUpdateTimer = new System.Timers.Timer();
         private Log2LoggingFile mTrackApplicationLogging;
         private object ExecuteLock = new object();
 
         private ReceivedMessage dummymessage;
+
+        /// <summary>
+        /// This is the HmiTrackForm that holds a container for the WPF via elementhost
+        /// </summary>
+        private static HmiTrackControlForm hmiTrackForm;
 
         /// <summary>
         /// This enum holds all the possible states of the TrackControlMain statemachine
@@ -47,8 +52,7 @@ namespace Siebwalde_Application
             mTrackApplicationVariables = trackApplicationVariables;
             mTrackApplicationLogging = TrackApplicationLogging;
 
-            // instantiate sub classes
-            mHmiTrackControlViewModel = new HmiTrackControlViewModel(mTrackApplicationVariables);
+            // instantiate sub classes            
             mTrackAmplifierInitalizationSequencer = new TrackAmplifierInitalizationSequencer(mTrackApplicationLogging, mTrackApplicationVariables, mTrackIOHandle);
             
             // subscribe to trackamplifier data changed events
@@ -104,6 +108,13 @@ namespace Siebwalde_Application
                         break;
                     }
 
+                case "StartHmiTrackControlForm":
+                    {
+                        ShowHmiTrackControlWindow();
+                        //mTrackApplicationVariables.trackControllerCommands.StartInitializeTrackAmplifiers = true;
+                        break;
+                    }
+
                 default:
                     {
                         Console.WriteLine("Command received: " + e.PropertyName + " set to: " + sender.GetType().GetProperty(e.PropertyName).GetValue(sender).ToString());
@@ -121,6 +132,43 @@ namespace Siebwalde_Application
         private void OnTimedEvent(object source, ElapsedEventArgs e)
         {
             TrackApplicationUpdate("TimerEvent", 0);
+        }
+
+        #endregion
+
+        #region ShowHmiTrackControlWindow
+
+        /// <summary>
+        /// Show the HmiTrackControlWindow
+        /// </summary>
+        public static void ShowHmiTrackControlWindow()
+        {
+            if (hmiTrackForm != null && hmiTrackForm.IsDisposed != true)
+            {
+                if (hmiTrackForm.Visible && hmiTrackForm.WindowState != FormWindowState.Minimized)
+                {
+                    hmiTrackForm.Hide();
+                }
+                else
+                {
+                    hmiTrackForm.Show();
+                    hmiTrackForm.TopLevel = true;
+                    hmiTrackForm.BringToFront();
+
+                    if (hmiTrackForm.WindowState == FormWindowState.Minimized)
+                    {
+                        hmiTrackForm.WindowState = FormWindowState.Maximized;
+                    }
+                }
+            }
+            else
+            {
+                hmiTrackForm = new HmiTrackControlForm();
+                hmiTrackForm.Show();
+                hmiTrackForm.TopLevel = true;
+                hmiTrackForm.BringToFront();
+                hmiTrackForm.WindowState = FormWindowState.Maximized;
+            }
         }
 
         #endregion

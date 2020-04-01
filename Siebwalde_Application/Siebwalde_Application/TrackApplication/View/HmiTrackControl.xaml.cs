@@ -10,6 +10,8 @@ namespace Siebwalde_Application
         public HmiTrackControl()
         {
             InitializeComponent();
+
+            DataContext = new HmiTrackControlViewModel(this);
         }
     }
 }

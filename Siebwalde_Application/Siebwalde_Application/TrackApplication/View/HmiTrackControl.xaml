@@ -3,8 +3,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:Siebwalde_Application"
              mc:Ignorable="d" 
-             d:DesignHeight="542" d:DesignWidth="1081" >   
+             d:DesignHeight="542" d:DesignWidth="1081" >
     <DockPanel >
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
@@ -16,36 +17,9 @@
                 <MenuItem Header="_TrackAmp Manual Mode" IsEnabled="True" Command="{Binding ShowTrackAmplifierWindowCommand}"  />
             </MenuItem>
         </Menu>
-        <StackPanel>
-            <Grid >
-                <Frame x:Name="MainFrame" Content="{Binding CurrentPage}" />
-            </Grid>
-            <!--
-            <local:TrackAmplifierItemView >
-                
-            </local:TrackAmplifierItemView>
-            -->
-            
-            <!--
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="200" />
-                    <ColumnDefinition Width="200" />
-                    <ColumnDefinition Width="200" />
-                </Grid.ColumnDefinitions>
 
-                <Button Grid.Column="0" 
-                    Content="Initialize Track Amplifiers" HorizontalAlignment="Left" 
-                    Margin="10,10,0,0"  Width="auto" Height="20" 
-                    Command="{Binding OnStartInitTrackAmpplifiers}"/>
-            </Grid>
-
-            <Label Content="Logging" HorizontalAlignment="Left" Margin="10,260,0,0"/>
-
-            <TextBox HorizontalAlignment="Left" VerticalAlignment="Bottom" Height="200" Margin="10,10,0,0" TextWrapping="Wrap" Text="TextBox" Width="500"/>
-
-            -->
-
-        </StackPanel>
+        <Grid >
+            <Frame x:Name="MainFrame" Content="{Binding CurrentPage, Converter={local:ApplicationPageValueConverter}}" />
+        </Grid>        
     </DockPanel>
 </UserControl>

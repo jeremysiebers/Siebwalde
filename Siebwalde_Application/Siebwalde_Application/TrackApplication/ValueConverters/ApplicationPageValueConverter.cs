@@ -16,7 +16,7 @@ namespace Siebwalde_Application
             switch ((ApplicationPage)value)
             {
                 case ApplicationPage.StartPage:
-                    return null;// new StartPage();
+                    return new TrackControlView();
 
                 default:
                     Debugger.Break();
