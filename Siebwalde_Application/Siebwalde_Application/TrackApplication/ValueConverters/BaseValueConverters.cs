@@ -37,7 +37,7 @@ namespace Siebwalde_Application
 
         #endregion
 
-        #region Value COnverter Methods
+        #region Value Converter Methods
 
         /// <summary>
         /// The method to convert one type to another

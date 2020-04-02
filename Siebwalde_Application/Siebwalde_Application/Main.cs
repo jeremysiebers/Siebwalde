@@ -22,7 +22,7 @@ namespace Siebwalde_Application
         public TrackController MTcontroller;
         public FiddleYardController YDcontroller;
         public MAC_IP_Conditioner MACIPConditioner = new MAC_IP_Conditioner { };
-        public HmiTrackControlForm hmiTrackForm;
+        //public HmiTrackControlForm hmiTrackForm;
 
         private const int LINKACTMAX = 100;
         private string path = Enums.HOMEPATH + Enums.LOGGING + DateTime.Now.Day + "-"+ DateTime.Now.Month + "-"+ DateTime.Now.Year + "_SiebwaldeApplicationMain.txt"; //  different logging file per target, this is default

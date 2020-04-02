@@ -11,7 +11,7 @@ namespace Siebwalde_Application
         {
             InitializeComponent();
 
-            DataContext = new HmiTrackControlViewModel(this);
+            DataContext = new HmiTrackControlViewModel();
         }
     }
 }

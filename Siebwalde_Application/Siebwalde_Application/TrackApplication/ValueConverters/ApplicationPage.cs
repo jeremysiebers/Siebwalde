@@ -8,6 +8,8 @@
         /// <summary>
         /// The initial login page
         /// </summary>
-        StartPage = 0,
+        TrackControlView = 0,
+
+        TrackAmplifierItemView = 1
     }
 }

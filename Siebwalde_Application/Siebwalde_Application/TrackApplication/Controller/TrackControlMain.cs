@@ -27,6 +27,7 @@ namespace Siebwalde_Application
         /// This is the HmiTrackForm that holds a container for the WPF via elementhost
         /// </summary>
         private static HmiTrackControlForm hmiTrackForm;
+        private static HmiTrackControl hmiTrackControl;
 
         /// <summary>
         /// This enum holds all the possible states of the TrackControlMain statemachine

@@ -7,11 +7,6 @@
     {
         #region Local Variables
 
-        /// <summary>
-        /// The window this view model controls
-        /// </summary>
-        private HmiTrackControl mWindow;
-
         #endregion
 
         #region Properties
@@ -19,7 +14,7 @@
         /// <summary>
         /// The current page of the application
         /// </summary>
-        public ApplicationPage CurrentPage { get; set; } = ApplicationPage.StartPage;
+        public ApplicationPage CurrentPage { get; set; } = ApplicationPage.TrackControlView;
 
         #endregion
 
@@ -29,10 +24,10 @@
         /// Constructor
         /// </summary>
         /// <param name="trackController"></param>
-        public HmiTrackControlViewModel(HmiTrackControl hmiTrackControl)
-        {
-            mWindow = hmiTrackControl;
-        }
+        //public HmiTrackControlViewModel()
+        //{
+
+        //}
 
         #endregion
     }
