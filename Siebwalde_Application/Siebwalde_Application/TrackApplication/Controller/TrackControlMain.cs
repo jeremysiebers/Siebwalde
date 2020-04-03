@@ -18,7 +18,7 @@ namespace Siebwalde_Application
         private TrackApplicationVariables mTrackApplicationVariables;
         private TrackAmplifierInitalizationSequencer mTrackAmplifierInitalizationSequencer;
         private System.Timers.Timer AppUpdateTimer = new System.Timers.Timer();
-        private Log2LoggingFile mTrackApplicationLogging;
+        private ILogger mTrackApplicationLogging;
         private object ExecuteLock = new object();
 
         private ReceivedMessage dummymessage;
@@ -45,7 +45,7 @@ namespace Siebwalde_Application
         /// <param name="main"></param>
         /// <param name="trackIOHandle"></param>
         /// <param name="trackApplicationVariables"></param>
-        public TrackControlMain(Main main, Log2LoggingFile TrackApplicationLogging, TrackIOHandle trackIOHandle, TrackApplicationVariables trackApplicationVariables)
+        public TrackControlMain(Main main, ILogger TrackApplicationLogging, TrackIOHandle trackIOHandle, TrackApplicationVariables trackApplicationVariables)
         {
             // couple and hold local variables
             mMain = main;

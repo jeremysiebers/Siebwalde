@@ -30,8 +30,11 @@ namespace Siebwalde_Application
         private int mTrackReceivingPort;
 
         // logging local variables
-        private Log2LoggingFile mTrackApplicationLogging;
-        private string path = "null";
+        private ILogger mTrackApplicationLogging;
+        static ILogger GetLogger(string file)
+        {
+            return new FileLogger(file);
+        }
 
         #endregion
 
@@ -50,8 +53,7 @@ namespace Siebwalde_Application
             mTrackSendingPort = TrackSendingPort;
 
             // create logging instance for Track application
-            path = Enums.HOMEPATH + Enums.LOGGING + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_TrackApplicationMain.txt";
-            mTrackApplicationLogging = new Log2LoggingFile(path);
+            mTrackApplicationLogging = GetLogger("TrackApplicationMain.txt");
 
 
             // create new instance of trackApplicationVariables (DATA)

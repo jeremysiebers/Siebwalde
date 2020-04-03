@@ -12,7 +12,7 @@ namespace Siebwalde_Application
 
         #region Local variables
 
-        private Log2LoggingFile mTrackApplicationLogging;
+        private ILogger mTrackApplicationLogging;
         private string PathToFile = null;
         private StreamReader sr;
         private bool ConfigWordReadSuccessful;
@@ -25,7 +25,7 @@ namespace Siebwalde_Application
         /// <summary>
         /// constructor
         /// </summary>
-        public TrackAmplifierBootloaderHelpers(string path, Log2LoggingFile trackApplicationLogging)
+        public TrackAmplifierBootloaderHelpers(string path, ILogger trackApplicationLogging)
         {
             mTrackApplicationLogging = trackApplicationLogging;
             ConfigWordReadSuccessful = false;

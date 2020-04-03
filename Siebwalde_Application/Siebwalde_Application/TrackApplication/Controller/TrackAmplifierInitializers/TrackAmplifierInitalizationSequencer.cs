@@ -18,7 +18,7 @@ namespace Siebwalde_Application
         #region Local variables
 
         private TrackApplicationVariables mTrackApplicationVariables;
-        private Log2LoggingFile mTrackApplicationLogging;
+        private ILogger mTrackApplicationLogging;
         private TrackAmplifierBootloaderHelpers mTrackAmplifierBootloaderHelpers;
         private TrackIOHandle mTrackIOHandle;
         private SendMessage mSendMessage;
@@ -43,7 +43,7 @@ namespace Siebwalde_Application
 
         #region Constructor
 
-        public TrackAmplifierInitalizationSequencer(Log2LoggingFile trackApplicationLogging, TrackApplicationVariables trackApplicationVariables, TrackIOHandle trackIOHandle)
+        public TrackAmplifierInitalizationSequencer(ILogger trackApplicationLogging, TrackApplicationVariables trackApplicationVariables, TrackIOHandle trackIOHandle)
         {
             mTrackApplicationVariables = trackApplicationVariables;
             mTrackApplicationLogging = trackApplicationLogging;

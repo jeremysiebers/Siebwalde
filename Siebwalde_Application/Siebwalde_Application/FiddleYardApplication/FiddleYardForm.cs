@@ -8,11 +8,15 @@ namespace Siebwalde_Application
     public delegate void SetMessageCallback(string name, string Log);  // defines a delegate type TOP/BOT if caller runs on other thread
 
     public partial class FiddleYardForm : Form
-    {        
-        private iFiddleYardApplication m_iFYApp;
+    {
+        static ILogger GetLogger(string file)
+        {
+            return new FileLogger(file);
+        }
 
-        string path = "null";
-        public Log2LoggingFile FiddleYardFormLogging;
+        private IFiddleYardApplication m_iFYApp;
+
+        public ILogger FiddleYardFormLogging;
         
         public const int TOP = 1;
         public const int BOT = 0;
@@ -85,7 +89,7 @@ namespace Siebwalde_Application
          *  Notes      :
          */
         /*#--------------------------------------------------------------------------#*/
-        public FiddleYardForm(iFiddleYardApplication iFYApp)//, FiddleYardMip50SettingsForm FYMip50SettingsForm)
+        public FiddleYardForm(IFiddleYardApplication iFYApp)//, FiddleYardMip50SettingsForm FYMip50SettingsForm)
         {
             InitializeComponent();
 
@@ -427,18 +431,17 @@ namespace Siebwalde_Application
         /*#--------------------------------------------------------------------------#*/
         public void Connect(FiddleYardIOHandleVariables FYIOHandleVar, FiddleYardApplicationVariables FYAppVar)
         {
-            m_FYIOHandleVar = FYIOHandleVar;    // connect to FYIOHandle interface, save interface in variable
+            m_FYIOHandleVar = FYIOHandleVar;        // connect to FYIOHandle interface, save interface in variable
             m_FYAppVar = FYAppVar;                  // connect to FYApplication variables, save interface in variable
 
             if (this.Name == "FiddleYardTOP")
             {
-                path = Enums.HOMEPATH + Enums.LOGGING + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_FiddleYardFormTOP.txt"; //  different logging file per target, this is default
-                FiddleYardFormLogging = new Log2LoggingFile(path);
+                FiddleYardFormLogging = GetLogger("FiddleYardFormTOP.txt");
             }
             else if (this.Name == "FiddleYardBOT")
             {
-                path = Enums.HOMEPATH + Enums.LOGGING + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_FiddleYardFormBOT.txt"; //  different logging file per target, this is default
-                FiddleYardFormLogging = new Log2LoggingFile(path);
+                // different logging file per target, this is default
+                FiddleYardFormLogging = GetLogger("FiddleYardFormBOT.txt");                
             }
 
             #region Attach sensors
@@ -956,7 +959,7 @@ namespace Siebwalde_Application
             {
                 if (log != "")
                 {
-                    FiddleYardFormLogging.StoreText(log);
+                    FiddleYardFormLogging.Log(GetType().Name, log);
                     string fmt = "000";
                     int m_Millisecond = DateTime.Now.Millisecond;
                     string m_text = DateTime.Now + ":" + m_Millisecond.ToString(fmt) + " " + log + " " + Environment.NewLine;                    

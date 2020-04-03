@@ -25,8 +25,12 @@ namespace Siebwalde_Application
         //public HmiTrackControlForm hmiTrackForm;
 
         private const int LINKACTMAX = 100;
-        private string path = Enums.HOMEPATH + Enums.LOGGING + DateTime.Now.Day + "-"+ DateTime.Now.Month + "-"+ DateTime.Now.Year + "_SiebwaldeApplicationMain.txt"; //  different logging file per target, this is default
-        public Log2LoggingFile SiebwaldeApplicationMainLogging;
+        public ILogger SiebwaldeApplicationMainLogging;
+
+        static ILogger GetLogger(string file)
+        {
+            return new FileLogger(file);
+        }
 
         private bool ViewTop = true;
         private bool ViewBot = true;
@@ -35,7 +39,7 @@ namespace Siebwalde_Application
         {
 
             Siebwalde_Application.Properties.Settings.Default.Reload();
-            SiebwaldeApplicationMainLogging = new Log2LoggingFile(path);
+            SiebwaldeApplicationMainLogging = GetLogger("SiebwaldeApplicationMain.txt");
             this.StartPosition = FormStartPosition.Manual;
             this.Location = new Point(0, 0);
             InitializeComponent();            
@@ -204,7 +208,7 @@ namespace Siebwalde_Application
 
         public void SiebwaldeAppLogging(string text)
         {
-            SiebwaldeApplicationMainLogging.StoreText(text);
+            SiebwaldeApplicationMainLogging.Log(GetType().Name, text);
             string fmt = "000";
             int m_Millisecond = DateTime.Now.Millisecond;
             string m_text = DateTime.Now + ":" + m_Millisecond.ToString(fmt) + " " + text + " " + Environment.NewLine;

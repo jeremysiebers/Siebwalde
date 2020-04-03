@@ -61,6 +61,7 @@ namespace Siebwalde_Application
         public const string LOGGING = "Logging\\";
         public const string TRACKTARGET = "TRACKCONTROL";
         public const string SLAVEHEXFILE = "TrackAmplifier4.X.production.hex";
+        public const int SPACELENGTH = 40;
 
         public const uint Busy = 0;
         public const uint Finished = 1;

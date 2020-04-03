@@ -10,7 +10,7 @@ namespace Siebwalde_Application
         private FiddleYardIOHandleVariables m_FYIOHandleVar;             // connect variable to connect to FYIOH class for defined variables
         private FiddleYardApplicationVariables m_FYAppVar;
         private FiddleYardMip50 m_FYMIP50;
-        private Log2LoggingFile m_FYAppLog;
+        private ILogger m_FYAppLog;
 
         private enum State
         {
@@ -38,7 +38,7 @@ namespace Siebwalde_Application
          *  Notes      : 
          */
         /*#--------------------------------------------------------------------------#*/
-        public FiddleYardTrainDetection(FiddleYardIOHandleVariables FYIOHandleVar, FiddleYardApplicationVariables FYAppVar, FiddleYardMip50 FYMIP50, Log2LoggingFile FiddleYardApplicationLogging)
+        public FiddleYardTrainDetection(FiddleYardIOHandleVariables FYIOHandleVar, FiddleYardApplicationVariables FYAppVar, FiddleYardMip50 FYMIP50, ILogger FiddleYardApplicationLogging)
         {
             m_FYIOHandleVar = FYIOHandleVar;
             m_FYAppVar = FYAppVar;
@@ -132,32 +132,32 @@ namespace Siebwalde_Application
                         if (m_FYAppVar.GetTrackNr() < 7)        // Go to track 1
                         {
                             m_FYMIP50.MIP50xMOVExCALC(1);
-                            m_FYAppLog.StoreText("FYTDT.Traindetection() m_FYMIP50.MIP50xMOVExCALC(1)");
+                            m_FYAppLog.Log(GetType().Name, "FYTDT.Traindetection() m_FYMIP50.MIP50xMOVExCALC(1)");
                             State_Machine = State.MoveToTrack1;
-                            m_FYAppLog.StoreText("FYTDT.Traindetection() State_Machine = State.MoveToTrack1");
+                            m_FYAppLog.Log(GetType().Name, "FYTDT.Traindetection() State_Machine = State.MoveToTrack1");
                         }
                         else if (m_FYAppVar.GetTrackNr() > 6)   // Go to track 11
                         {
                             m_FYMIP50.MIP50xMOVExCALC(11);
-                            m_FYAppLog.StoreText("FYTDT.Traindetection() m_FYMIP50.MIP50xMOVExCALC(11)");
+                            m_FYAppLog.Log(GetType().Name, "FYTDT.Traindetection() m_FYMIP50.MIP50xMOVExCALC(11)");
                             State_Machine = State.MoveToTrack11;
-                            m_FYAppLog.StoreText("FYTDT.Traindetection() State_Machine = State.MoveToTrack11");
+                            m_FYAppLog.Log(GetType().Name, "FYTDT.Traindetection() State_Machine = State.MoveToTrack11");
                         }
                     }
                     else if(m_FYAppVar.GetTrackNr() == 1)       // On track 1, Go to Track 11 for scan
                     {
                         m_FYMIP50.MIP50xMOVExCALC(11);
-                        m_FYAppLog.StoreText("FYTDT.Traindetection() m_FYMIP50.MIP50xMOVExCALC(11)");
+                        m_FYAppLog.Log(GetType().Name, "FYTDT.Traindetection() m_FYMIP50.MIP50xMOVExCALC(11)");
                         State_Machine = State.TDT;
-                        m_FYAppLog.StoreText("FYTDT.Traindetection() State_Machine = State.TDT");
+                        m_FYAppLog.Log(GetType().Name, "FYTDT.Traindetection() State_Machine = State.TDT");
                         m_FYAppVar.TrainDetectionStarted.UpdateMessage();                           // Set message on Form
                     }
                     else if (m_FYAppVar.GetTrackNr() == 11)       // On track 11, Go to Track 1 for scan
                     {
                         m_FYMIP50.MIP50xMOVExCALC(1);
-                        m_FYAppLog.StoreText("FYTDT.Traindetection() m_FYMIP50.MIP50xMOVExCALC(1)");
+                        m_FYAppLog.Log(GetType().Name, "FYTDT.Traindetection() m_FYMIP50.MIP50xMOVExCALC(1)");
                         State_Machine = State.TDT;
-                        m_FYAppLog.StoreText("FYTDT.Traindetection() State_Machine = State.TDT");
+                        m_FYAppLog.Log(GetType().Name, "FYTDT.Traindetection() State_Machine = State.TDT");
                         m_FYAppVar.TrainDetectionStarted.UpdateMessage();                           // Set message on Form
                     }                    
                     break;
@@ -170,9 +170,9 @@ namespace Siebwalde_Application
                     if (SubProgramReturnVal == "Finished")
                     {
                         m_FYMIP50.MIP50xMOVExCALC(11);
-                        m_FYAppLog.StoreText("FYTDT.Traindetection() m_FYMIP50.MIP50xMOVExCALC(11)");
+                        m_FYAppLog.Log(GetType().Name, "FYTDT.Traindetection() m_FYMIP50.MIP50xMOVExCALC(11)");
                         State_Machine = State.TDT;                 // When finished moving, execute TrainDetection TDT
-                        m_FYAppLog.StoreText("FYTDT.Traindetection() State_Machine = State.TDT");
+                        m_FYAppLog.Log(GetType().Name, "FYTDT.Traindetection() State_Machine = State.TDT");
                         m_FYAppVar.TrainDetectionStarted.UpdateMessage();                           // Set message on Form
                     }
                     break;
@@ -181,9 +181,9 @@ namespace Siebwalde_Application
                     if (SubProgramReturnVal == "Finished")
                     {
                         m_FYMIP50.MIP50xMOVExCALC(1);
-                        m_FYAppLog.StoreText("FYTDT.Traindetection() m_FYMIP50.MIP50xMOVExCALC(1)");
+                        m_FYAppLog.Log(GetType().Name, "FYTDT.Traindetection() m_FYMIP50.MIP50xMOVExCALC(1)");
                         State_Machine = State.TDT;
-                        m_FYAppLog.StoreText("FYTDT.Traindetection() State_Machine = State.TDT");
+                        m_FYAppLog.Log(GetType().Name, "FYTDT.Traindetection() State_Machine = State.TDT");
                         m_FYAppVar.TrainDetectionStarted.UpdateMessage();                           // Set message on Form
                     }
                     break;
@@ -199,9 +199,9 @@ namespace Siebwalde_Application
                         m_FYAppVar.TrackTrainsOnFYUpdater();                                                    // Force update Form
 
                         State_Machine = State.Idle;
-                        m_FYAppLog.StoreText("FYTDT.Traindetection() State_Machine = State.Idle");
+                        m_FYAppLog.Log(GetType().Name, "FYTDT.Traindetection() State_Machine = State.Idle");
                         _Return = "Finished";
-                        m_FYAppLog.StoreText("FYTDT.Traindetection() _Return = Finished");
+                        m_FYAppLog.Log(GetType().Name, "FYTDT.Traindetection() _Return = Finished");
                     }
 
                     if (CL10Heart == true && F10 == true && m_FYAppVar.GetTrackNr() > 0)                        // While checking if heartbit is true and F10 is true and GetTracknr() is 1 <> 11
