@@ -21,6 +21,9 @@ namespace Siebwalde_Application
                 case ApplicationPage.TrackAmplifierItemView:
                     return new TrackAmplifierItemView();
 
+                case ApplicationPage.TrackAmplifierManualControlView:
+                    return new TrackAmplifierManualControlView();
+
                 default:
                     Debugger.Break();
                     return null;

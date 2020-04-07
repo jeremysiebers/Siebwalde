@@ -42,7 +42,7 @@
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
     <ExcludeDeploymentUrl>true</ExcludeDeploymentUrl>
     <PublishWizardCompleted>true</PublishWizardCompleted>
-    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <BootstrapperEnabled>true</BootstrapperEnabled>    
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -204,6 +204,7 @@
     <Compile Include="TrackApplication\Model\TrackControllerCommands.cs" />
     <Compile Include="TrackApplication\Services\PublicEnums.cs" />
     <Compile Include="TrackApplication\Simulator\EthernetTargetDataSimulator.cs" />
+    <Compile Include="TrackApplication\ValueConverters\BooleanToVisibilityConverter.cs" />
     <Compile Include="TrackApplication\ValueConverters\IoCConverter.cs" />
     <Compile Include="TrackApplication\ValueConverters\ApplicationPageValueConverter.cs" />
     <Compile Include="TrackApplication\ValueConverters\BaseValueConverters.cs" />
@@ -229,6 +230,7 @@
     <Compile Include="TrackApplication\ViewModel\TrackControlViewModel.cs" />
     <Compile Include="TrackApplication\ViewModel\TrackAmplifierManualControlViewModel.cs" />
     <Compile Include="TrackApplication\ViewModel\ViewModelLocator.cs" />
+    <Compile Include="TrackApplication\Pages\BasePage.cs" />
     <Compile Include="TrackApplication\View\HmiTrackControl.xaml.cs">
       <DependentUpon>HmiTrackControl.xaml</DependentUpon>
     </Compile>
@@ -238,13 +240,13 @@
     <Compile Include="TrackApplication\View\HmiTrackControlForm.Designer.cs">
       <DependentUpon>HmiTrackControlForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="TrackApplication\View\TrackAmplifierItemView.xaml.cs">
+    <Compile Include="TrackApplication\Pages\TrackAmplifierItemView.xaml.cs">
       <DependentUpon>TrackAmplifierItemView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="TrackApplication\View\TrackAmplifierManualControlView.xaml.cs">
+    <Compile Include="TrackApplication\Pages\TrackAmplifierManualControlView.xaml.cs">
       <DependentUpon>TrackAmplifierManualControlView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="TrackApplication\View\TrackControlView.xaml.cs">
+    <Compile Include="TrackApplication\Pages\TrackControlView.xaml.cs">
       <DependentUpon>TrackControlView.xaml</DependentUpon>
     </Compile>
     <EmbeddedResource Include="AboutBox1.resx">
@@ -341,15 +343,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="TrackApplication\View\TrackAmplifierItemView.xaml">
+    <Page Include="TrackApplication\Pages\TrackAmplifierItemView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="TrackApplication\View\TrackAmplifierManualControlView.xaml">
+    <Page Include="TrackApplication\Pages\TrackAmplifierManualControlView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="TrackApplication\View\TrackControlView.xaml">
+    <Page Include="TrackApplication\Pages\TrackControlView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

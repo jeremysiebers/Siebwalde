@@ -83,7 +83,7 @@ namespace Siebwalde_Application
                 string EmptyString = new string(' ', Enums.SPACELENGTH - mText.Length);
                 mText = mText + EmptyString + " " + text;
                 int m_Millisecond = DateTime.Now.Millisecond;
-                mText = mText + DateTime.Now + ":" + m_Millisecond.ToString(fmt) + " " + text + " " + Environment.NewLine;
+                mText = mText + DateTime.Now + ":" + m_Millisecond.ToString(fmt) + " " + text + " ";
                 Console.WriteLine(mText);
             }            
         }

@@ -27,7 +27,7 @@ namespace Siebwalde_Application
 
         static ILogger GetLogger(string file)
         {
-            return new ConsoleLogger(file);
+            return new FileLogger(file);
         }
 
         /*#--------------------------------------------------------------------------#*/

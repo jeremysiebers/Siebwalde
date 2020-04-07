@@ -14,7 +14,7 @@
                 <MenuItem Header="_Exit" />
             </MenuItem>
             <MenuItem Header="_Edit">
-                <MenuItem Header="_TrackAmp Manual Mode" IsEnabled="True" Command="{Binding ShowTrackAmplifierWindowCommand}"  />
+                <MenuItem Header="_TrackAmp Manual Mode" IsEnabled="True" Command="{Binding TrackAmpManualMode}"  />
             </MenuItem>
         </Menu>
 

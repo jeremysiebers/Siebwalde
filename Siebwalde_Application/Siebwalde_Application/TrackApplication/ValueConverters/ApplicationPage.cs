@@ -10,6 +10,8 @@
         /// </summary>
         TrackControlView = 0,
 
-        TrackAmplifierItemView = 1
+        TrackAmplifierItemView = 1,
+
+        TrackAmplifierManualControlView = 2
     }
 }
