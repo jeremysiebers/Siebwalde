@@ -8,15 +8,25 @@ namespace Siebwalde_Application
     /// </summary>
     public static class IoC
     {
-        #region Properties
+        #region Public properties
 
         /// <summary>
         /// The kernel for our IoC container
         /// </summary>
         public static IKernel Kernel { get; private set; } = new StandardKernel();
 
+        /// <summary>
+        /// A shortcut to access the <see cref="SiebwaldeControlViewModel"/>
+        /// </summary>
+        public static SiebwaldeControlViewModel SiebwaldeMain => IoC.Get<SiebwaldeControlViewModel>();
+
+        /// <summary>
+        /// A shortcut to access the <see cref="TrackApplicationVariables"/>
+        /// </summary>
+        public static TrackApplicationVariables TrackVar => IoC.Get<TrackApplicationVariables>();
+
         #endregion
-        
+
         #region Construction
 
         /// <summary>
@@ -29,14 +39,17 @@ namespace Siebwalde_Application
             // Bind all required view models
             BindViewModels();
         }
-        
+
         /// <summary>
         /// Binds all singleton view models
         /// </summary>
         private static void BindViewModels()
         {
             // Bind to a single instance of Application view model
-            Kernel.Bind<HmiTrackControlViewModel>().ToConstant(new HmiTrackControlViewModel());
+            Kernel.Bind<SiebwaldeControlViewModel>().ToConstant(new SiebwaldeControlViewModel());
+
+            // bind to a single instance of Track Application Variables
+            Kernel.Bind<TrackApplicationVariables>().ToConstant(new TrackApplicationVariables());
         }
 
         #endregion

@@ -17,8 +17,8 @@ namespace Siebwalde_Application
             // Find the appropiate page
             switch ((string)parameter)
             {
-                case nameof(HmiTrackControlViewModel):
-                    return IoC.Get<HmiTrackControlViewModel>();
+                case nameof(SiebwaldeControlViewModel):
+                    return IoC.SiebwaldeMain;
 
                 default:
                     Debugger.Break();

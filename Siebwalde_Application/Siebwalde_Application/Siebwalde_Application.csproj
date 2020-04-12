@@ -42,7 +42,7 @@
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
     <ExcludeDeploymentUrl>true</ExcludeDeploymentUrl>
     <PublishWizardCompleted>true</PublishWizardCompleted>
-    <BootstrapperEnabled>true</BootstrapperEnabled>    
+    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -93,7 +93,8 @@
     <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>Siebwalde_Application_TemporaryKey.pfx</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject>Siebwalde_Application.Program</StartupObject>
@@ -224,21 +225,15 @@
     <Compile Include="Services\Settings.cs" />
     <Compile Include="TrackApplication\Data\TrackIOHandle.cs" />
     <Compile Include="TrackApplication\Data\TrackApplicationVariables.cs" />
-    <Compile Include="TrackApplication\ViewModel\HmiTrackControlViewModel.cs" />
+    <Compile Include="SiebwaldeControlViewModel.cs" />
     <Compile Include="TrackApplication\ViewModel\RelayCommand.cs" />
     <Compile Include="TrackApplication\ViewModel\TrackAmplifierItemViewModel.cs" />
     <Compile Include="TrackApplication\ViewModel\TrackControlViewModel.cs" />
     <Compile Include="TrackApplication\ViewModel\TrackAmplifierManualControlViewModel.cs" />
     <Compile Include="TrackApplication\ViewModel\ViewModelLocator.cs" />
     <Compile Include="TrackApplication\Pages\BasePage.cs" />
-    <Compile Include="TrackApplication\View\HmiTrackControl.xaml.cs">
-      <DependentUpon>HmiTrackControl.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="TrackApplication\View\HmiTrackControlForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="TrackApplication\View\HmiTrackControlForm.Designer.cs">
-      <DependentUpon>HmiTrackControlForm.cs</DependentUpon>
+    <Compile Include="SiebwaldeControl.xaml.cs">
+      <DependentUpon>SiebwaldeControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="TrackApplication\Pages\TrackAmplifierItemView.xaml.cs">
       <DependentUpon>TrackAmplifierItemView.xaml</DependentUpon>
@@ -270,9 +265,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <SubType>Designer</SubType>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="TrackApplication\View\HmiTrackControlForm.resx">
-      <DependentUpon>HmiTrackControlForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config" />
     <None Include="packages.config" />
@@ -339,7 +331,7 @@
     <Analyzer Include="..\packages\Microsoft.CodeQuality.Analyzers.2.9.8\analyzers\dotnet\cs\Microsoft.CodeQuality.CSharp.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="TrackApplication\View\HmiTrackControl.xaml">
+    <Page Include="SiebwaldeControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -358,6 +350,9 @@
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="TrackApplication\View\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

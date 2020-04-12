@@ -1,0 +1,40 @@
+﻿using System;
+using System.Drawing;
+using System.IO;
+using System.Windows.Forms;
+using System.Windows.Forms.Integration;
+
+namespace Siebwalde_Application
+{
+    public interface IMain
+    {
+        void SiebwaldeAppLogging(string text);
+        void FYLinkActivityUpdate();
+    }
+
+    public partial class Main : Form , IMain
+    {
+        public Main()
+        {
+            InitializeComponent();
+
+            // Setup IoC
+            IoC.Setup();
+
+            var WpfWindow = new SiebwaldeControl(this);
+            ElementHost.EnableModelessKeyboardInterop(WpfWindow);
+            WpfWindow.Show();
+
+        }
+
+        public void FYLinkActivityUpdate()
+        {
+            
+        }
+
+        public void SiebwaldeAppLogging(string text)
+        {
+            
+        }
+    }
+}

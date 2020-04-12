@@ -1,8 +1,8 @@
-﻿using Siebwalde_Application.TrackApplication.View;
-using System;
+﻿using System;
+using System.Windows.Forms;
+using System.Windows.Forms.Integration;
 using System.ComponentModel;
 using System.Timers;
-using System.Windows.Forms;
 
 namespace Siebwalde_Application
 {
@@ -26,8 +26,8 @@ namespace Siebwalde_Application
         /// <summary>
         /// This is the HmiTrackForm that holds a container for the WPF via elementhost
         /// </summary>
-        private static HmiTrackControlForm hmiTrackForm;
-        private static HmiTrackControl hmiTrackControl;
+        //private static HmiTrackControlForm hmiTrackForm;
+        //private static HmiTrackControl mHmiTrackControl;
 
         /// <summary>
         /// This enum holds all the possible states of the TrackControlMain statemachine
@@ -65,7 +65,7 @@ namespace Siebwalde_Application
             // subscribe to commands set in the TrackControllerCommands class
             mTrackApplicationVariables.trackControllerCommands.PropertyChanged += new PropertyChangedEventHandler(TrackControllerCommands_PropertyChanged);
 
-            dummymessage = new ReceivedMessage(0, 0, 0, 0);
+            dummymessage = new ReceivedMessage(0, 0, 0, 0);                        
         }
 
         #endregion
@@ -111,8 +111,8 @@ namespace Siebwalde_Application
 
                 case "StartHmiTrackControlForm":
                     {
-                        ShowHmiTrackControlWindow();
-                        //mTrackApplicationVariables.trackControllerCommands.StartInitializeTrackAmplifiers = true;
+                        // Start Track Control view container housing WPF application
+                        //ShowHmiTrackControlWindow();                        
                         break;
                     }
 
@@ -142,35 +142,38 @@ namespace Siebwalde_Application
         /// <summary>
         /// Show the HmiTrackControlWindow
         /// </summary>
-        public static void ShowHmiTrackControlWindow()
-        {
-            if (hmiTrackForm != null && hmiTrackForm.IsDisposed != true)
-            {
-                if (hmiTrackForm.Visible && hmiTrackForm.WindowState != FormWindowState.Minimized)
-                {
-                    hmiTrackForm.Hide();
-                }
-                else
-                {
-                    hmiTrackForm.Show();
-                    hmiTrackForm.TopLevel = true;
-                    hmiTrackForm.BringToFront();
+        //public static void ShowHmiTrackControlWindow()
+        //{
+        //    var wpfwindow = new HmiTrackControl(); //WPFWindow.Window1();
+        //    ElementHost.EnableModelessKeyboardInterop(wpfwindow);
+        //    wpfwindow.Show();
+        //    //if (hmiTrackForm != null && hmiTrackForm.IsDisposed != true)
+        //    //{
+        //    //    if (hmiTrackForm.Visible && hmiTrackForm.WindowState != FormWindowState.Minimized)
+        //    //    {
+        //    //        hmiTrackForm.Hide();
+        //    //    }
+        //    //    else
+        //    //    {
+        //    //        hmiTrackForm.Show();
+        //    //        hmiTrackForm.TopLevel = true;
+        //    //        hmiTrackForm.BringToFront();
 
-                    if (hmiTrackForm.WindowState == FormWindowState.Minimized)
-                    {
-                        hmiTrackForm.WindowState = FormWindowState.Maximized;
-                    }
-                }
-            }
-            else
-            {
-                hmiTrackForm = new HmiTrackControlForm();
-                hmiTrackForm.Show();
-                hmiTrackForm.TopLevel = true;
-                hmiTrackForm.BringToFront();
-                hmiTrackForm.WindowState = FormWindowState.Maximized;
-            }
-        }
+        //    //        if (hmiTrackForm.WindowState == FormWindowState.Minimized)
+        //    //        {
+        //    //            hmiTrackForm.WindowState = FormWindowState.Maximized;
+        //    //        }
+        //    //    }
+        //    //}
+        //    //else
+        //    //{                
+        //    //    hmiTrackForm = new HmiTrackControlForm();
+        //    //    hmiTrackForm.Show();
+        //    //    hmiTrackForm.TopLevel = true;
+        //    //    hmiTrackForm.BringToFront();
+        //    //    hmiTrackForm.WindowState = FormWindowState.Maximized;
+        //    //}
+        //}
 
         #endregion
 

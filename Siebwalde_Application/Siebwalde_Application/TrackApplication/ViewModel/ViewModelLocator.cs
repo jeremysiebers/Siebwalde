@@ -17,7 +17,7 @@ namespace Siebwalde_Application
         /// <summary>
         /// The application view model
         /// </summary>
-        public static HmiTrackControlViewModel HmiTrackControlViewModel => IoC.Get<HmiTrackControlViewModel>();
+        public static SiebwaldeControlViewModel HmiTrackControlViewModel => IoC.SiebwaldeMain;
 
         #endregion
     }

@@ -13,7 +13,7 @@ namespace Siebwalde_Application
     
     public class FiddleYardController : iFiddleYardController
     {
-        public iMain m_iMain;                                       // connect variable to connect to FYController class to Main for application logging        
+        public IMain m_iMain;                                       // connect variable to connect to FYController class to Main for application logging        
         public const int SEND_DELAY = 10;
         public FiddleYardIOHandle FYIOHandleTOP;
         public FiddleYardIOHandle FYIOHandleBOT;
@@ -56,7 +56,7 @@ namespace Siebwalde_Application
          *  Notes      :
          */
         /*#--------------------------------------------------------------------------#*/
-        public FiddleYardController(iMain iMainCtrl, byte[,] macAddr, byte[,] ipAddr, int FYReceivingPort, int FYSendingPort)
+        public FiddleYardController(IMain iMainCtrl, byte[,] macAddr, byte[,] ipAddr, int FYReceivingPort, int FYSendingPort)
         {
             m_iMain = iMainCtrl;                        // connect to Main interface for application text logging and link activity update, save interface in variable
             m_FYReceivingPort = FYReceivingPort;

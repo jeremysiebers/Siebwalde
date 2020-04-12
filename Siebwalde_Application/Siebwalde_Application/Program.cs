@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Windows.Forms.Integration;
 using System.Windows.Forms;
 
 namespace Siebwalde_Application
@@ -15,7 +14,7 @@ namespace Siebwalde_Application
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Main());            
+            Application.Run(new Main());
         }
     }
 }

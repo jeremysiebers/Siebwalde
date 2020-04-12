@@ -57,7 +57,7 @@ namespace Siebwalde_Application
 
 
             // create new instance of trackApplicationVariables (DATA)
-            mTrackApplicationVariables = new TrackApplicationVariables();
+            mTrackApplicationVariables = IoC.TrackVar;
 
             // create new instance of TrackIOHandle (communication layer with EthernetTarget)
             mTrackIOHandle = new TrackIOHandle(mMain, mTrackApplicationVariables, mTrackReceivingPort, mTrackSendingPort);
