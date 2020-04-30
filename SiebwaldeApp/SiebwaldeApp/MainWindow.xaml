@@ -70,23 +70,23 @@
                                         </Grid.ColumnDefinitions>
 
                                         <StackPanel Grid.Column="0" Orientation="Horizontal">
-                                            <Button Command="{Binding }"
+                                            <Button Command="{Binding SiebwaldeApplicationPage }"
                                                     Style="{StaticResource IconButtonTop}"
                                                     Content="Siebwalde Application" Width="150" />
 
-                                            <Button Command="{Binding }"
+                                            <Button Command="{Binding SiebwaldeTrackControlPage}"
                                                     Style="{StaticResource IconButtonTop}"
                                                     Content=" Track Control" Width="150" />
-                                            
-                                            <Button Command="{Binding }"
+
+                                            <Button Command="{Binding SiebwaldeFiddleYardControlPage}"
                                                     Style="{StaticResource IconButtonTop}"
                                                     Content="Fiddle Yard Control" Width="150" />
 
-                                            <Button Command="{Binding }"
+                                            <Button Command="{Binding SiebwaldeYardControlPage}"
                                                     Style="{StaticResource IconButtonTop}"
                                                     Content="Train Yard Control" Width="150" />
 
-                                            <Button Command="{Binding }"
+                                            <Button Command="{Binding SiebwaldeCityControlPage}"
                                                     Style="{StaticResource IconButtonTop}"
                                                     Content="City Control" Width="150" />
                                         </StackPanel>
@@ -141,39 +141,14 @@
     </WindowChrome.WindowChrome>
 
     <Border Background="{StaticResource WordDarkBlueBrush}">
-        <Grid>
-
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            
-            
-
-            <!-- Blue background image 
-            <Grid.Background>
-                <ImageBrush TileMode="Tile" ViewportUnits="Absolute" Viewport="0 0 500 500" ImageSource="/Images/Backgrounds/emoji-background.png" />
-            </Grid.Background>
-
-            <Frame Grid.Column="1" 
+        <Frame  
                    x:Name="MainFrame" 
                    Content="{Binding ApplicationViewModel.CurrentPage, 
                                      Source={x:Static local:ViewModelLocator.Instance},  
                                      Converter={local:ApplicationPageValueConverter}}"
-                   Background="Transparent" />
-            -->
-
-            <!-- Side Menu 
-            <local:SideMenuControl 
-                Width="300" 
-                local:AnimateSlideInFromLeftProperty.Value="{Binding ApplicationViewModel.SideMenuVisible, 
-                                     Source={x:Static local:ViewModelLocator.Instance}}">
-
-                <local:ChatListControl />
-
-            </local:SideMenuControl>
-            -->
-        </Grid>
+                   Background="Transparent" 
+                   NavigationUIVisibility="Hidden"/>
+        
     </Border>
 
 </Window>

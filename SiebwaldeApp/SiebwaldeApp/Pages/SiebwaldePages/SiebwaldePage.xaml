@@ -1,0 +1,81 @@
+﻿<local:BasePage x:TypeArguments="local:SiebwaldePageViewModel" x:Class="SiebwaldeApp.SiebwaldePage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:SiebwaldeApp"
+      mc:Ignorable="d" 
+      d:DesignHeight="803" d:DesignWidth="1920"
+      Title="SiebwaldePage">
+
+    <Grid >
+        <Grid.ColumnDefinitions >
+            <ColumnDefinition Width="auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Column="0" Width="30" Background="{StaticResource WordBlueBrush}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30" />
+                <RowDefinition Height="30" />
+                <RowDefinition Height="30" />
+                <RowDefinition Height="30" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+
+            <Button Grid.Row="1"
+              Style="{StaticResource IconButton}" 
+              Content="{StaticResource FontAwesomePowerOff}" 
+              Foreground="White"  
+                  />
+
+            <Button Grid.Row="2"
+              Style="{StaticResource IconButton}" 
+              Content="{StaticResource FontAwesomeCogIcon}" 
+              Foreground="White"  
+                  />
+        </Grid>
+
+        <Grid.Background >
+            <ImageBrush Stretch="UniformToFill" 
+                        ViewportUnits="Absolute" 
+                        AlignmentX="Center"
+                        AlignmentY="Center"
+                        Viewport="200 200 1920 803"
+                        
+                        ImageSource="/Images/Backgrounds/steam-train-silhouette.png">
+                <ImageBrush.Transform>
+                    <ScaleTransform ScaleX=".8" ScaleY=".8"/>
+                </ImageBrush.Transform>
+            </ImageBrush>
+        </Grid.Background>
+        
+        
+        
+    </Grid>
+
+    <!--
+    <Grid>
+        
+
+        <Frame Grid.Column="1" 
+                   x:Name="MainFrame" 
+                   Content="{Binding ApplicationViewModel.CurrentPage, 
+                                     Source={x:Static local:ViewModelLocator.Instance},  
+                                     Converter={local:ApplicationPageValueConverter}}"
+                   Background="Transparent" 
+                   NavigationUIVisibility="Hidden"/>
+
+        <Frame Grid.Column="0" 
+                   x:Name="SideMenu" 
+                   Content="{Binding ApplicationViewModel.CurrentSideMenu, 
+                                     Source={x:Static local:ViewModelLocator.Instance},  
+                                     Converter={local:MenuPageValueConverter}}"
+                   Background="Transparent" 
+                   NavigationUIVisibility="Hidden"/>
+
+    </Grid>
+    -->
+
+</local:BasePage>

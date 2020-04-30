@@ -8,10 +8,21 @@
         /// <summary>
         /// The initial login page
         /// </summary>
-        TrackControlView = 0,
+        Siebwalde = 0,
 
-        TrackAmplifierItemView = 1,
+        TrackControl = 1,
 
-        TrackAmplifierManualControlView = 2
+        FiddleYardControl = 2,
+
+        YardControl = 3,
+
+        CityControl = 4,
+
+
+        /*------------- TrackControl ------------------*/
+
+        TrackPageInit = 10,
+
+        TrackAmplifier = 11,
     }
 }

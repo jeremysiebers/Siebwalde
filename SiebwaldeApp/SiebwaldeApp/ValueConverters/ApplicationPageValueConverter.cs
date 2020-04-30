@@ -14,15 +14,28 @@ namespace SiebwaldeApp
             // Find the appropriate page
             switch ((ApplicationPage)value)
             {
-                //case ApplicationPage.Login:
-                //    return new LoginPage();
+                /*------------- MainWindow ------------------*/
+                case ApplicationPage.Siebwalde:
+                    return new SiebwaldePage();
 
-                //case ApplicationPage.Register:
-                //    return new RegisterPage();
+                case ApplicationPage.TrackControl:
+                    return new TrackPage();
 
-                //case ApplicationPage.Chat:
-                //    return new ChatPage();
+                case ApplicationPage.FiddleYardControl:
+                    return new FiddleYardPage();
 
+                case ApplicationPage.YardControl:
+                    return new YardPage();
+
+                case ApplicationPage.CityControl:
+                    return new CityPage();
+
+                /*------------- TrackControl ------------------*/
+
+                case ApplicationPage.TrackAmplifier:
+                    return new TrackAmplifierPage();
+
+                    
                 default:
                     Debugger.Break();
                     return null;

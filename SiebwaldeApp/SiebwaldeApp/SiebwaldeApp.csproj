@@ -17,6 +17,22 @@
     <Deterministic>true</Deterministic>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>C:\localdata\Siebwalde\App\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>2</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <PublishWizardCompleted>true</PublishWizardCompleted>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -37,7 +53,22 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ManifestCertificateThumbprint>90527365F0A809BFB97B46D15605C637443685C3</ManifestCertificateThumbprint>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestKeyFile>SiebwaldeApp_TemporaryKey.pfx</ManifestKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GenerateManifests>true</GenerateManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignManifests>true</SignManifests>
+  </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Ninject, Version=3.3.4.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
+      <HintPath>packages\Ninject.3.3.4\lib\net45\Ninject.dll</HintPath>
+    </Reference>
     <Reference Include="PropertyChanged, Version=3.2.8.0, Culture=neutral, PublicKeyToken=ee3ee20bcf148ddd, processorArchitecture=MSIL">
       <HintPath>packages\PropertyChanged.Fody.3.2.8\lib\net40\PropertyChanged.dll</HintPath>
     </Reference>
@@ -69,14 +100,47 @@
     <Compile Include="AttachedProperties\ButtonAttachedProperty.cs" />
     <Compile Include="AttachedProperties\FrameworkElementAnimationAttachedProperties.cs" />
     <Compile Include="AttachedProperties\PasswordBoxAttachedProperties.cs" />
+    <Compile Include="IoC\IoC.cs" />
     <Compile Include="Pages\BasePage.cs" />
+    <Compile Include="Pages\SiebwaldePages\SiebwaldeMenuPage.xaml.cs">
+      <DependentUpon>SiebwaldeMenuPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\FiddleYardPages\FiddleYardPage.xaml.cs">
+      <DependentUpon>FiddleYardPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\CityPages\CityPage.xaml.cs">
+      <DependentUpon>CityPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\TrackControlPages\TrackAmplifierPage.xaml.cs">
+      <DependentUpon>TrackAmplifierPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\YardPages\YardPage.xaml.cs">
+      <DependentUpon>YardPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\TrackControlPages\TrackPage.xaml.cs">
+      <DependentUpon>TrackPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\SiebwaldePages\SiebwaldePage.xaml.cs">
+      <DependentUpon>SiebwaldePage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ValueConverters\MenuPageValueConverter.cs" />
+    <Compile Include="ValueConverters\SideMenuPage.cs" />
     <Compile Include="ValueConverters\ApplicationPage.cs" />
     <Compile Include="ValueConverters\ApplicationPageValueConverter.cs" />
     <Compile Include="ValueConverters\BaseValueConverter.cs" />
     <Compile Include="ValueConverters\BooleanToVisibilityConverter.cs" />
     <Compile Include="ValueConverters\StringRGBToBrushConverter.cs" />
+    <Compile Include="ViewModel\ApplicationViewModel.cs" />
     <Compile Include="ViewModel\Base\BaseViewModel.cs" />
     <Compile Include="ViewModel\Base\RelayCommand.cs" />
+    <Compile Include="ViewModel\SiebwaldeMenuViewModel.cs" />
+    <Compile Include="ViewModel\FiddleYardPageViewModel.cs" />
+    <Compile Include="ViewModel\CityPageViewModel.cs" />
+    <Compile Include="ViewModel\TrackAmplifierPageViewModel.cs" />
+    <Compile Include="ViewModel\YardPageViewModel.cs" />
+    <Compile Include="ViewModel\TrackPageViewModel.cs" />
+    <Compile Include="ViewModel\SiebwaldePageViewModel.cs" />
+    <Compile Include="ViewModel\Base\ViewModelLocator.cs" />
     <Compile Include="ViewModel\WindowViewModel.cs" />
     <Compile Include="Window\WindowResizer.cs" />
     <Page Include="MainWindow.xaml">
@@ -91,6 +155,34 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Pages\SiebwaldePages\SiebwaldeMenuPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\FiddleYardPages\FiddleYardPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\CityPages\CityPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\TrackControlPages\TrackAmplifierPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\YardPages\YardPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\TrackControlPages\TrackPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\SiebwaldePages\SiebwaldePage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Styles\Buttons.xaml">
       <SubType>Designer</SubType>
       <Generator>XamlIntelliSenseFileGenerator</Generator>
@@ -126,6 +218,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="SiebwaldeApp_TemporaryKey.pfx" />
     <Resource Include="Fonts\Lato-Black.ttf" />
     <Resource Include="Fonts\Lato-BlackItalic.ttf" />
     <Resource Include="Fonts\Lato-Bold.ttf" />
@@ -144,6 +237,7 @@
     <Resource Include="Fonts\Lato-SemiboldItalic.ttf" />
     <Resource Include="Fonts\Lato-Thin.ttf" />
     <Resource Include="Fonts\Lato-ThinItalic.ttf" />
+    <Resource Include="Fonts\fontawesome-webfont.ttf" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -157,10 +251,28 @@
     <Resource Include="Images\favicon.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\Backgrounds\emoji-background.png" />
-    <Resource Include="Images\Logo\icon.ico" />
-    <Resource Include="Images\Logo\logo-small.png" />
-    <Resource Include="Images\Logo\logo.png" />
+    <Resource Include="FodyWeavers.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Images\Logo\" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.8">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.8 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Backgrounds\steam-train-silhouette.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Backgrounds\Lay-out Siebwalde.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="packages\Fody.6.1.1\build\Fody.targets" Condition="Exists('packages\Fody.6.1.1\build\Fody.targets')" />

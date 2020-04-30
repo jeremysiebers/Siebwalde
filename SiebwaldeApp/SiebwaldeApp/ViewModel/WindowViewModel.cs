@@ -25,7 +25,7 @@ namespace SiebwaldeApp
         /// <summary>
         /// The margin around the window to allow for a drop shadow
         /// </summary>
-        private int mOuterMarginSize = 10;
+        private int mOuterMarginSize = 5;
 
         /// <summary>
         /// The radius of the edges of the window
@@ -58,7 +58,7 @@ namespace SiebwaldeApp
         /// <summary>
         /// The size of the resize border around the window
         /// </summary>
-        public int ResizeBorder => Borderless ? 0 : 6;
+        public int ResizeBorder => Borderless ? 0 : 3;
 
         /// <summary>
         /// The size of the resize border around the window, taking into account the outer margin
@@ -133,6 +133,31 @@ namespace SiebwaldeApp
         /// </summary>
         public ICommand MenuCommand { get; set; }
 
+        /// <summary>
+        /// The command to show the system menu of the window
+        /// </summary>
+        public ICommand SiebwaldeApplicationPage { get; set; }
+
+        /// <summary>
+        /// The command to show the system menu of the window
+        /// </summary>
+        public ICommand SiebwaldeTrackControlPage { get; set; }
+
+        /// <summary>
+        /// The command to show the system menu of the window
+        /// </summary>
+        public ICommand SiebwaldeFiddleYardControlPage { get; set; }
+
+        /// <summary>
+        /// The command to show the system menu of the window
+        /// </summary>
+        public ICommand SiebwaldeYardControlPage { get; set; }
+
+        /// <summary>
+        /// The command to show the system menu of the window
+        /// </summary>
+        public ICommand SiebwaldeCityControlPage { get; set; }
+
         #endregion
 
         #region Constructor
@@ -156,6 +181,12 @@ namespace SiebwaldeApp
             MaximizeCommand = new RelayCommand(() => mWindow.WindowState ^= WindowState.Maximized);
             CloseCommand = new RelayCommand(() => mWindow.Close());
             MenuCommand = new RelayCommand(() => SystemCommands.ShowSystemMenu(mWindow, GetMousePosition()));
+
+            SiebwaldeApplicationPage = new RelayCommand(() => IoC.Get<ApplicationViewModel>().CurrentPage = ApplicationPage.Siebwalde);
+            SiebwaldeTrackControlPage = new RelayCommand(() => IoC.Get<ApplicationViewModel>().CurrentPage = ApplicationPage.TrackControl);
+            SiebwaldeFiddleYardControlPage = new RelayCommand(() => IoC.Get<ApplicationViewModel>().CurrentPage = ApplicationPage.FiddleYardControl);
+            SiebwaldeYardControlPage = new RelayCommand(() => IoC.Get<ApplicationViewModel>().CurrentPage = ApplicationPage.YardControl);
+            SiebwaldeCityControlPage = new RelayCommand(() => IoC.Get<ApplicationViewModel>().CurrentPage = ApplicationPage.CityControl);
 
             // Fix window resize issue
             mWindowResizer = new WindowResizer(mWindow);

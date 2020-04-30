@@ -1,0 +1,33 @@
+﻿<local:BasePage x:TypeArguments="local:SiebwaldeMenuViewModel" x:Class="SiebwaldeApp.SiebwaldeMenuPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:SiebwaldeApp"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="30"
+      Title="SiebwaldeMenuPage">
+
+      <Grid Width="30" Background="{StaticResource WordBlueBrush}">
+          <Grid.RowDefinitions>
+              <RowDefinition Height="30" />
+              <RowDefinition Height="30" />
+              <RowDefinition Height="30" />
+              <RowDefinition Height="30" />
+              <RowDefinition Height="*" />
+          </Grid.RowDefinitions>
+
+
+          <Button Grid.Row="1"
+              Style="{StaticResource IconButton}" 
+              Content="{StaticResource FontAwesomePowerOff}" 
+              Foreground="White"  
+                  />
+
+        <Button Grid.Row="2"
+              Style="{StaticResource IconButton}" 
+              Content="{StaticResource FontAwesomeCogIcon}" 
+              Foreground="White"  
+                  />
+    </Grid>
+</local:BasePage>
