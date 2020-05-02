@@ -15,13 +15,19 @@ namespace SiebwaldeApp
             switch ((SideMenuPage)value)
             {
                 case SideMenuPage.Siebwalde:
-                    return new SiebwaldeMenuPage();
+                    return new SiebwaldeMenu();
 
-                //case ApplicationPage.Register:
-                //    return new RegisterPage();
+                case SideMenuPage.TrackControl:
+                    return new TrackMenu();
 
-                //case ApplicationPage.Chat:
-                //    return new ChatPage();
+                case SideMenuPage.FiddleYardControl:
+                    return new FiddleYardMenu();
+
+                case SideMenuPage.YardControl:
+                    return new YardMenu();
+
+                case SideMenuPage.CityControl:
+                    return new CityMenu();
 
                 default:
                     Debugger.Break();

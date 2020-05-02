@@ -17,7 +17,12 @@ namespace SiebwaldeApp
         /// <summary>
         /// The application view model
         /// </summary>
-        public static ApplicationViewModel ApplicationViewModel => IoC.Get<ApplicationViewModel>();
+        public static ApplicationViewModel ApplicationViewModel => IoC.Application;
+
+        /// <summary>
+        /// The menu view model
+        /// </summary>
+        public static SideMenuViewModel SideMenuViewModel => IoC.SideMenu;
 
         #endregion
     }

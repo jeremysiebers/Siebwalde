@@ -8,50 +8,20 @@
       d:DesignHeight="803" d:DesignWidth="1920"
       Title="SiebwaldePage">
 
-    <Grid >
-        <Grid.ColumnDefinitions >
-            <ColumnDefinition Width="auto" />
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
-
-        <Grid Grid.Column="0" Width="30" Background="{StaticResource WordBlueBrush}">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="30" />
-                <RowDefinition Height="30" />
-                <RowDefinition Height="30" />
-                <RowDefinition Height="30" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-
-
-            <Button Grid.Row="1"
-              Style="{StaticResource IconButton}" 
-              Content="{StaticResource FontAwesomePowerOff}" 
-              Foreground="White"  
-                  />
-
-            <Button Grid.Row="2"
-              Style="{StaticResource IconButton}" 
-              Content="{StaticResource FontAwesomeCogIcon}" 
-              Foreground="White"  
-                  />
-        </Grid>
+    <Grid >       
 
         <Grid.Background >
             <ImageBrush Stretch="UniformToFill" 
                         ViewportUnits="Absolute" 
                         AlignmentX="Center"
                         AlignmentY="Center"
-                        Viewport="200 200 1920 803"
-                        
+                        Viewport="200 200 1920 803"                        
                         ImageSource="/Images/Backgrounds/steam-train-silhouette.png">
                 <ImageBrush.Transform>
                     <ScaleTransform ScaleX=".8" ScaleY=".8"/>
                 </ImageBrush.Transform>
             </ImageBrush>
-        </Grid.Background>
-        
-        
+        </Grid.Background>            
         
     </Grid>
 

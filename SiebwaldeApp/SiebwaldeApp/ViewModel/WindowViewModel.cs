@@ -182,11 +182,11 @@ namespace SiebwaldeApp
             CloseCommand = new RelayCommand(() => mWindow.Close());
             MenuCommand = new RelayCommand(() => SystemCommands.ShowSystemMenu(mWindow, GetMousePosition()));
 
-            SiebwaldeApplicationPage = new RelayCommand(() => IoC.Get<ApplicationViewModel>().CurrentPage = ApplicationPage.Siebwalde);
-            SiebwaldeTrackControlPage = new RelayCommand(() => IoC.Get<ApplicationViewModel>().CurrentPage = ApplicationPage.TrackControl);
-            SiebwaldeFiddleYardControlPage = new RelayCommand(() => IoC.Get<ApplicationViewModel>().CurrentPage = ApplicationPage.FiddleYardControl);
-            SiebwaldeYardControlPage = new RelayCommand(() => IoC.Get<ApplicationViewModel>().CurrentPage = ApplicationPage.YardControl);
-            SiebwaldeCityControlPage = new RelayCommand(() => IoC.Get<ApplicationViewModel>().CurrentPage = ApplicationPage.CityControl);
+            SiebwaldeApplicationPage         = new RelayCommand(LoadSiebwaldeApplicationPage);
+            SiebwaldeTrackControlPage        = new RelayCommand(LoadSiebwaldeTrackControlPage);
+            SiebwaldeFiddleYardControlPage   = new RelayCommand(LoadSiebwaldeFiddleYardControlPage);
+            SiebwaldeYardControlPage         = new RelayCommand(LoadSiebwaldeYardControlPage);
+            SiebwaldeCityControlPage         = new RelayCommand(LoadSiebwaldeCityControlPage);
 
             // Fix window resize issue
             mWindowResizer = new WindowResizer(mWindow);
@@ -200,6 +200,65 @@ namespace SiebwaldeApp
                 // Fire off resize events
                 WindowResized();
             };
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        /// <summary>
+        /// Method to load the Siebwalde page and menu
+        /// </summary>
+        private void LoadSiebwaldeApplicationPage()
+        {
+            // Load Siebwalde page
+            IoC.Application.CurrentPage = ApplicationPage.Siebwalde;
+            // Load Siebwalde menu
+            IoC.SideMenu.CurrentMenu = SideMenuPage.Siebwalde;
+        }
+
+        /// <summary>
+        /// Method to load the Track control page and menu
+        /// </summary>
+        private void LoadSiebwaldeTrackControlPage()
+        {
+            // Load Siebwalde page
+            IoC.Application.CurrentPage = ApplicationPage.TrackControl;
+            // Load Siebwalde menu
+            IoC.SideMenu.CurrentMenu = SideMenuPage.TrackControl;
+        }
+
+        /// <summary>
+        /// Method to load the Fiddle Yard control page and menu
+        /// </summary>
+        private void LoadSiebwaldeFiddleYardControlPage()
+        {
+            // Load Siebwalde page
+            IoC.Application.CurrentPage = ApplicationPage.FiddleYardControl;
+            // Load Siebwalde menu
+            IoC.SideMenu.CurrentMenu = SideMenuPage.FiddleYardControl;
+        }
+
+        /// <summary>
+        /// Method to load the Yard control page and menu
+        /// </summary>
+        private void LoadSiebwaldeYardControlPage()
+        {
+            // Load Siebwalde page
+            IoC.Application.CurrentPage = ApplicationPage.YardControl;
+            // Load Siebwalde menu
+            IoC.SideMenu.CurrentMenu = SideMenuPage.YardControl;
+        }
+
+        /// <summary>
+        /// Method to load the City control page and menu
+        /// </summary>
+        private void LoadSiebwaldeCityControlPage()
+        {
+            // Load Siebwalde page
+            IoC.Application.CurrentPage = ApplicationPage.CityControl;
+            // Load Siebwalde menu
+            IoC.SideMenu.CurrentMenu = SideMenuPage.CityControl;
         }
 
         #endregion

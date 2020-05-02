@@ -1,0 +1,59 @@
+﻿<UserControl x:Class="SiebwaldeApp.TrackMenu"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:SiebwaldeApp"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="30">
+
+    <Grid Width="30" Background="{StaticResource WordBlueBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30" />
+            <RowDefinition Height="30" />
+            <RowDefinition Height="30" />
+            <RowDefinition Height="30" />
+            <RowDefinition Height="30" />
+            <RowDefinition Height="30" />
+            <RowDefinition Height="30" />
+            <RowDefinition Height="30" />
+            <RowDefinition Height="30" />
+            <RowDefinition Height="30" />
+            <RowDefinition Height="30" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+
+        <Button Grid.Row="1"
+              Style="{StaticResource IconButton}" 
+              Command="{Binding TrackMainPage }"
+              Content="{StaticResource FontAwesomeTrain}" 
+              ToolTip="Start automatic train drive."
+              Foreground="White"  
+                  />
+
+        <Button Grid.Row="2"
+              Style="{StaticResource IconButton}" 
+              Command="{Binding TrackInitPage }"
+              Content="{StaticResource FontAwesomePowerOff}" 
+              ToolTip="Initialize track control."
+              Foreground="White"  
+                  />
+
+        <Button Grid.Row="3"
+              Style="{StaticResource IconButton}"
+              Command="{Binding TrackAmplifierPage }"
+              Content="{StaticResource FontAwesomeTh}" 
+              ToolTip="Track amplifier info page."
+              Foreground="White"  
+                  />
+
+        <Button Grid.Row="4"
+              Style="{StaticResource IconButton}"
+              Command="{Binding TrackSettingsPage }"
+              Content="{StaticResource FontAwesomeCogIcon}" 
+              ToolTip="Track control settings page."
+              Foreground="White"  
+                  />
+    </Grid>
+</UserControl>

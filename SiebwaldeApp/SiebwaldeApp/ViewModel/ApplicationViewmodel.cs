@@ -9,8 +9,6 @@
 
         public ApplicationPage CurrentPage { get; set; } = ApplicationPage.Siebwalde;
 
-        //public SideMenuPage CurrentSideMenu { get; set; } = SideMenuPage.Siebwalde;
-
         #endregion
     }
 }

@@ -16,6 +16,16 @@ namespace SiebwaldeApp
         /// </summary>
         public static IKernel Kernel { get; private set; } = new StandardKernel();
 
+        /// <summary>
+        /// A shortcut to access the <see cref="ApplicationViewModel"/>
+        /// </summary>
+        public static ApplicationViewModel Application => IoC.Get<ApplicationViewModel>();
+
+        /// <summary>
+        /// A shortcut to access the <see cref="SideMenuViewModel"/>
+        /// </summary>
+        public static SideMenuViewModel SideMenu => IoC.Get<SideMenuViewModel>();
+
         #endregion
 
         #region Construction
@@ -38,6 +48,9 @@ namespace SiebwaldeApp
         {
             // Bind to a single instance of Application view model
             Kernel.Bind<ApplicationViewModel>().ToConstant(new ApplicationViewModel());
+
+            // Bind to a single instance of Menu view model
+            Kernel.Bind<SideMenuViewModel>().ToConstant(new SideMenuViewModel());
         }
 
         #endregion

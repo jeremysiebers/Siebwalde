@@ -12,6 +12,10 @@
 
         TrackControl = 1,
 
-        FiddleYardControl = 2
+        FiddleYardControl = 2,
+
+        YardControl = 3,
+
+        CityControl = 4
     }
 }

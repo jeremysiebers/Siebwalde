@@ -18,11 +18,17 @@
 
         CityControl = 4,
 
+        /*------------- Siebwalde ---------------------*/
+
+        SiebwaldeInit = 10,
+
+        SiebwaldeSettings = 11,
+
 
         /*------------- TrackControl ------------------*/
 
-        TrackPageInit = 10,
+        TrackPageInit = 20,
 
-        TrackAmplifier = 11,
+        TrackAmplifier = 21,
     }
 }

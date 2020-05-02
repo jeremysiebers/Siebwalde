@@ -8,60 +8,8 @@
       d:DesignHeight="803" d:DesignWidth="1920"
       Title="TrackPage">
 
-    <Grid>
-        <Grid.ColumnDefinitions >
-            <ColumnDefinition Width="auto" />
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
-
-        <Grid Grid.Column="0" Width="30" Background="{StaticResource WordBlueBrush}">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="30" />
-                <RowDefinition Height="30" />
-                <RowDefinition Height="30" />
-                <RowDefinition Height="30" />
-                <RowDefinition Height="30" />
-                <RowDefinition Height="30" />
-                <RowDefinition Height="30" />
-                <RowDefinition Height="30" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-
-            <Button Grid.Row="1"
-              Style="{StaticResource IconButton}" 
-              Command="{Binding TrackMainPage }"
-              Content="{StaticResource FontAwesomeTrain}" 
-              ToolTip="Start automatic train drive."
-              Foreground="White"  
-                  />
-
-            <Button Grid.Row="2"
-              Style="{StaticResource IconButton}" 
-              Command="{Binding TrackInitPage }"
-              Content="{StaticResource FontAwesomePowerOff}" 
-              ToolTip="Initialize track control."
-              Foreground="White"  
-                  />
-
-            <Button Grid.Row="3"
-              Style="{StaticResource IconButton}"
-              Command="{Binding TrackAmplifierPage }"
-              Content="{StaticResource FontAwesomeTh}" 
-              ToolTip="Track amplifier info page."
-              Foreground="White"  
-                  />
-
-            <Button Grid.Row="4"
-              Style="{StaticResource IconButton}"
-              Command="{Binding TrackSettingsPage }"
-              Content="{StaticResource FontAwesomeCogIcon}" 
-              ToolTip="Track control settings page."
-              Foreground="White"  
-                  />
-        </Grid>
-
-        <Grid Grid.Column="1">
-            <Grid.Background >
+    <Grid>        
+        <Grid.Background >
                 <ImageBrush Stretch="Fill" 
                         ViewportUnits="RelativeToBoundingBox" 
                         AlignmentX="Center"
@@ -74,6 +22,5 @@
                     </ImageBrush.Transform>
                 </ImageBrush>
             </Grid.Background>
-        </Grid>
     </Grid>
 </local:BasePage>

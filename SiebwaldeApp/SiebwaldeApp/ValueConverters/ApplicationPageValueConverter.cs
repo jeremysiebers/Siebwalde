@@ -30,6 +30,14 @@ namespace SiebwaldeApp
                 case ApplicationPage.CityControl:
                     return new CityPage();
 
+                /*------------- SiebwaldeControl --------------*/
+
+                case ApplicationPage.SiebwaldeInit:
+                    return new SiebwaldeInitPage();
+
+                case ApplicationPage.SiebwaldeSettings:
+                    return new SiebwaldeSettingsPage();
+
                 /*------------- TrackControl ------------------*/
 
                 case ApplicationPage.TrackAmplifier:

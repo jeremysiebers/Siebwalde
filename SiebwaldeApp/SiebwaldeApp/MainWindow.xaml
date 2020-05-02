@@ -141,14 +141,31 @@
     </WindowChrome.WindowChrome>
 
     <Border Background="{StaticResource WordDarkBlueBrush}">
-        <Frame  
+        <Grid>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Frame Grid.Column="0"  
+                   x:Name="MenuFrame" 
+                   Content="{Binding SideMenuViewModel.CurrentMenu, 
+                                     Source={x:Static local:ViewModelLocator.Instance},  
+                                     Converter={local:MenuPageValueConverter}}"
+                   Background="Transparent" 
+                   NavigationUIVisibility="Hidden"/>
+
+            <Frame Grid.Column="1"  
                    x:Name="MainFrame" 
                    Content="{Binding ApplicationViewModel.CurrentPage, 
                                      Source={x:Static local:ViewModelLocator.Instance},  
                                      Converter={local:ApplicationPageValueConverter}}"
                    Background="Transparent" 
                    NavigationUIVisibility="Hidden"/>
-        
+
+        </Grid>
+
     </Border>
 
 </Window>

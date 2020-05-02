@@ -1,15 +1,19 @@
-﻿namespace SiebwaldeApp
+﻿using System.Windows.Input;
+
+namespace SiebwaldeApp
 {
     /// <summary
     /// 
     /// <summary
-    public class SiebwaldeMenuViewModel : BaseViewModel
+    public class TrackPageViewModel : BaseViewModel
     {
         #region Private members
 
         #endregion
 
         #region Public properties
+        
+        
 
         #endregion
 
@@ -18,9 +22,9 @@
         /// <summary>
         /// Default constructor
         /// <summary>
-        public SiebwaldeMenuViewModel()
+        public TrackPageViewModel()
         {
-
+           
         }
 
         #endregion
