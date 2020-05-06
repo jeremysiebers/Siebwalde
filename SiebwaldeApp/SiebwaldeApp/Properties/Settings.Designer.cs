@@ -8,22 +8,102 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Fasetto.Word.Properties
-{
-
-
+namespace SiebwaldeApp.Properties {
+    
+    
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "11.0.0.0")]
-    internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase
-    {
-
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "16.4.0.0")]
+    internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
+        
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
-
-        public static Settings Default
-        {
-            get
-            {
+        
+        public static Settings Default {
+            get {
                 return defaultInstance;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10")]
+        public decimal FIDDLExYARDxSIMxSPEEDxSETTING {
+            get {
+                return ((decimal)(this["FIDDLExYARDxSIMxSPEEDxSETTING"]));
+            }
+            set {
+                this["FIDDLExYARDxSIMxSPEEDxSETTING"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Cyan")]
+        public global::System.Drawing.Color SETxCOLORxTRACKxOCCUPIED {
+            get {
+                return ((global::System.Drawing.Color)(this["SETxCOLORxTRACKxOCCUPIED"]));
+            }
+            set {
+                this["SETxCOLORxTRACKxOCCUPIED"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Yellow")]
+        public global::System.Drawing.Color SETxCOLORxTRACKxNOTxINITIALIZED {
+            get {
+                return ((global::System.Drawing.Color)(this["SETxCOLORxTRACKxNOTxINITIALIZED"]));
+            }
+            set {
+                this["SETxCOLORxTRACKxNOTxINITIALIZED"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("RoyalBlue")]
+        public global::System.Drawing.Color SETxCOLORxTRACKxNOTxACTIVE {
+            get {
+                return ((global::System.Drawing.Color)(this["SETxCOLORxTRACKxNOTxACTIVE"]));
+            }
+            set {
+                this["SETxCOLORxTRACKxNOTxACTIVE"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Transparent")]
+        public global::System.Drawing.Color SETxCOLORxTRACKxDISABLED {
+            get {
+                return ((global::System.Drawing.Color)(this["SETxCOLORxTRACKxDISABLED"]));
+            }
+            set {
+                this["SETxCOLORxTRACKxDISABLED"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Transparent")]
+        public global::System.Drawing.Color SETxCOLORxTRACKxDISABLEDxNOTxOCCUPIED {
+            get {
+                return ((global::System.Drawing.Color)(this["SETxCOLORxTRACKxDISABLEDxNOTxOCCUPIED"]));
+            }
+            set {
+                this["SETxCOLORxTRACKxDISABLEDxNOTxOCCUPIED"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string dummy {
+            get {
+                return ((string)(this["dummy"]));
+            }
+            set {
+                this["dummy"] = value;
             }
         }
     }

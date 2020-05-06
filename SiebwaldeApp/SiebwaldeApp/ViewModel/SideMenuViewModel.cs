@@ -76,7 +76,6 @@ namespace SiebwaldeApp
             SiebwaldeSettingsPage = new RelayCommand(() => IoC.Application.CurrentPage = ApplicationPage.SiebwaldeSettings);
             #endregion
         }
-
         #endregion
     }
 }

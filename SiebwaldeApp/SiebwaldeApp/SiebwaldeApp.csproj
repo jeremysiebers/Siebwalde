@@ -187,32 +187,8 @@
     <Compile Include="Services\ScaleBitmap.cs" />
     <Compile Include="Services\SenActCmdMes.cs" />
     <Compile Include="Services\Sender.cs" />
-    <Compile Include="Services\Settings.cs" />
-    <Compile Include="TrackApplication\Controller\TrackAmplifierInitializers\TrackAmplifierBootloaderHelpers.cs" />
-    <Compile Include="TrackApplication\Controller\TrackAmplifierInitializers\TrackAmplifierInitalizationSequencer.cs" />
-    <Compile Include="TrackApplication\Controller\TrackControlMain.cs" />
-    <Compile Include="TrackApplication\Data\TrackApplicationVariables.cs" />
-    <Compile Include="TrackApplication\Data\TrackIOHandle.cs" />
-    <Compile Include="TrackApplication\Model\TrackAmplifierItem.cs" />
-    <Compile Include="TrackApplication\Model\TrackControllerCommands.cs" />
-    <Compile Include="TrackApplication\Pages\BasePage.cs" />
-    <Compile Include="TrackApplication\Pages\TrackAmplifierItemView.xaml.cs">
-      <DependentUpon>TrackAmplifierItemView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="TrackApplication\Pages\TrackAmplifierManualControlView.xaml.cs">
-      <DependentUpon>TrackAmplifierManualControlView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="TrackApplication\Pages\TrackControlView.xaml.cs">
-      <DependentUpon>TrackControlView.xaml</DependentUpon>
-    </Compile>
+    <Compile Include="Settings.cs" />
     <Compile Include="TrackApplication\Services\PublicEnums.cs" />
-    <Compile Include="TrackApplication\Simulator\EthernetTargetDataSimulator.cs" />
-    <Compile Include="TrackApplication\TrackController.cs" />
-    <Compile Include="TrackApplication\ViewModel\BaseViewModel.cs" />
-    <Compile Include="TrackApplication\ViewModel\RelayCommand.cs" />
-    <Compile Include="TrackApplication\ViewModel\TrackAmplifierItemViewModel.cs" />
-    <Compile Include="TrackApplication\ViewModel\TrackAmplifierManualControlViewModel.cs" />
-    <Compile Include="TrackApplication\ViewModel\TrackControlViewModel.cs" />
     <Compile Include="ValueConverters\MenuPageValueConverter.cs" />
     <Compile Include="ValueConverters\SideMenuPage.cs" />
     <Compile Include="ValueConverters\ApplicationPage.cs" />
@@ -314,18 +290,6 @@
     <Page Include="Styles\Texts.xaml">
       <SubType>Designer</SubType>
       <Generator>XamlIntelliSenseFileGenerator</Generator>
-    </Page>
-    <Page Include="TrackApplication\Pages\TrackAmplifierItemView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="TrackApplication\Pages\TrackAmplifierManualControlView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="TrackApplication\Pages\TrackControlView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
   <ItemGroup>
