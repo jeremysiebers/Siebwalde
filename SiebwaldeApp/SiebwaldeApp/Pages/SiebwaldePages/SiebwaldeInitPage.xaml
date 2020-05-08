@@ -9,8 +9,227 @@
       Title="SiebwaldeInitPage">
 
     <Grid>
-            <TextBlock>
-            <Run Text="Siebwalde Init Page Loaded!" FontSize="100"/>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="700"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel>
+            <GroupBox Grid.Column="0" Margin="50 50 0 50" Foreground="{StaticResource BackgroundLightBrush}">
+                <StackPanel Grid.Column="0">
+                    <!-- Init all controllers row-->
+                    <Grid Margin="0 10 0 10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="30"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="30"/>
+                            <ColumnDefinition Width="500"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Button 
+                    Grid.Column="1" 
+                    Height="100"
+                    HorizontalAlignment="Center" 
+                    Style="{StaticResource IconGrowButton}" 
+                    Content="{StaticResource FontAwesomeMicroChip}" 
+                    Command="{Binding SiebwaldeInitPage }"
+                    Foreground="White"  
+                />
+
+                        <TextBlock 
+                Grid.Row="1" 
+                Grid.Column="3"
+                FontSize="{StaticResource FontSizeXXLarge}"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center">
+                
+                <Run Text="Initialize all controllers." 
+                     FontFamily="{StaticResource FontAwesome}"
+                     Foreground="{StaticResource ForegroundLightBrush}"
+                     />
+                        </TextBlock>
+                    </Grid>
+
+                    <!-- Init Track controller row-->
+                    <Grid Margin="0 10 0 10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="30"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="30"/>
+                            <ColumnDefinition Width="500"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Button 
+                    Grid.Column="1" 
+                    Height="100"
+                    HorizontalAlignment="Center" 
+                    Style="{StaticResource IconGrowButton}" 
+                    Content="{StaticResource FontAwesomeMicroChip}" 
+                    Command="{Binding SiebwaldeInitPage }"
+                    Foreground="White"  
+                />
+
+                        <TextBlock 
+                Grid.Row="1" 
+                Grid.Column="3"
+                FontSize="{StaticResource FontSizeXXLarge}"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center">
+                
+                <Run Text="Initialize Track Controller." 
+                     FontFamily="{StaticResource FontAwesome}"
+                     Foreground="{StaticResource ForegroundLightBrush}"
+                     />
+                        </TextBlock>
+                    </Grid>
+
+                    <!-- Init Fiddle Yard controller row-->
+                    <Grid Margin="0 10 0 10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="30"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="30"/>
+                            <ColumnDefinition Width="500"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Button 
+                    Grid.Column="1" 
+                    Height="100"
+                    HorizontalAlignment="Center" 
+                    Style="{StaticResource IconGrowButton}" 
+                    Content="{StaticResource FontAwesomeMicroChip}" 
+                    Command="{Binding SiebwaldeInitPage }"
+                    Foreground="White"  
+                />
+
+                        <TextBlock 
+                Grid.Row="1" 
+                Grid.Column="3"
+                FontSize="{StaticResource FontSizeXXLarge}"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center">
+                
+                <Run Text="Initialize Fiddle Yard Controller." 
+                     FontFamily="{StaticResource FontAwesome}"
+                     Foreground="{StaticResource ForegroundLightBrush}"
+                     />
+                        </TextBlock>
+                    </Grid>
+
+                    <!-- Init Yard controller row-->
+                    <Grid Margin="0 10 0 10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="30"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="30"/>
+                            <ColumnDefinition Width="500"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Button 
+                    Grid.Column="1" 
+                    Height="100"
+                    HorizontalAlignment="Center" 
+                    Style="{StaticResource IconGrowButton}" 
+                    Content="{StaticResource FontAwesomeMicroChip}" 
+                    Command="{Binding SiebwaldeInitPage }"
+                    Foreground="White"  
+                />
+
+                        <TextBlock 
+                Grid.Row="1" 
+                Grid.Column="3"
+                FontSize="{StaticResource FontSizeXXLarge}"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center">
+                
+                <Run Text="Initialize Yard Controller." 
+                     FontFamily="{StaticResource FontAwesome}"
+                     Foreground="{StaticResource ForegroundLightBrush}"
+                     />
+                        </TextBlock>
+                    </Grid>
+
+                    <!-- Init City controller row-->
+                    <Grid Margin="0 10 0 10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="30"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="30"/>
+                            <ColumnDefinition Width="500"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Button 
+                    Grid.Column="1" 
+                    Height="100"
+                    HorizontalAlignment="Center" 
+                    Style="{StaticResource IconGrowButton}" 
+                    Content="{StaticResource FontAwesomeMicroChip}" 
+                    Command="{Binding SiebwaldeInitPage }"
+                    Foreground="White"  
+                />
+
+                        <TextBlock 
+                Grid.Row="1" 
+                Grid.Column="3"
+                FontSize="{StaticResource FontSizeXXLarge}"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center">
+                
+                <Run Text="Initialize City Controller." 
+                     FontFamily="{StaticResource FontAwesome}"
+                     Foreground="{StaticResource ForegroundLightBrush}"
+                     />
+                        </TextBlock>
+                    </Grid>
+
+                </StackPanel>
+            </GroupBox>
+        </StackPanel>
+        
+        
+        
+
+        <!-- Logging TextBlock -->
+        <Grid Grid.Column="1">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="100"/>
+            </Grid.RowDefinitions>
+            
+            <TextBox Grid.Column="1"
+                 Margin="50 50 50 10"
+                 HorizontalAlignment="Stretch"   
+                 VerticalAlignment="Stretch" 
+                 VerticalScrollBarVisibility="Auto"
+                 TextWrapping="Wrap"    
+                 IsReadOnly="True"
+                 Background="{StaticResource TextBoxBackgroundBrush}"
+                 Foreground="{StaticResource BackgroundLightBrush}"                 
+                 Text="Siebwalde Logging..."
+                 />
+
+            <TextBlock
+                Grid.Row="1"
+                Grid.Column="1"
+                FontSize="{StaticResource FontSizeXXLarge}"
+                Margin="50 0 0 0 ">                
+                <Run Text="Logging"
+                     FontFamily="{StaticResource FontAwesome}"
+                     Foreground="{StaticResource BackgroundLightBrush}"
+                     />
             </TextBlock>
+        </Grid>       
+        
     </Grid>
 </local:BasePage>

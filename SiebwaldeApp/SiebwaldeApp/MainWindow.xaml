@@ -72,23 +72,33 @@
                                         <StackPanel Grid.Column="0" Orientation="Horizontal">
                                             <Button Command="{Binding SiebwaldeApplicationPage }"
                                                     Style="{StaticResource IconButtonTop}"
-                                                    Content="Siebwalde Application" Width="150" />
+                                                    Content="Siebwalde App" Width="150" 
+                                                    FontFamily="{StaticResource FontAwesome}"
+                                                    FontSize="{StaticResource FontSizeXXLarge}"/>
 
                                             <Button Command="{Binding SiebwaldeTrackControlPage}"
                                                     Style="{StaticResource IconButtonTop}"
-                                                    Content=" Track Control" Width="150" />
+                                                    Content=" Track Control" Width="150" 
+                                                    FontFamily="{StaticResource FontAwesome}"
+                                                    FontSize="{StaticResource FontSizeXXLarge}"/>
 
                                             <Button Command="{Binding SiebwaldeFiddleYardControlPage}"
                                                     Style="{StaticResource IconButtonTop}"
-                                                    Content="Fiddle Yard Control" Width="150" />
+                                                    Content="Fiddle Yard Control" Width="150" 
+                                                    FontFamily="{StaticResource FontAwesome}"
+                                                    FontSize="{StaticResource FontSizeXXLarge}"/>
 
                                             <Button Command="{Binding SiebwaldeYardControlPage}"
                                                     Style="{StaticResource IconButtonTop}"
-                                                    Content="Train Yard Control" Width="150" />
+                                                    Content="Train Yard Control" Width="150" 
+                                                    FontFamily="{StaticResource FontAwesome}"
+                                                    FontSize="{StaticResource FontSizeXXLarge}"/>
 
                                             <Button Command="{Binding SiebwaldeCityControlPage}"
                                                     Style="{StaticResource IconButtonTop}"
-                                                    Content="City Control" Width="150" />
+                                                    Content="City Control" Width="150" 
+                                                    FontFamily="{StaticResource FontAwesome}"
+                                                    FontSize="{StaticResource FontSizeXXLarge}"/>
                                         </StackPanel>
 
                                         <!-- Window Buttons -->

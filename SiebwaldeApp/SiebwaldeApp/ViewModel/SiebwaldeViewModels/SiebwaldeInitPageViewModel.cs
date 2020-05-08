@@ -44,35 +44,35 @@ namespace SiebwaldeApp
         /// <summary>
         public SiebwaldeInitPageViewModel()
         {
-            SiebwaldeApplicationMainLogging = GetLogger("SiebwaldeApplicationMain.txt");
-            try
-            {
-                if (!Directory.Exists(Enums.HOMEPATH + Enums.LOGGING))
-                {
-                    Directory.CreateDirectory(Enums.HOMEPATH + Enums.LOGGING);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
+            //SiebwaldeApplicationMainLogging = GetLogger("SiebwaldeApplicationMain.txt");
+            //try
+            //{
+            //    if (!Directory.Exists(Enums.HOMEPATH + Enums.LOGGING))
+            //    {
+            //        Directory.CreateDirectory(Enums.HOMEPATH + Enums.LOGGING);
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    MessageBox.Show(ex.Message);
+            //}
 
-            SiebwaldeAppLogging("Siebwalde Application started.");
-            SiebwaldeAppLogging("Main: PC MAC adress is: " + MACIPConditioner.MACstring());
-            SiebwaldeAppLogging("Main: PC IP adress is: " + MACIPConditioner.IPstring());
+            //SiebwaldeAppLogging("Siebwalde Application started.");
+            //SiebwaldeAppLogging("Main: PC MAC adress is: " + MACIPConditioner.MACstring());
+            //SiebwaldeAppLogging("Main: PC IP adress is: " + MACIPConditioner.IPstring());
 
-            int FYSendingport = 28671;
-            int FYReceivingport = 0x7000; // Port on which the PC will receive data from the FiddleYard   
-            FYcontroller = new FiddleYardController(this, MACIPConditioner.MAC(), MACIPConditioner.IP(), FYReceivingport, FYSendingport);
-            SiebwaldeAppLogging("Main: FiddleYard Controller starting...");
-            FYcontroller.Start();
+            //int FYSendingport = 28671;
+            //int FYReceivingport = 0x7000; // Port on which the PC will receive data from the FiddleYard   
+            //FYcontroller = new FiddleYardController(this, MACIPConditioner.MAC(), MACIPConditioner.IP(), FYReceivingport, FYSendingport);
+            //SiebwaldeAppLogging("Main: FiddleYard Controller starting...");
+            //FYcontroller.Start();
 
-            FYcontroller.FYTOPShow(false, 1010, 1948, 0, 0, true);
-            FYcontroller.FYBOTShow(false, 1010, 1948, 0, 0, true);
-            //FiddleYardFormTop.Visible = true;
-            //FYLinkActivity.Visible = true;
-            //LFYLinkActivity.Visible = true;
-            SiebwaldeAppLogging("Main: FiddleYard Controller started.");
+            //FYcontroller.FYTOPShow(false, 1010, 1948, 0, 0, true);
+            //FYcontroller.FYBOTShow(false, 1010, 1948, 0, 0, true);
+            ////FiddleYardFormTop.Visible = true;
+            ////FYLinkActivity.Visible = true;
+            ////LFYLinkActivity.Visible = true;
+            //SiebwaldeAppLogging("Main: FiddleYard Controller started.");
 
         }
 
