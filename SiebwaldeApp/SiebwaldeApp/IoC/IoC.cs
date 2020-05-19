@@ -26,6 +26,21 @@ namespace SiebwaldeApp
         /// </summary>
         public static SideMenuViewModel SideMenu => IoC.Get<SideMenuViewModel>();
 
+        /// <summary>
+        /// A shortcut to access the <see cref="SiebwaldeApplicationModel"/>
+        /// </summary>
+        public static SiebwaldeApplicationModel siebwaldeApplicationModel => IoC.Get<SiebwaldeApplicationModel>();
+
+        /// <summary>
+        /// A shortcut to access the <see cref="IFileManager"/>
+        /// </summary>
+        public static IFileManager File => IoC.Get<IFileManager>();
+
+        /// <summary>
+        /// A shortcut to access the <see cref="ILogFactory"/>
+        /// </summary>
+        public static ILogFactory Logger => IoC.Get<ILogFactory>();
+
         #endregion
 
         #region Construction
@@ -51,6 +66,9 @@ namespace SiebwaldeApp
 
             // Bind to a single instance of Menu view model
             Kernel.Bind<SideMenuViewModel>().ToConstant(new SideMenuViewModel());
+
+            // Bind to a single instance of Siebwalde Application Model
+            Kernel.Bind<SiebwaldeApplicationModel>().ToConstant(new SiebwaldeApplicationModel());
         }
 
         #endregion

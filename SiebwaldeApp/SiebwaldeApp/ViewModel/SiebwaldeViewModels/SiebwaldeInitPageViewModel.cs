@@ -1,40 +1,37 @@
-﻿using SiebwaldeApp;
-using System;
-using System.IO;
-using System.Windows;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Windows.Input;
 
 namespace SiebwaldeApp
 {
-    public interface IMain
-    {
-        void SiebwaldeAppLogging(string text);
-        void FYLinkActivityUpdate();
-    }
-
     /// <summary
     /// 
     /// <summary
     public class SiebwaldeInitPageViewModel : BaseViewModel
     {
-        #region Private members
+        #region Private property
 
-        private FiddleYardController FYcontroller;
-        private FiddleYardSettingsForm FYSettingsForm;
-        //private TrackController MTcontroller;
-        private FiddleYardController YDcontroller;
-        private MAC_IP_Conditioner MACIPConditioner = new MAC_IP_Conditioner { };
 
-        public ILogger SiebwaldeApplicationMainLogging;
-
-        static ILogger GetLogger(string file)
-        {
-            return new FileLogger(file);
-        }
 
         #endregion
 
-        #region Public properties
+        #region Public property
 
+        public ObservableCollection<string> Log2 { get; set; }
+
+        //public ObservableCollection<StringObject> LogObj { get; private set; }
+
+        //public List<string> Log { get; set; }
+
+        #endregion
+
+        #region Public Commands
+
+        /// <summary>
+        /// The command to init all controllers at once
+        /// </summary>
+        public ICommand InitAllControllers { get; set; }
+        
         #endregion
 
         #region Constructor
@@ -44,64 +41,34 @@ namespace SiebwaldeApp
         /// <summary>
         public SiebwaldeInitPageViewModel()
         {
-            //SiebwaldeApplicationMainLogging = GetLogger("SiebwaldeApplicationMain.txt");
-            //try
-            //{
-            //    if (!Directory.Exists(Enums.HOMEPATH + Enums.LOGGING))
-            //    {
-            //        Directory.CreateDirectory(Enums.HOMEPATH + Enums.LOGGING);
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    MessageBox.Show(ex.Message);
-            //}
+            //Log = new ObservableCollection<LogList>();
+            //Log.Add(IoC.siebwaldeApplicationModel.Logging);
+            //Log = new List<string>();
 
-            //SiebwaldeAppLogging("Siebwalde Application started.");
-            //SiebwaldeAppLogging("Main: PC MAC adress is: " + MACIPConditioner.MACstring());
-            //SiebwaldeAppLogging("Main: PC IP adress is: " + MACIPConditioner.IPstring());
+            Log2 = new ObservableCollection<string>();
 
-            //int FYSendingport = 28671;
-            //int FYReceivingport = 0x7000; // Port on which the PC will receive data from the FiddleYard   
-            //FYcontroller = new FiddleYardController(this, MACIPConditioner.MAC(), MACIPConditioner.IP(), FYReceivingport, FYSendingport);
-            //SiebwaldeAppLogging("Main: FiddleYard Controller starting...");
-            //FYcontroller.Start();
+            //LogObj = new ObservableCollection<StringObject> { };
 
-            //FYcontroller.FYTOPShow(false, 1010, 1948, 0, 0, true);
-            //FYcontroller.FYBOTShow(false, 1010, 1948, 0, 0, true);
-            ////FiddleYardFormTop.Visible = true;
-            ////FYLinkActivity.Visible = true;
-            ////LFYLinkActivity.Visible = true;
-            //SiebwaldeAppLogging("Main: FiddleYard Controller started.");
+            IoC.siebwaldeApplicationModel.SiebwaldeApplicationMainLogging.PropertyChanged += SiebwaldeApplicationMainLogging_PropertyChanged;
 
+            InitAllControllers = new RelayCommand(() => IoC.siebwaldeApplicationModel.StartFYController());           
         }
 
-        public void SiebwaldeAppLogging(string text)
+        private void SiebwaldeApplicationMainLogging_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            SiebwaldeApplicationMainLogging.Log(GetType().Name, text);
-            string fmt = "000";
-            int m_Millisecond = DateTime.Now.Millisecond;
-            string m_text = DateTime.Now + ":" + m_Millisecond.ToString(fmt) + " " + text + " " + Environment.NewLine;
-            //SiebwaldeAppLog.AppendText(m_text);
-        }
+            //Log.Add(sender.GetType().GetProperty(e.PropertyName).GetValue(sender).ToString());
 
-        public void FYLinkActivityUpdate()
-        {
-            //if (FYLinkActivity.InvokeRequired)
-            //{
-            //    ToggleCommLinkCallback d = new ToggleCommLinkCallback(FYLinkActivityUpdate);
-            //    FYLinkActivity.Invoke(d, new object[] { });  // invoking itself
-            //}
-            //else
-            //{
-            //    if (FYLinkActivity.Value >= LINKACTMAX)
-            //    {
-            //        FYLinkActivity.Value = 0;
-            //    }
-            //    FYLinkActivity.Value++;
-            //}
+            Log2.Add(sender.GetType().GetProperty(e.PropertyName).GetValue(sender).ToString());
+
+            //LogObj.Add(new StringObject { Value = sender.GetType().GetProperty(e.PropertyName).GetValue(sender).ToString() });
         }
 
         #endregion
     }
+
+    public class StringObject : BaseViewModel
+    {
+        public string Value { get; set; }
+    }
+
 }

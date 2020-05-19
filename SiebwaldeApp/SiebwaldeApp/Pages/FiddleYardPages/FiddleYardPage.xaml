@@ -6,7 +6,7 @@
       xmlns:local="clr-namespace:SiebwaldeApp"
       mc:Ignorable="d" 
       d:DesignHeight="803" d:DesignWidth="1920"
-      Title="FiddleYardPage">
+      Title="FiddleYardPage" Loaded="OnLoaded">
 
     <Grid>
             <TextBlock>

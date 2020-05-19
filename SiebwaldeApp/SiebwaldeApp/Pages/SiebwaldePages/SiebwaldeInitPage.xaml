@@ -28,26 +28,26 @@
                         </Grid.ColumnDefinitions>
 
                         <Button 
-                    Grid.Column="1" 
-                    Height="100"
-                    HorizontalAlignment="Center" 
-                    Style="{StaticResource IconGrowButton}" 
-                    Content="{StaticResource FontAwesomeMicroChip}" 
-                    Command="{Binding SiebwaldeInitPage }"
-                    Foreground="White"  
-                />
+                            Grid.Column="1" 
+                            Height="100"
+                            HorizontalAlignment="Center" 
+                            Style="{StaticResource IconGrowButton}" 
+                            Content="{StaticResource FontAwesomeMicroChip}" 
+                            Command="{Binding InitAllControllers }"
+                            Foreground="White"  
+                        />
 
                         <TextBlock 
-                Grid.Row="1" 
-                Grid.Column="3"
-                FontSize="{StaticResource FontSizeXXLarge}"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Center">
-                
-                <Run Text="Initialize all controllers." 
-                     FontFamily="{StaticResource FontAwesome}"
-                     Foreground="{StaticResource ForegroundLightBrush}"
-                     />
+                            Grid.Row="1" 
+                            Grid.Column="3"
+                            FontSize="{StaticResource FontSizeXXLarge}"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center">
+                            
+                            <Run Text="Initialize all controllers." 
+                                 FontFamily="{StaticResource FontAwesome}"
+                                 Foreground="{StaticResource ForegroundLightBrush}"
+                                 />
                         </TextBlock>
                     </Grid>
 
@@ -67,7 +67,7 @@
                     HorizontalAlignment="Center" 
                     Style="{StaticResource IconGrowButton}" 
                     Content="{StaticResource FontAwesomeMicroChip}" 
-                    Command="{Binding SiebwaldeInitPage }"
+                    Command="{Binding }"
                     Foreground="White"  
                 />
 
@@ -101,7 +101,7 @@
                     HorizontalAlignment="Center" 
                     Style="{StaticResource IconGrowButton}" 
                     Content="{StaticResource FontAwesomeMicroChip}" 
-                    Command="{Binding SiebwaldeInitPage }"
+                    Command="{Binding }"
                     Foreground="White"  
                 />
 
@@ -135,7 +135,7 @@
                     HorizontalAlignment="Center" 
                     Style="{StaticResource IconGrowButton}" 
                     Content="{StaticResource FontAwesomeMicroChip}" 
-                    Command="{Binding SiebwaldeInitPage }"
+                    Command="{Binding }"
                     Foreground="White"  
                 />
 
@@ -169,7 +169,7 @@
                     HorizontalAlignment="Center" 
                     Style="{StaticResource IconGrowButton}" 
                     Content="{StaticResource FontAwesomeMicroChip}" 
-                    Command="{Binding SiebwaldeInitPage }"
+                    Command="{Binding }"
                     Foreground="White"  
                 />
 
@@ -206,18 +206,22 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="100"/>
             </Grid.RowDefinitions>
+
+            <ListBox             
+                x:Name="TextBoxLogging"
+                Grid.Column="1"
+                Margin="50 50 50 10"
+                HorizontalAlignment="Stretch"   
+                VerticalAlignment="Stretch" 
+                
+                TextElement.FontFamily="{StaticResource FontAwesome}"
+                FontFamily="{StaticResource FontAwesome}"
+                FontSize="{StaticResource FontSizeRegular}"
+                Background="{StaticResource TextBoxBackgroundBrush}"
+                Foreground="{StaticResource BackgroundLightBrush}" 
+                ItemsSource="{Binding Path=Log2}"
+                />
             
-            <TextBox Grid.Column="1"
-                 Margin="50 50 50 10"
-                 HorizontalAlignment="Stretch"   
-                 VerticalAlignment="Stretch" 
-                 VerticalScrollBarVisibility="Auto"
-                 TextWrapping="Wrap"    
-                 IsReadOnly="True"
-                 Background="{StaticResource TextBoxBackgroundBrush}"
-                 Foreground="{StaticResource BackgroundLightBrush}"                 
-                 Text="Siebwalde Logging..."
-                 />
 
             <TextBlock
                 Grid.Row="1"

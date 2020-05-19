@@ -100,6 +100,7 @@
     <Compile Include="Animation\PageAnimation.cs" />
     <Compile Include="Animation\PageAnimations.cs" />
     <Compile Include="Animation\StoryboardHelpers.cs" />
+    <Compile Include="Async\AsyncAwaiter.cs" />
     <Compile Include="AttachedProperties\BaseAttachedProperty.cs" />
     <Compile Include="AttachedProperties\ButtonAttachedProperty.cs" />
     <Compile Include="AttachedProperties\FrameworkElementAnimationAttachedProperties.cs" />
@@ -153,7 +154,16 @@
     <Compile Include="FiddleYardSimulator\FiddleYardSimTrainDetect.cs" />
     <Compile Include="FiddleYardSimulator\FiddleYardSimulator.cs" />
     <Compile Include="FiddleYardSimulator\FiddleYardSimulatorVariables.cs" />
+    <Compile Include="File\FileManager.cs" />
+    <Compile Include="IoC\Interfaces\iFileManager.cs" />
+    <Compile Include="IoC\Interfaces\ILogFactory.cs" />
     <Compile Include="IoC\IoC.cs" />
+    <Compile Include="Logging\Implementation\BaseLogFactory.cs" />
+    <Compile Include="Logging\Implementation\ConsoleLogger.cs" />
+    <Compile Include="Logging\Implementation\FileLogger.cs" />
+    <Compile Include="Logging\Implementation\ILogger.cs" />
+    <Compile Include="Logging\Base\LogFactoryLevel.cs" />
+    <Compile Include="Model\SiebwaldeApplicationModel.cs" />
     <Compile Include="Pages\BasePage.cs" />
     <Compile Include="Pages\FiddleYardPages\FiddleYardPage.xaml.cs">
       <DependentUpon>FiddleYardPage.xaml</DependentUpon>
@@ -180,7 +190,6 @@
       <DependentUpon>SiebwaldePage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Services\CropBitmap.cs" />
-    <Compile Include="Services\Log2LoggingFile.cs" />
     <Compile Include="Services\MAC_IP_Conditioner.cs" />
     <Compile Include="Services\PingTarget.cs" />
     <Compile Include="Services\Receiver.cs" />
@@ -189,6 +198,8 @@
     <Compile Include="Services\Sender.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="TrackApplication\Services\PublicEnums.cs" />
+    <Compile Include="ValueConverters\MultiBaseValueConverter.cs" />
+    <Compile Include="ValueConverters\EnumarableToTextConverter.cs" />
     <Compile Include="ValueConverters\MenuPageValueConverter.cs" />
     <Compile Include="ValueConverters\SideMenuPage.cs" />
     <Compile Include="ValueConverters\ApplicationPage.cs" />

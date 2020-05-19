@@ -2,6 +2,7 @@
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
+using System.ComponentModel;
 
 namespace SiebwaldeApp
 {
@@ -19,6 +20,11 @@ namespace SiebwaldeApp
         /// Defines the log level
         /// </summary>
         LogLevel LogLevel { get; set; }
+
+        /// <summary>
+        /// The event that is fired when any child property changes it value
+        /// </summary>
+        event PropertyChangedEventHandler PropertyChanged;
 
     }
 
@@ -40,8 +46,22 @@ namespace SiebwaldeApp
     /// <summary>
     /// A logger that logss to the console
     /// </summary>
-    public class ConsoleLogger : ILogger
+    public class ConsoleLogger : ILogger, INotifyPropertyChanged
     {
+        /// <summary>
+        /// The event that is fired when any child property changes it value
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged = (Sender, e) => { };
+
+        #region Public  Members
+        
+        /// <summary>
+        /// String that get's filled with the last log entry
+        /// </summary>
+        public string Logs { get; private set; }
+
+        #endregion
+
         #region Private Members
 
         private readonly string m_file = "null";
@@ -85,6 +105,9 @@ namespace SiebwaldeApp
                 int m_Millisecond = DateTime.Now.Millisecond;
                 mText = mText + DateTime.Now + ":" + m_Millisecond.ToString(fmt) + " " + text + " ";
                 Console.WriteLine(mText);
+                
+                // Let listeners know that there is a new logstring
+                Logs = mText;
             }            
         }
 
@@ -93,18 +116,35 @@ namespace SiebwaldeApp
 
     #endregion
 
+    #region LogList
+
+
+
+    #endregion
+
     #region FileLogger
 
     /// <summary>
     /// A logger that logs to a file
     /// </summary>
-    public class FileLogger : ILogger
+    public class FileLogger : ILogger, INotifyPropertyChanged
     {
+        /// <summary>
+        /// The event that is fired when any child property changes it value
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged = (Sender, e) => { };
+
         #region Private Members
 
         private readonly string m_path = "null";
         private object writelock = new object();
         private string fmt = "000";
+
+        #endregion
+
+        #region Public  Members
+
+        public string Logs { get; private set; }
 
         #endregion
 
@@ -148,11 +188,15 @@ namespace SiebwaldeApp
 
             lock (writelock)
             {
-                int m_Millisecond = DateTime.Now.Millisecond;
-                string m_text = DateTime.Now + ":" + m_Millisecond.ToString(fmt) + " " + text + " " + Environment.NewLine;
-
                 try
                 {
+                    int m_Millisecond = DateTime.Now.Millisecond;
+                    string m_text = DateTime.Now + ":" + m_Millisecond.ToString(fmt) + " " + text + " " + Environment.NewLine;
+
+                    // Let listeners know that there is a new logstring
+                    Logs = m_text;
+
+               
                     using (var fs = new FileStream(m_path, FileMode.Append))
                     {
                         Byte[] info = new UTF8Encoding(true).GetBytes(m_text);

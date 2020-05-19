@@ -31,7 +31,7 @@
                                         CornerRadius="{Binding WindowCornerRadius, FallbackValue=10}" />
 
                                 <!-- Window border and dropshadown -->
-                                <Border CornerRadius="{Binding WindowCornerRadius, FallbackValue=10}"
+                                <Border x:Name="window_border" CornerRadius="{Binding WindowCornerRadius, FallbackValue=10}"
                                     Background="{Binding ForegroundLightBrush, FallbackValue=White}">
                                     <Border.Effect>
                                         <DropShadowEffect ShadowDepth="0" Opacity="0.2" />
