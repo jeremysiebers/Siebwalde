@@ -19,7 +19,7 @@ namespace SiebwaldeApp
             // Setup main application
             ApplicationSetup();
 
-            IoC.Logger.Log("Main Siebwalde application starting up...");
+            IoC.Logger.Log("Main Siebwalde application starting up...", "");
 
             // Show the main window
             Current.MainWindow = new MainWindow();

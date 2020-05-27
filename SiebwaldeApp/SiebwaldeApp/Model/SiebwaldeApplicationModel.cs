@@ -34,9 +34,10 @@ namespace SiebwaldeApp
 
         public ILogger SiebwaldeApplicationMainLogging;
 
-        static ILogger GetLogger(string file)
+        private string LoggerInstance { get; set; }
+        static ILogger GetLogger(string file, string loggerinstance)
         {
-            return new FileLogger(file);
+            return new FileLogger(file, loggerinstance);
         }
 
         #endregion
@@ -48,7 +49,7 @@ namespace SiebwaldeApp
         /// <summary>
         public SiebwaldeApplicationModel()
         {
-            SiebwaldeApplicationMainLogging = GetLogger("SiebwaldeApplicationMain.txt");
+            //SiebwaldeApplicationMainLogging = GetLogger("SiebwaldeApplicationMain.txt");
             try
             {
                 if (!Directory.Exists(Enums.HOMEPATH + Enums.LOGGING))
@@ -61,15 +62,15 @@ namespace SiebwaldeApp
                 MessageBox.Show(ex.Message);
             }
 
-            SiebwaldeApplicationMainLogging.Log(GetType().Name, "Siebwalde Application started.");
-            SiebwaldeApplicationMainLogging.Log(GetType().Name, "Main: PC MAC adress is: " + MACIPConditioner.MACstring());
-            SiebwaldeApplicationMainLogging.Log(GetType().Name, "Main: PC IP adress is: " + MACIPConditioner.IPstring());
+            //SiebwaldeApplicationMainLogging.Log("Siebwalde Application started.");
+            //SiebwaldeApplicationMainLogging.Log("Main: PC MAC adress is: " + MACIPConditioner.MACstring());
+            //SiebwaldeApplicationMainLogging.Log("Main: PC IP adress is: " + MACIPConditioner.IPstring());
         }
         #endregion
 
         public void SiebwaldeAppLogging(string text)
         {
-            SiebwaldeApplicationMainLogging.Log(GetType().Name, text);
+            //SiebwaldeApplicationMainLogging.Log(text);
             string fmt = "000";
             int m_Millisecond = DateTime.Now.Millisecond;
             string m_text = DateTime.Now + ":" + m_Millisecond.ToString(fmt) + " " + text + " " + Environment.NewLine;
@@ -106,7 +107,7 @@ namespace SiebwaldeApp
             int FYSendingport = 28671;
             int FYReceivingport = 0x7000; // Port on which the PC will receive data from the FiddleYard   
             FYcontroller = new FiddleYardController(this, MACIPConditioner.MAC(), MACIPConditioner.IP(), FYReceivingport, FYSendingport);
-            IoC.siebwaldeApplicationModel.SiebwaldeApplicationMainLogging.Log(GetType().Name, "Main: FiddleYard Controller starting...");
+            //IoC.siebwaldeApplicationModel.SiebwaldeApplicationMainLogging.Log("Main: FiddleYard Controller starting...");
             FYcontroller.Start();
 ;
             //FYcontroller.FYTOPShow(false, 1010, 1948, 0, 0, true);
@@ -114,7 +115,7 @@ namespace SiebwaldeApp
             //FiddleYardFormTop.Visible = true;
             //FYLinkActivity.Visible = true;
             //LFYLinkActivity.Visible = true;
-            IoC.siebwaldeApplicationModel.SiebwaldeApplicationMainLogging.Log(GetType().Name, "Main: FiddleYard Controller started.");
+            //IoC.siebwaldeApplicationModel.SiebwaldeApplicationMainLogging.Log("Main: FiddleYard Controller started.");
         }
 
     }

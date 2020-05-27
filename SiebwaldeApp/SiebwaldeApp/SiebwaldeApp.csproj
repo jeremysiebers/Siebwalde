@@ -158,7 +158,9 @@
     <Compile Include="IoC\Interfaces\iFileManager.cs" />
     <Compile Include="IoC\Interfaces\ILogFactory.cs" />
     <Compile Include="IoC\IoC.cs" />
+    <Compile Include="Logging\Base\LogLevel.cs" />
     <Compile Include="Logging\Implementation\BaseLogFactory.cs" />
+    <Compile Include="Logging\Implementation\DebugLogger.cs" />
     <Compile Include="Logging\Implementation\ConsoleLogger.cs" />
     <Compile Include="Logging\Implementation\FileLogger.cs" />
     <Compile Include="Logging\Implementation\ILogger.cs" />

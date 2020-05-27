@@ -13,7 +13,7 @@ namespace SiebwaldeApp
         /// <summary>
         /// The level of logging to output
         /// </summary>
-        LogFactoryLevel LogOutputLevel { get; set; }
+        LogOutputLevel LogOutputLevel { get; set; }
 
         /// <summary>
         /// If true, includes the origin of where the log message was logged from
@@ -28,7 +28,7 @@ namespace SiebwaldeApp
         /// <summary>
         /// Fires whenever a new log arrives
         /// </summary>
-        event Action<(string Message, LogFactoryLevel Level)> NewLog;
+        event Action<(string Message, LogLevel Level, string loggerinstance)> NewLog;
 
         #endregion       
 
@@ -50,13 +50,15 @@ namespace SiebwaldeApp
         /// Logs the specific message to all loggers in this factory
         /// </summary>
         /// <param name="message">The message to log</param>
+        /// <param name="loggerinstance">The logger instance</param>
         /// <param name="level">The level of the message being logged</param>
         /// <param name="origin">The method/function this message was logged in</param>
         /// <param name="filepath">The code filename that this message was logged from</param>
         /// <param name="linenumber">The line of code in the filename this message was logged from</param>
         void Log(
             string message,
-            LogFactoryLevel level = LogFactoryLevel.Informative,
+            string loggerinstance,
+            LogLevel level = LogLevel.Informative,            
             [CallerMemberName]string origin = "",
             [CallerFilePath]string filepath = "",
             [CallerLineNumber]int linenumber = 0);

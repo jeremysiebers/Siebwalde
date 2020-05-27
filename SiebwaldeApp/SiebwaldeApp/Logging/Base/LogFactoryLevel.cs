@@ -1,9 +1,9 @@
 ﻿namespace SiebwaldeApp
 {
     /// <summary>
-    /// The severity of the log message
+    /// The level of details to output for a logger
     /// </summary>
-    public enum LogFactoryLevel
+    public enum LogOutputLevel
     {
         /// <summary>
         /// Logs everything
@@ -21,18 +21,13 @@
         Informative = 3,
 
         /// <summary>
-        /// Logs only warnings, errors and standard messages
+        /// Logs only critical errors and warnings and success, no general information
         /// </summary>
-        Normal = 4,
-
-        /// <summary>
-        /// Logs only critical errors and warnings, no general information
-        /// </summary>
-        Critical = 5,
+        Critical = 4,
 
         /// <summary>
         /// Logger outputs nothing
         /// </summary>
-        Nothing = 6,
+        Nothing = 7,
     }
 }

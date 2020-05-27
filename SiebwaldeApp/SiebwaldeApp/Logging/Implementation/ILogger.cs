@@ -10,6 +10,7 @@
         /// </summary>
         /// <param name="message">The message being logged</param>
         /// <param name="level">Log level of the log message</param>
-        void Log(string message, LogFactoryLevel level);
+        /// <param name="loggerinstance">The logger instance to log to</param>
+        void Log(string message, LogLevel level, string loggerinstance);
     }
 }

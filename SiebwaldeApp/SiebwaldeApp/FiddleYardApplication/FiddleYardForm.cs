@@ -10,9 +10,10 @@ namespace SiebwaldeApp
 
     public partial class FiddleYardForm : Form
     {
-        static ILogger GetLogger(string file)
+        private string LoggerInstance { get; set; }
+        static ILogger GetLogger(string file, string loggerinstance)
         {
-            return new FileLogger(file);
+            return new FileLogger(file, loggerinstance);
         }
 
         private IFiddleYardApplication m_iFYApp;
@@ -437,12 +438,12 @@ namespace SiebwaldeApp
 
             if (this.Name == "FiddleYardTOP")
             {
-                FiddleYardFormLogging = GetLogger("FiddleYardFormTOP.txt");
+                //FiddleYardFormLogging = GetLogger("FiddleYardFormTOP.txt");
             }
             else if (this.Name == "FiddleYardBOT")
             {
                 // different logging file per target, this is default
-                FiddleYardFormLogging = GetLogger("FiddleYardFormBOT.txt");                
+                //FiddleYardFormLogging = GetLogger("FiddleYardFormBOT.txt");                
             }
 
             #region Attach sensors
@@ -962,7 +963,7 @@ namespace SiebwaldeApp
             {
                 if (log != "")
                 {
-                    FiddleYardFormLogging.Log(GetType().Name, log);
+                    //FiddleYardFormLogging.log(log);
                     string fmt = "000";
                     int m_Millisecond = DateTime.Now.Millisecond;
                     string m_text = DateTime.Now + ":" + m_Millisecond.ToString(fmt) + " " + log + " " + Environment.NewLine;                    

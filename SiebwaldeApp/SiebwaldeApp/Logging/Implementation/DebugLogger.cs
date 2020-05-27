@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Diagnostics;
 
 namespace SiebwaldeApp
 {
     /// <summary>
     /// Logs the nmessages to the console
     /// </summary>
-    public class ConsoleLogger : ILogger
+    public class DebugLogger : ILogger
     {
         /// <summary>
         /// Logs the given message to the system console
@@ -15,58 +16,49 @@ namespace SiebwaldeApp
         /// <param name="loggerinstance">THe logger instance to decide if logging is applicable for this logger</param>
         public void Log(string message, LogLevel level, string loggerinstance)
         {
-            // Store the current color
-            var consoleOldColor = Console.ForegroundColor;
-
-            // Default log color value
-            var consoleColor = ConsoleColor.White;
+            // The default category
+            var category = default(string);
 
             // Color console based on level
             switch (level)
             {
                 // Debug is blue
                 case LogLevel.Debug:
-                    consoleColor = ConsoleColor.Blue;
+                    category = "information";
                     break;
 
                 // Verbose is gray
                 case LogLevel.Verbose:
-                    consoleColor = ConsoleColor.Gray;
+                    category = "verbose";
                     break;
 
                 // Warning is orange
                 case LogLevel.Warning:
-                    consoleColor = ConsoleColor.DarkYellow;
+                    category = "warning";
                     break;
 
                 // Error is red
                 case LogLevel.Error:
-                    consoleColor = ConsoleColor.Red;
+                    category = "error";
                     break;
 
                 // Success is green
                 case LogLevel.Success:
-                    consoleColor = ConsoleColor.Green;
+                    category = "-----";
                     break;
             }
-
-            // Set the desired color
-            Console.ForegroundColor = consoleColor;
 
             // Check if loggerinstance is specified
             if (loggerinstance != "")
             {
                 // Write message to console with loggerinstance
-                Console.WriteLine($"{loggerinstance} > {message}");
+                Debug.WriteLine($"{loggerinstance} > {message}", category);
             }
             else
             {
                 // Write message to console without loggerinstance
-                Console.WriteLine(message);
-            }
-
-            // Set old color back
-            Console.ForegroundColor = consoleOldColor;
+                Debug.WriteLine(message, category);
+            }            
         }
     }
 }

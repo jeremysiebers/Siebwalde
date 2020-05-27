@@ -20,9 +20,10 @@ namespace SiebwaldeApp
         public FiddleYardSimTrainDetect FYSimTrDt;
         private ILogger FiddleYardSimulatorLogging;
 
-        static ILogger GetLogger(string file)
+        private string LoggerInstance { get; set; }
+        static ILogger GetLogger(string file, string loggerinstance)
         {
-            return new FileLogger(file);
+            return new FileLogger(file, loggerinstance);
         }
 
         private enum State { Idle, Reset, MIP50xAbs_Pos, MIP50xHomexAxis, MIP50xSetxPositioningxVelxDefault, MIP50xSetxAcceleration, MIP50xClearxError, MIP50xActivatexPosxReg, MIP50xDeactivatexPosxReg,
@@ -81,11 +82,11 @@ namespace SiebwaldeApp
 
             if ("TOP" == m_instance)
             {
-                FiddleYardSimulatorLogging = GetLogger("FiddleYardSimulatorTOP.txt");
+                //FiddleYardSimulatorLogging = GetLogger("FiddleYardSimulatorTOP.txt");
             }
             else if ("BOT" == m_instance)
             {
-                FiddleYardSimulatorLogging = GetLogger("FiddleYardSimulatorBOT.txt");
+                //FiddleYardSimulatorLogging = GetLogger("FiddleYardSimulatorBOT.txt");
             }
 
             FYSimVar = new FiddleYardSimulatorVariables();            
@@ -119,7 +120,7 @@ namespace SiebwaldeApp
         /*#--------------------------------------------------------------------------#*/
         public void Start()
         {
-            FiddleYardSimulatorLogging.Log(GetType().Name, "### Fiddle Yard Simulator started ###");
+            //FiddleYardSimulatorLogging.Log("### Fiddle Yard Simulator started ###");
 
 
             // Create simtrains here, when the simulator is not started the simulated trains are not created
@@ -138,12 +139,12 @@ namespace SiebwaldeApp
                 }
                 FYSimTrains.Add(current);
             }
-            FiddleYardSimulatorLogging.Log(GetType().Name, "FYSim created "+ Convert.ToString(NoOfSimTrains) +" FYSimTrains.");
+            //FiddleYardSimulatorLogging.Log("FYSim created "+ Convert.ToString(NoOfSimTrains) +" FYSimTrains.");
 
             FYSimVar.Reset();
-            FiddleYardSimulatorLogging.Log(GetType().Name, "FYSim Simulator Reset()");
+            //FiddleYardSimulatorLogging.Log("FYSim Simulator Reset()");
             UpdateSimArrayToAppArray(); // Update track variables if a train is present or not  
-            FiddleYardSimulatorLogging.Log(GetType().Name, "FYSim Simulator UpdateSimArrayToAppArray()");
+            //FiddleYardSimulatorLogging.Log("FYSim Simulator UpdateSimArrayToAppArray()");
 
             aTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
             // Set the Interval to [x] miliseconds.
@@ -152,8 +153,8 @@ namespace SiebwaldeApp
             // Enable the timer
             aTimer.Enabled = true;
 
-            FiddleYardSimulatorLogging.Log(GetType().Name, "FYSim Simulator Timer started: aTimer.Interval = " + Convert.ToString(aTimer.Interval));
-            FiddleYardSimulatorLogging.Log(GetType().Name, "FYSim State_Machine = State.Idle from Start()");            
+            //FiddleYardSimulatorLogging.Log("FYSim Simulator Timer started: aTimer.Interval = " + Convert.ToString(aTimer.Interval));
+            //FiddleYardSimulatorLogging.Log("FYSim State_Machine = State.Idle from Start()");            
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -178,7 +179,7 @@ namespace SiebwaldeApp
         public void Stop()
         {
             aTimer.Enabled = false;
-            FiddleYardSimulatorLogging.Log(GetType().Name, "FYSimulator STOP() command received, stopping timer event");
+            //FiddleYardSimulatorLogging.Log("FYSimulator STOP() command received, stopping timer event");
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -208,49 +209,49 @@ namespace SiebwaldeApp
                 case State.Idle:                    
                     if (kicksimulator == "MIP50xAbs_Pos" && val == GO)
                     {
-                        FiddleYardSimulatorLogging.Log(GetType().Name, "FYSim State_Machine = State.MIP50xAbs_Pos");
+                        //FiddleYardSimulatorLogging.Log("FYSim State_Machine = State.MIP50xAbs_Pos");
                         State_Machine = State.MIP50xAbs_Pos;                        
                     }
                     else if (kicksimulator == "MIP50xHomexAxis" && val == GO)
                     {
-                        FiddleYardSimulatorLogging.Log(GetType().Name, "FYSim State_Machine = State.MIP50xHomexAxis");
+                        //FiddleYardSimulatorLogging.Log("FYSim State_Machine = State.MIP50xHomexAxis");
                         State_Machine = State.MIP50xHomexAxis;
                     }
                     else if (kicksimulator == "MIP50xSetxPositioningxVelxDefault" && val == GO)
                     {
-                        FiddleYardSimulatorLogging.Log(GetType().Name, "FYSim State_Machine = State.MIP50xSetxPositioningxVelxDefault");
+                        //FiddleYardSimulatorLogging.Log("FYSim State_Machine = State.MIP50xSetxPositioningxVelxDefault");
                         State_Machine = State.MIP50xSetxPositioningxVelxDefault;
                     }
                     else if (kicksimulator == "MIP50xSetxAcceleration" && val == GO)
                     {
-                        FiddleYardSimulatorLogging.Log(GetType().Name, "FYSim State_Machine = State.MIP50xSetxAcceleration");
+                        //FiddleYardSimulatorLogging.Log("FYSim State_Machine = State.MIP50xSetxAcceleration");
                         State_Machine = State.MIP50xSetxAcceleration;
                     }
                     else if (kicksimulator == "MIP50xClearxError" && val == GO)
                     {
-                        FiddleYardSimulatorLogging.Log(GetType().Name, "FYSim State_Machine = State.MIP50xClearxError");
+                        //FiddleYardSimulatorLogging.Log("FYSim State_Machine = State.MIP50xClearxError");
                         State_Machine = State.MIP50xClearxError;
                     }
                     else if (kicksimulator == "MIP50xActivatexPosxReg" && val == GO)
                     {
-                        FiddleYardSimulatorLogging.Log(GetType().Name, "FYSim State_Machine = State.MIP50xActivatexPosxReg");
+                        //FiddleYardSimulatorLogging.Log("FYSim State_Machine = State.MIP50xActivatexPosxReg");
                         State_Machine = State.MIP50xActivatexPosxReg;
                     }
                     else if (kicksimulator == "MIP50xDeactivatexPosxReg" && val == GO)
                     {
-                        FiddleYardSimulatorLogging.Log(GetType().Name, "FYSim State_Machine = State.MIP50xDeactivatexPosxReg");
+                        //FiddleYardSimulatorLogging.Log("FYSim State_Machine = State.MIP50xDeactivatexPosxReg");
                         State_Machine = State.MIP50xDeactivatexPosxReg;
                     }
                     else if (kicksimulator == "MIP50xReadxPosition" && val == GO)
                     {
-                        FiddleYardSimulatorLogging.Log(GetType().Name, "FYSim State_Machine = State.MIP50xReadxPosition");
+                        //FiddleYardSimulatorLogging.Log("FYSim State_Machine = State.MIP50xReadxPosition");
                         State_Machine = State.MIP50xReadxPosition;
                     }
                     else if (kicksimulator == "Reset")
                     {
-                        FiddleYardSimulatorLogging.Log(GetType().Name, "FYSim kicksimulator == Reset");
+                        //FiddleYardSimulatorLogging.Log("FYSim kicksimulator == Reset");
                         State_Machine = State.Reset;
-                        FiddleYardSimulatorLogging.Log(GetType().Name, "FYSim State_Machine = State.Reset");
+                        //FiddleYardSimulatorLogging.Log("FYSim State_Machine = State.Reset");
                     }
                     else if (kicksimulator != "TargetAlive")
                     {
@@ -275,7 +276,7 @@ namespace SiebwaldeApp
                         FYSimVar.MIP50xReceivedxCmdxArrayxCounterxTemp = 0;
                         Number = Convert.ToUInt32(ConvertAbsoluteNo2TrackNo(Number));
                         FYSimMove.FiddleMultipleMove("Go" + Convert.ToString(Number));
-                        FiddleYardSimulatorLogging.Log(GetType().Name, "FYSim State_Machine = State.FiddleMultipleMove");
+                        //FiddleYardSimulatorLogging.Log("FYSim State_Machine = State.FiddleMultipleMove");
                         State_Machine = State.FiddleMultipleMove;
                     }
                     break;
@@ -285,9 +286,9 @@ namespace SiebwaldeApp
                     {
                         if (true == FYSimMove.FiddleMultipleMove(kicksimulator))
                         {
-                            FiddleYardSimulatorLogging.Log(GetType().Name, "FYSim true == FYMove.FiddleMultipleMove(kicksimulator)");
+                            //FiddleYardSimulatorLogging.Log("FYSim true == FYMove.FiddleMultipleMove(kicksimulator)");
                             State_Machine = State.MIP50xSetxPositioningxVelxDefault;
-                            FiddleYardSimulatorLogging.Log(GetType().Name, "FYSim State_Machine = State.MIP50xSetxPositioningxVelxDefault from State.FiddleMultipleMove"); // to sen X0 after move
+                            //FiddleYardSimulatorLogging.Log("FYSim State_Machine = State.MIP50xSetxPositioningxVelxDefault from State.FiddleMultipleMove"); // to sen X0 after move
                             FYSimVar.uControllerReady.Mssg = true;
                         }
                     }
@@ -318,7 +319,7 @@ namespace SiebwaldeApp
                                 {
                                     FYSimVar.F10.Value = true;
                                 }
-                                FiddleYardSimulatorLogging.Log(GetType().Name, "FYSim State_Machine = State.Idle");
+                                //FiddleYardSimulatorLogging.Log("FYSim State_Machine = State.Idle");
                                 State_Machine = State.Idle;
                                 break;
                         }
@@ -345,7 +346,7 @@ namespace SiebwaldeApp
                             case 3:
                                 FYSimVar.MIP50DataReturn = 0x30;
                                 FYSimVar.MIP50Cnt = 0;
-                                FiddleYardSimulatorLogging.Log(GetType().Name, "FYSim State_Machine = State.Idle");
+                                //FiddleYardSimulatorLogging.Log("FYSim State_Machine = State.Idle");
                                 State_Machine = State.Idle;
                                 break;
                         }
@@ -372,7 +373,7 @@ namespace SiebwaldeApp
                             case 3:
                                 FYSimVar.MIP50DataReturn = 0x30;
                                 FYSimVar.MIP50Cnt = 0;
-                                FiddleYardSimulatorLogging.Log(GetType().Name, "FYSim State_Machine = State.Idle");
+                                //FiddleYardSimulatorLogging.Log("FYSim State_Machine = State.Idle");
                                 State_Machine = State.Idle;
                                 break;
                         }
@@ -400,7 +401,7 @@ namespace SiebwaldeApp
                             case 3:
                                 FYSimVar.MIP50DataReturn = 0x30;
                                 FYSimVar.MIP50Cnt = 0;
-                                FiddleYardSimulatorLogging.Log(GetType().Name, "FYSim State_Machine = State.Idle");
+                                //FiddleYardSimulatorLogging.Log("FYSim State_Machine = State.Idle");
                                 State_Machine = State.Idle;
                                 break;
                         }
@@ -427,7 +428,7 @@ namespace SiebwaldeApp
                             case 3:
                                 FYSimVar.MIP50DataReturn = 0x30;
                                 FYSimVar.MIP50Cnt = 0;
-                                FiddleYardSimulatorLogging.Log(GetType().Name, "FYSim State_Machine = State.Idle");
+                                //FiddleYardSimulatorLogging.Log("FYSim State_Machine = State.Idle");
                                 State_Machine = State.Idle;
                                 break;
                         }
@@ -454,7 +455,7 @@ namespace SiebwaldeApp
                             case 3:
                                 FYSimVar.MIP50DataReturn = 0x30;
                                 FYSimVar.MIP50Cnt = 0;
-                                FiddleYardSimulatorLogging.Log(GetType().Name, "FYSim State_Machine = State.Idle");
+                                //FiddleYardSimulatorLogging.Log("FYSim State_Machine = State.Idle");
                                 State_Machine = State.Idle;
                                 break;                                
                         }
@@ -513,7 +514,7 @@ namespace SiebwaldeApp
                             case 7:
                                 FYSimVar.MIP50DataReturn = 0x30;
                                 FYSimVar.MIP50Cnt = 0;
-                                FiddleYardSimulatorLogging.Log(GetType().Name, "FYSim State_Machine = State.Idle");
+                                //FiddleYardSimulatorLogging.Log("FYSim State_Machine = State.Idle");
                                 State_Machine = State.Idle;
                                 break;
                         }
@@ -526,7 +527,7 @@ namespace SiebwaldeApp
                     State_Machine = State.Idle;
                     FYSimVar.MIP50Cnt = 0;
                     FYSimVar.MIP50Cnt2 = 0;
-                    FiddleYardSimulatorLogging.Log(GetType().Name, "FYSim State_Machine = State.Idle from State.Reset");
+                    //FiddleYardSimulatorLogging.Log("FYSim State_Machine = State.Idle from State.Reset");
                     break;
 
                 default:
@@ -599,7 +600,7 @@ namespace SiebwaldeApp
             if (name == "FYSimSpeedSetting")
             {
                 aTimer.Interval = val;
-                FiddleYardSimulatorLogging.Log(GetType().Name, "FYSim Simulator aTimer.Interval = " + Convert.ToString(aTimer.Interval));
+                //FiddleYardSimulatorLogging.Log("FYSim Simulator aTimer.Interval = " + Convert.ToString(aTimer.Interval));
             }
         }
 
@@ -800,34 +801,34 @@ namespace SiebwaldeApp
 
 //if (kicksimulator == "FiddleOneLeft")
 //{
-//    FiddleYardSimulatorLogging.Log(GetType().Name, "FYSim State_Machine = State.FiddleOneLeft");
+//    //FiddleYardSimulatorLogging.Log("FYSim State_Machine = State.FiddleOneLeft");
 //    State_Machine = State.FiddleOneLeft;                                                // When a sequence has to be executed, the corresponding state is started
 //}
 //else if (kicksimulator == "FiddleOneRight")
 //{
-//    FiddleYardSimulatorLogging.Log(GetType().Name, "FYSim State_Machine = State.FiddleOneRight");
+//    //FiddleYardSimulatorLogging.Log("FYSim State_Machine = State.FiddleOneRight");
 //    State_Machine = State.FiddleOneRight;
 //}
 //else if (kicksimulator.TrimEnd(kicksimulator[kicksimulator.Length - 1]) == "FiddleGo" || kicksimulator == "FiddleGo10") // the 0 of 10 is not recognized...therefore: || kicksimulator == "FiddleGo10"
 //{
 //    string test = kicksimulator.TrimEnd(kicksimulator[kicksimulator.Length - 1]);
-//    FiddleYardSimulatorLogging.Log(GetType().Name, "FYSim FYMove.FiddleMultipleMove(" + kicksimulator + ")");
+//    //FiddleYardSimulatorLogging.Log("FYSim FYMove.FiddleMultipleMove(" + kicksimulator + ")");
 //    FYMove.FiddleMultipleMove(kicksimulator);                                           // Already pass the command which was received, else it will be lost
-//    FiddleYardSimulatorLogging.Log(GetType().Name, "FYSim State_Machine = State.FiddleMultipleMove");
+//    //FiddleYardSimulatorLogging.Log("FYSim State_Machine = State.FiddleMultipleMove");
 //    State_Machine = State.FiddleMultipleMove;                                           // When a sequence has to be executed, the corresponding state is started
 //}
 //else if (kicksimulator == "TrainDetect")
 //{
-//    FiddleYardSimulatorLogging.Log(GetType().Name, "FYSim State_Machine = State.TrainDetect");
+//    //FiddleYardSimulatorLogging.Log("FYSim State_Machine = State.TrainDetect");
 //    State_Machine = State.TrainDetect;
 //}
 
 //case State.FiddleOneLeft:
 //    if (true == FYMove.FiddleOneMove("Left"))
 //    {
-//        FiddleYardSimulatorLogging.Log(GetType().Name, "FYSim true == FYMove.FiddleOneMove(Left)");
+//        //FiddleYardSimulatorLogging.Log("FYSim true == FYMove.FiddleOneMove(Left)");
 //        State_Machine = State.Idle;
-//        FiddleYardSimulatorLogging.Log(GetType().Name, "FYSim State_Machine = State.Idle from State.FiddleOneLeft");
+//        //FiddleYardSimulatorLogging.Log("FYSim State_Machine = State.Idle from State.FiddleOneLeft");
 //        FYSimVar.uControllerReady.Mssg = true;
 //    }
 //    break;
@@ -835,9 +836,9 @@ namespace SiebwaldeApp
 //case State.FiddleOneRight:
 //    if (true == FYMove.FiddleOneMove("Right"))
 //    {
-//        FiddleYardSimulatorLogging.Log(GetType().Name, "FYSim true == FYMove.FiddleOneMove(Right)");
+//        //FiddleYardSimulatorLogging.Log("FYSim true == FYMove.FiddleOneMove(Right)");
 //        State_Machine = State.Idle;
-//        FiddleYardSimulatorLogging.Log(GetType().Name, "FYSim State_Machine = State.Idle from State.FiddleOneRight");
+//        //FiddleYardSimulatorLogging.Log("FYSim State_Machine = State.Idle from State.FiddleOneRight");
 //        FYSimVar.uControllerReady.Mssg = true;
 //    }
 //    break;
@@ -845,9 +846,9 @@ namespace SiebwaldeApp
 //case State.FiddleMultipleMove:
 //    if (true == FYMove.FiddleMultipleMove(kicksimulator))
 //    {
-//        FiddleYardSimulatorLogging.Log(GetType().Name, "FYSim true == FYMove.FiddleMultipleMove(kicksimulator)");
+//        //FiddleYardSimulatorLogging.Log("FYSim true == FYMove.FiddleMultipleMove(kicksimulator)");
 //        State_Machine = State.Idle;
-//        FiddleYardSimulatorLogging.Log(GetType().Name, "FYSim State_Machine = State.Idle from State.FiddleMultipleMove");
+//        //FiddleYardSimulatorLogging.Log("FYSim State_Machine = State.Idle from State.FiddleMultipleMove");
 //        FYSimVar.uControllerReady.Mssg = true;
 //    }
 //    break;
@@ -855,9 +856,9 @@ namespace SiebwaldeApp
 //case State.TrainDetect:
 //    if (true == FYTrDt.FiddleTrDt())
 //    {
-//        FiddleYardSimulatorLogging.Log(GetType().Name, "FYSim true == FYTrDt.FiddleTrDt()");
+//        //FiddleYardSimulatorLogging.Log("FYSim true == FYTrDt.FiddleTrDt()");
 //        State_Machine = State.Idle;
-//        FiddleYardSimulatorLogging.Log(GetType().Name, "FYSim State_Machine = State.Idle from State.TrainDetect");
+//        //FiddleYardSimulatorLogging.Log("FYSim State_Machine = State.Idle from State.TrainDetect");
 //        FYSimVar.uControllerReady.Mssg = true;
 //    }
 //    break;

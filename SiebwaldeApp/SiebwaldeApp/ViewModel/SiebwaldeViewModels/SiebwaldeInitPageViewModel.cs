@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using SiebwaldeApp;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 
@@ -49,7 +50,7 @@ namespace SiebwaldeApp
 
             //LogObj = new ObservableCollection<StringObject> { };
 
-            IoC.siebwaldeApplicationModel.SiebwaldeApplicationMainLogging.PropertyChanged += SiebwaldeApplicationMainLogging_PropertyChanged;
+            //IoC.siebwaldeApplicationModel.//SiebwaldeApplicationMainLogging.PropertyChanged += //SiebwaldeApplicationMainLogging_PropertyChanged;
 
             InitAllControllers = new RelayCommand(() => IoC.siebwaldeApplicationModel.StartFYController());           
         }
