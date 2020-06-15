@@ -7,16 +7,10 @@ using System.Windows;
 
 namespace SiebwaldeApp
 {
-    public interface IMain
-    {
-        void SiebwaldeAppLogging(string text);
-        void FYLinkActivityUpdate();
-    }
-
     public class SiebwaldeApplicationModel
     {
         #region Public properties
-
+            
         //public ObservableCollection<LogList> Log { get; set; }
         //public LogList Logging { get; private set; }
 
@@ -31,15 +25,6 @@ namespace SiebwaldeApp
         //private TrackController MTcontroller;
         public FiddleYardController YDcontroller;
         public MAC_IP_Conditioner MACIPConditioner = new MAC_IP_Conditioner { };
-
-        public ILogger SiebwaldeApplicationMainLogging;
-
-        private string LoggerInstance { get; set; }
-        static ILogger GetLogger(string file, string loggerinstance)
-        {
-            return new FileLogger(file, loggerinstance);
-        }
-
         #endregion
 
         #region Constructor
@@ -48,34 +33,12 @@ namespace SiebwaldeApp
         /// Default constructor
         /// <summary>
         public SiebwaldeApplicationModel()
-        {
-            //SiebwaldeApplicationMainLogging = GetLogger("SiebwaldeApplicationMain.txt");
-            try
-            {
-                if (!Directory.Exists(Enums.HOMEPATH + Enums.LOGGING))
-                {
-                    Directory.CreateDirectory(Enums.HOMEPATH + Enums.LOGGING);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-
-            //SiebwaldeApplicationMainLogging.Log("Siebwalde Application started.");
-            //SiebwaldeApplicationMainLogging.Log("Main: PC MAC adress is: " + MACIPConditioner.MACstring());
-            //SiebwaldeApplicationMainLogging.Log("Main: PC IP adress is: " + MACIPConditioner.IPstring());
+        {            
+            IoC.Logger.Log("Siebwalde Application started.", "");
+            IoC.Logger.Log("Main: PC MAC adress is: " + MACIPConditioner.MACstring(), "");
+            IoC.Logger.Log("Main: PC IP adress is: " + MACIPConditioner.IPstring(), "");
         }
         #endregion
-
-        public void SiebwaldeAppLogging(string text)
-        {
-            //SiebwaldeApplicationMainLogging.Log(text);
-            string fmt = "000";
-            int m_Millisecond = DateTime.Now.Millisecond;
-            string m_text = DateTime.Now + ":" + m_Millisecond.ToString(fmt) + " " + text + " " + Environment.NewLine;
-            //SiebwaldeAppLog.AppendText(m_text);
-        }
 
         public void FYLinkActivityUpdate()
         {
@@ -103,11 +66,14 @@ namespace SiebwaldeApp
                 //FYcontroller.FYBOTShow(false, 1010, 1948, 0, 0, true);
                 return;
             }
-            
-            int FYSendingport = 28671;
-            int FYReceivingport = 0x7000; // Port on which the PC will receive data from the FiddleYard   
-            FYcontroller = new FiddleYardController(this, MACIPConditioner.MAC(), MACIPConditioner.IP(), FYReceivingport, FYSendingport);
-            //IoC.siebwaldeApplicationModel.SiebwaldeApplicationMainLogging.Log("Main: FiddleYard Controller starting...");
+ 
+            FYcontroller = new FiddleYardController(this, 
+                MACIPConditioner.MAC(), 
+                MACIPConditioner.IP(), 
+                Properties.Settings.Default.FYReceivingport, 
+                Properties.Settings.Default.FYSendingport);
+
+            IoC.Logger.Log("FiddleYard Controller starting...", "");
             FYcontroller.Start();
 ;
             //FYcontroller.FYTOPShow(false, 1010, 1948, 0, 0, true);
@@ -115,7 +81,7 @@ namespace SiebwaldeApp
             //FiddleYardFormTop.Visible = true;
             //FYLinkActivity.Visible = true;
             //LFYLinkActivity.Visible = true;
-            //IoC.siebwaldeApplicationModel.SiebwaldeApplicationMainLogging.Log("Main: FiddleYard Controller started.");
+            IoC.Logger.Log("FiddleYard Controller started.", "");
         }
 
     }

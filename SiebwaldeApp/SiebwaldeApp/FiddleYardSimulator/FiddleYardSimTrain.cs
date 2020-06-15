@@ -51,8 +51,7 @@ namespace SiebwaldeApp
         private State FYSimTrainState;
         private int ActionCounter = 0;
 
-        public ILogger FiddleYardSimTrainLogging;
-        string path = "null";        
+        private ILogger FiddleYardSimTrainLogging;       
 
         /*#--------------------------------------------------------------------------#*/
         /*  Description: FiddleYardSimTrain constructor
@@ -87,11 +86,19 @@ namespace SiebwaldeApp
 
             if ("TOP" == m_instance)
             {
-                //FiddleYardSimTrainLogging = GetLogger("FiddleYardSimTrainTOP.txt");
+                // Set the log instance string to the logging instance name used for directed file logging
+                LoggerInstance = "FySimTrainTopLog";
+                //  different logging file per target, this is default
+                FiddleYardSimTrainLogging = GetLogger(Properties.Settings.Default.LogDirectory + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_" + "FiddleYardSimTrainLogTOP.txt", LoggerInstance);
+                IoC.Logger.AddLogger(FiddleYardSimTrainLogging);
             }
             else if ("BOT" == m_instance)
             {
-                //FiddleYardSimTrainLogging = GetLogger("FiddleYardSimTrainBOT.txt");
+                // Set the log instance string to the logging instance name used for directed file logging
+                LoggerInstance = "FySimTrainBotLog";
+                //  different logging file per target, this is default
+                FiddleYardSimTrainLogging = GetLogger(Properties.Settings.Default.LogDirectory + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_" + "FiddleYardSimTrainLogBOT.txt", LoggerInstance);
+                IoC.Logger.AddLogger(FiddleYardSimTrainLogging);
             }
 
             Sensor Sns_FYSimSpeedSetting = new Sensor("FYSimSpeedSetting", " FYSimSpeedSetting ", 0, (name, val, log) => SimulatorSettings(name, val, log)); // initialize and subscribe sensors
@@ -121,8 +128,8 @@ namespace SiebwaldeApp
             {
                 MINIMUMxWAITxTIME = 80 / 100 * val;
                 MAXIMUMxWAITxTIME = 500 / 100 * val;
-                ////FiddleYardSimTrainLogging.Log(FYSimtrainInstance + " MINIMUMxWAITxTIME = " + Convert.ToString(MINIMUMxWAITxTIME));
-                ////FiddleYardSimTrainLogging.Log(FYSimtrainInstance + " MAXIMUMxWAITxTIME = " + Convert.ToString(MAXIMUMxWAITxTIME));
+                //IoC.Logger.Log(FYSimtrainInstance + " MINIMUMxWAITxTIME = " + Convert.ToString(MINIMUMxWAITxTIME));
+                //IoC.Logger.Log(FYSimtrainInstance + " MAXIMUMxWAITxTIME = " + Convert.ToString(MAXIMUMxWAITxTIME));
             }
         }
 
@@ -154,12 +161,12 @@ namespace SiebwaldeApp
             {
                 if (_SimTrainLocation == null)
                 {
-                    //FiddleYardSimTrainLogging.Log("###Fiddle Yard " + FYSimtrainInstance + " Started###");
-                    //FiddleYardSimTrainLogging.Log(FYSimtrainInstance + " on " + value);
+                    IoC.Logger.Log("###Fiddle Yard " + FYSimtrainInstance + " Started###", LoggerInstance);
+                    IoC.Logger.Log(FYSimtrainInstance + " on " + value, LoggerInstance);
                 }
                 else if (_SimTrainLocation != null && _SimTrainLocation != value)
                 {
-                    //FiddleYardSimTrainLogging.Log(FYSimtrainInstance + " on " + value);//+ " :location change with set SimTrainLocation.");
+                    IoC.Logger.Log(FYSimtrainInstance + " on " + value, LoggerInstance);//+ " :location change with set SimTrainLocation.");
                 }
                 _SimTrainLocation = value;
                 
@@ -193,25 +200,25 @@ namespace SiebwaldeApp
                     if (kicksimtrain == "Track_No" && SimTrainLocation == TrackNoToTrackString(val))
                     {
                         FYSimTrainState = State.FYActiveTrack;
-                        //FiddleYardSimTrainLogging.Log(FYSimtrainInstance + " FYSimTrainState = State.FYActiveTrack");
+                        IoC.Logger.Log(FYSimtrainInstance + " FYSimTrainState = State.FYActiveTrack", LoggerInstance);
                     }
                     else if (SimTrainLocation == "Block5B")
                     {
                         m_FYSimVar.Block5B.Value = true;
                         FYSimTrainState = State.TrainInBlock5B;
-                        //FiddleYardSimTrainLogging.Log(FYSimtrainInstance + " FYSimTrainState = State.TrainInBlock5B");
+                        IoC.Logger.Log(FYSimtrainInstance + " FYSimTrainState = State.TrainInBlock5B", LoggerInstance);
                     }
                     else if (SimTrainLocation == "Block8A")
                     {
                         m_FYSimVar.Block8A.Value = true;
                         FYSimTrainState = State.TrainInBlock8A;
-                        //FiddleYardSimTrainLogging.Log(FYSimtrainInstance + " FYSimTrainState = State.TrainInBlock8A");
+                        IoC.Logger.Log(FYSimtrainInstance + " FYSimTrainState = State.TrainInBlock8A", LoggerInstance);
                     }
                     else if (SimTrainLocation == "Block6")
                     {
                         m_FYSimVar.Block6.Value = true;
                         FYSimTrainState = State.TrainInBlock6;
-                        //FiddleYardSimTrainLogging.Log(FYSimtrainInstance + " FYSimTrainState = State.TrainInBlock6");
+                        IoC.Logger.Log(FYSimtrainInstance + " FYSimTrainState = State.TrainInBlock6", LoggerInstance);
                     }
                     else if (SimTrainLocation == "Buffer")
                     {
@@ -221,7 +228,7 @@ namespace SiebwaldeApp
                             BufferWaitDelay = rng.Next(MinimumWaitTime, MaximumWaitTime);
                         }                        
                         FYSimTrainState = State.TrainInBuffer;
-                        //FiddleYardSimTrainLogging.Log(FYSimtrainInstance + " FYSimTrainState = State.TrainInBuffer. " + "BufferWaitDelay = " + Convert.ToString(BufferWaitDelay));                        
+                        IoC.Logger.Log(FYSimtrainInstance + " FYSimTrainState = State.TrainInBuffer. " + "BufferWaitDelay = " + Convert.ToString(BufferWaitDelay), LoggerInstance);                        
                     }
                     break;
 
@@ -248,7 +255,7 @@ namespace SiebwaldeApp
                     if (m_FYSimVar.Block7In.Value == false && m_FYSimVar.Block8A.Value == false && m_FYSimVar.TrackPower.Value == true)// check if train may leave and if block 8 is free and track is powered (coupled)
                     {
                         FYSimTrainState = State.TrainDriveToBlock8A;
-                        //FiddleYardSimTrainLogging.Log(FYSimtrainInstance + " FYSimTrainState = State.TrainDriveToBlock8A");
+                        IoC.Logger.Log(FYSimtrainInstance + " FYSimTrainState = State.TrainDriveToBlock8A", LoggerInstance);
                         ActionCounter = 0;
                     }
                     if (kicksimtrain == "Track_No" && SimTrainLocation != TrackNoToTrackString(val))
@@ -256,8 +263,8 @@ namespace SiebwaldeApp
                         FYSimTrainState = State.Idle;
                         m_FYSimVar.F10.Value = false;
                         m_FYSimVar.F11.Value = false;
-                        //FiddleYardSimTrainLogging.Log(FYSimtrainInstance + " kicksimtrain == Track_No && SimTrainLocation != TrackNoToTrackString(val)");
-                        //FiddleYardSimTrainLogging.Log(FYSimtrainInstance + " FYSimTrainState = State.Idle");
+                        IoC.Logger.Log(FYSimtrainInstance + " kicksimtrain == Track_No && SimTrainLocation != TrackNoToTrackString(val)", LoggerInstance);
+                        IoC.Logger.Log(FYSimtrainInstance + " FYSimTrainState = State.Idle", LoggerInstance);
                     }
                     break;
 
@@ -310,7 +317,7 @@ namespace SiebwaldeApp
                         m_iFYSim.GetTrainsOnFYSim()[m_FYSimVar.TrackNo.Count] = 0;
                         ActionCounter = 0;
                         FYSimTrainState = State.TrainInBlock8A;
-                        //FiddleYardSimTrainLogging.Log(FYSimtrainInstance + " FYSimTrainState = State.TrainInBlock8A");
+                        IoC.Logger.Log(FYSimtrainInstance + " FYSimTrainState = State.TrainInBlock8A", LoggerInstance);
                     }
                     break;
 
@@ -326,7 +333,7 @@ namespace SiebwaldeApp
                     {
                         ActionCounter = 0;
                         FYSimTrainState = State.TrainDriveToBuffer;
-                        //FiddleYardSimTrainLogging.Log(FYSimtrainInstance + " FYSimTrainState = State.TrainDriveToBuffer");
+                        IoC.Logger.Log(FYSimtrainInstance + " FYSimTrainState = State.TrainDriveToBuffer", LoggerInstance);
                     }
                     break;
 
@@ -340,14 +347,14 @@ namespace SiebwaldeApp
                     SimTrainLocation = "Buffer";                        // train drives into buffer
                     m_FYSimVar.Block8A.Value = false;
                     FYSimTrainState = State.TrainInBuffer;
-                    //FiddleYardSimTrainLogging.Log(FYSimtrainInstance + " FYSimTrainState = State.TrainInBuffer");
+                    IoC.Logger.Log(FYSimtrainInstance + " FYSimTrainState = State.TrainInBuffer", LoggerInstance);
 
                     BufferWaitDelayRandomTrigger = (Convert.ToInt16(DateTime.Now.Second) + 1) * 10;                // Use a variable millisecond value as wait time until the next train wants to enter the fiddle yard 
                     for (int i = 1; i <= BufferWaitDelayRandomTrigger; i++)
                     {
                         BufferWaitDelay = rng.Next(MinimumWaitTime, MaximumWaitTime);
                     }                    
-                    //FiddleYardSimTrainLogging.Log(FYSimtrainInstance + " FYSimTrainState = State.TrainInBuffer. " + "BufferWaitDelay = " + Convert.ToString(BufferWaitDelay));       
+                    IoC.Logger.Log(FYSimtrainInstance + " FYSimTrainState = State.TrainInBuffer. " + "BufferWaitDelay = " + Convert.ToString(BufferWaitDelay), LoggerInstance);       
                     break;
 
                 case State.TrainInBuffer:
@@ -370,7 +377,7 @@ namespace SiebwaldeApp
                         {                            
                             m_FYSimVar.Block5B.Value = true;
                             FYSimTrainState = State.TrainInBlock5B;
-                            //FiddleYardSimTrainLogging.Log(FYSimtrainInstance + " FYSimTrainState = State.TrainInBlock5B");
+                            IoC.Logger.Log(FYSimtrainInstance + " FYSimTrainState = State.TrainInBlock5B", LoggerInstance);
                             SimTrainLocation = "Block5B";
                         }                        
                     }
@@ -399,7 +406,7 @@ namespace SiebwaldeApp
                     {
                         ActionCounter = 0;
                         FYSimTrainState = State.TrainDriveToBlock6;
-                        //FiddleYardSimTrainLogging.Log(FYSimtrainInstance + " FYSimTrainState = State.TrainDriveToBlock6");                        
+                        IoC.Logger.Log(FYSimtrainInstance + " FYSimTrainState = State.TrainDriveToBlock6", LoggerInstance);                        
                     }
                     break;
 
@@ -422,7 +429,7 @@ namespace SiebwaldeApp
                         m_FYSimVar.F10.Value = true;
                         ActionCounter = 0;
                         FYSimTrainState = State.TrainInBlock6;
-                        //FiddleYardSimTrainLogging.Log(FYSimtrainInstance + " FYSimTrainState = State.TrainInBlock6");
+                        IoC.Logger.Log(FYSimtrainInstance + " FYSimTrainState = State.TrainInBlock6", LoggerInstance);
                         SimTrainLocation = "Block6";
                     }
                     break;
@@ -438,7 +445,7 @@ namespace SiebwaldeApp
                     if (m_FYSimVar.Block7.Value == false && m_FYSimVar.TrackNo.Count != 0 && m_FYSimVar.TrackPower.Value == true)// check if train may drive into block7, if the fiddle yard is aligned and if coupled
                     {                        
                         FYSimTrainState = State.TrainDriveToBlock7;
-                        //FiddleYardSimTrainLogging.Log(FYSimtrainInstance + " FYSimTrainState = State.TrainDriveToBlock7");
+                        IoC.Logger.Log(FYSimtrainInstance + " FYSimTrainState = State.TrainDriveToBlock7", LoggerInstance);
                         m_FYSimVar.Block7.Value = true;
                     }
                     break;
@@ -455,8 +462,8 @@ namespace SiebwaldeApp
                         ActionCounter = 0;
                         m_FYSimVar.Block7.Value = false;
                         FYSimTrainState = State.Idle;
-                        //FiddleYardSimTrainLogging.Log(FYSimtrainInstance + " kicksimtrain == Track_No && SimTrainLocation != TrackNoToTrackString(val)");
-                        //FiddleYardSimTrainLogging.Log(FYSimtrainInstance + " FYSimTrainState = State.Idle");
+                        IoC.Logger.Log(FYSimtrainInstance + " kicksimtrain == Track_No && SimTrainLocation != TrackNoToTrackString(val)", LoggerInstance);
+                        IoC.Logger.Log(FYSimtrainInstance + " FYSimTrainState = State.Idle", LoggerInstance);
                         break;
                     }
 
@@ -469,7 +476,7 @@ namespace SiebwaldeApp
                     {
                         SimTrainLocation = "Track" + Convert.ToString(m_FYSimVar.TrackNo.Count);
                         m_FYSimVar.F13.Value = true;                        
-                        ////FiddleYardSimTrainLogging.Log(FYSimtrainInstance + " in " + SimTrainLocation); <-------------------- a lot of logging!!!
+                        //IoC.Logger.Log(FYSimtrainInstance + " in " + SimTrainLocation); <-------------------- a lot of logging!!!
                     }
                     else 
                     { 
@@ -486,9 +493,9 @@ namespace SiebwaldeApp
                     if (ActionCounter >= ActionCounter25)
                     {
                         ActionCounter = 0;
-                        //FiddleYardSimTrainLogging.Log(FYSimtrainInstance + " Train not stopped on fiddle yard...");
+                        IoC.Logger.Log(FYSimtrainInstance + " Train not stopped on fiddle yard...", LoggerInstance);
                         FYSimTrainState = State.TrainDriveToBlock8A;
-                        //FiddleYardSimTrainLogging.Log(FYSimtrainInstance + " FYSimTrainState = State.TrainDriveToBlock8A");                        
+                        IoC.Logger.Log(FYSimtrainInstance + " FYSimTrainState = State.TrainDriveToBlock8A", LoggerInstance);                        
                     }
                     break;
 

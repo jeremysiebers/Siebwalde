@@ -24,7 +24,7 @@ namespace SiebwaldeApp
         private FiddleYardIOHandleVariables m_FYIOHandleVar;             // connect variable to connect to FYIOH class for defined variables
         private FiddleYardApplicationVariables m_FYAppVar;
         private FiddleYardMip50 m_FYMIP50;                               // Create new MIP50 sub program       
-        private ILogger m_FYAppLog;
+        private string LoggerInstance { get; set; }
         private enum State { Start, CheckEmptyTrack, MoveToEmptyTrack, CheckArrivedAtEmptyTrack, CheckTrainInTrack6, CheckTrainF10, CheckTrainInTrack7, CheckTrainF11, CheckTrainStopped, TrainDriveInFailed,
             CheckFullTrack, MoveToFullTrack, CheckArrivedAtFullTrack, CheckTrainLeftTrack7, Idle, Stop, CheckArrivedAtEmptyTrack_1, CheckArrivedAtEmptyTrack_2, CheckArrivedAtEmptyTrack_3,
             CheckArrivedAtEmptyTrack_4, CheckArrivedAtEmptyTrack_5, CheckTrainInTrack6_1, CheckTrainF10_1, CheckTrainF11_1,CheckTrainStopped_1, CheckTrainStopped_2, CheckTrainStopped_3, MoveToFullTrack_1,
@@ -60,14 +60,17 @@ namespace SiebwaldeApp
          *  Notes      : 
          */
         /*#--------------------------------------------------------------------------#*/
-        public FiddleYardAppTrainDrive(FiddleYardIOHandleVariables FYIOHandleVar, iFiddleYardIOHandle iFYIOH, FiddleYardApplicationVariables FYAppVar,
-            FiddleYardMip50 FYMIP50, ILogger FiddleYardApplicationLogging)
+        public FiddleYardAppTrainDrive(FiddleYardIOHandleVariables FYIOHandleVar, 
+            iFiddleYardIOHandle iFYIOH, 
+            FiddleYardApplicationVariables FYAppVar,
+            FiddleYardMip50 FYMIP50,
+            string loggerInstance)
         {
             m_FYIOHandleVar = FYIOHandleVar;
             m_iFYIOH = iFYIOH;
             m_FYAppVar = FYAppVar;
             m_FYMIP50 = FYMIP50;
-            m_FYAppLog = FiddleYardApplicationLogging;
+            LoggerInstance = loggerInstance;
             TrainDriveIn_Machine = State.Start;
             TrainDriveOut_Machine = State.Start;
             TrainDriveThrough_Machine = State.Start;
@@ -80,7 +83,7 @@ namespace SiebwaldeApp
         {
             if (TrainDriveIn_Machine != State.Start || TrainDriveOut_Machine != State.Start)
             {
-                //m_FYAppLog.Log("FYAppTrainDrive().recieved uControllerReady = true");
+                IoC.Logger.Log("recieved uControllerReady = true", LoggerInstance);
             }            
             uControllerReady = true;
         }
@@ -142,9 +145,9 @@ namespace SiebwaldeApp
                 case State.Start:                    
                     TrainDriveInPointer = m_FYAppVar.GetTrackNr();        // Driving trains into the fiddle yard may be done without memorizeing, driving out is done in Fi-La
                     TrainDriveInPointerCheckedAll = TrainDriveInPointer;
-                    //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn TrainDriveInPointer = m_iFYApp.GetTrackNr() = " + Convert.ToString(m_FYAppVar.GetTrackNr()));
+                    IoC.Logger.Log("TrainDriveInPointer = m_iFYApp.GetTrackNr() = " + Convert.ToString(m_FYAppVar.GetTrackNr()), LoggerInstance);
                     TrainDriveIn_Machine = State.CheckEmptyTrack;
-                    //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn TrainDriveIn_Machine = State.CheckEmptyTrack");
+                    IoC.Logger.Log("TrainDriveIn_Machine = State.CheckEmptyTrack", LoggerInstance);
 
                     if (m_iFYIOH.GetFYSimulatorActive() == true)
                     {
@@ -166,32 +169,32 @@ namespace SiebwaldeApp
                         {
                             TrainDriveIn_Machine = State.Start;
                             _Return = "Finished";
-                            //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn All tracks are disabled, cancelling Traindrive in Program");
+                            IoC.Logger.Log("All tracks are disabled, cancelling Traindrive in Program", LoggerInstance);
                         }
                     }
                     else 
                     { 
                         TrainDriveIn_Machine = State.MoveToEmptyTrack;
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn Goto Track" + Convert.ToString(TrainDriveInPointer));
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn TrainDriveIn_Machine = State.MoveToEmptyTrack");
+                        IoC.Logger.Log("Goto Track" + Convert.ToString(TrainDriveInPointer), LoggerInstance);
+                        IoC.Logger.Log("TrainDriveIn_Machine = State.MoveToEmptyTrack", LoggerInstance);
                     }
                     break;
 
                 case State.MoveToEmptyTrack:
                     uControllerReady = false;
                     m_FYAppVar.Uncouple.UpdateActuator(); // This will give back uCOntroller ready. 
-                    //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn m_FYAppVar.Uncouple.UpdateActuator()");                    
+                    IoC.Logger.Log("m_FYAppVar.Uncouple.UpdateActuator()", LoggerInstance);                    
                     TrainDriveIn_Machine = State.CheckArrivedAtEmptyTrack;                    
-                    //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn TrainDriveIn_Machine = State.CheckArrivedAtEmptyTrack");
+                    IoC.Logger.Log("TrainDriveIn_Machine = State.CheckArrivedAtEmptyTrack", LoggerInstance);
                     break;
 
                 case State.CheckArrivedAtEmptyTrack:
                     if (uControllerReady == true)   // Check if Uncoupled
                     {
                         m_FYMIP50.MIP50xMOVExCALC(Convert.ToUInt16(TrainDriveInPointer));
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn m_FYMIP50.MIP50xMOVExCALC(" + Convert.ToString(TrainDriveInPointer) + ")");
+                        IoC.Logger.Log("m_FYMIP50.MIP50xMOVExCALC(" + Convert.ToString(TrainDriveInPointer) + ")", LoggerInstance);
                         TrainDriveIn_Machine = State.CheckArrivedAtEmptyTrack_1;
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn TrainDriveIn_Machine = State.CheckArrivedAtEmptyTrack_1");
+                        IoC.Logger.Log("TrainDriveIn_Machine = State.CheckArrivedAtEmptyTrack_1", LoggerInstance);
                     }
                     break;
 
@@ -199,21 +202,21 @@ namespace SiebwaldeApp
                     SubProgramReturnVal = m_FYMIP50.MIP50xMOVE();
                     if (SubProgramReturnVal == "Finished")
                     {
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn m_FYMIP50.MIP50xMOVE == Finished");
+                        IoC.Logger.Log("m_FYMIP50.MIP50xMOVE == Finished", LoggerInstance);
                         TrainDriveIn_Machine = State.CheckArrivedAtEmptyTrack_2;
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn TrainDriveIn_Machine = State.CheckArrivedAtEmptyTrack_2");
+                        IoC.Logger.Log("TrainDriveIn_Machine = State.CheckArrivedAtEmptyTrack_2", LoggerInstance);
                     }
                     break;
 
                 case State.CheckArrivedAtEmptyTrack_2:
                     if (m_FYAppVar.GetTrackNr() == TrainDriveInPointer && uControllerReady == true)
                     {
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn m_iFYApp.GetTrackNr() == TrainDriveInPointer");
+                        IoC.Logger.Log("m_iFYApp.GetTrackNr() == TrainDriveInPointer", LoggerInstance);
                         uControllerReady = false;
                         m_FYAppVar.Couple.UpdateActuator();
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn m_FYAppVar.Couple.UpdateActuator()");
+                        IoC.Logger.Log("m_FYAppVar.Couple.UpdateActuator()", LoggerInstance);
                         TrainDriveIn_Machine = State.CheckArrivedAtEmptyTrack_3;
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn TrainDriveIn_Machine = State.CheckArrivedAtEmptyTrack3");
+                        IoC.Logger.Log("TrainDriveIn_Machine = State.CheckArrivedAtEmptyTrack3", LoggerInstance);
                     }
                     break;
 
@@ -222,9 +225,9 @@ namespace SiebwaldeApp
                     {
                         uControllerReady = false;
                         m_FYAppVar.Occ5BOnFalse.UpdateActuator();//m_iFYApp.GetFYApp().CmdOcc5BOnFalse();  
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn m_FYAppVar.Occ5BOnFalse.UpdateActuator()");
+                        IoC.Logger.Log("m_FYAppVar.Occ5BOnFalse.UpdateActuator()", LoggerInstance);
                         TrainDriveIn_Machine = State.CheckArrivedAtEmptyTrack_4;
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn TrainDriveIn_Machine = State.CheckArrivedAtEmptyTrack4");
+                        IoC.Logger.Log("TrainDriveIn_Machine = State.CheckArrivedAtEmptyTrack4", LoggerInstance);
                     }
                     break;
 
@@ -233,9 +236,9 @@ namespace SiebwaldeApp
                     {
                         uControllerReady = false;
                         m_FYAppVar.Occ6OnFalse.UpdateActuator();//m_iFYApp.GetFYApp().CmdOcc6OnFalse();
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn m_FYAppVar.Occ6OnFalse.UpdateActuator()");
+                        IoC.Logger.Log("m_FYAppVar.Occ6OnFalse.UpdateActuator()", LoggerInstance);
                         TrainDriveIn_Machine = State.CheckArrivedAtEmptyTrack_5;
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn TrainDriveIn_Machine = State.CheckArrivedAtEmptyTrack5");
+                        IoC.Logger.Log("TrainDriveIn_Machine = State.CheckArrivedAtEmptyTrack5", LoggerInstance);
                     }
                     break;
 
@@ -243,20 +246,20 @@ namespace SiebwaldeApp
                     if (uControllerReady == true)   // Check if Occ6OnFalse
                     {
                         TrainDriveIn_Machine = State.CheckTrainInTrack6;
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn TrainDriveIn_Machine = State.CheckTrainInTrack6");
+                        IoC.Logger.Log("TrainDriveIn_Machine = State.CheckTrainInTrack6", LoggerInstance);
                     }
                     break;
 
                 case State.CheckTrainInTrack6:
                     if (m_FYAppVar.bBlock6 == true)
                     {
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn m_iFYApp.GetBlock6() == true");
+                        IoC.Logger.Log("m_iFYApp.GetBlock6() == true", LoggerInstance);
                         // <---------------------------------------------------------------------------------------------------------delay required in real life?
                         uControllerReady = false;
                         m_FYAppVar.Occ7OnFalse.UpdateActuator();//m_iFYApp.GetFYApp().CmdOcc7OnFalse();
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn m_iFYApp.CmdOcc7OnFalse()");
+                        IoC.Logger.Log("m_iFYApp.CmdOcc7OnFalse()", LoggerInstance);
                         TrainDriveIn_Machine = State.CheckTrainInTrack6_1;
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn TrainDriveIn_Machine = State.CheckTrainInTrack6_1");
+                        IoC.Logger.Log("TrainDriveIn_Machine = State.CheckTrainInTrack6_1", LoggerInstance);
                     }
                     break;
 
@@ -264,19 +267,19 @@ namespace SiebwaldeApp
                     if (uControllerReady == true)
                     {
                         TrainDriveIn_Machine = State.CheckTrainF10;
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn TrainDriveIn_Machine = State.CheckTrainF10");
+                        IoC.Logger.Log("TrainDriveIn_Machine = State.CheckTrainF10", LoggerInstance);
                     }
                     break;
                     
                 case State.CheckTrainF10:
                     if (m_FYAppVar.bF10 == true)
                     {
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn m_iFYApp.GetF10() == true");
+                        IoC.Logger.Log("m_iFYApp.GetF10() == true", LoggerInstance);
                         uControllerReady = false;
                         m_FYAppVar.Occ5BOnTrue.UpdateActuator();//m_iFYApp.GetFYApp().CmdOcc5BOnTrue();
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn m_iFYApp.CmdOcc5BOnTrue()");
+                        IoC.Logger.Log("m_iFYApp.CmdOcc5BOnTrue()", LoggerInstance);
                         TrainDriveIn_Machine = State.CheckTrainF10_1;
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn TrainDriveIn_Machine = State.CheckTrainF10_1");
+                        IoC.Logger.Log("TrainDriveIn_Machine = State.CheckTrainF10_1", LoggerInstance);
                     }
                     break;
 
@@ -284,28 +287,28 @@ namespace SiebwaldeApp
                     if (uControllerReady == true)
                     {
                         TrainDriveIn_Machine = State.CheckTrainInTrack7;
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn TrainDriveIn_Machine = State.CheckTrainInTrack7");
+                        IoC.Logger.Log("TrainDriveIn_Machine = State.CheckTrainInTrack7", LoggerInstance);
                     }
                     break;
 
                 case State.CheckTrainInTrack7:
                     if (m_FYAppVar.bBlock7 == true)
                     {
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn m_iFYApp.GetBlock7() == true");
+                        IoC.Logger.Log("m_iFYApp.GetBlock7() == true", LoggerInstance);
                         TrainDriveIn_Machine = State.CheckTrainF11;
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn TrainDriveIn_Machine = State.CheckTrainF11");
+                        IoC.Logger.Log("TrainDriveIn_Machine = State.CheckTrainF11", LoggerInstance);
                     }
                     break;
 
                 case State.CheckTrainF11:
                     if (m_FYAppVar.bF11 == true)
                     {
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn m_iFYApp.GetF11() == true");
+                        IoC.Logger.Log("m_iFYApp.GetF11() == true", LoggerInstance);
                         uControllerReady = false;
                         m_FYAppVar.Occ7OnTrue.UpdateActuator();//m_iFYApp.GetFYApp().CmdOcc7OnTrue();
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn m_iFYApp.CmdOcc7OnTrue()");
+                        IoC.Logger.Log("m_iFYApp.CmdOcc7OnTrue()", LoggerInstance);
                         TrainDriveIn_Machine = State.CheckTrainF11_1;
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn TrainDriveIn_Machine = State.CheckTrainF11_1");
+                        IoC.Logger.Log("TrainDriveIn_Machine = State.CheckTrainF11_1", LoggerInstance);
                     }
                     break;
 
@@ -313,7 +316,7 @@ namespace SiebwaldeApp
                     if (uControllerReady == true)
                     {
                         TrainDriveIn_Machine = State.CheckTrainStopped;
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn TrainDriveIn_Machine = State.CheckTrainInTrack7");
+                        IoC.Logger.Log("TrainDriveIn_Machine = State.CheckTrainInTrack7", LoggerInstance);
                     }
                     break;
 
@@ -322,25 +325,25 @@ namespace SiebwaldeApp
                     TrainDriveDelay++;
                     if (m_FYAppVar.bF12 == false && m_FYAppVar.bF13 == false && TrainDriveDelay > TRAINDRIVEDELAY)
                     {
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn m_iFYApp.GetF12() == false && m_iFYApp.GetF13() == false");
+                        IoC.Logger.Log("m_iFYApp.GetF12() == false && m_iFYApp.GetF13() == false", LoggerInstance);
                         TrainDriveDelay = 0;
                         uControllerReady = false;
                         m_FYAppVar.Occ6OnTrue.UpdateActuator();//m_iFYApp.GetFYApp().CmdOcc6OnTrue();
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn m_iFYApp.CmdOcc6OnTrue()");
+                        IoC.Logger.Log("m_iFYApp.CmdOcc6OnTrue()", LoggerInstance);
                         TrainDriveIn_Machine = State.CheckTrainStopped_1;
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn TrainDriveIn_Machine = State.CheckTrainStopped_1");
+                        IoC.Logger.Log("TrainDriveIn_Machine = State.CheckTrainStopped_1", LoggerInstance);
                         
                     }
                     else if (m_FYAppVar.bF12 == true || m_FYAppVar.bF13 == true && TrainDriveDelay > TRAINDRIVEDELAY)
                     {
                         TrainDriveDelay = 0;
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn m_iFYApp.GetF12()->" + Convert.ToString(m_FYAppVar.F12) + ", m_iFYApp.GetF13()->" + Convert.ToString(m_FYAppVar.F13));
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn Train drove to far");//<-----------------------------------------------------------------Send to FORM!!!
+                        IoC.Logger.Log("m_iFYApp.GetF12()->" + Convert.ToString(m_FYAppVar.F12) + ", m_iFYApp.GetF13()->" + Convert.ToString(m_FYAppVar.F13), LoggerInstance);
+                        IoC.Logger.Log("Train drove to far", LoggerInstance);//<-----------------------------------------------------------------Send to FORM!!!
                         uControllerReady = false;
                         m_FYAppVar.Occ6OnFalse.UpdateActuator();//m_iFYApp.GetFYApp().CmdOcc6OnFalse();
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn m_iFYApp.CmdOcc6OnFalse()");
+                        IoC.Logger.Log("m_iFYApp.CmdOcc6OnFalse()", LoggerInstance);
                         TrainDriveIn_Machine = State.CheckTrainStopped_2;
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn TrainDriveIn_Machine = State.CheckTrainStopped_2");
+                        IoC.Logger.Log("TrainDriveIn_Machine = State.CheckTrainStopped_2", LoggerInstance);
                     }
                     break;
 
@@ -348,13 +351,13 @@ namespace SiebwaldeApp
                     if (uControllerReady == true)
                     {
                         m_FYAppVar.iTrainsOnFY[TrainDriveInPointer] = 1;
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn m_iFYApp.GetTrainsOnFY()[" + Convert.ToString(TrainDriveInPointer) + "] = 1 (TRAIN IN)");//<-----------------------------------------------------------------Send to FORM!!!
+                        IoC.Logger.Log("m_iFYApp.GetTrainsOnFY()[" + Convert.ToString(TrainDriveInPointer) + "] = 1 (TRAIN IN)", LoggerInstance);//<-----------------------------------------------------------------Send to FORM!!!
                         m_FYAppVar.UpdateTrainsOnFY("Track" + Convert.ToString(TrainDriveInPointer), 1, "");
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn m_iFYApp.UpdateTrainsOnFY()");
+                        IoC.Logger.Log("m_iFYApp.UpdateTrainsOnFY()", LoggerInstance);
                         _Return = "Finished";
                         TrainDriveIn_Machine = State.Start;
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn TrainDriveIn_Machine = State.Start");
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn _Return = Finished");
+                        IoC.Logger.Log("TrainDriveIn_Machine = State.Start", LoggerInstance);
+                        IoC.Logger.Log("_Return = Finished", LoggerInstance);
                     }
                     break;
 
@@ -362,9 +365,9 @@ namespace SiebwaldeApp
                     if (uControllerReady == true)
                     {
                         m_FYAppVar.Occ7OnFalse.UpdateActuator();//m_iFYApp.GetFYApp().CmdOcc7OnFalse();
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn m_iFYApp.CmdOcc7OnFalse()");
+                        IoC.Logger.Log("m_iFYApp.CmdOcc7OnFalse()", LoggerInstance);
                         TrainDriveIn_Machine = State.CheckTrainStopped_3;
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn TrainDriveIn_Machine = State.CheckTrainStopped_3");
+                        IoC.Logger.Log("TrainDriveIn_Machine = State.CheckTrainStopped_3", LoggerInstance);
                     }
                     break;
 
@@ -372,22 +375,22 @@ namespace SiebwaldeApp
                     if (uControllerReady == true)
                     {                       
                         TrainDriveIn_Machine = State.TrainDriveInFailed;
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn TrainDriveIn_Machine = State.TrainDriveInFailed");
+                        IoC.Logger.Log("TrainDriveIn_Machine = State.TrainDriveInFailed", LoggerInstance);
                     }
                     break;
 
                 case State.TrainDriveInFailed:
                     if (m_FYAppVar.bF10 == false && m_FYAppVar.bF11 == false && m_FYAppVar.bF12 == false && m_FYAppVar.bF13 == false && m_FYAppVar.bBlock6 == false && m_FYAppVar.bBlock7 == false)
                     {
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn Train has driven away");//<-----------------------------------------------------------------Send to FORM!!!
+                        IoC.Logger.Log("Train has driven away", LoggerInstance);//<-----------------------------------------------------------------Send to FORM!!!
                         m_FYAppVar.iTrainsOnFY[TrainDriveInPointer] = 0;
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn m_iFYApp.GetTrainsOnFY()[" + Convert.ToString(TrainDriveInPointer) + "] = 0 (NO TRAIN IN)");
+                        IoC.Logger.Log("m_iFYApp.GetTrainsOnFY()[" + Convert.ToString(TrainDriveInPointer) + "] = 0 (NO TRAIN IN)", LoggerInstance);
                         m_FYAppVar.UpdateTrainsOnFY("Track" + Convert.ToString(TrainDriveInPointer), 0, "");
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn m_iFYApp.UpdateTrainsOnFY()");
+                        IoC.Logger.Log("m_iFYApp.UpdateTrainsOnFY()", LoggerInstance);
                         _Return = "Finished";//<-----------------------------------------------------------------Maybe required some day to CmdOcc7OnTrue() and CmdOcc6OnTrue()
                         TrainDriveIn_Machine = State.Start;
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn TrainDriveIn_Machine = State.Start");
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn _Return = Finished");
+                        IoC.Logger.Log("TrainDriveIn_Machine = State.Start", LoggerInstance);
+                        IoC.Logger.Log("_Return = Finished", LoggerInstance);
                     }
                     break;
                 
@@ -426,7 +429,7 @@ namespace SiebwaldeApp
                     TrainDriveOutPointer = m_FYAppVar.iTrainDriveOutPointer;                        // get latest next traindriveout pointer number, if not changed in FYFORM it is th elast value created here
                     TrainDriveOutPointerCheckedAll = TrainDriveOutPointer;                    
                     TrainDriveOut_Machine = State.CheckFullTrack;
-                    //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveOut TrainDriveOut_Machine = State.CheckFullTrack");
+                    IoC.Logger.Log("TrainDriveOut_Machine = State.CheckFullTrack", LoggerInstance);
                     break;
 
                 case State.CheckFullTrack:
@@ -436,7 +439,7 @@ namespace SiebwaldeApp
                         if (TrainDriveOutPointer > 11)
                         {
                             TrainDriveOutPointer = 1;
-                            //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveOut TrainDriveOutPointer > 11 -> TrainDriveOutPointer == " + Convert.ToString(TrainDriveOutPointer));
+                            IoC.Logger.Log("TrainDriveOutPointer > 11 -> TrainDriveOutPointer == " + Convert.ToString(TrainDriveOutPointer), LoggerInstance);
                         }
                         m_FYAppVar.TrainDriveOutPointer.UpdateSensorValue(TrainDriveOutPointer, false); // When Traindrive out created a new number for TrainDriveOutPointer then update FYFORM with this numeber
 
@@ -444,41 +447,41 @@ namespace SiebwaldeApp
                         {
                             TrainDriveOut_Machine = State.Start;
                             _Return = "Finished";
-                            //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveOut All tracks are disabled, cancelling Traindrive out Program");
+                            IoC.Logger.Log("All tracks are disabled, cancelling Traindrive out Program", LoggerInstance);
                         }
 
                         if (m_FYAppVar.iTrainsOnFY[TrainDriveOutPointer] == 0)
                         {
-                            //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveOut track: " + Convert.ToString(TrainDriveOutPointer) + " is empty");
+                            IoC.Logger.Log("track: " + Convert.ToString(TrainDriveOutPointer) + " is empty", LoggerInstance);
                         }
                         if (m_FYAppVar.icheckBoxTrack[TrainDriveOutPointer] == 1)
                         {
-                            //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveOut track: " + Convert.ToString(TrainDriveOutPointer) + " is disabled in FYFORM");
+                            IoC.Logger.Log("track: " + Convert.ToString(TrainDriveOutPointer) + " is disabled in FYFORM", LoggerInstance);
                         }
                     }
                     else
                     {
                         TrainDriveOut_Machine = State.MoveToFullTrack;
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveOut Goto Track" + Convert.ToString(TrainDriveOutPointer));
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveOut TrainDriveOut_Machine = State.MoveToFullTrack");
+                        IoC.Logger.Log("Goto Track" + Convert.ToString(TrainDriveOutPointer), LoggerInstance);
+                        IoC.Logger.Log("TrainDriveOut_Machine = State.MoveToFullTrack", LoggerInstance);
                     }
                     break;
 
                 case State.MoveToFullTrack:
                     uControllerReady = false;
                     m_FYAppVar.Uncouple.UpdateActuator(); // This will give back uCOntroller ready. 
-                    //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn m_FYAppVar.Uncouple.UpdateActuator()");
+                    IoC.Logger.Log("m_FYAppVar.Uncouple.UpdateActuator()", LoggerInstance);
                     TrainDriveOut_Machine = State.MoveToFullTrack_1;
-                    //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveOut TrainDriveOut_Machine = State.MoveToFullTrack_1");                    
+                    IoC.Logger.Log("TrainDriveOut_Machine = State.MoveToFullTrack_1", LoggerInstance);                    
                     break;
 
                 case State.MoveToFullTrack_1:
                     if (uControllerReady == true)   // Check if uncoupled
                     {
                         m_FYMIP50.MIP50xMOVExCALC(Convert.ToUInt16(TrainDriveOutPointer));// Do the calculation on the track to move to                    
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveOut m_FYMIP50.MIP50xMOVExCALC(" + Convert.ToString(TrainDriveOutPointer) + ")");
+                        IoC.Logger.Log("m_FYMIP50.MIP50xMOVExCALC(" + Convert.ToString(TrainDriveOutPointer) + ")", LoggerInstance);
                         TrainDriveOut_Machine = State.CheckArrivedAtFullTrack;
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveOut TrainDriveOut_Machine = State.CheckArrivedAtFullTrack");
+                        IoC.Logger.Log("TrainDriveOut_Machine = State.CheckArrivedAtFullTrack", LoggerInstance);
                     }
                     break;
 
@@ -487,7 +490,7 @@ namespace SiebwaldeApp
                     if (SubProgramReturnVal == "Finished")
                     {
                         TrainDriveOut_Machine = State.CheckArrivedAtFullTrack_1;
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveOut TrainDriveOut_Machine = State.CheckArrivedAtFullTrack_1");
+                        IoC.Logger.Log("TrainDriveOut_Machine = State.CheckArrivedAtFullTrack_1", LoggerInstance);
                     }
                     break;
 
@@ -496,9 +499,9 @@ namespace SiebwaldeApp
                     {
                         uControllerReady = false;
                         m_FYAppVar.Couple.UpdateActuator();
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn m_FYAppVar.Couple.UpdateActuator()");
+                        IoC.Logger.Log("m_FYAppVar.Couple.UpdateActuator()", LoggerInstance);
                         TrainDriveOut_Machine = State.CheckArrivedAtFullTrack_2;
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveOut TrainDriveOut_Machine = State.CheckArrivedAtFullTrack_2");
+                        IoC.Logger.Log("TrainDriveOut_Machine = State.CheckArrivedAtFullTrack_2", LoggerInstance);
                     }
                     break;
 
@@ -507,9 +510,9 @@ namespace SiebwaldeApp
                     {
                         uControllerReady = false;
                         m_FYAppVar.Occ7OnFalse.UpdateActuator();
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveOut m_FYAppVar.Occ7OnFalse.UpdateActuator()");
+                        IoC.Logger.Log("m_FYAppVar.Occ7OnFalse.UpdateActuator()", LoggerInstance);
                         TrainDriveOut_Machine = State.CheckArrivedAtFullTrack_3;
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveOut TrainDriveOut_Machine = State.CheckArrivedAtFullTrack_3");
+                        IoC.Logger.Log("TrainDriveOut_Machine = State.CheckArrivedAtFullTrack_3", LoggerInstance);
                     }
                     break;
 
@@ -517,7 +520,7 @@ namespace SiebwaldeApp
                     if (uControllerReady == true)   // Check if Occ7OnFalse
                     {
                         TrainDriveOut_Machine = State.CheckTrainLeftTrack7;
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveOut TrainDriveOut_Machine = State.CheckTrainLeftTrack7");
+                        IoC.Logger.Log("TrainDriveOut_Machine = State.CheckTrainLeftTrack7", LoggerInstance);
                     }
                     break;
 
@@ -526,20 +529,20 @@ namespace SiebwaldeApp
                     {
                         uControllerReady = false;
                         m_FYAppVar.Occ7OnTrue.UpdateActuator();//m_iFYApp.GetFYApp().CmdOcc7OnTrue();
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveOut m_iFYApp.CmdOcc7OnTrue()");
+                        IoC.Logger.Log("m_iFYApp.CmdOcc7OnTrue()", LoggerInstance);
                         TrainDriveOut_Machine = State.CheckTrainLeftTrack7_1;
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveOut TrainDriveOut_Machine = State.CheckTrainLeftTrack7_1");
+                        IoC.Logger.Log("TrainDriveOut_Machine = State.CheckTrainLeftTrack7_1", LoggerInstance);
                     }
                     break;
 
                 case State.CheckTrainLeftTrack7_1:
                     if (uControllerReady == true)
                     {
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveOut Train has driven out of the Fiddle Yard"); //<-----------------------------------------------------------------Send to FORM!!!
+                        IoC.Logger.Log("Train has driven out of the Fiddle Yard", LoggerInstance); //<-----------------------------------------------------------------Send to FORM!!!
                         m_FYAppVar.iTrainsOnFY[TrainDriveOutPointer] = 0;
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveOut m_iFYApp.GetTrainsOnFY()[" + Convert.ToString(TrainDriveOutPointer) + "] = 0 (TRAIN LEFT)");
+                        IoC.Logger.Log("m_iFYApp.GetTrainsOnFY()[" + Convert.ToString(TrainDriveOutPointer) + "] = 0 (TRAIN LEFT)", LoggerInstance);
                         m_FYAppVar.UpdateTrainsOnFY("Track" + Convert.ToString(TrainDriveOutPointer), 0, "");
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveOut m_iFYApp.UpdateTrainsOnFY()");
+                        IoC.Logger.Log("m_iFYApp.UpdateTrainsOnFY()", LoggerInstance);
 
                         if (m_FYAppVar.iTrainDriveOutPointer == TrainDriveOutPointer)   // check if user has changed next track to drive train out of
                         {
@@ -547,16 +550,16 @@ namespace SiebwaldeApp
                             if (TrainDriveOutPointer > 11)
                             {
                                 TrainDriveOutPointer = 1;
-                                //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveOut TrainDriveOutPointer > 11 -> TrainDriveOutPointer == " + Convert.ToString(TrainDriveOutPointer));
+                                IoC.Logger.Log("TrainDriveOutPointer > 11 -> TrainDriveOutPointer == " + Convert.ToString(TrainDriveOutPointer), LoggerInstance);
                             }
                             m_FYAppVar.TrainDriveOutPointer.UpdateSensorValue(TrainDriveOutPointer, false); // When Traindrive out created a new number for TrainDriveOutPointer then update FYFORM with this numeber
                         }
 
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveOut TrainDriveOutPointer++ -> TrainDriveOutPointer == " + Convert.ToString(TrainDriveOutPointer));
+                        IoC.Logger.Log("TrainDriveOutPointer++ -> TrainDriveOutPointer == " + Convert.ToString(TrainDriveOutPointer), LoggerInstance);
                         _Return = "Finished";
                         TrainDriveOut_Machine = State.Start;
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveOut TrainDriveOut_Machine = State.Start");
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveOut _Return = Finished");                        
+                        IoC.Logger.Log("TrainDriveOut_Machine = State.Start", LoggerInstance);
+                        IoC.Logger.Log("_Return = Finished", LoggerInstance);                        
                     }
                     break;
 
@@ -594,9 +597,9 @@ namespace SiebwaldeApp
                 case State.Start:
                     uControllerReady = false;
                     m_FYAppVar.Occ5BOnFalse.UpdateActuator();//m_iFYApp.GetFYApp().CmdOcc5BOnFalse();
-                    //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn m_iFYApp.CmdOcc5BOnFalse()");
+                    IoC.Logger.Log("m_iFYApp.CmdOcc5BOnFalse()", LoggerInstance);
                     TrainDriveThrough_Machine = State.TrainDriveThrough_1;
-                    //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveOut TrainDriveThrough_Machine = State.TrainDriveThrough_1");
+                    IoC.Logger.Log("TrainDriveThrough_Machine = State.TrainDriveThrough_1", LoggerInstance);
                     break;
 
                 case State.TrainDriveThrough_1:
@@ -604,9 +607,9 @@ namespace SiebwaldeApp
                     {
                         uControllerReady = false;
                         m_FYAppVar.Occ6OnFalse.UpdateActuator();//m_iFYApp.GetFYApp().CmdOcc6OnFalse();
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn m_iFYApp.CmdOcc6OnFalse()");
+                        IoC.Logger.Log("m_iFYApp.CmdOcc6OnFalse()", LoggerInstance);
                         TrainDriveThrough_Machine = State.TrainDriveThrough_2;
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveOut TrainDriveThrough_Machine = State.TrainDriveThrough_2");
+                        IoC.Logger.Log("TrainDriveThrough_Machine = State.TrainDriveThrough_2", LoggerInstance);
                     }
                     break;
 
@@ -615,9 +618,9 @@ namespace SiebwaldeApp
                     {
                         uControllerReady = false;
                         m_FYAppVar.Occ7OnFalse.UpdateActuator();//m_iFYApp.GetFYApp().CmdOcc7OnFalse();
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn m_iFYApp.CmdOcc7OnFalse()");
+                        IoC.Logger.Log("m_iFYApp.CmdOcc7OnFalse()", LoggerInstance);
                         TrainDriveThrough_Machine = State.TrainDriveThrough_3;
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveOut TrainDriveThrough_Machine = State.TrainDriveThrough_3");
+                        IoC.Logger.Log("TrainDriveThrough_Machine = State.TrainDriveThrough_3", LoggerInstance);
                     }
                     break;
 
@@ -625,24 +628,24 @@ namespace SiebwaldeApp
                     if (uControllerReady == true)
                     {
                         TrainDriveThrough_Machine = State.Idle;
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveThrough_Machine = State.Idle");
+                        IoC.Logger.Log("TrainDriveThrough_Machine = State.Idle", LoggerInstance);
                         _Return = "Finished";
                         m_FYAppVar.UpdateTrainsOnFY("Track" + Convert.ToString(m_FYAppVar.GetTrackNr()), 0, "");
                     }
                     break;
 
                 case State.Idle:
-                    //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveThrough -> Collect has become false");
+                    IoC.Logger.Log("TrainDriveThrough -> Collect has become false", LoggerInstance);
                     TrainDriveThrough_Machine = State.Stop;
-                    //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveThrough_Machine = State.Stop");                                            
+                    IoC.Logger.Log("TrainDriveThrough_Machine = State.Stop", LoggerInstance);                                            
                     break;
 
                 case State.Stop:
                     uControllerReady = false;
                     m_FYAppVar.Occ5BOnTrue.UpdateActuator();//m_iFYApp.GetFYApp().CmdOcc5BOnTrue();
-                    //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn m_iFYApp.CmdOcc5BOnTrue()");
+                    IoC.Logger.Log("m_iFYApp.CmdOcc5BOnTrue()", LoggerInstance);
                     TrainDriveThrough_Machine = State.TrainDriveThrough_4;
-                    //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveOut TrainDriveThrough_Machine = State.TrainDriveThrough_4");
+                    IoC.Logger.Log("TrainDriveThrough_Machine = State.TrainDriveThrough_4", LoggerInstance);
                     break;
 
                 case State.TrainDriveThrough_4:
@@ -650,9 +653,9 @@ namespace SiebwaldeApp
                     {
                         uControllerReady = false;
                         m_FYAppVar.Occ6OnTrue.UpdateActuator();//m_iFYApp.GetFYApp().CmdOcc6OnTrue();
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn m_iFYApp.CmdOcc6OnTrue()");
+                        IoC.Logger.Log("m_iFYApp.CmdOcc6OnTrue()", LoggerInstance);
                         TrainDriveThrough_Machine = State.TrainDriveThrough_5;
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveOut TrainDriveThrough_Machine = State.TrainDriveThrough_5");
+                        IoC.Logger.Log("TrainDriveThrough_Machine = State.TrainDriveThrough_5", LoggerInstance);
                     }
                     break;
 
@@ -661,9 +664,9 @@ namespace SiebwaldeApp
                     {
                         uControllerReady = false;
                         m_FYAppVar.Occ7OnTrue.UpdateActuator();//m_iFYApp.GetFYApp().CmdOcc7OnTrue();
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveIn m_iFYApp.CmdOcc7OnTrue()");
+                        IoC.Logger.Log("m_iFYApp.CmdOcc7OnTrue()", LoggerInstance);
                         TrainDriveThrough_Machine = State.TrainDriveThrough_6;
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveOut TrainDriveThrough_Machine = State.TrainDriveThrough_6");
+                        IoC.Logger.Log("TrainDriveThrough_Machine = State.TrainDriveThrough_6", LoggerInstance);
                     }
                     break;
 
@@ -671,7 +674,7 @@ namespace SiebwaldeApp
                     if (uControllerReady == true)
                     {
                         TrainDriveThrough_Machine = State.Start;
-                        //m_FYAppLog.Log("FYAppTrainDrive().TrainDriveThrough_Machine = State.Start");
+                        IoC.Logger.Log("TrainDriveThrough_Machine = State.Start", LoggerInstance);
                         _Return = "Finished";
                     }
                     break;

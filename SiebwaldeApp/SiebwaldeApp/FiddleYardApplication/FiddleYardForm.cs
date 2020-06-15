@@ -15,10 +15,9 @@ namespace SiebwaldeApp
         {
             return new FileLogger(file, loggerinstance);
         }
+        private ILogger FiddleYardFormLogging;
 
-        private IFiddleYardApplication m_iFYApp;
-
-        public ILogger FiddleYardFormLogging;
+        private IFiddleYardApplication m_iFYApp;       
         
         public const int TOP = 1;
         public const int BOT = 0;
@@ -438,12 +437,19 @@ namespace SiebwaldeApp
 
             if (this.Name == "FiddleYardTOP")
             {
-                //FiddleYardFormLogging = GetLogger("FiddleYardFormTOP.txt");
+                // Set the log instance string to the logging instance name used for directed file logging
+                LoggerInstance = "FyFormTopLog";
+                //  different logging file per target, this is default
+                FiddleYardFormLogging = GetLogger(Properties.Settings.Default.LogDirectory + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_" + "FiddleYardFormLogTOP.txt", LoggerInstance);
+                IoC.Logger.AddLogger(FiddleYardFormLogging);
             }
             else if (this.Name == "FiddleYardBOT")
             {
-                // different logging file per target, this is default
-                //FiddleYardFormLogging = GetLogger("FiddleYardFormBOT.txt");                
+                // Set the log instance string to the logging instance name used for directed file logging
+                LoggerInstance = "FyFormBotLog";
+                //  different logging file per target, this is default
+                FiddleYardFormLogging = GetLogger(Properties.Settings.Default.LogDirectory + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_" + "FiddleYardFormLogBOT.txt", LoggerInstance);
+                IoC.Logger.AddLogger(FiddleYardFormLogging);                
             }
 
             #region Attach sensors
@@ -963,7 +969,7 @@ namespace SiebwaldeApp
             {
                 if (log != "")
                 {
-                    //FiddleYardFormLogging.log(log);
+                    IoC.Logger.Log(log, LoggerInstance);
                     string fmt = "000";
                     int m_Millisecond = DateTime.Now.Millisecond;
                     string m_text = DateTime.Now + ":" + m_Millisecond.ToString(fmt) + " " + log + " " + Environment.NewLine;                    

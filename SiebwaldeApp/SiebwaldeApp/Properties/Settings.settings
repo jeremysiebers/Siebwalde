@@ -26,5 +26,11 @@
     <Setting Name="LogDirectory" Type="System.String" Scope="Application">
       <Value Profile="(Default)">C:\\Localdata\\Siebwalde\\Logging\\</Value>
     </Setting>
+    <Setting Name="FYSendingport" Type="System.UInt16" Scope="Application">
+      <Value Profile="(Default)">28671</Value>
+    </Setting>
+    <Setting Name="FYReceivingport" Type="System.UInt16" Scope="Application">
+      <Value Profile="(Default)">28672</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

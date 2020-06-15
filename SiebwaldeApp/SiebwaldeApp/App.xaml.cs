@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using System.IO;
+using System.Windows;
+using System;
 
 namespace SiebwaldeApp
 {
@@ -19,7 +21,7 @@ namespace SiebwaldeApp
             // Setup main application
             ApplicationSetup();
 
-            IoC.Logger.Log("Main Siebwalde application starting up...", "");
+            IoC.Logger.Log("Siebwalde application starting up...", "");           
 
             // Show the main window
             Current.MainWindow = new MainWindow();
@@ -27,16 +29,29 @@ namespace SiebwaldeApp
         }
 
         private void ApplicationSetup()
-        {
-            // Setup IoC
-            IoC.Setup();
+        {            
+            try
+            {
+                // Verify if logging directory exists
+                if (!Directory.Exists(SiebwaldeApp.Properties.Settings.Default.LogDirectory))
+                {
+                    // Create logging directory
+                    Directory.CreateDirectory(SiebwaldeApp.Properties.Settings.Default.LogDirectory);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
 
             // Bind a logger
             IoC.Kernel.Bind<ILogFactory>().ToConstant(new BaseLogFactory());
 
             // Bind a file manager
             IoC.Kernel.Bind<IFileManager>().ToConstant(new FileManager());
-            //IoC.File.WriteAllTextToFileAsync("test", "C:\\Localdata\\Siebwalde\\Logging\\test.txt");
+
+            // Setup IoC ViewModels, this one as last since the loggers are used within the ViewModels
+            IoC.Setup();
         }
     }
 }

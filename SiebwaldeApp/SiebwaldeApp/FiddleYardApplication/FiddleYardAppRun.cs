@@ -1,20 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
-using System.Timers;
-using System.Net.Sockets;
-using System.IO;
-using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Management;
-using System.Net.NetworkInformation;
-using System.Globalization;
 
 namespace SiebwaldeApp
 {
@@ -24,7 +8,7 @@ namespace SiebwaldeApp
         private FiddleYardIOHandleVariables m_FYIOHandleVar;             // connect variable to connect to FYIOH class for defined variables
         private FiddleYardApplicationVariables m_FYAppVar;
         private FiddleYardMip50 m_FYMIP50;                               // Create new MIP50 sub program       
-        private ILogger m_FYAppLog;
+        private string LoggerInstance { get; set; }
         private FiddleYardAppTrainDrive FYAppTrainDrive;
         public enum State { Idle, Check5B, TrainDriveIn, Check8A, TrainDriveOut, TrainDriveTrough, TrainDriveTroughPrepare, TrainDriveTroughCleanup};        
         private State State_Machine;
@@ -49,14 +33,18 @@ namespace SiebwaldeApp
          *  Notes      : 
          */
         /*#--------------------------------------------------------------------------#*/
-        public FiddleYardAppRun(FiddleYardIOHandleVariables FYIOHandleVar, iFiddleYardIOHandle iFYIOH, FiddleYardApplicationVariables FYAppVar, FiddleYardMip50 FYMIP50, ILogger FiddleYardApplicationLogging)
+        public FiddleYardAppRun(FiddleYardIOHandleVariables FYIOHandleVar, 
+            iFiddleYardIOHandle iFYIOH, 
+            FiddleYardApplicationVariables FYAppVar, 
+            FiddleYardMip50 FYMIP50,
+            string loggerInstance)
         {
             m_iFYIOH = iFYIOH;
             m_FYIOHandleVar = FYIOHandleVar;
             m_FYAppVar = FYAppVar;
             m_FYMIP50 = FYMIP50;
-            m_FYAppLog = FiddleYardApplicationLogging;
-            FYAppTrainDrive = new FiddleYardAppTrainDrive(m_FYIOHandleVar, m_iFYIOH, m_FYAppVar, m_FYMIP50, m_FYAppLog);
+            LoggerInstance = loggerInstance;
+            FYAppTrainDrive = new FiddleYardAppTrainDrive(m_FYIOHandleVar, m_iFYIOH, m_FYAppVar, m_FYMIP50, loggerInstance);
             State_Machine = State.Idle;
 
             Message Msg_TrackPower15VDown = new Message("TrackPower15VDown", " TrackPower15VDown ", (name, log) => SetMessage(name, 0, log)); // initialize and subscribe readback action, Message
@@ -72,21 +60,21 @@ namespace SiebwaldeApp
             if (name == "TrackPower15VDown")
             {
                 TrackPower15VDown = true;
-                //m_FYAppLog.Log("FYAppRun.Run() TrackPower15VDown = true");
+                IoC.Logger.Log("TrackPower15VDown = true", LoggerInstance);
                 m_FYAppVar.EMOPressed15VTrackPowerDown.UpdateMessage();//m_iFYApp.GetFYApp().FYFORM.SetMessage("FYAppInit", "EMO pressed, 15V Track Power down!");
             }
             else if (name == "15VTrackPower" && val > 0)
             {
                 TrackPower15VDown = false;
-                //m_FYAppLog.Log("FYAppRun.Run() TrackPower15VDown = false");
-                //m_FYAppLog.Log("FYAppRun.Run() Wait aditional time for signals to arrive: System.Threading.Thread.Sleep(500)");
+                IoC.Logger.Log("TrackPower15VDown = false", LoggerInstance);
+                IoC.Logger.Log("Wait aditional time for signals to arrive: System.Threading.Thread.Sleep(500)", LoggerInstance);
                 System.Threading.Thread.Sleep(500);
                 m_FYAppVar.EMOPressed15VTrackPowerUp.UpdateMessage();//m_iFYApp.GetFYApp().FYFORM.SetMessage("FYAppInit", "EMO released, 15V Track Power up!");
             }
             else if (name == "Collect")
             {
                 m_collect = !m_collect;
-                //m_FYAppLog.Log("FYAppRun.Run() m_collect = " + Convert.ToString(m_collect));
+                IoC.Logger.Log("m_collect = " + Convert.ToString(m_collect), LoggerInstance);
             }
         }
 
@@ -149,25 +137,25 @@ namespace SiebwaldeApp
                     {
                         State_Machine = State.Idle;
                         _Return = "Stop";
-                        //m_FYAppLog.Log("FYAppRun.Run() Stop == kickrun -> State_Machine = State.Start");
-                        //m_FYAppLog.Log("FYAppRun.Run() _Return = Stop");
+                        IoC.Logger.Log("Stop == kickrun -> State_Machine = State.Start", LoggerInstance);
+                        IoC.Logger.Log("_Return = Stop", LoggerInstance);
                         break;
                     }
 
                     if (FYFull(State.Check5B) < 11)                                                                                 // Always drive trains into FiddleYard regardless the status of m_collect until FYFull == 11
                     {
                         State_Machine = State.Check5B;                                                                              // alway scheck 5B first, when no train is present, check then 8B
-                        ////m_FYAppLog.Log("FYAppRun.Run() FYFull() < 10 -> State_Machine = State.Check5B");
+                        //IoC.Logger.Log("FYFull() < 10 -> State_Machine = State.Check5B");
                     }
                     else if (true == m_collect && m_FYAppVar.bBlock5B)                                                              // When the FiddleYard is full, but m_collect is true and a train appears on 5B, then shift-pass trains
                     {
                         State_Machine = State.Check8A;
-                        ////m_FYAppLog.Log("FYAppRun.Run() false == m_collect && FYFull() > 0 -> State_Machine = State.Check8A");
+                        //IoC.Logger.Log("false == m_collect && FYFull() > 0 -> State_Machine = State.Check8A");
                     }
                     else if (false == m_collect && FYFull(State.Check8A) > 0)                                                       // When the FiddleYard is full, but m_collect is false, then check if a train may leave
                     {
                         State_Machine = State.Check8A;
-                        ////m_FYAppLog.Log("FYAppRun.Run() false == m_collect && FYFull() > 0 -> State_Machine = State.Check8A");
+                        //IoC.Logger.Log("false == m_collect && FYFull() > 0 -> State_Machine = State.Check8A");
                     }
                     break;
 
@@ -175,7 +163,7 @@ namespace SiebwaldeApp
                     if (m_FYAppVar.bBlock5B && FYFull(State.Check5B) < 11)
                     {
                         State_Machine = State.TrainDriveIn;
-                        //m_FYAppLog.Log("FYAppRun.Run() State_Machine = State.Check5B -> State_Machine = State.TrainDriveIn");//<-----------------------------------------------------------------Send to FORM!!!
+                        IoC.Logger.Log("State_Machine = State.Check5B -> State_Machine = State.TrainDriveIn", LoggerInstance);//<-----------------------------------------------------------------Send to FORM!!!
                     }
                     else if (false == m_collect)
                     { 
@@ -191,7 +179,7 @@ namespace SiebwaldeApp
                     if (FYFull(State.Check8A) > 0 && m_FYAppVar.bBlock8A == false)
                     {
                         State_Machine = State.TrainDriveOut;
-                        //m_FYAppLog.Log("FYAppRun.Run() State_Machine = State.Check8A -> State_Machine = State.TrainDriveOut");//<-----------------------------------------------------------------Send to FORM!!!
+                        IoC.Logger.Log("State_Machine = State.Check8A -> State_Machine = State.TrainDriveOut", LoggerInstance);//<-----------------------------------------------------------------Send to FORM!!!
                     }
                     else { State_Machine = State.Idle; }
                     break;
@@ -199,18 +187,18 @@ namespace SiebwaldeApp
                 case State.TrainDriveIn:
                     if (FYAppTrainDrive.TrainDriveIn(kickrun) == "Finished")
                     {
-                        //m_FYAppLog.Log("FYAppRun.Run() FYAppTrainDrive.TrainDriveIn(kickrun) == Finished");//<-----------------------------------------------------------------Send to FORM!!!
+                        IoC.Logger.Log("FYAppTrainDrive.TrainDriveIn(kickrun) == Finished", LoggerInstance);//<-----------------------------------------------------------------Send to FORM!!!
                         State_Machine = State.Idle;
-                        //m_FYAppLog.Log("FYAppRun.Run() State_Machine = State.Idle");
+                        IoC.Logger.Log("State_Machine = State.Idle", LoggerInstance);
                     }
                     break;
 
                 case State.TrainDriveOut:
                     if (FYAppTrainDrive.TrainDriveOut(kickrun) == "Finished")
                     {
-                        //m_FYAppLog.Log("FYAppRun.Run() FYAppTrainDrive.TrainDriveOut(kickrun) == Finished");//<-----------------------------------------------------------------Send to FORM!!!
+                        IoC.Logger.Log("FYAppTrainDrive.TrainDriveOut(kickrun) == Finished", LoggerInstance);//<-----------------------------------------------------------------Send to FORM!!!
                         State_Machine = State.Idle;
-                        //m_FYAppLog.Log("FYAppRun.Run() State_Machine = State.Idle");
+                        IoC.Logger.Log("State_Machine = State.Idle", LoggerInstance);
                     }
                     break;
 

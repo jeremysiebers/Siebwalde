@@ -115,5 +115,23 @@ namespace SiebwaldeApp.Properties {
                 return ((string)(this["LogDirectory"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("28671")]
+        public ushort FYSendingport {
+            get {
+                return ((ushort)(this["FYSendingport"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("28672")]
+        public ushort FYReceivingport {
+            get {
+                return ((ushort)(this["FYReceivingport"]));
+            }
+        }
     }
 }

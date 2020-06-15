@@ -5,16 +5,16 @@ namespace SiebwaldeApp
 {
     public interface iFiddleYardController
     {        
-        void FYLinkActivityUpdate();                // Update Link activity in main form
-        void ClearEventLoggers();                   // Clear event loggers interface to form eventloggers for clearing
-        void ReConnect();                           // Re-connect to target
+        //void FYLinkActivityUpdate();                // Update Link activity in main form
+        //void ClearEventLoggers();                   // Clear event loggers interface to form eventloggers for clearing
+        //void ReConnect();                           // Re-connect to target
         Sender GetFYSender();                       // interface to FYSender
         Receiver GetFYReceiver();                   // interface to Receiver        
     }
     
     public class FiddleYardController : iFiddleYardController
     {
-        public SiebwaldeApplicationModel m_iMain;                                       // connect variable to connect to FYController class to Main for application logging        
+        // to be removed public SiebwaldeApplicationModel m_iMain;                                       // connect variable to connect to FYController class to Main for application logging        
         public const int SEND_DELAY = 10;
         public FiddleYardIOHandle FYIOHandleTOP;
         public FiddleYardIOHandle FYIOHandleBOT;
@@ -59,7 +59,7 @@ namespace SiebwaldeApp
         /*#--------------------------------------------------------------------------#*/
         public FiddleYardController(SiebwaldeApplicationModel iMainCtrl, byte[,] macAddr, byte[,] ipAddr, int FYReceivingPort, int FYSendingPort)
         {
-            m_iMain = iMainCtrl;                        // connect to Main interface for application text logging and link activity update, save interface in variable
+           // m_iMain = iMainCtrl;                        // connect to Main interface for application text logging and link activity update, save interface in variable
             m_FYReceivingPort = FYReceivingPort;
             m_FYSendingPort   = FYSendingPort;
             m_macAddr = macAddr;
@@ -93,7 +93,7 @@ namespace SiebwaldeApp
         {
             if (ConnectFiddleYard(m_macAddr, m_ipAddr) == true) // when connection was succesfull and target was found and is connected
             {
-                m_iMain.SiebwaldeAppLogging("FYCTRL: Fiddle Yard uController target in real mode");
+                IoC.Logger.Log("FYCTRL: Fiddle Yard uController target in real mode", "");
                 //FYIOHandleTOP.FYApp.FYFORM.FiddleYardFormLogging.Log("###Fiddle Yard uController target in real mode###");
                 FYIOHandleTOP.FYApp.FYFORM.SimMode(FYSimulatorActive);
                 //FYIOHandleBOT.FYApp.FYFORM.FiddleYardFormLogging.Log("###Fiddle Yard uController target in real mode###");
@@ -102,7 +102,7 @@ namespace SiebwaldeApp
             }
             else
             {
-                m_iMain.SiebwaldeAppLogging("FYCTRL: Fiddle Yard uController target in simulator mode");
+                IoC.Logger.Log("FYCTRL: Fiddle Yard uController target in simulator mode", "");
                 //FYIOHandleTOP.FYApp.FYFORM.FiddleYardFormLogging.Log("###Fiddle Yard uController target in simulation mode###");
                 FYIOHandleTOP.FYApp.FYFORM.SimMode(FYSimulatorActive);
                 //FYIOHandleBOT.FYApp.FYFORM.FiddleYardFormLogging.Log("###Fiddle Yard uController target in simulation mode###");
@@ -110,7 +110,7 @@ namespace SiebwaldeApp
             }
             FYIOHandleTOP.Start(FYSimulatorActive);   // use these to disable this layer of the fiddle yard in order to do easy debugging by commenting this line
             FYIOHandleBOT.Start(FYSimulatorActive);   // use these to disable this layer of the fiddle yard in order to do easy debugging by commenting this line
-            m_iMain.SiebwaldeAppLogging("FYCTRL: Fiddle Yard uController Reset.");      
+            IoC.Logger.Log("FYCTRL: Fiddle Yard uController Reset.", "");      
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -135,17 +135,17 @@ namespace SiebwaldeApp
             string PingReturn = "";
             try
             {
-                m_iMain.SiebwaldeAppLogging("FYCTRL: Pinging FIDDLEYARD target...");
+                IoC.Logger.Log("FYCTRL: Pinging FIDDLEYARD target...", "");
                 PingReturn = m_PingTarget.TargetFound(FYTarget);
                 if (PingReturn == "targetfound")
                 {
-                    m_iMain.SiebwaldeAppLogging("FYCTRL: Ping successfull.");
+                    IoC.Logger.Log("FYCTRL: Ping successfull.", "");
 
-                    m_iMain.SiebwaldeAppLogging("FYCTRL: FiddleYard Connecting...");
+                    IoC.Logger.Log("FYCTRL: FiddleYard Connecting...", "");
                     FYSender.ConnectUdp(m_FYSendingPort);
 
-                    m_iMain.SiebwaldeAppLogging("FYCTRL: FiddleYard Connected.");
-                    m_iMain.SiebwaldeAppLogging("FYCTRL: FiddleYard Send MAC and IP...");
+                    IoC.Logger.Log("FYCTRL: FiddleYard Connected.", "");
+                    IoC.Logger.Log("FYCTRL: FiddleYard Send MAC and IP...", "");
 
                     ProgramMACIPPORT(macAddr, ipAddr);
                     FYSimulatorActive = false;
@@ -153,7 +153,7 @@ namespace SiebwaldeApp
                 }
                 else
                 {
-                    m_iMain.SiebwaldeAppLogging("FYCTRL: " + PingReturn);
+                    IoC.Logger.Log("FYCTRL: " + PingReturn, "");
                     FYSimulatorActive = true;
                     return false; // ping was unsuccessfull    
                 }
@@ -161,7 +161,7 @@ namespace SiebwaldeApp
             }
             catch (Exception)
             {
-                m_iMain.SiebwaldeAppLogging("FYCTRL: FiddleYard failed to connect.");
+                IoC.Logger.Log("FYCTRL: FiddleYard failed to connect.", "");
                 FYSimulatorActive = true;
                 return false; // ping was successfull but connecting failed
             }
@@ -259,7 +259,7 @@ namespace SiebwaldeApp
         /*#--------------------------------------------------------------------------#*/
         public void FYLinkActivityUpdate()
         {
-            m_iMain.FYLinkActivityUpdate();
+            //m_iMain.FYLinkActivityUpdate();
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -334,7 +334,7 @@ namespace SiebwaldeApp
                 FYSender.SendUdp(Send);
                 System.Threading.Thread.Sleep(50);
             }
-            m_iMain.SiebwaldeAppLogging("FYCTRL: FiddleYard MAC is sent.");
+            IoC.Logger.Log("FYCTRL: FiddleYard MAC is sent.", "");
 
             for (int i = 0; i < 4; i++)
             {
@@ -344,7 +344,7 @@ namespace SiebwaldeApp
                 FYSender.SendUdp(Send);
                 System.Threading.Thread.Sleep(50);
             }
-            m_iMain.SiebwaldeAppLogging("FYCTRL: FiddleYard IP is sent.");
+            IoC.Logger.Log("FYCTRL: FiddleYard IP is sent.", "");
 
             System.Threading.Thread.Sleep(50);
 
@@ -360,7 +360,7 @@ namespace SiebwaldeApp
             Send[2] = 0xD;
             FYSender.SendUdp(Send);
             System.Threading.Thread.Sleep(50);
-            m_iMain.SiebwaldeAppLogging("FYCTRL: FiddleYard sending Port is sent.");
+            IoC.Logger.Log("FYCTRL: FiddleYard sending Port is sent.", "");
 
 
 
@@ -369,7 +369,7 @@ namespace SiebwaldeApp
             Send[2] = 0xD;
             FYSender.SendUdp(Send);
             System.Threading.Thread.Sleep(50);
-            m_iMain.SiebwaldeAppLogging("FYCTRL: FiddleYard MAC_IP_READY is sent.");
+            IoC.Logger.Log("FYCTRL: FiddleYard MAC_IP_READY is sent.", "");
         }               
         
     }

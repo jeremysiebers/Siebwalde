@@ -326,7 +326,7 @@ namespace SiebwaldeApp
                 }
             }
             
-            m_iFYCtrl.FYLinkActivityUpdate();
+            //m_iFYCtrl.FYLinkActivityUpdate();
         }
     }    
 }

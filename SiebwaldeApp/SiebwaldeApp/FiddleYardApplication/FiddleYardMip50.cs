@@ -9,7 +9,6 @@ namespace SiebwaldeApp
     public class FiddleYardMip50
     {
         public FiddleYardApplicationVariables FYAppVar;                             // IOHanlder connects the event handlers via this way
-        public ILogger FiddleYardMIP50Logging;                              // Logging directive       
         private FiddleYardIOHandleVariables m_FYIOHandleVar;                        // connect variable to connect to FYIOH class for defined interfaces  
         private iFiddleYardIOHandle m_iFYIOH;
         private FiddleYardApplicationVariables m_FYAppVar;                          // connect variable to connect to FYAppVar class for defined interfaces
@@ -20,24 +19,9 @@ namespace SiebwaldeApp
         {
             return new FileLogger(file, loggerinstance);
         }
+        private ILogger FiddleYardMIP50Logging;
 
-        /*#--------------------------------------------------------------------------#*/
-        /*  Description: Application variables
-         * 
-         *  Input(s)   :
-         *
-         *  Output(s)  : 
-         *
-         *  Returns    :
-         *
-         *  Pre.Cond.  :
-         *
-         *  Post.Cond. :
-         *
-         *  Notes      : 
-         *  
-         */
-        /*#--------------------------------------------------------------------------#*/
+        /*------------------------------------------------------------------------#*/
 
         private string m_instance = null;
         private string path = null;
@@ -57,6 +41,9 @@ namespace SiebwaldeApp
         private bool HomeOffsetMovementUpdated = false;
         private uint Next_Track = 0;
         private uint Current_Track = 0;
+        private FiddleYardIOHandleVariables fYIOHandleVar;
+        private iFiddleYardIOHandle iFYIOH;
+
         //private const int TEMPOFFSET = 700;
         //public uint[] TrackForward = new uint[12] { 0, 0, 42800, 85600, 128400, 171200, 214000, 256800, 299600, 342400, 385200, 428000 };// New track coordinates forward movement 1 --> 11
         //public uint[] TrackBackwardOffset = new uint[12] { 0, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, TEMPOFFSET, 0 };   // New track coordinates forward movement 11 --> 1 offset number
@@ -89,16 +76,21 @@ namespace SiebwaldeApp
 
             if ("TOP" == m_instance)
             {
-                path = Enums.HOMEPATH + Enums.LOGGING + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_FiddleYardMIP50TOP.txt"; //  different logging file per target, this is default
-                //FiddleYardMIP50Logging = GetLogger("FiddleYardMIP50TOP.txt");
+                // Set the log instance string to the logging instance name used for directed file logging
+                LoggerInstance = "FyMip50TopLog";
+                //  different logging file per target, this is default
+                FiddleYardMIP50Logging = GetLogger(Properties.Settings.Default.LogDirectory + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_" + "FiddleYardMip50LogTOP.txt", LoggerInstance);
+                IoC.Logger.AddLogger(FiddleYardMIP50Logging);
             }
             else if ("BOT" == m_instance)
             {
-                path = Enums.HOMEPATH + Enums.LOGGING + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_FiddleYardMIP50BOT.txt"; //  different logging file per target, this is default
-                //FiddleYardMIP50Logging = GetLogger("FiddleYardMIP50BOT.txt");
+                // Set the log instance string to the logging instance name used for directed file logging
+                LoggerInstance = "FyMip50BotLog";
+                //  different logging file per target, this is default
+                FiddleYardMIP50Logging = GetLogger(Properties.Settings.Default.LogDirectory + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_" + "FiddleYardMip50LogBOT.txt", LoggerInstance);
+                IoC.Logger.AddLogger(FiddleYardMIP50Logging);
             }
         }
-
         /*#--------------------------------------------------------------------------#*/
         /*  Description: Start: initializing and attaching all sensors, actuators,
          *               messages etc.
@@ -135,7 +127,7 @@ namespace SiebwaldeApp
                 Layer = "q";
             }
 
-            //FiddleYardMIP50Logging.Log("### Fiddle Yard MIP50 API started ###");
+            IoC.Logger.Log("### Fiddle Yard MIP50 API started ###", LoggerInstance);
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -252,7 +244,7 @@ namespace SiebwaldeApp
                 case State.X0:
                     if (val == 0x30)                                                    // When received data is 0 from X0
                     {
-                        //FiddleYardMIP50Logging.Log("Received Acknowledge from MIP50: X0");
+                        IoC.Logger.Log("Received Acknowledge from MIP50: X0", LoggerInstance);
                         MIP50xRECxCMDxW("X0");                                          // Put X0 into mailbox
                         MIP50ReceivedData = State.CR;                                   // Start again with checking for CR
                     }
@@ -265,7 +257,7 @@ namespace SiebwaldeApp
                 case State.M:
                     if (val == 0xD)                                                     // When the next char data is a CR then the end of the data is found and next a LF is expected
                     {
-                        //FiddleYardMIP50Logging.Log(MIP50ReceivedDataBuffer);      // Log original received data fom MIP in logging file
+                        IoC.Logger.Log(MIP50ReceivedDataBuffer, LoggerInstance);      // Log original received data fom MIP in logging file
                         MIP50xRECxCMDxW(MIP50ReceivedDataBuffer);                       // Put received data into mailbox
                         MIP50ReceivedData = State.LF;                                   // Goto the check for LF for next telegram                        
                     }
@@ -292,7 +284,7 @@ namespace SiebwaldeApp
                 case State.E_C:
                     if (val == 0xA)                                                     // Check if second received char is LF
                     {
-                        //FiddleYardMIP50Logging.Log(MIP50ReceivedDataBuffer);      // Log original received data fom MIP in logging file
+                        IoC.Logger.Log(MIP50ReceivedDataBuffer, LoggerInstance);      // Log original received data fom MIP in logging file
                         MIP50xRECxCMDxW(MIP50ReceivedDataBuffer);                       // Put received data into mailbox
                         MIP50ReceivedData = State.CR;                                   // If LF then the data from the MIP is closed Reset switch                        
                     }
@@ -490,23 +482,23 @@ namespace SiebwaldeApp
         /*#--------------------------------------------------------------------------#*/
         public void MIP50xMOVExCALC(uint New_Track)
         {
-            //FiddleYardMIP50Logging.Log("---------------------------------------------------------------------");
+            IoC.Logger.Log("---------------------------------------------------------------------", LoggerInstance);
             MIP50xReadxPosition();
             Next_Track = New_Track;
             if (New_Track < 12)				// Not track++ or track-- button used
             {
                 Current_Track = New_Track; // Already store track te become.(memory when next time track++ or track-- is used)                
-                //FiddleYardMIP50Logging.Log("MIP50 Start Absolute Move to track " + Convert.ToString(Next_Track));
+                IoC.Logger.Log("MIP50 Start Absolute Move to track " + Convert.ToString(Next_Track), LoggerInstance);
             }
             else
             {
                 if (New_Track == 12 && Current_Track < 11) //track++
                 {
-                    //FiddleYardMIP50Logging.Log("MIP50 Start Absolute Move to track " + Convert.ToString(Current_Track + 1));
+                    IoC.Logger.Log("MIP50 Start Absolute Move to track " + Convert.ToString(Current_Track + 1), LoggerInstance);
                 }
                 else if (New_Track == 13 && Current_Track > 1) //track--
                 {
-                    //FiddleYardMIP50Logging.Log("MIP50 Start Absolute Move to track " + Convert.ToString(Current_Track - 1));
+                    IoC.Logger.Log("MIP50 Start Absolute Move to track " + Convert.ToString(Current_Track - 1), LoggerInstance);
                 }
             }
         }
@@ -583,15 +575,15 @@ namespace SiebwaldeApp
                             {
                                 MIP50TransmitData = 0;
                                 ActualPositionUpdated = false;                                          // Set local bool to false for future next update-and-check
-                                //FiddleYardMIP50Logging.Log("MIP50 Absolute Move Routine Finished, TrackForward[Next_Track] == ActualPosition.");
+                                IoC.Logger.Log("MIP50 Absolute Move Routine Finished, TrackForward[Next_Track] == ActualPosition.", LoggerInstance);
                                 _Return = "Finished";
                             }
 
                         }
                         else
                         {
-                            //FiddleYardMIP50Logging.Log("MIP50 New position same as current position");
-                            //FiddleYardMIP50Logging.Log("MIP50 Absolute Move Routine Finished.");
+                            IoC.Logger.Log("MIP50 New position same as current position", LoggerInstance);
+                            IoC.Logger.Log("MIP50 Absolute Move Routine Finished.", LoggerInstance);
                             MIP50TransmitData = 0;
                             _Return = "Finished";
                         }
@@ -604,7 +596,7 @@ namespace SiebwaldeApp
                     break;
 
                 case 2:
-                    //FiddleYardMIP50Logging.Log("MIP50 Start Absolute Move to " + Convert.ToString(Next_Track));
+                    IoC.Logger.Log("MIP50 Start Absolute Move to " + Convert.ToString(Next_Track), LoggerInstance);
                     MIP50xActivatexPosxReg();
                     MIP50TransmitData = 3;
                     break;
@@ -674,7 +666,7 @@ namespace SiebwaldeApp
                     {
                         MIP50TransmitData = 0;
                         ActualPositionUpdated = false;                                          // Set local bool to false for future next update-and-check
-                        //FiddleYardMIP50Logging.Log("MIP50 Absolute Move Routine Finished.");
+                        IoC.Logger.Log("MIP50 Absolute Move Routine Finished.", LoggerInstance);
                         _Return = "Finished";
                     }
                     else if (m_MIP50xRECxCMDxR != "")
@@ -716,8 +708,8 @@ namespace SiebwaldeApp
             switch (MIP50TransmitData)
             {
                 case 0:
-                    //FiddleYardMIP50Logging.Log("---------------------------------------------------------------------");
-                    //FiddleYardMIP50Logging.Log("MIP50 Start Homing Routine:");
+                    IoC.Logger.Log("---------------------------------------------------------------------", LoggerInstance);
+                    IoC.Logger.Log("MIP50 Start Homing Routine:", LoggerInstance);
                     MIP50xENABLE();
                     MIP50xDeactivatexPosxReg();
                     MIP50TransmitData = 1;
@@ -855,10 +847,10 @@ namespace SiebwaldeApp
                     {
                         MIP50TransmitData = 0;
                         Current_Track = 1;
-                        //FiddleYardMIP50Logging.Log("MIP50 Current Track = 1.");
+                        IoC.Logger.Log("MIP50 Current Track = 1.", LoggerInstance);
                         m_FYAppVar.FYHomed.BoolVariable = true;
-                        //FiddleYardMIP50Logging.Log("MIP50 Homing Routine FYAppVar.FYHomed = true");
-                        //FiddleYardMIP50Logging.Log("MIP50 Homing Routine Finished.");
+                        IoC.Logger.Log("MIP50 Homing Routine FYAppVar.FYHomed = true", LoggerInstance);
+                        IoC.Logger.Log("MIP50 Homing Routine Finished.", LoggerInstance);
                         m_FYAppVar.FiddleYardHomingFinished.UpdateMessage();                                // Set message text in Form: Homing finished
                         _Return = "Finished";
                     }
@@ -908,7 +900,7 @@ namespace SiebwaldeApp
 
             m_iFYIOH.ActuatorCmd("MIP50xAbs_Pos", Layer + "G" + "\r");
             MIP50xCRLFxAppend();
-            //FiddleYardMIP50Logging.Log("MIP50 Start Absolute Move...");
+            IoC.Logger.Log("MIP50 Start Absolute Move...", LoggerInstance);
         }
         /*#--------------------------------------------------------------------------#*/
         /*  Description: MIP50xRel_Pos
@@ -941,7 +933,7 @@ namespace SiebwaldeApp
 
             m_iFYIOH.ActuatorCmd("MIP50xRel_Pos", Layer + "G" + "\r");
             MIP50xCRLFxAppend();
-            //FiddleYardMIP50Logging.Log("MIP50 Start Relative Move...");
+            IoC.Logger.Log("MIP50 Start Relative Move...", LoggerInstance);
         }
         /*#--------------------------------------------------------------------------#*/
         /*  Description: MIP50xENABLE
@@ -969,7 +961,7 @@ namespace SiebwaldeApp
             {
                 m_iFYIOH.ActuatorCmd("MIP50xENABLE", "b3" + "\r");
             }
-            //FiddleYardMIP50Logging.Log("MIP50 Enable (M10)");
+            IoC.Logger.Log("MIP50 Enable (M10)", LoggerInstance);
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -998,7 +990,7 @@ namespace SiebwaldeApp
             {
                 m_iFYIOH.ActuatorCmd("MIP50xDISABLE", "b4" + "\r");
             }
-            //FiddleYardMIP50Logging.Log("MIP50 Disable (M10)");
+            IoC.Logger.Log("MIP50 Disable (M10)", LoggerInstance);
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -1024,7 +1016,7 @@ namespace SiebwaldeApp
             m_iFYIOH.ActuatorCmd("MIP50xHomexAxis", Layer + "x" + "\r");
             m_iFYIOH.ActuatorCmd("MIP50xHomexAxis", Layer + "G" + "\r");
             MIP50xCRLFxAppend();
-            //FiddleYardMIP50Logging.Log("MIP50 Start Homing...");
+            IoC.Logger.Log("MIP50 Start Homing...", LoggerInstance);
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -1059,7 +1051,7 @@ namespace SiebwaldeApp
             //m_iFYIOH.ActuatorCmd("MIP50xSetxPositioningxVelxDefault", Layer + "0" + "\r");
             m_iFYIOH.ActuatorCmd("MIP50xSetxPositioningxVelxDefault", Layer + "G" + "\r");
             MIP50xCRLFxAppend();
-            //FiddleYardMIP50Logging.Log("MIP50 Set Velocity to " + Velocity + " Qc/ms");
+            IoC.Logger.Log("MIP50 Set Velocity to " + Velocity + " Qc/ms", LoggerInstance);
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -1099,7 +1091,7 @@ namespace SiebwaldeApp
 
             m_iFYIOH.ActuatorCmd("MIP50xSetxAcceleration", Layer + "G" + "\r");
             MIP50xCRLFxAppend();
-            //FiddleYardMIP50Logging.Log("MIP50 Set Accleration and deceleration to 0.2 Qc/ms^2");
+            IoC.Logger.Log("MIP50 Set Accleration and deceleration to 0.2 Qc/ms^2", LoggerInstance);
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -1126,7 +1118,7 @@ namespace SiebwaldeApp
             m_iFYIOH.ActuatorCmd("MIP50xClearxError", Layer + "x" + "\r");
             m_iFYIOH.ActuatorCmd("MIP50xClearxError", Layer + "G" + "\r");
             MIP50xCRLFxAppend();
-            //FiddleYardMIP50Logging.Log("MIP50 Try Clear All Errors");
+            IoC.Logger.Log("MIP50 Try Clear All Errors", LoggerInstance);
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -1152,7 +1144,7 @@ namespace SiebwaldeApp
             m_iFYIOH.ActuatorCmd("MIP50xActivatexPosxReg", Layer + "x" + "\r");
             m_iFYIOH.ActuatorCmd("MIP50xActivatexPosxReg", Layer + "G" + "\r");
             MIP50xCRLFxAppend();
-            //FiddleYardMIP50Logging.Log("MIP50 Activate Position Regulation");
+            IoC.Logger.Log("MIP50 Activate Position Regulation", LoggerInstance);
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -1178,7 +1170,7 @@ namespace SiebwaldeApp
             m_iFYIOH.ActuatorCmd("MIP50xDeactivatexPosxReg", Layer + "x" + "\r");
             m_iFYIOH.ActuatorCmd("MIP50xDeactivatexPosxReg", Layer + "G" + "\r");
             MIP50xCRLFxAppend();
-            //FiddleYardMIP50Logging.Log("MIP50 Deactivate Position Regulation");
+            IoC.Logger.Log("MIP50 Deactivate Position Regulation", LoggerInstance);
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -1204,7 +1196,7 @@ namespace SiebwaldeApp
             m_iFYIOH.ActuatorCmd("MIP50xReadxPosition", Layer + "x" + "\r");
             m_iFYIOH.ActuatorCmd("MIP50xReadxPosition", Layer + "G" + "\r");
             MIP50xCRLFxAppend();
-            //FiddleYardMIP50Logging.Log("MIP50 Read Actual Position");
+            IoC.Logger.Log("MIP50 Read Actual Position", LoggerInstance);
             ActualPositionUpdated = false;
         }
         /*#--------------------------------------------------------------------------#*/
@@ -1237,7 +1229,7 @@ namespace SiebwaldeApp
             m_iFYIOH.ActuatorCmd("MIP50xReadxPermanentxParameter", Layer + "p" + "\r");
             m_iFYIOH.ActuatorCmd("MIP50xReadxPermanentxParameter", Layer + "G" + "\r");
             MIP50xCRLFxAppend();
-            //FiddleYardMIP50Logging.Log("MIP50 Read Permanent Parameter: " + parameter);
+            IoC.Logger.Log("MIP50 Read Permanent Parameter: " + parameter, LoggerInstance);
 
             if(parameter == "33")
             {
@@ -1280,7 +1272,7 @@ namespace SiebwaldeApp
             }
             m_iFYIOH.ActuatorCmd("MIP50xWritexPermanentxParameter", Layer + "G" + "\r");
             MIP50xCRLFxAppend();
-            //FiddleYardMIP50Logging.Log("MIP50 Write Permanent Parameter: " + parameter + ", value: " + value);
+            IoC.Logger.Log("MIP50 Write Permanent Parameter: " + parameter + ", value: " + value, LoggerInstance);
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -1386,7 +1378,7 @@ namespace SiebwaldeApp
                                 j++;
                             }
                         }
-                        //FiddleYardMIP50Logging.Log(LogString.ToString());
+                        IoC.Logger.Log(LogString.ToString(), LoggerInstance);
                         _Return = true;
                         break;
 
@@ -1409,7 +1401,7 @@ namespace SiebwaldeApp
                                 j++;
                             }
                         }
-                        //FiddleYardMIP50Logging.Log(LogString.ToString());
+                        IoC.Logger.Log(LogString.ToString(), LoggerInstance);
                         _Return = true;
                         break;
 
@@ -1432,7 +1424,7 @@ namespace SiebwaldeApp
                                 j++;
                             }
                         }
-                        //FiddleYardMIP50Logging.Log(LogString.ToString());
+                        IoC.Logger.Log(LogString.ToString(), LoggerInstance);
                         _Return = true;
                         break;
 
@@ -1442,7 +1434,7 @@ namespace SiebwaldeApp
                         {
                             LogString.Append(ArrayIndex);
                         }
-                        //FiddleYardMIP50Logging.Log(LogString.ToString());
+                        IoC.Logger.Log(LogString.ToString(), LoggerInstance);
                         _Return = true;
                         break;
                 }
@@ -1469,7 +1461,7 @@ namespace SiebwaldeApp
                                 j++;
                             }
                         }
-                        //FiddleYardMIP50Logging.Log(LogString.ToString());
+                        IoC.Logger.Log(LogString.ToString(), LoggerInstance);
                         _Return = false; // Error message return false to indicate an error has occured
                         break;
 
@@ -1490,7 +1482,7 @@ namespace SiebwaldeApp
                                 j++;
                             }
                         }
-                        //FiddleYardMIP50Logging.Log(LogString.ToString());
+                        IoC.Logger.Log(LogString.ToString(), LoggerInstance);
                         _Return = false; // Error message return false to indicate an error has occured
                         break;
 
@@ -1500,7 +1492,7 @@ namespace SiebwaldeApp
                         {
                             LogString.Append(ArrayIndex);
                         }
-                        //FiddleYardMIP50Logging.Log(LogString.ToString());
+                        IoC.Logger.Log(LogString.ToString(), LoggerInstance);
                         _Return = false; // Error message return false to indicate an error has occured
                         break;
                 }
@@ -1513,7 +1505,7 @@ namespace SiebwaldeApp
                 {
                     LogString.Append(ArrayIndex);
                 }
-                //FiddleYardMIP50Logging.Log(LogString.ToString());
+                IoC.Logger.Log(LogString.ToString(), LoggerInstance);
                 _Return = true;
             }
 
