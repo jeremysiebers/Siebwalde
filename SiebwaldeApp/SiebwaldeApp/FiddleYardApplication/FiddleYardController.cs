@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using SiebwaldeApp;
 
 namespace SiebwaldeApp
@@ -91,26 +92,27 @@ namespace SiebwaldeApp
         /*#--------------------------------------------------------------------------#*/
         public void Start()
         {
-            if (ConnectFiddleYard(m_macAddr, m_ipAddr) == true) // when connection was succesfull and target was found and is connected
-            {
-                IoC.Logger.Log("FYCTRL: Fiddle Yard uController target in real mode", "");
-                //FYIOHandleTOP.FYApp.FYFORM.FiddleYardFormLogging.Log("###Fiddle Yard uController target in real mode###");
-                FYIOHandleTOP.FYApp.FYFORM.SimMode(FYSimulatorActive);
-                //FYIOHandleBOT.FYApp.FYFORM.FiddleYardFormLogging.Log("###Fiddle Yard uController target in real mode###");
-                FYIOHandleBOT.FYApp.FYFORM.SimMode(FYSimulatorActive);
-                FYReceiver.Start();
-            }
-            else
-            {
-                IoC.Logger.Log("FYCTRL: Fiddle Yard uController target in simulator mode", "");
-                //FYIOHandleTOP.FYApp.FYFORM.FiddleYardFormLogging.Log("###Fiddle Yard uController target in simulation mode###");
-                FYIOHandleTOP.FYApp.FYFORM.SimMode(FYSimulatorActive);
-                //FYIOHandleBOT.FYApp.FYFORM.FiddleYardFormLogging.Log("###Fiddle Yard uController target in simulation mode###");
-                FYIOHandleBOT.FYApp.FYFORM.SimMode(FYSimulatorActive);
-            }
-            FYIOHandleTOP.Start(FYSimulatorActive);   // use these to disable this layer of the fiddle yard in order to do easy debugging by commenting this line
-            FYIOHandleBOT.Start(FYSimulatorActive);   // use these to disable this layer of the fiddle yard in order to do easy debugging by commenting this line
-            IoC.Logger.Log("FYCTRL: Fiddle Yard uController Reset.", "");      
+                if (ConnectFiddleYard(m_macAddr, m_ipAddr) == true) // when connection was succesfull and target was found and is connected
+                {
+                    IoC.Logger.Log("FYCTRL: Fiddle Yard uController target in real mode", "");
+                    //FYIOHandleTOP.FYApp.FYFORM.FiddleYardFormLogging.Log("###Fiddle Yard uController target in real mode###");
+                    FYIOHandleTOP.FYApp.FYFORM.SimMode(FYSimulatorActive);
+                    //FYIOHandleBOT.FYApp.FYFORM.FiddleYardFormLogging.Log("###Fiddle Yard uController target in real mode###");
+                    FYIOHandleBOT.FYApp.FYFORM.SimMode(FYSimulatorActive);
+                    FYReceiver.Start();
+                }
+                else
+                {
+                    IoC.Logger.Log("FYCTRL: Fiddle Yard uController target in simulator mode", "");
+                    //FYIOHandleTOP.FYApp.FYFORM.FiddleYardFormLogging.Log("###Fiddle Yard uController target in simulation mode###");
+                    FYIOHandleTOP.FYApp.FYFORM.SimMode(FYSimulatorActive);
+                    //FYIOHandleBOT.FYApp.FYFORM.FiddleYardFormLogging.Log("###Fiddle Yard uController target in simulation mode###");
+                    FYIOHandleBOT.FYApp.FYFORM.SimMode(FYSimulatorActive);
+                }
+                FYIOHandleTOP.Start(FYSimulatorActive);   // use these to disable this layer of the fiddle yard in order to do easy debugging by commenting this line
+                FYIOHandleBOT.Start(FYSimulatorActive);   // use these to disable this layer of the fiddle yard in order to do easy debugging by commenting this line
+                IoC.Logger.Log("FYCTRL: Fiddle Yard uController Reset.", "");
+        
         }
 
         /*#--------------------------------------------------------------------------#*/

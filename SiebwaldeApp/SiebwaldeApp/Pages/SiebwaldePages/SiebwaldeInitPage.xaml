@@ -67,7 +67,7 @@
                     HorizontalAlignment="Center" 
                     Style="{StaticResource IconGrowButton}" 
                     Content="{StaticResource FontAwesomeMicroChip}" 
-                    Command="{Binding }"
+                    Command="{Binding TrackController}"
                     Foreground="White"  
                 />
 

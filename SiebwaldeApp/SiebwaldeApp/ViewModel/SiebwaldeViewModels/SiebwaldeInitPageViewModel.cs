@@ -32,7 +32,12 @@ namespace SiebwaldeApp
         /// The command to init all controllers at once
         /// </summary>
         public ICommand InitAllControllers { get; set; }
-        
+
+        /// <summary>
+        /// The command to init the TrackController
+        /// </summary>
+        public ICommand TrackController { get; set; }
+
         #endregion
 
         #region Constructor
@@ -52,7 +57,9 @@ namespace SiebwaldeApp
 
             //IoC.siebwaldeApplicationModel.//SiebwaldeApplicationMainLogging.PropertyChanged += //SiebwaldeApplicationMainLogging_PropertyChanged;
 
-            InitAllControllers = new RelayCommand(() => IoC.siebwaldeApplicationModel.StartFYController());           
+            InitAllControllers = new RelayCommand(() => IoC.siebwaldeApplicationModel.StartFYController());
+
+            TrackController    = new RelayCommand(() => IoC.siebwaldeApplicationModel.StartTrackController());
         }
 
         private void SiebwaldeApplicationMainLogging_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -66,10 +73,4 @@ namespace SiebwaldeApp
 
         #endregion
     }
-
-    public class StringObject : BaseViewModel
-    {
-        public string Value { get; set; }
-    }
-
 }

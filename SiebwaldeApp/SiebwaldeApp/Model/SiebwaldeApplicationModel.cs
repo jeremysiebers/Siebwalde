@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Windows;
 
 namespace SiebwaldeApp
 {
@@ -25,6 +21,11 @@ namespace SiebwaldeApp
         //private TrackController MTcontroller;
         public FiddleYardController YDcontroller;
         public MAC_IP_Conditioner MACIPConditioner = new MAC_IP_Conditioner { };
+
+        public const string FYTarget = "FIDDLEYARD";
+        public Sender FYSender = new Sender(FYTarget);
+        public Receiver FYReceiver;
+
         #endregion
 
         #region Constructor
@@ -37,6 +38,9 @@ namespace SiebwaldeApp
             IoC.Logger.Log("Siebwalde Application started.", "");
             IoC.Logger.Log("Main: PC MAC adress is: " + MACIPConditioner.MACstring(), "");
             IoC.Logger.Log("Main: PC IP adress is: " + MACIPConditioner.IPstring(), "");
+
+            FYReceiver = new Receiver(Properties.Settings.Default.FYReceivingport);
+            //FYSender.ConnectUdp(Properties.Settings.Default.FYSendingport);
         }
         #endregion
 
@@ -67,6 +71,9 @@ namespace SiebwaldeApp
                 return;
             }
  
+            // Tried to make Task and start FiddleYard with it, however the winform stuff needs to run on "main" task as well hence
+            // it will give error when starting it on a different task. Therefore first continue with the whole track, later re-build 
+            // the fiddle yard part....
             FYcontroller = new FiddleYardController(this, 
                 MACIPConditioner.MAC(), 
                 MACIPConditioner.IP(), 
@@ -82,6 +89,39 @@ namespace SiebwaldeApp
             //FYLinkActivity.Visible = true;
             //LFYLinkActivity.Visible = true;
             IoC.Logger.Log("FiddleYard Controller started.", "");
+        }
+
+        public async void StartTrackController()
+        {
+            IoC.Logger.Log("Fake Track Controller started.", "");
+            await StartTrackControlApp();
+        }
+
+        /// <summary>
+        /// Does some work asynchronously for somebody
+        /// </summary>
+        /// <param name="forWho">Who we are doing the work for</param>
+        /// <returns></returns>
+        private static async Task StartTrackControlApp()
+        {
+            // Log it
+            IoC.Logger.Log($"Doing work for","");
+
+            // Start a new task (so it runs on a different thread)
+            await Task.Run(async () =>
+            {
+                // Log it
+                IoC.Logger.Log($"Doing work on inner thread for ","");
+
+                // Wait 
+                await Task.Delay(500);
+
+                // Log it
+                IoC.Logger.Log($"Done work on inner thread for","");
+            });
+
+            // Log it
+            IoC.Logger.Log($"Done work for ","");
         }
 
     }

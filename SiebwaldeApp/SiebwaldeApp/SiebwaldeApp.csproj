@@ -155,7 +155,7 @@
     <Compile Include="FiddleYardSimulator\FiddleYardSimulator.cs" />
     <Compile Include="FiddleYardSimulator\FiddleYardSimulatorVariables.cs" />
     <Compile Include="File\FileManager.cs" />
-    <Compile Include="IoC\Interfaces\iFileManager.cs" />
+    <Compile Include="IoC\Interfaces\IFileManager.cs" />
     <Compile Include="IoC\Interfaces\ILogFactory.cs" />
     <Compile Include="IoC\IoC.cs" />
     <Compile Include="Logging\Base\LogLevel.cs" />
