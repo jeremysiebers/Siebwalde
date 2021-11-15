@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows.Input;
 
-namespace Siebwalde_Application
+namespace SiebwaldeApp
 { 
     /// <summary>
     /// A view model for each TrackAmplifier item

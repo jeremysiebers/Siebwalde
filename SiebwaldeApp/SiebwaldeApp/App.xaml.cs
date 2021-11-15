@@ -19,9 +19,7 @@ namespace SiebwaldeApp
             base.OnStartup(e);
 
             // Setup main application
-            ApplicationSetup();
-
-            IoC.Logger.Log("Siebwalde application starting up...", "");           
+            ApplicationSetup();                     
 
             // Show the main window
             Current.MainWindow = new MainWindow();
@@ -46,9 +44,11 @@ namespace SiebwaldeApp
 
             // Bind a logger
             IoC.Kernel.Bind<ILogFactory>().ToConstant(new BaseLogFactory());
-
+            
             // Bind a file manager
             IoC.Kernel.Bind<IFileManager>().ToConstant(new FileManager());
+
+            IoC.Logger.Log("Siebwalde application starting up...", "");
 
             // Setup IoC ViewModels, this one as last since the loggers are used within the ViewModels
             IoC.Setup();

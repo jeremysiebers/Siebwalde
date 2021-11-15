@@ -1,6 +1,6 @@
 ﻿using System.Windows.Controls;
 
-namespace Siebwalde_Application
+namespace SiebwaldeApp
 {
     /// <summary>
     /// Interaction logic for TrackAmplifierManualControlView.xaml

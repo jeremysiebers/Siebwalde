@@ -8,7 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 
-namespace Siebwalde_Application
+namespace SiebwaldeApp
 {
     /// <summary>
     /// This TrackAmplifierInitalizationSequencer initializes all the Track amplifiers and checks if firmware download is required
@@ -18,7 +18,6 @@ namespace Siebwalde_Application
         #region Local variables
 
         private TrackApplicationVariables mTrackApplicationVariables;
-        private ILogger mTrackApplicationLogging;
         private TrackAmplifierBootloaderHelpers mTrackAmplifierBootloaderHelpers;
         private TrackIOHandle mTrackIOHandle;
         private SendMessage mSendMessage;
@@ -26,6 +25,9 @@ namespace Siebwalde_Application
         private Stopwatch sw = new Stopwatch();
         private object ExecuteLock = new object();
         private System.Timers.Timer AppUpdateTimer = new System.Timers.Timer();
+
+        // Logger instance
+        private string mLoggerInstance { get; set; }
 
         /// <summary>
         /// This enum holds all the possible states of the TrackAmplifierInitalizationSequencer statemachine
@@ -43,12 +45,12 @@ namespace Siebwalde_Application
 
         #region Constructor
 
-        public TrackAmplifierInitalizationSequencer(ILogger trackApplicationLogging, TrackApplicationVariables trackApplicationVariables, TrackIOHandle trackIOHandle)
+        public TrackAmplifierInitalizationSequencer(string LoggerInstance, TrackApplicationVariables trackApplicationVariables, TrackIOHandle trackIOHandle)
         {
+            mLoggerInstance = LoggerInstance;
             mTrackApplicationVariables = trackApplicationVariables;
-            mTrackApplicationLogging = trackApplicationLogging;
             mTrackIOHandle = trackIOHandle;
-            mTrackAmplifierBootloaderHelpers = new TrackAmplifierBootloaderHelpers("C:\\GIT-REPOS\\Siebwalde\\TrackAmplifier4.X\\dist\\Offset\\production\\TrackAmplifier4.X.production.hex", trackApplicationLogging);//(Enums.HOMEPATH + Enums.SLAVEHEXFILE, trackApplicationLogging);
+            mTrackAmplifierBootloaderHelpers = new TrackAmplifierBootloaderHelpers("C:\\Users\\jerem\\Siebwalde\\TrackAmplifier4.X\\dist\\Offset\\production\\TrackAmplifier4.X.production.hex", LoggerInstance);//(Enums.HOMEPATH + Enums.SLAVEHEXFILE, trackApplicationLogging);
 
             StateMachine = State.Idle;
             SubMethodState = 0;
@@ -71,7 +73,7 @@ namespace Siebwalde_Application
         public void Start()
         {
             // Load the HEX-file and readout all the data required
-            mTrackApplicationLogging.Log(GetType().Name, "TrackAmplifierBootloaderHelpers.Start()");
+            IoC.Logger.Log("TrackAmplifierBootloaderHelpers.Start()", mLoggerInstance);
             mTrackAmplifierBootloaderHelpers.Start();
 
             // set the state machine to the first case
@@ -155,7 +157,7 @@ namespace Siebwalde_Application
                 // Check if the read of the HEX file was successful otherwise return an error to the caller
                 if (!mTrackAmplifierBootloaderHelpers.HexFileReadSuccessful)
                 {
-                    mTrackApplicationLogging.Log(GetType().Name, "TrackAmplifierBootloaderHelpers.HexFileReadSuccessful == false stopping init request.");
+                    IoC.Logger.Log("TrackAmplifierBootloaderHelpers.HexFileReadSuccessful == false stopping init request.", mLoggerInstance);
                     CheckInitSequence = Enums.Error;
                     return;
                 }
@@ -187,13 +189,13 @@ namespace Siebwalde_Application
                                     }
                                 case Enums.Finished:
                                     {
-                                        mTrackApplicationLogging.Log(GetType().Name, "State.ConnectToEthernetTarget == Finished.");
+                                        IoC.Logger.Log("State.ConnectToEthernetTarget == Finished.", mLoggerInstance);
                                         StateMachine = State.ResetAllSlaves;
                                         break;
                                     }
                                 case Enums.Error:
                                     {
-                                        mTrackApplicationLogging.Log(GetType().Name, "State.ConnectToEthernetTarget == Error.");
+                                        IoC.Logger.Log("State.ConnectToEthernetTarget == Error.", mLoggerInstance);
                                         StateMachine = State.Idle;
                                         returnval = Enums.Error;
                                         break;
@@ -217,13 +219,13 @@ namespace Siebwalde_Application
                                     }
                                 case Enums.Finished:
                                     {
-                                        mTrackApplicationLogging.Log(GetType().Name, "State.ResetAllSlaves == Finished.");
+                                        IoC.Logger.Log("State.ResetAllSlaves == Finished.", mLoggerInstance);
                                         StateMachine = State.DataUploadStart;
                                         break;
                                     }
                                 case Enums.Error:
                                     {
-                                        mTrackApplicationLogging.Log(GetType().Name, "State.ResetAllSlaves == Error.");
+                                        IoC.Logger.Log("State.ResetAllSlaves == Error.", mLoggerInstance);
                                         StateMachine = State.Idle;
                                         returnval = Enums.Error;
                                         break;
@@ -247,13 +249,13 @@ namespace Siebwalde_Application
                                     }
                                 case Enums.Finished:
                                     {
-                                        mTrackApplicationLogging.Log(GetType().Name, "State.DataUploadStart == Finished.");
+                                        IoC.Logger.Log("State.DataUploadStart == Finished.", mLoggerInstance);
                                         StateMachine = State.DetectSlaves;
                                         break;
                                     }
                                 case Enums.Error:
                                     {
-                                        mTrackApplicationLogging.Log(GetType().Name, "State.DataUploadStart == Error.");
+                                        IoC.Logger.Log("State.DataUploadStart == Error.", mLoggerInstance);
                                         StateMachine = State.Idle;
                                         returnval = Enums.Error;
                                         break;
@@ -277,19 +279,19 @@ namespace Siebwalde_Application
                                     }
                                 case Enums.Finished:
                                     {
-                                        mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaves == Finished.");
+                                        IoC.Logger.Log("State.DetectSlaves == Finished.", mLoggerInstance);
                                         StateMachine = State.FlashFwTrackamplifiers;
                                         break;
                                     }
                                 case Enums.Next:
                                     {
-                                        mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaves => State.DetectSlaveRecovery.");
+                                        IoC.Logger.Log("State.DetectSlaves => State.DetectSlaveRecovery.", mLoggerInstance);
                                         StateMachine = State.DetectSlaveRecovery;
                                         break;
                                     }
                                 case Enums.Error:
                                     {
-                                        mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaves == Error.");
+                                        IoC.Logger.Log("State.DetectSlaves == Error.", mLoggerInstance);
                                         StateMachine = State.Idle;
                                         returnval = Enums.Error;
                                         break;
@@ -313,19 +315,19 @@ namespace Siebwalde_Application
                                     }
                                 case Enums.Finished:
                                     {
-                                        mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaveRecovery == Finished.");
+                                        IoC.Logger.Log("State.DetectSlaveRecovery == Finished.", mLoggerInstance);
                                         StateMachine = State.FlashFwTrackamplifiers;
                                         break;
                                     }
                                 case Enums.Next:
                                     {
-                                        mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaveRecovery => State.DetectSlaves.");
+                                        IoC.Logger.Log("State.DetectSlaveRecovery => State.DetectSlaves.", mLoggerInstance);
                                         StateMachine = State.DetectSlaves;
                                         break;
                                     }
                                 case Enums.Error:
                                     {
-                                        mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaveRecovery == Error.");
+                                        IoC.Logger.Log("State.DetectSlaveRecovery == Error.", mLoggerInstance);
                                         StateMachine = State.Idle;
                                         returnval = Enums.Error;
                                         break;
@@ -349,13 +351,13 @@ namespace Siebwalde_Application
                                     }
                                 case Enums.Finished:
                                     {
-                                        mTrackApplicationLogging.Log(GetType().Name, "State.FlashFwTrackamplifiers == Finished.");
+                                        IoC.Logger.Log("State.FlashFwTrackamplifiers == Finished.", mLoggerInstance);
                                         StateMachine = State.InitTrackamplifiers;
                                         break;
                                     }
                                 case Enums.Error:
                                     {
-                                        mTrackApplicationLogging.Log(GetType().Name, "State.FlashFwTrackamplifiers == Error.");
+                                        IoC.Logger.Log("State.FlashFwTrackamplifiers == Error.", mLoggerInstance);
                                         StateMachine = State.Idle;
                                         returnval = Enums.Error;
                                         break;
@@ -379,13 +381,13 @@ namespace Siebwalde_Application
                                     }
                                 case Enums.Finished:
                                     {
-                                        mTrackApplicationLogging.Log(GetType().Name, "State.InitTrackamplifiers == Finished.");
+                                        IoC.Logger.Log("State.InitTrackamplifiers == Finished.", mLoggerInstance);
                                         StateMachine = State.EnableTrackamplifiers;
                                         break;
                                     }
                                 case Enums.Error:
                                     {
-                                        mTrackApplicationLogging.Log(GetType().Name, "State.InitTrackamplifiers == Error.");
+                                        IoC.Logger.Log("State.InitTrackamplifiers == Error.", mLoggerInstance);
                                         StateMachine = State.Idle;
                                         returnval = Enums.Error;
                                         break;
@@ -409,14 +411,14 @@ namespace Siebwalde_Application
                                     }
                                 case Enums.Finished:
                                     {
-                                        mTrackApplicationLogging.Log(GetType().Name, "State.EnableTrackamplifiers == Finished.");
+                                        IoC.Logger.Log("State.EnableTrackamplifiers == Finished.", mLoggerInstance);
                                         StateMachine = State.Idle;
                                         returnval = Enums.Finished;
                                         break;
                                     }
                                 case Enums.Error:
                                     {
-                                        mTrackApplicationLogging.Log(GetType().Name, "State.EnableTrackamplifiers == Error.");
+                                        IoC.Logger.Log("State.EnableTrackamplifiers == Error.", mLoggerInstance);
                                         StateMachine = State.Idle;
                                         returnval = Enums.Error;
                                         break;
@@ -469,7 +471,7 @@ namespace Siebwalde_Application
                         mSendMessage.Command = EnumClientCommands.CLIENT_CONNECTION_REQUEST;
                         mTrackIOHandle.ActuatorCmd(mSendMessage);
                         SubMethodState += 1;
-                        mTrackApplicationLogging.Log(GetType().Name, "State.ConnectToEthernetTarget => CLIENT_CONNECTION_REQUEST.");
+                        IoC.Logger.Log("State.ConnectToEthernetTarget => CLIENT_CONNECTION_REQUEST.", mLoggerInstance);
                         break;
                     }
                 case 1:
@@ -485,7 +487,7 @@ namespace Siebwalde_Application
                                 returnval = Enums.Finished;
                                 // Set Model variable to indicate a connection was made with the Ethernet Target
                                 mTrackApplicationVariables.trackControllerCommands.EthernetTargetConnected = true;
-                                mTrackApplicationLogging.Log(GetType().Name, "State.ConnectToEthernetTarget => CLIENT_CONNECTED.");
+                                IoC.Logger.Log("State.ConnectToEthernetTarget => CLIENT_CONNECTED.", mLoggerInstance);
                             }
                         //}
                         break;
@@ -512,7 +514,7 @@ namespace Siebwalde_Application
                         mSendMessage.Command = TrackCommand.EXEC_MBUS_STATE_RESET;
                         mTrackIOHandle.ActuatorCmd(mSendMessage);
                         SubMethodState += 1;
-                        mTrackApplicationLogging.Log(GetType().Name, "State.ResetAllSlaves => EXEC_MBUS_STATE_RESET.");
+                        IoC.Logger.Log("State.ResetAllSlaves => EXEC_MBUS_STATE_RESET.", mLoggerInstance);
                         break;
                     }
                 case 1:
@@ -521,11 +523,11 @@ namespace Siebwalde_Application
                             receivedMessage.Taskcommand == EnumMbusStatus.MBUS_STATE_RESET &&
                             receivedMessage.Taskstate == TaskStates.DONE)
                         {
-                            mTrackApplicationLogging.Log(GetType().Name, "State.ResetAllSlaves => MBUS_STATE_RESET.");
+                            IoC.Logger.Log("State.ResetAllSlaves => MBUS_STATE_RESET.", mLoggerInstance);
                             mSendMessage.Command = TrackCommand.EXEC_MBUS_STATE_SLAVES_ON;
                             mTrackIOHandle.ActuatorCmd(mSendMessage);
                             SubMethodState += 1;                                
-                            mTrackApplicationLogging.Log(GetType().Name, "State.ResetAllSlaves => EXEC_MBUS_STATE_SLAVES_ON.");
+                            IoC.Logger.Log("State.ResetAllSlaves => EXEC_MBUS_STATE_SLAVES_ON.", mLoggerInstance);
                         }                        
                         break;
                     }
@@ -535,7 +537,7 @@ namespace Siebwalde_Application
                             receivedMessage.Taskcommand == EnumMbusStatus.MBUS_STATE_SLAVES_ON &&
                             receivedMessage.Taskstate == TaskStates.DONE)
                         {
-                            mTrackApplicationLogging.Log(GetType().Name, "State.ResetAllSlaves => MBUS_STATE_SLAVES_ON.");
+                            IoC.Logger.Log("State.ResetAllSlaves => MBUS_STATE_SLAVES_ON.", mLoggerInstance);
                             SubMethodState = 0;
                             returnval = Enums.Finished;
                         }                        
@@ -563,7 +565,7 @@ namespace Siebwalde_Application
                         mSendMessage.Command = TrackCommand.EXEC_MBUS_STATE_START_DATA_UPLOAD;
                         mTrackIOHandle.ActuatorCmd(mSendMessage);
                         SubMethodState += 1;
-                        mTrackApplicationLogging.Log(GetType().Name, "State.DataUploadStart => EXEC_MBUS_STATE_START_DATA_UPLOAD.");
+                        IoC.Logger.Log("State.DataUploadStart => EXEC_MBUS_STATE_START_DATA_UPLOAD.", mLoggerInstance);
                         break;
                     }
                 case 1:
@@ -572,7 +574,7 @@ namespace Siebwalde_Application
                             receivedMessage.Taskcommand == EnumMbusStatus.MBUS_STATE_START_DATA_UPLOAD &&
                             receivedMessage.Taskstate == TaskStates.DONE)
                         {
-                            mTrackApplicationLogging.Log(GetType().Name, "State.DataUploadStart => MBUS_STATE_START_DATA_UPLOAD.");
+                            IoC.Logger.Log("State.DataUploadStart => MBUS_STATE_START_DATA_UPLOAD.", mLoggerInstance);
                             SubMethodState = 0;
                             returnval = Enums.Finished;
                         }
@@ -601,7 +603,7 @@ namespace Siebwalde_Application
                         mSendMessage.Command = TrackCommand.EXEC_MBUS_STATE_SLAVE_DETECT;
                         mTrackIOHandle.ActuatorCmd(mSendMessage);
                         SubMethodState += 1;
-                        mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaves => EXEC_MBUS_STATE_SLAVE_DETECT.");
+                        IoC.Logger.Log("State.DetectSlaves => EXEC_MBUS_STATE_SLAVE_DETECT.", mLoggerInstance);
                         break;
                     }
                 case 1:
@@ -610,7 +612,7 @@ namespace Siebwalde_Application
                             receivedMessage.Taskcommand == EnumMbusStatus.MBUS_STATE_SLAVE_DETECT &&
                             receivedMessage.Taskstate == TaskStates.DONE)
                         {
-                            mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaves => MBUS_STATE_SLAVE_DETECT.");
+                            IoC.Logger.Log("State.DetectSlaves => MBUS_STATE_SLAVE_DETECT.", mLoggerInstance);
 
                             Thread.Sleep(2000);
 
@@ -621,13 +623,13 @@ namespace Siebwalde_Application
                                 if (amplifier.SlaveDetected == 1)
                                 {
                                     SlaveCount++;
-                                    Console.WriteLine("DetectSlaves --> slave " + amplifier.SlaveNumber.ToString() + " detected.");
-                                    mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaves => slave " + amplifier.SlaveNumber.ToString() + " detected.");
+                                    //Console.WriteLine("DetectSlaves --> slave " + amplifier.SlaveNumber.ToString() + " detected.");
+                                    IoC.Logger.Log("State.DetectSlaves => slave " + amplifier.SlaveNumber.ToString() + " detected.", mLoggerInstance);
                                 }
                             }
 
-                            Console.WriteLine("DetectSlaves --> " + SlaveCount.ToString() + " slaves in total detected.");
-                            mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaves => " + SlaveCount.ToString() + " slaves in total detected.");
+                            //Console.WriteLine("DetectSlaves --> " + SlaveCount.ToString() + " slaves in total detected.");
+                            IoC.Logger.Log("State.DetectSlaves => " + SlaveCount.ToString() + " slaves in total detected.", mLoggerInstance);
 
                             if (SlaveCount > 2)
                             {
@@ -638,18 +640,18 @@ namespace Siebwalde_Application
                             }
                             else if (loopcounter > attemptmax)
                             {
-                                Console.WriteLine("DetectSlaves --> more then " + loopcounter.ToString() + " recovery attempts, stopping program!");
-                                mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaves => more then " + loopcounter.ToString() + " recovery attempts, stopping program!");
+                                //Console.WriteLine("DetectSlaves --> more then " + loopcounter.ToString() + " recovery attempts, stopping program!");
+                                IoC.Logger.Log("State.DetectSlaves => more then " + loopcounter.ToString() + " recovery attempts, stopping program!", mLoggerInstance);
                                 SubMethodState = 0;
                                 loopcounter = 1;
                                 returnval = Enums.Error;
                             }
                             else
                             {
-                                Console.WriteLine("DetectSlaves --> Start checking if one slave is stuck in bootloader mode, attempt " + 
-                                    loopcounter.ToString() + " of " + attemptmax.ToString() + ".");
-                                mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaves => Start checking if one slave is stuck in bootloader mode, attempt " +
-                                    loopcounter.ToString() + " of " + attemptmax.ToString() + ".");
+                                //Console.WriteLine("DetectSlaves --> Start checking if one slave is stuck in bootloader mode, attempt " + 
+                                //    loopcounter.ToString() + " of " + attemptmax.ToString() + ".");
+                                IoC.Logger.Log("State.DetectSlaves => Start checking if one slave is stuck in bootloader mode, attempt " +
+                                    loopcounter.ToString() + " of " + attemptmax.ToString() + ".", mLoggerInstance);
                                 SubMethodState = 0;
                                 // try to recover slave by running a "next" sequence
                                 returnval = Enums.Next;
@@ -682,7 +684,7 @@ namespace Siebwalde_Application
                         mSendMessage.Command = TrackCommand.EXEC_MBUS_STATE_SLAVE_FW_FLASH;
                         mTrackIOHandle.ActuatorCmd(mSendMessage);
                         SubMethodState += 1;
-                        mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaveRecovery => EXEC_MBUS_STATE_SLAVE_FW_FLASH.");
+                        IoC.Logger.Log("State.DetectSlaveRecovery => EXEC_MBUS_STATE_SLAVE_FW_FLASH.", mLoggerInstance);
                         break;
                     }
                 case 1:
@@ -691,11 +693,11 @@ namespace Siebwalde_Application
                             receivedMessage.Taskcommand == TrackCommand.FWHANDLERINIT &&
                             receivedMessage.Taskstate == TaskStates.CONNECTED)
                         {
-                            mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaveRecovery => FWHANDLER CONNECTED.");
+                            IoC.Logger.Log("State.DetectSlaveRecovery => FWHANDLER CONNECTED.", mLoggerInstance);
                             mSendMessage.Command = TrackCommand.EXEC_FW_STATE_GET_BOOTLOADER_VERSION;
                             mTrackIOHandle.ActuatorCmd(mSendMessage);
                             SubMethodState += 1;
-                            mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaveRecovery => EXEC_FW_STATE_GET_BOOTLOADER_VERSION.");
+                            IoC.Logger.Log("State.DetectSlaveRecovery => EXEC_FW_STATE_GET_BOOTLOADER_VERSION.", mLoggerInstance);
                         }
                         break;
                     }
@@ -712,28 +714,28 @@ namespace Siebwalde_Application
                             if (receivedMessage.Taskcommand == TrackCommand.GET_BOOTLOADER_VERSION_OK &&
                                 receivedMessage.Taskstate == TaskStates.DONE)
                             {
-                                mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaveRecovery => GET_BOOTLOADER_VERSION_OK.");
-                                mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaveRecovery => Found a slave in bootloader mode!");
-                                mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaveRecovery => Start flash sequence for this slave only.");
+                                IoC.Logger.Log("State.DetectSlaveRecovery => GET_BOOTLOADER_VERSION_OK.", mLoggerInstance);
+                                IoC.Logger.Log("State.DetectSlaveRecovery => Found a slave in bootloader mode!", mLoggerInstance);
+                                IoC.Logger.Log("State.DetectSlaveRecovery => Start flash sequence for this slave only.", mLoggerInstance);
                                 mSendMessage.Command = TrackCommand.EXEC_FW_STATE_ERASE_FLASH;
                                 mTrackIOHandle.ActuatorCmd(mSendMessage);
                                 SubMethodState += 1;
-                                mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaveRecovery => EXEC_FW_STATE_ERASE_FLASH.");
+                                IoC.Logger.Log("State.DetectSlaveRecovery => EXEC_FW_STATE_ERASE_FLASH.", mLoggerInstance);
                             }
                             else if ((receivedMessage.Taskcommand == TrackCommand.GET_BOOTLOADER_VERSION_NOK ||
                                         receivedMessage.Taskcommand == TrackCommand.BOOTLOADER_START_BYTE_ERROR ||
                                         receivedMessage.Taskcommand == TrackCommand.GET_BOOTLOADER_VERSION_RECEIVE_DATA_TIMEOUT) &&
                                         receivedMessage.Taskstate == TaskStates.ERROR)
                             {
-                                mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaveRecovery => GET_BOOTLOADER_VERSION_NOK.");
-                                mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaveRecovery => No slave found, stopping slave detection.");
+                                IoC.Logger.Log("State.DetectSlaveRecovery => GET_BOOTLOADER_VERSION_NOK.", mLoggerInstance);
+                                IoC.Logger.Log("State.DetectSlaveRecovery => No slave found, stopping slave detection.", mLoggerInstance);
                                 SubMethodState = 0;
                                 returnval = Enums.Error;
                             }
                             else
                             {
-                                mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaveRecovery => GET_BOOTLOADER_VERSION_NOK.");
-                                mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaveRecovery => No slave found, stopping slave detection.");
+                                IoC.Logger.Log("State.DetectSlaveRecovery => GET_BOOTLOADER_VERSION_NOK.", mLoggerInstance);
+                                IoC.Logger.Log("State.DetectSlaveRecovery => No slave found, stopping slave detection.", mLoggerInstance);
                                 SubMethodState = 0;
                                 returnval = Enums.Error;
                             }
@@ -748,11 +750,11 @@ namespace Siebwalde_Application
                         receivedMessage.Taskcommand == TrackCommand.ERASE_FLASH_RETURNED_OK &&
                         receivedMessage.Taskstate == TaskStates.DONE)
                         {
-                            mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaveRecovery => ERASE_FLASH_RETURNED_OK.");
+                            IoC.Logger.Log("State.DetectSlaveRecovery => ERASE_FLASH_RETURNED_OK.", mLoggerInstance);
                             mSendMessage.Command = TrackCommand.EXEC_FW_STATE_RECEIVE_FW_FILE;
                             mTrackIOHandle.ActuatorCmd(mSendMessage);
                             SubMethodState += 1;
-                            mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaveRecovery => EXEC_FW_STATE_RECEIVE_FW_FILE.");
+                            IoC.Logger.Log("State.DetectSlaveRecovery => EXEC_FW_STATE_RECEIVE_FW_FILE.", mLoggerInstance);
                         }
                         break;
                     }
@@ -763,7 +765,7 @@ namespace Siebwalde_Application
                         receivedMessage.Taskcommand == TrackCommand.FILEDOWNLOAD_STATE_RECEIVE_FW_FILE_STANDBY &&
                         receivedMessage.Taskstate == TaskStates.DONE)
                         {
-                            mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaveRecovery => FILEDOWNLOAD_STATE_RECEIVE_FW_FILE_STANDBY.");
+                            IoC.Logger.Log("State.DetectSlaveRecovery => FILEDOWNLOAD_STATE_RECEIVE_FW_FILE_STANDBY.", mLoggerInstance);
                             SendNextFwDataPacket();
                             SubMethodState = 6;
                         }
@@ -775,7 +777,7 @@ namespace Siebwalde_Application
                         if(IterationCounter > Iterations)
                         {
                             IterationCounter = 0;
-                            mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaveRecovery => EXEC_FW_STATE_RECEIVE_FW_FILE DONE.");
+                            IoC.Logger.Log("State.DetectSlaveRecovery => EXEC_FW_STATE_RECEIVE_FW_FILE DONE.", mLoggerInstance);
                             SubMethodState += 2;
                         }
 
@@ -812,7 +814,7 @@ namespace Siebwalde_Application
                         receivedMessage.Taskstate == TaskStates.DONE)
                         {
                             IterationCounter = 0;
-                            mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaveRecovery => EXEC_FW_STATE_RECEIVE_FW_FILE DONE.");
+                            IoC.Logger.Log("State.DetectSlaveRecovery => EXEC_FW_STATE_RECEIVE_FW_FILE DONE.", mLoggerInstance);
                             Console.WriteLine("All packages sent.");
                             SubMethodState = 7;
                         }
@@ -826,10 +828,10 @@ namespace Siebwalde_Application
                         receivedMessage.Taskstate == TaskStates.DONE &&
                         receivedMessage.Taskmessage == TaskMessages.RECEIVED_CHECKSUM_OK)
                         {
-                            mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaveRecovery => RECEIVED_CHECKSUM_OK.");
+                            IoC.Logger.Log("State.DetectSlaveRecovery => RECEIVED_CHECKSUM_OK.", mLoggerInstance);
                             mSendMessage.Command = TrackCommand.EXEC_FW_STATE_RECEIVE_CONFIG_WORD; 
                             mTrackIOHandle.ActuatorCmd(mSendMessage);
-                            mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaveRecovery => EXEC_FW_STATE_RECEIVE_CONFIG_WORD.");
+                            IoC.Logger.Log("State.DetectSlaveRecovery => EXEC_FW_STATE_RECEIVE_CONFIG_WORD.", mLoggerInstance);
                             SubMethodState += 1;
                         }
                         else if (receivedMessage.TaskId == TrackCommand.FWFILEDOWNLOAD &&
@@ -837,9 +839,9 @@ namespace Siebwalde_Application
                         receivedMessage.Taskstate == TaskStates.DONE &&
                         receivedMessage.Taskmessage == TaskMessages.RECEIVED_CHECKSUM_NOK)
                         {
-                            mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaveRecovery => RECEIVED_CHECKSUM_NOK.");
+                            IoC.Logger.Log("State.DetectSlaveRecovery => RECEIVED_CHECKSUM_NOK.", mLoggerInstance);
                             mSendMessage.Command = TrackCommand.EXEC_FW_STATE_RECEIVE_FW_FILE;
-                            mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaveRecovery => EXEC_FW_STATE_RECEIVE_FW_FILE try again.");
+                            IoC.Logger.Log("State.DetectSlaveRecovery => EXEC_FW_STATE_RECEIVE_FW_FILE try again.", mLoggerInstance);
                             SubMethodState = 4;
                         }
                         break;
@@ -851,7 +853,7 @@ namespace Siebwalde_Application
                         receivedMessage.Taskcommand == TrackCommand.CONFIGWORDDOWNLOAD_STATE_RECEIVE_CONFIG_WORD_STANDBY &&
                         receivedMessage.Taskstate == TaskStates.DONE)
                         {
-                            mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaveRecovery => CONFIGWORDDOWNLOAD_STATE_RECEIVE_CONFIG_WORD_STANDBY.");
+                            IoC.Logger.Log("State.DetectSlaveRecovery => CONFIGWORDDOWNLOAD_STATE_RECEIVE_CONFIG_WORD_STANDBY.", mLoggerInstance);
 
                             mSendMessage.Command = TrackCommand.CONFIGWORDDOWNLOAD_STATE_FW_CONFIG_WORD_RECEIVE;
 
@@ -874,9 +876,9 @@ namespace Siebwalde_Application
                         receivedMessage.Taskcommand == TrackCommand.CONFIGWORDDOWNLOAD_STATE_FW_CONFIG_WORD_DOWNLOAD_DONE &&
                         receivedMessage.Taskstate == TaskStates.DONE)
                         {
-                            mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaveRecovery => CONFIGWORDDOWNLOAD_STATE_FW_CONFIG_WORD_DOWNLOAD_DONE.");
+                            IoC.Logger.Log("State.DetectSlaveRecovery => CONFIGWORDDOWNLOAD_STATE_FW_CONFIG_WORD_DOWNLOAD_DONE.", mLoggerInstance);
                             mSendMessage.Command = TrackCommand.EXEC_FW_STATE_WRITE_FLASH;
-                            mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaveRecovery => EXEC_FW_STATE_WRITE_FLASH.");
+                            IoC.Logger.Log("State.DetectSlaveRecovery => EXEC_FW_STATE_WRITE_FLASH.", mLoggerInstance);
                             mTrackIOHandle.ActuatorCmd(mSendMessage);
                             SubMethodState += 1;
                         }
@@ -889,9 +891,9 @@ namespace Siebwalde_Application
                         receivedMessage.Taskcommand == TrackCommand.WRITE_FLASH_RETURNED_OK &&
                         receivedMessage.Taskstate == TaskStates.DONE)
                         {
-                            mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaveRecovery => WRITE_FLASH_RETURNED_OK.");
+                            IoC.Logger.Log("State.DetectSlaveRecovery => WRITE_FLASH_RETURNED_OK.", mLoggerInstance);
                             mSendMessage.Command = TrackCommand.EXEC_FW_STATE_WRITE_CONFIG;
-                            mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaveRecovery => EXEC_FW_STATE_WRITE_CONFIG.");
+                            IoC.Logger.Log("State.DetectSlaveRecovery => EXEC_FW_STATE_WRITE_CONFIG.", mLoggerInstance);
                             mTrackIOHandle.ActuatorCmd(mSendMessage);
                             SubMethodState += 1;
                         }
@@ -904,9 +906,9 @@ namespace Siebwalde_Application
                         receivedMessage.Taskcommand == TrackCommand.WRITE_CONFIG_RETURNED_OK &&
                         receivedMessage.Taskstate == TaskStates.DONE)
                         {
-                            mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaveRecovery => WRITE_CONFIG_RETURNED_OK.");
+                            IoC.Logger.Log("State.DetectSlaveRecovery => WRITE_CONFIG_RETURNED_OK.", mLoggerInstance);
                             mSendMessage.Command = TrackCommand.EXEC_FW_STATE_CHECK_CHECKSUM;
-                            mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaveRecovery => EXEC_FW_STATE_CHECK_CHECKSUM.");
+                            IoC.Logger.Log("State.DetectSlaveRecovery => EXEC_FW_STATE_CHECK_CHECKSUM.", mLoggerInstance);
                             mTrackIOHandle.ActuatorCmd(mSendMessage);
                             SubMethodState += 1;
                         }
@@ -919,9 +921,9 @@ namespace Siebwalde_Application
                         receivedMessage.Taskcommand == TrackCommand.CHECK_CHECKSUM_CONFIG_RETURNED_OK &&
                         receivedMessage.Taskstate == TaskStates.DONE)
                         {
-                            mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaveRecovery => CHECK_CHECKSUM_CONFIG_RETURNED_OK.");
+                            IoC.Logger.Log("State.DetectSlaveRecovery => CHECK_CHECKSUM_CONFIG_RETURNED_OK.", mLoggerInstance);
                             mSendMessage.Command = TrackCommand.EXEC_FW_STATE_SLAVE_RESET;
-                            mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaveRecovery => EXEC_FW_STATE_SLAVE_RESET.");
+                            IoC.Logger.Log("State.DetectSlaveRecovery => EXEC_FW_STATE_SLAVE_RESET.", mLoggerInstance);
                             mTrackIOHandle.ActuatorCmd(mSendMessage);
                             SubMethodState += 1;
                         }
@@ -934,9 +936,9 @@ namespace Siebwalde_Application
                         receivedMessage.Taskcommand == TrackCommand.RESET_SLAVE_OK &&
                         receivedMessage.Taskstate == TaskStates.DONE)
                         {
-                            mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaveRecovery => RESET_SLAVE_OK.");
+                            IoC.Logger.Log("State.DetectSlaveRecovery => RESET_SLAVE_OK.", mLoggerInstance);
                             mSendMessage.Command = TrackCommand.EXIT_SLAVExFWxHANDLER;
-                            mTrackApplicationLogging.Log(GetType().Name, "State.DetectSlaveRecovery => EXIT_SLAVExFWxHANDLER.");
+                            IoC.Logger.Log("State.DetectSlaveRecovery => EXIT_SLAVExFWxHANDLER.", mLoggerInstance);
                             mTrackIOHandle.ActuatorCmd(mSendMessage);
                             SubMethodState = 0;
                             // keep track of the retries
@@ -962,7 +964,7 @@ namespace Siebwalde_Application
             {
                 case 0:
                     {
-                        mTrackApplicationLogging.Log(GetType().Name, "State.FlashFwTrackamplifiers => Expected Slave CheckSum = ox" + mTrackAmplifierBootloaderHelpers.GetFileCheckSum.ToString("X") + ".");
+                        IoC.Logger.Log("State.FlashFwTrackamplifiers => Expected Slave CheckSum = ox" + mTrackAmplifierBootloaderHelpers.GetFileCheckSum.ToString("X") + ".", mLoggerInstance);
 
                         foreach (TrackAmplifierItem amplifierItem in mTrackApplicationVariables.trackAmpItems)
                         {
@@ -971,24 +973,24 @@ namespace Siebwalde_Application
                                 amplifierItem.SlaveNumber < 51)
                             {
                                 FwFlashRequired += 1;
-                                mTrackApplicationLogging.Log(GetType().Name, "State.FlashFwTrackamplifiers => Slave " + amplifierItem.SlaveNumber.ToString() + 
+                                IoC.Logger.Log("State.FlashFwTrackamplifiers => Slave " + amplifierItem.SlaveNumber.ToString() + 
                                     " has checksum = 0x" + amplifierItem.HoldingReg[11].ToString("X") + 
-                                    " and requires flashing");
+                                    " and requires flashing", mLoggerInstance);
                             }
                         }
 
                         if (FwFlashRequired > 0)
                         {
-                            mTrackApplicationLogging.Log(GetType().Name, "State.FlashFwTrackamplifiers => FwFlashRequired == true.");
-                            mTrackApplicationLogging.Log(GetType().Name, "State.FlashFwTrackamplifiers => " + FwFlashRequired.ToString() + " slaves require flashing");
+                            IoC.Logger.Log("State.FlashFwTrackamplifiers => FwFlashRequired == true.", mLoggerInstance);
+                            IoC.Logger.Log("State.FlashFwTrackamplifiers => " + FwFlashRequired.ToString() + " slaves require flashing", mLoggerInstance);
                             mSendMessage.Command = TrackCommand.EXEC_MBUS_STATE_SLAVE_FW_FLASH;
-                            mTrackApplicationLogging.Log(GetType().Name, "State.FlashFwTrackamplifiers => EXEC_MBUS_STATE_SLAVE_FW_FLASH.");
+                            IoC.Logger.Log("State.FlashFwTrackamplifiers => EXEC_MBUS_STATE_SLAVE_FW_FLASH.", mLoggerInstance);
                             mTrackIOHandle.ActuatorCmd(mSendMessage);
                             SubMethodState += 1;
                         }
                         else
                         {
-                            mTrackApplicationLogging.Log(GetType().Name, "State.FlashFwTrackamplifiers => FwFlashRequired == false.");
+                            IoC.Logger.Log("State.FlashFwTrackamplifiers => FwFlashRequired == false.", mLoggerInstance);
                             SubMethodState = 0;
                             returnval = Enums.Finished;
                         }
@@ -1001,11 +1003,11 @@ namespace Siebwalde_Application
                             receivedMessage.Taskcommand == TrackCommand.FWHANDLERINIT &&
                             receivedMessage.Taskstate == TaskStates.CONNECTED)
                         {
-                            mTrackApplicationLogging.Log(GetType().Name, "State.FlashFwTrackamplifiers => FWHANDLER CONNECTED.");
+                            IoC.Logger.Log("State.FlashFwTrackamplifiers => FWHANDLER CONNECTED.", mLoggerInstance);
                             mSendMessage.Command = TrackCommand.EXEC_FW_STATE_RECEIVE_FW_FILE;
                             mTrackIOHandle.ActuatorCmd(mSendMessage);
                             SubMethodState += 1;
-                            mTrackApplicationLogging.Log(GetType().Name, "State.FlashFwTrackamplifiers => EXEC_FW_STATE_RECEIVE_FW_FILE.");
+                            IoC.Logger.Log("State.FlashFwTrackamplifiers => EXEC_FW_STATE_RECEIVE_FW_FILE.", mLoggerInstance);
                         }
                         break;
                     }
@@ -1016,7 +1018,7 @@ namespace Siebwalde_Application
                         receivedMessage.Taskcommand == TrackCommand.FILEDOWNLOAD_STATE_RECEIVE_FW_FILE_STANDBY &&
                         receivedMessage.Taskstate == TaskStates.DONE)
                         {
-                            mTrackApplicationLogging.Log(GetType().Name, "State.FlashFwTrackamplifiers => FILEDOWNLOAD_STATE_RECEIVE_FW_FILE_STANDBY.");
+                            IoC.Logger.Log("State.FlashFwTrackamplifiers => FILEDOWNLOAD_STATE_RECEIVE_FW_FILE_STANDBY.", mLoggerInstance);
 
                             SendNextFwDataPacket();
 
@@ -1030,7 +1032,7 @@ namespace Siebwalde_Application
                         if (IterationCounter > Iterations)
                         {
                             IterationCounter = 0;
-                            mTrackApplicationLogging.Log(GetType().Name, "State.FlashFwTrackamplifiers => EXEC_FW_STATE_RECEIVE_FW_FILE DONE.");
+                            IoC.Logger.Log("State.FlashFwTrackamplifiers => EXEC_FW_STATE_RECEIVE_FW_FILE DONE.", mLoggerInstance);
                             Console.WriteLine("All packages sent.");
                             SubMethodState = 5;
                             break;
@@ -1055,7 +1057,7 @@ namespace Siebwalde_Application
                         receivedMessage.Taskstate == TaskStates.DONE)
                         {
                             IterationCounter = 0;
-                            mTrackApplicationLogging.Log(GetType().Name, "State.FlashFwTrackamplifiers => EXEC_FW_STATE_RECEIVE_FW_FILE DONE.");
+                            IoC.Logger.Log("State.FlashFwTrackamplifiers => EXEC_FW_STATE_RECEIVE_FW_FILE DONE.", mLoggerInstance);
                             Console.WriteLine("All packages sent.");
                             SubMethodState = 5;
                         }
@@ -1069,10 +1071,10 @@ namespace Siebwalde_Application
                         receivedMessage.Taskstate == TaskStates.DONE &&
                         receivedMessage.Taskmessage == TaskMessages.RECEIVED_CHECKSUM_OK)
                         {
-                            mTrackApplicationLogging.Log(GetType().Name, "State.FlashFwTrackamplifiers => RECEIVED_CHECKSUM_OK.");
+                            IoC.Logger.Log("State.FlashFwTrackamplifiers => RECEIVED_CHECKSUM_OK.", mLoggerInstance);
                             mSendMessage.Command = TrackCommand.EXEC_FW_STATE_RECEIVE_CONFIG_WORD;
                             mTrackIOHandle.ActuatorCmd(mSendMessage);
-                            mTrackApplicationLogging.Log(GetType().Name, "State.FlashFwTrackamplifiers => EXEC_FW_STATE_RECEIVE_CONFIG_WORD.");
+                            IoC.Logger.Log("State.FlashFwTrackamplifiers => EXEC_FW_STATE_RECEIVE_CONFIG_WORD.", mLoggerInstance);
                             SubMethodState += 1;
                         }
                         else if (receivedMessage.TaskId == TrackCommand.FWFILEDOWNLOAD &&
@@ -1080,9 +1082,9 @@ namespace Siebwalde_Application
                         receivedMessage.Taskstate == TaskStates.DONE &&
                         receivedMessage.Taskmessage == TaskMessages.RECEIVED_CHECKSUM_NOK)
                         {
-                            mTrackApplicationLogging.Log(GetType().Name, "State.FlashFwTrackamplifiers => RECEIVED_CHECKSUM_NOK.");
+                            IoC.Logger.Log("State.FlashFwTrackamplifiers => RECEIVED_CHECKSUM_NOK.", mLoggerInstance);
                             mSendMessage.Command = TrackCommand.EXEC_FW_STATE_RECEIVE_FW_FILE;
-                            mTrackApplicationLogging.Log(GetType().Name, "State.FlashFwTrackamplifiers => EXEC_FW_STATE_RECEIVE_FW_FILE try again.");
+                            IoC.Logger.Log("State.FlashFwTrackamplifiers => EXEC_FW_STATE_RECEIVE_FW_FILE try again.", mLoggerInstance);
                             SubMethodState = 2;
                         }
                         break;
@@ -1094,7 +1096,7 @@ namespace Siebwalde_Application
                         receivedMessage.Taskcommand == TrackCommand.CONFIGWORDDOWNLOAD_STATE_RECEIVE_CONFIG_WORD_STANDBY &&
                         receivedMessage.Taskstate == TaskStates.DONE)
                         {
-                            mTrackApplicationLogging.Log(GetType().Name, "State.FlashFwTrackamplifiers => CONFIGWORDDOWNLOAD_STATE_RECEIVE_CONFIG_WORD_STANDBY.");
+                            IoC.Logger.Log("State.FlashFwTrackamplifiers => CONFIGWORDDOWNLOAD_STATE_RECEIVE_CONFIG_WORD_STANDBY.", mLoggerInstance);
 
                             mSendMessage.Command = TrackCommand.CONFIGWORDDOWNLOAD_STATE_FW_CONFIG_WORD_RECEIVE;
 
@@ -1117,9 +1119,9 @@ namespace Siebwalde_Application
                         receivedMessage.Taskcommand == TrackCommand.CONFIGWORDDOWNLOAD_STATE_FW_CONFIG_WORD_DOWNLOAD_DONE &&
                         receivedMessage.Taskstate == TaskStates.DONE)
                         {
-                            mTrackApplicationLogging.Log(GetType().Name, "State.FlashFwTrackamplifiers => CONFIGWORDDOWNLOAD_STATE_FW_CONFIG_WORD_DOWNLOAD_DONE.");
+                            IoC.Logger.Log("State.FlashFwTrackamplifiers => CONFIGWORDDOWNLOAD_STATE_FW_CONFIG_WORD_DOWNLOAD_DONE.", mLoggerInstance);
                             mSendMessage.Command = TrackCommand.EXEC_FW_STATE_FLASH_ALL_SLAVES;
-                            mTrackApplicationLogging.Log(GetType().Name, "State.FlashFwTrackamplifiers => EXEC_FW_STATE_FLASH_ALL_SLAVES.");
+                            IoC.Logger.Log("State.FlashFwTrackamplifiers => EXEC_FW_STATE_FLASH_ALL_SLAVES.", mLoggerInstance);
                             mTrackIOHandle.ActuatorCmd(mSendMessage);
                             sw.Start();
                             SubMethodState += 1;
@@ -1134,9 +1136,9 @@ namespace Siebwalde_Application
                         receivedMessage.Taskstate == TaskStates.DONE)
                         {
                             long elapsedtime = sw.ElapsedMilliseconds;
-                            mTrackApplicationLogging.Log(GetType().Name, "State.FlashFwTrackamplifiers => Flashing took " + Convert.ToString(elapsedtime / 1000) + " seconds.");
-                            mTrackApplicationLogging.Log(GetType().Name, "State.FlashFwTrackamplifiers => That is on average " + Convert.ToString((float)elapsedtime / FwFlashRequired / 1000) + " seconds per slave.");
-                            mTrackApplicationLogging.Log(GetType().Name, "State.FlashFwTrackamplifiers => EXEC_FW_STATE_FLASH_ALL_SLAVES DONE.");
+                            IoC.Logger.Log("State.FlashFwTrackamplifiers => Flashing took " + Convert.ToString(elapsedtime / 1000) + " seconds.", mLoggerInstance);
+                            IoC.Logger.Log("State.FlashFwTrackamplifiers => That is on average " + Convert.ToString((float)elapsedtime / FwFlashRequired / 1000) + " seconds per slave.", mLoggerInstance);
+                            IoC.Logger.Log("State.FlashFwTrackamplifiers => EXEC_FW_STATE_FLASH_ALL_SLAVES DONE.", mLoggerInstance);
                             sw.Stop();
                             SubMethodState = 0;
                             returnval = Enums.Finished;
@@ -1146,9 +1148,9 @@ namespace Siebwalde_Application
                         //receivedMessage.Taskcommand != 0 &&
                         //receivedMessage.Taskstate != 0)
                         //{
-                        //    mTrackApplicationLogging.Log(GetType().Name, "State.FlashFwTrackamplifiers => Received data during flashing: TaskId = "
+                        //    IoC.Logger.Log("State.FlashFwTrackamplifiers => Received data during flashing: TaskId = "
                         //        + Convert.ToString(receivedMessage.TaskId) + " Taskcommand = " + Convert.ToString(receivedMessage.Taskcommand)
-                        //        + " Taskstate = " + Convert.ToString(receivedMessage.Taskstate) + " Taskmessage = " + Convert.ToString(receivedMessage.Taskmessage) + ".");
+                        //        + " Taskstate = " + Convert.ToString(receivedMessage.Taskstate) + " Taskmessage = " + Convert.ToString(receivedMessage.Taskmessage) + ".", mLoggerInstance);
                         //}
                         break;
                     }
@@ -1176,7 +1178,7 @@ namespace Siebwalde_Application
                         mSendMessage.Command = TrackCommand.EXEC_MBUS_STATE_SLAVE_INIT;
                         mTrackIOHandle.ActuatorCmd(mSendMessage);
                         SubMethodState += 1;
-                        mTrackApplicationLogging.Log(GetType().Name, "State.InitTrackamplifiers => EXEC_MBUS_STATE_SLAVE_INIT.");
+                        IoC.Logger.Log("State.InitTrackamplifiers => EXEC_MBUS_STATE_SLAVE_INIT.", mLoggerInstance);
                         break;
                     }
                 case 1:
@@ -1185,7 +1187,7 @@ namespace Siebwalde_Application
                             receivedMessage.Taskcommand == EnumMbusStatus.MBUS_STATE_SLAVE_INIT &&
                             receivedMessage.Taskstate == TaskStates.DONE)
                         {
-                            mTrackApplicationLogging.Log(GetType().Name, "State.InitTrackamplifiers => EXEC_MBUS_STATE_SLAVE_INIT DONE.");
+                            IoC.Logger.Log("State.InitTrackamplifiers => EXEC_MBUS_STATE_SLAVE_INIT DONE.", mLoggerInstance);
                             SubMethodState = 0;
                             returnval = Enums.Finished;
                         }
@@ -1212,7 +1214,7 @@ namespace Siebwalde_Application
                         mSendMessage.Command = TrackCommand.EXEC_MBUS_STATE_SLAVE_ENABLE;
                         mTrackIOHandle.ActuatorCmd(mSendMessage);
                         SubMethodState += 1;
-                        mTrackApplicationLogging.Log(GetType().Name, "State.EnableTrackamplifiers => EXEC_MBUS_STATE_SLAVE_ENABLE.");
+                        IoC.Logger.Log("State.EnableTrackamplifiers => EXEC_MBUS_STATE_SLAVE_ENABLE.", mLoggerInstance);
                         break;
                     }
                 case 1:
@@ -1221,7 +1223,7 @@ namespace Siebwalde_Application
                             receivedMessage.Taskcommand == EnumMbusStatus.MBUS_STATE_SLAVE_ENABLE &&
                             receivedMessage.Taskstate == TaskStates.DONE)
                         {
-                            mTrackApplicationLogging.Log(GetType().Name, "State.EnableTrackamplifiers => MBUS_STATE_SLAVE_ENABLE DONE.");
+                            IoC.Logger.Log("State.EnableTrackamplifiers => MBUS_STATE_SLAVE_ENABLE DONE.", mLoggerInstance);
                             SubMethodState = 0;
                             returnval = Enums.Finished;
                         }

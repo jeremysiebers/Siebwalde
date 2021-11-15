@@ -28,7 +28,7 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>2</ApplicationRevision>
+    <ApplicationRevision>3</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -63,7 +63,7 @@
     <GenerateManifests>true</GenerateManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <SignManifests>true</SignManifests>
+    <SignManifests>false</SignManifests>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Ninject, Version=3.3.4.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
@@ -76,6 +76,7 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
@@ -166,6 +167,28 @@
     <Compile Include="Logging\Implementation\ILogger.cs" />
     <Compile Include="Logging\Base\LogFactoryLevel.cs" />
     <Compile Include="Model\SiebwaldeApplicationModel.cs" />
+    <Compile Include="Model\TrackApplication\Controller\TrackAmplifierInitializers\TrackAmplifierBootloaderHelpers.cs" />
+    <Compile Include="Model\TrackApplication\Controller\TrackAmplifierInitializers\TrackAmplifierInitalizationSequencer.cs" />
+    <Compile Include="Model\TrackApplication\Controller\TrackControlMain.cs" />
+    <Compile Include="Model\TrackApplication\Data\TrackApplicationVariables.cs" />
+    <Compile Include="Model\TrackApplication\Data\TrackIOHandle.cs" />
+    <Compile Include="Model\TrackApplication\Model\TrackAmplifierItem.cs" />
+    <Compile Include="Model\TrackApplication\Model\TrackControllerCommands.cs" />
+    <Compile Include="Model\TrackApplication\Pages\TrackAmplifierItemView.xaml.cs">
+      <DependentUpon>TrackAmplifierItemView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Model\TrackApplication\Pages\TrackAmplifierManualControlView.xaml.cs">
+      <DependentUpon>TrackAmplifierManualControlView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Model\TrackApplication\Pages\TrackControlView.xaml.cs">
+      <DependentUpon>TrackControlView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Model\TrackApplication\Services\PublicEnums.cs" />
+    <Compile Include="Model\TrackApplication\Simulator\EthernetTargetDataSimulator.cs" />
+    <Compile Include="Model\TrackApplication\TrackController.cs" />
+    <Compile Include="Model\TrackApplication\ViewModel\TrackAmplifierItemViewModel.cs" />
+    <Compile Include="Model\TrackApplication\ViewModel\TrackAmplifierManualControlViewModel.cs" />
+    <Compile Include="Model\TrackApplication\ViewModel\TrackControlViewModel.cs" />
     <Compile Include="Pages\BasePage.cs" />
     <Compile Include="Pages\FiddleYardPages\FiddleYardPage.xaml.cs">
       <DependentUpon>FiddleYardPage.xaml</DependentUpon>
@@ -199,7 +222,6 @@
     <Compile Include="Services\SenActCmdMes.cs" />
     <Compile Include="Services\Sender.cs" />
     <Compile Include="Settings.cs" />
-    <Compile Include="TrackApplication\Services\PublicEnums.cs" />
     <Compile Include="ValueConverters\MultiBaseValueConverter.cs" />
     <Compile Include="ValueConverters\EnumarableToTextConverter.cs" />
     <Compile Include="ValueConverters\MenuPageValueConverter.cs" />
@@ -256,6 +278,18 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Model\TrackApplication\Pages\TrackAmplifierItemView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Model\TrackApplication\Pages\TrackAmplifierManualControlView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Model\TrackApplication\Pages\TrackControlView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Pages\FiddleYardPages\FiddleYardPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -332,7 +366,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="SiebwaldeApp_TemporaryKey.pfx" />
     <Resource Include="Fonts\Lato-Black.ttf" />
     <Resource Include="Fonts\Lato-BlackItalic.ttf" />
     <Resource Include="Fonts\Lato-Bold.ttf" />

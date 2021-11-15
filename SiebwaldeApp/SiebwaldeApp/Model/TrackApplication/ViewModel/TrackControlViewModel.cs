@@ -1,4 +1,4 @@
-﻿namespace Siebwalde_Application
+﻿namespace SiebwaldeApp
 {
     public class TrackControlViewModel : BaseViewModel
     {

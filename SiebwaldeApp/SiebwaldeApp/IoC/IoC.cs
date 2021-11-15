@@ -41,6 +41,11 @@ namespace SiebwaldeApp
         /// </summary>
         public static ILogFactory Logger => IoC.Get<ILogFactory>();
 
+        /// <summary>
+        /// A shortcut to access the <see cref="TrackApplicationVariables"/>
+        /// </summary>
+        public static TrackApplicationVariables TrackVar => IoC.Get<TrackApplicationVariables>();
+
         #endregion
 
         #region Construction
@@ -69,6 +74,9 @@ namespace SiebwaldeApp
 
             // Bind to a single instance of Siebwalde Application Model
             Kernel.Bind<SiebwaldeApplicationModel>().ToConstant(new SiebwaldeApplicationModel());
+
+            // bind to a single instance of Track Application Variables
+            Kernel.Bind<TrackApplicationVariables>().ToConstant(new TrackApplicationVariables());
         }
 
         #endregion

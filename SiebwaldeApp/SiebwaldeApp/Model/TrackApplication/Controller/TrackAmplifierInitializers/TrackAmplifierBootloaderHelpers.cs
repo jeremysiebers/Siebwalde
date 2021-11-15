@@ -2,21 +2,22 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Windows;
 
-namespace Siebwalde_Application
+namespace SiebwaldeApp
 {
     public class TrackAmplifierBootloaderHelpers
     {
 
         #region Local variables
-
-        private ILogger mTrackApplicationLogging;
+                
         private string PathToFile = null;
         private StreamReader sr;
         private bool ConfigWordReadSuccessful;
         private byte[] mGetConfigWord;
+
+        // Logger instance
+        private string mLoggerInstance { get; set; }
 
         #endregion
 
@@ -25,9 +26,9 @@ namespace Siebwalde_Application
         /// <summary>
         /// constructor
         /// </summary>
-        public TrackAmplifierBootloaderHelpers(string path, ILogger trackApplicationLogging)
+        public TrackAmplifierBootloaderHelpers(string path, string LoggerInstance)
         {
-            mTrackApplicationLogging = trackApplicationLogging;
+            mLoggerInstance = LoggerInstance;
             ConfigWordReadSuccessful = false;
             PathToFile = path;
             try
@@ -89,7 +90,7 @@ namespace Siebwalde_Application
             {
                 if (File.Exists(PathToFile))
                 {
-                    mTrackApplicationLogging.Log(GetType().Name, "Hex file " + PathToFile + " found, start reading...");
+                    IoC.Logger.Log("Hex file " + PathToFile + " found, start reading...", mLoggerInstance);
                     // Getting the HexData of the source file
                     using (StreamReader sr = new StreamReader(PathToFile))
                     {
@@ -102,7 +103,7 @@ namespace Siebwalde_Application
                             byte[] data = StringToByteArray(buffer);
                             GetHexFileData.Add(new byte[][] { address, data });
                         }
-                        mTrackApplicationLogging.Log(GetType().Name, "Hex file slave FW data acquired, read config word...");
+                        IoC.Logger.Log("Hex file slave FW data acquired, read config word...", mLoggerInstance);
 
                         uint loopcounter = 0;
                         bool run = true;
@@ -124,12 +125,12 @@ namespace Siebwalde_Application
 
                             if(loopcounter > 1000)
                             {
-                                mTrackApplicationLogging.Log(GetType().Name, "Failed to aquire Config word.");
+                                IoC.Logger.Log("Failed to aquire Config word.", mLoggerInstance);
                                 ConfigWordReadSuccessful = false;
                                 run = false;
                             }
                         }
-                        mTrackApplicationLogging.Log(GetType().Name, "Config word acquired, calculating checksum on slave FW data...");
+                        IoC.Logger.Log("Config word acquired, calculating checksum on slave FW data...", mLoggerInstance);
 
                     }
 
@@ -151,19 +152,19 @@ namespace Siebwalde_Application
                             }
                         }                        
                     }
-                    mTrackApplicationLogging.Log(GetType().Name, "Checksum of slave FW data acquired.");
+                    IoC.Logger.Log("Checksum of slave FW data acquired.", mLoggerInstance);
                 }
                 else
                 {
                     MessageBox.Show(GetType().Name + "The expected Slave firmware file " + PathToFile + " could not be found!");
-                    mTrackApplicationLogging.Log(GetType().Name, "The expected Slave firmware file " + PathToFile + " could not be found!");
+                    IoC.Logger.Log("The expected Slave firmware file " + PathToFile + " could not be found!", mLoggerInstance);
                     HexFileReadSuccessful = false;
                     return Enums.Error;
                 }
             }
             catch (Exception e)
             {
-                mTrackApplicationLogging.Log(GetType().Name, "Exception occured within this program!");
+                IoC.Logger.Log("Exception occured within this program!", mLoggerInstance);
                 HexFileReadSuccessful = false;
                 MessageBox.Show(e.Message);
                 return Enums.Error;
@@ -172,7 +173,7 @@ namespace Siebwalde_Application
             if(ConfigWordReadSuccessful && GetFileCheckSum != 0)
             {
                 HexFileReadSuccessful = true;
-                mTrackApplicationLogging.Log(GetType().Name, "HexFileReadSuccessful > Finished.");
+                IoC.Logger.Log("HexFileReadSuccessful > Finished.", mLoggerInstance);
             }            
             return Enums.Finished;
         }

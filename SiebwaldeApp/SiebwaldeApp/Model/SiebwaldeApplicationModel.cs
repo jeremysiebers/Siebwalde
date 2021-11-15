@@ -10,7 +10,7 @@ namespace SiebwaldeApp
         //public ObservableCollection<LogList> Log { get; set; }
         //public LogList Logging { get; private set; }
 
-        public List<string> Logging { get; private set; }
+        //public List<string> Logging { get; private set; }
 
         #endregion
 
@@ -25,6 +25,8 @@ namespace SiebwaldeApp
         public const string FYTarget = "FIDDLEYARD";
         public Sender FYSender = new Sender(FYTarget);
         public Receiver FYReceiver;
+
+        public TrackController TrackController;
 
         #endregion
 
@@ -91,38 +93,22 @@ namespace SiebwaldeApp
             IoC.Logger.Log("FiddleYard Controller started.", "");
         }
 
-        public async void StartTrackController()
+        public async Task StartTrackController()
         {
-            IoC.Logger.Log("Fake Track Controller started.", "");
-            await StartTrackControlApp();
-        }
-
-        /// <summary>
-        /// Does some work asynchronously for somebody
-        /// </summary>
-        /// <param name="forWho">Who we are doing the work for</param>
-        /// <returns></returns>
-        private static async Task StartTrackControlApp()
-        {
-            // Log it
-            IoC.Logger.Log($"Doing work for","");
-
-            // Start a new task (so it runs on a different thread)
-            await Task.Run(async () =>
+            if (TrackController == null)
             {
-                // Log it
-                IoC.Logger.Log($"Doing work on inner thread for ","");
+                IoC.Logger.Log("Track Controller starting...", "");
 
-                // Wait 
-                await Task.Delay(500);
+                TrackController = new TrackController(Properties.Settings.Default.TrckReceivingPort, Properties.Settings.Default.TrckSendingPort);
 
-                // Log it
-                IoC.Logger.Log($"Done work on inner thread for","");
-            });
+                await TrackController.StartTrackControllerAsync();
 
-            // Log it
-            IoC.Logger.Log($"Done work for ","");
+                IoC.Logger.Log("Track Controller started.", "");
+            }
+            
         }
+
+        
 
     }
 }
