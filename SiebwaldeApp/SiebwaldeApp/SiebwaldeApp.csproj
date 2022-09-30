@@ -28,7 +28,7 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>3</ApplicationRevision>
+    <ApplicationRevision>4</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -167,6 +167,16 @@
     <Compile Include="Logging\Implementation\ILogger.cs" />
     <Compile Include="Logging\Base\LogFactoryLevel.cs" />
     <Compile Include="Model\SiebwaldeApplicationModel.cs" />
+    <Compile Include="Model\TrackApplication\Controller\TrackAmplifierInitializers\AmplifierInitializersBaseClass.cs" />
+    <Compile Include="Model\TrackApplication\Controller\TrackAmplifierInitializers\RecoverSlaves.cs" />
+    <Compile Include="Model\TrackApplication\Controller\TrackAmplifierInitializers\EnableTrackamplifiers.cs" />
+    <Compile Include="Model\TrackApplication\Controller\TrackAmplifierInitializers\InitTrackamplifiers.cs" />
+    <Compile Include="Model\TrackApplication\Controller\TrackAmplifierInitializers\FlashFwTrackamplifiers.cs" />
+    <Compile Include="Model\TrackApplication\Controller\TrackAmplifierInitializers\DetectSlaves.cs" />
+    <Compile Include="Model\TrackApplication\Controller\TrackAmplifierInitializers\DataUpload.cs" />
+    <Compile Include="Model\TrackApplication\Controller\TrackAmplifierInitializers\ResetAllSlaves.cs" />
+    <Compile Include="Model\TrackApplication\Controller\TrackAmplifierInitializers\ConnectToEthernetTarget.cs" />
+    <Compile Include="Model\TrackApplication\Controller\TrackAmplifierInitializers\SendNextFwDataPacket.cs" />
     <Compile Include="Model\TrackApplication\Controller\TrackAmplifierInitializers\TrackAmplifierBootloaderHelpers.cs" />
     <Compile Include="Model\TrackApplication\Controller\TrackAmplifierInitializers\TrackAmplifierInitalizationSequencer.cs" />
     <Compile Include="Model\TrackApplication\Controller\TrackControlMain.cs" />

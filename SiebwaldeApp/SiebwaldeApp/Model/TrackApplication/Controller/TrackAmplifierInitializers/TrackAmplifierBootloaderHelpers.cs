@@ -8,7 +8,6 @@ namespace SiebwaldeApp
 {
     public class TrackAmplifierBootloaderHelpers
     {
-
         #region Local variables
                 
         private string PathToFile = null;
@@ -78,7 +77,7 @@ namespace SiebwaldeApp
         /// <summary>
         /// Start the reading process and get all the info
         /// </summary>
-        public uint Start()
+        public uint Execute()
         {
             ushort ProcessLines = Convert.ToUInt16((Enums.PROGMEMSIZE - Enums.BOOTLOADEROFFSET) / Enums.HEXROWWIDTH);
             string line;

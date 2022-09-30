@@ -137,59 +137,25 @@ namespace SiebwaldeApp
 
         #endregion
 
-        #region ShowHmiTrackControlWindow
-
-        /// <summary>
-        /// Show the HmiTrackControlWindow
-        /// </summary>
-        //public static void ShowHmiTrackControlWindow()
-        //{
-        //    var wpfwindow = new HmiTrackControl(); //WPFWindow.Window1();
-        //    ElementHost.EnableModelessKeyboardInterop(wpfwindow);
-        //    wpfwindow.Show();
-        //    //if (hmiTrackForm != null && hmiTrackForm.IsDisposed != true)
-        //    //{
-        //    //    if (hmiTrackForm.Visible && hmiTrackForm.WindowState != FormWindowState.Minimized)
-        //    //    {
-        //    //        hmiTrackForm.Hide();
-        //    //    }
-        //    //    else
-        //    //    {
-        //    //        hmiTrackForm.Show();
-        //    //        hmiTrackForm.TopLevel = true;
-        //    //        hmiTrackForm.BringToFront();
-
-        //    //        if (hmiTrackForm.WindowState == FormWindowState.Minimized)
-        //    //        {
-        //    //            hmiTrackForm.WindowState = FormWindowState.Maximized;
-        //    //        }
-        //    //    }
-        //    //}
-        //    //else
-        //    //{                
-        //    //    hmiTrackForm = new HmiTrackControlForm();
-        //    //    hmiTrackForm.Show();
-        //    //    hmiTrackForm.TopLevel = true;
-        //    //    hmiTrackForm.BringToFront();
-        //    //    hmiTrackForm.WindowState = FormWindowState.Maximized;
-        //    //}
-        //}
-
-        #endregion
-
         #region Start method of the Track application
 
         /// <summary>
         /// Start the Track Main Application
         /// </summary>
-        internal void Start()
+        internal void Start(bool TrackRealMode)
         {
             AppUpdateTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
             AppUpdateTimer.Interval = 50;
             AppUpdateTimer.AutoReset = true;
             // Enable the timer
             AppUpdateTimer.Enabled = true;
-            IoC.Logger.Log("Track Application started.", mLoggerInstance);            
+            IoC.Logger.Log("Track Application started.", mLoggerInstance);   
+            
+            // When in real mode start initializing the amplifiers
+            if (TrackRealMode)
+            {
+                TrackApplicationUpdate("StartInitializeTrackAmplifiers", 0);
+            }
         }
 
         #endregion
