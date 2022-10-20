@@ -1,4 +1,6 @@
-﻿namespace SiebwaldeApp
+﻿using System.Windows.Controls;
+
+namespace SiebwaldeApp
 {
     /// <summary>
     /// Interaction logic for SiebwaldePage.xaml
