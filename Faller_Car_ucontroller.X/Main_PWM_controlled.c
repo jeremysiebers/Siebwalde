@@ -35,16 +35,12 @@ static void Init_Timers(void);  // Initialize Timers (0)
 static void Init_IO(void);      // Init IO
 static void Init_ADC(void);     // init ADC
 
-uint16_t PWM1_DUTY = 7;
-uint16_t PWM1_COUNT = 0;
-uint16_t SAMPLE_DELAY = 500;
-uint16_t SAMPLE_DELAY_COUNT = 0;
-uint8_t MEAS_DELAY = 0;
-uint8_t MEAS_DELAY_COUNT = 0;
+uint16_t Pulses = 0;                        // Pulses counter to generate 50 Hz servo pulse
+uint16_t Update_Tick = 0;
+uint16_t Output_Enable_Delay = 0;
+
 uint16_t calc = 0;
 uint8_t i = 0;
-uint8_t Measure = False;
-uint8_t Measure_Prev = False;
 
 //MAIN ROUTINE/////////////////////////////////////////////////////////////////////////////////////////
 
@@ -67,11 +63,11 @@ void main(void)
 
     while (On) // Infinite loop
     {
-//        BRKLED = Off;
+        BRKLED = Off;
         
         switch(i)
         {
-            case 0  :                
+            case 0  :
                 ADCON0bits.GO_DONE = 1;
                 BRKLED = On;
                 i = 1;
@@ -79,8 +75,9 @@ void main(void)
                 
             case 1  :
                 if (ADCON0bits.GO_DONE == 0){
-//                    TRISIO0 = 0;                                                // Set servo_out to output to enable drive
                     BRKLED = Off;
+//                    result = ADRESL;
+//                    result |= (uint16_t)(ADRESH << 8);
                     result = (uint16_t)((ADRESH << 8) | ADRESL);
                     i = 2;
                 }
@@ -88,49 +85,30 @@ void main(void)
                 
             case 2  :
                 BRKLED = On;
-                if(result > 410){
-                   PWM1_DUTY++; 
-                }                
-                if(result < 400){
-                    PWM1_DUTY--;
+                calc = 1023 - result;
+                if(calc > 1023){
+                    calc = 1023;
                 }
                 
-                // saturation levels:
-                if(PWM1_DUTY > 60){
-                    PWM1_DUTY = 60;
+                if(calc < 1){
+                    calc = 0xFB00;
                 }
-                if(PWM1_DUTY < 5){
-                    PWM1_DUTY = 5;
-                }
+                else{
+                    calc *= 30;
+                    calc = 0xFB00 - calc; //(0xFB00 - ((0x400 - result)*0xF));
+                    if(calc < 0xE040){
+                        calc = 0xE040;
+                        BRKLED = On;
+                    } 
+                }              
                 BRKLED = Off;
                 i = 10;
                 break;
                 
             case 10 :
-                SAMPLE_DELAY_COUNT++;
-                if(SAMPLE_DELAY_COUNT > SAMPLE_DELAY){
-                    SAMPLE_DELAY_COUNT = 0;
-                    i = 11;
-                }
                 break;
                 
-            case 11 :
-                if(Measure == True && Measure_Prev == False){
-                   i = 12;
-                   Measure_Prev = True;
-//                   TRISIO0 = 1;                                                    // Set servo_out to input to disable drive
-                }
-                break;
-                
-            case 12 :
-                MEAS_DELAY_COUNT++;
-                if(MEAS_DELAY_COUNT > MEAS_DELAY){
-                    MEAS_DELAY_COUNT = 0;
-                    i = 0;
-                }
-                break;
-                
-            default: i = 11;
+            default: i = 0;
                 break;
         }
     }
@@ -147,41 +125,17 @@ void __interrupt() isr(void)
 
     if (T0IF) // If Timer 0 interrupt
     {
-        PWM1_COUNT++;
-        if(PWM1_COUNT > PWM1_DUTY ){
-            ServoOut = Off;
-            Measure = False;
-            Measure_Prev = False;
-        }
-        else{
-            ServoOut = On;
-            Measure = True;
-        }
-        
-        if(PWM1_COUNT > 63){
-            PWM1_COUNT = 0;
-            ServoOut = On;
-        }
-        
-        
-        
-        
-        
-        
-        
-        
-//        ServoOut = On;
-//        TMR1H = (calc >> 8);
-//        TMR1L = (uint8_t) calc;
-//        i = 0;
-//        TMR1ON = Off;
-        TMR0 = 0xC0;
+        ServoOut = On;
+        TMR1H = (calc >> 8);
+        TMR1L = (uint8_t) calc;
+        i = 0;
+        TMR1ON = On;
         T0IF = Off; // Clear Timer 0 interrupt flag
     }
 
     if (TMR1IF) // If Timer 0 interrupt
     {
-//        ServoOut = Off;
+        ServoOut = Off;
         TMR1ON = Off;        
         TMR1IF = Off;
     }
@@ -230,7 +184,7 @@ static void Init_Timers(void)
     // TMR0 prescaler
     OPTION_REGbits.PS0      = 0;
     OPTION_REGbits.PS1      = 0;
-    OPTION_REGbits.PS2      = 0; // 1:32 --> (FOSC/4) /32 /256 = ~134Hz(measured)
+    OPTION_REGbits.PS2      = 1; // 1:32 --> (FOSC/4) /32 /256 = ~134Hz(measured)
     
     OPTION_REGbits.PSA      = 0;
     OPTION_REGbits.T0SE     = 0;

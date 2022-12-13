@@ -88,10 +88,10 @@ void main(void)
                 
             case 2  :
                 BRKLED = On;
-                if(result > 410){
+                if(result > 360){
                    PWM1_DUTY++; 
                 }                
-                if(result < 400){
+                if(result < 350){
                     PWM1_DUTY--;
                 }
                 
