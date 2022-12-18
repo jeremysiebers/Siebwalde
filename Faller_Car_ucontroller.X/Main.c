@@ -42,23 +42,35 @@
 */
 
 #include "mcc_generated_files/mcc.h"
-/*
-                         Set Methods here
- */
-void TMR0_INT(void);
-void LED_FLASH(void);
+#include "Main.h"
+#include "executer.h"
+#include "mcc_generated_files/adc.h"
+/******************************************************************************/
+/*          Methods                                                              */
+/******************************************************************************/
 
+/******************************************************************************/
+/*          Local variables                                                              */
+/******************************************************************************/
 
-/*
-                         Main application
- */
+bool         UpdateLeds     = false;
+bool         UpdateRcs      = false;
+bool         UpdateVbatt    = false;
+bool         BattProtect    = false;
+bool         CarrOff        = false;
+uint8_t      AdcState       = 0;
+adc_result_t AdcResult[AdcSize] = {1023,1023,1023,1023,1023,1023,1023,1023};
+adc_result_t AdcResultSample= 0;
+adc_result_t AdcResultAvg   = 0;
+uint8_t      pAdcResult     = 0;
 
-uint16_t    TimerToggleCnt = 0;
-bool        TimerToggle = false;
+/******************************************************************************/
+/*          Main                                                              */
+/******************************************************************************/
 
 void main(void)
 {
-    // initialize the device
+    // Initialize the device
     SYSTEM_Initialize();
 
     // When using interrupts, you need to set the Global and Peripheral Interrupt Enable bits
@@ -76,42 +88,100 @@ void main(void)
     // Disable the Peripheral Interrupts
     //INTERRUPT_PeripheralInterruptDisable();
     
+    /* Setup Timer interrupt */
     TMR0_SetInterruptHandler(TMR0_INT);
-    DASHLED_SetHigh();
+    TMR1_SetInterruptHandler(TMR1_INT);
+    /* Setup RCS pin interrupt */
+    IOCCF1_SetInterruptHandler(RCS_INT);  
+    /* Setup ADC Channel selection */
+    ADC_SelectChannel(Vbatt);
     
-    
+    INITxEXECUTER();
+       
     while (1)
     {
-        if(TimerToggleCnt > 99){
-            TimerToggleCnt = 0;
-            TimerToggle = ~TimerToggle;
+        /* Main Led routine updater */
+        if(UpdateLeds){
+            if (EXECUTExEFFECT() == finished )                                  // When all switch cases are stable in the underlying routines
+            {                
+                UpdateLeds = false;                                             // Set to OFF for next update of timer0
+            }
         }
         
-        LED_FLASH();
+        /* When reed contact switch sees a magnet, the car has to stop */
+        if(UpdateRcs && !CarrOff){
+            RCSxLED();
+            UpdateRcs = false;
+        }
+        
+        /* Measure the Battery voltage and calc average */
+        if(UpdateVbatt){
+            switch(AdcState){
+                case 0: ADC_StartConversion();
+                        AdcState = 1;
+                    break;
+                case 1: if(ADC_IsConversionDone()){                            
+                            AdcResultSample = ADC_GetConversionResult();
+                            AdcResult[pAdcResult] = AdcResultSample;
+                                    
+                            pAdcResult++;
+                            if(pAdcResult > AdcRef){
+                                pAdcResult = 0;
+                            }
+                            
+                            AdcResultAvg = 0;
+                            for(uint8_t i=0; i < AdcSize; i++){
+                                AdcResultAvg += AdcResult[i];
+                            };
+                            /* 8 samples --> divide by 8 = 3 bits shift */
+                            AdcResultAvg = AdcResultAvg >> 3;
+                            if (AdcResultAvg < 800){
+                               BattProtect = true; 
+                            }
+                            UpdateVbatt = false;
+                            AdcState = 0;
+                        }                        
+                    break;
+                    
+                default: AdcState = 0;
+                    break;
+            }
+        }
+         /* When battery voltage is too low, execute protection */
+        if(BattProtect){            
+            /* Call indication once */
+            BATTxPROTECT();
+            BattProtect = false;
+            /* Block RCS interrupt from overwriting */
+            CarrOff = true;
+        }
+        CLRWDT();
     }
 }
 
-/*
-                         Interrupt routines
- */
-
+/******************************************************************************/
+/*          Timer Interrupt Routines                                                */
+/******************************************************************************/
 void TMR0_INT()
 {
-    EN_MOT_Toggle();
-    TimerToggleCnt++;
+    UpdateLeds = true;    
+}
+
+void TMR1_INT(){
+    /* Check battery voltage (every 10 seconds) */
+    UpdateVbatt = true;
+}
+
+/******************************************************************************/
+/*          Pin Interrupts                                                    */
+/******************************************************************************/
+void RCS_INT()
+{
+    /* Call RCS LED to prevent duplicated code */
+    UpdateRcs = true;
+    /* Restart Timer 1 to indicate car is driving and has actively stopped */
+    TMR1_Reload();
 }
 /**
  End of File
 */
-
-void LED_FLASH()
-{
-    if(TimerToggle){
-        PWM1_LoadDutyValue(0);
-        PWM2_LoadDutyValue(1023);
-    }
-    else{
-        PWM1_LoadDutyValue(1023);
-        PWM2_LoadDutyValue(0);
-    }
-}

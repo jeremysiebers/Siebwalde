@@ -126,8 +126,8 @@
      PWM3_LoadDutyValue(dutycycle);
      </code>
  */
- void PWM3_LoadDutyValue(uint16_t dutyValue);
-
+ void PWM3_LoadDutyValue(uint16_t dutyValue); 
+ 
  
  #ifdef __cplusplus  // Provide C++ Compatibility
 

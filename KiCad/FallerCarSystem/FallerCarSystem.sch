@@ -214,7 +214,7 @@ L Device:R R2
 U 1 1 639A6230
 P 2400 4150
 F 0 "R2" H 2470 4196 50  0000 L CNN
-F 1 "1k" H 2470 4105 50  0000 L CNN
+F 1 "4.7k" H 2470 4105 50  0000 L CNN
 F 2 "" V 2330 4150 50  0001 C CNN
 F 3 "~" H 2400 4150 50  0001 C CNN
 	1    2400 4150
@@ -339,23 +339,23 @@ $EndComp
 $Comp
 L Device:R R10
 U 1 1 639E8742
-P 8950 2850
-F 0 "R10" V 9157 2850 50  0000 C CNN
-F 1 "100E" V 9066 2850 50  0000 C CNN
-F 2 "" V 8880 2850 50  0001 C CNN
-F 3 "~" H 8950 2850 50  0001 C CNN
-	1    8950 2850
+P 9700 2850
+F 0 "R10" V 9907 2850 50  0000 C CNN
+F 1 "100E" V 9816 2850 50  0000 C CNN
+F 2 "" V 9630 2850 50  0001 C CNN
+F 3 "~" H 9700 2850 50  0001 C CNN
+	1    9700 2850
 	-1   0    0    1   
 $EndComp
 $Comp
 L Device:R R9
 U 1 1 639EBB86
-P 8950 2300
-F 0 "R9" H 9020 2346 50  0000 L CNN
-F 1 "10k" H 9020 2255 50  0000 L CNN
-F 2 "" V 8880 2300 50  0001 C CNN
-F 3 "~" H 8950 2300 50  0001 C CNN
-	1    8950 2300
+P 9700 2300
+F 0 "R9" H 9770 2346 50  0000 L CNN
+F 1 "10k" H 9770 2255 50  0000 L CNN
+F 2 "" V 9630 2300 50  0001 C CNN
+F 3 "~" H 9700 2300 50  0001 C CNN
+	1    9700 2300
 	1    0    0    -1  
 $EndComp
 Text Notes 3550 5550 0    50   ~ 0
@@ -397,17 +397,15 @@ Wire Wire Line
 	4500 3850 4500 4000
 Wire Wire Line
 	4500 4300 4500 4400
-Text Notes 4700 5650 0    50   ~ 0
-Front Lights\nYellow 3V x3\n2mA\nmcl-s250yc
 Wire Wire Line
 	6800 1550 6950 1550
 Wire Wire Line
 	8350 1550 7900 1550
 Connection ~ 7900 1550
 Wire Wire Line
-	8350 2400 8350 2300
+	8350 2400 8350 2350
 Wire Wire Line
-	8350 1800 8350 1550
+	8350 1800 8350 1650
 $Comp
 L power:-BATT #PWR010
 U 1 1 63AA556D
@@ -426,23 +424,21 @@ Wire Wire Line
 $Comp
 L power:-BATT #PWR016
 U 1 1 63ADE5C4
-P 8950 1150
-F 0 "#PWR016" H 8950 1000 50  0001 C CNN
-F 1 "-BATT" H 8965 1323 50  0000 C CNN
-F 2 "" H 8950 1150 50  0001 C CNN
-F 3 "" H 8950 1150 50  0001 C CNN
-	1    8950 1150
+P 9700 1150
+F 0 "#PWR016" H 9700 1000 50  0001 C CNN
+F 1 "-BATT" H 9715 1323 50  0000 C CNN
+F 2 "" H 9700 1150 50  0001 C CNN
+F 3 "" H 9700 1150 50  0001 C CNN
+	1    9700 1150
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	8950 1150 8950 2150
+	9700 1150 9700 2150
 Wire Wire Line
-	8950 2450 8950 2600
+	9700 2450 9700 2600
 Wire Wire Line
-	8950 2600 8650 2600
-Wire Wire Line
-	8950 2600 8950 2700
-Connection ~ 8950 2600
+	9700 2600 9700 2700
+Connection ~ 9700 2600
 Wire Wire Line
 	8350 2800 8350 3050
 Wire Wire Line
@@ -539,8 +535,6 @@ F 3 "http://ww1.microchip.com/downloads/en/DeviceDoc/PIC16LF15356-75-76-85-86-Da
 	1    4400 3100
 	1    0    0    -1  
 $EndComp
-Wire Wire Line
-	3300 1500 3450 1500
 Connection ~ 3300 1500
 Wire Wire Line
 	4400 2100 4400 1500
@@ -560,29 +554,6 @@ F 3 "~" H 950 4000 50  0001 C CNN
 $EndComp
 Text GLabel 3300 2300 0    50   Input ~ 0
 Vpp
-Wire Wire Line
-	3300 2300 3450 2300
-$Comp
-L Device:R R?
-U 1 1 63A04FA2
-P 3450 1900
-F 0 "R?" H 3520 1946 50  0000 L CNN
-F 1 "4.7k" H 3520 1855 50  0000 L CNN
-F 2 "" V 3380 1900 50  0001 C CNN
-F 3 "~" H 3450 1900 50  0001 C CNN
-	1    3450 1900
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	3450 2050 3450 2300
-Connection ~ 3450 2300
-Wire Wire Line
-	3450 2300 3600 2300
-Wire Wire Line
-	3450 1500 3450 1750
-Connection ~ 3450 1500
-Wire Wire Line
-	3450 1500 4400 1500
 Text GLabel 1450 3800 2    50   Input ~ 0
 Vpp
 Wire Wire Line
@@ -638,10 +609,10 @@ F 3 "" H 4400 3250 50  0001 C CNN
 $EndComp
 Wire Wire Line
 	4400 3250 4400 3100
-Text GLabel 8950 3200 3    50   Input ~ 0
+Text GLabel 9700 3200 3    50   Input ~ 0
 ICSPDAT_ENMOT
 Wire Wire Line
-	8950 3000 8950 3200
+	9700 3000 9700 3200
 Text GLabel 5550 2500 2    50   Input ~ 0
 DASHLED
 Text GLabel 3300 2400 0    50   Input ~ 0
@@ -650,36 +621,24 @@ Wire Wire Line
 	3300 2400 3600 2400
 Wire Wire Line
 	3300 2500 3600 2500
-Text GLabel 3300 2600 0    50   Input ~ 0
-LedRRight
-Text GLabel 3300 2700 0    50   Input ~ 0
-LedRLeft
-Text GLabel 3300 2800 0    50   Input ~ 0
-LedFRight
 Text GLabel 3300 2900 0    50   Input ~ 0
-LedFLeft
-Wire Wire Line
-	3300 2600 3600 2600
-Wire Wire Line
-	3600 2700 3300 2700
-Wire Wire Line
-	3300 2800 3600 2800
-Wire Wire Line
-	3600 2900 3300 2900
+LedFrRight
+Text GLabel 3300 2800 0    50   Input ~ 0
+LedFrLeft
 Text GLabel 5550 2600 2    50   Input ~ 0
+LedRRight
+Text GLabel 3300 2600 0    50   Input ~ 0
+LedFLeft
+Text GLabel 3300 2700 0    50   Input ~ 0
 LedFRight
 Text GLabel 5550 2700 2    50   Input ~ 0
-LedFLeft
+LedRLeft
 Wire Wire Line
 	5550 2300 5200 2300
 Wire Wire Line
 	5200 2400 5550 2400
 Wire Wire Line
 	5550 2500 5200 2500
-Wire Wire Line
-	5200 2600 5550 2600
-Wire Wire Line
-	5550 2700 5200 2700
 $Comp
 L power:-BATT #PWR?
 U 1 1 63A97366
@@ -906,14 +865,6 @@ Text GLabel 3650 4800 3    50   Input ~ 0
 LedFLeft
 Text GLabel 4050 4800 3    50   Input ~ 0
 LedFRight
-Text GLabel 4500 4800 3    50   Input ~ 0
-LedRLeft
-Text GLabel 4900 4800 3    50   Input ~ 0
-LedRRight
-Text GLabel 5750 4800 3    50   Input ~ 0
-LedFLeft
-Text GLabel 6150 4800 3    50   Input ~ 0
-LedFLeft
 Text GLabel 5300 4800 3    50   Input ~ 0
 DASHLED
 Wire Wire Line
@@ -931,9 +882,84 @@ Wire Wire Line
 Wire Wire Line
 	6150 4700 6150 4800
 Wire Wire Line
-	2400 4800 2400 5000
+	2400 4800 2400 4900
 Wire Wire Line
 	1350 4350 1350 4000
 Wire Wire Line
 	1350 4000 1150 4000
+$Comp
+L Device:R R?
+U 1 1 639DE365
+P 2100 4650
+F 0 "R?" H 2170 4696 50  0000 L CNN
+F 1 "4.7k" H 2170 4605 50  0000 L CNN
+F 2 "" V 2030 4650 50  0001 C CNN
+F 3 "~" H 2100 4650 50  0001 C CNN
+	1    2100 4650
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2100 4500 2100 4400
+Wire Wire Line
+	2100 4400 2400 4400
+Wire Wire Line
+	2400 4900 2100 4900
+Wire Wire Line
+	2100 4900 2100 4800
+Connection ~ 2400 4900
+Wire Wire Line
+	2400 4900 2400 5000
+Wire Wire Line
+	3600 2600 3300 2600
+Wire Wire Line
+	3300 2700 3600 2700
+Wire Wire Line
+	3600 2800 3300 2800
+Wire Wire Line
+	3300 2900 3600 2900
+Wire Wire Line
+	5550 2600 5200 2600
+Wire Wire Line
+	5550 2700 5200 2700
+Wire Wire Line
+	3300 1500 4400 1500
+Wire Wire Line
+	3300 2300 3600 2300
+Text Notes 4450 5600 0    50   ~ 0
+Front Lights\nYellow 3V x3\n2mA\nmcl-s250yc
+Text GLabel 5750 4800 3    50   Input ~ 0
+LedRLeft
+Text GLabel 6150 4800 3    50   Input ~ 0
+LedRRight
+Text GLabel 4900 4800 3    50   Input ~ 0
+LedFrRight
+Text GLabel 4500 4800 3    50   Input ~ 0
+LedFrLeft
+$Comp
+L Diode:1N4148W D?
+U 1 1 63A3C7A6
+P 8950 2050
+F 0 "D?" V 8904 2130 50  0000 L CNN
+F 1 "1N4148W" V 8995 2130 50  0000 L CNN
+F 2 "Diode_SMD:D_SOD-123" H 8950 1875 50  0001 C CNN
+F 3 "https://www.vishay.com/docs/85748/1n4148w.pdf" H 8950 2050 50  0001 C CNN
+	1    8950 2050
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	8650 2600 9700 2600
+Wire Wire Line
+	8950 1900 8950 1650
+Wire Wire Line
+	8950 1650 8350 1650
+Connection ~ 8350 1650
+Wire Wire Line
+	8350 1650 8350 1550
+Wire Wire Line
+	8950 2200 8950 2350
+Wire Wire Line
+	8950 2350 8350 2350
+Connection ~ 8350 2350
+Wire Wire Line
+	8350 2350 8350 2300
 $EndSCHEMATC

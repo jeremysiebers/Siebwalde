@@ -85,25 +85,17 @@
 #define EN_MOT_SetAnalogMode()      do { ANSELAbits.ANSA0 = 1; } while(0)
 #define EN_MOT_SetDigitalMode()     do { ANSELAbits.ANSA0 = 0; } while(0)
 
-// get/set UNUSED aliases
-#define UNUSED_TRIS                 TRISAbits.TRISA1
-#define UNUSED_LAT                  LATAbits.LATA1
-#define UNUSED_PORT                 PORTAbits.RA1
-#define UNUSED_WPU                  WPUAbits.WPUA1
-#define UNUSED_OD                   ODCONAbits.ODCA1
-#define UNUSED_ANS                  ANSELAbits.ANSA1
-#define UNUSED_SetHigh()            do { LATAbits.LATA1 = 1; } while(0)
-#define UNUSED_SetLow()             do { LATAbits.LATA1 = 0; } while(0)
-#define UNUSED_Toggle()             do { LATAbits.LATA1 = ~LATAbits.LATA1; } while(0)
-#define UNUSED_GetValue()           PORTAbits.RA1
-#define UNUSED_SetDigitalInput()    do { TRISAbits.TRISA1 = 1; } while(0)
-#define UNUSED_SetDigitalOutput()   do { TRISAbits.TRISA1 = 0; } while(0)
-#define UNUSED_SetPullup()          do { WPUAbits.WPUA1 = 1; } while(0)
-#define UNUSED_ResetPullup()        do { WPUAbits.WPUA1 = 0; } while(0)
-#define UNUSED_SetPushPull()        do { ODCONAbits.ODCA1 = 0; } while(0)
-#define UNUSED_SetOpenDrain()       do { ODCONAbits.ODCA1 = 1; } while(0)
-#define UNUSED_SetAnalogMode()      do { ANSELAbits.ANSA1 = 1; } while(0)
-#define UNUSED_SetDigitalMode()     do { ANSELAbits.ANSA1 = 0; } while(0)
+// get/set RA1 procedures
+#define RA1_SetHigh()            do { LATAbits.LATA1 = 1; } while(0)
+#define RA1_SetLow()             do { LATAbits.LATA1 = 0; } while(0)
+#define RA1_Toggle()             do { LATAbits.LATA1 = ~LATAbits.LATA1; } while(0)
+#define RA1_GetValue()              PORTAbits.RA1
+#define RA1_SetDigitalInput()    do { TRISAbits.TRISA1 = 1; } while(0)
+#define RA1_SetDigitalOutput()   do { TRISAbits.TRISA1 = 0; } while(0)
+#define RA1_SetPullup()             do { WPUAbits.WPUA1 = 1; } while(0)
+#define RA1_ResetPullup()           do { WPUAbits.WPUA1 = 0; } while(0)
+#define RA1_SetAnalogMode()         do { ANSELAbits.ANSA1 = 1; } while(0)
+#define RA1_SetDigitalMode()        do { ANSELAbits.ANSA1 = 0; } while(0)
 
 // get/set DASHLED aliases
 #define DASHLED_TRIS                 TRISAbits.TRISA2
@@ -124,6 +116,23 @@
 #define DASHLED_SetOpenDrain()       do { ODCONAbits.ODCA2 = 1; } while(0)
 #define DASHLED_SetAnalogMode()      do { ANSELAbits.ANSA2 = 1; } while(0)
 #define DASHLED_SetDigitalMode()     do { ANSELAbits.ANSA2 = 0; } while(0)
+
+// get/set IO_RA3 aliases
+#define IO_RA3_TRIS                 TRISAbits.TRISA3
+#define IO_RA3_LAT                  LATAbits.LATA3
+#define IO_RA3_PORT                 PORTAbits.RA3
+#define IO_RA3_WPU                  WPUAbits.WPUA3
+#define IO_RA3_OD                   ODCONAbits.ODCA3
+#define IO_RA3_SetHigh()            do { LATAbits.LATA3 = 1; } while(0)
+#define IO_RA3_SetLow()             do { LATAbits.LATA3 = 0; } while(0)
+#define IO_RA3_Toggle()             do { LATAbits.LATA3 = ~LATAbits.LATA3; } while(0)
+#define IO_RA3_GetValue()           PORTAbits.RA3
+#define IO_RA3_SetDigitalInput()    do { TRISAbits.TRISA3 = 1; } while(0)
+#define IO_RA3_SetDigitalOutput()   do { TRISAbits.TRISA3 = 0; } while(0)
+#define IO_RA3_SetPullup()          do { WPUAbits.WPUA3 = 1; } while(0)
+#define IO_RA3_ResetPullup()        do { WPUAbits.WPUA3 = 0; } while(0)
+#define IO_RA3_SetPushPull()        do { ODCONAbits.ODCA3 = 0; } while(0)
+#define IO_RA3_SetOpenDrain()       do { ODCONAbits.ODCA3 = 1; } while(0)
 
 // get/set RA4 procedures
 #define RA4_SetHigh()            do { LATAbits.LATA4 = 1; } while(0)
@@ -260,6 +269,90 @@ void PIN_MANAGER_Initialize (void);
     PIN_MANAGER_IOC();
  */
 void PIN_MANAGER_IOC(void);
+
+
+/**
+ * @Param
+    none
+ * @Returns
+    none
+ * @Description
+    Interrupt on Change Handler for the IOCCF1 pin functionality
+ * @Example
+    IOCCF1_ISR();
+ */
+void IOCCF1_ISR(void);
+
+/**
+  @Summary
+    Interrupt Handler Setter for IOCCF1 pin interrupt-on-change functionality
+
+  @Description
+    Allows selecting an interrupt handler for IOCCF1 at application runtime
+    
+  @Preconditions
+    Pin Manager intializer called
+
+  @Returns
+    None.
+
+  @Param
+    InterruptHandler function pointer.
+
+  @Example
+    PIN_MANAGER_Initialize();
+    IOCCF1_SetInterruptHandler(MyInterruptHandler);
+
+*/
+void IOCCF1_SetInterruptHandler(void (* InterruptHandler)(void));
+
+/**
+  @Summary
+    Dynamic Interrupt Handler for IOCCF1 pin
+
+  @Description
+    This is a dynamic interrupt handler to be used together with the IOCCF1_SetInterruptHandler() method.
+    This handler is called every time the IOCCF1 ISR is executed and allows any function to be registered at runtime.
+    
+  @Preconditions
+    Pin Manager intializer called
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    PIN_MANAGER_Initialize();
+    IOCCF1_SetInterruptHandler(IOCCF1_InterruptHandler);
+
+*/
+extern void (*IOCCF1_InterruptHandler)(void);
+
+/**
+  @Summary
+    Default Interrupt Handler for IOCCF1 pin
+
+  @Description
+    This is a predefined interrupt handler to be used together with the IOCCF1_SetInterruptHandler() method.
+    This handler is called every time the IOCCF1 ISR is executed. 
+    
+  @Preconditions
+    Pin Manager intializer called
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    PIN_MANAGER_Initialize();
+    IOCCF1_SetInterruptHandler(IOCCF1_DefaultInterruptHandler);
+
+*/
+void IOCCF1_DefaultInterruptHandler(void);
 
 
 
