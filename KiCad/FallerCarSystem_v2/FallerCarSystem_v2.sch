@@ -14,34 +14,12 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 $Comp
-L Battery_Management:MCP73871-2AA U2
-U 1 1 63A20AF7
-P 5000 2300
-F 0 "U2" H 5400 1450 50  0000 C CNN
-F 1 "MCP73871-2AA" H 4600 3150 50  0000 C CNN
-F 2 "Package_DFN_QFN:QFN-20-1EP_4x4mm_P0.5mm_EP2.5x2.5mm_ThermalVias" H 5200 1400 50  0001 L CIN
-F 3 "http://www.mouser.com/ds/2/268/22090a-52174.pdf" H 4850 2850 50  0001 C CNN
-	1    5000 2300
-	1    0    0    -1  
-$EndComp
-$Comp
-L FallerCarSystem_v2-rescue:PIC16F15345-I_GZ-MCU_Microchip_PIC16 U1
-U 1 1 63A50E46
-P 4900 4850
-F 0 "U1" H 5900 4150 50  0000 C CNN
-F 1 "PIC16F15345-I_GZ" H 4100 5550 50  0000 C CNN
-F 2 "Package_DFN_QFN:QFN-20-1EP_4x4mm_P0.5mm_EP2.7x2.7mm" H 4900 4850 50  0001 C CNN
-F 3 "http://ww1.microchip.com/downloads/en/DeviceDoc/41586A.pdf" H 4900 4850 50  0001 C CNN
-	1    4900 4850
-	1    0    0    -1  
-$EndComp
-$Comp
 L Connector:Conn_01x01_Male J15
 U 1 1 63A588D8
 P 900 1200
 F 0 "J15" H 1008 1381 50  0000 C CNN
 F 1 "Conn_01x01_Male" H 1008 1290 50  0000 C CNN
-F 2 "Connector:Finger" H 900 1200 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_0.5x1.0mm" H 900 1200 50  0001 C CNN
 F 3 "~" H 900 1200 50  0001 C CNN
 	1    900  1200
 	1    0    0    -1  
@@ -52,7 +30,7 @@ U 1 1 63A5972C
 P 900 1600
 F 0 "J16" H 1008 1781 50  0000 C CNN
 F 1 "Conn_01x01_Male" H 1008 1690 50  0000 C CNN
-F 2 "Connector:Finger" H 900 1600 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_0.5x1.0mm" H 900 1600 50  0001 C CNN
 F 3 "~" H 900 1600 50  0001 C CNN
 	1    900  1600
 	1    0    0    -1  
@@ -63,7 +41,7 @@ U 1 1 63A59ACE
 P 900 2250
 F 0 "J17" H 1008 2431 50  0000 C CNN
 F 1 "Conn_01x01_Male" H 1008 2340 50  0000 C CNN
-F 2 "Connector:Finger" H 900 2250 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_0.5x1.0mm" H 900 2250 50  0001 C CNN
 F 3 "~" H 900 2250 50  0001 C CNN
 	1    900  2250
 	1    0    0    -1  
@@ -74,7 +52,7 @@ U 1 1 63A59EA3
 P 900 2500
 F 0 "J18" H 1008 2681 50  0000 C CNN
 F 1 "Conn_01x01_Male" H 1008 2590 50  0000 C CNN
-F 2 "Connector:Finger" H 900 2500 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_0.5x1.0mm" H 900 2500 50  0001 C CNN
 F 3 "~" H 900 2500 50  0001 C CNN
 	1    900  2500
 	1    0    0    -1  
@@ -85,7 +63,7 @@ U 1 1 63A5A0E9
 P 800 4800
 F 0 "J4" H 908 4981 50  0000 C CNN
 F 1 "Conn_01x01_Male" H 908 4890 50  0000 C CNN
-F 2 "Connector:Finger" H 800 4800 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_0.5x1.0mm" H 800 4800 50  0001 C CNN
 F 3 "~" H 800 4800 50  0001 C CNN
 	1    800  4800
 	1    0    0    -1  
@@ -169,17 +147,14 @@ L Device:R R8
 U 1 1 63A61633
 P 3550 2850
 F 0 "R8" H 3480 2804 50  0000 R CNN
-F 1 "10k" H 3480 2895 50  0000 R CNN
+F 1 "10k" V 3550 2950 50  0000 R CNN
 F 2 "Resistor_SMD:R_0402_1005Metric" V 3480 2850 50  0001 C CNN
 F 3 "~" H 3550 2850 50  0001 C CNN
 	1    3550 2850
 	-1   0    0    1   
 $EndComp
 Wire Wire Line
-	5000 1400 5000 850 
-Wire Wire Line
 	5250 850  5000 850 
-Connection ~ 5000 850 
 Wire Wire Line
 	5000 850  5000 750 
 Wire Wire Line
@@ -187,7 +162,7 @@ Wire Wire Line
 Wire Wire Line
 	5250 1250 5250 1200
 Text GLabel 1600 2250 2    50   Input ~ 0
-VBATT
+BATT
 Wire Wire Line
 	1600 2250 1100 2250
 $Comp
@@ -203,10 +178,8 @@ F 3 "" H 1600 2550 50  0001 C CNN
 $EndComp
 Wire Wire Line
 	1100 2500 1600 2500
-Wire Wire Line
-	1600 2500 1600 2550
 Text GLabel 8100 1350 2    50   Input ~ 0
-VBATT
+BATT
 Wire Wire Line
 	5700 2000 5800 2000
 Wire Wire Line
@@ -225,8 +198,6 @@ F 3 "" H 4000 2700 50  0001 C CNN
 	1    4000 2700
 	0    -1   -1   0   
 $EndComp
-Wire Wire Line
-	4000 2700 4150 2700
 Wire Wire Line
 	4300 2900 4150 2900
 Wire Wire Line
@@ -252,7 +223,7 @@ L Device:R R7
 U 1 1 63A6EC9E
 P 3300 2850
 F 0 "R7" H 3230 2804 50  0000 R CNN
-F 1 "1k" H 3230 2895 50  0000 R CNN
+F 1 "220k" V 3300 2950 50  0000 R CNN
 F 2 "Resistor_SMD:R_0402_1005Metric" V 3230 2850 50  0001 C CNN
 F 3 "~" H 3300 2850 50  0001 C CNN
 	1    3300 2850
@@ -263,7 +234,7 @@ L Device:R R4
 U 1 1 63A6F06A
 P 3050 2850
 F 0 "R4" H 2980 2804 50  0000 R CNN
-F 1 "5k" H 2980 2895 50  0000 R CNN
+F 1 "18k" V 3050 2950 50  0000 R CNN
 F 2 "Resistor_SMD:R_0402_1005Metric" V 2980 2850 50  0001 C CNN
 F 3 "~" H 3050 2850 50  0001 C CNN
 	1    3050 2850
@@ -291,8 +262,8 @@ $Comp
 L Device:R R12
 U 1 1 63A73328
 P 6300 2500
-F 0 "R12" V 6507 2500 50  0000 C CNN
-F 1 "470E" V 6416 2500 50  0000 C CNN
+F 0 "R12" V 6400 2500 50  0000 C CNN
+F 1 "470E" V 6300 2500 50  0000 C CNN
 F 2 "Resistor_SMD:R_0402_1005Metric" V 6230 2500 50  0001 C CNN
 F 3 "~" H 6300 2500 50  0001 C CNN
 	1    6300 2500
@@ -302,8 +273,8 @@ $Comp
 L Device:R R13
 U 1 1 63A73DB9
 P 6300 2700
-F 0 "R13" V 6300 2700 50  0000 C CNN
-F 1 "470E" V 6350 2500 50  0000 C CNN
+F 0 "R13" V 6400 2700 50  0000 C CNN
+F 1 "470E" V 6300 2700 50  0000 C CNN
 F 2 "Resistor_SMD:R_0402_1005Metric" V 6230 2700 50  0001 C CNN
 F 3 "~" H 6300 2700 50  0001 C CNN
 	1    6300 2700
@@ -313,8 +284,8 @@ $Comp
 L Device:R R14
 U 1 1 63A74012
 P 6300 2800
-F 0 "R14" V 6300 2800 50  0000 C CNN
-F 1 "470E" V 6250 2600 50  0000 C CNN
+F 0 "R14" V 6200 2800 50  0000 C CNN
+F 1 "470E" V 6300 2800 50  0000 C CNN
 F 2 "Resistor_SMD:R_0402_1005Metric" V 6230 2800 50  0001 C CNN
 F 3 "~" H 6300 2800 50  0001 C CNN
 	1    6300 2800
@@ -377,8 +348,6 @@ Wire Wire Line
 Wire Wire Line
 	7550 2800 7550 2300
 Wire Wire Line
-	7250 1700 7250 1850
-Wire Wire Line
 	6950 2000 6950 1850
 Wire Wire Line
 	6950 1850 7250 1850
@@ -389,18 +358,12 @@ Wire Wire Line
 	7550 2000 7550 1850
 Wire Wire Line
 	7550 1850 7250 1850
-Wire Wire Line
-	5700 2500 6150 2500
-Wire Wire Line
-	6150 2700 5700 2700
-Wire Wire Line
-	5700 2800 6150 2800
 Text Notes 2800 850  0    50   ~ 0
-PROG1 (Fast charge current regulation)\nIreg(mA) = 1000V/Rprog1(kOhm)\n5k = 200mA
+PROG1 (Fast charge current regulation)\nIreg(mA) = 1000V/Rprog1(kOhm)\n18k = 55mA
 Text Notes 2800 1100 0    50   ~ 0
 PROG2 (USB port current regulation select)\nPROG2  = High --> max 500mA
 Text Notes 2800 1400 0    50   ~ 0
-PROG3 (Charge termination)\nItermination(mA) = 1000V / Rprog3(kOhm)\n1k = 1mA
+PROG3 (Charge termination)\nItermination(mA) = 1000V / Rprog3(kOhm)\n220k = 4.55mA (100k is max...)
 Text Notes 2800 1650 0    50   ~ 0
 THERM (Battery temperature monitor)\n10k = not used
 $Comp
@@ -482,8 +445,6 @@ F 3 "" H 4900 5800 50  0001 C CNN
 	1    4900 5800
 	1    0    0    -1  
 $EndComp
-Wire Wire Line
-	4900 5800 4900 5650
 $Comp
 L Device:R R3
 U 1 1 63AACB0D
@@ -516,7 +477,7 @@ U 1 1 63AB0FC7
 P 800 5050
 F 0 "J5" H 908 5231 50  0000 C CNN
 F 1 "Conn_01x01_Male" H 908 5140 50  0000 C CNN
-F 2 "Connector:Finger" H 800 5050 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_0.5x1.0mm" H 800 5050 50  0001 C CNN
 F 3 "~" H 800 5050 50  0001 C CNN
 	1    800  5050
 	1    0    0    -1  
@@ -527,7 +488,7 @@ U 1 1 63AB11E3
 P 800 5300
 F 0 "J6" H 908 5481 50  0000 C CNN
 F 1 "Conn_01x01_Male" H 908 5390 50  0000 C CNN
-F 2 "Connector:Finger" H 800 5300 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_0.5x1.0mm" H 800 5300 50  0001 C CNN
 F 3 "~" H 800 5300 50  0001 C CNN
 	1    800  5300
 	1    0    0    -1  
@@ -538,7 +499,7 @@ U 1 1 63AB141E
 P 800 5550
 F 0 "J7" H 908 5731 50  0000 C CNN
 F 1 "Conn_01x01_Male" H 908 5640 50  0000 C CNN
-F 2 "Connector:Finger" H 800 5550 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_0.5x1.0mm" H 800 5550 50  0001 C CNN
 F 3 "~" H 800 5550 50  0001 C CNN
 	1    800  5550
 	1    0    0    -1  
@@ -549,7 +510,7 @@ U 1 1 63AB1726
 P 800 5800
 F 0 "J8" H 908 5981 50  0000 C CNN
 F 1 "Conn_01x01_Male" H 908 5890 50  0000 C CNN
-F 2 "Connector:Finger" H 800 5800 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_0.5x1.0mm" H 800 5800 50  0001 C CNN
 F 3 "~" H 800 5800 50  0001 C CNN
 	1    800  5800
 	1    0    0    -1  
@@ -688,21 +649,8 @@ Text GLabel 2400 6450 0    50   Input ~ 0
 Vbatt
 Wire Wire Line
 	2400 6450 2600 6450
-Text GLabel 6400 4350 2    50   Input ~ 0
+Text GLabel 6400 4450 2    50   Input ~ 0
 Vbatt
-Wire Wire Line
-	6200 4350 6400 4350
-$Comp
-L FallerCarSystem_v2-rescue:MCP1725-ADJE_MC_DFN-8-Regulator_Linear U3
-U 1 1 63AE8B9C
-P 5100 6550
-F 0 "U3" H 5075 6965 50  0000 C CNN
-F 1 "MCP1725-ADJE_MC_DFN-8" H 5075 6874 50  0000 C CNN
-F 2 "Package_DFN_QFN:DFN-8-1EP_3x2mm_P0.5mm_EP1.36x1.46mm" H 5100 6150 50  0001 C CNN
-F 3 "" H 5100 6400 50  0001 C CNN
-	1    5100 6550
-	1    0    0    -1  
-$EndComp
 $Comp
 L Device:C C3
 U 1 1 63AE97E6
@@ -750,8 +698,6 @@ F 3 "" H 4200 7400 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	4700 6700 4600 6700
-Wire Wire Line
 	4600 6700 4600 6900
 Wire Wire Line
 	4600 6900 4200 6900
@@ -764,7 +710,7 @@ U 1 1 63B04F32
 P 800 6300
 F 0 "J9" H 908 6481 50  0000 C CNN
 F 1 "Conn_01x01_Male" H 908 6390 50  0000 C CNN
-F 2 "Connector:Finger" H 800 6300 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_0.5x1.0mm" H 800 6300 50  0001 C CNN
 F 3 "~" H 800 6300 50  0001 C CNN
 	1    800  6300
 	1    0    0    -1  
@@ -775,7 +721,7 @@ U 1 1 63B05692
 P 800 6550
 F 0 "J10" H 908 6731 50  0000 C CNN
 F 1 "Conn_01x01_Male" H 908 6640 50  0000 C CNN
-F 2 "Connector:Finger" H 800 6550 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_0.5x1.0mm" H 800 6550 50  0001 C CNN
 F 3 "~" H 800 6550 50  0001 C CNN
 	1    800  6550
 	1    0    0    -1  
@@ -894,15 +840,13 @@ F 3 "" H 4650 7400 50  0001 C CNN
 	1    4650 7400
 	1    0    0    -1  
 $EndComp
-Wire Wire Line
-	4650 7250 4650 7400
 $Comp
 L Connector:Conn_01x01_Male J11
 U 1 1 63B591F9
 P 800 6850
 F 0 "J11" H 908 7031 50  0000 C CNN
 F 1 "Conn_01x01_Male" H 908 6940 50  0000 C CNN
-F 2 "Connector:Finger" H 800 6850 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_0.5x1.0mm" H 800 6850 50  0001 C CNN
 F 3 "~" H 800 6850 50  0001 C CNN
 	1    800  6850
 	1    0    0    -1  
@@ -913,7 +857,7 @@ U 1 1 63B59457
 P 800 7100
 F 0 "J12" H 908 7281 50  0000 C CNN
 F 1 "Conn_01x01_Male" H 908 7190 50  0000 C CNN
-F 2 "Connector:Finger" H 800 7100 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_0.5x1.0mm" H 800 7100 50  0001 C CNN
 F 3 "~" H 800 7100 50  0001 C CNN
 	1    800  7100
 	1    0    0    -1  
@@ -960,14 +904,14 @@ Wire Wire Line
 Text GLabel 5900 1700 2    50   Output ~ 0
 SWONOFF_OUT
 Wire Wire Line
-	5900 1700 5700 1700
+	5900 1700 5800 1700
 $Comp
 L Connector:Conn_01x01_Male J14
 U 1 1 63B89B76
 P 800 7700
 F 0 "J14" H 908 7881 50  0000 C CNN
 F 1 "Conn_01x01_Male" H 908 7790 50  0000 C CNN
-F 2 "Connector:Finger" H 800 7700 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_0.5x1.0mm" H 800 7700 50  0001 C CNN
 F 3 "~" H 800 7700 50  0001 C CNN
 	1    800  7700
 	1    0    0    -1  
@@ -978,7 +922,7 @@ U 1 1 63B89FA4
 P 800 7450
 F 0 "J13" H 908 7631 50  0000 C CNN
 F 1 "Conn_01x01_Male" H 908 7540 50  0000 C CNN
-F 2 "Connector:Finger" H 800 7450 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_0.5x1.0mm" H 800 7450 50  0001 C CNN
 F 3 "~" H 800 7450 50  0001 C CNN
 	1    800  7450
 	1    0    0    -1  
@@ -987,46 +931,35 @@ Text GLabel 1400 7700 2    50   Output ~ 0
 RCS_IN
 Wire Wire Line
 	1000 7700 1400 7700
-Text GLabel 7300 4750 2    50   Input ~ 0
-RCS_IN
 $Comp
 L Device:R R15
 U 1 1 63B9D80B
-P 7150 5100
-F 0 "R15" H 7080 5054 50  0000 R CNN
-F 1 "4.7k" H 7080 5145 50  0000 R CNN
-F 2 "Resistor_SMD:R_0402_1005Metric" V 7080 5100 50  0001 C CNN
-F 3 "~" H 7150 5100 50  0001 C CNN
-	1    7150 5100
+P 3000 5250
+F 0 "R15" H 2930 5204 50  0000 R CNN
+F 1 "4.7k" H 2930 5295 50  0000 R CNN
+F 2 "Resistor_SMD:R_0402_1005Metric" V 2930 5250 50  0001 C CNN
+F 3 "~" H 3000 5250 50  0001 C CNN
+	1    3000 5250
 	-1   0    0    1   
 $EndComp
-Wire Wire Line
-	7150 4950 7150 4750
-Wire Wire Line
-	7150 4750 7300 4750
-Wire Wire Line
-	6200 4750 7150 4750
-Connection ~ 7150 4750
 $Comp
 L power:GND #PWR023
 U 1 1 63BA79EA
-P 7150 5800
-F 0 "#PWR023" H 7150 5550 50  0001 C CNN
-F 1 "GND" H 7155 5627 50  0000 C CNN
-F 2 "" H 7150 5800 50  0001 C CNN
-F 3 "" H 7150 5800 50  0001 C CNN
-	1    7150 5800
+P 3000 5500
+F 0 "#PWR023" H 3000 5250 50  0001 C CNN
+F 1 "GND" H 3005 5327 50  0000 C CNN
+F 2 "" H 3000 5500 50  0001 C CNN
+F 3 "" H 3000 5500 50  0001 C CNN
+	1    3000 5500
 	1    0    0    -1  
 $EndComp
-Wire Wire Line
-	7150 5800 7150 5250
 $Comp
 L Connector:Conn_01x01_Male J1
 U 1 1 63BACD6F
 P 800 3850
 F 0 "J1" H 908 4031 50  0000 C CNN
 F 1 "Conn_01x01_Male" H 908 3940 50  0000 C CNN
-F 2 "Connector:Finger" H 800 3850 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_0.5x1.0mm" H 800 3850 50  0001 C CNN
 F 3 "~" H 800 3850 50  0001 C CNN
 	1    800  3850
 	1    0    0    -1  
@@ -1037,7 +970,7 @@ U 1 1 63BAD092
 P 800 4100
 F 0 "J2" H 908 4281 50  0000 C CNN
 F 1 "Conn_01x01_Male" H 908 4190 50  0000 C CNN
-F 2 "Connector:Finger" H 800 4100 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_0.5x1.0mm" H 800 4100 50  0001 C CNN
 F 3 "~" H 800 4100 50  0001 C CNN
 	1    800  4100
 	1    0    0    -1  
@@ -1048,7 +981,7 @@ U 1 1 63BAD3E2
 P 800 4350
 F 0 "J3" H 908 4531 50  0000 C CNN
 F 1 "Conn_01x01_Male" H 908 4440 50  0000 C CNN
-F 2 "Connector:Finger" H 800 4350 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_0.5x1.0mm" H 800 4350 50  0001 C CNN
 F 3 "~" H 800 4350 50  0001 C CNN
 	1    800  4350
 	1    0    0    -1  
@@ -1076,47 +1009,43 @@ Text GLabel 1400 4100 2    50   Output ~ 0
 UART_RX
 Wire Wire Line
 	1400 4100 1000 4100
-Text GLabel 2850 5250 0    50   Output ~ 0
+Text GLabel 6850 4350 2    50   Output ~ 0
 UART_TX
-Text GLabel 2850 5350 0    50   Input ~ 0
+Text GLabel 2450 4800 0    50   Input ~ 0
 UART_RX
 $Comp
 L Device:R R5
 U 1 1 63BC9D85
-P 3150 5250
-F 0 "R5" V 3250 5250 50  0000 C CNN
-F 1 "200E" V 3150 5250 50  0000 C CNN
-F 2 "Resistor_SMD:R_0402_1005Metric" V 3080 5250 50  0001 C CNN
-F 3 "~" H 3150 5250 50  0001 C CNN
-	1    3150 5250
-	0    -1   -1   0   
+P 6550 4350
+F 0 "R5" V 6450 4350 50  0000 C CNN
+F 1 "200E" V 6550 4350 50  0000 C CNN
+F 2 "Resistor_SMD:R_0402_1005Metric" V 6480 4350 50  0001 C CNN
+F 3 "~" H 6550 4350 50  0001 C CNN
+	1    6550 4350
+	0    1    1    0   
 $EndComp
 $Comp
 L Device:R R6
 U 1 1 63BCA259
-P 3150 5350
-F 0 "R6" V 3050 5350 50  0000 C CNN
-F 1 "200E" V 3150 5350 50  0000 C CNN
-F 2 "Resistor_SMD:R_0402_1005Metric" V 3080 5350 50  0001 C CNN
-F 3 "~" H 3150 5350 50  0001 C CNN
-	1    3150 5350
+P 2750 4800
+F 0 "R6" V 2650 4800 50  0000 C CNN
+F 1 "200E" V 2750 4800 50  0000 C CNN
+F 2 "Resistor_SMD:R_0402_1005Metric" V 2680 4800 50  0001 C CNN
+F 3 "~" H 2750 4800 50  0001 C CNN
+	1    2750 4800
 	0    -1   -1   0   
 $EndComp
 Wire Wire Line
-	3300 5250 3600 5250
+	2600 4800 2450 4800
 Wire Wire Line
-	3300 5350 3600 5350
-Wire Wire Line
-	3000 5350 2850 5350
-Wire Wire Line
-	2850 5250 3000 5250
+	6850 4350 6700 4350
 $Comp
 L Connector:Conn_01x01_Male J19
 U 1 1 63BE8DD5
 P 9100 750
 F 0 "J19" H 9208 931 50  0000 C CNN
 F 1 "Conn_01x01_Male" H 9208 840 50  0000 C CNN
-F 2 "Connector:Finger" H 9100 750 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_0.5x1.0mm" H 9100 750 50  0001 C CNN
 F 3 "~" H 9100 750 50  0001 C CNN
 	1    9100 750 
 	1    0    0    -1  
@@ -1127,7 +1056,7 @@ U 1 1 63BE8DDB
 P 9100 1000
 F 0 "J20" H 9208 1181 50  0000 C CNN
 F 1 "Conn_01x01_Male" H 9208 1090 50  0000 C CNN
-F 2 "Connector:Finger" H 9100 1000 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_0.5x1.0mm" H 9100 1000 50  0001 C CNN
 F 3 "~" H 9100 1000 50  0001 C CNN
 	1    9100 1000
 	1    0    0    -1  
@@ -1138,7 +1067,7 @@ U 1 1 63BE8DE1
 P 9100 1250
 F 0 "J21" H 9208 1431 50  0000 C CNN
 F 1 "Conn_01x01_Male" H 9208 1340 50  0000 C CNN
-F 2 "Connector:Finger" H 9100 1250 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_0.5x1.0mm" H 9100 1250 50  0001 C CNN
 F 3 "~" H 9100 1250 50  0001 C CNN
 	1    9100 1250
 	1    0    0    -1  
@@ -1149,7 +1078,7 @@ U 1 1 63BE8DE7
 P 9100 1500
 F 0 "J22" H 9208 1681 50  0000 C CNN
 F 1 "Conn_01x01_Male" H 9208 1590 50  0000 C CNN
-F 2 "Connector:Finger" H 9100 1500 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_0.5x1.0mm" H 9100 1500 50  0001 C CNN
 F 3 "~" H 9100 1500 50  0001 C CNN
 	1    9100 1500
 	1    0    0    -1  
@@ -1160,7 +1089,7 @@ U 1 1 63BE8DED
 P 9100 2000
 F 0 "J24" H 9208 2181 50  0000 C CNN
 F 1 "Conn_01x01_Male" H 9208 2090 50  0000 C CNN
-F 2 "Connector:Finger" H 9100 2000 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_0.5x1.0mm" H 9100 2000 50  0001 C CNN
 F 3 "~" H 9100 2000 50  0001 C CNN
 	1    9100 2000
 	1    0    0    -1  
@@ -1171,7 +1100,7 @@ U 1 1 63BE8DF3
 P 9100 1750
 F 0 "J23" H 9208 1931 50  0000 C CNN
 F 1 "Conn_01x01_Male" H 9208 1840 50  0000 C CNN
-F 2 "Connector:Finger" H 9100 1750 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_0.5x1.0mm" H 9100 1750 50  0001 C CNN
 F 3 "~" H 9100 1750 50  0001 C CNN
 	1    9100 1750
 	1    0    0    -1  
@@ -1193,7 +1122,7 @@ U 1 1 63C0E82A
 P 9100 2250
 F 0 "J25" H 9208 2431 50  0000 C CNN
 F 1 "Conn_01x01_Male" H 9208 2340 50  0000 C CNN
-F 2 "Connector:Finger" H 9100 2250 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_0.5x1.0mm" H 9100 2250 50  0001 C CNN
 F 3 "~" H 9100 2250 50  0001 C CNN
 	1    9100 2250
 	1    0    0    -1  
@@ -1204,7 +1133,7 @@ U 1 1 63C0E830
 P 9100 2500
 F 0 "J26" H 9208 2681 50  0000 C CNN
 F 1 "Conn_01x01_Male" H 9208 2590 50  0000 C CNN
-F 2 "Connector:Finger" H 9100 2500 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_0.5x1.0mm" H 9100 2500 50  0001 C CNN
 F 3 "~" H 9100 2500 50  0001 C CNN
 	1    9100 2500
 	1    0    0    -1  
@@ -1215,7 +1144,7 @@ U 1 1 63C0E836
 P 9100 2750
 F 0 "J27" H 9208 2931 50  0000 C CNN
 F 1 "Conn_01x01_Male" H 9208 2840 50  0000 C CNN
-F 2 "Connector:Finger" H 9100 2750 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_0.5x1.0mm" H 9100 2750 50  0001 C CNN
 F 3 "~" H 9100 2750 50  0001 C CNN
 	1    9100 2750
 	1    0    0    -1  
@@ -1226,7 +1155,7 @@ U 1 1 63C0E83C
 P 9100 3000
 F 0 "J28" H 9208 3181 50  0000 C CNN
 F 1 "Conn_01x01_Male" H 9208 3090 50  0000 C CNN
-F 2 "Connector:Finger" H 9100 3000 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_0.5x1.0mm" H 9100 3000 50  0001 C CNN
 F 3 "~" H 9100 3000 50  0001 C CNN
 	1    9100 3000
 	1    0    0    -1  
@@ -1237,7 +1166,7 @@ U 1 1 63C0E842
 P 9100 3500
 F 0 "J30" H 9208 3681 50  0000 C CNN
 F 1 "Conn_01x01_Male" H 9208 3590 50  0000 C CNN
-F 2 "Connector:Finger" H 9100 3500 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_0.5x1.0mm" H 9100 3500 50  0001 C CNN
 F 3 "~" H 9100 3500 50  0001 C CNN
 	1    9100 3500
 	1    0    0    -1  
@@ -1248,7 +1177,7 @@ U 1 1 63C0E848
 P 9100 3250
 F 0 "J29" H 9208 3431 50  0000 C CNN
 F 1 "Conn_01x01_Male" H 9208 3340 50  0000 C CNN
-F 2 "Connector:Finger" H 9100 3250 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_0.5x1.0mm" H 9100 3250 50  0001 C CNN
 F 3 "~" H 9100 3250 50  0001 C CNN
 	1    9100 3250
 	1    0    0    -1  
@@ -1337,7 +1266,7 @@ U 1 1 63CAF31E
 P 9100 3750
 F 0 "J31" H 9208 3931 50  0000 C CNN
 F 1 "Conn_01x01_Male" H 9208 3840 50  0000 C CNN
-F 2 "Connector:Finger" H 9100 3750 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_0.5x1.0mm" H 9100 3750 50  0001 C CNN
 F 3 "~" H 9100 3750 50  0001 C CNN
 	1    9100 3750
 	1    0    0    -1  
@@ -1348,7 +1277,7 @@ U 1 1 63CAF4CB
 P 9100 4000
 F 0 "J32" H 9208 4181 50  0000 C CNN
 F 1 "Conn_01x01_Male" H 9208 4090 50  0000 C CNN
-F 2 "Connector:Finger" H 9100 4000 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_0.5x1.0mm" H 9100 4000 50  0001 C CNN
 F 3 "~" H 9100 4000 50  0001 C CNN
 	1    9100 4000
 	1    0    0    -1  
@@ -1359,7 +1288,7 @@ U 1 1 63CAF6B3
 P 9100 4250
 F 0 "J33" H 9208 4431 50  0000 C CNN
 F 1 "Conn_01x01_Male" H 9208 4340 50  0000 C CNN
-F 2 "Connector:Finger" H 9100 4250 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_0.5x1.0mm" H 9100 4250 50  0001 C CNN
 F 3 "~" H 9100 4250 50  0001 C CNN
 	1    9100 4250
 	1    0    0    -1  
@@ -1370,7 +1299,7 @@ U 1 1 63CAF8CF
 P 9100 4500
 F 0 "J34" H 9208 4681 50  0000 C CNN
 F 1 "Conn_01x01_Male" H 9208 4590 50  0000 C CNN
-F 2 "Connector:Finger" H 9100 4500 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_0.5x1.0mm" H 9100 4500 50  0001 C CNN
 F 3 "~" H 9100 4500 50  0001 C CNN
 	1    9100 4500
 	1    0    0    -1  
@@ -1397,38 +1326,28 @@ F 3 "~" H 9700 4250 50  0001 C CNN
 	1    9700 4250
 	0    -1   -1   0   
 $EndComp
-Text GLabel 9950 3750 2    50   Input ~ 0
-LEDA
 Text GLabel 9950 4250 2    50   Input ~ 0
+LEDA
+Text GLabel 9950 3750 2    50   Input ~ 0
 LEDB
-Text GLabel 6400 4650 2    50   Output ~ 0
+Text GLabel 6400 4750 2    50   Output ~ 0
 PWM2
 Text GLabel 6400 4850 2    50   Output ~ 0
 PWM1
-Text GLabel 3400 4550 0    50   Output ~ 0
+Text GLabel 6400 4650 2    50   Output ~ 0
 PWM3
-Text GLabel 6400 4450 2    50   Output ~ 0
+Text GLabel 6400 4950 2    50   Output ~ 0
 PWM4
 Wire Wire Line
-	6400 4450 6200 4450
-Wire Wire Line
 	6400 4850 6200 4850
-Wire Wire Line
-	6400 4650 6200 4650
-Wire Wire Line
-	3600 4550 3400 4550
-Text GLabel 6400 4950 2    50   Output ~ 0
-PWM5
 Text GLabel 6400 5050 2    50   Output ~ 0
+PWM5
+Text GLabel 3500 5350 0    50   Output ~ 0
 PWM6
-Wire Wire Line
-	6400 4950 6200 4950
-Wire Wire Line
-	6200 5050 6400 5050
 Text GLabel 3350 4750 0    50   Output ~ 0
-LedA
-Text GLabel 3350 4850 0    50   Output ~ 0
 LEDB
+Text GLabel 3350 4850 0    50   Output ~ 0
+LEDA
 Wire Wire Line
 	3600 4750 3350 4750
 Wire Wire Line
@@ -1462,18 +1381,10 @@ Wire Wire Line
 Wire Wire Line
 	9550 4250 9300 4250
 Wire Wire Line
-	9850 4250 9950 4250
-Wire Wire Line
-	9950 3750 9850 3750
-Wire Wire Line
 	2350 3950 2800 3950
-Wire Wire Line
-	4900 3950 4900 4050
 Wire Wire Line
 	2800 3900 2800 3950
 Connection ~ 2800 3950
-Wire Wire Line
-	2800 3950 4900 3950
 Wire Wire Line
 	2800 3950 2800 4200
 $Comp
@@ -1482,7 +1393,7 @@ U 1 1 63EB2097
 P 9100 4750
 F 0 "J35" H 9208 4931 50  0000 C CNN
 F 1 "Conn_01x01_Male" H 9208 4840 50  0000 C CNN
-F 2 "Connector:Finger" H 9100 4750 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_0.5x1.0mm" H 9100 4750 50  0001 C CNN
 F 3 "~" H 9100 4750 50  0001 C CNN
 	1    9100 4750
 	1    0    0    -1  
@@ -1493,7 +1404,7 @@ U 1 1 63EB209D
 P 9100 5000
 F 0 "J36" H 9208 5181 50  0000 C CNN
 F 1 "Conn_01x01_Male" H 9208 5090 50  0000 C CNN
-F 2 "Connector:Finger" H 9100 5000 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_0.5x1.0mm" H 9100 5000 50  0001 C CNN
 F 3 "~" H 9100 5000 50  0001 C CNN
 	1    9100 5000
 	1    0    0    -1  
@@ -1509,19 +1420,17 @@ F 3 "~" H 9700 4750 50  0001 C CNN
 	1    9700 4750
 	0    -1   -1   0   
 $EndComp
-Text GLabel 9950 4750 2    50   Input ~ 0
+Text GLabel 9950 5250 2    50   Input ~ 0
 LEDC
 Wire Wire Line
 	9550 4750 9300 4750
-Wire Wire Line
-	9850 4750 9950 4750
 $Comp
 L Connector:Conn_01x01_Male J37
 U 1 1 63EBA680
 P 9100 5250
 F 0 "J37" H 9208 5431 50  0000 C CNN
 F 1 "Conn_01x01_Male" H 9208 5340 50  0000 C CNN
-F 2 "Connector:Finger" H 9100 5250 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_0.5x1.0mm" H 9100 5250 50  0001 C CNN
 F 3 "~" H 9100 5250 50  0001 C CNN
 	1    9100 5250
 	1    0    0    -1  
@@ -1532,7 +1441,7 @@ U 1 1 63EBA686
 P 9100 5500
 F 0 "J38" H 9208 5681 50  0000 C CNN
 F 1 "Conn_01x01_Male" H 9208 5590 50  0000 C CNN
-F 2 "Connector:Finger" H 9100 5500 50  0001 C CNN
+F 2 "TestPoint:TestPoint_Pad_0.5x1.0mm" H 9100 5500 50  0001 C CNN
 F 3 "~" H 9100 5500 50  0001 C CNN
 	1    9100 5500
 	1    0    0    -1  
@@ -1548,20 +1457,14 @@ F 3 "~" H 9700 5250 50  0001 C CNN
 	1    9700 5250
 	0    -1   -1   0   
 $EndComp
-Text GLabel 9950 5250 2    50   Input ~ 0
+Text GLabel 9950 4750 2    50   Input ~ 0
 LEDD
 Wire Wire Line
 	9550 5250 9300 5250
-Wire Wire Line
-	9850 5250 9950 5250
 Text GLabel 3500 5150 0    50   Output ~ 0
 LEDD
-Text GLabel 3500 5050 0    50   Output ~ 0
+Text GLabel 3500 5250 0    50   Output ~ 0
 LEDC
-Wire Wire Line
-	3500 5050 3600 5050
-Wire Wire Line
-	3600 5150 3500 5150
 Wire Wire Line
 	9300 1000 10650 1000
 Wire Wire Line
@@ -1634,8 +1537,6 @@ Connection ~ 1900 7100
 Wire Wire Line
 	1900 7100 2150 7100
 Wire Wire Line
-	6050 6800 6050 7400
-Wire Wire Line
 	1400 6300 1000 6300
 $Comp
 L power:GND #PWR0102
@@ -1649,27 +1550,156 @@ F 3 "" H 1350 6600 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	1000 6550 1350 6550
-Wire Wire Line
-	1350 6550 1350 6600
-Wire Wire Line
 	4200 6200 4200 6400
-$Comp
-L Device:R R?
-U 1 1 63AA4EE8
-P 4400 6400
-F 0 "R?" H 4330 6354 50  0000 R CNN
-F 1 "10E" H 4330 6445 50  0000 R CNN
-F 2 "Resistor_SMD:R_0402_1005Metric" V 4330 6400 50  0001 C CNN
-F 3 "~" H 4400 6400 50  0001 C CNN
-	1    4400 6400
-	0    1    1    0   
-$EndComp
-Wire Wire Line
-	4250 6400 4200 6400
 Connection ~ 4200 6400
 Wire Wire Line
 	4200 6400 4200 6550
 Wire Wire Line
-	4550 6400 4700 6400
+	4200 6400 4700 6400
+Wire Wire Line
+	6400 4750 6200 4750
+Wire Wire Line
+	6400 4650 6200 4650
+Wire Wire Line
+	6400 4950 6200 4950
+Wire Wire Line
+	6400 5050 6200 5050
+Wire Wire Line
+	3600 5350 3500 5350
+Text GLabel 2650 5050 0    50   Input ~ 0
+RCS_IN
+Wire Wire Line
+	6400 4450 6200 4450
+Wire Wire Line
+	6400 4350 6200 4350
+Wire Wire Line
+	3600 4550 3000 4550
+Wire Wire Line
+	3000 4550 3000 4800
+Wire Wire Line
+	3000 4800 2900 4800
+Wire Wire Line
+	2650 5050 3000 5050
+Wire Wire Line
+	3000 5050 3000 5100
+Connection ~ 3000 5050
+Wire Wire Line
+	3000 5050 3600 5050
+Wire Wire Line
+	3000 5400 3000 5500
+Wire Wire Line
+	4650 7400 4650 7250
+Wire Wire Line
+	1000 6550 1350 6550
+Wire Wire Line
+	1350 6550 1350 6600
+Wire Wire Line
+	2800 3950 4900 3950
+Wire Wire Line
+	4900 3950 4900 4050
+Wire Wire Line
+	4000 2700 4150 2700
+Wire Wire Line
+	7250 1850 7250 1700
+Wire Wire Line
+	4900 5800 4900 5650
+Wire Wire Line
+	1600 2500 1600 2550
+Wire Wire Line
+	6050 6800 6050 7400
+Wire Wire Line
+	5000 850  5000 1400
+Connection ~ 5000 850 
+Wire Wire Line
+	9850 3750 9950 3750
+Wire Wire Line
+	9950 4250 9850 4250
+Wire Wire Line
+	9950 4750 9850 4750
+Wire Wire Line
+	9850 5250 9950 5250
+Wire Wire Line
+	3500 5150 3600 5150
+Wire Wire Line
+	3600 5250 3500 5250
+Text Label 5800 2800 0    50   ~ 0
+STAT2
+Text Label 5800 2700 0    50   ~ 0
+STAT1
+Wire Wire Line
+	5700 2800 6150 2800
+Wire Wire Line
+	6150 2700 5700 2700
+$Comp
+L Battery_Management:MCP73871-2AA U2
+U 1 1 63A20AF7
+P 5000 2300
+F 0 "U2" H 5400 1450 50  0000 C CNN
+F 1 "MCP73871-2AA" H 4600 3150 50  0000 C CNN
+F 2 "Package_DFN_QFN:QFN-20-1EP_4x4mm_P0.5mm_EP2.5x2.5mm_ThermalVias" H 5200 1400 50  0001 L CIN
+F 3 "http://www.mouser.com/ds/2/268/22090a-52174.pdf" H 4850 2850 50  0001 C CNN
+	1    5000 2300
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5700 2500 6150 2500
+Text Label 5800 2500 0    50   ~ 0
+PG
+$Comp
+L FallerCarSystem_v2-rescue:PIC16F15345-I_GZ-MCU_Microchip_PIC16 U1
+U 1 1 640D206D
+P 4900 4850
+F 0 "U1" H 4900 5831 50  0000 C CNN
+F 1 "PIC16F15345-I_GZ-MCU_Microchip_PIC16" H 5800 5650 50  0000 C CNN
+F 2 "Package_DFN_QFN:QFN-20-1EP_4x4mm_P0.5mm_EP2.7x2.7mm_ThermalVias" H 4900 4850 50  0001 C CNN
+F 3 "" H 4900 4850 50  0001 C CNN
+	1    4900 4850
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4600 6700 4700 6700
+$Comp
+L FallerCarSystem_v2-rescue:MCP1725-ADJE_MC_DFN-8-Regulator_Linear U3
+U 1 1 6410C2A5
+P 5100 6550
+F 0 "U3" H 5075 6965 50  0000 C CNN
+F 1 "MCP1725-ADJE_MC_DFN-8-Regulator_Linear" H 5075 6874 50  0000 C CNN
+F 2 "Package_DFN_QFN:DFN-8-1EP_3x2mm_P0.5mm_EP1.36x1.46mm_ThermalVias" H 5100 6150 50  0001 C CNN
+F 3 "" H 5100 6400 50  0001 C CNN
+	1    5100 6550
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:C C7
+U 1 1 641DD2D2
+P 6200 1050
+F 0 "C7" H 6315 1096 50  0000 L CNN
+F 1 "4.7uF" H 6315 1005 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0805_2012Metric" H 6238 900 50  0001 C CNN
+F 3 "~" H 6200 1050 50  0001 C CNN
+	1    6200 1050
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR01
+U 1 1 641DD61C
+P 6200 1250
+F 0 "#PWR01" H 6200 1000 50  0001 C CNN
+F 1 "GND" H 6205 1077 50  0000 C CNN
+F 2 "" H 6200 1250 50  0001 C CNN
+F 3 "" H 6200 1250 50  0001 C CNN
+	1    6200 1250
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6200 1250 6200 1200
+Wire Wire Line
+	5800 1700 5800 850 
+Wire Wire Line
+	5800 850  6200 850 
+Wire Wire Line
+	6200 850  6200 900 
+Connection ~ 5800 1700
+Wire Wire Line
+	5800 1700 5700 1700
 $EndSCHEMATC
