@@ -1,0 +1,19 @@
+Comment,Designator,Footprint
+0.1uF,"C1, C2",Capacitor_SMD:C_0603_1608Metric
+4.7uF,"C3, C5, C6, C7",Capacitor_SMD:C_0805_2012Metric
+10uF,C4,Capacitor_SMD:C_0805_2012Metric
+SMAJ5.0A/AC,D1,Diode_SMD:D_SMA
+Everlight Elec 16-213SYGC/S530-E3/TR8,"D2, D4",LED_SMD:LED_0402_1005Metric
+Everlight Elec 16-213/SDRC/S530-A3/TR8,D3,LED_SMD:LED_0402_1005Metric
+4.7k,"R1, R2, R3, R9, R15",Resistor_SMD:R_0402_1005Metric
+18k,R4,Resistor_SMD:R_0402_1005Metric
+200,"R5, R6",Resistor_SMD:R_0402_1005Metric
+220k,R7,Resistor_SMD:R_0402_1005Metric
+10k,R8,Resistor_SMD:R_0402_1005Metric
+47k,R10,Resistor_SMD:R_0402_1005Metric
+22k,R11,Resistor_SMD:R_0402_1005Metric
+470,"R12, R13, R14",Resistor_SMD:R_0402_1005Metric
+150,"R16, R17, R18, R19, R20, R21, R22, R23, R24, R25",Resistor_SMD:R_0402_1005Metric
+PIC16F15345-I_GZ-MCU_Microchip_PIC16_UQFN_20_4x4,U1,Package_DFN_QFN:QFN-20-1EP_4x4mm_P0.5mm_EP2.7x2.7mm_ThermalVias
+MCP73871-2AA_VQFN_20_4x4,U2,Package_DFN_QFN:QFN-20-1EP_4x4mm_P0.5mm_EP2.5x2.5mm_ThermalVias
+MCP1725-ADJE_MC_DFN-8-Regulator_Linear,U3,Package_DFN_QFN:DFN-8-1EP_3x2mm_P0.5mm_EP1.36x1.46mm_ThermalVias

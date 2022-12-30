@@ -1,0 +1,1110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<export version="D">
+  <design>
+    <source>C:\Users\jerem\Siebwalde\KiCad\FallerCarSystem_v2\FallerCarSystem_v2.sch</source>
+    <date>29-12-2022 18:19:37</date>
+    <tool>Eeschema (5.1.9)-1</tool>
+    <sheet number="1" name="/" tstamps="/">
+      <title_block>
+        <title/>
+        <company/>
+        <rev/>
+        <date/>
+        <source>FallerCarSystem_v2.sch</source>
+        <comment number="1" value=""/>
+        <comment number="2" value=""/>
+        <comment number="3" value=""/>
+        <comment number="4" value=""/>
+      </title_block>
+    </sheet>
+  </design>
+  <components>
+    <comp ref="J15">
+      <value>Conn_01x01_Male</value>
+      <footprint>TestPoint:TestPoint_Pad_0.5x1.0mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="Conn_01x01_Male" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63A588D8</tstamp>
+    </comp>
+    <comp ref="J16">
+      <value>Conn_01x01_Male</value>
+      <footprint>TestPoint:TestPoint_Pad_0.5x1.0mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="Conn_01x01_Male" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63A5972C</tstamp>
+    </comp>
+    <comp ref="J17">
+      <value>Conn_01x01_Male</value>
+      <footprint>TestPoint:TestPoint_Pad_0.5x1.0mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="Conn_01x01_Male" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63A59ACE</tstamp>
+    </comp>
+    <comp ref="J18">
+      <value>Conn_01x01_Male</value>
+      <footprint>TestPoint:TestPoint_Pad_0.5x1.0mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="Conn_01x01_Male" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63A59EA3</tstamp>
+    </comp>
+    <comp ref="J4">
+      <value>Conn_01x01_Male</value>
+      <footprint>TestPoint:TestPoint_Pad_0.5x1.0mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="Conn_01x01_Male" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63A5A0E9</tstamp>
+    </comp>
+    <comp ref="C4">
+      <value>10uF</value>
+      <footprint>Capacitor_SMD:C_0805_2012Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63A60619</tstamp>
+    </comp>
+    <comp ref="R8">
+      <value>10k</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63A61633</tstamp>
+    </comp>
+    <comp ref="R7">
+      <value>220k</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63A6EC9E</tstamp>
+    </comp>
+    <comp ref="R4">
+      <value>18k</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63A6F06A</tstamp>
+    </comp>
+    <comp ref="R12">
+      <value>470E</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63A73328</tstamp>
+    </comp>
+    <comp ref="R13">
+      <value>470E</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63A73DB9</tstamp>
+    </comp>
+    <comp ref="R14">
+      <value>470E</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63A74012</tstamp>
+    </comp>
+    <comp ref="D3">
+      <value>LED</value>
+      <footprint>LED_SMD:LED_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="LED" description="Light emitting diode"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63A74EA4</tstamp>
+    </comp>
+    <comp ref="D2">
+      <value>LED</value>
+      <footprint>LED_SMD:LED_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="LED" description="Light emitting diode"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63A75CC2</tstamp>
+    </comp>
+    <comp ref="D4">
+      <value>LED</value>
+      <footprint>LED_SMD:LED_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="LED" description="Light emitting diode"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63A7609B</tstamp>
+    </comp>
+    <comp ref="D1">
+      <value>SMAJ5.0A/AC</value>
+      <footprint>Diode_SMD:D_SMA</footprint>
+      <datasheet>https://www.st.com/resource/en/datasheet/sm6t.pdf</datasheet>
+      <libsource lib="Diode" part="SM6T6V8A" description="600W unidirectional Transil Transient Voltage Suppressor, 6.8Vrwm, DO-214AA"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63A7E703</tstamp>
+    </comp>
+    <comp ref="C1">
+      <value>0.1uF</value>
+      <footprint>Capacitor_SMD:C_0603_1608Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63AA6F19</tstamp>
+    </comp>
+    <comp ref="R3">
+      <value>4k7</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63AACB0D</tstamp>
+    </comp>
+    <comp ref="J5">
+      <value>Conn_01x01_Male</value>
+      <footprint>TestPoint:TestPoint_Pad_0.5x1.0mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="Conn_01x01_Male" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63AB0FC7</tstamp>
+    </comp>
+    <comp ref="J6">
+      <value>Conn_01x01_Male</value>
+      <footprint>TestPoint:TestPoint_Pad_0.5x1.0mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="Conn_01x01_Male" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63AB11E3</tstamp>
+    </comp>
+    <comp ref="J7">
+      <value>Conn_01x01_Male</value>
+      <footprint>TestPoint:TestPoint_Pad_0.5x1.0mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="Conn_01x01_Male" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63AB141E</tstamp>
+    </comp>
+    <comp ref="J8">
+      <value>Conn_01x01_Male</value>
+      <footprint>TestPoint:TestPoint_Pad_0.5x1.0mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="Conn_01x01_Male" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63AB1726</tstamp>
+    </comp>
+    <comp ref="R1">
+      <value>4.7k</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63AC09A9</tstamp>
+    </comp>
+    <comp ref="R2">
+      <value>4.7k</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63AC12F0</tstamp>
+    </comp>
+    <comp ref="C2">
+      <value>0.1uF</value>
+      <footprint>Capacitor_SMD:C_0603_1608Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63AC1984</tstamp>
+    </comp>
+    <comp ref="C3">
+      <value>4.7uF</value>
+      <footprint>Capacitor_SMD:C_0805_2012Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63AE97E6</tstamp>
+    </comp>
+    <comp ref="C5">
+      <value>4.7uF</value>
+      <footprint>Capacitor_SMD:C_0805_2012Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63AEA235</tstamp>
+    </comp>
+    <comp ref="J9">
+      <value>Conn_01x01_Male</value>
+      <footprint>TestPoint:TestPoint_Pad_0.5x1.0mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="Conn_01x01_Male" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63B04F32</tstamp>
+    </comp>
+    <comp ref="J10">
+      <value>Conn_01x01_Male</value>
+      <footprint>TestPoint:TestPoint_Pad_0.5x1.0mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="Conn_01x01_Male" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63B05692</tstamp>
+    </comp>
+    <comp ref="R10">
+      <value>47k</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63B1882C</tstamp>
+    </comp>
+    <comp ref="R11">
+      <value>22k</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63B18F6F</tstamp>
+    </comp>
+    <comp ref="R9">
+      <value>4.7k</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63B4BCCF</tstamp>
+    </comp>
+    <comp ref="J11">
+      <value>Conn_01x01_Male</value>
+      <footprint>TestPoint:TestPoint_Pad_0.5x1.0mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="Conn_01x01_Male" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63B591F9</tstamp>
+    </comp>
+    <comp ref="J12">
+      <value>Conn_01x01_Male</value>
+      <footprint>TestPoint:TestPoint_Pad_0.5x1.0mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="Conn_01x01_Male" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63B59457</tstamp>
+    </comp>
+    <comp ref="C6">
+      <value>4.7uF</value>
+      <footprint>Capacitor_SMD:C_0805_2012Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63B6168F</tstamp>
+    </comp>
+    <comp ref="J14">
+      <value>Conn_01x01_Male</value>
+      <footprint>TestPoint:TestPoint_Pad_0.5x1.0mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="Conn_01x01_Male" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63B89B76</tstamp>
+    </comp>
+    <comp ref="J13">
+      <value>Conn_01x01_Male</value>
+      <footprint>TestPoint:TestPoint_Pad_0.5x1.0mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="Conn_01x01_Male" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63B89FA4</tstamp>
+    </comp>
+    <comp ref="R15">
+      <value>4.7k</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63B9D80B</tstamp>
+    </comp>
+    <comp ref="J1">
+      <value>Conn_01x01_Male</value>
+      <footprint>TestPoint:TestPoint_Pad_0.5x1.0mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="Conn_01x01_Male" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63BACD6F</tstamp>
+    </comp>
+    <comp ref="J2">
+      <value>Conn_01x01_Male</value>
+      <footprint>TestPoint:TestPoint_Pad_0.5x1.0mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="Conn_01x01_Male" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63BAD092</tstamp>
+    </comp>
+    <comp ref="J3">
+      <value>Conn_01x01_Male</value>
+      <footprint>TestPoint:TestPoint_Pad_0.5x1.0mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="Conn_01x01_Male" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63BAD3E2</tstamp>
+    </comp>
+    <comp ref="R5">
+      <value>200E</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63BC9D85</tstamp>
+    </comp>
+    <comp ref="R6">
+      <value>200E</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63BCA259</tstamp>
+    </comp>
+    <comp ref="J19">
+      <value>Conn_01x01_Male</value>
+      <footprint>TestPoint:TestPoint_Pad_0.5x1.0mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="Conn_01x01_Male" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63BE8DD5</tstamp>
+    </comp>
+    <comp ref="J20">
+      <value>Conn_01x01_Male</value>
+      <footprint>TestPoint:TestPoint_Pad_0.5x1.0mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="Conn_01x01_Male" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63BE8DDB</tstamp>
+    </comp>
+    <comp ref="J21">
+      <value>Conn_01x01_Male</value>
+      <footprint>TestPoint:TestPoint_Pad_0.5x1.0mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="Conn_01x01_Male" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63BE8DE1</tstamp>
+    </comp>
+    <comp ref="J22">
+      <value>Conn_01x01_Male</value>
+      <footprint>TestPoint:TestPoint_Pad_0.5x1.0mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="Conn_01x01_Male" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63BE8DE7</tstamp>
+    </comp>
+    <comp ref="J24">
+      <value>Conn_01x01_Male</value>
+      <footprint>TestPoint:TestPoint_Pad_0.5x1.0mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="Conn_01x01_Male" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63BE8DED</tstamp>
+    </comp>
+    <comp ref="J23">
+      <value>Conn_01x01_Male</value>
+      <footprint>TestPoint:TestPoint_Pad_0.5x1.0mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="Conn_01x01_Male" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63BE8DF3</tstamp>
+    </comp>
+    <comp ref="J25">
+      <value>Conn_01x01_Male</value>
+      <footprint>TestPoint:TestPoint_Pad_0.5x1.0mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="Conn_01x01_Male" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63C0E82A</tstamp>
+    </comp>
+    <comp ref="J26">
+      <value>Conn_01x01_Male</value>
+      <footprint>TestPoint:TestPoint_Pad_0.5x1.0mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="Conn_01x01_Male" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63C0E830</tstamp>
+    </comp>
+    <comp ref="J27">
+      <value>Conn_01x01_Male</value>
+      <footprint>TestPoint:TestPoint_Pad_0.5x1.0mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="Conn_01x01_Male" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63C0E836</tstamp>
+    </comp>
+    <comp ref="J28">
+      <value>Conn_01x01_Male</value>
+      <footprint>TestPoint:TestPoint_Pad_0.5x1.0mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="Conn_01x01_Male" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63C0E83C</tstamp>
+    </comp>
+    <comp ref="J30">
+      <value>Conn_01x01_Male</value>
+      <footprint>TestPoint:TestPoint_Pad_0.5x1.0mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="Conn_01x01_Male" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63C0E842</tstamp>
+    </comp>
+    <comp ref="J29">
+      <value>Conn_01x01_Male</value>
+      <footprint>TestPoint:TestPoint_Pad_0.5x1.0mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="Conn_01x01_Male" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63C0E848</tstamp>
+    </comp>
+    <comp ref="R16">
+      <value>470E</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63CA1005</tstamp>
+    </comp>
+    <comp ref="R17">
+      <value>470E</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63CA1A25</tstamp>
+    </comp>
+    <comp ref="R18">
+      <value>470E</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63CA1D94</tstamp>
+    </comp>
+    <comp ref="R19">
+      <value>470E</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63CAE9AF</tstamp>
+    </comp>
+    <comp ref="R20">
+      <value>470E</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63CAEC42</tstamp>
+    </comp>
+    <comp ref="R21">
+      <value>470E</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63CAEF23</tstamp>
+    </comp>
+    <comp ref="J31">
+      <value>Conn_01x01_Male</value>
+      <footprint>TestPoint:TestPoint_Pad_0.5x1.0mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="Conn_01x01_Male" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63CAF31E</tstamp>
+    </comp>
+    <comp ref="J32">
+      <value>Conn_01x01_Male</value>
+      <footprint>TestPoint:TestPoint_Pad_0.5x1.0mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="Conn_01x01_Male" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63CAF4CB</tstamp>
+    </comp>
+    <comp ref="J33">
+      <value>Conn_01x01_Male</value>
+      <footprint>TestPoint:TestPoint_Pad_0.5x1.0mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="Conn_01x01_Male" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63CAF6B3</tstamp>
+    </comp>
+    <comp ref="J34">
+      <value>Conn_01x01_Male</value>
+      <footprint>TestPoint:TestPoint_Pad_0.5x1.0mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="Conn_01x01_Male" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63CAF8CF</tstamp>
+    </comp>
+    <comp ref="R22">
+      <value>470E</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63CAFB00</tstamp>
+    </comp>
+    <comp ref="R23">
+      <value>470E</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63CB001C</tstamp>
+    </comp>
+    <comp ref="J35">
+      <value>Conn_01x01_Male</value>
+      <footprint>TestPoint:TestPoint_Pad_0.5x1.0mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="Conn_01x01_Male" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63EB2097</tstamp>
+    </comp>
+    <comp ref="J36">
+      <value>Conn_01x01_Male</value>
+      <footprint>TestPoint:TestPoint_Pad_0.5x1.0mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="Conn_01x01_Male" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63EB209D</tstamp>
+    </comp>
+    <comp ref="R24">
+      <value>470E</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63EB20A3</tstamp>
+    </comp>
+    <comp ref="J37">
+      <value>Conn_01x01_Male</value>
+      <footprint>TestPoint:TestPoint_Pad_0.5x1.0mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="Conn_01x01_Male" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63EBA680</tstamp>
+    </comp>
+    <comp ref="J38">
+      <value>Conn_01x01_Male</value>
+      <footprint>TestPoint:TestPoint_Pad_0.5x1.0mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Connector" part="Conn_01x01_Male" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63EBA686</tstamp>
+    </comp>
+    <comp ref="R25">
+      <value>470E</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63EBA68C</tstamp>
+    </comp>
+    <comp ref="U2">
+      <value>MCP73871-2AA</value>
+      <footprint>Package_DFN_QFN:QFN-20-1EP_4x4mm_P0.5mm_EP2.5x2.5mm_ThermalVias</footprint>
+      <datasheet>http://www.mouser.com/ds/2/268/22090a-52174.pdf</datasheet>
+      <libsource lib="Battery_Management" part="MCP73871-2AA" description="Single cell, Li-Ion/Li-Po charge management controller, 4.20V"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>63A20AF7</tstamp>
+    </comp>
+    <comp ref="U1">
+      <value>PIC16F15345-I_GZ-MCU_Microchip_PIC16</value>
+      <footprint>Package_DFN_QFN:QFN-20-1EP_4x4mm_P0.5mm_EP2.7x2.7mm_ThermalVias</footprint>
+      <libsource lib="FallerCarSystem_v2-rescue" part="PIC16F15345-I_GZ-MCU_Microchip_PIC16" description=""/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>640D206D</tstamp>
+    </comp>
+    <comp ref="U3">
+      <value>MCP1725-ADJE_MC_DFN-8-Regulator_Linear</value>
+      <footprint>Package_DFN_QFN:DFN-8-1EP_3x2mm_P0.5mm_EP1.36x1.46mm_ThermalVias</footprint>
+      <libsource lib="FallerCarSystem_v2-rescue" part="MCP1725-ADJE_MC_DFN-8-Regulator_Linear" description=""/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>6410C2A5</tstamp>
+    </comp>
+    <comp ref="C7">
+      <value>4.7uF</value>
+      <footprint>Capacitor_SMD:C_0805_2012Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>641DD2D2</tstamp>
+    </comp>
+  </components>
+  <libparts>
+    <libpart lib="Battery_Management" part="MCP73871">
+      <aliases>
+        <alias>MCP73871-1AA</alias>
+        <alias>MCP73871-1CA</alias>
+        <alias>MCP73871-1CC</alias>
+        <alias>MCP73871-2AA</alias>
+        <alias>MCP73871-2CA</alias>
+        <alias>MCP73871-2CC</alias>
+        <alias>MCP73871-3CA</alias>
+        <alias>MCP73871-3CC</alias>
+        <alias>MCP73871-4CA</alias>
+        <alias>MCP73871-4CC</alias>
+      </aliases>
+      <description>Single cell, Li-Ion/Li-Po charge management controller</description>
+      <docs>http://www.mouser.com/ds/2/268/22090a-52174.pdf</docs>
+      <footprints>
+        <fp>QFN*4x4mm*P0.5mm*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">MCP73871</field>
+        <field name="Footprint">Package_DFN_QFN:QFN-20-1EP_4x4mm_P0.5mm_EP2.5x2.5mm</field>
+      </fields>
+      <pins>
+        <pin num="1" name="OUT" type="power_out"/>
+        <pin num="2" name="VPCC" type="input"/>
+        <pin num="3" name="SEL" type="input"/>
+        <pin num="4" name="PROG2" type="input"/>
+        <pin num="5" name="THERM" type="BiDi"/>
+        <pin num="6" name="~PG~" type="openCol"/>
+        <pin num="7" name="STAT2" type="openCol"/>
+        <pin num="8" name="STAT1/~LBO~" type="openCol"/>
+        <pin num="9" name="~TE" type="input"/>
+        <pin num="10" name="VSS" type="power_in"/>
+        <pin num="11" name="VSS" type="passive"/>
+        <pin num="12" name="PROG3" type="BiDi"/>
+        <pin num="13" name="PROG1" type="BiDi"/>
+        <pin num="14" name="VBAT" type="power_out"/>
+        <pin num="15" name="VBAT" type="passive"/>
+        <pin num="16" name="Vbat_SENSE" type="input"/>
+        <pin num="17" name="CE" type="input"/>
+        <pin num="18" name="IN" type="power_in"/>
+        <pin num="19" name="IN" type="passive"/>
+        <pin num="20" name="OUT" type="passive"/>
+        <pin num="21" name="VSS" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Connector" part="Conn_01x01_Male">
+      <description>Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>Connector*:*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">Conn_01x01_Male</field>
+      </fields>
+      <pins>
+        <pin num="1" name="Pin_1" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="C">
+      <description>Unpolarized capacitor</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>C_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">C</field>
+        <field name="Value">C</field>
+      </fields>
+      <pins>
+        <pin num="1" name="~" type="passive"/>
+        <pin num="2" name="~" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="LED">
+      <description>Light emitting diode</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>LED*</fp>
+        <fp>LED_SMD:*</fp>
+        <fp>LED_THT:*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">D</field>
+        <field name="Value">LED</field>
+      </fields>
+      <pins>
+        <pin num="1" name="K" type="passive"/>
+        <pin num="2" name="A" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="R">
+      <description>Resistor</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>R_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">R</field>
+        <field name="Value">R</field>
+      </fields>
+      <pins>
+        <pin num="1" name="~" type="passive"/>
+        <pin num="2" name="~" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Diode" part="SM6T6V8A">
+      <aliases>
+        <alias>SM6T7V5A</alias>
+        <alias>SM6T10A</alias>
+        <alias>SM6T12A</alias>
+        <alias>SM6T15A</alias>
+        <alias>SM6T18A</alias>
+        <alias>SM6T22A</alias>
+        <alias>SM6T24A</alias>
+        <alias>SM6T27A</alias>
+        <alias>SM6T30A</alias>
+        <alias>SM6T33A</alias>
+        <alias>SM6T36A</alias>
+        <alias>SM6T39A</alias>
+        <alias>SM6T56A</alias>
+        <alias>SM6T68A</alias>
+        <alias>SM6T75A</alias>
+        <alias>SM6T100A</alias>
+        <alias>SM6T150A</alias>
+        <alias>SM6T200A</alias>
+        <alias>SM6T220A</alias>
+      </aliases>
+      <description>600W unidirectional Transil Transient Voltage Suppressor, 6.8Vrwm, DO-214AA</description>
+      <docs>https://www.st.com/resource/en/datasheet/sm6t.pdf</docs>
+      <footprints>
+        <fp>D*SMB*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">D</field>
+        <field name="Value">SM6T6V8A</field>
+        <field name="Footprint">Diode_SMD:D_SMB</field>
+      </fields>
+      <pins>
+        <pin num="1" name="A1" type="passive"/>
+        <pin num="2" name="A2" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="FallerCarSystem_v2-rescue" part="MCP1725-ADJE_MC_DFN-8-Regulator_Linear">
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">MCP1725-ADJE_MC_DFN-8-Regulator_Linear</field>
+        <field name="Footprint">Package_DFN_QFN:DFN-8-1EP_3x2mm_P0.5mm_EP1.36x1.46mm</field>
+      </fields>
+      <pins>
+        <pin num="1" name="Vin" type="power_in"/>
+        <pin num="2" name="Vin" type="input"/>
+        <pin num="3" name="~SHDN" type="input"/>
+        <pin num="4" name="GND" type="input"/>
+        <pin num="5" name="PWRGD" type="output"/>
+        <pin num="6" name="Cdelay" type="input"/>
+        <pin num="7" name="ADJ" type="input"/>
+        <pin num="8" name="Vout" type="power_out"/>
+        <pin num="9" name="GND" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="FallerCarSystem_v2-rescue" part="PIC16F15345-I_GZ-MCU_Microchip_PIC16">
+      <footprints>
+        <fp>MLF*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">PIC16F15345-I_GZ-MCU_Microchip_PIC16</field>
+      </fields>
+      <pins>
+        <pin num="1" name="RA3/CLC1IN0/~MCLR~/Vpp" type="input"/>
+        <pin num="2" name="PWM1/CLC1/CWG1A/RC5" type="BiDi"/>
+        <pin num="3" name="CLC2IN1/CWG1B/RC4" type="BiDi"/>
+        <pin num="4" name="PWM2/CLC2IN0/AN7/RC3" type="BiDi"/>
+        <pin num="5" name="NCO1/AN8/RC6" type="BiDi"/>
+        <pin num="6" name="CLCIN1/AN9/RC7" type="BiDi"/>
+        <pin num="7" name="RB7" type="BiDi"/>
+        <pin num="8" name="RB6" type="BiDi"/>
+        <pin num="9" name="RB5/AN11" type="BiDi"/>
+        <pin num="10" name="RB4/AN10" type="BiDi"/>
+        <pin num="11" name="AN6/RC2" type="BiDi"/>
+        <pin num="12" name="PWM4/NCO1/AN5/RC1" type="BiDi"/>
+        <pin num="13" name="CLC2/AN4/RC0" type="BiDi"/>
+        <pin num="14" name="RA2/AN2/~CWG1FLT~/CLC1/T0CKI/PWM3" type="BiDi"/>
+        <pin num="15" name="RA1/AN1/Vref+/ICSPCLK" type="BiDi"/>
+        <pin num="16" name="RA0/AN0/ICSPDAT" type="BiDi"/>
+        <pin num="17" name="VSS" type="power_in"/>
+        <pin num="18" name="VDD" type="power_in"/>
+        <pin num="19" name="RA5/NCO1CLK/T1CKI/CLKIN" type="BiDi"/>
+        <pin num="20" name="RA4/AN3/~T1G~/CLKOUT" type="BiDi"/>
+        <pin num="21" name="VSS" type="passive"/>
+      </pins>
+    </libpart>
+  </libparts>
+  <libraries>
+    <library logical="Battery_Management">
+      <uri>C:\Program Files\KiCad\share\kicad\library/Battery_Management.lib</uri>
+    </library>
+    <library logical="Connector">
+      <uri>C:\Program Files\KiCad\share\kicad\library/Connector.lib</uri>
+    </library>
+    <library logical="Device">
+      <uri>C:\Program Files\KiCad\share\kicad\library/Device.lib</uri>
+    </library>
+    <library logical="Diode">
+      <uri>C:\Program Files\KiCad\share\kicad\library/Diode.lib</uri>
+    </library>
+    <library logical="FallerCarSystem_v2-rescue">
+      <uri>C:\Users\jerem\Siebwalde\KiCad\FallerCarSystem_v2/FallerCarSystem_v2-rescue.lib</uri>
+    </library>
+  </libraries>
+  <nets>
+    <net code="1" name="Net-(J35-Pad1)">
+      <node ref="R24" pin="1"/>
+      <node ref="J35" pin="1"/>
+    </net>
+    <net code="2" name="Net-(J33-Pad1)">
+      <node ref="R23" pin="1"/>
+      <node ref="J33" pin="1"/>
+    </net>
+    <net code="3" name="Net-(J31-Pad1)">
+      <node ref="R22" pin="1"/>
+      <node ref="J31" pin="1"/>
+    </net>
+    <net code="4" name="Net-(J29-Pad1)">
+      <node ref="J29" pin="1"/>
+      <node ref="R21" pin="1"/>
+    </net>
+    <net code="5" name="Net-(J27-Pad1)">
+      <node ref="R20" pin="1"/>
+      <node ref="J27" pin="1"/>
+    </net>
+    <net code="6" name="Net-(J25-Pad1)">
+      <node ref="R19" pin="1"/>
+      <node ref="J25" pin="1"/>
+    </net>
+    <net code="7" name="Net-(J23-Pad1)">
+      <node ref="R18" pin="1"/>
+      <node ref="J23" pin="1"/>
+    </net>
+    <net code="8" name="Net-(J21-Pad1)">
+      <node ref="R17" pin="1"/>
+      <node ref="J21" pin="1"/>
+    </net>
+    <net code="9" name="PWM1">
+      <node ref="U1" pin="2"/>
+      <node ref="R16" pin="2"/>
+    </net>
+    <net code="10" name="Net-(J19-Pad1)">
+      <node ref="J19" pin="1"/>
+      <node ref="R16" pin="1"/>
+    </net>
+    <net code="11" name="LEDA">
+      <node ref="R23" pin="2"/>
+      <node ref="U1" pin="19"/>
+    </net>
+    <net code="12" name="LEDB">
+      <node ref="U1" pin="20"/>
+      <node ref="R22" pin="2"/>
+    </net>
+    <net code="13" name="Net-(J37-Pad1)">
+      <node ref="J37" pin="1"/>
+      <node ref="R25" pin="1"/>
+    </net>
+    <net code="14" name="LEDC">
+      <node ref="R25" pin="2"/>
+      <node ref="U1" pin="8"/>
+    </net>
+    <net code="15" name="UART_RX">
+      <node ref="R6" pin="1"/>
+      <node ref="J2" pin="1"/>
+    </net>
+    <net code="16" name="GND">
+      <node ref="U1" pin="21"/>
+      <node ref="U2" pin="11"/>
+      <node ref="U3" pin="9"/>
+      <node ref="C7" pin="2"/>
+      <node ref="D1" pin="2"/>
+      <node ref="J3" pin="1"/>
+      <node ref="J6" pin="1"/>
+      <node ref="C1" pin="2"/>
+      <node ref="U2" pin="10"/>
+      <node ref="R15" pin="1"/>
+      <node ref="C6" pin="2"/>
+      <node ref="C2" pin="2"/>
+      <node ref="R2" pin="1"/>
+      <node ref="J10" pin="1"/>
+      <node ref="C5" pin="2"/>
+      <node ref="C3" pin="2"/>
+      <node ref="J18" pin="1"/>
+      <node ref="R8" pin="1"/>
+      <node ref="C4" pin="2"/>
+      <node ref="J16" pin="1"/>
+      <node ref="R7" pin="1"/>
+      <node ref="R4" pin="1"/>
+      <node ref="R9" pin="1"/>
+      <node ref="R11" pin="1"/>
+      <node ref="J30" pin="1"/>
+      <node ref="U2" pin="21"/>
+      <node ref="J38" pin="1"/>
+      <node ref="J28" pin="1"/>
+      <node ref="J26" pin="1"/>
+      <node ref="J24" pin="1"/>
+      <node ref="J22" pin="1"/>
+      <node ref="J20" pin="1"/>
+      <node ref="J34" pin="1"/>
+      <node ref="U1" pin="17"/>
+      <node ref="J32" pin="1"/>
+      <node ref="U3" pin="4"/>
+      <node ref="J36" pin="1"/>
+    </net>
+    <net code="17" name="UART_TX">
+      <node ref="R5" pin="1"/>
+      <node ref="J1" pin="1"/>
+    </net>
+    <net code="18" name="ICSPCLK">
+      <node ref="U1" pin="15"/>
+      <node ref="J8" pin="1"/>
+    </net>
+    <net code="19" name="Net-(R6-Pad2)">
+      <node ref="U1" pin="14"/>
+      <node ref="R6" pin="2"/>
+    </net>
+    <net code="20" name="Net-(R5-Pad2)">
+      <node ref="U1" pin="13"/>
+      <node ref="R5" pin="2"/>
+    </net>
+    <net code="21" name="Vbatt">
+      <node ref="U1" pin="12"/>
+      <node ref="C2" pin="1"/>
+      <node ref="R1" pin="1"/>
+      <node ref="R2" pin="2"/>
+    </net>
+    <net code="22" name="EnMOT">
+      <node ref="U3" pin="3"/>
+      <node ref="R9" pin="2"/>
+      <node ref="U1" pin="11"/>
+    </net>
+    <net code="23" name="RCS_IN">
+      <node ref="U1" pin="10"/>
+      <node ref="R15" pin="2"/>
+      <node ref="J14" pin="1"/>
+    </net>
+    <net code="24" name="/PG">
+      <node ref="R12" pin="1"/>
+      <node ref="U2" pin="6"/>
+    </net>
+    <net code="25" name="SWONOFF_OUT">
+      <node ref="J11" pin="1"/>
+      <node ref="U2" pin="20"/>
+      <node ref="C7" pin="1"/>
+      <node ref="U2" pin="1"/>
+    </net>
+    <net code="26" name="Net-(U3-Pad6)">
+      <node ref="U3" pin="6"/>
+    </net>
+    <net code="27" name="Net-(U3-Pad5)">
+      <node ref="U3" pin="5"/>
+    </net>
+    <net code="28" name="LEDD">
+      <node ref="U1" pin="9"/>
+      <node ref="R24" pin="2"/>
+    </net>
+    <net code="29" name="PWM6">
+      <node ref="R21" pin="2"/>
+      <node ref="U1" pin="7"/>
+    </net>
+    <net code="30" name="PWM5">
+      <node ref="U1" pin="6"/>
+      <node ref="R20" pin="2"/>
+    </net>
+    <net code="31" name="PWM4">
+      <node ref="U1" pin="5"/>
+      <node ref="R19" pin="2"/>
+    </net>
+    <net code="32" name="PWM3">
+      <node ref="R18" pin="2"/>
+      <node ref="U1" pin="4"/>
+    </net>
+    <net code="33" name="PWM2">
+      <node ref="R17" pin="2"/>
+      <node ref="U1" pin="3"/>
+    </net>
+    <net code="34" name="MOTOR+">
+      <node ref="C5" pin="1"/>
+      <node ref="R10" pin="2"/>
+      <node ref="J9" pin="1"/>
+      <node ref="U3" pin="8"/>
+    </net>
+    <net code="35" name="+3V8">
+      <node ref="J12" pin="1"/>
+      <node ref="C1" pin="1"/>
+      <node ref="J13" pin="1"/>
+      <node ref="R3" pin="2"/>
+      <node ref="C3" pin="1"/>
+      <node ref="U1" pin="18"/>
+      <node ref="U3" pin="2"/>
+      <node ref="U3" pin="1"/>
+      <node ref="J5" pin="1"/>
+      <node ref="R1" pin="2"/>
+    </net>
+    <net code="36" name="/STAT1">
+      <node ref="R13" pin="1"/>
+      <node ref="U2" pin="8"/>
+    </net>
+    <net code="37" name="/STAT2">
+      <node ref="R14" pin="1"/>
+      <node ref="U2" pin="7"/>
+    </net>
+    <net code="38" name="+5V">
+      <node ref="D1" pin="1"/>
+      <node ref="D4" pin="2"/>
+      <node ref="U2" pin="18"/>
+      <node ref="C4" pin="1"/>
+      <node ref="U2" pin="17"/>
+      <node ref="U2" pin="19"/>
+      <node ref="D3" pin="2"/>
+      <node ref="D2" pin="2"/>
+      <node ref="J15" pin="1"/>
+      <node ref="U2" pin="9"/>
+      <node ref="U2" pin="4"/>
+      <node ref="U2" pin="3"/>
+      <node ref="U2" pin="2"/>
+    </net>
+    <net code="39" name="Net-(D3-Pad1)">
+      <node ref="D3" pin="1"/>
+      <node ref="R13" pin="2"/>
+    </net>
+    <net code="40" name="Net-(D4-Pad1)">
+      <node ref="R14" pin="2"/>
+      <node ref="D4" pin="1"/>
+    </net>
+    <net code="41" name="Net-(D2-Pad1)">
+      <node ref="D2" pin="1"/>
+      <node ref="R12" pin="2"/>
+    </net>
+    <net code="42" name="Net-(R8-Pad2)">
+      <node ref="U2" pin="5"/>
+      <node ref="R8" pin="2"/>
+    </net>
+    <net code="43" name="Net-(R7-Pad2)">
+      <node ref="R7" pin="2"/>
+      <node ref="U2" pin="12"/>
+    </net>
+    <net code="44" name="Net-(R4-Pad2)">
+      <node ref="U2" pin="13"/>
+      <node ref="R4" pin="2"/>
+    </net>
+    <net code="45" name="BATT">
+      <node ref="C6" pin="1"/>
+      <node ref="U2" pin="16"/>
+      <node ref="U2" pin="15"/>
+      <node ref="J17" pin="1"/>
+      <node ref="U2" pin="14"/>
+    </net>
+    <net code="46" name="Vpp">
+      <node ref="J4" pin="1"/>
+      <node ref="R3" pin="1"/>
+      <node ref="U1" pin="1"/>
+    </net>
+    <net code="47" name="ICSPDATA">
+      <node ref="U1" pin="16"/>
+      <node ref="J7" pin="1"/>
+    </net>
+    <net code="48" name="Net-(R10-Pad1)">
+      <node ref="U3" pin="7"/>
+      <node ref="R11" pin="2"/>
+      <node ref="R10" pin="1"/>
+    </net>
+  </nets>
+</export>
