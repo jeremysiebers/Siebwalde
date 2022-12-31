@@ -51,6 +51,8 @@
 
 
 
+void (*IOCBF4_InterruptHandler)(void);
+
 
 void PIN_MANAGER_Initialize(void)
 {
@@ -64,14 +66,14 @@ void PIN_MANAGER_Initialize(void)
     /**
     TRISx registers
     */
-    TRISA = 0x03;
-    TRISB = 0x80;
-    TRISC = 0x11;
+    TRISA = 0x07;
+    TRISB = 0x10;
+    TRISC = 0x02;
 
     /**
     ANSELx registers
     */
-    ANSELC = 0x01;
+    ANSELC = 0x02;
     ANSELB = 0x00;
     ANSELA = 0x00;
 
@@ -104,25 +106,73 @@ void PIN_MANAGER_Initialize(void)
     INLVLC = 0x3F;
 
 
+    /**
+    IOCx registers 
+    */
+    //interrupt on change for group IOCBF - flag
+    IOCBFbits.IOCBF4 = 0;
+    //interrupt on change for group IOCBN - negative
+    IOCBNbits.IOCBN4 = 1;
+    //interrupt on change for group IOCBP - positive
+    IOCBPbits.IOCBP4 = 1;
 
 
 
+    // register default IOC callback functions at runtime; use these methods to register a custom function
+    IOCBF4_SetInterruptHandler(IOCBF4_DefaultInterruptHandler);
    
+    // Enable IOCI interrupt 
+    PIE0bits.IOCIE = 1; 
     
 	
-    ADACTPPS = 0x00;   //NONE->ADC:ADCACT;    
-    RB6PPS = 0x0F;   //RB6->EUSART1:TX1;    
-    RC3PPS = 0x0A;   //RC3->CCP2:CCP2;    
-    RC1PPS = 0x0C;   //RC1->PWM4:PWM4OUT;    
-    RA2PPS = 0x0B;   //RA2->PWM3:PWM3OUT;    
+    RC0PPS = 0x0F;   //RC0->EUSART1:TX1;    
+    ADACTPPS = 0x11;   //RC1->ADC:ADCACT;    
+    RC3PPS = 0x0B;   //RC3->PWM3:PWM3OUT;    
+    RB7PPS = 0x0E;   //RB7->PWM6:PWM6OUT;    
+    RC4PPS = 0x0A;   //RC4->CCP2:CCP2;    
     RC5PPS = 0x09;   //RC5->CCP1:CCP1;    
-    RC6PPS = 0x0D;   //RC6->PWM5:PWM5OUT;    
-    RC7PPS = 0x0E;   //RC7->PWM6:PWM6OUT;    
-    RX1DTPPS = 0x0F;   //RB7->EUSART1:RX1;    
+    RC6PPS = 0x0C;   //RC6->PWM4:PWM4OUT;    
+    RC7PPS = 0x0D;   //RC7->PWM5:PWM5OUT;    
+    RX1DTPPS = 0x02;   //RA2->EUSART1:RX1;    
 }
   
 void PIN_MANAGER_IOC(void)
 {   
+	// interrupt on change for pin IOCBF4
+    if(IOCBFbits.IOCBF4 == 1)
+    {
+        IOCBF4_ISR();  
+    }	
+}
+
+/**
+   IOCBF4 Interrupt Service Routine
+*/
+void IOCBF4_ISR(void) {
+
+    // Add custom IOCBF4 code
+
+    // Call the interrupt handler for the callback registered at runtime
+    if(IOCBF4_InterruptHandler)
+    {
+        IOCBF4_InterruptHandler();
+    }
+    IOCBFbits.IOCBF4 = 0;
+}
+
+/**
+  Allows selecting an interrupt handler for IOCBF4 at application runtime
+*/
+void IOCBF4_SetInterruptHandler(void (* InterruptHandler)(void)){
+    IOCBF4_InterruptHandler = InterruptHandler;
+}
+
+/**
+  Default interrupt handler for IOCBF4
+*/
+void IOCBF4_DefaultInterruptHandler(void){
+    // add your IOCBF4 interrupt custom code
+    // or set custom function using IOCBF4_SetInterruptHandler()
 }
 
 /**

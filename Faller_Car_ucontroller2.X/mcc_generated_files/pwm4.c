@@ -61,8 +61,8 @@
     // PWM4POL active_hi; PWM4EN enabled; 
     PWM4CON = 0x80;   
 
-    // DC 127; 
-    PWM4DCH = 0x7F;   
+    // DC 99; 
+    PWM4DCH = 0x63;   
 
     // DC 3; 
     PWM4DCL = 0xC0;   

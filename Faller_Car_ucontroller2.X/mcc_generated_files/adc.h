@@ -94,7 +94,7 @@ typedef struct
 
 typedef enum
 {
-    Vbatt =  0x10,
+    Vbatt =  0x11,
     channel_AVSS =  0x3B,
     channel_Temp =  0x3C,
     channel_DAC1 =  0x3D,

@@ -42,12 +42,36 @@
 */
 
 #include "mcc_generated_files/mcc.h"
+#include "Main.h"
+#include "executer.h"
+#include "mcc_generated_files/adc.h"
+/******************************************************************************/
+/*          Methods                                                              */
+/******************************************************************************/
 
-/*
-                         Main application
- */
+/******************************************************************************/
+/*          Local variables                                                              */
+/******************************************************************************/
+
+bool         UpdateLeds     = false;
+bool         UpdateRcs      = false;
+bool         UpdateVbatt    = false;
+bool         BattProtect    = false;
+bool         CarrOff        = false;
+uint8_t      AdcState       = 0;
+adc_result_t AdcResult[AdcSize] = {1023,1023,1023,1023,1023,1023,1023,1023};
+adc_result_t AdcResultSample= 0;
+adc_result_t AdcResultAvg   = 0;
+uint8_t      pAdcResult     = 0;
+uint24_t     CalcMv         = 0;
+uint8_t      StartUp        = 0;
+bool         FirstLoop      = true;
+
+/******************************************************************************/
+/*          Main                                                              */
+/******************************************************************************/
 void main(void)
-{
+{    
     // initialize the device
     SYSTEM_Initialize();
 
@@ -55,21 +79,117 @@ void main(void)
     // Use the following macros to:
 
     // Enable the Global Interrupts
-    //INTERRUPT_GlobalInterruptEnable();
+    INTERRUPT_GlobalInterruptEnable();
 
     // Enable the Peripheral Interrupts
-    //INTERRUPT_PeripheralInterruptEnable();
-
+    INTERRUPT_PeripheralInterruptEnable();
+    
     // Disable the Global Interrupts
     //INTERRUPT_GlobalInterruptDisable();
 
     // Disable the Peripheral Interrupts
     //INTERRUPT_PeripheralInterruptDisable();
-
+    
+    /* Setup Timer interrupt */
+    TMR0_SetInterruptHandler(TMR0_INT);
+    TMR1_SetInterruptHandler(TMR1_INT);
+    /* Setup RCS pin interrupt */
+    IOCBF4_SetInterruptHandler(RCS_INT);  
+    /* Setup ADC Channel selection */
+    ADC_SelectChannel(Vbatt);
+    
+    INITxEXECUTER();
+    
+    /* Clear terminal set cursor to first position */
+    printf("\033[2J\033[1;1H");
+    
+    /* Main infinite loop */
     while (1)
     {
-        LEDA_Toggle();
+        /* Main Led routine updater */
+        if(UpdateLeds){
+            if (EXECUTExEFFECT() == finished )                                  // When all switch cases are stable in the underlying routines
+            {                
+                UpdateLeds = false;                                             // Set to OFF for next update of timer0
+            }
+        }
+        
+        /* When reed contact switch sees a magnet, the car has to stop */
+        if(UpdateRcs && !CarrOff){
+            RCSxLED();
+            UpdateRcs = false;
+        }
+        
+        /* Measure the Battery voltage and calc average */
+        if(UpdateVbatt){
+            switch(AdcState){
+                case 0: ADC_StartConversion();
+                        AdcState = 1;
+                    break;
+                case 1: if(ADC_IsConversionDone()){                            
+                            AdcResultSample = ADC_GetConversionResult();
+                            AdcResult[pAdcResult] = AdcResultSample;
+                                    
+                            pAdcResult++;
+                            if(pAdcResult > AdcRef){
+                                pAdcResult = 0;
+                            }
+                            
+                            AdcResultAvg = 0;
+                            for(uint8_t i=0; i < AdcSize; i++){
+                                AdcResultAvg += AdcResult[i];
+                            };
+                            /* 8 samples --> divide by 8 = 3 bits shift */
+                            AdcResultAvg = AdcResultAvg >> 3;
+                            if (AdcResultAvg < 750){                            // 750 ~2.90V
+                               BattProtect = true; 
+                            }
+                            UpdateVbatt = false;
+                            AdcState = 0;
+                            
+                            /* mV = ADC result / 500 * 2000 --> = ADC result * 4 */
+                            printf("\033[2J\033[1;1H");
+                            printf("ADC = %d [mV].\n\r", AdcResultAvg << 2);
+                            printf("ADC = %d [dec].\n\r", AdcResultSample);
+                        }                        
+                    break;
+                    
+                default: AdcState = 0;
+                    break;
+            }
+        }
+         /* When battery voltage is too low, execute protection */
+        if(BattProtect){            
+            /* Call indication once */
+            BATTxPROTECT();
+            BattProtect = false;
+            /* Block RCS interrupt from overwriting */
+            CarrOff = true;
+        }        
     }
+}
+/******************************************************************************/
+/*          Timer Interrupt Routines                                                */
+/******************************************************************************/
+void TMR0_INT()
+{
+    /* Check battery voltage (every 10 seconds) */
+    UpdateVbatt = true;
+}
+
+void TMR1_INT(){
+    UpdateLeds = true;    
+}
+
+/******************************************************************************/
+/*          Pin Interrupts                                                    */
+/******************************************************************************/
+void RCS_INT()
+{
+    /* Call RCS LED to prevent duplicated code */
+    UpdateRcs = true;
+    /* Restart Timer 0 to indicate car is driving and has actively stopped */
+    TMR0_Reload();
 }
 /**
  End of File

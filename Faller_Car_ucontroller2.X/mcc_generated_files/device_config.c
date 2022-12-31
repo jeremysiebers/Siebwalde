@@ -48,14 +48,14 @@
 
 // CONFIG1
 #pragma config FEXTOSC = OFF    // External Oscillator mode selection bits->Oscillator not enabled
-#pragma config RSTOSC = HFINTPLL    // Power-up default value for COSC bits->HFINTOSC with 2x PLL, with OSCFRQ = 16 MHz and CDIV = 1:1 (FOSC = 32 MHz)
+#pragma config RSTOSC = HFINT1    // Power-up default value for COSC bits->HFINTOSC (1MHz)
 #pragma config CLKOUTEN = OFF    // Clock Out Enable bit->CLKOUT function is disabled; i/o or oscillator function on OSC2
 #pragma config CSWEN = ON    // Clock Switch Enable bit->Writing to NOSC and NDIV is allowed
 #pragma config FCMEN = ON    // Fail-Safe Clock Monitor Enable bit->FSCM timer enabled
 
 // CONFIG2
 #pragma config MCLRE = ON    // Master Clear Enable bit->MCLR pin is Master Clear function
-#pragma config PWRTE = OFF    // Power-up Timer Enable bit->PWRT disabled
+#pragma config PWRTE = ON    // Power-up Timer Enable bit->PWRT enabled
 #pragma config LPBOREN = OFF    // Low-Power BOR enable bit->ULPBOR disabled
 #pragma config BOREN = ON    // Brown-out reset enable bits->Brown-out Reset Enabled, SBOREN bit is ignored
 #pragma config BORV = LO    // Brown-out Reset Voltage Selection->Brown-out Reset Voltage (VBOR) set to 1.9V on LF, and 2.45V on F Devices
@@ -71,10 +71,10 @@
 
 // CONFIG4
 #pragma config BBSIZE = BB512    // ->512 words boot block size
-#pragma config BBEN = ON    // ->Boot Block enabled
+#pragma config BBEN = OFF    // ->Boot Block disabled
 #pragma config SAFEN = OFF    // ->SAF disabled
 #pragma config WRTAPP = OFF    // ->Application Block not write protected
-#pragma config WRTB = ON    // ->Boot Block write protected
+#pragma config WRTB = OFF    // ->Boot Block not write protected
 #pragma config WRTC = OFF    // ->Configuration Register not write protected
 #pragma config WRTSAF = OFF    // ->SAF not write protected
 #pragma config LVP = OFF    // Low Voltage Programming Enable bit->High Voltage on MCLR/Vpp must be used for programming

@@ -55,7 +55,7 @@
   Section: Macro Declarations
 */
 
-#define PWM2_INITIALIZE_DUTY_VALUE    511
+#define PWM2_INITIALIZE_DUTY_VALUE    399
 
 /**
   Section: PWM Module APIs
@@ -71,8 +71,8 @@ void PWM2_Initialize(void)
 	// RH 1; 
 	CCPR2H = 0x01;    
 	
-	// RL 255; 
-	CCPR2L = 0xFF;    
+	// RL 143; 
+	CCPR2L = 0x8F;    
 
     
 }

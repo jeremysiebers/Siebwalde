@@ -56,43 +56,38 @@ void SYSTEM_Initialize(void)
     PWM2_Initialize();
     PWM4_Initialize();
     TMR2_Initialize();
+    TMR0_Initialize();
     PWM6_Initialize();
     PWM1_Initialize();
     ADC_Initialize();
     PWM3_Initialize();
     PWM5_Initialize();
+    TMR1_Initialize();
     EUSART1_Initialize();
-#ifdef BOOTLOAD_AND_APP
-    BOOTLOADER_Initialize();
-#endif
 }
 
 void OSCILLATOR_Initialize(void)
 {
-    // NOSC HFINTOSC with 2x PLL; NDIV 1; 
-    OSCCON1 = 0x10;
+    // NOSC HFINTOSC; NDIV 1; 
+    OSCCON1 = 0x60;
     // CSWHOLD may proceed; SOSCPWR Low power; 
     OSCCON3 = 0x00;
     // MFOEN disabled; LFOEN disabled; ADOEN disabled; SOSCEN disabled; EXTOEN disabled; HFOEN disabled; 
     OSCEN = 0x00;
-    // HFFRQ 12_MHz; 
-    OSCFRQ = 0x04;
+    // HFFRQ 16_MHz; 
+    OSCFRQ = 0x05;
     // MFOR not ready; 
     OSCSTAT = 0x00;
     // HFTUN 0; 
     OSCTUNE = 0x00;
-    // Wait for PLL to stabilize
-    while(PLLR == 0)
-    {
-    }
 }
 
 void PMD_Initialize(void)
 {
     // CLKRMD CLKR disabled; SYSCMD SYSCLK enabled; FVRMD FVR enabled; IOCMD IOC enabled; NVMMD NVM disabled; 
     PMD0 = 0x06;
-    // TMR0MD TMR0 enabled; TMR1MD TMR1 enabled; TMR2MD TMR2 enabled; NCOMD DDS(NCO) enabled; 
-    PMD1 = 0x00;
+    // TMR0MD TMR0 enabled; TMR1MD TMR1 enabled; TMR2MD TMR2 enabled; NCOMD DDS(NCO) disabled; 
+    PMD1 = 0x80;
     // ZCDMD ZCD disabled; CMP1MD CMP1 disabled; ADCMD ADC enabled; CMP2MD CMP2 disabled; DAC1MD DAC1 disabled; 
     PMD2 = 0x47;
     // CCP2MD CCP2 enabled; CCP1MD CCP1 enabled; PWM4MD PWM4 enabled; PWM3MD PWM3 enabled; PWM6MD PWM6 enabled; PWM5MD PWM5 enabled; 
