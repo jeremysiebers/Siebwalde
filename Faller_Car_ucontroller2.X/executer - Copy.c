@@ -15,12 +15,12 @@
 
 LEDBIT LedBit[6] = {
 /*   NAME          Led Program   Spd nom    pgst itt stp   PWM*/
-    {LedFlashLeft,  0,  Led_Off,   0,  MAX,   0,   0,  1,    PWM1},
-    {LedFlashRight, 0,  Led_Off,   0,  MAX,   0,   0,  1,    PWM2},
-    {LedBackLeft,   0,  Led_Off,   0,  BACK,  0,   0,  1,    PWM3},
-    {LedBackRight,  0,  Led_Off,   0,  BACK,  0,   0,  1,    PWM4},
-    {LedFrontLeft,  0,  Led_Off,   0,  FRONT, 0,   0,  1,    PWM5},
-    {LedFrontRight, 0,  Led_Off,   0,  FRONT, 0,   0,  1,    PWM6}};
+    {LedFlashLeft,  0,  LedOff,   0,  MAX,   0,   0,  1,    PWM1_LoadDutyValue},
+    {LedFlashRight, 0,  LedOff,   0,  MAX,   0,   0,  1,    PWM2_LoadDutyValue},
+    {LedBackLeft,   0,  LedOff,   0,  BACK,  0,   0,  1,    PWM3_LoadDutyValue},
+    {LedBackRight,  0,  LedOff,   0,  BACK,  0,   0,  1,    PWM4_LoadDutyValue},
+    {LedFrontLeft,  0,  LedOff,   0,  FRONT, 0,   0,  1,    PWM5_LoadDutyValue},
+    {LedFrontRight, 0,  LedOff,   0,  FRONT, 0,   0,  1,    PWM6_LoadDutyValue}};
 
 /******************************************************************************/
 /*          LOCAL VARIABLES                                                   */
@@ -53,27 +53,27 @@ void BATTxPROTECT(){
     /* Block motor from running */
     EnMOT_SetDigitalInput();
     
-    LedBit[LedBackLeft].Prog         = Led_Off;
+    LedBit[LedBackLeft].Prog         = LedOff;
 //    LedBit[LedBackLeft].Led          = MAX;
 //    LedBit[LedBackLeft].Speed        = 150;
 //    
-    LedBit[LedBackRight].Prog        = Led_Off;
+    LedBit[LedBackRight].Prog        = LedOff;
 //    LedBit[LedBackRight].Led         = MAX;
 //    LedBit[LedBackRight].Speed       = 150;
     
-    LedBit[LedFlashLeft].Prog        = Led_Flash;
+    LedBit[LedFlashLeft].Prog        = LedFlash;
     LedBit[LedFlashLeft].Led         = MAX;
     LedBit[LedFlashLeft].Speed       = 150;
     
-    LedBit[LedFlashRight].Prog       = Led_Off;
+    LedBit[LedFlashRight].Prog       = LedOff;
 //    LedBit[LedFlashRight].Led        = MAX;
 //    LedBit[LedFlashRight].Speed      = 150;
     
-    LedBit[LedFrontLeft].Prog        = Led_Off;
+    LedBit[LedFrontLeft].Prog        = LedOff;
 //    LedBit[LedFrontLeft].Led         = MAX;
 //    LedBit[LedFrontLeft].Speed       = 150;
 //    
-    LedBit[LedFrontRight].Prog       = Led_Off;
+    LedBit[LedFrontRight].Prog       = LedOff;
 //    LedBit[LedFrontRight].Led        = MAX;
 //    LedBit[LedFrontRight].Speed      = 150;
 }
@@ -86,30 +86,30 @@ void RCSxLED(void)
     if(RCS_GetValue()){ /* Check if the car is driving */
                
         /* Set the back lights to normal intensity */
-        LedBit[LedBackLeft].Prog         = Led_Nom;
-        LedBit[LedBackRight].Prog        = Led_Nom;
+        LedBit[LedBackLeft].Prog         = LedNom;
+        LedBit[LedBackRight].Prog        = LedNom;
         
         /* Let random decide to enable flashing lights or not */
         if(Random > 16383)
         {
             /* Set the flashing lights on */
-            LedBit[LedFlashLeft].Prog        = Led_Flash;
+            LedBit[LedFlashLeft].Prog        = LedFlash;
             LedBit[LedFlashLeft].Led         = MAX;
             LedBit[LedFlashLeft].Prog_State  = 0;
             LedBit[LedFlashLeft].Speed       = 150;
 
-            LedBit[LedFlashRight].Prog       = Led_Flash;
+            LedBit[LedFlashRight].Prog       = LedFlash;
             LedBit[LedFlashRight].Led        = 0;
             LedBit[LedFlashRight].Prog_State = 0;
             LedBit[LedFlashRight].Speed       = 150;
 
             /* Let the front lights also glow flash */
-            LedBit[LedFrontLeft].Prog        = Led_SlFl;
+            LedBit[LedFrontLeft].Prog        = LedSlFl;
             LedBit[LedFrontLeft].Led         = FRONT_HIGH;
             LedBit[LedFrontLeft].Prog_State  = 2;
             LedBit[LedFrontLeft].Speed       = 1;
 
-            LedBit[LedFrontRight].Prog       = Led_SlFl;
+            LedBit[LedFrontRight].Prog       = LedSlFl;
             LedBit[LedFrontRight].Led        = FRONT;
             LedBit[LedFrontRight].Prog_State = 0;
             LedBit[LedFrontRight].Speed      = 1;
@@ -124,16 +124,16 @@ void RCSxLED(void)
     /* The Car has braked to stop */
     else{
         /* Set the brake light intensity */
-        LedBit[LedBackLeft].Prog        = Led_Brake;
-        LedBit[LedBackRight].Prog       = Led_Brake;
+        LedBit[LedBackLeft].Prog        = LedBrake;
+        LedBit[LedBackRight].Prog       = LedBrake;
         
         /* Disable the flash light */
-        LedBit[LedFlashLeft].Prog       = Led_Off;
-        LedBit[LedFlashRight].Prog      = Led_Off;
+        LedBit[LedFlashLeft].Prog       = LedOff;
+        LedBit[LedFlashRight].Prog      = LedOff;
         
         /* Set the front lights to normal */
-        LedBit[LedFrontLeft].Prog       = Led_Nom;
-        LedBit[LedFrontRight].Prog      = Led_Nom;
+        LedBit[LedFrontLeft].Prog       = LedNom;
+        LedBit[LedFrontRight].Prog      = LedNom;
         
         if(Random < 16383)
         {
@@ -163,7 +163,7 @@ uint8_t EXECUTExEFFECT(void)
     
     for(uint8_t x=0; x<6; x++)
     {
-        ReturnData += Effect_Prog(LedBit[x].Prog, x);                           // Add all return values, call the program that was set for this led       
+        ReturnData += LedBit[x].Prog(x);                                         // Add all return values, call the program that was set for this led       
     }
     if(ReturnData  >= 5)                                                        // when value is lower or equal to -8 all sub routines are finished
     {
@@ -173,38 +173,6 @@ uint8_t EXECUTExEFFECT(void)
         ReturnVal = busy;
     }
     return ReturnVal;
-}
-
-/******************************************************************************/
-/*          Effect_Prog                                                       */
-/******************************************************************************/
-uint8_t Effect_Prog(uint8_t Prog, uint8_t Led)
-{
-    uint8_t ReturnData = 0;
-    switch (Prog)                                                               // Start the selected program for the pointed led
-    {
-        case    Led_Off  :  ReturnData = (LedOff(Led));                                // return also the status of the subroutine that is called
-                            break;  
-
-        case    Led_Nom  :  ReturnData = (LedNom(Led));
-                            break;
-
-        case    Led_Max  :  ReturnData = (LedMax(Led));
-                            break;
-
-        case    Led_Brake:  ReturnData = (LedBrake(Led));
-                            break;
-
-        case    Led_SlFl :  ReturnData = (LedSlFl(Led));
-                            break;
-
-        case    Led_Flash:  ReturnData = (LedFlash(Led));
-                            break;
-            
-        default          :
-                            break;
-    }
-    return ReturnData;
 }
 
 /******************************************************************************/
@@ -347,23 +315,5 @@ uint8_t LedFlash(uint8_t Led)
 /*          Calculate PWM value                                               */
 /******************************************************************************/
 void CalcPwm(uint8_t Led){
-    uint16_t calc = (uint16_t)LedBit[Led].Led * 4;
-    
-    switch(LedBit[Led].PWM){
-        case PWM1: PWM1_LoadDutyValue(calc);
-            break;
-        case PWM2: PWM2_LoadDutyValue(calc);
-            break;
-        case PWM3: PWM3_LoadDutyValue(calc);
-            break;
-        case PWM4: PWM4_LoadDutyValue(calc);
-            break;
-        case PWM5: PWM5_LoadDutyValue(calc);
-            break;
-        case PWM6: PWM6_LoadDutyValue(calc);
-            break;
-        default:
-            break;
-    }    
-    //LedBit[Led].PWM((uint16_t)LedBit[Led].Led * 4);
+    LedBit[Led].PWM((uint16_t)LedBit[Led].Led * 4);
 }

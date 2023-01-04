@@ -44,6 +44,11 @@
     SOFTWARE.
 */
 
+#ifdef OMIT_CONFIGURATIONS
+//#info "Configuration bits are not generated with the code. If you need them switch to the 'WITH_CONFIGURATIONS' Configuration."
+#else
+//#info "Configuration bits are generated with the code. If you get a linker error, solve conflict related to Configuration bits!"
+
 // Configuration bits: selected in the GUI
 
 // CONFIG1
@@ -81,3 +86,5 @@
 
 // CONFIG5
 #pragma config CP = OFF    // UserNVM Program memory code protection bit->UserNVM code protection disabled
+
+#endif

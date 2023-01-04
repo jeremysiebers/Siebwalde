@@ -17,49 +17,55 @@
         Device            :  PIC16F15345
         Driver Version    :  2.00
 */
+
+/*
+    (c) 2018 Microchip Technology Inc. and its subsidiaries. 
+    
+    Subject to your compliance with these terms, you may use Microchip software and any 
+    derivatives exclusively with Microchip products. It is your responsibility to comply with third party 
+    license terms applicable to your use of third party software (including open source software) that 
+    may accompany Microchip software.
+    
+    THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER 
+    EXPRESS, IMPLIED OR STATUTORY, APPLY TO THIS SOFTWARE, INCLUDING ANY 
+    IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS 
+    FOR A PARTICULAR PURPOSE.
+    
+    IN NO EVENT WILL MICROCHIP BE LIABLE FOR ANY INDIRECT, SPECIAL, PUNITIVE, 
+    INCIDENTAL OR CONSEQUENTIAL LOSS, DAMAGE, COST OR EXPENSE OF ANY KIND 
+    WHATSOEVER RELATED TO THE SOFTWARE, HOWEVER CAUSED, EVEN IF MICROCHIP 
+    HAS BEEN ADVISED OF THE POSSIBILITY OR THE DAMAGES ARE FORESEEABLE. TO 
+    THE FULLEST EXTENT ALLOWED BY LAW, MICROCHIP'S TOTAL LIABILITY ON ALL 
+    CLAIMS IN ANY WAY RELATED TO THIS SOFTWARE WILL NOT EXCEED THE AMOUNT 
+    OF FEES, IF ANY, THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS 
+    SOFTWARE.
+*/
+
 #include "mcc_generated_files/mcc.h"
 #include "Main.h"
 #include "executer.h"
 #include "mcc_generated_files/adc.h"
-#include "communication.h"
-
 /******************************************************************************/
-/*          SAF area                                                          */
-/******************************************************************************/
-/* warning: (1604) Storage Area Flash has been enabled by the configuration 
- * bits; ensure this memory is not used for program code 
-*/
-/* "XC8 Global Options Additional Options" --> "-mreserve=rom@0x1f80:0x1fff"  */
-/* OR occupy the SAF area with defined data */
-//typedef struct { uint32_t a, b, c, d, e, f, g, h; }saf_struct;
-//const saf_struct saf[4] __at(0x1F80) = {
-//    {0x88888888, 0x99999999, 0xAAAAAAAA, 0xBBBBBBBB, 0xCCCCCCCC, 0xDDDDDDDD, 0xEEEEEEEE, 0xFFFFFFFF },
-//    {0x88888888, 0x99999999, 0xAAAAAAAA, 0xBBBBBBBB, 0xCCCCCCCC, 0xDDDDDDDD, 0xEEEEEEEE, 0xFFFFFFFF },
-//    {0x88888888, 0x99999999, 0xAAAAAAAA, 0xBBBBBBBB, 0xCCCCCCCC, 0xDDDDDDDD, 0xEEEEEEEE, 0xFFFFFFFF },
-//    {0x88888888, 0x99999999, 0xAAAAAAAA, 0xBBBBBBBB, 0xCCCCCCCC, 0xDDDDDDDD, 0xEEEEEEEE, 0xFFFFFFFF },
-//};
-
-/******************************************************************************/
-/*          Methods                                                           */
+/*          Methods                                                              */
 /******************************************************************************/
 
 /******************************************************************************/
-/*          Local variables                                                   */
+/*          Local variables                                                              */
 /******************************************************************************/
 
-bool         UpdateLeds         = false;
-bool         UpdateRcs          = false;
-bool         UpdateVbatt        = false;
-bool         BattProtect        = false;
-bool         CarrOff            = false;
-uint8_t      AdcState           = 0;
+bool         UpdateLeds     = false;
+bool         UpdateRcs      = false;
+bool         UpdateVbatt    = false;
+bool         BattProtect    = false;
+bool         CarrOff        = false;
+uint8_t      AdcState       = 0;
 adc_result_t AdcResult[AdcSize] = {1023,1023,1023,1023,1023,1023,1023,1023};
-adc_result_t AdcResultSample    = 0;
-adc_result_t AdcResultAvg       = 0;
-uint8_t      pAdcResult         = 0;
-uint24_t     CalcMv             = 0;
-uint8_t      StartUp            = 0;
-bool         FirstLoop          = true;
+adc_result_t AdcResultSample= 0;
+adc_result_t AdcResultAvg   = 0;
+uint8_t      pAdcResult     = 0;
+uint24_t     CalcMv         = 0;
+uint8_t      StartUp        = 0;
+bool         FirstLoop      = true;
 
 /******************************************************************************/
 /*          Main                                                              */
@@ -142,9 +148,9 @@ void main(void)
                             AdcState = 0;
                             
                             /* mV = ADC result / 500 * 2000 --> = ADC result * 4 */
-//                            printf("\033[2J\033[1;1H");
-//                            printf("ADC = %d [mV].\n\r", AdcResultAvg << 2);
-//                            printf("ADC = %d [dec].\n\r", AdcResultSample);
+                            printf("\033[2J\033[1;1H");
+                            printf("ADC = %d [mV].\n\r", AdcResultAvg << 2);
+                            printf("ADC = %d [dec].\n\r", AdcResultSample);
                         }                        
                     break;
                     
@@ -159,7 +165,7 @@ void main(void)
             BattProtect = false;
             /* Block RCS interrupt from overwriting */
             CarrOff = true;
-        }
+        }        
     }
 }
 /******************************************************************************/
@@ -167,7 +173,7 @@ void main(void)
 /******************************************************************************/
 void TMR0_INT()
 {
-    /* Check battery voltage (every second) */
+    /* Check battery voltage (every 10 seconds) */
     UpdateVbatt = true;
 }
 

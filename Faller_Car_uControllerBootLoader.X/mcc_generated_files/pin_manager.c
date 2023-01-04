@@ -1,24 +1,26 @@
 /**
-  @Generated PIC10 / PIC12 / PIC16 / PIC18 MCUs Header File
+  Generated Pin Manager File
 
-  @Company:
+  Company:
     Microchip Technology Inc.
 
-  @File Name:
-    mcc.h
+  File Name:
+    pin_manager.c
 
-  @Summary:
-    This is the mcc.h file generated using PIC10 / PIC12 / PIC16 / PIC18 MCUs
+  Summary:
+    This is the Pin Manager file generated using PIC10 / PIC12 / PIC16 / PIC18 MCUs
 
-  @Description:
-    This header file provides implementations for driver APIs for all modules selected in the GUI.
+  Description:
+    This header file provides implementations for pin APIs for all pins selected in the GUI.
     Generation Information :
         Product Revision  :  PIC10 / PIC12 / PIC16 / PIC18 MCUs - 1.81.8
         Device            :  PIC16F15345
-        Driver Version    :  2.00
+        Driver Version    :  2.11
     The generated drivers are tested against the following:
-        Compiler          :  XC8 2.36 and above or later
+        Compiler          :  XC8 2.36 and above
         MPLAB             :  MPLAB X 6.00
+
+    Copyright (c) 2013 - 2015 released Microchip Technology Inc.  All rights reserved.
 */
 
 /*
@@ -44,71 +46,78 @@
     SOFTWARE.
 */
 
-#ifndef MCC_H
-#define	MCC_H
-#include <xc.h>
-#include "device_config.h"
 #include "pin_manager.h"
-#include <stdint.h>
-#include <stdbool.h>
-#include <conio.h>
-#include "interrupt_manager.h"
-#include "pwm6.h"
-#include "tmr1.h"
-#include "tmr2.h"
-#include "pwm4.h"
-#include "tmr0.h"
-#include "pwm5.h"
-#include "pwm2.h"
-#include "pwm1.h"
-#include "fvr.h"
-#include "pwm3.h"
-#include "adc.h"
-#include "eusart1.h"
 
 
 
-/**
- * @Param
-    none
- * @Returns
-    none
- * @Description
-    Initializes the device to the default states configured in the
- *                  MCC GUI
- * @Example
-    SYSTEM_Initialize(void);
- */
-void SYSTEM_Initialize(void);
-
-/**
- * @Param
-    none
- * @Returns
-    none
- * @Description
-    Initializes the oscillator to the default states configured in the
- *                  MCC GUI
- * @Example
-    OSCILLATOR_Initialize(void);
- */
-void OSCILLATOR_Initialize(void);
-
-/**
- * @Param
-    none
- * @Returns
-    none
- * @Description
-    Initializes the PMD module to the default states configured in the
- *                  MCC GUI
- * @Example
-    PMD_Initialize(void);
- */
-void PMD_Initialize(void);
 
 
-#endif	/* MCC_H */
+void PIN_MANAGER_Initialize(void)
+{
+    /**
+    LATx registers
+    */
+    LATA = 0x00;
+    LATB = 0x00;
+    LATC = 0x00;
+
+    /**
+    TRISx registers
+    */
+    TRISA = 0x27;
+    TRISB = 0xF0;
+    TRISC = 0xFE;
+
+    /**
+    ANSELx registers
+    */
+    ANSELC = 0x00;
+    ANSELB = 0x00;
+    ANSELA = 0x00;
+
+    /**
+    WPUx registers
+    */
+    WPUB = 0x00;
+    WPUA = 0x00;
+    WPUC = 0x00;
+
+    /**
+    ODx registers
+    */
+    ODCONA = 0x00;
+    ODCONB = 0x00;
+    ODCONC = 0x00;
+
+    /**
+    SLRCONx registers
+    */
+    SLRCONA = 0x1F;
+    SLRCONB = 0x00;
+    SLRCONC = 0x3F;
+
+    /**
+    INLVLx registers
+    */
+    INLVLA = 0x3F;
+    INLVLB = 0x00;
+    INLVLC = 0x3F;
+
+
+
+
+
+   
+    
+	
+    RC0PPS = 0x0F;   //RC0->EUSART1:TX1;    
+    RX1DTPPS = 0x02;   //RA2->EUSART1:RX1;    
+}
+  
+//void PIN_MANAGER_IOC(void)
+//{   
+//}
+
 /**
  End of File
 */

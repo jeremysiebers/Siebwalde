@@ -3,27 +3,19 @@
     <type>com.microchip.mplab.nbide.embedded.makeproject</type>
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/make-project/1">
-            <name>Faller_Car_ucontroller2</name>
-            <creation-uuid>0e6e519e-57a4-425f-92a9-f022186c7c80</creation-uuid>
+            <name>Faller_Car_uControllerBootLoader</name>
+            <creation-uuid>c81a5527-78ba-4246-a492-d0d56181907d</creation-uuid>
             <make-project-type>0</make-project-type>
             <sourceEncoding>ISO-8859-1</sourceEncoding>
-            <make-dep-projects>
-                <make-dep-project>../Faller_Car_uControllerBootLoader.X</make-dep-project>
-            </make-dep-projects>
-            <sourceRootList>
-                <sourceRootElem>.</sourceRootElem>
-            </sourceRootList>
+            <make-dep-projects/>
+            <sourceRootList/>
             <confList>
                 <confElem>
-                    <name>Stand_Alone</name>
+                    <name>No_Configurations</name>
                     <type>2</type>
                 </confElem>
                 <confElem>
-                    <name>Offset</name>
-                    <type>2</type>
-                </confElem>
-                <confElem>
-                    <name>Combined</name>
+                    <name>With_Configurations</name>
                     <type>2</type>
                 </confElem>
             </confList>

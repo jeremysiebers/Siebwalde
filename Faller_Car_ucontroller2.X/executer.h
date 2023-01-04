@@ -31,7 +31,8 @@
 #ifndef __EXECUTER_H
 #define	__EXECUTER_H
 
-#include <xc.h> // include processor files - each processor file is guarded.  
+#include <xc.h> // include processor files - each processor file is guarded. 
+#include "Main.h"
 #include "mcc_generated_files/adc.h"
 
 // TODO Insert appropriate #include <>
@@ -45,13 +46,13 @@ typedef struct
 {
     uint8_t Name;            // Name of the Led
     uint8_t Led;             // Holds the duty cycle value for a Led
-    uint8_t (*Prog)(uint8_t); // Program to run on a selected Led
+    uint8_t Prog;            // Program to run on a selected Led
     uint8_t Speed;           // setting on how fast to change a led on time, should be lower than 254
     uint8_t nominal;         // Free to use nominal value for intensity 
     uint8_t Prog_State;      // Memory to hold a actual program status
     uint8_t Iteration;       // Counter to flow over the Speed setting
     uint8_t StepSize;        // Multiplier for PWM calc
-    void (*PWM)(uint16_t);   // Pointer to method for setting a linked PWM duty cycle
+    uint8_t PWM;             // Pointer to method for setting a linked PWM duty cycle
 
 }LEDBIT;
 
@@ -75,12 +76,25 @@ enum{
     SLOW_FLASH_LOW = 30
 };
 
-extern void INITxEXECUTER(void);
-extern uint8_t EXECUTExEFFECT(void);
-extern LEDBIT LedBit[6];
-extern void RCSxLED(void);
-extern void BATTxPROTECT(void);
+enum{
+    Led_Off,
+    Led_Nom,
+    Led_Max,
+    Led_Brake,
+    Led_SlFl,
+    Led_Flash
+};
 
+enum{
+    PWM1,
+    PWM2,
+    PWM3,
+    PWM4,
+    PWM5,
+    PWM6    
+};
+
+uint8_t Effect_Prog(uint8_t Prog, uint8_t Led);
 uint8_t LedOff(uint8_t Led);
 uint8_t LedNom(uint8_t Led);
 uint8_t LedMax(uint8_t Led);
@@ -88,6 +102,12 @@ uint8_t LedBrake(uint8_t Led);
 uint8_t LedSlFl(uint8_t Led);
 uint8_t LedFlash(uint8_t Led);
 void CalcPwm(uint8_t Led);
+
+extern void INITxEXECUTER(void);
+extern uint8_t EXECUTExEFFECT(void);
+extern LEDBIT LedBit[6];
+extern void RCSxLED(void);
+extern void BATTxPROTECT(void);
 
 // TODO Insert declarations or function prototypes (right here) to leverage 
 // live documentation
