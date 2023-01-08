@@ -71,7 +71,7 @@ void PIN_MANAGER_Initialize(void)
     /**
     ANSELx registers
     */
-    ANSELC = 0x00;
+    ANSELC = 0x02;
     ANSELB = 0x00;
     ANSELA = 0x00;
 
@@ -114,9 +114,9 @@ void PIN_MANAGER_Initialize(void)
     RX1DTPPS = 0x02;   //RA2->EUSART1:RX1;    
 }
   
-//void PIN_MANAGER_IOC(void)
-//{   
-//}
+void PIN_MANAGER_IOC(void)
+{   
+}
 
 /**
  End of File

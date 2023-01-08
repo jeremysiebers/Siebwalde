@@ -43,6 +43,11 @@
 
 #include "mcc_generated_files/mcc.h"
 
+/* PIC16 has 32 write latches so it can write only in chunks of 32, meaning
+ * that every "row" is a multiple of 32. meaning the bootloader can sit
+ * in the first 0x512 words or smaller per 32!
+ */
+
 /*
                          Main application
  */

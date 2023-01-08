@@ -142,9 +142,14 @@ void main(void)
                             AdcState = 0;
                             
                             /* mV = ADC result / 500 * 2000 --> = ADC result * 4 */
-//                            printf("\033[2J\033[1;1H");
-//                            printf("ADC = %d [mV].\n\r", AdcResultAvg << 2);
-//                            printf("ADC = %d [dec].\n\r", AdcResultSample);
+                            printf("\033[2J\033[1;1H");
+                            printf("ADC = %d [mV].\n\r", AdcResultAvg << 2);
+                            printf("ADC = %d [dec].\n\r", AdcResultSample);
+                            
+                            if(EUSART1_is_rx_ready())
+                            {
+                                EUSART1_Write(EUSART1_Read());
+                            }
                         }                        
                     break;
                     

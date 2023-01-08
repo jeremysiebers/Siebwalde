@@ -67,8 +67,8 @@ void EUSART1_Initialize(void)
 {
     // Set the EUSART1 module to the options selected in the user interface.
 
-    // ABDOVF no_overflow; SCKP Non-Inverted; BRG16 16bit_generator; WUE disabled; ABDEN enabled; 
-    BAUD1CON = 0x09;
+    // ABDOVF no_overflow; SCKP Non-Inverted; BRG16 16bit_generator; WUE disabled; ABDEN disabled; 
+    BAUD1CON = 0x08;
 
     // SPEN enabled; RX9 8-bit; CREN enabled; ADDEN disabled; SREN disabled; 
     RC1STA = 0x90;
@@ -76,11 +76,11 @@ void EUSART1_Initialize(void)
     // TX9 8-bit; TX9D 0; SENDB sync_break_complete; TXEN enabled; SYNC asynchronous; BRGH hi_speed; CSRC slave; 
     TX1STA = 0x24;
 
-    // SP1BRGL 160; 
-    SP1BRGL = 0xA0;
+    // SP1BRGL 34; 
+    SP1BRGL = 0x22;
 
-    // SP1BRGH 1; 
-    SP1BRGH = 0x01;
+    // SP1BRGH 0; 
+    SP1BRGH = 0x00;
 
 
     EUSART1_SetFramingErrorHandler(EUSART1_DefaultFramingErrorHandler);
@@ -91,24 +91,24 @@ void EUSART1_Initialize(void)
 
 }
 
-//bool EUSART1_is_tx_ready(void)
-//{
-//    return (bool)(PIR3bits.TX1IF && TX1STAbits.TXEN);
-//}
+bool EUSART1_is_tx_ready(void)
+{
+    return (bool)(PIR3bits.TX1IF && TX1STAbits.TXEN);
+}
 
-//bool EUSART1_is_rx_ready(void)
-//{
-//    return (bool)(PIR3bits.RC1IF);
-//}
+bool EUSART1_is_rx_ready(void)
+{
+    return (bool)(PIR3bits.RC1IF);
+}
 
-//bool EUSART1_is_tx_done(void)
-//{
-//    return TX1STAbits.TRMT;
-//}
+bool EUSART1_is_tx_done(void)
+{
+    return TX1STAbits.TRMT;
+}
 
-//eusart1_status_t EUSART1_get_last_status(void){
-//    return eusart1RxLastError;
-//}
+eusart1_status_t EUSART1_get_last_status(void){
+    return eusart1RxLastError;
+}
 
 uint8_t EUSART1_Read(void)
 {
@@ -138,6 +138,15 @@ void EUSART1_Write(uint8_t txData)
     TX1REG = txData;    // Write the data byte to the USART.
 }
 
+char getch(void)
+{
+    return EUSART1_Read();
+}
+
+void putch(char txData)
+{
+    EUSART1_Write(txData);
+}
 
 
 

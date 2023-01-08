@@ -2795,11 +2795,11 @@
          <value>3</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="CCP1PPS%aux0"/>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="CCP1PPS%aux1"/>
          <value>21</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="CCP2PPS%aux1"/>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="CCP2PPS%aux0"/>
          <value>19</value>
       </entry>
       <entry>
@@ -2967,11 +2967,11 @@
          <value>disabled</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="RX1DTPPS%aux4"/>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="RX1DTPPS%aux2"/>
          <value>2</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="T0CKIPPS%aux2"/>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="T0CKIPPS%aux3"/>
          <value>%DESELECT%</value>
       </entry>
       <entry>
@@ -2983,7 +2983,7 @@
          <value>%DESELECT%</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="T2INPPS%aux3"/>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="T2INPPS%aux4"/>
          <value>%DESELECT%</value>
       </entry>
       <entry>
@@ -6276,7 +6276,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="System Module" registerAlias="CONFIG2"/>
-         <value>5857</value>
+         <value>5345</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="System Module" registerAlias="CONFIG3"/>
@@ -6316,7 +6316,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="System Module" registerAlias="CONFIG2" settingAlias="BORV"/>
-         <value>LO</value>
+         <value>HI</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="System Module" registerAlias="CONFIG2" settingAlias="LPBOREN"/>
@@ -7638,7 +7638,7 @@
       </entry>
       <entry>
          <file>mcc_generated_files\mcc.h</file>
-         <hash>aa5533c6d7aa9ab11d57b012e445c650776e54d46fff2994753bda24ced46ea7</hash>
+         <hash>19c8cace61e956d01dad700ffe8262c01e09b5b37d2aa5c5f47f5ef4f94e2413</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\device_config.h</file>
@@ -7653,12 +7653,12 @@
          <hash>304615074393f25d955edd535402604f097b376bf7ded757a096b526a0dacccd</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files\tmr0.h</file>
-         <hash>196086016310cd42d148cd21db3bf9dc533aabf89fa29f706d9aadcc59a0ffb4</hash>
-      </entry>
-      <entry>
          <file>mcc_generated_files\pwm6.h</file>
          <hash>7dfbafea8f47cc42b540f50586ec1a765d52d1d46ac8c8a631a2dac52885cf4d</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files\tmr0.h</file>
+         <hash>196086016310cd42d148cd21db3bf9dc533aabf89fa29f706d9aadcc59a0ffb4</hash>
       </entry>
       <entry>
          <file>main.c</file>
@@ -7666,7 +7666,7 @@
       </entry>
       <entry>
          <file>mcc_generated_files\device_config.c</file>
-         <hash>c5ba685699646cc916df5a313e4b837262b5f79118eec67cc60686e2783e9d3f</hash>
+         <hash>23fba5b9e6e0775e4d732af50c77c1864df36c78b1de00db1dd41c3532b9213e</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\tmr2.h</file>
@@ -7705,12 +7705,12 @@
          <hash>b304ea07de86a96793b8c2693463169d1c0c8399fa8d88177c53528d8ba4b952</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files\pwm1.h</file>
-         <hash>111cdf3ebae123f2cc169326d8e7a49fe5895865b81ffb1714b8a7a5715e3ebc</hash>
-      </entry>
-      <entry>
          <file>mcc_generated_files\pwm6.c</file>
          <hash>95f567e524fab69c3546e47a06b25abafac8d749d588b702cf1f29ba4512da1b</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files\pwm1.h</file>
+         <hash>111cdf3ebae123f2cc169326d8e7a49fe5895865b81ffb1714b8a7a5715e3ebc</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\pwm2.h</file>
@@ -7741,12 +7741,12 @@
          <hash>9913d6d6cbcfdaffeb5f08c4c234af782475ee30fb16b2c020c8e34ab6790655</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files\pwm5.c</file>
-         <hash>f264ac99e60748bc999bdd175103466af56383c9f08e1fe4469184712f97d5b1</hash>
-      </entry>
-      <entry>
          <file>mcc_generated_files\eusart1.c</file>
          <hash>764e21eb25144f04d4adee7a8a51a4a9ccf93fc1cc45ea319a877d8a6fc6899e</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files\pwm5.c</file>
+         <hash>f264ac99e60748bc999bdd175103466af56383c9f08e1fe4469184712f97d5b1</hash>
       </entry>
    </generatedFileHashHistoryMap>
 </config>

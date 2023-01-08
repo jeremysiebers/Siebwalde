@@ -4,7 +4,7 @@
  *
  * Created on December 10, 2012, 9:36 PM
  */
-#include <pic12f675.h>
+//#include <pic12f675.h>
 #include <xc.h>
 #include "Main.h"
 
@@ -57,7 +57,7 @@ void main(void)
     // Hardware Initialization
     TRISIO = 0xFF; // All IO are inputs to be safe
     GPIO = 0x00; // All IO to 0
-    ANSEL = 0x00; // Turn off ADC
+//    ANSEL = 0x00; // Turn off ADC
     CMCON = 7; // Turn off Comparators
 
     Init_Timers(); // Initialize Timers (TMR0)
@@ -75,8 +75,7 @@ void main(void)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Interrupt routines//
 
-static void interrupt
-isr(void) // Here the interrupt function
+void __interrupt() isr(void) // Here the interrupt function
 {
 
     if (T0IF) // If Timer 0 interrupt

@@ -58,7 +58,7 @@
 #pragma config PWRTE = ON    // Power-up Timer Enable bit->PWRT enabled
 #pragma config LPBOREN = OFF    // Low-Power BOR enable bit->ULPBOR disabled
 #pragma config BOREN = ON    // Brown-out reset enable bits->Brown-out Reset Enabled, SBOREN bit is ignored
-#pragma config BORV = LO    // Brown-out Reset Voltage Selection->Brown-out Reset Voltage (VBOR) set to 1.9V on LF, and 2.45V on F Devices
+#pragma config BORV = HI    // Brown-out Reset Voltage Selection->Brown-out Reset Voltage (VBOR) is set to 2.7V
 #pragma config ZCD = OFF    // Zero-cross detect disable->Zero-cross detect circuit is disabled at POR.
 #pragma config PPS1WAY = OFF    // Peripheral Pin Select one-way control->The PPSLOCK bit can be set and cleared repeatedly by software
 #pragma config STVREN = ON    // Stack Overflow/Underflow Reset Enable bit->Stack Overflow or Underflow will cause a reset

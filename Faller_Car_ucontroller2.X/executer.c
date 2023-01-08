@@ -117,6 +117,7 @@ void RCSxLED(void)
         
         /* Disable the dashboard light */
         LEDA_SetLow();
+        //LEDB_SetHigh();
         
         /* Enable the motor */
         EnMOT_LAT = true;
@@ -144,7 +145,7 @@ void RCSxLED(void)
             /* Disable the dashboard light */
             LEDA_SetLow();
         }
-        
+        //LEDB_SetLow();
         /* Disable the motor */
         EnMOT_LAT = false;
     }
