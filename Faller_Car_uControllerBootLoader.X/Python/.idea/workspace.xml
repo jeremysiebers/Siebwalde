@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="29037513-b39d-45b6-9f51-de77be6ae152" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Faller_Car_uControllerBootLoader.mc3" beforeDir="false" afterPath="$PROJECT_DIR$/../Faller_Car_uControllerBootLoader.mc3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bootload.py" beforeDir="false" afterPath="$PROJECT_DIR$/bootload.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../dist/With_Configurations/production/Faller_Car_uControllerBootLoader.X.production.hex" beforeDir="false" afterPath="$PROJECT_DIR$/../dist/With_Configurations/production/Faller_Car_uControllerBootLoader.X.production.hex" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../mcc_generated_files/mcc.c" beforeDir="false" afterPath="$PROJECT_DIR$/../mcc_generated_files/mcc.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Faller_Car_ucontroller2.X/Faller_Car_ucontroller2.mc3" beforeDir="false" afterPath="$PROJECT_DIR$/../../Faller_Car_ucontroller2.X/Faller_Car_ucontroller2.mc3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Faller_Car_ucontroller2.X/dist/Combined/production/Faller_Car_ucontroller2.X.production.unified.hex" beforeDir="false" afterPath="$PROJECT_DIR$/../../Faller_Car_ucontroller2.X/dist/Combined/production/Faller_Car_ucontroller2.X.production.unified.hex" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Faller_Car_ucontroller2.X/dist/Offset/production/Faller_Car_ucontroller2.X.production.hex" beforeDir="false" afterPath="$PROJECT_DIR$/../../Faller_Car_ucontroller2.X/dist/Offset/production/Faller_Car_ucontroller2.X.production.hex" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Faller_Car_ucontroller2.X/dist/Stand_Alone/production/Faller_Car_ucontroller2.X.production.hex" beforeDir="false" afterPath="$PROJECT_DIR$/../../Faller_Car_ucontroller2.X/dist/Stand_Alone/production/Faller_Car_ucontroller2.X.production.hex" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Faller_Car_ucontroller2.X/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/../../Faller_Car_ucontroller2.X/main.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Faller_Car_ucontroller2.X/mcc_generated_files/mcc.c" beforeDir="false" afterPath="$PROJECT_DIR$/../../Faller_Car_ucontroller2.X/mcc_generated_files/mcc.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Faller_Car_ucontroller2.X/mcc_generated_files/mcc.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../Faller_Car_ucontroller2.X/mcc_generated_files/mcc.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Faller_Car_ucontroller2.X/nbproject/configurations.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../Faller_Car_ucontroller2.X/nbproject/configurations.xml" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="2KI4vOsGcnfRg4w9ZJC6Z8eL1uC" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "last_opened_file_path": "C:/Users/jerem/Siebwalde/Faller_Car_uControllerBootLoader.X/Python",
+    "settings.editor.selected.configurable": "debugger.dataViews.python.type.renderers"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\jerem\Siebwalde\Faller_Car_uControllerBootLoader.X\Python" />
+    </key>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="29037513-b39d-45b6-9f51-de77be6ae152" name="Changes" comment="" />
+      <created>1673648992489</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1673648992489</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/bootload.py</url>
+          <line>374</line>
+          <option name="timeStamp" value="30" />
+        </line-breakpoint>
+      </breakpoints>
+      <default-breakpoints>
+        <breakpoint type="python-exception">
+          <properties notifyOnTerminate="true" exception="BaseException">
+            <option name="notifyOnTerminate" value="true" />
+          </properties>
+        </breakpoint>
+      </default-breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>

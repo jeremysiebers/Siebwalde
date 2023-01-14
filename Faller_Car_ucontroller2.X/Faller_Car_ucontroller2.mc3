@@ -30,6 +30,10 @@
          <string>class com.microchip.mcc.mcu8.interruptManager.InterruptManager</string>
       </entry>
       <entry>
+         <string>MEMORY</string>
+         <string>class com.microchip.mcc.mcu8.modules.memory.MEMORY</string>
+      </entry>
+      <entry>
          <string>PMD</string>
          <string>class com.microchip.mcc.mcu8.systemManager.pmd.PMD</string>
       </entry>
@@ -1939,6 +1943,134 @@
          <value>enabled</value>
       </entry>
       <entry>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="MEMORY" name="END_FLASH"/>
+         <value>8192</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="MEMORY" name="ERASE_FLASH_BLOCKSIZE"/>
+         <value>32</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="MEMORY" name="WRITE_FLASH_BLOCKSIZE"/>
+         <value>32</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="MEMORY" name="useDATAEE"/>
+         <value>enabled</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="MEMORY" registerAlias="NVMCON1" settingAlias="FREE" alias="erase"/>
+         <value>1</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="MEMORY" registerAlias="NVMCON1" settingAlias="FREE" alias="write"/>
+         <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="MEMORY" registerAlias="NVMCON1" settingAlias="LWLO" alias="WR command updates write latch"/>
+         <value>1</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="MEMORY" registerAlias="NVMCON1" settingAlias="LWLO" alias="WR command writes/erases data"/>
+         <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="MEMORY" registerAlias="NVMCON1" settingAlias="NVMREGS" alias="access_userID_config_DFM"/>
+         <value>1</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="MEMORY" registerAlias="NVMCON1" settingAlias="NVMREGS" alias="access_user_program_memory"/>
+         <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="MEMORY" registerAlias="NVMCON1" settingAlias="RD" alias="do_not_initiate_read"/>
+         <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="MEMORY" registerAlias="NVMCON1" settingAlias="RD" alias="initiate_read"/>
+         <value>1</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="MEMORY" registerAlias="NVMCON1" settingAlias="WR" alias="initiate_write"/>
+         <value>1</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="MEMORY" registerAlias="NVMCON1" settingAlias="WR" alias="write_complete"/>
+         <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="MEMORY" registerAlias="NVMCON1" settingAlias="WREN" alias="disabled"/>
+         <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="MEMORY" registerAlias="NVMCON1" settingAlias="WREN" alias="enabled"/>
+         <value>1</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="MEMORY" registerAlias="NVMCON1" settingAlias="WRERR" alias="normal_completion"/>
+         <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="MEMORY" registerAlias="NVMCON1" settingAlias="WRERR" alias="program_error"/>
+         <value>1</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="MEMORY" registerAlias="NVMADRH"/>
+         <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="MEMORY" registerAlias="NVMADRL"/>
+         <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="MEMORY" registerAlias="NVMCON1"/>
+         <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="MEMORY" registerAlias="NVMCON2"/>
+         <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="MEMORY" registerAlias="NVMDATH"/>
+         <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="MEMORY" registerAlias="NVMDATL"/>
+         <value>0</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="MEMORY" registerAlias="NVMCON1" settingAlias="FREE"/>
+         <value>write</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="MEMORY" registerAlias="NVMCON1" settingAlias="LWLO"/>
+         <value>WR command writes/erases data</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="MEMORY" registerAlias="NVMCON1" settingAlias="NVMREGS"/>
+         <value>access_user_program_memory</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="MEMORY" registerAlias="NVMCON1" settingAlias="RD"/>
+         <value>do_not_initiate_read</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="MEMORY" registerAlias="NVMCON1" settingAlias="WR"/>
+         <value>write_complete</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="MEMORY" registerAlias="NVMCON1" settingAlias="WREN"/>
+         <value>disabled</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="MEMORY" registerAlias="NVMCON1" settingAlias="WRERR"/>
+         <value>normal_completion</value>
+      </entry>
+      <entry>
+         <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="MEMORY" registerAlias="NVMCON2" settingAlias="NVMCON2"/>
+         <value>0</value>
+      </entry>
+      <entry>
          <key class="com.microchip.mcc.core.tokenManager.OptionKey" moduleName="PMD" registerAlias="PMD0" settingAlias="CLKRMD" alias="CLKR disabled"/>
          <value>1</value>
       </entry>
@@ -2164,7 +2296,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="PMD" registerAlias="PMD0"/>
-         <value>6</value>
+         <value>2</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="PMD" registerAlias="PMD1"/>
@@ -2200,7 +2332,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PMD" registerAlias="PMD0" settingAlias="NVMMD"/>
-         <value>NVM disabled</value>
+         <value>NVM enabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PMD" registerAlias="PMD0" settingAlias="SYSCMD"/>
@@ -2799,7 +2931,7 @@
          <value>21</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="CCP2PPS%aux5"/>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="CCP2PPS%aux6"/>
          <value>19</value>
       </entry>
       <entry>
@@ -2967,23 +3099,23 @@
          <value>disabled</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="RX1DTPPS%aux0"/>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="RX1DTPPS%aux2"/>
          <value>2</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="T0CKIPPS%aux3"/>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="T0CKIPPS%aux5"/>
          <value>%DESELECT%</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="T1CKIPPS%aux1"/>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="T1CKIPPS%aux0"/>
          <value>%DESELECT%</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="T1GPPS%aux2"/>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="T1GPPS%aux1"/>
          <value>%DESELECT%</value>
       </entry>
       <entry>
-         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="T2INPPS%aux6"/>
+         <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="T2INPPS%aux3"/>
          <value>%DESELECT%</value>
       </entry>
       <entry>
@@ -7621,6 +7753,10 @@
          <hash>6782952dada3480019c9f6c748d372d1e58e360defea9fffe3648b40edcae800</hash>
       </entry>
       <entry>
+         <file>mcc_generated_files\memory.c</file>
+         <hash>61663445009fb260f0b67ff13ec2103634f802041ebdae69cca07dc22dfb1da3</hash>
+      </entry>
+      <entry>
          <file>mcc_generated_files\eusart1.h</file>
          <hash>8fbea6a832eddcdd1ae1f9e005ba262adf2a1092b70358ef8e7993c646738145</hash>
       </entry>
@@ -7634,23 +7770,23 @@
       </entry>
       <entry>
          <file>mcc_generated_files\mcc.c</file>
-         <hash>23726008549e6cf0e81e62a54c806c0eca286d4e43fe419f849f032b011ef973</hash>
+         <hash>49dd532743c8cdd793b48cbe661085b84028eb07b9d0db5dfcca2184ce512b12</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\mcc.h</file>
-         <hash>96fb62a8d8cac2c43daccd18c8a914496811e06ea60dd21d85bfd4c6776a2e95</hash>
+         <hash>0518bfe6bcc36e7080c326c9976eef06b1bae7fd2a0ac3a53c7cd7a991bf6342</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\device_config.h</file>
          <hash>02368520f3f5a408861753067dd7635b320e832aba2c7cba9dfd4c47b1c4dc62</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files\tmr1.h</file>
-         <hash>304615074393f25d955edd535402604f097b376bf7ded757a096b526a0dacccd</hash>
-      </entry>
-      <entry>
          <file>mcc_generated_files\pwm5.h</file>
          <hash>bcf2a7f755425f94653b47dbe2a0433b83acd9f5ad31e0f5c195d47082875ad9</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files\tmr1.h</file>
+         <hash>304615074393f25d955edd535402604f097b376bf7ded757a096b526a0dacccd</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\tmr0.h</file>
@@ -7665,20 +7801,20 @@
          <hash>7aa32f6e615e7caeb969d79f8f2e5127e6f2a75451346d3822b17c975c228a6a</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files\device_config.c</file>
-         <hash>c54838183d58a152a593818d3697f7f9641bd475ea7cba03ee8f02997ef85fea</hash>
-      </entry>
-      <entry>
          <file>mcc_generated_files\tmr2.h</file>
          <hash>04f2500b72ae008b615321f81711eb9c9497bf45f43ee047fec421eb05fc7b47</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files\tmr2.c</file>
-         <hash>51c0846d0b53aa44dc7f346c8297cdadda012a9b75f72e476be17bfcf6bf4b7e</hash>
+         <file>mcc_generated_files\device_config.c</file>
+         <hash>c54838183d58a152a593818d3697f7f9641bd475ea7cba03ee8f02997ef85fea</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\pin_manager.h</file>
          <hash>96f80272069ae4c942c298b303d5c7e67f5d7d0bac659db349dc5fbbbad7726e</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files\tmr2.c</file>
+         <hash>51c0846d0b53aa44dc7f346c8297cdadda012a9b75f72e476be17bfcf6bf4b7e</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\tmr1.c</file>
@@ -7705,12 +7841,12 @@
          <hash>b304ea07de86a96793b8c2693463169d1c0c8399fa8d88177c53528d8ba4b952</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files\pwm1.h</file>
-         <hash>111cdf3ebae123f2cc169326d8e7a49fe5895865b81ffb1714b8a7a5715e3ebc</hash>
-      </entry>
-      <entry>
          <file>mcc_generated_files\pwm6.c</file>
          <hash>95f567e524fab69c3546e47a06b25abafac8d749d588b702cf1f29ba4512da1b</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files\pwm1.h</file>
+         <hash>111cdf3ebae123f2cc169326d8e7a49fe5895865b81ffb1714b8a7a5715e3ebc</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\pwm2.h</file>
@@ -7721,12 +7857,16 @@
          <hash>3a0c41edd59af846b71330d91e8ff37602e0c400dbc30817cd1aa227be42afd8</hash>
       </entry>
       <entry>
+         <file>mcc_generated_files\pwm4.h</file>
+         <hash>753d99bc7fa12a6b0cdce5ad6917d4f1773fa479b369fd16d9bdce349f0e7e20</hash>
+      </entry>
+      <entry>
          <file>mcc_generated_files\interrupt_manager.c</file>
          <hash>fc616bb35ed636cd847cd783c74bcf2f97bae3c5f1aa343e48b076d59e0b86e7</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files\pwm4.h</file>
-         <hash>753d99bc7fa12a6b0cdce5ad6917d4f1773fa479b369fd16d9bdce349f0e7e20</hash>
+         <file>mcc_generated_files\memory.h</file>
+         <hash>54936f6ceca76e8834b5575b55e7686691129351a7f0a8c88f151ec79ea53b44</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\pwm2.c</file>

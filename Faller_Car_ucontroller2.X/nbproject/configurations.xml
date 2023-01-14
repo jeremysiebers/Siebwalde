@@ -23,6 +23,7 @@
         <itemPath>mcc_generated_files/tmr0.h</itemPath>
         <itemPath>mcc_generated_files/interrupt_manager.h</itemPath>
         <itemPath>mcc_generated_files/tmr1.h</itemPath>
+        <itemPath>mcc_generated_files/memory.h</itemPath>
       </logicalFolder>
       <itemPath>Main.h</itemPath>
       <itemPath>executer.h</itemPath>
@@ -54,6 +55,7 @@
         <itemPath>mcc_generated_files/tmr0.c</itemPath>
         <itemPath>mcc_generated_files/interrupt_manager.c</itemPath>
         <itemPath>mcc_generated_files/tmr1.c</itemPath>
+        <itemPath>mcc_generated_files/memory.c</itemPath>
       </logicalFolder>
       <itemPath>main.c</itemPath>
       <itemPath>executer.c</itemPath>
@@ -401,7 +403,7 @@
       </HI-TECH-COMP>
       <HI-TECH-LINK>
         <property key="additional-options-checksum"
-                  value="520-1FFE@1FFF,width=-2,algorithm=2"/>
+                  value="520-1FFD@1FFE,width=-2,algorithm=2,code=3f"/>
         <property key="additional-options-code-offset" value="520"/>
         <property key="additional-options-command-line" value=""/>
         <property key="additional-options-errata" value=""/>
@@ -456,6 +458,7 @@
         <property key="debugoptions.debug-startup" value="Use system settings"/>
         <property key="debugoptions.reset-behaviour" value="Use system settings"/>
         <property key="debugoptions.useswbreakpoints" value="false"/>
+        <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="memories.aux" value="false"/>
         <property key="memories.bootflash" value="true"/>
@@ -649,7 +652,7 @@
       </HI-TECH-COMP>
       <HI-TECH-LINK>
         <property key="additional-options-checksum"
-                  value="520-1FFE@1FFF,width=-2,algorithm=2"/>
+                  value="520-1FFD@1FFE,width=-2,algorithm=2,code=3f"/>
         <property key="additional-options-code-offset" value="520"/>
         <property key="additional-options-command-line" value=""/>
         <property key="additional-options-errata" value=""/>

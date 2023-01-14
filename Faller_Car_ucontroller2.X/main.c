@@ -39,6 +39,9 @@
 //    {0x88888888, 0x99999999, 0xAAAAAAAA, 0xBBBBBBBB, 0xCCCCCCCC, 0xDDDDDDDD, 0xEEEEEEEE, 0xFFFFFFFF },
 //};
 
+#define _str(x)  #x
+#define str(x)  _str(x)
+
 /******************************************************************************/
 /*          Methods                                                           */
 /******************************************************************************/
@@ -61,6 +64,8 @@ uint24_t     CalcMv             = 0;
 uint8_t      StartUp            = 0;
 bool         FirstLoop          = true;
 
+bool         test               = false;
+uint16_t     data               = 0;
 /******************************************************************************/
 /*          Main                                                              */
 /******************************************************************************/
@@ -99,7 +104,7 @@ void main(void)
     
     /* Main infinite loop */
     while (1)
-    {
+    {   
         /* Main Led routine updater */
         if(UpdateLeds){
             if (EXECUTExEFFECT() == finished )                                  // When all switch cases are stable in the underlying routines

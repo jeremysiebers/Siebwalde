@@ -137,31 +137,39 @@ def WriteFlash(bootloader_offset, program_mem_size):
     ByteArray = []
     ByteArrayChecksum = []
     
-    ProcessLines = int((program_mem_size - bootloader_offset) / HexRowWidth) # 2 times more since hex file is per 16 words per row!
+    ProcessLines = int((program_mem_size - bootloader_offset) / HexRowWidth)
+
+    address = BOOTLOADEROFFSET
     
     for i in range(ProcessLines):        
-        buff  = file_object.readline()
+        buff1 = file_object.readline()
         buff2 = file_object.readline()
         buff3 = file_object.readline()
         buff4 = file_object.readline()
-        address = buff[3:7]
+        #address = buff1[3:7]
+        #print(address)
         
-        if(int(address, 16) < bootloader_offset):
+        if(address < bootloader_offset):
             print('Write flash nok, first address to write is within bootloader block!\n')
-            return(COMMAND_UNSUCCESSFUL)            
-        if(int(address, 16) > (program_mem_size * 2)): #since we are writing 32 words per time, hex file size is 2x longer on 16 words per row
+            return(COMMAND_UNSUCCESSFUL)
+        if(address > program_mem_size ): #since we are writing 32 words per time, hex file size is 2x longer on 16 words per row
             print('Write flash nok, address to write is greater then memory size!\n')
             return(COMMAND_UNSUCCESSFUL)
         
-        data = buff[9:41] + buff2[9:41] + buff3[9:41] + buff4[9:41]
-        ByteArray.append([bytearray.fromhex(address), bytearray.fromhex(data)])
+        data = buff1[9:41] + buff2[9:41] + buff3[9:41] + buff4[9:41]
+        #ByteArray.append([bytearray.fromhex(address), bytearray.fromhex(data)])
+        ByteArray.append([address, bytearray.fromhex(data)])
         ByteArrayChecksum.append([bytearray.fromhex(data)])
+
+        address = address + WRITE_FLASH_BLOCKSIZE
     
     
     CalcChecksumFile = 0
-    
-    ByteArrayChecksum[ProcessLines-1][0][63] = 0
-    ByteArrayChecksum[ProcessLines-1][0][62] = 0
+
+    ByteArrayChecksum[ProcessLines - 1][0][63] = 0
+    ByteArrayChecksum[ProcessLines - 1][0][62] = 0
+    ByteArrayChecksum[ProcessLines - 1][0][61] = 0
+    ByteArrayChecksum[ProcessLines - 1][0][60] = 0
         
     for j in range(ProcessLines):
         for x in range(0, 64, 2):
@@ -192,8 +200,8 @@ def WriteFlash(bootloader_offset, program_mem_size):
             time.sleep(1)
             if(leftover == 0):
                 run = False
-                print('Checksum of sent data : ', hex(CalcChecksumFile))
-                print('Write to flash successful\n')
+                print('\nChecksum of sent data : ', hex(CalcChecksumFile))
+                print('Write to flash successful, leftover == 0.\n')
                 return COMMAND_SUCCESSFUL, CalcChecksumFile               
             else:
                 if(_WriteLinesOfFlash(i, leftover, ByteArray)['cmd'] != COMMAND_SUCCESSFUL):
@@ -209,21 +217,23 @@ def WriteFlash(bootloader_offset, program_mem_size):
         i += jumpsize        
         
 #---------------------------------------------------------------------------------------------------------------------------#
-
 def _WriteLinesOfFlash(line, incr, array):
     
     WriteFlash = 2
     byteslength = incr * 64
+
+    bla1 = (array[line][0] & 0xFF00) >> 8
+    bla2 = array[line][0] & 0xFF
     
-    tx = struct.pack('<6BBB2B', 0x55, WriteFlash, byteslength, 0, 0x55, 0xAA, array[line][0][1], array[line][0][0], 0, 0)
-    
-    #print('line = '),str(line), '\n')
-    
+    tx = struct.pack('<6BBB2B', 0x55, WriteFlash, byteslength, 0, 0x55, 0xAA, (array[line][0] & 0xFF), ((array[line][0] & 0xFF00) >> 8), 0, 0)
+
+    #print('line = ',str(line), '\n')
+
     for j in range(line, (line + incr)):
         for val in array[j][1]:
-            #print val
+            #print (val)
             tx += struct.pack('<B', val)
-    
+
     ser.write(tx)
     
     rx = ser.read(11)
@@ -307,11 +317,11 @@ def RequestChecksum(bootloader_offset, program_mem_size):
     print('Bootloader offset: ', hex(bootloader_offset), '\n')
     print('program Mem size: ', hex(program_mem_size), '\n')
     
-    DataLength = program_mem_size - bootloader_offset - 2
+    DataLength = (program_mem_size - bootloader_offset - 2) * 2
     Checksum = 0x0000
     CalcChecksum = 8
     
-    tx = struct.pack('<BBHBBHBB', 0x55, CalcChecksum, DataLength, 0x00, 0x00, bootloader_offset, 0x00, 0x00)
+    tx = struct.pack('<BBHBBBBBB', 0x55, CalcChecksum, DataLength, 0x00, 0x00, (bootloader_offset & 0xFF), ((bootloader_offset & 0xFF00) >> 8), 0x00, 0x00)
     
     ser.write(tx)
     

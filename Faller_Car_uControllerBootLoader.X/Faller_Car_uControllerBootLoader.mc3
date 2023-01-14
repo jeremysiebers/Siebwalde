@@ -441,7 +441,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Bootloader Generator" name="pubSubBootloader Generator_EUSART/interfaceV2"/>
-         <value>8353.66828757957</value>
+         <value>6968.25473899064</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Bootloader Generator" name="sourcePath"/>
@@ -1605,7 +1605,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="PMD" registerAlias="PMD0"/>
-         <value>6</value>
+         <value>2</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="PMD" registerAlias="PMD1"/>
@@ -1641,7 +1641,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PMD" registerAlias="PMD0" settingAlias="NVMMD"/>
-         <value>NVM disabled</value>
+         <value>NVM enabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="PMD" registerAlias="PMD0" settingAlias="SYSCMD"/>
@@ -5391,7 +5391,7 @@
       </entry>
       <entry>
          <file>mcc_generated_files\mcc.c</file>
-         <hash>b6e3961db5af0826f76463a864f81fc68f760b2ef330b69824dcc23bbef4ad0e</hash>
+         <hash>9ea551eaac2dafacb15158d7a46b1d5e0d79e0383b79f2eec885756451f19612</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\memory.h</file>
