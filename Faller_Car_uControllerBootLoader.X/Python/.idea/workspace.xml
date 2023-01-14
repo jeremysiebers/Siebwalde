@@ -5,18 +5,20 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="29037513-b39d-45b6-9f51-de77be6ae152" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../Faller_Car_uControllerBootLoader.mc3" beforeDir="false" afterPath="$PROJECT_DIR$/../Faller_Car_uControllerBootLoader.mc3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bootload.py" beforeDir="false" afterPath="$PROJECT_DIR$/bootload.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../dist/With_Configurations/production/Faller_Car_uControllerBootLoader.X.production.hex" beforeDir="false" afterPath="$PROJECT_DIR$/../dist/With_Configurations/production/Faller_Car_uControllerBootLoader.X.production.hex" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../mcc_generated_files/mcc.c" beforeDir="false" afterPath="$PROJECT_DIR$/../mcc_generated_files/mcc.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../mcc_generated_files/device_config.c" beforeDir="false" afterPath="$PROJECT_DIR$/../mcc_generated_files/device_config.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../mcc_generated_files/pic16f1_bootload.c" beforeDir="false" afterPath="$PROJECT_DIR$/../mcc_generated_files/pic16f1_bootload.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../mcc_generated_files/pin_manager.c" beforeDir="false" afterPath="$PROJECT_DIR$/../mcc_generated_files/pin_manager.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../nbproject/configurations.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../nbproject/configurations.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../Faller_Car_ucontroller2.X/Faller_Car_ucontroller2.mc3" beforeDir="false" afterPath="$PROJECT_DIR$/../../Faller_Car_ucontroller2.X/Faller_Car_ucontroller2.mc3" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../Faller_Car_ucontroller2.X/dist/Combined/production/Faller_Car_ucontroller2.X.production.unified.hex" beforeDir="false" afterPath="$PROJECT_DIR$/../../Faller_Car_ucontroller2.X/dist/Combined/production/Faller_Car_ucontroller2.X.production.unified.hex" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../Faller_Car_ucontroller2.X/dist/Offset/production/Faller_Car_ucontroller2.X.production.hex" beforeDir="false" afterPath="$PROJECT_DIR$/../../Faller_Car_ucontroller2.X/dist/Offset/production/Faller_Car_ucontroller2.X.production.hex" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../Faller_Car_ucontroller2.X/dist/Stand_Alone/production/Faller_Car_ucontroller2.X.production.hex" beforeDir="false" afterPath="$PROJECT_DIR$/../../Faller_Car_ucontroller2.X/dist/Stand_Alone/production/Faller_Car_ucontroller2.X.production.hex" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../Faller_Car_ucontroller2.X/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/../../Faller_Car_ucontroller2.X/main.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../Faller_Car_ucontroller2.X/mcc_generated_files/mcc.c" beforeDir="false" afterPath="$PROJECT_DIR$/../../Faller_Car_ucontroller2.X/mcc_generated_files/mcc.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../Faller_Car_ucontroller2.X/mcc_generated_files/mcc.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../Faller_Car_ucontroller2.X/mcc_generated_files/mcc.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Faller_Car_ucontroller2.X/mcc_generated_files/device_config.c" beforeDir="false" afterPath="$PROJECT_DIR$/../../Faller_Car_ucontroller2.X/mcc_generated_files/device_config.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Faller_Car_ucontroller2.X/mcc_generated_files/pin_manager.c" beforeDir="false" afterPath="$PROJECT_DIR$/../../Faller_Car_ucontroller2.X/mcc_generated_files/pin_manager.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../Faller_Car_ucontroller2.X/nbproject/configurations.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../Faller_Car_ucontroller2.X/nbproject/configurations.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -61,13 +63,6 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/bootload.py</url>
-          <line>374</line>
-          <option name="timeStamp" value="30" />
-        </line-breakpoint>
-      </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
           <properties notifyOnTerminate="true" exception="BaseException">

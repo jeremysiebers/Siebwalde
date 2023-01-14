@@ -66,7 +66,8 @@
 
 #define WRITE_FLASH_BLOCKSIZE    32
 #define ERASE_FLASH_BLOCKSIZE    32
-#define END_FLASH                0x2000
+#define END_FLASH                0x1F80
+#define SAF_SIZE                 0x7F
 
 /**
   Section: Flash Module APIs

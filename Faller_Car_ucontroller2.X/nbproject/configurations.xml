@@ -161,7 +161,7 @@
         <property key="calibrate-oscillator-value" value="0x3400"/>
         <property key="clear-bss" value="true"/>
         <property key="code-model-external" value="wordwrite"/>
-        <property key="code-model-rom" value=""/>
+        <property key="code-model-rom" value="0-7ff,800-fff,1000-17ff,1800-1f7f"/>
         <property key="create-html-files" value="false"/>
         <property key="data-model-ram" value=""/>
         <property key="data-model-size-of-double" value="32"/>
@@ -403,8 +403,8 @@
       </HI-TECH-COMP>
       <HI-TECH-LINK>
         <property key="additional-options-checksum"
-                  value="520-1FFD@1FFE,width=-2,algorithm=2,code=3f"/>
-        <property key="additional-options-code-offset" value="520"/>
+                  value="420-1F7D@1F7E,width=-2,algorithm=2,code=3f"/>
+        <property key="additional-options-code-offset" value="420"/>
         <property key="additional-options-command-line" value=""/>
         <property key="additional-options-errata" value=""/>
         <property key="additional-options-extend-address" value="false"/>
@@ -415,7 +415,7 @@
         <property key="calibrate-oscillator-value" value="0x3400"/>
         <property key="clear-bss" value="true"/>
         <property key="code-model-external" value="wordwrite"/>
-        <property key="code-model-rom" value="520-7ff,800-fff,1000-17ff,1800-1fff"/>
+        <property key="code-model-rom" value="420-7ff,800-fff,1000-17ff,1800-1f7f"/>
         <property key="create-html-files" value="false"/>
         <property key="data-model-ram" value=""/>
         <property key="data-model-size-of-double" value="32"/>
@@ -458,7 +458,6 @@
         <property key="debugoptions.debug-startup" value="Use system settings"/>
         <property key="debugoptions.reset-behaviour" value="Use system settings"/>
         <property key="debugoptions.useswbreakpoints" value="false"/>
-        <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="memories.aux" value="false"/>
         <property key="memories.bootflash" value="true"/>
@@ -652,8 +651,8 @@
       </HI-TECH-COMP>
       <HI-TECH-LINK>
         <property key="additional-options-checksum"
-                  value="520-1FFD@1FFE,width=-2,algorithm=2,code=3f"/>
-        <property key="additional-options-code-offset" value="520"/>
+                  value="420-1F7D@1F7E,width=-2,algorithm=2,code=3f"/>
+        <property key="additional-options-code-offset" value="420"/>
         <property key="additional-options-command-line" value=""/>
         <property key="additional-options-errata" value=""/>
         <property key="additional-options-extend-address" value="false"/>
@@ -664,7 +663,7 @@
         <property key="calibrate-oscillator-value" value="0x3400"/>
         <property key="clear-bss" value="true"/>
         <property key="code-model-external" value="wordwrite"/>
-        <property key="code-model-rom" value=""/>
+        <property key="code-model-rom" value="0-7ff,800-fff,1000-17ff,1800-1f7f"/>
         <property key="create-html-files" value="false"/>
         <property key="data-model-ram" value=""/>
         <property key="data-model-size-of-double" value="32"/>

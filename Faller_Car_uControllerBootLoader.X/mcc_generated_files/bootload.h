@@ -44,18 +44,18 @@ void 	Check_Device_Reset (void);
 #define  OPEN_DRAIN_ENABLED             1  // Enable Open Drain operation
 #define  OPEN_DRAIN_DISABLE             0   // Regular operation
 
-#define  TRIS_BOOTLOADER_INDICATOR      TRISAbits.TRISA4
-#define  BOOTLOADER_INDICATOR           LATAbits.LATA4
-#define  BOOTLOADER_INDICATOR_PORT      PORTAbits.RA4
-#define  BOOTLOADER_INDICATOR_ANSEL     ANSELAbits.ANSA4
+#define  TRIS_BOOTLOADER_INDICATOR      TRISAbits.TRISA5
+#define  BOOTLOADER_INDICATOR           LATAbits.LATA5
+#define  BOOTLOADER_INDICATOR_PORT      PORTAbits.RA5
+#define  BOOTLOADER_INDICATOR_ANSEL     ANSELAbits.ANSA5
 #define  BL_INDICATOR_ON                1
 #define  BL_INDICATOR_OFF               0
 
-#define  IO_PIN_ENTRY_TRIS              TRISBbits.TRISB4
-#define  IO_PIN_ENTRY_LAT_PIN           LATBbits.LATB4
-#define  IO_PIN_ENTRY_PORT_PIN          PORTBbits.RB4
-#define  IO_PIN_ENTRY_ANSEL             ANSELBbits.ANSB4
-#define  IO_PIN_ENTRY_WPU               WPUBbits.WPUB4
+#define  IO_PIN_ENTRY_TRIS              TRISAbits.TRISA0
+#define  IO_PIN_ENTRY_LAT_PIN           LATAbits.LATA0
+#define  IO_PIN_ENTRY_PORT_PIN          PORTAbits.RA0
+#define  IO_PIN_ENTRY_ANSEL             ANSELAbits.ANSA0
+#define  IO_PIN_ENTRY_WPU               WPUAbits.WPUA0
 #define  IO_PIN_ENTRY_RUN_APP           1
 #define  IO_PIN_ENTRY_RUN_BL            0
 

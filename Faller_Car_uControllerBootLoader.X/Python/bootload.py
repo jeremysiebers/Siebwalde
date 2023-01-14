@@ -15,8 +15,8 @@ COMMAND_UNSUCCESSFUL        = 0xFD              # - Command unSuccessful
 
 SERIALSPEED             = 115200                # Serial baudrate
 
-BOOTLOADEROFFSET        = 0x520                 # PIC16 has 32 write latches hence it can handle data per 32 which means that the offset has to be a multiple of 32!
-PICPROGRAMMEMSIZE       = 0x2000
+BOOTLOADEROFFSET        = 0x420                 # PIC16 has 32 write latches hence it can handle data per 32 which means that the offset has to be a multiple of 32!
+PICPROGRAMMEMSIZE       = 0x1F80                # SAF ENABLED!
 
 WRITE_FLASH_BLOCKSIZE   = 0x20 #32
 ERASE_FLASH_BLOCKSIZE   = 0x20 #32
@@ -116,7 +116,7 @@ def EraseFlash(bootloader_offset, program_mem_size):
             print('Erase flash nok, target returned ERROR_ADDRESS_OUT_OF_RANGE!\n')
         else:
             print('Erase flash nok, target returned:{}\n',SuccessCode)
-        return(COMMAND_SUCCESSFUL)            
+        return(COMMAND_UNSUCCESSFUL)
     
     print('Erase flash successful')
     
@@ -202,6 +202,8 @@ def WriteFlash(bootloader_offset, program_mem_size):
                 run = False
                 print('\nChecksum of sent data : ', hex(CalcChecksumFile))
                 print('Write to flash successful, leftover == 0.\n')
+                time_calc = time_calc + time_seg
+                bar.update(time_calc)
                 return COMMAND_SUCCESSFUL, CalcChecksumFile               
             else:
                 if(_WriteLinesOfFlash(i, leftover, ByteArray)['cmd'] != COMMAND_SUCCESSFUL):
@@ -212,7 +214,10 @@ def WriteFlash(bootloader_offset, program_mem_size):
                     run = False
                     print('Checksum of sent data : ', hex(CalcChecksumFile))
                     print('Write to flash successful\n')
+                    time_calc = time_calc + time_seg
+                    bar.update(time_calc)
                     return COMMAND_SUCCESSFUL, CalcChecksumFile
+
 
         i += jumpsize        
         

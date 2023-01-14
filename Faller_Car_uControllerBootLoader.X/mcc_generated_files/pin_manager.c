@@ -64,7 +64,7 @@ void PIN_MANAGER_Initialize(void)
     /**
     TRISx registers
     */
-    TRISA = 0x27;
+    TRISA = 0x17;
     TRISB = 0xF0;
     TRISC = 0xFE;
 
@@ -79,7 +79,7 @@ void PIN_MANAGER_Initialize(void)
     WPUx registers
     */
     WPUB = 0x00;
-    WPUA = 0x00;
+    WPUA = 0x01;
     WPUC = 0x00;
 
     /**

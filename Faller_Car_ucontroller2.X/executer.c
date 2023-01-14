@@ -107,12 +107,12 @@ void RCSxLED(void)
             LedBit[LedFrontLeft].Prog        = Led_SlFl;
             LedBit[LedFrontLeft].Led         = FRONT_HIGH;
             LedBit[LedFrontLeft].Prog_State  = 2;
-            LedBit[LedFrontLeft].Speed       = 2;
+            LedBit[LedFrontLeft].Speed       = 0;
 
             LedBit[LedFrontRight].Prog       = Led_SlFl;
             LedBit[LedFrontRight].Led        = FRONT;
             LedBit[LedFrontRight].Prog_State = 0;
-            LedBit[LedFrontRight].Speed      = 2;
+            LedBit[LedFrontRight].Speed      = 0;
         }
         
         /* Disable the dashboard light */

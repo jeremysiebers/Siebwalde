@@ -117,45 +117,45 @@
 #define RA2_SetAnalogMode()         do { ANSELAbits.ANSA2 = 1; } while(0)
 #define RA2_SetDigitalMode()        do { ANSELAbits.ANSA2 = 0; } while(0)
 
-// get/set LEDA aliases
-#define LEDA_TRIS                 TRISAbits.TRISA4
-#define LEDA_LAT                  LATAbits.LATA4
-#define LEDA_PORT                 PORTAbits.RA4
-#define LEDA_WPU                  WPUAbits.WPUA4
-#define LEDA_OD                   ODCONAbits.ODCA4
-#define LEDA_ANS                  ANSELAbits.ANSA4
-#define LEDA_SetHigh()            do { LATAbits.LATA4 = 1; } while(0)
-#define LEDA_SetLow()             do { LATAbits.LATA4 = 0; } while(0)
-#define LEDA_Toggle()             do { LATAbits.LATA4 = ~LATAbits.LATA4; } while(0)
-#define LEDA_GetValue()           PORTAbits.RA4
-#define LEDA_SetDigitalInput()    do { TRISAbits.TRISA4 = 1; } while(0)
-#define LEDA_SetDigitalOutput()   do { TRISAbits.TRISA4 = 0; } while(0)
-#define LEDA_SetPullup()          do { WPUAbits.WPUA4 = 1; } while(0)
-#define LEDA_ResetPullup()        do { WPUAbits.WPUA4 = 0; } while(0)
-#define LEDA_SetPushPull()        do { ODCONAbits.ODCA4 = 0; } while(0)
-#define LEDA_SetOpenDrain()       do { ODCONAbits.ODCA4 = 1; } while(0)
-#define LEDA_SetAnalogMode()      do { ANSELAbits.ANSA4 = 1; } while(0)
-#define LEDA_SetDigitalMode()     do { ANSELAbits.ANSA4 = 0; } while(0)
-
 // get/set LEDB aliases
-#define LEDB_TRIS                 TRISAbits.TRISA5
-#define LEDB_LAT                  LATAbits.LATA5
-#define LEDB_PORT                 PORTAbits.RA5
-#define LEDB_WPU                  WPUAbits.WPUA5
-#define LEDB_OD                   ODCONAbits.ODCA5
-#define LEDB_ANS                  ANSELAbits.ANSA5
-#define LEDB_SetHigh()            do { LATAbits.LATA5 = 1; } while(0)
-#define LEDB_SetLow()             do { LATAbits.LATA5 = 0; } while(0)
-#define LEDB_Toggle()             do { LATAbits.LATA5 = ~LATAbits.LATA5; } while(0)
-#define LEDB_GetValue()           PORTAbits.RA5
-#define LEDB_SetDigitalInput()    do { TRISAbits.TRISA5 = 1; } while(0)
-#define LEDB_SetDigitalOutput()   do { TRISAbits.TRISA5 = 0; } while(0)
-#define LEDB_SetPullup()          do { WPUAbits.WPUA5 = 1; } while(0)
-#define LEDB_ResetPullup()        do { WPUAbits.WPUA5 = 0; } while(0)
-#define LEDB_SetPushPull()        do { ODCONAbits.ODCA5 = 0; } while(0)
-#define LEDB_SetOpenDrain()       do { ODCONAbits.ODCA5 = 1; } while(0)
-#define LEDB_SetAnalogMode()      do { ANSELAbits.ANSA5 = 1; } while(0)
-#define LEDB_SetDigitalMode()     do { ANSELAbits.ANSA5 = 0; } while(0)
+#define LEDB_TRIS                 TRISAbits.TRISA4
+#define LEDB_LAT                  LATAbits.LATA4
+#define LEDB_PORT                 PORTAbits.RA4
+#define LEDB_WPU                  WPUAbits.WPUA4
+#define LEDB_OD                   ODCONAbits.ODCA4
+#define LEDB_ANS                  ANSELAbits.ANSA4
+#define LEDB_SetHigh()            do { LATAbits.LATA4 = 1; } while(0)
+#define LEDB_SetLow()             do { LATAbits.LATA4 = 0; } while(0)
+#define LEDB_Toggle()             do { LATAbits.LATA4 = ~LATAbits.LATA4; } while(0)
+#define LEDB_GetValue()           PORTAbits.RA4
+#define LEDB_SetDigitalInput()    do { TRISAbits.TRISA4 = 1; } while(0)
+#define LEDB_SetDigitalOutput()   do { TRISAbits.TRISA4 = 0; } while(0)
+#define LEDB_SetPullup()          do { WPUAbits.WPUA4 = 1; } while(0)
+#define LEDB_ResetPullup()        do { WPUAbits.WPUA4 = 0; } while(0)
+#define LEDB_SetPushPull()        do { ODCONAbits.ODCA4 = 0; } while(0)
+#define LEDB_SetOpenDrain()       do { ODCONAbits.ODCA4 = 1; } while(0)
+#define LEDB_SetAnalogMode()      do { ANSELAbits.ANSA4 = 1; } while(0)
+#define LEDB_SetDigitalMode()     do { ANSELAbits.ANSA4 = 0; } while(0)
+
+// get/set LEDA aliases
+#define LEDA_TRIS                 TRISAbits.TRISA5
+#define LEDA_LAT                  LATAbits.LATA5
+#define LEDA_PORT                 PORTAbits.RA5
+#define LEDA_WPU                  WPUAbits.WPUA5
+#define LEDA_OD                   ODCONAbits.ODCA5
+#define LEDA_ANS                  ANSELAbits.ANSA5
+#define LEDA_SetHigh()            do { LATAbits.LATA5 = 1; } while(0)
+#define LEDA_SetLow()             do { LATAbits.LATA5 = 0; } while(0)
+#define LEDA_Toggle()             do { LATAbits.LATA5 = ~LATAbits.LATA5; } while(0)
+#define LEDA_GetValue()           PORTAbits.RA5
+#define LEDA_SetDigitalInput()    do { TRISAbits.TRISA5 = 1; } while(0)
+#define LEDA_SetDigitalOutput()   do { TRISAbits.TRISA5 = 0; } while(0)
+#define LEDA_SetPullup()          do { WPUAbits.WPUA5 = 1; } while(0)
+#define LEDA_ResetPullup()        do { WPUAbits.WPUA5 = 0; } while(0)
+#define LEDA_SetPushPull()        do { ODCONAbits.ODCA5 = 0; } while(0)
+#define LEDA_SetOpenDrain()       do { ODCONAbits.ODCA5 = 1; } while(0)
+#define LEDA_SetAnalogMode()      do { ANSELAbits.ANSA5 = 1; } while(0)
+#define LEDA_SetDigitalMode()     do { ANSELAbits.ANSA5 = 0; } while(0)
 
 // get/set RCS aliases
 #define RCS_TRIS                 TRISBbits.TRISB4
