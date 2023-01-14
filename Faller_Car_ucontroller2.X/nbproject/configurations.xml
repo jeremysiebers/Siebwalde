@@ -401,8 +401,8 @@
       </HI-TECH-COMP>
       <HI-TECH-LINK>
         <property key="additional-options-checksum"
-                  value="4ff-1FFE@1FFF,width=-2,algorithm=2"/>
-        <property key="additional-options-code-offset" value="4ff"/>
+                  value="520-1FFE@1FFF,width=-2,algorithm=2"/>
+        <property key="additional-options-code-offset" value="520"/>
         <property key="additional-options-command-line" value=""/>
         <property key="additional-options-errata" value=""/>
         <property key="additional-options-extend-address" value="false"/>
@@ -413,7 +413,7 @@
         <property key="calibrate-oscillator-value" value="0x3400"/>
         <property key="clear-bss" value="true"/>
         <property key="code-model-external" value="wordwrite"/>
-        <property key="code-model-rom" value="4ff-7ff,800-fff,1000-17ff,1800-1fff"/>
+        <property key="code-model-rom" value="520-7ff,800-fff,1000-17ff,1800-1fff"/>
         <property key="create-html-files" value="false"/>
         <property key="data-model-ram" value=""/>
         <property key="data-model-size-of-double" value="32"/>
@@ -649,8 +649,8 @@
       </HI-TECH-COMP>
       <HI-TECH-LINK>
         <property key="additional-options-checksum"
-                  value="4ff-1FFE@1FFF,width=-2,algorithm=2"/>
-        <property key="additional-options-code-offset" value="4ff"/>
+                  value="520-1FFE@1FFF,width=-2,algorithm=2"/>
+        <property key="additional-options-code-offset" value="520"/>
         <property key="additional-options-command-line" value=""/>
         <property key="additional-options-errata" value=""/>
         <property key="additional-options-extend-address" value="false"/>
@@ -704,6 +704,7 @@
         <property key="debugoptions.debug-startup" value="Use system settings"/>
         <property key="debugoptions.reset-behaviour" value="Use system settings"/>
         <property key="debugoptions.useswbreakpoints" value="false"/>
+        <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="memories.aux" value="false"/>
         <property key="memories.bootflash" value="true"/>
@@ -748,6 +749,7 @@
         <property key="debugoptions.debug-startup" value="Use system settings"/>
         <property key="debugoptions.reset-behaviour" value="Use system settings"/>
         <property key="debugoptions.useswbreakpoints" value="false"/>
+        <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="memories.aux" value="false"/>
         <property key="memories.bootflash" value="true"/>

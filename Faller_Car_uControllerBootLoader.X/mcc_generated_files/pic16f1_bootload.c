@@ -120,8 +120,8 @@ bool     Bootload_Required (void);
 
 // To be device independent, these are set by mcc in memory.h
 #define  LAST_WORD_MASK          (WRITE_FLASH_BLOCKSIZE - 1)
-#define  NEW_RESET_VECTOR        0x500
-#define  NEW_INTERRUPT_VECTOR    0x504
+#define  NEW_RESET_VECTOR        0x520
+#define  NEW_INTERRUPT_VECTOR    0x524
 
 #define _str(x)  #x
 #define str(x)  _str(x)
@@ -340,17 +340,6 @@ uint8_t Write_Flash()
     NVMADRL = frame.address_L;
     NVMADRH = frame.address_H;
     NVMCON1 = 0xA4;       // Setup writes
-    {
-        uint16_t  Address_Ptr;
-
-        Address_Ptr = ((uint16_t) NVMADRH) << 8;
-        Address_Ptr += NVMADRL;
-        if ((Address_Ptr & 0x7FFF) < NEW_RESET_VECTOR)
-        {
-            frame.data[0] = ERROR_ADDRESS_OUT_OF_RANGE;
-            return (10);
-        }
-    }
     for (uint16_t  i= 0; i < frame.data_length; i += 2)
     {
 		
@@ -379,17 +368,6 @@ uint8_t Erase_Flash ()
 {
     NVMADRL = frame.address_L;
     NVMADRH = frame.address_H;
-//    {
-//        uint16_t  Address_Ptr;
-//
-//        Address_Ptr = ((uint16_t) NVMADRH) << 8;
-//        Address_Ptr += NVMADRL;
-//        if ((Address_Ptr & (0x7FFF & (~LAST_WORD_MASK))) < NEW_RESET_VECTOR)
-//        {
-//            frame.data[0] = ERROR_ADDRESS_OUT_OF_RANGE;
-//            return (10);
-//        }
-//    }
     for (uint16_t i=0; i < frame.data_length; i++)
     {
         if ((NVMADRH & 0x7F) >= ((END_FLASH & 0xFF00) >> 8))

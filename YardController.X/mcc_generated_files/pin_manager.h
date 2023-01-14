@@ -106,6 +106,17 @@
 #define LEDA_SetDigitalInput()    do { TRISBbits.TRISB0 = 1; } while(0)
 #define LEDA_SetDigitalOutput()   do { TRISBbits.TRISB0 = 0; } while(0)
 
+// get/set RDBKA aliases
+#define RDBKA_TRIS                 TRISCbits.TRISC0
+#define RDBKA_LAT                  LATCbits.LATC0
+#define RDBKA_PORT                 PORTCbits.RC0
+#define RDBKA_SetHigh()            do { LATCbits.LATC0 = 1; } while(0)
+#define RDBKA_SetLow()             do { LATCbits.LATC0 = 0; } while(0)
+#define RDBKA_Toggle()             do { LATCbits.LATC0 = ~LATCbits.LATC0; } while(0)
+#define RDBKA_GetValue()           PORTCbits.RC0
+#define RDBKA_SetDigitalInput()    do { TRISCbits.TRISC0 = 1; } while(0)
+#define RDBKA_SetDigitalOutput()   do { TRISCbits.TRISC0 = 0; } while(0)
+
 
 /**
    @Param

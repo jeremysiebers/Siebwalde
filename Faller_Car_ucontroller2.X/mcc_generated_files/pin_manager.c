@@ -59,7 +59,7 @@ void PIN_MANAGER_Initialize(void)
     /**
     LATx registers
     */
-    LATA = 0x00;
+    LATA = 0x01;
     LATB = 0x00;
     LATC = 0x00;
 
@@ -94,7 +94,7 @@ void PIN_MANAGER_Initialize(void)
     /**
     SLRCONx registers
     */
-    SLRCONA = 0x1F;
+    SLRCONA = 0x1E;
     SLRCONB = 0x00;
     SLRCONC = 0x3F;
 

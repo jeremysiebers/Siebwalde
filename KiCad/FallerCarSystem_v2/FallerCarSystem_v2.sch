@@ -1702,4 +1702,6 @@ Wire Wire Line
 Connection ~ 5800 1700
 Wire Wire Line
 	5800 1700 5700 1700
+Text Notes 5200 3850 0    50   ~ 0
+Battery should be disconnected by external switch.\nIn order to not have the uController run while charging, patch a wire\nfrom the power good output of U2 to the uCOntroller MCLR.
 $EndSCHEMATC

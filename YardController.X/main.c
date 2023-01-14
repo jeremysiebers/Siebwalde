@@ -79,7 +79,13 @@ void main(void)
     while (1)
     {
         Network_Manage();
-        LEDA_Toggle();
+        
+        if(RDBKA_PORT == 0){
+            LEDA_LAT = 1;
+        }
+        else{
+            LEDA_LAT = 0;
+        }
     }
 }
 /**

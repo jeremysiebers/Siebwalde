@@ -71,10 +71,10 @@
 
 // CONFIG4
 #pragma config BBSIZE = BB512    // ->512 words boot block size
-#pragma config BBEN = OFF    // ->Boot Block disabled
+#pragma config BBEN = ON    // ->Boot Block enabled
 #pragma config SAFEN = OFF    // ->SAF disabled
 #pragma config WRTAPP = OFF    // ->Application Block not write protected
-#pragma config WRTB = OFF    // ->Boot Block not write protected
+#pragma config WRTB = ON    // ->Boot Block write protected
 #pragma config WRTC = OFF    // ->Configuration Register not write protected
 #pragma config WRTSAF = OFF    // ->SAF not write protected
 #pragma config LVP = OFF    // Low Voltage Programming Enable bit->High Voltage on MCLR/Vpp must be used for programming

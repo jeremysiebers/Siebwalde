@@ -15,11 +15,11 @@ COMMAND_UNSUCCESSFUL        = 0xFD              # - Command unSuccessful
 
 SERIALSPEED             = 115200                # Serial baudrate
 
-BOOTLOADEROFFSET        = 0x500                 # PIC16 has 32 write latches hence it can handle data per 32 which means that the offset has to be a multiple of 32!
+BOOTLOADEROFFSET        = 0x520                 # PIC16 has 32 write latches hence it can handle data per 32 which means that the offset has to be a multiple of 32!
 PICPROGRAMMEMSIZE       = 0x2000
 
-WRITE_FLASH_BLOCKSIZE   = 32
-ERASE_FLASH_BLOCKSIZE   = 32
+WRITE_FLASH_BLOCKSIZE   = 0x20 #32
+ERASE_FLASH_BLOCKSIZE   = 0x20 #32
 
 try:
     file_object  = open("C:\\Users\\Jerem\\Siebwalde\\Faller_Car_ucontroller2.X\\dist\\Offset\\production\\Faller_Car_ucontroller2.X.production.hex", 'r')
@@ -132,40 +132,43 @@ def WriteFlash(bootloader_offset, program_mem_size):
         print('Write flash nok, no file loaded/found!\n')
         return(COMMAND_UNSUCCESSFUL)
     
-    HexRowWidth = 16 #bytes per line in hex file
+    HexRowWidth = WRITE_FLASH_BLOCKSIZE #words per line in hex file
     
     ByteArray = []
     ByteArrayChecksum = []
     
-    ProcessLines = int((program_mem_size - bootloader_offset) / HexRowWidth)
+    ProcessLines = int((program_mem_size - bootloader_offset) / HexRowWidth) # 2 times more since hex file is per 16 words per row!
     
     for i in range(ProcessLines):        
-        buff = file_object.readline()
+        buff  = file_object.readline()
+        buff2 = file_object.readline()
+        buff3 = file_object.readline()
+        buff4 = file_object.readline()
         address = buff[3:7]
         
         if(int(address, 16) < bootloader_offset):
             print('Write flash nok, first address to write is within bootloader block!\n')
             return(COMMAND_UNSUCCESSFUL)            
-        if(int(address, 16) > program_mem_size):
+        if(int(address, 16) > (program_mem_size * 2)): #since we are writing 32 words per time, hex file size is 2x longer on 16 words per row
             print('Write flash nok, address to write is greater then memory size!\n')
             return(COMMAND_UNSUCCESSFUL)
         
-        data = buff[9:41]
+        data = buff[9:41] + buff2[9:41] + buff3[9:41] + buff4[9:41]
         ByteArray.append([bytearray.fromhex(address), bytearray.fromhex(data)])
         ByteArrayChecksum.append([bytearray.fromhex(data)])
     
     
     CalcChecksumFile = 0
     
-    ByteArrayChecksum[ProcessLines-1][0][14] = 0
-    ByteArrayChecksum[ProcessLines-1][0][15] = 0
+    ByteArrayChecksum[ProcessLines-1][0][63] = 0
+    ByteArrayChecksum[ProcessLines-1][0][62] = 0
         
     for j in range(ProcessLines):
-        for x in range(0, 16, 2):
+        for x in range(0, 64, 2):
             CalcChecksumFile = ((ByteArrayChecksum[j][0][x] + (ByteArrayChecksum[j][0][x + 1] << 8)) + CalcChecksumFile) & 0xFFFF
     
     run = True
-    jumpsize = 4
+    jumpsize = 1
     iteration = ProcessLines - jumpsize
     leftover  = ProcessLines % jumpsize
     i = 0
@@ -210,7 +213,7 @@ def WriteFlash(bootloader_offset, program_mem_size):
 def _WriteLinesOfFlash(line, incr, array):
     
     WriteFlash = 2
-    byteslength = incr * 16
+    byteslength = incr * 64
     
     tx = struct.pack('<6BBB2B', 0x55, WriteFlash, byteslength, 0, 0x55, 0xAA, array[line][0][1], array[line][0][0], 0, 0)
     
@@ -360,23 +363,19 @@ GetBootloaderVersion()
 
 if(EraseFlash(BOOTLOADEROFFSET, PICPROGRAMMEMSIZE) == COMMAND_SUCCESSFUL):    
     cmd_returnval, CalcChecksumFile = WriteFlash(BOOTLOADEROFFSET, PICPROGRAMMEMSIZE)
-    if(cmd_returnval == COMMAND_SUCCESSFUL):        
-        if(WriteConfig() == COMMAND_SUCCESSFUL): 
-            ChecksumRequest = RequestChecksum(BOOTLOADEROFFSET, PICPROGRAMMEMSIZE)
-            if(CalcChecksumFile == ChecksumRequest):
-                print('Checksum match between file and PIC!\n')
-                if(ResetDevice() == COMMAND_SUCCESSFUL):
-                    print("------------- Done...------------------------------\n")
-                    print('Programming device done closing program')
-                else:
-                    print('Reset device error, closing program')
+    if(cmd_returnval == COMMAND_SUCCESSFUL):
+        ChecksumRequest = RequestChecksum(BOOTLOADEROFFSET, PICPROGRAMMEMSIZE)
+        if(CalcChecksumFile == ChecksumRequest):
+            print('Checksum match between file and PIC!\n')
+            if(ResetDevice() == COMMAND_SUCCESSFUL):
+                print("------------- Done...------------------------------\n")
+                print('Programming device done closing program')
             else:
-                print('Checksum mismatch between file and PIC, programming stopped!\n')
+                print('Reset device error, closing program')
         else:
-            print('Writing config words to device failed!\n')
-    else:
+            print('Checksum mismatch between file and PIC, programming stopped!\n')
+
         print('Programming stopped!\n')
-        
 else:
     print('Programming stopped!\n')
 

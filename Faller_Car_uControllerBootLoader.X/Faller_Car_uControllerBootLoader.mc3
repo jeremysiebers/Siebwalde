@@ -241,15 +241,15 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Bootloader Generator" name="NewInterruptVector_High"/>
-         <value>0x504</value>
+         <value>0x524</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Bootloader Generator" name="NewInterruptVector_Low"/>
-         <value>0x504</value>
+         <value>0x524</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Bootloader Generator" name="NewResetVector"/>
-         <value>0x500</value>
+         <value>0x520</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Bootloader Generator" name="Peripheral_Pin_Select_xxx"/>
@@ -337,7 +337,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Bootloader Generator" name="SelfProtection"/>
-         <value>Enabled</value>
+         <value>Disabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Bootloader Generator" name="SupportChecksum"/>
@@ -441,7 +441,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Bootloader Generator" name="pubSubBootloader Generator_EUSART/interfaceV2"/>
-         <value>4834.87670822017</value>
+         <value>8353.66828757957</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Bootloader Generator" name="sourcePath"/>
@@ -3677,7 +3677,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="Pin Module" registerAlias="ANSELC"/>
-         <value>2</value>
+         <value>0</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="Pin Module" registerAlias="CCP1PPS"/>
@@ -3981,7 +3981,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="Pin Module" registerAlias="ANSELC" settingAlias="ANSC1"/>
-         <value>analog</value>
+         <value>digital</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="Pin Module" registerAlias="ANSELC" settingAlias="ANSC2"/>
@@ -5205,7 +5205,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="System Module" registerAlias="CONFIG4"/>
-         <value>2975</value>
+         <value>2711</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="System Module" registerAlias="CONFIG5"/>
@@ -5281,7 +5281,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="System Module" registerAlias="CONFIG4" settingAlias="BBEN"/>
-         <value>OFF</value>
+         <value>ON</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="System Module" registerAlias="CONFIG4" settingAlias="BBSIZE"/>
@@ -5301,7 +5301,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="System Module" registerAlias="CONFIG4" settingAlias="WRTB"/>
-         <value>OFF</value>
+         <value>ON</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="System Module" registerAlias="CONFIG4" settingAlias="WRTC"/>
@@ -5358,12 +5358,12 @@
          <hash>02368520f3f5a408861753067dd7635b320e832aba2c7cba9dfd4c47b1c4dc62</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files\memory.c</file>
-         <hash>61663445009fb260f0b67ff13ec2103634f802041ebdae69cca07dc22dfb1da3</hash>
+         <file>mcc_generated_files\pic16f1_bootload.c</file>
+         <hash>cac17ad64a74f94213c5b9594c19287178ff58acc62a087ac2c08cbbb8b3a8e9</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files\pic16f1_bootload.c</file>
-         <hash>6078fff646c163064756e0680d6e3a920d9d34465d74e3efad45dc74daddce68</hash>
+         <file>mcc_generated_files\memory.c</file>
+         <hash>61663445009fb260f0b67ff13ec2103634f802041ebdae69cca07dc22dfb1da3</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\eusart1.h</file>
@@ -5375,7 +5375,7 @@
       </entry>
       <entry>
          <file>mcc_generated_files\device_config.c</file>
-         <hash>23fba5b9e6e0775e4d732af50c77c1864df36c78b1de00db1dd41c3532b9213e</hash>
+         <hash>c54838183d58a152a593818d3697f7f9641bd475ea7cba03ee8f02997ef85fea</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\pin_manager.h</file>
@@ -5387,7 +5387,7 @@
       </entry>
       <entry>
          <file>mcc_generated_files\pin_manager.c</file>
-         <hash>02b11ff6fb0991cd1a9394dea291155ad15c9de52844942f0c76822a8f84f8e9</hash>
+         <hash>2d57174ae95611724b2e696c7d73a15ea5b8add68e731572082a4f4d124def2b</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\mcc.c</file>

@@ -2,7 +2,7 @@
 <export version="D">
   <design>
     <source>C:\Users\jerem\Siebwalde\KiCad\FallerCarSystem_v2\FallerCarSystem_v2.sch</source>
-    <date>29-12-2022 18:19:37</date>
+    <date>10-1-2023 14:44:49</date>
     <tool>Eeschema (5.1.9)-1</tool>
     <sheet number="1" name="/" tstamps="/">
       <title_block>
@@ -92,7 +92,7 @@
       <tstamp>63A6F06A</tstamp>
     </comp>
     <comp ref="R12">
-      <value>470E</value>
+      <value>470</value>
       <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
       <datasheet>~</datasheet>
       <libsource lib="Device" part="R" description="Resistor"/>
@@ -100,7 +100,7 @@
       <tstamp>63A73328</tstamp>
     </comp>
     <comp ref="R13">
-      <value>470E</value>
+      <value>470</value>
       <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
       <datasheet>~</datasheet>
       <libsource lib="Device" part="R" description="Resistor"/>
@@ -108,7 +108,7 @@
       <tstamp>63A73DB9</tstamp>
     </comp>
     <comp ref="R14">
-      <value>470E</value>
+      <value>470</value>
       <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
       <datasheet>~</datasheet>
       <libsource lib="Device" part="R" description="Resistor"/>
@@ -156,7 +156,7 @@
       <tstamp>63AA6F19</tstamp>
     </comp>
     <comp ref="R3">
-      <value>4k7</value>
+      <value>4.7k</value>
       <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
       <datasheet>~</datasheet>
       <libsource lib="Device" part="R" description="Resistor"/>
@@ -348,7 +348,7 @@
       <tstamp>63BAD3E2</tstamp>
     </comp>
     <comp ref="R5">
-      <value>200E</value>
+      <value>200</value>
       <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
       <datasheet>~</datasheet>
       <libsource lib="Device" part="R" description="Resistor"/>
@@ -356,7 +356,7 @@
       <tstamp>63BC9D85</tstamp>
     </comp>
     <comp ref="R6">
-      <value>200E</value>
+      <value>200</value>
       <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
       <datasheet>~</datasheet>
       <libsource lib="Device" part="R" description="Resistor"/>
@@ -460,7 +460,7 @@
       <tstamp>63C0E848</tstamp>
     </comp>
     <comp ref="R16">
-      <value>470E</value>
+      <value>150</value>
       <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
       <datasheet>~</datasheet>
       <libsource lib="Device" part="R" description="Resistor"/>
@@ -468,7 +468,7 @@
       <tstamp>63CA1005</tstamp>
     </comp>
     <comp ref="R17">
-      <value>470E</value>
+      <value>150</value>
       <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
       <datasheet>~</datasheet>
       <libsource lib="Device" part="R" description="Resistor"/>
@@ -476,7 +476,7 @@
       <tstamp>63CA1A25</tstamp>
     </comp>
     <comp ref="R18">
-      <value>470E</value>
+      <value>150</value>
       <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
       <datasheet>~</datasheet>
       <libsource lib="Device" part="R" description="Resistor"/>
@@ -484,7 +484,7 @@
       <tstamp>63CA1D94</tstamp>
     </comp>
     <comp ref="R19">
-      <value>470E</value>
+      <value>150</value>
       <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
       <datasheet>~</datasheet>
       <libsource lib="Device" part="R" description="Resistor"/>
@@ -492,7 +492,7 @@
       <tstamp>63CAE9AF</tstamp>
     </comp>
     <comp ref="R20">
-      <value>470E</value>
+      <value>150</value>
       <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
       <datasheet>~</datasheet>
       <libsource lib="Device" part="R" description="Resistor"/>
@@ -500,7 +500,7 @@
       <tstamp>63CAEC42</tstamp>
     </comp>
     <comp ref="R21">
-      <value>470E</value>
+      <value>150</value>
       <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
       <datasheet>~</datasheet>
       <libsource lib="Device" part="R" description="Resistor"/>
@@ -540,7 +540,7 @@
       <tstamp>63CAF8CF</tstamp>
     </comp>
     <comp ref="R22">
-      <value>470E</value>
+      <value>150</value>
       <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
       <datasheet>~</datasheet>
       <libsource lib="Device" part="R" description="Resistor"/>
@@ -548,7 +548,7 @@
       <tstamp>63CAFB00</tstamp>
     </comp>
     <comp ref="R23">
-      <value>470E</value>
+      <value>150</value>
       <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
       <datasheet>~</datasheet>
       <libsource lib="Device" part="R" description="Resistor"/>
@@ -572,7 +572,7 @@
       <tstamp>63EB209D</tstamp>
     </comp>
     <comp ref="R24">
-      <value>470E</value>
+      <value>150</value>
       <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
       <datasheet>~</datasheet>
       <libsource lib="Device" part="R" description="Resistor"/>
@@ -596,7 +596,7 @@
       <tstamp>63EBA686</tstamp>
     </comp>
     <comp ref="R25">
-      <value>470E</value>
+      <value>150</value>
       <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
       <datasheet>~</datasheet>
       <libsource lib="Device" part="R" description="Resistor"/>
