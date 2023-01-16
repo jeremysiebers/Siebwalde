@@ -19,11 +19,19 @@
                     <type>2</type>
                 </confElem>
                 <confElem>
-                    <name>Offset</name>
+                    <name>Offset_Ambulance</name>
                     <type>2</type>
                 </confElem>
                 <confElem>
                     <name>Combined</name>
+                    <type>2</type>
+                </confElem>
+                <confElem>
+                    <name>Offset_Polizei</name>
+                    <type>2</type>
+                </confElem>
+                <confElem>
+                    <name>Offset_MercedesBus</name>
                     <type>2</type>
                 </confElem>
             </confList>

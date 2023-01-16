@@ -45,7 +45,7 @@
 typedef struct
 {
     uint8_t Name;            // Name of the Led
-    uint8_t Led;             // Holds the duty cycle value for a Led
+    uint16_t Led;            // Holds the duty cycle value for a Led
     uint8_t Prog;            // Program to run on a selected Led
     uint8_t Speed;           // setting on how fast to change a led on time, should be lower than 254
     uint8_t nominal;         // Free to use nominal value for intensity 
@@ -57,13 +57,16 @@ typedef struct
 }LEDBIT;
 
 enum{
-    LedFlashLeft  = 0,
-    LedFlashRight = 1,
-    LedBackLeft   = 2,
-    LedBackRight  = 3,
-    LedFrontLeft  = 4,
-    LedFrontRight = 5,
-    
+    LedFlashLeft    = 0,
+    LedFlashRight   = 1,
+    LedBackLeft     = 2,
+    LedBackRight    = 3,
+    LedFrontLeft    = 4,
+    LedFrontRight   = 5,
+    LedA            = 6,
+    LedB            = 7,
+    LedC            = 8,
+    LedD            = 9    
 };
 
 enum{
@@ -72,8 +75,10 @@ enum{
     FRONT_HIGH = 255,
     BACK = 25,
     BRAKE = 127,
+    MARK = 15,
     MIN = 1,
-    SLOW_FLASH_LOW = 30
+    SLOW_FLASH_LOW = 30,
+    ON = 255
 };
 
 enum{
@@ -82,7 +87,8 @@ enum{
     Led_Max,
     Led_Brake,
     Led_SlFl,
-    Led_Flash
+    Led_Flash,
+    Led_Mark
 };
 
 enum{
@@ -91,7 +97,12 @@ enum{
     PWM3,
     PWM4,
     PWM5,
-    PWM6    
+    PWM6,
+    LEDA,
+    LEDB,
+    LEDC,
+    LEDD
+    
 };
 
 uint8_t Effect_Prog(uint8_t Prog, uint8_t Led);
@@ -99,13 +110,15 @@ uint8_t LedOff(uint8_t Led);
 uint8_t LedNom(uint8_t Led);
 uint8_t LedMax(uint8_t Led);
 uint8_t LedBrake(uint8_t Led);
+uint8_t LedMark(uint8_t Led);
 uint8_t LedSlFl(uint8_t Led);
 uint8_t LedFlash(uint8_t Led);
 void CalcPwm(uint8_t Led);
+void LED_StandardOutput(uint8_t PWM, uint16_t val);
 
 extern void INITxEXECUTER(void);
 extern uint8_t EXECUTExEFFECT(void);
-extern LEDBIT LedBit[6];
+extern LEDBIT LedBit[7];
 extern void RCSxLED(void);
 extern void BATTxPROTECT(void);
 
