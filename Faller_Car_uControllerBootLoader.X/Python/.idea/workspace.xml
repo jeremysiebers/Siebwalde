@@ -4,12 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="29037513-b39d-45b6-9f51-de77be6ae152" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bootload.py" beforeDir="false" afterPath="$PROJECT_DIR$/bootload.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../Faller_Car_ucontroller2.X/dist/Combined/production/Faller_Car_ucontroller2.X.production.unified.hex" beforeDir="false" afterPath="$PROJECT_DIR$/../../Faller_Car_ucontroller2.X/dist/Combined/production/Faller_Car_ucontroller2.X.production.unified.hex" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../Faller_Car_ucontroller2.X/nbproject/configurations.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../Faller_Car_ucontroller2.X/nbproject/configurations.xml" afterDir="false" />
-    </list>
+    <list default="true" id="29037513-b39d-45b6-9f51-de77be6ae152" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
