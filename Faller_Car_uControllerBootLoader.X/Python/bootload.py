@@ -22,7 +22,7 @@ WRITE_FLASH_BLOCKSIZE   = 0x20 #32
 ERASE_FLASH_BLOCKSIZE   = 0x20 #32
 
 try:
-    file_object  = open("..\\..\\Faller_Car_ucontroller2.X\\dist\\Offset_Ambulance\\production\\Faller_Car_ucontroller2.X.production.hex", 'r')
+    file_object  = open("..\\..\\Faller_Car_ucontroller2.X\\dist\\Offset_MercedesBus\\production\\Faller_Car_ucontroller2.X.production.hex", 'r')
 except:
     print('failed to open file !!!! \n')
     exit()
@@ -31,7 +31,7 @@ except:
 # open the serial port
 try:
     # open the com port
-    ser = serial.Serial("COM3", SERIALSPEED, timeout = 300)
+    ser = serial.Serial("COM5", SERIALSPEED, timeout = 300)
     
     # flush the buffer
     #r = self._ser.read ()

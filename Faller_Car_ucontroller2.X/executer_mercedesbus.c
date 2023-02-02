@@ -14,13 +14,13 @@
 /******************************************************************************/
 
 LEDBIT LedBit[7] = {
-/*   NAME          Led Program   Spd nom    pgst itt stp   PWM*/
+/*   NAME           Led Program    Spd nom    pgst itt stp   PWM*/
     {LedFlashLeft,  0,  Led_Off,   0,  MAX,   0,   0,  1,    PWM1},
     {LedFlashRight, 0,  Led_Off,   0,  MAX,   0,   0,  1,    PWM2},
-    {LedBackLeft,   0,  Led_Off,   0,  BACK,  0,   0,  1,    PWM3},
-    {LedBackRight,  0,  Led_Off,   0,  BACK,  0,   0,  1,    PWM4},
-    {LedFrontLeft,  0,  Led_Off,   0,  FRONT, 0,   0,  1,    PWM5},
-    {LedFrontRight, 0,  Led_Off,   0,  FRONT, 0,   0,  1,    PWM6}};
+    {LedBackLR,     0,  Led_Off,   0,  BACK,  0,   0,  1,    PWM3},
+    {LedCabin,      0,  Led_Off,   0,  CAB,   0,   0,  1,    PWM4},
+    {LedFrontLR,    0,  Led_Off,   0,  FRONT, 0,   0,  1,    PWM5},
+    {LedVehicle,    0,  Led_Off,   0,  VHC,   0,   0,  1,    PWM6}};
 
 /******************************************************************************/
 /*          LOCAL VARIABLES                                                   */
@@ -53,11 +53,11 @@ void BATTxPROTECT(){
     /* Block motor from running */
     EnMOT_SetDigitalInput();
     
-    LedBit[LedBackLeft].Prog         = Led_Off;
+    LedBit[LedBackLR].Prog           = Led_Off;
 //    LedBit[LedBackLeft].Led          = MAX;
 //    LedBit[LedBackLeft].Speed        = 150;
 //    
-    LedBit[LedBackRight].Prog        = Led_Off;
+    LedBit[LedCabin].Prog            = Led_Off;
 //    LedBit[LedBackRight].Led         = MAX;
 //    LedBit[LedBackRight].Speed       = 150;
     
@@ -69,11 +69,11 @@ void BATTxPROTECT(){
 //    LedBit[LedFlashRight].Led        = MAX;
 //    LedBit[LedFlashRight].Speed      = 150;
     
-    LedBit[LedFrontLeft].Prog        = Led_Off;
+    LedBit[LedFrontLR].Prog          = Led_Off;
 //    LedBit[LedFrontLeft].Led         = MAX;
 //    LedBit[LedFrontLeft].Speed       = 150;
 //    
-    LedBit[LedFrontRight].Prog       = Led_Off;
+    LedBit[LedVehicle].Prog          = Led_Off;
 //    LedBit[LedFrontRight].Led        = MAX;
 //    LedBit[LedFrontRight].Speed      = 150;
 }
@@ -86,38 +86,17 @@ void RCSxLED(void)
     if(RCS_GetValue()){ /* Check if the car is driving */
                
         /* Set the back lights to normal intensity */
-        LedBit[LedBackLeft].Prog         = Led_Nom;
-        LedBit[LedBackRight].Prog        = Led_Nom;
-        
-        /* Let random decide to enable flashing lights or not */
-        if(Random > 16383)
-        {
-            /* Set the flashing lights on */
-            LedBit[LedFlashLeft].Prog        = Led_Flash;
-            LedBit[LedFlashLeft].Led         = MAX;
-            LedBit[LedFlashLeft].Prog_State  = 0;
-            LedBit[LedFlashLeft].Speed       = 150;
-
-            LedBit[LedFlashRight].Prog       = Led_Flash;
-            LedBit[LedFlashRight].Led        = 0;
-            LedBit[LedFlashRight].Prog_State = 0;
-            LedBit[LedFlashRight].Speed       = 150;
-
-            /* Let the front lights also glow flash */
-            LedBit[LedFrontLeft].Prog        = Led_SlFl;
-            LedBit[LedFrontLeft].Led         = FRONT_HIGH;
-            LedBit[LedFrontLeft].Prog_State  = 2;
-            LedBit[LedFrontLeft].Speed       = 0;
-
-            LedBit[LedFrontRight].Prog       = Led_SlFl;
-            LedBit[LedFrontRight].Led        = FRONT;
-            LedBit[LedFrontRight].Prog_State = 0;
-            LedBit[LedFrontRight].Speed      = 0;
-        }
-        
-        /* Disable the dashboard light */
-        LEDA_SetLow();
-        //LEDB_SetHigh();
+        LedBit[LedBackLR].Prog           = Led_Nom;
+        LedBit[LedCabin].Prog            = Led_Nom;
+        /* Set the front lights to normal */
+        LedBit[LedFrontLR].Prog          = Led_Nom;
+        LedBit[LedVehicle].Prog          = Led_Nom;
+        LedBit[LedFlashRight].Prog       = Led_Off;
+        LedBit[LedFlashLeft].Prog        = Led_Off;
+        LEDA_SetHigh();
+        LEDB_SetHigh();
+        LEDC_SetHigh();
+        LEDD_SetHigh();
         
         /* Enable the motor */
         EnMOT_LAT = true;
@@ -125,28 +104,13 @@ void RCSxLED(void)
     /* The Car has braked to stop */
     else{
         /* Set the brake light intensity */
-        LedBit[LedBackLeft].Prog        = Led_Brake;
-        LedBit[LedBackRight].Prog       = Led_Brake;
+        LedBit[LedBackLR].Prog            = Led_Brake;
+        LedBit[LedCabin].Prog             = Led_Max;
+        LedBit[LedFrontLR].Prog           = Led_Mark;
+        LedBit[LedFlashRight].Prog        = Led_Flash;
+        LedBit[LedFlashRight].Led         = MAX;
+        LedBit[LedFlashRight].Speed       = 254;
         
-        /* Disable the flash light */
-        LedBit[LedFlashLeft].Prog       = Led_Off;
-        LedBit[LedFlashRight].Prog      = Led_Off;
-        
-        /* Set the front lights to normal */
-        LedBit[LedFrontLeft].Prog       = Led_Nom;
-        LedBit[LedFrontRight].Prog      = Led_Nom;
-        
-        if(Random < 16383)
-        {
-            /* Set the dash light on */
-            LEDA_SetHigh();
-        }
-        else{
-            /* Disable the dashboard light */
-            LEDA_SetLow();
-        }
-        //LEDB_SetLow();
-        /* Disable the motor */
         EnMOT_LAT = false;
     }
     
@@ -200,6 +164,9 @@ uint8_t Effect_Prog(uint8_t Prog, uint8_t Led)
                             break;
 
         case    Led_Flash:  ReturnData = (LedFlash(Led));
+                            break;
+            
+        case    Led_Mark:  ReturnData = (LedMark(Led));
                             break;
             
         default          :
@@ -343,7 +310,18 @@ uint8_t LedFlash(uint8_t Led)
     CalcPwm(Led);
     return(ReturnVal);
 }
-
+/******************************************************************************/
+/*          Program 6 = Led soft on                                        */
+/******************************************************************************/
+uint8_t LedMark(uint8_t Led)
+{
+    LedBit[Led].Led = MARK;                                                      // Set led bit to soft intensity
+    LedBit[Led].Speed = 0;
+    LedBit[Led].Prog_State = 0;
+    LedBit[Led].Iteration = 0;    
+    CalcPwm(Led);
+    return(finished);
+}
 /******************************************************************************/
 /*          Calculate PWM value                                               */
 /******************************************************************************/

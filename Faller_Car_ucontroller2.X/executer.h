@@ -59,10 +59,10 @@ typedef struct
 enum{
     LedFlashLeft    = 0,
     LedFlashRight   = 1,
-    LedBackLeft     = 2,
-    LedBackRight    = 3,
-    LedFrontLeft    = 4,
-    LedFrontRight   = 5,
+    LedBackLR       = 2,
+    LedCabin        = 3,
+    LedFrontLR      = 4,
+    LedVehicle      = 5,
     LedA            = 6,
     LedB            = 7,
     LedC            = 8,
@@ -78,7 +78,9 @@ enum{
     MARK = 15,
     MIN = 1,
     SLOW_FLASH_LOW = 30,
-    ON = 255
+    ON = 255,
+    VHC = 40,
+    CAB = 5
 };
 
 enum{
@@ -113,6 +115,7 @@ uint8_t LedBrake(uint8_t Led);
 uint8_t LedMark(uint8_t Led);
 uint8_t LedSlFl(uint8_t Led);
 uint8_t LedFlash(uint8_t Led);
+uint8_t LedMark(uint8_t Led);
 void CalcPwm(uint8_t Led);
 void LED_StandardOutput(uint8_t PWM, uint16_t val);
 
