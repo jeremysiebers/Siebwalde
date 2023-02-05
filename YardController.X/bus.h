@@ -1,20 +1,3 @@
-/**
-  Descriptive File Name
-	
-  Company:
-    Microchip Technology Inc.
-
-  File Name:
-    log_console.h
-
-  Summary:
-    This is the header file for the log_console.c
-
-  Description:
-    This header file provides the API for sending log messages to console.
-
- */
-
 /* Microchip Technology Inc. and its subsidiaries.  You may use this software 
  * and any derivatives exclusively with Microchip products. 
  * 
@@ -36,27 +19,35 @@
  * TERMS. 
  */
 
+/* 
+ * File:   
+ * Author: 
+ * Comments:
+ * Revision history: 
+ */
+
 // This is a guard condition so that contents of this file are not included
 // more than once.  
-#ifndef LOG_CONSOLE_H
-#define	LOG_CONSOLE_H
+#ifndef BUS_H
+#define	BUS_H
 
+#include <xc.h> // include processor files - each processor file is guarded.  
 
-/*Log a message to console.
- * The function will log a message to console using UART.
- * 
- * @param message
- *      Message
- * 
- * @param priorityVal
- *      Message priority
- * 
- * @param return
- *      1
- * 
- */
-uint8_t logConsole(const char *message, uint8_t priorityVal);
+void BUSxDRIVE(void);
 
+// TODO Insert declarations or function prototypes (right here) to leverage 
+// live documentation
 
-#endif	/* LOG_CONSOLE_H */
+#ifdef	__cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+    // TODO If C++ is being used, regular C code needs function names to have C 
+    // linkage so the functions can be used by the c code. 
+
+#ifdef	__cplusplus
+}
+#endif /* __cplusplus */
+
+#endif	/* XC_HEADER_TEMPLATE_H */
 

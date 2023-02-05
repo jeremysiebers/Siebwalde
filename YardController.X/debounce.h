@@ -1,20 +1,3 @@
-/**
-  Descriptive File Name
-	
-  Company:
-    Microchip Technology Inc.
-
-  File Name:
-    log_syslog.h
-
-  Summary:
-    This is the header file for the log_syslog.c
-
-  Description:
-    This header file provides the API for sending log messages using Ethernet (Syslog RFC 5424).
-
- */
-
 /* Microchip Technology Inc. and its subsidiaries.  You may use this software 
  * and any derivatives exclusively with Microchip products. 
  * 
@@ -36,32 +19,50 @@
  * TERMS. 
  */
 
+/* 
+ * File:   
+ * Author: 
+ * Comments:
+ * Revision history: 
+ */
+
 // This is a guard condition so that contents of this file are not included
 // more than once.  
-#ifndef LOG_ETHERNET_H
-#define	LOG_ETHERNET_H
-  
-#include <stdint.h>
-#include "tcpip_types.h"
+#ifndef DEBOUNCE_H
+#define	DEBOUNCE_H
 
-#define SOURCEPORT_SYSLOG   514
-#define DESTPORT_SYSLOG     514
+#include <xc.h> // include processor files - each processor file is guarded.  
+
+// TODO Insert appropriate #include <>
+
+// TODO Insert C++ class definitions if appropriate
+
+// TODO Insert declarations
+
+void DEBOUNCExIO(void);
 
 
-/*Send a syslog message.
- * The function will send a Syslog message.
- * 
- * @param message
- *      Message
- * 
- * @param priorityVal
- *      Message priority
- * 
- * @param return
- *      Status of sending the message
- * 
- */
-error_msg logSyslog(const char *message, uint8_t priorityVal);
+typedef struct
+{
+    uint8_t Count;              // Debounce counter
+    uint8_t Threshold;          // Value when to except input value
+    uint8_t Value;              // Debounced value
+    
+}DEBOUNCE;
 
-#endif	/* LOG_ETHERNET_H */
+// TODO Insert declarations or function prototypes (right here) to leverage 
+// live documentation
+
+#ifdef	__cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+    // TODO If C++ is being used, regular C code needs function names to have C 
+    // linkage so the functions can be used by the c code. 
+
+#ifdef	__cplusplus
+}
+#endif /* __cplusplus */
+
+#endif	/* XC_HEADER_TEMPLATE_H */
 

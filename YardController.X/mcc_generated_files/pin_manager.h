@@ -95,27 +95,126 @@
 #define ETHLEDB_SetAnalogMode()      do { anselRA1bits.anselRA1 = 1; } while(0)
 #define ETHLEDB_SetDigitalMode()     do { anselRA1bits.anselRA1 = 0; } while(0)
 
-// get/set LEDA aliases
-#define LEDA_TRIS                 TRISBbits.TRISB0
-#define LEDA_LAT                  LATBbits.LATB0
-#define LEDA_PORT                 PORTBbits.RB0
-#define LEDA_SetHigh()            do { LATBbits.LATB0 = 1; } while(0)
-#define LEDA_SetLow()             do { LATBbits.LATB0 = 0; } while(0)
-#define LEDA_Toggle()             do { LATBbits.LATB0 = ~LATBbits.LATB0; } while(0)
-#define LEDA_GetValue()           PORTBbits.RB0
-#define LEDA_SetDigitalInput()    do { TRISBbits.TRISB0 = 1; } while(0)
-#define LEDA_SetDigitalOutput()   do { TRISBbits.TRISB0 = 0; } while(0)
+// get/set SW_BUSSTOP_IND aliases
+#define SW_BUSSTOP_IND_TRIS                 TRISDbits.TRISD0
+#define SW_BUSSTOP_IND_LAT                  LATDbits.LATD0
+#define SW_BUSSTOP_IND_PORT                 PORTDbits.RD0
+#define SW_BUSSTOP_IND_SetHigh()            do { LATDbits.LATD0 = 1; } while(0)
+#define SW_BUSSTOP_IND_SetLow()             do { LATDbits.LATD0 = 0; } while(0)
+#define SW_BUSSTOP_IND_Toggle()             do { LATDbits.LATD0 = ~LATDbits.LATD0; } while(0)
+#define SW_BUSSTOP_IND_GetValue()           PORTDbits.RD0
+#define SW_BUSSTOP_IND_SetDigitalInput()    do { TRISDbits.TRISD0 = 1; } while(0)
+#define SW_BUSSTOP_IND_SetDigitalOutput()   do { TRISDbits.TRISD0 = 0; } while(0)
 
-// get/set RDBKA aliases
-#define RDBKA_TRIS                 TRISCbits.TRISC0
-#define RDBKA_LAT                  LATCbits.LATC0
-#define RDBKA_PORT                 PORTCbits.RC0
-#define RDBKA_SetHigh()            do { LATCbits.LATC0 = 1; } while(0)
-#define RDBKA_SetLow()             do { LATCbits.LATC0 = 0; } while(0)
-#define RDBKA_Toggle()             do { LATCbits.LATC0 = ~LATCbits.LATC0; } while(0)
-#define RDBKA_GetValue()           PORTCbits.RC0
-#define RDBKA_SetDigitalInput()    do { TRISCbits.TRISC0 = 1; } while(0)
-#define RDBKA_SetDigitalOutput()   do { TRISCbits.TRISC0 = 0; } while(0)
+// get/set STOP_BUS_AT_IND aliases
+#define STOP_BUS_AT_IND_TRIS                 TRISDbits.TRISD1
+#define STOP_BUS_AT_IND_LAT                  LATDbits.LATD1
+#define STOP_BUS_AT_IND_PORT                 PORTDbits.RD1
+#define STOP_BUS_AT_IND_SetHigh()            do { LATDbits.LATD1 = 1; } while(0)
+#define STOP_BUS_AT_IND_SetLow()             do { LATDbits.LATD1 = 0; } while(0)
+#define STOP_BUS_AT_IND_Toggle()             do { LATDbits.LATD1 = ~LATDbits.LATD1; } while(0)
+#define STOP_BUS_AT_IND_GetValue()           PORTDbits.RD1
+#define STOP_BUS_AT_IND_SetDigitalInput()    do { TRISDbits.TRISD1 = 1; } while(0)
+#define STOP_BUS_AT_IND_SetDigitalOutput()   do { TRISDbits.TRISD1 = 0; } while(0)
+
+// get/set SW_BUSSTOP_STN aliases
+#define SW_BUSSTOP_STN_TRIS                 TRISDbits.TRISD2
+#define SW_BUSSTOP_STN_LAT                  LATDbits.LATD2
+#define SW_BUSSTOP_STN_PORT                 PORTDbits.RD2
+#define SW_BUSSTOP_STN_SetHigh()            do { LATDbits.LATD2 = 1; } while(0)
+#define SW_BUSSTOP_STN_SetLow()             do { LATDbits.LATD2 = 0; } while(0)
+#define SW_BUSSTOP_STN_Toggle()             do { LATDbits.LATD2 = ~LATDbits.LATD2; } while(0)
+#define SW_BUSSTOP_STN_GetValue()           PORTDbits.RD2
+#define SW_BUSSTOP_STN_SetDigitalInput()    do { TRISDbits.TRISD2 = 1; } while(0)
+#define SW_BUSSTOP_STN_SetDigitalOutput()   do { TRISDbits.TRISD2 = 0; } while(0)
+
+// get/set STOP_BUS_AT_STN aliases
+#define STOP_BUS_AT_STN_TRIS                 TRISDbits.TRISD3
+#define STOP_BUS_AT_STN_LAT                  LATDbits.LATD3
+#define STOP_BUS_AT_STN_PORT                 PORTDbits.RD3
+#define STOP_BUS_AT_STN_SetHigh()            do { LATDbits.LATD3 = 1; } while(0)
+#define STOP_BUS_AT_STN_SetLow()             do { LATDbits.LATD3 = 0; } while(0)
+#define STOP_BUS_AT_STN_Toggle()             do { LATDbits.LATD3 = ~LATDbits.LATD3; } while(0)
+#define STOP_BUS_AT_STN_GetValue()           PORTDbits.RD3
+#define STOP_BUS_AT_STN_SetDigitalInput()    do { TRISDbits.TRISD3 = 1; } while(0)
+#define STOP_BUS_AT_STN_SetDigitalOutput()   do { TRISDbits.TRISD3 = 0; } while(0)
+
+// get/set SW_FDEP_RIGHT aliases
+#define SW_FDEP_RIGHT_TRIS                 TRISDbits.TRISD4
+#define SW_FDEP_RIGHT_LAT                  LATDbits.LATD4
+#define SW_FDEP_RIGHT_PORT                 PORTDbits.RD4
+#define SW_FDEP_RIGHT_SetHigh()            do { LATDbits.LATD4 = 1; } while(0)
+#define SW_FDEP_RIGHT_SetLow()             do { LATDbits.LATD4 = 0; } while(0)
+#define SW_FDEP_RIGHT_Toggle()             do { LATDbits.LATD4 = ~LATDbits.LATD4; } while(0)
+#define SW_FDEP_RIGHT_GetValue()           PORTDbits.RD4
+#define SW_FDEP_RIGHT_SetDigitalInput()    do { TRISDbits.TRISD4 = 1; } while(0)
+#define SW_FDEP_RIGHT_SetDigitalOutput()   do { TRISDbits.TRISD4 = 0; } while(0)
+
+// get/set SW_FDEP_MID aliases
+#define SW_FDEP_MID_TRIS                 TRISDbits.TRISD5
+#define SW_FDEP_MID_LAT                  LATDbits.LATD5
+#define SW_FDEP_MID_PORT                 PORTDbits.RD5
+#define SW_FDEP_MID_SetHigh()            do { LATDbits.LATD5 = 1; } while(0)
+#define SW_FDEP_MID_SetLow()             do { LATDbits.LATD5 = 0; } while(0)
+#define SW_FDEP_MID_Toggle()             do { LATDbits.LATD5 = ~LATDbits.LATD5; } while(0)
+#define SW_FDEP_MID_GetValue()           PORTDbits.RD5
+#define SW_FDEP_MID_SetDigitalInput()    do { TRISDbits.TRISD5 = 1; } while(0)
+#define SW_FDEP_MID_SetDigitalOutput()   do { TRISDbits.TRISD5 = 0; } while(0)
+
+// get/set STOP_FDEP_AT_MID aliases
+#define STOP_FDEP_AT_MID_TRIS                 TRISDbits.TRISD6
+#define STOP_FDEP_AT_MID_LAT                  LATDbits.LATD6
+#define STOP_FDEP_AT_MID_PORT                 PORTDbits.RD6
+#define STOP_FDEP_AT_MID_SetHigh()            do { LATDbits.LATD6 = 1; } while(0)
+#define STOP_FDEP_AT_MID_SetLow()             do { LATDbits.LATD6 = 0; } while(0)
+#define STOP_FDEP_AT_MID_Toggle()             do { LATDbits.LATD6 = ~LATDbits.LATD6; } while(0)
+#define STOP_FDEP_AT_MID_GetValue()           PORTDbits.RD6
+#define STOP_FDEP_AT_MID_SetDigitalInput()    do { TRISDbits.TRISD6 = 1; } while(0)
+#define STOP_FDEP_AT_MID_SetDigitalOutput()   do { TRISDbits.TRISD6 = 0; } while(0)
+
+// get/set STOP_FDEP_AT_RIGHT aliases
+#define STOP_FDEP_AT_RIGHT_TRIS                 TRISDbits.TRISD7
+#define STOP_FDEP_AT_RIGHT_LAT                  LATDbits.LATD7
+#define STOP_FDEP_AT_RIGHT_PORT                 PORTDbits.RD7
+#define STOP_FDEP_AT_RIGHT_SetHigh()            do { LATDbits.LATD7 = 1; } while(0)
+#define STOP_FDEP_AT_RIGHT_SetLow()             do { LATDbits.LATD7 = 0; } while(0)
+#define STOP_FDEP_AT_RIGHT_Toggle()             do { LATDbits.LATD7 = ~LATDbits.LATD7; } while(0)
+#define STOP_FDEP_AT_RIGHT_GetValue()           PORTDbits.RD7
+#define STOP_FDEP_AT_RIGHT_SetDigitalInput()    do { TRISDbits.TRISD7 = 1; } while(0)
+#define STOP_FDEP_AT_RIGHT_SetDigitalOutput()   do { TRISDbits.TRISD7 = 0; } while(0)
+
+// get/set HALL_BUSSTOP_STN aliases
+#define HALL_BUSSTOP_STN_TRIS                 TRISJbits.TRISJ0
+#define HALL_BUSSTOP_STN_LAT                  LATJbits.LATJ0
+#define HALL_BUSSTOP_STN_PORT                 PORTJbits.RJ0
+#define HALL_BUSSTOP_STN_SetHigh()            do { LATJbits.LATJ0 = 1; } while(0)
+#define HALL_BUSSTOP_STN_SetLow()             do { LATJbits.LATJ0 = 0; } while(0)
+#define HALL_BUSSTOP_STN_Toggle()             do { LATJbits.LATJ0 = ~LATJbits.LATJ0; } while(0)
+#define HALL_BUSSTOP_STN_GetValue()           PORTJbits.RJ0
+#define HALL_BUSSTOP_STN_SetDigitalInput()    do { TRISJbits.TRISJ0 = 1; } while(0)
+#define HALL_BUSSTOP_STN_SetDigitalOutput()   do { TRISJbits.TRISJ0 = 0; } while(0)
+
+// get/set HALL_BUSSTOP_IND aliases
+#define HALL_BUSSTOP_IND_TRIS                 TRISJbits.TRISJ1
+#define HALL_BUSSTOP_IND_LAT                  LATJbits.LATJ1
+#define HALL_BUSSTOP_IND_PORT                 PORTJbits.RJ1
+#define HALL_BUSSTOP_IND_SetHigh()            do { LATJbits.LATJ1 = 1; } while(0)
+#define HALL_BUSSTOP_IND_SetLow()             do { LATJbits.LATJ1 = 0; } while(0)
+#define HALL_BUSSTOP_IND_Toggle()             do { LATJbits.LATJ1 = ~LATJbits.LATJ1; } while(0)
+#define HALL_BUSSTOP_IND_GetValue()           PORTJbits.RJ1
+#define HALL_BUSSTOP_IND_SetDigitalInput()    do { TRISJbits.TRISJ1 = 1; } while(0)
+#define HALL_BUSSTOP_IND_SetDigitalOutput()   do { TRISJbits.TRISJ1 = 0; } while(0)
+
+// get/set HALL_STOP_FDEP aliases
+#define HALL_STOP_FDEP_TRIS                 TRISJbits.TRISJ2
+#define HALL_STOP_FDEP_LAT                  LATJbits.LATJ2
+#define HALL_STOP_FDEP_PORT                 PORTJbits.RJ2
+#define HALL_STOP_FDEP_SetHigh()            do { LATJbits.LATJ2 = 1; } while(0)
+#define HALL_STOP_FDEP_SetLow()             do { LATJbits.LATJ2 = 0; } while(0)
+#define HALL_STOP_FDEP_Toggle()             do { LATJbits.LATJ2 = ~LATJbits.LATJ2; } while(0)
+#define HALL_STOP_FDEP_GetValue()           PORTJbits.RJ2
+#define HALL_STOP_FDEP_SetDigitalInput()    do { TRISJbits.TRISJ2 = 1; } while(0)
+#define HALL_STOP_FDEP_SetDigitalOutput()   do { TRISJbits.TRISJ2 = 0; } while(0)
 
 
 /**

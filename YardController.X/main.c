@@ -19,6 +19,9 @@
 */
 
 #include "mcc_generated_files/mcc.h"
+#include "debounce.h"
+#include "bus.h"
+#include "firedep.h"
 
 /*
                          Main application
@@ -31,7 +34,13 @@
 //udpPacket.sourcePortNumber = 65533;
 //udpPacket.destinationPortNumber = 65531;
 
-error_msg ret = ERROR;
+/* 
+ * PORTG = INPUT  CARD 1 LOW BYTE
+ * PORTH = INPUT  CARD 1 HIGH BYTE
+ * PORTD = OUTPUT CARD 2 LOW BYTE
+ * PORTC = OUTPUT CARD 2 HIGH BYTE
+ */
+
 void main(void)
 {
     // Initialize the device
@@ -42,27 +51,30 @@ void main(void)
     // Use the following macros to:
 
     // Enable the Global Interrupts
-    INTERRUPT_GlobalInterruptEnable();
+    //INTERRUPT_GlobalInterruptEnable();
 
     // Disable the Global Interrupts
     //INTERRUPT_GlobalInterruptDisable();
 
     // Enable the Peripheral Interrupts
-    INTERRUPT_PeripheralInterruptEnable();
+    //INTERRUPT_PeripheralInterruptEnable();
 
     // Disable the Peripheral Interrupts
     //INTERRUPT_PeripheralInterruptDisable();
 
     while (1)
     {
-        Network_Manage();
+        //Network_Manage();         
+        //DEBOUNCExIO();
         
-        if(RDBKA_PORT == 0){
-            LEDA_LAT = 1;
+        if(TMR0_HasOverflowOccured() == 1)
+        {
+            TMR0_Clear();
+            BUSxDRIVE();
+            FIREDEPPxDRIVE();
         }
-        else{
-            LEDA_LAT = 0;
-        }
+        
+
     }
 }
 /**
