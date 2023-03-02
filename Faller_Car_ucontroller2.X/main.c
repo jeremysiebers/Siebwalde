@@ -48,10 +48,8 @@
 /******************************************************************************/
 
 bool         UpdateLeds         = false;
-bool         UpdateRcs          = false;
 bool         UpdateVbatt        = false;
 bool         BattProtect        = false;
-bool         CarrOff            = false;
 uint8_t      AdcState           = 0;
 adc_result_t AdcResult[AdcSize] = {1023,1023,1023,1023,1023,1023,1023,1023};
 adc_result_t AdcResultSample    = 0;
@@ -60,6 +58,7 @@ uint8_t      pAdcResult         = 0;
 uint24_t     CalcMv             = 0;
 uint8_t      StartUp            = 0;
 bool         FirstLoop          = true;
+bool         UpdateRcsDisable   = true;
 
 /******************************************************************************/
 /*          Main                                                              */
@@ -108,11 +107,11 @@ void main(void)
             }
         }
         
-        /* When reed contact switch sees a magnet, the car has to stop */
-        if(UpdateRcs && !CarrOff){
-            RCSxLED();
-            UpdateRcs = false;
-        }
+        /* Reed contact updater */
+        if (!UpdateRcsDisable)        
+        {
+            RCSxLED(UpdateRcs);
+        }        
         
         /* Measure the Battery voltage and calc average */
         if(UpdateVbatt){
@@ -177,7 +176,8 @@ void TMR0_INT()
 }
 
 void TMR1_INT(){
-    UpdateLeds = true;    
+    UpdateLeds = true;
+    DebounceCount++;
 }
 
 /******************************************************************************/
@@ -186,8 +186,9 @@ void TMR1_INT(){
 void RCS_INT()
 {
     /* Call RCS LED to prevent duplicated code */
-    UpdateRcs = true;
-    /* Restart Timer 0 to indicate car is driving and has actively stopped */
+    UpdateRcs = RCS_GetValue();
+    UpdateRcsDisable = false;
+    /* Restart Timer 0 */
     TMR0_Reload();
 }
 /**

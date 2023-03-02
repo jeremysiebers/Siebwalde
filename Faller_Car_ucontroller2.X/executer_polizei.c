@@ -27,8 +27,11 @@ LEDBIT LedBit[7] = {
 /*          LOCAL VARIABLES                                                   */
 /******************************************************************************/
 
-uint8_t ReturnVal = busy; 
-uint16_t Random = 0;
+uint8_t     ReturnVal   = busy; 
+uint16_t    Random      = 0;
+uint8_t     ReedState   = 0;
+bool        DriveStatus = true;
+
 
 /******************************************************************************/
 /*          Initialize Executer                                               */
@@ -38,8 +41,10 @@ void INITxEXECUTER(void)
     /* Setup first random number */
     srand(13);
     Random = rand();
+    /* Force startup with flashing lights */
+    Random = 40000;
     /* Setup first initial led behavior*/
-    RCSxLED();
+    UpdateCarStatus(true);
 }
 
 /******************************************************************************/
@@ -69,16 +74,52 @@ void BATTxPROTECT(){
 /******************************************************************************/
 /*          RCS LED behavior                                                  */
 /******************************************************************************/
-void RCSxLED(void)
+void RCSxLED(bool ReedStatus)
 {
-    if(RCS_GetValue()){ /* Check if the car is driving */
+    switch (ReedState){
+        case 0:
+            /* When reed contact switch sees a magnet, the car has to stop, inverse logic */
+            if(!ReedStatus && !CarrOff){
+                DebounceCount = 0;
+                /* car stops driving */
+                UpdateCarStatus(false);
+                ReedState++;
+            }
+            break;
+            
+        case 1:
+            /* Take into account some wait time to verify reed contact still switched so car does not overshoot driving */
+            if(DebounceCount > 5000 && !CarrOff){
+                ReedState++;
+            }
+            break;
+            
+        case 2:
+            if(ReedStatus && !CarrOff){
+                /* car start driving again */
+                UpdateCarStatus(true);
+                ReedState = 0;
+            }
+            break;
+            
+        default: 
+            break;
+    }
+}
+
+void UpdateCarStatus(bool DriveStatus){
+    
+    if(DriveStatus){ /* Check if the car is driving */
                
         /* Set the back lights to normal intensity */
         LedBit[LedBackLeft].Prog         = Led_Nom;
         LedBit[LedBackRight].Prog        = Led_Nom;
+        /* Set the front lights to normal */
+        LedBit[LedFrontLeft].Prog       = Led_Nom;
+        LedBit[LedFrontRight].Prog      = Led_Nom;
         
         /* Let random decide to enable flashing lights or not */
-        if(Random > 16383)
+        if(Random > 20000)
         {
             /* Set the flashing lights on */
             LedBit[LedFlashLeft].Prog        = Led_Flash;

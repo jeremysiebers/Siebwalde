@@ -20,7 +20,7 @@ LEDBIT LedBit[7] = {
     {LedBackLR,     0,  Led_Off,   0,  BACK,  0,   0,  1,    PWM3},
     {LedCabin,      0,  Led_Off,   0,  CAB,   0,   0,  1,    PWM4},
     {LedFrontLR,    0,  Led_Off,   0,  FRONT, 0,   0,  1,    PWM5},
-    {LedVehicle,    0,  Led_Off,   0,  VHC,   0,   0,  1,    PWM6}};
+    {LedVehicle,    0,  Led_Off,   0,  MARK,  0,   0,  1,    PWM6}};
 
 /******************************************************************************/
 /*          LOCAL VARIABLES                                                   */
@@ -28,6 +28,8 @@ LEDBIT LedBit[7] = {
 
 uint8_t ReturnVal = busy; 
 uint16_t Random = 0;
+uint8_t     ReedState   = 0;
+bool        DriveStatus = true;
 
 /******************************************************************************/
 /*          Initialize Executer                                               */
@@ -38,7 +40,7 @@ void INITxEXECUTER(void)
     srand(13);
     Random = rand();
     /* Setup first initial led behavior*/
-    RCSxLED();
+    UpdateCarStatus(false);
 }
 
 /******************************************************************************/
@@ -81,16 +83,48 @@ void BATTxPROTECT(){
 /******************************************************************************/
 /*          RCS LED behavior                                                  */
 /******************************************************************************/
-void RCSxLED(void)
+void RCSxLED(bool ReedStatus)
 {
-    if(RCS_GetValue()){ /* Check if the car is driving */
+    switch (ReedState){
+        case 0:
+            /* When reed contact switch sees a magnet, the car has to stop, inverse logic */
+            if(ReedStatus && !CarrOff){
+                DebounceCount = 0;
+                /* car stops driving */
+                UpdateCarStatus(true);
+                ReedState++;
+            }
+            break;
+            
+        case 1:
+            /* Take into account some wait time to verify reed contact still switched so car does not overshoot driving */
+            if(DebounceCount > 5000 && !CarrOff){
+                ReedState++;
+            }
+            break;
+            
+        case 2:
+            if(!ReedStatus && !CarrOff){
+                /* car start driving again */
+                UpdateCarStatus(false);
+                ReedState = 0;
+            }
+            break;
+            
+        default: 
+            break;
+    }
+}
+    
+void UpdateCarStatus(bool DriveStatus){
+    if(!DriveStatus){ /* Check if the car is driving, mercedesbus has inverted reed contact logic! */
                
         /* Set the back lights to normal intensity */
         LedBit[LedBackLR].Prog           = Led_Nom;
         LedBit[LedCabin].Prog            = Led_Nom;
         /* Set the front lights to normal */
         LedBit[LedFrontLR].Prog          = Led_Nom;
-        LedBit[LedVehicle].Prog          = Led_Nom;
+        LedBit[LedVehicle].Prog          = Led_Mark;
         LedBit[LedFlashRight].Prog       = Led_Off;
         LedBit[LedFlashLeft].Prog        = Led_Off;
         LEDA_SetHigh();

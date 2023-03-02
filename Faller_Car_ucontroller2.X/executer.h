@@ -60,8 +60,12 @@ enum{
     LedFlashLeft    = 0,
     LedFlashRight   = 1,
     LedBackLR       = 2,
+    LedBackLeft     = 2,
+    LedBackRight    = 3,
     LedCabin        = 3,
     LedFrontLR      = 4,
+    LedFrontLeft    = 4,
+    LedFrontRight   = 5,
     LedVehicle      = 5,
     LedA            = 6,
     LedB            = 7,
@@ -75,7 +79,7 @@ enum{
     FRONT_HIGH = 255,
     BACK = 25,
     BRAKE = 127,
-    MARK = 15,
+    MARK = 10,
     MIN = 1,
     SLOW_FLASH_LOW = 30,
     ON = 255,
@@ -118,11 +122,12 @@ uint8_t LedFlash(uint8_t Led);
 uint8_t LedMark(uint8_t Led);
 void CalcPwm(uint8_t Led);
 void LED_StandardOutput(uint8_t PWM, uint16_t val);
+void UpdateCarStatus(bool DriveStatus);
 
 extern void INITxEXECUTER(void);
 extern uint8_t EXECUTExEFFECT(void);
 extern LEDBIT LedBit[7];
-extern void RCSxLED(void);
+extern void RCSxLED(bool ReedStatus);
 extern void BATTxPROTECT(void);
 
 // TODO Insert declarations or function prototypes (right here) to leverage 
