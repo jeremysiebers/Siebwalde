@@ -55,6 +55,7 @@
   Section: Global Variables Definitions
 */
 
+void (*TMR0_InterruptHandler)(void);
 
 volatile uint16_t timer0ReloadVal;
 
@@ -80,8 +81,14 @@ void TMR0_Initialize(void)
     // Load TMR0 value to the 16-bit reload variable
     timer0ReloadVal = (uint16_t)((TMR0H << 8) | TMR0L);
 
-    // Clearing IF flag
+    // Clear Interrupt flag before enabling the interrupt
     INTCONbits.TMR0IF = 0;
+
+    // Enabling TMR0 interrupt.
+    INTCONbits.TMR0IE = 1;
+
+    // Set Default Interrupt Handler
+    TMR0_SetInterruptHandler(TMR0_DefaultInterruptHandler);
 
     // T0PS 1:2; T08BIT 16-bit; T0SE Increment_hi_lo; T0CS FOSC/4; TMR0ON enabled; PSA assigned; 
     T0CON = 0x90;
@@ -126,15 +133,50 @@ void TMR0_Reload(void)
     TMR0L = (uint8_t) timer0ReloadVal;
 }
 
-bool TMR0_HasOverflowOccured(void)
+void TMR0_ISR(void)
 {
-    // check if  overflow has occurred by checking the TMRIF bit
-    return(INTCONbits.TMR0IF);
+    static volatile uint16_t CountCallBack = 0;
+
+    // clear the TMR0 interrupt flag
+    INTCONbits.TMR0IF = 0;
+
+    // reload TMR0
+    // Write to the Timer0 register
+    TMR0H = timer0ReloadVal >> 8;
+    TMR0L = (uint8_t) timer0ReloadVal;
+
+    // callback function - called every 100th pass
+    if (++CountCallBack >= TMR0_INTERRUPT_TICKER_FACTOR)
+    {
+        // ticker function call
+        TMR0_CallBack();
+
+        // reset ticker counter
+        CountCallBack = 0;
+    }
+
+    // add your TMR0 interrupt custom code
 }
 
-void TMR0_Clear(void){
-    INTCONbits.TMR0IF = 0;
+void TMR0_CallBack(void)
+{
+    // Add your custom callback code here
+
+    if(TMR0_InterruptHandler)
+    {
+        TMR0_InterruptHandler();
+    }
 }
+
+void TMR0_SetInterruptHandler(void (* InterruptHandler)(void)){
+    TMR0_InterruptHandler = InterruptHandler;
+}
+
+void TMR0_DefaultInterruptHandler(void){
+    // add your TMR0 interrupt custom code
+    // or set custom function using TMR0_SetInterruptHandler()
+}
+
 /**
   End of File
 */

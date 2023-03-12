@@ -57,7 +57,7 @@ void PIN_MANAGER_Initialize(void)
     LATD = 0x00;
     LATA = 0x00;
     LATF = 0x00;
-    LATB = 0x20;
+    LATB = 0x00;
     LATG = 0x00;
     LATC = 0x00;
     LATH = 0x00;
@@ -65,15 +65,15 @@ void PIN_MANAGER_Initialize(void)
     /**
     TRISx registers
     */
-    TRISE = 0xFF;
+    TRISE = 0x00;
     TRISF = 0xFF;
-    TRISA = 0x0C;
+    TRISA = 0x3C;
     TRISG = 0xFF;
-    TRISB = 0xC3;
+    TRISB = 0x00;
     TRISH = 0xFF;
-    TRISC = 0xFF;
-    TRISD = 0x60;
-    TRISJ = 0xFF;
+    TRISC = 0x00;
+    TRISD = 0x00;
+    TRISJ = 0x00;
     
     /**
     PCFG setting

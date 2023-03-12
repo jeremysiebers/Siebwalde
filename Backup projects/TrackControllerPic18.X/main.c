@@ -20,6 +20,8 @@
 
 #include "mcc_generated_files/mcc.h"
 
+void TMR0_INTERRUPT(void);
+
 /*
                          Main application
  */
@@ -38,6 +40,8 @@
  * PORTC = OUTPUT CARD 2 HIGH BYTE
  */
 
+uint64_t test = 0;
+
 void main(void)
 {
     // Initialize the device
@@ -48,28 +52,38 @@ void main(void)
     // Use the following macros to:
 
     // Enable the Global Interrupts
-    //INTERRUPT_GlobalInterruptEnable();
+    INTERRUPT_GlobalInterruptEnable();
 
     // Disable the Global Interrupts
     //INTERRUPT_GlobalInterruptDisable();
 
     // Enable the Peripheral Interrupts
-    //INTERRUPT_PeripheralInterruptEnable();
+    INTERRUPT_PeripheralInterruptEnable();
 
     // Disable the Peripheral Interrupts
     //INTERRUPT_PeripheralInterruptDisable();
-
+    
+    TMR0_SetInterruptHandler(TMR0_INTERRUPT);
+    
     while (1)
     {
         //Network_Manage();         
         //DEBOUNCExIO();
-        
-        if(TMR0_HasOverflowOccured() == 1)
-        {
-            TMR0_Clear();
-        }
-        
+        /*
+        LATB= (test & 0xFF);
+        LATD= (test & 0xFF00) >> 8;
+        LATC= (test & 0xFF0000) >> 16;
+        LATJ= (test & 0xFF000000) >> 24;
+        LATE= (test & 0xFF00000000) >> 32;
+        */
+    }
+}
 
+void TMR0_INTERRUPT()
+{
+    test = test << 1;
+    if(test > 0x8000000000){
+        test = 1;
     }
 }
 /**

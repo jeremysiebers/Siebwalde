@@ -63,6 +63,12 @@
 
 
 /**
+  Section: Macro Declarations
+*/
+
+#define TMR0_INTERRUPT_TICKER_FACTOR    100
+
+/**
   Section: TMR0 APIs
 */
 
@@ -273,43 +279,93 @@ void TMR0_Reload(void);
 
 /**
   @Summary
-    Boolean routine to poll or to check for the overflow flag on the fly.
+    Timer Interrupt Service Routine
 
   @Description
-    This function is called to check for the timer overflow flag.
-    This function is usd in timer polling method.
+    Timer Interrupt Service Routine is called by the Interrupt Manager.
 
   @Preconditions
-    Initialize  the TMR0 module before calling this routine.
+    Initialize  the TMR0 module with interrupt before calling this isr.
 
   @Param
     None
 
   @Returns
-    true - timer overflow has occured.
-    false - timer overflow has not occured.
+    None
+ */
+void TMR0_ISR(void);
 
-  @Example
-    <code>
-    while(1)
-    {
-        // check the overflow flag
-        if(TMR0_HasOverflowOccured())
-        {
-            // Do something else...
+/**
+  @Summary
+    CallBack function
 
-            // clear the TMR0 interrupt flag
-            TMR0IF = 0;
+  @Description
+    This function is called from the timer ISR. User can write your code in this function.
 
-            // Reload the TMR0 value
-            TMR0_Reload();
-        }
-    }
-    </code>
+  @Preconditions
+    Initialize  the TMR0 module with interrupt before calling this function.
+
+  @Param
+    None
+
+  @Returns
+    None
 */
-bool TMR0_HasOverflowOccured(void);
+void TMR0_CallBack(void);
 
-void TMR0_Clear(void);
+/**
+  @Summary
+    Set Timer Interrupt Handler
+
+  @Description
+    This sets the function to be called during the ISR
+
+  @Preconditions
+    Initialize  the TMR0 module with interrupt before calling this.
+
+  @Param
+    Address of function to be set
+
+  @Returns
+    None
+*/
+ void TMR0_SetInterruptHandler(void (* InterruptHandler)(void));
+
+/**
+  @Summary
+    Timer Interrupt Handler
+
+  @Description
+    This is a function pointer to the function that will be called during the ISR
+
+  @Preconditions
+    Initialize  the TMR0 module with interrupt before calling this isr.
+
+  @Param
+    None
+
+  @Returns
+    None
+*/
+extern void (*TMR0_InterruptHandler)(void);
+
+/**
+  @Summary
+    Default Timer Interrupt Handler
+
+  @Description
+    This is the default Interrupt Handler function
+
+  @Preconditions
+    Initialize  the TMR0 module with interrupt before calling this isr.
+
+  @Param
+    None
+
+  @Returns
+    None
+*/
+void TMR0_DefaultInterruptHandler(void);
 
 #ifdef __cplusplus  // Provide C++ Compatibility
 
