@@ -19,8 +19,11 @@
 */
 
 #include "mcc_generated_files/mcc.h"
+#include "main.h"
+#include "milisecond_counter.h"
+#include "debounce.h"
 
-void TMR0_INTERRUPT(void);
+void DebounceIO(void);
 
 /*
                          Main application
@@ -46,7 +49,7 @@ void main(void)
 {
     // Initialize the device
     SYSTEM_Initialize();
-
+    
     // If using interrupts in PIC18 High/Low Priority Mode you need to enable the Global High and Low Interrupts
     // If using interrupts in PIC Mid-Range Compatibility Mode you need to enable the Global and Peripheral Interrupts
     // Use the following macros to:
@@ -63,28 +66,57 @@ void main(void)
     // Disable the Peripheral Interrupts
     //INTERRUPT_PeripheralInterruptDisable();
     
-    TMR0_SetInterruptHandler(TMR0_INTERRUPT);
+    MILLIESxINIT();
+    SETxMILLISECONDxUPDATExHANDLER(DebounceIO);
     
     while (1)
     {
-        //Network_Manage();         
-        //DEBOUNCExIO();
-        /*
-        LATB= (test & 0xFF);
-        LATD= (test & 0xFF00) >> 8;
-        LATC= (test & 0xFF0000) >> 16;
-        LATJ= (test & 0xFF000000) >> 24;
-        LATE= (test & 0xFF00000000) >> 32;
-        */
+        /* Manage TCP/IP Stack */
+        //Network_Manage();
+        
+        /* Check if over ride key is present, if yes then disable controller. */
+        if(CTRL_OFF_GetValue())
+        {
+            LATB = 0;
+            LATC = 0;
+            LATD = 0;
+            LATE = 0;
+            LATJ = 0;  
+            BLK_SIG_3B_GR_SetHigh();
+            BLK_SIG_12B_GR_SetHigh();
+        }
+        else
+        {
+            
+        }  
+                
     }
 }
 
-void TMR0_INTERRUPT()
+void DebounceIO(void)
 {
-    test = test << 1;
-    if(test > 0x8000000000){
-        test = 1;
-    }
+    TP2_SetHigh();
+    DEBOUNCExIO(&HALL_BLK_13  );        
+    DEBOUNCExIO(&HALL_BLK_21A );
+    DEBOUNCExIO(&HALL_BLK_T4  );
+    DEBOUNCExIO(&HALL_BLK_T5  );
+    DEBOUNCExIO(&HALL_BLK_T1  );
+    DEBOUNCExIO(&HALL_BLK_T2  );
+    DEBOUNCExIO(&HALL_BLK_9B  );
+    DEBOUNCExIO(&HALL_BLK_4A  );
+    DEBOUNCExIO(&HALL_BLK_T7  );
+    DEBOUNCExIO(&HALL_BLK_T8  );
+    DEBOUNCExIO(&OCC_FR_BLK13 );
+    DEBOUNCExIO(&OCC_FR_BLK4  );
+    DEBOUNCExIO(&OCC_FR_STN_1 );
+    DEBOUNCExIO(&OCC_FR_STN_2 );
+    DEBOUNCExIO(&OCC_FR_STN_3 );
+    DEBOUNCExIO(&OCC_FR_STN_10);
+    DEBOUNCExIO(&OCC_FR_STN_11);
+    DEBOUNCExIO(&OCC_FR_STN_12);
+    DEBOUNCExIO(&OCC_FR_STN_T6);
+    DEBOUNCExIO(&OCC_FR_STN_T3);
+    TP2_SetLow();
 }
 /**
  End of File

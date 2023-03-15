@@ -28,61 +28,61 @@
 
 // This is a guard condition so that contents of this file are not included
 // more than once.  
-#ifndef DEBOUNCE_H
-#define	DEBOUNCE_H
-
-#include <xc.h> // include processor files - each processor file is guarded.  
+#ifndef MAIN_H
+#define	MAIN_H
 
 // TODO Insert appropriate #include <>
-
+#include <xc.h> // include processor files - each processor file is guarded. 
+#include "debounce.h"
+ 
 // TODO Insert C++ class definitions if appropriate
 
 // TODO Insert declarations
 
-/*
- * Debounce struct
-*/
-typedef struct
-{
-    uint8_t                 debounceDelay;      // Debounce counter
-    uint32_t                lastDebounceTime;   // Value when to except input value
-    bool                    lastButtonState;    // Debounced value
-    bool                    buttonState;        // State of the input
-    volatile unsigned char  *portx_ptr;         // Reference to the input port used
-    uint8_t                 pin_mask;           // Mask to point to pin used
-    bool                    value;              // Holds the final value of the signal
-    
-}DEBOUNCE;
+DEBOUNCE HALL_BLK_13    = {10, 0, 0, 0, &PORTF, 0x1, false};
+DEBOUNCE HALL_BLK_21A   = {10, 0, 0, 0, &PORTF, 0x2, false};
+DEBOUNCE HALL_BLK_T4    = {10, 0, 0, 0, &PORTF, 0x4, false};
+DEBOUNCE HALL_BLK_T5    = {10, 0, 0, 0, &PORTF, 0x8, false};
+DEBOUNCE HALL_BLK_T1    = {10, 0, 0, 0, &PORTF, 0x10, false};
+DEBOUNCE HALL_BLK_T2    = {10, 0, 0, 0, &PORTF, 0x20, false};
+DEBOUNCE HALL_BLK_9B    = {10, 0, 0, 0, &PORTF, 0x40, false};
+DEBOUNCE HALL_BLK_4A    = {10, 0, 0, 0, &PORTF, 0x80, false};
+DEBOUNCE HALL_BLK_T7    = {10, 0, 0, 0, &PORTH, 0x1, false};
+DEBOUNCE HALL_BLK_T8    = {10, 0, 0, 0, &PORTH, 0x2, false};
+DEBOUNCE OCC_FR_BLK13   = {10, 0, 0, 0, &PORTH, 0x4, false};
+DEBOUNCE OCC_FR_BLK4    = {10, 0, 0, 0, &PORTH, 0x8, false};
+DEBOUNCE OCC_FR_STN_1   = {10, 0, 0, 0, &PORTH, 0x10, false};
+DEBOUNCE OCC_FR_STN_2   = {10, 0, 0, 0, &PORTH, 0x20, false};
+DEBOUNCE OCC_FR_STN_3   = {10, 0, 0, 0, &PORTH, 0x40, false};
+DEBOUNCE OCC_FR_STN_10  = {10, 0, 0, 0, &PORTH, 0x80, false};
+DEBOUNCE OCC_FR_STN_11  = {10, 0, 0, 0, &PORTG, 0x1, false};
+DEBOUNCE OCC_FR_STN_12  = {10, 0, 0, 0, &PORTG, 0x2, false};
+DEBOUNCE OCC_FR_STN_T6  = {10, 0, 0, 0, &PORTG, 0x4, false};
+DEBOUNCE OCC_FR_STN_T3  = {10, 0, 0, 0, &PORTG, 0x8, false};
 
+  
+
+// Comment a function and leverage automatic documentation with slash star star
 /**
-  @Summary
-    Debounces an input that is given
+    <p><b>Function prototype:</b></p>
+  
+    <p><b>Summary:</b></p>
 
-  @Description
-    This function debounces an input of the microcontroller.
-    This function must be called after the creation of an instance of
-    the DEBOUNCE struct.
+    <p><b>Description:</b></p>
 
-  @Preconditions
-    None
+    <p><b>Precondition:</b></p>
 
-  @Param
-    instance address of an instantiated DEBOUNCE struct.
+    <p><b>Parameters:</b></p>
 
-  @Returns
-    None
+    <p><b>Returns:</b></p>
 
-  @Comment
-    
-	
-  @Example
+    <p><b>Example:</b></p>
     <code>
-        creation: DEBOUNCE HALL_BLK_13    = {10, 0, 0, 0, &PORTF, 0x1, false};
-        usage: DEBOUNCExIO(&HALL_BLK_13);
+ 
     </code>
-*/
-void DEBOUNCExIO(DEBOUNCE *instance);
 
+    <p><b>Remarks:</b></p>
+ */
 // TODO Insert declarations or function prototypes (right here) to leverage 
 // live documentation
 

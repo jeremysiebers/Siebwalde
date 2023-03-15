@@ -309,8 +309,6 @@ void TMR0_Reload(void);
 */
 bool TMR0_HasOverflowOccured(void);
 
-void TMR0_Clear(void);
-
 #ifdef __cplusplus  // Provide C++ Compatibility
 
     }

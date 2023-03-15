@@ -71,11 +71,11 @@ void TMR0_Initialize(void)
     //Enable 16bit timer mode before assigning value to TMR0H
     T0CONbits.T08BIT = 0;
 
-    // TMR0H 52; 
-    TMR0H = 0x34;
+    // TMR0H 253; 
+    TMR0H = 0xFD;
 
-    // TMR0L 140; 
-    TMR0L = 0x8C;
+    // TMR0L 116; 
+    TMR0L = 0x74;
 
 	
     // Load TMR0 value to the 16-bit reload variable
@@ -90,8 +90,8 @@ void TMR0_Initialize(void)
     // Set Default Interrupt Handler
     TMR0_SetInterruptHandler(TMR0_DefaultInterruptHandler);
 
-    // T0PS 1:2; T08BIT 16-bit; T0SE Increment_hi_lo; T0CS FOSC/4; TMR0ON enabled; PSA assigned; 
-    T0CON = 0x90;
+    // T0PS 1:16; T08BIT 16-bit; T0SE Increment_hi_lo; T0CS FOSC/4; TMR0ON enabled; PSA assigned; 
+    T0CON = 0x93;
 }
 
 void TMR0_StartTimer(void)
@@ -135,7 +135,6 @@ void TMR0_Reload(void)
 
 void TMR0_ISR(void)
 {
-    static volatile uint16_t CountCallBack = 0;
 
     // clear the TMR0 interrupt flag
     INTCONbits.TMR0IF = 0;
@@ -145,28 +144,14 @@ void TMR0_ISR(void)
     TMR0H = timer0ReloadVal >> 8;
     TMR0L = (uint8_t) timer0ReloadVal;
 
-    // callback function - called every 100th pass
-    if (++CountCallBack >= TMR0_INTERRUPT_TICKER_FACTOR)
+    if(TMR0_InterruptHandler)
     {
-        // ticker function call
-        TMR0_CallBack();
-
-        // reset ticker counter
-        CountCallBack = 0;
+        TMR0_InterruptHandler();
     }
 
     // add your TMR0 interrupt custom code
 }
 
-void TMR0_CallBack(void)
-{
-    // Add your custom callback code here
-
-    if(TMR0_InterruptHandler)
-    {
-        TMR0_InterruptHandler();
-    }
-}
 
 void TMR0_SetInterruptHandler(void (* InterruptHandler)(void)){
     TMR0_InterruptHandler = InterruptHandler;

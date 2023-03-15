@@ -131,10 +131,6 @@ bool TMR0_HasOverflowOccured(void)
     // check if  overflow has occurred by checking the TMRIF bit
     return(INTCONbits.TMR0IF);
 }
-
-void TMR0_Clear(void){
-    INTCONbits.TMR0IF = 0;
-}
 /**
   End of File
 */

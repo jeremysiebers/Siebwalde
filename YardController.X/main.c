@@ -69,7 +69,7 @@ void main(void)
         
         if(TMR0_HasOverflowOccured() == 1)
         {
-            TMR0_Clear();
+            TMR0_Reload();
             BUSxDRIVE();
             FIREDEPPxDRIVE();
         }
