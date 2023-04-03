@@ -1,5 +1,0 @@
-Standard:
-Minimum track width: 0.2mm
-Minimum distance between tracks: 0.2mm
-Minimum drill size: 0.3mm
-Minimum ring around drill: 0.15mm

@@ -11,6 +11,7 @@ namespace SiebwaldeApp
     /// </summary>
     public class TrackAmplifierInitalizationSequencer
     {
+        private const string Path = "C:\\Localdata\\Siebwalde\\TrackAmplifier4.X\\dist\\Offset\\production\\TrackAmplifier4.X.production.hex";
         #region Local variables
 
         private TrackApplicationVariables mTrackApplicationVariables;
@@ -73,7 +74,7 @@ namespace SiebwaldeApp
             // Set the return value to standby
             CheckInitSequence = Enums.Standby;
             // init the helper function
-            mTrackAmplifierBootloaderHelpers = new TrackAmplifierBootloaderHelpers("C:\\Users\\jerem\\Siebwalde\\TrackAmplifier4.X\\dist\\Offset\\production\\TrackAmplifier4.X.production.hex", LoggerInstance);//(Enums.HOMEPATH + Enums.SLAVEHEXFILE, trackApplicationLogging);
+            mTrackAmplifierBootloaderHelpers = new TrackAmplifierBootloaderHelpers(Path, LoggerInstance);//(Enums.HOMEPATH + Enums.SLAVEHEXFILE, trackApplicationLogging);
             // init send FW helper function
             mSendNextFwDataPacket = new SendNextFwDataPacket(mTrackIOHandle, mTrackAmplifierBootloaderHelpers);
 

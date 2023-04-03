@@ -16,6 +16,7 @@
       <itemPath>debounce.h</itemPath>
       <itemPath>main.h</itemPath>
       <itemPath>milisecond_counter.h</itemPath>
+      <itemPath>pathway.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -36,6 +37,7 @@
       <itemPath>main.c</itemPath>
       <itemPath>debounce.c</itemPath>
       <itemPath>milisecond_counter.c</itemPath>
+      <itemPath>pathway.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
