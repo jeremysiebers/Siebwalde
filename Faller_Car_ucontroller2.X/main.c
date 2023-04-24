@@ -98,7 +98,7 @@ void main(void)
     
     /* Main infinite loop */
     while (1)
-    {   
+    {
         /* Main Led routine updater */
         if(UpdateLeds){
             if (EXECUTExEFFECT() == finished )                                  // When all switch cases are stable in the underlying routines
@@ -190,6 +190,7 @@ void RCS_INT()
     UpdateRcsDisable = false;
     /* Restart Timer 0 */
     TMR0_Reload();
+    UpdateVbatt = false;
 }
 /**
  End of File

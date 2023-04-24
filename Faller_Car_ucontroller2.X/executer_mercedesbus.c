@@ -50,8 +50,9 @@ void BATTxPROTECT(){
     /* Disable Dash Board Led*/
     LEDA_SetLow();
     LEDB_SetLow();
-    LEDC_SetLow();
     LEDD_SetLow();
+    // brake FET disable
+    LEDC_SetLow();
     /* Block motor from running */
     EnMOT_SetDigitalInput();
     
@@ -129,8 +130,9 @@ void UpdateCarStatus(bool DriveStatus){
         LedBit[LedFlashLeft].Prog        = Led_Off;
         LEDA_SetHigh();
         LEDB_SetHigh();
-        LEDC_SetHigh();
         LEDD_SetHigh();
+        // brake FET disable
+        LEDC_SetLow();
         
         /* Enable the motor */
         EnMOT_LAT = true;
@@ -138,14 +140,15 @@ void UpdateCarStatus(bool DriveStatus){
     /* The Car has braked to stop */
     else{
         /* Set the brake light intensity */
+        EnMOT_LAT = false;
+        // brake FET enable
+        LEDC_SetHigh();
         LedBit[LedBackLR].Prog            = Led_Brake;
         LedBit[LedCabin].Prog             = Led_Max;
         LedBit[LedFrontLR].Prog           = Led_Mark;
         LedBit[LedFlashRight].Prog        = Led_Flash;
         LedBit[LedFlashRight].Led         = MAX;
-        LedBit[LedFlashRight].Speed       = 254;
-        
-        EnMOT_LAT = false;
+        LedBit[LedFlashRight].Speed       = 254; 
     }
     
     /* Assign new random number */
