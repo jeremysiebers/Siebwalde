@@ -49,10 +49,33 @@ typedef struct
     bool                    lastButtonState;    // Debounced value
     bool                    buttonState;        // State of the input
     volatile unsigned char  *portx_ptr;         // Reference to the input port used
-    uint8_t                 pin_mask;           // Mask to point to pin used
+    uint8_t                 pin_mask;           // Mask to point to pin used of port
     bool                    value;              // Holds the final value of the signal
+    bool                    ResetH2L;           // value able to follow button to false? 
+    bool                    ResetL2H;           // value able to follow button to true? 
     
 }DEBOUNCE;
+
+DEBOUNCE HALL_BLK_13    = {10, 0, 0, 0, &PORTF, 0x1,  false,  false,  true};
+DEBOUNCE HALL_BLK_21A   = {10, 0, 0, 0, &PORTF, 0x2,  false,  false,  true};
+DEBOUNCE HALL_BLK_T4    = {10, 0, 0, 0, &PORTF, 0x4,  false,  false,  true};
+DEBOUNCE HALL_BLK_T5    = {10, 0, 0, 0, &PORTF, 0x8,  false,  false,  true};
+DEBOUNCE HALL_BLK_T1    = {10, 0, 0, 0, &PORTF, 0x10, false,  false,  true};
+DEBOUNCE HALL_BLK_T2    = {10, 0, 0, 0, &PORTF, 0x20, false,  false,  true};
+DEBOUNCE HALL_BLK_9B    = {10, 0, 0, 0, &PORTF, 0x40, false,  false,  true};
+DEBOUNCE HALL_BLK_4A    = {10, 0, 0, 0, &PORTF, 0x80, false,  false,  true};
+DEBOUNCE HALL_BLK_T7    = {10, 0, 0, 0, &PORTH, 0x1,  false,  false,  true};
+DEBOUNCE HALL_BLK_T8    = {10, 0, 0, 0, &PORTH, 0x2,  false,  false,  true};
+DEBOUNCE OCC_FR_BLK13   = {10, 0, 0, 0, &PORTH, 0x4,  false,  true,   true};
+DEBOUNCE OCC_FR_BLK4    = {10, 0, 0, 0, &PORTH, 0x8,  false,  true,   true};
+DEBOUNCE OCC_FR_STN_1   = {10, 0, 0, 0, &PORTH, 0x10, false,  true,   true};
+DEBOUNCE OCC_FR_STN_2   = {10, 0, 0, 0, &PORTH, 0x20, false,  true,   true};
+DEBOUNCE OCC_FR_STN_3   = {10, 0, 0, 0, &PORTH, 0x40, false,  true,   true};
+DEBOUNCE OCC_FR_STN_10  = {10, 0, 0, 0, &PORTH, 0x80, false,  true,   true};
+DEBOUNCE OCC_FR_STN_11  = {10, 0, 0, 0, &PORTG, 0x1,  false,  true,   true};
+DEBOUNCE OCC_FR_STN_12  = {10, 0, 0, 0, &PORTG, 0x2,  false,  true,   true};
+DEBOUNCE OCC_FR_STN_T6  = {10, 0, 0, 0, &PORTG, 0x4,  false,  true,   true};
+DEBOUNCE OCC_FR_STN_T3  = {10, 0, 0, 0, &PORTG, 0x8,  false,  true,   true};
 
 /**
   @Summary
@@ -81,7 +104,7 @@ typedef struct
         usage: DEBOUNCExIO(&HALL_BLK_13);
     </code>
 */
-void DEBOUNCExIO(DEBOUNCE *instance);
+extern void DEBOUNCExIO(DEBOUNCE *instance);
 
 // TODO Insert declarations or function prototypes (right here) to leverage 
 // live documentation

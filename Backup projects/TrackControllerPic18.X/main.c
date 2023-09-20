@@ -22,6 +22,7 @@
 #include "main.h"
 #include "milisecond_counter.h"
 #include "debounce.h"
+#include "station.h"
 
 void DebounceIO(void);
 
@@ -69,6 +70,8 @@ void main(void)
     MILLIESxINIT();
     SETxMILLISECONDxUPDATExHANDLER(DebounceIO);
     
+    INITxSTATION();
+    
     while (1)
     {
         /* Manage TCP/IP Stack */
@@ -87,7 +90,8 @@ void main(void)
         }
         else
         {
-            
+            UPDATExSTATION(&top);
+            UPDATExSTATION(&bot);
         }  
                 
     }

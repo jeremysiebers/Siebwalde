@@ -29,11 +29,12 @@ void DEBOUNCExIO(DEBOUNCE *instance)
       instance->lastDebounceTime = 0;
 
       // Process the button state change
-      if (instance->buttonState == HIGH) {
-        // Handle high-to-low transition
-          instance->value = true;
-      } else {
+      if (instance->buttonState == HIGH && instance->ResetL2H) {
         // Handle low-to-high transition
+          instance->value = true;
+      } 
+      if (instance->buttonState == LOW && instance->ResetH2L) {
+        // Handle high-to-low transition
         instance->value = false;
         }
     }

@@ -71,11 +71,11 @@ void TMR0_Initialize(void)
     //Enable 16bit timer mode before assigning value to TMR0H
     T0CONbits.T08BIT = 0;
 
-    // TMR0H 253; 
-    TMR0H = 0xFD;
+    // TMR0H 230; 
+    TMR0H = 0xE6;
 
-    // TMR0L 116; 
-    TMR0L = 0x74;
+    // TMR0L 145; 
+    TMR0L = 0x91;
 
 	
     // Load TMR0 value to the 16-bit reload variable

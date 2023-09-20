@@ -48,4 +48,6 @@ int8_t SETxSTATIONxPATHWAY(uint8_t pathway)
             
             break;
     }
+    
+    return (0);
 }
