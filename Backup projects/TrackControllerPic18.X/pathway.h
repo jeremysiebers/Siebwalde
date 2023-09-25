@@ -33,7 +33,32 @@
 
 #include <xc.h> // include processor files - each processor file is guarded.  
 
-int8_t SETxSTATIONxPATHWAY(uint8_t pathway);
+typedef struct
+{
+    volatile unsigned char      *port1_ptr;                                     // Reference to the input port used
+    uint8_t                     pin1_mask;                                      // Mask to point to pin used of port
+    volatile unsigned char      *port2_ptr;                                     // Reference to the input port used
+    uint8_t                     pin2_mask;                                      // Mask to point to pin used of port
+    volatile unsigned char      *port3_ptr;                                     // Reference to the input port used
+    uint8_t                     pin3_mask;                                      // Mask to point to pin used of port
+    volatile unsigned char      *port4_ptr;                                     // Reference to the input port used
+    uint8_t                     pin4_mask;                                      // Mask to point to pin used of port
+    volatile unsigned char      *port5_ptr;                                     // Reference to the input port used
+    uint8_t                     pin5_mask;                                      // Mask to point to pin used of port
+    volatile unsigned char      *port6_ptr;                                     // Reference to the input port used
+    uint8_t                     pin6_mask;                                      // Mask to point to pin used of port
+    
+}WS, SIG;
+
+WS WS_TOP    = {&LATB, 0x01, &LATB, 0x02, &LATB, 0x04, &LATB, 0x08,0,0,0,0};    // All switches for TOP part of station W1,2,3 and 4
+WS WS_BOT    = {&LATB, 0x10, &LATB, 0x20, &LATB, 0x40, &LATB, 0x80,0,0,0,0};    // All switches for BOT part of station W5,6,7 and 8
+
+SIG SIG_TOP  = {&LATC, 0x04, &LATC, 0x08, &LATC, 0x10, &LATC, 0x20, &LATC, 0x40, &LATC, 0x80};// Signal Leds 1B, 2B and 3B Green and Red
+SIG SIG_BOT  = {&LATC, 0x01, &LATC, 0x02, &LATJ, 0x01, &LATJ, 0x02, &LATJ, 0x04, &LATJ, 0x08};// Signal Leds 10B, 11B and 12B Green and Red
+
+void INITxPATHWAY(SIG *signal1, SIG *signal2, uint8_t path);
+void SETxSTATIONxPATHWAY(WS *pathway, SIG *signal, uint8_t *prevpath, uint8_t path);
+void updateSignal(void);
 // TODO Insert appropriate #include <>
 
 // TODO Insert C++ class definitions if appropriate

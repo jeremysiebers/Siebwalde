@@ -4,50 +4,65 @@
 #include "main.h"
 #include "milisecond_counter.h"
 
+SIG*     temp1;
+uint8_t tempSig1 = 0;
 
 
-int8_t SETxSTATIONxPATHWAY(uint8_t pathway)
+SIG     temp2;
+uint8_t tempSig2 = 0;
+
+void INITxPATHWAY(SIG *signal1, SIG *signal2, uint8_t path)
 {
-    switch(pathway){
+//    SETxMILLISECONDxUPDATExHANDLER2(updateSignal);
+//    tempSig1 = *signal1;
+//    tempSig2 = *signal2;
+//    
+//    temp1 = path;
+//    temp2 = path;
+    
+    temp1 = (SIG*) malloc (sizeof(SIG));
+    
+    
+}
+
+void SETxSTATIONxPATHWAY(WS *pathway, SIG *signal, uint8_t *prevpath, uint8_t path)
+{
+    switch(path){
         case 1:
-            WS_TO_FYRD_1_L_LAT  = 1;
-            WS_TO_FYRD_3_R_LAT  = 1;
+            *pathway->port1_ptr |=  pathway->pin1_mask;
+            *pathway->port2_ptr &= ~pathway->pin2_mask;
+            *pathway->port3_ptr |=  pathway->pin3_mask;
+            *pathway->port4_ptr &= ~pathway->pin4_mask; 
             break;
             
         case 2:
-            WS_TO_FYRD_1_L_LAT  = 0;
-            WS_TO_FYRD_3_R_LAT  = 0;
-            
-            WS_TO_FYRD_2_L_LAT  = 1;
-            WS_TO_FYRD_4_R_LAT  = 1;
+            *pathway->port1_ptr &= ~pathway->pin1_mask;
+            *pathway->port2_ptr |=  pathway->pin2_mask;
+            *pathway->port3_ptr &= ~pathway->pin3_mask;
+            *pathway->port4_ptr |=  pathway->pin4_mask;
             break;
             
         case 3:
-            WS_TO_FYRD_1_L_LAT  = 0;
-            WS_TO_FYRD_3_R_LAT  = 0;
-            
-            WS_TO_FYRD_2_L_LAT  = 0;
-            WS_TO_FYRD_4_R_LAT  = 0;
+            *pathway->port1_ptr &= ~pathway->pin1_mask;
+            *pathway->port2_ptr &= ~pathway->pin2_mask;
+            *pathway->port3_ptr &= ~pathway->pin3_mask;
+            *pathway->port4_ptr &= ~pathway->pin4_mask;
             break;
-
-        case 10:
-            break;
-            
-        case 11:
-            break;
-            
-        case 12:
-            break;
-            
-        default:
-            WS_TO_FYRD_1_L_LAT  = 0;
-            WS_TO_FYRD_3_R_LAT  = 0;            
-            WS_TO_FYRD_2_L_LAT  = 0;
-            WS_TO_FYRD_4_R_LAT  = 0;
-            
-            
-            break;
+ 
+        default:break;
     }
     
-    return (0);
+    if(*prevpath != path)
+    {
+        *prevpath = path;
+        
+    }
+}
+
+
+
+
+void updateSignal()
+{
+    
 }

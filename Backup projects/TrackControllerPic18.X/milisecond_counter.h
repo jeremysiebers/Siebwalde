@@ -15,10 +15,13 @@ extern "C" {
     extern void MILLIESxINIT(void);    
     extern uint32_t millis(void);
     
-    void SETxMILLISECONDxUPDATExHANDLER(void (* InterruptHandler)(void));
     void Millisecond_DefaultUpdateHandler(void);
+    
+    void SETxMILLISECONDxUPDATExHANDLER(void (* InterruptHandler)(void));
     extern void (*Millisecond_Update_Handler)(void);
-
+    
+    void SETxMILLISECONDxUPDATExHANDLER2(void (* InterruptHandler)(void));
+    extern void (*Millisecond_Update_Handler2)(void);
 
 #ifdef	__cplusplus
 }

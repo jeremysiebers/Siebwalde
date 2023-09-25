@@ -44,8 +44,6 @@ void DebounceIO(void);
  * PORTC = OUTPUT CARD 2 HIGH BYTE
  */
 
-uint64_t test = 0;
-
 void main(void)
 {
     // Initialize the device
