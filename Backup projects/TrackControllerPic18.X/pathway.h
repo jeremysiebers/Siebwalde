@@ -31,24 +31,8 @@
 #ifndef PATHWAY_H
 #define	PATHWAY_H
 
-#include <xc.h> // include processor files - each processor file is guarded.  
-
-typedef struct
-{
-    volatile unsigned char      *port1_ptr;                                     // Reference to the input port used
-    uint8_t                     pin1_mask;                                      // Mask to point to pin used of port
-    volatile unsigned char      *port2_ptr;                                     // Reference to the input port used
-    uint8_t                     pin2_mask;                                      // Mask to point to pin used of port
-    volatile unsigned char      *port3_ptr;                                     // Reference to the input port used
-    uint8_t                     pin3_mask;                                      // Mask to point to pin used of port
-    volatile unsigned char      *port4_ptr;                                     // Reference to the input port used
-    uint8_t                     pin4_mask;                                      // Mask to point to pin used of port
-    volatile unsigned char      *port5_ptr;                                     // Reference to the input port used
-    uint8_t                     pin5_mask;                                      // Mask to point to pin used of port
-    volatile unsigned char      *port6_ptr;                                     // Reference to the input port used
-    uint8_t                     pin6_mask;                                      // Mask to point to pin used of port
-    
-}WS, SIG;
+#include <xc.h> // include processor files - each processor file is guarded. 
+#include "main.h"
 
 WS WS_TOP    = {&LATB, 0x01, &LATB, 0x02, &LATB, 0x04, &LATB, 0x08,0,0,0,0};    // All switches for TOP part of station W1,2,3 and 4
 WS WS_BOT    = {&LATB, 0x10, &LATB, 0x20, &LATB, 0x40, &LATB, 0x80,0,0,0,0};    // All switches for BOT part of station W5,6,7 and 8
@@ -56,38 +40,12 @@ WS WS_BOT    = {&LATB, 0x10, &LATB, 0x20, &LATB, 0x40, &LATB, 0x80,0,0,0,0};    
 SIG SIG_TOP  = {&LATC, 0x04, &LATC, 0x08, &LATC, 0x10, &LATC, 0x20, &LATC, 0x40, &LATC, 0x80};// Signal Leds 1B, 2B and 3B Green and Red
 SIG SIG_BOT  = {&LATC, 0x01, &LATC, 0x02, &LATJ, 0x01, &LATJ, 0x02, &LATJ, 0x04, &LATJ, 0x08};// Signal Leds 10B, 11B and 12B Green and Red
 
-void INITxPATHWAY(SIG *signal1, SIG *signal2, uint8_t path);
-void SETxSTATIONxPATHWAY(WS *pathway, SIG *signal, uint8_t *prevpath, uint8_t path);
-void updateSignal(void);
-// TODO Insert appropriate #include <>
+extern void INITxPATHWAY(STATION *reftop, STATION *refbot);
+extern void SETxSTATIONxPATHWAY(STATION *instance, uint8_t path);
+extern void UPDATExSIGNAL(void);
+void setSignal(STATION *instance);
 
-// TODO Insert C++ class definitions if appropriate
 
-// TODO Insert declarations
-
-// Comment a function and leverage automatic documentation with slash star star
-/**
-    <p><b>Function prototype:</b></p>
-  
-    <p><b>Summary:</b></p>
-
-    <p><b>Description:</b></p>
-
-    <p><b>Precondition:</b></p>
-
-    <p><b>Parameters:</b></p>
-
-    <p><b>Returns:</b></p>
-
-    <p><b>Example:</b></p>
-    <code>
- 
-    </code>
-
-    <p><b>Remarks:</b></p>
- */
-// TODO Insert declarations or function prototypes (right here) to leverage 
-// live documentation
 
 #ifdef	__cplusplus
 extern "C" {

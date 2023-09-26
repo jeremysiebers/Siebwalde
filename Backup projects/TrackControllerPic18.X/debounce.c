@@ -17,11 +17,11 @@ void DEBOUNCExIO(DEBOUNCE *instance)
     // Check if the button state has changed
     if (instance->buttonState != instance->lastButtonState && instance->lastDebounceTime == 0) {
       // Reset the debounce timer
-      instance->lastDebounceTime = millis();
+      instance->lastDebounceTime = GETxMILLIS();
     }
 
     // Check if the debounce time has elapsed
-    if ((millis() - instance->lastDebounceTime) > instance->debounceDelay) {
+    if ((GETxMILLIS() - instance->lastDebounceTime) > instance->debounceDelay) {
       // Update the last button state
       instance->lastButtonState = instance->buttonState;
       

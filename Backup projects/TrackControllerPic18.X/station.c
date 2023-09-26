@@ -1,19 +1,16 @@
 #include <xc.h>
 #include <stdbool.h>
+#include "main.h"
 #include "station.h"
 #include "pathway.h"
-#include "mcc_generated_files/mcc.h"
-#include "main.h"
-#include "milisecond_counter.h"
-#include "debounce.h"
 
-void setPort(OCC *instance, bool value);
+void setOCC(OCC *instance, bool value);
 
 unsigned char test = 0;
 
 void INITxSTATION(void)
 {
-    INITxPATHWAY(&SIG_TOP, &SIG_BOT, 3);
+    INITxPATHWAY(&top, &bot);
     
     top.state = INIT;
     top.getFreightLeaveStation  = &HALL_BLK_13;
@@ -27,6 +24,7 @@ void INITxSTATION(void)
     top.getOccStn2              = &OCC_FR_STN_11;
     top.getOccStn3              = &OCC_FR_STN_12;
     top.setPath                 = &WS_TOP;
+    top.prevPath                = 0;
     top.setSignal               = &SIG_TOP;    
     
     bot.state = INIT;
@@ -41,6 +39,7 @@ void INITxSTATION(void)
     bot.getOccStn2              = &OCC_FR_STN_2;
     bot.getOccStn3              = &OCC_FR_STN_3;
     bot.setPath                 = &WS_BOT;
+    bot.prevPath                = 0;
     bot.setSignal               = &SIG_BOT;
 }
 
@@ -55,14 +54,17 @@ void UPDATExSTATION(STATION *instance)
             
             /* Set the occupied signals to all blocks to true to stop
              * all trains from driving. */
-            setPort(instance->setOccBlkIn, true);
-            setPort(instance->setOccStn1 , true);
-            setPort(instance->setOccStn2 , true);
-            setPort(instance->setOccStn3 , true);
+            setOCC(instance->setOccBlkIn, true);
+            setOCC(instance->setOccStn1 , true);
+            setOCC(instance->setOccStn2 , true);
+            setOCC(instance->setOccStn3 , true);
             
             /* Set freight passing path */
-            SETxSTATIONxPATHWAY(instance->setPath, instance->setSignal, &instance->prevPath, 3);
+            SETxSTATIONxPATHWAY(instance, 3);
             
+            
+            
+            instance->state = RUN;
             break;
             
         case RUN:
@@ -80,7 +82,7 @@ void UPDATExSTATION(STATION *instance)
 /*
  * Function to set the desired output pin following instance and a value
  */
-void setPort(OCC *instance, bool value)
+void setOCC(OCC *instance, bool value)
 {
     if(value)
     {

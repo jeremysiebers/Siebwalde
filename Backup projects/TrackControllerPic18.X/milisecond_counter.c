@@ -18,6 +18,7 @@ void (*Millisecond_Update_Handler2)(void);
 /*
  * Local variables
  */
+/* volatile due to interrupt service routine */
 volatile uint32_t milliseconds_counter = 1;
 
 /*
@@ -51,7 +52,7 @@ void MILLISECOND_HANDLER()
 /*
  * Universal function from arduino, here re-created for this project.
  */
-uint32_t millis()
+uint32_t GETxMILLIS()
 {
     return milliseconds_counter;
 }

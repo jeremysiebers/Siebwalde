@@ -32,14 +32,61 @@
 #define	MAIN_H
 
 // TODO Insert appropriate #include <>
-#include <xc.h> // include processor files - each processor file is guarded. 
+#include <xc.h> // include processor files - each processor file is guarded.
+#include <stdbool.h>
 #include "debounce.h"
  
-// TODO Insert C++ class definitions if appropriate
+enum STATES{
+    INIT,
+    RUN        
+};
 
-// TODO Insert declarations
+typedef struct
+{
+    volatile unsigned char      *portx_ptr;                                     // Reference to the input port used
+    uint8_t                     pin_mask;                                       // Mask to point to pin used of port
+}OCC;
 
+typedef struct
+{
+    volatile unsigned char      *port1_ptr;                                     // Reference to the input port used
+    uint8_t                     pin1_mask;                                      // Mask to point to pin used of port
+    volatile unsigned char      *port2_ptr;                                     // Reference to the input port used
+    uint8_t                     pin2_mask;                                      // Mask to point to pin used of port
+    volatile unsigned char      *port3_ptr;                                     // Reference to the input port used
+    uint8_t                     pin3_mask;                                      // Mask to point to pin used of port
+    volatile unsigned char      *port4_ptr;                                     // Reference to the input port used
+    uint8_t                     pin4_mask;                                      // Mask to point to pin used of port
+    volatile unsigned char      *port5_ptr;                                     // Reference to the input port used
+    uint8_t                     pin5_mask;                                      // Mask to point to pin used of port
+    volatile unsigned char      *port6_ptr;                                     // Reference to the input port used
+    uint8_t                     pin6_mask;                                      // Mask to point to pin used of port
+    
+}WS, SIG;
 
+/*
+ * Station struct
+*/
+typedef struct
+{
+    enum STATES                 state;                                          // State of the state meachine
+    DEBOUNCE                    *getFreightLeaveStation;
+    DEBOUNCE                    *getFreightEnterStation;
+    OCC                         *setOccBlkIn;
+    DEBOUNCE                    *getOccBlkOut;
+    OCC                         *setOccStn1;
+    DEBOUNCE                    *getOccStn1;
+    OCC                         *setOccStn2;
+    DEBOUNCE                    *getOccStn2;
+    OCC                         *setOccStn3;
+    DEBOUNCE                    *getOccStn3;
+    WS                          *setPath;
+    uint8_t                     prevPath;
+    uint8_t                     newPath;
+    SIG                         *setSignal;
+    uint32_t                    setSignalTime;
+            
+}STATION;
 
 // Comment a function and leverage automatic documentation with slash star star
 /**

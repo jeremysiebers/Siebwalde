@@ -13,7 +13,7 @@ extern "C" {
 #endif
     
     extern void MILLIESxINIT(void);    
-    extern uint32_t millis(void);
+    extern uint32_t GETxMILLIS(void);
     
     void Millisecond_DefaultUpdateHandler(void);
     

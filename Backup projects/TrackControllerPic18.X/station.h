@@ -11,40 +11,7 @@
 #include <xc.h> // include processor files - each processor file is guarded.
 #include <stdbool.h>
 #include "debounce.h"
-#include "pathway.h"
-
-enum STATES{
-    INIT,
-    RUN        
-};
-
-typedef struct
-{
-    volatile unsigned char      *portx_ptr;                                     // Reference to the input port used
-    uint8_t                     pin_mask;                                       // Mask to point to pin used of port
-}OCC;
-
-/*
- * Station struct
-*/
-typedef struct
-{
-    enum STATES                 state;                                          // State of the state meachine
-    DEBOUNCE                    *getFreightLeaveStation;
-    DEBOUNCE                    *getFreightEnterStation;
-    OCC                         *setOccBlkIn;
-    DEBOUNCE                    *getOccBlkOut;
-    OCC                         *setOccStn1;
-    DEBOUNCE                    *getOccStn1;
-    OCC                         *setOccStn2;
-    DEBOUNCE                    *getOccStn2;
-    OCC                         *setOccStn3;
-    DEBOUNCE                    *getOccStn3;
-    WS                          *setPath;
-    uint8_t                     prevPath;
-    SIG                         *setSignal;
-            
-}STATION;
+#include "main.h"
 
 STATION top;
 STATION bot;

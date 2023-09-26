@@ -23,6 +23,7 @@
 #include "milisecond_counter.h"
 #include "debounce.h"
 #include "station.h"
+#include "pathway.h"
 
 void DebounceIO(void);
 
@@ -67,7 +68,7 @@ void main(void)
     
     MILLIESxINIT();
     SETxMILLISECONDxUPDATExHANDLER(DebounceIO);
-    
+    SETxMILLISECONDxUPDATExHANDLER2(UPDATExSIGNAL);
     INITxSTATION();
     
     while (1)
