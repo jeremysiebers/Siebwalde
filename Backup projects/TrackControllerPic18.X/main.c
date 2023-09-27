@@ -77,7 +77,7 @@ void main(void)
         //Network_Manage();
         
         /* Check if over ride key is present, if yes then disable controller. */
-        if(CTRL_OFF_GetValue())
+        if(CTRL_OFF.value)
         {
             LATB = 0;
             LATC = 0;
@@ -87,7 +87,8 @@ void main(void)
             BLK_SIG_3B_GR_SetHigh();
             BLK_SIG_12B_GR_SetHigh();
         }
-        else
+        /* When driving voltage is present execute state machines */
+        else if(DrvVOLT_GetValue())
         {
             UPDATExSTATION(&top);
             UPDATExSTATION(&bot);
@@ -98,28 +99,33 @@ void main(void)
 
 void DebounceIO(void)
 {
-    TP2_SetHigh();
-    DEBOUNCExIO(&HALL_BLK_13  );        
-    DEBOUNCExIO(&HALL_BLK_21A );
-    DEBOUNCExIO(&HALL_BLK_T4  );
-    DEBOUNCExIO(&HALL_BLK_T5  );
-    DEBOUNCExIO(&HALL_BLK_T1  );
-    DEBOUNCExIO(&HALL_BLK_T2  );
-    DEBOUNCExIO(&HALL_BLK_9B  );
-    DEBOUNCExIO(&HALL_BLK_4A  );
-    DEBOUNCExIO(&HALL_BLK_T7  );
-    DEBOUNCExIO(&HALL_BLK_T8  );
-    DEBOUNCExIO(&OCC_FR_BLK13 );
-    DEBOUNCExIO(&OCC_FR_BLK4  );
-    DEBOUNCExIO(&OCC_FR_STN_1 );
-    DEBOUNCExIO(&OCC_FR_STN_2 );
-    DEBOUNCExIO(&OCC_FR_STN_3 );
-    DEBOUNCExIO(&OCC_FR_STN_10);
-    DEBOUNCExIO(&OCC_FR_STN_11);
-    DEBOUNCExIO(&OCC_FR_STN_12);
-    DEBOUNCExIO(&OCC_FR_STN_T6);
-    DEBOUNCExIO(&OCC_FR_STN_T3);
-    TP2_SetLow();
+    if(DrvVOLT_GetValue()){
+        TP2_SetHigh();
+        DEBOUNCExIO(&HALL_BLK_13  );        
+        DEBOUNCExIO(&HALL_BLK_21A );
+        DEBOUNCExIO(&HALL_BLK_T4  );
+        DEBOUNCExIO(&HALL_BLK_T5  );
+        DEBOUNCExIO(&HALL_BLK_T1  );
+        DEBOUNCExIO(&HALL_BLK_T2  );
+        DEBOUNCExIO(&HALL_BLK_9B  );
+        DEBOUNCExIO(&HALL_BLK_4A  );
+        DEBOUNCExIO(&HALL_BLK_T7  );
+        DEBOUNCExIO(&HALL_BLK_T8  );
+        DEBOUNCExIO(&OCC_FR_BLK13 );
+        DEBOUNCExIO(&OCC_FR_BLK4  );
+        DEBOUNCExIO(&OCC_FR_STN_1 );
+        DEBOUNCExIO(&OCC_FR_STN_2 );
+        DEBOUNCExIO(&OCC_FR_STN_3 );
+        DEBOUNCExIO(&OCC_FR_STN_10);
+        DEBOUNCExIO(&OCC_FR_STN_11);
+        DEBOUNCExIO(&OCC_FR_STN_12);
+        DEBOUNCExIO(&OCC_FR_STN_T6);
+        DEBOUNCExIO(&OCC_FR_STN_T3);
+        DEBOUNCExIO(&CTRL_OFF);
+        DEBOUNCExIO(&OCC_FR_9B);
+        DEBOUNCExIO(&OCC_FR_21B);
+        TP2_SetLow();
+    }
 }
 /**
  End of File

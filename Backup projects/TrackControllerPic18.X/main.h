@@ -73,13 +73,14 @@ typedef struct
     DEBOUNCE                    *getFreightLeaveStation;
     DEBOUNCE                    *getFreightEnterStation;
     OCC                         *setOccBlkIn;
-    DEBOUNCE                    *getOccBlkOut;
+    DEBOUNCE                    *getOccBlkIn;
     OCC                         *setOccStn1;
     DEBOUNCE                    *getOccStn1;
     OCC                         *setOccStn2;
     DEBOUNCE                    *getOccStn2;
     OCC                         *setOccStn3;
     DEBOUNCE                    *getOccStn3;
+    DEBOUNCE                    *getOccBlkOut;
     WS                          *setPath;
     uint8_t                     prevPath;
     uint8_t                     newPath;

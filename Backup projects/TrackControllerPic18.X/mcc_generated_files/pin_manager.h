@@ -592,6 +592,39 @@
 #define CTRL_OFF_SetDigitalInput()    do { TRISGbits.TRISG4 = 1; } while(0)
 #define CTRL_OFF_SetDigitalOutput()   do { TRISGbits.TRISG4 = 0; } while(0)
 
+// get/set OCC_FR_BLK9B aliases
+#define OCC_FR_BLK9B_TRIS                 TRISGbits.TRISG5
+#define OCC_FR_BLK9B_LAT                  LATGbits.LATG5
+#define OCC_FR_BLK9B_PORT                 PORTGbits.RG5
+#define OCC_FR_BLK9B_SetHigh()            do { LATGbits.LATG5 = 1; } while(0)
+#define OCC_FR_BLK9B_SetLow()             do { LATGbits.LATG5 = 0; } while(0)
+#define OCC_FR_BLK9B_Toggle()             do { LATGbits.LATG5 = ~LATGbits.LATG5; } while(0)
+#define OCC_FR_BLK9B_GetValue()           PORTGbits.RG5
+#define OCC_FR_BLK9B_SetDigitalInput()    do { TRISGbits.TRISG5 = 1; } while(0)
+#define OCC_FR_BLK9B_SetDigitalOutput()   do { TRISGbits.TRISG5 = 0; } while(0)
+
+// get/set OCC_FR_BLK21B aliases
+#define OCC_FR_BLK21B_TRIS                 TRISGbits.TRISG6
+#define OCC_FR_BLK21B_LAT                  LATGbits.LATG6
+#define OCC_FR_BLK21B_PORT                 PORTGbits.RG6
+#define OCC_FR_BLK21B_SetHigh()            do { LATGbits.LATG6 = 1; } while(0)
+#define OCC_FR_BLK21B_SetLow()             do { LATGbits.LATG6 = 0; } while(0)
+#define OCC_FR_BLK21B_Toggle()             do { LATGbits.LATG6 = ~LATGbits.LATG6; } while(0)
+#define OCC_FR_BLK21B_GetValue()           PORTGbits.RG6
+#define OCC_FR_BLK21B_SetDigitalInput()    do { TRISGbits.TRISG6 = 1; } while(0)
+#define OCC_FR_BLK21B_SetDigitalOutput()   do { TRISGbits.TRISG6 = 0; } while(0)
+
+// get/set DrvVOLT aliases
+#define DrvVOLT_TRIS                 TRISGbits.TRISG7
+#define DrvVOLT_LAT                  LATGbits.LATG7
+#define DrvVOLT_PORT                 PORTGbits.RG7
+#define DrvVOLT_SetHigh()            do { LATGbits.LATG7 = 1; } while(0)
+#define DrvVOLT_SetLow()             do { LATGbits.LATG7 = 0; } while(0)
+#define DrvVOLT_Toggle()             do { LATGbits.LATG7 = ~LATGbits.LATG7; } while(0)
+#define DrvVOLT_GetValue()           PORTGbits.RG7
+#define DrvVOLT_SetDigitalInput()    do { TRISGbits.TRISG7 = 1; } while(0)
+#define DrvVOLT_SetDigitalOutput()   do { TRISGbits.TRISG7 = 0; } while(0)
+
 // get/set HALL_BLK_T7 aliases
 #define HALL_BLK_T7_TRIS                 TRISHbits.TRISH0
 #define HALL_BLK_T7_LAT                  LATHbits.LATH0
