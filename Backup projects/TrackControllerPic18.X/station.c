@@ -12,7 +12,8 @@ void INITxSTATION(void)
 {
     INITxPATHWAY(&top, &bot);
     
-    top.state = INIT;
+    top.extState                = INIT;
+    top.intState                = 0;
     top.getFreightLeaveStation  = &HALL_BLK_13;
     top.getFreightEnterStation  = &HALL_BLK_9B;
     top.setOccBlkIn             = &OCC_TO_9B;
@@ -30,7 +31,8 @@ void INITxSTATION(void)
     top.setSignal               = &SIG_TOP; 
     top.setSignalTime           = 0;
     
-    bot.state = INIT;
+    bot.extState                = INIT;
+    bot.intState                = 0;
     bot.getFreightLeaveStation  = &HALL_BLK_4A;
     bot.getFreightEnterStation  = &HALL_BLK_21A;
     bot.setOccBlkIn             = &OCC_TO_21B;
@@ -50,7 +52,7 @@ void INITxSTATION(void)
 
 void UPDATExSTATION(STATION *instance) 
 {    
-    switch(instance->state)
+    switch(instance->extState)
     {
         case INIT:
             /* Set both hall sensors debounced values to False */
@@ -119,17 +121,24 @@ void UPDATExSTATION(STATION *instance)
             }
             
             /* Start executing main state machine */
-            instance->state = RUN;
+            instance->extState = RUN;
+            instance->intState = WAIT;
             break;
             
         case RUN:
-            if(instance->getFreightLeaveStation->value){
-                
+            
+            switch(instance->intState){
+                case WAIT:
+                    
+                    break;
+                    
+                default: break;
             }
+            
             break;
         
         default:
-            instance->state = INIT;
+            instance->extState = INIT;
         break;
     }
 }

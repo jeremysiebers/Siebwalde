@@ -38,7 +38,9 @@
  
 enum STATES{
     INIT,
-    RUN        
+    RUN,
+    WAIT,
+    
 };
 
 typedef struct
@@ -69,7 +71,8 @@ typedef struct
 */
 typedef struct
 {
-    enum STATES                 state;                                          // State of the state meachine
+    enum STATES                 extState;                                       // State of the state meachine
+    enum STATES                 intState;
     DEBOUNCE                    *getFreightLeaveStation;
     DEBOUNCE                    *getFreightEnterStation;
     OCC                         *setOccBlkIn;
