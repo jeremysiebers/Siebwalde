@@ -77,29 +77,43 @@ void main(void)
         //Network_Manage();
         
         /* Check if over ride key is present, if yes then disable controller. */
-        if(CTRL_OFF.value)
+        if(KEY_CTRL_GetValue())
         {
-            LATB = 0;
-            LATC = 0;
-            LATD = 0;
-            LATE = 0;
-            LATJ = 0;  
             BLK_SIG_3B_GR_SetHigh();
-            BLK_SIG_12B_GR_SetHigh();
+            BLK_SIG_12B_GR_SetHigh();            
+            BLK_SIG_1B_RD_SetHigh();
+            BLK_SIG_2B_RD_SetHigh();
+            BLK_SIG_10B_RD_SetHigh();
+            BLK_SIG_11B_RD_SetHigh();
+            
+            WS_FR_FYRD_7_L_SetLow();
+            
+            OCC_TO_21B_SetLow();
+            OCC_TO_9B_SetLow();
+            OCC_TO_STN_11_SetHigh();
+            OCC_TO_STN_12_SetLow();
+            OCC_TO_T6_SetHigh();
+            OCC_TO_T3_SetHigh();
+            OCC_TO_8A_SetLow();
+            OCC_TO_STN_1_SetHigh();
+            OCC_TO_STN_2_SetHigh();
+            OCC_TO_STN_3_SetLow();
+            OCC_TO_STN_10_SetHigh();
         }
         /* When driving voltage is present execute state machines */
-        else if(DrvVOLT_GetValue())
+        else if(VOLTDET_GetValue())
         {
             UPDATExSTATION(&top);
             UPDATExSTATION(&bot);
-        }  
+        }
+        
                 
     }
 }
 
 void DebounceIO(void)
 {
-    if(DrvVOLT_GetValue()){
+    if(VOLTDET_GetValue()){
         TP2_SetHigh();
         DEBOUNCExIO(&HALL_BLK_13  );        
         DEBOUNCExIO(&HALL_BLK_21A );

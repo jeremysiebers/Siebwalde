@@ -428,6 +428,28 @@
 #define OCC_TO_T3_SetDigitalInput()    do { TRISEbits.TRISE3 = 1; } while(0)
 #define OCC_TO_T3_SetDigitalOutput()   do { TRISEbits.TRISE3 = 0; } while(0)
 
+// get/set OCC_TO_8A aliases
+#define OCC_TO_8A_TRIS                 TRISEbits.TRISE4
+#define OCC_TO_8A_LAT                  LATEbits.LATE4
+#define OCC_TO_8A_PORT                 PORTEbits.RE4
+#define OCC_TO_8A_SetHigh()            do { LATEbits.LATE4 = 1; } while(0)
+#define OCC_TO_8A_SetLow()             do { LATEbits.LATE4 = 0; } while(0)
+#define OCC_TO_8A_Toggle()             do { LATEbits.LATE4 = ~LATEbits.LATE4; } while(0)
+#define OCC_TO_8A_GetValue()           PORTEbits.RE4
+#define OCC_TO_8A_SetDigitalInput()    do { TRISEbits.TRISE4 = 1; } while(0)
+#define OCC_TO_8A_SetDigitalOutput()   do { TRISEbits.TRISE4 = 0; } while(0)
+
+// get/set VOLTDET aliases
+#define VOLTDET_TRIS                 TRISEbits.TRISE7
+#define VOLTDET_LAT                  LATEbits.LATE7
+#define VOLTDET_PORT                 PORTEbits.RE7
+#define VOLTDET_SetHigh()            do { LATEbits.LATE7 = 1; } while(0)
+#define VOLTDET_SetLow()             do { LATEbits.LATE7 = 0; } while(0)
+#define VOLTDET_Toggle()             do { LATEbits.LATE7 = ~LATEbits.LATE7; } while(0)
+#define VOLTDET_GetValue()           PORTEbits.RE7
+#define VOLTDET_SetDigitalInput()    do { TRISEbits.TRISE7 = 1; } while(0)
+#define VOLTDET_SetDigitalOutput()   do { TRISEbits.TRISE7 = 0; } while(0)
+
 // get/set HALL_BLK_13 aliases
 #define HALL_BLK_13_TRIS                 TRISFbits.TRISF0
 #define HALL_BLK_13_LAT                  LATFbits.LATF0
@@ -581,49 +603,49 @@
 #define OCC_FR_STN_T3_SetDigitalInput()    do { TRISGbits.TRISG3 = 1; } while(0)
 #define OCC_FR_STN_T3_SetDigitalOutput()   do { TRISGbits.TRISG3 = 0; } while(0)
 
-// get/set CTRL_OFF aliases
-#define CTRL_OFF_TRIS                 TRISGbits.TRISG4
-#define CTRL_OFF_LAT                  LATGbits.LATG4
-#define CTRL_OFF_PORT                 PORTGbits.RG4
-#define CTRL_OFF_SetHigh()            do { LATGbits.LATG4 = 1; } while(0)
-#define CTRL_OFF_SetLow()             do { LATGbits.LATG4 = 0; } while(0)
-#define CTRL_OFF_Toggle()             do { LATGbits.LATG4 = ~LATGbits.LATG4; } while(0)
-#define CTRL_OFF_GetValue()           PORTGbits.RG4
-#define CTRL_OFF_SetDigitalInput()    do { TRISGbits.TRISG4 = 1; } while(0)
-#define CTRL_OFF_SetDigitalOutput()   do { TRISGbits.TRISG4 = 0; } while(0)
+// get/set KEY_CTRL aliases
+#define KEY_CTRL_TRIS                 TRISGbits.TRISG4
+#define KEY_CTRL_LAT                  LATGbits.LATG4
+#define KEY_CTRL_PORT                 PORTGbits.RG4
+#define KEY_CTRL_SetHigh()            do { LATGbits.LATG4 = 1; } while(0)
+#define KEY_CTRL_SetLow()             do { LATGbits.LATG4 = 0; } while(0)
+#define KEY_CTRL_Toggle()             do { LATGbits.LATG4 = ~LATGbits.LATG4; } while(0)
+#define KEY_CTRL_GetValue()           PORTGbits.RG4
+#define KEY_CTRL_SetDigitalInput()    do { TRISGbits.TRISG4 = 1; } while(0)
+#define KEY_CTRL_SetDigitalOutput()   do { TRISGbits.TRISG4 = 0; } while(0)
+
+// get/set OCC_FR_BLK23B aliases
+#define OCC_FR_BLK23B_TRIS                 TRISGbits.TRISG5
+#define OCC_FR_BLK23B_LAT                  LATGbits.LATG5
+#define OCC_FR_BLK23B_PORT                 PORTGbits.RG5
+#define OCC_FR_BLK23B_SetHigh()            do { LATGbits.LATG5 = 1; } while(0)
+#define OCC_FR_BLK23B_SetLow()             do { LATGbits.LATG5 = 0; } while(0)
+#define OCC_FR_BLK23B_Toggle()             do { LATGbits.LATG5 = ~LATGbits.LATG5; } while(0)
+#define OCC_FR_BLK23B_GetValue()           PORTGbits.RG5
+#define OCC_FR_BLK23B_SetDigitalInput()    do { TRISGbits.TRISG5 = 1; } while(0)
+#define OCC_FR_BLK23B_SetDigitalOutput()   do { TRISGbits.TRISG5 = 0; } while(0)
+
+// get/set OCC_FR_BLK22B aliases
+#define OCC_FR_BLK22B_TRIS                 TRISGbits.TRISG6
+#define OCC_FR_BLK22B_LAT                  LATGbits.LATG6
+#define OCC_FR_BLK22B_PORT                 PORTGbits.RG6
+#define OCC_FR_BLK22B_SetHigh()            do { LATGbits.LATG6 = 1; } while(0)
+#define OCC_FR_BLK22B_SetLow()             do { LATGbits.LATG6 = 0; } while(0)
+#define OCC_FR_BLK22B_Toggle()             do { LATGbits.LATG6 = ~LATGbits.LATG6; } while(0)
+#define OCC_FR_BLK22B_GetValue()           PORTGbits.RG6
+#define OCC_FR_BLK22B_SetDigitalInput()    do { TRISGbits.TRISG6 = 1; } while(0)
+#define OCC_FR_BLK22B_SetDigitalOutput()   do { TRISGbits.TRISG6 = 0; } while(0)
 
 // get/set OCC_FR_BLK9B aliases
-#define OCC_FR_BLK9B_TRIS                 TRISGbits.TRISG5
-#define OCC_FR_BLK9B_LAT                  LATGbits.LATG5
-#define OCC_FR_BLK9B_PORT                 PORTGbits.RG5
-#define OCC_FR_BLK9B_SetHigh()            do { LATGbits.LATG5 = 1; } while(0)
-#define OCC_FR_BLK9B_SetLow()             do { LATGbits.LATG5 = 0; } while(0)
-#define OCC_FR_BLK9B_Toggle()             do { LATGbits.LATG5 = ~LATGbits.LATG5; } while(0)
-#define OCC_FR_BLK9B_GetValue()           PORTGbits.RG5
-#define OCC_FR_BLK9B_SetDigitalInput()    do { TRISGbits.TRISG5 = 1; } while(0)
-#define OCC_FR_BLK9B_SetDigitalOutput()   do { TRISGbits.TRISG5 = 0; } while(0)
-
-// get/set OCC_FR_BLK21B aliases
-#define OCC_FR_BLK21B_TRIS                 TRISGbits.TRISG6
-#define OCC_FR_BLK21B_LAT                  LATGbits.LATG6
-#define OCC_FR_BLK21B_PORT                 PORTGbits.RG6
-#define OCC_FR_BLK21B_SetHigh()            do { LATGbits.LATG6 = 1; } while(0)
-#define OCC_FR_BLK21B_SetLow()             do { LATGbits.LATG6 = 0; } while(0)
-#define OCC_FR_BLK21B_Toggle()             do { LATGbits.LATG6 = ~LATGbits.LATG6; } while(0)
-#define OCC_FR_BLK21B_GetValue()           PORTGbits.RG6
-#define OCC_FR_BLK21B_SetDigitalInput()    do { TRISGbits.TRISG6 = 1; } while(0)
-#define OCC_FR_BLK21B_SetDigitalOutput()   do { TRISGbits.TRISG6 = 0; } while(0)
-
-// get/set DrvVOLT aliases
-#define DrvVOLT_TRIS                 TRISGbits.TRISG7
-#define DrvVOLT_LAT                  LATGbits.LATG7
-#define DrvVOLT_PORT                 PORTGbits.RG7
-#define DrvVOLT_SetHigh()            do { LATGbits.LATG7 = 1; } while(0)
-#define DrvVOLT_SetLow()             do { LATGbits.LATG7 = 0; } while(0)
-#define DrvVOLT_Toggle()             do { LATGbits.LATG7 = ~LATGbits.LATG7; } while(0)
-#define DrvVOLT_GetValue()           PORTGbits.RG7
-#define DrvVOLT_SetDigitalInput()    do { TRISGbits.TRISG7 = 1; } while(0)
-#define DrvVOLT_SetDigitalOutput()   do { TRISGbits.TRISG7 = 0; } while(0)
+#define OCC_FR_BLK9B_TRIS                 TRISGbits.TRISG7
+#define OCC_FR_BLK9B_LAT                  LATGbits.LATG7
+#define OCC_FR_BLK9B_PORT                 PORTGbits.RG7
+#define OCC_FR_BLK9B_SetHigh()            do { LATGbits.LATG7 = 1; } while(0)
+#define OCC_FR_BLK9B_SetLow()             do { LATGbits.LATG7 = 0; } while(0)
+#define OCC_FR_BLK9B_Toggle()             do { LATGbits.LATG7 = ~LATGbits.LATG7; } while(0)
+#define OCC_FR_BLK9B_GetValue()           PORTGbits.RG7
+#define OCC_FR_BLK9B_SetDigitalInput()    do { TRISGbits.TRISG7 = 1; } while(0)
+#define OCC_FR_BLK9B_SetDigitalOutput()   do { TRISGbits.TRISG7 = 0; } while(0)
 
 // get/set HALL_BLK_T7 aliases
 #define HALL_BLK_T7_TRIS                 TRISHbits.TRISH0

@@ -356,7 +356,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="Custom Name RE4"/>
-         <value/>
+         <value>OCC_TO_8A</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="Custom Name RE5"/>
@@ -368,7 +368,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="Custom Name RE7"/>
-         <value/>
+         <value>VOLTDET</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="Custom Name RF0"/>
@@ -420,19 +420,19 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="Custom Name RG4"/>
-         <value>CTRL_OFF</value>
+         <value>KEY_CTRL</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="Custom Name RG5"/>
-         <value>OCC_FR_BLK9B</value>
+         <value>OCC_FR_BLK23B</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="Custom Name RG6"/>
-         <value>OCC_FR_BLK21B</value>
+         <value>OCC_FR_BLK22B</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="Custom Name RG7"/>
-         <value>DrvVOLT</value>
+         <value>OCC_FR_BLK9B</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="Custom Name RH0"/>
@@ -656,7 +656,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="RE4"/>
-         <value>disabled</value>
+         <value>output</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="RE5"/>
@@ -668,7 +668,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="RE7"/>
-         <value>disabled</value>
+         <value>input</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="RF0"/>
@@ -1012,7 +1012,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="customNameUserSet RE4"/>
-         <value>disabled</value>
+         <value>enabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="customNameUserSet RE5"/>
@@ -1024,7 +1024,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="customNameUserSet RE7"/>
-         <value>disabled</value>
+         <value>enabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="customNameUserSet RF0"/>
@@ -3376,7 +3376,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="Pin Module" registerAlias="TRISE"/>
-         <value>240</value>
+         <value>224</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="Pin Module" registerAlias="TRISF"/>
@@ -3896,7 +3896,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="Pin Module" registerAlias="TRISE" settingAlias="TRISE4"/>
-         <value>input</value>
+         <value>output</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="Pin Module" registerAlias="TRISE" settingAlias="TRISE5"/>
@@ -4691,7 +4691,23 @@
          <value>131.07200</value>
       </entry>
    </tokenMap>
-   <generatedFileHashHistoryMap class="java.util.TreeMap">
+   <generatedFileHashHistoryMap class="java.util.HashMap">
+      <entry>
+         <file>mcc_generated_files\interrupt_manager.h</file>
+         <hash>5c311e57ab563c3fadc6e5c40b1e425436e9366c40e5772f46f393a9f8ed9d39</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files\mcc.h</file>
+         <hash>bcced904d7987a0710536eb30328ac39bf19a85cd34968f98a9ccd95855a6bd6</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files\device_config.h</file>
+         <hash>8beaab6b86f9d9581aad873abe16c9fbc07b9279b06c13f7d65c254df656ef48</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files\tmr0.h</file>
+         <hash>60487f4faa42d9fec7389ebc68c7a0a01ec6343892ddd4f936b3e776d62a07b0</hash>
+      </entry>
       <entry>
          <file>main.c</file>
          <hash>30e3e0e5956e494fcd566f1509f2f2bbc404d25265a77934114af7c9d1fcdbd7</hash>
@@ -4701,40 +4717,24 @@
          <hash>0b9de28f5f302b704d2e54c6905811471fdd0b9da89488285c8db8cc32174086</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files\device_config.h</file>
-         <hash>8beaab6b86f9d9581aad873abe16c9fbc07b9279b06c13f7d65c254df656ef48</hash>
+         <file>mcc_generated_files\pin_manager.h</file>
+         <hash>aab7c262a97516118eb7406ac0baea16dba280c12e2165e99070c1590eb3cb87</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\interrupt_manager.c</file>
          <hash>ddb8e8d3744a5d106c84a03b80282245f18d8577f05ba5bd1edde305ffbc02c5</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files\interrupt_manager.h</file>
-         <hash>5c311e57ab563c3fadc6e5c40b1e425436e9366c40e5772f46f393a9f8ed9d39</hash>
-      </entry>
-      <entry>
          <file>mcc_generated_files\mcc.c</file>
          <hash>229cf06ea23ee44bba22f4dda551e9b2aefec9469625b9a3ede7c28310dd3844</hash>
-      </entry>
-      <entry>
-         <file>mcc_generated_files\mcc.h</file>
-         <hash>bcced904d7987a0710536eb30328ac39bf19a85cd34968f98a9ccd95855a6bd6</hash>
-      </entry>
-      <entry>
-         <file>mcc_generated_files\pin_manager.c</file>
-         <hash>d7baabdf0c8281d2d7cfea3d0a85e7a150e2866372faa0a0659903397a83350c</hash>
-      </entry>
-      <entry>
-         <file>mcc_generated_files\pin_manager.h</file>
-         <hash>0d30a24f5bdc6d1e0996ed27c2dff812929c26cdfa3954d567b29716246524e8</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\tmr0.c</file>
          <hash>41178c77b41938c2d5c71ae16aa8660b6ea87a1b6e9ecb566df908017219a871</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files\tmr0.h</file>
-         <hash>60487f4faa42d9fec7389ebc68c7a0a01ec6343892ddd4f936b3e776d62a07b0</hash>
+         <file>mcc_generated_files\pin_manager.c</file>
+         <hash>fa673e40b6808795110a81e8b347eb77cdd59a58e7d28b86cba51818498b1c5b</hash>
       </entry>
    </generatedFileHashHistoryMap>
 </config>
