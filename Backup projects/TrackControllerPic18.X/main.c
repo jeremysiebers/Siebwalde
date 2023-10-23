@@ -22,7 +22,7 @@
 #include "main.h"
 #include "milisecond_counter.h"
 #include "debounce.h"
-#include "station.h"
+#include "mainstation.h"
 #include "pathway.h"
 
 void DebounceIO(void);
@@ -138,6 +138,8 @@ void DebounceIO(void)
         DEBOUNCExIO(&CTRL_OFF);
         DEBOUNCExIO(&OCC_FR_9B);
         DEBOUNCExIO(&OCC_FR_21B);
+        DEBOUNCExIO(&OCC_FR_22B);
+        DEBOUNCExIO(&OCC_FR_23B);
         TP2_SetLow();
     }
 }

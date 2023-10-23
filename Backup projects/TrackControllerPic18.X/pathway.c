@@ -12,46 +12,46 @@ void INITxPATHWAY(STATION *reftop, STATION *refbot)
     refBOT = refbot;
 }
 
-void SETxSTATIONxPATHWAY(STATION *instance, uint8_t path)
+void SETxSTATIONxPATHWAY(STATION *self, uint8_t path)
 {
     switch(path){
         case 1:
-            *instance->setPath->port1_ptr |=  instance->setPath->pin1_mask;
-            *instance->setPath->port2_ptr &= ~instance->setPath->pin2_mask;
-            *instance->setPath->port3_ptr |=  instance->setPath->pin3_mask;
-            *instance->setPath->port4_ptr &= ~instance->setPath->pin4_mask; 
+            *self->setPath->port1_ptr |=  self->setPath->pin1_mask;
+            *self->setPath->port2_ptr &= ~self->setPath->pin2_mask;
+            *self->setPath->port3_ptr |=  self->setPath->pin3_mask;
+            *self->setPath->port4_ptr &= ~self->setPath->pin4_mask; 
             break;
             
         case 2:
-            *instance->setPath->port1_ptr &= ~instance->setPath->pin1_mask;
-            *instance->setPath->port2_ptr |=  instance->setPath->pin2_mask;
-            *instance->setPath->port3_ptr &= ~instance->setPath->pin3_mask;
-            *instance->setPath->port4_ptr |=  instance->setPath->pin4_mask;
+            *self->setPath->port1_ptr &= ~self->setPath->pin1_mask;
+            *self->setPath->port2_ptr |=  self->setPath->pin2_mask;
+            *self->setPath->port3_ptr &= ~self->setPath->pin3_mask;
+            *self->setPath->port4_ptr |=  self->setPath->pin4_mask;
             break;
             
         case 3:
-            *instance->setPath->port1_ptr &= ~instance->setPath->pin1_mask;
-            *instance->setPath->port2_ptr &= ~instance->setPath->pin2_mask;
-            *instance->setPath->port3_ptr &= ~instance->setPath->pin3_mask;
-            *instance->setPath->port4_ptr &= ~instance->setPath->pin4_mask;
+            *self->setPath->port1_ptr &= ~self->setPath->pin1_mask;
+            *self->setPath->port2_ptr &= ~self->setPath->pin2_mask;
+            *self->setPath->port3_ptr &= ~self->setPath->pin3_mask;
+            *self->setPath->port4_ptr &= ~self->setPath->pin4_mask;
             break;
  
         default:break;
     }
     
-    if(instance->prevPath != path)
+    if(self->prevPath != path)
     {        
         /* Store new path in the previous path and set path update in newPath */
-        instance->prevPath = path;
-        instance->newPath = path;
+        self->prevPath = path;
+        self->newPath = path;
         /* Path has changed, set all signals to red*/
-        *instance->setSignal->port1_ptr &= ~instance->setSignal->pin1_mask; // Green
-        *instance->setSignal->port2_ptr |=  instance->setSignal->pin2_mask; // Red
-        *instance->setSignal->port3_ptr &= ~instance->setSignal->pin3_mask;
-        *instance->setSignal->port4_ptr |=  instance->setSignal->pin4_mask;
-        *instance->setSignal->port5_ptr &= ~instance->setSignal->pin5_mask;
-        *instance->setSignal->port6_ptr |=  instance->setSignal->pin6_mask;
-        instance->setSignalTime = GETxMILLIS();
+        *self->setSignal->port1_ptr &= ~self->setSignal->pin1_mask; // Green
+        *self->setSignal->port2_ptr |=  self->setSignal->pin2_mask; // Red
+        *self->setSignal->port3_ptr &= ~self->setSignal->pin3_mask;
+        *self->setSignal->port4_ptr |=  self->setSignal->pin4_mask;
+        *self->setSignal->port5_ptr &= ~self->setSignal->pin5_mask;
+        *self->setSignal->port6_ptr |=  self->setSignal->pin6_mask;
+        self->setSignalTime = GETxMILLIS();
     }
 }
 
@@ -92,26 +92,26 @@ void UPDATExSIGNAL()
  * This function takes a reference to a Station and changes the signal status
  * related to the desired newPath
  */
-void setSignal(STATION *instance)
+void setSignal(STATION *self)
 {
-    switch(instance->newPath)
+    switch(self->newPath)
     {
         case 1:
             /* Signal 1B / 10B */
-            *instance->setSignal->port1_ptr |=  instance->setSignal->pin1_mask; // Green
-            *instance->setSignal->port2_ptr &= ~instance->setSignal->pin2_mask; // Red
+            *self->setSignal->port1_ptr |=  self->setSignal->pin1_mask; // Green
+            *self->setSignal->port2_ptr &= ~self->setSignal->pin2_mask; // Red
             break;
             
         case 2:
             /* Signal 2B / 11B */
-            *instance->setSignal->port3_ptr |=  instance->setSignal->pin3_mask;
-            *instance->setSignal->port4_ptr &= ~instance->setSignal->pin4_mask;
+            *self->setSignal->port3_ptr |=  self->setSignal->pin3_mask;
+            *self->setSignal->port4_ptr &= ~self->setSignal->pin4_mask;
             break;
             
         case 3:
             /* Signal 3B / 12B */
-            *instance->setSignal->port5_ptr |=  instance->setSignal->pin5_mask;
-            *instance->setSignal->port6_ptr &= ~instance->setSignal->pin6_mask;
+            *self->setSignal->port5_ptr |=  self->setSignal->pin5_mask;
+            *self->setSignal->port6_ptr &= ~self->setSignal->pin6_mask;
             break;
             
         default: break;

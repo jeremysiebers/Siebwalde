@@ -40,7 +40,7 @@ OCC OCC_TO_T3     = {&LATE, 0x8};
 
 
 extern void INITxSTATION(void);
-extern void UPDATExSTATION(STATION *instance);
+extern void UPDATExSTATION(STATION *self);
 
 #ifdef	__cplusplus
 extern "C" {

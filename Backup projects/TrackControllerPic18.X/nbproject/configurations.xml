@@ -4,6 +4,10 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <logicalFolder name="f1" displayName="MainStation" projectFiles="true">
+        <itemPath>mainStationOutgoing.h</itemPath>
+        <itemPath>mainstation.h</itemPath>
+      </logicalFolder>
       <logicalFolder name="MCC Generated Files"
                      displayName="MCC Generated Files"
                      projectFiles="true">
@@ -17,7 +21,7 @@
       <itemPath>main.h</itemPath>
       <itemPath>milisecond_counter.h</itemPath>
       <itemPath>pathway.h</itemPath>
-      <itemPath>station.h</itemPath>
+      <itemPath>setocc.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -26,6 +30,11 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
+      <logicalFolder name="f1" displayName="MainStation" projectFiles="true">
+        <itemPath>pathway.c</itemPath>
+        <itemPath>mainStationOutgoing.c</itemPath>
+        <itemPath>mainstation.c</itemPath>
+      </logicalFolder>
       <logicalFolder name="MCC Generated Files"
                      displayName="MCC Generated Files"
                      projectFiles="true">
@@ -38,8 +47,7 @@
       <itemPath>main.c</itemPath>
       <itemPath>debounce.c</itemPath>
       <itemPath>milisecond_counter.c</itemPath>
-      <itemPath>pathway.c</itemPath>
-      <itemPath>station.c</itemPath>
+      <itemPath>setocc.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -61,7 +69,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>PICkit3PlatformTool</platformTool>
         <languageToolchain>XC8</languageToolchain>
-        <languageToolchainVersion>2.41</languageToolchainVersion>
+        <languageToolchainVersion>2.31</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <packs>

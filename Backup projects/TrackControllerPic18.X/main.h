@@ -35,11 +35,31 @@
 #include <xc.h> // include processor files - each processor file is guarded.
 #include <stdbool.h>
 #include "debounce.h"
- 
+
+#define busy -1
+#define done 1
+
 enum STATES{
     INIT,
     RUN,
     WAIT,
+    IDLE,
+
+    HNDL_IDLE,
+    HNDL_INCOMMING,
+    HNDL_OUTGOING,
+    HNDL_PASSING,
+    
+    STN_INCOMMING,
+    STN_OUTGOING,
+    STN_PASSING,
+    STN_WAIT,
+    STN_EMPTY,
+    
+    SEQ_IDLE,
+    SEQ_WAIT,
+    SEQ_SET_OCC,
+    
     
 };
 
@@ -66,13 +86,24 @@ typedef struct
     
 }WS, SIG;
 
+typedef struct
+{
+    enum STATES                 stnState;
+    enum STATES                 stnSequence;
+    enum STATES                 stnNextState;
+    bool                        stnOccupied;
+    uint8_t                     trackNr;
+    
+    
+}STNTRACK;
+
 /*
  * Station struct
 */
 typedef struct
 {
-    enum STATES                 extState;                                       // State of the state meachine
-    enum STATES                 intState;
+    enum STATES                 AppState;                                       // State of the state meachine
+    enum STATES                 hndlState;
     DEBOUNCE                    *getFreightLeaveStation;
     DEBOUNCE                    *getFreightEnterStation;
     OCC                         *setOccBlkIn;
@@ -89,6 +120,9 @@ typedef struct
     uint8_t                     newPath;
     SIG                         *setSignal;
     uint32_t                    setSignalTime;
+    STNTRACK                    stnTrack1;
+    STNTRACK                    stnTrack2;
+    STNTRACK                    stnTrack3;
             
 }STATION;
 

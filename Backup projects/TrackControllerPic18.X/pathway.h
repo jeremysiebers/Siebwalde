@@ -41,9 +41,9 @@ SIG SIG_TOP  = {&LATC, 0x01, &LATC, 0x02, &LATJ, 0x01, &LATJ, 0x02, &LATJ, 0x04,
 SIG SIG_BOT  = {&LATC, 0x04, &LATC, 0x08, &LATC, 0x10, &LATC, 0x20, &LATC, 0x40, &LATC, 0x80};// Signal Leds 1B, 2B and 3B Green and Red
 
 extern void INITxPATHWAY(STATION *reftop, STATION *refbot);
-extern void SETxSTATIONxPATHWAY(STATION *instance, uint8_t path);
+extern void SETxSTATIONxPATHWAY(STATION *self, uint8_t path);
 extern void UPDATExSIGNAL(void);
-void setSignal(STATION *instance);
+void setSignal(STATION *self);
 
 
 

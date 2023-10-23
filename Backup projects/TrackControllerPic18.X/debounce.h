@@ -77,8 +77,11 @@ DEBOUNCE OCC_FR_STN_12  = {1, 0, 0, 0, &PORTG, 0x2,  0,  true,   true};
 DEBOUNCE OCC_FR_STN_T6  = {1, 0, 0, 0, &PORTG, 0x4,  0,  true,   true};
 DEBOUNCE OCC_FR_STN_T3  = {1, 0, 0, 0, &PORTG, 0x8,  0,  true,   true};
 DEBOUNCE CTRL_OFF       = {1, 0, 0, 0, &PORTG, 0x10, 0,  true,   true};
-DEBOUNCE OCC_FR_9B      = {1, 0, 0, 0, &PORTG, 0x20, 0,  true,   true};
-DEBOUNCE OCC_FR_21B     = {1, 0, 0, 0, &PORTG, 0x40, 0,  true,   true};
+DEBOUNCE OCC_FR_23B     = {1, 0, 0, 0, &PORTG, 0x20, 0,  true,   true};
+DEBOUNCE OCC_FR_22B     = {1, 0, 0, 0, &PORTG, 0x40, 0,  true,   true};
+DEBOUNCE OCC_FR_9B      = {1, 0, 0, 0, &PORTG, 0x80, 0,  true,   true};
+//VOLTDETECT is used directly for now
+DEBOUNCE OCC_FR_21B     = {1, 0, 0, 0, &PORTE, 0x40, 0,  true,   true};
 
 /**
   @Summary

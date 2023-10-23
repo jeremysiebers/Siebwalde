@@ -360,7 +360,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="Custom Name RE5"/>
-         <value/>
+         <value>OCC_FR_21B</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="Custom Name RE6"/>
@@ -660,7 +660,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="RE5"/>
-         <value>disabled</value>
+         <value>input</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="RE6"/>
@@ -1016,7 +1016,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="customNameUserSet RE5"/>
-         <value>disabled</value>
+         <value>enabled</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="customNameUserSet RE6"/>
@@ -4693,16 +4693,16 @@
    </tokenMap>
    <generatedFileHashHistoryMap class="java.util.HashMap">
       <entry>
-         <file>mcc_generated_files\interrupt_manager.h</file>
-         <hash>5c311e57ab563c3fadc6e5c40b1e425436e9366c40e5772f46f393a9f8ed9d39</hash>
-      </entry>
-      <entry>
          <file>mcc_generated_files\mcc.h</file>
          <hash>bcced904d7987a0710536eb30328ac39bf19a85cd34968f98a9ccd95855a6bd6</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\device_config.h</file>
          <hash>8beaab6b86f9d9581aad873abe16c9fbc07b9279b06c13f7d65c254df656ef48</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files\interrupt_manager.h</file>
+         <hash>5c311e57ab563c3fadc6e5c40b1e425436e9366c40e5772f46f393a9f8ed9d39</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\tmr0.h</file>
@@ -4718,15 +4718,15 @@
       </entry>
       <entry>
          <file>mcc_generated_files\pin_manager.h</file>
-         <hash>aab7c262a97516118eb7406ac0baea16dba280c12e2165e99070c1590eb3cb87</hash>
-      </entry>
-      <entry>
-         <file>mcc_generated_files\interrupt_manager.c</file>
-         <hash>ddb8e8d3744a5d106c84a03b80282245f18d8577f05ba5bd1edde305ffbc02c5</hash>
+         <hash>94a3f6ebe6f20cc0eacc3983b28e076669719a04566c321aee789d8f0f692db1</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\mcc.c</file>
          <hash>229cf06ea23ee44bba22f4dda551e9b2aefec9469625b9a3ede7c28310dd3844</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files\interrupt_manager.c</file>
+         <hash>ddb8e8d3744a5d106c84a03b80282245f18d8577f05ba5bd1edde305ffbc02c5</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\tmr0.c</file>

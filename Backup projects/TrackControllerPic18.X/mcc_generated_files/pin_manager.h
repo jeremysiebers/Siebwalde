@@ -439,6 +439,17 @@
 #define OCC_TO_8A_SetDigitalInput()    do { TRISEbits.TRISE4 = 1; } while(0)
 #define OCC_TO_8A_SetDigitalOutput()   do { TRISEbits.TRISE4 = 0; } while(0)
 
+// get/set OCC_FR_21B aliases
+#define OCC_FR_21B_TRIS                 TRISEbits.TRISE5
+#define OCC_FR_21B_LAT                  LATEbits.LATE5
+#define OCC_FR_21B_PORT                 PORTEbits.RE5
+#define OCC_FR_21B_SetHigh()            do { LATEbits.LATE5 = 1; } while(0)
+#define OCC_FR_21B_SetLow()             do { LATEbits.LATE5 = 0; } while(0)
+#define OCC_FR_21B_Toggle()             do { LATEbits.LATE5 = ~LATEbits.LATE5; } while(0)
+#define OCC_FR_21B_GetValue()           PORTEbits.RE5
+#define OCC_FR_21B_SetDigitalInput()    do { TRISEbits.TRISE5 = 1; } while(0)
+#define OCC_FR_21B_SetDigitalOutput()   do { TRISEbits.TRISE5 = 0; } while(0)
+
 // get/set VOLTDET aliases
 #define VOLTDET_TRIS                 TRISEbits.TRISE7
 #define VOLTDET_LAT                  LATEbits.LATE7
