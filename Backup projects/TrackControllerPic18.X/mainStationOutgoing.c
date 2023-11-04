@@ -28,7 +28,9 @@ int8_t MAINxSTATIONSxOUTGOING(STATION *self){
             activeTrack->stnSequence = SEQ_WAIT;
             break;
             
-            case SEQ_WAIT
+        case SEQ_WAIT:
+            
+            break;
             
         default: break;
     }
