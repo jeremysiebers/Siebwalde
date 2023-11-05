@@ -5,8 +5,11 @@
                    displayName="Header Files"
                    projectFiles="true">
       <logicalFolder name="f1" displayName="MainStation" projectFiles="true">
-        <itemPath>mainStationOutgoing.h</itemPath>
         <itemPath>mainstation.h</itemPath>
+        <itemPath>pathway.h</itemPath>
+        <itemPath>mainStationPassing.h</itemPath>
+        <itemPath>mainStationInbound.h</itemPath>
+        <itemPath>mainStationOutbound.h</itemPath>
       </logicalFolder>
       <logicalFolder name="MCC Generated Files"
                      displayName="MCC Generated Files"
@@ -20,7 +23,6 @@
       <itemPath>debounce.h</itemPath>
       <itemPath>main.h</itemPath>
       <itemPath>milisecond_counter.h</itemPath>
-      <itemPath>pathway.h</itemPath>
       <itemPath>setocc.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
@@ -32,8 +34,10 @@
                    projectFiles="true">
       <logicalFolder name="f1" displayName="MainStation" projectFiles="true">
         <itemPath>pathway.c</itemPath>
-        <itemPath>mainStationOutgoing.c</itemPath>
         <itemPath>mainstation.c</itemPath>
+        <itemPath>mainStationPassing.c</itemPath>
+        <itemPath>mainStationInbound.c</itemPath>
+        <itemPath>mainStationOutbound.c</itemPath>
       </logicalFolder>
       <logicalFolder name="MCC Generated Files"
                      displayName="MCC Generated Files"

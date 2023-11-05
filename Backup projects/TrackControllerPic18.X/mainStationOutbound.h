@@ -16,7 +16,7 @@
 extern "C" {
 #endif
 
-    extern int8_t MAINxSTATIONSxOUTGOING(STATION *self);
+    extern int8_t MAINxSTATIONxOUTBOUND(STATION *self);
 
 
 #ifdef	__cplusplus

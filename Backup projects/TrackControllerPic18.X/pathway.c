@@ -68,7 +68,7 @@ void UPDATExSIGNAL()
     else{
         /* If a new path is defined then check if enough time has elapsed to
          swith the signal */
-        if((GETxMILLIS() - refTOP->setSignalTime) > 50){
+        if((GETxMILLIS() - refTOP->setSignalTime) > (tSignalSwitchWaitTime)){
             setSignal(refTOP);
             refTOP->newPath = 0;
         }
@@ -81,7 +81,7 @@ void UPDATExSIGNAL()
     else{
         /* If a new path is defined then check if enough time has elapsed to
          swith the signal */
-        if((GETxMILLIS() - refBOT->setSignalTime) > 50){
+        if((GETxMILLIS() - refBOT->setSignalTime) > (tSignalSwitchWaitTime)){
             setSignal(refBOT);
             refBOT->newPath = 0;
         }

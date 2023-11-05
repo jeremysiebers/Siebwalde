@@ -38,6 +38,14 @@
 
 #define busy -1
 #define done 1
+#define nop 2
+
+/* factor to be set according to set timer intterrupt vallue */
+const uint32_t tFactor = 100;
+/* 5 seconds wait time after point switch set the signal */
+const uint32_t  tSignalSwitchWaitTime = (uint32_t)(5 * tFactor);
+/* Time to wait for servo to move to new position */
+const uint32_t  tSwitchPointWaitTime = (uint32_t)(5 * tFactor);
 
 enum STATES{
     INIT,
@@ -46,12 +54,13 @@ enum STATES{
     IDLE,
 
     HNDL_IDLE,
-    HNDL_INCOMMING,
+    HNDL_INBOUND,
     HNDL_OUTGOING,
     HNDL_PASSING,
+    HNDL_WAIT_BLK_OUT,
     
-    STN_INCOMMING,
-    STN_OUTGOING,
+    STN_INBOUND,
+    STN_OUTBOUND,
     STN_PASSING,
     STN_WAIT,
     STN_EMPTY,
@@ -59,7 +68,7 @@ enum STATES{
     SEQ_IDLE,
     SEQ_WAIT,
     SEQ_SET_OCC,
-    
+    SEQ_CHK_TRAIN,
     
 };
 
@@ -93,6 +102,10 @@ typedef struct
     enum STATES                 stnNextState;
     bool                        stnOccupied;
     uint8_t                     trackNr;
+    uint32_t                    tCountTime;
+    uint32_t                    tWaitTime;
+    OCC                         *setOccStn;
+    DEBOUNCE                    *getOccStn;
     
     
 }STNTRACK;
@@ -107,13 +120,7 @@ typedef struct
     DEBOUNCE                    *getFreightLeaveStation;
     DEBOUNCE                    *getFreightEnterStation;
     OCC                         *setOccBlkIn;
-    DEBOUNCE                    *getOccBlkIn;
-    OCC                         *setOccStn1;
-    DEBOUNCE                    *getOccStn1;
-    OCC                         *setOccStn2;
-    DEBOUNCE                    *getOccStn2;
-    OCC                         *setOccStn3;
-    DEBOUNCE                    *getOccStn3;
+    DEBOUNCE                    *getOccBlkIn;    
     DEBOUNCE                    *getOccBlkOut;
     WS                          *setPath;
     uint8_t                     prevPath;
