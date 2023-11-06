@@ -12,8 +12,7 @@
 extern "C" {
 #endif
 
-
-
+    extern int8_t MAINxSTATIONxPASSING(STATION *self);
 
 #ifdef	__cplusplus
 }

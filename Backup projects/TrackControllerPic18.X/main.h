@@ -46,6 +46,8 @@ const uint32_t tFactor = 100;
 const uint32_t  tSignalSwitchWaitTime = (uint32_t)(5 * tFactor);
 /* Time to wait for servo to move to new position */
 const uint32_t  tSwitchPointWaitTime = (uint32_t)(5 * tFactor);
+/* Time that Train waits before leaving */
+const uint32_t  tTrainWaitTime = (uint32_t)(30 * tFactor);
 
 enum STATES{
     INIT,
@@ -55,7 +57,7 @@ enum STATES{
 
     HNDL_IDLE,
     HNDL_INBOUND,
-    HNDL_OUTGOING,
+    HNDL_OUTBOUND,
     HNDL_PASSING,
     HNDL_WAIT_BLK_OUT,
     
@@ -69,7 +71,7 @@ enum STATES{
     SEQ_WAIT,
     SEQ_SET_OCC,
     SEQ_CHK_TRAIN,
-    
+    SEQ_CHK_PASSED,    
 };
 
 typedef struct

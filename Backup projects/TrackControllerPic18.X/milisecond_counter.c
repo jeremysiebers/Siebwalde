@@ -14,6 +14,7 @@
 void MILLISECOND_HANDLER(void);
 void (*Millisecond_Update_Handler)(void);
 void (*Millisecond_Update_Handler2)(void);
+void (*Millisecond_Update_Handler3)(void);
 
 /*
  * Local variables
@@ -47,6 +48,10 @@ void MILLISECOND_HANDLER()
     {
         Millisecond_Update_Handler2();
     }
+    if(Millisecond_Update_Handler3)
+    {
+        Millisecond_Update_Handler3();
+    }
 }
 
 /*
@@ -63,6 +68,10 @@ void SETxMILLISECONDxUPDATExHANDLER(void (* InterruptHandler)(void)){
 
 void SETxMILLISECONDxUPDATExHANDLER2(void (* InterruptHandler)(void)){
     Millisecond_Update_Handler2 = InterruptHandler;
+}
+
+void SETxMILLISECONDxUPDATExHANDLER3(void (* InterruptHandler)(void)){
+    Millisecond_Update_Handler3 = InterruptHandler;
 }
 
 void Millisecond_DefaultUpdateHandler(void){

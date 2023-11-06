@@ -41,6 +41,7 @@ OCC OCC_TO_T3     = {&LATE, 0x8};
 
 extern void INITxSTATION(void);
 extern void UPDATExSTATION(STATION *self);
+extern void UPDATExTRAINxWAIT(void);
 
 #ifdef	__cplusplus
 extern "C" {

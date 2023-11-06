@@ -22,6 +22,9 @@ extern "C" {
     
     void SETxMILLISECONDxUPDATExHANDLER2(void (* InterruptHandler)(void));
     extern void (*Millisecond_Update_Handler2)(void);
+    
+    void SETxMILLISECONDxUPDATExHANDLER3(void (* InterruptHandler)(void));
+    extern void (*Millisecond_Update_Handler3)(void);
 
 #ifdef	__cplusplus
 }
