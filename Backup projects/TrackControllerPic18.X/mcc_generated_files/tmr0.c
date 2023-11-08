@@ -50,6 +50,7 @@
 
 #include <xc.h>
 #include "tmr0.h"
+//#include "mcc.h"
 
 /**
   Section: Global Variables Definitions
@@ -135,6 +136,7 @@ void TMR0_Reload(void)
 
 void TMR0_ISR(void)
 {
+    //TP2_SetHigh();
 
     // clear the TMR0 interrupt flag
     INTCONbits.TMR0IF = 0;
@@ -148,6 +150,8 @@ void TMR0_ISR(void)
     {
         TMR0_InterruptHandler();
     }
+    
+    //TP2_SetLow();
 
     // add your TMR0 interrupt custom code
 }

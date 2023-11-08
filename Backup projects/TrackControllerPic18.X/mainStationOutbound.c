@@ -9,14 +9,14 @@ STNTRACK *activeTrack;
 
 int8_t MAINxSTATIONxOUTBOUND(STATION *self){
     
-    if(self->stnTrack1.stnState == STN_OUTBOUND){
+    if(self->stnTrack3.stnState == STN_OUTBOUND){
+        activeTrack = &self->stnTrack3;
+    }
+    else if(self->stnTrack1.stnState == STN_OUTBOUND){
         activeTrack = &self->stnTrack1;
     }
     else if(self->stnTrack2.stnState == STN_OUTBOUND){
         activeTrack = &self->stnTrack2;
-    }
-    else if(self->stnTrack3.stnState == STN_OUTBOUND){
-        activeTrack = &self->stnTrack3;
     }
     else{
         return(nop);

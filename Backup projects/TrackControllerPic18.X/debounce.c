@@ -10,24 +10,26 @@
 #include "milisecond_counter.h"
 
 void DEBOUNCExIO(DEBOUNCE *instance) 
-{    
+{
+    uint32_t millis = GETxMILLIS();
+
     // Read the input signal and store it in the struct
     instance->buttonState = (bool)((*instance->portx_ptr) & instance->pin_mask);
-    
+
     // Check if the button state has changed
     if (instance->buttonState != instance->lastButtonState && instance->lastDebounceTime == 0) {
       // Reset the debounce timer
-      instance->lastDebounceTime = GETxMILLIS();
+      instance->lastDebounceTime = millis;
     }
 
     // Check if the debounce time has elapsed
-    if ((GETxMILLIS() - instance->lastDebounceTime) > instance->debounceDelay) {
+    if ((millis - instance->lastDebounceTime) > instance->debounceDelay) {
       // Update the last button state
       instance->lastButtonState = instance->buttonState;
       
       // re-set the lastDebounceTime
       instance->lastDebounceTime = 0;
-
+      
       // Process the button state change
       if (instance->buttonState == HIGH && instance->ResetL2H) {
         // Handle low-to-high transition

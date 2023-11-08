@@ -4,6 +4,7 @@
 #include "mainstation.h"
 #include "pathway.h"
 #include "setocc.h"
+#include "milisecond_counter.h"
 #include "mainStationOutbound.h"
 #include "mainStationInbound.h"
 #include "mainStationPassing.h"

@@ -26,6 +26,7 @@
 #include "pathway.h"
 
 void DebounceIO(void);
+void UpdateTick(void);
 
 /*
                          Main application
@@ -44,6 +45,8 @@ void DebounceIO(void);
  * PORTD = OUTPUT CARD 2 LOW BYTE
  * PORTC = OUTPUT CARD 2 HIGH BYTE
  */
+
+bool updateTick = false;
 
 void main(void)
 {
@@ -67,15 +70,18 @@ void main(void)
     //INTERRUPT_PeripheralInterruptDisable();
     
     MILLIESxINIT();
-    SETxMILLISECONDxUPDATExHANDLER(DebounceIO);
-    SETxMILLISECONDxUPDATExHANDLER2(UPDATExSIGNAL);
-    SETxMILLISECONDxUPDATExHANDLER3(UPDATExTRAINxWAIT);
+    //SETxMILLISECONDxUPDATExHANDLER(DebounceIO);
+    //SETxMILLISECONDxUPDATExHANDLER2(UPDATExSIGNAL);
+    //SETxMILLISECONDxUPDATExHANDLER3(UPDATExTRAINxWAIT);
+    SETxMILLISECONDxUPDATExHANDLER(UpdateTick);
     INITxSTATION();
     
     while (1)
     {
+        TP1_SetHigh();
         /* Manage TCP/IP Stack */
-        //Network_Manage();
+        Network_Manage();
+        TP1_SetLow();
         
         /* Check if over ride key is present, if yes then disable controller. */
         if(KEY_CTRL_GetValue())
@@ -102,21 +108,46 @@ void main(void)
             OCC_TO_STN_10_SetHigh();
         }
         /* When driving voltage is present execute state machines */
-        else if(VOLTDET_GetValue())
+        else if(!VOLTDET_GetValue())
         {
+            //TP1_SetHigh();
+            
+            if(true == updateTick){
+                DebounceIO();
+                UPDATExSIGNAL();
+                UPDATExTRAINxWAIT();
+                updateTick = false;
+            }
+            //TP1_SetHigh();
             UPDATExSTATION(&top);
+            //TP2_SetLow();
             UPDATExSTATION(&bot);
+            
+            //TP1_SetLow();
         }
         
                 
     }
 }
 
-void DebounceIO(void)
+/*
+ * Set to true by x millisecond update 
+ */
+void UpdateTick(){
+    updateTick = true;
+}
+
+/*
+ * Debounce all I/O
+ */
+void DebounceIO()
 {
-    if(VOLTDET_GetValue()){
+    /*
+     * almost 500us
+     */
+    if(!VOLTDET_GetValue()){
         TP2_SetHigh();
-        DEBOUNCExIO(&HALL_BLK_13  );        
+        DEBOUNCExIO(&HALL_BLK_13  );
         DEBOUNCExIO(&HALL_BLK_21A );
         DEBOUNCExIO(&HALL_BLK_T4  );
         DEBOUNCExIO(&HALL_BLK_T5  );
