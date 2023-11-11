@@ -40,6 +40,8 @@
 #define done 1
 #define nop 2
 
+void UDP_DATA_RECV(int length);
+
 /* factor to be set according to set timer intterrupt vallue */
 const uint32_t tFactor = 100;
 /* 5 seconds wait time after point switch set the signal */

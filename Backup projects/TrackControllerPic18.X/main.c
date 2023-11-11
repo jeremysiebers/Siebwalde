@@ -24,9 +24,35 @@
 #include "debounce.h"
 #include "mainstation.h"
 #include "pathway.h"
+#include "mcc_generated_files/TCPIPLibrary/udpv4.h"
+#include "mcc_generated_files/TCPIPLibrary/tcpip_config.h"
 
 void DebounceIO(void);
 void UpdateTick(void);
+
+void UDP_DEMO_Initialize(void);
+void UDP_DEMO_Send (void);
+void UDP_DEMO_Recv(void);
+
+
+typedef struct
+{
+    uint32_t destinationAddress;
+    uint16_t sourcePortNumber;
+    uint16_t destinationPortNumber;    
+}udpStart_t;
+
+static udpStart_t udpPacket;
+
+uint8_t ProcessEthData = false;
+
+uint8_t data=0;
+uint32_t SrcIpAddress = 0;
+uint32_t DstIpAddress = 0;
+uint16_t DestPort = 0;
+uint16_t SourcePort = 0;
+
+bool autosend = false;
 
 /*
                          Main application
@@ -75,6 +101,17 @@ void main(void)
     //SETxMILLISECONDxUPDATExHANDLER3(UPDATExTRAINxWAIT);
     SETxMILLISECONDxUPDATExHANDLER(UpdateTick);
     INITxSTATION();
+    
+    /* UDP Packet Initializations*/
+    udpPacket.destinationAddress = MAKE_IPV4_ADDRESS(192,168,1,19);
+    udpPacket.sourcePortNumber = 65533;
+    udpPacket.destinationPortNumber = 65531;
+
+    error_msg ret = ERROR;
+    
+    while(!ETH_CheckLinkUp()){
+        Network_Manage();
+    }
     
     while (1)
     {
@@ -126,7 +163,29 @@ void main(void)
             //TP1_SetLow();
         }
         
-                
+        if(true == ProcessEthData){
+            ProcessEthData = false;
+            SrcIpAddress    = UDP_GetSrcIP();   // IP of uController
+            DstIpAddress    = UDP_GetDestIP();  // sender IP
+            DestPort        = UDP_GetDestPort();// sender port used 
+            SourcePort      = UDP_GetSrcPort(); // port of uController
+            
+            // error_msg UDP_Start(uint32_t destIP, uint16_t srcPort, uint16_t dstPort)
+            
+            ret = UDP_Start(DstIpAddress, 0x7000, 0x7000);
+            if(ret == SUCCESS){
+                UDP_Write8(data);
+                UDP_Send();
+            }
+            
+            if(data == 0x55){
+                autosend = true;
+            }
+            else{
+                autosend  = false;
+            }
+        }
+        
     }
 }
 
@@ -142,6 +201,13 @@ void UpdateTick(){
  */
 void DebounceIO()
 {
+    if(autosend){
+           error_msg ret = UDP_Start(DstIpAddress, 0x7000, 0x7000);
+            if(ret == SUCCESS){
+                UDP_Write32(GETxMILLIS());
+                UDP_Send();
+            }
+        }
     /*
      * almost 500us
      */
@@ -178,3 +244,10 @@ void DebounceIO()
 /**
  End of File
 */
+
+void UDP_DATA_RECV(int length)
+{    
+    //UDP_ReadBlock(&udpRecv,sizeof(udpDemoRecv_t));
+    data = UDP_Read8();
+    ProcessEthData = true;
+}
