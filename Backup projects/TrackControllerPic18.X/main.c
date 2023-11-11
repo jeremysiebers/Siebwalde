@@ -178,12 +178,6 @@ void main(void)
                 UDP_Send();
             }
             
-            if(data == 0x55){
-                autosend = true;
-            }
-            else{
-                autosend  = false;
-            }
         }
         
     }
@@ -201,13 +195,6 @@ void UpdateTick(){
  */
 void DebounceIO()
 {
-    if(autosend){
-           error_msg ret = UDP_Start(DstIpAddress, 0x7000, 0x7000);
-            if(ret == SUCCESS){
-                UDP_Write32(GETxMILLIS());
-                UDP_Send();
-            }
-        }
     /*
      * almost 500us
      */
