@@ -167,38 +167,11 @@
     <Compile Include="Logging\Implementation\ILogger.cs" />
     <Compile Include="Logging\Base\LogFactoryLevel.cs" />
     <Compile Include="Model\SiebwaldeApplicationModel.cs" />
-    <Compile Include="Model\TrackApplication\Controller\TrackAmplifierInitializers\AmplifierInitializersBaseClass.cs" />
-    <Compile Include="Model\TrackApplication\Controller\TrackAmplifierInitializers\RecoverSlaves.cs" />
-    <Compile Include="Model\TrackApplication\Controller\TrackAmplifierInitializers\EnableTrackamplifiers.cs" />
-    <Compile Include="Model\TrackApplication\Controller\TrackAmplifierInitializers\InitTrackamplifiers.cs" />
-    <Compile Include="Model\TrackApplication\Controller\TrackAmplifierInitializers\FlashFwTrackamplifiers.cs" />
-    <Compile Include="Model\TrackApplication\Controller\TrackAmplifierInitializers\DetectSlaves.cs" />
-    <Compile Include="Model\TrackApplication\Controller\TrackAmplifierInitializers\DataUpload.cs" />
-    <Compile Include="Model\TrackApplication\Controller\TrackAmplifierInitializers\ResetAllSlaves.cs" />
-    <Compile Include="Model\TrackApplication\Controller\TrackAmplifierInitializers\ConnectToEthernetTarget.cs" />
-    <Compile Include="Model\TrackApplication\Controller\TrackAmplifierInitializers\SendNextFwDataPacket.cs" />
-    <Compile Include="Model\TrackApplication\Controller\TrackAmplifierInitializers\TrackAmplifierBootloaderHelpers.cs" />
-    <Compile Include="Model\TrackApplication\Controller\TrackAmplifierInitializers\TrackAmplifierInitalizationSequencer.cs" />
-    <Compile Include="Model\TrackApplication\Controller\TrackControlMain.cs" />
-    <Compile Include="Model\TrackApplication\Data\TrackApplicationVariables.cs" />
-    <Compile Include="Model\TrackApplication\Data\TrackIOHandle.cs" />
-    <Compile Include="Model\TrackApplication\Model\TrackAmplifierItem.cs" />
-    <Compile Include="Model\TrackApplication\Model\TrackControllerCommands.cs" />
-    <Compile Include="Model\TrackApplication\Pages\TrackAmplifierItemView.xaml.cs">
-      <DependentUpon>TrackAmplifierItemView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Model\TrackApplication\Pages\TrackAmplifierManualControlView.xaml.cs">
-      <DependentUpon>TrackAmplifierManualControlView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Model\TrackApplication\Pages\TrackControlView.xaml.cs">
-      <DependentUpon>TrackControlView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Model\TrackApplication\Services\PublicEnums.cs" />
-    <Compile Include="Model\TrackApplication\Simulator\EthernetTargetDataSimulator.cs" />
-    <Compile Include="Model\TrackApplication\TrackController.cs" />
-    <Compile Include="Model\TrackApplication\ViewModel\TrackAmplifierItemViewModel.cs" />
-    <Compile Include="Model\TrackApplication\ViewModel\TrackAmplifierManualControlViewModel.cs" />
-    <Compile Include="Model\TrackApplication\ViewModel\TrackControlViewModel.cs" />
+    <Compile Include="Model\TrackApplicationAn\Controller\TrackControlMain.cs" />
+    <Compile Include="Model\TrackApplicationAn\Data\TrackApplicationVariables.cs" />
+    <Compile Include="Model\TrackApplicationAn\Data\TrackIOHandle.cs" />
+    <Compile Include="Model\TrackApplicationAn\Services\PublicEnums.cs" />
+    <Compile Include="Model\TrackApplicationAn\TrackController.cs" />
     <Compile Include="Pages\BasePage.cs" />
     <Compile Include="Pages\FiddleYardPages\FiddleYardPage.xaml.cs">
       <DependentUpon>FiddleYardPage.xaml</DependentUpon>
@@ -288,18 +261,6 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="Model\TrackApplication\Pages\TrackAmplifierItemView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Model\TrackApplication\Pages\TrackAmplifierManualControlView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Model\TrackApplication\Pages\TrackControlView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="Pages\FiddleYardPages\FiddleYardPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -412,6 +373,10 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Images\Logo\" />
+    <Folder Include="Model\TrackApplicationAn\Model\" />
+    <Folder Include="Model\TrackApplicationAn\Pages\" />
+    <Folder Include="Model\TrackApplicationAn\Simulator\" />
+    <Folder Include="Model\TrackApplicationAn\ViewModel\" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.8">

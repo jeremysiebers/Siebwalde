@@ -86,22 +86,16 @@ typedef struct
 {
     volatile unsigned char      *port1_ptr;                                     // Reference to the input port used
     uint8_t                     pin1_mask;                                      // Mask to point to pin used of port
-    bool                        invert_pin1;                                    // If value needs to be inverted, used for switches (wissels))
     volatile unsigned char      *port2_ptr;                                     // Reference to the input port used
     uint8_t                     pin2_mask;                                      // Mask to point to pin used of port
-    bool                        invert_pin2;                                    // If value needs to be inverted, used for switches (wissels))
     volatile unsigned char      *port3_ptr;                                     // Reference to the input port used
     uint8_t                     pin3_mask;                                      // Mask to point to pin used of port
-    bool                        invert_pin3;                                    // If value needs to be inverted, used for switches (wissels))
     volatile unsigned char      *port4_ptr;                                     // Reference to the input port used
     uint8_t                     pin4_mask;                                      // Mask to point to pin used of port
-    bool                        invert_pin4;                                    // If value needs to be inverted, used for switches (wissels))
     volatile unsigned char      *port5_ptr;                                     // Reference to the input port used
     uint8_t                     pin5_mask;                                      // Mask to point to pin used of port
-    bool                        invert_pin5;                                    // If value needs to be inverted, used for switches (wissels))
     volatile unsigned char      *port6_ptr;                                     // Reference to the input port used
     uint8_t                     pin6_mask;                                      // Mask to point to pin used of port
-    bool                        invert_pin6;                                    // If value needs to be inverted, used for switches (wissels))
     
 }WS, SIG;
 

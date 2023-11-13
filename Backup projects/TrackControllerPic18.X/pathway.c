@@ -16,98 +16,45 @@ void SETxSTATIONxPATHWAY(STATION *self, uint8_t path)
 {
     switch(path){
         case 1:
-            //*self->setPath->port1_ptr |=  self->setPath->pin1_mask;
-            //*self->setPath->port2_ptr |=  self->setPath->pin2_mask;
-            //*self->setPath->port3_ptr |=  self->setPath->pin3_mask; not needed to switch
-            //*self->setPath->port4_ptr |=  self->setPath->pin4_mask; 
-            
-            if(self->setPath->invert_pin1){
-                *self->setPath->port1_ptr &= ~self->setPath->pin1_mask;
-            }
-            else{
-                *self->setPath->port1_ptr |= self->setPath->pin1_mask;
-            }
-            
-            if(self->setPath->invert_pin2){
-                *self->setPath->port2_ptr &= ~self->setPath->pin2_mask;
-            }
-            else{
-                *self->setPath->port2_ptr |= self->setPath->pin2_mask;
-            }
-            
-            if(self->setPath->invert_pin4){
-                *self->setPath->port4_ptr &= ~self->setPath->pin4_mask;
-            }
-            else{
-                *self->setPath->port4_ptr |= self->setPath->pin4_mask;
-            }
+            *self->setPath->port1_ptr &= ~self->setPath->pin1_mask;
+            *self->setPath->port2_ptr |=  self->setPath->pin2_mask;
+            *self->setPath->port3_ptr &= ~self->setPath->pin3_mask;
+            *self->setPath->port4_ptr &= ~self->setPath->pin4_mask;
             break;
-            // wissel 1, wissel 4, wissel 3 --> daarom toevoegen, alle 4 wissels aansturen ook al wiasselstraat nit actief!
-            
+        
         case 2:
-//            *self->setPath->port1_ptr |=  self->setPath->pin1_mask;
-//            *self->setPath->port2_ptr &= ~self->setPath->pin2_mask;
-//            *self->setPath->port3_ptr |=  self->setPath->pin3_mask;
-//            *self->setPath->port4_ptr &= ~self->setPath->pin4_mask;
-            
-            if(self->setPath->invert_pin1){
-                *self->setPath->port1_ptr &= ~self->setPath->pin1_mask;
-            }
-            else{
-                *self->setPath->port1_ptr |= self->setPath->pin1_mask;
-            }
-            
-            if(self->setPath->invert_pin2){
-                *self->setPath->port2_ptr |= self->setPath->pin2_mask;
-            }
-            else{
-                *self->setPath->port2_ptr &= ~self->setPath->pin2_mask;
-            }
-            
-            if(self->setPath->invert_pin3){
-                *self->setPath->port3_ptr &= ~self->setPath->pin3_mask;
-            }
-            else{
-                *self->setPath->port3_ptr |= self->setPath->pin3_mask;
-            }
-            
-            if(self->setPath->invert_pin4){
-                *self->setPath->port4_ptr |= self->setPath->pin4_mask;
-            }
-            else{
-                *self->setPath->port4_ptr &= ~self->setPath->pin4_mask;
-            }
-            
+            *self->setPath->port1_ptr |=  self->setPath->pin1_mask;
+            *self->setPath->port2_ptr &= ~self->setPath->pin2_mask;
+            *self->setPath->port3_ptr |=  self->setPath->pin3_mask;
+            *self->setPath->port4_ptr &= ~self->setPath->pin4_mask;                  
             break;
             
         case 3:
-//            *self->setPath->port1_ptr &= ~self->setPath->pin1_mask;
-//            //*self->setPath->port2_ptr &= ~self->setPath->pin2_mask;
-//            *self->setPath->port3_ptr &= ~self->setPath->pin3_mask;
-//            *self->setPath->port4_ptr &= ~self->setPath->pin4_mask;
+            *self->setPath->port1_ptr |=  self->setPath->pin1_mask;
+            *self->setPath->port2_ptr &= ~self->setPath->pin2_mask;
+            *self->setPath->port3_ptr &= ~self->setPath->pin3_mask;
+            *self->setPath->port4_ptr |=  self->setPath->pin4_mask;            
+        
+        case 10:
+            *self->setPath->port1_ptr |=  self->setPath->pin1_mask;
+            *self->setPath->port2_ptr |=  self->setPath->pin2_mask;
+            *self->setPath->port3_ptr |=  self->setPath->pin3_mask;
+            *self->setPath->port4_ptr |=  self->setPath->pin4_mask;
+            break;            
             
-            if(self->setPath->invert_pin1){
-                *self->setPath->port1_ptr |= self->setPath->pin1_mask;
-            }
-            else{
-                *self->setPath->port1_ptr &= ~self->setPath->pin1_mask;
-            }
-                                    
-            if(self->setPath->invert_pin3){
-                *self->setPath->port3_ptr |= self->setPath->pin3_mask;
-            }
-            else{
-                *self->setPath->port3_ptr &= ~self->setPath->pin3_mask;
-            }
-            
-            if(self->setPath->invert_pin4){
-                *self->setPath->port4_ptr |= self->setPath->pin4_mask;
-            }
-            else{
-                *self->setPath->port4_ptr &= ~self->setPath->pin4_mask;
-            }
+        case 11:
+            *self->setPath->port1_ptr |=  self->setPath->pin1_mask;
+            *self->setPath->port2_ptr &= ~self->setPath->pin2_mask;
+            *self->setPath->port3_ptr |=  self->setPath->pin3_mask;
+            *self->setPath->port4_ptr &= ~self->setPath->pin4_mask;                  
             break;
-            // wissel 1 en wissel 4 niet ok, geen sein aan
+            
+        case 12:
+            *self->setPath->port1_ptr &= ~self->setPath->pin1_mask;
+            *self->setPath->port2_ptr &= ~self->setPath->pin2_mask;
+            *self->setPath->port3_ptr &= ~self->setPath->pin3_mask;
+            *self->setPath->port4_ptr &= ~self->setPath->pin4_mask;
+            break;
  
         default:break;
     }

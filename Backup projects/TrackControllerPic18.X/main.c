@@ -149,7 +149,7 @@ void main(void)
             OCC_TO_STN_10_SetHigh();
         }
         /* When driving voltage is present execute state machines */
-        else if(VOLTDET_GetValue())
+        else if(!VOLTDET_GetValue())
         {
             //TP1_SetHigh();
             
@@ -219,7 +219,7 @@ void DebounceIO()
     /*
      * almost 500us
      */
-    if(VOLTDET_GetValue()){
+    if(!VOLTDET_GetValue()){
         TP2_SetHigh();
         DEBOUNCExIO(&HALL_BLK_13  );
         DEBOUNCExIO(&HALL_BLK_21A );

@@ -26,19 +26,19 @@ void INITxSTATION(void)
     top.setSignal               = &SIG_TOP; 
     top.setSignalTime           = 0;
     
-    top.stnTrack1.trackNr       = 1;
+    top.stnTrack1.trackNr       = 10;
     top.stnTrack1.stnState      = STN_EMPTY;
     top.stnTrack1.stnSequence   = SEQ_IDLE;
     top.stnTrack1.setOccStn     = &OCC_TO_STN_10;
     top.stnTrack1.getOccStn     = &OCC_FR_STN_10;
     
-    top.stnTrack2.trackNr       = 2;
+    top.stnTrack2.trackNr       = 11;
     top.stnTrack2.stnState      = STN_EMPTY;    
     top.stnTrack2.stnSequence   = SEQ_IDLE;
     top.stnTrack2.setOccStn     = &OCC_TO_STN_11;
     top.stnTrack2.getOccStn     = &OCC_FR_STN_11;
     
-    top.stnTrack3.trackNr       = 3;
+    top.stnTrack3.trackNr       = 12;
     top.stnTrack3.stnState      = STN_EMPTY;
     top.stnTrack3.stnSequence   = SEQ_IDLE;
     top.stnTrack3.setOccStn     = &OCC_TO_STN_12;

@@ -34,11 +34,11 @@
 #include <xc.h> // include processor files - each processor file is guarded. 
 #include "main.h"
 
-WS WS_TOP    = {&LATB, 0x10, 0, &LATB, 0x20, 0, &LATB, 0x40, 0, &LATB, 0x80, 0,0,0,0,0,0,0};    // All switches for BOT part of station W5,6,7 and 8
-WS WS_BOT    = {&LATB, 0x01, 1, &LATB, 0x02, 1, &LATB, 0x04, 1, &LATB, 0x08, 1,0,0,0,0,0,0};    // All switches for TOP part of station W1,2,3 and 4
-
-SIG SIG_TOP  = {&LATC, 0x01, 0, &LATC, 0x02, 0, &LATJ, 0x01, 0, &LATJ, 0x02, 0, &LATJ, 0x04, 0, &LATJ, 0x08, 0};// Signal Leds 10B, 11B and 12B Green and Red
-SIG SIG_BOT  = {&LATC, 0x04, 0, &LATC, 0x08, 0, &LATC, 0x10, 0, &LATC, 0x20, 0, &LATC, 0x40, 0, &LATC, 0x80, 0};// Signal Leds 1B, 2B and 3B Green and Red
+WS WS_TOP    = {&LATB, 0x10, &LATB, 0x20, &LATB, 0x40, &LATB, 0x80,0,0,0,0};    // All switches for BOT part of station W5,6,7 and 8
+WS WS_BOT    = {&LATB, 0x01, &LATB, 0x02, &LATB, 0x04, &LATB, 0x08,0,0,0,0};    // All switches for TOP part of station W1,2,3 and 4
+ 
+SIG SIG_TOP  = {&LATC, 0x01, &LATC, 0x02, &LATJ, 0x01, &LATJ, 0x02, &LATJ, 0x04, &LATJ, 0x08};// Signal Leds 10B, 11B and 12B Green and Red
+SIG SIG_BOT  = {&LATC, 0x04, &LATC, 0x08, &LATC, 0x10, &LATC, 0x20, &LATC, 0x40, &LATC, 0x80};// Signal Leds 1B, 2B and 3B Green and Red
 
 extern void INITxPATHWAY(STATION *reftop, STATION *refbot);
 extern void SETxSTATIONxPATHWAY(STATION *self, uint8_t path);
