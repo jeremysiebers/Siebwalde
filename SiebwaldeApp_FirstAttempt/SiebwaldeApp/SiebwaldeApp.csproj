@@ -167,7 +167,10 @@
     <Compile Include="Logging\Implementation\ILogger.cs" />
     <Compile Include="Logging\Base\LogFactoryLevel.cs" />
     <Compile Include="Model\SiebwaldeApplicationModel.cs" />
-    <Compile Include="Model\TrackApplicationAn\Controller\TrackControlMain.cs" />
+    <Compile Include="Model\TrackApplicationAn\Station Controller\PathWay.cs" />
+    <Compile Include="Model\TrackApplicationAn\Station Controller\StationControl.cs" />
+    <Compile Include="Model\TrackApplicationAn\Station Controller\StationTrack.cs" />
+    <Compile Include="Model\TrackApplicationAn\Track Controller\TrackControlMain.cs" />
     <Compile Include="Model\TrackApplicationAn\Data\TrackApplicationVariables.cs" />
     <Compile Include="Model\TrackApplicationAn\Data\TrackIOHandle.cs" />
     <Compile Include="Model\TrackApplicationAn\Services\PublicEnums.cs" />
@@ -198,6 +201,7 @@
       <DependentUpon>SiebwaldePage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Services\CropBitmap.cs" />
+    <Compile Include="Services\LogFileBasics.cs" />
     <Compile Include="Services\MAC_IP_Conditioner.cs" />
     <Compile Include="Services\PingTarget.cs" />
     <Compile Include="Services\Receiver.cs" />

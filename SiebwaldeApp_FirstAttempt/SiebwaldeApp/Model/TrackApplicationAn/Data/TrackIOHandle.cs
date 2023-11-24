@@ -13,17 +13,16 @@ namespace SiebwaldeApp
         private Sender mTrackSender;
         private Receiver mTrackReceiver;
         //private Enums mEnums;
-        private TrackApplicationVariables mTrackApplicationVariables;
-        /* connect variable to connect to FYController class to Main for application logging */
-
+        
         private int mTrackSendingPort;
         private int mTrackReceivingPort;
                 
         private ReceivedMessage mReceivedMessage;
 
-        //public List<TrackAmplifierItem> trackAmpItems;
-        //private TrackAmplifierItem trackAmp;
+        // Public variables
+        private TrackApplicationVariables mTrackApplicationVariables;
 
+        // If track runs in real mode or in sim mode
         public bool mTrackRealMode { get; set; }
 
         //private EthernetTargetDataSimulator mEthernetTargetDataSimulator;
@@ -38,15 +37,17 @@ namespace SiebwaldeApp
         /// <param name="TrackReceivingPort"></param>
         /// <param name="TrackSendingPort"></param>
         /// <param name="trackApplicationVariables"></param>
-        public TrackIOHandle(TrackApplicationVariables trackApplicationVariables, int TrackReceivingPort, int TrackSendingPort, string LoggerInstance)
+        public TrackIOHandle(int TrackReceivingPort, int TrackSendingPort, string LoggerInstance)
         {
-            mTrackApplicationVariables = trackApplicationVariables;
             mTrackReceivingPort = TrackReceivingPort;
             mTrackSendingPort = TrackSendingPort;
             mLoggerInstance = LoggerInstance;
 
             mTrackReceiver = new Receiver(mTrackReceivingPort);
             mTrackSender = new Sender(TRACKTARGET);
+            // create new instance of trackApplicationVariables (DATA)
+            mTrackApplicationVariables = IoC.TrackVar;
+
             //mEthernetTargetDataSimulator = new EthernetTargetDataSimulator();
             mReceivedMessage = new ReceivedMessage(0,0,0,0);
         }
@@ -57,24 +58,28 @@ namespace SiebwaldeApp
         /// <param name="tracksimulator"></param>
         public void Start(bool trackrealmode)
         {
+            IoC.Logger.Log("Track IO Handler started.", mLoggerInstance);
 
             mTrackRealMode = trackrealmode;
 
             if (mTrackRealMode == true)
             {
                 //mEthernetTargetDataSimulator.NewData -= HandleNewData;
-                IoC.Logger.Log("MTCTRL: Track controller Connecting...", mLoggerInstance);
+                IoC.Logger.Log("Track IO handler Connecting to target...", mLoggerInstance);
                 mTrackSender.ConnectUdp(mTrackSendingPort);
+
                 mTrackReceiver.NewData += HandleNewData;
-                IoC.Logger.Log("MTCTRL: Track controller Connected.", mLoggerInstance);
+                IoC.Logger.Log("Track IO handler connected to target.", mLoggerInstance);
+
                 mTrackReceiver.Start();
+                IoC.Logger.Log("Track IO handler reciever started.", mLoggerInstance);
             }
             else if (mTrackRealMode == false)
             {
                 mTrackReceiver.NewData -= HandleNewData;
                 //mEthernetTargetDataSimulator.Start();
                 //mEthernetTargetDataSimulator.NewData += HandleNewData;
-                IoC.Logger.Log("MTCTRL: Track controller Simulator started.", mLoggerInstance);
+                IoC.Logger.Log("Track IO handler connected to Simulator.", mLoggerInstance);
             }
 
         }

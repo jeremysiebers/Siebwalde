@@ -45,11 +45,9 @@ namespace SiebwaldeApp
         /// <param name="LoggerInstance"></param>
         /// <param name="trackIOHandle"></param>
         /// <param name="trackApplicationVariables"></param>
-        public TrackControlMain(string LoggerInstance, TrackIOHandle trackIOHandle, TrackApplicationVariables trackApplicationVariables)
+        public TrackControlMain(string LoggerInstance)
         {
-            // couple and hold local variables
-            mTrackIOHandle = trackIOHandle;
-            mTrackApplicationVariables = trackApplicationVariables;
+            // couple and hold local variables                    
             mLoggerInstance = LoggerInstance;
 
             dummymessage = new ReceivedMessage(0, 0, 0, 0);

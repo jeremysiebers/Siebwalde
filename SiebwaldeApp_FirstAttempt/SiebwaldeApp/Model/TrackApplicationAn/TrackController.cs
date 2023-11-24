@@ -19,12 +19,10 @@ namespace SiebwaldeApp
         // Data
         public static TrackIOHandle mTrackIOHandle;
 
-        //Controller
+        //Controllers
         public static TrackControlMain mTrackControlMain;
-
-        // Public variables
-        public TrackApplicationVariables mTrackApplicationVariables;
-
+        public static StationControl mstationControl;
+        
         // Sending and receiving port variable
         private int mTrackSendingPort;
         private int mTrackReceivingPort;
@@ -34,6 +32,9 @@ namespace SiebwaldeApp
 
         // Logger instance
         private static string LoggerInstance { get; set; }
+
+        // Basic string for file name
+        private LogFileBasics m_LogFileBasics;
 
         // Get a new log factory
         static ILogger GetLogger(string file, string loggerinstance)
@@ -59,18 +60,22 @@ namespace SiebwaldeApp
             // Set logger instance
             LoggerInstance = "Track";
 
+            m_LogFileBasics = new LogFileBasics();
+
             // create logging instance for Track application
-            mTrackApplicationLogging = GetLogger(SiebwaldeApp.Properties.Settings.Default.LogDirectory + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_" + "TrackApplicationMain.txt", LoggerInstance);
+            //mTrackApplicationLogging = GetLogger(SiebwaldeApp.Properties.Settings.Default.LogDirectory + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_" + "TrackApplicationMain.txt", LoggerInstance);
+            mTrackApplicationLogging = GetLogger(m_LogFileBasics.getLogFile("TrackApplicationMain.txt"), LoggerInstance);
+            // Add the logger to the logging factory
             IoC.Logger.AddLogger(mTrackApplicationLogging);
 
-            // create new instance of trackApplicationVariables (DATA)
-            mTrackApplicationVariables = IoC.TrackVar;
-
             // create new instance of TrackIOHandle (Data exchange layer from EthernetTarget)
-            mTrackIOHandle = new TrackIOHandle(mTrackApplicationVariables, mTrackReceivingPort, mTrackSendingPort, LoggerInstance);
+            mTrackIOHandle = new TrackIOHandle(mTrackReceivingPort, mTrackSendingPort, LoggerInstance);
 
             // create new instance of trackControlMain
-            mTrackControlMain = new TrackControlMain(LoggerInstance,  mTrackIOHandle, mTrackApplicationVariables);
+            mTrackControlMain = new TrackControlMain(LoggerInstance);
+
+            // create new instance of station control
+            mstationControl = new StationControl(LoggerInstance);
         }
 
         #endregion
@@ -88,7 +93,7 @@ namespace SiebwaldeApp
                 // Log it
                 IoC.Logger.Log($"Start pinging the TrackController HW...", LoggerInstance);
                 
-                bool TrackRealMode = ConnectTrackConntroller();
+                bool TrackRealMode = PingTrackConntroller();
                 
                 //force if required
                 //TrackRealMode = false;
@@ -107,11 +112,11 @@ namespace SiebwaldeApp
 
                 // start listening to data from ethernet target
                 IoC.Logger.Log("Start Track I/O Handle.", LoggerInstance);
-                //mTrackIOHandle.Start(TrackRealMode);
+                mTrackIOHandle.Start(TrackRealMode);
 
                 // start the Track controller main application
                 IoC.Logger.Log("Start Track Application.", LoggerInstance);
-                //mTrackControlMain.Start(TrackRealMode);
+                mTrackControlMain.Start(TrackRealMode);
             });
         }
 
@@ -123,7 +128,7 @@ namespace SiebwaldeApp
         /// Try to connect/ping the Ethernet TrackTarget 
         /// </summary>
         /// <returns></returns>
-        private static bool ConnectTrackConntroller()
+        private static bool PingTrackConntroller()
         {
             string PingReturn = "";
             try

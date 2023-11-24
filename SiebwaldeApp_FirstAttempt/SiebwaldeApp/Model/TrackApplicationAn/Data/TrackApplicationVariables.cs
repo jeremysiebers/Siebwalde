@@ -26,15 +26,5 @@ namespace SiebwaldeApp
         }
 
         #endregion
-
-        #region Method GetAmplifierListing()
-
-        /// <summary>
-        /// Helper function to get amplifier list
-        /// </summary>
-        /// <returns></returns>
-
-
-        #endregion
     }
 }

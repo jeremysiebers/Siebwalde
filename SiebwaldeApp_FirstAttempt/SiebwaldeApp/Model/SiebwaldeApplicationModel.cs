@@ -99,16 +99,20 @@ namespace SiebwaldeApp
             {
                 IoC.Logger.Log("Track Controller starting...", "");
 
-                TrackController = new TrackController(Properties.Settings.Default.TrckReceivingPort, Properties.Settings.Default.TrckSendingPort);
+                TrackController = initTrackcontroller();
 
                 await TrackController.StartTrackControllerAsync();
 
                 IoC.Logger.Log("Track Controller started.", "");
             }
-            
+
         }
 
-        
+        private static TrackController initTrackcontroller()
+        {
+            return new TrackController(Properties.Settings.Default.TrckReceivingPort, Properties.Settings.Default.TrckSendingPort);
+        }
+
 
     }
 }
