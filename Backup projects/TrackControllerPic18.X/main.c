@@ -54,8 +54,6 @@ uint16_t SourcePort = 0;
 
 bool autosend = false;
 
-uint8_t test = 0;
-
 /*
                          Main application
  */
@@ -115,8 +113,6 @@ void main(void)
         Network_Manage();
     }
     
-    test = 1;
-    
     while (1)
     {
         TP1_SetHigh();
@@ -149,7 +145,7 @@ void main(void)
             OCC_TO_STN_10_SetHigh();
         }
         /* When driving voltage is present execute state machines */
-        else if(!VOLTDET_GetValue())
+        else if(VOLTDET_GetValue())
         {
             //TP1_SetHigh();
             
@@ -160,26 +156,11 @@ void main(void)
                 updateTick = false;
             }
             //TP1_SetHigh();
-            //UPDATExSTATION(&top);
+            UPDATExSTATION(&top);
             //TP2_SetLow();
-            //UPDATExSTATION(&bot);
+            UPDATExSTATION(&bot);
             
-            switch(test){
-                case 10: SETxSTATIONxPATHWAY(&top, 1);
-                break;
-                case 11: SETxSTATIONxPATHWAY(&top, 2);
-                break;
-                case 12: SETxSTATIONxPATHWAY(&top, 3);
-                break;
-                
-                case 1: SETxSTATIONxPATHWAY(&bot, 1);
-                break;
-                case 2: SETxSTATIONxPATHWAY(&bot, 2);
-                break;
-                case 3: SETxSTATIONxPATHWAY(&bot, 3);
-                break;
-                default: break;
-            }
+            
             
             //TP1_SetLow();
         }
@@ -198,7 +179,45 @@ void main(void)
                 UDP_Write8(data);
                 UDP_Send();
             }
-            
+            /*
+            switch(data){
+                case 1: SETxSTATIONxPATHWAY(&bot, 1);
+                break;
+                case 2: SETxSTATIONxPATHWAY(&bot, 2);
+                break;
+                case 3: SETxSTATIONxPATHWAY(&bot, 3);
+                break;
+                
+                case 10: SETxSTATIONxPATHWAY(&top, 10);
+                break;
+                case 11: SETxSTATIONxPATHWAY(&top, 11);
+                break;
+                case 12: SETxSTATIONxPATHWAY(&top, 12);
+                break;
+                
+                case 16: LATB = 0x01;
+                break;
+                case 17: LATB = 0x02;
+                break;
+                case 18: LATB = 0x04;
+                break;
+                case 19: LATB = 0x08;
+                break;
+                case 20: LATB = 0x10;
+                break;
+                case 21: LATB = 0x20;
+                break;
+                case 22: LATB = 0x40;
+                break;
+                case 23: LATB = 0x80;
+                break;
+                case 24: LATB = 0;
+                break;
+                
+                default: break;
+            }
+             */
+            data = 0;
         }
         
     }
@@ -219,7 +238,7 @@ void DebounceIO()
     /*
      * almost 500us
      */
-    if(!VOLTDET_GetValue()){
+    if(VOLTDET_GetValue()){
         TP2_SetHigh();
         DEBOUNCExIO(&HALL_BLK_13  );
         DEBOUNCExIO(&HALL_BLK_21A );

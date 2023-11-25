@@ -1,4 +1,4 @@
-<config configName="default" projectName="YardController" configVersion="1.1" device="PIC18F97J60" deviceLibraryClass="com.microchip.mcc.mcu8.Mcu8PeripheralLibrary" coreVersion="5.5.7">
+<config configName="default" projectName="YardController" configVersion="1.1" device="PIC18F97J60" deviceLibraryClass="com.microchip.mcc.mcu8.Mcu8PeripheralLibrary" coreVersion="5.4.14">
    <usedPackages class="java.util.ArrayList"/>
    <usedClasses class="java.util.TreeMap">
       <entry>
@@ -63,8 +63,8 @@
       </entry>
    </usedClasses>
    <usedLibraries class="java.util.ArrayList">
-      <ILibraryFile class="com.microchip.mcc.core.library.BaseLibraryFile" libraryClass="com.microchip.mcc.mcu8.Mcu8PeripheralLibrary" version="1.82.1"/>
       <ILibraryFile class="com.microchip.mcc.core.library.BaseLibraryFile" libraryClass="com.microchip.mcc.TCPIPLite.TCPIPLite" version="2.2.13"/>
+      <ILibraryFile class="com.microchip.mcc.core.library.BaseLibraryFile" libraryClass="com.microchip.mcc.mcu8.Mcu8PeripheralLibrary" version="1.82.1"/>
    </usedLibraries>
    <tokenMap class="java.util.TreeMap">
       <entry>
@@ -237,7 +237,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="IPV4" name="AlternateDNS"/>
-         <value></value>
+         <value/>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="IPV4" name="Gateway"/>
@@ -249,7 +249,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="IPV4" name="PreferredDNS"/>
-         <value></value>
+         <value/>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="IPV4" name="SubnetMask"/>
@@ -297,7 +297,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="MAC" name="pubSubMAC_SPIMASTER/interface"/>
-         <value>5743.876970602188</value>
+         <value>1037.0218983336965</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="Custom Name MCLR"/>
@@ -4505,7 +4505,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="System Module" registerAlias="CONFIG1L"/>
-         <value>32</value>
+         <value>160</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.RegisterKey" moduleName="System Module" registerAlias="CONFIG2H"/>
@@ -4529,7 +4529,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="System Module" registerAlias="CONFIG1L" settingAlias="DEBUG"/>
-         <value>ON</value>
+         <value>OFF</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.SettingKey" moduleName="System Module" registerAlias="CONFIG1L" settingAlias="STVR"/>
@@ -4649,11 +4649,11 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TCP/IP Lite" name="pubSubTCP/IP Lite_ETHERNET/MAC/interface"/>
-         <value>3366.8430656901683</value>
+         <value>7120.835018451743</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TCP/IP Lite" name="pubSubselectedTimer"/>
-         <value>3493.627614928897</value>
+         <value>5536.336092975459</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TCP/IP Lite" name="selectedTimer"/>
@@ -5102,12 +5102,12 @@
          <hash>9a94f3769f5e61f63525503416ebd6ee6dccf2bc42ff888e645c647676a86f51</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files\TCPIPLibrary\ETHxxJ6x_driver.c</file>
-         <hash>0650227cfa7b75563b710e05f1336c7e13df05e6668425cccc42bba0232f44a0</hash>
-      </entry>
-      <entry>
          <file>mcc_generated_files\TCPIPLibrary\log.c</file>
          <hash>3364f0310232237e88f8d59d59877af7c6b6280c877a88f0967cfe9e787550fa</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files\TCPIPLibrary\ETHxxJ6x_driver.c</file>
+         <hash>0650227cfa7b75563b710e05f1336c7e13df05e6668425cccc42bba0232f44a0</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\TCPIPLibrary\arpv4.c</file>
@@ -5187,7 +5187,7 @@
       </entry>
       <entry>
          <file>mcc_generated_files\device_config.c</file>
-         <hash>0b9de28f5f302b704d2e54c6905811471fdd0b9da89488285c8db8cc32174086</hash>
+         <hash>ce881e01ee5085594984832474cb2d8575e0ad0a7767bc9ba2e80d907b4c9bfd</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\TCPIPLibrary\log_syslog.h</file>
@@ -5230,12 +5230,12 @@
          <hash>76176cfb56d467fac95a5f62473924150bb0cb47677d07aab9e767aed9423e11</hash>
       </entry>
       <entry>
-         <file>mcc_generated_files\TCPIPLibrary\mac_address.c</file>
-         <hash>d0a6f884d64f75d6c3b69d1c53ec42d3d8f02ee1a7f81aa6ed358de5b6c9a18f</hash>
-      </entry>
-      <entry>
          <file>mcc_generated_files\TCPIPLibrary\tcpip_types.h</file>
          <hash>273ede2ace227344b0daa4730b53f8837a3978d57a9c9d610cb1ac1d8616939a</hash>
+      </entry>
+      <entry>
+         <file>mcc_generated_files\TCPIPLibrary\mac_address.c</file>
+         <hash>d0a6f884d64f75d6c3b69d1c53ec42d3d8f02ee1a7f81aa6ed358de5b6c9a18f</hash>
       </entry>
       <entry>
          <file>mcc_generated_files\TCPIPLibrary\icmp.h</file>

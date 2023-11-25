@@ -12,51 +12,32 @@ void INITxPATHWAY(STATION *reftop, STATION *refbot)
     refBOT = refbot;
 }
 
+#pragma optimize( "", off )
 void SETxSTATIONxPATHWAY(STATION *self, uint8_t path)
 {
-    switch(path){
-        case 1:
-            *self->setPath->port1_ptr &= ~self->setPath->pin1_mask;
-            *self->setPath->port2_ptr |=  self->setPath->pin2_mask;
-            *self->setPath->port3_ptr &= ~self->setPath->pin3_mask;
-            *self->setPath->port4_ptr &= ~self->setPath->pin4_mask;
-            break;
-        
-        case 2:
-            *self->setPath->port1_ptr |=  self->setPath->pin1_mask;
-            *self->setPath->port2_ptr &= ~self->setPath->pin2_mask;
-            *self->setPath->port3_ptr |=  self->setPath->pin3_mask;
-            *self->setPath->port4_ptr &= ~self->setPath->pin4_mask;                  
-            break;
-            
-        case 3:
-            *self->setPath->port1_ptr |=  self->setPath->pin1_mask;
-            *self->setPath->port2_ptr &= ~self->setPath->pin2_mask;
-            *self->setPath->port3_ptr &= ~self->setPath->pin3_mask;
-            *self->setPath->port4_ptr |=  self->setPath->pin4_mask;            
-        
-        case 10:
-            *self->setPath->port1_ptr |=  self->setPath->pin1_mask;
+    if(path == 1 || path == 10){
+        *self->setPath->port1_ptr |=  self->setPath->pin1_mask;
             *self->setPath->port2_ptr |=  self->setPath->pin2_mask;
             *self->setPath->port3_ptr |=  self->setPath->pin3_mask;
             *self->setPath->port4_ptr |=  self->setPath->pin4_mask;
-            break;            
-            
-        case 11:
-            *self->setPath->port1_ptr |=  self->setPath->pin1_mask;
-            *self->setPath->port2_ptr &= ~self->setPath->pin2_mask;
-            *self->setPath->port3_ptr |=  self->setPath->pin3_mask;
-            *self->setPath->port4_ptr &= ~self->setPath->pin4_mask;                  
-            break;
-            
-        case 12:
-            *self->setPath->port1_ptr &= ~self->setPath->pin1_mask;
+    }
+    else if(path == 3 || path == 12){
+        *self->setPath->port1_ptr &= ~self->setPath->pin1_mask;
             *self->setPath->port2_ptr &= ~self->setPath->pin2_mask;
             *self->setPath->port3_ptr &= ~self->setPath->pin3_mask;
-            *self->setPath->port4_ptr &= ~self->setPath->pin4_mask;
-            break;
- 
-        default:break;
+            *self->setPath->port4_ptr &= ~self->setPath->pin4_mask; 
+    }
+    else if(path == 2){
+        *self->setPath->port1_ptr &= ~self->setPath->pin1_mask;
+            *self->setPath->port2_ptr |=  self->setPath->pin2_mask;
+            *self->setPath->port3_ptr &= ~self->setPath->pin3_mask;
+            *self->setPath->port4_ptr |=  self->setPath->pin4_mask;  
+    }
+    else if(path == 11){
+        *self->setPath->port1_ptr |=  self->setPath->pin1_mask;
+            *self->setPath->port2_ptr &= ~self->setPath->pin2_mask;
+            *self->setPath->port3_ptr |=  self->setPath->pin3_mask;
+            *self->setPath->port4_ptr &= ~self->setPath->pin4_mask; 
     }
     
     if(self->prevPath != path)
@@ -74,6 +55,7 @@ void SETxSTATIONxPATHWAY(STATION *self, uint8_t path)
         self->setSignalTime = GETxMILLIS();
     }
 }
+#pragma optimize( "", on )
 
 /*
  * During every xMiliseconds an interrupt will call this function to check
@@ -82,10 +64,7 @@ void SETxSTATIONxPATHWAY(STATION *self, uint8_t path)
 void UPDATExSIGNAL()
 {
     /* Check of TOP station 1-3 */
-    if(refTOP->newPath == 0){
-        return;
-    }
-    else{
+    if(refTOP->newPath != 0){        
         /* If a new path is defined then check if enough time has elapsed to
          swith the signal */
         if((GETxMILLIS() - refTOP->setSignalTime) > (tSignalSwitchWaitTime)){
@@ -95,10 +74,7 @@ void UPDATExSIGNAL()
     }
     
     /* Check of BOT station 10-12 */
-    if(refBOT->newPath == 0){
-        return;
-    }
-    else{
+    if(refBOT->newPath != 0){    
         /* If a new path is defined then check if enough time has elapsed to
          swith the signal */
         if((GETxMILLIS() - refBOT->setSignalTime) > (tSignalSwitchWaitTime)){
@@ -130,6 +106,24 @@ void setSignal(STATION *self)
             
         case 3:
             /* Signal 3B / 12B */
+            *self->setSignal->port5_ptr |=  self->setSignal->pin5_mask;
+            *self->setSignal->port6_ptr &= ~self->setSignal->pin6_mask;
+            break;
+            
+        case 10:
+            /* Signal 10B */
+            *self->setSignal->port1_ptr |=  self->setSignal->pin1_mask; // Green
+            *self->setSignal->port2_ptr &= ~self->setSignal->pin2_mask; // Red
+            break;
+            
+        case 11:
+            /* Signal 11B */
+            *self->setSignal->port3_ptr |=  self->setSignal->pin3_mask;
+            *self->setSignal->port4_ptr &= ~self->setSignal->pin4_mask;
+            break;
+            
+        case 12:
+            /* Signal 12B */
             *self->setSignal->port5_ptr |=  self->setSignal->pin5_mask;
             *self->setSignal->port6_ptr &= ~self->setSignal->pin6_mask;
             break;

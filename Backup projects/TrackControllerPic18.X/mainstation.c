@@ -95,7 +95,8 @@ void UPDATExSTATION(STATION *self)
             SETxOCC(self->stnTrack3.setOccStn , true);
             
             /* Set freight passing path */
-            //SETxSTATIONxPATHWAY(self, 3);
+            SETxSTATIONxPATHWAY(self, 3);
+            SETxSTATIONxPATHWAY(self, 12);
             
             /* Check if Station3 is occupied */
             if(self->stnTrack3.getOccStn->value){

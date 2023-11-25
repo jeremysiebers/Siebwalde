@@ -50,7 +50,7 @@
 #pragma config WDT = OFF    // Watchdog Timer Enable bit->WDT disabled (control is placed on SWDTEN bit)
 #pragma config STVR = ON    // Stack Overflow/Underflow Reset Enable bit->Reset on stack overflow/underflow enabled
 #pragma config XINST = OFF    // Extended Instruction Set Enable bit->Instruction set extension and Indexed Addressing mode disabled (Legacy mode)
-#pragma config DEBUG = ON    // Background Debugger Enable bit->Background debugger enabled; RB6 and RB7 are dedicated to In-Circuit Debug
+#pragma config DEBUG = OFF    // Background Debugger Enable bit->Background debugger disabled; RB6 and RB7 configured as general purpose I/O pins
 
 // CONFIG1H
 #pragma config CP0 = OFF    // Code Protection bit->Program memory is not code-protected
