@@ -60,8 +60,8 @@ void INITxSTATION(void)
     bot.stnTrack1.trackNr       = 1;
     bot.stnTrack1.stnState      = STN_EMPTY;
     bot.stnTrack1.stnSequence   = SEQ_IDLE;
-    bot.stnTrack1.setOccStn     = &OCC_TO_STN_10;
-    bot.stnTrack1.getOccStn     = &OCC_FR_STN_10;
+    bot.stnTrack1.setOccStn     = &OCC_TO_STN_1;
+    bot.stnTrack1.getOccStn     = &OCC_FR_STN_1;
     
     bot.stnTrack2.trackNr       = 2;
     bot.stnTrack2.stnState      = STN_EMPTY;
