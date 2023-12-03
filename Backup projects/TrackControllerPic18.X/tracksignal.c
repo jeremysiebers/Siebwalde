@@ -6,7 +6,7 @@
 /*
  * Set the required signal
  */
-void UPDATExSIGNAL(STATION *self, uint8_t path, enum STATES signal)
+void SETxSIGNAL(STATION *self, uint8_t path, enum STATES signal)
 {
     uint8_t pin1 = self->setPath->pin1_mask;
     uint8_t pin2 = self->setPath->pin2_mask;

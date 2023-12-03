@@ -87,75 +87,32 @@ void UPDATExSTATION(STATION *self)
             self->getFreightLeaveStation->value  = false;
             self->getFreightEnterStation->value = false;
             
-            /* Set the occupied signals to all blocks to true to stop
-             * all trains from driving. */
+            /* 
+             * Set the occupied signals to all blocks to true to stop
+             * all trains from driving. 
+             */
             SETxOCC(self->setOccBlkIn, true);
             SETxOCC(self->stnTrack1.setOccStn , true);
             SETxOCC(self->stnTrack2.setOccStn , true);
             SETxOCC(self->stnTrack3.setOccStn , true);
             
-            /* Check if Station3 is occupied */
-            if(self->stnTrack3.getOccStn->value){
-                
-                /* Set station 3 to occupied */
-                self->stnTrack3.stnOccupied = true;
-                self->stnTrack3.stnState = STN_OUTBOUND;
-                
-                /* Check if outgoing block is occupied */
-                if(self->getOccBlkOut->value){
-                    /* 
-                     * Go to wait stage, wait until outgoing block is free
-                     * and release STN3 train
-                     */                    
-                    self->hndlState = HNDL_WAIT_BLK_OUT;
-                }
-                /* Outgoing block is free */
-                else {
-                    /*
-                     * Go to release STN3 train stage
-                     */                    
-                    self->hndlState = HNDL_OUTBOUND;
-                }
-            }
-            
-            /* When STN3 is free check if there is an incoming train */
-            else if(self->getOccBlkIn->value){
-                
-                /* Check if outgoing block is occupied */
-                if(self->getOccBlkOut->value){
-                    /*
-                     * Go to: Inbound on Station track 3
-                     * continue with incoming train as freight
-                     */
-                    self->stnTrack3.stnState = STN_INBOUND;
-                    self->hndlState = HNDL_INBOUND;
-                }
-                /* Outgoing block is free */
-                else{
-                    /*
-                     * Go to: let the incoming train pass as freight  
-                     */
-                    self->stnTrack3.stnState = STN_PASSING;
-                    self->hndlState = HNDL_PASSING;
-                }
-                
-            }
-            else{
-                self->stnTrack3.stnState = STN_EMPTY;
-                self->hndlState = HNDL_IDLE;
-            }
+            /*
+             * Set all the track signals to red
+             */
+            SETxSIGNAL(STATION *self, 1, SIG_RED);
+            SETxSIGNAL(STATION *self, 2, SIG_RED);
+            SETxSIGNAL(STATION *self, 3, SIG_RED);
             
             /* Check if Station1 is occupied */
             if(self->stnTrack1.getOccStn->value){
                 /*
                  * Start station wait random timers set STN1 to occupied
-                 */
-                
-                /* Set station 1 to occupied */
+                 */                
                 self->stnTrack1.stnOccupied = true;
                 self->stnTrack1.stnState = STN_WAIT;
             }
             else{
+                self->stnTrack1.stnOccupied = false;
                 self->stnTrack1.stnState = STN_EMPTY;
             }
             
@@ -164,15 +121,49 @@ void UPDATExSTATION(STATION *self)
                 /*
                  * Start station wait random timers set STN2 to occupied
                  */
-                
-                /* Set station 2 to occupied */
                 self->stnTrack2.stnOccupied = true;
                 self->stnTrack2.stnState = STN_WAIT;
             }
             else{
+                self->stnTrack2.stnOccupied = false;
                 self->stnTrack2.stnState = STN_EMPTY;
             }
             
+            /* Check if Station3 is occupied */
+            if(self->stnTrack3.getOccStn->value){
+                
+                /* Set station 3 to occupied */
+                self->stnTrack3.stnOccupied = true;
+                self->stnTrack3.stnState = STN_OUTBOUND;                                
+            }            
+            /* When STN3 is free check if there is an incoming train */
+            else if(self->getOccBlkIn->value){
+                
+                if(false == self->stnTrack1.stnOccupied){
+                    self->stnTrack1.stnState = STN_INBOUND;
+                }
+                else if(false == self->stnTrack2.stnOccupied){
+                    self->stnTrack2.stnState = STN_INBOUND;
+                }
+                else if(self->getOccBlkOut->value){
+                    /*
+                     * Go to: Inbound on Station track 3
+                     * continue with incoming train as freight
+                     */
+                    self->stnTrack3.stnState = STN_INBOUND;
+                }
+                /* Outgoing block is free */
+                else{
+                    /*
+                     * Go to: let the incoming train pass as freight  
+                     */
+                    self->stnTrack3.stnState = STN_PASSING;
+                }                
+            }
+            else{
+                self->stnTrack3.stnOccupied = false;
+                self->stnTrack3.stnState = STN_EMPTY;
+            }
             /* Start executing main state machine */
             self->AppState = RUN;
             break;
@@ -186,7 +177,8 @@ void UPDATExSTATION(STATION *self)
              * while no INBOUND or PASSING is in progress,
              * take the train to the empty station track
              */
-            if(true == self->getOccBlkIn->value &&                    
+            if(true == self->getOccBlkIn->value &&
+                    false == self->getFreightEnterStation->value &&
                     STN_EMPTY   == self->stnTrack1.stnState &&
                     STN_INBOUND != self->stnTrack2.stnState &&
                     STN_INBOUND != self->stnTrack3.stnState &&
@@ -197,6 +189,7 @@ void UPDATExSTATION(STATION *self)
                 //self->hndlState = HNDL_INBOUND;
             }
             else if(true == self->getOccBlkIn->value &&
+                    false == self->getFreightEnterStation->value &&
                     STN_EMPTY   == self->stnTrack2.stnState &&
                     STN_INBOUND != self->stnTrack1.stnState &&
                     STN_INBOUND != self->stnTrack3.stnState &&
@@ -222,7 +215,9 @@ void UPDATExSTATION(STATION *self)
                     STN_PASSING != self->stnTrack2.stnState
                     ){
                 self->stnTrack3.stnState = STN_PASSING;
-                //self->hndlState = HNDL_PASSING;
+                if(true == self->getFreightEnterStation->value){
+                    self->getFreightEnterStation->value = false;
+                }
             }
             else if(true  == self->getOccBlkIn->value  && 
                     true == self->getOccBlkOut->value &&
@@ -233,7 +228,9 @@ void UPDATExSTATION(STATION *self)
                     STN_PASSING != self->stnTrack2.stnState
                     ){
                 self->stnTrack3.stnState = STN_INBOUND;
-                //self->hndlState = HNDL_PASSING;
+                if(true == self->getFreightEnterStation->value){
+                    self->getFreightEnterStation->value = false;
+                }
             }
             
             switch(MAINxSTATIONxOUTBOUND(self)){
@@ -274,117 +271,6 @@ void UPDATExSTATION(STATION *self)
                 default:
                     break;
             }
-            
-            
-            /*
-             * OUTBOUND:
-             * Check first if a station has the outbound status,
-             * if so, then let the train leave the station when the
-             * outbound block is free.
-             */
-//            if(false == self->getOccBlkOut->value && (
-//                    STN_OUTBOUND == self->stnTrack1.stnState || 
-//                    STN_OUTBOUND == self->stnTrack2.stnState || 
-//                    STN_OUTBOUND == self->stnTrack3.stnState)){
-//                self->hndlState = HNDL_OUTBOUND;
-//            }            
-//            switch(self->hndlState){
-//                
-//                /*
-//                 * HNDL_IDLE:
-//                 * Main IDLE state where conditions are checked what the next 
-//                 * action will be.
-//                 */
-//                case HNDL_IDLE:
-//                    
-//                    
-//                    
-//                    break;
-//                    
-//                /*
-//                 * HNDL_INBOUND:
-//                 * Handles trains going inbound
-//                 */    
-//                case HNDL_INBOUND:
-//                    switch(MAINxSTATIONxINBOUND(self)){
-//                        case busy:
-//                            break;
-//                        case done:
-//                            self->hndlState = HNDL_IDLE;
-//                            break;
-//                        case nop:
-//                            self->hndlState = HNDL_IDLE;
-//                            break;
-//                        default:
-//                            break;
-//                    }
-//                    break;
-//                
-//                /*
-//                 * HNDL_OUTBOUND:
-//                 * Handles trains going outbound
-//                 */
-//                case HNDL_OUTBOUND:
-//                    switch(MAINxSTATIONxOUTBOUND(self)){
-//                        case busy:
-//                            break;
-//                        case done:
-//                            self->hndlState = HNDL_IDLE;
-//                            break;
-//                        case nop:
-//                            self->hndlState = HNDL_IDLE;
-//                            break;
-//                        default:
-//                            break;
-//                    }
-//                    break;
-//                
-//                /* 
-//                 * HNDL_PASSING:
-//                 * When after start or when a freight train is detected, 
-//                 * a pass of the station is to be executed.
-//                 */
-//                case HNDL_PASSING:
-//                    switch(MAINxSTATIONxPASSING(self)){
-//                        case busy:
-//                            break;
-//                        case done:
-//                            self->hndlState = HNDL_IDLE;
-//                            break;
-//                        case nop:
-//                            self->hndlState = HNDL_IDLE;
-//                            break;
-//                        default:
-//                            break;
-//                    }
-//                    break;
-//                    
-//                /* 
-//                 * HNDL_WAIT_BLK_OUT:
-//                 * When after start, the outgoing block is occupied, a wait
-//                 * must be done until outgoing track is free.
-//                 */
-//                case HNDL_WAIT_BLK_OUT:
-//                    if(self->getOccBlkOut->value){
-//                        break;
-//                    }
-//                    else{
-//                        /* When outgoing block is free check if track 3 is
-//                         * in an outbound state.
-//                         */
-//                        if(STN_OUTBOUND == self->stnTrack3.stnState){
-//                            self->hndlState = HNDL_OUTBOUND;
-//                        }
-//                        else{
-//                            self->hndlState = HNDL_IDLE;
-//                        }
-//                    }
-//                    break;
-//                    
-//                default:
-//                    self->hndlState = HNDL_IDLE;
-//                    break;
-//            }
             break;
         
         default:

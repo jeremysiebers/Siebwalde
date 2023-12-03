@@ -20,7 +20,7 @@ int8_t MAINxSTATIONxPASSING(STATION *self){
         case SEQ_IDLE:
             if(false == self->getOccBlkOut->value){
                 SETxSTATIONxPATHWAY(self, activeTrack->trackNr, STN_PASSING);
-                UPDATExSIGNAL(self, activeTrack->trackNr, SIG_GREEN);
+                SETxSIGNAL(self, activeTrack->trackNr, SIG_GREEN);
                 activeTrack->tCountTime     = GETxMILLIS();
                 activeTrack->tWaitTime      =  tSwitchPointWaitTime;
                 activeTrack->stnNextState   = SEQ_SET_OCC;
@@ -53,7 +53,7 @@ int8_t MAINxSTATIONxPASSING(STATION *self){
                 break;             
             }
             else{
-                UPDATExSIGNAL(self, activeTrack->trackNr, SIG_RED);
+                SETxSIGNAL(self, activeTrack->trackNr, SIG_RED);
                 activeTrack->stnOccupied = false;
                 activeTrack->stnState    = STN_EMPTY;
                 activeTrack->stnSequence = SEQ_IDLE;

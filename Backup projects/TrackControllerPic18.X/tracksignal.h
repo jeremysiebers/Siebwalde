@@ -11,7 +11,7 @@
 #include <xc.h> // include processor files - each processor file is guarded. 
 #include "main.h"
 
-extern void UPDATExSIGNAL(STATION *self, uint8_t path, enum STATES signal);
+extern void SETxSIGNAL(STATION *self, uint8_t path, enum STATES signal);
 
 #ifdef	__cplusplus
 extern "C" {
