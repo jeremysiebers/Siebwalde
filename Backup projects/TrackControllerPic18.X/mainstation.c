@@ -3,6 +3,7 @@
 #include "main.h"
 #include "mainstation.h"
 #include "pathway.h"
+#include "tracksignal.h"
 #include "setocc.h"
 #include "milisecond_counter.h"
 #include "mainStationOutbound.h"
@@ -99,9 +100,9 @@ void UPDATExSTATION(STATION *self)
             /*
              * Set all the track signals to red
              */
-            SETxSIGNAL(STATION *self, 1, SIG_RED);
-            SETxSIGNAL(STATION *self, 2, SIG_RED);
-            SETxSIGNAL(STATION *self, 3, SIG_RED);
+            SETxSIGNAL(self, 1, SIG_RED);
+            SETxSIGNAL(self, 2, SIG_RED);
+            SETxSIGNAL(self, 3, SIG_RED);
             
             /* Check if Station1 is occupied */
             if(self->stnTrack1.getOccStn->value){
