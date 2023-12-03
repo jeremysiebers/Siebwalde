@@ -55,7 +55,7 @@ void MILLISECOND_HANDLER()
 }
 
 /*
- * Universal function from arduino, here re-created for this project.
+ * Universal function
  */
 uint32_t GETxMILLIS()
 {

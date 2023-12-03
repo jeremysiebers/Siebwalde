@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include "main.h"
 #include "pathway.h"
+#include "tracksignal.h"
 #include "setocc.h"
 #include "milisecond_counter.h"
 
@@ -24,13 +25,18 @@ int8_t MAINxSTATIONxOUTBOUND(STATION *self){
     
     switch(activeTrack->stnSequence){
         
-        /* switch to the outgoing track, set the signals and wait */
-        case SEQ_IDLE:            
-            SETxSTATIONxPATHWAY(self, activeTrack->trackNr);
-            activeTrack->tCountTime     = GETxMILLIS();
-            activeTrack->tWaitTime      =  tSwitchPointWaitTime;
-            activeTrack->stnNextState   = SEQ_SET_OCC;
-            activeTrack->stnSequence    = SEQ_WAIT;
+        /* switch to the outgoing track, set the signals and wait 
+         * when the outgoing block is free
+         */
+        case SEQ_IDLE:
+            if(false == self->getOccBlkOut->value){
+                SETxSTATIONxPATHWAY(self, activeTrack->trackNr, STN_OUTBOUND);
+                UPDATExSIGNAL(self, activeTrack->trackNr, SIG_GREEN);
+                activeTrack->tCountTime     = GETxMILLIS();
+                activeTrack->tWaitTime      =  tSwitchPointWaitTime;
+                activeTrack->stnNextState   = SEQ_SET_OCC;
+                activeTrack->stnSequence    = SEQ_WAIT;
+            }                
             break;
             
             /* Disable the occupied signal to let the train drive out*/
@@ -45,6 +51,7 @@ int8_t MAINxSTATIONxOUTBOUND(STATION *self){
                 break;
             }
             else{
+                UPDATExSIGNAL(self, activeTrack->trackNr, SIG_RED);
                 activeTrack->stnOccupied = false;
                 activeTrack->stnState    = STN_EMPTY;
                 activeTrack->stnSequence = SEQ_IDLE;

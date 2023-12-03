@@ -41,11 +41,7 @@ SIG SIG_TOP  = {&LATB, 0x01, &LATB, 0x02, &LATJ, 0x01, &LATJ, 0x02, &LATJ, 0x04,
 SIG SIG_BOT  = {&LATB, 0x04, &LATB, 0x08, &LATB, 0x10, &LATB, 0x20, &LATB, 0x40, &LATB, 0x80};// Signal Leds 1B, 2B and 3B Green and Red
 
 extern void INITxPATHWAY(STATION *reftop, STATION *refbot);
-extern void SETxSTATIONxPATHWAY(STATION *self, uint8_t path);
-extern void UPDATExSIGNAL(void);
-void setSignal(STATION *self);
-
-
+extern void SETxSTATIONxPATHWAY(STATION *self, uint8_t path, enum STATES dir);
 
 #ifdef	__cplusplus
 extern "C" {

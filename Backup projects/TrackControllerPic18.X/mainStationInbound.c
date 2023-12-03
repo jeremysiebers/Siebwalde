@@ -24,9 +24,11 @@ int8_t MAINxSTATIONxINBOUND(STATION *self){
     
     switch(activeTrack->stnSequence){
         
-        /* switch to the outgoing track, set the signals and wait */
+        /* switch to the inbound track, set the signals and wait.
+         * Inbound track does not need to check if the outgoing block is free
+         */
         case SEQ_IDLE:            
-            SETxSTATIONxPATHWAY(self, activeTrack->trackNr);
+            SETxSTATIONxPATHWAY(self, activeTrack->trackNr, STN_INBOUND);
             activeTrack->tCountTime     = GETxMILLIS();
             activeTrack->tWaitTime      =  tSwitchPointWaitTime;
             activeTrack->stnNextState   = SEQ_SET_OCC;

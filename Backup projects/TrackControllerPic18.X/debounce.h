@@ -31,13 +31,16 @@
 #ifndef DEBOUNCE_H
 #define	DEBOUNCE_H
 
-#include <xc.h> // include processor files - each processor file is guarded.  
+#include <xc.h> // include processor files - each processor file is guarded. 
 
 // TODO Insert appropriate #include <>
 
 // TODO Insert C++ class definitions if appropriate
 
 // TODO Insert declarations
+
+/* Debounce Delay time */
+const uint32_t  tIoSignalDebounceTime = (uint32_t)(5);
 
 /*
  * Debounce struct
@@ -56,32 +59,33 @@ typedef struct
     
 }DEBOUNCE;
 
-DEBOUNCE HALL_BLK_13    = {1, 0, 0, 0, &PORTF, 0x1,  0,  false,  true};
-DEBOUNCE HALL_BLK_21A   = {1, 0, 0, 0, &PORTF, 0x2,  0,  false,  true};
-DEBOUNCE HALL_BLK_T4    = {1, 0, 0, 0, &PORTF, 0x4,  0,  false,  true};
-DEBOUNCE HALL_BLK_T5    = {1, 0, 0, 0, &PORTF, 0x8,  0,  false,  true};
-DEBOUNCE HALL_BLK_T1    = {1, 0, 0, 0, &PORTF, 0x10, 0,  false,  true};
-DEBOUNCE HALL_BLK_T2    = {1, 0, 0, 0, &PORTF, 0x20, 0,  false,  true};
-DEBOUNCE HALL_BLK_9B    = {1, 0, 0, 0, &PORTF, 0x40, 0,  false,  true};
-DEBOUNCE HALL_BLK_4A    = {1, 0, 0, 0, &PORTF, 0x80, 0,  false,  true};
-DEBOUNCE HALL_BLK_T7    = {1, 0, 0, 0, &PORTH, 0x1,  0,  false,  true};
-DEBOUNCE HALL_BLK_T8    = {1, 0, 0, 0, &PORTH, 0x2,  0,  false,  true};
-DEBOUNCE OCC_FR_BLK13   = {1, 0, 0, 0, &PORTH, 0x4,  0,  true,   true};
-DEBOUNCE OCC_FR_BLK4    = {1, 0, 0, 0, &PORTH, 0x8,  0,  true,   true};
-DEBOUNCE OCC_FR_STN_1   = {1, 0, 0, 0, &PORTH, 0x10, 0,  true,   true};
-DEBOUNCE OCC_FR_STN_2   = {1, 0, 0, 0, &PORTH, 0x20, 0,  true,   true};
-DEBOUNCE OCC_FR_STN_3   = {1, 0, 0, 0, &PORTH, 0x40, 0,  true,   true};
-DEBOUNCE OCC_FR_STN_10  = {1, 0, 0, 0, &PORTH, 0x80, 0,  true,   true};
-DEBOUNCE OCC_FR_STN_11  = {1, 0, 0, 0, &PORTG, 0x1,  0,  true,   true};
-DEBOUNCE OCC_FR_STN_12  = {1, 0, 0, 0, &PORTG, 0x2,  0,  true,   true};
-DEBOUNCE OCC_FR_STN_T6  = {1, 0, 0, 0, &PORTG, 0x4,  0,  true,   true};
-DEBOUNCE OCC_FR_STN_T3  = {1, 0, 0, 0, &PORTG, 0x8,  0,  true,   true};
-DEBOUNCE CTRL_OFF       = {1, 0, 0, 0, &PORTG, 0x10, 0,  true,   true};
-DEBOUNCE OCC_FR_23B     = {1, 0, 0, 0, &PORTG, 0x20, 0,  true,   true};
-DEBOUNCE OCC_FR_22B     = {1, 0, 0, 0, &PORTG, 0x40, 0,  true,   true};
-DEBOUNCE OCC_FR_9B      = {1, 0, 0, 0, &PORTG, 0x80, 0,  true,   true};
+
+DEBOUNCE HALL_BLK_13    = {tIoSignalDebounceTime, 0, 0, 0, &PORTF, 0x1,  0,  false,  true};
+DEBOUNCE HALL_BLK_21A   = {tIoSignalDebounceTime, 0, 0, 0, &PORTF, 0x2,  0,  false,  true};
+DEBOUNCE HALL_BLK_T4    = {tIoSignalDebounceTime, 0, 0, 0, &PORTF, 0x4,  0,  false,  true};
+DEBOUNCE HALL_BLK_T5    = {tIoSignalDebounceTime, 0, 0, 0, &PORTF, 0x8,  0,  false,  true};
+DEBOUNCE HALL_BLK_T1    = {tIoSignalDebounceTime, 0, 0, 0, &PORTF, 0x10, 0,  false,  true};
+DEBOUNCE HALL_BLK_T2    = {tIoSignalDebounceTime, 0, 0, 0, &PORTF, 0x20, 0,  false,  true};
+DEBOUNCE HALL_BLK_9B    = {tIoSignalDebounceTime, 0, 0, 0, &PORTF, 0x40, 0,  false,  true};
+DEBOUNCE HALL_BLK_4A    = {tIoSignalDebounceTime, 0, 0, 0, &PORTF, 0x80, 0,  false,  true};
+DEBOUNCE HALL_BLK_T7    = {tIoSignalDebounceTime, 0, 0, 0, &PORTH, 0x1,  0,  false,  true};
+DEBOUNCE HALL_BLK_T8    = {tIoSignalDebounceTime, 0, 0, 0, &PORTH, 0x2,  0,  false,  true};
+DEBOUNCE OCC_FR_BLK13   = {tIoSignalDebounceTime, 0, 0, 0, &PORTH, 0x4,  0,  true,   true};
+DEBOUNCE OCC_FR_BLK4    = {tIoSignalDebounceTime, 0, 0, 0, &PORTH, 0x8,  0,  true,   true};
+DEBOUNCE OCC_FR_STN_1   = {tIoSignalDebounceTime, 0, 0, 0, &PORTH, 0x10, 0,  true,   true};
+DEBOUNCE OCC_FR_STN_2   = {tIoSignalDebounceTime, 0, 0, 0, &PORTH, 0x20, 0,  true,   true};
+DEBOUNCE OCC_FR_STN_3   = {tIoSignalDebounceTime, 0, 0, 0, &PORTH, 0x40, 0,  true,   true};
+DEBOUNCE OCC_FR_STN_10  = {tIoSignalDebounceTime, 0, 0, 0, &PORTH, 0x80, 0,  true,   true};
+DEBOUNCE OCC_FR_STN_11  = {tIoSignalDebounceTime, 0, 0, 0, &PORTG, 0x1,  0,  true,   true};
+DEBOUNCE OCC_FR_STN_12  = {tIoSignalDebounceTime, 0, 0, 0, &PORTG, 0x2,  0,  true,   true};
+DEBOUNCE OCC_FR_STN_T6  = {tIoSignalDebounceTime, 0, 0, 0, &PORTG, 0x4,  0,  true,   true};
+DEBOUNCE OCC_FR_STN_T3  = {tIoSignalDebounceTime, 0, 0, 0, &PORTG, 0x8,  0,  true,   true};
+DEBOUNCE CTRL_OFF       = {tIoSignalDebounceTime, 0, 0, 0, &PORTG, 0x10, 0,  true,   true};
+DEBOUNCE OCC_FR_23B     = {tIoSignalDebounceTime, 0, 0, 0, &PORTG, 0x20, 0,  true,   true};
+DEBOUNCE OCC_FR_22B     = {tIoSignalDebounceTime, 0, 0, 0, &PORTG, 0x40, 0,  true,   true};
+DEBOUNCE OCC_FR_9B      = {tIoSignalDebounceTime, 0, 0, 0, &PORTG, 0x80, 0,  true,   true};
 //VOLTDETECT is used directly for now
-DEBOUNCE OCC_FR_21B     = {1, 0, 0, 0, &PORTE, 0x40, 0,  true,   true};
+DEBOUNCE OCC_FR_21B     = {tIoSignalDebounceTime, 0, 0, 0, &PORTE, 0x40, 0,  true,   true};
 
 /**
   @Summary
@@ -110,7 +114,7 @@ DEBOUNCE OCC_FR_21B     = {1, 0, 0, 0, &PORTE, 0x40, 0,  true,   true};
         usage: DEBOUNCExIO(&HALL_BLK_13);
     </code>
 */
-extern void DEBOUNCExIO(DEBOUNCE *instance);
+extern void DEBOUNCExIO(DEBOUNCE *instance, uint32_t *millisPtr);
 
 // TODO Insert declarations or function prototypes (right here) to leverage 
 // live documentation
