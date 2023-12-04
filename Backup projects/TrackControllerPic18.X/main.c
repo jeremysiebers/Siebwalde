@@ -24,6 +24,7 @@
 #include "debounce.h"
 #include "mainstation.h"
 #include "pathway.h"
+#include "mountaintrack.h"
 #include "mcc_generated_files/TCPIPLibrary/udpv4.h"
 #include "mcc_generated_files/TCPIPLibrary/tcpip_config.h"
 
@@ -142,12 +143,18 @@ void main(void)
             if(true == updateTick){
                 DebounceIO();                
                 UPDATExTRAINxWAIT();
+                UPDATExMOUNTAINxTRAINxWAIT();
                 updateTick = false;
             }
             //TP1_SetHigh();
             UPDATExSTATION(&top);
             //TP2_SetLow();
             UPDATExSTATION(&bot);
+            
+            UPDATExMOUNTAINxSTATION(&waldsee);
+            UPDATExMOUNTAINxSTATION(&siebwalde);
+            UPDATExMOUNTAINxSTATION(&waldberg);
+            
             TP1_SetLow();
         }
         
@@ -276,8 +283,8 @@ void DebounceIO()
         DEBOUNCExIO(&OCC_FR_STN_10, &millis);
         DEBOUNCExIO(&OCC_FR_STN_11, &millis);
         DEBOUNCExIO(&OCC_FR_STN_12, &millis);
-        DEBOUNCExIO(&OCC_FR_STN_T6, &millis);
-        DEBOUNCExIO(&OCC_FR_STN_T3, &millis);
+        DEBOUNCExIO(&OCC_FR_T6,     &millis);
+        DEBOUNCExIO(&OCC_FR_T3,     &millis);
         DEBOUNCExIO(&CTRL_OFF     , &millis);
         DEBOUNCExIO(&OCC_FR_9B    , &millis);
         DEBOUNCExIO(&OCC_FR_21B   , &millis);

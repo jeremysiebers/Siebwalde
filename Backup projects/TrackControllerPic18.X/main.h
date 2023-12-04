@@ -55,6 +55,8 @@ const uint32_t tReadIoSignalWaitTime = (uint32_t)(1 * tFactor);
 
 enum STATES{
     INIT,
+    INIT2,
+    INIT3,
     RUN,
     WAIT,
     IDLE,
@@ -85,7 +87,7 @@ typedef struct
 {
     volatile unsigned char      *portx_ptr;                                     // Reference to the input port used
     uint8_t                     pin_mask;                                       // Mask to point to pin used of port
-}OCC;
+}OCC, REL;
 
 typedef struct
 {
@@ -104,44 +106,6 @@ typedef struct
     
 }WS, SIG;
 
-typedef struct
-{
-    enum STATES                 stnState;
-    enum STATES                 stnSequence;
-    enum STATES                 stnNextState;
-    bool                        stnOccupied;
-    uint8_t                     trackNr;
-    uint32_t                    tCountTime;
-    uint32_t                    tWaitTime;
-    OCC                         *setOccStn;
-    DEBOUNCE                    *getOccStn;
-    
-    
-}STNTRACK;
-
-/*
- * Station struct
-*/
-typedef struct
-{
-    uint8_t                     name;
-    enum STATES                 AppState;                                       // State of the state meachine
-    enum STATES                 hndlState;
-    DEBOUNCE                    *getFreightLeaveStation;
-    DEBOUNCE                    *getFreightEnterStation;
-    OCC                         *setOccBlkIn;
-    DEBOUNCE                    *getOccBlkIn;    
-    DEBOUNCE                    *getOccBlkOut;
-    WS                          *setPath;
-    uint8_t                     prevPath;
-    uint8_t                     newPath;
-    SIG                         *setSignal;
-    uint32_t                    setSignalTime;
-    STNTRACK                    stnTrack1;
-    STNTRACK                    stnTrack2;
-    STNTRACK                    stnTrack3;
-            
-}STATION;
 
 // Comment a function and leverage automatic documentation with slash star star
 /**

@@ -1,6 +1,7 @@
 #include <xc.h>
 #include "tracksignal.h"
 #include "main.h"
+#include "mainstation.h"
 #include "milisecond_counter.h"
 
 /*

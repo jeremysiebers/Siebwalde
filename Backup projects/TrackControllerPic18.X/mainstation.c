@@ -12,8 +12,8 @@
 
 void INITxSTATION(void)
 {
-    INITxPATHWAY(&top, &bot);
-    top.name                    = 1;
+    INITxPATHWAYxSTATION(&top, &bot);
+    top.name                    = TOP;
     top.AppState                = INIT;
     top.hndlState               = HNDL_IDLE;
     top.getFreightLeaveStation  = &HALL_BLK_13;
@@ -45,7 +45,7 @@ void INITxSTATION(void)
     top.stnTrack3.setOccStn     = &OCC_TO_STN_12;
     top.stnTrack3.getOccStn     = &OCC_FR_STN_12;
     
-    bot.name                    = 0;
+    bot.name                    = BOT;
     bot.AppState                = INIT;
     bot.hndlState               = HNDL_IDLE;
     bot.getFreightLeaveStation  = &HALL_BLK_4A;
@@ -101,17 +101,10 @@ void UPDATExSTATION(STATION *self)
             /*
              * Set all the track signals to red
              */
-            if(self->name == 1){
-                SETxSIGNAL(self, 10, SIG_RED);
-                SETxSIGNAL(self, 11, SIG_RED);
-                SETxSIGNAL(self, 12, SIG_RED);
-            }
-            else{
-                SETxSIGNAL(self, 1,  SIG_RED);
-                SETxSIGNAL(self, 2,  SIG_RED);
-                SETxSIGNAL(self, 3,  SIG_RED);
-            }
-            
+            SETxSIGNAL(self, 1,  SIG_RED);
+            SETxSIGNAL(self, 2,  SIG_RED);
+            SETxSIGNAL(self, 3,  SIG_RED);
+
             /* Check if Station1 is occupied */
             if(self->stnTrack1.getOccStn->value){
                 /*
@@ -209,7 +202,7 @@ void UPDATExSTATION(STATION *self)
                 //self->hndlState = HNDL_INBOUND;
             }
             /*
-             * INBOUND:
+             * INBOUND: Track3
              * When inbound and only station3 is empty and the outbound
              * track is free(false) or occupied (true) then let the train 
              * pass the station or store it in station track 3

@@ -33,12 +33,21 @@
 
 #include <xc.h> // include processor files - each processor file is guarded. 
 #include "main.h"
+#include "mainstation.h"
+#include "mountaintrack.h"
 
-WS WS_TOP    = {&LATC, 0x10, &LATC, 0x20, &LATC, 0x40, &LATC, 0x80,0,0,0,0};    // All switches for BOT part of station W5,6,7 and 8
-WS WS_BOT    = {&LATC, 0x01, &LATC, 0x02, &LATC, 0x04, &LATC, 0x08,0,0,0,0};    // All switches for TOP part of station W1,2,3 and 4
+WS WS_TOP       = {&LATC, 0x10, &LATC, 0x20, &LATC, 0x40, &LATC, 0x80,0,0,0,0};    // All switches for BOT part of station W5,6,7 and 8
+WS WS_BOT       = {&LATC, 0x01, &LATC, 0x02, &LATC, 0x04, &LATC, 0x08,0,0,0,0};    // All switches for TOP part of station W1,2,3 and 4
 
-extern void INITxPATHWAY(STATION *reftop, STATION *refbot);
+WS WS_WALDSEE   = {&LATD, 0x01};
+WS WS_WALDBERG  = {&LATD, 0x08};
+/* Siebwalde switchpoints are static non moving */
+
+extern void INITxPATHWAYxSTATION(STATION *reftop, STATION *refbot);
 extern void SETxSTATIONxPATHWAY(STATION *self, uint8_t path, enum STATES dir);
+
+void INITxPATHWAYxMNTSTATION(MNTSTATION *refwaldsee, MNTSTATION *refwaldberg);
+void SETxMNTSTATIONxPATHWAY(MNTSTATION *self, uint8_t path);
 
 #ifdef	__cplusplus
 extern "C" {

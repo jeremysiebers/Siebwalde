@@ -4,16 +4,8 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
-      <logicalFolder name="f1" displayName="MainStation" projectFiles="true">
-        <itemPath>mainstation.h</itemPath>
-        <itemPath>pathway.h</itemPath>
-        <itemPath>mainStationPassing.h</itemPath>
-        <itemPath>mainStationInbound.h</itemPath>
-        <itemPath>mainStationOutbound.h</itemPath>
-        <itemPath>tracksignal.h</itemPath>
-      </logicalFolder>
       <logicalFolder name="MCC Generated Files"
-                     displayName="MCC Generated Files"
+                     displayName="0 MCC Generated Files"
                      projectFiles="true">
         <logicalFolder name="TCPIPLibrary"
                        displayName="TCPIPLibrary"
@@ -43,6 +35,17 @@
         <itemPath>mcc_generated_files/interrupt_manager.h</itemPath>
         <itemPath>mcc_generated_files/tmr1.h</itemPath>
       </logicalFolder>
+      <logicalFolder name="f1" displayName="1 MainStation" projectFiles="true">
+        <itemPath>mainstation.h</itemPath>
+        <itemPath>pathway.h</itemPath>
+        <itemPath>mainStationPassing.h</itemPath>
+        <itemPath>mainStationInbound.h</itemPath>
+        <itemPath>mainStationOutbound.h</itemPath>
+        <itemPath>tracksignal.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="f2" displayName="2 MountainTrack" projectFiles="true">
+        <itemPath>mountaintrack.h</itemPath>
+      </logicalFolder>
       <itemPath>debounce.h</itemPath>
       <itemPath>main.h</itemPath>
       <itemPath>milisecond_counter.h</itemPath>
@@ -55,16 +58,8 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
-      <logicalFolder name="f1" displayName="MainStation" projectFiles="true">
-        <itemPath>pathway.c</itemPath>
-        <itemPath>mainstation.c</itemPath>
-        <itemPath>mainStationPassing.c</itemPath>
-        <itemPath>mainStationInbound.c</itemPath>
-        <itemPath>mainStationOutbound.c</itemPath>
-        <itemPath>tracksignal.c</itemPath>
-      </logicalFolder>
       <logicalFolder name="MCC Generated Files"
-                     displayName="MCC Generated Files"
+                     displayName="0 MCC Generated Files"
                      projectFiles="true">
         <logicalFolder name="TCPIPLibrary"
                        displayName="TCPIPLibrary"
@@ -92,6 +87,17 @@
         <itemPath>mcc_generated_files/interrupt_manager.c</itemPath>
         <itemPath>mcc_generated_files/tmr1.c</itemPath>
       </logicalFolder>
+      <logicalFolder name="f1" displayName="1 MainStation" projectFiles="true">
+        <itemPath>pathway.c</itemPath>
+        <itemPath>mainstation.c</itemPath>
+        <itemPath>mainStationPassing.c</itemPath>
+        <itemPath>mainStationInbound.c</itemPath>
+        <itemPath>mainStationOutbound.c</itemPath>
+        <itemPath>tracksignal.c</itemPath>
+      </logicalFolder>
+      <logicalFolder name="f2" displayName="2 MountainTrack" projectFiles="true">
+        <itemPath>mountaintrack.c</itemPath>
+      </logicalFolder>
       <itemPath>main.c</itemPath>
       <itemPath>debounce.c</itemPath>
       <itemPath>milisecond_counter.c</itemPath>
@@ -117,7 +123,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>PICkit3PlatformTool</platformTool>
         <languageToolchain>XC8</languageToolchain>
-        <languageToolchainVersion>2.41</languageToolchainVersion>
+        <languageToolchainVersion>2.31</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <packs>

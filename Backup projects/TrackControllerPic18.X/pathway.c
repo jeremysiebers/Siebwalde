@@ -1,15 +1,26 @@
 #include <xc.h>
 #include "pathway.h"
 #include "main.h"
+#include "mainstation.h"
+#include "mountaintrack.h"
 #include "milisecond_counter.h"
 
 STATION *refTOP;
 STATION *refBOT;
 
-void INITxPATHWAY(STATION *reftop, STATION *refbot)
+MNTSTATION *refWALDSEE;
+MNTSTATION *refWALDBERG;
+
+void INITxPATHWAYxSTATION(STATION *reftop, STATION *refbot)
 {
     refTOP = reftop;
     refBOT = refbot;
+}
+
+void INITxPATHWAYxMNTSTATION(MNTSTATION *refwaldsee, MNTSTATION *refwaldberg)
+{
+    refWALDSEE  = refwaldsee;
+    refWALDBERG = refwaldberg;
 }
 
 /* Disable optimizing otherwise the compiler might optimize the definitions
@@ -90,4 +101,10 @@ void SETxSTATIONxPATHWAY(STATION *self, uint8_t path, enum STATES dir)
         default:break;
     }
 #pragma optimize( "", on )
+}
+
+void SETxMNTSTATIONxPATHWAY(MNTSTATION *self, uint8_t path)
+{
+    #pragma optimize( "", off )
+    #pragma optimize( "", on )
 }
