@@ -40,8 +40,8 @@
 // TODO Insert declarations
 
 /* Debounce Delay time */
-const uint32_t  tIoSignalDebounceTime = (uint32_t)(5);
-
+const uint32_t  tIoSignalDebounceTime   = (uint32_t)(5);
+const uint32_t  tHallSignalDebounceTime = (uint32_t)(0);
 /*
  * Debounce struct
 */
@@ -60,16 +60,16 @@ typedef struct
 }DEBOUNCE;
 
 
-DEBOUNCE HALL_BLK_13    = {tIoSignalDebounceTime, 0, 0, 0, &PORTF, 0x1,  0,  false,  true};
-DEBOUNCE HALL_BLK_21A   = {tIoSignalDebounceTime, 0, 0, 0, &PORTF, 0x2,  0,  false,  true};
-DEBOUNCE HALL_BLK_T4    = {tIoSignalDebounceTime, 0, 0, 0, &PORTF, 0x4,  0,  false,  true};
-DEBOUNCE HALL_BLK_T5    = {tIoSignalDebounceTime, 0, 0, 0, &PORTF, 0x8,  0,  false,  true};
-DEBOUNCE HALL_BLK_T1    = {tIoSignalDebounceTime, 0, 0, 0, &PORTF, 0x10, 0,  false,  true};
-DEBOUNCE HALL_BLK_T2    = {tIoSignalDebounceTime, 0, 0, 0, &PORTF, 0x20, 0,  false,  true};
-DEBOUNCE HALL_BLK_9B    = {tIoSignalDebounceTime, 0, 0, 0, &PORTF, 0x40, 0,  false,  true};
-DEBOUNCE HALL_BLK_4A    = {tIoSignalDebounceTime, 0, 0, 0, &PORTF, 0x80, 0,  false,  true};
-DEBOUNCE HALL_BLK_T7    = {tIoSignalDebounceTime, 0, 0, 0, &PORTH, 0x1,  0,  false,  true};
-DEBOUNCE HALL_BLK_T8    = {tIoSignalDebounceTime, 0, 0, 0, &PORTH, 0x2,  0,  false,  true};
+DEBOUNCE HALL_BLK_13    = {tHallSignalDebounceTime, 0, 0, 0, &PORTF, 0x1,  0,  false,  true};
+DEBOUNCE HALL_BLK_21A   = {tHallSignalDebounceTime, 0, 0, 0, &PORTF, 0x2,  0,  false,  true};
+DEBOUNCE HALL_BLK_T4    = {tHallSignalDebounceTime, 0, 0, 0, &PORTF, 0x4,  0,  false,  true};
+DEBOUNCE HALL_BLK_T5    = {tHallSignalDebounceTime, 0, 0, 0, &PORTF, 0x8,  0,  false,  true};
+DEBOUNCE HALL_BLK_T1    = {tHallSignalDebounceTime, 0, 0, 0, &PORTF, 0x10, 0,  false,  true};
+DEBOUNCE HALL_BLK_T2    = {tHallSignalDebounceTime, 0, 0, 0, &PORTF, 0x20, 0,  false,  true};
+DEBOUNCE HALL_BLK_9B    = {tHallSignalDebounceTime, 0, 0, 0, &PORTF, 0x40, 0,  false,  true};
+DEBOUNCE HALL_BLK_4A    = {tHallSignalDebounceTime, 0, 0, 0, &PORTF, 0x80, 0,  false,  true};
+DEBOUNCE HALL_BLK_T7    = {tHallSignalDebounceTime, 0, 0, 0, &PORTH, 0x1,  0,  false,  true};
+DEBOUNCE HALL_BLK_T8    = {tHallSignalDebounceTime, 0, 0, 0, &PORTH, 0x2,  0,  false,  true};
 DEBOUNCE OCC_FR_BLK13   = {tIoSignalDebounceTime, 0, 0, 0, &PORTH, 0x4,  0,  true,   true};
 DEBOUNCE OCC_FR_BLK4    = {tIoSignalDebounceTime, 0, 0, 0, &PORTH, 0x8,  0,  true,   true};
 DEBOUNCE OCC_FR_STN_1   = {tIoSignalDebounceTime, 0, 0, 0, &PORTH, 0x10, 0,  true,   true};

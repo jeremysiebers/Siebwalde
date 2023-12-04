@@ -97,15 +97,15 @@ void main(void)
 
     error_msg ret = ERROR;
     
-    while(!ETH_CheckLinkUp()){
-        Network_Manage();
-    }
+//    while(!ETH_CheckLinkUp()){
+//        Network_Manage();
+//    }
 // </editor-fold>    
     while (1)
     {
         //TP1_SetHigh();
         /* Manage TCP/IP Stack */
-        Network_Manage();
+//        Network_Manage();
         //TP1_SetLow();
         
 // <editor-fold defaultstate="collapsed">

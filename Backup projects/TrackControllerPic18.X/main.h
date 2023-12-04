@@ -124,6 +124,7 @@ typedef struct
 */
 typedef struct
 {
+    uint8_t                     name;
     enum STATES                 AppState;                                       // State of the state meachine
     enum STATES                 hndlState;
     DEBOUNCE                    *getFreightLeaveStation;
