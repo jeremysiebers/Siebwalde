@@ -170,7 +170,6 @@ void main(void)
             OCC_TO_9B_SetHigh();            
             OCC_TO_T6_SetHigh();
             OCC_TO_T3_SetHigh();
-            OCC_TO_8A_SetHigh();
             OCC_TO_STN_1_SetHigh();
             OCC_TO_STN_2_SetHigh();
             OCC_TO_STN_3_SetHigh();
