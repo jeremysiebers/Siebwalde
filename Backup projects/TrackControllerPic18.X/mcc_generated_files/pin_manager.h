@@ -95,6 +95,34 @@
 #define ETHLEDB_SetAnalogMode()      do { anselRA1bits.anselRA1 = 1; } while(0)
 #define ETHLEDB_SetDigitalMode()     do { anselRA1bits.anselRA1 = 0; } while(0)
 
+// get/set TP3 aliases
+#define TP3_TRIS                 TRISAbits.TRISA2
+#define TP3_LAT                  LATAbits.LATA2
+#define TP3_PORT                 PORTAbits.RA2
+#define TP3_ANS                  anselRA2bits.anselRA2
+#define TP3_SetHigh()            do { LATAbits.LATA2 = 1; } while(0)
+#define TP3_SetLow()             do { LATAbits.LATA2 = 0; } while(0)
+#define TP3_Toggle()             do { LATAbits.LATA2 = ~LATAbits.LATA2; } while(0)
+#define TP3_GetValue()           PORTAbits.RA2
+#define TP3_SetDigitalInput()    do { TRISAbits.TRISA2 = 1; } while(0)
+#define TP3_SetDigitalOutput()   do { TRISAbits.TRISA2 = 0; } while(0)
+#define TP3_SetAnalogMode()      do { anselRA2bits.anselRA2 = 1; } while(0)
+#define TP3_SetDigitalMode()     do { anselRA2bits.anselRA2 = 0; } while(0)
+
+// get/set TP4 aliases
+#define TP4_TRIS                 TRISAbits.TRISA3
+#define TP4_LAT                  LATAbits.LATA3
+#define TP4_PORT                 PORTAbits.RA3
+#define TP4_ANS                  anselRA3bits.anselRA3
+#define TP4_SetHigh()            do { LATAbits.LATA3 = 1; } while(0)
+#define TP4_SetLow()             do { LATAbits.LATA3 = 0; } while(0)
+#define TP4_Toggle()             do { LATAbits.LATA3 = ~LATAbits.LATA3; } while(0)
+#define TP4_GetValue()           PORTAbits.RA3
+#define TP4_SetDigitalInput()    do { TRISAbits.TRISA3 = 1; } while(0)
+#define TP4_SetDigitalOutput()   do { TRISAbits.TRISA3 = 0; } while(0)
+#define TP4_SetAnalogMode()      do { anselRA3bits.anselRA3 = 1; } while(0)
+#define TP4_SetDigitalMode()     do { anselRA3bits.anselRA3 = 0; } while(0)
+
 // get/set TP1 aliases
 #define TP1_TRIS                 TRISAbits.TRISA4
 #define TP1_LAT                  LATAbits.LATA4

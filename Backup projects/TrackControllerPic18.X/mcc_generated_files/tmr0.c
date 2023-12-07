@@ -50,7 +50,6 @@
 
 #include <xc.h>
 #include "tmr0.h"
-//#include "mcc.h"
 
 /**
   Section: Global Variables Definitions
@@ -72,11 +71,11 @@ void TMR0_Initialize(void)
     //Enable 16bit timer mode before assigning value to TMR0H
     T0CONbits.T08BIT = 0;
 
-    // TMR0H 230; 
-    TMR0H = 0xE6;
+    // TMR0H 97; 
+    TMR0H = 0x61;
 
-    // TMR0L 145; 
-    TMR0L = 0x91;
+    // TMR0L 13; 
+    TMR0L = 0x0D;
 
 	
     // Load TMR0 value to the 16-bit reload variable
@@ -91,8 +90,8 @@ void TMR0_Initialize(void)
     // Set Default Interrupt Handler
     TMR0_SetInterruptHandler(TMR0_DefaultInterruptHandler);
 
-    // T0PS 1:16; T08BIT 16-bit; T0SE Increment_hi_lo; T0CS FOSC/4; TMR0ON enabled; PSA assigned; 
-    T0CON = 0x93;
+    // T0PS 1:256; T08BIT 16-bit; T0SE Increment_hi_lo; T0CS FOSC/4; TMR0ON enabled; PSA assigned; 
+    T0CON = 0x97;
 }
 
 void TMR0_StartTimer(void)
@@ -136,7 +135,6 @@ void TMR0_Reload(void)
 
 void TMR0_ISR(void)
 {
-    //TP2_SetHigh();
 
     // clear the TMR0 interrupt flag
     INTCONbits.TMR0IF = 0;
@@ -150,8 +148,6 @@ void TMR0_ISR(void)
     {
         TMR0_InterruptHandler();
     }
-    
-    //TP2_SetLow();
 
     // add your TMR0 interrupt custom code
 }

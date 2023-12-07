@@ -27,11 +27,11 @@ void INITxMOUNTAINxSTATION(void)
     waldsee.setPath                         = &WS_WALDSEE;
       
     waldsee.mntStnTrack1.trackNr            = T1;
-    waldsee.mntStnTrack1.stnState           = STN_EMPTY;
+    waldsee.mntStnTrack1.stnState           = STN_IDLE;
     waldsee.mntStnTrack1.stnSequence        = SEQ_IDLE;
       
     waldsee.mntStnTrack2.trackNr            = T2;
-    waldsee.mntStnTrack2.stnState           = STN_EMPTY;    
+    waldsee.mntStnTrack2.stnState           = STN_IDLE;    
     waldsee.mntStnTrack2.stnSequence        = SEQ_IDLE;
     /**************************************************************************/
     siebwalde.name                          = SIEBWALDE;
@@ -41,11 +41,11 @@ void INITxMOUNTAINxSTATION(void)
     siebwalde.getTrainEnterStationTrack2    = &HALL_BLK_T5;    
 
     siebwalde.mntStnTrack1.trackNr          = T4;
-    siebwalde.mntStnTrack1.stnState         = STN_EMPTY;
+    siebwalde.mntStnTrack1.stnState         = STN_IDLE;
     siebwalde.mntStnTrack1.stnSequence      = SEQ_IDLE;
 
     siebwalde.mntStnTrack2.trackNr          = T5;
-    siebwalde.mntStnTrack2.stnState         = STN_EMPTY;    
+    siebwalde.mntStnTrack2.stnState         = STN_IDLE;    
     siebwalde.mntStnTrack2.stnSequence      = SEQ_IDLE;
     /**************************************************************************/
     waldberg.name                           = WALDBERG;
@@ -60,11 +60,11 @@ void INITxMOUNTAINxSTATION(void)
     waldberg.setPath                        = &WS_WALDBERG;
  
     waldberg.mntStnTrack1.trackNr           = T7;
-    waldberg.mntStnTrack1.stnState          = STN_EMPTY;
+    waldberg.mntStnTrack1.stnState          = STN_IDLE;
     waldberg.mntStnTrack1.stnSequence       = SEQ_IDLE;
  
     waldberg.mntStnTrack2.trackNr           = T8;
-    waldberg.mntStnTrack2.stnState          = STN_EMPTY;    
+    waldberg.mntStnTrack2.stnState          = STN_IDLE;    
     waldberg.mntStnTrack2.stnSequence       = SEQ_IDLE;    
 }
 

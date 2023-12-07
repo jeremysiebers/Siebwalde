@@ -1,6 +1,7 @@
 #include <xc.h>
 #include <stdbool.h>
 #include "main.h"
+#include "rand.h"
 #include "mainstation.h"
 #include "pathway.h"
 #include "tracksignal.h"
@@ -28,19 +29,19 @@ void INITxSTATION(void)
     top.setSignalTime           = 0;
     
     top.stnTrack1.trackNr       = 10;
-    top.stnTrack1.stnState      = STN_EMPTY;
+    top.stnTrack1.stnState      = STN_IDLE;
     top.stnTrack1.stnSequence   = SEQ_IDLE;
     top.stnTrack1.setOccStn     = &OCC_TO_STN_10;
     top.stnTrack1.getOccStn     = &OCC_FR_STN_10;
     
     top.stnTrack2.trackNr       = 11;
-    top.stnTrack2.stnState      = STN_EMPTY;    
+    top.stnTrack2.stnState      = STN_IDLE;    
     top.stnTrack2.stnSequence   = SEQ_IDLE;
     top.stnTrack2.setOccStn     = &OCC_TO_STN_11;
     top.stnTrack2.getOccStn     = &OCC_FR_STN_11;
     
     top.stnTrack3.trackNr       = 12;
-    top.stnTrack3.stnState      = STN_EMPTY;
+    top.stnTrack3.stnState      = STN_IDLE;
     top.stnTrack3.stnSequence   = SEQ_IDLE;
     top.stnTrack3.setOccStn     = &OCC_TO_STN_12;
     top.stnTrack3.getOccStn     = &OCC_FR_STN_12;
@@ -60,19 +61,19 @@ void INITxSTATION(void)
     bot.setSignalTime           = 0;
     
     bot.stnTrack1.trackNr       = 1;
-    bot.stnTrack1.stnState      = STN_EMPTY;
+    bot.stnTrack1.stnState      = STN_IDLE;
     bot.stnTrack1.stnSequence   = SEQ_IDLE;
     bot.stnTrack1.setOccStn     = &OCC_TO_STN_1;
     bot.stnTrack1.getOccStn     = &OCC_FR_STN_1;
     
     bot.stnTrack2.trackNr       = 2;
-    bot.stnTrack2.stnState      = STN_EMPTY;
+    bot.stnTrack2.stnState      = STN_IDLE;
     bot.stnTrack2.stnSequence   = SEQ_IDLE;
     bot.stnTrack2.setOccStn     = &OCC_TO_STN_2;
     bot.stnTrack2.getOccStn     = &OCC_FR_STN_2;
     
     bot.stnTrack3.trackNr       = 3;
-    bot.stnTrack3.stnState      = STN_EMPTY;
+    bot.stnTrack3.stnState      = STN_IDLE;
     bot.stnTrack3.stnSequence   = SEQ_IDLE;
     bot.stnTrack3.setOccStn     = &OCC_TO_STN_3;
     bot.stnTrack3.getOccStn     = &OCC_FR_STN_3;
@@ -101,21 +102,29 @@ void UPDATExSTATION(STATION *self)
             /*
              * Set all the track signals to red
              */
-            SETxSIGNAL(self, 1,  SIG_RED);
-            SETxSIGNAL(self, 2,  SIG_RED);
-            SETxSIGNAL(self, 3,  SIG_RED);
-
+            if(self->name == TOP){
+                SETxSIGNAL(self, 10, SIG_RED);
+                SETxSIGNAL(self, 11, SIG_RED);
+                SETxSIGNAL(self, 12, SIG_RED);
+            }
+            else if(self->name == BOT){
+                SETxSIGNAL(self, 1,  SIG_RED);
+                SETxSIGNAL(self, 2,  SIG_RED);
+                SETxSIGNAL(self, 3,  SIG_RED);
+            }
+            
             /* Check if Station1 is occupied */
             if(self->stnTrack1.getOccStn->value){
                 /*
                  * Start station wait random timers set STN1 to occupied
                  */                
                 self->stnTrack1.stnOccupied = true;
-                self->stnTrack1.stnState = STN_WAIT;
+                self->stnTrack1.stnState    = STN_WAIT;
+                self->stnTrack1.tWaitTime   = tTrainWaitTime + GETxRANDOMxNUMBER();
             }
             else{
                 self->stnTrack1.stnOccupied = false;
-                self->stnTrack1.stnState = STN_EMPTY;
+                self->stnTrack1.stnState = STN_IDLE;
             }
             
             /* Check if Station2 is occupied */
@@ -124,11 +133,12 @@ void UPDATExSTATION(STATION *self)
                  * Start station wait random timers set STN2 to occupied
                  */
                 self->stnTrack2.stnOccupied = true;
-                self->stnTrack2.stnState = STN_WAIT;
+                self->stnTrack2.stnState    = STN_WAIT;
+                self->stnTrack2.tWaitTime   = tTrainWaitTime + GETxRANDOMxNUMBER();
             }
             else{
                 self->stnTrack2.stnOccupied = false;
-                self->stnTrack2.stnState = STN_EMPTY;
+                self->stnTrack2.stnState = STN_IDLE;
             }
             
             /* Check if Station3 is occupied */
@@ -140,14 +150,14 @@ void UPDATExSTATION(STATION *self)
             }            
             /* When STN3 is free check if there is an incoming train */
             else if(self->getOccBlkIn->value){
-                
-                if(false == self->stnTrack1.stnOccupied){
-                    self->stnTrack1.stnState = STN_INBOUND;
-                }
-                else if(false == self->stnTrack2.stnOccupied){
-                    self->stnTrack2.stnState = STN_INBOUND;
-                }
-                else if(self->getOccBlkOut->value){
+//                /* Check for a free track */
+//                if(false == self->stnTrack1.stnOccupied){
+//                    self->stnTrack1.stnState = STN_INBOUND;
+//                }
+//                else if(false == self->stnTrack2.stnOccupied){
+//                    self->stnTrack2.stnState = STN_INBOUND;
+//                }
+                if(self->getOccBlkOut->value){
                     /*
                      * Go to: Inbound on Station track 3
                      * continue with incoming train as freight
@@ -164,7 +174,7 @@ void UPDATExSTATION(STATION *self)
             }
             else{
                 self->stnTrack3.stnOccupied = false;
-                self->stnTrack3.stnState = STN_EMPTY;
+                self->stnTrack3.stnState = STN_IDLE;
             }
             /* Start executing main state machine */
             self->AppState = RUN;
@@ -179,145 +189,134 @@ void UPDATExSTATION(STATION *self)
              * while no INBOUND or PASSING is in progress,
              * take the train to the empty station track
              */
-            if(true == self->getOccBlkIn->value &&
-                    false == self->getFreightEnterStation->value &&
-                    STN_EMPTY   == self->stnTrack1.stnState &&
-                    STN_INBOUND != self->stnTrack2.stnState &&
-                    STN_INBOUND != self->stnTrack3.stnState &&
-                    STN_PASSING != self->stnTrack2.stnState &&
-                    STN_PASSING != self->stnTrack3.stnState
-                    ){
-                self->stnTrack1.stnState = STN_INBOUND;
-                //self->hndlState = HNDL_INBOUND;
-            }
-            else if(true == self->getOccBlkIn->value &&
-                    false == self->getFreightEnterStation->value &&
-                    STN_EMPTY   == self->stnTrack2.stnState &&
-                    STN_INBOUND != self->stnTrack1.stnState &&
-                    STN_INBOUND != self->stnTrack3.stnState &&
-                    STN_PASSING != self->stnTrack1.stnState &&
-                    STN_PASSING != self->stnTrack3.stnState
-                    ){
-                self->stnTrack2.stnState = STN_INBOUND;
-                //self->hndlState = HNDL_INBOUND;
-            }
-            /*
-             * INBOUND: Track3
-             * When inbound and only station3 is empty and the outbound
-             * track is free(false) or occupied (true) then let the train 
-             * pass the station or store it in station track 3
-             * There will be no train storage on track 3 normally.
-             */
-            else if(true  == self->getOccBlkIn->value  && 
-                    false == self->getOccBlkOut->value &&
-                    STN_EMPTY   == self->stnTrack3.stnState &&
-                    STN_INBOUND != self->stnTrack1.stnState &&
-                    STN_INBOUND != self->stnTrack2.stnState &&
-                    STN_PASSING != self->stnTrack1.stnState &&
-                    STN_PASSING != self->stnTrack2.stnState
-                    ){
-                self->stnTrack3.stnState = STN_PASSING;
-                if(true == self->getFreightEnterStation->value){
-                    self->getFreightEnterStation->value = false;
+            if(true == self->getOccBlkIn->value){
+                /* Check Track 1 and other states */
+                if(false == self->getFreightEnterStation->value){
+                    if(false == self->stnTrack1.stnOccupied &&
+                            STN_INBOUND != self->stnTrack2.stnState &&
+                            STN_INBOUND != self->stnTrack3.stnState &&
+                            STN_PASSING != self->stnTrack2.stnState &&
+                            STN_PASSING != self->stnTrack3.stnState
+                            ){
+                        self->stnTrack1.stnState = STN_INBOUND;
+                    }
+                    /* Check Track 2 and other states */
+                    else if(false == self->stnTrack2.stnOccupied &&
+                            STN_INBOUND != self->stnTrack1.stnState &&
+                            STN_INBOUND != self->stnTrack3.stnState &&
+                            STN_PASSING != self->stnTrack1.stnState &&
+                            STN_PASSING != self->stnTrack3.stnState
+                            ){
+                        self->stnTrack2.stnState = STN_INBOUND;
+                    }
+                }                                        
+                /*
+                 * INBOUND TRACK3:
+                 * When inbound and only station3 is empty and the outbound
+                 * track is free(false) or occupied (true) then let the train 
+                 * pass the station or store it in station track 3
+                 * There will be no train storage on track 3 normally.
+                 */
+                else if(false == self->getOccBlkOut->value &&
+                        false        == self->stnTrack3.stnOccupied &&
+                        STN_INBOUND  != self->stnTrack1.stnState &&
+                        STN_INBOUND  != self->stnTrack2.stnState &&
+                        STN_PASSING  != self->stnTrack1.stnState &&
+                        STN_PASSING  != self->stnTrack2.stnState &&
+                        STN_OUTBOUND != self->stnTrack1.stnState &&
+                        STN_OUTBOUND != self->stnTrack2.stnState
+                        ){
+                    self->stnTrack3.stnState = STN_PASSING;
+                    if(true == self->getFreightEnterStation->value){
+                        self->getFreightEnterStation->value = false;
+                    }
+                }
+                /* 
+                 * Station 1 and 2 are allowed to do outbound while stnTrack3 
+                 * has an Inbound 
+                 */
+                else if(true == self->getOccBlkOut->value &&
+                        false       == self->stnTrack3.stnOccupied &&
+                        STN_INBOUND != self->stnTrack1.stnState &&
+                        STN_INBOUND != self->stnTrack2.stnState &&
+                        STN_PASSING != self->stnTrack1.stnState &&
+                        STN_PASSING != self->stnTrack2.stnState
+                        ){
+                    self->stnTrack3.stnState = STN_INBOUND;
+                    if(true == self->getFreightEnterStation->value){
+                        self->getFreightEnterStation->value = false;
+                    }
                 }
             }
-            else if(true  == self->getOccBlkIn->value  && 
-                    true == self->getOccBlkOut->value &&
-                    STN_EMPTY   == self->stnTrack3.stnState &&
-                    STN_INBOUND != self->stnTrack1.stnState &&
-                    STN_INBOUND != self->stnTrack2.stnState &&
-                    STN_PASSING != self->stnTrack1.stnState &&
-                    STN_PASSING != self->stnTrack2.stnState
-                    ){
-                self->stnTrack3.stnState = STN_INBOUND;
-                if(true == self->getFreightEnterStation->value){
-                    self->getFreightEnterStation->value = false;
-                }
-            }
             
-            switch(MAINxSTATIONxOUTBOUND(self)){
-                case busy:
-                    break;
-                case done:
-                    self->hndlState = HNDL_IDLE;
-                    break;
-                case nop:
-                    self->hndlState = HNDL_IDLE;
-                    break;
-                default:
-                    break;
-            }
+            /* Handle the stnTrack x which is in Outbound mode */
+            MAINxSTATIONxOUTBOUND(self);
+            /* Handle the stnTrack x which is in Inbound mode */
+            MAINxSTATIONxINBOUND(self);
+            /* Handle the stnTrack x which is in Passing mode */
+            MAINxSTATIONxPASSING(self);
             
-            switch(MAINxSTATIONxINBOUND(self)){
-                case busy:
-                    break;
-                case done:
-                    self->hndlState = HNDL_IDLE;
-                    break;
-                case nop:
-                    self->hndlState = HNDL_IDLE;
-                    break;
-                default:
-                    break;
-            }
-            
-            switch(MAINxSTATIONxPASSING(self)){
-                case busy:
-                    break;
-                case done:
-                    self->hndlState = HNDL_IDLE;
-                    break;
-                case nop:
-                    self->hndlState = HNDL_IDLE;
-                    break;
-                default:
-                    break;
-            }
             break;
         
         default:
             self->AppState = INIT;
-        break;
+            break;
     }
 }
 
 /*
  * During every xMiliseconds an interrupt will call this function to 
- * check if a train wait time is done
+ * check if a train wait time is done and no other track is in outbound mode.
+ * Otherwise add another random time of max 0 - 32 seconds
  */
-void UPDATExTRAINxWAIT()
+void UPDATExSTATIONxTRAINxWAIT(STATION *self)
 {
+    /* Get one time the actual time */
     uint32_t millis = GETxMILLIS();
     
-    if(STN_WAIT == top.stnTrack1.stnState){
-        if((millis - top.stnTrack1.tCountTime) > top.stnTrack1.tWaitTime){
-                top.stnTrack1.stnState = STN_OUTBOUND;
+    if(STN_WAIT == self->stnTrack1.stnState){
+        if((millis - self->stnTrack1.tCountTime) > self->stnTrack1.tWaitTime){
+            if(STN_OUTBOUND != self->stnTrack2.stnState &&
+                    STN_OUTBOUND != self->stnTrack3.stnState &&
+                    STN_PASSING  != self->stnTrack2.stnState &&
+                    STN_PASSING  != self->stnTrack3.stnState){
+                self->stnTrack1.stnState = STN_OUTBOUND;
             }
+            else{
+                self->stnTrack1.tCountTime = millis;
+                self->stnTrack1.tWaitTime = GETxRANDOMxNUMBER();
+                self->stnTrack1.stnState = STN_WAIT;
+            }
+        }
     }
-    if(STN_WAIT == top.stnTrack2.stnState){
-        if((millis - top.stnTrack2.tCountTime) > top.stnTrack2.tWaitTime){
-                top.stnTrack2.stnState = STN_OUTBOUND;
+    if(STN_WAIT == self->stnTrack2.stnState){
+        if((millis - self->stnTrack2.tCountTime) > self->stnTrack2.tWaitTime){
+            if(STN_OUTBOUND != self->stnTrack1.stnState &&
+                    STN_OUTBOUND != self->stnTrack3.stnState &&
+                    STN_PASSING  != self->stnTrack1.stnState &&
+                    STN_PASSING  != self->stnTrack3.stnState){
+                self->stnTrack2.stnState = STN_OUTBOUND;
             }
+            else{
+                self->stnTrack2.tCountTime = millis;
+                self->stnTrack2.tWaitTime = GETxRANDOMxNUMBER();
+                self->stnTrack2.stnState = STN_WAIT;
+            }
+        }
     }
-    if(STN_WAIT == top.stnTrack3.stnState){
-        if((millis - top.stnTrack3.tCountTime) > top.stnTrack3.tWaitTime){
-                top.stnTrack3.stnState = STN_OUTBOUND;
+    if(STN_WAIT == self->stnTrack3.stnState){
+        if((millis - self->stnTrack3.tCountTime) > self->stnTrack3.tWaitTime){
+            if(STN_OUTBOUND != self->stnTrack1.stnState &&
+                    STN_OUTBOUND != self->stnTrack2.stnState &&
+                    STN_PASSING  != self->stnTrack1.stnState &&
+                    STN_PASSING  != self->stnTrack2.stnState){
+                self->stnTrack3.stnState = STN_OUTBOUND;
             }
+            else{
+                self->stnTrack3.tCountTime = millis;
+                self->stnTrack3.tWaitTime = GETxRANDOMxNUMBER();
+                self->stnTrack3.stnState = STN_WAIT;
+            }
+        }
     }
-    
-    if(STN_WAIT == bot.stnTrack1.stnState){
-        if((millis - bot.stnTrack1.tCountTime) > bot.stnTrack1.tWaitTime){
-                bot.stnTrack1.stnState = STN_OUTBOUND;
-            }
-    }
-    if(STN_WAIT == bot.stnTrack2.stnState){
-        if((millis - bot.stnTrack2.tCountTime) > bot.stnTrack2.tWaitTime){
-                bot.stnTrack2.stnState = STN_OUTBOUND;
-            }
-    }
-    if(STN_WAIT == bot.stnTrack3.stnState){
-        if((millis - bot.stnTrack3.tCountTime) > bot.stnTrack3.tWaitTime){
-                bot.stnTrack3.stnState = STN_OUTBOUND;
-            }
-    }    
 }

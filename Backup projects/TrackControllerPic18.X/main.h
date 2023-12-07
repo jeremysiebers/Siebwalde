@@ -42,16 +42,16 @@
 
 void UDP_DATA_RECV(int length);
 
-/* factor to be set according to set timer intterrupt vallue */
-const uint32_t tFactor = 100; // timer set to 10ms, 10 * 100 = 1 second
+/* factor to be set according to set timer interrupt value to calc seconds */
+const uint32_t tFactorSec = 1000; // timer set to 1ms, 10 * 1000 = 1 second
 /* 5 seconds wait time after point switch set the signal */
-const uint32_t tSignalSwitchWaitTime = (uint32_t)(5 * tFactor);
+const uint32_t tSignalSwitchWaitTime = (uint32_t)(5 * tFactorSec);
 /* Time to wait for servo to move to new position */
-const uint32_t tSwitchPointWaitTime = (uint32_t)(5 * tFactor);
+const uint32_t tSwitchPointWaitTime = (uint32_t)(5 * tFactorSec);
 /* Time that Train waits before leaving */
-const uint32_t tTrainWaitTime = (uint32_t)(30 * tFactor);
+const uint32_t tTrainWaitTime = (uint32_t)(30 * tFactorSec);
 /* Boot wait time to get all IO read and debounced first */
-const uint32_t tReadIoSignalWaitTime = (uint32_t)(1 * tFactor);
+const uint32_t tReadIoSignalWaitTime = (uint32_t)(2 * tFactorSec * 4); //tmr1 interrupt 250us
 
 enum STATES{
     INIT,
@@ -71,7 +71,7 @@ enum STATES{
     STN_OUTBOUND,
     STN_PASSING,
     STN_WAIT,
-    STN_EMPTY,
+    STN_IDLE,
     
     SEQ_IDLE,
     SEQ_WAIT,
@@ -80,7 +80,7 @@ enum STATES{
     SEQ_CHK_PASSED,
     
     SIG_RED,
-    SIG_GREEN
+    SIG_GREEN,
 };
 
 typedef struct
@@ -105,7 +105,6 @@ typedef struct
     uint8_t                     pin6_mask;                                      // Mask to point to pin used of port
     
 }WS, SIG;
-
 
 // Comment a function and leverage automatic documentation with slash star star
 /**

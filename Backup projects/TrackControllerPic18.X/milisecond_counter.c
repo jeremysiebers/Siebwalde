@@ -29,7 +29,7 @@ volatile uint32_t milliseconds_counter = 1;
 //#warning USING TIMER0 FOR MILLISECOND TIMER
 void MILLIESxINIT(void)
 {
-    TMR0_SetInterruptHandler(MILLISECOND_HANDLER);
+    TMR1_SetInterruptHandler(MILLISECOND_HANDLER);
     SETxMILLISECONDxUPDATExHANDLER(Millisecond_DefaultUpdateHandler);
 }
 

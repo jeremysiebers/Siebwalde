@@ -29,7 +29,7 @@ int8_t MAINxSTATIONxOUTBOUND(STATION *self){
          * when the outgoing block is free
          */
         case SEQ_IDLE:
-            if(false == self->getOccBlkOut->value){
+            if(false == self->getOccBlkOut->value ){
                 SETxSTATIONxPATHWAY(self, activeTrack->trackNr, STN_OUTBOUND);
                 SETxSIGNAL(self, activeTrack->trackNr, SIG_GREEN);
                 activeTrack->tCountTime     = GETxMILLIS();
@@ -45,15 +45,16 @@ int8_t MAINxSTATIONxOUTBOUND(STATION *self){
             activeTrack->stnSequence    = SEQ_CHK_TRAIN;
             break;
             
-        /* Check when the occupied signal goes low */
+        /* 
+         * Check when the occupied signal goes low AND train is in the 
+         * block out! 
+         */
         case SEQ_CHK_TRAIN:
-            if(activeTrack->getOccStn->value){
-                break;
-            }
-            else{
+            if(false == activeTrack->getOccStn->value && 
+                    true == self->getOccBlkOut->value){
                 SETxSIGNAL(self, activeTrack->trackNr, SIG_RED);
                 activeTrack->stnOccupied = false;
-                activeTrack->stnState    = STN_EMPTY;
+                activeTrack->stnState    = STN_IDLE;
                 activeTrack->stnSequence = SEQ_IDLE;
                 activeTrack = 0;
                 return(done);

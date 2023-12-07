@@ -31,6 +31,10 @@
 #ifndef DEBOUNCE_H
 #define	DEBOUNCE_H
 
+#ifdef	__cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 #include <xc.h> // include processor files - each processor file is guarded. 
 
 // TODO Insert appropriate #include <>
@@ -39,15 +43,16 @@
 
 // TODO Insert declarations
 
-/* Debounce Delay time */
-const uint32_t  tIoSignalDebounceTime   = (uint32_t)(5);
-const uint32_t  tHallSignalDebounceTime = (uint32_t)(0);
+/* Debounce Delay time in y * 1_ms(timer interrupt time) */
+const uint32_t  tIoSignalDebounceTime   = (uint32_t)(200);
+const uint32_t  tBlkOutDebounceTime     = (uint32_t)(2000);
+const uint32_t  tHallSignalDebounceTime = (uint32_t)(5);
 /*
  * Debounce struct
 */
 typedef struct
 {
-    uint8_t                 debounceDelay;      // Debounce counter
+    uint16_t                debounceDelay;      // Debounce counter
     uint32_t                lastDebounceTime;   // Value when to except input value
     bool                    lastButtonState;    // Debounced value
     bool                    buttonState;        // State of the input
@@ -59,7 +64,7 @@ typedef struct
     
 }DEBOUNCE;
 
-
+/* PORTF */
 DEBOUNCE HALL_BLK_13    = {tHallSignalDebounceTime, 0, 0, 0, &PORTF, 0x1,  0,  false,  true};
 DEBOUNCE HALL_BLK_21A   = {tHallSignalDebounceTime, 0, 0, 0, &PORTF, 0x2,  0,  false,  true};
 DEBOUNCE HALL_BLK_T4    = {tHallSignalDebounceTime, 0, 0, 0, &PORTF, 0x4,  0,  false,  true};
@@ -68,25 +73,27 @@ DEBOUNCE HALL_BLK_T1    = {tHallSignalDebounceTime, 0, 0, 0, &PORTF, 0x10, 0,  f
 DEBOUNCE HALL_BLK_T2    = {tHallSignalDebounceTime, 0, 0, 0, &PORTF, 0x20, 0,  false,  true};
 DEBOUNCE HALL_BLK_9B    = {tHallSignalDebounceTime, 0, 0, 0, &PORTF, 0x40, 0,  false,  true};
 DEBOUNCE HALL_BLK_4A    = {tHallSignalDebounceTime, 0, 0, 0, &PORTF, 0x80, 0,  false,  true};
+/* PORTH */
 DEBOUNCE HALL_BLK_T7    = {tHallSignalDebounceTime, 0, 0, 0, &PORTH, 0x1,  0,  false,  true};
 DEBOUNCE HALL_BLK_T8    = {tHallSignalDebounceTime, 0, 0, 0, &PORTH, 0x2,  0,  false,  true};
-DEBOUNCE OCC_FR_BLK13   = {tIoSignalDebounceTime, 0, 0, 0, &PORTH, 0x4,  0,  true,   true};
-DEBOUNCE OCC_FR_BLK4    = {tIoSignalDebounceTime, 0, 0, 0, &PORTH, 0x8,  0,  true,   true};
-DEBOUNCE OCC_FR_STN_1   = {tIoSignalDebounceTime, 0, 0, 0, &PORTH, 0x10, 0,  true,   true};
-DEBOUNCE OCC_FR_STN_2   = {tIoSignalDebounceTime, 0, 0, 0, &PORTH, 0x20, 0,  true,   true};
-DEBOUNCE OCC_FR_STN_3   = {tIoSignalDebounceTime, 0, 0, 0, &PORTH, 0x40, 0,  true,   true};
-DEBOUNCE OCC_FR_STN_10  = {tIoSignalDebounceTime, 0, 0, 0, &PORTH, 0x80, 0,  true,   true};
-DEBOUNCE OCC_FR_STN_11  = {tIoSignalDebounceTime, 0, 0, 0, &PORTG, 0x1,  0,  true,   true};
-DEBOUNCE OCC_FR_STN_12  = {tIoSignalDebounceTime, 0, 0, 0, &PORTG, 0x2,  0,  true,   true};
-DEBOUNCE OCC_FR_T6      = {tIoSignalDebounceTime, 0, 0, 0, &PORTG, 0x4,  0,  true,   true};
-DEBOUNCE OCC_FR_T3      = {tIoSignalDebounceTime, 0, 0, 0, &PORTG, 0x8,  0,  true,   true};
-DEBOUNCE CTRL_OFF       = {tIoSignalDebounceTime, 0, 0, 0, &PORTG, 0x10, 0,  true,   true};
-DEBOUNCE OCC_FR_23B     = {tIoSignalDebounceTime, 0, 0, 0, &PORTG, 0x20, 0,  true,   true};
-DEBOUNCE OCC_FR_22B     = {tIoSignalDebounceTime, 0, 0, 0, &PORTG, 0x40, 0,  true,   true};
-DEBOUNCE OCC_FR_9B      = {tIoSignalDebounceTime, 0, 0, 0, &PORTG, 0x80, 0,  true,   true};
-//VOLTDETECT is used directly for now
-DEBOUNCE OCC_FR_21B     = {tIoSignalDebounceTime, 0, 0, 0, &PORTE, 0x40, 0,  true,   true};
-
+DEBOUNCE OCC_FR_BLK13   = {tBlkOutDebounceTime    , 0, 0, 0, &PORTH, 0x4,  0,  true,   true};
+DEBOUNCE OCC_FR_BLK4    = {tBlkOutDebounceTime    , 0, 0, 0, &PORTH, 0x8,  0,  true,   true};
+DEBOUNCE OCC_FR_STN_1   = {tIoSignalDebounceTime  , 0, 0, 0, &PORTH, 0x10, 0,  true,   true};
+DEBOUNCE OCC_FR_STN_2   = {tIoSignalDebounceTime  , 0, 0, 0, &PORTH, 0x20, 0,  true,   true};
+DEBOUNCE OCC_FR_STN_3   = {tIoSignalDebounceTime  , 0, 0, 0, &PORTH, 0x40, 0,  true,   true};
+DEBOUNCE OCC_FR_STN_10  = {tIoSignalDebounceTime  , 0, 0, 0, &PORTH, 0x80, 0,  true,   true};
+/* PORTG */  
+DEBOUNCE OCC_FR_STN_11  = {tIoSignalDebounceTime  , 0, 0, 0, &PORTG, 0x1,  0,  true,   true};
+DEBOUNCE OCC_FR_STN_12  = {tIoSignalDebounceTime  , 0, 0, 0, &PORTG, 0x2,  0,  true,   true};
+DEBOUNCE OCC_FR_T6      = {tIoSignalDebounceTime  , 0, 0, 0, &PORTG, 0x4,  0,  true,   true};
+DEBOUNCE OCC_FR_T3      = {tIoSignalDebounceTime  , 0, 0, 0, &PORTG, 0x8,  0,  true,   true};
+DEBOUNCE CTRL_OFF       = {tIoSignalDebounceTime  , 0, 0, 0, &PORTG, 0x10, 0,  true,   true};
+DEBOUNCE OCC_FR_23B     = {tIoSignalDebounceTime  , 0, 0, 0, &PORTG, 0x20, 0,  true,   true};
+DEBOUNCE OCC_FR_22B     = {tIoSignalDebounceTime  , 0, 0, 0, &PORTG, 0x40, 0,  true,   true};
+DEBOUNCE OCC_FR_9B      = {tIoSignalDebounceTime  , 0, 0, 0, &PORTG, 0x80, 0,  true,   true};
+/* PORTE */
+DEBOUNCE OCC_FR_21B     = {tIoSignalDebounceTime  , 0, 0, 0, &PORTE, 0x40, 0,  true,   true};
+DEBOUNCE VOLTDETECT     = {tHallSignalDebounceTime, 0, 0, 0, &PORTE, 0x80, 0,  true,   false};
 /**
   @Summary
     Debounces an input that is given
@@ -118,13 +125,6 @@ extern void DEBOUNCExIO(DEBOUNCE *instance, uint32_t *millisPtr);
 
 // TODO Insert declarations or function prototypes (right here) to leverage 
 // live documentation
-
-#ifdef	__cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
-    // TODO If C++ is being used, regular C code needs function names to have C 
-    // linkage so the functions can be used by the c code. 
 
 #ifdef	__cplusplus
 }

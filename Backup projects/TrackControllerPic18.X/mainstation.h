@@ -8,22 +8,16 @@
 #ifndef STATION_H
 #define	STATION_H
 
-#ifdef	__cplusplus
-extern "C" {
-#endif
-
 #include <xc.h> // include processor files - each processor file is guarded.
 #include <stdbool.h>
 #include "debounce.h"
 #include "main.h"
-    
-enum STATION_NAME{
-    TOP,
-    BOT
-};    
-/*
- * Station Track struct
- */
+
+enum LAYER{
+    BOT = 0,
+    TOP = 1,
+};
+
 typedef struct
 {
     enum STATES                 stnState;
@@ -36,6 +30,7 @@ typedef struct
     OCC                         *setOccStn;
     DEBOUNCE                    *getOccStn;
     
+    
 }STNTRACK;
 
 /*
@@ -43,7 +38,7 @@ typedef struct
 */
 typedef struct
 {
-    uint8_t                     name;
+    enum LAYER                  name;
     enum STATES                 AppState;                                       // State of the state meachine
     enum STATES                 hndlState;
     DEBOUNCE                    *getFreightLeaveStation;
@@ -61,7 +56,7 @@ typedef struct
     STNTRACK                    stnTrack3;
             
 }STATION;
-    
+
 STATION top;
 STATION bot;
 
@@ -73,10 +68,26 @@ OCC OCC_TO_STN_3  = {&LATJ, 0x40};
 OCC OCC_TO_STN_10 = {&LATJ, 0x80};
 OCC OCC_TO_STN_11 = {&LATE, 0x1};
 OCC OCC_TO_STN_12 = {&LATE, 0x2};
+/* OCC_FR_x goes via debounce function */
+//OCC OCC_FR_BLK13  = {&PORTH, 0x4};
+//OCC OCC_FR_BLK4   = {&PORTH, 0x8};
+//OCC OCC_FR_STN_1  = {&PORTH, 0x10};
+//OCC OCC_FR_STN_2  = {&PORTH, 0x20};
+//OCC OCC_FR_STN_3  = {&PORTH, 0x30};
+//OCC OCC_FR_STN_10 = {&PORTH, 0x80};
+//OCC OCC_FR_STN_11 = {&PORTG, 0x1};
+//OCC OCC_FR_STN_12 = {&PORTG, 0x2};
+//OCC OCC_FR_STN_T6 = {&PORTG, 0x4};
+//OCC OCC_FR_STN_T3 = {&PORTG, 0x8};
+
 
 extern void INITxSTATION(void);
 extern void UPDATExSTATION(STATION *self);
-extern void UPDATExTRAINxWAIT(void);
+extern void UPDATExSTATIONxTRAINxWAIT(STATION *self);
+
+#ifdef	__cplusplus
+extern "C" {
+#endif
 
 #ifdef	__cplusplus
 }

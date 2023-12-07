@@ -60,7 +60,7 @@ volatile uint16_t seconds_counter;
 void rtcc_init(void)
 {
     deviceTime = 1293861600;
-    TMR1_SetInterruptHandler(rtcc_handler);
+    TMR0_SetInterruptHandler(rtcc_handler);
 }
 
 /****************************************************************************

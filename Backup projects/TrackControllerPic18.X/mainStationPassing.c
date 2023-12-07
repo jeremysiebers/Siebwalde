@@ -10,14 +10,14 @@ STNTRACK *activeTrack;
 
 int8_t MAINxSTATIONxPASSING(STATION *self){
     
-    if(self->stnTrack1.stnState == STN_PASSING){
+    if(self->stnTrack3.stnState == STN_PASSING){
+        activeTrack = &self->stnTrack3;
+    }
+    else if(self->stnTrack1.stnState == STN_PASSING){
         activeTrack = &self->stnTrack1;
     }
     else if(self->stnTrack2.stnState == STN_PASSING){
         activeTrack = &self->stnTrack2;
-    }
-    else if(self->stnTrack3.stnState == STN_PASSING){
-        activeTrack = &self->stnTrack3;
     }
     else{
         return(nop);
@@ -52,21 +52,18 @@ int8_t MAINxSTATIONxPASSING(STATION *self){
                 SETxOCC(self->setOccBlkIn, true); // Stop other trains from driving in
                 activeTrack->stnSequence = SEQ_CHK_PASSED;                
             }
-            else{
-                /* Wait until train is passing the station */
-                break;
-            }
             break;
         
-        /* Check if the train has left the passing track */
+        /* 
+         * Check if the train has left the passing track AND is in the
+         * block out. 
+         */
         case SEQ_CHK_PASSED:
-            if(activeTrack->getOccStn->value){
-                break;             
-            }
-            else{
+            if(false == activeTrack->getOccStn->value &&
+                    true == self->getOccBlkOut->value){
                 SETxSIGNAL(self, activeTrack->trackNr, SIG_RED);
                 activeTrack->stnOccupied = false;
-                activeTrack->stnState    = STN_EMPTY;
+                activeTrack->stnState    = STN_IDLE;
                 activeTrack->stnSequence = SEQ_IDLE;
                 activeTrack = 0;
                 return(done);

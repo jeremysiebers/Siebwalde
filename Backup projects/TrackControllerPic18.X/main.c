@@ -24,11 +24,11 @@
 #include "debounce.h"
 #include "mainstation.h"
 #include "pathway.h"
-#include "mountaintrack.h"
+#include "rand.h"
 #include "mcc_generated_files/TCPIPLibrary/udpv4.h"
 #include "mcc_generated_files/TCPIPLibrary/tcpip_config.h"
 
-void DebounceIO(void);
+void DebounceIO(bool trackio);
 void UpdateTick(void);
 
 typedef struct
@@ -64,6 +64,7 @@ bool autosend = false;
 bool updateTick = false;
 uint32_t tBootWaitTimeCnt = 1;
 bool booted = false;
+uint8_t milisecondUpdate = 0;
 
 void main(void)
 // <editor-fold defaultstate="collapsed">
@@ -90,6 +91,7 @@ void main(void)
     MILLIESxINIT();
     SETxMILLISECONDxUPDATExHANDLER(UpdateTick);
     INITxSTATION();
+    INITxRANDxNUMBER();
     
     /* UDP Packet Initializations*/
     udpPacket.destinationAddress = MAKE_IPV4_ADDRESS(192,168,1,19);
@@ -101,14 +103,10 @@ void main(void)
 //    while(!ETH_CheckLinkUp()){
 //        Network_Manage();
 //    }
-// </editor-fold>    
+// </editor-fold>
     while (1)
     {
-        //TP1_SetHigh();
-        /* Manage TCP/IP Stack */
-//        Network_Manage();
-        //TP1_SetLow();
-        
+                
 // <editor-fold defaultstate="collapsed">
         /* Check if over ride key is present, if yes then disable controller. */
         if(KEY_CTRL_GetValue())
@@ -135,30 +133,68 @@ void main(void)
             OCC_TO_STN_12_SetLow();
         }
 // </editor-fold>
-        /* When driving voltage is present and booted, execute state machines */
-        else if(VOLTDET_GetValue() && booted)
+        /* 
+         * When driving voltage is present and system booted, 
+         * execute state machines 
+         */
+        else if(VOLTDETECT.value && booted)
         {
-            TP1_SetHigh();
-            
             if(true == updateTick){
-                DebounceIO();                
-                UPDATExTRAINxWAIT();
-                UPDATExMOUNTAINxTRAINxWAIT();
+                milisecondUpdate++;
+                if(milisecondUpdate > 2){
+                    milisecondUpdate = 0;
+                    DebounceIO(true);
+                    TP1_SetHigh();
+
+                    /*
+                     * MainStation methods
+                     */
+                    UPDATExSTATIONxTRAINxWAIT(&top);
+                    UPDATExSTATIONxTRAINxWAIT(&bot);
+                    TP1_SetLow();
+                    TP2_SetHigh();
+                    UPDATExSTATION(&top);
+                    UPDATExSTATION(&bot);
+
+                    /*
+                     * Mountain track methods
+                     */
+
+                    TP2_SetLow();
+                }
+                               
+                /* Manage TCP/IP Stack */
+                TP4_SetHigh();
+                Network_Manage();
+                TP4_SetLow(); 
+                
+                updateTick = false;                
+                
+            }
+            
+        }
+        /* 
+         * When EMO is pressed stop updates to state machines 
+         * and debouncing of IO
+         */
+        else if(false == VOLTDETECT.value && booted){
+            if(true == updateTick){
+                DebounceIO(true);
+                if(VOLTDET_GetValue()){
+                    tBootWaitTimeCnt++;
+                    if(tBootWaitTimeCnt > tReadIoSignalWaitTime){
+                        VOLTDETECT.value = true;
+                        tBootWaitTimeCnt = 0;
+                    }
+                }
+                else{
+                    tBootWaitTimeCnt = 0;
+                }
                 updateTick = false;
             }
-            //TP1_SetHigh();
-            UPDATExSTATION(&top);
-            //TP2_SetLow();
-            UPDATExSTATION(&bot);
-            
-            UPDATExMOUNTAINxSTATION(&waldsee);
-            UPDATExMOUNTAINxSTATION(&siebwalde);
-            UPDATExMOUNTAINxSTATION(&waldberg);
-            
-            TP1_SetLow();
-        }
-        
+        }        
 // <editor-fold defaultstate="collapsed">
+        /* First boot up sequence, set IO, warm up debounce first */
         else if(false == booted){
             BLK_SIG_3B_RD_SetHigh();
             BLK_SIG_12B_RD_SetHigh();            
@@ -169,7 +205,7 @@ void main(void)
             OCC_TO_21B_SetHigh();
             OCC_TO_9B_SetHigh();            
             OCC_TO_T6_SetHigh();
-            OCC_TO_T3_SetHigh();
+            OCC_TO_T3_SetHigh();            
             OCC_TO_STN_1_SetHigh();
             OCC_TO_STN_2_SetHigh();
             OCC_TO_STN_3_SetHigh();
@@ -178,16 +214,23 @@ void main(void)
             OCC_TO_STN_12_SetHigh();
             
             if(true == updateTick){
-                DebounceIO();
+                DebounceIO(false);
                 tBootWaitTimeCnt++;
                 updateTick = false;
             }
+            /* 
+             * After 2 seconds warm up time check if driving 
+             * voltage is present, if not reset warmup time
+             */
             if(tBootWaitTimeCnt > tReadIoSignalWaitTime){
-                booted = true;
+                tBootWaitTimeCnt = 0;
+                if(VOLTDET_GetValue()){
+                    booted = true;
+                }                
             }
 // </editor-fold>
         }
-        
+// <editor-fold defaultstate="collapsed">        
         if(true == ProcessEthData){
             ProcessEthData = false;
             SrcIpAddress    = UDP_GetSrcIP();   // IP of uController
@@ -242,7 +285,7 @@ void main(void)
              */
             data = 0;
         }
-        
+// </editor-fold>        
     }
 }
 
@@ -256,14 +299,20 @@ void UpdateTick(){
 /*
  * Debounce all I/O
  */
-void DebounceIO()
+void DebounceIO(bool trackio)
 {
     /*
-     * almost 500us
+     * Fetch one time the actual milisecond timer value
+     * debounce the EMO button(voltdetect) always.
      */
-    if(VOLTDET_GetValue()){        
-        TP2_SetHigh();
-        uint32_t millis = GETxMILLIS();
+    uint32_t millis = GETxMILLIS();
+    DEBOUNCExIO(&VOLTDETECT, &millis);
+    /*
+     * (175us) when track IO is allowed to be debounced, typically when 
+     * trackvoltage is present and no emo is pressed
+     */    
+    if(trackio){
+        TP3_SetHigh();        
         DEBOUNCExIO(&HALL_BLK_13  , &millis); 
         DEBOUNCExIO(&HALL_BLK_21A , &millis);
         DEBOUNCExIO(&HALL_BLK_T4  , &millis);
@@ -282,14 +331,14 @@ void DebounceIO()
         DEBOUNCExIO(&OCC_FR_STN_10, &millis);
         DEBOUNCExIO(&OCC_FR_STN_11, &millis);
         DEBOUNCExIO(&OCC_FR_STN_12, &millis);
-        DEBOUNCExIO(&OCC_FR_T6,     &millis);
-        DEBOUNCExIO(&OCC_FR_T3,     &millis);
+        DEBOUNCExIO(&OCC_FR_T6    , &millis);
+        DEBOUNCExIO(&OCC_FR_T3    , &millis);
         DEBOUNCExIO(&CTRL_OFF     , &millis);
         DEBOUNCExIO(&OCC_FR_9B    , &millis);
         DEBOUNCExIO(&OCC_FR_21B   , &millis);
         DEBOUNCExIO(&OCC_FR_22B   , &millis);
         DEBOUNCExIO(&OCC_FR_23B   , &millis);
-        TP2_SetLow();
+        TP3_SetLow();
     }
 }
 /**
