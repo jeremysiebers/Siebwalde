@@ -52,13 +52,20 @@ int8_t MAINxSTATIONxOUTBOUND(STATION *self){
         case SEQ_CHK_TRAIN:
             if(false == activeTrack->getOccStn->value && 
                     true == self->getOccBlkOut->value){
-                SETxSIGNAL(self, activeTrack->trackNr, SIG_RED);
-                activeTrack->stnOccupied = false;
-                activeTrack->stnState    = STN_IDLE;
-                activeTrack->stnSequence = SEQ_IDLE;
-                activeTrack = 0;
-                return(done);
+                activeTrack->tCountTime     = GETxMILLIS();
+                activeTrack->tWaitTime      = tOutboundWaitTime;
+                activeTrack->stnNextState   = SEQ_OUTBOUND_LEFT_STATTION;
+                activeTrack->stnSequence    = SEQ_WAIT;
             }
+            break;
+            
+        case SEQ_OUTBOUND_LEFT_STATTION:
+            SETxSIGNAL(self, activeTrack->trackNr, SIG_RED);
+            activeTrack->stnOccupied = false;
+            activeTrack->stnState    = STN_IDLE;
+            activeTrack->stnSequence = SEQ_IDLE;
+            activeTrack = 0;
+            return(done);
             break;
         
         /* Wait time counter using actual millisecond counter */

@@ -141,27 +141,25 @@ void main(void)
         {
             if(true == updateTick){
                 milisecondUpdate++;
-                if(milisecondUpdate > 2){
-                    milisecondUpdate = 0;
-                    DebounceIO(true);
-                    TP1_SetHigh();
+                
+                DebounceIO(true);
+                TP1_SetHigh();
 
-                    /*
-                     * MainStation methods
-                     */
-                    UPDATExSTATIONxTRAINxWAIT(&top);
-                    UPDATExSTATIONxTRAINxWAIT(&bot);
-                    TP1_SetLow();
-                    TP2_SetHigh();
-                    UPDATExSTATION(&top);
-                    UPDATExSTATION(&bot);
+                /*
+                 * MainStation methods
+                 */
+                UPDATExSTATIONxTRAINxWAIT(&top);
+                UPDATExSTATIONxTRAINxWAIT(&bot);
+                TP1_SetLow();
+                TP2_SetHigh();
+                UPDATExSTATION(&top);
+                UPDATExSTATION(&bot);
 
-                    /*
-                     * Mountain track methods
-                     */
+                /*
+                 * Mountain track methods
+                 */
 
-                    TP2_SetLow();
-                }
+                TP2_SetLow();
                                
                 /* Manage TCP/IP Stack */
                 TP4_SetHigh();

@@ -209,6 +209,14 @@ void UPDATExSTATION(STATION *self)
                             ){
                         self->stnTrack2.stnState = STN_INBOUND;
                     }
+//                    else if(false == self->stnTrack3.stnOccupied &&
+//                            STN_INBOUND != self->stnTrack1.stnState &&
+//                            STN_INBOUND != self->stnTrack2.stnState &&
+//                            STN_PASSING != self->stnTrack1.stnState &&
+//                            STN_PASSING != self->stnTrack2.stnState
+//                            ){
+//                        self->stnTrack3.stnState = STN_INBOUND;
+//                    }
                 }                                        
                 /*
                  * INBOUND TRACK3:
@@ -235,26 +243,49 @@ void UPDATExSTATION(STATION *self)
                  * Station 1 and 2 are allowed to do outbound while stnTrack3 
                  * has an Inbound 
                  */
-                else if(true == self->getOccBlkOut->value &&
-                        false       == self->stnTrack3.stnOccupied &&
-                        STN_INBOUND != self->stnTrack1.stnState &&
-                        STN_INBOUND != self->stnTrack2.stnState &&
-                        STN_PASSING != self->stnTrack1.stnState &&
-                        STN_PASSING != self->stnTrack2.stnState
-                        ){
-                    self->stnTrack3.stnState = STN_INBOUND;
-                    if(true == self->getFreightEnterStation->value){
-                        self->getFreightEnterStation->value = false;
+                else if(true == self->getOccBlkOut->value){
+                    if(false == self->stnTrack3.stnOccupied &&
+                            STN_INBOUND != self->stnTrack1.stnState &&
+                            STN_INBOUND != self->stnTrack2.stnState &&
+                            STN_PASSING != self->stnTrack1.stnState &&
+                            STN_PASSING != self->stnTrack2.stnState
+                            ){
+                        self->stnTrack3.stnState = STN_INBOUND;
+    //                    if(true == self->getFreightEnterStation->value){
+    //                        self->getFreightEnterStation->value = false;
+    //                    }
                     }
-                }
-            }
+                    /* 
+                     * Only store freight in stnTrack 1 or 2 when stnTrack3
+                     * is full and getOccBlkOut is true, set freight wait time
+                     * on stnTrack 1 or 2!
+                     */
+//                    else if(false == self->stnTrack1.stnOccupied &&
+//                            STN_INBOUND != self->stnTrack2.stnState &&
+//                            STN_INBOUND != self->stnTrack3.stnState &&
+//                            STN_PASSING != self->stnTrack2.stnState &&
+//                            STN_PASSING != self->stnTrack3.stnState
+//                            ){
+//                        self->stnTrack1.stnState = STN_INBOUND;
+//                    }
+//                    /* Check Track 2 and other states */
+//                    else if(false == self->stnTrack2.stnOccupied &&
+//                            STN_INBOUND != self->stnTrack1.stnState &&
+//                            STN_INBOUND != self->stnTrack3.stnState &&
+//                            STN_PASSING != self->stnTrack1.stnState &&
+//                            STN_PASSING != self->stnTrack3.stnState
+//                            ){
+//                        self->stnTrack2.stnState = STN_INBOUND;
+//                    }
+                }                
+            }            
             
-            /* Handle the stnTrack x which is in Outbound mode */
-            MAINxSTATIONxOUTBOUND(self);
             /* Handle the stnTrack x which is in Inbound mode */
             MAINxSTATIONxINBOUND(self);
             /* Handle the stnTrack x which is in Passing mode */
             MAINxSTATIONxPASSING(self);
+            /* Handle the stnTrack x which is in Outbound mode */
+            MAINxSTATIONxOUTBOUND(self);
             
             break;
         
@@ -314,7 +345,7 @@ void UPDATExSTATIONxTRAINxWAIT(STATION *self)
             }
             else{
                 self->stnTrack3.tCountTime = millis;
-                self->stnTrack3.tWaitTime = GETxRANDOMxNUMBER();
+                self->stnTrack3.tWaitTime = tFreightTrainWaitTime;//GETxRANDOMxNUMBER();
                 self->stnTrack3.stnState = STN_WAIT;
             }
         }

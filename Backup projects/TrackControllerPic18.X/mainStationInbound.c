@@ -52,8 +52,31 @@ int8_t MAINxSTATIONxINBOUND(STATION *self){
                 activeTrack->stnSequence = SEQ_IDLE;
                 activeTrack->stnState    = STN_WAIT; // Set to wait state for next outbound event
                 activeTrack->tCountTime  = GETxMILLIS();
-                /* Set the minimum wait time + a random time */
-                activeTrack->tWaitTime   = tTrainWaitTime + GETxRANDOMxNUMBER();
+                
+                /*
+                 * When a freight is in track 3 or 12, set freight wait time,
+                 * Als when a freight goes into track 1 or 2 set freight wait
+                 * time. Else set people carrier time
+                 */
+                if(activeTrack->trackNr != 3 || activeTrack->trackNr != 12){
+                    if(self->getFreightEnterStation->value){
+                        activeTrack->tWaitTime = tFreightTrainWaitTime;
+                    }
+                    else{
+                        /* Set the minimum wait time + a random time if no freight */
+                        activeTrack->tWaitTime   = (tTrainWaitTime + GETxRANDOMxNUMBER());
+                    }
+                } 
+                else{
+                    if(self->getFreightEnterStation->value){
+                        activeTrack->tWaitTime = tFreightTrainWaitTime;
+                    }
+                    else{
+                        /* Set the minimum wait time + a random time if no freight */
+                        activeTrack->tWaitTime   = (tTrainWaitTime + GETxRANDOMxNUMBER());
+                    }
+                }
+                self->getFreightEnterStation->value = false;
                 activeTrack = 0;
                 return(done);
             }
