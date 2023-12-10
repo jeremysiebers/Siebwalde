@@ -63,8 +63,8 @@
       </entry>
    </usedClasses>
    <usedLibraries class="java.util.ArrayList">
-      <ILibraryFile class="com.microchip.mcc.core.library.BaseLibraryFile" libraryClass="com.microchip.mcc.mcu8.Mcu8PeripheralLibrary" version="1.82.1"/>
       <ILibraryFile class="com.microchip.mcc.core.library.BaseLibraryFile" libraryClass="com.microchip.mcc.TCPIPLite.TCPIPLite" version="2.2.13"/>
+      <ILibraryFile class="com.microchip.mcc.core.library.BaseLibraryFile" libraryClass="com.microchip.mcc.mcu8.Mcu8PeripheralLibrary" version="1.82.1"/>
    </usedLibraries>
    <tokenMap class="java.util.TreeMap">
       <entry>
@@ -297,7 +297,7 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="MAC" name="pubSubMAC_SPIMASTER/interface"/>
-         <value>6789.456577973792</value>
+         <value>5158.404703363189</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="Pin Module" name="Custom Name MCLR"/>
@@ -4649,11 +4649,11 @@
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TCP/IP Lite" name="pubSubTCP/IP Lite_ETHERNET/MAC/interface"/>
-         <value>4480.046954949342</value>
+         <value>2039.1632738839971</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TCP/IP Lite" name="pubSubselectedTimer"/>
-         <value>8829.928987713052</value>
+         <value>2096.9851026049214</value>
       </entry>
       <entry>
          <key class="com.microchip.mcc.core.tokenManager.CustomKey" moduleName="TCP/IP Lite" name="selectedTimer"/>

@@ -106,5 +106,15 @@ void SETxSTATIONxPATHWAY(STATION *self, uint8_t path, enum STATES dir)
 void SETxMNTSTATIONxPATHWAY(MNTSTATION *self, uint8_t path)
 {
     #pragma optimize( "", off )
+
+    uint8_t pin1 = self->setPath->pin1_mask;    
+    
+    if(path == T1 || path == T7){        
+        *self->setPath->port1_ptr &= ~pin1;
+    }
+    else if(path == T2 || path == T8){
+        *self->setPath->port1_ptr |=  pin1;
+    }
+    
     #pragma optimize( "", on )
 }

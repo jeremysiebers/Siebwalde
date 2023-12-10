@@ -279,14 +279,12 @@ void UPDATExSTATION(STATION *self)
 //                    }
                 }                
             }            
-            
             /* Handle the stnTrack x which is in Inbound mode */
             MAINxSTATIONxINBOUND(self);
             /* Handle the stnTrack x which is in Passing mode */
             MAINxSTATIONxPASSING(self);
             /* Handle the stnTrack x which is in Outbound mode */
             MAINxSTATIONxOUTBOUND(self);
-            
             break;
         
         default:

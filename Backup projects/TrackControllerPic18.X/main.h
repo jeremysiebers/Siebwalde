@@ -31,6 +31,11 @@
 #ifndef MAIN_H
 #define	MAIN_H
 
+
+#ifdef	__cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 // TODO Insert appropriate #include <>
 #include <xc.h> // include processor files - each processor file is guarded.
 #include <stdbool.h>
@@ -40,7 +45,8 @@
 #define done 1
 #define nop 2
 
-void UDP_DATA_RECV(int length);
+void DebounceIO(bool trackio);
+void UpdateTick(void);
 
 /* factor to be set according to set timer interrupt value to calc seconds */
 const uint32_t tFactorSec = 1000; // timer set to 1ms, 10 * 1000 = 1 second
@@ -60,10 +66,13 @@ const uint32_t tOutboundWaitTime = (uint32_t)(10 * tFactorSec);
 enum STATES{
     INIT,
     INIT2,
-    INIT3,
     RUN,
     WAIT,
     IDLE,
+    
+    STN_TO_SIEBWALDE,
+    SIEBWALDE_TO_STN,
+    SIEBWALDE_SWITCHT4T5,
 
     HNDL_IDLE,
     HNDL_INBOUND,
@@ -110,37 +119,6 @@ typedef struct
     uint8_t                     pin6_mask;                                      // Mask to point to pin used of port
     
 }WS, SIG;
-
-// Comment a function and leverage automatic documentation with slash star star
-/**
-    <p><b>Function prototype:</b></p>
-  
-    <p><b>Summary:</b></p>
-
-    <p><b>Description:</b></p>
-
-    <p><b>Precondition:</b></p>
-
-    <p><b>Parameters:</b></p>
-
-    <p><b>Returns:</b></p>
-
-    <p><b>Example:</b></p>
-    <code>
- 
-    </code>
-
-    <p><b>Remarks:</b></p>
- */
-// TODO Insert declarations or function prototypes (right here) to leverage 
-// live documentation
-
-#ifdef	__cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
-    // TODO If C++ is being used, regular C code needs function names to have C 
-    // linkage so the functions can be used by the c code. 
 
 #ifdef	__cplusplus
 }

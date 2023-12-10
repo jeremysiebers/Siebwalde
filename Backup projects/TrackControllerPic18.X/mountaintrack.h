@@ -37,8 +37,9 @@ typedef struct
     enum STATES                 stnState;
     enum STATES                 stnSequence;
     enum STATES                 stnNextState;
+    DEBOUNCE                    *getTrainEnterStnTrack;
     bool                        stnOccupied;
-    uint8_t                     trackNr;
+    enum MNTSTATION_NAMES       trackNr;
     uint32_t                    tCountTime;
     uint32_t                    tWaitTime;
     
@@ -49,25 +50,24 @@ typedef struct
  */
 typedef struct
 {
-    uint8_t                     name;
+    enum MNTSTATION_NAMES       name;
     enum STATES                 AppState;                                       // State of the state meachine
-    enum STATES                 hndlState;
-    DEBOUNCE                    *getTrainEnterStationTrack1;
-    DEBOUNCE                    *getTrainEnterStationTrack2;
+    enum STATES                 AppNextState;
+    enum MNTSTATION_NAMES       LastInboundStn;
+    enum STATES                 LastState;
+    DEBOUNCE                    *getTrainEnterSiebwaldeStn;
     OCC                         *setOccAmpOut;
-    DEBOUNCE                    *getOccAmpOut;
-    OCC                         *setOccAmpIn;
-    DEBOUNCE                    *getOccAmpIn;
+    DEBOUNCE                    *getOccAmpOut;    
     WS                          *setPath;
-    MNTSTNTRACK                 mntStnTrack1;
-    MNTSTNTRACK                 mntStnTrack2;
+    MNTSTNTRACK                 stnTrack1;
+    MNTSTNTRACK                 stnTrack2;
     uint32_t                    tCountTime;
     uint32_t                    tWaitTime;
             
 }MNTSTATION;
 
 MNTSTATION waldsee;
-MNTSTATION siebwalde;
+//MNTSTATION siebwalde;
 MNTSTATION waldberg;
 
 OCC OCC_TO_T6       = {&LATE, 0x4};
@@ -77,7 +77,7 @@ REL REL_T5          = {&LATD, 0x20};
 
 extern void INITxMOUNTAINxSTATION(void);
 extern void UPDATExMOUNTAINxSTATION(MNTSTATION *self);
-extern void UPDATExMOUNTAINxTRAINxWAIT(void);
+extern void UPDATExMOUNTAINxTRAINxWAIT(MNTSTATION *self);
 
 #ifdef	__cplusplus
 }

@@ -41,12 +41,12 @@ MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE OF THESE TER
 #include "tcpip_config.h"
 #include "dhcp_client.h"
 #include "udpv4_port_handler_table.h"
-#include "../../main.h"
+#include "../../communication.h"
 
 const udp_handler_t UDP_CallBackTable[] = \
 {    
     {68      , DHCP_Handler},
-    {0x7000  , UDP_DATA_RECV},
+    {60000   , UDPxDATAxRECV},
 };
 
 // ***************** Leave the stuff below this line alone *********************

@@ -26,7 +26,7 @@
 #include "rtcc.h"
 #include "../mcc.h"
 
-#warning USING TIMER1 FOR TIMEBASE
+#warning USING TIMER0 FOR TIMEBASE
 
 volatile time_t deviceTime;
 volatile bool dirtyTime;

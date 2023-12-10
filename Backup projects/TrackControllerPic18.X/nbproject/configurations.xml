@@ -45,14 +45,11 @@
       </logicalFolder>
       <logicalFolder name="f2" displayName="2 MountainTrack" projectFiles="true">
         <itemPath>mountaintrack.h</itemPath>
+        <itemPath>mountainStationInbound.h</itemPath>
+        <itemPath>mountainStationOutbound.h</itemPath>
       </logicalFolder>
-      <logicalFolder name="MCC Generated Files"
-                     displayName="MCC Generated Files"
-                     projectFiles="true">
-        <logicalFolder name="TCPIPLibrary"
-                       displayName="TCPIPLibrary"
-                       projectFiles="true">
-        </logicalFolder>
+      <logicalFolder name="f3" displayName="Communication" projectFiles="true">
+        <itemPath>communication.h</itemPath>
       </logicalFolder>
       <itemPath>debounce.h</itemPath>
       <itemPath>main.h</itemPath>
@@ -106,14 +103,11 @@
       </logicalFolder>
       <logicalFolder name="f2" displayName="2 MountainTrack" projectFiles="true">
         <itemPath>mountaintrack.c</itemPath>
+        <itemPath>mountainStationInbound.c</itemPath>
+        <itemPath>mountainStationOutbound.c</itemPath>
       </logicalFolder>
-      <logicalFolder name="MCC Generated Files"
-                     displayName="MCC Generated Files"
-                     projectFiles="true">
-        <logicalFolder name="TCPIPLibrary"
-                       displayName="TCPIPLibrary"
-                       projectFiles="true">
-        </logicalFolder>
+      <logicalFolder name="f3" displayName="Communication" projectFiles="true">
+        <itemPath>communication.c</itemPath>
       </logicalFolder>
       <itemPath>main.c</itemPath>
       <itemPath>debounce.c</itemPath>
@@ -139,9 +133,9 @@
         <targetDevice>PIC18F97J60</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool>PICkit3PlatformTool</platformTool>
+        <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>XC8</languageToolchain>
-        <languageToolchainVersion>2.41</languageToolchainVersion>
+        <languageToolchainVersion>2.31</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <packs>
@@ -263,7 +257,7 @@
         <property key="ToolFirmwareOption.UseLatestFirmware" value="true"/>
         <property key="debugoptions.debug-startup" value="Use system settings"/>
         <property key="debugoptions.reset-behaviour" value="Use system settings"/>
-        <property key="debugoptions.useswbreakpoints" value="false"/>
+        <property key="debugoptions.useswbreakpoints" value="true"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="memories.aux" value="false"/>
         <property key="memories.bootflash" value="false"/>
@@ -822,7 +816,7 @@
         <property key="codecoverage.outputfile" value=""/>
         <property key="debugoptions.debug-startup" value="Use system settings"/>
         <property key="debugoptions.reset-behaviour" value="Use system settings"/>
-        <property key="debugoptions.useswbreakpoints" value="false"/>
+        <property key="debugoptions.useswbreakpoints" value="true"/>
         <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="lastid" value=""/>

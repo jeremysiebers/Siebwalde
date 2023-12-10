@@ -6,7 +6,7 @@
 #include "setocc.h"
 #include "milisecond_counter.h"
 
-STNTRACK *activeTrack;
+static STNTRACK *activeTrack;
 
 int8_t MAINxSTATIONxPASSING(STATION *self){
     
