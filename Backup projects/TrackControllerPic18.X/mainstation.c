@@ -1,8 +1,9 @@
 #include <xc.h>
 #include <stdbool.h>
-#include "main.h"
+#include "enums.h"
 #include "rand.h"
 #include "mainstation.h"
+#include "communication.h"
 #include "pathway.h"
 #include "tracksignal.h"
 #include "setocc.h"
@@ -14,9 +15,8 @@
 void INITxSTATION(void)
 {
     INITxPATHWAYxSTATION(&top, &bot);
-    top.name                    = TOP;
+    top.name                    = MAIN_STATION_TOP;
     top.AppState                = INIT;
-    top.hndlState               = HNDL_IDLE;
     top.getFreightLeaveStation  = &HALL_BLK_13;
     top.getFreightEnterStation  = &HALL_BLK_9B;
     top.setOccBlkIn             = &OCC_TO_9B;
@@ -28,27 +28,29 @@ void INITxSTATION(void)
     top.setSignal               = &SIG_TOP; 
     top.setSignalTime           = 0;
     
+    top.stnTrack1.stnName       = STNTRACK1;
     top.stnTrack1.trackNr       = 10;
     top.stnTrack1.stnState      = STN_IDLE;
     top.stnTrack1.stnSequence   = SEQ_IDLE;
     top.stnTrack1.setOccStn     = &OCC_TO_STN_10;
     top.stnTrack1.getOccStn     = &OCC_FR_STN_10;
     
+    top.stnTrack2.stnName       = STNTRACK2;
     top.stnTrack2.trackNr       = 11;
     top.stnTrack2.stnState      = STN_IDLE;    
     top.stnTrack2.stnSequence   = SEQ_IDLE;
     top.stnTrack2.setOccStn     = &OCC_TO_STN_11;
     top.stnTrack2.getOccStn     = &OCC_FR_STN_11;
     
+    top.stnTrack3.stnName       = STNTRACK3;
     top.stnTrack3.trackNr       = 12;
     top.stnTrack3.stnState      = STN_IDLE;
     top.stnTrack3.stnSequence   = SEQ_IDLE;
     top.stnTrack3.setOccStn     = &OCC_TO_STN_12;
     top.stnTrack3.getOccStn     = &OCC_FR_STN_12;
     
-    bot.name                    = BOT;
+    bot.name                    = MAIN_STATION_BOT;
     bot.AppState                = INIT;
-    bot.hndlState               = HNDL_IDLE;
     bot.getFreightLeaveStation  = &HALL_BLK_4A;
     bot.getFreightEnterStation  = &HALL_BLK_21A;
     bot.setOccBlkIn             = &OCC_TO_21B;
@@ -60,18 +62,21 @@ void INITxSTATION(void)
     bot.setSignal               = &SIG_BOT; 
     bot.setSignalTime           = 0;
     
+    bot.stnTrack1.stnName       = STNTRACK1;
     bot.stnTrack1.trackNr       = 1;
     bot.stnTrack1.stnState      = STN_IDLE;
     bot.stnTrack1.stnSequence   = SEQ_IDLE;
     bot.stnTrack1.setOccStn     = &OCC_TO_STN_1;
     bot.stnTrack1.getOccStn     = &OCC_FR_STN_1;
     
+    bot.stnTrack2.stnName       = STNTRACK2;
     bot.stnTrack2.trackNr       = 2;
     bot.stnTrack2.stnState      = STN_IDLE;
     bot.stnTrack2.stnSequence   = SEQ_IDLE;
     bot.stnTrack2.setOccStn     = &OCC_TO_STN_2;
     bot.stnTrack2.getOccStn     = &OCC_FR_STN_2;
     
+    bot.stnTrack3.stnName       = STNTRACK3;
     bot.stnTrack3.trackNr       = 3;
     bot.stnTrack3.stnState      = STN_IDLE;
     bot.stnTrack3.stnSequence   = SEQ_IDLE;
@@ -86,6 +91,10 @@ void UPDATExSTATION(STATION *self)
     {    
         // <editor-fold defaultstate="collapsed">
         case INIT:
+            CREATExTASKxSTATUSxMESSAGE(self->name, 
+                                       0, 
+                                       self->AppState, 
+                                       NONE);
             /* Set both hall sensors debounced values to False */
             self->getFreightLeaveStation->value  = false;
             self->getFreightEnterStation->value = false;
@@ -102,12 +111,12 @@ void UPDATExSTATION(STATION *self)
             /*
              * Set all the track signals to red
              */
-            if(self->name == TOP){
+            if(self->name == MAIN_STATION_TOP){
                 SETxSIGNAL(self, 10, SIG_RED);
                 SETxSIGNAL(self, 11, SIG_RED);
                 SETxSIGNAL(self, 12, SIG_RED);
             }
-            else if(self->name == BOT){
+            else if(self->name == MAIN_STATION_BOT){
                 SETxSIGNAL(self, 1,  SIG_RED);
                 SETxSIGNAL(self, 2,  SIG_RED);
                 SETxSIGNAL(self, 3,  SIG_RED);
@@ -121,11 +130,16 @@ void UPDATExSTATION(STATION *self)
                 self->stnTrack1.stnOccupied = true;
                 self->stnTrack1.stnState    = STN_WAIT;
                 self->stnTrack1.tWaitTime   = tTrainWaitTime + GETxRANDOMxNUMBER();
+                
             }
             else{
                 self->stnTrack1.stnOccupied = false;
                 self->stnTrack1.stnState = STN_IDLE;
             }
+            CREATExTASKxSTATUSxMESSAGE(self->name, 
+                                       self->stnTrack1.stnName, 
+                                       self->stnTrack1.stnState, 
+                                       NONE);
             
             /* Check if Station2 is occupied */
             if(self->stnTrack2.getOccStn->value){
@@ -140,6 +154,10 @@ void UPDATExSTATION(STATION *self)
                 self->stnTrack2.stnOccupied = false;
                 self->stnTrack2.stnState = STN_IDLE;
             }
+            CREATExTASKxSTATUSxMESSAGE(self->name, 
+                                       self->stnTrack2.stnName, 
+                                       self->stnTrack2.stnState, 
+                                       NONE);
             
             /* Check if Station3 is occupied */
             if(self->stnTrack3.getOccStn->value){
@@ -147,7 +165,7 @@ void UPDATExSTATION(STATION *self)
                 /* Set station 3 to occupied */
                 self->stnTrack3.stnOccupied = true;
                 self->stnTrack3.stnState = STN_OUTBOUND;                                
-            }            
+            }
             /* When STN3 is free check if there is an incoming train */
             else if(self->getOccBlkIn->value){
 //                /* Check for a free track */
@@ -176,8 +194,17 @@ void UPDATExSTATION(STATION *self)
                 self->stnTrack3.stnOccupied = false;
                 self->stnTrack3.stnState = STN_IDLE;
             }
+            CREATExTASKxSTATUSxMESSAGE(self->name, 
+                                       self->stnTrack3.stnName, 
+                                       self->stnTrack3.stnState, 
+                                       NONE);
+            
             /* Start executing main state machine */
             self->AppState = RUN;
+            CREATExTASKxSTATUSxMESSAGE(self->name, 
+                                       0, 
+                                       self->AppState, 
+                                       NONE);
             break;
             
         // </editor-fold>
@@ -199,6 +226,10 @@ void UPDATExSTATION(STATION *self)
                             STN_PASSING != self->stnTrack3.stnState
                             ){
                         self->stnTrack1.stnState = STN_INBOUND;
+                        CREATExTASKxSTATUSxMESSAGE(self->name, 
+                                                   self->stnTrack1.stnName, 
+                                                   self->stnTrack1.stnState, 
+                                                   NONE);
                     }
                     /* Check Track 2 and other states */
                     else if(false == self->stnTrack2.stnOccupied &&
@@ -208,6 +239,10 @@ void UPDATExSTATION(STATION *self)
                             STN_PASSING != self->stnTrack3.stnState
                             ){
                         self->stnTrack2.stnState = STN_INBOUND;
+                        CREATExTASKxSTATUSxMESSAGE(self->name, 
+                                                   self->stnTrack2.stnName, 
+                                                   self->stnTrack2.stnState, 
+                                                   NONE);
                     }
 //                    else if(false == self->stnTrack3.stnOccupied &&
 //                            STN_INBOUND != self->stnTrack1.stnState &&
@@ -238,6 +273,10 @@ void UPDATExSTATION(STATION *self)
                     if(true == self->getFreightEnterStation->value){
                         self->getFreightEnterStation->value = false;
                     }
+                    CREATExTASKxSTATUSxMESSAGE(self->name, 
+                                                   self->stnTrack3.stnName, 
+                                                   self->stnTrack3.stnState, 
+                                                   NONE);
                 }
                 /* 
                  * Station 1 and 2 are allowed to do outbound while stnTrack3 
@@ -251,6 +290,10 @@ void UPDATExSTATION(STATION *self)
                             STN_PASSING != self->stnTrack2.stnState
                             ){
                         self->stnTrack3.stnState = STN_INBOUND;
+                        CREATExTASKxSTATUSxMESSAGE(self->name, 
+                                                   self->stnTrack3.stnName, 
+                                                   self->stnTrack3.stnState, 
+                                                   NONE);
     //                    if(true == self->getFreightEnterStation->value){
     //                        self->getFreightEnterStation->value = false;
     //                    }
@@ -309,13 +352,17 @@ void UPDATExSTATIONxTRAINxWAIT(STATION *self)
                     STN_OUTBOUND != self->stnTrack3.stnState &&
                     STN_PASSING  != self->stnTrack2.stnState &&
                     STN_PASSING  != self->stnTrack3.stnState){
-                self->stnTrack1.stnState = STN_OUTBOUND;
+                self->stnTrack1.stnState = STN_OUTBOUND;                
             }
             else{
                 self->stnTrack1.tCountTime = millis;
                 self->stnTrack1.tWaitTime = GETxRANDOMxNUMBER();
                 self->stnTrack1.stnState = STN_WAIT;
             }
+            CREATExTASKxSTATUSxMESSAGE(self->name, 
+                                           self->stnTrack1.stnName, 
+                                           self->stnTrack1.stnState, 
+                                           NONE);
         }
     }
     if(STN_WAIT == self->stnTrack2.stnState){
@@ -332,6 +379,10 @@ void UPDATExSTATIONxTRAINxWAIT(STATION *self)
                 self->stnTrack2.stnState = STN_WAIT;
             }
         }
+        CREATExTASKxSTATUSxMESSAGE(self->name, 
+                                           self->stnTrack2.stnName, 
+                                           self->stnTrack2.stnState, 
+                                           NONE);
     }
     if(STN_WAIT == self->stnTrack3.stnState){
         if((millis - self->stnTrack3.tCountTime) > self->stnTrack3.tWaitTime){
@@ -347,5 +398,9 @@ void UPDATExSTATIONxTRAINxWAIT(STATION *self)
                 self->stnTrack3.stnState = STN_WAIT;
             }
         }
+        CREATExTASKxSTATUSxMESSAGE(self->name, 
+                                           self->stnTrack3.stnName, 
+                                           self->stnTrack3.stnState, 
+                                           NONE);
     }
 }

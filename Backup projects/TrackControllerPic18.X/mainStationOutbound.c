@@ -1,10 +1,11 @@
 #include <xc.h>
 #include <stdbool.h>
-#include "main.h"
+#include "enums.h"
 #include "pathway.h"
 #include "tracksignal.h"
 #include "setocc.h"
 #include "milisecond_counter.h"
+#include "communication.h"
 
 static STNTRACK *activeTrack;
 
@@ -36,6 +37,10 @@ int8_t MAINxSTATIONxOUTBOUND(STATION *self){
                 activeTrack->tWaitTime      =  tSwitchPointWaitTime;
                 activeTrack->stnNextState   = SEQ_SET_OCC;
                 activeTrack->stnSequence    = SEQ_WAIT;
+                CREATExTASKxSTATUSxMESSAGE(self->name, 
+                                           activeTrack->stnName, 
+                                           activeTrack->stnState, 
+                                           activeTrack->stnSequence);
             }                
             break;
             
@@ -43,6 +48,10 @@ int8_t MAINxSTATIONxOUTBOUND(STATION *self){
         case SEQ_SET_OCC:
             SETxOCC(activeTrack->setOccStn, false);
             activeTrack->stnSequence    = SEQ_CHK_TRAIN;
+            CREATExTASKxSTATUSxMESSAGE(self->name, 
+                                           activeTrack->stnName, 
+                                           activeTrack->stnState, 
+                                           activeTrack->stnSequence);
             break;
             
         /* 
@@ -56,6 +65,10 @@ int8_t MAINxSTATIONxOUTBOUND(STATION *self){
                 activeTrack->tWaitTime      = tOutboundWaitTime;
                 activeTrack->stnNextState   = SEQ_OUTBOUND_LEFT_STATTION;
                 activeTrack->stnSequence    = SEQ_WAIT;
+                CREATExTASKxSTATUSxMESSAGE(self->name, 
+                                           activeTrack->stnName, 
+                                           activeTrack->stnState, 
+                                           activeTrack->stnSequence);
             }
             break;
             
@@ -64,6 +77,10 @@ int8_t MAINxSTATIONxOUTBOUND(STATION *self){
             activeTrack->stnOccupied = false;
             activeTrack->stnState    = STN_IDLE;
             activeTrack->stnSequence = SEQ_IDLE;
+            CREATExTASKxSTATUSxMESSAGE(self->name, 
+                                           activeTrack->stnName, 
+                                           activeTrack->stnState, 
+                                           activeTrack->stnSequence);
             activeTrack = 0;
             return(done);
             break;

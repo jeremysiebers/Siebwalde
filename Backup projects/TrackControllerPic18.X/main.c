@@ -1,4 +1,5 @@
 #include "main.h"
+#include "enums.h"
 #include "mcc_generated_files/mcc.h"
 #include "milisecond_counter.h"
 #include "communication.h"
@@ -35,6 +36,7 @@ void main(void)
     
     MILLIESxINIT();
     SETxMILLISECONDxUPDATExHANDLER(UpdateTick);
+    PROCESSxETHxDATAxINIT();
     INITxSTATION();
     INITxMOUNTAINxSTATION();
     INITxRANDxNUMBER();

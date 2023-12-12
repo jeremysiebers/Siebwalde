@@ -1,6 +1,6 @@
 #include <xc.h>
 #include <stdbool.h>
-#include "main.h"
+#include "enums.h"
 /*
  * Function to set the desired output pin following instance and a value
  */

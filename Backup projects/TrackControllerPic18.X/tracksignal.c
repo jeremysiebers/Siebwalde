@@ -1,13 +1,13 @@
 #include <xc.h>
 #include "tracksignal.h"
-#include "main.h"
+#include "enums.h"
 #include "mainstation.h"
 #include "milisecond_counter.h"
 
 /*
  * Set the required signal
  */
-void SETxSIGNAL(STATION *self, uint8_t path, enum STATES signal)
+void SETxSIGNAL(STATION *self, uint8_t path, TASK_STATE signal)
 {
     #pragma optimize( "", off )
     uint8_t pin1 = self->setSignal->pin1_mask;

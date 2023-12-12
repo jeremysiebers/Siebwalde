@@ -231,7 +231,7 @@ void ETHERNET_Tasks( void );
     
  */
 
-udpTrans_t *GETxDATAxFROMxRECEIVExMAILxBOX();
+udpTrans_t *GETxDATAxFROMxRECEIVExMAILxBOX(void);
 
 
 /*******************************************************************************
@@ -323,7 +323,7 @@ uint32_t GETxETHERNETxSTATE (void);
   Remarks:
     This routine must be called from SYS_Tasks() routine.
  */
-bool CHECKxDATAxINxRECEIVExMAILxBOX();
+bool CHECKxDATAxINxRECEIVExMAILxBOX(void);
 
 /*******************************************************************************
   Function:

@@ -1,10 +1,11 @@
 #include <xc.h>
 #include <stdbool.h>
-#include "main.h"
+#include "enums.h"
 #include "pathway.h"
 #include "tracksignal.h"
 #include "setocc.h"
 #include "milisecond_counter.h"
+#include "communication.h"
 
 static STNTRACK *activeTrack;
 
@@ -36,6 +37,10 @@ int8_t MAINxSTATIONxPASSING(STATION *self){
                 activeTrack->tWaitTime      =  tSwitchPointWaitTime;
                 activeTrack->stnNextState   = SEQ_SET_OCC;
                 activeTrack->stnSequence    = SEQ_WAIT;
+                CREATExTASKxSTATUSxMESSAGE(self->name, 
+                                           activeTrack->stnName, 
+                                           activeTrack->stnState, 
+                                           activeTrack->stnSequence);
             }                
             break;
             
@@ -44,13 +49,21 @@ int8_t MAINxSTATIONxPASSING(STATION *self){
             SETxOCC(activeTrack->setOccStn, false);
             SETxOCC(self->setOccBlkIn, false);
             activeTrack->stnSequence    = SEQ_CHK_TRAIN;
+            CREATExTASKxSTATUSxMESSAGE(self->name, 
+                                           activeTrack->stnName, 
+                                           activeTrack->stnState, 
+                                           activeTrack->stnSequence);
             break;
             
         /* Check if the train is passing in the station */
         case SEQ_CHK_TRAIN:
             if(activeTrack->getOccStn->value){
                 SETxOCC(self->setOccBlkIn, true); // Stop other trains from driving in
-                activeTrack->stnSequence = SEQ_CHK_PASSED;                
+                activeTrack->stnSequence = SEQ_CHK_PASSED; 
+                CREATExTASKxSTATUSxMESSAGE(self->name, 
+                                           activeTrack->stnName, 
+                                           activeTrack->stnState, 
+                                           activeTrack->stnSequence);
             }
             break;
         
@@ -68,6 +81,10 @@ int8_t MAINxSTATIONxPASSING(STATION *self){
                 activeTrack->tWaitTime      = tOutboundWaitTime;
                 activeTrack->stnNextState   = SEQ_OUTBOUND_LEFT_STATTION;
                 activeTrack->stnSequence    = SEQ_WAIT;
+                CREATExTASKxSTATUSxMESSAGE(self->name, 
+                                           activeTrack->stnName, 
+                                           activeTrack->stnState, 
+                                           activeTrack->stnSequence);
             }
             break;
             
@@ -76,6 +93,10 @@ int8_t MAINxSTATIONxPASSING(STATION *self){
             activeTrack->stnOccupied = false;
             activeTrack->stnState    = STN_IDLE;
             activeTrack->stnSequence = SEQ_IDLE;
+            CREATExTASKxSTATUSxMESSAGE(self->name, 
+                                           activeTrack->stnName, 
+                                           activeTrack->stnState, 
+                                           activeTrack->stnSequence);
             activeTrack = 0;
             return(done);
             break;

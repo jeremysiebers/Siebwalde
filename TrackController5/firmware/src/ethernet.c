@@ -136,8 +136,8 @@ static udpTrans_t   udpTransBox[MAILBOXSIZE];
 
 
 void        PutDataInReceiveMailBox (udpTrans_t data);
-udpTrans_t *GetDataFromSendMailBox ();
-bool        CheckDataInSendMailBox ();
+udpTrans_t *GetDataFromSendMailBox (void);
+bool        CheckDataInSendMailBox (void);
 
 
 // *****************************************************************************

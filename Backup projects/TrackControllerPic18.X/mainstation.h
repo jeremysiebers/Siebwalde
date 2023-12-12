@@ -11,18 +11,14 @@
 #include <xc.h> // include processor files - each processor file is guarded.
 #include <stdbool.h>
 #include "debounce.h"
-#include "main.h"
-
-enum LAYER{
-    BOT = 0,
-    TOP = 1,
-};
+#include "enums.h"
 
 typedef struct
 {
-    enum STATES                 stnState;
-    enum STATES                 stnSequence;
-    enum STATES                 stnNextState;
+    TASK_COMMAND                stnName;
+    TASK_STATE                  stnState;
+    TASK_STATE                  stnSequence;
+    TASK_STATE                  stnNextState;
     bool                        stnOccupied;
     uint8_t                     trackNr;
     uint32_t                    tCountTime;
@@ -38,9 +34,8 @@ typedef struct
 */
 typedef struct
 {
-    enum LAYER                  name;
-    enum STATES                 AppState;                                       // State of the state meachine
-    enum STATES                 hndlState;
+    TASK_ID                     name;
+    TASK_STATE                  AppState;                                       // State of the state meachine
     DEBOUNCE                    *getFreightLeaveStation;
     DEBOUNCE                    *getFreightEnterStation;
     OCC                         *setOccBlkIn;

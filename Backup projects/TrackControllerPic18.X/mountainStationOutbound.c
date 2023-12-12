@@ -1,6 +1,6 @@
 #include <xc.h>
 #include <stdbool.h>
-#include "main.h"
+#include "enums.h"
 #include "pathway.h"
 #include "setocc.h"
 #include "milisecond_counter.h"

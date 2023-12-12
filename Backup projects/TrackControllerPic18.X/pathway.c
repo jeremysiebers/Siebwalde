@@ -1,6 +1,6 @@
 #include <xc.h>
 #include "pathway.h"
-#include "main.h"
+#include "enums.h"
 #include "mainstation.h"
 #include "mountaintrack.h"
 #include "milisecond_counter.h"
@@ -26,7 +26,7 @@ void INITxPATHWAYxMNTSTATION(MNTSTATION *refwaldsee, MNTSTATION *refwaldberg)
 /* Disable optimizing otherwise the compiler might optimize the definitions
  * away of the inverted state of a path
  */
-void SETxSTATIONxPATHWAY(STATION *self, uint8_t path, enum STATES dir)
+void SETxSTATIONxPATHWAY(STATION *self, uint8_t path, TASK_STATE dir)
 {
 #pragma optimize( "", off )
     

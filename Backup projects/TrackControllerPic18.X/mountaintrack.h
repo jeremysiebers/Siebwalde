@@ -15,31 +15,19 @@ extern "C" {
 #include <xc.h> // include processor files - each processor file is guarded.
 #include <stdbool.h>
 #include "debounce.h"
-#include "main.h"
-
-enum MNTSTATION_NAMES{
-WALDSEE,
-SIEBWALDE,
-WALDBERG,
-T1,
-T2,
-T4,
-T5,
-T7,
-T8
-};   
+#include "enums.h"
     
 /*
  * Mountain Station Track struct
  */
 typedef struct
 {
-    enum STATES                 stnState;
-    enum STATES                 stnSequence;
-    enum STATES                 stnNextState;
+    TASK_STATE                  stnState;
+    TASK_STATE                  stnSequence;
+    TASK_STATE                  stnNextState;
     DEBOUNCE                    *getTrainEnterStnTrack;
     bool                        stnOccupied;
-    enum MNTSTATION_NAMES       trackNr;
+    TASK_MESSAGES               trackNr;
     uint32_t                    tCountTime;
     uint32_t                    tWaitTime;
     
@@ -50,11 +38,11 @@ typedef struct
  */
 typedef struct
 {
-    enum MNTSTATION_NAMES       name;
-    enum STATES                 AppState;                                       // State of the state meachine
-    enum STATES                 AppNextState;
-    enum MNTSTATION_NAMES       LastInboundStn;
-    enum STATES                 LastState;
+    TASK_ID                     name;
+    TASK_STATE                  AppState;                                       // State of the state meachine
+    TASK_STATE                  AppNextState;
+    TASK_MESSAGES               LastInboundStn;
+    TASK_STATE                  LastState;
     DEBOUNCE                    *getTrainEnterSiebwaldeStn;
     OCC                         *setOccAmpOut;
     DEBOUNCE                    *getOccAmpOut;    

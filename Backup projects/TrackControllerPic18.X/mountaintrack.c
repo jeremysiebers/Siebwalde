@@ -1,6 +1,6 @@
 #include <xc.h>
 #include <stdbool.h>
-#include "main.h"
+#include "enums.h"
 #include "rand.h"
 #include "mountaintrack.h"
 #include "pathway.h"
