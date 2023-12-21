@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Runtime.Remoting.Messaging;
 using System.Threading.Tasks;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace SiebwaldeApp
 {
@@ -72,7 +74,7 @@ namespace SiebwaldeApp
             mTrackIOHandle = new TrackIOHandle(mTrackReceivingPort, mTrackSendingPort, LoggerInstance);
 
             // create new instance of trackControlMain
-            mTrackControlMain = new TrackControlMain(LoggerInstance);
+            mTrackControlMain = new TrackControlMain(LoggerInstance, mTrackIOHandle);
 
             // create new instance of station control
             mstationControl = new StationControl(LoggerInstance);

@@ -44,10 +44,10 @@ WS WS_WALDBERG  = {&LATD, 0x08};
 /* Siebwalde switchpoints are static non moving */
 
 extern void INITxPATHWAYxSTATION(STATION *reftop, STATION *refbot);
-extern void SETxSTATIONxPATHWAY(STATION *self, uint8_t path, TASK_STATE dir);
+extern void SETxSTATIONxPATHWAY(STATION *self, TASK_MESSAGES path, TASK_STATE dir);
 
 void INITxPATHWAYxMNTSTATION(MNTSTATION *refwaldsee, MNTSTATION *refwaldberg);
-void SETxMNTSTATIONxPATHWAY(MNTSTATION *self, uint8_t path);
+void SETxMNTSTATIONxPATHWAY(MNTSTATION *self, TASK_MESSAGES path);
 
 #ifdef	__cplusplus
 extern "C" {

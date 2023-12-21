@@ -20,12 +20,11 @@ typedef struct
     TASK_STATE                  stnSequence;
     TASK_STATE                  stnNextState;
     bool                        stnOccupied;
-    uint8_t                     trackNr;
+    TASK_MESSAGES               trackNr;
     uint32_t                    tCountTime;
     uint32_t                    tWaitTime;
     OCC                         *setOccStn;
-    DEBOUNCE                    *getOccStn;
-    
+    DEBOUNCE                    *getOccStn;    
     
 }STNTRACK;
 

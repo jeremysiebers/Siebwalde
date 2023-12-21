@@ -25,6 +25,8 @@ namespace SiebwaldeApp
         // If track runs in real mode or in sim mode
         public bool mTrackRealMode { get; set; }
 
+        public bool mconnected { get; private set; }
+
         //private EthernetTargetDataSimulator mEthernetTargetDataSimulator;
 
         // Logger instance
@@ -67,12 +69,14 @@ namespace SiebwaldeApp
                 //mEthernetTargetDataSimulator.NewData -= HandleNewData;
                 IoC.Logger.Log("Track IO handler Connecting to target...", mLoggerInstance);
                 mTrackSender.ConnectUdp(mTrackSendingPort);
-
+                
                 mTrackReceiver.NewData += HandleNewData;
                 IoC.Logger.Log("Track IO handler connected to target.", mLoggerInstance);
 
                 mTrackReceiver.Start();
                 IoC.Logger.Log("Track IO handler reciever started.", mLoggerInstance);
+
+                mconnected = true;
             }
             else if (mTrackRealMode == false)
             {
@@ -113,27 +117,10 @@ namespace SiebwaldeApp
 
             UInt16 Header = reader.ReadByte();
             UInt16 Sender = reader.ReadByte(); // and is also taskid
-            if (Header == HEADER && Sender == SLAVEINFO)
+            if (Header == HEADER && Sender == 0x55)
             {
-                UInt16 MbHeader = reader.ReadByte();
-                UInt16 SlaveNumber = reader.ReadByte();
-                UInt16 SlaveDetected = reader.ReadByte();
-                UInt16 Padding = reader.ReadByte();
-
-                UInt16[] HoldingReg = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, };
-                for (int i = 0; i < 12; i++)
-                {
-                    HoldingReg[i] = reader.ReadUInt16();
-                }
-
-                UInt16 MbReceiveCounter = reader.ReadUInt16();
-                UInt16 MbSentCounter = reader.ReadUInt16();
-
                 UInt32 MbCommError = reader.ReadUInt32();
-
-                UInt16 MbExceptionCode = reader.ReadByte();
-                UInt16 SpiCommErrorCounter = reader.ReadByte();
-                UInt16 MbFooter = reader.ReadByte();
+                IoC.Logger.Log("received count = " + MbCommError.ToString(), mLoggerInstance);
 
                 //mTrackApplicationVariables.trackAmpItems[SlaveNumber].SlaveDetected = SlaveDetected;                
                 //mTrackApplicationVariables.trackAmpItems[SlaveNumber].HoldingReg = HoldingReg;

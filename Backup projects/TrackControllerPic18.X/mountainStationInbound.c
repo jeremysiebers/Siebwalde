@@ -5,6 +5,7 @@
 #include "setocc.h"
 #include "milisecond_counter.h"
 #include "rand.h"
+#include "communication.h"
 
 static MNTSTNTRACK *activeTrack;
 
@@ -31,12 +32,20 @@ int8_t MOUNTAINxSTATIONxINBOUND(MNTSTATION *self){
             activeTrack->tWaitTime      = tSwitchPointWaitTime;
             activeTrack->stnNextState   = SEQ_SET_OCC;
             activeTrack->stnSequence    = SEQ_WAIT;
+            CREATExTASKxSTATUSxMESSAGE(self->name, 
+                                           activeTrack->stnName, 
+                                           activeTrack->stnState, 
+                                           activeTrack->stnSequence);
             break;
             
             /* Disable the occupied signal to let the train drive in */
         case SEQ_SET_OCC:
             SETxOCC(self->setOccAmpOut, false);
             activeTrack->stnSequence    = SEQ_CHK_TRAIN;
+            CREATExTASKxSTATUSxMESSAGE(self->name, 
+                                           activeTrack->stnName, 
+                                           activeTrack->stnState, 
+                                           activeTrack->stnSequence);
             break;
             
         /* Check when the occupied signal goes low */
@@ -51,6 +60,10 @@ int8_t MOUNTAINxSTATIONxINBOUND(MNTSTATION *self){
                 activeTrack->getTrainEnterStnTrack->value = false;
                 self->getTrainEnterSiebwaldeStn->value = false;
                 self->LastInboundStn = activeTrack->trackNr;
+                CREATExTASKxSTATUSxMESSAGE(self->name, 
+                                           activeTrack->stnName, 
+                                           activeTrack->stnState, 
+                                           activeTrack->stnSequence);
                 activeTrack = 0;
                 return(done);
             }

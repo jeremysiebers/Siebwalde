@@ -57,7 +57,7 @@
 
         //public const string HOMEPATH = @"c:\localdata\Siebwalde\";
         //public const string LOGGING = "Logging\\";
-        public const string TRACKTARGET = "TRACKCONTROLLER";
+        public const string TRACKTARGET = "TRACKCONTROLLER"; //"192.168.1.50"; //"TRACKCONTROLLER";
         public const string SLAVEHEXFILE = "TrackAmplifier4.X.production.hex";
         public const int SPACELENGTH = 40;
 

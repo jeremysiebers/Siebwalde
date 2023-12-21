@@ -3,11 +3,12 @@
 #include "enums.h"
 #include "mainstation.h"
 #include "milisecond_counter.h"
+#include "communication.h"
 
 /*
  * Set the required signal
  */
-void SETxSIGNAL(STATION *self, uint8_t path, TASK_STATE signal)
+void SETxSIGNAL(STATION *self, TASK_MESSAGES path, TASK_STATE signal)
 {
     #pragma optimize( "", off )
     uint8_t pin1 = self->setSignal->pin1_mask;
@@ -19,30 +20,30 @@ void SETxSIGNAL(STATION *self, uint8_t path, TASK_STATE signal)
     
     switch(signal){
         case SIG_RED:
-            if(path == 1 || path == 10){
+            if(path == TRACK1|| path == TRACK10){
                 *self->setSignal->port1_ptr &= ~pin1; // Green
                 *self->setSignal->port2_ptr |=  pin2; // Red
             }
-            else if(path == 2 || path == 11){
+            else if(path == TRACK2 || path == TRACK11){
                 *self->setSignal->port3_ptr &= ~pin3; // Green
                 *self->setSignal->port4_ptr |=  pin4; // Red
             }
-            else if(path == 3 || path == 12){
+            else if(path == TRACK3 || path == TRACK12){
                 *self->setSignal->port5_ptr &= ~pin5; // Green
                 *self->setSignal->port6_ptr |=  pin6; // Red
             }
             break;
             
         case SIG_GREEN:
-            if(path == 1 || path == 10){
+            if(path == TRACK1|| path == TRACK10){
                 *self->setSignal->port1_ptr |=  pin1; // Green
                 *self->setSignal->port2_ptr &= ~pin2; // Red
             }
-            else if(path == 2 || path == 11){
+            else if(path == TRACK2 || path == TRACK11){
                 *self->setSignal->port3_ptr |=  pin3; // Green
                 *self->setSignal->port4_ptr &= ~pin4; // Red
             }
-            else if(path == 3 || path == 12){
+            else if(path == TRACK3 || path == TRACK12){
                 *self->setSignal->port5_ptr |=  pin5; // Green
                 *self->setSignal->port6_ptr &= ~pin6; // Red
             }
@@ -50,5 +51,11 @@ void SETxSIGNAL(STATION *self, uint8_t path, TASK_STATE signal)
             
         default: break;
     }
+    
+    CREATExTASKxSTATUSxMESSAGE(self->name,
+            NONE, 
+            signal, 
+            path);
+    
     #pragma optimize( "", on )
 }

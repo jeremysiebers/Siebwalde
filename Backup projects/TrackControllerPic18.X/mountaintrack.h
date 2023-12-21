@@ -22,6 +22,7 @@ extern "C" {
  */
 typedef struct
 {
+    TASK_COMMAND                stnName;
     TASK_STATE                  stnState;
     TASK_STATE                  stnSequence;
     TASK_STATE                  stnNextState;

@@ -7,10 +7,14 @@
 #include "mountaintrack.h"
 #include "debounce.h"
 #include "rand.h"
+#include <string.h>
 
-bool updateTick = false;
-uint32_t tBootWaitTimeCnt = 1;
-bool booted = false;
+static bool updateTick = false;
+static uint32_t tBootWaitTimeCnt = 1;
+static bool booted = false;
+
+static uint32_t tSendAliveMessWaitTimeCnt = 0;
+static udpTrans_t StatusMessage;
 
 void main(void)
 {
@@ -145,36 +149,52 @@ void main(void)
             if(true == updateTick){
                 
                 DebounceIO(true);
-                TP1_SetHigh();
-                /*
-                 * MainStation methods
-                 */
-                UPDATExSTATIONxTRAINxWAIT(&top);
-                UPDATExSTATIONxTRAINxWAIT(&bot);
-                TP1_SetLow();
-                TP2_SetHigh();
-                UPDATExSTATION(&top);
-                UPDATExSTATION(&bot);
-                TP2_SetLow();
                 
-                TP1_SetHigh();
-                /*
-                 * Mountain track methods
-                 */
-                UPDATExMOUNTAINxTRAINxWAIT(&waldsee);
-                UPDATExMOUNTAINxTRAINxWAIT(&waldberg);
-                TP1_SetLow();
-                TP2_SetHigh();
-                UPDATExMOUNTAINxSTATION(&waldsee);
-                UPDATExMOUNTAINxSTATION(&waldberg);
-                TP2_SetLow();
-                
-                updateTick = false;                
-                
+                if(isUdpConnected){                    
+                    /*
+                    * MainStation methods
+                    */
+                    TP1_SetHigh();
+                    UPDATExSTATIONxTRAINxWAIT(&top);
+                    UPDATExSTATIONxTRAINxWAIT(&bot);
+                    TP1_SetLow();
+                    TP2_SetHigh();
+                    UPDATExSTATION(&top);
+                    UPDATExSTATION(&bot);
+                    TP2_SetLow();
+ 
+                    TP1_SetHigh();
+                    /*
+                     * Mountain track methods
+                     */
+                    UPDATExMOUNTAINxTRAINxWAIT(&waldsee);
+                    UPDATExMOUNTAINxTRAINxWAIT(&waldberg);
+                    TP1_SetLow();
+                    TP2_SetHigh();
+                    UPDATExMOUNTAINxSTATION(&waldsee);
+                    UPDATExMOUNTAINxSTATION(&waldberg);
+                    TP2_SetLow();
+ 
+                    tSendAliveMessWaitTimeCnt++;
+                    if(tSendAliveMessWaitTimeCnt >= 999){
+                        TP3_SetHigh();
+                        uint32_t millis = GETxMILLIS();
+                        StatusMessage.header  = (uint8_t)HEADER;
+                        StatusMessage.command = (uint8_t)ALIVE;
+                        
+                        for(size_t i=0; i < sizeof(millis); i++){
+                           StatusMessage.data[i] = (millis >> (8 * i)) & 0xFF;
+                        }
+                        
+                        PUTxDATAxINxSENDxMAILxBOX(&StatusMessage);
+                        tSendAliveMessWaitTimeCnt = 0;
+                        TP3_SetLow();
+                    }
+                }                                
+                updateTick = false;
             }            
         }
         // </editor-fold>
-        
     }
 }
 
@@ -201,7 +221,7 @@ void DebounceIO(bool trackio)
      * trackvoltage is present and no emo is pressed
      */    
     if(trackio){
-        TP3_SetHigh();        
+        //TP3_SetHigh();        
         DEBOUNCExIO(&HALL_BLK_13  , &millis); 
         DEBOUNCExIO(&HALL_BLK_21A , &millis);
         DEBOUNCExIO(&HALL_BLK_T4  , &millis);
@@ -227,7 +247,7 @@ void DebounceIO(bool trackio)
         DEBOUNCExIO(&OCC_FR_21B   , &millis);
         DEBOUNCExIO(&OCC_FR_22B   , &millis);
         DEBOUNCExIO(&OCC_FR_23B   , &millis);
-        TP3_SetLow();
+        //TP3_SetLow();
     }
 }
 /**

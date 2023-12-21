@@ -119,7 +119,7 @@ typedef struct
 dhcp_data_t dhcpData = {0,0,0,0,0,0,0,0,0,10,3600,0};
 dhcp_state_t dhcpState = {SELECTING,INIT_TIMER};
 
-const char dhcpName[] = "TRACKCONTROLLER";
+const char dhcpName[] = "PIC18F97J60 Ethernet";
 
 bool sendRequest(dhcp_type type);
 

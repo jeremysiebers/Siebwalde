@@ -45,10 +45,11 @@ namespace SiebwaldeApp
         /// <param name="LoggerInstance"></param>
         /// <param name="trackIOHandle"></param>
         /// <param name="trackApplicationVariables"></param>
-        public TrackControlMain(string LoggerInstance)
+        public TrackControlMain(string LoggerInstance, TrackIOHandle bla)
         {
             // couple and hold local variables                    
             mLoggerInstance = LoggerInstance;
+            mTrackIOHandle = bla;
 
             dummymessage = new ReceivedMessage(0, 0, 0, 0);
         }
@@ -62,7 +63,10 @@ namespace SiebwaldeApp
         /// <param name="e"></param>
         private void OnTimedEvent(object source, ElapsedEventArgs e)
         {
-            
+            if (mTrackIOHandle.mconnected)
+            {
+                mTrackIOHandle.ActuatorCmd(new SendMessage(8, new byte[] { 0, 1, 3, 4, 5,6 ,7 ,8 }));
+            }            
         }
 
 
@@ -74,7 +78,7 @@ namespace SiebwaldeApp
         internal void Start(bool TrackRealMode)
         {
             AppUpdateTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
-            AppUpdateTimer.Interval = 50;
+            AppUpdateTimer.Interval = 500;
             AppUpdateTimer.AutoReset = true;
             // Enable the timer
             AppUpdateTimer.Enabled = true;

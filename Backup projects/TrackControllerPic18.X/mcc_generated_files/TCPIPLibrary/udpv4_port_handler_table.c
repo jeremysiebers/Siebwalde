@@ -44,8 +44,8 @@ MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE OF THESE TER
 #include "../../communication.h"
 
 const udp_handler_t UDP_CallBackTable[] = \
-{    
-    {68             , DHCP_Handler},
+{
+    {68, DHCP_Handler},    
     {UDP_RXTX_PORT  , UDPxDATAxRECV},
 };
 

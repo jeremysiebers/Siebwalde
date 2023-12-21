@@ -4,6 +4,7 @@
 #include "pathway.h"
 #include "setocc.h"
 #include "milisecond_counter.h"
+#include "communication.h"
 
 static MNTSTNTRACK *activeTrack;
 
@@ -29,13 +30,21 @@ int8_t MOUNTAINxSTATIONxOUTBOUND(MNTSTATION *self){
                 activeTrack->tCountTime     = GETxMILLIS();
                 activeTrack->tWaitTime      =  tSwitchPointWaitTime;
                 activeTrack->stnNextState   = SEQ_SET_OCC;
-                activeTrack->stnSequence    = SEQ_WAIT;              
+                activeTrack->stnSequence    = SEQ_WAIT; 
+                CREATExTASKxSTATUSxMESSAGE(self->name, 
+                                           activeTrack->stnName, 
+                                           activeTrack->stnState, 
+                                           activeTrack->stnSequence);
             break;
             
             /* Disable the occupied signal to let the train drive out*/
         case SEQ_SET_OCC:
             SETxOCC(self->setOccAmpOut, false);
             activeTrack->stnSequence = SEQ_CHK_TRAIN;
+            CREATExTASKxSTATUSxMESSAGE(self->name, 
+                                           activeTrack->stnName, 
+                                           activeTrack->stnState, 
+                                           activeTrack->stnSequence);
             break;
             
         /* 
@@ -49,6 +58,10 @@ int8_t MOUNTAINxSTATIONxOUTBOUND(MNTSTATION *self){
                 activeTrack->getTrainEnterStnTrack = false;
                 activeTrack->stnState    = STN_IDLE;
                 activeTrack->stnSequence = SEQ_IDLE;
+                CREATExTASKxSTATUSxMESSAGE(self->name, 
+                                           activeTrack->stnName, 
+                                           activeTrack->stnState, 
+                                           activeTrack->stnSequence);
                 activeTrack = 0;
                 self->getTrainEnterSiebwaldeStn->value = false;
             return(done);

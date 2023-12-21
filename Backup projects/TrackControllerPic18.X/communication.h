@@ -40,17 +40,18 @@ extern "C" {
         /* Application's state machine's initial state. */
         ETHERNET_LINKUP,
         ETHERNET_CONNECT,
+        ETHERNET_NTP,
         ETHERNET_DATA_RX,
         ETHERNET_DATA_TX,
         ETHERNET_TCPIP_ERROR,
 
         /* TODO: Define states used by the application state machine. */
 
-    } ETHERNET_STATES;
+    } ETH_STATES;
     
         
     extern void PROCESSxETHxDATAxINIT(void);
-    extern void UDPxDATAxRECV(int length);
+    extern void UDPxDATAxRECV(int16_t length);
     extern void PROCESSxETHxDATA(void);
     
     extern udpTrans_t   *GETxDATAxFROMxRECEIVExMAILxBOX(void);
@@ -61,6 +62,7 @@ extern "C" {
                             uint8_t task_command, 
                             uint8_t task_state, 
                             uint8_t task_messages);
+    extern bool         isUdpConnected;
 
     
 #ifdef	__cplusplus

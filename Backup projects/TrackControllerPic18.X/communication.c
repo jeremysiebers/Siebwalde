@@ -1,16 +1,21 @@
-/* https://www.microchip.com/en-us/software-library/tcpipstack */
+/* 
+ * https://www.microchip.com/en-us/software-library/tcpipstack 
+ * (ip.dst==192.168.1.176 and udp.port==60000 and ip.src==192.168.1.50) or (ip.dst==192.168.1.50 and udp.port==60000 and ip.src==192.168.1.176) and !(udp.stream eq 16)
+ */
 #include <xc.h>
 #include <stdbool.h>
+#include <time.h>
 #include "communication.h"
 #include "enums.h"
 #include "mcc_generated_files/mcc.h"
 #include "mcc_generated_files/TCPIPLibrary/udpv4.h"
 #include "mcc_generated_files/TCPIPLibrary/tcpip_config.h"
+//#include "mcc_generated_files/TCPIPLibrary/dhcp_client.h"
 
-ETHERNET_STATES     ethernetState;
+static ETH_STATES   ethernetState;
 static udpStart_t   udpPacketHeader;
-static udpTrans_t   udpReceivedData;
 
+static udpTrans_t   udpReceivedData;
 static udpTrans_t   udpRecvBox[MAILBOXSIZE];
 static udpTrans_t   udpTransBox[MAILBOXSIZE];
 
@@ -19,9 +24,12 @@ static udpTrans_t   *M_Box_Eth_Recv_Ptr_prev;
 static udpTrans_t   *M_Box_Eth_Send_Ptr;
 static udpTrans_t   *M_Box_Eth_Send_Ptr_prev;
 
-bool isUdpConnected;
+static time_t       Time = 0;
+static uint32_t     ip_addr_ntp;
 
-error_msg ret = ERROR;
+bool         isUdpConnected;
+
+static error_msg    ret = ERROR;
 
 // *****************************************************************************
 // Section: Application Local Methods
@@ -60,6 +68,7 @@ void PROCESSxETHxDATAxINIT ( void )
     M_Box_Eth_Send_Ptr      = &udpTransBox[0];
     /* For external use to set new data to be send from send mailbox*/
     M_Box_Eth_Send_Ptr_prev = &udpTransBox[0];
+    
 }
 
 
@@ -76,7 +85,7 @@ void PROCESSxETHxDATA(void)
     
     switch(ethernetState){
         case ETHERNET_LINKUP:
-            if(ETH_CheckLinkUp()){
+            if(ETH_CheckLinkUp()){ //&& DHCP_GET_BOUND()){
                 ethernetState = ETHERNET_CONNECT;
             }
             break;
@@ -97,25 +106,35 @@ void PROCESSxETHxDATA(void)
             }
             break;
             
-        case ETHERNET_DATA_RX:
-            if(CHECKxDATAxINxRECEIVExMAILxBOX() == true){
-                /* Do something with the data */
-                udpTrans_t *udpSend;
-                udpSend = GETxDATAxFROMxRECEIVExMAILxBOX();
-                PUTxDATAxINxSENDxMAILxBOX(udpSend);
-            }
-            ethernetState = ETHERNET_DATA_TX;
-            break;
+//        case ETHERNET_DATA_RX:
+//            if(CHECKxDATAxINxRECEIVExMAILxBOX() == true){
+//                /* Do something with the data */
+//                udpTrans_t *udpSend;
+//                udpSend = GETxDATAxFROMxRECEIVExMAILxBOX();
+//                PUTxDATAxINxSENDxMAILxBOX(udpSend);
+//            }
+//            ethernetState = ETHERNET_DATA_TX;
+//            break;
             
         case ETHERNET_DATA_TX:
             if (CheckDataInSendMailBox()){
-                udpTrans_t *udpSend;
-                udpSend = GetDataFromSendMailBox();
-                UDP_WriteBlock((char *)udpSend,udpTrans_t_length);
-                UDP_Send();
-                ethernetState = ETHERNET_DATA_RX;
+                ret = UDP_Start(udpPacketHeader.destinationAddress, udpPacketHeader.sourcePortNumber, udpPacketHeader.destinationPortNumber);
+                if(ret == SUCCESS){
+                    udpTrans_t *udpSend;
+                    udpSend = GetDataFromSendMailBox();
+                    UDP_WriteBlock((char *)udpSend,udpTrans_t_length);
+                    UDP_Send();
+                }
+                else{
+                    //printf("ret: %02X\n\r", ret);
+                    if(ret == BUFFER_BUSY){
+                        //printf("Flush and reset.");
+                        UDP_FlushTXPackets();
+                        //UDP_FlushRxdPacket(); 
+                    }                
+                }
             }
-            //ethernetState = ETHERNET_DATA_RX;
+            ethernetState = ETHERNET_DATA_TX;
             break;
             
         default: ethernetState = ETHERNET_LINKUP;
@@ -124,14 +143,13 @@ void PROCESSxETHxDATA(void)
 }
 
 /*
- * 
+ * Catch incoming UDP packets on the specified port
  */
-
-void UDPxDATAxRECV(int length)
+void UDPxDATAxRECV(int16_t length)
 {
-    if(length == udpTrans_t_length){
+    if(length == udpTrans_t_length){        
         UDP_ReadBlock(&udpReceivedData,udpTrans_t_length);
-        PutDataInReceiveMailBox(udpReceivedData);
+        PutDataInReceiveMailBox(udpReceivedData);   
     }
     else{
         UDP_FlushRxdPacket();
@@ -236,18 +254,20 @@ bool CHECKxDATAxINxRECEIVExMAILxBOX(){
   Remarks:
     See prototype in ethernet.h.
  */
-
 udpTrans_t *GetDataFromSendMailBox (){
     
     udpTrans_t *data;
-    
+    /* Check if pointers are not equal (check for mail) */
     if (M_Box_Eth_Send_Ptr != M_Box_Eth_Send_Ptr_prev){
         
         //memcpy(&data, M_Box_Eth_Send_Ptr_prev, sizeof(data));
+        /* get the data from the send buffer */
         data = M_Box_Eth_Send_Ptr_prev;
-        
+        /* increase the prev send pointer */
         M_Box_Eth_Send_Ptr_prev++;
+        /* Check if the send prev pointer is still pointing to the buffer */
         if(M_Box_Eth_Send_Ptr_prev >= &udpTransBox[MAILBOXSIZE]){
+            /* Reset the pointer to the begin of the buffer */
             M_Box_Eth_Send_Ptr_prev = &udpTransBox[0];
         }
         
@@ -262,7 +282,6 @@ udpTrans_t *GetDataFromSendMailBox (){
   Remarks:
     See prototype in ethernet.h.
  */
-
 bool CheckDataInSendMailBox (){
     
     if (M_Box_Eth_Send_Ptr != M_Box_Eth_Send_Ptr_prev){
@@ -281,13 +300,15 @@ bool CheckDataInSendMailBox (){
   Remarks:
     See prototype in ethernet.h.
  */
-
 void PUTxDATAxINxSENDxMAILxBOX (udpTrans_t *data){
     
+    /* Park the data in the buffer */
     *M_Box_Eth_Send_Ptr = *data;
+    /* increase the pointer to point to next cell */
     M_Box_Eth_Send_Ptr++;
-    
+    /* Check if pointer is still pointing within the buffer */
     if(M_Box_Eth_Send_Ptr >= &udpTransBox[MAILBOXSIZE]){
+        /* reset pointer to begin of buffer */
         M_Box_Eth_Send_Ptr = &udpTransBox[0];
     } 
 }

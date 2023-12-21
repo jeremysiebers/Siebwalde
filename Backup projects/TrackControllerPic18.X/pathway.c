@@ -4,6 +4,7 @@
 #include "mainstation.h"
 #include "mountaintrack.h"
 #include "milisecond_counter.h"
+#include "communication.h"
 
 STATION *refTOP;
 STATION *refBOT;
@@ -26,7 +27,7 @@ void INITxPATHWAYxMNTSTATION(MNTSTATION *refwaldsee, MNTSTATION *refwaldberg)
 /* Disable optimizing otherwise the compiler might optimize the definitions
  * away of the inverted state of a path
  */
-void SETxSTATIONxPATHWAY(STATION *self, uint8_t path, TASK_STATE dir)
+void SETxSTATIONxPATHWAY(STATION *self, TASK_MESSAGES path, TASK_STATE dir)
 {
 #pragma optimize( "", off )
     
@@ -37,73 +38,79 @@ void SETxSTATIONxPATHWAY(STATION *self, uint8_t path, TASK_STATE dir)
     
     switch(dir){
         case STN_INBOUND:
-            if(path == 1 || path == 10 || path == 11){
+            if(path == TRACK1 || path == TRACK10 || path == TRACK11){
                 *self->setPath->port1_ptr |=  pin1; // W1, W5
             }
-            else if(path == 2 || path == 3 || path == 12){
+            else if(path == TRACK2 || path == TRACK3 || path == TRACK12){
                 *self->setPath->port1_ptr &= ~pin1; // W1, W5
             } 
             
-            if(path == 2 || path == 10){                
+            if(path == TRACK2 || path == TRACK10){                
                 *self->setPath->port2_ptr |=  pin2; // W2, W6 
             }
-            else if(path == 3 || path == 11){                
+            else if(path == TRACK3 || path == TRACK11){                
                 *self->setPath->port2_ptr &= ~pin2; // W2, W6 
             }
             break;
             
         case STN_OUTBOUND:
-            if(path == 1 || path == 11){
+            if(path == TRACK1 || path == TRACK11){
                 *self->setPath->port3_ptr |=  pin3; // W3, W7
             }
-            else if(path == 2 || path == 12){
+            else if(path == TRACK2 || path == TRACK12){
                 *self->setPath->port3_ptr &= ~pin3; // W3, W7 
             }
             
-            if(path == 3 || path == 11 || path == 12){
+            if(path == TRACK3 || path == TRACK11 || path == TRACK12){
                 *self->setPath->port4_ptr &= ~pin4; // W4, W8 
             }
-            else if(path == 1 || path == 2 || path == 10){
+            else if(path == TRACK1 || path == TRACK2 || path == TRACK10){
                 *self->setPath->port4_ptr |=  pin4; // W4, W8
             }
             break;
             
         case STN_PASSING:
-            if(path == 1 || path == 10 || path == 11){
+            if(path == TRACK1 || path == TRACK10 || path == TRACK11){
                 *self->setPath->port1_ptr |=  pin1; // W1, W5
             }
-            else if(path == 2 || path == 3 || path == 12){
+            else if(path == TRACK2 || path == TRACK3 || path == TRACK12){
                 *self->setPath->port1_ptr &= ~pin1; // W1, W5
             }
             
-            if(path == 2 || path == 10){
+            if(path == TRACK2 || path == TRACK10){
                 *self->setPath->port2_ptr |=  pin2; // W2, W6
             }
-            else if(path == 3 || path == 11){
+            else if(path == TRACK3 || path == TRACK11){
                 *self->setPath->port2_ptr &= ~pin2; // W2, W6
             }
             
-            if(path == 1 || path == 11){
+            if(path == TRACK1 || path == TRACK11){
                 *self->setPath->port3_ptr |=  pin3; // W3, W7
             }
-            else if(path == 2 || path == 12){
+            else if(path == TRACK2 || path == TRACK12){
                 *self->setPath->port3_ptr &= ~pin3; // W3, W7
             }
             
-            if(path == 1 || path == 2 || path == 10){
+            if(path == TRACK1 || path == TRACK2 || path == TRACK10){
                 *self->setPath->port4_ptr |=  pin4; // W4, W8
             }
-            else if(path == 3 || path == 11 || path == 12){
+            else if(path == TRACK3 || path == TRACK11 || path == TRACK12){
                 *self->setPath->port4_ptr &= ~pin4; // W4, W8
             }            
             break;
             
         default:break;
     }
+    
+    CREATExTASKxSTATUSxMESSAGE(self->name,
+            NONE, 
+            dir, 
+            path);
+    
 #pragma optimize( "", on )
 }
 
-void SETxMNTSTATIONxPATHWAY(MNTSTATION *self, uint8_t path)
+void SETxMNTSTATIONxPATHWAY(MNTSTATION *self, TASK_MESSAGES path)
 {
     #pragma optimize( "", off )
 
@@ -115,6 +122,11 @@ void SETxMNTSTATIONxPATHWAY(MNTSTATION *self, uint8_t path)
     else if(path == T2 || path == T8){
         *self->setPath->port1_ptr |=  pin1;
     }
+    
+    CREATExTASKxSTATUSxMESSAGE(self->name,
+            NONE, 
+            NONE, 
+            path);
     
     #pragma optimize( "", on )
 }

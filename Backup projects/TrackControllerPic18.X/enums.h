@@ -88,6 +88,7 @@ extern "C" {
     
     typedef enum
     {
+        MAIN_LOOP                                                   = 01,
         MAIN_STATION_TOP                              				= 10,
         MAIN_STATION_BOT                              				= 20,
         WALDSEE                                                     = 30,
@@ -98,10 +99,16 @@ extern "C" {
     typedef enum		
     {
         HEADER                                                      = 0xAA,
+        ALIVE                                                       = 0x55,
         /* FW HANDLER COMMANDS */
         STNTRACK1                                                   = 31,
         STNTRACK2                                                   = 32,
         STNTRACK3                                                   = 33,
+        MTNTRACK1                                                   = 34,
+        MTNTRACK2                                                   = 35,
+        MTNTRACK7                                                   = 36,
+        MTNTRACK8                                                   = 37,
+        
     } TASK_COMMAND;
     
     typedef enum				
@@ -137,19 +144,28 @@ extern "C" {
 
         SIG_RED,
         SIG_GREEN,
+                
+        INVERT,
         
     } TASK_STATE;		
 
     typedef enum
     {
-        NONE                                        				= 100,
-        T1                                        				    = 101,
-        T2                                        				    = 102,
-        T4                                        				    = 103,
-        T5                                        				    = 104,
-        T7                                        				    = 105,
-        T8                                        				    = 106,
-                INBOUND
+       NONE    = 100,
+       T1      = 101,
+       T2      = 102,
+       T3      = 103,
+       T4      = 104,
+       T5      = 105,
+       T7      = 107,
+       T8      = 108,
+       TRACK1  = 110,
+       TRACK2  = 111,
+       TRACK3  = 112,
+       TRACK10 = 113,
+       TRACK11 = 114,
+       TRACK12 = 115,       
+       
     } TASK_MESSAGES;
 
 
