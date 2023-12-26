@@ -19,15 +19,18 @@ extern "C" {
     /* 5 seconds wait time after point switch set the signal */
     const uint32_t tSignalSwitchWaitTime = (uint32_t)(5 * tFactorSec);
     /* Time to wait for servo to move to new position */
-    const uint32_t tSwitchPointWaitTime = (uint32_t)(5 * tFactorSec);
+    const uint32_t tSwitchPointWaitTime = (uint32_t)(7 * tFactorSec);
     /* Time that Train waits before leaving */
     const uint32_t tTrainWaitTime = (uint32_t)(30 * tFactorSec);
     /* Time that Freight Train waits before leaving */
     const uint32_t tFreightTrainWaitTime = (uint32_t)(5 * tFactorSec);
     /* Boot wait time to get all IO read and debounced first */
-    const uint32_t tReadIoSignalWaitTime = (uint32_t)(2 * tFactorSec);
+    const uint32_t tReadIoSignalWaitTime = (uint32_t)(10 * tFactorSec);
     /* Time to wait after outbound, train fully left the station */
     const uint32_t tOutboundWaitTime = (uint32_t)(10 * tFactorSec);
+    /* Time to wait after inbound, train fully stopped */
+    const uint32_t tInOutboundStopWaitTime = (uint32_t)(10 * tFactorSec);
+    
 
 //    enum STATES{
 ////        INIT,
@@ -141,6 +144,8 @@ extern "C" {
         SEQ_CHK_TRAIN,
         SEQ_CHK_PASSED,
         SEQ_OUTBOUND_LEFT_STATTION,
+        SEQ_INBOUND_BRAKE_TIME,
+        SEQ_OUTBOUND_BRAKE_TIME,
 
         SIG_RED,
         SIG_GREEN,

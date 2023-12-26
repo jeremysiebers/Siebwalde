@@ -116,13 +116,19 @@ void SETxMNTSTATIONxPATHWAY(MNTSTATION *self, TASK_MESSAGES path)
 
     uint8_t pin1 = self->setPath->pin1_mask;    
     
-    if(path == T1 || path == T7){        
-        *self->setPath->port1_ptr &= ~pin1;
-    }
-    else if(path == T2 || path == T8){
+    if(path == T1){        
         *self->setPath->port1_ptr |=  pin1;
     }
-    
+    else if(path == T2){
+        *self->setPath->port1_ptr &= ~pin1;
+    }    
+    else if(path == T7){        
+        *self->setPath->port1_ptr |=  pin1;
+    }
+    else if(path == T8){
+        *self->setPath->port1_ptr &= ~pin1;
+    }
+
     CREATExTASKxSTATUSxMESSAGE(self->name,
             NONE, 
             NONE, 

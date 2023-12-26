@@ -150,7 +150,7 @@ void main(void)
                 
                 DebounceIO(true);
                 
-                if(isUdpConnected){                    
+                if(!isUdpConnected){                    
                     /*
                     * MainStation methods
                     */

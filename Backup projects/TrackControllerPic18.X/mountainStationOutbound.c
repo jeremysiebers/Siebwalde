@@ -16,8 +16,15 @@ int8_t MOUNTAINxSTATIONxOUTBOUND(MNTSTATION *self){
     else if(self->stnTrack2.stnState == STN_OUTBOUND){
         activeTrack = &self->stnTrack2;
     }
+    /* when only 1 train, and the outbound program is started when self
+     * has no trains in the station, skip outbound program with nop */
+    else if(false == self->stnTrack1.stnOccupied && 
+            false == self->stnTrack2.stnOccupied){
+        return(nop);
+    }
+    /* Occupied on one track wait for WAIT state to go to OUTBOUND */
     else{
-        return(done);
+        return(busy);
     }
     
     switch(activeTrack->stnSequence){
@@ -55,17 +62,27 @@ int8_t MOUNTAINxSTATIONxOUTBOUND(MNTSTATION *self){
             if(true == self->getTrainEnterSiebwaldeStn->value ){
                 SETxOCC(self->setOccAmpOut, true);
                 activeTrack->stnOccupied = false;
-                activeTrack->getTrainEnterStnTrack = false;
-                activeTrack->stnState    = STN_IDLE;
-                activeTrack->stnSequence = SEQ_IDLE;
+                /* Reset the hall sensors */
+                activeTrack->getTrainEnterStnTrack->value = false;
+                self->getTrainEnterSiebwaldeStn->value = false;
+                
+                activeTrack->stnNextState   = SEQ_OUTBOUND_BRAKE_TIME;
+                activeTrack->stnSequence    = SEQ_WAIT;
+                activeTrack->tCountTime     = GETxMILLIS();
+                activeTrack->tWaitTime      =  tInOutboundStopWaitTime;
+                
                 CREATExTASKxSTATUSxMESSAGE(self->name, 
                                            activeTrack->stnName, 
                                            activeTrack->stnState, 
-                                           activeTrack->stnSequence);
-                activeTrack = 0;
-                self->getTrainEnterSiebwaldeStn->value = false;
-            return(done);
+                                           activeTrack->stnSequence);               
             }
+            break;
+            
+        case SEQ_OUTBOUND_BRAKE_TIME:
+            activeTrack->stnState    = STN_IDLE;
+            activeTrack->stnSequence = SEQ_IDLE;
+            activeTrack = 0;
+            return(done);
             break;
         
         /* Wait time counter using actual millisecond counter */

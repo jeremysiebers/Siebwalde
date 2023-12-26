@@ -17,6 +17,11 @@ int8_t MOUNTAINxSTATIONxINBOUND(MNTSTATION *self){
     else if(self->stnTrack2.stnState == STN_INBOUND){
         activeTrack = &self->stnTrack2;
     }
+    /* when only 1 train, and the inbound program is started.. */
+    else if(STN_IDLE == self->stnTrack1.stnState &&
+            STN_IDLE == self->stnTrack2.stnState){
+        return(done);
+    }
     else{
         return(done);
     }
@@ -53,20 +58,31 @@ int8_t MOUNTAINxSTATIONxINBOUND(MNTSTATION *self){
             if(activeTrack->getTrainEnterStnTrack->value){
                 SETxOCC(self->setOccAmpOut, true); // Stop train from driving
                 activeTrack->stnOccupied = true;
-                activeTrack->stnSequence = SEQ_IDLE;
-                activeTrack->stnState    = STN_WAIT; // Set to wait state for next outbound event
-                activeTrack->tCountTime  = GETxMILLIS();
-                activeTrack->tWaitTime   = (tTrainWaitTime + GETxRANDOMxNUMBER());
-                activeTrack->getTrainEnterStnTrack->value = false;
-                self->getTrainEnterSiebwaldeStn->value = false;
-                self->LastInboundStn = activeTrack->trackNr;
+                activeTrack->stnNextState   = SEQ_INBOUND_BRAKE_TIME;
+                activeTrack->stnSequence    = SEQ_WAIT;
+                activeTrack->tCountTime     = GETxMILLIS();
+                activeTrack->tWaitTime      = tInOutboundStopWaitTime;
                 CREATExTASKxSTATUSxMESSAGE(self->name, 
-                                           activeTrack->stnName, 
-                                           activeTrack->stnState, 
-                                           activeTrack->stnSequence);
-                activeTrack = 0;
-                return(done);
+                                       activeTrack->stnName, 
+                                       activeTrack->stnState, 
+                                       activeTrack->stnSequence);
             }
+            break;
+            
+        case SEQ_INBOUND_BRAKE_TIME:
+            activeTrack->stnSequence = SEQ_IDLE;
+            activeTrack->stnState    = STN_WAIT; // Set to wait state for next outbound event
+            activeTrack->tCountTime  = GETxMILLIS();
+            activeTrack->tWaitTime   = (tTrainWaitTime + GETxRANDOMxNUMBER());
+            activeTrack->getTrainEnterStnTrack->value = false;
+            self->getTrainEnterSiebwaldeStn->value = false;
+            self->LastInboundStn = activeTrack->trackNr;
+            CREATExTASKxSTATUSxMESSAGE(self->name, 
+                                       activeTrack->stnName, 
+                                       activeTrack->stnState, 
+                                       activeTrack->stnSequence);
+            activeTrack = 0;
+            return(done);
             break;
         
         /* Wait time counter using actual millisecond counter */

@@ -75,7 +75,7 @@ void INITxMOUNTAINxSTATION(void)
 }
 
 void UPDATExMOUNTAINxSTATION(MNTSTATION *self)
-{
+{   
     switch(self->AppState)
     {    
         // <editor-fold defaultstate="collapsed">
@@ -99,38 +99,42 @@ void UPDATExMOUNTAINxSTATION(MNTSTATION *self)
              */
             
             if(self->getOccAmpOut->value){
-                /* Check if assumed default switch state T1<->T3 and T7<->T6 */
-                self->stnTrack1.stnOccupied = true;
-                self->stnTrack1.stnState = STN_WAIT;
+                /* Default switch state T3<->T2 and T6<->T8 */
+                self->stnTrack2.stnOccupied = true;
+                self->stnTrack2.stnState = STN_WAIT;
+                self->AppState = STN_TO_SIEBWALDE;
             }
             else{
-                self->stnTrack1.stnState = STN_IDLE;
-                self->stnTrack1.stnOccupied = false;
+                self->stnTrack2.stnState = STN_IDLE;
+                self->stnTrack2.stnOccupied = false;
+                
+                /* Switch to the other track of the station when train not 
+                 * detected (only 2 trains drive). 
+                 */
+                SETxMNTSTATIONxPATHWAY(self, self->stnTrack1.trackNr);
+                /* Setup a wait time for the switch */
+                self->tCountTime = GETxMILLIS();
+                self->tWaitTime  = tSwitchPointWaitTime;
+                self->AppNextState = INIT2;
+                self->AppState = WAIT;
             }
             CREATExTASKxSTATUSxMESSAGE(self->name,
-                    self->stnTrack1.stnName, 
-                    self->stnTrack1.stnState, 
-                    NONE);
+                    self->stnTrack2.stnName, 
+                    self->stnTrack2.stnState, 
+                    NONE);            
             
-            /* Switch to the other track of the station */
-            SETxMNTSTATIONxPATHWAY(self, self->stnTrack2.trackNr);
-            /* Setup a wait time for the switch */
-            self->tCountTime = GETxMILLIS();
-            self->tWaitTime  = tSwitchPointWaitTime;
-            self->AppNextState = INIT2;
-            self->AppState = WAIT;
             break;
             
         case INIT2:
             /* Check if other side of the station has a train */
             if(self->getOccAmpOut->value){
                 /* Check if assumed switched state T3<->T2, T8<->T6 */
-                self->stnTrack2.stnOccupied = true;
-                self->stnTrack2.stnState = STN_WAIT;                    
+                self->stnTrack1.stnOccupied = true;
+                self->stnTrack1.stnState = STN_WAIT;                    
             }
             else{
-                self->stnTrack2.stnState = STN_IDLE;
-                self->stnTrack2.stnOccupied = false;
+                self->stnTrack1.stnState = STN_IDLE;
+                self->stnTrack1.stnOccupied = false;
             }
             CREATExTASKxSTATUSxMESSAGE(self->name,
                     self->stnTrack2.stnName, 
@@ -158,14 +162,15 @@ void UPDATExMOUNTAINxSTATION(MNTSTATION *self)
         case STN_TO_SIEBWALDE:
             
             /* Handle the stnTrack x which is in Outbound mode */
-            if(MOUNTAINxSTATIONxOUTBOUND(self) == done){
+            self->Return = (TASK_STATE)MOUNTAINxSTATIONxOUTBOUND(self);
+            if(done == self->Return || nop == self->Return){
                 /* 
                  * Do wait after outbound for the train to drive to other 
                  * station 
                  */
                 self->AppNextState = SIEBWALDE_SWITCHT4T5;
                 self->LastState    = STN_OUTBOUND;
-                self->AppState     = WAIT;
+                self->AppState     = SIEBWALDE_SWITCHT4T5; //changed to directly depend on wait time of the train in siebwalde iso waiting longer
                 self->tCountTime   = GETxMILLIS();
                 self->tWaitTime    = tTrainWaitTime + GETxRANDOMxNUMBER();
                 CREATExTASKxSTATUSxMESSAGE(self->name,
@@ -174,23 +179,26 @@ void UPDATExMOUNTAINxSTATION(MNTSTATION *self)
                     NONE);
                 
                 
-                /* Set the inbound to the other Station */
-                if(self->name == WALDSEE){
-                    if(waldberg.stnTrack1.stnOccupied){
-                        waldberg.stnTrack2.stnState = STN_INBOUND;
-                    }
-                    else{
+                /* Set the inbound to the other Station to inbound when the
+                 * return function is done (a train has moved).
+                 */
+                if(WALDSEE == self->name && done == self->Return){
+                    if(false == waldberg.stnTrack1.stnOccupied){
                         waldberg.stnTrack1.stnState = STN_INBOUND;
                     }
+                    else if(false == waldberg.stnTrack2.stnOccupied){
+                        waldberg.stnTrack2.stnState = STN_INBOUND;
+                    }
                 }
-                else if(self->name == WALDBERG){
-                    if(waldsee.stnTrack1.stnOccupied){
+                else if(WALDBERG == self->name && done == self->Return){
+                    if(false == waldsee.stnTrack2.stnOccupied){
                         waldsee.stnTrack2.stnState = STN_INBOUND;
                     }
-                    else{
+                    else if(false == waldsee.stnTrack1.stnOccupied){
                         waldsee.stnTrack1.stnState = STN_INBOUND;
                     }
                 }
+                /* messages */
                 if(STN_INBOUND == self->stnTrack1.stnState){
                     CREATExTASKxSTATUSxMESSAGE(self->name,
                     self->stnTrack1.stnName, 
@@ -211,46 +219,45 @@ void UPDATExMOUNTAINxSTATION(MNTSTATION *self)
             /* Handle the stnTrack x which is in Outbound mode */
             if(MOUNTAINxSTATIONxINBOUND(self) == done){
                 self->AppState  = SIEBWALDE_SWITCHT4T5;  
-                self->LastState = STN_INBOUND;
-                
+                self->LastState = STN_INBOUND;                
                 CREATExTASKxSTATUSxMESSAGE(self->name,
                     NONE, 
                     self->AppState, 
                     NONE);
                 
-                /* Set the outbound for each Station */
-                if(self->name == WALDSEE){
-                    if(self->LastInboundStn == T1 && self->stnTrack2.stnOccupied){
-                        self->stnTrack2.stnState = STN_WAIT;
-                    }
-                    else if(self->stnTrack1.stnOccupied){
-                        self->stnTrack1.stnState = STN_WAIT;
-                    }
-                    else{
-                        self->stnTrack1.stnState = STN_IDLE;
-                        self->stnTrack2.stnState = STN_IDLE;
-                    }                    
-                }
-                else if(self->name == WALDBERG){
-                    if(self->LastInboundStn == T7 && self->stnTrack2.stnOccupied){
-                        self->stnTrack2.stnState = STN_WAIT;
-                    }
-                    else if(self->stnTrack1.stnOccupied){
-                        self->stnTrack1.stnState = STN_WAIT;
-                    }
-                    else{
-                        self->stnTrack1.stnState = STN_IDLE;
-                        self->stnTrack2.stnState = STN_IDLE;
-                    }
-                }
-                CREATExTASKxSTATUSxMESSAGE(self->name,
-                    self->stnTrack1.stnName, 
-                    self->stnTrack1.stnState, 
-                    NONE);
-                CREATExTASKxSTATUSxMESSAGE(self->name,
-                    self->stnTrack2.stnName, 
-                    self->stnTrack2.stnState, 
-                    NONE);
+                /* Set the required outbound for each Station */
+//                if(self->name == WALDSEE){
+//                    if(self->LastInboundStn == T1 && self->stnTrack2.stnOccupied){
+//                        self->stnTrack2.stnState = STN_WAIT;
+//                    }
+//                    else if(self->stnTrack1.stnOccupied){
+//                        self->stnTrack1.stnState = STN_WAIT;
+//                    }
+//                    else{
+//                        self->stnTrack1.stnState = STN_IDLE;
+//                        self->stnTrack2.stnState = STN_IDLE;
+//                    }                    
+//                }
+//                else if(self->name == WALDBERG){
+//                    if(self->LastInboundStn == T7 && self->stnTrack2.stnOccupied){
+//                        self->stnTrack2.stnState = STN_WAIT;
+//                    }
+//                    else if(self->stnTrack1.stnOccupied){
+//                        self->stnTrack1.stnState = STN_WAIT;
+//                    }
+//                    else{
+//                        self->stnTrack1.stnState = STN_IDLE;
+//                        self->stnTrack2.stnState = STN_IDLE;
+//                    }
+//                }
+//                CREATExTASKxSTATUSxMESSAGE(self->name,
+//                    self->stnTrack1.stnName, 
+//                    self->stnTrack1.stnState, 
+//                    NONE);
+//                CREATExTASKxSTATUSxMESSAGE(self->name,
+//                    self->stnTrack2.stnName, 
+//                    self->stnTrack2.stnState, 
+//                    NONE);
             }
             break;
         
