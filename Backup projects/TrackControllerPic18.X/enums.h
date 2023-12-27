@@ -21,14 +21,14 @@ extern "C" {
     /* Time to wait for servo to move to new position */
     const uint32_t tSwitchPointWaitTime = (uint32_t)(7 * tFactorSec);
     /* Time that Train waits before leaving */
-    const uint32_t tTrainWaitTime = (uint32_t)(30 * tFactorSec);
+    const uint32_t tTrainWaitTime = (uint32_t)(90 * tFactorSec);
     /* Time that Freight Train waits before leaving */
     const uint32_t tFreightTrainWaitTime = (uint32_t)(5 * tFactorSec);
     /* Boot wait time to get all IO read and debounced first */
     const uint32_t tReadIoSignalWaitTime = (uint32_t)(10 * tFactorSec);
     /* Time to wait after outbound, train fully left the station */
     const uint32_t tOutboundWaitTime = (uint32_t)(10 * tFactorSec);
-    /* Time to wait after inbound, train fully stopped */
+    /* Time to wait after in-outbound, train fully stopped (mountain) */
     const uint32_t tInOutboundStopWaitTime = (uint32_t)(10 * tFactorSec);
     
 

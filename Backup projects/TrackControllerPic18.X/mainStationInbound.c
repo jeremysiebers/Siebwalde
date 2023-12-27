@@ -67,7 +67,7 @@ int8_t MAINxSTATIONxINBOUND(STATION *self){
                                            activeTrack->stnSequence);
                 /*
                  * When a freight is in track 3 or 12, set freight wait time,
-                 * Als when a freight goes into track 1 or 2 set freight wait
+                 * Also when a freight goes into track 1 or 2 set freight wait
                  * time. Else set people carrier time
                  */
                 if(activeTrack->trackNr != 3 || activeTrack->trackNr != 12){

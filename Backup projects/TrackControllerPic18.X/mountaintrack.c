@@ -170,7 +170,11 @@ void UPDATExMOUNTAINxSTATION(MNTSTATION *self)
                  */
                 self->AppNextState = SIEBWALDE_SWITCHT4T5;
                 self->LastState    = STN_OUTBOUND;
-                self->AppState     = SIEBWALDE_SWITCHT4T5; //changed to directly depend on wait time of the train in siebwalde iso waiting longer
+                /*
+                 * SIEBWALDE_SWITCHT4T5; / WAIT;
+                 * changed to directly depend on wait time of the train in siebwalde iso waiting longer
+                 */
+                self->AppState     = WAIT;
                 self->tCountTime   = GETxMILLIS();
                 self->tWaitTime    = tTrainWaitTime + GETxRANDOMxNUMBER();
                 CREATExTASKxSTATUSxMESSAGE(self->name,
@@ -223,41 +227,7 @@ void UPDATExMOUNTAINxSTATION(MNTSTATION *self)
                 CREATExTASKxSTATUSxMESSAGE(self->name,
                     NONE, 
                     self->AppState, 
-                    NONE);
-                
-                /* Set the required outbound for each Station */
-//                if(self->name == WALDSEE){
-//                    if(self->LastInboundStn == T1 && self->stnTrack2.stnOccupied){
-//                        self->stnTrack2.stnState = STN_WAIT;
-//                    }
-//                    else if(self->stnTrack1.stnOccupied){
-//                        self->stnTrack1.stnState = STN_WAIT;
-//                    }
-//                    else{
-//                        self->stnTrack1.stnState = STN_IDLE;
-//                        self->stnTrack2.stnState = STN_IDLE;
-//                    }                    
-//                }
-//                else if(self->name == WALDBERG){
-//                    if(self->LastInboundStn == T7 && self->stnTrack2.stnOccupied){
-//                        self->stnTrack2.stnState = STN_WAIT;
-//                    }
-//                    else if(self->stnTrack1.stnOccupied){
-//                        self->stnTrack1.stnState = STN_WAIT;
-//                    }
-//                    else{
-//                        self->stnTrack1.stnState = STN_IDLE;
-//                        self->stnTrack2.stnState = STN_IDLE;
-//                    }
-//                }
-//                CREATExTASKxSTATUSxMESSAGE(self->name,
-//                    self->stnTrack1.stnName, 
-//                    self->stnTrack1.stnState, 
-//                    NONE);
-//                CREATExTASKxSTATUSxMESSAGE(self->name,
-//                    self->stnTrack2.stnName, 
-//                    self->stnTrack2.stnState, 
-//                    NONE);
+                    NONE);                
             }
             break;
         
