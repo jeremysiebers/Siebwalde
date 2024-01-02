@@ -46,25 +46,4 @@ void DEBOUNCExIO(DEBOUNCE *instance, uint32_t *millisPtr)
          */
         instance->lastDebounceTime = 0;
     }
-
-    // Check if the debounce time has elapsed only when needed
-//    if(0 != instance->lastDebounceTime){
-//        if ((millis - instance->lastDebounceTime) > instance->debounceDelay) {
-//            // Update the last button state
-//            instance->lastButtonState = instance->buttonState;
-//            
-//            // re-set the lastDebounceTime
-//            instance->lastDebounceTime = 0;
-//            
-//            // Process the button state change
-//            if (instance->buttonState == HIGH && instance->ResetL2H) {
-//              // Handle low-to-high transition
-//                instance->value = true;
-//            } 
-//            if (instance->buttonState == LOW && instance->ResetH2L) {
-//              // Handle high-to-low transition
-//              instance->value = false;
-//              }
-//        }
-//    }
 }

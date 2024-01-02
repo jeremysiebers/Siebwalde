@@ -30,7 +30,7 @@ extern "C" {
     {
         uint8_t header;
         uint8_t command;
-        uint8_t data[8]; 
+        uint8_t data[8];
     }udpTrans_t;
     
     const int udpTrans_t_length = sizeof(udpTrans_t);
@@ -49,6 +49,8 @@ extern "C" {
 
     } ETH_STATES;
     
+    void COMMxSETxRXxDATAxHANDLER(void (* RxDataHandler)(void));
+    extern void (*DataRxHandler)(void);
         
     extern void PROCESSxETHxDATAxINIT(void);
     extern void UDPxDATAxRECV(int16_t length);
@@ -63,6 +65,9 @@ extern "C" {
                             uint8_t task_state, 
                             uint8_t task_messages);
     extern bool         isUdpConnected;
+    extern void         CREATExDATAxMESSAGE(
+                            uint8_t task_id, 
+                            uint8_t *data);
 
     
 #ifdef	__cplusplus

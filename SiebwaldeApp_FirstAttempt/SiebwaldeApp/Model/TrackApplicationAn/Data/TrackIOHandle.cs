@@ -60,21 +60,19 @@ namespace SiebwaldeApp
         /// <param name="tracksimulator"></param>
         public void Start(bool trackrealmode)
         {
-            IoC.Logger.Log("Track IO Handler started.", mLoggerInstance);
-
             mTrackRealMode = trackrealmode;
 
             if (mTrackRealMode == true)
             {
                 //mEthernetTargetDataSimulator.NewData -= HandleNewData;
-                IoC.Logger.Log("Track IO handler Connecting to target...", mLoggerInstance);
+                IoC.Logger.Log("Track IO handler Connecting to sending port: " + mTrackSendingPort.ToString() + ".", mLoggerInstance);
                 mTrackSender.ConnectUdp(mTrackSendingPort);
                 
                 mTrackReceiver.NewData += HandleNewData;
-                IoC.Logger.Log("Track IO handler connected to target.", mLoggerInstance);
+                IoC.Logger.Log("Track IO handler handle incoming data.", mLoggerInstance);
 
                 mTrackReceiver.Start();
-                IoC.Logger.Log("Track IO handler reciever started.", mLoggerInstance);
+                IoC.Logger.Log("Track IO handler reciever started on receiving port: " + mTrackReceivingPort.ToString() + ".", mLoggerInstance);
 
                 mconnected = true;
             }
@@ -85,6 +83,8 @@ namespace SiebwaldeApp
                 //mEthernetTargetDataSimulator.NewData += HandleNewData;
                 IoC.Logger.Log("Track IO handler connected to Simulator.", mLoggerInstance);
             }
+
+            IoC.Logger.Log("Track IO Handler started.", mLoggerInstance);
 
         }
 
@@ -117,18 +117,70 @@ namespace SiebwaldeApp
 
             UInt16 Header = reader.ReadByte();
             UInt16 Sender = reader.ReadByte(); // and is also taskid
-            if (Header == HEADER && Sender == 0x55)
+            if (Header == HEADER && Sender == CONTROLLERDATA)
+            {
+                UInt16 Data = reader.ReadByte();
+                mTrackApplicationVariables.HallBlock4A = Convert.ToBoolean((Data & 0x01));
+                Data >>= 0x01;
+                mTrackApplicationVariables.HallBlock9B = Convert.ToBoolean((Data & 0x01));
+                Data >>= 0x01;
+                mTrackApplicationVariables.HallBlockT2 = Convert.ToBoolean((Data & 0x01));
+                Data >>= 0x01;
+                mTrackApplicationVariables.HallBlockT1 = Convert.ToBoolean((Data & 0x01));
+                Data >>= 0x01;
+                mTrackApplicationVariables.HallBlockT5 = Convert.ToBoolean((Data & 0x01));
+                Data >>= 0x01;
+                mTrackApplicationVariables.HallBlockT4 = Convert.ToBoolean((Data & 0x01));
+                Data >>= 0x01;
+                mTrackApplicationVariables.HallBlock21A = Convert.ToBoolean((Data & 0x01));
+                Data >>= 0x01;
+                mTrackApplicationVariables.HallBlock13 = Convert.ToBoolean((Data & 0x01));
+
+                Data = reader.ReadByte();
+                mTrackApplicationVariables.OccFromStn10 = Convert.ToBoolean((Data & 0x01));
+                Data >>= 0x01;
+                mTrackApplicationVariables.OccFromStn3 = Convert.ToBoolean((Data & 0x01));
+                Data >>= 0x01;
+                mTrackApplicationVariables.OccFromStn2 = Convert.ToBoolean((Data & 0x01));
+                Data >>= 0x01;
+                mTrackApplicationVariables.OccFromStn1 = Convert.ToBoolean((Data & 0x01));
+                Data >>= 0x01;
+                mTrackApplicationVariables.OccFromBlock4 = Convert.ToBoolean((Data & 0x01));
+                Data >>= 0x01;
+                mTrackApplicationVariables.OccFromBlock13 = Convert.ToBoolean((Data & 0x01));
+                Data >>= 0x01;
+                mTrackApplicationVariables.HallBlockT8 = Convert.ToBoolean((Data & 0x01));
+                Data >>= 0x01;
+                mTrackApplicationVariables.HallBlockT7 = Convert.ToBoolean((Data & 0x01));
+
+                Data = reader.ReadByte();
+                mTrackApplicationVariables.OccFromBlock9B = Convert.ToBoolean((Data & 0x01));
+                Data >>= 0x01;
+                mTrackApplicationVariables.OccFromBlock22B = Convert.ToBoolean((Data & 0x01));
+                Data >>= 0x01;
+                mTrackApplicationVariables.OccFromBlock23B = Convert.ToBoolean((Data & 0x01));
+                Data >>= 0x01;
+                mTrackApplicationVariables.CtrlOff = Convert.ToBoolean((Data & 0x01));
+                Data >>= 0x01;
+                mTrackApplicationVariables.OccFromT3 = Convert.ToBoolean((Data & 0x01));
+                Data >>= 0x01;
+                mTrackApplicationVariables.OccFromT6 = Convert.ToBoolean((Data & 0x01));
+                Data >>= 0x01;
+                mTrackApplicationVariables.OccFromStn12 = Convert.ToBoolean((Data & 0x01));
+                Data >>= 0x01;
+                mTrackApplicationVariables.OccFromStn11 = Convert.ToBoolean((Data & 0x01));
+
+                Data = reader.ReadByte();
+                Data >>= 0x06;
+                mTrackApplicationVariables.VoltageDetected = Convert.ToBoolean((Data & 0x01));
+                Data >>= 0x01;
+                mTrackApplicationVariables.OccFromBlock21B = Convert.ToBoolean((Data & 0x01));
+
+            }
+            if (Header == HEADER && Sender == CONTROLLERALIVE)
             {
                 UInt32 MbCommError = reader.ReadUInt32();
                 IoC.Logger.Log("received count = " + MbCommError.ToString(), mLoggerInstance);
-
-                //mTrackApplicationVariables.trackAmpItems[SlaveNumber].SlaveDetected = SlaveDetected;                
-                //mTrackApplicationVariables.trackAmpItems[SlaveNumber].HoldingReg = HoldingReg;
-                //mTrackApplicationVariables.trackAmpItems[SlaveNumber].MbReceiveCounter = MbReceiveCounter;
-                //mTrackApplicationVariables.trackAmpItems[SlaveNumber].MbSentCounter = MbSentCounter;
-                //mTrackApplicationVariables.trackAmpItems[SlaveNumber].MbCommError = MbCommError;
-                //mTrackApplicationVariables.trackAmpItems[SlaveNumber].MbExceptionCode = MbExceptionCode;
-                //mTrackApplicationVariables.trackAmpItems[SlaveNumber].SpiCommErrorCounter = SpiCommErrorCounter;
             }
             else if (Header == HEADER)
             {                

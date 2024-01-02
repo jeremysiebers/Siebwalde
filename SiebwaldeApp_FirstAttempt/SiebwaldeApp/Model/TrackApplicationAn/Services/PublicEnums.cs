@@ -1,4 +1,7 @@
-﻿namespace SiebwaldeApp
+﻿using System.Collections;
+using System.Collections.Generic;
+
+namespace SiebwaldeApp
 {
     public struct ReceivedMessage
     {
@@ -53,19 +56,45 @@
         public const byte HEADER = 0xAA;
         public const byte FOOTER = 0x55;
 
-        public const byte SLAVEINFO = 0xFF;
+        public const byte CONTROLLERDATA = 60;
+        public const byte CONTROLLERALIVE = 0xFF;
 
         //public const string HOMEPATH = @"c:\localdata\Siebwalde\";
         //public const string LOGGING = "Logging\\";
         public const string TRACKTARGET = "TRACKCONTROLLER"; //"192.168.1.50"; //"TRACKCONTROLLER";
-        public const string SLAVEHEXFILE = "TrackAmplifier4.X.production.hex";
-        public const int SPACELENGTH = 40;
 
-        public const uint Busy = 0;
-        public const uint Finished = 1;
-        public const uint Next = 2;
-        public const uint Standby = 2;
-        public const uint Error = 11;
+        private static readonly Dictionary<int, string> NumberTextMap = new Dictionary<int, string>
+        {
+            { 1,  "MAIN_LOOP" },
+            { 10, "MAIN_STATION_TOP" },
+            { 20, "MAIN_STATION_BOT" },
+            { 30, "WALDSEE" },
+            { 40, "SIEBWALDE" },
+            { 50, "WALDBERG" },
+            { 60, "DATA" },
+
+            { 1,  "MAIN_LOOP" },
+            { 10, "MAIN_STATION_TOP" },
+            { 20, "MAIN_STATION_BOT" },
+            { 30, "WALDSEE" },
+            { 40, "SIEBWALDE" },
+            { 50, "WALDBERG" },
+            { 60, "DATA" },
+        };
+
+        public static string TranslateNumber(int number)
+        {
+            if (NumberTextMap.ContainsKey(number))
+            {
+                return NumberTextMap[number];
+            }
+            else
+            {
+                return $"No translation found for the number: {number}";
+            }
+        }
+
+
     }
 
 

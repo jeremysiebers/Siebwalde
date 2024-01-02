@@ -30,7 +30,6 @@ extern "C" {
     const uint32_t tOutboundWaitTime = (uint32_t)(10 * tFactorSec);
     /* Time to wait after in-outbound, train fully stopped (mountain) */
     const uint32_t tInOutboundStopWaitTime = (uint32_t)(10 * tFactorSec);
-    
 
 //    enum STATES{
 ////        INIT,
@@ -97,12 +96,13 @@ extern "C" {
         WALDSEE                                                     = 30,
         SIEBWALDE                                                   = 40,
         WALDBERG                                                    = 50,
+        DATA                                                        = 60,
     } TASK_ID;				
 
     typedef enum		
     {
         HEADER                                                      = 0xAA,
-        ALIVE                                                       = 0x55,
+        ALIVE                                                       = 0xFF,
         /* FW HANDLER COMMANDS */
         STNTRACK1                                                   = 31,
         STNTRACK2                                                   = 32,

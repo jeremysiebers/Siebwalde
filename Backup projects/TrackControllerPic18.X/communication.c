@@ -1,6 +1,6 @@
 /* 
  * https://www.microchip.com/en-us/software-library/tcpipstack 
- * (ip.dst==192.168.1.176 and udp.port==60000 and ip.src==192.168.1.50) or (ip.dst==192.168.1.50 and udp.port==60000 and ip.src==192.168.1.176) and !(udp.stream eq 16)
+ * (ip.dst==192.168.1.176 and udp.port==60000 and ip.src==192.168.1.158) or (ip.dst==192.168.1.158 and udp.port==60000 and ip.src==192.168.1.176)
  */
 #include <xc.h>
 #include <stdbool.h>
@@ -27,9 +27,14 @@ static udpTrans_t   *M_Box_Eth_Send_Ptr_prev;
 static time_t       Time = 0;
 static uint32_t     ip_addr_ntp;
 
-bool         isUdpConnected;
+bool                isUdpConnected;
 
 static error_msg    ret = ERROR;
+
+/*
+  Section: Global Variable Definitions
+*/
+void (*DataRxHandler)(void);
 
 // *****************************************************************************
 // Section: Application Local Methods
@@ -43,6 +48,17 @@ bool        CheckDataInSendMailBox (void);
 // Section: Application Initialization and State Machine Functions
 // *****************************************************************************
 // *****************************************************************************
+
+/*******************************************************************************
+  Function:
+    void COMMxSETxRXxDATAxHANDLER(void (* RxDataHandler)(void))
+
+  Remarks:
+    register a callback function
+ */
+void COMMxSETxRXxDATAxHANDLER(void (* RxDataHandler)(void)){
+    DataRxHandler = RxDataHandler;
+}
 
 /*******************************************************************************
   Function:
@@ -71,7 +87,6 @@ void PROCESSxETHxDATAxINIT ( void )
     
 }
 
-
 // *****************************************************************************
 // Section: Ethernet Application
 // *****************************************************************************
@@ -79,9 +94,7 @@ void PROCESSxETHxDATAxINIT ( void )
 void PROCESSxETHxDATA(void)
 {   
     /* Manage TCP/IP Stack */
-    TP4_SetHigh();
-    Network_Manage();    
-    TP4_SetLow();
+    Network_Manage();
     
     switch(ethernetState){
         case ETHERNET_LINKUP:
@@ -98,7 +111,7 @@ void PROCESSxETHxDATA(void)
                 udpPacketHeader.sourceAddress         = UDP_GetSrcIP();
                 udpPacketHeader.sourcePortNumber      = UDP_GetSrcPort();
                 
-                ret = UDP_Start(udpPacketHeader.destinationAddress, udpPacketHeader.sourcePortNumber, udpPacketHeader.destinationPortNumber);
+                ret = UDP_Start(udpPacketHeader.destinationAddress, udpPacketHeader.sourcePortNumber, UDP_RXTX_PORT);
                 if(ret == SUCCESS){
                     isUdpConnected = true;
                     ethernetState = ETHERNET_DATA_TX;
@@ -106,19 +119,23 @@ void PROCESSxETHxDATA(void)
             }
             break;
             
-//        case ETHERNET_DATA_RX:
-//            if(CHECKxDATAxINxRECEIVExMAILxBOX() == true){
-//                /* Do something with the data */
-//                udpTrans_t *udpSend;
-//                udpSend = GETxDATAxFROMxRECEIVExMAILxBOX();
-//                PUTxDATAxINxSENDxMAILxBOX(udpSend);
-//            }
-//            ethernetState = ETHERNET_DATA_TX;
-//            break;
+        case ETHERNET_DATA_RX:
+            if(CHECKxDATAxINxRECEIVExMAILxBOX() == true){
+                /* Do something with the data */
+                udpTrans_t *udpReceived;
+                udpReceived = GETxDATAxFROMxRECEIVExMAILxBOX();
+                
+                if(DataRxHandler)
+                {
+                    DataRxHandler();
+                }                
+            }
+            ethernetState = ETHERNET_DATA_TX;
+            break;
             
         case ETHERNET_DATA_TX:
             if (CheckDataInSendMailBox()){
-                ret = UDP_Start(udpPacketHeader.destinationAddress, udpPacketHeader.sourcePortNumber, udpPacketHeader.destinationPortNumber);
+                ret = UDP_Start(udpPacketHeader.destinationAddress, udpPacketHeader.sourcePortNumber, UDP_RXTX_PORT);
                 if(ret == SUCCESS){
                     udpTrans_t *udpSend;
                     udpSend = GetDataFromSendMailBox();
@@ -161,7 +178,7 @@ void UDPxDATAxRECV(int16_t length)
     void CREATExTASKxSTATUSxMESSAGE(uint8_t taskid, uint8_t taskstate, uint8_t feedback)
 
   Remarks:
-    See prototype in ethernet.h.
+    See prototype in communication.h.
  */
 //static 
 
@@ -181,6 +198,27 @@ void CREATExTASKxSTATUSxMESSAGE(uint8_t task_id, uint8_t task_command, uint8_t t
     for(i=3; i < sizeof(StatusMessage.data); i++){
         StatusMessage.data[i] = 0;
     }
+    PUTxDATAxINxSENDxMAILxBOX(&StatusMessage);
+}
+
+/******************************************************************************
+  Function:
+    void CREATExDATAxMESSAGE(uint8_t taskid, uint8_t *data)
+
+  Remarks:
+    See prototype in communication.h.
+ */
+void CREATExDATAxMESSAGE(uint8_t task_id, uint8_t *data){
+    
+    udpTrans_t StatusMessage;
+    
+    StatusMessage.header  = (uint8_t)HEADER;
+    StatusMessage.command = (uint8_t)task_id;
+    
+    for(uint8_t i=0; i < sizeof(StatusMessage.data); i++){
+        StatusMessage.data[i] = data[i];
+    }
+    
     PUTxDATAxINxSENDxMAILxBOX(&StatusMessage);
 }
 

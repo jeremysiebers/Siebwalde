@@ -8,13 +8,16 @@
 #include "debounce.h"
 #include "rand.h"
 #include <string.h>
+#include <stdbool.h>
 
-static bool updateTick = false;
-static uint32_t tBootWaitTimeCnt = 1;
-static bool booted = false;
+static bool         updateTick = false;
+static uint32_t     tBootWaitTimeCnt = 1;
+static bool         booted = false;
 
-static uint32_t tSendAliveMessWaitTimeCnt = 0;
-static udpTrans_t StatusMessage;
+static uint32_t     tSendAliveMessWaitTimeCnt = 0;
+static udpTrans_t   StatusMessage;
+static udpTrans_t   DataMessage;
+static uint8_t      tmp = 0;
 
 void main(void)
 {
@@ -150,34 +153,84 @@ void main(void)
                 
                 DebounceIO(true);
                 
-                if(!isUdpConnected){                    
+                if(isUdpConnected){                    
                     /*
                     * MainStation methods
                     */
-                    TP1_SetHigh();
+                    //TP1_SetHigh();
                     UPDATExSTATIONxTRAINxWAIT(&top);
                     UPDATExSTATIONxTRAINxWAIT(&bot);
-                    TP1_SetLow();
+                    //TP1_SetLow();
                     TP2_SetHigh();
                     UPDATExSTATION(&top);
                     UPDATExSTATION(&bot);
                     TP2_SetLow();
  
-                    TP1_SetHigh();
+                    //TP1_SetHigh();
                     /*
                      * Mountain track methods
                      */
                     UPDATExMOUNTAINxTRAINxWAIT(&waldsee);
                     UPDATExMOUNTAINxTRAINxWAIT(&waldberg);
-                    TP1_SetLow();
+                    //TP1_SetLow();
                     TP2_SetHigh();
                     UPDATExMOUNTAINxSTATION(&waldsee);
                     UPDATExMOUNTAINxSTATION(&waldberg);
                     TP2_SetLow();
- 
+                    
+                    TP3_SetHigh();
+                    DataMessage.header = (uint8_t)HEADER;
+                    DataMessage.command = (uint8_t)DATA;                    
+                    tmp = 0;
+                    tmp = (uint8_t)(tmp << 1) | HALL_BLK_13.value       //MSB
+                    tmp = (uint8_t)(tmp << 1) | HALL_BLK_21A.value;
+                    tmp = (uint8_t)(tmp << 1) | HALL_BLK_T4.value;
+                    tmp = (uint8_t)(tmp << 1) | HALL_BLK_T5.value;
+                    tmp = (uint8_t)(tmp << 1) | HALL_BLK_T1.value;
+                    tmp = (uint8_t)(tmp << 1) | HALL_BLK_T2.value;
+                    tmp = (uint8_t)(tmp << 1) | HALL_BLK_9B.value;
+                    tmp = (uint8_t)(tmp << 1) | HALL_BLK_4A.value;
+                    DataMessage.data[0] = tmp;
+                    
+                    tmp = 0;
+                        tmp = (uint8_t)(tmp << 1) | HALL_BLK_T7.value;   //MSB
+                    tmp = (uint8_t)(tmp << 1) | HALL_BLK_T8.value;
+                    tmp = (uint8_t)(tmp << 1) | OCC_FR_BLK13.value;
+                    tmp = (uint8_t)(tmp << 1) | OCC_FR_BLK4.value;
+                    tmp = (uint8_t)(tmp << 1) | OCC_FR_STN_1.value;
+                    tmp = (uint8_t)(tmp << 1) | OCC_FR_STN_2.value;
+                    tmp = (uint8_t)(tmp << 1) | OCC_FR_STN_3.value;
+                    tmp = (uint8_t)(tmp << 1) | OCC_FR_STN_10.value;
+                    DataMessage.data[1] = tmp;
+                    
+                    tmp = 0;
+                    tmp = (uint8_t)(tmp << 1) | OCC_FR_STN_11.value;    //MSB
+                    tmp = (uint8_t)(tmp << 1) | OCC_FR_STN_12.value;
+                    tmp = (uint8_t)(tmp << 1) | OCC_FR_T6.value;
+                    tmp = (uint8_t)(tmp << 1) | OCC_FR_T3.value;
+                    tmp = (uint8_t)(tmp << 1) | CTRL_OFF.value;
+                    tmp = (uint8_t)(tmp << 1) | OCC_FR_23B.value;
+                    tmp = (uint8_t)(tmp << 1) | OCC_FR_22B.value;
+                    tmp = (uint8_t)(tmp << 1) | OCC_FR_9B.value;
+                    DataMessage.data[2] = tmp;
+                    
+                    tmp = 0;
+                    tmp = (uint8_t)(tmp << 1) | OCC_FR_21B.value;       //MSB
+                    tmp = (uint8_t)(tmp << 1) | VOLTDETECT.value;                    
+                    tmp = (uint8_t)(tmp << 1) | 1;
+                    tmp = (uint8_t)(tmp << 1) | 1;
+                    tmp = (uint8_t)(tmp << 1) | 1;
+                    tmp = (uint8_t)(tmp << 1) | 1;
+                    tmp = (uint8_t)(tmp << 1) | 1;
+                    tmp = (uint8_t)(tmp << 1) | 1;                      // LSB
+                                        
+                    DataMessage.data[3] = tmp;
+                    PUTxDATAxINxSENDxMAILxBOX(&DataMessage);                    
+                    TP3_SetLow();
+                    
                     tSendAliveMessWaitTimeCnt++;
                     if(tSendAliveMessWaitTimeCnt >= 999){
-                        TP3_SetHigh();
+                        //TP3_SetHigh();
                         uint32_t millis = GETxMILLIS();
                         StatusMessage.header  = (uint8_t)HEADER;
                         StatusMessage.command = (uint8_t)ALIVE;
@@ -188,9 +241,18 @@ void main(void)
                         
                         PUTxDATAxINxSENDxMAILxBOX(&StatusMessage);
                         tSendAliveMessWaitTimeCnt = 0;
-                        TP3_SetLow();
+                        //TP3_SetLow();
                     }
-                }                                
+                    
+                    if(CHECKxDATAxINxRECEIVExMAILxBOX() == true){
+                        /* Do something with the data */
+                        udpTrans_t *udpReceived;
+                        udpReceived = GETxDATAxFROMxRECEIVExMAILxBOX();
+                        if(udpReceived->command == 8){
+                            TP1_Toggle();
+                        }
+                    }
+                }
                 updateTick = false;
             }            
         }

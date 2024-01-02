@@ -66,6 +66,7 @@ namespace SiebwaldeApp
             if (mTrackIOHandle.mconnected)
             {
                 mTrackIOHandle.ActuatorCmd(new SendMessage(8, new byte[] { 0, 1, 3, 4, 5,6 ,7 ,8 }));
+                //IoC.Logger.Log("Send data to Trackcontroller.", mLoggerInstance);
             }            
         }
 
@@ -78,7 +79,7 @@ namespace SiebwaldeApp
         internal void Start(bool TrackRealMode)
         {
             AppUpdateTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
-            AppUpdateTimer.Interval = 500;
+            AppUpdateTimer.Interval = 100;
             AppUpdateTimer.AutoReset = true;
             // Enable the timer
             AppUpdateTimer.Enabled = true;
