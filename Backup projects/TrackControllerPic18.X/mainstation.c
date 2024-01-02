@@ -129,7 +129,7 @@ void UPDATExSTATION(STATION *self)
                  */                
                 self->stnTrack1.stnOccupied = true;
                 self->stnTrack1.stnState    = STN_WAIT;
-                self->stnTrack1.tWaitTime   = tTrainWaitTime + GETxRANDOMxNUMBER();
+                self->stnTrack1.tWaitTime   = tTrainWaitTime + (GETxRANDOMxNUMBER() << tRandomShift);
                 
             }
             else{
@@ -148,7 +148,7 @@ void UPDATExSTATION(STATION *self)
                  */
                 self->stnTrack2.stnOccupied = true;
                 self->stnTrack2.stnState    = STN_WAIT;
-                self->stnTrack2.tWaitTime   = tTrainWaitTime + GETxRANDOMxNUMBER();
+                self->stnTrack2.tWaitTime   = tTrainWaitTime + (GETxRANDOMxNUMBER() << tRandomShift);
             }
             else{
                 self->stnTrack2.stnOccupied = false;
@@ -356,7 +356,7 @@ void UPDATExSTATIONxTRAINxWAIT(STATION *self)
             }
             else{
                 self->stnTrack1.tCountTime = millis;
-                self->stnTrack1.tWaitTime = GETxRANDOMxNUMBER();
+                self->stnTrack1.tWaitTime = (GETxRANDOMxNUMBER() << tRandomShift);
                 self->stnTrack1.stnState = STN_WAIT;
             }
             CREATExTASKxSTATUSxMESSAGE(self->name, 
@@ -375,7 +375,7 @@ void UPDATExSTATIONxTRAINxWAIT(STATION *self)
             }
             else{
                 self->stnTrack2.tCountTime = millis;
-                self->stnTrack2.tWaitTime = GETxRANDOMxNUMBER();
+                self->stnTrack2.tWaitTime = (GETxRANDOMxNUMBER() << tRandomShift);
                 self->stnTrack2.stnState = STN_WAIT;
             }
         }

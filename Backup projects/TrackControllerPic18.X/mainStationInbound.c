@@ -76,7 +76,7 @@ int8_t MAINxSTATIONxINBOUND(STATION *self){
                     }
                     else{
                         /* Set the minimum wait time + a random time if no freight */
-                        activeTrack->tWaitTime   = (tTrainWaitTime + GETxRANDOMxNUMBER());
+                        activeTrack->tWaitTime   = (tTrainWaitTime + (GETxRANDOMxNUMBER() << tRandomShift));
                     }
                 } 
                 else{
@@ -85,7 +85,7 @@ int8_t MAINxSTATIONxINBOUND(STATION *self){
                     }
                     else{
                         /* Set the minimum wait time + a random time if no freight */
-                        activeTrack->tWaitTime   = (tTrainWaitTime + GETxRANDOMxNUMBER());
+                        activeTrack->tWaitTime   = (tTrainWaitTime + (GETxRANDOMxNUMBER() << tRandomShift));
                     }
                 }
                 self->getFreightEnterStation->value = false;

@@ -73,7 +73,7 @@ int8_t MOUNTAINxSTATIONxINBOUND(MNTSTATION *self){
             activeTrack->stnSequence = SEQ_IDLE;
             activeTrack->stnState    = STN_WAIT; // Set to wait state for next outbound event
             activeTrack->tCountTime  = GETxMILLIS();
-            activeTrack->tWaitTime   = (tTrainWaitTime + GETxRANDOMxNUMBER());
+            activeTrack->tWaitTime   = (tTrainWaitTime + (GETxRANDOMxNUMBER() << tRandomShift));
             activeTrack->getTrainEnterStnTrack->value = false;
             self->getTrainEnterSiebwaldeStn->value = false;
             self->LastInboundStn = activeTrack->trackNr;

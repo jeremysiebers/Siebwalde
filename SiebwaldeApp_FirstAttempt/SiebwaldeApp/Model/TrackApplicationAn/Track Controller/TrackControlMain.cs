@@ -79,7 +79,7 @@ namespace SiebwaldeApp
         internal void Start(bool TrackRealMode)
         {
             AppUpdateTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
-            AppUpdateTimer.Interval = 100;
+            AppUpdateTimer.Interval = 1000;
             AppUpdateTimer.AutoReset = true;
             // Enable the timer
             AppUpdateTimer.Enabled = true;

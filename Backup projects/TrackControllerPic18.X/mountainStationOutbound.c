@@ -60,8 +60,7 @@ int8_t MOUNTAINxSTATIONxOUTBOUND(MNTSTATION *self){
          */
         case SEQ_CHK_TRAIN:
             if(true == self->getTrainEnterSiebwaldeStn->value ){
-                SETxOCC(self->setOccAmpOut, true);
-                activeTrack->stnOccupied = false;
+                SETxOCC(self->setOccAmpOut, true);                
                 /* Reset the hall sensors */
                 activeTrack->getTrainEnterStnTrack->value = false;
                 self->getTrainEnterSiebwaldeStn->value = false;
@@ -81,6 +80,8 @@ int8_t MOUNTAINxSTATIONxOUTBOUND(MNTSTATION *self){
         case SEQ_OUTBOUND_BRAKE_TIME:
             activeTrack->stnState    = STN_IDLE;
             activeTrack->stnSequence = SEQ_IDLE;
+            /* remove occupied here so a "done" is reported back iso NOP! */
+            activeTrack->stnOccupied = false;
             activeTrack = 0;
             return(done);
             break;

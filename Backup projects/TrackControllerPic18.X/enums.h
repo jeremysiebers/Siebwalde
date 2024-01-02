@@ -16,12 +16,12 @@ extern "C" {
     
     /* factor to be set according to set timer interrupt value to calc seconds */
     const uint32_t tFactorSec = 1000; // timer set to 1ms, 10 * 1000 = 1 second
-    /* 5 seconds wait time after point switch set the signal */
-    const uint32_t tSignalSwitchWaitTime = (uint32_t)(5 * tFactorSec);
+    /* To shift the max result of 32 sec to 131 seconds if val = 2 */
+    const uint8_t  tRandomShift = 2;
     /* Time to wait for servo to move to new position */
     const uint32_t tSwitchPointWaitTime = (uint32_t)(7 * tFactorSec);
-    /* Time that Train waits before leaving */
-    const uint32_t tTrainWaitTime = (uint32_t)(90 * tFactorSec);
+    /* Minimum Time that Train waits before leaving */
+    const uint32_t tTrainWaitTime = (uint32_t)(60 * tFactorSec);
     /* Time that Freight Train waits before leaving */
     const uint32_t tFreightTrainWaitTime = (uint32_t)(5 * tFactorSec);
     /* Boot wait time to get all IO read and debounced first */
@@ -130,7 +130,10 @@ extern "C" {
 
         STN_TO_SIEBWALDE,
         SIEBWALDE_TO_STN,
+        SIEBWALDE_SWITCHT4T5_OUT,
+        SIEBWALDE_SWITCHT4T5_IN,
         SIEBWALDE_SWITCHT4T5,
+        SIEWALDE_SET_NEXT,
         
         STN_INBOUND,
         STN_OUTBOUND,

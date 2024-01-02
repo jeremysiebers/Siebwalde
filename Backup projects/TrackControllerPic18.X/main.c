@@ -182,7 +182,7 @@ void main(void)
                     DataMessage.header = (uint8_t)HEADER;
                     DataMessage.command = (uint8_t)DATA;                    
                     tmp = 0;
-                    tmp = (uint8_t)(tmp << 1) | HALL_BLK_13.value       //MSB
+                    tmp = (uint8_t)(tmp << 1) | HALL_BLK_13.value;       //MSB
                     tmp = (uint8_t)(tmp << 1) | HALL_BLK_21A.value;
                     tmp = (uint8_t)(tmp << 1) | HALL_BLK_T4.value;
                     tmp = (uint8_t)(tmp << 1) | HALL_BLK_T5.value;
@@ -193,7 +193,7 @@ void main(void)
                     DataMessage.data[0] = tmp;
                     
                     tmp = 0;
-                        tmp = (uint8_t)(tmp << 1) | HALL_BLK_T7.value;   //MSB
+                    tmp = (uint8_t)(tmp << 1) | HALL_BLK_T7.value;      //MSB
                     tmp = (uint8_t)(tmp << 1) | HALL_BLK_T8.value;
                     tmp = (uint8_t)(tmp << 1) | OCC_FR_BLK13.value;
                     tmp = (uint8_t)(tmp << 1) | OCC_FR_BLK4.value;

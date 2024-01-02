@@ -1,6 +1,8 @@
 /* 
  * https://www.microchip.com/en-us/software-library/tcpipstack 
  * (ip.dst==192.168.1.176 and udp.port==60000 and ip.src==192.168.1.158) or (ip.dst==192.168.1.158 and udp.port==60000 and ip.src==192.168.1.176)
+ * 
+ * (ip.dst==192.168.1.89 and udp.port==60000 and ip.src==192.168.1.177) or (ip.dst==192.168.1.177 and udp.port==60000 and ip.src==192.168.1.89)
  */
 #include <xc.h>
 #include <stdbool.h>
@@ -134,22 +136,25 @@ void PROCESSxETHxDATA(void)
             break;
             
         case ETHERNET_DATA_TX:
-            if (CheckDataInSendMailBox()){
-                ret = UDP_Start(udpPacketHeader.destinationAddress, udpPacketHeader.sourcePortNumber, UDP_RXTX_PORT);
-                if(ret == SUCCESS){
+            /*
+             * Keep checking the return value of the start message             
+             */
+            ret = UDP_Start(udpPacketHeader.destinationAddress, udpPacketHeader.sourcePortNumber, UDP_RXTX_PORT);
+            if(ret == SUCCESS){
+                if (CheckDataInSendMailBox()){
                     udpTrans_t *udpSend;
                     udpSend = GetDataFromSendMailBox();
                     UDP_WriteBlock((char *)udpSend,udpTrans_t_length);
                     UDP_Send();
                 }
-                else{
-                    //printf("ret: %02X\n\r", ret);
-                    if(ret == BUFFER_BUSY){
-                        //printf("Flush and reset.");
-                        UDP_FlushTXPackets();
-                        //UDP_FlushRxdPacket(); 
-                    }                
-                }
+            }
+            else{
+                //printf("ret: %02X\n\r", ret);
+                if(ret == BUFFER_BUSY){
+                    //printf("Flush and reset.");
+                    UDP_FlushTXPackets();
+                    //UDP_FlushRxdPacket(); 
+                }                
             }
             ethernetState = ETHERNET_DATA_TX;
             break;
