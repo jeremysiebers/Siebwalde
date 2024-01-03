@@ -183,9 +183,9 @@ void UPDATExMOUNTAINxSTATION(MNTSTATION *self)
                 self->tCountTime   = GETxMILLIS();
                 self->tWaitTime    = tTrainWaitTime + (GETxRANDOMxNUMBER() << tRandomShift);
                 CREATExTASKxSTATUSxMESSAGE(self->name,
-                    NONE, 
                     self->AppNextState, 
-                    NONE);
+                    TIME, 
+                    ((uint8_t)(self->tWaitTime/1000)));
                 
                 
                 /* Set the inbound to the other Station to inbound when the
@@ -230,8 +230,8 @@ void UPDATExMOUNTAINxSTATION(MNTSTATION *self)
                 self->AppState  = SIEBWALDE_SWITCHT4T5;  
                 self->LastState = STN_INBOUND;                
                 CREATExTASKxSTATUSxMESSAGE(self->name,
-                    NONE, 
                     self->AppState, 
+                    NONE, 
                     NONE);                
             }
             break;
@@ -257,7 +257,7 @@ void UPDATExMOUNTAINxSTATION(MNTSTATION *self)
                 CREATExTASKxSTATUSxMESSAGE(self->name,
                 NONE,
                 INVERT, 
-                invert);
+                NONE);
 
                 invert = !invert;
                 
@@ -302,36 +302,6 @@ void UPDATExMOUNTAINxSTATION(MNTSTATION *self)
             NONE,
             self->AppState, 
             NONE);
-            
-//            /* Only switch one time! */
-//            if(self->name == WALDSEE){
-//                if(waldsee.AppState == SIEBWALDE_SWITCHT4T5 &&
-//                        waldberg.AppState == SIEBWALDE_SWITCHT4T5){
-//                    SETxOCC(setT4ToAmpT6, invert);
-//                    SETxOCC(setT5ToAmpT3, invert);
-//                    
-//                    CREATExTASKxSTATUSxMESSAGE(self->name,
-//                    NONE,
-//                    INVERT, 
-//                    invert);
-//                    
-//                    invert = !invert;
-//                    
-//                    if(STN_INBOUND == self->LastState){
-//                        waldsee.AppState     = STN_TO_SIEBWALDE;
-//                        waldberg.AppState    = STN_TO_SIEBWALDE;
-//                    }
-//                    else{
-//                        waldsee.AppState     = SIEBWALDE_TO_STN;
-//                        waldberg.AppState    = SIEBWALDE_TO_STN;
-//                    }
-//                    
-//                    CREATExTASKxSTATUSxMESSAGE(self->name,
-//                    NONE,
-//                    self->AppState, 
-//                    NONE);
-//                }                
-//            }
             break;
         
         case WAIT:
@@ -372,8 +342,8 @@ void UPDATExMOUNTAINxTRAINxWAIT(MNTSTATION *self)
                 self->stnTrack1.stnState = STN_WAIT;
                 CREATExTASKxSTATUSxMESSAGE(self->name,
                     self->stnTrack1.stnName, 
-                    self->stnTrack1.stnState, 
-                    NONE);
+                    TIME, 
+                    ((uint8_t)(self->stnTrack1.tWaitTime/1000)));
             }
         }
     }
@@ -393,8 +363,8 @@ void UPDATExMOUNTAINxTRAINxWAIT(MNTSTATION *self)
                 self->stnTrack2.stnState = STN_WAIT;
                 CREATExTASKxSTATUSxMESSAGE(self->name,
                     self->stnTrack2.stnName, 
-                    self->stnTrack2.stnState, 
-                    NONE);
+                    TIME, 
+                    ((uint8_t)(self->stnTrack2.tWaitTime/1000)));
             }
         }
     }

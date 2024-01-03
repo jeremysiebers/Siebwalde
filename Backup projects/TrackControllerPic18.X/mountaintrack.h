@@ -56,6 +56,8 @@ typedef struct
             
 }MNTSTATION;
 
+const uint8_t sizeOfMntStationStruct = sizeof(MNTSTATION);
+
 MNTSTATION waldsee;
 //MNTSTATION siebwalde;
 MNTSTATION waldberg;

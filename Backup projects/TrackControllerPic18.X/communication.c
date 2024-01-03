@@ -213,14 +213,16 @@ void CREATExTASKxSTATUSxMESSAGE(uint8_t task_id, uint8_t task_command, uint8_t t
   Remarks:
     See prototype in communication.h.
  */
-void CREATExDATAxMESSAGE(uint8_t task_id, uint8_t *data){
+void CREATExDATAxMESSAGE(uint8_t task_id, uint8_t task_command, uint8_t task_state, uint8_t *data){
     
     udpTrans_t StatusMessage;
     
     StatusMessage.header  = (uint8_t)HEADER;
     StatusMessage.command = (uint8_t)task_id;
+    StatusMessage.data[0] = (uint8_t)task_command;
+    StatusMessage.data[1] = (uint8_t)task_state;
     
-    for(uint8_t i=0; i < sizeof(StatusMessage.data); i++){
+    for(uint8_t i=2; i < sizeof(StatusMessage.data); i++){
         StatusMessage.data[i] = data[i];
     }
     

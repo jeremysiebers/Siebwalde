@@ -53,7 +53,7 @@ void SETxSIGNAL(STATION *self, TASK_MESSAGES path, TASK_STATE signal)
     }
     
     CREATExTASKxSTATUSxMESSAGE(self->name,
-            NONE, 
+            SET_SIGNAL, 
             signal, 
             path);
     

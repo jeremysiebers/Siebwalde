@@ -137,7 +137,15 @@ namespace SiebwaldeApp
             {
                 
                 IoC.Logger.Log("MTCTRL: Pinging Track controller target...", LoggerInstance);
-                PingReturn = m_PingTarget.TargetFound(Enums.TRACKTARGET);
+                for(int i = 0; i < 10; i++)
+                {
+                    PingReturn = m_PingTarget.TargetFound(Enums.TRACKTARGET);
+                    if (PingReturn == "targetfound")
+                    {
+                        break;
+                    }
+                    IoC.Logger.Log("MTCTRL: Pinging TrackController, try nr: " + Convert.ToString(i) , LoggerInstance);
+                }
                 if (PingReturn == "targetfound")
                 {
                     IoC.Logger.Log("MTCTRL: Ping successfull.", LoggerInstance);

@@ -23,6 +23,8 @@ void main(void)
 {
     // Initialize the device
     // <editor-fold defaultstate="collapsed">
+    uint8_t test = 0;
+    test = sizeOfMntStationStruct;
     SYSTEM_Initialize();
     
     // If using interrupts in PIC18 High/Low Priority Mode you need to enable the Global High and Low Interrupts
@@ -132,6 +134,11 @@ void main(void)
                     if(tBootWaitTimeCnt > tReadIoSignalWaitTime){
                         VOLTDETECT.value = true;
                         tBootWaitTimeCnt = 0;
+                        CREATExTASKxSTATUSxMESSAGE(
+                            MAIN_LOOP,
+                            VOLTAGE_DETECTED, 
+                            RUN, 
+                            NONE);
                     }
                 }
                 else{
@@ -178,9 +185,10 @@ void main(void)
                     UPDATExMOUNTAINxSTATION(&waldberg);
                     TP2_SetLow();
                     
+                    // <editor-fold defaultstate="collapsed">
                     TP3_SetHigh();
                     DataMessage.header = (uint8_t)HEADER;
-                    DataMessage.command = (uint8_t)DATA;                    
+                    DataMessage.command = (uint8_t)IODATA;                    
                     tmp = 0;
                     tmp = (uint8_t)(tmp << 1) | HALL_BLK_13.value;       //MSB
                     tmp = (uint8_t)(tmp << 1) | HALL_BLK_21A.value;
@@ -225,8 +233,9 @@ void main(void)
                     tmp = (uint8_t)(tmp << 1) | 1;                      // LSB
                                         
                     DataMessage.data[3] = tmp;
-                    PUTxDATAxINxSENDxMAILxBOX(&DataMessage);                    
+                    //PUTxDATAxINxSENDxMAILxBOX(&DataMessage);                    
                     TP3_SetLow();
+                    // </editor-fold>
                     
                     tSendAliveMessWaitTimeCnt++;
                     if(tSendAliveMessWaitTimeCnt >= 999){

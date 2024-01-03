@@ -88,6 +88,12 @@ int8_t MAINxSTATIONxINBOUND(STATION *self){
                         activeTrack->tWaitTime   = (tTrainWaitTime + (GETxRANDOMxNUMBER() << tRandomShift));
                     }
                 }
+                
+                CREATExTASKxSTATUSxMESSAGE(self->name, 
+                                       activeTrack->stnName,
+                                       TIME, 
+                                       ((uint8_t)(activeTrack->tWaitTime/1000)));
+                
                 self->getFreightEnterStation->value = false;
                 activeTrack = 0;
                 return(done);

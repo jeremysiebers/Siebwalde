@@ -81,6 +81,11 @@ int8_t MOUNTAINxSTATIONxINBOUND(MNTSTATION *self){
                                        activeTrack->stnName, 
                                        activeTrack->stnState, 
                                        activeTrack->stnSequence);
+            CREATExTASKxSTATUSxMESSAGE(self->name, 
+                                       activeTrack->stnName,
+                                       TIME, 
+                                       ((uint8_t)(activeTrack->tWaitTime/1000)));
+                                       
             activeTrack = 0;
             return(done);
             break;
@@ -89,6 +94,10 @@ int8_t MOUNTAINxSTATIONxINBOUND(MNTSTATION *self){
         case SEQ_WAIT:
             if((GETxMILLIS() - activeTrack->tCountTime) > activeTrack->tWaitTime){
                 activeTrack->stnSequence = activeTrack->stnNextState;
+                CREATExTASKxSTATUSxMESSAGE(self->name, 
+                                       activeTrack->stnName, 
+                                       activeTrack->stnState, 
+                                       activeTrack->stnSequence);
             }
             break;
             

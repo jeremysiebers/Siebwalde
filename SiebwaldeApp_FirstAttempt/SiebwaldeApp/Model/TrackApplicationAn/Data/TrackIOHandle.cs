@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text;
 using static SiebwaldeApp.Enums;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
 
 namespace SiebwaldeApp
 {
@@ -177,10 +178,10 @@ namespace SiebwaldeApp
                 mTrackApplicationVariables.OccFromBlock21B = Convert.ToBoolean((Data & 0x01));
 
             }
-            if (Header == HEADER && Sender == CONTROLLERALIVE)
+            else if (Header == HEADER && Sender == CONTROLLERALIVE)
             {
                 UInt32 MbCommError = reader.ReadUInt32();
-                IoC.Logger.Log("received count = " + MbCommError.ToString(), mLoggerInstance);
+                //IoC.Logger.Log("received count = " + MbCommError.ToString(), mLoggerInstance);
             }
             else if (Header == HEADER)
             {                
@@ -189,20 +190,21 @@ namespace SiebwaldeApp
                 mReceivedMessage.Taskstate = reader.ReadByte();
                 mReceivedMessage.Taskmessage = reader.ReadByte();
 
-                //mTrackApplicationVariables.trackControllerCommands.ReceivedMessage = mReceivedMessage;
+                IoC.Logger.Log("TaskId      = " + TranslateNumber(mReceivedMessage.TaskId), mLoggerInstance);
+                IoC.Logger.Log("Taskcommand = " + TranslateNumber(mReceivedMessage.Taskcommand), mLoggerInstance);
+                IoC.Logger.Log("Taskstate   = " + TranslateNumber(mReceivedMessage.Taskstate), mLoggerInstance);
 
-                //Console.WriteLine("Received message: TaskId = " +
-                //mReceivedMessage.TaskId.ToString() + ", Taskcommand = " +
-                //mReceivedMessage.Taskcommand.ToString() + ", Taskstate = " +
-                //mReceivedMessage.Taskstate.ToString() + ", Taskmessage = " +
-                //mReceivedMessage.Taskmessage.ToString() + ".");
+                if(mReceivedMessage.Taskstate != TIME)
+                {
+                    IoC.Logger.Log("Taskmessage = " + TranslateNumber(mReceivedMessage.Taskmessage), mLoggerInstance);
+                }
+                else
+                {
+                    IoC.Logger.Log("WaitTime is set to " + Convert.ToString(mReceivedMessage.Taskmessage) + " sec.", mLoggerInstance);
+                }
+                IoC.Logger.Log("---------------------------------", mLoggerInstance);
             }
 
-            // dispose of object data
-            //reader.Dispose();
-            //stream.Dispose();
-
-            //m_iMTCtrl.MTLinkActivityUpdate();
         }
                 
     }    

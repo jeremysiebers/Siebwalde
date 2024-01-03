@@ -103,7 +103,7 @@ void SETxSTATIONxPATHWAY(STATION *self, TASK_MESSAGES path, TASK_STATE dir)
     }
     
     CREATExTASKxSTATUSxMESSAGE(self->name,
-            NONE, 
+            SET_PATH_WAY, 
             dir, 
             path);
     
@@ -130,8 +130,8 @@ void SETxMNTSTATIONxPATHWAY(MNTSTATION *self, TASK_MESSAGES path)
     }
 
     CREATExTASKxSTATUSxMESSAGE(self->name,
-            NONE, 
-            NONE, 
+            SET_PATH_WAY, 
+            self->name, 
             path);
     
     #pragma optimize( "", on )

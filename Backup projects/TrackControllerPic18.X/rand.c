@@ -5,7 +5,6 @@
 static int16_t RandomNumber = 0;
 
 void INITxRANDxNUMBER(){
-    srand(0x100);
     RandomNumber = rand();
     RandomNumber = rand();
     RandomNumber = rand();

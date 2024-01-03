@@ -214,11 +214,19 @@ void UPDATExSTATION(STATION *self)
              * INBOUND:
              * When inbound and a station is empty, 
              * while no INBOUND or PASSING is in progress,
-             * take the train to the empty station track
+             * take the train to the empty station track (check all to allow
+             * execution once!
              */
-            if(true == self->getOccBlkIn->value){
+            if(true == self->getOccBlkIn->value &&
+                    STN_INBOUND != self->stnTrack1.stnState &&
+                    STN_INBOUND != self->stnTrack2.stnState &&
+                    STN_INBOUND != self->stnTrack3.stnState &&
+                    STN_PASSING != self->stnTrack1.stnState &&
+                    STN_PASSING != self->stnTrack2.stnState &&
+                    STN_PASSING != self->stnTrack3.stnState){
                 /* Check Track 1 and other states */
                 if(false == self->getFreightEnterStation->value){
+                    /* When not a freighter */
                     if(false == self->stnTrack1.stnOccupied &&
                             STN_INBOUND != self->stnTrack2.stnState &&
                             STN_INBOUND != self->stnTrack3.stnState &&
@@ -299,9 +307,9 @@ void UPDATExSTATION(STATION *self)
     //                    }
                     }
                     /* 
-                     * Only store freight in stnTrack 1 or 2 when stnTrack3
+                     * Only store freight in stnTrack 2 when stnTrack3
                      * is full and getOccBlkOut is true, set freight wait time
-                     * on stnTrack 1 or 2!
+                     * on stnTrack 2!
                      */
 //                    else if(false == self->stnTrack1.stnOccupied &&
 //                            STN_INBOUND != self->stnTrack2.stnState &&
@@ -311,15 +319,15 @@ void UPDATExSTATION(STATION *self)
 //                            ){
 //                        self->stnTrack1.stnState = STN_INBOUND;
 //                    }
-//                    /* Check Track 2 and other states */
-//                    else if(false == self->stnTrack2.stnOccupied &&
-//                            STN_INBOUND != self->stnTrack1.stnState &&
-//                            STN_INBOUND != self->stnTrack3.stnState &&
-//                            STN_PASSING != self->stnTrack1.stnState &&
-//                            STN_PASSING != self->stnTrack3.stnState
-//                            ){
-//                        self->stnTrack2.stnState = STN_INBOUND;
-//                    }
+                    /* Check Track 2 and other states */
+                    else if(false == self->stnTrack2.stnOccupied &&
+                            STN_INBOUND != self->stnTrack1.stnState &&
+                            STN_INBOUND != self->stnTrack3.stnState &&
+                            STN_PASSING != self->stnTrack1.stnState &&
+                            STN_PASSING != self->stnTrack3.stnState
+                            ){
+                        self->stnTrack2.stnState = STN_INBOUND;
+                    }
                 }                
             }            
             /* Handle the stnTrack x which is in Inbound mode */
@@ -378,11 +386,11 @@ void UPDATExSTATIONxTRAINxWAIT(STATION *self)
                 self->stnTrack2.tWaitTime = (GETxRANDOMxNUMBER() << tRandomShift);
                 self->stnTrack2.stnState = STN_WAIT;
             }
-        }
-        CREATExTASKxSTATUSxMESSAGE(self->name, 
+            CREATExTASKxSTATUSxMESSAGE(self->name, 
                                            self->stnTrack2.stnName, 
                                            self->stnTrack2.stnState, 
                                            NONE);
+        }
     }
     if(STN_WAIT == self->stnTrack3.stnState){
         if((millis - self->stnTrack3.tCountTime) > self->stnTrack3.tWaitTime){
@@ -397,10 +405,10 @@ void UPDATExSTATIONxTRAINxWAIT(STATION *self)
                 self->stnTrack3.tWaitTime = tFreightTrainWaitTime;//GETxRANDOMxNUMBER();
                 self->stnTrack3.stnState = STN_WAIT;
             }
-        }
-        CREATExTASKxSTATUSxMESSAGE(self->name, 
+            CREATExTASKxSTATUSxMESSAGE(self->name, 
                                            self->stnTrack3.stnName, 
                                            self->stnTrack3.stnState, 
                                            NONE);
+        }        
     }
 }

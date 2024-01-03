@@ -67,6 +67,8 @@ extern "C" {
     extern bool         isUdpConnected;
     extern void         CREATExDATAxMESSAGE(
                             uint8_t task_id, 
+                            uint8_t task_command, 
+                            uint8_t task_state, 
                             uint8_t *data);
 
     

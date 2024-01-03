@@ -42,7 +42,6 @@
           <itemPath>mcc_generated_files/TCPIPLibrary/udpv4_port_handler_table.h</itemPath>
           <itemPath>mcc_generated_files/TCPIPLibrary/log_syslog.h</itemPath>
           <itemPath>mcc_generated_files/TCPIPLibrary/lfsr.h</itemPath>
-          <itemPath>mcc_generated_files/TCPIPLibrary/dhcp_client.h</itemPath>
         </logicalFolder>
         <itemPath>mcc_generated_files/pin_manager.h</itemPath>
         <itemPath>mcc_generated_files/device_config.h</itemPath>
@@ -101,7 +100,6 @@
           <itemPath>mcc_generated_files/TCPIPLibrary/log_syslog.c</itemPath>
           <itemPath>mcc_generated_files/TCPIPLibrary/log.c</itemPath>
           <itemPath>mcc_generated_files/TCPIPLibrary/rtcc.c</itemPath>
-          <itemPath>mcc_generated_files/TCPIPLibrary/dhcp_client.c</itemPath>
         </logicalFolder>
         <itemPath>mcc_generated_files/mcc.c</itemPath>
         <itemPath>mcc_generated_files/pin_manager.c</itemPath>
