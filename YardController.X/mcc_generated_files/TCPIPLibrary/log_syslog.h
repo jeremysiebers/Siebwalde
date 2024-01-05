@@ -1,3 +1,20 @@
+/**
+  Descriptive File Name
+	
+  Company:
+    Microchip Technology Inc.
+
+  File Name:
+    log_syslog.h
+
+  Summary:
+    This is the header file for the log_syslog.c
+
+  Description:
+    This header file provides the API for sending log messages using Ethernet (Syslog RFC 5424).
+
+ */
+
 /* Microchip Technology Inc. and its subsidiaries.  You may use this software 
  * and any derivatives exclusively with Microchip products. 
  * 
@@ -19,63 +36,32 @@
  * TERMS. 
  */
 
-/* 
- * File:   
- * Author: 
- * Comments:
- * Revision history: 
- */
-
 // This is a guard condition so that contents of this file are not included
 // more than once.  
-#ifndef FIREDEP_H
-#define	FIREDEP_H
-
-#include <xc.h> // include processor files - each processor file is guarded.  
-
-void INITxFIREDEP(void);
-void UPDATExFIREDEPxDRIVE(VEHICLE *self);
-void UPDATExFIREDEPxDRIVExWAIT(VEHICLE *self);
-// TODO Insert appropriate #include <>
-
-// TODO Insert C++ class definitions if appropriate
-
-// TODO Insert declarations
-
-// Comment a function and leverage automatic documentation with slash star star
-/**
-    <p><b>Function prototype:</b></p>
+#ifndef LOG_ETHERNET_H
+#define	LOG_ETHERNET_H
   
-    <p><b>Summary:</b></p>
+#include <stdint.h>
+#include "tcpip_types.h"
 
-    <p><b>Description:</b></p>
+#define SOURCEPORT_SYSLOG   514
+#define DESTPORT_SYSLOG     514
 
-    <p><b>Precondition:</b></p>
 
-    <p><b>Parameters:</b></p>
-
-    <p><b>Returns:</b></p>
-
-    <p><b>Example:</b></p>
-    <code>
- 
-    </code>
-
-    <p><b>Remarks:</b></p>
+/*Send a syslog message.
+ * The function will send a Syslog message.
+ * 
+ * @param message
+ *      Message
+ * 
+ * @param priorityVal
+ *      Message priority
+ * 
+ * @param return
+ *      Status of sending the message
+ * 
  */
-// TODO Insert declarations or function prototypes (right here) to leverage 
-// live documentation
+error_msg logSyslog(const char *message, uint8_t priorityVal);
 
-#ifdef	__cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
-    // TODO If C++ is being used, regular C code needs function names to have C 
-    // linkage so the functions can be used by the c code. 
-
-#ifdef	__cplusplus
-}
-#endif /* __cplusplus */
-
-#endif	/* XC_HEADER_TEMPLATE_H */
+#endif	/* LOG_ETHERNET_H */
 

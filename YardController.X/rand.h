@@ -28,14 +28,11 @@
 
 // This is a guard condition so that contents of this file are not included
 // more than once.  
-#ifndef FIREDEP_H
-#define	FIREDEP_H
+#ifndef XC_HEADER_TEMPLATE_H
+#define	XC_HEADER_TEMPLATE_H
 
 #include <xc.h> // include processor files - each processor file is guarded.  
 
-void INITxFIREDEP(void);
-void UPDATExFIREDEPxDRIVE(VEHICLE *self);
-void UPDATExFIREDEPxDRIVExWAIT(VEHICLE *self);
 // TODO Insert appropriate #include <>
 
 // TODO Insert C++ class definitions if appropriate
@@ -70,8 +67,8 @@ void UPDATExFIREDEPxDRIVExWAIT(VEHICLE *self);
 extern "C" {
 #endif /* __cplusplus */
 
-    // TODO If C++ is being used, regular C code needs function names to have C 
-    // linkage so the functions can be used by the c code. 
+    extern void INITxRANDxNUMBER(void);
+    extern uint16_t GETxRANDOMxNUMBER(void);
 
 #ifdef	__cplusplus
 }

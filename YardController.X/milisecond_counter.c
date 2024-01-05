@@ -8,8 +8,7 @@
 #include "mcc_generated_files/mcc.h"
 #include "milisecond_counter.h"
 
-#warning USING TIMER0 FOR TIMEBASE
-
+#warning USING TIMER1 FOR TIMEBASE
 /*
  * Local functions
  */

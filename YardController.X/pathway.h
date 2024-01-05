@@ -28,43 +28,27 @@
 
 // This is a guard condition so that contents of this file are not included
 // more than once.  
-#ifndef FIREDEP_H
-#define	FIREDEP_H
+#ifndef PATHWAY_H
+#define	PATHWAY_H
 
-#include <xc.h> // include processor files - each processor file is guarded.  
+#include <xc.h> // include processor files - each processor file is guarded. 
+#include "main.h"
+#include "enums.h"
 
-void INITxFIREDEP(void);
-void UPDATExFIREDEPxDRIVE(VEHICLE *self);
-void UPDATExFIREDEPxDRIVExWAIT(VEHICLE *self);
-// TODO Insert appropriate #include <>
+VEHICLESTOP BUS        = {&LATD, 0x01, &LATD, 0x02, &LATD, 0x04, &LATD, 0x08};// All servos for industrial and station
+VEHICLESTOP FIRE_DEP   = {&LATD, 0x10, &LATD, 0x20, &LATD, 0x40, &LATD, 0x80};// All servos for fire department
 
-// TODO Insert C++ class definitions if appropriate
+//    SERVO SWITCH_BUSSTOP_INDUSTRIAL     = {&LATD, 0x01};
+//    SERVO STOP_DRIVE_BUSSTOP_INDUSTRIAL = {&LATD, 0x02};
+//    SERVO SWITCH_BUSSTOP_STATION        = {&LATD, 0x04};
+//    SERVO STOP_DRIVE_BUSSTOP_STATION    = {&LATD, 0x08};
+//    
+//    SERVO SWITCH_FIREDEP_RIGHT          = {&LATD, 0x10};
+//    SERVO SWITCH_FIREDEP_MID            = {&LATD, 0x20};
+//    SERVO STOP_DRIVE_FIREDEP_RIGHT      = {&LATD, 0x40};
+//    SERVO STOP_DRIVE_FIREDEP_MID        = {&LATD, 0x80};
 
-// TODO Insert declarations
-
-// Comment a function and leverage automatic documentation with slash star star
-/**
-    <p><b>Function prototype:</b></p>
-  
-    <p><b>Summary:</b></p>
-
-    <p><b>Description:</b></p>
-
-    <p><b>Precondition:</b></p>
-
-    <p><b>Parameters:</b></p>
-
-    <p><b>Returns:</b></p>
-
-    <p><b>Example:</b></p>
-    <code>
- 
-    </code>
-
-    <p><b>Remarks:</b></p>
- */
-// TODO Insert declarations or function prototypes (right here) to leverage 
-// live documentation
+void SETxVEHICLExACTION(VEHICLE *self, TASK_MESSAGES action, TASK_STATE path);
 
 #ifdef	__cplusplus
 extern "C" {

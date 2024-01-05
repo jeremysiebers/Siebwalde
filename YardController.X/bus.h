@@ -33,7 +33,9 @@
 
 #include <xc.h> // include processor files - each processor file is guarded.  
 
-void BUSxDRIVE(void);
+void INITxBUSxDIRIVE(void);
+void UPDATExBUSxDRIVE(VEHICLE *self);
+void UPDATExBUSxDRIVExWAIT(VEHICLE *self);
 
 // TODO Insert declarations or function prototypes (right here) to leverage 
 // live documentation

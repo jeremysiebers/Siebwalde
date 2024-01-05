@@ -23,8 +23,6 @@ void main(void)
 {
     // Initialize the device
     // <editor-fold defaultstate="collapsed">
-    uint8_t test = 0;
-    test = sizeOfMntStationStruct;
     SYSTEM_Initialize();
     
     // If using interrupts in PIC18 High/Low Priority Mode you need to enable the Global High and Low Interrupts

@@ -6,78 +6,169 @@
  */
 #include <xc.h>
 #include "mcc_generated_files/mcc.h"
+#include "enums.h"
+#include "pathway.h"
+#include "rand.h"
+#include "milisecond_counter.h"
+#include "communication.h"
 
-uint8_t State_bus = 0;
-uint16_t timer_bus = 0;
+void INITxBUSxDIRIVE(void){
+    bus.name                    = FALLER_BUS;
+    bus.AppState                = INIT;
+    bus.setParkAction           = &BUS;
+    bus.getVehicleAtStop1       = &HALL_BUSSTOP_IND;
+    bus.stop1occupied           = false;
+    bus.parkState1              = NONE;
+    bus.getVehicleAtStop2       = &HALL_BUSSTOP_STN;
+    bus.stop2occupied           = false;
+    bus.parkState2              = NONE;    
+}
 
-void BUSxDRIVE(void) 
+void UPDATExBUSxDRIVE(VEHICLE *self) 
 {
-    switch(State_bus)
+    switch(self->AppState)
     {
-        case 0: 
-            /* Give time to power supply startup and servo PCB to startup */
-            timer_bus++;
-            if(timer_bus > 1000){
-                timer_bus = 0;
-                State_bus++;
+        case INIT:
+            /* Set all servo outputs to 1 */
+            SETxVEHICLExACTION(self, PASS, INDUSTRIAL);
+            SETxVEHICLExACTION(self, PASS, STATION);
+            self->AppNextState  = IDLE;
+            self->AppState      = WAIT;
+            self->tCountTime    = GETxMILLIS();
+            self->tWaitTime     = tSwitchPointWaitTime;
+            
+            /* Log the application state */
+            CREATExTASKxSTATUSxMESSAGE(self->name,
+                    self->AppNextState, 
+                    TIME, 
+                    ((uint8_t)(self->tWaitTime/1000)));                        
+            break;
+
+        case IDLE:
+            /* Check for BUS detection */
+            if(true == self->getVehicleAtStop1->value &&
+                    NONE == self->parkState1){
+                SETxVEHICLExACTION(self, BRAKE, INDUSTRIAL);
+                self->LastState     = IDLE;                
+                self->stop1occupied = true;
+                self->parkState1    = PARK;
+                self->tWaitTime1    = (tParkTime + (GETxRANDOMxNUMBER() << tRandomShift));
+                self->tCountTime1   = GETxMILLIS();
+            }
+            else if(true == self->getVehicleAtStop2->value &&
+                    NONE == self->parkState2){
+                SETxVEHICLExACTION(self, BRAKE, STATION);
+                self->LastState     = IDLE;                
+                self->stop2occupied = true;
+                self->parkState2    = PARK;
+                self->tWaitTime2    = (tParkTime + (GETxRANDOMxNUMBER() << tRandomShift));
+                self->tCountTime2   = GETxMILLIS();
+            }
+            
+            /* 
+             * If a park area is in the Wait state then restore the pathway,
+             * wait a few seconds before switching the switch servo back. 
+             */
+            if((WAIT == self->parkState1 || WAIT == self->parkState2) &&
+                    self->LastState != RESTORE){
+                self->AppNextState  = RESTORE;
+                self->AppState      = WAIT;
+                self->LastState     = RESTORE;
+                self->tCountTime    = GETxMILLIS();
+                self->tWaitTime     = tRestoreTime;
+                
+                /* Log the application state */
+                CREATExTASKxSTATUSxMESSAGE(self->name,
+                        self->AppNextState, 
+                        TIME, 
+                        ((uint8_t)(self->tWaitTime/1000)));
+            }
+            
+            if(DRIVE == self->parkState1){
+                SETxVEHICLExACTION(self, DRIVE, INDUSTRIAL);
+                self->parkState1 = NONE;
+                /* Log the action */
+                CREATExTASKxSTATUSxMESSAGE(self->name,
+                        self->AppState, 
+                        DRIVE, 
+                        INDUSTRIAL);
+            }
+            if(DRIVE == self->parkState2){
+                SETxVEHICLExACTION(self, DRIVE, STATION);
+                self->parkState2 = NONE;
+                /* Log the action */
+                CREATExTASKxSTATUSxMESSAGE(self->name,
+                        self->AppState, 
+                        DRIVE, 
+                        STATION);
             }
             break;
             
-        case 1:
-            SW_BUSSTOP_IND_LAT      = 1;
-            STOP_BUS_AT_IND_LAT     = 1;
-            SW_BUSSTOP_STN_LAT      = 1;
-            STOP_BUS_AT_STN_LAT     = 1;
-            timer_bus++;
-            if(timer_bus > 500){
-                SW_BUSSTOP_IND_LAT      = 0;
-                STOP_BUS_AT_IND_LAT     = 1;
-                SW_BUSSTOP_STN_LAT      = 0;
-                STOP_BUS_AT_STN_LAT     = 1;
-                timer_bus = 0;
-                State_bus++;
+        case RESTORE:
+            /* 
+             * Restore the drive way to normal road pass condition for other 
+             * traffic.
+             */
+            if(self->stop1occupied){
+                SETxVEHICLExACTION(self, PASS, INDUSTRIAL);
+                
+                CREATExTASKxSTATUSxMESSAGE(self->name,
+                        self->AppState, 
+                        PASS, 
+                        INDUSTRIAL);
             }
+            else if(self->stop2occupied){
+                SETxVEHICLExACTION(self, PASS, STATION);
+                
+                CREATExTASKxSTATUSxMESSAGE(self->name,
+                        self->AppState, 
+                        PASS, 
+                        STATION);
+            }
+            /* Log the application state */
+            self->AppState      = IDLE;            
+            CREATExTASKxSTATUSxMESSAGE(self->name,
+                        self->AppState, 
+                        NONE, 
+                        NONE);
             break;
             
-        case 2:
-            if(HALL_BUSSTOP_STN_PORT == 1)
-            {
-                SW_BUSSTOP_STN_LAT      = 1;
-                STOP_BUS_AT_STN_LAT     = 0;
-                State_bus = 3;
-            }
-            
-            if(HALL_BUSSTOP_IND_PORT == 1)
-            {
-                SW_BUSSTOP_IND_LAT      = 1;
-                STOP_BUS_AT_IND_LAT     = 0;
-                State_bus = 3;
-            }
-            break;
-            
-        case 3:
-            timer_bus++;
-            if(timer_bus > 500)
-            {
-                SW_BUSSTOP_STN_LAT      = 0;
-                SW_BUSSTOP_IND_LAT      = 0;
-                timer_bus = 0;
-                State_bus = 4;
-            }
-            break;
-            
-        case 4:
-            timer_bus++;
-            if(timer_bus > 1000)
-            {
-                timer_bus = 0;
-                STOP_BUS_AT_IND_LAT     = 1;
-                STOP_BUS_AT_STN_LAT     = 1;
-                State_bus = 2;
+        case WAIT:
+            if((GETxMILLIS() - self->tCountTime) > self->tWaitTime){
+                self->AppState = self->AppNextState;
             }
             break;
             
         default:
             break;
+    }
+}
+
+/*
+ * During every xMiliseconds an interrupt will call this function to 
+ * check if a vehicle wait time is done 
+ */
+void UPDATExBUSxDRIVExWAIT(VEHICLE *self){
+    /* Get one time the actual time */
+    uint32_t millis = GETxMILLIS();
+    
+    if(PARK == self->parkState1){
+        if((millis - self->tCountTime1) > self->tWaitTime1){
+            self->parkState1 = DRIVE;
+            CREATExTASKxSTATUSxMESSAGE(self->name, 
+                                           self->parkState1, 
+                                           DRIVE, 
+                                           NONE);
+        }
+    }
+    
+    if(PARK == self->parkState2){
+        if((millis - self->tCountTime2) > self->tWaitTime2){
+            self->parkState2 = DRIVE;
+            CREATExTASKxSTATUSxMESSAGE(self->name, 
+                                           self->parkState2, 
+                                           DRIVE, 
+                                           NONE);
+        }
     }
 }
