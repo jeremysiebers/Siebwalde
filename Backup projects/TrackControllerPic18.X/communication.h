@@ -33,7 +33,8 @@ extern "C" {
         uint8_t data[8];
     }udpTrans_t;
     
-    const int udpTrans_t_length = sizeof(udpTrans_t);
+    const uint8_t udpTrans_t_length = (sizeof(udpTrans_t) / sizeof(uint8_t));
+    const uint8_t udpTrans_t_data_length = udpTrans_t_length - 2;
     
     typedef enum
     {

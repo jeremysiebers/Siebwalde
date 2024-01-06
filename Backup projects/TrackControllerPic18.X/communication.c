@@ -1,6 +1,6 @@
 /* 
  * https://www.microchip.com/en-us/software-library/tcpipstack 
- * (ip.dst==192.168.1.176 and udp.port==60000 and ip.src==192.168.1.158) or (ip.dst==192.168.1.158 and udp.port==60000 and ip.src==192.168.1.176)
+ * (ip.dst==192.168.1.176 and udp.port==60000 and ip.src==192.168.1.177) or (ip.dst==192.168.1.177 and udp.port==60000 and ip.src==192.168.1.176)
  * 
  * (ip.dst==192.168.1.89 and udp.port==60000 and ip.src==192.168.1.177) or (ip.dst==192.168.1.177 and udp.port==60000 and ip.src==192.168.1.89)
  */

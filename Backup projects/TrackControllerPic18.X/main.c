@@ -13,11 +13,14 @@
 static bool         updateTick = false;
 static uint32_t     tBootWaitTimeCnt = 1;
 static bool         booted = false;
+static bool         justSendData = false;
 
 static uint32_t     tSendAliveMessWaitTimeCnt = 0;
 static udpTrans_t   StatusMessage;
-static udpTrans_t   DataMessage;
+static udpTrans_t   DataMessage, prevDataMessage;
 static uint8_t      tmp = 0;
+
+bool compareDataToSend(const uint8_t *arr1, const uint8_t *arr2, uint8_t size);
 
 void main(void)
 {
@@ -52,9 +55,9 @@ void main(void)
     
     while (1)
     {        
-        TP4_SetHigh();
+        //TP4_SetHigh();
         PROCESSxETHxDATA();
-        TP4_SetLow();
+        //TP4_SetLow();
                 
         /* Check if over ride key is present, if yes then disable controller. */
         // <editor-fold defaultstate="collapsed">
@@ -155,36 +158,43 @@ void main(void)
         else if(VOLTDETECT.value && booted)
         {
             if(true == updateTick){
+                TP4_SetHigh();
                 
+                TP1_SetHigh();
                 DebounceIO(true);
+                TP1_SetLow();
                 
-                if(isUdpConnected){                    
+                if(isUdpConnected){
+                    // <editor-fold defaultstate="collapsed">
                     /*
                     * MainStation methods
                     */
-                    //TP1_SetHigh();
+                    TP2_SetHigh();
                     UPDATExSTATIONxTRAINxWAIT(&top);
                     UPDATExSTATIONxTRAINxWAIT(&bot);
-                    //TP1_SetLow();
-                    TP2_SetHigh();
+                    TP2_SetLow();
+                    
+                    TP1_SetHigh();
                     UPDATExSTATION(&top);
                     UPDATExSTATION(&bot);
-                    TP2_SetLow();
+                    TP1_SetLow();
  
-                    //TP1_SetHigh();
                     /*
                      * Mountain track methods
                      */
+                    TP2_SetHigh();
                     UPDATExMOUNTAINxTRAINxWAIT(&waldsee);
                     UPDATExMOUNTAINxTRAINxWAIT(&waldberg);
-                    //TP1_SetLow();
-                    TP2_SetHigh();
+                    TP2_SetLow();
+                    TP1_SetHigh();
                     UPDATExMOUNTAINxSTATION(&waldsee);
                     UPDATExMOUNTAINxSTATION(&waldberg);
-                    TP2_SetLow();
+                    TP1_SetLow();
+                    // </editor-fold>
                     
+                    /* Gather data to send to PC */
                     // <editor-fold defaultstate="collapsed">
-                    TP3_SetHigh();
+                    TP2_SetHigh();
                     DataMessage.header = (uint8_t)HEADER;
                     DataMessage.command = (uint8_t)IODATA;                    
                     tmp = 0;
@@ -229,12 +239,21 @@ void main(void)
                     tmp = (uint8_t)(tmp << 1) | 1;
                     tmp = (uint8_t)(tmp << 1) | 1;
                     tmp = (uint8_t)(tmp << 1) | 1;                      // LSB
-                                        
                     DataMessage.data[3] = tmp;
-                    //PUTxDATAxINxSENDxMAILxBOX(&DataMessage);                    
+                    TP2_SetLow();
+                    
+                    TP3_SetHigh();
+                    if(compareDataToSend(prevDataMessage.data, DataMessage.data, udpTrans_t_data_length)){
+                        PUTxDATAxINxSENDxMAILxBOX(&DataMessage); 
+                        prevDataMessage = DataMessage;
+                        justSendData = true;
+                    }                                       
                     TP3_SetLow();
                     // </editor-fold>
                     
+                    /* Alive heartbeat and force data send every second */
+                    // <editor-fold defaultstate="collapsed">
+                    TP1_SetHigh();
                     tSendAliveMessWaitTimeCnt++;
                     if(tSendAliveMessWaitTimeCnt >= 999){
                         //TP3_SetHigh();
@@ -249,23 +268,52 @@ void main(void)
                         PUTxDATAxINxSENDxMAILxBOX(&StatusMessage);
                         tSendAliveMessWaitTimeCnt = 0;
                         //TP3_SetLow();
+                        
+                        /* Force data send once per second also if not already 
+                         * send 
+                         */
+                        if(false == justSendData){
+                            PUTxDATAxINxSENDxMAILxBOX(&DataMessage);
+                        }
+                        else{
+                            justSendData = false;
+                        }
                     }
+                    TP1_SetLow();
+                    // </editor-fold>
                     
+                    /* Check if commands are received */
+                    // <editor-fold defaultstate="collapsed">
+                    TP2_SetHigh();
                     if(CHECKxDATAxINxRECEIVExMAILxBOX() == true){
                         /* Do something with the data */
                         udpTrans_t *udpReceived;
                         udpReceived = GETxDATAxFROMxRECEIVExMAILxBOX();
                         if(udpReceived->command == 8){
-                            TP1_Toggle();
+                            //TP1_Toggle();
                         }
                     }
+                    TP2_SetLow();
+                    // </editor-fold>
                 }
                 updateTick = false;
+                TP4_SetLow();
             }            
         }
         // </editor-fold>
     }
 }
+
+// Function to compare two arrays of the same type
+bool compareDataToSend(const uint8_t *arr1, const uint8_t *arr2, uint8_t size) {
+    for (uint8_t i = 0; i < size; ++i) {
+        if (arr1[i] != arr2[i]) {
+            return 1; // Arrays are not equal
+        }
+    }
+    return 0; // Arrays are equal
+}
+
 
 /*
  * Set to true by x millisecond update 
