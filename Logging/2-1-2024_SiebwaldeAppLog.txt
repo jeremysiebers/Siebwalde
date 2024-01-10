@@ -1,4 +1,0 @@
-[2-1-2024 08:20:31:556 > App.xaml.cs > ApplicationSetup() > line 51] Siebwalde application starting up...
-[2-1-2024 08:20:31:599 > SiebwaldeApplicationModel.cs > .ctor() > line 40] Siebwalde Application started.
-[2-1-2024 08:20:31:600 > SiebwaldeApplicationModel.cs > .ctor() > line 41] Main: PC MAC adress is: 18C04D94A26D
-[2-1-2024 08:20:31:600 > SiebwaldeApplicationModel.cs > .ctor() > line 42] Main: PC IP adress is: 192.168.1.176
