@@ -71,31 +71,36 @@
                                         </Grid.ColumnDefinitions>
 
                                         <StackPanel Grid.Column="0" Orientation="Horizontal">
-                                            <Button Command="{Binding SiebwaldeApplicationPage }"
+                                            <Button Command="{Binding ApplicationViewModel.SiebwaldeApplicationPage, 
+                                                    Source={x:Static local:ViewModelLocator.Instance}}"
                                                     Style="{StaticResource IconButtonTop}"
                                                     Content="Siebwalde App" Width="150" 
                                                     FontFamily="{StaticResource FontAwesome}"
                                                     FontSize="{StaticResource FontSizeXXLarge}"/>
 
-                                            <Button Command="{Binding SiebwaldeTrackControlPage}"
+                                            <Button Command="{Binding ApplicationViewModel.SiebwaldeTrackControlPage, 
+                                                    Source={x:Static local:ViewModelLocator.Instance}}"
                                                     Style="{StaticResource IconButtonTop}"
                                                     Content=" Track Control" Width="150" 
                                                     FontFamily="{StaticResource FontAwesome}"
                                                     FontSize="{StaticResource FontSizeXXLarge}"/>
 
-                                            <Button Command="{Binding SiebwaldeFiddleYardControlPage}"
+                                            <Button Command="{Binding ApplicationViewModel.SiebwaldeFiddleYardControlPage, 
+                                                    Source={x:Static local:ViewModelLocator.Instance}}"
                                                     Style="{StaticResource IconButtonTop}"
                                                     Content="Fiddle Yard Control" Width="150" 
                                                     FontFamily="{StaticResource FontAwesome}"
                                                     FontSize="{StaticResource FontSizeXXLarge}"/>
 
-                                            <Button Command="{Binding SiebwaldeYardControlPage}"
+                                            <Button Command="{Binding ApplicationViewModel.SiebwaldeYardControlPage, 
+                                                    Source={x:Static local:ViewModelLocator.Instance}}"
                                                     Style="{StaticResource IconButtonTop}"
                                                     Content="Train Yard Control" Width="150" 
                                                     FontFamily="{StaticResource FontAwesome}"
                                                     FontSize="{StaticResource FontSizeXXLarge}"/>
 
-                                            <Button Command="{Binding SiebwaldeCityControlPage}"
+                                            <Button Command="{Binding ApplicationViewModel.SiebwaldeCityControlPage, 
+                                                    Source={x:Static local:ViewModelLocator.Instance}}"
                                                     Style="{StaticResource IconButtonTop}"
                                                     Content="City Control" Width="150" 
                                                     FontFamily="{StaticResource FontAwesome}"
@@ -162,7 +167,7 @@
             <Frame Grid.Column="0"  
                    x:Name="MenuFrame" 
                    Content="{Binding SideMenuViewModel.CurrentMenu, 
-                                     Source={x:Static core:ViewModelLocator.Instance},  
+                                     Source={x:Static local:ViewModelLocator.Instance},  
                                      Converter={local:MenuPageValueConverter}}"
                    Background="Transparent" 
                    NavigationUIVisibility="Hidden"/>
@@ -170,7 +175,7 @@
             <Frame Grid.Column="1"  
                    x:Name="MainFrame" 
                    Content="{Binding ApplicationViewModel.CurrentPage, 
-                                     Source={x:Static core:ViewModelLocator.Instance},  
+                                     Source={x:Static local:ViewModelLocator.Instance},  
                                      Converter={local:ApplicationPageValueConverter}}"
                    Background="Transparent" 
                    NavigationUIVisibility="Hidden"/>

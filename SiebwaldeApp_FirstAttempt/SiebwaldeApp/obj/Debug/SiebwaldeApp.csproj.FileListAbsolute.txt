@@ -58,5 +58,5 @@ C:\Localdata\Siebwalde\SiebwaldeApp_FirstAttempt\SiebwaldeApp\obj\Debug\Siebwald
 C:\Localdata\Siebwalde\SiebwaldeApp_FirstAttempt\SiebwaldeApp\obj\Debug\SiebwaldeApp.GeneratedMSBuildEditorConfig.editorconfig
 C:\Localdata\Siebwalde\SiebwaldeApp_FirstAttempt\SiebwaldeApp\bin\Debug\SiebwaldeApp.Core.dll
 C:\Localdata\Siebwalde\SiebwaldeApp_FirstAttempt\SiebwaldeApp\bin\Debug\SiebwaldeApp.Core.pdb
-C:\Localdata\Siebwalde\SiebwaldeApp_FirstAttempt\SiebwaldeApp\bin\Debug\PropertyChanged.dll
-C:\Localdata\Siebwalde\SiebwaldeApp_FirstAttempt\SiebwaldeApp\bin\Debug\PropertyChanged.xml
+C:\Localdata\Siebwalde\SiebwaldeApp_FirstAttempt\SiebwaldeApp\obj\Debug\SiebwaldeApp.csproj.Fody.CopyLocal.cache
+C:\Localdata\Siebwalde\SiebwaldeApp_FirstAttempt\SiebwaldeApp\obj\Debug\SiebwaldeApp.csproj.Fody.RuntimeCopyLocal.cache

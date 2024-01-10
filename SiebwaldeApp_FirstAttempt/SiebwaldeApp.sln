@@ -5,7 +5,7 @@ VisualStudioVersion = 17.7.34221.43
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SiebwaldeApp", "SiebwaldeApp\SiebwaldeApp.csproj", "{6EE1CC36-71C2-49CE-A47E-EB3559E88F24}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SiebwaldeApp.Core", "SiebwaldeApp.Core\SiebwaldeApp.Core.csproj", "{AB311209-6790-43EB-8738-0034B31A4A56}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SiebwaldeApp.Core", "SiebwaldeApp.Core\SiebwaldeApp.Core.csproj", "{2031E2CC-C63C-4C9D-830B-E6CDBD3592F0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,10 @@ Global
 		{6EE1CC36-71C2-49CE-A47E-EB3559E88F24}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6EE1CC36-71C2-49CE-A47E-EB3559E88F24}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6EE1CC36-71C2-49CE-A47E-EB3559E88F24}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AB311209-6790-43EB-8738-0034B31A4A56}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AB311209-6790-43EB-8738-0034B31A4A56}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AB311209-6790-43EB-8738-0034B31A4A56}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AB311209-6790-43EB-8738-0034B31A4A56}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2031E2CC-C63C-4C9D-830B-E6CDBD3592F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2031E2CC-C63C-4C9D-830B-E6CDBD3592F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2031E2CC-C63C-4C9D-830B-E6CDBD3592F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2031E2CC-C63C-4C9D-830B-E6CDBD3592F0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
