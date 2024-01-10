@@ -1,4 +1,6 @@
-﻿namespace SiebwaldeApp
+﻿using SiebwaldeApp.Core;
+
+namespace SiebwaldeApp
 {
     /// <summary>
     /// Interaction logic for SiebwaldePage.xaml

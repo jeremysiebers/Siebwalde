@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <executable name="dist/Offset_MercedesBus/production\Faller_Car_ucontroller2.X.production.hex">
+    <memory name="program">
+      <units>words</units>
+      <length>7008</length>
+      <used>4281</used>
+      <free>2727</free>
+    </memory>
+    <memory name="data">
+      <units>bytes</units>
+      <length>1024</length>
+      <used>310</used>
+      <free>714</free>
+    </memory>
+  </executable>
+</project>

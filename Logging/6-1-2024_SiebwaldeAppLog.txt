@@ -1,0 +1,14 @@
+[6-1-2024 11:52:43:325 > App.xaml.cs > ApplicationSetup() > line 51] Siebwalde application starting up...
+[6-1-2024 11:52:43:364 > SiebwaldeApplicationModel.cs > .ctor() > line 40] Siebwalde Application started.
+[6-1-2024 11:52:43:364 > SiebwaldeApplicationModel.cs > .ctor() > line 41] Main: PC MAC adress is: 18C04D94A26D
+[6-1-2024 11:52:43:364 > SiebwaldeApplicationModel.cs > .ctor() > line 42] Main: PC IP adress is: 192.168.1.176
+[6-1-2024 11:52:53:944 > SiebwaldeApplicationModel.cs > StartTrackController() > line 100] Track Controller starting...
+[6-1-2024 11:52:54:324 > SiebwaldeApplicationModel.cs > StartTrackController() > line 106] Track Controller started.
+[6-1-2024 16:19:58:369 > App.xaml.cs > ApplicationSetup() > line 51] Siebwalde application starting up...
+[6-1-2024 16:19:58:412 > SiebwaldeApplicationModel.cs > .ctor() > line 40] Siebwalde Application started.
+[6-1-2024 16:19:58:412 > SiebwaldeApplicationModel.cs > .ctor() > line 41] Main: PC MAC adress is: 18C04D94A26D
+[6-1-2024 16:19:58:413 > SiebwaldeApplicationModel.cs > .ctor() > line 42] Main: PC IP adress is: 192.168.1.176
+[6-1-2024 17:06:42:242 > App.xaml.cs > ApplicationSetup() > line 51] Siebwalde application starting up...
+[6-1-2024 17:06:42:284 > SiebwaldeApplicationModel.cs > .ctor() > line 40] Siebwalde Application started.
+[6-1-2024 17:06:42:286 > SiebwaldeApplicationModel.cs > .ctor() > line 41] Main: PC MAC adress is: 18C04D94A26D
+[6-1-2024 17:06:42:286 > SiebwaldeApplicationModel.cs > .ctor() > line 42] Main: PC IP adress is: 192.168.1.176

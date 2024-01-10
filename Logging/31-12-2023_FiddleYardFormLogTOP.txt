@@ -1,0 +1,9 @@
+[31-12-2023 16:01:58:472 > FiddleYardForm.cs > SetMessage() > line 972]  EMO released, 15V Track Power up! 
+[31-12-2023 16:02:57:428 > FiddleYardForm.cs > SetMessage() > line 972]  FiddleYard Auto mode Start 
+[31-12-2023 16:02:57:433 > FiddleYardForm.cs > SetMessage() > line 972]  FiddleYard init... 
+[31-12-2023 16:02:57:489 > FiddleYardForm.cs > SetMessage() > line 972]  FiddleYard not homed, start homing 
+[31-12-2023 16:02:58:786 > FiddleYardForm.cs > SetMessage() > line 972]  FiddleYard homing finished 
+[31-12-2023 16:02:58:919 > FiddleYardForm.cs > SetMessage() > line 972]  Train Detection Started 
+[31-12-2023 16:03:01:455 > FiddleYardForm.cs > SetMessage() > line 972]  Train Detection Finished 
+[31-12-2023 16:03:01:467 > FiddleYardForm.cs > SetMessage() > line 972]  FiddleYard init Finished 
+[31-12-2023 16:03:01:470 > FiddleYardForm.cs > SetMessage() > line 972]  FiddleYard Application running... 

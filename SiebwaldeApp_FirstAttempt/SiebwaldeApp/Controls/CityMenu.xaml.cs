@@ -1,4 +1,5 @@
-﻿using System.Windows.Controls;
+﻿using SiebwaldeApp.Core;
+using System.Windows.Controls;
 
 namespace SiebwaldeApp
 {

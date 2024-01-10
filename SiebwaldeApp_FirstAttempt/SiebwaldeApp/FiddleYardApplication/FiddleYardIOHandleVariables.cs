@@ -1,4 +1,6 @@
-﻿namespace SiebwaldeApp
+﻿
+
+namespace SiebwaldeApp
 {
     public class FiddleYardIOHandleVariables
     {

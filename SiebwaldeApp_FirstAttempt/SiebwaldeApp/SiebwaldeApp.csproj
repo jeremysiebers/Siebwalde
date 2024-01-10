@@ -104,7 +104,6 @@
     <Compile Include="Animation\PageAnimation.cs" />
     <Compile Include="Animation\PageAnimations.cs" />
     <Compile Include="Animation\StoryboardHelpers.cs" />
-    <Compile Include="Async\AsyncAwaiter.cs" />
     <Compile Include="AttachedProperties\BaseAttachedProperty.cs" />
     <Compile Include="AttachedProperties\ButtonAttachedProperty.cs" />
     <Compile Include="AttachedProperties\FrameworkElementAnimationAttachedProperties.cs" />
@@ -159,25 +158,6 @@
     <Compile Include="FiddleYardSimulator\FiddleYardSimulator.cs" />
     <Compile Include="FiddleYardSimulator\FiddleYardSimulatorVariables.cs" />
     <Compile Include="File\FileManager.cs" />
-    <Compile Include="IoC\Interfaces\IFileManager.cs" />
-    <Compile Include="IoC\Interfaces\ILogFactory.cs" />
-    <Compile Include="IoC\IoC.cs" />
-    <Compile Include="Logging\Base\LogLevel.cs" />
-    <Compile Include="Logging\Implementation\BaseLogFactory.cs" />
-    <Compile Include="Logging\Implementation\DebugLogger.cs" />
-    <Compile Include="Logging\Implementation\ConsoleLogger.cs" />
-    <Compile Include="Logging\Implementation\FileLogger.cs" />
-    <Compile Include="Logging\Implementation\ILogger.cs" />
-    <Compile Include="Logging\Base\LogFactoryLevel.cs" />
-    <Compile Include="Model\SiebwaldeApplicationModel.cs" />
-    <Compile Include="Model\TrackApplicationAn\Station Controller\PathWay.cs" />
-    <Compile Include="Model\TrackApplicationAn\Station Controller\StationControl.cs" />
-    <Compile Include="Model\TrackApplicationAn\Station Controller\StationTrack.cs" />
-    <Compile Include="Model\TrackApplicationAn\Track Controller\TrackControlMain.cs" />
-    <Compile Include="Model\TrackApplicationAn\Data\TrackApplicationVariables.cs" />
-    <Compile Include="Model\TrackApplicationAn\Data\TrackIOHandle.cs" />
-    <Compile Include="Model\TrackApplicationAn\Services\PublicEnums.cs" />
-    <Compile Include="Model\TrackApplicationAn\TrackController.cs" />
     <Compile Include="Pages\BasePage.cs" />
     <Compile Include="Pages\FiddleYardPages\FiddleYardPage.xaml.cs">
       <DependentUpon>FiddleYardPage.xaml</DependentUpon>
@@ -204,6 +184,7 @@
       <DependentUpon>SiebwaldePage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Services\CropBitmap.cs" />
+    <Compile Include="Services\Log2LoggingFile.cs" />
     <Compile Include="Services\LogFileBasics.cs" />
     <Compile Include="Services\MAC_IP_Conditioner.cs" />
     <Compile Include="Services\PingTarget.cs" />
@@ -215,25 +196,10 @@
     <Compile Include="ValueConverters\MultiBaseValueConverter.cs" />
     <Compile Include="ValueConverters\EnumarableToTextConverter.cs" />
     <Compile Include="ValueConverters\MenuPageValueConverter.cs" />
-    <Compile Include="ValueConverters\SideMenuPage.cs" />
-    <Compile Include="ValueConverters\ApplicationPage.cs" />
     <Compile Include="ValueConverters\ApplicationPageValueConverter.cs" />
     <Compile Include="ValueConverters\BaseValueConverter.cs" />
     <Compile Include="ValueConverters\BooleanToVisibilityConverter.cs" />
     <Compile Include="ValueConverters\StringRGBToBrushConverter.cs" />
-    <Compile Include="ViewModel\SideMenuViewModel.cs" />
-    <Compile Include="ViewModel\ApplicationViewModel.cs" />
-    <Compile Include="ViewModel\Base\BaseViewModel.cs" />
-    <Compile Include="ViewModel\Base\RelayCommand.cs" />
-    <Compile Include="ViewModel\FiddleYardViewModels\FiddleYardPageViewModel.cs" />
-    <Compile Include="ViewModel\CityViewModels\CityPageViewModel.cs" />
-    <Compile Include="ViewModel\SiebwaldeViewModels\SiebwaldeInitPageViewModel.cs" />
-    <Compile Include="ViewModel\SiebwaldeViewModels\SiebwaldeSettingsPageViewModel.cs" />
-    <Compile Include="ViewModel\TrackViewModels\TrackAmplifierPageViewModel.cs" />
-    <Compile Include="ViewModel\YardViewModels\YardPageViewModel.cs" />
-    <Compile Include="ViewModel\TrackViewModels\TrackPageViewModel.cs" />
-    <Compile Include="ViewModel\SiebwaldeViewModels\SiebwaldePageViewModel.cs" />
-    <Compile Include="ViewModel\Base\ViewModelLocator.cs" />
     <Compile Include="ViewModel\WindowViewModel.cs" />
     <Compile Include="Window\WindowResizer.cs" />
     <Page Include="Controls\CityMenu.xaml">
@@ -380,10 +346,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Images\Logo\" />
-    <Folder Include="Model\TrackApplicationAn\Model\" />
-    <Folder Include="Model\TrackApplicationAn\Pages\" />
-    <Folder Include="Model\TrackApplicationAn\Simulator\" />
-    <Folder Include="Model\TrackApplicationAn\ViewModel\" />
+    <Folder Include="Model\" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.8">
@@ -414,6 +377,12 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="favicon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SiebwaldeApp.Core\SiebwaldeApp.Core.csproj">
+      <Project>{ab311209-6790-43eb-8738-0034b31a4a56}</Project>
+      <Name>SiebwaldeApp.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="packages\Fody.6.8.0\build\Fody.targets" Condition="Exists('packages\Fody.6.8.0\build\Fody.targets')" />

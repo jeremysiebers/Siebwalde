@@ -3,6 +3,7 @@ using System.Text;
 using System.Timers;
 using System.Windows.Forms;
 using SiebwaldeApp;
+using SiebwaldeApp.Core;
 
 namespace SiebwaldeApp
 {

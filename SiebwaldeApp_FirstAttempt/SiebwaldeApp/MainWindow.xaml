@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SiebwaldeApp"
+        xmlns:core="clr-namespace:SiebwaldeApp.Core;assembly=SiebwaldeApp.Core"
         mc:Ignorable="d"
         WindowStyle="None"
         AllowsTransparency="True"
@@ -161,7 +162,7 @@
             <Frame Grid.Column="0"  
                    x:Name="MenuFrame" 
                    Content="{Binding SideMenuViewModel.CurrentMenu, 
-                                     Source={x:Static local:ViewModelLocator.Instance},  
+                                     Source={x:Static core:ViewModelLocator.Instance},  
                                      Converter={local:MenuPageValueConverter}}"
                    Background="Transparent" 
                    NavigationUIVisibility="Hidden"/>
@@ -169,7 +170,7 @@
             <Frame Grid.Column="1"  
                    x:Name="MainFrame" 
                    Content="{Binding ApplicationViewModel.CurrentPage, 
-                                     Source={x:Static local:ViewModelLocator.Instance},  
+                                     Source={x:Static core:ViewModelLocator.Instance},  
                                      Converter={local:ApplicationPageValueConverter}}"
                    Background="Transparent" 
                    NavigationUIVisibility="Hidden"/>

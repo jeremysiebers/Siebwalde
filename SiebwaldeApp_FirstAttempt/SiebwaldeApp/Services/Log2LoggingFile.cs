@@ -3,10 +3,11 @@ using System.Text;
 using System.Windows.Forms;
 using System.IO;
 using System.ComponentModel;
+using SiebwaldeApp.Core;
 
 namespace SiebwaldeApp
 {
-    public interface ILogger
+    public interface ILoggerOld
     {
         /// <summary>
         /// Logs the specified message
@@ -46,7 +47,7 @@ namespace SiebwaldeApp
     /// <summary>
     /// A logger that logss to the console
     /// </summary>
-    public class ConsoleLogger : ILogger, INotifyPropertyChanged
+    public class ConsoleLoggerOld : ILoggerOld, INotifyPropertyChanged
     {
         /// <summary>
         /// The event that is fired when any child property changes it value
@@ -83,7 +84,7 @@ namespace SiebwaldeApp
         /// Specifiy and test the path to a file
         /// </summary>
         /// <param name="path">The path to log to</param>
-        public ConsoleLogger(string file)
+        public ConsoleLoggerOld(string file)
         {
             // Set the log path
             m_file = file;
@@ -127,7 +128,7 @@ namespace SiebwaldeApp
     /// <summary>
     /// A logger that logs to a file
     /// </summary>
-    public class FileLogger : ILogger, INotifyPropertyChanged
+    public class FileLoggerOld : ILoggerOld, INotifyPropertyChanged
     {
         /// <summary>
         /// The event that is fired when any child property changes it value
@@ -154,7 +155,7 @@ namespace SiebwaldeApp
         /// Specifiy and test the path to a file
         /// </summary>
         /// <param name="path">The path to log to</param>
-        public FileLogger(string file)
+        public FileLoggerOld(string file)
         {
             // Set the log path
             m_path = Enums.HOMEPATH + Enums.LOGGING + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_" + file;

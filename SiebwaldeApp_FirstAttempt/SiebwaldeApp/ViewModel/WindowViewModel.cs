@@ -1,7 +1,6 @@
-﻿using System;
-using System.Runtime.InteropServices;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Input;
+using SiebwaldeApp.Core;
 
 namespace SiebwaldeApp
 {
@@ -36,6 +35,30 @@ namespace SiebwaldeApp
         /// The last known dock position
         /// </summary>
         private WindowDockPosition mDockPosition = WindowDockPosition.Undocked;
+
+        #endregion
+
+        #region Commands
+
+        /// <summary>
+        /// The command to minimize the window
+        /// </summary>
+        public ICommand MinimizeCommand { get; set; }
+
+        /// <summary>
+        /// The command to maximize the window
+        /// </summary>
+        public ICommand MaximizeCommand { get; set; }
+
+        /// <summary>
+        /// The command to close the window
+        /// </summary>
+        public ICommand CloseCommand { get; set; }
+
+        /// <summary>
+        /// The command to show the system menu of the window
+        /// </summary>
+        public ICommand MenuCommand { get; set; }
 
         #endregion
 
@@ -111,55 +134,6 @@ namespace SiebwaldeApp
 
         #endregion
 
-        #region Commands
-
-        /// <summary>
-        /// The command to minimize the window
-        /// </summary>
-        public ICommand MinimizeCommand { get; set; }
-
-        /// <summary>
-        /// The command to maximize the window
-        /// </summary>
-        public ICommand MaximizeCommand { get; set; }
-
-        /// <summary>
-        /// The command to close the window
-        /// </summary>
-        public ICommand CloseCommand { get; set; }
-
-        /// <summary>
-        /// The command to show the system menu of the window
-        /// </summary>
-        public ICommand MenuCommand { get; set; }
-
-        /// <summary>
-        /// The command to show the system menu of the window
-        /// </summary>
-        public ICommand SiebwaldeApplicationPage { get; set; }
-
-        /// <summary>
-        /// The command to show the system menu of the window
-        /// </summary>
-        public ICommand SiebwaldeTrackControlPage { get; set; }
-
-        /// <summary>
-        /// The command to show the system menu of the window
-        /// </summary>
-        public ICommand SiebwaldeFiddleYardControlPage { get; set; }
-
-        /// <summary>
-        /// The command to show the system menu of the window
-        /// </summary>
-        public ICommand SiebwaldeYardControlPage { get; set; }
-
-        /// <summary>
-        /// The command to show the system menu of the window
-        /// </summary>
-        public ICommand SiebwaldeCityControlPage { get; set; }
-
-        #endregion
-
         #region Constructor
 
         /// <summary>
@@ -175,19 +149,7 @@ namespace SiebwaldeApp
                 // Fire off events for all properties that are affected by a resize
                 WindowResized();
             };
-
-            // Create commands
-            MinimizeCommand = new RelayCommand(() => mWindow.WindowState = WindowState.Minimized);
-            MaximizeCommand = new RelayCommand(() => mWindow.WindowState ^= WindowState.Maximized);
-            CloseCommand = new RelayCommand(() => mWindow.Close());
-            MenuCommand = new RelayCommand(() => SystemCommands.ShowSystemMenu(mWindow, GetMousePosition()));
-
-            SiebwaldeApplicationPage         = new RelayCommand(LoadSiebwaldeApplicationPage);
-            SiebwaldeTrackControlPage        = new RelayCommand(LoadSiebwaldeTrackControlPage);
-            SiebwaldeFiddleYardControlPage   = new RelayCommand(LoadSiebwaldeFiddleYardControlPage);
-            SiebwaldeYardControlPage         = new RelayCommand(LoadSiebwaldeYardControlPage);
-            SiebwaldeCityControlPage         = new RelayCommand(LoadSiebwaldeCityControlPage);
-
+                        
             // Fix window resize issue
             mWindowResizer = new WindowResizer(mWindow);
 
@@ -200,65 +162,12 @@ namespace SiebwaldeApp
                 // Fire off resize events
                 WindowResized();
             };
-        }
 
-        #endregion
-
-        #region Private Methods
-
-        /// <summary>
-        /// Method to load the Siebwalde page and menu
-        /// </summary>
-        private void LoadSiebwaldeApplicationPage()
-        {
-            // Load Siebwalde page
-            IoC.Application.CurrentPage = ApplicationPage.Siebwalde;
-            // Load Siebwalde menu
-            IoC.SideMenu.CurrentMenu = SideMenuPage.Siebwalde;
-        }
-
-        /// <summary>
-        /// Method to load the Track control page and menu
-        /// </summary>
-        private void LoadSiebwaldeTrackControlPage()
-        {
-            // Load Siebwalde page
-            IoC.Application.CurrentPage = ApplicationPage.TrackControl;
-            // Load Siebwalde menu
-            IoC.SideMenu.CurrentMenu = SideMenuPage.TrackControl;
-        }
-
-        /// <summary>
-        /// Method to load the Fiddle Yard control page and menu
-        /// </summary>
-        private void LoadSiebwaldeFiddleYardControlPage()
-        {
-            // Load Siebwalde page
-            IoC.Application.CurrentPage = ApplicationPage.FiddleYardControl;
-            // Load Siebwalde menu
-            IoC.SideMenu.CurrentMenu = SideMenuPage.FiddleYardControl;
-        }
-
-        /// <summary>
-        /// Method to load the Yard control page and menu
-        /// </summary>
-        private void LoadSiebwaldeYardControlPage()
-        {
-            // Load Siebwalde page
-            IoC.Application.CurrentPage = ApplicationPage.YardControl;
-            // Load Siebwalde menu
-            IoC.SideMenu.CurrentMenu = SideMenuPage.YardControl;
-        }
-
-        /// <summary>
-        /// Method to load the City control page and menu
-        /// </summary>
-        private void LoadSiebwaldeCityControlPage()
-        {
-            // Load Siebwalde page
-            IoC.Application.CurrentPage = ApplicationPage.CityControl;
-            // Load Siebwalde menu
-            IoC.SideMenu.CurrentMenu = SideMenuPage.CityControl;
+            // Create commands
+            MinimizeCommand = new RelayCommand(() => mWindow.WindowState = WindowState.Minimized);
+            MaximizeCommand = new RelayCommand(() => mWindow.WindowState ^= WindowState.Maximized);
+            CloseCommand = new RelayCommand(() => mWindow.Close());
+            MenuCommand = new RelayCommand(() => SystemCommands.ShowSystemMenu(mWindow, GetMousePosition()));
         }
 
         #endregion
@@ -295,8 +204,6 @@ namespace SiebwaldeApp
             OnPropertyChanged(nameof(WindowRadius));
             OnPropertyChanged(nameof(WindowCornerRadius));
         }
-
-
         #endregion
     }
 }

@@ -1,0 +1,239 @@
+Version 4.0 HI-TECH Software Intermediate Code
+"66 mcc_generated_files/TCPIPLibrary/log.c
+[; ;mcc_generated_files/TCPIPLibrary/log.c: 66: LOG_SEVERITY limit[LOG_LAST];
+[c E682 0 1 2 3 4 5 6 7 .. ]
+[n E682 . LOG_EMERGENCY LOG_ALERTS LOG_CRITICAL LOG_ERROR LOG_WARNING LOG_NOTICE LOG_INFO LOG_DEBUG  ]
+"68
+[; ;mcc_generated_files/TCPIPLibrary/log.c: 68: const logFields_t severityThresholdTable[] = {
+[c E692 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 .. ]
+[n E692 . LOG_KERN LOG_DTLS LOG_ECC LOG_DAEMON LOG_AUTH LOG_SYSLOG LOG_LPR LOG_NEWS LOG_TFTP LOG_UUID LOG_COAP LOG_FTP LOG_NTP LOG_HTTP LOG_SNMP LOG_RTCC LOG_CBOR LOG_UDP LOG_TCP LOG_DHCP LOG_DNS LOG_LLDP LOG_LINK LOG_LAST  ]
+"101 mcc_generated_files/TCPIPLibrary/log.h
+[; ;mcc_generated_files/TCPIPLibrary/log.h: 101: {
+[s S8 `E692 1 `E682 1 ]
+[n S8 . logFacility severityThreshold ]
+"39 mcc_generated_files/TCPIPLibrary/rtcc.h
+[; ;mcc_generated_files/TCPIPLibrary/rtcc.h: 39: time_t time(time_t *t);
+[v _time `(o ~T0 @X0 0 ef1`*o ]
+"105 C:\Program Files\Microchip\xc8\v2.40\pic\include\c99\stdio.h
+[; ;C:\Program Files\Microchip\xc8\v2.40\pic\include\c99\stdio.h: 105: int printf(const char *restrict, ...);
+[v _printf `(i ~T0 @X0 0 ev`*Cuc ]
+"119 mcc_generated_files/TCPIPLibrary/log.c
+[; ;mcc_generated_files/TCPIPLibrary/log.c: 119:             logSyslog(message, priVal);
+[c E990 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 .. ]
+[n E990 . ERROR SUCCESS LINK_NOT_FOUND BUFFER_BUSY TX_LOGIC_NOT_IDLE MAC_NOT_FOUND IP_WRONG_VERSION IPV4_CHECKSUM_FAILS DEST_IP_NOT_MATCHED ICMP_CHECKSUM_FAILS UDP_CHECKSUM_FAILS TCP_CHECKSUM_FAILS DMA_TIMEOUT PORT_NOT_AVAILABLE ARP_IP_NOT_MATCHED EAPoL_PACKET_FAILURE INCORRECT_IPV4_HLEN IPV4_NO_OPTIONS TX_QUEUED IPV6_CHECKSUM_FAILS IPV6_LOCAL_ADDR_RESOLVE IPV6_LOCAL_ADDR_INVALID NO_GATEWAY ADDRESS_RESOLUTION GLOBAL_DESTINATION ARP_WRONG_HARDWARE_ADDR_TYPE ARP_WRONG_PROTOCOL_TYPE ARP_WRONG_HARDWARE_ADDR_LEN ARP_WRONG_PROTOCOL_LEN  ]
+"64 mcc_generated_files/TCPIPLibrary/log_syslog.h
+[; ;mcc_generated_files/TCPIPLibrary/log_syslog.h: 64: error_msg logSyslog(const char *message, uint8_t priorityVal);
+[v _logSyslog `(E990 ~T0 @X0 0 ef2`*Cuc`uc ]
+"58 mcc_generated_files/TCPIPLibrary/log_console.h
+[; ;mcc_generated_files/TCPIPLibrary/log_console.h: 58: uint8_t logConsole(const char *message, uint8_t priorityVal);
+[v _logConsole `(uc ~T0 @X0 0 ef2`*Cuc`uc ]
+"66 mcc_generated_files/TCPIPLibrary/log.c
+[; ;mcc_generated_files/TCPIPLibrary/log.c: 66: LOG_SEVERITY limit[LOG_LAST];
+[v _limit `E682 ~T0 @X0 -> 23 `i e ]
+"68
+[; ;mcc_generated_files/TCPIPLibrary/log.c: 68: const logFields_t severityThresholdTable[] = {
+[v _severityThresholdTable `CS8 ~T0 @X0 -> 24 `i e ]
+[i _severityThresholdTable
+:U ..
+:U ..
+. `E692 0
+. `E682 6
+..
+:U ..
+. `E692 1
+. `E682 5
+..
+:U ..
+. `E692 2
+. `E682 5
+..
+:U ..
+. `E692 3
+. `E682 6
+..
+:U ..
+. `E692 4
+. `E682 5
+..
+:U ..
+. `E692 5
+. `E682 5
+..
+:U ..
+. `E692 6
+. `E682 6
+..
+:U ..
+. `E692 7
+. `E682 5
+..
+:U ..
+. `E692 8
+. `E682 6
+..
+:U ..
+. `E692 9
+. `E682 5
+..
+:U ..
+. `E692 10
+. `E682 5
+..
+:U ..
+. `E692 11
+. `E682 5
+..
+:U ..
+. `E692 12
+. `E682 6
+..
+:U ..
+. `E692 13
+. `E682 5
+..
+:U ..
+. `E692 14
+. `E682 5
+..
+:U ..
+. `E692 15
+. `E682 5
+..
+:U ..
+. `E692 16
+. `E682 6
+..
+:U ..
+. `E692 17
+. `E682 5
+..
+:U ..
+. `E692 18
+. `E682 5
+..
+:U ..
+. `E692 19
+. `E682 6
+..
+:U ..
+. `E692 20
+. `E682 5
+..
+:U ..
+. `E692 21
+. `E682 6
+..
+:U ..
+. `E692 22
+. `E682 5
+..
+:U ..
+. `E692 23
+. `E682 5
+..
+..
+]
+"97
+[; ;mcc_generated_files/TCPIPLibrary/log.c: 97: void LOG_Init(void)
+[v _LOG_Init `(v ~T0 @X0 1 ef ]
+"98
+[; ;mcc_generated_files/TCPIPLibrary/log.c: 98: {
+{
+[e :U _LOG_Init ]
+[f ]
+"99
+[; ;mcc_generated_files/TCPIPLibrary/log.c: 99:     unsigned long t = (unsigned long)time(0);
+[v _t `ul ~T0 @X0 1 a ]
+[e = _t -> ( _time (1 -> -> 0 `i `*o `ul ]
+"100
+[; ;mcc_generated_files/TCPIPLibrary/log.c: 100:     printf("\n\nStarting Syslog at %lu\n",t);
+[e ( _printf , (. :s 1C _t ]
+"101
+[; ;mcc_generated_files/TCPIPLibrary/log.c: 101:     for(uint8_t x=0;x<LOG_LAST;x++)
+{
+[v _x `uc ~T0 @X0 1 a ]
+[e = _x -> -> 0 `i `uc ]
+[e $ < -> _x `i -> . `E692 23 `i 27  ]
+[e $U 28  ]
+[e :U 27 ]
+"102
+[; ;mcc_generated_files/TCPIPLibrary/log.c: 102:     {
+{
+"103
+[; ;mcc_generated_files/TCPIPLibrary/log.c: 103:         limit[(uint8_t)severityThresholdTable[x].logFacility] = severityThresholdTable[x].severityThreshold;
+[e = *U + &U _limit * -> -> . *U + &U _severityThresholdTable * -> _x `ux -> -> # *U &U _severityThresholdTable `ui `ux 0 `uc `ux -> -> # *U &U _limit `ui `ux . *U + &U _severityThresholdTable * -> _x `ux -> -> # *U &U _severityThresholdTable `ui `ux 1 ]
+"104
+[; ;mcc_generated_files/TCPIPLibrary/log.c: 104:     }
+}
+[e ++ _x -> -> 1 `i `uc ]
+[e $ < -> _x `i -> . `E692 23 `i 27  ]
+[e :U 28 ]
+}
+"105
+[; ;mcc_generated_files/TCPIPLibrary/log.c: 105: }
+[e :UE 26 ]
+}
+"108
+[; ;mcc_generated_files/TCPIPLibrary/log.c: 108: void logMessage(const char *message, LOG_FACILITY facility, LOG_SEVERITY severity, uint8_t logDest)
+[v _logMessage `(v ~T0 @X0 1 ef4`*Cuc`E692`E682`uc ]
+"109
+[; ;mcc_generated_files/TCPIPLibrary/log.c: 109: {
+{
+[e :U _logMessage ]
+"108
+[; ;mcc_generated_files/TCPIPLibrary/log.c: 108: void logMessage(const char *message, LOG_FACILITY facility, LOG_SEVERITY severity, uint8_t logDest)
+[v _message `*Cuc ~T0 @X0 1 r1 ]
+[v _facility `E692 ~T0 @X0 1 r2 ]
+[v _severity `E682 ~T0 @X0 1 r3 ]
+[v _logDest `uc ~T0 @X0 1 r4 ]
+"109
+[; ;mcc_generated_files/TCPIPLibrary/log.c: 109: {
+[f ]
+"110
+[; ;mcc_generated_files/TCPIPLibrary/log.c: 110:     uint8_t priVal;
+[v _priVal `uc ~T0 @X0 1 a ]
+"112
+[; ;mcc_generated_files/TCPIPLibrary/log.c: 112:     priVal = (((facility) << 3) | (severity));
+[e = _priVal -> | << -> _facility `ui -> 3 `i -> _severity `ui `uc ]
+"114
+[; ;mcc_generated_files/TCPIPLibrary/log.c: 114:     if((severity <= limit[(uint8_t)severityThresholdTable[(uint8_t)facility].logFacility]) &&
+[e $ ! && <= -> _severity `ui -> *U + &U _limit * -> -> . *U + &U _severityThresholdTable * -> -> _facility `uc `ux -> -> # *U &U _severityThresholdTable `ui `ux 0 `uc `ux -> -> # *U &U _limit `ui `ux `ui <= -> _priVal `i -> 191 `i 31  ]
+"116
+[; ;mcc_generated_files/TCPIPLibrary/log.c: 116:     {
+{
+"117
+[; ;mcc_generated_files/TCPIPLibrary/log.c: 117:         if((logDest & 0b00000001) == 0b00000001)
+[e $ ! == & -> _logDest `i -> 1 `i -> 1 `i 32  ]
+"118
+[; ;mcc_generated_files/TCPIPLibrary/log.c: 118:         {
+{
+"119
+[; ;mcc_generated_files/TCPIPLibrary/log.c: 119:             logSyslog(message, priVal);
+[e ( _logSyslog (2 , _message _priVal ]
+"120
+[; ;mcc_generated_files/TCPIPLibrary/log.c: 120:         }
+}
+[e :U 32 ]
+"121
+[; ;mcc_generated_files/TCPIPLibrary/log.c: 121:         if((logDest & 0b00000010) == 0b00000010)
+[e $ ! == & -> _logDest `i -> 2 `i -> 2 `i 33  ]
+"122
+[; ;mcc_generated_files/TCPIPLibrary/log.c: 122:         {
+{
+"123
+[; ;mcc_generated_files/TCPIPLibrary/log.c: 123:             logConsole(message, priVal);
+[e ( _logConsole (2 , _message _priVal ]
+"124
+[; ;mcc_generated_files/TCPIPLibrary/log.c: 124:         }
+}
+[e :U 33 ]
+"125
+[; ;mcc_generated_files/TCPIPLibrary/log.c: 125:     }
+}
+[e :U 31 ]
+"126
+[; ;mcc_generated_files/TCPIPLibrary/log.c: 126: }
+[e :UE 30 ]
+}
+[p f _printf 8389648 ]
+[a 1C 10 10 83 116 97 114 116 105 110 103 32 83 121 115 108 111 103 32 97 116 32 37 108 117 10 0 ]

@@ -1,0 +1,2512 @@
+Version 4.0 HI-TECH Software Intermediate Code
+"54 ./debounce.h
+[; ;./debounce.h: 54: {
+[s S540 `us 1 `ul 1 `a 1 `a 1 `*Vuc 1 `uc 1 `a 1 `a 1 `a 1 ]
+[n S540 . debounceDelay lastDebounceTime lastButtonState buttonState portx_ptr pin_mask value ResetH2L ResetL2H ]
+"5310 C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 5310: extern volatile unsigned char PORTF __attribute__((address(0xF85)));
+[v _PORTF `Vuc ~T0 @X0 0 e@3973 ]
+"5619
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 5619: extern volatile unsigned char PORTH __attribute__((address(0xF87)));
+[v _PORTH `Vuc ~T0 @X0 0 e@3975 ]
+"5489
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 5489: extern volatile unsigned char PORTG __attribute__((address(0xF86)));
+[v _PORTG `Vuc ~T0 @X0 0 e@3974 ]
+"5018
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 5018: extern volatile unsigned char PORTE __attribute__((address(0xF84)));
+[v _PORTE `Vuc ~T0 @X0 0 e@3972 ]
+"54 ./mainstation.h
+[; ;./mainstation.h: 54: STATION top;
+[c E4941 1 10 20 30 40 50 60 .. ]
+[n E4941 . MAIN_LOOP MAIN_STATION_TOP MAIN_STATION_BOT WALDSEE SIEBWALDE WALDBERG IODATA  ]
+[c E4962 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 .. ]
+[n E4962 . busy connected done command nop INIT INIT2 RUN WAIT IDLE STN_TO_SIEBWALDE SIEBWALDE_TO_STN SIEBWALDE_SWITCHT4T5_OUT SIEBWALDE_SWITCHT4T5_IN SIEBWALDE_SWITCHT4T5 SIEWALDE_SET_NEXT STN_INBOUND STN_OUTBOUND STN_PASSING STN_WAIT STN_IDLE SEQ_IDLE SEQ_WAIT SEQ_SET_OCC SEQ_CHK_TRAIN SEQ_CHK_PASSED SEQ_OUTBOUND_LEFT_STATTION SEQ_INBOUND_BRAKE_TIME SEQ_OUTBOUND_BRAKE_TIME SIG_RED SIG_GREEN INVERT TIME SET_PATH_WAY SET_SIGNAL  ]
+"35 ./enums.h
+[; ;./enums.h: 35:     {
+[s S538 `*Vuc 1 `uc 1 ]
+[n S538 . portx_ptr pin_mask ]
+"41
+[; ;./enums.h: 41:     {
+[s S539 `*Vuc 1 `uc 1 `*Vuc 1 `uc 1 `*Vuc 1 `uc 1 `*Vuc 1 `uc 1 `*Vuc 1 `uc 1 `*Vuc 1 `uc 1 ]
+[n S539 . port1_ptr pin1_mask port2_ptr pin2_mask port3_ptr pin3_mask port4_ptr pin4_mask port5_ptr pin5_mask port6_ptr pin6_mask ]
+"54 ./mainstation.h
+[; ;./mainstation.h: 54: STATION top;
+[c E4950 170 255 81 82 83 84 85 86 87 88 .. ]
+[n E4950 . HEADER ALIVE STNTRACK1 STNTRACK2 STNTRACK3 MTNTRACK1 MTNTRACK2 MTNTRACK7 MTNTRACK8 VOLTAGE_DETECTED  ]
+[c E4999 150 151 152 153 154 155 157 158 159 160 161 162 163 164 .. ]
+[n E4999 . NONE T1 T2 T3 T4 T5 T7 T8 TRACK1 TRACK2 TRACK3 TRACK10 TRACK11 TRACK12  ]
+"17
+[; ;./mainstation.h: 17: {
+[s S541 `E4950 1 `E4962 1 `E4962 1 `E4962 1 `a 1 `E4999 1 `ul 1 `ul 1 `*S538 1 `*S540 1 ]
+[n S541 . stnName stnState stnSequence stnNextState stnOccupied trackNr tCountTime tWaitTime setOccStn getOccStn ]
+"35
+[; ;./mainstation.h: 35: {
+[s S542 `E4941 1 `E4962 1 `*S540 1 `*S540 1 `*S538 1 `*S540 1 `*S540 1 `*S539 1 `uc 1 `uc 1 `*S539 1 `ul 1 `S541 1 `S541 1 `S541 1 ]
+[n S542 . name AppState getFreightLeaveStation getFreightEnterStation setOccBlkIn getOccBlkIn getOccBlkOut setPath prevPath newPath setSignal setSignalTime stnTrack1 stnTrack2 stnTrack3 ]
+"6336 C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 6336: extern volatile unsigned char LATD __attribute__((address(0xF8C)));
+[v _LATD `Vuc ~T0 @X0 0 e@3980 ]
+"6878
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 6878: extern volatile unsigned char LATJ __attribute__((address(0xF91)));
+[v _LATJ `Vuc ~T0 @X0 0 e@3985 ]
+"6448
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 6448: extern volatile unsigned char LATE __attribute__((address(0xF8D)));
+[v _LATE `Vuc ~T0 @X0 0 e@3981 ]
+"30 ./communication.h
+[; ;./communication.h: 30:     {
+[s S544 `uc 1 `uc 1 `uc -> 8 `i ]
+[n S544 . header command data ]
+"24 ./mountaintrack.h
+[; ;./mountaintrack.h: 24: {
+[s S545 `E4950 1 `E4962 1 `E4962 1 `E4962 1 `*S540 1 `a 1 `E4999 1 `ul 1 `ul 1 ]
+[n S545 . stnName stnState stnSequence stnNextState getTrainEnterStnTrack stnOccupied trackNr tCountTime tWaitTime ]
+"41
+[; ;./mountaintrack.h: 41: {
+[s S546 `E4941 1 `E4962 1 `E4962 1 `E4999 1 `E4962 1 `E4962 1 `*S540 1 `*S538 1 `*S540 1 `*S539 1 `S545 1 `S545 1 `ul 1 `ul 1 ]
+[n S546 . name AppState AppNextState LastInboundStn LastState Return getTrainEnterSiebwaldeStn setOccAmpOut getOccAmpOut setPath stnTrack1 stnTrack2 tCountTime tWaitTime ]
+"6224 C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 6224: extern volatile unsigned char LATC __attribute__((address(0xF8B)));
+[v _LATC `Vuc ~T0 @X0 0 e@3979 ]
+"6112
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 6112: extern volatile unsigned char LATB __attribute__((address(0xF8A)));
+[v _LATB `Vuc ~T0 @X0 0 e@3978 ]
+"46 ./pathway.h
+[; ;./pathway.h: 46: extern void INITxPATHWAYxSTATION(STATION *reftop, STATION *refbot);
+[v _INITxPATHWAYxSTATION `(v ~T0 @X0 0 ef2`*S542`*S542 ]
+"63 ./communication.h
+[; ;./communication.h: 63:     extern void CREATExTASKxSTATUSxMESSAGE(
+[v _CREATExTASKxSTATUSxMESSAGE `(v ~T0 @X0 0 ef4`uc`uc`uc`uc ]
+"15 ./setocc.h
+[; ;./setocc.h: 15:     extern void SETxOCC(OCC *self, _Bool value);
+[v _SETxOCC `(v ~T0 @X0 0 ef2`*S538`a ]
+"18 ./tracksignal.h
+[; ;./tracksignal.h: 18: extern void SETxSIGNAL(STATION *self, TASK_MESSAGES path, TASK_STATE signal);
+[v _SETxSIGNAL `(v ~T0 @X0 0 ef3`*S542`E4999`E4962 ]
+"71 ./rand.h
+[; ;./rand.h: 71:     extern uint16_t GETxRANDOMxNUMBER(void);
+[v _GETxRANDOMxNUMBER `(us ~T0 @X0 0 ef ]
+"19 ./mainStationInbound.h
+[; ;./mainStationInbound.h: 19:     extern int8_t MAINxSTATIONxINBOUND(STATION *self);
+[v _MAINxSTATIONxINBOUND `(c ~T0 @X0 0 ef1`*S542 ]
+"15 ./mainStationPassing.h
+[; ;./mainStationPassing.h: 15:     extern int8_t MAINxSTATIONxPASSING(STATION *self);
+[v _MAINxSTATIONxPASSING `(c ~T0 @X0 0 ef1`*S542 ]
+"19 ./mainStationOutbound.h
+[; ;./mainStationOutbound.h: 19:     extern int8_t MAINxSTATIONxOUTBOUND(STATION *self);
+[v _MAINxSTATIONxOUTBOUND `(c ~T0 @X0 0 ef1`*S542 ]
+"16 ./milisecond_counter.h
+[; ;./milisecond_counter.h: 16:     extern uint32_t GETxMILLIS(void);
+[v _GETxMILLIS `(ul ~T0 @X0 0 ef ]
+"54 C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 54: __asm("MAADR5 equ 0E80h");
+[; <" MAADR5 equ 0E80h ;# ">
+"61
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 61: __asm("MAADR6 equ 0E81h");
+[; <" MAADR6 equ 0E81h ;# ">
+"68
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 68: __asm("MAADR3 equ 0E82h");
+[; <" MAADR3 equ 0E82h ;# ">
+"75
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 75: __asm("MAADR4 equ 0E83h");
+[; <" MAADR4 equ 0E83h ;# ">
+"82
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 82: __asm("MAADR1 equ 0E84h");
+[; <" MAADR1 equ 0E84h ;# ">
+"89
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 89: __asm("MAADR2 equ 0E85h");
+[; <" MAADR2 equ 0E85h ;# ">
+"96
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 96: __asm("MISTAT equ 0E8Ah");
+[; <" MISTAT equ 0E8Ah ;# ">
+"129
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 129: __asm("EFLOCON equ 0E97h");
+[; <" EFLOCON equ 0E97h ;# ">
+"161
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 161: __asm("EPAUS equ 0E98h");
+[; <" EPAUS equ 0E98h ;# ">
+"168
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 168: __asm("EPAUSL equ 0E98h");
+[; <" EPAUSL equ 0E98h ;# ">
+"175
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 175: __asm("EPAUSH equ 0E99h");
+[; <" EPAUSH equ 0E99h ;# ">
+"182
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 182: __asm("MACON1 equ 0EA0h");
+[; <" MACON1 equ 0EA0h ;# ">
+"220
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 220: __asm("MACON3 equ 0EA2h");
+[; <" MACON3 equ 0EA2h ;# ">
+"291
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 291: __asm("MACON4 equ 0EA3h");
+[; <" MACON4 equ 0EA3h ;# ">
+"313
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 313: __asm("MABBIPG equ 0EA4h");
+[; <" MABBIPG equ 0EA4h ;# ">
+"369
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 369: __asm("MAIPG equ 0EA6h");
+[; <" MAIPG equ 0EA6h ;# ">
+"376
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 376: __asm("MAIPGL equ 0EA6h");
+[; <" MAIPGL equ 0EA6h ;# ">
+"383
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 383: __asm("MAIPGH equ 0EA7h");
+[; <" MAIPGH equ 0EA7h ;# ">
+"390
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 390: __asm("MAMXFL equ 0EAAh");
+[; <" MAMXFL equ 0EAAh ;# ">
+"397
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 397: __asm("MAMXFLL equ 0EAAh");
+[; <" MAMXFLL equ 0EAAh ;# ">
+"404
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 404: __asm("MAMXFLH equ 0EABh");
+[; <" MAMXFLH equ 0EABh ;# ">
+"411
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 411: __asm("MICMD equ 0EB2h");
+[; <" MICMD equ 0EB2h ;# ">
+"437
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 437: __asm("MIREGADR equ 0EB4h");
+[; <" MIREGADR equ 0EB4h ;# ">
+"444
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 444: __asm("MIWR equ 0EB6h");
+[; <" MIWR equ 0EB6h ;# ">
+"451
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 451: __asm("MIWRL equ 0EB6h");
+[; <" MIWRL equ 0EB6h ;# ">
+"458
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 458: __asm("MIWRH equ 0EB7h");
+[; <" MIWRH equ 0EB7h ;# ">
+"465
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 465: __asm("MIRD equ 0EB8h");
+[; <" MIRD equ 0EB8h ;# ">
+"472
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 472: __asm("MIRDL equ 0EB8h");
+[; <" MIRDL equ 0EB8h ;# ">
+"479
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 479: __asm("MIRDH equ 0EB9h");
+[; <" MIRDH equ 0EB9h ;# ">
+"486
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 486: __asm("EHT0 equ 0EC0h");
+[; <" EHT0 equ 0EC0h ;# ">
+"493
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 493: __asm("EHT1 equ 0EC1h");
+[; <" EHT1 equ 0EC1h ;# ">
+"500
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 500: __asm("EHT2 equ 0EC2h");
+[; <" EHT2 equ 0EC2h ;# ">
+"507
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 507: __asm("EHT3 equ 0EC3h");
+[; <" EHT3 equ 0EC3h ;# ">
+"514
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 514: __asm("EHT4 equ 0EC4h");
+[; <" EHT4 equ 0EC4h ;# ">
+"521
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 521: __asm("EHT5 equ 0EC5h");
+[; <" EHT5 equ 0EC5h ;# ">
+"528
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 528: __asm("EHT6 equ 0EC6h");
+[; <" EHT6 equ 0EC6h ;# ">
+"535
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 535: __asm("EHT7 equ 0EC7h");
+[; <" EHT7 equ 0EC7h ;# ">
+"542
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 542: __asm("EPMM0 equ 0EC8h");
+[; <" EPMM0 equ 0EC8h ;# ">
+"549
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 549: __asm("EPMM1 equ 0EC9h");
+[; <" EPMM1 equ 0EC9h ;# ">
+"556
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 556: __asm("EPMM2 equ 0ECAh");
+[; <" EPMM2 equ 0ECAh ;# ">
+"563
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 563: __asm("EPMM3 equ 0ECBh");
+[; <" EPMM3 equ 0ECBh ;# ">
+"570
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 570: __asm("EPMM4 equ 0ECCh");
+[; <" EPMM4 equ 0ECCh ;# ">
+"577
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 577: __asm("EPMM5 equ 0ECDh");
+[; <" EPMM5 equ 0ECDh ;# ">
+"584
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 584: __asm("EPMM6 equ 0ECEh");
+[; <" EPMM6 equ 0ECEh ;# ">
+"591
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 591: __asm("EPMM7 equ 0ECFh");
+[; <" EPMM7 equ 0ECFh ;# ">
+"598
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 598: __asm("EPMCS equ 0ED0h");
+[; <" EPMCS equ 0ED0h ;# ">
+"605
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 605: __asm("EPMCSL equ 0ED0h");
+[; <" EPMCSL equ 0ED0h ;# ">
+"612
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 612: __asm("EPMCSH equ 0ED1h");
+[; <" EPMCSH equ 0ED1h ;# ">
+"619
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 619: __asm("EPMO equ 0ED4h");
+[; <" EPMO equ 0ED4h ;# ">
+"626
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 626: __asm("EPMOL equ 0ED4h");
+[; <" EPMOL equ 0ED4h ;# ">
+"633
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 633: __asm("EPMOH equ 0ED5h");
+[; <" EPMOH equ 0ED5h ;# ">
+"640
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 640: __asm("ERXFCON equ 0ED8h");
+[; <" ERXFCON equ 0ED8h ;# ">
+"702
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 702: __asm("EPKTCNT equ 0ED9h");
+[; <" EPKTCNT equ 0ED9h ;# ">
+"709
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 709: __asm("EWRPT equ 0EE2h");
+[; <" EWRPT equ 0EE2h ;# ">
+"716
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 716: __asm("EWRPTL equ 0EE2h");
+[; <" EWRPTL equ 0EE2h ;# ">
+"723
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 723: __asm("EWRPTH equ 0EE3h");
+[; <" EWRPTH equ 0EE3h ;# ">
+"730
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 730: __asm("ETXST equ 0EE4h");
+[; <" ETXST equ 0EE4h ;# ">
+"737
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 737: __asm("ETXSTL equ 0EE4h");
+[; <" ETXSTL equ 0EE4h ;# ">
+"744
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 744: __asm("ETXSTH equ 0EE5h");
+[; <" ETXSTH equ 0EE5h ;# ">
+"751
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 751: __asm("ETXND equ 0EE6h");
+[; <" ETXND equ 0EE6h ;# ">
+"758
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 758: __asm("ETXNDL equ 0EE6h");
+[; <" ETXNDL equ 0EE6h ;# ">
+"765
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 765: __asm("ETXNDH equ 0EE7h");
+[; <" ETXNDH equ 0EE7h ;# ">
+"772
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 772: __asm("ERXST equ 0EE8h");
+[; <" ERXST equ 0EE8h ;# ">
+"779
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 779: __asm("ERXSTL equ 0EE8h");
+[; <" ERXSTL equ 0EE8h ;# ">
+"786
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 786: __asm("ERXSTH equ 0EE9h");
+[; <" ERXSTH equ 0EE9h ;# ">
+"793
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 793: __asm("ERXND equ 0EEAh");
+[; <" ERXND equ 0EEAh ;# ">
+"800
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 800: __asm("ERXNDL equ 0EEAh");
+[; <" ERXNDL equ 0EEAh ;# ">
+"807
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 807: __asm("ERXNDH equ 0EEBh");
+[; <" ERXNDH equ 0EEBh ;# ">
+"814
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 814: __asm("ERXRDPT equ 0EECh");
+[; <" ERXRDPT equ 0EECh ;# ">
+"821
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 821: __asm("ERXRDPTL equ 0EECh");
+[; <" ERXRDPTL equ 0EECh ;# ">
+"828
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 828: __asm("ERXRDPTH equ 0EEDh");
+[; <" ERXRDPTH equ 0EEDh ;# ">
+"835
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 835: __asm("ERXWRPT equ 0EEEh");
+[; <" ERXWRPT equ 0EEEh ;# ">
+"842
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 842: __asm("ERXWRPTL equ 0EEEh");
+[; <" ERXWRPTL equ 0EEEh ;# ">
+"849
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 849: __asm("ERXWRPTH equ 0EEFh");
+[; <" ERXWRPTH equ 0EEFh ;# ">
+"856
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 856: __asm("EDMAST equ 0EF0h");
+[; <" EDMAST equ 0EF0h ;# ">
+"863
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 863: __asm("EDMASTL equ 0EF0h");
+[; <" EDMASTL equ 0EF0h ;# ">
+"870
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 870: __asm("EDMASTH equ 0EF1h");
+[; <" EDMASTH equ 0EF1h ;# ">
+"877
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 877: __asm("EDMAND equ 0EF2h");
+[; <" EDMAND equ 0EF2h ;# ">
+"884
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 884: __asm("EDMANDL equ 0EF2h");
+[; <" EDMANDL equ 0EF2h ;# ">
+"891
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 891: __asm("EDMANDH equ 0EF3h");
+[; <" EDMANDH equ 0EF3h ;# ">
+"898
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 898: __asm("EDMADST equ 0EF4h");
+[; <" EDMADST equ 0EF4h ;# ">
+"905
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 905: __asm("EDMADSTL equ 0EF4h");
+[; <" EDMADSTL equ 0EF4h ;# ">
+"912
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 912: __asm("EDMADSTH equ 0EF5h");
+[; <" EDMADSTH equ 0EF5h ;# ">
+"919
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 919: __asm("EDMACS equ 0EF6h");
+[; <" EDMACS equ 0EF6h ;# ">
+"926
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 926: __asm("EDMACSL equ 0EF6h");
+[; <" EDMACSL equ 0EF6h ;# ">
+"933
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 933: __asm("EDMACSH equ 0EF7h");
+[; <" EDMACSH equ 0EF7h ;# ">
+"940
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 940: __asm("EIE equ 0EFBh");
+[; <" EIE equ 0EFBh ;# ">
+"1000
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 1000: __asm("ESTAT equ 0EFDh");
+[; <" ESTAT equ 0EFDh ;# ">
+"1040
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 1040: __asm("ECON2 equ 0EFEh");
+[; <" ECON2 equ 0EFEh ;# ">
+"1073
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 1073: __asm("EIR equ 0F60h");
+[; <" EIR equ 0F60h ;# ">
+"1133
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 1133: __asm("EDATA equ 0F61h");
+[; <" EDATA equ 0F61h ;# ">
+"1195
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 1195: __asm("SSP2CON2 equ 0F62h");
+[; <" SSP2CON2 equ 0F62h ;# ">
+"1382
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 1382: __asm("SSP2CON1 equ 0F63h");
+[; <" SSP2CON1 equ 0F63h ;# ">
+"1502
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 1502: __asm("SSP2STAT equ 0F64h");
+[; <" SSP2STAT equ 0F64h ;# ">
+"1929
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 1929: __asm("SSP2ADD equ 0F65h");
+[; <" SSP2ADD equ 0F65h ;# ">
+"1991
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 1991: __asm("SSP2BUF equ 0F66h");
+[; <" SSP2BUF equ 0F66h ;# ">
+"1998
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 1998: __asm("ECCP2DEL equ 0F67h");
+[; <" ECCP2DEL equ 0F67h ;# ">
+"2118
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 2118: __asm("ECCP2AS equ 0F68h");
+[; <" ECCP2AS equ 0F68h ;# ">
+"2250
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 2250: __asm("ECCP3DEL equ 0F69h");
+[; <" ECCP3DEL equ 0F69h ;# ">
+"2370
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 2370: __asm("ECCP3AS equ 0F6Ah");
+[; <" ECCP3AS equ 0F6Ah ;# ">
+"2502
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 2502: __asm("RCSTA2 equ 0F6Bh");
+[; <" RCSTA2 equ 0F6Bh ;# ">
+"2680
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 2680: __asm("TXSTA2 equ 0F6Ch");
+[; <" TXSTA2 equ 0F6Ch ;# ">
+"2840
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 2840: __asm("TXREG2 equ 0F6Dh");
+[; <" TXREG2 equ 0F6Dh ;# ">
+"2847
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 2847: __asm("RCREG2 equ 0F6Eh");
+[; <" RCREG2 equ 0F6Eh ;# ">
+"2854
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 2854: __asm("SPBRG2 equ 0F6Fh");
+[; <" SPBRG2 equ 0F6Fh ;# ">
+"2861
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 2861: __asm("CCP5CON equ 0F70h");
+[; <" CCP5CON equ 0F70h ;# ">
+"2940
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 2940: __asm("CCPR5 equ 0F71h");
+[; <" CCPR5 equ 0F71h ;# ">
+"2947
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 2947: __asm("CCPR5L equ 0F71h");
+[; <" CCPR5L equ 0F71h ;# ">
+"2954
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 2954: __asm("CCPR5H equ 0F72h");
+[; <" CCPR5H equ 0F72h ;# ">
+"2961
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 2961: __asm("CCP4CON equ 0F73h");
+[; <" CCP4CON equ 0F73h ;# ">
+"3040
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 3040: __asm("CCPR4 equ 0F74h");
+[; <" CCPR4 equ 0F74h ;# ">
+"3047
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 3047: __asm("CCPR4L equ 0F74h");
+[; <" CCPR4L equ 0F74h ;# ">
+"3054
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 3054: __asm("CCPR4H equ 0F75h");
+[; <" CCPR4H equ 0F75h ;# ">
+"3061
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 3061: __asm("T4CON equ 0F76h");
+[; <" T4CON equ 0F76h ;# ">
+"3132
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 3132: __asm("PR4 equ 0F77h");
+[; <" PR4 equ 0F77h ;# ">
+"3139
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 3139: __asm("TMR4 equ 0F78h");
+[; <" TMR4 equ 0F78h ;# ">
+"3146
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 3146: __asm("ECCP1DEL equ 0F79h");
+[; <" ECCP1DEL equ 0F79h ;# ">
+"3266
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 3266: __asm("ERDPT equ 0F7Ah");
+[; <" ERDPT equ 0F7Ah ;# ">
+"3273
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 3273: __asm("ERDPTL equ 0F7Ah");
+[; <" ERDPTL equ 0F7Ah ;# ">
+"3280
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 3280: __asm("ERDPTH equ 0F7Bh");
+[; <" ERDPTH equ 0F7Bh ;# ">
+"3287
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 3287: __asm("BAUDCON2 equ 0F7Ch");
+[; <" BAUDCON2 equ 0F7Ch ;# ">
+"3292
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 3292: __asm("BAUDCTL2 equ 0F7Ch");
+[; <" BAUDCTL2 equ 0F7Ch ;# ">
+"3563
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 3563: __asm("SPBRGH2 equ 0F7Dh");
+[; <" SPBRGH2 equ 0F7Dh ;# ">
+"3570
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 3570: __asm("BAUDCON1 equ 0F7Eh");
+[; <" BAUDCON1 equ 0F7Eh ;# ">
+"3575
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 3575: __asm("BAUDCON equ 0F7Eh");
+[; <" BAUDCON equ 0F7Eh ;# ">
+"3579
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 3579: __asm("BAUDCTL equ 0F7Eh");
+[; <" BAUDCTL equ 0F7Eh ;# ">
+"3583
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 3583: __asm("BAUDCTL1 equ 0F7Eh");
+[; <" BAUDCTL1 equ 0F7Eh ;# ">
+"4248
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 4248: __asm("SPBRGH1 equ 0F7Fh");
+[; <" SPBRGH1 equ 0F7Fh ;# ">
+"4253
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 4253: __asm("SPBRGH equ 0F7Fh");
+[; <" SPBRGH equ 0F7Fh ;# ">
+"4260
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 4260: __asm("PORTA equ 0F80h");
+[; <" PORTA equ 0F80h ;# ">
+"4403
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 4403: __asm("PORTB equ 0F81h");
+[; <" PORTB equ 0F81h ;# ">
+"4561
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 4561: __asm("PORTC equ 0F82h");
+[; <" PORTC equ 0F82h ;# ">
+"4801
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 4801: __asm("PORTD equ 0F83h");
+[; <" PORTD equ 0F83h ;# ">
+"5020
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 5020: __asm("PORTE equ 0F84h");
+[; <" PORTE equ 0F84h ;# ">
+"5312
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 5312: __asm("PORTF equ 0F85h");
+[; <" PORTF equ 0F85h ;# ">
+"5491
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 5491: __asm("PORTG equ 0F86h");
+[; <" PORTG equ 0F86h ;# ">
+"5621
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 5621: __asm("PORTH equ 0F87h");
+[; <" PORTH equ 0F87h ;# ">
+"5787
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 5787: __asm("PORTJ equ 0F88h");
+[; <" PORTJ equ 0F88h ;# ">
+"5993
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 5993: __asm("LATA equ 0F89h");
+[; <" LATA equ 0F89h ;# ">
+"6114
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 6114: __asm("LATB equ 0F8Ah");
+[; <" LATB equ 0F8Ah ;# ">
+"6226
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 6226: __asm("LATC equ 0F8Bh");
+[; <" LATC equ 0F8Bh ;# ">
+"6338
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 6338: __asm("LATD equ 0F8Ch");
+[; <" LATD equ 0F8Ch ;# ">
+"6450
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 6450: __asm("LATE equ 0F8Dh");
+[; <" LATE equ 0F8Dh ;# ">
+"6562
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 6562: __asm("LATF equ 0F8Eh");
+[; <" LATF equ 0F8Eh ;# ">
+"6674
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 6674: __asm("LATG equ 0F8Fh");
+[; <" LATG equ 0F8Fh ;# ">
+"6768
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 6768: __asm("LATH equ 0F90h");
+[; <" LATH equ 0F90h ;# ">
+"6880
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 6880: __asm("LATJ equ 0F91h");
+[; <" LATJ equ 0F91h ;# ">
+"6992
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 6992: __asm("TRISA equ 0F92h");
+[; <" TRISA equ 0F92h ;# ">
+"6997
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 6997: __asm("DDRA equ 0F92h");
+[; <" DDRA equ 0F92h ;# ">
+"7166
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 7166: __asm("TRISB equ 0F93h");
+[; <" TRISB equ 0F93h ;# ">
+"7171
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 7171: __asm("DDRB equ 0F93h");
+[; <" DDRB equ 0F93h ;# ">
+"7388
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 7388: __asm("TRISC equ 0F94h");
+[; <" TRISC equ 0F94h ;# ">
+"7393
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 7393: __asm("DDRC equ 0F94h");
+[; <" DDRC equ 0F94h ;# ">
+"7610
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 7610: __asm("TRISD equ 0F95h");
+[; <" TRISD equ 0F95h ;# ">
+"7615
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 7615: __asm("DDRD equ 0F95h");
+[; <" DDRD equ 0F95h ;# ">
+"7832
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 7832: __asm("TRISE equ 0F96h");
+[; <" TRISE equ 0F96h ;# ">
+"7837
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 7837: __asm("DDRE equ 0F96h");
+[; <" DDRE equ 0F96h ;# ">
+"8054
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 8054: __asm("TRISF equ 0F97h");
+[; <" TRISF equ 0F97h ;# ">
+"8059
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 8059: __asm("DDRF equ 0F97h");
+[; <" DDRF equ 0F97h ;# ">
+"8276
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 8276: __asm("TRISG equ 0F98h");
+[; <" TRISG equ 0F98h ;# ">
+"8281
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 8281: __asm("DDRG equ 0F98h");
+[; <" DDRG equ 0F98h ;# ">
+"8498
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 8498: __asm("TRISH equ 0F99h");
+[; <" TRISH equ 0F99h ;# ">
+"8503
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 8503: __asm("DDRH equ 0F99h");
+[; <" DDRH equ 0F99h ;# ">
+"8720
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 8720: __asm("TRISJ equ 0F9Ah");
+[; <" TRISJ equ 0F9Ah ;# ">
+"8725
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 8725: __asm("DDRJ equ 0F9Ah");
+[; <" DDRJ equ 0F9Ah ;# ">
+"8942
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 8942: __asm("OSCTUNE equ 0F9Bh");
+[; <" OSCTUNE equ 0F9Bh ;# ">
+"8996
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 8996: __asm("MEMCON equ 0F9Ch");
+[; <" MEMCON equ 0F9Ch ;# ">
+"9057
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 9057: __asm("PIE1 equ 0F9Dh");
+[; <" PIE1 equ 0F9Dh ;# ">
+"9140
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 9140: __asm("PIR1 equ 0F9Eh");
+[; <" PIR1 equ 0F9Eh ;# ">
+"9226
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 9226: __asm("IPR1 equ 0F9Fh");
+[; <" IPR1 equ 0F9Fh ;# ">
+"9309
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 9309: __asm("PIE2 equ 0FA0h");
+[; <" PIE2 equ 0FA0h ;# ">
+"9370
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 9370: __asm("PIR2 equ 0FA1h");
+[; <" PIR2 equ 0FA1h ;# ">
+"9431
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 9431: __asm("IPR2 equ 0FA2h");
+[; <" IPR2 equ 0FA2h ;# ">
+"9492
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 9492: __asm("PIE3 equ 0FA3h");
+[; <" PIE3 equ 0FA3h ;# ">
+"9602
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 9602: __asm("PIR3 equ 0FA4h");
+[; <" PIR3 equ 0FA4h ;# ">
+"9680
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 9680: __asm("IPR3 equ 0FA5h");
+[; <" IPR3 equ 0FA5h ;# ">
+"9758
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 9758: __asm("EECON1 equ 0FA6h");
+[; <" EECON1 equ 0FA6h ;# ">
+"9797
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 9797: __asm("EECON2 equ 0FA7h");
+[; <" EECON2 equ 0FA7h ;# ">
+"9804
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 9804: __asm("RCSTA1 equ 0FABh");
+[; <" RCSTA1 equ 0FABh ;# ">
+"9809
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 9809: __asm("RCSTA equ 0FABh");
+[; <" RCSTA equ 0FABh ;# ">
+"10128
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 10128: __asm("TXSTA1 equ 0FACh");
+[; <" TXSTA1 equ 0FACh ;# ">
+"10133
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 10133: __asm("TXSTA equ 0FACh");
+[; <" TXSTA equ 0FACh ;# ">
+"10416
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 10416: __asm("TXREG1 equ 0FADh");
+[; <" TXREG1 equ 0FADh ;# ">
+"10421
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 10421: __asm("TXREG equ 0FADh");
+[; <" TXREG equ 0FADh ;# ">
+"10428
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 10428: __asm("RCREG1 equ 0FAEh");
+[; <" RCREG1 equ 0FAEh ;# ">
+"10433
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 10433: __asm("RCREG equ 0FAEh");
+[; <" RCREG equ 0FAEh ;# ">
+"10440
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 10440: __asm("SPBRG1 equ 0FAFh");
+[; <" SPBRG1 equ 0FAFh ;# ">
+"10445
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 10445: __asm("SPBRG equ 0FAFh");
+[; <" SPBRG equ 0FAFh ;# ">
+"10452
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 10452: __asm("PSPCON equ 0FB0h");
+[; <" PSPCON equ 0FB0h ;# ">
+"10491
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 10491: __asm("T3CON equ 0FB1h");
+[; <" T3CON equ 0FB1h ;# ">
+"10612
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 10612: __asm("TMR3 equ 0FB2h");
+[; <" TMR3 equ 0FB2h ;# ">
+"10619
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 10619: __asm("TMR3L equ 0FB2h");
+[; <" TMR3L equ 0FB2h ;# ">
+"10626
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 10626: __asm("TMR3H equ 0FB3h");
+[; <" TMR3H equ 0FB3h ;# ">
+"10633
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 10633: __asm("CMCON equ 0FB4h");
+[; <" CMCON equ 0FB4h ;# ">
+"10723
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 10723: __asm("CVRCON equ 0FB5h");
+[; <" CVRCON equ 0FB5h ;# ">
+"10802
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 10802: __asm("ECCP1AS equ 0FB6h");
+[; <" ECCP1AS equ 0FB6h ;# ">
+"10934
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 10934: __asm("CCP3CON equ 0FB7h");
+[; <" CCP3CON equ 0FB7h ;# ">
+"10939
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 10939: __asm("ECCP3CON equ 0FB7h");
+[; <" ECCP3CON equ 0FB7h ;# ">
+"11126
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 11126: __asm("CCPR3 equ 0FB8h");
+[; <" CCPR3 equ 0FB8h ;# ">
+"11133
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 11133: __asm("CCPR3L equ 0FB8h");
+[; <" CCPR3L equ 0FB8h ;# ">
+"11140
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 11140: __asm("CCPR3H equ 0FB9h");
+[; <" CCPR3H equ 0FB9h ;# ">
+"11147
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 11147: __asm("CCP2CON equ 0FBAh");
+[; <" CCP2CON equ 0FBAh ;# ">
+"11152
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 11152: __asm("ECCP2CON equ 0FBAh");
+[; <" ECCP2CON equ 0FBAh ;# ">
+"11339
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 11339: __asm("CCPR2 equ 0FBBh");
+[; <" CCPR2 equ 0FBBh ;# ">
+"11346
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 11346: __asm("CCPR2L equ 0FBBh");
+[; <" CCPR2L equ 0FBBh ;# ">
+"11353
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 11353: __asm("CCPR2H equ 0FBCh");
+[; <" CCPR2H equ 0FBCh ;# ">
+"11360
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 11360: __asm("CCP1CON equ 0FBDh");
+[; <" CCP1CON equ 0FBDh ;# ">
+"11365
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 11365: __asm("ECCP1CON equ 0FBDh");
+[; <" ECCP1CON equ 0FBDh ;# ">
+"11552
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 11552: __asm("CCPR1 equ 0FBEh");
+[; <" CCPR1 equ 0FBEh ;# ">
+"11559
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 11559: __asm("CCPR1L equ 0FBEh");
+[; <" CCPR1L equ 0FBEh ;# ">
+"11566
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 11566: __asm("CCPR1H equ 0FBFh");
+[; <" CCPR1H equ 0FBFh ;# ">
+"11573
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 11573: __asm("ADCON2 equ 0FC0h");
+[; <" ADCON2 equ 0FC0h ;# ">
+"11644
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 11644: __asm("ADCON1 equ 0FC1h");
+[; <" ADCON1 equ 0FC1h ;# ">
+"11729
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 11729: __asm("ADCON0 equ 0FC2h");
+[; <" ADCON0 equ 0FC2h ;# ">
+"11855
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 11855: __asm("ADRES equ 0FC3h");
+[; <" ADRES equ 0FC3h ;# ">
+"11862
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 11862: __asm("ADRESL equ 0FC3h");
+[; <" ADRESL equ 0FC3h ;# ">
+"11869
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 11869: __asm("ADRESH equ 0FC4h");
+[; <" ADRESH equ 0FC4h ;# ">
+"11876
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 11876: __asm("SSP1CON2 equ 0FC5h");
+[; <" SSP1CON2 equ 0FC5h ;# ">
+"11881
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 11881: __asm("SSPCON2 equ 0FC5h");
+[; <" SSPCON2 equ 0FC5h ;# ">
+"12248
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 12248: __asm("SSP1CON1 equ 0FC6h");
+[; <" SSP1CON1 equ 0FC6h ;# ">
+"12253
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 12253: __asm("SSPCON1 equ 0FC6h");
+[; <" SSPCON1 equ 0FC6h ;# ">
+"12486
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 12486: __asm("SSP1STAT equ 0FC7h");
+[; <" SSP1STAT equ 0FC7h ;# ">
+"12491
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 12491: __asm("SSPSTAT equ 0FC7h");
+[; <" SSPSTAT equ 0FC7h ;# ">
+"13084
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 13084: __asm("SSP1ADD equ 0FC8h");
+[; <" SSP1ADD equ 0FC8h ;# ">
+"13089
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 13089: __asm("SSPADD equ 0FC8h");
+[; <" SSPADD equ 0FC8h ;# ">
+"13306
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 13306: __asm("SSP1BUF equ 0FC9h");
+[; <" SSP1BUF equ 0FC9h ;# ">
+"13311
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 13311: __asm("SSPBUF equ 0FC9h");
+[; <" SSPBUF equ 0FC9h ;# ">
+"13318
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 13318: __asm("T2CON equ 0FCAh");
+[; <" T2CON equ 0FCAh ;# ">
+"13389
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 13389: __asm("PR2 equ 0FCBh");
+[; <" PR2 equ 0FCBh ;# ">
+"13396
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 13396: __asm("TMR2 equ 0FCCh");
+[; <" TMR2 equ 0FCCh ;# ">
+"13403
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 13403: __asm("T1CON equ 0FCDh");
+[; <" T1CON equ 0FCDh ;# ">
+"13515
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 13515: __asm("TMR1 equ 0FCEh");
+[; <" TMR1 equ 0FCEh ;# ">
+"13522
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 13522: __asm("TMR1L equ 0FCEh");
+[; <" TMR1L equ 0FCEh ;# ">
+"13529
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 13529: __asm("TMR1H equ 0FCFh");
+[; <" TMR1H equ 0FCFh ;# ">
+"13536
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 13536: __asm("RCON equ 0FD0h");
+[; <" RCON equ 0FD0h ;# ">
+"13684
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 13684: __asm("WDTCON equ 0FD1h");
+[; <" WDTCON equ 0FD1h ;# ">
+"13712
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 13712: __asm("ECON1 equ 0FD2h");
+[; <" ECON1 equ 0FD2h ;# ">
+"13763
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 13763: __asm("OSCCON equ 0FD3h");
+[; <" OSCCON equ 0FD3h ;# ">
+"13811
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 13811: __asm("T0CON equ 0FD5h");
+[; <" T0CON equ 0FD5h ;# ">
+"13881
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 13881: __asm("TMR0 equ 0FD6h");
+[; <" TMR0 equ 0FD6h ;# ">
+"13888
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 13888: __asm("TMR0L equ 0FD6h");
+[; <" TMR0L equ 0FD6h ;# ">
+"13895
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 13895: __asm("TMR0H equ 0FD7h");
+[; <" TMR0H equ 0FD7h ;# ">
+"13902
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 13902: __asm("STATUS equ 0FD8h");
+[; <" STATUS equ 0FD8h ;# ">
+"13973
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 13973: __asm("FSR2 equ 0FD9h");
+[; <" FSR2 equ 0FD9h ;# ">
+"13980
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 13980: __asm("FSR2L equ 0FD9h");
+[; <" FSR2L equ 0FD9h ;# ">
+"13987
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 13987: __asm("FSR2H equ 0FDAh");
+[; <" FSR2H equ 0FDAh ;# ">
+"13994
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 13994: __asm("PLUSW2 equ 0FDBh");
+[; <" PLUSW2 equ 0FDBh ;# ">
+"14001
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14001: __asm("PREINC2 equ 0FDCh");
+[; <" PREINC2 equ 0FDCh ;# ">
+"14008
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14008: __asm("POSTDEC2 equ 0FDDh");
+[; <" POSTDEC2 equ 0FDDh ;# ">
+"14015
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14015: __asm("POSTINC2 equ 0FDEh");
+[; <" POSTINC2 equ 0FDEh ;# ">
+"14022
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14022: __asm("INDF2 equ 0FDFh");
+[; <" INDF2 equ 0FDFh ;# ">
+"14029
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14029: __asm("BSR equ 0FE0h");
+[; <" BSR equ 0FE0h ;# ">
+"14036
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14036: __asm("FSR1 equ 0FE1h");
+[; <" FSR1 equ 0FE1h ;# ">
+"14043
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14043: __asm("FSR1L equ 0FE1h");
+[; <" FSR1L equ 0FE1h ;# ">
+"14050
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14050: __asm("FSR1H equ 0FE2h");
+[; <" FSR1H equ 0FE2h ;# ">
+"14057
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14057: __asm("PLUSW1 equ 0FE3h");
+[; <" PLUSW1 equ 0FE3h ;# ">
+"14064
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14064: __asm("PREINC1 equ 0FE4h");
+[; <" PREINC1 equ 0FE4h ;# ">
+"14071
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14071: __asm("POSTDEC1 equ 0FE5h");
+[; <" POSTDEC1 equ 0FE5h ;# ">
+"14078
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14078: __asm("POSTINC1 equ 0FE6h");
+[; <" POSTINC1 equ 0FE6h ;# ">
+"14085
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14085: __asm("INDF1 equ 0FE7h");
+[; <" INDF1 equ 0FE7h ;# ">
+"14092
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14092: __asm("WREG equ 0FE8h");
+[; <" WREG equ 0FE8h ;# ">
+"14099
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14099: __asm("FSR0 equ 0FE9h");
+[; <" FSR0 equ 0FE9h ;# ">
+"14106
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14106: __asm("FSR0L equ 0FE9h");
+[; <" FSR0L equ 0FE9h ;# ">
+"14113
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14113: __asm("FSR0H equ 0FEAh");
+[; <" FSR0H equ 0FEAh ;# ">
+"14120
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14120: __asm("PLUSW0 equ 0FEBh");
+[; <" PLUSW0 equ 0FEBh ;# ">
+"14127
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14127: __asm("PREINC0 equ 0FECh");
+[; <" PREINC0 equ 0FECh ;# ">
+"14134
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14134: __asm("POSTDEC0 equ 0FEDh");
+[; <" POSTDEC0 equ 0FEDh ;# ">
+"14141
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14141: __asm("POSTINC0 equ 0FEEh");
+[; <" POSTINC0 equ 0FEEh ;# ">
+"14148
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14148: __asm("INDF0 equ 0FEFh");
+[; <" INDF0 equ 0FEFh ;# ">
+"14155
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14155: __asm("INTCON3 equ 0FF0h");
+[; <" INTCON3 equ 0FF0h ;# ">
+"14267
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14267: __asm("INTCON2 equ 0FF1h");
+[; <" INTCON2 equ 0FF1h ;# ">
+"14354
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14354: __asm("INTCON equ 0FF2h");
+[; <" INTCON equ 0FF2h ;# ">
+"14471
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14471: __asm("PROD equ 0FF3h");
+[; <" PROD equ 0FF3h ;# ">
+"14478
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14478: __asm("PRODL equ 0FF3h");
+[; <" PRODL equ 0FF3h ;# ">
+"14485
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14485: __asm("PRODH equ 0FF4h");
+[; <" PRODH equ 0FF4h ;# ">
+"14492
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14492: __asm("TABLAT equ 0FF5h");
+[; <" TABLAT equ 0FF5h ;# ">
+"14501
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14501: __asm("TBLPTR equ 0FF6h");
+[; <" TBLPTR equ 0FF6h ;# ">
+"14508
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14508: __asm("TBLPTRL equ 0FF6h");
+[; <" TBLPTRL equ 0FF6h ;# ">
+"14515
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14515: __asm("TBLPTRH equ 0FF7h");
+[; <" TBLPTRH equ 0FF7h ;# ">
+"14522
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14522: __asm("TBLPTRU equ 0FF8h");
+[; <" TBLPTRU equ 0FF8h ;# ">
+"14531
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14531: __asm("PCLAT equ 0FF9h");
+[; <" PCLAT equ 0FF9h ;# ">
+"14538
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14538: __asm("PC equ 0FF9h");
+[; <" PC equ 0FF9h ;# ">
+"14545
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14545: __asm("PCL equ 0FF9h");
+[; <" PCL equ 0FF9h ;# ">
+"14552
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14552: __asm("PCLATH equ 0FFAh");
+[; <" PCLATH equ 0FFAh ;# ">
+"14559
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14559: __asm("PCLATU equ 0FFBh");
+[; <" PCLATU equ 0FFBh ;# ">
+"14566
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14566: __asm("STKPTR equ 0FFCh");
+[; <" STKPTR equ 0FFCh ;# ">
+"14672
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14672: __asm("TOS equ 0FFDh");
+[; <" TOS equ 0FFDh ;# ">
+"14679
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14679: __asm("TOSL equ 0FFDh");
+[; <" TOSL equ 0FFDh ;# ">
+"14686
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14686: __asm("TOSH equ 0FFEh");
+[; <" TOSH equ 0FFEh ;# ">
+"14693
+[; ;C:/Users/jerem/.mchp_packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 14693: __asm("TOSU equ 0FFFh");
+[; <" TOSU equ 0FFFh ;# ">
+"18 ./enums.h
+[; ;./enums.h: 18:     const uint32_t tFactorSec = 1000;
+[v _tFactorSec `Cul ~T0 @X0 1 e ]
+[i _tFactorSec
+-> -> -> 1000 `i `l `ul
+]
+"20
+[; ;./enums.h: 20:     const uint8_t tRandomShift = 3;
+[v _tRandomShift `Cuc ~T0 @X0 1 e ]
+[i _tRandomShift
+-> -> 3 `i `uc
+]
+"22
+[; ;./enums.h: 22:     const uint32_t tSwitchPointWaitTime = (uint32_t)(7 * tFactorSec);
+[v _tSwitchPointWaitTime `Cul ~T0 @X0 1 e ]
+[i _tSwitchPointWaitTime
+* -> -> -> 7 `i `l `ul _tFactorSec
+]
+"24
+[; ;./enums.h: 24:     const uint32_t tTrainWaitTime = (uint32_t)(100 * tFactorSec);
+[v _tTrainWaitTime `Cul ~T0 @X0 1 e ]
+[i _tTrainWaitTime
+* -> -> -> 100 `i `l `ul _tFactorSec
+]
+"26
+[; ;./enums.h: 26:     const uint32_t tFreightTrainWaitTime = (uint32_t)(5 * tFactorSec);
+[v _tFreightTrainWaitTime `Cul ~T0 @X0 1 e ]
+[i _tFreightTrainWaitTime
+* -> -> -> 5 `i `l `ul _tFactorSec
+]
+"28
+[; ;./enums.h: 28:     const uint32_t tReadIoSignalWaitTime = (uint32_t)(10 * tFactorSec);
+[v _tReadIoSignalWaitTime `Cul ~T0 @X0 1 e ]
+[i _tReadIoSignalWaitTime
+* -> -> -> 10 `i `l `ul _tFactorSec
+]
+"30
+[; ;./enums.h: 30:     const uint32_t tOutboundWaitTime = (uint32_t)(10 * tFactorSec);
+[v _tOutboundWaitTime `Cul ~T0 @X0 1 e ]
+[i _tOutboundWaitTime
+* -> -> -> 10 `i `l `ul _tFactorSec
+]
+"32
+[; ;./enums.h: 32:     const uint32_t tInOutboundStopWaitTime = (uint32_t)(10 * tFactorSec);
+[v _tInOutboundStopWaitTime `Cul ~T0 @X0 1 e ]
+[i _tInOutboundStopWaitTime
+* -> -> -> 10 `i `l `ul _tFactorSec
+]
+"47 ./debounce.h
+[; ;./debounce.h: 47: const uint32_t tIoSignalDebounceTime = (uint32_t)(200);
+[v _tIoSignalDebounceTime `Cul ~T0 @X0 1 e ]
+[i _tIoSignalDebounceTime
+-> -> 200 `i `ul
+]
+"48
+[; ;./debounce.h: 48: const uint32_t tBlkOutDebounceTime = (uint32_t)(2000);
+[v _tBlkOutDebounceTime `Cul ~T0 @X0 1 e ]
+[i _tBlkOutDebounceTime
+-> -> 2000 `i `ul
+]
+"49
+[; ;./debounce.h: 49: const uint32_t tHallSignalDebounceTime = (uint32_t)(5);
+[v _tHallSignalDebounceTime `Cul ~T0 @X0 1 e ]
+[i _tHallSignalDebounceTime
+-> -> 5 `i `ul
+]
+"68
+[; ;./debounce.h: 68: DEBOUNCE HALL_BLK_13 = {tHallSignalDebounceTime, 0, 0, 0, &PORTF, 0x1, 0, 0, 1};
+[v _HALL_BLK_13 `S540 ~T0 @X0 1 e ]
+[i _HALL_BLK_13
+:U ..
+:U ..
+-> _tHallSignalDebounceTime `us
+-> -> -> 0 `i `l `ul
+-> -> 0 `i `a
+-> -> 0 `i `a
+&U _PORTF
+-> -> 1 `i `uc
+-> -> 0 `i `a
+-> -> 0 `i `a
+-> -> 1 `i `a
+..
+..
+]
+"69
+[; ;./debounce.h: 69: DEBOUNCE HALL_BLK_21A = {tHallSignalDebounceTime, 0, 0, 0, &PORTF, 0x2, 0, 0, 1};
+[v _HALL_BLK_21A `S540 ~T0 @X0 1 e ]
+[i _HALL_BLK_21A
+:U ..
+:U ..
+-> _tHallSignalDebounceTime `us
+-> -> -> 0 `i `l `ul
+-> -> 0 `i `a
+-> -> 0 `i `a
+&U _PORTF
+-> -> 2 `i `uc
+-> -> 0 `i `a
+-> -> 0 `i `a
+-> -> 1 `i `a
+..
+..
+]
+"70
+[; ;./debounce.h: 70: DEBOUNCE HALL_BLK_T4 = {tHallSignalDebounceTime, 0, 0, 0, &PORTF, 0x4, 0, 0, 1};
+[v _HALL_BLK_T4 `S540 ~T0 @X0 1 e ]
+[i _HALL_BLK_T4
+:U ..
+:U ..
+-> _tHallSignalDebounceTime `us
+-> -> -> 0 `i `l `ul
+-> -> 0 `i `a
+-> -> 0 `i `a
+&U _PORTF
+-> -> 4 `i `uc
+-> -> 0 `i `a
+-> -> 0 `i `a
+-> -> 1 `i `a
+..
+..
+]
+"71
+[; ;./debounce.h: 71: DEBOUNCE HALL_BLK_T5 = {tHallSignalDebounceTime, 0, 0, 0, &PORTF, 0x8, 0, 0, 1};
+[v _HALL_BLK_T5 `S540 ~T0 @X0 1 e ]
+[i _HALL_BLK_T5
+:U ..
+:U ..
+-> _tHallSignalDebounceTime `us
+-> -> -> 0 `i `l `ul
+-> -> 0 `i `a
+-> -> 0 `i `a
+&U _PORTF
+-> -> 8 `i `uc
+-> -> 0 `i `a
+-> -> 0 `i `a
+-> -> 1 `i `a
+..
+..
+]
+"72
+[; ;./debounce.h: 72: DEBOUNCE HALL_BLK_T1 = {tHallSignalDebounceTime, 0, 0, 0, &PORTF, 0x10, 0, 0, 1};
+[v _HALL_BLK_T1 `S540 ~T0 @X0 1 e ]
+[i _HALL_BLK_T1
+:U ..
+:U ..
+-> _tHallSignalDebounceTime `us
+-> -> -> 0 `i `l `ul
+-> -> 0 `i `a
+-> -> 0 `i `a
+&U _PORTF
+-> -> 16 `i `uc
+-> -> 0 `i `a
+-> -> 0 `i `a
+-> -> 1 `i `a
+..
+..
+]
+"73
+[; ;./debounce.h: 73: DEBOUNCE HALL_BLK_T2 = {tHallSignalDebounceTime, 0, 0, 0, &PORTF, 0x20, 0, 0, 1};
+[v _HALL_BLK_T2 `S540 ~T0 @X0 1 e ]
+[i _HALL_BLK_T2
+:U ..
+:U ..
+-> _tHallSignalDebounceTime `us
+-> -> -> 0 `i `l `ul
+-> -> 0 `i `a
+-> -> 0 `i `a
+&U _PORTF
+-> -> 32 `i `uc
+-> -> 0 `i `a
+-> -> 0 `i `a
+-> -> 1 `i `a
+..
+..
+]
+"74
+[; ;./debounce.h: 74: DEBOUNCE HALL_BLK_9B = {tHallSignalDebounceTime, 0, 0, 0, &PORTF, 0x40, 0, 0, 1};
+[v _HALL_BLK_9B `S540 ~T0 @X0 1 e ]
+[i _HALL_BLK_9B
+:U ..
+:U ..
+-> _tHallSignalDebounceTime `us
+-> -> -> 0 `i `l `ul
+-> -> 0 `i `a
+-> -> 0 `i `a
+&U _PORTF
+-> -> 64 `i `uc
+-> -> 0 `i `a
+-> -> 0 `i `a
+-> -> 1 `i `a
+..
+..
+]
+"75
+[; ;./debounce.h: 75: DEBOUNCE HALL_BLK_4A = {tHallSignalDebounceTime, 0, 0, 0, &PORTF, 0x80, 0, 0, 1};
+[v _HALL_BLK_4A `S540 ~T0 @X0 1 e ]
+[i _HALL_BLK_4A
+:U ..
+:U ..
+-> _tHallSignalDebounceTime `us
+-> -> -> 0 `i `l `ul
+-> -> 0 `i `a
+-> -> 0 `i `a
+&U _PORTF
+-> -> 128 `i `uc
+-> -> 0 `i `a
+-> -> 0 `i `a
+-> -> 1 `i `a
+..
+..
+]
+"77
+[; ;./debounce.h: 77: DEBOUNCE HALL_BLK_T7 = {tHallSignalDebounceTime, 0, 0, 0, &PORTH, 0x1, 0, 0, 1};
+[v _HALL_BLK_T7 `S540 ~T0 @X0 1 e ]
+[i _HALL_BLK_T7
+:U ..
+:U ..
+-> _tHallSignalDebounceTime `us
+-> -> -> 0 `i `l `ul
+-> -> 0 `i `a
+-> -> 0 `i `a
+&U _PORTH
+-> -> 1 `i `uc
+-> -> 0 `i `a
+-> -> 0 `i `a
+-> -> 1 `i `a
+..
+..
+]
+"78
+[; ;./debounce.h: 78: DEBOUNCE HALL_BLK_T8 = {tHallSignalDebounceTime, 0, 0, 0, &PORTH, 0x2, 0, 0, 1};
+[v _HALL_BLK_T8 `S540 ~T0 @X0 1 e ]
+[i _HALL_BLK_T8
+:U ..
+:U ..
+-> _tHallSignalDebounceTime `us
+-> -> -> 0 `i `l `ul
+-> -> 0 `i `a
+-> -> 0 `i `a
+&U _PORTH
+-> -> 2 `i `uc
+-> -> 0 `i `a
+-> -> 0 `i `a
+-> -> 1 `i `a
+..
+..
+]
+"79
+[; ;./debounce.h: 79: DEBOUNCE OCC_FR_BLK13 = {tBlkOutDebounceTime , 0, 0, 0, &PORTH, 0x4, 0, 1, 1};
+[v _OCC_FR_BLK13 `S540 ~T0 @X0 1 e ]
+[i _OCC_FR_BLK13
+:U ..
+:U ..
+-> _tBlkOutDebounceTime `us
+-> -> -> 0 `i `l `ul
+-> -> 0 `i `a
+-> -> 0 `i `a
+&U _PORTH
+-> -> 4 `i `uc
+-> -> 0 `i `a
+-> -> 1 `i `a
+-> -> 1 `i `a
+..
+..
+]
+"80
+[; ;./debounce.h: 80: DEBOUNCE OCC_FR_BLK4 = {tBlkOutDebounceTime , 0, 0, 0, &PORTH, 0x8, 0, 1, 1};
+[v _OCC_FR_BLK4 `S540 ~T0 @X0 1 e ]
+[i _OCC_FR_BLK4
+:U ..
+:U ..
+-> _tBlkOutDebounceTime `us
+-> -> -> 0 `i `l `ul
+-> -> 0 `i `a
+-> -> 0 `i `a
+&U _PORTH
+-> -> 8 `i `uc
+-> -> 0 `i `a
+-> -> 1 `i `a
+-> -> 1 `i `a
+..
+..
+]
+"81
+[; ;./debounce.h: 81: DEBOUNCE OCC_FR_STN_1 = {tIoSignalDebounceTime , 0, 0, 0, &PORTH, 0x10, 0, 1, 1};
+[v _OCC_FR_STN_1 `S540 ~T0 @X0 1 e ]
+[i _OCC_FR_STN_1
+:U ..
+:U ..
+-> _tIoSignalDebounceTime `us
+-> -> -> 0 `i `l `ul
+-> -> 0 `i `a
+-> -> 0 `i `a
+&U _PORTH
+-> -> 16 `i `uc
+-> -> 0 `i `a
+-> -> 1 `i `a
+-> -> 1 `i `a
+..
+..
+]
+"82
+[; ;./debounce.h: 82: DEBOUNCE OCC_FR_STN_2 = {tIoSignalDebounceTime , 0, 0, 0, &PORTH, 0x20, 0, 1, 1};
+[v _OCC_FR_STN_2 `S540 ~T0 @X0 1 e ]
+[i _OCC_FR_STN_2
+:U ..
+:U ..
+-> _tIoSignalDebounceTime `us
+-> -> -> 0 `i `l `ul
+-> -> 0 `i `a
+-> -> 0 `i `a
+&U _PORTH
+-> -> 32 `i `uc
+-> -> 0 `i `a
+-> -> 1 `i `a
+-> -> 1 `i `a
+..
+..
+]
+"83
+[; ;./debounce.h: 83: DEBOUNCE OCC_FR_STN_3 = {tIoSignalDebounceTime , 0, 0, 0, &PORTH, 0x40, 0, 1, 1};
+[v _OCC_FR_STN_3 `S540 ~T0 @X0 1 e ]
+[i _OCC_FR_STN_3
+:U ..
+:U ..
+-> _tIoSignalDebounceTime `us
+-> -> -> 0 `i `l `ul
+-> -> 0 `i `a
+-> -> 0 `i `a
+&U _PORTH
+-> -> 64 `i `uc
+-> -> 0 `i `a
+-> -> 1 `i `a
+-> -> 1 `i `a
+..
+..
+]
+"84
+[; ;./debounce.h: 84: DEBOUNCE OCC_FR_STN_10 = {tIoSignalDebounceTime , 0, 0, 0, &PORTH, 0x80, 0, 1, 1};
+[v _OCC_FR_STN_10 `S540 ~T0 @X0 1 e ]
+[i _OCC_FR_STN_10
+:U ..
+:U ..
+-> _tIoSignalDebounceTime `us
+-> -> -> 0 `i `l `ul
+-> -> 0 `i `a
+-> -> 0 `i `a
+&U _PORTH
+-> -> 128 `i `uc
+-> -> 0 `i `a
+-> -> 1 `i `a
+-> -> 1 `i `a
+..
+..
+]
+"86
+[; ;./debounce.h: 86: DEBOUNCE OCC_FR_STN_11 = {tIoSignalDebounceTime , 0, 0, 0, &PORTG, 0x1, 0, 1, 1};
+[v _OCC_FR_STN_11 `S540 ~T0 @X0 1 e ]
+[i _OCC_FR_STN_11
+:U ..
+:U ..
+-> _tIoSignalDebounceTime `us
+-> -> -> 0 `i `l `ul
+-> -> 0 `i `a
+-> -> 0 `i `a
+&U _PORTG
+-> -> 1 `i `uc
+-> -> 0 `i `a
+-> -> 1 `i `a
+-> -> 1 `i `a
+..
+..
+]
+"87
+[; ;./debounce.h: 87: DEBOUNCE OCC_FR_STN_12 = {tIoSignalDebounceTime , 0, 0, 0, &PORTG, 0x2, 0, 1, 1};
+[v _OCC_FR_STN_12 `S540 ~T0 @X0 1 e ]
+[i _OCC_FR_STN_12
+:U ..
+:U ..
+-> _tIoSignalDebounceTime `us
+-> -> -> 0 `i `l `ul
+-> -> 0 `i `a
+-> -> 0 `i `a
+&U _PORTG
+-> -> 2 `i `uc
+-> -> 0 `i `a
+-> -> 1 `i `a
+-> -> 1 `i `a
+..
+..
+]
+"88
+[; ;./debounce.h: 88: DEBOUNCE OCC_FR_T6 = {tIoSignalDebounceTime , 0, 0, 0, &PORTG, 0x4, 0, 1, 1};
+[v _OCC_FR_T6 `S540 ~T0 @X0 1 e ]
+[i _OCC_FR_T6
+:U ..
+:U ..
+-> _tIoSignalDebounceTime `us
+-> -> -> 0 `i `l `ul
+-> -> 0 `i `a
+-> -> 0 `i `a
+&U _PORTG
+-> -> 4 `i `uc
+-> -> 0 `i `a
+-> -> 1 `i `a
+-> -> 1 `i `a
+..
+..
+]
+"89
+[; ;./debounce.h: 89: DEBOUNCE OCC_FR_T3 = {tIoSignalDebounceTime , 0, 0, 0, &PORTG, 0x8, 0, 1, 1};
+[v _OCC_FR_T3 `S540 ~T0 @X0 1 e ]
+[i _OCC_FR_T3
+:U ..
+:U ..
+-> _tIoSignalDebounceTime `us
+-> -> -> 0 `i `l `ul
+-> -> 0 `i `a
+-> -> 0 `i `a
+&U _PORTG
+-> -> 8 `i `uc
+-> -> 0 `i `a
+-> -> 1 `i `a
+-> -> 1 `i `a
+..
+..
+]
+"90
+[; ;./debounce.h: 90: DEBOUNCE CTRL_OFF = {tIoSignalDebounceTime , 0, 0, 0, &PORTG, 0x10, 0, 1, 1};
+[v _CTRL_OFF `S540 ~T0 @X0 1 e ]
+[i _CTRL_OFF
+:U ..
+:U ..
+-> _tIoSignalDebounceTime `us
+-> -> -> 0 `i `l `ul
+-> -> 0 `i `a
+-> -> 0 `i `a
+&U _PORTG
+-> -> 16 `i `uc
+-> -> 0 `i `a
+-> -> 1 `i `a
+-> -> 1 `i `a
+..
+..
+]
+"91
+[; ;./debounce.h: 91: DEBOUNCE OCC_FR_23B = {tIoSignalDebounceTime , 0, 0, 0, &PORTG, 0x20, 0, 1, 1};
+[v _OCC_FR_23B `S540 ~T0 @X0 1 e ]
+[i _OCC_FR_23B
+:U ..
+:U ..
+-> _tIoSignalDebounceTime `us
+-> -> -> 0 `i `l `ul
+-> -> 0 `i `a
+-> -> 0 `i `a
+&U _PORTG
+-> -> 32 `i `uc
+-> -> 0 `i `a
+-> -> 1 `i `a
+-> -> 1 `i `a
+..
+..
+]
+"92
+[; ;./debounce.h: 92: DEBOUNCE OCC_FR_22B = {tIoSignalDebounceTime , 0, 0, 0, &PORTG, 0x40, 0, 1, 1};
+[v _OCC_FR_22B `S540 ~T0 @X0 1 e ]
+[i _OCC_FR_22B
+:U ..
+:U ..
+-> _tIoSignalDebounceTime `us
+-> -> -> 0 `i `l `ul
+-> -> 0 `i `a
+-> -> 0 `i `a
+&U _PORTG
+-> -> 64 `i `uc
+-> -> 0 `i `a
+-> -> 1 `i `a
+-> -> 1 `i `a
+..
+..
+]
+"93
+[; ;./debounce.h: 93: DEBOUNCE OCC_FR_9B = {tIoSignalDebounceTime , 0, 0, 0, &PORTG, 0x80, 0, 1, 1};
+[v _OCC_FR_9B `S540 ~T0 @X0 1 e ]
+[i _OCC_FR_9B
+:U ..
+:U ..
+-> _tIoSignalDebounceTime `us
+-> -> -> 0 `i `l `ul
+-> -> 0 `i `a
+-> -> 0 `i `a
+&U _PORTG
+-> -> 128 `i `uc
+-> -> 0 `i `a
+-> -> 1 `i `a
+-> -> 1 `i `a
+..
+..
+]
+"95
+[; ;./debounce.h: 95: DEBOUNCE OCC_FR_21B = {tIoSignalDebounceTime , 0, 0, 0, &PORTE, 0x40, 0, 1, 1};
+[v _OCC_FR_21B `S540 ~T0 @X0 1 e ]
+[i _OCC_FR_21B
+:U ..
+:U ..
+-> _tIoSignalDebounceTime `us
+-> -> -> 0 `i `l `ul
+-> -> 0 `i `a
+-> -> 0 `i `a
+&U _PORTE
+-> -> 64 `i `uc
+-> -> 0 `i `a
+-> -> 1 `i `a
+-> -> 1 `i `a
+..
+..
+]
+"96
+[; ;./debounce.h: 96: DEBOUNCE VOLTDETECT = {tHallSignalDebounceTime, 0, 0, 0, &PORTE, 0x80, 0, 1, 0};
+[v _VOLTDETECT `S540 ~T0 @X0 1 e ]
+[i _VOLTDETECT
+:U ..
+:U ..
+-> _tHallSignalDebounceTime `us
+-> -> -> 0 `i `l `ul
+-> -> 0 `i `a
+-> -> 0 `i `a
+&U _PORTE
+-> -> 128 `i `uc
+-> -> 0 `i `a
+-> -> 1 `i `a
+-> -> 0 `i `a
+..
+..
+]
+"54 ./mainstation.h
+[; ;./mainstation.h: 54: STATION top;
+[v _top `S542 ~T0 @X0 1 e ]
+"55
+[; ;./mainstation.h: 55: STATION bot;
+[v _bot `S542 ~T0 @X0 1 e ]
+"57
+[; ;./mainstation.h: 57: OCC OCC_TO_21B = {&LATD, 0x40};
+[v _OCC_TO_21B `S538 ~T0 @X0 1 e ]
+[i _OCC_TO_21B
+:U ..
+:U ..
+&U _LATD
+-> -> 64 `i `uc
+..
+..
+]
+"58
+[; ;./mainstation.h: 58: OCC OCC_TO_9B = {&LATD, 0x80};
+[v _OCC_TO_9B `S538 ~T0 @X0 1 e ]
+[i _OCC_TO_9B
+:U ..
+:U ..
+&U _LATD
+-> -> 128 `i `uc
+..
+..
+]
+"59
+[; ;./mainstation.h: 59: OCC OCC_TO_STN_1 = {&LATJ, 0x10};
+[v _OCC_TO_STN_1 `S538 ~T0 @X0 1 e ]
+[i _OCC_TO_STN_1
+:U ..
+:U ..
+&U _LATJ
+-> -> 16 `i `uc
+..
+..
+]
+"60
+[; ;./mainstation.h: 60: OCC OCC_TO_STN_2 = {&LATJ, 0x20};
+[v _OCC_TO_STN_2 `S538 ~T0 @X0 1 e ]
+[i _OCC_TO_STN_2
+:U ..
+:U ..
+&U _LATJ
+-> -> 32 `i `uc
+..
+..
+]
+"61
+[; ;./mainstation.h: 61: OCC OCC_TO_STN_3 = {&LATJ, 0x40};
+[v _OCC_TO_STN_3 `S538 ~T0 @X0 1 e ]
+[i _OCC_TO_STN_3
+:U ..
+:U ..
+&U _LATJ
+-> -> 64 `i `uc
+..
+..
+]
+"62
+[; ;./mainstation.h: 62: OCC OCC_TO_STN_10 = {&LATJ, 0x80};
+[v _OCC_TO_STN_10 `S538 ~T0 @X0 1 e ]
+[i _OCC_TO_STN_10
+:U ..
+:U ..
+&U _LATJ
+-> -> 128 `i `uc
+..
+..
+]
+"63
+[; ;./mainstation.h: 63: OCC OCC_TO_STN_11 = {&LATE, 0x1};
+[v _OCC_TO_STN_11 `S538 ~T0 @X0 1 e ]
+[i _OCC_TO_STN_11
+:U ..
+:U ..
+&U _LATE
+-> -> 1 `i `uc
+..
+..
+]
+"64
+[; ;./mainstation.h: 64: OCC OCC_TO_STN_12 = {&LATE, 0x2};
+[v _OCC_TO_STN_12 `S538 ~T0 @X0 1 e ]
+[i _OCC_TO_STN_12
+:U ..
+:U ..
+&U _LATE
+-> -> 2 `i `uc
+..
+..
+]
+"36 ./communication.h
+[; ;./communication.h: 36:     const uint8_t udpTrans_t_length = (sizeof(udpTrans_t) / sizeof(uint8_t));
+[v _udpTrans_t_length `Cuc ~T0 @X0 1 e ]
+[i _udpTrans_t_length
+-> / -> # `S544 `ui -> # `uc `ui `uc
+]
+"37
+[; ;./communication.h: 37:     const uint8_t udpTrans_t_data_length = udpTrans_t_length - 2;
+[v _udpTrans_t_data_length `Cuc ~T0 @X0 1 e ]
+[i _udpTrans_t_data_length
+-> - -> _udpTrans_t_length `i -> 2 `i `uc
+]
+"59 ./mountaintrack.h
+[; ;./mountaintrack.h: 59: const uint8_t sizeOfMntStationStruct = sizeof(MNTSTATION);
+[v _sizeOfMntStationStruct `Cuc ~T0 @X0 1 e ]
+[i _sizeOfMntStationStruct
+-> -> # `S546 `ui `uc
+]
+"61
+[; ;./mountaintrack.h: 61: MNTSTATION waldsee;
+[v _waldsee `S546 ~T0 @X0 1 e ]
+"63
+[; ;./mountaintrack.h: 63: MNTSTATION waldberg;
+[v _waldberg `S546 ~T0 @X0 1 e ]
+"65
+[; ;./mountaintrack.h: 65: OCC OCC_TO_T6 = {&LATE, 0x8};
+[v _OCC_TO_T6 `S538 ~T0 @X0 1 e ]
+[i _OCC_TO_T6
+:U ..
+:U ..
+&U _LATE
+-> -> 8 `i `uc
+..
+..
+]
+"66
+[; ;./mountaintrack.h: 66: OCC OCC_TO_T3 = {&LATE, 0x4};
+[v _OCC_TO_T3 `S538 ~T0 @X0 1 e ]
+[i _OCC_TO_T3
+:U ..
+:U ..
+&U _LATE
+-> -> 4 `i `uc
+..
+..
+]
+"67
+[; ;./mountaintrack.h: 67: REL REL_T4 = {&LATD, 0x10};
+[v _REL_T4 `S538 ~T0 @X0 1 e ]
+[i _REL_T4
+:U ..
+:U ..
+&U _LATD
+-> -> 16 `i `uc
+..
+..
+]
+"68
+[; ;./mountaintrack.h: 68: REL REL_T5 = {&LATD, 0x20};
+[v _REL_T5 `S538 ~T0 @X0 1 e ]
+[i _REL_T5
+:U ..
+:U ..
+&U _LATD
+-> -> 32 `i `uc
+..
+..
+]
+"39 ./pathway.h
+[; ;./pathway.h: 39: WS WS_TOP = {&LATC, 0x10, &LATC, 0x20, &LATC, 0x40, &LATC, 0x80,0,0,0,0};
+[v _WS_TOP `S539 ~T0 @X0 1 e ]
+[i _WS_TOP
+:U ..
+:U ..
+&U _LATC
+-> -> 16 `i `uc
+&U _LATC
+-> -> 32 `i `uc
+&U _LATC
+-> -> 64 `i `uc
+&U _LATC
+-> -> 128 `i `uc
+-> -> 0 `i `*Vuc
+-> -> 0 `i `uc
+-> -> 0 `i `*Vuc
+-> -> 0 `i `uc
+..
+..
+]
+"40
+[; ;./pathway.h: 40: WS WS_BOT = {&LATC, 0x01, &LATC, 0x02, &LATC, 0x04, &LATC, 0x08,0,0,0,0};
+[v _WS_BOT `S539 ~T0 @X0 1 e ]
+[i _WS_BOT
+:U ..
+:U ..
+&U _LATC
+-> -> 1 `i `uc
+&U _LATC
+-> -> 2 `i `uc
+&U _LATC
+-> -> 4 `i `uc
+&U _LATC
+-> -> 8 `i `uc
+-> -> 0 `i `*Vuc
+-> -> 0 `i `uc
+-> -> 0 `i `*Vuc
+-> -> 0 `i `uc
+..
+..
+]
+"42
+[; ;./pathway.h: 42: WS WS_WALDSEE = {&LATD, 0x01};
+[v _WS_WALDSEE `S539 ~T0 @X0 1 e ]
+[i _WS_WALDSEE
+:U ..
+:U ..
+&U _LATD
+-> -> 1 `i `uc
+..
+..
+]
+"43
+[; ;./pathway.h: 43: WS WS_WALDBERG = {&LATD, 0x08};
+[v _WS_WALDBERG `S539 ~T0 @X0 1 e ]
+[i _WS_WALDBERG
+:U ..
+:U ..
+&U _LATD
+-> -> 8 `i `uc
+..
+..
+]
+"15 ./tracksignal.h
+[; ;./tracksignal.h: 15: SIG SIG_TOP = {&LATB, 0x01, &LATB, 0x02, &LATJ, 0x01, &LATJ, 0x02, &LATJ, 0x04, &LATJ, 0x08};
+[v _SIG_TOP `S539 ~T0 @X0 1 e ]
+[i _SIG_TOP
+:U ..
+:U ..
+&U _LATB
+-> -> 1 `i `uc
+&U _LATB
+-> -> 2 `i `uc
+&U _LATJ
+-> -> 1 `i `uc
+&U _LATJ
+-> -> 2 `i `uc
+&U _LATJ
+-> -> 4 `i `uc
+&U _LATJ
+-> -> 8 `i `uc
+..
+..
+]
+"16
+[; ;./tracksignal.h: 16: SIG SIG_BOT = {&LATB, 0x04, &LATB, 0x08, &LATB, 0x10, &LATB, 0x20, &LATB, 0x40, &LATB, 0x80};
+[v _SIG_BOT `S539 ~T0 @X0 1 e ]
+[i _SIG_BOT
+:U ..
+:U ..
+&U _LATB
+-> -> 4 `i `uc
+&U _LATB
+-> -> 8 `i `uc
+&U _LATB
+-> -> 16 `i `uc
+&U _LATB
+-> -> 32 `i `uc
+&U _LATB
+-> -> 64 `i `uc
+&U _LATB
+-> -> 128 `i `uc
+..
+..
+]
+"15 mainstation.c
+[; ;mainstation.c: 15: void INITxSTATION(void)
+[v _INITxSTATION `(v ~T0 @X0 1 ef ]
+"16
+[; ;mainstation.c: 16: {
+{
+[e :U _INITxSTATION ]
+[f ]
+"17
+[; ;mainstation.c: 17:     INITxPATHWAYxSTATION(&top, &bot);
+[e ( _INITxPATHWAYxSTATION (2 , &U _top &U _bot ]
+"18
+[; ;mainstation.c: 18:     top.name = MAIN_STATION_TOP;
+[e = . _top 0 . `E4941 1 ]
+"19
+[; ;mainstation.c: 19:     top.AppState = INIT;
+[e = . _top 1 . `E4962 5 ]
+"20
+[; ;mainstation.c: 20:     top.getFreightLeaveStation = &HALL_BLK_13;
+[e = . _top 2 &U _HALL_BLK_13 ]
+"21
+[; ;mainstation.c: 21:     top.getFreightEnterStation = &HALL_BLK_9B;
+[e = . _top 3 &U _HALL_BLK_9B ]
+"22
+[; ;mainstation.c: 22:     top.setOccBlkIn = &OCC_TO_9B;
+[e = . _top 4 &U _OCC_TO_9B ]
+"23
+[; ;mainstation.c: 23:     top.getOccBlkIn = &OCC_FR_9B;
+[e = . _top 5 &U _OCC_FR_9B ]
+"24
+[; ;mainstation.c: 24:     top.getOccBlkOut = &OCC_FR_BLK13;
+[e = . _top 6 &U _OCC_FR_BLK13 ]
+"25
+[; ;mainstation.c: 25:     top.setPath = &WS_TOP;
+[e = . _top 7 &U _WS_TOP ]
+"26
+[; ;mainstation.c: 26:     top.prevPath = 0;
+[e = . _top 8 -> -> 0 `i `uc ]
+"27
+[; ;mainstation.c: 27:     top.newPath = 0;
+[e = . _top 9 -> -> 0 `i `uc ]
+"28
+[; ;mainstation.c: 28:     top.setSignal = &SIG_TOP;
+[e = . _top 10 &U _SIG_TOP ]
+"29
+[; ;mainstation.c: 29:     top.setSignalTime = 0;
+[e = . _top 11 -> -> -> 0 `i `l `ul ]
+"31
+[; ;mainstation.c: 31:     top.stnTrack1.stnName = STNTRACK1;
+[e = . . _top 12 0 . `E4950 2 ]
+"32
+[; ;mainstation.c: 32:     top.stnTrack1.trackNr = TRACK10;
+[e = . . _top 12 5 . `E4999 11 ]
+"33
+[; ;mainstation.c: 33:     top.stnTrack1.stnState = STN_IDLE;
+[e = . . _top 12 1 . `E4962 20 ]
+"34
+[; ;mainstation.c: 34:     top.stnTrack1.stnSequence = SEQ_IDLE;
+[e = . . _top 12 2 . `E4962 21 ]
+"35
+[; ;mainstation.c: 35:     top.stnTrack1.setOccStn = &OCC_TO_STN_10;
+[e = . . _top 12 8 &U _OCC_TO_STN_10 ]
+"36
+[; ;mainstation.c: 36:     top.stnTrack1.getOccStn = &OCC_FR_STN_10;
+[e = . . _top 12 9 &U _OCC_FR_STN_10 ]
+"38
+[; ;mainstation.c: 38:     top.stnTrack2.stnName = STNTRACK2;
+[e = . . _top 13 0 . `E4950 3 ]
+"39
+[; ;mainstation.c: 39:     top.stnTrack2.trackNr = TRACK11;
+[e = . . _top 13 5 . `E4999 12 ]
+"40
+[; ;mainstation.c: 40:     top.stnTrack2.stnState = STN_IDLE;
+[e = . . _top 13 1 . `E4962 20 ]
+"41
+[; ;mainstation.c: 41:     top.stnTrack2.stnSequence = SEQ_IDLE;
+[e = . . _top 13 2 . `E4962 21 ]
+"42
+[; ;mainstation.c: 42:     top.stnTrack2.setOccStn = &OCC_TO_STN_11;
+[e = . . _top 13 8 &U _OCC_TO_STN_11 ]
+"43
+[; ;mainstation.c: 43:     top.stnTrack2.getOccStn = &OCC_FR_STN_11;
+[e = . . _top 13 9 &U _OCC_FR_STN_11 ]
+"45
+[; ;mainstation.c: 45:     top.stnTrack3.stnName = STNTRACK3;
+[e = . . _top 14 0 . `E4950 4 ]
+"46
+[; ;mainstation.c: 46:     top.stnTrack3.trackNr = TRACK12;
+[e = . . _top 14 5 . `E4999 13 ]
+"47
+[; ;mainstation.c: 47:     top.stnTrack3.stnState = STN_IDLE;
+[e = . . _top 14 1 . `E4962 20 ]
+"48
+[; ;mainstation.c: 48:     top.stnTrack3.stnSequence = SEQ_IDLE;
+[e = . . _top 14 2 . `E4962 21 ]
+"49
+[; ;mainstation.c: 49:     top.stnTrack3.setOccStn = &OCC_TO_STN_12;
+[e = . . _top 14 8 &U _OCC_TO_STN_12 ]
+"50
+[; ;mainstation.c: 50:     top.stnTrack3.getOccStn = &OCC_FR_STN_12;
+[e = . . _top 14 9 &U _OCC_FR_STN_12 ]
+"52
+[; ;mainstation.c: 52:     bot.name = MAIN_STATION_BOT;
+[e = . _bot 0 . `E4941 2 ]
+"53
+[; ;mainstation.c: 53:     bot.AppState = INIT;
+[e = . _bot 1 . `E4962 5 ]
+"54
+[; ;mainstation.c: 54:     bot.getFreightLeaveStation = &HALL_BLK_4A;
+[e = . _bot 2 &U _HALL_BLK_4A ]
+"55
+[; ;mainstation.c: 55:     bot.getFreightEnterStation = &HALL_BLK_21A;
+[e = . _bot 3 &U _HALL_BLK_21A ]
+"56
+[; ;mainstation.c: 56:     bot.setOccBlkIn = &OCC_TO_21B;
+[e = . _bot 4 &U _OCC_TO_21B ]
+"57
+[; ;mainstation.c: 57:     bot.getOccBlkIn = &OCC_FR_21B;
+[e = . _bot 5 &U _OCC_FR_21B ]
+"58
+[; ;mainstation.c: 58:     bot.getOccBlkOut = &OCC_FR_BLK4;
+[e = . _bot 6 &U _OCC_FR_BLK4 ]
+"59
+[; ;mainstation.c: 59:     bot.setPath = &WS_BOT;
+[e = . _bot 7 &U _WS_BOT ]
+"60
+[; ;mainstation.c: 60:     bot.prevPath = 0;
+[e = . _bot 8 -> -> 0 `i `uc ]
+"61
+[; ;mainstation.c: 61:     bot.newPath = 0;
+[e = . _bot 9 -> -> 0 `i `uc ]
+"62
+[; ;mainstation.c: 62:     bot.setSignal = &SIG_BOT;
+[e = . _bot 10 &U _SIG_BOT ]
+"63
+[; ;mainstation.c: 63:     bot.setSignalTime = 0;
+[e = . _bot 11 -> -> -> 0 `i `l `ul ]
+"65
+[; ;mainstation.c: 65:     bot.stnTrack1.stnName = STNTRACK1;
+[e = . . _bot 12 0 . `E4950 2 ]
+"66
+[; ;mainstation.c: 66:     bot.stnTrack1.trackNr = TRACK1;
+[e = . . _bot 12 5 . `E4999 8 ]
+"67
+[; ;mainstation.c: 67:     bot.stnTrack1.stnState = STN_IDLE;
+[e = . . _bot 12 1 . `E4962 20 ]
+"68
+[; ;mainstation.c: 68:     bot.stnTrack1.stnSequence = SEQ_IDLE;
+[e = . . _bot 12 2 . `E4962 21 ]
+"69
+[; ;mainstation.c: 69:     bot.stnTrack1.setOccStn = &OCC_TO_STN_1;
+[e = . . _bot 12 8 &U _OCC_TO_STN_1 ]
+"70
+[; ;mainstation.c: 70:     bot.stnTrack1.getOccStn = &OCC_FR_STN_1;
+[e = . . _bot 12 9 &U _OCC_FR_STN_1 ]
+"72
+[; ;mainstation.c: 72:     bot.stnTrack2.stnName = STNTRACK2;
+[e = . . _bot 13 0 . `E4950 3 ]
+"73
+[; ;mainstation.c: 73:     bot.stnTrack2.trackNr = TRACK2;
+[e = . . _bot 13 5 . `E4999 9 ]
+"74
+[; ;mainstation.c: 74:     bot.stnTrack2.stnState = STN_IDLE;
+[e = . . _bot 13 1 . `E4962 20 ]
+"75
+[; ;mainstation.c: 75:     bot.stnTrack2.stnSequence = SEQ_IDLE;
+[e = . . _bot 13 2 . `E4962 21 ]
+"76
+[; ;mainstation.c: 76:     bot.stnTrack2.setOccStn = &OCC_TO_STN_2;
+[e = . . _bot 13 8 &U _OCC_TO_STN_2 ]
+"77
+[; ;mainstation.c: 77:     bot.stnTrack2.getOccStn = &OCC_FR_STN_2;
+[e = . . _bot 13 9 &U _OCC_FR_STN_2 ]
+"79
+[; ;mainstation.c: 79:     bot.stnTrack3.stnName = STNTRACK3;
+[e = . . _bot 14 0 . `E4950 4 ]
+"80
+[; ;mainstation.c: 80:     bot.stnTrack3.trackNr = TRACK3;
+[e = . . _bot 14 5 . `E4999 10 ]
+"81
+[; ;mainstation.c: 81:     bot.stnTrack3.stnState = STN_IDLE;
+[e = . . _bot 14 1 . `E4962 20 ]
+"82
+[; ;mainstation.c: 82:     bot.stnTrack3.stnSequence = SEQ_IDLE;
+[e = . . _bot 14 2 . `E4962 21 ]
+"83
+[; ;mainstation.c: 83:     bot.stnTrack3.setOccStn = &OCC_TO_STN_3;
+[e = . . _bot 14 8 &U _OCC_TO_STN_3 ]
+"84
+[; ;mainstation.c: 84:     bot.stnTrack3.getOccStn = &OCC_FR_STN_3;
+[e = . . _bot 14 9 &U _OCC_FR_STN_3 ]
+"86
+[; ;mainstation.c: 86: }
+[e :UE 547 ]
+}
+"88
+[; ;mainstation.c: 88: void UPDATExSTATION(STATION *self)
+[v _UPDATExSTATION `(v ~T0 @X0 1 ef1`*S542 ]
+"89
+[; ;mainstation.c: 89: {
+{
+[e :U _UPDATExSTATION ]
+"88
+[; ;mainstation.c: 88: void UPDATExSTATION(STATION *self)
+[v _self `*S542 ~T0 @X0 1 r1 ]
+"89
+[; ;mainstation.c: 89: {
+[f ]
+"90
+[; ;mainstation.c: 90:     switch(self->AppState)
+[e $U 550  ]
+"91
+[; ;mainstation.c: 91:     {
+{
+"93
+[; ;mainstation.c: 93:         case INIT:
+[e :U 551 ]
+"94
+[; ;mainstation.c: 94:             CREATExTASKxSTATUSxMESSAGE(self->name,
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> -> 0 `i `uc -> . *U _self 1 `uc -> . `E4999 0 `uc ]
+"99
+[; ;mainstation.c: 99:             self->getFreightLeaveStation->value = 0;
+[e = . *U . *U _self 2 6 -> -> 0 `i `a ]
+"100
+[; ;mainstation.c: 100:             self->getFreightEnterStation->value = 0;
+[e = . *U . *U _self 3 6 -> -> 0 `i `a ]
+"106
+[; ;mainstation.c: 106:             SETxOCC(self->setOccBlkIn, 1);
+[e ( _SETxOCC (2 , . *U _self 4 -> -> 1 `i `a ]
+"107
+[; ;mainstation.c: 107:             SETxOCC(self->stnTrack1.setOccStn , 1);
+[e ( _SETxOCC (2 , . . *U _self 12 8 -> -> 1 `i `a ]
+"108
+[; ;mainstation.c: 108:             SETxOCC(self->stnTrack2.setOccStn , 1);
+[e ( _SETxOCC (2 , . . *U _self 13 8 -> -> 1 `i `a ]
+"109
+[; ;mainstation.c: 109:             SETxOCC(self->stnTrack3.setOccStn , 1);
+[e ( _SETxOCC (2 , . . *U _self 14 8 -> -> 1 `i `a ]
+"114
+[; ;mainstation.c: 114:             if(self->name == MAIN_STATION_TOP){
+[e $ ! == -> . *U _self 0 `ui -> . `E4941 1 `ui 552  ]
+{
+"115
+[; ;mainstation.c: 115:                 SETxSIGNAL(self, 10, SIG_RED);
+[e ( _SETxSIGNAL (3 , , _self -> -> 10 `i `E4999 . `E4962 29 ]
+"116
+[; ;mainstation.c: 116:                 SETxSIGNAL(self, 11, SIG_RED);
+[e ( _SETxSIGNAL (3 , , _self -> -> 11 `i `E4999 . `E4962 29 ]
+"117
+[; ;mainstation.c: 117:                 SETxSIGNAL(self, 12, SIG_RED);
+[e ( _SETxSIGNAL (3 , , _self -> -> 12 `i `E4999 . `E4962 29 ]
+"118
+[; ;mainstation.c: 118:             }
+}
+[e $U 553  ]
+"119
+[; ;mainstation.c: 119:             else if(self->name == MAIN_STATION_BOT){
+[e :U 552 ]
+[e $ ! == -> . *U _self 0 `ui -> . `E4941 2 `ui 554  ]
+{
+"120
+[; ;mainstation.c: 120:                 SETxSIGNAL(self, 1, SIG_RED);
+[e ( _SETxSIGNAL (3 , , _self -> -> 1 `i `E4999 . `E4962 29 ]
+"121
+[; ;mainstation.c: 121:                 SETxSIGNAL(self, 2, SIG_RED);
+[e ( _SETxSIGNAL (3 , , _self -> -> 2 `i `E4999 . `E4962 29 ]
+"122
+[; ;mainstation.c: 122:                 SETxSIGNAL(self, 3, SIG_RED);
+[e ( _SETxSIGNAL (3 , , _self -> -> 3 `i `E4999 . `E4962 29 ]
+"123
+[; ;mainstation.c: 123:             }
+}
+[e :U 554 ]
+[e :U 553 ]
+"126
+[; ;mainstation.c: 126:             if(self->stnTrack1.getOccStn->value){
+[e $ ! != -> . *U . . *U _self 12 9 6 `i -> 0 `i 555  ]
+{
+"130
+[; ;mainstation.c: 130:                 self->stnTrack1.stnOccupied = 1;
+[e = . . *U _self 12 4 -> -> 1 `i `a ]
+"131
+[; ;mainstation.c: 131:                 self->stnTrack1.stnState = STN_WAIT;
+[e = . . *U _self 12 1 . `E4962 19 ]
+"132
+[; ;mainstation.c: 132:                 self->stnTrack1.tWaitTime = tTrainWaitTime + (GETxRANDOMxNUMBER() << tRandomShift);
+[e = . . *U _self 12 7 + _tTrainWaitTime -> << -> ( _GETxRANDOMxNUMBER ..  `ui -> _tRandomShift `i `ul ]
+"134
+[; ;mainstation.c: 134:             }
+}
+[e $U 556  ]
+"135
+[; ;mainstation.c: 135:             else{
+[e :U 555 ]
+{
+"136
+[; ;mainstation.c: 136:                 self->stnTrack1.stnOccupied = 0;
+[e = . . *U _self 12 4 -> -> 0 `i `a ]
+"137
+[; ;mainstation.c: 137:                 self->stnTrack1.stnState = STN_IDLE;
+[e = . . *U _self 12 1 . `E4962 20 ]
+"138
+[; ;mainstation.c: 138:             }
+}
+[e :U 556 ]
+"139
+[; ;mainstation.c: 139:             CREATExTASKxSTATUSxMESSAGE(self->name,
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 12 0 `uc -> . . *U _self 12 1 `uc -> . `E4999 0 `uc ]
+"145
+[; ;mainstation.c: 145:             if(self->stnTrack2.getOccStn->value){
+[e $ ! != -> . *U . . *U _self 13 9 6 `i -> 0 `i 557  ]
+{
+"149
+[; ;mainstation.c: 149:                 self->stnTrack2.stnOccupied = 1;
+[e = . . *U _self 13 4 -> -> 1 `i `a ]
+"150
+[; ;mainstation.c: 150:                 self->stnTrack2.stnState = STN_WAIT;
+[e = . . *U _self 13 1 . `E4962 19 ]
+"151
+[; ;mainstation.c: 151:                 self->stnTrack2.tWaitTime = tTrainWaitTime + (GETxRANDOMxNUMBER() << tRandomShift);
+[e = . . *U _self 13 7 + _tTrainWaitTime -> << -> ( _GETxRANDOMxNUMBER ..  `ui -> _tRandomShift `i `ul ]
+"152
+[; ;mainstation.c: 152:             }
+}
+[e $U 558  ]
+"153
+[; ;mainstation.c: 153:             else{
+[e :U 557 ]
+{
+"154
+[; ;mainstation.c: 154:                 self->stnTrack2.stnOccupied = 0;
+[e = . . *U _self 13 4 -> -> 0 `i `a ]
+"155
+[; ;mainstation.c: 155:                 self->stnTrack2.stnState = STN_IDLE;
+[e = . . *U _self 13 1 . `E4962 20 ]
+"156
+[; ;mainstation.c: 156:             }
+}
+[e :U 558 ]
+"157
+[; ;mainstation.c: 157:             CREATExTASKxSTATUSxMESSAGE(self->name,
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 13 0 `uc -> . . *U _self 13 1 `uc -> . `E4999 0 `uc ]
+"163
+[; ;mainstation.c: 163:             if(self->stnTrack3.getOccStn->value){
+[e $ ! != -> . *U . . *U _self 14 9 6 `i -> 0 `i 559  ]
+{
+"166
+[; ;mainstation.c: 166:                 self->stnTrack3.stnOccupied = 1;
+[e = . . *U _self 14 4 -> -> 1 `i `a ]
+"167
+[; ;mainstation.c: 167:                 self->stnTrack3.stnState = STN_OUTBOUND;
+[e = . . *U _self 14 1 . `E4962 17 ]
+"168
+[; ;mainstation.c: 168:             }
+}
+[e $U 560  ]
+"170
+[; ;mainstation.c: 170:             else if(self->getOccBlkIn->value){
+[e :U 559 ]
+[e $ ! != -> . *U . *U _self 5 6 `i -> 0 `i 561  ]
+{
+"178
+[; ;mainstation.c: 178:                 if(self->getOccBlkOut->value){
+[e $ ! != -> . *U . *U _self 6 6 `i -> 0 `i 562  ]
+{
+"183
+[; ;mainstation.c: 183:                     self->stnTrack3.stnState = STN_INBOUND;
+[e = . . *U _self 14 1 . `E4962 16 ]
+"184
+[; ;mainstation.c: 184:                 }
+}
+[e $U 563  ]
+"186
+[; ;mainstation.c: 186:                 else{
+[e :U 562 ]
+{
+"190
+[; ;mainstation.c: 190:                     self->stnTrack3.stnState = STN_PASSING;
+[e = . . *U _self 14 1 . `E4962 18 ]
+"191
+[; ;mainstation.c: 191:                 }
+}
+[e :U 563 ]
+"192
+[; ;mainstation.c: 192:             }
+}
+[e $U 564  ]
+"193
+[; ;mainstation.c: 193:             else{
+[e :U 561 ]
+{
+"194
+[; ;mainstation.c: 194:                 self->stnTrack3.stnOccupied = 0;
+[e = . . *U _self 14 4 -> -> 0 `i `a ]
+"195
+[; ;mainstation.c: 195:                 self->stnTrack3.stnState = STN_IDLE;
+[e = . . *U _self 14 1 . `E4962 20 ]
+"196
+[; ;mainstation.c: 196:             }
+}
+[e :U 564 ]
+[e :U 560 ]
+"197
+[; ;mainstation.c: 197:             CREATExTASKxSTATUSxMESSAGE(self->name,
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 14 0 `uc -> . . *U _self 14 1 `uc -> . `E4999 0 `uc ]
+"203
+[; ;mainstation.c: 203:             self->AppState = RUN;
+[e = . *U _self 1 . `E4962 7 ]
+"204
+[; ;mainstation.c: 204:             CREATExTASKxSTATUSxMESSAGE(self->name,
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> -> 0 `i `uc -> . *U _self 1 `uc -> . `E4999 0 `uc ]
+"208
+[; ;mainstation.c: 208:             break;
+[e $U 549  ]
+"212
+[; ;mainstation.c: 212:         case RUN:
+[e :U 565 ]
+"220
+[; ;mainstation.c: 220:             if(1 == self->getOccBlkIn->value &&
+[e $ ! && && && && && && == -> 1 `i -> . *U . *U _self 5 6 `i != -> . `E4962 16 `ui -> . . *U _self 12 1 `ui != -> . `E4962 16 `ui -> . . *U _self 13 1 `ui != -> . `E4962 16 `ui -> . . *U _self 14 1 `ui != -> . `E4962 18 `ui -> . . *U _self 12 1 `ui != -> . `E4962 18 `ui -> . . *U _self 13 1 `ui != -> . `E4962 18 `ui -> . . *U _self 14 1 `ui 566  ]
+"226
+[; ;mainstation.c: 226:                     STN_PASSING != self->stnTrack3.stnState){
+{
+"228
+[; ;mainstation.c: 228:                 if(0 == self->getFreightEnterStation->value){
+[e $ ! == -> 0 `i -> . *U . *U _self 3 6 `i 567  ]
+{
+"230
+[; ;mainstation.c: 230:                     if(0 == self->stnTrack1.stnOccupied &&
+[e $ ! && && && && == -> 0 `i -> . . *U _self 12 4 `i != -> . `E4962 16 `ui -> . . *U _self 13 1 `ui != -> . `E4962 16 `ui -> . . *U _self 14 1 `ui != -> . `E4962 18 `ui -> . . *U _self 13 1 `ui != -> . `E4962 18 `ui -> . . *U _self 14 1 `ui 568  ]
+"235
+[; ;mainstation.c: 235:                             ){
+{
+"236
+[; ;mainstation.c: 236:                         self->stnTrack1.stnState = STN_INBOUND;
+[e = . . *U _self 12 1 . `E4962 16 ]
+"237
+[; ;mainstation.c: 237:                         CREATExTASKxSTATUSxMESSAGE(self->name,
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 12 0 `uc -> . . *U _self 12 1 `uc -> . `E4999 0 `uc ]
+"241
+[; ;mainstation.c: 241:                     }
+}
+[e $U 569  ]
+"243
+[; ;mainstation.c: 243:                     else if(0 == self->stnTrack2.stnOccupied &&
+[e :U 568 ]
+[e $ ! && && && && == -> 0 `i -> . . *U _self 13 4 `i != -> . `E4962 16 `ui -> . . *U _self 12 1 `ui != -> . `E4962 16 `ui -> . . *U _self 14 1 `ui != -> . `E4962 18 `ui -> . . *U _self 12 1 `ui != -> . `E4962 18 `ui -> . . *U _self 14 1 `ui 570  ]
+"248
+[; ;mainstation.c: 248:                             ){
+{
+"249
+[; ;mainstation.c: 249:                         self->stnTrack2.stnState = STN_INBOUND;
+[e = . . *U _self 13 1 . `E4962 16 ]
+"250
+[; ;mainstation.c: 250:                         CREATExTASKxSTATUSxMESSAGE(self->name,
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 13 0 `uc -> . . *U _self 13 1 `uc -> . `E4999 0 `uc ]
+"254
+[; ;mainstation.c: 254:                     }
+}
+[e :U 570 ]
+[e :U 569 ]
+"263
+[; ;mainstation.c: 263:                 }
+}
+[e $U 571  ]
+"271
+[; ;mainstation.c: 271:                 else if(0 == self->getOccBlkOut->value &&
+[e :U 567 ]
+[e $ ! && && && && && && && == -> 0 `i -> . *U . *U _self 6 6 `i == -> 0 `i -> . . *U _self 14 4 `i != -> . `E4962 16 `ui -> . . *U _self 12 1 `ui != -> . `E4962 16 `ui -> . . *U _self 13 1 `ui != -> . `E4962 18 `ui -> . . *U _self 12 1 `ui != -> . `E4962 18 `ui -> . . *U _self 13 1 `ui != -> . `E4962 17 `ui -> . . *U _self 12 1 `ui != -> . `E4962 17 `ui -> . . *U _self 13 1 `ui 572  ]
+"279
+[; ;mainstation.c: 279:                         ){
+{
+"280
+[; ;mainstation.c: 280:                     self->stnTrack3.stnState = STN_PASSING;
+[e = . . *U _self 14 1 . `E4962 18 ]
+"281
+[; ;mainstation.c: 281:                     if(1 == self->getFreightEnterStation->value){
+[e $ ! == -> 1 `i -> . *U . *U _self 3 6 `i 573  ]
+{
+"282
+[; ;mainstation.c: 282:                         self->getFreightEnterStation->value = 0;
+[e = . *U . *U _self 3 6 -> -> 0 `i `a ]
+"283
+[; ;mainstation.c: 283:                     }
+}
+[e :U 573 ]
+"284
+[; ;mainstation.c: 284:                     CREATExTASKxSTATUSxMESSAGE(self->name,
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 14 0 `uc -> . . *U _self 14 1 `uc -> . `E4999 0 `uc ]
+"288
+[; ;mainstation.c: 288:                 }
+}
+[e $U 574  ]
+"293
+[; ;mainstation.c: 293:                 else if(1 == self->getOccBlkOut->value){
+[e :U 572 ]
+[e $ ! == -> 1 `i -> . *U . *U _self 6 6 `i 575  ]
+{
+"294
+[; ;mainstation.c: 294:                     if(0 == self->stnTrack3.stnOccupied &&
+[e $ ! && && && && == -> 0 `i -> . . *U _self 14 4 `i != -> . `E4962 16 `ui -> . . *U _self 12 1 `ui != -> . `E4962 16 `ui -> . . *U _self 13 1 `ui != -> . `E4962 18 `ui -> . . *U _self 12 1 `ui != -> . `E4962 18 `ui -> . . *U _self 13 1 `ui 576  ]
+"299
+[; ;mainstation.c: 299:                             ){
+{
+"300
+[; ;mainstation.c: 300:                         self->stnTrack3.stnState = STN_INBOUND;
+[e = . . *U _self 14 1 . `E4962 16 ]
+"301
+[; ;mainstation.c: 301:                         CREATExTASKxSTATUSxMESSAGE(self->name,
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 14 0 `uc -> . . *U _self 14 1 `uc -> . `E4999 0 `uc ]
+"308
+[; ;mainstation.c: 308:                     }
+}
+[e $U 577  ]
+"323
+[; ;mainstation.c: 323:                     else if(0 == self->stnTrack2.stnOccupied &&
+[e :U 576 ]
+[e $ ! && && && && == -> 0 `i -> . . *U _self 13 4 `i != -> . `E4962 16 `ui -> . . *U _self 12 1 `ui != -> . `E4962 16 `ui -> . . *U _self 14 1 `ui != -> . `E4962 18 `ui -> . . *U _self 12 1 `ui != -> . `E4962 18 `ui -> . . *U _self 14 1 `ui 578  ]
+"328
+[; ;mainstation.c: 328:                             ){
+{
+"329
+[; ;mainstation.c: 329:                         self->stnTrack2.stnState = STN_INBOUND;
+[e = . . *U _self 13 1 . `E4962 16 ]
+"330
+[; ;mainstation.c: 330:                     }
+}
+[e :U 578 ]
+[e :U 577 ]
+"331
+[; ;mainstation.c: 331:                 }
+}
+[e :U 575 ]
+[e :U 574 ]
+[e :U 571 ]
+"332
+[; ;mainstation.c: 332:             }
+}
+[e :U 566 ]
+"334
+[; ;mainstation.c: 334:             MAINxSTATIONxINBOUND(self);
+[e ( _MAINxSTATIONxINBOUND (1 _self ]
+"336
+[; ;mainstation.c: 336:             MAINxSTATIONxPASSING(self);
+[e ( _MAINxSTATIONxPASSING (1 _self ]
+"338
+[; ;mainstation.c: 338:             MAINxSTATIONxOUTBOUND(self);
+[e ( _MAINxSTATIONxOUTBOUND (1 _self ]
+"339
+[; ;mainstation.c: 339:             break;
+[e $U 549  ]
+"341
+[; ;mainstation.c: 341:         default:
+[e :U 579 ]
+"342
+[; ;mainstation.c: 342:             self->AppState = INIT;
+[e = . *U _self 1 . `E4962 5 ]
+"343
+[; ;mainstation.c: 343:             break;
+[e $U 549  ]
+"344
+[; ;mainstation.c: 344:     }
+}
+[e $U 549  ]
+[e :U 550 ]
+[e [\ -> . *U _self 1 `ui , $ -> . `E4962 5 `ui 551
+ , $ -> . `E4962 7 `ui 565
+ 579 ]
+[e :U 549 ]
+"345
+[; ;mainstation.c: 345: }
+[e :UE 548 ]
+}
+"352
+[; ;mainstation.c: 352: void UPDATExSTATIONxTRAINxWAIT(STATION *self)
+[v _UPDATExSTATIONxTRAINxWAIT `(v ~T0 @X0 1 ef1`*S542 ]
+"353
+[; ;mainstation.c: 353: {
+{
+[e :U _UPDATExSTATIONxTRAINxWAIT ]
+"352
+[; ;mainstation.c: 352: void UPDATExSTATIONxTRAINxWAIT(STATION *self)
+[v _self `*S542 ~T0 @X0 1 r1 ]
+"353
+[; ;mainstation.c: 353: {
+[f ]
+"355
+[; ;mainstation.c: 355:     uint32_t millis = GETxMILLIS();
+[v _millis `ul ~T0 @X0 1 a ]
+[e = _millis ( _GETxMILLIS ..  ]
+"357
+[; ;mainstation.c: 357:     if(STN_WAIT == self->stnTrack1.stnState){
+[e $ ! == -> . `E4962 19 `ui -> . . *U _self 12 1 `ui 581  ]
+{
+"358
+[; ;mainstation.c: 358:         if((millis - self->stnTrack1.tCountTime) > self->stnTrack1.tWaitTime){
+[e $ ! > - _millis . . *U _self 12 6 . . *U _self 12 7 582  ]
+{
+"359
+[; ;mainstation.c: 359:             if(STN_OUTBOUND != self->stnTrack2.stnState &&
+[e $ ! && && && != -> . `E4962 17 `ui -> . . *U _self 13 1 `ui != -> . `E4962 17 `ui -> . . *U _self 14 1 `ui != -> . `E4962 18 `ui -> . . *U _self 13 1 `ui != -> . `E4962 18 `ui -> . . *U _self 14 1 `ui 583  ]
+"362
+[; ;mainstation.c: 362:                     STN_PASSING != self->stnTrack3.stnState){
+{
+"363
+[; ;mainstation.c: 363:                 self->stnTrack1.stnState = STN_OUTBOUND;
+[e = . . *U _self 12 1 . `E4962 17 ]
+"364
+[; ;mainstation.c: 364:             }
+}
+[e $U 584  ]
+"365
+[; ;mainstation.c: 365:             else{
+[e :U 583 ]
+{
+"366
+[; ;mainstation.c: 366:                 self->stnTrack1.tCountTime = millis;
+[e = . . *U _self 12 6 _millis ]
+"367
+[; ;mainstation.c: 367:                 self->stnTrack1.tWaitTime = (GETxRANDOMxNUMBER() << tRandomShift);
+[e = . . *U _self 12 7 -> << -> ( _GETxRANDOMxNUMBER ..  `ui -> _tRandomShift `i `ul ]
+"368
+[; ;mainstation.c: 368:                 self->stnTrack1.stnState = STN_WAIT;
+[e = . . *U _self 12 1 . `E4962 19 ]
+"369
+[; ;mainstation.c: 369:             }
+}
+[e :U 584 ]
+"370
+[; ;mainstation.c: 370:             CREATExTASKxSTATUSxMESSAGE(self->name,
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 12 0 `uc -> . . *U _self 12 1 `uc -> . `E4999 0 `uc ]
+"374
+[; ;mainstation.c: 374:         }
+}
+[e :U 582 ]
+"375
+[; ;mainstation.c: 375:     }
+}
+[e :U 581 ]
+"376
+[; ;mainstation.c: 376:     if(STN_WAIT == self->stnTrack2.stnState){
+[e $ ! == -> . `E4962 19 `ui -> . . *U _self 13 1 `ui 585  ]
+{
+"377
+[; ;mainstation.c: 377:         if((millis - self->stnTrack2.tCountTime) > self->stnTrack2.tWaitTime){
+[e $ ! > - _millis . . *U _self 13 6 . . *U _self 13 7 586  ]
+{
+"378
+[; ;mainstation.c: 378:             if(STN_OUTBOUND != self->stnTrack1.stnState &&
+[e $ ! && && && != -> . `E4962 17 `ui -> . . *U _self 12 1 `ui != -> . `E4962 17 `ui -> . . *U _self 14 1 `ui != -> . `E4962 18 `ui -> . . *U _self 12 1 `ui != -> . `E4962 18 `ui -> . . *U _self 14 1 `ui 587  ]
+"381
+[; ;mainstation.c: 381:                     STN_PASSING != self->stnTrack3.stnState){
+{
+"382
+[; ;mainstation.c: 382:                 self->stnTrack2.stnState = STN_OUTBOUND;
+[e = . . *U _self 13 1 . `E4962 17 ]
+"383
+[; ;mainstation.c: 383:             }
+}
+[e $U 588  ]
+"384
+[; ;mainstation.c: 384:             else{
+[e :U 587 ]
+{
+"385
+[; ;mainstation.c: 385:                 self->stnTrack2.tCountTime = millis;
+[e = . . *U _self 13 6 _millis ]
+"386
+[; ;mainstation.c: 386:                 self->stnTrack2.tWaitTime = (GETxRANDOMxNUMBER() << tRandomShift);
+[e = . . *U _self 13 7 -> << -> ( _GETxRANDOMxNUMBER ..  `ui -> _tRandomShift `i `ul ]
+"387
+[; ;mainstation.c: 387:                 self->stnTrack2.stnState = STN_WAIT;
+[e = . . *U _self 13 1 . `E4962 19 ]
+"388
+[; ;mainstation.c: 388:             }
+}
+[e :U 588 ]
+"389
+[; ;mainstation.c: 389:             CREATExTASKxSTATUSxMESSAGE(self->name,
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 13 0 `uc -> . . *U _self 13 1 `uc -> . `E4999 0 `uc ]
+"393
+[; ;mainstation.c: 393:         }
+}
+[e :U 586 ]
+"394
+[; ;mainstation.c: 394:     }
+}
+[e :U 585 ]
+"395
+[; ;mainstation.c: 395:     if(STN_WAIT == self->stnTrack3.stnState){
+[e $ ! == -> . `E4962 19 `ui -> . . *U _self 14 1 `ui 589  ]
+{
+"396
+[; ;mainstation.c: 396:         if((millis - self->stnTrack3.tCountTime) > self->stnTrack3.tWaitTime){
+[e $ ! > - _millis . . *U _self 14 6 . . *U _self 14 7 590  ]
+{
+"397
+[; ;mainstation.c: 397:             if(STN_OUTBOUND != self->stnTrack1.stnState &&
+[e $ ! && && && != -> . `E4962 17 `ui -> . . *U _self 12 1 `ui != -> . `E4962 17 `ui -> . . *U _self 13 1 `ui != -> . `E4962 18 `ui -> . . *U _self 12 1 `ui != -> . `E4962 18 `ui -> . . *U _self 13 1 `ui 591  ]
+"400
+[; ;mainstation.c: 400:                     STN_PASSING != self->stnTrack2.stnState){
+{
+"401
+[; ;mainstation.c: 401:                 self->stnTrack3.stnState = STN_OUTBOUND;
+[e = . . *U _self 14 1 . `E4962 17 ]
+"402
+[; ;mainstation.c: 402:             }
+}
+[e $U 592  ]
+"403
+[; ;mainstation.c: 403:             else{
+[e :U 591 ]
+{
+"404
+[; ;mainstation.c: 404:                 self->stnTrack3.tCountTime = millis;
+[e = . . *U _self 14 6 _millis ]
+"405
+[; ;mainstation.c: 405:                 self->stnTrack3.tWaitTime = tFreightTrainWaitTime;
+[e = . . *U _self 14 7 _tFreightTrainWaitTime ]
+"406
+[; ;mainstation.c: 406:                 self->stnTrack3.stnState = STN_WAIT;
+[e = . . *U _self 14 1 . `E4962 19 ]
+"407
+[; ;mainstation.c: 407:             }
+}
+[e :U 592 ]
+"408
+[; ;mainstation.c: 408:             CREATExTASKxSTATUSxMESSAGE(self->name,
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 14 0 `uc -> . . *U _self 14 1 `uc -> . `E4999 0 `uc ]
+"412
+[; ;mainstation.c: 412:         }
+}
+[e :U 590 ]
+"413
+[; ;mainstation.c: 413:     }
+}
+[e :U 589 ]
+"414
+[; ;mainstation.c: 414: }
+[e :UE 580 ]
+}

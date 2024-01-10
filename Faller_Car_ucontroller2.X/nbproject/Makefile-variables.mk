@@ -1,0 +1,26 @@
+#
+# Generated - do not edit!
+#
+# NOCDDL
+#
+CND_BASEDIR=`pwd`
+# Stand_Alone configuration
+CND_ARTIFACT_DIR_Stand_Alone=dist/Stand_Alone/production
+CND_ARTIFACT_NAME_Stand_Alone=Faller_Car_ucontroller2.X.production.hex
+CND_ARTIFACT_PATH_Stand_Alone=dist/Stand_Alone/production/Faller_Car_ucontroller2.X.production.hex
+# Offset_Ambulance configuration
+CND_ARTIFACT_DIR_Offset_Ambulance=dist/Offset_Ambulance/production
+CND_ARTIFACT_NAME_Offset_Ambulance=Faller_Car_ucontroller2.X.production.hex
+CND_ARTIFACT_PATH_Offset_Ambulance=dist/Offset_Ambulance/production/Faller_Car_ucontroller2.X.production.hex
+# Combined configuration
+CND_ARTIFACT_DIR_Combined=dist/Combined/production
+CND_ARTIFACT_NAME_Combined=Faller_Car_ucontroller2.X.production.hex
+CND_ARTIFACT_PATH_Combined=dist/Combined/production/Faller_Car_ucontroller2.X.production.hex
+# Offset_Polizei configuration
+CND_ARTIFACT_DIR_Offset_Polizei=dist/Offset_Polizei/production
+CND_ARTIFACT_NAME_Offset_Polizei=Faller_Car_ucontroller2.X.production.hex
+CND_ARTIFACT_PATH_Offset_Polizei=dist/Offset_Polizei/production/Faller_Car_ucontroller2.X.production.hex
+# Offset_MercedesBus configuration
+CND_ARTIFACT_DIR_Offset_MercedesBus=dist/Offset_MercedesBus/production
+CND_ARTIFACT_NAME_Offset_MercedesBus=Faller_Car_ucontroller2.X.production.hex
+CND_ARTIFACT_PATH_Offset_MercedesBus=dist/Offset_MercedesBus/production/Faller_Car_ucontroller2.X.production.hex

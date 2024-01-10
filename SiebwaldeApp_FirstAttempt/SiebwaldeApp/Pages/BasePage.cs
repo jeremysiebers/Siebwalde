@@ -1,4 +1,5 @@
-﻿using System.Windows.Controls;
+﻿using SiebwaldeApp.Core;
+using System.Windows.Controls;
 
 namespace SiebwaldeApp
 {
@@ -25,7 +26,7 @@ namespace SiebwaldeApp
         /// </summary>
         public T ViewModel
         {
-            get { return mViewModel; }
+            get => mViewModel;
             set
             {
                 // If nothing has changed, return
@@ -36,7 +37,7 @@ namespace SiebwaldeApp
                 mViewModel = value;
 
                 // Set the data context for this page
-                this.DataContext = mViewModel;
+                DataContext = mViewModel;
             }
         }
 
@@ -50,11 +51,9 @@ namespace SiebwaldeApp
         public BasePage()
         {
             // Create a default View Model
-            this.ViewModel = new T();
+            ViewModel = new T();
         }
 
-        #endregion
-
-       
+        #endregion       
     }
 }

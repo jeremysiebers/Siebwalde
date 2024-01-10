@@ -1,0 +1,16 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\Model",
+    "\\Model\\TrackApplication",
+    "\\Model\\TrackApplication\\Data",
+    "\\Model\\TrackApplication\\Pages",
+    "\\Model\\TrackApplication\\Services",
+    "\\Properties",
+    "\\Services",
+    "\\ViewModel",
+    "\\ViewModel\\SiebwaldeViewModels"
+  ],
+  "SelectedNode": "\\Model\\TrackApplication\\Pages\\TrackAmplifierItemView.xaml",
+  "PreviewInSolutionExplorer": false
+}
