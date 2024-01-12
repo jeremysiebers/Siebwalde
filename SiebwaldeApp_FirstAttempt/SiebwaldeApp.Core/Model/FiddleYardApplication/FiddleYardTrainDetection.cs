@@ -1,6 +1,6 @@
 ﻿using SiebwaldeApp.Core;
 
-namespace SiebwaldeApp
+namespace SiebwaldeApp.Core
 {
     public class FiddleYardTrainDetection
     {

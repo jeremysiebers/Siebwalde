@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Windows.Forms;
 using SiebwaldeApp.Core;
+using Message = SiebwaldeApp.Core.Message;
 
 namespace SiebwaldeApp
 {

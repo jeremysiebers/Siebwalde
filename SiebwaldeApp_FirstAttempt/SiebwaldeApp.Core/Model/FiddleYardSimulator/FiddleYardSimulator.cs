@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Timers;
 using SiebwaldeApp.Core;
 
-namespace SiebwaldeApp
+namespace SiebwaldeApp.Core
 {
     public interface iFiddleYardSimulator
     {        
@@ -154,7 +154,7 @@ namespace SiebwaldeApp
 
             aTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
             // Set the Interval to [x] miliseconds.
-            aTimer.Interval = Convert.ToInt16(SiebwaldeApp.Properties.Settings.Default.FIDDLExYARDxSIMxSPEEDxSETTING);
+            aTimer.Interval = Convert.ToInt16(Properties.Settings.Default.FIDDLExYARDxSIMxSPEEDxSETTING);
             aTimer.AutoReset = true;
             // Enable the timer
             aTimer.Enabled = true;

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using SiebwaldeApp.Core;
 
-namespace SiebwaldeApp
+namespace SiebwaldeApp.Core
 {
     public class FiddleYardSimTrainDetect
     {

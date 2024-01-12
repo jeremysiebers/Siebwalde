@@ -1,7 +1,7 @@
 ﻿using System;
 using SiebwaldeApp.Core;
 
-namespace SiebwaldeApp
+namespace SiebwaldeApp.Core
 {
     public class FiddleYardSimTrain
     {
@@ -87,7 +87,7 @@ namespace SiebwaldeApp
             }
 
             Sensor Sns_FYSimSpeedSetting = new Sensor("FYSimSpeedSetting", " FYSimSpeedSetting ", 0, (name, val, log) => SimulatorSettings(name, val, log)); // initialize and subscribe sensors
-            SiebwaldeApp.Properties.Settings.Default.FYSimSpeedSetting.Attach(Sns_FYSimSpeedSetting);
+            Properties.Settings.Default.FYSimSpeedSetting.Attach(Sns_FYSimSpeedSetting);
         }
 
         /*#--------------------------------------------------------------------------#*/

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Windows.Forms;
-using System.Threading;
 using System.Configuration;
 using System.Timers;
+using SiebwaldeApp.Core;
 
 namespace SiebwaldeApp
 {

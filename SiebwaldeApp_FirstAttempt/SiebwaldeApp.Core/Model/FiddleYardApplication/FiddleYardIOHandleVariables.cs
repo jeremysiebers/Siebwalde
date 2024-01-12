@@ -1,6 +1,8 @@
 ﻿
 
-namespace SiebwaldeApp
+using SiebwaldeApp.Core;
+
+namespace SiebwaldeApp.Core
 {
     public class FiddleYardIOHandleVariables
     {

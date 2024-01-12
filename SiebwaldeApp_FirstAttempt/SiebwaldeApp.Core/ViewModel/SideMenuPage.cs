@@ -1,4 +1,4 @@
-﻿namespace SiebwaldeApp
+﻿namespace SiebwaldeApp.Core
 {
     /// <summary>
     /// A page of the application

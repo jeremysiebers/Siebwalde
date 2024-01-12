@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Text;
 using System.Timers;
-using System.Windows.Forms;
-using SiebwaldeApp;
-using SiebwaldeApp.Core;
 
-namespace SiebwaldeApp
+namespace SiebwaldeApp.Core
 {
     public interface IFiddleYardApplication
     {
@@ -67,7 +63,7 @@ namespace SiebwaldeApp
                 // Set the log instance string to the logging instance name used for directed file logging
                 LoggerInstance = "FyAppTopLog";
                 //  different logging file per target, this is default
-                FiddleYardApplicationLogging = GetLogger(Properties.Settings.Default.LogDirectory + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_" + "FiddleYardAppLogTOP.txt", LoggerInstance);
+                FiddleYardApplicationLogging = GetLogger(Core.Properties.Settings.Default.LogDirectory + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_" + "FiddleYardAppLogTOP.txt", LoggerInstance);
                 IoC.Logger.AddLogger(FiddleYardApplicationLogging);
             }
             else if ("BOT" == m_instance)
@@ -75,7 +71,7 @@ namespace SiebwaldeApp
                 // Set the log instance string to the logging instance name used for directed file logging
                 LoggerInstance = "FyAppBotLog";
                 //  different logging file per target, this is default
-                FiddleYardApplicationLogging = GetLogger(Properties.Settings.Default.LogDirectory + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_" + "FiddleYardAppLogBOT.txt", LoggerInstance);
+                FiddleYardApplicationLogging = GetLogger(Core.Properties.Settings.Default.LogDirectory + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_" + "FiddleYardAppLogBOT.txt", LoggerInstance);
                 IoC.Logger.AddLogger(FiddleYardApplicationLogging);
             }
 

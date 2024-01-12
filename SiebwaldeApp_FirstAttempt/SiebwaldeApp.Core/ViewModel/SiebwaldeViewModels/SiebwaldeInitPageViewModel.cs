@@ -55,9 +55,9 @@ namespace SiebwaldeApp.Core
 
             //IoC.siebwaldeApplicationModel.//SiebwaldeApplicationMainLogging.PropertyChanged += //SiebwaldeApplicationMainLogging_PropertyChanged;
 
-            //InitAllControllers = new RelayCommand(() => IoC.siebwaldeApplicationModel.StartFYController());
+            InitAllControllers = new RelayCommand(() => IoC.siebwaldeApplicationModel.StartFYController());
 
-            TrackController = new RelayCommand(() => IoC.siebwaldeApplicationModel.StartTrackController());
+            TrackController = new RelayCommand(async () => await IoC.siebwaldeApplicationModel.StartTrackController());
         }
 
         private void SiebwaldeApplicationMainLogging_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)

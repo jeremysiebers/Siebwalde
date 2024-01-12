@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Configuration;
-using System.Linq;
 using System.Text;
 using SiebwaldeApp.Core;
 
@@ -80,7 +78,7 @@ namespace SiebwaldeApp
                 // Set the log instance string to the logging instance name used for directed file logging
                 LoggerInstance = "FyMip50TopLog";
                 //  different logging file per target, this is default
-                FiddleYardMIP50Logging = GetLogger(Properties.Settings.Default.LogDirectory + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_" + "FiddleYardMip50LogTOP.txt", LoggerInstance);
+                FiddleYardMIP50Logging = GetLogger(Core.Properties.Settings.Default.LogDirectory + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_" + "FiddleYardMip50LogTOP.txt", LoggerInstance);
                 IoC.Logger.AddLogger(FiddleYardMIP50Logging);
             }
             else if ("BOT" == m_instance)
@@ -88,7 +86,7 @@ namespace SiebwaldeApp
                 // Set the log instance string to the logging instance name used for directed file logging
                 LoggerInstance = "FyMip50BotLog";
                 //  different logging file per target, this is default
-                FiddleYardMIP50Logging = GetLogger(Properties.Settings.Default.LogDirectory + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_" + "FiddleYardMip50LogBOT.txt", LoggerInstance);
+                FiddleYardMIP50Logging = GetLogger(Core.Properties.Settings.Default.LogDirectory + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_" + "FiddleYardMip50LogBOT.txt", LoggerInstance);
                 IoC.Logger.AddLogger(FiddleYardMIP50Logging);
             }
         }

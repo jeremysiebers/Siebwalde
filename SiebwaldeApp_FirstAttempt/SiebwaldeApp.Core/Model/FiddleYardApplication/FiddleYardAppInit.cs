@@ -5,7 +5,7 @@ using System.Text;
 using SiebwaldeApp;
 using SiebwaldeApp.Core;
 
-namespace SiebwaldeApp
+namespace SiebwaldeApp.Core
 {
     public class FiddleYardAppInit
     {        

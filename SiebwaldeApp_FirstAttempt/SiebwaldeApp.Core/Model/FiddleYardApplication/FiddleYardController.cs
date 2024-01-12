@@ -1,17 +1,15 @@
 ﻿using System;
-using System.Threading.Tasks;
-using SiebwaldeApp;
 using SiebwaldeApp.Core;
 
-namespace SiebwaldeApp
+namespace SiebwaldeApp.Core
 {
     public interface iFiddleYardController
     {        
         //void FYLinkActivityUpdate();                // Update Link activity in main form
         //void ClearEventLoggers();                   // Clear event loggers interface to form eventloggers for clearing
         //void ReConnect();                           // Re-connect to target
-        Sender GetFYSender();                       // interface to FYSender
-        Receiver GetFYReceiver();                   // interface to Receiver        
+        NewSender GetFYSender();                       // interface to FYSender
+        NewReceiver GetFYReceiver();                   // interface to Receiver        
     }
     
     public class FiddleYardController : iFiddleYardController
@@ -21,21 +19,21 @@ namespace SiebwaldeApp
         public FiddleYardIOHandle FYIOHandleTOP;
         public FiddleYardIOHandle FYIOHandleBOT;
         public const string FYTarget = "FIDDLEYARD";
-        public Sender FYSender = new Sender(FYTarget);
-        private Receiver FYReceiver;
-        public PingTarget m_PingTarget = new PingTarget { };
+        public NewSender FYSender = new NewSender(FYTarget);
+        private NewReceiver FYReceiver;
+        public NewPingTarget m_PingTarget = new NewPingTarget { };
         private int m_FYReceivingPort = 0;
         private int m_FYSendingPort   = 0;
         private bool FYSimulatorActive = false;        
         private byte[,] m_macAddr;
         private byte[,] m_ipAddr;
 
-        public Sender GetFYSender()
+        public NewSender GetFYSender()
         {
             return FYSender;
         }
 
-        public Receiver GetFYReceiver()
+        public NewReceiver GetFYReceiver()
         {
             return FYReceiver;
         }   
@@ -66,7 +64,7 @@ namespace SiebwaldeApp
             m_FYSendingPort   = FYSendingPort;
             m_macAddr = macAddr;
             m_ipAddr = ipAddr;
-            FYReceiver = new Receiver(m_FYReceivingPort);
+            FYReceiver = new NewReceiver(m_FYReceivingPort);
             FYIOHandleTOP = new FiddleYardIOHandle("TOP", this);
             FYIOHandleBOT = new FiddleYardIOHandle("BOT", this);                 
         }

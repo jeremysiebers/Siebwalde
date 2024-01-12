@@ -123,22 +123,12 @@
     <Compile Include="Controls\SiebwaldeMenu.xaml.cs">
       <DependentUpon>SiebwaldeMenu.xaml</DependentUpon>
     </Compile>
-    <Compile Include="FiddleYardApplication\FiddleYardAppInit.cs" />
-    <Compile Include="FiddleYardApplication\FiddleYardApplication.cs" />
-    <Compile Include="FiddleYardApplication\FiddleYardApplicationVariables.cs" />
-    <Compile Include="FiddleYardApplication\FiddleYardAppRun.cs" />
-    <Compile Include="FiddleYardApplication\FiddleYardAppTrainDrive.cs" />
-    <Compile Include="FiddleYardApplication\FiddleYardController.cs" />
     <Compile Include="FiddleYardApplication\FiddleYardForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="FiddleYardApplication\FiddleYardForm.Designer.cs">
       <DependentUpon>FiddleYardForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="FiddleYardApplication\FiddleYardFormIndicator.cs" />
-    <Compile Include="FiddleYardApplication\FiddleYardIOHandle.cs" />
-    <Compile Include="FiddleYardApplication\FiddleYardIOHandleVariables.cs" />
-    <Compile Include="FiddleYardApplication\FiddleYardMip50.cs" />
     <Compile Include="FiddleYardApplication\FiddleYardMip50SettingsForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -151,13 +141,6 @@
     <Compile Include="FiddleYardApplication\FiddleYardSettingsForm.Designer.cs">
       <DependentUpon>FiddleYardSettingsForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="FiddleYardApplication\FiddleYardTrainDetection.cs" />
-    <Compile Include="FiddleYardSimulator\FiddleYardSimMove.cs" />
-    <Compile Include="FiddleYardSimulator\FiddleYardSimTrain.cs" />
-    <Compile Include="FiddleYardSimulator\FiddleYardSimTrainDetect.cs" />
-    <Compile Include="FiddleYardSimulator\FiddleYardSimulator.cs" />
-    <Compile Include="FiddleYardSimulator\FiddleYardSimulatorVariables.cs" />
-    <Compile Include="File\FileManager.cs" />
     <Compile Include="Pages\BasePage.cs" />
     <Compile Include="Pages\FiddleYardPages\FiddleYardPage.xaml.cs">
       <DependentUpon>FiddleYardPage.xaml</DependentUpon>
@@ -183,15 +166,8 @@
     <Compile Include="Pages\SiebwaldePages\SiebwaldePage.xaml.cs">
       <DependentUpon>SiebwaldePage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Services\CropBitmap.cs" />
-    <Compile Include="Services\Log2LoggingFile.cs" />
-    <Compile Include="Services\LogFileBasics.cs" />
-    <Compile Include="Services\MAC_IP_Conditioner.cs" />
-    <Compile Include="Services\PingTarget.cs" />
-    <Compile Include="Services\Receiver.cs" />
-    <Compile Include="Services\ScaleBitmap.cs" />
-    <Compile Include="Services\SenActCmdMes.cs" />
-    <Compile Include="Services\Sender.cs" />
+    <Compile Include="FiddleYardApplication\CropBitmap.cs" />
+    <Compile Include="FiddleYardApplication\ScaleBitmap.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="ValueConverters\MultiBaseValueConverter.cs" />
     <Compile Include="ValueConverters\EnumarableToTextConverter.cs" />
@@ -347,7 +323,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Images\Logo\" />
-    <Folder Include="Model\" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.8">

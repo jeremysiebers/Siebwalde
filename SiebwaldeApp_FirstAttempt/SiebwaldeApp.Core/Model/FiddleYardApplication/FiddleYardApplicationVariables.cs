@@ -2,7 +2,7 @@
 using System.Drawing;
 using SiebwaldeApp.Core;
 
-namespace SiebwaldeApp
+namespace SiebwaldeApp.Core
 {
 
     //public interface iFiddleYardApplicationVariables
@@ -169,11 +169,11 @@ namespace SiebwaldeApp
         public int iTrackNo = 0;
         public int iTrainDriveOutPointer = 5;        
 
-        public Color TrackOccupiedColor = SiebwaldeApp.Properties.Settings.Default.SETxCOLORxTRACKxOCCUPIED;
-        public Color TrackNotInitializedColor = SiebwaldeApp.Properties.Settings.Default.SETxCOLORxTRACKxNOTxINITIALIZED;
-        public Color TrackNotActiveColor = SiebwaldeApp.Properties.Settings.Default.SETxCOLORxTRACKxNOTxACTIVE;
-        public Color TrackDisabledColor = SiebwaldeApp.Properties.Settings.Default.SETxCOLORxTRACKxDISABLED;
-        public Color TrackDisabledNotOccupiedColor = SiebwaldeApp.Properties.Settings.Default.SETxCOLORxTRACKxDISABLEDxNOTxOCCUPIED;
+        public Color TrackOccupiedColor = Properties.Settings.Default.SETxCOLORxTRACKxOCCUPIED;
+        public Color TrackNotInitializedColor = Properties.Settings.Default.SETxCOLORxTRACKxNOTxINITIALIZED;
+        public Color TrackNotActiveColor = Properties.Settings.Default.SETxCOLORxTRACKxNOTxACTIVE;
+        public Color TrackDisabledColor = Properties.Settings.Default.SETxCOLORxTRACKxDISABLED;
+        public Color TrackDisabledNotOccupiedColor = Properties.Settings.Default.SETxCOLORxTRACKxDISABLEDxNOTxOCCUPIED;
 
         public PublicBool FYHomed = new PublicBool();
 

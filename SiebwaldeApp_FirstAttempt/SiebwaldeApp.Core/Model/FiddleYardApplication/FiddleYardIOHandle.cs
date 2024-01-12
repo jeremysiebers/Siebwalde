@@ -1,22 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
-using System.Timers;
-using System.Net.Sockets;
-using System.IO;
-using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Management;
-using System.Net.NetworkInformation;
-using System.Globalization;
+﻿using System.Text;
 
-namespace SiebwaldeApp
+namespace SiebwaldeApp.Core
 {
     public interface iFiddleYardIOHandle
     {        

@@ -41,7 +41,9 @@
       <HintPath>..\packages\PropertyChanged.Fody.4.1.0\lib\net40\PropertyChanged.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -62,6 +64,22 @@
     <Compile Include="Logging\Implementation\DebugLogger.cs" />
     <Compile Include="Logging\Implementation\FileLogger.cs" />
     <Compile Include="Logging\Implementation\ILogger.cs" />
+    <Compile Include="Model\FiddleYardApplication\FiddleYardAppInit.cs" />
+    <Compile Include="Model\FiddleYardApplication\FiddleYardApplication.cs" />
+    <Compile Include="Model\FiddleYardApplication\FiddleYardApplicationVariables.cs" />
+    <Compile Include="Model\FiddleYardApplication\FiddleYardAppRun.cs" />
+    <Compile Include="Model\FiddleYardApplication\FiddleYardAppTrainDrive.cs" />
+    <Compile Include="Model\FiddleYardApplication\FiddleYardController.cs" />
+    <Compile Include="Model\FiddleYardApplication\FiddleYardFormIndicator.cs" />
+    <Compile Include="Model\FiddleYardApplication\FiddleYardIOHandle.cs" />
+    <Compile Include="Model\FiddleYardApplication\FiddleYardIOHandleVariables.cs" />
+    <Compile Include="Model\FiddleYardApplication\FiddleYardMip50.cs" />
+    <Compile Include="Model\FiddleYardApplication\FiddleYardTrainDetection.cs" />
+    <Compile Include="Model\FiddleYardSimulator\FiddleYardSimMove.cs" />
+    <Compile Include="Model\FiddleYardSimulator\FiddleYardSimTrain.cs" />
+    <Compile Include="Model\FiddleYardSimulator\FiddleYardSimTrainDetect.cs" />
+    <Compile Include="Model\FiddleYardSimulator\FiddleYardSimulator.cs" />
+    <Compile Include="Model\FiddleYardSimulator\FiddleYardSimulatorVariables.cs" />
     <Compile Include="Model\SiebwaldeApplicationModel.cs" />
     <Compile Include="Model\TrackApplicationAn\Data\TrackApplicationVariables.cs" />
     <Compile Include="Model\TrackApplicationAn\Data\TrackIOHandle.cs" />
@@ -72,11 +90,17 @@
     <Compile Include="Model\TrackApplicationAn\Track Controller\TrackControlMain.cs" />
     <Compile Include="Model\TrackApplicationAn\TrackController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
     <Compile Include="Services\NewLogFileBasics.cs" />
     <Compile Include="Services\NewMAC_IP_Conditioner.cs" />
     <Compile Include="Services\NewPingTarget.cs" />
     <Compile Include="Services\NewReceiver.cs" />
     <Compile Include="Services\NewSender.cs" />
+    <Compile Include="Services\NewSenActCmdMes.cs" />
     <Compile Include="ViewModel\ApplicationPage.cs" />
     <Compile Include="ViewModel\ApplicationViewmodel.cs" />
     <Compile Include="ViewModel\Base\BaseViewModel.cs" />
@@ -94,7 +118,12 @@
     <Compile Include="ViewModel\YardViewModels\YardPageViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Model\TrackApplicationAn\Model\" />
