@@ -383,19 +383,19 @@ namespace SiebwaldeApp.Core
             CmdCollect.Attach(Act_Collect);
 
             Colorc Clr_FYTrackOccupiedColorSetting = new Colorc(Color.Transparent, "Clr_FYTrackOccupiedColorSetting", (NewColor, log) => SetColorIndicator(NewColor, log));
-            SiebwaldeApp.Properties.Settings.Default.SWSetColorTrainOccupied.Attach(Clr_FYTrackOccupiedColorSetting);
+            Properties.Settings.Default.SWSetColorTrainOccupied.Attach(Clr_FYTrackOccupiedColorSetting);
 
             Colorc Clr_FYTrackNotInitializedColorSetting = new Colorc(Color.Transparent, "Clr_FYTrackNotInitializedColorSetting", (NewColor, log) => SetColorIndicator(NewColor, log));
-            SiebwaldeApp.Properties.Settings.Default.SWSetColorTrackNotInitialized.Attach(Clr_FYTrackNotInitializedColorSetting);
+            Properties.Settings.Default.SWSetColorTrackNotInitialized.Attach(Clr_FYTrackNotInitializedColorSetting);
 
             Colorc Clr_FYTrackNotActiveColorSetting = new Colorc(Color.Transparent, "Clr_FYTrackNotActiveColorSetting", (NewColor, log) => SetColorIndicator(NewColor, log));
-            SiebwaldeApp.Properties.Settings.Default.SWSetColorTrackNotActive.Attach(Clr_FYTrackNotActiveColorSetting);
+            Properties.Settings.Default.SWSetColorTrackNotActive.Attach(Clr_FYTrackNotActiveColorSetting);
 
             Colorc Clr_FYTrackDisabledColorSetting = new Colorc(Color.Transparent, "Clr_FYTrackDisabledColorSetting", (NewColor, log) => SetColorIndicator(NewColor, log));
-            SiebwaldeApp.Properties.Settings.Default.SWSetColorTrackDisabled.Attach(Clr_FYTrackDisabledColorSetting);
+            Properties.Settings.Default.SWSetColorTrackDisabled.Attach(Clr_FYTrackDisabledColorSetting);
 
             Colorc Clr_FYTrackDisabledNotOccupiedColorSetting = new Colorc(Color.Transparent, "Clr_FYTrackDisabledNotOccupiedColorSetting", (NewColor, log) => SetColorIndicator(NewColor, log));
-            SiebwaldeApp.Properties.Settings.Default.SWSetColorTrackDisabledNotOccupied.Attach(Clr_FYTrackDisabledNotOccupiedColorSetting);
+            Properties.Settings.Default.SWSetColorTrackDisabledNotOccupied.Attach(Clr_FYTrackDisabledNotOccupiedColorSetting);
             
 
             for (int i = 1; i < 12; i++)

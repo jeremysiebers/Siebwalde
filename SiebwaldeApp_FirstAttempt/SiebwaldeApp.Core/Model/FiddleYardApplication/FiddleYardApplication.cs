@@ -12,15 +12,13 @@ namespace SiebwaldeApp.Core
     {
         public FiddleYardApplicationVariables FYAppVar;                             // IOHanlder connects the event handlers via this way
         private ILogger FiddleYardApplicationLogging;
-        public FiddleYardForm FYFORM;
         private FiddleYardIOHandleVariables m_FYIOHandleVar;                        // connect variable to connect to FYIOH class for defined interfaces
         private iFiddleYardIOHandle m_iFYIOH;
         private FiddleYardAppInit FYAppInit;
         private FiddleYardAppRun FYAppRun;
         private FiddleYardMip50 FYMIP50;                                            // Create new MIP50 sub program       
         private FiddleYardTrainDetection FYTDT;                                     // Create new Traindetection sub program
-        private FiddleYardMip50SettingsForm FYMip50SettingsForm;                    // Create new MIP50 settings Form for calibration of MIP50 coordinates etc 
-        private string m_instance = null;        
+       private string m_instance = null;        
         private object ExecuteLock = new object();
         private string LoggerInstance { get; set; }
         static ILogger GetLogger(string file, string loggerinstance)
@@ -80,18 +78,7 @@ namespace SiebwaldeApp.Core
             FYMIP50 = new FiddleYardMip50(m_instance, m_FYIOHandleVar, m_iFYIOH, FYAppVar);            
             FYAppRun = new FiddleYardAppRun(m_FYIOHandleVar, m_iFYIOH, FYAppVar, FYMIP50, LoggerInstance);            
             FYTDT = new FiddleYardTrainDetection(m_FYIOHandleVar, FYAppVar, FYMIP50, LoggerInstance);
-            FYAppInit = new FiddleYardAppInit(m_FYIOHandleVar, FYAppVar, FYMIP50, FYTDT, LoggerInstance);
-            FYFORM = new FiddleYardForm(this);
-
-            //Init and setup FYFORM (after the creation of the sensors and commands)
-            if ("TOP" == m_instance)
-                FYFORM.Name = "FiddleYardTOP";
-            else if ("BOT" == m_instance)
-                FYFORM.Name = "FiddleYardBOT";
-
-            FYFORM.Show();
-            FYFORM.Hide();
-            FYFORM.Connect(m_FYIOHandleVar, FYAppVar); // connect the Form to the FYIOHandle interface           
+            FYAppInit = new FiddleYardAppInit(m_FYIOHandleVar, FYAppVar, FYMIP50, FYTDT, LoggerInstance);         
             
         }
         /*#--------------------------------------------------------------------------#*/
@@ -114,64 +101,15 @@ namespace SiebwaldeApp.Core
         /*#--------------------------------------------------------------------------#*/
         public void OpenFYMip50SettingsForm()
         {
-            FYMip50SettingsForm = new FiddleYardMip50SettingsForm(m_instance, FYMIP50, FYAppVar);
-            if ("TOP" == m_instance)
-                FYMip50SettingsForm.Name = "FiddleYardTOP";
-            else if ("BOT" == m_instance)
-                FYMip50SettingsForm.Name = "FiddleYardBOT";
-            FYMip50SettingsForm.FYMIP50SETTINGSFORMShow();
+            //FYMip50SettingsForm = new FiddleYardMip50SettingsForm(m_instance, FYMIP50, FYAppVar);
+            //if ("TOP" == m_instance)
+            //    FYMip50SettingsForm.Name = "FiddleYardTOP";
+            //else if ("BOT" == m_instance)
+            //    FYMip50SettingsForm.Name = "FiddleYardBOT";
+            //FYMip50SettingsForm.FYMIP50SETTINGSFORMShow();
         }
         /*#--------------------------------------------------------------------------#*/
-        /*  Description: FYFORMShow show or hide the FORM and set width and etc.
-         *               
-         * 
-         *  Input(s)   :
-         *
-         *  Output(s)  : 
-         *
-         *  Returns    :
-         *
-         *  Pre.Cond.  :
-         *
-         *  Post.Cond. :
-         *
-         *  Notes      : 
-         *  
-         */
-        /*#--------------------------------------------------------------------------#*/
-        public void FYFORMShow(bool autoscroll, int height, int width, int LocX, int LocY, bool View)
-        {
-            FYFORM.StartPosition = FormStartPosition.Manual;
-
-            FYFORM.Height = height;// - 60 - 20;// 27;
-            if (autoscroll == true)
-            {
-                FYFORM.Width = width / 2;// - 6;
-            }
-            else
-            {
-                FYFORM.Width = width / 2;
-            }
-            if (m_instance == "TOP")
-                FYFORM.Location = new System.Drawing.Point(LocX + 0, LocY + 40); //(LocX + 6, LocY + 80);
-            else if (m_instance == "BOT")
-                FYFORM.Location = new System.Drawing.Point(LocX + 960, LocY + 40);//(LocX + width / 2, LocY + 80);  //960
-            FYFORM.AutoScroll = autoscroll;
-
-            if (View && FYFORM.WindowState != FormWindowState.Minimized)
-            {
-                FYFORM.FYFORMShow(View);                               
-            }
-            else if (!View && FYFORM.WindowState != FormWindowState.Minimized)
-            {
-                FYFORM.FYFORMShow(View);
-            }
-            else
-            {
-                FYFORM.WindowState = FormWindowState.Normal;
-            }
-        }
-
+        
         /*#--------------------------------------------------------------------------#*/
         /*  Description: Start: initializing and attaching all sensors, actuators,
          *               messages etc.

@@ -1,4 +1,5 @@
-﻿using System.Net.Sockets;
+﻿using System.Linq.Expressions;
+using System.Net.Sockets;
 
 namespace SiebwaldeApp.Core
 {
@@ -19,7 +20,10 @@ namespace SiebwaldeApp.Core
 
         public void ConnectUdp(int port)
         {
-            sendingUdpClient.Connect(_target, port);
+            try{
+                    sendingUdpClient.Connect(_target, port);
+            }
+            catch { }
         }
 
         public void ConnectUdpLocalHost(int port)

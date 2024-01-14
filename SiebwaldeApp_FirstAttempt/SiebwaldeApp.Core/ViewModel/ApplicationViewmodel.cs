@@ -1,4 +1,5 @@
-﻿using System.Windows.Input;
+﻿using System;
+using System.Windows.Input;
 
 namespace SiebwaldeApp.Core
 {
@@ -75,6 +76,8 @@ namespace SiebwaldeApp.Core
             IoC.Application.CurrentPage = ApplicationPage.FiddleYardControl;
             // Load Siebwalde menu
             IoC.SideMenu.CurrentMenu = SideMenuPage.FiddleYardControl;
+            // Show the Fiddle Yard Winforms
+            IoC.siebwaldeApplicationModel.OnFiddleYardShowWinForm(EventArgs.Empty);
         }
 
         /// <summary>
@@ -101,6 +104,9 @@ namespace SiebwaldeApp.Core
 
         #endregion
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public ApplicationViewModel()
         {
             SiebwaldeApplicationPage = new RelayCommand(LoadSiebwaldeApplicationPage);

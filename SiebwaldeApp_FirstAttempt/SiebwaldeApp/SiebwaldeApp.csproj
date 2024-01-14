@@ -129,6 +129,7 @@
     <Compile Include="FiddleYardApplication\FiddleYardForm.Designer.cs">
       <DependentUpon>FiddleYardForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="FiddleYardApplication\FiddleYardWinFormViewModel.cs" />
     <Compile Include="FiddleYardApplication\FiddleYardMip50SettingsForm.cs">
       <SubType>Form</SubType>
     </Compile>

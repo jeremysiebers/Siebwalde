@@ -57,9 +57,10 @@ namespace SiebwaldeApp.Core
          *  Notes      :
          */
         /*#--------------------------------------------------------------------------#*/
-        public FiddleYardController(SiebwaldeApplicationModel iMainCtrl, byte[,] macAddr, byte[,] ipAddr, int FYReceivingPort, int FYSendingPort)
+        //public FiddleYardController(SiebwaldeApplicationModel iMainCtrl, byte[,] macAddr, byte[,] ipAddr, int FYReceivingPort, int FYSendingPort)
+        public FiddleYardController(byte[,] macAddr, byte[,] ipAddr, int FYReceivingPort, int FYSendingPort)
         {
-           // m_iMain = iMainCtrl;                        // connect to Main interface for application text logging and link activity update, save interface in variable
+            // m_iMain = iMainCtrl;                        // connect to Main interface for application text logging and link activity update, save interface in variable
             m_FYReceivingPort = FYReceivingPort;
             m_FYSendingPort   = FYSendingPort;
             m_macAddr = macAddr;
@@ -94,19 +95,19 @@ namespace SiebwaldeApp.Core
                 if (ConnectFiddleYard(m_macAddr, m_ipAddr) == true) // when connection was succesfull and target was found and is connected
                 {
                     IoC.Logger.Log("FYCTRL: Fiddle Yard uController target in real mode", "");
-                    //FYIOHandleTOP.FYApp.FYFORM.FiddleYardFormLogging.Log("###Fiddle Yard uController target in real mode###");
-                    FYIOHandleTOP.FYApp.FYFORM.SimMode(FYSimulatorActive);
-                    //FYIOHandleBOT.FYApp.FYFORM.FiddleYardFormLogging.Log("###Fiddle Yard uController target in real mode###");
-                    FYIOHandleBOT.FYApp.FYFORM.SimMode(FYSimulatorActive);
+                    
+                    //FYIOHandleTOP.FYApp.FYFORM.SimMode(FYSimulatorActive);
+                    
+                    //FYIOHandleBOT.FYApp.FYFORM.SimMode(FYSimulatorActive);
                     FYReceiver.Start();
                 }
                 else
                 {
                     IoC.Logger.Log("FYCTRL: Fiddle Yard uController target in simulator mode", "");
-                    //FYIOHandleTOP.FYApp.FYFORM.FiddleYardFormLogging.Log("###Fiddle Yard uController target in simulation mode###");
-                    FYIOHandleTOP.FYApp.FYFORM.SimMode(FYSimulatorActive);
-                    //FYIOHandleBOT.FYApp.FYFORM.FiddleYardFormLogging.Log("###Fiddle Yard uController target in simulation mode###");
-                    FYIOHandleBOT.FYApp.FYFORM.SimMode(FYSimulatorActive);
+                    
+                    //FYIOHandleTOP.FYApp.FYFORM.SimMode(FYSimulatorActive);
+                    
+                    //FYIOHandleBOT.FYApp.FYFORM.SimMode(FYSimulatorActive);
                 }
                 FYIOHandleTOP.Start(FYSimulatorActive);   // use these to disable this layer of the fiddle yard in order to do easy debugging by commenting this line
                 FYIOHandleBOT.Start(FYSimulatorActive);   // use these to disable this layer of the fiddle yard in order to do easy debugging by commenting this line
@@ -237,8 +238,8 @@ namespace SiebwaldeApp.Core
         /*#--------------------------------------------------------------------------#*/
         public void ClearEventLoggers()
         {
-            FYIOHandleTOP.FYApp.FYFORM.ClearReceivedCmd();
-            FYIOHandleBOT.FYApp.FYFORM.ClearReceivedCmd();
+            //FYIOHandleTOP.FYApp.FYFORM.ClearReceivedCmd();
+            //FYIOHandleBOT.FYApp.FYFORM.ClearReceivedCmd();
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -280,10 +281,10 @@ namespace SiebwaldeApp.Core
          *  Notes      :
          */
         /*#--------------------------------------------------------------------------#*/
-        public void FYTOPShow(bool autoscroll, int height, int width, int LocX, int LocY, bool View)
-        {
-            FYIOHandleTOP.FYApp.FYFORMShow(autoscroll, height, width, LocX, LocY, View);
-        }
+        //public void FYTOPShow(bool autoscroll, int height, int width, int LocX, int LocY, bool View)
+        //{
+        //    FYIOHandleTOP.FYApp.FYFORMShow(autoscroll, height, width, LocX, LocY, View);
+        //}
 
         /*#--------------------------------------------------------------------------#*/
         /*  Description: FiddleYardController FYBOTShow
@@ -302,10 +303,10 @@ namespace SiebwaldeApp.Core
          *  Notes      :
          */
         /*#--------------------------------------------------------------------------#*/
-        public void FYBOTShow(bool autoscroll, int height, int width, int LocX, int LocY, bool View)
-        {
-            FYIOHandleBOT.FYApp.FYFORMShow(autoscroll, height, width, LocX, LocY, View);
-        }
+        //public void FYBOTShow(bool autoscroll, int height, int width, int LocX, int LocY, bool View)
+        //{
+        //    FYIOHandleBOT.FYApp.FYFORMShow(autoscroll, height, width, LocX, LocY, View);
+        //}
 
         /*#--------------------------------------------------------------------------#*/
         /*  Description: FiddleYardController ProgramMACIPPORT

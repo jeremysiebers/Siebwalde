@@ -10,6 +10,8 @@ namespace SiebwaldeApp
     /// </summary>
     public partial class App : Application
     {
+        public FiddleYardWinFormViewModel FyWinForm;
+
         /// <summary>
         /// Custom startup so we load our IoC immediately before anything else
         /// </summary>
@@ -53,6 +55,8 @@ namespace SiebwaldeApp
 
             // Setup IoC ViewModels, this one as last since the loggers are used within the ViewModels
             IoC.Setup();
+
+            FyWinForm = new FiddleYardWinFormViewModel();
         }
     }
 }
