@@ -53,9 +53,8 @@ namespace SiebwaldeApp
             m_FYAppVar = FYAppVar;
             m_instance = instance;
 
-            
-
-            //config.AppSettings.Settings[m_instance + "_" + "Track1_Abs_Position"].Value = "50";
+            Name = "FiddleYardMip50SettingsForm" + m_instance;
+            Text = "FiddleYardMip50SettingsForm" + m_instance;
 
             this.FormClosing += new FormClosingEventHandler(FiddleYardMip50SettingsForm_Close);
             try

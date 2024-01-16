@@ -13,12 +13,15 @@
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
-            base.Dispose(disposing);
+            this.Hide();
         }
+        //{
+        //    if (disposing && (components != null))
+        //    {
+        //        components.Dispose();
+        //    }
+        //    base.Dispose(disposing);
+        //}
 
         #region Component Designer generated code
 
@@ -48,7 +51,6 @@
             this.label4 = new System.Windows.Forms.Label();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.FiddleYard = new System.Windows.Forms.TabPage();
-            this.New = new System.Windows.Forms.TabPage();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.FiddleYardSimSpeedSetting)).BeginInit();
@@ -259,7 +261,6 @@
             // tabControl1
             // 
             this.tabControl1.Controls.Add(this.FiddleYard);
-            this.tabControl1.Controls.Add(this.New);
             this.tabControl1.Location = new System.Drawing.Point(5, 5);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
@@ -277,16 +278,6 @@
             this.FiddleYard.Size = new System.Drawing.Size(372, 334);
             this.FiddleYard.TabIndex = 0;
             this.FiddleYard.Text = "FiddleYard";
-            // 
-            // New
-            // 
-            this.New.BackColor = System.Drawing.SystemColors.Control;
-            this.New.Location = new System.Drawing.Point(4, 22);
-            this.New.Name = "New";
-            this.New.Padding = new System.Windows.Forms.Padding(3);
-            this.New.Size = new System.Drawing.Size(372, 334);
-            this.New.TabIndex = 1;
-            this.New.Text = "New";
             // 
             // FiddleYardSettingsForm
             // 
@@ -339,7 +330,6 @@
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage FiddleYard;
-        private System.Windows.Forms.TabPage New;
 
     }
 }

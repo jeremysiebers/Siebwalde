@@ -16,7 +16,7 @@ namespace SiebwaldeApp.Core
         private iFiddleYardIOHandle m_iFYIOH;
         private FiddleYardAppInit FYAppInit;
         private FiddleYardAppRun FYAppRun;
-        private FiddleYardMip50 FYMIP50;                                            // Create new MIP50 sub program       
+        public FiddleYardMip50 FYMIP50;                                             // Create new MIP50 sub program       
         private FiddleYardTrainDetection FYTDT;                                     // Create new Traindetection sub program
        private string m_instance = null;        
         private object ExecuteLock = new object();
@@ -61,7 +61,7 @@ namespace SiebwaldeApp.Core
                 // Set the log instance string to the logging instance name used for directed file logging
                 LoggerInstance = "FyAppTopLog";
                 //  different logging file per target, this is default
-                FiddleYardApplicationLogging = GetLogger(Core.Properties.Settings.Default.LogDirectory + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_" + "FiddleYardAppLogTOP.txt", LoggerInstance);
+                FiddleYardApplicationLogging = GetLogger(Core.Properties.CoreSettings.Default.LogDirectory + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_" + "FiddleYardAppLogTOP.txt", LoggerInstance);
                 IoC.Logger.AddLogger(FiddleYardApplicationLogging);
             }
             else if ("BOT" == m_instance)
@@ -69,7 +69,7 @@ namespace SiebwaldeApp.Core
                 // Set the log instance string to the logging instance name used for directed file logging
                 LoggerInstance = "FyAppBotLog";
                 //  different logging file per target, this is default
-                FiddleYardApplicationLogging = GetLogger(Core.Properties.Settings.Default.LogDirectory + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_" + "FiddleYardAppLogBOT.txt", LoggerInstance);
+                FiddleYardApplicationLogging = GetLogger(Core.Properties.CoreSettings.Default.LogDirectory + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_" + "FiddleYardAppLogBOT.txt", LoggerInstance);
                 IoC.Logger.AddLogger(FiddleYardApplicationLogging);
             }
 

@@ -55,26 +55,26 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="SiebwaldeApp.exe" size="14285312">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="SiebwaldeApp.exe" size="14286848">
       <assemblyIdentity name="SiebwaldeApp" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>poLq1WsMe8JAeTVwwmInBeyCycYhslQSaTm12Dh1CMY=</dsig:DigestValue>
+        <dsig:DigestValue>Lk42fsPFpYOEHLhMJ70xdlhmS/33HbSrEBjnJ5IYdEQ=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="SiebwaldeApp.Core.dll" size="175104">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="SiebwaldeApp.Core.dll" size="176128">
       <assemblyIdentity name="SiebwaldeApp.Core" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>coBr/Wa4L1vqDpZQILqJcXeEJzYhZ1mnEDJdNI8zXoI=</dsig:DigestValue>
+        <dsig:DigestValue>CE6GMaJNxHVH9pMTZFBGpD/EhiyiQZnCOqlshcBDZ8w=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>

@@ -9,6 +9,7 @@ namespace SiebwaldeApp.Core
 
         public event EventHandler InstantiateFiddleYardWinForms;
         public event EventHandler FiddleYardShowWinForms;
+        public event EventHandler FiddleYardShowSettingsWinForms;
 
         #endregion
 
@@ -46,6 +47,11 @@ namespace SiebwaldeApp.Core
             FiddleYardShowWinForms?.Invoke(this, e);
         }
 
+        public void OnFiddleYardSettingsWinForm(EventArgs e)
+        {
+            FiddleYardShowSettingsWinForms?.Invoke(this, e);
+        }
+
         /// <summary>
         /// Fiddle Yard
         /// </summary>
@@ -64,8 +70,8 @@ namespace SiebwaldeApp.Core
             FYcontroller = new FiddleYardController(
                 MACIPConditioner.MAC(),
                 MACIPConditioner.IP(),
-                Properties.Settings.Default.FYReceivingport,
-                Properties.Settings.Default.FYSendingport);
+                Properties.CoreSettings.Default.FYReceivingport,
+                Properties.CoreSettings.Default.FYSendingport);
 
             // Launch winform here before controller is started.
             OnLaunchWinFormsFormRequested(EventArgs.Empty);

@@ -10,8 +10,48 @@
       Title="FiddleYardPage">
 
     <Grid>
-            <TextBlock>
-            <Run Text="Fiddle Yard Control Page Loaded!" FontSize="100"/>
-            </TextBlock>        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="700"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel>
+            <GroupBox Grid.Column="0" Margin="50 50 0 50" Foreground="{StaticResource BackgroundLightBrush}">
+                <StackPanel Grid.Column="0">
+                    <Grid Margin="0 10 0 10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="30"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="30"/>
+                            <ColumnDefinition Width="500"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Button 
+                        Grid.Column="1" 
+                        Height="100"
+                        HorizontalAlignment="Center" 
+                        Style="{StaticResource IconGrowButton}" 
+                        Content="{StaticResource FontAwesomeCogIcon}" 
+                        Command="{Binding FiddleYardSettingsmenu }"
+                        Foreground="White"  
+    />
+
+                        <TextBlock 
+                        Grid.Row="1" 
+                        Grid.Column="3"
+                        FontSize="{StaticResource FontSizeXXLarge}"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center">
+        
+                        <Run Text="Fiddle Yard settings." 
+                             FontFamily="{StaticResource FontAwesome}"
+                             Foreground="{StaticResource ForegroundLightBrush}"
+                             />
+                        </TextBlock>
+                    </Grid>
+                </StackPanel>
+            </GroupBox>
+        </StackPanel>
     </Grid>
 </local:BasePage>

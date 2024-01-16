@@ -64,7 +64,7 @@ namespace SiebwaldeApp.Core
             m_LogFileBasics = new NewLogFileBasics();
 
             // create logging instance for Track application
-            //mTrackApplicationLogging = GetLogger(SiebwaldeApp.Core.Properties.Settings.Default.LogDirectory + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_" + "TrackApplicationMain.txt", LoggerInstance);
+            //mTrackApplicationLogging = GetLogger(SiebwaldeApp.Core.Properties.CoreSettings.Default.LogDirectory + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_" + "TrackApplicationMain.txt", LoggerInstance);
             mTrackApplicationLogging = GetLogger(m_LogFileBasics.getLogFile("TrackApplicationMain.txt"), LoggerInstance);
             // Add the logger to the logging factory
             IoC.Logger.AddLogger(mTrackApplicationLogging);

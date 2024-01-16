@@ -18,8 +18,10 @@ namespace SiebwaldeApp
         }
         private ILogger FiddleYardFormLogging;
 
-        private IFiddleYardApplication m_iFYApp;       
-        
+        private IFiddleYardApplication m_iFYApp;
+        private FiddleYardMip50SettingsForm m_FYMip50SettingsForm;
+
+
         public const int TOP = 1;
         public const int BOT = 0;
 
@@ -91,12 +93,12 @@ namespace SiebwaldeApp
          *  Notes      :
          */
         /*#--------------------------------------------------------------------------#*/
-        public FiddleYardForm(IFiddleYardApplication iFYApp)//, FiddleYardMip50SettingsForm FYMip50SettingsForm)
+        public FiddleYardForm(IFiddleYardApplication iFYApp, FiddleYardMip50SettingsForm FYMip50SettingsForm)
         {
             InitializeComponent();
 
-            //m_FYMip50SettingsForm = FYMip50SettingsForm;
-            //m_FYMip50SettingsForm.Hide();
+            m_FYMip50SettingsForm = FYMip50SettingsForm;
+            m_FYMip50SettingsForm.Hide();
             m_iFYApp = iFYApp;
 
             #region Indicator init
@@ -3658,7 +3660,7 @@ namespace SiebwaldeApp
         {
             try
             {
-                m_iFYApp.OpenFYMip50SettingsForm();                
+                m_FYMip50SettingsForm.Show();
             }
             catch
             {

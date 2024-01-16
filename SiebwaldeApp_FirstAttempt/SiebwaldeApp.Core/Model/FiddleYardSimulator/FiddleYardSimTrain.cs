@@ -74,7 +74,7 @@ namespace SiebwaldeApp.Core
                 // Set the log instance string to the logging instance name used for directed file logging
                 LoggerInstance = "FySimTrainTopLog";
                 //  different logging file per target, this is default
-                FiddleYardSimTrainLogging = GetLogger(Properties.Settings.Default.LogDirectory + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_" + "FiddleYardSimTrainLogTOP.txt", LoggerInstance);
+                FiddleYardSimTrainLogging = GetLogger(Properties.CoreSettings.Default.LogDirectory + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_" + "FiddleYardSimTrainLogTOP.txt", LoggerInstance);
                 IoC.Logger.AddLogger(FiddleYardSimTrainLogging);
             }
             else if ("BOT" == m_instance)
@@ -82,12 +82,12 @@ namespace SiebwaldeApp.Core
                 // Set the log instance string to the logging instance name used for directed file logging
                 LoggerInstance = "FySimTrainBotLog";
                 //  different logging file per target, this is default
-                FiddleYardSimTrainLogging = GetLogger(Properties.Settings.Default.LogDirectory + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_" + "FiddleYardSimTrainLogBOT.txt", LoggerInstance);
+                FiddleYardSimTrainLogging = GetLogger(Properties.CoreSettings.Default.LogDirectory + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_" + "FiddleYardSimTrainLogBOT.txt", LoggerInstance);
                 IoC.Logger.AddLogger(FiddleYardSimTrainLogging);
             }
 
             Sensor Sns_FYSimSpeedSetting = new Sensor("FYSimSpeedSetting", " FYSimSpeedSetting ", 0, (name, val, log) => SimulatorSettings(name, val, log)); // initialize and subscribe sensors
-            Properties.Settings.Default.FYSimSpeedSetting.Attach(Sns_FYSimSpeedSetting);
+            Properties.CoreSettings.Default.FYSimSpeedSetting.Attach(Sns_FYSimSpeedSetting);
         }
 
         /*#--------------------------------------------------------------------------#*/

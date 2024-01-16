@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Windows.Forms;
-using SiebwaldeApp;
 
 namespace SiebwaldeApp
 {
@@ -20,34 +19,34 @@ namespace SiebwaldeApp
         private void FiddleYardSettingsForm_Load(object sender, EventArgs e)
         {
             this.FormClosing += new FormClosingEventHandler(FiddleYardSettingsForm_FormClosing);
-            FYSimSpeedSetting = SiebwaldeApp.Properties.Settings.Default.FIDDLExYARDxSIMxSPEEDxSETTING;
-            SetColorTrackOccupied.BackColor = SiebwaldeApp.Properties.Settings.Default.SETxCOLORxTRACKxOCCUPIED;
-            SetColorTrackNotInitialized.BackColor = SiebwaldeApp.Properties.Settings.Default.SETxCOLORxTRACKxNOTxINITIALIZED;
-            SetColorTrackNotActive.BackColor = SiebwaldeApp.Properties.Settings.Default.SETxCOLORxTRACKxNOTxACTIVE;
-            SetColorTrackDisabled.BackColor = SiebwaldeApp.Properties.Settings.Default.SETxCOLORxTRACKxDISABLED;
-            SetColorTrackDisabledNotOccupied.BackColor = SiebwaldeApp.Properties.Settings.Default.SETxCOLORxTRACKxDISABLEDxNOTxOCCUPIED;
+            FYSimSpeedSetting = Core.Properties.CoreSettings.Default.FIDDLExYARDxSIMxSPEEDxSETTING;
+            SetColorTrackOccupied.BackColor = Core.Properties.CoreSettings.Default.SETxCOLORxTRACKxOCCUPIED;
+            SetColorTrackNotInitialized.BackColor = Core.Properties.CoreSettings.Default.SETxCOLORxTRACKxNOTxINITIALIZED;
+            SetColorTrackNotActive.BackColor = Core.Properties.CoreSettings.Default.SETxCOLORxTRACKxNOTxACTIVE;
+            SetColorTrackDisabled.BackColor = Core.Properties.CoreSettings.Default.SETxCOLORxTRACKxDISABLED;
+            SetColorTrackDisabledNotOccupied.BackColor = Core.Properties.CoreSettings.Default.SETxCOLORxTRACKxDISABLEDxNOTxOCCUPIED;
         }
 
         private void FiddleYardSettingsForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            SiebwaldeApp.Properties.Settings.Default.Reload();
+            Core.Properties.CoreSettings.Default.Reload();
         }        
 
         private void BtnCancel_Click(object sender, EventArgs e)
         {
             //Properties.Settings.Default.Reload();
-            this.Close();
+            Close();
         }
 
         private void BtnReload_Click(object sender, EventArgs e)
         {
-            Properties.Settings.Default.Reload();
+            Core.Properties.CoreSettings.Default.Reload();
         }
 
         private void BtnSave_Click(object sender, EventArgs e)
         {
-            Properties.Settings.Default.Save();            
-            this.Close();            
+            Core.Properties.CoreSettings.Default.Save();            
+            Close();            
         }
 
         private void SetColorTrackOccupied_Click(object sender, EventArgs e)
@@ -64,7 +63,7 @@ namespace SiebwaldeApp
             if (MyDialog.ShowDialog() == DialogResult.OK)
             {
                 SetColorTrackOccupied.BackColor = MyDialog.Color;
-                Properties.Settings.Default.SETxCOLORxTRACKxOCCUPIED = SetColorTrackOccupied.BackColor;
+                Core.Properties.CoreSettings.Default.SETxCOLORxTRACKxOCCUPIED = SetColorTrackOccupied.BackColor;
             }
         }       
 
@@ -82,7 +81,7 @@ namespace SiebwaldeApp
             if (MyDialog.ShowDialog() == DialogResult.OK)
             {
                 SetColorTrackNotInitialized.BackColor = MyDialog.Color;
-                Properties.Settings.Default.SETxCOLORxTRACKxNOTxINITIALIZED = SetColorTrackNotInitialized.BackColor;
+                Core.Properties.CoreSettings.Default.SETxCOLORxTRACKxNOTxINITIALIZED = SetColorTrackNotInitialized.BackColor;
             }
         }
 
@@ -100,7 +99,7 @@ namespace SiebwaldeApp
             if (MyDialog.ShowDialog() == DialogResult.OK)
             {
                 SetColorTrackNotActive.BackColor = MyDialog.Color;
-                Properties.Settings.Default.SETxCOLORxTRACKxNOTxACTIVE = SetColorTrackNotActive.BackColor;
+                Core.Properties.CoreSettings.Default.SETxCOLORxTRACKxNOTxACTIVE = SetColorTrackNotActive.BackColor;
             }
         }       
 

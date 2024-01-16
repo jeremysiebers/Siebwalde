@@ -169,11 +169,11 @@ namespace SiebwaldeApp.Core
         public int iTrackNo = 0;
         public int iTrainDriveOutPointer = 5;        
 
-        public Color TrackOccupiedColor = Properties.Settings.Default.SETxCOLORxTRACKxOCCUPIED;
-        public Color TrackNotInitializedColor = Properties.Settings.Default.SETxCOLORxTRACKxNOTxINITIALIZED;
-        public Color TrackNotActiveColor = Properties.Settings.Default.SETxCOLORxTRACKxNOTxACTIVE;
-        public Color TrackDisabledColor = Properties.Settings.Default.SETxCOLORxTRACKxDISABLED;
-        public Color TrackDisabledNotOccupiedColor = Properties.Settings.Default.SETxCOLORxTRACKxDISABLEDxNOTxOCCUPIED;
+        public Color TrackOccupiedColor = Properties.CoreSettings.Default.SETxCOLORxTRACKxOCCUPIED;
+        public Color TrackNotInitializedColor = Properties.CoreSettings.Default.SETxCOLORxTRACKxNOTxINITIALIZED;
+        public Color TrackNotActiveColor = Properties.CoreSettings.Default.SETxCOLORxTRACKxNOTxACTIVE;
+        public Color TrackDisabledColor = Properties.CoreSettings.Default.SETxCOLORxTRACKxDISABLED;
+        public Color TrackDisabledNotOccupiedColor = Properties.CoreSettings.Default.SETxCOLORxTRACKxDISABLEDxNOTxOCCUPIED;
 
         public PublicBool FYHomed = new PublicBool();
 
@@ -383,19 +383,19 @@ namespace SiebwaldeApp.Core
             CmdCollect.Attach(Act_Collect);
 
             Colorc Clr_FYTrackOccupiedColorSetting = new Colorc(Color.Transparent, "Clr_FYTrackOccupiedColorSetting", (NewColor, log) => SetColorIndicator(NewColor, log));
-            Properties.Settings.Default.SWSetColorTrainOccupied.Attach(Clr_FYTrackOccupiedColorSetting);
+            Properties.CoreSettings.Default.SWSetColorTrainOccupied.Attach(Clr_FYTrackOccupiedColorSetting);
 
             Colorc Clr_FYTrackNotInitializedColorSetting = new Colorc(Color.Transparent, "Clr_FYTrackNotInitializedColorSetting", (NewColor, log) => SetColorIndicator(NewColor, log));
-            Properties.Settings.Default.SWSetColorTrackNotInitialized.Attach(Clr_FYTrackNotInitializedColorSetting);
+            Properties.CoreSettings.Default.SWSetColorTrackNotInitialized.Attach(Clr_FYTrackNotInitializedColorSetting);
 
             Colorc Clr_FYTrackNotActiveColorSetting = new Colorc(Color.Transparent, "Clr_FYTrackNotActiveColorSetting", (NewColor, log) => SetColorIndicator(NewColor, log));
-            Properties.Settings.Default.SWSetColorTrackNotActive.Attach(Clr_FYTrackNotActiveColorSetting);
+            Properties.CoreSettings.Default.SWSetColorTrackNotActive.Attach(Clr_FYTrackNotActiveColorSetting);
 
             Colorc Clr_FYTrackDisabledColorSetting = new Colorc(Color.Transparent, "Clr_FYTrackDisabledColorSetting", (NewColor, log) => SetColorIndicator(NewColor, log));
-            Properties.Settings.Default.SWSetColorTrackDisabled.Attach(Clr_FYTrackDisabledColorSetting);
+            Properties.CoreSettings.Default.SWSetColorTrackDisabled.Attach(Clr_FYTrackDisabledColorSetting);
 
             Colorc Clr_FYTrackDisabledNotOccupiedColorSetting = new Colorc(Color.Transparent, "Clr_FYTrackDisabledNotOccupiedColorSetting", (NewColor, log) => SetColorIndicator(NewColor, log));
-            Properties.Settings.Default.SWSetColorTrackDisabledNotOccupied.Attach(Clr_FYTrackDisabledNotOccupiedColorSetting);
+            Properties.CoreSettings.Default.SWSetColorTrackDisabledNotOccupied.Attach(Clr_FYTrackDisabledNotOccupiedColorSetting);
             
 
             for (int i = 1; i < 12; i++)

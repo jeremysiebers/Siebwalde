@@ -83,7 +83,7 @@ namespace SiebwaldeApp.Core
                 // Set the log instance string to the logging instance name used for directed file logging
                 LoggerInstance = "FySimulatorTopLog";
                 //  different logging file per target, this is default
-                FiddleYardSimulatorLogging = GetLogger(Properties.Settings.Default.LogDirectory + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_" + "FiddleYardSimulatorLogTOP.txt", LoggerInstance);
+                FiddleYardSimulatorLogging = GetLogger(Properties.CoreSettings.Default.LogDirectory + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_" + "FiddleYardSimulatorLogTOP.txt", LoggerInstance);
                 IoC.Logger.AddLogger(FiddleYardSimulatorLogging);
             }
             else if ("BOT" == m_instance)
@@ -91,7 +91,7 @@ namespace SiebwaldeApp.Core
                 // Set the log instance string to the logging instance name used for directed file logging
                 LoggerInstance = "FySimulatorBotLog";
                 //  different logging file per target, this is default
-                FiddleYardSimulatorLogging = GetLogger(Properties.Settings.Default.LogDirectory + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_" + "FiddleYardSimulatorLogBOT.txt", LoggerInstance);
+                FiddleYardSimulatorLogging = GetLogger(Properties.CoreSettings.Default.LogDirectory + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_" + "FiddleYardSimulatorLogBOT.txt", LoggerInstance);
                 IoC.Logger.AddLogger(FiddleYardSimulatorLogging);
             }
 
@@ -102,7 +102,7 @@ namespace SiebwaldeApp.Core
             FYSimVar.TrackNo.Count = 1;            
 
             Sensor Sns_FYSimSpeedSetting = new Sensor("FYSimSpeedSetting", " FYSimSpeedSetting ", 0, (name, val, log) => SimulatorSettings(name, val, log)); // initialize and subscribe sensors
-            Properties.Settings.Default.FYSimSpeedSetting.Attach(Sns_FYSimSpeedSetting);
+            Properties.CoreSettings.Default.FYSimSpeedSetting.Attach(Sns_FYSimSpeedSetting);
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -154,7 +154,7 @@ namespace SiebwaldeApp.Core
 
             aTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
             // Set the Interval to [x] miliseconds.
-            aTimer.Interval = Convert.ToInt16(Properties.Settings.Default.FIDDLExYARDxSIMxSPEEDxSETTING);
+            aTimer.Interval = Convert.ToInt16(Properties.CoreSettings.Default.FIDDLExYARDxSIMxSPEEDxSETTING);
             aTimer.AutoReset = true;
             // Enable the timer
             aTimer.Enabled = true;

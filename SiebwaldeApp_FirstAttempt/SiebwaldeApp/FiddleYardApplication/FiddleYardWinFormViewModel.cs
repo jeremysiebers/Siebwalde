@@ -9,8 +9,8 @@ namespace SiebwaldeApp
 {
     public class FiddleYardWinFormViewModel
     {
-        public FiddleYardSettingsForm FYSettingsFormTop, FYSettingsFormBot;
-        
+        public FiddleYardSettingsForm FYSettingsForm;
+        public FiddleYardMip50SettingsForm FYMip50SettingsFormTop, FYMip50SettingsFormBot;
         public FiddleYardForm FyFormTop, FyFormBot;
 
         /// <summary>
@@ -20,6 +20,22 @@ namespace SiebwaldeApp
         {
             IoC.siebwaldeApplicationModel.InstantiateFiddleYardWinForms += FiddleYardPageStart;
             IoC.siebwaldeApplicationModel.FiddleYardShowWinForms += ShowFiddleYardWinForm;
+            IoC.siebwaldeApplicationModel.FiddleYardShowSettingsWinForms += ShowFiddleYardSettingsWinForm;
+        }
+
+        #region Private methods
+
+        private void ShowFiddleYardSettingsWinForm(object sender, EventArgs e)
+        {
+            if (FYSettingsForm == null)
+            {
+                FYSettingsForm = new FiddleYardSettingsForm();
+            }
+            else
+            {
+                FYSettingsForm.Show();
+            }
+                
         }
 
         private void ShowFiddleYardWinForm(object sender, EventArgs e)
@@ -42,18 +58,24 @@ namespace SiebwaldeApp
             {
                 if (FyFormTop == null)
                 {
-                    FyFormTop = new FiddleYardForm(IoC.siebwaldeApplicationModel.FYcontroller.FYIOHandleTOP.FYApp) { Name = "FiddleYardTOP" };
+                    FYMip50SettingsFormTop = new FiddleYardMip50SettingsForm("TOP", 
+                        IoC.siebwaldeApplicationModel.FYcontroller.FYIOHandleTOP.FYApp.FYMIP50,
+                        IoC.siebwaldeApplicationModel.FYcontroller.FYIOHandleTOP.FYApp.FYAppVar);
+
+                    FyFormTop = new FiddleYardForm(IoC.siebwaldeApplicationModel.FYcontroller.FYIOHandleTOP.FYApp, FYMip50SettingsFormTop) { Name = "FiddleYardTOP" };
                     FyFormTop.Show();
                     FyFormTop.Hide();
                     // connect the Form to the FYIOHandle interface
                     FyFormTop.Connect(IoC.siebwaldeApplicationModel.FYcontroller.FYIOHandleTOP.FYIOHandleVar,
                         IoC.siebwaldeApplicationModel.FYcontroller.FYIOHandleTOP.FYApp.FYAppVar);
-
-                    //FYSettingsFormTop = new FiddleYardSettingsForm();
                 }
                 if (FyFormBot == null)
                 {
-                    FyFormBot = new FiddleYardForm(IoC.siebwaldeApplicationModel.FYcontroller.FYIOHandleBOT.FYApp) { Name = "FiddleYardBOT" };
+                    FYMip50SettingsFormBot = new FiddleYardMip50SettingsForm("BOT",
+                       IoC.siebwaldeApplicationModel.FYcontroller.FYIOHandleTOP.FYApp.FYMIP50,
+                       IoC.siebwaldeApplicationModel.FYcontroller.FYIOHandleTOP.FYApp.FYAppVar);
+
+                    FyFormBot = new FiddleYardForm(IoC.siebwaldeApplicationModel.FYcontroller.FYIOHandleBOT.FYApp, FYMip50SettingsFormBot) { Name = "FiddleYardBOT" };
                     FyFormBot.Show();
                     FyFormBot.Hide();
                     // connect the Form to the FYIOHandle interface 
@@ -103,7 +125,9 @@ namespace SiebwaldeApp
                 FYFORM.WindowState = FormWindowState.Normal;
             }
         }
+
+        #endregion
     }
 
-    
+
 }

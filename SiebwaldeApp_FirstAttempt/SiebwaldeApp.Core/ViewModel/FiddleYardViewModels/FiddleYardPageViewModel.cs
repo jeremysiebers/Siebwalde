@@ -1,11 +1,32 @@
-﻿namespace SiebwaldeApp.Core
+﻿using System;
+using System.Windows.Input;
+
+namespace SiebwaldeApp.Core
 {
     /// <summary
     /// 
     /// <summary
     public class FiddleYardPageViewModel : BaseViewModel
     {
+        #region Commands
+
+        /// <summary>
+        /// The command to show the system menu of the window
+        /// </summary>
+        public ICommand FiddleYardSettingsmenu { get; set; }
+
+        #endregion
+
         #region Private members
+
+        /// <summary>
+        /// Method to load the Siebwalde page and menu
+        /// </summary>
+        private void LoadFiddleYardSettingsmenu()
+        {
+            // Show the Fiddle Yard Settings Winforms
+            IoC.siebwaldeApplicationModel.OnFiddleYardSettingsWinForm(EventArgs.Empty);
+        }
 
         #endregion
 
@@ -20,7 +41,7 @@
         /// <summary>
         public FiddleYardPageViewModel()
         {
-
+            FiddleYardSettingsmenu = new RelayCommand(LoadFiddleYardSettingsmenu);
         }
         #endregion
     }
