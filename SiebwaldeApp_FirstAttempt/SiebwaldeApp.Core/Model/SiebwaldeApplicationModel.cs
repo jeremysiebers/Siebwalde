@@ -55,12 +55,10 @@ namespace SiebwaldeApp.Core
         /// <summary>
         /// Fiddle Yard
         /// </summary>
-        public void StartFYController()
+        public async Task StartFYController()
         {
             if (FYcontroller != null)
-            {
-                //FYcontroller.FYTOPShow(false, 1010, 1948, 0, 0, true);
-                //FYcontroller.FYBOTShow(false, 1010, 1948, 0, 0, true);
+            {                
                 return;
             }
 
@@ -78,7 +76,8 @@ namespace SiebwaldeApp.Core
 
 
             IoC.Logger.Log("FiddleYard Controller starting...", "");
-            FYcontroller.Start();
+
+            await FYcontroller.StartFiddleYardControllerAsync();
             
             ////FYcontroller.FYTOPShow(false, 1010, 1948, 0, 0, true);
             //FYcontroller.FYBOTShow(false, 1010, 1948, 0, 0, true);

@@ -34,7 +34,12 @@ namespace SiebwaldeApp.Core
         /// <summary>
         /// The command to init the TrackController
         /// </summary>
-        public ICommand TrackController { get; set; }
+        public ICommand InitTrackController { get; set; }
+
+        /// <summary>
+        /// The command to init the TrackController
+        /// </summary>
+        public ICommand InitFiddleYardController { get; set; }
 
         #endregion
 
@@ -55,9 +60,9 @@ namespace SiebwaldeApp.Core
 
             //IoC.siebwaldeApplicationModel.//SiebwaldeApplicationMainLogging.PropertyChanged += //SiebwaldeApplicationMainLogging_PropertyChanged;
 
-            InitAllControllers = new RelayCommand(() => IoC.siebwaldeApplicationModel.StartFYController());
+            InitFiddleYardController = new RelayCommand(async () => await IoC.siebwaldeApplicationModel.StartFYController());
 
-            TrackController = new RelayCommand(async () => await IoC.siebwaldeApplicationModel.StartTrackController());
+            InitTrackController = new RelayCommand(async () => await IoC.siebwaldeApplicationModel.StartTrackController());
         }
 
         private void SiebwaldeApplicationMainLogging_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)

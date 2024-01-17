@@ -1,5 +1,5 @@
 ﻿using System;
-using SiebwaldeApp.Core;
+using System.Threading.Tasks;
 
 namespace SiebwaldeApp.Core
 {
@@ -24,7 +24,7 @@ namespace SiebwaldeApp.Core
         public NewPingTarget m_PingTarget = new NewPingTarget { };
         private int m_FYReceivingPort = 0;
         private int m_FYSendingPort   = 0;
-        private bool FYSimulatorActive = false;        
+        private bool FYSimulatorActive = false;
         private byte[,] m_macAddr;
         private byte[,] m_ipAddr;
 
@@ -90,29 +90,36 @@ namespace SiebwaldeApp.Core
          *  Notes      :
          */
         /*#--------------------------------------------------------------------------#*/
-        public void Start()
+        public async Task StartFiddleYardControllerAsync()
         {
+            // Start a new task (so it runs on a different thread)
+            await Task.Run(() =>
+            {
                 if (ConnectFiddleYard(m_macAddr, m_ipAddr) == true) // when connection was succesfull and target was found and is connected
                 {
                     IoC.Logger.Log("FYCTRL: Fiddle Yard uController target in real mode", "");
-                    
+
                     //FYIOHandleTOP.FYApp.FYFORM.SimMode(FYSimulatorActive);
-                    
                     //FYIOHandleBOT.FYApp.FYFORM.SimMode(FYSimulatorActive);
                     FYReceiver.Start();
                 }
                 else
                 {
                     IoC.Logger.Log("FYCTRL: Fiddle Yard uController target in simulator mode", "");
-                    
+
                     //FYIOHandleTOP.FYApp.FYFORM.SimMode(FYSimulatorActive);
-                    
                     //FYIOHandleBOT.FYApp.FYFORM.SimMode(FYSimulatorActive);
                 }
-                FYIOHandleTOP.Start(FYSimulatorActive);   // use these to disable this layer of the fiddle yard in order to do easy debugging by commenting this line
-                FYIOHandleBOT.Start(FYSimulatorActive);   // use these to disable this layer of the fiddle yard in order to do easy debugging by commenting this line
+                FYIOHandleTOP.Init(FYSimulatorActive);   // use these to disable this layer of the fiddle yard in order to do easy debugging by commenting this line
+                FYIOHandleBOT.Init(FYSimulatorActive);   // use these to disable this layer of the fiddle yard in order to do easy debugging by commenting this line
                 IoC.Logger.Log("FYCTRL: Fiddle Yard uController Reset.", "");
-        
+
+                System.Threading.Thread.Sleep(50);              // Add aditional wait time for the target to process the reset command
+
+                FYIOHandleTOP.Start(); // start here the timers of FyApp and FySim
+                FYIOHandleBOT.Start(); // start here the timers of FyApp and FySim
+
+            });
         }
 
         /*#--------------------------------------------------------------------------#*/

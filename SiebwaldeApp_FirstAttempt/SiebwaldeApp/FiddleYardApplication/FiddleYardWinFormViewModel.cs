@@ -1,8 +1,5 @@
-﻿
-
-using SiebwaldeApp.Core;
+﻿using SiebwaldeApp.Core;
 using System;
-using System.ComponentModel;
 using System.Windows.Forms;
 
 namespace SiebwaldeApp 
@@ -81,8 +78,6 @@ namespace SiebwaldeApp
                     // connect the Form to the FYIOHandle interface 
                     FyFormBot.Connect(IoC.siebwaldeApplicationModel.FYcontroller.FYIOHandleBOT.FYIOHandleVar,
                         IoC.siebwaldeApplicationModel.FYcontroller.FYIOHandleBOT.FYApp.FYAppVar);
-
-                    //FYSettingsFormBot = new FiddleYardSettingsForm();
                 }
             }
         }

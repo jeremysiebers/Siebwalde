@@ -81,22 +81,23 @@ namespace SiebwaldeApp.Core
          */
         /*#--------------------------------------------------------------------------#*/
         
-        public void Start(bool FYSimulatorActive)
+        public void Init(bool FYSimulatorActive)
         {
             m_FYSimulatorActive = FYSimulatorActive;
-            FYApp.Start();                                  // start application (in application the actuators are defined there for first start FYApplication, then attach)
-
+            
             string Layer = "0";
             if (m_instance == "TOP")
                 Layer = "a";
             else if (m_instance == "BOT")
                 Layer = "b";
 
+            #region Data and signal subscribers
             // Instantiate actuators  here, after all source files are generated and items are created, otherwise deadlock (egg - chicken story)
             Actuator Act_Couple = new Actuator("Couple",  Layer + "1\r", (name, cmd) => ActuatorCmd(name, cmd)); // initialize and subscribe actuators
             FYApp.FYAppVar.Couple.Attach(Act_Couple);
             Actuator Act_Uncouple = new Actuator("Uncouple",  Layer + "2\r", (name, cmd) => ActuatorCmd(name, cmd)); // initialize and subscribe actuators
             FYApp.FYAppVar.Uncouple.Attach(Act_Uncouple);
+            #region old
             //Actuator Act_MIP50_Enable = new Actuator("MIP50_Enable",  Layer + "3\r", (name, cmd) => ActuatorCmd(name, cmd)); // initialize and subscribe actuators
             //FYApp.FYAppVar.MIP50_Enable.Attach(Act_MIP50_Enable);
             //Actuator Act_MIP50_Disable = new Actuator("MIP50_Disable",  Layer + "4\r", (name, cmd) => ActuatorCmd(name, cmd)); // initialize and subscribe actuators
@@ -129,6 +130,7 @@ namespace SiebwaldeApp.Core
             //FYApp.FYAppVar.FYStart.Attach(Act_Start);
             //Actuator Act_Stop = new Actuator("Stop",  Layer + "I\r", (name, cmd) => ActuatorCmd(name, cmd)); // initialize and subscribe actuators
             //FYApp.FYAppVar.FYStop.Attach(Act_Stop);
+            #endregion
             Actuator Act_Reset = new Actuator("Reset",  Layer + "5\r", (name, cmd) => ActuatorCmd(name, cmd)); // initialize and subscribe actuators
             FYApp.FYAppVar.Reset.Attach(Act_Reset);
             Actuator Act_Occ5BOnTrue = new Actuator("Occ5BOnTrue",  Layer + "6\r", (name, cmd) => ActuatorCmd(name, cmd)); // initialize and subscribe actuators
@@ -147,6 +149,8 @@ namespace SiebwaldeApp.Core
             //FYApp.FYAppVar.HomeFY.Attach(Act_HomeFY);
             //Actuator Act_Collect = new Actuator("Collect",  Layer + "R\r", (name, cmd) => ActuatorCmd(name, cmd)); // initialize and subscribe actuators
             //FYApp.FYAppVar.Collect.Attach(Act_Collect);
+
+            #endregion
 
             if (m_instance == "TOP")
             {
@@ -179,12 +183,24 @@ namespace SiebwaldeApp.Core
             {                
                 m_iFYCtrl.GetFYReceiver().NewData -= HandleNewData;
                 FYSimulator.NewData += HandleNewData;
-                FYSimulator.Start();
+                //FYSimulator.Start();
             }
 
             //ActuatorCmd("Reset", Layer + "J\r");            // Reset Fiddle Yard layer to reset target in order to sync C# application and C embedded software --> not required due to all intelligence to FY application
             System.Threading.Thread.Sleep(50);              // Add aditional wait time for the target to process the reset command
             
+        }
+
+        /// <summary>
+        /// Starting of the timers after all loggers etc are created.
+        /// </summary>
+        public void Start()
+        {
+            FYApp.Start();
+            if (m_FYSimulatorActive == true)
+            {
+                FYSimulator.Start();
+            }
         }
 
         /*#--------------------------------------------------------------------------#*/

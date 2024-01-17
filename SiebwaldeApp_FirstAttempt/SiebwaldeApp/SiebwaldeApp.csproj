@@ -169,7 +169,7 @@
     </Compile>
     <Compile Include="FiddleYardApplication\CropBitmap.cs" />
     <Compile Include="FiddleYardApplication\ScaleBitmap.cs" />
-    <Compile Include="Settings.cs" />
+    <Compile Include="FiddleYardApplication\Settings.cs" />
     <Compile Include="ValueConverters\MultiBaseValueConverter.cs" />
     <Compile Include="ValueConverters\EnumarableToTextConverter.cs" />
     <Compile Include="ValueConverters\MenuPageValueConverter.cs" />
@@ -287,6 +287,7 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <Resource Include="Fonts\Lato-Black.ttf" />
     <Resource Include="Fonts\Lato-BlackItalic.ttf" />

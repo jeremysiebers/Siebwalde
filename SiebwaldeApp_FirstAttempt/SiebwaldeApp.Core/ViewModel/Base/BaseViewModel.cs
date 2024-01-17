@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using PropertyChanged;
 
 namespace SiebwaldeApp.Core
 {

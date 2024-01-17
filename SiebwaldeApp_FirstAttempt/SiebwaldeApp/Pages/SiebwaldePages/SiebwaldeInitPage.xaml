@@ -68,7 +68,7 @@
                     HorizontalAlignment="Center" 
                     Style="{StaticResource IconGrowButton}" 
                     Content="{StaticResource FontAwesomeMicroChip}" 
-                    Command="{Binding TrackController}"
+                    Command="{Binding InitTrackController}"
                     Foreground="White"  
                 />
 
@@ -102,7 +102,7 @@
                     HorizontalAlignment="Center" 
                     Style="{StaticResource IconGrowButton}" 
                     Content="{StaticResource FontAwesomeMicroChip}" 
-                    Command="{Binding }"
+                    Command="{Binding InitFiddleYardController}"
                     Foreground="White"  
                 />
 

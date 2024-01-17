@@ -11,9 +11,6 @@ namespace SiebwaldeApp.Core
     {
         #region variables
 
-        // connect variable to connect to FYController class to Main for application logging
-        //private Main mMain;
-
         // Ping instance
         private static NewPingTarget m_PingTarget = new NewPingTarget { };
 
@@ -72,9 +69,6 @@ namespace SiebwaldeApp.Core
             // create new instance of TrackIOHandle (Data exchange layer from EthernetTarget)
             mTrackIOHandle = new TrackIOHandle(mTrackReceivingPort, mTrackSendingPort, LoggerInstance);
 
-            // create new instance of trackControlMain
-            mTrackControlMain = new TrackControlMain(LoggerInstance, mTrackIOHandle);
-
             // create new instance of station control
             mstationControl = new StationControl(LoggerInstance);
         }
@@ -117,7 +111,7 @@ namespace SiebwaldeApp.Core
 
                 // start the Track controller main application
                 IoC.Logger.Log("Start Track Application.", LoggerInstance);
-                mTrackControlMain.Start(TrackRealMode);
+                //mTrackControlMain.Start(TrackRealMode);
             });
         }
 

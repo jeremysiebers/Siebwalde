@@ -2,12 +2,14 @@
 using System.Drawing;
 using System.Windows.Forms;
 using SiebwaldeApp.Core;
+using static SiebwaldeApp.Core.FiddleYardSimulatorVariables;
 using Message = SiebwaldeApp.Core.Message;
 
 namespace SiebwaldeApp
 {
     public delegate void SetLedIndicatorCallback(string Indicator, int Val, string Log);  // defines a delegate type TOP/BOT if caller runs on other thread
     public delegate void SetMessageCallback(string name, string Log);  // defines a delegate type TOP/BOT if caller runs on other thread
+    public delegate void SetSimModeVisibleCallback(bool val);
 
     public partial class FiddleYardForm : Form
     {
@@ -654,10 +656,19 @@ namespace SiebwaldeApp
          *
          *  Notes      :
          */
-        /*#--------------------------------------------------------------------------#*/
+        /*#--------------------------------------------------------------------------#*/       
+
         public void SimMode(bool val)
         {
-            SimulationMode.Visible = val;
+            if (SimulationMode.InvokeRequired)
+            {
+                SetSimModeVisibleCallback d = new SetSimModeVisibleCallback(SimMode);
+                SimulationMode.Invoke(d, new object[] { val });  // invoking itself
+            }
+            else
+            {
+                SimulationMode.Visible = val;
+            }                
         }
 
         /*#--------------------------------------------------------------------------#*/
@@ -1870,6 +1881,15 @@ namespace SiebwaldeApp
 
                     default: break;
                 }
+            }
+
+            if (Name == "FiddleYardTOP")
+            {
+                SimMode(IoC.siebwaldeApplicationModel.FYcontroller.FYIOHandleTOP.GetFYSimulatorActive());
+            }
+            else if (Name == "FiddleYardBOT")
+            {
+                SimMode(IoC.siebwaldeApplicationModel.FYcontroller.FYIOHandleBOT.GetFYSimulatorActive());
             }
         }
         /*#--------------------------------------------------------------------------#*/

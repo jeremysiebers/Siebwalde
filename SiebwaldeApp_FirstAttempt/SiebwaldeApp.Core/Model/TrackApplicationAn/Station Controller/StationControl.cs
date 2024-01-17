@@ -20,7 +20,12 @@ namespace SiebwaldeApp.Core
             // couple and hold local variables                    
             mLoggerInstance = LoggerInstance;
 
+            IoC.TrackVariables.PropertyChanged += TrackVar_PropertyChanged;
+        }
 
+        private void TrackVar_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            IoC.Logger.Log(e.PropertyName + " = " + sender.GetType().GetProperty(e.PropertyName).GetValue(sender).ToString(), mLoggerInstance);
         }
     }
 }

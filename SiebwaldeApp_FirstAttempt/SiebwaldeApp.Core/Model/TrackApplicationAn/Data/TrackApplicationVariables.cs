@@ -1,12 +1,8 @@
-﻿using PropertyChanged;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 
 namespace SiebwaldeApp.Core
 {
-    public class TrackApplicationVariables
+    public class TrackApplicationVariables : INotifyPropertyChanged
     {
         /// <summary>
         /// The event that is fired when any child property changes it value
@@ -52,7 +48,7 @@ namespace SiebwaldeApp.Core
         /// <summary>
         /// Get/Set and generate event for HallBlock13
         /// </summary>
-        [DoNotNotify]
+        //[DoNotNotify]
         public bool HallBlock13
         {
             get => _HallBlock13;
@@ -65,7 +61,7 @@ namespace SiebwaldeApp.Core
                 else
                 {
                     _HallBlock13 = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(HallBlock13)));
+                   // PropertyChanged(this, new PropertyChangedEventArgs(nameof(HallBlock13)));
                 }
             }
         }
@@ -73,7 +69,7 @@ namespace SiebwaldeApp.Core
         /// <summary>
         /// Get/Set and generate event for HallBlock21A
         /// </summary>
-        [DoNotNotify]
+        //[DoNotNotify]
         public bool HallBlock21A
         {
             get => _HallBlock21A;
@@ -86,7 +82,7 @@ namespace SiebwaldeApp.Core
                 else
                 {
                     _HallBlock21A = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(HallBlock21A)));
+                    //PropertyChanged(this, new PropertyChangedEventArgs(nameof(HallBlock21A)));
                 }
             }
         }
@@ -94,7 +90,7 @@ namespace SiebwaldeApp.Core
         /// <summary>
         /// Get/Set and generate event for HallBlockT4
         /// </summary>
-        [DoNotNotify]
+        //[DoNotNotify]
         public bool HallBlockT4
         {
             get => _HallBlockT4;
@@ -107,7 +103,7 @@ namespace SiebwaldeApp.Core
                 else
                 {
                     _HallBlockT4 = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(HallBlockT4)));
+                    //PropertyChanged(this, new PropertyChangedEventArgs(nameof(HallBlockT4)));
                 }
             }
         }
@@ -115,7 +111,7 @@ namespace SiebwaldeApp.Core
         /// <summary>
         /// Get/Set and generate event for HallBlockT5
         /// </summary>
-        [DoNotNotify]
+        //[DoNotNotify]
         public bool HallBlockT5
         {
             get => _HallBlockT5;
@@ -128,7 +124,7 @@ namespace SiebwaldeApp.Core
                 else
                 {
                     _HallBlockT5 = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(HallBlockT5)));
+                    //PropertyChanged(this, new PropertyChangedEventArgs(nameof(HallBlockT5)));
                 }
             }
         }
@@ -136,7 +132,7 @@ namespace SiebwaldeApp.Core
         /// <summary>
         /// Get/Set and generate event for HallBlockT1
         /// </summary>
-        [DoNotNotify]
+        //[DoNotNotify]
         public bool HallBlockT1
         {
             get => _HallBlockT1;
@@ -149,7 +145,7 @@ namespace SiebwaldeApp.Core
                 else
                 {
                     _HallBlockT1 = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(HallBlockT1)));
+                    //PropertyChanged(this, new PropertyChangedEventArgs(nameof(HallBlockT1)));
                 }
             }
         }
@@ -157,7 +153,7 @@ namespace SiebwaldeApp.Core
         /// <summary>
         /// Get/Set and generate event for HallBlockT2
         /// </summary>
-        [DoNotNotify]
+        //[DoNotNotify]
         public bool HallBlockT2
         {
             get => _HallBlockT2;
@@ -170,7 +166,7 @@ namespace SiebwaldeApp.Core
                 else
                 {
                     _HallBlockT2 = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(HallBlockT2)));
+                    //PropertyChanged(this, new PropertyChangedEventArgs(nameof(HallBlockT2)));
                 }
             }
         }
@@ -178,7 +174,7 @@ namespace SiebwaldeApp.Core
         /// <summary>
         /// Get/Set and generate event for HallBlock9B
         /// </summary>
-        [DoNotNotify]
+        //[DoNotNotify]
         public bool HallBlock9B
         {
             get => _HallBlock9B;
@@ -191,7 +187,7 @@ namespace SiebwaldeApp.Core
                 else
                 {
                     _HallBlock9B = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(HallBlock9B)));
+                    //PropertyChanged(this, new PropertyChangedEventArgs(nameof(HallBlock9B)));
                 }
             }
         }
@@ -199,7 +195,7 @@ namespace SiebwaldeApp.Core
         /// <summary>
         /// Get/Set and generate event for HallBlock4A
         /// </summary>
-        [DoNotNotify]
+        //[DoNotNotify]
         public bool HallBlock4A
         {
             get => _HallBlock4A;
@@ -212,7 +208,7 @@ namespace SiebwaldeApp.Core
                 else
                 {
                     _HallBlock4A = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(HallBlock4A)));
+                    //PropertyChanged(this, new PropertyChangedEventArgs(nameof(HallBlock4A)));
                 }
             }
         }
@@ -220,7 +216,7 @@ namespace SiebwaldeApp.Core
         /// <summary>
         /// Get/Set and generate event for HallBlockT7
         /// </summary>
-        [DoNotNotify]
+        //[DoNotNotify]
         public bool HallBlockT7
         {
             get => _HallBlockT7;
@@ -233,7 +229,7 @@ namespace SiebwaldeApp.Core
                 else
                 {
                     _HallBlockT7 = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(HallBlockT7)));
+                    //PropertyChanged(this, new PropertyChangedEventArgs(nameof(HallBlockT7)));
                 }
             }
         }
@@ -241,7 +237,7 @@ namespace SiebwaldeApp.Core
         /// <summary>
         /// Get/Set and generate event for HallBlockT8
         /// </summary>
-        [DoNotNotify]
+        //[DoNotNotify]
         public bool HallBlockT8
         {
             get => _HallBlockT8;
@@ -254,7 +250,7 @@ namespace SiebwaldeApp.Core
                 else
                 {
                     _HallBlockT8 = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(HallBlockT8)));
+                    //PropertyChanged(this, new PropertyChangedEventArgs(nameof(HallBlockT8)));
                 }
             }
         }
@@ -262,7 +258,7 @@ namespace SiebwaldeApp.Core
         /// <summary>
         /// Get/Set and generate event for OccFromBlock13
         /// </summary>
-        [DoNotNotify]
+        //[DoNotNotify]
         public bool OccFromBlock13
         {
             get => _OccFromBlock13;
@@ -275,7 +271,7 @@ namespace SiebwaldeApp.Core
                 else
                 {
                     _OccFromBlock13 = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(OccFromBlock13)));
+                    //PropertyChanged(this, new PropertyChangedEventArgs(nameof(OccFromBlock13)));
                 }
             }
         }
@@ -283,7 +279,7 @@ namespace SiebwaldeApp.Core
         /// <summary>
         /// Get/Set and generate event for OccFromBlock4
         /// </summary>
-        [DoNotNotify]
+        //[DoNotNotify]
         public bool OccFromBlock4
         {
             get => _OccFromBlock4;
@@ -296,7 +292,7 @@ namespace SiebwaldeApp.Core
                 else
                 {
                     _OccFromBlock4 = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(OccFromBlock4)));
+                    //PropertyChanged(this, new PropertyChangedEventArgs(nameof(OccFromBlock4)));
                 }
             }
         }
@@ -304,7 +300,7 @@ namespace SiebwaldeApp.Core
         /// <summary>
         /// Get/Set and generate event for OccFromStn1
         /// </summary>
-        [DoNotNotify]
+        //[DoNotNotify]
         public bool OccFromStn1
         {
             get => _OccFromStn1;
@@ -317,7 +313,7 @@ namespace SiebwaldeApp.Core
                 else
                 {
                     _OccFromStn1 = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(OccFromStn1)));
+                    //PropertyChanged(this, new PropertyChangedEventArgs(nameof(OccFromStn1)));
                 }
             }
         }
@@ -325,7 +321,7 @@ namespace SiebwaldeApp.Core
         /// <summary>
         /// Get/Set and generate event for OccFromStn2
         /// </summary>
-        [DoNotNotify]
+        //[DoNotNotify]
         public bool OccFromStn2
         {
             get => _OccFromStn2;
@@ -338,7 +334,7 @@ namespace SiebwaldeApp.Core
                 else
                 {
                     _OccFromStn2 = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(OccFromStn2)));
+                    //PropertyChanged(this, new PropertyChangedEventArgs(nameof(OccFromStn2)));
                 }
             }
         }
@@ -346,7 +342,7 @@ namespace SiebwaldeApp.Core
         /// <summary>
         /// Get/Set and generate event for OccFromStn1
         /// </summary>
-        [DoNotNotify]
+        //[DoNotNotify]
         public bool OccFromStn3
         {
             get => _OccFromStn3;
@@ -359,7 +355,7 @@ namespace SiebwaldeApp.Core
                 else
                 {
                     _OccFromStn3 = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(OccFromStn3)));
+                    //PropertyChanged(this, new PropertyChangedEventArgs(nameof(OccFromStn3)));
                 }
             }
         }
@@ -367,7 +363,7 @@ namespace SiebwaldeApp.Core
         /// <summary>
         /// Get/Set and generate event for OccFromStn1
         /// </summary>
-        [DoNotNotify]
+        //[DoNotNotify]
         public bool OccFromStn10
         {
             get => _OccFromStn10;
@@ -380,7 +376,7 @@ namespace SiebwaldeApp.Core
                 else
                 {
                     _OccFromStn10 = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(OccFromStn10)));
+                    //PropertyChanged(this, new PropertyChangedEventArgs(nameof(OccFromStn10)));
                 }
             }
         }
@@ -388,7 +384,7 @@ namespace SiebwaldeApp.Core
         /// <summary>
         /// Get/Set and generate event for OccFromStn11
         /// </summary>
-        [DoNotNotify]
+        //[DoNotNotify]
         public bool OccFromStn11
         {
             get => _OccFromStn11;
@@ -401,7 +397,7 @@ namespace SiebwaldeApp.Core
                 else
                 {
                     _OccFromStn11 = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(OccFromStn11)));
+                    //PropertyChanged(this, new PropertyChangedEventArgs(nameof(OccFromStn11)));
                 }
             }
         }
@@ -409,7 +405,7 @@ namespace SiebwaldeApp.Core
         /// <summary>
         /// Get/Set and generate event for OccFromStn12
         /// </summary>
-        [DoNotNotify]
+        //[DoNotNotify]
         public bool OccFromStn12
         {
             get => _OccFromStn12;
@@ -422,7 +418,7 @@ namespace SiebwaldeApp.Core
                 else
                 {
                     _OccFromStn12 = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(OccFromStn12)));
+                   // PropertyChanged(this, new PropertyChangedEventArgs(nameof(OccFromStn12)));
                 }
             }
         }
@@ -430,7 +426,7 @@ namespace SiebwaldeApp.Core
         /// <summary>
         /// Get/Set and generate event for OccFromT6
         /// </summary>
-        [DoNotNotify]
+        //[DoNotNotify]
         public bool OccFromT6
         {
             get => _OccFromT6;
@@ -443,7 +439,7 @@ namespace SiebwaldeApp.Core
                 else
                 {
                     _OccFromT6 = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(OccFromT6)));
+                    //PropertyChanged(this, new PropertyChangedEventArgs(nameof(OccFromT6)));
                 }
             }
         }
@@ -451,7 +447,7 @@ namespace SiebwaldeApp.Core
         /// <summary>
         /// Get/Set and generate event for OccFromT3
         /// </summary>
-        [DoNotNotify]
+        //[DoNotNotify]
         public bool OccFromT3
         {
             get => _OccFromT3;
@@ -464,7 +460,7 @@ namespace SiebwaldeApp.Core
                 else
                 {
                     _OccFromT3 = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(OccFromT3)));
+                    //PropertyChanged(this, new PropertyChangedEventArgs(nameof(OccFromT3)));
                 }
             }
         }
@@ -472,7 +468,7 @@ namespace SiebwaldeApp.Core
         /// <summary>
         /// Get/Set and generate event for CtrlOff
         /// </summary>
-        [DoNotNotify]
+        //[DoNotNotify]
         public bool CtrlOff
         {
             get => _CtrlOff;
@@ -485,7 +481,7 @@ namespace SiebwaldeApp.Core
                 else
                 {
                     _CtrlOff = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(CtrlOff)));
+                   // PropertyChanged(this, new PropertyChangedEventArgs(nameof(CtrlOff)));
                 }
             }
         }
@@ -493,7 +489,7 @@ namespace SiebwaldeApp.Core
         /// <summary>
         /// Get/Set and generate event for OccFromBlock23B
         /// </summary>
-        [DoNotNotify]
+        //[DoNotNotify]
         public bool OccFromBlock23B
         {
             get => _OccFromBlock23B;
@@ -506,7 +502,7 @@ namespace SiebwaldeApp.Core
                 else
                 {
                     _OccFromBlock23B = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(OccFromBlock23B)));
+                    //PropertyChanged(this, new PropertyChangedEventArgs(nameof(OccFromBlock23B)));
                 }
             }
         }
@@ -514,7 +510,7 @@ namespace SiebwaldeApp.Core
         /// <summary>
         /// Get/Set and generate event for OccFromBlock22B
         /// </summary>
-        [DoNotNotify]
+        //[DoNotNotify]
         public bool OccFromBlock22B
         {
             get => _OccFromBlock22B;
@@ -527,7 +523,7 @@ namespace SiebwaldeApp.Core
                 else
                 {
                     _OccFromBlock22B = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(OccFromBlock22B)));
+                    ///PropertyChanged(this, new PropertyChangedEventArgs(nameof(OccFromBlock22B)));
                 }
             }
         }
@@ -535,7 +531,7 @@ namespace SiebwaldeApp.Core
         /// <summary>
         /// Get/Set and generate event for OccFromBlock9B
         /// </summary>
-        [DoNotNotify]
+        //[DoNotNotify]
         public bool OccFromBlock9B
         {
             get => _OccFromBlock9B;
@@ -548,7 +544,7 @@ namespace SiebwaldeApp.Core
                 else
                 {
                     _OccFromBlock9B = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(OccFromBlock9B)));
+                    //PropertyChanged(this, new PropertyChangedEventArgs(nameof(OccFromBlock9B)));
                 }
             }
         }
@@ -556,7 +552,7 @@ namespace SiebwaldeApp.Core
         /// <summary>
         /// Get/Set and generate event for OccFromBlock9B
         /// </summary>
-        [DoNotNotify]
+        //[DoNotNotify]
         public bool OccFromBlock21B
         {
             get => _OccFromBlock21B;
@@ -569,7 +565,7 @@ namespace SiebwaldeApp.Core
                 else
                 {
                     _OccFromBlock21B = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(OccFromBlock21B)));
+                    //PropertyChanged(this, new PropertyChangedEventArgs(nameof(OccFromBlock21B)));
                 }
             }
         }
@@ -577,7 +573,7 @@ namespace SiebwaldeApp.Core
         /// <summary>
         /// Get/Set and generate event for VoltageDetected
         /// </summary>
-        [DoNotNotify]
+        //[DoNotNotify]
         public bool VoltageDetected
         {
             get => _VoltageDetected;
@@ -590,7 +586,7 @@ namespace SiebwaldeApp.Core
                 else
                 {
                     _VoltageDetected = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(VoltageDetected)));
+                    //PropertyChanged(this, new PropertyChangedEventArgs(nameof(VoltageDetected)));
                 }
             }
         }
@@ -610,24 +606,5 @@ namespace SiebwaldeApp.Core
         }
         #endregion
 
-        //// Event declaration using EventHandler<T>
-        //public event EventHandler<EthernetDataEventArgs> EthernetDataReceived;
-
-        //// Method to simulate receiving Ethernet data
-        //public void ReceiveEthernetData(string data)
-        //{
-        //    // Process the data, e.g., store it in a variable
-        //    // ...
-
-        //    // Raise the event to notify subscribers
-        //    OnEthernetDataReceived(new EthernetDataEventArgs(data));
-        //}
-
-        //// Method to raise the event
-        //protected virtual void OnEthernetDataReceived(EthernetDataEventArgs e)
-        //{
-        //    // Check if there are subscribers
-        //    EthernetDataReceived?.Invoke(this, e);
-        //}
     }
 }

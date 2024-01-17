@@ -42,7 +42,7 @@ namespace SiebwaldeApp.Core
         /// <summary>
         /// A shortcut to access the <see cref="TrackApplicationVariables"/>
         /// </summary>
-        public static TrackApplicationVariables TrackVar => IoC.Get<TrackApplicationVariables>();
+        public static TrackApplicationVariables TrackVariables => IoC.Get<TrackApplicationVariables>();
 
         #endregion
 

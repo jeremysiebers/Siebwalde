@@ -128,9 +128,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Model\TrackApplicationAn\Model\" />
-    <Folder Include="Model\TrackApplicationAn\Pages\" />
     <Folder Include="Model\TrackApplicationAn\Simulator\" />
-    <Folder Include="Model\TrackApplicationAn\ViewModel\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Fody.6.8.0\build\Fody.targets" Condition="Exists('..\packages\Fody.6.8.0\build\Fody.targets')" />

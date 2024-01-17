@@ -49,7 +49,7 @@ namespace SiebwaldeApp.Core
             mTrackReceiver = new NewReceiver(mTrackReceivingPort);
             mTrackSender = new NewSender(TRACKTARGET);
             // create new instance of trackApplicationVariables (DATA)
-            mTrackApplicationVariables = IoC.TrackVar;
+            mTrackApplicationVariables = IoC.TrackVariables;
 
             //mEthernetTargetDataSimulator = new EthernetTargetDataSimulator();
             mReceivedMessage = new ReceivedMessage(0,0,0,0);
