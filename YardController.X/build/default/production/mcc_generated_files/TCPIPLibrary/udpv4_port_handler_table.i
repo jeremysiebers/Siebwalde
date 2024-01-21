@@ -9355,15 +9355,8 @@ __attribute__((__unsupported__("The " "Write_b_eep" " routine is no longer suppo
 unsigned char __t1rd16on(void);
 unsigned char __t3rd16on(void);
 # 34 "C:/Program Files/Microchip/MPLABX/v6.05/packs/Microchip/PIC18F-J_DFP/1.5.44/xc8\\pic\\include\\xc.h" 2 3
-# 39 "./debounce.h" 2
-
-
-
-
-
-
-
-
+# 38 "./debounce.h" 2
+# 47 "./debounce.h"
 const uint32_t tIoSignalDebounceTime = (uint32_t)(200);
 const uint32_t tBlkOutDebounceTime = (uint32_t)(2000);
 const uint32_t tHallSignalDebounceTime = (uint32_t)(5);
@@ -9387,7 +9380,7 @@ typedef struct
 
 DEBOUNCE HALL_BUSSTOP_STN = {tHallSignalDebounceTime, 0, 0, 0, &PORTJ, 0x1, 0, 0, 1};
 DEBOUNCE HALL_BUSSTOP_IND = {tHallSignalDebounceTime, 0, 0, 0, &PORTJ, 0x2, 0, 0, 1};
-DEBOUNCE HALL_STOP_FDEP = {tHallSignalDebounceTime, 0, 0, 0, &PORTJ, 0x3, 0, 0, 1};
+DEBOUNCE HALL_STOP_FDEP = {tHallSignalDebounceTime, 0, 0, 0, &PORTJ, 0x4, 0, 0, 1};
 # 98 "./debounce.h"
 extern void DEBOUNCExIO(DEBOUNCE *instance, uint32_t *millisPtr);
 # 16 "./enums.h" 2
@@ -9396,13 +9389,13 @@ extern void DEBOUNCExIO(DEBOUNCE *instance, uint32_t *millisPtr);
 
     const uint32_t tFactorSec = 1000;
 
-    const uint8_t tRandomShift = 3;
+    const uint8_t tRandomShift = 0;
 
     const uint32_t tSwitchPointWaitTime = (uint32_t)(1 * tFactorSec);
 
     const uint32_t tParkTime = (uint32_t)(60 * tFactorSec);
 
-    const uint32_t tRestoreTime = (uint32_t)(5 * tFactorSec);
+    const uint32_t tRestoreTime = (uint32_t)(3 * tFactorSec);
 
     const uint32_t tReadIoSignalWaitTime = (uint32_t)(10 * tFactorSec);
 
@@ -9416,6 +9409,7 @@ extern void DEBOUNCExIO(DEBOUNCE *instance, uint32_t *millisPtr);
         WALDBERG = 50,
         IODATA = 60,
         FALLER_BUS = 70,
+        FALLER_CARS = 80,
     } TASK_ID;
 
     typedef enum
@@ -9478,7 +9472,9 @@ extern void DEBOUNCExIO(DEBOUNCE *instance, uint32_t *millisPtr);
         FIREDEP = 140,
 
         RESTORE = 141,
-# 123 "./enums.h"
+        RESTORE_NEEDED = 142,
+        STOP_RESTORE = 143,
+# 127 "./enums.h"
     } TASK_STATE;
 
     typedef enum
@@ -9497,10 +9493,11 @@ extern void DEBOUNCExIO(DEBOUNCE *instance, uint32_t *millisPtr);
        TRACK10 = 162,
        TRACK11 = 163,
        TRACK12 = 164,
-       BRAKE = 165,
+       HALT = 165,
        DRIVE = 166,
        PASS = 167,
        PARK = 168,
+       BRAKE = 169,
 
     } TASK_MESSAGES;
 

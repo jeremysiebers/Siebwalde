@@ -87,7 +87,7 @@ void main(void)
                 
                 DebounceIO();
                 
-                if(isUdpConnected){
+                if(1){
                     /*
                     * MainStation methods
                     */

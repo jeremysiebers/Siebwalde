@@ -18,13 +18,13 @@ extern "C" {
     /* factor to be set according to set timer interrupt value to calc seconds */
     const uint32_t tFactorSec = 1000; // timer set to 1ms, 10 * 1000 = 1 second
     /* To shift the max result of 32 sec to 131 seconds if val = 2 */
-    const uint8_t  tRandomShift = 3;
+    const uint8_t  tRandomShift = 0;
     /* Time to wait for servo to move to new position */
     const uint32_t tSwitchPointWaitTime = (uint32_t)(1 * tFactorSec);
     /* Minimum Time that Train waits before leaving */
     const uint32_t tParkTime = (uint32_t)(60 * tFactorSec);
     /* Time that Freight Train waits before leaving */
-    const uint32_t tRestoreTime = (uint32_t)(5 * tFactorSec);
+    const uint32_t tRestoreTime = (uint32_t)(3 * tFactorSec);
     /* Boot wait time to get all IO read and debounced first */
     const uint32_t tReadIoSignalWaitTime = (uint32_t)(10 * tFactorSec);
 
@@ -38,6 +38,7 @@ extern "C" {
         WALDBERG                        = 50,
         IODATA                          = 60,
         FALLER_BUS                      = 70,
+        FALLER_CARS                     = 80,
     } TASK_ID;				
 
     typedef enum		
@@ -100,6 +101,9 @@ extern "C" {
         FIREDEP                         = 140,
                 
         RESTORE                         = 141,
+        RESTORE_NEEDED                  = 142,
+        STOP_RESTORE                    = 143,
+        
                 
 //        DRIVE_TO_INDUSTRIAL             = 135,
 //        PASS_INDUSTRIAL                 = 136,
@@ -138,10 +142,11 @@ extern "C" {
        TRACK10 							= 162,
        TRACK11 							= 163,
        TRACK12 							= 164, 
-       BRAKE                            = 165,
+       HALT                             = 165,
        DRIVE                            = 166,
        PASS                             = 167,
        PARK                             = 168,
+       BRAKE                            = 169,      
        
     } TASK_MESSAGES;
     

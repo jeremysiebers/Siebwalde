@@ -36,7 +36,10 @@
 #include "enums.h"
 
 VEHICLESTOP BUS        = {&LATD, 0x01, &LATD, 0x02, &LATD, 0x04, &LATD, 0x08};// All servos for industrial and station
+
+
 VEHICLESTOP FIRE_DEP   = {&LATD, 0x10, &LATD, 0x20, &LATD, 0x40, &LATD, 0x80};// All servos for fire department
+                         /*    switch,      switch,        stop,        stop */
 
 //    SERVO SWITCH_BUSSTOP_INDUSTRIAL     = {&LATD, 0x01};
 //    SERVO STOP_DRIVE_BUSSTOP_INDUSTRIAL = {&LATD, 0x02};

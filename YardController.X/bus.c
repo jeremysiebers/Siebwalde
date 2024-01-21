@@ -32,6 +32,8 @@ void UPDATExBUSxDRIVE(VEHICLE *self)
             /* Set all servo outputs to 1 */
             SETxVEHICLExACTION(self, PASS, INDUSTRIAL);
             SETxVEHICLExACTION(self, PASS, STATION);
+            self->getVehicleAtStop1->value = false;
+            self->getVehicleAtStop2->value = false;
             self->AppNextState  = IDLE;
             self->AppState      = WAIT;
             self->tCountTime    = GETxMILLIS();
@@ -48,28 +50,37 @@ void UPDATExBUSxDRIVE(VEHICLE *self)
             /* Check for BUS detection */
             if(true == self->getVehicleAtStop1->value &&
                     NONE == self->parkState1){
-                SETxVEHICLExACTION(self, BRAKE, INDUSTRIAL);
-                self->LastState     = IDLE;                
+                self->getVehicleAtStop1->value = false;
+                SETxVEHICLExACTION(self, HALT, INDUSTRIAL);
                 self->stop1occupied = true;
                 self->parkState1    = PARK;
                 self->tWaitTime1    = (tParkTime + (GETxRANDOMxNUMBER() << tRandomShift));
                 self->tCountTime1   = GETxMILLIS();
+                self->LastState     = RESTORE_NEEDED;
             }
-            else if(true == self->getVehicleAtStop2->value &&
+            else{
+                /* Reset Hall when stop is occupied but a magnet was seen */
+                self->getVehicleAtStop1->value = false;
+            }
+            if(true == self->getVehicleAtStop2->value &&
                     NONE == self->parkState2){
-                SETxVEHICLExACTION(self, BRAKE, STATION);
-                self->LastState     = IDLE;                
+                self->getVehicleAtStop2->value = false;
+                SETxVEHICLExACTION(self, HALT, STATION);
                 self->stop2occupied = true;
                 self->parkState2    = PARK;
                 self->tWaitTime2    = (tParkTime + (GETxRANDOMxNUMBER() << tRandomShift));
                 self->tCountTime2   = GETxMILLIS();
+                self->LastState     = RESTORE_NEEDED;
             }
-            
+            else{
+                /* Reset Hall when stop is occupied but a magnet was seen */
+                self->getVehicleAtStop2->value = false;
+            }
             /* 
              * If a park area is in the Wait state then restore the pathway,
              * wait a few seconds before switching the switch servo back. 
              */
-            if((WAIT == self->parkState1 || WAIT == self->parkState2) &&
+            if((PARK == self->parkState1 || PARK == self->parkState2) &&
                     self->LastState != RESTORE){
                 self->AppNextState  = RESTORE;
                 self->AppState      = WAIT;
@@ -87,6 +98,12 @@ void UPDATExBUSxDRIVE(VEHICLE *self)
             if(DRIVE == self->parkState1){
                 SETxVEHICLExACTION(self, DRIVE, INDUSTRIAL);
                 self->parkState1 = NONE;
+                self->stop1occupied = false;
+                /* Restore the stop location, prep for next time */
+                self->AppNextState  = STOP_RESTORE;
+                self->AppState      = WAIT;                
+                self->tCountTime    = GETxMILLIS();
+                self->tWaitTime     = tRestoreTime;                
                 /* Log the action */
                 CREATExTASKxSTATUSxMESSAGE(self->name,
                         self->AppState, 
@@ -96,6 +113,12 @@ void UPDATExBUSxDRIVE(VEHICLE *self)
             if(DRIVE == self->parkState2){
                 SETxVEHICLExACTION(self, DRIVE, STATION);
                 self->parkState2 = NONE;
+                self->stop2occupied = false;
+                /* Restore the stop location, prep for next time */
+                self->AppNextState  = STOP_RESTORE;
+                self->AppState      = WAIT;                
+                self->tCountTime    = GETxMILLIS();
+                self->tWaitTime     = tRestoreTime;
                 /* Log the action */
                 CREATExTASKxSTATUSxMESSAGE(self->name,
                         self->AppState, 
@@ -131,6 +154,18 @@ void UPDATExBUSxDRIVE(VEHICLE *self)
                         self->AppState, 
                         NONE, 
                         NONE);
+            break;
+            
+        case STOP_RESTORE:
+            /* restore stop magnet into default position */
+            SETxVEHICLExACTION(self, BRAKE, INDUSTRIAL);
+            SETxVEHICLExACTION(self, BRAKE, STATION);
+            /* Log the application state */
+            CREATExTASKxSTATUSxMESSAGE(self->name,
+                        self->AppState, 
+                        NONE, 
+                        NONE);            
+            self->AppState      = IDLE;    
             break;
             
         case WAIT:

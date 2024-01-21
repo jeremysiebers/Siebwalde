@@ -27,7 +27,7 @@ uint8_t FDepOccMid = 0;
  */
 
 void INITxFIREDEP(void){
-    firedep.name                    = FALLER_BUS;
+    firedep.name                    = FALLER_CARS;
     firedep.AppState                = INIT;
     firedep.setParkAction           = &FIRE_DEP;
     firedep.getVehicleAtStop1       = &HALL_STOP_FDEP;
@@ -45,6 +45,7 @@ void UPDATExFIREDEPxDRIVE(VEHICLE *self)
         case INIT:
             /* Set all servo outputs to 1 */
             SETxVEHICLExACTION(self, PASS, FIREDEP);
+            self->getVehicleAtStop1->value = false; // double used
             self->AppNextState  = IDLE;
             self->AppState      = WAIT;
             self->tCountTime    = GETxMILLIS();
@@ -61,8 +62,9 @@ void UPDATExFIREDEPxDRIVE(VEHICLE *self)
             /* Check for firedep detection */
             if(true == self->getVehicleAtStop1->value &&
                     NONE == self->parkState1){
-                SETxVEHICLExACTION(self, BRAKE, FIREDEP_MID);
-                self->LastState     = IDLE;                
+                self->getVehicleAtStop1->value = false;
+                SETxVEHICLExACTION(self, HALT, FIREDEP_MID);
+                self->LastState     = RESTORE_NEEDED;                
                 self->stop1occupied = true;
                 self->parkState1    = PARK;
                 self->tWaitTime1    = (tParkTime + (GETxRANDOMxNUMBER() << tRandomShift));
@@ -70,19 +72,24 @@ void UPDATExFIREDEPxDRIVE(VEHICLE *self)
             }
             else if(true == self->getVehicleAtStop2->value &&
                     NONE == self->parkState2){
-                SETxVEHICLExACTION(self, BRAKE, FIREDEP_RIGHT);
-                self->LastState     = IDLE;                
+                self->getVehicleAtStop2->value = false;
+                SETxVEHICLExACTION(self, HALT, FIREDEP_RIGHT);
+                self->LastState     = RESTORE_NEEDED;                
                 self->stop2occupied = true;
                 self->parkState2    = PARK;
                 self->tWaitTime2    = (tParkTime + (GETxRANDOMxNUMBER() << tRandomShift));
                 self->tCountTime2   = GETxMILLIS();
+            }
+            else{
+                /* Reset Hall when stop is occupied but a magnet was seen */
+                self->getVehicleAtStop1->value = false;
             }
             
             /* 
              * If a park area is in the Wait state then restore the pathway,
              * wait a few seconds before switching the switch servo back. 
              */
-            if((WAIT == self->parkState1 || WAIT == self->parkState2) &&
+            if((PARK == self->parkState1 || PARK == self->parkState2) &&
                     self->LastState != RESTORE){
                 self->AppNextState  = RESTORE;
                 self->AppState      = WAIT;
@@ -100,6 +107,12 @@ void UPDATExFIREDEPxDRIVE(VEHICLE *self)
             if(DRIVE == self->parkState1){
                 SETxVEHICLExACTION(self, DRIVE, FIREDEP_MID);
                 self->parkState1 = NONE;
+                self->stop1occupied = false;
+                /* Restore the stop location, prep for next time */
+                self->AppNextState  = STOP_RESTORE;
+                self->AppState      = WAIT;                
+                self->tCountTime    = GETxMILLIS();
+                self->tWaitTime     = tRestoreTime; 
                 /* Log the action */
                 CREATExTASKxSTATUSxMESSAGE(self->name,
                         self->AppState, 
@@ -109,6 +122,12 @@ void UPDATExFIREDEPxDRIVE(VEHICLE *self)
             if(DRIVE == self->parkState2){
                 SETxVEHICLExACTION(self, DRIVE, FIREDEP_RIGHT);
                 self->parkState2 = NONE;
+                self->stop2occupied = false;
+                /* Restore the stop location, prep for next time */
+                self->AppNextState  = STOP_RESTORE;
+                self->AppState      = WAIT;                
+                self->tCountTime    = GETxMILLIS();
+                self->tWaitTime     = tRestoreTime; 
                 /* Log the action */
                 CREATExTASKxSTATUSxMESSAGE(self->name,
                         self->AppState, 
@@ -122,28 +141,25 @@ void UPDATExFIREDEPxDRIVE(VEHICLE *self)
              * Restore the drive way to normal road pass condition for other 
              * traffic.
              */
-            if(self->stop1occupied){
-                SETxVEHICLExACTION(self, PASS, FIREDEP_MID);
-                
-                CREATExTASKxSTATUSxMESSAGE(self->name,
-                        self->AppState, 
-                        PASS, 
-                        FIREDEP_MID);
-            }
-            else if(self->stop2occupied){
-                SETxVEHICLExACTION(self, PASS, FIREDEP_RIGHT);
-                
-                CREATExTASKxSTATUSxMESSAGE(self->name,
-                        self->AppState, 
-                        PASS, 
-                        FIREDEP_RIGHT);
-            }
+            SETxVEHICLExACTION(self, PASS, FIREDEP);//          
             /* Log the application state */
             self->AppState      = IDLE;            
             CREATExTASKxSTATUSxMESSAGE(self->name,
                         self->AppState, 
                         NONE, 
                         NONE);
+            break;
+            
+        case STOP_RESTORE:
+            /* restore stop magnet into default position */
+            SETxVEHICLExACTION(self, BRAKE, FIREDEP_MID);
+            SETxVEHICLExACTION(self, BRAKE, FIREDEP_RIGHT);
+            /* Log the application state */
+            CREATExTASKxSTATUSxMESSAGE(self->name,
+                        self->AppState, 
+                        NONE, 
+                        NONE);            
+            self->AppState      = IDLE;
             break;
             
         case WAIT:
@@ -155,96 +171,6 @@ void UPDATExFIREDEPxDRIVE(VEHICLE *self)
         default:
             break;
     }
-    
-//    switch(State_firedep)
-//    {
-//        case 0: 
-//            /* Give time to power supply startup and servo PCB to startup */
-//            timer_firedep++;
-//            if(timer_firedep > 1000){
-//                timer_firedep = 0;
-//                State_firedep++;
-//            }
-//            break;
-//            
-//        case 1:
-//            SW_FDEP_RIGHT_LAT       = 1;
-//            SW_FDEP_MID_LAT         = 1;
-//            STOP_FDEP_AT_RIGHT_LAT  = 1;
-//            STOP_FDEP_AT_MID_LAT    = 1;
-//            timer_firedep++;
-//            if(timer_firedep > 500){
-//                SW_FDEP_RIGHT_LAT       = 0;
-//                SW_FDEP_MID_LAT         = 0;
-//                STOP_FDEP_AT_RIGHT_LAT  = 1;
-//                STOP_FDEP_AT_MID_LAT    = 1;
-//                timer_firedep = 0;
-//                State_firedep++;
-//            }
-//            break;
-//            
-//        case 2:
-//            if(HALL_STOP_FDEP_IO_PORT == 1)
-//            {
-////                if(FDepOccRight == 0)
-////                {
-////                    SW_FDEP_RIGHT_LAT       = 1;
-////                    SW_FDEP_MID_LAT         = 0;
-////                    STOP_FDEP_AT_RIGHT_LAT  = 0;
-////                    FDepOccRight = 1;
-////                }
-//                if(FDepOccMid == 0)
-//                {
-//                    SW_FDEP_RIGHT_LAT       = 0;
-//                    SW_FDEP_MID_LAT         = 1;
-//                    STOP_FDEP_AT_MID_LAT    = 0;
-//                    FDepOccMid = 1;
-//                }
-//                else
-//                {
-//                    /* Pass driving Left again */
-//                    SW_FDEP_RIGHT_LAT       = 0;
-//                    SW_FDEP_MID_LAT         = 0;
-//                }
-//                State_firedep = 3;
-//            }            
-//            break;
-//            
-//        case 3:
-//            timer_firedep++;
-//            if(timer_firedep > 500)
-//            {
-//                /* Pass driving Left again */
-//                SW_FDEP_RIGHT_LAT       = 0;
-//                SW_FDEP_MID_LAT         = 0;
-//                timer_firedep = 0;
-//                State_firedep = 4;
-//            }
-//            break;
-//            
-//        case 4:
-//            timer_firedep++;
-//            if(timer_firedep > 1500)
-//            {
-//                timer_firedep = 0;
-//                
-//                if(FDepOccMid)
-//                {
-//                    STOP_FDEP_AT_MID_LAT  = 1;
-//                    FDepOccMid = 0;
-//                }
-//                else
-//                {
-//                    STOP_FDEP_AT_RIGHT_LAT    = 1;
-//                    FDepOccRight = 0;
-//                }
-//                State_firedep = 2;
-//            }
-//            break;
-//            
-//        default:
-//            break;
-//    }
 }
 
 /*
@@ -257,7 +183,13 @@ void UPDATExFIREDEPxDRIVExWAIT(VEHICLE *self){
     
     if(PARK == self->parkState1){
         if((millis - self->tCountTime1) > self->tWaitTime1){
-            self->parkState1 = DRIVE;
+            if(PARK == self->parkState2){
+                self->parkState1 = DRIVE;
+            }
+            else{
+                self->parkState1 = PARK;
+                self->tCountTime1 = millis;
+            }            
             CREATExTASKxSTATUSxMESSAGE(self->name, 
                                            self->parkState1, 
                                            DRIVE, 
@@ -266,8 +198,14 @@ void UPDATExFIREDEPxDRIVExWAIT(VEHICLE *self){
     }
     
     if(PARK == self->parkState2){
-        if((millis - self->tCountTime2) > self->tWaitTime2){
-            self->parkState2 = DRIVE;
+        if((millis - self->tCountTime2) > self->tWaitTime2){            
+            if(PARK == self->parkState1){
+                self->parkState2 = DRIVE;
+            }
+            else{
+                self->parkState2 = PARK;
+                self->tCountTime2 = millis;
+            }            
             CREATExTASKxSTATUSxMESSAGE(self->name, 
                                            self->parkState2, 
                                            DRIVE, 

@@ -4,7 +4,6 @@
  *
  * Created on December 10, 2012, 9:36 PM
  */
-#include <pic12f629.h>
 #include <xc.h>
 #include "Main.h"
 
@@ -27,15 +26,15 @@
 #define SeinBend						GP0             // SeinBend Led output
 #define ServoOut                        GP2             // Servo pulse output
 #define SwMiddle                        GP3             // Spare
-#define SwInput  						!GP4            // Switch input high to drive servo to the right (bus exit lane)
+#define SwInput  						(!GP4)          // Switch input high to drive servo to the right (bus exit lane)
 #define Heart_Pol                       GP5             // Heart polaization relais output
 
-#define SERVO_RIGHT                                                (SERVO_MIDDLE + SERVO_DIST)
-#define SERVO_LEFT                                                 (SERVO_MIDDLE - SERVO_DIST)
+const uint16_t SERVO_MIDDLE   =                 0xFA00;//4D        // 1.5ms is also used for switching Heart_Pol
 
-#define SERVO_MIDDLE                                              0xFA00//4D        // 1.5ms is also used for switching Heart_Pol
+#define SERVO_RIGHT                     (SERVO_MIDDLE + SERVO_DIST)
+#define SERVO_LEFT                      (SERVO_MIDDLE - SERVO_DIST)
 
-#define SERVO_DIST                                                900          //90 degrees move
+#define SERVO_DIST                      900          //90 degrees move
 
 //#define SERVO_LEFT                                              0xFD40          // 1ms
 //#define SERVO_MIDDLE                                            0xFBD7          // 1.5ms
@@ -75,8 +74,7 @@ void main(void)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Interrupt routines//
 
-static void interrupt
-isr(void) // Here the interrupt function
+void __interrupt() isr(void) // Here the interrupt function
 {
 
     if (T0IF) // If Timer 0 interrupt
@@ -99,11 +97,11 @@ isr(void) // Here the interrupt function
 
             if ((SwInput == Off) && (SwMiddle == Off) && (Servo_Pos < SERVO_RIGHT))
             {
-            Servo_Pos = SERVO_RIGHT; //Servo_Pos + 0x1;
+                Servo_Pos +=2; //Servo_Pos +=10;//Servo_Pos = SERVO_RIGHT; //Servo_Pos + 0x1;
             }
             else if ((SwInput == On) && (SwMiddle == Off) && (Servo_Pos > SERVO_MIDDLE))
             {
-                Servo_Pos = SERVO_MIDDLE; //Servo_Pos - 0x1;
+                Servo_Pos -= 2; //Servo_Pos -= 10;//Servo_Pos = SERVO_MIDDLE; //Servo_Pos - 0x1;
             }
             else if (SwMiddle == On)
             {
@@ -141,7 +139,7 @@ isr(void) // Here the interrupt function
         }
 
         TMR1H = Servo_Pos >> 8;
-        TMR1L = Servo_Pos;
+        TMR1L = (uint8_t)Servo_Pos;
         ServoOut = On;
         TMR1ON = On;
         T0IF = Off; // Clear Timer 0 interrupt flag
@@ -197,7 +195,7 @@ static void Init_Timers(void)
     TMR1CS = 0;
     TMR1ON = 0;
     TMR1H = SERVO_MIDDLE>>8;
-    TMR1L = SERVO_MIDDLE;
+    TMR1L = (uint8_t)SERVO_MIDDLE;
     TMR1IF = Off;
 }
 

@@ -6,21 +6,21 @@ Version 4.0 HI-TECH Software Intermediate Code
 "5786 C:/Program Files/Microchip/MPLABX/v6.05/packs/Microchip/PIC18F-J_DFP/1.5.44/xc8\pic\include\proc\pic18f97j60.h
 [; ;C:/Program Files/Microchip/MPLABX/v6.05/packs/Microchip/PIC18F-J_DFP/1.5.44/xc8\pic\include\proc\pic18f97j60.h: 5786: extern volatile unsigned char PORTJ __attribute__((address(0xF88)));
 [v _PORTJ `Vuc ~T0 @X0 0 e@3976 ]
-"190 ./enums.h
-[; ;./enums.h: 190:     VEHICLE bus;
-[c E5562 1 10 20 30 40 50 60 70 .. ]
-[n E5562 . MAIN_LOOP MAIN_STATION_TOP MAIN_STATION_BOT WALDSEE SIEBWALDE WALDBERG IODATA FALLER_BUS  ]
-[c E5584 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 140 141 .. ]
-[n E5584 . busy connected done command nop INIT INIT2 RUN WAIT IDLE STN_TO_SIEBWALDE SIEBWALDE_TO_STN SIEBWALDE_SWITCHT4T5_OUT SIEBWALDE_SWITCHT4T5_IN SIEBWALDE_SWITCHT4T5 SIEWALDE_SET_NEXT STN_INBOUND STN_OUTBOUND STN_PASSING STN_WAIT STN_IDLE SEQ_IDLE SEQ_WAIT SEQ_SET_OCC SEQ_CHK_TRAIN SEQ_CHK_PASSED SEQ_OUTBOUND_LEFT_STATTION SEQ_INBOUND_BRAKE_TIME SEQ_OUTBOUND_BRAKE_TIME SIG_RED SIG_GREEN INVERT TIME SET_PATH_WAY SET_SIGNAL INDUSTRIAL STATION FIREDEP_MID FIREDEP_RIGHT FIREDEP RESTORE  ]
-[c E5627 150 151 152 153 154 155 157 158 159 160 161 162 163 164 165 166 167 168 .. ]
-[n E5627 . NONE T1 T2 T3 T4 T5 T7 T8 TRACK1 TRACK2 TRACK3 TRACK10 TRACK11 TRACK12 BRAKE DRIVE PASS PARK  ]
-"155
-[; ;./enums.h: 155:     {
+"195 ./enums.h
+[; ;./enums.h: 195:     VEHICLE bus;
+[c E5562 1 10 20 30 40 50 60 70 80 .. ]
+[n E5562 . MAIN_LOOP MAIN_STATION_TOP MAIN_STATION_BOT WALDSEE SIEBWALDE WALDBERG IODATA FALLER_BUS FALLER_CARS  ]
+[c E5585 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 140 141 142 143 .. ]
+[n E5585 . busy connected done command nop INIT INIT2 RUN WAIT IDLE STN_TO_SIEBWALDE SIEBWALDE_TO_STN SIEBWALDE_SWITCHT4T5_OUT SIEBWALDE_SWITCHT4T5_IN SIEBWALDE_SWITCHT4T5 SIEWALDE_SET_NEXT STN_INBOUND STN_OUTBOUND STN_PASSING STN_WAIT STN_IDLE SEQ_IDLE SEQ_WAIT SEQ_SET_OCC SEQ_CHK_TRAIN SEQ_CHK_PASSED SEQ_OUTBOUND_LEFT_STATTION SEQ_INBOUND_BRAKE_TIME SEQ_OUTBOUND_BRAKE_TIME SIG_RED SIG_GREEN INVERT TIME SET_PATH_WAY SET_SIGNAL INDUSTRIAL STATION FIREDEP_MID FIREDEP_RIGHT FIREDEP RESTORE RESTORE_NEEDED STOP_RESTORE  ]
+[c E5630 150 151 152 153 154 155 157 158 159 160 161 162 163 164 165 166 167 168 169 .. ]
+[n E5630 . NONE T1 T2 T3 T4 T5 T7 T8 TRACK1 TRACK2 TRACK3 TRACK10 TRACK11 TRACK12 HALT DRIVE PASS PARK BRAKE  ]
+"160
+[; ;./enums.h: 160:     {
 [s S560 `*Vuc 1 `uc 1 `*Vuc 1 `uc 1 `*Vuc 1 `uc 1 `*Vuc 1 `uc 1 ]
 [n S560 . port1_ptr pin1_mask port2_ptr pin2_mask port3_ptr pin3_mask port4_ptr pin4_mask ]
-"167
-[; ;./enums.h: 167:     {
-[s S561 `E5562 1 `E5584 1 `E5584 1 `E5627 1 `E5584 1 `E5584 1 `*S560 1 `*S558 1 `a 1 `E5627 1 `ul 1 `ul 1 `*S558 1 `a 1 `E5627 1 `ul 1 `ul 1 `ul 1 `ul 1 ]
+"172
+[; ;./enums.h: 172:     {
+[s S561 `E5562 1 `E5585 1 `E5585 1 `E5630 1 `E5585 1 `E5585 1 `*S560 1 `*S558 1 `a 1 `E5630 1 `ul 1 `ul 1 `*S558 1 `a 1 `E5630 1 `ul 1 `ul 1 `ul 1 `ul 1 ]
 [n S561 . name AppState AppNextState LastInboundStn LastState Return setParkAction getVehicleAtStop1 stop1occupied parkState1 tWaitTime1 tCountTime1 getVehicleAtStop2 stop2occupied parkState2 tWaitTime2 tCountTime2 tCountTime tWaitTime ]
 "30 mcc_generated_files/TCPIPLibrary/../../communication.h
 [; ;mcc_generated_files/TCPIPLibrary/../../communication.h: 30:     {
@@ -959,7 +959,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 ..
 ]
 "70
-[; ;./debounce.h: 70: DEBOUNCE HALL_STOP_FDEP = {tHallSignalDebounceTime, 0, 0, 0, &PORTJ, 0x3, 0, 0, 1};
+[; ;./debounce.h: 70: DEBOUNCE HALL_STOP_FDEP = {tHallSignalDebounceTime, 0, 0, 0, &PORTJ, 0x4, 0, 0, 1};
 [v _HALL_STOP_FDEP `S558 ~T0 @X0 1 e ]
 [i _HALL_STOP_FDEP
 :U ..
@@ -969,7 +969,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 -> -> 0 `i `a
 -> -> 0 `i `a
 &U _PORTJ
--> -> 3 `i `uc
+-> -> 4 `i `uc
 -> -> 0 `i `a
 -> -> 0 `i `a
 -> -> 1 `i `a
@@ -983,10 +983,10 @@ Version 4.0 HI-TECH Software Intermediate Code
 -> -> -> 1000 `i `l `ul
 ]
 "21
-[; ;./enums.h: 21:     const uint8_t tRandomShift = 3;
+[; ;./enums.h: 21:     const uint8_t tRandomShift = 0;
 [v _tRandomShift `Cuc ~T0 @X0 1 e ]
 [i _tRandomShift
--> -> 3 `i `uc
+-> -> 0 `i `uc
 ]
 "23
 [; ;./enums.h: 23:     const uint32_t tSwitchPointWaitTime = (uint32_t)(1 * tFactorSec);
@@ -1001,10 +1001,10 @@ Version 4.0 HI-TECH Software Intermediate Code
 * -> -> -> 60 `i `l `ul _tFactorSec
 ]
 "27
-[; ;./enums.h: 27:     const uint32_t tRestoreTime = (uint32_t)(5 * tFactorSec);
+[; ;./enums.h: 27:     const uint32_t tRestoreTime = (uint32_t)(3 * tFactorSec);
 [v _tRestoreTime `Cul ~T0 @X0 1 e ]
 [i _tRestoreTime
-* -> -> -> 5 `i `l `ul _tFactorSec
+* -> -> -> 3 `i `l `ul _tFactorSec
 ]
 "29
 [; ;./enums.h: 29:     const uint32_t tReadIoSignalWaitTime = (uint32_t)(10 * tFactorSec);
@@ -1012,11 +1012,11 @@ Version 4.0 HI-TECH Software Intermediate Code
 [i _tReadIoSignalWaitTime
 * -> -> -> 10 `i `l `ul _tFactorSec
 ]
-"190
-[; ;./enums.h: 190:     VEHICLE bus;
+"195
+[; ;./enums.h: 195:     VEHICLE bus;
 [v _bus `S561 ~T0 @X0 1 e ]
-"191
-[; ;./enums.h: 191:     VEHICLE firedep;
+"196
+[; ;./enums.h: 196:     VEHICLE firedep;
 [v _firedep `S561 ~T0 @X0 1 e ]
 "36 mcc_generated_files/TCPIPLibrary/../../communication.h
 [; ;mcc_generated_files/TCPIPLibrary/../../communication.h: 36:     const int udpTrans_t_length = sizeof(udpTrans_t);

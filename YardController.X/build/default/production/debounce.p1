@@ -931,7 +931,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 ..
 ]
 "70
-[; ;./debounce.h: 70: DEBOUNCE HALL_STOP_FDEP = {tHallSignalDebounceTime, 0, 0, 0, &PORTJ, 0x3, 0, 0, 1};
+[; ;./debounce.h: 70: DEBOUNCE HALL_STOP_FDEP = {tHallSignalDebounceTime, 0, 0, 0, &PORTJ, 0x4, 0, 0, 1};
 [v _HALL_STOP_FDEP `S557 ~T0 @X0 1 e ]
 [i _HALL_STOP_FDEP
 :U ..
@@ -941,7 +941,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 -> -> 0 `i `a
 -> -> 0 `i `a
 &U _PORTJ
--> -> 3 `i `uc
+-> -> 4 `i `uc
 -> -> 0 `i `a
 -> -> 0 `i `a
 -> -> 1 `i `a

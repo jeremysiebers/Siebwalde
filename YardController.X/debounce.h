@@ -67,7 +67,7 @@ typedef struct
 /* PORTF */
 DEBOUNCE HALL_BUSSTOP_STN = {tHallSignalDebounceTime, 0, 0, 0, &PORTJ, 0x1,  0,  false,  true};
 DEBOUNCE HALL_BUSSTOP_IND = {tHallSignalDebounceTime, 0, 0, 0, &PORTJ, 0x2,  0,  false,  true};
-DEBOUNCE HALL_STOP_FDEP   = {tHallSignalDebounceTime, 0, 0, 0, &PORTJ, 0x3,  0,  false,  true};
+DEBOUNCE HALL_STOP_FDEP   = {tHallSignalDebounceTime, 0, 0, 0, &PORTJ, 0x4,  0,  false,  true};
 /**
   @Summary
     Debounces an input that is given

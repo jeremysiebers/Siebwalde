@@ -30,10 +30,10 @@
 #define SwInput  						GP4		// Switch input to drive servo to the right or the left
 #define Heart_Pol        				GP5		// Heart polaization relais output
 
+const uint16_t SERVO_MIDDLE   =         0xFA4D;        // 1.5ms is also used for switching Heart_Pol
+
 #define SERVO_RIGHT                                              (SERVO_MIDDLE + SERVO_DIST)
 #define SERVO_LEFT                                               (SERVO_MIDDLE - SERVO_DIST)
-
-#define SERVO_MIDDLE                                              0xFA4D        // 1.5ms is also used for switching Heart_Pol
 
 #define SERVO_DIST                                                200//70
 
@@ -140,7 +140,7 @@ void __interrupt() isr(void) // Here the interrupt function
         }
 
         TMR1H = Servo_Pos >> 8;
-        TMR1L = Servo_Pos;
+        TMR1L = (uint8_t)Servo_Pos;
         ServoOut = On;
         TMR1ON = On;
         T0IF = Off; // Clear Timer 0 interrupt flag
@@ -196,7 +196,7 @@ static void Init_Timers(void)
     TMR1CS = 0;
     TMR1ON = 0;
     TMR1H = SERVO_MIDDLE>>8;
-    TMR1L = SERVO_MIDDLE;
+    TMR1L = (uint8_t)SERVO_MIDDLE;
     TMR1IF = Off;
 }
 

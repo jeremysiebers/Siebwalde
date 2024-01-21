@@ -8833,7 +8833,8 @@ __attribute__((__unsupported__("The " "Write_b_eep" " routine is no longer suppo
 unsigned char __t1rd16on(void);
 unsigned char __t3rd16on(void);
 # 34 "C:/Program Files/Microchip/MPLABX/v6.05/packs/Microchip/PIC18F-J_DFP/1.5.44/xc8\\pic\\include\\xc.h" 2 3
-# 8 "debounce.c" 2
+# 7 "debounce.c" 2
+
 # 1 "./mcc_generated_files/mcc.h" 1
 # 50 "./mcc_generated_files/mcc.h"
 # 1 "./mcc_generated_files/device_config.h" 1
@@ -9423,7 +9424,8 @@ void timersInit(void);
 void SYSTEM_Initialize(void);
 # 86 "./mcc_generated_files/mcc.h"
 void OSCILLATOR_Initialize(void);
-# 9 "debounce.c" 2
+# 8 "debounce.c" 2
+
 # 1 "./debounce.h" 1
 # 47 "./debounce.h"
 const uint32_t tIoSignalDebounceTime = (uint32_t)(200);
@@ -9449,10 +9451,11 @@ typedef struct
 
 DEBOUNCE HALL_BUSSTOP_STN = {tHallSignalDebounceTime, 0, 0, 0, &PORTJ, 0x1, 0, 0, 1};
 DEBOUNCE HALL_BUSSTOP_IND = {tHallSignalDebounceTime, 0, 0, 0, &PORTJ, 0x2, 0, 0, 1};
-DEBOUNCE HALL_STOP_FDEP = {tHallSignalDebounceTime, 0, 0, 0, &PORTJ, 0x3, 0, 0, 1};
+DEBOUNCE HALL_STOP_FDEP = {tHallSignalDebounceTime, 0, 0, 0, &PORTJ, 0x4, 0, 0, 1};
 # 98 "./debounce.h"
 extern void DEBOUNCExIO(DEBOUNCE *instance, uint32_t *millisPtr);
-# 10 "debounce.c" 2
+# 9 "debounce.c" 2
+
 # 1 "./milisecond_counter.h" 1
 # 15 "./milisecond_counter.h"
     extern void MILLIESxINIT(void);
@@ -9468,7 +9471,8 @@ extern void DEBOUNCExIO(DEBOUNCE *instance, uint32_t *millisPtr);
 
     void SETxMILLISECONDxUPDATExHANDLER3(void (* InterruptHandler)(void));
     extern void (*Millisecond_Update_Handler3)(void);
-# 11 "debounce.c" 2
+# 10 "debounce.c" 2
+
 
 void DEBOUNCExIO(DEBOUNCE *instance, uint32_t *millisPtr)
 {

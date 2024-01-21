@@ -9453,7 +9453,7 @@ typedef struct
 
 DEBOUNCE HALL_BUSSTOP_STN = {tHallSignalDebounceTime, 0, 0, 0, &PORTJ, 0x1, 0, 0, 1};
 DEBOUNCE HALL_BUSSTOP_IND = {tHallSignalDebounceTime, 0, 0, 0, &PORTJ, 0x2, 0, 0, 1};
-DEBOUNCE HALL_STOP_FDEP = {tHallSignalDebounceTime, 0, 0, 0, &PORTJ, 0x3, 0, 0, 1};
+DEBOUNCE HALL_STOP_FDEP = {tHallSignalDebounceTime, 0, 0, 0, &PORTJ, 0x4, 0, 0, 1};
 # 98 "./debounce.h"
 extern void DEBOUNCExIO(DEBOUNCE *instance, uint32_t *millisPtr);
 # 16 "./enums.h" 2
@@ -9462,13 +9462,13 @@ extern void DEBOUNCExIO(DEBOUNCE *instance, uint32_t *millisPtr);
 
     const uint32_t tFactorSec = 1000;
 
-    const uint8_t tRandomShift = 3;
+    const uint8_t tRandomShift = 0;
 
     const uint32_t tSwitchPointWaitTime = (uint32_t)(1 * tFactorSec);
 
     const uint32_t tParkTime = (uint32_t)(60 * tFactorSec);
 
-    const uint32_t tRestoreTime = (uint32_t)(5 * tFactorSec);
+    const uint32_t tRestoreTime = (uint32_t)(3 * tFactorSec);
 
     const uint32_t tReadIoSignalWaitTime = (uint32_t)(10 * tFactorSec);
 
@@ -9482,6 +9482,7 @@ extern void DEBOUNCExIO(DEBOUNCE *instance, uint32_t *millisPtr);
         WALDBERG = 50,
         IODATA = 60,
         FALLER_BUS = 70,
+        FALLER_CARS = 80,
     } TASK_ID;
 
     typedef enum
@@ -9544,7 +9545,9 @@ extern void DEBOUNCExIO(DEBOUNCE *instance, uint32_t *millisPtr);
         FIREDEP = 140,
 
         RESTORE = 141,
-# 123 "./enums.h"
+        RESTORE_NEEDED = 142,
+        STOP_RESTORE = 143,
+# 127 "./enums.h"
     } TASK_STATE;
 
     typedef enum
@@ -9563,10 +9566,11 @@ extern void DEBOUNCExIO(DEBOUNCE *instance, uint32_t *millisPtr);
        TRACK10 = 162,
        TRACK11 = 163,
        TRACK12 = 164,
-       BRAKE = 165,
+       HALT = 165,
        DRIVE = 166,
        PASS = 167,
        PARK = 168,
+       BRAKE = 169,
 
     } TASK_MESSAGES;
 
@@ -9627,8 +9631,10 @@ extern void DEBOUNCExIO(DEBOUNCE *instance, uint32_t *millisPtr);
 
 
 VEHICLESTOP BUS = {&LATD, 0x01, &LATD, 0x02, &LATD, 0x04, &LATD, 0x08};
+
+
 VEHICLESTOP FIRE_DEP = {&LATD, 0x10, &LATD, 0x20, &LATD, 0x40, &LATD, 0x80};
-# 51 "./pathway.h"
+# 54 "./pathway.h"
 void SETxVEHICLExACTION(VEHICLE *self, TASK_MESSAGES action, TASK_STATE path);
 # 10 "bus.c" 2
 
@@ -9732,6 +9738,8 @@ void UPDATExBUSxDRIVE(VEHICLE *self)
 
             SETxVEHICLExACTION(self, PASS, INDUSTRIAL);
             SETxVEHICLExACTION(self, PASS, STATION);
+            self->getVehicleAtStop1->value = 0;
+            self->getVehicleAtStop2->value = 0;
             self->AppNextState = IDLE;
             self->AppState = WAIT;
             self->tCountTime = GETxMILLIS();
@@ -9748,28 +9756,37 @@ void UPDATExBUSxDRIVE(VEHICLE *self)
 
             if(1 == self->getVehicleAtStop1->value &&
                     NONE == self->parkState1){
-                SETxVEHICLExACTION(self, BRAKE, INDUSTRIAL);
-                self->LastState = IDLE;
+                self->getVehicleAtStop1->value = 0;
+                SETxVEHICLExACTION(self, HALT, INDUSTRIAL);
                 self->stop1occupied = 1;
                 self->parkState1 = PARK;
                 self->tWaitTime1 = (tParkTime + (GETxRANDOMxNUMBER() << tRandomShift));
                 self->tCountTime1 = GETxMILLIS();
+                self->LastState = RESTORE_NEEDED;
             }
-            else if(1 == self->getVehicleAtStop2->value &&
+            else{
+
+                self->getVehicleAtStop1->value = 0;
+            }
+            if(1 == self->getVehicleAtStop2->value &&
                     NONE == self->parkState2){
-                SETxVEHICLExACTION(self, BRAKE, STATION);
-                self->LastState = IDLE;
+                self->getVehicleAtStop2->value = 0;
+                SETxVEHICLExACTION(self, HALT, STATION);
                 self->stop2occupied = 1;
                 self->parkState2 = PARK;
                 self->tWaitTime2 = (tParkTime + (GETxRANDOMxNUMBER() << tRandomShift));
                 self->tCountTime2 = GETxMILLIS();
+                self->LastState = RESTORE_NEEDED;
+            }
+            else{
+
+                self->getVehicleAtStop2->value = 0;
             }
 
 
 
 
-
-            if((WAIT == self->parkState1 || WAIT == self->parkState2) &&
+            if((PARK == self->parkState1 || PARK == self->parkState2) &&
                     self->LastState != RESTORE){
                 self->AppNextState = RESTORE;
                 self->AppState = WAIT;
@@ -9787,6 +9804,12 @@ void UPDATExBUSxDRIVE(VEHICLE *self)
             if(DRIVE == self->parkState1){
                 SETxVEHICLExACTION(self, DRIVE, INDUSTRIAL);
                 self->parkState1 = NONE;
+                self->stop1occupied = 0;
+
+                self->AppNextState = STOP_RESTORE;
+                self->AppState = WAIT;
+                self->tCountTime = GETxMILLIS();
+                self->tWaitTime = tRestoreTime;
 
                 CREATExTASKxSTATUSxMESSAGE(self->name,
                         self->AppState,
@@ -9796,6 +9819,12 @@ void UPDATExBUSxDRIVE(VEHICLE *self)
             if(DRIVE == self->parkState2){
                 SETxVEHICLExACTION(self, DRIVE, STATION);
                 self->parkState2 = NONE;
+                self->stop2occupied = 0;
+
+                self->AppNextState = STOP_RESTORE;
+                self->AppState = WAIT;
+                self->tCountTime = GETxMILLIS();
+                self->tWaitTime = tRestoreTime;
 
                 CREATExTASKxSTATUSxMESSAGE(self->name,
                         self->AppState,
@@ -9831,6 +9860,18 @@ void UPDATExBUSxDRIVE(VEHICLE *self)
                         self->AppState,
                         NONE,
                         NONE);
+            break;
+
+        case STOP_RESTORE:
+
+            SETxVEHICLExACTION(self, BRAKE, INDUSTRIAL);
+            SETxVEHICLExACTION(self, BRAKE, STATION);
+
+            CREATExTASKxSTATUSxMESSAGE(self->name,
+                        self->AppState,
+                        NONE,
+                        NONE);
+            self->AppState = IDLE;
             break;
 
         case WAIT:

@@ -6,21 +6,21 @@ Version 4.0 HI-TECH Software Intermediate Code
 "5786 C:/Program Files/Microchip/MPLABX/v6.05/packs/Microchip/PIC18F-J_DFP/1.5.44/xc8\pic\include\proc\pic18f97j60.h
 [; ;C:/Program Files/Microchip/MPLABX/v6.05/packs/Microchip/PIC18F-J_DFP/1.5.44/xc8\pic\include\proc\pic18f97j60.h: 5786: extern volatile unsigned char PORTJ __attribute__((address(0xF88)));
 [v _PORTJ `Vuc ~T0 @X0 0 e@3976 ]
-"190 ./enums.h
-[; ;./enums.h: 190:     VEHICLE bus;
-[c E4941 1 10 20 30 40 50 60 70 .. ]
-[n E4941 . MAIN_LOOP MAIN_STATION_TOP MAIN_STATION_BOT WALDSEE SIEBWALDE WALDBERG IODATA FALLER_BUS  ]
-[c E4963 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 140 141 .. ]
-[n E4963 . busy connected done command nop INIT INIT2 RUN WAIT IDLE STN_TO_SIEBWALDE SIEBWALDE_TO_STN SIEBWALDE_SWITCHT4T5_OUT SIEBWALDE_SWITCHT4T5_IN SIEBWALDE_SWITCHT4T5 SIEWALDE_SET_NEXT STN_INBOUND STN_OUTBOUND STN_PASSING STN_WAIT STN_IDLE SEQ_IDLE SEQ_WAIT SEQ_SET_OCC SEQ_CHK_TRAIN SEQ_CHK_PASSED SEQ_OUTBOUND_LEFT_STATTION SEQ_INBOUND_BRAKE_TIME SEQ_OUTBOUND_BRAKE_TIME SIG_RED SIG_GREEN INVERT TIME SET_PATH_WAY SET_SIGNAL INDUSTRIAL STATION FIREDEP_MID FIREDEP_RIGHT FIREDEP RESTORE  ]
-[c E5006 150 151 152 153 154 155 157 158 159 160 161 162 163 164 165 166 167 168 .. ]
-[n E5006 . NONE T1 T2 T3 T4 T5 T7 T8 TRACK1 TRACK2 TRACK3 TRACK10 TRACK11 TRACK12 BRAKE DRIVE PASS PARK  ]
-"155
-[; ;./enums.h: 155:     {
+"195 ./enums.h
+[; ;./enums.h: 195:     VEHICLE bus;
+[c E4941 1 10 20 30 40 50 60 70 80 .. ]
+[n E4941 . MAIN_LOOP MAIN_STATION_TOP MAIN_STATION_BOT WALDSEE SIEBWALDE WALDBERG IODATA FALLER_BUS FALLER_CARS  ]
+[c E4964 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 140 141 142 143 .. ]
+[n E4964 . busy connected done command nop INIT INIT2 RUN WAIT IDLE STN_TO_SIEBWALDE SIEBWALDE_TO_STN SIEBWALDE_SWITCHT4T5_OUT SIEBWALDE_SWITCHT4T5_IN SIEBWALDE_SWITCHT4T5 SIEWALDE_SET_NEXT STN_INBOUND STN_OUTBOUND STN_PASSING STN_WAIT STN_IDLE SEQ_IDLE SEQ_WAIT SEQ_SET_OCC SEQ_CHK_TRAIN SEQ_CHK_PASSED SEQ_OUTBOUND_LEFT_STATTION SEQ_INBOUND_BRAKE_TIME SEQ_OUTBOUND_BRAKE_TIME SIG_RED SIG_GREEN INVERT TIME SET_PATH_WAY SET_SIGNAL INDUSTRIAL STATION FIREDEP_MID FIREDEP_RIGHT FIREDEP RESTORE RESTORE_NEEDED STOP_RESTORE  ]
+[c E5009 150 151 152 153 154 155 157 158 159 160 161 162 163 164 165 166 167 168 169 .. ]
+[n E5009 . NONE T1 T2 T3 T4 T5 T7 T8 TRACK1 TRACK2 TRACK3 TRACK10 TRACK11 TRACK12 HALT DRIVE PASS PARK BRAKE  ]
+"160
+[; ;./enums.h: 160:     {
 [s S540 `*Vuc 1 `uc 1 `*Vuc 1 `uc 1 `*Vuc 1 `uc 1 `*Vuc 1 `uc 1 ]
 [n S540 . port1_ptr pin1_mask port2_ptr pin2_mask port3_ptr pin3_mask port4_ptr pin4_mask ]
-"167
-[; ;./enums.h: 167:     {
-[s S541 `E4941 1 `E4963 1 `E4963 1 `E5006 1 `E4963 1 `E4963 1 `*S540 1 `*S538 1 `a 1 `E5006 1 `ul 1 `ul 1 `*S538 1 `a 1 `E5006 1 `ul 1 `ul 1 `ul 1 `ul 1 ]
+"172
+[; ;./enums.h: 172:     {
+[s S541 `E4941 1 `E4964 1 `E4964 1 `E5009 1 `E4964 1 `E4964 1 `*S540 1 `*S538 1 `a 1 `E5009 1 `ul 1 `ul 1 `*S538 1 `a 1 `E5009 1 `ul 1 `ul 1 `ul 1 `ul 1 ]
 [n S541 . name AppState AppNextState LastInboundStn LastState Return setParkAction getVehicleAtStop1 stop1occupied parkState1 tWaitTime1 tCountTime1 getVehicleAtStop2 stop2occupied parkState2 tWaitTime2 tCountTime2 tCountTime tWaitTime ]
 "6337 C:/Program Files/Microchip/MPLABX/v6.05/packs/Microchip/PIC18F-J_DFP/1.5.44/xc8\pic\include\proc\pic18f97j60.h
 [; ;C:/Program Files/Microchip/MPLABX/v6.05/packs/Microchip/PIC18F-J_DFP/1.5.44/xc8\pic\include\proc\pic18f97j60.h: 6337: extern volatile unsigned char LATD __attribute__((address(0xF8C)));
@@ -957,7 +957,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 ..
 ]
 "70
-[; ;./debounce.h: 70: DEBOUNCE HALL_STOP_FDEP = {tHallSignalDebounceTime, 0, 0, 0, &PORTJ, 0x3, 0, 0, 1};
+[; ;./debounce.h: 70: DEBOUNCE HALL_STOP_FDEP = {tHallSignalDebounceTime, 0, 0, 0, &PORTJ, 0x4, 0, 0, 1};
 [v _HALL_STOP_FDEP `S538 ~T0 @X0 1 e ]
 [i _HALL_STOP_FDEP
 :U ..
@@ -967,7 +967,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 -> -> 0 `i `a
 -> -> 0 `i `a
 &U _PORTJ
--> -> 3 `i `uc
+-> -> 4 `i `uc
 -> -> 0 `i `a
 -> -> 0 `i `a
 -> -> 1 `i `a
@@ -981,10 +981,10 @@ Version 4.0 HI-TECH Software Intermediate Code
 -> -> -> 1000 `i `l `ul
 ]
 "21
-[; ;./enums.h: 21:     const uint8_t tRandomShift = 3;
+[; ;./enums.h: 21:     const uint8_t tRandomShift = 0;
 [v _tRandomShift `Cuc ~T0 @X0 1 e ]
 [i _tRandomShift
--> -> 3 `i `uc
+-> -> 0 `i `uc
 ]
 "23
 [; ;./enums.h: 23:     const uint32_t tSwitchPointWaitTime = (uint32_t)(1 * tFactorSec);
@@ -999,10 +999,10 @@ Version 4.0 HI-TECH Software Intermediate Code
 * -> -> -> 60 `i `l `ul _tFactorSec
 ]
 "27
-[; ;./enums.h: 27:     const uint32_t tRestoreTime = (uint32_t)(5 * tFactorSec);
+[; ;./enums.h: 27:     const uint32_t tRestoreTime = (uint32_t)(3 * tFactorSec);
 [v _tRestoreTime `Cul ~T0 @X0 1 e ]
 [i _tRestoreTime
-* -> -> -> 5 `i `l `ul _tFactorSec
+* -> -> -> 3 `i `l `ul _tFactorSec
 ]
 "29
 [; ;./enums.h: 29:     const uint32_t tReadIoSignalWaitTime = (uint32_t)(10 * tFactorSec);
@@ -1010,11 +1010,11 @@ Version 4.0 HI-TECH Software Intermediate Code
 [i _tReadIoSignalWaitTime
 * -> -> -> 10 `i `l `ul _tFactorSec
 ]
-"190
-[; ;./enums.h: 190:     VEHICLE bus;
+"195
+[; ;./enums.h: 195:     VEHICLE bus;
 [v _bus `S541 ~T0 @X0 1 e ]
-"191
-[; ;./enums.h: 191:     VEHICLE firedep;
+"196
+[; ;./enums.h: 196:     VEHICLE firedep;
 [v _firedep `S541 ~T0 @X0 1 e ]
 "38 ./pathway.h
 [; ;./pathway.h: 38: VEHICLESTOP BUS = {&LATD, 0x01, &LATD, 0x02, &LATD, 0x04, &LATD, 0x08};
@@ -1033,8 +1033,8 @@ Version 4.0 HI-TECH Software Intermediate Code
 ..
 ..
 ]
-"39
-[; ;./pathway.h: 39: VEHICLESTOP FIRE_DEP = {&LATD, 0x10, &LATD, 0x20, &LATD, 0x40, &LATD, 0x80};
+"41
+[; ;./pathway.h: 41: VEHICLESTOP FIRE_DEP = {&LATD, 0x10, &LATD, 0x20, &LATD, 0x40, &LATD, 0x80};
 [v _FIRE_DEP `S540 ~T0 @X0 1 e ]
 [i _FIRE_DEP
 :U ..
@@ -1056,224 +1056,279 @@ Version 4.0 HI-TECH Software Intermediate Code
 [i _udpTrans_t_length
 -> -> # `S543 `ui `i
 ]
-"10 pathway.c
-[; ;pathway.c: 10: void SETxVEHICLExACTION(VEHICLE *self, TASK_MESSAGES action, TASK_STATE path)
-[; ;pathway.c: 10:             }
-[v _SETxVEHICLExACTION `(v ~T0 @X0 1 ef3`*S541`E5006`E4963 ]
-"11
-[; ;pathway.c: 11: {
-[; ;pathway.c: 11:             if(path == STATION){
+"11 pathway.c
+[; ;pathway.c: 11:             }
+[v _SETxVEHICLExACTION `(v ~T0 @X0 1 ef3`*S541`E5009`E4964 ]
+"12
+[; ;pathway.c: 12:             if(path == STATION){
 {
 [e :U _SETxVEHICLExACTION ]
-"10
-[; ;pathway.c: 10: void SETxVEHICLExACTION(VEHICLE *self, TASK_MESSAGES action, TASK_STATE path)
-[; ;pathway.c: 10:             }
-[v _self `*S541 ~T0 @X0 1 r1 ]
-[v _action `E5006 ~T0 @X0 1 r2 ]
-[v _path `E4963 ~T0 @X0 1 r3 ]
 "11
-[; ;pathway.c: 11: {
-[; ;pathway.c: 11:             if(path == STATION){
+[; ;pathway.c: 11:             }
+[v _self `*S541 ~T0 @X0 1 r1 ]
+[v _action `E5009 ~T0 @X0 1 r2 ]
+[v _path `E4964 ~T0 @X0 1 r3 ]
+"12
+[; ;pathway.c: 12:             if(path == STATION){
 [f ]
-"14
-[; ;pathway.c: 14:             }
+"13
+[; ;pathway.c: 13:                 *self->setParkAction->port1_ptr |= pin3;
 [v _pin1 `uc ~T0 @X0 1 a ]
 [e = _pin1 . *U . *U _self 6 1 ]
-"15
-[; ;pathway.c: 15:             if(path == FIREDEP_MID){
+"14
+[; ;pathway.c: 14:                 *self->setParkAction->port2_ptr &= ~pin4;
 [v _pin2 `uc ~T0 @X0 1 a ]
 [e = _pin2 . *U . *U _self 6 3 ]
-"16
-[; ;pathway.c: 16:                 *self->setParkAction->port2_ptr &= ~pin1;
+"15
+[; ;pathway.c: 15:             }
 [v _pin3 `uc ~T0 @X0 1 a ]
 [e = _pin3 . *U . *U _self 6 5 ]
-"17
-[; ;pathway.c: 17:                 *self->setParkAction->port2_ptr |= pin2;
+"16
+[; ;pathway.c: 16:             if(path == FIREDEP_MID){
 [v _pin4 `uc ~T0 @X0 1 a ]
 [e = _pin4 . *U . *U _self 6 7 ]
-"19
-[; ;pathway.c: 19:             }
+"18
+[; ;pathway.c: 18:                 *self->setParkAction->port2_ptr |= pin2;
 [e $U 546  ]
 {
-"20
-[; ;pathway.c: 20:             if(path == FIREDEP_RIGHT){
+"19
+[; ;pathway.c: 19:                 *self->setParkAction->port1_ptr &= ~pin3;
 [e :U 547 ]
-"21
-[; ;pathway.c: 21:                 *self->setParkAction->port2_ptr |= pin1;
-[e $ ! == -> _path `ui -> . `E4963 35 `ui 548  ]
+"20
+[; ;pathway.c: 20:             }
+[e $ ! == -> _path `ui -> . `E4964 35 `ui 548  ]
 {
+"21
+[; ;pathway.c: 21:             if(path == FIREDEP_RIGHT){
+[e =| *U . *U . *U _self 6 0 -> _pin1 `uc ]
 "22
-[; ;pathway.c: 22:                 *self->setParkAction->port2_ptr &= ~pin2;
-[e =& *U . *U . *U _self 6 0 -> ~ -> _pin1 `i `uc ]
-"23
-[; ;pathway.c: 23:                 *self->setParkAction->port2_ptr &= ~pin4;
+[; ;pathway.c: 22:                 *self->setParkAction->port2_ptr |= pin1;
 [e =& *U . *U . *U _self 6 2 -> ~ -> _pin2 `i `uc ]
-"24
-[; ;pathway.c: 24:             }
+"23
+[; ;pathway.c: 23:                 *self->setParkAction->port2_ptr &= ~pin2;
 }
 [e :U 548 ]
-"25
-[; ;pathway.c: 25:             break;
-[e $ ! == -> _path `ui -> . `E4963 36 `ui 549  ]
+"24
+[; ;pathway.c: 24:                 *self->setParkAction->port2_ptr &= ~pin4;
+[e $ ! == -> _path `ui -> . `E4964 36 `ui 549  ]
 {
-"26
-[; ;pathway.c: 26: 
+"25
+[; ;pathway.c: 25:             }
 [e =| *U . *U . *U _self 6 0 -> _pin3 `uc ]
-"27
-[; ;pathway.c: 27:         case PASS:
+"26
+[; ;pathway.c: 26:             break;
 [e =& *U . *U . *U _self 6 2 -> ~ -> _pin4 `i `uc ]
-"28
-[; ;pathway.c: 28:             if(path == INDUSTRIAL){
+"27
+[; ;pathway.c: 27: 
 }
 [e :U 549 ]
-"29
-[; ;pathway.c: 29:                 *self->setParkAction->port1_ptr |= pin1;
-[e $ ! == -> _path `ui -> . `E4963 37 `ui 550  ]
+"28
+[; ;pathway.c: 28:         case PASS:
+[e $ ! == -> _path `ui -> . `E4964 37 `ui 550  ]
 {
-"30
-[; ;pathway.c: 30:             }
+"29
+[; ;pathway.c: 29:             if(path == INDUSTRIAL){
 [e =& *U . *U . *U _self 6 2 -> ~ -> _pin1 `i `uc ]
-"31
-[; ;pathway.c: 31:             else if(path == STATION){
+"30
+[; ;pathway.c: 30:                 *self->setParkAction->port1_ptr &= ~pin1;
 [e =| *U . *U . *U _self 6 2 -> _pin2 `uc ]
-"32
-[; ;pathway.c: 32:                 *self->setParkAction->port1_ptr &= ~pin3;
+"31
+[; ;pathway.c: 31:             }
 [e =& *U . *U . *U _self 6 0 -> ~ -> _pin3 `i `uc ]
-"33
-[; ;pathway.c: 33:             }
+"32
+[; ;pathway.c: 32:             else if(path == STATION){
 }
 [e :U 550 ]
-"34
-[; ;pathway.c: 34:             else if(path == FIREDEP){
-[e $ ! == -> _path `ui -> . `E4963 38 `ui 551  ]
+"33
+[; ;pathway.c: 33:                 *self->setParkAction->port1_ptr &= ~pin3;
+[e $ ! == -> _path `ui -> . `E4964 38 `ui 551  ]
 {
-"35
-[; ;pathway.c: 35:                 *self->setParkAction->port2_ptr &= ~pin1;
+"34
+[; ;pathway.c: 34:             }
 [e =| *U . *U . *U _self 6 2 -> _pin1 `uc ]
-"36
-[; ;pathway.c: 36:                 *self->setParkAction->port2_ptr &= ~pin2;
+"35
+[; ;pathway.c: 35:             else if(path == FIREDEP){
 [e =& *U . *U . *U _self 6 2 -> ~ -> _pin2 `i `uc ]
-"37
-[; ;pathway.c: 37:             }
+"36
+[; ;pathway.c: 36:                 *self->setParkAction->port2_ptr &= ~pin1;
 [e =& *U . *U . *U _self 6 2 -> ~ -> _pin4 `i `uc ]
-"38
-[; ;pathway.c: 38:             break;
+"37
+[; ;pathway.c: 37:                 *self->setParkAction->port2_ptr &= ~pin2;
 }
 [e :U 551 ]
-"39
-[; ;pathway.c: 39: 
+"38
+[; ;pathway.c: 38:             }
 [e $U 545  ]
-"41
-[; ;pathway.c: 41:             if(path == INDUSTRIAL){
+"40
+[; ;pathway.c: 40: 
 [e :U 552 ]
-"42
-[; ;pathway.c: 42:                 *self->setParkAction->port2_ptr |= pin2;
-[e $ ! == -> _path `ui -> . `E4963 35 `ui 553  ]
+"41
+[; ;pathway.c: 41:         case DRIVE:
+[e $ ! == -> _path `ui -> . `E4964 35 `ui 553  ]
 {
+"42
+[; ;pathway.c: 42:             if(path == INDUSTRIAL){
+[e =& *U . *U . *U _self 6 0 -> ~ -> _pin1 `i `uc ]
 "43
-[; ;pathway.c: 43:             }
-[e =| *U . *U . *U _self 6 0 -> _pin1 `uc ]
-"44
-[; ;pathway.c: 44:             else if(path == STATION){
+[; ;pathway.c: 43:                 *self->setParkAction->port2_ptr |= pin2;
 }
 [e $U 554  ]
-"45
-[; ;pathway.c: 45:                 *self->setParkAction->port2_ptr |= pin4;
+"44
+[; ;pathway.c: 44:             }
 [e :U 553 ]
-[e $ ! == -> _path `ui -> . `E4963 36 `ui 555  ]
+[e $ ! == -> _path `ui -> . `E4964 36 `ui 555  ]
 {
-"46
-[; ;pathway.c: 46:             }
+"45
+[; ;pathway.c: 45:             else if(path == STATION){
 [e =& *U . *U . *U _self 6 0 -> ~ -> _pin3 `i `uc ]
-"47
-[; ;pathway.c: 47:             else if(path == FIREDEP_MID){
+"46
+[; ;pathway.c: 46:                 *self->setParkAction->port2_ptr |= pin4;
 }
 [e $U 556  ]
-"48
-[; ;pathway.c: 48:                 *self->setParkAction->port2_ptr |= pin3;
+"47
+[; ;pathway.c: 47:             }
 [e :U 555 ]
-[e $ ! == -> _path `ui -> . `E4963 39 `ui 557  ]
+[e $ ! == -> _path `ui -> . `E4964 39 `ui 557  ]
 {
-"49
-[; ;pathway.c: 49:             }
+"48
+[; ;pathway.c: 48:             else if(path == FIREDEP_MID){
 [e =& *U . *U . *U _self 6 2 -> ~ -> _pin1 `i `uc ]
-"50
-[; ;pathway.c: 50:             else if(path == FIREDEP_RIGHT){
+"49
+[; ;pathway.c: 49:                 *self->setParkAction->port2_ptr |= pin3;
 [e =& *U . *U . *U _self 6 2 -> ~ -> _pin2 `i `uc ]
-"51
-[; ;pathway.c: 51:                 *self->setParkAction->port2_ptr |= pin4;
+"50
+[; ;pathway.c: 50:             }
 }
 [e :U 557 ]
 [e :U 556 ]
 [e :U 554 ]
-"52
-[; ;pathway.c: 52:             }
+"51
+[; ;pathway.c: 51:             else if(path == FIREDEP_RIGHT){
 [e $U 545  ]
-"54
-[; ;pathway.c: 54: 
+"53
+[; ;pathway.c: 53:             }
 [e :U 558 ]
-"55
-[; ;pathway.c: 55:         default:break;
-[e $ ! == -> _path `ui -> . `E4963 35 `ui 559  ]
+"54
+[; ;pathway.c: 54:             break;
+[e $ ! == -> _path `ui -> . `E4964 35 `ui 559  ]
 {
-"56
-[; ;pathway.c: 56:     }
+"55
+[; ;pathway.c: 55: 
 [e =| *U . *U . *U _self 6 2 -> _pin2 `uc ]
-"57
-[; ;pathway.c: 57: 
+"56
+[; ;pathway.c: 56:         case BRAKE:
 }
 [e $U 560  ]
-"58
-[; ;pathway.c: 58:     CREATExTASKxSTATUSxMESSAGE(self->name,
+"57
+[; ;pathway.c: 57:             if(path == INDUSTRIAL){
 [e :U 559 ]
-[e $ ! == -> _path `ui -> . `E4963 36 `ui 561  ]
+[e $ ! == -> _path `ui -> . `E4964 36 `ui 561  ]
 {
-"59
-[; ;pathway.c: 59:             SET_PATH_WAY,
+"58
+[; ;pathway.c: 58:                 *self->setParkAction->port2_ptr &= ~pin2;
 [e =| *U . *U . *U _self 6 2 -> _pin4 `uc ]
-"60
-[; ;pathway.c: 60:             action,
+"59
+[; ;pathway.c: 59:             }
 }
 [e $U 562  ]
-"61
-[; ;pathway.c: 61:             path);
+"60
+[; ;pathway.c: 60:             else if(path == STATION){
 [e :U 561 ]
-[e $ ! == -> _path `ui -> . `E4963 37 `ui 563  ]
+[e $ ! == -> _path `ui -> . `E4964 37 `ui 563  ]
 {
-"62
-[; ;pathway.c: 62: 
+"61
+[; ;pathway.c: 61:                 *self->setParkAction->port2_ptr &= ~pin4;
 [e =| *U . *U . *U _self 6 2 -> _pin3 `uc ]
-"63
+"62
+[; ;pathway.c: 62:             }
 }
 [e $U 564  ]
-"64
+"63
+[; ;pathway.c: 63:             else if(path == FIREDEP_MID){
 [e :U 563 ]
-[e $ ! == -> _path `ui -> . `E4963 38 `ui 565  ]
+[e $ ! == -> _path `ui -> . `E4964 38 `ui 565  ]
 {
-"65
+"64
+[; ;pathway.c: 64:                 *self->setParkAction->port2_ptr &= ~pin3;
 [e =| *U . *U . *U _self 6 2 -> _pin4 `uc ]
-"66
+"65
+[; ;pathway.c: 65:             }
 }
 [e :U 565 ]
 [e :U 564 ]
 [e :U 562 ]
 [e :U 560 ]
-"67
+"66
+[; ;pathway.c: 66:             else if(path == FIREDEP_RIGHT){
 [e $U 545  ]
-"69
+"68
+[; ;pathway.c: 68:             }
 [e :U 566 ]
-[e $U 545  ]
+"69
+[; ;pathway.c: 69:             break;
+[e $ ! == -> _path `ui -> . `E4964 35 `ui 567  ]
+{
 "70
+[; ;pathway.c: 70: 
+[e =& *U . *U . *U _self 6 2 -> ~ -> _pin2 `i `uc ]
+"71
+[; ;pathway.c: 71:         default:break;
+}
+[e $U 568  ]
+"72
+[; ;pathway.c: 72:     }
+[e :U 567 ]
+[e $ ! == -> _path `ui -> . `E4964 36 `ui 569  ]
+{
+"73
+[; ;pathway.c: 73: 
+[e =& *U . *U . *U _self 6 2 -> ~ -> _pin4 `i `uc ]
+"74
+[; ;pathway.c: 74:     CREATExTASKxSTATUSxMESSAGE(self->name,
+}
+[e $U 570  ]
+"75
+[; ;pathway.c: 75:             SET_PATH_WAY,
+[e :U 569 ]
+[e $ ! == -> _path `ui -> . `E4964 37 `ui 571  ]
+{
+"76
+[; ;pathway.c: 76:             action,
+[e =& *U . *U . *U _self 6 2 -> ~ -> _pin3 `i `uc ]
+"77
+[; ;pathway.c: 77:             path);
+}
+[e $U 572  ]
+"78
+[; ;pathway.c: 78: }
+[e :U 571 ]
+[e $ ! == -> _path `ui -> . `E4964 38 `ui 573  ]
+{
+"79
+[e =& *U . *U . *U _self 6 2 -> ~ -> _pin4 `i `uc ]
+"80
+}
+[e :U 573 ]
+[e :U 572 ]
+[e :U 570 ]
+[e :U 568 ]
+"81
+[e $U 545  ]
+"83
+[e :U 574 ]
+[e $U 545  ]
+"84
 }
 [e $U 545  ]
 [e :U 546 ]
-[e [\ -> _action `ui , $ -> . `E5006 14 `ui 547
- , $ -> . `E5006 16 `ui 552
- , $ -> . `E5006 15 `ui 558
- 566 ]
+[e [\ -> _action `ui , $ -> . `E5009 14 `ui 547
+ , $ -> . `E5009 16 `ui 552
+ , $ -> . `E5009 15 `ui 558
+ , $ -> . `E5009 18 `ui 566
+ 574 ]
 [e :U 545 ]
-"72
-[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . `E4963 33 `uc -> _action `uc -> _path `uc ]
-"78
+"86
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . `E4964 33 `uc -> _action `uc -> _path `uc ]
+"90
 [e :UE 544 ]
 }

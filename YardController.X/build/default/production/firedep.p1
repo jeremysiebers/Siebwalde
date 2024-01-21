@@ -6,21 +6,21 @@ Version 4.0 HI-TECH Software Intermediate Code
 "5786 C:/Program Files/Microchip/MPLABX/v6.05/packs/Microchip/PIC18F-J_DFP/1.5.44/xc8\pic\include\proc\pic18f97j60.h
 [; ;C:/Program Files/Microchip/MPLABX/v6.05/packs/Microchip/PIC18F-J_DFP/1.5.44/xc8\pic\include\proc\pic18f97j60.h: 5786: extern volatile unsigned char PORTJ __attribute__((address(0xF88)));
 [v _PORTJ `Vuc ~T0 @X0 0 e@3976 ]
-"190 ./enums.h
-[; ;./enums.h: 190:     VEHICLE bus;
-[c E5593 1 10 20 30 40 50 60 70 .. ]
-[n E5593 . MAIN_LOOP MAIN_STATION_TOP MAIN_STATION_BOT WALDSEE SIEBWALDE WALDBERG IODATA FALLER_BUS  ]
-[c E5615 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 140 141 .. ]
-[n E5615 . busy connected done command nop INIT INIT2 RUN WAIT IDLE STN_TO_SIEBWALDE SIEBWALDE_TO_STN SIEBWALDE_SWITCHT4T5_OUT SIEBWALDE_SWITCHT4T5_IN SIEBWALDE_SWITCHT4T5 SIEWALDE_SET_NEXT STN_INBOUND STN_OUTBOUND STN_PASSING STN_WAIT STN_IDLE SEQ_IDLE SEQ_WAIT SEQ_SET_OCC SEQ_CHK_TRAIN SEQ_CHK_PASSED SEQ_OUTBOUND_LEFT_STATTION SEQ_INBOUND_BRAKE_TIME SEQ_OUTBOUND_BRAKE_TIME SIG_RED SIG_GREEN INVERT TIME SET_PATH_WAY SET_SIGNAL INDUSTRIAL STATION FIREDEP_MID FIREDEP_RIGHT FIREDEP RESTORE  ]
-[c E5658 150 151 152 153 154 155 157 158 159 160 161 162 163 164 165 166 167 168 .. ]
-[n E5658 . NONE T1 T2 T3 T4 T5 T7 T8 TRACK1 TRACK2 TRACK3 TRACK10 TRACK11 TRACK12 BRAKE DRIVE PASS PARK  ]
-"155
-[; ;./enums.h: 155:     {
+"195 ./enums.h
+[; ;./enums.h: 195:     VEHICLE bus;
+[c E5593 1 10 20 30 40 50 60 70 80 .. ]
+[n E5593 . MAIN_LOOP MAIN_STATION_TOP MAIN_STATION_BOT WALDSEE SIEBWALDE WALDBERG IODATA FALLER_BUS FALLER_CARS  ]
+[c E5616 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 140 141 142 143 .. ]
+[n E5616 . busy connected done command nop INIT INIT2 RUN WAIT IDLE STN_TO_SIEBWALDE SIEBWALDE_TO_STN SIEBWALDE_SWITCHT4T5_OUT SIEBWALDE_SWITCHT4T5_IN SIEBWALDE_SWITCHT4T5 SIEWALDE_SET_NEXT STN_INBOUND STN_OUTBOUND STN_PASSING STN_WAIT STN_IDLE SEQ_IDLE SEQ_WAIT SEQ_SET_OCC SEQ_CHK_TRAIN SEQ_CHK_PASSED SEQ_OUTBOUND_LEFT_STATTION SEQ_INBOUND_BRAKE_TIME SEQ_OUTBOUND_BRAKE_TIME SIG_RED SIG_GREEN INVERT TIME SET_PATH_WAY SET_SIGNAL INDUSTRIAL STATION FIREDEP_MID FIREDEP_RIGHT FIREDEP RESTORE RESTORE_NEEDED STOP_RESTORE  ]
+[c E5661 150 151 152 153 154 155 157 158 159 160 161 162 163 164 165 166 167 168 169 .. ]
+[n E5661 . NONE T1 T2 T3 T4 T5 T7 T8 TRACK1 TRACK2 TRACK3 TRACK10 TRACK11 TRACK12 HALT DRIVE PASS PARK BRAKE  ]
+"160
+[; ;./enums.h: 160:     {
 [s S559 `*Vuc 1 `uc 1 `*Vuc 1 `uc 1 `*Vuc 1 `uc 1 `*Vuc 1 `uc 1 ]
 [n S559 . port1_ptr pin1_mask port2_ptr pin2_mask port3_ptr pin3_mask port4_ptr pin4_mask ]
-"167
-[; ;./enums.h: 167:     {
-[s S560 `E5593 1 `E5615 1 `E5615 1 `E5658 1 `E5615 1 `E5615 1 `*S559 1 `*S557 1 `a 1 `E5658 1 `ul 1 `ul 1 `*S557 1 `a 1 `E5658 1 `ul 1 `ul 1 `ul 1 `ul 1 ]
+"172
+[; ;./enums.h: 172:     {
+[s S560 `E5593 1 `E5616 1 `E5616 1 `E5661 1 `E5616 1 `E5616 1 `*S559 1 `*S557 1 `a 1 `E5661 1 `ul 1 `ul 1 `*S557 1 `a 1 `E5661 1 `ul 1 `ul 1 `ul 1 `ul 1 ]
 [n S560 . name AppState AppNextState LastInboundStn LastState Return setParkAction getVehicleAtStop1 stop1occupied parkState1 tWaitTime1 tCountTime1 getVehicleAtStop2 stop2occupied parkState2 tWaitTime2 tCountTime2 tCountTime tWaitTime ]
 "6337 C:/Program Files/Microchip/MPLABX/v6.05/packs/Microchip/PIC18F-J_DFP/1.5.44/xc8\pic\include\proc\pic18f97j60.h
 [; ;C:/Program Files/Microchip/MPLABX/v6.05/packs/Microchip/PIC18F-J_DFP/1.5.44/xc8\pic\include\proc\pic18f97j60.h: 6337: extern volatile unsigned char LATD __attribute__((address(0xF8C)));
@@ -29,9 +29,9 @@ Version 4.0 HI-TECH Software Intermediate Code
 [; ;./communication.h: 30:     {
 [s S562 `uc 1 `uc 1 `uc -> 8 `i ]
 [n S562 . header command data ]
-"51 ./pathway.h
-[; ;./pathway.h: 51: void SETxVEHICLExACTION(VEHICLE *self, TASK_MESSAGES action, TASK_STATE path);
-[v _SETxVEHICLExACTION `(v ~T0 @X0 0 ef3`*S560`E5658`E5615 ]
+"54 ./pathway.h
+[; ;./pathway.h: 54: void SETxVEHICLExACTION(VEHICLE *self, TASK_MESSAGES action, TASK_STATE path);
+[v _SETxVEHICLExACTION `(v ~T0 @X0 0 ef3`*S560`E5661`E5616 ]
 "16 ./milisecond_counter.h
 [; ;./milisecond_counter.h: 16:     extern uint32_t GETxMILLIS(void);
 [v _GETxMILLIS `(ul ~T0 @X0 0 ef ]
@@ -966,7 +966,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 ..
 ]
 "70
-[; ;./debounce.h: 70: DEBOUNCE HALL_STOP_FDEP = {tHallSignalDebounceTime, 0, 0, 0, &PORTJ, 0x3, 0, 0, 1};
+[; ;./debounce.h: 70: DEBOUNCE HALL_STOP_FDEP = {tHallSignalDebounceTime, 0, 0, 0, &PORTJ, 0x4, 0, 0, 1};
 [v _HALL_STOP_FDEP `S557 ~T0 @X0 1 e ]
 [i _HALL_STOP_FDEP
 :U ..
@@ -976,7 +976,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 -> -> 0 `i `a
 -> -> 0 `i `a
 &U _PORTJ
--> -> 3 `i `uc
+-> -> 4 `i `uc
 -> -> 0 `i `a
 -> -> 0 `i `a
 -> -> 1 `i `a
@@ -990,10 +990,10 @@ Version 4.0 HI-TECH Software Intermediate Code
 -> -> -> 1000 `i `l `ul
 ]
 "21
-[; ;./enums.h: 21:     const uint8_t tRandomShift = 3;
+[; ;./enums.h: 21:     const uint8_t tRandomShift = 0;
 [v _tRandomShift `Cuc ~T0 @X0 1 e ]
 [i _tRandomShift
--> -> 3 `i `uc
+-> -> 0 `i `uc
 ]
 "23
 [; ;./enums.h: 23:     const uint32_t tSwitchPointWaitTime = (uint32_t)(1 * tFactorSec);
@@ -1008,10 +1008,10 @@ Version 4.0 HI-TECH Software Intermediate Code
 * -> -> -> 60 `i `l `ul _tFactorSec
 ]
 "27
-[; ;./enums.h: 27:     const uint32_t tRestoreTime = (uint32_t)(5 * tFactorSec);
+[; ;./enums.h: 27:     const uint32_t tRestoreTime = (uint32_t)(3 * tFactorSec);
 [v _tRestoreTime `Cul ~T0 @X0 1 e ]
 [i _tRestoreTime
-* -> -> -> 5 `i `l `ul _tFactorSec
+* -> -> -> 3 `i `l `ul _tFactorSec
 ]
 "29
 [; ;./enums.h: 29:     const uint32_t tReadIoSignalWaitTime = (uint32_t)(10 * tFactorSec);
@@ -1019,11 +1019,11 @@ Version 4.0 HI-TECH Software Intermediate Code
 [i _tReadIoSignalWaitTime
 * -> -> -> 10 `i `l `ul _tFactorSec
 ]
-"190
-[; ;./enums.h: 190:     VEHICLE bus;
+"195
+[; ;./enums.h: 195:     VEHICLE bus;
 [v _bus `S560 ~T0 @X0 1 e ]
-"191
-[; ;./enums.h: 191:     VEHICLE firedep;
+"196
+[; ;./enums.h: 196:     VEHICLE firedep;
 [v _firedep `S560 ~T0 @X0 1 e ]
 "38 ./pathway.h
 [; ;./pathway.h: 38: VEHICLESTOP BUS = {&LATD, 0x01, &LATD, 0x02, &LATD, 0x04, &LATD, 0x08};
@@ -1042,8 +1042,8 @@ Version 4.0 HI-TECH Software Intermediate Code
 ..
 ..
 ]
-"39
-[; ;./pathway.h: 39: VEHICLESTOP FIRE_DEP = {&LATD, 0x10, &LATD, 0x20, &LATD, 0x40, &LATD, 0x80};
+"41
+[; ;./pathway.h: 41: VEHICLESTOP FIRE_DEP = {&LATD, 0x10, &LATD, 0x20, &LATD, 0x40, &LATD, 0x80};
 [v _FIRE_DEP `S559 ~T0 @X0 1 e ]
 [i _FIRE_DEP
 :U ..
@@ -1096,11 +1096,11 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e :U _INITxFIREDEP ]
 [f ]
 "30
-[; ;firedep.c: 30:     firedep.name = FALLER_BUS;
-[e = . _firedep 0 . `E5593 7 ]
+[; ;firedep.c: 30:     firedep.name = FALLER_CARS;
+[e = . _firedep 0 . `E5593 8 ]
 "31
 [; ;firedep.c: 31:     firedep.AppState = INIT;
-[e = . _firedep 1 . `E5615 5 ]
+[e = . _firedep 1 . `E5616 5 ]
 "32
 [; ;firedep.c: 32:     firedep.setParkAction = &FIRE_DEP;
 [e = . _firedep 6 &U _FIRE_DEP ]
@@ -1112,7 +1112,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e = . _firedep 8 -> -> 0 `i `a ]
 "35
 [; ;firedep.c: 35:     firedep.parkState1 = NONE;
-[e = . _firedep 9 . `E5658 0 ]
+[e = . _firedep 9 . `E5661 0 ]
 "36
 [; ;firedep.c: 36:     firedep.getVehicleAtStop2 = &HALL_STOP_FDEP;
 [e = . _firedep 12 &U _HALL_STOP_FDEP ]
@@ -1121,7 +1121,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e = . _firedep 13 -> -> 0 `i `a ]
 "38
 [; ;firedep.c: 38:     firedep.parkState2 = NONE;
-[e = . _firedep 14 . `E5658 0 ]
+[e = . _firedep 14 . `E5661 0 ]
 "39
 [; ;firedep.c: 39: }
 [e :UE 563 ]
@@ -1150,287 +1150,373 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e :U 567 ]
 "47
 [; ;firedep.c: 47:             SETxVEHICLExACTION(self, PASS, FIREDEP);
-[e ( _SETxVEHICLExACTION (3 , , _self . `E5658 16 . `E5615 39 ]
+[e ( _SETxVEHICLExACTION (3 , , _self . `E5661 16 . `E5616 39 ]
 "48
-[; ;firedep.c: 48:             self->AppNextState = IDLE;
-[e = . *U _self 2 . `E5615 9 ]
+[; ;firedep.c: 48:             self->getVehicleAtStop1->value = 0;
+[e = . *U . *U _self 7 6 -> -> 0 `i `a ]
 "49
-[; ;firedep.c: 49:             self->AppState = WAIT;
-[e = . *U _self 1 . `E5615 8 ]
+[; ;firedep.c: 49:             self->AppNextState = IDLE;
+[e = . *U _self 2 . `E5616 9 ]
 "50
-[; ;firedep.c: 50:             self->tCountTime = GETxMILLIS();
-[e = . *U _self 17 ( _GETxMILLIS ..  ]
+[; ;firedep.c: 50:             self->AppState = WAIT;
+[e = . *U _self 1 . `E5616 8 ]
 "51
-[; ;firedep.c: 51:             self->tWaitTime = tSwitchPointWaitTime;
+[; ;firedep.c: 51:             self->tCountTime = GETxMILLIS();
+[e = . *U _self 17 ( _GETxMILLIS ..  ]
+"52
+[; ;firedep.c: 52:             self->tWaitTime = tSwitchPointWaitTime;
 [e = . *U _self 18 _tSwitchPointWaitTime ]
-"54
-[; ;firedep.c: 54:             CREATExTASKxSTATUSxMESSAGE(self->name,
-[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . *U _self 2 `uc -> . `E5615 32 `uc -> / . *U _self 18 -> -> -> 1000 `i `l `ul `uc ]
-"58
-[; ;firedep.c: 58:             break;
+"55
+[; ;firedep.c: 55:             CREATExTASKxSTATUSxMESSAGE(self->name,
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . *U _self 2 `uc -> . `E5616 32 `uc -> / . *U _self 18 -> -> -> 1000 `i `l `ul `uc ]
+"59
+[; ;firedep.c: 59:             break;
 [e $U 565  ]
-"60
-[; ;firedep.c: 60:         case IDLE:
+"61
+[; ;firedep.c: 61:         case IDLE:
 [e :U 568 ]
-"62
-[; ;firedep.c: 62:             if(1 == self->getVehicleAtStop1->value &&
-[e $ ! && == -> 1 `i -> . *U . *U _self 7 6 `i == -> . `E5658 0 `ui -> . *U _self 9 `ui 569  ]
 "63
-[; ;firedep.c: 63:                     NONE == self->parkState1){
-{
+[; ;firedep.c: 63:             if(1 == self->getVehicleAtStop1->value &&
+[e $ ! && == -> 1 `i -> . *U . *U _self 7 6 `i == -> . `E5661 0 `ui -> . *U _self 9 `ui 569  ]
 "64
-[; ;firedep.c: 64:                 SETxVEHICLExACTION(self, BRAKE, FIREDEP_MID);
-[e ( _SETxVEHICLExACTION (3 , , _self . `E5658 14 . `E5615 37 ]
+[; ;firedep.c: 64:                     NONE == self->parkState1){
+{
 "65
-[; ;firedep.c: 65:                 self->LastState = IDLE;
-[e = . *U _self 4 . `E5615 9 ]
+[; ;firedep.c: 65:                 self->getVehicleAtStop1->value = 0;
+[e = . *U . *U _self 7 6 -> -> 0 `i `a ]
 "66
-[; ;firedep.c: 66:                 self->stop1occupied = 1;
-[e = . *U _self 8 -> -> 1 `i `a ]
+[; ;firedep.c: 66:                 SETxVEHICLExACTION(self, HALT, FIREDEP_MID);
+[e ( _SETxVEHICLExACTION (3 , , _self . `E5661 14 . `E5616 37 ]
 "67
-[; ;firedep.c: 67:                 self->parkState1 = PARK;
-[e = . *U _self 9 . `E5658 17 ]
+[; ;firedep.c: 67:                 self->LastState = RESTORE_NEEDED;
+[e = . *U _self 4 . `E5616 41 ]
 "68
-[; ;firedep.c: 68:                 self->tWaitTime1 = (tParkTime + (GETxRANDOMxNUMBER() << tRandomShift));
-[e = . *U _self 10 + _tParkTime -> << -> ( _GETxRANDOMxNUMBER ..  `ui -> _tRandomShift `i `ul ]
+[; ;firedep.c: 68:                 self->stop1occupied = 1;
+[e = . *U _self 8 -> -> 1 `i `a ]
 "69
-[; ;firedep.c: 69:                 self->tCountTime1 = GETxMILLIS();
-[e = . *U _self 11 ( _GETxMILLIS ..  ]
+[; ;firedep.c: 69:                 self->parkState1 = PARK;
+[e = . *U _self 9 . `E5661 17 ]
 "70
-[; ;firedep.c: 70:             }
+[; ;firedep.c: 70:                 self->tWaitTime1 = (tParkTime + (GETxRANDOMxNUMBER() << tRandomShift));
+[e = . *U _self 10 + _tParkTime -> << -> ( _GETxRANDOMxNUMBER ..  `ui -> _tRandomShift `i `ul ]
+"71
+[; ;firedep.c: 71:                 self->tCountTime1 = GETxMILLIS();
+[e = . *U _self 11 ( _GETxMILLIS ..  ]
+"72
+[; ;firedep.c: 72:             }
 }
 [e $U 570  ]
-"71
-[; ;firedep.c: 71:             else if(1 == self->getVehicleAtStop2->value &&
-[e :U 569 ]
-[e $ ! && == -> 1 `i -> . *U . *U _self 12 6 `i == -> . `E5658 0 `ui -> . *U _self 14 `ui 571  ]
-"72
-[; ;firedep.c: 72:                     NONE == self->parkState2){
-{
 "73
-[; ;firedep.c: 73:                 SETxVEHICLExACTION(self, BRAKE, FIREDEP_RIGHT);
-[e ( _SETxVEHICLExACTION (3 , , _self . `E5658 14 . `E5615 38 ]
+[; ;firedep.c: 73:             else if(1 == self->getVehicleAtStop2->value &&
+[e :U 569 ]
+[e $ ! && == -> 1 `i -> . *U . *U _self 12 6 `i == -> . `E5661 0 `ui -> . *U _self 14 `ui 571  ]
 "74
-[; ;firedep.c: 74:                 self->LastState = IDLE;
-[e = . *U _self 4 . `E5615 9 ]
-"75
-[; ;firedep.c: 75:                 self->stop2occupied = 1;
-[e = . *U _self 13 -> -> 1 `i `a ]
-"76
-[; ;firedep.c: 76:                 self->parkState2 = PARK;
-[e = . *U _self 14 . `E5658 17 ]
-"77
-[; ;firedep.c: 77:                 self->tWaitTime2 = (tParkTime + (GETxRANDOMxNUMBER() << tRandomShift));
-[e = . *U _self 15 + _tParkTime -> << -> ( _GETxRANDOMxNUMBER ..  `ui -> _tRandomShift `i `ul ]
-"78
-[; ;firedep.c: 78:                 self->tCountTime2 = GETxMILLIS();
-[e = . *U _self 16 ( _GETxMILLIS ..  ]
-"79
-[; ;firedep.c: 79:             }
-}
-[e :U 571 ]
-[e :U 570 ]
-"85
-[; ;firedep.c: 85:             if((WAIT == self->parkState1 || WAIT == self->parkState2) &&
-[e $ ! && || == -> . `E5615 8 `ui -> . *U _self 9 `ui == -> . `E5615 8 `ui -> . *U _self 14 `ui != -> . *U _self 4 `ui -> . `E5615 40 `ui 572  ]
-"86
-[; ;firedep.c: 86:                     self->LastState != RESTORE){
+[; ;firedep.c: 74:                     NONE == self->parkState2){
 {
-"87
-[; ;firedep.c: 87:                 self->AppNextState = RESTORE;
-[e = . *U _self 2 . `E5615 40 ]
-"88
-[; ;firedep.c: 88:                 self->AppState = WAIT;
-[e = . *U _self 1 . `E5615 8 ]
-"89
-[; ;firedep.c: 89:                 self->LastState = RESTORE;
-[e = . *U _self 4 . `E5615 40 ]
-"90
-[; ;firedep.c: 90:                 self->tCountTime = GETxMILLIS();
-[e = . *U _self 17 ( _GETxMILLIS ..  ]
-"91
-[; ;firedep.c: 91:                 self->tWaitTime = tRestoreTime;
-[e = . *U _self 18 _tRestoreTime ]
-"94
-[; ;firedep.c: 94:                 CREATExTASKxSTATUSxMESSAGE(self->name,
-[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . *U _self 2 `uc -> . `E5615 32 `uc -> / . *U _self 18 -> -> -> 1000 `i `l `ul `uc ]
-"98
-[; ;firedep.c: 98:             }
+"75
+[; ;firedep.c: 75:                 self->getVehicleAtStop2->value = 0;
+[e = . *U . *U _self 12 6 -> -> 0 `i `a ]
+"76
+[; ;firedep.c: 76:                 SETxVEHICLExACTION(self, HALT, FIREDEP_RIGHT);
+[e ( _SETxVEHICLExACTION (3 , , _self . `E5661 14 . `E5616 38 ]
+"77
+[; ;firedep.c: 77:                 self->LastState = RESTORE_NEEDED;
+[e = . *U _self 4 . `E5616 41 ]
+"78
+[; ;firedep.c: 78:                 self->stop2occupied = 1;
+[e = . *U _self 13 -> -> 1 `i `a ]
+"79
+[; ;firedep.c: 79:                 self->parkState2 = PARK;
+[e = . *U _self 14 . `E5661 17 ]
+"80
+[; ;firedep.c: 80:                 self->tWaitTime2 = (tParkTime + (GETxRANDOMxNUMBER() << tRandomShift));
+[e = . *U _self 15 + _tParkTime -> << -> ( _GETxRANDOMxNUMBER ..  `ui -> _tRandomShift `i `ul ]
+"81
+[; ;firedep.c: 81:                 self->tCountTime2 = GETxMILLIS();
+[e = . *U _self 16 ( _GETxMILLIS ..  ]
+"82
+[; ;firedep.c: 82:             }
+}
+[e $U 572  ]
+"83
+[; ;firedep.c: 83:             else{
+[e :U 571 ]
+{
+"85
+[; ;firedep.c: 85:                 self->getVehicleAtStop1->value = 0;
+[e = . *U . *U _self 7 6 -> -> 0 `i `a ]
+"86
+[; ;firedep.c: 86:             }
 }
 [e :U 572 ]
-"100
-[; ;firedep.c: 100:             if(DRIVE == self->parkState1){
-[e $ ! == -> . `E5658 15 `ui -> . *U _self 9 `ui 573  ]
+[e :U 570 ]
+"92
+[; ;firedep.c: 92:             if((PARK == self->parkState1 || PARK == self->parkState2) &&
+[e $ ! && || == -> . `E5661 17 `ui -> . *U _self 9 `ui == -> . `E5661 17 `ui -> . *U _self 14 `ui != -> . *U _self 4 `ui -> . `E5616 40 `ui 573  ]
+"93
+[; ;firedep.c: 93:                     self->LastState != RESTORE){
 {
+"94
+[; ;firedep.c: 94:                 self->AppNextState = RESTORE;
+[e = . *U _self 2 . `E5616 40 ]
+"95
+[; ;firedep.c: 95:                 self->AppState = WAIT;
+[e = . *U _self 1 . `E5616 8 ]
+"96
+[; ;firedep.c: 96:                 self->LastState = RESTORE;
+[e = . *U _self 4 . `E5616 40 ]
+"97
+[; ;firedep.c: 97:                 self->tCountTime = GETxMILLIS();
+[e = . *U _self 17 ( _GETxMILLIS ..  ]
+"98
+[; ;firedep.c: 98:                 self->tWaitTime = tRestoreTime;
+[e = . *U _self 18 _tRestoreTime ]
 "101
-[; ;firedep.c: 101:                 SETxVEHICLExACTION(self, DRIVE, FIREDEP_MID);
-[e ( _SETxVEHICLExACTION (3 , , _self . `E5658 15 . `E5615 37 ]
-"102
-[; ;firedep.c: 102:                 self->parkState1 = NONE;
-[e = . *U _self 9 . `E5658 0 ]
-"104
-[; ;firedep.c: 104:                 CREATExTASKxSTATUSxMESSAGE(self->name,
-[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . *U _self 1 `uc -> . `E5658 15 `uc -> . `E5615 37 `uc ]
-"108
-[; ;firedep.c: 108:             }
+[; ;firedep.c: 101:                 CREATExTASKxSTATUSxMESSAGE(self->name,
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . *U _self 2 `uc -> . `E5616 32 `uc -> / . *U _self 18 -> -> -> 1000 `i `l `ul `uc ]
+"105
+[; ;firedep.c: 105:             }
 }
 [e :U 573 ]
-"109
-[; ;firedep.c: 109:             if(DRIVE == self->parkState2){
-[e $ ! == -> . `E5658 15 `ui -> . *U _self 14 `ui 574  ]
+"107
+[; ;firedep.c: 107:             if(DRIVE == self->parkState1){
+[e $ ! == -> . `E5661 15 `ui -> . *U _self 9 `ui 574  ]
 {
+"108
+[; ;firedep.c: 108:                 SETxVEHICLExACTION(self, DRIVE, FIREDEP_MID);
+[e ( _SETxVEHICLExACTION (3 , , _self . `E5661 15 . `E5616 37 ]
+"109
+[; ;firedep.c: 109:                 self->parkState1 = NONE;
+[e = . *U _self 9 . `E5661 0 ]
 "110
-[; ;firedep.c: 110:                 SETxVEHICLExACTION(self, DRIVE, FIREDEP_RIGHT);
-[e ( _SETxVEHICLExACTION (3 , , _self . `E5658 15 . `E5615 38 ]
-"111
-[; ;firedep.c: 111:                 self->parkState2 = NONE;
-[e = . *U _self 14 . `E5658 0 ]
+[; ;firedep.c: 110:                 self->stop1occupied = 0;
+[e = . *U _self 8 -> -> 0 `i `a ]
+"112
+[; ;firedep.c: 112:                 self->AppNextState = STOP_RESTORE;
+[e = . *U _self 2 . `E5616 42 ]
 "113
-[; ;firedep.c: 113:                 CREATExTASKxSTATUSxMESSAGE(self->name,
-[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . *U _self 1 `uc -> . `E5658 15 `uc -> . `E5615 38 `uc ]
+[; ;firedep.c: 113:                 self->AppState = WAIT;
+[e = . *U _self 1 . `E5616 8 ]
+"114
+[; ;firedep.c: 114:                 self->tCountTime = GETxMILLIS();
+[e = . *U _self 17 ( _GETxMILLIS ..  ]
+"115
+[; ;firedep.c: 115:                 self->tWaitTime = tRestoreTime;
+[e = . *U _self 18 _tRestoreTime ]
 "117
-[; ;firedep.c: 117:             }
+[; ;firedep.c: 117:                 CREATExTASKxSTATUSxMESSAGE(self->name,
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . *U _self 1 `uc -> . `E5661 15 `uc -> . `E5616 37 `uc ]
+"121
+[; ;firedep.c: 121:             }
 }
 [e :U 574 ]
-"118
-[; ;firedep.c: 118:             break;
-[e $U 565  ]
-"120
-[; ;firedep.c: 120:         case RESTORE:
-[e :U 575 ]
+"122
+[; ;firedep.c: 122:             if(DRIVE == self->parkState2){
+[e $ ! == -> . `E5661 15 `ui -> . *U _self 14 `ui 575  ]
+{
+"123
+[; ;firedep.c: 123:                 SETxVEHICLExACTION(self, DRIVE, FIREDEP_RIGHT);
+[e ( _SETxVEHICLExACTION (3 , , _self . `E5661 15 . `E5616 38 ]
+"124
+[; ;firedep.c: 124:                 self->parkState2 = NONE;
+[e = . *U _self 14 . `E5661 0 ]
 "125
-[; ;firedep.c: 125:             if(self->stop1occupied){
-[e $ ! != -> . *U _self 8 `i -> 0 `i 576  ]
-{
-"126
-[; ;firedep.c: 126:                 SETxVEHICLExACTION(self, PASS, FIREDEP_MID);
-[e ( _SETxVEHICLExACTION (3 , , _self . `E5658 16 . `E5615 37 ]
+[; ;firedep.c: 125:                 self->stop2occupied = 0;
+[e = . *U _self 13 -> -> 0 `i `a ]
+"127
+[; ;firedep.c: 127:                 self->AppNextState = STOP_RESTORE;
+[e = . *U _self 2 . `E5616 42 ]
 "128
-[; ;firedep.c: 128:                 CREATExTASKxSTATUSxMESSAGE(self->name,
-[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . *U _self 1 `uc -> . `E5658 16 `uc -> . `E5615 37 `uc ]
+[; ;firedep.c: 128:                 self->AppState = WAIT;
+[e = . *U _self 1 . `E5616 8 ]
+"129
+[; ;firedep.c: 129:                 self->tCountTime = GETxMILLIS();
+[e = . *U _self 17 ( _GETxMILLIS ..  ]
+"130
+[; ;firedep.c: 130:                 self->tWaitTime = tRestoreTime;
+[e = . *U _self 18 _tRestoreTime ]
 "132
-[; ;firedep.c: 132:             }
-}
-[e $U 577  ]
-"133
-[; ;firedep.c: 133:             else if(self->stop2occupied){
-[e :U 576 ]
-[e $ ! != -> . *U _self 13 `i -> 0 `i 578  ]
-{
-"134
-[; ;firedep.c: 134:                 SETxVEHICLExACTION(self, PASS, FIREDEP_RIGHT);
-[e ( _SETxVEHICLExACTION (3 , , _self . `E5658 16 . `E5615 38 ]
+[; ;firedep.c: 132:                 CREATExTASKxSTATUSxMESSAGE(self->name,
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . *U _self 1 `uc -> . `E5661 15 `uc -> . `E5616 38 `uc ]
 "136
-[; ;firedep.c: 136:                 CREATExTASKxSTATUSxMESSAGE(self->name,
-[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . *U _self 1 `uc -> . `E5658 16 `uc -> . `E5615 38 `uc ]
-"140
-[; ;firedep.c: 140:             }
+[; ;firedep.c: 136:             }
 }
-[e :U 578 ]
-[e :U 577 ]
-"142
-[; ;firedep.c: 142:             self->AppState = IDLE;
-[e = . *U _self 1 . `E5615 9 ]
-"143
-[; ;firedep.c: 143:             CREATExTASKxSTATUSxMESSAGE(self->name,
-[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . *U _self 1 `uc -> . `E5658 0 `uc -> . `E5658 0 `uc ]
+[e :U 575 ]
+"137
+[; ;firedep.c: 137:             break;
+[e $U 565  ]
+"139
+[; ;firedep.c: 139:         case RESTORE:
+[e :U 576 ]
+"144
+[; ;firedep.c: 144:             SETxVEHICLExACTION(self, PASS, FIREDEP);
+[e ( _SETxVEHICLExACTION (3 , , _self . `E5661 16 . `E5616 39 ]
+"146
+[; ;firedep.c: 146:             self->AppState = IDLE;
+[e = . *U _self 1 . `E5616 9 ]
 "147
-[; ;firedep.c: 147:             break;
-[e $U 565  ]
-"149
-[; ;firedep.c: 149:         case WAIT:
-[e :U 579 ]
-"150
-[; ;firedep.c: 150:             if((GETxMILLIS() - self->tCountTime) > self->tWaitTime){
-[e $ ! > - ( _GETxMILLIS ..  . *U _self 17 . *U _self 18 580  ]
-{
+[; ;firedep.c: 147:             CREATExTASKxSTATUSxMESSAGE(self->name,
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . *U _self 1 `uc -> . `E5661 0 `uc -> . `E5661 0 `uc ]
 "151
-[; ;firedep.c: 151:                 self->AppState = self->AppNextState;
-[e = . *U _self 1 . *U _self 2 ]
-"152
-[; ;firedep.c: 152:             }
-}
-[e :U 580 ]
+[; ;firedep.c: 151:             break;
+[e $U 565  ]
 "153
-[; ;firedep.c: 153:             break;
-[e $U 565  ]
+[; ;firedep.c: 153:         case STOP_RESTORE:
+[e :U 577 ]
 "155
-[; ;firedep.c: 155:         default:
-[e :U 581 ]
+[; ;firedep.c: 155:             SETxVEHICLExACTION(self, BRAKE, FIREDEP_MID);
+[e ( _SETxVEHICLExACTION (3 , , _self . `E5661 18 . `E5616 37 ]
 "156
-[; ;firedep.c: 156:             break;
+[; ;firedep.c: 156:             SETxVEHICLExACTION(self, BRAKE, FIREDEP_RIGHT);
+[e ( _SETxVEHICLExACTION (3 , , _self . `E5661 18 . `E5616 38 ]
+"158
+[; ;firedep.c: 158:             CREATExTASKxSTATUSxMESSAGE(self->name,
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . *U _self 1 `uc -> . `E5661 0 `uc -> . `E5661 0 `uc ]
+"162
+[; ;firedep.c: 162:             self->AppState = IDLE;
+[e = . *U _self 1 . `E5616 9 ]
+"163
+[; ;firedep.c: 163:             break;
 [e $U 565  ]
-"157
-[; ;firedep.c: 157:     }
+"165
+[; ;firedep.c: 165:         case WAIT:
+[e :U 578 ]
+"166
+[; ;firedep.c: 166:             if((GETxMILLIS() - self->tCountTime) > self->tWaitTime){
+[e $ ! > - ( _GETxMILLIS ..  . *U _self 17 . *U _self 18 579  ]
+{
+"167
+[; ;firedep.c: 167:                 self->AppState = self->AppNextState;
+[e = . *U _self 1 . *U _self 2 ]
+"168
+[; ;firedep.c: 168:             }
+}
+[e :U 579 ]
+"169
+[; ;firedep.c: 169:             break;
+[e $U 565  ]
+"171
+[; ;firedep.c: 171:         default:
+[e :U 580 ]
+"172
+[; ;firedep.c: 172:             break;
+[e $U 565  ]
+"173
+[; ;firedep.c: 173:     }
 }
 [e $U 565  ]
 [e :U 566 ]
-[e [\ -> . *U _self 1 `ui , $ -> . `E5615 5 `ui 567
- , $ -> . `E5615 9 `ui 568
- , $ -> . `E5615 40 `ui 575
- , $ -> . `E5615 8 `ui 579
- 581 ]
+[e [\ -> . *U _self 1 `ui , $ -> . `E5616 5 `ui 567
+ , $ -> . `E5616 9 `ui 568
+ , $ -> . `E5616 40 `ui 576
+ , $ -> . `E5616 42 `ui 577
+ , $ -> . `E5616 8 `ui 578
+ 580 ]
 [e :U 565 ]
-"248
-[; ;firedep.c: 248: }
+"174
+[; ;firedep.c: 174: }
 [e :UE 564 ]
 }
-"254
-[; ;firedep.c: 254: void UPDATExFIREDEPxDRIVExWAIT(VEHICLE *self){
+"180
+[; ;firedep.c: 180: void UPDATExFIREDEPxDRIVExWAIT(VEHICLE *self){
 [v _UPDATExFIREDEPxDRIVExWAIT `(v ~T0 @X0 1 ef1`*S560 ]
 {
 [e :U _UPDATExFIREDEPxDRIVExWAIT ]
 [v _self `*S560 ~T0 @X0 1 r1 ]
 [f ]
-"256
-[; ;firedep.c: 256:     uint32_t millis = GETxMILLIS();
+"182
+[; ;firedep.c: 182:     uint32_t millis = GETxMILLIS();
 [v _millis `ul ~T0 @X0 1 a ]
 [e = _millis ( _GETxMILLIS ..  ]
-"258
-[; ;firedep.c: 258:     if(PARK == self->parkState1){
-[e $ ! == -> . `E5658 17 `ui -> . *U _self 9 `ui 583  ]
+"184
+[; ;firedep.c: 184:     if(PARK == self->parkState1){
+[e $ ! == -> . `E5661 17 `ui -> . *U _self 9 `ui 582  ]
 {
-"259
-[; ;firedep.c: 259:         if((millis - self->tCountTime1) > self->tWaitTime1){
-[e $ ! > - _millis . *U _self 11 . *U _self 10 584  ]
+"185
+[; ;firedep.c: 185:         if((millis - self->tCountTime1) > self->tWaitTime1){
+[e $ ! > - _millis . *U _self 11 . *U _self 10 583  ]
 {
-"260
-[; ;firedep.c: 260:             self->parkState1 = DRIVE;
-[e = . *U _self 9 . `E5658 15 ]
-"261
-[; ;firedep.c: 261:             CREATExTASKxSTATUSxMESSAGE(self->name,
-[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . *U _self 9 `uc -> . `E5658 15 `uc -> . `E5658 0 `uc ]
-"265
-[; ;firedep.c: 265:         }
+"186
+[; ;firedep.c: 186:             if(PARK == self->parkState2){
+[e $ ! == -> . `E5661 17 `ui -> . *U _self 14 `ui 584  ]
+{
+"187
+[; ;firedep.c: 187:                 self->parkState1 = DRIVE;
+[e = . *U _self 9 . `E5661 15 ]
+"188
+[; ;firedep.c: 188:             }
 }
+[e $U 585  ]
+"189
+[; ;firedep.c: 189:             else{
 [e :U 584 ]
-"266
-[; ;firedep.c: 266:     }
-}
-[e :U 583 ]
-"268
-[; ;firedep.c: 268:     if(PARK == self->parkState2){
-[e $ ! == -> . `E5658 17 `ui -> . *U _self 14 `ui 585  ]
 {
-"269
-[; ;firedep.c: 269:         if((millis - self->tCountTime2) > self->tWaitTime2){
-[e $ ! > - _millis . *U _self 16 . *U _self 15 586  ]
-{
-"270
-[; ;firedep.c: 270:             self->parkState2 = DRIVE;
-[e = . *U _self 14 . `E5658 15 ]
-"271
-[; ;firedep.c: 271:             CREATExTASKxSTATUSxMESSAGE(self->name,
-[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . *U _self 14 `uc -> . `E5658 15 `uc -> . `E5658 0 `uc ]
-"275
-[; ;firedep.c: 275:         }
-}
-[e :U 586 ]
-"276
-[; ;firedep.c: 276:     }
+"190
+[; ;firedep.c: 190:                 self->parkState1 = PARK;
+[e = . *U _self 9 . `E5661 17 ]
+"191
+[; ;firedep.c: 191:                 self->tCountTime1 = millis;
+[e = . *U _self 11 _millis ]
+"192
+[; ;firedep.c: 192:             }
 }
 [e :U 585 ]
-"277
-[; ;firedep.c: 277: }
-[e :UE 582 ]
+"193
+[; ;firedep.c: 193:             CREATExTASKxSTATUSxMESSAGE(self->name,
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . *U _self 9 `uc -> . `E5661 15 `uc -> . `E5661 0 `uc ]
+"197
+[; ;firedep.c: 197:         }
+}
+[e :U 583 ]
+"198
+[; ;firedep.c: 198:     }
+}
+[e :U 582 ]
+"200
+[; ;firedep.c: 200:     if(PARK == self->parkState2){
+[e $ ! == -> . `E5661 17 `ui -> . *U _self 14 `ui 586  ]
+{
+"201
+[; ;firedep.c: 201:         if((millis - self->tCountTime2) > self->tWaitTime2){
+[e $ ! > - _millis . *U _self 16 . *U _self 15 587  ]
+{
+"202
+[; ;firedep.c: 202:             if(PARK == self->parkState1){
+[e $ ! == -> . `E5661 17 `ui -> . *U _self 9 `ui 588  ]
+{
+"203
+[; ;firedep.c: 203:                 self->parkState2 = DRIVE;
+[e = . *U _self 14 . `E5661 15 ]
+"204
+[; ;firedep.c: 204:             }
+}
+[e $U 589  ]
+"205
+[; ;firedep.c: 205:             else{
+[e :U 588 ]
+{
+"206
+[; ;firedep.c: 206:                 self->parkState2 = PARK;
+[e = . *U _self 14 . `E5661 17 ]
+"207
+[; ;firedep.c: 207:                 self->tCountTime2 = millis;
+[e = . *U _self 16 _millis ]
+"208
+[; ;firedep.c: 208:             }
+}
+[e :U 589 ]
+"209
+[; ;firedep.c: 209:             CREATExTASKxSTATUSxMESSAGE(self->name,
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . *U _self 14 `uc -> . `E5661 15 `uc -> . `E5661 0 `uc ]
+"213
+[; ;firedep.c: 213:         }
+}
+[e :U 587 ]
+"214
+[; ;firedep.c: 214:     }
+}
+[e :U 586 ]
+"215
+[; ;firedep.c: 215: }
+[e :UE 581 ]
 }

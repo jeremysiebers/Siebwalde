@@ -7,19 +7,18 @@
 /* Disable optimizing otherwise the compiler might optimize the definitions
  * away of the inverted state of a path
  */
-void SETxVEHICLExACTION(VEHICLE *self, TASK_MESSAGES action, TASK_STATE path)
-{
 #pragma optimize( "", off )
-    
+void SETxVEHICLExACTION(VEHICLE *self, TASK_MESSAGES action, TASK_STATE path)
+{    
     uint8_t pin1 = self->setParkAction->pin1_mask;
     uint8_t pin2 = self->setParkAction->pin2_mask;
     uint8_t pin3 = self->setParkAction->pin3_mask;
     uint8_t pin4 = self->setParkAction->pin4_mask;
     
     switch(action){
-        case BRAKE:
+        case HALT:
             if(path == INDUSTRIAL){
-                *self->setParkAction->port1_ptr &= ~pin1; // switch to INDUSTRIAL
+                *self->setParkAction->port1_ptr |=  pin1; // switch to INDUSTRIAL
                 *self->setParkAction->port2_ptr &= ~pin2; // stop at INDUSTRIAL
             }            
             if(path == STATION){
@@ -40,7 +39,7 @@ void SETxVEHICLExACTION(VEHICLE *self, TASK_MESSAGES action, TASK_STATE path)
             
         case PASS:
             if(path == INDUSTRIAL){
-                *self->setParkAction->port1_ptr |=  pin1; // switch to PASS INDUSTRIAL
+                *self->setParkAction->port1_ptr &= ~pin1; // switch to PASS INDUSTRIAL
             }
             else if(path == STATION){
                 *self->setParkAction->port1_ptr &= ~pin3; // switch to PASS STATION
@@ -66,6 +65,21 @@ void SETxVEHICLExACTION(VEHICLE *self, TASK_MESSAGES action, TASK_STATE path)
             }
             break;
             
+        case BRAKE:
+            if(path == INDUSTRIAL){
+                *self->setParkAction->port2_ptr &= ~pin2; // DRIVE at INDUSTRIAL
+            }
+            else if(path == STATION){
+                *self->setParkAction->port2_ptr &= ~pin4; // DRIVE at STATION
+            }
+            else if(path == FIREDEP_MID){
+                *self->setParkAction->port2_ptr &= ~pin3; // FIREDEP MID
+            }
+            else if(path == FIREDEP_RIGHT){
+                *self->setParkAction->port2_ptr &= ~pin4; // FIREDEP RIGHT
+            }
+            break;
+            
         default:break;
     }
     
@@ -73,6 +87,5 @@ void SETxVEHICLExACTION(VEHICLE *self, TASK_MESSAGES action, TASK_STATE path)
             SET_PATH_WAY, 
             action, 
             path);
-    
-#pragma optimize( "", on )
 }
+#pragma optimize( "", on )
