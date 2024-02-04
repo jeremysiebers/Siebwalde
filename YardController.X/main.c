@@ -49,7 +49,9 @@ void main(void)
     PROCESSxETHxDATAxINIT();
     INITxRANDxNUMBER();
     INITxBUSxDIRIVE();
-    INITxFIREDEP();    
+    INITxFIREDEP();
+    /* Kick all servo controllers */
+    LATD = 0xFF;
 
     while (1)
     {
@@ -73,6 +75,7 @@ void main(void)
             if(tBootWaitTimeCnt > tReadIoSignalWaitTime){
                 tBootWaitTimeCnt = 0;
                 booted = true;
+                LATD = 0x00;
             }
         }
         // </editor-fold>
