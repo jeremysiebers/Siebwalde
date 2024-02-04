@@ -54,9 +54,10 @@ void UPDATExBUSxDRIVE(VEHICLE *self)
                 SETxVEHICLExACTION(self, HALT, INDUSTRIAL);
                 self->stop1occupied = true;
                 self->parkState1    = PARK;
-                self->tWaitTime1    = (tParkTime + (GETxRANDOMxNUMBER() << tRandomShift));
+                self->tWaitTime1    = (tParkTime);// + (GETxRANDOMxNUMBER() << tRandomShift));
                 self->tCountTime1   = GETxMILLIS();
                 self->LastState     = RESTORE_NEEDED;
+                state = done;
             }
             else{
                 /* Reset Hall when stop is occupied but a magnet was seen */
@@ -68,9 +69,10 @@ void UPDATExBUSxDRIVE(VEHICLE *self)
                 SETxVEHICLExACTION(self, HALT, STATION);
                 self->stop2occupied = true;
                 self->parkState2    = PARK;
-                self->tWaitTime2    = (tParkTime + (GETxRANDOMxNUMBER() << tRandomShift));
+                self->tWaitTime2    = (tParkTime);// + (GETxRANDOMxNUMBER() << tRandomShift));
                 self->tCountTime2   = GETxMILLIS();
                 self->LastState     = RESTORE_NEEDED;
+                state = done;
             }
             else{
                 /* Reset Hall when stop is occupied but a magnet was seen */
@@ -183,6 +185,7 @@ void UPDATExBUSxDRIVE(VEHICLE *self)
  * During every xMiliseconds an interrupt will call this function to 
  * check if a vehicle wait time is done 
  */
+#pragma optimize( "", off )
 void UPDATExBUSxDRIVExWAIT(VEHICLE *self){
     /* Get one time the actual time */
     uint32_t millis = GETxMILLIS();
@@ -219,3 +222,4 @@ void UPDATExBUSxDRIVExWAIT(VEHICLE *self){
         }
     }
 }
+#pragma optimize( "", on )

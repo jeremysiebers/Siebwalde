@@ -22,9 +22,9 @@ extern "C" {
     /* Time to wait for servo to move to new position */
     const uint32_t tSwitchPointWaitTime = (uint32_t)(1 * tFactorSec);
     /* Minimum Time that Train waits before leaving */
-    const uint32_t tParkTime = (uint32_t)(60 * tFactorSec);
+    const uint32_t tParkTime = (uint32_t)(10 * tFactorSec);
     /* Time that Freight Train waits before leaving */
-    const uint32_t tRestoreTime = (uint32_t)(3 * tFactorSec);
+    const uint32_t tRestoreTime = (uint32_t)(2 * tFactorSec);
     /* Boot wait time to get all IO read and debounced first */
     const uint32_t tReadIoSignalWaitTime = (uint32_t)(10 * tFactorSec);
     

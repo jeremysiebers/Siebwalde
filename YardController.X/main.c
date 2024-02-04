@@ -51,6 +51,7 @@ void main(void)
     INITxFIREDEP();
     /* Kick all servo controllers */
     LATD = 0xFF;
+    order = STATION;
 
     while (1)
     {
