@@ -164,7 +164,7 @@ void main(void)
                 DebounceIO(true);
                 TP1_SetLow();
                 
-                if(isUdpConnected){
+                if(true){//if(isUdpConnected){
                     // <editor-fold defaultstate="collapsed">
                     /*
                     * MainStation methods
