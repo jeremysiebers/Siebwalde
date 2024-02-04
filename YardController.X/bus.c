@@ -189,21 +189,33 @@ void UPDATExBUSxDRIVExWAIT(VEHICLE *self){
     
     if(PARK == self->parkState1){
         if((millis - self->tCountTime1) > self->tWaitTime1){
-            self->parkState1 = DRIVE;
-            CREATExTASKxSTATUSxMESSAGE(self->name, 
+            if(STATION == order){
+                self->parkState1 = DRIVE;
+                CREATExTASKxSTATUSxMESSAGE(self->name, 
                                            self->parkState1, 
                                            DRIVE, 
                                            NONE);
+            }
+            else{
+                self->parkState1 = PARK;
+                self->tCountTime1 = millis;
+            }
         }
     }
     
     if(PARK == self->parkState2){
         if((millis - self->tCountTime2) > self->tWaitTime2){
-            self->parkState2 = DRIVE;
-            CREATExTASKxSTATUSxMESSAGE(self->name, 
+            if(STATION == order){
+                self->parkState2 = DRIVE;
+                CREATExTASKxSTATUSxMESSAGE(self->name, 
                                            self->parkState2, 
                                            DRIVE, 
                                            NONE);
+            }
+            else{
+                self->parkState2 = PARK;
+                self->tCountTime2 = millis;
+            }
         }
     }
 }

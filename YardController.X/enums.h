@@ -27,6 +27,7 @@ extern "C" {
     const uint32_t tRestoreTime = (uint32_t)(3 * tFactorSec);
     /* Boot wait time to get all IO read and debounced first */
     const uint32_t tReadIoSignalWaitTime = (uint32_t)(10 * tFactorSec);
+    
 
     typedef enum
     {
@@ -194,6 +195,10 @@ extern "C" {
     
     VEHICLE bus;
     VEHICLE firedep;
+    
+    /* To control the flow of the cars */
+    TASK_STATE   state = busy;
+    TASK_STATE   order = STATION;
     
 #ifdef	__cplusplus
 }

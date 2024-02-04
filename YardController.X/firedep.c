@@ -183,33 +183,45 @@ void UPDATExFIREDEPxDRIVExWAIT(VEHICLE *self){
     
     if(PARK == self->parkState1){
         if((millis - self->tCountTime1) > self->tWaitTime1){
-            if(PARK == self->parkState2){
-                self->parkState1 = DRIVE;
+            if(STATION == FIREDEP){
+                if(PARK == self->parkState2){
+                    self->parkState1 = DRIVE;
+                }
+                else{
+                    self->parkState1 = PARK;
+                    self->tCountTime1 = millis;
+                }            
+                CREATExTASKxSTATUSxMESSAGE(self->name, 
+                                           self->parkState1, 
+                                           DRIVE, 
+                                           NONE);
             }
             else{
                 self->parkState1 = PARK;
                 self->tCountTime1 = millis;
-            }            
-            CREATExTASKxSTATUSxMESSAGE(self->name, 
-                                           self->parkState1, 
-                                           DRIVE, 
-                                           NONE);
+            }
         }
     }
     
     if(PARK == self->parkState2){
         if((millis - self->tCountTime2) > self->tWaitTime2){            
-            if(PARK == self->parkState1){
-                self->parkState2 = DRIVE;
+            if(STATION == FIREDEP){
+                if(PARK == self->parkState1){
+                    self->parkState2 = DRIVE;
+                }
+                else{
+                    self->parkState2 = PARK;
+                    self->tCountTime2 = millis;
+                }            
+                CREATExTASKxSTATUSxMESSAGE(self->name, 
+                                               self->parkState2, 
+                                               DRIVE, 
+                                               NONE);
             }
             else{
                 self->parkState2 = PARK;
                 self->tCountTime2 = millis;
             }            
-            CREATExTASKxSTATUSxMESSAGE(self->name, 
-                                           self->parkState2, 
-                                           DRIVE, 
-                                           NONE);
         }
     }
 }

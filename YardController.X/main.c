@@ -18,7 +18,6 @@ static uint32_t     tSendAliveMessWaitTimeCnt = 0;
 static udpTrans_t   StatusMessage;
 static udpTrans_t   DataMessage;
 static uint8_t      tmp = 0;
-
 /*
                          Main application
  */
@@ -90,10 +89,28 @@ void main(void)
                 
                 DebounceIO();
                 
-                if(1){
+                if(1){ /* Here normally the udp connected check */
                     /*
                     * MainStation methods
                     */
+                    
+                    /* Determine order of departure to prohibit overtaking */
+                    switch(order){
+                        case STATION: if(state == done){
+                            order = FIREDEP;
+                            state = busy;
+                        }
+                        break;
+                        
+                        case FIREDEP: if(state == done){
+                            order = STATION;
+                            state = busy;
+                        }
+                        break;
+                            
+                        default:break;
+                    }
+                    
                     //TP1_SetHigh();
                     UPDATExBUSxDRIVExWAIT(&bus);
                     //TP1_SetLow();
