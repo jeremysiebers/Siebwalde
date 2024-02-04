@@ -17,8 +17,6 @@ uint16_t timer_firedep = 0;
 uint8_t FDepOccRight = 1;
 uint8_t FDepOccMid = 0;
 
-static fuckingKUTNazi = true;
-
 /*
  * 3-way switch:
  * SW_FDEP_RIGHT_LAT = 0, SW_FDEP_MID_LAT = 0 --> LEFT LANE pass by
@@ -42,7 +40,6 @@ void INITxFIREDEP(void){
 
 void UPDATExFIREDEPxDRIVE(VEHICLE *self) 
 {
-    fuckingKUTNazi = true;
     switch(self->AppState)
     {
         case INIT:
@@ -184,16 +181,13 @@ void UPDATExFIREDEPxDRIVE(VEHICLE *self)
  */
 
 void UPDATExFIREDEPxDRIVExWAIT(VEHICLE *self){
-    #pragma optimize( "", off )
+//    #pragma optimize( "", off )
     /* Get one time the actual time */
     uint32_t millis = GETxMILLIS();
     
     if(PARK == self->parkState1){
         if((millis - self->tCountTime1) > self->tWaitTime1){
-            if(STATION == FIREDEP){
-                fuckingKUTNazi = false;
-                fuckingKUTNazi = true;
-                fuckingKUTNazi = false;
+            if(FIREDEP == order){
                 if(PARK == self->parkState2){
                     self->parkState1 = DRIVE;
                 }
@@ -215,10 +209,7 @@ void UPDATExFIREDEPxDRIVExWAIT(VEHICLE *self){
     
     if(PARK == self->parkState2){
         if((millis - self->tCountTime2) > self->tWaitTime2){            
-            if(STATION == FIREDEP){
-                fuckingKUTNazi = false;
-                fuckingKUTNazi = true;
-                fuckingKUTNazi = false;
+            if(FIREDEP == order){
                 if(PARK == self->parkState1){
                     self->parkState2 = DRIVE;
                 }
@@ -237,5 +228,5 @@ void UPDATExFIREDEPxDRIVExWAIT(VEHICLE *self){
             }            
         }
     }
-    #pragma optimize( "", on )
+//    #pragma optimize( "", on )
 }
