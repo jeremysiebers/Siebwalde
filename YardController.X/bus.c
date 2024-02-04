@@ -57,7 +57,7 @@ void UPDATExBUSxDRIVE(VEHICLE *self)
                 self->tWaitTime1    = (tParkTime);// + (GETxRANDOMxNUMBER() << tRandomShift));
                 self->tCountTime1   = GETxMILLIS();
                 self->LastState     = RESTORE_NEEDED;
-                state = done;
+                FLOWxCONTROLxState = STATION;
             }
             else{
                 /* Reset Hall when stop is occupied but a magnet was seen */
@@ -72,7 +72,7 @@ void UPDATExBUSxDRIVE(VEHICLE *self)
                 self->tWaitTime2    = (tParkTime);// + (GETxRANDOMxNUMBER() << tRandomShift));
                 self->tCountTime2   = GETxMILLIS();
                 self->LastState     = RESTORE_NEEDED;
-                state = done;
+                FLOWxCONTROLxState = STATION;
             }
             else{
                 /* Reset Hall when stop is occupied but a magnet was seen */
@@ -192,7 +192,7 @@ void UPDATExBUSxDRIVExWAIT(VEHICLE *self){
     
     if(PARK == self->parkState1){
         if((millis - self->tCountTime1) > self->tWaitTime1){
-            if(STATION == order){
+            if(STATION == FLOWxCONTROLxOrder){
                 self->parkState1 = DRIVE;
                 CREATExTASKxSTATUSxMESSAGE(self->name, 
                                            self->parkState1, 
@@ -208,7 +208,7 @@ void UPDATExBUSxDRIVExWAIT(VEHICLE *self){
     
     if(PARK == self->parkState2){
         if((millis - self->tCountTime2) > self->tWaitTime2){
-            if(STATION == order){
+            if(STATION == FLOWxCONTROLxOrder){
                 self->parkState2 = DRIVE;
                 CREATExTASKxSTATUSxMESSAGE(self->name, 
                                            self->parkState2, 

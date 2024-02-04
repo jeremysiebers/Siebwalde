@@ -16,6 +16,7 @@ uint8_t State_firedep = 0;
 uint16_t timer_firedep = 0;
 uint8_t FDepOccRight = 1;
 uint8_t FDepOccMid = 0;
+TASK_STATE   StopSelector = FIREDEP_MID;
 
 /*
  * 3-way switch:
@@ -69,7 +70,10 @@ void UPDATExFIREDEPxDRIVE(VEHICLE *self)
                 self->parkState1    = PARK;
                 self->tWaitTime1    = (tParkTime);// + (GETxRANDOMxNUMBER() << tRandomShift));
                 self->tCountTime1   = GETxMILLIS();
-                state = done;
+                FLOWxCONTROLxState = FIREDEP;
+                if(FLOWxCONTROLxOrder == nop){
+                    FLOWxCONTROLxOrder = FIREDEP;
+                }
             }
             else if(true == self->getVehicleAtStop2->value &&
                     NONE == self->parkState2){
@@ -80,7 +84,10 @@ void UPDATExFIREDEPxDRIVE(VEHICLE *self)
                 self->parkState2    = PARK;
                 self->tWaitTime2    = (tParkTime);// + (GETxRANDOMxNUMBER() << tRandomShift));
                 self->tCountTime2   = GETxMILLIS();
-                state = done;
+                FLOWxCONTROLxState = FIREDEP;
+                if(FLOWxCONTROLxOrder == nop){
+                    FLOWxCONTROLxOrder = FIREDEP;
+                }
             }
             else{
                 /* Reset Hall when stop is occupied but a magnet was seen */
@@ -187,14 +194,18 @@ void UPDATExFIREDEPxDRIVExWAIT(VEHICLE *self){
     
     if(PARK == self->parkState1){
         if((millis - self->tCountTime1) > self->tWaitTime1){
-            if(FIREDEP == order){
+            if(FIREDEP == FLOWxCONTROLxOrder && FIREDEP_MID == StopSelector){
+                self->parkState1 = DRIVE;
+                /* Only switch to second stop if something is parked there */
                 if(PARK == self->parkState2){
-                    self->parkState1 = DRIVE;
-                }
-                else{
-                    self->parkState1 = PARK;
-                    self->tCountTime1 = millis;
-                }            
+                    StopSelector = FIREDEP_RIGHT;
+                    /* Switch flow control state when 2 are occupied at firedep. 
+                     * to nop so first the other (bus) has to drive into station
+                     * first!
+                     */
+                    FLOWxCONTROLxState = nop;
+                    FLOWxCONTROLxOrder = nop;
+                }                
                 CREATExTASKxSTATUSxMESSAGE(self->name, 
                                            self->parkState1, 
                                            DRIVE, 
@@ -209,14 +220,16 @@ void UPDATExFIREDEPxDRIVExWAIT(VEHICLE *self){
     
     if(PARK == self->parkState2){
         if((millis - self->tCountTime2) > self->tWaitTime2){            
-            if(FIREDEP == order){
-                if(PARK == self->parkState1){
-                    self->parkState2 = DRIVE;
-                }
-                else{
-                    self->parkState2 = PARK;
-                    self->tCountTime2 = millis;
-                }            
+            if(FIREDEP == FLOWxCONTROLxOrder && FIREDEP_RIGHT == StopSelector){
+                self->parkState2 = DRIVE;  
+                /* Always set stop selector back to first stop location */
+                StopSelector = FIREDEP_MID;
+                /* Switch flow control state when 2 are occupied at firedep. 
+                * to nop so first the other (bus) has to drive into station
+                * first! + wait until this one has returned first!
+                */
+                FLOWxCONTROLxState = nop;
+                FLOWxCONTROLxOrder = nop;
                 CREATExTASKxSTATUSxMESSAGE(self->name, 
                                                self->parkState2, 
                                                DRIVE, 

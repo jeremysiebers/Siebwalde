@@ -51,7 +51,7 @@ void main(void)
     INITxFIREDEP();
     /* Kick all servo controllers */
     LATD = 0xFF;
-    order = STATION;
+    FLOWxCONTROLxOrder = STATION;
 
     while (1)
     {
@@ -96,16 +96,16 @@ void main(void)
                     */
                     
                     /* Determine order of departure to prohibit overtaking */
-                    switch(order){
-                        case STATION: if(state == done){
-                            order = FIREDEP;
-                            state = busy;
+                    switch(FLOWxCONTROLxOrder){
+                        case STATION: if(FLOWxCONTROLxState == STATION){
+                            FLOWxCONTROLxOrder = FIREDEP;
+                            FLOWxCONTROLxState = busy;
                         }
                         break;
                         
-                        case FIREDEP: if(state == done){
-                            order = STATION;
-                            state = busy;
+                        case FIREDEP: if(FLOWxCONTROLxState == FIREDEP){
+                            FLOWxCONTROLxOrder = STATION;
+                            FLOWxCONTROLxState = busy;
                         }
                         break;
                             
