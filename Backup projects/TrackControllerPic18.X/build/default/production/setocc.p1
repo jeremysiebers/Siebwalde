@@ -1,6 +1,6 @@
 Version 4.0 HI-TECH Software Intermediate Code
-"35 ./enums.h
-[; ;./enums.h: 35:     {
+"39 ./enums.h
+[; ;./enums.h: 39:     {
 [s S538 `*Vuc 1 `uc 1 ]
 [n S538 . portx_ptr pin_mask ]
 "54 C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h
@@ -920,6 +920,18 @@ Version 4.0 HI-TECH Software Intermediate Code
 [v _tInOutboundStopWaitTime `Cul ~T0 @X0 1 e ]
 [i _tInOutboundStopWaitTime
 * -> -> -> 10 `i `l `ul _tFactorSec
+]
+"34
+[; ;./enums.h: 34:     const uint32_t tMountainTrainWaitTime = (uint32_t)(50 * tFactorSec);
+[v _tMountainTrainWaitTime `Cul ~T0 @X0 1 e ]
+[i _tMountainTrainWaitTime
+* -> -> -> 50 `i `l `ul _tFactorSec
+]
+"36
+[; ;./enums.h: 36:     const uint8_t tMountainRandomShift = 2;
+[v _tMountainRandomShift `Cuc ~T0 @X0 1 e ]
+[i _tMountainRandomShift
+-> -> 2 `i `uc
 ]
 "7 setocc.c
 [; ;setocc.c: 7: void SETxOCC(OCC *self, _Bool value)

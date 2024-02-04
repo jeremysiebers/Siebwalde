@@ -17,31 +17,31 @@ Version 4.0 HI-TECH Software Intermediate Code
 [v _PORTE `Vuc ~T0 @X0 0 e@3972 ]
 "54 ./mainstation.h
 [; ;./mainstation.h: 54: STATION top;
-[c E4954 1 10 20 30 40 50 60 .. ]
-[n E4954 . MAIN_LOOP MAIN_STATION_TOP MAIN_STATION_BOT WALDSEE SIEBWALDE WALDBERG IODATA  ]
-[c E4975 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 .. ]
-[n E4975 . busy connected done command nop INIT INIT2 RUN WAIT IDLE STN_TO_SIEBWALDE SIEBWALDE_TO_STN SIEBWALDE_SWITCHT4T5_OUT SIEBWALDE_SWITCHT4T5_IN SIEBWALDE_SWITCHT4T5 SIEWALDE_SET_NEXT STN_INBOUND STN_OUTBOUND STN_PASSING STN_WAIT STN_IDLE SEQ_IDLE SEQ_WAIT SEQ_SET_OCC SEQ_CHK_TRAIN SEQ_CHK_PASSED SEQ_OUTBOUND_LEFT_STATTION SEQ_INBOUND_BRAKE_TIME SEQ_OUTBOUND_BRAKE_TIME SIG_RED SIG_GREEN INVERT TIME SET_PATH_WAY SET_SIGNAL  ]
-"35 ./enums.h
-[; ;./enums.h: 35:     {
+[c E4956 1 10 20 30 40 50 60 .. ]
+[n E4956 . MAIN_LOOP MAIN_STATION_TOP MAIN_STATION_BOT WALDSEE SIEBWALDE WALDBERG IODATA  ]
+[c E4977 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 .. ]
+[n E4977 . busy connected done command nop INIT INIT2 RUN WAIT IDLE STN_TO_SIEBWALDE SIEBWALDE_TO_STN SIEBWALDE_SWITCHT4T5_OUT SIEBWALDE_SWITCHT4T5_IN SIEBWALDE_SWITCHT4T5 SIEWALDE_SET_NEXT STN_INBOUND STN_OUTBOUND STN_PASSING STN_WAIT STN_IDLE SEQ_IDLE SEQ_WAIT SEQ_SET_OCC SEQ_CHK_TRAIN SEQ_CHK_PASSED SEQ_OUTBOUND_LEFT_STATTION SEQ_INBOUND_BRAKE_TIME SEQ_OUTBOUND_BRAKE_TIME SIG_RED SIG_GREEN INVERT TIME SET_PATH_WAY SET_SIGNAL  ]
+"39 ./enums.h
+[; ;./enums.h: 39:     {
 [s S538 `*Vuc 1 `uc 1 ]
 [n S538 . portx_ptr pin_mask ]
-"41
-[; ;./enums.h: 41:     {
+"45
+[; ;./enums.h: 45:     {
 [s S539 `*Vuc 1 `uc 1 `*Vuc 1 `uc 1 `*Vuc 1 `uc 1 `*Vuc 1 `uc 1 `*Vuc 1 `uc 1 `*Vuc 1 `uc 1 ]
 [n S539 . port1_ptr pin1_mask port2_ptr pin2_mask port3_ptr pin3_mask port4_ptr pin4_mask port5_ptr pin5_mask port6_ptr pin6_mask ]
 "54 ./mainstation.h
 [; ;./mainstation.h: 54: STATION top;
-[c E4963 170 255 81 82 83 84 85 86 87 88 .. ]
-[n E4963 . HEADER ALIVE STNTRACK1 STNTRACK2 STNTRACK3 MTNTRACK1 MTNTRACK2 MTNTRACK7 MTNTRACK8 VOLTAGE_DETECTED  ]
-[c E5012 150 151 152 153 154 155 157 158 159 160 161 162 163 164 .. ]
-[n E5012 . NONE T1 T2 T3 T4 T5 T7 T8 TRACK1 TRACK2 TRACK3 TRACK10 TRACK11 TRACK12  ]
+[c E4965 170 255 81 82 83 84 85 86 87 88 .. ]
+[n E4965 . HEADER ALIVE STNTRACK1 STNTRACK2 STNTRACK3 MTNTRACK1 MTNTRACK2 MTNTRACK7 MTNTRACK8 VOLTAGE_DETECTED  ]
+[c E5014 150 151 152 153 154 155 157 158 159 160 161 162 163 164 .. ]
+[n E5014 . NONE T1 T2 T3 T4 T5 T7 T8 TRACK1 TRACK2 TRACK3 TRACK10 TRACK11 TRACK12  ]
 "17
 [; ;./mainstation.h: 17: {
-[s S541 `E4963 1 `E4975 1 `E4975 1 `E4975 1 `a 1 `E5012 1 `ul 1 `ul 1 `*S538 1 `*S540 1 ]
+[s S541 `E4965 1 `E4977 1 `E4977 1 `E4977 1 `a 1 `E5014 1 `ul 1 `ul 1 `*S538 1 `*S540 1 ]
 [n S541 . stnName stnState stnSequence stnNextState stnOccupied trackNr tCountTime tWaitTime setOccStn getOccStn ]
 "35
 [; ;./mainstation.h: 35: {
-[s S542 `E4954 1 `E4975 1 `*S540 1 `*S540 1 `*S538 1 `*S540 1 `*S540 1 `*S539 1 `uc 1 `uc 1 `*S539 1 `ul 1 `S541 1 `S541 1 `S541 1 ]
+[s S542 `E4956 1 `E4977 1 `*S540 1 `*S540 1 `*S538 1 `*S540 1 `*S540 1 `*S539 1 `uc 1 `uc 1 `*S539 1 `ul 1 `S541 1 `S541 1 `S541 1 ]
 [n S542 . name AppState getFreightLeaveStation getFreightEnterStation setOccBlkIn getOccBlkIn getOccBlkOut setPath prevPath newPath setSignal setSignalTime stnTrack1 stnTrack2 stnTrack3 ]
 "6336 C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h
 [; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 6336: extern volatile unsigned char LATD __attribute__((address(0xF8C)));
@@ -58,11 +58,11 @@ Version 4.0 HI-TECH Software Intermediate Code
 [n S544 . header command data ]
 "24 ./mountaintrack.h
 [; ;./mountaintrack.h: 24: {
-[s S545 `E4963 1 `E4975 1 `E4975 1 `E4975 1 `*S540 1 `a 1 `E5012 1 `ul 1 `ul 1 ]
+[s S545 `E4965 1 `E4977 1 `E4977 1 `E4977 1 `*S540 1 `a 1 `E5014 1 `ul 1 `ul 1 ]
 [n S545 . stnName stnState stnSequence stnNextState getTrainEnterStnTrack stnOccupied trackNr tCountTime tWaitTime ]
 "41
 [; ;./mountaintrack.h: 41: {
-[s S546 `E4954 1 `E4975 1 `E4975 1 `E5012 1 `E4975 1 `E4975 1 `*S540 1 `*S538 1 `*S540 1 `*S539 1 `S545 1 `S545 1 `ul 1 `ul 1 ]
+[s S546 `E4956 1 `E4977 1 `E4977 1 `E5014 1 `E4977 1 `E4977 1 `*S540 1 `*S538 1 `*S540 1 `*S539 1 `S545 1 `S545 1 `ul 1 `ul 1 ]
 [n S546 . name AppState AppNextState LastInboundStn LastState Return getTrainEnterSiebwaldeStn setOccAmpOut getOccAmpOut setPath stnTrack1 stnTrack2 tCountTime tWaitTime ]
 "6224 C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h
 [; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 6224: extern volatile unsigned char LATC __attribute__((address(0xF8B)));
@@ -81,7 +81,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 [v _SETxOCC `(v ~T0 @X0 0 ef2`*S538`a ]
 "18 ./tracksignal.h
 [; ;./tracksignal.h: 18: extern void SETxSIGNAL(STATION *self, TASK_MESSAGES path, TASK_STATE signal);
-[v _SETxSIGNAL `(v ~T0 @X0 0 ef3`*S542`E5012`E4975 ]
+[v _SETxSIGNAL `(v ~T0 @X0 0 ef3`*S542`E5014`E4977 ]
 "71 ./rand.h
 [; ;./rand.h: 71:     extern uint16_t GETxRANDOMxNUMBER(void);
 [v _GETxRANDOMxNUMBER `(us ~T0 @X0 0 ef ]
@@ -1015,6 +1015,18 @@ Version 4.0 HI-TECH Software Intermediate Code
 [i _tInOutboundStopWaitTime
 * -> -> -> 10 `i `l `ul _tFactorSec
 ]
+"34
+[; ;./enums.h: 34:     const uint32_t tMountainTrainWaitTime = (uint32_t)(50 * tFactorSec);
+[v _tMountainTrainWaitTime `Cul ~T0 @X0 1 e ]
+[i _tMountainTrainWaitTime
+* -> -> -> 50 `i `l `ul _tFactorSec
+]
+"36
+[; ;./enums.h: 36:     const uint8_t tMountainRandomShift = 2;
+[v _tMountainRandomShift `Cuc ~T0 @X0 1 e ]
+[i _tMountainRandomShift
+-> -> 2 `i `uc
+]
 "47 ./debounce.h
 [; ;./debounce.h: 47: const uint32_t tIoSignalDebounceTime = (uint32_t)(200);
 [v _tIoSignalDebounceTime `Cul ~T0 @X0 1 e ]
@@ -1782,10 +1794,10 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e ( _INITxPATHWAYxSTATION (2 , &U _top &U _bot ]
 "18
 [; ;mainstation.c: 18:     top.name = MAIN_STATION_TOP;
-[e = . _top 0 . `E4954 1 ]
+[e = . _top 0 . `E4956 1 ]
 "19
 [; ;mainstation.c: 19:     top.AppState = INIT;
-[e = . _top 1 . `E4975 5 ]
+[e = . _top 1 . `E4977 5 ]
 "20
 [; ;mainstation.c: 20:     top.getFreightLeaveStation = &HALL_BLK_13;
 [e = . _top 2 &U _HALL_BLK_13 ]
@@ -1818,16 +1830,16 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e = . _top 11 -> -> -> 0 `i `l `ul ]
 "31
 [; ;mainstation.c: 31:     top.stnTrack1.stnName = STNTRACK1;
-[e = . . _top 12 0 . `E4963 2 ]
+[e = . . _top 12 0 . `E4965 2 ]
 "32
 [; ;mainstation.c: 32:     top.stnTrack1.trackNr = TRACK10;
-[e = . . _top 12 5 . `E5012 11 ]
+[e = . . _top 12 5 . `E5014 11 ]
 "33
 [; ;mainstation.c: 33:     top.stnTrack1.stnState = STN_IDLE;
-[e = . . _top 12 1 . `E4975 20 ]
+[e = . . _top 12 1 . `E4977 20 ]
 "34
 [; ;mainstation.c: 34:     top.stnTrack1.stnSequence = SEQ_IDLE;
-[e = . . _top 12 2 . `E4975 21 ]
+[e = . . _top 12 2 . `E4977 21 ]
 "35
 [; ;mainstation.c: 35:     top.stnTrack1.setOccStn = &OCC_TO_STN_10;
 [e = . . _top 12 8 &U _OCC_TO_STN_10 ]
@@ -1836,16 +1848,16 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e = . . _top 12 9 &U _OCC_FR_STN_10 ]
 "38
 [; ;mainstation.c: 38:     top.stnTrack2.stnName = STNTRACK2;
-[e = . . _top 13 0 . `E4963 3 ]
+[e = . . _top 13 0 . `E4965 3 ]
 "39
 [; ;mainstation.c: 39:     top.stnTrack2.trackNr = TRACK11;
-[e = . . _top 13 5 . `E5012 12 ]
+[e = . . _top 13 5 . `E5014 12 ]
 "40
 [; ;mainstation.c: 40:     top.stnTrack2.stnState = STN_IDLE;
-[e = . . _top 13 1 . `E4975 20 ]
+[e = . . _top 13 1 . `E4977 20 ]
 "41
 [; ;mainstation.c: 41:     top.stnTrack2.stnSequence = SEQ_IDLE;
-[e = . . _top 13 2 . `E4975 21 ]
+[e = . . _top 13 2 . `E4977 21 ]
 "42
 [; ;mainstation.c: 42:     top.stnTrack2.setOccStn = &OCC_TO_STN_11;
 [e = . . _top 13 8 &U _OCC_TO_STN_11 ]
@@ -1854,16 +1866,16 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e = . . _top 13 9 &U _OCC_FR_STN_11 ]
 "45
 [; ;mainstation.c: 45:     top.stnTrack3.stnName = STNTRACK3;
-[e = . . _top 14 0 . `E4963 4 ]
+[e = . . _top 14 0 . `E4965 4 ]
 "46
 [; ;mainstation.c: 46:     top.stnTrack3.trackNr = TRACK12;
-[e = . . _top 14 5 . `E5012 13 ]
+[e = . . _top 14 5 . `E5014 13 ]
 "47
 [; ;mainstation.c: 47:     top.stnTrack3.stnState = STN_IDLE;
-[e = . . _top 14 1 . `E4975 20 ]
+[e = . . _top 14 1 . `E4977 20 ]
 "48
 [; ;mainstation.c: 48:     top.stnTrack3.stnSequence = SEQ_IDLE;
-[e = . . _top 14 2 . `E4975 21 ]
+[e = . . _top 14 2 . `E4977 21 ]
 "49
 [; ;mainstation.c: 49:     top.stnTrack3.setOccStn = &OCC_TO_STN_12;
 [e = . . _top 14 8 &U _OCC_TO_STN_12 ]
@@ -1872,10 +1884,10 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e = . . _top 14 9 &U _OCC_FR_STN_12 ]
 "52
 [; ;mainstation.c: 52:     bot.name = MAIN_STATION_BOT;
-[e = . _bot 0 . `E4954 2 ]
+[e = . _bot 0 . `E4956 2 ]
 "53
 [; ;mainstation.c: 53:     bot.AppState = INIT;
-[e = . _bot 1 . `E4975 5 ]
+[e = . _bot 1 . `E4977 5 ]
 "54
 [; ;mainstation.c: 54:     bot.getFreightLeaveStation = &HALL_BLK_4A;
 [e = . _bot 2 &U _HALL_BLK_4A ]
@@ -1908,16 +1920,16 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e = . _bot 11 -> -> -> 0 `i `l `ul ]
 "65
 [; ;mainstation.c: 65:     bot.stnTrack1.stnName = STNTRACK1;
-[e = . . _bot 12 0 . `E4963 2 ]
+[e = . . _bot 12 0 . `E4965 2 ]
 "66
 [; ;mainstation.c: 66:     bot.stnTrack1.trackNr = TRACK1;
-[e = . . _bot 12 5 . `E5012 8 ]
+[e = . . _bot 12 5 . `E5014 8 ]
 "67
 [; ;mainstation.c: 67:     bot.stnTrack1.stnState = STN_IDLE;
-[e = . . _bot 12 1 . `E4975 20 ]
+[e = . . _bot 12 1 . `E4977 20 ]
 "68
 [; ;mainstation.c: 68:     bot.stnTrack1.stnSequence = SEQ_IDLE;
-[e = . . _bot 12 2 . `E4975 21 ]
+[e = . . _bot 12 2 . `E4977 21 ]
 "69
 [; ;mainstation.c: 69:     bot.stnTrack1.setOccStn = &OCC_TO_STN_1;
 [e = . . _bot 12 8 &U _OCC_TO_STN_1 ]
@@ -1926,16 +1938,16 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e = . . _bot 12 9 &U _OCC_FR_STN_1 ]
 "72
 [; ;mainstation.c: 72:     bot.stnTrack2.stnName = STNTRACK2;
-[e = . . _bot 13 0 . `E4963 3 ]
+[e = . . _bot 13 0 . `E4965 3 ]
 "73
 [; ;mainstation.c: 73:     bot.stnTrack2.trackNr = TRACK2;
-[e = . . _bot 13 5 . `E5012 9 ]
+[e = . . _bot 13 5 . `E5014 9 ]
 "74
 [; ;mainstation.c: 74:     bot.stnTrack2.stnState = STN_IDLE;
-[e = . . _bot 13 1 . `E4975 20 ]
+[e = . . _bot 13 1 . `E4977 20 ]
 "75
 [; ;mainstation.c: 75:     bot.stnTrack2.stnSequence = SEQ_IDLE;
-[e = . . _bot 13 2 . `E4975 21 ]
+[e = . . _bot 13 2 . `E4977 21 ]
 "76
 [; ;mainstation.c: 76:     bot.stnTrack2.setOccStn = &OCC_TO_STN_2;
 [e = . . _bot 13 8 &U _OCC_TO_STN_2 ]
@@ -1944,16 +1956,16 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e = . . _bot 13 9 &U _OCC_FR_STN_2 ]
 "79
 [; ;mainstation.c: 79:     bot.stnTrack3.stnName = STNTRACK3;
-[e = . . _bot 14 0 . `E4963 4 ]
+[e = . . _bot 14 0 . `E4965 4 ]
 "80
 [; ;mainstation.c: 80:     bot.stnTrack3.trackNr = TRACK3;
-[e = . . _bot 14 5 . `E5012 10 ]
+[e = . . _bot 14 5 . `E5014 10 ]
 "81
 [; ;mainstation.c: 81:     bot.stnTrack3.stnState = STN_IDLE;
-[e = . . _bot 14 1 . `E4975 20 ]
+[e = . . _bot 14 1 . `E4977 20 ]
 "82
 [; ;mainstation.c: 82:     bot.stnTrack3.stnSequence = SEQ_IDLE;
-[e = . . _bot 14 2 . `E4975 21 ]
+[e = . . _bot 14 2 . `E4977 21 ]
 "83
 [; ;mainstation.c: 83:     bot.stnTrack3.setOccStn = &OCC_TO_STN_3;
 [e = . . _bot 14 8 &U _OCC_TO_STN_3 ]
@@ -1988,7 +2000,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e :U 551 ]
 "94
 [; ;mainstation.c: 94:             CREATExTASKxSTATUSxMESSAGE(self->name,
-[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> -> 0 `i `uc -> . *U _self 1 `uc -> . `E5012 0 `uc ]
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> -> 0 `i `uc -> . *U _self 1 `uc -> . `E5014 0 `uc ]
 "99
 [; ;mainstation.c: 99:             self->getFreightLeaveStation->value = 0;
 [e = . *U . *U _self 2 6 -> -> 0 `i `a ]
@@ -2009,17 +2021,17 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e ( _SETxOCC (2 , . . *U _self 14 8 -> -> 1 `i `a ]
 "114
 [; ;mainstation.c: 114:             if(self->name == MAIN_STATION_TOP){
-[e $ ! == -> . *U _self 0 `ui -> . `E4954 1 `ui 552  ]
+[e $ ! == -> . *U _self 0 `ui -> . `E4956 1 `ui 552  ]
 {
 "115
 [; ;mainstation.c: 115:                 SETxSIGNAL(self, 10, SIG_RED);
-[e ( _SETxSIGNAL (3 , , _self -> -> 10 `i `E5012 . `E4975 29 ]
+[e ( _SETxSIGNAL (3 , , _self -> -> 10 `i `E5014 . `E4977 29 ]
 "116
 [; ;mainstation.c: 116:                 SETxSIGNAL(self, 11, SIG_RED);
-[e ( _SETxSIGNAL (3 , , _self -> -> 11 `i `E5012 . `E4975 29 ]
+[e ( _SETxSIGNAL (3 , , _self -> -> 11 `i `E5014 . `E4977 29 ]
 "117
 [; ;mainstation.c: 117:                 SETxSIGNAL(self, 12, SIG_RED);
-[e ( _SETxSIGNAL (3 , , _self -> -> 12 `i `E5012 . `E4975 29 ]
+[e ( _SETxSIGNAL (3 , , _self -> -> 12 `i `E5014 . `E4977 29 ]
 "118
 [; ;mainstation.c: 118:             }
 }
@@ -2027,17 +2039,17 @@ Version 4.0 HI-TECH Software Intermediate Code
 "119
 [; ;mainstation.c: 119:             else if(self->name == MAIN_STATION_BOT){
 [e :U 552 ]
-[e $ ! == -> . *U _self 0 `ui -> . `E4954 2 `ui 554  ]
+[e $ ! == -> . *U _self 0 `ui -> . `E4956 2 `ui 554  ]
 {
 "120
 [; ;mainstation.c: 120:                 SETxSIGNAL(self, 1, SIG_RED);
-[e ( _SETxSIGNAL (3 , , _self -> -> 1 `i `E5012 . `E4975 29 ]
+[e ( _SETxSIGNAL (3 , , _self -> -> 1 `i `E5014 . `E4977 29 ]
 "121
 [; ;mainstation.c: 121:                 SETxSIGNAL(self, 2, SIG_RED);
-[e ( _SETxSIGNAL (3 , , _self -> -> 2 `i `E5012 . `E4975 29 ]
+[e ( _SETxSIGNAL (3 , , _self -> -> 2 `i `E5014 . `E4977 29 ]
 "122
 [; ;mainstation.c: 122:                 SETxSIGNAL(self, 3, SIG_RED);
-[e ( _SETxSIGNAL (3 , , _self -> -> 3 `i `E5012 . `E4975 29 ]
+[e ( _SETxSIGNAL (3 , , _self -> -> 3 `i `E5014 . `E4977 29 ]
 "123
 [; ;mainstation.c: 123:             }
 }
@@ -2052,7 +2064,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e = . . *U _self 12 4 -> -> 1 `i `a ]
 "131
 [; ;mainstation.c: 131:                 self->stnTrack1.stnState = STN_WAIT;
-[e = . . *U _self 12 1 . `E4975 19 ]
+[e = . . *U _self 12 1 . `E4977 19 ]
 "132
 [; ;mainstation.c: 132:                 self->stnTrack1.tWaitTime = tTrainWaitTime + (GETxRANDOMxNUMBER() << tRandomShift);
 [e = . . *U _self 12 7 + _tTrainWaitTime -> << -> ( _GETxRANDOMxNUMBER ..  `ui -> _tRandomShift `i `ul ]
@@ -2069,14 +2081,14 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e = . . *U _self 12 4 -> -> 0 `i `a ]
 "137
 [; ;mainstation.c: 137:                 self->stnTrack1.stnState = STN_IDLE;
-[e = . . *U _self 12 1 . `E4975 20 ]
+[e = . . *U _self 12 1 . `E4977 20 ]
 "138
 [; ;mainstation.c: 138:             }
 }
 [e :U 556 ]
 "139
 [; ;mainstation.c: 139:             CREATExTASKxSTATUSxMESSAGE(self->name,
-[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 12 0 `uc -> . . *U _self 12 1 `uc -> . `E5012 0 `uc ]
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 12 0 `uc -> . . *U _self 12 1 `uc -> . `E5014 0 `uc ]
 "145
 [; ;mainstation.c: 145:             if(self->stnTrack2.getOccStn->value){
 [e $ ! != -> . *U . . *U _self 13 9 6 `i -> 0 `i 557  ]
@@ -2086,7 +2098,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e = . . *U _self 13 4 -> -> 1 `i `a ]
 "150
 [; ;mainstation.c: 150:                 self->stnTrack2.stnState = STN_WAIT;
-[e = . . *U _self 13 1 . `E4975 19 ]
+[e = . . *U _self 13 1 . `E4977 19 ]
 "151
 [; ;mainstation.c: 151:                 self->stnTrack2.tWaitTime = tTrainWaitTime + (GETxRANDOMxNUMBER() << tRandomShift);
 [e = . . *U _self 13 7 + _tTrainWaitTime -> << -> ( _GETxRANDOMxNUMBER ..  `ui -> _tRandomShift `i `ul ]
@@ -2103,14 +2115,14 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e = . . *U _self 13 4 -> -> 0 `i `a ]
 "155
 [; ;mainstation.c: 155:                 self->stnTrack2.stnState = STN_IDLE;
-[e = . . *U _self 13 1 . `E4975 20 ]
+[e = . . *U _self 13 1 . `E4977 20 ]
 "156
 [; ;mainstation.c: 156:             }
 }
 [e :U 558 ]
 "157
 [; ;mainstation.c: 157:             CREATExTASKxSTATUSxMESSAGE(self->name,
-[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 13 0 `uc -> . . *U _self 13 1 `uc -> . `E5012 0 `uc ]
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 13 0 `uc -> . . *U _self 13 1 `uc -> . `E5014 0 `uc ]
 "163
 [; ;mainstation.c: 163:             if(self->stnTrack3.getOccStn->value){
 [e $ ! != -> . *U . . *U _self 14 9 6 `i -> 0 `i 559  ]
@@ -2120,7 +2132,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e = . . *U _self 14 4 -> -> 1 `i `a ]
 "167
 [; ;mainstation.c: 167:                 self->stnTrack3.stnState = STN_OUTBOUND;
-[e = . . *U _self 14 1 . `E4975 17 ]
+[e = . . *U _self 14 1 . `E4977 17 ]
 "168
 [; ;mainstation.c: 168:             }
 }
@@ -2136,7 +2148,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 {
 "183
 [; ;mainstation.c: 183:                     self->stnTrack3.stnState = STN_INBOUND;
-[e = . . *U _self 14 1 . `E4975 16 ]
+[e = . . *U _self 14 1 . `E4977 16 ]
 "184
 [; ;mainstation.c: 184:                 }
 }
@@ -2147,7 +2159,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 {
 "190
 [; ;mainstation.c: 190:                     self->stnTrack3.stnState = STN_PASSING;
-[e = . . *U _self 14 1 . `E4975 18 ]
+[e = . . *U _self 14 1 . `E4977 18 ]
 "191
 [; ;mainstation.c: 191:                 }
 }
@@ -2165,7 +2177,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e = . . *U _self 14 4 -> -> 0 `i `a ]
 "195
 [; ;mainstation.c: 195:                 self->stnTrack3.stnState = STN_IDLE;
-[e = . . *U _self 14 1 . `E4975 20 ]
+[e = . . *U _self 14 1 . `E4977 20 ]
 "196
 [; ;mainstation.c: 196:             }
 }
@@ -2173,13 +2185,13 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e :U 560 ]
 "197
 [; ;mainstation.c: 197:             CREATExTASKxSTATUSxMESSAGE(self->name,
-[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 14 0 `uc -> . . *U _self 14 1 `uc -> . `E5012 0 `uc ]
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 14 0 `uc -> . . *U _self 14 1 `uc -> . `E5014 0 `uc ]
 "203
 [; ;mainstation.c: 203:             self->AppState = RUN;
-[e = . *U _self 1 . `E4975 7 ]
+[e = . *U _self 1 . `E4977 7 ]
 "204
 [; ;mainstation.c: 204:             CREATExTASKxSTATUSxMESSAGE(self->name,
-[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> -> 0 `i `uc -> . *U _self 1 `uc -> . `E5012 0 `uc ]
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> -> 0 `i `uc -> . *U _self 1 `uc -> . `E5014 0 `uc ]
 "208
 [; ;mainstation.c: 208:             break;
 [e $U 549  ]
@@ -2188,7 +2200,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e :U 565 ]
 "220
 [; ;mainstation.c: 220:             if(1 == self->getOccBlkIn->value &&
-[e $ ! && && && && && && == -> 1 `i -> . *U . *U _self 5 6 `i != -> . `E4975 16 `ui -> . . *U _self 12 1 `ui != -> . `E4975 16 `ui -> . . *U _self 13 1 `ui != -> . `E4975 16 `ui -> . . *U _self 14 1 `ui != -> . `E4975 18 `ui -> . . *U _self 12 1 `ui != -> . `E4975 18 `ui -> . . *U _self 13 1 `ui != -> . `E4975 18 `ui -> . . *U _self 14 1 `ui 566  ]
+[e $ ! && && && && && && == -> 1 `i -> . *U . *U _self 5 6 `i != -> . `E4977 16 `ui -> . . *U _self 12 1 `ui != -> . `E4977 16 `ui -> . . *U _self 13 1 `ui != -> . `E4977 16 `ui -> . . *U _self 14 1 `ui != -> . `E4977 18 `ui -> . . *U _self 12 1 `ui != -> . `E4977 18 `ui -> . . *U _self 13 1 `ui != -> . `E4977 18 `ui -> . . *U _self 14 1 `ui 566  ]
 "226
 [; ;mainstation.c: 226:                     STN_PASSING != self->stnTrack3.stnState){
 {
@@ -2198,16 +2210,16 @@ Version 4.0 HI-TECH Software Intermediate Code
 {
 "230
 [; ;mainstation.c: 230:                     if(0 == self->stnTrack1.stnOccupied &&
-[e $ ! && && && && == -> 0 `i -> . . *U _self 12 4 `i != -> . `E4975 16 `ui -> . . *U _self 13 1 `ui != -> . `E4975 16 `ui -> . . *U _self 14 1 `ui != -> . `E4975 18 `ui -> . . *U _self 13 1 `ui != -> . `E4975 18 `ui -> . . *U _self 14 1 `ui 568  ]
+[e $ ! && && && && == -> 0 `i -> . . *U _self 12 4 `i != -> . `E4977 16 `ui -> . . *U _self 13 1 `ui != -> . `E4977 16 `ui -> . . *U _self 14 1 `ui != -> . `E4977 18 `ui -> . . *U _self 13 1 `ui != -> . `E4977 18 `ui -> . . *U _self 14 1 `ui 568  ]
 "235
 [; ;mainstation.c: 235:                             ){
 {
 "236
 [; ;mainstation.c: 236:                         self->stnTrack1.stnState = STN_INBOUND;
-[e = . . *U _self 12 1 . `E4975 16 ]
+[e = . . *U _self 12 1 . `E4977 16 ]
 "237
 [; ;mainstation.c: 237:                         CREATExTASKxSTATUSxMESSAGE(self->name,
-[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 12 0 `uc -> . . *U _self 12 1 `uc -> . `E5012 0 `uc ]
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 12 0 `uc -> . . *U _self 12 1 `uc -> . `E5014 0 `uc ]
 "241
 [; ;mainstation.c: 241:                     }
 }
@@ -2215,16 +2227,16 @@ Version 4.0 HI-TECH Software Intermediate Code
 "243
 [; ;mainstation.c: 243:                     else if(0 == self->stnTrack2.stnOccupied &&
 [e :U 568 ]
-[e $ ! && && && && == -> 0 `i -> . . *U _self 13 4 `i != -> . `E4975 16 `ui -> . . *U _self 12 1 `ui != -> . `E4975 16 `ui -> . . *U _self 14 1 `ui != -> . `E4975 18 `ui -> . . *U _self 12 1 `ui != -> . `E4975 18 `ui -> . . *U _self 14 1 `ui 570  ]
+[e $ ! && && && && == -> 0 `i -> . . *U _self 13 4 `i != -> . `E4977 16 `ui -> . . *U _self 12 1 `ui != -> . `E4977 16 `ui -> . . *U _self 14 1 `ui != -> . `E4977 18 `ui -> . . *U _self 12 1 `ui != -> . `E4977 18 `ui -> . . *U _self 14 1 `ui 570  ]
 "248
 [; ;mainstation.c: 248:                             ){
 {
 "249
 [; ;mainstation.c: 249:                         self->stnTrack2.stnState = STN_INBOUND;
-[e = . . *U _self 13 1 . `E4975 16 ]
+[e = . . *U _self 13 1 . `E4977 16 ]
 "250
 [; ;mainstation.c: 250:                         CREATExTASKxSTATUSxMESSAGE(self->name,
-[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 13 0 `uc -> . . *U _self 13 1 `uc -> . `E5012 0 `uc ]
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 13 0 `uc -> . . *U _self 13 1 `uc -> . `E5014 0 `uc ]
 "254
 [; ;mainstation.c: 254:                     }
 }
@@ -2237,13 +2249,13 @@ Version 4.0 HI-TECH Software Intermediate Code
 "271
 [; ;mainstation.c: 271:                 else if(0 == self->getOccBlkOut->value &&
 [e :U 567 ]
-[e $ ! && && && && && && && == -> 0 `i -> . *U . *U _self 6 6 `i == -> 0 `i -> . . *U _self 14 4 `i != -> . `E4975 16 `ui -> . . *U _self 12 1 `ui != -> . `E4975 16 `ui -> . . *U _self 13 1 `ui != -> . `E4975 18 `ui -> . . *U _self 12 1 `ui != -> . `E4975 18 `ui -> . . *U _self 13 1 `ui != -> . `E4975 17 `ui -> . . *U _self 12 1 `ui != -> . `E4975 17 `ui -> . . *U _self 13 1 `ui 572  ]
+[e $ ! && && && && && && && == -> 0 `i -> . *U . *U _self 6 6 `i == -> 0 `i -> . . *U _self 14 4 `i != -> . `E4977 16 `ui -> . . *U _self 12 1 `ui != -> . `E4977 16 `ui -> . . *U _self 13 1 `ui != -> . `E4977 18 `ui -> . . *U _self 12 1 `ui != -> . `E4977 18 `ui -> . . *U _self 13 1 `ui != -> . `E4977 17 `ui -> . . *U _self 12 1 `ui != -> . `E4977 17 `ui -> . . *U _self 13 1 `ui 572  ]
 "279
 [; ;mainstation.c: 279:                         ){
 {
 "280
 [; ;mainstation.c: 280:                     self->stnTrack3.stnState = STN_PASSING;
-[e = . . *U _self 14 1 . `E4975 18 ]
+[e = . . *U _self 14 1 . `E4977 18 ]
 "281
 [; ;mainstation.c: 281:                     if(1 == self->getFreightEnterStation->value){
 [e $ ! == -> 1 `i -> . *U . *U _self 3 6 `i 573  ]
@@ -2257,7 +2269,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e :U 573 ]
 "284
 [; ;mainstation.c: 284:                     CREATExTASKxSTATUSxMESSAGE(self->name,
-[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 14 0 `uc -> . . *U _self 14 1 `uc -> . `E5012 0 `uc ]
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 14 0 `uc -> . . *U _self 14 1 `uc -> . `E5014 0 `uc ]
 "288
 [; ;mainstation.c: 288:                 }
 }
@@ -2269,16 +2281,16 @@ Version 4.0 HI-TECH Software Intermediate Code
 {
 "294
 [; ;mainstation.c: 294:                     if(0 == self->stnTrack3.stnOccupied &&
-[e $ ! && && && && == -> 0 `i -> . . *U _self 14 4 `i != -> . `E4975 16 `ui -> . . *U _self 12 1 `ui != -> . `E4975 16 `ui -> . . *U _self 13 1 `ui != -> . `E4975 18 `ui -> . . *U _self 12 1 `ui != -> . `E4975 18 `ui -> . . *U _self 13 1 `ui 576  ]
+[e $ ! && && && && == -> 0 `i -> . . *U _self 14 4 `i != -> . `E4977 16 `ui -> . . *U _self 12 1 `ui != -> . `E4977 16 `ui -> . . *U _self 13 1 `ui != -> . `E4977 18 `ui -> . . *U _self 12 1 `ui != -> . `E4977 18 `ui -> . . *U _self 13 1 `ui 576  ]
 "299
 [; ;mainstation.c: 299:                             ){
 {
 "300
 [; ;mainstation.c: 300:                         self->stnTrack3.stnState = STN_INBOUND;
-[e = . . *U _self 14 1 . `E4975 16 ]
+[e = . . *U _self 14 1 . `E4977 16 ]
 "301
 [; ;mainstation.c: 301:                         CREATExTASKxSTATUSxMESSAGE(self->name,
-[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 14 0 `uc -> . . *U _self 14 1 `uc -> . `E5012 0 `uc ]
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 14 0 `uc -> . . *U _self 14 1 `uc -> . `E5014 0 `uc ]
 "308
 [; ;mainstation.c: 308:                     }
 }
@@ -2286,13 +2298,13 @@ Version 4.0 HI-TECH Software Intermediate Code
 "323
 [; ;mainstation.c: 323:                     else if(0 == self->stnTrack2.stnOccupied &&
 [e :U 576 ]
-[e $ ! && && && && == -> 0 `i -> . . *U _self 13 4 `i != -> . `E4975 16 `ui -> . . *U _self 12 1 `ui != -> . `E4975 16 `ui -> . . *U _self 14 1 `ui != -> . `E4975 18 `ui -> . . *U _self 12 1 `ui != -> . `E4975 18 `ui -> . . *U _self 14 1 `ui 578  ]
+[e $ ! && && && && == -> 0 `i -> . . *U _self 13 4 `i != -> . `E4977 16 `ui -> . . *U _self 12 1 `ui != -> . `E4977 16 `ui -> . . *U _self 14 1 `ui != -> . `E4977 18 `ui -> . . *U _self 12 1 `ui != -> . `E4977 18 `ui -> . . *U _self 14 1 `ui 578  ]
 "328
 [; ;mainstation.c: 328:                             ){
 {
 "329
 [; ;mainstation.c: 329:                         self->stnTrack2.stnState = STN_INBOUND;
-[e = . . *U _self 13 1 . `E4975 16 ]
+[e = . . *U _self 13 1 . `E4977 16 ]
 "330
 [; ;mainstation.c: 330:                     }
 }
@@ -2325,7 +2337,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e :U 579 ]
 "342
 [; ;mainstation.c: 342:             self->AppState = INIT;
-[e = . *U _self 1 . `E4975 5 ]
+[e = . *U _self 1 . `E4977 5 ]
 "343
 [; ;mainstation.c: 343:             break;
 [e $U 549  ]
@@ -2334,8 +2346,8 @@ Version 4.0 HI-TECH Software Intermediate Code
 }
 [e $U 549  ]
 [e :U 550 ]
-[e [\ -> . *U _self 1 `ui , $ -> . `E4975 5 `ui 551
- , $ -> . `E4975 7 `ui 565
+[e [\ -> . *U _self 1 `ui , $ -> . `E4977 5 `ui 551
+ , $ -> . `E4977 7 `ui 565
  579 ]
 [e :U 549 ]
 "345
@@ -2361,7 +2373,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e = _millis ( _GETxMILLIS ..  ]
 "357
 [; ;mainstation.c: 357:     if(STN_WAIT == self->stnTrack1.stnState){
-[e $ ! == -> . `E4975 19 `ui -> . . *U _self 12 1 `ui 581  ]
+[e $ ! == -> . `E4977 19 `ui -> . . *U _self 12 1 `ui 581  ]
 {
 "358
 [; ;mainstation.c: 358:         if((millis - self->stnTrack1.tCountTime) > self->stnTrack1.tWaitTime){
@@ -2369,13 +2381,13 @@ Version 4.0 HI-TECH Software Intermediate Code
 {
 "359
 [; ;mainstation.c: 359:             if(STN_OUTBOUND != self->stnTrack2.stnState &&
-[e $ ! && && && != -> . `E4975 17 `ui -> . . *U _self 13 1 `ui != -> . `E4975 17 `ui -> . . *U _self 14 1 `ui != -> . `E4975 18 `ui -> . . *U _self 13 1 `ui != -> . `E4975 18 `ui -> . . *U _self 14 1 `ui 583  ]
+[e $ ! && && && != -> . `E4977 17 `ui -> . . *U _self 13 1 `ui != -> . `E4977 17 `ui -> . . *U _self 14 1 `ui != -> . `E4977 18 `ui -> . . *U _self 13 1 `ui != -> . `E4977 18 `ui -> . . *U _self 14 1 `ui 583  ]
 "362
 [; ;mainstation.c: 362:                     STN_PASSING != self->stnTrack3.stnState){
 {
 "363
 [; ;mainstation.c: 363:                 self->stnTrack1.stnState = STN_OUTBOUND;
-[e = . . *U _self 12 1 . `E4975 17 ]
+[e = . . *U _self 12 1 . `E4977 17 ]
 "364
 [; ;mainstation.c: 364:             }
 }
@@ -2392,14 +2404,14 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e = . . *U _self 12 7 -> << -> ( _GETxRANDOMxNUMBER ..  `ui -> _tRandomShift `i `ul ]
 "368
 [; ;mainstation.c: 368:                 self->stnTrack1.stnState = STN_WAIT;
-[e = . . *U _self 12 1 . `E4975 19 ]
+[e = . . *U _self 12 1 . `E4977 19 ]
 "369
 [; ;mainstation.c: 369:             }
 }
 [e :U 584 ]
 "370
 [; ;mainstation.c: 370:             CREATExTASKxSTATUSxMESSAGE(self->name,
-[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 12 0 `uc -> . . *U _self 12 1 `uc -> . `E5012 0 `uc ]
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 12 0 `uc -> . . *U _self 12 1 `uc -> . `E5014 0 `uc ]
 "374
 [; ;mainstation.c: 374:         }
 }
@@ -2410,7 +2422,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e :U 581 ]
 "376
 [; ;mainstation.c: 376:     if(STN_WAIT == self->stnTrack2.stnState){
-[e $ ! == -> . `E4975 19 `ui -> . . *U _self 13 1 `ui 585  ]
+[e $ ! == -> . `E4977 19 `ui -> . . *U _self 13 1 `ui 585  ]
 {
 "377
 [; ;mainstation.c: 377:         if((millis - self->stnTrack2.tCountTime) > self->stnTrack2.tWaitTime){
@@ -2418,13 +2430,13 @@ Version 4.0 HI-TECH Software Intermediate Code
 {
 "378
 [; ;mainstation.c: 378:             if(STN_OUTBOUND != self->stnTrack1.stnState &&
-[e $ ! && && && != -> . `E4975 17 `ui -> . . *U _self 12 1 `ui != -> . `E4975 17 `ui -> . . *U _self 14 1 `ui != -> . `E4975 18 `ui -> . . *U _self 12 1 `ui != -> . `E4975 18 `ui -> . . *U _self 14 1 `ui 587  ]
+[e $ ! && && && != -> . `E4977 17 `ui -> . . *U _self 12 1 `ui != -> . `E4977 17 `ui -> . . *U _self 14 1 `ui != -> . `E4977 18 `ui -> . . *U _self 12 1 `ui != -> . `E4977 18 `ui -> . . *U _self 14 1 `ui 587  ]
 "381
 [; ;mainstation.c: 381:                     STN_PASSING != self->stnTrack3.stnState){
 {
 "382
 [; ;mainstation.c: 382:                 self->stnTrack2.stnState = STN_OUTBOUND;
-[e = . . *U _self 13 1 . `E4975 17 ]
+[e = . . *U _self 13 1 . `E4977 17 ]
 "383
 [; ;mainstation.c: 383:             }
 }
@@ -2441,14 +2453,14 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e = . . *U _self 13 7 -> << -> ( _GETxRANDOMxNUMBER ..  `ui -> _tRandomShift `i `ul ]
 "387
 [; ;mainstation.c: 387:                 self->stnTrack2.stnState = STN_WAIT;
-[e = . . *U _self 13 1 . `E4975 19 ]
+[e = . . *U _self 13 1 . `E4977 19 ]
 "388
 [; ;mainstation.c: 388:             }
 }
 [e :U 588 ]
 "389
 [; ;mainstation.c: 389:             CREATExTASKxSTATUSxMESSAGE(self->name,
-[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 13 0 `uc -> . . *U _self 13 1 `uc -> . `E5012 0 `uc ]
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 13 0 `uc -> . . *U _self 13 1 `uc -> . `E5014 0 `uc ]
 "393
 [; ;mainstation.c: 393:         }
 }
@@ -2459,7 +2471,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e :U 585 ]
 "395
 [; ;mainstation.c: 395:     if(STN_WAIT == self->stnTrack3.stnState){
-[e $ ! == -> . `E4975 19 `ui -> . . *U _self 14 1 `ui 589  ]
+[e $ ! == -> . `E4977 19 `ui -> . . *U _self 14 1 `ui 589  ]
 {
 "396
 [; ;mainstation.c: 396:         if((millis - self->stnTrack3.tCountTime) > self->stnTrack3.tWaitTime){
@@ -2467,13 +2479,13 @@ Version 4.0 HI-TECH Software Intermediate Code
 {
 "397
 [; ;mainstation.c: 397:             if(STN_OUTBOUND != self->stnTrack1.stnState &&
-[e $ ! && && && != -> . `E4975 17 `ui -> . . *U _self 12 1 `ui != -> . `E4975 17 `ui -> . . *U _self 13 1 `ui != -> . `E4975 18 `ui -> . . *U _self 12 1 `ui != -> . `E4975 18 `ui -> . . *U _self 13 1 `ui 591  ]
+[e $ ! && && && != -> . `E4977 17 `ui -> . . *U _self 12 1 `ui != -> . `E4977 17 `ui -> . . *U _self 13 1 `ui != -> . `E4977 18 `ui -> . . *U _self 12 1 `ui != -> . `E4977 18 `ui -> . . *U _self 13 1 `ui 591  ]
 "400
 [; ;mainstation.c: 400:                     STN_PASSING != self->stnTrack2.stnState){
 {
 "401
 [; ;mainstation.c: 401:                 self->stnTrack3.stnState = STN_OUTBOUND;
-[e = . . *U _self 14 1 . `E4975 17 ]
+[e = . . *U _self 14 1 . `E4977 17 ]
 "402
 [; ;mainstation.c: 402:             }
 }
@@ -2490,14 +2502,14 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e = . . *U _self 14 7 _tFreightTrainWaitTime ]
 "406
 [; ;mainstation.c: 406:                 self->stnTrack3.stnState = STN_WAIT;
-[e = . . *U _self 14 1 . `E4975 19 ]
+[e = . . *U _self 14 1 . `E4977 19 ]
 "407
 [; ;mainstation.c: 407:             }
 }
 [e :U 592 ]
 "408
 [; ;mainstation.c: 408:             CREATExTASKxSTATUSxMESSAGE(self->name,
-[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 14 0 `uc -> . . *U _self 14 1 `uc -> . `E5012 0 `uc ]
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 14 0 `uc -> . . *U _self 14 1 `uc -> . `E5014 0 `uc ]
 "412
 [; ;mainstation.c: 412:         }
 }

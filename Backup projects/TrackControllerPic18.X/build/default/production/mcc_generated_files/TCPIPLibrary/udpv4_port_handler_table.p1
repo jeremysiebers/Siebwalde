@@ -59,6 +59,18 @@ Version 4.0 HI-TECH Software Intermediate Code
 [i _tInOutboundStopWaitTime
 * -> -> -> 10 `i `l `ul _tFactorSec
 ]
+"34
+[; ;./enums.h: 34:     const uint32_t tMountainTrainWaitTime = (uint32_t)(50 * tFactorSec);
+[v _tMountainTrainWaitTime `Cul ~T0 @X0 1 e ]
+[i _tMountainTrainWaitTime
+* -> -> -> 50 `i `l `ul _tFactorSec
+]
+"36
+[; ;./enums.h: 36:     const uint8_t tMountainRandomShift = 2;
+[v _tMountainRandomShift `Cuc ~T0 @X0 1 e ]
+[i _tMountainRandomShift
+-> -> 2 `i `uc
+]
 "36 mcc_generated_files/TCPIPLibrary/../../communication.h
 [; ;mcc_generated_files/TCPIPLibrary/../../communication.h: 36:     const uint8_t udpTrans_t_length = (sizeof(udpTrans_t) / sizeof(uint8_t));
 [v _udpTrans_t_length `Cuc ~T0 @X0 1 e ]

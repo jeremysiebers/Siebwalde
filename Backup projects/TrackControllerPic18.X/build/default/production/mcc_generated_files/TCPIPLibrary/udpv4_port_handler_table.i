@@ -653,6 +653,10 @@ udp_table_iterator_t udp_table_nextEntry(udp_table_iterator_t i);
 
     const uint32_t tInOutboundStopWaitTime = (uint32_t)(10 * tFactorSec);
 
+    const uint32_t tMountainTrainWaitTime = (uint32_t)(50 * tFactorSec);
+
+    const uint8_t tMountainRandomShift = 2;
+
     typedef struct
     {
         volatile unsigned char *portx_ptr;

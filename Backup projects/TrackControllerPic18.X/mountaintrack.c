@@ -43,20 +43,6 @@ void INITxMOUNTAINxSTATION(void)
     waldsee.stnTrack2.stnSequence           = SEQ_IDLE;
     waldsee.stnTrack2.getTrainEnterStnTrack = &HALL_BLK_T2;
     /**************************************************************************/
-//    siebwalde.name                          = SIEBWALDE;
-//    siebwalde.AppState                      = INIT;
-//    siebwalde.hndlState                     = HNDL_IDLE;
-//    siebwalde.getTrainEnterStationTrack1    = &HALL_BLK_T4;
-//    siebwalde.getTrainEnterStationTrack2    = &HALL_BLK_T5;    
-//
-//    siebwalde.stnTrack1.trackNr          = T4;
-//    siebwalde.stnTrack1.stnState         = STN_IDLE;
-//    siebwalde.stnTrack1.stnSequence      = SEQ_IDLE;
-//
-//    siebwalde.stnTrack2.trackNr          = T5;
-//    siebwalde.stnTrack2.stnState         = STN_IDLE;    
-//    siebwalde.stnTrack2.stnSequence      = SEQ_IDLE;
-    /**************************************************************************/
     waldberg.name                           = WALDBERG;
     waldberg.AppState                       = INIT;
     waldberg.LastState                      = STN_IDLE;
@@ -181,7 +167,7 @@ void UPDATExMOUNTAINxSTATION(MNTSTATION *self)
                  */
                 self->AppState     = WAIT;
                 self->tCountTime   = GETxMILLIS();
-                self->tWaitTime    = tTrainWaitTime + (GETxRANDOMxNUMBER() << tRandomShift);
+                self->tWaitTime    = tMountainTrainWaitTime + (GETxRANDOMxNUMBER() << tMountainRandomShift);
                 CREATExTASKxSTATUSxMESSAGE(self->name,
                     self->AppNextState, 
                     TIME, 
@@ -338,7 +324,7 @@ void UPDATExMOUNTAINxTRAINxWAIT(MNTSTATION *self)
             }
             else{
                 self->stnTrack1.tCountTime = millis;
-                self->stnTrack1.tWaitTime = (GETxRANDOMxNUMBER() << tRandomShift);
+                self->stnTrack1.tWaitTime = (GETxRANDOMxNUMBER() <<  );
                 self->stnTrack1.stnState = STN_WAIT;
                 CREATExTASKxSTATUSxMESSAGE(self->name,
                     self->stnTrack1.stnName, 
@@ -359,7 +345,7 @@ void UPDATExMOUNTAINxTRAINxWAIT(MNTSTATION *self)
             }
             else{
                 self->stnTrack2.tCountTime = millis;
-                self->stnTrack2.tWaitTime = (GETxRANDOMxNUMBER() << tRandomShift);
+                self->stnTrack2.tWaitTime = (GETxRANDOMxNUMBER() << tMountainRandomShift);
                 self->stnTrack2.stnState = STN_WAIT;
                 CREATExTASKxSTATUSxMESSAGE(self->name,
                     self->stnTrack2.stnName, 

@@ -8841,9 +8841,11 @@ __attribute__((__unsupported__("The " "Write_b_eep" " routine is no longer suppo
 unsigned char __t1rd16on(void);
 unsigned char __t3rd16on(void);
 # 33 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\xc.h" 2 3
-# 2 "mountaintrack.c" 2
+# 1 "mountaintrack.c" 2
+
 # 1 "C:\\Program Files\\Microchip\\xc8\\v2.46\\pic\\include\\c99\\stdbool.h" 1 3
-# 3 "mountaintrack.c" 2
+# 2 "mountaintrack.c" 2
+
 # 1 "./enums.h" 1
 # 18 "./enums.h"
     const uint32_t tFactorSec = 1000;
@@ -8861,6 +8863,10 @@ unsigned char __t3rd16on(void);
     const uint32_t tOutboundWaitTime = (uint32_t)(10 * tFactorSec);
 
     const uint32_t tInOutboundStopWaitTime = (uint32_t)(10 * tFactorSec);
+
+    const uint32_t tMountainTrainWaitTime = (uint32_t)(50 * tFactorSec);
+
+    const uint8_t tMountainRandomShift = 2;
 
     typedef struct
     {
@@ -8968,12 +8974,14 @@ unsigned char __t3rd16on(void);
        TRACK12 = 164,
 
     } TASK_MESSAGES;
-# 4 "mountaintrack.c" 2
+# 3 "mountaintrack.c" 2
+
 # 1 "./rand.h" 1
 # 70 "./rand.h"
     extern void INITxRANDxNUMBER(void);
     extern uint16_t GETxRANDOMxNUMBER(void);
-# 5 "mountaintrack.c" 2
+# 4 "mountaintrack.c" 2
+
 # 1 "./mountaintrack.h" 1
 # 17 "./mountaintrack.h"
 # 1 "./debounce.h" 1
@@ -9086,7 +9094,8 @@ REL REL_T5 = {&LATD, 0x20};
 extern void INITxMOUNTAINxSTATION(void);
 extern void UPDATExMOUNTAINxSTATION(MNTSTATION *self);
 extern void UPDATExMOUNTAINxTRAINxWAIT(MNTSTATION *self);
-# 6 "mountaintrack.c" 2
+# 5 "mountaintrack.c" 2
+
 # 1 "./pathway.h" 1
 # 35 "./pathway.h"
 # 1 "./main.h" 1
@@ -9164,11 +9173,13 @@ extern void SETxSTATIONxPATHWAY(STATION *self, TASK_MESSAGES path, TASK_STATE di
 
 void INITxPATHWAYxMNTSTATION(MNTSTATION *refwaldsee, MNTSTATION *refwaldberg);
 void SETxMNTSTATIONxPATHWAY(MNTSTATION *self, TASK_MESSAGES path);
-# 7 "mountaintrack.c" 2
+# 6 "mountaintrack.c" 2
+
 # 1 "./setocc.h" 1
 # 15 "./setocc.h"
     extern void SETxOCC(OCC *self, _Bool value);
-# 8 "mountaintrack.c" 2
+# 7 "mountaintrack.c" 2
+
 # 1 "./milisecond_counter.h" 1
 # 15 "./milisecond_counter.h"
     extern void MILLIESxINIT(void);
@@ -9184,15 +9195,18 @@ void SETxMNTSTATIONxPATHWAY(MNTSTATION *self, TASK_MESSAGES path);
 
     void SETxMILLISECONDxUPDATExHANDLER3(void (* InterruptHandler)(void));
     extern void (*Millisecond_Update_Handler3)(void);
-# 9 "mountaintrack.c" 2
+# 8 "mountaintrack.c" 2
+
 # 1 "./mountainStationOutbound.h" 1
 # 19 "./mountainStationOutbound.h"
     extern int8_t MOUNTAINxSTATIONxOUTBOUND(MNTSTATION *self);
-# 10 "mountaintrack.c" 2
+# 9 "mountaintrack.c" 2
+
 # 1 "./mountainStationInbound.h" 1
 # 19 "./mountainStationInbound.h"
     extern int8_t MOUNTAINxSTATIONxINBOUND(MNTSTATION *self);
-# 11 "mountaintrack.c" 2
+# 10 "mountaintrack.c" 2
+
 # 1 "./communication.h" 1
 # 21 "./communication.h"
     typedef struct
@@ -9248,7 +9262,8 @@ void SETxMNTSTATIONxPATHWAY(MNTSTATION *self, TASK_MESSAGES path);
                             uint8_t task_command,
                             uint8_t task_state,
                             uint8_t *data);
-# 12 "mountaintrack.c" 2
+# 11 "mountaintrack.c" 2
+
 
 static REL *setT4ToAmpT6;
 static REL *setT5ToAmpT3;
@@ -9282,7 +9297,7 @@ void INITxMOUNTAINxSTATION(void)
     waldsee.stnTrack2.stnState = STN_IDLE;
     waldsee.stnTrack2.stnSequence = SEQ_IDLE;
     waldsee.stnTrack2.getTrainEnterStnTrack = &HALL_BLK_T2;
-# 60 "mountaintrack.c"
+
     waldberg.name = WALDBERG;
     waldberg.AppState = INIT;
     waldberg.LastState = STN_IDLE;
@@ -9407,7 +9422,7 @@ void UPDATExMOUNTAINxSTATION(MNTSTATION *self)
 
                 self->AppState = WAIT;
                 self->tCountTime = GETxMILLIS();
-                self->tWaitTime = tTrainWaitTime + (GETxRANDOMxNUMBER() << tRandomShift);
+                self->tWaitTime = tMountainTrainWaitTime + (GETxRANDOMxNUMBER() << tMountainRandomShift);
                 CREATExTASKxSTATUSxMESSAGE(self->name,
                     self->AppNextState,
                     TIME,
@@ -9564,7 +9579,7 @@ void UPDATExMOUNTAINxTRAINxWAIT(MNTSTATION *self)
             }
             else{
                 self->stnTrack1.tCountTime = millis;
-                self->stnTrack1.tWaitTime = (GETxRANDOMxNUMBER() << tRandomShift);
+                self->stnTrack1.tWaitTime = (GETxRANDOMxNUMBER() << tMountainRandomShift);
                 self->stnTrack1.stnState = STN_WAIT;
                 CREATExTASKxSTATUSxMESSAGE(self->name,
                     self->stnTrack1.stnName,
@@ -9585,7 +9600,7 @@ void UPDATExMOUNTAINxTRAINxWAIT(MNTSTATION *self)
             }
             else{
                 self->stnTrack2.tCountTime = millis;
-                self->stnTrack2.tWaitTime = (GETxRANDOMxNUMBER() << tRandomShift);
+                self->stnTrack2.tWaitTime = (GETxRANDOMxNUMBER() << tMountainRandomShift);
                 self->stnTrack2.stnState = STN_WAIT;
                 CREATExTASKxSTATUSxMESSAGE(self->name,
                     self->stnTrack2.stnName,

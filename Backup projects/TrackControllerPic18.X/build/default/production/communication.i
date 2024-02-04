@@ -8969,6 +8969,10 @@ struct tm *getdate (const char *);
 
     const uint32_t tInOutboundStopWaitTime = (uint32_t)(10 * tFactorSec);
 
+    const uint32_t tMountainTrainWaitTime = (uint32_t)(50 * tFactorSec);
+
+    const uint8_t tMountainRandomShift = 2;
+
     typedef struct
     {
         volatile unsigned char *portx_ptr;

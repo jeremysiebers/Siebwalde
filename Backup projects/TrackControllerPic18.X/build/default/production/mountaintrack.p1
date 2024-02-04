@@ -17,31 +17,31 @@ Version 4.0 HI-TECH Software Intermediate Code
 [v _PORTE `Vuc ~T0 @X0 0 e@3972 ]
 "59 ./mountaintrack.h
 [; ;./mountaintrack.h: 59: const uint8_t sizeOfMntStationStruct = sizeof(MNTSTATION);
-[c E4954 1 10 20 30 40 50 60 .. ]
-[n E4954 . MAIN_LOOP MAIN_STATION_TOP MAIN_STATION_BOT WALDSEE SIEBWALDE WALDBERG IODATA  ]
-[c E4975 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 .. ]
-[n E4975 . busy connected done command nop INIT INIT2 RUN WAIT IDLE STN_TO_SIEBWALDE SIEBWALDE_TO_STN SIEBWALDE_SWITCHT4T5_OUT SIEBWALDE_SWITCHT4T5_IN SIEBWALDE_SWITCHT4T5 SIEWALDE_SET_NEXT STN_INBOUND STN_OUTBOUND STN_PASSING STN_WAIT STN_IDLE SEQ_IDLE SEQ_WAIT SEQ_SET_OCC SEQ_CHK_TRAIN SEQ_CHK_PASSED SEQ_OUTBOUND_LEFT_STATTION SEQ_INBOUND_BRAKE_TIME SEQ_OUTBOUND_BRAKE_TIME SIG_RED SIG_GREEN INVERT TIME SET_PATH_WAY SET_SIGNAL  ]
-[c E5012 150 151 152 153 154 155 157 158 159 160 161 162 163 164 .. ]
-[n E5012 . NONE T1 T2 T3 T4 T5 T7 T8 TRACK1 TRACK2 TRACK3 TRACK10 TRACK11 TRACK12  ]
-"35 ./enums.h
-[; ;./enums.h: 35:     {
+[c E4956 1 10 20 30 40 50 60 .. ]
+[n E4956 . MAIN_LOOP MAIN_STATION_TOP MAIN_STATION_BOT WALDSEE SIEBWALDE WALDBERG IODATA  ]
+[c E4977 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 .. ]
+[n E4977 . busy connected done command nop INIT INIT2 RUN WAIT IDLE STN_TO_SIEBWALDE SIEBWALDE_TO_STN SIEBWALDE_SWITCHT4T5_OUT SIEBWALDE_SWITCHT4T5_IN SIEBWALDE_SWITCHT4T5 SIEWALDE_SET_NEXT STN_INBOUND STN_OUTBOUND STN_PASSING STN_WAIT STN_IDLE SEQ_IDLE SEQ_WAIT SEQ_SET_OCC SEQ_CHK_TRAIN SEQ_CHK_PASSED SEQ_OUTBOUND_LEFT_STATTION SEQ_INBOUND_BRAKE_TIME SEQ_OUTBOUND_BRAKE_TIME SIG_RED SIG_GREEN INVERT TIME SET_PATH_WAY SET_SIGNAL  ]
+[c E5014 150 151 152 153 154 155 157 158 159 160 161 162 163 164 .. ]
+[n E5014 . NONE T1 T2 T3 T4 T5 T7 T8 TRACK1 TRACK2 TRACK3 TRACK10 TRACK11 TRACK12  ]
+"39 ./enums.h
+[; ;./enums.h: 39:     {
 [s S538 `*Vuc 1 `uc 1 ]
 [n S538 . portx_ptr pin_mask ]
-"41
-[; ;./enums.h: 41:     {
+"45
+[; ;./enums.h: 45:     {
 [s S539 `*Vuc 1 `uc 1 `*Vuc 1 `uc 1 `*Vuc 1 `uc 1 `*Vuc 1 `uc 1 `*Vuc 1 `uc 1 `*Vuc 1 `uc 1 ]
 [n S539 . port1_ptr pin1_mask port2_ptr pin2_mask port3_ptr pin3_mask port4_ptr pin4_mask port5_ptr pin5_mask port6_ptr pin6_mask ]
 "59 ./mountaintrack.h
 [; ;./mountaintrack.h: 59: const uint8_t sizeOfMntStationStruct = sizeof(MNTSTATION);
-[c E4963 170 255 81 82 83 84 85 86 87 88 .. ]
-[n E4963 . HEADER ALIVE STNTRACK1 STNTRACK2 STNTRACK3 MTNTRACK1 MTNTRACK2 MTNTRACK7 MTNTRACK8 VOLTAGE_DETECTED  ]
+[c E4965 170 255 81 82 83 84 85 86 87 88 .. ]
+[n E4965 . HEADER ALIVE STNTRACK1 STNTRACK2 STNTRACK3 MTNTRACK1 MTNTRACK2 MTNTRACK7 MTNTRACK8 VOLTAGE_DETECTED  ]
 "24
 [; ;./mountaintrack.h: 24: {
-[s S541 `E4963 1 `E4975 1 `E4975 1 `E4975 1 `*S540 1 `a 1 `E5012 1 `ul 1 `ul 1 ]
+[s S541 `E4965 1 `E4977 1 `E4977 1 `E4977 1 `*S540 1 `a 1 `E5014 1 `ul 1 `ul 1 ]
 [n S541 . stnName stnState stnSequence stnNextState getTrainEnterStnTrack stnOccupied trackNr tCountTime tWaitTime ]
 "41
 [; ;./mountaintrack.h: 41: {
-[s S542 `E4954 1 `E4975 1 `E4975 1 `E5012 1 `E4975 1 `E4975 1 `*S540 1 `*S538 1 `*S540 1 `*S539 1 `S541 1 `S541 1 `ul 1 `ul 1 ]
+[s S542 `E4956 1 `E4977 1 `E4977 1 `E5014 1 `E4977 1 `E4977 1 `*S540 1 `*S538 1 `*S540 1 `*S539 1 `S541 1 `S541 1 `ul 1 `ul 1 ]
 [n S542 . name AppState AppNextState LastInboundStn LastState Return getTrainEnterSiebwaldeStn setOccAmpOut getOccAmpOut setPath stnTrack1 stnTrack2 tCountTime tWaitTime ]
 "6448 C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h
 [; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 6448: extern volatile unsigned char LATE __attribute__((address(0xF8D)));
@@ -51,11 +51,11 @@ Version 4.0 HI-TECH Software Intermediate Code
 [v _LATD `Vuc ~T0 @X0 0 e@3980 ]
 "17 ./mainstation.h
 [; ;./mainstation.h: 17: {
-[s S543 `E4963 1 `E4975 1 `E4975 1 `E4975 1 `a 1 `E5012 1 `ul 1 `ul 1 `*S538 1 `*S540 1 ]
+[s S543 `E4965 1 `E4977 1 `E4977 1 `E4977 1 `a 1 `E5014 1 `ul 1 `ul 1 `*S538 1 `*S540 1 ]
 [n S543 . stnName stnState stnSequence stnNextState stnOccupied trackNr tCountTime tWaitTime setOccStn getOccStn ]
 "35
 [; ;./mainstation.h: 35: {
-[s S544 `E4954 1 `E4975 1 `*S540 1 `*S540 1 `*S538 1 `*S540 1 `*S540 1 `*S539 1 `uc 1 `uc 1 `*S539 1 `ul 1 `S543 1 `S543 1 `S543 1 ]
+[s S544 `E4956 1 `E4977 1 `*S540 1 `*S540 1 `*S538 1 `*S540 1 `*S540 1 `*S539 1 `uc 1 `uc 1 `*S539 1 `ul 1 `S543 1 `S543 1 `S543 1 ]
 [n S544 . name AppState getFreightLeaveStation getFreightEnterStation setOccBlkIn getOccBlkIn getOccBlkOut setPath prevPath newPath setSignal setSignalTime stnTrack1 stnTrack2 stnTrack3 ]
 "6878 C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h
 [; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 6878: extern volatile unsigned char LATJ __attribute__((address(0xF91)));
@@ -75,7 +75,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 [v _SETxOCC `(v ~T0 @X0 0 ef2`*S538`a ]
 "50 ./pathway.h
 [; ;./pathway.h: 50: void SETxMNTSTATIONxPATHWAY(MNTSTATION *self, TASK_MESSAGES path);
-[v _SETxMNTSTATIONxPATHWAY `(v ~T0 @X0 0 ef2`*S542`E5012 ]
+[v _SETxMNTSTATIONxPATHWAY `(v ~T0 @X0 0 ef2`*S542`E5014 ]
 "16 ./milisecond_counter.h
 [; ;./milisecond_counter.h: 16:     extern uint32_t GETxMILLIS(void);
 [v _GETxMILLIS `(ul ~T0 @X0 0 ef ]
@@ -1009,6 +1009,18 @@ Version 4.0 HI-TECH Software Intermediate Code
 [i _tInOutboundStopWaitTime
 * -> -> -> 10 `i `l `ul _tFactorSec
 ]
+"34
+[; ;./enums.h: 34:     const uint32_t tMountainTrainWaitTime = (uint32_t)(50 * tFactorSec);
+[v _tMountainTrainWaitTime `Cul ~T0 @X0 1 e ]
+[i _tMountainTrainWaitTime
+* -> -> -> 50 `i `l `ul _tFactorSec
+]
+"36
+[; ;./enums.h: 36:     const uint8_t tMountainRandomShift = 2;
+[v _tMountainRandomShift `Cuc ~T0 @X0 1 e ]
+[i _tMountainRandomShift
+-> -> 2 `i `uc
+]
 "47 ./debounce.h
 [; ;./debounce.h: 47: const uint32_t tIoSignalDebounceTime = (uint32_t)(200);
 [v _tIoSignalDebounceTime `Cul ~T0 @X0 1 e ]
@@ -1758,13 +1770,13 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e = _setT5ToAmpT3 &U _REL_T5 ]
 "25
 [; ;mountaintrack.c: 25:     waldsee.name = WALDSEE;
-[e = . _waldsee 0 . `E4954 3 ]
+[e = . _waldsee 0 . `E4956 3 ]
 "26
 [; ;mountaintrack.c: 26:     waldsee.AppState = INIT;
-[e = . _waldsee 1 . `E4975 5 ]
+[e = . _waldsee 1 . `E4977 5 ]
 "27
 [; ;mountaintrack.c: 27:     waldsee.LastState = STN_IDLE;
-[e = . _waldsee 4 . `E4975 20 ]
+[e = . _waldsee 4 . `E4977 20 ]
 "28
 [; ;mountaintrack.c: 28:     waldsee.getTrainEnterSiebwaldeStn = &HALL_BLK_T4;
 [e = . _waldsee 6 &U _HALL_BLK_T4 ]
@@ -1779,711 +1791,711 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e = . _waldsee 9 &U _WS_WALDSEE ]
 "32
 [; ;mountaintrack.c: 32:     waldsee.LastInboundStn = T1;
-[e = . _waldsee 3 . `E5012 1 ]
+[e = . _waldsee 3 . `E5014 1 ]
 "34
 [; ;mountaintrack.c: 34:     waldsee.stnTrack1.stnName = MTNTRACK1;
-[e = . . _waldsee 10 0 . `E4963 5 ]
+[e = . . _waldsee 10 0 . `E4965 5 ]
 "35
 [; ;mountaintrack.c: 35:     waldsee.stnTrack1.trackNr = T1;
-[e = . . _waldsee 10 6 . `E5012 1 ]
+[e = . . _waldsee 10 6 . `E5014 1 ]
 "36
 [; ;mountaintrack.c: 36:     waldsee.stnTrack1.stnState = STN_IDLE;
-[e = . . _waldsee 10 1 . `E4975 20 ]
+[e = . . _waldsee 10 1 . `E4977 20 ]
 "37
 [; ;mountaintrack.c: 37:     waldsee.stnTrack1.stnSequence = SEQ_IDLE;
-[e = . . _waldsee 10 2 . `E4975 21 ]
+[e = . . _waldsee 10 2 . `E4977 21 ]
 "38
 [; ;mountaintrack.c: 38:     waldsee.stnTrack1.getTrainEnterStnTrack = &HALL_BLK_T1;
 [e = . . _waldsee 10 4 &U _HALL_BLK_T1 ]
 "40
 [; ;mountaintrack.c: 40:     waldsee.stnTrack2.stnName = MTNTRACK2;
-[e = . . _waldsee 11 0 . `E4963 6 ]
+[e = . . _waldsee 11 0 . `E4965 6 ]
 "41
 [; ;mountaintrack.c: 41:     waldsee.stnTrack2.trackNr = T2;
-[e = . . _waldsee 11 6 . `E5012 2 ]
+[e = . . _waldsee 11 6 . `E5014 2 ]
 "42
 [; ;mountaintrack.c: 42:     waldsee.stnTrack2.stnState = STN_IDLE;
-[e = . . _waldsee 11 1 . `E4975 20 ]
+[e = . . _waldsee 11 1 . `E4977 20 ]
 "43
 [; ;mountaintrack.c: 43:     waldsee.stnTrack2.stnSequence = SEQ_IDLE;
-[e = . . _waldsee 11 2 . `E4975 21 ]
+[e = . . _waldsee 11 2 . `E4977 21 ]
 "44
 [; ;mountaintrack.c: 44:     waldsee.stnTrack2.getTrainEnterStnTrack = &HALL_BLK_T2;
 [e = . . _waldsee 11 4 &U _HALL_BLK_T2 ]
-"60
-[; ;mountaintrack.c: 60:     waldberg.name = WALDBERG;
-[e = . _waldberg 0 . `E4954 5 ]
-"61
-[; ;mountaintrack.c: 61:     waldberg.AppState = INIT;
-[e = . _waldberg 1 . `E4975 5 ]
-"62
-[; ;mountaintrack.c: 62:     waldberg.LastState = STN_IDLE;
-[e = . _waldberg 4 . `E4975 20 ]
-"63
-[; ;mountaintrack.c: 63:     waldberg.getTrainEnterSiebwaldeStn = &HALL_BLK_T5;
+"46
+[; ;mountaintrack.c: 46:     waldberg.name = WALDBERG;
+[e = . _waldberg 0 . `E4956 5 ]
+"47
+[; ;mountaintrack.c: 47:     waldberg.AppState = INIT;
+[e = . _waldberg 1 . `E4977 5 ]
+"48
+[; ;mountaintrack.c: 48:     waldberg.LastState = STN_IDLE;
+[e = . _waldberg 4 . `E4977 20 ]
+"49
+[; ;mountaintrack.c: 49:     waldberg.getTrainEnterSiebwaldeStn = &HALL_BLK_T5;
 [e = . _waldberg 6 &U _HALL_BLK_T5 ]
-"64
-[; ;mountaintrack.c: 64:     waldberg.setOccAmpOut = &OCC_TO_T6;
+"50
+[; ;mountaintrack.c: 50:     waldberg.setOccAmpOut = &OCC_TO_T6;
 [e = . _waldberg 7 &U _OCC_TO_T6 ]
-"65
-[; ;mountaintrack.c: 65:     waldberg.getOccAmpOut = &OCC_FR_T6;
+"51
+[; ;mountaintrack.c: 51:     waldberg.getOccAmpOut = &OCC_FR_T6;
 [e = . _waldberg 8 &U _OCC_FR_T6 ]
-"66
-[; ;mountaintrack.c: 66:     waldberg.setPath = &WS_WALDBERG;
+"52
+[; ;mountaintrack.c: 52:     waldberg.setPath = &WS_WALDBERG;
 [e = . _waldberg 9 &U _WS_WALDBERG ]
-"67
-[; ;mountaintrack.c: 67:     waldberg.LastInboundStn = T8;
-[e = . _waldberg 3 . `E5012 7 ]
-"69
-[; ;mountaintrack.c: 69:     waldberg.stnTrack1.stnName = MTNTRACK7;
-[e = . . _waldberg 10 0 . `E4963 7 ]
-"70
-[; ;mountaintrack.c: 70:     waldberg.stnTrack1.trackNr = T7;
-[e = . . _waldberg 10 6 . `E5012 6 ]
-"71
-[; ;mountaintrack.c: 71:     waldberg.stnTrack1.stnState = STN_IDLE;
-[e = . . _waldberg 10 1 . `E4975 20 ]
-"72
-[; ;mountaintrack.c: 72:     waldberg.stnTrack1.stnSequence = SEQ_IDLE;
-[e = . . _waldberg 10 2 . `E4975 21 ]
-"73
-[; ;mountaintrack.c: 73:     waldberg.stnTrack1.getTrainEnterStnTrack= &HALL_BLK_T7;
+"53
+[; ;mountaintrack.c: 53:     waldberg.LastInboundStn = T8;
+[e = . _waldberg 3 . `E5014 7 ]
+"55
+[; ;mountaintrack.c: 55:     waldberg.stnTrack1.stnName = MTNTRACK7;
+[e = . . _waldberg 10 0 . `E4965 7 ]
+"56
+[; ;mountaintrack.c: 56:     waldberg.stnTrack1.trackNr = T7;
+[e = . . _waldberg 10 6 . `E5014 6 ]
+"57
+[; ;mountaintrack.c: 57:     waldberg.stnTrack1.stnState = STN_IDLE;
+[e = . . _waldberg 10 1 . `E4977 20 ]
+"58
+[; ;mountaintrack.c: 58:     waldberg.stnTrack1.stnSequence = SEQ_IDLE;
+[e = . . _waldberg 10 2 . `E4977 21 ]
+"59
+[; ;mountaintrack.c: 59:     waldberg.stnTrack1.getTrainEnterStnTrack= &HALL_BLK_T7;
 [e = . . _waldberg 10 4 &U _HALL_BLK_T7 ]
-"75
-[; ;mountaintrack.c: 75:     waldberg.stnTrack2.stnName = MTNTRACK8;
-[e = . . _waldberg 11 0 . `E4963 8 ]
-"76
-[; ;mountaintrack.c: 76:     waldberg.stnTrack2.trackNr = T8;
-[e = . . _waldberg 11 6 . `E5012 7 ]
-"77
-[; ;mountaintrack.c: 77:     waldberg.stnTrack2.stnState = STN_IDLE;
-[e = . . _waldberg 11 1 . `E4975 20 ]
-"78
-[; ;mountaintrack.c: 78:     waldberg.stnTrack2.stnSequence = SEQ_IDLE;
-[e = . . _waldberg 11 2 . `E4975 21 ]
-"79
-[; ;mountaintrack.c: 79:     waldberg.stnTrack2.getTrainEnterStnTrack= &HALL_BLK_T8;
+"61
+[; ;mountaintrack.c: 61:     waldberg.stnTrack2.stnName = MTNTRACK8;
+[e = . . _waldberg 11 0 . `E4965 8 ]
+"62
+[; ;mountaintrack.c: 62:     waldberg.stnTrack2.trackNr = T8;
+[e = . . _waldberg 11 6 . `E5014 7 ]
+"63
+[; ;mountaintrack.c: 63:     waldberg.stnTrack2.stnState = STN_IDLE;
+[e = . . _waldberg 11 1 . `E4977 20 ]
+"64
+[; ;mountaintrack.c: 64:     waldberg.stnTrack2.stnSequence = SEQ_IDLE;
+[e = . . _waldberg 11 2 . `E4977 21 ]
+"65
+[; ;mountaintrack.c: 65:     waldberg.stnTrack2.getTrainEnterStnTrack= &HALL_BLK_T8;
 [e = . . _waldberg 11 4 &U _HALL_BLK_T8 ]
-"80
-[; ;mountaintrack.c: 80: }
+"66
+[; ;mountaintrack.c: 66: }
 [e :UE 547 ]
 }
-"82
-[; ;mountaintrack.c: 82: void UPDATExMOUNTAINxSTATION(MNTSTATION *self)
+"68
+[; ;mountaintrack.c: 68: void UPDATExMOUNTAINxSTATION(MNTSTATION *self)
 [v _UPDATExMOUNTAINxSTATION `(v ~T0 @X0 1 ef1`*S542 ]
-"83
-[; ;mountaintrack.c: 83: {
+"69
+[; ;mountaintrack.c: 69: {
 {
 [e :U _UPDATExMOUNTAINxSTATION ]
-"82
-[; ;mountaintrack.c: 82: void UPDATExMOUNTAINxSTATION(MNTSTATION *self)
+"68
+[; ;mountaintrack.c: 68: void UPDATExMOUNTAINxSTATION(MNTSTATION *self)
 [v _self `*S542 ~T0 @X0 1 r1 ]
-"83
-[; ;mountaintrack.c: 83: {
+"69
+[; ;mountaintrack.c: 69: {
 [f ]
-"84
-[; ;mountaintrack.c: 84:     switch(self->AppState)
+"70
+[; ;mountaintrack.c: 70:     switch(self->AppState)
 [e $U 550  ]
-"85
-[; ;mountaintrack.c: 85:     {
+"71
+[; ;mountaintrack.c: 71:     {
 {
-"87
-[; ;mountaintrack.c: 87:         case INIT:
+"73
+[; ;mountaintrack.c: 73:         case INIT:
 [e :U 551 ]
-"90
-[; ;mountaintrack.c: 90:             self->stnTrack1.getTrainEnterStnTrack->value = 0;
+"76
+[; ;mountaintrack.c: 76:             self->stnTrack1.getTrainEnterStnTrack->value = 0;
 [e = . *U . . *U _self 10 4 6 -> -> 0 `i `a ]
-"91
-[; ;mountaintrack.c: 91:             self->stnTrack2.getTrainEnterStnTrack->value = 0;
+"77
+[; ;mountaintrack.c: 77:             self->stnTrack2.getTrainEnterStnTrack->value = 0;
 [e = . *U . . *U _self 11 4 6 -> -> 0 `i `a ]
-"92
-[; ;mountaintrack.c: 92:             self->getTrainEnterSiebwaldeStn->value = 0;
+"78
+[; ;mountaintrack.c: 78:             self->getTrainEnterSiebwaldeStn->value = 0;
 [e = . *U . *U _self 6 6 -> -> 0 `i `a ]
-"98
-[; ;mountaintrack.c: 98:             SETxOCC(self->setOccAmpOut, 1);
+"84
+[; ;mountaintrack.c: 84:             SETxOCC(self->setOccAmpOut, 1);
 [e ( _SETxOCC (2 , . *U _self 7 -> -> 1 `i `a ]
-"106
-[; ;mountaintrack.c: 106:             if(self->getOccAmpOut->value){
+"92
+[; ;mountaintrack.c: 92:             if(self->getOccAmpOut->value){
 [e $ ! != -> . *U . *U _self 8 6 `i -> 0 `i 552  ]
 {
-"108
-[; ;mountaintrack.c: 108:                 self->stnTrack2.stnOccupied = 1;
+"94
+[; ;mountaintrack.c: 94:                 self->stnTrack2.stnOccupied = 1;
 [e = . . *U _self 11 5 -> -> 1 `i `a ]
+"95
+[; ;mountaintrack.c: 95:                 self->stnTrack2.stnState = STN_WAIT;
+[e = . . *U _self 11 1 . `E4977 19 ]
+"96
+[; ;mountaintrack.c: 96:                 self->AppState = STN_TO_SIEBWALDE;
+[e = . *U _self 1 . `E4977 10 ]
+"97
+[; ;mountaintrack.c: 97:             }
+}
+[e $U 553  ]
+"98
+[; ;mountaintrack.c: 98:             else{
+[e :U 552 ]
+{
+"99
+[; ;mountaintrack.c: 99:                 self->stnTrack2.stnState = STN_IDLE;
+[e = . . *U _self 11 1 . `E4977 20 ]
+"100
+[; ;mountaintrack.c: 100:                 self->stnTrack2.stnOccupied = 0;
+[e = . . *U _self 11 5 -> -> 0 `i `a ]
+"105
+[; ;mountaintrack.c: 105:                 SETxMNTSTATIONxPATHWAY(self, self->stnTrack1.trackNr);
+[e ( _SETxMNTSTATIONxPATHWAY (2 , _self . . *U _self 10 6 ]
+"107
+[; ;mountaintrack.c: 107:                 self->tCountTime = GETxMILLIS();
+[e = . *U _self 12 ( _GETxMILLIS ..  ]
+"108
+[; ;mountaintrack.c: 108:                 self->tWaitTime = tSwitchPointWaitTime;
+[e = . *U _self 13 _tSwitchPointWaitTime ]
 "109
-[; ;mountaintrack.c: 109:                 self->stnTrack2.stnState = STN_WAIT;
-[e = . . *U _self 11 1 . `E4975 19 ]
+[; ;mountaintrack.c: 109:                 self->AppNextState = INIT2;
+[e = . *U _self 2 . `E4977 6 ]
 "110
-[; ;mountaintrack.c: 110:                 self->AppState = STN_TO_SIEBWALDE;
-[e = . *U _self 1 . `E4975 10 ]
+[; ;mountaintrack.c: 110:                 self->AppState = WAIT;
+[e = . *U _self 1 . `E4977 8 ]
 "111
 [; ;mountaintrack.c: 111:             }
 }
-[e $U 553  ]
+[e :U 553 ]
 "112
-[; ;mountaintrack.c: 112:             else{
-[e :U 552 ]
-{
-"113
-[; ;mountaintrack.c: 113:                 self->stnTrack2.stnState = STN_IDLE;
-[e = . . *U _self 11 1 . `E4975 20 ]
-"114
-[; ;mountaintrack.c: 114:                 self->stnTrack2.stnOccupied = 0;
-[e = . . *U _self 11 5 -> -> 0 `i `a ]
+[; ;mountaintrack.c: 112:             CREATExTASKxSTATUSxMESSAGE(self->name,
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 11 0 `uc -> . . *U _self 11 1 `uc -> . `E5014 0 `uc ]
+"117
+[; ;mountaintrack.c: 117:             break;
+[e $U 549  ]
 "119
-[; ;mountaintrack.c: 119:                 SETxMNTSTATIONxPATHWAY(self, self->stnTrack1.trackNr);
-[e ( _SETxMNTSTATIONxPATHWAY (2 , _self . . *U _self 10 6 ]
+[; ;mountaintrack.c: 119:         case INIT2:
+[e :U 554 ]
 "121
-[; ;mountaintrack.c: 121:                 self->tCountTime = GETxMILLIS();
-[e = . *U _self 12 ( _GETxMILLIS ..  ]
-"122
-[; ;mountaintrack.c: 122:                 self->tWaitTime = tSwitchPointWaitTime;
-[e = . *U _self 13 _tSwitchPointWaitTime ]
+[; ;mountaintrack.c: 121:             if(self->getOccAmpOut->value){
+[e $ ! != -> . *U . *U _self 8 6 `i -> 0 `i 555  ]
+{
 "123
-[; ;mountaintrack.c: 123:                 self->AppNextState = INIT2;
-[e = . *U _self 2 . `E4975 6 ]
+[; ;mountaintrack.c: 123:                 self->stnTrack1.stnOccupied = 1;
+[e = . . *U _self 10 5 -> -> 1 `i `a ]
 "124
-[; ;mountaintrack.c: 124:                 self->AppState = WAIT;
-[e = . *U _self 1 . `E4975 8 ]
+[; ;mountaintrack.c: 124:                 self->stnTrack1.stnState = STN_WAIT;
+[e = . . *U _self 10 1 . `E4977 19 ]
 "125
 [; ;mountaintrack.c: 125:             }
 }
-[e :U 553 ]
-"126
-[; ;mountaintrack.c: 126:             CREATExTASKxSTATUSxMESSAGE(self->name,
-[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 11 0 `uc -> . . *U _self 11 1 `uc -> . `E5012 0 `uc ]
-"131
-[; ;mountaintrack.c: 131:             break;
-[e $U 549  ]
-"133
-[; ;mountaintrack.c: 133:         case INIT2:
-[e :U 554 ]
-"135
-[; ;mountaintrack.c: 135:             if(self->getOccAmpOut->value){
-[e $ ! != -> . *U . *U _self 8 6 `i -> 0 `i 555  ]
-{
-"137
-[; ;mountaintrack.c: 137:                 self->stnTrack1.stnOccupied = 1;
-[e = . . *U _self 10 5 -> -> 1 `i `a ]
-"138
-[; ;mountaintrack.c: 138:                 self->stnTrack1.stnState = STN_WAIT;
-[e = . . *U _self 10 1 . `E4975 19 ]
-"139
-[; ;mountaintrack.c: 139:             }
-}
 [e $U 556  ]
-"140
-[; ;mountaintrack.c: 140:             else{
+"126
+[; ;mountaintrack.c: 126:             else{
 [e :U 555 ]
 {
-"141
-[; ;mountaintrack.c: 141:                 self->stnTrack1.stnState = STN_IDLE;
-[e = . . *U _self 10 1 . `E4975 20 ]
-"142
-[; ;mountaintrack.c: 142:                 self->stnTrack1.stnOccupied = 0;
+"127
+[; ;mountaintrack.c: 127:                 self->stnTrack1.stnState = STN_IDLE;
+[e = . . *U _self 10 1 . `E4977 20 ]
+"128
+[; ;mountaintrack.c: 128:                 self->stnTrack1.stnOccupied = 0;
 [e = . . *U _self 10 5 -> -> 0 `i `a ]
-"143
-[; ;mountaintrack.c: 143:             }
+"129
+[; ;mountaintrack.c: 129:             }
 }
 [e :U 556 ]
-"144
-[; ;mountaintrack.c: 144:             CREATExTASKxSTATUSxMESSAGE(self->name,
-[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 11 0 `uc -> . . *U _self 11 1 `uc -> . `E5012 0 `uc ]
-"149
-[; ;mountaintrack.c: 149:             if(self->stnTrack2.stnOccupied){
+"130
+[; ;mountaintrack.c: 130:             CREATExTASKxSTATUSxMESSAGE(self->name,
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 11 0 `uc -> . . *U _self 11 1 `uc -> . `E5014 0 `uc ]
+"135
+[; ;mountaintrack.c: 135:             if(self->stnTrack2.stnOccupied){
 [e $ ! != -> . . *U _self 11 5 `i -> 0 `i 557  ]
 {
-"150
-[; ;mountaintrack.c: 150:                 self->AppState = STN_TO_SIEBWALDE;
-[e = . *U _self 1 . `E4975 10 ]
-"151
-[; ;mountaintrack.c: 151:             }
+"136
+[; ;mountaintrack.c: 136:                 self->AppState = STN_TO_SIEBWALDE;
+[e = . *U _self 1 . `E4977 10 ]
+"137
+[; ;mountaintrack.c: 137:             }
 }
 [e $U 558  ]
-"152
-[; ;mountaintrack.c: 152:             else if(self->stnTrack1.stnOccupied){
+"138
+[; ;mountaintrack.c: 138:             else if(self->stnTrack1.stnOccupied){
 [e :U 557 ]
 [e $ ! != -> . . *U _self 10 5 `i -> 0 `i 559  ]
 {
-"153
-[; ;mountaintrack.c: 153:                 self->AppState = STN_TO_SIEBWALDE;
-[e = . *U _self 1 . `E4975 10 ]
-"154
-[; ;mountaintrack.c: 154:             }
+"139
+[; ;mountaintrack.c: 139:                 self->AppState = STN_TO_SIEBWALDE;
+[e = . *U _self 1 . `E4977 10 ]
+"140
+[; ;mountaintrack.c: 140:             }
 }
 [e $U 560  ]
-"155
-[; ;mountaintrack.c: 155:             else{
+"141
+[; ;mountaintrack.c: 141:             else{
 [e :U 559 ]
 {
-"156
-[; ;mountaintrack.c: 156:                 self->AppState = SIEBWALDE_SWITCHT4T5;
-[e = . *U _self 1 . `E4975 14 ]
-"157
-[; ;mountaintrack.c: 157:             }
+"142
+[; ;mountaintrack.c: 142:                 self->AppState = SIEBWALDE_SWITCHT4T5;
+[e = . *U _self 1 . `E4977 14 ]
+"143
+[; ;mountaintrack.c: 143:             }
 }
 [e :U 560 ]
 [e :U 558 ]
-"158
-[; ;mountaintrack.c: 158:             CREATExTASKxSTATUSxMESSAGE(self->name,
-[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . `E5012 0 `uc -> . *U _self 1 `uc -> . `E5012 0 `uc ]
-"163
-[; ;mountaintrack.c: 163:             break;
+"144
+[; ;mountaintrack.c: 144:             CREATExTASKxSTATUSxMESSAGE(self->name,
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . `E5014 0 `uc -> . *U _self 1 `uc -> . `E5014 0 `uc ]
+"149
+[; ;mountaintrack.c: 149:             break;
 [e $U 549  ]
-"167
-[; ;mountaintrack.c: 167:         case STN_TO_SIEBWALDE:
+"153
+[; ;mountaintrack.c: 153:         case STN_TO_SIEBWALDE:
 [e :U 561 ]
-"170
-[; ;mountaintrack.c: 170:             self->Return = (TASK_STATE)MOUNTAINxSTATIONxOUTBOUND(self);
-[e = . *U _self 5 -> ( _MOUNTAINxSTATIONxOUTBOUND (1 _self `E4975 ]
-"171
-[; ;mountaintrack.c: 171:             if(done == self->Return || nop == self->Return){
-[e $ ! || == -> . `E4975 2 `ui -> . *U _self 5 `ui == -> . `E4975 4 `ui -> . *U _self 5 `ui 562  ]
+"156
+[; ;mountaintrack.c: 156:             self->Return = (TASK_STATE)MOUNTAINxSTATIONxOUTBOUND(self);
+[e = . *U _self 5 -> ( _MOUNTAINxSTATIONxOUTBOUND (1 _self `E4977 ]
+"157
+[; ;mountaintrack.c: 157:             if(done == self->Return || nop == self->Return){
+[e $ ! || == -> . `E4977 2 `ui -> . *U _self 5 `ui == -> . `E4977 4 `ui -> . *U _self 5 `ui 562  ]
 {
-"176
-[; ;mountaintrack.c: 176:                 self->AppNextState = SIEBWALDE_SWITCHT4T5;
-[e = . *U _self 2 . `E4975 14 ]
-"177
-[; ;mountaintrack.c: 177:                 self->LastState = STN_OUTBOUND;
-[e = . *U _self 4 . `E4975 17 ]
-"182
-[; ;mountaintrack.c: 182:                 self->AppState = WAIT;
-[e = . *U _self 1 . `E4975 8 ]
-"183
-[; ;mountaintrack.c: 183:                 self->tCountTime = GETxMILLIS();
+"162
+[; ;mountaintrack.c: 162:                 self->AppNextState = SIEBWALDE_SWITCHT4T5;
+[e = . *U _self 2 . `E4977 14 ]
+"163
+[; ;mountaintrack.c: 163:                 self->LastState = STN_OUTBOUND;
+[e = . *U _self 4 . `E4977 17 ]
+"168
+[; ;mountaintrack.c: 168:                 self->AppState = WAIT;
+[e = . *U _self 1 . `E4977 8 ]
+"169
+[; ;mountaintrack.c: 169:                 self->tCountTime = GETxMILLIS();
 [e = . *U _self 12 ( _GETxMILLIS ..  ]
-"184
-[; ;mountaintrack.c: 184:                 self->tWaitTime = tTrainWaitTime + (GETxRANDOMxNUMBER() << tRandomShift);
-[e = . *U _self 13 + _tTrainWaitTime -> << -> ( _GETxRANDOMxNUMBER ..  `ui -> _tRandomShift `i `ul ]
-"185
-[; ;mountaintrack.c: 185:                 CREATExTASKxSTATUSxMESSAGE(self->name,
-[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . *U _self 2 `uc -> . `E4975 32 `uc -> / . *U _self 13 -> -> -> 1000 `i `l `ul `uc ]
-"194
-[; ;mountaintrack.c: 194:                 if(WALDSEE == self->name && done == self->Return){
-[e $ ! && == -> . `E4954 3 `ui -> . *U _self 0 `ui == -> . `E4975 2 `ui -> . *U _self 5 `ui 563  ]
+"170
+[; ;mountaintrack.c: 170:                 self->tWaitTime = tMountainTrainWaitTime + (GETxRANDOMxNUMBER() << tMountainRandomShift);
+[e = . *U _self 13 + _tMountainTrainWaitTime -> << -> ( _GETxRANDOMxNUMBER ..  `ui -> _tMountainRandomShift `i `ul ]
+"171
+[; ;mountaintrack.c: 171:                 CREATExTASKxSTATUSxMESSAGE(self->name,
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . *U _self 2 `uc -> . `E4977 32 `uc -> / . *U _self 13 -> -> -> 1000 `i `l `ul `uc ]
+"180
+[; ;mountaintrack.c: 180:                 if(WALDSEE == self->name && done == self->Return){
+[e $ ! && == -> . `E4956 3 `ui -> . *U _self 0 `ui == -> . `E4977 2 `ui -> . *U _self 5 `ui 563  ]
 {
-"195
-[; ;mountaintrack.c: 195:                     if(0 == waldberg.stnTrack1.stnOccupied){
+"181
+[; ;mountaintrack.c: 181:                     if(0 == waldberg.stnTrack1.stnOccupied){
 [e $ ! == -> 0 `i -> . . _waldberg 10 5 `i 564  ]
 {
-"196
-[; ;mountaintrack.c: 196:                         waldberg.stnTrack1.stnState = STN_INBOUND;
-[e = . . _waldberg 10 1 . `E4975 16 ]
-"197
-[; ;mountaintrack.c: 197:                     }
+"182
+[; ;mountaintrack.c: 182:                         waldberg.stnTrack1.stnState = STN_INBOUND;
+[e = . . _waldberg 10 1 . `E4977 16 ]
+"183
+[; ;mountaintrack.c: 183:                     }
 }
 [e $U 565  ]
-"198
-[; ;mountaintrack.c: 198:                     else if(0 == waldberg.stnTrack2.stnOccupied){
+"184
+[; ;mountaintrack.c: 184:                     else if(0 == waldberg.stnTrack2.stnOccupied){
 [e :U 564 ]
 [e $ ! == -> 0 `i -> . . _waldberg 11 5 `i 566  ]
 {
-"199
-[; ;mountaintrack.c: 199:                         waldberg.stnTrack2.stnState = STN_INBOUND;
-[e = . . _waldberg 11 1 . `E4975 16 ]
-"200
-[; ;mountaintrack.c: 200:                     }
+"185
+[; ;mountaintrack.c: 185:                         waldberg.stnTrack2.stnState = STN_INBOUND;
+[e = . . _waldberg 11 1 . `E4977 16 ]
+"186
+[; ;mountaintrack.c: 186:                     }
 }
 [e :U 566 ]
 [e :U 565 ]
-"201
-[; ;mountaintrack.c: 201:                 }
+"187
+[; ;mountaintrack.c: 187:                 }
 }
 [e $U 567  ]
-"202
-[; ;mountaintrack.c: 202:                 else if(WALDBERG == self->name && done == self->Return){
+"188
+[; ;mountaintrack.c: 188:                 else if(WALDBERG == self->name && done == self->Return){
 [e :U 563 ]
-[e $ ! && == -> . `E4954 5 `ui -> . *U _self 0 `ui == -> . `E4975 2 `ui -> . *U _self 5 `ui 568  ]
+[e $ ! && == -> . `E4956 5 `ui -> . *U _self 0 `ui == -> . `E4977 2 `ui -> . *U _self 5 `ui 568  ]
 {
-"203
-[; ;mountaintrack.c: 203:                     if(0 == waldsee.stnTrack2.stnOccupied){
+"189
+[; ;mountaintrack.c: 189:                     if(0 == waldsee.stnTrack2.stnOccupied){
 [e $ ! == -> 0 `i -> . . _waldsee 11 5 `i 569  ]
 {
-"204
-[; ;mountaintrack.c: 204:                         waldsee.stnTrack2.stnState = STN_INBOUND;
-[e = . . _waldsee 11 1 . `E4975 16 ]
-"205
-[; ;mountaintrack.c: 205:                     }
+"190
+[; ;mountaintrack.c: 190:                         waldsee.stnTrack2.stnState = STN_INBOUND;
+[e = . . _waldsee 11 1 . `E4977 16 ]
+"191
+[; ;mountaintrack.c: 191:                     }
 }
 [e $U 570  ]
-"206
-[; ;mountaintrack.c: 206:                     else if(0 == waldsee.stnTrack1.stnOccupied){
+"192
+[; ;mountaintrack.c: 192:                     else if(0 == waldsee.stnTrack1.stnOccupied){
 [e :U 569 ]
 [e $ ! == -> 0 `i -> . . _waldsee 10 5 `i 571  ]
 {
-"207
-[; ;mountaintrack.c: 207:                         waldsee.stnTrack1.stnState = STN_INBOUND;
-[e = . . _waldsee 10 1 . `E4975 16 ]
-"208
-[; ;mountaintrack.c: 208:                     }
+"193
+[; ;mountaintrack.c: 193:                         waldsee.stnTrack1.stnState = STN_INBOUND;
+[e = . . _waldsee 10 1 . `E4977 16 ]
+"194
+[; ;mountaintrack.c: 194:                     }
 }
 [e :U 571 ]
 [e :U 570 ]
-"209
-[; ;mountaintrack.c: 209:                 }
+"195
+[; ;mountaintrack.c: 195:                 }
 }
 [e :U 568 ]
 [e :U 567 ]
-"211
-[; ;mountaintrack.c: 211:                 if(STN_INBOUND == self->stnTrack1.stnState){
-[e $ ! == -> . `E4975 16 `ui -> . . *U _self 10 1 `ui 572  ]
+"197
+[; ;mountaintrack.c: 197:                 if(STN_INBOUND == self->stnTrack1.stnState){
+[e $ ! == -> . `E4977 16 `ui -> . . *U _self 10 1 `ui 572  ]
 {
-"212
-[; ;mountaintrack.c: 212:                     CREATExTASKxSTATUSxMESSAGE(self->name,
-[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 10 0 `uc -> . . *U _self 10 1 `uc -> . `E5012 0 `uc ]
-"216
-[; ;mountaintrack.c: 216:                 }
+"198
+[; ;mountaintrack.c: 198:                     CREATExTASKxSTATUSxMESSAGE(self->name,
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 10 0 `uc -> . . *U _self 10 1 `uc -> . `E5014 0 `uc ]
+"202
+[; ;mountaintrack.c: 202:                 }
 }
 [e $U 573  ]
-"217
-[; ;mountaintrack.c: 217:                 else if(STN_INBOUND == self->stnTrack2.stnState){
+"203
+[; ;mountaintrack.c: 203:                 else if(STN_INBOUND == self->stnTrack2.stnState){
 [e :U 572 ]
-[e $ ! == -> . `E4975 16 `ui -> . . *U _self 11 1 `ui 574  ]
+[e $ ! == -> . `E4977 16 `ui -> . . *U _self 11 1 `ui 574  ]
 {
-"218
-[; ;mountaintrack.c: 218:                     CREATExTASKxSTATUSxMESSAGE(self->name,
-[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 11 0 `uc -> . . *U _self 11 1 `uc -> . `E5012 0 `uc ]
-"222
-[; ;mountaintrack.c: 222:                 }
+"204
+[; ;mountaintrack.c: 204:                     CREATExTASKxSTATUSxMESSAGE(self->name,
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 11 0 `uc -> . . *U _self 11 1 `uc -> . `E5014 0 `uc ]
+"208
+[; ;mountaintrack.c: 208:                 }
 }
 [e :U 574 ]
 [e :U 573 ]
-"223
-[; ;mountaintrack.c: 223:             }
+"209
+[; ;mountaintrack.c: 209:             }
 }
 [e :U 562 ]
-"224
-[; ;mountaintrack.c: 224:             break;
+"210
+[; ;mountaintrack.c: 210:             break;
 [e $U 549  ]
-"226
-[; ;mountaintrack.c: 226:         case SIEBWALDE_TO_STN:
+"212
+[; ;mountaintrack.c: 212:         case SIEBWALDE_TO_STN:
 [e :U 575 ]
-"229
-[; ;mountaintrack.c: 229:             if(MOUNTAINxSTATIONxINBOUND(self) == done){
-[e $ ! == -> ( _MOUNTAINxSTATIONxINBOUND (1 _self `i -> . `E4975 2 `i 576  ]
+"215
+[; ;mountaintrack.c: 215:             if(MOUNTAINxSTATIONxINBOUND(self) == done){
+[e $ ! == -> ( _MOUNTAINxSTATIONxINBOUND (1 _self `i -> . `E4977 2 `i 576  ]
 {
-"230
-[; ;mountaintrack.c: 230:                 self->AppState = SIEBWALDE_SWITCHT4T5;
-[e = . *U _self 1 . `E4975 14 ]
-"231
-[; ;mountaintrack.c: 231:                 self->LastState = STN_INBOUND;
-[e = . *U _self 4 . `E4975 16 ]
-"232
-[; ;mountaintrack.c: 232:                 CREATExTASKxSTATUSxMESSAGE(self->name,
-[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . *U _self 1 `uc -> . `E5012 0 `uc -> . `E5012 0 `uc ]
-"236
-[; ;mountaintrack.c: 236:             }
+"216
+[; ;mountaintrack.c: 216:                 self->AppState = SIEBWALDE_SWITCHT4T5;
+[e = . *U _self 1 . `E4977 14 ]
+"217
+[; ;mountaintrack.c: 217:                 self->LastState = STN_INBOUND;
+[e = . *U _self 4 . `E4977 16 ]
+"218
+[; ;mountaintrack.c: 218:                 CREATExTASKxSTATUSxMESSAGE(self->name,
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . *U _self 1 `uc -> . `E5014 0 `uc -> . `E5014 0 `uc ]
+"222
+[; ;mountaintrack.c: 222:             }
 }
 [e :U 576 ]
-"237
-[; ;mountaintrack.c: 237:             break;
+"223
+[; ;mountaintrack.c: 223:             break;
 [e $U 549  ]
-"243
-[; ;mountaintrack.c: 243:         case SIEBWALDE_SWITCHT4T5:
+"229
+[; ;mountaintrack.c: 229:         case SIEBWALDE_SWITCHT4T5:
 [e :U 577 ]
-"245
-[; ;mountaintrack.c: 245:             if((waldsee.AppState == SIEBWALDE_SWITCHT4T5 ||
-[e $ ! && && || == -> . _waldsee 1 `ui -> . `E4975 14 `ui == -> . _waldsee 1 `ui -> . `E4975 8 `ui || == -> . _waldberg 1 `ui -> . `E4975 14 `ui == -> . _waldberg 1 `ui -> . `E4975 8 `ui || || == -> . _waldberg 4 `ui -> . _waldsee 4 `ui == -> . _waldberg 4 `ui -> . `E4975 20 `ui == -> . _waldsee 4 `ui -> . `E4975 20 `ui 578  ]
-"251
-[; ;mountaintrack.c: 251:                 waldsee.LastState == STN_IDLE)){
+"231
+[; ;mountaintrack.c: 231:             if((waldsee.AppState == SIEBWALDE_SWITCHT4T5 ||
+[e $ ! && && || == -> . _waldsee 1 `ui -> . `E4977 14 `ui == -> . _waldsee 1 `ui -> . `E4977 8 `ui || == -> . _waldberg 1 `ui -> . `E4977 14 `ui == -> . _waldberg 1 `ui -> . `E4977 8 `ui || || == -> . _waldberg 4 `ui -> . _waldsee 4 `ui == -> . _waldberg 4 `ui -> . `E4977 20 `ui == -> . _waldsee 4 `ui -> . `E4977 20 `ui 578  ]
+"237
+[; ;mountaintrack.c: 237:                 waldsee.LastState == STN_IDLE)){
 {
-"254
-[; ;mountaintrack.c: 254:                 SETxOCC(setT4ToAmpT6, invert);
+"240
+[; ;mountaintrack.c: 240:                 SETxOCC(setT4ToAmpT6, invert);
 [e ( _SETxOCC (2 , _setT4ToAmpT6 _invert ]
-"255
-[; ;mountaintrack.c: 255:                 SETxOCC(setT5ToAmpT3, invert);
+"241
+[; ;mountaintrack.c: 241:                 SETxOCC(setT5ToAmpT3, invert);
 [e ( _SETxOCC (2 , _setT5ToAmpT3 _invert ]
-"257
-[; ;mountaintrack.c: 257:                 CREATExTASKxSTATUSxMESSAGE(self->name,
-[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . `E5012 0 `uc -> . `E4975 31 `uc -> . `E5012 0 `uc ]
-"262
-[; ;mountaintrack.c: 262:                 invert = !invert;
+"243
+[; ;mountaintrack.c: 243:                 CREATExTASKxSTATUSxMESSAGE(self->name,
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . `E5014 0 `uc -> . `E4977 31 `uc -> . `E5014 0 `uc ]
+"248
+[; ;mountaintrack.c: 248:                 invert = !invert;
 [e = _invert -> -> ! != -> _invert `i -> 0 `i `i `a ]
-"265
-[; ;mountaintrack.c: 265:                 if(SIEBWALDE_SWITCHT4T5 == self->AppState){
-[e $ ! == -> . `E4975 14 `ui -> . *U _self 1 `ui 579  ]
+"251
+[; ;mountaintrack.c: 251:                 if(SIEBWALDE_SWITCHT4T5 == self->AppState){
+[e $ ! == -> . `E4977 14 `ui -> . *U _self 1 `ui 579  ]
 {
-"266
-[; ;mountaintrack.c: 266:                     self->AppState = SIEWALDE_SET_NEXT;
-[e = . *U _self 1 . `E4975 15 ]
-"267
-[; ;mountaintrack.c: 267:                 }
+"252
+[; ;mountaintrack.c: 252:                     self->AppState = SIEWALDE_SET_NEXT;
+[e = . *U _self 1 . `E4977 15 ]
+"253
+[; ;mountaintrack.c: 253:                 }
 }
 [e $U 580  ]
-"268
-[; ;mountaintrack.c: 268:                 else{
+"254
+[; ;mountaintrack.c: 254:                 else{
 [e :U 579 ]
 {
-"269
-[; ;mountaintrack.c: 269:                     self->AppNextState = SIEWALDE_SET_NEXT;
-[e = . *U _self 2 . `E4975 15 ]
-"270
-[; ;mountaintrack.c: 270:                 }
+"255
+[; ;mountaintrack.c: 255:                     self->AppNextState = SIEWALDE_SET_NEXT;
+[e = . *U _self 2 . `E4977 15 ]
+"256
+[; ;mountaintrack.c: 256:                 }
 }
 [e :U 580 ]
-"273
-[; ;mountaintrack.c: 273:                 if(self->name == WALDSEE){
-[e $ ! == -> . *U _self 0 `ui -> . `E4954 3 `ui 581  ]
+"259
+[; ;mountaintrack.c: 259:                 if(self->name == WALDSEE){
+[e $ ! == -> . *U _self 0 `ui -> . `E4956 3 `ui 581  ]
 {
-"274
-[; ;mountaintrack.c: 274:                     if(waldberg.AppState == SIEBWALDE_SWITCHT4T5){
-[e $ ! == -> . _waldberg 1 `ui -> . `E4975 14 `ui 582  ]
+"260
+[; ;mountaintrack.c: 260:                     if(waldberg.AppState == SIEBWALDE_SWITCHT4T5){
+[e $ ! == -> . _waldberg 1 `ui -> . `E4977 14 `ui 582  ]
 {
-"275
-[; ;mountaintrack.c: 275:                         waldberg.AppState = SIEWALDE_SET_NEXT;
-[e = . _waldberg 1 . `E4975 15 ]
-"276
-[; ;mountaintrack.c: 276:                     }
+"261
+[; ;mountaintrack.c: 261:                         waldberg.AppState = SIEWALDE_SET_NEXT;
+[e = . _waldberg 1 . `E4977 15 ]
+"262
+[; ;mountaintrack.c: 262:                     }
 }
 [e $U 583  ]
-"277
-[; ;mountaintrack.c: 277:                     else if(waldberg.AppState == WAIT){
+"263
+[; ;mountaintrack.c: 263:                     else if(waldberg.AppState == WAIT){
 [e :U 582 ]
-[e $ ! == -> . _waldberg 1 `ui -> . `E4975 8 `ui 584  ]
+[e $ ! == -> . _waldberg 1 `ui -> . `E4977 8 `ui 584  ]
 {
-"278
-[; ;mountaintrack.c: 278:                         waldberg.AppNextState = SIEWALDE_SET_NEXT;
-[e = . _waldberg 2 . `E4975 15 ]
-"279
-[; ;mountaintrack.c: 279:                     }
+"264
+[; ;mountaintrack.c: 264:                         waldberg.AppNextState = SIEWALDE_SET_NEXT;
+[e = . _waldberg 2 . `E4977 15 ]
+"265
+[; ;mountaintrack.c: 265:                     }
 }
 [e :U 584 ]
 [e :U 583 ]
-"280
-[; ;mountaintrack.c: 280:                 }
+"266
+[; ;mountaintrack.c: 266:                 }
 }
 [e $U 585  ]
-"281
-[; ;mountaintrack.c: 281:                 else if(self->name == WALDBERG){
+"267
+[; ;mountaintrack.c: 267:                 else if(self->name == WALDBERG){
 [e :U 581 ]
-[e $ ! == -> . *U _self 0 `ui -> . `E4954 5 `ui 586  ]
+[e $ ! == -> . *U _self 0 `ui -> . `E4956 5 `ui 586  ]
 {
-"282
-[; ;mountaintrack.c: 282:                     if(waldsee.AppState == SIEBWALDE_SWITCHT4T5){
-[e $ ! == -> . _waldsee 1 `ui -> . `E4975 14 `ui 587  ]
+"268
+[; ;mountaintrack.c: 268:                     if(waldsee.AppState == SIEBWALDE_SWITCHT4T5){
+[e $ ! == -> . _waldsee 1 `ui -> . `E4977 14 `ui 587  ]
 {
-"283
-[; ;mountaintrack.c: 283:                         waldsee.AppState = SIEWALDE_SET_NEXT;
-[e = . _waldsee 1 . `E4975 15 ]
-"284
-[; ;mountaintrack.c: 284:                     }
+"269
+[; ;mountaintrack.c: 269:                         waldsee.AppState = SIEWALDE_SET_NEXT;
+[e = . _waldsee 1 . `E4977 15 ]
+"270
+[; ;mountaintrack.c: 270:                     }
 }
 [e $U 588  ]
-"285
-[; ;mountaintrack.c: 285:                     else if(waldsee.AppState == WAIT){
+"271
+[; ;mountaintrack.c: 271:                     else if(waldsee.AppState == WAIT){
 [e :U 587 ]
-[e $ ! == -> . _waldsee 1 `ui -> . `E4975 8 `ui 589  ]
+[e $ ! == -> . _waldsee 1 `ui -> . `E4977 8 `ui 589  ]
 {
-"286
-[; ;mountaintrack.c: 286:                         waldsee.AppNextState = SIEWALDE_SET_NEXT;
-[e = . _waldsee 2 . `E4975 15 ]
-"287
-[; ;mountaintrack.c: 287:                     }
+"272
+[; ;mountaintrack.c: 272:                         waldsee.AppNextState = SIEWALDE_SET_NEXT;
+[e = . _waldsee 2 . `E4977 15 ]
+"273
+[; ;mountaintrack.c: 273:                     }
 }
 [e :U 589 ]
 [e :U 588 ]
-"288
-[; ;mountaintrack.c: 288:                 }
+"274
+[; ;mountaintrack.c: 274:                 }
 }
 [e :U 586 ]
 [e :U 585 ]
-"289
-[; ;mountaintrack.c: 289:             }
+"275
+[; ;mountaintrack.c: 275:             }
 }
 [e :U 578 ]
-"290
-[; ;mountaintrack.c: 290:             break;
+"276
+[; ;mountaintrack.c: 276:             break;
 [e $U 549  ]
-"292
-[; ;mountaintrack.c: 292:         case SIEWALDE_SET_NEXT:
+"278
+[; ;mountaintrack.c: 278:         case SIEWALDE_SET_NEXT:
 [e :U 590 ]
-"294
-[; ;mountaintrack.c: 294:             if(STN_INBOUND == self->LastState){
-[e $ ! == -> . `E4975 16 `ui -> . *U _self 4 `ui 591  ]
+"280
+[; ;mountaintrack.c: 280:             if(STN_INBOUND == self->LastState){
+[e $ ! == -> . `E4977 16 `ui -> . *U _self 4 `ui 591  ]
 {
-"295
-[; ;mountaintrack.c: 295:                 self->AppState = STN_TO_SIEBWALDE;
-[e = . *U _self 1 . `E4975 10 ]
-"296
-[; ;mountaintrack.c: 296:             }
+"281
+[; ;mountaintrack.c: 281:                 self->AppState = STN_TO_SIEBWALDE;
+[e = . *U _self 1 . `E4977 10 ]
+"282
+[; ;mountaintrack.c: 282:             }
 }
 [e $U 592  ]
-"297
-[; ;mountaintrack.c: 297:             else{
+"283
+[; ;mountaintrack.c: 283:             else{
 [e :U 591 ]
 {
-"298
-[; ;mountaintrack.c: 298:                 self->AppState = SIEBWALDE_TO_STN;
-[e = . *U _self 1 . `E4975 11 ]
-"299
-[; ;mountaintrack.c: 299:             }
+"284
+[; ;mountaintrack.c: 284:                 self->AppState = SIEBWALDE_TO_STN;
+[e = . *U _self 1 . `E4977 11 ]
+"285
+[; ;mountaintrack.c: 285:             }
 }
 [e :U 592 ]
-"301
-[; ;mountaintrack.c: 301:             CREATExTASKxSTATUSxMESSAGE(self->name,
-[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . `E5012 0 `uc -> . *U _self 1 `uc -> . `E5012 0 `uc ]
-"305
-[; ;mountaintrack.c: 305:             break;
+"287
+[; ;mountaintrack.c: 287:             CREATExTASKxSTATUSxMESSAGE(self->name,
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . `E5014 0 `uc -> . *U _self 1 `uc -> . `E5014 0 `uc ]
+"291
+[; ;mountaintrack.c: 291:             break;
 [e $U 549  ]
-"307
-[; ;mountaintrack.c: 307:         case WAIT:
+"293
+[; ;mountaintrack.c: 293:         case WAIT:
 [e :U 593 ]
-"309
-[; ;mountaintrack.c: 309:             if((GETxMILLIS() - self->tCountTime) > self->tWaitTime){
+"295
+[; ;mountaintrack.c: 295:             if((GETxMILLIS() - self->tCountTime) > self->tWaitTime){
 [e $ ! > - ( _GETxMILLIS ..  . *U _self 12 . *U _self 13 594  ]
 {
-"310
-[; ;mountaintrack.c: 310:                 self->AppState = self->AppNextState;
+"296
+[; ;mountaintrack.c: 296:                 self->AppState = self->AppNextState;
 [e = . *U _self 1 . *U _self 2 ]
-"311
-[; ;mountaintrack.c: 311:             }
+"297
+[; ;mountaintrack.c: 297:             }
 }
 [e :U 594 ]
-"312
-[; ;mountaintrack.c: 312:             break;
+"298
+[; ;mountaintrack.c: 298:             break;
 [e $U 549  ]
-"314
-[; ;mountaintrack.c: 314:         default: self->AppState = INIT;
+"300
+[; ;mountaintrack.c: 300:         default: self->AppState = INIT;
 [e :U 595 ]
-[e = . *U _self 1 . `E4975 5 ]
-"315
-[; ;mountaintrack.c: 315:             break;
+[e = . *U _self 1 . `E4977 5 ]
+"301
+[; ;mountaintrack.c: 301:             break;
 [e $U 549  ]
-"316
-[; ;mountaintrack.c: 316:     }
+"302
+[; ;mountaintrack.c: 302:     }
 }
 [e $U 549  ]
 [e :U 550 ]
-[e [\ -> . *U _self 1 `ui , $ -> . `E4975 5 `ui 551
- , $ -> . `E4975 6 `ui 554
- , $ -> . `E4975 10 `ui 561
- , $ -> . `E4975 11 `ui 575
- , $ -> . `E4975 14 `ui 577
- , $ -> . `E4975 15 `ui 590
- , $ -> . `E4975 8 `ui 593
+[e [\ -> . *U _self 1 `ui , $ -> . `E4977 5 `ui 551
+ , $ -> . `E4977 6 `ui 554
+ , $ -> . `E4977 10 `ui 561
+ , $ -> . `E4977 11 `ui 575
+ , $ -> . `E4977 14 `ui 577
+ , $ -> . `E4977 15 `ui 590
+ , $ -> . `E4977 8 `ui 593
  595 ]
 [e :U 549 ]
-"317
-[; ;mountaintrack.c: 317: }
+"303
+[; ;mountaintrack.c: 303: }
 [e :UE 548 ]
 }
-"325
-[; ;mountaintrack.c: 325: void UPDATExMOUNTAINxTRAINxWAIT(MNTSTATION *self)
+"311
+[; ;mountaintrack.c: 311: void UPDATExMOUNTAINxTRAINxWAIT(MNTSTATION *self)
 [v _UPDATExMOUNTAINxTRAINxWAIT `(v ~T0 @X0 1 ef1`*S542 ]
-"326
-[; ;mountaintrack.c: 326: {
+"312
+[; ;mountaintrack.c: 312: {
 {
 [e :U _UPDATExMOUNTAINxTRAINxWAIT ]
-"325
-[; ;mountaintrack.c: 325: void UPDATExMOUNTAINxTRAINxWAIT(MNTSTATION *self)
+"311
+[; ;mountaintrack.c: 311: void UPDATExMOUNTAINxTRAINxWAIT(MNTSTATION *self)
 [v _self `*S542 ~T0 @X0 1 r1 ]
-"326
-[; ;mountaintrack.c: 326: {
+"312
+[; ;mountaintrack.c: 312: {
 [f ]
-"328
-[; ;mountaintrack.c: 328:     uint32_t millis = GETxMILLIS();
+"314
+[; ;mountaintrack.c: 314:     uint32_t millis = GETxMILLIS();
 [v _millis `ul ~T0 @X0 1 a ]
 [e = _millis ( _GETxMILLIS ..  ]
-"330
-[; ;mountaintrack.c: 330:     if(STN_WAIT == self->stnTrack1.stnState){
-[e $ ! == -> . `E4975 19 `ui -> . . *U _self 10 1 `ui 597  ]
+"316
+[; ;mountaintrack.c: 316:     if(STN_WAIT == self->stnTrack1.stnState){
+[e $ ! == -> . `E4977 19 `ui -> . . *U _self 10 1 `ui 597  ]
 {
-"331
-[; ;mountaintrack.c: 331:         if((millis - self->stnTrack1.tCountTime) > self->stnTrack1.tWaitTime){
+"317
+[; ;mountaintrack.c: 317:         if((millis - self->stnTrack1.tCountTime) > self->stnTrack1.tWaitTime){
 [e $ ! > - _millis . . *U _self 10 7 . . *U _self 10 8 598  ]
 {
-"332
-[; ;mountaintrack.c: 332:             if(STN_OUTBOUND != self->stnTrack2.stnState){
-[e $ ! != -> . `E4975 17 `ui -> . . *U _self 11 1 `ui 599  ]
+"318
+[; ;mountaintrack.c: 318:             if(STN_OUTBOUND != self->stnTrack2.stnState){
+[e $ ! != -> . `E4977 17 `ui -> . . *U _self 11 1 `ui 599  ]
 {
-"333
-[; ;mountaintrack.c: 333:                 self->stnTrack1.stnState = STN_OUTBOUND;
-[e = . . *U _self 10 1 . `E4975 17 ]
-"334
-[; ;mountaintrack.c: 334:                 CREATExTASKxSTATUSxMESSAGE(self->name,
-[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 10 0 `uc -> . . *U _self 10 1 `uc -> . `E5012 0 `uc ]
-"338
-[; ;mountaintrack.c: 338:             }
+"319
+[; ;mountaintrack.c: 319:                 self->stnTrack1.stnState = STN_OUTBOUND;
+[e = . . *U _self 10 1 . `E4977 17 ]
+"320
+[; ;mountaintrack.c: 320:                 CREATExTASKxSTATUSxMESSAGE(self->name,
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 10 0 `uc -> . . *U _self 10 1 `uc -> . `E5014 0 `uc ]
+"324
+[; ;mountaintrack.c: 324:             }
 }
 [e $U 600  ]
-"339
-[; ;mountaintrack.c: 339:             else{
+"325
+[; ;mountaintrack.c: 325:             else{
 [e :U 599 ]
 {
-"340
-[; ;mountaintrack.c: 340:                 self->stnTrack1.tCountTime = millis;
+"326
+[; ;mountaintrack.c: 326:                 self->stnTrack1.tCountTime = millis;
 [e = . . *U _self 10 7 _millis ]
-"341
-[; ;mountaintrack.c: 341:                 self->stnTrack1.tWaitTime = (GETxRANDOMxNUMBER() << tRandomShift);
-[e = . . *U _self 10 8 -> << -> ( _GETxRANDOMxNUMBER ..  `ui -> _tRandomShift `i `ul ]
-"342
-[; ;mountaintrack.c: 342:                 self->stnTrack1.stnState = STN_WAIT;
-[e = . . *U _self 10 1 . `E4975 19 ]
-"343
-[; ;mountaintrack.c: 343:                 CREATExTASKxSTATUSxMESSAGE(self->name,
-[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 10 0 `uc -> . `E4975 32 `uc -> / . . *U _self 10 8 -> -> -> 1000 `i `l `ul `uc ]
-"347
-[; ;mountaintrack.c: 347:             }
+"327
+[; ;mountaintrack.c: 327:                 self->stnTrack1.tWaitTime = (GETxRANDOMxNUMBER() << tMountainRandomShift);
+[e = . . *U _self 10 8 -> << -> ( _GETxRANDOMxNUMBER ..  `ui -> _tMountainRandomShift `i `ul ]
+"328
+[; ;mountaintrack.c: 328:                 self->stnTrack1.stnState = STN_WAIT;
+[e = . . *U _self 10 1 . `E4977 19 ]
+"329
+[; ;mountaintrack.c: 329:                 CREATExTASKxSTATUSxMESSAGE(self->name,
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 10 0 `uc -> . `E4977 32 `uc -> / . . *U _self 10 8 -> -> -> 1000 `i `l `ul `uc ]
+"333
+[; ;mountaintrack.c: 333:             }
 }
 [e :U 600 ]
-"348
-[; ;mountaintrack.c: 348:         }
+"334
+[; ;mountaintrack.c: 334:         }
 }
 [e :U 598 ]
-"349
-[; ;mountaintrack.c: 349:     }
+"335
+[; ;mountaintrack.c: 335:     }
 }
 [e :U 597 ]
-"351
-[; ;mountaintrack.c: 351:     if(STN_WAIT == self->stnTrack2.stnState){
-[e $ ! == -> . `E4975 19 `ui -> . . *U _self 11 1 `ui 601  ]
+"337
+[; ;mountaintrack.c: 337:     if(STN_WAIT == self->stnTrack2.stnState){
+[e $ ! == -> . `E4977 19 `ui -> . . *U _self 11 1 `ui 601  ]
 {
-"352
-[; ;mountaintrack.c: 352:         if((millis - self->stnTrack2.tCountTime) > self->stnTrack2.tWaitTime){
+"338
+[; ;mountaintrack.c: 338:         if((millis - self->stnTrack2.tCountTime) > self->stnTrack2.tWaitTime){
 [e $ ! > - _millis . . *U _self 11 7 . . *U _self 11 8 602  ]
 {
-"353
-[; ;mountaintrack.c: 353:             if(STN_OUTBOUND != self->stnTrack1.stnState){
-[e $ ! != -> . `E4975 17 `ui -> . . *U _self 10 1 `ui 603  ]
+"339
+[; ;mountaintrack.c: 339:             if(STN_OUTBOUND != self->stnTrack1.stnState){
+[e $ ! != -> . `E4977 17 `ui -> . . *U _self 10 1 `ui 603  ]
 {
-"354
-[; ;mountaintrack.c: 354:                 self->stnTrack2.stnState = STN_OUTBOUND;
-[e = . . *U _self 11 1 . `E4975 17 ]
-"355
-[; ;mountaintrack.c: 355:                 CREATExTASKxSTATUSxMESSAGE(self->name,
-[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 11 0 `uc -> . . *U _self 11 1 `uc -> . `E5012 0 `uc ]
-"359
-[; ;mountaintrack.c: 359:             }
+"340
+[; ;mountaintrack.c: 340:                 self->stnTrack2.stnState = STN_OUTBOUND;
+[e = . . *U _self 11 1 . `E4977 17 ]
+"341
+[; ;mountaintrack.c: 341:                 CREATExTASKxSTATUSxMESSAGE(self->name,
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 11 0 `uc -> . . *U _self 11 1 `uc -> . `E5014 0 `uc ]
+"345
+[; ;mountaintrack.c: 345:             }
 }
 [e $U 604  ]
-"360
-[; ;mountaintrack.c: 360:             else{
+"346
+[; ;mountaintrack.c: 346:             else{
 [e :U 603 ]
 {
-"361
-[; ;mountaintrack.c: 361:                 self->stnTrack2.tCountTime = millis;
+"347
+[; ;mountaintrack.c: 347:                 self->stnTrack2.tCountTime = millis;
 [e = . . *U _self 11 7 _millis ]
-"362
-[; ;mountaintrack.c: 362:                 self->stnTrack2.tWaitTime = (GETxRANDOMxNUMBER() << tRandomShift);
-[e = . . *U _self 11 8 -> << -> ( _GETxRANDOMxNUMBER ..  `ui -> _tRandomShift `i `ul ]
-"363
-[; ;mountaintrack.c: 363:                 self->stnTrack2.stnState = STN_WAIT;
-[e = . . *U _self 11 1 . `E4975 19 ]
-"364
-[; ;mountaintrack.c: 364:                 CREATExTASKxSTATUSxMESSAGE(self->name,
-[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 11 0 `uc -> . `E4975 32 `uc -> / . . *U _self 11 8 -> -> -> 1000 `i `l `ul `uc ]
-"368
-[; ;mountaintrack.c: 368:             }
+"348
+[; ;mountaintrack.c: 348:                 self->stnTrack2.tWaitTime = (GETxRANDOMxNUMBER() << tMountainRandomShift);
+[e = . . *U _self 11 8 -> << -> ( _GETxRANDOMxNUMBER ..  `ui -> _tMountainRandomShift `i `ul ]
+"349
+[; ;mountaintrack.c: 349:                 self->stnTrack2.stnState = STN_WAIT;
+[e = . . *U _self 11 1 . `E4977 19 ]
+"350
+[; ;mountaintrack.c: 350:                 CREATExTASKxSTATUSxMESSAGE(self->name,
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . . *U _self 11 0 `uc -> . `E4977 32 `uc -> / . . *U _self 11 8 -> -> -> 1000 `i `l `ul `uc ]
+"354
+[; ;mountaintrack.c: 354:             }
 }
 [e :U 604 ]
-"369
-[; ;mountaintrack.c: 369:         }
+"355
+[; ;mountaintrack.c: 355:         }
 }
 [e :U 602 ]
-"370
-[; ;mountaintrack.c: 370:     }
+"356
+[; ;mountaintrack.c: 356:     }
 }
 [e :U 601 ]
-"371
-[; ;mountaintrack.c: 371: }
+"357
+[; ;mountaintrack.c: 357: }
 [e :UE 596 ]
 }

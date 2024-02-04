@@ -5,19 +5,19 @@ Version 4.0 HI-TECH Software Intermediate Code
 [n S546 . header command data ]
 "17 communication.c
 [; ;communication.c: 17: static ETH_STATES ethernetState;
-[c E5194 0 1 2 3 4 5 .. ]
-[n E5194 . ETHERNET_LINKUP ETHERNET_CONNECT ETHERNET_NTP ETHERNET_DATA_RX ETHERNET_DATA_TX ETHERNET_TCPIP_ERROR  ]
+[c E5196 0 1 2 3 4 5 .. ]
+[n E5196 . ETHERNET_LINKUP ETHERNET_CONNECT ETHERNET_NTP ETHERNET_DATA_RX ETHERNET_DATA_TX ETHERNET_TCPIP_ERROR  ]
 "22 ./communication.h
 [; ;./communication.h: 22:     {
 [s S545 `ul 1 `us 1 `ul 1 `us 1 ]
 [n S545 . destinationAddress destinationPortNumber sourceAddress sourcePortNumber ]
 "34 communication.c
 [; ;communication.c: 34: static error_msg ret = ERROR;
-[c E5838 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 .. ]
-[n E5838 . ERROR SUCCESS LINK_NOT_FOUND BUFFER_BUSY TX_LOGIC_NOT_IDLE MAC_NOT_FOUND IP_WRONG_VERSION IPV4_CHECKSUM_FAILS DEST_IP_NOT_MATCHED ICMP_CHECKSUM_FAILS UDP_CHECKSUM_FAILS TCP_CHECKSUM_FAILS DMA_TIMEOUT PORT_NOT_AVAILABLE ARP_IP_NOT_MATCHED EAPoL_PACKET_FAILURE INCORRECT_IPV4_HLEN IPV4_NO_OPTIONS TX_QUEUED IPV6_CHECKSUM_FAILS IPV6_LOCAL_ADDR_RESOLVE IPV6_LOCAL_ADDR_INVALID NO_GATEWAY ADDRESS_RESOLUTION GLOBAL_DESTINATION ARP_WRONG_HARDWARE_ADDR_TYPE ARP_WRONG_PROTOCOL_TYPE ARP_WRONG_HARDWARE_ADDR_LEN ARP_WRONG_PROTOCOL_LEN  ]
-[v F6048 `(v ~T0 @X0 0 tf ]
-[v F6054 `(v ~T0 @X0 0 tf ]
+[c E5840 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 .. ]
+[n E5840 . ERROR SUCCESS LINK_NOT_FOUND BUFFER_BUSY TX_LOGIC_NOT_IDLE MAC_NOT_FOUND IP_WRONG_VERSION IPV4_CHECKSUM_FAILS DEST_IP_NOT_MATCHED ICMP_CHECKSUM_FAILS UDP_CHECKSUM_FAILS TCP_CHECKSUM_FAILS DMA_TIMEOUT PORT_NOT_AVAILABLE ARP_IP_NOT_MATCHED EAPoL_PACKET_FAILURE INCORRECT_IPV4_HLEN IPV4_NO_OPTIONS TX_QUEUED IPV6_CHECKSUM_FAILS IPV6_LOCAL_ADDR_RESOLVE IPV6_LOCAL_ADDR_INVALID NO_GATEWAY ADDRESS_RESOLUTION GLOBAL_DESTINATION ARP_WRONG_HARDWARE_ADDR_TYPE ARP_WRONG_PROTOCOL_TYPE ARP_WRONG_HARDWARE_ADDR_LEN ARP_WRONG_PROTOCOL_LEN  ]
+[v F6050 `(v ~T0 @X0 0 tf ]
 [v F6056 `(v ~T0 @X0 0 tf ]
+[v F6058 `(v ~T0 @X0 0 tf ]
 "104 ./mcc_generated_files/TCPIPLibrary/network.h
 [; ;./mcc_generated_files/TCPIPLibrary/network.h: 104: void Network_Manage(void);
 [v _Network_Manage `(v ~T0 @X0 0 ef ]
@@ -46,11 +46,11 @@ Version 4.0 HI-TECH Software Intermediate Code
 [v _udpHeader `S556 ~T0 @X0 0 e ]
 "82
 [; ;./mcc_generated_files/TCPIPLibrary/udpv4.h: 82: error_msg UDP_Start(uint32_t destIP, uint16_t srcPort, uint16_t dstPort);
-[v _UDP_Start `(E5838 ~T0 @X0 0 ef3`ul`us`us ]
+[v _UDP_Start `(E5840 ~T0 @X0 0 ef3`ul`us`us ]
 "60 ./communication.h
 [; ;./communication.h: 60:     extern udpTrans_t *GETxDATAxFROMxRECEIVExMAILxBOX(void);
 [v _GETxDATAxFROMxRECEIVExMAILxBOX `(*S546 ~T0 @X0 0 ef ]
-[v F6061 `(v ~T0 @X0 0 tf ]
+[v F6063 `(v ~T0 @X0 0 tf ]
 "47 communication.c
 [; ;communication.c: 47: _Bool CheckDataInSendMailBox (void);
 [v _CheckDataInSendMailBox `(a ~T0 @X0 0 ef ]
@@ -62,7 +62,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 [v _ETH_WriteBlock `(us ~T0 @X0 0 ef2`*Cuc`us ]
 "83 ./mcc_generated_files/TCPIPLibrary/udpv4.h
 [; ;./mcc_generated_files/TCPIPLibrary/udpv4.h: 83: error_msg UDP_Send(void);
-[v _UDP_Send `(E5838 ~T0 @X0 0 ef ]
+[v _UDP_Send `(E5840 ~T0 @X0 0 ef ]
 "157 ./mcc_generated_files/TCPIPLibrary/ethernet_driver.h
 [; ;./mcc_generated_files/TCPIPLibrary/ethernet_driver.h: 157: void ETH_TxReset(void);
 [v _ETH_TxReset `(v ~T0 @X0 0 ef ]
@@ -77,8 +77,8 @@ Version 4.0 HI-TECH Software Intermediate Code
 [v _ETH_Flush `(v ~T0 @X0 0 ef ]
 "195 communication.c
 [; ;communication.c: 195:     StatusMessage.header = (uint8_t)HEADER;
-[c E5116 170 255 81 82 83 84 85 86 87 88 .. ]
-[n E5116 . HEADER ALIVE STNTRACK1 STNTRACK2 STNTRACK3 MTNTRACK1 MTNTRACK2 MTNTRACK7 MTNTRACK8 VOLTAGE_DETECTED  ]
+[c E5118 170 255 81 82 83 84 85 86 87 88 .. ]
+[n E5118 . HEADER ALIVE STNTRACK1 STNTRACK2 STNTRACK3 MTNTRACK1 MTNTRACK2 MTNTRACK7 MTNTRACK8 VOLTAGE_DETECTED  ]
 "61 ./communication.h
 [; ;./communication.h: 61:     extern void PUTxDATAxINxSENDxMAILxBOX (udpTrans_t *data);
 [v _PUTxDATAxINxSENDxMAILxBOX `(v ~T0 @X0 0 ef1`*S546 ]
@@ -1000,6 +1000,18 @@ Version 4.0 HI-TECH Software Intermediate Code
 [i _tInOutboundStopWaitTime
 * -> -> -> 10 `i `l `ul _tFactorSec
 ]
+"34
+[; ;./enums.h: 34:     const uint32_t tMountainTrainWaitTime = (uint32_t)(50 * tFactorSec);
+[v _tMountainTrainWaitTime `Cul ~T0 @X0 1 e ]
+[i _tMountainTrainWaitTime
+* -> -> -> 50 `i `l `ul _tFactorSec
+]
+"36
+[; ;./enums.h: 36:     const uint8_t tMountainRandomShift = 2;
+[v _tMountainRandomShift `Cuc ~T0 @X0 1 e ]
+[i _tMountainRandomShift
+-> -> 2 `i `uc
+]
 "36 ./communication.h
 [; ;./communication.h: 36:     const uint8_t udpTrans_t_length = (sizeof(udpTrans_t) / sizeof(uint8_t));
 [v _udpTrans_t_length `Cuc ~T0 @X0 1 e ]
@@ -1014,7 +1026,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 ]
 "17 communication.c
 [; ;communication.c: 17: static ETH_STATES ethernetState;
-[v _ethernetState `E5194 ~T0 @X0 1 s ]
+[v _ethernetState `E5196 ~T0 @X0 1 s ]
 "18
 [; ;communication.c: 18: static udpStart_t udpPacketHeader;
 [v _udpPacketHeader `S545 ~T0 @X0 1 s ]
@@ -1053,19 +1065,19 @@ Version 4.0 HI-TECH Software Intermediate Code
 [v _isUdpConnected `a ~T0 @X0 1 e ]
 "34
 [; ;communication.c: 34: static error_msg ret = ERROR;
-[v _ret `E5838 ~T0 @X0 1 s ]
+[v _ret `E5840 ~T0 @X0 1 s ]
 [i _ret
-. `E5838 0
+. `E5840 0
 ]
 "39
 [; ;communication.c: 39: void (*DataRxHandler)(void);
-[v _DataRxHandler `*F6048 ~T0 @X0 1 e ]
+[v _DataRxHandler `*F6050 ~T0 @X0 1 e ]
 "61
 [; ;communication.c: 61: void COMMxSETxRXxDATAxHANDLER(void (* RxDataHandler)(void)){
-[v _COMMxSETxRXxDATAxHANDLER `(v ~T0 @X0 1 ef1`*F6054 ]
+[v _COMMxSETxRXxDATAxHANDLER `(v ~T0 @X0 1 ef1`*F6056 ]
 {
 [e :U _COMMxSETxRXxDATAxHANDLER ]
-[v _RxDataHandler `*F6056 ~T0 @X0 1 r1 ]
+[v _RxDataHandler `*F6058 ~T0 @X0 1 r1 ]
 [f ]
 "62
 [; ;communication.c: 62:     DataRxHandler = RxDataHandler;
@@ -1084,7 +1096,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 [f ]
 "76
 [; ;communication.c: 76:     ethernetState = ETHERNET_LINKUP;
-[e = _ethernetState . `E5194 0 ]
+[e = _ethernetState . `E5196 0 ]
 "79
 [; ;communication.c: 79:     isUdpConnected = 0;
 [e = _isUdpConnected -> -> 0 `i `a ]
@@ -1128,7 +1140,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 {
 "104
 [; ;communication.c: 104:                 ethernetState = ETHERNET_CONNECT;
-[e = _ethernetState . `E5194 1 ]
+[e = _ethernetState . `E5196 1 ]
 "105
 [; ;communication.c: 105:             }
 }
@@ -1160,14 +1172,14 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e = _ret ( _UDP_Start (3 , , . _udpPacketHeader 0 . _udpPacketHeader 3 -> -> 60000 `l `us ]
 "117
 [; ;communication.c: 117:                 if(ret == SUCCESS){
-[e $ ! == -> _ret `ui -> . `E5838 1 `ui 583  ]
+[e $ ! == -> _ret `ui -> . `E5840 1 `ui 583  ]
 {
 "118
 [; ;communication.c: 118:                     isUdpConnected = 1;
 [e = _isUdpConnected -> -> 1 `i `a ]
 "119
 [; ;communication.c: 119:                     ethernetState = ETHERNET_DATA_TX;
-[e = _ethernetState . `E5194 4 ]
+[e = _ethernetState . `E5196 4 ]
 "120
 [; ;communication.c: 120:                 }
 }
@@ -1194,7 +1206,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e = _udpReceived ( _GETxDATAxFROMxRECEIVExMAILxBOX ..  ]
 "130
 [; ;communication.c: 130:                 if(DataRxHandler)
-[e $ ! != _DataRxHandler -> -> 0 `i `*F6061 586  ]
+[e $ ! != _DataRxHandler -> -> 0 `i `*F6063 586  ]
 "131
 [; ;communication.c: 131:                 {
 {
@@ -1211,7 +1223,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e :U 585 ]
 "135
 [; ;communication.c: 135:             ethernetState = ETHERNET_DATA_TX;
-[e = _ethernetState . `E5194 4 ]
+[e = _ethernetState . `E5196 4 ]
 "136
 [; ;communication.c: 136:             break;
 [e $U 577  ]
@@ -1223,7 +1235,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e = _ret ( _UDP_Start (3 , , . _udpPacketHeader 0 . _udpPacketHeader 3 -> -> 60000 `l `us ]
 "143
 [; ;communication.c: 143:             if(ret == SUCCESS){
-[e $ ! == -> _ret `ui -> . `E5838 1 `ui 588  ]
+[e $ ! == -> _ret `ui -> . `E5840 1 `ui 588  ]
 {
 "144
 [; ;communication.c: 144:                 if (CheckDataInSendMailBox()){
@@ -1255,7 +1267,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 {
 "153
 [; ;communication.c: 153:                 if(ret == BUFFER_BUSY){
-[e $ ! == -> _ret `ui -> . `E5838 3 `ui 591  ]
+[e $ ! == -> _ret `ui -> . `E5840 3 `ui 591  ]
 {
 "155
 [; ;communication.c: 155:                     ETH_TxReset();
@@ -1270,14 +1282,14 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e :U 590 ]
 "159
 [; ;communication.c: 159:             ethernetState = ETHERNET_DATA_TX;
-[e = _ethernetState . `E5194 4 ]
+[e = _ethernetState . `E5196 4 ]
 "160
 [; ;communication.c: 160:             break;
 [e $U 577  ]
 "162
 [; ;communication.c: 162:         default: ethernetState = ETHERNET_LINKUP;
 [e :U 592 ]
-[e = _ethernetState . `E5194 0 ]
+[e = _ethernetState . `E5196 0 ]
 "163
 [; ;communication.c: 163:         break;
 [e $U 577  ]
@@ -1286,10 +1298,10 @@ Version 4.0 HI-TECH Software Intermediate Code
 }
 [e $U 577  ]
 [e :U 578 ]
-[e [\ -> _ethernetState `ui , $ -> . `E5194 0 `ui 579
- , $ -> . `E5194 1 `ui 581
- , $ -> . `E5194 3 `ui 584
- , $ -> . `E5194 4 `ui 587
+[e [\ -> _ethernetState `ui , $ -> . `E5196 0 `ui 579
+ , $ -> . `E5196 1 `ui 581
+ , $ -> . `E5196 3 `ui 584
+ , $ -> . `E5196 4 `ui 587
  592 ]
 [e :U 577 ]
 "165
@@ -1353,7 +1365,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 [v _StatusMessage `S546 ~T0 @X0 1 a ]
 "195
 [; ;communication.c: 195:     StatusMessage.header = (uint8_t)HEADER;
-[e = . _StatusMessage 0 -> . `E5116 0 `uc ]
+[e = . _StatusMessage 0 -> . `E5118 0 `uc ]
 "196
 [; ;communication.c: 196:     StatusMessage.command = (uint8_t)task_id;
 [e = . _StatusMessage 1 _task_id ]
@@ -1410,7 +1422,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 [v _StatusMessage `S546 ~T0 @X0 1 a ]
 "220
 [; ;communication.c: 220:     StatusMessage.header = (uint8_t)HEADER;
-[e = . _StatusMessage 0 -> . `E5116 0 `uc ]
+[e = . _StatusMessage 0 -> . `E5118 0 `uc ]
 "221
 [; ;communication.c: 221:     StatusMessage.command = (uint8_t)task_id;
 [e = . _StatusMessage 1 _task_id ]
@@ -1455,7 +1467,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 [f ]
 "242
 [; ;communication.c: 242:     if(data.header == HEADER){
-[e $ ! == -> . _data 0 `i -> . `E5116 0 `i 605  ]
+[e $ ! == -> . _data 0 `i -> . `E5118 0 `i 605  ]
 {
 "243
 [; ;communication.c: 243:         *M_Box_Eth_Recv_Ptr = data;

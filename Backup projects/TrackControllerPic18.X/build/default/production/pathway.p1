@@ -17,31 +17,31 @@ Version 4.0 HI-TECH Software Intermediate Code
 [v _PORTE `Vuc ~T0 @X0 0 e@3972 ]
 "54 ./mainstation.h
 [; ;./mainstation.h: 54: STATION top;
-[c E5000 1 10 20 30 40 50 60 .. ]
-[n E5000 . MAIN_LOOP MAIN_STATION_TOP MAIN_STATION_BOT WALDSEE SIEBWALDE WALDBERG IODATA  ]
-[c E5021 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 .. ]
-[n E5021 . busy connected done command nop INIT INIT2 RUN WAIT IDLE STN_TO_SIEBWALDE SIEBWALDE_TO_STN SIEBWALDE_SWITCHT4T5_OUT SIEBWALDE_SWITCHT4T5_IN SIEBWALDE_SWITCHT4T5 SIEWALDE_SET_NEXT STN_INBOUND STN_OUTBOUND STN_PASSING STN_WAIT STN_IDLE SEQ_IDLE SEQ_WAIT SEQ_SET_OCC SEQ_CHK_TRAIN SEQ_CHK_PASSED SEQ_OUTBOUND_LEFT_STATTION SEQ_INBOUND_BRAKE_TIME SEQ_OUTBOUND_BRAKE_TIME SIG_RED SIG_GREEN INVERT TIME SET_PATH_WAY SET_SIGNAL  ]
-"35 ./enums.h
-[; ;./enums.h: 35:     {
+[c E5002 1 10 20 30 40 50 60 .. ]
+[n E5002 . MAIN_LOOP MAIN_STATION_TOP MAIN_STATION_BOT WALDSEE SIEBWALDE WALDBERG IODATA  ]
+[c E5023 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 .. ]
+[n E5023 . busy connected done command nop INIT INIT2 RUN WAIT IDLE STN_TO_SIEBWALDE SIEBWALDE_TO_STN SIEBWALDE_SWITCHT4T5_OUT SIEBWALDE_SWITCHT4T5_IN SIEBWALDE_SWITCHT4T5 SIEWALDE_SET_NEXT STN_INBOUND STN_OUTBOUND STN_PASSING STN_WAIT STN_IDLE SEQ_IDLE SEQ_WAIT SEQ_SET_OCC SEQ_CHK_TRAIN SEQ_CHK_PASSED SEQ_OUTBOUND_LEFT_STATTION SEQ_INBOUND_BRAKE_TIME SEQ_OUTBOUND_BRAKE_TIME SIG_RED SIG_GREEN INVERT TIME SET_PATH_WAY SET_SIGNAL  ]
+"39 ./enums.h
+[; ;./enums.h: 39:     {
 [s S539 `*Vuc 1 `uc 1 ]
 [n S539 . portx_ptr pin_mask ]
-"41
-[; ;./enums.h: 41:     {
+"45
+[; ;./enums.h: 45:     {
 [s S540 `*Vuc 1 `uc 1 `*Vuc 1 `uc 1 `*Vuc 1 `uc 1 `*Vuc 1 `uc 1 `*Vuc 1 `uc 1 `*Vuc 1 `uc 1 ]
 [n S540 . port1_ptr pin1_mask port2_ptr pin2_mask port3_ptr pin3_mask port4_ptr pin4_mask port5_ptr pin5_mask port6_ptr pin6_mask ]
 "54 ./mainstation.h
 [; ;./mainstation.h: 54: STATION top;
-[c E5009 170 255 81 82 83 84 85 86 87 88 .. ]
-[n E5009 . HEADER ALIVE STNTRACK1 STNTRACK2 STNTRACK3 MTNTRACK1 MTNTRACK2 MTNTRACK7 MTNTRACK8 VOLTAGE_DETECTED  ]
-[c E5058 150 151 152 153 154 155 157 158 159 160 161 162 163 164 .. ]
-[n E5058 . NONE T1 T2 T3 T4 T5 T7 T8 TRACK1 TRACK2 TRACK3 TRACK10 TRACK11 TRACK12  ]
+[c E5011 170 255 81 82 83 84 85 86 87 88 .. ]
+[n E5011 . HEADER ALIVE STNTRACK1 STNTRACK2 STNTRACK3 MTNTRACK1 MTNTRACK2 MTNTRACK7 MTNTRACK8 VOLTAGE_DETECTED  ]
+[c E5060 150 151 152 153 154 155 157 158 159 160 161 162 163 164 .. ]
+[n E5060 . NONE T1 T2 T3 T4 T5 T7 T8 TRACK1 TRACK2 TRACK3 TRACK10 TRACK11 TRACK12  ]
 "17
 [; ;./mainstation.h: 17: {
-[s S541 `E5009 1 `E5021 1 `E5021 1 `E5021 1 `a 1 `E5058 1 `ul 1 `ul 1 `*S539 1 `*S538 1 ]
+[s S541 `E5011 1 `E5023 1 `E5023 1 `E5023 1 `a 1 `E5060 1 `ul 1 `ul 1 `*S539 1 `*S538 1 ]
 [n S541 . stnName stnState stnSequence stnNextState stnOccupied trackNr tCountTime tWaitTime setOccStn getOccStn ]
 "35
 [; ;./mainstation.h: 35: {
-[s S542 `E5000 1 `E5021 1 `*S538 1 `*S538 1 `*S539 1 `*S538 1 `*S538 1 `*S540 1 `uc 1 `uc 1 `*S540 1 `ul 1 `S541 1 `S541 1 `S541 1 ]
+[s S542 `E5002 1 `E5023 1 `*S538 1 `*S538 1 `*S539 1 `*S538 1 `*S538 1 `*S540 1 `uc 1 `uc 1 `*S540 1 `ul 1 `S541 1 `S541 1 `S541 1 ]
 [n S542 . name AppState getFreightLeaveStation getFreightEnterStation setOccBlkIn getOccBlkIn getOccBlkOut setPath prevPath newPath setSignal setSignalTime stnTrack1 stnTrack2 stnTrack3 ]
 "6336 C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h
 [; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 6336: extern volatile unsigned char LATD __attribute__((address(0xF8C)));
@@ -54,11 +54,11 @@ Version 4.0 HI-TECH Software Intermediate Code
 [v _LATE `Vuc ~T0 @X0 0 e@3981 ]
 "24 ./mountaintrack.h
 [; ;./mountaintrack.h: 24: {
-[s S543 `E5009 1 `E5021 1 `E5021 1 `E5021 1 `*S538 1 `a 1 `E5058 1 `ul 1 `ul 1 ]
+[s S543 `E5011 1 `E5023 1 `E5023 1 `E5023 1 `*S538 1 `a 1 `E5060 1 `ul 1 `ul 1 ]
 [n S543 . stnName stnState stnSequence stnNextState getTrainEnterStnTrack stnOccupied trackNr tCountTime tWaitTime ]
 "41
 [; ;./mountaintrack.h: 41: {
-[s S544 `E5000 1 `E5021 1 `E5021 1 `E5058 1 `E5021 1 `E5021 1 `*S538 1 `*S539 1 `*S538 1 `*S540 1 `S543 1 `S543 1 `ul 1 `ul 1 ]
+[s S544 `E5002 1 `E5023 1 `E5023 1 `E5060 1 `E5023 1 `E5023 1 `*S538 1 `*S539 1 `*S538 1 `*S540 1 `S543 1 `S543 1 `ul 1 `ul 1 ]
 [n S544 . name AppState AppNextState LastInboundStn LastState Return getTrainEnterSiebwaldeStn setOccAmpOut getOccAmpOut setPath stnTrack1 stnTrack2 tCountTime tWaitTime ]
 "6224 C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h
 [; ;C:/Program Files/Microchip/MPLABX/v6.20/packs/Microchip/PIC18F-J_DFP/1.7.159/xc8\pic\include\proc\pic18f97j60.h: 6224: extern volatile unsigned char LATC __attribute__((address(0xF8B)));
@@ -1474,6 +1474,18 @@ Version 4.0 HI-TECH Software Intermediate Code
 [i _tInOutboundStopWaitTime
 * -> -> -> 10 `i `l `ul _tFactorSec
 ]
+"34
+[; ;./enums.h: 34:     const uint32_t tMountainTrainWaitTime = (uint32_t)(50 * tFactorSec);
+[v _tMountainTrainWaitTime `Cul ~T0 @X0 1 e ]
+[i _tMountainTrainWaitTime
+* -> -> -> 50 `i `l `ul _tFactorSec
+]
+"36
+[; ;./enums.h: 36:     const uint8_t tMountainRandomShift = 2;
+[v _tMountainRandomShift `Cuc ~T0 @X0 1 e ]
+[i _tMountainRandomShift
+-> -> 2 `i `uc
+]
 "54 ./mainstation.h
 [; ;./mainstation.h: 54: STATION top;
 [v _top `S542 ~T0 @X0 1 e ]
@@ -1792,7 +1804,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 "30
 [; ;pathway.c: 30: void SETxSTATIONxPATHWAY(STATION *self, TASK_MESSAGES path, TASK_STATE dir)
 [; ;pathway.c: 30:             if(path == TRACK3 || path == TRACK11 || path == TRACK12){
-[v _SETxSTATIONxPATHWAY `(v ~T0 @X0 1 ef3`*S542`E5058`E5021 ]
+[v _SETxSTATIONxPATHWAY `(v ~T0 @X0 1 ef3`*S542`E5060`E5023 ]
 "31
 [; ;pathway.c: 31: {
 [; ;pathway.c: 31:                 *self->setPath->port4_ptr &= ~pin4;
@@ -1802,8 +1814,8 @@ Version 4.0 HI-TECH Software Intermediate Code
 [; ;pathway.c: 30: void SETxSTATIONxPATHWAY(STATION *self, TASK_MESSAGES path, TASK_STATE dir)
 [; ;pathway.c: 30:             if(path == TRACK3 || path == TRACK11 || path == TRACK12){
 [v _self `*S542 ~T0 @X0 1 r1 ]
-[v _path `E5058 ~T0 @X0 1 r2 ]
-[v _dir `E5021 ~T0 @X0 1 r3 ]
+[v _path `E5060 ~T0 @X0 1 r2 ]
+[v _dir `E5023 ~T0 @X0 1 r3 ]
 "31
 [; ;pathway.c: 31: {
 [; ;pathway.c: 31:                 *self->setPath->port4_ptr &= ~pin4;
@@ -1833,7 +1845,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e :U 552 ]
 "41
 [; ;pathway.c: 41:             }
-[e $ ! || || == -> _path `ui -> . `E5058 8 `ui == -> _path `ui -> . `E5058 11 `ui == -> _path `ui -> . `E5058 12 `ui 553  ]
+[e $ ! || || == -> _path `ui -> . `E5060 8 `ui == -> _path `ui -> . `E5060 11 `ui == -> _path `ui -> . `E5060 12 `ui 553  ]
 {
 "42
 [; ;pathway.c: 42:             else if(path == TRACK2 || path == TRACK3 || path == TRACK12){
@@ -1845,7 +1857,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 "44
 [; ;pathway.c: 44:             }
 [e :U 553 ]
-[e $ ! || || == -> _path `ui -> . `E5058 9 `ui == -> _path `ui -> . `E5058 10 `ui == -> _path `ui -> . `E5058 13 `ui 555  ]
+[e $ ! || || == -> _path `ui -> . `E5060 9 `ui == -> _path `ui -> . `E5060 10 `ui == -> _path `ui -> . `E5060 13 `ui 555  ]
 {
 "45
 [; ;pathway.c: 45: 
@@ -1857,7 +1869,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e :U 554 ]
 "48
 [; ;pathway.c: 48:             }
-[e $ ! || == -> _path `ui -> . `E5058 9 `ui == -> _path `ui -> . `E5058 11 `ui 556  ]
+[e $ ! || == -> _path `ui -> . `E5060 9 `ui == -> _path `ui -> . `E5060 11 `ui 556  ]
 {
 "49
 [; ;pathway.c: 49:             else if(path == TRACK3 || path == TRACK11){
@@ -1869,7 +1881,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 "51
 [; ;pathway.c: 51:             }
 [e :U 556 ]
-[e $ ! || == -> _path `ui -> . `E5058 10 `ui == -> _path `ui -> . `E5058 12 `ui 558  ]
+[e $ ! || == -> _path `ui -> . `E5060 10 `ui == -> _path `ui -> . `E5060 12 `ui 558  ]
 {
 "52
 [; ;pathway.c: 52: 
@@ -1887,7 +1899,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e :U 559 ]
 "57
 [; ;pathway.c: 57:                 *self->setPath->port3_ptr &= ~pin3;
-[e $ ! || == -> _path `ui -> . `E5058 8 `ui == -> _path `ui -> . `E5058 12 `ui 560  ]
+[e $ ! || == -> _path `ui -> . `E5060 8 `ui == -> _path `ui -> . `E5060 12 `ui 560  ]
 {
 "58
 [; ;pathway.c: 58:             }
@@ -1899,7 +1911,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 "60
 [; ;pathway.c: 60:             if(path == TRACK1 || path == TRACK2 || path == TRACK10){
 [e :U 560 ]
-[e $ ! || == -> _path `ui -> . `E5058 9 `ui == -> _path `ui -> . `E5058 13 `ui 562  ]
+[e $ ! || == -> _path `ui -> . `E5060 9 `ui == -> _path `ui -> . `E5060 13 `ui 562  ]
 {
 "61
 [; ;pathway.c: 61:                 *self->setPath->port4_ptr |= pin4;
@@ -1911,7 +1923,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e :U 561 ]
 "64
 [; ;pathway.c: 64:                 *self->setPath->port4_ptr &= ~pin4;
-[e $ ! || || == -> _path `ui -> . `E5058 10 `ui == -> _path `ui -> . `E5058 12 `ui == -> _path `ui -> . `E5058 13 `ui 563  ]
+[e $ ! || || == -> _path `ui -> . `E5060 10 `ui == -> _path `ui -> . `E5060 12 `ui == -> _path `ui -> . `E5060 13 `ui 563  ]
 {
 "65
 [; ;pathway.c: 65:             }
@@ -1923,7 +1935,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 "67
 [; ;pathway.c: 67: 
 [e :U 563 ]
-[e $ ! || || == -> _path `ui -> . `E5058 8 `ui == -> _path `ui -> . `E5058 9 `ui == -> _path `ui -> . `E5058 11 `ui 565  ]
+[e $ ! || || == -> _path `ui -> . `E5060 8 `ui == -> _path `ui -> . `E5060 9 `ui == -> _path `ui -> . `E5060 11 `ui 565  ]
 {
 "68
 [; ;pathway.c: 68:         default:break;
@@ -1941,7 +1953,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e :U 566 ]
 "73
 [; ;pathway.c: 73:             dir,
-[e $ ! || || == -> _path `ui -> . `E5058 8 `ui == -> _path `ui -> . `E5058 11 `ui == -> _path `ui -> . `E5058 12 `ui 567  ]
+[e $ ! || || == -> _path `ui -> . `E5060 8 `ui == -> _path `ui -> . `E5060 11 `ui == -> _path `ui -> . `E5060 12 `ui 567  ]
 {
 "74
 [; ;pathway.c: 74:             path);
@@ -1952,7 +1964,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e $U 568  ]
 "76
 [e :U 567 ]
-[e $ ! || || == -> _path `ui -> . `E5058 9 `ui == -> _path `ui -> . `E5058 10 `ui == -> _path `ui -> . `E5058 13 `ui 569  ]
+[e $ ! || || == -> _path `ui -> . `E5060 9 `ui == -> _path `ui -> . `E5060 10 `ui == -> _path `ui -> . `E5060 13 `ui 569  ]
 {
 "77
 [e =& *U . *U . *U _self 7 0 -> ~ -> _pin1 `i `uc ]
@@ -1961,7 +1973,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e :U 569 ]
 [e :U 568 ]
 "80
-[e $ ! || == -> _path `ui -> . `E5058 9 `ui == -> _path `ui -> . `E5058 11 `ui 570  ]
+[e $ ! || == -> _path `ui -> . `E5060 9 `ui == -> _path `ui -> . `E5060 11 `ui 570  ]
 {
 "81
 [e =| *U . *U . *U _self 7 2 -> _pin2 `uc ]
@@ -1970,7 +1982,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e $U 571  ]
 "83
 [e :U 570 ]
-[e $ ! || == -> _path `ui -> . `E5058 10 `ui == -> _path `ui -> . `E5058 12 `ui 572  ]
+[e $ ! || == -> _path `ui -> . `E5060 10 `ui == -> _path `ui -> . `E5060 12 `ui 572  ]
 {
 "84
 [e =& *U . *U . *U _self 7 2 -> ~ -> _pin2 `i `uc ]
@@ -1979,7 +1991,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e :U 572 ]
 [e :U 571 ]
 "87
-[e $ ! || == -> _path `ui -> . `E5058 8 `ui == -> _path `ui -> . `E5058 12 `ui 573  ]
+[e $ ! || == -> _path `ui -> . `E5060 8 `ui == -> _path `ui -> . `E5060 12 `ui 573  ]
 {
 "88
 [e =| *U . *U . *U _self 7 4 -> _pin3 `uc ]
@@ -1988,7 +2000,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e $U 574  ]
 "90
 [e :U 573 ]
-[e $ ! || == -> _path `ui -> . `E5058 9 `ui == -> _path `ui -> . `E5058 13 `ui 575  ]
+[e $ ! || == -> _path `ui -> . `E5060 9 `ui == -> _path `ui -> . `E5060 13 `ui 575  ]
 {
 "91
 [e =& *U . *U . *U _self 7 4 -> ~ -> _pin3 `i `uc ]
@@ -1997,7 +2009,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e :U 575 ]
 [e :U 574 ]
 "94
-[e $ ! || || == -> _path `ui -> . `E5058 8 `ui == -> _path `ui -> . `E5058 9 `ui == -> _path `ui -> . `E5058 11 `ui 576  ]
+[e $ ! || || == -> _path `ui -> . `E5060 8 `ui == -> _path `ui -> . `E5060 9 `ui == -> _path `ui -> . `E5060 11 `ui 576  ]
 {
 "95
 [e =| *U . *U . *U _self 7 6 -> _pin4 `uc ]
@@ -2006,7 +2018,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e $U 577  ]
 "97
 [e :U 576 ]
-[e $ ! || || == -> _path `ui -> . `E5058 10 `ui == -> _path `ui -> . `E5058 12 `ui == -> _path `ui -> . `E5058 13 `ui 578  ]
+[e $ ! || || == -> _path `ui -> . `E5060 10 `ui == -> _path `ui -> . `E5060 12 `ui == -> _path `ui -> . `E5060 13 `ui 578  ]
 {
 "98
 [e =& *U . *U . *U _self 7 6 -> ~ -> _pin4 `i `uc ]
@@ -2023,31 +2035,31 @@ Version 4.0 HI-TECH Software Intermediate Code
 }
 [e $U 550  ]
 [e :U 551 ]
-[e [\ -> _dir `ui , $ -> . `E5021 16 `ui 552
- , $ -> . `E5021 17 `ui 559
- , $ -> . `E5021 18 `ui 566
+[e [\ -> _dir `ui , $ -> . `E5023 16 `ui 552
+ , $ -> . `E5023 17 `ui 559
+ , $ -> . `E5023 18 `ui 566
  579 ]
 [e :U 550 ]
 "105
-[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . `E5021 33 `uc -> _dir `uc -> _path `uc ]
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . `E5023 33 `uc -> _dir `uc -> _path `uc ]
 "111
 [e :UE 549 ]
 }
 "113
-[v _SETxMNTSTATIONxPATHWAY `(v ~T0 @X0 1 ef2`*S544`E5058 ]
+[v _SETxMNTSTATIONxPATHWAY `(v ~T0 @X0 1 ef2`*S544`E5060 ]
 "114
 {
 [e :U _SETxMNTSTATIONxPATHWAY ]
 "113
 [v _self `*S544 ~T0 @X0 1 r1 ]
-[v _path `E5058 ~T0 @X0 1 r2 ]
+[v _path `E5060 ~T0 @X0 1 r2 ]
 "114
 [f ]
 "117
 [v _pin1 `uc ~T0 @X0 1 a ]
 [e = _pin1 . *U . *U _self 9 1 ]
 "119
-[e $ ! == -> _path `ui -> . `E5058 1 `ui 581  ]
+[e $ ! == -> _path `ui -> . `E5060 1 `ui 581  ]
 {
 "120
 [e =| *U . *U . *U _self 9 0 -> _pin1 `uc ]
@@ -2056,7 +2068,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e $U 582  ]
 "122
 [e :U 581 ]
-[e $ ! == -> _path `ui -> . `E5058 2 `ui 583  ]
+[e $ ! == -> _path `ui -> . `E5060 2 `ui 583  ]
 {
 "123
 [e =& *U . *U . *U _self 9 0 -> ~ -> _pin1 `i `uc ]
@@ -2065,7 +2077,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e $U 584  ]
 "125
 [e :U 583 ]
-[e $ ! == -> _path `ui -> . `E5058 6 `ui 585  ]
+[e $ ! == -> _path `ui -> . `E5060 6 `ui 585  ]
 {
 "126
 [e =| *U . *U . *U _self 9 0 -> _pin1 `uc ]
@@ -2074,7 +2086,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e $U 586  ]
 "128
 [e :U 585 ]
-[e $ ! == -> _path `ui -> . `E5058 7 `ui 587  ]
+[e $ ! == -> _path `ui -> . `E5060 7 `ui 587  ]
 {
 "129
 [e =& *U . *U . *U _self 9 0 -> ~ -> _pin1 `i `uc ]
@@ -2085,7 +2097,7 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e :U 584 ]
 [e :U 582 ]
 "132
-[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . `E5021 33 `uc -> . *U _self 0 `uc -> _path `uc ]
+[e ( _CREATExTASKxSTATUSxMESSAGE (4 , , , -> . *U _self 0 `uc -> . `E5023 33 `uc -> . *U _self 0 `uc -> _path `uc ]
 "138
 [e :UE 580 ]
 }

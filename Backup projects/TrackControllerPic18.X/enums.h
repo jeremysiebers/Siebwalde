@@ -30,6 +30,10 @@ extern "C" {
     const uint32_t tOutboundWaitTime = (uint32_t)(10 * tFactorSec);
     /* Time to wait after in-outbound, train fully stopped (mountain) */
     const uint32_t tInOutboundStopWaitTime = (uint32_t)(10 * tFactorSec);
+    /* Minimum Time that Mountain Train waits before leaving */
+    const uint32_t tMountainTrainWaitTime = (uint32_t)(50 * tFactorSec);
+    /* To shift the max result of 32 sec to 131 seconds if val = 2 */
+    const uint8_t  tMountainRandomShift = 2;
 
     typedef struct
     {
