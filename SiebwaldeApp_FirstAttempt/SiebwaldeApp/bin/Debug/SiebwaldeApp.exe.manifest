@@ -62,19 +62,19 @@
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>LzFLLC8ztxT6hrbMoo574+4zxv7dW7HPRE4rMBUHeXo=</dsig:DigestValue>
+        <dsig:DigestValue>+AH5Q62jzCHWT3BUm0j3jpNLbqzoPdMWLyh0FQ8Xp+w=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="SiebwaldeApp.Core.dll" size="179200">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="SiebwaldeApp.Core.dll" size="179712">
       <assemblyIdentity name="SiebwaldeApp.Core" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>pkDi0Hy4xENcZWvHB23H7C6ZgFqw9TW5JXwCtdO3R/4=</dsig:DigestValue>
+        <dsig:DigestValue>+RCrEpHPE+6zUmpEdaZ/PBVQ8T636G4sW0orV/MkhoU=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
