@@ -80,7 +80,10 @@ namespace SiebwaldeApp.Core
             {
                 _Identifier = Encoding.ASCII.GetBytes(Identifier[i]);
                 Send[i,0] = _Identifier[0];
-                Send[i,1] = Convert.ToByte(int.Parse(Convert.ToString(macAddr[i]), NumberStyles.HexNumber));
+                if(macAddr != "" && ipAddr != "")
+                {
+                    Send[i,1] = Convert.ToByte(int.Parse(Convert.ToString(macAddr[i]), NumberStyles.HexNumber));
+                }                
                 Send[i,2] = 0x0D; // send CR afterwards
                 //SEND XXX
             }

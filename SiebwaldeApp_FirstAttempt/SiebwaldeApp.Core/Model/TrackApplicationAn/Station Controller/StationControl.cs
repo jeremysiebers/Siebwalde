@@ -35,7 +35,7 @@ namespace SiebwaldeApp.Core
         /// <param name="LoggerInstance"></param>
         public StationControl(string LoggerInstance)
         {
-            // couple and hold local variables                    
+            // couple and hold local variables
             _mLoggerInstance = LoggerInstance;
             _mStations = new Dictionary<string, Station>();
 
@@ -52,7 +52,7 @@ namespace SiebwaldeApp.Core
             stationBOT.addStationTrack("Track3");
             _mStations["BOT"] = stationBOT;
 
-            // Subscribe to IO updates
+            // Subscribe to external IO updates
             IoC.TrackVariables.PropertyChanged += ExternalTrackVar_PropertyChanged;
 
             foreach (var stationEntry in _mStations)
@@ -65,6 +65,10 @@ namespace SiebwaldeApp.Core
                 }
             }
         }
+
+        #endregion
+
+        #region methods
 
         /// <summary>
         /// Catching event from track internal vars and sets the correct instance data to be send to Ethernet controller
@@ -93,11 +97,7 @@ namespace SiebwaldeApp.Core
                     default: break;
             }
         }
-
-        #endregion
-
-        #region methods
-
+                
         /// <summary>
         /// Catching event from track io and sets the correct instance variables of station and tracks
         /// </summary>
