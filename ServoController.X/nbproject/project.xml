@@ -4,32 +4,32 @@
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/make-project/1">
             <name>ServoController</name>
-            <creation-uuid>c1185b78-15a4-4156-a895-e8bc41475fa3</creation-uuid>
+            <creation-uuid>40e5f648-f723-4751-b5ec-7f5a85f80cca</creation-uuid>
             <make-project-type>0</make-project-type>
-            <c-extensions>c</c-extensions>
-            <cpp-extensions/>
-            <header-extensions>h</header-extensions>
             <sourceEncoding>ISO-8859-1</sourceEncoding>
-            <asminc-extensions/>
             <make-dep-projects/>
             <sourceRootList>
                 <sourceRootElem>.</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>
-                    <name>TrainJunction</name>
+                    <name>MainTrainJunction</name>
                     <type>2</type>
                 </confElem>
                 <confElem>
-                    <name>FallerCarStop</name>
+                    <name>MainTrainJunctionInversed</name>
                     <type>2</type>
                 </confElem>
                 <confElem>
-                    <name>FallerCarJunctionRight</name>
+                    <name>MainFallerCarJunctionRight</name>
                     <type>2</type>
                 </confElem>
                 <confElem>
-                    <name>FallerCarJunctionRightMiddleLeft</name>
+                    <name>MainFallerCarJunctionRightMiddleLeft</name>
+                    <type>2</type>
+                </confElem>
+                <confElem>
+                    <name>MainFallerCarStop</name>
                     <type>2</type>
                 </confElem>
             </confList>
