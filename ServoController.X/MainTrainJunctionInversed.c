@@ -35,7 +35,7 @@ const uint16_t SERVO_MIDDLE   =         0xF9F0;        // 1.5ms is also used for
 #define SERVO_RIGHT                                              (SERVO_MIDDLE + SERVO_DIST)
 #define SERVO_LEFT                                               (SERVO_MIDDLE - SERVO_DIST)
 
-#define SERVO_DIST                                                200//70
+#define SERVO_DIST                                                40//70
 
 //#define SERVO_RIGHT                                             0xFD40          // 1ms
 //#define SERVO_MIDDLE                                            0xFBD7          // 1.5ms
