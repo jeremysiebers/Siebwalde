@@ -27,7 +27,7 @@
 #define SeinBend						GP0		// SeinBend Led output
 #define ServoOut                        GP2     // Servo pulse output
 #define SwMiddle                        GP3     // Spare
-#define SwInput  						GP4		// Switch input to drive servo to the right or the left
+#define SwInput  						(!GP4)		// Switch input to drive servo to the right or the left
 #define Heart_Pol        				GP5		// Heart polaization relais output
 
 const uint16_t SERVO_MIDDLE   =         0xF9F0;        // 1.5ms is also used for switching Heart_Pol
