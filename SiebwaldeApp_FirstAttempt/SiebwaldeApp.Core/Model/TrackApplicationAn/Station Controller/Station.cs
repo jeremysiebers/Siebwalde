@@ -12,7 +12,14 @@ namespace SiebwaldeApp.Core
     {
         #region private properties
 
+        /// <summary>
+        /// name of the station
+        /// </summary>
         private string _name;
+
+        /// <summary>
+        /// Struct to hold the data of the station
+        /// </summary>
         private Dictionary<string,StationTrack> _stnTracks;
 
         #endregion

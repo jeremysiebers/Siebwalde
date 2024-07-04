@@ -26,6 +26,9 @@ namespace SiebwaldeApp.Core
         /// </summary>
         public string stnTrackName { get; private set; }
         
+        /// <summary>
+        /// Get the occupied state of the track
+        /// </summary>
         public bool getOccStn
         {
             get => _getOccStn;
@@ -42,6 +45,9 @@ namespace SiebwaldeApp.Core
             }
         }
 
+        /// <summary>
+        /// Set the occupied state of the track
+        /// </summary>
         public bool setOccStn
         {
             get => _setOccStn;

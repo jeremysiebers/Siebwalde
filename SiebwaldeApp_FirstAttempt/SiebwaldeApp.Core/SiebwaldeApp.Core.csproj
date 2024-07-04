@@ -87,6 +87,7 @@
     <Compile Include="Model\TrackApplicationAn\Station Controller\InitSequencer.cs" />
     <Compile Include="Model\TrackApplicationAn\Station Controller\PathWay.cs" />
     <Compile Include="Model\TrackApplicationAn\Station Controller\Station.cs" />
+    <Compile Include="Model\TrackApplicationAn\Station Controller\StationApplication.cs" />
     <Compile Include="Model\TrackApplicationAn\Station Controller\StationControl.cs" />
     <Compile Include="Model\TrackApplicationAn\Station Controller\StationTrack.cs" />
     <Compile Include="Model\TrackApplicationAn\Track Controller\TrackControlMain.cs" />
@@ -129,7 +130,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Model\TrackApplicationAn\Model\" />
     <Folder Include="Model\TrackApplicationAn\Simulator\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

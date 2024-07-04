@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace SiebwaldeApp.Core
 {
@@ -14,11 +15,16 @@ namespace SiebwaldeApp.Core
         private string _mLoggerInstance { get; set; }
         // Dictonary to hold all stations
         private Dictionary<string, Station> _mStations;
+        // Dictonary to hold all StationApplications
+        private Dictionary<string, StationApplication> _application;
 
         #endregion
 
         #region public properties
 
+        /// <summary>
+        /// Dictonary to hold the station instances
+        /// </summary>
         public Dictionary<string, Station> mStations
         {
             get { return _mStations; }
@@ -52,6 +58,14 @@ namespace SiebwaldeApp.Core
             stationBOT.addStationTrack("Track3");
             _mStations["BOT"] = stationBOT;
 
+            _application = new Dictionary<string, StationApplication>();
+
+            StationApplication stationApplicationTop = new StationApplication(stationTOP);
+            StationApplication stationApplicationBot = new StationApplication(stationBOT);
+
+            _application[nameof(stationTOP)] = stationApplicationTop;
+            _application[nameof(stationBOT)] = stationApplicationBot;
+
             // Subscribe to external IO updates
             IoC.TrackVariables.PropertyChanged += ExternalTrackVar_PropertyChanged;
 
@@ -82,13 +96,15 @@ namespace SiebwaldeApp.Core
 
             StationTrack stnTrack = sender as StationTrack;
 
+            bool value = (bool)sender.GetType().GetProperty(e.PropertyName).GetValue(sender);
+
             switch (stnTrack.stnTrackName)
             {
                 case "Track1":
                     switch(e.PropertyName)
                     {
                         case "setOccStn":
-                            IoC.TrackVariables.OccToStn1 = (bool)sender.GetType().GetProperty(e.PropertyName).GetValue(sender);
+                            IoC.TrackVariables.OccToStn1 = value;
                             break;
                         default: break;
                     }
@@ -107,25 +123,27 @@ namespace SiebwaldeApp.Core
         {
             if (mStations == null) { return; }
 
+            bool value = (bool)sender.GetType().GetProperty(e.PropertyName).GetValue(sender);
+
             switch (e.PropertyName)
             {
                 case "OccFromStn1":
-                    _mStations["BOT"].StnTracks["Track1"].getOccStn = (bool)sender.GetType().GetProperty(e.PropertyName).GetValue(sender);
+                    _mStations["BOT"].StnTracks["Track1"].getOccStn = value;
                     break;
                 case "OccFromStn2":
-                    _mStations["BOT"].StnTracks["Track2"].getOccStn = (bool)sender.GetType().GetProperty(e.PropertyName).GetValue(sender);
+                    _mStations["BOT"].StnTracks["Track2"].getOccStn = value;
                     break;
                 case "OccFromStn3":
-                    _mStations["BOT"].StnTracks["Track3"].getOccStn = (bool)sender.GetType().GetProperty(e.PropertyName).GetValue(sender);
+                    _mStations["BOT"].StnTracks["Track3"].getOccStn = value;
                     break;
                 case "OccFromStn10":
-                    _mStations["TOP"].StnTracks["Track10"].getOccStn = (bool)sender.GetType().GetProperty(e.PropertyName).GetValue(sender);
+                    _mStations["TOP"].StnTracks["Track10"].getOccStn = value;
                     break;
                 case "OccFromStn11":
-                    _mStations["TOP"].StnTracks["Track11"].getOccStn = (bool)sender.GetType().GetProperty(e.PropertyName).GetValue(sender);
+                    _mStations["TOP"].StnTracks["Track11"].getOccStn = value;
                     break;
                 case "OccFromStn12":
-                    _mStations["TOP"].StnTracks["Track12"].getOccStn = (bool)sender.GetType().GetProperty(e.PropertyName).GetValue(sender);
+                    _mStations["TOP"].StnTracks["Track12"].getOccStn = value;
                     break;
 
                 default:
