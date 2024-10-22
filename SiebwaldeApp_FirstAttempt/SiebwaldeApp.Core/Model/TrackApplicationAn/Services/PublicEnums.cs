@@ -110,6 +110,27 @@ namespace SiebwaldeApp.Core
         TRACK12 = 164,
     }
 
+    public enum Stn
+    {
+        TOP,
+        HallBlock13,
+        HallBlock9B,
+        OCC_FR_9B,
+        OccFromBlock13,
+        TRACK10,
+        TRACK11,
+        TRACK12,
+
+        BOT,
+        HallBlock4A,
+        HallBlock21A,
+        OCC_FR_21B,
+        OccFromBlock4,
+        TRACK1,
+        TRACK2,
+        TRACK3,
+    }
+
     public enum TopStationVar
     {
         HallBlock13,

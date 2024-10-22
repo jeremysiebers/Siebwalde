@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 
 namespace SiebwaldeApp.Core
 {
@@ -24,8 +25,13 @@ namespace SiebwaldeApp.Core
         /// <summary>
         /// Set the station track name
         /// </summary>
-        public string stnTrackName { get; private set; }
-        
+        public Stn stnTrackName { get; private set; }
+
+        /// <summary>
+        /// Set the station track number
+        /// </summary>
+        public Stn stnTrackNumber { get; private set; }
+
         /// <summary>
         /// Get the occupied state of the track
         /// </summary>
@@ -72,9 +78,10 @@ namespace SiebwaldeApp.Core
         /// Constructor
         /// </summary>
         /// <param name="name"></param>
-        public StationTrack(string name)
+        public StationTrack(Stn name, Stn trackNr)
         {
             stnTrackName = name;
+            stnTrackNumber = trackNr;
         }
 
         #endregion

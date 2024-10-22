@@ -42,6 +42,11 @@ namespace SiebwaldeApp.Core
         private bool _VoltageDetected;
 
         private bool _OccToStn1;
+        private bool _OccToStn2;
+        private bool _OccToStn3;
+        private bool _OccToStn10;
+        private bool _OccToStn11;
+        private bool _OccToStn12;
 
         #endregion
 
@@ -608,7 +613,101 @@ namespace SiebwaldeApp.Core
                 else
                 {
                     _OccToStn1 = value;
-                    //PropertyChanged(this, new PropertyChangedEventArgs(nameof(VoltageDetected)));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Get/Set and generate event for OccToStn2
+        /// </summary>
+        public bool OccToStn2
+        {
+            get => _OccToStn2;
+            set
+            {
+                if (value == _OccToStn2)
+                {
+                    return;
+                }
+                else
+                {
+                    _OccToStn2 = value;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Get/Set and generate event for OccToStn3
+        /// </summary>
+        public bool OccToStn3
+        {
+            get => _OccToStn3;
+            set
+            {
+                if (value == _OccToStn3)
+                {
+                    return;
+                }
+                else
+                {
+                    _OccToStn3 = value;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Get/Set and generate event for OccToStn10
+        /// </summary>
+        public bool OccToStn10
+        {
+            get => _OccToStn10;
+            set
+            {
+                if (value == _OccToStn10)
+                {
+                    return;
+                }
+                else
+                {
+                    _OccToStn10 = value;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Get/Set and generate event for OccToStn11
+        /// </summary>
+        public bool OccToStn11
+        {
+            get => _OccToStn11;
+            set
+            {
+                if (value == _OccToStn11)
+                {
+                    return;
+                }
+                else
+                {
+                    _OccToStn11 = value;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Get/Set and generate event for OccToStn12
+        /// </summary>
+        public bool OccToStn12
+        {
+            get => _OccToStn12;
+            set
+            {
+                if (value == _OccToStn12)
+                {
+                    return;
+                }
+                else
+                {
+                    _OccToStn12 = value;
                 }
             }
         }

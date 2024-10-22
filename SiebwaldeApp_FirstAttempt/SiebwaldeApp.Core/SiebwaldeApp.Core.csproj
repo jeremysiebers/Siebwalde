@@ -84,7 +84,7 @@
     <Compile Include="Model\TrackApplicationAn\Data\TrackApplicationVariables.cs" />
     <Compile Include="Model\TrackApplicationAn\Data\TrackIOHandle.cs" />
     <Compile Include="Model\TrackApplicationAn\Services\PublicEnums.cs" />
-    <Compile Include="Model\TrackApplicationAn\Station Controller\InitSequencer.cs" />
+    <Compile Include="Model\TrackApplicationAn\Station Controller\StationState.cs" />
     <Compile Include="Model\TrackApplicationAn\Station Controller\PathWay.cs" />
     <Compile Include="Model\TrackApplicationAn\Station Controller\Station.cs" />
     <Compile Include="Model\TrackApplicationAn\Station Controller\StationApplication.cs" />
