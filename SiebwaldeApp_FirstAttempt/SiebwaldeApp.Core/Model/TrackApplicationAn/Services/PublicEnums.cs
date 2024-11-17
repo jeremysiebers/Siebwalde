@@ -90,6 +90,7 @@ namespace SiebwaldeApp.Core
         TIME = 132,
         SET_PATH_WAY = 133,
         SET_SIGNAL = 134,
+        WAIT_DONE = 135,
     }
 
     public enum TrackNr

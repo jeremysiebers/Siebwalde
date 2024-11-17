@@ -37,12 +37,11 @@ namespace SiebwaldeApp.Core
         /// Get the state if a freighter is entering the station
         /// </summary>
         private bool _getFreightEnterStation;
-
+        
         /// <summary>
         /// Struct to hold the data of the station track
         /// </summary>
         private Dictionary<Stn, StationTrack> _stnTracks;
-
         /// <summary>
         /// Struct to hold the vars of the station like block occupied etc
         /// </summary>

@@ -22,7 +22,7 @@ namespace SiebwaldeApp.Core
         //private Dictionary<Stn, Station> _mStations;
         // Dictonary to hold all StationApplications
         private Dictionary<Stn, StationApplication> _application;
-
+        
         #endregion
 
         #region public properties
