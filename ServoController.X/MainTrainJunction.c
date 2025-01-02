@@ -57,7 +57,9 @@ void main(void)
     // Hardware Initialization
     TRISIO = 0xFF; // All IO are inputs to be safe
     GPIO = 0x00; // All IO to 0
-//    ANSEL = 0x00; // Turn off ADC
+#ifdef _12F675
+    ANSEL = 0x00; // Turn off ADC (PIC12F675))
+#endif
     CMCON = 7; // Turn off Comparators
 
     Init_Timers(); // Initialize Timers (TMR0)
