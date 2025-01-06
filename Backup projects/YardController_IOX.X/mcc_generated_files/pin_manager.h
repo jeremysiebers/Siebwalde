@@ -741,61 +741,61 @@
 #define IO_RH3_SetDigitalInput()    do { TRISHbits.TRISH3 = 1; } while(0)
 #define IO_RH3_SetDigitalOutput()   do { TRISHbits.TRISH3 = 0; } while(0)
 
-// get/set IO_RH4 aliases
-#define IO_RH4_TRIS                 TRISHbits.TRISH4
-#define IO_RH4_LAT                  LATHbits.LATH4
-#define IO_RH4_PORT                 PORTHbits.RH4
-#define IO_RH4_ANS                  anselRH4bits.anselRH4
-#define IO_RH4_SetHigh()            do { LATHbits.LATH4 = 1; } while(0)
-#define IO_RH4_SetLow()             do { LATHbits.LATH4 = 0; } while(0)
-#define IO_RH4_Toggle()             do { LATHbits.LATH4 = ~LATHbits.LATH4; } while(0)
-#define IO_RH4_GetValue()           PORTHbits.RH4
-#define IO_RH4_SetDigitalInput()    do { TRISHbits.TRISH4 = 1; } while(0)
-#define IO_RH4_SetDigitalOutput()   do { TRISHbits.TRISH4 = 0; } while(0)
-#define IO_RH4_SetAnalogMode()      do { anselRH4bits.anselRH4 = 1; } while(0)
-#define IO_RH4_SetDigitalMode()     do { anselRH4bits.anselRH4 = 0; } while(0)
+// get/set HOTRC_CH3_IO aliases
+#define HOTRC_CH3_IO_TRIS                 TRISHbits.TRISH4
+#define HOTRC_CH3_IO_LAT                  LATHbits.LATH4
+#define HOTRC_CH3_IO_PORT                 PORTHbits.RH4
+#define HOTRC_CH3_IO_ANS                  anselRH4bits.anselRH4
+#define HOTRC_CH3_IO_SetHigh()            do { LATHbits.LATH4 = 1; } while(0)
+#define HOTRC_CH3_IO_SetLow()             do { LATHbits.LATH4 = 0; } while(0)
+#define HOTRC_CH3_IO_Toggle()             do { LATHbits.LATH4 = ~LATHbits.LATH4; } while(0)
+#define HOTRC_CH3_IO_GetValue()           PORTHbits.RH4
+#define HOTRC_CH3_IO_SetDigitalInput()    do { TRISHbits.TRISH4 = 1; } while(0)
+#define HOTRC_CH3_IO_SetDigitalOutput()   do { TRISHbits.TRISH4 = 0; } while(0)
+#define HOTRC_CH3_IO_SetAnalogMode()      do { anselRH4bits.anselRH4 = 1; } while(0)
+#define HOTRC_CH3_IO_SetDigitalMode()     do { anselRH4bits.anselRH4 = 0; } while(0)
 
-// get/set IO_RH5 aliases
-#define IO_RH5_TRIS                 TRISHbits.TRISH5
-#define IO_RH5_LAT                  LATHbits.LATH5
-#define IO_RH5_PORT                 PORTHbits.RH5
-#define IO_RH5_ANS                  anselRH5bits.anselRH5
-#define IO_RH5_SetHigh()            do { LATHbits.LATH5 = 1; } while(0)
-#define IO_RH5_SetLow()             do { LATHbits.LATH5 = 0; } while(0)
-#define IO_RH5_Toggle()             do { LATHbits.LATH5 = ~LATHbits.LATH5; } while(0)
-#define IO_RH5_GetValue()           PORTHbits.RH5
-#define IO_RH5_SetDigitalInput()    do { TRISHbits.TRISH5 = 1; } while(0)
-#define IO_RH5_SetDigitalOutput()   do { TRISHbits.TRISH5 = 0; } while(0)
-#define IO_RH5_SetAnalogMode()      do { anselRH5bits.anselRH5 = 1; } while(0)
-#define IO_RH5_SetDigitalMode()     do { anselRH5bits.anselRH5 = 0; } while(0)
+// get/set HOTRC_CH4_IO aliases
+#define HOTRC_CH4_IO_TRIS                 TRISHbits.TRISH5
+#define HOTRC_CH4_IO_LAT                  LATHbits.LATH5
+#define HOTRC_CH4_IO_PORT                 PORTHbits.RH5
+#define HOTRC_CH4_IO_ANS                  anselRH5bits.anselRH5
+#define HOTRC_CH4_IO_SetHigh()            do { LATHbits.LATH5 = 1; } while(0)
+#define HOTRC_CH4_IO_SetLow()             do { LATHbits.LATH5 = 0; } while(0)
+#define HOTRC_CH4_IO_Toggle()             do { LATHbits.LATH5 = ~LATHbits.LATH5; } while(0)
+#define HOTRC_CH4_IO_GetValue()           PORTHbits.RH5
+#define HOTRC_CH4_IO_SetDigitalInput()    do { TRISHbits.TRISH5 = 1; } while(0)
+#define HOTRC_CH4_IO_SetDigitalOutput()   do { TRISHbits.TRISH5 = 0; } while(0)
+#define HOTRC_CH4_IO_SetAnalogMode()      do { anselRH5bits.anselRH5 = 1; } while(0)
+#define HOTRC_CH4_IO_SetDigitalMode()     do { anselRH5bits.anselRH5 = 0; } while(0)
 
-// get/set IO_RH6 aliases
-#define IO_RH6_TRIS                 TRISHbits.TRISH6
-#define IO_RH6_LAT                  LATHbits.LATH6
-#define IO_RH6_PORT                 PORTHbits.RH6
-#define IO_RH6_ANS                  anselRH6bits.anselRH6
-#define IO_RH6_SetHigh()            do { LATHbits.LATH6 = 1; } while(0)
-#define IO_RH6_SetLow()             do { LATHbits.LATH6 = 0; } while(0)
-#define IO_RH6_Toggle()             do { LATHbits.LATH6 = ~LATHbits.LATH6; } while(0)
-#define IO_RH6_GetValue()           PORTHbits.RH6
-#define IO_RH6_SetDigitalInput()    do { TRISHbits.TRISH6 = 1; } while(0)
-#define IO_RH6_SetDigitalOutput()   do { TRISHbits.TRISH6 = 0; } while(0)
-#define IO_RH6_SetAnalogMode()      do { anselRH6bits.anselRH6 = 1; } while(0)
-#define IO_RH6_SetDigitalMode()     do { anselRH6bits.anselRH6 = 0; } while(0)
+// get/set HOTRC_CH5_IO aliases
+#define HOTRC_CH5_IO_TRIS                 TRISHbits.TRISH6
+#define HOTRC_CH5_IO_LAT                  LATHbits.LATH6
+#define HOTRC_CH5_IO_PORT                 PORTHbits.RH6
+#define HOTRC_CH5_IO_ANS                  anselRH6bits.anselRH6
+#define HOTRC_CH5_IO_SetHigh()            do { LATHbits.LATH6 = 1; } while(0)
+#define HOTRC_CH5_IO_SetLow()             do { LATHbits.LATH6 = 0; } while(0)
+#define HOTRC_CH5_IO_Toggle()             do { LATHbits.LATH6 = ~LATHbits.LATH6; } while(0)
+#define HOTRC_CH5_IO_GetValue()           PORTHbits.RH6
+#define HOTRC_CH5_IO_SetDigitalInput()    do { TRISHbits.TRISH6 = 1; } while(0)
+#define HOTRC_CH5_IO_SetDigitalOutput()   do { TRISHbits.TRISH6 = 0; } while(0)
+#define HOTRC_CH5_IO_SetAnalogMode()      do { anselRH6bits.anselRH6 = 1; } while(0)
+#define HOTRC_CH5_IO_SetDigitalMode()     do { anselRH6bits.anselRH6 = 0; } while(0)
 
-// get/set IO_RH7 aliases
-#define IO_RH7_TRIS                 TRISHbits.TRISH7
-#define IO_RH7_LAT                  LATHbits.LATH7
-#define IO_RH7_PORT                 PORTHbits.RH7
-#define IO_RH7_ANS                  anselRH7bits.anselRH7
-#define IO_RH7_SetHigh()            do { LATHbits.LATH7 = 1; } while(0)
-#define IO_RH7_SetLow()             do { LATHbits.LATH7 = 0; } while(0)
-#define IO_RH7_Toggle()             do { LATHbits.LATH7 = ~LATHbits.LATH7; } while(0)
-#define IO_RH7_GetValue()           PORTHbits.RH7
-#define IO_RH7_SetDigitalInput()    do { TRISHbits.TRISH7 = 1; } while(0)
-#define IO_RH7_SetDigitalOutput()   do { TRISHbits.TRISH7 = 0; } while(0)
-#define IO_RH7_SetAnalogMode()      do { anselRH7bits.anselRH7 = 1; } while(0)
-#define IO_RH7_SetDigitalMode()     do { anselRH7bits.anselRH7 = 0; } while(0)
+// get/set HOTRC_CH6_IO aliases
+#define HOTRC_CH6_IO_TRIS                 TRISHbits.TRISH7
+#define HOTRC_CH6_IO_LAT                  LATHbits.LATH7
+#define HOTRC_CH6_IO_PORT                 PORTHbits.RH7
+#define HOTRC_CH6_IO_ANS                  anselRH7bits.anselRH7
+#define HOTRC_CH6_IO_SetHigh()            do { LATHbits.LATH7 = 1; } while(0)
+#define HOTRC_CH6_IO_SetLow()             do { LATHbits.LATH7 = 0; } while(0)
+#define HOTRC_CH6_IO_Toggle()             do { LATHbits.LATH7 = ~LATHbits.LATH7; } while(0)
+#define HOTRC_CH6_IO_GetValue()           PORTHbits.RH7
+#define HOTRC_CH6_IO_SetDigitalInput()    do { TRISHbits.TRISH7 = 1; } while(0)
+#define HOTRC_CH6_IO_SetDigitalOutput()   do { TRISHbits.TRISH7 = 0; } while(0)
+#define HOTRC_CH6_IO_SetAnalogMode()      do { anselRH7bits.anselRH7 = 1; } while(0)
+#define HOTRC_CH6_IO_SetDigitalMode()     do { anselRH7bits.anselRH7 = 0; } while(0)
 
 // get/set HALL_BUSSTOP_STN_IO aliases
 #define HALL_BUSSTOP_STN_IO_TRIS                 TRISJbits.TRISJ0

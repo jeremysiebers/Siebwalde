@@ -57,7 +57,7 @@
 #include "tmr1.h"
 #include "tmr0.h"
 #include "TCPIPLibrary/network.h"
-
+#define SIMULATOR
 
 
 /**

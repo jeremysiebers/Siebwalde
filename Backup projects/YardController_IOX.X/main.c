@@ -9,24 +9,7 @@
 #include <stdbool.h>
 #include "bus.h"
 #include "firedep.h"
-#include "mcc_generated_files/examples/i2c2_master_example.h"
-
-// Address of thee MCP23017 (0x20 - 0x27 depending on A0-A2 pins first 4 bits are 0100!)
-i2c2_address_t MCP23017_ADDR1 = 0x21;
-i2c2_address_t MCP23017_ADDR2 = 0x22;
-i2c2_address_t MCP23017_ADDR3 = 0x23;
-i2c2_address_t MCP23017_ADDR4 = 0x24;
-i2c2_address_t MCP23017_ADDR5 = 0x25;
-i2c2_address_t MCP23017_ADDR6 = 0x26;
-
-// MCP23017 register addresses 
-#define IODIRA   0x00  // I/O direction register (port A)
-#define IODIRB   0x01  // I/O direction register (port B)
-#define IOCON    0x0A  // IOCON shared between PORT A and B!
-#define GPIOA    0x12  // GPIO-register for port A
-#define GPIOB    0x13  // GPIO-register for port B
-#define OLATA    0x14  // Output latch A
-#define OLATB    0x15  // Output latch B
+#include "yard_functions.h"
 
 static bool         updateTick = false;
 static uint32_t     tBootWaitTimeCnt = 1;
@@ -68,8 +51,8 @@ void main(void)
     PROCESSxETHxDATAxINIT();
     INITxRANDxNUMBER();
     INITxBUSxDIRIVE();
-    INITxFIREDEP();    
-    IOX_RESET_SetLow();
+    INITxFIREDEP();
+    INITxYARDxFUNCTION();    
     /* Kick all servo controllers */
     LATE = 0xFF;
     FLOWxCONTROLxOrder = STATION;
@@ -79,7 +62,9 @@ void main(void)
         EXT_WDT_Toggle();
         
         //TP4_SetHigh();
+        #ifndef SIMULATOR
         PROCESSxETHxDATA();
+        #endif        
         //TP4_SetLow();
         
         /* First boot up sequence, set IO, warm up debounce first */
@@ -97,11 +82,9 @@ void main(void)
              */
             if(tBootWaitTimeCnt > tReadIoSignalWaitTime){
                 tBootWaitTimeCnt = 0;
-                booted = true;
-                IOX_RESET_SetHigh();
+                booted = true;                
                 // release all servos
-                LATE = 0x00;
-                MCP23017_Init();
+                LATE = 0x00;                
             }
         }
         // </editor-fold>
@@ -115,7 +98,11 @@ void main(void)
             if(true == updateTick){
                 
                 DebounceIO();
+                UPDATExYARDxFUNCTIONxSELECTION();
                 
+                WRITExYARDxDEVICExVAR(yardOutputArr, ARRAY_SIZE(yardOutputArr),
+                        BW1, true);
+                                
                 if(1){ /* Here normally the udp connected check */
                     /*
                     * MainStation methods
@@ -146,14 +133,11 @@ void main(void)
                     TP2_SetLow();
  
                     //TP1_SetHigh();
-                    /*
-                     * Mountain track methods
-                     */
                     UPDATExFIREDEPxDRIVExWAIT(&firedep);
                     //TP1_SetLow();
                     TP2_SetHigh();
                     UPDATExFIREDEPxDRIVE(&firedep);
-                    TP2_SetLow();
+                    TP2_SetLow();                   
                     
                     // <editor-fold defaultstate="collapsed">
                     TP3_SetHigh();
@@ -191,7 +175,6 @@ void main(void)
                         tSendAliveMessWaitTimeCnt = 0;
                         //TP3_SetLow();
                         
-                        MCP23017_ToggleOutputs();
                     }
                     
                     if(CHECKxDATAxINxRECEIVExMAILxBOX() == true){
@@ -227,74 +210,15 @@ void DebounceIO()
      */
     uint32_t millis = GETxMILLIS();    
     //TP3_SetHigh();        
-    DEBOUNCExIO(&HALL_BUSSTOP_STN , &millis); 
+    DEBOUNCExIO(&HALL_BUSSTOP_STN , &millis);
     DEBOUNCExIO(&HALL_BUSSTOP_IND , &millis);
-    DEBOUNCExIO(&HALL_STOP_FDEP   , &millis);        
+    DEBOUNCExIO(&HALL_STOP_FDEP   , &millis);
+    DEBOUNCExIO(&HOTRC_CH3        , &millis);
+    DEBOUNCExIO(&HOTRC_CH4        , &millis);
+    DEBOUNCExIO(&HOTRC_CH5        , &millis);
+    DEBOUNCExIO(&HOTRC_CH6        , &millis);    
     //TP3_SetLow();
     
-}
-
-void MCP23017_Init(void) {
-    // init the IO Expander ports all outputs
-    for(uint8_t i = 0x21; i<0x27; i++){
-        I2C2_Write1ByteRegister(i, IOCON,  0b00100000);
-        I2C2_Write1ByteRegister(i, IODIRA, 0x00);
-        I2C2_Write1ByteRegister(i, IODIRB, 0x00);    
-        uint8_t data1[2] = {OLATA, 0xFF};
-        I2C2_WriteNBytes(i, data1, 2);
-        uint8_t data2[2] = {OLATB, 0xFF};
-        I2C2_WriteNBytes(i, data2, 2);
-    }    
-    
-//    I2C2_Write1ByteRegister(MCP23017_ADDR2, IOCON,  0b00100000);
-//    I2C2_Write1ByteRegister(MCP23017_ADDR2, IODIRA, 0x00);
-//    I2C2_Write1ByteRegister(MCP23017_ADDR2, IODIRB, 0x00);    
-//    I2C2_WriteNBytes(MCP23017_ADDR2, data1, 2);
-//    I2C2_WriteNBytes(MCP23017_ADDR2, data2, 2);
-//    
-//    I2C2_Write1ByteRegister(MCP23017_ADDR3, IOCON,  0b00100000);
-//    I2C2_Write1ByteRegister(MCP23017_ADDR3, IODIRA, 0x00);
-//    I2C2_Write1ByteRegister(MCP23017_ADDR3, IODIRB, 0x00);    
-//    I2C2_WriteNBytes(MCP23017_ADDR3, data1, 2);
-//    I2C2_WriteNBytes(MCP23017_ADDR3, data2, 2);
-}
-
-void MCP23017_ToggleOutputs(void) {
-    TP4_SetHigh();
-    if(toggle == true){
-        //uint8_t data1[2] = {OLATA, 0xFF};
-        //uint8_t data2[2] = {OLATB, 0xFF};
-        uint8_t data1[3] = {OLATA, 0xAA, 0xAA};
-        //I2C2_Write1ByteRegister(MCP23017_ADDR, OLATA, 0);
-//        I2C2_WriteNBytes(MCP23017_ADDR1, data1, 3);
-//        I2C2_WriteNBytes(MCP23017_ADDR2, data1, 3);
-//        I2C2_WriteNBytes(MCP23017_ADDR3, data1, 3);
-        //I2C2_WriteNBytes(MCP23017_ADDR, data2, 2);
-        //I2C2_Write1ByteRegister(MCP23017_ADDR, OLATB, 0x00);
-        toggle = false;
-        
-        for(uint8_t i = 0x21; i<0x27; i++){
-            I2C2_WriteNBytes(i, data1, 3);
-        }
-        
-    }
-    else{
-        //uint8_t data1[2] = {OLATA, 0x00};
-        //uint8_t data2[2] = {OLATB, 0x00};
-        uint8_t data1[3] = {OLATA, 0x55, 0x55};
-        //I2C2_Write1ByteRegister(MCP23017_ADDR, OLATA, 0);
-//        I2C2_WriteNBytes(MCP23017_ADDR1, data1, 3);
-//        I2C2_WriteNBytes(MCP23017_ADDR2, data1, 3);
-//        I2C2_WriteNBytes(MCP23017_ADDR3, data1, 3);
-        //I2C2_WriteNBytes(MCP23017_ADDR, data2, 2);
-        //I2C2_Write1ByteRegister(MCP23017_ADDR, OLATB, 0xFF);
-        toggle = true;
-        
-        for(uint8_t i = 0x21; i<0x27; i++){
-            I2C2_WriteNBytes(i, data1, 3);
-        }
-    }
-    TP4_SetLow();
 }
 /**
  End of File

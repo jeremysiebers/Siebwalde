@@ -38,6 +38,10 @@ void DEBOUNCExIO(DEBOUNCE *instance, uint32_t *millisPtr)
                   // Handle high-to-low transition
                   instance->value = false;
                 }
+                /* Consumer can reset the updated flag by calling 
+                 * DEBOUNCExIOxGETxSTATE(DEBOUNCE *instance)())
+                 */
+                instance->valueUpdated = true;
         }
     }
     else{
@@ -46,4 +50,11 @@ void DEBOUNCExIO(DEBOUNCE *instance, uint32_t *millisPtr)
          */
         instance->lastDebounceTime = 0;
     }
+}
+
+/* Get the updated value state and reset it to false */
+bool DEBOUNCExGETxVALUExUPDATEDxSTATE(DEBOUNCE *instance){
+    bool temp = instance->valueUpdated;
+    instance->valueUpdated = false;
+    return temp;
 }

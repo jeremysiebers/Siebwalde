@@ -2,15 +2,15 @@
 
 manifest_file_version: 1.0.0
 project: YardController
-creation_date: 2025-01-01T20:46:15.343+01:00[Europe/Berlin]
+creation_date: 2025-01-05T12:39:05.731+01:00[Europe/Berlin]
 operating_system: Windows 10
 mcc_mode: IDE
-mcc_mode_version: v6.20
+mcc_mode_version: v6.05
 device_name: PIC18F97J60
-compiler: XC8 2.46
-mcc_version: 5.5.0
-mcc_core_version: 5.7.0
-content_manager_version: 5.0.1
+compiler: XC8 2.31
+mcc_version: 5.4.1
+mcc_core_version: 5.6.1
+content_manager_version: 4.3.2
 is_mcc_offline: false
 is_using_prerelease_versions: false
 mcc_content_registries: https://registry.npmjs.org/

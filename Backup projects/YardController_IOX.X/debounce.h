@@ -58,7 +58,8 @@ typedef struct
     bool                    buttonState;        // State of the input
     volatile unsigned char  *portx_ptr;         // Reference to the input port used
     uint8_t                 pin_mask;           // Mask to point to pin used of port
-    bool                    value;              // Holds the final value of the signal
+    bool                    value;              // Holds the final value of the signal to be used in SW
+    bool                    valueUpdated;       // Indicates a change in the value
     bool                    ResetH2L;           // value able to follow button to false? 
     bool                    ResetL2H;           // value able to follow button to true? 
     
@@ -68,6 +69,11 @@ typedef struct
 DEBOUNCE HALL_BUSSTOP_STN = {tHallSignalDebounceTime, 0, 0, 0, &PORTJ, 0x1,  0,  false,  true};
 DEBOUNCE HALL_BUSSTOP_IND = {tHallSignalDebounceTime, 0, 0, 0, &PORTJ, 0x2,  0,  false,  true};
 DEBOUNCE HALL_STOP_FDEP   = {tHallSignalDebounceTime, 0, 0, 0, &PORTJ, 0x4,  0,  false,  true};
+
+DEBOUNCE HOTRC_CH3        = {tHallSignalDebounceTime, 0, 0, 0, &PORTH, 0x10, 0,  false,  true};
+DEBOUNCE HOTRC_CH4        = {tHallSignalDebounceTime, 0, 0, 0, &PORTH, 0x20, 0,  false,  true};
+DEBOUNCE HOTRC_CH5        = {tHallSignalDebounceTime, 0, 0, 0, &PORTH, 0x40, 0,  false,  true};
+DEBOUNCE HOTRC_CH6        = {tHallSignalDebounceTime, 0, 0, 0, &PORTH, 0x80, 0,  false,  true};
 /**
   @Summary
     Debounces an input that is given
@@ -96,6 +102,7 @@ DEBOUNCE HALL_STOP_FDEP   = {tHallSignalDebounceTime, 0, 0, 0, &PORTJ, 0x4,  0, 
     </code>
 */
 extern void DEBOUNCExIO(DEBOUNCE *instance, uint32_t *millisPtr);
+extern bool DEBOUNCExGETxVALUExUPDATEDxSTATE(DEBOUNCE *instance);
 
 // TODO Insert declarations or function prototypes (right here) to leverage 
 // live documentation
