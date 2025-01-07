@@ -200,16 +200,7 @@ extern "C" {
     /* To control the flow of the cars */
     TASK_STATE   FLOWxCONTROLxState = busy;
     TASK_STATE   FLOWxCONTROLxOrder = STATION;
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+        
     
     /*Yard Functions*/
     #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
@@ -278,149 +269,40 @@ extern "C" {
 		
 		BW17  	=	0x30,
 		BW18  	=	0x31,
-		BW19  	=	0x32,			
-		BVLED1  =	0x33,
-		BVLED2  =	0x34,
-		BVLED3  =	0x35,
-		BVLED4  =	0x36,
-		BVLED5  =	0x37,
-		BVLED6  =	0x38,
-		BVLED7  =	0x39,
-		BVLED8  =	0x3A,
-		BVLED9  =	0x3B,
-		BVLED10 =	0x3C,
-		BVLED11 =	0x3D,
-		BVLED12 =	0x3E,
-		BVLED13 =	0x3F,
+		BW19  	=	0x32,		
 		
-		BVLED14 =	0x40,
-		BVLED15 =	0x41,
-		BVLED16 =	0x42,
-		BVLED17 =	0x43,
-		BVLED18 =	0x44,
-		BVLED19 =	0x45,
-		BVLED20 =	0x46,
-		BVLED21 =	0x47,
-		BVLED22 =	0x48,
-		BVLED23 =	0x49,
-		BVLED24 =	0x4A,
-		BVLED25 =	0x4B,
-		BVLED22AB =	0x4C,
-		BVLED23AB =	0x4D,
-		BVLEDS3 =	0x4E,
-		BVLEDS4 =	0x4F,
+        BV22AB  =   0x33,
+        BV23AB  =   0x34,
+		MISC3   =	0x35,
+		MISC4   =	0x36,
+		MISC5   =	0x37,
+		MISC6   =	0x38,
+		MISC7   =	0x39,
+		MISC8   =	0x3A,
+		MISC9   =	0x3B,
+		MISC10  =	0x3C,
+		MISC11  =	0x3D,
+		MISC12  =	0x3E,
+		MISC13  =	0x3F,
+		MISC14  =	0x40,
+		MISC15  =	0x41,
+		MISC16  =	0x42,
 		
-        BV22AB  =   0x50,
-        BV23AB  =   0x51,
-		MISC3   =	0x52,
-		MISC4   =	0x53,
-		MISC5   =	0x54,
-		MISC6   =	0x55,
-		MISC7   =	0x56,
-		MISC8   =	0x57,
-		MISC9   =	0x58,
-		MISC10  =	0x59,
-		MISC11  =	0x5A,
-		MISC12  =	0x5B,
-		MISC13  =	0x5C,
-		MISC14  =	0x5D,
-		MISC15  =	0x5E,
-		MISC16  =	0x5F,
-		
-    } YARD_FUNCTIONS;
+    } YARD_OUTPUTS;
     
     typedef struct
     {
-        YARD_FUNCTIONS          function;           // The name of the function
-        uint8_t                 lastOutputState ;//:1; // Previous output value
-        uint8_t                 value           ;//:1; // Actual output value
-        bool                    invertedLevel   ;//:1; // When level must be inverted
-        bool                    valueUpdated    ;//:1; // Indicates a change in the value    
-        uint8_t                 *portx_ptr;         // Reference to the Output port used
-        uint8_t                 pin_mask;           // Mask to point to pin used of port        
-    }YARDOUTPUT;    
-    
-////    typedef struct
-////    {        
-////        bool                    invertedLevel   ;//:1; // When level must be inverted
-////        bool                    valueUpdated    ;//:1; // Indicates a change in the value
-////		uint8_t                 *portx_ptr;         // Reference to the Output port used 
-////        
-////        uint8_t                 IOXRA :1;
-////        uint8_t                 IOXRA :1;
-////        uint8_t                 IOXRA :1;
-////        uint8_t                 IOXRA :1;
-////        uint8_t                 IOXRA :1;
-////        uint8_t                 IOXRA :1;
-////        uint8_t                 IOXRA :1;
-////        uint8_t                 IOXRA :1;
-////        
-////        uint8_t                 IOXRB :1;
-////        uint8_t                 IOXRB :1;
-////        uint8_t                 IOXRB :1;
-////        uint8_t                 IOXRB :1;
-////        uint8_t                 IOXRB :1;
-////        uint8_t                 IOXRB :1;
-////        uint8_t                 IOXRB :1;
-////        uint8_t                 IOXRB :1;
-////    }YARDOUTPUT2;
-	
-//	YARDOUTPUT2 yardOutputArr2[] = {
-//		0, 0, &devices[0].IOXRA, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,
-//	};
+        YARD_OUTPUTS            output          ;// The name of the output
+        uint8_t                 lastOutputState ;// Previous output value
+        uint8_t                 value           ;// Actual output value
+        bool                    invertedLevel   ;// When level must be inverted
+        bool                    valueUpdated    ;// Indicates a change in the value    
+        uint8_t                 *portx_ptr      ;// Reference to the Output port used
+        uint8_t                 pin_mask        ;// Mask to point to pin used of port        
+    }YARDOUTPUT;
     
     YARDOUTPUT yardOutputArr[] = {
-		BW1    , 0, 0, 0, 0, &devices[0].byteView.IOXRA, 0x1 ,
-		BW2    , 0, 0, 0, 0, &devices[0].byteView.IOXRA, 0x2 ,
-		BW3    , 0, 0, 0, 0, &devices[0].byteView.IOXRA, 0x4 ,
-		BW4    , 0, 0, 0, 0, &devices[0].byteView.IOXRA, 0x8 ,
-		BW5    , 0, 0, 0, 0, &devices[0].byteView.IOXRA, 0x10,
-		BW6    , 0, 0, 0, 0, &devices[0].byteView.IOXRA, 0x20,
-		BW7    , 0, 0, 0, 0, &devices[0].byteView.IOXRA, 0x40,
-		BW8    , 0, 0, 0, 0, &devices[0].byteView.IOXRA, 0x80,
-		BW9    , 0, 0, 0, 0, &devices[0].byteView.IOXRB, 0x1 ,
-		BW10   , 0, 0, 0, 0, &devices[0].byteView.IOXRB, 0x2 ,
-		BW11   , 0, 0, 0, 0, &devices[0].byteView.IOXRB, 0x4 ,
-		BW12   , 0, 0, 0, 0, &devices[0].byteView.IOXRB, 0x8 ,
-		BW13   , 0, 0, 0, 0, &devices[0].byteView.IOXRB, 0x10,
-		BW14   , 0, 0, 0, 0, &devices[0].byteView.IOXRB, 0x20,
-		BW15   , 0, 0, 0, 0, &devices[0].byteView.IOXRB, 0x40,
-        BW16   , 0, 0, 0, 0, &devices[0].byteView.IOXRB, 0x80,
-			   
-		BW17   , 0, 0, 0, 0, &devices[1].byteView.IOXRA, 0x1 ,
-		BW18   , 0, 0, 0, 0, &devices[1].byteView.IOXRA, 0x2 ,
-		BW19   , 0, 0, 0, 0, &devices[1].byteView.IOXRA, 0x4 ,
-		BVLED1 , 0, 0, 0, 0, &devices[1].byteView.IOXRA, 0x8 ,
-		BVLED2 , 0, 0, 0, 0, &devices[1].byteView.IOXRA, 0x10,
-		BVLED3 , 0, 0, 0, 0, &devices[1].byteView.IOXRA, 0x20,
-		BVLED4 , 0, 0, 0, 0, &devices[1].byteView.IOXRA, 0x40,
-		BVLED5 , 0, 0, 0, 0, &devices[1].byteView.IOXRA, 0x80,
-		BVLED6 , 0, 0, 0, 0, &devices[1].byteView.IOXRB, 0x1 ,
-		BVLED7 , 0, 0, 0, 0, &devices[1].byteView.IOXRB, 0x2 ,
-		BVLED8 , 0, 0, 0, 0, &devices[1].byteView.IOXRB, 0x4 ,
-		BVLED9 , 0, 0, 0, 0, &devices[1].byteView.IOXRB, 0x8 ,
-		BVLED10, 0, 0, 0, 0, &devices[1].byteView.IOXRB, 0x10,
-		BVLED11, 0, 0, 0, 0, &devices[1].byteView.IOXRB, 0x20,
-		BVLED12, 0, 0, 0, 0, &devices[1].byteView.IOXRB, 0x40,
-        BVLED13, 0, 0, 0, 0, &devices[1].byteView.IOXRB, 0x80,
-		
-		BVLED14, 0, 0, 0, 0, &devices[2].byteView.IOXRA, 0x1 ,
-		BVLED15, 0, 0, 0, 0, &devices[2].byteView.IOXRA, 0x2 ,
-		BVLED16, 0, 0, 0, 0, &devices[2].byteView.IOXRA, 0x4 ,
-		BVLED17, 0, 0, 0, 0, &devices[2].byteView.IOXRA, 0x8 ,
-		BVLED18, 0, 0, 0, 0, &devices[2].byteView.IOXRA, 0x10,
-		BVLED19, 0, 0, 0, 0, &devices[2].byteView.IOXRA, 0x20,
-		BVLED20, 0, 0, 0, 0, &devices[2].byteView.IOXRA, 0x40,
-		BVLED21, 0, 0, 0, 0, &devices[2].byteView.IOXRA, 0x80,
-		BVLED22, 0, 0, 0, 0, &devices[2].byteView.IOXRB, 0x1 ,
-		BVLED23, 0, 0, 0, 0, &devices[2].byteView.IOXRB, 0x2 ,
-		BVLED24, 0, 0, 0, 0, &devices[2].byteView.IOXRB, 0x4 ,
-		BVLED25, 0, 0, 0, 0, &devices[2].byteView.IOXRB, 0x8 ,
-		BVLED22AB, 0, 0, 0, 0, &devices[2].byteView.IOXRB, 0x10,
-		BVLED23AB, 0, 0, 0, 0, &devices[2].byteView.IOXRB, 0x20,
-		BVLEDS3, 0, 0, 0, 0, &devices[2].byteView.IOXRB, 0x40,
-        BVLEDS4, 0, 0, 0, 0, &devices[2].byteView.IOXRB, 0x80,
-		
+        
         BV1    , 0, 0, 0, 0, &devices[3].byteView.IOXRA, 0x1 ,
 		BV2    , 0, 0, 0, 0, &devices[3].byteView.IOXRA, 0x2 ,
 		BV3    , 0, 0, 0, 0, &devices[3].byteView.IOXRA, 0x4 ,
@@ -454,6 +336,27 @@ extern "C" {
 		BVSP5  , 0, 0, 0, 0, &devices[4].byteView.IOXRB, 0x20,
 		BVSP6  , 0, 0, 0, 0, &devices[4].byteView.IOXRB, 0x40,
 		BVSP7  , 0, 0, 0, 0, &devices[4].byteView.IOXRB, 0x80,
+        
+		BW1    , 0, 0, 0, 0, &devices[0].byteView.IOXRA, 0x1 ,
+		BW2    , 0, 0, 0, 0, &devices[0].byteView.IOXRA, 0x2 ,
+		BW3    , 0, 0, 0, 0, &devices[0].byteView.IOXRA, 0x4 ,
+		BW4    , 0, 0, 0, 0, &devices[0].byteView.IOXRA, 0x8 ,
+		BW5    , 0, 0, 0, 0, &devices[0].byteView.IOXRA, 0x10,
+		BW6    , 0, 0, 0, 0, &devices[0].byteView.IOXRA, 0x20,
+		BW7    , 0, 0, 0, 0, &devices[0].byteView.IOXRA, 0x40,
+		BW8    , 0, 0, 0, 0, &devices[0].byteView.IOXRA, 0x80,
+		BW9    , 0, 0, 0, 0, &devices[0].byteView.IOXRB, 0x1 ,
+		BW10   , 0, 0, 0, 0, &devices[0].byteView.IOXRB, 0x2 ,
+		BW11   , 0, 0, 0, 0, &devices[0].byteView.IOXRB, 0x4 ,
+		BW12   , 0, 0, 0, 0, &devices[0].byteView.IOXRB, 0x8 ,
+		BW13   , 0, 0, 0, 0, &devices[0].byteView.IOXRB, 0x10,
+		BW14   , 0, 0, 0, 0, &devices[0].byteView.IOXRB, 0x20,
+		BW15   , 0, 0, 0, 0, &devices[0].byteView.IOXRB, 0x40,
+        BW16   , 0, 0, 0, 0, &devices[0].byteView.IOXRB, 0x80,
+			   
+		BW17   , 0, 0, 0, 0, &devices[1].byteView.IOXRA, 0x1 ,
+		BW18   , 0, 0, 0, 0, &devices[1].byteView.IOXRA, 0x2 ,
+		BW19   , 0, 0, 0, 0, &devices[1].byteView.IOXRA, 0x4 ,	
 		
 		BV22AB , 0, 0, 0, 0, &devices[5].byteView.IOXRA, 0x1 ,
 		BV23AB , 0, 0, 0, 0, &devices[5].byteView.IOXRA, 0x2 ,
@@ -473,6 +376,87 @@ extern "C" {
         MISC16 , 0, 0, 0, 0, &devices[5].byteView.IOXRB, 0x80,				
 	};
     
+    typedef enum{
+        BVLED1  =	0x0,
+		BVLED2  =	0x1,
+		BVLED3  =	0x2,
+		BVLED4  =	0x3,
+		BVLED5  =	0x4,
+		BVLED6  =	0x5,
+		BVLED7  =	0x6,
+		BVLED8  =	0x7,
+		BVLED9  =	0x8,
+		BVLED10 =	0x9,
+		BVLED11 =	0xA,
+		BVLED12 =	0xB,
+		BVLED13 =	0xC,
+		
+		BVLED14 =	0xD,
+		BVLED15 =	0xE,
+		BVLED16 =	0xF,
+		BVLED17 =	0x10,
+		BVLED18 =	0x11,
+		BVLED19 =	0x12,
+		BVLED20 =	0x13,
+		BVLED21 =	0x14,
+		BVLED22 =	0x15,
+		BVLED23 =	0x16,
+		BVLED24 =	0x17,
+		BVLED25 =	0x18,
+		BVLED26 =	0x19,
+		BVLED27 =	0x1A,
+		BVLED28 =	0x1B,
+		BVLED29 =	0x1C,
+    }YARD_LEDS;
+    
+    typedef struct
+    {
+        YARD_LEDS               function;     // The name of the function        
+        uint8_t                 value;        // Actual output value        
+        bool                    valueUpdated; // Indicates a change in the value    
+        uint8_t                 *portx_ptr;   // Reference to the Output port used
+        uint8_t                 pin_mask;     // Mask to point to pin used of port        
+    }YARDLED;
+    
+    YARDLED yardLedArr[] = {
+        BVLED1 , 0, 0, &devices[1].byteView.IOXRA, 0x8 ,
+		BVLED2 , 0, 0, &devices[1].byteView.IOXRA, 0x10,
+		BVLED3 , 0, 0, &devices[1].byteView.IOXRA, 0x20,
+		BVLED4 , 0, 0, &devices[1].byteView.IOXRA, 0x40,
+		BVLED5 , 0, 0, &devices[1].byteView.IOXRA, 0x80,
+		BVLED6 , 0, 0, &devices[1].byteView.IOXRB, 0x1 ,
+		BVLED7 , 0, 0, &devices[1].byteView.IOXRB, 0x2 ,
+		BVLED8 , 0, 0, &devices[1].byteView.IOXRB, 0x4 ,
+		BVLED9 , 0, 0, &devices[1].byteView.IOXRB, 0x8 ,
+		BVLED10, 0, 0, &devices[1].byteView.IOXRB, 0x10,
+		BVLED11, 0, 0, &devices[1].byteView.IOXRB, 0x20,
+		BVLED12, 0, 0, &devices[1].byteView.IOXRB, 0x40,
+        BVLED13, 0, 0, &devices[1].byteView.IOXRB, 0x80,
+		
+		BVLED14, 0, 0, &devices[2].byteView.IOXRA, 0x1 ,
+		BVLED15, 0, 0, &devices[2].byteView.IOXRA, 0x2 ,
+		BVLED16, 0, 0, &devices[2].byteView.IOXRA, 0x4 ,
+		BVLED17, 0, 0, &devices[2].byteView.IOXRA, 0x8 ,
+		BVLED18, 0, 0, &devices[2].byteView.IOXRA, 0x10,
+		BVLED19, 0, 0, &devices[2].byteView.IOXRA, 0x20,
+		BVLED20, 0, 0, &devices[2].byteView.IOXRA, 0x40,
+		BVLED21, 0, 0, &devices[2].byteView.IOXRA, 0x80,
+		BVLED22, 0, 0, &devices[2].byteView.IOXRB, 0x1 ,
+		BVLED23, 0, 0, &devices[2].byteView.IOXRB, 0x2 ,
+		BVLED24, 0, 0, &devices[2].byteView.IOXRB, 0x4 ,
+		BVLED25, 0, 0, &devices[2].byteView.IOXRB, 0x8 ,
+		BVLED26, 0, 0, &devices[2].byteView.IOXRB, 0x10,
+		BVLED27, 0, 0, &devices[2].byteView.IOXRB, 0x20,
+		BVLED28, 0, 0, &devices[2].byteView.IOXRB, 0x40,
+        BVLED29, 0, 0, &devices[2].byteView.IOXRB, 0x80,
+    };
+
+    // Enum to distinguish the array type
+    typedef enum{
+        OUTPUTS,
+        LEDS,
+    }ARRAY_TYPE;
+     
 #ifdef	__cplusplus
 }
 #endif

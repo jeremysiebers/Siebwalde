@@ -99,9 +99,6 @@ void main(void)
                 
                 DebounceIO();
                 UPDATExYARDxFUNCTIONxSELECTION();
-                
-                WRITExYARDxDEVICExVAR(yardOutputArr, ARRAY_SIZE(yardOutputArr),
-                        BW1, true);
                                 
                 if(1){ /* Here normally the udp connected check */
                     /*

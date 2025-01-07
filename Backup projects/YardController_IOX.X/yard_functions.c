@@ -19,10 +19,7 @@ static bool    idle = true;
 void INITxYARDxFUNCTION(void){
    IOX_RESET_SetLow();
    IOX_RESET_SetHigh();
-   MCP23017_Init(devices, 6); // Initialize 25 MCP23017 devices
-   
-   yardOutputArr[0].value = true;
-   yardOutputArr[0].valueUpdated = true;
+   MCP23017_Init(devices, 6); // Initialize 6 MCP23017 devices
 }
 
 void UPDATExYARDxFUNCTIONxSELECTION(void) 
@@ -39,15 +36,36 @@ void UPDATExYARDxFUNCTIONxSELECTION(void)
     if(DEBOUNCExGETxVALUExUPDATEDxSTATE(&HOTRC_CH6)){
         
     }
+    
+    WRITExYARDxDEVICExVAR(yardLedArr, ARRAY_SIZE(yardOutputArr),
+                        LEDS, BVLED1, true);
 }
 
-void WRITExYARDxDEVICExVAR(YARDOUTPUT self[], size_t size, YARD_FUNCTIONS function, bool value){
+void WRITExYARDxDEVICExVAR(void *self, size_t arrSize, ARRAY_TYPE type, 
+        int8_t index, bool value){
+    
+    if(index < 0 || index >= arrSize){
+        return;
+    }
     bool temp = value;
-    if(self[function].invertedLevel){
-        temp = !temp; // Invert the value
-    } 
-    self[function].value = temp;
-    self[function].valueUpdated = true;
+    switch(type){
+        case OUTPUTS:
+            YARDOUTPUT yardOutput = *((YARDOUTPUT *)self);
+            if(yardOutput[index].invertedLevel){
+                temp = !temp; // Invert the value
+            }
+            yardOutput[index].value = temp;
+            yardOutput[index].valueUpdated = true;
+            break;
+            
+        case LEDS:
+            YARDLED *yardLed = self;
+            yardLed[index].value = temp;
+            yardLed[index].valueUpdated = true;
+            break;
+            
+        default: break;
+    }    
 }
 
 //void MCP23017_Init(void) {
