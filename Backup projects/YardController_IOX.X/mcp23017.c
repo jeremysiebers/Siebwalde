@@ -19,11 +19,11 @@ void MCP23017_Init(MCP23017_t *devices, uint8_t num_devices) {
             break;
         }
         // disable auto addressing
-        //I2C2_Write1ByteRegister(devices[i]->address, MCP23017_IOCON,  0b00100000);
+        I2C2_Write1ByteRegister(devices[i].byteView.address, MCP23017_IOCON,  0b00100000);
         // set IO direction of Port A
-        //I2C2_Write1ByteRegister(devices[i].byteView.address, MCP23017_IODIRA, devices[i].byteView.IODIRA);
+        I2C2_Write1ByteRegister(devices[i].byteView.address, MCP23017_IODIRA, devices[i].byteView.IODIRA);
         // set IO direction of Port B
-        //I2C2_Write1ByteRegister(devices[i].byteView.address, MCP23017_IODIRB, devices[i].byteView.IODIRB);
+        I2C2_Write1ByteRegister(devices[i].byteView.address, MCP23017_IODIRB, devices[i].byteView.IODIRB);
     }
 }
 

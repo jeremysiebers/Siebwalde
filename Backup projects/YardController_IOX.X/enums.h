@@ -205,17 +205,40 @@ extern "C" {
     /*Yard Functions*/
     #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
     
-    MCP23017_t devices[] = {
-    {0x00, 0x00, 0x00, 0x00, 0x21, }, // MCP23017 at address 0x21, PORTA/B = Output
-    {0x00, 0x00, 0x00, 0x00, 0x22, }, // MCP23017 at address 0x22, PORTA/B = Output
-    {0x00, 0x00, 0x00, 0x00, 0x23, }, // MCP23017 at address 0x23, PORTA/B = Output
-    {0x00, 0x00, 0x00, 0x00, 0x24, }, // MCP23017 at address 0x24, PORTA/B = Output
-    {0x00, 0x00, 0x00, 0x00, 0x25, }, // MCP23017 at address 0x25, PORTA/B = Output
-    {0x00, 0x00, 0x00, 0x00, 0x26, }, // MCP23017 at address 0x26, PORTA/B = Output
+    MCP23017_t devices[] = {    
+    //IODIRA,IODIRB,IOXRA,IOXRB,address
+    {0x00, 0x00, 0x00, 0x00, 0x21, }, // MCP23017 at address 0x21, PORTA/B = Output, PCB428
+    {0x00, 0x00, 0x00, 0x00, 0x22, }, // MCP23017 at address 0x22, PORTA/B = Output, PCB429
+    {0x00, 0x00, 0x00, 0x00, 0x23, }, // MCP23017 at address 0x23, PORTA/B = Output, PCB431
+    {0x00, 0x00, 0x00, 0x00, 0x24, }, // MCP23017 at address 0x24, PORTA/B = Output, PCB432
+    {0x00, 0x00, 0x00, 0x00, 0x25, }, // MCP23017 at address 0x25, PORTA/B = Output, PCB433
+    {0x00, 0x00, 0x00, 0x00, 0x26, }, // MCP23017 at address 0x26, PORTA/B = Output, PCB430
     };
     
     typedef enum
     {
+		// PCB428 I2C_ADDRESS = 0x21
+		BW1   	=	0x20,
+		BW2   	=	0x21,
+		BW3   	=	0x22,
+		BW4   	=	0x23,
+		BW5   	=	0x24,
+		BW6   	=	0x25,
+		BW7   	=	0x26,
+		BW8   	=	0x27,
+		BW9   	=	0x28,
+		BW10  	=	0x29,
+		BW11  	=	0x2A,
+		BW12  	=	0x2B,
+		BW13  	=	0x2C,
+		BW14  	=	0x2D,
+		BW15  	=	0x2E,
+		BW16  	=	0x2F,		
+        // PCB429 I2C_ADDRESS = 0x22
+		BW17  	=	0x30,
+		BW18  	=	0x31,
+		BW19  	=	0x32,
+        // PCB431 I2C_ADDRESS = 0x23
 		BV1   	=	0x0,	
 		BV2   	=	0x1,
 		BV3   	=	0x2,
@@ -232,7 +255,7 @@ extern "C" {
 		BV14  	=	0xD,
 		BV15  	=	0xE,
 		BV16  	=	0xF,
-		
+		// PCB432 I2C_ADDRESS = 0x24
 		BV17  	=	0x10,
 		BV18  	=	0x11,
 		BV19  	=	0x12,
@@ -248,31 +271,10 @@ extern "C" {
         BVSP4   =	0x1C,
         BVSP5   =	0x1D,
         BVSP6   =	0x1E,
-        BVSP7   =	0x1F,                
-                
-		BW1   	=	0x20,
-		BW2   	=	0x21,
-		BW3   	=	0x22,
-		BW4   	=	0x23,
-		BW5   	=	0x24,
-		BW6   	=	0x25,
-		BW7   	=	0x26,
-		BW8   	=	0x27,
-		BW9   	=	0x28,
-		BW10  	=	0x29,
-		BW11  	=	0x2A,
-		BW12  	=	0x2B,
-		BW13  	=	0x2C,
-		BW14  	=	0x2D,
-		BW15  	=	0x2E,
-		BW16  	=	0x2F,
-		
-		BW17  	=	0x30,
-		BW18  	=	0x31,
-		BW19  	=	0x32,		
-		
-        BV22AB  =   0x33,
-        BV23AB  =   0x34,
+        BVSP7   =	0x1F,
+		// PCB433 I2C_ADDRESS = 0x25
+        BLK22   =   0x33,
+        BLK23   =   0x34,
 		MISC3   =	0x35,
 		MISC4   =	0x36,
 		MISC5   =	0x37,
@@ -302,41 +304,7 @@ extern "C" {
     }YARDOUTPUT;
     
     YARDOUTPUT yardOutputArr[] = {
-        
-        BV1    , 0, 0, 0, 0, &devices[3].byteView.IOXRA, 0x1 ,
-		BV2    , 0, 0, 0, 0, &devices[3].byteView.IOXRA, 0x2 ,
-		BV3    , 0, 0, 0, 0, &devices[3].byteView.IOXRA, 0x4 ,
-		BV4    , 0, 0, 0, 0, &devices[3].byteView.IOXRA, 0x8 ,
-		BV5    , 0, 0, 0, 0, &devices[3].byteView.IOXRA, 0x10,
-		BV6    , 0, 0, 0, 0, &devices[3].byteView.IOXRA, 0x20,
-		BV7    , 0, 0, 0, 0, &devices[3].byteView.IOXRA, 0x40,
-		BV8    , 0, 0, 0, 0, &devices[3].byteView.IOXRA, 0x80,
-		BV9    , 0, 0, 0, 0, &devices[3].byteView.IOXRB, 0x1 ,
-		BV10   , 0, 0, 0, 0, &devices[3].byteView.IOXRB, 0x2 ,
-		BV11   , 0, 0, 0, 0, &devices[3].byteView.IOXRB, 0x4 ,
-		BV12   , 0, 0, 0, 0, &devices[3].byteView.IOXRB, 0x8 ,
-		BV13   , 0, 0, 0, 0, &devices[3].byteView.IOXRB, 0x10,
-		BV14   , 0, 0, 0, 0, &devices[3].byteView.IOXRB, 0x20,
-		BV15   , 0, 0, 0, 0, &devices[3].byteView.IOXRB, 0x40,
-		BV16   , 0, 0, 0, 0, &devices[3].byteView.IOXRB, 0x80,
-		
-		BV17   , 0, 0, 0, 0, &devices[4].byteView.IOXRA, 0x1 ,
-		BV18   , 0, 0, 0, 0, &devices[4].byteView.IOXRA, 0x2 ,
-		BV19   , 0, 0, 0, 0, &devices[4].byteView.IOXRA, 0x4 ,
-		BV20   , 0, 0, 0, 0, &devices[4].byteView.IOXRA, 0x8 ,
-		BV21   , 0, 0, 0, 0, &devices[4].byteView.IOXRA, 0x10,
-		BV22   , 0, 0, 0, 0, &devices[4].byteView.IOXRA, 0x20,
-		BV23   , 0, 0, 0, 0, &devices[4].byteView.IOXRA, 0x40,
-		BV24   , 0, 0, 0, 0, &devices[4].byteView.IOXRA, 0x80,
-		BV25   , 0, 0, 0, 0, &devices[4].byteView.IOXRB, 0x1 ,	
-		BVSP1  , 0, 0, 0, 0, &devices[4].byteView.IOXRB, 0x2 ,
-		BVSP2  , 0, 0, 0, 0, &devices[4].byteView.IOXRB, 0x4 ,
-		BVSP3  , 0, 0, 0, 0, &devices[4].byteView.IOXRB, 0x8 ,
-		BVSP4  , 0, 0, 0, 0, &devices[4].byteView.IOXRB, 0x10,
-		BVSP5  , 0, 0, 0, 0, &devices[4].byteView.IOXRB, 0x20,
-		BVSP6  , 0, 0, 0, 0, &devices[4].byteView.IOXRB, 0x40,
-		BVSP7  , 0, 0, 0, 0, &devices[4].byteView.IOXRB, 0x80,
-        
+		// PCB428 I2C_ADDRESS = 0x21
 		BW1    , 0, 0, 0, 0, &devices[0].byteView.IOXRA, 0x1 ,
 		BW2    , 0, 0, 0, 0, &devices[0].byteView.IOXRA, 0x2 ,
 		BW3    , 0, 0, 0, 0, &devices[0].byteView.IOXRA, 0x4 ,
@@ -353,30 +321,65 @@ extern "C" {
 		BW14   , 0, 0, 0, 0, &devices[0].byteView.IOXRB, 0x20,
 		BW15   , 0, 0, 0, 0, &devices[0].byteView.IOXRB, 0x40,
         BW16   , 0, 0, 0, 0, &devices[0].byteView.IOXRB, 0x80,
-			   
+		// PCB429 I2C_ADDRESS = 0x22	   
 		BW17   , 0, 0, 0, 0, &devices[1].byteView.IOXRA, 0x1 ,
 		BW18   , 0, 0, 0, 0, &devices[1].byteView.IOXRA, 0x2 ,
 		BW19   , 0, 0, 0, 0, &devices[1].byteView.IOXRA, 0x4 ,	
-		
-		BV22AB , 0, 0, 0, 0, &devices[5].byteView.IOXRA, 0x1 ,
-		BV23AB , 0, 0, 0, 0, &devices[5].byteView.IOXRA, 0x2 ,
-		MISC3  , 0, 0, 0, 0, &devices[5].byteView.IOXRA, 0x4 ,
-		MISC4  , 0, 0, 0, 0, &devices[5].byteView.IOXRA, 0x8 ,
-		MISC5  , 0, 0, 0, 0, &devices[5].byteView.IOXRA, 0x10,
-		MISC6  , 0, 0, 0, 0, &devices[5].byteView.IOXRA, 0x20,
-		MISC7  , 0, 0, 0, 0, &devices[5].byteView.IOXRA, 0x40,
-		MISC8  , 0, 0, 0, 0, &devices[5].byteView.IOXRA, 0x80,
-		MISC9  , 0, 0, 0, 0, &devices[5].byteView.IOXRB, 0x1 ,
-		MISC10 , 0, 0, 0, 0, &devices[5].byteView.IOXRB, 0x2 ,
-		MISC11 , 0, 0, 0, 0, &devices[5].byteView.IOXRB, 0x4 ,
-		MISC12 , 0, 0, 0, 0, &devices[5].byteView.IOXRB, 0x8 ,
-		MISC13 , 0, 0, 0, 0, &devices[5].byteView.IOXRB, 0x10,
-		MISC14 , 0, 0, 0, 0, &devices[5].byteView.IOXRB, 0x20,
-		MISC15 , 0, 0, 0, 0, &devices[5].byteView.IOXRB, 0x40,
-        MISC16 , 0, 0, 0, 0, &devices[5].byteView.IOXRB, 0x80,				
+        // PCB431 I2C_ADDRESS = 0x23 relay card
+        BV1    , 0, 0, 0, 0, &devices[2].byteView.IOXRA, 0x1 ,
+		BV2    , 0, 0, 0, 0, &devices[2].byteView.IOXRA, 0x2 ,
+		BV3    , 0, 0, 0, 0, &devices[2].byteView.IOXRA, 0x4 ,
+		BV4    , 0, 0, 0, 0, &devices[2].byteView.IOXRA, 0x8 ,
+		BV5    , 0, 0, 0, 0, &devices[2].byteView.IOXRA, 0x10,
+		BV6    , 0, 0, 0, 0, &devices[2].byteView.IOXRA, 0x20,
+		BV7    , 0, 0, 0, 0, &devices[2].byteView.IOXRA, 0x40,
+		BV8    , 0, 0, 0, 0, &devices[2].byteView.IOXRA, 0x80,
+		BV9    , 0, 0, 0, 0, &devices[2].byteView.IOXRB, 0x1 ,
+		BV10   , 0, 0, 0, 0, &devices[2].byteView.IOXRB, 0x2 ,
+		BV11   , 0, 0, 0, 0, &devices[2].byteView.IOXRB, 0x4 ,
+		BV12   , 0, 0, 0, 0, &devices[2].byteView.IOXRB, 0x8 ,
+		BV13   , 0, 0, 0, 0, &devices[2].byteView.IOXRB, 0x10,
+		BV14   , 0, 0, 0, 0, &devices[2].byteView.IOXRB, 0x20,
+		BV15   , 0, 0, 0, 0, &devices[2].byteView.IOXRB, 0x40,
+		BV16   , 0, 0, 0, 0, &devices[2].byteView.IOXRB, 0x80,
+		// PCB432 I2C_ADDRESS = 0x24 relay card
+		BV17   , 0, 0, 0, 0, &devices[3].byteView.IOXRA, 0x1 ,
+		BV18   , 0, 0, 0, 0, &devices[3].byteView.IOXRA, 0x2 ,
+		BV19   , 0, 0, 0, 0, &devices[3].byteView.IOXRA, 0x4 ,
+		BV20   , 0, 0, 0, 0, &devices[3].byteView.IOXRA, 0x8 ,
+		BV21   , 0, 0, 0, 0, &devices[3].byteView.IOXRA, 0x10,
+		BV22   , 0, 0, 0, 0, &devices[3].byteView.IOXRA, 0x20,
+		BV23   , 0, 0, 0, 0, &devices[3].byteView.IOXRA, 0x40,
+		BV24   , 0, 0, 0, 0, &devices[3].byteView.IOXRA, 0x80,
+		BV25   , 0, 0, 0, 0, &devices[3].byteView.IOXRB, 0x1 ,	
+		BVSP1  , 0, 0, 0, 0, &devices[3].byteView.IOXRB, 0x2 ,
+		BVSP2  , 0, 0, 0, 0, &devices[3].byteView.IOXRB, 0x4 ,
+		BVSP3  , 0, 0, 0, 0, &devices[3].byteView.IOXRB, 0x8 ,
+		BVSP4  , 0, 0, 0, 0, &devices[3].byteView.IOXRB, 0x10,
+		BVSP5  , 0, 0, 0, 0, &devices[3].byteView.IOXRB, 0x20,
+		BVSP6  , 0, 0, 0, 0, &devices[3].byteView.IOXRB, 0x40,
+		BVSP7  , 0, 0, 0, 0, &devices[3].byteView.IOXRB, 0x80,
+        // PCB433 I2C_ADDRESS = 0x25 relay card
+		BLK22  , 0, 0, 0, 0, &devices[4].byteView.IOXRA, 0x1 ,
+		BLK23  , 0, 0, 0, 0, &devices[4].byteView.IOXRA, 0x2 ,
+		MISC3  , 0, 0, 0, 0, &devices[4].byteView.IOXRA, 0x4 ,
+		MISC4  , 0, 0, 0, 0, &devices[4].byteView.IOXRA, 0x8 ,
+		MISC5  , 0, 0, 0, 0, &devices[4].byteView.IOXRA, 0x10,
+		MISC6  , 0, 0, 0, 0, &devices[4].byteView.IOXRA, 0x20,
+		MISC7  , 0, 0, 0, 0, &devices[4].byteView.IOXRA, 0x40,
+		MISC8  , 0, 0, 0, 0, &devices[4].byteView.IOXRA, 0x80,
+		MISC9  , 0, 0, 0, 0, &devices[4].byteView.IOXRB, 0x1 ,
+		MISC10 , 0, 0, 0, 0, &devices[4].byteView.IOXRB, 0x2 ,
+		MISC11 , 0, 0, 0, 0, &devices[4].byteView.IOXRB, 0x4 ,
+		MISC12 , 0, 0, 0, 0, &devices[4].byteView.IOXRB, 0x8 ,
+		MISC13 , 0, 0, 0, 0, &devices[4].byteView.IOXRB, 0x10,
+		MISC14 , 0, 0, 0, 0, &devices[4].byteView.IOXRB, 0x20,
+		MISC15 , 0, 0, 0, 0, &devices[4].byteView.IOXRB, 0x40,
+        MISC16 , 0, 0, 0, 0, &devices[4].byteView.IOXRB, 0x80,				
 	};
     
     typedef enum{
+        // PCB430 I2C_ADDRESS = 0x26
         BVLED1  =	0x0,
 		BVLED2  =	0x1,
 		BVLED3  =	0x2,
@@ -389,11 +392,12 @@ extern "C" {
 		BVLED10 =	0x9,
 		BVLED11 =	0xA,
 		BVLED12 =	0xB,
-		BVLED13 =	0xC,
-		
+		BVLED13 =	0xC,		
 		BVLED14 =	0xD,
 		BVLED15 =	0xE,
 		BVLED16 =	0xF,
+                
+		// PCB429 I2C_ADDRESS = 0x22
 		BVLED17 =	0x10,
 		BVLED18 =	0x11,
 		BVLED19 =	0x12,
@@ -402,11 +406,12 @@ extern "C" {
 		BVLED22 =	0x15,
 		BVLED23 =	0x16,
 		BVLED24 =	0x17,
-		BVLED25 =	0x18,
+		BVLED25 =	0x18,                
 		BVLED26 =	0x19,
 		BVLED27 =	0x1A,
 		BVLED28 =	0x1B,
 		BVLED29 =	0x1C,
+                
     }YARD_LEDS;
     
     typedef struct
@@ -419,36 +424,37 @@ extern "C" {
     }YARDLED;
     
     YARDLED yardLedArr[] = {
-        BVLED1 , 0, 0, &devices[1].byteView.IOXRA, 0x8 ,
-		BVLED2 , 0, 0, &devices[1].byteView.IOXRA, 0x10,
-		BVLED3 , 0, 0, &devices[1].byteView.IOXRA, 0x20,
-		BVLED4 , 0, 0, &devices[1].byteView.IOXRA, 0x40,
-		BVLED5 , 0, 0, &devices[1].byteView.IOXRA, 0x80,
-		BVLED6 , 0, 0, &devices[1].byteView.IOXRB, 0x1 ,
-		BVLED7 , 0, 0, &devices[1].byteView.IOXRB, 0x2 ,
-		BVLED8 , 0, 0, &devices[1].byteView.IOXRB, 0x4 ,
-		BVLED9 , 0, 0, &devices[1].byteView.IOXRB, 0x8 ,
-		BVLED10, 0, 0, &devices[1].byteView.IOXRB, 0x10,
-		BVLED11, 0, 0, &devices[1].byteView.IOXRB, 0x20,
-		BVLED12, 0, 0, &devices[1].byteView.IOXRB, 0x40,
-        BVLED13, 0, 0, &devices[1].byteView.IOXRB, 0x80,
-		
-		BVLED14, 0, 0, &devices[2].byteView.IOXRA, 0x1 ,
-		BVLED15, 0, 0, &devices[2].byteView.IOXRA, 0x2 ,
-		BVLED16, 0, 0, &devices[2].byteView.IOXRA, 0x4 ,
-		BVLED17, 0, 0, &devices[2].byteView.IOXRA, 0x8 ,
-		BVLED18, 0, 0, &devices[2].byteView.IOXRA, 0x10,
-		BVLED19, 0, 0, &devices[2].byteView.IOXRA, 0x20,
-		BVLED20, 0, 0, &devices[2].byteView.IOXRA, 0x40,
-		BVLED21, 0, 0, &devices[2].byteView.IOXRA, 0x80,
-		BVLED22, 0, 0, &devices[2].byteView.IOXRB, 0x1 ,
-		BVLED23, 0, 0, &devices[2].byteView.IOXRB, 0x2 ,
-		BVLED24, 0, 0, &devices[2].byteView.IOXRB, 0x4 ,
-		BVLED25, 0, 0, &devices[2].byteView.IOXRB, 0x8 ,
-		BVLED26, 0, 0, &devices[2].byteView.IOXRB, 0x10,
-		BVLED27, 0, 0, &devices[2].byteView.IOXRB, 0x20,
-		BVLED28, 0, 0, &devices[2].byteView.IOXRB, 0x40,
-        BVLED29, 0, 0, &devices[2].byteView.IOXRB, 0x80,
+		// PCB430 I2C_ADDRESS = 0x26
+        BVLED1 , 0, 0, &devices[5].byteView.IOXRA, 0x1 ,
+		BVLED2 , 0, 0, &devices[5].byteView.IOXRA, 0x2 ,
+		BVLED3 , 0, 0, &devices[5].byteView.IOXRA, 0x4 ,
+		BVLED4 , 0, 0, &devices[5].byteView.IOXRA, 0x8 ,
+		BVLED5 , 0, 0, &devices[5].byteView.IOXRA, 0x10,
+		BVLED6 , 0, 0, &devices[5].byteView.IOXRA, 0x20,
+		BVLED7 , 0, 0, &devices[5].byteView.IOXRA, 0x40,
+		BVLED8 , 0, 0, &devices[5].byteView.IOXRA, 0x80,
+		BVLED9 , 0, 0, &devices[5].byteView.IOXRB, 0x1 ,
+		BVLED10, 0, 0, &devices[5].byteView.IOXRB, 0x2 ,
+		BVLED11, 0, 0, &devices[5].byteView.IOXRB, 0x4 ,
+		BVLED12, 0, 0, &devices[5].byteView.IOXRB, 0x8 ,
+        BVLED13, 0, 0, &devices[5].byteView.IOXRB, 0x10,		
+		BVLED14, 0, 0, &devices[5].byteView.IOXRB, 0x20,
+		BVLED15, 0, 0, &devices[5].byteView.IOXRB, 0x40,
+		BVLED16, 0, 0, &devices[5].byteView.IOXRB, 0x80,
+        // PCB429 I2C_ADDRESS = 0x22
+		BVLED17, 0, 0, &devices[1].byteView.IOXRA, 0x8 ,
+		BVLED18, 0, 0, &devices[1].byteView.IOXRA, 0x10,
+		BVLED19, 0, 0, &devices[1].byteView.IOXRA, 0x20,
+		BVLED20, 0, 0, &devices[1].byteView.IOXRA, 0x40,
+		BVLED21, 0, 0, &devices[1].byteView.IOXRA, 0x80,
+		BVLED22, 0, 0, &devices[1].byteView.IOXRB, 0x1 ,
+		BVLED23, 0, 0, &devices[1].byteView.IOXRB, 0x2 ,
+		BVLED24, 0, 0, &devices[1].byteView.IOXRB, 0x4 ,
+		BVLED25, 0, 0, &devices[1].byteView.IOXRB, 0x8 ,
+		BVLED26, 0, 0, &devices[1].byteView.IOXRB, 0x10,
+		BVLED27, 0, 0, &devices[1].byteView.IOXRB, 0x20,
+		BVLED28, 0, 0, &devices[1].byteView.IOXRB, 0x40,
+        BVLED29, 0, 0, &devices[1].byteView.IOXRB, 0x80,
     };
 
     // Enum to distinguish the array type
@@ -456,6 +462,13 @@ extern "C" {
         OUTPUTS,
         LEDS,
     }ARRAY_TYPE;
+    
+    typedef enum{
+        CH3,
+        CH4,
+        CH5,
+        CH6,        
+    }CHANNEL;
      
 #ifdef	__cplusplus
 }

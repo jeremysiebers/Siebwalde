@@ -37,7 +37,8 @@
     void UPDATExYARDxFUNCTIONxSELECTION(void);
     
     // for size supply the caller with: ARRAY_SIZE(arr)which will give the size of the array
-    void WRITExYARDxDEVICExVAR(void *self, size_t arrSize, ARRAY_TYPE type, int8_t index,  bool value);
+    void WRITExYARDxDEVICExVAR(void *self, size_t arrSize, ARRAY_TYPE type, 
+        int8_t index, bool value);
 
 #ifdef	__cplusplus
 extern "C" {

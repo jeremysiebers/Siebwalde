@@ -12,9 +12,12 @@
 #include "communication.h"
 #include "mcp23017.h"
 #include "yard_functions.h"
+// local methods
+void ProcessYardFunction(CHANNEL channel);
 
 static uint8_t selector = 0;
 static bool    idle = true;
+
 
 void INITxYARDxFUNCTION(void){
    IOX_RESET_SetLow();
@@ -25,21 +28,56 @@ void INITxYARDxFUNCTION(void){
 void UPDATExYARDxFUNCTIONxSELECTION(void) 
 {
     if(DEBOUNCExGETxVALUExUPDATEDxSTATE(&HOTRC_CH3)){
-        
+        ProcessYardFunction(CH3);
     }
-    if(DEBOUNCExGETxVALUExUPDATEDxSTATE(&HOTRC_CH4)){
-        
+    else if(DEBOUNCExGETxVALUExUPDATEDxSTATE(&HOTRC_CH4)){
+        ProcessYardFunction(CH4);
     }
-    if(DEBOUNCExGETxVALUExUPDATEDxSTATE(&HOTRC_CH5)){
-        
+    else if(DEBOUNCExGETxVALUExUPDATEDxSTATE(&HOTRC_CH5)){
+        ProcessYardFunction(CH5);
     }
-    if(DEBOUNCExGETxVALUExUPDATEDxSTATE(&HOTRC_CH6)){
-        
+    else if(DEBOUNCExGETxVALUExUPDATEDxSTATE(&HOTRC_CH6)){
+        ProcessYardFunction(CH6);
+    }
+    else{
+        ProcessYardFunction(NULL);
     }
     
-    WRITExYARDxDEVICExVAR(yardLedArr, ARRAY_SIZE(yardOutputArr),
+    WRITExYARDxDEVICExVAR(yardLedArr, ARRAY_SIZE(yardLedArr),
                         LEDS, BVLED1, true);
 }
+
+void ProcessYardFunction(CHANNEL channel){
+    // Show the last selected function and do nothing
+    if(idle){
+        WRITExYARDxDEVICExVAR(yardLedArr, ARRAY_SIZE(yardLedArr),
+                        LEDS, yardLedArr[selector], true);
+        idle = false;
+        return;
+    }
+    // Check which button was pressed
+    switch (channel){
+        case CH3:
+            break;
+            
+        case CH4:
+            break;
+            
+        case CH5:
+            break;
+            
+        case CH6:
+            break;
+            
+        default:
+            break;
+    }
+    
+}
+
+
+
+
 
 void WRITExYARDxDEVICExVAR(void *self, size_t arrSize, ARRAY_TYPE type, 
         int8_t index, bool value){
@@ -48,9 +86,12 @@ void WRITExYARDxDEVICExVAR(void *self, size_t arrSize, ARRAY_TYPE type,
         return;
     }
     bool temp = value;
+    YARDOUTPUT *yardOutput = NULL; // Declare and initialize
+    YARDLED *yardLed = NULL;       // Declare and initialize
+    
     switch(type){
         case OUTPUTS:
-            YARDOUTPUT yardOutput = *((YARDOUTPUT *)self);
+            yardOutput = (YARDOUTPUT *)self;
             if(yardOutput[index].invertedLevel){
                 temp = !temp; // Invert the value
             }
@@ -59,7 +100,7 @@ void WRITExYARDxDEVICExVAR(void *self, size_t arrSize, ARRAY_TYPE type,
             break;
             
         case LEDS:
-            YARDLED *yardLed = self;
+            yardLed = (YARDLED *)self;
             yardLed[index].value = temp;
             yardLed[index].valueUpdated = true;
             break;
