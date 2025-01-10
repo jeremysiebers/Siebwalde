@@ -22,55 +22,111 @@ static bool    idle = true;
 void INITxYARDxFUNCTION(void){
    IOX_RESET_SetLow();
    IOX_RESET_SetHigh();
-   MCP23017_Init(devices, 6); // Initialize 6 MCP23017 devices
+   //MCP23017_Init(devices, 6); // Initialize 6 MCP23017 devices
 }
 
 void UPDATExYARDxFUNCTIONxSELECTION(void) 
 {
+    // Set the default channel state
+    CHANNEL channel = NOF;
+    // Set the current selected Led(function)
+    YARDLED *led = &yardLedArr[selector];
+    /* Get one time the actual time */
+    uint32_t millis = GETxMILLIS();
+    // put the time in an universal holder since only 1 led will be blinking, handle this not in a time count in every led!
+    
     if(DEBOUNCExGETxVALUExUPDATEDxSTATE(&HOTRC_CH3)){
-        ProcessYardFunction(CH3);
+        //ProcessYardFunction(CH3);
+        channel = CH3;
     }
     else if(DEBOUNCExGETxVALUExUPDATEDxSTATE(&HOTRC_CH4)){
-        ProcessYardFunction(CH4);
+        //ProcessYardFunction(CH4);
+        channel = CH4;
     }
     else if(DEBOUNCExGETxVALUExUPDATEDxSTATE(&HOTRC_CH5)){
-        ProcessYardFunction(CH5);
+        //ProcessYardFunction(CH5);
+        channel = CH5;
     }
     else if(DEBOUNCExGETxVALUExUPDATEDxSTATE(&HOTRC_CH6)){
-        ProcessYardFunction(CH6);
+        //ProcessYardFunction(CH6);
+        channel = CH6;
+    }
+//    else{
+//        //ProcessYardFunction(NOF);
+//        
+//    }
+//}
+
+//void ProcessYardFunction(CHANNEL channel){
+    // Show the last selected function and do nothing
+    if(NOF != channel && idle){        
+        led->enLed = true;
+        idle = false;
     }
     else{
-        ProcessYardFunction(NULL);
+        // Check if a "next" button was pressed, turn off the current selected function led
+        if(NOF != channel && CH6 != channel){
+            led->enLed = false;
+        }
+        // Check which button was pressed and jump or activate new function
+        switch (channel){
+            case CH3:
+            {
+                if(ARR_MAX_ELEM(yardLedArr) == selector){
+                   selector = 0; 
+                }
+                else{
+                    selector++;            
+                }
+                *led = yardLedArr[selector];
+                led->enLed = true;
+            }
+                break;
+
+            case CH4:
+            {
+                if(0 == selector){
+                    selector = ARR_MAX_ELEM(yardLedArr);
+                }
+                else{
+                    selector--;
+                }
+                *led = yardLedArr[selector];
+                led->enLed = true;
+            }
+                break;
+
+            case CH5:
+            {
+                if((selector + 10) >(ARR_MAX_ELEM(yardLedArr))){
+                    uint8_t delta = ARR_MAX_ELEM(yardLedArr) - selector;
+                    selector = 10 - delta;
+                }
+                else{
+                    selector+=10;
+                }
+                *led = yardLedArr[selector]
+                led->enLed = true;
+            }
+                break;
+
+            case CH6:
+            {
+                // turn off the led
+                led->enLed = false;
+                idle = true;
+                //ExecSelectedFunction(selector);
+            }
+                break;
+
+            default:
+                break;
+        }
     }
     
-    WRITExYARDxDEVICExVAR(yardLedArr, ARRAY_SIZE(yardLedArr),
-                        LEDS, BVLED1, true);
-}
-
-void ProcessYardFunction(CHANNEL channel){
-    // Show the last selected function and do nothing
-    if(idle){
-        WRITExYARDxDEVICExVAR(yardLedArr, ARRAY_SIZE(yardLedArr),
-                        LEDS, yardLedArr[selector], true);
-        idle = false;
-        return;
-    }
-    // Check which button was pressed
-    switch (channel){
-        case CH3:
-            break;
-            
-        case CH4:
-            break;
-            
-        case CH5:
-            break;
-            
-        case CH6:
-            break;
-            
-        default:
-            break;
+    // check if the function is on or off, when off the led needs to blink
+    if(true == led->enLed && BLK == led->state){
+        
     }
     
 }
@@ -80,29 +136,35 @@ void ProcessYardFunction(CHANNEL channel){
 
 
 void WRITExYARDxDEVICExVAR(void *self, size_t arrSize, ARRAY_TYPE type, 
-        int8_t index, bool value){
+        int8_t index, void *value){
     
     if(index < 0 || index >= arrSize){
         return;
     }
-    bool temp = value;
-    YARDOUTPUT *yardOutput = NULL; // Declare and initialize
-    YARDLED *yardLed = NULL;       // Declare and initialize
+    
+    //YARDOUTPUT *yardOutput = NULL; // Declare and initialize
+    //YARDLED *yardLed = NULL;       // Declare and initialize
     
     switch(type){
         case OUTPUTS:
-            yardOutput = (YARDOUTPUT *)self;
+        {
+            YARDOUTPUT *yardOutput = (YARDOUTPUT *)self;
+            YARDOUTPUT *yardOutputUpdate = (YARDOUTPUT *)value;
             if(yardOutput[index].invertedLevel){
-                temp = !temp; // Invert the value
+                //temp = !temp; // Invert the value
             }
-            yardOutput[index].value = temp;
+            //yardOutput[index].value = temp;
             yardOutput[index].valueUpdated = true;
+        }
             break;
             
         case LEDS:
-            yardLed = (YARDLED *)self;
-            yardLed[index].value = temp;
-            yardLed[index].valueUpdated = true;
+        {
+            YARDLED *yardLed = (YARDLED *)self;
+            YARDLED *yardLedUpdate = (YARDLED *)value;
+            //yardLed[index].value = temp;
+            //yardLed[index].valueUpdated = true;
+        }
             break;
             
         default: break;

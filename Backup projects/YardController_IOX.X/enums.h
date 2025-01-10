@@ -203,7 +203,8 @@ extern "C" {
         
     
     /*Yard Functions*/
-    #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
+    #define ARR_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
+    #define ARR_MAX_ELEM(arr) ((sizeof(arr) / sizeof((arr)[0]))-1)
     
     MCP23017_t devices[] = {    
     //IODIRA,IODIRB,IOXRA,IOXRB,address
@@ -414,47 +415,54 @@ extern "C" {
                 
     }YARD_LEDS;
     
+    typedef enum{
+        OFF = 0, // led is/set-to off, not used, enLed is used for this
+        On = 1,  // led is/set-to on and function was activated
+        BLK = 2, // Led is/set-to blinking function not yet activated
+    }LEDSTATE;
+    
     typedef struct
     {
-        YARD_LEDS               function;     // The name of the function        
-        uint8_t                 value;        // Actual output value        
-        bool                    valueUpdated; // Indicates a change in the value    
+        YARD_LEDS               nled;         // The name of the led        
+        LEDSTATE                state;        // Actual led state        
+        bool                    funcActivated;// Function activated state
+        bool                    enLed;        // Enable the led according to state
         uint8_t                 *portx_ptr;   // Reference to the Output port used
         uint8_t                 pin_mask;     // Mask to point to pin used of port        
     }YARDLED;
     
     YARDLED yardLedArr[] = {
 		// PCB430 I2C_ADDRESS = 0x26
-        BVLED1 , 0, 0, &devices[5].byteView.IOXRA, 0x1 ,
-		BVLED2 , 0, 0, &devices[5].byteView.IOXRA, 0x2 ,
-		BVLED3 , 0, 0, &devices[5].byteView.IOXRA, 0x4 ,
-		BVLED4 , 0, 0, &devices[5].byteView.IOXRA, 0x8 ,
-		BVLED5 , 0, 0, &devices[5].byteView.IOXRA, 0x10,
-		BVLED6 , 0, 0, &devices[5].byteView.IOXRA, 0x20,
-		BVLED7 , 0, 0, &devices[5].byteView.IOXRA, 0x40,
-		BVLED8 , 0, 0, &devices[5].byteView.IOXRA, 0x80,
-		BVLED9 , 0, 0, &devices[5].byteView.IOXRB, 0x1 ,
-		BVLED10, 0, 0, &devices[5].byteView.IOXRB, 0x2 ,
-		BVLED11, 0, 0, &devices[5].byteView.IOXRB, 0x4 ,
-		BVLED12, 0, 0, &devices[5].byteView.IOXRB, 0x8 ,
-        BVLED13, 0, 0, &devices[5].byteView.IOXRB, 0x10,		
-		BVLED14, 0, 0, &devices[5].byteView.IOXRB, 0x20,
-		BVLED15, 0, 0, &devices[5].byteView.IOXRB, 0x40,
-		BVLED16, 0, 0, &devices[5].byteView.IOXRB, 0x80,
+        BVLED1 , BLK, 0, 0, &devices[5].byteView.IOXRA, 0x1 ,
+		BVLED2 , BLK, 0, 0, &devices[5].byteView.IOXRA, 0x2 ,
+		BVLED3 , BLK, 0, 0, &devices[5].byteView.IOXRA, 0x4 ,
+		BVLED4 , BLK, 0, 0, &devices[5].byteView.IOXRA, 0x8 ,
+		BVLED5 , BLK, 0, 0, &devices[5].byteView.IOXRA, 0x10,
+		BVLED6 , BLK, 0, 0, &devices[5].byteView.IOXRA, 0x20,
+		BVLED7 , BLK, 0, 0, &devices[5].byteView.IOXRA, 0x40,
+		BVLED8 , BLK, 0, 0, &devices[5].byteView.IOXRA, 0x80,
+		BVLED9 , BLK, 0, 0, &devices[5].byteView.IOXRB, 0x1 ,
+		BVLED10, BLK, 0, 0, &devices[5].byteView.IOXRB, 0x2 ,
+		BVLED11, BLK, 0, 0, &devices[5].byteView.IOXRB, 0x4 ,
+		BVLED12, BLK, 0, 0, &devices[5].byteView.IOXRB, 0x8 ,
+        BVLED13, BLK, 0, 0, &devices[5].byteView.IOXRB, 0x10,		
+		BVLED14, BLK, 0, 0, &devices[5].byteView.IOXRB, 0x20,
+		BVLED15, BLK, 0, 0, &devices[5].byteView.IOXRB, 0x40,
+		BVLED16, BLK, 0, 0, &devices[5].byteView.IOXRB, 0x80,
         // PCB429 I2C_ADDRESS = 0x22
-		BVLED17, 0, 0, &devices[1].byteView.IOXRA, 0x8 ,
-		BVLED18, 0, 0, &devices[1].byteView.IOXRA, 0x10,
-		BVLED19, 0, 0, &devices[1].byteView.IOXRA, 0x20,
-		BVLED20, 0, 0, &devices[1].byteView.IOXRA, 0x40,
-		BVLED21, 0, 0, &devices[1].byteView.IOXRA, 0x80,
-		BVLED22, 0, 0, &devices[1].byteView.IOXRB, 0x1 ,
-		BVLED23, 0, 0, &devices[1].byteView.IOXRB, 0x2 ,
-		BVLED24, 0, 0, &devices[1].byteView.IOXRB, 0x4 ,
-		BVLED25, 0, 0, &devices[1].byteView.IOXRB, 0x8 ,
-		BVLED26, 0, 0, &devices[1].byteView.IOXRB, 0x10,
-		BVLED27, 0, 0, &devices[1].byteView.IOXRB, 0x20,
-		BVLED28, 0, 0, &devices[1].byteView.IOXRB, 0x40,
-        BVLED29, 0, 0, &devices[1].byteView.IOXRB, 0x80,
+		BVLED17, BLK, 0, 0, &devices[1].byteView.IOXRA, 0x8 ,
+		BVLED18, BLK, 0, 0, &devices[1].byteView.IOXRA, 0x10,
+		BVLED19, BLK, 0, 0, &devices[1].byteView.IOXRA, 0x20,
+		BVLED20, BLK, 0, 0, &devices[1].byteView.IOXRA, 0x40,
+		BVLED21, BLK, 0, 0, &devices[1].byteView.IOXRA, 0x80,
+		BVLED22, BLK, 0, 0, &devices[1].byteView.IOXRB, 0x1 ,
+		BVLED23, BLK, 0, 0, &devices[1].byteView.IOXRB, 0x2 ,
+		BVLED24, BLK, 0, 0, &devices[1].byteView.IOXRB, 0x4 ,
+		BVLED25, BLK, 0, 0, &devices[1].byteView.IOXRB, 0x8 ,
+		BVLED26, BLK, 0, 0, &devices[1].byteView.IOXRB, 0x10,
+		BVLED27, BLK, 0, 0, &devices[1].byteView.IOXRB, 0x20,
+		BVLED28, BLK, 0, 0, &devices[1].byteView.IOXRB, 0x40,
+        BVLED29, BLK, 0, 0, &devices[1].byteView.IOXRB, 0x80,
     };
 
     // Enum to distinguish the array type
@@ -464,10 +472,11 @@ extern "C" {
     }ARRAY_TYPE;
     
     typedef enum{
-        CH3,
-        CH4,
-        CH5,
-        CH6,        
+        NOF = 0,
+        CH3 = 3,
+        CH4 = 4,
+        CH5 = 5,
+        CH6 = 6,        
     }CHANNEL;
      
 #ifdef	__cplusplus
