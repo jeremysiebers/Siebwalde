@@ -28,6 +28,10 @@ extern "C" {
     const uint32_t tRestoreTime = (uint32_t)(3 * tFactorSec);
     /* Boot wait time to get all IO read and debounced first */
     const uint32_t tReadIoSignalWaitTime = (uint32_t)(1 * tFactorSec);
+    /* Led blink time */
+    const uint32_t tLedBlinkTime = (uint32_t)(200);
+    /* Idle TimeOut */
+    const uint32_t tIdleTimeOut = (uint32_t)(5 * tFactorSec);
     
 
     typedef enum
@@ -416,15 +420,15 @@ extern "C" {
     }YARD_LEDS;
     
     typedef enum{
-        OFF = 0, // led is/set-to off, not used, enLed is used for this
-        On = 1,  // led is/set-to on and function was activated
-        BLK = 2, // Led is/set-to blinking function not yet activated
+        OFF   = 0, // led is/set-to off, not used, enLed is used for this
+        ON    = 1,  // led is/set-to on and function was activated
+        BLINK = 2, // Led is/set-to blinking function not yet activated
     }LEDSTATE;
     
     typedef struct
     {
         YARD_LEDS               nled;         // The name of the led        
-        LEDSTATE                state;        // Actual led state        
+        LEDSTATE                state;        // Actual led state, On/Off/Blink       
         bool                    funcActivated;// Function activated state
         bool                    enLed;        // Enable the led according to state
         uint8_t                 *portx_ptr;   // Reference to the Output port used
@@ -433,36 +437,36 @@ extern "C" {
     
     YARDLED yardLedArr[] = {
 		// PCB430 I2C_ADDRESS = 0x26
-        BVLED1 , BLK, 0, 0, &devices[5].byteView.IOXRA, 0x1 ,
-		BVLED2 , BLK, 0, 0, &devices[5].byteView.IOXRA, 0x2 ,
-		BVLED3 , BLK, 0, 0, &devices[5].byteView.IOXRA, 0x4 ,
-		BVLED4 , BLK, 0, 0, &devices[5].byteView.IOXRA, 0x8 ,
-		BVLED5 , BLK, 0, 0, &devices[5].byteView.IOXRA, 0x10,
-		BVLED6 , BLK, 0, 0, &devices[5].byteView.IOXRA, 0x20,
-		BVLED7 , BLK, 0, 0, &devices[5].byteView.IOXRA, 0x40,
-		BVLED8 , BLK, 0, 0, &devices[5].byteView.IOXRA, 0x80,
-		BVLED9 , BLK, 0, 0, &devices[5].byteView.IOXRB, 0x1 ,
-		BVLED10, BLK, 0, 0, &devices[5].byteView.IOXRB, 0x2 ,
-		BVLED11, BLK, 0, 0, &devices[5].byteView.IOXRB, 0x4 ,
-		BVLED12, BLK, 0, 0, &devices[5].byteView.IOXRB, 0x8 ,
-        BVLED13, BLK, 0, 0, &devices[5].byteView.IOXRB, 0x10,		
-		BVLED14, BLK, 0, 0, &devices[5].byteView.IOXRB, 0x20,
-		BVLED15, BLK, 0, 0, &devices[5].byteView.IOXRB, 0x40,
-		BVLED16, BLK, 0, 0, &devices[5].byteView.IOXRB, 0x80,
+        BVLED1 , BLINK, false, false, &devices[5].byteView.IOXRA, 0x1 ,
+		BVLED2 , BLINK, false, false, &devices[5].byteView.IOXRA, 0x2 ,
+		BVLED3 , BLINK, false, false, &devices[5].byteView.IOXRA, 0x4 ,
+		BVLED4 , BLINK, false, false, &devices[5].byteView.IOXRA, 0x8 ,
+		BVLED5 , BLINK, false, false, &devices[5].byteView.IOXRA, 0x10,
+		BVLED6 , BLINK, false, false, &devices[5].byteView.IOXRA, 0x20,
+		BVLED7 , BLINK, false, false, &devices[5].byteView.IOXRA, 0x40,
+		BVLED8 , BLINK, false, false, &devices[5].byteView.IOXRA, 0x80,
+		BVLED9 , BLINK, false, false, &devices[5].byteView.IOXRB, 0x1 ,
+		BVLED10, BLINK, false, false, &devices[5].byteView.IOXRB, 0x2 ,
+		BVLED11, BLINK, false, false, &devices[5].byteView.IOXRB, 0x4 ,
+		BVLED12, BLINK, false, false, &devices[5].byteView.IOXRB, 0x8 ,
+        BVLED13, BLINK, false, false, &devices[5].byteView.IOXRB, 0x10,		
+		BVLED14, BLINK, false, false, &devices[5].byteView.IOXRB, 0x20,
+		BVLED15, BLINK, false, false, &devices[5].byteView.IOXRB, 0x40,
+		BVLED16, BLINK, false, false, &devices[5].byteView.IOXRB, 0x80,
         // PCB429 I2C_ADDRESS = 0x22
-		BVLED17, BLK, 0, 0, &devices[1].byteView.IOXRA, 0x8 ,
-		BVLED18, BLK, 0, 0, &devices[1].byteView.IOXRA, 0x10,
-		BVLED19, BLK, 0, 0, &devices[1].byteView.IOXRA, 0x20,
-		BVLED20, BLK, 0, 0, &devices[1].byteView.IOXRA, 0x40,
-		BVLED21, BLK, 0, 0, &devices[1].byteView.IOXRA, 0x80,
-		BVLED22, BLK, 0, 0, &devices[1].byteView.IOXRB, 0x1 ,
-		BVLED23, BLK, 0, 0, &devices[1].byteView.IOXRB, 0x2 ,
-		BVLED24, BLK, 0, 0, &devices[1].byteView.IOXRB, 0x4 ,
-		BVLED25, BLK, 0, 0, &devices[1].byteView.IOXRB, 0x8 ,
-		BVLED26, BLK, 0, 0, &devices[1].byteView.IOXRB, 0x10,
-		BVLED27, BLK, 0, 0, &devices[1].byteView.IOXRB, 0x20,
-		BVLED28, BLK, 0, 0, &devices[1].byteView.IOXRB, 0x40,
-        BVLED29, BLK, 0, 0, &devices[1].byteView.IOXRB, 0x80,
+		BVLED17, BLINK, false, false, &devices[1].byteView.IOXRA, 0x8 ,
+		BVLED18, BLINK, false, false, &devices[1].byteView.IOXRA, 0x10,
+		BVLED19, BLINK, false, false, &devices[1].byteView.IOXRA, 0x20,
+		BVLED20, BLINK, false, false, &devices[1].byteView.IOXRA, 0x40,
+		BVLED21, BLINK, false, false, &devices[1].byteView.IOXRA, 0x80,
+		BVLED22, BLINK, false, false, &devices[1].byteView.IOXRB, 0x1 ,
+		BVLED23, BLINK, false, false, &devices[1].byteView.IOXRB, 0x2 ,
+		BVLED24, BLINK, false, false, &devices[1].byteView.IOXRB, 0x4 ,
+		BVLED25, BLINK, false, false, &devices[1].byteView.IOXRB, 0x8 ,
+		BVLED26, BLINK, false, false, &devices[1].byteView.IOXRB, 0x10,
+		BVLED27, BLINK, false, false, &devices[1].byteView.IOXRB, 0x20,
+		BVLED28, BLINK, false, false, &devices[1].byteView.IOXRB, 0x40,
+        BVLED29, BLINK, false, false, &devices[1].byteView.IOXRB, 0x80,
     };
 
     // Enum to distinguish the array type
@@ -473,11 +477,19 @@ extern "C" {
     
     typedef enum{
         NOF = 0,
-        CH3 = 3,
-        CH4 = 4,
-        CH5 = 5,
-        CH6 = 6,        
+        NEXT = 3,
+        PREV = 4,
+        JMP = 5,
+        ASSERT = 6,        
     }CHANNEL;
+    
+    typedef struct{        
+        uint32_t                    tStartBlinkTime; // The start time for blinking
+        uint32_t                    tWaitBlinkTime;        
+        uint32_t                    tStartIdleTime; // The start time for timeout
+        uint32_t                    tWaitIdleTime;
+        bool                        idle;
+    }BLINKOUT;
      
 #ifdef	__cplusplus
 }

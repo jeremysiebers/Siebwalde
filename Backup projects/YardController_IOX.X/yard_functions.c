@@ -13,16 +13,25 @@
 #include "mcp23017.h"
 #include "yard_functions.h"
 // local methods
-void ProcessYardFunction(CHANNEL channel);
+uint8_t computeChecksum(const YARDLED *array, size_t size);
 
-static uint8_t selector = 0;
-static bool    idle = true;
+static uint8_t  selector = 0;
+//static bool     idle     = true;
+static BLINKOUT blinkout;
+static uint8_t  prevLedArray;
 
 
 void INITxYARDxFUNCTION(void){
    IOX_RESET_SetLow();
    IOX_RESET_SetHigh();
    //MCP23017_Init(devices, 6); // Initialize 6 MCP23017 devices
+   
+   // Init the blinkout struct (static) hence cannot use compile time values
+   blinkout.idle = true;
+   blinkout.tStartBlinkTime = GETxMILLIS();
+   blinkout.tStartIdleTime  = GETxMILLIS();
+   blinkout.tWaitBlinkTime  = tLedBlinkTime;
+   blinkout.tWaitIdleTime   = tIdleTimeOut;
 }
 
 void UPDATExYARDxFUNCTIONxSELECTION(void) 
@@ -30,47 +39,54 @@ void UPDATExYARDxFUNCTIONxSELECTION(void)
     // Set the default channel state
     CHANNEL channel = NOF;
     // Set the current selected Led(function)
-    YARDLED *led = &yardLedArr[selector];
+    YARDLED* led = &yardLedArr[selector];
     /* Get one time the actual time */
     uint32_t millis = GETxMILLIS();
-    // put the time in an universal holder since only 1 led will be blinking, handle this not in a time count in every led!
+    /* Store the current state of the selected LED */
+    prevLedArray = computeChecksum(yardLedArr, ARR_SIZE(yardLedArr));
     
+    // Check if a button was pressed
     if(DEBOUNCExGETxVALUExUPDATEDxSTATE(&HOTRC_CH3)){
-        //ProcessYardFunction(CH3);
-        channel = CH3;
+        channel = NEXT;        
     }
     else if(DEBOUNCExGETxVALUExUPDATEDxSTATE(&HOTRC_CH4)){
-        //ProcessYardFunction(CH4);
-        channel = CH4;
+        channel = PREV;
     }
     else if(DEBOUNCExGETxVALUExUPDATEDxSTATE(&HOTRC_CH5)){
-        //ProcessYardFunction(CH5);
-        channel = CH5;
+        channel = JMP;
     }
     else if(DEBOUNCExGETxVALUExUPDATEDxSTATE(&HOTRC_CH6)){
-        //ProcessYardFunction(CH6);
-        channel = CH6;
+        channel = ASSERT;
+    }    
+    if(NOF != channel){
+        // re-start the idle timer after a button press
+        blinkout.tStartIdleTime = millis;
     }
-//    else{
-//        //ProcessYardFunction(NOF);
-//        
-//    }
-//}
 
-//void ProcessYardFunction(CHANNEL channel){
     // Show the last selected function and do nothing
-    if(NOF != channel && idle){        
+    if(NOF != channel && blinkout.idle){ 
+        if(led->funcActivated){
+            led->state = ON;
+        }
+        else{
+            led->state = BLINK;
+        }
         led->enLed = true;
-        idle = false;
+        // We are not idle anymore
+        blinkout.idle           = false;
+        // Start the idle countdown timer
+        blinkout.tStartIdleTime = millis;
     }
     else{
-        // Check if a "next" button was pressed, turn off the current selected function led
-        if(NOF != channel && CH6 != channel){
+        /* Check if a "next" button was pressed, turn off the current selected 
+         * function led to lid the next one
+         */
+        if(NOF != channel && ASSERT != channel){
             led->enLed = false;
         }
         // Check which button was pressed and jump or activate new function
         switch (channel){
-            case CH3:
+            case NEXT:
             {
                 if(ARR_MAX_ELEM(yardLedArr) == selector){
                    selector = 0; 
@@ -78,12 +94,12 @@ void UPDATExYARDxFUNCTIONxSELECTION(void)
                 else{
                     selector++;            
                 }
-                *led = yardLedArr[selector];
-                led->enLed = true;
+                // Point to next function
+                led = &yardLedArr[selector];
             }
                 break;
 
-            case CH4:
+            case PREV:
             {
                 if(0 == selector){
                     selector = ARR_MAX_ELEM(yardLedArr);
@@ -91,12 +107,12 @@ void UPDATExYARDxFUNCTIONxSELECTION(void)
                 else{
                     selector--;
                 }
-                *led = yardLedArr[selector];
-                led->enLed = true;
+                // Point to previous function
+                led = &yardLedArr[selector];
             }
                 break;
 
-            case CH5:
+            case JMP:
             {
                 if((selector + 10) >(ARR_MAX_ELEM(yardLedArr))){
                     uint8_t delta = ARR_MAX_ELEM(yardLedArr) - selector;
@@ -105,16 +121,17 @@ void UPDATExYARDxFUNCTIONxSELECTION(void)
                 else{
                     selector+=10;
                 }
-                *led = yardLedArr[selector]
-                led->enLed = true;
+                // Jump 10 functions
+                led = &yardLedArr[selector];
             }
                 break;
 
-            case CH6:
+            case ASSERT:
             {
-                // turn off the led
-                led->enLed = false;
-                idle = true;
+                led->funcActivated = !led->funcActivated;
+                // led shall show the state
+                led->state = (led->funcActivated) ? ON : BLINK;
+                blinkout.tStartIdleTime = millis;
                 //ExecSelectedFunction(selector);
             }
                 break;
@@ -125,12 +142,38 @@ void UPDATExYARDxFUNCTIONxSELECTION(void)
     }
     
     // check if the function is on or off, when off the led needs to blink
-    if(true == led->enLed && BLK == led->state){
-        
+    if(BLINK == led->state){
+        if((millis - blinkout.tStartBlinkTime) > blinkout.tWaitBlinkTime){
+            blinkout.tStartBlinkTime = millis;
+            led->enLed = !led->enLed;
+        }
     }
+    else if(ON == led->state){
+        led->enLed = true;
+    }
+    else{
+        led->enLed = false;
+    }
+    
+    // Handle the idle timeout when not idle
+    if((millis - blinkout.tStartIdleTime) > blinkout.tWaitIdleTime && !blinkout.idle){
+            led->state = OFF;
+            blinkout.idle = true;
+    }
+    
     
 }
 
+uint8_t computeChecksum(const YARDLED *array, size_t size) {
+    uint8_t checksum = 0;
+    for (size_t i = 0; i < size; i++) {
+        // XOR all elements that matter
+        checksum ^= array[i].enLed ? 0x01: 0x00; // convert bool to make sure 
+        checksum ^= array[i].funcActivated ? 0x01: 0x00;
+        checksum ^= array[i].state;
+    }
+    return checksum;
+}
 
 
 
