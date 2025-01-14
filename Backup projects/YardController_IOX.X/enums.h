@@ -32,6 +32,8 @@ extern "C" {
     const uint32_t tLedBlinkTime = (uint32_t)(200);
     /* Idle TimeOut */
     const uint32_t tIdleTimeOut = (uint32_t)(5 * tFactorSec);
+    /* IOX update time */
+    const uint32_t tIOXTimeOut = (uint32_t)(10);
     
 
     typedef enum
@@ -210,6 +212,7 @@ extern "C" {
     #define ARR_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
     #define ARR_MAX_ELEM(arr) ((sizeof(arr) / sizeof((arr)[0]))-1)
     
+    
     MCP23017_t devices[] = {    
     //IODIRA,IODIRB,IOXRA,IOXRB,address
     {0x00, 0x00, 0x00, 0x00, 0x21, }, // MCP23017 at address 0x21, PORTA/B = Output, PCB428
@@ -219,6 +222,13 @@ extern "C" {
     {0x00, 0x00, 0x00, 0x00, 0x25, }, // MCP23017 at address 0x25, PORTA/B = Output, PCB433
     {0x00, 0x00, 0x00, 0x00, 0x26, }, // MCP23017 at address 0x26, PORTA/B = Output, PCB430
     };
+    
+    typedef struct {
+        uint8_t IOXRA;
+        bool    IOXRAupdate;
+        uint8_t IOXRB;
+        bool    IOXRBupdate;        
+    }IOXDATA;
     
     typedef enum
     {
@@ -420,9 +430,10 @@ extern "C" {
     }YARD_LEDS;
     
     typedef enum{
-        OFF   = 0, // led is/set-to off, not used, enLed is used for this
-        ON    = 1,  // led is/set-to on and function was activated
-        BLINK = 2, // Led is/set-to blinking function not yet activated
+        OFF    = 3, // led is/set-to off, not used, enLed is used for this
+        ON     = 4, // led is/set-to on and function was activated
+        BLINK  = 5, // Led is/set-to blinking function not yet activated
+        TOGGLE = 6, // Led is toggled
     }LEDSTATE;
     
     typedef struct

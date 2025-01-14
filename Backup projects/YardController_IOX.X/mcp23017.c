@@ -13,7 +13,7 @@
  */
 
 // Initialize MCP23017 Devices
-void MCP23017_Init(MCP23017_t *devices, uint8_t num_devices) {
+void MCP23017xInit(MCP23017_t *devices, uint8_t num_devices) {
     for (uint8_t i = 0; i < num_devices; i++) {
         if(i > MAX_MCP23017_DEVICES){
             break;
@@ -133,7 +133,7 @@ void MCP23017_Init(MCP23017_t *devices, uint8_t num_devices) {
 //}
 
 // Write to an Entire Port
-void MCP23017_WritePort(MCP23017_t *device, uint8_t port, uint8_t value) {
+void MCP23017xWritePort(MCP23017_t *device, uint8_t port, uint8_t value) {
     uint8_t reg = (port == 0xA) ? MCP23017_OLATA : MCP23017_OLATB;
 
     uint8_t data[3] = {reg, value};

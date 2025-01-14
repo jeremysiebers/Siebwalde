@@ -56,6 +56,24 @@ typedef struct {
 } ByteFieldStruct;
 
 typedef struct {
+    uint8_t   IODIRA0 :1;
+    uint8_t   IODIRA1 :1;
+    uint8_t   IODIRA2 :1;
+    uint8_t   IODIRA3 :1;
+    uint8_t   IODIRA4 :1;
+    uint8_t   IODIRA5 :1;
+    uint8_t   IODIRA6 :1;
+    uint8_t   IODIRA7 :1;
+
+    uint8_t   IODIRB0 :1;
+    uint8_t   IODIRB1 :1;
+    uint8_t   IODIRB2 :1;
+    uint8_t   IODIRB3 :1;
+    uint8_t   IODIRB4 :1;
+    uint8_t   IODIRB5 :1;
+    uint8_t   IODIRB6 :1;
+    uint8_t   IODIRB7 :1;
+    
     uint8_t   IOXRA0 :1;
     uint8_t   IOXRA1 :1;
     uint8_t   IOXRA2 :1;
@@ -73,6 +91,15 @@ typedef struct {
     uint8_t   IOXRB5 :1;
     uint8_t   IOXRB6 :1;
     uint8_t   IOXRB7 :1;
+    
+    uint8_t   ADDR0 :1;
+    uint8_t   ADDR1 :1;
+    uint8_t   ADDR2 :1;
+    uint8_t   ADDR3 :1;
+    uint8_t   ADDR4 :1;
+    uint8_t   ADDR5 :1;
+    uint8_t   ADDR6 :1;
+    uint8_t   ADDR7 :1;
 } BitFieldStruct;
 
 typedef union {
@@ -81,11 +108,11 @@ typedef union {
 } MCP23017_t;
 
 // MCP23017 Functions
-    void MCP23017_Init(MCP23017_t *devices, uint8_t num_devices);
+    void MCP23017xInit(MCP23017_t *devices, uint8_t num_devices);
     //void MCP23017_SetPinDirection(MCP23017_t *device, uint8_t pin, uint8_t direction);
     //void MCP23017_WritePin(MCP23017_t *device, uint8_t pin, uint8_t value);
     //uint8_t MCP23017_ReadPin(MCP23017_t *device, uint8_t pin);
-    void MCP23017_WritePort(MCP23017_t *device, uint8_t port, uint8_t value);
+    void MCP23017xWritePort(MCP23017_t *device, uint8_t port, uint8_t value);
     //uint8_t MCP23017_ReadPort(MCP23017_t *device, char port);
 
 #ifdef	__cplusplus

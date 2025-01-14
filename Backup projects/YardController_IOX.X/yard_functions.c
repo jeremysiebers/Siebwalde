@@ -12,14 +12,17 @@
 #include "communication.h"
 #include "mcp23017.h"
 #include "yard_functions.h"
+
 // local methods
+void setLed(const YARDLED *self, LEDSTATE state);
 uint8_t computeChecksum(const YARDLED *array, size_t size);
+void updateIOX(void);
 
 static uint8_t  selector = 0;
-//static bool     idle     = true;
 static BLINKOUT blinkout;
-static uint8_t  prevLedArray;
-
+static IOXDATA  prevIOX[6];
+static uint32_t tStartIOXTime;
+static uint32_t tWaitIOXTime;
 
 void INITxYARDxFUNCTION(void){
    IOX_RESET_SetLow();
@@ -32,6 +35,18 @@ void INITxYARDxFUNCTION(void){
    blinkout.tStartIdleTime  = GETxMILLIS();
    blinkout.tWaitBlinkTime  = tLedBlinkTime;
    blinkout.tWaitIdleTime   = tIdleTimeOut;
+   
+   // Init the IOX update time
+   tStartIOXTime = GETxMILLIS();
+   tWaitIOXTime = tIOXTimeOut;
+   
+   /* Store the current state of the device IOX var */
+    {
+        for(uint8_t i=0; i<6; i++){
+            prevIOX[i].IOXRA = devices[i].byteView.IOXRA;
+            prevIOX[i].IOXRB = devices[i].byteView.IOXRB;
+        }
+    }
 }
 
 void UPDATExYARDxFUNCTIONxSELECTION(void) 
@@ -42,9 +57,7 @@ void UPDATExYARDxFUNCTIONxSELECTION(void)
     YARDLED* led = &yardLedArr[selector];
     /* Get one time the actual time */
     uint32_t millis = GETxMILLIS();
-    /* Store the current state of the selected LED */
-    prevLedArray = computeChecksum(yardLedArr, ARR_SIZE(yardLedArr));
-    
+        
     // Check if a button was pressed
     if(DEBOUNCExGETxVALUExUPDATEDxSTATE(&HOTRC_CH3)){
         channel = NEXT;        
@@ -71,7 +84,8 @@ void UPDATExYARDxFUNCTIONxSELECTION(void)
         else{
             led->state = BLINK;
         }
-        led->enLed = true;
+        //led->enLed = true;
+        setLed(led, ON);
         // We are not idle anymore
         blinkout.idle           = false;
         // Start the idle countdown timer
@@ -82,7 +96,8 @@ void UPDATExYARDxFUNCTIONxSELECTION(void)
          * function led to lid the next one
          */
         if(NOF != channel && ASSERT != channel){
-            led->enLed = false;
+            setLed(led, OFF);
+            //led->enLed = false;
         }
         // Check which button was pressed and jump or activate new function
         switch (channel){
@@ -145,14 +160,14 @@ void UPDATExYARDxFUNCTIONxSELECTION(void)
     if(BLINK == led->state){
         if((millis - blinkout.tStartBlinkTime) > blinkout.tWaitBlinkTime){
             blinkout.tStartBlinkTime = millis;
-            led->enLed = !led->enLed;
+            setLed(led, TOGGLE);
         }
     }
     else if(ON == led->state){
-        led->enLed = true;
+        setLed(led, ON);
     }
     else{
-        led->enLed = false;
+        setLed(led, OFF);
     }
     
     // Handle the idle timeout when not idle
@@ -162,57 +177,75 @@ void UPDATExYARDxFUNCTIONxSELECTION(void)
     }
     
     
-}
+    /* Check the current state of the device IOX var to the previous */
+    for(uint8_t i=0; i<6; i++){
+        //led->state = (led->funcActivated) ? ON : BLINK;
+        prevIOX[i].IOXRAupdate = 
+                (prevIOX[i].IOXRA == devices[i].byteView.IOXRA) 
+                ? false : true;
 
-uint8_t computeChecksum(const YARDLED *array, size_t size) {
-    uint8_t checksum = 0;
-    for (size_t i = 0; i < size; i++) {
-        // XOR all elements that matter
-        checksum ^= array[i].enLed ? 0x01: 0x00; // convert bool to make sure 
-        checksum ^= array[i].funcActivated ? 0x01: 0x00;
-        checksum ^= array[i].state;
-    }
-    return checksum;
-}
-
-
-
-
-void WRITExYARDxDEVICExVAR(void *self, size_t arrSize, ARRAY_TYPE type, 
-        int8_t index, void *value){
-    
-    if(index < 0 || index >= arrSize){
-        return;
+        prevIOX[i].IOXRBupdate = 
+                (prevIOX[i].IOXRB == devices[i].byteView.IOXRB) 
+                ? false : true;
     }
     
-    //YARDOUTPUT *yardOutput = NULL; // Declare and initialize
-    //YARDLED *yardLed = NULL;       // Declare and initialize
+    /* Activate only 1 IOX port per tWaitIOXTime */
+    if((millis - tStartIOXTime) > tWaitIOXTime){
+        /* Check if an update to a IOX is needed */
+        updateIOX();
+        /* start the timer for next check */
+        tStartIOXTime = millis;
+    }
+}
+
+//#pragma optimize( "", off )
+void setLed(const YARDLED *self, LEDSTATE state)
+{
+    if (TOGGLE == state){
+        if((*self->portx_ptr & self->pin_mask) != 0){
+            state = OFF;
+        }
+        else{
+            state = ON;
+        }
+    }
+    if(ON == state){
+        *self->portx_ptr |= self->pin_mask;
+    }
+    else if(OFF == state){
+        *self->portx_ptr &= !self->pin_mask;
+    }
+}
+//#pragma optimize( "", on )
+
+
+static uint8_t IOXupdater = 0;
+
+void updateIOX(void){
+    bool updatePrev = false;
     
-    switch(type){
-        case OUTPUTS:
-        {
-            YARDOUTPUT *yardOutput = (YARDOUTPUT *)self;
-            YARDOUTPUT *yardOutputUpdate = (YARDOUTPUT *)value;
-            if(yardOutput[index].invertedLevel){
-                //temp = !temp; // Invert the value
-            }
-            //yardOutput[index].value = temp;
-            yardOutput[index].valueUpdated = true;
-        }
-            break;
-            
-        case LEDS:
-        {
-            YARDLED *yardLed = (YARDLED *)self;
-            YARDLED *yardLedUpdate = (YARDLED *)value;
-            //yardLed[index].value = temp;
-            //yardLed[index].valueUpdated = true;
-        }
-            break;
-            
-        default: break;
+    if(prevIOX[IOXupdater].IOXRAupdate){
+        //MCP23017xWritePort(&devices[IOXupdater], 0xA, devices[IOXupdater].byteView.IOXRA);
+        prevIOX[IOXupdater].IOXRAupdate = false;
+        updatePrev = true;
+    }
+    if(prevIOX[IOXupdater].IOXRBupdate){
+        //MCP23017xWritePort(&devices[IOXupdater], 0xB, devices[IOXupdater].byteView.IOXRB);
+        prevIOX[IOXupdater].IOXRBupdate = false;
+        updatePrev = true;
     }    
+    
+    if(updatePrev){
+        /* Store the current state of the device IOX var */
+        for(uint8_t i=0; i<6; i++){
+            prevIOX[i].IOXRA = devices[i].byteView.IOXRA;
+            prevIOX[i].IOXRB = devices[i].byteView.IOXRB;
+        }
+    }
+    
+    IOXupdater = (IOXupdater == 5) ? 0 : IOXupdater + 1;
 }
+
 
 //void MCP23017_Init(void) {
 //    // init the IO Expander ports all outputs
