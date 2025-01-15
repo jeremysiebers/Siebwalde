@@ -20,6 +20,10 @@ void MCP23017xInit(MCP23017_t *devices, uint8_t num_devices) {
         }
         // disable auto addressing
         I2C2_Write1ByteRegister(devices[i].byteView.address, MCP23017_IOCON,  0b00100000);
+        // First update Output register A when outputs are inverted (low) level active (relay card)
+        I2C2_Write1ByteRegister(devices[i].byteView.address, MCP23017_OLATA, devices[i].byteView.IOXRA);
+        // First update Output register B when outputs are inverted (low) level active (relay card)
+        I2C2_Write1ByteRegister(devices[i].byteView.address, MCP23017_OLATB, devices[i].byteView.IOXRB);
         // set IO direction of Port A
         I2C2_Write1ByteRegister(devices[i].byteView.address, MCP23017_IODIRA, devices[i].byteView.IODIRA);
         // set IO direction of Port B

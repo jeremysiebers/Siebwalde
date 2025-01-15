@@ -17,12 +17,15 @@
 void setLed(const YARDLED *self, LEDSTATE state);
 uint8_t computeChecksum(const YARDLED *array, size_t size);
 void updateIOX(void);
+void ExecSelectedFunction(const YARDLED *self, YARDOUTPUT *output);
+void executeRules(YARDOUTPUT *output, YARD_LEDS led);
 
-static uint8_t  selector = 0;
+static uint8_t  selector        = 0;
 static BLINKOUT blinkout;
 static IOXDATA  prevIOX[6];
 static uint32_t tStartIOXTime;
 static uint32_t tWaitIOXTime;
+static uint8_t  IOXupdater      = 0;
 
 void INITxYARDxFUNCTION(void){
    IOX_RESET_SetLow();
@@ -147,7 +150,7 @@ void UPDATExYARDxFUNCTIONxSELECTION(void)
                 // led shall show the state
                 led->state = (led->funcActivated) ? ON : BLINK;
                 blinkout.tStartIdleTime = millis;
-                //ExecSelectedFunction(selector);
+                ExecSelectedFunction(led, yardOutputArr);
             }
                 break;
 
@@ -202,12 +205,13 @@ void UPDATExYARDxFUNCTIONxSELECTION(void)
 void setLed(const YARDLED *self, LEDSTATE state)
 {
     if (TOGGLE == state){
-        if((*self->portx_ptr & self->pin_mask) != 0){
-            state = OFF;
-        }
-        else{
-            state = ON;
-        }
+        state = (*self->portx_ptr & self->pin_mask) ? OFF : ON; // Determine new state
+//        if((*self->portx_ptr & self->pin_mask) != 0){
+//            state = OFF;
+//        }
+//        else{
+//            state = ON;
+//        }
     }
     if(ON == state){
         *self->portx_ptr |= self->pin_mask;
@@ -216,10 +220,19 @@ void setLed(const YARDLED *self, LEDSTATE state)
         *self->portx_ptr &= !self->pin_mask;
     }
 }
+void setOut(const YARDOUTPUT *self, bool state)
+{
+    if (self->invertedLevel) {
+        state = !state; // Invert the state if the level is inverted
+    }
+
+    if (state) {
+        *self->portx_ptr |= self->pin_mask; // Set the bit
+    } else {
+        *self->portx_ptr &= ~self->pin_mask; // Clear the bit
+    }
+}
 //#pragma optimize( "", on )
-
-
-static uint8_t IOXupdater = 0;
 
 void updateIOX(void){
     bool updatePrev = false;
@@ -246,66 +259,53 @@ void updateIOX(void){
     IOXupdater = (IOXupdater == 5) ? 0 : IOXupdater + 1;
 }
 
-
-//void MCP23017_Init(void) {
-//    // init the IO Expander ports all outputs
-//    for(uint8_t i = 0x21; i<0x27; i++){
-//        I2C2_Write1ByteRegister(i, IOCON,  0b00100000);
-//        I2C2_Write1ByteRegister(i, IODIRA, 0x00);
-//        I2C2_Write1ByteRegister(i, IODIRB, 0x00);    
-//        uint8_t data1[2] = {OLATA, 0xFF};
-//        I2C2_WriteNBytes(i, data1, 2);
-//        uint8_t data2[2] = {OLATB, 0xFF};
-//        I2C2_WriteNBytes(i, data2, 2);
-//    }    
+void ExecSelectedFunction(const YARDLED *led, YARDOUTPUT *output){
     
-//    I2C2_Write1ByteRegister(MCP23017_ADDR2, IOCON,  0b00100000);
-//    I2C2_Write1ByteRegister(MCP23017_ADDR2, IODIRA, 0x00);
-//    I2C2_Write1ByteRegister(MCP23017_ADDR2, IODIRB, 0x00);    
-//    I2C2_WriteNBytes(MCP23017_ADDR2, data1, 2);
-//    I2C2_WriteNBytes(MCP23017_ADDR2, data2, 2);
-//    
-//    I2C2_Write1ByteRegister(MCP23017_ADDR3, IOCON,  0b00100000);
-//    I2C2_Write1ByteRegister(MCP23017_ADDR3, IODIRA, 0x00);
-//    I2C2_Write1ByteRegister(MCP23017_ADDR3, IODIRB, 0x00);    
-//    I2C2_WriteNBytes(MCP23017_ADDR3, data1, 2);
-//    I2C2_WriteNBytes(MCP23017_ADDR3, data2, 2);
-//}
+    /* When a function is deactivated, only the rail power needs to be
+     * disabled. This assumes the first 29 leds to map to the first
+     * 29 BV's!!!
+     */
+    if(!led->funcActivated){
+        setOut(&output[led->nled], led->funcActivated);
+        return;
+    }
+    
+    // turn off all BV's since a new one is going to be activated
+    switch(led->nled){
+        case BVLED1:
+        case BVLED2:
+        case BVLED3:
+        case BVLED4:
+        case BVLED5:
+        case BVLED6:
+        case BVLED7:
+        case BVLED8:
+        case BVLED9:
+        case BVLED10:
+        case BVLED11:
+        case BVLED12:
+        case BVLED13:
+        case BVLED14:
+        case BVLED15:
+        case BVLED16:
+            // all are inverted so do it on byte level
+            *output[0x00].portx_ptr |= 0xFF; // Dereference the pointer to modify the value
+            *output[0x08].portx_ptr |= 0xFF; // Dereference the pointer to modify the value
+            break;
+            
+        default: break;        
+    }
+    /* Call the rule table and execute the rules */
+    executeRules(output, led->nled);
+}
 
-//void MCP23017_ToggleOutputs(void) {
-//    TP4_SetHigh();
-//    if(toggle == true){
-//        //uint8_t data1[2] = {OLATA, 0xFF};
-//        //uint8_t data2[2] = {OLATB, 0xFF};
-//        uint8_t data1[3] = {OLATA, 0xAA, 0xAA};
-//        //I2C2_Write1ByteRegister(MCP23017_ADDR, OLATA, 0);
-////        I2C2_WriteNBytes(MCP23017_ADDR1, data1, 3);
-////        I2C2_WriteNBytes(MCP23017_ADDR2, data1, 3);
-////        I2C2_WriteNBytes(MCP23017_ADDR3, data1, 3);
-//        //I2C2_WriteNBytes(MCP23017_ADDR, data2, 2);
-//        //I2C2_Write1ByteRegister(MCP23017_ADDR, OLATB, 0x00);
-//        toggle = false;
-//        
-//        for(uint8_t i = 0x21; i<0x27; i++){
-//            I2C2_WriteNBytes(i, data1, 3);
-//        }
-//        
-//    }
-//    else{
-//        //uint8_t data1[2] = {OLATA, 0x00};
-//        //uint8_t data2[2] = {OLATB, 0x00};
-//        uint8_t data1[3] = {OLATA, 0x55, 0x55};
-//        //I2C2_Write1ByteRegister(MCP23017_ADDR, OLATA, 0);
-////        I2C2_WriteNBytes(MCP23017_ADDR1, data1, 3);
-////        I2C2_WriteNBytes(MCP23017_ADDR2, data1, 3);
-////        I2C2_WriteNBytes(MCP23017_ADDR3, data1, 3);
-//        //I2C2_WriteNBytes(MCP23017_ADDR, data2, 2);
-//        //I2C2_Write1ByteRegister(MCP23017_ADDR, OLATB, 0xFF);
-//        toggle = true;
-//        
-//        for(uint8_t i = 0x21; i<0x27; i++){
-//            I2C2_WriteNBytes(i, data1, 3);
-//        }
-//    }
-//    TP4_SetLow();
-//}
+void executeRules(YARDOUTPUT *output, YARD_LEDS led) {
+    if (led >= sizeof(ruleTable) / sizeof(ruleTable[0]) || ruleTable[led].rules == NULL) {
+        return; // Invalid or undefined LED
+    }
+
+    const RuleSet *ruleSet = &ruleTable[led];
+    for (size_t i = 0; i < ruleSet->ruleCount; i++) {
+        setOut(&output[ruleSet->rules[i].outputIndex], ruleSet->rules[i].state);
+    }
+}
