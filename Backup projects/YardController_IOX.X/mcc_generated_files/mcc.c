@@ -56,9 +56,9 @@ void SYSTEM_Initialize(void)
     OSCILLATOR_Initialize();
     TMR1_Initialize();
     TMR0_Initialize();
-#ifndef SIMULATOR
+//#ifndef SIMULATOR
     Network_Init();
-#endif
+//#endif
 }
 
 void OSCILLATOR_Initialize(void)

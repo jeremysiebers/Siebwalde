@@ -30,7 +30,9 @@ static uint8_t  IOXupdater      = 0;
 void INITxYARDxFUNCTION(void){
    IOX_RESET_SetLow();
    IOX_RESET_SetHigh();
-   //MCP23017_Init(devices, 6); // Initialize 6 MCP23017 devices
+   //#ifndef SIMULATOR
+   MCP23017xInit(devices, 6); // Initialize 6 MCP23017 devices
+   //#endif
    
    // Init the blinkout struct (static) hence cannot use compile time values
    blinkout.idle = true;
@@ -69,10 +71,10 @@ void UPDATExYARDxFUNCTIONxSELECTION(void)
         channel = PREV;
     }
     else if(DEBOUNCExGETxVALUExUPDATEDxSTATE(&HOTRC_CH5)){
-        channel = JMP;
+        channel = ASSERT;
     }
     else if(DEBOUNCExGETxVALUExUPDATEDxSTATE(&HOTRC_CH6)){
-        channel = ASSERT;
+        channel = JMP;
     }    
     if(NOF != channel){
         // re-start the idle timer after a button press
@@ -87,7 +89,7 @@ void UPDATExYARDxFUNCTIONxSELECTION(void)
         else{
             led->state = BLINK;
         }
-        //led->enLed = true;
+        // Set the led on(true) if state is BLINK it will blink automatically
         setLed(led, ON);
         // We are not idle anymore
         blinkout.idle           = false;
@@ -100,7 +102,6 @@ void UPDATExYARDxFUNCTIONxSELECTION(void)
          */
         if(NOF != channel && ASSERT != channel){
             setLed(led, OFF);
-            //led->enLed = false;
         }
         // Check which button was pressed and jump or activate new function
         switch (channel){
@@ -201,7 +202,7 @@ void UPDATExYARDxFUNCTIONxSELECTION(void)
     }
 }
 
-//#pragma optimize( "", off )
+#pragma optimize( "", off )
 void setLed(const YARDLED *self, LEDSTATE state)
 {
     if (TOGGLE == state){
@@ -220,6 +221,7 @@ void setLed(const YARDLED *self, LEDSTATE state)
         *self->portx_ptr &= !self->pin_mask;
     }
 }
+
 void setOut(const YARDOUTPUT *self, bool state)
 {
     if (self->invertedLevel) {
@@ -232,28 +234,29 @@ void setOut(const YARDOUTPUT *self, bool state)
         *self->portx_ptr &= ~self->pin_mask; // Clear the bit
     }
 }
-//#pragma optimize( "", on )
+#pragma optimize( "", on )
 
 void updateIOX(void){
-    bool updatePrev = false;
+    uint8_t updatePrev = 0;
     
     if(prevIOX[IOXupdater].IOXRAupdate){
-        //MCP23017xWritePort(&devices[IOXupdater], 0xA, devices[IOXupdater].byteView.IOXRA);
+        MCP23017xWritePort(&devices[IOXupdater], 0xA, devices[IOXupdater].byteView.IOXRA);
         prevIOX[IOXupdater].IOXRAupdate = false;
-        updatePrev = true;
+        updatePrev = 1;
     }
     if(prevIOX[IOXupdater].IOXRBupdate){
-        //MCP23017xWritePort(&devices[IOXupdater], 0xB, devices[IOXupdater].byteView.IOXRB);
+        MCP23017xWritePort(&devices[IOXupdater], 0xB, devices[IOXupdater].byteView.IOXRB);
         prevIOX[IOXupdater].IOXRBupdate = false;
-        updatePrev = true;
+        updatePrev = 2;
     }    
     
-    if(updatePrev){
-        /* Store the current state of the device IOX var */
-        for(uint8_t i=0; i<6; i++){
-            prevIOX[i].IOXRA = devices[i].byteView.IOXRA;
-            prevIOX[i].IOXRB = devices[i].byteView.IOXRB;
-        }
+    if(updatePrev == 1){
+        /* Store the current state of the device IOX var that was updated */
+        prevIOX[IOXupdater].IOXRA = devices[IOXupdater].byteView.IOXRA;
+    }
+    else if(updatePrev == 2){
+        /* Store the current state of the device IOX var that was updated */
+        prevIOX[IOXupdater].IOXRB = devices[IOXupdater].byteView.IOXRB;
     }
     
     IOXupdater = (IOXupdater == 5) ? 0 : IOXupdater + 1;
@@ -265,36 +268,12 @@ void ExecSelectedFunction(const YARDLED *led, YARDOUTPUT *output){
      * disabled. This assumes the first 29 leds to map to the first
      * 29 BV's!!!
      */
-    if(!led->funcActivated){
-        setOut(&output[led->nled], led->funcActivated);
+    if(false == led->funcActivated){
+        setOut(&output[led->nled], false);
         return;
-    }
-    
-    // turn off all BV's since a new one is going to be activated
-    switch(led->nled){
-        case BVLED1:
-        case BVLED2:
-        case BVLED3:
-        case BVLED4:
-        case BVLED5:
-        case BVLED6:
-        case BVLED7:
-        case BVLED8:
-        case BVLED9:
-        case BVLED10:
-        case BVLED11:
-        case BVLED12:
-        case BVLED13:
-        case BVLED14:
-        case BVLED15:
-        case BVLED16:
-            // all are inverted so do it on byte level
-            *output[0x00].portx_ptr |= 0xFF; // Dereference the pointer to modify the value
-            *output[0x08].portx_ptr |= 0xFF; // Dereference the pointer to modify the value
-            break;
-            
-        default: break;        
-    }
+    }    
+    // turn off all BV's and Leds since a new one is going to be activated
+    executeRules(output, BVLEDZERO);
     /* Call the rule table and execute the rules */
     executeRules(output, led->nled);
 }
