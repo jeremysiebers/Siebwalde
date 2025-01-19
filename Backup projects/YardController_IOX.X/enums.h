@@ -221,12 +221,12 @@ extern "C" {
     
     MCP23017_t devices[] = {    
     //IODIRA,IODIRB,IOXRA,IOXRB,address
-    {0x00, 0x00, 0x00, 0x00, 0x26, }, // MCP23017 at address 0x26, PORTA/B = Output, PCB428
-    {0x00, 0x00, 0x00, 0x00, 0x25, }, // MCP23017 at address 0x25, PORTA/B = Output, PCB429
-    {0x00, 0x00, 0xFF, 0xFF, 0x24, }, // MCP23017 at address 0x24, PORTA/B = Output, PCB431 relay card inverted level
-    {0x00, 0x00, 0xFF, 0xFF, 0x23, }, // MCP23017 at address 0x23, PORTA/B = Output, PCB432 relay card inverted level
-    {0x00, 0x00, 0xFF, 0xFF, 0x22, }, // MCP23017 at address 0x22, PORTA/B = Output, PCB433 relay card inverted level
-    {0x00, 0x00, 0x00, 0x00, 0x21, }, // MCP23017 at address 0x21, PORTA/B = Output, PCB430
+    [PCB428] = {0x00, 0x00, 0x00, 0x00, 0x26, }, // MCP23017 at address 0x26, PORTA/B = Output, PCB428
+    [PCB429] = {0x00, 0x00, 0x00, 0x00, 0x25, }, // MCP23017 at address 0x25, PORTA/B = Output, PCB429
+    [PCB431] = {0x00, 0x00, 0xFF, 0xFF, 0x24, }, // MCP23017 at address 0x24, PORTA/B = Output, PCB431 relay card inverted level
+    [PCB432] = {0x00, 0x00, 0xFF, 0xFF, 0x23, }, // MCP23017 at address 0x23, PORTA/B = Output, PCB432 relay card inverted level
+    [PCB433] = {0x00, 0x00, 0xFF, 0xFF, 0x22, }, // MCP23017 at address 0x22, PORTA/B = Output, PCB433 relay card inverted level
+    [PCB430] = {0x00, 0x00, 0x00, 0x00, 0x21, }, // MCP23017 at address 0x21, PORTA/B = Output, PCB430
     };
     
     typedef struct {
@@ -238,7 +238,7 @@ extern "C" {
     
     typedef enum
     {		
-        // PCB431 I2C_ADDRESS = 0x23
+        // PCB431 I2C_ADDRESS = 0x24
 		BV1   	=	0x0,	
 		BV2   	=	0x1,
 		BV3   	=	0x2,
@@ -255,7 +255,7 @@ extern "C" {
 		BV14  	=	0xD,
 		BV15  	=	0xE,
 		BV16  	=	0xF,
-		// PCB432 I2C_ADDRESS = 0x24
+		// PCB432 I2C_ADDRESS = 0x23
 		BV17  	=	0x10,
 		BV18  	=	0x11,
 		BV19  	=	0x12,
@@ -272,7 +272,7 @@ extern "C" {
         BV30    =	0x1D,
         BV31    =	0x1E,
         BV32    =	0x1F,
-        // PCB428 I2C_ADDRESS = 0x21
+        // PCB428 I2C_ADDRESS = 0x26
 		BW1   	=	0x20,
 		BW2   	=	0x21,
 		BW3   	=	0x22,
@@ -289,11 +289,11 @@ extern "C" {
 		BW14  	=	0x2D,
 		BW15  	=	0x2E,
 		BW16  	=	0x2F,		
-        // PCB429 I2C_ADDRESS = 0x22
+        // PCB429 I2C_ADDRESS = 0x25
 		BW17  	=	0x30,
 		BW18  	=	0x31,
 		BW19  	=	0x32,
-		// PCB433 I2C_ADDRESS = 0x25
+		// PCB433 I2C_ADDRESS = 0x22
         BLK22   =   0x33,
         BLK23   =   0x34,
 		MISC3   =	0x35,
@@ -400,7 +400,7 @@ extern "C" {
 	};
     
     typedef enum{
-        // PCB430 I2C_ADDRESS = 0x26
+        // PCB430 I2C_ADDRESS = 0x21
         BVLED1  =	0x0,
 		BVLED2  =	0x1,
 		BVLED3  =	0x2,
@@ -533,7 +533,19 @@ extern "C" {
         {BV14, false},
         {BV15, false},
         {BV16, false},
-        
+        {BV17, false},
+        {BV18, false},
+        {BV19, false},
+        {BV20, false},
+        {BV21, false},
+        {BV22, false},
+        {BV23, false},
+        {BV24, false},
+        {BV25, false},
+        {BV26, false},
+        {BV27, false},
+        {BV28, false},
+        {BV29, false},        
     };
     
     static const Rule bvled1Rules[] = {
@@ -570,6 +582,110 @@ extern "C" {
         {BW11, false}
     };
     
+    static const Rule bvled4Rules[] = {
+        {BV4, true},
+    };
+    
+    static const Rule bvled5Rules[] = {
+        {BV5, true},
+    };
+    
+    static const Rule bvled6Rules[] = {
+        {BV6, true},
+    };
+    
+    static const Rule bvled7Rules[] = {
+        {BV7, true},
+    };
+    
+    static const Rule bvled8Rules[] = {
+        {BV8, true},
+    };
+    
+    static const Rule bvled9Rules[] = {
+        {BV9, true},
+    };
+    
+    static const Rule bvled10Rules[] = {
+        {BV10, true},
+    };
+    
+    static const Rule bvled11Rules[] = {
+        {BV11, true},
+    };
+    
+    static const Rule bvled12Rules[] = {
+        {BV12, true},
+    };
+    
+    static const Rule bvled13Rules[] = {
+        {BV13, true},
+    };
+    
+    static const Rule bvled14Rules[] = {
+        {BV14, true},
+    };
+    
+    static const Rule bvled15Rules[] = {
+        {BV15, true},
+    };
+    
+    static const Rule bvled16Rules[] = {
+        {BV16, true},
+    };
+    
+    static const Rule bvled17Rules[] = {
+        {BV17, true},
+    };
+    
+    static const Rule bvled18Rules[] = {
+        {BV18, true},
+    };
+    
+    static const Rule bvled19Rules[] = {
+        {BV19, true},
+    };
+    
+    static const Rule bvled20Rules[] = {
+        {BV20, true},
+    };
+    
+    static const Rule bvled21Rules[] = {
+        {BV21, true},
+    };
+    
+    static const Rule bvled22Rules[] = {
+        {BV22, true},
+    };
+    
+    static const Rule bvled23Rules[] = {
+        {BV23, true},
+    };
+    
+    static const Rule bvled24Rules[] = {
+        {BV24, true},
+    };
+    
+    static const Rule bvled25Rules[] = {
+        {BV25, true},
+    };
+    
+    static const Rule bvled26Rules[] = {
+        {BV26, true},
+    };
+    
+    static const Rule bvled27Rules[] = {
+        {BV27, true},
+    };
+    
+    static const Rule bvled28Rules[] = {
+        {BV28, true},
+    };
+    
+    static const Rule bvled29Rules[] = {
+        {BV29, true},
+    };
+            
     typedef struct {
         const Rule *rules; // Pointer to the array of rules
         size_t ruleCount;  // Number of rules in the array
@@ -578,8 +694,34 @@ extern "C" {
     static const RuleSet ruleTable[] = {
         [BVLED1] = {bvled1Rules, sizeof(bvled1Rules) / sizeof(bvled1Rules[0])},
         [BVLED2] = {bvled2Rules, sizeof(bvled2Rules) / sizeof(bvled2Rules[0])},
-        [BVLED3] = {bvled3Rules, sizeof(bvled3Rules) / sizeof(bvled3Rules[0])},
-        [BVLEDZERO] = {bvResetZero, sizeof(bvResetZero) / sizeof(bvResetZero[0])},
+        [BVLED3] = {bvled3Rules, sizeof(bvled3Rules) / sizeof(bvled3Rules[0])},        
+        [BVLED4] = {bvled4Rules, sizeof(bvled4Rules) / sizeof(bvled4Rules[0])},
+        [BVLED5] = {bvled5Rules, sizeof(bvled5Rules) / sizeof(bvled5Rules[0])},
+        [BVLED6] = {bvled6Rules, sizeof(bvled6Rules) / sizeof(bvled6Rules[0])},        
+        [BVLED7] = {bvled7Rules, sizeof(bvled7Rules) / sizeof(bvled7Rules[0])},
+        [BVLED8] = {bvled8Rules, sizeof(bvled8Rules) / sizeof(bvled8Rules[0])},        
+        [BVLED9] = {bvled9Rules, sizeof(bvled9Rules) / sizeof(bvled9Rules[0])},
+        [BVLED10] = {bvled10Rules, sizeof(bvled10Rules) / sizeof(bvled10Rules[0])},
+        [BVLED11] = {bvled11Rules, sizeof(bvled11Rules) / sizeof(bvled11Rules[0])},
+        [BVLED12] = {bvled12Rules, sizeof(bvled12Rules) / sizeof(bvled12Rules[0])},
+        [BVLED13] = {bvled13Rules, sizeof(bvled13Rules) / sizeof(bvled13Rules[0])},
+        [BVLED14] = {bvled14Rules, sizeof(bvled14Rules) / sizeof(bvled14Rules[0])},        
+        [BVLED15] = {bvled15Rules, sizeof(bvled15Rules) / sizeof(bvled15Rules[0])},
+        [BVLED16] = {bvled16Rules, sizeof(bvled16Rules) / sizeof(bvled16Rules[0])},
+        [BVLED17] = {bvled17Rules, sizeof(bvled17Rules) / sizeof(bvled17Rules[0])},
+        [BVLED18] = {bvled18Rules, sizeof(bvled18Rules) / sizeof(bvled18Rules[0])},
+        [BVLED19] = {bvled19Rules, sizeof(bvled19Rules) / sizeof(bvled19Rules[0])},
+        [BVLED20] = {bvled20Rules, sizeof(bvled20Rules) / sizeof(bvled20Rules[0])},        
+        [BVLED21] = {bvled21Rules, sizeof(bvled21Rules) / sizeof(bvled21Rules[0])},
+        [BVLED22] = {bvled22Rules, sizeof(bvled22Rules) / sizeof(bvled22Rules[0])},
+        [BVLED23] = {bvled23Rules, sizeof(bvled23Rules) / sizeof(bvled23Rules[0])},
+        [BVLED24] = {bvled24Rules, sizeof(bvled24Rules) / sizeof(bvled24Rules[0])},
+		[BVLED25] = {bvled25Rules, sizeof(bvled25Rules) / sizeof(bvled25Rules[0])},
+		[BVLED26] = {bvled26Rules, sizeof(bvled26Rules) / sizeof(bvled26Rules[0])},
+		[BVLED27] = {bvled27Rules, sizeof(bvled27Rules) / sizeof(bvled27Rules[0])},
+		[BVLED28] = {bvled28Rules, sizeof(bvled28Rules) / sizeof(bvled28Rules[0])},
+		[BVLED29] = {bvled29Rules, sizeof(bvled29Rules) / sizeof(bvled29Rules[0])},
+		[BVLEDZERO] = {bvResetZero, sizeof(bvResetZero) / sizeof(bvResetZero[0])},
     };
 
 

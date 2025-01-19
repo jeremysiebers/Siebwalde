@@ -1,0 +1,1956 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+
+
+    
+    
+
+
+    <!-- *** FE html start -->
+    <meta charset="utf-8">
+
+                <title>Bus Buffers Simplify Design of Large, Noisy I2C Systems | Analog Devices</title>
+            <meta name="description" content="The IC bus and its derivatives—such as SMBus, PMBus, the DDC bus of HDMI and IPMB bus of ATCA—are used in a variety of large systems to transfer vital system information. These bus specifications have" />
+                <meta name="keywords" content="bus buffers, I2C bus, I2C, I2C systems">
+            <meta http-equiv="X-UA-Compatible" content="IE=edge">
+            <meta name="apple-mobile-web-app-capable" content="yes" />
+            <meta name="mobile-web-app-capable" content="yes" />
+            <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <meta name="referrer" content="no-referrer-when-downgrade" />
+                        <meta name="yandex-verification" content="86a60d9bcaab43f0" />
+                        <meta name="google-site-verification" content="aVOSmh5Dsd1VpzYMM3a_ZvOQcjP9G5GDlvU-atf48ss" />
+                        <meta name="baidu-site-verification" content="cSddD8r1N7" />
+                        <meta name="msvalidate.01" content="381E86BC7EF76D19F9365D26D8BFCD35" />
+                                <link rel="canonical" href="https://www.analog.com/en/resources/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems.html" />
+                                <link rel="alternate" hreflang=x-default href="https://www.analog.com/en/resources/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems.html" />
+                                <link rel="alternate" hreflang=en-US href="https://www.analog.com/en/resources/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems.html" />
+                                <link rel="alternate" hreflang=en-CN href="https://www.analog.com/cn/resources/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems.html" />
+                                <link rel="alternate" hreflang=ja-JP href="https://www.analog.com/jp/resources/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems.html" />
+
+        <script type="application/ld+json">
+           {"datePublished":"2013-01-01T00:00:00","dateModified":"2025-01-16T14:35:27","@context":"https://schema.org","@type":"TechArticle","genre":"Technical Articles","audience":"Engineers","author":[{"@type":"Person","name":"Rajesh Venugopal"}],"url":"https://www.analog.com/en/resources/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems.html","headline":"Bus Buffers Simplify Design of Large, Noisy I<sup>2</sup>C Systems","abstract":null,"publisher":{"@type":"Organization","name":"Analog Devices, Inc."}};
+        </script>
+
+
+    <script>!function (e, a, n, t) { var i = e.head; if (i) { if (a) return; var o = e.createElement("style"); o.id = "alloy-prehiding", o.innerText = n, i.appendChild(o), setTimeout(function () { o.parentNode && o.parentNode.removeChild(o) }, t) } }(document, document.location.href.indexOf("adobe_authoring_enabled") !== -1, "body { opacity: 0 !important }", 3000);</script>
+
+    <script type="text/javascript">
+        var datalayer = {"device":{"browser":"","type":""},"page":{"details":{"part":{"applicableParts":null,"categories":null,"id":null,"lifeCycle":null,"markets":null,"name":null,"type":null}},"meta":{"breadcrumbs":null,"id":null,"journey":null,"language":null,"pathname":null,"persona":null,"publishDate":null,"title":null,"taxonomy":null,"type":null}},"user":{"cart":{"purchaseID":"","sampleID":"","transactionID":""},"email":"","loggedIn":false,"blocked":false,"memberStatus":false}};
+    </script>
+
+
+        <link href="https://assets2.analog.com/cms-assets/images/images/adi-favicon.svg" rel="shortcut icon" />
+    
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Barlow:wght@600&family=Inter:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@600&family=Inter:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'"></noscript>
+    <style>
+        :root {
+            --cta-color: #fff;
+            --cta-background: #1c1c1c;
+        }
+    </style>
+
+
+
+
+
+
+    <!-- Font-awesome -->
+    <!-- Latest compiled and minified CSS -->
+    <!-- Optional theme -->
+    <!-- owl-slider -->
+    <!-- Algolia Instant Search Theme -->
+    <!-- Autocomplete Theme -->
+
+
+    <!-- Latest compiled and minified JavaScript -->
+
+
+
+    <link rel="preload" href="https://assets2.analog.com/cms-assets/css/app.bundle.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://assets2.analog.com/cms-assets/css/app.bundle.css"></noscript>
+    <link rel="preload" href="https://assets2.analog.com/cms-assets/css/pages/styles//vendor.bundle.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://assets2.analog.com/cms-assets/css/pages/styles//vendor.bundle.css"></noscript>
+        <link rel="preload" href="https://assets2.analog.com/cms-assets/css/pages/styles/common.bundle.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="https://assets2.analog.com/cms-assets/css/pages/styles/common.bundle.css"></noscript>
+                    <link rel="preload" href="https://assets2.analog.com/cms-assets-optimizations/css/vendor.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="https://assets2.analog.com/cms-assets-optimizations/css/vendor.min.css"></noscript>
+        <link rel="preload" href="https://assets2.analog.com/cms-assets-optimizations/css/article.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="https://assets2.analog.com/cms-assets-optimizations/css/article.min.css"></noscript>
+    <script src="https://assets2.analog.com/cms-assets/js/pages/scripts/analog-vendor.js"></script>
+
+    
+    <link rel="stylesheet" href="https://assets2.analog.com/cms-assets/css/pages/styles/rte-editor-control.bundle.css">
+    
+    
+
+    <link rel="stylesheet" type="text/css" href="https://assets2.analog.com/header-footer/index.css">
+    <script src="https://assets2.analog.com/header-footer/index.js" type="module" defer></script>
+    <link rel="modulepreload" crossorigin href="https://assets2.analog.com/header-footer/search.js">
+
+    <script src="https://assets.adobedtm.com/bc68b7886092/25785b612092/launch-715705770daf.min.js" async></script>
+    <!-- *** FE html end -->
+</head>
+<body class="default-device bodyclass" data-comp-prefix="app-js__" data-show-legacy-div-wrapper="False">
+
+    
+
+    
+
+<!-- #wrapper -->
+<div id="wrapper" class="page-wrap">
+    <!-- #header -->
+    <header>
+        <div id="header" class="container-fluid">
+            <div class="row">
+                <div>
+        <adi-header>            
+            <adi-account></adi-account>
+        </adi-header>
+            <adi-menu divided>
+                <adi-cart slot="buttons"></adi-cart>
+                <adi-search slot="drawer">
+                    <div slot="search"></div>
+                    <div slot="results"></div>
+                </adi-search>
+            </adi-menu>
+        <adi-dispatch></adi-dispatch>
+</div>
+            </div>
+        </div>
+    </header>
+    <!-- /#header -->
+    <!-- #content -->
+    <main role="main" id="main" tabindex="-1" class="main-content content">
+        <div id="content" class="container-fluid">
+            <div class="row">
+<div>
+
+
+
+
+<div class="component Global-Breadcrumb">
+        <script type="application/ld+json">
+            {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://www.analog.com/en/index.html"},{"@type":"ListItem","position":2,"name":"Resource Library","item":"https://www.analog.com/en/resources.html"},{"@type":"ListItem","position":3,"name":"Technical Articles","item":"https://www.analog.com/en/resources/technical-articles.html"},{"@type":"ListItem","position":4,"name":"Bus Buffers Simplify Design of Large, Noisy I2C Systems","item":"https://www.analog.com/en/resources/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems.html"}]};
+        </script>
+    <div class="component-content">
+        <!-- Breadcrumb component : start -->
+
+        <article class="breadcrumb app-js__breadcrumb breadcrumb breadcrumb-no-border">
+
+            <div class="breadcrumb__container" aria-label="Breadcrumb" role="navigation">
+                            <div class="breadcrumb__container__section body-small">
+                                            <a class="breadcrumb__container__section_item text-underline" href="/en/index.html">
+                                                <span class="breadcrumb__container__section_item" aria-current="page">Home</span>
+
+                                            </a>
+
+
+
+                            </div>
+                            <div class="breadcrumb__container__section body-small">
+                                            <a class="breadcrumb__container__section_item text-underline" href="/en/resources.html">
+                                                <span class="breadcrumb__container__section_item" aria-current="page">Resource Library</span>
+                                            </a>
+
+
+
+                            </div>
+                            <div class="breadcrumb__container__section body-small">
+                                            <a class="breadcrumb__container__section_item text-underline" href="/en/search.html?resourceTypes=Technical Documentation~Technical Articles">
+                                                <span class="breadcrumb__container__section_item" aria-current="page">Technical Articles</span>
+                                            </a>
+
+
+
+                            </div>
+                            <div class="breadcrumb__container__section body-small">
+Bus Buffers Simplify Design of Large, Noisy I2C Systems
+
+
+                            </div>
+
+            </div>
+        </article>
+      
+
+        <!-- Previous page link component : start -->
+
+
+        <article class="previous-page-link app-js__previous-page-link">
+                        <a class="previous-page-link__link button-small" href="/en/index.html">
+                            <span class="previous-page-link__icon">
+<img src="https://www.analog.com/en/_/media/project/analogweb/analogweb/global/chevron-left-s.png?as=0&amp;dmc=0&amp;iar=0&amp;thn=0&amp;udi=0&amp;rev=c50da4dd134a41a28db3d68c9b26e721&amp;la=en&amp;h=16&amp;w=16&amp;hash=12C65D8611F1448B9E07B6645A314CD5" class="previous-page-link__arrow-left" height="16" alt="left arrow" width="16" />                            </span>
+                            <span class="previous-page-link__label">
+Back to Home
+
+                            </span>
+                        </a>
+
+        </article>
+
+
+        <!-- Previous page link component : end -->
+
+        <div class="">
+
+
+        </div>
+    </div>
+</div>
+    <main class="adi__article">
+
+        <!-- Header start -->
+        <adi-container class="adi__spotlight">
+            <div class="adi__container adi__container--dividedLeft">
+                <div class="adi__container__wrapper">
+                    <heading class="adi__articleHeading">
+                        <div>
+            <h1 class="adi__articleHeading__title">
+                Bus Buffers Simplify Design of Large, Noisy I<sup>2</sup>C Systems <!-- Dynamic Article Title -->
+            </h1>
+<div class="adi__articleHeading__detail">
+    <div class="adi__articleHeading__byLine">
+
+        by
+
+        <a href="#authors">
+Rajesh Venugopal        </a>
+
+    </div>
+
+    <div class="adi__articleHeading__date">
+Jan 1 2013    </div>
+
+</div>
+</div>
+                        <div>
+    <div class="adi__articleHeading__meta">
+        <div class="adi__articleHeading__meta__datum">
+            <a href="#" class="adi__button adi__button--ghost adi__articleHeading__meta__datum--save"
+               data-toggle="modal" aria-controls="saveToMyAnalog">
+                <i class="adi__icon adi__icon--bookmarkPlus"></i>
+                <span class="adi__chip__label">Add to myAnalog</span>
+            </a>
+        </div>
+        <div class="adi__articleHeading__meta__datum">
+            <button class="adi__button adi__button--ghost adi__articleHeading__meta__datum--share" data-toggle="context-menu" aria-controls="shareMenu">
+                <i class="ri-share-forward-line"></i>
+                <span class="adi__chip__label">Share</span>
+            </button>
+        </div>
+        <div class="adi__articleHeading__meta__datum">
+            <a href="#" class="adi__button adi__button--ghost adi__articleHeading__meta__datum--download" download>
+                <i class="ri-download-2-line"></i>
+                <span class="adi__chip__label">Download Article</span>
+            </a>
+        </div>
+        <div class="adi__articleHeading__meta__datum">
+
+
+        </div>
+    </div>
+    <menu class="adi__contextMenu adi__shareMenu" id="shareMenu" hidden>
+        <li role="button"
+            class="adi__contextMenu__option"
+            data-type="link"
+            data-success-msg="Copied to clipboard!">
+            Copy Link 
+        </li>
+        <li role="button" class="adi__contextMenu__option" data-type="email">
+            Send to Mail  
+        </li>
+    </menu>
+    <dialog class="adi__modal adi__saveToMyAnalog" id="saveToMyAnalog">
+        <form>
+            <section class="adi__modal__heading">
+                <button type="button"
+                        data-toggle="modal"
+                        class="adi__button adi__button--ghost adi__button--compact adi__modal__heading__close"
+                        aria-label="close">
+                    <i class="ri-close-fill"></i>
+                </button>
+                <div class="adi__modal__heading__title">
+                    <i class="adi__icon adi__icon--bookmarkPlus"></i>
+                    Add to myAnalog 
+                </div>
+            </section>
+            <div class="adi__saveToMyAnalog__alert"></div>
+            <section class="adi__modal__content">
+                <p class="adi__saveToMyAnalog__description">
+                    Add article to the Resources section of myAnalog, to an existing project or to a new project.
+                </p>
+                <div class="adi__field adi__field--select adi__saveToMyAnalog__target">
+                    <label for="saveTo" class="adi__field__label">Add article to</label>
+                    <div class="adi__field__container">
+                        <input type="hidden" id="saveTo" name="saveTo" value="resources">
+                        <button type="button" class="adi__field__container__input" data-toggle="context-menu" aria-controls="saveToOptions">
+                            Resources on myAnalog
+                        </button>
+                        <menu class="adi__contextMenu adi__field__container__options" id="saveToOptions" hidden>
+                            <li role="button" data-value="resources" class="adi__contextMenu__option">
+                                Resources on myAnalog
+                            </li>
+                            <li role="button" data-value="new" class="adi__contextMenu__option">
+                                <i class="ri-add-line"></i>
+                                New Project
+                            </li>
+                        </menu>
+                    </div>
+                </div>
+                <fieldset class="adi__saveToMyAnalog__newProject">
+                    <legend class="adi__saveToMyAnalog__newProject__legend">Create New Project</legend>
+                    <div class="adi__field">
+                        <label for="newProjectName" class="adi__field__label">Project Name</label>
+                        <div class="adi__field__container">
+                            <input type="text" id="newProjectName" name="title" class="adi__field__container__input">
+                        </div>
+                    </div>
+                    <div class="adi__field">
+                        <label for="newProjectDescription" class="adi__field__label">Description</label>
+                        <div class="adi__field__container">
+                            <input type="text" id="newProjectDescription" name="description" class="adi__field__container__input">
+                        </div>
+                    </div>
+                </fieldset>
+                <div class="adi__field adi__field--toggle">
+                    <label for="checkbox-1-2" class="adi__field__label">
+                        <input type="checkbox" id="checkbox-1-2">
+                        
+                    </label>
+                </div>
+            </section>
+            <section class="adi__modal__actions">
+                <button data-toggle="modal"
+                        type="button"
+                        class="adi__button adi__button--secondary">
+                    Cancel
+                </button>
+                <button type="submit" data-artifact-api="["POST", "project/${projectID}/artifact"]"
+                        class="adi__button">
+                    Confirm
+                </button>
+            </section>
+        </form>
+    </dialog>
+    <section class="adi__snackbar"></section>
+</div>
+                    </heading>
+                </div>
+            </div>
+        </adi-container>
+        <!-- Header end -->
+        <!-- Content start -->
+        <adi-container class="adi__spotlight adi__productResources" compact>
+            <div class="adi__spotlight__columns" data-columns="3">
+
+                <!-- Left side content start -->
+                <div class="adi__spotlight__column adi__spotlight__column--double rte-control">
+                    
+    <!-- Component Start -->
+    <!-- Component end -->
+    <!-- Content start -->
+<p>The I<sup>2</sup>C bus and its derivatives&mdash;such as SMBus, PMBus, the DDC bus of HDMI and IPMB bus of ATCA&mdash;are used in a variety of large systems to transfer vital system information. These bus specifications have gained wide acceptance due to ease of use. The I<sup>2</sup>C bus is a digital serial 2-wire bus consisting of a single clock (SCL) and single data (SDA) line. The I<sup>2</sup>C protocol employs open drain pull-downs to drive the bus low, and resistors or current sources to pull the bus high. The maximum allowed pull-up current and bus capacitance are 4mA and 400pF, respectively.</p>
+<p>The original I<sup>2</sup>C specification limited the maximum bus operating frequency to 100kHz; it is now 400kHz. As systems grew larger, bus buffers were introduced to buffer bus capacitance and solve several other common I<sup>2</sup>C issues. Early bus buffers degraded certain I<sup>2</sup>C specifications in a manner that can be unacceptable in large noisy systems. The <a href="/en/products/ltc4313.html">LTC4313</a> and <a href="/en/products/ltc4315.html">LTC4315</a> family of bus buffers offers the benefits of traditional bus buffers while maintaining compliance to all I<sup>2</sup>C voltage specifications. This makes it the preferred choice for use in large noisy systems.</p>
+<p>Figure 1 shows the I<sup>2</sup>C specification requirements for logic high and logic low voltages on the bus. For I<sup>2</sup>C compliance, driven logic low signals must be below an output low level (V<sub>OL</sub>) of 0.4V. Logic high signals require the bus to be pulled up above an output high level (V<sub>OH</sub>) of 0.9 &bull; V<sub>CC</sub>, where V<sub>CC</sub> is the bus supply voltage. I<sup>2</sup>C compliant receivers must interpret any voltage below an input low level (V<sub>IL</sub>) of 0.3 &bull; V<sub>CC</sub> as a logic low and any voltage above an input high level (V<sub>IH</sub>) of 0.7 &bull; V<sub>CC</sub> as a logic high. These requirements yield a logic low noise margin of 0.3 &bull; V<sub>CC</sub> &ndash; 0.4V and a logic high noise margin of 0.2 &bull; V<sub>CC</sub>.</p>
+<figure>
+<div class="image-container"><a href="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure1.jpg?w=900&amp;rev=aff279907192416c8d3baa51293a03f9&sc_lang=en" data-lightbox="174E5C6C-1EC4-455E-8927-37E99D4E0E38" name="Figure 1_174E5C6C-1EC4-455E-8927-37E99D4E0E38">
+<div class="icon-zoom">&nbsp;</div>
+<div data-picture=" " data-alt="Figure 1" data-title="Figure 1. I<sup>2</sup>C bus voltage specifications and resulting noise margins." data-class="img-responsive">
+<div data-src="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure1.jpg?w=577&amp;rev=aff279907192416c8d3baa51293a03f9&sc_lang=en"> </div>
+<div data-src="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure1.jpg?h=270&amp;hash=4A771AAEC44776F964A9FA1E3B75341A0EB4057C&amp;rev=aff279907192416c8d3baa51293a03f9&sc_lang=en" data-media="(min-width: 640px)">&nbsp;</div>
+<noscript> &amp;amp;amp;amp;amp;lt;img src='/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure1.jpg?w=435 ' alt='Figure 1'&amp;amp;amp;amp;amp;gt; </noscript> </div>
+</a> </div>
+<img alt="" width="350" class="rtezoom-hideimg" src="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure1.jpg?la=en&amp;rev=aff279907192416c8d3baa51293a03f9&sc_lang=en" /><figcaption>
+<p>Figure 1. I<sup>2</sup>C bus voltage specifications and resulting noise margins.</p>
+</figcaption></figure>
+<p>Over time, as systems grew larger, bus capacitance increased well beyond 400pF. Bus buffers were introduced to break the large I<sup>2</sup>C bus into smaller segments and to drive the capacitance associated with each segment.</p>
+<p>A higher operating frequency coupled with increasing bus capacitance also required a decrease in signal rise times. Rise time accelerators (RTAs) were incorporated into the bus buffers to reduce bus rise times&mdash;by sourcing strong pull-up currents into the bus during these transitions.</p>
+<p>In addition, bus buffer products offered by Analog Devices also incorporated several additional features like SDA, SCL Hot Swap, precharge and stuck bus recovery to improve robustness of I<sup>2</sup>C systems and voltage level translation to ease communication across voltage domains.</p>
+<p>The downside of buffer and RTA insertion into a bidirectional I<sup>2</sup>C bus is the introduction of deviations from the I<sup>2</sup>C specification. There are three reasons for this:</p>
+<ul>
+    <li>
+    First, buffers require a scheme to differentiate an externally driven logic low from their own driven low. This is required to prevent locking the bus into a permanent low state. As a result, some buffers drive V<sub>OL</sub>s above the 0.4V I<sup>2</sup>C specification and require all other devices to drive below 0.4V. Others drive an output V<sub>OL</sub> that is a small offset higher than the driven input V<sub>OL</sub>.</li>
+    <li>Second, to maximize RTA operating range, Analog Devices bus buffers turn off their pull-down devices and turn on their RTAs at voltages slightly higher than the I<sup>2</sup>C V<sub>OL</sub>.</li>
+    <li>Third, all buffers capacitively load the bus when they are active and need to be turned off at as low a voltage as possible in order to reduce bus rise time.</li>
+</ul>
+<p>As a result, most existing bus buffers detect a logic low only if the bus voltage is &lt; 0.6V. Most buffers turn on their RTAs at 0.8V. Some buffers drive a non-compliant V<sub>OL</sub> &gt; 0.4V. All these result in reducing the logic low noise margin from (0.3 &bull; V<sub>CC</sub> &ndash; 0.4V) to 0.2V or even lower, and slowing the bus rising edge by the capactive load of the buffers when they are active.</p>
+<p>As systems grew, the compressed logic low noise margin of existing buffers increased the bus&rsquo; susceptibility to noise. Typically larger systems require a bus buffer that restores logic low noise margin to the I<sup>2</sup>C specification, namely a fast buffer that is active until the bus voltage crosses the V<sub>IL</sub> value of 0.3 &bull; V<sub>CC</sub> and does not load the bus.</p>
+<p>An additional requirement in large systems is backward compatibility with buffer products whose RTAs turn on below 0.3 &bull; V<sub>CC</sub> or with products that drive a non-compliant V<sub>OL</sub> of 0.6V. An adjustable RTA current is also advantageous, especially in large systems where multiple RTAs can be activated simultaneously. Large RTA currents result in sharp edges and raise concerns about unwanted effects like inductive ringing and EMI.</p>
+<p>The LTC4315 (12-pin) and the LTC4313 (8-pin) parts specifically solve these problems while retaining the beneficial features of other Analog Devices bus buffer products. Table 1 lists the key features of these products. This document references the LTC4315, but all text applies to the LTC4313 as well, unless otherwise noted. The LTC4315 has a high 0.3 &bull; V<sub>CC</sub> guaranteed minimum V<sub>IL</sub>, ensuring a high logic-low noise margin. The LTC4315 is interoperable with devices that drive a high V<sub>OL</sub> &gt; 0.4V and with products whose RTAs turn on at voltages below 0.3 &bull; V<sub>CC</sub>. The LTC4315 allows user selection of the RTA current level in order to control bus rise rates. The LTC4315 retains capacitance buffering, Hot Swap, precharge, stuck bus recovery and level translation features of other Analog Devices bus buffers. Since its buffers do not load the bus, the LTC4315 is capable of operation up to 1MHz and is compatible with the I<sup>2</sup>C standard mode and fast mode, SMBus and PMBus specifications. In summary, LTC4315 provides all the benefits of the existing buffers without compromising any I<sup>2</sup>C specification.</p>
+<table style="width: 100%;" cellspacing="2">
+    <caption style="text-align: left; font-weight: bold; vertical-align: top; caption-side: top;">Table 1. A list of LTC4313 and LTC4315 features and benefits</caption>
+    <tbody>
+        <tr>
+            <td style="padding: 10px 7px; border-top: 2px solid #ffffff; border-right: 2px solid #ffffff; color: #ffffff; font-weight: bold; background-color: #009fbd; width: 35%;">Features</td>
+            <td style="padding: 10px 7px; border-top: 2px solid #ffffff; border-right: 2px solid #ffffff; color: #ffffff; font-weight: bold; background-color: #acacac; width: 65%;">Benefits</td>
+        </tr>
+        <tr>
+            <td style="padding: 10px 7px; border-top: 2px solid #ffffff; border-right: 2px solid #ffffff; color: #636363; font-weight: normal; background-color: #f5f5f5;">I<sup>2</sup>C Buffers</td>
+            <td style="padding: 10px 7px; border-top: 2px solid #ffffff; border-right: 2px solid #ffffff; color: #636363; font-weight: normal; background-color: #f5f5f5;">&bull; Break up bus capacitance, which allows large I<sup>2</sup>C compliant systems to be built, by keeping the capacitance of each section &lt; 400pF</td>
+        </tr>
+        <tr>
+            <td style="padding: 10px 7px; border-top: 2px solid #ffffff; border-right: 2px solid #ffffff; color: #636363; font-weight: normal; background-color: #f5f5f5;">High V<sub>IL</sub></td>
+            <td style="padding: 10px 7px; border-top: 2px solid #ffffff; border-right: 2px solid #ffffff; color: #636363; font-weight: normal; background-color: #f5f5f5;">&bull; High logic-low noise margin up to 0.3 &bull; V<sub>CC</sub><br />
+            &bull;&nbsp;Operation with non-compliant I<sup>2</sup>C devices</td>
+        </tr>
+        <tr>
+            <td style="padding: 10px 7px; border-top: 2px solid #ffffff; border-right: 2px solid #ffffff; color: #636363; font-weight: normal; background-color: #f5f5f5;">Automatic Buffer Turn-Off Voltage Adjustment</td>
+            <td style="padding: 10px 7px; border-top: 2px solid #ffffff; border-right: 2px solid #ffffff; color: #636363; font-weight: normal; background-color: #f5f5f5;"> &bull; Compatible with devices whose RTA turn-on voltage is lower than 0.3&nbsp;&bull;&nbsp;V<sub>CC</sub><br />
+            &bull;&nbsp;Interoperable with other LTC buffers</td>
+        </tr>
+        <tr>
+            <td style="padding: 10px 7px; border-top: 2px solid #ffffff; border-right: 2px solid #ffffff; color: #636363; font-weight: normal; background-color: #f5f5f5;">Level Translation</td>
+            <td style="padding: 10px 7px; border-top: 2px solid #ffffff; border-right: 2px solid #ffffff; color: #636363; font-weight: normal; background-color: #f5f5f5;">&bull; Provides I<sup>2</sup>C communication between buses with voltages from 1.4V to 5.5V</td>
+        </tr>
+        <tr>
+            <td style="padding: 10px 7px; border-top: 2px solid #ffffff; border-right: 2px solid #ffffff; color: #636363; font-weight: normal; background-color: #f5f5f5;">Rise Time Accelerators (RTAs)</td>
+            <td style="padding: 10px 7px; border-top: 2px solid #ffffff; border-right: 2px solid #ffffff; color: #636363; font-weight: normal; background-color: #f5f5f5;">&bull; Reduce rise time<br />
+            &bull;&nbsp;Allow larger bus pull-up resistors for better logic low noise margin<br />
+            &bull;&nbsp;Selectable RTA pull-up current strength </td>
+        </tr>
+        <tr>
+            <td style="padding: 10px 7px; border-top: 2px solid #ffffff; border-right: 2px solid #ffffff; color: #636363; font-weight: normal; background-color: #f5f5f5;">Disconnection and Recovery from Stuck Bus</td>
+            <td style="padding: 10px 7px; border-top: 2px solid #ffffff; border-right: 2px solid #ffffff; color: #636363; font-weight: normal; background-color: #f5f5f5;">&bull; Free masters to resume upstream communications<br />
+            &bull;&nbsp;Generates up to 16 clock pulses and a stop bit on the stuck buses to get the bus to release high</td>
+        </tr>
+        <tr>
+            <td style="padding: 10px 7px; border-top: 2px solid #ffffff; border-right: 2px solid #ffffff; color: #636363; font-weight: normal; background-color: #f5f5f5;">Fall Time Control</td>
+            <td style="padding: 10px 7px; border-top: 2px solid #ffffff; border-right: 2px solid #ffffff; color: #636363; font-weight: normal; background-color: #f5f5f5;">&bull; Minimizes transmission line effects in systems</td>
+        </tr>
+        <tr>
+            <td style="padding: 10px 7px; border-top: 2px solid #ffffff; border-right: 2px solid #ffffff; color: #636363; font-weight: normal; background-color: #f5f5f5;">Hot Swapping</td>
+            <td style="padding: 10px 7px; border-top: 2px solid #ffffff; border-right: 2px solid #ffffff; color: #636363; font-weight: normal; background-color: #f5f5f5;">&bull; Waits for bus idle or stop bit before making a connection<br />
+            &bull; Precharges bus to minimize disturbance</td>
+        </tr>
+    </tbody>
+</table>
+<p><h2>Capacitance Buffering and Noise Rejection in Large Systems</h2></p>
+<p>In large I<sup>2</sup>C systems, long PCB traces and large backplanes with long cables cause large parasitic bus capacitances. As shown in Figure 2, the LTC4315&rsquo;s high noise margin buffers can drive these large capacitances without degrading signal integrity or reducing operating frequency.</p>
+<figure>
+<div class="image-container"><a href="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure2.jpg?w=900&amp;rev=559a4f31a26a435c902d0102ed081677&sc_lang=en" data-lightbox="1E400BB2-6EA9-4DCC-A46F-C4C937EE60F1" name="Figure 2_1E400BB2-6EA9-4DCC-A46F-C4C937EE60F1">
+<div class="icon-zoom">&nbsp;</div>
+<div data-picture=" " data-alt="Figure 2" data-title="Figure 2. The LTC4315 driving the parasitic backplane capacitance in a large system. Only the SCL pathway is shown for simplicity." data-class="img-responsive">
+<div data-src="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure2.jpg?w=577&amp;rev=559a4f31a26a435c902d0102ed081677&sc_lang=en"> </div>
+<div data-src="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure2.jpg?h=270&amp;hash=FAA9081C7FB82BC3A67924BE57C15D8AFA492928&amp;rev=559a4f31a26a435c902d0102ed081677&sc_lang=en" data-media="(min-width: 640px)">&nbsp;</div>
+<noscript> &amp;amp;amp;amp;amp;lt;img src='/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure2.jpg?w=435 ' alt='Figure 2'&amp;amp;amp;amp;amp;gt; </noscript> </div>
+</a> </div>
+<img alt="" width="350" class="rtezoom-hideimg" src="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure2.jpg?la=en&amp;rev=559a4f31a26a435c902d0102ed081677&sc_lang=en" /><figcaption>
+<p>Figure 2. The LTC4315 driving the parasitic backplane capacitance in a large system. Only the SCL pathway is shown for simplicity. </p>
+</figcaption></figure>
+<p>Another issue of large I<sup>2</sup>C systems, like the one in Figure 2, is noise susceptibility. Noise and signal coupling in the cable and between PCB traces can disrupt input and output clock and data signals, causing system level failures. A particularly extreme example of a noisy SCL waveform is shown in Figure 3 to illustrate the robust noise rejection the LTC4315 features.</p>
+<figure>
+<div class="image-container"><a href="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure3.jpg?w=900&amp;rev=f8de7d44790d4402b58ae7fef40967d3&sc_lang=en" data-lightbox="4224FD72-7A21-4E0A-BACD-08C7BC5AAB06" name="Figure 3_4224FD72-7A21-4E0A-BACD-08C7BC5AAB06">
+<div class="icon-zoom">&nbsp;</div>
+<div data-picture=" " data-alt="Figure 3" data-title="Figure 3. The LTC4315 transmits a clean logic high at SCLOUT even when a noisy 400kHz I<sup>2</sup>C signal is applied to SCLIN." data-class="img-responsive">
+<div data-src="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure3.jpg?w=577&amp;rev=f8de7d44790d4402b58ae7fef40967d3&sc_lang=en"> </div>
+<div data-src="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure3.jpg?h=270&amp;hash=A9A2CE312AE371535FF76A54936F3BA1732727B6&amp;rev=f8de7d44790d4402b58ae7fef40967d3&sc_lang=en" data-media="(min-width: 640px)">&nbsp;</div>
+<noscript> &amp;amp;amp;amp;amp;lt;img src='/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure3.jpg?w=435 ' alt='Figure 3'&amp;amp;amp;amp;amp;gt; </noscript> </div>
+</a> </div>
+<img alt="" width="350" class="rtezoom-hideimg" src="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure3.jpg?la=en&amp;rev=f8de7d44790d4402b58ae7fef40967d3&sc_lang=en" /><figcaption>
+<p>Figure 3. The LTC4315 transmits a clean logic high at SCLOUT even when a noisy 400kHz I<sup>2</sup>C signal is applied to SCLIN. </p>
+</figcaption></figure>
+<p>Figure 3 shows the LTC4315&rsquo;s handling of sinusoidal noise superimposed on a 400kHz square wave at its input. The noise applied to the logic high state is not propagated to the other side as long as that bus voltage does not drop below 0.33 &bull; V<sub>MIN</sub>. The logic high state of SCLOUT is not affected by noise on SCLIN. For the LTC4315, logic high noise margin is V<sub>OH</sub> &ndash; 0.33 &bull; V<sub>MIN</sub>, where V<sub>MIN</sub> is the lower of the V<sub>CC</sub> and V<sub>CC2</sub> voltages. For all versions of the LTC4313, V<sub>MIN</sub> defaults to V<sub>CC</sub>.</p>
+<p>In Figure 3, when the SCLIN voltage drops below 0.33 &bull; VM<sub>IN</sub>, SCLOUT tracks SCLIN. No output glitches occur as the input crosses the V<sub>IL</sub> level of 0.33 &bull; V<sub>MIN</sub>. Assuming a worst-case DC V<sub>OL</sub> of 0.4V on the bus, the LTC4315&rsquo;s logic low noise margin is 0.33 &bull; V<sub>MIN</sub> &ndash; 0.4V = 1.25V. These noise suppression features make the LTC4315 a solid choice for large, noisy I<sup>2</sup>C systems. Ideally, system designers of large, noisy I<sup>2</sup>C systems should use LTC4315s on all boards for maximum noise immunity.</p>
+<p><h2>Operation with Non-Compliant I<sup>2</sup>C Devices</h2></p>
+<p>Figure 4 shows the LTC4315&rsquo;s compatibility with devices that drive non-compliant V<sub>OL</sub>s&mdash;in this case 0.6V. The LTC4315 passes the 0.6V to the microprocessor where it is interpreted as a logic low. The high buffer turn-off voltage of the LTC4315&mdash;1.089V in this circuit&mdash;yields a logic low noise margin of 489mV.</p>
+<figure>
+<div class="image-container"><a href="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure4.jpg?w=900&amp;rev=dabdde75a02541e2ba5ce2566ab8b81d&sc_lang=en" data-lightbox="1A27CD3F-2BEC-462B-8B65-7DC8D21D599D" name="Figure 4_1A27CD3F-2BEC-462B-8B65-7DC8D21D599D">
+<div class="icon-zoom">&nbsp;</div>
+<div data-picture=" " data-alt="Figure 4" data-title="Figure 4. The LTC4315 communicating with a non-compliant I<sup>2</sup>C device." data-class="img-responsive">
+<div data-src="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure4.jpg?w=577&amp;rev=dabdde75a02541e2ba5ce2566ab8b81d&sc_lang=en"> </div>
+<div data-src="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure4.jpg?h=270&amp;hash=B78B3AF18C327437E8F090821FFEEFED988E7976&amp;rev=dabdde75a02541e2ba5ce2566ab8b81d&sc_lang=en" data-media="(min-width: 640px)">&nbsp;</div>
+<noscript> &amp;amp;amp;amp;amp;lt;img src='/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure4.jpg?w=435 ' alt='Figure 4'&amp;amp;amp;amp;amp;gt; </noscript> </div>
+</a> </div>
+<img alt="" width="350" class="rtezoom-hideimg" src="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure4.jpg?la=en&amp;rev=dabdde75a02541e2ba5ce2566ab8b81d&sc_lang=en" /><figcaption>
+<p>Figure 4. The LTC4315 communicating with a non-compliant I<sup>2</sup>C device.</p>
+</figcaption></figure>
+<p><h2>Interoperability with Other Analog Devices Buffers</h2></p>
+<p>In large systems older Analog Devices buffers might be present on the same bus with the LTC4315. These older buffers may have RTAs that turn on at voltages below the LTC4315 buffer turn-off voltage of 0.3 &bull; V<sub>CC</sub>. Glitch-free operation under these circumstances is critical for system integrity. The LTC4315 detects RTA current from other devices at bus voltages below 0.3 &bull; V<sub>CC</sub> and turns off its buffers to prevent contention between its buffers and other RTAs, to facilitate interoperability.</p>
+<p>Figure 5 shows the LTC4315 operating in a dynamic system that changes as cards are plugged into or out of the backplane. For simplicity, a single 3.3V supply is chosen and only the SCL pathway is shown. Cards have buffers at their edges in order to shield the I<sup>2</sup>C devices on the card from the large backplane capacitance and to keep the card capacitances isolated from each other and to aid in hot swapping. The cards in the application shown have <a href="/en/products/ltc4300a-1.html">LTC4300A</a> or <a href="/en/products/ltc4307.html">LTC4307</a> buffers on their edges. The RTAs of these products turn on at 0.6V and 0.8V, respectively, while the LTC4315&rsquo;s buffers turn off at 0.3 &bull; V<sub>CC</sub> (~1V).</p>
+<figure>
+<div class="image-container"><a href="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure5.jpg?w=900&amp;rev=e2e5142569a54141bf03c71f93896e3f&sc_lang=en" data-lightbox="8A237C25-CB16-4F0F-869A-213D99F45F4A" name="Figure 5_8A237C25-CB16-4F0F-869A-213D99F45F4A">
+<div class="icon-zoom">&nbsp;</div>
+<div data-picture=" " data-alt="Figure 5" data-title="Figure 5. The LTC4315 operating with multiple LTC4300As and LTC4307s in a cascaded application." data-class="img-responsive">
+<div data-src="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure5.jpg?w=577&amp;rev=e2e5142569a54141bf03c71f93896e3f&sc_lang=en"> </div>
+<div data-src="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure5.jpg?h=270&amp;hash=A65D2DFA42C9594FDB47618DBD35377DFCCCDA9B&amp;rev=e2e5142569a54141bf03c71f93896e3f&sc_lang=en" data-media="(min-width: 640px)">&nbsp;</div>
+<noscript> &amp;amp;amp;amp;amp;lt;img src='/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure5.jpg?w=435 ' alt='Figure 5'&amp;amp;amp;amp;amp;gt; </noscript> </div>
+</a> </div>
+<img alt="" width="350" class="rtezoom-hideimg" src="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure5.jpg?la=en&amp;rev=e2e5142569a54141bf03c71f93896e3f&sc_lang=en" /><figcaption>
+<p>Figure 5. The LTC4315 operating with multiple LTC4300As and LTC4307s in a cascaded application. </p>
+</figcaption></figure>
+<p>Figures 6&ndash;9 track backplane and card SCL waveforms in this system as its configuration changes. Figure 6 shows the SCL waveforms for the system configuration shown in Figure 5, where three LTC4300As and one LTC4307 operate with one LTC4315. In Figure 7, the LTC4307 is swapped out, leaving three LTC4300As and one LTC4315. In Figure 8, two more LTC4300As are swapped out, leaving one LTC4315 and one LTC4300A. Finally in Figure 9, the LTC4307 is reconnected, making the system one LTC4307, one LTC4300A and one LTC4315. The SCL waveforms remain monotonic during the entire sequence of events due to the automatic adjustment of the LTC4315 buffer turn-off voltage in response to varying amounts of LTC4300A and LTC4307 RTA current.</p>
+<figure>
+<div class="image-container"><a href="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure6.jpg?w=900&amp;rev=4e503f2a07574084932b7301c66af453&sc_lang=en" data-lightbox="79DAD04F-12E3-4CE4-938E-CDB97B5F21FA" name="Figure 6_79DAD04F-12E3-4CE4-938E-CDB97B5F21FA">
+<div class="icon-zoom">&nbsp;</div>
+<div data-picture=" " data-alt="Figure 6" data-title="Figure 6. SCL waveforms of one LTC4315 operating with three LTC4300As and one LTC4307." data-class="img-responsive">
+<div data-src="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure6.jpg?w=577&amp;rev=4e503f2a07574084932b7301c66af453&sc_lang=en"> </div>
+<div data-src="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure6.jpg?h=270&amp;hash=0FFDEBDF81199A01581A594B888A4FDCACBDC036&amp;rev=4e503f2a07574084932b7301c66af453&sc_lang=en" data-media="(min-width: 640px)">&nbsp;</div>
+<noscript> &amp;amp;amp;amp;amp;lt;img src='/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure6.jpg?w=435 ' alt='Figure 6'&amp;amp;amp;amp;amp;gt; </noscript> </div>
+</a> </div>
+<img alt="" width="350" class="rtezoom-hideimg" src="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure6.jpg?la=en&amp;rev=4e503f2a07574084932b7301c66af453&sc_lang=en" /><figcaption>
+<p>Figure 6. SCL waveforms of one LTC4315 operating with three LTC4300As and one LTC4307.</p>
+</figcaption></figure><figure>
+<div class="image-container"><a href="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure7.jpg?w=900&amp;rev=58b6cf974a5245cba6bc1fba8cb1c374&sc_lang=en" data-lightbox="4ED8DE9D-8052-4B93-9C4F-B57966842FCE" name="Figure 7_4ED8DE9D-8052-4B93-9C4F-B57966842FCE">
+<div class="icon-zoom">&nbsp;</div>
+<div data-picture=" " data-alt="Figure 7" data-title="Figure 7. SCL waveforms of one LTC4315 operating with three LTC4300As." data-class="img-responsive">
+<div data-src="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure7.jpg?w=577&amp;rev=58b6cf974a5245cba6bc1fba8cb1c374&sc_lang=en"> </div>
+<div data-src="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure7.jpg?h=270&amp;hash=8E25131EE45CB45E669159E3955A7EA8B3626E45&amp;rev=58b6cf974a5245cba6bc1fba8cb1c374&sc_lang=en" data-media="(min-width: 640px)">&nbsp;</div>
+<noscript> &amp;amp;amp;amp;amp;lt;img src='/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure7.jpg?w=435 ' alt='Figure 7'&amp;amp;amp;amp;amp;gt; </noscript> </div>
+</a> </div>
+<img alt="" width="350" class="rtezoom-hideimg" src="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure7.jpg?la=en&amp;rev=58b6cf974a5245cba6bc1fba8cb1c374&sc_lang=en" /><figcaption>
+<p>Figure 7. SCL waveforms of one LTC4315 operating with three LTC4300As.</p>
+</figcaption></figure><figure>
+<div class="image-container"><a href="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure8.jpg?w=900&amp;rev=94b16b3ae4f848e2a2a32f1f5c26b830&sc_lang=en" data-lightbox="C7863A34-8FF8-4E33-819E-8024CF1DCE54" name="Figure 8_C7863A34-8FF8-4E33-819E-8024CF1DCE54">
+<div class="icon-zoom">&nbsp;</div>
+<div data-picture=" " data-alt="Figure 8" data-title="Figure 8. SCL waveforms of one LTC4315 operating with one LTC4300A." data-class="img-responsive">
+<div data-src="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure8.jpg?w=577&amp;rev=94b16b3ae4f848e2a2a32f1f5c26b830&sc_lang=en"> </div>
+<div data-src="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure8.jpg?h=270&amp;hash=6CA7EAF7B9249926C57E64D6B9CAD66FA16E769A&amp;rev=94b16b3ae4f848e2a2a32f1f5c26b830&sc_lang=en" data-media="(min-width: 640px)">&nbsp;</div>
+<noscript> &amp;amp;amp;amp;amp;lt;img src='/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure8.jpg?w=435 ' alt='Figure 8'&amp;amp;amp;amp;amp;gt; </noscript> </div>
+</a> </div>
+<img alt="" width="350" class="rtezoom-hideimg" src="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure8.jpg?la=en&amp;rev=94b16b3ae4f848e2a2a32f1f5c26b830&sc_lang=en" /><figcaption>
+<p>Figure 8. SCL waveforms of one LTC4315 operating with one LTC4300A.</p>
+</figcaption></figure><figure>
+<div class="image-container"><a href="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure9.jpg?w=900&amp;rev=a2aa4e93a2414b26b1c02f7f831bb8da&sc_lang=en" data-lightbox="F3DE9770-EBC1-4800-B288-463FBFF60901" name="Figure 9_F3DE9770-EBC1-4800-B288-463FBFF60901">
+<div class="icon-zoom">&nbsp;</div>
+<div data-picture=" " data-alt="Figure 9" data-title="Figure 9. SCL waveforms of one LTC4315 operating with one LTC4300A and one LTC4307." data-class="img-responsive">
+<div data-src="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure9.jpg?w=577&amp;rev=a2aa4e93a2414b26b1c02f7f831bb8da&sc_lang=en"> </div>
+<div data-src="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure9.jpg?h=270&amp;hash=C48B455F2FDA3E1247FCA7B24FF84A5E318D9265&amp;rev=a2aa4e93a2414b26b1c02f7f831bb8da&sc_lang=en" data-media="(min-width: 640px)">&nbsp;</div>
+<noscript> &amp;amp;amp;amp;amp;lt;img src='/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure9.jpg?w=435 ' alt='Figure 9'&amp;amp;amp;amp;amp;gt; </noscript> </div>
+</a> </div>
+<img alt="" width="350" class="rtezoom-hideimg" src="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure9.jpg?la=en&amp;rev=a2aa4e93a2414b26b1c02f7f831bb8da&sc_lang=en" /><figcaption>
+<p>Figure 9. SCL waveforms of one LTC4315 operating with one LTC4300A and one LTC4307.</p>
+</figcaption></figure>
+<p>Figures 6&ndash;9 illustrate the interoperability of the LTC4315 with various combinations of LTC4300As and LTC4307s in a moderately complex system. As a general rule, the LTC4315 is interoperable with any number or combination of older Analog Devices buffers. Nevertheless, given the varying number and variety of buffers that can interact with each other, interoperability cannot be tested and hence guaranteed under all circumstances. Useful guidelines on card capacitances, bus pull-up resistances and buffer combinations to ensure interoperability in large systems are provided in the LTC4315 data sheet.</p>
+<p><h2>Hot Swap and Capacitance Buffering</h2></p>
+<p>I/O cards with LTC4315s on their edges can be hot swapped into a live backplane as shown in Figure 10. The corresponding waveforms are shown in Figure 11. Communication at the backplane end is not disrupted during hot plug because the LTC4315&rsquo;s small input capacitance causes minimal disturbance during connection to the backplane. Furthermore the LTC4315 precharges its clock and data lines to 1V before they contact the backplane, minimizing the voltage step on the backplane bus. The LTC4315 waits for a stop bit or bus idle condition to enable its buffers, ensuring that a partial message is not transmitted across its buffers. When hot plugging into a live backplane, a staggered connector should be used. Make ENABLE the shortest pin with a pull-down resistor to GND on the card, V<sub>CC</sub> and GND the longest pins and SCL and SDA medium length pins. This ensures that the part is powered up and SDA and SCL pins are precharged to 1V, before they connect to the backplane. Holding ENABLE low during this period ensures correct operation of the stop bit and bus idle circuitry and allows any transients associated with card insertion to settle before the LTC4315 is activated.</p>
+<figure>
+<div class="image-container"><a href="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure10.jpg?w=900&amp;rev=f98d2cf8725b41528d18edfe27c74f41&sc_lang=en" data-lightbox="AC3E3733-6D2F-40C1-9AF1-52E0114FC6C5" name="Figure 10_AC3E3733-6D2F-40C1-9AF1-52E0114FC6C5">
+<div class="icon-zoom">&nbsp;</div>
+<div data-picture=" " data-alt="Figure 10" data-title="Figure 10. The LTC4315 in an I<sup>2</sup>C Hot Swap application with staggered pin lengths in the connector." data-class="img-responsive">
+<div data-src="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure10.jpg?w=577&amp;rev=f98d2cf8725b41528d18edfe27c74f41&sc_lang=en"> </div>
+<div data-src="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure10.jpg?h=270&amp;hash=06EA2D47C825BBC63A216049FD4C2BC0EF10DCD7&amp;rev=f98d2cf8725b41528d18edfe27c74f41&sc_lang=en" data-media="(min-width: 640px)">&nbsp;</div>
+<noscript> &amp;amp;amp;amp;amp;lt;img src='/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure10.jpg?w=435 ' alt='Figure 10'&amp;amp;amp;amp;amp;gt; </noscript> </div>
+</a> </div>
+<img alt="" width="350" class="rtezoom-hideimg" src="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure10.jpg?la=en&amp;rev=f98d2cf8725b41528d18edfe27c74f41&sc_lang=en" /><figcaption>
+<p>Figure 10. The LTC4315 in an I<sup>2</sup>C Hot Swap application with staggered pin lengths in the connector.</p>
+</figcaption></figure><figure>
+<div class="image-container"><a href="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure11.jpg?w=900&amp;rev=329e36d4f91645f08e489fb352060fac&sc_lang=en" data-lightbox="8EC9C1EB-39BC-462C-A720-230B09FBE136" name="Figure 11_8EC9C1EB-39BC-462C-A720-230B09FBE136">
+<div class="icon-zoom">&nbsp;</div>
+<div data-picture=" " data-alt="Figure 11" data-title="Figure 11. Waveforms during an LTC4315 Hot Swap event into a live backplane using a staggered connector." data-class="img-responsive">
+<div data-src="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure11.jpg?w=577&amp;rev=329e36d4f91645f08e489fb352060fac&sc_lang=en"> </div>
+<div data-src="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure11.jpg?h=270&amp;hash=9DCBA1818BC5E5DF0AEC008FEC8CDC2A2B12A0FC&amp;rev=329e36d4f91645f08e489fb352060fac&sc_lang=en" data-media="(min-width: 640px)">&nbsp;</div>
+<noscript> &amp;amp;amp;amp;amp;lt;img src='/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure11.jpg?w=435 ' alt='Figure 11'&amp;amp;amp;amp;amp;gt; </noscript> </div>
+</a> </div>
+<img alt="" width="350" class="rtezoom-hideimg" src="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure11.jpg?la=en&amp;rev=329e36d4f91645f08e489fb352060fac&sc_lang=en" /><figcaption>
+<p>Figure 11. Waveforms during an LTC4315 Hot Swap event into a live backplane using a staggered connector.</p>
+</figcaption></figure>
+<p>Figure 11 shows waveforms when the LTC4315 is hot plugged into a live backplane using a staggered connector. V<sub>CC</sub> and V<sub>CC2</sub>, as the longest pins, have already contacted the backplane and are powering the LTC4315 and the output buses. At this time SDAIN and SCLIN are precharged to 1V by the LTC4315. Once SDAIN and SCLIN contact the backplane, they are driven by backplane circuitry. Stop bits at the input are ignored by the LTC4315 as ENABLE is low. The outputs of the LTC4315 idle high (SCLOUT not shown), until a stop bit is detected at the input after ENABLE has been asserted high and is stable. The LTC431 buffers turn on at this time and establish a connection between the input and output. Partial messages are not propagated across the LTC4315. If a staggered connector is not used, ENABLE should be held low until all transients associated with card insertion into a live system die out.</p>
+<p>Circuits on a card that has an LTC4315 on its edge drive only the &lt; 10pF input capacitance of the LTC4315. The LTC4315 drives the large combined capacitance of the backplane and all the cards that plug into it. The LTC4315 can drive up to 1.2nF of capacitance on its SDA and SCL pins. This capacitance buffering feature, combined with RTAs, permits 400kHz operation in large systems.</p>
+<p><h2>Rise Time Accelerators</h2></p>
+<p>The RTAs of the LTC4315 can be configured either in the current source mode (<span class="analog-text-overline">ACC</span> open), slew limited switch mode (<span class="analog-text-overline">ACC</span> grounded) or disabled (<span class="analog-text-overline">ACC</span> high). In the current source mode the RTAs source a constant 2.5mA current into the bus. In the slew controlled switch mode, the RTAs turn on in a controlled manner and source current into the buses, making them rise at a typical rate of 40V/&micro;s. To selectively disable RTAs only on the outputs, ground V<sub>CC2</sub> and either ground <span class="analog-text-overline">ACC</span> or leave <span class="analog-text-overline">ACC</span> open. The LTC4313 comes with 3 different versions of RTAs. The LTC4313-1 RTAs are slew controlled switches, the LTC4313-2 RTAs are 2.5mA current sources and the LTC4313-3 has no RTAs.</p>
+<p><h2>Level Translation</h2></p>
+<p>The circuit shown in Figure 12 illustrates the level translation feature of the LTC4315. The operating ranges for the LTC4315 supplies are V<sub>CC</sub> from 2.9V&ndash;5.5V and V<sub>CC2</sub> from 2.25V&ndash;5.5V. Tying the input bus to V<sub>CC</sub> and the output bus to V<sub>CC2</sub> permits level translation between 2.9V&ndash;5.5V inputs and 2.25V&ndash;5.5V outputs.</p>
+<figure>
+<div class="image-container"><a href="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure12.jpg?w=900&amp;rev=8cd3862ed4c043c3a37d91f7ebe95570&sc_lang=en" data-lightbox="73B1A74F-57F3-43FA-874D-73C55768A858" name="Figure 12_73B1A74F-57F3-43FA-874D-73C55768A858">
+<div class="icon-zoom">&nbsp;</div>
+<div data-picture=" " data-alt="Figure 12" data-title="Figure 12. The LTC4315 in a level translating application." data-class="img-responsive">
+<div data-src="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure12.jpg?w=577&amp;rev=8cd3862ed4c043c3a37d91f7ebe95570&sc_lang=en"> </div>
+<div data-src="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure12.jpg?h=270&amp;hash=AF8EF57F35633B3D057412FBC86DADED177CA442&amp;rev=8cd3862ed4c043c3a37d91f7ebe95570&sc_lang=en" data-media="(min-width: 640px)">&nbsp;</div>
+<noscript> &amp;amp;amp;amp;amp;lt;img src='/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure12.jpg?w=435 ' alt='Figure 12'&amp;amp;amp;amp;amp;gt; </noscript> </div>
+</a> </div>
+<img alt="" width="350" class="rtezoom-hideimg" src="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure12.jpg?la=en&amp;rev=8cd3862ed4c043c3a37d91f7ebe95570&sc_lang=en" /><figcaption>
+<p>Figure 12. The LTC4315 in a level translating application.</p>
+</figcaption></figure>
+<p>The example shown in Figure 12 translates a 3.3V input to a 5V output. Level translation to voltages lower than the minimum allowed V<sub>CC</sub> and V<sub>CC2</sub> values imposes other constraints. Level translation to output voltages less than 2.25V requires V<sub>CC2</sub> to be tied low to disable output RTAs. Level translation to input voltages less than 2.9V requires all RTAs to be disabled by tying ACC high for the LTC4315 or using the LTC4313-3. This prevents overdriving of the input bus by the RTA. Under these conditions, level translation to a bus voltage of 1.4V is possible. The buffer turn-off voltage in both cases is 0.3 &bull; V<sub>CC</sub> and a high logic-low noise margin is maintained.</p>
+<p><h2>Stuck Bus Detection and Recovery</h2></p>
+<p>Occasionally, slave devices get confused and get stuck in a low state. The LTC4315 monitors the output I<sup>2</sup>C bus to see if clock and data have been simultaneously high at least once in 45ms. If this condition is not detected, the LTC4315 asserts the FAULT flag low.</p>
+<p>If DISCEN is tied high, the LTC4315 also disconnects the input and output sides and generates clock pulses on SCLOUT in an attempt to free the stuck bus. Clocking is stopped when data releases high or 16 clocks have been generated. After the final clock pulse, a stop bit is generated to reset the bus for further communication. When a stuck bus releases high, connection is reestablished when a stop bit or bus idle condition is detected on both buses. No user intervention is required.</p>
+<p>Figure 13 shows the waveforms during an SDAOUT stuck low and recovery event with DISCEN tied high. In Figure 13, the FAULT flag is asserted low after the 45ms timeout period and the input and output sides are disconnected. This causes SDAIN to release high. Clock pulses are generated on SCLOUT. SDAOUT releases high before 16 clock pulses have been generated. Clock pulsing is stopped and a stop bit is generated. As SDAOUT recovers and a stop bit is detected, connection is reestablished and signals propagate from the input to the output. If SDAOUT stays low, an input to output connection can be forced by toggling ENABLE low, then high.</p>
+<figure>
+<div class="image-container"><a href="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure13.jpg?w=900&amp;rev=58987fc6e383439cb42ffee386563d8d&sc_lang=en" data-lightbox="9F8D8DB4-DEB6-4E96-A236-026604ECD42D" name="Figure 13_9F8D8DB4-DEB6-4E96-A236-026604ECD42D">
+<div class="icon-zoom">&nbsp;</div>
+<div data-picture=" " data-alt="Figure 13" data-title="Figure 13. Bus waveforms during an SDAOUT stuck low and recovery event." data-class="img-responsive">
+<div data-src="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure13.jpg?w=577&amp;rev=58987fc6e383439cb42ffee386563d8d&sc_lang=en"> </div>
+<div data-src="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure13.jpg?h=270&amp;hash=67430B9E2563F096C3200FE02BAC0497A4AED813&amp;rev=58987fc6e383439cb42ffee386563d8d&sc_lang=en" data-media="(min-width: 640px)">&nbsp;</div>
+<noscript> &amp;amp;amp;amp;amp;lt;img src='/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure13.jpg?w=435 ' alt='Figure 13'&amp;amp;amp;amp;amp;gt; </noscript> </div>
+</a> </div>
+<img alt="" width="350" class="rtezoom-hideimg" src="/en/_/media/analog/en/landing-pages/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems/figure13.jpg?la=en&amp;rev=58987fc6e383439cb42ffee386563d8d&sc_lang=en" /><figcaption>
+<p>Figure 13. Bus waveforms during an SDAOUT stuck low and recovery event.</p>
+</figcaption></figure>
+<p>If automatic stuck bus disconnection is not desired, this feature can be disabled in the LTC4315 by tying DISCEN low. In this case, during a stuck bus event, the FAULT flag is asserted low, but no stop bit or clock generation occurs and the input and output sides stay connected. Stuck bus disconnection and output clocking cannot be disabled in the LTC4313.</p>
+<p><h2>Conclusion</h2></p>
+<p>The LTC4315 and LTC4313 are high noise margin bus buffers that solve a number of problems associated with large I<sup>2</sup>C systems. They provide capacitance buffering, level translation for bus supplies ranging from 1.4V to 5.5V, high logic-low noise margins up to 0.3 &bull; V<sub>CC</sub> and reject noise above 0.3 &bull; V<sub>CC</sub> when the bus is a logic high. Their high bandwidth buffers and integrated RTAs enable operation at frequencies up to 1MHz. The buffers can drive non-compliant buses with parasitic capacitance as large as 1.2nF. They disconnect stuck buses and allow I/O cards to be hot swapped into and out of live systems. These buffers are interoperable with non-compliant I<sup>2</sup>C devices that drive a high V<sub>OL</sub> and with legacy buffers whose RTAs turn on at low voltages. The LTC4315 and LTC4313 ease practical design issues associated with large I<sup>2</sup>C bus systems.</p>    <!-- Content end -->
+
+                <h3>About The Authors</h3>
+                <article class="adi__authors__card">
+                <address>
+                    <div class="adi__authors__card__address">
+                        <div class="adi__authors__card__name">Rajesh Venugopal</div>
+                           
+                    </div>
+                    <div>
+                                <div id="foo" data-content="System and Design. Currently he is leading the firmware and system development team for healthcare applications at Analog Devices.  " class="adi__authors__card__title"> Rajesh has over 23 years’ experience in firmware development in areas of video, audio, image and healthcare domains on C/assembly/MATLAB/Python on multiple processor family platforms. He holds a masters’ degree in Digital ...</div>
+                                <button class="adi__collapse adi__button adi__button--ghost" aria-expanded="false" aria-controls="foo" data-has-content='true'                                        aria-label="Show More" data-label-expanded="Show Less" data-label-collapsed="Show More">
+                                    <i class="ri-arrow-down-s-line adi__collapse__caret"></i>
+                                </button>
+
+                    </div>
+                </address>
+                </article>
+
+                </div>
+                <!-- Left side content end -->
+                <!-- right side content start -->
+                <div class="adi__spotlight__column">
+
+                    
+    <!-- Related to this Article start -->
+    <section class="adi__productResources__category">
+        <h2 class="adi__heading--xs">
+            
+            Related to this Article
+        </h2>
+        
+        <h2 class="adi__subtitle--small"> Products </h2>
+                <div class="adi__rail">
+                                <a class="adi__card adi__card--mini" href="https://www.analog.com/en/products/ltc4313" tabindex="0" aria-label="LTC4313-PRODUCTION-2-Wire Bus Buffers with High Noise Margin">
+                                    <header class="adi__card__header">
+LTC4313                                        
+
+                                        <div>
+                                            <span class="adi__badge adi__badge--compact adi__badge--success adi__badge--small">
+                                                PRODUCTION 
+                                                <i class="ri-information-line" data-toggle="popover" data-placement="right" data-content="At least one model within this product family is in production and available for purchase. The product is appropriate for new designs but newer alternatives may exist."></i> 
+                                                
+                                            </span>
+                                        </div>
+                                    </header>
+                                    <main class="adi__card__content">
+                                            <p>2-Wire Bus Buffers with High Noise Margin</p>                                     </main>
+                                    <footer class="adi__card_actions">
+                                            <span class="adi__button adi__button--ghost adi__button--icon">
+                                                <i class="ri-arrow-right-line"></i>
+                                                
+                                            </span>
+                                    </footer>
+                                </a>
+                                <a class="adi__card adi__card--mini" href="https://www.analog.com/en/products/ltc4315" tabindex="0" aria-label="LTC4315-PRODUCTION-2-Wire Bus Buffer with High Noise Margin">
+                                    <header class="adi__card__header">
+LTC4315                                        
+
+                                        <div>
+                                            <span class="adi__badge adi__badge--compact adi__badge--success adi__badge--small">
+                                                PRODUCTION 
+                                                <i class="ri-information-line" data-toggle="popover" data-placement="right" data-content="At least one model within this product family is in production and available for purchase. The product is appropriate for new designs but newer alternatives may exist."></i> 
+                                                
+                                            </span>
+                                        </div>
+                                    </header>
+                                    <main class="adi__card__content">
+                                            <p>2-Wire Bus Buffer with High Noise Margin</p>                                     </main>
+                                    <footer class="adi__card_actions">
+                                            <span class="adi__button adi__button--ghost adi__button--icon">
+                                                <i class="ri-arrow-right-line"></i>
+                                                
+                                            </span>
+                                    </footer>
+                                </a>
+                                <a class="adi__card adi__card--mini" href="https://www.analog.com/en/products/ltc4300a-1" tabindex="0" aria-label="LTC4300A-1-PRODUCTION-Hot Swappable 2-Wire Bus Buffers">
+                                    <header class="adi__card__header">
+LTC4300A-1                                        
+
+                                        <div>
+                                            <span class="adi__badge adi__badge--compact adi__badge--success adi__badge--small">
+                                                PRODUCTION 
+                                                <i class="ri-information-line" data-toggle="popover" data-placement="right" data-content="At least one model within this product family is in production and available for purchase. The product is appropriate for new designs but newer alternatives may exist."></i> 
+                                                
+                                            </span>
+                                        </div>
+                                    </header>
+                                    <main class="adi__card__content">
+                                            <p>Hot Swappable 2-Wire Bus Buffers</p>                                     </main>
+                                    <footer class="adi__card_actions">
+                                            <span class="adi__button adi__button--ghost adi__button--icon">
+                                                <i class="ri-arrow-right-line"></i>
+                                                
+                                            </span>
+                                    </footer>
+                                </a>
+                                            <div id="expandProduct">
+                            <div class="adi__rail">
+                                            <a class="adi__card adi__card--mini" href="https://www.analog.com/en/products/ltc4307" tabindex="0" aria-label="LTC4307-PRODUCTION- Low Offset Hot Swappable 2-Wire Bus Buffer with Stuck Bus Recovery">
+                                                <header class="adi__card__header">
+LTC4307                                                    
+
+                                                                                                            <span class="adi__badge adi__badge--compact adi__badge--success adi__badge--small">
+                                                            PRODUCTION
+                                                            <i class="ri-information-line" data-toggle="popover" data-placement="right" data-content="At least one model within this product family is in production and available for purchase. The product is appropriate for new designs but newer alternatives may exist."></i>
+                                                        </span>
+                                                </header>
+                                                <main class="adi__card__content">
+                                                        <p> Low Offset Hot Swappable 2-Wire Bus Buffer with Stuck Bus Recovery</p>
+                                                </main>
+                                                <footer class="adi__card_actions">
+                                                        <span class="adi__button adi__button--ghost adi__button--icon">
+                                                            <i class="ri-arrow-right-line"></i>
+                                                        </span>
+                                                </footer>
+                                            </a>
+                            </div>
+                        </div>
+                        <button class="adi__collapse adi__button adi__button--ghost" aria-expanded="false" aria-controls="expandProduct"
+                                aria-label="Show More" data-label-expanded="Show Less" data-label-collapsed="Show More">
+                            <i class="ri-arrow-down-s-line adi__collapse__caret"></i>
+                        </button>
+                </div>
+
+        <section class="adi__productResources__category__resource">
+            
+
+
+
+
+
+            
+
+
+
+
+
+        </section>
+        <section class="adi__productResources__category__resource">
+            
+        <h2 class="adi__subtitle--small"> Resources </h2>         <ul class="adi__productRelatedProducts__resources adi__list adi__list--custom">
+                <li class="adi__productResources__category__resource adi__list__item adi__list__item--html">
+                    
+                    <a href="https://www.analog.com/en/education/education-library/Webcasts/i2c-unbounded-solve-your-2-wire-challenges.html" target="_blank">
+                        I&lt;sup&gt;2&lt;/sup&gt;C Unbounded - Solve Your 2 Wire Challenges
+                        
+                        <i class="ri-external-link-line adi__card__meta__data"></i>
+                    </a>
+                    <div class="adi__list__item__subtext"></div>
+                </li>
+        </ul>
+
+        </section>
+        
+
+    <div class="component Related-News">
+        <div class="component-content">
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+    </section>
+    <!-- Related to this Article end -->
+
+                </div>
+                <!-- right side content end -->
+
+            </div>
+        </adi-container>
+        <!-- Content end -->
+
+        <section class="adi__snackbar" />
+    </main>
+
+
+
+
+    <script type="text/x-handlebars-template" id="add-to-myanalog-hbs-template">
+        <article id='add-to-myanalog-modal-apis'
+                 class='add-to-myanalog-modal app-js__add-to-myanalog-modal'
+                 data-class-name='{{className}}'
+                 data-translations-api='{{translationsAPI}}'
+                 data-modal-added-icon='{{modalAddedIcon}}'
+                 data-modal-error-icon='{{modalErrorIcon}}'
+                 data-add-to-my-analog-api='{{addToMyAnalogAPI}}'
+                 data-artifact-api='{{artifactAPI}}'
+                 data-create-project-api='{{createProjectAPI}}'
+                 data-body-data='{{bodyData}}'
+                 data-is-table-product='{{isTableProduct}}'>
+            <div class='add-to-myanalog-modal__container'>
+                <div class='modal-container'  aria-label="{{dropdownTitle}} Modal">
+                    <div class='modal-container__header'>
+                        <div class='modal-container__header__title'>
+                            <img src="/en/_/media/project/analogweb/analogweb/addtomyanalog/part-updates-modal-bookmark.svg?rev=a3ca34e1e7fb492a8486be300d9b702f"
+                                 width='24'
+                                 height='24'
+                                 loading="lazy"
+                                 class='modal-container__header__title__icon'
+                                 alt='modal bookmark icon' />
+                            <h2 class='modal-container__header__title__text title-extraSmall'>{{modalTitle}}</h2>
+                        </div>
+                        <img src="/en/_/media/project/analogweb/analogweb/videomodalicons/modal-close-icon.svg?rev=3118d8d7637e43d48516217b5de375a8"
+                             alt='modal close icon'
+                             width='24'
+                             height='24'
+                             loading="lazy"
+                             class='modal-container__header__close'
+                             aria-label="Close Modal" role="button" tabindex="0" />
+                    </div>
+                    <div class='modal-container__content__error__content' role="alert">
+                    </div>
+                    <div class='modal-container__content'>
+                        <p class='modal-container__content__description body-medium-inverse'>{{modalDescription}}</p>
+
+                        <div class='modal-container__content__products'>
+                            <h2 class='modal-container__content__products__title body-small'>{{dropdownTitle}}</h2>
+                            <div class='modal-container__content__products__dropdown-container'>
+                                <div class='dropdown-wrapper'>
+                                    <div class='dropdown-wrapper__input-container'>
+                                        <input type='text'
+                                               value='{{defaultSelectedText}}'
+                                               class='body-small dropdown-wrapper__input-container__box' aria-expanded="false" role="combobox" tabindex="0" aria-label="{{dropdownTitle}}" aria-autocomplete="list" />
+                                        <span id='arrow-input-dropdown'
+                                              class='dropdown-wrapper__input-container__down-arrow'>
+                                            <img src="/en/_/media/project/analogweb/analogweb/contactadi/arrowimg.svg?rev=682c7547b6084fa5a1bfa14c688e5142"
+                                                 alt='input down arrow'
+                                                 loading="lazy"
+                                                 width='24'
+                                                 height='24' />
+                                        </span>
+                                        <p id="dropdown-aria-label" class="sr-only" aria-live="assertive" role="alert" aria-atomic="true" data-navigate-text="Navigate into the list items using tab key"></p>
+                                        <p id="input-aria-label" class="sr-only sr-only-input" aria-live="assertive" role="alert" aria-atomic="true" data-navigate-text="Use Down arrow key to open the drodpown"></p>
+                                    </div>
+                                    <div id='dropdownContent' class='dropdown-wrapper__content'>
+                                        <ul class='dropdown-content__lists'
+                                            data-default-selected-text='{{defaultSelectedText}}'
+                                            data-new-project-plus-icon='{{newProjectPlusIcon}}'
+                                            data-new-project-text='{{newProjectText}}'
+                                            data-project-names='{{projectNames}}'
+                                             role="listbox">
+                                            <li role="button" tabindex="0" aria-label="{{defaultSelectedText}}">
+                                                <span class='body-small dropdown-content__list__border'>{{defaultSelectedText}}</span>
+                                            </li>
+                                            {{#each projectNames}}
+                                            <li role="button" tabindex="0" aria-label="{{name}}"><span class='body-small dropdown-content__list__border'>{{name}}</span></li>
+                                            {{/each}}
+                                            {{#if newProjectText}}
+                                            <li class='dropdown-content__list__new-product' role="button" tabindex="0" aria-label="{{newProjectText}}">
+                                                <img src="/en/_/media/project/analogweb/analogweb/addtomyanalog/part-updates-modal-plus.svg?rev=92e1fe6fd6d846ee8c6a037e7a3aec06" alt='plus icon' width='24' height='24' loading="lazy" />
+                                                <span class='body-small'>{{newProjectText}}</span>
+                                            </li>
+                                            {{/if}}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {{#if toggleButtonDescription}}
+                        <div class='modal-container__content__toggle-button-container'>
+                            <div class='modal-container__content__toggle-button-container__wrapper'>
+                                <label class='toggle-button-wrapper'
+                                       tabindex="0"
+                                       aria-label="Toggle Button for {{toggleButtonDescription}}"
+                                       aria-checked="false">
+                                    <input type='checkbox'
+                                           id='add-to-myanalog-toggle-button'
+                                           class='toggle-button-wrapper__box'
+                                           tabindex="-1" />
+                                    <span class='toggle-button-wrapper__slider'></span>
+                                </label>
+                                <div class='modal-container__content__toggle-button-container__wrapper__text body-medium'>{{toggleButtonDescription}}</div>
+                            </div>
+                        </div>
+                        {{/if}}
+                        {{#if newProjectTitle}}
+                        <div class='modal-container__content__new-project-container'>
+                            <div class='modal-container__content__new-project-container__wrapper'>
+                                <h3 class='modal-container__content__new-project-container__wrapper__title subtitle-small'>
+                                    {{newProjectTitle}}
+                                </h3>
+                                <div class='modal-container__content__new-project-container__wrapper__name'>
+                                    <label for=''
+                                           class='body-small-greyscale modal-container__content__new-project-container__wrapper__name__text'>{{newProjectNameText}}</label>
+                                    <input type='text'
+                                           aria-label="{{newProjectNameText}}"
+                                            aria-invalid="false"
+                                           class='modal-container__content__new-project-container__wrapper__name__input body-small' />
+                                    <div class='modal-container__content__new-project-container__wrapper__name__error'>
+                                        <img src="/en/_/media/project/analogweb/analogweb/addtomyanalog/add-to-myanalog-error.svg?rev=59f82523eb254771a702ad10fe29cb8c"
+                                             width='16'
+                                             height='16'
+                                             loading="lazy"
+                                             class='modal-container__content__new-project-container__wrapper__name__error__icon' />
+                                        <p class='modal-container__content__new-project-container__wrapper__name__error__text body-extraSmall'>{{projectNameErrorText}}</p>
+                                    </div>
+                                </div>
+                                <div class='modal-container__content__new-project-container__wrapper__description'>
+                                    <label for=''
+                                           class='body-small-greyscale modal-container__content__new-project-container__wrapper__description__text'>{{newProjectDescriptionText}}</label>
+                                    <input type='text'
+                                           aria-label="{{newProjectDescriptionText}}"
+                                           class='modal-container__content__new-project-container__wrapper__description__input body-small' />
+                                </div>
+                            </div>
+                        </div>
+                        {{/if}}
+                    </div>
+                    <div class='modal-container__footer'>
+                        <div class='modal-container__footer__button'>
+                            <button aria-label="{{cancelButtonText}}"
+                                    role="button"
+                                    class='modal-container__footer__button__cancel button-medium'>
+                                {{cancelButtonText}}
+                            </button>
+                            <button aria-label="{{confirmButtonText}}"
+                                    role="button"
+                                    class='modal-container__footer__button__confirm button-medium'>
+                                {{confirmButtonText}}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </script>
+    <script type="text/javascript">
+        window.addToMyAnalogCommonJSON = {
+            "modalTitle": "Add to myAnalog",
+            "modalCloseIcon": "/en/_/media/project/analogweb/analogweb/videomodalicons/modal-close-icon.svg?rev=3118d8d7637e43d48516217b5de375a8",
+            "modalBookmarkIcon": "/en/_/media/project/analogweb/analogweb/addtomyanalog/part-updates-modal-bookmark.svg?rev=a3ca34e1e7fb492a8486be300d9b702f",
+            "inputDownArrowIcon": "/en/_/media/project/analogweb/analogweb/contactadi/arrowimg.svg?rev=682c7547b6084fa5a1bfa14c688e5142",
+            "cancelButtonText": "Cancel",
+            "confirmButtonText": "Confirm",
+            "modalAddedIcon":"/en/_/media/project/analogweb/analogweb/addtomyanalog/part-updates-modal-added.svg?rev=dae85b8e8998417da6b147854d31ec51",
+            "modalErrorIcon": "/en/_/media/project/analogweb/analogweb/addtomyanalog/add-to-myanalog-error.svg?rev=59f82523eb254771a702ad10fe29cb8c",
+            "translationsAPI": "translations?pageId=a89dc8dd3e864dd39c826c1b3c679be1&amp;languageCode=en"
+        }
+        var addToMyAnalogProductJSON = {
+            "toggleButtonDescription": "Receive PCN/PDN notifications for all part models.",
+            "modalDescription": "Add product to the Products section of myAnalog (to receive notifications), to an existing project or to a new project.",
+            "dropdownTitle": "Add product to",
+            "addToMyAnalogAPI": ["POST", "products"],
+            "artifactAPI": ["POST", "project/${projectID}/artifact"],
+            "createProjectAPI": ["POST", "project"],
+            "newProjectText": "New Project",
+            "defaultSelectedText": "Products on myAnalog",
+            "newProjectTitle": "Create New Project",
+            "newProjectPlusIcon": "/en/_/media/project/analogweb/analogweb/addtomyanalog/part-updates-modal-plus.svg?rev=92e1fe6fd6d846ee8c6a037e7a3aec06",
+            "newProjectNameText": "Project Name",
+            "newProjectDescriptionText": "Description",
+            "projectNameErrorIcon": "/en/_/media/project/analogweb/analogweb/addtomyanalog/part-updates-modal-error.svg?rev=107ad58f138e44a382fad8143d5a83f2",
+            "projectNameErrorText": "The Project Name is already taken. Try giving a different name.",
+            "projectNames": [
+                {
+                    "name": "Dummmy Name 1"
+                }
+            ],
+        }
+        var addToMyAnalogArticleJSON = {
+            "modalDescription": "Add article to the Resources section of myAnalog, to an existing project or to a new project.",
+            "dropdownTitle": "Add article to",
+            "addToMyAnalogAPI": ["POST", "bookmarks"],
+            "artifactAPI": ["POST", "project/${projectID}/artifact"],
+            "defaultSelectedText": "Resources on myAnalog",
+            "createProjectAPI": ["POST", "project"],
+            "newProjectText": "New Project",
+            "newProjectTitle": "Create New Project",
+            "newProjectNameText": "Project Name",
+            "newProjectPlusIcon": "/en/_/media/project/analogweb/analogweb/addtomyanalog/part-updates-modal-plus.svg?rev=92e1fe6fd6d846ee8c6a037e7a3aec06",
+            "newProjectDescriptionText": "Description",
+            "projectNameErrorIcon":  "/en/_/media/project/analogweb/analogweb/addtomyanalog/part-updates-modal-error.svg?rev=107ad58f138e44a382fad8143d5a83f2",
+            "projectNameErrorText": "The Project Name is already taken. Try giving a different name.",
+            "projectNames": [
+                {
+                    "name": "Dummmy Name 1"
+                }
+            ],
+        }
+        var addToMyAnalogProductAlertJSON = {
+            "modalDescription": "Add product alert to the Resources section of myAnalog, to an existing project or to a new project.",
+            "dropdownTitle": "Add product alert to",
+            "addToMyAnalogAPI": ["POST", "bookmarks"],
+            "defaultSelectedText": "Resources on myAnalog",
+        }
+        var addToMyAnalogMediaJSON = {
+            "modalDescription": "Add media to the Resources section of myAnalog, to an existing project or to a new project.",
+            "dropdownTitle": "Add media to",
+            "addToMyAnalogAPI": ["POST", "bookmarks"],
+            "defaultSelectedText": "Resources on myAnalog",
+        }
+        var addToMyAnalogPressReleaseJSON = {
+            "modalDescription": "Add press release to the Resources section of myAnalog, to an existing project or to a new project.",
+            "dropdownTitle": "Add press release to",
+            "addToMyAnalogAPI": ["POST", "bookmarks"],
+            "defaultSelectedText": "Resources on myAnalog",
+        }
+    </script>
+    <div id="add-to-myanalog-container">
+        <article id='add-to-myanalog-modal-apis'
+                 class='add-to-myanalog-modal app-js__add-to-myanalog-modal'
+                 data-class-name='{{className}}'
+                 data-translations-api='{{translationsAPI}}'
+                 data-modal-added-icon='{{modalAddedIcon}}'
+                 data-modal-error-icon='{{modalErrorIcon}}'
+                 data-add-to-my-analog-api='{{addToMyAnalogAPI}}'
+                 data-artifact-api='{{artifactAPI}}'
+                 data-create-project-api='{{createProjectAPI}}'
+                 data-body-data='{{bodyData}}'
+                 data-is-table-product='{{isTableProduct}}'>
+            <div class='add-to-myanalog-modal__container'>
+                <div class='modal-container'  aria-label="{{dropdownTitle}} Modal">
+                    <div class='modal-container__header'>
+                        <div class='modal-container__header__title'>
+                            <img src="/en/_/media/project/analogweb/analogweb/addtomyanalog/part-updates-modal-bookmark.svg?rev=a3ca34e1e7fb492a8486be300d9b702f"
+                                 width='24'
+                                 height='24'
+                                 loading="lazy"
+                                 class='modal-container__header__title__icon'
+                                 alt='modal bookmark icon' />
+                            <h2 class='modal-container__header__title__text title-extraSmall'>{{modalTitle}}</h2>
+                        </div>
+                        <img src="/en/_/media/project/analogweb/analogweb/videomodalicons/modal-close-icon.svg?rev=3118d8d7637e43d48516217b5de375a8"
+                             alt='modal close icon'
+                             width='24'
+                             height='24'
+                             loading="lazy"
+                             class='modal-container__header__close'
+                             aria-label="Close Modal" role="button" tabindex="0" />
+                    </div>
+                    <div class='modal-container__content__error__content' role="alert">
+                    </div>
+                    <div class='modal-container__content'>
+                        <p class='modal-container__content__description body-medium-inverse'>{{modalDescription}}</p>
+
+                        <div class='modal-container__content__products'>
+                            <h2 class='modal-container__content__products__title body-small'>{{dropdownTitle}}</h2>
+                            <div class='modal-container__content__products__dropdown-container'>
+                                <div class='dropdown-wrapper'>
+                                    <div class='dropdown-wrapper__input-container'>
+                                        <input type='text'
+                                               value='{{defaultSelectedText}}'
+                                               class='body-small dropdown-wrapper__input-container__box' aria-expanded="false" role="combobox" tabindex="0" aria-label="{{dropdownTitle}}" aria-autocomplete="list" />
+                                        <span id='arrow-input-dropdown'
+                                              class='dropdown-wrapper__input-container__down-arrow'>
+                                            <img src="/en/_/media/project/analogweb/analogweb/contactadi/arrowimg.svg?rev=682c7547b6084fa5a1bfa14c688e5142"
+                                                 alt='input down arrow'
+                                                 width='24'
+                                                 height='24'
+                                                 loading="lazy"/>
+                                        </span>
+                                        <p id="dropdown-aria-label" class="sr-only" aria-live="assertive" role="alert" aria-atomic="true" data-navigate-text="Navigate into the list items using tab key"></p>
+                                        <p id="input-aria-label" class="sr-only sr-only-input" aria-live="assertive" role="alert" aria-atomic="true" data-navigate-text="Use Down arrow key to open the drodpown"></p>
+                                    </div>
+                                    <div id='dropdownContent' class='dropdown-wrapper__content'>
+                                        <ul class='dropdown-content__lists'
+                                            data-default-selected-text='{{defaultSelectedText}}'
+                                            data-new-project-plus-icon='{{newProjectPlusIcon}}'
+                                            data-new-project-text='{{newProjectText}}'
+                                            data-project-names='{{projectNames}}'
+                                             role="listbox">
+                                            <li role="button" tabindex="0" aria-label="{{defaultSelectedText}}">
+                                                <span class='body-small dropdown-content__list__border'>{{defaultSelectedText}}</span>
+                                            </li>
+                                            {{#each projectNames}}
+                                            <li role="button" tabindex="0" aria-label="{{name}}"><span class='body-small dropdown-content__list__border'>{{name}}</span></li>
+                                            {{/each}}
+                                            {{#if newProjectText}}
+                                            <li class='dropdown-content__list__new-product' role="button" tabindex="0" aria-label="{{newProjectText}}">
+                                                <img src="/en/_/media/project/analogweb/analogweb/addtomyanalog/part-updates-modal-plus.svg?rev=92e1fe6fd6d846ee8c6a037e7a3aec06" alt='plus icon' width='24' height='24' loading="lazy" />
+                                                <span class='body-small'>{{newProjectText}}</span>
+                                            </li>
+                                            {{/if}}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {{#if toggleButtonDescription}}
+                        <div class='modal-container__content__toggle-button-container'>
+                            <div class='modal-container__content__toggle-button-container__wrapper'>
+                                <label class='toggle-button-wrapper'
+                                       tabindex="0"
+                                       aria-label="Toggle Button for {{toggleButtonDescription}}"
+                                       aria-checked="false">
+                                    <input type='checkbox'
+                                           id='add-to-myanalog-toggle-button'
+                                           class='toggle-button-wrapper__box'
+                                           tabindex="-1" />
+                                    <span class='toggle-button-wrapper__slider'></span>
+                                </label>
+                                <div class='modal-container__content__toggle-button-container__wrapper__text body-medium'>{{toggleButtonDescription}}</div>
+                            </div>
+                        </div>
+                        {{/if}}
+                        {{#if newProjectTitle}}
+                        <div class='modal-container__content__new-project-container'>
+                            <div class='modal-container__content__new-project-container__wrapper'>
+                                <h3 class='modal-container__content__new-project-container__wrapper__title subtitle-small'>
+                                    {{newProjectTitle}}
+                                </h3>
+                                <div class='modal-container__content__new-project-container__wrapper__name'>
+                                    <label for=''
+                                           class='body-small-greyscale modal-container__content__new-project-container__wrapper__name__text'>{{newProjectNameText}}</label>
+                                    <input type='text'
+                                           aria-label="{{newProjectNameText}}"
+                                            aria-invalid="false"
+                                           class='modal-container__content__new-project-container__wrapper__name__input body-small' />
+                                    <div class='modal-container__content__new-project-container__wrapper__name__error'>
+                                        <img src="/en/_/media/project/analogweb/analogweb/addtomyanalog/add-to-myanalog-error.svg?rev=59f82523eb254771a702ad10fe29cb8c"
+                                             width='16'
+                                             height='16'
+                                             loading="lazy"
+                                             class='modal-container__content__new-project-container__wrapper__name__error__icon' />
+                                        <p class='modal-container__content__new-project-container__wrapper__name__error__text body-extraSmall'>{{projectNameErrorText}}</p>
+                                    </div>
+                                </div>
+                                <div class='modal-container__content__new-project-container__wrapper__description'>
+                                    <label for=''
+                                           class='body-small-greyscale modal-container__content__new-project-container__wrapper__description__text'>{{newProjectDescriptionText}}</label>
+                                    <input type='text'
+                                           aria-label="{{newProjectDescriptionText}}"
+                                           class='modal-container__content__new-project-container__wrapper__description__input body-small' />
+                                </div>
+                            </div>
+                        </div>
+                        {{/if}}
+                    </div>
+                    <div class='modal-container__footer'>
+                        <div class='modal-container__footer__button'>
+                            <button aria-label="{{cancelButtonText}}"
+                                    role="button"
+                                    class='modal-container__footer__button__cancel button-medium'>
+                                {{cancelButtonText}}
+                            </button>
+                            <button aria-label="{{confirmButtonText}}"
+                                    role="button"
+                                    class='modal-container__footer__button__confirm button-medium'>
+                                {{confirmButtonText}}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </div>
+
+
+
+
+
+
+        <adi-container class="adi__latestMedia adi__spotlight">
+            <h2 class="adi__heading">
+                Latest Media
+                    <small>20</small>
+            </h2>
+                <p></p>
+            <template>
+                    <article class="adi__card adi__card--ghost">
+                        <figure class="adi__card__meta"
+                                  data-toggle="modal" aria-controls="videoModal" data-modal-content="6366107642112" data-modal-title="Learn More about Securing Industrial Control Systems with Analog Devices" data-modal-subtitle="Dec 17, 2024"  >
+                            <div class="adi__card__meta__overlay">
+                                        <img src="http://wcm2.cldnet.analog.com:80/_/media/images/videoimages/en/video-still-6366107642112.jpg?rev=21ef2673fc894a2fb97e1c9f17c89183&amp;hash=C9BF58CE53739A4DE27B83D9F5DF8CC6&amp;isUpdated=true&amp;updatedDateTime=12%2f17%2f2024+2%3a58%3a03+PM" alt="Thumbnail Image" class="adi__card__meta__image" loading="lazy" />
+                            </div>
+                            <figcaption class="adi__card__meta__data">
+                                <span>Video . Dec 17, 2024 </span>
+                                <span>01:37</span>
+                            </figcaption>
+                        </figure>
+
+                        <header class="adi__card__header">
+                            Securing Industrial Control Systems with Analog Devices
+                        </header>
+                        <footer class="adi__card__actions">
+                                <a class="adi__button adi__button--ghost" href="/en/resources/media-center/videos/6366107642112.html" target="_self" aria-label="Learn More about Securing Industrial Control Systems with Analog Devices-Opens up in a new window">
+                                    Learn More
+                                        <i class="ri-arrow-right-line"></i>
+
+                                </a>
+                        </footer>
+                    </article>
+                    <article class="adi__card adi__card--ghost">
+                        <figure class="adi__card__meta"
+                                  data-toggle="modal" aria-controls="videoModal" data-modal-content="6366067474112" data-modal-title="Learn More about Supplier Excellence and the Creators’ Code" data-modal-subtitle="Dec 16, 2024"  >
+                            <div class="adi__card__meta__overlay">
+                                        <img src="http://wcm2.cldnet.analog.com:80/_/media/analog/en/signals/video-images/video-still-6366067474112.jpg?rev=9a359ad962744753aa49811607c8742c&amp;hash=97AE9516B35D8F095255D4725AF53190&amp;isUpdated=true&amp;updatedDateTime=12%2f17%2f2024+10%3a31%3a00+PM" alt="Thumbnail Image" class="adi__card__meta__image" loading="lazy" />
+                            </div>
+                            <figcaption class="adi__card__meta__data">
+                                <span>Video . Dec 16, 2024 </span>
+                                <span></span>
+                            </figcaption>
+                        </figure>
+
+                        <header class="adi__card__header">
+                            Supplier Excellence and the Creators’ Code
+                        </header>
+                        <footer class="adi__card__actions">
+                                <a class="adi__button adi__button--ghost" href="/en/resources/media-center/videos/6366067474112.html" target="_self" aria-label="Learn More about Supplier Excellence and the Creators’ Code-Opens up in a new window">
+                                    Learn More
+                                        <i class="ri-arrow-right-line"></i>
+
+                                </a>
+                        </footer>
+                    </article>
+                    <article class="adi__card adi__card--ghost">
+                        <figure class="adi__card__meta"
+                                  data-toggle="modal" aria-controls="videoModal" data-modal-content="6366065546112" data-modal-title="Learn More about ADI and JLR: The Power of Collaboration" data-modal-subtitle="Dec 16, 2024"  >
+                            <div class="adi__card__meta__overlay">
+                                        <img src="http://wcm2.cldnet.analog.com:80/_/media/analog/en/signals/video-images/video-still-6366065546112.jpg?rev=07c1c4c0281c4d0988dad8647330fe5f&amp;hash=87B244CC1145C146153B3F30CCC90648&amp;isUpdated=true&amp;updatedDateTime=12%2f17%2f2024+10%3a25%3a52+PM" alt="Thumbnail Image" class="adi__card__meta__image" loading="lazy" />
+                            </div>
+                            <figcaption class="adi__card__meta__data">
+                                <span>Video . Dec 16, 2024 </span>
+                                <span></span>
+                            </figcaption>
+                        </figure>
+
+                        <header class="adi__card__header">
+                            ADI and JLR: The Power of Collaboration
+                        </header>
+                        <footer class="adi__card__actions">
+                                <a class="adi__button adi__button--ghost" href="/en/resources/media-center/videos/6366065546112.html" target="_self" aria-label="Learn More about ADI and JLR: The Power of Collaboration-Opens up in a new window">
+                                    Learn More
+                                        <i class="ri-arrow-right-line"></i>
+
+                                </a>
+                        </footer>
+                    </article>
+                    <article class="adi__card adi__card--ghost">
+                        <figure class="adi__card__meta"
+                                  data-toggle="modal" aria-controls="videoModal" data-modal-content="6366066315112" data-modal-title="Learn More about Driving Automotive Innovation with JLR" data-modal-subtitle="Dec 16, 2024"  >
+                            <div class="adi__card__meta__overlay">
+                                        <img src="http://wcm2.cldnet.analog.com:80/_/media/analog/en/signals/video-images/driving-automotive-innovation-jlr/video-still-6366066315112.jpg?rev=8943e85f111445fba3f3ca54690d9045&amp;hash=E37423FF2F59B940565B8ADD79D6BF7B&amp;isUpdated=true&amp;updatedDateTime=12%2f18%2f2024+3%3a09%3a01+PM" alt="Thumbnail Image" class="adi__card__meta__image" loading="lazy" />
+                            </div>
+                            <figcaption class="adi__card__meta__data">
+                                <span>Video . Dec 16, 2024 </span>
+                                <span></span>
+                            </figcaption>
+                        </figure>
+
+                        <header class="adi__card__header">
+                            Driving Automotive Innovation with JLR
+                        </header>
+                        <footer class="adi__card__actions">
+                                <a class="adi__button adi__button--ghost" href="/en/resources/media-center/videos/6366066315112.html" target="_self" aria-label="Learn More about Driving Automotive Innovation with JLR-Opens up in a new window">
+                                    Learn More
+                                        <i class="ri-arrow-right-line"></i>
+
+                                </a>
+                        </footer>
+                    </article>
+                    <article class="adi__card adi__card--ghost">
+                        <figure class="adi__card__meta"
+                                  data-toggle="modal" aria-controls="videoModal" data-modal-content="6366065448112" data-modal-title="Learn More about An Evolving Industry" data-modal-subtitle="Dec 16, 2024"  >
+                            <div class="adi__card__meta__overlay">
+                                        <img src="http://wcm2.cldnet.analog.com:80/_/media/analog/en/signals/video-images/driving-automotive-innovation-jlr/video-still-6366065448112.jpg?rev=a543cfafcb724e1084a5272af066ef3a&amp;hash=88E644DE7F80814A6998ACAD5EF5B2C4&amp;isUpdated=true&amp;updatedDateTime=1%2f16%2f2025+10%3a48%3a04+PM" alt="Thumbnail Image" class="adi__card__meta__image" loading="lazy" />
+                            </div>
+                            <figcaption class="adi__card__meta__data">
+                                <span>Video . Dec 16, 2024 </span>
+                                <span></span>
+                            </figcaption>
+                        </figure>
+
+                        <header class="adi__card__header">
+                            An Evolving Industry
+                        </header>
+                        <footer class="adi__card__actions">
+                                <a class="adi__button adi__button--ghost" href="/en/resources/media-center/videos/6366065448112.html" target="_self" aria-label="Learn More about An Evolving Industry-Opens up in a new window">
+                                    Learn More
+                                        <i class="ri-arrow-right-line"></i>
+
+                                </a>
+                        </footer>
+                    </article>
+                    <article class="adi__card adi__card--ghost">
+                        <figure class="adi__card__meta"
+                                  data-toggle="modal" aria-controls="videoModal" data-modal-content="6365538243112" data-modal-title="Learn More about ADI at BTYSTE Highlights " data-modal-subtitle="Dec 4, 2024"  >
+                            <div class="adi__card__meta__overlay">
+                                        <img src="http://wcm2.cldnet.analog.com:80/_/media/images/videoimages/en/video-still-6365538243112.jpg?rev=20f317b53ffb400a8a9406e9f96048b9&amp;hash=BB8E629BA6E0918788CFC92D279EF2EE&amp;isUpdated=true&amp;updatedDateTime=12%2f10%2f2024+2%3a34%3a35+PM" alt="Thumbnail Image" class="adi__card__meta__image" loading="lazy" />
+                            </div>
+                            <figcaption class="adi__card__meta__data">
+                                <span>Video . Dec 4, 2024 </span>
+                                <span></span>
+                            </figcaption>
+                        </figure>
+
+                        <header class="adi__card__header">
+                            ADI at BTYSTE Highlights 
+                        </header>
+                        <footer class="adi__card__actions">
+                                <a class="adi__button adi__button--ghost" href="/en/resources/media-center/videos/6365538243112.html" target="_self" aria-label="Learn More about ADI at BTYSTE Highlights -Opens up in a new window">
+                                    Learn More
+                                        <i class="ri-arrow-right-line"></i>
+
+                                </a>
+                        </footer>
+                    </article>
+                    <article class="adi__card adi__card--ghost">
+                        <figure class="adi__card__meta"
+                                  data-toggle="modal" aria-controls="videoModal" data-modal-content="6365179850112" data-modal-title="Learn More about Motion Control Solutions For Autonomous Manufacturing" data-modal-subtitle="Nov 25, 2024"  >
+                            <div class="adi__card__meta__overlay">
+                                        <img src="http://wcm2.cldnet.analog.com:80/_/media/images/videoimages/en/video-still-6365179850112.jpg?rev=4ee1408798d642f0b03e1dbe49fe13bd&amp;hash=5BC45A44BFAE74D68DC7C1C95846009F&amp;isUpdated=true&amp;updatedDateTime=12%2f6%2f2024+8%3a11%3a11+PM" alt="Thumbnail Image" class="adi__card__meta__image" loading="lazy" />
+                            </div>
+                            <figcaption class="adi__card__meta__data">
+                                <span>Video . Nov 25, 2024 </span>
+                                <span>01:22</span>
+                            </figcaption>
+                        </figure>
+
+                        <header class="adi__card__header">
+                            Motion Control Solutions For Autonomous Manufacturing
+                        </header>
+                        <footer class="adi__card__actions">
+                                <a class="adi__button adi__button--ghost" href="/en/resources/media-center/videos/6365179850112.html" target="_self" aria-label="Learn More about Motion Control Solutions For Autonomous Manufacturing-Opens up in a new window">
+                                    Learn More
+                                        <i class="ri-arrow-right-line"></i>
+
+                                </a>
+                        </footer>
+                    </article>
+                    <article class="adi__card adi__card--ghost">
+                        <figure class="adi__card__meta"
+                                  data-toggle="modal" aria-controls="videoModal" data-modal-content="6364995024112" data-modal-title="Learn More about AD-SWIOT1L-SL Plugin in Scopy2" data-modal-subtitle="Nov 21, 2024"  >
+                            <div class="adi__card__meta__overlay">
+                                        <img src=":80/_/media/images/videoimages/en/video-still-6364995024112.jpg?rev=70391625cedc487fa407ee4b4bd3afdd&amp;hash=34C56D957952C9851232A4321966167A&amp;isUpdated=true&amp;updatedDateTime=11%2f21%2f2024+4%3a19%3a56+PM" alt="Thumbnail Image" class="adi__card__meta__image" loading="lazy" />
+                            </div>
+                            <figcaption class="adi__card__meta__data">
+                                <span>Video . Nov 21, 2024 </span>
+                                <span></span>
+                            </figcaption>
+                        </figure>
+
+                        <header class="adi__card__header">
+                            AD-SWIOT1L-SL Plugin in Scopy2
+                        </header>
+                        <footer class="adi__card__actions">
+                                <a class="adi__button adi__button--ghost" href="/en/resources/media-center/videos/6364995024112.html" target="_self" aria-label="Learn More about AD-SWIOT1L-SL Plugin in Scopy2-Opens up in a new window">
+                                    Learn More
+                                        <i class="ri-arrow-right-line"></i>
+
+                                </a>
+                        </footer>
+                    </article>
+                    <article class="adi__card adi__card--ghost">
+                        <figure class="adi__card__meta"
+                                  data-toggle="modal" aria-controls="videoModal" data-modal-content="6364995766112" data-modal-title="Learn More about Python Support for AD-SWIOT1L-SL" data-modal-subtitle="Nov 21, 2024"  >
+                            <div class="adi__card__meta__overlay">
+                                        <img src=":80/_/media/images/videoimages/en/video-still-6364995766112.jpg?rev=7d576bccb7d7498b97d7062a648daa8f&amp;hash=6F4FD80CC942BE4AB4D68FBC6FA4D9EE&amp;isUpdated=true&amp;updatedDateTime=11%2f21%2f2024+5%3a59%3a10+PM" alt="Thumbnail Image" class="adi__card__meta__image" loading="lazy" />
+                            </div>
+                            <figcaption class="adi__card__meta__data">
+                                <span>Video . Nov 21, 2024 </span>
+                                <span></span>
+                            </figcaption>
+                        </figure>
+
+                        <header class="adi__card__header">
+                            Python Support for AD-SWIOT1L-SL
+                        </header>
+                        <footer class="adi__card__actions">
+                                <a class="adi__button adi__button--ghost" href="/en/resources/media-center/videos/6364995766112.html" target="_self" aria-label="Learn More about Python Support for AD-SWIOT1L-SL-Opens up in a new window">
+                                    Learn More
+                                        <i class="ri-arrow-right-line"></i>
+
+                                </a>
+                        </footer>
+                    </article>
+                    <article class="adi__card adi__card--ghost">
+                        <figure class="adi__card__meta"
+                                  data-toggle="modal" aria-controls="videoModal" data-modal-content="6364995570112" data-modal-title="Learn More about Unboxing the AD-SWIOT1L-SL Platform" data-modal-subtitle="Nov 21, 2024"  >
+                            <div class="adi__card__meta__overlay">
+                                        <img src=":80/_/media/images/videoimages/en/video-still-6364995570112.jpg?rev=3ac65a847b554c168790880ba4c5bdc3&amp;hash=84AD74E015B643FC97B347E8499C8EF3&amp;isUpdated=true&amp;updatedDateTime=11%2f21%2f2024+5%3a19%3a24+PM" alt="Thumbnail Image" class="adi__card__meta__image" loading="lazy" />
+                            </div>
+                            <figcaption class="adi__card__meta__data">
+                                <span>Video . Nov 21, 2024 </span>
+                                <span></span>
+                            </figcaption>
+                        </figure>
+
+                        <header class="adi__card__header">
+                            Unboxing the AD-SWIOT1L-SL Platform
+                        </header>
+                        <footer class="adi__card__actions">
+                                <a class="adi__button adi__button--ghost" href="/en/resources/media-center/videos/6364995570112.html" target="_self" aria-label="Learn More about Unboxing the AD-SWIOT1L-SL Platform-Opens up in a new window">
+                                    Learn More
+                                        <i class="ri-arrow-right-line"></i>
+
+                                </a>
+                        </footer>
+                    </article>
+                    <article class="adi__card adi__card--ghost">
+                        <figure class="adi__card__meta"
+                                  data-toggle="modal" aria-controls="videoModal" data-modal-content="6364928436112" data-modal-title="Learn More about Industrial Sustainability - The Time for Action is Now!" data-modal-subtitle="Nov 20, 2024"  >
+                            <div class="adi__card__meta__overlay">
+                                        <img src=":80/_/media/images/videoimages/en/video-still-6364928436112.jpg?rev=7a0be24f260c4bfdbf870ce10de4b891&amp;hash=64184992C9E6B3E336968D3E39AEE18F&amp;isUpdated=true&amp;updatedDateTime=11%2f21%2f2024+3%3a50%3a06+PM" alt="Thumbnail Image" class="adi__card__meta__image" loading="lazy" />
+                            </div>
+                            <figcaption class="adi__card__meta__data">
+                                <span>Video . Nov 20, 2024 </span>
+                                <span></span>
+                            </figcaption>
+                        </figure>
+
+                        <header class="adi__card__header">
+                            Industrial Sustainability - The Time for Action is Now!
+                        </header>
+                        <footer class="adi__card__actions">
+                                <a class="adi__button adi__button--ghost" href="/en/resources/media-center/videos/6364928436112.html" target="_self" aria-label="Learn More about Industrial Sustainability - The Time for Action is Now!-Opens up in a new window">
+                                    Learn More
+                                        <i class="ri-arrow-right-line"></i>
+
+                                </a>
+                        </footer>
+                    </article>
+                    <article class="adi__card adi__card--ghost">
+                        <figure class="adi__card__meta"
+                                  data-toggle="modal" aria-controls="videoModal" data-modal-content="6364923225112" data-modal-title="Learn More about VT1006: Switch Fault Protection" data-modal-subtitle="Nov 19, 2024"  >
+                            <div class="adi__card__meta__overlay">
+                                        <img src=":80/_/media/images/videoimages/en/video-still-6364923225112.jpg?rev=245c472086134f1e89924e607a599ae7&amp;hash=A92CB85B861D119FFEDCE6CA69630C44&amp;isUpdated=true&amp;updatedDateTime=11%2f21%2f2024+6%3a07%3a16+PM" alt="Thumbnail Image" class="adi__card__meta__image" loading="lazy" />
+                            </div>
+                            <figcaption class="adi__card__meta__data">
+                                <span>Video . Nov 19, 2024 </span>
+                                <span>07:37</span>
+                            </figcaption>
+                        </figure>
+
+                        <header class="adi__card__header">
+                            VT1006: Switch Fault Protection
+                        </header>
+                        <footer class="adi__card__actions">
+                                <a class="adi__button adi__button--ghost" href="/en/resources/media-center/videos/6364923225112.html" target="_self" aria-label="Learn More about VT1006: Switch Fault Protection-Opens up in a new window">
+                                    Learn More
+                                        <i class="ri-arrow-right-line"></i>
+
+                                </a>
+                        </footer>
+                    </article>
+                    <article class="adi__card adi__card--ghost">
+                        <figure class="adi__card__meta"
+                                  data-toggle="modal" aria-controls="videoModal" data-modal-content="6364922461112" data-modal-title="Learn More about MAX9295D GMSL2 6 Gbps Dual CSI-2 Serializer with GMSL1 Compatibility." data-modal-subtitle="Nov 19, 2024"  >
+                            <div class="adi__card__meta__overlay">
+                                        <img src=":80/_/media/images/videoimages/en/video-still-6364922461112.jpg?rev=b2a584f227924506b708e11314a19909&amp;hash=06AFF2FD3D8E51D862677DE65C0F9ACD&amp;isUpdated=true&amp;updatedDateTime=11%2f21%2f2024+8%3a21%3a35+PM" alt="Thumbnail Image" class="adi__card__meta__image" loading="lazy" />
+                            </div>
+                            <figcaption class="adi__card__meta__data">
+                                <span>Video . Nov 19, 2024 </span>
+                                <span>01:20</span>
+                            </figcaption>
+                        </figure>
+
+                        <header class="adi__card__header">
+                            MAX9295D GMSL2 6 Gbps Dual CSI-2 Serializer with GMSL1 Compatibility.
+                        </header>
+                        <footer class="adi__card__actions">
+                                <a class="adi__button adi__button--ghost" href="/en/resources/media-center/videos/6364922461112.html" target="_self" aria-label="Learn More about MAX9295D GMSL2 6 Gbps Dual CSI-2 Serializer with GMSL1 Compatibility.-Opens up in a new window">
+                                    Learn More
+                                        <i class="ri-arrow-right-line"></i>
+
+                                </a>
+                        </footer>
+                    </article>
+                    <article class="adi__card adi__card--ghost">
+                        <figure class="adi__card__meta"
+                                  data-toggle="modal" aria-controls="videoModal" data-modal-content="6363866845112" data-modal-title="Learn More about Analog.com Reimagined: Product Detail Pages" data-modal-subtitle="Oct 28, 2024"  >
+                            <div class="adi__card__meta__overlay">
+                                        <img src=":80/_/media/images/videoimages/en/video-still-6363866845112.jpg?rev=c2f4b46f19704f249e07e890d7925eaf&amp;hash=960E91DC06BEBB2C51DC8E83DF6D61C4&amp;isUpdated=true&amp;updatedDateTime=10%2f28%2f2024+1%3a03%3a40+PM" alt="Thumbnail Image" class="adi__card__meta__image" loading="lazy" />
+                            </div>
+                            <figcaption class="adi__card__meta__data">
+                                <span>Video . Oct 28, 2024 </span>
+                                <span>00:45</span>
+                            </figcaption>
+                        </figure>
+
+                        <header class="adi__card__header">
+                            Analog.com Reimagined: Product Detail Pages
+                        </header>
+                        <footer class="adi__card__actions">
+                                <a class="adi__button adi__button--ghost" href="/en/resources/media-center/videos/6363866845112.html" target="_self" aria-label="Learn More about Analog.com Reimagined: Product Detail Pages-Opens up in a new window">
+                                    Learn More
+                                        <i class="ri-arrow-right-line"></i>
+
+                                </a>
+                        </footer>
+                    </article>
+                    <article class="adi__card adi__card--ghost">
+                        <figure class="adi__card__meta"
+                                  data-toggle="modal" aria-controls="videoModal" data-modal-content="6363745168112" data-modal-title="Learn More about ADI&#39;s 10BASE-T1S E2B™ Transceivers" data-modal-subtitle="Oct 25, 2024"  >
+                            <div class="adi__card__meta__overlay">
+                                        <img src=":80/_/media/images/videoimages/en/video-still-6363745168112.jpg?rev=7078401ec7364b0ab8a1d63b2c5dd5a4&amp;hash=7DAD71F908A12DDDD006516E5302B774&amp;isUpdated=true&amp;updatedDateTime=10%2f28%2f2024+3%3a03%3a14+PM" alt="Thumbnail Image" class="adi__card__meta__image" loading="lazy" />
+                            </div>
+                            <figcaption class="adi__card__meta__data">
+                                <span>Video . Oct 25, 2024 </span>
+                                <span>02:36</span>
+                            </figcaption>
+                        </figure>
+
+                        <header class="adi__card__header">
+                            ADI's 10BASE-T1S E2B™ Transceivers
+                        </header>
+                        <footer class="adi__card__actions">
+                                <a class="adi__button adi__button--ghost" href="/en/resources/media-center/videos/6363745168112.html" target="_self" aria-label="Learn More about ADI&#39;s 10BASE-T1S E2B™ Transceivers-Opens up in a new window">
+                                    Learn More
+                                        <i class="ri-arrow-right-line"></i>
+
+                                </a>
+                        </footer>
+                    </article>
+                    <article class="adi__card adi__card--ghost">
+                        <figure class="adi__card__meta"
+                                  data-toggle="modal" aria-controls="videoModal" data-modal-content="6358228860112" data-modal-title="Learn More about LTM8080：ノイズ性能とPSRR性能が極めて高いμModuleレギュレータ、入力電圧は40Vで出力電流はデュアル500mA／シングル1A" data-modal-subtitle="Oct 23, 2024"  >
+                            <div class="adi__card__meta__overlay">
+                                        <img src="/_/media/images/videoimages/jp/npi/video-still-6358228860112.jpg?rev=ef40afeccc7c43fdbecdc10e3cc9168d&amp;la=ja&amp;hash=16DE8D59B061E250E5FB404FE30CF626&amp;isUpdated=true&amp;updatedDateTime=7%2f17%2f2024+4%3a49%3a21+AM" alt="Thumbnail Image" class="adi__card__meta__image" loading="lazy" />
+                            </div>
+                            <figcaption class="adi__card__meta__data">
+                                <span>Video . Oct 23, 2024 </span>
+                                <span></span>
+                            </figcaption>
+                        </figure>
+
+                        <header class="adi__card__header">
+                            LTM8080：ノイズ性能とPSRR性能が極めて高いμModuleレギュレータ、入力電圧は40Vで出力電流はデュアル500mA／シングル1A
+                        </header>
+                        <footer class="adi__card__actions">
+                                <a class="adi__button adi__button--ghost" href="/en/resources/media-center/videos/6358228860112.html" target="_self" aria-label="Learn More about LTM8080：ノイズ性能とPSRR性能が極めて高いμModuleレギュレータ、入力電圧は40Vで出力電流はデュアル500mA／シングル1A-Opens up in a new window">
+                                    Learn More
+                                        <i class="ri-arrow-right-line"></i>
+
+                                </a>
+                        </footer>
+                    </article>
+                    <article class="adi__card adi__card--ghost">
+                        <figure class="adi__card__meta"
+                                  data-toggle="modal" aria-controls="videoModal" data-modal-content="6363567188112" data-modal-title="Learn More about ADI launches CodeFusion Studio™ at the first embedded world NA" data-modal-subtitle="Oct 21, 2024"  >
+                            <div class="adi__card__meta__overlay">
+                                        <img src=":80/_/media/images/videoimages/en/video-still-6363567188112.jpg?rev=18207cea597b4dd7b0e0c45bd998499a&amp;hash=F3A2768C6A15495A874BF7FABADA0F4E&amp;isUpdated=true&amp;updatedDateTime=10%2f28%2f2024+12%3a22%3a52+PM" alt="Thumbnail Image" class="adi__card__meta__image" loading="lazy" />
+                            </div>
+                            <figcaption class="adi__card__meta__data">
+                                <span>Video . Oct 21, 2024 </span>
+                                <span>00:10</span>
+                            </figcaption>
+                        </figure>
+
+                        <header class="adi__card__header">
+                            ADI launches CodeFusion Studio™ at the first embedded world NA
+                        </header>
+                        <footer class="adi__card__actions">
+                                <a class="adi__button adi__button--ghost" href="/en/resources/media-center/videos/6363567188112.html" target="_self" aria-label="Learn More about ADI launches CodeFusion Studio™ at the first embedded world NA-Opens up in a new window">
+                                    Learn More
+                                        <i class="ri-arrow-right-line"></i>
+
+                                </a>
+                        </footer>
+                    </article>
+                    <article class="adi__card adi__card--ghost">
+                        <figure class="adi__card__meta"
+                                  data-toggle="modal" aria-controls="videoModal" data-modal-content="6363568264112" data-modal-title="Learn More about Hands-on with CodeFusion Studio" data-modal-subtitle="Oct 21, 2024"  >
+                            <div class="adi__card__meta__overlay">
+                                        <img src=":80/_/media/images/videoimages/en/video-still-6363568264112.jpg?rev=5095a33ee3a640b19b8a38f9f89269b7&amp;hash=D4DE15DA5B4FD4CAA6A0C659FFA0F9C3&amp;isUpdated=true&amp;updatedDateTime=10%2f23%2f2024+1%3a15%3a29+PM" alt="Thumbnail Image" class="adi__card__meta__image" loading="lazy" />
+                            </div>
+                            <figcaption class="adi__card__meta__data">
+                                <span>Video . Oct 21, 2024 </span>
+                                <span>00:10</span>
+                            </figcaption>
+                        </figure>
+
+                        <header class="adi__card__header">
+                            Hands-on with CodeFusion Studio
+                        </header>
+                        <footer class="adi__card__actions">
+                                <a class="adi__button adi__button--ghost" href="/en/resources/media-center/videos/6363568264112.html" target="_self" aria-label="Learn More about Hands-on with CodeFusion Studio-Opens up in a new window">
+                                    Learn More
+                                        <i class="ri-arrow-right-line"></i>
+
+                                </a>
+                        </footer>
+                    </article>
+                    <article class="adi__card adi__card--ghost">
+                        <figure class="adi__card__meta"
+                                  data-toggle="modal" aria-controls="videoModal" data-modal-content="6363567187112" data-modal-title="Learn More about Secure Industrial Edge Connectivity with 10BASE-T1L &amp; Zephyr RTOS" data-modal-subtitle="Oct 21, 2024"  >
+                            <div class="adi__card__meta__overlay">
+                                        <img src=":80/_/media/images/videoimages/en/video-still-6363567187112.jpg?rev=0d9113579d3b442abd00afbebac6d717&amp;hash=C14E568A1F4C25FFCFD555E308F7BEE6&amp;isUpdated=true&amp;updatedDateTime=10%2f23%2f2024+2%3a04%3a50+PM" alt="Thumbnail Image" class="adi__card__meta__image" loading="lazy" />
+                            </div>
+                            <figcaption class="adi__card__meta__data">
+                                <span>Video . Oct 21, 2024 </span>
+                                <span>00:10</span>
+                            </figcaption>
+                        </figure>
+
+                        <header class="adi__card__header">
+                            Secure Industrial Edge Connectivity with 10BASE-T1L & Zephyr RTOS
+                        </header>
+                        <footer class="adi__card__actions">
+                                <a class="adi__button adi__button--ghost" href="/en/resources/media-center/videos/6363567187112.html" target="_self" aria-label="Learn More about Secure Industrial Edge Connectivity with 10BASE-T1L &amp; Zephyr RTOS-Opens up in a new window">
+                                    Learn More
+                                        <i class="ri-arrow-right-line"></i>
+
+                                </a>
+                        </footer>
+                    </article>
+                    <article class="adi__card adi__card--ghost">
+                        <figure class="adi__card__meta"
+                                  data-toggle="modal" aria-controls="videoModal" data-modal-content="6363568843112" data-modal-title="Learn More about Machine-Learning Based Anomaly and Intrusion Detection for Microcontrollers" data-modal-subtitle="Oct 21, 2024"  >
+                            <div class="adi__card__meta__overlay">
+                                        <img src=":80/_/media/images/videoimages/en/video-still-6363568843112.jpg?rev=459ca73b69f44d08853a21d523f2cd50&amp;hash=5BF99A059811F96E2B77300021E305C7&amp;isUpdated=true&amp;updatedDateTime=10%2f23%2f2024+12%3a15%3a50+AM" alt="Thumbnail Image" class="adi__card__meta__image" loading="lazy" />
+                            </div>
+                            <figcaption class="adi__card__meta__data">
+                                <span>Video . Oct 21, 2024 </span>
+                                <span>00:10</span>
+                            </figcaption>
+                        </figure>
+
+                        <header class="adi__card__header">
+                            Machine-Learning Based Anomaly and Intrusion Detection for Microcontrollers
+                        </header>
+                        <footer class="adi__card__actions">
+                                <a class="adi__button adi__button--ghost" href="/en/resources/media-center/videos/6363568843112.html" target="_self" aria-label="Learn More about Machine-Learning Based Anomaly and Intrusion Detection for Microcontrollers-Opens up in a new window">
+                                    Learn More
+                                        <i class="ri-arrow-right-line"></i>
+
+                                </a>
+                        </footer>
+                    </article>
+            </template>
+            <div class="adi__carousel">
+                <button aria-label="previous" type="button" class="adi__button adi__button--ghost adi__carousel__control" data-index="-1">
+                    <i class="ri-arrow-left-s-line"></i>
+                </button>
+                <div class="adi__carousel__stage">
+                </div>
+                <button aria-label="next" type="button" class="adi__button adi__button--ghost adi__carousel__control" data-index="1">
+                    <i class="ri-arrow-right-s-line"></i>
+                </button>
+                <div class="adi__carousel__progression"></div>
+            </div>
+        </adi-container>
+    <!-- Video Modal component start -->
+    <dialog class="adi__modal adi__modal--fluid adi__modal--video adi__latestMedia__video" id="videoModal" aria-modal="false">
+        <section class="adi__modal__heading">
+            <button type="button" data-toggle="modal"
+                    class="adi__button adi__button--ghost adi__button--compact adi__modal__heading__close" aria-label="close">
+                <i class="ri-close-fill"></i>
+            </button>
+            <div class="adi__modal__heading__title adi__videoModal__title"></div>
+            <div class="adi__modal__heading__subtitle adi__videoModal__subtitle">Subtitle</div>
+        </section>
+        <section class="adi__modal__content adi__videoModal__content">
+            <adi-video></adi-video>
+        </section>
+        <section class="adi__modal__actions">
+            <a class="adi__button adi__button--compact adi__button--ghost" href="#">
+                Learn More
+                <i class="ri-arrow-right-line"></i>
+            </a>
+            <button type="button"
+                    class="adi__button adi__button--compact adi__button--ghost"
+                    data-toggle="modal"
+                    aria-controls="saveVideoToMyAnalog">
+                <i class="adi__icon adi__icon--bookmarkPlus"></i>
+                Add to myAnalog
+            </button>
+            <button type="button"
+                    class="adi__button adi__button--compact adi__button--ghost"
+                    data-toggle="context-menu"
+                    aria-controls="shareVideo">
+                <i class="ri-share-forward-line"></i>
+                Share
+            </button>
+
+        </section>
+    </dialog>
+    <!-- Video Modal component end -->
+    <!-- saveVideoToMyAnalog component start -->
+    <dialog class="adi__modal adi__saveToMyAnalog adi__productResources__save" id="saveVideoToMyAnalog">
+        <form>
+            <section class="adi__modal__heading">
+                <button type="button"
+                        data-toggle="modal"
+                        class="adi__button adi__button--ghost adi__button--compact adi__modal__heading__close"
+                        aria-label="close">
+                    <i class="ri-close-fill"></i>
+                </button>
+                <div class="adi__modal__heading__title">
+                    <i class="adi__icon adi__icon--bookmarkPlus"></i>
+                    Add to myAnalog 
+                </div>
+            </section>
+            <div class="adi__saveToMyAnalog__alert"></div>
+            <section class="adi__modal__content">
+                <p class="adi__saveToMyAnalog__description">
+                    Add article to the Resources section of myAnalog, to an existing project or to a new project.
+                </p>
+                <div class="adi__field adi__field--select adi__saveToMyAnalog__target">
+                    <label for="saveTo" class="adi__field__label">Add article to</label>
+                    <div class="adi__field__container">
+                        <input type="hidden" id="saveTo" name="saveTo" value="resources">
+                        <button type="button" class="adi__field__container__input" data-toggle="context-menu" aria-controls="saveToOptions">
+                            Resources on myAnalog
+                        </button>
+                        <menu class="adi__contextMenu adi__field__container__options" id="saveToOptions" hidden>
+                            <li role="button" data-value="resources" class="adi__contextMenu__option">
+                                Resources on myAnalog
+                            </li>
+                            <li role="button" data-value="new" class="adi__contextMenu__option">
+                                <i class="ri-add-line"></i>
+                                New Project
+                            </li>
+                        </menu>
+                    </div>
+                </div>
+                <fieldset class="adi__saveToMyAnalog__newProject">
+                    <legend class="adi__saveToMyAnalog__newProject__legend">Create New Project</legend>
+                    <div class="adi__field">
+                        <label for="newProjectName" class="adi__field__label">Project Name</label>
+                        <div class="adi__field__container">
+                            <input type="text" id="newProjectName" name="name" class="adi__field__container__input">
+                        </div>
+                        <div class="adi__field__helperText"></div>
+                    </div>
+                    <div class="adi__field">
+                        <label for="newProjectDescription" class="adi__field__label">Description</label>
+                        <div class="adi__field__container">
+                            <input type="text" id="newProjectDescription" name="description" class="adi__field__container__input">
+                        </div>
+                    </div>
+                </fieldset>
+                <div class="adi__field adi__field--toggle">
+                    <label for="checkbox-1-2" class="adi__field__label">
+                        <input type="checkbox" id="checkbox-1-2">
+                        
+                    </label>
+                </div>
+            </section>
+            <section class="adi__modal__actions">
+                <button data-toggle="modal"
+                        type="button"
+                        class="adi__button adi__button--secondary">
+                    Cancel
+                </button>
+                <button type="submit" data-artifact-api="["POST", "project/${projectID}/artifact"]"
+                        class="adi__button">
+                    Confirm
+                </button>
+            </section>
+        </form>
+    </dialog>
+    <!-- saveVideoToMyAnalog component end -->
+    <!-- Share Video start -->
+    <menu class="adi__contextMenu adi__shareMenu adi__productResources__share" id="shareVideo" hidden>
+        <li role="button" class="adi__contextMenu__option" data-type="link" data-success-msg="Copied to clipboard!">
+            Copy Link 
+        </li>
+        <li role="button" class="adi__contextMenu__option" data-type="email">
+            Send to Mail  
+        </li>
+    </menu>
+    <!-- Share Video end -->
+
+
+
+
+
+
+
+    <script type="text/javascript">
+
+    var analyticsObject = {"pageInformation":{"pageName":"Bus Buffers Simplify Design of Large, Noisy I<sup>2</sup>C Systems","itemId":"721a7c6f-e8ea-4460-bc57-7ce81e57ff4e","pageUrl":"https://www.analog.com/en/resources/technical-articles/bus-buffers-simplify-design-of-large-noisy-i2c-systems.html","pageCategory":"Technical Article Page","previousPageUrl":"https://www.google.com/","pageType":"Technical Article Page","isProduct":false}};
+    </script>
+    <script>
+        let userLoggedState = false;
+        try {
+            const savedAuthToken = localStorage.getItem('active-tokens');
+            if (savedAuthToken) {
+                const activeTokenObject = JSON.parse(savedAuthToken);
+                if (activeTokenObject && activeTokenObject['my'] && activeTokenObject['my']['token']) {
+                    var base64Url = activeTokenObject['my']['token'].split('.')[1]
+                    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                    var jsonPayload = decodeURIComponent(
+                        atob(base64)
+                            .split('')
+                            .map(function (c) {
+                                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                            })
+                            .join('')
+                    )
+                }
+                const decodedToken = JSON.parse(jsonPayload)
+                const currentTimestamp = Math.floor(Date.now() / 1000);
+                if (!(decodedToken.exp && currentTimestamp > decodedToken.exp)) {
+                    userLoggedState = true;
+                }
+            } else {
+                const tempAuthStatusKey = 'isAuthenticated';
+                const cookies = document.cookie.split( '; ' );
+                const cookieOptions = 'domain=.analog.com; path=/; secure;';
+	            const tempAuthStatus = cookies.find( ( cookie ) => cookie.includes( tempAuthStatusKey ) )
+                                             ?.slice( ( tempAuthStatusKey.length + 1 ) ) || null;
+        	    
+        	    // Updating 'isLoggedIn' only for the first page visit post login redirect
+        	    if ( tempAuthStatus ) {
+            		userLoggedState = tempAuthStatus === 'true';
+
+                    // Delete 'isAuthenticated' cookie
+                    document.cookie = `${tempAuthStatusKey}=; expires=${new Date().toUTCString()}; ${cookieOptions}`;
+        	    }
+        	}
+        }
+        catch (error) {
+            console.log(error)
+        }
+        const localAnalyticsObject = window.analyticsObject;
+
+        if (localAnalyticsObject && localAnalyticsObject?.pageInformation) {
+            const isPDPPage = localAnalyticsObject?.pageInformation?.isProduct || false;
+            const pageViewObject = {
+				"event": "pageview"
+			};
+
+            let commonBreadCrumb = '';
+            const breadcrumbListSections = document.querySelectorAll('.breadcrumb__container__section');
+            breadcrumbListSections?.forEach((DomElement, indexOfDomElement) => {
+                const itemText = DomElement.querySelector(".breadcrumb__container__section_item")
+                const dropdownText = DomElement.querySelector(".breadcrumb__container__section_dropdown-item")
+                let breadcrumbText = "";
+                if (itemText) {
+                    breadcrumbText = ((indexOfDomElement === 0) ? "" : (breadcrumbText + "|")) + itemText.textContent.trim();
+                } else if (dropdownText) {
+                    breadcrumbText = ((indexOfDomElement === 0) ? "" : (breadcrumbText + "|")) + dropdownText.textContent.trim();
+                } else {
+                    breadcrumbText = ((indexOfDomElement === 0) ? "" : (breadcrumbText + "|")) + DomElement.textContent.trim();
+                }
+                commonBreadCrumb = commonBreadCrumb + breadcrumbText;
+            });
+            if (isPDPPage) {
+                const productLifeCycle = document.querySelector('.recently-viewed-flag');
+                pageViewObject.productInfo = {
+                    eventName: 'Product View',
+                    productListItems: []
+                };
+                pageViewObject.productInfo.productListItems.push({
+                    productLifeCycle: productLifeCycle ? productLifeCycle.textContent.trim().toUpperCase() : '',
+                    productBreadCrumb: '',
+                    SKU: ''
+                })
+                pageViewObject.productInfo.productListItems[0].productBreadCrumb = commonBreadCrumb;
+                pageViewObject.productInfo.productListItems[0].SKU = commonBreadCrumb.split("|").reverse()[0];
+            } else {
+                pageViewObject.productInfo = {};
+            }
+            const url = localAnalyticsObject?.pageInformation?.pageUrl
+            let previousPageName = localAnalyticsObject?.pageInformation?.previousPageUrl;
+            if (previousPageName) {
+                previousPageName = previousPageName.split('.html')[0];
+                previousPageName = previousPageName.split('/').reverse()[0];
+            }
+            const category = url?.split('/');
+            category.shift();
+            category.splice(0, 2);
+            pageViewObject.pageInfo = {
+                "pageName": localAnalyticsObject?.pageInformation?.pageName,
+                "pageCategory": localAnalyticsObject?.pageInformation?.pageCategory,
+                "pageURL": localAnalyticsObject?.pageInformation?.pageUrl,
+                "pageType": localAnalyticsObject?.pageInformation?.pageType,
+                "pageBreadCrumb": commonBreadCrumb,
+                "previousPageName": previousPageName,
+                "previousPageUrl": localAnalyticsObject?.pageInformation?.previousPageUrl,
+                "pageEvents": '',
+                "siteSection1": category[1],
+                "siteSection2": category[2] ? category[2] : '',
+                "siteSection3": category[3] ? category[3] : '',
+                "siteSection4": category[4] ? category[4] : '',
+                "siteSection5": category[5] ? category[5] : '',
+                "sitecoreItemID": localAnalyticsObject?.pageInformation?.itemId
+            };
+            pageViewObject.siteInfo = {
+                "siteLanguage": category[0]
+            };
+            pageViewObject.userInfo = {
+                "userType": '',
+                "isLoggedIn": userLoggedState
+            }
+            window.adobeDataLayer = window.adobeDataLayer || [];
+            window.adobeDataLayer.push(pageViewObject);
+			window.adobeDataLayer.reverse();
+            console.log(window.adobeDataLayer);
+        }
+    </script>
+
+
+</div>
+
+            </div>
+        </div>
+    </main>
+    <!-- /#content -->
+    <!-- #footer -->
+    <footer role="contentinfo">
+        <div id="footer" class="container-fluid">
+            <div class=" row">
+                <div>
+        <adi-footer></adi-footer>
+</div>
+            </div>
+        </div>
+    </footer>
+    <!-- /#footer -->
+</div>
+<!-- /#wrapper -->
+
+
+    
+        
+
+
+    <!-- /#wrapper -->
+                <script src="https://players.brightcove.net/706011717001/AQ1ZKQZJE_default/index.min.js" defer></script>
+
+    <script src="https://assets2.analog.com/cms-assets/js/pages/scripts/common.bundle.js"></script>
+    <script src="https://assets2.analog.com/cms-assets/js/pages/scripts/rte-editor-control.bundle.js"></script>
+    <script async src="https://assets2.analog.com/cms-assets/js/legacy/scripts/legacy-plugin.bundle.js"></script>
+    <script src="https://assets2.analog.com/cms-assets/js/app.bundle.js"></script>
+    <script src="https://assets2.analog.com/lib/scripts/plugins/bootstrap-slider.min.js"></script>
+
+    <!-- Latest compiled and minified JS -->
+
+            <script src="https://assets2.analog.com/cms-assets-optimizations/js/article.min.mjs" type="module" defer></script>
+        <script src="https://assets2.analog.com/cms-assets/js/pages/scripts/productarticlepage.bundle.js"></script>
+        <script src="https://assets2.analog.com/cms-assets/js/pages/scripts/pressarticlepage.bundle.js"></script>
+
+    <script id="image-rte-modal-template" type="text/x-handlebars-template">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title" id="image-label">{{{title}}}</h4>
+        </div>
+        <div class="modal-body">
+            <ul class="control-icons">
+                <li>
+                    {{#if data_download}}
+                    <a class="downloadimagelink" href="{{data_download}}" download="{{data_download}}">
+                        <span id="downbutton" class="icon-download"></span>
+                    </a>
+                    {{else}}
+                    <a class="downloadimagelink" href="{{src}}" download="{{src}}">
+                        <span id="downbutton" class="icon-download"></span>
+                    </a>
+                    {{/if}}
+                </li>
+                <li><a class="print pull-right"><span class="icon-print"></span></a></li>
+            </ul>
+            <br />
+            <img alt="{{{title}}}" class="img-responsive" title="{{{title}}}" src="{{src}}" loading="lazy" />
+            <br />
+        </div>
+    </script>
+
+    <div class="rte-control">
+        <div class="modal fade product-modal image-rte-modal" id="image-rte-modal" tabindex="-1" role="dialog" aria-labelledby="product-modal" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content"></div>
+            </div>
+        </div>
+    </div>
+
+<script type="text/javascript"  src="/vgClI1CgJ5qoL/Nqy/o_5E0zFBsS8/k1J9w6QmLVVzJiOk/I0J6RQ/TXg/2SWZAPAs"></script></body>
+</html>
