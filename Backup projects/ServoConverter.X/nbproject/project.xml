@@ -3,7 +3,7 @@
     <type>com.microchip.mplab.nbide.embedded.makeproject</type>
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/make-project/1">
-            <name>ServoController</name>
+            <name>ServoConverter</name>
             <creation-uuid>c1185b78-15a4-4156-a895-e8bc41475fa3</creation-uuid>
             <make-project-type>0</make-project-type>
             <c-extensions>c</c-extensions>
@@ -17,7 +17,11 @@
             </sourceRootList>
             <confList>
                 <confElem>
-                    <name>Main</name>
+                    <name>2ChanRC2ChanOut</name>
+                    <type>2</type>
+                </confElem>
+                <confElem>
+                    <name>1ChanRC2ChanOut</name>
                     <type>2</type>
                 </confElem>
             </confList>
