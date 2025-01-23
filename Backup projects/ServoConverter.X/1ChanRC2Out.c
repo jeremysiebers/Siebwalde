@@ -34,12 +34,10 @@
 static void Init_Timers(void); // Initialize Timers (0)
 
 uint8_t Input1Count = 0;
-uint8_t Input2Count = 0;
 
-const uint8_t Servo11ms = 20; // no of counts equal to 1.1ms
-const uint8_t Servo15ms = 28; // no of counts equal to 1.5ms
-const uint8_t Servo19ms = 36; // no of counts equal to 1.9ms
-
+#define Servo2Low    22U // no of counts equal to 1.20ms
+#define Servo15ms    26U // no of counts equal to 1.50ms
+#define Servo2High   30U // no of counts equal to 1.70ms
 //MAIN ROUTINE/////////////////////////////////////////////////////////////////////////////////////////
 
 void main(void)
@@ -61,16 +59,25 @@ void main(void)
     {
         CLRWDT();
         
+        /* When no measurement cycle is running */
         if(T0IE == Off && TMR1ON == Off){
+            /* When channel 1 sees a high level RC pulse*/
             if(In1){
+                /* Enable Timer0 interrupt for starting sampling 
+                 * and set Timer1 On to stop the sampling after some time 
+                 * Set a pre-set Timer1 time before the next RC pulse*/
                 T0IE = On;
                 TMR1ON = On;
-                TMR1H = 0xE0;
+                TMR1H = 0xF2;
                 TMR1L = 0x00;
+                //Out1 = On;
             }
         }
+        /* When a measurement is running */
         else{
+            /* When the RC signal is low on channel 1 */
             if(!In1){
+                /* Stop timer0 interrupt to stop sampling */
                 T0IE = Off;
             }
         }
@@ -86,30 +93,28 @@ void __interrupt() isr(void) // Here the interrupt function
 {
     // Timer 1 interrupt measurement time (check first to prevent timer 0 from firing again)
     if (T1IF){
-        TMR1ON = Off;
+        /* Disable timer0 interrupts (done sampling) */
         T0IE = Off;
+        /* Stop timer 1 */
+        TMR1ON = Off;
         
         //Out1 = Off;
-        if(Input1Count < Servo11ms){
-            Out1 = Out1Led = On;
+
+        if(Input1Count <= Servo2Low){
+            Out1 = Out1Led = On;             
             Out2 = Out2Led = Off;
+            Input1Count = 0;
         }
-        if(Input1Count > Servo19ms){
+        else if(Input1Count >= Servo2High){            
+            Out1 = Out1Led = Off;             
             Out2 = Out2Led = On;
-            Out1 = Out1Led = Off;
+            Input1Count = 0;
         }
         else{
-            Out1 = Out1Led = Off;
+            Out1 = Out1Led = Off;             
             Out2 = Out2Led = Off;
+            Input1Count = 0;
         }
-//        if(Input2Count > Servo15ms){
-//            Out2 = Out2Led =On;
-//        }
-//        else{
-//            Out2 = Out2Led = Off;
-//        }
-        Input1Count = 0;
-//        Input2Count = 0;
         T1IF = 0;
         T0IF = 0;
     }
@@ -117,15 +122,15 @@ void __interrupt() isr(void) // Here the interrupt function
     // Timer 0 sample freq = 9523 Hz
     if (T0IF)
     {
+        //Out2 = On; // 38 pulses per 2ms rc servo pulse, 28 pulses == 1.5ms
+        /* When channel is high increment the sample high count */
         if(In1){
             Input1Count++;
         }
-//        if(In2){
-//            Input2Count++;
-//        }        
-        TMR0 = 0xF0;
-        //Out2 = !Out2; // 38 pulses per 2ms rc servo pulse, 28 pulses == 1.5ms
+        /* Pre-set the timer 0 for next sample */
+        TMR0 = 0xEE;        
         T0IF = 0;
+        //Out2 = Off;
     }
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -172,7 +177,3 @@ static void Init_Timers(void)
     TMR1ON = 0;
     TMR1IF = Off;
 }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//MAIN SUBROUTINES//
