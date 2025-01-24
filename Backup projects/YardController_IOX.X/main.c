@@ -210,6 +210,8 @@ void DebounceIO()
     DEBOUNCExIO(&HALL_BUSSTOP_STN , &millis);
     DEBOUNCExIO(&HALL_BUSSTOP_IND , &millis);
     DEBOUNCExIO(&HALL_STOP_FDEP   , &millis);
+    DEBOUNCExIO(&HOTRC_CH2L       , &millis);
+    DEBOUNCExIO(&HOTRC_CH2R       , &millis);
     DEBOUNCExIO(&HOTRC_CH3        , &millis);
     DEBOUNCExIO(&HOTRC_CH4        , &millis);
     DEBOUNCExIO(&HOTRC_CH5        , &millis);

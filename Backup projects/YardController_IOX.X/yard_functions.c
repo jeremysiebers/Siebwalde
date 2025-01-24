@@ -15,6 +15,7 @@
 
 // local methods
 void setLed(const YARDLED *self, LEDSTATE state);
+void setOut(const YARDOUTPUT *self, bool state);
 uint8_t computeChecksum(const YARDLED *array, size_t size);
 void updateIOX(void);
 void ExecSelectedFunction(const YARDLED *self, YARDOUTPUT *output);
@@ -75,7 +76,13 @@ void UPDATExYARDxFUNCTIONxSELECTION(void)
     }
     else if(DEBOUNCExGETxVALUExUPDATEDxSTATE(&HOTRC_CH6)){
         channel = JMP;
-    }    
+    }
+    else if(DEBOUNCExGETxVALUExUPDATEDxSTATE(&HOTRC_CH2L)){
+        setOut(&yardOutputArr[DISKL], HOTRC_CH2L.value);
+    }
+    else if(DEBOUNCExGETxVALUExUPDATEDxSTATE(&HOTRC_CH2R)){
+        setOut(&yardOutputArr[DISKR], HOTRC_CH2R.value);
+    }
     if(NOF != channel){
         // re-start the idle timer after a button press
         blinkout.tStartIdleTime = millis;
@@ -236,6 +243,11 @@ void setOut(const YARDOUTPUT *self, bool state)
 }
 #pragma optimize( "", on )
 
+
+/*
+ * updateIOX()
+ * Wrtite to the IO Expander chips 1 at a time
+ */
 void updateIOX(void){
     uint8_t updatePrev = 0;
     
@@ -262,6 +274,10 @@ void updateIOX(void){
     IOXupdater = (IOXupdater == 5) ? 0 : IOXupdater + 1;
 }
 
+/*
+ * ExecSelectedFunction(const YARDLED *led, YARDOUTPUT *output)
+ * Execute the selected function BV.
+ */
 void ExecSelectedFunction(const YARDLED *led, YARDOUTPUT *output){
     
     /* When a function is deactivated, only the rail power needs to be
@@ -271,8 +287,14 @@ void ExecSelectedFunction(const YARDLED *led, YARDOUTPUT *output){
     if(false == led->funcActivated){
         setOut(&output[led->nled], false);
         return;
+    }
+    /* Disable all other leds when switching from 1 activated BVLED to another */
+    for (uint8_t i = 0; i < ARR_SIZE(yardLedArr); i++){
+        if(yardLedArr[i].nled != led->nled){
+            yardLedArr[i].state = BLINK;
+        }
     }    
-    // turn off all BV's and Leds since a new one is going to be activated
+    // turn off all BV's since a new one is going to be activated
     executeRules(output, BVLEDZERO);
     /* Call the rule table and execute the rules */
     executeRules(output, led->nled);

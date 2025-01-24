@@ -296,8 +296,8 @@ extern "C" {
 		// PCB433 I2C_ADDRESS = 0x22
         BLK22   =   0x33,
         BLK23   =   0x34,
-		MISC3   =	0x35,
-		MISC4   =	0x36,
+		DISKL   =	0x35,
+		DISKR   =	0x36,
 		MISC5   =	0x37,
 		MISC6   =	0x38,
 		MISC7   =	0x39,
@@ -383,8 +383,8 @@ extern "C" {
         // PCB433 I2C_ADDRESS = 0x22 relay card
 		BLK22  , 0, 0, true, 0, &devices[PCB433].byteView.IOXRA, 0x1 ,
 		BLK23  , 0, 0, true, 0, &devices[PCB433].byteView.IOXRA, 0x2 ,
-		MISC3  , 0, 0, true, 0, &devices[PCB433].byteView.IOXRA, 0x4 ,
-		MISC4  , 0, 0, true, 0, &devices[PCB433].byteView.IOXRA, 0x8 ,
+		DISKL  , 0, 0, true, 0, &devices[PCB433].byteView.IOXRA, 0x4 ,
+		DISKR  , 0, 0, true, 0, &devices[PCB433].byteView.IOXRA, 0x8 ,
 		MISC5  , 0, 0, true, 0, &devices[PCB433].byteView.IOXRA, 0x10,
 		MISC6  , 0, 0, true, 0, &devices[PCB433].byteView.IOXRA, 0x20,
 		MISC7  , 0, 0, true, 0, &devices[PCB433].byteView.IOXRA, 0x40,
@@ -498,7 +498,9 @@ extern "C" {
         NEXT = 3,
         PREV = 4,
         JMP = 5,
-        ASSERT = 6,        
+        ASSERT = 6,
+//        DISKLEFT = 7,
+//        DISKRIGHT = 8,
     }CHANNEL;
     
     typedef struct{        
@@ -551,10 +553,7 @@ extern "C" {
     static const Rule bvled1Rules[] = {
         {BV1, true},
         
-        {BW1, true},
-        {BW7, false},
-        {BW10, true},
-        {BW11, true}
+        {BW1, true},        
     };
 
     static const Rule bvled2Rules[] = {
@@ -562,11 +561,7 @@ extern "C" {
         
         {BW1, false},
         {BW2, false},
-        {BW3, true},
-        {BW8, true},
-        {BW9, true},
-        {BW10, false},
-        {BW11, false}
+        {BW3, true},        
     };
     
     static const Rule bvled3Rules[] = {
@@ -575,27 +570,39 @@ extern "C" {
         {BW1, false},
         {BW2, false},
         {BW3, false},
-        {BW4, false},
-        {BW8, false},
-        {BW9, false},
-        {BW10, false},
-        {BW11, false}
+        {BW4, false},        
     };
     
     static const Rule bvled4Rules[] = {
         {BV4, true},
+        
+        {BW1, false},
+        {BW2, false},
+        {BW3, false},
+        {BW4, true},
     };
     
     static const Rule bvled5Rules[] = {
         {BV5, true},
+        
+        {BW1, false},
+        {BW2, true},
+        {BW5, false},
     };
     
     static const Rule bvled6Rules[] = {
         {BV6, true},
+        
+        {BW1, false},
+        {BW2, true},
+        {BW5, true},
+        {BW6, false},
     };
     
     static const Rule bvled7Rules[] = {
         {BV7, true},
+        
+        {BW6, true},
     };
     
     static const Rule bvled8Rules[] = {

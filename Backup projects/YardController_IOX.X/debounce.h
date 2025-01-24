@@ -66,14 +66,16 @@ typedef struct
 }DEBOUNCE;
 
 /* PORTF */
-DEBOUNCE HALL_BUSSTOP_STN = {tHallSignalDebounceTime, 0, 0, 0, &PORTJ, 0x1,  0,  false,  true};
-DEBOUNCE HALL_BUSSTOP_IND = {tHallSignalDebounceTime, 0, 0, 0, &PORTJ, 0x2,  0,  false,  true};
-DEBOUNCE HALL_STOP_FDEP   = {tHallSignalDebounceTime, 0, 0, 0, &PORTJ, 0x4,  0,  false,  true};
+DEBOUNCE HALL_BUSSTOP_STN = {tHallSignalDebounceTime, 0, 0, 0, &PORTJ, 0x1,  0, 0,  false,  true};
+DEBOUNCE HALL_BUSSTOP_IND = {tHallSignalDebounceTime, 0, 0, 0, &PORTJ, 0x2,  0, 0,  false,  true};
+DEBOUNCE HALL_STOP_FDEP   = {tHallSignalDebounceTime, 0, 0, 0, &PORTJ, 0x4,  0, 0,  false,  true};
 
-DEBOUNCE HOTRC_CH3        = {tHallSignalDebounceTime, 0, 0, 0, &PORTH, 0x10, 0,  false,  true};
-DEBOUNCE HOTRC_CH4        = {tHallSignalDebounceTime, 0, 0, 0, &PORTH, 0x20, 0,  false,  true};
-DEBOUNCE HOTRC_CH5        = {tHallSignalDebounceTime, 0, 0, 0, &PORTH, 0x40, 0,  false,  true};
-DEBOUNCE HOTRC_CH6        = {tHallSignalDebounceTime, 0, 0, 0, &PORTH, 0x80, 0,  false,  true};
+DEBOUNCE HOTRC_CH2R       = {tHallSignalDebounceTime, 0, 0, 0, &PORTH, 0x04, 0, 0,  true,  true};
+DEBOUNCE HOTRC_CH2L       = {tHallSignalDebounceTime, 0, 0, 0, &PORTH, 0x08, 0, 0,  true,  true};
+DEBOUNCE HOTRC_CH3        = {tHallSignalDebounceTime, 0, 0, 0, &PORTH, 0x10, 0, 0,  false,  true};
+DEBOUNCE HOTRC_CH4        = {tHallSignalDebounceTime, 0, 0, 0, &PORTH, 0x20, 0, 0,  false,  true};
+DEBOUNCE HOTRC_CH5        = {tHallSignalDebounceTime, 0, 0, 0, &PORTH, 0x40, 0, 0,  false,  true};
+DEBOUNCE HOTRC_CH6        = {tHallSignalDebounceTime, 0, 0, 0, &PORTH, 0x80, 0, 0,  false,  true};
 /**
   @Summary
     Debounces an input that is given
