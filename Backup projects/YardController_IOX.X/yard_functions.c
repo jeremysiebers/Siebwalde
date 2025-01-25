@@ -13,6 +13,8 @@
 #include "mcp23017.h"
 #include "yard_functions.h"
 
+#define unusedBV 4U
+
 // local methods
 void setLed(const YARDLED *self, LEDSTATE state);
 void setOut(const YARDOUTPUT *self, bool state);
@@ -78,10 +80,18 @@ void UPDATExYARDxFUNCTIONxSELECTION(void)
         channel = JMP;
     }
     else if(DEBOUNCExGETxVALUExUPDATEDxSTATE(&HOTRC_CH2L)){
-        setOut(&yardOutputArr[DISKL], HOTRC_CH2L.value);
+        if(HOTRC_CH2L.value){
+            setOut(&yardOutputArr[DISKL], true);
+            setOut(&yardOutputArr[DISKR], true);
+        }
+        setOut(&yardOutputArr[DISKC], HOTRC_CH2L.value);
     }
     else if(DEBOUNCExGETxVALUExUPDATEDxSTATE(&HOTRC_CH2R)){
-        setOut(&yardOutputArr[DISKR], HOTRC_CH2R.value);
+        if(HOTRC_CH2R.value){
+            setOut(&yardOutputArr[DISKL], false);
+            setOut(&yardOutputArr[DISKR], false);
+        }
+        setOut(&yardOutputArr[DISKC], HOTRC_CH2R.value);
     }
     if(NOF != channel){
         // re-start the idle timer after a button press
@@ -114,7 +124,7 @@ void UPDATExYARDxFUNCTIONxSELECTION(void)
         switch (channel){
             case NEXT:
             {
-                if(ARR_MAX_ELEM(yardLedArr) == selector){
+                if((ARR_MAX_ELEM(yardLedArr) - unusedBV) == selector){
                    selector = 0; 
                 }
                 else{
@@ -128,7 +138,7 @@ void UPDATExYARDxFUNCTIONxSELECTION(void)
             case PREV:
             {
                 if(0 == selector){
-                    selector = ARR_MAX_ELEM(yardLedArr);
+                    selector = (ARR_MAX_ELEM(yardLedArr) - unusedBV);
                 }
                 else{
                     selector--;
@@ -140,8 +150,8 @@ void UPDATExYARDxFUNCTIONxSELECTION(void)
 
             case JMP:
             {
-                if((selector + 10) >(ARR_MAX_ELEM(yardLedArr))){
-                    uint8_t delta = ARR_MAX_ELEM(yardLedArr) - selector;
+                if((selector + 10) >(ARR_MAX_ELEM(yardLedArr) - unusedBV)){
+                    uint8_t delta = (ARR_MAX_ELEM(yardLedArr) - unusedBV) - selector;
                     selector = 10 - delta;
                 }
                 else{
