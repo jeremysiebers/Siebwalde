@@ -76,6 +76,8 @@ DEBOUNCE HOTRC_CH3        = {tHallSignalDebounceTime, 0, 0, 0, &PORTH, 0x10, 0, 
 DEBOUNCE HOTRC_CH4        = {tHallSignalDebounceTime, 0, 0, 0, &PORTH, 0x20, 0, 0,  false,  true};
 DEBOUNCE HOTRC_CH5        = {tHallSignalDebounceTime, 0, 0, 0, &PORTH, 0x40, 0, 0,  false,  true};
 DEBOUNCE HOTRC_CH6        = {tHallSignalDebounceTime, 0, 0, 0, &PORTH, 0x80, 0, 0,  false,  true};
+
+DEBOUNCE RESET_IOX        = {tIoSignalDebounceTime,   0, 0, 0, &PORTB, 0x1,  0, 0,  false,  true};
 /**
   @Summary
     Debounces an input that is given

@@ -215,7 +215,8 @@ void DebounceIO()
     DEBOUNCExIO(&HOTRC_CH3        , &millis);
     DEBOUNCExIO(&HOTRC_CH4        , &millis);
     DEBOUNCExIO(&HOTRC_CH5        , &millis);
-    DEBOUNCExIO(&HOTRC_CH6        , &millis);    
+    DEBOUNCExIO(&HOTRC_CH6        , &millis);
+    DEBOUNCExIO(&RESET_IOX        , &millis);
     //TP3_SetLow();
     
 }

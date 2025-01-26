@@ -13,7 +13,7 @@
 #include "mcp23017.h"
 #include "yard_functions.h"
 
-#define unusedBV 4U
+#define unusedBV 2U /* Unused outputs */
 
 // local methods
 void setLed(const YARDLED *self, LEDSTATE state);
@@ -81,18 +81,23 @@ void UPDATExYARDxFUNCTIONxSELECTION(void)
     }
     else if(DEBOUNCExGETxVALUExUPDATEDxSTATE(&HOTRC_CH2L)){
         if(HOTRC_CH2L.value){
-            setOut(&yardOutputArr[DISKL], true);
-            setOut(&yardOutputArr[DISKR], true);
+            setOut(&yardOutputArr[DISKL], false);
+            setOut(&yardOutputArr[DISKR], false);
         }
         setOut(&yardOutputArr[DISKC], HOTRC_CH2L.value);
     }
     else if(DEBOUNCExGETxVALUExUPDATEDxSTATE(&HOTRC_CH2R)){
         if(HOTRC_CH2R.value){
-            setOut(&yardOutputArr[DISKL], false);
-            setOut(&yardOutputArr[DISKR], false);
+            setOut(&yardOutputArr[DISKL], true);
+            setOut(&yardOutputArr[DISKR], true);
         }
         setOut(&yardOutputArr[DISKC], HOTRC_CH2R.value);
     }
+    else if(DEBOUNCExGETxVALUExUPDATEDxSTATE(&RESET_IOX)){
+        INITxYARDxFUNCTION();
+        return;
+    }
+    
     if(NOF != channel){
         // re-start the idle timer after a button press
         blinkout.tStartIdleTime = millis;
@@ -292,15 +297,34 @@ void ExecSelectedFunction(const YARDLED *led, YARDOUTPUT *output){
     
     /* When a function is deactivated, only the rail power needs to be
      * disabled. This assumes the first 29 leds to map to the first
-     * 29 BV's!!!
+     * 29 BV's!!! Filter out those who should be handled diff!!
      */
     if(false == led->funcActivated){
-        setOut(&output[led->nled], false);
+        if(BVLED27 == led->nled){
+            // Crane function, stop function, invert crane direction
+            setOut(&output[CRENA], false);
+//            if(false == output[CRDIR].value){
+//                output[CRDIR].value = true;
+//            }
+            
+            output[CRDIR].value = !output[CRDIR].value;
+            setOut(&output[CRDIR], output[CRDIR].value);
+        }
+        else{
+            // BV functions
+            setOut(&output[led->nled], false);
+        }
         return;
     }
-    /* Disable all other leds when switching from 1 activated BVLED to another */
-    for (uint8_t i = 0; i < ARR_SIZE(yardLedArr); i++){
-        if(yardLedArr[i].nled != led->nled){
+    /* Activate function */
+    /* Disable all other leds when switching from 1 activated BVLED to another 
+     * Filter out those who should not be touched
+     */
+    for (uint8_t i = 0; i < (ARR_SIZE(yardLedArr)); i++){
+        if(BVLED27 == yardLedArr[i].nled){
+            // Crane function do not touch!            
+        }
+        else if(yardLedArr[i].nled != led->nled){
             yardLedArr[i].state = BLINK;
         }
     }    

@@ -293,12 +293,12 @@ extern "C" {
 		BW17  	=	0x30,
 		BW18  	=	0x31,
 		BW19  	=	0x32,
-		// PCB433 I2C_ADDRESS = 0x22
+		// PCB433 I2C_ADDRESS = 0x22 (MISC))
         BLK22   =   0x33,
         BLK23   =   0x34,
 		DISKC   =	0x35,
-		MISC4   =	0x36,
-		MISC5   =	0x37,
+		CRENA   =	0x36,
+		CRDIR   =	0x37,
 		DISKL   =	0x38,
 		DISKR   =	0x39,
 		MISC8   =	0x3A,
@@ -384,8 +384,8 @@ extern "C" {
 		BLK22  , 0, 0, true, 0, &devices[PCB433].byteView.IOXRA, 0x1 ,
 		BLK23  , 0, 0, true, 0, &devices[PCB433].byteView.IOXRA, 0x2 ,
 		DISKC  , 0, 0, true, 0, &devices[PCB433].byteView.IOXRA, 0x4 ,
-		MISC4  , 0, 0, true, 0, &devices[PCB433].byteView.IOXRA, 0x8 ,
-		MISC5  , 0, 0, true, 0, &devices[PCB433].byteView.IOXRA, 0x10,
+		CRENA  , 0, 0, true, 0, &devices[PCB433].byteView.IOXRA, 0x8 ,
+		CRDIR  , 0, 0, true, 0, &devices[PCB433].byteView.IOXRA, 0x10,
 		DISKL  , 0, 0, true, 0, &devices[PCB433].byteView.IOXRA, 0x20,
 		DISKR  , 0, 0, true, 0, &devices[PCB433].byteView.IOXRA, 0x40,
 		MISC8  , 0, 0, true, 0, &devices[PCB433].byteView.IOXRA, 0x80,
@@ -427,12 +427,12 @@ extern "C" {
 		BVLED22 =	0x15,
 		BVLED23 =	0x16,
 		BVLED24 =	0x17,
-		BVLED25 =	0x18,                
-		BVLED26 =	0x19,
-		BVLED27 =	0x1A,
-		BVLED28 =	0x1B,
-		BVLED29 =	0x1C,
-        BVLEDZERO = 0x1D,
+		BVLED25 =	0x18, // Rotate Disk               
+		BVLED26 =	0x19, // Crane
+		BVLED27 =	0x1A, // Spare
+		BVLED28 =	0x1B, // Spare
+		BVLED29 =	0x1C, // Spare
+        BVLEDZERO = 0x1D, // Reset all
                 
     }YARD_LEDS;
     
@@ -517,38 +517,6 @@ extern "C" {
         int outputIndex; // Index of the output to be set (e.g., BVx, BWx)
         bool state;      // Desired state (true/false)
     } Rule;
-    
-    static const Rule bvResetZero[] = {
-        {BV1, false},
-        {BV2, false},
-        {BV3, false},
-        {BV4, false},
-        {BV5, false},
-        {BV6, false},
-        {BV7, false},
-        {BV8, false},
-        {BV9, false},
-        {BV10, false},
-        {BV11, false},
-        {BV12, false},
-        {BV13, false},
-        {BV14, false},
-        {BV15, false},
-        {BV16, false},
-        {BV17, false},
-        {BV18, false},
-        {BV19, false},
-        {BV20, false},
-        {BV21, false},
-        {BV22, false},
-        {BV23, false},
-        {BV24, false},
-        {BV25, false},
-        {BV26, false},
-        {BV27, false},
-        {BV28, false},
-        {BV29, false},        
-    };
     
     static const Rule bvled1Rules[] = {
         {BV1, true},
@@ -751,23 +719,55 @@ extern "C" {
     };
     
     static const Rule bvled25Rules[] = {
-        {BV25, true},
+        {BV25, true}, 
     };
     
     static const Rule bvled26Rules[] = {
-        {BV26, true},
+        {BV26, true}, // Rotate disk power
     };
     
     static const Rule bvled27Rules[] = {
-        {BV27, true},
+        {CRENA, true}, // Yard Crane
     };
     
     static const Rule bvled28Rules[] = {
-        {BV28, true},
+        {BV28, true}, // Spare
     };
     
     static const Rule bvled29Rules[] = {
-        {BV29, true},
+        {BV29, true}, // Spare
+    };
+    
+    static const Rule bvResetZero[] = {
+        {BV1, false},
+        {BV2, false},
+        {BV3, false},
+        {BV4, false},
+        {BV5, false},
+        {BV6, false},
+        {BV7, false},
+        {BV8, false},
+        {BV9, false},
+        {BV10, false},
+        {BV11, false},
+        {BV12, false},
+        {BV13, false},
+        {BV14, false},
+        {BV15, false},
+        {BV16, false},
+        {BV17, false},
+        {BV18, false},
+        {BV19, false},
+        {BV20, false},
+        {BV21, false},
+        {BV22, false},
+        {BV23, false},
+        {BV24, false},
+        {BV25, false},
+        {BV26, false},
+        {BV27, false},
+        {BV28, false},
+        {BV29, false},        
     };
             
     typedef struct {
