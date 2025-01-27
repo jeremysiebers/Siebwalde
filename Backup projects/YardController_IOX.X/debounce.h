@@ -44,9 +44,10 @@ extern "C" {
 // TODO Insert declarations
 
 /* Debounce Delay time in y * 1_ms(timer interrupt time) */
-const uint32_t  tIoSignalDebounceTime   = (uint32_t)(200);
-const uint32_t  tBlkOutDebounceTime     = (uint32_t)(2000);
-const uint32_t  tHallSignalDebounceTime = (uint32_t)(5);
+const uint32_t  tIoSignalDebounceTime   = (uint16_t)(200);
+const uint32_t  tBlkOutDebounceTime     = (uint16_t)(2000);
+const uint32_t  tHallSignalDebounceTime = (uint16_t)(5);
+const uint32_t  tChan6DebounceTime      = (uint16_t)(100);
 /*
  * Debounce struct
 */
@@ -65,18 +66,18 @@ typedef struct
     
 }DEBOUNCE;
 
-/* PORTF */
+/* PORTJ */
 DEBOUNCE HALL_BUSSTOP_STN = {tHallSignalDebounceTime, 0, 0, 0, &PORTJ, 0x1,  0, 0,  false,  true};
 DEBOUNCE HALL_BUSSTOP_IND = {tHallSignalDebounceTime, 0, 0, 0, &PORTJ, 0x2,  0, 0,  false,  true};
 DEBOUNCE HALL_STOP_FDEP   = {tHallSignalDebounceTime, 0, 0, 0, &PORTJ, 0x4,  0, 0,  false,  true};
-
+/* PORTH */
 DEBOUNCE HOTRC_CH2R       = {tHallSignalDebounceTime, 0, 0, 0, &PORTH, 0x04, 0, 0,  true,  true};
 DEBOUNCE HOTRC_CH2L       = {tHallSignalDebounceTime, 0, 0, 0, &PORTH, 0x08, 0, 0,  true,  true};
-DEBOUNCE HOTRC_CH3        = {tHallSignalDebounceTime, 0, 0, 0, &PORTH, 0x10, 0, 0,  false,  true};
-DEBOUNCE HOTRC_CH4        = {tHallSignalDebounceTime, 0, 0, 0, &PORTH, 0x20, 0, 0,  false,  true};
-DEBOUNCE HOTRC_CH5        = {tHallSignalDebounceTime, 0, 0, 0, &PORTH, 0x40, 0, 0,  false,  true};
+DEBOUNCE HOTRC_CH3        = {tHallSignalDebounceTime, 0, 0, 0, &PORTH, 0x10, 0, 0,  true,  true};
+DEBOUNCE HOTRC_CH4        = {tHallSignalDebounceTime, 0, 0, 0, &PORTH, 0x20, 0, 0,  true,  true};
+DEBOUNCE HOTRC_CH5        = {tHallSignalDebounceTime, 0, 0, 0, &PORTH, 0x40, 0, 0,  true,  true};
 DEBOUNCE HOTRC_CH6        = {tHallSignalDebounceTime, 0, 0, 0, &PORTH, 0x80, 0, 0,  false,  true};
-
+/* PORTB */
 DEBOUNCE RESET_IOX        = {tIoSignalDebounceTime,   0, 0, 0, &PORTB, 0x1,  0, 0,  false,  true};
 /**
   @Summary

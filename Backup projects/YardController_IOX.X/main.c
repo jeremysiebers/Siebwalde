@@ -62,7 +62,7 @@ void main(void)
         EXT_WDT_Toggle();
         
         //TP4_SetHigh();
-        #ifndef SIMULATOR
+        #ifndef DEBUG
         PROCESSxETHxDATA();
         #endif        
         //TP4_SetLow();

@@ -13,9 +13,11 @@
 #include "mcp23017.h"
 #include "yard_functions.h"
 
+#define jumpSize 4
 #define unusedBV 2U /* Unused outputs */
 
 // local methods
+bool ResetHelperFunction(void);
 void setLed(const YARDLED *self, LEDSTATE state);
 void setOut(const YARDOUTPUT *self, bool state);
 uint8_t computeChecksum(const YARDLED *array, size_t size);
@@ -29,20 +31,22 @@ static IOXDATA  prevIOX[6];
 static uint32_t tStartIOXTime;
 static uint32_t tWaitIOXTime;
 static uint8_t  IOXupdater      = 0;
+static uint8_t  resetSequencer  = 0;
 
 void INITxYARDxFUNCTION(void){
-   IOX_RESET_SetLow();
-   IOX_RESET_SetHigh();
-   //#ifndef SIMULATOR
+    while(ResetHelperFunction());
+   #ifndef DEBUG
    MCP23017xInit(devices, 6); // Initialize 6 MCP23017 devices
-   //#endif
+   #endif
    
    // Init the blinkout struct (static) hence cannot use compile time values
    blinkout.idle = true;
    blinkout.tStartBlinkTime = GETxMILLIS();
    blinkout.tStartIdleTime  = GETxMILLIS();
+   blinkout.tStartResetTime = GETxMILLIS();
    blinkout.tWaitBlinkTime  = tLedBlinkTime;
    blinkout.tWaitIdleTime   = tIdleTimeOut;
+   blinkout.tWaitResetTime  = tIOXReset;
    
    // Init the IOX update time
    tStartIOXTime = GETxMILLIS();
@@ -55,6 +59,51 @@ void INITxYARDxFUNCTION(void){
             prevIOX[i].IOXRB = devices[i].byteView.IOXRB;
         }
     }
+}
+
+/*
+ * Reset the IOX devices for first init or reset to recover from I2C issue
+ */
+
+bool ResetHelperFunction(void){
+    bool busy = true;
+    
+    switch(resetSequencer){
+        case 0:{
+            /* Store the latest data to go out */
+            IOX_RESET_SetLow();
+            blinkout.tStartResetTime = GETxMILLIS();
+            resetSequencer++;
+        }
+        break;
+        
+        case 1:{
+            if((GETxMILLIS() - blinkout.tStartResetTime) > blinkout.tWaitResetTime){
+                IOX_RESET_SetHigh();
+                resetSequencer++;
+            }
+        }
+        break;
+                
+        case 2:{
+            #ifndef DEBUG
+            MCP23017xInit(devices, 6); // Initialize 6 MCP23017 devices
+            #endif
+            
+            /* Reset the previous data so outputs are re-written */
+            for(uint8_t i=0; i<6; i++){
+                prevIOX[i].IOXRA = 0;
+                prevIOX[i].IOXRB = 0;
+            }            
+            resetSequencer = 0;
+            busy = false;
+        }
+        break;
+                
+        default: break;
+        
+    }
+    return(busy);
 }
 
 void UPDATExYARDxFUNCTIONxSELECTION(void) 
@@ -76,30 +125,32 @@ void UPDATExYARDxFUNCTIONxSELECTION(void)
     else if(DEBOUNCExGETxVALUExUPDATEDxSTATE(&HOTRC_CH5)){
         channel = ASSERT;
     }
-    else if(DEBOUNCExGETxVALUExUPDATEDxSTATE(&HOTRC_CH6)){
+    else if(HOTRC_CH6.value){ /* Channel pulses one 1 press 0-1-0 */
+        HOTRC_CH6.value = false; /* Reset the value for next press */
         channel = JMP;
     }
-    else if(DEBOUNCExGETxVALUExUPDATEDxSTATE(&HOTRC_CH2L)){
+    else if(DEBOUNCExGETxVALUExUPDATEDxSTATE(&HOTRC_CH2L)){ /* Rotate disk */
         if(HOTRC_CH2L.value){
             setOut(&yardOutputArr[DISKL], false);
             setOut(&yardOutputArr[DISKR], false);
         }
         setOut(&yardOutputArr[DISKC], HOTRC_CH2L.value);
     }
-    else if(DEBOUNCExGETxVALUExUPDATEDxSTATE(&HOTRC_CH2R)){
+    else if(DEBOUNCExGETxVALUExUPDATEDxSTATE(&HOTRC_CH2R)){ /* Rotate disk */
         if(HOTRC_CH2R.value){
             setOut(&yardOutputArr[DISKL], true);
             setOut(&yardOutputArr[DISKR], true);
         }
         setOut(&yardOutputArr[DISKC], HOTRC_CH2R.value);
     }
-    else if(DEBOUNCExGETxVALUExUPDATEDxSTATE(&RESET_IOX)){
-        INITxYARDxFUNCTION();
+    else if(RESET_IOX.value){ /* Check if a reset sequence is required for IOX I2C recovery */
+        RESET_IOX.value = ResetHelperFunction();
         return;
     }
-    
+
+    /* Check if button is pressed */
     if(NOF != channel){
-        // re-start the idle timer after a button press
+        // re-start the idle timer when button is pressed
         blinkout.tStartIdleTime = millis;
     }
 
@@ -155,14 +206,14 @@ void UPDATExYARDxFUNCTIONxSELECTION(void)
 
             case JMP:
             {
-                if((selector + 10) >(ARR_MAX_ELEM(yardLedArr) - unusedBV)){
+                if((selector + jumpSize) >(ARR_MAX_ELEM(yardLedArr) - unusedBV)){
                     uint8_t delta = (ARR_MAX_ELEM(yardLedArr) - unusedBV) - selector;
-                    selector = 10 - delta;
+                    selector = jumpSize - delta;
                 }
                 else{
-                    selector+=10;
+                    selector += jumpSize;
                 }
-                // Jump 10 functions
+                // Jump JUMPSIZE functions
                 led = &yardLedArr[selector];
             }
                 break;
@@ -205,7 +256,6 @@ void UPDATExYARDxFUNCTIONxSELECTION(void)
     
     /* Check the current state of the device IOX var to the previous */
     for(uint8_t i=0; i<6; i++){
-        //led->state = (led->funcActivated) ? ON : BLINK;
         prevIOX[i].IOXRAupdate = 
                 (prevIOX[i].IOXRA == devices[i].byteView.IOXRA) 
                 ? false : true;
