@@ -26,45 +26,38 @@ void ExecSelectedFunction(const YARDLED *self, YARDOUTPUT *output);
 void executeRules(YARDOUTPUT *output, YARD_LEDS led);
 
 static uint8_t  selector        = 0;
-static BLINKOUT blinkout;
+static uint8_t  jmpSelector     = 3;
+static TIMERS   timers;
 static IOXDATA  prevIOX[6];
-static uint32_t tStartIOXTime;
-static uint32_t tWaitIOXTime;
 static uint8_t  IOXupdater      = 0;
 static uint8_t  resetSequencer  = 0;
 
+/*
+ * INITxYARDxFUNCTION()
+ * The main Yard updater init function called by main program
+ */
 void INITxYARDxFUNCTION(void){
+    /* Call the reset function */
     while(ResetHelperFunction());
-   #ifndef DEBUG
-   MCP23017xInit(devices, 6); // Initialize 6 MCP23017 devices
-   #endif
    
+    /* Get one time the actual time */
+    uint32_t millis = GETxMILLIS();
+    
    // Init the blinkout struct (static) hence cannot use compile time values
-   blinkout.idle = true;
-   blinkout.tStartBlinkTime = GETxMILLIS();
-   blinkout.tStartIdleTime  = GETxMILLIS();
-   blinkout.tStartResetTime = GETxMILLIS();
-   blinkout.tWaitBlinkTime  = tLedBlinkTime;
-   blinkout.tWaitIdleTime   = tIdleTimeOut;
-   blinkout.tWaitResetTime  = tIOXReset;
-   
-   // Init the IOX update time
-   tStartIOXTime = GETxMILLIS();
-   tWaitIOXTime = tIOXTimeOut;
-   
-   /* Store the current state of the device IOX var */
-    {
-        for(uint8_t i=0; i<6; i++){
-            prevIOX[i].IOXRA = devices[i].byteView.IOXRA;
-            prevIOX[i].IOXRB = devices[i].byteView.IOXRB;
-        }
-    }
+   timers.idle = true;
+   timers.tStartBlinkTime = millis;
+   timers.tStartIdleTime  = millis;
+   timers.tStartResetTime = millis;
+   timers.tStartIOXTime   = millis;
+   timers.tWaitBlinkTime  = tLedBlinkTime;
+   timers.tWaitIdleTime   = tIdleTimeOut;
+   timers.tWaitResetTime  = tIOXReset;
+   timers.tWaitIOXTime    = tIOXTimeOut;
 }
 
 /*
  * Reset the IOX devices for first init or reset to recover from I2C issue
  */
-
 bool ResetHelperFunction(void){
     bool busy = true;
     
@@ -72,15 +65,15 @@ bool ResetHelperFunction(void){
         case 0:{
             /* Store the latest data to go out */
             IOX_RESET_SetLow();
-            blinkout.tStartResetTime = GETxMILLIS();
-            resetSequencer++;
+            timers.tStartResetTime = GETxMILLIS();
+            resetSequencer = 1;
         }
         break;
         
         case 1:{
-            if((GETxMILLIS() - blinkout.tStartResetTime) > blinkout.tWaitResetTime){
+            if((GETxMILLIS() - timers.tStartResetTime) > timers.tWaitResetTime){
                 IOX_RESET_SetHigh();
-                resetSequencer++;
+                resetSequencer = 2;
             }
         }
         break;
@@ -94,18 +87,35 @@ bool ResetHelperFunction(void){
             for(uint8_t i=0; i<6; i++){
                 prevIOX[i].IOXRA = 0;
                 prevIOX[i].IOXRB = 0;
-            }            
+            }
+            
+            /* 
+             * Initialize functions that need to be enabled and active from the 
+             * beginning.
+             */
+            YARDLED* led = &yardLedArr[BVLED7];
+            led->funcActivated = true;
+            led->state = ON;
+            setLed(led, ON);
+            led = &yardLedArr[BVLED25];
+            led->funcActivated = true;
+            led->state = ON;
+            setLed(led, ON);
+            executeRules(yardOutputArr, BVLEDINIT); 
+            
             resetSequencer = 0;
             busy = false;
         }
         break;
                 
-        default: break;
-        
+        default: break;        
     }
     return(busy);
 }
-
+/*
+ * UPDATExYARDxFUNCTIONxSELECTION()
+ * The main Yard updater function called by main program
+ */
 void UPDATExYARDxFUNCTIONxSELECTION(void) 
 {
     // Set the default channel state
@@ -143,7 +153,8 @@ void UPDATExYARDxFUNCTIONxSELECTION(void)
         }
         setOut(&yardOutputArr[DISKC], HOTRC_CH2R.value);
     }
-    else if(RESET_IOX.value){ /* Check if a reset sequence is required for IOX I2C recovery */
+    /* Check if a reset sequence is required for manual IOX I2C recovery */
+    else if(RESET_IOX.value){ 
         RESET_IOX.value = ResetHelperFunction();
         return;
     }
@@ -151,11 +162,11 @@ void UPDATExYARDxFUNCTIONxSELECTION(void)
     /* Check if button is pressed */
     if(NOF != channel){
         // re-start the idle timer when button is pressed
-        blinkout.tStartIdleTime = millis;
+        timers.tStartIdleTime = millis;
     }
 
     // Show the last selected function and do nothing
-    if(NOF != channel && blinkout.idle){ 
+    if(NOF != channel && timers.idle){ 
         if(led->funcActivated){
             led->state = ON;
         }
@@ -165,9 +176,9 @@ void UPDATExYARDxFUNCTIONxSELECTION(void)
         // Set the led on(true) if state is BLINK it will blink automatically
         setLed(led, ON);
         // We are not idle anymore
-        blinkout.idle           = false;
+        timers.idle           = false;
         // Start the idle countdown timer
-        blinkout.tStartIdleTime = millis;
+        timers.tStartIdleTime = millis;
     }
     else{
         /* Check if a "next" button was pressed, turn off the current selected 
@@ -183,12 +194,9 @@ void UPDATExYARDxFUNCTIONxSELECTION(void)
                 if((ARR_MAX_ELEM(yardLedArr) - unusedBV) == selector){
                    selector = 0; 
                 }
-                else{
-                    selector++;            
-                }
+                else{ selector++; }
                 // Point to next function
-                led = &yardLedArr[selector];
-            }
+                led = &yardLedArr[selector];}
                 break;
 
             case PREV:
@@ -196,65 +204,76 @@ void UPDATExYARDxFUNCTIONxSELECTION(void)
                 if(0 == selector){
                     selector = (ARR_MAX_ELEM(yardLedArr) - unusedBV);
                 }
-                else{
-                    selector--;
-                }
+                else{ selector--; }
                 // Point to previous function
-                led = &yardLedArr[selector];
-            }
+                led = &yardLedArr[selector];}
                 break;
 
             case JMP:
             {
-                if((selector + jumpSize) >(ARR_MAX_ELEM(yardLedArr) - unusedBV)){
-                    uint8_t delta = (ARR_MAX_ELEM(yardLedArr) - unusedBV) - selector;
-                    selector = jumpSize - delta;
-                }
-                else{
-                    selector += jumpSize;
-                }
+                // <editor-fold defaultstate="collapsed">
+//                if((selector + jumpSize) >(ARR_MAX_ELEM(yardLedArr) - unusedBV)){
+//                    uint8_t delta = (ARR_MAX_ELEM(yardLedArr) - unusedBV) - selector;
+//                    selector = jumpSize - delta;
+//                }
+//                else{
+//                    selector += jumpSize;
+//                }                
                 // Jump JUMPSIZE functions
-                led = &yardLedArr[selector];
+                // </editor-fold>
+                // Jump fixed groups
+                
+                led = &yardLedArr[jmpSelector];
+                if(3 == jmpSelector){
+                    jmpSelector = 11;
+                }
+                else if(11 == jmpSelector){
+                    jmpSelector = 22;
+                }
+                else if(22 == jmpSelector){
+                    jmpSelector = 3;
+                }
             }
                 break;
 
             case ASSERT:
             {
+                // Toggle the function activated state
                 led->funcActivated = !led->funcActivated;
                 // led shall show the state
                 led->state = (led->funcActivated) ? ON : BLINK;
-                blinkout.tStartIdleTime = millis;
+                // restart the idle timeout counter
+                timers.tStartIdleTime = millis;
+                // Execute the selected led function
                 ExecSelectedFunction(led, yardOutputArr);
             }
                 break;
-
             default:
                 break;
         }
     }
     
-    // check if the function is on or off, when off the led needs to blink
+    // check if the function is on, off or blink
     if(BLINK == led->state){
-        if((millis - blinkout.tStartBlinkTime) > blinkout.tWaitBlinkTime){
-            blinkout.tStartBlinkTime = millis;
+        if((millis - timers.tStartBlinkTime) > timers.tWaitBlinkTime){
+            timers.tStartBlinkTime = millis;
             setLed(led, TOGGLE);
         }
     }
     else if(ON == led->state){
         setLed(led, ON);
     }
-    else{
-        setLed(led, OFF);
-    }
+    else{ setLed(led, OFF); }
     
     // Handle the idle timeout when not idle
-    if((millis - blinkout.tStartIdleTime) > blinkout.tWaitIdleTime && !blinkout.idle){
+    if((millis - timers.tStartIdleTime) > timers.tWaitIdleTime && !timers.idle){
             led->state = OFF;
-            blinkout.idle = true;
-    }
+            timers.idle = true;
+    }    
     
-    
-    /* Check the current state of the device IOX var to the previous */
+    /* 
+     * Check the current state of the device IOX var to the previous
+     */
     for(uint8_t i=0; i<6; i++){
         prevIOX[i].IOXRAupdate = 
                 (prevIOX[i].IOXRA == devices[i].byteView.IOXRA) 
@@ -265,26 +284,25 @@ void UPDATExYARDxFUNCTIONxSELECTION(void)
                 ? false : true;
     }
     
-    /* Activate only 1 IOX port per tWaitIOXTime */
-    if((millis - tStartIOXTime) > tWaitIOXTime){
+    /* Update only 1 IOX chip per tWaitIOXTime */
+    if((millis - timers.tStartIOXTime) > timers.tWaitIOXTime){
         /* Check if an update to a IOX is needed */
         updateIOX();
         /* start the timer for next check */
-        tStartIOXTime = millis;
+        timers.tStartIOXTime = millis;
     }
 }
 
 #pragma optimize( "", off )
+/*
+ * setLed(const YARDLED *self, LEDSTATE state)
+ * Sets the led state of the passed led to ON or Off
+ * Write the IOX var that will be send by the updateIOX()
+ */
 void setLed(const YARDLED *self, LEDSTATE state)
 {
     if (TOGGLE == state){
-        state = (*self->portx_ptr & self->pin_mask) ? OFF : ON; // Determine new state
-//        if((*self->portx_ptr & self->pin_mask) != 0){
-//            state = OFF;
-//        }
-//        else{
-//            state = ON;
-//        }
+        state = (*self->portx_ptr & self->pin_mask) ? OFF : ON;
     }
     if(ON == state){
         *self->portx_ptr |= self->pin_mask;
@@ -293,7 +311,12 @@ void setLed(const YARDLED *self, LEDSTATE state)
         *self->portx_ptr &= !self->pin_mask;
     }
 }
-
+/*
+ * setOut(const YARDOUTPUT *self, bool state)
+ * Sets the output state of the passed output to ON or Off
+ * taking into account if the output is active high or low
+ * Write the IOX var that will be send by the updateIOX()
+ */
 void setOut(const YARDOUTPUT *self, bool state)
 {
     if (self->invertedLevel) {
@@ -301,9 +324,9 @@ void setOut(const YARDOUTPUT *self, bool state)
     }
 
     if (state) {
-        *self->portx_ptr |= self->pin_mask; // Set the bit
+        *self->portx_ptr |= self->pin_mask; // Set the bit in the devices mem
     } else {
-        *self->portx_ptr &= ~self->pin_mask; // Clear the bit
+        *self->portx_ptr &= ~self->pin_mask; // Clear the bit in the devices mem
     }
 }
 #pragma optimize( "", on )
@@ -311,31 +334,23 @@ void setOut(const YARDOUTPUT *self, bool state)
 
 /*
  * updateIOX()
- * Wrtite to the IO Expander chips 1 at a time
+ * Write to the IO Expander chip, 1 at a time
  */
 void updateIOX(void){
-    uint8_t updatePrev = 0;
-    
     if(prevIOX[IOXupdater].IOXRAupdate){
+        #ifndef DEBUG
         MCP23017xWritePort(&devices[IOXupdater], 0xA, devices[IOXupdater].byteView.IOXRA);
+        #endif
         prevIOX[IOXupdater].IOXRAupdate = false;
-        updatePrev = 1;
-    }
-    if(prevIOX[IOXupdater].IOXRBupdate){
-        MCP23017xWritePort(&devices[IOXupdater], 0xB, devices[IOXupdater].byteView.IOXRB);
-        prevIOX[IOXupdater].IOXRBupdate = false;
-        updatePrev = 2;
-    }    
-    
-    if(updatePrev == 1){
-        /* Store the current state of the device IOX var that was updated */
         prevIOX[IOXupdater].IOXRA = devices[IOXupdater].byteView.IOXRA;
     }
-    else if(updatePrev == 2){
-        /* Store the current state of the device IOX var that was updated */
+    if(prevIOX[IOXupdater].IOXRBupdate){
+        #ifndef DEBUG
+        MCP23017xWritePort(&devices[IOXupdater], 0xB, devices[IOXupdater].byteView.IOXRB);
+        #endif
+        prevIOX[IOXupdater].IOXRBupdate = false;
         prevIOX[IOXupdater].IOXRB = devices[IOXupdater].byteView.IOXRB;
-    }
-    
+    }    
     IOXupdater = (IOXupdater == 5) ? 0 : IOXupdater + 1;
 }
 
@@ -347,16 +362,12 @@ void ExecSelectedFunction(const YARDLED *led, YARDOUTPUT *output){
     
     /* When a function is deactivated, only the rail power needs to be
      * disabled. This assumes the first 29 leds to map to the first
-     * 29 BV's!!! Filter out those who should be handled diff!!
+     * 29 BV's!!! Filter out those who should be handled differently!!
      */
     if(false == led->funcActivated){
         if(BVLED27 == led->nled){
             // Crane function, stop function, invert crane direction
             setOut(&output[CRENA], false);
-//            if(false == output[CRDIR].value){
-//                output[CRDIR].value = true;
-//            }
-            
             output[CRDIR].value = !output[CRDIR].value;
             setOut(&output[CRDIR], output[CRDIR].value);
         }
@@ -371,8 +382,10 @@ void ExecSelectedFunction(const YARDLED *led, YARDOUTPUT *output){
      * Filter out those who should not be touched
      */
     for (uint8_t i = 0; i < (ARR_SIZE(yardLedArr)); i++){
-        if(BVLED27 == yardLedArr[i].nled){
-            // Crane function do not touch!            
+        if(     BVLED27 == yardLedArr[i].nled ||    // Crane function
+                BVLED7  == yardLedArr[i].nled ||    // BV7 power
+                BVLED26 == yardLedArr[i].nled ){    // BV26 Rotate disk power
+                // functions not to touch!            
         }
         else if(yardLedArr[i].nled != led->nled){
             yardLedArr[i].state = BLINK;
@@ -384,6 +397,10 @@ void ExecSelectedFunction(const YARDLED *led, YARDOUTPUT *output){
     executeRules(output, led->nled);
 }
 
+/*
+ * executeRules(YARDOUTPUT *output, YARD_LEDS led)
+ * Execute the selected function by reading the rules lines per function.
+ */
 void executeRules(YARDOUTPUT *output, YARD_LEDS led) {
     if (led >= sizeof(ruleTable) / sizeof(ruleTable[0]) || ruleTable[led].rules == NULL) {
         return; // Invalid or undefined LED

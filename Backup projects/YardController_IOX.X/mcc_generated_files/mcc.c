@@ -52,7 +52,9 @@ void SYSTEM_Initialize(void)
 {
 
     INTERRUPT_Initialize();
+#ifndef DEBUG
     I2C2_Initialize();
+#endif
     PIN_MANAGER_Initialize();
     OSCILLATOR_Initialize();
     TMR1_Initialize();

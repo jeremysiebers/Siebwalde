@@ -19,26 +19,23 @@ extern "C" {
     #include "mcp23017.h"
     
     /* factor to be set according to set timer interrupt value to calc seconds */
-    const uint32_t tFactorSec = 1000; // timer set to 1ms, 10 * 1000 = 1 second
-    /* To shift the max result of 32 sec to 131 seconds if val = 2 */
-    const uint8_t  tRandomShift = 0;
+    const uint16_t tFactorSec = 1000; // timer set to 1ms, 10 * 1000 = 1 second
     /* Time to wait for servo to move to new position */
-    const uint32_t tSwitchPointWaitTime = (uint32_t)(1 * tFactorSec);
+    const uint16_t tSwitchPointWaitTime = (uint16_t)(1 * tFactorSec);
     /* Minimum Time that Train waits before leaving */
-    const uint32_t tParkTime = (uint32_t)(1 * tFactorSec);
+    const uint16_t tParkTime = (uint16_t)(1 * tFactorSec);
     /* Time that Freight Train waits before leaving */
-    const uint32_t tRestoreTime = (uint32_t)(3 * tFactorSec);
+    const uint16_t tRestoreTime = (uint16_t)(3 * tFactorSec);
     /* Boot wait time to get all IO read and debounced first */
-    const uint32_t tReadIoSignalWaitTime = (uint32_t)(1 * tFactorSec);
+    const uint16_t tReadIoSignalWaitTime = (uint16_t)(1 * tFactorSec);
     /* Led blink time */
-    const uint32_t tLedBlinkTime = (uint32_t)(200);
+    const uint16_t tLedBlinkTime = (uint16_t)(200);
     /* Idle TimeOut */
-    const uint32_t tIdleTimeOut = (uint32_t)(5 * tFactorSec);
+    const uint16_t tIdleTimeOut = (uint16_t)(5 * tFactorSec);
     /* IOX update time */
-    const uint32_t tIOXTimeOut = (uint32_t)(10);
+    const uint16_t tIOXTimeOut = (uint16_t)(10);
     /* IOX reset time */
-    const uint32_t tIOXReset = (uint32_t)(1 * tFactorSec);
-    
+    const uint16_t tIOXReset = (uint16_t)(1 * tFactorSec);    
 
     typedef enum
     {
@@ -227,8 +224,8 @@ extern "C" {
     //IODIRA,IODIRB,IOXRA,IOXRB,address
     [PCB428] = {0x00, 0x00, 0x00, 0x00, 0x26, }, // MCP23017 at address 0x26, PORTA/B = Output, PCB428
     [PCB429] = {0x00, 0x00, 0x00, 0x00, 0x25, }, // MCP23017 at address 0x25, PORTA/B = Output, PCB429
-    [PCB431] = {0x00, 0x00, 0xBF, 0xFF, 0x24, }, // MCP23017 at address 0x24, PORTA/B = Output, PCB431 relay card inverted level
-    [PCB432] = {0x00, 0x00, 0xFF, 0xFD, 0x23, }, // MCP23017 at address 0x23, PORTA/B = Output, PCB432 relay card inverted level
+    [PCB431] = {0x00, 0x00, 0xFF, 0xFF, 0x24, }, // MCP23017 at address 0x24, PORTA/B = Output, PCB431 relay card inverted level
+    [PCB432] = {0x00, 0x00, 0xFF, 0xFF, 0x23, }, // MCP23017 at address 0x23, PORTA/B = Output, PCB432 relay card inverted level
     [PCB433] = {0x00, 0x00, 0xFF, 0xFF, 0x22, }, // MCP23017 at address 0x22, PORTA/B = Output, PCB433 relay card inverted level
     [PCB430] = {0x00, 0x00, 0x00, 0x00, 0x21, }, // MCP23017 at address 0x21, PORTA/B = Output, PCB430
     };
@@ -334,7 +331,7 @@ extern "C" {
 		BV4    , 0, true, &devices[PCB431].byteView.IOXRA, 0x8 ,
 		BV5    , 0, true, &devices[PCB431].byteView.IOXRA, 0x10,
 		BV6    , 0, true, &devices[PCB431].byteView.IOXRA, 0x20,
-		BV7    , 1, true, &devices[PCB431].byteView.IOXRA, 0x40,
+		BV7    , 0, true, &devices[PCB431].byteView.IOXRA, 0x40,
 		BV8    , 0, true, &devices[PCB431].byteView.IOXRA, 0x80,
 		BV9    , 0, true, &devices[PCB431].byteView.IOXRB, 0x1 ,
 		BV10   , 0, true, &devices[PCB431].byteView.IOXRB, 0x2 ,
@@ -354,7 +351,7 @@ extern "C" {
 		BV23   , 0, true, &devices[PCB432].byteView.IOXRA, 0x40,
 		BV24   , 0, true, &devices[PCB432].byteView.IOXRA, 0x80,
 		BV25   , 0, true, &devices[PCB432].byteView.IOXRB, 0x1 ,	
-		BV26   , 1, true, &devices[PCB432].byteView.IOXRB, 0x2 ,
+		BV26   , 0, true, &devices[PCB432].byteView.IOXRB, 0x2 ,
 		BV27   , 0, true, &devices[PCB432].byteView.IOXRB, 0x4 ,
 		BV28   , 0, true, &devices[PCB432].byteView.IOXRB, 0x8 ,
 		BV29   , 0, true, &devices[PCB432].byteView.IOXRB, 0x10,
@@ -435,6 +432,7 @@ extern "C" {
 		BVLED28 =	0x1B, // Spare
 		BVLED29 =	0x1C, // Spare
         BVLEDZERO = 0x1D, // Reset all
+        BVLEDINIT = 0x1E, // Init certain BV's at startup
                 
     }YARD_LEDS;
     
@@ -450,43 +448,43 @@ extern "C" {
         YARD_LEDS               nled;         // The name of the led        
         LEDSTATE                state;        // Actual led state, On/Off/Blink       
         bool                    funcActivated;// Function activated state
-        bool                    enLed;        // Enable the led according to state
+        //bool                    enLed;        // Enable the led according to state
         uint8_t                 *portx_ptr;   // Reference to the Output port used
         uint8_t                 pin_mask;     // Mask to point to pin used of port        
     }YARDLED;
     
     YARDLED yardLedArr[] = {
 		// PCB430 I2C_ADDRESS = 0x21
-        BVLED1 , BLINK, false, false, &devices[PCB430].byteView.IOXRA, 0x1 ,
-		BVLED2 , BLINK, false, false, &devices[PCB430].byteView.IOXRA, 0x2 ,
-		BVLED3 , BLINK, false, false, &devices[PCB430].byteView.IOXRA, 0x4 ,
-		BVLED4 , BLINK, false, false, &devices[PCB430].byteView.IOXRA, 0x8 ,
-		BVLED5 , BLINK, false, false, &devices[PCB430].byteView.IOXRA, 0x10,
-		BVLED6 , BLINK, false, false, &devices[PCB430].byteView.IOXRA, 0x20,
-		BVLED7 ,    ON,  true, false, &devices[PCB430].byteView.IOXRA, 0x40,
-		BVLED8 , BLINK, false, false, &devices[PCB430].byteView.IOXRA, 0x80,
-		BVLED9 , BLINK, false, false, &devices[PCB430].byteView.IOXRB, 0x1 ,
-		BVLED10, BLINK, false, false, &devices[PCB430].byteView.IOXRB, 0x2 ,
-		BVLED11, BLINK, false, false, &devices[PCB430].byteView.IOXRB, 0x4 ,
-		BVLED12, BLINK, false, false, &devices[PCB430].byteView.IOXRB, 0x8 ,
-        BVLED13, BLINK, false, false, &devices[PCB430].byteView.IOXRB, 0x10,		
-		BVLED14, BLINK, false, false, &devices[PCB430].byteView.IOXRB, 0x20,
-		BVLED15, BLINK, false, false, &devices[PCB430].byteView.IOXRB, 0x40,
-		BVLED16, BLINK, false, false, &devices[PCB430].byteView.IOXRB, 0x80,
+        BVLED1 , BLINK, false, &devices[PCB430].byteView.IOXRA, 0x1 ,
+		BVLED2 , BLINK, false, &devices[PCB430].byteView.IOXRA, 0x2 ,
+		BVLED3 , BLINK, false, &devices[PCB430].byteView.IOXRA, 0x4 ,
+		BVLED4 , BLINK, false, &devices[PCB430].byteView.IOXRA, 0x8 ,
+		BVLED5 , BLINK, false, &devices[PCB430].byteView.IOXRA, 0x10,
+		BVLED6 , BLINK, false, &devices[PCB430].byteView.IOXRA, 0x20,
+		BVLED7 , BLINK, false, &devices[PCB430].byteView.IOXRA, 0x40,
+		BVLED8 , BLINK, false, &devices[PCB430].byteView.IOXRA, 0x80,
+		BVLED9 , BLINK, false, &devices[PCB430].byteView.IOXRB, 0x1 ,
+		BVLED10, BLINK, false, &devices[PCB430].byteView.IOXRB, 0x2 ,
+		BVLED11, BLINK, false, &devices[PCB430].byteView.IOXRB, 0x4 ,
+		BVLED12, BLINK, false, &devices[PCB430].byteView.IOXRB, 0x8 ,
+        BVLED13, BLINK, false, &devices[PCB430].byteView.IOXRB, 0x10,		
+		BVLED14, BLINK, false, &devices[PCB430].byteView.IOXRB, 0x20,
+		BVLED15, BLINK, false, &devices[PCB430].byteView.IOXRB, 0x40,
+		BVLED16, BLINK, false, &devices[PCB430].byteView.IOXRB, 0x80,
         // PCB429 I2C_ADDRESS = 0x25
-		BVLED17, BLINK, false, false, &devices[PCB429].byteView.IOXRA, 0x8 ,
-		BVLED18, BLINK, false, false, &devices[PCB429].byteView.IOXRA, 0x10,
-		BVLED19, BLINK, false, false, &devices[PCB429].byteView.IOXRA, 0x20,
-		BVLED20, BLINK, false, false, &devices[PCB429].byteView.IOXRA, 0x40,
-		BVLED21, BLINK, false, false, &devices[PCB429].byteView.IOXRA, 0x80,
-		BVLED22, BLINK, false, false, &devices[PCB429].byteView.IOXRB, 0x1 ,
-		BVLED23, BLINK, false, false, &devices[PCB429].byteView.IOXRB, 0x2 ,
-		BVLED24, BLINK, false, false, &devices[PCB429].byteView.IOXRB, 0x4 ,
-		BVLED25, BLINK, false, false, &devices[PCB429].byteView.IOXRB, 0x8 ,
-		BVLED26, BLINK, false, false, &devices[PCB429].byteView.IOXRB, 0x10,
-		BVLED27,    ON,  true, false, &devices[PCB429].byteView.IOXRB, 0x20,
-		BVLED28, BLINK, false, false, &devices[PCB429].byteView.IOXRB, 0x40,
-        BVLED29, BLINK, false, false, &devices[PCB429].byteView.IOXRB, 0x80,
+		BVLED17, BLINK, false, &devices[PCB429].byteView.IOXRA, 0x8 ,
+		BVLED18, BLINK, false, &devices[PCB429].byteView.IOXRA, 0x10,
+		BVLED19, BLINK, false, &devices[PCB429].byteView.IOXRA, 0x20,
+		BVLED20, BLINK, false, &devices[PCB429].byteView.IOXRA, 0x40,
+		BVLED21, BLINK, false, &devices[PCB429].byteView.IOXRA, 0x80,
+		BVLED22, BLINK, false, &devices[PCB429].byteView.IOXRB, 0x1 ,
+		BVLED23, BLINK, false, &devices[PCB429].byteView.IOXRB, 0x2 ,
+		BVLED24, BLINK, false, &devices[PCB429].byteView.IOXRB, 0x4 ,
+		BVLED25, BLINK, false, &devices[PCB429].byteView.IOXRB, 0x8 ,
+		BVLED26, BLINK, false, &devices[PCB429].byteView.IOXRB, 0x10,
+		BVLED27, BLINK, false, &devices[PCB429].byteView.IOXRB, 0x20,
+		BVLED28, BLINK, false, &devices[PCB429].byteView.IOXRB, 0x40,
+        BVLED29, BLINK, false, &devices[PCB429].byteView.IOXRB, 0x80,
     };
 
     // Enum to distinguish the array type
@@ -501,8 +499,6 @@ extern "C" {
         PREV = 4,
         JMP = 5,
         ASSERT = 6,
-//        DISKLEFT = 7,
-//        DISKRIGHT = 8,
     }CHANNEL;
     
     typedef struct{        
@@ -512,8 +508,10 @@ extern "C" {
         uint16_t                    tWaitIdleTime;
         uint32_t                    tStartResetTime; // The start time for reset IOX
         uint16_t                    tWaitResetTime;
+        uint32_t                    tStartIOXTime; // The start time for IOX update
+        uint16_t                    tWaitIOXTime;
         bool                        idle;
-    }BLINKOUT;
+    }TIMERS;
     
     /* Rules */
     
@@ -749,6 +747,7 @@ extern "C" {
         {BV4, false},
         {BV5, false},
         {BV6, false},
+        //{BV7, false},
         {BV8, false},
         {BV9, false},
         {BV10, false},
@@ -767,9 +766,15 @@ extern "C" {
         {BV23, false},
         {BV24, false},
         {BV25, false},
+        //{BV26, false}, Rotate Disk rail power
         {BV27, false},
         {BV28, false},
         {BV29, false},        
+    };
+    
+    static const Rule bvledInit[] = {
+        {BV26, true}, // Rotate Disk rail power
+        {BV7, true},  
     };
             
     typedef struct {
@@ -808,10 +813,8 @@ extern "C" {
 		[BVLED28] = {bvled28Rules, sizeof(bvled28Rules) / sizeof(bvled28Rules[0])},
 		[BVLED29] = {bvled29Rules, sizeof(bvled29Rules) / sizeof(bvled29Rules[0])},
 		[BVLEDZERO] = {bvResetZero, sizeof(bvResetZero) / sizeof(bvResetZero[0])},
+        [BVLEDINIT] = {bvledInit, sizeof(bvledInit) / sizeof(bvledInit[0])},
     };
-
-
-
      
 #ifdef	__cplusplus
 }
