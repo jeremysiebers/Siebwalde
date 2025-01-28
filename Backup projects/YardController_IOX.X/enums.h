@@ -227,8 +227,8 @@ extern "C" {
     //IODIRA,IODIRB,IOXRA,IOXRB,address
     [PCB428] = {0x00, 0x00, 0x00, 0x00, 0x26, }, // MCP23017 at address 0x26, PORTA/B = Output, PCB428
     [PCB429] = {0x00, 0x00, 0x00, 0x00, 0x25, }, // MCP23017 at address 0x25, PORTA/B = Output, PCB429
-    [PCB431] = {0x00, 0x00, 0xFF, 0xFF, 0x24, }, // MCP23017 at address 0x24, PORTA/B = Output, PCB431 relay card inverted level
-    [PCB432] = {0x00, 0x00, 0xFF, 0xFF, 0x23, }, // MCP23017 at address 0x23, PORTA/B = Output, PCB432 relay card inverted level
+    [PCB431] = {0x00, 0x00, 0xBF, 0xFF, 0x24, }, // MCP23017 at address 0x24, PORTA/B = Output, PCB431 relay card inverted level
+    [PCB432] = {0x00, 0x00, 0xFF, 0xFD, 0x23, }, // MCP23017 at address 0x23, PORTA/B = Output, PCB432 relay card inverted level
     [PCB433] = {0x00, 0x00, 0xFF, 0xFF, 0x22, }, // MCP23017 at address 0x22, PORTA/B = Output, PCB433 relay card inverted level
     [PCB430] = {0x00, 0x00, 0x00, 0x00, 0x21, }, // MCP23017 at address 0x21, PORTA/B = Output, PCB430
     };
