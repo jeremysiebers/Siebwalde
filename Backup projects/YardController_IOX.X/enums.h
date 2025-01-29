@@ -208,6 +208,7 @@ extern "C" {
     TASK_STATE   FLOWxCONTROLxState = busy;
     TASK_STATE   FLOWxCONTROLxOrder = STATION;
         
+/******************************************************************************/
     
     /*Yard Functions*/
     #define ARR_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
@@ -317,7 +318,7 @@ extern "C" {
     typedef struct
     {
         YARD_OUTPUTS            nOutput         ;// The name of the output
-        uint8_t                 value           ;// Actual output value
+        uint8_t                 value           ;// Actual output value (used only for CRane DIRection)
         bool                    invertedLevel   ;// When level must be inverted
         uint8_t                 *portx_ptr      ;// Reference to the Output port used
         uint8_t                 pin_mask        ;// Mask to point to pin used of port        
@@ -426,11 +427,11 @@ extern "C" {
 		BVLED22 =	0x15,
 		BVLED23 =	0x16,
 		BVLED24 =	0x17,
-		BVLED25 =	0x18, // Rotate Disk               
-		BVLED26 =	0x19, // Crane
-		BVLED27 =	0x1A, // Spare
-		BVLED28 =	0x1B, // Spare
-		BVLED29 =	0x1C, // Spare
+		BVLED25 =	0x18,      
+		BVLED26 =	0x19, // Rotate Disk
+		BVLED27 =	0x1A, // Crane
+		BVLED28 =	0x1B, // BLK22
+		BVLED29 =	0x1C, // BLK23
         BVLEDZERO = 0x1D, // Reset all
         BVLEDINIT = 0x1E, // Init certain BV's at startup
                 
@@ -448,7 +449,6 @@ extern "C" {
         YARD_LEDS               nled;         // The name of the led        
         LEDSTATE                state;        // Actual led state, On/Off/Blink       
         bool                    funcActivated;// Function activated state
-        //bool                    enLed;        // Enable the led according to state
         uint8_t                 *portx_ptr;   // Reference to the Output port used
         uint8_t                 pin_mask;     // Mask to point to pin used of port        
     }YARDLED;
@@ -486,12 +486,6 @@ extern "C" {
 		BVLED28, BLINK, false, &devices[PCB429].byteView.IOXRB, 0x40,
         BVLED29, BLINK, false, &devices[PCB429].byteView.IOXRB, 0x80,
     };
-
-    // Enum to distinguish the array type
-    typedef enum{
-        OUTPUTS,
-        LEDS,
-    }ARRAY_TYPE;
     
     typedef enum{
         NOF = 0,
@@ -501,6 +495,7 @@ extern "C" {
         ASSERT = 6,
     }CHANNEL;
     
+    /* Timers used for various functions */
     typedef struct{        
         uint32_t                    tStartBlinkTime; // The start time for blinking
         uint16_t                    tWaitBlinkTime;        
@@ -513,8 +508,75 @@ extern "C" {
         bool                        idle;
     }TIMERS;
     
-    /* Rules */
     
+    /* Jump Selector groups */
+    typedef enum{
+        jmpGrp1 = 0,
+        jmpGrp2 = 1,
+        jmpGrp3 = 2,
+        jmpGrp4 = 3,        
+    }jmpGroups;
+    
+    /* Jump Selector groups */
+    typedef struct {
+        int groupIndex; // Index of the output to be set (e.g., BVx, BWx)
+    } Group;
+    
+    static const Group jmpGrp1BVs[] = {
+        {BVLED1},
+        {BVLED2},
+        {BVLED3},
+        {BVLED4},
+        {BVLED5},
+        {BVLED6},
+        {BVLED7},
+    };
+    
+    static const Group jmpGrp2BVs[] = {
+        {BVLED8},
+        {BVLED9},
+        {BVLED10},
+        {BVLED11},
+        {BVLED12},
+        {BVLED13},
+        {BVLED14},
+    };
+    
+    static const Group jmpGrp3BVs[] = {
+        {BVLED15},
+        {BVLED16},
+        {BVLED17},
+        {BVLED18},
+        {BVLED19},
+        {BVLED20},
+        {BVLED21},
+        {BVLED22},
+        {BVLED23},
+        {BVLED24},
+        {BVLED25},
+        {BVLED26},        
+    };
+    
+    static const Group jmpGrp4BVs[] = {
+        {BVLED28}, // BLK22
+        {BVLED29}, // BLK23
+        {BVLED27}, // Crane
+    };
+    
+    typedef struct {
+        const Group *groups; // Pointer to the array of groups
+        size_t groupCount;  // Number of groups in the array
+    } GroupSet;
+
+    static const GroupSet groupTable[] = {
+        [jmpGrp1] = {jmpGrp1BVs, sizeof(jmpGrp1BVs) / sizeof(jmpGrp1BVs[0])},
+        [jmpGrp2] = {jmpGrp2BVs, sizeof(jmpGrp2BVs) / sizeof(jmpGrp2BVs[0])},
+        [jmpGrp3] = {jmpGrp3BVs, sizeof(jmpGrp3BVs) / sizeof(jmpGrp3BVs[0])},
+        [jmpGrp4] = {jmpGrp4BVs, sizeof(jmpGrp4BVs) / sizeof(jmpGrp4BVs[0])},
+    };
+    
+    
+    /* BV Rules */    
     typedef struct {
         int outputIndex; // Index of the output to be set (e.g., BVx, BWx)
         bool state;      // Desired state (true/false)
@@ -733,11 +795,11 @@ extern "C" {
     };
     
     static const Rule bvled28Rules[] = {
-        {BV28, true}, // Spare
+        {BV28, true}, // BLK22
     };
     
     static const Rule bvled29Rules[] = {
-        {BV29, true}, // Spare
+        {BV29, true}, // BLK23
     };
     
     static const Rule bvResetZero[] = {
@@ -747,7 +809,7 @@ extern "C" {
         {BV4, false},
         {BV5, false},
         {BV6, false},
-        //{BV7, false},
+        {BV7, false},
         {BV8, false},
         {BV9, false},
         {BV10, false},
@@ -773,8 +835,7 @@ extern "C" {
     };
     
     static const Rule bvledInit[] = {
-        {BV26, true}, // Rotate Disk rail power
-        {BV7, true},  
+        {BV26, true}, // Rotate Disk rail power  
     };
             
     typedef struct {

@@ -13,8 +13,8 @@
 #include "mcp23017.h"
 #include "yard_functions.h"
 
-#define jumpSize 4
-#define unusedBV 2U /* Unused outputs */
+//#define jumpSize 4
+//#define unusedBV 2U /* Unused outputs */
 
 // local methods
 bool ResetHelperFunction(void);
@@ -26,7 +26,7 @@ void ExecSelectedFunction(const YARDLED *self, YARDOUTPUT *output);
 void executeRules(YARDOUTPUT *output, YARD_LEDS led);
 
 static uint8_t  selector        = 0;
-static uint8_t  jmpSelector     = 3;
+static uint8_t  jmpSelector     = jmpGrp1;
 static TIMERS   timers;
 static IOXDATA  prevIOX[6];
 static uint8_t  IOXupdater      = 0;
@@ -93,11 +93,7 @@ bool ResetHelperFunction(void){
              * Initialize functions that need to be enabled and active from the 
              * beginning.
              */
-            YARDLED* led = &yardLedArr[BVLED7];
-            led->funcActivated = true;
-            led->state = ON;
-            setLed(led, ON);
-            led = &yardLedArr[BVLED25];
+            YARDLED* led = &yardLedArr[BVLED25];
             led->funcActivated = true;
             led->state = ON;
             setLed(led, ON);
@@ -140,22 +136,36 @@ void UPDATExYARDxFUNCTIONxSELECTION(void)
         channel = JMP;
     }
     else if(DEBOUNCExGETxVALUExUPDATEDxSTATE(&HOTRC_CH2L)){ /* Rotate disk */
+        /* If activated by RC controller */
         if(HOTRC_CH2L.value){
+            /* Let the motor turn anti-clock wise */
             setOut(&yardOutputArr[DISKL], false);
             setOut(&yardOutputArr[DISKR], false);
         }
+        /* Activate or de-activate the coil depending on the RC controller
+         * letting the stick go will make the coil go back(off) and stop the 
+         * motor on the next track at the rotate disk.
+         */
         setOut(&yardOutputArr[DISKC], HOTRC_CH2L.value);
     }
     else if(DEBOUNCExGETxVALUExUPDATEDxSTATE(&HOTRC_CH2R)){ /* Rotate disk */
+        /* If activated by RC controller */
         if(HOTRC_CH2R.value){
+            /* Let the motor turn clock wise */
             setOut(&yardOutputArr[DISKL], true);
             setOut(&yardOutputArr[DISKR], true);
         }
+        /* Activate or de-activate the coil depending on the RC controller
+         * letting the stick go will make the coil go back(off) and stop the 
+         * motor on the next track at the rotate disk.
+         */
         setOut(&yardOutputArr[DISKC], HOTRC_CH2R.value);
     }
     /* Check if a reset sequence is required for manual IOX I2C recovery */
     else if(RESET_IOX.value){ 
+        /* Keep calling the reset helper function until done */
         RESET_IOX.value = ResetHelperFunction();
+        /* go back to main as long as the reset is not done */
         return;
     }
 
@@ -187,26 +197,59 @@ void UPDATExYARDxFUNCTIONxSELECTION(void)
         if(NOF != channel && ASSERT != channel){
             setLed(led, OFF);
         }
-        // Check which button was pressed and jump or activate new function
+        /* Create const pointer to the group table */
+        const GroupSet *groupSet = &groupTable[jmpSelector];
+        // Check which button was pressed, jump or activate new function
         switch (channel){
             case NEXT:
-            {
-                if((ARR_MAX_ELEM(yardLedArr) - unusedBV) == selector){
-                   selector = 0; 
+            {     
+                // <editor-fold defaultstate="collapsed">
+//                if((ARR_MAX_ELEM(yardLedArr) - unusedBV) == selector){
+//                   selector = 0; 
+//                }
+//                else{ selector++; }
+//                // Point to next function
+//                led = &yardLedArr[selector];// </editor-fold>
+                /* Increment the selector */
+                selector++;
+                /* Check if the selector still fits in the active group table */
+                if(selector < groupSet->groupCount){
+                    /* Select the next BV from the active group table */
+                    led = &yardLedArr[groupSet->groups[selector].groupIndex];
                 }
-                else{ selector++; }
-                // Point to next function
-                led = &yardLedArr[selector];}
+                else{
+                    /* Reset selector to beginning */
+                    selector = 0;
+                    /* Select the first BV within the active group table */
+                    led = &yardLedArr[groupSet->groups[selector].groupIndex];
+                }
+            }
                 break;
 
             case PREV:
             {
+                // <editor-fold defaultstate="collapsed">
+//                if(0 == selector){
+//                    selector = (ARR_MAX_ELEM(yardLedArr) - unusedBV);
+//                }
+//                else{ selector--; }
+//                // Point to previous function
+//                led = &yardLedArr[selector];// 
+                //</editor-fold>
+                /* Check if the selector is already 0 */
                 if(0 == selector){
-                    selector = (ARR_MAX_ELEM(yardLedArr) - unusedBV);
+                    /* set the selector to the last BV in the active group table */
+                    selector = (uint8_t)(groupSet->groupCount - 1);
+                    /* Select the last BV from the active group table */
+                    led = &yardLedArr[groupSet->groups[selector].groupIndex];                    
                 }
-                else{ selector--; }
-                // Point to previous function
-                led = &yardLedArr[selector];}
+                else{
+                    /* Decrement the selector */
+                    selector--;
+                    /* Select the previous BV from the active group table */
+                    led = &yardLedArr[groupSet->groups[selector].groupIndex];
+                }                
+            }
                 break;
 
             case JMP:
@@ -220,19 +263,36 @@ void UPDATExYARDxFUNCTIONxSELECTION(void)
 //                    selector += jumpSize;
 //                }                
                 // Jump JUMPSIZE functions
-                // </editor-fold>
+                
                 // Jump fixed groups
                 
-                led = &yardLedArr[jmpSelector];
-                if(3 == jmpSelector){
-                    jmpSelector = 11;
-                }
-                else if(11 == jmpSelector){
-                    jmpSelector = 22;
-                }
-                else if(22 == jmpSelector){
-                    jmpSelector = 3;
-                }
+//                led = &yardLedArr[jmpSelector];
+//                if(3 == jmpSelector){
+//                    jmpSelector = 11;
+//                }
+//                else if(11 == jmpSelector){
+//                    jmpSelector = 22;
+//                }
+//                else if(22 == jmpSelector){
+//                    jmpSelector = 3;
+//                }
+//                for (size_t i = 0; i < ruleSet->ruleCount; i++) {
+//                    setOut(&output[ruleSet->rules[i].outputIndex], ruleSet->rules[i].state);
+//                }
+                // </editor-fold>
+                /* Move to the next group, wrap around automatically */
+                jmpSelector = (jmpSelector + 1) % (sizeof(groupTable) / sizeof(groupTable[0]));
+                /* 
+                 * %(modulus) total_groups ensures that when jmpSelector reaches 
+                 * the last index, it wraps around to 0 (3 % 3 = 0)
+                 */
+                
+                /* Update the const pointer to the new pointed group table */
+                const GroupSet *groupSet = &groupTable[jmpSelector];
+                /* Reset the selector */
+                selector = 0;
+                /* Fetch the first BV within the active group table */
+                led = &yardLedArr[groupSet->groups[selector].groupIndex];               
             }
                 break;
 
@@ -382,8 +442,7 @@ void ExecSelectedFunction(const YARDLED *led, YARDOUTPUT *output){
      * Filter out those who should not be touched
      */
     for (uint8_t i = 0; i < (ARR_SIZE(yardLedArr)); i++){
-        if(     BVLED27 == yardLedArr[i].nled ||    // Crane function
-                BVLED7  == yardLedArr[i].nled ||    // BV7 power
+        if(     BVLED27 == yardLedArr[i].nled ||    // Crane function                
                 BVLED26 == yardLedArr[i].nled ){    // BV26 Rotate disk power
                 // functions not to touch!            
         }
