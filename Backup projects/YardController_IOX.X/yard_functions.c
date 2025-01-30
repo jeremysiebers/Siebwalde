@@ -26,7 +26,7 @@ void ExecSelectedFunction(const YARDLED *self, YARDOUTPUT *output);
 void executeRules(YARDOUTPUT *output, YARD_LEDS led);
 
 static uint8_t  selector        = 0;
-static uint8_t  jmpSelector     = jmpGrp1;
+static jmpGroups  jmpSelector   = jmpGrp1;
 static TIMERS   timers;
 static IOXDATA  prevIOX[6];
 static uint8_t  IOXupdater      = 0;
@@ -93,10 +93,10 @@ bool ResetHelperFunction(void){
              * Initialize functions that need to be enabled and active from the 
              * beginning.
              */
-            YARDLED* led = &yardLedArr[BVLED25];
-            led->funcActivated = true;
-            led->state = ON;
-            setLed(led, ON);
+            YARDLED* tmp = &yardLedArr[BVLED26];
+            tmp->funcActivated = true;
+            tmp->state = ON;
+            //setLed(tmp, ON); do not set the actual port output on!
             executeRules(yardOutputArr, BVLEDINIT); 
             
             resetSequencer = 0;
@@ -115,11 +115,13 @@ bool ResetHelperFunction(void){
 void UPDATExYARDxFUNCTIONxSELECTION(void) 
 {
     // Set the default channel state
-    CHANNEL channel = NOF;
-    // Set the current selected Led(function)
-    YARDLED* led = &yardLedArr[selector];
+    CHANNEL channel = NOF;    
     /* Get one time the actual time */
     uint32_t millis = GETxMILLIS();
+    /* Create const pointer to the group table */
+    const GroupSet *groupSet = &groupTable[jmpSelector];
+    // Set the current selected Led(function)
+    YARDLED* led = &yardLedArr[groupSet->groups[selector].groupIndex];    
         
     // Check if a button was pressed
     if(DEBOUNCExGETxVALUExUPDATEDxSTATE(&HOTRC_CH3)){
@@ -175,9 +177,9 @@ void UPDATExYARDxFUNCTIONxSELECTION(void)
         timers.tStartIdleTime = millis;
     }
 
-    // Show the last selected function and do nothing
+    // Show the last selected function and do nothing (wakeup from "sleep")
     if(NOF != channel && timers.idle){ 
-        if(led->funcActivated){
+        if(true == led->funcActivated){
             led->state = ON;
         }
         else{
@@ -196,9 +198,7 @@ void UPDATExYARDxFUNCTIONxSELECTION(void)
          */
         if(NOF != channel && ASSERT != channel){
             setLed(led, OFF);
-        }
-        /* Create const pointer to the group table */
-        const GroupSet *groupSet = &groupTable[jmpSelector];
+        }        
         // Check which button was pressed, jump or activate new function
         switch (channel){
             case NEXT:
@@ -288,7 +288,7 @@ void UPDATExYARDxFUNCTIONxSELECTION(void)
                  */
                 
                 /* Update the const pointer to the new pointed group table */
-                const GroupSet *groupSet = &groupTable[jmpSelector];
+                groupSet = &groupTable[jmpSelector];
                 /* Reset the selector */
                 selector = 0;
                 /* Fetch the first BV within the active group table */
@@ -320,10 +320,8 @@ void UPDATExYARDxFUNCTIONxSELECTION(void)
             setLed(led, TOGGLE);
         }
     }
-    else if(ON == led->state){
-        setLed(led, ON);
-    }
-    else{ setLed(led, OFF); }
+    else if(ON == led->state){ setLed(led, ON);}
+    else if(OFF == led->state){ setLed(led, OFF);}
     
     // Handle the idle timeout when not idle
     if((millis - timers.tStartIdleTime) > timers.tWaitIdleTime && !timers.idle){

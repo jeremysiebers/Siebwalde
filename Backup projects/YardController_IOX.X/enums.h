@@ -31,7 +31,7 @@ extern "C" {
     /* Led blink time */
     const uint16_t tLedBlinkTime = (uint16_t)(200);
     /* Idle TimeOut */
-    const uint16_t tIdleTimeOut = (uint16_t)(5 * tFactorSec);
+    const uint16_t tIdleTimeOut = (uint16_t)(10 * tFactorSec);
     /* IOX update time */
     const uint16_t tIOXTimeOut = (uint16_t)(10);
     /* IOX reset time */
@@ -540,6 +540,7 @@ extern "C" {
         {BVLED12},
         {BVLED13},
         {BVLED14},
+        {BVLED27}, // Crane
     };
     
     static const Group jmpGrp3BVs[] = {
@@ -572,7 +573,7 @@ extern "C" {
         [jmpGrp1] = {jmpGrp1BVs, sizeof(jmpGrp1BVs) / sizeof(jmpGrp1BVs[0])},
         [jmpGrp2] = {jmpGrp2BVs, sizeof(jmpGrp2BVs) / sizeof(jmpGrp2BVs[0])},
         [jmpGrp3] = {jmpGrp3BVs, sizeof(jmpGrp3BVs) / sizeof(jmpGrp3BVs[0])},
-        [jmpGrp4] = {jmpGrp4BVs, sizeof(jmpGrp4BVs) / sizeof(jmpGrp4BVs[0])},
+        //[jmpGrp4] = {jmpGrp4BVs, sizeof(jmpGrp4BVs) / sizeof(jmpGrp4BVs[0])},
     };
     
     
