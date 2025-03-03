@@ -379,16 +379,16 @@
 #define DIR_INVERT_T4_SetDigitalInput()    do { TRISDbits.TRISD4 = 1; } while(0)
 #define DIR_INVERT_T4_SetDigitalOutput()   do { TRISDbits.TRISD4 = 0; } while(0)
 
-// get/set DIR_INVERT_T5 aliases
-#define DIR_INVERT_T5_TRIS                 TRISDbits.TRISD5
-#define DIR_INVERT_T5_LAT                  LATDbits.LATD5
-#define DIR_INVERT_T5_PORT                 PORTDbits.RD5
-#define DIR_INVERT_T5_SetHigh()            do { LATDbits.LATD5 = 1; } while(0)
-#define DIR_INVERT_T5_SetLow()             do { LATDbits.LATD5 = 0; } while(0)
-#define DIR_INVERT_T5_Toggle()             do { LATDbits.LATD5 = ~LATDbits.LATD5; } while(0)
-#define DIR_INVERT_T5_GetValue()           PORTDbits.RD5
-#define DIR_INVERT_T5_SetDigitalInput()    do { TRISDbits.TRISD5 = 1; } while(0)
-#define DIR_INVERT_T5_SetDigitalOutput()   do { TRISDbits.TRISD5 = 0; } while(0)
+// get/set OCC_TO_23B aliases
+#define OCC_TO_23B_TRIS                 TRISDbits.TRISD5
+#define OCC_TO_23B_LAT                  LATDbits.LATD5
+#define OCC_TO_23B_PORT                 PORTDbits.RD5
+#define OCC_TO_23B_SetHigh()            do { LATDbits.LATD5 = 1; } while(0)
+#define OCC_TO_23B_SetLow()             do { LATDbits.LATD5 = 0; } while(0)
+#define OCC_TO_23B_Toggle()             do { LATDbits.LATD5 = ~LATDbits.LATD5; } while(0)
+#define OCC_TO_23B_GetValue()           PORTDbits.RD5
+#define OCC_TO_23B_SetDigitalInput()    do { TRISDbits.TRISD5 = 1; } while(0)
+#define OCC_TO_23B_SetDigitalOutput()   do { TRISDbits.TRISD5 = 0; } while(0)
 
 // get/set OCC_TO_21B aliases
 #define OCC_TO_21B_TRIS                 TRISDbits.TRISD6
@@ -467,16 +467,16 @@
 #define OCC_TO_8A_SetDigitalInput()    do { TRISEbits.TRISE4 = 1; } while(0)
 #define OCC_TO_8A_SetDigitalOutput()   do { TRISEbits.TRISE4 = 0; } while(0)
 
-// get/set unused aliases
-#define unused_TRIS                 TRISEbits.TRISE5
-#define unused_LAT                  LATEbits.LATE5
-#define unused_PORT                 PORTEbits.RE5
-#define unused_SetHigh()            do { LATEbits.LATE5 = 1; } while(0)
-#define unused_SetLow()             do { LATEbits.LATE5 = 0; } while(0)
-#define unused_Toggle()             do { LATEbits.LATE5 = ~LATEbits.LATE5; } while(0)
-#define unused_GetValue()           PORTEbits.RE5
-#define unused_SetDigitalInput()    do { TRISEbits.TRISE5 = 1; } while(0)
-#define unused_SetDigitalOutput()   do { TRISEbits.TRISE5 = 0; } while(0)
+// get/set OCC_TO_22B aliases
+#define OCC_TO_22B_TRIS                 TRISEbits.TRISE5
+#define OCC_TO_22B_LAT                  LATEbits.LATE5
+#define OCC_TO_22B_PORT                 PORTEbits.RE5
+#define OCC_TO_22B_SetHigh()            do { LATEbits.LATE5 = 1; } while(0)
+#define OCC_TO_22B_SetLow()             do { LATEbits.LATE5 = 0; } while(0)
+#define OCC_TO_22B_Toggle()             do { LATEbits.LATE5 = ~LATEbits.LATE5; } while(0)
+#define OCC_TO_22B_GetValue()           PORTEbits.RE5
+#define OCC_TO_22B_SetDigitalInput()    do { TRISEbits.TRISE5 = 1; } while(0)
+#define OCC_TO_22B_SetDigitalOutput()   do { TRISEbits.TRISE5 = 0; } while(0)
 
 // get/set OCC_FR_21B aliases
 #define OCC_FR_21B_TRIS                 TRISEbits.TRISE6

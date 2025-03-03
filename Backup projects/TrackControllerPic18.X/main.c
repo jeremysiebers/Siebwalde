@@ -83,6 +83,9 @@ void main(void)
             OCC_TO_STN_10_SetHigh();
             OCC_TO_STN_11_SetHigh();
             OCC_TO_STN_12_SetLow();
+            
+            OCC_TO_22B_SetHigh();
+            OCC_TO_23B_SetHigh();
         }
         // </editor-fold>
         /* First boot up sequence, set IO, warm up debounce first */
@@ -104,6 +107,9 @@ void main(void)
             OCC_TO_STN_10_SetHigh();
             OCC_TO_STN_11_SetHigh();
             OCC_TO_STN_12_SetHigh();
+            
+            OCC_TO_22B_SetHigh();
+            OCC_TO_23B_SetHigh();
             
             if(true == updateTick){
                 DebounceIO(false);

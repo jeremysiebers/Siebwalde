@@ -64,8 +64,7 @@ MNTSTATION waldberg;
 
 OCC OCC_TO_T6       = {&LATE, 0x8};
 OCC OCC_TO_T3       = {&LATE, 0x4};
-REL REL_T4          = {&LATD, 0x10};
-REL REL_T5          = {&LATD, 0x20};
+REL REL_T4_T5       = {&LATD, 0x10};
 
 extern void INITxMOUNTAINxSTATION(void);
 extern void UPDATExMOUNTAINxSTATION(MNTSTATION *self);

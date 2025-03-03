@@ -11,15 +11,15 @@
 #include "communication.h"
 
 static REL          *setT4ToAmpT6;
-static REL          *setT5ToAmpT3;   
+//static REL          *setT5ToAmpT3; //soldered to REL_T4_T5  
 static bool         invert = true;
 static bool         invertExecuted = false;
 
 void INITxMOUNTAINxSTATION(void)
 {
     INITxPATHWAYxMNTSTATION(&waldsee, &waldberg);
-    setT4ToAmpT6                            = &REL_T4; /* default T4 to AmpT3 */
-    setT5ToAmpT3                            = &REL_T5; /* default T5 to AmpT6 */
+    setT4ToAmpT6                            = &REL_T4_T5; /* default T4 to AmpT3 */
+    //setT5ToAmpT3                            = &REL_T5; /* default T5 to AmpT6 soldered to REL_T4_T5 */
     
     /**************************************************************************/
     waldsee.name                            = WALDSEE;
@@ -238,7 +238,7 @@ void UPDATExMOUNTAINxSTATION(MNTSTATION *self)
                 
                 /* Invert the drive direction */
                 SETxOCC(setT4ToAmpT6, invert);
-                SETxOCC(setT5ToAmpT3, invert);
+                //SETxOCC(setT5ToAmpT3, invert); soldered to REL_T4_T5
                 
                 CREATExTASKxSTATUSxMESSAGE(self->name,
                 NONE,
@@ -324,7 +324,7 @@ void UPDATExMOUNTAINxTRAINxWAIT(MNTSTATION *self)
             }
             else{
                 self->stnTrack1.tCountTime = millis;
-                self->stnTrack1.tWaitTime = (GETxRANDOMxNUMBER() <<  );
+                self->stnTrack1.tWaitTime = (GETxRANDOMxNUMBER() << tRandomShift);
                 self->stnTrack1.stnState = STN_WAIT;
                 CREATExTASKxSTATUSxMESSAGE(self->name,
                     self->stnTrack1.stnName, 
