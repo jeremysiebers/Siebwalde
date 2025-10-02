@@ -102,7 +102,9 @@ namespace SiebwaldeApp.Core
 
                 TrackController = initTrackcontroller();
 
-                await TrackController.StartTrackControllerAsync();
+                await TrackController.InitTrackControllerAsync();
+
+                TrackController.StartTrackController();
 
                 IoC.Logger.Log("Track Controller started.", "");
             }

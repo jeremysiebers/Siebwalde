@@ -41,6 +41,8 @@ namespace SiebwaldeApp.Core
         private bool _OccFromBlock21B;
         private bool _VoltageDetected;
 
+        private bool _OccToStn1;
+
         #endregion
 
         #region Public Methods
@@ -61,7 +63,7 @@ namespace SiebwaldeApp.Core
                 else
                 {
                     _HallBlock13 = value;
-                   // PropertyChanged(this, new PropertyChangedEventArgs(nameof(HallBlock13)));
+                    //PropertyChanged(this, new PropertyChangedEventArgs(nameof(HallBlock13)));
                 }
             }
         }
@@ -586,6 +588,26 @@ namespace SiebwaldeApp.Core
                 else
                 {
                     _VoltageDetected = value;
+                    //PropertyChanged(this, new PropertyChangedEventArgs(nameof(VoltageDetected)));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Get/Set and generate event for OccToStn1
+        /// </summary>
+        public bool OccToStn1
+        {
+            get => _OccToStn1;
+            set
+            {
+                if (value == _OccToStn1)
+                {
+                    return;
+                }
+                else
+                {
+                    _OccToStn1 = value;
                     //PropertyChanged(this, new PropertyChangedEventArgs(nameof(VoltageDetected)));
                 }
             }

@@ -80,7 +80,7 @@ namespace SiebwaldeApp.Core
         /// <summary>
         /// Starting async Method of TrackController
         /// </summary>
-        public static async Task StartTrackControllerAsync()
+        public static async Task InitTrackControllerAsync()
         {
             // Start a new task (so it runs on a different thread)
             await Task.Run(() =>
@@ -112,7 +112,17 @@ namespace SiebwaldeApp.Core
                 // start the Track controller main application
                 IoC.Logger.Log("Start Track Application.", LoggerInstance);
                 //mTrackControlMain.Start(TrackRealMode);
+
+                
             });
+        }
+
+        /// <summary>
+        /// Start the trackcontroller
+        /// </summary>
+        public void StartTrackController() {
+            // Start the station controller
+            mstationControl.Start();
         }
 
         #endregion

@@ -1,20 +1,76 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 
 namespace SiebwaldeApp.Core
 {
-    public class StationTrack
+    /// <summary>
+    /// Stationtrack class holds all data and properties of a station track
+    /// </summary>
+    public class StationTrack : INotifyPropertyChanged
     {
-        public string name { get; set; }
+        #region Private properties
 
-        public uint pathway { get; set; }
+        private bool _getOccStn;
+        private bool _setOccStn;
+
+        #endregion
+
+        #region Public properties
+
+        /// <summary>
+        /// The event that is fired when any child property changes it value
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged = (Sender, e) => { };
+
+        /// <summary>
+        /// Set the station track name
+        /// </summary>
+        public string stnTrackName { get; private set; }
         
-        public StationTrack()
+        public bool getOccStn
         {
-
+            get => _getOccStn;
+            set
+            {
+                if (value == _getOccStn)
+                {
+                    return;
+                }
+                else
+                {
+                    _getOccStn = value;
+                }
+            }
         }
+
+        public bool setOccStn
+        {
+            get => _setOccStn;
+            set
+            {
+                if (value == _setOccStn)
+                {
+                    return;
+                }
+                else
+                {
+                    _setOccStn = value;
+                }
+            }
+        }
+
+        #endregion
+
+        #region constructor
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="name"></param>
+        public StationTrack(string name)
+        {
+            stnTrackName = name;
+        }
+
+        #endregion
     }
 }
