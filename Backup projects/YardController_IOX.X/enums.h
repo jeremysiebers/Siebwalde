@@ -31,7 +31,7 @@ extern "C" {
     /* Led blink time */
     const uint16_t tLedBlinkTime = (uint16_t)(200);
     /* Idle TimeOut */
-    const uint16_t tIdleTimeOut = (uint16_t)(10 * tFactorSec);
+    const uint16_t tIdleTimeOut = (uint16_t)(5 * tFactorSec);
     /* IOX update time */
     const uint16_t tIOXTimeOut = (uint16_t)(10);
     /* IOX reset time */
