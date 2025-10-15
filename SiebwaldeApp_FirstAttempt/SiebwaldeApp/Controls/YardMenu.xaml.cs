@@ -1,12 +1,14 @@
-﻿using System.Windows.Controls;
-using SiebwaldeApp.Core;
+﻿using SiebwaldeApp.Core;
+
+// Alias to make WPF types explicit (avoids clash with WinForms)
+using WpfControls = System.Windows.Controls;
 
 namespace SiebwaldeApp
 {
     /// <summary>
     /// Interaction logic for SiebwaldeMenu.xaml
     /// </summary>
-    public partial class YardMenu : UserControl
+    public partial class YardMenu : WpfControls.UserControl
     {
         public YardMenu()
         {

@@ -1,5 +1,4 @@
 ﻿using SiebwaldeApp.Core;
-using System.Windows.Forms;
 
 namespace SiebwaldeApp
 {

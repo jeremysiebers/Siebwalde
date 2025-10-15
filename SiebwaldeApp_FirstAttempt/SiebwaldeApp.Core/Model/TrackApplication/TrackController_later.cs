@@ -6,7 +6,7 @@ namespace SiebwaldeApp
     /// <summary>
     /// TrackController instantiates all drivers related to Trackcontrol functionality and trackapplication
     /// </summary>
-    public class TrackController
+    public class TrackController_later
     {
         #region variables
 
@@ -51,7 +51,7 @@ namespace SiebwaldeApp
         /// <param name="main"></param>
         /// <param name="TrackReceivingPort"></param>
         /// <param name="TrackSendingPort"></param>
-        public TrackController(int TrackReceivingPort, int TrackSendingPort)
+        public TrackController_later(int TrackReceivingPort, int TrackSendingPort)
         {            
             mTrackReceivingPort = TrackReceivingPort;
             mTrackSendingPort = TrackSendingPort;

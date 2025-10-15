@@ -13,7 +13,7 @@ namespace SiebwaldeApp
     {
         #region variables
 
-        private TrackController MTcontroller;
+        private TrackController_later MTcontroller;
         //private TrackIOHandle trackIOHandle;
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace SiebwaldeApp
         /// <summary>
         /// Construct all related classes as shown in MVVM examples
         /// </summary>
-        public TrackAmplifierItemViewModel(TrackController trackController,
+        public TrackAmplifierItemViewModel(TrackController_later trackController,
             ushort slaveNumber,
             string slaveDetected,
             ushort[] holdingReg,

@@ -25,7 +25,7 @@ namespace SiebwaldeApp.Core
         public static SideMenuViewModel SideMenu => IoC.Get<SideMenuViewModel>();
 
         /// <summary>
-        /// A shortcut to access the <see cref="SiebwaldeApp.CorelicationModel"/>
+        /// A shortcut to access the <see cref="SiebwaldeApp.SiebwaldeApplicationModel"/>
         /// </summary>
         public static SiebwaldeApplicationModel siebwaldeApplicationModel => IoC.Get<SiebwaldeApplicationModel>();
 
@@ -42,7 +42,27 @@ namespace SiebwaldeApp.Core
         /// <summary>
         /// A shortcut to access the <see cref="TrackApplicationVariables"/>
         /// </summary>
-        public static TrackApplicationVariables TrackVariables => IoC.Get<TrackApplicationVariables>();
+        //public static TrackApplicationVariables TrackVariables => IoC.Get<TrackApplicationVariables>(); OLD
+
+        // Shared adapters (ports)
+        public static class TrackAdapter
+        {
+            public static ITrackIn? TrackIn { get; set; }
+            public static ITrackOut? TrackOut { get; set; }
+
+            // Safe accessors that fail fast if not initialized
+            public static ITrackIn RequireIn() => TrackIn ?? throw new InvalidOperationException("TrackAdapter.TrackIn not initialized.");
+            public static ITrackOut RequireOut() => TrackOut ?? throw new InvalidOperationException("TrackAdapter.TrackOut not initialized.");
+        }
+
+        public static class YardAdapter
+        {
+            public static IYardIn? YardIn { get; set; }
+            public static IYardOut? YardOut { get; set; }
+
+            public static IYardIn RequireIn() => YardIn ?? throw new InvalidOperationException("YardAdapter.YardIn not initialized.");
+            public static IYardOut RequireOut() => YardOut ?? throw new InvalidOperationException("YardAdapter.YardOut not initialized.");
+        }
 
         #endregion
 
@@ -74,7 +94,7 @@ namespace SiebwaldeApp.Core
             Kernel.Bind<SiebwaldeApplicationModel>().ToConstant(new SiebwaldeApplicationModel());
 
             // bind to a single instance of Track Application Variables
-            Kernel.Bind<TrackApplicationVariables>().ToConstant(new TrackApplicationVariables());
+            //Kernel.Bind<TrackApplicationVariables>().ToConstant(new TrackApplicationVariables()); OLD
         }
 
         #endregion

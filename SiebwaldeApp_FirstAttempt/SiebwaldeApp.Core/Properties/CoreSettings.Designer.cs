@@ -12,7 +12,7 @@ namespace SiebwaldeApp.Core.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.7.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.14.0.0")]
     public sealed partial class CoreSettings : global::System.Configuration.ApplicationSettingsBase {
         
         private static CoreSettings defaultInstance = ((CoreSettings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new CoreSettings())));
@@ -146,6 +146,18 @@ namespace SiebwaldeApp.Core.Properties {
         public ushort TrckReceivingPort {
             get {
                 return ((ushort)(this["TrckReceivingPort"]));
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool UseFakeHardwareAdapters {
+            get {
+                return ((bool)(this["UseFakeHardwareAdapters"]));
+            }
+            set {
+                this["UseFakeHardwareAdapters"] = value;
             }
         }
     }

@@ -14,4 +14,15 @@
   <PropertyGroup>
     <EnableSecurityDebugging>false</EnableSecurityDebugging>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Update="FiddleYardApplication\FiddleYardForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="FiddleYardApplication\FiddleYardMip50SettingsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="FiddleYardApplication\FiddleYardSettingsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+  </ItemGroup>
 </Project>
