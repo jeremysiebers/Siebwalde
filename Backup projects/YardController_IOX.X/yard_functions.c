@@ -131,11 +131,11 @@ void UPDATExYARDxFUNCTIONxSELECTION(void)
         channel = PREV;
     }
     else if(DEBOUNCExGETxVALUExUPDATEDxSTATE(&HOTRC_CH5)){
-        channel = ASSERT;
+        channel = JMP;
     }
     else if(HOTRC_CH6.value){ /* Channel pulses one 1 press 0-1-0 */
         HOTRC_CH6.value = false; /* Reset the value for next press */
-        channel = JMP;
+        channel = ASSERT;
     }
     else if(DEBOUNCExGETxVALUExUPDATEDxSTATE(&HOTRC_CH2L)){ /* Rotate disk */
         /* If activated by RC controller */
