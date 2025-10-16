@@ -77,36 +77,84 @@ namespace SiebwaldeApp.Core
             if (_trackApplication != null) return;
 
             IoC.Logger.Log("Track Application starting...", "");
-            // Get ports from your IoC (adapters already set up elsewhere)
-            ITrackIn trackIn = IoC.TrackAdapter.TrackIn;
-            ITrackOut trackOut = IoC.TrackAdapter.TrackOut;
-            IYardIn yardIn = IoC.YardAdapter.YardIn;
-            IYardOut yardOut = IoC.YardAdapter.YardOut;
 
-            _trackApplication = new TrackApplication(trackIn, trackOut, yardIn, yardOut);
+            // Get ports from IoC (throw if not initialized)
+            var trackIn = IoC.TrackAdapter.RequireIn();
+            var trackOut = IoC.TrackAdapter.RequireOut();
 
+            // Build root
+            _trackApplication = new TrackApplication(trackIn, trackOut);
+
+            // Register the 6 station tracks with metadata into the registry
             RegisterStationBlocks(trackOut);
 
-            // StationController was constructed inside TrackApplication and is event-wired already.
-            await Task.CompletedTask;
+            // 🔹 Start the application (spins up StationSide run loops)
+            await _trackApplication.StartAsync();
 
-            //TrackController = initTrackApplication();
-            //await TrackApplication.InitTrackControllerAsync();
-            //TrackController.StartTrackController();
             IoC.Logger.Log("Track Application started.", "");
         }
 
+        /// <summary>
+        /// Stops the currently running track application, if one is active.
+        /// </summary>
+        /// <remarks>This method ensures that the track application is properly stopped and its resources
+        /// are released.  If no track application is active, the method exits without performing any action.  Any
+        /// errors encountered during the stopping process are logged.</remarks>
+        public void StopTrackApplication()
+        {
+            if (_trackApplication == null)
+                return;
+
+            IoC.Logger.Log("Track Application stopping...", "");
+
+            try
+            {
+                _trackApplication.Stop();
+                _trackApplication = null;
+                IoC.Logger.Log("Track Application stopped.", "");
+            }
+            catch (Exception ex)
+            {
+                IoC.Logger.Log($"Error while stopping Track Application: {ex.Message}", "");
+            }
+        }
+
+        /// <summary>
+        /// Registers station track blocks and their associated metadata in the track application registry.
+        /// </summary>
+        /// <remarks>This method defines and registers track blocks for two station zones: "StationTop"
+        /// and "StationBottom". Each block is associated with entry and exit sensors, a signal, an amplifier, and
+        /// metadata specifying the zone and track role. The metadata includes a "Station" tag to identify the blocks as
+        /// station-related.</remarks>
+        /// <param name="trackOut">The output track interface used to initialize amplifiers for the registered track blocks.</param>
         private void RegisterStationBlocks(ITrackOut trackOut)
         {
-            foreach (var id in TrackApplication.TopTracks.Concat(TrackApplication.BottomTracks))
+            if (_trackApplication == null)
+                throw new InvalidOperationException("TrackApplication must be initialized before registering blocks.");
+
+            void Add(int id, string zone, TrackRole role)
             {
                 var entry = new TrackSensor($"{id}-Entry");
                 var exit = new TrackSensor($"{id}-Exit");
-                var signal = new Signal($"{id}-Head"); // station head per track (software-controlled)
+                var signal = new Signal($"{id}-Head");
                 var amp = new Amplifier(id, trackOut);
 
-                _trackApplication.RegisterBlock(new TrackBlock(id, entry, exit, signal, amp));
+                var block = new TrackBlock(id, entry, exit, signal, amp);
+                var meta = new TrackMetadata { Zone = zone, Role = role };
+                meta.Tags.Add("Station");
+
+                _trackApplication.Registry.Register(block, meta);
             }
+
+            // Top: 10,11,12 (12 = middle freight)
+            Add(10, "StationTop", TrackRole.FreightAllowed);
+            Add(11, "StationTop", TrackRole.FreightAllowed);
+            Add(12, "StationTop", TrackRole.MiddleFreight);
+
+            // Bottom: 1,2,3 (3 = middle freight)
+            Add(1, "StationBottom", TrackRole.FreightAllowed);
+            Add(2, "StationBottom", TrackRole.FreightAllowed);
+            Add(3, "StationBottom", TrackRole.MiddleFreight);
         }
 
         /// <summary>

@@ -1,157 +1,160 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Xml.Linq;
+﻿// File: SiebwaldeApp.Core/Station/StationController.cs
 
 namespace SiebwaldeApp.Core
 {
     /// <summary>
-    /// Coordinates sides (Top/Bottom), detects incoming, assigns tracks,
-    /// provides exit availability, and forwards departure requests from SW.
+    /// Coordinates both sides of the station.
+    /// Listens to track I/O events and delegates per-side logic to StationSide.
     /// </summary>
     public class StationController
     {
-        #region private properties
-        // Logger instance
-        // logging local variables
-        private ILogger _stationcontrolloging;
-
-        private CancellationTokenSource _cts;
-        // Basic string for file name
-        private NewLogFileBasics _logfilebasics;
-
-        // Logger instance
-        private static string? LoggerInstance { get; set; }
-
-        // Get a new log factory
-        static ILogger GetLogger(string file, string loggerinstance)
-        {
-            return new FileLogger(file, loggerinstance);
-        }
-
-        #endregion
-
-        #region public properties
+        private readonly TrackApplication _app;
+        private readonly ITrackIn _in;
+        private readonly ITrackOut _out;
+        private readonly string _loggerInstance;
 
         public StationSide TopStation { get; }
         public StationSide BottomStation { get; }
 
-        #endregion
-
-        #region constructor
+        // Track -> reserved train type (so on entry sensor we know Passenger vs Freight)
+        private readonly Dictionary<int, TrainType> _reservedTypes = new();
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StationController"/> class with the specified logger instance.
+        /// Initializes a new instance of the <see cref="StationController"/> class, which manages the operations of a
+        /// station, including its top and bottom sides, and facilitates interactions with track input and output
+        /// systems.
         /// </summary>
-        /// <remarks>This constructor initializes the logging system for the station control and creates
-        /// two station sides: "Top" and "Bottom". Each station side is associated with a specific set of identifiers
-        /// and is logged using the provided logger instance.</remarks>
-        /// <param name="LoggerInstance">The name of the logger instance to be used for logging operations. This value is used to identify log
-        /// entries associated with this instance of <see cref="StationController"/>.</param>
-        public StationController(string LoggerInstance)
+        /// <remarks>This constructor initializes the top and bottom sides of the station with predefined
+        /// zones and middle track numbers. It also sets up event wiring and logs the initialization process using the
+        /// specified logger instance.</remarks>
+        /// <param name="app">The application instance that provides core functionality and services for the station.</param>
+        /// <param name="trackIn">The track input system used to handle incoming operations at the station.</param>
+        /// <param name="trackOut">The track output system used to handle outgoing operations from the station.</param>
+        /// <param name="loggerInstance">The name of the logger instance used for logging station-related events. Defaults to "Station" if not
+        /// specified.</param>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="app"/>, <paramref name="trackIn"/>, or <paramref name="trackOut"/> is <see
+        /// langword="null"/>.</exception>
+        public StationController(TrackApplication app, ITrackIn trackIn, ITrackOut trackOut, string loggerInstance)
         {
-            // Set logger instance
-            LoggerInstance = "Station";
+            _app = app ?? throw new ArgumentNullException(nameof(app));
+            _in = trackIn ?? throw new ArgumentNullException(nameof(trackIn));
+            _out = trackOut ?? throw new ArgumentNullException(nameof(trackOut));
+            _loggerInstance = loggerInstance;
 
-            _logfilebasics = new NewLogFileBasics();
+            // Create sides based on zones + middle track numbers
+            TopStation = new StationSide("Top", zone: "StationTop", middleTrackNumber: 12, app: _app, loggerInstance: _loggerInstance);
+            BottomStation = new StationSide("Bottom", zone: "StationBottom", middleTrackNumber: 3, app: _app, loggerInstance: _loggerInstance);
 
-            _stationcontrolloging = GetLogger(_logfilebasics.getLogFile("StationControl.txt"), LoggerInstance);
-            // Add the logger to the logging factory
-            IoC.Logger.AddLogger(_stationcontrolloging);
-
-            TopStation = new StationSide("Top", new int[] { 10, 11, 12 }, LoggerInstance);
-            IoC.Logger.Log($"Instantiate Top Station...", LoggerInstance);
-
-            BottomStation = new StationSide("Bottom", new int[] { 1, 2, 3 }, LoggerInstance);
-            IoC.Logger.Log($"Instantiate Bottom Station...", LoggerInstance);
-
+            WireEvents();
+            IoC.Logger.Log("StationController initialized", _loggerInstance);
         }
 
-        #endregion
-
-        #region public methods
-
-        public void Start()
+        /// <summary>
+        /// Starts the operations of both the top and bottom stations.
+        /// </summary>
+        /// <remarks>This method initiates the start process for both the top and bottom stations.  The
+        /// operation respects the provided <paramref name="token"/> to allow for cancellation.</remarks>
+        /// <param name="token">A <see cref="CancellationToken"/> that can be used to cancel the operation.</param>
+        public void Start(CancellationToken token)
         {
-            IoC.Logger.Log($"Start StationControl GlobalLoop.", LoggerInstance);
-            _cts = new CancellationTokenSource();
-            TopStation.Start(_cts.Token);
-            BottomStation.Start(_cts.Token);
-            Task.Run(() => GlobalLoop(_cts.Token));
+            TopStation.Start(token);
+            BottomStation.Start(token);
         }
 
-        public void Stop() => _cts?.Cancel();
-
-        // Called by the outside world (SW) when a departure is requested.
-        public void RequestDeparture(bool preferPassenger, bool isTopSide)
+        /// <summary>
+        /// Stops the operation of both the top and bottom stations.
+        /// </summary>
+        /// <remarks>This method halts the processes of the top and bottom stations by invoking their
+        /// respective stop operations. Ensure that any ongoing tasks or operations are completed or safely interrupted
+        /// before calling this method.</remarks>
+        public void Stop()
         {
-            var side = isTopSide ? TopStation : BottomStation;
-            side.RequestPreferredDeparture(preferPassenger ? TrainType.Passenger : TrainType.Freight);
+            TopStation.Stop();
+            BottomStation.Stop();
         }
 
-        // Called by your layout/sensors when the exit block becomes free/busy.
-        public void SetExitAvailability(bool isTopSide, bool isFree)
+        private void WireEvents()
         {
-            var side = isTopSide ? TopStation : BottomStation;
-            side.SetExitAvailability(isFree);
-        }
-
-        #endregion
-
-        #region private methods
-
-        private async Task GlobalLoop(CancellationToken token)
-        {
-            while (!token.IsCancellationRequested)
+            // Train approaching before station
+            _in.IncomingDetected += e =>
             {
-                if (DetectIncomingTrain(out bool isFreight, out bool isTop))
+                var side = e.IsTopSide ? TopStation : BottomStation;
+                var type = e.IsFreight ? TrainType.Freight : TrainType.Passenger;
+
+                var free = side.GetFreeTrack(isFreight: e.IsFreight);
+                if (free == null)
                 {
-                    var side = isTop ? TopStation : BottomStation;
-
-                    var freeTrack = side.GetFreeTrack(isFreight);
-
-                    if (freeTrack == null)
-                    {
-                        // ❌ No track free → stop the train before entering the station
-                        StopIncomingTrain(isTop);
-                    }
-                    else
-                    {
-                        // ✅ Track free → reserve and let StationSide handle the rest
-                        //StartIncomingTrain(isTop);
-                        //freeTrack.Reserve();
-                        //side.HandleIncomingTrain(isFreight);
-
-                        freeTrack.Reserve();
-                        // Later, when the train hits the entry sensor for this track:
-                        // side.ConfirmArrivalAndStop(freeTrack, isFreight ? TrainType.Freight : TrainType.Passenger);
-                        side.HandleIncomingTrain(freeTrack, isFreight ? TrainType.Freight : TrainType.Passenger);
-
-                        IoC.Logger.Log($"Handle incoming train on {side.Name}, train is {(isFreight ? "Freight" : "Passenger")}", LoggerInstance);
-                    }
-                    
+                    // No capacity: stop before station and hold entry signal at red
+                    _out.StopBeforeStation(e.IsTopSide);
+                    _app.SetEntrySignal(e.IsTopSide, green: false);
+                    IoC.Logger.Log($"{side.Name}: no free track, stopping before station", _loggerInstance);
+                    return;
                 }
 
-                await Task.Delay(200, token);
-            }
+                // Reserve locally (track knows only Reserved state; we keep the type here)
+                free.Reserve();
+                _reservedTypes[free.Number] = type;
+
+                side.HandleIncomingTrain(free, type);
+
+                // Allow entry (route safety checks can be added later)
+                _app.SetEntrySignal(e.IsTopSide, green: true);
+                IoC.Logger.Log($"{side.Name}: reserved track {free.Number} for {type}, entry signal GREEN", _loggerInstance);
+            };
+
+            // Entry sensor at a specific track fired → stop amplifier and mark occupied
+            _in.EntrySensorTriggered += e =>
+            {
+                var side = e.IsTopSide ? TopStation : BottomStation;
+                var track = side.GetByNumber(e.TrackNumber);
+                if (track == null)
+                {
+                    IoC.Logger.Log($"{side.Name}: entry sensor on unknown track {e.TrackNumber}", _loggerInstance);
+                    return;
+                }
+
+                if (!_reservedTypes.TryGetValue(e.TrackNumber, out var type))
+                {
+                    // Fallback if missing reservation — assume Passenger to be safe
+                    type = TrainType.Passenger;
+                }
+
+                side.ConfirmArrivalAndStop(track, type);
+
+                // Close entry again by default
+                _app.SetEntrySignal(e.IsTopSide, green: false);
+            };
+
+            // Exit block (beyond station) availability
+            _in.ExitBlockFreeChanged += e =>
+            {
+                var side = e.IsTopSide ? TopStation : BottomStation;
+                side.SetExitAvailability(e.IsFree);
+
+                // Mirror on hardware exit signal for this side
+                _app.SetExitSignal(e.IsTopSide, e.IsFree);
+                IoC.Logger.Log($"{side.Name}: exit is {(e.IsFree ? "FREE" : "BLOCKED")}", _loggerInstance);
+            };
+
+            // Train has cleared a specific station track (amplifier OUT cleared / exit sensor)
+            _in.TrainClearedFromBlock += e =>
+            {
+                var side = e.IsTopSide ? TopStation : BottomStation;
+                var track = side.GetByNumber(e.TrackNumber);
+                if (track == null) return;
+
+                side.ConfirmTrainLeft(track);
+                _reservedTypes.Remove(e.TrackNumber);
+            };
         }
 
-        private bool DetectIncomingTrain(out bool isFreight, out bool isTop)
+        /// <summary>
+        /// Optional: pass departure preference down to a side (from UI, for example).
+        /// </summary>
+        public void RequestPreferredDeparture(bool isTopSide, TrainType type)
         {
-            // TODO: hook up sensors
-            isFreight = false;
-            isTop = true;
-            return false;
+            var side = isTopSide ? TopStation : BottomStation;
+            side.RequestPreferredDeparture(type);
         }
-
-        private void StopIncomingTrain(bool isTop)
-        {
-            /// TODO: command to stop before station
-            IoC.Logger.Log($"Incoming train stopped before {(isTop ? "Top" : "Bottom")} station — no free track.", LoggerInstance);
-        }
-
-        #endregion
     }
 }

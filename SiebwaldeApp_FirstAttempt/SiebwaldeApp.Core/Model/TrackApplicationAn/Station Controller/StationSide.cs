@@ -1,8 +1,6 @@
-﻿
-using PropertyChanged;
+﻿// File: SiebwaldeApp.Core/Station/StationSide.cs
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,17 +18,25 @@ namespace SiebwaldeApp.Core
     }
 
     /// <summary>
-    /// One side of the station (Top or Bottom). 
-    /// Owns 3 tracks and runs its own local loop.
+    /// One side of the station (Top or Bottom).
+    /// Owns 3 tracks (resolved by zone via TrackApplication.Registry) and runs its own local loop.
     /// Implements dwell/priority logic: Passenger first when requested,
     /// Freight only when exit is free (and min dwell elapsed).
+    /// 
+    /// NOTE: StationTrack does not yet know TrackBlock/Amplifier. Therefore this class
+    /// also issues amplifier commands by resolving the block from TrackApplication.Registry.
     /// </summary>
     public class StationSide
     {
-        #region private properties
+        #region private fields
 
         private readonly string _name;
-        private readonly List<StationTrack> _tracks;
+        private readonly string _zone;
+        private readonly int _middleTrackNumber;
+        private readonly TrackApplication _app; // root (to query registry / command amps)
+        private readonly string _loggerInstance;
+
+        private readonly List<StationTrack> _tracks = new();
 
         private CancellationTokenSource _localCts;
 
@@ -38,52 +44,50 @@ namespace SiebwaldeApp.Core
         private volatile bool _exitFree;
 
         // Pending preference from SW (e.g., "depart a passenger now" vs "freight").
-        private readonly object _sync = new object();
+        private readonly object _sync = new();
         private TrainType? _preferredDeparture;
 
-        // Simple local state machine for demonstration; you can expand if needed.
+        // Simple local state machine for diagnostics.
         private StationState _currentState = StationState.Idle;
 
-        private readonly string _loggerInstance;
-
         #endregion
 
-        #region public properties
+        #region public api
 
-        // Name of this station side (Top or Bottom)
-        public string Name { get { return _name; } }
-                
-        #endregion
-
-        #region constructor
+        public string Name => _name;
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public StationSide(string name, IEnumerable<int> trackNumbers, string loggerInstance)
-        {   
+        /// <param name="name">Side name (e.g., "Top", "Bottom")</param>
+        /// <param name="zone">Registry zone that contains this side's 3 station tracks (e.g., "StationTop")</param>
+        /// <param name="middleTrackNumber">Physical number of the middle (freight) track (e.g., 12 or 3)</param>
+        /// <param name="app">TrackApplication root (to query the registry)</param>
+        /// <param name="loggerInstance">Logger category/instance name</param>
+        public StationSide(string name, string zone, int middleTrackNumber, TrackApplication app, string loggerInstance)
+        {
             _name = name;
+            _zone = zone;
+            _middleTrackNumber = middleTrackNumber;
+            _app = app ?? throw new ArgumentNullException(nameof(app));
             _loggerInstance = loggerInstance;
-            _tracks = trackNumbers.Select(num => new StationTrack(num, _loggerInstance)).ToList();
-            
 
-            IoC.Logger.Log($"Instantiate " + _name + " Tracks..." , _loggerInstance);
+            // Resolve this side's blocks by zone and create StationTrack models (by number)
+            var blocks = _app.Registry.Query(zone: _zone).OrderBy(b => b.Id).ToList();
+            foreach (var b in blocks)
+                _tracks.Add(new StationTrack(b.Id, _loggerInstance));
+
+            IoC.Logger.Log(
+                $"Instantiate {_name} Tracks from zone '{_zone}' [{string.Join(",", _tracks.Select(t => t.Number))}]...",
+                _loggerInstance);
         }
 
-        #endregion
-
-        #region public methods
-
         /// <summary>
-        /// Starts the execution of the run loop for this instance.
+        /// Starts the execution loop for this side.
         /// </summary>
-        /// <remarks>This method initializes a linked <see cref="CancellationTokenSource"/> using the
-        /// provided <paramref name="globalToken"/>  and begins the run loop on a separate task. The run loop will
-        /// continue until the cancellation token is triggered.</remarks>
-        /// <param name="globalToken">A <see cref="CancellationToken"/> that can be used to signal a request to cancel the operation.</param>
         public void Start(CancellationToken globalToken)
         {
-            IoC.Logger.Log($"Start " + _name + " RunLoop.", _loggerInstance);
+            IoC.Logger.Log($"Start {_name} RunLoop.", _loggerInstance);
             _localCts = CancellationTokenSource.CreateLinkedTokenSource(globalToken);
             Task.Run(() => RunLoop(_localCts.Token));
         }
@@ -91,19 +95,13 @@ namespace SiebwaldeApp.Core
         public void Stop() => _localCts?.Cancel();
 
         /// <summary>
-        /// Called by StationControl when a train was routed to this side.
-        /// Reserves the chosen track and transitions local flow.
+        /// Called by StationControl when a train is routed to this side.
         /// </summary>
         public void HandleIncomingTrain(StationTrack reservedTrack, TrainType type)
         {
             if (reservedTrack == null) return;
 
-            // At this moment the track is reserved; when the train hits the entry sensor,
-            // StationSide should call "StopTrain()" and then mark Occupy(type).
-            // For now, we go to the TrainIncoming state; sensors should promote to Stopping/Occupied.
             _currentState = StationState.TrainIncoming;
-
-            // Optional log:
             IoC.Logger.Log($"{_name}: incoming {type} assigned to track {reservedTrack.Number}", _loggerInstance);
         }
 
@@ -113,22 +111,24 @@ namespace SiebwaldeApp.Core
         public void SetExitAvailability(bool isFree)
         {
             _exitFree = isFree;
+            if (isFree)
+            {
+                // Try depart immediately when exit becomes free
+                TryDepartOneIfPossible();
+            }
         }
 
         /// <summary>
-        /// StationControl (SW) can nudge a preferred departure type.
-        /// We keep this lightweight; it only influences the next selection.
+        /// SW can hint which type to prioritize for the next departure.
         /// </summary>
         public void RequestPreferredDeparture(TrainType type)
         {
-            lock (_sync)
-            {
-                _preferredDeparture = type;
-            }
+            lock (_sync) _preferredDeparture = type;
 
-            // Also set "intent" on all tracks that match the type and are occupied.
             foreach (var t in _tracks.Where(t => t.IsOccupied && t.OccupantType == type))
                 t.RequestDeparture();
+
+            IoC.Logger.Log($"{_name}: preferred departure requested for {type}", _loggerInstance);
         }
 
         /// <summary>
@@ -139,78 +139,105 @@ namespace SiebwaldeApp.Core
         {
             if (isFreight)
             {
-                var middle = _tracks[2]; // the middle one of the 3
-                return middle.IsFree ? middle : null;
+                var mid = GetByNumber(_middleTrackNumber);
+                return (mid != null && mid.IsFree) ? mid : null;
             }
-            else
-            {
-                // Outer two: index 0 and 1
-                var outer = new[] { _tracks[0], _tracks[1] };
-                return outer.FirstOrDefault(t => t.IsFree);
-            }
+
+            // Passenger: prefer outers (anything except the middle)
+            return _tracks.Where(t => t.Number != _middleTrackNumber)
+                          .FirstOrDefault(t => t.IsFree);
         }
 
         /// <summary>
+        /// Track lookup by physical number; returns null if not part of this side.
+        /// </summary>
+        public StationTrack GetByNumber(int trackNumber) =>
+            _tracks.FirstOrDefault(t => t.Number == trackNumber);
+
+        /// <summary>
         /// Call when entry sensor triggers for a specific reserved track.
-        /// Typically: stop amplifier and mark occupied.
+        /// - Sends amplifier STOP via registry (Occupied IN)
+        /// - Marks StationTrack as occupied (with dwell start)
         /// </summary>
         public void ConfirmArrivalAndStop(StationTrack track, TrainType type)
         {
             if (track == null) return;
-            track.StopTrain();
+
+            // 1) Stop via amplifier (resolve block by number)
+            var reg = _app.Registry.Get(track.Number);
+            if (reg != null)
+            {
+                reg.Value.Block.CommandStop();
+                IoC.Logger.Log($"{_name}: amplifier STOP on track {track.Number}", _loggerInstance);
+            }
+
+            // 2) Maintain StationTrack local state/logging
+            track.StopTrain(); // keeps your existing hooks/logs inside StationTrack
             track.Occupy(type);
-            _currentState = StationState.TrainWaiting; // train is now at platform
+
+            _currentState = StationState.TrainWaiting; // now at platform
+            IoC.Logger.Log($"{_name}: track {track.Number} occupied by {type}", _loggerInstance);
         }
 
         /// <summary>
-        /// Call when exit sensor shows train has left this track.
+        /// Call when the train has fully left the track (exit sensor cleared / amplifier OUT cleared).
         /// </summary>
         public void ConfirmTrainLeft(StationTrack track)
         {
-            track?.Release();
+            if (track == null) return;
+
+            track.Release();
             _currentState = HasAnyOccupied() ? StationState.TrainWaiting : StationState.Idle;
+
+            IoC.Logger.Log($"{_name}: track {track.Number} cleared", _loggerInstance);
         }
 
         /// <summary>
-        /// Releases all occupied tracks in the station and transitions the station to the idle state.
+        /// Emergency: release all occupied tracks (logic side only).
         /// </summary>
-        /// <remarks>This method should be used in emergency scenarios where all tracks need to be cleared
-        /// immediately.  Tracks that are not occupied will remain unaffected.</remarks>
         public void EmergencyReleaseAllTracks()
         {
             foreach (var t in _tracks.Where(t => t.IsOccupied))
                 t.Release();
+
             _currentState = StationState.Idle;
+            IoC.Logger.Log($"{_name}: EMERGENCY RELEASE executed", _loggerInstance);
         }
 
         #endregion
 
-        #region private methods
+        #region private loop & policy
 
         private async Task RunLoop(CancellationToken token)
         {
             while (!token.IsCancellationRequested)
             {
-                switch (_currentState)
+                try
                 {
-                    case StationState.Idle:
-                        // Nothing to do until HandleIncomingTrain is called.
-                        break;
+                    switch (_currentState)
+                    {
+                        case StationState.Idle:
+                            // Wait for HandleIncomingTrain(...)
+                            break;
 
-                    case StationState.TrainIncoming:
-                        // Waiting for sensor to confirm arrival -> external call ConfirmArrivalAndStop(...)
-                        // We stay in this state until ConfirmArrivalAndStop moves us forward.
-                        break;
+                        case StationState.TrainIncoming:
+                            // Waiting for sensor -> ConfirmArrivalAndStop(...)
+                            break;
 
-                    case StationState.TrainWaiting:
-                        // Evaluate if any train can depart based on dwell/priority/exit.
-                        TryDepartOneIfPossible();
-                        break;
+                        case StationState.TrainWaiting:
+                            // Evaluate departures regularly
+                            TryDepartOneIfPossible();
+                            break;
 
-                    case StationState.Departing:
-                        // Transient; after StartTrain() we move back to Idle or stay in Waiting if others remain.
-                        _currentState = HasAnyOccupied() ? StationState.TrainWaiting : StationState.Idle;
-                        break;
+                        case StationState.Departing:
+                            // After StartTrain() we fall back based on remaining occupancy
+                            _currentState = HasAnyOccupied() ? StationState.TrainWaiting : StationState.Idle;
+                            break;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    IoC.Logger.Log($"{_name}: RunLoop error: {ex.Message}", _loggerInstance);
                 }
 
                 await Task.Delay(200, token);
@@ -221,52 +248,58 @@ namespace SiebwaldeApp.Core
 
         /// <summary>
         /// Core departure policy:
-        /// 1) If SW prefers Passenger now and any Passenger is ready -> depart that passenger.
-        /// 2) Else if any Passenger is ready -> depart a passenger.
-        /// 3) Else if SW prefers Freight and any Freight is ready -> depart that freight.
-        /// 4) Else if any Freight is ready -> depart a freight.
+        /// 1) If preferred Passenger and any Passenger is ready -> depart that passenger.
+        /// 2) Else any Passenger ready -> depart passenger.
+        /// 3) Else if preferred Freight and any Freight is ready -> depart freight.
+        /// 4) Else any Freight ready -> depart freight.
+        /// Also issues amplifier START for the chosen track.
         /// </summary>
         private void TryDepartOneIfPossible()
         {
+            if (!_exitFree) return;
+
             TrainType? preferred;
-            lock (_sync) { preferred = _preferredDeparture; }
+            lock (_sync) preferred = _preferredDeparture;
 
             StationTrack PickReady(Func<StationTrack, bool> pred) =>
                 _tracks.FirstOrDefault(t => t.IsOccupied && pred(t) && t.IsReadyToDepart(_exitFree));
 
             StationTrack candidate = null;
 
-            // 1) Preferred passenger
-            if (_preferredDeparture == TrainType.Passenger)
+            if (preferred == TrainType.Passenger)
                 candidate = PickReady(t => t.OccupantType == TrainType.Passenger && t.DepartureRequested);
 
-            // 2) Any passenger ready
             if (candidate == null)
                 candidate = PickReady(t => t.OccupantType == TrainType.Passenger);
 
-            // 3) Preferred freight
-            if (candidate == null && _preferredDeparture == TrainType.Freight)
+            if (candidate == null && preferred == TrainType.Freight)
                 candidate = PickReady(t => t.OccupantType == TrainType.Freight && t.DepartureRequested);
 
-            // 4) Any freight ready
             if (candidate == null)
                 candidate = PickReady(t => t.OccupantType == TrainType.Freight);
 
             if (candidate == null) return;
 
-            // We have a candidate: perform departure
+            // 1) Start via amplifier (resolve block by number)
+            var reg = _app.Registry.Get(candidate.Number);
+            if (reg != null)
+            {
+                reg.Value.Block.CommandStart();
+                IoC.Logger.Log($"{_name}: amplifier START on track {candidate.Number}", _loggerInstance);
+            }
+
+            // 2) Maintain StationTrack local state/logging
             candidate.StartTrain();
 
-            // After the train clears the block, sensors should call ReleaseFor(candidate)
-            // For now we simulate immediate release or leave to external sensor logic.
-            // candidate.Release();
-
-            // Clear the one-shot preference once used (optional behavior).
-            _preferredDeparture = null;
-
             _currentState = StationState.Departing;
-            IoC.Logger.Log($"{_name}: departing track {candidate.Number} ({candidate.OccupantType})", _loggerInstance);
+
+            // One-shot; clear once used
+            lock (_sync) _preferredDeparture = null;
+
+            IoC.Logger.Log($"{_name}: departing track {candidate.Number} ({candidate.OccupantType})",
+                _loggerInstance);
         }
+
         #endregion
     }
 }

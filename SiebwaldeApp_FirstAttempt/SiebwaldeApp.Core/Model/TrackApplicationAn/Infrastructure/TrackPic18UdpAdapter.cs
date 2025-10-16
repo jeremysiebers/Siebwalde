@@ -1,9 +1,4 @@
 ﻿// File: SiebwaldeApp.Core/Infrastructure/Pic18UdpAdapter.cs
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using SiebwaldeApp.Core
 
 namespace SiebwaldeApp.Core
 {

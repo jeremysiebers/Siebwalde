@@ -152,6 +152,16 @@ namespace SiebwaldeApp
 
         protected override void OnExit(ExitEventArgs e)
         {
+            try
+            {
+                IoC.siebwaldeApplicationModel.StopTrackApplication();
+                IoC.Logger.Log("Application exiting cleanly.", "");
+            }
+            catch (Exception ex)
+            {
+                IoC.Logger.Log($"Error during shutdown: {ex.Message}", "");
+            }
+
             base.OnExit(e);
             try { _udpCts?.Cancel(); } catch { }
             (IoC.TrackAdapter.TrackIn as IDisposable)?.Dispose();
