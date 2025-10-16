@@ -13,7 +13,7 @@ namespace SiebwaldeApp.Core
         private ILogger _trackapplicationloging;
 
         // Logger instance
-        private static string? _loggerInstance;
+        private readonly string _loggerInstance;
 
         // Get a new log factory
         static ILogger GetLogger(string file, string loggerinstance)
@@ -23,7 +23,7 @@ namespace SiebwaldeApp.Core
 
         public TrackRegistry Registry { get; } = new();
 
-        public StationController Station { get; }
+        public StationController Station { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TrackApplication"/> class.
@@ -45,8 +45,13 @@ namespace SiebwaldeApp.Core
 
             IoC.Logger.Log("Track Application instantiated.", _loggerInstance);
 
-            Station = new StationController(this, _trackIn, _trackOut, _loggerInstance);
             WireBuses();
+
+            _trackIn.AmplifierOccupiedChanged += e =>
+            {
+                var entry = Registry.Get(e.TrackNumber);
+                entry?.Block.Amplifier.SetFeedback(e.OccupiedOut);
+            };
         }
 
         /// <summary>
@@ -77,7 +82,13 @@ namespace SiebwaldeApp.Core
         public Task StartAsync(CancellationToken token = default)
         {
             _cts = CancellationTokenSource.CreateLinkedTokenSource(token);
-            IoC.Logger.Log("Track Application started StationConroller.", _loggerInstance);
+            IoC.Logger.Log("Track Application started StationController.", _loggerInstance);
+
+            if (Station == null)
+            {
+                Station = new StationController(this, _trackIn, _trackOut, _loggerInstance);
+            }
+
             Station.Start(_cts.Token);   // start Top/Bottom loops
             return Task.CompletedTask;
         }
@@ -89,8 +100,10 @@ namespace SiebwaldeApp.Core
         /// method multiple times.</remarks>
         public void Stop()
         {
+            IoC.Logger.Log("Track Application stopping...", _loggerInstance);
             try { _cts?.Cancel(); } catch { }
             Station.Stop();
+            IoC.Logger.Log("Track Application stopped.", _loggerInstance);
         }
 
         public void SetEntrySignal(bool isTopSide, bool green) => _trackOut.SetSignalEntry(isTopSide, green);
