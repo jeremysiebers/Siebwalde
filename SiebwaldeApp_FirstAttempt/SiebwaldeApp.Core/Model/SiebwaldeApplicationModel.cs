@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Ninject;
+using System;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,6 +16,7 @@ namespace SiebwaldeApp.Core
         #region Private members
         public FiddleYardController? FYcontroller;
         public FiddleYardController? YDcontroller;
+        private CancellationTokenSource _appCts;
 
         private readonly NewMAC_IP_Conditioner _macIp = new();
         public TrackApplication? _trackApplication;
@@ -24,6 +26,9 @@ namespace SiebwaldeApp.Core
         public SiebwaldeApplicationModel()
         {
             IoC.Logger.Log("Siebwalde Application started.", "");
+
+            _appCts?.Cancel();
+            _appCts = new CancellationTokenSource();
 
             var macString = _macIp.MACstring();
             IoC.Logger.Log($"Main: PC MAC address is: {(string.IsNullOrWhiteSpace(macString) ? "<unknown>" : macString)}", "");
@@ -71,7 +76,17 @@ namespace SiebwaldeApp.Core
             IoC.Logger.Log("FiddleYard Controller started.", "");
         }
 
-        /// <summary>Track Controller</summary>
+
+
+        /// <summary>
+        /// Starts the track application, initializing and registering station tracks, and launching the simulation
+        /// controller.
+        /// </summary>
+        /// <remarks>This method initializes the track application if it has not already been started. It
+        /// retrieves the necessary input and output ports, registers station tracks with metadata, and starts the
+        /// application's main processing loop. Additionally, it starts the simulation controller to manage
+        /// simulation-related tasks.</remarks>
+        /// <returns></returns>
         public async Task StartTrackApplication()
         {
             if (_trackApplication != null) return;
@@ -88,8 +103,15 @@ namespace SiebwaldeApp.Core
             // Register the 6 station tracks with metadata into the registry
             RegisterStationBlocks(trackOut);
 
-            // 🔹 Start the application (spins up StationSide run loops)
-            await _trackApplication.StartAsync();
+            // 1) Start the application (spins up StationSide run loops)
+            await _trackApplication.StartAsync(_appCts.Token);
+
+            // 2) Pas nu de simulatie starten
+            var simCtrl = IoC.Kernel.Get<ISimulationController>();
+            if (simCtrl != null)
+            {
+                await simCtrl.StartAsync(_appCts.Token);
+            }
 
             IoC.Logger.Log("Track Application started.", "");
         }
@@ -112,6 +134,10 @@ namespace SiebwaldeApp.Core
                 _trackApplication.Stop();
                 _trackApplication = null;
                 IoC.Logger.Log("Track Application stopped.", "");
+                // sim ook stoppen
+                IoC.Kernel.Get<ISimulationController>().Stop();
+
+                _appCts?.Cancel();
             }
             catch (Exception ex)
             {

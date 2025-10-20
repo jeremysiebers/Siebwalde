@@ -5,12 +5,14 @@ using Xunit;
 
 namespace SiebwaldeApp.Core.Tests.Station
 {
+    [Collection("IoC bootstrap")]
+
     public class StationControllerTests
     {
         public StationControllerTests()
         {
             // Replace IoC logger binding with our test stub
-            IoC.Kernel.Rebind<ILogFactory>().ToConstant(new TestLogFactory());
+            //IoC.Kernel.Rebind<ILogFactory>().ToConstant(new TestLogFactory());
         }
 
         private (TrackApplication app, TestTrackIn inBus, TestTrackOut outBus) BuildTrackAppWithStation()

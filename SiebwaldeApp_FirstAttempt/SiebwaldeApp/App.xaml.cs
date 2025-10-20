@@ -1,9 +1,10 @@
-﻿using System.IO;
-using System.Windows;
+﻿using Ninject;
 using SiebwaldeApp.Core;
+using SiebwaldeApp.Core.Properties;
+using System.IO;
+using System.Windows;
 using Application = System.Windows.Application;
 using MessageBox = System.Windows.MessageBox;
-using SiebwaldeApp.Core.Properties;
 
 namespace SiebwaldeApp
 {
@@ -13,6 +14,8 @@ namespace SiebwaldeApp
     public partial class App : Application
     {
         public FiddleYardWinFormViewModel FyWinForm;
+
+        private const bool USE_SIMULATION = true;
 
         /// <summary>
         /// Custom startup so we load our IoC immediately before anything else
@@ -25,12 +28,21 @@ namespace SiebwaldeApp
             // Setup main application
             ApplicationSetup();
 
-            // IMPORTANT: Initialize hardware adapters after IoC.Setup()
-            InitializeHardwareAdapters();
-
+            if (USE_SIMULATION)
+            {
+                // Load simulation module
+                IoC.Kernel.Load(new SimulationModule());
+                IoC.Logger.Log("Simulation mode active", "");
+            }
+            else
+            {
+                InitializeHardwareAdapters();
+            }
+            
             // Show the main window
             Current.MainWindow = new MainWindow();
             Current.MainWindow.Show();
+
         }
 
         private void ApplicationSetup()
@@ -71,26 +83,6 @@ namespace SiebwaldeApp
         /// </summary>
         private void InitializeHardwareAdapters()
         {
-            // 1) Decide mode: DEBUG default to fakes, unless explicitly overridden
-            bool useFakes =
-#if DEBUG
-                true;
-#else
-                false;
-#endif
-
-            // 2) Allow runtime override via setting
-            if (CoreSettings.Default.UseFakeHardwareAdapters)
-                useFakes = true;
-
-            // 3) Attempt to create adapters based on mode
-            if (useFakes)
-            {
-                IoC.Logger.Log("Initializing FAKE hardware adapters (debug/sim)...", "");
-                UseFakeAdapters();
-                return;
-            }
-
             // 4) Try REAL adapters, fallback to fakes on failure
             try
             {
@@ -162,12 +154,16 @@ namespace SiebwaldeApp
                 IoC.Logger.Log($"Error during shutdown: {ex.Message}", "");
             }
 
-            base.OnExit(e);
+            
             try { _udpCts?.Cancel(); } catch { }
+
+            IoC.Kernel.Dispose();
+
             (IoC.TrackAdapter.TrackIn as IDisposable)?.Dispose();
             (IoC.TrackAdapter.TrackOut as IDisposable)?.Dispose();
             (IoC.YardAdapter.YardIn as IDisposable)?.Dispose();
             (IoC.YardAdapter.YardOut as IDisposable)?.Dispose();
+            base.OnExit(e);
         }
     }
 }

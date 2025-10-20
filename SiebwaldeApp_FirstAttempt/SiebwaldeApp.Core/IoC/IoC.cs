@@ -51,17 +51,18 @@ namespace SiebwaldeApp.Core
             public static ITrackOut? TrackOut { get; set; }
 
             // Safe accessors that fail fast if not initialized
-            public static ITrackIn RequireIn() => TrackIn ?? throw new InvalidOperationException("TrackAdapter.TrackIn not initialized.");
-            public static ITrackOut RequireOut() => TrackOut ?? throw new InvalidOperationException("TrackAdapter.TrackOut not initialized.");
+            public static ITrackIn RequireIn() => TrackIn ?? (TrackIn = IoC.Kernel.Get<ITrackIn>());
+            public static ITrackOut RequireOut() => TrackOut ?? (TrackOut = IoC.Kernel.Get<ITrackOut>());
         }
+    
 
         public static class YardAdapter
         {
             public static IYardIn? YardIn { get; set; }
             public static IYardOut? YardOut { get; set; }
 
-            public static IYardIn RequireIn() => YardIn ?? throw new InvalidOperationException("YardAdapter.YardIn not initialized.");
-            public static IYardOut RequireOut() => YardOut ?? throw new InvalidOperationException("YardAdapter.YardOut not initialized.");
+            public static IYardIn RequireIn() => YardIn ?? (YardIn = IoC.Kernel.Get<IYardIn>());
+            public static IYardOut RequireOut() => YardOut ?? (YardOut = IoC.Kernel.Get<IYardOut>());
         }
 
         #endregion

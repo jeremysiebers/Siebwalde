@@ -5,12 +5,14 @@ using SiebwaldeApp.Tests;
 
 namespace SiebwaldeApp.Core.Tests
 {
+    [Collection("IoC bootstrap")]
+
     public class StationSideTests
     {
         public StationSideTests()
         {
             // Replace IoC logger binding with our test stub
-            IoC.Kernel.Rebind<ILogFactory>().ToConstant(new TestLogFactory());
+            //IoC.Kernel.Rebind<ILogFactory>().ToConstant(new TestLogFactory());
         }
 
         private TrackApplication BuildAppForSide(string zone, int[] ids, int middle, out StationSide side)
