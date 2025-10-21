@@ -52,7 +52,7 @@ namespace SiebwaldeApp.Core
         /// <summary>
         /// The command to show the TrackInitPage
         /// </summary>
-        public ICommand TrackSettingsPage { get; set; }
+        public ICommand StationSettingsPage { get; set; }
 
         #endregion
 
@@ -67,7 +67,7 @@ namespace SiebwaldeApp.Core
             TrackMainPage = new RelayCommand(() => IoC.Application.CurrentPage = ApplicationPage.TrackControl);
             TrackInitPage = new RelayCommand(() => IoC.Application.CurrentPage = ApplicationPage.TrackControl);
             TrackAmplifierPage = new RelayCommand(() => IoC.Application.CurrentPage = ApplicationPage.TrackAmplifier);
-            TrackSettingsPage = new RelayCommand(() => IoC.Application.CurrentPage = ApplicationPage.TrackControl);
+            StationSettingsPage = new RelayCommand(() => IoC.Application.CurrentPage = ApplicationPage.StationSettings);
             #endregion
 
             #region SiebwaldeMenu commands

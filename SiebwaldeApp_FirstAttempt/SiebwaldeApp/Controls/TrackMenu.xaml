@@ -50,7 +50,7 @@
 
         <Button Grid.Row="4"
               Style="{StaticResource IconButton}"
-              Command="{Binding TrackSettingsPage }"
+              Command="{Binding StationSettingsPage }"
               Content="{StaticResource FontAwesomeCogIcon}" 
               ToolTip="Track control settings page."
               Foreground="White"  

@@ -1,7 +1,5 @@
 ﻿using Ninject;
-using System;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace SiebwaldeApp.Core
 {
@@ -11,6 +9,7 @@ namespace SiebwaldeApp.Core
         public event EventHandler? InstantiateFiddleYardWinForms;
         public event EventHandler? FiddleYardShowWinForms;
         public event EventHandler? FiddleYardShowSettingsWinForms;
+        public StationSettingsPageViewModel SettingsViewModel { get; private set; }
         #endregion
 
         #region Private members
@@ -33,6 +32,10 @@ namespace SiebwaldeApp.Core
             var macString = _macIp.MACstring();
             IoC.Logger.Log($"Main: PC MAC address is: {(string.IsNullOrWhiteSpace(macString) ? "<unknown>" : macString)}", "");
             IoC.Logger.Log($"Main: PC IP address is:  {_macIp.IPstring()}", "");
+
+            var topPolicy = new StationPolicy();
+            var bottomPolicy = new StationPolicy();
+            SettingsViewModel = new StationSettingsPageViewModel(topPolicy, bottomPolicy, this);
         }
         #endregion
 

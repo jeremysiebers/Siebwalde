@@ -42,8 +42,8 @@ namespace SiebwaldeApp.Core
             _loggerInstance = loggerInstance;
 
             // Create sides based on zones + middle track numbers
-            TopStation = new StationSide("Top", zone: "StationTop", middleTrackNumber: 12, app: _app, loggerInstance: _loggerInstance);
-            BottomStation = new StationSide("Bottom", zone: "StationBottom", middleTrackNumber: 3, app: _app, loggerInstance: _loggerInstance);
+            TopStation = new StationSide("Top", zone: "StationTop", middleTrackNumber: 12, app: _app, isTopSide: true, loggerInstance: _loggerInstance);
+            BottomStation = new StationSide("Bottom", zone: "StationBottom", middleTrackNumber: 3, app: _app, isTopSide: false, loggerInstance: _loggerInstance);
 
             WireEvents();
             IoC.Logger.Log("StationController initialized", _loggerInstance);
@@ -81,70 +81,47 @@ namespace SiebwaldeApp.Core
                 var side = e.IsTopSide ? TopStation : BottomStation;
                 var type = e.IsFreight ? TrainType.Freight : TrainType.Passenger;
 
+                // Decide storage target (null means no capacity).
                 var free = side.GetFreeTrack(isFreight: e.IsFreight);
                 if (free == null)
                 {
-                    // No capacity: stop before station and hold entry signal at red
+                    // No capacity: stop early before the station, keep entry at RED.
                     _out.StopBeforeStation(e.IsTopSide);
                     _app.SetEntrySignal(e.IsTopSide, green: false);
                     IoC.Logger.Log($"{side.Name}: no free track, stopping before station", _loggerInstance);
                     return;
                 }
 
-                // Reserve locally (track knows only Reserved state; we keep the type here)
-                free.Reserve();
-                _reservedTypes[free.Number] = type;
+                // PASSING is only allowed on the middle track (12 or 3) and only if the exit block is free.
+                // For now we allow Freight to pass; Passenger only stops on outer tracks by default.
+                bool isMiddle = free.Number == side.MiddleTrackNumber;
+                bool allowPassing = isMiddle && side.ExitIsFree && e.IsFreight;
 
-                side.HandleIncomingTrain(free, type);
-
-                // Allow entry (route safety checks can be added later)
-                _app.SetEntrySignal(e.IsTopSide, green: true);
-                IoC.Logger.Log($"{side.Name}: reserved track {free.Number} for {type}, entry signal GREEN", _loggerInstance);
-            };
-
-            // Entry sensor at a specific track fired → stop amplifier and mark occupied
-            _in.EntrySensorTriggered += e =>
-            {
-                var side = e.IsTopSide ? TopStation : BottomStation;
-                var track = side.GetByNumber(e.TrackNumber);
-                if (track == null)
+                if (allowPassing)
                 {
-                    IoC.Logger.Log($"{side.Name}: entry sensor on unknown track {e.TrackNumber}", _loggerInstance);
-                    return;
-                }
+                    // Do NOT force a storage stop — let it pass through:
+                    // - We still reserve locally to keep our bookkeeping simple (optional).
+                    free.Reserve();
+                    _reservedTypes[free.Number] = type;
 
-                if (!_reservedTypes.TryGetValue(e.TrackNumber, out var type))
+                    side.HandleIncomingTrain(free, type);
+
+                    // Entry may turn GREEN to allow immediate pass-through towards the exit
+                    _app.SetEntrySignal(e.IsTopSide, green: true);
+                    IoC.Logger.Log($"{side.Name}: passing via track {free.Number} ({type}), entry signal GREEN", _loggerInstance);
+                }
+                else
                 {
-                    // Fallback if missing reservation — assume Passenger to be safe
-                    type = TrainType.Passenger;
+                    // Storage (10/11 or 1/2) or exit blocked: keep entry RED, train will stop on the assigned track.
+                    free.Reserve();
+                    _reservedTypes[free.Number] = type;
+
+                    side.HandleIncomingTrain(free, type);
+
+                    // Keep entry RED for storage. The actual stop is executed on entry sensor (ConfirmArrivalAndStop).
+                    _app.SetEntrySignal(e.IsTopSide, green: false);
+                    IoC.Logger.Log($"{side.Name}: reserved track {free.Number} for {type}, entry signal RED (storage)", _loggerInstance);
                 }
-
-                side.ConfirmArrivalAndStop(track, type);
-
-                // Close entry again by default
-                _app.SetEntrySignal(e.IsTopSide, green: false);
-            };
-
-            // Exit block (beyond station) availability
-            _in.ExitBlockFreeChanged += e =>
-            {
-                var side = e.IsTopSide ? TopStation : BottomStation;
-                side.SetExitAvailability(e.IsFree);
-
-                // Mirror on hardware exit signal for this side
-                _app.SetExitSignal(e.IsTopSide, e.IsFree);
-                IoC.Logger.Log($"{side.Name}: exit is {(e.IsFree ? "FREE" : "BLOCKED")}", _loggerInstance);
-            };
-
-            // Train has cleared a specific station track (amplifier OUT cleared / exit sensor)
-            _in.TrainClearedFromBlock += e =>
-            {
-                var side = e.IsTopSide ? TopStation : BottomStation;
-                var track = side.GetByNumber(e.TrackNumber);
-                if (track == null) return;
-
-                side.ConfirmTrainLeft(track);
-                _reservedTypes.Remove(e.TrackNumber);
             };
         }
 

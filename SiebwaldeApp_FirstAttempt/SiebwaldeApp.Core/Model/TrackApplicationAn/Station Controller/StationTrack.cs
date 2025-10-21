@@ -170,7 +170,9 @@ namespace SiebwaldeApp.Core
         /// implementation.</remarks>
         public void StopTrain()
         {
-            // TODO: send stop command to amplifier
+            // The actual amplifier STOP is executed by StationSide (via Registry).
+            IoC.TrackAdapter.RequireOut().SetAmplifierStop(Number, true);
+            IoC.Logger.Log($"Track{Number}: STOP (storage stop engaged)", _loggerInstance);
         }
 
         /// <summary>
@@ -181,7 +183,9 @@ namespace SiebwaldeApp.Core
         /// this method.</remarks>
         public void StartTrain()
         {
-            // TODO: send start command to amplifier
+            // The actual amplifier START is executed by StationSide (via Registry).
+            IoC.TrackAdapter.RequireOut().SetAmplifierStop(Number, false);
+            IoC.Logger.Log($"Track{Number}: START (departure released)", _loggerInstance);
         }
 
         #endregion

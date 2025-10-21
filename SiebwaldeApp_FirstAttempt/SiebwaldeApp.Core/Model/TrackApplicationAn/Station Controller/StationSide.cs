@@ -50,9 +50,18 @@ namespace SiebwaldeApp.Core
         // Simple local state machine for diagnostics.
         private StationState _currentState = StationState.Idle;
 
+        // --- Signal & route helpers (defaults; make configurable later via WPF) ---
+        private readonly TimeSpan _switchWait = TimeSpan.FromMilliseconds(350);      // wait after setting switches
+        private readonly TimeSpan _outboundSettleWait = TimeSpan.FromMilliseconds(80); // short settle before signal change
+
         #endregion
 
         #region public api
+
+        // Expose middle track (passing track) and current exit availability to the controller.
+        public int MiddleTrackNumber => _middleTrackNumber;
+        public bool ExitIsFree => _exitFree;
+        public bool IsTopSide { get;  }
 
         public string Name => _name;
 
@@ -64,12 +73,13 @@ namespace SiebwaldeApp.Core
         /// <param name="middleTrackNumber">Physical number of the middle (freight) track (e.g., 12 or 3)</param>
         /// <param name="app">TrackApplication root (to query the registry)</param>
         /// <param name="loggerInstance">Logger category/instance name</param>
-        public StationSide(string name, string zone, int middleTrackNumber, TrackApplication app, string loggerInstance)
+        public StationSide(string name, string zone, int middleTrackNumber, TrackApplication app, bool isTopSide, string loggerInstance)
         {
             _name = name;
             _zone = zone;
             _middleTrackNumber = middleTrackNumber;
             _app = app ?? throw new ArgumentNullException(nameof(app));
+            IsTopSide = isTopSide;
             _loggerInstance = loggerInstance;
 
             // Resolve this side's blocks by zone and create StationTrack models (by number)
@@ -100,6 +110,13 @@ namespace SiebwaldeApp.Core
         public void HandleIncomingTrain(StationTrack reservedTrack, TrainType type)
         {
             if (reservedTrack == null) return;
+
+            // Passing is only allowed on the middle track (12 or 3) AND if exit is free AND (policy) typically for freight
+            bool isMiddle = reservedTrack.Number == MiddleTrackNumber;
+            bool isPassing = isMiddle && _exitFree && (type == TrainType.Freight);
+
+            // Kick off the inbound preparation (route + entry signal policy)
+            _ = PrepareInboundAsync(reservedTrack, isPassing);
 
             _currentState = StationState.TrainIncoming;
             IoC.Logger.Log($"{_name}: incoming {type} assigned to track {reservedTrack.Number}", _loggerInstance);
@@ -163,16 +180,11 @@ namespace SiebwaldeApp.Core
         {
             if (track == null) return;
 
-            // 1) Stop via amplifier (resolve block by number)
-            var reg = _app.Registry.Get(track.Number);
-            if (reg != null)
-            {
-                reg.Value.Block.CommandStop();
-                IoC.Logger.Log($"{_name}: amplifier STOP on track {track.Number}", _loggerInstance);
-            }
+            // Stop the train on the assigned station track.
+            // Keep entry signal RED for storage tracks; entry OCC_TO re-engaged elsewhere.
+            track.StopTrain();
 
-            // 2) Maintain StationTrack local state/logging
-            track.StopTrain(); // keeps your existing hooks/logs inside StationTrack
+            // Mark track as occupied (starts dwell timer).
             track.Occupy(type);
 
             _currentState = StationState.TrainWaiting; // now at platform
@@ -187,6 +199,7 @@ namespace SiebwaldeApp.Core
             if (track == null) return;
 
             track.Release();
+            SetExitSignal(track, green: false);
             _currentState = HasAnyOccupied() ? StationState.TrainWaiting : StationState.Idle;
 
             IoC.Logger.Log($"{_name}: track {track.Number} cleared", _loggerInstance);
@@ -280,24 +293,92 @@ namespace SiebwaldeApp.Core
 
             if (candidate == null) return;
 
-            // 1) Start via amplifier (resolve block by number)
-            var reg = _app.Registry.Get(candidate.Number);
-            if (reg != null)
-            {
-                reg.Value.Block.CommandStart();
-                IoC.Logger.Log($"{_name}: amplifier START on track {candidate.Number}", _loggerInstance);
-            }
-
-            // 2) Maintain StationTrack local state/logging
-            candidate.StartTrain();
+            // Fire the async departure sequence (route -> wait -> exit signal GREEN -> start)
+            _ = DepartSequenceAsync(candidate);
 
             _currentState = StationState.Departing;
 
             // One-shot; clear once used
             lock (_sync) _preferredDeparture = null;
 
-            IoC.Logger.Log($"{_name}: departing track {candidate.Number} ({candidate.OccupantType})",
-                _loggerInstance);
+            IoC.Logger.Log($"{_name}: departing track {candidate.Number} ({candidate.OccupantType})", _loggerInstance);
+        }
+
+        private async Task DepartSequenceAsync(StationTrack track)
+        {
+            try
+            {
+                // 1) Set outbound route (switches) and wait a moment (servo travel)
+                SetPathOutboundFrom(track);
+                await Delay(_switchWait);
+
+                // 2) Short settle; then set EXIT signal GREEN for this side
+                await Delay(_outboundSettleWait);
+                SetExitSignal(track, green: true);
+
+                // 3) Release the track stop so the train can leave
+                track.StartTrain();
+
+                // Signal back to RED is handled when the train clears (OnTrackCleared).
+            }
+            catch (Exception ex)
+            {
+                IoC.Logger.Log($"{_name}: DepartSequence error on track {track.Number} -> {ex.Message}", _loggerInstance);
+            }
+        }
+
+        // Map station-side to path/switch configuration (TODO: replace with your actual mapping)
+        // Keep the API tiny: we only need an intent, not a new type system.
+        private void SetPathTo(StationTrack track)
+        {
+            // TODO: translate track.Number -> your concrete switch commands.
+            // Example sketch; replace with your IDs:
+            // if (track.Number == 10 || track.Number == 1)  _out.SetSwitch(1, SwitchPosition.Straight);
+            // if (track.Number == 11 || track.Number == 2)  _out.SetSwitch(1, SwitchPosition.Diverging);
+            // if (track.Number == 12 || track.Number == 3)  _out.SetSwitch(2, SwitchPosition.Straight);
+        }
+
+        private void SetPathOutboundFrom(StationTrack track)
+        {
+            // TODO: set the route from the given track towards the exit (13A on top / 4A bottom).
+            // Same idea as SetPathTo(...) but for the outbound path.
+        }
+
+        private void SetEntrySignal(bool green)
+            => IoC.TrackAdapter.RequireOut().SetSignalEntry(IsTopSide /* station side */, green);
+
+        private void SetExitSignal(StationTrack track, bool green)
+            => IoC.TrackAdapter.RequireOut().SetSignalExit(IsTopSide /* station side */, green);
+
+        // Utility: tiny, local delay (later: consider a CancellationToken if you have one in StationSide)
+        private static Task Delay(TimeSpan t) => Task.Delay(t);
+
+        /// <summary>
+        /// Prepares the inbound route and entry signal policy *before* the train arrives at the station track.
+        /// - Sets the switch route towards the chosen track and waits for servo travel.
+        /// - Entry signal policy:
+        ///   * Storage tracks (10/11 or 1/2): keep entry RED
+        ///   * Passing on the middle track (12 or 3) with free exit: entry GREEN
+        /// </summary>
+        private async Task PrepareInboundAsync(StationTrack track, bool isPassing)
+        {
+            try
+            {
+                // 1) Set inbound route (switches) to this track and wait briefly
+                SetPathTo(track);
+                await Delay(_switchWait);
+
+                // 2) Entry signal policy (GREEN only if passing on the middle track and exit is free)
+                SetEntrySignal(green: isPassing);
+
+                // NOTE:
+                // We do NOT release/engage inbound OCC_TO here; keep that in your existing inbound logic.
+                // We also do NOT touch the station track stop here; ConfirmArrivalAndStop() will STOP on arrival.
+            }
+            catch (Exception ex)
+            {
+                IoC.Logger.Log($"{_name}: PrepareInbound error for track {track?.Number} -> {ex.Message}", _loggerInstance);
+            }
         }
 
         #endregion

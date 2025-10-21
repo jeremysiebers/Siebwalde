@@ -1,0 +1,67 @@
+﻿<!-- SiebwaldeApp/Views/StationSettingsView.xaml -->
+<local:BasePage x:TypeArguments="core:StationSettingsPageViewModel"
+                x:Class="SiebwaldeApp.StationSettingsPage"
+                xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                xmlns:local="clr-namespace:SiebwaldeApp"
+                xmlns:core="clr-namespace:SiebwaldeApp.Core;assembly=SiebwaldeApp.Core"
+                xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                mc:Ignorable="d"
+                d:DesignWidth="1200"
+                d:DesignHeight="800"
+                Title="StationSettingsPage">
+    
+    <Grid Margin="12">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="5" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- TOP side -->
+        <StackPanel Grid.Column="0">
+            <TextBlock Text="Top side policy" FontWeight="Bold" />
+            <CheckBox Content="Freight may pass on 12" IsChecked="{Binding TopPolicy.FreightPassingOnMiddle, Mode=TwoWay}"/>
+            <CheckBox Content="Passenger may pass on 12" IsChecked="{Binding TopPolicy.PassengerPassingOnMiddle, Mode=TwoWay}" Margin="0,0,0,8"/>
+
+            <TextBlock Text="Passenger storage (10/12/11)" />
+            <WrapPanel>
+                <CheckBox Content="10" IsChecked="{Binding TopPolicy.PassengerStorageOnFirst,  Mode=TwoWay}" Margin="0,0,8,0"/>
+                <CheckBox Content="12" IsChecked="{Binding TopPolicy.PassengerStorageOnMiddle, Mode=TwoWay}" Margin="0,0,8,0"/>
+                <CheckBox Content="11" IsChecked="{Binding TopPolicy.PassengerStorageOnLast,   Mode=TwoWay}"/>
+            </WrapPanel>
+
+            <TextBlock Text="Freight storage (10/12/11)" />
+            <WrapPanel>
+                <CheckBox Content="10" IsChecked="{Binding TopPolicy.FreightStorageOnFirst,  Mode=TwoWay}" Margin="0,0,8,0"/>
+                <CheckBox Content="12" IsChecked="{Binding TopPolicy.FreightStorageOnMiddle, Mode=TwoWay}" Margin="0,0,8,0"/>
+                <CheckBox Content="11" IsChecked="{Binding TopPolicy.FreightStorageOnLast,   Mode=TwoWay}"/>
+            </WrapPanel>
+        </StackPanel>
+
+        <StackPanel Grid.Column="1">
+        </StackPanel>
+
+        <!-- BOTTOM side -->
+        <StackPanel Grid.Column="2">
+            <TextBlock Text="Bottom side policy" FontWeight="Bold" />
+            <CheckBox Content="Freight may pass on 3" IsChecked="{Binding BottomPolicy.FreightPassingOnMiddle, Mode=TwoWay}"/>
+            <CheckBox Content="Passenger may pass on 3" IsChecked="{Binding BottomPolicy.PassengerPassingOnMiddle, Mode=TwoWay}" Margin="0,0,0,8"/>
+
+            <TextBlock Text="Passenger storage (1/3/2)" />
+            <WrapPanel>
+                <CheckBox Content="1" IsChecked="{Binding BottomPolicy.PassengerStorageOnFirst,  Mode=TwoWay}" Margin="0,0,8,0"/>
+                <CheckBox Content="3" IsChecked="{Binding BottomPolicy.PassengerStorageOnMiddle, Mode=TwoWay}" Margin="0,0,8,0"/>
+                <CheckBox Content="2" IsChecked="{Binding BottomPolicy.PassengerStorageOnLast,   Mode=TwoWay}"/>
+            </WrapPanel>
+
+            <TextBlock Text="Freight storage (1/3/2)" />
+            <WrapPanel>
+                <CheckBox Content="1" IsChecked="{Binding BottomPolicy.FreightStorageOnFirst,  Mode=TwoWay}" Margin="0,0,8,0"/>
+                <CheckBox Content="3" IsChecked="{Binding BottomPolicy.FreightStorageOnMiddle, Mode=TwoWay}" Margin="0,0,8,0"/>
+                <CheckBox Content="2" IsChecked="{Binding BottomPolicy.FreightStorageOnLast,   Mode=TwoWay}"/>
+            </WrapPanel>
+        </StackPanel>
+    </Grid>
+</local:BasePage>
