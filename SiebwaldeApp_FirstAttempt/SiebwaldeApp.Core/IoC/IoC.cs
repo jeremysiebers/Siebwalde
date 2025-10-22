@@ -96,6 +96,25 @@ namespace SiebwaldeApp.Core
 
             // bind to a single instance of Track Application Variables
             //Kernel.Bind<TrackApplicationVariables>().ToConstant(new TrackApplicationVariables()); OLD
+
+            // Station policies (top + bottom)
+            var bindings = IoC.Kernel.GetBindings(typeof(StationPolicy));
+            bool hasTop = bindings.Any(b => b.Metadata?.Name == "TopStationPolicy");
+            bool hasBottom = bindings.Any(b => b.Metadata?.Name == "BottomStationPolicy");
+
+            if (!hasTop)
+            {
+                IoC.Kernel.Bind<StationPolicy>()
+                    .ToConstant(new StationPolicy())
+                    .Named("TopStationPolicy");
+            }
+
+            if (!hasBottom)
+            {
+                IoC.Kernel.Bind<StationPolicy>()
+                    .ToConstant(new StationPolicy())
+                    .Named("BottomStationPolicy");
+            }
         }
 
         #endregion

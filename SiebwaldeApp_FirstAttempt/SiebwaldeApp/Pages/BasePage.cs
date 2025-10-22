@@ -1,4 +1,5 @@
-﻿using SiebwaldeApp.Core;
+﻿using Ninject;
+using SiebwaldeApp.Core;
 using System.Windows.Controls;
 
 namespace SiebwaldeApp
@@ -7,8 +8,7 @@ namespace SiebwaldeApp
     /// A base page for all pages to gain base functionality
     /// </summary>
     /// <typeparam name="VM"></typeparam>
-    public class BasePage<T> : Page
-        where T : BaseViewModel, new()
+    public class BasePage<T> : Page where T : BaseViewModel
     {
         #region Private Member
 
@@ -50,8 +50,8 @@ namespace SiebwaldeApp
         /// </summary>
         public BasePage()
         {
-            // Create a default View Model
-            ViewModel = new T();
+            // Ensure IoC is initialized ahead of time (App.OnStartup)
+            DataContext = IoC.Kernel.Get<T>();
         }
 
         #endregion       

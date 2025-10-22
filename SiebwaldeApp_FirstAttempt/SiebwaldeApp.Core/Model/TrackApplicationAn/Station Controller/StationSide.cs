@@ -34,6 +34,7 @@ namespace SiebwaldeApp.Core
         private readonly string _zone;
         private readonly int _middleTrackNumber;
         private readonly TrackApplication _app; // root (to query registry / command amps)
+        private readonly ITrackOut _trackOut;
         private readonly string _loggerInstance;
 
         private readonly List<StationTrack> _tracks = new();
@@ -73,13 +74,14 @@ namespace SiebwaldeApp.Core
         /// <param name="middleTrackNumber">Physical number of the middle (freight) track (e.g., 12 or 3)</param>
         /// <param name="app">TrackApplication root (to query the registry)</param>
         /// <param name="loggerInstance">Logger category/instance name</param>
-        public StationSide(string name, string zone, int middleTrackNumber, TrackApplication app, bool isTopSide, string loggerInstance)
+        public StationSide(string name, string zone, int middleTrackNumber, TrackApplication app, bool isTopSide, ITrackOut trackOut, string loggerInstance)
         {
             _name = name;
             _zone = zone;
             _middleTrackNumber = middleTrackNumber;
             _app = app ?? throw new ArgumentNullException(nameof(app));
             IsTopSide = isTopSide;
+            _trackOut = trackOut ?? throw new ArgumentNullException(nameof(trackOut));
             _loggerInstance = loggerInstance;
 
             // Resolve this side's blocks by zone and create StationTrack models (by number)
@@ -182,7 +184,7 @@ namespace SiebwaldeApp.Core
 
             // Stop the train on the assigned station track.
             // Keep entry signal RED for storage tracks; entry OCC_TO re-engaged elsewhere.
-            track.StopTrain();
+            track.StopTrain(_trackOut);
 
             // Mark track as occupied (starts dwell timer).
             track.Occupy(type);
@@ -317,7 +319,7 @@ namespace SiebwaldeApp.Core
                 SetExitSignal(track, green: true);
 
                 // 3) Release the track stop so the train can leave
-                track.StartTrain();
+                track.StartTrain(_trackOut);
 
                 // Signal back to RED is handled when the train clears (OnTrackCleared).
             }
@@ -345,10 +347,14 @@ namespace SiebwaldeApp.Core
         }
 
         private void SetEntrySignal(bool green)
-            => IoC.TrackAdapter.RequireOut().SetSignalEntry(IsTopSide /* station side */, green);
+        {
+            _trackOut.SetSignalEntry(IsTopSide /* station side */, green);
+        }
 
         private void SetExitSignal(StationTrack track, bool green)
-            => IoC.TrackAdapter.RequireOut().SetSignalExit(IsTopSide /* station side */, green);
+        {
+            _trackOut.SetSignalExit(IsTopSide /* station side */, green);
+        }            
 
         // Utility: tiny, local delay (later: consider a CancellationToken if you have one in StationSide)
         private static Task Delay(TimeSpan t) => Task.Delay(t);

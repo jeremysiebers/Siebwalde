@@ -28,6 +28,11 @@ namespace SiebwaldeApp.Core
         // Log van uitgaande commando's (handig voor asserts/debug)
         public readonly List<string> OutboundLog = new();
 
+        /// <summary>
+        /// Adds one or more simulation steps to the track bus and sorts them by their scheduled execution time.
+        /// </summary>
+        /// <param name="steps">An array of simulation steps to add. Each step must implement the <see cref="ISimStep"/> interface.</param>
+        /// <returns>The current instance of <see cref="SimulatedTrackBus"/>, allowing for method chaining.</returns>
         public SimulatedTrackBus Add(params ISimStep[] steps)
         {
             _steps.AddRange(steps);
@@ -42,6 +47,16 @@ namespace SiebwaldeApp.Core
             return Task.CompletedTask;
         }
 
+        /// <summary>
+        /// Executes a sequence of steps asynchronously, ensuring each step is executed at its scheduled time.
+        /// </summary>
+        /// <remarks>Each step in the sequence is executed at the time specified by its <c>WhenUtc</c>
+        /// property. If the scheduled time for a step is in the future, the method waits until that time before
+        /// executing the step. If the <paramref name="token"/> is canceled during the delay or execution, the method
+        /// terminates early.</remarks>
+        /// <param name="token">A <see cref="CancellationToken"/> used to observe cancellation requests. If cancellation is requested, the
+        /// execution of remaining steps will be stopped.</param>
+        /// <returns></returns>
         private async Task RunAsync(CancellationToken token)
         {
             foreach (var step in _steps)

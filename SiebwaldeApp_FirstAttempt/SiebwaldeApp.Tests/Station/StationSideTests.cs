@@ -32,7 +32,7 @@ namespace SiebwaldeApp.Core.Tests
                     new TrackMetadata { Zone = zone, Role = id == middle ? TrackRole.MiddleFreight : TrackRole.FreightAllowed });
             }
 
-            side = new StationSide("Top", zone, middle, app, true, "Test");
+            side = new StationSide("Top", zone, middle, app, true, outBus, "Test");
             side.Start(CancellationToken.None);
             return app;
         }

@@ -42,8 +42,8 @@ namespace SiebwaldeApp.Core
             _loggerInstance = loggerInstance;
 
             // Create sides based on zones + middle track numbers
-            TopStation = new StationSide("Top", zone: "StationTop", middleTrackNumber: 12, app: _app, isTopSide: true, loggerInstance: _loggerInstance);
-            BottomStation = new StationSide("Bottom", zone: "StationBottom", middleTrackNumber: 3, app: _app, isTopSide: false, loggerInstance: _loggerInstance);
+            TopStation = new StationSide("Top", zone: "StationTop", middleTrackNumber: 12, app: _app, isTopSide: true, _out, loggerInstance: _loggerInstance);
+            BottomStation = new StationSide("Bottom", zone: "StationBottom", middleTrackNumber: 3, app: _app, isTopSide: false, _out, loggerInstance: _loggerInstance);
 
             WireEvents();
             IoC.Logger.Log("StationController initialized", _loggerInstance);
@@ -122,6 +122,72 @@ namespace SiebwaldeApp.Core
                     _app.SetEntrySignal(e.IsTopSide, green: false);
                     IoC.Logger.Log($"{side.Name}: reserved track {free.Number} for {type}, entry signal RED (storage)", _loggerInstance);
                 }
+            };
+
+            // Exit block free/occupied
+            _in.ExitBlockFreeChanged += e =>
+            {
+                var side = e.IsTopSide ? TopStation : BottomStation;
+                side.SetExitAvailability(e.IsFree);
+
+                // Wees expliciet: bij bezet exit meteen sein uit
+                if (!e.IsFree)
+                    _app.SetExitSignal(e.IsTopSide, green: false);
+            };
+
+            // Entry sensor op specifiek station-spoor -> aankomst bevestigen & STOP
+            _in.EntrySensorTriggered += e =>
+            {
+                var side = e.IsTopSide ? TopStation : BottomStation;
+                var track = side.GetByNumber(e.TrackNumber);
+                if (track == null) return;
+
+                // Haal gereserveerd type op (default: Passenger als onbekend)
+                var type = _reservedTypes.TryGetValue(track.Number, out var t) ? t : TrainType.Passenger;
+                side.ConfirmArrivalAndStop(track, type);
+            };
+
+            // Amplifier OUT feedback (OccupiedOut == true zodra gestopt; false als weggereden)
+            _in.AmplifierOccupiedChanged += e =>
+            {
+                // Top = 10/11/12, Bottom = 1/2/3
+                var side = (e.TrackNumber >= 10) ? TopStation : BottomStation;
+                var track = side.GetByNumber(e.TrackNumber);
+                if (track == null) return;
+
+                if (!e.OccupiedOut)
+                {
+                    // Trein is het spoor uit -> logische vrijgave + sein terug rood
+                    side.ConfirmTrainLeft(track);
+                    _reservedTypes.Remove(e.TrackNumber);
+                }
+            };
+
+            // Downstream clear (redundant met amplifier false, maar veilig om ook te handelen)
+            _in.TrainClearedFromBlock += e =>
+            {
+                var side = e.IsTopSide ? TopStation : BottomStation;
+                var track = side.GetByNumber(e.TrackNumber);
+                if (track == null) return;
+
+                side.ConfirmTrainLeft(track);
+                _reservedTypes.Remove(e.TrackNumber);
+            };
+
+            // Hardware heartbeat
+            _in.HardwareAliveChanged += e =>
+            {
+                if (!e.IsAlive)
+                {
+                    // Fail-safe: alles rood en logische staat opruimen
+                    TopStation.EmergencyReleaseAllTracks();
+                    BottomStation.EmergencyReleaseAllTracks();
+                    _app.SetEntrySignal(true, green: false);
+                    _app.SetEntrySignal(false, green: false);
+                    _app.SetExitSignal(true, green: false);
+                    _app.SetExitSignal(false, green: false);
+                }
+
             };
         }
 

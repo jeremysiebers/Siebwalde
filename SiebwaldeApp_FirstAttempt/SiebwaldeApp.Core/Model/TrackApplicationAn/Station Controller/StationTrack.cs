@@ -168,10 +168,16 @@ namespace SiebwaldeApp.Core
         /// <remarks>This method halts the train's operation. Ensure that the train is in a state where
         /// stopping is safe  before calling this method. The exact behavior depends on the amplifier's
         /// implementation.</remarks>
-        public void StopTrain()
+        //public void StopTrain()
+        //{
+        //    // The actual amplifier STOP is executed by StationSide (via Registry).
+        //    IoC.TrackAdapter.RequireOut().SetAmplifierStop(Number, true);
+        //    IoC.Logger.Log($"Track{Number}: STOP (storage stop engaged)", _loggerInstance);
+        //}
+        public void StopTrain(ITrackOut io)
         {
-            // The actual amplifier STOP is executed by StationSide (via Registry).
-            IoC.TrackAdapter.RequireOut().SetAmplifierStop(Number, true);
+            if (io == null) throw new ArgumentNullException(nameof(io));
+            io.SetAmplifierStop(Number, true);
             IoC.Logger.Log($"Track{Number}: STOP (storage stop engaged)", _loggerInstance);
         }
 
@@ -181,10 +187,16 @@ namespace SiebwaldeApp.Core
         /// <remarks>This method initiates the training process by sending a start command to the
         /// amplifier.  Ensure that the amplifier is properly configured and ready to receive commands before calling
         /// this method.</remarks>
-        public void StartTrain()
+        //public void StartTrain()
+        //{
+        //    // The actual amplifier START is executed by StationSide (via Registry).
+        //    IoC.TrackAdapter.RequireOut().SetAmplifierStop(Number, false);
+        //    IoC.Logger.Log($"Track{Number}: START (departure released)", _loggerInstance);
+        //}        
+        public void StartTrain(ITrackOut io)
         {
-            // The actual amplifier START is executed by StationSide (via Registry).
-            IoC.TrackAdapter.RequireOut().SetAmplifierStop(Number, false);
+            if (io == null) throw new ArgumentNullException(nameof(io));
+            io.SetAmplifierStop(Number, false);
             IoC.Logger.Log($"Track{Number}: START (departure released)", _loggerInstance);
         }
 

@@ -14,53 +14,49 @@
     
     <Grid Margin="12">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="5" />
+            <ColumnDefinition Width="200" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
         <!-- TOP side -->
         <StackPanel Grid.Column="0">
-            <TextBlock Text="Top side policy" FontWeight="Bold" />
-            <CheckBox Content="Freight may pass on 12" IsChecked="{Binding TopPolicy.FreightPassingOnMiddle, Mode=TwoWay}"/>
-            <CheckBox Content="Passenger may pass on 12" IsChecked="{Binding TopPolicy.PassengerPassingOnMiddle, Mode=TwoWay}" Margin="0,0,0,8"/>
+            <TextBlock Text="Top side policy" FontWeight="Bold" Foreground="White"/>
+            <CheckBox Content="Freight may pass on 12" IsChecked="{Binding TopPolicy.FreightPassingOnMiddle, Mode=TwoWay}" Foreground="White"/>
+            <CheckBox Content="Passenger may pass on 12" IsChecked="{Binding TopPolicy.PassengerPassingOnMiddle, Mode=TwoWay}" Margin="0,0,0,8" Foreground="White"/>
 
-            <TextBlock Text="Passenger storage (10/12/11)" />
+            <TextBlock Text="Passenger storage (10/12/11)" Foreground="White"/>
             <WrapPanel>
-                <CheckBox Content="10" IsChecked="{Binding TopPolicy.PassengerStorageOnFirst,  Mode=TwoWay}" Margin="0,0,8,0"/>
-                <CheckBox Content="12" IsChecked="{Binding TopPolicy.PassengerStorageOnMiddle, Mode=TwoWay}" Margin="0,0,8,0"/>
-                <CheckBox Content="11" IsChecked="{Binding TopPolicy.PassengerStorageOnLast,   Mode=TwoWay}"/>
+                <CheckBox Content="10" IsChecked="{Binding TopPolicy.PassengerStorageOnFirst,  Mode=TwoWay}" Margin="0,0,8,0" Foreground="White"/>
+                <CheckBox Content="12" IsChecked="{Binding TopPolicy.PassengerStorageOnMiddle, Mode=TwoWay}" Margin="0,0,8,0" Foreground="White"/>
+                <CheckBox Content="11" IsChecked="{Binding TopPolicy.PassengerStorageOnLast,   Mode=TwoWay}" Foreground="White"/>
             </WrapPanel>
 
-            <TextBlock Text="Freight storage (10/12/11)" />
+            <TextBlock Text="Freight storage (10/12/11)" Foreground="White"/>
             <WrapPanel>
-                <CheckBox Content="10" IsChecked="{Binding TopPolicy.FreightStorageOnFirst,  Mode=TwoWay}" Margin="0,0,8,0"/>
-                <CheckBox Content="12" IsChecked="{Binding TopPolicy.FreightStorageOnMiddle, Mode=TwoWay}" Margin="0,0,8,0"/>
-                <CheckBox Content="11" IsChecked="{Binding TopPolicy.FreightStorageOnLast,   Mode=TwoWay}"/>
+                <CheckBox Content="10" IsChecked="{Binding TopPolicy.FreightStorageOnFirst,  Mode=TwoWay}" Margin="0,0,8,0" Foreground="White"/>
+                <CheckBox Content="12" IsChecked="{Binding TopPolicy.FreightStorageOnMiddle, Mode=TwoWay}" Margin="0,0,8,0" Foreground="White"/>
+                <CheckBox Content="11" IsChecked="{Binding TopPolicy.FreightStorageOnLast,   Mode=TwoWay}" Foreground="White"/>
             </WrapPanel>
-        </StackPanel>
-
-        <StackPanel Grid.Column="1">
         </StackPanel>
 
         <!-- BOTTOM side -->
         <StackPanel Grid.Column="2">
-            <TextBlock Text="Bottom side policy" FontWeight="Bold" />
-            <CheckBox Content="Freight may pass on 3" IsChecked="{Binding BottomPolicy.FreightPassingOnMiddle, Mode=TwoWay}"/>
-            <CheckBox Content="Passenger may pass on 3" IsChecked="{Binding BottomPolicy.PassengerPassingOnMiddle, Mode=TwoWay}" Margin="0,0,0,8"/>
+            <TextBlock Text="Bottom side policy" FontWeight="Bold" Foreground="White"/>
+            <CheckBox Content="Freight may pass on 3" IsChecked="{Binding BottomPolicy.FreightPassingOnMiddle, Mode=TwoWay}" Foreground="White"/>
+            <CheckBox Content="Passenger may pass on 3" IsChecked="{Binding BottomPolicy.PassengerPassingOnMiddle, Mode=TwoWay}" Margin="0,0,0,8" Foreground="White"/>
 
-            <TextBlock Text="Passenger storage (1/3/2)" />
+            <TextBlock Text="Passenger storage (1/3/2)" Foreground="White"/>
             <WrapPanel>
-                <CheckBox Content="1" IsChecked="{Binding BottomPolicy.PassengerStorageOnFirst,  Mode=TwoWay}" Margin="0,0,8,0"/>
-                <CheckBox Content="3" IsChecked="{Binding BottomPolicy.PassengerStorageOnMiddle, Mode=TwoWay}" Margin="0,0,8,0"/>
-                <CheckBox Content="2" IsChecked="{Binding BottomPolicy.PassengerStorageOnLast,   Mode=TwoWay}"/>
+                <CheckBox Content="1" IsChecked="{Binding BottomPolicy.PassengerStorageOnFirst,  Mode=TwoWay}" Margin="0,0,8,0" Foreground="White"/>
+                <CheckBox Content="3" IsChecked="{Binding BottomPolicy.PassengerStorageOnMiddle, Mode=TwoWay}" Margin="0,0,8,0" Foreground="White"/>
+                <CheckBox Content="2" IsChecked="{Binding BottomPolicy.PassengerStorageOnLast,   Mode=TwoWay}" Foreground="White"/>
             </WrapPanel>
 
-            <TextBlock Text="Freight storage (1/3/2)" />
+            <TextBlock Text="Freight storage (1/3/2)" Foreground="White"/>
             <WrapPanel>
-                <CheckBox Content="1" IsChecked="{Binding BottomPolicy.FreightStorageOnFirst,  Mode=TwoWay}" Margin="0,0,8,0"/>
-                <CheckBox Content="3" IsChecked="{Binding BottomPolicy.FreightStorageOnMiddle, Mode=TwoWay}" Margin="0,0,8,0"/>
-                <CheckBox Content="2" IsChecked="{Binding BottomPolicy.FreightStorageOnLast,   Mode=TwoWay}"/>
+                <CheckBox Content="1" IsChecked="{Binding BottomPolicy.FreightStorageOnFirst,  Mode=TwoWay}" Margin="0,0,8,0" Foreground="White"/>
+                <CheckBox Content="3" IsChecked="{Binding BottomPolicy.FreightStorageOnMiddle, Mode=TwoWay}" Margin="0,0,8,0" Foreground="White"/>
+                <CheckBox Content="2" IsChecked="{Binding BottomPolicy.FreightStorageOnLast,   Mode=TwoWay}" Foreground="White"/>
             </WrapPanel>
         </StackPanel>
     </Grid>
