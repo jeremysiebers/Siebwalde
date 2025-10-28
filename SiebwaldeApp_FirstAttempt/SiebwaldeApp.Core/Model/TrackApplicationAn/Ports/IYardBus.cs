@@ -15,7 +15,7 @@ namespace SiebwaldeApp.Core
     public interface IYardOut
     {
         void SetYardSignal(bool mergeSignalGreen);
-        void SetYardSwitch(int switchId, SwitchPosition position);
+        void SetYardSwitch(int switchId, bool position);
         void AuthorizeMerge(bool authorize); // allow yard to dispatch the requested freight to mainline
     }
 

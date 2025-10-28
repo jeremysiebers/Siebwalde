@@ -142,7 +142,7 @@ namespace SiebwaldeApp.Core
             Send(BuildSignalExitPayload(isTopSide, green));
         }
 
-        public void SetSwitch(int switchId, SwitchPosition position)
+        public void SetSwitch(int switchId, bool position)
         {
             Send(BuildSwitchPayload(switchId, position));
         }
@@ -176,8 +176,8 @@ namespace SiebwaldeApp.Core
         private static byte[] BuildSignalExitPayload(bool isTopSide, bool green) =>
             new byte[] { 0xB2, (byte)(isTopSide ? 1 : 0), (byte)(green ? 1 : 0) };
 
-        private static byte[] BuildSwitchPayload(int switchId, SwitchPosition pos) =>
-            new byte[] { 0xC1, (byte)switchId, (byte)(pos == SwitchPosition.Straight ? 0 : 1) };
+        private static byte[] BuildSwitchPayload(int switchId, bool pos) =>
+            new byte[] { 0xC1, (byte)switchId, (byte)(pos == false ? 0 : 1) };
 
         private static byte[] BuildStopBeforeStationPayload(bool isTopSide) =>
             new byte[] { 0xD1, (byte)(isTopSide ? 1 : 0) };

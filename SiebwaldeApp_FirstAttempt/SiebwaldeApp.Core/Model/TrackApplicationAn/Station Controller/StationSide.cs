@@ -17,6 +17,13 @@ namespace SiebwaldeApp.Core
         Departing
     }
 
+    public enum StationDirection
+    {
+        Inbound,
+        Outbound,
+        Passing
+    }
+
     /// <summary>
     /// One side of the station (Top or Bottom).
     /// Owns 3 tracks (resolved by zone via TrackApplication.Registry) and runs its own local loop.
@@ -311,8 +318,7 @@ namespace SiebwaldeApp.Core
             try
             {
                 // 1) Set outbound route (switches) and wait a moment (servo travel)
-                SetPathOutboundFrom(track);
-                await Delay(_switchWait);
+                await SetPathAsync(track, StationDirection.Outbound);
 
                 // 2) Short settle; then set EXIT signal GREEN for this side
                 await Delay(_outboundSettleWait);
@@ -327,24 +333,7 @@ namespace SiebwaldeApp.Core
             {
                 IoC.Logger.Log($"{_name}: DepartSequence error on track {track.Number} -> {ex.Message}", _loggerInstance);
             }
-        }
-
-        // Map station-side to path/switch configuration (TODO: replace with your actual mapping)
-        // Keep the API tiny: we only need an intent, not a new type system.
-        private void SetPathTo(StationTrack track)
-        {
-            // TODO: translate track.Number -> your concrete switch commands.
-            // Example sketch; replace with your IDs:
-            // if (track.Number == 10 || track.Number == 1)  _out.SetSwitch(1, SwitchPosition.Straight);
-            // if (track.Number == 11 || track.Number == 2)  _out.SetSwitch(1, SwitchPosition.Diverging);
-            // if (track.Number == 12 || track.Number == 3)  _out.SetSwitch(2, SwitchPosition.Straight);
-        }
-
-        private void SetPathOutboundFrom(StationTrack track)
-        {
-            // TODO: set the route from the given track towards the exit (13A on top / 4A bottom).
-            // Same idea as SetPathTo(...) but for the outbound path.
-        }
+        }                
 
         private void SetEntrySignal(bool green)
         {
@@ -371,11 +360,10 @@ namespace SiebwaldeApp.Core
             try
             {
                 // 1) Set inbound route (switches) to this track and wait briefly
-                SetPathTo(track);
-                await Delay(_switchWait);
-
+                await SetPathAsync(track, StationDirection.Inbound, isPassing);
+                
                 // 2) Entry signal policy (GREEN only if passing on the middle track and exit is free)
-                SetEntrySignal(green: isPassing);
+                //SetEntrySignal(green: isPassing);
 
                 // NOTE:
                 // We do NOT release/engage inbound OCC_TO here; keep that in your existing inbound logic.
@@ -384,6 +372,76 @@ namespace SiebwaldeApp.Core
             catch (Exception ex)
             {
                 IoC.Logger.Log($"{_name}: PrepareInbound error for track {track?.Number} -> {ex.Message}", _loggerInstance);
+            }
+        }
+
+        // Nullable = "don’t touch this switch in this direction"
+        public readonly record struct PathState(bool? W1, bool? W2, bool? W3, bool? W4);
+
+        private PathState ComputePathState(StationTrack track, StationDirection dir)
+        {
+            var t = track.Number; // 1,2,3,10,11,12
+
+            switch (dir)
+            {
+                case StationDirection.Inbound:
+                    return new PathState(
+                        W1: t is 1 or 10 or 11 ? true : t is 2 or 3 or 12 ? false : null,
+                        W2: t is 2 or 10 ? true : t is 3 or 11 ? false : null,
+                        W3: null, // not touched by inbound in your C
+                        W4: null  // not touched by inbound in your C
+                    );
+
+                case StationDirection.Outbound:
+                    return new PathState(
+                        W1: null, // not touched by outbound in your C
+                        W2: null,
+                        W3: t is 1 or 11 ? true : t is 2 or 12 ? false : null,
+                        W4: t is 1 or 2 or 10 ? true : t is 3 or 11 or 12 ? false : null
+                    );
+
+                case StationDirection.Passing:
+                    return new PathState(
+                        W1: t is 1 or 10 or 11 ? true : t is 2 or 3 or 12 ? false : null,
+                        W2: t is 2 or 10 ? true : t is 3 or 11 ? false : null,
+                        W3: t is 1 or 11 ? true : t is 2 or 12 ? false : null,
+                        W4: t is 1 or 2 or 10 ? true : t is 3 or 11 or 12 ? false : null
+                    );
+
+                default:
+                    return new PathState(null, null, null, null);
+            }
+        }
+
+        private void ApplyPath(PathState state)
+        {
+            // Map to your ITrackOut / pin writes. Only touch when HasValue.
+            if (state.W1.HasValue) _trackOut.SetSwitch(1, state.W1.Value); // W1/W5
+            if (state.W2.HasValue) _trackOut.SetSwitch(2, state.W2.Value); // W2/W6
+            if (state.W3.HasValue) _trackOut.SetSwitch(3, state.W3.Value); // W3/W7
+            if (state.W4.HasValue) _trackOut.SetSwitch(4, state.W4.Value); // W4/W8
+        }
+
+        // Unified entry point: replaces SetPathTo(...) and SetPathOutboundFrom(...)
+        public async Task SetPathAsync(StationTrack track, StationDirection dir, bool isPassing = false)
+        {
+            try
+            {
+                var path = ComputePathState(track, dir);
+                ApplyPath(path);
+                await Delay(_switchWait);
+
+                // Entry-signal policy: you previously set it only for inbound prepare.
+                // Keep that here so the caller doesn’t need a second call.
+                // If you want the “only green when passing” rule, keep as below:
+                if (dir is StationDirection.Inbound or StationDirection.Passing)
+                {
+                    SetEntrySignal(green: dir == StationDirection.Passing && isPassing);
+                }
+            }
+            catch (Exception ex)
+            {
+                IoC.Logger.Log($"{_name}: SetPath error for track {track?.Number} ({dir}) -> {ex.Message}", _loggerInstance);
             }
         }
 

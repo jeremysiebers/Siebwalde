@@ -83,7 +83,7 @@ namespace SiebwaldeApp.Core
             Send(BuildYardSignalPayload(mergeSignalGreen));
         }
 
-        public void SetYardSwitch(int switchId, SwitchPosition position)
+        public void SetYardSwitch(int switchId, bool position)
         {
             Send(BuildYardSwitchPayload(switchId, position));
         }
@@ -100,8 +100,8 @@ namespace SiebwaldeApp.Core
         private static byte[] BuildYardSignalPayload(bool green) =>
             new byte[] { 0xE1, (byte)(green ? 1 : 0) };
 
-        private static byte[] BuildYardSwitchPayload(int switchId, SwitchPosition pos) =>
-            new byte[] { 0xE2, (byte)switchId, (byte)(pos == SwitchPosition.Straight ? 0 : 1) };
+        private static byte[] BuildYardSwitchPayload(int switchId, bool pos) =>
+            new byte[] { 0xE2, (byte)switchId, (byte)(pos == false ? 0 : 1) };
 
         private static byte[] BuildAuthorizeMergePayload(bool authorize) =>
             new byte[] { 0xE3, (byte)(authorize ? 1 : 0) };

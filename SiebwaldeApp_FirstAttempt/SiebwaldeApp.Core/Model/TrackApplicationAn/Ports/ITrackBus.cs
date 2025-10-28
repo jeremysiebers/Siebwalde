@@ -18,11 +18,11 @@ namespace SiebwaldeApp.Core
         void SetAmplifierStop(int trackNumber, bool stop);
         void SetSignalEntry(bool isTopSide, bool green);
         void SetSignalExit(bool isTopSide, bool green);
-        void SetSwitch(int switchId, SwitchPosition position);
+        void SetSwitch(int switchId, bool position);
         void StopBeforeStation(bool isTopSide);
     }
 
-    public enum SwitchPosition { Straight, Diverging }
+    //public enum SwitchPosition { Straight, Diverging }
 
     public readonly record struct IncomingDetectedEvent(bool IsTopSide, bool IsFreight, DateTime Utc);
     public readonly record struct EntrySensorEvent(bool IsTopSide, int TrackNumber, DateTime Utc);

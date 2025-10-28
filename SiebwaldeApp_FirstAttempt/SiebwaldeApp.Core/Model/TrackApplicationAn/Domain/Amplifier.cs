@@ -10,6 +10,12 @@ namespace SiebwaldeApp.Core
         public int TrackNumber { get; }
         public bool OccupiedOut { get; private set; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Amplifier"/> class with the specified track number and output
+        /// bus.
+        /// </summary>
+        /// <param name="trackNumber">The track number associated with this amplifier. Must be a non-negative integer.</param>
+        /// <param name="bus">The output bus where the amplified signal will be sent. Cannot be null.</param>
         public Amplifier(int trackNumber, ITrackOut bus)
         {
             TrackNumber = trackNumber;

@@ -13,6 +13,13 @@ namespace SiebwaldeApp.Core
 
         public IEnumerable<TrackBlock> AllBlocks() => _byId.Values.Select(v => v.Block);
 
+        /// <summary>
+        /// Queries the collection of track blocks based on specified criteria.
+        /// </summary>
+        /// <param name="zone">The zone to filter track blocks by. If null or whitespace, no filtering is applied based on zone.</param>
+        /// <param name="role">The role to filter track blocks by. If null, no filtering is applied based on role.</param>
+        /// <param name="tag">The tag to filter track blocks by. If null or whitespace, no filtering is applied based on tag.</param>
+        /// <returns>An enumerable collection of <see cref="TrackBlock"/> objects that match the specified criteria.</returns>
         public IEnumerable<TrackBlock> Query(string zone = null, TrackRole? role = null, string tag = null)
         {
             IEnumerable<KeyValuePair<int, (TrackBlock Block, TrackMetadata Meta)>> q = _byId;

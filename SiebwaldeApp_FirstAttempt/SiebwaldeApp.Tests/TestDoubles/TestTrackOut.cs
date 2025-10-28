@@ -14,7 +14,7 @@ namespace SiebwaldeApp.Tests
         public void SetAmplifierStop(int trackNumber, bool stop) => Add(nameof(SetAmplifierStop), trackNumber, stop);
         public void SetSignalEntry(bool isTopSide, bool green) => Add(nameof(SetSignalEntry), isTopSide, green);
         public void SetSignalExit(bool isTopSide, bool green) => Add(nameof(SetSignalExit), isTopSide, green);
-        public void SetSwitch(int switchId, SwitchPosition position) => Add(nameof(SetSwitch), switchId, position);
+        public void SetSwitch(int switchId, bool position) => Add(nameof(SetSwitch), switchId, position);
         public void StopBeforeStation(bool isTopSide) => Add(nameof(StopBeforeStation), isTopSide);
     }
 }

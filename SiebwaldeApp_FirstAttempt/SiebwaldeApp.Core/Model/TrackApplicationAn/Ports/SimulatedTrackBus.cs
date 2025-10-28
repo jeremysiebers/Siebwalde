@@ -101,7 +101,7 @@ namespace SiebwaldeApp.Core
             IoC.Logger.Log("[SimBus OUT] " + msg, "");
         }
 
-        public void SetSwitch(int switchId, SwitchPosition position)
+        public void SetSwitch(int switchId, bool position)
         {
             var msg = $"SetSwitch id={switchId} pos={position} @ {DateTime.UtcNow:O}";
             OutboundLog.Add(msg);

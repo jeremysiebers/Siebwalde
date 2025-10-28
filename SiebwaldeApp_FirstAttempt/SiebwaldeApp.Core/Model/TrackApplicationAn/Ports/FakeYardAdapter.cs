@@ -13,7 +13,7 @@ namespace SiebwaldeApp.Core
 
         // ---- IYardOut commands (no-op) ----
         public void SetYardSignal(bool mergeSignalGreen) { }
-        public void SetYardSwitch(int switchId, SwitchPosition position) { }
+        public void SetYardSwitch(int switchId, bool position) { }
         public void AuthorizeMerge(bool authorize) { }
 
         public void Dispose() { }

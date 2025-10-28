@@ -20,7 +20,7 @@ namespace SiebwaldeApp.Core
         public void SetAmplifierStop(int trackNumber, bool stop) { }
         public void SetSignalEntry(bool isTopSide, bool green) { }
         public void SetSignalExit(bool isTopSide, bool green) { }
-        public void SetSwitch(int switchId, SwitchPosition position) { }
+        public void SetSwitch(int switchId, bool position) { }
         public void StopBeforeStation(bool isTopSide) { }
 
         public void Dispose() { }
