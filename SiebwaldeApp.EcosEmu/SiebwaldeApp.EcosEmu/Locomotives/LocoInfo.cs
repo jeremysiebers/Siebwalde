@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Linq;
 
 namespace SiebwaldeApp.EcosEmu
 {
@@ -38,5 +38,10 @@ namespace SiebwaldeApp.EcosEmu
         /// This is updated from Koploper via the external info client.
         /// </summary>
         public int? Block { get; set; }
+
+        /// <summary>
+        /// Stored function states F0..F28 (length 29).
+        /// </summary>
+        public int[] Functions { get; set; } = Enumerable.Repeat(0, 29).ToArray();
     }
 }

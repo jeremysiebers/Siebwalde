@@ -33,19 +33,55 @@ namespace SiebwaldeApp.EcosEmu
         public async Task LoadAsync(CancellationToken ct = default)
         {
             if (!File.Exists(_filePath))
-                return;
-
-            await using var stream = File.OpenRead(_filePath);
-            var loaded = await JsonSerializer.DeserializeAsync<List<LocoInfo>>(stream, SerializerOptions, ct)
-                          ?? new List<LocoInfo>();
-
-            lock (_syncRoot)
             {
-                _locos.Clear();
-                _locos.AddRange(loaded);
+                Console.WriteLine($"[LOCO] No JSON file found at '{_filePath}', starting with empty loco list.");
+                return;
             }
 
-            Console.WriteLine($"[LOCO] Loaded {loaded.Count} locomotives from '{_filePath}'.");
+            try
+            {
+                await using var stream = File.OpenRead(_filePath);
+
+                if (stream.Length == 0)
+                {
+                    // Empty file – treat as "no locos" instead of throwing.
+                    Console.WriteLine($"[LOCO] JSON file '{_filePath}' is empty, starting with empty loco list.");
+                    return;
+                }
+
+                var loaded = await JsonSerializer.DeserializeAsync<List<LocoInfo>>(stream, SerializerOptions, ct)
+                              ?? new List<LocoInfo>();
+
+                lock (_syncRoot)
+                {
+                    _locos.Clear();
+                    _locos.AddRange(loaded);
+                }
+
+                Console.WriteLine($"[LOCO] Loaded {loaded.Count} locomotives from '{_filePath}'.");
+            }
+            catch (JsonException ex)
+            {
+                Console.WriteLine($"[LOCO] Invalid JSON in '{_filePath}': {ex.Message}");
+                Console.WriteLine("[LOCO] Ignoring file and starting with empty loco list.");
+
+                lock (_syncRoot)
+                {
+                    _locos.Clear();
+                }
+                // Optioneel: je kunt hier het corrupte bestand hernoemen naar .bak
+                File.Move(_filePath, _filePath + ".bak", overwrite: true);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[LOCO] Error reading '{_filePath}': {ex.Message}");
+                Console.WriteLine("[LOCO] Starting with empty loco list.");
+
+                lock (_syncRoot)
+                {
+                    _locos.Clear();
+                }
+            }
         }
 
         public async Task SaveAsync(CancellationToken ct = default)

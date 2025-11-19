@@ -17,5 +17,10 @@ namespace SiebwaldeApp.EcosEmu
         {
             Console.WriteLine($"[HW] Loc address={address}, speed={ecosSpeed}, dir={direction}");
         }
+
+        public void SetSwitch(int decoderAddress, int outputIndex, bool on)
+        {
+            Console.WriteLine($"[HW] Switch decoder={decoderAddress}, output={outputIndex}, state={(on ? 1 : 0)}");
+        }
     }
 }
