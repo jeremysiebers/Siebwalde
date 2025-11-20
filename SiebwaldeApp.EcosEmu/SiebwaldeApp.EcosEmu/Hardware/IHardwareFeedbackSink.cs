@@ -15,5 +15,16 @@ namespace SiebwaldeApp.EcosEmu
         /// <param name="decoderAddress">Logical address used by the hardware layer.</param>
         /// <param name="outputIndex">0 = straight, 1 = diverging.</param>
         Task OnSwitchChangedAsync(int ecosId, int decoderAddress, int outputIndex);
+
+        /// <summary>
+        /// Called by external hardware code when an occupancy sensor changes state.
+        /// </summary>
+        /// <param name="sensorId">
+        /// Logical sensor id as seen by ECoS/Koploper (e.g. contact number 1..n).
+        /// </param>
+        /// <param name="occupied">
+        /// true = occupied, false = free.
+        /// </param>
+        Task OnSensorChangedAsync(int sensorId, bool occupied);
     }
 }

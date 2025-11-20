@@ -1,4 +1,5 @@
 ﻿using SiebwaldeApp.EcosEmu;
+using System.Diagnostics.Metrics;
 using System.Net;
 
 class Program
@@ -19,7 +20,7 @@ class Program
         // ECoS emulator backend
         var backend = new SimpleEcosBackend(hardware, locoRepository, externalInfo);
 
-        // Wire hardware feedback → backend (for switch events)
+        // Wire hardware feedback → backend (for switch/occupancy sensor events)
         if (backend is IHardwareFeedbackSink feedbackSink)
         {
             hardware.AttachFeedbackSink(feedbackSink);
@@ -27,6 +28,14 @@ class Program
 
         var server = new EcosEmulatorServer(15471, new SimpleEcosCommandParser(), backend);
         server.Start();
+                
+        _ = Task.Run(async () =>
+        {
+            await Task.Delay(TimeSpan.FromSeconds(10));
+            await hardware.SimulateExternalSensorChangeAsync(1, true);
+            await Task.Delay(TimeSpan.FromSeconds(10));
+            await hardware.SimulateExternalSensorChangeAsync(1, false);
+        });
 
         Console.WriteLine("ENTER to stop");
         Console.ReadLine();
@@ -40,12 +49,12 @@ class DummyHardwareBackend : IHardwareBackend
     private IHardwareFeedbackSink? _feedbackSink;
 
     /// <summary>
-    /// Attach a feedback sink so that the hardware backend can report
-    /// external changes (e.g. switch position changes) back to the ECoS backend.
+    /// Attaches a feedback sink so this hardware backend can report
+    /// external changes (e.g. switch or sensor state) back to the ECoS backend.
     /// </summary>
     public void AttachFeedbackSink(IHardwareFeedbackSink sink)
     {
-        _feedbackSink = sink;
+        _feedbackSink = sink ?? throw new ArgumentNullException(nameof(sink));
     }
 
     public void SetPower(bool on)
@@ -62,13 +71,49 @@ class DummyHardwareBackend : IHardwareBackend
     {
         Console.WriteLine($"[HW] Switch addr={decoderAddress} index={outputIndex} state={on}");
 
-        // For now, mirror the change back as if the real hardware has confirmed it.
-        // Simple 1:1 mapping: ecosId == decoderAddress.
-        if (_feedbackSink != null)
-        {
-            int ecosId = decoderAddress;
-            // Fire-and-forget; we do not block the caller on network I/O.
-            //_ = _feedbackSink.OnSwitchChangedAsync(ecosId, decoderAddress, outputIndex);
-        }
+        // IMPORTANT:
+        // Do NOT call back into the feedback sink here for now, because this
+        // method is usually triggered by the ECoS backend itself in response
+        // to a "set(...)" command from Koploper. If we reported a change here
+        // as external feedback, we would create duplicate events.
+        //
+        // External switch changes (e.g. hardware/manual changes) should use
+        // the helper method SimulateExternalSwitchChangeAsync instead.
+    }
+
+    /// <summary>
+    /// Test helper: simulate an EXTERNAL switch change (not coming from Koploper).
+    /// This will notify the ECoS backend via the feedback sink.
+    /// </summary>
+    public async Task SimulateExternalSwitchChangeAsync(int ecosId, int decoderAddress, int outputIndex)
+    {
+        if (_feedbackSink == null)
+            return; // method is async Task → mag zonder waarde terugkeren
+
+        Console.WriteLine($"[HW-SIM] External switch change ecosId={ecosId} addr={decoderAddress} idx={outputIndex}");
+
+        // Delay 5 seconds
+        await Task.Delay(TimeSpan.FromSeconds(1));
+
+        Console.WriteLine($"[HW-SIM] External switch change ecosId={ecosId} addr={decoderAddress} idx={outputIndex} (after delay)");
+
+        await _feedbackSink.OnSwitchChangedAsync(ecosId, decoderAddress, outputIndex);
+    }
+
+    /// <summary>
+    /// Test helper: simulate an EXTERNAL sensor/occupancy change.
+    /// </summary>
+    public async Task SimulateExternalSensorChangeAsync(int sensorId, bool occupied)
+    {
+        if (_feedbackSink == null)
+            return;
+
+        Console.WriteLine($"[HW-SIM] External sensor change requested sensorId={sensorId} occupied={occupied}");
+
+        // ADD DELAY HERE
+        await Task.Delay(TimeSpan.FromSeconds(1));
+
+        Console.WriteLine($"[HW-SIM] External sensor change sensorId={sensorId} occupied={occupied}");
+        await _feedbackSink.OnSensorChangedAsync(sensorId, occupied);
     }
 }
