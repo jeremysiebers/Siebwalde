@@ -19,10 +19,12 @@ namespace SiebwaldeApp.EcosEmu
         private CancellationTokenSource? _simCts;
         private Task? _simTask;
         private bool _powerOn;
-
+        
         public TrackSimulatorBackend(IBlockPositionProvider blockPositionProvider)
         {
             _blockPositionProvider = blockPositionProvider ?? throw new ArgumentNullException(nameof(blockPositionProvider));
+            // Listen for Koploper updates.
+            _blockPositionProvider.BlockEntered += OnKoploperLocBlockChanged;
             InitSimpleLoop();
         }
 
@@ -53,6 +55,62 @@ namespace SiebwaldeApp.EcosEmu
             }
         }
 
+        private void OnKoploperLocBlockChanged(int locoId, int blockId)
+        {
+            lock (_lock)
+            {
+                // 1. Loco removed from layout (Block = 0)
+                if (blockId <= 0)
+                {
+                    if (_locos.TryGetValue(locoId, out var loco))
+                    {
+                        // Clear old block occupancy
+                        if (_blocks.TryGetValue(loco.BlockId, out var oldBlock) &&
+                            _feedbackSink != null &&
+                            oldBlock.EnterSensorId != 0)
+                        {
+                            _ = _feedbackSink.OnSensorChangedAsync(oldBlock.EnterSensorId, false);
+                        }
+
+                        _locos.Remove(locoId);
+                    }
+
+                    return;
+                }
+
+                // 2. Loco is placed or moved to a real block
+                if (!_blocks.TryGetValue(blockId, out var newBlock))
+                {
+                    Console.WriteLine($"[SIM] Koploper reports block {blockId}, but simulator does not know this block.");
+                    return;
+                }
+
+                // Clear previous occupancy
+                if (_locos.TryGetValue(locoId, out var existing) &&
+                    _blocks.TryGetValue(existing.BlockId, out var previousBlock) &&
+                    _feedbackSink != null &&
+                    previousBlock.EnterSensorId != 0)
+                {
+                    _ = _feedbackSink.OnSensorChangedAsync(previousBlock.EnterSensorId, false);
+                }
+
+                // Place loco on new block
+                var locoSim = _locos.TryGetValue(locoId, out var locEntry)
+                    ? locEntry
+                    : new LocoSimState { DecoderAddress = locoId };
+
+                locoSim.BlockId = blockId;
+                locoSim.PositionMm = 0;
+                _locos[locoId] = locoSim;
+
+                // Mark new block as occupied
+                if (_feedbackSink != null && newBlock.EnterSensorId != 0)
+                {
+                    _ = _feedbackSink.OnSensorChangedAsync(newBlock.EnterSensorId, true);
+                }
+            }
+        }
+
         public void SetLocoSpeed(int decoderAddress, int speedSteps, int direction)
         {
             Console.WriteLine($"[SIM-HW] Loco addr={decoderAddress} speed={speedSteps} dir={direction}");
@@ -61,38 +119,42 @@ namespace SiebwaldeApp.EcosEmu
             {
                 if (!_locos.TryGetValue(decoderAddress, out var loco))
                 {
-                    // Ask Koploper (external info) for the last known block of this loco.
-                    int initialBlock = _blockPositionProvider.TryGetBlockForLoc(decoderAddress) ?? 1;
+                    // Ask Koploper for last known block (>0)
+                    int? blockFromKoploper = _blockPositionProvider.TryGetBlockForLoc(decoderAddress);
 
-                    // Fallback if Koploper reports a block we don't know in the simulator.
-                    if (!_blocks.ContainsKey(initialBlock))
+                    if (blockFromKoploper == null || blockFromKoploper <= 0)
                     {
-                        // Use the first defined block as a safe default.
-                        initialBlock = _blocks.Keys.OrderBy(id => id).First();
+                        // Locomotive is NOT on the layout, so ignore.
+                        return;
                     }
 
+                    if (!_blocks.TryGetValue(blockFromKoploper.Value, out _))
+                    {
+                        Console.WriteLine($"[SIM-HW] Unknown block {blockFromKoploper} for loco {decoderAddress}.");
+                        return;
+                    }
+
+                    // ONLY create sim state, do NOT touch occupancy here.
                     loco = new LocoSimState
                     {
                         DecoderAddress = decoderAddress,
-                        BlockId = initialBlock,
+                        BlockId = blockFromKoploper.Value,
                         PositionMm = 0,
                         Direction = 1,
                         SpeedSteps = 0
                     };
-                    _locos[decoderAddress] = loco;
 
-                    // Initial occupancy: mark the loco's starting block as occupied once.
-                    if (_feedbackSink != null && _blocks.TryGetValue(initialBlock, out var b) && b.EnterSensorId != 0)
-                    {
-                        // Fire-and-forget; do not block this call.
-                        _ = _feedbackSink.OnSensorChangedAsync(b.EnterSensorId, true);
-                    }
+                    _locos[decoderAddress] = loco;
                 }
 
+                // Update movement only
                 loco.Direction = direction >= 0 ? 1 : -1;
                 loco.SpeedSteps = Math.Max(0, speedSteps);
             }
         }
+
+
+
 
         public void SetSwitch(int decoderAddress, int outputIndex, bool on)
         {

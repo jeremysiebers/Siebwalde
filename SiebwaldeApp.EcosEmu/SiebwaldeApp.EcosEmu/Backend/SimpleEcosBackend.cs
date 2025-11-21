@@ -14,6 +14,11 @@ namespace SiebwaldeApp.EcosEmu
         private readonly Dictionary<int, FeedbackModule> _feedbackModules = new();
         private readonly Dictionary<int, int> _sensorModuleStates = new();
         private readonly object _sensorStateLock = new();
+        // Cache of last-known sensor states (sensorId → occupied)
+        private readonly Dictionary<int, bool> _sensorState = new();
+        // Flag to ensure we only send one initial sync after the first writer appears
+        private bool _initialFeedbackSent = false;
+
 
         /// <summary>
         /// Raised whenever the backend wants to send an unsolicited ECoS-style event
@@ -79,7 +84,6 @@ namespace SiebwaldeApp.EcosEmu
             var info = _locoRepository.GetByAddress(locoAddress);
             if (info != null)
             {
-                info.Block = blockNumber;
                 _locoRepository.AddOrUpdate(info);
 
                 // Fire-and-forget: do not block Koploper thread on disk I/O
@@ -234,66 +238,7 @@ namespace SiebwaldeApp.EcosEmu
             // 4) UNKNOWN OBJECT → return OK with empty body
             //
             await WriteReplyAsync(writer, cmd.RawLine, 0, "OK", null);
-        }
-        //private async Task HandleRequestAsync(EcosCommand cmd, TextWriter writer, CancellationToken ct)
-        //{
-        //    // Example: request(1000,control, force) or request(1000,view)
-
-        //    if (cmd.ObjectId == null)
-        //    {
-        //        await WriteReplyAsync(writer, cmd.RawLine, 2, "MISSING_ID", null);
-        //        return;
-        //    }
-
-        //    int id = (int)cmd.ObjectId;
-
-        //    if (!_locos.TryGetValue(id, out var loco))
-        //    {
-        //        // Try to create state from repository if not present yet
-        //        var info = _locoRepository.GetByEcosId(id);
-        //        if (info != null)
-        //        {
-        //            loco = new LocoState
-        //            {
-        //                EcosId = info.EcosId,
-        //                Address = info.Address,
-        //                Block = info.Block,
-        //                Speed = 0,
-        //                Direction = 1
-        //            };
-
-        //            // Load function states from JSON if available
-        //            loco.LoadFunctionsFromInfo(info);
-
-        //            _locos[info.EcosId] = loco;
-        //        }
-        //    }
-
-        //    var lines = new List<string>();
-
-        //    if (loco != null)
-        //    {
-        //        // Always report speed and direction
-        //        lines.Add($"{id} speed[{loco.Speed}]");
-        //        lines.Add($"{id} dir[{loco.Direction}]");
-
-        //        // IMPORTANT:
-        //        // Do not report all function states here, because Koploper appears
-        //        // to crash when func[...] lines are returned as part of a request(...)
-        //        // reply at startup.
-        //        //
-        //        // The function states are still kept in memory and JSON and will
-        //        // be reflected via func[...] events when Koploper changes them.
-        //        //
-        //        //for (int i = 0; i < loco.Functions.Length; i++)
-        //        //{
-        //        //    int val = loco.Functions[i] ? 1 : 0;
-        //        //    lines.Add($"{id} func[{i}][{val}]");
-        //        //}
-        //    }
-
-        //    await WriteReplyAsync(writer, cmd.RawLine, 0, "OK", lines);
-        //}
+        }        
 
         /// <summary>
         /// Handles the release command by processing the specified <see cref="EcosCommand"/> and writing an
@@ -639,6 +584,8 @@ namespace SiebwaldeApp.EcosEmu
                     .OrderBy(l => l.EcosId)
                     .ToList();
 
+                Console.WriteLine($"[ECOS] queryObjects(10,...): returning {locos.Count} locos");
+
                 var lines = new List<string>();
 
                 foreach (var loco in locos)
@@ -916,6 +863,9 @@ namespace SiebwaldeApp.EcosEmu
         {
             const int moduleId = 100;   // Koploper group 1
 
+            // Always cache the logical state, even if no writer is available yet.
+            _sensorState[sensorId] = occupied;
+
             if (!_feedbackModules.TryGetValue(moduleId, out var module))
             {
                 Console.WriteLine($"[HW-FEEDBACK] No feedback module {moduleId}");
@@ -935,19 +885,49 @@ namespace SiebwaldeApp.EcosEmu
             else
                 module.StateMask &= ~(1 << bit);
 
-            //string ev = $"{module.Id} state[{module.StateMask}]";
             string ev = $"{module.Id} state[0x{module.StateMask:X}]";
-
             Console.WriteLine($"[HW-FEEDBACK] {ev}");
 
-            // MUST HAVE: send to client
+            // Check for a connected ECoS client.
             var writer = _currentWriter;
             if (writer == null)
             {
-                Console.WriteLine("!! No writer available for EVENT");
+                // No writer yet: just keep the state cached, do not send anything.
+                Console.WriteLine("!! EVENT CACHED (no writer yet)");
                 return;
             }
 
+            // If this is the first time a writer is available, send an initial sync
+            // with the full, current state of all sensors.
+            if (!_initialFeedbackSent)
+            {
+                _initialFeedbackSent = true;
+
+                // Rebuild module.StateMask from the cached _sensorState to be 100% consistent.
+                module.StateMask = 0;
+                foreach (var kv in _sensorState)
+                {
+                    int sid = kv.Key;
+                    bool occ = kv.Value;
+
+                    if (sid < 1 || sid > module.Ports)
+                        continue;
+
+                    int b = sid - 1;
+                    if (occ)
+                        module.StateMask |= (1 << b);
+                }
+
+                string initialEv = $"{module.Id} state[0x{module.StateMask:X}]";
+                Console.WriteLine($"[HW-FEEDBACK] Initial sync: {initialEv}");
+                await WriteEventAsync(writer, initialEv);
+
+                // We can return here because initialEv already represents the current state,
+                // including this last change.
+                return;
+            }
+
+            // Normal case: writer is available and initial sync already sent.
             await WriteEventAsync(writer, ev);
         }
 

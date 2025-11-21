@@ -7,19 +7,22 @@ class Program
     static void Main(string[] args)
     {
         var externalInfo = new KoploperExternalInfoClient();
-        externalInfo.Start();
+        
+        var locoRepo = new JsonLocoRepository("C:\\Localdata\\Siebwalde\\Logging\\locos.json");
+        locoRepo.LoadAsync().GetAwaiter().GetResult();
 
         // Hardware backend: track simulator, now aware of Koploper block positions
         var hardware = new TrackSimulatorBackend(externalInfo);
-
-        var locoRepo = new JsonLocoRepository("C:\\Localdata\\Siebwalde\\Logging\\locos.json");
-
         var backend = new SimpleEcosBackend(hardware, locoRepo, externalInfo);
 
         // Let the simulator send sensor events back into the ECoS backend
         hardware.AttachFeedbackSink(backend);
 
         var server = new EcosEmulatorServer(15471, new SimpleEcosCommandParser(), backend);
+
+        // NOW start external info, AFTER feedback sink hookup:
+        externalInfo.Start();
+
         server.Start();
 
         Console.WriteLine("ENTER to stop");
