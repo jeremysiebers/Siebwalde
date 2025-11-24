@@ -3,14 +3,10 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Localdata/GIT/Siebwalde/Backup%20projects/TrackControllerPic18.X/mountaintrack.c</file>
-            <file>file:/C:/Localdata/GIT/Siebwalde/Backup%20projects/TrackControllerPic18.X/enums.h</file>
-            <file>file:/C:/Localdata/GIT/Siebwalde/Backup%20projects/TrackControllerPic18.X/main.c</file>
-            <file>file:/C:/Localdata/GIT/Siebwalde/Backup%20projects/TrackControllerPic18.X/communication.c</file>
-            <file>file:/C:/Localdata/GIT/Siebwalde/Backup%20projects/TrackControllerPic18.X/mcc_generated_files/pin_manager.h</file>
-            <file>file:/C:/Localdata/GIT/Siebwalde/Backup%20projects/TrackControllerPic18.X/mountainStationOutbound.c</file>
-            <file>file:/C:/Localdata/GIT/Siebwalde/Backup%20projects/TrackControllerPic18.X/setocc.c</file>
-            <file>file:/C:/Localdata/GIT/Siebwalde/Backup%20projects/TrackControllerPic18.X/mountaintrack.h</file>
+            <file>file:/C:/Localdata/Siebwalde/Backup%20projects/TrackControllerPic18.X/mainstation.c</file>
+            <file>file:/C:/Localdata/Siebwalde/Backup%20projects/TrackControllerPic18.X/pathway.c</file>
+            <file>file:/C:/Localdata/Siebwalde/Backup%20projects/TrackControllerPic18.X/mainStationPassing.c</file>
+            <file>file:/C:/Localdata/Siebwalde/Backup%20projects/TrackControllerPic18.X/mainStationInbound.c</file>
         </group>
     </open-files>
 </project-private>
