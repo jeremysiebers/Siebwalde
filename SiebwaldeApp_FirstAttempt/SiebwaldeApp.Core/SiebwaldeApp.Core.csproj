@@ -13,10 +13,6 @@
     <EmbeddedResource Remove="Model\TrackApplication\**" />
     <None Remove="Model\TrackApplication\**" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Remove="Model\TrackApplicationAn\Domain\TrackIOHandle.cs" />
-    <Compile Remove="Model\TrackApplicationAn\Track Controller\TrackControlMain.cs" />
-  </ItemGroup>
 
   <!-- NuGet packages (replaces old <Reference> + HintPath) -->
   <ItemGroup>
@@ -29,6 +25,15 @@
 
   <!-- Preserve Settings designer behavior -->
   <ItemGroup>
+    <None Update="Model\TrackApplication - Copy\Pages\TrackAmplifierItemView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
+    <None Update="Model\TrackApplication - Copy\Pages\TrackAmplifierManualControlView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
+    <None Update="Model\TrackApplication - Copy\Pages\TrackControlView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
     <None Update="Properties\CoreSettings.settings">
       <Generator>PublicSettingsSingleFileGenerator</Generator>
       <LastGenOutput>CoreSettings.Designer.cs</LastGenOutput>
@@ -48,9 +53,6 @@
     <Reference Include="PropertyChanged">
       <HintPath>..\packages\PropertyChanged.Fody.4.1.0\lib\net40\PropertyChanged.dll</HintPath>
     </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Model\TrackApplicationAn\Track Controller\" />
   </ItemGroup>
 
   <!-- Configuration-specific constants (SDK has sensible defaults for the rest) -->

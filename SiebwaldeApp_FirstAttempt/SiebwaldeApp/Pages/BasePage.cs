@@ -15,7 +15,7 @@ namespace SiebwaldeApp
         /// <summary>
         /// The View Model associated wth this page
         /// </summary>
-        private T mViewModel;
+        private T? mViewModel;
 
         #endregion
 
@@ -26,7 +26,7 @@ namespace SiebwaldeApp
         /// </summary>
         public T ViewModel
         {
-            get => mViewModel;
+            get => mViewModel!;
             set
             {
                 // If nothing has changed, return
