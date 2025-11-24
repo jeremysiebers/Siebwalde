@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36705.20 d17.14
+VisualStudioVersion = 17.14.36705.20
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SiebwaldeApp.EcosEmu", "SiebwaldeApp.EcosEmu\SiebwaldeApp.EcosEmu.csproj", "{DC78EFC9-8819-4AFF-B6BC-E143DF5DE14B}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SiebwaldeApp.EcosEmu.Host", "SiebwaldeApp.EcosEmu.Host\SiebwaldeApp.EcosEmu.Host.csproj", "{9400EE77-1859-4327-8976-F7616F97F11A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SiebwaldeApp.EcosEmu", "..\SiebwaldeApp\SiebwaldeApp.EcosEmu\SiebwaldeApp.EcosEmu.csproj", "{6597389F-BCE9-5E72-54C7-0DE1CEC7A730}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,14 +13,14 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{DC78EFC9-8819-4AFF-B6BC-E143DF5DE14B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DC78EFC9-8819-4AFF-B6BC-E143DF5DE14B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DC78EFC9-8819-4AFF-B6BC-E143DF5DE14B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DC78EFC9-8819-4AFF-B6BC-E143DF5DE14B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9400EE77-1859-4327-8976-F7616F97F11A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9400EE77-1859-4327-8976-F7616F97F11A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9400EE77-1859-4327-8976-F7616F97F11A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9400EE77-1859-4327-8976-F7616F97F11A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6597389F-BCE9-5E72-54C7-0DE1CEC7A730}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6597389F-BCE9-5E72-54C7-0DE1CEC7A730}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6597389F-BCE9-5E72-54C7-0DE1CEC7A730}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6597389F-BCE9-5E72-54C7-0DE1CEC7A730}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
