@@ -18,6 +18,8 @@ namespace SiebwaldeApp.EcosEmu
         private readonly Dictionary<int, bool> _sensorState = new();
         // Flag to ensure we only send one initial sync after the first writer appears
         private bool _initialFeedbackSent = false;
+        // Flag to ensure we only send one initial sync for switch states
+        private bool _initialSwitchFeedbackSent = false;
 
 
         /// <summary>
@@ -105,8 +107,14 @@ namespace SiebwaldeApp.EcosEmu
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task HandleAsync(EcosCommand cmd, TextWriter writer, CancellationToken ct)
         {
-            // Remember the current client writer so we can send unsolicited events later
+            // Detect first writer attachment so we can send initial sensor/switch feedback once.
+            bool isFirstWriter = _currentWriter == null;
             _currentWriter = writer;
+
+            if (isFirstWriter)
+            {
+                await EnsureInitialFeedbackAsync(writer);
+            }
 
             switch (cmd.Name)
             {
@@ -821,16 +829,28 @@ namespace SiebwaldeApp.EcosEmu
         /// <summary>
         /// Handles a change in the state of a switch and sends the corresponding event to the active writer.
         /// </summary>
-        /// <remarks>This method updates the internal state of the switch, creates an event representing
-        /// the change,  and writes the event to the currently active writer. If no writer is active, the event is not
-        /// sent,  and a message is logged to indicate this condition.</remarks>
-        /// <param name="ecosId">The identifier of the ecosystem where the switch resides.</param>
-        /// <param name="decoderAddress">The address of the decoder controlling the switch.</param>
-        /// <param name="outputIndex">The index of the output within the decoder that corresponds to the switch.</param>
-        /// <returns></returns>
+        /// <remarks>
+        /// This method updates the internal switch state and ensures that feedback is not lost
+        /// when no client is connected yet:
+        /// <list type="bullet">
+        ///   <item>
+        ///     <description>The logical state is always cached in <see cref="_switchStates"/>.</description>
+        ///   </item>
+        ///   <item>
+        ///     <description>If no writer is available, the event is effectively buffered and only logged.</description>
+        ///   </item>
+        ///   <item>
+        ///     <description>When a writer is available for the first time, an initial sync of all known
+        ///     switch states is sent.</description>
+        ///   </item>
+        /// </list>
+        /// </remarks>
+        /// <param name="ecosId">The ECoS object id of the switch.</param>
+        /// <param name="decoderAddress">The logical decoder address used by the hardware layer.</param>
+        /// <param name="outputIndex">0 = straight, 1 = diverging.</param>
         public async Task OnSwitchChangedAsync(int ecosId, int decoderAddress, int outputIndex)
         {
-            // Update internal state and build the event line
+            // Update internal state and build the canonical event payload.
             var ev = UpdateSwitchStateAndCreateEvent(ecosId, decoderAddress, outputIndex);
 
             Console.WriteLine($"[HW-FEEDBACK] {ev}");
@@ -838,10 +858,14 @@ namespace SiebwaldeApp.EcosEmu
             var writer = _currentWriter;
             if (writer == null)
             {
-                Console.WriteLine("  !! No active writer for switch feedback; event not sent.");
+                // No writer yet: the switch state is cached in _switchStates and will be part
+                // of the next initial sync once a client connects.
+                Console.WriteLine("!! EVENT CACHED (no writer yet)");
                 return;
             }
 
+            // Normal case: writer is available and initial switch sync has already been sent
+            // (or will be handled centrally via EnsureInitialFeedbackAsync).
             await WriteEventAsync(writer, ev);
         }
 
@@ -879,11 +903,16 @@ namespace SiebwaldeApp.EcosEmu
             }
 
             int bit = sensorId - 1;     // 1→0, 2→1, etc.
+            int oldMask = module.StateMask;
 
             if (occupied)
                 module.StateMask |= (1 << bit);
             else
                 module.StateMask &= ~(1 << bit);
+
+            // No change in the module state? Then there is nothing to report.
+            if (module.StateMask == oldMask)
+                return;
 
             string ev = $"{module.Id} state[0x{module.StateMask:X}]";
             Console.WriteLine($"[HW-FEEDBACK] {ev}");
@@ -929,6 +958,65 @@ namespace SiebwaldeApp.EcosEmu
 
             // Normal case: writer is available and initial sync already sent.
             await WriteEventAsync(writer, ev);
+        }
+
+        /// <summary>
+        /// Sends an initial snapshot of all known sensor and switch states once a writer is available.
+        /// This ensures that clients start from a consistent view and clears any stale occupancy.
+        /// </summary>
+        private async Task EnsureInitialFeedbackAsync(TextWriter writer)
+        {
+            // 1) Initial sensor snapshot (feedback module 100 / group 1 in Koploper)
+            if (!_initialFeedbackSent)
+            {
+                const int moduleId = 100;
+
+                if (_feedbackModules.TryGetValue(moduleId, out var module))
+                {
+                    // Rebuild StateMask from the cached _sensorState dictionary.
+                    module.StateMask = 0;
+
+                    foreach (var kv in _sensorState)
+                    {
+                        int sensorId = kv.Key;
+                        bool occupied = kv.Value;
+
+                        if (sensorId < 1 || sensorId > module.Ports)
+                            continue;
+
+                        int bit = sensorId - 1;
+                        if (occupied)
+                            module.StateMask |= (1 << bit);
+                    }
+
+                    string ev = $"{module.Id} state[0x{module.StateMask:X}]";
+                    Console.WriteLine($"[HW-FEEDBACK] Initial sensor sync: {ev}");
+                    await WriteEventAsync(writer, ev);
+                }
+
+                _initialFeedbackSent = true;
+            }
+
+            // 2) Initial switch snapshot (all known switches)
+            if (!_initialSwitchFeedbackSent)
+            {
+                List<string> initialEvents;
+                lock (_switchStateLock)
+                {
+                    initialEvents = _switchStates.Values
+                        .OrderBy(s => s.EcosId)
+                        .Select(s => $"{s.EcosId} state[{s.CurrentOutputIndex}]")
+                        .ToList();
+                }
+
+                foreach (var e in initialEvents)
+                {
+                    Console.WriteLine($"[HW-FEEDBACK] Initial switch sync: {e}");
+                    await WriteEventAsync(writer, e);
+                }
+
+                _initialSwitchFeedbackSent = true;
+            }
         }
 
         //public async Task OnSensorChangedAsync(int sensorId, bool occupied)
