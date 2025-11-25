@@ -10,6 +10,8 @@ namespace SiebwaldeApp.Core
         public event EventHandler? FiddleYardShowWinForms;
         public event EventHandler? FiddleYardShowSettingsWinForms;
         public StationSettingsPageViewModel SettingsViewModel { get; private set; }
+
+        public TrackApplication? _trackApplication;
         #endregion
 
         #region Private members
@@ -18,7 +20,10 @@ namespace SiebwaldeApp.Core
         private CancellationTokenSource _appCts;
 
         private readonly NewMAC_IP_Conditioner _macIp = new();
-        public TrackApplication? _trackApplication;
+        // --- New track amplifier infrastructure ---
+        private TrackApplicationVariables? _trackVariables;
+        private ITrackCommClient? _trackCommClient;
+        private ITrackAmplifierInitializationService? _trackInitService;
         #endregion
 
         #region Constructor
@@ -32,10 +37,7 @@ namespace SiebwaldeApp.Core
             var macString = _macIp.MACstring();
             IoC.Logger.Log($"Main: PC MAC address is: {(string.IsNullOrWhiteSpace(macString) ? "<unknown>" : macString)}", "");
             IoC.Logger.Log($"Main: PC IP address is:  {_macIp.IPstring()}", "");
-
-            var topPolicy = new StationPolicy();
-            var bottomPolicy = new StationPolicy();
-            SettingsViewModel = new StationSettingsPageViewModel(topPolicy, bottomPolicy, this);
+                        
         }
         #endregion
 
@@ -96,25 +98,59 @@ namespace SiebwaldeApp.Core
 
             IoC.Logger.Log("Track Application starting...", "");
 
-            // Get ports from IoC (throw if not initialized)
-            var trackIn = IoC.TrackAdapter.RequireIn();
-            var trackOut = IoC.TrackAdapter.RequireOut();
+            // --- NEW: build low-level amplifier communication + initialization ---
 
-            // Build root
-            _trackApplication = new TrackApplication(trackIn, trackOut);
+            // 0) Ensure we have the legacy variable container
+            _trackVariables ??= new TrackApplicationVariables();
 
-            // Register the 6 station tracks with metadata into the registry
-            RegisterStationBlocks(trackOut);
+            // TODO: get these ports from configuration or Enums, for now hard-coded
+            const int trackReceivingPort = 5000; // replace with your real port
+            const int trackSendingPort = 5001;   // replace with your real port
+            const string trackLoggerInstance = "Track";
+
+            // 1) Create transport + communication client
+            var transport = new UdpTrackTransport(trackReceivingPort, trackSendingPort, trackLoggerInstance);
+            _trackCommClient = new TrackCommClientAsync(transport, _trackVariables);
+
+            // 2) Compose initialization steps
+            var steps = new List<IInitializationStep>
+            {
+                new ConnectToEthernetTargetStep(_trackCommClient, _trackVariables, trackLoggerInstance),
+                new ResetAllSlavesStep(_trackCommClient, _trackVariables, trackLoggerInstance),
+                new DataUploadStep(_trackCommClient, _trackVariables, trackLoggerInstance),
+                new DetectSlavesStep(_trackCommClient, _trackVariables, trackLoggerInstance),
+                new RecoverSlavesStep(_trackCommClient, _trackVariables, _sendNextFwDataPacket, _bootloaderHelpers, trackLoggerInstance),
+                new FlashFwTrackamplifiersStep(_trackCommClient, _trackVariables, _sendNextFwDataPacket, _bootloaderHelpers, trackLoggerInstance),
+                new InitTrackamplifiersStep(_trackCommClient, trackLoggerInstance),
+                new EnableTrackamplifiersStep(_trackCommClient, trackLoggerInstance),
+            };
+
+            _trackInitService = new TrackAmplifierInitializationServiceAsync(
+                _trackCommClient,
+                _trackVariables,
+                steps);
+
+            // Optional: hook progress to logging or UI
+            _trackInitService.ProgressChanged += (s, e) =>
+            {
+                IoC.Logger.Log($"Track init: {e.StepName} - {e.Message}", trackLoggerInstance);
+            };
+
+            _trackInitService.StatusChanged += (s, status) =>
+            {
+                IoC.Logger.Log($"Track init status: {status}", trackLoggerInstance);
+            };
+
+            // 3) Start low-level communication (real HW for now, later also emu)
+            await _trackCommClient.StartAsync(realHardwareMode: true, _appCts.Token);
+
+            // 4) Start async initialization sequence in the background
+            _ = _trackInitService.InitializeAsync(_appCts.Token);
+
+            // --- Existing high-level application startup ---
 
             // 1) Start the application (spins up StationSide run loops)
             await _trackApplication.StartAsync(_appCts.Token);
-
-            // 2) Pas nu de simulatie starten
-            var simCtrl = IoC.Kernel.Get<ISimulationController>();
-            if (simCtrl != null)
-            {
-                await simCtrl.StartAsync(_appCts.Token);
-            }
 
             IoC.Logger.Log("Track Application started.", "");
         }
@@ -130,61 +166,30 @@ namespace SiebwaldeApp.Core
             if (_trackApplication == null)
                 return;
 
-            IoC.Logger.Log("Track Application stopping...", "");
+            IoC.Logger.Log("Stopping Track Application...", "");
 
             try
             {
-                _trackApplication.Stop();
-                _trackApplication = null;
-                IoC.Logger.Log("Track Application stopped.", "");
-                // sim ook stoppen
-                IoC.Kernel.Get<ISimulationController>().Stop();
+                _appCts.Cancel();
+            }
+            catch { /* ignore */ }
 
-                _appCts?.Cancel();
-            }
-            catch (Exception ex)
+            // TODO: ideally make this method async and await the dispose calls
+            if (_trackCommClient is IAsyncDisposable asyncDisposable)
             {
-                IoC.Logger.Log($"Error while stopping Track Application: {ex.Message}", "");
+                asyncDisposable.DisposeAsync().AsTask().Wait();
             }
+
+            _trackCommClient = null;
+            _trackInitService = null;
+            _trackVariables = null;
+
+            _trackApplication = null;
+
+            IoC.Logger.Log("Track Application stopped.", "");
         }
 
-        /// <summary>
-        /// Registers station track blocks and their associated metadata in the track application registry.
-        /// </summary>
-        /// <remarks>This method defines and registers track blocks for two station zones: "StationTop"
-        /// and "StationBottom". Each block is associated with entry and exit sensors, a signal, an amplifier, and
-        /// metadata specifying the zone and track role. The metadata includes a "Station" tag to identify the blocks as
-        /// station-related.</remarks>
-        /// <param name="trackOut">The output track interface used to initialize amplifiers for the registered track blocks.</param>
-        private void RegisterStationBlocks(ITrackOut trackOut)
-        {
-            if (_trackApplication == null)
-                throw new InvalidOperationException("TrackApplication must be initialized before registering blocks.");
 
-            void Add(int id, string zone, TrackRole role)
-            {
-                var entry = new TrackSensor($"{id}-Entry");
-                var exit = new TrackSensor($"{id}-Exit");
-                var signal = new Signal($"{id}-Head");
-                var amp = new Amplifier(id, trackOut);
-
-                var block = new TrackBlock(id, entry, exit, signal, amp);
-                var meta = new TrackMetadata { Zone = zone, Role = role };
-                meta.Tags.Add("Station");
-
-                _trackApplication.Registry.Register(block, meta);
-            }
-
-            // Top: 10,11,12 (12 = middle freight)
-            Add(10, "StationTop", TrackRole.FreightAllowed);
-            Add(11, "StationTop", TrackRole.FreightAllowed);
-            Add(12, "StationTop", TrackRole.MiddleFreight);
-
-            // Bottom: 1,2,3 (3 = middle freight)
-            Add(1, "StationBottom", TrackRole.FreightAllowed);
-            Add(2, "StationBottom", TrackRole.FreightAllowed);
-            Add(3, "StationBottom", TrackRole.MiddleFreight);
-        }
 
         /// <summary>
         /// Dummy MAC payload (12×3): identifiers u..z,0..5; value=0; CR
@@ -205,126 +210,3 @@ namespace SiebwaldeApp.Core
         }
     }
 }
-
-
-//using System;
-//using System.Threading.Tasks;
-
-//namespace SiebwaldeApp.Core
-//{
-//    public class SiebwaldeApplicationModel
-//    {
-//        #region Public properties
-
-//        public event EventHandler InstantiateFiddleYardWinForms;
-//        public event EventHandler FiddleYardShowWinForms;
-//        public event EventHandler FiddleYardShowSettingsWinForms;
-
-//        #endregion
-
-//        #region Private members
-
-//        public FiddleYardController FYcontroller;
-//        //public FiddleYardSettingsForm FYSettingsForm;
-
-//        public FiddleYardController YDcontroller;
-//        public NewMAC_IP_Conditioner MACIPConditioner = new NewMAC_IP_Conditioner { };
-
-//        public TrackController TrackController;
-
-//        #endregion
-
-//        #region Constructor
-
-//        /// <summary>
-//        /// Default constructor
-//        /// <summary>
-//        public SiebwaldeApplicationModel()
-//        {
-//            IoC.Logger.Log("Siebwalde Application started.", "");
-//            IoC.Logger.Log("Main: PC MAC adress is: " + MACIPConditioner.MACstring(), "");
-//            IoC.Logger.Log("Main: PC IP adress is: " + MACIPConditioner.IPstring(), "");
-//        }
-//        #endregion
-
-//        protected virtual void OnLaunchWinFormsFormRequested(EventArgs e)
-//        {
-//            InstantiateFiddleYardWinForms?.Invoke(this, e);
-//        }
-
-//        public void OnFiddleYardShowWinForm(EventArgs e) {
-//            FiddleYardShowWinForms?.Invoke(this, e);
-//        }
-
-//        public void OnFiddleYardSettingsWinForm(EventArgs e)
-//        {
-//            FiddleYardShowSettingsWinForms?.Invoke(this, e);
-//        }
-
-//        /// <summary>
-//        /// Fiddle Yard
-//        /// </summary>
-//        public async Task StartFYController()
-//        {
-//            if (FYcontroller != null)
-//            {                
-//                return;
-//            }
-
-//            // Tried to make Task and start FiddleYard with it, however the winform stuff needs to run on "main" task as well hence
-//            // it will give error when starting it on a different task. Therefore first continue with the whole track, later re-build 
-//            // the fiddle yard part....
-//            FYcontroller = new FiddleYardController(
-//                MACIPConditioner.MAC(),
-//                MACIPConditioner.IP(),
-//                Properties.CoreSettings.Default.FYReceivingport,
-//                Properties.CoreSettings.Default.FYSendingport);
-
-//            // Launch winform here before controller is started.
-//            OnLaunchWinFormsFormRequested(EventArgs.Empty);
-
-
-//            IoC.Logger.Log("FiddleYard Controller starting...", "");
-
-//            await FYcontroller.StartFiddleYardControllerAsync();
-
-//            ////FYcontroller.FYTOPShow(false, 1010, 1948, 0, 0, true);
-//            //FYcontroller.FYBOTShow(false, 1010, 1948, 0, 0, true);
-//            //FiddleYardFormTop.Visible = true;
-//            //FYLinkActivity.Visible = true;
-//            //LFYLinkActivity.Visible = true;
-//            IoC.Logger.Log("FiddleYard Controller started.", "");
-
-//        }
-
-
-
-//        /// <summary>
-//        /// Track Controller
-//        /// </summary>
-//        /// <returns></returns>
-//        public async Task StartTrackController()
-//        {
-//            if (TrackController == null)
-//            {
-//                IoC.Logger.Log("Track Controller starting...", "");
-
-//                TrackController = initTrackcontroller();
-
-//                await TrackController.InitTrackControllerAsync();
-
-//                TrackController.StartTrackController();
-
-//                IoC.Logger.Log("Track Controller started.", "");
-//            }
-
-//        }
-
-//        private static TrackController initTrackcontroller()
-//        {
-//            return new TrackController(60000, 60000);
-//        }
-
-
-//    }
-//}

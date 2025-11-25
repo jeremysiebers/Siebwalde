@@ -9,9 +9,7 @@
     <AssemblyName>SiebwaldeApp.Core</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Remove="Model\TrackApplication\**" />
-    <EmbeddedResource Remove="Model\TrackApplication\**" />
-    <None Remove="Model\TrackApplication\**" />
+    <Compile Remove="Model\AmplifierInitializersBaseClass.cs" />
   </ItemGroup>
 
   <!-- NuGet packages (replaces old <Reference> + HintPath) -->
@@ -32,6 +30,15 @@
       <Generator>MSBuild:Compile</Generator>
     </None>
     <None Update="Model\TrackApplication - Copy\Pages\TrackControlView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
+    <None Update="Model\TrackApplication\Pages\TrackAmplifierItemView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
+    <None Update="Model\TrackApplication\Pages\TrackAmplifierManualControlView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
+    <None Update="Model\TrackApplication\Pages\TrackControlView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </None>
     <None Update="Properties\CoreSettings.settings">

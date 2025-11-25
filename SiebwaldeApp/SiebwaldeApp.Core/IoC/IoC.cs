@@ -37,33 +37,7 @@ namespace SiebwaldeApp.Core
         /// <summary>
         /// A shortcut to access the <see cref="ILogFactory"/>
         /// </summary>
-        public static ILogFactory Logger => IoC.Get<ILogFactory>();
-
-        /// <summary>
-        /// A shortcut to access the <see cref="TrackApplicationVariables"/>
-        /// </summary>
-        //public static TrackApplicationVariables TrackVariables => IoC.Get<TrackApplicationVariables>(); OLD
-
-        // Shared adapters (ports)
-        public static class TrackAdapter
-        {
-            public static ITrackIn? TrackIn { get; set; }
-            public static ITrackOut? TrackOut { get; set; }
-
-            // Safe accessors that fail fast if not initialized
-            public static ITrackIn RequireIn() => TrackIn ?? (TrackIn = IoC.Kernel.Get<ITrackIn>());
-            public static ITrackOut RequireOut() => TrackOut ?? (TrackOut = IoC.Kernel.Get<ITrackOut>());
-        }
-    
-
-        public static class YardAdapter
-        {
-            public static IYardIn? YardIn { get; set; }
-            public static IYardOut? YardOut { get; set; }
-
-            public static IYardIn RequireIn() => YardIn ?? (YardIn = IoC.Kernel.Get<IYardIn>());
-            public static IYardOut RequireOut() => YardOut ?? (YardOut = IoC.Kernel.Get<IYardOut>());
-        }
+        public static ILogFactory Logger => IoC.Get<ILogFactory>();              
 
         #endregion
 
@@ -92,29 +66,7 @@ namespace SiebwaldeApp.Core
             Kernel.Bind<SideMenuViewModel>().ToConstant(new SideMenuViewModel());
 
             // Bind to a single instance of Siebwalde Application Model
-            Kernel.Bind<SiebwaldeApplicationModel>().ToConstant(new SiebwaldeApplicationModel());
-
-            // bind to a single instance of Track Application Variables
-            //Kernel.Bind<TrackApplicationVariables>().ToConstant(new TrackApplicationVariables()); OLD
-
-            // Station policies (top + bottom)
-            var bindings = IoC.Kernel.GetBindings(typeof(StationPolicy));
-            bool hasTop = bindings.Any(b => b.Metadata?.Name == "TopStationPolicy");
-            bool hasBottom = bindings.Any(b => b.Metadata?.Name == "BottomStationPolicy");
-
-            if (!hasTop)
-            {
-                IoC.Kernel.Bind<StationPolicy>()
-                    .ToConstant(new StationPolicy())
-                    .Named("TopStationPolicy");
-            }
-
-            if (!hasBottom)
-            {
-                IoC.Kernel.Bind<StationPolicy>()
-                    .ToConstant(new StationPolicy())
-                    .Named("BottomStationPolicy");
-            }
+            Kernel.Bind<SiebwaldeApplicationModel>().ToConstant(new SiebwaldeApplicationModel());         
         }
 
         #endregion
