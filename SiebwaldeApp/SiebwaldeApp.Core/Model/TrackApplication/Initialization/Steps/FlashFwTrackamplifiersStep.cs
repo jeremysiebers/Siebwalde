@@ -1,4 +1,7 @@
-﻿namespace SiebwaldeApp.Core
+﻿using System.Diagnostics;
+using System.Threading;
+
+namespace SiebwaldeApp.Core
 {
     /// <summary>
     /// Initialization step that determines which slaves require a firmware update
@@ -20,10 +23,9 @@
 
         // From legacy: counters for FW data loop over ALL slaves
         private uint _fwFlashRequired;
-        private int _iterationCounter;
-        private readonly uint _processLines;
-        private readonly uint _iterations;
-        private readonly int _jumpSize;
+
+        // Get enew stopwatch
+        private Stopwatch sw = new Stopwatch();
 
         public string Name => "FlashFwTrackamplifiers";
 
@@ -44,10 +46,6 @@
 
             var dummyData = new byte[80];
             _sendMessageTemplate = new SendMessage(0, dummyData);
-
-            _processLines = (Enums.PROGMEMSIZE - Enums.BOOTLOADEROFFSET) / Enums.HEXROWWIDTH;
-            _iterations = ((Enums.PROGMEMSIZE - Enums.BOOTLOADEROFFSET) / Enums.HEXROWWIDTH) / Enums.JUMPSIZE;
-            _jumpSize = (int)Enums.JUMPSIZE;
         }
 
         public async Task<InitStepResult> ExecuteAsync(
@@ -68,37 +66,39 @@
 
                 // 2: erase flash on all slaves
                 case 2:
-                    return await State2_EraseFlashAsync(lastMessage, cancellationToken)
+                    return await State2_StartDownloadAsync(lastMessage, cancellationToken)
                         .ConfigureAwait(false);
 
                 // 3: start FW download state
                 case 3:
-                    return await State3_StartDownloadAsync(lastMessage, cancellationToken)
-                        .ConfigureAwait(false);
+                    return State3_WaitStartDownloadDone(lastMessage);
 
                 // 4: send FW data blocks
                 case 4:
-                    return await State4_SendFwDataChunkAsync(lastMessage, cancellationToken)
-                        .ConfigureAwait(false);
+                    return State4_SendFwDataChunk(lastMessage);
 
                 // 5: verify FW checksum
                 case 5:
-                    return await State5_ChecksumAsync(lastMessage, cancellationToken)
-                        .ConfigureAwait(false);
+                    return State5_WaitChecksumResult(lastMessage);
 
                 // 6: set config word
                 case 6:
-                    return await State6_ConfigWordAsync(lastMessage, cancellationToken)
+                    return await State6_SendConfigWordAsync(lastMessage, cancellationToken)
                         .ConfigureAwait(false);
 
-                // 7: reset slaves
+                // 7: Wait for config word standby
                 case 7:
-                    return await State7_ResetSlavesAsync(lastMessage, cancellationToken)
+                    return await State7_WaitConfigWordStandbyAsync(lastMessage, cancellationToken)
                         .ConfigureAwait(false);
 
-                // 8: exit FW handler and finish sequence
+                // 8: Wait for config word done
                 case 8:
-                    return State8_ExitFwHandlerDone(lastMessage);
+                    return await State8_WaitConfigWordDoneAsync(lastMessage, cancellationToken)
+                        .ConfigureAwait(false);
+
+                // 9: Wait for all slaves flashed
+                case 9:
+                    return State9_WaitAllFlashed(lastMessage);
 
                 default:
                     IoC.Logger.Log(
@@ -166,7 +166,7 @@
 
         #endregion
 
-        #region State 1..3: connect FW handler / erase / start download
+        #region State 1..9: connect FW handler / send FW file / check checksum / send config / start flash
 
         private async Task<InitStepResult> State1_StartFwHandlerAsync(
             ReceivedMessage? lastMessage,
@@ -184,88 +184,64 @@
                     _loggerInstance);
 
                 var msg = _sendMessageTemplate;
-                msg.Command = TrackCommand.EXEC_FW_STATE_ERASE_FLASH;
+                msg.Command = TrackCommand.EXEC_FW_STATE_RECEIVE_FW_FILE;
 
                 await _commClient.SendAsync(msg, cancellationToken).ConfigureAwait(false);
 
                 _subState = 2;
 
                 IoC.Logger.Log(
-                    "State.FlashFwTrackamplifiers => EXEC_FW_STATE_ERASE_FLASH.",
+                    "State.FlashFwTrackamplifiers => EXEC_FW_STATE_RECEIVE_FW_FILE.",
                     _loggerInstance);
             }
 
             return InitStepResult.Continue();
         }
 
-        private async Task<InitStepResult> State2_EraseFlashAsync(
+        /// <summary>
+        /// State 2:
+        /// Start firmware download state on the slave.
+        /// </summary>
+        private async Task<InitStepResult> State2_StartDownloadAsync(
             ReceivedMessage? lastMessage,
             CancellationToken cancellationToken)
         {
-            if (!lastMessage.HasValue)
-                return InitStepResult.Continue();
+            var msg = _sendMessageTemplate;
+            msg.Command = TrackCommand.EXEC_FW_STATE_RECEIVE_FW_FILE;
 
-            if (lastMessage.Value.TaskId == TrackCommand.ERASE_FLASH &&
-                (lastMessage.Value.Taskcommand == TrackCommand.ERASE_FLASH_OK ||
-                 lastMessage.Value.Taskcommand == TrackCommand.ERASE_FLASH_NOK) &&
-                (lastMessage.Value.Taskstate == TaskStates.DONE ||
-                 lastMessage.Value.Taskstate == TaskStates.ERROR))
-            {
-                if (lastMessage.Value.Taskcommand == TrackCommand.ERASE_FLASH_OK &&
-                    lastMessage.Value.Taskstate == TaskStates.DONE)
-                {
-                    IoC.Logger.Log(
-                        "State.FlashFwTrackamplifiers => ERASE_FLASH_OK.",
-                        _loggerInstance);
+            await _commClient.SendAsync(msg, cancellationToken).ConfigureAwait(false);
 
-                    _iterationCounter = 0;
+            _subState = 3;
 
-                    var msg = _sendMessageTemplate;
-                    msg.Command = TrackCommand.EXEC_FW_STATE_START_FW_DOWNLOAD;
-
-                    await _commClient.SendAsync(msg, cancellationToken).ConfigureAwait(false);
-
-                    _subState = 3;
-
-                    IoC.Logger.Log(
-                        "State.FlashFwTrackamplifiers => EXEC_FW_STATE_START_FW_DOWNLOAD.",
-                        _loggerInstance);
-
-                    return InitStepResult.Continue();
-                }
-
-                IoC.Logger.Log(
-                    "State.FlashFwTrackamplifiers => ERASE_FLASH_NOK.",
-                    _loggerInstance);
-
-                _subState = 0;
-                return InitStepResult.Error("Erase flash failed during FlashFwTrackamplifiers.");
-            }
+            IoC.Logger.Log(
+                "State.FlashFwTrackamplifiers => EXEC_FW_STATE_RECEIVE_FW_FILE.",
+                _loggerInstance);
 
             return InitStepResult.Continue();
         }
 
-        private async Task<InitStepResult> State3_StartDownloadAsync(
-            ReceivedMessage? lastMessage,
-            CancellationToken cancellationToken)
+        /// <summary>
+        /// State 3:
+        /// Wait for START_FW_DOWNLOAD_* result and on success begin sending FW data rows.
+        /// </summary>
+        private InitStepResult State3_WaitStartDownloadDone(ReceivedMessage? lastMessage)
         {
             if (!lastMessage.HasValue)
                 return InitStepResult.Continue();
 
-            if (lastMessage.Value.TaskId == TrackCommand.START_FW_DOWNLOAD &&
-                (lastMessage.Value.Taskcommand == TrackCommand.START_FW_DOWNLOAD_OK ||
-                 lastMessage.Value.Taskcommand == TrackCommand.START_FW_DOWNLOAD_NOK) &&
-                (lastMessage.Value.Taskstate == TaskStates.DONE ||
-                 lastMessage.Value.Taskstate == TaskStates.ERROR))
+            if (lastMessage.Value.TaskId == TrackCommand.FWFILEDOWNLOAD &&
+                lastMessage.Value.Taskcommand == TrackCommand.FILEDOWNLOAD_STATE_RECEIVE_FW_FILE_STANDBY &&
+                lastMessage.Value.Taskstate == TaskStates.DONE)
             {
-                if (lastMessage.Value.Taskcommand == TrackCommand.START_FW_DOWNLOAD_OK &&
+                if (lastMessage.Value.Taskcommand == TrackCommand.FILEDOWNLOAD_STATE_RECEIVE_FW_FILE_STANDBY &&
                     lastMessage.Value.Taskstate == TaskStates.DONE)
                 {
                     IoC.Logger.Log(
-                        "State.FlashFwTrackamplifiers => START_FW_DOWNLOAD_OK.",
+                        "State.FlashFwTrackamplifiers => FILEDOWNLOAD_STATE_RECEIVE_FW_FILE_STANDBY.",
                         _loggerInstance);
 
-                    _iterationCounter = 0;
+                    _sendNextFwDataPacket.Execute();
+
                     _subState = 4;
 
                     return InitStepResult.Continue();
@@ -276,86 +252,74 @@
                     _loggerInstance);
 
                 _subState = 0;
-                return InitStepResult.Error("Start FW download failed during FlashFwTrackamplifiers.");
+                return InitStepResult.Error("Start FW download failed during slave recovery.");
             }
 
             return InitStepResult.Continue();
         }
 
-        #endregion
-
-        #region State 4: FW data loop
-
-        private async Task<InitStepResult> State4_SendFwDataChunkAsync(
-            ReceivedMessage? lastMessage,
-            CancellationToken cancellationToken)
+        /// <summary>
+        /// State 4:
+        /// Send next FW data block(s) using the SendNextFwDataPacket helper.
+        /// The legacy code uses ProcessLines, Iterations and JUMPSIZE to step
+        /// through the flash memory; we preserve that here.
+        /// </summary>
+        private InitStepResult State4_SendFwDataChunk(
+            ReceivedMessage? lastMessage)
         {
-            if (_iterationCounter >= _iterations)
-            {
-                // Done sending FW data for all iterations; move to checksum
-                _subState = 5;
-                return InitStepResult.Continue();
-            }
-
-            // Same logic as legacy: send next data block(s) for all slaves that need FW.
-            _sendNextFwDataPacket.Execute(
-                _bootloaderHelpers.HexFileLine,
-                _bootloaderHelpers.HexFileColumn,
-                _variables,
-                _iterationCounter,
-                _jumpSize,
-                _processLines);
-
-            _iterationCounter++;
-
-            IoC.Logger.Log(
-                $"State.FlashFwTrackamplifiers => FW data chunk {_iterationCounter}/{_iterations} sent.",
-                _loggerInstance);
-
-            // In de legacy code check je hier de FW download ACK/NOK per block.
-            // Als die case nog aparte states heeft, kun je hier een extra _subState 4/5 splitsing maken.
-            await Task.Yield();
-            return InitStepResult.Continue();
-        }
-
-        #endregion
-
-        #region State 5: checksum
-
-        private async Task<InitStepResult> State5_ChecksumAsync(
-            ReceivedMessage? lastMessage,
-            CancellationToken cancellationToken)
-        {
-            if (_subState == 5 && lastMessage == null)
-            {
-                var msg = _sendMessageTemplate;
-                msg.Command = TrackCommand.EXEC_FW_STATE_GET_FW_CHECKSUM;
-                await _commClient.SendAsync(msg, cancellationToken).ConfigureAwait(false);
-
-                IoC.Logger.Log(
-                    "State.FlashFwTrackamplifiers => EXEC_FW_STATE_GET_FW_CHECKSUM.",
-                    _loggerInstance);
-
-                return InitStepResult.Continue();
-            }
-
             if (!lastMessage.HasValue)
                 return InitStepResult.Continue();
 
-            if (lastMessage.Value.TaskId == TrackCommand.GET_FW_CHECKSUM &&
-                (lastMessage.Value.Taskcommand == TrackCommand.GET_FW_CHECKSUM_OK ||
-                 lastMessage.Value.Taskcommand == TrackCommand.GET_FW_CHECKSUM_NOK) &&
-                (lastMessage.Value.Taskstate == TaskStates.DONE ||
-                 lastMessage.Value.Taskstate == TaskStates.ERROR))
+            if (lastMessage.Value.TaskId == TrackCommand.FWFILEDOWNLOAD &&
+                lastMessage.Value.Taskcommand == TrackCommand.FILEDOWNLOAD_STATE_RECEIVE_FW_FILE_STANDBY &&
+                lastMessage.Value.Taskstate == TaskStates.DONE)
             {
-                if (lastMessage.Value.Taskcommand == TrackCommand.GET_FW_CHECKSUM_OK &&
-                    lastMessage.Value.Taskstate == TaskStates.DONE)
+                // Use your existing helper exactly as in RecoverSlaves case 6.
+                _sendNextFwDataPacket.Execute();
+            }
+            else if (lastMessage.Value.TaskId == TrackCommand.FWFILEDOWNLOAD &&
+                     lastMessage.Value.Taskcommand == TrackCommand.FILEDOWNLOAD_STATE_FW_DATA_DOWNLOAD_DONE &&
+                     lastMessage.Value.Taskstate == TaskStates.DONE)
+            {
+                // FW data download done
+                IoC.Logger.Log(
+                    "State.FlashFwTrackamplifiers => EXEC_FW_STATE_RECEIVE_FW_FILE Done.",
+                    _loggerInstance);
+
+                _subState = 5;
+
+                return InitStepResult.Continue();
+            }
+
+            return InitStepResult.Continue();
+        }
+
+        /// <summary>
+        /// State 5:
+        ///  Wait for checksum result of internal checksum number comparison to the sent data
+        /// the intermediate FW download responses).
+        /// </summary>
+        private InitStepResult State5_WaitChecksumResult(ReceivedMessage? lastMessage)
+        {
+            if (!lastMessage.HasValue)
+                return InitStepResult.Continue();
+
+            if (lastMessage.Value.TaskId == TrackCommand.FWFILEDOWNLOAD &&
+                lastMessage.Value.Taskcommand == TrackCommand.FILEDOWNLOAD_STATE_FW_CHECKSUM &&
+                lastMessage.Value.Taskstate == TaskStates.DONE &&
+                (lastMessage.Value.Taskmessage == TaskMessages.RECEIVED_CHECKSUM_OK) ||
+                 lastMessage.Value.Taskmessage == TaskMessages.RECEIVED_CHECKSUM_NOK)
+            {
+                if (lastMessage.Value.Taskcommand == TrackCommand.FILEDOWNLOAD_STATE_FW_CHECKSUM &&
+                    lastMessage.Value.Taskstate == TaskStates.DONE &&
+                    lastMessage.Value.Taskmessage == TaskMessages.RECEIVED_CHECKSUM_OK)
                 {
                     IoC.Logger.Log(
-                        "State.FlashFwTrackamplifiers => GET_FW_CHECKSUM_OK.",
+                        "State.FlashFwTrackamplifiers => RECEIVED_CHECKSUM_OK.",
                         _loggerInstance);
 
                     _subState = 6;
+
                     return InitStepResult.Continue();
                 }
 
@@ -364,97 +328,68 @@
                     _loggerInstance);
 
                 _subState = 0;
-                return InitStepResult.Error("Firmware checksum mismatch during FlashFwTrackamplifiers.");
+                return InitStepResult.Error("Firmware checksum mismatch during slave recovery.");
             }
 
             return InitStepResult.Continue();
         }
 
-        #endregion
-
-        #region State 6: config word
-
-        private async Task<InitStepResult> State6_ConfigWordAsync(
+        /// <summary>
+        /// State 6:
+        /// Send config word to slave.
+        /// </summary>
+        private async Task<InitStepResult> State6_SendConfigWordAsync(
             ReceivedMessage? lastMessage,
             CancellationToken cancellationToken)
         {
-            if (_subState == 6 && lastMessage == null)
-            {
-                var msg = _sendMessageTemplate;
-                msg.Command = TrackCommand.EXEC_FW_STATE_SET_CONFIG_WORD;
+            var msg = _sendMessageTemplate;
+            msg.Command = TrackCommand.EXEC_FW_STATE_RECEIVE_CONFIG_WORD;
 
-                await _commClient.SendAsync(msg, cancellationToken).ConfigureAwait(false);
+            await _commClient.SendAsync(msg, cancellationToken).ConfigureAwait(false);
 
-                IoC.Logger.Log(
-                    "State.FlashFwTrackamplifiers => EXEC_FW_STATE_SET_CONFIG_WORD.",
-                    _loggerInstance);
+            _subState = 7;
 
-                return InitStepResult.Continue();
-            }
-
-            if (!lastMessage.HasValue)
-                return InitStepResult.Continue();
-
-            if (lastMessage.Value.TaskId == TrackCommand.SET_CONFIG_WORD &&
-                (lastMessage.Value.Taskcommand == TrackCommand.SET_CONFIG_WORD_OK ||
-                 lastMessage.Value.Taskcommand == TrackCommand.SET_CONFIG_WORD_NOK) &&
-                (lastMessage.Value.Taskstate == TaskStates.DONE ||
-                 lastMessage.Value.Taskstate == TaskStates.ERROR))
-            {
-                if (lastMessage.Value.Taskcommand == TrackCommand.SET_CONFIG_WORD_OK &&
-                    lastMessage.Value.Taskstate == TaskStates.DONE)
-                {
-                    IoC.Logger.Log(
-                        "State.FlashFwTrackamplifiers => SET_CONFIG_WORD_OK.",
-                        _loggerInstance);
-
-                    _subState = 7;
-                    return InitStepResult.Continue();
-                }
-
-                IoC.Logger.Log(
-                    "State.FlashFwTrackamplifiers => SET_CONFIG_WORD_NOK.",
-                    _loggerInstance);
-
-                _subState = 0;
-                return InitStepResult.Error("Set config word failed during FlashFwTrackamplifiers.");
-            }
+            IoC.Logger.Log(
+                "State.FlashFwTrackamplifiers => EXEC_FW_STATE_RECEIVE_CONFIG_WORD.",
+                _loggerInstance);
 
             return InitStepResult.Continue();
         }
 
-        #endregion
-
-        #region State 7..8: reset + exit handler
-
-        private async Task<InitStepResult> State7_ResetSlavesAsync(
-            ReceivedMessage? lastMessage,
+        /// <summary>
+        /// State 7:
+        /// Wait for config word OK and then request reset.
+        /// </summary>
+        private async Task<InitStepResult> State7_WaitConfigWordStandbyAsync(ReceivedMessage? lastMessage, 
             CancellationToken cancellationToken)
         {
-            if (_subState == 7 && lastMessage == null)
-            {
-                var msg = _sendMessageTemplate;
-                msg.Command = TrackCommand.EXEC_FW_STATE_RESET_SLAVE;
-
-                await _commClient.SendAsync(msg, cancellationToken).ConfigureAwait(false);
-
-                IoC.Logger.Log(
-                    "State.FlashFwTrackamplifiers => EXEC_FW_STATE_RESET_SLAVE.",
-                    _loggerInstance);
-
-                return InitStepResult.Continue();
-            }
-
             if (!lastMessage.HasValue)
                 return InitStepResult.Continue();
 
-            if (lastMessage.Value.TaskId == TrackCommand.RESET_SLAVE &&
-                lastMessage.Value.Taskcommand == TrackCommand.RESET_SLAVE_OK &&
+            if (lastMessage.Value.TaskId == TrackCommand.FWCONFIGWORDDOWNLOAD &&
+                lastMessage.Value.Taskcommand == TrackCommand.CONFIGWORDDOWNLOAD_STATE_RECEIVE_CONFIG_WORD_STANDBY &&
                 lastMessage.Value.Taskstate == TaskStates.DONE)
             {
                 IoC.Logger.Log(
-                    "State.FlashFwTrackamplifiers => RESET_SLAVE_OK.",
+                    "State.FlashFwTrackamplifiers => CONFIGWORDDOWNLOAD_STATE_RECEIVE_CONFIG_WORD_STANDBY.",
                     _loggerInstance);
+
+                var msg = _sendMessageTemplate;
+                msg.Command = TrackCommand.CONFIGWORDDOWNLOAD_STATE_FW_CONFIG_WORD_RECEIVE;
+
+                List<byte> Data = new List<byte>();
+
+                foreach (byte val in _bootloaderHelpers.GetConfigWord)
+                {
+                    Data.Add(val);
+                }
+                msg.Data = Data.ToArray();
+
+                IoC.Logger.Log(
+                "State.FlashFwTrackamplifiers => EXEC_FW_STATE_SENT_CONFIG_WORD.",
+                _loggerInstance);
+
+                await _commClient.SendAsync(msg, cancellationToken).ConfigureAwait(false);
 
                 _subState = 8;
                 return InitStepResult.Continue();
@@ -463,20 +398,77 @@
             return InitStepResult.Continue();
         }
 
-        private InitStepResult State8_ExitFwHandlerDone(ReceivedMessage? lastMessage)
+        /// <summary>
+        /// State 8:
+        /// Wait for config word OK and then request reset.
+        /// </summary>
+        private async Task<InitStepResult> State8_WaitConfigWordDoneAsync(ReceivedMessage? lastMessage, CancellationToken cancellationToken)
         {
-            // Legacy: EXIT_SLAVExFWxHANDLER en na DONE is de sequencer klaar.
-            // In deze async-variant laten we dit als “einde van de FlashFwStep”
-            // en laten we de volgende step (InitTrackamplifiers) bepalen of er
-            // verder nog initialisatie nodig is.
-            IoC.Logger.Log(
-                "State.FlashFwTrackamplifiers => FW flash sequence completed for all slaves.",
+            if (!lastMessage.HasValue)
+                return InitStepResult.Continue();
+
+            if (lastMessage.Value.TaskId == TrackCommand.FWCONFIGWORDDOWNLOAD &&
+                lastMessage.Value.Taskcommand == TrackCommand.CONFIGWORDDOWNLOAD_STATE_FW_CONFIG_WORD_DOWNLOAD_DONE &&
+                lastMessage.Value.Taskstate == TaskStates.DONE)
+            {
+                IoC.Logger.Log(
+                    "State.FlashFwTrackamplifiers =>  EXEC_FW_STATE_FW_CONFIG_WORD_DOWNLOAD_DONE.",
+                    _loggerInstance);
+
+                var msg = _sendMessageTemplate;
+                msg.Command = TrackCommand.EXEC_FW_STATE_FLASH_ALL_SLAVES;
+
+                IoC.Logger.Log(
+                "State.FlashFwTrackamplifiers => EXEC_FW_STATE_FLASH_ALL_SLAVES.",
                 _loggerInstance);
 
-            _subState = 0;
-            return InitStepResult.Next("InitTrackamplifiers");
+                // Start stopwatch for measuring flash all slaves
+                sw.Start();
+
+                await _commClient.SendAsync(msg, cancellationToken).ConfigureAwait(false);
+
+                _subState = 9;
+
+                return InitStepResult.Continue();
+            }
+
+            return InitStepResult.Continue();
         }
 
+        /// <summary>
+        /// State 9:
+        ///  Wait for all amplifiers are flashed
+        /// </summary>
+        private InitStepResult State9_WaitAllFlashed(ReceivedMessage? lastMessage)
+        {
+            if (!lastMessage.HasValue)
+                return InitStepResult.Continue();
+
+            if (lastMessage.Value.TaskId == TaskId.FWHANDLER &&
+                lastMessage.Value.Taskcommand == TrackCommand.EXEC_FW_STATE_FLASH_ALL_SLAVES &&
+                lastMessage.Value.Taskstate == TaskStates.DONE)
+            {
+                long elapsedtime = sw.ElapsedMilliseconds;
+                sw.Stop();
+                IoC.Logger.Log("State.FlashFwTrackamplifiers => Flashing took " 
+                    + Convert.ToString(elapsedtime / 1000) 
+                    + " seconds.", _loggerInstance);
+
+                IoC.Logger.Log("State.FlashFwTrackamplifiers => That is on average " 
+                    + Convert.ToString((float)elapsedtime / _fwFlashRequired / 1000) 
+                    + " seconds per slave.", _loggerInstance);
+
+                IoC.Logger.Log(
+                    "State.FlashFwTrackamplifiers => EXEC_FW_STATE_FLASH_ALL_SLAVES DONE.",
+                    _loggerInstance);
+
+                _subState = 0;
+
+                return InitStepResult.Next("InitTrackamplifiers");
+            }
+
+            return InitStepResult.Continue();
+        }
         #endregion
     }
 }

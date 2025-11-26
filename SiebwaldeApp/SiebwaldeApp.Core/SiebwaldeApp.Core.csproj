@@ -10,6 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Model\AmplifierInitializersBaseClass.cs" />
+    <Compile Remove="Model\TrackApplication\Controller\TrackAmplifierInitializers\TrackAmplifierInitalizationSequencer - Backup.cs" />
   </ItemGroup>
 
   <!-- NuGet packages (replaces old <Reference> + HintPath) -->

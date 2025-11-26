@@ -3,15 +3,15 @@ using System.IO;
 using System.Text;
 using static SiebwaldeApp.Enums;
 
-namespace SiebwaldeApp
+namespace SiebwaldeApp.Core
 {
     /// <summary>
     /// Get data from Ethernet Target
     /// </summary>
     public class TrackIOHandle
     {
-        private Sender mTrackSender;
-        private Receiver mTrackReceiver;
+        private NewSender mTrackSender;
+        private NewReceiver mTrackReceiver;
         //private Enums mEnums;
         private TrackApplicationVariables mTrackApplicationVariables;
         /* connect variable to connect to FYController class to Main for application logging */
@@ -45,8 +45,8 @@ namespace SiebwaldeApp
             mTrackSendingPort = TrackSendingPort;
             mLoggerInstance = LoggerInstance;
 
-            mTrackReceiver = new Receiver(mTrackReceivingPort);
-            mTrackSender = new Sender(TRACKTARGET);
+            mTrackReceiver = new NewReceiver(mTrackReceivingPort);
+            mTrackSender = new NewSender(TRACKTARGET);
             mEthernetTargetDataSimulator = new EthernetTargetDataSimulator();
             mReceivedMessage = new ReceivedMessage(0,0,0,0);
         }

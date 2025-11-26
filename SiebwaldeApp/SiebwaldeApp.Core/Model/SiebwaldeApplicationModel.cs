@@ -1,5 +1,4 @@
-﻿using Ninject;
-using System.Text;
+﻿using System.Text;
 
 namespace SiebwaldeApp.Core
 {
@@ -11,7 +10,7 @@ namespace SiebwaldeApp.Core
         public event EventHandler? FiddleYardShowSettingsWinForms;
         public StationSettingsPageViewModel SettingsViewModel { get; private set; }
 
-        public TrackApplication? _trackApplication;
+        public TrackControlMain? _trackControlMain;
         #endregion
 
         #region Private members
@@ -24,6 +23,11 @@ namespace SiebwaldeApp.Core
         private TrackApplicationVariables? _trackVariables;
         private ITrackCommClient? _trackCommClient;
         private ITrackAmplifierInitializationService? _trackInitService;
+        // NEW: bootloader helpers
+        private TrackAmplifierBootloaderHelpers? _bootloaderHelpers;
+        private SendNextFwDataPacket? _sendNextFwDataPacket;
+        private const string FwPath = "C:\\Localdata\\Siebwalde\\TrackAmplifier4.X\\dist\\Offset\\production\\TrackAmplifier4.X.production.hex";
+
         #endregion
 
         #region Constructor
@@ -94,9 +98,11 @@ namespace SiebwaldeApp.Core
         /// <returns></returns>
         public async Task StartTrackApplication()
         {
-            if (_trackApplication != null) return;
+            if (_trackControlMain != null) return;
 
             IoC.Logger.Log("Track Application starting...", "");
+
+            _appCts = new CancellationTokenSource();
 
             // --- NEW: build low-level amplifier communication + initialization ---
 
@@ -112,7 +118,17 @@ namespace SiebwaldeApp.Core
             var transport = new UdpTrackTransport(trackReceivingPort, trackSendingPort, trackLoggerInstance);
             _trackCommClient = new TrackCommClientAsync(transport, _trackVariables);
 
-            // 2) Compose initialization steps
+            // 2) Bootloader helper objects(re -using legacy classes)
+            // Constructor signatures hier moeten hetzelfde blijven als in je oude sequencer.
+            _bootloaderHelpers ??= new TrackAmplifierBootloaderHelpers(
+                FwPath,
+                trackLoggerInstance);
+
+            _sendNextFwDataPacket ??= new SendNextFwDataPacket(
+                _trackCommClient,                
+                _bootloaderHelpers);
+
+            // 3) Compose initialization steps
             var steps = new List<IInitializationStep>
             {
                 new ConnectToEthernetTargetStep(_trackCommClient, _trackVariables, trackLoggerInstance),
@@ -141,16 +157,16 @@ namespace SiebwaldeApp.Core
                 IoC.Logger.Log($"Track init status: {status}", trackLoggerInstance);
             };
 
-            // 3) Start low-level communication (real HW for now, later also emu)
+            // 4) Start low-level communication (real HW for now, later also emu)
             await _trackCommClient.StartAsync(realHardwareMode: true, _appCts.Token);
 
-            // 4) Start async initialization sequence in the background
+            // 5) Start async initialization sequence in the background
             _ = _trackInitService.InitializeAsync(_appCts.Token);
 
             // --- Existing high-level application startup ---
 
-            // 1) Start the application (spins up StationSide run loops)
-            await _trackApplication.StartAsync(_appCts.Token);
+            // 6) Start the application (spins up StationSide run loops)
+            _trackControlMain.Start(true);
 
             IoC.Logger.Log("Track Application started.", "");
         }
@@ -163,7 +179,7 @@ namespace SiebwaldeApp.Core
         /// errors encountered during the stopping process are logged.</remarks>
         public void StopTrackApplication()
         {
-            if (_trackApplication == null)
+            if (_trackControlMain == null)
                 return;
 
             IoC.Logger.Log("Stopping Track Application...", "");
@@ -184,7 +200,7 @@ namespace SiebwaldeApp.Core
             _trackInitService = null;
             _trackVariables = null;
 
-            _trackApplication = null;
+            _trackControlMain = null;
 
             IoC.Logger.Log("Track Application stopped.", "");
         }

@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using SiebwaldeApp.Core;
+using System.Collections.Generic;
+using System.Threading;
+using static SiebwaldeApp.Core.FiddleYardSimulatorVariables;
 
 namespace SiebwaldeApp
 {
@@ -14,17 +17,21 @@ namespace SiebwaldeApp
         private int IterationCounter { get; set; }
         // Set the Boot loader helper
         private TrackAmplifierBootloaderHelpers mTrackAmplifierBootloaderHelpers;
+        private ITrackCommClient trackCommClient;
+        private TrackAmplifierBootloaderHelpers bootloaderHelpers;
+
         // Set the Track IO handle
-        private TrackIOHandle mTrackIOHandle;
+        private readonly ITrackCommClient _commClient;
         #endregion
 
         /// <summary>
         /// Instaniate
         /// </summary>
-        public SendNextFwDataPacket(TrackIOHandle trackIOHandle, TrackAmplifierBootloaderHelpers trackAmplifierBootloaderHelpers)
+        public SendNextFwDataPacket(ITrackCommClient commClient, 
+            TrackAmplifierBootloaderHelpers trackAmplifierBootloaderHelpers)
         {
             // Hold the Track IO Handle instance
-            mTrackIOHandle = trackIOHandle;
+            _commClient = commClient ?? throw new ArgumentNullException(nameof(commClient));
 
             // Hold the TrackAmplifierBootloaderHelpers
             mTrackAmplifierBootloaderHelpers = trackAmplifierBootloaderHelpers;
@@ -55,7 +62,8 @@ namespace SiebwaldeApp
                 }
             }
             mSendMessage.Data = Data.ToArray();
-            mTrackIOHandle.ActuatorCmd(mSendMessage);
+            //mTrackIOHandle.ActuatorCmd(mSendMessage);
+            _commClient.SendAsync(mSendMessage, cancellationToken).ConfigureAwait(false);
 
             //Console.WriteLine("Send Package " + (IterationCounter + 1).ToString() + " to Ethernet target.");
 

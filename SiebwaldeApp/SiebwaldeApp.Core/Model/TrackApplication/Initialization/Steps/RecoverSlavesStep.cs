@@ -24,12 +24,6 @@ namespace SiebwaldeApp.Core
         private uint _loopCounter;
         private readonly uint _attemptMax;
 
-        // Hex/bootloader related
-        private int _iterationCounter;
-        private readonly uint _processLines;
-        private readonly uint _iterations;
-        private readonly int _jumpSize;
-
         public string Name => "RecoverSlaves";
 
         public RecoverSlavesStep(
@@ -50,9 +44,6 @@ namespace SiebwaldeApp.Core
             _loopCounter = 1;
             _attemptMax = attemptMax;
 
-            _processLines = (Enums.PROGMEMSIZE - Enums.BOOTLOADEROFFSET) / Enums.HEXROWWIDTH;
-            _iterations = ((Enums.PROGMEMSIZE - Enums.BOOTLOADEROFFSET) / Enums.HEXROWWIDTH) / Enums.JUMPSIZE;
-            _jumpSize = (int)Enums.JUMPSIZE;
 
             var dummyData = new byte[80];
             _sendMessageTemplate = new SendMessage(0, dummyData);
@@ -94,8 +85,7 @@ namespace SiebwaldeApp.Core
                     return State6_WaitStartDownloadDone(lastMessage);
 
                 case 7:
-                    return await State7_SendFwDataChunkAsync(lastMessage, cancellationToken)
-                        .ConfigureAwait(false);
+                    return State7_SendFwDataChunk(lastMessage);
 
                 case 8:
                     return State8_WaitChecksumResult(lastMessage);
@@ -105,24 +95,24 @@ namespace SiebwaldeApp.Core
                         .ConfigureAwait(false);
 
                 case 10:
-                    return await State10_WaitConfigWordStandby(lastMessage, cancellationToken)
+                    return await State10_WaitConfigWordStandbyAsync(lastMessage, cancellationToken)
                         .ConfigureAwait(false);
 
                 case 11:
-                    return await State11_WaitConfigWordDone(lastMessage, cancellationToken)
+                    return await State11_WaitConfigWordDoneAsync(lastMessage, cancellationToken)
                         .ConfigureAwait(false);
 
                 case 12:
-                    return await State12_WaitSlaveFlashWritten(lastMessage, cancellationToken)
+                    return await State12_WaitSlaveFlashWrittenAsync(lastMessage, cancellationToken)
                         .ConfigureAwait(false);
 
                 
                 case 13:
-                    return await State13_WaitSlaveConfigWritten(lastMessage, cancellationToken)
+                    return await State13_WaitSlaveConfigWrittenAsync(lastMessage, cancellationToken)
                         .ConfigureAwait(false);
 
                 case 14:
-                    return await State14_WaitSlaveChecksum(lastMessage, cancellationToken)
+                    return await State14_WaitSlaveChecksumAsync(lastMessage, cancellationToken)
                         .ConfigureAwait(false);
 
                 // 15: reset and exit handler, go back to DetectSlaves
@@ -287,9 +277,6 @@ namespace SiebwaldeApp.Core
                         "State.DetectSlaveRecovery => ERASE_FLASH_RETURNED_OK.",
                         _loggerInstance);
 
-                    // Prepare FW download loop (same as legacy: set IterationCounter, etc.)
-                    _iterationCounter = 0;
-
                     _subState = 5;
                     return InitStepResult.Continue();
                 }
@@ -373,9 +360,8 @@ namespace SiebwaldeApp.Core
         /// The legacy code uses ProcessLines, Iterations and JUMPSIZE to step
         /// through the flash memory; we preserve that here.
         /// </summary>
-        private async Task<InitStepResult> State7_SendFwDataChunkAsync(
-            ReceivedMessage? lastMessage,
-            CancellationToken cancellationToken)
+        private InitStepResult State7_SendFwDataChunk(
+            ReceivedMessage? lastMessage)
         {
             if (!lastMessage.HasValue)
                 return InitStepResult.Continue();
@@ -471,7 +457,8 @@ namespace SiebwaldeApp.Core
         /// State 10:
         /// Wait for config word OK and then request reset.
         /// </summary>
-        private async Task<InitStepResult> State10_WaitConfigWordStandby(ReceivedMessage? lastMessage, CancellationToken cancellationToken)
+        private async Task<InitStepResult> State10_WaitConfigWordStandbyAsync(ReceivedMessage? lastMessage, 
+            CancellationToken cancellationToken)
         {
             if (!lastMessage.HasValue)
                 return InitStepResult.Continue();
@@ -512,7 +499,8 @@ namespace SiebwaldeApp.Core
         /// State 11:
         /// Wait for config word OK and then request reset.
         /// </summary>
-        private async Task<InitStepResult> State11_WaitConfigWordDone(ReceivedMessage? lastMessage, CancellationToken cancellationToken)
+        private async Task<InitStepResult> State11_WaitConfigWordDoneAsync(ReceivedMessage? lastMessage, 
+            CancellationToken cancellationToken)
         {
             if (!lastMessage.HasValue)
                 return InitStepResult.Continue();
@@ -546,7 +534,8 @@ namespace SiebwaldeApp.Core
         /// State 12:
         /// Wait for flash written.
         /// </summary>
-        private async Task<InitStepResult> State12_WaitSlaveFlashWritten (ReceivedMessage? lastMessage, CancellationToken cancellationToken)
+        private async Task<InitStepResult> State12_WaitSlaveFlashWrittenAsync(ReceivedMessage? lastMessage, 
+            CancellationToken cancellationToken)
         {
             if (!lastMessage.HasValue)
                 return InitStepResult.Continue();
@@ -580,7 +569,8 @@ namespace SiebwaldeApp.Core
         /// State 13:
         /// Wait for flash written.
         /// </summary>
-        private async Task<InitStepResult> State13_WaitSlaveConfigWritten(ReceivedMessage? lastMessage, CancellationToken cancellationToken)
+        private async Task<InitStepResult> State13_WaitSlaveConfigWrittenAsync(ReceivedMessage? lastMessage, 
+            CancellationToken cancellationToken)
         {
             if (!lastMessage.HasValue)
                 return InitStepResult.Continue();
@@ -614,7 +604,8 @@ namespace SiebwaldeApp.Core
         /// State 14:
         /// Wait for flash written.
         /// </summary>
-        private async Task<InitStepResult> State14_WaitSlaveChecksum(ReceivedMessage? lastMessage, CancellationToken cancellationToken)
+        private async Task<InitStepResult> State14_WaitSlaveChecksumAsync(ReceivedMessage? lastMessage, 
+            CancellationToken cancellationToken)
         {
             if (!lastMessage.HasValue)
                 return InitStepResult.Continue();
