@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.Timers;
 
-namespace SiebwaldeApp
+namespace SiebwaldeApp.Core
 {
     /// <summary>
     /// This is the main Trackcontroller Application class
