@@ -1,4 +1,4 @@
-﻿namespace SiebwaldeApp
+﻿namespace SiebwaldeApp.Core
 {
     public struct ReceivedMessage
     {
@@ -185,7 +185,7 @@
         public const byte RESET_SLAVE_NOK = 243;
     }
 
-    class TaskMessages
+    public class TaskMessages
     {
         public const byte NONE = 100;
         public const byte RECEIVED_WRONG_COMMAND = 101;
@@ -197,12 +197,12 @@
         public const byte SLAVE_ID_OUT_OF_BOUNDS = 107;
      }
 
-    class EnumClientCommands
+    public class EnumClientCommands
     {
         public const byte CLIENT_CONNECTION_REQUEST = 250;
     }
 
-    class EnumMbusStatus
+    public class EnumMbusStatus
     {
         public const byte MBUS_STATE_INIT = 0x00;
         public const byte MBUS_STATE_WAIT = 0x01;
@@ -217,7 +217,7 @@
         public const byte MBUS_STATE_RESET = 0x0A;
     }
 
-    class EnumBootloader
+    public class EnumBootloader
     {
         public const byte COMMAND_SUCCESSFUL = 0x01;     // Command Successful
         public const byte COMMAND_UNSUCCESSFUL = 0xfd;   // Command unSuccessful 

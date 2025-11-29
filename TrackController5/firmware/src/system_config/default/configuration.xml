@@ -898,7 +898,7 @@
         <Name dnOrder="0">system_interrupt.c</Name>
         <Path dnOrder="1">Source&amp;#160;Files/app/system_config/default</Path>
         <Checksum dnOrder="2">1B9B6F2174BC5735F64A89099E3F44A2</Checksum>
-        <ProjectFileChecksum dnOrder="3">609DF4E256B5EF6FD8176346C68E9AFE</ProjectFileChecksum>
+        <ProjectFileChecksum dnOrder="3">A3AF08F4316AB9CF54C9C925CA1B5DE5</ProjectFileChecksum>
       </Template>
       <Template dnOrder="11">
         <Name dnOrder="0">mbus.c</Name>
@@ -979,11 +979,11 @@
     </Templates>
     <CompilerItems dnOrder="2">
       <C32 dnOrder="0">
-        <Include dnOrder="0" value="C:\GIT-REPOS\Siebwalde\TrackController5\firmware\src"/>
-        <Include dnOrder="1" value="C:\GIT-REPOS\Siebwalde\TrackController5\firmware\src\system_config\default"/>
-        <Include dnOrder="2" value="C:\GIT-REPOS\Siebwalde\TrackController5\firmware\src\default"/>
+        <Include dnOrder="0" value="C:\Localdata\Siebwalde\TrackController5\firmware\src"/>
+        <Include dnOrder="1" value="C:\Localdata\Siebwalde\TrackController5\firmware\src\system_config\default"/>
+        <Include dnOrder="2" value="C:\Localdata\Siebwalde\TrackController5\firmware\src\default"/>
         <Include dnOrder="3" value="C:\microchip\harmony\v2_06\framework"/>
-        <Include dnOrder="4" value="C:\GIT-REPOS\Siebwalde\TrackController5\firmware\src\system_config\default\framework"/>
+        <Include dnOrder="4" value="C:\Localdata\Siebwalde\TrackController5\firmware\src\system_config\default\framework"/>
       </C32>
     </CompilerItems>
     <Libraries dnOrder="3">

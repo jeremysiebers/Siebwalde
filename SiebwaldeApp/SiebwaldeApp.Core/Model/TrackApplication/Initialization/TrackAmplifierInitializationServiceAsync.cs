@@ -9,7 +9,8 @@ namespace SiebwaldeApp.Core
     {
         private readonly ITrackCommClient _commClient;
         private readonly TrackApplicationVariables _variables;
-        private readonly IReadOnlyDictionary<string, IInitializationStep> _steps;
+        private readonly Dictionary<string, IInitializationStep> _steps
+        = new Dictionary<string, IInitializationStep>();
         private readonly Channel<ReceivedMessage> _controlMessages;
 
         private InitializationStatus _status = InitializationStatus.Idle;
@@ -17,15 +18,21 @@ namespace SiebwaldeApp.Core
         public event EventHandler<InitializationProgress>? ProgressChanged;
         public event EventHandler<InitializationStatus>? StatusChanged;
 
+        public IReadOnlyDictionary<string, IInitializationStep> Steps => _steps;
+
+        /// <summary>
+        /// TrackAmplifierInitializationServiceAsync
+        /// </summary>
+        /// <param name="commClient"></param>
+        /// <param name="variables"></param>
+        /// <param name="steps"></param>
         public TrackAmplifierInitializationServiceAsync(
             ITrackCommClient commClient,
             TrackApplicationVariables variables,
             IEnumerable<IInitializationStep> steps)
         {
-            _commClient = commClient ?? throw new ArgumentNullException(nameof(commClient));
-            _variables = variables ?? throw new ArgumentNullException(nameof(variables));
-            _steps = new Dictionary<string, IInitializationStep>(
-                StringComparer.OrdinalIgnoreCase);
+            _commClient = commClient;
+            _variables = variables;
 
             foreach (var step in steps)
             {
@@ -40,8 +47,16 @@ namespace SiebwaldeApp.Core
 
         private void OnControlMessageReceived(object? sender, ControlMessageEventArgs e)
         {
-            _controlMessages.Writer.TryWrite(e.Message);
+            var m = e.Message;
+
+            // NOTE: This log shows every control message coming from the transport.
+            IoC.Logger.Log(
+                $"[CONTROL] TaskId={m.TaskId}, Cmd={m.Taskcommand}, State={m.Taskstate}, Msg={m.Taskmessage}",
+                "fake");
+
+            _controlMessages.Writer.TryWrite(m);
         }
+
 
         public async Task InitializeAsync(CancellationToken cancellationToken = default)
         {

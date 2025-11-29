@@ -1,82 +1,104 @@
-﻿using SiebwaldeApp; // Sender, Receiver (existing types)
-using System;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Runtime.CompilerServices;
+using System.Threading.Channels;
 
-namespace SiebwaldeApp.Core
+namespace SiebwaldeApp.Core.TrackApplication.Comm
 {
     /// <summary>
-    /// UDP-based transport for the legacy Ethernet target.
+    /// Adapter that wraps an IRawUdpTransport and exposes it as ITrackTransport.
+    /// It uses a Channel&lt;byte[]&gt; to bridge the callback-based receive loop
+    /// into an async iterator (IAsyncEnumerable).
     /// </summary>
-    public sealed class UdpTrackTransport : ITrackTransport
+    public sealed class RawUdpTrackTransport : ITrackTransport
     {
-        private readonly int _receivePort;
-        private readonly int _sendPort;
-        private readonly string _loggerInstance;
+        private readonly IRawUdpTransport _inner;
+        private readonly Channel<byte[]> _frames;
+        private CancellationTokenSource? _cts;
+        private Task? _receiveLoopTask;
 
-        private Sender? _sender;
-        private Receiver? _receiver;
-
-        public UdpTrackTransport(int receivePort, int sendPort, string loggerInstance)
+        public RawUdpTrackTransport(IRawUdpTransport inner)
         {
-            _receivePort = receivePort;
-            _sendPort = sendPort;
-            _loggerInstance = loggerInstance;
+            _inner = inner ?? throw new ArgumentNullException(nameof(inner));
+            _frames = Channel.CreateUnbounded<byte[]>(
+                new UnboundedChannelOptions { SingleReader = true, SingleWriter = false });
         }
 
-        public Task OpenAsync(CancellationToken cancellationToken = default)
+        public async Task OpenAsync(CancellationToken cancellationToken = default)
         {
-            // TODO: copy setup logic from TrackIOHandle constructor and Start()
-            _sender = new Sender(_sendPort, _loggerInstance);
-            _receiver = new Receiver(_receivePort, _loggerInstance);
+            if (_cts != null)
+                throw new InvalidOperationException("Transport already opened.");
 
-            return Task.CompletedTask;
+            _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+
+            // Start the receive loop on the inner UDP transport.
+            _receiveLoopTask = _inner.StartReceiveLoopAsync(
+                async payload =>
+                {
+                    // Push every datagram into the channel.
+                    // No await here except the channel write.
+                    await _frames.Writer.WriteAsync(payload, _cts.Token)
+                                     .ConfigureAwait(false);
+                },
+                _cts.Token);
         }
 
-        public Task CloseAsync(CancellationToken cancellationToken = default)
+        public async Task CloseAsync(CancellationToken cancellationToken = default)
         {
-            _receiver?.Dispose();
-            _sender?.Dispose();
-            _receiver = null;
-            _sender = null;
+            var cts = _cts;
+            if (cts == null)
+                return;
 
-            return Task.CompletedTask;
+            _cts = null;
+            cts.Cancel();
+
+            if (_receiveLoopTask != null)
+            {
+                try { await _receiveLoopTask.ConfigureAwait(false); }
+                catch (OperationCanceledException) { /* ignore */ }
+            }
+
+            _frames.Writer.TryComplete();
         }
 
         public Task SendAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken = default)
         {
-            if (_sender == null)
-                throw new InvalidOperationException("Transport not opened.");
+            if (buffer == null) throw new ArgumentNullException(nameof(buffer));
+            if (offset != 0 || count != buffer.Length)
+                throw new NotSupportedException("This transport expects full-frame sends.");
 
-            // TODO: adapt to real Sender API
-            _sender.Send(buffer, offset, count);
+            _inner.Send(buffer);
             return Task.CompletedTask;
         }
 
         public async IAsyncEnumerable<byte[]> ReceiveAsync(
             [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
-            if (_receiver == null)
-                throw new InvalidOperationException("Transport not opened.");
+            var reader = _frames.Reader;
 
             while (!cancellationToken.IsCancellationRequested)
             {
-                // TODO: adapt to real Receiver API (blocking read or callback-based).
-                byte[] frame = _receiver.Receive();
-                yield return frame;
+                byte[] frame;
+                try
+                {
+                    var hasItem = await reader.WaitToReadAsync(cancellationToken).ConfigureAwait(false);
+                    if (!hasItem)
+                        yield break;
 
-                await Task.Yield();
+                    if (!reader.TryRead(out frame!))
+                        continue;
+                }
+                catch (OperationCanceledException)
+                {
+                    yield break;
+                }
+
+                yield return frame;
             }
         }
 
-        public ValueTask DisposeAsync()
+        public async ValueTask DisposeAsync()
         {
-            _receiver?.Dispose();
-            _sender?.Dispose();
-            return ValueTask.CompletedTask;
+            await CloseAsync().ConfigureAwait(false);
+            _inner.Dispose();
         }
     }
 }

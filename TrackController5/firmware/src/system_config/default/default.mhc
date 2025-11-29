@@ -6,7 +6,7 @@
 #     Harmony version: 2.06
 #
 #
-# from C:\GIT-REPOS\Siebwalde\TrackController5\firmware\TrackController5.hconfig
+# from C:\Localdata\Siebwalde\TrackController5\firmware\TrackController5.hconfig
 #
 CONFIG_APP_INSTANCES=3
 #
@@ -22,7 +22,7 @@ CONFIG_APP_MENU_IDX2=y
 CONFIG_APP_NAME_2="controller"
 CONFIG_APP_AUTO_GENERATE_CODE2=n
 #
-# from C:\GIT-REPOS\Siebwalde\TrackController5\firmware\TrackController5.hconfig
+# from C:\Localdata\Siebwalde\TrackController5\firmware\TrackController5.hconfig
 #
 CONFIG_USE_EXCEPTION_HANDLER=y
 CONFIG_EXCEPTION_USE_SYS_DEBUG=y

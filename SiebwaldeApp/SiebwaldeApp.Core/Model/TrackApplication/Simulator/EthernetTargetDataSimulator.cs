@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Timers;
-using static SiebwaldeApp.Enums;
+using static SiebwaldeApp.Core.Enums;
 
-namespace SiebwaldeApp
+namespace SiebwaldeApp.Core
 {
     /// <summary>
     /// This class simulates the EthernetTarget data events

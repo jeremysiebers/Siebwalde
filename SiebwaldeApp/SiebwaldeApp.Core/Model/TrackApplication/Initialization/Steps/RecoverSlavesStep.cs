@@ -611,7 +611,7 @@ namespace SiebwaldeApp.Core
                 return InitStepResult.Continue();
 
             if (lastMessage.Value.TaskId == TrackCommand.CHECK_CHECKSUM_CONFIG &&
-                (lastMessage.Value.Taskcommand == TrackCommand.CHECK_CHECKSUM_CONFIG_RETURNED_OK || &&
+                (lastMessage.Value.Taskcommand == TrackCommand.CHECK_CHECKSUM_CONFIG_RETURNED_OK ||
                     lastMessage.Value.Taskcommand == TrackCommand.CHECK_CHECKSUM_CONFIG_RETURNED_NOK) &&
                 (lastMessage.Value.Taskstate == TaskStates.DONE ||
                  lastMessage.Value.Taskstate == TaskStates.ERROR))

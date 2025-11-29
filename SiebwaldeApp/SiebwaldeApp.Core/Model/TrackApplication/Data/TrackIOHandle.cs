@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text;
-using static SiebwaldeApp.Enums;
+using static SiebwaldeApp.Core.Enums;
 
 namespace SiebwaldeApp.Core
 {

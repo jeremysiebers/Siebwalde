@@ -17,12 +17,12 @@ namespace SiebwaldeApp.Core
         /// <summary>
         /// A shortcut to access the <see cref="ApplicationViewModel"/>
         /// </summary>
-        public static ApplicationViewModel Application => IoC.Get<ApplicationViewModel>();
+        //public static ApplicationViewModel Application => IoC.Get<ApplicationViewModel>();
 
         /// <summary>
         /// A shortcut to access the <see cref="SideMenuViewModel"/>
         /// </summary>
-        public static SideMenuViewModel SideMenu => IoC.Get<SideMenuViewModel>();
+        //public static SideMenuViewModel SideMenu => IoC.Get<SideMenuViewModel>();
 
         /// <summary>
         /// A shortcut to access the <see cref="SiebwaldeApp.SiebwaldeApplicationModel"/>
@@ -60,10 +60,10 @@ namespace SiebwaldeApp.Core
         private static void BindViewModels()
         {
             // Bind to a single instance of Application view model
-            Kernel.Bind<ApplicationViewModel>().ToConstant(new ApplicationViewModel());
+            //Kernel.Bind<ApplicationViewModel>().ToConstant(new ApplicationViewModel());
 
             // Bind to a single instance of Menu view model
-            Kernel.Bind<SideMenuViewModel>().ToConstant(new SideMenuViewModel());
+            //Kernel.Bind<SideMenuViewModel>().ToConstant(new SideMenuViewModel());
 
             // Bind to a single instance of Siebwalde Application Model
             Kernel.Bind<SiebwaldeApplicationModel>().ToConstant(new SiebwaldeApplicationModel());         

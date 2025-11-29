@@ -58,7 +58,7 @@
                     return await ExecuteSendSlaveDetectAsync(cancellationToken).ConfigureAwait(false);
 
                 case 1:
-                    return ExecuteEvaluateDetection(lastMessage);
+                    return await ExecuteEvaluateDetectionAsync(lastMessage, cancellationToken).ConfigureAwait(false);
 
                 default:
                     _subState = 0;
@@ -97,7 +97,7 @@
         /// Wait for MBUS_STATE_SLAVE_DETECT / DONE, then count detected slaves
         /// and decide whether to continue with flashing or try recovery.
         /// </summary>
-        private InitStepResult ExecuteEvaluateDetection(ReceivedMessage? lastMessage)
+        private async Task<InitStepResult> ExecuteEvaluateDetectionAsync(ReceivedMessage? lastMessage, CancellationToken cancellationToken)
         {
             if (!lastMessage.HasValue)
             {
@@ -116,6 +116,8 @@
             IoC.Logger.Log(
                 "State.DetectSlaves => MBUS_STATE_SLAVE_DETECT.",
                 _loggerInstance);
+
+            await Task.Delay(2000); // waits 2 seconds for slave data to be ready
 
             // Count all detected slaves (legacy: amplifier.SlaveDetected == 1)
             uint slaveCount = 0;

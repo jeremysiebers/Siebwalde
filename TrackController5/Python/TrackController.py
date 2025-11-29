@@ -67,6 +67,7 @@ class MAIN():
                 returned = self.StateMachine.RunFunction(EnumStateMachine.InitTrackamplifiers)
                 if(returned == EnumStateMachine.ok):
                     self.state = EnumStateMachine.EnableTrackamplifiers
+
             
             #######################
             ## Enable the slaves ##

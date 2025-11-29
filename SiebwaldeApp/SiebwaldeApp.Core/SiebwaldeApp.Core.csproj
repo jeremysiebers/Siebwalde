@@ -9,12 +9,32 @@
     <AssemblyName>SiebwaldeApp.Core</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Bootstrap\**" />
+    <Compile Remove="Model\TrackApplication\Controller\TrackAmplifierInitializers\**" />
+    <Compile Remove="Model\TrackApplication\Pages\**" />
+    <Compile Remove="Model\TrackApplication\ViewModel\**" />
+    <Compile Remove="ViewModel\**" />
+    <EmbeddedResource Remove="Bootstrap\**" />
+    <EmbeddedResource Remove="Model\TrackApplication\Controller\TrackAmplifierInitializers\**" />
+    <EmbeddedResource Remove="Model\TrackApplication\Pages\**" />
+    <EmbeddedResource Remove="Model\TrackApplication\ViewModel\**" />
+    <EmbeddedResource Remove="ViewModel\**" />
+    <None Remove="Bootstrap\**" />
+    <None Remove="Model\TrackApplication\Controller\TrackAmplifierInitializers\**" />
+    <None Remove="Model\TrackApplication\Pages\**" />
+    <None Remove="Model\TrackApplication\ViewModel\**" />
+    <None Remove="ViewModel\**" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Remove="Model\AmplifierInitializersBaseClass.cs" />
-    <Compile Remove="Model\TrackApplication\Controller\TrackAmplifierInitializers\TrackAmplifierInitalizationSequencer - Backup.cs" />
+    <Compile Remove="Model\TrackApplication\Data\TrackIOHandle.cs" />
+    <Compile Remove="Model\TrackApplication\TrackController_later.cs" />
+    <Compile Remove="Model\TrackApplication\Use async then delete TrackController.cs" />
   </ItemGroup>
 
   <!-- NuGet packages (replaces old <Reference> + HintPath) -->
   <ItemGroup>
+    <PackageReference Include="Extended.Wpf.Toolkit" Version="5.0.0" />
     <PackageReference Include="Ninject" Version="3.3.6" />
     <PackageReference Include="Fody" Version="6.8.0" PrivateAssets="all" />
     <PackageReference Include="PropertyChanged.Fody" Version="4.1.0" />
@@ -31,15 +51,6 @@
       <Generator>MSBuild:Compile</Generator>
     </None>
     <None Update="Model\TrackApplication - Copy\Pages\TrackControlView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </None>
-    <None Update="Model\TrackApplication\Pages\TrackAmplifierItemView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </None>
-    <None Update="Model\TrackApplication\Pages\TrackAmplifierManualControlView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </None>
-    <None Update="Model\TrackApplication\Pages\TrackControlView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </None>
     <None Update="Properties\CoreSettings.settings">

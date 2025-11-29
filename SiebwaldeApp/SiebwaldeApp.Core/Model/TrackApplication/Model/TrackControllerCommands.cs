@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace SiebwaldeApp
+namespace SiebwaldeApp.Core
 {
     /// <summary>
     /// TrackDataItems

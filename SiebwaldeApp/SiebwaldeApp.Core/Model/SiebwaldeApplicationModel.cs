@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using SiebwaldeApp.Core.TrackApplication.Comm;
+using System.Text;
 
 namespace SiebwaldeApp.Core
 {
@@ -8,7 +9,7 @@ namespace SiebwaldeApp.Core
         public event EventHandler? InstantiateFiddleYardWinForms;
         public event EventHandler? FiddleYardShowWinForms;
         public event EventHandler? FiddleYardShowSettingsWinForms;
-        public StationSettingsPageViewModel SettingsViewModel { get; private set; }
+        //public StationSettingsPageViewModel SettingsViewModel { get; private set; }
 
         public TrackControlMain? _trackControlMain;
         #endregion
@@ -110,12 +111,13 @@ namespace SiebwaldeApp.Core
             _trackVariables ??= new TrackApplicationVariables();
 
             // TODO: get these ports from configuration or Enums, for now hard-coded
-            const int trackReceivingPort = 5000; // replace with your real port
-            const int trackSendingPort = 5001;   // replace with your real port
+            //const int trackReceivingPort = 5000; // replace with your real port
+            //const int trackSendingPort = 5001;   // replace with your real port
             const string trackLoggerInstance = "Track";
 
             // 1) Create transport + communication client
-            var transport = new UdpTrackTransport(trackReceivingPort, trackSendingPort, trackLoggerInstance);
+            var rawUdp = new RawUdpTransport("192.168.0.10", 5000); // IP/port van Ethernet target
+            ITrackTransport transport = new RawUdpTrackTransport(rawUdp);
             _trackCommClient = new TrackCommClientAsync(transport, _trackVariables);
 
             // 2) Bootloader helper objects(re -using legacy classes)
@@ -163,7 +165,11 @@ namespace SiebwaldeApp.Core
             // 5) Start async initialization sequence in the background
             _ = _trackInitService.InitializeAsync(_appCts.Token);
 
-            // --- Existing high-level application startup ---
+            // 5b) Create TrackControlMain, which owns the high-level track state machine
+            _trackControlMain = new TrackControlMain(
+                trackLoggerInstance,
+                _trackCommClient,
+                _trackVariables);
 
             // 6) Start the application (spins up StationSide run loops)
             _trackControlMain.Start(true);

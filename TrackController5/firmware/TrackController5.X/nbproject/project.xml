@@ -19,10 +19,15 @@
                 <sourceRootElem>..\src</sourceRootElem>
                 <sourceRootElem>..\src\default</sourceRootElem>
                 <sourceRootElem>..\src\system_config\default</sourceRootElem>
+                <sourceRootElem>../../harmonyV2_06</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>
                     <name>default</name>
+                    <type>2</type>
+                </confElem>
+                <confElem>
+                    <name>Production</name>
                     <type>2</type>
                 </confElem>
             </confList>

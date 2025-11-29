@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace SiebwaldeApp
+namespace SiebwaldeApp.Core
 {
     public class TrackApplicationVariables
     {

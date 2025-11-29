@@ -18,7 +18,7 @@ namespace SiebwaldeApp.Core
         private FiddleYardAppRun FYAppRun;
         public FiddleYardMip50 FYMIP50;                                             // Create new MIP50 sub program       
         private FiddleYardTrainDetection FYTDT;                                     // Create new Traindetection sub program
-       private string m_instance = null;        
+        private string m_instance = null;        
         private object ExecuteLock = new object();
         private string LoggerInstance { get; set; }
         static ILogger GetLogger(string file, string loggerinstance)

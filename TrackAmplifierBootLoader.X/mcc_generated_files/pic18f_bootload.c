@@ -109,8 +109,8 @@ bool     Bootload_Required (void);
     uint8_t tx_data;
     bool reset_pending  = false;
 // Force variables into Unbanked for 1-cycle accessibility 
-    uint8_t EE_Key_1    __at(0x0) = 0;
-    uint8_t EE_Key_2    __at(0x1) = 0;
+    uint8_t EE_Key_1    __at(0x0);
+    uint8_t EE_Key_2    __at(0x1);
 
 
 frame_t  frame;

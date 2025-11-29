@@ -11,25 +11,20 @@ namespace SiebwaldeApp.Core
     {
         #region Variables
 
-        private TrackIOHandle mTrackIOHandle;
-        private TrackApplicationVariables mTrackApplicationVariables;
-        private TrackAmplifierInitalizationSequencer mTrackAmplifierInitalizationSequencer;
+        // NEW: use ITrackCommClient instead of TrackIOHandle and remove old sequencer
+        private readonly ITrackCommClient _trackCommClient;
+        private readonly TrackApplicationVariables mTrackApplicationVariables;
+
+        // Geen eigen init-sequencer meer
+        // private TrackAmplifierInitalizationSequencer mTrackAmplifierInitalizationSequencer;
+
+        // De state-machine hoeft de init van de amplifiers niet meer zelf te regelen.
+        // Die taak ligt nu bij TrackAmplifierInitializationServiceAsync in SiebwaldeApplicationModel.
+        private enum State { Idle, Reset, Cmd };
+        private State State_Machine;
+        private ReceivedMessage dummymessage;
         private System.Timers.Timer AppUpdateTimer = new System.Timers.Timer();
         private readonly object ExecuteLock = new object();
-
-        private ReceivedMessage dummymessage;
-
-        /// <summary>
-        /// This is the HmiTrackForm that holds a container for the WPF via elementhost
-        /// </summary>
-        //private static HmiTrackControlForm hmiTrackForm;
-        //private static HmiTrackControl mHmiTrackControl;
-
-        /// <summary>
-        /// This enum holds all the possible states of the TrackControlMain statemachine
-        /// </summary>
-        private enum State { Idle, Reset, Cmd, InitializeTrackAmplifiers };
-        private State State_Machine;
 
         // Logger instance
         private string mLoggerInstance { get; set; }
@@ -44,26 +39,30 @@ namespace SiebwaldeApp.Core
         /// <param name="LoggerInstance"></param>
         /// <param name="trackIOHandle"></param>
         /// <param name="trackApplicationVariables"></param>
-        public TrackControlMain(string LoggerInstance, TrackIOHandle trackIOHandle, TrackApplicationVariables trackApplicationVariables)
+        public TrackControlMain(
+            string loggerInstance,
+            ITrackCommClient trackCommClient,
+            TrackApplicationVariables trackApplicationVariables)
         {
-            // couple and hold local variables
-            mTrackIOHandle = trackIOHandle;
-            mTrackApplicationVariables = trackApplicationVariables;
-            mLoggerInstance = LoggerInstance;
+            _trackCommClient = trackCommClient ?? throw new ArgumentNullException(nameof(trackCommClient));
+            mTrackApplicationVariables = trackApplicationVariables ?? throw new ArgumentNullException(nameof(trackApplicationVariables));
+            mLoggerInstance = loggerInstance ?? "Track";
 
-            // instantiate sub classes            
-            mTrackAmplifierInitalizationSequencer = new TrackAmplifierInitalizationSequencer(mLoggerInstance, mTrackApplicationVariables, mTrackIOHandle);
-            
+            // We gebruiken niet langer een lokale TrackAmplifierInitalizationSequencer;
+            // die verantwoordelijkheid ligt nu bij TrackAmplifierInitializationServiceAsync
+            // in SiebwaldeApplicationModel.
+            // mTrackAmplifierInitalizationSequencer = new TrackAmplifierInitalizationSequencer(...);
+
             // subscribe to trackamplifier data changed events
-            foreach (TrackAmplifierItem amplifier in trackApplicationVariables.trackAmpItems)//this.trackIOHandle.trackAmpItems)
+            foreach (TrackAmplifierItem amplifier in trackApplicationVariables.trackAmpItems)
             {
-                amplifier.PropertyChanged += new PropertyChangedEventHandler(Amplifier_PropertyChanged);
+                amplifier.PropertyChanged += Amplifier_PropertyChanged;
             }
 
             // subscribe to commands set in the TrackControllerCommands class
-            mTrackApplicationVariables.trackControllerCommands.PropertyChanged += new PropertyChangedEventHandler(TrackControllerCommands_PropertyChanged);
+            mTrackApplicationVariables.trackControllerCommands.PropertyChanged += TrackControllerCommands_PropertyChanged;
 
-            dummymessage = new ReceivedMessage(0, 0, 0, 0);                        
+            dummymessage = new ReceivedMessage(0, 0, 0, 0);
         }
 
         #endregion
@@ -98,7 +97,12 @@ namespace SiebwaldeApp.Core
 
                 case "SendMessage":
                     {
-                        //mTrackIOHandle.ActuatorCmd(mTrackApplicationVariables.trackControllerCommands.SendMessage);
+                        var toSend = mTrackApplicationVariables.trackControllerCommands.SendMessage;
+                        if (toSend != null)
+                        {
+                            // Fire-and-forget; TrackCommClientAsync handelt framing en IO af.
+                            _ = _trackCommClient.SendAsync(toSend, CancellationToken.None);
+                        }
                         break;
                     }
 
@@ -140,21 +144,22 @@ namespace SiebwaldeApp.Core
         /// <summary>
         /// Start the Track Main Application
         /// </summary>
-        internal void Start(bool TrackRealMode)
+        internal void Start(bool trackRealMode)
         {
             AppUpdateTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
             AppUpdateTimer.Interval = 50;
             AppUpdateTimer.AutoReset = true;
-            // Enable the timer
             AppUpdateTimer.Enabled = true;
-            IoC.Logger.Log("Track Application started.", mLoggerInstance);   
-            
-            // When in real mode start initializing the amplifiers
-            if (TrackRealMode)
-            {
-                TrackApplicationUpdate("StartInitializeTrackAmplifiers", 0);
-            }
+
+            State_Machine = State.Idle;
+
+            IoC.Logger.Log("Track Application (TrackControlMain) started.", mLoggerInstance);
+
+            // De init van de track amplifiers wordt nu extern gedaan
+            // via TrackAmplifierInitializationServiceAsync in SiebwaldeApplicationModel.
+            // Hier dus geen StartInitializeTrackAmplifiers meer.
         }
+
 
         #endregion
 
@@ -168,20 +173,11 @@ namespace SiebwaldeApp.Core
                 // stop the timer to prevent re-starting during execution of code
                 AppUpdateTimer.Stop();
 
-                // If StartInitializeTrackAmplifiers is set to true
-                if (source == "StartInitializeTrackAmplifiers")
-                {
-                    //mTrackApplicationVariables.trackControllerCommands.StartInitializeTrackAmplifiers = false;
-                    IoC.Logger.Log("Start Initialize Track Amplifiers.", mLoggerInstance);
-                    State_Machine = State.InitializeTrackAmplifiers;
-                    IoC.Logger.Log("State_Machine = State.StartInitializeTrackAmplifiers.", mLoggerInstance);
-                    mTrackApplicationVariables.trackControllerCommands.UserMessage = "Start initialize Track Amplifiers.";
-                }
-                else if(source == "TimerEvent")
+                if (source == "TimerEvent")
                 {
                     StateMachineUpdate(source, value);
                 }
-                
+
                 // Start the timer again
                 AppUpdateTimer.Start();
             }                        
@@ -206,41 +202,7 @@ namespace SiebwaldeApp.Core
 
                 case State.Idle:
                     // Here all manual commands are handled from the user
-                    break;
-
-                case State.InitializeTrackAmplifiers:
-                    {
-                        switch (mTrackAmplifierInitalizationSequencer.CheckInitSequence)
-                        {
-                            case Enums.Busy:
-                                {
-                                    break;
-                                }
-                            case Enums.Standby:
-                                {
-                                    IoC.Logger.Log("TrackAmplifierInitalizationSequencer.Start().", mLoggerInstance);
-                                    mTrackAmplifierInitalizationSequencer.Start();
-                                    break;
-                                }
-                            case Enums.Finished:
-                                {
-                                    IoC.Logger.Log("State.StartInitializeTrackAmplifiers == Finished.", mLoggerInstance);
-                                    State_Machine = State.Idle;
-                                    break;
-                                }
-                            case Enums.Error:
-                                {
-                                    State_Machine = State.Idle;
-                                    break;
-                                }
-                            default:
-                                {
-                                    State_Machine = State.Idle;
-                                    break;
-                                }
-                        }
-                        break;
-                    }
+                    break;                
                     
                 default:
                     break;

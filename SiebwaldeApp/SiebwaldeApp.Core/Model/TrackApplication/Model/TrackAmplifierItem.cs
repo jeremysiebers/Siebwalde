@@ -3,7 +3,7 @@ using System;
 using System.Collections;
 using System.ComponentModel;
 
-namespace SiebwaldeApp
+namespace SiebwaldeApp.Core
 {
     /// <summary>
     /// Information about a Trackamplifier
