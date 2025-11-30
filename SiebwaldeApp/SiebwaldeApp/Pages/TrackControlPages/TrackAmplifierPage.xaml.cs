@@ -143,5 +143,20 @@ namespace SiebwaldeApp
             MainScrollViewer.ScrollToHorizontalOffset(newOffsetX);
             MainScrollViewer.ScrollToVerticalOffset(newOffsetY);
         }
+
+        /// <summary>
+        /// Handles click on any amplifier box.
+        /// Toggles the global "expanded" state, causing all
+        /// amplifier boxes to either show only key parameters
+        /// or all register values.
+        /// </summary>
+        private void AmplifierBorder_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (DataContext is TrackAmplifierPageViewModel vm)
+            {
+                vm.AreAmplifiersExpanded = !vm.AreAmplifiersExpanded;
+            }
+        }
+
     }
 }

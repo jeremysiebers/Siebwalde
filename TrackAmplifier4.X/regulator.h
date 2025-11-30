@@ -71,7 +71,7 @@ extern "C" {
     // linkage so the functions can be used by the c code. 
     
     unsigned int        REGULATORxUPDATE   (void);
-    void                REGULATORxINIT     (void);
+    uint16_t            REGULATORxINIT     (void);
     extern unsigned int UPDATExPID;
 
 #ifdef	__cplusplus

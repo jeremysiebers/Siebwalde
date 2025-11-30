@@ -5,6 +5,10 @@
 
 void    ADC_BMF     (void);
 
+static uint16_t MeausureBemfCnt = 0;
+static uint16_t MeasueBemf = 0;
+static uint16_t Sequence = 0;
+
 /*#--------------------------------------------------------------------------#*/
 /*  Description: MEASURExBMF()
  *
@@ -21,64 +25,31 @@ void    ADC_BMF     (void);
  *  Notes      : 
  */
 /*#--------------------------------------------------------------------------#*/
-
-static uint16_t MeausureBemfCnt = 0;
-static uint16_t MeasueBemf = 0;
-static uint16_t Sequence = 0;
-
 uint16_t MEASURExBMF(){
-    uint16_t Return_Val = false;
     
-    if(MeasueBemf){
-        ADC_BMF();
-    }
+    uint16_t Return_Val = 0;
+    static uint8_t Sequence = 0;
+    static uint8_t MeausureBemfCnt = 0;
+    static bool    MeasueBemf = false;
     
     switch(Sequence){
         case 0:
-            Return_Val = true;
             MeausureBemfCnt++;
-            if (MeausureBemfCnt > 1){                                           // disable H bridge every 10ms
-                MeausureBemfCnt = 0;
-                TRISCbits.TRISC4 = 1;
-                TRISCbits.TRISC5 = 1;
-                TRISCbits.TRISC6 = 1;
-                T1CONbits.TMR1ON = 0;
-                TMR1H = 0xFF;
-                TMR1L = 0x38;
-                PIR4bits.TMR1IF = 0;
-                T1CONbits.TMR1ON = 1;
-                Return_Val = false;                                              
-                NC_2_LAT = true;
-                Sequence++;
+            if (MeausureBemfCnt > 5 && MeausureBemfCnt < 7){                // Read back EMF as late as possible
+                MeasueBemf = true;                                           // set update PID
             }
-            break;
+            else if(MeasueBemf == true && MeausureBemfCnt > 6){
+                MeasueBemf  = false;                        
+            }
             
-        case 1:
-            if (PIR4bits.TMR1IF){
-                T1CONbits.TMR1ON = 0;
-                TMR1H = 0xFF;
-                TMR1L = 0x38;
-                PIR4bits.TMR1IF = 0;
-                T1CONbits.TMR1ON = 1;
-                
-                MeausureBemfCnt++;
-                
-                if (MeausureBemfCnt > 5 && MeausureBemfCnt < 7){                // Read back EMF as late as possible
-                    MeasueBemf = true;                                           // set update PID
-                }
-                else if(MeasueBemf == true && MeausureBemfCnt > 6){
-                    MeasueBemf  = false;                        
-                }
-                
-                if (MeausureBemfCnt > 7){                                       // after 800us enable H bridge again
-                    MeausureBemfCnt = 0;
-                    TRISCbits.TRISC4 = 0;
-                    TRISCbits.TRISC5 = 0;
-                    TRISCbits.TRISC6 = 0; 
-                    NC_2_LAT = false;
-                    Return_Val = true;
-                    Sequence = 0;
-                }
+            if (MeausureBemfCnt > 7){                                       // after 800us enable H bridge again
+                MeausureBemfCnt = 0;
+                TRISCbits.TRISC4 = 0;
+                TRISCbits.TRISC5 = 0;
+                TRISCbits.TRISC6 = 0; 
+                NC_2_LAT = false;
+                Return_Val = true;
+                Sequence = 0;
             }
             break;
             
@@ -87,51 +58,15 @@ uint16_t MEASURExBMF(){
             break;
     }
     
+    if (MeasueBemf){
+        ADC_BMF();        
+    }
+    
     return (Return_Val);
 }
 
-/*
-    if(UpdatePID){
-        //NC_2_LAT = true;
-        PROCESSxBMF();
-    }
-    
-    //if (PIR4bits.TMR1IF){
-        MeausureBemfCnt++;
-        if (MeausureBemfCnt > 99){                                              // disable H bridge every 10ms
-            MeausureBemfCnt = 0;
-            TRISCbits.TRISC4 = 1;
-            TRISCbits.TRISC5 = 1;
-            TRISCbits.TRISC6 = 1;
-            Return_Val = false;                                                 // measuring time    
-            NC_2_LAT = true;
-        }
-        
-        if (MeausureBemfCnt > 0 && MeausureBemfCnt < 8){
-            Return_Val = false;  
-        }
-                
-        if (MeausureBemfCnt > 8){                                               // after 800us enable H bridge again
-            TRISCbits.TRISC4 = 0;
-            TRISCbits.TRISC5 = 0;
-            TRISCbits.TRISC6 = 0; 
-            NC_2_LAT = false;
-        }
-
-        if (MeausureBemfCnt > 6 && MeausureBemfCnt < 8){                        // Read back EMF as late as possible
-            //PORTAbits.RA6 = 1;
-            UpdatePID = true;                                                   // set update PID
-        }
-        else if(UpdatePID == true && MeausureBemfCnt > 7){
-            UpdatePID  = false;                        
-        }
-        //PIR4bits.TMR1IF = 0;
-        //TMR1_Reload();
-    }
-*/
-
 /*#--------------------------------------------------------------------------#*/
-/*  Description: ADCxBMF ()
+/*  Description: ADC_BMF ()
  *
  *  Input(s)   : 
  *
@@ -144,6 +79,9 @@ uint16_t MEASURExBMF(){
  *  Post.Cond. :
  *
  *  Notes      : 
+ *
+ *  This function performs the actual ADC conversion of the back-EMF
+ *  and stores it into the status holding register (HR_STATUS).
  */
 /*#--------------------------------------------------------------------------#*/
 static uint16_t Sequence_Bmf = 0;
@@ -160,7 +98,13 @@ void ADC_BMF (){
 
             case 1:
                 if (ADCON0bits.ADGO==0){
-                    PetitHoldingRegisters[8].ActValue = ADCC_GetConversionResult();
+                    {
+                        uint16_t bemf = (uint16_t)(ADCC_GetConversionResult() & HR_STATUS_BEMF_MASK);
+                        uint16_t status = PetitHoldingRegisters[HR_STATUS].ActValue;
+                        status &= (uint16_t)(~HR_STATUS_BEMF_MASK);  /* clear old BEMF bits    */
+                        status |= bemf;                              /* insert new BEMF value  */
+                        PetitHoldingRegisters[HR_STATUS].ActValue = status;
+                    }
                     Sequence_Bmf = 0;
                     //NC_2_LAT = true;
                 }
@@ -186,6 +130,15 @@ void ADC_BMF (){
  *  Post.Cond. :
  *
  *  Notes      : 
+ *
+ *  This function multiplexes several ADC channels and places the
+ *  measurements into the corresponding Modbus holding registers:
+ *
+ *  - LM_V     -> HR_FUSE_VOLTAGE          (HoldingReg4)
+ *  - LM_TEMP  -> HR_HBRIDGE_TEMPERATURE   (HoldingReg5)
+ *  - LM_CURR  -> HR_HBRIDGE_CURRENT       (HoldingReg6)
+ *
+ *  It also updates the thermal flag bit in HR_STATUS from LM_THFLG.
  */
 /*#--------------------------------------------------------------------------#*/
 static uint16_t sequence = 2;
@@ -194,7 +147,20 @@ uint16_t ADCxIO (){
     
     uint16_t Return_Val = false;
     
-    //PetitInputRegisters[0].ActValue |= (unsigned int)(THFLG_PORT << 11);
+    /* Update thermal flag bit in HR_STATUS from LM_THFLG input. */
+    {
+        uint16_t status = PetitHoldingRegisters[HR_STATUS].ActValue;
+        if (LM_THFLG_GetValue())
+        {
+            status |= HR_STATUS_THERMAL_BIT;
+        }
+        else
+        {
+            status &= (uint16_t)(~HR_STATUS_THERMAL_BIT);
+        }
+        PetitHoldingRegisters[HR_STATUS].ActValue = status;
+    }
+    
     if (ADCON0bits.ADGO==0){                                                    // extra check if conversion is done
     
         switch(sequence){
@@ -210,7 +176,7 @@ uint16_t ADCxIO (){
                     sequence++;
                 }
                 break;
-*/
+            */
             case 2:
                 ADCC_StartConversion(LM_V);
                 sequence++;
@@ -218,7 +184,8 @@ uint16_t ADCxIO (){
 
             case 3:
                 if (ADCON0bits.ADGO==0){
-                    PetitHoldingRegisters[7].ActValue = ADCC_GetConversionResult();
+                    /* H-bridge fuse voltage */
+                    PetitHoldingRegisters[HR_FUSE_VOLTAGE].ActValue = ADCC_GetConversionResult();
                     sequence++;
                     Return_Val = true;
                 }            
@@ -231,7 +198,8 @@ uint16_t ADCxIO (){
 
             case 5: 
                 if (ADCON0bits.ADGO==0){
-                    PetitHoldingRegisters[6].ActValue = ADCC_GetConversionResult();
+                    /* H-bridge temperature */
+                    PetitHoldingRegisters[HR_HBRIDGE_TEMPERATURE].ActValue = ADCC_GetConversionResult();
                     sequence++;
                     Return_Val = true;
                 }            
@@ -244,13 +212,15 @@ uint16_t ADCxIO (){
 
             case 7:
                 if (ADCON0bits.ADGO==0){
-                    PetitHoldingRegisters[5].ActValue = ADCC_GetConversionResult();
+                    /* H-bridge current */
+                    PetitHoldingRegisters[HR_HBRIDGE_CURRENT].ActValue = ADCC_GetConversionResult();
                     sequence = 2;
                     Return_Val = true;
                 }            
                 break;
 
-            default: sequence = 0;
+            default: 
+                sequence = 0;
                 break;
         }
     }

@@ -11,6 +11,7 @@
 #include "main.h"
 #include "mcc_generated_files/mcc.h"
 #include "modbus/PetitModbus.h"
+#include "modbus/General.h"
 #include "processio.h"
 #include "regulator.h"
 
@@ -31,166 +32,159 @@ void main(void) {
     unsigned int result = 0;
     
     SYSTEM_Initialize();
-    // If using interrupts in PIC18 High/Low Priority Mode you need to enable the Global High and Low Interrupts
-    // If using interrupts in PIC Mid-Range Compatibility Mode you need to enable the Global and Peripheral Interrupts
-    // Use the following macros to:
     
-    PetitHoldingRegisters[11].ActValue = ReadFlashChecksum();
+    /* Store firmware checksum to HoldingReg11 (HR_SW_CHECKSUM) for flash checking */
+    PetitHoldingRegisters[HR_SW_CHECKSUM].ActValue = ReadFlashChecksum();
 
-    // Enable the Global Interrupts
+    /* Enable the Global Interrupts */
     INTERRUPT_GlobalInterruptEnable();
 
-    // Disable the Global Interrupts
-    //INTERRUPT_GlobalInterruptDisable();
-
-    // Enable the Peripheral Interrupts
+    /* Enable the Peripheral Interrupts */
     INTERRUPT_PeripheralInterruptEnable();
-
-    // Disable the Peripheral Interrupts
-    //INTERRUPT_PeripheralInterruptDisable();
-    
-    /* Test the onboard Led's */
-    //while(Led_Disco() == false);
-    
+ 
+    /* Initialise LEDs and Modbus address etc. */
     LED_RUN_LAT     = 0;
-    LED_ERR_LAT     = 1;    
-    LM_DIR_LAT      = 0;
+    LED_ERR_LAT     = 0;
+    LED_WAR_LAT     = 0;
+    LED_TX_LAT      = 0;
+    LED_RX_LAT      = 0;
+    
     LM_PWM_LAT      = 0;
+    LM_DIR_LAT      = 0;
     LM_BRAKE_LAT    = 1;
     
-    MODBUS_ADDRESS = 0xAA;                                                      // Address to listen to get configured when ID pin is pulled low 170 dec.    
+    MODBUS_ADDRESS = 0xAA;                                  //...listen to get configured when ID pin is pulled low 170 dec.    
     InitPetitModbus(MODBUS_ADDRESS);
 /*----------------------------------------------------------------------------*/
-    
-    while(Config){
-        
-        test[0] = 1;
-        
-        switch(Startup_Machine){
-            case 0 :
-                if (ID_PORT == 0){                                              // When ID_PORT is pulled low the amplifier will be configured
-                    Startup_Machine = 1;
+
+        while(Config){
+            
+            test[0] = 1;
+            
+            switch(Startup_Machine){
+                case 0 :
+                    if (ID_PORT == 0){                         // ... // When ID_PORT is pulled low the amplifier will be configured
+                        Startup_Machine = 1;
+                    }
+					LED_ERR_LAT     = 1;
+                    break;
+                    
+                case 1 :
+                    result = ProcessPetitModbus();
+                    LED_ERR++;                
+                    Led_Blink();
+                    if (ID_PORT){                               //...d, check if a new ID is set, otherwise go back to initial state
+                        if((PetitHoldingRegisters[HR_STATUS].ActValue & HR_STATUS_CONFIG_ID_MASK)!= 0 ){
+                            LED_ERR         = 0; 
+                            LED_ERR_LAT     = 0;                        
+                            MODBUS_ADDRESS  = (PetitHoldingRegisters[HR_STATUS].ActValue & HR_STATUS_CONFIG_ID_MASK);
+                            /* Mark that the ID has been programmed by the master */
+                            PetitHoldingRegisters[HR_STATUS].ActValue |= HR_STATUS_ID_SET_BIT;
+                            InitPetitModbus(MODBUS_ADDRESS);
+                            Startup_Machine = 5;
+                       }  
+                        else{
+                            Startup_Machine = 0;
+                            Config          = 1;
+                            LED_ERR         = 0;
+                            LED_ERR_LAT     = 1;
+                            LED_RUN_LAT     = 0;
+                            LED_WAR_LAT     = 0;
+                            LED_TX_LAT      = 0;
+                            LED_RX_LAT      = 0;
+                        }
+                    }
+                    /* If checksum is zero, go into bootloader invoke sequence */
+                    if(PetitHoldingRegisters[HR_SW_CHECKSUM].ActValue == 0){
+                        Startup_Machine = 2;
+                        //RESET();                                                    // Called for bootloader invoking
+                    }
+                    break;
+                    
+                case 2 :
+                {
+                    if(ProcessPetitModbus() == 2){
+                        Startup_Machine = 3;
+                    }
+                    break;
                 }
-				LED_ERR_LAT     = 1;
-                break;
                 
-            case 1 :
-                result = ProcessPetitModbus();
-                LED_ERR++;                
-                Led_Blink();
-                if (ID_PORT){                                                   // When the ID_PORT is released, check if a new ID is set, otherwise go back to initial state
-                    if((PetitHoldingRegisters[2].ActValue & 0x3F)!= 0 ){
-                        LED_ERR         = 0; 
-                        LED_ERR_LAT     = 0;                        
-                        MODBUS_ADDRESS = (PetitHoldingRegisters[2].ActValue & 0x3F);
-                        InitPetitModbus(MODBUS_ADDRESS);
-                        Startup_Machine = 5;
-                   }  
-                    else{
+                case 3 :
+                {
+                    if(ProcessPetitModbus() == 1){
+                        RESET();                                                    // Called for bootloader invoking
+                    }
+                    break;
+                }
+                
+                case 5 :
+                    ProcessPetitModbus();
+                    LED_WAR++;
+                    Led_Blink();
+                    /* Wait until the amplifier is enabled by the Master
+                     * (bit 15 in HR_BEMF_CTRL / HoldingReg1)
+                     */
+                    if ((PetitHoldingRegisters[HR_BEMF_CTRL].ActValue & HR_BEMF_ENABLE_AMPLIFIER_BIT)){
                         Startup_Machine = 0;
-                        Config          = 1;
-                        LED_ERR         = 0;
-                        LED_ERR_LAT     = 1;
-                        LED_RUN_LAT     = 0;
+                        Config          = 0;
+                        LED_WAR         = 0;
                         LED_WAR_LAT     = 0;
-                        LED_TX_LAT      = 0;
-                        LED_RX_LAT      = 0;
+                        LED_RUN_LAT     = 1;
                     }
-                }
-                if(PetitHoldingRegisters[11].ActValue == 0){
-                    Startup_Machine = 2;
-                    //RESET();                                                    // Called for bootloader invoking
-                }
-                break;
-                
-            case 2 :
-            {
-                if(ProcessPetitModbus() == 2){
-                    Startup_Machine = 3;
-                }
-                break;
+                    break;
+                    
+                default: 
+                    break;
             }
-            
-            case 3 :
-            {
-                if(ProcessPetitModbus() == 1){
-                    RESET();                                                    // Called for bootloader invoking
-                }
-                break;
-            }
-                
-            case 5 :
-                ProcessPetitModbus();
-                LED_WAR++;
-                Led_Blink();
-                if ((PetitHoldingRegisters[1].ActValue & 0x8000)!= 0){          // Wait until the amplifier is enabled by the Master
-                    Startup_Machine = 0;
-                    Config          = 0;
-                    LED_WAR         = 0;
-                    LED_WAR_LAT     = 0;
-                    LED_RUN_LAT     = 1;
-                }
-                break;
-                
-            default: 
-                break;
-        }
-    }
-        
-    REGULATORxINIT();
-/*----------------------------------------------------------------------------*/
-    
-    while(1){
-    
-        ProcessPetitModbus();
-        Led_Blink();
-        
-//        test[0]++;
-//        
-//        if(test[0] > 50){
-//            test[0] = 0;
-//        }
-        
-        
-        if (Update_Amplifier){
-            
-            switch(Sequencer){
-                case 0:
-                    if(MEASURExBMF() == true){
-                        Sequencer++;
-                        Update_Amplifier = false;  
-                    }
-                    break;
-                    
-                case 1:
-                    if(REGULATORxUPDATE() == true){
-                        Sequencer++;
-                        Update_Amplifier = false;
-                    }
-                    break;
-                    
-                case 2:
-                    if(ADCxIO() == true){
-                        Sequencer++;
-                        Update_Amplifier = false;
-                    }
-                    break;
-                    
-                case 3:
-                    Sequencer = 0;
-                    Update_Amplifier = false;
-                    break;
-                    
-                default:
-                    Sequencer = 0;
-                    Update_Amplifier = false;
-                    break;
-            }            
-            
         }
         
-    }
+        REGULATORxINIT();
+        
+        while(1){
+        
+            ProcessPetitModbus();
+            Led_Blink();
+            
+            if (Update_Amplifier){
+                
+                switch(Sequencer){
+                    case 0:
+                        if(MEASURExBMF() == true){
+                            Sequencer++;
+                            Update_Amplifier = false;  
+                        }
+                        break;
+                        
+                    case 1:
+                        if(REGULATORxUPDATE() == true){
+                            Sequencer++;
+                            Update_Amplifier = false;
+                        }
+                        break;
+                        
+                    case 2:
+                        if(ADCxIO() == true){
+                            Sequencer++;
+                            Update_Amplifier = false;
+                        }
+                        break;
+                        
+                    case 3:
+                        Sequencer = 0;
+                        Update_Amplifier = false;
+                        break;
+                        
+                    default:
+                        Sequencer = 0;
+                        Update_Amplifier = false;
+                        break;
+                }            
+                
+            }
+        }
+    
 }
+
 
 /*----------------------------------------------------------------------------*/
 void Led_Blink (){

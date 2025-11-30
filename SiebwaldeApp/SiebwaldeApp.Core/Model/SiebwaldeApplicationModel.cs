@@ -149,6 +149,7 @@ namespace SiebwaldeApp.Core
                 new RecoverSlavesStep(commClient, _trackVariables, sendNextFwDataPacket, bootloaderHelpers, LoggerInstance),
                 new FlashFwTrackamplifiersStep(commClient, _trackVariables, sendNextFwDataPacket, bootloaderHelpers, LoggerInstance),
                 new InitTrackamplifiersStep(commClient, LoggerInstance),
+                new SetDefaultPwmSetpointsStep(_trackVariables, LoggerInstance),
                 new EnableTrackamplifiersStep(commClient, LoggerInstance),
             };
 
@@ -208,6 +209,74 @@ namespace SiebwaldeApp.Core
             }
         }
 
+        /// <summary>
+        /// Sets the PWM set point (0..799) for a given amplifier.
+        /// This updates HoldingReg0 bits 0..9 for the matching slave.
+        /// </summary>
+        public void SetAmplifierPwm(ushort slaveNumber, int pwm)
+        {
+            if (_trackVariables == null || _trackVariables.trackAmpItems == null)
+                return;
+
+            var amp = _trackVariables.trackAmpItems
+                .FirstOrDefault(a => a.SlaveNumber == slaveNumber);
+
+            if (amp == null)
+                return;
+
+            pwm = Math.Max(0, Math.Min(799, pwm));
+
+            var regs = amp.HoldingReg;
+            if (regs == null || regs.Length == 0)
+                return;
+
+            ushort reg0 = regs[0];
+
+            // Clear bits 0..9
+            reg0 = (ushort)(reg0 & ~0x03FF);
+
+            // Set new PWM in bits 0..9
+            reg0 |= (ushort)(pwm & 0x03FF);
+
+            regs[0] = reg0;
+            amp.HoldingReg = regs;
+        }
+
+        /// <summary>
+        /// Sets or clears the emergency stop bit (HoldingReg0 bit 15)
+        /// for a given amplifier.
+        /// </summary>
+        public void SetAmplifierEmStop(ushort slaveNumber, bool isEmStop)
+        {
+            if (_trackVariables == null || _trackVariables.trackAmpItems == null)
+                return;
+
+            var amp = _trackVariables.trackAmpItems
+                .FirstOrDefault(a => a.SlaveNumber == slaveNumber);
+
+            if (amp == null)
+                return;
+
+            var regs = amp.HoldingReg;
+            if (regs == null || regs.Length == 0)
+                return;
+
+            ushort reg0 = regs[0];
+
+            if (isEmStop)
+            {
+                // Set bit 15
+                reg0 |= 0x8000;
+            }
+            else
+            {
+                // Clear bit 15
+                reg0 = (ushort)(reg0 & ~0x8000);
+            }
+
+            regs[0] = reg0;
+            amp.HoldingReg = regs;
+        }
 
 
         /// <summary>

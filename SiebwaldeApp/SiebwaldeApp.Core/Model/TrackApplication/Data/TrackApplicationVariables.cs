@@ -66,6 +66,39 @@ namespace SiebwaldeApp.Core
             return trackAmpItems;
         }
 
+        /// <summary>
+        /// Initializes all known amplifiers with a default PWM set point
+        /// in HoldingReg0 bits 0..9. This does not enable power; it only
+        /// sets the idle value that will be used once the amplifiers are enabled.
+        /// </summary>
+        public void InitializeDefaultPwmSetpoints(ushort defaultPwm)
+        {
+            if (trackAmpItems == null || trackAmpItems.Count == 0)
+                return;
+
+            if (defaultPwm > 799)
+                defaultPwm = 799;
+
+            foreach (var amp in trackAmpItems)
+            {
+                var regs = amp.HoldingReg;
+                if (regs == null || regs.Length == 0)
+                    continue;
+
+                ushort reg0 = regs[0];
+
+                // Clear bits 0..9
+                reg0 = (ushort)(reg0 & ~0x03FF);
+
+                // Set default PWM
+                reg0 |= (ushort)(defaultPwm & 0x03FF);
+
+                regs[0] = reg0;
+                amp.HoldingReg = regs;
+            }
+        }
+
+
         #endregion
     }
 }

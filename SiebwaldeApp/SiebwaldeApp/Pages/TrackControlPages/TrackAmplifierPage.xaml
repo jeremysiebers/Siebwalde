@@ -106,39 +106,61 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Border Margin="4"
-                                        Padding="6"
-                                        BorderThickness="1"
-                                        CornerRadius="4"
-                                        BorderBrush="DarkGray"
-                                        Background="#FF202020">
+                    Padding="6"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    BorderBrush="DarkGray"
+                    Background="#FF202020"
+                    MouseLeftButtonUp="AmplifierBorder_MouseLeftButtonUp">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="MinHeight" Value="70" />
+                                            <Style.Triggers>
+                                                <!-- Make all amplifier boxes higher in expanded mode -->
+                                                <DataTrigger Value="True">
+                                                    <DataTrigger.Binding>
+                                                        <Binding Path="DataContext.AreAmplifiersExpanded"
+                                             RelativeSource="{RelativeSource AncestorType=local:TrackAmplifierPage}" />
+                                                    </DataTrigger.Binding>
+                                                    <Setter Property="MinHeight" Value="130" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+
                                     <Grid>
                                         <Grid.RowDefinitions>
-                                            <!-- Header row (Amp number + LED) -->
+                                            <!-- Header row (Amp number + detected LED) -->
                                             <RowDefinition Height="Auto" />
-                                            <!-- Modbus counters -->
+                                            <!-- PWM + EmStop controls -->
                                             <RowDefinition Height="Auto" />
-                                            <!-- Holding registers summary -->
+                                            <!-- Occupied indicator -->
+                                            <RowDefinition Height="Auto" />
+                                            <!-- Modbus counter summary -->
+                                            <RowDefinition Height="Auto" />
+                                            <!-- Full register summary (only visible in expanded mode) -->
                                             <RowDefinition Height="Auto" />
                                         </Grid.RowDefinitions>
 
-                                        <!-- Amplifier number + LED -->
+                                        <!-- Row 0: Amplifier number + detected LED -->
                                         <StackPanel Grid.Row="0"
-                                                    Orientation="Horizontal">
+                                Orientation="Horizontal">
                                             <TextBlock Text="{Binding SlaveNumber, StringFormat='Amp {0}'}"
-                                                       FontWeight="Bold"
-                                                       Foreground="White"
-                                                       FontSize="12" />
+                                   FontWeight="Bold"
+                                   Foreground="White"
+                                   FontSize="12" />
 
+                                            <!-- Detected LED: green when slave is detected -->
                                             <Border Width="10"
-                                                    Height="10"
-                                                    Margin="6,0,0,0"
-                                                    CornerRadius="5">
+                                Height="10"
+                                Margin="6,0,0,0"
+                                CornerRadius="5">
                                                 <Border.Style>
                                                     <Style TargetType="Border">
                                                         <Setter Property="Background" Value="Red" />
                                                         <Style.Triggers>
                                                             <DataTrigger Binding="{Binding IsDetected}"
-                                                                         Value="True">
+                                                     Value="True">
                                                                 <Setter Property="Background" Value="LimeGreen" />
                                                             </DataTrigger>
                                                         </Style.Triggers>
@@ -147,25 +169,88 @@
                                             </Border>
                                         </StackPanel>
 
-                                        <!-- Modbus counter summary -->
-                                        <TextBlock Grid.Row="1"
-                                                   Text="{Binding MbSummary}"
-                                                   Margin="0,4,0,0"
-                                                   Foreground="LightGray"
-                                                   FontSize="10"
-                                                   TextWrapping="Wrap" />
+                                        <!-- Row 1: PWM set point + EmStop control -->
+                                        <StackPanel Grid.Row="1"
+                                Orientation="Horizontal"
+                                Margin="0,4,0,0">
+                                            <TextBlock Text="PWM:"
+                                   Foreground="LightGray"
+                                   FontSize="10" />
+                                            <TextBox Text="{Binding PwmSetPoint, UpdateSourceTrigger=PropertyChanged}"
+                                 Width="40"
+                                 Margin="4,0,0,0"
+                                 FontSize="10"
+                                 HorizontalContentAlignment="Right" />
 
-                                        <!-- Holding registers summary -->
-                                        <TextBlock Grid.Row="2"
-                                                   Text="{Binding HoldingRegSummary}"
-                                                   Margin="0,4,0,0"
-                                                   Foreground="LightGray"
-                                                   FontSize="9"
-                                                   TextWrapping="Wrap" />
+                                            <CheckBox IsChecked="{Binding IsEmStop}"
+                                  Content="Em Stop"
+                                  Margin="8,0,0,0"
+                                  Foreground="LightGray"
+                                  FontSize="10"
+                                  VerticalAlignment="Center" />
+                                        </StackPanel>
+
+                                        <!-- Row 2: Occupied indicator -->
+                                        <StackPanel Grid.Row="2"
+                                Orientation="Horizontal"
+                                Margin="0,4,0,0">
+                                            <TextBlock Text="Occupied:"
+                                   Foreground="LightGray"
+                                   FontSize="10" />
+                                            <Border Width="10"
+                                Height="10"
+                                Margin="4,0,0,0"
+                                CornerRadius="5">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Setter Property="Background" Value="#404040" />
+                                                        <Style.Triggers>
+                                                            <!-- Yellow LED when occupied -->
+                                                            <DataTrigger Binding="{Binding IsOccupied}"
+                                                     Value="True">
+                                                                <Setter Property="Background" Value="Yellow" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <!-- Row 3: Modbus counter summary (always visible) -->
+                                        <TextBlock Grid.Row="3"
+                               Text="{Binding MbSummary}"
+                               Margin="0,4,0,0"
+                               Foreground="LightGray"
+                               FontSize="9"
+                               TextWrapping="Wrap" />
+
+                                        <!-- Row 4: full holding register summary (only in expanded mode) -->
+                                        <TextBlock Grid.Row="4"
+                               Text="{Binding AllHoldingRegsSummary}"
+                               Margin="0,4,0,0"
+                               Foreground="LightGray"
+                               FontSize="8"
+                               TextWrapping="Wrap">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Value="True">
+                                                            <DataTrigger.Binding>
+                                                                <Binding Path="DataContext.AreAmplifiersExpanded"
+                                                     RelativeSource="{RelativeSource AncestorType=local:TrackAmplifierPage}" />
+                                                            </DataTrigger.Binding>
+                                                            <Setter Property="Visibility" Value="Visible" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
                                     </Grid>
                                 </Border>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
+
                     </ItemsControl>
 
                     <!-- Backplane slaves 51-55 at the bottom, smaller boxes -->

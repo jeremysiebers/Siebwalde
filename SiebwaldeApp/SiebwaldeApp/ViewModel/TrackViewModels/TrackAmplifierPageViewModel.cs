@@ -1,6 +1,7 @@
 ﻿using SiebwaldeApp.Core;
 using System;
 using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Threading;
 
@@ -15,6 +16,7 @@ namespace SiebwaldeApp
         #region Private members
 
         private readonly DispatcherTimer _refreshTimer;
+        private bool _areAmplifiersExpanded;
 
         #endregion
 
@@ -35,6 +37,23 @@ namespace SiebwaldeApp
         /// shown as smaller boxes at the bottom of the page.
         /// </summary>
         public ObservableCollection<TrackAmplifierVisualViewModel> BackplaneSlaves { get; }
+
+        /// <summary>
+        /// When true, all amplifier boxes show their expanded view
+        /// (all register values); when false they show only the key parameters.
+        /// </summary>
+        public bool AreAmplifiersExpanded
+        {
+            get => _areAmplifiersExpanded;
+            set
+            {
+                if (_areAmplifiersExpanded == value)
+                    return;
+
+                _areAmplifiersExpanded = value;
+                OnPropertyChanged(nameof(AreAmplifiersExpanded));
+            }
+        }
 
         #endregion
 
@@ -84,6 +103,8 @@ namespace SiebwaldeApp
             {
                 // Track application not started or no slaves seen yet.
                 Master.UpdateFromModels(null, null);
+                Amplifiers.Clear();
+                BackplaneSlaves.Clear();
                 return;
             }
 
@@ -169,13 +190,20 @@ namespace SiebwaldeApp
 
         private ushort _slaveNumber;
         private bool _isDetected;
+
         private ushort _mbReceiveCounter;
         private ushort _mbSentCounter;
         private uint _mbCommError;
         private ushort _mbExceptionCode;
         private ushort _spiCommErrorCounter;
-        private string _holdingRegSummary = string.Empty;
+
         private string _mbSummary = string.Empty;
+        private string _holdingRegSummary = string.Empty;
+        private string _allHoldingRegsSummary = string.Empty;
+
+        private int _pwmSetPoint;
+        private bool _isEmStop;
+        private bool _isOccupied;
 
         #endregion
 
@@ -303,7 +331,7 @@ namespace SiebwaldeApp
 
         /// <summary>
         /// Short summary of the first few holding registers
-        /// (for now just the first 4 values).
+        /// (for the collapsed view).
         /// </summary>
         public string HoldingRegSummary
         {
@@ -315,6 +343,82 @@ namespace SiebwaldeApp
                     _holdingRegSummary = value;
                     OnPropertyChanged(nameof(HoldingRegSummary));
                 }
+            }
+        }
+
+        /// <summary>
+        /// Summary of all holding registers (R00=..., R01=..., ...).
+        /// Used in the expanded view.
+        /// </summary>
+        public string AllHoldingRegsSummary
+        {
+            get => _allHoldingRegsSummary;
+            private set
+            {
+                if (_allHoldingRegsSummary != value)
+                {
+                    _allHoldingRegsSummary = value;
+                    OnPropertyChanged(nameof(AllHoldingRegsSummary));
+                }
+            }
+        }
+
+        /// <summary>
+        /// PWM set point (0..799). Default idle is 400.
+        /// Changing this property will update the corresponding holding register
+        /// via the core application model.
+        /// </summary>
+        public int PwmSetPoint
+        {
+            get => _pwmSetPoint;
+            set
+            {
+                // Clamp to allowed range
+                int clamped = Math.Max(0, Math.Min(799, value));
+                if (_pwmSetPoint == clamped)
+                    return;
+
+                _pwmSetPoint = clamped;
+                OnPropertyChanged(nameof(PwmSetPoint));
+
+                // Inform core model so it can update HoldingReg[0] bits 0..9
+                IoC.siebwaldeApplicationModel?.SetAmplifierPwm(SlaveNumber, _pwmSetPoint);
+            }
+        }
+
+        /// <summary>
+        /// Emergency stop flag. When true, the amplifier should float the H-bridge
+        /// (no power to the rails). This maps to HoldingReg0 bit 15.
+        /// </summary>
+        public bool IsEmStop
+        {
+            get => _isEmStop;
+            set
+            {
+                if (_isEmStop == value)
+                    return;
+
+                _isEmStop = value;
+                OnPropertyChanged(nameof(IsEmStop));
+
+                IoC.siebwaldeApplicationModel?.SetAmplifierEmStop(SlaveNumber, _isEmStop);
+            }
+        }
+
+        /// <summary>
+        /// True when the amplifier detects an occupancy on the track
+        /// (HoldingReg2 bit 10). Read-only from the UI perspective.
+        /// </summary>
+        public bool IsOccupied
+        {
+            get => _isOccupied;
+            private set
+            {
+                if (_isOccupied == value)
+                    return;
+
+                _isOccupied = value;
+                OnPropertyChanged(nameof(IsOccupied));
             }
         }
 
@@ -334,6 +438,10 @@ namespace SiebwaldeApp
         /// <summary>
         /// Copies the latest values from a core TrackAmplifierItem
         /// into this view model.
+        /// 
+        /// Note: this method updates backing fields directly to avoid
+        /// triggering core write-back logic when we are just reflecting
+        /// current state from the model.
         /// </summary>
         public void UpdateFromModel(TrackAmplifierItem model)
         {
@@ -349,22 +457,65 @@ namespace SiebwaldeApp
             MbExceptionCode = model.MbExceptionCode;
             SpiCommErrorCounter = model.SpiCommErrorCounter;
 
-            // Build a short summary of the first holding registers.
             var regs = model.HoldingReg;
+
+            // Decode PWM/EmStop/Occupied from holding registers
             if (regs != null && regs.Length > 0)
             {
-                var count = Math.Min(4, regs.Length);
-                var parts = new string[count];
-                for (int i = 0; i < count; i++)
+                ushort reg0 = regs[0];
+
+                int pwm = reg0 & 0x03FF;          // bits 0..9
+                bool emStop = (reg0 & 0x8000) != 0; // bit 15
+
+                if (_pwmSetPoint != pwm)
                 {
-                    parts[i] = regs[i].ToString();
+                    _pwmSetPoint = pwm;
+                    OnPropertyChanged(nameof(PwmSetPoint));
                 }
 
-                HoldingRegSummary = $"Regs: {string.Join(", ", parts)}";
+                if (_isEmStop != emStop)
+                {
+                    _isEmStop = emStop;
+                    OnPropertyChanged(nameof(IsEmStop));
+                }
+
+                bool occupied = false;
+                if (regs.Length > 2)
+                {
+                    ushort reg2 = regs[2];
+                    occupied = (reg2 & (1 << 10)) != 0;
+                }
+
+                IsOccupied = occupied;
+
+                // Short summary (first 4 registers)
+                int shortCount = Math.Min(4, regs.Length);
+                if (shortCount > 0)
+                {
+                    var parts = new string[shortCount];
+                    for (int i = 0; i < shortCount; i++)
+                        parts[i] = regs[i].ToString();
+
+                    HoldingRegSummary = $"Regs: {string.Join(", ", parts)}";
+                }
+                else
+                {
+                    HoldingRegSummary = string.Empty;
+                }
+
+                // Full summary for expanded view
+                var allParts = new string[regs.Length];
+                for (int i = 0; i < regs.Length; i++)
+                {
+                    allParts[i] = $"R{i:D2}={regs[i]}";
+                }
+                AllHoldingRegsSummary = string.Join("  ", allParts);
             }
             else
             {
                 HoldingRegSummary = string.Empty;
+                AllHoldingRegsSummary = string.Empty;
+                IsOccupied = false;
             }
         }
 
