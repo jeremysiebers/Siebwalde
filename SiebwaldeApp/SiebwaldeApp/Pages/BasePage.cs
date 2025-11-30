@@ -1,5 +1,4 @@
 ﻿using Ninject;
-using SiebwaldeApp.Core;
 using System.Windows.Controls;
 
 namespace SiebwaldeApp

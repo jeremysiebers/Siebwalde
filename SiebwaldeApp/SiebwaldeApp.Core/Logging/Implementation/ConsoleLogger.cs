@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace SiebwaldeApp.Core
+﻿namespace SiebwaldeApp.Core
 {
     /// <summary>
     /// Logs the nmessages to the console

@@ -1,84 +1,42 @@
-﻿using Ninject;
-
-namespace SiebwaldeApp.Core
+﻿namespace SiebwaldeApp.Core
 {
     /// <summary>
-    /// The IoC container for our application
+    /// Very small service locator for the Core library.
+    /// This replaces the old Ninject-based IoC for Core.
+    /// Only non-UI, cross-cutting services live here (currently: logging).
     /// </summary>
     public static class IoC
     {
-        #region Public Properties
+        /// <summary>
+        /// Global log factory used by all Core classes.
+        /// By default it contains a Debug logger.
+        /// The host application can override it by calling ConfigureLogger.
+        /// </summary>
+        public static ILogFactory Logger { get; private set; } = CreateDefaultLogFactory();
 
         /// <summary>
-        /// The kernel for our IoC container
+        /// Allows the host application (e.g. WPF UI) to plug in its own logger
+        /// so that Core and UI use the same log pipeline.
         /// </summary>
-        public static IKernel Kernel { get; private set; } = new StandardKernel();
-
-        /// <summary>
-        /// A shortcut to access the <see cref="ApplicationViewModel"/>
-        /// </summary>
-        //public static ApplicationViewModel Application => IoC.Get<ApplicationViewModel>();
-
-        /// <summary>
-        /// A shortcut to access the <see cref="SideMenuViewModel"/>
-        /// </summary>
-        //public static SideMenuViewModel SideMenu => IoC.Get<SideMenuViewModel>();
-
-        /// <summary>
-        /// A shortcut to access the <see cref="SiebwaldeApp.SiebwaldeApplicationModel"/>
-        /// </summary>
-        public static SiebwaldeApplicationModel siebwaldeApplicationModel => IoC.Get<SiebwaldeApplicationModel>();
-
-        /// <summary>
-        /// A shortcut to access the <see cref="IFileManager"/>
-        /// </summary>
-        public static IFileManager File => IoC.Get<IFileManager>();
-
-        /// <summary>
-        /// A shortcut to access the <see cref="ILogFactory"/>
-        /// </summary>
-        public static ILogFactory Logger => IoC.Get<ILogFactory>();              
-
-        #endregion
-
-        #region Construction
-
-        /// <summary>
-        /// Sets up the IoC container, binds all information required and is ready for use
-        /// NOTE: Must be called as soon as your application starts up to ensure all 
-        ///       services can be found
-        /// </summary>
-        public static void Setup()
+        /// <param name="logger">The log factory instance to use</param>
+        public static void ConfigureLogger(ILogFactory logger)
         {
-            // Bind all required view models
-            BindViewModels();
+            Logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         /// <summary>
-        /// Binds all singleton view models
+        /// Creates the default log factory that Core uses
+        /// when the host application does not override it.
         /// </summary>
-        private static void BindViewModels()
+        /// <returns>The default <see cref="ILogFactory"/> instance.</returns>
+        private static ILogFactory CreateDefaultLogFactory()
         {
-            // Bind to a single instance of Application view model
-            //Kernel.Bind<ApplicationViewModel>().ToConstant(new ApplicationViewModel());
+            var factory = new BaseLogFactory();
 
-            // Bind to a single instance of Menu view model
-            //Kernel.Bind<SideMenuViewModel>().ToConstant(new SideMenuViewModel());
+            // Minimal default logging: write to the debugger output window.
+            factory.AddLogger(new DebugLogger());
 
-            // Bind to a single instance of Siebwalde Application Model
-            Kernel.Bind<SiebwaldeApplicationModel>().ToConstant(new SiebwaldeApplicationModel());         
-        }
-
-        #endregion
-
-        /// <summary>
-        /// Get's a service from the IoC, of the specified type
-        /// </summary>
-        /// <typeparam name="T">The type to get</typeparam>
-        /// <returns></returns>
-        public static T Get<T>()
-        {
-            return Kernel.Get<T>();
+            return factory;
         }
     }
 }

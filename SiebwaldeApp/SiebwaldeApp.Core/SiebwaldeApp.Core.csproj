@@ -10,16 +10,23 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Bootstrap\**" />
+    <Compile Remove="File\**" />
     <Compile Remove="Model\TrackApplication\Controller\TrackAmplifierInitializers\**" />
     <Compile Remove="Model\TrackApplication\Pages\**" />
     <Compile Remove="Model\TrackApplication\ViewModel\**" />
     <Compile Remove="ViewModel\**" />
     <EmbeddedResource Remove="Bootstrap\**" />
+    <EmbeddedResource Remove="File\**" />
+    <EmbeddedResource Remove="IoC\**" />
+    <EmbeddedResource Remove="Logging\**" />
     <EmbeddedResource Remove="Model\TrackApplication\Controller\TrackAmplifierInitializers\**" />
     <EmbeddedResource Remove="Model\TrackApplication\Pages\**" />
     <EmbeddedResource Remove="Model\TrackApplication\ViewModel\**" />
     <EmbeddedResource Remove="ViewModel\**" />
     <None Remove="Bootstrap\**" />
+    <None Remove="File\**" />
+    <None Remove="IoC\**" />
+    <None Remove="Logging\**" />
     <None Remove="Model\TrackApplication\Controller\TrackAmplifierInitializers\**" />
     <None Remove="Model\TrackApplication\Pages\**" />
     <None Remove="Model\TrackApplication\ViewModel\**" />

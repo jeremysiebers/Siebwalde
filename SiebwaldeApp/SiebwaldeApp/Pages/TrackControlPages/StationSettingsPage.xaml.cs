@@ -1,6 +1,4 @@
-﻿using SiebwaldeApp.Core;
-
-namespace SiebwaldeApp
+﻿namespace SiebwaldeApp
 {
     /// <summary>
     /// Interaction logic for StationSettingsView.xaml

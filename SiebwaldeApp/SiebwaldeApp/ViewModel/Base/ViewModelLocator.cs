@@ -1,7 +1,5 @@
 ﻿// https://youtu.be/w5kAUCFDRy4?t=5100
 
-using SiebwaldeApp.Core;
-
 namespace SiebwaldeApp
 {
     /// <summary>
