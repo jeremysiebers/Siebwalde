@@ -14,6 +14,7 @@ namespace SiebwaldeApp.Core
         private readonly Channel<ReceivedMessage> _controlMessages;
 
         private InitializationStatus _status = InitializationStatus.Idle;
+        private readonly string _loggerInstance;
 
         public event EventHandler<InitializationProgress>? ProgressChanged;
         public event EventHandler<InitializationStatus>? StatusChanged;
@@ -29,10 +30,12 @@ namespace SiebwaldeApp.Core
         public TrackAmplifierInitializationServiceAsync(
             ITrackCommClient commClient,
             TrackApplicationVariables variables,
-            IEnumerable<IInitializationStep> steps)
+            IEnumerable<IInitializationStep> steps,
+            string loggerInstance = "Track")
         {
             _commClient = commClient;
             _variables = variables;
+            _loggerInstance = loggerInstance ?? "Track";
 
             foreach (var step in steps)
             {
@@ -52,7 +55,7 @@ namespace SiebwaldeApp.Core
             // NOTE: This log shows every control message coming from the transport.
             IoC.Logger.Log(
                 $"[CONTROL] TaskId={m.TaskId}, Cmd={m.Taskcommand}, State={m.Taskstate}, Msg={m.Taskmessage}",
-                "fake");
+                _loggerInstance);
 
             _controlMessages.Writer.TryWrite(m);
         }
