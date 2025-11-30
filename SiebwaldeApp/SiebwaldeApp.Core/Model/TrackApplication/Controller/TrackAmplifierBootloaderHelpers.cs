@@ -56,7 +56,19 @@ namespace SiebwaldeApp.Core
         /// <summary>
         /// Get the config word
         /// </summary>
-        public byte[] GetConfigWord 
+        public bool GetConfigWordReadSuccessful
+        {
+            get => ConfigWordReadSuccessful;
+            private set
+            {
+                ConfigWordReadSuccessful = value;
+            }
+        }
+
+        /// <summary>
+        /// Get the config word
+        /// </summary>
+        public byte[] GetConfigWord
         {
             get
             {
@@ -65,7 +77,7 @@ namespace SiebwaldeApp.Core
             private set
             {
                 mGetConfigWord = value;
-            } 
+            }
         }
 
         /// <summary>

@@ -23,7 +23,7 @@ static unsigned int Startup_Machine = 0;
 unsigned int Update_Amplifier = 0;
 static unsigned int Sequencer = 0;
 
-static uint8_t test[100];
+static uint8_t test[1000];
 
 /*----------------------------------------------------------------------------*/
 void main(void) {

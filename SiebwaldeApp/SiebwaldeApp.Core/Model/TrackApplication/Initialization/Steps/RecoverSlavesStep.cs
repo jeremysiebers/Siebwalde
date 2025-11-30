@@ -476,7 +476,19 @@ namespace SiebwaldeApp.Core
 
                 List<byte> Data = new List<byte>();
 
-                foreach (byte val in _bootloaderHelpers.GetConfigWord)
+                if (!_bootloaderHelpers.GetConfigWordReadSuccessful)
+                {
+                    IoC.Logger.Log(
+                    "State.RecoverTrackamplifiers => GetConfigWordReadSuccessful == False.",
+                    _loggerInstance);
+
+                    _subState = 0;
+                    return InitStepResult.Error("GetConfigWordReadSuccessful NOK.");
+                }
+
+                var configWord = _bootloaderHelpers.GetConfigWord;
+
+                foreach (byte val in configWord)
                 {
                     Data.Add(val);
                 }

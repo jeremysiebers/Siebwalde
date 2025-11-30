@@ -46,6 +46,9 @@ namespace SiebwaldeApp.Core
 
             var dummyData = new byte[80];
             _sendMessageTemplate = new SendMessage(0, dummyData);
+
+            // First execute the bootloader helper to prepare the FW file checksum and config word.
+            _bootloaderHelpers.Execute();
         }
 
         public async Task<InitStepResult> ExecuteAsync(
@@ -64,10 +67,10 @@ namespace SiebwaldeApp.Core
                     return await State1_StartFwHandlerAsync(lastMessage, cancellationToken)
                         .ConfigureAwait(false);
 
-                // 2: erase flash on all slaves
-                case 2:
-                    return await State2_StartDownloadAsync(lastMessage, cancellationToken)
-                        .ConfigureAwait(false);
+                //// 2: erase flash on all slaves
+                //case 2:
+                //    return await State2_StartDownloadAsync(lastMessage, cancellationToken)
+                //        .ConfigureAwait(false);
 
                 // 3: start FW download state
                 case 3:
@@ -116,13 +119,24 @@ namespace SiebwaldeApp.Core
         {
             _fwFlashRequired = 0;
 
+            if(!_bootloaderHelpers.HexFileReadSuccessful)
+            {
+                IoC.Logger.Log(
+                    "State.FlashFwTrackamplifiers => HexFileReadSuccessful == False.",
+                    _loggerInstance);
+                return InitStepResult.Error("Firmware file read unsuccessful.");
+            }
+
+            // Get checksum for comparison
+            var checksum = _bootloaderHelpers.GetFileCheckSum;
+
             IoC.Logger.Log(
                 $"State.FlashFwTrackamplifiers => File checksum = 0x{_bootloaderHelpers.GetFileCheckSum:X}.",
                 _loggerInstance);
 
             foreach (TrackAmplifierItem amplifier in _variables.trackAmpItems)
             {
-                if (_bootloaderHelpers.GetFileCheckSum != amplifier.HoldingReg[11] &&
+                if (checksum != amplifier.HoldingReg[11] &&
                     amplifier.SlaveDetected == 1 &&
                     amplifier.SlaveNumber > 0 &&
                     amplifier.SlaveNumber < 51)
@@ -143,7 +157,7 @@ namespace SiebwaldeApp.Core
                     "State.FlashFwTrackamplifiers => 0 slaves require flashing, initialization DONE.",
                     _loggerInstance);
 
-                return InitStepResult.Completed();
+                return InitStepResult.Next("InitTrackamplifiers");
             }
 
             IoC.Logger.Log(
@@ -188,7 +202,7 @@ namespace SiebwaldeApp.Core
 
                 await _commClient.SendAsync(msg, cancellationToken).ConfigureAwait(false);
 
-                _subState = 2;
+                _subState = 3;
 
                 IoC.Logger.Log(
                     "State.FlashFwTrackamplifiers => EXEC_FW_STATE_RECEIVE_FW_FILE.",
@@ -197,28 +211,7 @@ namespace SiebwaldeApp.Core
 
             return InitStepResult.Continue();
         }
-
-        /// <summary>
-        /// State 2:
-        /// Start firmware download state on the slave.
-        /// </summary>
-        private async Task<InitStepResult> State2_StartDownloadAsync(
-            ReceivedMessage? lastMessage,
-            CancellationToken cancellationToken)
-        {
-            var msg = _sendMessageTemplate;
-            msg.Command = TrackCommand.EXEC_FW_STATE_RECEIVE_FW_FILE;
-
-            await _commClient.SendAsync(msg, cancellationToken).ConfigureAwait(false);
-
-            _subState = 3;
-
-            IoC.Logger.Log(
-                "State.FlashFwTrackamplifiers => EXEC_FW_STATE_RECEIVE_FW_FILE.",
-                _loggerInstance);
-
-            return InitStepResult.Continue();
-        }
+              
 
         /// <summary>
         /// State 3:
@@ -379,7 +372,18 @@ namespace SiebwaldeApp.Core
 
                 List<byte> Data = new List<byte>();
 
-                foreach (byte val in _bootloaderHelpers.GetConfigWord)
+                if (!_bootloaderHelpers.GetConfigWordReadSuccessful)
+                {
+                    IoC.Logger.Log(
+                    "State.FlashFwTrackamplifiers => GetConfigWordReadSuccessful == False.",
+                    _loggerInstance);
+
+                    _subState = 0;
+                    return InitStepResult.Error("GetConfigWordReadSuccessful NOK.");
+                }
+                var configWord = _bootloaderHelpers.GetConfigWord;
+
+                foreach (byte val in configWord)
                 {
                     Data.Add(val);
                 }

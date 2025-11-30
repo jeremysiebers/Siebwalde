@@ -96,6 +96,7 @@ namespace SiebwaldeApp.Core.Host
                 new ResetAllSlavesStep(commClient, variables),
                 new DataUploadStep(commClient, variables),
                 new DetectSlavesStep(commClient, variables),
+                new RecoverSlavesStep(commClient, variables, sendNextFwDataPacket, bootloaderHelpers),
                 new FlashFwTrackamplifiersStep(commClient, variables, sendNextFwDataPacket, bootloaderHelpers),
                 new InitTrackamplifiersStep(commClient),
                 new EnableTrackamplifiersStep(commClient),
