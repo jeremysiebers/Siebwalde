@@ -60,10 +60,22 @@
     <None Include="App.config" Condition="Exists('App.config')" />
     <!-- Fody weaver config -->
     <None Include="FodyWeavers.xml" Condition="Exists('FodyWeavers.xml')" />
+    <None Include="Pages\TrackControlPages\TrackAmplifierItemView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
+    <None Include="Pages\TrackControlPages\TrackAmplifierManualControlView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
+    <None Include="Pages\TrackControlPages\TrackControlView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
 
     <!-- Fonts and images (wildcards to cover your prior explicit list) -->
     <Resource Include="Fonts\**\*.ttf" Condition="Exists('Fonts')" />
     <Resource Include="Images\**\*" Condition="Exists('Images')" />
+    <Page Remove="Pages\TrackControlPages\TrackAmplifierItemView.xaml" />
+    <Page Remove="Pages\TrackControlPages\TrackAmplifierManualControlView.xaml" />
+    <Page Remove="Pages\TrackControlPages\TrackControlView.xaml" />
     <Reference Include="PropertyChanged">
       <HintPath>..\packages\PropertyChanged.Fody.4.1.0\lib\net40\PropertyChanged.dll</HintPath>
     </Reference>

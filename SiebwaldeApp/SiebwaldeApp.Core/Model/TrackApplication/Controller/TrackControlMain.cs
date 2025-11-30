@@ -56,11 +56,11 @@ namespace SiebwaldeApp.Core
             // subscribe to trackamplifier data changed events
             foreach (TrackAmplifierItem amplifier in trackApplicationVariables.trackAmpItems)
             {
-                amplifier.PropertyChanged += Amplifier_PropertyChanged;
+                //amplifier.PropertyChanged += Amplifier_PropertyChanged;
             }
 
             // subscribe to commands set in the TrackControllerCommands class
-            mTrackApplicationVariables.trackControllerCommands.PropertyChanged += TrackControllerCommands_PropertyChanged;
+            //mTrackApplicationVariables.trackControllerCommands.PropertyChanged += TrackControllerCommands_PropertyChanged;
 
             dummymessage = new ReceivedMessage(0, 0, 0, 0);
         }

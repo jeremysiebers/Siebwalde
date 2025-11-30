@@ -1,202 +1,112 @@
-﻿using PropertyChanged;
-using System;
-using System.Collections;
-using System.ComponentModel;
+﻿using System;
 
 namespace SiebwaldeApp.Core
 {
     /// <summary>
-    /// Information about a Trackamplifier
+    /// Information about a track amplifier.
     /// </summary>
-    public class TrackAmplifierItem : INotifyPropertyChanged
+    /// <remarks>
+    /// This version no longer uses INotifyPropertyChanged or Fody.
+    /// It is a plain data container used by the track application logic.
+    /// </remarks>
+    public class TrackAmplifierItem
     {
-        /// <summary>
-        /// The event that is fired when any child property changes it value
-        /// </summary>
-        public event PropertyChangedEventHandler PropertyChanged = (Sender, e) => { };
+        #region Private fields
 
-        #region Private Variables
-
-        private ushort mSlaveNumber;
-        private ushort[] mHoldingReg = new ushort[12];
-        private ushort mMbReceiveCounter;
-        private ushort mSlaveDetected;
-        private ushort mSpiCommErrorCounter;
-        private ushort mMbExceptionCode;
-        private uint mMbCommError;
-        private ushort mMbSentCounter;
+        private ushort _slaveNumber;
+        private ushort[] _holdingReg = new ushort[12];
+        private ushort _mbReceiveCounter;
+        private ushort _slaveDetected;
+        private ushort _spiCommErrorCounter;
+        private ushort _mbExceptionCode;
+        private uint _mbCommError;
+        private ushort _mbSentCounter;
 
         #endregion
 
-        #region Public Methods
+        #region Public properties
 
         /// <summary>
-        /// Get/Set and generate event for SlaveNumber
+        /// Modbus slave number of this track amplifier.
         /// </summary>
-        [DoNotNotify]
-        public ushort SlaveNumber {
-            get => mSlaveNumber;            
-            set
-            {
-                if (value == mSlaveNumber)
-                {
-                    return;
-                }
-                else
-                {
-                    mSlaveNumber = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(SlaveNumber)));
-                }                               
-            } 
+        public ushort SlaveNumber
+        {
+            get => _slaveNumber;
+            set => _slaveNumber = value;
         }
 
         /// <summary>
-        /// Get/Set and generate event for SlaveDetected
+        /// Indicates if this slave has been detected by the controller.
         /// </summary>
-        [DoNotNotify]
         public ushort SlaveDetected
         {
-            get => mSlaveDetected;
-            set
-            {
-                if (value == mSlaveDetected)
-                {
-                    return;
-                }
-                else
-                {
-                    mSlaveDetected = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(SlaveDetected)));
-                }                
-            }
+            get => _slaveDetected;
+            set => _slaveDetected = value;
         }
 
         /// <summary>
-        /// Get/Set and generate event for HoldingReg
+        /// Holding registers of this track amplifier.
+        /// The backing array is kept alive; assigning copies into it.
         /// </summary>
-        [DoNotNotify]
         public ushort[] HoldingReg
         {
-            get => mHoldingReg;
+            get => _holdingReg;
             set
             {
-                if (((IStructuralEquatable)mHoldingReg).Equals(value, StructuralComparisons.StructuralEqualityComparer))
-                //if (value == mHoldingReg)
-                {
-                    return;                    
-                }
-                else
-                {
-                    //mHoldingReg = value;
-                    Array.Copy(value, 0, mHoldingReg, 0, value.Length);
-                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(HoldingReg)));
-                }           
+                if (value == null)
+                    throw new ArgumentNullException(nameof(value));
+
+                // Ensure internal array is large enough
+                if (_holdingReg.Length != value.Length)
+                    _holdingReg = new ushort[value.Length];
+
+                Array.Copy(value, _holdingReg, value.Length);
             }
         }
 
         /// <summary>
-        /// Get/Set and generate event for MbReceiveCounter
+        /// Number of Modbus messages received from this amplifier.
         /// </summary>
-        [DoNotNotify]
         public ushort MbReceiveCounter
         {
-            get => mMbReceiveCounter;
-            set
-            {
-                if (value == mMbReceiveCounter)
-                {
-                    return;
-                }
-                else
-                {
-                    mMbReceiveCounter = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(MbReceiveCounter)));
-                }                
-            }
+            get => _mbReceiveCounter;
+            set => _mbReceiveCounter = value;
         }
 
         /// <summary>
-        /// Get/Set and generate event for MbSentCounter
+        /// Number of Modbus messages sent to this amplifier.
         /// </summary>
-        [DoNotNotify]
         public ushort MbSentCounter
         {
-            get => mMbSentCounter;
-            set
-            {
-                if (value == mMbSentCounter)
-                {
-                    return;
-                }
-                else
-                {
-                    mMbSentCounter = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(MbSentCounter)));
-                }                
-            }
+            get => _mbSentCounter;
+            set => _mbSentCounter = value;
         }
 
         /// <summary>
-        /// Get/Set and generate event for MbCommError
+        /// Number of Modbus communication errors.
         /// </summary>
-        [DoNotNotify]
-        public UInt32 MbCommError
+        public uint MbCommError
         {
-            get => mMbCommError;
-            set
-            {
-                if (value == mMbCommError)
-                {
-                    return;
-                }
-                else
-                {
-                    mMbCommError = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(MbCommError)));
-                }                
-            }
+            get => _mbCommError;
+            set => _mbCommError = value;
         }
 
         /// <summary>
-        /// Get/Set and generate event for MbExceptionCode
+        /// Last Modbus exception code that occurred.
         /// </summary>
-        [DoNotNotify]
         public ushort MbExceptionCode
         {
-            get => mMbExceptionCode;
-            set
-            {
-                if (value == mMbExceptionCode)
-                {
-                    return;
-                }
-                else
-                {
-                    mMbExceptionCode = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(MbExceptionCode)));
-                }                
-            }
+            get => _mbExceptionCode;
+            set => _mbExceptionCode = value;
         }
 
         /// <summary>
-        /// Get/Set and generate event for SpiCommErrorCounter
+        /// SPI communication error counter between controller and amplifier.
         /// </summary>
-        [DoNotNotify]
         public ushort SpiCommErrorCounter
         {
-            get => mSpiCommErrorCounter;
-            set
-            {
-                if (value == mSpiCommErrorCounter)
-                {
-                    return;
-                }
-                else
-                {
-                    mSpiCommErrorCounter = value;
-                    PropertyChanged(this, new PropertyChangedEventArgs(nameof(SpiCommErrorCounter)));
-                }                
-            }
+            get => _spiCommErrorCounter;
+            set => _spiCommErrorCounter = value;
         }
 
         #endregion

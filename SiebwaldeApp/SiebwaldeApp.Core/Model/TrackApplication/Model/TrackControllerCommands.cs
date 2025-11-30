@@ -1,108 +1,72 @@
-﻿using System.ComponentModel;
-
-namespace SiebwaldeApp.Core
+﻿namespace SiebwaldeApp.Core
 {
     /// <summary>
-    /// TrackDataItems
+    /// Commands and state used by the track controller.
     /// </summary>
-    public class TrackControllerCommands : INotifyPropertyChanged
+    /// <remarks>
+    /// This version no longer uses INotifyPropertyChanged.
+    /// Values are plain properties that the controller and UI can read/write.
+    /// </remarks>
+    public class TrackControllerCommands
     {
-        /// <summary>
-        /// The event that is fired when any child property changes it value
-        /// </summary>
-        public event PropertyChangedEventHandler PropertyChanged = (Sender, e) => { };
-
-        #region TrackController Commands Methods
-
+        #region TrackController Command properties
 
         /// <summary>
-        /// Holds the start init track amplifier command state
+        /// Indicates that initialization of all track amplifiers should start.
         /// </summary>
-        private bool mStartInitializeTrackAmplifiers;
-        public bool StartInitializeTrackAmplifiers
-        {
-            get => mStartInitializeTrackAmplifiers;
-            set
-            {
-                if (value == mStartInitializeTrackAmplifiers)
-                {
-                    return;
-                }
-                else
-                {
-                    mStartInitializeTrackAmplifiers = value;
-                    //PropertyChanged(this, new PropertyChangedEventArgs(nameof(StartInitializeTrackAmplifiers)));
-                }
-            }
-        }
+        public bool StartInitializeTrackAmplifiers { get; set; }
 
+        /// <summary>
+        /// Indicates that the HMI track control form should be started.
+        /// </summary>
         public bool StartHmiTrackControlForm { get; set; }
 
         /// <summary>
-        /// Holds the Ethernet Target connected state
+        /// Indicates whether the Ethernet target is connected.
         /// </summary>
         public bool EthernetTargetConnected { get; set; }
 
         #endregion
 
-        #region Usermessage
+        #region User message
+
         /// <summary>
-        /// User message that can be shown on user interface
+        /// User message that can be shown on the user interface.
         /// </summary>
-        public string UserMessage { get; set; }
+        public string UserMessage { get; set; } = string.Empty;
 
         #endregion
 
-        #region Ethernet Target received message Method
+        #region Ethernet target received message
 
-        private ReceivedMessage EthernetTargetRecv;
-        public ReceivedMessage ReceivedMessage
-        {
-            get { return EthernetTargetRecv; }
-            set
-            {
-                // Messages could be the same, downloading fw data for instance
-                EthernetTargetRecv = value;
-                //PropertyChanged(this, new PropertyChangedEventArgs(nameof(ReceivedMessage)));
-            }
-        }
+        /// <summary>
+        /// Last message received from the Ethernet target.
+        /// </summary>
+        public ReceivedMessage ReceivedMessage { get; set; }
 
         #endregion
 
-        #region Ethernet Target Message to Send Method
+        #region Ethernet target send message
 
-        private SendMessage EthernetTargetSend;
-        public SendMessage SendMessage
-        {
-            get { return EthernetTargetSend; }
-            set
-            {
-                if (value == SendMessage)
-                {
-                    return;
-                }
-                else
-                {
-                    EthernetTargetSend = value;
-                    //PropertyChanged(this, new PropertyChangedEventArgs(nameof(SendMessage)));
-                }
-            }
-        }
+        /// <summary>
+        /// Next message to send to the Ethernet target.
+        /// </summary>
+        public SendMessage SendMessage { get; set; }
 
         #endregion
 
         #region Constructor
 
         /// <summary>
-        /// Initialize all variables as required
+        /// Initialize all variables as required.
         /// </summary>
         public TrackControllerCommands()
         {
-            //public ReceivedMessage EthernetTarget = new ReceivedMessage();
-            EthernetTargetRecv = new ReceivedMessage(0, 0, 0, 0);
+            // Default dummy messages
+            ReceivedMessage = new ReceivedMessage(0, 0, 0, 0);
 
-            byte[] DummyData = new byte[80];
-            EthernetTargetSend = new SendMessage(0, DummyData);
+            var dummyData = new byte[80];
+            SendMessage = new SendMessage(0, dummyData);
         }
 
         #endregion

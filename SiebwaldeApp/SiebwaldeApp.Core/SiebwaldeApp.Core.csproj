@@ -1,91 +1,23 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-
-    <!-- Keep your original names -->
     <RootNamespace>SiebwaldeApp.Core</RootNamespace>
     <AssemblyName>SiebwaldeApp.Core</AssemblyName>
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Remove="Bootstrap\**" />
-    <Compile Remove="File\**" />
-    <Compile Remove="Model\TrackApplication\Controller\TrackAmplifierInitializers\**" />
-    <Compile Remove="Model\TrackApplication\Pages\**" />
-    <Compile Remove="Model\TrackApplication\ViewModel\**" />
-    <Compile Remove="ViewModel\**" />
-    <EmbeddedResource Remove="Bootstrap\**" />
-    <EmbeddedResource Remove="File\**" />
-    <EmbeddedResource Remove="IoC\**" />
-    <EmbeddedResource Remove="Logging\**" />
-    <EmbeddedResource Remove="Model\TrackApplication\Controller\TrackAmplifierInitializers\**" />
-    <EmbeddedResource Remove="Model\TrackApplication\Pages\**" />
-    <EmbeddedResource Remove="Model\TrackApplication\ViewModel\**" />
-    <EmbeddedResource Remove="ViewModel\**" />
-    <None Remove="Bootstrap\**" />
-    <None Remove="File\**" />
-    <None Remove="IoC\**" />
-    <None Remove="Logging\**" />
-    <None Remove="Model\TrackApplication\Controller\TrackAmplifierInitializers\**" />
-    <None Remove="Model\TrackApplication\Pages\**" />
-    <None Remove="Model\TrackApplication\ViewModel\**" />
-    <None Remove="ViewModel\**" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Remove="Model\AmplifierInitializersBaseClass.cs" />
-    <Compile Remove="Model\TrackApplication\Data\TrackIOHandle.cs" />
-    <Compile Remove="Model\TrackApplication\TrackController_later.cs" />
-    <Compile Remove="Model\TrackApplication\Use async then delete TrackController.cs" />
-  </ItemGroup>
 
-  <!-- NuGet packages (replaces old <Reference> + HintPath) -->
   <ItemGroup>
-    <PackageReference Include="Extended.Wpf.Toolkit" Version="5.0.0" />
-    <PackageReference Include="Ninject" Version="3.3.6" />
-    <PackageReference Include="Fody" Version="6.8.0" PrivateAssets="all" />
-    <PackageReference Include="PropertyChanged.Fody" Version="4.1.0" />
-    <!-- If you use ConfigurationManager (AppSettings/ConnectionStrings), keep this: -->
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.0" />
   </ItemGroup>
 
-  <!-- Preserve Settings designer behavior -->
-  <ItemGroup>
-    <None Update="Model\TrackApplication - Copy\Pages\TrackAmplifierItemView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </None>
-    <None Update="Model\TrackApplication - Copy\Pages\TrackAmplifierManualControlView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </None>
-    <None Update="Model\TrackApplication - Copy\Pages\TrackControlView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </None>
-    <None Update="Properties\CoreSettings.settings">
-      <Generator>PublicSettingsSingleFileGenerator</Generator>
-      <LastGenOutput>CoreSettings.Designer.cs</LastGenOutput>
-    </None>
-    <Compile Update="Properties\CoreSettings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <DependentUpon>CoreSettings.settings</DependentUpon>
-    </Compile>
-  </ItemGroup>
-
-  <!-- Optional: include app.config as content (note: not used by .NET 8 runtime, but harmless) -->
-  <ItemGroup>
-    <None Include="app.config" Condition="Exists('app.config')" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="PropertyChanged">
-      <HintPath>..\packages\PropertyChanged.Fody.4.1.0\lib\net40\PropertyChanged.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
-  <!-- Configuration-specific constants (SDK has sensible defaults for the rest) -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>DEBUG;TRACE</DefineConstants>
   </PropertyGroup>
+
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
+
 </Project>

@@ -28,4 +28,15 @@
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
+  <ItemGroup>
+    <None Update="Pages\TrackControlPages\TrackAmplifierItemView.xaml">
+      <SubType>Designer</SubType>
+    </None>
+    <None Update="Pages\TrackControlPages\TrackAmplifierManualControlView.xaml">
+      <SubType>Designer</SubType>
+    </None>
+    <None Update="Pages\TrackControlPages\TrackControlView.xaml">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
 </Project>
