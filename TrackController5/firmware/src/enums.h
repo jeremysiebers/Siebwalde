@@ -301,12 +301,12 @@ typedef struct
 
 typedef struct
 {
-    uint8_t  SlaveAddress;
-    uint8_t  Direction;
-    uint8_t  NoOfRegisters;    
-    uint8_t  StartRegister;
-    uint16_t RegData0;
-    uint16_t RegData1;    
+    uint8_t  SlaveAddress;      // Address of the slave
+    uint8_t  Direction;         // Read or write (0x55/0xAA) 1 or 2 registers
+    uint8_t  NoOfRegisters;     // number of registers to read/write
+    uint8_t  StartRegister;     // Start register to read/write from
+    uint16_t RegData0;          // Data for first register
+    uint16_t RegData1;          // Data for second register
 }REGISTER_PROCESSING;
 
 /*******************************************************************************

@@ -75,6 +75,9 @@
         public const ushort HEXROWWIDTH = 16;
         public const ushort JUMPSIZE = 4;
 
+        public const ushort WRITE = 0xAA; // Write commmand to write to slave
+        public const ushort READ = 0x55;  // Read command to read from slave
+
     }
 
     public static class TaskId
@@ -112,6 +115,7 @@
         public const byte EXEC_MBUS_STATE_SLAVE_ENABLE = 105;
         public const byte EXEC_MBUS_STATE_START_DATA_UPLOAD = 106;
         public const byte EXEC_MBUS_STATE_RESET = 107;
+        public const byte EXEC_MBUS_SLAVE_DATA_EXCH = 108;
 
         /* FWHANDLER COMMANDS */
         public const byte EXEC_FW_STATE_RECEIVE_FW_FILE = 120;
@@ -195,7 +199,8 @@
         public const byte RECEIVED_CHECKSUM_NOK = 105;
         public const byte SWITCH_OUT_OF_BOUNDS = 106;
         public const byte SLAVE_ID_OUT_OF_BOUNDS = 107;
-     }
+        public const byte MESSAGE_BUFFER_FULL = 108;
+    }
 
     public class EnumClientCommands
     {

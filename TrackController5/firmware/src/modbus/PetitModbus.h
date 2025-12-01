@@ -60,7 +60,8 @@ typedef enum
     SLAVE_DATA_OK = 0x02,
     SLAVE_DATA_NOK = 0x03,
     SLAVE_DATA_TIMEOUT = 0x04,
-    SLAVE_DATA_EXCEPTION = 0x05
+    SLAVE_DATA_EXCEPTION = 0x05,
+    SLAVE_DATA_UNKNOWN = 0x06
 }SLAVE_DATA;
 
 typedef struct

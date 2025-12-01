@@ -148,7 +148,7 @@ uint8_t CHECKxMODBUSxCOMMxSTATUS(uint8_t SlaveId, bool OverWrite){
         }
         else if( MASTER_SLAVE_DATA[SlaveId].MbCommError != SLAVE_DATA_BUSY &&
                  MASTER_SLAVE_DATA[SlaveId].MbCommError != SLAVE_DATA_OK){
-            return_val = SLAVENOK;
+            return_val = MASTER_SLAVE_DATA[SlaveId].MbCommError;
         }
     }
     

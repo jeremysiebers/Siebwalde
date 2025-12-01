@@ -20,7 +20,7 @@ extern "C" {
 extern void     INITxSLAVExHANDLER                  (SLAVE_INFO *location, SLAVE_INFO *Dump);
 extern bool     PROCESSxNEXTxSLAVE                  (void);
 extern bool     PROCESSxSLAVExCOMMUNICATION         (void);
-extern void     ADDxNEWxSLAVExDATAxCMDxTOxMAILBOX   (uint8_t *data);
+extern void     ADDxNEWxSLAVExDATAxCMDxTOxSLAVExMAILBOX   (uint8_t *data);
 
 #ifdef	__cplusplus
 }

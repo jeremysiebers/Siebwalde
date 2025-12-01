@@ -162,6 +162,12 @@ bool DetectSlave(uint8_t SlaveId){
                     RunSlaveDetect = 0;
                     return_val = true;
                     break;
+                case SLAVE_DATA_TIMEOUT: 
+                    MASTER_SLAVE_DATA[SlaveId].SlaveDetected = false;
+                    SYS_PRINT("Mbus handler\t: DETECTSLAVE Backplane %d not detected.\n\r", SlaveId);
+                    RunSlaveDetect = 0;
+                    return_val = true;
+                    break;
                 case SLAVEBUSY: break;
                 default : break;
             }

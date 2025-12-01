@@ -116,7 +116,7 @@ bool PROCESSxNEXTxSLAVE(){
         case 1:            
             if(SendNextMessage()){
                 ProcessSlave++;
-                /* when the current slave to be precessed is outside the no of
+                /* when the current slave to be processed is outside the no of
                  * amplifiers, start over with the Master again and increase
                  * the Message and SlaveInfoProcessor. */
                 if (ProcessSlave > (NUMBER_OF_AMPLIFIERS)){
@@ -167,7 +167,7 @@ uint8_t MasterMessageCounter = 0;
 bool SendNextMessage(){
     bool return_val = false;
     
-    /* Messaged to be send to slaves */
+    /* Fetch data from the slaves according to priority */
     if (ProcessSlave > 0){
         switch (Message){
             case MESSAGE1:
@@ -231,10 +231,10 @@ bool SendNextMessage(){
         }
         return_val = true;
     }
-    /* Messages directly to the slaves from the PC.*/
+    /* Messages directly to the slaves from the PC. */
     else{
         /* Next counter takes care that max number of messages sent by master does not
-         * exceed 50 like the normal message sequence 
+         * exceed 50 like the normal message sequence so max 50 messages can be send
          */
         MasterMessageCounter++;
         if (MasterMessageCounter    > 50){
@@ -287,21 +287,41 @@ bool SendNextMessage(){
 bool PROCESSxSLAVExCOMMUNICATION(){
     
     bool return_Val = false;
+    //char msg[128];
     
     /* Verify communication was OK */
     switch(CHECKxMODBUSxCOMMxSTATUS(ProcessSlave, true)){
-        case SLAVEOK:  
-            //MASTER_SLAVE_DATA[ProcessSlave].SlaveDetected = true;
-            //ProcessSlave++;
+        case SLAVEOK: 
+            //sprintf(msg, "Mbus handler\t: CHECKxMODBUSxCOMMxSTATUS SLAVE OK (ID=%d).\n\r", ProcessSlave);
+            //SYS_MESSAGE(msg);
             return_Val = true;
-            //DRV_USART0_WriteByte('6');
             break;                    
-        case SLAVENOK: 
-            //MASTER_SLAVE_DATA[ProcessSlave].SlaveDetected = false;
-            //ProcessSlave++;
+        case SLAVENOK:            
+            //sprintf(msg, "Mbus handler\t: CHECKxMODBUSxCOMMxSTATUS SLAVE NOK (ID=%d).\n\r", ProcessSlave);
+            //SYS_MESSAGE(msg);
             return_Val = true;
-            //DRV_USART0_WriteByte('6');
             break;
+        case SLAVE_DATA_TIMEOUT:            
+            //sprintf(msg, "Mbus handler\t: CHECKxMODBUSxCOMMxSTATUS SLAVE_DATA_TIMEOUT (ID=%d).\n\r", ProcessSlave);
+            //SYS_MESSAGE(msg);
+            return_Val = true;
+            break;
+        case SLAVE_DATA_EXCEPTION:            
+            //sprintf(msg, "Mbus handler\t: CHECKxMODBUSxCOMMxSTATUS SLAVE_DATA_EXCEPTION (ID=%d).\n\r", ProcessSlave);
+            //SYS_MESSAGE(msg);
+            return_Val = true;
+            break;
+        case SLAVE_DATA_IDLE:            
+            //sprintf(msg, "Mbus handler\t: CHECKxMODBUSxCOMMxSTATUS SLAVE_DATA_IDLE (ID=%d).\n\r", ProcessSlave);
+            //SYS_MESSAGE(msg);
+            return_Val = true;
+            break;
+        case SLAVE_DATA_UNKNOWN:            
+            //sprintf(msg, "Mbus handler\t: CHECKxMODBUSxCOMMxSTATUS SLAVE_DATA_UNKNOWN (ID=%d).\n\r", ProcessSlave);
+            //SYS_MESSAGE(msg);
+            return_Val = true;
+            break;
+        
         case SLAVEBUSY: break;
         default : break;
     }    
@@ -327,7 +347,7 @@ bool PROCESSxSLAVExCOMMUNICATION(){
 
 static bool FirstMessage = true;
 
-void ADDxNEWxSLAVExDATAxCMDxTOxMAILBOX(uint8_t *data){    
+void ADDxNEWxSLAVExDATAxCMDxTOxSLAVExMAILBOX(uint8_t *data){    
     
     if(FirstMessage == false && Rcd_Ptr == Rcd_Ptr_prev){
     

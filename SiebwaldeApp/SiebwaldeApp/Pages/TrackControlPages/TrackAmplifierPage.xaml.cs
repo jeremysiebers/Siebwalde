@@ -150,11 +150,12 @@ namespace SiebwaldeApp
         /// amplifier boxes to either show only key parameters
         /// or all register values.
         /// </summary>
-        private void AmplifierBorder_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        private void AmplifierBox_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
+            // Toggle global expanded / collapsed state for all amplifier boxes
             if (DataContext is TrackAmplifierPageViewModel vm)
             {
-                vm.AreAmplifiersExpanded = !vm.AreAmplifiersExpanded;
+                vm.IsExpanded = !vm.IsExpanded;
             }
         }
 

@@ -1,6 +1,7 @@
 #include <xc.h>
 #include "PetitModbus.h"
 #include "PetitModbusPort.h"
+#include "General.h"
 #include "../mcc_generated_files/mcc.h"
 
 /*******************************ModBus Functions*******************************/
@@ -188,7 +189,7 @@ unsigned char PetitSendMessage(void)
     if (Petit_Tx_State != PETIT_RXTX_IDLE){
         return FALSE;
     }
-	PetitHoldingRegisters[9].ActValue += 1;    // Count the amount of transmitted messages
+	PetitHoldingRegisters[HR_MESSAGES_SENT].ActValue += 1;    // Count the amount of transmitted messages
     Petit_Tx_Current  =0;
     Petit_Tx_State    =PETIT_RXTX_START;
 
@@ -671,7 +672,7 @@ unsigned int ProcessPetitModbus(void)
         if ((Petit_Rx_Data.Address == PETITMODBUS_SLAVE_ADDRESS) || (Petit_Rx_Data.Address == PETITMODBUS_BROADCAST_ADDRESS)) // Is Data for us?
         {
             if (Petit_Rx_Data.Address == PETITMODBUS_SLAVE_ADDRESS){
-                PetitHoldingRegisters[10].ActValue += 1;// Count the amount of received messages, not the broadcast messages
+                PetitHoldingRegisters[HR_MESSAGES_RECEIVED].ActValue += 1;// Count the amount of received messages, not the broadcast messages
             }
             
             switch (Petit_Rx_Data.Function)                                     // Data is for us but which function?

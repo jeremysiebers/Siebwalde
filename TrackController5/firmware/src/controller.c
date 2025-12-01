@@ -246,7 +246,7 @@ void CONTROLLER_Tasks ( void )
                 
                 case EXEC_MBUS_SLAVE_DATA_EXCH:
                 {
-                    ADDxNEWxSLAVExDATAxCMDxTOxMAILBOX(EthernetRecvData->data);
+                    ADDxNEWxSLAVExDATAxCMDxTOxSLAVExMAILBOX(EthernetRecvData->data);
                     break;
                 }
                 

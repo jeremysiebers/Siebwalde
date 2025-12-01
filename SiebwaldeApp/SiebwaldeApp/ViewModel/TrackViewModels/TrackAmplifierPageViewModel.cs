@@ -16,11 +16,29 @@ namespace SiebwaldeApp
         #region Private members
 
         private readonly DispatcherTimer _refreshTimer;
-        private bool _areAmplifiersExpanded;
+        private bool _isExpanded;
 
         #endregion
 
         #region Public properties
+
+        /// <summary>
+        /// Global expand/collapse state for all amplifier items.
+        /// When true, all amplifier boxes show full details.
+        /// When false, only the key controls are visible.
+        /// </summary>
+        public bool IsExpanded
+        {
+            get => _isExpanded;
+            set
+            {
+                if (_isExpanded != value)
+                {
+                    _isExpanded = value;
+                    OnPropertyChanged(nameof(IsExpanded));
+                }
+            }
+        }
 
         /// <summary>
         /// Visual representation of the Modbus master that talks to all slaves.
@@ -37,23 +55,6 @@ namespace SiebwaldeApp
         /// shown as smaller boxes at the bottom of the page.
         /// </summary>
         public ObservableCollection<TrackAmplifierVisualViewModel> BackplaneSlaves { get; }
-
-        /// <summary>
-        /// When true, all amplifier boxes show their expanded view
-        /// (all register values); when false they show only the key parameters.
-        /// </summary>
-        public bool AreAmplifiersExpanded
-        {
-            get => _areAmplifiersExpanded;
-            set
-            {
-                if (_areAmplifiersExpanded == value)
-                    return;
-
-                _areAmplifiersExpanded = value;
-                OnPropertyChanged(nameof(AreAmplifiersExpanded));
-            }
-        }
 
         #endregion
 
@@ -103,8 +104,6 @@ namespace SiebwaldeApp
             {
                 // Track application not started or no slaves seen yet.
                 Master.UpdateFromModels(null, null);
-                Amplifiers.Clear();
-                BackplaneSlaves.Clear();
                 return;
             }
 
@@ -183,6 +182,8 @@ namespace SiebwaldeApp
     /// <summary>
     /// Simple visual view model for a single slave (track amplifier or backplane slave).
     /// Wraps TrackAmplifierItem and exposes only the data needed for the page.
+    /// 
+    /// The mapping follows the "Modbus Track Slave Data Register mapping" specification.
     /// </summary>
     public class TrackAmplifierVisualViewModel : BaseViewModel
     {
@@ -190,6 +191,7 @@ namespace SiebwaldeApp
 
         private ushort _slaveNumber;
         private bool _isDetected;
+        private bool _isOccupied;
 
         private ushort _mbReceiveCounter;
         private ushort _mbSentCounter;
@@ -197,13 +199,35 @@ namespace SiebwaldeApp
         private ushort _mbExceptionCode;
         private ushort _spiCommErrorCounter;
 
-        private string _mbSummary = string.Empty;
         private string _holdingRegSummary = string.Empty;
-        private string _allHoldingRegsSummary = string.Empty;
+        private string _mbSummary = string.Empty;
 
-        private int _pwmSetPoint;
-        private bool _isEmStop;
-        private bool _isOccupied;
+        // Key controls (compact view)
+        private int _pwmSetpoint;
+        private bool _emoStop;
+
+        // Extended / decoded holding register values (expanded view)
+        private int _setBemfSpeed;
+        private bool _setCsReg;
+        private bool _clearAmpStatus;
+        private bool _clearMessageBuffer;
+        private bool _enableAmplifier;
+        private int _readBackEmf;
+        private bool _thermalFlag;
+        private bool _overCurrent;
+        private bool _amplifierIdSet;
+        private ushort _amplifierStatus;
+        private int _hBridgeFuseVoltage;
+        private int _hBridgeTemperature;
+        private int _hBridgeCurrent;
+        private ushort _messagesReceived;
+        private ushort _messagesSent;
+        private int _amplifierId;
+        private bool _singlePwmMode;
+        private bool _resetSlave;
+        private int _accelerationPar;
+        private int _decelerationPar;
+        private ushort _hexChecksum;
 
         #endregion
 
@@ -238,6 +262,23 @@ namespace SiebwaldeApp
                 {
                     _isDetected = value;
                     OnPropertyChanged(nameof(IsDetected));
+                }
+            }
+        }
+
+        /// <summary>
+        /// True when the amplifier reports "occupied" in HoldingReg2 bit 10.
+        /// Drives the yellow LED in the UI.
+        /// </summary>
+        public bool IsOccupied
+        {
+            get => _isOccupied;
+            private set
+            {
+                if (_isOccupied != value)
+                {
+                    _isOccupied = value;
+                    OnPropertyChanged(nameof(IsOccupied));
                 }
             }
         }
@@ -331,7 +372,7 @@ namespace SiebwaldeApp
 
         /// <summary>
         /// Short summary of the first few holding registers
-        /// (for the collapsed view).
+        /// (for now just the first 4 values).
         /// </summary>
         public string HoldingRegSummary
         {
@@ -347,80 +388,324 @@ namespace SiebwaldeApp
         }
 
         /// <summary>
-        /// Summary of all holding registers (R00=..., R01=..., ...).
-        /// Used in the expanded view.
+        /// PWM setpoint in the range 0..799 according to HoldingReg0 bits 0..9.
+        /// In the UI this is the main speed control.
+        /// 
+        /// NOTE: At the moment changing this property only changes the view model.
+        /// Wiring this into the core to actually send Modbus writes is a separate step.
         /// </summary>
-        public string AllHoldingRegsSummary
+        public int PwmSetpoint
         {
-            get => _allHoldingRegsSummary;
-            private set
+            get => _pwmSetpoint;
+            set
             {
-                if (_allHoldingRegsSummary != value)
+                int clamped = Math.Max(0, Math.Min(799, value));
+                if (_pwmSetpoint != clamped)
                 {
-                    _allHoldingRegsSummary = value;
-                    OnPropertyChanged(nameof(AllHoldingRegsSummary));
+                    _pwmSetpoint = clamped;
+                    OnPropertyChanged(nameof(PwmSetpoint));
+                    // TODO: send new PWM setpoint to core / Modbus master when write support is added.
                 }
             }
         }
 
         /// <summary>
-        /// PWM set point (0..799). Default idle is 400.
-        /// Changing this property will update the corresponding holding register
-        /// via the core application model.
+        /// Emergency stop flag (HoldingReg0 bit 15).
+        /// True means the amplifier should stop the train as fast as possible.
+        /// 
+        /// Currently only reflected in the UI. Actual write into the amplifier
+        /// should be implemented in the core layer.
         /// </summary>
-        public int PwmSetPoint
+        public bool EmoStop
         {
-            get => _pwmSetPoint;
+            get => _emoStop;
             set
             {
-                // Clamp to allowed range
-                int clamped = Math.Max(0, Math.Min(799, value));
-                if (_pwmSetPoint == clamped)
-                    return;
-
-                _pwmSetPoint = clamped;
-                OnPropertyChanged(nameof(PwmSetPoint));
-
-                // Inform core model so it can update HoldingReg[0] bits 0..9
-                IoC.siebwaldeApplicationModel?.SetAmplifierPwm(SlaveNumber, _pwmSetPoint);
+                if (_emoStop != value)
+                {
+                    _emoStop = value;
+                    OnPropertyChanged(nameof(EmoStop));
+                    // TODO: propagate EmoStop request into the core and to the amplifier.
+                }
             }
         }
 
-        /// <summary>
-        /// Emergency stop flag. When true, the amplifier should float the H-bridge
-        /// (no power to the rails). This maps to HoldingReg0 bit 15.
-        /// </summary>
-        public bool IsEmStop
+        #region Extended decoded properties (expanded view)
+
+        public int SetBemfSpeed
         {
-            get => _isEmStop;
-            set
-            {
-                if (_isEmStop == value)
-                    return;
-
-                _isEmStop = value;
-                OnPropertyChanged(nameof(IsEmStop));
-
-                IoC.siebwaldeApplicationModel?.SetAmplifierEmStop(SlaveNumber, _isEmStop);
-            }
-        }
-
-        /// <summary>
-        /// True when the amplifier detects an occupancy on the track
-        /// (HoldingReg2 bit 10). Read-only from the UI perspective.
-        /// </summary>
-        public bool IsOccupied
-        {
-            get => _isOccupied;
+            get => _setBemfSpeed;
             private set
             {
-                if (_isOccupied == value)
-                    return;
-
-                _isOccupied = value;
-                OnPropertyChanged(nameof(IsOccupied));
+                if (_setBemfSpeed != value)
+                {
+                    _setBemfSpeed = value;
+                    OnPropertyChanged(nameof(SetBemfSpeed));
+                }
             }
         }
+
+        public bool SetCsReg
+        {
+            get => _setCsReg;
+            private set
+            {
+                if (_setCsReg != value)
+                {
+                    _setCsReg = value;
+                    OnPropertyChanged(nameof(SetCsReg));
+                }
+            }
+        }
+
+        public bool ClearAmpStatus
+        {
+            get => _clearAmpStatus;
+            private set
+            {
+                if (_clearAmpStatus != value)
+                {
+                    _clearAmpStatus = value;
+                    OnPropertyChanged(nameof(ClearAmpStatus));
+                }
+            }
+        }
+
+        public bool ClearMessageBuffer
+        {
+            get => _clearMessageBuffer;
+            private set
+            {
+                if (_clearMessageBuffer != value)
+                {
+                    _clearMessageBuffer = value;
+                    OnPropertyChanged(nameof(ClearMessageBuffer));
+                }
+            }
+        }
+
+        public bool EnableAmplifier
+        {
+            get => _enableAmplifier;
+            private set
+            {
+                if (_enableAmplifier != value)
+                {
+                    _enableAmplifier = value;
+                    OnPropertyChanged(nameof(EnableAmplifier));
+                }
+            }
+        }
+
+        public int ReadBackEmf
+        {
+            get => _readBackEmf;
+            private set
+            {
+                if (_readBackEmf != value)
+                {
+                    _readBackEmf = value;
+                    OnPropertyChanged(nameof(ReadBackEmf));
+                }
+            }
+        }
+
+        public bool ThermalFlag
+        {
+            get => _thermalFlag;
+            private set
+            {
+                if (_thermalFlag != value)
+                {
+                    _thermalFlag = value;
+                    OnPropertyChanged(nameof(ThermalFlag));
+                }
+            }
+        }
+
+        public bool OverCurrent
+        {
+            get => _overCurrent;
+            private set
+            {
+                if (_overCurrent != value)
+                {
+                    _overCurrent = value;
+                    OnPropertyChanged(nameof(OverCurrent));
+                }
+            }
+        }
+
+        public bool AmplifierIdSet
+        {
+            get => _amplifierIdSet;
+            private set
+            {
+                if (_amplifierIdSet != value)
+                {
+                    _amplifierIdSet = value;
+                    OnPropertyChanged(nameof(AmplifierIdSet));
+                }
+            }
+        }
+
+        public ushort AmplifierStatus
+        {
+            get => _amplifierStatus;
+            private set
+            {
+                if (_amplifierStatus != value)
+                {
+                    _amplifierStatus = value;
+                    OnPropertyChanged(nameof(AmplifierStatus));
+                }
+            }
+        }
+
+        public int HBridgeFuseVoltage
+        {
+            get => _hBridgeFuseVoltage;
+            private set
+            {
+                if (_hBridgeFuseVoltage != value)
+                {
+                    _hBridgeFuseVoltage = value;
+                    OnPropertyChanged(nameof(HBridgeFuseVoltage));
+                }
+            }
+        }
+
+        public int HBridgeTemperature
+        {
+            get => _hBridgeTemperature;
+            private set
+            {
+                if (_hBridgeTemperature != value)
+                {
+                    _hBridgeTemperature = value;
+                    OnPropertyChanged(nameof(HBridgeTemperature));
+                }
+            }
+        }
+
+        public int HBridgeCurrent
+        {
+            get => _hBridgeCurrent;
+            private set
+            {
+                if (_hBridgeCurrent != value)
+                {
+                    _hBridgeCurrent = value;
+                    OnPropertyChanged(nameof(HBridgeCurrent));
+                }
+            }
+        }
+
+        public ushort MessagesReceived
+        {
+            get => _messagesReceived;
+            private set
+            {
+                if (_messagesReceived != value)
+                {
+                    _messagesReceived = value;
+                    OnPropertyChanged(nameof(MessagesReceived));
+                }
+            }
+        }
+
+        public ushort MessagesSent
+        {
+            get => _messagesSent;
+            private set
+            {
+                if (_messagesSent != value)
+                {
+                    _messagesSent = value;
+                    OnPropertyChanged(nameof(MessagesSent));
+                }
+            }
+        }
+
+        public int AmplifierId
+        {
+            get => _amplifierId;
+            private set
+            {
+                if (_amplifierId != value)
+                {
+                    _amplifierId = value;
+                    OnPropertyChanged(nameof(AmplifierId));
+                }
+            }
+        }
+
+        public bool SinglePwmMode
+        {
+            get => _singlePwmMode;
+            private set
+            {
+                if (_singlePwmMode != value)
+                {
+                    _singlePwmMode = value;
+                    OnPropertyChanged(nameof(SinglePwmMode));
+                }
+            }
+        }
+
+        public bool ResetSlave
+        {
+            get => _resetSlave;
+            private set
+            {
+                if (_resetSlave != value)
+                {
+                    _resetSlave = value;
+                    OnPropertyChanged(nameof(ResetSlave));
+                }
+            }
+        }
+
+        public int AccelerationPar
+        {
+            get => _accelerationPar;
+            private set
+            {
+                if (_accelerationPar != value)
+                {
+                    _accelerationPar = value;
+                    OnPropertyChanged(nameof(AccelerationPar));
+                }
+            }
+        }
+
+        public int DecelerationPar
+        {
+            get => _decelerationPar;
+            private set
+            {
+                if (_decelerationPar != value)
+                {
+                    _decelerationPar = value;
+                    OnPropertyChanged(nameof(DecelerationPar));
+                }
+            }
+        }
+
+        public ushort HexChecksum
+        {
+            get => _hexChecksum;
+            private set
+            {
+                if (_hexChecksum != value)
+                {
+                    _hexChecksum = value;
+                    OnPropertyChanged(nameof(HexChecksum));
+                }
+            }
+        }
+
+        #endregion
 
         #endregion
 
@@ -429,6 +714,11 @@ namespace SiebwaldeApp
         public TrackAmplifierVisualViewModel(ushort slaveNumber)
         {
             SlaveNumber = slaveNumber;
+
+            // Default PWM setpoint in the middle (dual sided PWM: 400 = standstill).
+            // This is a UI default only. Actual initialization of the registers
+            // should be done in the core before enabling the amplifiers.
+            _pwmSetpoint = 400;
         }
 
         #endregion
@@ -438,10 +728,6 @@ namespace SiebwaldeApp
         /// <summary>
         /// Copies the latest values from a core TrackAmplifierItem
         /// into this view model.
-        /// 
-        /// Note: this method updates backing fields directly to avoid
-        /// triggering core write-back logic when we are just reflecting
-        /// current state from the model.
         /// </summary>
         public void UpdateFromModel(TrackAmplifierItem model)
         {
@@ -457,66 +743,25 @@ namespace SiebwaldeApp
             MbExceptionCode = model.MbExceptionCode;
             SpiCommErrorCounter = model.SpiCommErrorCounter;
 
+            // Build a short summary of the first holding registers.
             var regs = model.HoldingReg;
-
-            // Decode PWM/EmStop/Occupied from holding registers
             if (regs != null && regs.Length > 0)
             {
-                ushort reg0 = regs[0];
-
-                int pwm = reg0 & 0x03FF;          // bits 0..9
-                bool emStop = (reg0 & 0x8000) != 0; // bit 15
-
-                if (_pwmSetPoint != pwm)
+                var count = Math.Min(4, regs.Length);
+                var parts = new string[count];
+                for (int i = 0; i < count; i++)
                 {
-                    _pwmSetPoint = pwm;
-                    OnPropertyChanged(nameof(PwmSetPoint));
+                    parts[i] = regs[i].ToString();
                 }
 
-                if (_isEmStop != emStop)
-                {
-                    _isEmStop = emStop;
-                    OnPropertyChanged(nameof(IsEmStop));
-                }
-
-                bool occupied = false;
-                if (regs.Length > 2)
-                {
-                    ushort reg2 = regs[2];
-                    occupied = (reg2 & (1 << 10)) != 0;
-                }
-
-                IsOccupied = occupied;
-
-                // Short summary (first 4 registers)
-                int shortCount = Math.Min(4, regs.Length);
-                if (shortCount > 0)
-                {
-                    var parts = new string[shortCount];
-                    for (int i = 0; i < shortCount; i++)
-                        parts[i] = regs[i].ToString();
-
-                    HoldingRegSummary = $"Regs: {string.Join(", ", parts)}";
-                }
-                else
-                {
-                    HoldingRegSummary = string.Empty;
-                }
-
-                // Full summary for expanded view
-                var allParts = new string[regs.Length];
-                for (int i = 0; i < regs.Length; i++)
-                {
-                    allParts[i] = $"R{i:D2}={regs[i]}";
-                }
-                AllHoldingRegsSummary = string.Join("  ", allParts);
+                HoldingRegSummary = $"Regs: {string.Join(", ", parts)}";
             }
             else
             {
                 HoldingRegSummary = string.Empty;
-                AllHoldingRegsSummary = string.Empty;
-                IsOccupied = false;
             }
+
+            DecodeHoldingRegisters(regs);
         }
 
         #endregion
@@ -527,6 +772,105 @@ namespace SiebwaldeApp
         {
             MbSummary = $"Rx {MbReceiveCounter}, Tx {MbSentCounter}, " +
                         $"Err {MbCommError}, Ex {MbExceptionCode}, Spi {SpiCommErrorCounter}";
+        }
+
+        /// <summary>
+        /// Decodes the holding registers into the strongly typed properties.
+        /// The mapping follows the "Modbus Track Slave Data Register mapping".
+        /// </summary>
+        private void DecodeHoldingRegisters(ushort[]? regs)
+        {
+            // Gracefully handle missing or short arrays.
+            ushort hr0 = GetReg(regs, 0);
+            ushort hr1 = GetReg(regs, 1);
+            ushort hr2 = GetReg(regs, 2);
+            ushort hr3 = GetReg(regs, 3);
+            ushort hr4 = GetReg(regs, 4);
+            ushort hr5 = GetReg(regs, 5);
+            ushort hr6 = GetReg(regs, 6);
+            ushort hr7 = GetReg(regs, 7);
+            ushort hr8 = GetReg(regs, 8);
+            ushort hr9 = GetReg(regs, 9);
+            ushort hr10 = GetReg(regs, 10);
+            ushort hr11 = GetReg(regs, 11);
+
+            // HoldingReg0: PWM setpoint, direction, brake, EmoStop
+            int pwm = GetBits(hr0, 0, 9); // 0..799 valid range for the application
+            // If the register is zero and the UI default is 400, we keep the UI at 400
+            // until the core initializes it. Otherwise we follow the actual value.
+            if (pwm != 0)
+            {
+                _pwmSetpoint = Math.Max(0, Math.Min(799, pwm));
+                OnPropertyChanged(nameof(PwmSetpoint));
+            }
+
+            bool emoStop = HasBit(hr0, 15);
+            EmoStop = emoStop;
+
+            // HoldingReg1: set BEMF speed, CSReg, clear status/buffer, enable amplifier
+            SetBemfSpeed = GetBits(hr1, 0, 9);
+            SetCsReg = HasBit(hr1, 10);
+            ClearAmpStatus = HasBit(hr1, 11);
+            ClearMessageBuffer = HasBit(hr1, 12);
+            EnableAmplifier = HasBit(hr1, 15);
+
+            // HoldingReg2: read back EMF, occupancy, thermal, over-current, ID set
+            ReadBackEmf = GetBits(hr2, 0, 9);
+            IsOccupied = HasBit(hr2, 10);
+            ThermalFlag = HasBit(hr2, 11);
+            OverCurrent = HasBit(hr2, 12);
+            AmplifierIdSet = HasBit(hr2, 13);
+
+            // HoldingReg3: amplifier status full 16 bits
+            AmplifierStatus = hr3;
+
+            // HoldingReg4: H-bridge fuse status 0..31 V (bits 0..9)
+            HBridgeFuseVoltage = GetBits(hr4, 0, 9);
+
+            // HoldingReg5: H-bridge temperature 0..255 degC (bits 0..9)
+            HBridgeTemperature = GetBits(hr5, 0, 9);
+
+            // HoldingReg6: H-bridge current (bits 0..9)
+            HBridgeCurrent = GetBits(hr6, 0, 9);
+
+            // HoldingReg7: messages received (full word)
+            MessagesReceived = hr7;
+
+            // HoldingReg8: messages sent (full word)
+            MessagesSent = hr8;
+
+            // HoldingReg9: amplifier ID (0..63), single/double PWM, reset slave
+            AmplifierId = GetBits(hr9, 0, 5);
+            SinglePwmMode = HasBit(hr9, 6);
+            ResetSlave = HasBit(hr9, 15);
+
+            // HoldingReg10: acceleration and deceleration parameters
+            AccelerationPar = GetBits(hr10, 0, 7);
+            DecelerationPar = GetBits(hr10, 8, 15);
+
+            // HoldingReg11: HEX checksum
+            HexChecksum = hr11;
+        }
+
+        private static ushort GetReg(ushort[]? regs, int index)
+        {
+            if (regs == null)
+                return 0;
+            if (index < 0 || index >= regs.Length)
+                return 0;
+            return regs[index];
+        }
+
+        private static bool HasBit(ushort value, int bitIndex)
+        {
+            return (value & (1 << bitIndex)) != 0;
+        }
+
+        private static int GetBits(ushort value, int fromBit, int toBitInclusive)
+        {
+            int width = toBitInclusive - fromBit + 1;
+            int mask = ((1 << width) - 1) << fromBit;
+            return (value & mask) >> fromBit;
         }
 
         #endregion
