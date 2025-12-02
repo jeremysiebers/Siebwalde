@@ -71,6 +71,7 @@ uint16_t REGULATORxUPDATE (){
     LM_BRAKE_LAT = PetitHoldingRegisters[HR_PWM_COMMAND].ActValue & HR_PWM_BRAKE_BIT;   // load brake from register
         
     if ((PwmDutyCyclePrev != (PetitHoldingRegisters[HR_PWM_COMMAND].ActValue & HR_PWM_SETPOINT_MASK))){
+        
         PWM3_LoadDutyValue(PetitHoldingRegisters[HR_PWM_COMMAND].ActValue & HR_PWM_SETPOINT_MASK);     // load duty cycle from register
         PwmDutyCyclePrev = PetitHoldingRegisters[HR_PWM_COMMAND].ActValue & HR_PWM_SETPOINT_MASK;
         Return_Val = true;

@@ -92,7 +92,7 @@ void SLAVExCOMMUNICATIONxHANDLER(){
             WriteData[3]++;                     // number of registers Low, 1 register extra to write
             WriteData[4]+= 2;                   // byte count, 4 bytes
             WriteData[7] = (Data.RegData1 >> 8);// Register Value Hi
-            WriteData[8] = Data.RegData0;       // Register Value Lo
+            WriteData[8] = Data.RegData1;       // Register Value Lo
             length += 2;
         }          
         SENDxPETITxMODBUS(Data.SlaveAddress, PETITMODBUS_WRITE_MULTIPLE_REGISTERS, WriteData, length);

@@ -1,215 +1,231 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Timers;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SiebwaldeApp.Core
 {
     /// <summary>
-    /// This is the main Trackcontroller Application class
+    /// Main high-level track controller.
+    /// 
+    /// The legacy sequencer logic is removed. Initialization is handled by
+    /// TrackAmplifierInitializationServiceAsync.
+    /// 
+    /// This class is responsible for:
+    /// - Holding a reference to the track application variables
+    /// - Periodically (10 Hz) checking for pending amplifier writes
+    /// - Sending EXEC_MBUS_SLAVE_DATA_EXCH commands to the master when data changed
     /// </summary>
     public class TrackControlMain
     {
-        #region Variables
+        #region Private fields
 
-        // NEW: use ITrackCommClient instead of TrackIOHandle and remove old sequencer
+        private readonly string _loggerInstance;
         private readonly ITrackCommClient _trackCommClient;
         private readonly TrackApplicationVariables mTrackApplicationVariables;
 
-        // Geen eigen init-sequencer meer
-        // private TrackAmplifierInitalizationSequencer mTrackAmplifierInitalizationSequencer;
+        private readonly System.Timers.Timer _runtimeTimer;
+        private readonly object _syncRoot = new();
 
-        // De state-machine hoeft de init van de amplifiers niet meer zelf te regelen.
-        // Die taak ligt nu bij TrackAmplifierInitializationServiceAsync in SiebwaldeApplicationModel.
-        private enum State { Idle, Reset, Cmd };
-        private State State_Machine;
-        private ReceivedMessage dummymessage;
-        private System.Timers.Timer AppUpdateTimer = new System.Timers.Timer();
-        private readonly object ExecuteLock = new object();
-
-        // Logger instance
-        private string mLoggerInstance { get; set; }
+        private bool _isRunning;
+        private bool _tickInProgress;
+        private CancellationToken _cancellationToken;
 
         #endregion
 
         #region Constructor
 
         /// <summary>
-        /// Constructor
+        /// Creates a new TrackControlMain instance.
         /// </summary>
-        /// <param name="LoggerInstance"></param>
-        /// <param name="trackIOHandle"></param>
-        /// <param name="trackApplicationVariables"></param>
+        /// <param name="loggerInstance">Logger instance name to use for IoC.Logger.</param>
+        /// <param name="trackCommClient">Low-level track communication client.</param>
+        /// <param name="variables">Shared track application variables.</param>
         public TrackControlMain(
             string loggerInstance,
             ITrackCommClient trackCommClient,
-            TrackApplicationVariables trackApplicationVariables)
+            TrackApplicationVariables variables)
         {
+            _loggerInstance = string.IsNullOrWhiteSpace(loggerInstance) ? "Track" : loggerInstance;
             _trackCommClient = trackCommClient ?? throw new ArgumentNullException(nameof(trackCommClient));
-            mTrackApplicationVariables = trackApplicationVariables ?? throw new ArgumentNullException(nameof(trackApplicationVariables));
-            mLoggerInstance = loggerInstance ?? "Track";
+            mTrackApplicationVariables = variables ?? throw new ArgumentNullException(nameof(variables));
 
-            // We gebruiken niet langer een lokale TrackAmplifierInitalizationSequencer;
-            // die verantwoordelijkheid ligt nu bij TrackAmplifierInitializationServiceAsync
-            // in SiebwaldeApplicationModel.
-            // mTrackAmplifierInitalizationSequencer = new TrackAmplifierInitalizationSequencer(...);
-
-            // subscribe to trackamplifier data changed events
-            foreach (TrackAmplifierItem amplifier in trackApplicationVariables.trackAmpItems)
+            // Runtime timer at 10 Hz (100 ms interval).
+            _runtimeTimer = new System.Timers.Timer(100)
             {
-                //amplifier.PropertyChanged += Amplifier_PropertyChanged;
-            }
-
-            // subscribe to commands set in the TrackControllerCommands class
-            //mTrackApplicationVariables.trackControllerCommands.PropertyChanged += TrackControllerCommands_PropertyChanged;
-
-            dummymessage = new ReceivedMessage(0, 0, 0, 0);
+                AutoReset = true
+            };
+            _runtimeTimer.Elapsed += RuntimeTimerElapsed;
         }
 
         #endregion
 
-        #region Poperty changed / timer event handlers
+        #region Public API
 
         /// <summary>
-        /// Property changes event handler on amplifier items
+        /// Starts the runtime loop that processes pending amplifier writes.
+        /// This is intended to be called AFTER the initialization sequence completed.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Amplifier_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        public void StartRuntime(CancellationToken cancellationToken)
         {
-            //Console.WriteLine("Main Track App updated");
-            //Console.WriteLine("Amplifier updated: " + e.PropertyName + " set to: " + sender.GetType().GetProperty(e.PropertyName).GetValue(sender).ToString());
-        }
-
-        /// <summary>
-        /// Property changes event handler on TrackControllerCommands these will be coming typically from the Gui via the viewModel or
-        /// from subclasses sending commands to the Ethernet target
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void TrackControllerCommands_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            switch (e.PropertyName)
+            lock (_syncRoot)
             {
-                case "UserMessage":
-                    {
-                        break;
-                    }
+                if (_isRunning)
+                    return;
 
-                case "SendMessage":
-                    {
-                        var toSend = mTrackApplicationVariables.trackControllerCommands.SendMessage;
-                        if (toSend != null)
-                        {
-                            // Fire-and-forget; TrackCommClientAsync handelt framing en IO af.
-                            _ = _trackCommClient.SendAsync(toSend, CancellationToken.None);
-                        }
-                        break;
-                    }
+                _cancellationToken = cancellationToken;
+                _isRunning = true;
+                _runtimeTimer.Start();
 
-                case "ReceivedMessage":
-                    {
-                        break;
-                    }
-
-                case "StartHmiTrackControlForm":
-                    {
-                        // Start Track Control view container housing WPF application
-                        //ShowHmiTrackControlWindow();                        
-                        break;
-                    }
-
-                default:
-                    {
-                        Console.WriteLine("Command received: " + e.PropertyName + " set to: " + sender.GetType().GetProperty(e.PropertyName).GetValue(sender).ToString());
-                        TrackApplicationUpdate(e.PropertyName, Convert.ToInt32(sender.GetType().GetProperty(e.PropertyName).GetValue(sender)));
-                        break;
-                    }
+                IoC.Logger.Log("TrackControlMain runtime loop started.", _loggerInstance);
             }
         }
 
         /// <summary>
-        /// Timer event to kick TrackApplication
+        /// Stops the runtime loop.
         /// </summary>
-        /// <param name="source"></param>
-        /// <param name="e"></param>
-        private void OnTimedEvent(object source, ElapsedEventArgs e)
+        public void StopRuntime()
         {
-            TrackApplicationUpdate("TimerEvent", 0);
+            lock (_syncRoot)
+            {
+                if (!_isRunning)
+                    return;
+
+                _runtimeTimer.Stop();
+                _isRunning = false;
+
+                IoC.Logger.Log("TrackControlMain runtime loop stopped.", _loggerInstance);
+            }
         }
 
         #endregion
 
-        #region Start method of the Track application
+        #region Timer processing
 
         /// <summary>
-        /// Start the Track Main Application
+        /// Executed at 10 Hz by the timer.
+        /// Sends pending writes to amplifiers if needed.
         /// </summary>
-        internal void Start(bool trackRealMode)
+        private async void RuntimeTimerElapsed(object? sender, ElapsedEventArgs e)
         {
-            AppUpdateTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
-            AppUpdateTimer.Interval = 50;
-            AppUpdateTimer.AutoReset = true;
-            AppUpdateTimer.Enabled = true;
+            if (!_isRunning)
+                return;
 
-            State_Machine = State.Idle;
+            // Simple re-entrancy guard; timer can fire on a thread pool thread
+            // while a previous tick is still running.
+            if (_tickInProgress)
+                return;
 
-            IoC.Logger.Log("Track Application (TrackControlMain) started.", mLoggerInstance);
+            try
+            {
+                _tickInProgress = true;
 
-            // De init van de track amplifiers wordt nu extern gedaan
-            // via TrackAmplifierInitializationServiceAsync in SiebwaldeApplicationModel.
-            // Hier dus geen StartInitializeTrackAmplifiers meer.
+                await ProcessPendingAmplifierWritesAsync(_cancellationToken).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                // Normal during shutdown/cancellation; no log required.
+            }
+            catch (Exception ex)
+            {
+                IoC.Logger.Log($"TrackControlMain runtime tick error: {ex}", _loggerInstance);
+            }
+            finally
+            {
+                _tickInProgress = false;
+            }
         }
 
-
-        #endregion
-
-        #region Track application updater
-
-        private void TrackApplicationUpdate(string source, Int32 value)
+        /// <summary>
+        /// Scans the TrackApplicationVariables.PendingWrites dictionary and sends
+        /// EXEC_MBUS_SLAVE_DATA_EXCH commands for each pending HoldingReg0 update.
+        /// </summary>
+        private async Task ProcessPendingAmplifierWritesAsync(CancellationToken cancellationToken)
         {
-            // Lock the execution since multiple events may arrive
-            lock (ExecuteLock)
-            {
-                // stop the timer to prevent re-starting during execution of code
-                AppUpdateTimer.Stop();
+            var pending = mTrackApplicationVariables.PendingWrites;
+            if (pending == null || pending.Count == 0)
+                return;
 
-                if (source == "TimerEvent")
+            // Take a snapshot to avoid issues if the dictionary is modified
+            // while we are iterating.
+            var items = pending.Values.ToArray();
+
+            foreach (var writeData in items)
+            {
+                if (cancellationToken.IsCancellationRequested)
+                    break;
+
+                if (writeData == null)
+                    continue;
+
+                if (writeData.TryConsumeHr0(out ushort hr0Value))
                 {
-                    StateMachineUpdate(source, value);
+                    // We only write HoldingReg0 (index 0) for now
+                    var message = BuildSlaveDataExchWriteMessage(
+                        writeData.SlaveNumber,
+                        startRegister: 0,
+                        hr0Value);
+
+                    await _trackCommClient.SendAsync(message, cancellationToken).ConfigureAwait(false);
+
+                    IoC.Logger.Log(
+                        $"[WRITE] EXEC_MBUS_SLAVE_DATA_EXCH: slave={writeData.SlaveNumber}, HR0=0x{hr0Value:X4}",
+                        _loggerInstance);
                 }
 
-                // Start the timer again
-                AppUpdateTimer.Start();
-            }                        
+                // Future extension: other holding registers (HR1, HR2, ...) could be handled here.
+            }
         }
 
         #endregion
 
-        #region Track Application State Machine
+        #region Helper to build EXEC_MBUS_SLAVE_DATA_EXCH message
 
         /// <summary>
-        /// Main Track application state machine, calls all the subclass functions
+        /// Builds a SendMessage for EXEC_MBUS_SLAVE_DATA_EXCH to write 1 or 2
+        /// consecutive holding registers to a given slave.
+        /// 
+        /// Format:
+        /// data[0] = SlaveAddress (1..50)
+        /// data[1] = Direction (read = 0x55, write = 0xAA)
+        /// data[2] = No of registers (1 or 2)
+        /// data[3] = Start register index
+        /// data[4] = RegisterData0 (low byte)
+        /// data[5] = RegisterData0 (high byte)
+        /// data[6] = RegisterData1 (low byte, optional)
+        /// data[7] = RegisterData1 (high byte, optional)
         /// </summary>
-        /// <param name="source"></param>
-        /// <param name="value"></param>
-        private void StateMachineUpdate(string source, Int32 value)
+        private static SendMessage BuildSlaveDataExchWriteMessage(
+            ushort slaveNumber,
+            byte startRegister,
+            params ushort[] registers)
         {
-            switch (State_Machine)
-            {
-                case State.Reset:
-                    // Here all sub classes reset methods are called in case of a forced reset
-                    break;
+            if (registers == null || registers.Length == 0 || registers.Length > 2)
+                throw new ArgumentException("Only 1 or 2 registers are supported.", nameof(registers));
 
-                case State.Idle:
-                    // Here all manual commands are handled from the user
-                    break;                
-                    
-                default:
-                    break;
+            byte registerCount = (byte)registers.Length;
+
+            int dataLength = 4 + registerCount * 2;
+            var data = new byte[dataLength];
+
+            data[0] = (byte)slaveNumber;
+            data[1] = 0xAA; // write direction
+            data[2] = registerCount;
+            data[3] = startRegister;
+
+            int offset = 4;
+            for (int i = 0; i < registerCount; i++)
+            {
+                ushort value = registers[i];
+                data[offset++] = (byte)(value & 0xFF);        // low byte
+                data[offset++] = (byte)((value >> 8) & 0xFF); // high byte
             }
 
+            return new SendMessage(TrackCommand.EXEC_MBUS_SLAVE_DATA_EXCH, data);
         }
+
         #endregion
     }
-
 }

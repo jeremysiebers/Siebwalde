@@ -32,6 +32,8 @@ static REGISTER_PROCESSING          Rcd[MAILBOXRCD];                            
 static REGISTER_PROCESSING          *Rcd_Ptr;                                   // points to actual mailbox location that is filled
 static REGISTER_PROCESSING          *Rcd_Ptr_prev;                              // points to last read out mailbox location
 
+//static char msg[256];                                                                  // debugging messages
+
 bool SendNextMessage(void);
 
 /*#--------------------------------------------------------------------------#*/
@@ -78,6 +80,7 @@ void INITxSLAVExHANDLER(SLAVE_INFO *location, SLAVE_INFO *Dump){
  */
 /*#--------------------------------------------------------------------------#*/
 static uint8_t      ProcessSlave        = 0;
+static uint8_t      ProcessSlaveLast    = 0;
 static uint8_t      iProcessNextSlave   = 0;
 static uint8_t      loopcount           = 0;
 static uint8_t      SlaveInfoProcessor  = 1;
@@ -115,7 +118,8 @@ bool PROCESSxNEXTxSLAVE(){
             
         case 1:            
             if(SendNextMessage()){
-                ProcessSlave++;
+                ProcessSlaveLast = ProcessSlave; // keep check on last communicated slave.
+                ProcessSlave++; // go already to next slave
                 /* when the current slave to be processed is outside the no of
                  * amplifiers, start over with the Master again and increase
                  * the Message and SlaveInfoProcessor. */
@@ -229,6 +233,7 @@ bool SendNextMessage(){
             default :
                 break;
         }
+        ProcessSlaveLast = ProcessSlave;
         return_val = true;
     }
     /* Messages directly to the slaves from the PC. */
@@ -243,7 +248,7 @@ bool SendNextMessage(){
         }
         else{
             if (Rcd_Ptr_prev != Rcd_Ptr){
-                Rcd_Ptr_prev++;
+                
                 if(Rcd_Ptr_prev >= &Rcd[MAILBOXRCD]){
                     Rcd_Ptr_prev = &Rcd[0];
                 }
@@ -254,6 +259,7 @@ bool SendNextMessage(){
                 Data.RegData0      = Rcd_Ptr_prev->RegData0;
                 Data.RegData1      = Rcd_Ptr_prev->RegData1;
                 SLAVExCOMMUNICATIONxHANDLER();
+                Rcd_Ptr_prev++;                                                 // first read the previous data then increment
             }
             else{
                 /* Stop the master processing as soon as there are no more
@@ -287,10 +293,10 @@ bool SendNextMessage(){
 bool PROCESSxSLAVExCOMMUNICATION(){
     
     bool return_Val = false;
-    //char msg[128];
+    
     
     /* Verify communication was OK */
-    switch(CHECKxMODBUSxCOMMxSTATUS(ProcessSlave, true)){
+    switch(CHECKxMODBUSxCOMMxSTATUS(ProcessSlaveLast, true)){
         case SLAVEOK: 
             //sprintf(msg, "Mbus handler\t: CHECKxMODBUSxCOMMxSTATUS SLAVE OK (ID=%d).\n\r", ProcessSlave);
             //SYS_MESSAGE(msg);
@@ -324,7 +330,12 @@ bool PROCESSxSLAVExCOMMUNICATION(){
         
         case SLAVEBUSY: break;
         default : break;
-    }    
+    }
+
+    if(return_Val != SLAVEBUSY){
+        ProcessSlaveLast = 60;
+    }
+    
     return (return_Val);
 }
 
@@ -363,8 +374,8 @@ void ADDxNEWxSLAVExDATAxCMDxTOxSLAVExMAILBOX(uint8_t *data){
         Rcd_Ptr->Direction      = data[1];
         Rcd_Ptr->NoOfRegisters  = data[2];
         Rcd_Ptr->StartRegister  = data[3];
-        Rcd_Ptr->RegData0       = data[4];
-        Rcd_Ptr->RegData1       = data[5];
+        Rcd_Ptr->RegData0 = ((uint16_t)data[4] << 8) | data[5];
+        Rcd_Ptr->RegData1 = ((uint16_t)data[6] << 8) | data[7];
 
         Rcd_Ptr++;
 
@@ -379,6 +390,7 @@ void ADDxNEWxSLAVExDATAxCMDxTOxSLAVExMAILBOX(uint8_t *data){
             NONE);                                  // TASK_MESSAGE
     }
     
-    /* Only 1 time required to be true */
-    FirstMessage = false;
+    /* Only 1 time required to be true to start using pointers otherwise they
+     are equal */
+    //FirstMessage = false;
 }

@@ -23,6 +23,11 @@ namespace SiebwaldeApp.Core
         private const string FwPath = "C:\\Localdata\\Siebwalde\\TrackAmplifier4.X\\dist\\Offset\\production\\TrackAmplifier4.X.production.hex";
 
         private ILogger TrackApplicationLogging;
+        private TrackCommClientAsync _trackCommClient;
+        private TrackAmplifierBootloaderHelpers _bootloaderHelpers;
+        private SendNextFwDataPacket _sendNextFwDataPacket;
+        private TrackAmplifierInitializationServiceAsync _trackInitService;
+
         private string LoggerInstance { get; set; }
         static ILogger GetLogger(string file, string loggerinstance)
         {
@@ -99,26 +104,39 @@ namespace SiebwaldeApp.Core
         /// <returns></returns>
         public async Task StartTrackApplication()
         {
-            if (_trackControlMain != null) return;
+            // If the main controller already exists we assume the track application
+            // is running and do nothing.
+            if (_trackControlMain != null)
+                return;
 
             IoC.Logger.Log("Track Application starting...", "");
 
-            // Setup logging
+            // ---------------------------------------------------------------------
+            // 0) Setup logging
+            // ---------------------------------------------------------------------
             LoggerInstance = "TrackAppLog";
-            TrackApplicationLogging = GetLogger(Core.Properties.CoreSettings.Default.LogDirectory 
-                + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_" 
-                + "TrackAppLog.txt", LoggerInstance);
+
+            TrackApplicationLogging = GetLogger(
+                Core.Properties.CoreSettings.Default.LogDirectory
+                + DateTime.Now.Day + "-" + DateTime.Now.Month + "-" + DateTime.Now.Year + "_"
+                + "TrackAppLog.txt",
+                LoggerInstance);
+
             IoC.Logger.AddLogger(TrackApplicationLogging);
 
-            // Setup cancellation token
+            // ---------------------------------------------------------------------
+            // 1) Setup cancellation token for the whole track application
+            // ---------------------------------------------------------------------
             _appCts = new CancellationTokenSource();
 
-            // 0) Ensure we have the legacy variable container
+            // ---------------------------------------------------------------------
+            // 2) Ensure we have the shared legacy variable container
+            // ---------------------------------------------------------------------
             _trackVariables ??= new TrackApplicationVariables();
 
-            ITrackTransport transport;
-
-            // TODO: Adjust these to match your real Ethernet target.
+            // ---------------------------------------------------------------------
+            // 3) Build low-level Ethernet / Modbus transport
+            // ---------------------------------------------------------------------
             const string targetIpAddress = "192.168.1.193"; // PIC32 IP
             const int targetPort = 10000;                  // PIC waiting for client
             const int localPort = 10001;                   // same local port as Python bind
@@ -126,44 +144,89 @@ namespace SiebwaldeApp.Core
             // Raw UDP client (simple wrapper around UdpClient).
             var rawUdp = new RawUdpTransport(targetIpAddress, targetPort, localPort);
 
-            // Adapter that exposes IRawUdpTransport as ITrackTransport.
-            transport = new RawUdpTrackTransport(rawUdp);
+            // Adapter that exposes RawUdpTransport as ITrackTransport.
+            ITrackTransport transport = new RawUdpTrackTransport(rawUdp);
 
-            // -----------------------------------------------------------------
-            // 1) Communication client on top of the selected transport
-            // -----------------------------------------------------------------
-            var commClient = new TrackCommClientAsync(transport, _trackVariables);
+            // ---------------------------------------------------------------------
+            // 4) Communication client on top of the selected transport
+            // ---------------------------------------------------------------------
+            _trackCommClient = new TrackCommClientAsync(transport, _trackVariables);
 
-            var bootloaderHelpers = new TrackAmplifierBootloaderHelpers(FwPath, LoggerInstance);
-            var sendNextFwDataPacket = new SendNextFwDataPacket(commClient, bootloaderHelpers);
+            // ---------------------------------------------------------------------
+            // 5) Bootloader helper objects (re-using legacy classes)
+            // ---------------------------------------------------------------------
+            _bootloaderHelpers ??= new TrackAmplifierBootloaderHelpers(
+                FwPath,
+                LoggerInstance);
 
-            // -----------------------------------------------------------------
-            // 2) Initialization steps
-            // -----------------------------------------------------------------
+            _sendNextFwDataPacket ??= new SendNextFwDataPacket(
+                _trackCommClient,
+                _bootloaderHelpers);
+
+            // ---------------------------------------------------------------------
+            // 6) Compose initialization steps
+            // ---------------------------------------------------------------------
             var steps = new IInitializationStep[]
             {
-                new ConnectToEthernetTargetStep(commClient, _trackVariables, LoggerInstance),
-                new ResetAllSlavesStep(commClient, _trackVariables, LoggerInstance),
-                new DataUploadStep(commClient, _trackVariables, LoggerInstance),
-                new DetectSlavesStep(commClient, _trackVariables, LoggerInstance),
-                new RecoverSlavesStep(commClient, _trackVariables, sendNextFwDataPacket, bootloaderHelpers, LoggerInstance),
-                new FlashFwTrackamplifiersStep(commClient, _trackVariables, sendNextFwDataPacket, bootloaderHelpers, LoggerInstance),
-                new InitTrackamplifiersStep(commClient, LoggerInstance),
+                new ConnectToEthernetTargetStep(_trackCommClient, _trackVariables, LoggerInstance),
+                new ResetAllSlavesStep(_trackCommClient, _trackVariables, LoggerInstance),
+                new DataUploadStep(_trackCommClient, _trackVariables, LoggerInstance),
+                new DetectSlavesStep(_trackCommClient, _trackVariables, LoggerInstance),
+                new RecoverSlavesStep(_trackCommClient, _trackVariables, _sendNextFwDataPacket, _bootloaderHelpers, LoggerInstance),
+                new FlashFwTrackamplifiersStep(_trackCommClient, _trackVariables, _sendNextFwDataPacket, _bootloaderHelpers, LoggerInstance),
+                new InitTrackamplifiersStep(_trackCommClient, LoggerInstance),
+                // Your new step that sets PWM defaults (e.g. 400) before enabling amps
                 new SetDefaultPwmSetpointsStep(_trackVariables, LoggerInstance),
-                new EnableTrackamplifiersStep(commClient, LoggerInstance),
+                new EnableTrackamplifiersStep(_trackCommClient, LoggerInstance),
             };
 
-            var initService = new TrackAmplifierInitializationServiceAsync(
-                commClient,
+            _trackInitService = new TrackAmplifierInitializationServiceAsync(
+                _trackCommClient,
                 _trackVariables,
-                steps);
+                steps,
+                LoggerInstance);
 
-            await commClient.StartAsync(true, cancellationToken: _appCts.Token);
+            // Optional: log progress of individual steps
+            _trackInitService.ProgressChanged += (s, e) =>
+            {
+                IoC.Logger.Log($"Track init: {e.StepName} - {e.Message}", LoggerInstance);
+            };
 
-            await initService.InitializeAsync(_appCts.Token);
+            // ---------------------------------------------------------------------
+            // 7) Create TrackControlMain and hook StatusChanged to start runtime
+            // ---------------------------------------------------------------------
+            _trackControlMain = new TrackControlMain(
+                LoggerInstance,
+                _trackCommClient,
+                _trackVariables);
+
+            _trackInitService.StatusChanged += (s, status) =>
+            {
+                IoC.Logger.Log($"Track init status: {status}", LoggerInstance);
+
+                if (status == InitializationStatus.Completed &&
+                    _trackControlMain != null &&
+                    _appCts != null)
+                {
+                    // Start the 10 Hz runtime loop that:
+                    // - checks TrackApplicationVariables.PendingWrites
+                    // - sends EXEC_MBUS_SLAVE_DATA_EXCH frames when data changed
+                    _trackControlMain.StartRuntime(_appCts.Token);
+                }
+            };
+
+            // ---------------------------------------------------------------------
+            // 8) Start communication and run the initialization pipeline
+            // ---------------------------------------------------------------------
+            await _trackCommClient.StartAsync(
+                true,
+                cancellationToken: _appCts.Token);
+
+            await _trackInitService.InitializeAsync(_appCts.Token);
 
             IoC.Logger.Log("Track Application started.", "");
         }
+
 
         /// <summary>
         /// Stops the currently running track application, if one is active.
@@ -180,12 +243,25 @@ namespace SiebwaldeApp.Core
 
             try
             {
-                _appCts.Cancel();
+                _trackControlMain.StopRuntime();
             }
             catch { /* ignore */ }
-                        
-            _trackVariables = null;
 
+            try
+            {
+                _appCts?.Cancel();
+            }
+            catch { /* ignore */ }
+
+            // TODO: ideally make this method async and await the dispose calls
+            if (_trackCommClient is IAsyncDisposable asyncDisposable)
+            {
+                asyncDisposable.DisposeAsync().AsTask().Wait();
+            }
+
+            _trackCommClient = null;
+            _trackInitService = null;
+            _trackVariables = null;
             _trackControlMain = null;
 
             IoC.Logger.Log("Track Application stopped.", "");
@@ -277,8 +353,7 @@ namespace SiebwaldeApp.Core
             regs[0] = reg0;
             amp.HoldingReg = regs;
         }
-
-
+                
         /// <summary>
         /// Dummy MAC payload (12×3): identifiers u..z,0..5; value=0; CR
         /// Matches the wire format expected by FiddleYardController.
@@ -296,5 +371,26 @@ namespace SiebwaldeApp.Core
             }
             return send;
         }
+
+        /// <summary>
+        /// Returns the current list of track amplifiers from the core model.
+        /// Returns an empty list if the track application is not running yet.
+        /// </summary>
+        public List<TrackAmplifierItem> GetAmplifierListing()
+        {
+            return _trackVariables?.GetAmplifierListing() ?? new List<TrackAmplifierItem>();
+        }
+
+        /// <summary>
+        /// Updates the desired control parameters (PWM setpoint + EmoStop)
+        /// for a given amplifier. The values are not sent immediately; they
+        /// are queued in TrackApplicationVariables and sent by TrackControlMain
+        /// at 10 Hz.
+        /// </summary>
+        public void SetAmplifierControl(ushort slaveNumber, int pwmSetpoint, bool emoStop)
+        {
+            _trackVariables?.SetDesiredAmplifierControl(slaveNumber, pwmSetpoint, emoStop);
+        }
+
     }
 }

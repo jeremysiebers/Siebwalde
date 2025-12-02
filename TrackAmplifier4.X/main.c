@@ -56,7 +56,7 @@ void main(void) {
     MODBUS_ADDRESS = 0xAA;                                  //...listen to get configured when ID pin is pulled low 170 dec.    
     InitPetitModbus(MODBUS_ADDRESS);
 /*----------------------------------------------------------------------------*/
-
+//<editor-fold defaultstate="collapsed" desc="CONFIG SECTION">
         while(Config){
             
             test[0] = 1;
@@ -137,8 +137,12 @@ void main(void) {
                     break;
             }
         }
+    
+//</editor-fold>
         
         REGULATORxINIT();
+        
+//<editor-fold defaultstate="collapsed" desc="RUN SECTION">
         
         while(1){
         
@@ -182,11 +186,10 @@ void main(void) {
                 
             }
         }
-    
+//</editor-fold>
 }
-
-
 /*----------------------------------------------------------------------------*/
+//<editor-fold defaultstate="collapsed" desc="LED SECTION">
 void Led_Blink (){
     if(PIR4bits.TMR6IF){
         PIR4bits.TMR6IF = 0;
@@ -405,6 +408,7 @@ void Led_Convert(uint8_t Number){
             break;
     }
 }
+//</editor-fold>
 
 /******************************************************************************
  * Function: uint16_t ReadFlashChecksum(){

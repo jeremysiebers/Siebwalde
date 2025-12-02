@@ -1,20 +1,27 @@
 ﻿using SiebwaldeApp.Core;
 using System;
 using System.Collections.ObjectModel;
-using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Threading;
 
 namespace SiebwaldeApp
 {
     /// <summary>
-    /// View model that exposes a live overview of the Modbus master
-    /// and all track amplifiers for the TrackAmplifierPage.
+    /// View model for the TrackAmplifierPage.
+    /// 
+    /// It exposes:
+    /// - Master: summary of the Modbus master
+    /// - Amplifiers: 1..50 amplifiers
+    /// - BackplaneSlaves: 51..55 backplane modules
+    /// 
+    /// It also polls the SiebwaldeApplicationModel at 2 Hz to refresh
+    /// the view from the core model.
     /// </summary>
     public class TrackAmplifierPageViewModel : BaseViewModel
     {
         #region Private members
 
+        private readonly SiebwaldeApplicationModel _appModel;
         private readonly DispatcherTimer _refreshTimer;
         private bool _isExpanded;
 
@@ -24,8 +31,8 @@ namespace SiebwaldeApp
 
         /// <summary>
         /// Global expand/collapse state for all amplifier items.
-        /// When true, all amplifier boxes show full details.
-        /// When false, only the key controls are visible.
+        /// When true, amplifier boxes show full details.
+        /// When false, only key controls are visible.
         /// </summary>
         public bool IsExpanded
         {
@@ -41,7 +48,7 @@ namespace SiebwaldeApp
         }
 
         /// <summary>
-        /// Visual representation of the Modbus master that talks to all slaves.
+        /// Visual representation of the Modbus master.
         /// </summary>
         public TrackAmplifierMasterViewModel Master { get; }
 
@@ -51,8 +58,7 @@ namespace SiebwaldeApp
         public ObservableCollection<TrackAmplifierVisualViewModel> Amplifiers { get; }
 
         /// <summary>
-        /// Visual representation of the backplane slaves (slave numbers 51..55),
-        /// shown as smaller boxes at the bottom of the page.
+        /// Visual representation of the backplane slaves (slave numbers 51..55).
         /// </summary>
         public ObservableCollection<TrackAmplifierVisualViewModel> BackplaneSlaves { get; }
 
@@ -62,16 +68,16 @@ namespace SiebwaldeApp
 
         /// <summary>
         /// Default constructor.
-        /// Sets up the collections and starts a 2 Hz refresh timer to
-        /// sample the core model state.
         /// </summary>
         public TrackAmplifierPageViewModel()
         {
+            _appModel = IoC.Get<SiebwaldeApplicationModel>();
+
             Master = new TrackAmplifierMasterViewModel();
             Amplifiers = new ObservableCollection<TrackAmplifierVisualViewModel>();
             BackplaneSlaves = new ObservableCollection<TrackAmplifierVisualViewModel>();
 
-            // Refresh the view at a fixed 2 Hz rate, independent of the Modbus data rate.
+            // Refresh 2 times per second (2 Hz)
             _refreshTimer = new DispatcherTimer
             {
                 Interval = TimeSpan.FromMilliseconds(500)
@@ -82,32 +88,19 @@ namespace SiebwaldeApp
 
         #endregion
 
-        #region Private helpers
+        #region Refresh from core model
 
-        /// <summary>
-        /// Periodically called by the dispatcher timer to copy data from
-        /// the core model into the view models.
-        /// 
-        /// This runs on the UI thread, so we keep it simple and reasonably cheap.
-        /// </summary>
         private void RefreshFromCoreModel(object? sender, EventArgs e)
         {
-            var app = IoC.siebwaldeApplicationModel;
-            if (app == null)
-            {
-                // Application model not available yet.
-                return;
-            }
-
-            var amplifiers = app.TrackAmplifiers;
+            var amplifiers = _appModel.GetAmplifierListing();
             if (amplifiers == null || amplifiers.Count == 0)
             {
-                // Track application not started or no slaves seen yet.
                 Master.UpdateFromModels(null, null);
+                Amplifiers.Clear();
+                BackplaneSlaves.Clear();
                 return;
             }
 
-            // Split into main amplifiers (1..50) and backplane slaves (51..55).
             var mainAmps = amplifiers
                 .Where(a => a.SlaveNumber >= 1 && a.SlaveNumber <= 50)
                 .OrderBy(a => a.SlaveNumber)
@@ -124,15 +117,9 @@ namespace SiebwaldeApp
             Master.UpdateFromModels(mainAmps, backplane);
         }
 
-        /// <summary>
-        /// Keeps an ObservableCollection of visual view models in sync with a list
-        /// of core TrackAmplifierItem instances.
-        /// 
-        /// The mapping is based on SlaveNumber and the collection order.
-        /// </summary>
         private static void SyncVisualCollection(
             ObservableCollection<TrackAmplifierVisualViewModel> target,
-            IList<TrackAmplifierItem> source)
+            System.Collections.Generic.IList<TrackAmplifierItem> source)
         {
             if (source == null)
             {
@@ -140,7 +127,7 @@ namespace SiebwaldeApp
                 return;
             }
 
-            // If the count changed, rebuild the collection in one go.
+            // Rebuild if count differs
             if (target.Count != source.Count)
             {
                 target.Clear();
@@ -153,7 +140,7 @@ namespace SiebwaldeApp
                 return;
             }
 
-            // Same number of items: update in-place and verify ordering.
+            // Same count: update in-place, verify ordering
             for (int i = 0; i < source.Count; i++)
             {
                 var model = source[i];
@@ -161,7 +148,6 @@ namespace SiebwaldeApp
 
                 if (vm.SlaveNumber != model.SlaveNumber)
                 {
-                    // If the order changed, rebuild to keep things simple and robust.
                     target.Clear();
                     foreach (var m in source)
                     {
@@ -180,14 +166,16 @@ namespace SiebwaldeApp
     }
 
     /// <summary>
-    /// Simple visual view model for a single slave (track amplifier or backplane slave).
-    /// Wraps TrackAmplifierItem and exposes only the data needed for the page.
-    /// 
-    /// The mapping follows the "Modbus Track Slave Data Register mapping" specification.
+    /// Simple view model for a single amplifier/backplane slave.
+    /// Wraps TrackAmplifierItem and exposes the properties needed for the page.
+    /// It also pushes user changes (PWM setpoint, EmoStop) back into the core
+    /// via SiebwaldeApplicationModel.SetAmplifierControl.
     /// </summary>
     public class TrackAmplifierVisualViewModel : BaseViewModel
     {
         #region Private fields
+
+        private readonly SiebwaldeApplicationModel _appModel;
 
         private ushort _slaveNumber;
         private bool _isDetected;
@@ -206,7 +194,7 @@ namespace SiebwaldeApp
         private int _pwmSetpoint;
         private bool _emoStop;
 
-        // Extended / decoded holding register values (expanded view)
+        // Extended / decoded values (expanded view)
         private int _setBemfSpeed;
         private bool _setCsReg;
         private bool _clearAmpStatus;
@@ -229,13 +217,12 @@ namespace SiebwaldeApp
         private int _decelerationPar;
         private ushort _hexChecksum;
 
+        private bool _suppressCoreUpdate;
+
         #endregion
 
         #region Public properties
 
-        /// <summary>
-        /// Modbus slave number (1..50 for amplifiers, 51..55 for backplane slaves).
-        /// </summary>
         public ushort SlaveNumber
         {
             get => _slaveNumber;
@@ -249,10 +236,6 @@ namespace SiebwaldeApp
             }
         }
 
-        /// <summary>
-        /// True if the slave is detected (SlaveDetected != 0).
-        /// Used to drive the green/red LED in the UI.
-        /// </summary>
         public bool IsDetected
         {
             get => _isDetected;
@@ -266,10 +249,6 @@ namespace SiebwaldeApp
             }
         }
 
-        /// <summary>
-        /// True when the amplifier reports "occupied" in HoldingReg2 bit 10.
-        /// Drives the yellow LED in the UI.
-        /// </summary>
         public bool IsOccupied
         {
             get => _isOccupied;
@@ -353,10 +332,6 @@ namespace SiebwaldeApp
             }
         }
 
-        /// <summary>
-        /// Short, human readable summary of the Modbus counters.
-        /// Shown as text inside the amplifier box.
-        /// </summary>
         public string MbSummary
         {
             get => _mbSummary;
@@ -370,10 +345,6 @@ namespace SiebwaldeApp
             }
         }
 
-        /// <summary>
-        /// Short summary of the first few holding registers
-        /// (for now just the first 4 values).
-        /// </summary>
         public string HoldingRegSummary
         {
             get => _holdingRegSummary;
@@ -388,33 +359,32 @@ namespace SiebwaldeApp
         }
 
         /// <summary>
-        /// PWM setpoint in the range 0..799 according to HoldingReg0 bits 0..9.
-        /// In the UI this is the main speed control.
-        /// 
-        /// NOTE: At the moment changing this property only changes the view model.
-        /// Wiring this into the core to actually send Modbus writes is a separate step.
+        /// PWM setpoint 0..799, middle (400) is standstill in dual-sided PWM.
         /// </summary>
         public int PwmSetpoint
         {
             get => _pwmSetpoint;
             set
             {
-                int clamped = Math.Max(0, Math.Min(799, value));
+                int clamped = value;
+                if (clamped < 0) clamped = 0;
+                if (clamped > 799) clamped = 799;
+
                 if (_pwmSetpoint != clamped)
                 {
                     _pwmSetpoint = clamped;
                     OnPropertyChanged(nameof(PwmSetpoint));
-                    // TODO: send new PWM setpoint to core / Modbus master when write support is added.
+
+                    if (!_suppressCoreUpdate)
+                    {
+                        _appModel.SetAmplifierControl(SlaveNumber, _pwmSetpoint, _emoStop);
+                    }
                 }
             }
         }
 
         /// <summary>
         /// Emergency stop flag (HoldingReg0 bit 15).
-        /// True means the amplifier should stop the train as fast as possible.
-        /// 
-        /// Currently only reflected in the UI. Actual write into the amplifier
-        /// should be implemented in the core layer.
         /// </summary>
         public bool EmoStop
         {
@@ -425,287 +395,142 @@ namespace SiebwaldeApp
                 {
                     _emoStop = value;
                     OnPropertyChanged(nameof(EmoStop));
-                    // TODO: propagate EmoStop request into the core and to the amplifier.
+
+                    if (!_suppressCoreUpdate)
+                    {
+                        _appModel.SetAmplifierControl(SlaveNumber, _pwmSetpoint, _emoStop);
+                    }
                 }
             }
         }
 
-        #region Extended decoded properties (expanded view)
+        // Extended properties for expanded view
 
         public int SetBemfSpeed
         {
             get => _setBemfSpeed;
-            private set
-            {
-                if (_setBemfSpeed != value)
-                {
-                    _setBemfSpeed = value;
-                    OnPropertyChanged(nameof(SetBemfSpeed));
-                }
-            }
+            private set { if (_setBemfSpeed != value) { _setBemfSpeed = value; OnPropertyChanged(nameof(SetBemfSpeed)); } }
         }
 
         public bool SetCsReg
         {
             get => _setCsReg;
-            private set
-            {
-                if (_setCsReg != value)
-                {
-                    _setCsReg = value;
-                    OnPropertyChanged(nameof(SetCsReg));
-                }
-            }
+            private set { if (_setCsReg != value) { _setCsReg = value; OnPropertyChanged(nameof(SetCsReg)); } }
         }
 
         public bool ClearAmpStatus
         {
             get => _clearAmpStatus;
-            private set
-            {
-                if (_clearAmpStatus != value)
-                {
-                    _clearAmpStatus = value;
-                    OnPropertyChanged(nameof(ClearAmpStatus));
-                }
-            }
+            private set { if (_clearAmpStatus != value) { _clearAmpStatus = value; OnPropertyChanged(nameof(ClearAmpStatus)); } }
         }
 
         public bool ClearMessageBuffer
         {
             get => _clearMessageBuffer;
-            private set
-            {
-                if (_clearMessageBuffer != value)
-                {
-                    _clearMessageBuffer = value;
-                    OnPropertyChanged(nameof(ClearMessageBuffer));
-                }
-            }
+            private set { if (_clearMessageBuffer != value) { _clearMessageBuffer = value; OnPropertyChanged(nameof(ClearMessageBuffer)); } }
         }
 
         public bool EnableAmplifier
         {
             get => _enableAmplifier;
-            private set
-            {
-                if (_enableAmplifier != value)
-                {
-                    _enableAmplifier = value;
-                    OnPropertyChanged(nameof(EnableAmplifier));
-                }
-            }
+            private set { if (_enableAmplifier != value) { _enableAmplifier = value; OnPropertyChanged(nameof(EnableAmplifier)); } }
         }
 
         public int ReadBackEmf
         {
             get => _readBackEmf;
-            private set
-            {
-                if (_readBackEmf != value)
-                {
-                    _readBackEmf = value;
-                    OnPropertyChanged(nameof(ReadBackEmf));
-                }
-            }
+            private set { if (_readBackEmf != value) { _readBackEmf = value; OnPropertyChanged(nameof(ReadBackEmf)); } }
         }
 
         public bool ThermalFlag
         {
             get => _thermalFlag;
-            private set
-            {
-                if (_thermalFlag != value)
-                {
-                    _thermalFlag = value;
-                    OnPropertyChanged(nameof(ThermalFlag));
-                }
-            }
+            private set { if (_thermalFlag != value) { _thermalFlag = value; OnPropertyChanged(nameof(ThermalFlag)); } }
         }
 
         public bool OverCurrent
         {
             get => _overCurrent;
-            private set
-            {
-                if (_overCurrent != value)
-                {
-                    _overCurrent = value;
-                    OnPropertyChanged(nameof(OverCurrent));
-                }
-            }
+            private set { if (_overCurrent != value) { _overCurrent = value; OnPropertyChanged(nameof(OverCurrent)); } }
         }
 
         public bool AmplifierIdSet
         {
             get => _amplifierIdSet;
-            private set
-            {
-                if (_amplifierIdSet != value)
-                {
-                    _amplifierIdSet = value;
-                    OnPropertyChanged(nameof(AmplifierIdSet));
-                }
-            }
+            private set { if (_amplifierIdSet != value) { _amplifierIdSet = value; OnPropertyChanged(nameof(AmplifierIdSet)); } }
         }
 
         public ushort AmplifierStatus
         {
             get => _amplifierStatus;
-            private set
-            {
-                if (_amplifierStatus != value)
-                {
-                    _amplifierStatus = value;
-                    OnPropertyChanged(nameof(AmplifierStatus));
-                }
-            }
+            private set { if (_amplifierStatus != value) { _amplifierStatus = value; OnPropertyChanged(nameof(AmplifierStatus)); } }
         }
 
         public int HBridgeFuseVoltage
         {
             get => _hBridgeFuseVoltage;
-            private set
-            {
-                if (_hBridgeFuseVoltage != value)
-                {
-                    _hBridgeFuseVoltage = value;
-                    OnPropertyChanged(nameof(HBridgeFuseVoltage));
-                }
-            }
+            private set { if (_hBridgeFuseVoltage != value) { _hBridgeFuseVoltage = value; OnPropertyChanged(nameof(HBridgeFuseVoltage)); } }
         }
 
         public int HBridgeTemperature
         {
             get => _hBridgeTemperature;
-            private set
-            {
-                if (_hBridgeTemperature != value)
-                {
-                    _hBridgeTemperature = value;
-                    OnPropertyChanged(nameof(HBridgeTemperature));
-                }
-            }
+            private set { if (_hBridgeTemperature != value) { _hBridgeTemperature = value; OnPropertyChanged(nameof(HBridgeTemperature)); } }
         }
 
         public int HBridgeCurrent
         {
             get => _hBridgeCurrent;
-            private set
-            {
-                if (_hBridgeCurrent != value)
-                {
-                    _hBridgeCurrent = value;
-                    OnPropertyChanged(nameof(HBridgeCurrent));
-                }
-            }
+            private set { if (_hBridgeCurrent != value) { _hBridgeCurrent = value; OnPropertyChanged(nameof(HBridgeCurrent)); } }
         }
 
         public ushort MessagesReceived
         {
             get => _messagesReceived;
-            private set
-            {
-                if (_messagesReceived != value)
-                {
-                    _messagesReceived = value;
-                    OnPropertyChanged(nameof(MessagesReceived));
-                }
-            }
+            private set { if (_messagesReceived != value) { _messagesReceived = value; OnPropertyChanged(nameof(MessagesReceived)); } }
         }
 
         public ushort MessagesSent
         {
             get => _messagesSent;
-            private set
-            {
-                if (_messagesSent != value)
-                {
-                    _messagesSent = value;
-                    OnPropertyChanged(nameof(MessagesSent));
-                }
-            }
+            private set { if (_messagesSent != value) { _messagesSent = value; OnPropertyChanged(nameof(MessagesSent)); } }
         }
 
         public int AmplifierId
         {
             get => _amplifierId;
-            private set
-            {
-                if (_amplifierId != value)
-                {
-                    _amplifierId = value;
-                    OnPropertyChanged(nameof(AmplifierId));
-                }
-            }
+            private set { if (_amplifierId != value) { _amplifierId = value; OnPropertyChanged(nameof(AmplifierId)); } }
         }
 
         public bool SinglePwmMode
         {
             get => _singlePwmMode;
-            private set
-            {
-                if (_singlePwmMode != value)
-                {
-                    _singlePwmMode = value;
-                    OnPropertyChanged(nameof(SinglePwmMode));
-                }
-            }
+            private set { if (_singlePwmMode != value) { _singlePwmMode = value; OnPropertyChanged(nameof(SinglePwmMode)); } }
         }
 
         public bool ResetSlave
         {
             get => _resetSlave;
-            private set
-            {
-                if (_resetSlave != value)
-                {
-                    _resetSlave = value;
-                    OnPropertyChanged(nameof(ResetSlave));
-                }
-            }
+            private set { if (_resetSlave != value) { _resetSlave = value; OnPropertyChanged(nameof(ResetSlave)); } }
         }
 
         public int AccelerationPar
         {
             get => _accelerationPar;
-            private set
-            {
-                if (_accelerationPar != value)
-                {
-                    _accelerationPar = value;
-                    OnPropertyChanged(nameof(AccelerationPar));
-                }
-            }
+            private set { if (_accelerationPar != value) { _accelerationPar = value; OnPropertyChanged(nameof(AccelerationPar)); } }
         }
 
         public int DecelerationPar
         {
             get => _decelerationPar;
-            private set
-            {
-                if (_decelerationPar != value)
-                {
-                    _decelerationPar = value;
-                    OnPropertyChanged(nameof(DecelerationPar));
-                }
-            }
+            private set { if (_decelerationPar != value) { _decelerationPar = value; OnPropertyChanged(nameof(DecelerationPar)); } }
         }
 
         public ushort HexChecksum
         {
             get => _hexChecksum;
-            private set
-            {
-                if (_hexChecksum != value)
-                {
-                    _hexChecksum = value;
-                    OnPropertyChanged(nameof(HexChecksum));
-                }
-            }
+            private set { if (_hexChecksum != value) { _hexChecksum = value; OnPropertyChanged(nameof(HexChecksum)); } }
         }
-
-        #endregion
 
         #endregion
 
@@ -713,55 +538,55 @@ namespace SiebwaldeApp
 
         public TrackAmplifierVisualViewModel(ushort slaveNumber)
         {
+            _appModel = IoC.Get<SiebwaldeApplicationModel>();
             SlaveNumber = slaveNumber;
-
-            // Default PWM setpoint in the middle (dual sided PWM: 400 = standstill).
-            // This is a UI default only. Actual initialization of the registers
-            // should be done in the core before enabling the amplifiers.
-            _pwmSetpoint = 400;
+            _pwmSetpoint = 400; // UI default for standstill (dual sided PWM)
         }
 
         #endregion
 
         #region Public methods
 
-        /// <summary>
-        /// Copies the latest values from a core TrackAmplifierItem
-        /// into this view model.
-        /// </summary>
         public void UpdateFromModel(TrackAmplifierItem model)
         {
             if (model == null)
                 return;
 
-            SlaveNumber = model.SlaveNumber;
-            IsDetected = model.SlaveDetected != 0;
-
-            MbReceiveCounter = model.MbReceiveCounter;
-            MbSentCounter = model.MbSentCounter;
-            MbCommError = model.MbCommError;
-            MbExceptionCode = model.MbExceptionCode;
-            SpiCommErrorCounter = model.SpiCommErrorCounter;
-
-            // Build a short summary of the first holding registers.
-            var regs = model.HoldingReg;
-            if (regs != null && regs.Length > 0)
+            _suppressCoreUpdate = true;
+            try
             {
-                var count = Math.Min(4, regs.Length);
-                var parts = new string[count];
-                for (int i = 0; i < count; i++)
+                SlaveNumber = model.SlaveNumber;
+                IsDetected = model.SlaveDetected != 0;
+
+                MbReceiveCounter = model.MbReceiveCounter;
+                MbSentCounter = model.MbSentCounter;
+                MbCommError = model.MbCommError;
+                MbExceptionCode = model.MbExceptionCode;
+                SpiCommErrorCounter = model.SpiCommErrorCounter;
+
+                var regs = model.HoldingReg;
+
+                if (regs != null && regs.Length > 0)
                 {
-                    parts[i] = regs[i].ToString();
+                    int count = Math.Min(4, regs.Length);
+                    var parts = new string[count];
+                    for (int i = 0; i < count; i++)
+                    {
+                        parts[i] = regs[i].ToString();
+                    }
+                    HoldingRegSummary = $"Regs: {string.Join(", ", parts)}";
+                }
+                else
+                {
+                    HoldingRegSummary = string.Empty;
                 }
 
-                HoldingRegSummary = $"Regs: {string.Join(", ", parts)}";
+                DecodeHoldingRegisters(regs);
             }
-            else
+            finally
             {
-                HoldingRegSummary = string.Empty;
+                _suppressCoreUpdate = false;
             }
-
-            DecodeHoldingRegisters(regs);
         }
 
         #endregion
@@ -770,17 +595,11 @@ namespace SiebwaldeApp
 
         private void UpdateMbSummary()
         {
-            MbSummary = $"Rx {MbReceiveCounter}, Tx {MbSentCounter}, " +
-                        $"Err {MbCommError}, Ex {MbExceptionCode}, Spi {SpiCommErrorCounter}";
+            MbSummary = $"Rx {MbReceiveCounter}, Tx {MbSentCounter}, Err {MbCommError}, Ex {MbExceptionCode}, Spi {SpiCommErrorCounter}";
         }
 
-        /// <summary>
-        /// Decodes the holding registers into the strongly typed properties.
-        /// The mapping follows the "Modbus Track Slave Data Register mapping".
-        /// </summary>
         private void DecodeHoldingRegisters(ushort[]? regs)
         {
-            // Gracefully handle missing or short arrays.
             ushort hr0 = GetReg(regs, 0);
             ushort hr1 = GetReg(regs, 1);
             ushort hr2 = GetReg(regs, 2);
@@ -794,61 +613,52 @@ namespace SiebwaldeApp
             ushort hr10 = GetReg(regs, 10);
             ushort hr11 = GetReg(regs, 11);
 
-            // HoldingReg0: PWM setpoint, direction, brake, EmoStop
-            int pwm = GetBits(hr0, 0, 9); // 0..799 valid range for the application
-            // If the register is zero and the UI default is 400, we keep the UI at 400
-            // until the core initializes it. Otherwise we follow the actual value.
+            // HoldingReg0
+            int pwm = GetBits(hr0, 0, 9);
             if (pwm != 0)
             {
-                _pwmSetpoint = Math.Max(0, Math.Min(799, pwm));
+                _pwmSetpoint = pwm;
                 OnPropertyChanged(nameof(PwmSetpoint));
             }
+            _emoStop = HasBit(hr0, 15);
+            OnPropertyChanged(nameof(EmoStop));
 
-            bool emoStop = HasBit(hr0, 15);
-            EmoStop = emoStop;
-
-            // HoldingReg1: set BEMF speed, CSReg, clear status/buffer, enable amplifier
+            // HoldingReg1
             SetBemfSpeed = GetBits(hr1, 0, 9);
             SetCsReg = HasBit(hr1, 10);
             ClearAmpStatus = HasBit(hr1, 11);
             ClearMessageBuffer = HasBit(hr1, 12);
             EnableAmplifier = HasBit(hr1, 15);
 
-            // HoldingReg2: read back EMF, occupancy, thermal, over-current, ID set
+            // HoldingReg2
             ReadBackEmf = GetBits(hr2, 0, 9);
             IsOccupied = HasBit(hr2, 10);
             ThermalFlag = HasBit(hr2, 11);
             OverCurrent = HasBit(hr2, 12);
             AmplifierIdSet = HasBit(hr2, 13);
 
-            // HoldingReg3: amplifier status full 16 bits
+            // HoldingReg3
             AmplifierStatus = hr3;
 
-            // HoldingReg4: H-bridge fuse status 0..31 V (bits 0..9)
+            // HoldingReg4..6
             HBridgeFuseVoltage = GetBits(hr4, 0, 9);
-
-            // HoldingReg5: H-bridge temperature 0..255 degC (bits 0..9)
             HBridgeTemperature = GetBits(hr5, 0, 9);
-
-            // HoldingReg6: H-bridge current (bits 0..9)
             HBridgeCurrent = GetBits(hr6, 0, 9);
 
-            // HoldingReg7: messages received (full word)
+            // HoldingReg7..8
             MessagesReceived = hr7;
-
-            // HoldingReg8: messages sent (full word)
             MessagesSent = hr8;
 
-            // HoldingReg9: amplifier ID (0..63), single/double PWM, reset slave
+            // HoldingReg9
             AmplifierId = GetBits(hr9, 0, 5);
             SinglePwmMode = HasBit(hr9, 6);
             ResetSlave = HasBit(hr9, 15);
 
-            // HoldingReg10: acceleration and deceleration parameters
+            // HoldingReg10
             AccelerationPar = GetBits(hr10, 0, 7);
             DecelerationPar = GetBits(hr10, 8, 15);
 
-            // HoldingReg11: HEX checksum
+            // HoldingReg11
             HexChecksum = hr11;
         }
 
@@ -878,24 +688,13 @@ namespace SiebwaldeApp
 
     /// <summary>
     /// Simple view model for the Modbus master status box.
-    /// Aggregates some statistics from the slaves.
     /// </summary>
     public class TrackAmplifierMasterViewModel : BaseViewModel
     {
-        #region Private fields
-
         private bool _isConnected;
         private int _detectedAmplifiers;
         private int _detectedBackplaneSlaves;
 
-        #endregion
-
-        #region Public properties
-
-        /// <summary>
-        /// Indicates if the master is considered "connected".
-        /// For now this simply means: we see at least one slave.
-        /// </summary>
         public bool IsConnected
         {
             get => _isConnected;
@@ -910,9 +709,6 @@ namespace SiebwaldeApp
             }
         }
 
-        /// <summary>
-        /// Number of detected track amplifiers (1..50).
-        /// </summary>
         public int DetectedAmplifiers
         {
             get => _detectedAmplifiers;
@@ -927,9 +723,6 @@ namespace SiebwaldeApp
             }
         }
 
-        /// <summary>
-        /// Number of detected backplane slaves (51..55).
-        /// </summary>
         public int DetectedBackplaneSlaves
         {
             get => _detectedBackplaneSlaves;
@@ -944,28 +737,14 @@ namespace SiebwaldeApp
             }
         }
 
-        /// <summary>
-        /// Short status text used in the master box.
-        /// </summary>
         public string StatusText => IsConnected ? "Online" : "Idle";
 
-        /// <summary>
-        /// Combined summary text used in the master box.
-        /// </summary>
         public string SummaryText =>
             $"Amps: {DetectedAmplifiers}, BP: {DetectedBackplaneSlaves}";
 
-        #endregion
-
-        #region Public methods
-
-        /// <summary>
-        /// Updates the master status based on the currently known
-        /// amplifiers and backplane slaves.
-        /// </summary>
         public void UpdateFromModels(
-            IList<TrackAmplifierItem>? amplifiers,
-            IList<TrackAmplifierItem>? backplaneSlaves)
+            System.Collections.Generic.IList<TrackAmplifierItem>? amplifiers,
+            System.Collections.Generic.IList<TrackAmplifierItem>? backplaneSlaves)
         {
             amplifiers ??= Array.Empty<TrackAmplifierItem>();
             backplaneSlaves ??= Array.Empty<TrackAmplifierItem>();
@@ -975,7 +754,5 @@ namespace SiebwaldeApp
             DetectedAmplifiers = amplifiers.Count(a => a.SlaveDetected != 0);
             DetectedBackplaneSlaves = backplaneSlaves.Count(a => a.SlaveDetected != 0);
         }
-
-        #endregion
     }
 }
