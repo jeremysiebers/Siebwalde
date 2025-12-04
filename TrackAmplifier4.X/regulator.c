@@ -58,8 +58,12 @@ uint16_t REGULATORxUPDATE (){
     if (PetitHoldingRegisters[HR_PWM_COMMAND].ActValue & HR_PWM_EMO_BIT){        // If EMO command active kill PWM
         PWM3_LoadDutyValue(0);
         PwmDutyCyclePrev = 0;
+        LED_OCC_LAT = true;
         Return_Val = true;
         return (Return_Val);
+    }
+    else{
+        LED_OCC_LAT = false;
     }
     
     /* Normal PWM control */

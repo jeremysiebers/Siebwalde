@@ -54,7 +54,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 
 #include "ethernet.h"
-#include "tcpip/tcpip.h"
+#include "system_definitions.h"
 #include "enums.h"
 
 // *****************************************************************************
@@ -101,6 +101,8 @@ static udpTrans_t   *M_Box_Eth_Send_Ptr_prev;
 
 static udpTrans_t   udpRecvBox[MAILBOXSIZE];
 static udpTrans_t   udpTransBox[MAILBOXSIZE];
+
+static TCP_SOCKET         logSocket = INVALID_SOCKET;
 
 //unsigned char *Cmd2Ascii[] = {
 //    "NOP",
@@ -190,7 +192,7 @@ void ETHERNET_Tasks ( void )
             ethernetData.tcpipStat = TCPIP_STACK_Status(sysObj.tcpip);
             if(ethernetData.tcpipStat < 0)
             {   // some error occurred
-                SYS_MESSAGE("Ethernet\t: TCP/IP stack initialization failed!\r\n");
+                LOG_Push("Ethernet\t: TCP/IP stack initialization failed!");
                 ethernetData.state = ETHERNET_TCPIP_ERROR;
             }
             else if (ethernetData.tcpipStat == SYS_STATUS_READY){
@@ -205,9 +207,9 @@ void ETHERNET_Tasks ( void )
                     netBiosName = TCPIP_STACK_NetBIOSName(netH);
 
 #if defined(TCPIP_STACK_USE_NBNS)
-                    SYS_PRINT("Ethernet\t: Interface %s on host %s - NBNS enabled\r\n", netName, netBiosName);
+                    LOG_Printf("Ethernet\t: Interface %s on host %s - NBNS enabled", netName, netBiosName);
 #else
-                    SYS_PRINT("    Interface %s on host %s - NBNS disabled\r\n", netName, netBiosName);
+                    LOG_Push("    Interface %s on host %s - NBNS disabled\r\n", netName, netBiosName);
 #endif  // defined(TCPIP_STACK_USE_NBNS)
 
                 }
@@ -235,10 +237,9 @@ void ETHERNET_Tasks ( void )
                 if(dwLastIP[i].Val != ipAddr.Val)
                 {
                     dwLastIP[i].Val = ipAddr.Val;
-                    SYS_MESSAGE("Ethernet\t: ");
-                    SYS_MESSAGE(TCPIP_STACK_NetNameGet(netH));
-                    SYS_MESSAGE(" IP Address: ");
-                    SYS_PRINT("%d.%d.%d.%d \r\n", ipAddr.v[0], ipAddr.v[1], ipAddr.v[2], ipAddr.v[3]);                                     
+                    LOG_Printf("Ethernet\t: %s  IP Address: %u.%u.%u.%u",
+                    TCPIP_STACK_NetNameGet(netH),
+                    ipAddr.v[0], ipAddr.v[1], ipAddr.v[2], ipAddr.v[3]);                                  
                 }
             }
 			// all interfaces ready. Could start transactions!!!
@@ -247,11 +248,12 @@ void ETHERNET_Tasks ( void )
 			
         case ETHERNET_TCPIP_OPENING_SERVER:
         {
-            SYS_PRINT("Ethernet\t: Waiting for Client Connection on port: %d\r\n", SERVER_PORT);
+            LOG_Printf("Ethernet\t: Waiting for Client Connection on port: %d", SERVER_PORT);
             ethernetData.recvsocket = TCPIP_UDP_ServerOpen(IP_ADDRESS_TYPE_IPV4, SERVER_PORT, 0);
+            logSocket = TCPIP_TCP_ServerOpen(IP_ADDRESS_TYPE_IPV4, LOG_TCP_PORT, 0);
             if (ethernetData.recvsocket == INVALID_SOCKET)
             {
-                SYS_MESSAGE("Ethernet\t: Couldn't open server recvsocket\r\n");
+                LOG_Push("Ethernet\t: Couldn't open server recvsocket");
                 break;
             }
             ethernetData.state = ETHERNET_TCPIP_WAIT_FOR_CONNECTION;
@@ -268,7 +270,7 @@ void ETHERNET_Tasks ( void )
             {                
                 // We got a connection
                 ethernetData.state = ETHERNET_TCPIP_DATA_RX;
-                SYS_MESSAGE("Ethernet\t: Received a connection\r\n");
+                LOG_Push("Ethernet\t: Received a connection");
 
                 if (!TransSocketReady){//TCPIP_UDP_IsConnected(ethernetData.transsocket)){
                     TCPIP_UDP_SocketInfoGet(ethernetData.recvsocket, &SocketInfo);                
@@ -277,7 +279,7 @@ void ETHERNET_Tasks ( void )
                             CLIENT_PORT, &SocketInfo.remoteIPaddress);
                     if (ethernetData.transsocket == INVALID_SOCKET)
                     {
-                        SYS_MESSAGE("Ethernet\t: Couldn't open client transsocket\r\n");
+                        LOG_Push("Ethernet\t: Couldn't open client transsocket");
                         TCPIP_UDP_Discard(ethernetData.recvsocket);
                         TCPIP_UDP_Discard(ethernetData.transsocket);
                         TransSocketReady = false;
@@ -299,7 +301,7 @@ void ETHERNET_Tasks ( void )
                 TCPIP_UDP_Discard(ethernetData.recvsocket);
                 TCPIP_UDP_Close(ethernetData.recvsocket);
                 ethernetData.state = ETHERNET_TCPIP_OPENING_SERVER;
-                SYS_MESSAGE("Ethernet\t: Connection was closed\r\n");
+                LOG_Push("Ethernet\t: Connection was closed");
                 break;
             }
             
@@ -324,7 +326,7 @@ void ETHERNET_Tasks ( void )
             PutDataInReceiveMailBox(udpRecv);
 //            if(udpRecv.command < CMD2ASCII){
 //                unsigned char *ptr = Cmd2Ascii[udpRecv.command];
-//                SYS_PRINT("Received command: '%s' (length %d)\r\n", ptr, rxed);
+//                LOG_Push("Received command: '%s' (length %d)\r\n", ptr, rxed);
 //            }
             ethernetData.state = ETHERNET_TCPIP_DATA_TX;
         }
@@ -336,7 +338,7 @@ void ETHERNET_Tasks ( void )
             {
                 ethernetData.state = ETHERNET_TCPIP_WAIT_FOR_CONNECTION;
                 TransSocketReady = false;
-                //SYS_MESSAGE("No transsocket connected\r\n");
+                //LOG_Push("No transsocket connected\r\n");
                 break;
             }
             
@@ -541,7 +543,7 @@ void DISCONNECTxCLIENT(){
     TCPIP_UDP_Discard(ethernetData.transsocket);
     TCPIP_UDP_Close(ethernetData.transsocket);
     ethernetData.state = ETHERNET_TCPIP_OPENING_SERVER;
-    SYS_MESSAGE(" Ethernet:    Connection was closed\r\n");    
+    LOG_Push(" Ethernet:    Connection was closed\r\n");    
 }
 
 /*******************************************************************************

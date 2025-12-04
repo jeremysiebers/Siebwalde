@@ -193,6 +193,8 @@ namespace SiebwaldeApp
         // Key controls (compact view)
         private int _pwmSetpoint;
         private bool _emoStop;
+        private int _pwmFeedback;
+        private bool _emoStopFeedback;
 
         // Extended / decoded values (expanded view)
         private int _setBemfSpeed;
@@ -382,6 +384,43 @@ namespace SiebwaldeApp
                 }
             }
         }
+
+        /// <summary>
+        /// PWM feedback value read from HoldingReg0 bits 0..9.
+        /// This represents what the amplifier reports, independent of the command
+        /// value chosen with the slider.
+        /// </summary>
+        public int PwmFeedback
+        {
+            get => _pwmFeedback;
+            private set
+            {
+                if (_pwmFeedback != value)
+                {
+                    _pwmFeedback = value;
+                    OnPropertyChanged(nameof(PwmFeedback));
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Readback of EmoStop flag from HoldingReg0 bit 15.
+        /// This value is visual-only and does NOT affect the UI command toggle.
+        /// </summary>
+        public bool EmoStopFeedback
+        {
+            get => _emoStopFeedback;
+            private set
+            {
+                if (_emoStopFeedback != value)
+                {
+                    _emoStopFeedback = value;
+                    OnPropertyChanged(nameof(EmoStopFeedback));
+                }
+            }
+        }
+       
 
         /// <summary>
         /// Emergency stop flag (HoldingReg0 bit 15).
@@ -615,13 +654,16 @@ namespace SiebwaldeApp
 
             // HoldingReg0
             int pwm = GetBits(hr0, 0, 9);
-            if (pwm != 0)
-            {
-                _pwmSetpoint = pwm;
-                OnPropertyChanged(nameof(PwmSetpoint));
-            }
-            _emoStop = HasBit(hr0, 15);
-            OnPropertyChanged(nameof(EmoStop));
+
+            // Do NOT push this back into the PwmSetpoint (command) slider.
+            // PwmSetpoint is purely user-commanded.
+            // Store the readback value separately as feedback.
+            PwmFeedback = pwm;
+
+            // EmoStop feedback still comes from the amplifier, but we keep it
+            // in sync with the toggle state in the UI.
+            // EmoStop readback
+            EmoStopFeedback = HasBit(hr0, 15);
 
             // HoldingReg1
             SetBemfSpeed = GetBits(hr1, 0, 9);
@@ -754,5 +796,6 @@ namespace SiebwaldeApp
             DetectedAmplifiers = amplifiers.Count(a => a.SlaveDetected != 0);
             DetectedBackplaneSlaves = backplaneSlaves.Count(a => a.SlaveDetected != 0);
         }
+
     }
 }

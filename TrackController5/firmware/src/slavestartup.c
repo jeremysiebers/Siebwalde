@@ -152,19 +152,19 @@ bool DetectSlave(uint8_t SlaveId){
             switch(CHECKxMODBUSxCOMMxSTATUS(SlaveId, true)){
                 case SLAVEOK:  
                     MASTER_SLAVE_DATA[SlaveId].SlaveDetected = true;
-                    SYS_PRINT("Mbus handler\t: DETECTSLAVE Backplane %d detected.\n\r", SlaveId);
+                    LOG_Printf("Mbus handler\t: DETECTSLAVE Backplane %d detected.", SlaveId);
                     RunSlaveDetect = 0;
                     return_val = true;
                     break;                    
                 case SLAVENOK: 
                     MASTER_SLAVE_DATA[SlaveId].SlaveDetected = false;
-                    SYS_PRINT("Mbus handler\t: DETECTSLAVE Backplane %d not detected.\n\r", SlaveId);
+                    LOG_Printf("Mbus handler\t: DETECTSLAVE Backplane %d not detected.", SlaveId);
                     RunSlaveDetect = 0;
                     return_val = true;
                     break;
                 case SLAVE_DATA_TIMEOUT: 
                     MASTER_SLAVE_DATA[SlaveId].SlaveDetected = false;
-                    SYS_PRINT("Mbus handler\t: DETECTSLAVE Backplane %d not detected.\n\r", SlaveId);
+                    LOG_Printf("Mbus handler\t: DETECTSLAVE Backplane %d not detected.", SlaveId);
                     RunSlaveDetect = 0;
                     return_val = true;
                     break;
@@ -228,7 +228,7 @@ bool DetectSlave(uint8_t SlaveId){
                     break;                    
                 case SLAVENOK: 
                     MASTER_SLAVE_DATA[BackplaneId].SlaveDetected = false;
-                    SYS_MESSAGE("Mbus handler\t: DETECTSLAVE SLAVENOK returned in case 4.\n\r");
+                    LOG_Push("Mbus handler\t: DETECTSLAVE SLAVENOK returned in case 4.");
                     RunSlaveDetect = 0;
                     return_val = true;
                     DRV_USART0_WriteByte('4');
@@ -256,13 +256,13 @@ bool DetectSlave(uint8_t SlaveId){
                 case SLAVEOK:  
                     MASTER_SLAVE_DATA[SlaveId].SlaveDetected = true;
                     MASTER_SLAVE_DATA[SlaveId].HoldingReg[HOLDINGREG11] = DUMP_SLAVE_DATA[0].HoldingReg[HOLDINGREG11]; // store the read FW version
-                    SYS_PRINT("Mbus handler\t: DETECTSLAVE Slave %d detected.\n\r", SlaveId);
+                    LOG_Printf("Mbus handler\t: DETECTSLAVE Slave %d detected.", SlaveId);
                     RunSlaveDetect++;                    
                     //DRV_USART0_WriteByte('6');
                     break;                    
                 case SLAVENOK: 
                     MASTER_SLAVE_DATA[SlaveId].SlaveDetected = false;
-                    SYS_PRINT("Mbus handler\t: DETECTSLAVE Slave %d not detected.\n\r", SlaveId);
+                    LOG_Printf("Mbus handler\t: DETECTSLAVE Slave %d not detected.", SlaveId);
                     RunSlaveDetect++;
                     //DRV_USART0_WriteByte('6');
                     break;
@@ -299,7 +299,7 @@ bool DetectSlave(uint8_t SlaveId){
                 case SLAVENOK: 
                     RunSlaveDetect = 0;
                     return_val = true;
-                    SYS_MESSAGE("Mbus handler\t: DETECTSLAVE SLAVENOK returned in case 8.\n\r");
+                    LOG_Push("Mbus handler\t: DETECTSLAVE SLAVENOK returned in case 8.");
                     break;
                 case SLAVEBUSY: break;
                 default : break;

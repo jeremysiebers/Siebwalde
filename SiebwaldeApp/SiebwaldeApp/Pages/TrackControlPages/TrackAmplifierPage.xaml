@@ -106,12 +106,37 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Border Margin="4"
-                Padding="6"
-                BorderThickness="1"
-                CornerRadius="4"
-                BorderBrush="DarkGray"
-                Background="#FF202020"
-                MouseLeftButtonUp="AmplifierBox_MouseLeftButtonUp">
+                                    Padding="6"
+                                    CornerRadius="4"
+                                    Background="#FF202020"
+                                    MouseLeftButtonUp="AmplifierBox_MouseLeftButtonUp">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="BorderThickness" Value="1" />
+                                            <Setter Property="BorderBrush" Value="DarkGray" />
+
+                                            <Style.Triggers>
+                                                <!-- 1) EMO feedback actief: amplifier meldt noodstop -->
+                                                <DataTrigger Binding="{Binding EmoStopFeedback}" Value="True">
+                                                    <Setter Property="BorderBrush" Value="Red" />
+                                                    <Setter Property="BorderThickness" Value="2" />
+                                                </DataTrigger>
+
+                                                <!-- 2) Command EMO aan, maar feedback nog niet actief -->
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <!-- UI-command zegt: EMO aan -->
+                                                        <Condition Binding="{Binding EmoStop}" Value="True" />
+                                                        <!-- Amplifier zegt: EMO nog niet actief -->
+                                                        <Condition Binding="{Binding EmoStopFeedback}" Value="False" />
+                                                    </MultiDataTrigger.Conditions>
+
+                                                    <Setter Property="BorderBrush" Value="Yellow" />
+                                                    <Setter Property="BorderThickness" Value="2" />
+                                                </MultiDataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
                                     <Grid>
                                         <Grid.RowDefinitions>
                                             <!-- Header row (Amp number + LEDs) -->
@@ -126,17 +151,17 @@
 
                                         <!-- Amplifier number + LEDs -->
                                         <StackPanel Grid.Row="0"
-                            Orientation="Horizontal">
+                                            Orientation="Horizontal">
                                             <TextBlock Text="{Binding SlaveNumber, StringFormat='Amp {0}'}"
-                               FontWeight="Bold"
-                               Foreground="White"
-                               FontSize="12" />
+                                                FontWeight="Bold"
+                                                Foreground="White"
+                                                FontSize="12" />
 
                                             <!-- Slave-detected LED (green/red) -->
                                             <Border Width="10"
-                            Height="10"
-                            Margin="6,0,0,0"
-                            CornerRadius="5">
+                                                Height="10"
+                                                Margin="6,0,0,0"
+                                                CornerRadius="5">
                                                 <Border.Style>
                                                     <Style TargetType="Border">
                                                         <Setter Property="Background" Value="Red" />
@@ -150,7 +175,7 @@
                                                 </Border.Style>
                                             </Border>
 
-                                            <!-- Occupied LED (off / yellow) -->
+                                            <!-- Occupied LED (off / blue) -->
                                             <Border Width="10"
                             Height="10"
                             Margin="4,0,0,0"
@@ -161,7 +186,7 @@
                                                         <Style.Triggers>
                                                             <DataTrigger Binding="{Binding IsOccupied}"
                                                  Value="True">
-                                                                <Setter Property="Background" Value="Yellow" />
+                                                                <Setter Property="Background" Value="Blue" />
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
@@ -240,6 +265,19 @@
                                Foreground="LightGray"
                                FontSize="9"
                                Margin="0,0,0,2" />
+
+                                            <!-- PWM feedback (readback from amplifier) -->
+                                            <TextBlock Text="{Binding PwmFeedback, StringFormat='PWM feedback: {0}'}"
+                                Foreground="LightGray"
+                                FontSize="9"
+                                Margin="0,0,0,2" />
+
+                                            <!-- EMOStop feedback (readback from amplifier) -->
+                                            <TextBlock Text="{Binding EmoStopFeedback, StringFormat='EmoStop feedback: {0}'}"
+                                Foreground="LightGray"
+                                FontSize="9"
+                                Margin="0,0,0,2" />
+
 
                                             <!-- Running parameters -->
                                             <TextBlock Text="{Binding SetBemfSpeed, StringFormat='Set BEMF speed: {0}'}"

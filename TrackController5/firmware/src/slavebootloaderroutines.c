@@ -70,7 +70,7 @@ uint32_t GETxBOOTxLOADERxVERSION(){
                             GET_BOOTLOADER_VERSION_OK,                          // TASK_COMMAND
                             DONE,                                               // TASK_STATE
                             NONE);                                              // TASK_MESSAGE
-                        SYS_MESSAGE("Fw handler\t: GET_BOOTLOADER_VERSION GET_BOOTLOADER_VERSION_OK.\n\r");
+                        LOG_Push("Fw handler\t: GET_BOOTLOADER_VERSION GET_BOOTLOADER_VERSION_OK.");
                         return_val          = DONE;
                     }
                     else{
@@ -79,7 +79,7 @@ uint32_t GETxBOOTxLOADERxVERSION(){
                             GET_BOOTLOADER_VERSION_NOK,                         // TASK_COMMAND
                             ERROR,                                              // TASK_STATE
                             NONE);                                              // TASK_MESSAGE
-                        SYS_MESSAGE("Fw handler\t: GET_BOOTLOADER_VERSION GET_BOOTLOADER_VERSION_NOK.\n\r");
+                        LOG_Push("Fw handler\t: GET_BOOTLOADER_VERSION GET_BOOTLOADER_VERSION_NOK.");
                     return_val              = ERROR;
                     }
                 }
@@ -89,7 +89,7 @@ uint32_t GETxBOOTxLOADERxVERSION(){
                         BOOTLOADER_START_BYTE_ERROR,                            // TASK_COMMAND
                         ERROR,                                                  // TASK_STATE
                         NONE);                                                  // TASK_MESSAGE
-                    SYS_MESSAGE("Fw handler\t: GET_BOOTLOADER_VERSION BOOTLOADER_START_BYTE_ERROR.\n\r");
+                    LOG_Push("Fw handler\t: GET_BOOTLOADER_VERSION BOOTLOADER_START_BYTE_ERROR.");
                     return_val              = ERROR;
                 }
                 ClearOldBtldrData();
@@ -101,7 +101,7 @@ uint32_t GETxBOOTxLOADERxVERSION(){
                     BOOTLOADER_DATA_RECEIVE_ERROR,                              // TASK_COMMAND
                     ERROR,                                                      // TASK_STATE
                     NONE);                                                      // TASK_MESSAGE
-                SYS_MESSAGE("Fw handler\t: GET_BOOTLOADER_VERSION BOOTLOADER_DATA_RECEIVE_ERROR.\n\r");
+                LOG_Push("Fw handler\t: GET_BOOTLOADER_VERSION BOOTLOADER_DATA_RECEIVE_ERROR.");
                 return_val                  = ERROR;
                 ClearOldBtldrData();
                 ClearOldBtldrReceiveData();
@@ -112,7 +112,7 @@ uint32_t GETxBOOTxLOADERxVERSION(){
                     GET_BOOTLOADER_VERSION_RECEIVE_DATA_TIMEOUT,                // TASK_COMMAND
                     ERROR,                                                      // TASK_STATE
                     NONE);                                                      // TASK_MESSAGE
-                SYS_MESSAGE("Fw handler\t: GET_BOOTLOADER_VERSION BOOTLOADER_DATA_RECEIVE_ERROR.\n\r");
+                LOG_Push("Fw handler\t: GET_BOOTLOADER_VERSION BOOTLOADER_DATA_RECEIVE_ERROR.");
                 return_val                  = ERROR;
                 ClearOldBtldrData();
                 ClearOldBtldrReceiveData();
@@ -182,7 +182,7 @@ uint32_t ERASExFLASH(uint16_t flash_bootloader_offset, uint16_t flash_end_addres
                             ERASE_FLASH_RETURNED_OK,                            // TASK_COMMAND
                             DONE,                                               // TASK_STATE
                             NONE);                                              // TASK_MESSAGE
-                        SYS_MESSAGE("Fw handler\t: ERASE_FLASH ERASE_FLASH_RETURNED_OK.\n\r");
+                        LOG_Push("Fw handler\t: ERASE_FLASH ERASE_FLASH_RETURNED_OK.");
                         return_val          = DONE;
                     }
                     else{
@@ -191,7 +191,7 @@ uint32_t ERASExFLASH(uint16_t flash_bootloader_offset, uint16_t flash_end_addres
                             ERASE_FLASH_RETURNED_NOK,                           // TASK_COMMAND
                             ERROR,                                              // TASK_STATE
                             NONE);                                              // TASK_MESSAGE
-                        SYS_MESSAGE("Fw handler\t: ERASE_FLASH ERASE_FLASH_RETURNED_NOK.\n\r");
+                        LOG_Push("Fw handler\t: ERASE_FLASH ERASE_FLASH_RETURNED_NOK.");
                     return_val              = ERROR;
                     }
                 }
@@ -201,7 +201,7 @@ uint32_t ERASExFLASH(uint16_t flash_bootloader_offset, uint16_t flash_end_addres
                         BOOTLOADER_START_BYTE_ERROR,                            // TASK_COMMAND
                         ERROR,                                                  // TASK_STATE
                         NONE);                                                  // TASK_MESSAGE
-                    SYS_MESSAGE("Fw handler\t: ERASE_FLASH BOOTLOADER_START_BYTE_ERROR.\n\r");
+                    LOG_Push("Fw handler\t: ERASE_FLASH BOOTLOADER_START_BYTE_ERROR.");
                     return_val              = ERROR;
                 }
                 ClearOldBtldrData();
@@ -213,7 +213,7 @@ uint32_t ERASExFLASH(uint16_t flash_bootloader_offset, uint16_t flash_end_addres
                     BOOTLOADER_DATA_RECEIVE_ERROR,                              // TASK_COMMAND
                     ERROR,                                                      // TASK_STATE
                     NONE);                                                      // TASK_MESSAGE
-                SYS_MESSAGE("Fw handler\t: ERASE_FLASH BOOTLOADER_DATA_RECEIVE_ERROR.\n\r");
+                LOG_Push("Fw handler\t: ERASE_FLASH BOOTLOADER_DATA_RECEIVE_ERROR.");
                 return_val                  = ERROR;
                 ClearOldBtldrData();
                 ClearOldBtldrReceiveData();
@@ -224,7 +224,7 @@ uint32_t ERASExFLASH(uint16_t flash_bootloader_offset, uint16_t flash_end_addres
                     ERASE_FLASH_RECEIVE_DATA_TIMEOUT,                           // TASK_COMMAND
                     ERROR,                                                      // TASK_STATE
                     NONE);                                                      // TASK_MESSAGE
-                SYS_MESSAGE("Fw handler\t: ERASE_FLASH ERASE_FLASH_RECEIVE_DATA_TIMEOUT.\n\r");
+                LOG_Push("Fw handler\t: ERASE_FLASH ERASE_FLASH_RECEIVE_DATA_TIMEOUT.");
                 return_val                  = ERROR;
                 ClearOldBtldrData();
                 ClearOldBtldrReceiveData();
@@ -303,7 +303,7 @@ uint32_t WRITExFLASH(uint16_t flash_bootloader_offset, uint16_t flash_end_addres
                                 WRITE_FLASH_RETURNED_OK,                        // TASK_COMMAND
                                 DONE,                                           // TASK_STATE
                                 NONE);                                          // TASK_MESSAGE
-                            SYS_MESSAGE("Fw handler\t: WRITE_FLASH WRITE_FLASH_RETURNED_OK.\n\r");
+                            LOG_Push("Fw handler\t: WRITE_FLASH WRITE_FLASH_RETURNED_OK.");
                             return_val          = DONE;
                             ClearOldBtldrData();
                             
@@ -320,7 +320,7 @@ uint32_t WRITExFLASH(uint16_t flash_bootloader_offset, uint16_t flash_end_addres
                             WRITE_FLASH_RETURNED_NOK,                           // TASK_COMMAND
                             ERROR,                                              // TASK_STATE
                             NONE);                                              // TASK_MESSAGE
-                        SYS_MESSAGE("Fw handler\t: WRITE_FLASH WRITE_FLASH_RETURNED_NOK.\n\r");
+                        LOG_Push("Fw handler\t: WRITE_FLASH WRITE_FLASH_RETURNED_NOK.");
                     return_val              = ERROR;
                     }
                 }
@@ -330,7 +330,7 @@ uint32_t WRITExFLASH(uint16_t flash_bootloader_offset, uint16_t flash_end_addres
                         BOOTLOADER_START_BYTE_ERROR,                            // TASK_COMMAND
                         ERROR,                                                  // TASK_STATE
                         NONE);                                                  // TASK_MESSAGE
-                    SYS_MESSAGE("Fw handler\t: WRITE_FLASH BOOTLOADER_START_BYTE_ERROR.\n\r");
+                    LOG_Push("Fw handler\t: WRITE_FLASH BOOTLOADER_START_BYTE_ERROR.");
                     return_val              = ERROR;
                     ClearOldBtldrData();
                     ClearOldBtldrReceiveData();
@@ -342,7 +342,7 @@ uint32_t WRITExFLASH(uint16_t flash_bootloader_offset, uint16_t flash_end_addres
                     BOOTLOADER_DATA_RECEIVE_ERROR,                              // TASK_COMMAND
                     ERROR,                                                      // TASK_STATE
                     NONE);                                                      // TASK_MESSAGE
-                SYS_MESSAGE("Fw handler\t: WRITE_FLASH BOOTLOADER_DATA_RECEIVE_ERROR.\n\r");
+                LOG_Push("Fw handler\t: WRITE_FLASH BOOTLOADER_DATA_RECEIVE_ERROR.");
                 return_val                  = ERROR;
                 ClearOldBtldrData();
                 ClearOldBtldrReceiveData();
@@ -353,7 +353,7 @@ uint32_t WRITExFLASH(uint16_t flash_bootloader_offset, uint16_t flash_end_addres
                     WRITE_FLASH_RECEIVE_DATA_TIMEOUT,                           // TASK_COMMAND
                     ERROR,                                                      // TASK_STATE
                     NONE);                                                      // TASK_MESSAGE
-                SYS_MESSAGE("Fw handler\t: WRITE_FLASH WRITE_FLASH_RECEIVE_DATA_TIMEOUT.\n\r");
+                LOG_Push("Fw handler\t: WRITE_FLASH WRITE_FLASH_RECEIVE_DATA_TIMEOUT.");
                 return_val                  = ERROR;
                 ClearOldBtldrData();
                 ClearOldBtldrReceiveData();
@@ -421,7 +421,7 @@ uint32_t WRITExCONFIG(uint8_t *config_data){
                             WRITE_CONFIG_RETURNED_OK,                           // TASK_COMMAND
                             DONE,                                               // TASK_STATE
                             NONE);                                              // TASK_MESSAGE
-                        SYS_MESSAGE("Fw handler\t: WRITE_CONFIG WRITE_CONFIG_RETURNED_OK.\n\r");
+                        LOG_Push("Fw handler\t: WRITE_CONFIG WRITE_CONFIG_RETURNED_OK.");
                         return_val          = DONE;                        
                     }
                     else{
@@ -430,7 +430,7 @@ uint32_t WRITExCONFIG(uint8_t *config_data){
                             WRITE_CONFIG_RETURNED_NOK,                          // TASK_COMMAND
                             ERROR,                                              // TASK_STATE
                             NONE);                                              // TASK_MESSAGE
-                        SYS_MESSAGE("Fw handler\t: WRITE_CONFIG WRITE_CONFIG_RETURNED_NOK.\n\r");
+                        LOG_Push("Fw handler\t: WRITE_CONFIG WRITE_CONFIG_RETURNED_NOK.");
                     return_val              = ERROR;
                     }
                     ClearOldBtldrData();
@@ -442,7 +442,7 @@ uint32_t WRITExCONFIG(uint8_t *config_data){
                         BOOTLOADER_START_BYTE_ERROR,                            // TASK_COMMAND
                         ERROR,                                                  // TASK_STATE
                         NONE);                                                  // TASK_MESSAGE
-                    SYS_MESSAGE("Fw handler\t: WRITE_CONFIG BOOTLOADER_START_BYTE_ERROR.\n\r");
+                    LOG_Push("Fw handler\t: WRITE_CONFIG BOOTLOADER_START_BYTE_ERROR.");
                     return_val              = ERROR;
                 }
                 ClearOldBtldrData();
@@ -454,7 +454,7 @@ uint32_t WRITExCONFIG(uint8_t *config_data){
                     BOOTLOADER_DATA_RECEIVE_ERROR,                              // TASK_COMMAND
                     ERROR,                                                      // TASK_STATE
                     NONE);                                                      // TASK_MESSAGE
-                SYS_MESSAGE("Fw handler\t: WRITE_CONFIG BOOTLOADER_DATA_RECEIVE_ERROR.\n\r");
+                LOG_Push("Fw handler\t: WRITE_CONFIG BOOTLOADER_DATA_RECEIVE_ERROR.");
                 return_val                  = ERROR;
                 ClearOldBtldrData();
                 ClearOldBtldrReceiveData();
@@ -465,7 +465,7 @@ uint32_t WRITExCONFIG(uint8_t *config_data){
                     WRITE_FLASH_RECEIVE_DATA_TIMEOUT,                           // TASK_COMMAND
                     ERROR,                                                      // TASK_STATE
                     NONE);                                                      // TASK_MESSAGE
-                SYS_MESSAGE("Fw handler\t: WRITE_CONFIG WRITE_CONFIG_RECEIVE_DATA_TIMEOUT.\n\r");
+                LOG_Push("Fw handler\t: WRITE_CONFIG WRITE_CONFIG_RECEIVE_DATA_TIMEOUT.");
                 return_val                  = ERROR;
                 ClearOldBtldrData();
                 ClearOldBtldrReceiveData();
@@ -537,7 +537,7 @@ uint32_t CHECKxCHECKSUM(uint16_t flash_bootloader_offset, uint16_t flash_end_add
                             CHECK_CHECKSUM_CONFIG_RETURNED_OK,                  // TASK_COMMAND
                             DONE,                                               // TASK_STATE
                             NONE);                                              // TASK_MESSAGE
-                        SYS_MESSAGE("Fw handler\t: CHECK_CHECKSUM_CONFIG CHECK_CHECKSUM_CONFIG_RETURNED_OK.\n\r");
+                        LOG_Push("Fw handler\t: CHECK_CHECKSUM_CONFIG CHECK_CHECKSUM_CONFIG_RETURNED_OK.");
                         return_val          = DONE;                        
                     }
                     else{
@@ -546,7 +546,7 @@ uint32_t CHECKxCHECKSUM(uint16_t flash_bootloader_offset, uint16_t flash_end_add
                             CHECK_CHECKSUM_CONFIG_RETURNED_NOK,                 // TASK_COMMAND
                             ERROR,                                              // TASK_STATE
                             NONE);                                              // TASK_MESSAGE
-                        SYS_MESSAGE("Fw handler\t: CHECK_CHECKSUM_CONFIG CHECK_CHECKSUM_CONFIG_RETURNED_NOK.\n\r");
+                        LOG_Push("Fw handler\t: CHECK_CHECKSUM_CONFIG CHECK_CHECKSUM_CONFIG_RETURNED_NOK.");
                     return_val              = ERROR;
                     }
                     ClearOldBtldrData();
@@ -558,7 +558,7 @@ uint32_t CHECKxCHECKSUM(uint16_t flash_bootloader_offset, uint16_t flash_end_add
                         BOOTLOADER_START_BYTE_ERROR,                            // TASK_COMMAND
                         ERROR,                                                  // TASK_STATE
                         NONE);                                                  // TASK_MESSAGE
-                    SYS_MESSAGE("Fw handler\t: CHECK_CHECKSUM_CONFIG BOOTLOADER_START_BYTE_ERROR.\n\r");
+                    LOG_Push("Fw handler\t: CHECK_CHECKSUM_CONFIG BOOTLOADER_START_BYTE_ERROR.");
                     return_val              = ERROR;
                 }
                 ClearOldBtldrData();
@@ -570,7 +570,7 @@ uint32_t CHECKxCHECKSUM(uint16_t flash_bootloader_offset, uint16_t flash_end_add
                     BOOTLOADER_DATA_RECEIVE_ERROR,                              // TASK_COMMAND
                     ERROR,                                                      // TASK_STATE
                     NONE);                                                      // TASK_MESSAGE
-                SYS_MESSAGE("Fw handler\t: CHECK_CHECKSUM_CONFIG BOOTLOADER_DATA_RECEIVE_ERROR.\n\r");
+                LOG_Push("Fw handler\t: CHECK_CHECKSUM_CONFIG BOOTLOADER_DATA_RECEIVE_ERROR.");
                 return_val                  = ERROR;
                 ClearOldBtldrData();
                 ClearOldBtldrReceiveData();
@@ -581,7 +581,7 @@ uint32_t CHECKxCHECKSUM(uint16_t flash_bootloader_offset, uint16_t flash_end_add
                     CHECK_CHECKSUM_CONFIG_RECEIVE_DATA_TIMEOUT,                 // TASK_COMMAND
                     ERROR,                                                      // TASK_STATE
                     NONE);                                                      // TASK_MESSAGE
-                SYS_MESSAGE("Fw handler\t: CHECK_CHECKSUM_CONFIG CHECK_CHECKSUM_CONFIG_RECEIVE_DATA_TIMEOUT.\n\r");
+                LOG_Push("Fw handler\t: CHECK_CHECKSUM_CONFIG CHECK_CHECKSUM_CONFIG_RECEIVE_DATA_TIMEOUT.");
                 return_val                  = ERROR;
                 ClearOldBtldrData();
                 ClearOldBtldrReceiveData();
@@ -649,7 +649,7 @@ uint32_t RESETxSLAVE(){
                             RESET_SLAVE_OK,                                     // TASK_COMMAND
                             DONE,                                               // TASK_STATE
                             NONE);                                              // TASK_MESSAGE
-                        SYS_MESSAGE("Fw handler\t: RESET_SLAVE RESET_SLAVE_OK.\n\r");
+                        LOG_Push("Fw handler\t: RESET_SLAVE RESET_SLAVE_OK.");
                         return_val          = DONE;
                     }
                     else{
@@ -658,7 +658,7 @@ uint32_t RESETxSLAVE(){
                             RESET_SLAVE_NOK,                                    // TASK_COMMAND
                             ERROR,                                              // TASK_STATE
                             NONE);                                              // TASK_MESSAGE
-                        SYS_MESSAGE("Fw handler\t: RESET_SLAVE RESET_SLAVE_NOK.\n\r");
+                        LOG_Push("Fw handler\t: RESET_SLAVE RESET_SLAVE_NOK.");
                     return_val              = ERROR;
                     }
                 }
@@ -668,7 +668,7 @@ uint32_t RESETxSLAVE(){
                         BOOTLOADER_START_BYTE_ERROR,                            // TASK_COMMAND
                         ERROR,                                                  // TASK_STATE
                         NONE);                                                  // TASK_MESSAGE
-                    SYS_MESSAGE("Fw handler\t: RESET_SLAVE BOOTLOADER_START_BYTE_ERROR.\n\r");
+                    LOG_Push("Fw handler\t: RESET_SLAVE BOOTLOADER_START_BYTE_ERROR.");
                     return_val              = ERROR;
                 }
                 ClearOldBtldrData();
@@ -680,7 +680,7 @@ uint32_t RESETxSLAVE(){
                     BOOTLOADER_DATA_RECEIVE_ERROR,                              // TASK_COMMAND
                     ERROR,                                                      // TASK_STATE
                     NONE);                                                      // TASK_MESSAGE
-                SYS_MESSAGE("Fw handler\t: RESET_SLAVE BOOTLOADER_DATA_RECEIVE_ERROR.\n\r");
+                LOG_Push("Fw handler\t: RESET_SLAVE BOOTLOADER_DATA_RECEIVE_ERROR.");
                 return_val                  = ERROR;
                 ClearOldBtldrData();
                 ClearOldBtldrReceiveData();
@@ -691,7 +691,7 @@ uint32_t RESETxSLAVE(){
                     RESET_SLAVE_DATA_TIMEOUT,                                   // TASK_COMMAND
                     ERROR,                                                      // TASK_STATE
                     NONE);                                                      // TASK_MESSAGE
-                SYS_MESSAGE("Fw handler\t: RESET_SLAVE RESET_SLAVE_DATA_TIMEOUT.\n\r");
+                LOG_Push("Fw handler\t: RESET_SLAVE RESET_SLAVE_DATA_TIMEOUT.");
                 return_val                  = ERROR;
                 ClearOldBtldrData();
                 ClearOldBtldrReceiveData();
@@ -748,7 +748,7 @@ bool SendDataToBootloader(BTDR_SEND_DATA_FORMAT *btldrDataSend)
         Length = 22;
     }
     else{
-        SYS_MESSAGE("BOOTLOADER\t: Bootloader command not implemented!.\n\r");
+        LOG_Push("BOOTLOADER\t: Bootloader command not implemented!.");
         return false;        
     }
     
@@ -759,7 +759,7 @@ bool SendDataToBootloader(BTDR_SEND_DATA_FORMAT *btldrDataSend)
     for(DummyCounter=0; DummyCounter<Length; DummyCounter++){
         while(DRV_USART1_TransmitBufferIsFull() );
         DRV_USART1_WriteByte(*btldr_p);
-        //SYS_PRINT("%d.\n\r", *btldr_p);
+        //LOG_Push("%d.", *btldr_p);
         btldr_p++;
     }   
 

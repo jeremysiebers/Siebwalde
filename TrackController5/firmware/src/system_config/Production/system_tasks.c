@@ -69,6 +69,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
     See prototype in system/common/sys_module.h.
 */
 
+uint8_t state = 0;
+
 void SYS_Tasks ( void )
 {
     /* Maintain system services */
@@ -82,11 +84,39 @@ void SYS_Tasks ( void )
     /* Maintain Middleware & Other Libraries */
     /* Maintain the TCP/IP Stack*/
     TCPIP_STACK_Task(sysObj.tcpip);
-
-    /* Maintain the application's state machine. */
-    MBUS_Tasks();
-    ETHERNET_Tasks();
-    CONTROLLER_Tasks();
+    
+    switch(state){
+        case 0:
+            if (TCPIP_STACK_Status(sysObj.tcpip) == SYS_STATUS_READY)
+            {
+                /* Initialize the Logger */
+                LOG_Init();
+                state++;
+            }            
+            break;
+            
+        case 1:
+            if(LOG_IsClientConnected){
+                /* Initialize the Application */
+                MBUS_Initialize();
+                ETHERNET_Initialize();
+                CONTROLLER_Initialize();
+                state++;
+            }            
+            break;
+    
+        case 2:
+            /* Maintain the application's state machines. */
+            LOG_Task();
+            MBUS_Tasks();
+            ETHERNET_Tasks();
+            CONTROLLER_Tasks();
+            break;
+            
+        default: 
+            state = 0;
+            break;
+    }
 }
 
 

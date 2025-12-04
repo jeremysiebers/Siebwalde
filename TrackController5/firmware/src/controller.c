@@ -127,10 +127,10 @@ void CONTROLLER_Initialize ( void )
     /* TODO: Initialize your application's state machine and other
      * parameters.
      */
-    SYS_MESSAGE("\033[2J\033[1;1H");//clear terminal
-    SYS_MESSAGE("---------------------------------------------------------------------------------\n\r");    
-    SYS_MESSAGE("Controller\t: Starting Siebwalde TrackController.\n\r");
-    SYS_MESSAGE("Controller\t: Application created " __DATE__ " " __TIME__ ".\n\r");
+    LOG_Push("\033[2J\033[1;1H");//clear terminal
+    LOG_Push("--------------------------------------------------------------------------------");    
+    LOG_Push("Controller\t: Starting Siebwalde TrackController.");
+    LOG_Push("Controller\t: Application created " __DATE__ " " __TIME__ ".");
 }
 
 
@@ -153,7 +153,7 @@ void CONTROLLER_Tasks ( void )
         case CONTROLLER_STATE_INIT:
         {
             if (GETxMBUSxSTATE() == MBUS_STATE_WAIT && GETxETHERNETxSTATE() == ETHERNET_TCPIP_WAIT_FOR_CONNECTION){
-                SYS_MESSAGE("Controller\t: MBUS and ETHERNET ready, controller waiting for client.\n\r");
+                LOG_Push("Controller\t: MBUS and ETHERNET ready, controller waiting for client.");
                 controllerData.state = CONTROLLER_STATE_WAITING_FOR_CLIENT;
             }            
             break;
@@ -167,13 +167,13 @@ void CONTROLLER_Tasks ( void )
                 if(EthernetRecvData->header == HEADER && 
                         EthernetRecvData->command == CLIENT_CONNECTION_REQUEST){
                     controllerData.state = CONTROLLER_STATE_IDLE;
-                    SYS_MESSAGE("Controller\t: Client connected, controller going to Idle state.\n\r");
+                    LOG_Push("Controller\t: Client connected, controller going to Idle state.");
                     CREATExTASKxSTATUSxMESSAGE(task_id, CONNECTED, DONE, NONE);
                 }
                 else{
                     DISCONNECTxCLIENT();
                     controllerData.state = CONTROLLER_STATE_INIT;
-                    SYS_MESSAGE("Controller\t: Received wrong handshake, resetting Ethernet sockets.\n\r");
+                    LOG_Push("Controller\t: Received wrong handshake, resetting Ethernet sockets.");
                 }
             }
             break;
@@ -198,48 +198,48 @@ void CONTROLLER_Tasks ( void )
                 case CLIENT_CONNECTION_REQUEST:
                 {
                     CREATExTASKxSTATUSxMESSAGE(task_id, CONNECTED, DONE, NONE); // assume same client is connecting again
-                    SYS_MESSAGE("Controller\t: Client re-connected, controller going to Idle state.\n\r");
+                    LOG_Push("Controller\t: Client re-connected, controller going to Idle state.");
                     break;
                 }                
                 case EXEC_MBUS_STATE_SLAVES_ON:
                 {
-                    SYS_MESSAGE("Controller\t: EXEC_MBUS_STATE_SLAVES_ON.\n\r");
+                    LOG_Push("Controller\t: EXEC_MBUS_STATE_SLAVES_ON.");
                     SETxMBUSxSTATE(MBUS_STATE_SLAVES_ON);
                     break;
                 }
                 case EXEC_MBUS_STATE_SLAVE_DETECT:
                 {
-                    SYS_MESSAGE("Controller\t: EXEC_MBUS_STATE_SLAVE_DETECT.\n\r");
+                    LOG_Push("Controller\t: EXEC_MBUS_STATE_SLAVE_DETECT.");
                     SETxMBUSxSTATE(MBUS_STATE_SLAVE_DETECT);
                     break;
                 }
                 case EXEC_MBUS_STATE_SLAVE_FW_FLASH:
                 {
-                    SYS_MESSAGE("Controller\t: EXEC_MBUS_STATE_SLAVE_FW_FLASH.\n\r");
+                    LOG_Push("Controller\t: EXEC_MBUS_STATE_SLAVE_FW_FLASH.");
                     SETxMBUSxSTATE(MBUS_STATE_SLAVE_FW_FLASH);
                     break;
                 }
                 case EXEC_MBUS_STATE_SLAVE_INIT:
                 {
-                    SYS_MESSAGE("Controller\t: EXEC_MBUS_STATE_SLAVE_INIT.\n\r");
+                    LOG_Push("Controller\t: EXEC_MBUS_STATE_SLAVE_INIT.");
                     SETxMBUSxSTATE(MBUS_STATE_SLAVE_INIT);
                     break;
                 }
                 case EXEC_MBUS_STATE_SLAVE_ENABLE:
                 {
-                    SYS_MESSAGE("Controller\t: EXEC_MBUS_STATE_SLAVE_ENABLE.\n\r");
+                    LOG_Push("Controller\t: EXEC_MBUS_STATE_SLAVE_ENABLE.");
                     SETxMBUSxSTATE(MBUS_STATE_SLAVE_ENABLE);
                     break;
                 }
                 case EXEC_MBUS_STATE_START_DATA_UPLOAD:
                 {
-                    SYS_MESSAGE("Controller\t: EXEC_MBUS_STATE_START_DATA_UPLOAD.\n\r");
+                    LOG_Push("Controller\t: EXEC_MBUS_STATE_START_DATA_UPLOAD.");
                     SETxMBUSxSTATE(MBUS_STATE_START_DATA_UPLOAD);
                     break;
                 }
                 case EXEC_MBUS_STATE_RESET:
                 {
-                    SYS_MESSAGE("Controller\t: EXEC_MBUS_STATE_RESET.\n\r");
+                    LOG_Push("Controller\t: EXEC_MBUS_STATE_RESET.");
                     SETxMBUSxSTATE(MBUS_STATE_RESET);
                     break;
                 }
@@ -253,7 +253,7 @@ void CONTROLLER_Tasks ( void )
                 default:
                 {
                     CREATExTASKxSTATUSxMESSAGE(task_id, RECEIVED_UNKNOWN_COMMAND, ERROR, NONE);
-                    SYS_MESSAGE("Controller\t: command error, received command invalid.\n\r");
+                    LOG_Push("Controller\t: command error, received command invalid.");
                     controllerData.state = CONTROLLER_STATE_IDLE;
                     break;
                 }                

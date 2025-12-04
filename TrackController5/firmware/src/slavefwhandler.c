@@ -78,7 +78,7 @@ bool SLAVExFWxHANDLER(){
         case FW_STATE_INIT:
         {
             CREATExTASKxSTATUSxMESSAGE(FWHANDLER, FWHANDLERINIT, CONNECTED, NONE);
-            SYS_MESSAGE("Fw handler\t: FW_STATE_INIT done.\n\r");
+            LOG_Push("Fw handler\t: FW_STATE_INIT done.");
             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
             break;
         }
@@ -95,7 +95,7 @@ bool SLAVExFWxHANDLER(){
                 }
                 else{                    
                     fwData.state = FW_STATE_WAITING_FOR_COMMAND;
-                    SYS_MESSAGE("Fw handler\t: received wrong HEADER, stay in wait state.\n\r");
+                    LOG_Push("Fw handler\t: received wrong HEADER, stay in wait state.");
                     CREATExTASKxSTATUSxMESSAGE(
                             FWHANDLER, 
                             FW_STATE_WAITING_FOR_COMMAND, 
@@ -120,7 +120,7 @@ bool SLAVExFWxHANDLER(){
                                         EXEC_FW_STATE_RECEIVE_FW_FILE,          // TASK_COMMAND
                                         DONE,                                   // TASK_STATE
                                         NONE);                                  // TASK_MESSAGE
-                                    SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_RECEIVE_FW_FILE DONE.\n\r");
+                                    LOG_Push("Fw handler\t: EXEC_FW_STATE_RECEIVE_FW_FILE DONE.");
                                     break;
                         case ERROR: fwData.state = FW_STATE_WAITING_FOR_COMMAND;
                                     CREATExTASKxSTATUSxMESSAGE(
@@ -128,10 +128,10 @@ bool SLAVExFWxHANDLER(){
                                         EXEC_FW_STATE_RECEIVE_FW_FILE,          // TASK_COMMAND
                                         ERROR,                                  // TASK_STATE
                                         NONE);                                  // TASK_MESSAGE
-                                    SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_RECEIVE_FW_FILE ERROR.\n\r");
+                                    LOG_Push("Fw handler\t: EXEC_FW_STATE_RECEIVE_FW_FILE ERROR.");
                                     break;
                         case BUSY : break;
-                        default   : SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_RECEIVE_FW_FILE default case not allowed.\n\r");
+                        default   : LOG_Push("Fw handler\t: EXEC_FW_STATE_RECEIVE_FW_FILE default case not allowed.");
                     }
                     break;
                 }
@@ -146,7 +146,7 @@ bool SLAVExFWxHANDLER(){
                                         EXEC_FW_STATE_RECEIVE_CONFIG_WORD,      // TASK_COMMAND
                                         DONE,                                   // TASK_STATE
                                         NONE);                                  // TASK_MESSAGE
-                                    SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_RECEIVE_CONFIG_WORD DONE.\n\r");
+                                    LOG_Push("Fw handler\t: EXEC_FW_STATE_RECEIVE_CONFIG_WORD DONE.");
                                     break;
                         case ERROR: fwData.state = FW_STATE_WAITING_FOR_COMMAND;
                                     CREATExTASKxSTATUSxMESSAGE(
@@ -154,10 +154,10 @@ bool SLAVExFWxHANDLER(){
                                         EXEC_FW_STATE_RECEIVE_CONFIG_WORD,      // TASK_COMMAND
                                         ERROR,                                  // TASK_STATE
                                         NONE);                                  // TASK_MESSAGE
-                                    SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_RECEIVE_CONFIG_WORD ERROR.\n\r");
+                                    LOG_Push("Fw handler\t: EXEC_FW_STATE_RECEIVE_CONFIG_WORD ERROR.");
                                     break;
                         case BUSY : break;
-                        default   : SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_RECEIVE_CONFIG_WORD default case not allowed.\n\r");
+                        default   : LOG_Push("Fw handler\t: EXEC_FW_STATE_RECEIVE_CONFIG_WORD default case not allowed.");
                     }                  
                     break;
                 }
@@ -173,7 +173,7 @@ bool SLAVExFWxHANDLER(){
                                         EXEC_FW_STATE_FLASH_ALL_SLAVES,        // TASK_COMMAND
                                         DONE,                                   // TASK_STATE
                                         NONE);                                  // TASK_MESSAGE
-                                    SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_FLASH_ALL_SLAVES DONE.\n\r");
+                                    LOG_Push("Fw handler\t: EXEC_FW_STATE_FLASH_ALL_SLAVES DONE.");
                                     return_val = true;
                                     break;
                         case ERROR: fwData.state = FW_STATE_WAITING_FOR_COMMAND;
@@ -183,10 +183,10 @@ bool SLAVExFWxHANDLER(){
                                         EXEC_FW_STATE_FLASH_ALL_SLAVES,         // TASK_COMMAND
                                         ERROR,                                  // TASK_STATE
                                         NONE);                                  // TASK_MESSAGE
-                                    SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_FLASH_ALL_SLAVES ERROR.\n\r");
+                                    LOG_Push("Fw handler\t: EXEC_FW_STATE_FLASH_ALL_SLAVES ERROR.");
                                     break;
                         case BUSY : break;
-                        default   : SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_FLASH_ALL_SLAVES default case not allowed.\n\r");
+                        default   : LOG_Push("Fw handler\t: EXEC_FW_STATE_FLASH_ALL_SLAVES default case not allowed.");
                     }
                     break;
                 }
@@ -197,18 +197,18 @@ bool SLAVExFWxHANDLER(){
                     switch (result){
                         case DONE:
                         {
-                            SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_SELECT_SLAVE DONE.\n\r");
+                            LOG_Push("Fw handler\t: EXEC_FW_STATE_SELECT_SLAVE DONE.");
                             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
                             break;
                         }
                         case ERROR: 
                         {
-                            SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_SELECT_SLAVE ERROR.\n\r");
+                            LOG_Push("Fw handler\t: EXEC_FW_STATE_SELECT_SLAVE ERROR.");
                             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
                             break;
                         }
                         case BUSY : {break;}
-                        default   : {SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_SELECT_SLAVE default case not allowed.\n\r");}
+                        default   : {LOG_Push("Fw handler\t: EXEC_FW_STATE_SELECT_SLAVE default case not allowed.");}
                     }
                     break;
                 }
@@ -220,20 +220,20 @@ bool SLAVExFWxHANDLER(){
                     switch (result){
                         case DONE:
                         {
-                            SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_GET_BOOTLOADER_VERSION DONE.\n\r");
+                            LOG_Push("Fw handler\t: EXEC_FW_STATE_GET_BOOTLOADER_VERSION DONE.");
                             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
                             fwData.SlaveBootloaderHandlingActive = false;        // enable modbus
                             break;
                         }
                         case ERROR: 
                         {
-                            SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_GET_BOOTLOADER_VERSION ERROR.\n\r");
+                            LOG_Push("Fw handler\t: EXEC_FW_STATE_GET_BOOTLOADER_VERSION ERROR.");
                             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
                             fwData.SlaveBootloaderHandlingActive = false;        // enable modbus
                             break;
                         }
                         case BUSY : {break;}
-                        default   : {SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_GET_BOOTLOADER_VERSION default case not allowed.\n\r");}
+                        default   : {LOG_Push("Fw handler\t: EXEC_FW_STATE_GET_BOOTLOADER_VERSION default case not allowed.");}
                     }
                     break;
                 }
@@ -245,20 +245,20 @@ bool SLAVExFWxHANDLER(){
                     switch (result){
                         case DONE:
                         {
-                            SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_ERASE_FLASH DONE.\n\r");
+                            LOG_Push("Fw handler\t: EXEC_FW_STATE_ERASE_FLASH DONE.");
                             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
                             fwData.SlaveBootloaderHandlingActive = false;        // enable modbus
                             break;
                         }
                         case ERROR: 
                         {
-                            SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_ERASE_FLASH ERROR.\n\r");
+                            LOG_Push("Fw handler\t: EXEC_FW_STATE_ERASE_FLASH ERROR.");
                             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
                             fwData.SlaveBootloaderHandlingActive = false;        // enable modbus
                             break;
                         }
                         case BUSY : {break;}
-                        default   : {SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_ERASE_FLASH default case not allowed.\n\r");}
+                        default   : {LOG_Push("Fw handler\t: EXEC_FW_STATE_ERASE_FLASH default case not allowed.");}
                     }
                     break;
                 }
@@ -270,20 +270,20 @@ bool SLAVExFWxHANDLER(){
                     switch (result){
                         case DONE:
                         {
-                            SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_WRITE_FLASH DONE.\n\r");
+                            LOG_Push("Fw handler\t: EXEC_FW_STATE_WRITE_FLASH DONE.");
                             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
                             fwData.SlaveBootloaderHandlingActive = false;        // enable modbus
                             break;
                         }
                         case ERROR: 
                         {
-                            SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_WRITE_FLASH ERROR.\n\r");
+                            LOG_Push("Fw handler\t: EXEC_FW_STATE_WRITE_FLASH ERROR.");
                             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
                             fwData.SlaveBootloaderHandlingActive = false;        // enable modbus
                             break;
                         }
                         case BUSY : {break;}
-                        default   : {SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_WRITE_FLASH default case not allowed.\n\r");}
+                        default   : {LOG_Push("Fw handler\t: EXEC_FW_STATE_WRITE_FLASH default case not allowed.");}
                     }
                     break;
                 }
@@ -295,20 +295,20 @@ bool SLAVExFWxHANDLER(){
                     switch (result){
                         case DONE:
                         {
-                            SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_WRITE_CONFIG DONE.\n\r");
+                            LOG_Push("Fw handler\t: EXEC_FW_STATE_WRITE_CONFIG DONE.");
                             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
                             fwData.SlaveBootloaderHandlingActive = false;        // enable modbus
                             break;
                         }
                         case ERROR: 
                         {
-                            SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_WRITE_CONFIG ERROR.\n\r");
+                            LOG_Push("Fw handler\t: EXEC_FW_STATE_WRITE_CONFIG ERROR.");
                             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
                             fwData.SlaveBootloaderHandlingActive = false;        // enable modbus
                             break;
                         }
                         case BUSY : {break;}
-                        default   : {SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_WRITE_CONFIG default case not allowed.\n\r");}
+                        default   : {LOG_Push("Fw handler\t: EXEC_FW_STATE_WRITE_CONFIG default case not allowed.");}
                     }
                     break;
                 }
@@ -320,20 +320,20 @@ bool SLAVExFWxHANDLER(){
                     switch (result){
                         case DONE:
                         {
-                            SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_CHECK_CHECKSUM DONE.\n\r");
+                            LOG_Push("Fw handler\t: EXEC_FW_STATE_CHECK_CHECKSUM DONE.");
                             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
                             fwData.SlaveBootloaderHandlingActive = false;        // enable modbus
                             break;
                         }
                         case ERROR: 
                         {
-                            SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_CHECK_CHECKSUM ERROR.\n\r");
+                            LOG_Push("Fw handler\t: EXEC_FW_STATE_CHECK_CHECKSUM ERROR.");
                             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
                             fwData.SlaveBootloaderHandlingActive = false;        // enable modbus
                             break;
                         }
                         case BUSY : {break;}
-                        default   : {SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_CHECK_CHECKSUM default case not allowed.\n\r");}
+                        default   : {LOG_Push("Fw handler\t: EXEC_FW_STATE_CHECK_CHECKSUM default case not allowed.");}
                     }
                     break;
                 }
@@ -345,20 +345,20 @@ bool SLAVExFWxHANDLER(){
                     switch (result){
                         case DONE:
                         {
-                            SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_SLAVE_RESET DONE.\n\r");
+                            LOG_Push("Fw handler\t: EXEC_FW_STATE_SLAVE_RESET DONE.");
                             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
                             fwData.SlaveBootloaderHandlingActive = false;        // enable modbus
                             break;
                         }
                         case ERROR: 
                         {
-                            SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_SLAVE_RESET ERROR.\n\r");
+                            LOG_Push("Fw handler\t: EXEC_FW_STATE_SLAVE_RESET ERROR.");
                             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
                             fwData.SlaveBootloaderHandlingActive = false;        // enable modbus
                             break;
                         }
                         case BUSY : {break;}
-                        default   : {SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_SLAVE_RESET default case not allowed.\n\r");}
+                        default   : {LOG_Push("Fw handler\t: EXEC_FW_STATE_SLAVE_RESET default case not allowed.");}
                     }
                     break;
                 }
@@ -381,7 +381,7 @@ bool SLAVExFWxHANDLER(){
 
                 default:
                 {
-                    SYS_MESSAGE("Fw handler\t: received unknown command, stay in wait state.\n\r");
+                    LOG_Push("Fw handler\t: received unknown command, stay in wait state.");
                     CREATExTASKxSTATUSxMESSAGE(FWHANDLER, FW_STATE_COMMAND_HANDLING, RECEIVED_UNKNOWN_COMMAND, ERROR);
                     fwData.state = FW_STATE_WAITING_FOR_COMMAND;
                     break;
@@ -465,7 +465,7 @@ uint32_t FwFileDownload(){
                                 FILEDOWNLOAD_STATE_FW_DATA_DOWNLOAD_DONE,       // TASK_COMMAND
                                 DONE,                                           // TASK_STATE
                                 NONE);                                          // TASK_MESSAGE
-                        SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_RECEIVE_FW_FILE received a FW file.\n\r");
+                        LOG_Push("Fw handler\t: EXEC_FW_STATE_RECEIVE_FW_FILE received a FW file.");
                     }
                     else{
                         CREATExTASKxSTATUSxMESSAGE(                                
@@ -476,7 +476,7 @@ uint32_t FwFileDownload(){
                     }
                 }
                 else{
-                    SYS_MESSAGE("EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY received wrong command stopping FW download.\n\r");
+                    LOG_Push("EXEC_FW_STATE_RECEIVE_FW_FILE_STANDBY received wrong command stopping FW download.");
                     iFwFileDownload = 0;
                     return_val = ERROR;
                     CREATExTASKxSTATUSxMESSAGE(                                
@@ -518,7 +518,7 @@ uint32_t FwFileDownload(){
                         FILEDOWNLOAD_STATE_FW_CHECKSUM,                         // TASK_COMMAND
                         DONE,                                                   // TASK_STATE
                         RECEIVED_CHECKSUM_OK);                                  // TASK_MESSAGE
-                SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_RECEIVE_FW_FILE checksum is OK.\n\r");
+                LOG_Push("Fw handler\t: EXEC_FW_STATE_RECEIVE_FW_FILE checksum is OK.");
             }
             else{
                 fwData.fwchecksum       = 0;
@@ -528,7 +528,7 @@ uint32_t FwFileDownload(){
                         FILEDOWNLOAD_STATE_FW_CHECKSUM,                         // TASK_COMMAND
                         ERROR,                                                  // TASK_STATE
                         RECEIVED_CHECKSUM_NOK);                                 // TASK_MESSAGE
-                SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_RECEIVE_FW_FILE checksum is NOK.\n\r");
+                LOG_Push("Fw handler\t: EXEC_FW_STATE_RECEIVE_FW_FILE checksum is NOK.");
             }
             iFwFileDownload = 0;
             break;
@@ -594,7 +594,7 @@ uint32_t   ConfigWordDownload  (){
                         CONFIGWORDDOWNLOAD_STATE_FW_CONFIG_WORD_DOWNLOAD_DONE,  // TASK_COMMAND
                         DONE,                                                   // TASK_STATE
                         NONE);                                                  // TASK_MESSAGE
-                    SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_RECEIVE_CONFIG_WORD received config data.\n\r");
+                    LOG_Push("Fw handler\t: EXEC_FW_STATE_RECEIVE_CONFIG_WORD received config data.");
                     return_val = DONE;
                 }
                 else{
@@ -603,7 +603,7 @@ uint32_t   ConfigWordDownload  (){
                         CONFIGWORDDOWNLOAD_STATE_FW_CONFIG_WORD_DOWNLOAD_DONE,  // TASK_COMMAND
                         ERROR,                                                  // TASK_STATE
                         RECEIVED_WRONG_COMMAND);                                // TASK_MESSAGE
-                    SYS_MESSAGE("EXEC_FW_STATE_RECEIVE_CONFIG_WORD_STANDBY received wrong command stopping FW Handler.\n\r");
+                    LOG_Push("EXEC_FW_STATE_RECEIVE_CONFIG_WORD_STANDBY received wrong command stopping FW Handler.");
                     return_val = ERROR;
                 }
                 iConfigWordDownload = 0;
@@ -656,7 +656,7 @@ uint32_t FlashAllSlavesAuto(){
                         FWFLASHSLAVES_STATE_CHECK_CHECKSUM,                     // TASK_COMMAND
                         ERROR,                                                  // TASK_STATE
                         RECEIVED_CHECKSUM_NOK);                                 // TASK_MESSAGE
-                SYS_MESSAGE("Fw handler\t: FlashSlaves checksum is empty, stopping FW flash.\n\r");
+                LOG_Push("Fw handler\t: FlashSlaves checksum is empty, stopping FW flash.");
                 return_val = ERROR;
             }
             break;
@@ -670,7 +670,7 @@ uint32_t FlashAllSlavesAuto(){
             }
             else{
                 if((MASTER_SLAVE_DATA[SlaveId1].SlaveDetected == true) && (MASTER_SLAVE_DATA[SlaveId1].HoldingReg[11] != fwData.fwchecksum)){
-                    SYS_PRINT("Fw handler\t: EXEC_FW_STATE_FLASH_ALL_SLAVES flash Slave ID %d.\n\r", SlaveId1);
+                    LOG_Printf("Fw handler\t: EXEC_FW_STATE_FLASH_ALL_SLAVES flash Slave ID %d.", SlaveId1);
                     iFlashSlaves++;
                 }
                 else{
@@ -684,16 +684,16 @@ uint32_t FlashAllSlavesAuto(){
         {
             result = FlashSequencer(SlaveId1);
             switch (result){
-                case DONE:  SYS_MESSAGE("Fw handler\t: FWFLASHSEQUENCER_STATE_FLASHED_SLAVE DONE.\n\r");
+                case DONE:  LOG_Push("Fw handler\t: FWFLASHSEQUENCER_STATE_FLASHED_SLAVE DONE.");
                             SlaveId1++;
                             iFlashSlaves = 1;
                             break;
-                case ERROR: SYS_MESSAGE("Fw handler\t: FWFLASHSEQUENCER_STATE_FLASHED_SLAVE ERROR.\n\r");
+                case ERROR: LOG_Push("Fw handler\t: FWFLASHSEQUENCER_STATE_FLASHED_SLAVE ERROR.");
                             iFlashSlaves    = 0;
                             return_val      = ERROR;
                             break;
                 case BUSY : break;
-                default   : SYS_MESSAGE("Fw handler\t: FWFLASHSEQUENCER_STATE_FLASHED_SLAVE default case not allowed.\n\r");
+                default   : LOG_Push("Fw handler\t: FWFLASHSEQUENCER_STATE_FLASHED_SLAVE default case not allowed.");
             }
             break;
         }
@@ -795,7 +795,7 @@ uint32_t FlashSequencer(uint8_t Slave){
             }
             else if((DelayCount1 > DelayCount2) && ((0xFFFFFFFF - DelayCount1 + DelayCount2) > (10 * MILISECONDS) )){
                 iFlashSequencer = 4;
-                SYS_MESSAGE("Fw handler\t: overflow READxCORExTIMER() detected");
+                LOG_Push("Fw handler\t: overflow READxCORExTIMER() detected");
             }  
             break;
         }
@@ -839,7 +839,7 @@ uint32_t FlashSequencer(uint8_t Slave){
                     DelayCount1 = READxCORExTIMER();
                     break;                    
                 case SLAVENOK: 
-                    SYS_MESSAGE("Fw handler\t: FWFLASHSEQUENCER SLAVENOK returned in case 5.\n\r");
+                    LOG_Push("Fw handler\t: FWFLASHSEQUENCER SLAVENOK returned in case 5.");
                     iFlashSequencer = 2;
                     return_val = ERROR;
                     break;
@@ -872,7 +872,7 @@ uint32_t FlashSequencer(uint8_t Slave){
                     DelayCount1 = READxCORExTIMER();
                     break;                    
                 case SLAVENOK: 
-                    SYS_MESSAGE("Fw handler\t: FWFLASHSEQUENCER SLAVENOK returned in case 7.\n\r");
+                    LOG_Push("Fw handler\t: FWFLASHSEQUENCER SLAVENOK returned in case 7.");
                     iFlashSequencer = 2;
                     return_val = ERROR;
                     break;
@@ -908,7 +908,7 @@ uint32_t FlashSequencer(uint8_t Slave){
                     DelayCount1 = READxCORExTIMER();
                     break;                    
                 case SLAVENOK:
-                    SYS_MESSAGE("Fw handler\t: FWFLASHSEQUENCER SLAVENOK returned in case 9.\n\r");
+                    LOG_Push("Fw handler\t: FWFLASHSEQUENCER SLAVENOK returned in case 9.");
                     return_val = ERROR;
                     iFlashSequencer = 2;
                     break;
@@ -921,15 +921,15 @@ uint32_t FlashSequencer(uint8_t Slave){
         {
             result = GETxBOOTxLOADERxVERSION();
             switch (result){
-                case DONE:  SYS_MESSAGE("Fw handler\t: FWFLASHSEQUENCER_STATE_GET_BOOTLOADER_VERSION DONE.\n\r");
+                case DONE:  LOG_Push("Fw handler\t: FWFLASHSEQUENCER_STATE_GET_BOOTLOADER_VERSION DONE.");
                             iFlashSequencer++;
                             break;
-                case ERROR: SYS_MESSAGE("Fw handler\t: FWFLASHSEQUENCER_STATE_GET_BOOTLOADER_VERSION ERROR.\n\r");
+                case ERROR: LOG_Push("Fw handler\t: FWFLASHSEQUENCER_STATE_GET_BOOTLOADER_VERSION ERROR.");
                             iFlashSequencer = 0;
                             return_val      = ERROR;
                             break;
                 case BUSY : break;
-                default   : SYS_MESSAGE("Fw handler\t: FWFLASHSEQUENCER_STATE_GET_BOOTLOADER_VERSION default case not allowed.\n\r");
+                default   : LOG_Push("Fw handler\t: FWFLASHSEQUENCER_STATE_GET_BOOTLOADER_VERSION default case not allowed.");
             }
             break;
         }
@@ -938,15 +938,15 @@ uint32_t FlashSequencer(uint8_t Slave){
         {
             result = ERASExFLASH(SLAVE_BOOT_LOADER_OFFSET, SLAVE_FLASH_END);
             switch (result){
-                case DONE:  SYS_MESSAGE("Fw handler\t: FWFLASHSEQUENCER_STATE_ERASE_FLASH DONE.\n\r");
+                case DONE:  LOG_Push("Fw handler\t: FWFLASHSEQUENCER_STATE_ERASE_FLASH DONE.");
                             iFlashSequencer++;
                             break;
-                case ERROR: SYS_MESSAGE("Fw handler\t: FWFLASHSEQUENCER_STATE_ERASE_FLASH ERROR.\n\r");
+                case ERROR: LOG_Push("Fw handler\t: FWFLASHSEQUENCER_STATE_ERASE_FLASH ERROR.");
                             iFlashSequencer = 0;
                             return_val      = ERROR;
                             break;
                 case BUSY : break;
-                default   : SYS_MESSAGE("Fw handler\t: FWFLASHSEQUENCER_STATE_ERASE_FLASH default case not allowed.\n\r");
+                default   : LOG_Push("Fw handler\t: FWFLASHSEQUENCER_STATE_ERASE_FLASH default case not allowed.");
             }            
             break;
         }
@@ -955,15 +955,15 @@ uint32_t FlashSequencer(uint8_t Slave){
         {
             result = WRITExFLASH(SLAVE_BOOT_LOADER_OFFSET, SLAVE_FLASH_END, &FwFile[0]);
             switch (result){
-                case DONE:  SYS_MESSAGE("Fw handler\t: FWFLASHSEQUENCER_STATE_WRITE_FLASH DONE.\n\r");
+                case DONE:  LOG_Push("Fw handler\t: FWFLASHSEQUENCER_STATE_WRITE_FLASH DONE.");
                             iFlashSequencer++;
                             break;
-                case ERROR: SYS_MESSAGE("Fw handler\t: FWFLASHSEQUENCER_STATE_WRITE_FLASH ERROR.\n\r");
+                case ERROR: LOG_Push("Fw handler\t: FWFLASHSEQUENCER_STATE_WRITE_FLASH ERROR.");
                             iFlashSequencer = 0;
                             return_val      = ERROR;
                             break;
                 case BUSY : break;
-                default   : SYS_MESSAGE("Fw handler\t: FWFLASHSEQUENCER_STATE_WRITE_FLASH default case not allowed.\n\r");
+                default   : LOG_Push("Fw handler\t: FWFLASHSEQUENCER_STATE_WRITE_FLASH default case not allowed.");
             }
             break;
         }
@@ -972,15 +972,15 @@ uint32_t FlashSequencer(uint8_t Slave){
         {
             result = WRITExCONFIG(&FwConfigWord[0]);
             switch (result){
-                case DONE:  SYS_MESSAGE("Fw handler\t: FWFLASHSEQUENCER_STATE_WRITE_CONFIG DONE.\n\r");
+                case DONE:  LOG_Push("Fw handler\t: FWFLASHSEQUENCER_STATE_WRITE_CONFIG DONE.");
                             iFlashSequencer++;
                             break;
-                case ERROR: SYS_MESSAGE("Fw handler\t: FWFLASHSEQUENCER_STATE_WRITE_CONFIG ERROR.\n\r");
+                case ERROR: LOG_Push("Fw handler\t: FWFLASHSEQUENCER_STATE_WRITE_CONFIG ERROR.");
                             iFlashSequencer = 0;
                             return_val      = ERROR;
                             break;
                 case BUSY : break;
-                default   : SYS_MESSAGE("Fw handler\t: FWFLASHSEQUENCER_STATE_WRITE_CONFIG default case not allowed.\n\r");
+                default   : LOG_Push("Fw handler\t: FWFLASHSEQUENCER_STATE_WRITE_CONFIG default case not allowed.");
             }
             break;
         }
@@ -989,15 +989,15 @@ uint32_t FlashSequencer(uint8_t Slave){
         {
             result = CHECKxCHECKSUM(SLAVE_BOOT_LOADER_OFFSET, SLAVE_FLASH_END, checksum);
             switch (result){
-                case DONE:  SYS_MESSAGE("Fw handler\t: FWFLASHSEQUENCER_STATE_CHECK_CHECKSUM DONE.\n\r");
+                case DONE:  LOG_Push("Fw handler\t: FWFLASHSEQUENCER_STATE_CHECK_CHECKSUM DONE.");
                             iFlashSequencer++;
                             break;
-                case ERROR: SYS_MESSAGE("Fw handler\t: FWFLASHSEQUENCER_STATE_CHECK_CHECKSUM ERROR.\n\r");
+                case ERROR: LOG_Push("Fw handler\t: FWFLASHSEQUENCER_STATE_CHECK_CHECKSUM ERROR.");
                             iFlashSequencer = 0;
                             return_val      = ERROR;
                             break;
                 case BUSY : break;
-                default   : SYS_MESSAGE("Fw handler\t: FWFLASHSEQUENCER_STATE_CHECK_CHECKSUM default case not allowed.\n\r");
+                default   : LOG_Push("Fw handler\t: FWFLASHSEQUENCER_STATE_CHECK_CHECKSUM default case not allowed.");
             }
             break;
         }
@@ -1006,18 +1006,18 @@ uint32_t FlashSequencer(uint8_t Slave){
         {
             result = RESETxSLAVE();
             switch (result){
-                case DONE:  SYS_MESSAGE("Fw handler\t: FWFLASHSEQUENCER_STATE_RESET_SLAVE DONE.\n\r");
+                case DONE:  LOG_Push("Fw handler\t: FWFLASHSEQUENCER_STATE_RESET_SLAVE DONE.");
                             iFlashSequencer = 2;
                             fwData.SlaveBootloaderHandlingActive = false;       // enable modbus again
                             return_val      = DONE;
                             break;
-                case ERROR: SYS_MESSAGE("Fw handler\t: FWFLASHSEQUENCER_STATE_RESET_SLAVE ERROR.\n\r");
+                case ERROR: LOG_Push("Fw handler\t: FWFLASHSEQUENCER_STATE_RESET_SLAVE ERROR.");
                             iFlashSequencer = 2;
                             fwData.SlaveBootloaderHandlingActive = false;       // enable modbus again
                             return_val      = ERROR;
                             break;
                 case BUSY : break;
-                default   : SYS_MESSAGE("Fw handler\t: FWFLASHSEQUENCER_STATE_RESET_SLAVE default case not allowed.\n\r");
+                default   : LOG_Push("Fw handler\t: FWFLASHSEQUENCER_STATE_RESET_SLAVE default case not allowed.");
             }
             break;
         }
@@ -1092,7 +1092,7 @@ uint32_t        SelectSlave         (uint8_t SlaveId){
                 EXEC_FW_STATE_SELECT_SLAVE,                                     // TASK_COMMAND
                 ERROR,                                                          // TASK_STATE
                 SLAVE_ID_OUT_OF_BOUNDS);                                        // TASK_MESSAGE
-        SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_SELECT_SLAVE SLAVE_ID_OUT_OF_BOUNDS ERROR.\n\r");
+        LOG_Push("Fw handler\t: EXEC_FW_STATE_SELECT_SLAVE SLAVE_ID_OUT_OF_BOUNDS ERROR.");
         return (ERROR);
     }
     
@@ -1113,7 +1113,7 @@ uint32_t        SelectSlave         (uint8_t SlaveId){
             }
             else if((DelayCount1 > DelayCount2) && ((0xFFFFFFFF - DelayCount1 + DelayCount2) > (10 * MILISECONDS) )){
                 iSelectSlaveSequencer = 2;
-                SYS_MESSAGE("Fw handler\t: overflow READxCORExTIMER() detected");
+                LOG_Push("Fw handler\t: overflow READxCORExTIMER() detected");
             }  
             break;
         }
@@ -1141,7 +1141,7 @@ uint32_t        SelectSlave         (uint8_t SlaveId){
                     DelayCount1 = READxCORExTIMER();
                     break;                    
                 case SLAVENOK: 
-                    SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_SELECT_SLAVE SLAVENOK returned in case 3.\n\r");
+                    LOG_Push("Fw handler\t: EXEC_FW_STATE_SELECT_SLAVE SLAVENOK returned in case 3.");
                     iSelectSlaveSequencer = 0;
                     return_val = ERROR;
                     break;
@@ -1174,7 +1174,7 @@ uint32_t        SelectSlave         (uint8_t SlaveId){
                     DelayCount1 = READxCORExTIMER();
                     break;                    
                 case SLAVENOK: 
-                    SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_SELECT_SLAVE SLAVENOK returned in case 5.\n\r");
+                    LOG_Push("Fw handler\t: EXEC_FW_STATE_SELECT_SLAVE SLAVENOK returned in case 5.");
                     iSelectSlaveSequencer = 0;
                     return_val = ERROR;
                     break;
@@ -1209,7 +1209,7 @@ uint32_t        SelectSlave         (uint8_t SlaveId){
                     DelayCount1 = READxCORExTIMER();
                     break;                    
                 case SLAVENOK:
-                    SYS_MESSAGE("Fw handler\t: EXEC_FW_STATE_SELECT_SLAVE SLAVENOK returned in case 7.\n\r");
+                    LOG_Push("Fw handler\t: EXEC_FW_STATE_SELECT_SLAVE SLAVENOK returned in case 7.");
                     return_val = ERROR;
                     iSelectSlaveSequencer = 0;
                     break;

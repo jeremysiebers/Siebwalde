@@ -247,6 +247,13 @@ const TCPIP_UDP_MODULE_CONFIG tcpipUDPInitData =
     .sktTxBuffSize  = TCPIP_UDP_SOCKET_DEFAULT_TX_SIZE, 
 };
 
+/*** TCP Sockets Initialization Data ***/
+const TCPIP_TCP_MODULE_CONFIG tcpipTCPInitData =
+{
+    .nSockets       = TCPIP_TCP_MAX_SOCKETS,
+    .sktTxBuffSize  = TCPIP_TCP_SOCKET_DEFAULT_TX_SIZE, 
+    .sktRxBuffSize  = TCPIP_TCP_SOCKET_DEFAULT_RX_SIZE,
+};
 
 
 
@@ -355,6 +362,7 @@ const TCPIP_STACK_MODULE_CONFIG TCPIP_STACK_MODULE_CONFIG_TBL [] =
     {TCPIP_MODULE_ICMP,             0},                             // TCPIP_MODULE_ICMP
     {TCPIP_MODULE_ARP,              &tcpipARPInitData},             // TCPIP_MODULE_ARP
     {TCPIP_MODULE_UDP,              &tcpipUDPInitData},             // TCPIP_MODULE_UDP
+    {TCPIP_MODULE_TCP,              &tcpipTCPInitData},             // TCPIP_MODULE_TCP
     {TCPIP_MODULE_DHCP_CLIENT,      &tcpipDHCPInitData},            // TCPIP_MODULE_DHCP_CLIENT
     {TCPIP_MODULE_ANNOUNCE,         &tcpipAnnounceInitData},        // TCPIP_MODULE_ANNOUNCE
     {TCPIP_MODULE_NBNS,             &tcpipNBNSInitData},            // TCPIP_MODULE_NBNS
@@ -489,12 +497,7 @@ void SYS_Initialize ( void* data )
 
 
     /* Enable Global Interrupts */
-    SYS_INT_Enable();
-
-    /* Initialize the Application */
-    MBUS_Initialize();
-    ETHERNET_Initialize();
-    CONTROLLER_Initialize();
+    SYS_INT_Enable();    
 }
 
 

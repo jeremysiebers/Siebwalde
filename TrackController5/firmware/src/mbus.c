@@ -215,54 +215,54 @@ void MBUS_Tasks ( void )
             if ( DRV_HANDLE_INVALID == mbusData.ModbusCommCycleHandle )
             {
                 // Unable to open the driver
-                SYS_MESSAGE("Mbus handler\t: Failed to open mbusData.ModbusCommCycleHandle.\n\r");
+                LOG_Push("Mbus handler\t: Failed to open mbusData.ModbusCommCycleHandle.");
             }
             if ( DRV_HANDLE_INVALID == mbusData.ModbusCharacterTimeoutHandle )
             {
                 // Unable to open the driver
-                SYS_MESSAGE("Mbus handler\t: Failed to open mbusData.ModbusCharacterTimeoutHandle.\n\r");
+                LOG_Push("Mbus handler\t: Failed to open mbusData.ModbusCharacterTimeoutHandle.");
             }
             if ( DRV_HANDLE_INVALID == mbusData.ModbusReceiveTimeoutHandle )
             {
                 // Unable to open the driver
-                SYS_MESSAGE("Mbus handler\t: Failed to open mbusData.ModbusReceiveTimeoutHandle.\n\r");
+                LOG_Push("Mbus handler\t: Failed to open mbusData.ModbusReceiveTimeoutHandle.");
             }
 
 
             actualFrequency = DRV_TMR_CounterFrequencyGet(mbusData.ModbusCommCycleHandle);
-            divider = actualFrequency/(uint32_t)832; // cacluate divider value
-//            SYS_PRINT("Mbus handler\t: ModbusCommCycleHandle divider is %d.\r\n", divider);
+            divider = actualFrequency/(uint32_t)832; // calculate divider value
+//            LOG_Push("Mbus handler\t: ModbusCommCycleHandle divider is %d.\r\n", divider);
 //            if (DRV_TMR_AlarmRegister(mbusData.ModbusCommCycleHandle, 394,true, 0, ModbusCommCycleCallBack) == true){
             if (DRV_TMR_AlarmRegister(mbusData.ModbusCommCycleHandle, divider,true, 0, ModbusCommCycleCallBack) == true){
                 _nop();
                 
             }
             else{
-                SYS_MESSAGE("Mbus handler\t: Register mbusData.ModbusCommCycleCallBack failed.\n\r");
+                LOG_Push("Mbus handler\t: Register mbusData.ModbusCommCycleCallBack failed.");
             }
 
             actualFrequency = DRV_TMR_CounterFrequencyGet(mbusData.ModbusCharacterTimeoutHandle);
             divider = actualFrequency/(uint32_t)41015; // cacluate divider value
-//            SYS_PRINT("Mbus handler\t: ModbusCharacterTimeoutHandle divider is %d.\r\n", divider);
+//            LOG_Push("Mbus handler\t: ModbusCharacterTimeoutHandle divider is %d.\r\n", divider);
 //            if (DRV_TMR_AlarmRegister(mbusData.ModbusCharacterTimeoutHandle, 8,true, 0, ModbusCharacterTimeoutCallBack) == true){
             if (DRV_TMR_AlarmRegister(mbusData.ModbusCharacterTimeoutHandle, divider,true, 0, ModbusCharacterTimeoutCallBack) == true){
                 _nop();
                 
             }
             else{
-                SYS_MESSAGE("Mbus handler\t: Register mbusData.ModbusCharacterTimeoutCallBack failed.\n\r");
+                LOG_Push("Mbus handler\t: Register mbusData.ModbusCharacterTimeoutCallBack failed.");
             }
 
             actualFrequency = DRV_TMR_CounterFrequencyGet(mbusData.ModbusReceiveTimeoutHandle);
             divider = actualFrequency/(uint32_t)4002; // cacluate divider value
-//            SYS_PRINT("Mbus handler\t: ModbusReceiveTimeoutHandle divider is %d.\r\n", divider);
+//            LOG_Push("Mbus handler\t: ModbusReceiveTimeoutHandle divider is %d.\r\n", divider);
 //            if (DRV_TMR_AlarmRegister(mbusData.ModbusReceiveTimeoutHandle, 82,true, 0, ModbusReceiveTimeoutCallBack) == true){
             if (DRV_TMR_AlarmRegister(mbusData.ModbusReceiveTimeoutHandle, divider,true, 0, ModbusReceiveTimeoutCallBack) == true){
                 _nop();
                 
             }
             else{
-                SYS_MESSAGE("Mbus handler\t: Register mbusData.ModbusReceiveTimeoutCallBack failed.\n\r");
+                LOG_Push("Mbus handler\t: Register mbusData.ModbusReceiveTimeoutCallBack failed.");
             }
             
             mbusData.state = MBUS_STATE_WAIT;            
@@ -287,7 +287,7 @@ void MBUS_Tasks ( void )
             if((READxCORExTIMER() - DelayCount) > 200000000){
                 mbusData.state = MBUS_STATE_WAIT;
                 CREATExTASKxSTATUSxMESSAGE(task_id, MBUS_STATE_SLAVES_ON, DONE, NONE);
-                SYS_MESSAGE("Mbus handler\t: MBUS_STATE_SLAVES_BOOT_WAIT done.\n\r");
+                LOG_Push("Mbus handler\t: MBUS_STATE_SLAVES_BOOT_WAIT done.");
             }            
             break;
         }
@@ -297,7 +297,7 @@ void MBUS_Tasks ( void )
             if (SLAVExDETECT()){
                 mbusData.state = MBUS_STATE_WAIT;
                 CREATExTASKxSTATUSxMESSAGE(task_id, MBUS_STATE_SLAVE_DETECT, DONE, NONE);
-                SYS_MESSAGE("Mbus handler\t: MBUS_STATE_SLAVE_DETECT done.\n\r");
+                LOG_Push("Mbus handler\t: MBUS_STATE_SLAVE_DETECT done.");
                 MaxSlaveUploadCount = 50;                                       // limit the upload to slave data only (cyclic))
             }
             PROCESSxPETITxMODBUS();
@@ -309,7 +309,7 @@ void MBUS_Tasks ( void )
             if (SLAVExFWxHANDLER()){
                 mbusData.state = MBUS_STATE_WAIT;
                 CREATExTASKxSTATUSxMESSAGE(task_id, MBUS_STATE_SLAVE_FW_FLASH, DONE, NONE);
-                SYS_MESSAGE("Mbus handler\t: MBUS_STATE_SLAVE_FW_FLASH done.\n\r");
+                LOG_Push("Mbus handler\t: MBUS_STATE_SLAVE_FW_FLASH done.");
             }
             if(fwData.SlaveBootloaderHandlingActive == false){
                 PROCESSxPETITxMODBUS();
@@ -323,7 +323,7 @@ void MBUS_Tasks ( void )
             {                
                 mbusData.state = MBUS_STATE_WAIT;
                 CREATExTASKxSTATUSxMESSAGE(task_id, MBUS_STATE_SLAVE_INIT, DONE, NONE);
-                SYS_MESSAGE("Mbus handler\t: MBUS_STATE_SLAVE_INIT done.\n\r");
+                LOG_Push("Mbus handler\t: MBUS_STATE_SLAVE_INIT done.");
             }
             PROCESSxPETITxMODBUS();
             break;
@@ -334,7 +334,7 @@ void MBUS_Tasks ( void )
             if (ENABLExAMPLIFIER()){                
                 mbusData.state = MBUS_STATE_SERVICE_TASKS;                
                 CREATExTASKxSTATUSxMESSAGE(task_id, MBUS_STATE_SLAVE_ENABLE, DONE, NONE);
-                SYS_MESSAGE("Mbus handler\t: MBUS_STATE_SLAVE_ENABLE done.\n\r");
+                LOG_Push("Mbus handler\t: MBUS_STATE_SLAVE_ENABLE done.");
             }
             PROCESSxPETITxMODBUS();
             break;
@@ -346,7 +346,7 @@ void MBUS_Tasks ( void )
             mbusData.state  = MBUS_STATE_WAIT;
             mbusData.upload = UPLOAD_STATE_ALL;
             CREATExTASKxSTATUSxMESSAGE(task_id, MBUS_STATE_START_DATA_UPLOAD, DONE, NONE);
-            SYS_MESSAGE("Mbus handler\t: MBUS_STATE_START_DATA_UPLOAD done.\n\r");
+            LOG_Push("Mbus handler\t: MBUS_STATE_START_DATA_UPLOAD done.");
             break;
         }
 
@@ -378,7 +378,7 @@ void MBUS_Tasks ( void )
             if((READxCORExTIMER() - DelayCount) > (1* SECONDS)){
                 mbusData.state = MBUS_STATE_WAIT;
                 CREATExTASKxSTATUSxMESSAGE(task_id, MBUS_STATE_RESET, DONE, NONE);
-                SYS_MESSAGE("Mbus handler\t: MBUS_STATE_RESET_WAIT done.\n\r");
+                LOG_Push("Mbus handler\t: MBUS_STATE_RESET_WAIT done.");
             }            
             break;
         }
@@ -391,7 +391,7 @@ void MBUS_Tasks ( void )
         }
     }
     
-    
+    // upload slave data to PC client app
     switch ( mbusData.upload )
     {
         /* Application's initial state. */

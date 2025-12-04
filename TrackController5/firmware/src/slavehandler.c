@@ -166,21 +166,56 @@ bool PROCESSxNEXTxSLAVE(){
 //uint8_t HoldingRegistersRead [4] = {0, 0, 0, 0};                                // {start address High, start address Low, number of registers High, number of registers Low}
 //uint8_t HoldingRegistersWrite[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};                 // {start address High, start address Low, number of registers High, number of registers Low, 
 
-uint8_t MasterMessageCounter = 0;
-
-bool SendNextMessage(){
+bool SendNextMessage(void)
+{
     bool return_val = false;
-    
-    /* Fetch data from the slaves according to priority */
-    if (ProcessSlave > 0){
-        switch (Message){
+
+    /* --------------------------------------------------------------------
+     * 1) High priority: berichten uit de mailbox (PC -> Master -> Slave)
+     * -------------------------------------------------------------------- */
+    if (Rcd_Ptr_prev != Rcd_Ptr)
+    {
+        if (Rcd_Ptr_prev >= &Rcd[MAILBOXRCD])
+        {
+            Rcd_Ptr_prev = &Rcd[0];
+        }
+
+        /* Kopieer mailbox entry naar de globale Data-struct */
+        Data.SlaveAddress  = Rcd_Ptr_prev->SlaveAddress;
+        Data.Direction     = Rcd_Ptr_prev->Direction;
+        Data.NoOfRegisters = Rcd_Ptr_prev->NoOfRegisters;
+        Data.StartRegister = Rcd_Ptr_prev->StartRegister;
+        Data.RegData0      = Rcd_Ptr_prev->RegData0;
+        Data.RegData1      = Rcd_Ptr_prev->RegData1;
+
+        /* Voor CHECKxMODBUSxCOMMxSTATUS() */
+        ProcessSlaveLast = Data.SlaveAddress;
+
+        SLAVExCOMMUNICATIONxHANDLER();
+
+        /* Na versturen naar volgende mailbox entry */
+        Rcd_Ptr_prev++;
+        if (Rcd_Ptr_prev >= &Rcd[MAILBOXRCD])
+        {
+            Rcd_Ptr_prev = &Rcd[0];
+        }
+
+        return true;   // deze Modbus-cyclus is gevuld met 1 PC-bericht
+    }
+
+    /* --------------------------------------------------------------------
+     * 2) Geen PC-commando's ? normale cyclic slave polling
+     * -------------------------------------------------------------------- */
+    if (ProcessSlave > 0)
+    {
+        /* Fetch data from the slaves according to priority */
+        switch (Message)
+        {
             case MESSAGE1:
                 Data.SlaveAddress  = ProcessSlave;
                 Data.Direction     = READ;
                 Data.NoOfRegisters = 2;
                 Data.StartRegister = HOLDINGREG0;
-//                Data.RegData0      = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[0];
-//                Data.RegData1      = MASTER_SLAVE_DATA[ProcessSlave].HoldingReg[1];
                 SLAVExCOMMUNICATIONxHANDLER();
                 break;
 
@@ -193,13 +228,15 @@ bool SendNextMessage(){
                 break;
 
             case MESSAGE3:
-                switch (SlaveInfoProcessor){
+                switch (SlaveInfoProcessor)
+                {
                     case SIP1:
                         Data.SlaveAddress  = ProcessSlave;
                         Data.Direction     = READ;
                         Data.NoOfRegisters = 2;
                         Data.StartRegister = HOLDINGREG4;
                         SLAVExCOMMUNICATIONxHANDLER();
+                        break;
 
                     case SIP2:
                         Data.SlaveAddress  = ProcessSlave;
@@ -214,7 +251,7 @@ bool SendNextMessage(){
                         Data.Direction     = READ;
                         Data.NoOfRegisters = 2;
                         Data.StartRegister = HOLDINGREG8;
-                        SLAVExCOMMUNICATIONxHANDLER(); 
+                        SLAVExCOMMUNICATIONxHANDLER();
                         break;
 
                     case SIP4:
@@ -222,56 +259,33 @@ bool SendNextMessage(){
                         Data.Direction     = READ;
                         Data.NoOfRegisters = 2;
                         Data.StartRegister = HOLDINGREG10;
-                        SLAVExCOMMUNICATIONxHANDLER(); 
+                        SLAVExCOMMUNICATIONxHANDLER();
                         break;
 
                     default:
-                        break;                
+                        break;
                 }
                 break;
 
-            default :
+            default:
                 break;
         }
+
         ProcessSlaveLast = ProcessSlave;
         return_val = true;
     }
-    /* Messages directly to the slaves from the PC. */
-    else{
-        /* Next counter takes care that max number of messages sent by master does not
-         * exceed 50 like the normal message sequence so max 50 messages can be send
-         */
-        MasterMessageCounter++;
-        if (MasterMessageCounter    > 50){
-            MasterMessageCounter    = 0;
-            return_val              = true;
-        }
-        else{
-            if (Rcd_Ptr_prev != Rcd_Ptr){
-                
-                if(Rcd_Ptr_prev >= &Rcd[MAILBOXRCD]){
-                    Rcd_Ptr_prev = &Rcd[0];
-                }
-                Data.SlaveAddress  = Rcd_Ptr_prev->SlaveAddress;
-                Data.Direction     = Rcd_Ptr_prev->Direction;
-                Data.NoOfRegisters = Rcd_Ptr_prev->NoOfRegisters;
-                Data.StartRegister = Rcd_Ptr_prev->StartRegister;
-                Data.RegData0      = Rcd_Ptr_prev->RegData0;
-                Data.RegData1      = Rcd_Ptr_prev->RegData1;
-                SLAVExCOMMUNICATIONxHANDLER();
-                Rcd_Ptr_prev++;                                                 // first read the previous data then increment
-            }
-            else{
-                /* Stop the master processing as soon as there are no more
-                 * messages to be processed */
-                MasterMessageCounter    = 0;
-                //return_val              = true;
-                iProcessNextSlave       = 0; // reuse this cycle to actually do something else
-                ProcessSlave++;              // also tell to go to the next slave
-            }
-        }                  
+    else
+    {
+        /* ProcessSlave == 0 en geen mailbox-data:
+         * gebruik deze cycle om direct een volgende slave/Message klaar te
+         * zetten via PROCESSxNEXTxSLAVE(). */
+        iProcessNextSlave = 0;
+        ProcessSlave++;
+        /* return_val blijft false: MBUS laat UpdateNextSlave op true staan
+         * en zal PROCESSxNEXTxSLAVE() opnieuw aanroepen. */
     }
-    return (return_val);        
+
+    return return_val;
 }
 
 /*#--------------------------------------------------------------------------#*/
@@ -298,33 +312,33 @@ bool PROCESSxSLAVExCOMMUNICATION(){
     /* Verify communication was OK */
     switch(CHECKxMODBUSxCOMMxSTATUS(ProcessSlaveLast, true)){
         case SLAVEOK: 
-            //sprintf(msg, "Mbus handler\t: CHECKxMODBUSxCOMMxSTATUS SLAVE OK (ID=%d).\n\r", ProcessSlave);
-            //SYS_MESSAGE(msg);
+            //sprintf(msg, "Mbus handler\t: CHECKxMODBUSxCOMMxSTATUS SLAVE OK (ID=%d).", ProcessSlave);
+            //LOG_Push(msg);
             return_Val = true;
             break;                    
         case SLAVENOK:            
-            //sprintf(msg, "Mbus handler\t: CHECKxMODBUSxCOMMxSTATUS SLAVE NOK (ID=%d).\n\r", ProcessSlave);
-            //SYS_MESSAGE(msg);
+            //sprintf(msg, "Mbus handler\t: CHECKxMODBUSxCOMMxSTATUS SLAVE NOK (ID=%d).", ProcessSlave);
+            //LOG_Push(msg);
             return_Val = true;
             break;
         case SLAVE_DATA_TIMEOUT:            
-            //sprintf(msg, "Mbus handler\t: CHECKxMODBUSxCOMMxSTATUS SLAVE_DATA_TIMEOUT (ID=%d).\n\r", ProcessSlave);
-            //SYS_MESSAGE(msg);
+            //sprintf(msg, "Mbus handler\t: CHECKxMODBUSxCOMMxSTATUS SLAVE_DATA_TIMEOUT (ID=%d).", ProcessSlave);
+            //LOG_Push(msg);
             return_Val = true;
             break;
         case SLAVE_DATA_EXCEPTION:            
-            //sprintf(msg, "Mbus handler\t: CHECKxMODBUSxCOMMxSTATUS SLAVE_DATA_EXCEPTION (ID=%d).\n\r", ProcessSlave);
-            //SYS_MESSAGE(msg);
+            //sprintf(msg, "Mbus handler\t: CHECKxMODBUSxCOMMxSTATUS SLAVE_DATA_EXCEPTION (ID=%d).", ProcessSlave);
+            //LOG_Push(msg);
             return_Val = true;
             break;
         case SLAVE_DATA_IDLE:            
-            //sprintf(msg, "Mbus handler\t: CHECKxMODBUSxCOMMxSTATUS SLAVE_DATA_IDLE (ID=%d).\n\r", ProcessSlave);
-            //SYS_MESSAGE(msg);
+            //sprintf(msg, "Mbus handler\t: CHECKxMODBUSxCOMMxSTATUS SLAVE_DATA_IDLE (ID=%d).", ProcessSlave);
+            //LOG_Push(msg);
             return_Val = true;
             break;
         case SLAVE_DATA_UNKNOWN:            
-            //sprintf(msg, "Mbus handler\t: CHECKxMODBUSxCOMMxSTATUS SLAVE_DATA_UNKNOWN (ID=%d).\n\r", ProcessSlave);
-            //SYS_MESSAGE(msg);
+            //sprintf(msg, "Mbus handler\t: CHECKxMODBUSxCOMMxSTATUS SLAVE_DATA_UNKNOWN (ID=%d).", ProcessSlave);
+            //LOG_Push(msg);
             return_Val = true;
             break;
         
@@ -356,41 +370,41 @@ bool PROCESSxSLAVExCOMMUNICATION(){
  */
 /*#--------------------------------------------------------------------------#*/
 
-static bool FirstMessage = true;
-
-void ADDxNEWxSLAVExDATAxCMDxTOxSLAVExMAILBOX(uint8_t *data){    
-    
-    if(FirstMessage == false && Rcd_Ptr == Rcd_Ptr_prev){
-    
-        CREATExTASKxSTATUSxMESSAGE(
-            MBUS,                                   // TASK_ID
-            EXEC_MBUS_SLAVE_DATA_EXCH,              // TASK_COMMAND
-            ERROR,                                  // TASK_STATE
-            MESSAGE_BUFFER_FULL);                   // TASK_MESSAGE
-        SYS_MESSAGE("Mbus handler\t: EXEC_MBUS_SLAVE_DATA_EXCH ERROR MESSAGE_BUFFER_FULL.\n\r");
+void ADDxNEWxSLAVExDATAxCMDxTOxSLAVExMAILBOX(uint8_t *data)
+{
+    // Calculate the next write position
+    REGISTER_PROCESSING *next = Rcd_Ptr + 1;
+    if (next >= &Rcd[MAILBOXRCD]) {
+        next = &Rcd[0];
     }
-    else{
-        Rcd_Ptr->SlaveAddress   = data[0];
-        Rcd_Ptr->Direction      = data[1];
-        Rcd_Ptr->NoOfRegisters  = data[2];
-        Rcd_Ptr->StartRegister  = data[3];
-        Rcd_Ptr->RegData0 = ((uint16_t)data[4] << 8) | data[5];
-        Rcd_Ptr->RegData1 = ((uint16_t)data[6] << 8) | data[7];
 
-        Rcd_Ptr++;
-
-        if(Rcd_Ptr >= &Rcd[MAILBOXRCD]){
-            Rcd_Ptr = &Rcd[0];
-        }
-        
+    // IF next is going to hit the read pointer --> buffer full
+    if (next == Rcd_Ptr_prev)
+    {
         CREATExTASKxSTATUSxMESSAGE(
-            MBUS,                                   // TASK_ID
-            EXEC_MBUS_SLAVE_DATA_EXCH,              // TASK_COMMAND
-            DONE,                                   // TASK_STATE
-            NONE);                                  // TASK_MESSAGE
+            MBUS,
+            EXEC_MBUS_SLAVE_DATA_EXCH,
+            ERROR,
+            MESSAGE_BUFFER_FULL);
+        LOG_Push("Mbus handler\t: EXEC_MBUS_SLAVE_DATA_EXCH ERROR MESSAGE_BUFFER_FULL.");
+        return;
     }
-    
-    /* Only 1 time required to be true to start using pointers otherwise they
-     are equal */
-    //FirstMessage = false;
+
+    // There is room in the buffer: write current entry on Rcd_Ptr
+    Rcd_Ptr->SlaveAddress   = data[0];
+    Rcd_Ptr->Direction      = data[1];
+    Rcd_Ptr->NoOfRegisters  = data[2];
+    Rcd_Ptr->StartRegister  = data[3];
+    Rcd_Ptr->RegData0       = ((uint16_t)data[4] << 8) | data[5];
+    Rcd_Ptr->RegData1       = ((uint16_t)data[6] << 8) | data[7];
+
+    // Commit: schrijf-pointer verschuiven naar next
+    Rcd_Ptr = next;
+
+    CREATExTASKxSTATUSxMESSAGE(
+        MBUS,
+        EXEC_MBUS_SLAVE_DATA_EXCH,
+        DONE,
+        NONE);
 }
+
