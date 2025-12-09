@@ -6,7 +6,7 @@
 void    ADC_BMF     (void);
 
 static uint16_t MeausureBemfCnt = 0;
-static uint16_t MeasueBemf = 0;
+static uint16_t MeasueBemf = false;
 static uint16_t Sequence = 0;
 
 /*#--------------------------------------------------------------------------#*/
@@ -27,39 +27,63 @@ static uint16_t Sequence = 0;
 /*#--------------------------------------------------------------------------#*/
 uint16_t MEASURExBMF(){
     
-    uint16_t Return_Val = 0;
-    static uint8_t Sequence = 0;
-    static uint8_t MeausureBemfCnt = 0;
-    static bool    MeasueBemf = false;
+    uint16_t Return_Val = false;
+    if(MeasueBemf){
+        ADC_BMF();
+    }
     
     switch(Sequence){
         case 0:
+            Return_Val = true;
             MeausureBemfCnt++;
-            if (MeausureBemfCnt > 5 && MeausureBemfCnt < 7){                // Read back EMF as late as possible
-                MeasueBemf = true;                                           // set update PID
-            }
-            else if(MeasueBemf == true && MeausureBemfCnt > 6){
-                MeasueBemf  = false;                        
-            }
-            
-            if (MeausureBemfCnt > 7){                                       // after 800us enable H bridge again
+            if (MeausureBemfCnt > 1){                                           // disable H bridge every 10ms
                 MeausureBemfCnt = 0;
-                TRISCbits.TRISC4 = 0;
-                TRISCbits.TRISC5 = 0;
-                TRISCbits.TRISC6 = 0; 
-                NC_2_LAT = false;
-                Return_Val = true;
-                Sequence = 0;
+                TRISCbits.TRISC4 = 1;
+                TRISCbits.TRISC5 = 1;
+                TRISCbits.TRISC6 = 1;
+                T1CONbits.TMR1ON = 0;
+                TMR1H = 0xFF;
+                TMR1L = 0x38;
+                PIR4bits.TMR1IF = 0;
+                T1CONbits.TMR1ON = 1;
+                Return_Val = false;                                              
+                NC_2_LAT = true;
+                Sequence++;
+            }
+            break;
+            
+        case 1:
+            if (PIR4bits.TMR1IF){
+                T1CONbits.TMR1ON = 0;
+                TMR1H = 0xFF;
+                TMR1L = 0x38;
+                PIR4bits.TMR1IF = 0;
+                T1CONbits.TMR1ON = 1;
+                
+                MeausureBemfCnt++;
+                
+                if (MeausureBemfCnt > 5 && MeausureBemfCnt < 7){                // Read back EMF as late as possible
+                    MeasueBemf = true;                                           // set update PID
+                }
+                else if(MeasueBemf == true && MeausureBemfCnt > 6){
+                    MeasueBemf  = false;                        
+                }
+                
+                if (MeausureBemfCnt > 7){                                       // after 800us enable H bridge again
+                    MeausureBemfCnt = 0;
+                    TRISCbits.TRISC4 = 0;
+                    TRISCbits.TRISC5 = 0;
+                    TRISCbits.TRISC6 = 0; 
+                    NC_2_LAT = false;
+                    Return_Val = true;
+                    Sequence = 0;
+                }
             }
             break;
             
         default :
             Sequence = 0;
             break;
-    }
-    
-    if (MeasueBemf){
-        ADC_BMF();        
     }
     
     return (Return_Val);

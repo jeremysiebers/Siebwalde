@@ -192,6 +192,10 @@ bool SendNextMessage(void)
         ProcessSlaveLast = Data.SlaveAddress;
 
         SLAVExCOMMUNICATIONxHANDLER();
+                
+//        LOG_Printf("Mbus handler\t: Dt to #%d, dir %d, NoReg %d, Strt %d, Dat0 %d, Dat1 %d .",
+//                Rcd_Ptr_prev->SlaveAddress, Rcd_Ptr_prev->Direction, Rcd_Ptr_prev->NoOfRegisters, 
+//                Rcd_Ptr_prev->StartRegister, Rcd_Ptr_prev->RegData0, Rcd_Ptr_prev->RegData1);
 
         /* Na versturen naar volgende mailbox entry */
         Rcd_Ptr_prev++;
@@ -395,8 +399,11 @@ void ADDxNEWxSLAVExDATAxCMDxTOxSLAVExMAILBOX(uint8_t *data)
     Rcd_Ptr->Direction      = data[1];
     Rcd_Ptr->NoOfRegisters  = data[2];
     Rcd_Ptr->StartRegister  = data[3];
-    Rcd_Ptr->RegData0       = ((uint16_t)data[4] << 8) | data[5];
-    Rcd_Ptr->RegData1       = ((uint16_t)data[6] << 8) | data[7];
+    Rcd_Ptr->RegData0       = ((uint16_t)data[5] << 8) | data[4];
+    Rcd_Ptr->RegData1       = ((uint16_t)data[7] << 8) | data[6];
+    
+//    LOG_Printf("Mbus handler\t: Dt rc #%d, dir %d, NoReg %d, Strt %d, Dat4 %d, Dat5 %d, Dat6 %d, Dat7 %d .",
+//                data[0], data[1], data[2], data[3], data[4], data[5],data[6], data[7]);
 
     // Commit: schrijf-pointer verschuiven naar next
     Rcd_Ptr = next;

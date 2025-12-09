@@ -168,7 +168,7 @@ void main(void) {
                         
                     case 2:
                         if(ADCxIO() == true){
-                            Sequencer++;
+                            Sequencer = 0;
                             Update_Amplifier = false;
                         }
                         break;

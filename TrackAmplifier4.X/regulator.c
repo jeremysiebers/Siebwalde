@@ -26,10 +26,18 @@ uint16_t REGULATORxINIT (){
     
     uint16_t Return_Val = false;
     
-    PwmDutyCyclePrev = 0;
+    PwmDutyCyclePrev = 399;
     
-    PWM3_Initialize();
-    PWM3_LoadDutyValue(0);
+    //PWM3_Initialize();
+    PWM3_LoadDutyValue(399);
+    
+    TRISCbits.TRISC4 = 0;
+    TRISCbits.TRISC5 = 0;
+    TRISCbits.TRISC6 = 0;
+    
+    PWM3EN = true;
+    LM_PWM_LAT = true;
+    PetitHoldingRegisters[HR_PWM_COMMAND].ActValue |= (HR_PWM_SETPOINT_MASK & 400);
     
     return (Return_Val);
 }
@@ -56,8 +64,8 @@ uint16_t REGULATORxUPDATE (){
     
     /* EMO stop: kill PWM immediately if EMO bit is set in HR_PWM_COMMAND */
     if (PetitHoldingRegisters[HR_PWM_COMMAND].ActValue & HR_PWM_EMO_BIT){        // If EMO command active kill PWM
-        PWM3_LoadDutyValue(0);
-        PwmDutyCyclePrev = 0;
+        //PWM3_LoadDutyValue(0);
+        //PwmDutyCyclePrev = 0;
         LED_OCC_LAT = true;
         Return_Val = true;
         return (Return_Val);
@@ -76,6 +84,9 @@ uint16_t REGULATORxUPDATE (){
         
     if ((PwmDutyCyclePrev != (PetitHoldingRegisters[HR_PWM_COMMAND].ActValue & HR_PWM_SETPOINT_MASK))){
         
+        if((PetitHoldingRegisters[HR_PWM_COMMAND].ActValue & HR_PWM_SETPOINT_MASK) == 0){
+            PetitHoldingRegisters[HR_PWM_COMMAND].ActValue |= (HR_PWM_SETPOINT_MASK & 1);
+        }
         PWM3_LoadDutyValue(PetitHoldingRegisters[HR_PWM_COMMAND].ActValue & HR_PWM_SETPOINT_MASK);     // load duty cycle from register
         PwmDutyCyclePrev = PetitHoldingRegisters[HR_PWM_COMMAND].ActValue & HR_PWM_SETPOINT_MASK;
         Return_Val = true;

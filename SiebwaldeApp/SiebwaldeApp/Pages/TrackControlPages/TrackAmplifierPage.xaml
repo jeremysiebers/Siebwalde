@@ -128,7 +128,7 @@
                                                         <!-- UI-command zegt: EMO aan -->
                                                         <Condition Binding="{Binding EmoStop}" Value="True" />
                                                         <!-- Amplifier zegt: EMO nog niet actief -->
-                                                        <Condition Binding="{Binding EmoStopFeedback}" Value="False" />
+                                                        <!--<Condition Binding="{Binding EmoStopFeedback}" Value="False" /> -->
                                                     </MultiDataTrigger.Conditions>
 
                                                     <Setter Property="BorderBrush" Value="Yellow" />
@@ -218,19 +218,25 @@
                                   FontSize="10"
                                   Padding="4,1"
                                   IsChecked="{Binding EmoStop, Mode=TwoWay}">
-                                                <ToggleButton.Style>
-                                                    <Style TargetType="ToggleButton">
-                                                        <Setter Property="Background" Value="#FF404040" />
-                                                        <Setter Property="Foreground" Value="White" />
-                                                        <Setter Property="BorderBrush" Value="DarkGray" />
-                                                        <Setter Property="BorderThickness" Value="1" />
-                                                        <Style.Triggers>
+                                                <ToggleButton.Template>
+                                                    <ControlTemplate TargetType="ToggleButton">
+                                                        <Border x:Name="border"
+                                                                Background="{TemplateBinding Background}"
+                                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                                CornerRadius="2">
+                                                            <ContentPresenter HorizontalAlignment="Center"
+                                                                              VerticalAlignment="Center"
+                                                                              RecognizesAccessKey="True"/>
+                                                        </Border>
+                                                        <ControlTemplate.Triggers>
                                                             <Trigger Property="IsChecked" Value="True">
-                                                                <Setter Property="Background" Value="Red" />
+                                                                <Setter TargetName="border" Property="Background" Value="Red"/>
                                                             </Trigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </ToggleButton.Style>
+                                                            <!-- No IsMouseOver trigger: no highlight on hover -->
+                                                        </ControlTemplate.Triggers>
+                                                    </ControlTemplate>
+                                                </ToggleButton.Template>
                                             </ToggleButton>
                                         </StackPanel>
 

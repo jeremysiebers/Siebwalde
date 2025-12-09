@@ -387,7 +387,7 @@ namespace SiebwaldeApp.Core
         /// are queued in TrackApplicationVariables and sent by TrackControlMain
         /// at 10 Hz.
         /// </summary>
-        public void SetAmplifierControl(ushort slaveNumber, int pwmSetpoint, bool emoStop)
+        public void  SetAmplifierControl(ushort slaveNumber, int pwmSetpoint, bool emoStop)
         {
             _trackVariables?.SetDesiredAmplifierControl(slaveNumber, pwmSetpoint, emoStop);
         }

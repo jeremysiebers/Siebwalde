@@ -238,6 +238,7 @@ typedef enum
     SWITCH_OUT_OF_BOUNDS                        				= 106,
     SLAVE_ID_OUT_OF_BOUNDS                                      = 107,
     MESSAGE_BUFFER_FULL                                         = 108,
+    DATA_SENT_TO_SLAVE                                          = 109,
 } TASK_MESSAGES;				
 				
 				
