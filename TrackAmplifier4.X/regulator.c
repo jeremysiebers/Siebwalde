@@ -37,7 +37,7 @@ uint16_t REGULATORxINIT (){
     
     PWM3EN = true;
     LM_PWM_LAT = true;
-    PetitHoldingRegisters[HR_PWM_COMMAND].ActValue |= (HR_PWM_SETPOINT_MASK & 400);
+    PetitHoldingRegisters[HR_PWM_COMMAND].ActValue |= (HR_PWM_SETPOINT_MASK & 399);
     
     return (Return_Val);
 }
@@ -64,23 +64,17 @@ uint16_t REGULATORxUPDATE (){
     
     /* EMO stop: kill PWM immediately if EMO bit is set in HR_PWM_COMMAND */
     if (PetitHoldingRegisters[HR_PWM_COMMAND].ActValue & HR_PWM_EMO_BIT){        // If EMO command active kill PWM
-        //PWM3_LoadDutyValue(0);
-        //PwmDutyCyclePrev = 0;
-        LED_OCC_LAT = true;
+        LM_BRAKE_LAT = true;
+        LED_ERR_LAT = true;
         Return_Val = true;
         return (Return_Val);
     }
     else{
-        LED_OCC_LAT = false;
+        LM_BRAKE_LAT = false;
+        LED_ERR_LAT = false;
     }
-    
-    /* Normal PWM control */
-    /*
-        // Direction (commented in original code)
-        //LM_DIR_LAT =  PetitHoldingRegisters[HR_PWM_COMMAND].ActValue & HR_PWM_DIR_BIT;      
-        // load direction from register only when single sided PWM
-    */
-    LM_BRAKE_LAT = PetitHoldingRegisters[HR_PWM_COMMAND].ActValue & HR_PWM_BRAKE_BIT;   // load brake from register
+
+    //LM_BRAKE_LAT = PetitHoldingRegisters[HR_PWM_COMMAND].ActValue & HR_PWM_BRAKE_BIT;   // load brake from register
         
     if ((PwmDutyCyclePrev != (PetitHoldingRegisters[HR_PWM_COMMAND].ActValue & HR_PWM_SETPOINT_MASK))){
         

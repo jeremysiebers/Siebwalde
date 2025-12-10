@@ -19,7 +19,6 @@
         <itemPath>mcc_generated_files/interrupt_manager.h</itemPath>
         <itemPath>mcc_generated_files/crc.h</itemPath>
         <itemPath>mcc_generated_files/pwm3.h</itemPath>
-        <itemPath>mcc_generated_files/dac1.h</itemPath>
         <itemPath>mcc_generated_files/device_config.h</itemPath>
         <itemPath>mcc_generated_files/tmr4.h</itemPath>
         <itemPath>mcc_generated_files/tmr6.h</itemPath>
@@ -58,7 +57,6 @@
         <itemPath>mcc_generated_files/interrupt_manager.c</itemPath>
         <itemPath>mcc_generated_files/crc.c</itemPath>
         <itemPath>mcc_generated_files/pwm3.c</itemPath>
-        <itemPath>mcc_generated_files/dac1.c</itemPath>
         <itemPath>mcc_generated_files/tmr4.c</itemPath>
         <itemPath>mcc_generated_files/tmr6.c</itemPath>
       </logicalFolder>

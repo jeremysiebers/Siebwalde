@@ -67,8 +67,8 @@ void CMP1_Initialize(void)
 	// NCH CIN1-;                          
     CM1NCH = 0x01;
 	
-	// PCH DACOUT;                          
-    CM1PCH = 0x05;
+	// PCH FVR_buf2;                          
+    CM1PCH = 0x06;
 	
 }
 

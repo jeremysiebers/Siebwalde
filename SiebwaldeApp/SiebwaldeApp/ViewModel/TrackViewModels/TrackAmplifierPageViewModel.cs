@@ -207,8 +207,8 @@ namespace SiebwaldeApp
         private bool _overCurrent;
         private bool _amplifierIdSet;
         private ushort _amplifierStatus;
-        private int _hBridgeFuseVoltage;
-        private int _hBridgeTemperature;
+        private double _hBridgeFuseVoltage;
+        private double _hBridgeTemperature;
         private int _hBridgeCurrent;
         private ushort _messagesReceived;
         private ushort _messagesSent;
@@ -505,13 +505,13 @@ namespace SiebwaldeApp
             private set { if (_amplifierStatus != value) { _amplifierStatus = value; OnPropertyChanged(nameof(AmplifierStatus)); } }
         }
 
-        public int HBridgeFuseVoltage
+        public double HBridgeFuseVoltage
         {
             get => _hBridgeFuseVoltage;
             private set { if (_hBridgeFuseVoltage != value) { _hBridgeFuseVoltage = value; OnPropertyChanged(nameof(HBridgeFuseVoltage)); } }
         }
 
-        public int HBridgeTemperature
+        public double HBridgeTemperature
         {
             get => _hBridgeTemperature;
             private set { if (_hBridgeTemperature != value) { _hBridgeTemperature = value; OnPropertyChanged(nameof(HBridgeTemperature)); } }
@@ -652,6 +652,12 @@ namespace SiebwaldeApp
             ushort hr10 = GetReg(regs, 10);
             ushort hr11 = GetReg(regs, 11);
 
+            //ADC 5V ref scale
+            double scaleVolt = 5.0 / 1023.0;
+
+            //ADC 4A ref scale
+            double scaleAmp = 4.0 / 1023.0;
+
             // HoldingReg0
             int pwm = GetBits(hr0, 0, 9);
 
@@ -683,9 +689,9 @@ namespace SiebwaldeApp
             AmplifierStatus = hr3;
 
             // HoldingReg4..6
-            HBridgeFuseVoltage = GetBits(hr4, 0, 9);
-            HBridgeTemperature = GetBits(hr5, 0, 9);
-            HBridgeCurrent = GetBits(hr6, 0, 9);
+            HBridgeFuseVoltage = (double)(scaleVolt * GetBits(hr4, 0, 9) * 6);
+            HBridgeTemperature = (double)(scaleVolt * GetBits(hr5, 0, 9) * 100);
+            HBridgeCurrent = (int)(scaleAmp * GetBits(hr6, 0, 9) * 1000);
 
             // HoldingReg7..8
             MessagesReceived = hr7;

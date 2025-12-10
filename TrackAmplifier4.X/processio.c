@@ -182,6 +182,14 @@ uint16_t ADCxIO (){
         {
             status &= (uint16_t)(~HR_STATUS_THERMAL_BIT);
         }
+        
+        if (CMP1_GetOutputStatus()){
+            status |= HR_STATUS_OCCUPIED_BIT;
+        }
+        else
+        {
+            status &= (uint16_t)(~HR_STATUS_OCCUPIED_BIT);
+        }        
         PetitHoldingRegisters[HR_STATUS].ActValue = status;
     }
     
@@ -244,7 +252,7 @@ uint16_t ADCxIO (){
                 break;
 
             default: 
-                sequence = 0;
+                sequence = 2;
                 break;
         }
     }

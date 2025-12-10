@@ -1,8 +1,9 @@
-﻿using System;
+﻿using SiebwaldeApp; // TrackApplicationVariables, TrackAmplifierItem, ReceivedMessage, SendMessage
+using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using SiebwaldeApp; // TrackApplicationVariables, TrackAmplifierItem, ReceivedMessage, SendMessage
+using System.Timers;
 using static SiebwaldeApp.Core.Enums; // for HEADER, SLAVEINFO
 
 namespace SiebwaldeApp.Core
@@ -22,10 +23,16 @@ namespace SiebwaldeApp.Core
         public event EventHandler<AmplifierDataEventArgs>? AmplifierDataReceived;
         public event EventHandler<ControlMessageEventArgs>? ControlMessageReceived;
 
+        // NEW: periodic publish timer (no communication, just re-push container data)
+        private readonly System.Timers.Timer _publishTimer = new(500) { AutoReset = true };
+        private bool _publishTickInProgress;
+
         public TrackCommClientAsync(ITrackTransport transport, TrackApplicationVariables variables)
         {
             _transport = transport ?? throw new ArgumentNullException(nameof(transport));
             _variables = variables ?? throw new ArgumentNullException(nameof(variables));
+
+            _publishTimer.Elapsed += PublishTimerElapsed;
         }
 
         // --------------------------------------------------------------------
@@ -44,6 +51,9 @@ namespace SiebwaldeApp.Core
             _receiveLoopTask = Task.Run(
                 () => ReceiveLoopAsync(_cts.Token),
                 CancellationToken.None);
+
+            // Start 2 Hz container-to-UI publish
+            _publishTimer.Start();
         }
 
         public async Task StopAsync(CancellationToken cancellationToken = default)
@@ -54,6 +64,8 @@ namespace SiebwaldeApp.Core
 
             _cts = null;
             cts.Cancel();
+
+            _publishTimer.Stop();
 
             if (_receiveLoopTask != null)
             {
@@ -197,6 +209,36 @@ namespace SiebwaldeApp.Core
             else
             {
                 // Onbekend frame (geen HEADER) -> negeren (zelfde gedrag als oude code)
+            }
+        }
+
+        // NEW: periodic publish of current container data to UI (no bus I/O)
+        private void PublishTimerElapsed(object? sender, ElapsedEventArgs e)
+        {
+            if (_publishTickInProgress)
+                return;
+
+            try
+            {
+                _publishTickInProgress = true;
+
+                var items = _variables.trackAmpItems;
+                if (items == null || items.Count == 0)
+                    return;
+
+                // Push all detected amplifiers; you can also do round-robin if needed
+                for (int i = 0; i < items.Count; i++)
+                {
+                    var amp = items[i];
+                    if (amp == null || amp.SlaveDetected == 0)
+                        continue;
+
+                    AmplifierDataReceived?.Invoke(this, new AmplifierDataEventArgs(i, amp));
+                }
+            }
+            finally
+            {
+                _publishTickInProgress = false;
             }
         }
 

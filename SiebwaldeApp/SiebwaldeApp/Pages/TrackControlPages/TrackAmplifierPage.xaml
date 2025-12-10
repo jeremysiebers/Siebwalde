@@ -321,13 +321,13 @@
                                FontSize="9"
                                Margin="0,2,0,0" />
 
-                                            <TextBlock Text="{Binding HBridgeFuseVoltage, StringFormat='H-bridge fuse V: {0}'}"
+                                            <TextBlock Text="{Binding HBridgeFuseVoltage, StringFormat='H-bridge fuse V: {0:F2}V'}"
                                Foreground="LightGray"
                                FontSize="9" />
-                                            <TextBlock Text="{Binding HBridgeTemperature, StringFormat='H-bridge temp: {0}'}"
+                                            <TextBlock Text="{Binding HBridgeTemperature, StringFormat='H-bridge temp: {0:F2}°C'}"
                                Foreground="LightGray"
                                FontSize="9" />
-                                            <TextBlock Text="{Binding HBridgeCurrent, StringFormat='H-bridge current: {0}'}"
+                                            <TextBlock Text="{Binding HBridgeCurrent, StringFormat='H-bridge current: {0}mA'}"
                                Foreground="LightGray"
                                FontSize="9" />
 

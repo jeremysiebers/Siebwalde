@@ -22,9 +22,7 @@ static unsigned int LED_ERR, LED_WAR = 0;
 static unsigned int Config = 1;
 static unsigned int Startup_Machine = 0;
 unsigned int Update_Amplifier = 0;
-static unsigned int Sequencer = 0;
-
-static uint8_t test[1000];
+static unsigned int Sequencer = 1;
 
 /*----------------------------------------------------------------------------*/
 void main(void) {
@@ -58,8 +56,6 @@ void main(void) {
 /*----------------------------------------------------------------------------*/
 //<editor-fold defaultstate="collapsed" desc="CONFIG SECTION">
         while(Config){
-            
-            test[0] = 1;
             
             switch(Startup_Machine){
                 case 0 :
@@ -151,6 +147,8 @@ void main(void) {
             
             if (Update_Amplifier){
                 
+                LED_OCC_LAT = CMP1_GetOutputStatus();
+                
                 switch(Sequencer){
                     case 0:
                         if(MEASURExBMF() == true){
@@ -168,13 +166,13 @@ void main(void) {
                         
                     case 2:
                         if(ADCxIO() == true){
-                            Sequencer = 0;
+                            Sequencer++;
                             Update_Amplifier = false;
                         }
                         break;
                         
                     case 3:
-                        Sequencer = 0;
+                        Sequencer = 1;
                         Update_Amplifier = false;
                         break;
                         

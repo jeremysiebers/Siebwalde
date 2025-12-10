@@ -33,7 +33,7 @@
 extern unsigned char PETITMODBUS_SLAVE_ADDRESS;                                 // Petit Modbus RTU Slave icin adres numarasi [0 to 255]
 
 typedef struct{
-            unsigned int                     ActValue;
+            uint16_t                     ActValue;
         }PetitRegStructure;
 
 #if ((PETITMODBUS_READ_HOLDING_REGISTERS_ENABLED > 0)|| (PETITMODBUSWRITE_SINGLE_REGISTER_ENABLED > 0) || (PETITMODBUS_WRITE_MULTIPLE_REGISTERS_ENABLED > 0))
