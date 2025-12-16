@@ -86,7 +86,7 @@ namespace SiebwaldeApp.Core
             // Event to TrackIoHandleData
             UpdateToTrackIoHandleTimer.Elapsed += new ElapsedEventHandler(UpdateToTrackIoHandle);
             // Set the Interval to [x] miliseconds.
-            UpdateToTrackIoHandleTimer.Interval = 500;
+            UpdateToTrackIoHandleTimer.Interval = 100;
             UpdateToTrackIoHandleTimer.AutoReset = true;
             // Enable the timer
             UpdateToTrackIoHandleTimer.Enabled = true;

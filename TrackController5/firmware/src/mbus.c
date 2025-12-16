@@ -411,7 +411,8 @@ void MBUS_Tasks ( void )
                 data.command = SLAVEINFO;
                 memcpy(&data.data, &(SlaveInfo[NextSlaveCounter].Header), sizeof(SLAVE_INFO));
                 //data.data[0] &= SlaveInfo[NextSlaveCounter].Header;
-                PUTxDATAxINxSENDxMAILxBOX(&data);                
+                PUTxDATAxINxSENDxMAILxBOX(&data); 
+                
                 NextSlaveCounter++;
                 if(NextSlaveCounter > MaxSlaveUploadCount){
                     NextSlaveCounter = 1;

@@ -9,6 +9,10 @@ static uint16_t MeausureBemfCnt = 0;
 static uint16_t MeasueBemf = false;
 static uint16_t Sequence = 0;
 
+static volatile  uint16_t g_occ  = 0;
+static volatile  uint16_t g_tflg = 0;
+static volatile  uint16_t g_bemf = 0;
+
 /*#--------------------------------------------------------------------------#*/
 /*  Description: MEASURExBMF()
  *
@@ -34,7 +38,7 @@ uint16_t MEASURExBMF(){
     
     switch(Sequence){
         case 0:
-            Return_Val = true;
+            //Return_Val = true;
             MeausureBemfCnt++;
             if (MeausureBemfCnt > 1){                                           // disable H bridge every 10ms
                 MeausureBemfCnt = 0;
@@ -46,7 +50,7 @@ uint16_t MEASURExBMF(){
                 TMR1L = 0x38;
                 PIR4bits.TMR1IF = 0;
                 T1CONbits.TMR1ON = 1;
-                Return_Val = false;                                              
+                //Return_Val = false;                                              
                 NC_2_LAT = true;
                 Sequence++;
             }
@@ -123,11 +127,7 @@ void ADC_BMF (){
             case 1:
                 if (ADCON0bits.ADGO==0){
                     {
-                        uint16_t bemf = (uint16_t)(ADCC_GetConversionResult() & HR_STATUS_BEMF_MASK);
-                        uint16_t status = PetitHoldingRegisters[HR_STATUS].ActValue;
-                        status &= (uint16_t)(~HR_STATUS_BEMF_MASK);  /* clear old BEMF bits    */
-                        status |= bemf;                              /* insert new BEMF value  */
-                        PetitHoldingRegisters[HR_STATUS].ActValue = status;
+                        g_bemf = (uint16_t)(ADCC_GetConversionResult() & HR_STATUS_BEMF_MASK);                        
                     }
                     Sequence_Bmf = 0;
                     //NC_2_LAT = true;
@@ -171,27 +171,30 @@ uint16_t ADCxIO (){
     
     uint16_t Return_Val = false;
     
-    /* Update thermal flag bit in HR_STATUS from LM_THFLG input. */
-    {
-        uint16_t status = PetitHoldingRegisters[HR_STATUS].ActValue;
-        if (LM_THFLG_GetValue())
-        {
-            status |= HR_STATUS_THERMAL_BIT;
-        }
-        else
-        {
-            status &= (uint16_t)(~HR_STATUS_THERMAL_BIT);
-        }
-        
-        if (CMP1_GetOutputStatus()){
-            status |= HR_STATUS_OCCUPIED_BIT;
-        }
-        else
-        {
-            status &= (uint16_t)(~HR_STATUS_OCCUPIED_BIT);
-        }        
-        PetitHoldingRegisters[HR_STATUS].ActValue = status;
-    }
+    /* Update HR_STATUS only here */
+    g_occ = CMP1_GetOutputStatus();
+    g_tflg = LM_THFLG_GetValue();
+    
+    uint16_t status = PetitHoldingRegisters[HR_STATUS].ActValue;
+
+    // clear only fields we own
+    status &= ~(HR_STATUS_OCCUPIED_BIT | HR_STATUS_THERMAL_BIT | HR_STATUS_BEMF_MASK);
+
+    // set from latest sampled values
+    if (g_occ)  status |= HR_STATUS_OCCUPIED_BIT;
+    if (g_tflg) status |= HR_STATUS_THERMAL_BIT;
+    status |= (g_bemf & HR_STATUS_BEMF_MASK);
+
+    PetitHoldingRegisters[HR_STATUS].ActValue = status;
+    /* End of update of HR_STATUS */
+
+    /*check data to master*/
+//    PetitHoldingRegisters[HR_CONFIG_ID_PWM].ActValue++;
+//    
+//    PetitHoldingRegisters[HR_ACCEL_PARAMS].ActValue =
+//    (g_occ ? 1 : 0) |
+//    (LED_OCC_LAT ? 2 : 0);
+    /* end of check */
     
     if (ADCON0bits.ADGO==0){                                                    // extra check if conversion is done
     

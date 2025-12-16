@@ -15,7 +15,7 @@ extern "C" {
 //#define _XTAL_FREQ 32000000                                                     // Fosc  frequency for _delay()  library
 
 void Led_Blink (void);
-extern unsigned int Update_Amplifier;
+extern volatile uint8_t Update_AmplifierTicks;
 uint16_t    ReadFlashChecksum(void);
 uint8_t     Led_Disco       (void);
 void        Led_Convert     (uint8_t Number);

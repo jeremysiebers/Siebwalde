@@ -95,7 +95,8 @@ void __interrupt() INTERRUPT_InterruptManager (void)
             T4CONbits.TMR4ON = 0;
             T4TMR = 0x00;
             PIR4bits.TMR4IF = 0;
-            Update_Amplifier = true;                                            // Start the other tasks like the regulator etc
+            Update_AmplifierTicks++;                                            // Start the other tasks like the regulator etc
+            T4CONbits.TMR4ON = 1;
         }
         else
         {

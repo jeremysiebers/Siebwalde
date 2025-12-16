@@ -24,7 +24,7 @@ namespace SiebwaldeApp.Core
         public event EventHandler<ControlMessageEventArgs>? ControlMessageReceived;
 
         // NEW: periodic publish timer (no communication, just re-push container data)
-        private readonly System.Timers.Timer _publishTimer = new(500) { AutoReset = true };
+        private readonly System.Timers.Timer _publishTimer = new(100) { AutoReset = true };
         private bool _publishTickInProgress;
 
         public TrackCommClientAsync(ITrackTransport transport, TrackApplicationVariables variables)

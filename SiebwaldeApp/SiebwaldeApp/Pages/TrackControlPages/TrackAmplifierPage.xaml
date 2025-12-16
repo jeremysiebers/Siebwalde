@@ -41,7 +41,7 @@
                     <!-- Modbus Master box at the top (outside the amplifier grid, but inside the border) -->
                     <StackPanel Grid.Row="0"
                                 Orientation="Horizontal"
-                                HorizontalAlignment="Center"
+                                HorizontalAlignment="Left"
                                 Margin="0,0,0,12">
                         <Border Width="160"
                                 Height="100"

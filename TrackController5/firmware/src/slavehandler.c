@@ -11,6 +11,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include "slavecommhandler.h"
+#include "mbus.h"
 
 #define MAILBOXRCD 100
 
@@ -97,7 +98,7 @@ bool PROCESSxNEXTxSLAVE(){
              * were checked. */
             while (MASTER_SLAVE_DATA[ProcessSlave].SlaveDetected == false){
                 ProcessSlave++;
-                /* when the current slave to be precessed is outside the no of
+                /* when the current slave to be processed is outside the no of
                  * amplifiers, start over with the Master again and increase
                  * the Message and SlaveInfoProcessor. */
                 if (ProcessSlave > (NUMBER_OF_AMPLIFIERS)){
@@ -108,7 +109,7 @@ bool PROCESSxNEXTxSLAVE(){
 
                         SlaveInfoProcessor++;
                         if (SlaveInfoProcessor > SIPBOXSIZE){
-                            SlaveInfoProcessor = 1;
+                            SlaveInfoProcessor = SIP1;
                         }
                     }
                 }
@@ -277,6 +278,7 @@ bool SendNextMessage(void)
 
         ProcessSlaveLast = ProcessSlave;
         return_val = true;
+        
     }
     else
     {
@@ -288,7 +290,6 @@ bool SendNextMessage(void)
         /* return_val blijft false: MBUS laat UpdateNextSlave op true staan
          * en zal PROCESSxNEXTxSLAVE() opnieuw aanroepen. */
     }
-
     return return_val;
 }
 

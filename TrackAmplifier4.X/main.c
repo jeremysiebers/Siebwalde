@@ -15,19 +15,19 @@
 #include "processio.h"
 #include "regulator.h"
 
-static unsigned int MODBUS_ADDRESS = 0;
-static unsigned int LED_TX_prev, LED_RX_prev, LED_ERR_prev, LED_WAR_prev = 0;
-static unsigned int LED_TX_STATE, LED_RX_STATE, LED_ERR_STATE, LED_WAR_STATE = 0;
-static unsigned int LED_ERR, LED_WAR = 0;
-static unsigned int Config = 1;
-static unsigned int Startup_Machine = 0;
-unsigned int Update_Amplifier = 0;
-static unsigned int Sequencer = 1;
+static uint8_t MODBUS_ADDRESS = 0;
+static uint8_t LED_TX_prev, LED_RX_prev, LED_ERR_prev, LED_WAR_prev = 0;
+static uint8_t LED_TX_STATE, LED_RX_STATE, LED_ERR_STATE, LED_WAR_STATE = 0;
+static uint8_t LED_ERR, LED_WAR = 0;
+static uint8_t Config = 1;
+static uint8_t Startup_Machine = 0;
+static uint8_t Sequencer = 0;
+volatile uint8_t Update_AmplifierTicks = 0;
 
 /*----------------------------------------------------------------------------*/
 void main(void) {
     
-    unsigned int result = 0;
+    uint8_t result = 0;
     
     SYSTEM_Initialize();
     
@@ -145,40 +145,40 @@ void main(void) {
             ProcessPetitModbus();
             Led_Blink();
             
-            if (Update_Amplifier){
-                
+            if (Update_AmplifierTicks){
+                                
                 LED_OCC_LAT = CMP1_GetOutputStatus();
                 
                 switch(Sequencer){
                     case 0:
                         if(MEASURExBMF() == true){
-                            Sequencer++;
-                            Update_Amplifier = false;  
+                            Sequencer = 1;
+                            Update_AmplifierTicks = 0;
                         }
                         break;
                         
                     case 1:
                         if(REGULATORxUPDATE() == true){
-                            Sequencer++;
-                            Update_Amplifier = false;
+                            Sequencer = 2;
+                            Update_AmplifierTicks = 0;
                         }
                         break;
                         
                     case 2:
                         if(ADCxIO() == true){
-                            Sequencer++;
-                            Update_Amplifier = false;
+                            Sequencer = 0;
+                            Update_AmplifierTicks = 0;
                         }
                         break;
                         
                     case 3:
-                        Sequencer = 1;
-                        Update_Amplifier = false;
+                        Sequencer = 0;
+                            Update_AmplifierTicks = 0;
                         break;
                         
                     default:
                         Sequencer = 0;
-                        Update_Amplifier = false;
+                            Update_AmplifierTicks = 0;
                         break;
                 }            
                 

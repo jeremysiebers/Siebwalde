@@ -4,7 +4,7 @@
 #include "modbus/General.h"
 #include "processio.h"
 
-static unsigned int PwmDutyCyclePrev = 0;
+static uint16_t PwmDutyCyclePrev = 0;
 
 /*#--------------------------------------------------------------------------#*/
 /*  Description: REGULATORxINIT()
@@ -58,33 +58,32 @@ uint16_t REGULATORxINIT (){
  *  Notes      : 
  */
 /*#--------------------------------------------------------------------------#*/
-uint16_t REGULATORxUPDATE (){
-    
+uint16_t REGULATORxUPDATE(void)
+{
     uint16_t Return_Val = false;
-    
-    /* EMO stop: kill PWM immediately if EMO bit is set in HR_PWM_COMMAND */
-    if (PetitHoldingRegisters[HR_PWM_COMMAND].ActValue & HR_PWM_EMO_BIT){        // If EMO command active kill PWM
+
+    // Read command once (avoid multiple reads of a shared 16-bit value)
+    uint16_t cmd = PetitHoldingRegisters[HR_PWM_COMMAND].ActValue;
+
+    /* EMO stop: kill PWM immediately if EMO bit is set */
+    if (cmd & HR_PWM_EMO_BIT) {
         LM_BRAKE_LAT = true;
-        LED_ERR_LAT = true;
-        Return_Val = true;
-        return (Return_Val);
-    }
-    else{
-        LM_BRAKE_LAT = false;
-        LED_ERR_LAT = false;
+        LED_ERR_LAT  = true;
+        return true;
     }
 
-    //LM_BRAKE_LAT = PetitHoldingRegisters[HR_PWM_COMMAND].ActValue & HR_PWM_BRAKE_BIT;   // load brake from register
-        
-    if ((PwmDutyCyclePrev != (PetitHoldingRegisters[HR_PWM_COMMAND].ActValue & HR_PWM_SETPOINT_MASK))){
-        
-        if((PetitHoldingRegisters[HR_PWM_COMMAND].ActValue & HR_PWM_SETPOINT_MASK) == 0){
-            PetitHoldingRegisters[HR_PWM_COMMAND].ActValue |= (HR_PWM_SETPOINT_MASK & 1);
-        }
-        PWM3_LoadDutyValue(PetitHoldingRegisters[HR_PWM_COMMAND].ActValue & HR_PWM_SETPOINT_MASK);     // load duty cycle from register
-        PwmDutyCyclePrev = PetitHoldingRegisters[HR_PWM_COMMAND].ActValue & HR_PWM_SETPOINT_MASK;
-        Return_Val = true;
-    }        
-    
-    return (Return_Val);
+    LM_BRAKE_LAT = false;
+    LED_ERR_LAT  = false;
+
+    uint16_t duty = cmd & HR_PWM_SETPOINT_MASK;
+
+    /* Due to remote timer2 reset pulse (PWM clock sync) value 0 cannot be reached */
+    if (duty == 0) duty = 1;              // clamp locally, do NOT modify HR_PWM_COMMAND
+
+    if (PwmDutyCyclePrev != duty) {
+        PWM3_LoadDutyValue(duty);
+        PwmDutyCyclePrev = duty;
+    }
+
+    return true;
 }

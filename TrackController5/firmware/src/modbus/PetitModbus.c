@@ -99,6 +99,10 @@ volatile unsigned int SlaveAnswerTimeoutCounter         = 0;
 volatile unsigned int LED_TX = 0;
 volatile unsigned int LED_RX = 0;
 
+volatile uint8_t  g_lastReqAddr;
+volatile uint16_t g_lastReqStart;
+volatile uint16_t g_lastReqQty;
+
 /****************End of Slave Transmit and Receive Variables*******************/
 
 /*
@@ -572,6 +576,18 @@ unsigned char SENDxPETITxMODBUS(unsigned char Address, unsigned char Function, u
     return_val = PetitSendMessage();
     
     if (return_val){                                                            // a message has been sent
+        
+        // Snapshot request parameters ONLY for read-register functions.
+        // This prevents using Petit_Tx_Data later in RX callback after it may have been overwritten.
+        if (Function == PETITMODBUS_READ_HOLDING_REGISTERS || Function == PETITMODBUS_READ_INPUT_REGISTERS || Function == PETITMODBUS_DIAGNOSTIC_REGISTERS)
+        {
+            g_lastReqAddr  = Address;
+
+            // DataBuf layout for these requests: [StartHi, StartLo, QtyHi, QtyLo]
+            g_lastReqStart = ((uint16_t)DataBuf[0] << 8) | (uint16_t)DataBuf[1];
+            g_lastReqQty   = ((uint16_t)DataBuf[2] << 8) | (uint16_t)DataBuf[3];
+        }
+        
         if(Petit_Rx_Data.Address > SlaveAmount){
             DUMP_SLAVE_DATA[0].MbSentCounter += 1;
         }
@@ -593,53 +609,72 @@ unsigned char SENDxPETITxMODBUS(unsigned char Address, unsigned char Function, u
 
 void HandlePetitModbusReadHoldingRegistersSlaveReadback(void)
 {
-    unsigned int    Petit_StartAddress             = 0;
-    unsigned int    Petit_NumberOfRegistersBytes   = 0;
-    unsigned int    Petit_NumberOfRegisters        = 0;
-    unsigned int    Petit_i                        = 0;
-    unsigned int    BufReadIndex                   = 0;
-    unsigned int    RegData                        = 0;
-            
-    Petit_StartAddress = ((unsigned int) (Petit_Tx_Data.DataBuf[0]) << 8) + (unsigned int) (Petit_Tx_Data.DataBuf[1]);
-    Petit_NumberOfRegisters = ((unsigned int) (Petit_Tx_Data.DataBuf[2]) << 8) + (unsigned int) (Petit_Tx_Data.DataBuf[3]);
-    Petit_NumberOfRegistersBytes = 2* Petit_NumberOfRegisters;
-    
-    if(Petit_Tx_Data.Address == Petit_Rx_Data.Address){                         // Function is already checked, but who did send the message
-        if(Petit_NumberOfRegistersBytes == Petit_Rx_Data.DataBuf[0]){           // Check if the amount of data sent back is equal to the requested amount of registers sent
-            
-            //Petit_NumberOfRegisters += 1;                                       // in order to let the FOR loop process all registers that are been read
+    unsigned int Petit_i      = 0;
+    unsigned int BufReadIndex = 0;
+    unsigned int RegData      = 0;
+
+    uint8_t  reqAddr = g_lastReqAddr;
+    uint16_t start   = g_lastReqStart;                 // keep original for logging
+    uint16_t qty     = g_lastReqQty;
+    uint16_t bytes   = 2u * qty;
+
+    uint16_t regAddr = start;
+
+    if (reqAddr == Petit_Rx_Data.Address)
+    {
+        if (bytes == Petit_Rx_Data.DataBuf[0])
+        {
             BufReadIndex = 0;
-            for (Petit_i = 0; Petit_i < Petit_NumberOfRegisters; Petit_i++)
+
+            for (Petit_i = 0; Petit_i < qty; Petit_i++)
             {
-                RegData = ((unsigned int) (Petit_Rx_Data.DataBuf[BufReadIndex + 1]) << 8) + (unsigned int) (Petit_Rx_Data.DataBuf[BufReadIndex + 2]);
-                if(Petit_Tx_Data.Address > SlaveAmount){
-                    DUMP_SLAVE_DATA[0].HoldingReg[Petit_StartAddress] = RegData;
+                RegData = ((unsigned int)Petit_Rx_Data.DataBuf[BufReadIndex + 1] << 8)
+                        |  (unsigned int)Petit_Rx_Data.DataBuf[BufReadIndex + 2];
+
+                if (reqAddr > SlaveAmount) {
+                    DUMP_SLAVE_DATA[0].HoldingReg[regAddr] = RegData;
+                } else {
+                    MASTER_SLAVE_DATA[reqAddr].HoldingReg[regAddr] = RegData;
                 }
-                else{                
-                    MASTER_SLAVE_DATA[Petit_Tx_Data.Address].HoldingReg[Petit_StartAddress] = RegData;}
-                Petit_StartAddress += 1;                                        // point to the next register to write
-                BufReadIndex += 2;                                              // jump to the next char pair for the next register read from buffer (2 bytes))
+
+                regAddr++;
+                BufReadIndex += 2;
             }
-            if(Petit_Tx_Data.Address > SlaveAmount){
-                    DUMP_SLAVE_DATA[0].MbCommError = SLAVE_DATA_OK;
-                    DUMP_SLAVE_DATA[0].MbReceiveCounter += 1;
+
+            if (reqAddr > SlaveAmount) {
+                DUMP_SLAVE_DATA[0].MbCommError = SLAVE_DATA_OK;
+                DUMP_SLAVE_DATA[0].MbReceiveCounter += 1;
+            } else {
+                MASTER_SLAVE_DATA[reqAddr].MbCommError = SLAVE_DATA_OK;
+                MASTER_SLAVE_DATA[reqAddr].MbReceiveCounter += 1;
             }
-            else{
-                MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbCommError = SLAVE_DATA_OK;
-                MASTER_SLAVE_DATA[Petit_Rx_Data.Address].MbReceiveCounter += 1;
-            }
+
+//            if (reqAddr == 3) {
+//                LOG_Printf("RX from %u, reqAddr=%u start=%u qty=%u HR2=0x%04X OCC=%u HRdbg=0x%04X HRdbg2=0x%04X",
+//                    (unsigned)Petit_Rx_Data.Address,
+//                    (unsigned)reqAddr,
+//                    (unsigned)start,
+//                    (unsigned)qty,
+//                    (unsigned)MASTER_SLAVE_DATA[reqAddr].HoldingReg[2],
+//                    (unsigned)((MASTER_SLAVE_DATA[reqAddr].HoldingReg[2] & 0x0400) ? 1 : 0),
+//                    (unsigned)(MASTER_SLAVE_DATA[reqAddr].HoldingReg[9]),
+//                    (unsigned)(MASTER_SLAVE_DATA[reqAddr].HoldingReg[10])
+//                        );
+//            }
         }
     }
-    else{
-        if(Petit_Tx_Data.Address > SlaveAmount){
+    else
+    {
+        if (reqAddr > SlaveAmount) {
             DUMP_SLAVE_DATA[0].MbCommError = SLAVE_DATA_NOK;
-        }
-        else{
-            MASTER_SLAVE_DATA[Petit_Tx_Data.Address].MbCommError = SLAVE_DATA_NOK;    // the address send did not respond, so set the NOK to that address
+        } else {
+            MASTER_SLAVE_DATA[reqAddr].MbCommError = SLAVE_DATA_NOK;
         }
     }
-    Petit_Tx_State =  PETIT_RXTX_IDLE;
+
+    Petit_Tx_State = PETIT_RXTX_IDLE;
 }
+
 
 #endif
 /******************************************************************************/
