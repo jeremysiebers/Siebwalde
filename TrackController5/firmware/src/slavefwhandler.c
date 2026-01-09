@@ -21,6 +21,63 @@ static uint8_t      FwConfigWord[14];
 static uint16_t     checksum        = 0;
 static uint32_t     DelayCount1     = 0;
 static uint32_t     DelayCount2     = 0;
+static uint32_t     threshold       = 0;
+
+/*#--------------------------------------------------------------------------#*/
+/*  Description: UART2_Config_9bit_Modbus(void) & UART2_Config_8bit_Bootloader(void)
+ *
+ *  Input(s)   : Switch UART to 8 or 9 bit mode
+ *
+ *  Output(s)  :
+ *
+ *  Returns    :
+ *
+ *  Pre.Cond.  :
+ *
+ *  Post.Cond. :
+ *
+ *  Notes      :
+ */
+/*#--------------------------------------------------------------------------#*/
+static void UART2_Config_9bit_Modbus(void)
+{
+    // Disable UART before changing mode
+    U2MODEbits.ON = 0;
+
+    // 9-bit, no parity: PDSEL = 0b11
+    U2MODEbits.PDSEL = 0x3;
+    U2MODEbits.STSEL = 0;   // 1 stop bit
+
+    // Enable TX/RX
+    U2STAbits.UTXEN = 1;
+    U2STAbits.URXEN = 1;
+
+    // Clear errors
+    U2STAbits.OERR = 0;
+
+    U2MODEbits.ON = 1;
+
+    // Flush RX FIFO
+    while (U2STAbits.URXDA) { (void)U2RXREG; }
+}
+
+static void UART2_Config_8bit_Bootloader(void)
+{
+    U2MODEbits.ON = 0;
+
+    // 8-bit, no parity: PDSEL = 0b00
+    U2MODEbits.PDSEL = 0x0;
+    U2MODEbits.STSEL = 0;
+
+    U2STAbits.UTXEN = 1;
+    U2STAbits.URXEN = 1;
+
+    U2STAbits.OERR = 0;
+
+    U2MODEbits.ON = 1;
+
+    while (U2STAbits.URXDA) { (void)U2RXREG; }
+}
 
 /*#--------------------------------------------------------------------------#*/
 /*  Description: INITxSLAVExFWxHANDLER(SLAVE_INFO *location)
@@ -168,6 +225,7 @@ bool SLAVExFWxHANDLER(){
                     switch (result){
                         case DONE:  fwData.state = FW_STATE_INIT;
                                     fwData.SlaveBootloaderHandlingActive = false;
+                                    UART2_Config_9bit_Modbus();
                                     CREATExTASKxSTATUSxMESSAGE(
                                         FWHANDLER,                              // TASK_ID
                                         EXEC_FW_STATE_FLASH_ALL_SLAVES,        // TASK_COMMAND
@@ -178,6 +236,7 @@ bool SLAVExFWxHANDLER(){
                                     break;
                         case ERROR: fwData.state = FW_STATE_WAITING_FOR_COMMAND;
                                     fwData.SlaveBootloaderHandlingActive = false;
+                                    UART2_Config_9bit_Modbus();
                                     CREATExTASKxSTATUSxMESSAGE(
                                         FWHANDLER,                              // TASK_ID
                                         EXEC_FW_STATE_FLASH_ALL_SLAVES,         // TASK_COMMAND
@@ -216,6 +275,7 @@ bool SLAVExFWxHANDLER(){
                 case EXEC_FW_STATE_GET_BOOTLOADER_VERSION:
                 {
                     fwData.SlaveBootloaderHandlingActive = true;                // disable modbus
+                    UART2_Config_8bit_Bootloader();
                     result = GETxBOOTxLOADERxVERSION();
                     switch (result){
                         case DONE:
@@ -223,6 +283,7 @@ bool SLAVExFWxHANDLER(){
                             LOG_Push("Fw handler\t: EXEC_FW_STATE_GET_BOOTLOADER_VERSION DONE.");
                             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
                             fwData.SlaveBootloaderHandlingActive = false;        // enable modbus
+                            UART2_Config_9bit_Modbus();
                             break;
                         }
                         case ERROR: 
@@ -230,6 +291,7 @@ bool SLAVExFWxHANDLER(){
                             LOG_Push("Fw handler\t: EXEC_FW_STATE_GET_BOOTLOADER_VERSION ERROR.");
                             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
                             fwData.SlaveBootloaderHandlingActive = false;        // enable modbus
+                            UART2_Config_9bit_Modbus();
                             break;
                         }
                         case BUSY : {break;}
@@ -241,6 +303,7 @@ bool SLAVExFWxHANDLER(){
                 case EXEC_FW_STATE_ERASE_FLASH:
                 {
                     fwData.SlaveBootloaderHandlingActive = true;                // disable modbus
+                    UART2_Config_8bit_Bootloader();
                     result = ERASExFLASH(SLAVE_BOOT_LOADER_OFFSET, SLAVE_FLASH_END);
                     switch (result){
                         case DONE:
@@ -248,6 +311,7 @@ bool SLAVExFWxHANDLER(){
                             LOG_Push("Fw handler\t: EXEC_FW_STATE_ERASE_FLASH DONE.");
                             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
                             fwData.SlaveBootloaderHandlingActive = false;        // enable modbus
+                            UART2_Config_9bit_Modbus();
                             break;
                         }
                         case ERROR: 
@@ -255,6 +319,7 @@ bool SLAVExFWxHANDLER(){
                             LOG_Push("Fw handler\t: EXEC_FW_STATE_ERASE_FLASH ERROR.");
                             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
                             fwData.SlaveBootloaderHandlingActive = false;        // enable modbus
+                            UART2_Config_9bit_Modbus();
                             break;
                         }
                         case BUSY : {break;}
@@ -266,6 +331,7 @@ bool SLAVExFWxHANDLER(){
                 case EXEC_FW_STATE_WRITE_FLASH:
                 {
                     fwData.SlaveBootloaderHandlingActive = true;                // disable modbus
+                    UART2_Config_8bit_Bootloader();
                     result = WRITExFLASH(SLAVE_BOOT_LOADER_OFFSET, SLAVE_FLASH_END, &FwFile[0]);
                     switch (result){
                         case DONE:
@@ -273,6 +339,7 @@ bool SLAVExFWxHANDLER(){
                             LOG_Push("Fw handler\t: EXEC_FW_STATE_WRITE_FLASH DONE.");
                             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
                             fwData.SlaveBootloaderHandlingActive = false;        // enable modbus
+                            UART2_Config_9bit_Modbus();
                             break;
                         }
                         case ERROR: 
@@ -280,6 +347,7 @@ bool SLAVExFWxHANDLER(){
                             LOG_Push("Fw handler\t: EXEC_FW_STATE_WRITE_FLASH ERROR.");
                             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
                             fwData.SlaveBootloaderHandlingActive = false;        // enable modbus
+                            UART2_Config_9bit_Modbus();
                             break;
                         }
                         case BUSY : {break;}
@@ -291,6 +359,7 @@ bool SLAVExFWxHANDLER(){
                 case EXEC_FW_STATE_WRITE_CONFIG:
                 {
                     fwData.SlaveBootloaderHandlingActive = true;                // disable modbus
+                    UART2_Config_8bit_Bootloader();
                     result = WRITExCONFIG(&FwConfigWord[0]);
                     switch (result){
                         case DONE:
@@ -298,6 +367,7 @@ bool SLAVExFWxHANDLER(){
                             LOG_Push("Fw handler\t: EXEC_FW_STATE_WRITE_CONFIG DONE.");
                             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
                             fwData.SlaveBootloaderHandlingActive = false;        // enable modbus
+                            UART2_Config_9bit_Modbus();
                             break;
                         }
                         case ERROR: 
@@ -305,6 +375,7 @@ bool SLAVExFWxHANDLER(){
                             LOG_Push("Fw handler\t: EXEC_FW_STATE_WRITE_CONFIG ERROR.");
                             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
                             fwData.SlaveBootloaderHandlingActive = false;        // enable modbus
+                            UART2_Config_9bit_Modbus();
                             break;
                         }
                         case BUSY : {break;}
@@ -316,6 +387,7 @@ bool SLAVExFWxHANDLER(){
                 case EXEC_FW_STATE_CHECK_CHECKSUM:
                 {
                     fwData.SlaveBootloaderHandlingActive = true;                // disable modbus
+                    UART2_Config_8bit_Bootloader();
                     result = CHECKxCHECKSUM(SLAVE_BOOT_LOADER_OFFSET, SLAVE_FLASH_END, checksum);
                     switch (result){
                         case DONE:
@@ -323,6 +395,7 @@ bool SLAVExFWxHANDLER(){
                             LOG_Push("Fw handler\t: EXEC_FW_STATE_CHECK_CHECKSUM DONE.");
                             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
                             fwData.SlaveBootloaderHandlingActive = false;        // enable modbus
+                            UART2_Config_9bit_Modbus();
                             break;
                         }
                         case ERROR: 
@@ -330,6 +403,7 @@ bool SLAVExFWxHANDLER(){
                             LOG_Push("Fw handler\t: EXEC_FW_STATE_CHECK_CHECKSUM ERROR.");
                             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
                             fwData.SlaveBootloaderHandlingActive = false;        // enable modbus
+                            UART2_Config_9bit_Modbus();
                             break;
                         }
                         case BUSY : {break;}
@@ -341,6 +415,7 @@ bool SLAVExFWxHANDLER(){
                 case EXEC_FW_STATE_SLAVE_RESET:
                 {
                     fwData.SlaveBootloaderHandlingActive = true;                // disable modbus
+                    UART2_Config_8bit_Bootloader();
                     result = RESETxSLAVE();
                     switch (result){
                         case DONE:
@@ -348,6 +423,7 @@ bool SLAVExFWxHANDLER(){
                             LOG_Push("Fw handler\t: EXEC_FW_STATE_SLAVE_RESET DONE.");
                             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
                             fwData.SlaveBootloaderHandlingActive = false;        // enable modbus
+                            UART2_Config_9bit_Modbus();
                             break;
                         }
                         case ERROR: 
@@ -355,6 +431,7 @@ bool SLAVExFWxHANDLER(){
                             LOG_Push("Fw handler\t: EXEC_FW_STATE_SLAVE_RESET ERROR.");
                             fwData.state = FW_STATE_WAITING_FOR_COMMAND;
                             fwData.SlaveBootloaderHandlingActive = false;        // enable modbus
+                            UART2_Config_9bit_Modbus();
                             break;
                         }
                         case BUSY : {break;}
@@ -366,6 +443,7 @@ bool SLAVExFWxHANDLER(){
                 case EXIT_SLAVExFWxHANDLER:
                 {
                     fwData.SlaveBootloaderHandlingActive = false;               // enable modbus
+                    UART2_Config_9bit_Modbus();
                     fwData.state = FW_STATE_INIT;
                     return_val = true;
                     break;
@@ -373,7 +451,8 @@ bool SLAVExFWxHANDLER(){
                                 
                 case CLIENT_CONNECTION_REQUEST:
                 {
-                    fwData.SlaveBootloaderHandlingActive = false;               // enable modbus                    
+                    fwData.SlaveBootloaderHandlingActive = false;               // enable modbus   
+                    UART2_Config_9bit_Modbus();
                     fwData.state = FW_STATE_INIT;
                     return_val = true;
                     break;
@@ -803,6 +882,7 @@ uint32_t FlashSequencer(uint8_t Slave){
         case 4:                                                                 // select first a slave amplifier by selecting one via a backplane slave
         {            
             fwData.SlaveBootloaderHandlingActive = false;
+            UART2_Config_9bit_Modbus();
             if(     Slave > 0  && Slave < 11){
                 BackplaneId = 51;
                 ShiftSlot1  = Slave - 1;}
@@ -903,6 +983,7 @@ uint32_t FlashSequencer(uint8_t Slave){
             switch(CHECKxMODBUSxCOMMxSTATUS(BackplaneId, false)){               // --> do not overwrite otherwise diagnostics are gone
                 case SLAVEOK:  
                     fwData.SlaveBootloaderHandlingActive = true;                    // disable modbus
+                    UART2_Config_8bit_Bootloader();
                     GoToCase        = 10;//iFlashSequencer + 1;
                     iFlashSequencer = WAIT;
                     DelayCount1 = READxCORExTIMER();
@@ -1009,11 +1090,14 @@ uint32_t FlashSequencer(uint8_t Slave){
                 case DONE:  LOG_Push("Fw handler\t: FWFLASHSEQUENCER_STATE_RESET_SLAVE DONE.");
                             iFlashSequencer = 2;
                             fwData.SlaveBootloaderHandlingActive = false;       // enable modbus again
+                            UART2_Config_9bit_Modbus();
+                            LOG_Push("Fw handler\t: Done flash and reset.");
                             return_val      = DONE;
                             break;
                 case ERROR: LOG_Push("Fw handler\t: FWFLASHSEQUENCER_STATE_RESET_SLAVE ERROR.");
                             iFlashSequencer = 2;
                             fwData.SlaveBootloaderHandlingActive = false;       // enable modbus again
+                            UART2_Config_9bit_Modbus();
                             return_val      = ERROR;
                             break;
                 case BUSY : break;
@@ -1022,19 +1106,13 @@ uint32_t FlashSequencer(uint8_t Slave){
             break;
         }
         
-        case WAIT:            
-//            WaitCounter++;
-//            if (WaitCounter > WAIT_TIME){
-//                WaitCounter = 0;
-//                Led1Off();
-//                iFlashSequencer = GoToCase;
-//            }
+        case WAIT:
             DelayCount2 = READxCORExTIMER();
-            if((DelayCount2 - DelayCount1) > (WAIT_TIME1 * MILISECONDS)){
+            threshold = (uint32_t)(WAIT_TIME1 * MILISECONDS);
+
+            if ((uint32_t)(DelayCount2 - DelayCount1) > threshold)
+            {
                 iFlashSequencer = GoToCase;
-            }
-            else if((DelayCount1 > DelayCount2) && ((0xFFFFFFFF - DelayCount1 + DelayCount2) > (WAIT_TIME1 * MILISECONDS) )){
-                iFlashSequencer = GoToCase;               
             }
             break;
         
@@ -1121,6 +1199,7 @@ uint32_t        SelectSlave         (uint8_t SlaveId){
         case 2:                                                                 // select first a slave amplifier by selecting one via a backplane slave
         {            
             fwData.SlaveBootloaderHandlingActive = false;
+            UART2_Config_9bit_Modbus();
             Data.SlaveAddress  = BackplaneId;
             Data.Direction     = WRITE;
             Data.NoOfRegisters = 1;
@@ -1225,15 +1304,15 @@ uint32_t        SelectSlave         (uint8_t SlaveId){
             break;
         }
             
-        case WAIT:
-        DelayCount2 = READxCORExTIMER();
-        if((DelayCount2 - DelayCount1) > (WAIT_TIME1 * MILISECONDS)){
-            iSelectSlaveSequencer = GoToCase;
-        }
-        else if((DelayCount1 > DelayCount2) && ((0xFFFFFFFF - DelayCount1 + DelayCount2) > (WAIT_TIME1 * MILISECONDS) )){
-            iSelectSlaveSequencer = GoToCase;               
-        }
-        break;
+        case WAIT:        
+            DelayCount2 = READxCORExTIMER();
+            threshold = (uint32_t)(WAIT_TIME1 * MILISECONDS);
+
+            if ((uint32_t)(DelayCount2 - DelayCount1) > threshold)
+            {
+                iSelectSlaveSequencer = GoToCase;
+            }
+            break;
             
         default: 
         {

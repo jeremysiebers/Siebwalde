@@ -35,12 +35,14 @@ extern "C" {
         bool                        SlaveBootloaderHandlingActive;
     } FW_DATA;
 
-    FW_DATA fwData;
+    volatile FW_DATA fwData;
     
     // TODO If C++ is being used, regular C code needs function names to have C 
     // linkage so the functions can be used by the c code. 
     void INITxSLAVExFWxHANDLER(SLAVE_INFO *location, SLAVE_INFO *Dump);
     bool SLAVExFWxHANDLER(void);
+    static void UART2_Config_9bit_Modbus(void);
+    static void UART2_Config_8bit_Bootloader(void);
     
 
 #ifdef	__cplusplus

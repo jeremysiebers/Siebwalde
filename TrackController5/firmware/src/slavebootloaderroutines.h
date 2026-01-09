@@ -107,7 +107,7 @@ typedef struct
     uint16_t        flashrowcounter;
 } BTLDR_DATA;
 
-BTLDR_DATA btldrData;
+volatile BTLDR_DATA btldrData;
 
 typedef struct
 {

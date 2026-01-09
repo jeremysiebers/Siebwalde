@@ -206,7 +206,7 @@ void MBUS_Tasks ( void )
             uint32_t actualFrequency;
             uint32_t divider;
 
-            DRV_USART1_Initialize();
+            DRV_USART0_Initialize();
 
             mbusData.ModbusCommCycleHandle = DRV_TMR_Open(DRV_TMR_INDEX_1 , DRV_IO_INTENT_EXCLUSIVE);
             mbusData.ModbusCharacterTimeoutHandle = DRV_TMR_Open(DRV_TMR_INDEX_2 , DRV_IO_INTENT_EXCLUSIVE);
@@ -284,7 +284,7 @@ void MBUS_Tasks ( void )
         
         case MBUS_STATE_SLAVES_BOOT_WAIT:
         {
-            if((READxCORExTIMER() - DelayCount) > 200000000){
+            if((READxCORExTIMER() - DelayCount) > 100000000){
                 mbusData.state = MBUS_STATE_WAIT;
                 CREATExTASKxSTATUSxMESSAGE(task_id, MBUS_STATE_SLAVES_ON, DONE, NONE);
                 LOG_Push("Mbus handler\t: MBUS_STATE_SLAVES_BOOT_WAIT done.");

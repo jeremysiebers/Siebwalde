@@ -62,41 +62,50 @@ void __interrupt() INTERRUPT_InterruptManager (void)
     // interrupt handler
     if(INTCONbits.PEIE == 1)
     {
-        if(PIE3bits.RCIE == 1 && PIR3bits.RCIF == 1)
-        {
-            ReceiveInterrupt(RCREG);                                            // Read first read character from buffer
-            
-            T4CONbits.TMR4ON = 1;                                               // Enable Timer4 for PID sync to modbus messages
-            
-            if(1 == RC1STAbits.OERR)
+        if (PIE3bits.RCIE == 1 && PIR3bits.RCIF == 1)
+{
+            // Handle EUSART overrun
+            if (RC1STAbits.OERR)
             {
-                // EUSART error - restart
-
                 RC1STAbits.CREN = 0;
                 RC1STAbits.CREN = 1;
             }
+
+            // Read all available bytes from RX FIFO
+            while (PIR3bits.RCIF == 1)
+            {
+                unsigned char ninth = RC1STAbits.RX9D;   // read 9th bit first
+                unsigned char data  = RCREG;             // then read data (clears RCIF for that byte)
+
+                ReceiveInterrupt(data, ninth);
+                PT2_Toggle();
+            }
+
+            // Restart inter-character timer (your existing mechanism)
             TMR3_Reload();
             PIR4bits.TMR3IF = 0;
             PIE4bits.TMR3IE = 1;
-
-            if (PIR3bits.RCIF == 1){                                            // If the buffer contains more characters do read again
-                ReceiveInterrupt(RCREG);
-            }
-        } 
-        else if(PIE4bits.TMR3IE == 1 && PIR4bits.TMR3IF == 1)
+        }
+        else if (PIE4bits.TMR3IE == 1 && PIR4bits.TMR3IF == 1)
         {
-            PetitModbusTimerValue = 3;                                          // Between receive interrupts it took to long --> message done
+            // Inter-character timeout -> message ended
+            PetitModbusTimerValue = 3;          // keep your existing behavior
             PIE4bits.TMR3IE = 0;
             PIR4bits.TMR3IF = 0;
-            
+
+            // Re-arm address detection for next frame
+            RC1STAbits.ADDEN = 1;
+            // Note: do NOT clear PetitReceiveCounter here, Petit_RxRTU() may still consume it.
+            // If the frame was incomplete, Petit_CheckRxTimeout() will clear it.
         }
+
         else if(PIE4bits.TMR4IE == 1 && PIR4bits.TMR4IF == 1)
         {
-            T4CONbits.TMR4ON = 0;
+            //T4CONbits.TMR4ON = 0;                                               
             T4TMR = 0x00;
             PIR4bits.TMR4IF = 0;
             Update_AmplifierTicks++;                                            // Start the other tasks like the regulator etc
-            T4CONbits.TMR4ON = 1;
+            //T4CONbits.TMR4ON = 1;
         }
         else
         {

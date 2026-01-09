@@ -31,6 +31,7 @@
 
 // Variable for Slave Address
 extern unsigned char PETITMODBUS_SLAVE_ADDRESS;                                 // Petit Modbus RTU Slave icin adres numarasi [0 to 255]
+extern unsigned char PETITMODBUS_BROADCAST_ADDRESS;
 
 typedef struct{
             unsigned int                     ActValue;

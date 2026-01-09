@@ -38,7 +38,7 @@ uint16_t MEASURExBMF(){
     
     switch(Sequence){
         case 0:
-            //Return_Val = true;
+            Return_Val = true;
             MeausureBemfCnt++;
             if (MeausureBemfCnt > 1){                                           // disable H bridge every 10ms
                 MeausureBemfCnt = 0;
@@ -50,7 +50,7 @@ uint16_t MEASURExBMF(){
                 TMR1L = 0x38;
                 PIR4bits.TMR1IF = 0;
                 T1CONbits.TMR1ON = 1;
-                //Return_Val = false;                                              
+                Return_Val = false;                                              
                 NC_2_LAT = true;
                 Sequence++;
             }
@@ -68,9 +68,11 @@ uint16_t MEASURExBMF(){
                 
                 if (MeausureBemfCnt > 5 && MeausureBemfCnt < 7){                // Read back EMF as late as possible
                     MeasueBemf = true;                                           // set update PID
+                    PT1_SetHigh();  // debug measurement pin
                 }
                 else if(MeasueBemf == true && MeausureBemfCnt > 6){
-                    MeasueBemf  = false;                        
+                    MeasueBemf  = false;  
+                    PT1_SetLow();  // debug measurement pin
                 }
                 
                 if (MeausureBemfCnt > 7){                                       // after 800us enable H bridge again
@@ -169,6 +171,8 @@ static uint16_t sequence = 2;
 
 uint16_t ADCxIO (){
     
+    PT1_SetHigh();  // debug measurement pin
+    
     uint16_t Return_Val = false;
     
     /* Update HR_STATUS only here */
@@ -259,6 +263,7 @@ uint16_t ADCxIO (){
                 break;
         }
     }
+    if(Return_Val){PT1_SetLow();}  // debug measurement pin
     
     return (Return_Val);
 }

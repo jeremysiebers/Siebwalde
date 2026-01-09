@@ -25,8 +25,8 @@
 #define PETIT_ERROR_CODE_02                     0x02                            // Register address is not allowed or write-protected
 #define PETIT_ERROR_CODE_03                     0x03                            // Some data values are out of range, invalid number of register
 
-unsigned char PETITMODBUS_SLAVE_ADDRESS         = 255;
-unsigned char PETITMODBUS_BROADCAST_ADDRESS     = 0;
+uint8_t PETITMODBUS_SLAVE_ADDRESS         = 255;
+uint8_t PETITMODBUS_BROADCAST_ADDRESS     = 0;
 
 #ifdef  CRC_HW_REVERSE
 uint16_t CRC_ReverseValue(uint16_t crc);                                        // When using HW CRC the result must be reversed after the last calculation
@@ -62,7 +62,7 @@ unsigned int        Petit_Rx_CRC16                = 0xFFFF;
 PETIT_RXTX_STATE    Petit_Rx_State                = PETIT_RXTX_IDLE;
 unsigned char       Petit_Rx_Data_Available       = FALSE;
 
-unsigned short PetitModbusTimerValue         = 0;
+volatile unsigned short PetitModbusTimerValue         = 0;
 volatile unsigned int LED_TX = 0;
 volatile unsigned int LED_RX = 0;
 /****************End of Slave Transmit and Receive Variables*******************/
@@ -497,6 +497,7 @@ unsigned char Petit_CheckRxTimeout(void)
     // A return value of true indicates there is a timeout    
     if (PetitModbusTimerValue>= PETITMODBUS_TIMEOUTTIMER)
     {
+        RC1STAbits.ADDEN = 1;      // ensure we return to address-detect
         PetitModbusTimerValue   =0;
         PetitReceiveCounter     =0;
         return TRUE;
@@ -514,42 +515,124 @@ unsigned char Petit_CheckRxTimeout(void)
  *                        If data is not ready, return          DATA_NOT_READY
  *                        If functions is wrong, return         FALSE_FUNCTION
  */
+// Use the actual receive buffer length here.
+// If PetitReceiveBuffer is sized PETITMODBUS_RXTX_BUFFER_SIZE, keep it like this.
+#define PETIT_RX_BUF_LEN   PETITMODBUS_RXTX_BUFFER_SIZE
+
+static inline uint16_t U16_FromBE(uint8_t hi, uint8_t lo)
+{
+    return (uint16_t)(((uint16_t)hi << 8) | (uint16_t)lo);
+}
+
 unsigned char CheckPetitModbusBufferComplete(void)
 {
-    int PetitExpectedReceiveCount=0;
+    uint16_t expected = 0;
+    uint8_t  addr, fn;
 
-    if(PetitReceiveCounter>4)
+    // Need enough bytes to identify address/function and (for variable length) reach byteCount
+    if (PetitReceiveCounter <= 4u)
+        return PETIT_DATA_NOT_READY;
+
+    // Hard clamp: if counter already exceeds our buffer, drop it immediately.
+    if (PetitReceiveCounter > PETIT_RX_BUF_LEN)
     {
-        if((PetitReceiveBuffer[0]== PETITMODBUS_SLAVE_ADDRESS) || (PetitReceiveBuffer[0]==PETITMODBUS_BROADCAST_ADDRESS))
+        PetitReceiveCounter = 0;                      // overflow / desync
+        return PETIT_DATA_NOT_READY;
+    }
+
+    addr = PetitReceiveBuffer[0];
+    fn   = PetitReceiveBuffer[1];
+
+    // Not for us? Drop partial frame and wait for silent gap timeout to resync.
+    if ((addr != PETITMODBUS_SLAVE_ADDRESS) && (addr != PETITMODBUS_BROADCAST_ADDRESS))
+    {
+        PetitReceiveCounter = 0;                      // not for us; drop partial frame
+        return PETIT_FALSE_SLAVE_ADDRESS;
+    }
+
+    switch (fn)
+    {
+        case PETITMODBUS_READ_COILS:
+        case PETITMODBUS_READ_DISCRETE_INPUTS:
+        case PETITMODBUS_READ_HOLDING_REGISTERS:
+        case PETITMODBUS_READ_INPUT_REGISTERS:
+        case PETITMODBUS_WRITE_SINGLE_COIL:
+        case PETITMODBUS_WRITE_SINGLE_REGISTER:
+        case PETITMODBUS_DIAGNOSTIC_REGISTERS:
+            expected = 8u;                            // fixed-length request + CRC
+            break;
+
+        case PETITMODBUS_WRITE_MULTIPLE_COILS:        // FC15
+        case PETITMODBUS_WRITE_MULTIPLE_REGISTERS:    // FC16
         {
-            if(PetitReceiveBuffer[1]==0x01 || PetitReceiveBuffer[1]==0x02 || PetitReceiveBuffer[1]==0x03 || PetitReceiveBuffer[1]==0x04 || PetitReceiveBuffer[1]==0x05 || PetitReceiveBuffer[1]==0x06 || PetitReceiveBuffer[1]==0x08)  // RHR
+            // Need at least up to byteCount at index 6
+            if (PetitReceiveCounter <= 6u)
+                return PETIT_DATA_NOT_READY;
+
+            // Parse quantity field (big-endian) from request:
+            // addr(0), fn(1), startHi(2), startLo(3), qtyHi(4), qtyLo(5), byteCount(6), ...
+            uint16_t qty       = U16_FromBE(PetitReceiveBuffer[4], PetitReceiveBuffer[5]);
+            uint16_t byteCount = (uint16_t)PetitReceiveBuffer[6];
+
+            // Quantity must be non-zero for FC15/FC16
+            if (qty == 0u)
             {
-                PetitExpectedReceiveCount    =8;
+                PetitReceiveCounter = 0;              // invalid request -> drop
+                return PETIT_DATA_NOT_READY;
             }
-            else if(PetitReceiveBuffer[1]==0x0F || PetitReceiveBuffer[1]==0x10)
+
+            // Validate byteCount against qty according to Modbus spec
+            if (fn == PETITMODBUS_WRITE_MULTIPLE_REGISTERS)
             {
-                PetitExpectedReceiveCount=PetitReceiveBuffer[6]+9;
+                // FC16: byteCount must be qty * 2
+                uint16_t required = (uint16_t)(qty * 2u);
+                if (byteCount != required)
+                {
+                    PetitReceiveCounter = 0;          // inconsistent length -> drop
+                    return PETIT_DATA_NOT_READY;
+                }
             }
             else
             {
-                PetitReceiveCounter=0;
-                return PETIT_FALSE_FUNCTION;
+                // FC15: byteCount must be ceil(qty/8) = (qty + 7) / 8
+                uint16_t required = (uint16_t)((qty + 7u) >> 3);
+                if (byteCount != required)
+                {
+                    PetitReceiveCounter = 0;          // inconsistent length -> drop
+                    return PETIT_DATA_NOT_READY;
+                }
             }
-        }
-        else
-        {
-            PetitReceiveCounter=0;                  // if data is not for this slave, reset the counter, however data is still coming in from the rest of the message, 
-            return PETIT_FALSE_SLAVE_ADDRESS;       // this is deleted by resetting the counter again after the minimum of 3.5 char wait time: PETITMODBUS_TIMEOUTTIMER
-        }
-    }
-    else
-        return PETIT_DATA_NOT_READY;
 
-    if(PetitReceiveCounter==PetitExpectedReceiveCount)
-    {
+            // Total frame length (request):
+            // addr(1) fn(1) start(2) qty(2) byteCount(1) data(byteCount) crc(2) = 9 + byteCount
+            expected = (uint16_t)(9u + byteCount);
+
+            // Clamp: reject impossible sizes (prevents buffer overrun).
+            if (expected > PETIT_RX_BUF_LEN)
+            {
+                PetitReceiveCounter = 0;              // invalid length -> drop
+                return PETIT_DATA_NOT_READY;
+            }
+
+            break;
+        }
+
+        default:
+            PetitReceiveCounter = 0;                  // unsupported function
+            return PETIT_FALSE_FUNCTION;
+    }
+
+    if (PetitReceiveCounter == expected)
+    {        
         return PETIT_DATA_READY;
     }
 
+    // If we somehow exceeded expected, we're out of sync; drop it.
+    if (PetitReceiveCounter > expected)
+    {
+        PetitReceiveCounter = 0;                       // desync / noise
+        return PETIT_DATA_NOT_READY;
+    }
     return PETIT_DATA_NOT_READY;
 }
 

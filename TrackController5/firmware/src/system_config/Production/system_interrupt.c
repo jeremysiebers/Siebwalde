@@ -73,51 +73,65 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 // *****************************************************************************
  
-void __ISR(_UART1_TX_VECTOR, ipl0AUTO) _IntHandlerDrvUsartTransmitInstance0(void)
+ /* 9th bit helper function */
+ static inline uint16_t UART2_Read9(void)
+{
+    return (U2RXREG & 0x01FF);
+}
+ 
+ 
+void __ISR(_UART2_TX_VECTOR, ipl0AUTO) _IntHandlerDrvUsartTransmitInstance0(void)
 {
     DRV_USART_TasksTransmit(sysObj.drvUsart0);
 }
-void __ISR(_UART1_RX_VECTOR, ipl0AUTO) _IntHandlerDrvUsartReceiveInstance0(void)
-{
-    DRV_USART_TasksReceive(sysObj.drvUsart0);
-}
-void __ISR(_UART1_FAULT_VECTOR, ipl0AUTO) _IntHandlerDrvUsartErrorInstance0(void)
-{
-    DRV_USART_TasksError(sysObj.drvUsart0);
-}
- 
- 
-
- 
-void __ISR(_UART2_TX_VECTOR, ipl0AUTO) _IntHandlerDrvUsartTransmitInstance1(void)
-{
-    DRV_USART_TasksTransmit(sysObj.drvUsart1);
-}
-void __ISR(_UART2_RX_VECTOR, ipl1AUTO) _IntHandlerDrvUsartReceiveInstance1(void)
+void __ISR(_UART2_RX_VECTOR, ipl1AUTO) _IntHandlerDrvUsartReceiveInstance0(void)
 {
     if(!fwData.SlaveBootloaderHandlingActive){
-        /* Handle received char */
-        ReceiveInterrupt(DRV_USART1_ReadByte());                                    // read received byte into modbus buffer;
-        DRV_USART_TasksReceive(sysObj.drvUsart1);
         
-        /* Reset and start TMR2 (timer_6) for inter character timeout 25us */
-        DRV_TMR_Stop(mbusData.ModbusCharacterTimeoutHandle);
-        DRV_TMR_CounterClear(mbusData.ModbusCharacterTimeoutHandle);
-        DRV_TMR_Start(mbusData.ModbusCharacterTimeoutHandle);
+        bool gotAny = false;
+        
+        while (PLIB_USART_ReceiverDataIsAvailable(USART_ID_2)){
+            gotAny = true;
+            /* Handle received char */
+            uint16_t w = UART2_Read9();        
+            uint8_t data = (uint8_t)(w & 0x00FF);        
+            bool isAddress = ((w & 0x0100u) != 0u);
+            //LOG_Printf("Sys_interrupt\t: raw data %d address %d", w, isAddress);        
+            ReceiveInterrupt(data, isAddress);
+        }
+        
+        if (gotAny)
+        {
+            // Inter-character timeout: restart once after draining FIFO
+            DRV_TMR_Stop(mbusData.ModbusCharacterTimeoutHandle);
+            DRV_TMR_CounterClear(mbusData.ModbusCharacterTimeoutHandle);
+            DRV_TMR_Start(mbusData.ModbusCharacterTimeoutHandle);
 
-        /* Stop and reset TMR3 (timer_8) for message receive timeout 250us */
-        DRV_TMR_Stop(mbusData.ModbusReceiveTimeoutHandle);
-        DRV_TMR_CounterClear(mbusData.ModbusReceiveTimeoutHandle);
+            // Message timeout: restart once after draining FIFO
+            DRV_TMR_Stop(mbusData.ModbusReceiveTimeoutHandle);
+            DRV_TMR_CounterClear(mbusData.ModbusReceiveTimeoutHandle);
+        }
+
+        SYS_INT_SourceStatusClear(INT_SOURCE_USART_2_RECEIVE);
     }
-    else{
-        SLAVExBOOTLOADERxDATAxRETURN(DRV_USART1_ReadByte());
-        DRV_USART_TasksReceive(sysObj.drvUsart1);
+    else
+    {
+        while (PLIB_USART_ReceiverDataIsAvailable(USART_ID_2))
+        {
+            uint8_t b = (uint8_t)(U2RXREG & 0x00FFu);
+            SLAVExBOOTLOADERxDATAxRETURN(b);
+        }
+        SYS_INT_SourceStatusClear(INT_SOURCE_USART_2_RECEIVE);
+
     }
-    
 }
-void __ISR(_UART2_FAULT_VECTOR, ipl1AUTO) _IntHandlerDrvUsartErrorInstance1(void)
+
+
+void __ISR(_UART2_FAULT_VECTOR, ipl1AUTO) _IntHandlerDrvUsartErrorInstance0(void)
 {
     if(PLIB_USART_ReceiverFramingErrorHasOccurred(USART_ID_2)){
+        // Drain RX to clear FE condition
+        while (U2STAbits.URXDA) { (void)U2RXREG; }
         LOG_Push("UART2_FAULT_VECTOR\t: PLIB_USART_ReceiverFramingErrorHasOccurred.");
     }
     if(PLIB_USART_ReceiverOverrunHasOccurred(USART_ID_2))
@@ -125,10 +139,8 @@ void __ISR(_UART2_FAULT_VECTOR, ipl1AUTO) _IntHandlerDrvUsartErrorInstance1(void
         PLIB_USART_ReceiverOverrunErrorClear(USART_ID_2);
         LOG_Push("UART2_FAULT_VECTOR\t: PLIB_USART_ReceiverOverrunHasOccurred.");
     }
-    DRV_USART_TasksError(sysObj.drvUsart1);
+    DRV_USART_TasksError(sysObj.drvUsart0);
 }
- 
- 
 
  
 
@@ -139,7 +151,6 @@ void __ISR(_UART2_FAULT_VECTOR, ipl1AUTO) _IntHandlerDrvUsartErrorInstance1(void
  
  
  
-
 void __ISR(_TIMER_1_VECTOR, ipl1AUTO) IntHandlerDrvTmrInstance0(void)
 {
     DRV_TMR_Tasks(sysObj.drvTmr0);

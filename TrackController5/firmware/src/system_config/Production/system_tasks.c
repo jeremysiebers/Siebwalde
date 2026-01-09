@@ -102,7 +102,7 @@ void SYS_Tasks ( void )
                 ETHERNET_Initialize();
                 CONTROLLER_Initialize();
                 state++;
-            }            
+            }
             break;
     
         case 2:
@@ -111,6 +111,7 @@ void SYS_Tasks ( void )
             MBUS_Tasks();
             ETHERNET_Tasks();
             CONTROLLER_Tasks();
+            //Led1Toggle();
             break;
             
         default: 

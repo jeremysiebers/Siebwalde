@@ -5,17 +5,20 @@
  * the default interrupt handler is re-routed to the routines here. 
 */
 
+
+/* Below funcitons are not used, interrupt handling is done in interrupt_manager (MCC) */
+
 void PetitModbusIntHandlerTMR(void){
     //PetitModBus_TimerValues();
-    PetitModbusTimerValue = 3;                                                  // Between receive interrupts it took to long --> message done
-    PIE4bits.TMR3IE = 0;
-    PIR4bits.TMR3IF = 0;
+//    PetitModbusTimerValue = 3;                                                  // Between receive interrupts it took to long --> message done
+//    PIE4bits.TMR3IE = 0;
+//    PIR4bits.TMR3IF = 0;
 }
 
 void PetitModbusIntHandlerRC(void){ 
     
-    TMR3_Reload();
-    PIR4bits.TMR3IF = 0;
-    PIE4bits.TMR3IE = 1;
-    ReceiveInterrupt(RCREG);    
+//    TMR3_Reload();
+//    PIR4bits.TMR3IF = 0;
+//    PIE4bits.TMR3IE = 1;
+//    ReceiveInterrupt(RCREG);    
 }

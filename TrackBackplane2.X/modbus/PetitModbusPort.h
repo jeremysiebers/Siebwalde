@@ -24,7 +24,7 @@ extern void             PetitModBus_TIMER_Initialise(void);
 extern void             PetitModBus_UART_Putch(unsigned char c);
 extern unsigned char    PetitModBus_UART_String(unsigned char *s, unsigned int Length);
 
-extern void             ReceiveInterrupt(unsigned char Data);
+extern void             ReceiveInterrupt(unsigned char data, unsigned char ninthBit);
 extern void             PetitModBus_TimerValues(void);
 
 #endif

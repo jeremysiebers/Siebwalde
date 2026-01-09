@@ -24,6 +24,7 @@ static uint8_t      GoToCase        = 0;
 static uint16_t     WaitCounter     = 0;
 static uint32_t     DelayCount1     = 0;
 static uint32_t     DelayCount2     = 0;
+static uint32_t     threshold       = 0;
 
 /*#--------------------------------------------------------------------------#*/
 /*  Description: INITxSLAVExSTARTUP(SLAVE_INFO *location)
@@ -231,7 +232,7 @@ bool DetectSlave(uint8_t SlaveId){
                     LOG_Push("Mbus handler\t: DETECTSLAVE SLAVENOK returned in case 4.");
                     RunSlaveDetect = 0;
                     return_val = true;
-                    DRV_USART0_WriteByte('4');
+                    //DRV_USART0_WriteByte('4');
                     break;
                 case SLAVEBUSY: break;
                 default : break;
@@ -243,7 +244,7 @@ bool DetectSlave(uint8_t SlaveId){
             Data.SlaveAddress  = SLAVE_INITIAL_ADDR;
             Data.Direction     = READ;
             Data.NoOfRegisters = 1;
-            Data.StartRegister = HOLDINGREG11;
+            Data.StartRegister = HOLDINGREG11; // read the checksum of a slave
             SLAVExCOMMUNICATIONxHANDLER();
 //            SLAVExCOMMUNICATIONxHANDLERxREAD(SLAVE_INITIAL_ADDR, HoldingReg11, ReadSingle);
             RunSlaveDetect++;
@@ -306,21 +307,12 @@ bool DetectSlave(uint8_t SlaveId){
             }
             break;
             
-        case WAIT:
-//            Led1On();
-//            WaitCounter++;
-//            if (WaitCounter > WAIT_TIME){
-//                WaitCounter = 0;
-//                Led1Off();
-//                RunSlaveDetect = GoToCase;
-//                //DRV_USART0_WriteByte('W');
-//            }
+        case WAIT:            
             DelayCount2 = READxCORExTIMER();
-            if((DelayCount2 - DelayCount1) > (WAIT_TIME1 * MILISECONDS)){
+            threshold = (uint32_t)(WAIT_TIME1 * MILISECONDS);
+            if ((uint32_t)(DelayCount2 - DelayCount1) > threshold)
+            {
                 RunSlaveDetect = GoToCase;
-            }
-            else if((DelayCount1 > DelayCount2) && ((0xFFFFFFFF - DelayCount1 + DelayCount2) > (WAIT_TIME1 * MILISECONDS) )){
-                RunSlaveDetect = GoToCase;                
             }
             break; 
             
@@ -482,7 +474,7 @@ bool ConfigureSlave(uint8_t BackplaneId, uint16_t AmplifierLatchSet, uint8_t Tra
                     break;                    
                 case SLAVENOK: 
                     StartupMachine = 5;
-                    DRV_USART0_WriteByte('4');
+                    //DRV_USART0_WriteByte('4');
                     break;
                 case SLAVEBUSY: break;
                 default : break;
@@ -549,7 +541,7 @@ bool ConfigureSlave(uint8_t BackplaneId, uint16_t AmplifierLatchSet, uint8_t Tra
                 case SLAVENOK: 
                     StartupMachine = 0;
                     return_val = true;
-                    DRV_USART0_WriteByte('4');
+                    //DRV_USART0_WriteByte('4');
                     break;
                 case SLAVEBUSY: break;
                 default : break;
@@ -557,21 +549,12 @@ bool ConfigureSlave(uint8_t BackplaneId, uint16_t AmplifierLatchSet, uint8_t Tra
             break;
             
         case WAIT:
-//            Led1On();
-//            WaitCounter++;
-//            if (WaitCounter > WAIT_TIME){
-//                WaitCounter = 0;
-//                Led1Off();
-//                StartupMachine = GoToCase;
-//                //DRV_USART0_WriteByte('W');
-//            }
             DelayCount2 = READxCORExTIMER();
-            if((DelayCount2 - DelayCount1) > (WAIT_TIME1 * MILISECONDS)){
+            threshold = (uint32_t)(WAIT_TIME1 * MILISECONDS);
+            if ((uint32_t)(DelayCount2 - DelayCount1) > threshold)
+            {
                 StartupMachine = GoToCase;
-            }
-            else if((DelayCount1 > DelayCount2) && ((0xFFFFFFFF - DelayCount1 + DelayCount2) > (WAIT_TIME1 * MILISECONDS) )){
-                StartupMachine = GoToCase;                
-            }
+            }            
             break;
             
         default :                
@@ -631,18 +614,11 @@ bool ENABLExAMPLIFIER(void){
             break;
             
         case WAIT:
-//            WaitCounter++;
-//            if (WaitCounter > WAIT_TIME2){
-//                WaitCounter = 0;
-//                EnableMachine = GoToCase;
-//                //DRV_USART0_WriteByte('W');
-//            }  
             DelayCount2 = READxCORExTIMER();
-            if((DelayCount2 - DelayCount1) > (WAIT_TIME2 * MILISECONDS)){
+            threshold = (uint32_t)(WAIT_TIME2 * MILISECONDS);
+            if ((uint32_t)(DelayCount2 - DelayCount1) > threshold)
+            {
                 EnableMachine = GoToCase;
-            }
-            else if((DelayCount1 > DelayCount2) && ((0xFFFFFFFF - DelayCount1 + DelayCount2) > (WAIT_TIME2 * MILISECONDS) )){
-                EnableMachine = GoToCase;                
             }
             break;
 

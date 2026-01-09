@@ -65,8 +65,8 @@ void TMR4_Initialize(void)
 {
     // Set TMR4 to the options selected in the User Interface
 
-    // T4CS T4CKIPPS pin; 
-    T4CLKCON = 0x00;
+    // T4CS FOSC/4; 
+    T4CLKCON = 0x01;
 
     // T4PSYNC Not Synchronized; T4MODE Software control; T4CKPOL Rising Edge; T4CKSYNC Not Synchronized; 
     T4HLT = 0x00;
@@ -74,8 +74,8 @@ void TMR4_Initialize(void)
     // T4RSEL T4CKIPPS pin; 
     T4RST = 0x00;
 
-    // PR4 5; 
-    T4PR = 0x05;
+    // PR4 212; 
+    T4PR = 0xD4;
 
     // TMR4 0; 
     T4TMR = 0x00;
@@ -89,8 +89,8 @@ void TMR4_Initialize(void)
     // Set Default Interrupt Handler
     TMR4_SetInterruptHandler(TMR4_DefaultInterruptHandler);
 
-    // T4CKPS 1:1; T4OUTPS 1:1; TMR4ON on; 
-    T4CON = 0x80;
+    // T4CKPS 1:128; T4OUTPS 1:1; TMR4ON on; 
+    T4CON = 0xF0;
 }
 
 void TMR4_ModeSet(TMR4_HLT_MODE mode)

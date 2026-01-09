@@ -24,6 +24,8 @@ static uint8_t Startup_Machine = 0;
 static uint8_t Sequencer = 0;
 volatile uint8_t Update_AmplifierTicks = 0;
 
+//static uint8_t test = 0xFE;
+
 /*----------------------------------------------------------------------------*/
 void main(void) {
     
@@ -141,8 +143,11 @@ void main(void) {
 //<editor-fold defaultstate="collapsed" desc="RUN SECTION">
         
         while(1){
-        
+            
+            //PT2_SetHigh();
             ProcessPetitModbus();
+            //PT2_SetLow();
+            
             Led_Blink();
             
             if (Update_AmplifierTicks){

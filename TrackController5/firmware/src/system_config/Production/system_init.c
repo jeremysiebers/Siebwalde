@@ -453,13 +453,6 @@ void SYS_Initialize ( void* data )
  
  
      sysObj.drvUsart0 = DRV_USART_Initialize(DRV_USART_INDEX_0, (SYS_MODULE_INIT *)NULL);
-    sysObj.drvUsart1 = DRV_USART_Initialize(DRV_USART_INDEX_1, (SYS_MODULE_INIT *)NULL);
-    SYS_INT_VectorPrioritySet(INT_VECTOR_UART1_TX, INT_DISABLE_INTERRUPT);
-    SYS_INT_VectorSubprioritySet(INT_VECTOR_UART1_TX, INT_SUBPRIORITY_LEVEL0);
-    SYS_INT_VectorPrioritySet(INT_VECTOR_UART1_RX, INT_DISABLE_INTERRUPT);
-    SYS_INT_VectorSubprioritySet(INT_VECTOR_UART1_RX, INT_SUBPRIORITY_LEVEL1);
-    SYS_INT_VectorPrioritySet(INT_VECTOR_UART1_FAULT, INT_DISABLE_INTERRUPT);
-    SYS_INT_VectorSubprioritySet(INT_VECTOR_UART1_FAULT, INT_SUBPRIORITY_LEVEL1);
     SYS_INT_VectorPrioritySet(INT_VECTOR_UART2_TX, INT_DISABLE_INTERRUPT);
     SYS_INT_VectorSubprioritySet(INT_VECTOR_UART2_TX, INT_SUBPRIORITY_LEVEL0);
     SYS_INT_VectorPrioritySet(INT_VECTOR_UART2_RX, INT_PRIORITY_LEVEL1);
@@ -497,7 +490,12 @@ void SYS_Initialize ( void* data )
 
 
     /* Enable Global Interrupts */
-    SYS_INT_Enable();    
+    SYS_INT_Enable();
+
+    /* Initialize the Application */
+    MBUS_Initialize();
+    ETHERNET_Initialize();
+    CONTROLLER_Initialize();
 }
 
 

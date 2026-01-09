@@ -31,6 +31,7 @@
 
 // Variable for Slave Address
 extern unsigned char PETITMODBUS_SLAVE_ADDRESS;                                 // Petit Modbus RTU Slave icin adres numarasi [0 to 255]
+extern unsigned char PETITMODBUS_BROADCAST_ADDRESS;                             // Petit Modbus RTU Slave icin adres numarasi [0 to 255]
 
 typedef volatile struct{
             uint16_t                     ActValue;
@@ -48,11 +49,11 @@ typedef volatile struct{
     PetitRegStructure   PetitDiagnosticRegisters[NUMBER_OF_DIAGNOSTIC_PETITREGISTERS];
 #endif
 
-extern unsigned short PetitModbusTimerValue;
+extern volatile unsigned short PetitModbusTimerValue;
 
 // Main Functions
-extern void             InitPetitModbus(unsigned char PetitModbusSlaveAddress);
-unsigned int            ProcessPetitModbus(void);
+extern void             InitPetitModbus(uint8_t PetitModbusSlaveAddress);
+uint16_t                ProcessPetitModbus(void);
 
 extern volatile unsigned int LED_TX;
 extern volatile unsigned int LED_RX;

@@ -269,7 +269,7 @@ ssize_t SYS_CONSOLE_Read(const SYS_MODULE_INDEX index, int fd, void *buf, size_t
     char* pReadByte = (char*)buf;
 	if( !DRV_USART0_ReceiverBufferIsEmpty() )
 	{
-		*pReadByte = DRV_USART0_ReadByte();
+		*pReadByte = 0;//DRV_USART0_ReadByte();
 
 		numBytes++;
 		pReadByte++;
@@ -312,7 +312,8 @@ ssize_t SYS_CONSOLE_Write(const SYS_MODULE_INDEX index, int fd, const char *buf,
     size_t numBytes = 0;
     while( numBytes < count )
     {
-        DRV_USART0_WriteByte(buf[numBytes++]);
+        numBytes++;
+        //DRV_USART0_WriteByte(buf[numBytes++]);
     }
     return count;
 }

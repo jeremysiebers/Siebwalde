@@ -36,23 +36,28 @@ static uint32_t     DelayCount = 0;
  */
 /*#--------------------------------------------------------------------------#*/
 
+volatile uint8_t boot_rx_buf[128];
+volatile uint16_t boot_rx_wr = 0;
+
+volatile uint16_t boot_tx_dbg = 0;   // just last value for now
+
 uint32_t GETxBOOTxLOADERxVERSION(){
     uint32_t return_val = BUSY;
-    
+     
     switch(btldrData.sequence){
         case 0:
         {
             btldrDataSend.bootloader_start_byte = 0x55;
             btldrDataSend.command               = (uint8_t)CMD_READ_VERSION;
-            btldrDataSend.data_length_high      = 0x00;
-            btldrDataSend.data_length_low       = 0x00;
-            btldrDataSend.unlock_hgh            = 0x00;
-            btldrDataSend.unlock_low            = 0x00;
-            btldrDataSend.address_low           = 0x00;
-            btldrDataSend.address_hgh           = 0x00;
-            btldrDataSend.address_upp           = 0x00;
-            btldrDataSend.address_ext           = 0x00;
-
+            btldrDataSend.data_length_high      = 0x01;
+            btldrDataSend.data_length_low       = 0x02;
+            btldrDataSend.unlock_hgh            = 0x03;
+            btldrDataSend.unlock_low            = 0x04;
+            btldrDataSend.address_low           = 0x05;
+            btldrDataSend.address_hgh           = 0x06;
+            btldrDataSend.address_upp           = 0x07;
+            btldrDataSend.address_ext           = 0x08;
+                        
             SendDataToBootloader((BTDR_SEND_DATA_FORMAT *)&btldrDataSend);
             DelayCount                          = READxCORExTIMER();
             btldrData.sequence++;
@@ -725,11 +730,18 @@ uint32_t RESETxSLAVE(){
  *  Notes      :
  */
 /*#--------------------------------------------------------------------------#*/
+
+static void __attribute__((noinline)) UART2_Write8(uint8_t b)
+{    
+    while (U2STAbits.UTXBF) { }       // wait while TX buffer full
+    U2TXREG = (uint16_t)(b & 0x00FFu);              // 8-bit payload
+}
+
 bool SendDataToBootloader(BTDR_SEND_DATA_FORMAT *btldrDataSend)
 {
-    uint8_t DummyCounter = 0;
-    uint8_t Length = 0;
-    uint8_t *btldr_p;
+    volatile uint8_t DummyCounter = 0;
+    volatile uint8_t Length = 0;
+    volatile uint8_t *btldr_p;
     
     if(btldrDataSend->command == CMD_READ_VERSION  || 
        btldrDataSend->command == CMD_READ_FLASH    || 
@@ -754,19 +766,13 @@ bool SendDataToBootloader(BTDR_SEND_DATA_FORMAT *btldrDataSend)
     
     btldr_p = &btldrDataSend->bootloader_start_byte;
     
-    Led1On();
-    
     for(DummyCounter=0; DummyCounter<Length; DummyCounter++){
-        while(DRV_USART1_TransmitBufferIsFull() );
-        DRV_USART1_WriteByte(*btldr_p);
-        //LOG_Push("%d.", *btldr_p);
+        UART2_Write8(*btldr_p);
         btldr_p++;
-    }   
-
-    Led1Off();
-    
+    }       
     return true;
 }
+
 
 /*#--------------------------------------------------------------------------#*/
 /*  Description: void SLAVExBOOTLOADERxDATAxRETURNED(uint8_t *buffer)
@@ -785,6 +791,8 @@ bool SendDataToBootloader(BTDR_SEND_DATA_FORMAT *btldrDataSend)
  */
 /*#--------------------------------------------------------------------------#*/
 void SLAVExBOOTLOADERxDATAxRETURN(uint8_t data){
+    
+    //boot_rx_buf[boot_rx_wr++ & 0x7F] = data; // 128 ring
     
     switch (btldrData.btldr_data_return_sequence){
         case 0:

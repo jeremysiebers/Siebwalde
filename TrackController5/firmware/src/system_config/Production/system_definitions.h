@@ -67,6 +67,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "controller.h"
 #include "log.h"
 
+
 // DOM-IGNORE-BEGIN
 #ifdef __cplusplus  // Provide C++ Compatibility
 
@@ -105,7 +106,6 @@ typedef struct
     SYS_MODULE_OBJ  drvTmr3;
 
     SYS_MODULE_OBJ  drvUsart0;
-    SYS_MODULE_OBJ  drvUsart1;
     SYS_MODULE_OBJ  sysDebug;
     SYS_MODULE_OBJ  sysConsole0;
     SYS_MODULE_OBJ  tcpip;

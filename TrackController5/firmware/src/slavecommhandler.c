@@ -131,7 +131,7 @@ void SLAVExCOMMUNICATIONxHANDLER(){
 uint8_t CHECKxMODBUSxCOMMxSTATUS(uint8_t SlaveId, bool OverWrite){
     uint8_t return_val = SLAVEBUSY;
     
-    if (SlaveId > NUMBER_OF_SLAVES){
+    if (SlaveId > NUMBER_OF_SLAVES){                                            // used during slave detect and checksum read, address = 0xAA
         if( DUMP_SLAVE_DATA[0].MbCommError != SLAVE_DATA_BUSY &&
             DUMP_SLAVE_DATA[0].MbCommError == SLAVE_DATA_OK){
             return_val = SLAVEOK;
@@ -141,7 +141,7 @@ uint8_t CHECKxMODBUSxCOMMxSTATUS(uint8_t SlaveId, bool OverWrite){
             return_val = SLAVENOK;
         }
     }
-    else{
+    else{                                                                       // Normal slave data handling
         if( MASTER_SLAVE_DATA[SlaveId].MbCommError != SLAVE_DATA_BUSY &&
             MASTER_SLAVE_DATA[SlaveId].MbCommError == SLAVE_DATA_OK){
             return_val = SLAVEOK;
