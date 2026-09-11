@@ -15,6 +15,8 @@
 #include "processio.h"
 #include "regulator.h"
 
+#define MODBUS_TIMEOUT_TICKS 200
+
 static uint8_t MODBUS_ADDRESS = 0;
 static uint8_t LED_TX_prev, LED_RX_prev, LED_ERR_prev, LED_WAR_prev = 0;
 static uint8_t LED_TX_STATE, LED_RX_STATE, LED_ERR_STATE, LED_WAR_STATE = 0;
@@ -22,8 +24,8 @@ static uint8_t LED_ERR, LED_WAR = 0;
 static uint8_t Config = 1;
 static uint8_t Startup_Machine = 0;
 static uint8_t Sequencer = 0;
-volatile uint8_t Update_AmplifierTicks = 0;
-
+volatile uint32_t Update_AmplifierTicks = 0;
+static uint32_t Update_AmplifierTicksPrev = 0;
 //static uint8_t test = 0xFE;
 
 /*----------------------------------------------------------------------------*/
@@ -150,48 +152,77 @@ void main(void) {
             
             Led_Blink();
             
-            if (Update_AmplifierTicks){
-                                
-                LED_OCC_LAT = CMP1_GetOutputStatus();
-                
-                switch(Sequencer){
-                    case 0:
-                        if(MEASURExBMF() == true){
-                            Sequencer = 1;
-                            Update_AmplifierTicks = 0;
-                        }
-                        break;
-                        
-                    case 1:
-                        if(REGULATORxUPDATE() == true){
-                            Sequencer = 2;
-                            Update_AmplifierTicks = 0;
-                        }
-                        break;
-                        
-                    case 2:
-                        if(ADCxIO() == true){
-                            Sequencer = 0;
-                            Update_AmplifierTicks = 0;
-                        }
-                        break;
-                        
-                    case 3:
-                        Sequencer = 0;
-                            Update_AmplifierTicks = 0;
-                        break;
-                        
-                    default:
-                        Sequencer = 0;
-                            Update_AmplifierTicks = 0;
-                        break;
-                }            
-                
+            if(AmplifierTick_Elapsed())
+            {
+                AmplifierPeriodicTasks();
+            }           
+
+            if((Update_AmplifierTicks - last_modbus_activity_tick) > MODBUS_TIMEOUT_TICKS)
+            {
+                runtime_command.comms_lost = true;
             }
+            
+//            if (AmplifierTickOccurred()){
+//                                
+//                LED_OCC_LAT = CMP1_GetOutputStatus();
+//                
+//                switch(Sequencer){
+//                    case 0:
+//                        if(MEASURExBMF() == true){
+//                            Sequencer = 1;
+//                        }
+//                        break;
+//                        
+//                    case 1:
+//                        if(REGULATORxUPDATE() == true){
+//                            Sequencer = 2;
+//                        }
+//                        break;
+//                        
+//                    case 2:
+//                        if(ADCxIO() == true){
+//                            Sequencer = 0;
+//                        }
+//                        break;
+//                        
+//                    case 3:
+//                        Sequencer = 0;
+//                        break;
+//                        
+//                    default:
+//                        Sequencer = 0;
+//                        break;
+//                }            
+//                
+//            }
         }
 //</editor-fold>
 }
-/*----------------------------------------------------------------------------*/
+
+//<editor-fold defaultstate="collapsed" desc="AmplifierPeriodicTasks SECTION">
+void AmplifierPeriodicTasks(void)
+{
+    CheckModbusTimeout();
+    Ramp_Update();
+    ControlCore_Update();
+}
+//</editor-fold>
+
+//<editor-fold defaultstate="collapsed" desc="AmplifierTickOccurred SECTION">
+bool AmplifierTick_Elapsed(){
+    static uint32_t prevTick = 0;
+    uint32_t currentTick = Update_AmplifierTicks;
+
+    if(currentTick != prevTick)
+    {
+        prevTick = currentTick;
+        return true;
+    }
+
+    return false;
+}
+//</editor-fold>
+
 //<editor-fold defaultstate="collapsed" desc="LED SECTION">
 void Led_Blink (){
     if(PIR4bits.TMR6IF){
@@ -413,6 +444,7 @@ void Led_Convert(uint8_t Number){
 }
 //</editor-fold>
 
+//<editor-fold defaultstate="collapsed" desc="ReadFlashChecksum SECTION">
 /******************************************************************************
  * Function: uint16_t ReadFlashChecksum(){
  *
@@ -436,6 +468,7 @@ uint16_t ReadFlashChecksum(){
     Stored_Checksum += ((uint16_t)TABLAT) << 8;
     return (Stored_Checksum);
 }
+//</editor-fold>
 /**
  End of File
 */

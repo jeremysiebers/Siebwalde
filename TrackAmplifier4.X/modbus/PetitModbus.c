@@ -345,6 +345,8 @@ void HandlePetitModbusWriteSingleRegister(void)
     if (Petit_Rx_Data.Address == PETITMODBUS_BROADCAST_ADDRESS)                 // Broadcast cannot process back communication (all slaves would have to respond!)
     {
         PetitHoldingRegisters[Petit_Address].ActValue=Petit_Value;
+        /* Notify application layer */
+        OnHoldingRegisterWrite(Petit_Address, Petit_Value, true);
         return;
     }
     else if(Petit_Address>=NUMBER_OF_HOLDING_PETITREGISTERS){
@@ -353,6 +355,8 @@ void HandlePetitModbusWriteSingleRegister(void)
     else
     {
         PetitHoldingRegisters[Petit_Address].ActValue=Petit_Value;
+        /* Notify application layer */
+        OnHoldingRegisterWrite(Petit_Address, Petit_Value, false);
         // Output data buffer is exact copy of input buffer
         for (Petit_i = 0; Petit_i < 4; ++Petit_i)
             Petit_Tx_Data.DataBuf[Petit_i] = Petit_Rx_Data.DataBuf[Petit_i];
@@ -439,6 +443,8 @@ void HandleMPetitodbusWriteMultipleRegisters(void)
         {
             Petit_Value = ((unsigned int)Petit_Rx_Data.DataBuf[5+2*Petit_i]<<8)+((unsigned int)Petit_Rx_Data.DataBuf[6+2*Petit_i]);
             PetitHoldingRegisters[Petit_StartAddress+Petit_i].ActValue=Petit_Value;
+            /* Notify application layer */
+            OnHoldingRegisterWrite((Petit_StartAddress+Petit_i), Petit_Value, true);
         }
         return;
     }
@@ -462,6 +468,8 @@ void HandleMPetitodbusWriteMultipleRegisters(void)
         {
             Petit_Value = ((unsigned int)Petit_Rx_Data.DataBuf[5+2*Petit_i]<<8) + ((unsigned int)Petit_Rx_Data.DataBuf[6+2*Petit_i]);
             PetitHoldingRegisters[Petit_StartAddress+Petit_i].ActValue=Petit_Value;
+            /* Notify application layer */
+            OnHoldingRegisterWrite((Petit_StartAddress+Petit_i), Petit_Value, false);
         }
 		
         PetitSendMessage();

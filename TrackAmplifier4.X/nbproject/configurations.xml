@@ -29,6 +29,7 @@
         <itemPath>modbus/Interrupts.h</itemPath>
         <itemPath>modbus/PetitModbus.h</itemPath>
         <itemPath>modbus/PetitModbusPort.h</itemPath>
+        <itemPath>modbus/modbushooks.h</itemPath>
       </logicalFolder>
       <itemPath>main.h</itemPath>
       <itemPath>processio.h</itemPath>
@@ -66,6 +67,7 @@
         <itemPath>modbus/Interrupts.c</itemPath>
         <itemPath>modbus/PetitModbus.c</itemPath>
         <itemPath>modbus/PetitModbusPort.c</itemPath>
+        <itemPath>modbus/modbushooks.c</itemPath>
       </logicalFolder>
       <itemPath>main.c</itemPath>
       <itemPath>processio.c</itemPath>

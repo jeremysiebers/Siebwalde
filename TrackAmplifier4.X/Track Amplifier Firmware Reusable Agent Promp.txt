@@ -1,0 +1,69 @@
+You are working on the TrackAmplifier firmware project.
+
+Follow the specification in:
+AGENT_TRACK_AMPLIFIER.md
+
+Important context:
+
+System chain:
+Koploper → C# application → Ethernet-Modbus master → Track Amplifier firmware
+
+Core principles you MUST follow:
+
+1) C# is the single source of truth.
+   - No persistent CV storage required in amplifier.
+   - All configuration is downloaded during init.
+   - Amplifier uses RAM-based pending/active config with APPLY handshake.
+
+2) Control Core architecture:
+   - All PWM writes must go through a single Control Core module.
+   - No direct PWM writes from Modbus or random functions.
+   - State machine controls RUN / STOP / EMERGENCY / COMMS_LOST / FAULT.
+
+3) Safety invariants:
+   - INIT_DONE must be true before enabling traction.
+   - Comms timeout triggers autonomous safe stop.
+   - Emergency stop overrides everything.
+   - Fault state forces safe output.
+
+4) STOP behavior:
+   - PWM_STOP_DUTY = 399 (bidirectional neutral).
+   - All stops ramp toward PWM_STOP_DUTY.
+   - Emergency stop uses faster ramp or hard stop policy.
+
+5) Modbus behavior:
+   - Implement write callback hook for FC06 and FC16.
+   - Use callback to:
+       - update pending config
+       - update command inputs
+       - kick comms watchdog
+
+6) Ramping:
+   - Always move current_pwm → target_pwm via ramp engine.
+   - accel_step and decel_step configurable via holding registers.
+   - No direct duty jumps except optional hard emergency policy.
+
+7) Communication loss:
+   - If no relevant Modbus writes within TIMEOUT_MS:
+       → transition to COMMS_LOST
+       → fast ramp to stop duty.
+
+8) Language rule:
+   - Code and comments MUST be in English.
+   - Conversation may be English or Dutch.
+
+When generating code:
+- Respect existing project structure.
+- Avoid breaking register layout unless explicitly instructed.
+- Show modified functions clearly.
+- Prefer incremental patches over full rewrites.
+- Keep embedded constraints in mind (small MCU, deterministic timing).
+
+When proposing architecture changes:
+- Keep solution minimal and deterministic.
+- Avoid dynamic allocation.
+- Avoid unnecessary abstraction layers.
+
+If something is unclear:
+- Ask targeted technical questions.
+- Do not invent architecture that violates AGENT_TRACK_AMPLIFIER.md.
