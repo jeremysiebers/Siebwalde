@@ -120,6 +120,20 @@ Result:
 - 0 errors. The WPF project rebuilt after the remnant removal and reported 175 warnings.
 - A targeted search found no remaining references to `StationSettingsPage`, `ApplicationPage.StationSettings`, `StationPolicy`, `TrackPic18UdpAdapter`, `YardPic18UdpAdapter`, or `TrackAmplifierItemViewModel` in the WPF app source.
 
+## Build Verification After Increment 4 (2026-09-11)
+
+Commands executed from `C:\Localdata\Siebwalde` (Debug, no hardware, no test execution):
+
+```powershell
+dotnet build "SiebwaldeApp.Core.Host\SiebwaldeApp.Core.Host.csproj" -c Debug --nologo
+dotnet build "SiebwaldeApp\SiebwaldeApp.sln" -c Debug --nologo
+```
+
+Result:
+
+- 0 errors for both.
+- A targeted search found no remaining hard-coded `192.168.1.193` or firmware hex path in active startup code, other than the new `CoreSettings` Designer defaults.
+
 ## External Endpoints And Files
 
 | Purpose | Value |

@@ -33,10 +33,16 @@
       <Value Profile="(Default)">28672</Value>
     </Setting>
     <Setting Name="TrckSendingPort" Type="System.UInt16" Scope="Application">
-      <Value Profile="(Default)">60000</Value>
+      <Value Profile="(Default)">10000</Value>
     </Setting>
     <Setting Name="TrckReceivingPort" Type="System.UInt16" Scope="Application">
-      <Value Profile="(Default)">60000</Value>
+      <Value Profile="(Default)">10001</Value>
+    </Setting>
+    <Setting Name="TrckIpAddress" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">192.168.1.193</Value>
+    </Setting>
+    <Setting Name="TrackAmplifierFwPath" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">C:\Localdata\Siebwalde\TrackAmplifier4.X\dist\Offset\production\TrackAmplifier4.X.production.hex</Value>
     </Setting>
     <Setting Name="UseFakeHardwareAdapters" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>

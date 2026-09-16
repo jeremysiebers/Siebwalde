@@ -20,7 +20,6 @@ namespace SiebwaldeApp.Core
         private CancellationTokenSource _appCts;
         private readonly NewMAC_IP_Conditioner _macIp = new();        
         private TrackApplicationVariables? _trackVariables;        
-        private const string FwPath = "C:\\Localdata\\Siebwalde\\TrackAmplifier4.X\\dist\\Offset\\production\\TrackAmplifier4.X.production.hex";
 
         private ILogger TrackApplicationLogging;
         private TrackCommClientAsync _trackCommClient;
@@ -135,9 +134,9 @@ namespace SiebwaldeApp.Core
             // ---------------------------------------------------------------------
             // 3) Build low-level Ethernet / Modbus transport
             // ---------------------------------------------------------------------
-            const string targetIpAddress = "192.168.1.193"; // PIC32 IP
-            const int targetPort = 10000;                  // PIC waiting for client
-            const int localPort = 10001;                   // same local port as Python bind
+            var targetIpAddress = CoreConfiguration.TrackControllerIpAddress;
+            var targetPort = CoreConfiguration.TrackControllerSendingPort;
+            var localPort = CoreConfiguration.TrackControllerReceivingPort;
 
             // Raw UDP client (simple wrapper around UdpClient).
             var rawUdp = new RawUdpTransport(targetIpAddress, targetPort, localPort);
@@ -154,7 +153,7 @@ namespace SiebwaldeApp.Core
             // 5) Bootloader helper objects (re-using legacy classes)
             // ---------------------------------------------------------------------
             _bootloaderHelpers ??= new TrackAmplifierBootloaderHelpers(
-                FwPath,
+                CoreConfiguration.TrackAmplifierFirmwarePath,
                 LoggerInstance);
 
             _sendNextFwDataPacket ??= new SendNextFwDataPacket(

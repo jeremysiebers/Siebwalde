@@ -295,3 +295,11 @@ Decision: Removed the three legacy XAML files that were excluded from compilatio
 Evidence: The files were unreferenced in active source and their ViewModels were empty classes only used by those XAMLs.
 
 Impact: `SiebwaldeApp.csproj` is simpler; `SiebwaldeApp.sln` builds with 0 errors.
+
+## 2026-09-11: Configuration Centralized Via CoreConfiguration (Increment 4)
+
+Decision: Introduced `SiebwaldeApp.Core.CoreConfiguration` as the single source of truth for core configuration values, backed by `SiebwaldeApp.Core.Properties.CoreSettings`. Startup code in `SiebwaldeApplicationModel` and `SiebwaldeApp.Core.Host/Program.cs` no longer hard-codes the track controller address/ports or the firmware path.
+
+Evidence: Added settings `TrckIpAddress` and `TrackAmplifierFwPath`, and corrected `TrckSendingPort`/`TrckReceivingPort` defaults from `60000` to `10000`/`10001` (the previous defaults were unused). Verified: `SiebwaldeApp.Core.Host` and `SiebwaldeApp.sln` build with 0 errors.
+
+Impact: Behavior is preserved because the new defaults match the previous hard-coded values. The WPF `App.config` does not yet carry the `CoreSettings` section, so the WPF app relies on the Designer defaults. The settings UI (editing, default per entity, undo) is still planned.

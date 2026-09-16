@@ -6,8 +6,6 @@ namespace SiebwaldeApp.Core.Host
 {
     internal class Program
     {
-        private const string FwPath = "C:\\Localdata\\Siebwalde\\TrackAmplifier4.X\\dist\\Offset\\production\\TrackAmplifier4.X.production.hex";
-
         /// <summary>
         /// Entry point for the console host that drives TrackCommClientAsync.
         /// This host can run either with a fake in-process transport or a real
@@ -55,9 +53,9 @@ namespace SiebwaldeApp.Core.Host
                 Console.WriteLine("[MAIN] Using REAL UDP transport.");
 
                 // TODO: Adjust these to match your real Ethernet target.
-                const string targetIpAddress = "192.168.1.193"; // PIC32 IP
-                const int targetPort = 10000;                  // PIC waiting for client
-                const int localPort = 10001;                   // same local port as Python bind
+                var targetIpAddress = CoreConfiguration.TrackControllerIpAddress;
+                var targetPort = CoreConfiguration.TrackControllerSendingPort;
+                var localPort = CoreConfiguration.TrackControllerReceivingPort;
 
                 // Raw UDP client (simple wrapper around UdpClient).
                 var rawUdp = new RawUdpTransport(targetIpAddress, targetPort, localPort);
@@ -78,7 +76,7 @@ namespace SiebwaldeApp.Core.Host
             // -----------------------------------------------------------------
             var commClient = new TrackCommClientAsync(transport, variables);
 
-            var bootloaderHelpers = new TrackAmplifierBootloaderHelpers(FwPath, "fake");
+            var bootloaderHelpers = new TrackAmplifierBootloaderHelpers(CoreConfiguration.TrackAmplifierFirmwarePath, "fake");
             var sendNextFwDataPacket = new SendNextFwDataPacket(commClient, bootloaderHelpers);
 
             // -----------------------------------------------------------------

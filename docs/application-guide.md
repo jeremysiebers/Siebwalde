@@ -178,22 +178,23 @@ Key planned behaviors:
 
 ## 8. Configuration and Endpoints
 
-Settings live in `app.config` (`SiebwaldeApp.Core.Properties.CoreSettings`):
+Core configuration values are read through `SiebwaldeApp.Core.CoreConfiguration`, which exposes them from `app.config` (`SiebwaldeApp.Core.Properties.CoreSettings`). Startup code no longer hard-codes the track controller address or the firmware path.
 
-| Setting | Value | Used by |
+| Setting | Default | Used by |
 | --- | --- | --- |
 | `LogDirectory` | `C:\Localdata\Siebwalde\Logging\` | Logging. |
 | `FYSendingport` | `28671` | Fiddle Yard. |
 | `FYReceivingport` | `28672` | Fiddle Yard. |
-| `TrckSendingPort` | `10000` | Defined, but the track transport currently hard-codes it. |
-| `TrckReceivingPort` | `10001` | Defined, but the track transport currently hard-codes it. |
+| `TrckSendingPort` | `10000` | Track controller UDP target port. |
+| `TrckReceivingPort` | `10001` | Track controller local receive port. |
+| `TrckIpAddress` | `192.168.1.193` | Track controller IP address. |
+| `TrackAmplifierFwPath` | `...\TrackAmplifier4.X.production.hex` | Firmware transfer. |
 
-Currently hard-coded in `SiebwaldeApplicationModel.cs` and `SiebwaldeApp.Core.Host/Program.cs`:
+`CoreConfiguration` properties: `TrackControllerIpAddress`, `TrackControllerSendingPort`, `TrackControllerReceivingPort`, `TrackAmplifierFirmwarePath`, `LogDirectory`, `FiddleYardSendingPort`, `FiddleYardReceivingPort`.
 
-- Track controller IP `192.168.1.193`, ports `10000`/`10001`.
-- Firmware path `C:\Localdata\Siebwalde\TrackAmplifier4.X\dist\Offset\production\TrackAmplifier4.X.production.hex`.
+Note: the WPF application currently relies on the settings' Designer defaults; the `SiebwaldeApp.Core.Properties.CoreSettings` section is not yet present in the WPF `App.config`.
 
-**Planned:** all hard-coded values become editable and persisted via a menu -> settings screen, owned by a core configuration service, with a default per entity and undo (Ctrl-Z).
+**Planned:** all values become editable and persisted via a menu -> settings screen, with a default per entity and undo (Ctrl-Z).
 
 | Endpoint | Value |
 | --- | --- |

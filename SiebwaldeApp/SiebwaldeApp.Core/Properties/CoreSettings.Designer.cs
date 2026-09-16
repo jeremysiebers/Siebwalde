@@ -133,7 +133,7 @@ namespace SiebwaldeApp.Core.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("60000")]
+        [global::System.Configuration.DefaultSettingValueAttribute("10000")]
         public ushort TrckSendingPort {
             get {
                 return ((ushort)(this["TrckSendingPort"]));
@@ -142,10 +142,28 @@ namespace SiebwaldeApp.Core.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("60000")]
+        [global::System.Configuration.DefaultSettingValueAttribute("10001")]
         public ushort TrckReceivingPort {
             get {
                 return ((ushort)(this["TrckReceivingPort"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("192.168.1.193")]
+        public string TrckIpAddress {
+            get {
+                return ((string)(this["TrckIpAddress"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\\\Localdata\\\\Siebwalde\\\\TrackAmplifier4.X\\\\dist\\\\Offset\\\\production\\\\TrackAmplifier4.X.production.hex")]
+        public string TrackAmplifierFwPath {
+            get {
+                return ((string)(this["TrackAmplifierFwPath"]));
             }
         }
         

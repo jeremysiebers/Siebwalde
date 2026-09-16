@@ -153,6 +153,22 @@ Fiddle Yard and the active ModBus `TrackControllerCommands` were not touched. Th
 
 `docs/application-guide.md` now exists and is indexed in `docs/README.md`. It covers the system overview, C# project structure, entry points, IoC, startup, track control, Fiddle Yard, ECoS emulator, the planned Koploper control loop, configuration/endpoints, build/run, current status, and a glossary. It marks planned versus verified behavior.
 
+## Increment 4 Implementation Results (2026-09-11)
+
+Implemented on `feature/csharp-cleanup-startup`:
+
+- Added `SiebwaldeApp.Core.CoreConfiguration` as the single source of truth for core configuration values.
+- Added `CoreSettings` entries `TrckIpAddress` (`192.168.1.193`) and `TrackAmplifierFwPath`, and corrected `TrckSendingPort`/`TrckReceivingPort` defaults from `60000` to `10000`/`10001`.
+- `SiebwaldeApplicationModel` and `SiebwaldeApp.Core.Host/Program.cs` now use `CoreConfiguration` instead of hard-coded values.
+
+Verified by `dotnet build` (Debug, no hardware):
+
+- `SiebwaldeApp.Core.Host`: 0 errors.
+- `SiebwaldeApp.sln`: 0 errors.
+- No hard-coded track IP or firmware path remains in active startup code.
+
+Note: the WPF `App.config` does not yet carry the `CoreSettings` section; the WPF app relies on the Designer defaults (behavior unchanged). The settings UI (edit/default/undo) is still planned.
+
 ## Resume Instructions
 
 1. Restart OpenCode from `C:\Localdata\Siebwalde` and select the `project-lead` agent.
