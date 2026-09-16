@@ -101,7 +101,7 @@ The product owner confirmed the following order. Items remain unapproved for imp
 
 | Item | Evidence | Suggested acceptance criteria |
 | --- | --- | --- |
-| Create the consolidated human-readable application guide. | `docs/application-guide.md` does not exist; `docs/product.md` now captures purpose and scope only. | A coherent guide covers architecture, workflows, and verified usage with diagrams, and distinguishes verified facts from revalidation items. |
+| Create the consolidated human-readable application guide. | DONE (2026-09-11): `docs/application-guide.md` created with system overview, structure, workflows, endpoints, status, and glossary. | A coherent guide covers architecture, workflows, and verified usage with diagrams, and distinguishes verified facts from revalidation items. |
 | Revalidate prior .NET code-analysis findings. | DONE (2026-09-11): revalidated by source inspection; the key claims are CONFIRMED (see `docs/build-test.md`). Fiddle Yard/emulator items remain not re-verified. | Remaining not-re-verified items are checked when those areas are touched. |
 | Investigate additional source areas. | Firmware/hardware/Python areas are inventoried only. | Each area has at least a bounded inventory note; deep analysis is scheduled by priority. |
 

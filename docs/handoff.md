@@ -149,12 +149,16 @@ Verified by `dotnet build` (Debug, no hardware):
 
 Fiddle Yard and the active ModBus `TrackControllerCommands` were not touched. The Page-Removed legacy XAML leftovers (`TrackAmplifierItemView.xaml`, `TrackAmplifierManualControlView.xaml`, `TrackControlView.xaml`) and their empty ViewModels were also removed afterwards, together with their csproj entries.
 
+## Application Guide Created (2026-09-11)
+
+`docs/application-guide.md` now exists and is indexed in `docs/README.md`. It covers the system overview, C# project structure, entry points, IoC, startup, track control, Fiddle Yard, ECoS emulator, the planned Koploper control loop, configuration/endpoints, build/run, current status, and a glossary. It marks planned versus verified behavior.
+
 ## Resume Instructions
 
 1. Restart OpenCode from `C:\Localdata\Siebwalde` and select the `project-lead` agent.
 2. Continue from `docs/product.md`, `human_input.md`, and `docs/analysis-coverage.md`.
 3. Increments 1-3 are implemented and verified; propose the next increment (configuration authority/settings UI, or the application guide) for approval.
-4. Create `docs/application-guide.md`.
+4. `docs/application-guide.md`. - DONE (2026-09-11): created.
 5. Product clarification rounds 1-5 are complete; remaining items are research tasks (Koploper protocol, ECoS overload semantics, topology/spreadsheet).
 6. Keep communicating with the user in Dutch; keep documentation and agent instructions in English.
 
@@ -178,7 +182,7 @@ Fiddle Yard and the active ModBus `TrackControllerCommands` were not touched. Th
 
 ## Remaining Work
 
-1. Create `docs/application-guide.md` (still missing).
+1. Create `docs/application-guide.md` (still missing). - DONE (2026-09-11): guide created and indexed.
 2. Revalidate prior .NET code-analysis findings against current source. - DONE (2026-09-11): confirmed; see Phase 1 Revalidation Results.
 3. Product clarification rounds 1-5. - DONE (2026-09-11): remaining items are research tasks (Koploper protocol, ECoS overload semantics, topology/spreadsheet).
 4. Design and implement the Koploper translation path (later increment).
@@ -187,5 +191,5 @@ Fiddle Yard and the active ModBus `TrackControllerCommands` were not touched. Th
 7. Propose the first fix increment for product-owner approval (Core.Host logger, init sequencing, remnant cleanup, test-project decision). - DONE (2026-09-11): Increment 1 (host logger + init sequencing) implemented and verified.
 8. Remove obsolete test project. - DONE (2026-09-11): Increment 2 removed `SiebwaldeApp.Tests`; design intent archived.
 9. Increment 3 (proposed): remove confirmed Pic18-era and station-era remnants from the WPF app. - DONE (2026-09-11): station-policy feature and commented Pic18 code removed; build verified.
-10. Increment 4 (candidate): configuration authority / settings UI; or create `docs/application-guide.md`.
+10. Increment 4 (next): configuration authority / settings UI. The application guide is done.
 11. Treat all remaining `docs/backlog.md` items as unapproved until the user selects implementation work.
