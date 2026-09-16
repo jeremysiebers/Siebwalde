@@ -35,7 +35,7 @@ See `docs/inventory.md` for the full inventory and `docs/analysis-coverage.md` f
 
 - Verified environment command: `dotnet --info` reported SDK `9.0.318`, .NET 8 runtime, and .NET 8 Windows Desktop runtime on Windows. This was verified in the pre-migration workspace; re-run it in `C:\Localdata\Siebwalde` to reconfirm.
 - Proposed build commands are documented in `docs/build-test.md`; full build/test execution was not performed because it can update `bin/` and `obj/`.
-- `dotnet test "SiebwaldeApp\SiebwaldeApp.Tests\SiebwaldeApp.Tests.csproj" --no-build --no-restore -c Debug` previously failed because the test DLL was not present. That check was run in the pre-migration workspace and requires revalidation here.
+- The former test project `SiebwaldeApp/SiebwaldeApp.Tests` was removed on 2026-09-11 as an obsolete remnant of the abandoned station-in-C# approach. There is currently no active test project; new tests for the window/program model are planned.
 - Firmware projects use Microchip MPLAB X / XC compilers and Python tooling. Do not build, flash, or connect to hardware without explicit authorization.
 
 ## Constraints

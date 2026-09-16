@@ -117,13 +117,28 @@ Verified by `dotnet build` (Debug, no hardware):
 - `SiebwaldeApp.sln`: 0 errors.
 - `SiebwaldeApp.EcosEmu.sln`: 0 errors.
 
-Step-name chain verified by source inspection. No Fiddle Yard source changed. `SiebwaldeApp.Tests` was not built (not in any solution; known not to compile).
+Step-name chain verified by source inspection. No Fiddle Yard source changed. `SiebwaldeApp.Tests` was not built (it was obsolete and has since been removed in Increment 2).
+
+## Increment 2 Implementation Results (2026-09-11)
+
+Implemented on `feature/csharp-cleanup-startup`:
+
+- Removed `SiebwaldeApp/SiebwaldeApp.Tests` (8 tracked files) as an obsolete remnant of the abandoned station-in-C# approach, per product-owner option 1 (archive/remove).
+- Removed the leftover generated `bin/`/`obj/` folder of the deleted project.
+- Archived the encoded station design intent in `docs/project-knowledge.md`; source recoverable from git commit `104c1e6`.
+
+Verified by `dotnet build` (Debug, no hardware):
+
+- `SiebwaldeApp.sln`: 0 errors after removal.
+- `SiebwaldeApp.Core.Host`: 0 errors after removal.
+
+No active project referenced the test project, so builds were unaffected.
 
 ## Resume Instructions
 
 1. Restart OpenCode from `C:\Localdata\Siebwalde` and select the `project-lead` agent.
 2. Continue from `docs/product.md`, `human_input.md`, and `docs/analysis-coverage.md`.
-3. Phase 1 revalidation is complete; propose the first fix increment for product-owner approval before any implementation.
+3. Increments 1 and 2 are implemented and verified; propose Increment 3 (Pic18/station remnants in the WPF app) for approval before implementing.
 4. Create `docs/application-guide.md`.
 5. Product clarification rounds 1-5 are complete; remaining items are research tasks (Koploper protocol, ECoS overload semantics, topology/spreadsheet).
 6. Keep communicating with the user in Dutch; keep documentation and agent instructions in English.
@@ -155,4 +170,6 @@ Step-name chain verified by source inspection. No Fiddle Yard source changed. `S
 5. Investigate the additional firmware/hardware/Python source areas in bounded passes.
 6. Designer and integrator agents. - DONE (2026-09-11): created.
 7. Propose the first fix increment for product-owner approval (Core.Host logger, init sequencing, remnant cleanup, test-project decision). - DONE (2026-09-11): Increment 1 (host logger + init sequencing) implemented and verified.
-8. Treat all `docs/backlog.md` items as unapproved until the user selects implementation work.
+8. Remove obsolete test project. - DONE (2026-09-11): Increment 2 removed `SiebwaldeApp.Tests`; design intent archived.
+9. Increment 3 (proposed): remove confirmed Pic18-era and station-era remnants from the WPF app (`App.xaml.cs` commented adapters, `StationSettingsPage`, `StationSettingsPageViewModel`, `ApplicationPage.StationSettings`, `SideMenuViewModel.StationSettingsPage`, stale XML doc on `StartTrackApplication`).
+10. Treat all remaining `docs/backlog.md` items as unapproved until the user selects implementation work.

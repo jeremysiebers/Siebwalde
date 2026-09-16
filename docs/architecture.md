@@ -41,7 +41,7 @@ Target control loop (product-owner-described, to be verified against code):
 - `SiebwaldeApp/SiebwaldeApp/SiebwaldeApp.csproj` references `SiebwaldeApp.Core` and `SiebwaldeApp.EcosEmu`.
 - `SiebwaldeApp.Core.Host/SiebwaldeApp.Core.Host.csproj` references `SiebwaldeApp.Core`.
 - `SiebwaldeApp.EcosEmu/SiebwaldeApp.EcosEmu.Host/SiebwaldeApp.EcosEmu.Host.csproj` references `SiebwaldeApp.EcosEmu`.
-- `SiebwaldeApp/SiebwaldeApp.Tests/SiebwaldeApp.Tests.csproj` references `SiebwaldeApp.Core` but is not included in the main solution.
+- `SiebwaldeApp/SiebwaldeApp.Tests` (xUnit, referencing `SiebwaldeApp.Core`) was removed on 2026-09-11 as an obsolete remnant; it was never in the main solution and could not compile.
 - No source-level use of active `SiebwaldeApp.EcosEmu` types from the WPF app was verified, even though the project reference exists.
 
 ## Startup And Lifecycle

@@ -36,7 +36,7 @@ The repository root is `C:\Localdata\Siebwalde`, a Git repository (`origin https
 | `SiebwaldeApp/SiebwaldeApp/SiebwaldeApp.csproj` | Windows desktop app | `net8.0-windows` | WPF application with Windows Forms integration. |
 | `SiebwaldeApp/SiebwaldeApp.Core/SiebwaldeApp.Core.csproj` | Class library | `net8.0` | Core/domain logic, track application, Fiddle Yard logic, logging, services. |
 | `SiebwaldeApp/SiebwaldeApp.EcosEmu/SiebwaldeApp.EcosEmu.csproj` | Class library | `net8.0-windows7.0` | Active ECoS emulator library. |
-| `SiebwaldeApp/SiebwaldeApp.Tests/SiebwaldeApp.Tests.csproj` | xUnit test project | `net8.0-windows7.0` | Tests for station-domain concepts; not included in `SiebwaldeApp.sln`. |
+| `SiebwaldeApp/SiebwaldeApp.Tests/SiebwaldeApp.Tests.csproj` | Removed 2026-09-11 | `net8.0-windows7.0` | Obsolete station-domain test project; removed (Increment 2). Recoverable from git commit `104c1e6`. |
 | `SiebwaldeApp.Core.Host/SiebwaldeApp.Core.Host.sln` | Visual Studio solution | Mixed | Host solution for `SiebwaldeApp.Core.Host` and `SiebwaldeApp.Core`. |
 | `SiebwaldeApp.Core.Host/SiebwaldeApp.Core.Host.csproj` | Console app | `net8.0-windows7.0` | Console host for track initialization. |
 | `SiebwaldeApp.EcosEmu/SiebwaldeApp.EcosEmu.sln` | Visual Studio solution | Mixed | Host solution for `SiebwaldeApp.EcosEmu.Host` and active emulator library. |
@@ -78,7 +78,7 @@ The repository root is `C:\Localdata\Siebwalde`, a Git repository (`origin https
 | `Ninject` `3.3.6` | `SiebwaldeApp/SiebwaldeApp/SiebwaldeApp.csproj` | UI service locator and view model binding. |
 | `Fody` and `PropertyChanged.Fody` | `SiebwaldeApp/SiebwaldeApp/SiebwaldeApp.csproj`, `FodyWeavers.xml` | Property change weaving for the desktop app. |
 | `System.Configuration.ConfigurationManager` `8.0.0` | `SiebwaldeApp/SiebwaldeApp/SiebwaldeApp.csproj`, `SiebwaldeApp/SiebwaldeApp.Core/SiebwaldeApp.Core.csproj` | App settings access. |
-| `Microsoft.NET.Test.Sdk`, `xunit`, `xunit.runner.visualstudio` | `SiebwaldeApp/SiebwaldeApp.Tests/SiebwaldeApp.Tests.csproj` | Test infrastructure. |
+| `Microsoft.NET.Test.Sdk`, `xunit`, `xunit.runner.visualstudio` | Formerly `SiebwaldeApp/SiebwaldeApp.Tests/SiebwaldeApp.Tests.csproj` | Test infrastructure; the project was removed on 2026-09-11. |
 
 ## Configuration And Persistence
 
@@ -103,9 +103,7 @@ The repository root is `C:\Localdata\Siebwalde`, a Git repository (`origin https
 
 ## Tests And Diagnostics
 
-- `SiebwaldeApp/SiebwaldeApp.Tests` contains xUnit tests, test doubles, and `IoCTestBootstrap`.
-- The tests appear stale or ahead of source because station-domain symbols referenced by tests were not found in active source.
-- `dotnet test ... --no-build --no-restore` failed because the expected test DLL was not present.
+- The former test project `SiebwaldeApp/SiebwaldeApp.Tests` (xUnit, station-domain tests) was removed on 2026-09-11 as an obsolete remnant. There is currently no active test project.
 - Logging uses `FileLogger`, `DebugLogger`, `ConsoleLogger`, and `BaseLogFactory` in core; emulator diagnostics mostly use `Console.WriteLine`.
 
 ## Generated, Vendored, Duplicate, And Experimental Content
@@ -120,11 +118,12 @@ The repository root is `C:\Localdata\Siebwalde`, a Git repository (`origin https
 
 ## Revalidation Note
 
-The .NET application findings in this file were produced before the workspace was confirmed as the full Git repository. Project references, solution membership, target frameworks, and file paths were re-checked during the migration check, but the following claims still require revalidation against current source before being treated as verified:
+The .NET application findings in this file were produced before the workspace was confirmed as the full Git repository. They were revalidated against current source on 2026-09-11:
 
-- Missing station-domain symbols referenced by `SiebwaldeApp.Tests`.
-- Missing `IoC.Kernel` in `SiebwaldeApp.Core.IoC` used by `SiebwaldeApp.Core.Host`.
-- The exact set of test failures and build risks, which were derived from a `--no-build --no-restore` check only.
+- CONFIRMED then RESOLVED: missing `IoC.Kernel` in `SiebwaldeApp.Core.IoC` used by `SiebwaldeApp.Core.Host` (fixed in Increment 1).
+- CONFIRMED then RESOLVED: missing station-domain symbols referenced by `SiebwaldeApp.Tests` (obsolete project removed in Increment 2).
+- The remaining build/test risk items are tracked in `docs/backlog.md`.
 
-No revalidation build or test was run during the migration check.
+Build results are recorded in `docs/build-test.md`.
+
 

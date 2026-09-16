@@ -271,3 +271,11 @@ Decision: Implemented the first fix increment on `feature/csharp-cleanup-startup
 Evidence: `dotnet build` results recorded in `docs/build-test.md`. `SiebwaldeApp.Core` and `SiebwaldeApp.Core.Host` build with 0 errors; `SiebwaldeApp.sln` and `SiebwaldeApp.EcosEmu.sln` also build with 0 errors. Step-name chain verified by source inspection.
 
 Impact: The host compile break and the initialization sequencing defect are resolved. No Fiddle Yard source was changed. `SiebwaldeApp.Tests`, remnant removal, and the configuration-authority refactor remain open.
+
+## 2026-09-11: Obsolete Test Project Removed (Increment 2)
+
+Decision: `SiebwaldeApp/SiebwaldeApp.Tests` is removed as an obsolete remnant of the abandoned station-in-C# approach. Option 1 (archive/remove) was chosen by the product owner.
+
+Evidence: The project references a station domain model that has no definition anywhere in the active C# source (`TrackApplication`, `StationSide`, `StationTrack`, `TrackSensor`, `TrackBlock`, `TrackMetadata`, `TrackRole`, `TrainType`, `Signal`, `Amplifier`, `ITrackIn`, `ITrackOut`) and uses the old Ninject `IoC.Kernel` API. It is in no solution and cannot compile.
+
+Impact: Files remain recoverable from git history (added in commit `104c1e6` "Rename to App", 2025-11-24). The encoded station design intent is recorded in `docs/project-knowledge.md`. No active project referenced the test project, so builds are unaffected.

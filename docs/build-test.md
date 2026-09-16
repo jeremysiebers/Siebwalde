@@ -39,13 +39,9 @@ dotnet build "SiebwaldeApp.Core.Host\SiebwaldeApp.Core.Host.sln" -c Debug
 dotnet build "SiebwaldeApp.EcosEmu\SiebwaldeApp.EcosEmu.sln" -c Debug
 ```
 
-The test project is not included in `SiebwaldeApp/SiebwaldeApp.sln`; run it explicitly when build writes are allowed:
+The former test project `SiebwaldeApp/SiebwaldeApp.Tests` was removed on 2026-09-11 (Increment 2) as an obsolete remnant; it was in no solution and could not compile. There is currently no active test project.
 
-```powershell
-dotnet test "SiebwaldeApp\SiebwaldeApp.Tests\SiebwaldeApp.Tests.csproj" -c Debug
-```
-
-## Test Check Performed
+## Former Test Check (Historical)
 
 Command executed from the pre-migration workspace (`C:\Users\jerem\Downloads\Test`; the active repository root is now `C:\Localdata\Siebwalde`):
 
@@ -57,6 +53,7 @@ Result:
 
 - Failed before running tests because `SiebwaldeApp/SiebwaldeApp.Tests/bin/Debug/net8.0-windows7.0/SiebwaldeApp.Tests.dll` was not found.
 - This does not prove source tests fail; it only proves there was no existing built test assembly at that path.
+- The project has since been removed; this entry is kept as history.
 
 ## Build Risks Revalidated Against Current Source (2026-09-11)
 

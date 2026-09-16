@@ -131,18 +131,11 @@ Important code-inspected caveats:
 
 ## Tests
 
-The test project contains:
+The former test project `SiebwaldeApp/SiebwaldeApp.Tests` was removed on 2026-09-11 (Increment 2). It contained `StationTrackTests`, `StationSideTests`, `StationControllerTests`, `TestTrackIn`, `TestTrackOut`, and `IoCTestBootstrap`.
 
-- `StationTrackTests`
-- `StationSideTests`
-- `StationControllerTests`
-- `TestTrackIn`
-- `TestTrackOut`
-- `IoCTestBootstrap`
+It referenced station-domain symbols with no definition in active source (`StationTrack`, `TrainType`, `TrackApplication`, `StationSide`, `TrackSensor`, `Signal`, `Amplifier`, `TrackBlock`, `TrackMetadata`, `TrackRole`, `ITrackIn`, `ITrackOut`) and `IoCTestBootstrap` used the old Ninject `IoC.Kernel`. It was in no solution and could not compile.
 
-The tests reference station-domain symbols not found in active source inspection, including `StationTrack`, `TrainType`, `TrackApplication`, `StationSide`, `TrackSensor`, `Signal`, `Amplifier`, `TrackBlock`, `TrackMetadata`, `TrackRole`, `ITrackIn`, and `ITrackOut`.
-
-`IoCTestBootstrap` also references `IoC.Kernel`, but the active core `SiebwaldeApp.Core.IoC` does not contain `Kernel`. This is a code-inspected build risk.
+The encoded station design intent is archived in `docs/project-knowledge.md`; the source is recoverable from git commit `104c1e6`. There is currently no active test project.
 
 ## Code-Inspected Risks
 

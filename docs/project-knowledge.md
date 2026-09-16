@@ -31,6 +31,18 @@ Status: confirmed by the product owner, not independently code-verified. See `do
 - A shuttle line (pendelbaan) exists: max 4, min 1 locomotive between 3 stations (2 end stations with a switch, 1 middle station with fixed direction).
 - Koploper controls speed profile and calibration; decoder settings, speed calibration (Koploper), and software acceleration/braking (Koploper) are three distinct concepts. The exact internal braking calculation could not be confirmed from documentation.
 
+## Archived Design Reference: Station Model (Removed Tests)
+
+The removed `SiebwaldeApp.Tests` project encoded an intended C# station driving model. It is kept here as a design reference; the behavior is now owned by Koploper, not C#.
+
+- A station has a Top and Bottom side. Each side has 3 tracks: Top = 10, 11, 12; Bottom = 1, 2, 3.
+- The middle track per side is `MiddleFreight` (12/3); the outer tracks are `FreightAllowed`.
+- Freight selects the middle track when free; passenger selects an outer track.
+- An incoming train reserves a track and sets the entry signal green.
+- When no track is free, the train is stopped before the station.
+- Intended interfaces: `ITrackIn` with events `IncomingDetected`, `EntrySensorTriggered`, `ExitBlockFreeChanged`, `AmplifierOccupiedChanged`, `TrainClearedFromBlock`, `HardwareAliveChanged`; `ITrackOut` with `SetAmplifierStop`, `SetSignalEntry`, `SetSignalExit`, `SetSwitch`, `StopBeforeStation`.
+- Source is recoverable from git commit `104c1e6` ("Rename to App", 2025-11-24).
+
 ## Important Symbols
 
 | Symbol | Responsibility | Path |
@@ -53,20 +65,20 @@ Status: confirmed by the product owner, not independently code-verified. See `do
 
 - The repository appears to be mid-migration from legacy timer/service-locator patterns to async abstractions, but the intended migration plan should be confirmed with the user before implementation.
 - `SiebwaldeApp.EcosEmu_old` likely exists as an old copy, but deletion or archival is not approved.
-- Tests appear stale or ahead of source, but this should be confirmed by a full build/test run when writing `bin/obj` is allowed.
+- The former `SiebwaldeApp.Tests` was an obsolete remnant of the abandoned station-in-C# approach; it was removed on 2026-09-11. New tests for the window/program model are still to be added.
 - The .NET code-analysis findings were revalidated against current source on 2026-09-11 (source inspection only, no build). The missing `IoC.Kernel`, the missing station-domain symbols, the initialization step sequencing, and the hard-coded endpoints are CONFIRMED. The Fiddle Yard error paths, `SendNextFwDataPacket` await behavior, `TrackCommClientAsync` publish comment, and ECoS multi-client behavior remain not re-verified.
 
 ## Open Questions
 
 - Should future work prioritize build health, track initialization correctness, ECoS emulator reliability, or documentation completeness?
-- Should `SiebwaldeApp.Core.Host` be fixed to use `SiebwaldeApp.Core.IoC.ConfigureLogger`, or was another `IoC` intended?
-- Should `SetDefaultPwmSetpointsStep` run before `EnableTrackamplifiersStep` in the active pipeline?
-- Is the active track controller always `192.168.1.193:10000`, or should `CoreSettings` be authoritative?
+- RESOLVED (Increment 1): `SiebwaldeApp.Core.Host` now uses `SiebwaldeApp.Core.IoC.ConfigureLogger`.
+- RESOLVED (Increment 1): `SetDefaultPwmSetpointsStep` now runs before `EnableTrackamplifiers` in the active pipeline.
+- Is the active track controller always `192.168.1.193:10000`, or should `CoreSettings` be authoritative? (Settings UI is the agreed direction.)
 - Should the WPF app start or manage the ECoS emulator, or is the project reference only for future use?
 
 ## Session Notes
 
-- No source code, dependency files, or runtime configuration were intentionally changed during this assignment.
-- `dotnet --info` was run successfully.
-- `dotnet test --no-build --no-restore` was run and failed because the test assembly was missing.
-- Full build/test commands remain unexecuted in this session.
+- The initial analysis changed no source. Increments 1 and 2 (2026-09-11) then changed source as explicitly authorized: host logging and init sequencing fixes, and removal of the obsolete test project.
+- `dotnet --info` was run successfully (SDK `9.0.318`).
+- `dotnet build` was executed for `SiebwaldeApp.Core`, `SiebwaldeApp.Core.Host`, `SiebwaldeApp.sln`, and `SiebwaldeApp.EcosEmu.sln`; all build with 0 errors after Increment 1.
+- The former test project was removed in Increment 2; no test execution is currently possible.

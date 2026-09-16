@@ -52,7 +52,7 @@ The product owner confirmed component roles and priorities on 2026-09-11 (see `d
 | `SiebwaldeApp/SiebwaldeApp` | Investigated | WPF/Windows Forms desktop application. | `SiebwaldeApp/SiebwaldeApp/SiebwaldeApp.csproj` targets `net8.0-windows`, `UseWPF`, and `UseWindowsForms`; `App.OnStartup` traced. | Detailed page-by-page UI behavior not documented. |
 | `SiebwaldeApp/SiebwaldeApp.Core` | Investigated | Core/domain library. | `SiebwaldeApp/SiebwaldeApp.Core/SiebwaldeApp.Core.csproj` targets `net8.0`; track and Fiddle Yard workflows traced. | Some deep Fiddle Yard state branches remain summarized. |
 | `SiebwaldeApp/SiebwaldeApp.EcosEmu` | Investigated | ECoS emulator library. | `SiebwaldeApp/SiebwaldeApp.EcosEmu/SiebwaldeApp.EcosEmu.csproj` targets `net8.0-windows7.0`; server/backend/simulator traced. | Exact full ECoS command coverage remains summarized. |
-| `SiebwaldeApp/SiebwaldeApp.Tests` | Partially investigated | xUnit test project, likely stale or ahead of source. | `SiebwaldeApp/SiebwaldeApp.Tests/SiebwaldeApp.Tests.csproj` references `SiebwaldeApp.Core`; tests reference missing station-domain symbols. | Full build not run; only `--no-build --no-restore` check run. |
+| `SiebwaldeApp/SiebwaldeApp.Tests` | Removed | Removed 2026-09-11 (Increment 2) as an obsolete remnant of the abandoned station-in-C# approach. | None; recoverable from git commit `104c1e6`. |
 | `SiebwaldeApp.Core.Host/` | Investigated | Console host for core startup and track initialization. | `SiebwaldeApp.Core.Host/SiebwaldeApp.Core.Host.sln` references `SiebwaldeApp.Core`; `Program.Main` traced. | Full build not run; build risk recorded. |
 | `SiebwaldeApp.EcosEmu/` | Investigated | Separate emulator host solution plus obsolete or experimental copy. | `SiebwaldeApp.EcosEmu/SiebwaldeApp.EcosEmu.sln` references host and shared emulator project under `SiebwaldeApp`. | User decision needed for `_old` copy. |
 | `SiebwaldeApp.EcosEmu/SiebwaldeApp.EcosEmu.Host` | Investigated | Console host for ECoS emulator. | `Program.Main` wires external info, loco repository, simulator, backend, and server. | Full build not run. |
@@ -72,7 +72,7 @@ The product owner confirmed component roles and priorities on 2026-09-11 (see `d
 | Fiddle yard application | Partially investigated | Architect | `FiddleYardController`, `FiddleYardIOHandle`, `FiddleYardApplication`. | Deep state-by-state behavior summarized, not exhaustive. |
 | Fiddle yard simulator | Partially investigated | Developer | `SiebwaldeApp/SiebwaldeApp.Core/Model/FiddleYardSimulator`. | Simulator internals summarized indirectly through Fiddle Yard flow. |
 | ECoS emulator protocol/server/backend | Investigated | Architect | `EcosEmulatorServer`, `SimpleEcosCommandParser`, `SimpleEcosBackend`, `TrackSimulatorBackend`, `KoploperExternalInfoClient`, `JsonLocoRepository`. | Exact command grammar edge cases not tested. |
-| Tests and test doubles | Partially investigated | Developer | `SiebwaldeApp/SiebwaldeApp.Tests`. | Full compile/test execution pending approval for build writes. |
+| Tests and test doubles | Removed | Project Lead | `SiebwaldeApp/SiebwaldeApp.Tests` was removed 2026-09-11 (obsolete station-domain tests). | New unit tests for the window/program model are still to be added. |
 
 ## Revalidation Note
 
@@ -81,7 +81,7 @@ All .NET application findings above were produced before the workspace was confi
 Revalidated on 2026-09-11 against current source (source inspection only, no build):
 
 - CONFIRMED: missing `IoC.Kernel` in `SiebwaldeApp.Core.IoC` used by `SiebwaldeApp.Core.Host`.
-- CONFIRMED: missing station-domain symbols and `IoC.Kernel`/Ninject usage in `SiebwaldeApp.Tests`.
+- CONFIRMED then REMOVED (Increment 2): missing station-domain symbols and `IoC.Kernel`/Ninject usage in `SiebwaldeApp.Tests`; the obsolete project was deleted.
 - CONFIRMED: initialization step sequencing (`SetDefaultPwmSetpointsStep` skipped; mismatched next-step name).
 - CONFIRMED: hard-coded endpoints and firmware path; `CoreSettings` is not authoritative for the track transport.
 - CONFIRMED: Pic18-era commented remnants and station-era UI remnants in the C# project.

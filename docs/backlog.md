@@ -58,8 +58,8 @@ The product owner confirmed the following order. Items remain unapproved for imp
 | Item | Evidence | Suggested acceptance criteria |
 | --- | --- | --- |
 | Fix `SiebwaldeApp.Core.Host` logger setup. | DONE (2026-09-11, Increment 1): `Program.cs` now uses `IoC.ConfigureLogger(...)`; host builds with 0 errors. | Host builds and configures logging through an existing or approved API. |
-| Reconcile `SiebwaldeApp.Tests` with active source. | CONFIRMED 2026-09-11: tests reference missing station-domain symbols and `IoC.Kernel`/Ninject. | Test project builds or is explicitly archived with rationale. |
-| Add the test project to the appropriate solution if it is active. | `SiebwaldeApp/SiebwaldeApp.Tests/SiebwaldeApp.Tests.csproj` exists but is not in `SiebwaldeApp.sln`. | Chosen solution includes active test project, or documentation explains why it is separate. |
+| Reconcile `SiebwaldeApp.Tests` with active source. | DONE (2026-09-11, Increment 2): the obsolete test project was removed; design intent archived in `docs/project-knowledge.md`; recoverable from git commit `104c1e6`. | Resolved. |
+| Add the test project to the appropriate solution if it is active. | CANCELLED (2026-09-11): the test project was obsolete and removed. | Not applicable. |
 
 ## Track Application
 
