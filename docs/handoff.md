@@ -90,23 +90,25 @@ Clarification rounds 1-5 are complete and the phase is closed. The requested age
 
 Development happens on branch `feature/csharp-cleanup-startup`; a pull request to the default branch happens only after a first successful integration with the agents. Restart OpenCode to load the new agents.
 
-## Revalidation Status
+## Phase 1 Revalidation Results (2026-09-11)
 
-Prior .NET findings were produced before the workspace was confirmed as the full Git repository and were not re-checked against current source. The following require revalidation:
+Prior .NET findings were revalidated against current source by inspection (no build). All confirmed:
 
-- Missing `IoC.Kernel` in `SiebwaldeApp.Core.IoC` used by `SiebwaldeApp.Core.Host`.
-- Missing station-domain symbols referenced by `SiebwaldeApp.Tests`.
-- Initialization step sequencing (`SetDefaultPwmSetpointsStep`).
-- Hard-coded endpoints and firmware path authority.
-- Any build/test success or failure claims.
+- CONFIRMED: `SiebwaldeApp.Core.Host/Program.cs:25` uses `IoC.Kernel`; `SiebwaldeApp.Core.IoC` has only `Logger`/`ConfigureLogger`. Compile error.
+- CONFIRMED: `SiebwaldeApp.Tests` uses `IoC.Kernel`/Ninject and references undefined station-domain symbols; it cannot compile.
+- CONFIRMED: `SetDefaultPwmSetpointsStep` is skipped by `InitTrackamplifiersStep` and returns `Next("EnableTrackamplifiersStep")`, which does not match the registered `EnableTrackamplifiers` and would fail initialization.
+- CONFIRMED: endpoints (`192.168.1.193`, `10000`, `10001`) and the firmware path are hard-coded in both `SiebwaldeApplicationModel.cs` and `Core.Host/Program.cs`; `CoreSettings` is not authoritative for the track transport.
+- CONFIRMED: Pic18-era commented remnants in `App.xaml.cs` and station-era UI remnants (`StationSettingsPage`, `StationSettingsPageViewModel`, `ApplicationPage.StationSettings`, `SideMenuViewModel.StationSettingsPage`). Active `TrackControllerCommands` (ModBus) is not a remnant.
+
+Not re-verified: Fiddle Yard error paths, `SendNextFwDataPacket` await behavior, `TrackClientAsync` publish-interval comment, ECoS multi-client behavior. No build/test was executed.
 
 ## Resume Instructions
 
 1. Restart OpenCode from `C:\Localdata\Siebwalde` and select the `project-lead` agent.
 2. Continue from `docs/product.md`, `human_input.md`, and `docs/analysis-coverage.md`.
-3. Confirm the first increment scope with the product owner, then revalidate the .NET findings against current source.
+3. Phase 1 revalidation is complete; propose the first fix increment for product-owner approval before any implementation.
 4. Create `docs/application-guide.md`.
-5. Answer the follow-up questions in `human_input.md` before designing the Koploper translation path.
+5. Product clarification rounds 1-5 are complete; remaining items are research tasks (Koploper protocol, ECoS overload semantics, topology/spreadsheet).
 6. Keep communicating with the user in Dutch; keep documentation and agent instructions in English.
 
 ## Constraints To Preserve
@@ -130,9 +132,10 @@ Prior .NET findings were produced before the workspace was confirmed as the full
 ## Remaining Work
 
 1. Create `docs/application-guide.md` (still missing).
-2. Revalidate prior .NET code-analysis findings against current source.
-3. Continue product clarification: round 2 questions (host detection technique, settings scope, then Koploper protocol/mapping, MMDC split, test layout, YardController split, designer agent).
+2. Revalidate prior .NET code-analysis findings against current source. - DONE (2026-09-11): confirmed; see Phase 1 Revalidation Results.
+3. Product clarification rounds 1-5. - DONE (2026-09-11): remaining items are research tasks (Koploper protocol, ECoS overload semantics, topology/spreadsheet).
 4. Design and implement the Koploper translation path (later increment).
 5. Investigate the additional firmware/hardware/Python source areas in bounded passes.
-6. Decide whether to add a designer agent. - DONE (2026-09-11): designer and integrator agents created.
-7. Treat all `docs/backlog.md` items as unapproved until the user selects implementation work.
+6. Designer and integrator agents. - DONE (2026-09-11): created.
+7. Propose the first fix increment for product-owner approval (Core.Host logger, init sequencing, remnant cleanup, test-project decision).
+8. Treat all `docs/backlog.md` items as unapproved until the user selects implementation work.

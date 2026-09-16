@@ -255,3 +255,11 @@ Decision: All code changes and commits are made on the branch `feature/csharp-cl
 Evidence: Product owner instruction.
 
 Impact: `master` stays stable. The pre-existing branch `SiebwaldeApp-stationcontrol` is unrelated and left untouched.
+
+## 2026-09-11: Prior .NET Findings Revalidated And Confirmed
+
+Decision: The prior .NET findings were revalidated against current source by inspection (no build). Confirmed: missing `IoC.Kernel` in `SiebwaldeApp.Core.IoC` used by `SiebwaldeApp.Core.Host`; missing station-domain symbols and Ninject/`IoC.Kernel` usage in `SiebwaldeApp.Tests`; `SetDefaultPwmSetpointsStep` skipped and returning a mismatched next-step name; hard-coded endpoints/firmware path with `CoreSettings` not authoritative for the track transport; Pic18-era commented remnants and station-era UI remnants.
+
+Evidence: Source inspection on 2026-09-11 in the active repository (see `docs/build-test.md`).
+
+Impact: These move from "requires revalidation" to "confirmed" in the documentation. Fixes remain unapproved implementation work. Still not re-verified: Fiddle Yard error paths, `SendNextFwDataPacket` await behavior, `TrackCommClientAsync` publish comment, ECoS multi-client behavior.

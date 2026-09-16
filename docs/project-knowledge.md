@@ -54,7 +54,7 @@ Status: confirmed by the product owner, not independently code-verified. See `do
 - The repository appears to be mid-migration from legacy timer/service-locator patterns to async abstractions, but the intended migration plan should be confirmed with the user before implementation.
 - `SiebwaldeApp.EcosEmu_old` likely exists as an old copy, but deletion or archival is not approved.
 - Tests appear stale or ahead of source, but this should be confirmed by a full build/test run when writing `bin/obj` is allowed.
-- The .NET code-analysis findings (missing `IoC.Kernel`, missing station-domain symbols, initialization step sequencing, hard-coded endpoints) were produced before the workspace was confirmed as the full Git repository and have not been revalidated against the current source. Treat them as requiring revalidation, not as confirmed true or false.
+- The .NET code-analysis findings were revalidated against current source on 2026-09-11 (source inspection only, no build). The missing `IoC.Kernel`, the missing station-domain symbols, the initialization step sequencing, and the hard-coded endpoints are CONFIRMED. The Fiddle Yard error paths, `SendNextFwDataPacket` await behavior, `TrackCommClientAsync` publish comment, and ECoS multi-client behavior remain not re-verified.
 
 ## Open Questions
 

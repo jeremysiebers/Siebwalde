@@ -58,14 +58,35 @@ Result:
 - Failed before running tests because `SiebwaldeApp/SiebwaldeApp.Tests/bin/Debug/net8.0-windows7.0/SiebwaldeApp.Tests.dll` was not found.
 - This does not prove source tests fail; it only proves there was no existing built test assembly at that path.
 
-## Expected Build Risks From Code Inspection (Require Revalidation)
+## Build Risks Revalidated Against Current Source (2026-09-11)
 
-These risks were derived from code inspection in the pre-migration workspace. They were not re-checked against current source during the migration check and must be treated as requiring revalidation, not as confirmed build failures.
+These findings were re-checked against the current source in the active repository. All were CONFIRMED as real compile-level or behavioral risks. No build was executed; these are source-inspection results.
 
-- `SiebwaldeApp.Core.Host/Program.cs` references `IoC.Kernel`, but `SiebwaldeApp/SiebwaldeApp.Core/IoC/IoC.cs` exposes only `Logger` and `ConfigureLogger`.
-- `SiebwaldeApp/SiebwaldeApp.Tests/Infrastructure/IoCTestBootstrap.cs` references `IoC.Kernel` and has `using Ninject`, but the test project does not reference Ninject and active core `IoC` has no `Kernel`.
-- Station tests reference symbols that were not found in active source inspection: `StationTrack`, `TrainType`, `TrackApplication`, `StationSide`, `TrackSensor`, `Signal`, `Amplifier`, `TrackBlock`, `TrackMetadata`, `TrackRole`, `ITrackIn`, and `ITrackOut`.
-- `SiebwaldeApp.EcosEmu_old` targets `net9.0` and is not referenced by discovered solutions; it should not be treated as active build coverage unless explicitly selected.
+- CONFIRMED: `SiebwaldeApp.Core.Host/Program.cs:25` calls `IoC.Kernel.Bind<ILogFactory>()`, but `SiebwaldeApp/SiebwaldeApp.Core/IoC/IoC.cs` exposes only `Logger` and `ConfigureLogger` (no `Kernel`). With `using SiebwaldeApp.Core;`, this is a compile error. The Ninject-style `Kernel` API exists only in the UI `SiebwaldeApp.IoC` (`SiebwaldeApp/SiebwaldeApp/IoC/IoC.cs`), and the host does not reference Ninject.
+- CONFIRMED: `SiebwaldeApp/SiebwaldeApp.Tests/Infrastructure/IoCTestBootstrap.cs` uses `using Ninject;` and `IoC.Kernel.Bind/Unbind`, but `SiebwaldeApp.Tests.csproj` references only `SiebwaldeApp.Core` plus xunit (no Ninject). The test project cannot compile.
+- CONFIRMED: Station tests reference symbols with no definition in `SiebwaldeApp.Core`: `StationTrack`, `TrainType`, `StationSide`, `TrackApplication`, `TrackMetadata`, `TrackRole`, `ITrackIn`, `ITrackOut`. (`TrackApplicationVariables` and `AmplifierDataEventArgs` exist; the station-domain types do not.)
+- CONFIRMED: `SiebwaldeApp.EcosEmu_old` targets `net9.0` and is not referenced by discovered solutions; it is not active build coverage.
+- Not re-checked: `BaseLogFactory` members used by the host (for example `LogOutputLevel`) were not verified in this pass.
+
+## Revalidated Initialization Sequencing (2026-09-11)
+
+- CONFIRMED: In `SiebwaldeApp/SiebwaldeApp.Core/Model/SiebwaldeApplicationModel.cs` (lines 169-181) the steps are registered as Connect, ResetAllSlaves, DataUpload, DetectSlaves, RecoverSlaves, FlashFwTrackamplifiers, `InitTrackamplifiersStep`, `SetDefaultPwmSetpointsStep`, `EnableTrackamplifiersStep`.
+- CONFIRMED: `InitTrackamplifiersStep` (`.../Initialization/Steps/InitTrackamplifiersStep.cs:65`) returns `InitStepResult.Next("EnableTrackamplifiers")`, so `SetDefaultPwmSetpointsStep` is skipped.
+- CONFIRMED: `SetDefaultPwmSetpointsStep` (`.../Steps/SetDefaultPwmSetpointsStep.cs:33,46`) returns `InitStepResult.Next("EnableTrackamplifiersStep")`, while `EnableTrackamplifiersStep.Name` is `"EnableTrackamplifiers"`. If the step were reached, `TrackAmplifierInitializationServiceAsync.InitializeAsync` would throw `Unknown init step: EnableTrackamplifiersStep` and fail initialization.
+
+## Revalidated Configuration Authority (2026-09-11)
+
+- CONFIRMED: `SiebwaldeApplicationModel.cs:23` hard-codes the firmware path, and `:140-142` hard-codes `192.168.1.193`, `10000`, and `10001`.
+- CONFIRMED: `SiebwaldeApp.Core.Host/Program.cs:9,59-61` hard-codes the same values independently.
+- CONFIRMED: `SiebwaldeApp/SiebwaldeApp.Core/app.config` defines `TrckSendingPort`/`TrckReceivingPort` (`10000`/`10001`), `FYSendingport`/`FYReceivingport` (`28671`/`28672`), and `LogDirectory`, but no IP address and no firmware path. Only the Fiddle Yard path uses `CoreSettings`; the track transport uses the hard-coded values.
+
+## Revalidated Obsolete Remnants (2026-09-11)
+
+- CONFIRMED: `SiebwaldeApp/SiebwaldeApp/App.xaml.cs` contains commented-out Pic18-era code referencing `TrackPic18UdpAdapter`, `YardPic18UdpAdapter`, `UseRealAdaptersOrThrow`, and `IoC.TrackAdapter.TrackIn/Out`.
+- CONFIRMED: Station-era UI remnants exist: `StationSettingsPage.xaml.cs`, `StationSettingsPageViewModel.cs` (largely commented), `ApplicationPage.StationSettings`, and `SideMenuViewModel.StationSettingsPage`.
+- CONFIRMED: `StartTrackApplication` has a stale XML doc comment mentioning "registering station tracks" that the code does not perform.
+- Note: `TrackControllerCommands` and `TrackController` references in Core belong to the active ModBus controller command set, not the Pic18 remnants. They must not be removed as part of remnant cleanup.
+
 
 ## External Endpoints And Files
 

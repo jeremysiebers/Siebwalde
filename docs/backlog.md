@@ -16,11 +16,11 @@ The product owner confirmed the following order. Items remain unapproved for imp
 
 | Item | Evidence | Suggested acceptance criteria |
 | --- | --- | --- |
-| Revalidate the missing `IoC.Kernel` finding. | `SiebwaldeApp.Core.Host/Program.cs` reportedly uses `IoC.Kernel`; finding predates the migration and was not re-checked. | Claim is verified or corrected against current source, with evidence recorded. |
-| Revalidate the missing station-domain symbols in tests. | `SiebwaldeApp.Tests` reportedly references symbols not found in active source. | Claim is verified or corrected; test project either compiles or is explicitly archived with rationale. |
-| Revalidate the initialization step order (`SetDefaultPwmSetpointsStep`). | The step is reportedly registered, skipped, and returns a mismatched next step name. | Intended order is confirmed and implemented with matching `IInitializationStep.Name` values. |
-| Establish configuration authority for endpoints and firmware path. | Startup code reportedly hard-codes `192.168.1.193`, `10000`, `10001`, and the firmware hex path. | One authoritative configuration source is documented and used. |
-| Remove obsolete `TrackControllerPic18.X` remnants from the C# project. | Product owner confirmed the component is obsolete. | Dead code is removed and the build/tests remain green. |
+| Revalidate the missing `IoC.Kernel` finding. | DONE (2026-09-11): CONFIRMED. `SiebwaldeApp.Core.Host/Program.cs:25` uses `IoC.Kernel.Bind<ILogFactory>()`; `SiebwaldeApp.Core.IoC` has only `Logger`/`ConfigureLogger`. | Fix unapproved: use `IoC.ConfigureLogger(...)` or another approved API. |
+| Revalidate the missing station-domain symbols in tests. | DONE (2026-09-11): CONFIRMED. Tests use `IoC.Kernel`/Ninject and reference undefined `StationTrack`, `TrainType`, `StationSide`, `TrackApplication`, `TrackMetadata`, `TrackRole`, `ITrackIn`, `ITrackOut`. | Test project either compiles or is explicitly archived with rationale. |
+| Revalidate the initialization step order (`SetDefaultPwmSetpointsStep`). | DONE (2026-09-11): CONFIRMED. `InitTrackamplifiersStep` returns `Next("EnableTrackamplifiers")` (skips it); `SetDefaultPwmSetpointsStep` returns `Next("EnableTrackamplifiersStep")`, which does not match the registered name and would fail initialization. | Intended order is confirmed and implemented with matching `IInitializationStep.Name` values. |
+| Establish configuration authority for endpoints and firmware path. | DONE (2026-09-11): CONFIRMED. `SiebwaldeApplicationModel.cs:23,140-142` and `Core.Host/Program.cs:9,59-61` hard-code values; `CoreSettings` has ports but no IP/firmware path and is not used for the track transport. | One authoritative configuration source is documented and used (ties into the settings UI item). |
+| Remove obsolete `TrackControllerPic18.X` remnants from the C# project. | CONFIRMED (2026-09-11): commented `TrackPic18UdpAdapter`/`YardPic18UdpAdapter` code in `App.xaml.cs`; station-era UI remnants (`StationSettingsPage`, `StationSettingsPageViewModel`, `ApplicationPage.StationSettings`, `SideMenuViewModel.StationSettingsPage`); stale doc comment on `StartTrackApplication`. | Remnants are removed; active `TrackControllerCommands` (ModBus) is kept; build/tests remain green. |
 | Define modern standards, unit testing, and simulation baseline. | Product owner requested modern programming standards, unit testing, and simulations. | Chosen frameworks/analyzers and a simulation approach are documented and applied. |
 | Restore intended core separation and IoC structure. | Product owner requested the intended core and separation (IoC) be put in order. | Core/UI boundaries and IoC composition are documented and consistent. |
 | Implement `SiebwaldeInitPage` host detection and dynamic display. | Product owner requires automatic detection of FiddleYard, ModBus master, Koploper, and later YardController, with human-readable page logging. | Expected hosts are probed (ping on host name; TCP connect for Koploper) and shown with present/absent state; page shows logical steps/states; start buttons enable detected hosts. |
@@ -57,17 +57,17 @@ The product owner confirmed the following order. Items remain unapproved for imp
 
 | Item | Evidence | Suggested acceptance criteria |
 | --- | --- | --- |
-| Fix `SiebwaldeApp.Core.Host` logger setup. | `SiebwaldeApp.Core.Host/Program.cs` uses `IoC.Kernel`; `SiebwaldeApp.Core.IoC` has no `Kernel`. | Host builds and configures logging through an existing or approved API. |
-| Reconcile `SiebwaldeApp.Tests` with active source. | Tests reference missing station-domain symbols and `IoC.Kernel`. | Test project builds or is explicitly archived with rationale. |
+| Fix `SiebwaldeApp.Core.Host` logger setup. | CONFIRMED 2026-09-11: `SiebwaldeApp.Core.Host/Program.cs:25` uses `IoC.Kernel`; `SiebwaldeApp.Core.IoC` has no `Kernel`. | Host builds and configures logging through an existing or approved API. |
+| Reconcile `SiebwaldeApp.Tests` with active source. | CONFIRMED 2026-09-11: tests reference missing station-domain symbols and `IoC.Kernel`/Ninject. | Test project builds or is explicitly archived with rationale. |
 | Add the test project to the appropriate solution if it is active. | `SiebwaldeApp/SiebwaldeApp.Tests/SiebwaldeApp.Tests.csproj` exists but is not in `SiebwaldeApp.sln`. | Chosen solution includes active test project, or documentation explains why it is separate. |
 
 ## Track Application
 
 | Item | Evidence | Suggested acceptance criteria |
 | --- | --- | --- |
-| Correct initialization step sequencing around `SetDefaultPwmSetpointsStep`. | The step is registered, skipped by `InitTrackamplifiersStep`, and returns a mismatched next step name. | Intended step order is verified and implemented with matching `IInitializationStep.Name` values. |
+| Correct initialization step sequencing around `SetDefaultPwmSetpointsStep`. | CONFIRMED 2026-09-11: the step is registered, skipped by `InitTrackamplifiersStep`, and returns a mismatched next step name. | Intended step order is verified and implemented with matching `IInitializationStep.Name` values. |
 | Await firmware packet sends. | `SendNextFwDataPacket.Execute` calls `SendAsync(...).ConfigureAwait(false)` without awaiting. | Firmware send ordering and error handling are deterministic. |
-| Decide settings source for track ports/IP. | Startup code hard-codes `192.168.1.193`, `10000`, and `10001`; settings also contain track ports. | One authoritative configuration source is documented and used. |
+| Decide settings source for track ports/IP. | CONFIRMED 2026-09-11: startup code hard-codes `192.168.1.193`, `10000`, `10001`, and the firmware path; `CoreSettings` has ports but no IP/path and is unused for the track transport. | One authoritative configuration source is documented and used (settings UI item). |
 | Add bounded timeout/recovery behavior for initialization. | `TrackAmplifierInitializationServiceAsync` has a per-read timeout but no overall timeout. | Initialization failures surface predictably with logged reason and cancellation support. |
 
 ## Fiddle Yard
@@ -101,7 +101,7 @@ The product owner confirmed the following order. Items remain unapproved for imp
 | Item | Evidence | Suggested acceptance criteria |
 | --- | --- | --- |
 | Create the consolidated human-readable application guide. | `docs/application-guide.md` does not exist; `docs/product.md` now captures purpose and scope only. | A coherent guide covers architecture, workflows, and verified usage with diagrams, and distinguishes verified facts from revalidation items. |
-| Revalidate prior .NET code-analysis findings. | Findings predate confirmation of the full Git repository and were not re-checked. | Key claims (`IoC.Kernel`, station-domain symbols, init sequencing, hard-coded endpoints) are re-checked against current source and marked verified or corrected. |
+| Revalidate prior .NET code-analysis findings. | DONE (2026-09-11): revalidated by source inspection; the key claims are CONFIRMED (see `docs/build-test.md`). Fiddle Yard/emulator items remain not re-verified. | Remaining not-re-verified items are checked when those areas are touched. |
 | Investigate additional source areas. | Firmware/hardware/Python areas are inventoried only. | Each area has at least a bounded inventory note; deep analysis is scheduled by priority. |
 
 ## YardController And Faller Car (Future)

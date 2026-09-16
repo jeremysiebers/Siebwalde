@@ -76,5 +76,16 @@ The product owner confirmed component roles and priorities on 2026-09-11 (see `d
 
 ## Revalidation Note
 
-All .NET application findings above were produced before the workspace was confirmed as the full Git repository at `C:\Localdata\Siebwalde`. Project/solution structure and references were re-verified during the migration check, but module-level code findings (for example missing `IoC.Kernel`, missing station-domain symbols, initialization step sequencing, hard-coded endpoints) have not been re-checked against the current source and must be treated as requiring revalidation rather than as confirmed true or false.
+All .NET application findings above were produced before the workspace was confirmed as the full Git repository at `C:\Localdata\Siebwalde`.
+
+Revalidated on 2026-09-11 against current source (source inspection only, no build):
+
+- CONFIRMED: missing `IoC.Kernel` in `SiebwaldeApp.Core.IoC` used by `SiebwaldeApp.Core.Host`.
+- CONFIRMED: missing station-domain symbols and `IoC.Kernel`/Ninject usage in `SiebwaldeApp.Tests`.
+- CONFIRMED: initialization step sequencing (`SetDefaultPwmSetpointsStep` skipped; mismatched next-step name).
+- CONFIRMED: hard-coded endpoints and firmware path; `CoreSettings` is not authoritative for the track transport.
+- CONFIRMED: Pic18-era commented remnants and station-era UI remnants in the C# project.
+
+Still not re-verified: the Fiddle Yard error paths, `SendNextFwDataPacket` await behavior, `TrackCommClientAsync` publish interval comment, and ECoS emulator multi-client behavior. Build/test execution is still pending authorization.
+
 

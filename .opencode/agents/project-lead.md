@@ -1,7 +1,6 @@
 ---
 description: Coordinates Siebwalde analysis and development, maintains product requirements and durable project knowledge.
 mode: primary
-steps: 25
 permission:
   task:
     "*": ask

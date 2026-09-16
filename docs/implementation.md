@@ -146,11 +146,13 @@ The tests reference station-domain symbols not found in active source inspection
 
 ## Code-Inspected Risks
 
-- `SiebwaldeApp.Core.Host/Program.cs` references `IoC.Kernel`, which does not exist in active `SiebwaldeApp.Core.IoC`.
-- `SiebwaldeApp.Tests` references missing station-domain symbols and likely cannot compile in the current source state.
-- `SetDefaultPwmSetpointsStep` naming does not match the registered next step name.
-- `SetDefaultPwmSetpointsStep` is registered but skipped by `InitTrackamplifiersStep`.
-- `TrackCommClientAsync` has a comment saying 2 Hz publish while the timer interval is 100 ms.
-- `SendNextFwDataPacket.Execute` does not await `SendAsync`.
-- Several Fiddle Yard error paths swallow exceptions or contain TODO/TBD recovery behavior.
-- ECoS emulator multi-client behavior is uncertain because `SimpleEcosBackend` stores one `_currentWriter`.
+Revalidation status (2026-09-11): the first four items below were re-checked against current source and confirmed. The remaining items are still code-inspected but not re-verified in this pass.
+
+- CONFIRMED: `SiebwaldeApp.Core.Host/Program.cs` references `IoC.Kernel`, which does not exist in active `SiebwaldeApp.Core.IoC` (only `Logger` and `ConfigureLogger`). Compile error.
+- CONFIRMED: `SiebwaldeApp.Tests` references missing station-domain symbols (`StationTrack`, `TrainType`, `StationSide`, `TrackApplication`, `TrackMetadata`, `TrackRole`, `ITrackIn`, `ITrackOut`) and uses `IoC.Kernel`/Ninject; it cannot compile in the current source state.
+- CONFIRMED: `SetDefaultPwmSetpointsStep` returns `Next("EnableTrackamplifiersStep")`, which does not match the registered `EnableTrackamplifiersStep.Name` (`"EnableTrackamplifiers"`).
+- CONFIRMED: `SetDefaultPwmSetpointsStep` is registered but skipped by `InitTrackamplifiersStep`, which returns `Next("EnableTrackamplifiers")`.
+- Not re-verified: `TrackCommClientAsync` has a comment saying 2 Hz publish while the timer interval is 100 ms.
+- Not re-verified: `SendNextFwDataPacket.Execute` does not await `SendAsync`.
+- Not re-verified: several Fiddle Yard error paths swallow exceptions or contain TODO/TBD recovery behavior.
+- Not re-verified: ECoS emulator multi-client behavior is uncertain because `SimpleEcosBackend` stores one `_currentWriter`.
