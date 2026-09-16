@@ -287,3 +287,11 @@ Decision: Removed the dead station-policy settings feature and the commented Pic
 Evidence: `StationSettingsPage.xaml(.cs)` bound to `TopPolicy`/`BottomPolicy`, which were commented out in `StationSettingsPageViewModel`, so the page was unbound; it was reachable from `TrackMenu.xaml`. `App.xaml.cs` had a large commented Pic18 block referencing `TrackPic18UdpAdapter`/`YardPic18UdpAdapter`.
 
 Impact: Deleted `StationSettingsPage.xaml`, `StationSettingsPage.xaml.cs`, `StationSettingsPageViewModel.cs`, the commented `TrackAmplifierItemView.xaml.cs` and `TrackAmplifierItemViewModel.cs`. Removed `ApplicationPage.StationSettings`, its converter case, the `SideMenuViewModel.StationSettingsPage` command, and the `TrackMenu.xaml` button. Removed the commented Pic18 block from `App.xaml.cs`. Fixed the stale `StartTrackApplication` XML doc. `SiebwaldeApp.sln` builds with 0 errors and no references to the removed symbols remain. Fiddle Yard and the active ModBus `TrackControllerCommands` are untouched.
+
+## 2026-09-11: Page-Removed Legacy XAML Leftovers Removed
+
+Decision: Removed the three legacy XAML files that were excluded from compilation via `<Page Remove>` (`TrackAmplifierItemView.xaml`, `TrackAmplifierManualControlView.xaml`, `TrackControlView.xaml`), their commented code-behinds, the two empty ViewModels they referenced (`TrackControlViewModel`, `TrackAmplifierManualControlViewModel`), and the corresponding `<None Include>`/`<Page Remove>` csproj entries.
+
+Evidence: The files were unreferenced in active source and their ViewModels were empty classes only used by those XAMLs.
+
+Impact: `SiebwaldeApp.csproj` is simpler; `SiebwaldeApp.sln` builds with 0 errors.
