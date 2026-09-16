@@ -279,3 +279,11 @@ Decision: `SiebwaldeApp/SiebwaldeApp.Tests` is removed as an obsolete remnant of
 Evidence: The project references a station domain model that has no definition anywhere in the active C# source (`TrackApplication`, `StationSide`, `StationTrack`, `TrackSensor`, `TrackBlock`, `TrackMetadata`, `TrackRole`, `TrainType`, `Signal`, `Amplifier`, `ITrackIn`, `ITrackOut`) and uses the old Ninject `IoC.Kernel` API. It is in no solution and cannot compile.
 
 Impact: Files remain recoverable from git history (added in commit `104c1e6` "Rename to App", 2025-11-24). The encoded station design intent is recorded in `docs/project-knowledge.md`. No active project referenced the test project, so builds are unaffected.
+
+## 2026-09-11: Pic18/Station Remnants Removed From The WPF App (Increment 3)
+
+Decision: Removed the dead station-policy settings feature and the commented Pic18-era code from the WPF application.
+
+Evidence: `StationSettingsPage.xaml(.cs)` bound to `TopPolicy`/`BottomPolicy`, which were commented out in `StationSettingsPageViewModel`, so the page was unbound; it was reachable from `TrackMenu.xaml`. `App.xaml.cs` had a large commented Pic18 block referencing `TrackPic18UdpAdapter`/`YardPic18UdpAdapter`.
+
+Impact: Deleted `StationSettingsPage.xaml`, `StationSettingsPage.xaml.cs`, `StationSettingsPageViewModel.cs`, the commented `TrackAmplifierItemView.xaml.cs` and `TrackAmplifierItemViewModel.cs`. Removed `ApplicationPage.StationSettings`, its converter case, the `SideMenuViewModel.StationSettingsPage` command, and the `TrackMenu.xaml` button. Removed the commented Pic18 block from `App.xaml.cs`. Fixed the stale `StartTrackApplication` XML doc. `SiebwaldeApp.sln` builds with 0 errors and no references to the removed symbols remain. Fiddle Yard and the active ModBus `TrackControllerCommands` are untouched.

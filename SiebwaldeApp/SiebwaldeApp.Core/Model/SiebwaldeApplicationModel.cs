@@ -94,14 +94,12 @@ namespace SiebwaldeApp.Core
 
 
         /// <summary>
-        /// Starts the track application, initializing and registering station tracks, and launching the simulation
-        /// controller.
+        /// Starts the track application: builds the UDP transport, the track communication client, the bootloader
+        /// helpers, the initialization pipeline, and the runtime write loop.
         /// </summary>
-        /// <remarks>This method initializes the track application if it has not already been started. It
-        /// retrieves the necessary input and output ports, registers station tracks with metadata, and starts the
-        /// application's main processing loop. Additionally, it starts the simulation controller to manage
-        /// simulation-related tasks.</remarks>
-        /// <returns></returns>
+        /// <remarks>If the runtime controller already exists, the method returns without doing anything. The
+        /// runtime write loop is started when initialization reaches the Completed status.</remarks>
+        /// <returns>A task that completes when the initialization pipeline has finished.</returns>
         public async Task StartTrackApplication()
         {
             // If the main controller already exists we assume the track application

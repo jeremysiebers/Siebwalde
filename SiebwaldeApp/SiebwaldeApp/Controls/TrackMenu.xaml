@@ -47,13 +47,5 @@
               ToolTip="Track amplifier info page."
               Foreground="White"  
                   />
-
-        <Button Grid.Row="4"
-              Style="{StaticResource IconButton}"
-              Command="{Binding StationSettingsPage }"
-              Content="{StaticResource FontAwesomeCogIcon}" 
-              ToolTip="Track control settings page."
-              Foreground="White"  
-                  />
     </Grid>
 </UserControl>

@@ -134,11 +134,26 @@ Verified by `dotnet build` (Debug, no hardware):
 
 No active project referenced the test project, so builds were unaffected.
 
+## Increment 3 Implementation Results (2026-09-11)
+
+Implemented on `feature/csharp-cleanup-startup`:
+
+- Removed the dead station-policy settings feature: `StationSettingsPage.xaml(.cs)`, `StationSettingsPageViewModel.cs`, `ApplicationPage.StationSettings`, the `ApplicationPageValueConverter` case, the `SideMenuViewModel.StationSettingsPage` command, and the `TrackMenu.xaml` menu button.
+- Removed the commented Pic18-era block from `App.xaml.cs` (and the two fully-commented amplifier view files `TrackAmplifierItemView.xaml.cs` and `TrackAmplifierItemViewModel.cs`).
+- Fixed the stale `StartTrackApplication` XML doc.
+
+Verified by `dotnet build` (Debug, no hardware):
+
+- `SiebwaldeApp.sln`: 0 errors.
+- No remaining references to `StationSettingsPage`, `ApplicationPage.StationSettings`, `StationPolicy`, `TrackPic18UdpAdapter`, `YardPic18UdpAdapter`, or `TrackAmplifierItemViewModel` in the WPF app source.
+
+Fiddle Yard and the active ModBus `TrackControllerCommands` were not touched. The Page-Removed legacy XAML leftovers (`TrackAmplifierItemView.xaml`, `TrackAmplifierManualControlView.xaml`, `TrackControlView.xaml`) remain and are tracked in the backlog.
+
 ## Resume Instructions
 
 1. Restart OpenCode from `C:\Localdata\Siebwalde` and select the `project-lead` agent.
 2. Continue from `docs/product.md`, `human_input.md`, and `docs/analysis-coverage.md`.
-3. Increments 1 and 2 are implemented and verified; propose Increment 3 (Pic18/station remnants in the WPF app) for approval before implementing.
+3. Increments 1-3 are implemented and verified; propose the next increment (configuration authority/settings UI, or the application guide) for approval.
 4. Create `docs/application-guide.md`.
 5. Product clarification rounds 1-5 are complete; remaining items are research tasks (Koploper protocol, ECoS overload semantics, topology/spreadsheet).
 6. Keep communicating with the user in Dutch; keep documentation and agent instructions in English.
@@ -171,5 +186,6 @@ No active project referenced the test project, so builds were unaffected.
 6. Designer and integrator agents. - DONE (2026-09-11): created.
 7. Propose the first fix increment for product-owner approval (Core.Host logger, init sequencing, remnant cleanup, test-project decision). - DONE (2026-09-11): Increment 1 (host logger + init sequencing) implemented and verified.
 8. Remove obsolete test project. - DONE (2026-09-11): Increment 2 removed `SiebwaldeApp.Tests`; design intent archived.
-9. Increment 3 (proposed): remove confirmed Pic18-era and station-era remnants from the WPF app (`App.xaml.cs` commented adapters, `StationSettingsPage`, `StationSettingsPageViewModel`, `ApplicationPage.StationSettings`, `SideMenuViewModel.StationSettingsPage`, stale XML doc on `StartTrackApplication`).
-10. Treat all remaining `docs/backlog.md` items as unapproved until the user selects implementation work.
+9. Increment 3 (proposed): remove confirmed Pic18-era and station-era remnants from the WPF app. - DONE (2026-09-11): station-policy feature and commented Pic18 code removed; build verified.
+10. Increment 4 (candidate): configuration authority / settings UI; or create `docs/application-guide.md`.
+11. Treat all remaining `docs/backlog.md` items as unapproved until the user selects implementation work.

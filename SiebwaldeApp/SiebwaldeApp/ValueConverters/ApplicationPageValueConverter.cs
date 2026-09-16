@@ -44,9 +44,6 @@ namespace SiebwaldeApp
                 case ApplicationPage.TrackAmplifier:
                     return new TrackAmplifierPage();
 
-                case ApplicationPage.StationSettings:
-                    return new StationSettingsPage();
-
                     
                 default:
                     Debugger.Break();

@@ -105,7 +105,20 @@ Results:
 | `SiebwaldeApp.sln` | not measured | 0 errors, 85 warnings |
 | `SiebwaldeApp.EcosEmu.sln` | not measured | 0 errors, 0 warnings |
 
-`SiebwaldeApp.Tests` was not built; it is not in any solution and is known not to compile (see the test-project finding).
+`SiebwaldeApp.Tests` was not built at Increment 1 time; it has since been removed (Increment 2).
+
+## Build Verification After Increment 3 (2026-09-11)
+
+Command executed from `C:\Localdata\Siebwalde` (Debug, no hardware, no test execution):
+
+```powershell
+dotnet build "SiebwaldeApp\SiebwaldeApp.sln" -c Debug --nologo
+```
+
+Result:
+
+- 0 errors. The WPF project rebuilt after the remnant removal and reported 175 warnings.
+- A targeted search found no remaining references to `StationSettingsPage`, `ApplicationPage.StationSettings`, `StationPolicy`, `TrackPic18UdpAdapter`, `YardPic18UdpAdapter`, or `TrackAmplifierItemViewModel` in the WPF app source.
 
 ## External Endpoints And Files
 
