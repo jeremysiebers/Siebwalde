@@ -88,6 +88,28 @@ These findings were re-checked against the current source in the active reposito
 - Note: `TrackControllerCommands` and `TrackController` references in Core belong to the active ModBus controller command set, not the Pic18 remnants. They must not be removed as part of remnant cleanup.
 
 
+## Build Verification After Increment 1 (2026-09-11)
+
+Commands executed from `C:\Localdata\Siebwalde` (Debug, no hardware, no test execution):
+
+```powershell
+dotnet build "SiebwaldeApp\SiebwaldeApp.Core\SiebwaldeApp.Core.csproj" -c Debug --nologo
+dotnet build "SiebwaldeApp.Core.Host\SiebwaldeApp.Core.Host.csproj" -c Debug --nologo
+dotnet build "SiebwaldeApp\SiebwaldeApp.sln" -c Debug --nologo
+dotnet build "SiebwaldeApp.EcosEmu\SiebwaldeApp.EcosEmu.sln" -c Debug --nologo
+```
+
+Results:
+
+| Build | Before | After |
+| --- | --- | --- |
+| `SiebwaldeApp.Core` | 0 errors, 94 warnings | 0 errors, 94 warnings |
+| `SiebwaldeApp.Core.Host` | 1 error (`IoC` has no `Kernel`) | 0 errors, 94 warnings |
+| `SiebwaldeApp.sln` | not measured | 0 errors, 85 warnings |
+| `SiebwaldeApp.EcosEmu.sln` | not measured | 0 errors, 0 warnings |
+
+`SiebwaldeApp.Tests` was not built; it is not in any solution and is known not to compile (see the test-project finding).
+
 ## External Endpoints And Files
 
 | Purpose | Value |

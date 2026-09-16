@@ -22,12 +22,11 @@ namespace SiebwaldeApp.Core.Host
             // -----------------------------------------------------------------
             // 1) Configure IoC for logging
             // -----------------------------------------------------------------
-            IoC.Kernel.Bind<ILogFactory>()
-                .ToConstant(new BaseLogFactory
-                {
-                    // Set the log output level to Debug so you see everything.
-                    LogOutputLevel = LogOutputLevel.Debug
-                });
+            IoC.ConfigureLogger(new BaseLogFactory
+            {
+                // Set the log output level to Debug so you see everything.
+                LogOutputLevel = LogOutputLevel.Debug
+            });
 
             var cts = new CancellationTokenSource();
 

@@ -88,4 +88,6 @@ Revalidated on 2026-09-11 against current source (source inspection only, no bui
 
 Still not re-verified: the Fiddle Yard error paths, `SendNextFwDataPacket` await behavior, `TrackCommClientAsync` publish interval comment, and ECoS emulator multi-client behavior. Build/test execution is still pending authorization.
 
+Increment 1 (2026-09-11) fixed two of the confirmed items: the `SiebwaldeApp.Core.Host` logger setup and the initialization step sequencing. See `docs/build-test.md` for build results.
+
 

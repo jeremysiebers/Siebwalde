@@ -62,7 +62,8 @@
                             _loggerInstance);
 
                         _subState = 0;
-                        return InitStepResult.Next("EnableTrackamplifiers");
+                        // Run the default PWM setpoints step before enabling the amplifiers.
+                        return InitStepResult.Next("SetDefaultPwmSetpoints");
                     }
 
                     return InitStepResult.Continue();

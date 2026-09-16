@@ -30,7 +30,7 @@ namespace SiebwaldeApp.Core
             if (_done)
             {
                 // Nothing to do anymore; proceed to next step.
-                return Task.FromResult(InitStepResult.Next("EnableTrackamplifiersStep"));
+                return Task.FromResult(InitStepResult.Next("EnableTrackamplifiers"));
             }
 
             // Default idle PWM setpoint is 400 (standstill, dual-sided PWM).
@@ -43,7 +43,7 @@ namespace SiebwaldeApp.Core
             _done = true;
 
             // We are done; proceed to next step.
-            return Task.FromResult(InitStepResult.Next("EnableTrackamplifiersStep"));
+            return Task.FromResult(InitStepResult.Next("EnableTrackamplifiers"));
         }
     }
 }

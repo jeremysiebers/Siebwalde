@@ -263,3 +263,11 @@ Decision: The prior .NET findings were revalidated against current source by ins
 Evidence: Source inspection on 2026-09-11 in the active repository (see `docs/build-test.md`).
 
 Impact: These move from "requires revalidation" to "confirmed" in the documentation. Fixes remain unapproved implementation work. Still not re-verified: Fiddle Yard error paths, `SendNextFwDataPacket` await behavior, `TrackCommClientAsync` publish comment, ECoS multi-client behavior.
+
+## 2026-09-11: Increment 1 Implemented And Verified
+
+Decision: Implemented the first fix increment on `feature/csharp-cleanup-startup`: (1) `SiebwaldeApp.Core.Host/Program.cs` now uses `IoC.ConfigureLogger(...)`; (2) `InitTrackamplifiersStep` now returns `Next("SetDefaultPwmSetpoints")`; (3) `SetDefaultPwmSetpointsStep` now returns `Next("EnableTrackamplifiers")`.
+
+Evidence: `dotnet build` results recorded in `docs/build-test.md`. `SiebwaldeApp.Core` and `SiebwaldeApp.Core.Host` build with 0 errors; `SiebwaldeApp.sln` and `SiebwaldeApp.EcosEmu.sln` also build with 0 errors. Step-name chain verified by source inspection.
+
+Impact: The host compile break and the initialization sequencing defect are resolved. No Fiddle Yard source was changed. `SiebwaldeApp.Tests`, remnant removal, and the configuration-authority refactor remain open.

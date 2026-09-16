@@ -57,7 +57,7 @@ The product owner confirmed the following order. Items remain unapproved for imp
 
 | Item | Evidence | Suggested acceptance criteria |
 | --- | --- | --- |
-| Fix `SiebwaldeApp.Core.Host` logger setup. | CONFIRMED 2026-09-11: `SiebwaldeApp.Core.Host/Program.cs:25` uses `IoC.Kernel`; `SiebwaldeApp.Core.IoC` has no `Kernel`. | Host builds and configures logging through an existing or approved API. |
+| Fix `SiebwaldeApp.Core.Host` logger setup. | DONE (2026-09-11, Increment 1): `Program.cs` now uses `IoC.ConfigureLogger(...)`; host builds with 0 errors. | Host builds and configures logging through an existing or approved API. |
 | Reconcile `SiebwaldeApp.Tests` with active source. | CONFIRMED 2026-09-11: tests reference missing station-domain symbols and `IoC.Kernel`/Ninject. | Test project builds or is explicitly archived with rationale. |
 | Add the test project to the appropriate solution if it is active. | `SiebwaldeApp/SiebwaldeApp.Tests/SiebwaldeApp.Tests.csproj` exists but is not in `SiebwaldeApp.sln`. | Chosen solution includes active test project, or documentation explains why it is separate. |
 
@@ -65,7 +65,7 @@ The product owner confirmed the following order. Items remain unapproved for imp
 
 | Item | Evidence | Suggested acceptance criteria |
 | --- | --- | --- |
-| Correct initialization step sequencing around `SetDefaultPwmSetpointsStep`. | CONFIRMED 2026-09-11: the step is registered, skipped by `InitTrackamplifiersStep`, and returns a mismatched next step name. | Intended step order is verified and implemented with matching `IInitializationStep.Name` values. |
+| Correct initialization step sequencing around `SetDefaultPwmSetpointsStep`. | DONE (2026-09-11, Increment 1): `InitTrackamplifiersStep` -> `SetDefaultPwmSetpoints` -> `EnableTrackamplifiers`; all names resolve. | Intended step order is verified and implemented with matching `IInitializationStep.Name` values. |
 | Await firmware packet sends. | `SendNextFwDataPacket.Execute` calls `SendAsync(...).ConfigureAwait(false)` without awaiting. | Firmware send ordering and error handling are deterministic. |
 | Decide settings source for track ports/IP. | CONFIRMED 2026-09-11: startup code hard-codes `192.168.1.193`, `10000`, `10001`, and the firmware path; `CoreSettings` has ports but no IP/path and is unused for the track transport. | One authoritative configuration source is documented and used (settings UI item). |
 | Add bounded timeout/recovery behavior for initialization. | `TrackAmplifierInitializationServiceAsync` has a per-read timeout but no overall timeout. | Initialization failures surface predictably with logged reason and cancellation support. |

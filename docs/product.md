@@ -148,6 +148,33 @@ Status: confirmed by the product owner (2026-09-11).
 4. **Firmware development.** TrackAmplifier4.X parameters/setpoints/MMDC and TrackController5 MMDC, in bounded passes.
 5. **Fiddle Yard, YardController, and shuttle line.** Defer Fiddle Yard; plan the YardController split and main-line/Yard handover later; define shuttle-line control later.
 
+## Approved Increment 1 (2026-09-11)
+
+Status: implemented and verified on 2026-09-11. See `docs/build-test.md` for build results.
+
+Scope:
+
+- Fix `SiebwaldeApp.Core.Host/Program.cs` logger setup to use the active Core IoC API.
+- Fix the initialization step sequencing so `SetDefaultPwmSetpointsStep` runs and all step names resolve.
+
+Exclusions:
+
+- No Fiddle Yard changes.
+- No test-project repair or archival decision.
+- No obsolete-remnant removal.
+- No configuration-authority refactor.
+
+Acceptance criteria:
+
+- `SiebwaldeApp.Core` and `SiebwaldeApp.Core.Host` build with 0 errors.
+- Initialization order is `InitTrackamplifiers` -> `SetDefaultPwmSetpoints` -> `EnableTrackamplifiers`, and each returned next-step name matches a registered step name.
+- No Fiddle Yard source file is modified.
+
+Verification approach:
+
+- `dotnet build` for both projects (Debug, no hardware, no test execution).
+- Source inspection of the step names against the registered dictionary.
+
 ## Ideas And Proposals (Unapproved)
 
 Status: not confirmed. Tracked for future discussion, not committed scope.

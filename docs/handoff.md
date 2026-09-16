@@ -102,6 +102,23 @@ Prior .NET findings were revalidated against current source by inspection (no bu
 
 Not re-verified: Fiddle Yard error paths, `SendNextFwDataPacket` await behavior, `TrackClientAsync` publish-interval comment, ECoS multi-client behavior. No build/test was executed.
 
+## Increment 1 Implementation Results (2026-09-11)
+
+Implemented on `feature/csharp-cleanup-startup`:
+
+- `SiebwaldeApp.Core.Host/Program.cs`: replaced `IoC.Kernel.Bind<ILogFactory>()` with `IoC.ConfigureLogger(...)`.
+- `InitTrackamplifiersStep`: now returns `Next("SetDefaultPwmSetpoints")`.
+- `SetDefaultPwmSetpointsStep`: now returns `Next("EnableTrackamplifiers")`.
+
+Verified by `dotnet build` (Debug, no hardware):
+
+- `SiebwaldeApp.Core`: 0 errors.
+- `SiebwaldeApp.Core.Host`: 1 error before, 0 errors after.
+- `SiebwaldeApp.sln`: 0 errors.
+- `SiebwaldeApp.EcosEmu.sln`: 0 errors.
+
+Step-name chain verified by source inspection. No Fiddle Yard source changed. `SiebwaldeApp.Tests` was not built (not in any solution; known not to compile).
+
 ## Resume Instructions
 
 1. Restart OpenCode from `C:\Localdata\Siebwalde` and select the `project-lead` agent.
@@ -137,5 +154,5 @@ Not re-verified: Fiddle Yard error paths, `SendNextFwDataPacket` await behavior,
 4. Design and implement the Koploper translation path (later increment).
 5. Investigate the additional firmware/hardware/Python source areas in bounded passes.
 6. Designer and integrator agents. - DONE (2026-09-11): created.
-7. Propose the first fix increment for product-owner approval (Core.Host logger, init sequencing, remnant cleanup, test-project decision).
+7. Propose the first fix increment for product-owner approval (Core.Host logger, init sequencing, remnant cleanup, test-project decision). - DONE (2026-09-11): Increment 1 (host logger + init sequencing) implemented and verified.
 8. Treat all `docs/backlog.md` items as unapproved until the user selects implementation work.
