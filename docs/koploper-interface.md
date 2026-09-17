@@ -59,6 +59,47 @@ This `set(id, speed[...])` / `set(id, dir[...])` traffic is the "per-encoder com
 4. **Topology configuration**: block-to-amplifier chaining (for example `block1=amp1, block2=amp2`) as a user-editable `app.config` setting.
 5. **Speed mapping**: convert the ECoS speed value Koploper sends into the amplifier PWM range (0..799).
 
+## Verified From A Live Session (2026-09-17)
+
+A real Koploper session against the emulator was captured in `Logging\17-09-2026_EcosEmuTrace.txt`. Confirmed behaviour:
+
+### Locomotive creation
+
+Koploper creates locomotives on the command station with:
+
+```
+create(10,name["Loco1"],protocol[DCC28],addr[1],append)
+create(10,name["Loco2"],protocol[DCC28],addr[2],append)
+```
+
+The emulator assigns the next object id (1002, 1003, ...) and persists them. Note Koploper used protocol `DCC28` here, not `DCC128`.
+
+### Driving
+
+Koploper drives a locomotive with `set(<ecosId>, speedstep[<n>])`, ramping the step over time (observed 1,2,3,...,7 in quick succession). Direction uses `set(<ecosId>, dir[...])`. The emulator echoes `TX: <ecosId> speed[<n>]`.
+
+Important: Koploper drives the object id it created (for example 1002), not a pre-seeded one for the same decoder address. Pre-seeding `locos.json` with the same address but a different id therefore creates duplicates (1000/1001 seeded + 1002/1003 created).
+
+### Occupancy feedback
+
+The simulator reports occupancy to Koploper as ECoS sensor events:
+
+```
+[HW-FEEDBACK] 100 state[0x110]
+TX: <EVENT 100>
+TX: 100 state[0x110]
+```
+
+Feedback module `100` carries the 16 occupancy inputs; the state is a bitmask.
+
+### Position records
+
+`[EXT] Loc <n> -> Block <m>` is the **current** block of the locomotive (observed as the train advanced: block 4 -> block 3). The description was `Route onbekend` in every observed record; no destination/route was transmitted.
+
+### Startup dependency
+
+If the emulator has no locomotives when Koploper connects, Koploper reports 0 locos, sends no `create` until the operator adds them in Koploper, and drives nothing. The loco list must exist (or be created by the operator) before driving.
+
 ## Trace Data (2026-09-11)
 
 - No Koploper/ECoS trace data exists in `Logging/` or anywhere else in the repository. The emulator and the external-info client log to the console only (`[EXT]`, `[LOCO]`, `[ECOS]`, `[HW-FEEDBACK]`, `TX:`), and no console capture was kept.
