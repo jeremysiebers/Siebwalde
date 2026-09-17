@@ -319,3 +319,11 @@ Decision: Implemented the settings page (`SiebwaldeSettingsPage`, reachable from
 Evidence: `SiebwaldeSettingsPageViewModel` provides editable values, `Save`, `Reload`, per-entity reset (`ResetTrack`, `ResetFiddleYard`, `ResetLogging`) and `Undo` (Ctrl-Z). The settings `LogDirectory`, `FYSendingport`, `FYReceivingport`, `TrckSendingPort`, `TrckReceivingPort`, `TrckIpAddress`, and `TrackAmplifierFwPath` are now User-scoped with setters; the config files were updated accordingly.
 
 Impact: Values persist to user settings via `CoreSettings.Default.Save()`. Per-entity defaults come from the settings' `DefaultValue`. Undo restores the previous snapshot. Verified: `SiebwaldeApp.sln` and `SiebwaldeApp.Core.Host` build with 0 errors. Runtime behavior of the page is not yet verified.
+
+## 2026-09-11: Init Page UI Improvements (Designer)
+
+Decision: The Designer agent improved the `SiebwaldeInitPage` presentation: larger logging text, colored host status dots, and a live re-detection indicator.
+
+Evidence: `Styles/Indicators.xaml` (`HostStatusDot`), `ValueConverters/HostStatusBrushConverter.cs` (present/checking/absent brush), updated `SiebwaldeInitPage.xaml`, `SiebwaldeInitPage.xaml.cs`, `SiebwaldeInitPageViewModel.cs`, and `App.xaml` (merged `Indicators.xaml`). All referenced resources exist (`SpinningText` in `Texts.xaml`, `FontSizeLarge` = 20, `WordOrangeBrush`/`WordGreenBrush`/`ForegroundDarkBrush` in `Colors.xaml`).
+
+Impact: Host detection now repeats every 10 seconds via a `DispatcherTimer`, guarded against overlapping passes; automatic passes only log presence changes to avoid flooding the log. The timer is stopped on `Unloaded` so navigating away does not leak the view model. Verified: `SiebwaldeApp.sln` builds with 0 errors. The visual result is not runtime-verified.

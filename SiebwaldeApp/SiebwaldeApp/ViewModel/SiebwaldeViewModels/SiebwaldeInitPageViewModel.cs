@@ -3,16 +3,28 @@ using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace SiebwaldeApp
 {
     /// <summary>
     /// View model for the start/initialization page. It detects the expected hosts,
     /// shows their presence, keeps a human-readable step/state log, and starts the
-    /// functionality of detected hosts.
+    /// functionality of detected hosts. Host detection repeats automatically at a
+    /// fixed interval without overlapping passes.
     /// </summary>
     public class SiebwaldeInitPageViewModel : BaseViewModel
     {
+        #region Private members
+
+        /// <summary>Interval between the automatic host re-detection passes.</summary>
+        private const int DetectionIntervalSeconds = 10;
+
+        /// <summary>Timer that triggers the automatic host re-detection on the UI thread.</summary>
+        private readonly DispatcherTimer _detectionTimer;
+
+        #endregion
+
         #region Public properties
 
         /// <summary>Human-readable step/state log shown on the page.</summary>
@@ -66,11 +78,11 @@ namespace SiebwaldeApp
         {
             Log2 = new ObservableCollection<string>();
 
-            DetectHosts = new RelayCommand(async () => await DetectHostsAsync());
+            DetectHosts = new RelayCommand(async () => await DetectHostsAsync(logAlways: true));
 
             InitAllControllers = new RelayCommand(async () =>
             {
-                await DetectHostsAsync();
+                await DetectHostsAsync(logAlways: true);
 
                 if (FiddleYardPresent)
                 {
@@ -89,15 +101,39 @@ namespace SiebwaldeApp
 
             Log("Init page ready. Press 'Detect hosts' to scan for FiddleYard, TrackController and Koploper.");
 
+            // Re-detect the hosts periodically. The DispatcherTimer ticks on the UI thread and
+            // DetectHostsAsync guards against overlapping passes via IsDetecting.
+            _detectionTimer = new DispatcherTimer(DispatcherPriority.Background)
+            {
+                Interval = TimeSpan.FromSeconds(DetectionIntervalSeconds)
+            };
+            _detectionTimer.Tick += async (_, __) => await DetectHostsAsync(logAlways: false);
+            _detectionTimer.Start();
+
             // Run an initial detection pass so the page shows current status.
-            _ = DetectHostsAsync();
+            _ = DetectHostsAsync(logAlways: true);
         }
+
+        #endregion
+
+        #region Page lifetime
+
+        /// <summary>
+        /// Starts the periodic host re-detection. Called when the page becomes visible.
+        /// </summary>
+        public void StartDetection() => _detectionTimer.Start();
+
+        /// <summary>
+        /// Stops the periodic host re-detection. Called when the page is unloaded so that
+        /// navigating away does not keep the timer (and this view model) alive.
+        /// </summary>
+        public void StopDetection() => _detectionTimer.Stop();
 
         #endregion
 
         #region Detection
 
-        private async Task DetectHostsAsync()
+        private async Task DetectHostsAsync(bool logAlways)
         {
             if (IsDetecting)
             {
@@ -105,26 +141,45 @@ namespace SiebwaldeApp
             }
 
             IsDetecting = true;
-            Log("Detecting hosts...");
+            if (logAlways)
+            {
+                Log("Detecting hosts...");
+            }
 
             try
             {
+                var previousFiddleYard = FiddleYardPresent;
+                var previousTrackController = TrackControllerPresent;
+                var previousKoploper = KoploperPresent;
+
                 var fiddleYard = await HostDetection.DetectFiddleYardAsync();
                 FiddleYardPresent = fiddleYard.IsPresent;
                 FiddleYardStatus = Format(fiddleYard);
-                Log($"FiddleYard: {FiddleYardStatus}");
+                if (logAlways || FiddleYardPresent != previousFiddleYard)
+                {
+                    Log($"FiddleYard: {FiddleYardStatus}");
+                }
 
                 var trackController = await HostDetection.DetectTrackControllerAsync();
                 TrackControllerPresent = trackController.IsPresent;
                 TrackControllerStatus = Format(trackController);
-                Log($"TrackController: {TrackControllerStatus}");
+                if (logAlways || TrackControllerPresent != previousTrackController)
+                {
+                    Log($"TrackController: {TrackControllerStatus}");
+                }
 
                 var koploper = await HostDetection.DetectKoploperAsync();
                 KoploperPresent = koploper.IsPresent;
                 KoploperStatus = Format(koploper);
-                Log($"Koploper: {KoploperStatus}");
+                if (logAlways || KoploperPresent != previousKoploper)
+                {
+                    Log($"Koploper: {KoploperStatus}");
+                }
 
-                Log("Detection finished.");
+                if (logAlways)
+                {
+                    Log("Detection finished.");
+                }
             }
             catch (Exception ex)
             {

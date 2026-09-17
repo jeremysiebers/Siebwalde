@@ -162,6 +162,19 @@ Result:
 - 0 errors for both.
 - Settings persistence (Save/user.config) and the settings page behavior are code-inspected only; not runtime-verified.
 
+## Build Verification After Init Page UI Improvements (2026-09-11)
+
+Command executed from `C:\Localdata\Siebwalde` (Debug, no hardware):
+
+```powershell
+dotnet build "SiebwaldeApp\SiebwaldeApp.sln" -c Debug --nologo
+```
+
+Result:
+
+- 0 errors.
+- The visual result (status dots, larger log text, detecting indicator) is not runtime-verified.
+
 ## External Endpoints And Files
 
 | Purpose | Value |

@@ -199,6 +199,22 @@ Verified by `dotnet build` (Debug, no hardware):
 
 Settings persistence and page behavior are code-inspected only; not runtime-verified.
 
+## Init Page UI Improvements (Designer, 2026-09-11)
+
+Delegated to the Designer agent and verified by the Project Lead:
+
+- Larger logging text (`FontSizeLarge`) in the init page log.
+- Colored host status dots (`Styles/Indicators.xaml` + `ValueConverters/HostStatusBrushConverter.cs`): amber while checking, green when present, gray when absent.
+- Live "Detecting hosts..." indicator using the existing `SpinningText` style.
+- Automatic host re-detection every 10 seconds (`DispatcherTimer`), overlap-guarded, with change-driven logging; timer stopped on page `Unloaded` to avoid leaking the transient view model.
+- `App.xaml` merges `Styles/Indicators.xaml`.
+
+Verified by `dotnet build "SiebwaldeApp\SiebwaldeApp.sln" -c Debug`: 0 errors. All referenced resources exist. Visual result not runtime-verified.
+
+## App Run Check (2026-09-11)
+
+`SiebwaldeApp.exe` (Debug) was launched: process `SiebwaldeApp` started, window title `Siebwalde Application`, and `Logging\17-09-2026_SiebwaldeApp.CoreLog.txt` recorded a clean startup (`Siebwalde Application started`, PC MAC `18C04D94A26D`, PC IP `192.168.1.13`). No exceptions. The process was stopped afterwards.
+
 ## Resume Instructions
 
 1. Restart OpenCode from `C:\Localdata\Siebwalde` and select the `project-lead` agent.
