@@ -10,214 +10,199 @@
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="900"/>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="3*"/>
         </Grid.ColumnDefinitions>
 
-        <StackPanel Grid.Column="0">
-            <GroupBox Margin="50 50 0 50" Foreground="{StaticResource BackgroundLightBrush}">
-                <StackPanel>
+        <GroupBox Grid.Column="0" Margin="50 50 0 50" Foreground="{StaticResource BackgroundLightBrush}">
+            <StackPanel>
 
-                    <!-- Detect hosts row -->
-                    <Grid Margin="0 10 0 10">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="30"/>
-                            <ColumnDefinition Width="200"/>
-                            <ColumnDefinition Width="30"/>
-                            <ColumnDefinition Width="600"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+                <!-- Detect hosts row -->
+                <Grid Margin="0 10 0 10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
 
-                        <Button
-                            Grid.Column="1"
-                            Height="60"
-                            HorizontalAlignment="Stretch"
-                            Command="{Binding DetectHosts}"
-                            Foreground="White"
-                            Content="Detect hosts" />
+                    <Button
+                        Grid.Column="0"
+                        MinWidth="170"
+                        Height="50"
+                        Padding="12 4"
+                        FontSize="{StaticResource FontSizeSmall}"
+                        VerticalAlignment="Center"
+                        Command="{Binding DetectHosts}"
+                        Foreground="White"
+                        Content="Detect hosts" />
 
-                        <StackPanel
-                            Grid.Column="3"
-                            HorizontalAlignment="Left"
-                            VerticalAlignment="Center">
-                            <TextBlock
-                                FontSize="{StaticResource FontSizeXXLarge}">
-                                <Run Text="Scan for FiddleYard, TrackController and Koploper."
-                                     FontFamily="{StaticResource FontAwesome}"
-                                     Foreground="{StaticResource ForegroundLightBrush}" />
-                            </TextBlock>
-
-                            <!-- Live re-detection indicator -->
-                            <StackPanel
-                                Orientation="Horizontal"
-                                Margin="0 4 0 0"
-                                Visibility="{Binding IsDetecting,
-                                                     Converter={local:BooleanToVisiblityConverter},
-                                                     ConverterParameter=True}">
-                                <TextBlock
-                                    Style="{StaticResource SpinningText}"
-                                    FontSize="{StaticResource FontSizeLarge}"
-                                    Foreground="{StaticResource WordOrangeBrush}"
-                                    VerticalAlignment="Center" />
-                                <TextBlock
-                                    Margin="10 0 0 0"
-                                    FontSize="{StaticResource FontSizeLarge}"
-                                    FontFamily="{StaticResource FontAwesome}"
-                                    Foreground="{StaticResource WordOrangeBrush}"
-                                    VerticalAlignment="Center"
-                                    Text="Detecting hosts..." />
-                            </StackPanel>
-                        </StackPanel>
-                    </Grid>
-
-                    <!-- TrackController row -->
-                    <Grid Margin="0 10 0 10">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="30"/>
-                            <ColumnDefinition Width="200"/>
-                            <ColumnDefinition Width="30"/>
-                            <ColumnDefinition Width="600"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <Button
-                            Grid.Column="1"
-                            Height="60"
-                            HorizontalAlignment="Stretch"
-                            Command="{Binding InitTrackController}"
-                            IsEnabled="{Binding TrackControllerPresent}"
-                            Foreground="White"
-                            Content="Start TrackController" />
-
-                        <StackPanel
-                            Grid.Column="3"
-                            Orientation="Horizontal"
-                            VerticalAlignment="Center">
-                            <Ellipse Style="{StaticResource HostStatusDot}">
-                                <Ellipse.Fill>
-                                    <MultiBinding Converter="{local:HostStatusBrushConverter}">
-                                        <Binding Path="TrackControllerPresent" />
-                                        <Binding Path="IsDetecting" />
-                                    </MultiBinding>
-                                </Ellipse.Fill>
-                            </Ellipse>
-
-                            <TextBlock
-                                FontSize="{StaticResource FontSizeXXLarge}"
-                                HorizontalAlignment="Left"
-                                VerticalAlignment="Center"
-                                TextWrapping="Wrap">
-                                <Run Text="{Binding TrackControllerStatus, Mode=OneWay}"
-                                     FontFamily="{StaticResource FontAwesome}"
-                                     Foreground="{StaticResource ForegroundLightBrush}" />
-                            </TextBlock>
-                        </StackPanel>
-                    </Grid>
-
-                    <!-- FiddleYard row -->
-                    <Grid Margin="0 10 0 10">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="30"/>
-                            <ColumnDefinition Width="200"/>
-                            <ColumnDefinition Width="10"/>
-                            <ColumnDefinition Width="200"/>
-                            <ColumnDefinition Width="30"/>
-                            <ColumnDefinition Width="400"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <Button
-                            Grid.Column="1"
-                            Height="60"
-                            HorizontalAlignment="Stretch"
-                            Command="{Binding InitFiddleYardController}"
-                            IsEnabled="{Binding FiddleYardPresent}"
-                            Foreground="White"
-                            Content="Start FiddleYard" />
-
-                        <Button
-                            Grid.Column="3"
-                            Height="60"
-                            HorizontalAlignment="Stretch"
-                            Command="{Binding InitFiddleYardSimulator}"
-                            Foreground="White"
-                            Content="FiddleYard simulator" />
-
-                        <StackPanel
-                            Grid.Column="5"
-                            Orientation="Horizontal"
-                            VerticalAlignment="Center">
-                            <Ellipse Style="{StaticResource HostStatusDot}">
-                                <Ellipse.Fill>
-                                    <MultiBinding Converter="{local:HostStatusBrushConverter}">
-                                        <Binding Path="FiddleYardPresent" />
-                                        <Binding Path="IsDetecting" />
-                                    </MultiBinding>
-                                </Ellipse.Fill>
-                            </Ellipse>
-
-                            <TextBlock
-                                FontSize="{StaticResource FontSizeXXLarge}"
-                                HorizontalAlignment="Left"
-                                VerticalAlignment="Center"
-                                TextWrapping="Wrap">
-                                <Run Text="{Binding FiddleYardStatus, Mode=OneWay}"
-                                     FontFamily="{StaticResource FontAwesome}"
-                                     Foreground="{StaticResource ForegroundLightBrush}" />
-                            </TextBlock>
-                        </StackPanel>
-                    </Grid>
-
-                    <!-- Koploper row -->
-                    <Grid Margin="0 10 0 10">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="30"/>
-                            <ColumnDefinition Width="200"/>
-                            <ColumnDefinition Width="30"/>
-                            <ColumnDefinition Width="600"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-
+                    <StackPanel Grid.Column="1" Margin="20 0 0 0" VerticalAlignment="Center">
                         <TextBlock
-                            Grid.Column="1"
-                            FontSize="{StaticResource FontSizeXXLarge}"
-                            HorizontalAlignment="Left"
-                            VerticalAlignment="Center">
-                            <Run Text="Koploper"
+                            FontSize="{StaticResource FontSizeRegular}"
+                            TextWrapping="Wrap">
+                            <Run Text="Scan for FiddleYard, TrackController and Koploper."
                                  FontFamily="{StaticResource FontAwesome}"
                                  Foreground="{StaticResource ForegroundLightBrush}" />
                         </TextBlock>
 
+                        <!-- Live re-detection indicator -->
                         <StackPanel
-                            Grid.Column="3"
                             Orientation="Horizontal"
-                            VerticalAlignment="Center">
-                            <Ellipse Style="{StaticResource HostStatusDot}">
-                                <Ellipse.Fill>
-                                    <MultiBinding Converter="{local:HostStatusBrushConverter}">
-                                        <Binding Path="KoploperPresent" />
-                                        <Binding Path="IsDetecting" />
-                                    </MultiBinding>
-                                </Ellipse.Fill>
-                            </Ellipse>
-
+                            Margin="0 4 0 0"
+                            Visibility="{Binding IsDetecting,
+                                                 Converter={local:BooleanToVisiblityConverter},
+                                                 ConverterParameter=True}">
                             <TextBlock
-                                FontSize="{StaticResource FontSizeXXLarge}"
-                                HorizontalAlignment="Left"
+                                Style="{StaticResource SpinningText}"
+                                FontSize="{StaticResource FontSizeRegular}"
+                                Foreground="{StaticResource WordOrangeBrush}"
+                                VerticalAlignment="Center" />
+                            <TextBlock
+                                Margin="10 0 0 0"
+                                FontSize="{StaticResource FontSizeRegular}"
+                                FontFamily="{StaticResource FontAwesome}"
+                                Foreground="{StaticResource WordOrangeBrush}"
                                 VerticalAlignment="Center"
-                                TextWrapping="Wrap">
-                                <Run Text="{Binding KoploperStatus, Mode=OneWay}"
-                                     FontFamily="{StaticResource FontAwesome}"
-                                     Foreground="{StaticResource ForegroundLightBrush}" />
-                            </TextBlock>
+                                Text="Detecting hosts..." />
                         </StackPanel>
-                    </Grid>
+                    </StackPanel>
+                </Grid>
 
-                </StackPanel>
-            </GroupBox>
-        </StackPanel>
+                <!-- TrackController row -->
+                <Grid Margin="0 10 0 10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
 
-        <!-- Logging TextBlock -->
+                    <Button
+                        Grid.Column="0"
+                        MinWidth="170"
+                        Height="50"
+                        Padding="12 4"
+                        FontSize="{StaticResource FontSizeSmall}"
+                        VerticalAlignment="Center"
+                        Command="{Binding InitTrackController}"
+                        IsEnabled="{Binding TrackControllerPresent}"
+                        Foreground="White"
+                        Content="Start TrackController" />
+
+                    <StackPanel Grid.Column="2" Margin="20 0 0 0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Ellipse Style="{StaticResource HostStatusDot}">
+                            <Ellipse.Fill>
+                                <MultiBinding Converter="{local:HostStatusBrushConverter}">
+                                    <Binding Path="TrackControllerPresent" />
+                                    <Binding Path="IsDetecting" />
+                                </MultiBinding>
+                            </Ellipse.Fill>
+                        </Ellipse>
+
+                        <TextBlock
+                            FontSize="{StaticResource FontSizeRegular}"
+                            VerticalAlignment="Center"
+                            TextWrapping="Wrap">
+                            <Run Text="{Binding TrackControllerStatus, Mode=OneWay}"
+                                 FontFamily="{StaticResource FontAwesome}"
+                                 Foreground="{StaticResource ForegroundLightBrush}" />
+                        </TextBlock>
+                    </StackPanel>
+                </Grid>
+
+                <!-- FiddleYard row -->
+                <Grid Margin="0 10 0 10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Button
+                        Grid.Column="0"
+                        MinWidth="170"
+                        Height="50"
+                        Padding="12 4"
+                        FontSize="{StaticResource FontSizeSmall}"
+                        VerticalAlignment="Center"
+                        Command="{Binding InitFiddleYardController}"
+                        IsEnabled="{Binding FiddleYardPresent}"
+                        Foreground="White"
+                        Content="Start FiddleYard" />
+
+                    <Button
+                        Grid.Column="1"
+                        MinWidth="170"
+                        Height="50"
+                        Margin="10 0 0 0"
+                        Padding="12 4"
+                        FontSize="{StaticResource FontSizeSmall}"
+                        VerticalAlignment="Center"
+                        Command="{Binding InitFiddleYardSimulator}"
+                        Foreground="White"
+                        Content="FiddleYard simulator" />
+
+                    <StackPanel Grid.Column="2" Margin="20 0 0 0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Ellipse Style="{StaticResource HostStatusDot}">
+                            <Ellipse.Fill>
+                                <MultiBinding Converter="{local:HostStatusBrushConverter}">
+                                    <Binding Path="FiddleYardPresent" />
+                                    <Binding Path="IsDetecting" />
+                                </MultiBinding>
+                            </Ellipse.Fill>
+                        </Ellipse>
+
+                        <TextBlock
+                            FontSize="{StaticResource FontSizeRegular}"
+                            VerticalAlignment="Center"
+                            TextWrapping="Wrap">
+                            <Run Text="{Binding FiddleYardStatus, Mode=OneWay}"
+                                 FontFamily="{StaticResource FontAwesome}"
+                                 Foreground="{StaticResource ForegroundLightBrush}" />
+                        </TextBlock>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Koploper row -->
+                <Grid Margin="0 10 0 10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock
+                        Grid.Column="0"
+                        MinWidth="170"
+                        FontSize="{StaticResource FontSizeRegular}"
+                        VerticalAlignment="Center"
+                        Foreground="{StaticResource ForegroundLightBrush}">
+                        <Run Text="Koploper"
+                             FontFamily="{StaticResource FontAwesome}" />
+                    </TextBlock>
+
+                    <StackPanel Grid.Column="1" Margin="20 0 0 0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Ellipse Style="{StaticResource HostStatusDot}">
+                            <Ellipse.Fill>
+                                <MultiBinding Converter="{local:HostStatusBrushConverter}">
+                                    <Binding Path="KoploperPresent" />
+                                    <Binding Path="IsDetecting" />
+                                </MultiBinding>
+                            </Ellipse.Fill>
+                        </Ellipse>
+
+                        <TextBlock
+                            FontSize="{StaticResource FontSizeRegular}"
+                            VerticalAlignment="Center"
+                            TextWrapping="Wrap">
+                            <Run Text="{Binding KoploperStatus, Mode=OneWay}"
+                                 FontFamily="{StaticResource FontAwesome}"
+                                 Foreground="{StaticResource ForegroundLightBrush}" />
+                        </TextBlock>
+                    </StackPanel>
+                </Grid>
+
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Logging -->
         <Grid Grid.Column="1">
 
             <Grid.ColumnDefinitions>

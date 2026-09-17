@@ -211,9 +211,18 @@ Delegated to the Designer agent and verified by the Project Lead:
 
 Verified by `dotnet build "SiebwaldeApp\SiebwaldeApp.sln" -c Debug`: 0 errors. All referenced resources exist. Visual result not runtime-verified.
 
-## App Run Check (2026-09-11)
+## App Run Check And Visual Verification (2026-09-11)
 
-`SiebwaldeApp.exe` (Debug) was launched: process `SiebwaldeApp` started, window title `Siebwalde Application`, and `Logging\17-09-2026_SiebwaldeApp.CoreLog.txt` recorded a clean startup (`Siebwalde Application started`, PC MAC `18C04D94A26D`, PC IP `192.168.1.13`). No exceptions. The process was stopped afterwards.
+`SiebwaldeApp.exe` (Debug) was launched several times: process `SiebwaldeApp` started, window title `Siebwalde Application`, and `Logging\17-09-2026_SiebwaldeApp.CoreLog.txt` recorded a clean startup (PC MAC `18C04D94A26D`, PC IP `192.168.1.13`). No exceptions.
+
+Verified at runtime:
+- Host detection works: TrackController `192.168.1.193` reported Present (ping OK); FiddleYard and Koploper Absent in this environment.
+- The TrackController page can manually drive PWM on the 4 detected amplifiers and shows the master/amplifier communication overview.
+- The init page was captured as a screenshot (PowerShell window capture) and inspected. The first implementation clipped the button text ("etect hosts", "TrackContr", "art FiddleYa", "leYard simu") because the buttons and status columns were too narrow. Fixed by switching the rows to `Auto`/`*` columns, `MinWidth` buttons with `FontSizeSmall`, and wrapping status text; re-verified visually.
+
+Process note: the Designer agent had no screenshot or visual feedback, which is why it did not catch the clipping. A screenshot workflow (PowerShell `CopyFromScreen` on the app window, then reading the PNG) is available for future UI work.
+
+The app process was stopped afterwards.
 
 ## Resume Instructions
 
