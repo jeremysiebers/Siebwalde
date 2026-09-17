@@ -239,6 +239,18 @@ Findings recorded while testing:
 
 Still open: window/UI-model tests, `SendNextFwDataPacket` send-path tests, `SimpleEcosBackend`/`JsonLocoRepository` tests.
 
+## Increment 6 Step 1: Koploper Protocol Reconnaissance (2026-09-11)
+
+Documented in `docs/koploper-interface.md`:
+
+- Port roles resolved: `15471` = `EcosEmulatorServer` (Koploper connects TO C# with ECoS commands); `5700` = Koploper external info (C# connects TO Koploper for locomotive-to-block positions).
+- ECoS commands handled: `set`, `get`, `queryObjects`, `request`, `release`, `create`, `delete`. Locomotive control arrives as `set(id, speed[...])` / `set(id, dir[...])` / `set(id, func[i,v])` and forwards to `IHardwareBackend.SetLocoSpeed(address, speed, direction)`.
+- Position records: `0x1B`-separated, 5 fields (`&loco`, block, modelTime, pcTime, description).
+- Seams: `IHardwareBackend`, `IHardwareFeedbackSink`, `IBlockPositionProvider`.
+- Proposed design and open questions recorded (speed range, sensor-id mapping, look-ahead rules, backend replacement).
+
+Next: step 2 (translation-layer design/implementation) and step 3 (4-amplifier test layout). No Koploper runtime test performed yet.
+
 ## Resume Instructions
 
 1. Restart OpenCode from `C:\Localdata\Siebwalde` and select the `project-lead` agent.

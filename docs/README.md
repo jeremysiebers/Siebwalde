@@ -7,6 +7,7 @@ This directory stores durable analysis and handoff knowledge for future human an
 | File | Purpose |
 | --- | --- |
 | `application-guide.md` | Human-readable guide to the application: system overview, structure, workflows, endpoints, and status. |
+| `koploper-interface.md` | Verified Koploper/ECoS interface: ports, commands, position records, and the translation-layer design. |
 | `product.md` | Confirmed project purpose, current documentation scope, and separated open questions. |
 | `analysis-coverage.md` | Investigation status by project and meaningful module. |
 | `inventory.md` | Workspace inventory, project classification, dependencies, configuration, persistence, tests, and generated/vendor areas. |

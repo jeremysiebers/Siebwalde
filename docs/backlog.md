@@ -40,7 +40,7 @@ The product owner confirmed the following order. Items remain unapproved for imp
 Status: this is the agreed NEXT MAJOR step, referred to as **Increment 6**. The product owner will ask for it explicitly; do not start it before that. When it is requested, resume from this section.
 
 Increment 6 outline:
-1. Protocol reconnaissance (bounded): derive the exact ECoS per-encoder command and the two port roles (`5700` vs `15471`) from `Ecos ESU info` and `SiebwaldeApp.EcosEmu`; document the findings.
+1. Protocol reconnaissance (bounded): derive the exact ECoS per-encoder command and the two port roles (`5700` vs `15471`) from `Ecos ESU info` and `SiebwaldeApp.EcosEmu`; document the findings. - DONE (2026-09-11): documented in `docs/koploper-interface.md`. Port roles resolved: `15471` = ECoS command server (Koploper connects to C#), `5700` = Koploper position info (C# connects to Koploper). Per-encoder command = `set(id, speed[...])` / `set(id, dir[...])` -> `IHardwareBackend.SetLocoSpeed`.
 2. Design the translation layer: Koploper command -> block -> amplifier setpoints; occupancy feedback back to Koploper; block-to-amplifier topology in `app.config`; look-ahead (pre-command the next block's amplifier).
 3. Implement on the 4-amplifier test layout.
 
