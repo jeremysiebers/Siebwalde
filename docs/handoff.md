@@ -262,5 +262,5 @@ The app process was stopped afterwards.
 7. Propose the first fix increment for product-owner approval (Core.Host logger, init sequencing, remnant cleanup, test-project decision). - DONE (2026-09-11): Increment 1 (host logger + init sequencing) implemented and verified.
 8. Remove obsolete test project. - DONE (2026-09-11): Increment 2 removed `SiebwaldeApp.Tests`; design intent archived.
 9. Increment 3 (proposed): remove confirmed Pic18-era and station-era remnants from the WPF app. - DONE (2026-09-11): station-policy feature and commented Pic18 code removed; build verified.
-10. Increment 4 (next): configuration authority / settings UI. The application guide is done.
-11. Treat all remaining `docs/backlog.md` items as unapproved until the user selects implementation work.
+10. Increment 4 (next): configuration authority / settings UI. The application guide is done.11. **Increment 6 (next major, on request): the Koploper translation path.** Protocol reconnaissance -> translation-layer design -> implement on the 4-amplifier test layout. See `docs/backlog.md`, section "Koploper Translation Path". Do not start before the product owner asks.
+12. Treat all remaining `docs/backlog.md` items as unapproved until the user selects implementation work.

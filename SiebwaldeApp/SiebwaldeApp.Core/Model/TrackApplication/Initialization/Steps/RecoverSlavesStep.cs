@@ -82,10 +82,12 @@ namespace SiebwaldeApp.Core
                         .ConfigureAwait(false);
 
                 case 6:
-                    return State6_WaitStartDownloadDone(lastMessage);
+                    return await State6_WaitStartDownloadDoneAsync(lastMessage)
+                        .ConfigureAwait(false);
 
                 case 7:
-                    return State7_SendFwDataChunk(lastMessage);
+                    return await State7_SendFwDataChunkAsync(lastMessage)
+                        .ConfigureAwait(false);
 
                 case 8:
                     return State8_WaitChecksumResult(lastMessage);
@@ -319,7 +321,7 @@ namespace SiebwaldeApp.Core
         /// State 6:
         /// Wait for START_FW_DOWNLOAD_* result and on success begin sending FW data rows.
         /// </summary>
-        private InitStepResult State6_WaitStartDownloadDone(ReceivedMessage? lastMessage)
+        private async Task<InitStepResult> State6_WaitStartDownloadDoneAsync(ReceivedMessage? lastMessage)
         {
             if (!lastMessage.HasValue)
                 return InitStepResult.Continue();
@@ -335,7 +337,7 @@ namespace SiebwaldeApp.Core
                         "State.DetectSlaveRecovery => FILEDOWNLOAD_STATE_RECEIVE_FW_FILE_STANDBY.",
                         _loggerInstance);
 
-                    _sendNextFwDataPacket.Execute();
+                    await _sendNextFwDataPacket.ExecuteAsync().ConfigureAwait(false);
 
                     _subState = 7;
 
@@ -360,7 +362,7 @@ namespace SiebwaldeApp.Core
         /// The legacy code uses ProcessLines, Iterations and JUMPSIZE to step
         /// through the flash memory; we preserve that here.
         /// </summary>
-        private InitStepResult State7_SendFwDataChunk(
+        private async Task<InitStepResult> State7_SendFwDataChunkAsync(
             ReceivedMessage? lastMessage)
         {
             if (!lastMessage.HasValue)
@@ -371,7 +373,7 @@ namespace SiebwaldeApp.Core
                 lastMessage.Value.Taskstate == TaskStates.DONE)
             {
                 // Use your existing helper exactly as in RecoverSlaves case 6.
-                _sendNextFwDataPacket.Execute();
+                await _sendNextFwDataPacket.ExecuteAsync().ConfigureAwait(false);
             }
             else if (lastMessage.Value.TaskId == TrackCommand.FWFILEDOWNLOAD &&
                      lastMessage.Value.Taskcommand == TrackCommand.FILEDOWNLOAD_STATE_FW_DATA_DOWNLOAD_DONE &&

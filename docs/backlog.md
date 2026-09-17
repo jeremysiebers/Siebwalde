@@ -34,6 +34,14 @@ The product owner confirmed the following order. Items remain unapproved for imp
 
 ## Koploper Translation Path (Later Increment)
 
+Status: this is the agreed NEXT MAJOR step, referred to as **Increment 6**. The product owner will ask for it explicitly; do not start it before that. When it is requested, resume from this section.
+
+Increment 6 outline:
+1. Protocol reconnaissance (bounded): derive the exact ECoS per-encoder command and the two port roles (`5700` vs `15471`) from `Ecos ESU info` and `SiebwaldeApp.EcosEmu`; document the findings.
+2. Design the translation layer: Koploper command -> block -> amplifier setpoints; occupancy feedback back to Koploper; block-to-amplifier topology in `app.config`; look-ahead (pre-command the next block's amplifier).
+3. Implement on the 4-amplifier test layout.
+
+
 | Item | Evidence | Suggested acceptance criteria |
 | --- | --- | --- |
 | Document the per-encoder Koploper command format and the dedicated locomotive-location port/protocol. | Product owner Round 3: derive from `Ecos ESU info`, the C# ECoS emulator code, and working test examples. | Protocol and port roles are documented from source/data; which port is the connection port vs the info port is confirmed. |

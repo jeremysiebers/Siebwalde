@@ -134,22 +134,5 @@ namespace SiebwaldeApp.Properties {
             }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("60000")]
-        public ushort TrckSendingPort {
-            get {
-                return ((ushort)(this["TrckSendingPort"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("60000")]
-        public ushort TrckReceivingPort {
-            get {
-                return ((ushort)(this["TrckReceivingPort"]));
-            }
-        }
     }
 }

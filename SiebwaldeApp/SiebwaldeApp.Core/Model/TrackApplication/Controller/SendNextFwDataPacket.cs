@@ -1,7 +1,7 @@
 ﻿using SiebwaldeApp.Core;
 using System.Collections.Generic;
 using System.Threading;
-using static SiebwaldeApp.Core.FiddleYardSimulatorVariables;
+using System.Threading.Tasks;
 
 namespace SiebwaldeApp
 {
@@ -11,14 +11,12 @@ namespace SiebwaldeApp
     public class SendNextFwDataPacket
     {
         #region Local variables
-        // Message conatiner for sending messages
+        // Message container for sending messages
         private SendMessage mSendMessage;
         // Set the recovery iteration counter
         private int IterationCounter { get; set; }
         // Set the Boot loader helper
         private TrackAmplifierBootloaderHelpers mTrackAmplifierBootloaderHelpers;
-        private ITrackCommClient trackCommClient;
-        private TrackAmplifierBootloaderHelpers bootloaderHelpers;
 
         // Set the Track IO handle
         private readonly ITrackCommClient _commClient;
@@ -27,7 +25,7 @@ namespace SiebwaldeApp
         /// <summary>
         /// Instaniate
         /// </summary>
-        public SendNextFwDataPacket(ITrackCommClient commClient, 
+        public SendNextFwDataPacket(ITrackCommClient commClient,
             TrackAmplifierBootloaderHelpers trackAmplifierBootloaderHelpers)
         {
             // Hold the Track IO Handle instance
@@ -42,13 +40,13 @@ namespace SiebwaldeApp
             mSendMessage = new SendMessage(0, DummyData);
             // Set the iteration counter
             IterationCounter = 0;
-
         }
 
         /// <summary>
-        /// Call to send the uController flash program data to the Ethernet target
+        /// Call to send the uController flash program data to the Ethernet target.
+        /// The send is awaited so that packet ordering and send failures are deterministic.
         /// </summary>
-        public void Execute()
+        public async Task ExecuteAsync(CancellationToken cancellationToken = default)
         {
             mSendMessage.Command = TrackCommand.FILEDOWNLOAD_STATE_FW_DATA_RECEIVE;
 
@@ -62,13 +60,10 @@ namespace SiebwaldeApp
                 }
             }
             mSendMessage.Data = Data.ToArray();
-            CancellationToken cancellationToken = default;
-            //mTrackIOHandle.ActuatorCmd(mSendMessage);
-            _commClient.SendAsync(mSendMessage, cancellationToken).ConfigureAwait(false);
 
-            //Console.WriteLine("Send Package " + (IterationCounter + 1).ToString() + " to Ethernet target.");
+            await _commClient.SendAsync(mSendMessage, cancellationToken).ConfigureAwait(false);
 
             IterationCounter += Enums.JUMPSIZE;
         }
-    }    
+    }
 }

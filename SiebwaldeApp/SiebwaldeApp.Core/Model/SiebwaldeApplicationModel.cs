@@ -9,7 +9,6 @@ namespace SiebwaldeApp.Core
         public event EventHandler? InstantiateFiddleYardWinForms;
         public event EventHandler? FiddleYardShowWinForms;
         public event EventHandler? FiddleYardShowSettingsWinForms;
-        //public StationSettingsPageViewModel SettingsViewModel { get; private set; }
         public FiddleYardController? FYcontroller;
         public FiddleYardController? YDcontroller;
         public TrackControlMain? _trackControlMain;
