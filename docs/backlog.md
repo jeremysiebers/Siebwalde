@@ -55,6 +55,11 @@ Increment 6 outline:
 | Implement clearer initialization: Ethernet target/online checks, amplifier init, FW checks/downloads, then Koploper connection. | Product owner requirement. | Initialization surfaces predictable status and failures. |
 | Translate Koploper switch-street commands into Fiddle Yard TOP/BOTTOM shift commands. | Product owner requirement. | Switch-street commands map to the Fiddle Yard shift protocol. |
 | Move hardware signals to software. | Occupancy cannot remain hardwired to the Fiddle Yard controller once real trains run. | Signal handling is defined and implemented in software. |
+| Add a block-adjacency / chain list in C#. | Needed to derive the next block for look-ahead (Koploper does not send the destination). | The chain is configurable and used to pre-command the next block's amplifier. |
+| Add a switch mapping list (real <-> Koploper + default init state). | Real switch x corresponds to Koploper switch designation y, with a default init state (straight/diverging). | Mapping is configurable and documented; Koploper switch commands can be translated. |
+| Feed amplifier occupancy to Koploper. | Real-system source of occupancy: amplifier -> C# (`IHardwareFeedbackSink.OnSensorChangedAsync`) -> ECoS event -> Koploper. | Amplifier occupancy reaches Koploper and drives block updates. |
+| Add a divergence check with ECoS stop and diagnostics logging. | If C# and Koploper drift apart, C# should command Koploper to stop and log what diverged. | Divergence is detected, Koploper is stopped via ECoS, and the mismatch is logged with detail. |
+| Consider a dedicated diagnostics agent. | Product owner suggestion for divergence/diagnostic analysis. | Role and outputs defined and approved before creation. |
 
 ## MMDC, Safety, And Yard (Later)
 

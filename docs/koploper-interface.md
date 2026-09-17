@@ -100,6 +100,32 @@ Feedback module `100` carries the 16 occupancy inputs; the state is a bitmask.
 
 If the emulator has no locomotives when Koploper connects, Koploper reports 0 locos, sends no `create` until the operator adds them in Koploper, and drives nothing. The loco list must exist (or be created by the operator) before driving.
 
+## Real-System Control Flow (design, confirmed with product owner 2026-09-17)
+
+This is the intended flow on real hardware. It supersedes the earlier "delta-sync" idea; the practical look-ahead is one block ahead.
+
+1. **Start position.** The operator drags a locomotive onto the block where it physically stands in Koploper. Koploper transmits this start position (before driving starts).
+2. **Driving decision.** Koploper decides to drive: it checks the occupancy of the next block; if free it reserves the route internally (Koploper's driving-schedule map) and commands the locomotive with setpoints (`set(<ecosId>, speedstep[<n>])`).
+3. **Translation in C#.** C# maps the locomotive's start position (block) through the block-to-amplifier table and forwards the setpoint to the correct amplifier(s).
+4. **Topology and switches.** C# needs a block-adjacency list (how blocks are chained) to derive the next block, plus a switch mapping list: real switch <-> Koploper switch designation, and the default init state after Koploper switches (straight or diverging). The block and switch list in C# must know this plan/order so the next block can be derived.
+5. **Occupancy.** When the locomotive enters the next block, an occupancy report is generated; C# forwards it to Koploper and it is also visible on the position port (5700).
+6. **Divergence check (optional, wanted).** If things drift apart, C# commands Koploper to stop (an ECoS stop command can be sent to Koploper) and logs that something diverged and what (diagnostics). A dedicated diagnostics agent may be added later.
+
+### C# data required
+
+| Data | Purpose |
+| --- | --- |
+| Block -> amplifier table | Which amplifier(s) drive a block. |
+| Block adjacency / chain | Derive the next block for look-ahead. |
+| Switch mapping | Real switch <-> Koploper switch designation. |
+| Switch default init state | Straight or diverging after Koploper switches. |
+| Loco position (from `[EXT]`) | Which block the locomotive currently occupies. |
+| Amplifier occupancy | Source of occupancy for the real system (amplifier -> C# -> Koploper). |
+
+### Causality note
+
+In the current simulator the causality is inverted (Koploper position -> simulator derives occupancy -> echoed back), because the simulator has no independent sensor model. On real hardware the amplifier occupancy is the source: amplifier -> C# -> Koploper -> `[EXT]` position confirmation.
+
 ## Trace Data (2026-09-11)
 
 - No Koploper/ECoS trace data exists in `Logging/` or anywhere else in the repository. The emulator and the external-info client log to the console only (`[EXT]`, `[LOCO]`, `[ECOS]`, `[HW-FEEDBACK]`, `TX:`), and no console capture was kept.
