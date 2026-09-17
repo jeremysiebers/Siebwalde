@@ -8,6 +8,7 @@ namespace SiebwaldeApp.Core.Tests
         [Fact]
         public void SpeedZero_IsNeutral()
         {
+            Assert.Equal(399, AmplifierSpeedMapper.NeutralPwm);
             Assert.Equal(AmplifierSpeedMapper.NeutralPwm, AmplifierSpeedMapper.ToPwm(0, 0));
             Assert.Equal(AmplifierSpeedMapper.NeutralPwm, AmplifierSpeedMapper.ToPwm(0, 1));
         }
@@ -25,21 +26,41 @@ namespace SiebwaldeApp.Core.Tests
         }
 
         [Fact]
-        public void ForwardLowSpeed_IsAboveNeutral()
+        public void ForwardLowSpeed_IsInForwardRange()
         {
             var pwm = AmplifierSpeedMapper.ToPwm(1, 0);
 
-            Assert.True(pwm > AmplifierSpeedMapper.NeutralPwm);
-            Assert.True(pwm <= AmplifierSpeedMapper.MaxPwm);
+            Assert.InRange(pwm, AmplifierSpeedMapper.ForwardMinPwm, AmplifierSpeedMapper.MaxPwm);
         }
 
         [Fact]
-        public void ReverseLowSpeed_IsBelowNeutral()
+        public void ReverseLowSpeed_IsInReverseRange()
         {
             var pwm = AmplifierSpeedMapper.ToPwm(1, 1);
 
-            Assert.True(pwm < AmplifierSpeedMapper.NeutralPwm);
-            Assert.True(pwm >= AmplifierSpeedMapper.MinPwm);
+            Assert.InRange(pwm, AmplifierSpeedMapper.MinPwm, AmplifierSpeedMapper.ReverseMaxPwm);
+        }
+
+        [Fact]
+        public void Forward_IsAlwaysAboveNeutral()
+        {
+            for (var speed = 1; speed <= AmplifierSpeedMapper.MaxEcosSpeed; speed++)
+            {
+                var pwm = AmplifierSpeedMapper.ToPwm(speed, 0);
+                Assert.InRange(pwm, AmplifierSpeedMapper.ForwardMinPwm, AmplifierSpeedMapper.MaxPwm);
+                Assert.True(pwm > AmplifierSpeedMapper.NeutralPwm);
+            }
+        }
+
+        [Fact]
+        public void Reverse_IsAlwaysBelowNeutral()
+        {
+            for (var speed = 1; speed <= AmplifierSpeedMapper.MaxEcosSpeed; speed++)
+            {
+                var pwm = AmplifierSpeedMapper.ToPwm(speed, 1);
+                Assert.InRange(pwm, AmplifierSpeedMapper.MinPwm, AmplifierSpeedMapper.ReverseMaxPwm);
+                Assert.True(pwm < AmplifierSpeedMapper.NeutralPwm);
+            }
         }
 
         [Theory]

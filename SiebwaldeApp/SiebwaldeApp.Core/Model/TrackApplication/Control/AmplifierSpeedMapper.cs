@@ -6,9 +6,9 @@ namespace SiebwaldeApp.Core
     /// Converts an ECoS speed step (0..127) plus direction into a bidirectional
     /// track amplifier PWM setpoint.
     ///
-    /// The amplifier PWM range is 1..799 with a neutral point at 400 (stop).
-    /// Forward uses the upper half (neutral..799); reverse uses the lower half
-    /// (neutral-1..1). PWM 0 is never produced because it causes a clipping artefact.
+    /// The amplifier PWM range is 1..799 with a neutral point at 399 (standstill).
+    /// Forward uses 400..799; reverse uses 398..1. PWM 0 is never produced because
+    /// it causes a clipping artefact.
     /// </summary>
     public static class AmplifierSpeedMapper
     {
@@ -19,7 +19,13 @@ namespace SiebwaldeApp.Core
         public const int MaxPwm = 799;
 
         /// <summary>PWM value that represents standstill.</summary>
-        public const int NeutralPwm = 400;
+        public const int NeutralPwm = 399;
+
+        /// <summary>Lowest PWM value used for forward motion.</summary>
+        public const int ForwardMinPwm = 400;
+
+        /// <summary>Highest PWM value used for reverse motion.</summary>
+        public const int ReverseMaxPwm = 398;
 
         /// <summary>Highest ECoS speed step (128 steps: 0..127).</summary>
         public const int MaxEcosSpeed = 127;
@@ -46,12 +52,12 @@ namespace SiebwaldeApp.Core
 
             if (direction == 0)
             {
-                // Forward: NeutralPwm .. MaxPwm
-                return NeutralPwm + (int)Math.Round((MaxPwm - NeutralPwm) * fraction);
+                // Forward: 400 .. 799
+                return ForwardMinPwm + (int)Math.Round((MaxPwm - ForwardMinPwm) * fraction);
             }
 
-            // Reverse: (NeutralPwm - 1) .. MinPwm
-            return (NeutralPwm - 1) - (int)Math.Round(((NeutralPwm - 1) - MinPwm) * fraction);
+            // Reverse: 398 .. 1
+            return ReverseMaxPwm - (int)Math.Round((ReverseMaxPwm - MinPwm) * fraction);
         }
     }
 }

@@ -66,20 +66,20 @@ This `set(id, speed[...])` / `set(id, dir[...])` traffic is the "per-encoder com
 - What are the exact look-ahead rules? - Product owner: Koploper reserves a route ahead internally from occupancy data and may report "loc x to block 4" while C# still has the loc in block 1; then C# can compute the delta and drive multiple amplifiers in sync. If Koploper does not provide this, C# checks whether the next block is free and pre-sets the same setpoint one block ahead. Testable with a Koploper test design, unit tests, or a simulator.
 - Should the track-amplifier backend replace or complement `TrackSimulatorBackend`? - RESOLVED: keep `TrackSimulatorBackend` as the simulation backend (it simulates blocks/trains/occupancy and reports sensors via `IHardwareFeedbackSink`) and add the real track-amplifier backend as an alternative, selectable like the Fiddle Yard real/simulator choice. `DummyHardwareBackend` is a minimal mock and can be kept for simple tests.
 
-## Amplifier PWM Mapping (product owner specification)
+## Amplifier PWM Mapping (confirmed)
 
 - ECoS sends speed steps `0..127`.
-- The amplifier PWM is bidirectional with a neutral point near the middle of `1..799`.
-- Forward: roughly `400..799` (the product owner wrote "399 - 800", but 799 is the maximum).
-- Reverse: roughly `1..399`.
+- The amplifier PWM is bidirectional: **neutral = 399**, **forward = 400..799**, **reverse = 398..1**.
 - PWM `0` must never be used: it produces a clipping artefact.
 - On the shuttle line (pendelbaan), after a locomotive change at the middle station and the relay switch-over, both amplifiers' driving direction must be reversed.
 
-Exact neutral value and end points must be confirmed before finalizing the mapping. Proposed mapping (to be confirmed):
+Implemented in `SiebwaldeApp.Core.AmplifierSpeedMapper`:
 
 | Condition | PWM |
 | --- | --- |
-| speed 0 (stop) | neutral (400) |
-| forward, speed 1..127 | 400 + speed * (799 - 400) / 127 |
-| reverse, speed 1..127 | 399 - speed * (399 - 1) / 127 |
+| speed 0 (stop) | 399 |
+| forward, speed 1..127 | `400 + round((799 - 400) * speed / 127)` |
+| reverse, speed 1..127 | `398 - round((398 - 1) * speed / 127)` |
+
+Because of the linear interpolation, speed step 1 does not land exactly on the end point (forward speed 1 -> 403, reverse speed 1 -> 395); the end points are reached at speed 127.
 
