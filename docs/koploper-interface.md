@@ -61,7 +61,25 @@ This `set(id, speed[...])` / `set(id, dir[...])` traffic is the "per-encoder com
 
 ## Open Questions
 
-- Which ECoS speed range does Koploper send (0..126 or 0..28)? Needed for the speed-to-PWM mapping.
-- Do Koploper block numbers map 1:1 to ECoS sensor ids used for occupancy feedback?
-- What are the exact look-ahead rules (one block ahead, or until occupied)?
-- Should the track-amplifier backend replace or complement `TrackSimulatorBackend`?
+- Which ECoS speed range does Koploper send (0..126 or 0..28)? Needed for the speed-to-PWM mapping. - RESOLVED: **0..127 (128 steps)**. The `ecos-master` C# library (`Ecos ESU info/ecos-master.zip`, `ECoSEntities/Locomotive.cs`) returns `128` from `GetNumberOfSpeedsteps()` for MM128/DCC128, and sends `set(<id>, speedstep[<step>])`. The emulator's `opt.StartsWith("speed")` also matches `speedstep[...]`.
+- Do Koploper block numbers map 1:1 to ECoS sensor ids used for occupancy feedback? - Product owner: a mapping must be created in Koploper; a screenshot will follow, and the settings page will be extended so the mapping can be created and edited.
+- What are the exact look-ahead rules? - Product owner: Koploper reserves a route ahead internally from occupancy data and may report "loc x to block 4" while C# still has the loc in block 1; then C# can compute the delta and drive multiple amplifiers in sync. If Koploper does not provide this, C# checks whether the next block is free and pre-sets the same setpoint one block ahead. Testable with a Koploper test design, unit tests, or a simulator.
+- Should the track-amplifier backend replace or complement `TrackSimulatorBackend`? - RESOLVED: keep `TrackSimulatorBackend` as the simulation backend (it simulates blocks/trains/occupancy and reports sensors via `IHardwareFeedbackSink`) and add the real track-amplifier backend as an alternative, selectable like the Fiddle Yard real/simulator choice. `DummyHardwareBackend` is a minimal mock and can be kept for simple tests.
+
+## Amplifier PWM Mapping (product owner specification)
+
+- ECoS sends speed steps `0..127`.
+- The amplifier PWM is bidirectional with a neutral point near the middle of `1..799`.
+- Forward: roughly `400..799` (the product owner wrote "399 - 800", but 799 is the maximum).
+- Reverse: roughly `1..399`.
+- PWM `0` must never be used: it produces a clipping artefact.
+- On the shuttle line (pendelbaan), after a locomotive change at the middle station and the relay switch-over, both amplifiers' driving direction must be reversed.
+
+Exact neutral value and end points must be confirmed before finalizing the mapping. Proposed mapping (to be confirmed):
+
+| Condition | PWM |
+| --- | --- |
+| speed 0 (stop) | neutral (400) |
+| forward, speed 1..127 | 400 + speed * (799 - 400) / 127 |
+| reverse, speed 1..127 | 399 - speed * (399 - 1) / 127 |
+
