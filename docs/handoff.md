@@ -224,6 +224,21 @@ Process note: the Designer agent had no screenshot or visual feedback, which is 
 
 The app process was stopped afterwards.
 
+## Increment 7 Implementation Results (2026-09-11)
+
+Implemented on `feature/csharp-cleanup-startup`:
+
+- Added `SiebwaldeApp/SiebwaldeApp.Core.Tests` (xUnit, `net8.0-windows7.0`), referencing `SiebwaldeApp.Core` and `SiebwaldeApp.EcosEmu`, and added it to `SiebwaldeApp.sln`.
+- 23 tests: `TrackApplicationVariables` (PWM clamp 0..799, EmoStop bit 15, slave 0 ignored, pending-write semantics, default PWM setpoints), `TrackAmplifierInitializationServiceAsync` (step chaining, unknown initial/next step, error, Continue-then-Completed), `SimpleEcosCommandParser` (id/options, malformed input, quoted-comma limitation).
+
+Verified: `dotnet test` -> 23/23 passed; `SiebwaldeApp.sln` builds with 0 errors.
+
+Findings recorded while testing:
+- A fresh `TrackAmplifierWriteData` starts at `Hr0Value` 0, so requesting PWM 0 on a fresh amplifier is treated as "no change" and is not queued (documented by a test).
+- `TrackApplicationVariables` assigns the same `HoldingReg` array instance to all 56 `trackAmpItems` (aliasing); recorded in `docs/backlog.md` for investigation.
+
+Still open: window/UI-model tests, `SendNextFwDataPacket` send-path tests, `SimpleEcosBackend`/`JsonLocoRepository` tests.
+
 ## Resume Instructions
 
 1. Restart OpenCode from `C:\Localdata\Siebwalde` and select the `project-lead` agent.

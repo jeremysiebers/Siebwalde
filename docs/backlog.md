@@ -30,7 +30,10 @@ The product owner confirmed the following order. Items remain unapproved for imp
 | Add menu -> settings option for hard-coded values. | DONE (2026-09-11, Increment 5B): `SiebwaldeSettingsPage` edits and persists the core configuration values, with per-entity reset and undo (Ctrl-Z). Editable settings changed to User scope. | Settings service lives in core using `app.config`; UI edits and persists values; per-entity default button and undo work; no hard-coded endpoint/path remains in active startup code. |
 | Build one uniform host detection layer (later). | Product owner wants a single detection layer after C-code changes. | Firmware exposes a stable detect/connect mechanism and the C# layer uses one uniform implementation. |
 | Add simulation fallback for undetected hosts. | Product owner requires a simulation option per host. | Undetected hosts can be started in simulation; FiddleYard uses its existing generator; a Koploper simulator builds on the ECoS emulator. |
-| Add unit tests for the window/program model. | Product owner requested unit tests for the existing model and extensions. | Existing window/program-model behavior is covered by tests before/while refactoring. |
+| Add unit tests for the window/program model. | PARTIAL (2026-09-11, Increment 7): `SiebwaldeApp.Core.Tests` added with 23 tests for `TrackApplicationVariables`, `TrackAmplifierInitializationServiceAsync`, and `SimpleEcosCommandParser`. Window/UI-model tests still to be added. | Existing window/program-model behavior is covered by tests before/while refactoring. |
+| Cover the firmware-packet send path with tests. | `SendNextFwDataPacket.ExecuteAsync` now awaits `SendAsync`; not covered by tests yet. | A test asserts send ordering and failure propagation via a fake `ITrackCommClient`. |
+| Cover `SimpleEcosBackend` and `JsonLocoRepository`. | Not covered yet; parser is covered. | Command handling and JSON persistence have unit tests. |
+| Investigate `TrackApplicationVariables` HoldingReg aliasing. | All 56 `trackAmpItems` receive the same `HoldingReg` array instance from the constructor. | Confirmed whether this is intended; fix or document. |
 
 ## Koploper Translation Path (Later Increment)
 

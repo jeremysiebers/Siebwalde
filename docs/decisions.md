@@ -327,3 +327,11 @@ Decision: The Designer agent improved the `SiebwaldeInitPage` presentation: larg
 Evidence: `Styles/Indicators.xaml` (`HostStatusDot`), `ValueConverters/HostStatusBrushConverter.cs` (present/checking/absent brush), updated `SiebwaldeInitPage.xaml`, `SiebwaldeInitPage.xaml.cs`, `SiebwaldeInitPageViewModel.cs`, and `App.xaml` (merged `Indicators.xaml`). All referenced resources exist (`SpinningText` in `Texts.xaml`, `FontSizeLarge` = 20, `WordOrangeBrush`/`WordGreenBrush`/`ForegroundDarkBrush` in `Colors.xaml`).
 
 Impact: Host detection now repeats every 10 seconds via a `DispatcherTimer`, guarded against overlapping passes; automatic passes only log presence changes to avoid flooding the log. The timer is stopped on `Unloaded` so navigating away does not leak the view model. Verified: `SiebwaldeApp.sln` builds with 0 errors. The visual result is not runtime-verified.
+
+## 2026-09-11: Unit Test Project Reintroduced (Increment 7)
+
+Decision: Added a new `SiebwaldeApp.Core.Tests` xUnit project (`net8.0-windows7.0`) referencing `SiebwaldeApp.Core` and `SiebwaldeApp.EcosEmu`, and added it to `SiebwaldeApp.sln`. It replaces the removed obsolete station-domain test project with tests for current behavior.
+
+Evidence: 23 tests covering `TrackApplicationVariables` (PWM clamp 0..799, EmoStop bit 15, slave 0 ignored, pending-write semantics, default PWM setpoints), `TrackAmplifierInitializationServiceAsync` (step chaining, unknown initial/next step, error, Continue-then-Completed), and `SimpleEcosCommandParser` (id/options parsing, malformed input, quoted-comma limitation).
+
+Impact: `dotnet test` passes 23/23 and `SiebwaldeApp.sln` builds with 0 errors. The initialization-service tests would catch the previously fixed step-name defect. Documented behavior found while testing: a fresh `TrackAmplifierWriteData` starts at `Hr0Value` 0, so requesting PWM 0 on a fresh amplifier is treated as "no change" and not queued; also `TrackApplicationVariables` gives all 56 `trackAmpItems` the same `HoldingReg` array instance (aliasing, recorded as a finding).

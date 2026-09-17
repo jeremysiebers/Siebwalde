@@ -175,6 +175,26 @@ Result:
 - 0 errors.
 - The visual result (status dots, larger log text, detecting indicator) is not runtime-verified.
 
+## Unit Tests (Increment 7, 2026-09-11)
+
+New test project: `SiebwaldeApp/SiebwaldeApp.Core.Tests` (`net8.0-windows7.0`, xUnit), added to `SiebwaldeApp.sln`. References `SiebwaldeApp.Core` and `SiebwaldeApp.EcosEmu`.
+
+Command executed from `C:\Localdata\Siebwalde`:
+
+```powershell
+dotnet test "SiebwaldeApp\SiebwaldeApp.Core.Tests\SiebwaldeApp.Core.Tests.csproj" -c Debug
+```
+
+Result:
+
+```
+Passed!  - Failed: 0, Passed: 23, Skipped: 0, Total: 23
+```
+
+Coverage: `TrackApplicationVariables` (PWM clamp, EmoStop bit, slave 0, pending-write semantics, default PWM setpoints), `TrackAmplifierInitializationServiceAsync` (step chaining, unknown step, error, Continue-then-Completed), `SimpleEcosCommandParser` (parsing, malformed input, quoted-comma limitation).
+
+`SiebwaldeApp.sln` also builds with 0 errors including the test project.
+
 ## External Endpoints And Files
 
 | Purpose | Value |
