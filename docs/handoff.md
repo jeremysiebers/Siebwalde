@@ -1,5 +1,35 @@
 # Handoff
 
+## Latest Session (2026-09-17)
+
+Completed today (all on `feature/csharp-cleanup-startup`, pushed):
+
+- Increments 1-7: host logging + init sequencing fix, obsolete test project removed, Pic18/station remnants removed, configuration centralized (`CoreConfiguration`), editable settings page, host detection + init page UI (status dots, larger log, 10 s re-detection), core unit tests.
+- Increment 6 step 1-2c: Koploper/ECoS reconnaissance (`docs/koploper-interface.md`), `AmplifierSpeedMapper` (neutral 399, forward 400..799, reverse 398..1, never 0), `BlockTopology`, and the new non-UI `SiebwaldeApp.Integration` project with `TrackAmplifierHardwareBackend`.
+- Live Koploper session captured; emulator host now tees console output to `Logging\<date>_EcosEmuTrace.txt`.
+
+Verified live against Koploper:
+
+- `create(10,name["..."],protocol[DCC28],addr[N],append)` -> emulator assigns ids 1002, 1003, ...
+- Driving: `set(<ecosId>, speedstep[<n>])` ramping over time; direction via `set(<ecosId>, dir[...])`.
+- Occupancy to Koploper: `TX: <EVENT 100>` + `100 state[0x...]` (module 100, 16 inputs, bitmask).
+- `[EXT] Loc N -> Block M` is the **current** block; no destination/route is transmitted (`desc="Route onbekend"`).
+- Startup dependency: with an empty loco list Koploper reports 0 locos, sends no `create`, and drives nothing.
+- Causality: in the simulator occupancy is derived from Koploper position (inverted); on real hardware the amplifier occupancy is the source.
+
+Known issues / next steps:
+
+1. Duplicate locos exist (seeded 1000/1001 + Koploper-created 1002/1003 for addresses 1/2). Seeding was a temporary workaround; the correct route is to let Koploper create them.
+2. Add a block-adjacency / chain list to `BlockTopology` (Koploper sends no destination).
+3. Add a switch mapping list (real switch <-> Koploper designation + default init state).
+4. Implement the look-ahead fallback (one block ahead) in `TrackAmplifierHardwareBackend`.
+5. Feed amplifier occupancy to `IHardwareFeedbackSink.OnSensorChangedAsync` (real-system source).
+6. Backend selection: real (`TrackAmplifierHardwareBackend`) vs `TrackSimulatorBackend`.
+7. Divergence check with ECoS stop command and diagnostics logging (maybe a dedicated diagnostics agent).
+8. Settings-page extension for the mapping tables (product owner will supply a Koploper screenshot).
+
+Tests: `dotnet test` 53/53 passing. `Logging/` (16.4 MB of runtime logs, including `locos.json`) is untracked and intentionally not committed. No pull request has been created yet.
+
 ## Current Session Status
 
 This session completed a documentation-only workspace migration check and started the product clarification phase for the Siebwalde repository at `C:\Localdata\Siebwalde` (Git repository, `origin https://github.com/jeremysiebers/Siebwalde.git`).
