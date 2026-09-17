@@ -59,6 +59,16 @@ This `set(id, speed[...])` / `set(id, dir[...])` traffic is the "per-encoder com
 4. **Topology configuration**: block-to-amplifier chaining (for example `block1=amp1, block2=amp2`) as a user-editable `app.config` setting.
 5. **Speed mapping**: convert the ECoS speed value Koploper sends into the amplifier PWM range (0..799).
 
+## Implementation Status
+
+- `SiebwaldeApp.Core.AmplifierSpeedMapper` - done (ECoS 0..127 + direction -> PWM).
+- `SiebwaldeApp.Core.BlockTopology` - done (block -> amplifier mapping, parsed from configuration text).
+- `SiebwaldeApp.Integration.TrackAmplifierHardwareBackend` - done: implements `IHardwareBackend`, resolves locomotive -> block via `IBlockPositionProvider`, block -> amplifiers via `BlockTopology`, speed -> PWM via `AmplifierSpeedMapper`, and queues writes through `TrackApplicationVariables.SetDesiredAmplifierControl`. `SetPower(false)` sets all mapped amplifiers to neutral. `SetSwitch` is not handled yet.
+- New non-UI project `SiebwaldeApp.Integration` (`net8.0-windows7.0`) references Core + EcosEmu; all translation logic stays out of the WPF project.
+- Still open: look-ahead (delta-sync and one-block-ahead fallback), occupancy feedback into `IHardwareFeedbackSink`, backend selection (real vs `TrackSimulatorBackend`), and the `app.config` topology setting plus settings-page editing.
+
+
+
 ## Open Questions
 
 - Which ECoS speed range does Koploper send (0..126 or 0..28)? Needed for the speed-to-PWM mapping. - RESOLVED: **0..127 (128 steps)**. The `ecos-master` C# library (`Ecos ESU info/ecos-master.zip`, `ECoSEntities/Locomotive.cs`) returns `128` from `GetNumberOfSpeedsteps()` for MM128/DCC128, and sends `set(<id>, speedstep[<step>])`. The emulator's `opt.StartsWith("speed")` also matches `speedstep[...]`.
