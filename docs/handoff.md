@@ -169,6 +169,22 @@ Verified by `dotnet build` (Debug, no hardware):
 
 Note: the WPF `App.config` does not yet carry the `CoreSettings` section; the WPF app relies on the Designer defaults (behavior unchanged). The settings UI (edit/default/undo) is still planned.
 
+## Increment 5A Implementation Results (2026-09-11)
+
+Implemented on `feature/csharp-cleanup-startup`:
+
+- Added `SiebwaldeApp.Core/Diagnostics/HostDetection.cs`: ping for FiddleYard (`FIDDLEYARD`) and the TrackController (`CoreConfiguration.TrackControllerIpAddress`), TCP connect for Koploper (`127.0.0.1:5700`).
+- Reworked `SiebwaldeInitPageViewModel`: per-host status, human-readable log, `DetectHosts`, `InitAllControllers`, `InitTrackController`, `InitFiddleYardController`, and `InitFiddleYardSimulator` commands; start buttons guarded by detection.
+- Reworked `SiebwaldeInitPage.xaml`: Detect button, TrackController/FiddleYard/Koploper status rows, start buttons, and a FiddleYard simulator button.
+- `FiddleYardController.StartFiddleYardControllerAsync(bool forceSimulator = false)` and `SiebwaldeApplicationModel.StartFYController(bool forceSimulator = false)` support the operator-activated simulator.
+
+Verified by `dotnet build` (Debug, no hardware):
+
+- `SiebwaldeApp.sln`: 0 errors.
+- `SiebwaldeApp.Core.Host`: 0 errors.
+
+Only FiddleYard has a simulator option; Koploper and TrackController do not (per product owner). Host detection was not run against live hosts.
+
 ## Resume Instructions
 
 1. Restart OpenCode from `C:\Localdata\Siebwalde` and select the `project-lead` agent.

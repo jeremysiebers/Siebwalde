@@ -76,10 +76,15 @@ This split is intentional but is a known cleanup area. `SiebwaldeApp.Core.Host` 
 4. `MainWindow` is created and shown.
 5. Navigation uses `ApplicationViewModel`, `SideMenuViewModel`, and page converters.
 
-Operator actions on `SiebwaldeInitPage` start the two main flows:
+Operator actions on `SiebwaldeInitPage`:
 
-- `InitTrackController` -> `SiebwaldeApplicationModel.StartTrackApplication()`.
-- `InitFiddleYardController` -> `SiebwaldeApplicationModel.StartFYController()`.
+- `DetectHosts` runs `HostDetection` for FiddleYard (ping on `FIDDLEYARD`), the TrackController (ping on its configured IP) and Koploper (TCP connect to `127.0.0.1:5700`), and shows the result with a step/state log.
+- `InitTrackController` -> `SiebwaldeApplicationModel.StartTrackApplication()` (enabled when the TrackController is detected).
+- `InitFiddleYardController` -> `SiebwaldeApplicationModel.StartFYController(false)` (enabled when the Fiddle Yard is detected).
+- `InitFiddleYardSimulator` -> `SiebwaldeApplicationModel.StartFYController(true)`; this forces the Fiddle Yard simulator and is operator-activated.
+- There is no simulator option for Koploper or the TrackController.
+
+Note: detection and page behavior are code-inspected, not runtime-verified. An initial detection pass runs when the page is constructed.
 
 ---
 

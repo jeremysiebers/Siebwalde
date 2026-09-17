@@ -60,7 +60,8 @@ namespace SiebwaldeApp.Core
             => FiddleYardShowSettingsWinForms?.Invoke(this, e);
 
         /// <summary>Fiddle Yard</summary>
-        public async Task StartFYController()
+        /// <param name="forceSimulator">When true, start the Fiddle Yard in simulator mode without probing the target.</param>
+        public async Task StartFYController(bool forceSimulator = false)
         {
             if (FYcontroller != null)
                 return;
@@ -86,7 +87,7 @@ namespace SiebwaldeApp.Core
             OnLaunchWinFormsFormRequested(EventArgs.Empty);
 
             IoC.Logger.Log("FiddleYard Controller starting...", "");
-            await FYcontroller.StartFiddleYardControllerAsync();
+            await FYcontroller.StartFiddleYardControllerAsync(forceSimulator);
             IoC.Logger.Log("FiddleYard Controller started.", "");
         }
 

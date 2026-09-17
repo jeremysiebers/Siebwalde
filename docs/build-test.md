@@ -134,6 +134,20 @@ Result:
 - 0 errors for both.
 - A targeted search found no remaining hard-coded `192.168.1.193` or firmware hex path in active startup code, other than the new `CoreSettings` Designer defaults.
 
+## Build Verification After Increment 5A (2026-09-11)
+
+Commands executed from `C:\Localdata\Siebwalde` (Debug, no hardware, no test execution):
+
+```powershell
+dotnet build "SiebwaldeApp\SiebwaldeApp.sln" -c Debug --nologo
+dotnet build "SiebwaldeApp.Core.Host\SiebwaldeApp.Core.Host.csproj" -c Debug --nologo
+```
+
+Result:
+
+- 0 errors for both.
+- Host detection is code-inspected only; no live host was contacted. Runtime behavior (ping/TCP results, page updates) is not yet verified.
+
 ## External Endpoints And Files
 
 | Purpose | Value |

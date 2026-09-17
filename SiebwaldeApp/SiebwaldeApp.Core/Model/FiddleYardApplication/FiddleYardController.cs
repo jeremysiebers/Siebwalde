@@ -90,12 +90,17 @@ namespace SiebwaldeApp.Core
          *  Notes      :
          */
         /*#--------------------------------------------------------------------------#*/
-        public async Task StartFiddleYardControllerAsync()
+        public async Task StartFiddleYardControllerAsync(bool forceSimulator = false)
         {
             // Start a new task (so it runs on a different thread)
             await Task.Run(() =>
             {
-                if (ConnectFiddleYard(m_macAddr, m_ipAddr) == true) // when connection was succesfull and target was found and is connected
+                if (forceSimulator)
+                {
+                    FYSimulatorActive = true;
+                    IoC.Logger.Log("FYCTRL: Fiddle Yard uController forced into simulator mode by operator.", "");
+                }
+                else if (ConnectFiddleYard(m_macAddr, m_ipAddr) == true) // when connection was succesfull and target was found and is connected
                 {
                     IoC.Logger.Log("FYCTRL: Fiddle Yard uController target in real mode", "");
 

@@ -303,3 +303,11 @@ Decision: Introduced `SiebwaldeApp.Core.CoreConfiguration` as the single source 
 Evidence: Added settings `TrckIpAddress` and `TrackAmplifierFwPath`, and corrected `TrckSendingPort`/`TrckReceivingPort` defaults from `60000` to `10000`/`10001` (the previous defaults were unused). Verified: `SiebwaldeApp.Core.Host` and `SiebwaldeApp.sln` build with 0 errors.
 
 Impact: Behavior is preserved because the new defaults match the previous hard-coded values. The WPF `App.config` does not yet carry the `CoreSettings` section, so the WPF app relies on the Designer defaults. The settings UI (editing, default per entity, undo) is still planned.
+
+## 2026-09-11: Host Detection And Init Page (Increment 5A)
+
+Decision: Added a core `HostDetection` service and wired it into `SiebwaldeInitPage`. FiddleYard and the TrackController are detected with a ping on their host name/IP; Koploper is detected with a TCP connect probe to `127.0.0.1:5700`. The page shows per-host status, a human-readable step/state log, and start buttons that are enabled only for detected hosts.
+
+Evidence: `SiebwaldeApp.Core/Diagnostics/HostDetection.cs`, `SiebwaldeInitPageViewModel`, and `SiebwaldeInitPage.xaml`.
+
+Impact: Only the Fiddle Yard has a simulator option, and it must be activated by the operator via a dedicated button (`InitFiddleYardSimulator`). There is no simulator option for Koploper or the TrackController. The Fiddle Yard simulator forces `FYSimulatorActive = true` in `FiddleYardController.StartFiddleYardControllerAsync(forceSimulator)`. Verified: `SiebwaldeApp.sln` and `SiebwaldeApp.Core.Host` build with 0 errors. The settings UI remains planned.
