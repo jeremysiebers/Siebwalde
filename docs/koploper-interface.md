@@ -59,6 +59,15 @@ This `set(id, speed[...])` / `set(id, dir[...])` traffic is the "per-encoder com
 4. **Topology configuration**: block-to-amplifier chaining (for example `block1=amp1, block2=amp2`) as a user-editable `app.config` setting.
 5. **Speed mapping**: convert the ECoS speed value Koploper sends into the amplifier PWM range (0..799).
 
+## Trace Data (2026-09-11)
+
+- No Koploper/ECoS trace data exists in `Logging/` or anywhere else in the repository. The emulator and the external-info client log to the console only (`[EXT]`, `[LOCO]`, `[ECOS]`, `[HW-FEEDBACK]`, `TX:`), and no console capture was kept.
+- Therefore the open question "is the block field the current block or the next/reserved block?" cannot be answered from code or history.
+- Added console-to-file tracing to `SiebwaldeApp.EcosEmu.Host` (`EcosEmuTrace`): it tees console output to `Logging\<dd-MM-yyyy>_EcosEmuTrace.txt`. Run a Koploper session (for example the simple circle) against the emulator to capture the records, then determine from the trace:
+  - whether `[EXT] Loc X -> Block Y` reports the current block or the next/reserved block;
+  - what the description field contains (the observed sample was `Route onbekend`);
+  - whether `[LOCO] Address A is now in block B` and the `TX:` speed/sensor frames can be correlated with the position records.
+
 ## Implementation Status
 
 - `SiebwaldeApp.Core.AmplifierSpeedMapper` - done (ECoS 0..127 + direction -> PWM).
