@@ -185,6 +185,20 @@ Verified by `dotnet build` (Debug, no hardware):
 
 Only FiddleYard has a simulator option; Koploper and TrackController do not (per product owner). Host detection was not run against live hosts.
 
+## Increment 5B Implementation Results (2026-09-11)
+
+Implemented on `feature/csharp-cleanup-startup`:
+
+- Implemented `SiebwaldeSettingsPage` + `SiebwaldeSettingsPageViewModel`: editable core configuration values, `Save`, `Reload`, per-entity reset (`ResetTrack`, `ResetFiddleYard`, `ResetLogging`), and `Undo` bound to Ctrl-Z.
+- Changed the editable settings to User scope with setters (`LogDirectory`, `FYSendingport`, `FYReceivingport`, `TrckSendingPort`, `TrckReceivingPort`, `TrckIpAddress`, `TrackAmplifierFwPath`) and moved their config entries to the `userSettings` sections in the WPF `App.config` and the Core `app.config`.
+
+Verified by `dotnet build` (Debug, no hardware):
+
+- `SiebwaldeApp.sln`: 0 errors.
+- `SiebwaldeApp.Core.Host`: 0 errors.
+
+Settings persistence and page behavior are code-inspected only; not runtime-verified.
+
 ## Resume Instructions
 
 1. Restart OpenCode from `C:\Localdata\Siebwalde` and select the `project-lead` agent.

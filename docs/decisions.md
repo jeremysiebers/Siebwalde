@@ -311,3 +311,11 @@ Decision: Added a core `HostDetection` service and wired it into `SiebwaldeInitP
 Evidence: `SiebwaldeApp.Core/Diagnostics/HostDetection.cs`, `SiebwaldeInitPageViewModel`, and `SiebwaldeInitPage.xaml`.
 
 Impact: Only the Fiddle Yard has a simulator option, and it must be activated by the operator via a dedicated button (`InitFiddleYardSimulator`). There is no simulator option for Koploper or the TrackController. The Fiddle Yard simulator forces `FYSimulatorActive = true` in `FiddleYardController.StartFiddleYardControllerAsync(forceSimulator)`. Verified: `SiebwaldeApp.sln` and `SiebwaldeApp.Core.Host` build with 0 errors. The settings UI remains planned.
+
+## 2026-09-11: Settings UI (Increment 5B)
+
+Decision: Implemented the settings page (`SiebwaldeSettingsPage`, reachable from the Siebwalde menu) to edit and persist the core configuration values. The editable settings were changed from Application scope to User scope so they can be written and saved.
+
+Evidence: `SiebwaldeSettingsPageViewModel` provides editable values, `Save`, `Reload`, per-entity reset (`ResetTrack`, `ResetFiddleYard`, `ResetLogging`) and `Undo` (Ctrl-Z). The settings `LogDirectory`, `FYSendingport`, `FYReceivingport`, `TrckSendingPort`, `TrckReceivingPort`, `TrckIpAddress`, and `TrackAmplifierFwPath` are now User-scoped with setters; the config files were updated accordingly.
+
+Impact: Values persist to user settings via `CoreSettings.Default.Save()`. Per-entity defaults come from the settings' `DefaultValue`. Undo restores the previous snapshot. Verified: `SiebwaldeApp.sln` and `SiebwaldeApp.Core.Host` build with 0 errors. Runtime behavior of the page is not yet verified.

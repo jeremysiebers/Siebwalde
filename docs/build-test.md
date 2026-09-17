@@ -148,6 +148,20 @@ Result:
 - 0 errors for both.
 - Host detection is code-inspected only; no live host was contacted. Runtime behavior (ping/TCP results, page updates) is not yet verified.
 
+## Build Verification After Increment 5B (2026-09-11)
+
+Commands executed from `C:\Localdata\Siebwalde` (Debug, no hardware, no test execution):
+
+```powershell
+dotnet build "SiebwaldeApp\SiebwaldeApp.sln" -c Debug --nologo
+dotnet build "SiebwaldeApp.Core.Host\SiebwaldeApp.Core.Host.csproj" -c Debug --nologo
+```
+
+Result:
+
+- 0 errors for both.
+- Settings persistence (Save/user.config) and the settings page behavior are code-inspected only; not runtime-verified.
+
 ## External Endpoints And Files
 
 | Purpose | Value |

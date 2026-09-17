@@ -104,66 +104,87 @@ namespace SiebwaldeApp.Core.Properties {
             }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("C:\\\\Localdata\\\\Siebwalde\\\\Logging\\\\")]
         public string LogDirectory {
             get {
                 return ((string)(this["LogDirectory"]));
             }
+            set {
+                this["LogDirectory"] = value;
+            }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("28671")]
         public ushort FYSendingport {
             get {
                 return ((ushort)(this["FYSendingport"]));
             }
+            set {
+                this["FYSendingport"] = value;
+            }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("28672")]
         public ushort FYReceivingport {
             get {
                 return ((ushort)(this["FYReceivingport"]));
             }
+            set {
+                this["FYReceivingport"] = value;
+            }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("10000")]
         public ushort TrckSendingPort {
             get {
                 return ((ushort)(this["TrckSendingPort"]));
             }
+            set {
+                this["TrckSendingPort"] = value;
+            }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("10001")]
         public ushort TrckReceivingPort {
             get {
                 return ((ushort)(this["TrckReceivingPort"]));
             }
+            set {
+                this["TrckReceivingPort"] = value;
+            }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("192.168.1.193")]
         public string TrckIpAddress {
             get {
                 return ((string)(this["TrckIpAddress"]));
             }
+            set {
+                this["TrckIpAddress"] = value;
+            }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("C:\\\\Localdata\\\\Siebwalde\\\\TrackAmplifier4.X\\\\dist\\\\Offset\\\\production\\\\TrackAmplifier4.X.production.hex")]
         public string TrackAmplifierFwPath {
             get {
                 return ((string)(this["TrackAmplifierFwPath"]));
+            }
+            set {
+                this["TrackAmplifierFwPath"] = value;
             }
         }
         
