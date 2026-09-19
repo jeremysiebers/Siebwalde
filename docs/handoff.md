@@ -1,5 +1,54 @@
 # Handoff
 
+## Latest Session (2026-09-19, real occupancy integration)
+
+Branch `feature/real-occupancy-integration` (from `master` at `f778a32`). Connects the existing real amplifier occupancy data to the new C# occupancy/divergence/safety architecture. **No firmware was changed.**
+
+### The existing occupancy path (verified)
+
+```
+PIC18 processio.c: g_occ = CMP1_GetOutputStatus() -> HR_STATUS (HoldingReg2) bit 10
+  -> PIC32 master SLAVEINFO frame
+  -> TrackCommClientAsync.HandleNewDataAsync: writes trackAmpItems[n].HoldingReg + SlaveDetected,
+     raises AmplifierDataReceived
+  -> TrackAmplifierItem.HoldingReg[2]
+```
+
+Both consumers read the same value: the track-amplifier page (`hr2 & TrackAmplifierRegisters.OccupiedBit`) and `TrackAmplifierOccupancyProvider` (`TrackAmplifierRegisters.IsOccupied(HoldingReg)`).
+
+### Why real mode previously reported occupancy unavailable
+
+`TrackControlHost` set `ModeObservability { OccupancyAvailable = false }` for real mode, based on the `General.h` "(TODO: implement when occupancy source known)" comment. That comment is **stale**: `processio.c` already sets the bit from a real comparator input.
+
+### What changed
+
+- `IOccupancyProvider` gained `IsBlockOccupancyKnown`; unknown is now distinct from clear.
+- `TrackAmplifierOccupancyProvider` reads `TrackAmplifierItem` (registers plus detection) and reports a block known only when every covering section has valid data.
+- `AmplifierOccupancyObservability` (Integration) replaces the hard-coded `false`: availability follows `SlaveDetected`, the existing "a frame was parsed" signal.
+- `DivergenceChecker`: occupied -> `OccupancyMismatch` (StopRequired); not occupied but unknown -> `StateUnknown` (Rejected, no stop).
+- `LookAheadPlanner` no longer pre-commands into a block whose occupancy is unknown.
+- `TrackAmplifierOccupancyBridge` skips unknown blocks instead of reporting them free, and leaves them out of change tracking.
+- `ControlSafetyGuard.Reset()` requires an `OccupancyMismatch` block to be known clear.
+
+### Files changed
+
+- Modified: `Core/Model/TrackApplication/Control/IOccupancyProvider.cs`, `TrackAmplifierOccupancyProvider.cs`, `LookAheadPlanner.cs`, `Integration/DivergenceChecker.cs`, `TrackAmplifierOccupancyBridge.cs`, `TrackControlIntegration.cs`, `TrackControlHost.cs`, `Observability.cs`, and the tests `TrackAmplifierOccupancyProviderTests.cs`, `TrackControlIntegrationTests.cs`, `DivergenceAndSafetyTests.cs`, `LookAheadPlannerTests.cs`, `TrackAmplifierHardwareBackendLookAheadTests.cs`, `TrackAmplifierOccupancyBridgeTests.cs`.
+
+### Tests and checks
+
+- `dotnet build SiebwaldeApp.sln` -> **0 errors**.
+- `dotnet test` -> **218/218 passed** (was 204; +14).
+
+### Remaining concerns
+
+1. Real occupancy still needs a live hardware run to confirm end-to-end behaviour with the actual amplifiers; only the data path is verified from code.
+2. Simulator mode still delivers occupancy as ECoS sensor events, so `OccupancyAvailable` stays false there (unchanged, out of scope).
+3. The stale `General.h` comment remains in the firmware; correcting it is a separate firmware change.
+
+### Best next step
+
+Validate real occupancy on the hardware oval with the amplifier firmware running, then consider the simulator occupancy provider.
+
 ## Latest Session (2026-09-19, safety movement interlock)
 
 Closes the gap that a latched `StopRequired` fault prevented repeated stops but not a later Koploper command from moving the affected locomotive again.

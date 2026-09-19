@@ -339,7 +339,7 @@ Consequence: for real hardware, amplifier occupancy must be reported as sensor i
 
 - `SiebwaldeApp.Core.AmplifierSpeedMapper` - done (ECoS 0..127 + direction -> PWM).
 - `SiebwaldeApp.Core.BlockTopology` - done: block -> amplifier mapping plus a routing model. Configuration sections: `amps: block:amp[+amp]` and `routes: from>to[@switchId:position][!]`; `!` forbids look-ahead (for example a station departure block).
-- `SiebwaldeApp.Core.IOccupancyProvider` - done: block occupancy abstraction. The real implementation (`TrackAmplifierOccupancyProvider`) is wired and used; it becomes reliable once the firmware populates the amplifier occupied bit.
+- `SiebwaldeApp.Core.IOccupancyProvider` - done: block occupancy abstraction, with an explicit `IsBlockOccupancyKnown` so "unknown" is never read as "clear". The real implementation (`TrackAmplifierOccupancyProvider`) reads the existing amplifier holding registers, the same value the track-amplifier page decodes.
 - `SiebwaldeApp.Core.LookAheadPlanner` - done: picks the next block to pre-command, filtered by switch position, excluding no-look-ahead transitions and occupied targets.
 - `SiebwaldeApp.Integration.TrackAmplifierHardwareBackend` - done: implements `IHardwareBackend`; resolves locomotive -> block, block -> amplifiers, speed -> PWM, queues writes, and (when a planner and occupancy provider are supplied) also commands the next block. `SetPower(false)` sets all mapped amplifiers to neutral. `SetSwitch` returns false and drives nothing, because switches are driven by accessory decoders and that real path is not wired yet.
 - `SiebwaldeApp.Core.SwitchMapping` - done: parses `SwitchMapConfig` (`ecosAddress:physicalAddress[:inverted][:g|r|keep]`), records invalid and duplicate entries in `Errors` instead of turning them into a plausible mapping.
@@ -366,6 +366,30 @@ Requested, commanded and observed stay separate: `SwitchController` records the 
 `IHardwareBackend.SetPower` and `SetLocoSpeed` return `bool`. When a movement is refused, `SimpleEcosBackend` replies `<END 8 (SAFETY_INTERLOCK)>`, keeps its logical speed unchanged and sends no `speed[...]`/`dir[...]` event, so Koploper is never told a refused movement succeeded. Rejections are reported once per locomotive per latch (`MovementRejectedBySafety`).
 
 Recovery is explicit: `ControlSafetyGuard.Reset()` revalidates every latched fault through `DivergenceChecker.IsResolved` and is refused with `ResetRefused` while the condition persists. Only after the correction plus a successful reset does movement become possible again.
+
+### Real occupancy path (verified, already working)
+
+The amplifier occupancy travels over the existing embedded transport; no firmware change is required.
+
+```
+PIC18 amplifier
+  processio.c: g_occ = CMP1_GetOutputStatus()
+  processio.c: HR_STATUS (HoldingReg2) bit 10 = g_occ
+  -> PIC32 master SLAVEINFO frame (12 holding registers + counters)
+  -> TrackCommClientAsync.HandleNewDataAsync
+       parses HEADER + SLAVEINFO, writes trackAmpItems[slaveNumber].HoldingReg
+       and sets SlaveDetected, then raises AmplifierDataReceived
+  -> TrackAmplifierItem.HoldingReg[2]
+```
+
+Both consumers read the same value:
+
+- the track-amplifier page decodes `IsOccupied = (hr2 & TrackAmplifierRegisters.OccupiedBit) != 0`;
+- `TrackAmplifierOccupancyProvider` uses `TrackAmplifierRegisters.IsOccupied(HoldingReg)` for the amplifier sections of a Koploper block, and therefore reads the identical bit from the identical array.
+
+**Stale comment:** `TrackAmplifier4.X/modbus/General.h` still annotates `HR_STATUS_OCCUPIED_BIT` with "(TODO: implement when occupancy source known)", but `processio.c` already implements it. The comment is wrong, not the firmware.
+
+**Known versus unknown.** `SlaveDetected` is written in the same step that stores the holding registers, so it is the existing "valid amplifier data has been received" signal. `TrackAmplifierOccupancyProvider.IsBlockOccupancyKnown` requires every amplifier section that covers a block to have valid data; one silent section makes the whole block unknown. Unknown is never reported to Koploper as clear, is never treated as a free block by look-ahead, and produces `StateUnknown` (Rejected) rather than `OccupancyMismatch` (StopRequired) during a route check.
 
 
 

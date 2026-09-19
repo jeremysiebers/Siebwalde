@@ -251,7 +251,8 @@ Done:
 
 | Item | Evidence | Acceptance criteria |
 | --- | --- | --- |
-| Real amplifier occupancy bit. | `TrackAmplifier4.X/modbus/General.h` TODO; real mode reports `OccupancyAvailable = false`. | Firmware populates the occupied bit and real occupancy becomes reliable. |
+| ~~Real amplifier occupancy bit.~~ **Not a dependency.** | `TrackAmplifier4.X/processio.c` already sets `HR_STATUS` bit 10 from `g_occ = CMP1_GetOutputStatus()`. The `General.h` TODO comment is stale. Real mode now consumes it. | Done: real mode reads the existing amplifier occupancy. |
+| Stale firmware comment. | `TrackAmplifier4.X/modbus/General.h` line 95 still says "(TODO: implement when occupancy source known)" while `processio.c` implements it. | Comment corrected in firmware (not part of this increment). |
 
 ### Physical hardware dependency
 
