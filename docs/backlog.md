@@ -153,15 +153,7 @@ Done this session:
 - `BlockTopology.Parse`/`KoploperBlockMap.Parse` accept line breaks as separators (the settings fields are multi-line), so an unprefixed section containing `>` is treated as routes instead of being silently dropped.
 - `locos.json` recreation/auto-sync validated; `locos.json` no longer pre-seeded.
 
-Still open (next steps):
-
-| Item | Evidence | Acceptance criteria |
-| --- | --- | --- |
-| Switch mapping (real <-> Koploper + default init state). | Oval switch addresses are 1 and 2; the `3>4` vs `3>5` branch selection is still provisional in the topology config. | Switch mapping is configurable and the branch selection is confirmed from a trace. |
-| Divergence check with ECoS stop and diagnostics. | C# should stop Koploper and log what diverged when data drifts apart. | Divergence detected, Koploper stopped via ECoS, mismatch logged. |
-| Watchdog for stale amplifier occupancy. | Event-driven occupancy has no timeout for missing updates. | Stale occupancy is detected and surfaced. |
-| Investigate `TrackApplicationVariables` HoldingReg aliasing. | All 56 `trackAmpItems` share one `HoldingReg` array instance. | Confirmed intended or fixed. |
-| `EcosEmulatorServer` binds loopback only. | `IPAddress.Loopback` in `EcosEmulatorServer.Start`; correct while Koploper runs on the same PC. | Confirmed same-PC, or made configurable. |
+Still open (next steps): see **Open work** at the end of this file, which is the single authoritative and categorised list.
 
 ## Increment 6 App-Startup Wiring (2026-09-19, second task)
 
@@ -237,19 +229,43 @@ Done:
 - Rejections are reported once per loco per latch (`MovementRejectedBySafety`).
 - `ControlSafetyGuard.Reset()` revalidates through `DivergenceChecker.IsResolved` and refuses while the condition persists (`ResetRefused`).
 
-**Increment 6 is complete.** The remaining items below are hardware/firmware dependencies, not code gaps.
+**Increment 6 is complete.** The open work below is categorised by what is actually needed to close it. Nothing here is a code gap in the implemented translation, safety or diagnostics path.
 
-## Remaining hardware and firmware dependencies (out of scope)
+## Open work
+
+### Software follow-up
 
 | Item | Evidence | Acceptance criteria |
 | --- | --- | --- |
-| Real amplifier occupancy firmware bit. | `TrackAmplifier4.X/modbus/General.h` TODO; real mode reports `OccupancyAvailable = false`. | Firmware populates the occupied bit and real occupancy becomes reliable. |
-| Real physical switch output. | `TrackAmplifierHardwareBackend.SetSwitch` returns false; the real switch sink drives nothing. | An accessory-decoder output path actuates mapped switches. |
+| Simulator occupancy through the production abstraction. | Simulator occupancy arrives as ECoS sensor events, so `OccupancyAvailable` is false in simulator mode and route occupancy checks do not run there. | An `IOccupancyProvider` over the simulator exists and occupancy divergence is checked in simulator mode. |
+| Route checks are only wired into the real-mode look-ahead path. | `TrackAmplifierHardwareBackend.Divergence` is set in real mode; the simulator's checker is only reachable by explicit calls. | A route check also runs automatically in simulator mode. |
+| Watchdog for stale amplifier occupancy. | Event-driven occupancy has no timeout for missing updates. | Stale occupancy is detected and surfaced. |
+| Investigate `TrackApplicationVariables` HoldingReg aliasing. | All 56 `trackAmpItems` share one `HoldingReg` array instance. | Confirmed intended or fixed. |
+| `EcosEmulatorServer` binds loopback only. | `IPAddress.Loopback` in `EcosEmulatorServer.Start`; correct while Koploper runs on the same PC. | Confirmed same-PC, or made configurable. |
+| `dir[...]` is refused during a loco safety latch even at speed 0. | `SimpleEcosBackend` routes `dir` through `SetLocoSpeed`, so the interlock treats it as movement. Conservative and safe. | Confirmed acceptable, or refined to allow a direction change at speed 0. |
+| A refused movement always answers `END 8 (SAFETY_INTERLOCK)`, even when the real reason is "no known block". | `SimpleEcosBackend` uses one refusal code; the structured diagnostic carries the true reason. | Refusal reasons are distinguishable in the ECoS reply. |
+| Unit tests for the window/program model. | `SiebwaldeApp.Core.Tests` covers Core/Integration; UI-model tests are still absent. | Window/program-model behaviour is covered. |
+| Tracked `.csproj.user` files with dangling entries. | `SiebwaldeApp/SiebwaldeApp/SiebwaldeApp.csproj.user` references XAML/VM files deleted in Increment 3; `.gitignore` has no `*.user` rule. | User-local files are untracked and ignored. |
+
+### Firmware dependency
+
+| Item | Evidence | Acceptance criteria |
+| --- | --- | --- |
+| Real amplifier occupancy bit. | `TrackAmplifier4.X/modbus/General.h` TODO; real mode reports `OccupancyAvailable = false`. | Firmware populates the occupied bit and real occupancy becomes reliable. |
+
+### Physical hardware dependency
+
+| Item | Evidence | Acceptance criteria |
+| --- | --- | --- |
+| Real physical switch output (accessory decoder). | `TrackAmplifierHardwareBackend.SetSwitch` returns false; the real switch sink drives nothing. | An accessory-decoder output path actuates mapped switches. |
 | Physical switch feedback. | `UnobservableSwitchObserver` always reports "not observable". | A real observer exists and the ECoS state reflects confirmed hardware state. |
-| Simulator occupancy through the production abstraction. | Simulator occupancy arrives as ECoS sensor events, so `OccupancyAvailable` is false there. | An `IOccupancyProvider` over the simulator exists and occupancy divergence is checked in simulator mode. |
-| Real-layout power-on switch positions. | `SwitchMapConfig` default is `keep`. | Confirmed positions are configured as `g`/`r`. |
+
+### Configuration / user-input dependency
+
+| Item | Evidence | Acceptance criteria |
+| --- | --- | --- |
+| Real-layout power-on switch positions. | `SwitchMapConfig` default is `keep` because the rest position is unknown. | Confirmed positions are configured as `g`/`r`. |
+| Real-layout topology, block map and switch addresses. | The shipped defaults describe the test oval. | The real layout values are entered on the settings page. |
 | Signals 51..55 as switches. | Koploper commands them via `switch[...]`; they are unmapped and ignored. | Signals are either mapped or deliberately documented as out of scope. |
-| Real switch output path (accessory decoder). | See above. | Mapped switches are actuated on the real layout. |
-| Latched fault and `dir` at speed 0. | `dir[...]` is treated as movement, so it is refused while latched. | Confirmed acceptable or refined. |
 
 

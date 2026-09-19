@@ -96,7 +96,7 @@ Increment 1 (2026-09-11) fixed two of the confirmed items: the `SiebwaldeApp.Cor
 | --- | --- | --- | --- |
 | Koploper/ECoS protocol | Investigated | `docs/koploper-interface.md`; live session trace `Logging\19-09-2026_EcosEmuTrace.txt`. | Edge cases; MMDC. |
 | Speed -> PWM | Implemented + tested | `AmplifierSpeedMapper`, `AmplifierSpeedMapperTests`. | None known. |
-| Routing + look-ahead | Implemented + tested | `BlockTopology`, `LookAheadPlanner`, `TrackAmplifierHardwareBackend`, tests. | Switch branch selection provisional. |
+| Routing + look-ahead | Implemented + tested | `BlockTopology`, `LookAheadPlanner`, `TrackAmplifierHardwareBackend`, tests. | Switch branch selection is proven (`3>4@1:0`, `3>5@1:1`); route checks are wired into the real-mode look-ahead path only. |
 | Koploper block mapping | Implemented + tested | `KoploperBlockMap`, `KoploperBlockMapTests`; oval mapping from the Koploper export. | Real-layout mapping not yet entered. |
 | Amplifier occupancy | Implemented + tested | `TrackAmplifierRegisters`, `TrackAmplifierOccupancyProvider`, tests. | Firmware still has a TODO for the occupied flag. |
 | Occupancy -> Koploper bridge | Implemented + tested | `TrackAmplifierOccupancyBridge`, tests. | Not yet wired into the running app. |

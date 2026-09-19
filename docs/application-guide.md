@@ -2,7 +2,7 @@
 
 This is the human-readable guide to the Siebwalde application. It explains what the system does, how the C# application is structured, how the main workflows run, and what is verified versus planned.
 
-Evidence rule: behavior described here is code-inspected unless a section says "runtime-verified". No runtime or hardware test has been performed. Items that are planned but not implemented are marked **Planned**.
+Evidence rule: behavior described here is code-inspected unless a section says "runtime-verified". Software-only runtime verification has been performed through the ECoS simulator on port 15471 (loco commands, switch mapping, divergence detection, safety interlock and reset); no physical hardware test has been performed. Items that are planned but not implemented are marked **Planned**.
 
 See also: `docs/product.md` (requirements and priorities), `docs/architecture.md` (architecture detail), `docs/implementation.md` (implementation detail), `docs/inventory.md` (inventory), `docs/build-test.md` (build results).
 

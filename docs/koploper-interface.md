@@ -339,16 +339,17 @@ Consequence: for real hardware, amplifier occupancy must be reported as sensor i
 
 - `SiebwaldeApp.Core.AmplifierSpeedMapper` - done (ECoS 0..127 + direction -> PWM).
 - `SiebwaldeApp.Core.BlockTopology` - done: block -> amplifier mapping plus a routing model. Configuration sections: `amps: block:amp[+amp]` and `routes: from>to[@switchId:position][!]`; `!` forbids look-ahead (for example a station departure block).
-- `SiebwaldeApp.Core.IOccupancyProvider` - done: block occupancy abstraction (real implementation still to be wired to amplifier occupancy).
+- `SiebwaldeApp.Core.IOccupancyProvider` - done: block occupancy abstraction. The real implementation (`TrackAmplifierOccupancyProvider`) is wired and used; it becomes reliable once the firmware populates the amplifier occupied bit.
 - `SiebwaldeApp.Core.LookAheadPlanner` - done: picks the next block to pre-command, filtered by switch position, excluding no-look-ahead transitions and occupied targets.
 - `SiebwaldeApp.Integration.TrackAmplifierHardwareBackend` - done: implements `IHardwareBackend`; resolves locomotive -> block, block -> amplifiers, speed -> PWM, queues writes, and (when a planner and occupancy provider are supplied) also commands the next block. `SetPower(false)` sets all mapped amplifiers to neutral. `SetSwitch` returns false and drives nothing, because switches are driven by accessory decoders and that real path is not wired yet.
 - `SiebwaldeApp.Core.SwitchMapping` - done: parses `SwitchMapConfig` (`ecosAddress:physicalAddress[:inverted][:g|r|keep]`), records invalid and duplicate entries in `Errors` instead of turning them into a plausible mapping.
 - `SiebwaldeApp.Integration.SwitchController` - done: translates an ECoS switch request into a physical drive, tracks the logical (ECoS) position for routing/look-ahead and the physical position for diagnostics, and initializes configured defaults.
 - `SiebwaldeApp.Integration.SwitchTranslatingHardwareBackend` - done: applies the shared switch translation in front of whichever hardware backend is active, so real and simulator mode use one control path.
-- `IHardwareBackend.SetSwitch` now returns `bool`: the ECoS backend only reports a switch state change when the command actually reached an output.
+- `SiebwaldeApp.Integration.ControlSafetyInterlockBackend` - done: refuses non-zero movement while a safety fault is latched (per loco, or layout-wide for an unattributable fault) while stops, power-off and switch commands stay allowed.
+- `IHardwareBackend.SetSwitch`, `SetPower` and `SetLocoSpeed` return `bool`: the ECoS backend never reports a state change or a movement that did not actually reach the hardware.
 - New non-UI project `SiebwaldeApp.Integration` (`net8.0-windows7.0`) references Core + EcosEmu; all translation logic stays out of the WPF project.
-- Tests: 70/70 passing.
-- Still open: divergence check with ECoS stop, a real switch-output path (accessory decoder), the real-layout power-on switch positions, and the watchdog for stale occupancy. Done: real `IOccupancyProvider` from amplifier occupancy, occupancy feedback into `IHardwareFeedbackSink`, switch mapping (real <-> Koploper + default init state), backend selection (real vs `TrackSimulatorBackend`), the `app.config` topology/routing/switch settings plus settings-page editing, and the divergence/safety/diagnostics layer.
+- Tests: 204/204 passing in `SiebwaldeApp.Core.Tests`.
+- Still open: the real switch-output path (accessory decoder), physical switch feedback, the real-layout power-on switch positions, the amplifier occupancy firmware bit, simulator occupancy through the production abstraction, and the watchdog for stale occupancy. See `docs/backlog.md`.
 
 ### Divergence, safety stop and diagnostics
 

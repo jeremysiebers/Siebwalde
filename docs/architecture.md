@@ -38,11 +38,12 @@ Target control loop (product-owner-described, to be verified against code):
 
 ## Dependency Direction
 
-- `SiebwaldeApp/SiebwaldeApp/SiebwaldeApp.csproj` references `SiebwaldeApp.Core` and `SiebwaldeApp.EcosEmu`.
+- `SiebwaldeApp/SiebwaldeApp/SiebwaldeApp.csproj` references `SiebwaldeApp.Core`, `SiebwaldeApp.EcosEmu` and `SiebwaldeApp.Integration`.
 - `SiebwaldeApp.Core.Host/SiebwaldeApp.Core.Host.csproj` references `SiebwaldeApp.Core`.
 - `SiebwaldeApp.EcosEmu/SiebwaldeApp.EcosEmu.Host/SiebwaldeApp.EcosEmu.Host.csproj` references `SiebwaldeApp.EcosEmu`.
 - `SiebwaldeApp/SiebwaldeApp.Tests` (xUnit, referencing `SiebwaldeApp.Core`) was removed on 2026-09-11 as an obsolete remnant; it was never in the main solution and could not compile.
-- No source-level use of active `SiebwaldeApp.EcosEmu` types from the WPF app was verified, even though the project reference exists.
+- The WPF app uses `SiebwaldeApp.Integration` types: `IoC.Setup` constructs `TrackControlHost` and hands it to `SiebwaldeApplicationModel`, which owns the ECoS host lifecycle. WPF initiates operations and presents state; the composition and all control/safety logic live in Core, EcosEmu and Integration.
+- `SiebwaldeApp/SiebwaldeApp.Integration/` (`net8.0-windows7.0`) references Core + EcosEmu and holds the composition/adapter layer: `TrackControlHost`, `TrackControlIntegration`, `TrackAmplifierHardwareBackend`, `SwitchController`, `SwitchTranslatingHardwareBackend`, `ControlSafetyInterlockBackend`, `ControlSafetyGuard`, `DivergenceChecker` and `EcosHardwareStopSink`. Core has no project references, so it cannot depend on Integration, EcosEmu or WPF.
 
 ## Startup And Lifecycle
 

@@ -31,7 +31,9 @@ The `TrackAmplifier4.X/` project keeps its own maintained guidance. These files 
 
 ## Current Scope
 
-The current assignment authorized analysis, documentation, and initial OpenCode agent setup only. No application source code, dependency files, or runtime configuration were intentionally changed. Firmware, PCB, and Python tooling are inventoried but not deeply analyzed.
+This branch (`feature/csharp-cleanup-startup`) started as analysis, documentation and OpenCode agent setup, and has since implemented the C# cleanup and the Increment 6 Koploper/ECoS translation layer (speed/PWM, routing and look-ahead, occupancy, switch mapping, ECoS host lifecycle, divergence/safety/diagnostics). Application source and configuration in `SiebwaldeApp/` were changed as part of that work; firmware, PCB and Python tooling are inventoried but not deeply analyzed and have not been modified.
+
+See `docs/handoff.md` for the current state and `docs/backlog.md` for the open work, categorised into software follow-up, firmware dependency, physical hardware dependency, and configuration/user-input dependency.
 
 ## Workspace Location
 
