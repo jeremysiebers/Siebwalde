@@ -175,6 +175,72 @@ amps:   1:1, 2:2, 3:3, 4:4, 5:5
 routes: 1>2, 2>3, 3>4@<switch>:<position>, 3>5@<switch>:<position>, 4>1, 5>1
 ```
 
+## Test / Simulation Oval - Authoritative Mapping (from Koploper export 2026-09-19)
+
+Source: `Logging\Ovaaltje\BaanOverzicht_20260919_1222_0001.html` (blocks) and `..._0002.html` (decoder outputs, bezetmelders, loco addresses).
+
+### Blocks and bezetmelders
+
+| Koploper block | Bezetmelders | Amplifier section |
+| --- | --- | --- |
+| 1 | 1.01, 1.02 | 1 |
+| 2 | 1.03, 1.04 | 2 |
+| 3 | 1.05, 1.06 | 3 |
+| 4 | 1.07, 1.08 | 4 |
+| 5 | 1.09, 1.10 | 5 |
+
+Each Koploper block has exactly 2 bezetmelders (entry + stop), as required by Koploper.
+
+### Decoder outputs
+
+| Address | Type | Used in block |
+| --- | --- | --- |
+| 1 | Wissel (switch) | - |
+| 2 | Wissel (switch) | - |
+| 51 | Sein (signal) | 1 |
+| 52 | Sein | 2 |
+| 53 | Sein | 3 |
+| 54 | Sein | 4 |
+| 55 | Sein | 5 |
+
+### Block routing
+
+- Block 1 is reached from 4 and from 5.
+- 1 -> 2 -> 3 -> (4 or 5) -> 1.
+
+The branch `3 -> 4` versus `3 -> 5` is controlled by the two switches (addresses 1 and 2).
+
+### Bezetmelder usage
+
+| Bezetmelder | Used for | Occupies block |
+| --- | --- | --- |
+| 1.01 | Van 4 naar 1, Van 5 naar 1 | 1 |
+| 1.02 | Van 4 naar 1, Van 5 naar 1 | 1 |
+| 1.03 | Van 1 naar 2 | 2 |
+| 1.04 | Van 1 naar 2 | 2 |
+| 1.05 | Van 2 naar 3 | 3 |
+| 1.06 | Van 2 naar 3 | 3 |
+| 1.07 | Van 3 naar 4 | 4 |
+| 1.08 | Van 3 naar 4 | 4 |
+| 1.09 | Van 3 naar 5 | 5 |
+| 1.10 | Van 3 naar 5 | 5 |
+
+### Locomotives
+
+| Decoder address | Description |
+| --- | --- |
+| 1 | Loc1 |
+| 2 | Loc2 |
+
+### Concrete topology configuration for this oval
+
+```
+amps:   1:1, 2:2, 3:3, 4:4, 5:5
+routes: 1>2, 2>3, 3>4@1:1, 3>5@2:1, 4>1, 5>1
+```
+
+(The switch ids/positions in the `routes` line are provisional until the exact switch that selects 4 versus 5 is confirmed from a trace.)
+
 ## Trace Data (2026-09-11)
 
 - No Koploper/ECoS trace data exists in `Logging/` or anywhere else in the repository. The emulator and the external-info client log to the console only (`[EXT]`, `[LOCO]`, `[ECOS]`, `[HW-FEEDBACK]`, `TX:`), and no console capture was kept.
