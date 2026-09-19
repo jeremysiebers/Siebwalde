@@ -10,15 +10,19 @@ namespace SiebwaldeApp.Integration
     /// </summary>
     public sealed class DelegateSwitchOutput : ISwitchOutput
     {
-        private readonly Action<int, SwitchPosition> _setPosition;
+        private readonly Func<int, SwitchPosition, bool> _setPosition;
 
-        public DelegateSwitchOutput(Action<int, SwitchPosition> setPosition)
+        public DelegateSwitchOutput(Func<int, SwitchPosition, bool> setPosition, bool isAvailable = true)
         {
             _setPosition = setPosition ?? throw new ArgumentNullException(nameof(setPosition));
+            IsAvailable = isAvailable;
         }
 
         /// <inheritdoc />
-        public void SetPosition(int physicalAddress, SwitchPosition position)
+        public bool IsAvailable { get; }
+
+        /// <inheritdoc />
+        public bool SetPosition(int physicalAddress, SwitchPosition position)
             => _setPosition(physicalAddress, position);
     }
 }

@@ -22,6 +22,21 @@ namespace SiebwaldeApp.Core
         TrackControlMode? Mode { get; }
 
         /// <summary>
+        /// Diagnostics surface for the running host, or null when it is not running. Consumers
+        /// read structured diagnostics from here instead of parsing log text.
+        /// </summary>
+        ControlDiagnostics? Diagnostics { get; }
+
+        /// <summary>True while an unsafe divergence is latched and not yet reset.</summary>
+        bool IsUnsafe { get; }
+
+        /// <summary>
+        /// Explicit recovery: clears the latched safety state. A latched fault never clears
+        /// itself, not even when a later command arrives.
+        /// </summary>
+        void ResetSafety();
+
+        /// <summary>
         /// Starts the host in the requested mode and reports what happened.
         ///
         /// - requesting the already active mode is an idempotent no-op (<see cref="EcosHostStartResult.AlreadyActive"/>);

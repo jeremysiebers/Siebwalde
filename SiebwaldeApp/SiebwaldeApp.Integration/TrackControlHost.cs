@@ -49,6 +49,7 @@ namespace SiebwaldeApp.Integration
         private TrackSimulatorBackend? _simulatorBackend;
         private TrackControlIntegration? _integration;
         private EcosEmulatorServer? _server;
+        private EcosHardwareStopSink? _stopSink;
         private TrackControlMode? _mode;
 
         /// <summary>
@@ -109,6 +110,24 @@ namespace SiebwaldeApp.Integration
         /// same controller is used in real and simulator mode.
         /// </summary>
         public SwitchController? Switches { get; private set; }
+
+        /// <summary>
+        /// Diagnostics surface for the running host (bounded history plus the latched unsafe
+        /// state), or null when the host is not running. The UI reads this instead of log text.
+        /// </summary>
+        public ControlDiagnostics? Diagnostics { get; private set; }
+
+        /// <summary>Safety latch state, or null when the host is not running.</summary>
+        public ControlSafetyGuard? Safety { get; private set; }
+
+        /// <summary>What the running mode can observe, or null when the host is not running.</summary>
+        public IObservability? Observability { get; private set; }
+
+        /// <summary>Divergence checks for routes, or null when the host is not running.</summary>
+        public DivergenceChecker? Divergence { get; private set; }
+
+        /// <inheritdoc />
+        public bool IsUnsafe => Diagnostics?.IsUnsafe ?? false;
 
         /// <inheritdoc />
         public async Task<EcosHostStartResult> StartAsync(
@@ -180,17 +199,41 @@ namespace SiebwaldeApp.Integration
             _locoRepository = new JsonLocoRepository(_locoRepositoryPath);
             await _locoRepository.LoadAsync(cancellationToken).ConfigureAwait(false);
 
+            // Diagnostics and the safety reaction are shared by both modes.
+            Diagnostics = new ControlDiagnostics();
+            _stopSink = new EcosHardwareStopSink(_log);
+            Safety = new ControlSafetyGuard(_stopSink, Diagnostics, _log);
+
             if (mode == TrackControlMode.Real)
             {
+                // Real mode cannot observe switch positions yet, and the amplifier occupancy bit
+                // is still a firmware TODO, so occupancy is not reliable either. Reporting that
+                // as unavailable prevents fabricated mismatches.
+                Observability = new ModeObservability
+                {
+                    SwitchFeedbackAvailable = false,
+                    OccupancyAvailable = false
+                };
+
                 // The physical switch side is not wired to real hardware yet, so the real
                 // output deliberately drives nothing and says so. The translation path is
                 // still the shared one, so only this sink has to change later.
                 Switches = new SwitchController(
                     _switchMapping,
-                    new DelegateSwitchOutput((address, position) => Log(
-                        $"Physical switch output {address} is not wired to real hardware yet; " +
-                        $"{position} was NOT driven.")),
-                    _log);
+                    new DelegateSwitchOutput(
+                        (address, position) =>
+                        {
+                            Log(
+                                $"Physical switch output {address} is not wired to real hardware yet; " +
+                                $"{position} was NOT driven.");
+                            return false;
+                        },
+                        isAvailable: false),
+                    _log,
+                    Diagnostics,
+                    Safety,
+                    new UnobservableSwitchObserver(),
+                    Observability);
 
                 _integration = new TrackControlIntegration(
                     commClient!,
@@ -207,20 +250,48 @@ namespace SiebwaldeApp.Integration
                 _ecosBackend = _integration.EcosBackend
                     ?? throw new InvalidOperationException(
                         "The integration did not create an in-process ECoS backend.");
+
+                Divergence = new DivergenceChecker(
+                    _topology,
+                    Switches,
+                    _integration.OccupancyProvider,
+                    Observability,
+                    Diagnostics,
+                    Safety,
+                    _log);
+
+                _integration.RealBackend.Divergence = Divergence;
+                _stopSink.Hardware = _integration.RealBackend;
             }
             else
             {
+                // The simulator can observe everything it drives.
+                Observability = new ModeObservability
+                {
+                    SwitchFeedbackAvailable = true,
+                    // Occupancy in the simulator is delivered as ECoS sensor events, not through
+                    // an IOccupancyProvider, so it is not consulted here yet.
+                    OccupancyAvailable = false
+                };
+
                 _simulatorBackend = new TrackSimulatorBackend(_externalInfo);
 
                 // Same translation path as real mode; only the physical sink differs.
                 Switches = new SwitchController(
                     _switchMapping,
                     new DelegateSwitchOutput((address, position) =>
+                    {
                         _simulatorBackend.SetSwitch(
                             address,
                             position == SwitchPosition.Straight ? 0 : 1,
-                            true)),
-                    _log);
+                            true);
+                        return true;
+                    }),
+                    _log,
+                    Diagnostics,
+                    Safety,
+                    new SimulatorSwitchObserver(_simulatorBackend),
+                    Observability);
 
                 _ecosBackend = new SimpleEcosBackend(
                     new SwitchTranslatingHardwareBackend(_simulatorBackend, Switches, _log),
@@ -230,6 +301,16 @@ namespace SiebwaldeApp.Integration
                 // The simulator needs the ECoS backend as feedback sink, so hook it up
                 // before the external-info client starts producing block positions.
                 _simulatorBackend.AttachFeedbackSink(_ecosBackend);
+                _stopSink.Hardware = _simulatorBackend;
+
+                Divergence = new DivergenceChecker(
+                    _topology,
+                    Switches,
+                    occupancy: null,
+                    Observability,
+                    Diagnostics,
+                    Safety,
+                    _log);
             }
 
             // Give every mapped switch a known state where one is configured. Entries marked
@@ -272,6 +353,11 @@ namespace SiebwaldeApp.Integration
             _externalInfo = null;
             _mode = null;
             Switches = null;
+            Diagnostics = null;
+            Safety = null;
+            Observability = null;
+            Divergence = null;
+            _stopSink = null;
 
             if (stoppedMode is not null)
             {
@@ -281,6 +367,12 @@ namespace SiebwaldeApp.Integration
 
         /// <inheritdoc />
         public void Dispose() => Stop();
+
+        /// <summary>
+        /// Explicit recovery: clears the latched safety state so the control path can continue.
+        /// A latched fault never clears itself, not even when a later command arrives.
+        /// </summary>
+        public void ResetSafety() => Safety?.Reset();
 
         private void TryRun(Action action, string description)
         {

@@ -222,8 +222,40 @@
                                  FontFamily="{StaticResource FontAwesome}"
                                  Foreground="{StaticResource WordOrangeBrush}" />
                         </TextBlock>
+
+                        <!-- Control-path health and the latest structured diagnostic. The view
+                             model only displays what the host reports. -->
+                        <TextBlock
+                            Margin="20 0 0 0"
+                            FontSize="{StaticResource FontSizeRegular}"
+                            VerticalAlignment="Center"
+                            TextWrapping="Wrap">
+                            <Run Text="{Binding ControlHealthStatus, Mode=OneWay}"
+                                 FontFamily="{StaticResource FontAwesome}"
+                                 Foreground="{StaticResource WordOrangeBrush}" />
+                        </TextBlock>
                     </StackPanel>
                 </Grid>
+
+                <!-- Latest control-path diagnostic, shown in full so no log parsing is needed. -->
+                <TextBlock
+                    Margin="0 0 0 10"
+                    FontSize="{StaticResource FontSizeRegular}"
+                    TextWrapping="Wrap"
+                    Foreground="{StaticResource ForegroundLightBrush}"
+                    Text="{Binding LatestDiagnostic, Mode=OneWay}" />
+
+                <Button
+                    HorizontalAlignment="Left"
+                    MinWidth="170"
+                    Height="40"
+                    Padding="12 4"
+                    Margin="0 0 0 10"
+                    FontSize="{StaticResource FontSizeSmall}"
+                    Command="{Binding ResetControlSafety}"
+                    IsEnabled="{Binding CanResetControlSafety}"
+                    Foreground="White"
+                    Content="Reset control safety" />
 
             </StackPanel>
         </GroupBox>

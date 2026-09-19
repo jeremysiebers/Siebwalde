@@ -254,6 +254,20 @@ namespace SiebwaldeApp.Core
         public TrackControlMode? ActiveEcosMode => _ecosHost?.Mode;
 
         /// <summary>
+        /// Diagnostics for the control path, or null when the ECoS host is not running. The UI
+        /// reads structured diagnostics from here instead of parsing log text.
+        /// </summary>
+        public ControlDiagnostics? ControlDiagnostics => _ecosHost?.Diagnostics;
+
+        /// <summary>True while an unsafe divergence is latched and not yet reset.</summary>
+        public bool IsControlPathUnsafe => _ecosHost?.IsUnsafe ?? false;
+
+        /// <summary>
+        /// Explicit recovery for a latched safety fault. A latched fault never clears itself.
+        /// </summary>
+        public void ResetControlSafety() => _ecosHost?.ResetSafety();
+
+        /// <summary>
         /// Starts the ECoS host in simulator mode, so Koploper can be exercised without the
         /// track controller or physical hardware. Reports what actually happened.
         /// </summary>

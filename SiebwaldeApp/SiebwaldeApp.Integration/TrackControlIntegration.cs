@@ -46,6 +46,8 @@ namespace SiebwaldeApp.Integration
                 blockMap,
                 section => GetHoldingRegisters(variables, section));
 
+            OccupancyProvider = occupancyProvider;
+
             RealBackend = new TrackAmplifierHardwareBackend(
                 blockPositionProvider,
                 topology,
@@ -86,6 +88,12 @@ namespace SiebwaldeApp.Integration
 
         /// <summary>The occupancy bridge (amplifier occupancy -> Koploper sensor events).</summary>
         public TrackAmplifierOccupancyBridge Bridge { get; }
+
+        /// <summary>
+        /// The occupancy provider this integration uses, exposed so divergence checks can reuse
+        /// it instead of duplicating occupancy logic.
+        /// </summary>
+        public IOccupancyProvider OccupancyProvider { get; }
 
         /// <summary>
         /// Subscribes to amplifier updates and performs one initial occupancy evaluation.

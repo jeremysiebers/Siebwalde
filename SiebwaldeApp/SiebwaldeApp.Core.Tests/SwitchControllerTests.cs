@@ -14,10 +14,17 @@ namespace SiebwaldeApp.Core.Tests
     {
         private sealed class RecordingSwitchOutput : ISwitchOutput
         {
+            public bool IsAvailable { get; set; } = true;
+
+            public bool Applied { get; set; } = true;
+
             public List<(int Address, SwitchPosition Position)> Drives { get; } = new();
 
-            public void SetPosition(int physicalAddress, SwitchPosition position)
-                => Drives.Add((physicalAddress, position));
+            public bool SetPosition(int physicalAddress, SwitchPosition position)
+            {
+                Drives.Add((physicalAddress, position));
+                return Applied;
+            }
         }
 
         private sealed class RecordingHardwareBackend : IHardwareBackend

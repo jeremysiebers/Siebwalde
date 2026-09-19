@@ -185,6 +185,23 @@ namespace SiebwaldeApp.EcosEmu
         }
 
         /// <summary>
+        /// Reads back the position the simulator currently has for a switch (0 = straight,
+        /// 1 = diverging). Returns false when nothing is known for that address, so a caller
+        /// cannot mistake "no information" for a confirmed position.
+        /// </summary>
+        public bool TryGetSwitchPosition(int decoderAddress, out int position)
+        {
+            lock (_lock)
+            {
+                var known = _switchStates.ContainsKey((decoderAddress, 0)) ||
+                            _switchStates.ContainsKey((decoderAddress, 1));
+
+                position = GetSwitchPosition(decoderAddress);
+                return known;
+            }
+        }
+
+        /// <summary>
         /// Bepaal de stand van een wissel (0 = recht, 1 = afbuigend)
         /// op basis van de twee coils (outputIndex 0 en 1).
         /// </summary>

@@ -103,7 +103,7 @@ namespace SiebwaldeApp.Integration
             _log?.Invoke(
                 $"Loco {address}: block {block.Value} speed {ecosSpeed} dir {direction} -> PWM {pwm} on amp(s) {string.Join("+", amplifiers)}");
 
-            ApplyLookAhead(block.Value, pwm);
+            ApplyLookAhead(address, block.Value, pwm);
         }
 
         /// <summary>
@@ -118,7 +118,7 @@ namespace SiebwaldeApp.Integration
             return false;
         }
 
-        private void ApplyLookAhead(int currentBlock, int pwm)
+        private void ApplyLookAhead(int locoAddress, int currentBlock, int pwm)
         {
             if (_lookAheadPlanner is null || _occupancyProvider is null)
             {
@@ -129,6 +129,17 @@ namespace SiebwaldeApp.Integration
 
             if (!_lookAheadPlanner.TryPlanNext(currentBlock, switchPositions, _occupancyProvider, out var nextBlock))
             {
+                return;
+            }
+
+            // A route whose required switch condition contradicts the known logical state must
+            // not be treated as safe: report it (which may trigger a safety stop) and do not
+            // pre-command the next block.
+            var divergence = Divergence?.CheckTransition(locoAddress, currentBlock, nextBlock);
+            if (divergence is not null)
+            {
+                _log?.Invoke(
+                    $"Look-ahead blocked: block {currentBlock} -> {nextBlock} ({divergence.Code}).");
                 return;
             }
 
@@ -145,5 +156,11 @@ namespace SiebwaldeApp.Integration
             _log?.Invoke(
                 $"Look-ahead: block {currentBlock} -> {nextBlock}, PWM {pwm} on amp(s) {string.Join("+", nextAmplifiers)}");
         }
+
+        /// <summary>
+        /// Divergence checks for the routes this backend is about to command. Bound after
+        /// composition, because the checker needs the occupancy provider this backend also uses.
+        /// </summary>
+        public DivergenceChecker? Divergence { get; set; }
     }
 }

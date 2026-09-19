@@ -1,4 +1,4 @@
-﻿using SiebwaldeApp.Core;
+using SiebwaldeApp.Core;
 using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
@@ -57,6 +57,18 @@ namespace SiebwaldeApp
         /// </summary>
         public string EcosModeStatus { get; set; } = "ECoS host: not running";
 
+        /// <summary>
+        /// Health of the control path as reported by the diagnostics surface: healthy, warning
+        /// or unsafe. This view model only displays it; the decision is made in the host.
+        /// </summary>
+        public string ControlHealthStatus { get; set; } = "Control path: not running";
+
+        /// <summary>The latest diagnostic, already formatted by the domain model.</summary>
+        public string LatestDiagnostic { get; set; } = "";
+
+        /// <summary>True when the control path is latched unsafe, so a reset is meaningful.</summary>
+        public bool CanResetControlSafety { get; set; }
+
         #endregion
 
         #region Public commands
@@ -78,6 +90,9 @@ namespace SiebwaldeApp
 
         /// <summary>Start the ECoS host in simulator mode, so Koploper can connect without hardware.</summary>
         public ICommand InitEcosSimulator { get; set; }
+
+        /// <summary>Explicit recovery for a latched control-path safety fault.</summary>
+        public ICommand ResetControlSafety { get; set; }
 
         #endregion
 
@@ -108,6 +123,7 @@ namespace SiebwaldeApp
             InitFiddleYardController = new RelayCommand(async () => await StartFiddleYardAsync(false));
             InitFiddleYardSimulator = new RelayCommand(async () => await StartFiddleYardAsync(true));
             InitEcosSimulator = new RelayCommand(async () => await StartEcosSimulatorAsync());
+            ResetControlSafety = new RelayCommand(ResetControlSafetyNow);
 
             Log("Init page ready. Press 'Detect hosts' to scan for FiddleYard, TrackController and Koploper.");
 
@@ -220,7 +236,7 @@ namespace SiebwaldeApp
             await IoC.siebwaldeApplicationModel.StartTrackApplication();
             Log("Track application start requested.");
 
-            UpdateEcosModeStatus();
+            UpdateControlStatus();
             Log($"ECoS after track start: {EcosModeStatus}");
         }
 
@@ -250,7 +266,7 @@ namespace SiebwaldeApp
 
             var result = await IoC.siebwaldeApplicationModel.StartEcosHostSimulatorAsync();
 
-            UpdateEcosModeStatus();
+            UpdateControlStatus();
             Log($"ECoS simulator start result: {result}. {EcosModeStatus}");
         }
 
@@ -258,13 +274,42 @@ namespace SiebwaldeApp
         /// Refreshes <see cref="EcosModeStatus"/> from the application model so the page
         /// always shows the mode that is really active.
         /// </summary>
-        private void UpdateEcosModeStatus()
+        private void UpdateControlStatus()
         {
             var mode = IoC.siebwaldeApplicationModel.ActiveEcosMode;
 
             EcosModeStatus = mode is null
                 ? "ECoS host: not running"
                 : $"ECoS host: {mode} mode active";
+
+            var diagnostics = IoC.siebwaldeApplicationModel.ControlDiagnostics;
+            if (diagnostics is null)
+            {
+                ControlHealthStatus = "Control path: not running";
+                LatestDiagnostic = "";
+                CanResetControlSafety = false;
+                return;
+            }
+
+            ControlHealthStatus = diagnostics.IsUnsafe
+                ? "Control path: UNSAFE (latched)"
+                : $"Control path: {diagnostics.CurrentSeverity}";
+
+            var latest = diagnostics.LatchedUnsafe ?? diagnostics.Latest;
+            LatestDiagnostic = latest?.ToString() ?? "";
+
+            CanResetControlSafety = diagnostics.IsUnsafe;
+        }
+
+        /// <summary>
+        /// Clears a latched safety fault. The view model only asks for the reset; the host
+        /// owns the latch and the safety decision.
+        /// </summary>
+        private void ResetControlSafetyNow()
+        {
+            IoC.siebwaldeApplicationModel.ResetControlSafety();
+            UpdateControlStatus();
+            Log("Control safety reset requested.");
         }
 
         #endregion
