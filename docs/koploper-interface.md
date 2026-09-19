@@ -65,6 +65,10 @@ A real Koploper session against the emulator was captured in `Logging\17-09-2026
 
 ### Locomotive creation
 
+Koploper can **synchronize** its locomotive data with the digital central (the ECoS emulator). This sync makes the placed trains known to the central. When the central's loco list (our `locos.json`) is empty, Koploper reports that a sync is required; the product owner has tested this and it works.
+
+Consequence: do **not** pre-seed `locos.json`. Let Koploper create/sync the locomotives. Pre-seeding causes duplicate locos for the same decoder address (seeded 1000/1001 plus Koploper-created 1002/1003).
+
 Koploper creates locomotives on the command station with:
 
 ```
