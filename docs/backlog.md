@@ -60,6 +60,9 @@ Increment 6 outline:
 | Feed amplifier occupancy to Koploper. | Real-system source of occupancy: amplifier -> C# (`IHardwareFeedbackSink.OnSensorChangedAsync`) -> ECoS event -> Koploper. | Amplifier occupancy reaches Koploper and drives block updates. |
 | Add a divergence check with ECoS stop and diagnostics logging. | If C# and Koploper drift apart, C# should command Koploper to stop and log what diverged. | Divergence is detected, Koploper is stopped via ECoS, and the mismatch is logged with detail. |
 | Consider a dedicated diagnostics agent. | Product owner suggestion for divergence/diagnostic analysis. | Role and outputs defined and approved before creation. |
+| Operator diagnostics for occupancy mismatches. | When Koploper data does not match the measured amplifier occupancy (and vice versa), the operator needs a clear signal and detail. | Mismatches are detected and surfaced; a simple track-plan view with the data is available. |
+| Add a Koploper-block to bezetmelder/amplifier mapping. | Koploper blocks are collections of occupancy detectors spanning several amplifier sections; terminology must stay sharp. | Koploper block -> bezetmelders -> amplifier sections is configurable and used by the translation layer. |
+| Validate `locos.json` recreation and auto-sync. | `locos.json` was removed; it must be recreated when Koploper starts and be auto-synced because it is new. | Starting the emulator + Koploper recreates the file and populates it via the Koploper sync. |
 
 ## MMDC, Safety, And Yard (Later)
 

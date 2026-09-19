@@ -130,6 +130,33 @@ This is the intended flow on real hardware. It supersedes the earlier "delta-syn
 
 In the current simulator the causality is inverted (Koploper position -> simulator derives occupancy -> echoed back), because the simulator has no independent sensor model. On real hardware the amplifier occupancy is the source: amplifier -> C# -> Koploper -> `[EXT]` position confirmation.
 
+## Terminology (important - Koploper vs amplifier sections)
+
+Koploper and our C# model use different meanings for "block". Keep these apart:
+
+| Term | Meaning |
+| --- | --- |
+| **Bezetmelder** (occupancy detector) | A single detection point/section of arbitrary track length. Koploper numbers them per block, for example `1.03` (first point) and `1.04` (last point). |
+| **Koploper block** | A *collection* of occupancy detectors placed strategically. One Koploper block can cover several physical amplifier sections. Koploper requires at least 2 detectors per block (an entry detector to slow the locomotive down and a stop detector to stop it), so a locomotive can stop precisely in a station. |
+| **Amplifier section** | The traditional physical division of the layout where each section has its own track amplifier. This is what `BlockTopology` currently models (called "block" in the code). |
+
+Consequence: our `BlockTopology` "block" numbers are **amplifier sections**, not Koploper blocks. A separate mapping is required:
+
+- Koploper block -> set of bezetmelders -> set of amplifier sections.
+- Amplifier section -> its amplifier(s) (already in `BlockTopology`).
+
+### Koploper oval (reference)
+
+The product owner's current Koploper oval was shared as screenshots:
+
+- **Layout overview**: oval with Koploper blocks 1..5, occupancy detectors (red), switches (cyan), and a `V`/`N` marker.
+- **Digital components**: `Bezetmelder` type with HSI-88 counts; `Wisseldecoders 0 => nrs 1 t/m 2048`.
+- **Blocks maintenance**: block graph (1-2-3-4-5).
+- **Switch routes ("wisselstraten")**: `Van: 1 naar 2` with a route sequence number; defines the route numbering.
+- **"Waar in blokken"**: `Van: 1 naar: 2` -> "Welke bezetmeldpunten komen er": `1e punt [=1.03]`, `Laatste punt [=1.04]`.
+
+This confirms: a Koploper block (for example block 1) is described by a start and end bezetmelder, and one such block spans multiple amplifier sections.
+
 ## Trace Data (2026-09-11)
 
 - No Koploper/ECoS trace data exists in `Logging/` or anywhere else in the repository. The emulator and the external-info client log to the console only (`[EXT]`, `[LOCO]`, `[ECOS]`, `[HW-FEEDBACK]`, `TX:`), and no console capture was kept.
