@@ -76,6 +76,14 @@ namespace SiebwaldeApp.Integration
         {
             foreach (var block in _blockMap.Blocks)
             {
+                // Never report "free" for a block whose occupancy cannot be confirmed: unknown is
+                // not clear, and a false clear would tell Koploper the block is safe. The block is
+                // left out of the change tracking so a later known value still produces an event.
+                if (!_occupancy.IsBlockOccupancyKnown(block.Number))
+                {
+                    continue;
+                }
+
                 var occupied = _occupancy.IsBlockOccupied(block.Number);
 
                 if (_lastState.TryGetValue(block.Number, out var previous) && previous == occupied)

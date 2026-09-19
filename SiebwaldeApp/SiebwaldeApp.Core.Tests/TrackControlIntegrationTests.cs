@@ -66,6 +66,20 @@ namespace SiebwaldeApp.Core.Tests
                 KoploperBlockMap.Parse(OvalMapping),
                 feedbackSink: sink);
 
+        /// <summary>
+        /// Marks amplifier sections as having received fresh valid data, the way the comm client
+        /// does when it parses a master frame (SlaveDetected and the frame timestamp are written
+        /// together with HoldingReg).
+        /// </summary>
+        private static void MarkDetected(TrackApplicationVariables variables, params int[] sections)
+        {
+            foreach (var section in sections)
+            {
+                variables.trackAmpItems[section].SlaveDetected = 1;
+                variables.trackAmpItems[section].LastDataReceivedUtc = System.DateTimeOffset.UtcNow;
+            }
+        }
+
         [Fact]
         public void Attach_EstablishesInitialOccupancy()
         {
@@ -73,10 +87,27 @@ namespace SiebwaldeApp.Core.Tests
             var sink = new RecordingFeedbackSink();
             var integration = CreateIntegration(new FakeCommClient(), variables, sink);
 
+            // Amplifier data has been received for every section the oval blocks cover.
+            MarkDetected(variables, 1, 2, 3, 4, 5);
+
             integration.Attach();
 
             // 5 blocks x 2 bezetmelders, all free
             Assert.Equal(10, sink.SensorEvents.Count);
+        }
+
+        [Fact]
+        public void Attach_ReportsNothingWhileAmplifierDataIsUnknown()
+        {
+            var variables = new TrackApplicationVariables();
+            var sink = new RecordingFeedbackSink();
+            var integration = CreateIntegration(new FakeCommClient(), variables, sink);
+
+            // No valid amplifier data yet: occupancy is unknown, which must not be sent to
+            // Koploper as "clear".
+            integration.Attach();
+
+            Assert.Empty(sink.SensorEvents);
         }
 
         [Fact]
@@ -87,6 +118,7 @@ namespace SiebwaldeApp.Core.Tests
             var commClient = new FakeCommClient();
             var integration = CreateIntegration(commClient, variables, sink);
 
+            MarkDetected(variables, 1, 2, 3, 4, 5);
             integration.Attach();
             sink.SensorEvents.Clear();
 

@@ -33,9 +33,30 @@ namespace SiebwaldeApp.Core.Tests
         {
             private readonly HashSet<int> _occupied = new();
 
+            /// <summary>Set to false to model "no valid amplifier data yet".</summary>
+            public bool Known { get; set; } = true;
+
             public void Occupy(int block) => _occupied.Add(block);
 
+            public void Clear(int block) => _occupied.Remove(block);
+
             public bool IsBlockOccupied(int block) => _occupied.Contains(block);
+
+            public bool IsBlockOccupancyKnown(int block) => Known;
+        }
+
+        private sealed class RecordingFeedbackSink : IHardwareFeedbackSink
+        {
+            public List<(int SensorId, bool Occupied)> SensorEvents { get; } = new();
+
+            public Task OnSwitchChangedAsync(int ecosId, int decoderAddress, int outputIndex)
+                => Task.CompletedTask;
+
+            public Task OnSensorChangedAsync(int sensorId, bool occupied)
+            {
+                SensorEvents.Add((sensorId, occupied));
+                return Task.CompletedTask;
+            }
         }
 
         private sealed class RecordingSwitchOutput : ISwitchOutput
@@ -436,7 +457,8 @@ namespace SiebwaldeApp.Core.Tests
         [Fact]
         public void UnavailableOccupancy_DoesNotFabricateAMismatch()
         {
-            // Real mode: the amplifier occupancy bit is still a firmware TODO.
+            // Occupancy is not observable in this mode, so an occupied block must not be
+            // turned into a mismatch from unavailable data.
             var (checker, switches, stops, diagnostics, _, occupancy) = CreateChecker(occupancyAvailable: false);
             switches.TryApply(1, SwitchPosition.Straight, out _);
             occupancy.Occupy(4);
@@ -444,6 +466,288 @@ namespace SiebwaldeApp.Core.Tests
             Assert.Null(checker.CheckTransition(locoAddress: 1, fromBlock: 3, toBlock: 4));
             Assert.Empty(stops.StoppedLocos);
             Assert.False(diagnostics.IsUnsafe);
+        }
+
+        // ---------------------------------------------------------------------
+        // Occupancy known versus unknown (existing amplifier data path)
+        // ---------------------------------------------------------------------
+
+        [Fact]
+        public void KnownClearOccupancy_ReportsNothing()
+        {
+            var (checker, switches, stops, diagnostics, _, occupancy) = CreateChecker();
+            switches.TryApply(1, SwitchPosition.Straight, out _);
+            occupancy.Known = true;
+
+            Assert.Null(checker.CheckTransition(locoAddress: 1, fromBlock: 3, toBlock: 4));
+            Assert.Empty(stops.StoppedLocos);
+            Assert.False(diagnostics.IsUnsafe);
+        }
+
+        [Fact]
+        public void UnknownOccupancy_IsNotTreatedAsClear()
+        {
+            // Amplifier data has not been received, so the block occupancy cannot be confirmed.
+            var (checker, switches, stops, diagnostics, _, occupancy) = CreateChecker();
+            switches.TryApply(1, SwitchPosition.Straight, out _);
+            occupancy.Known = false;
+
+            var diagnostic = checker.CheckTransition(locoAddress: 1, fromBlock: 3, toBlock: 4);
+
+            Assert.NotNull(diagnostic);
+            Assert.Equal(DiagnosticCode.StateUnknown, diagnostic!.Code);
+            Assert.Equal(DiagnosticSeverity.Rejected, diagnostic.Severity);
+            Assert.Equal(4, diagnostic.Block);
+
+            // Unknown must not stop a train, but it must not be reported as safe either.
+            Assert.Empty(stops.StoppedLocos);
+            Assert.False(diagnostics.IsUnsafe);
+        }
+
+        [Fact]
+        public void OccupiedDestination_StopsTheLocoThroughTheExistingMismatch()
+        {
+            var (checker, switches, stops, diagnostics, _, occupancy) = CreateChecker();
+            switches.TryApply(1, SwitchPosition.Straight, out _);
+            occupancy.Known = true;
+            occupancy.Occupy(4);
+
+            var diagnostic = checker.CheckTransition(locoAddress: 1, fromBlock: 3, toBlock: 4);
+
+            Assert.Equal(DiagnosticCode.OccupancyMismatch, diagnostic!.Code);
+            Assert.Equal(SafetyAction.StopLoco, diagnostic.SafetyAction);
+            Assert.Equal(new[] { 1 }, stops.StoppedLocos);
+            Assert.True(diagnostics.IsUnsafe);
+        }
+
+        [Fact]
+        public void OccupancyMismatchReset_RequiresTheBlockToBeKnownClear()
+        {
+            var (checker, switches, _, _, guard, occupancy) = CreateChecker();
+            switches.TryApply(1, SwitchPosition.Straight, out _);
+            occupancy.Known = true;
+            occupancy.Occupy(4);
+
+            checker.CheckTransition(locoAddress: 1, fromBlock: 3, toBlock: 4);
+            guard.RevalidationCheck = checker.IsResolved;
+
+            // Still occupied: the reset must be refused.
+            Assert.False(guard.Reset());
+
+            // Cleared but no longer known: still not safe to release.
+            occupancy.Clear(4);
+            occupancy.Known = false;
+            Assert.False(guard.Reset());
+
+            // Known clear: now the reset may be applied.
+            occupancy.Known = true;
+            Assert.True(guard.Reset());
+        }
+
+        [Fact]
+        public void AmplifierOccupancyObservability_IsUnavailableUntilFreshDataArrives()
+        {
+            var variables = new TrackApplicationVariables();
+            var observability = new AmplifierOccupancyObservability(variables);
+
+            // Nothing received yet.
+            Assert.False(observability.OccupancyAvailable);
+            Assert.False(observability.SwitchFeedbackAvailable);
+
+            // The comm client writes SlaveDetected and the frame timestamp together with the
+            // holding registers.
+            variables.trackAmpItems[3].SlaveDetected = 1;
+            variables.trackAmpItems[3].LastDataReceivedUtc = DateTimeOffset.UtcNow;
+
+            Assert.True(observability.OccupancyAvailable);
+            Assert.False(observability.SwitchFeedbackAvailable);
+        }
+
+        [Fact]
+        public void AmplifierOccupancyObservability_BecomesUnavailableAgainWhenDataGoesStale()
+        {
+            var variables = new TrackApplicationVariables();
+            var clock = new DateTimeOffset(2026, 9, 19, 20, 0, 0, TimeSpan.Zero);
+            var observability = new AmplifierOccupancyObservability(
+                variables,
+                clock: () => clock,
+                staleAfter: TimeSpan.FromSeconds(2));
+
+            variables.trackAmpItems[3].SlaveDetected = 1;
+            variables.trackAmpItems[3].LastDataReceivedUtc = clock;
+
+            Assert.True(observability.OccupancyAvailable);
+
+            // Communication stopped: the cached data must not stay observable forever.
+            clock = clock + TimeSpan.FromSeconds(10);
+
+            Assert.False(observability.OccupancyAvailable);
+        }
+
+        [Fact]
+        public void LookAhead_DoesNotPreCommandIntoAnUnknownBlock()
+        {
+            var topology = BlockTopology.Parse(OvalTopology);
+            var planner = new LookAheadPlanner(topology);
+            var occupancy = new FakeOccupancy { Known = false };
+            var switches = new Dictionary<int, SwitchPosition>();
+
+            var planned = planner.TryPlanNext(1, switches, occupancy, out var nextBlock);
+
+            Assert.False(planned);
+            Assert.Equal(0, nextBlock);
+        }
+
+        [Fact]
+        public void LookAhead_PlansIntoAKnownClearBlock()
+        {
+            var topology = BlockTopology.Parse(OvalTopology);
+            var planner = new LookAheadPlanner(topology);
+            var occupancy = new FakeOccupancy { Known = true };
+            var switches = new Dictionary<int, SwitchPosition>();
+
+            var planned = planner.TryPlanNext(1, switches, occupancy, out var nextBlock);
+
+            Assert.True(planned);
+            Assert.Equal(2, nextBlock);
+        }
+
+        // ---------------------------------------------------------------------
+        // Freshness, end to end through the real provider
+        // ---------------------------------------------------------------------
+
+        private const string OvalBlockMap =
+            "1:1.01+1.02:1, 2:1.03+1.04:2, 3:1.05+1.06:3, 4:1.07+1.08:4, 5:1.09+1.10:5";
+
+        /// <summary>Real provider over real amplifier variables with a controllable clock.</summary>
+        private static TrackAmplifierOccupancyProvider CreateRealProvider(
+            TrackApplicationVariables variables,
+            Func<DateTimeOffset> clock)
+            => new(
+                KoploperBlockMap.Parse(OvalBlockMap),
+                section => variables.trackAmpItems.FirstOrDefault(a => a.SlaveNumber == section),
+                clock: clock);
+
+        private static void Receive(TrackApplicationVariables variables, int section, bool occupied, DateTimeOffset at)
+        {
+            var amplifier = variables.trackAmpItems[section];
+            var regs = amplifier.HoldingReg;
+
+            regs[TrackAmplifierRegisters.Status] = occupied ? TrackAmplifierRegisters.OccupiedBit : (ushort)0;
+            amplifier.HoldingReg = regs;
+            amplifier.SlaveDetected = 1;
+            amplifier.LastDataReceivedUtc = at;
+        }
+
+        [Fact]
+        public void StaleOccupancy_PreventsLookAhead()
+        {
+            var now = new DateTimeOffset(2026, 9, 19, 20, 0, 0, TimeSpan.Zero);
+            var clock = now;
+            var variables = new TrackApplicationVariables();
+
+            for (var section = 1; section <= 5; section++)
+            {
+                Receive(variables, section, occupied: false, at: now);
+            }
+
+            var provider = CreateRealProvider(variables, () => clock);
+            var planner = new LookAheadPlanner(BlockTopology.Parse(OvalTopology));
+            var switches = new Dictionary<int, SwitchPosition> { [1] = SwitchPosition.Straight };
+
+            // Fresh clear data: block 4 may be pre-commanded.
+            Assert.True(planner.TryPlanNext(3, switches, provider, out var planned));
+            Assert.Equal(4, planned);
+
+            // Communication stops: the cached clear value must not keep the route selectable.
+            clock = now + TimeSpan.FromSeconds(30);
+
+            Assert.False(provider.IsBlockOccupancyKnown(4));
+            Assert.False(planner.TryPlanNext(3, switches, provider, out _));
+        }
+
+        [Fact]
+        public async Task StaleOccupancy_IsNeverReportedToKoploperAsClear()
+        {
+            var now = new DateTimeOffset(2026, 9, 19, 20, 0, 0, TimeSpan.Zero);
+            var clock = now;
+            var variables = new TrackApplicationVariables();
+
+            for (var section = 1; section <= 5; section++)
+            {
+                Receive(variables, section, occupied: false, at: now);
+            }
+
+            var provider = CreateRealProvider(variables, () => clock);
+            var sink = new RecordingFeedbackSink();
+            var bridge = new TrackAmplifierOccupancyBridge(
+                KoploperBlockMap.Parse(OvalBlockMap), provider, sink);
+
+            // Fresh clear: the initial snapshot reports the blocks free.
+            await bridge.EvaluateAsync();
+            Assert.Equal(10, sink.SensorEvents.Count);
+
+            // Communication stops, then the bridge is evaluated again (as the comm client keeps
+            // republishing its cached container).
+            clock = now + TimeSpan.FromSeconds(30);
+            sink.SensorEvents.Clear();
+            await bridge.EvaluateAsync();
+
+            // Stale data must not be pushed to Koploper as a state at all.
+            Assert.Empty(sink.SensorEvents);
+        }
+
+        [Fact]
+        public void OccupancyMismatchReset_RequiresFreshData()
+        {
+            var now = new DateTimeOffset(2026, 9, 19, 20, 0, 0, TimeSpan.Zero);
+            var clock = now;
+            var variables = new TrackApplicationVariables();
+
+            for (var section = 1; section <= 5; section++)
+            {
+                Receive(variables, section, occupied: false, at: now);
+            }
+
+            // Block 4 is occupied.
+            Receive(variables, 4, occupied: true, at: now);
+
+            var diagnostics = new ControlDiagnostics();
+            var stops = new RecordingStopSink();
+            var guard = new ControlSafetyGuard(stops, diagnostics);
+            var provider = CreateRealProvider(variables, () => clock);
+            var switches = CreateController(
+                new RecordingSwitchOutput(),
+                diagnostics,
+                guard,
+                observability: new ModeObservability { SwitchFeedbackAvailable = false, OccupancyAvailable = true });
+            switches.TryApply(1, SwitchPosition.Straight, out _);
+
+            var checker = new DivergenceChecker(
+                BlockTopology.Parse(OvalTopology),
+                switches,
+                provider,
+                new ModeObservability { SwitchFeedbackAvailable = false, OccupancyAvailable = true },
+                diagnostics,
+                guard);
+
+            guard.RevalidationCheck = checker.IsResolved;
+
+            // Occupied and fresh: the existing mismatch stops the loco.
+            var fault = checker.CheckTransition(locoAddress: 1, fromBlock: 3, toBlock: 4);
+            Assert.Equal(DiagnosticCode.OccupancyMismatch, fault!.Code);
+            Assert.Equal(new[] { 1 }, stops.StoppedLocos);
+
+            // The block clears, but the data then goes stale: recovery must not be granted.
+            Receive(variables, 4, occupied: false, at: now);
+            clock = now + TimeSpan.FromSeconds(30);
+            Assert.False(guard.Reset());
+            Assert.True(guard.IsLatched);
+
+            // Fresh, known-clear data: now recovery is allowed.
+            Receive(variables, 4, occupied: false, at: clock);
+            Assert.True(guard.Reset());
+            Assert.False(guard.IsLatched);
         }
 
         [Fact]

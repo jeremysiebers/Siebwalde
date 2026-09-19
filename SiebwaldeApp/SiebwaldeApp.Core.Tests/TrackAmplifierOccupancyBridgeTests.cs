@@ -13,7 +13,12 @@ namespace SiebwaldeApp.Core.Tests
         {
             public HashSet<int> Occupied { get; } = new();
 
+            /// <summary>Set to false to model "no valid amplifier data yet".</summary>
+            public bool Known { get; set; } = true;
+
             public bool IsBlockOccupied(int block) => Occupied.Contains(block);
+
+            public bool IsBlockOccupancyKnown(int block) => Known;
         }
 
         private sealed class RecordingFeedbackSink : IHardwareFeedbackSink

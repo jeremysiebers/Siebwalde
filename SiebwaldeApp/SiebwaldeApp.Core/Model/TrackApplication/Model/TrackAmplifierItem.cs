@@ -45,6 +45,17 @@ namespace SiebwaldeApp.Core
         }
 
         /// <summary>
+        /// UTC time at which the last amplifier frame for this item was parsed, or null when no
+        /// frame has been received yet.
+        ///
+        /// This is the only freshness signal for the amplifier data: <see cref="SlaveDetected"/>
+        /// and <see cref="HoldingReg"/> are written once and are never cleared, and the comm
+        /// client keeps republishing the cached container, so neither of those proves that the
+        /// data is current.
+        /// </summary>
+        public DateTimeOffset? LastDataReceivedUtc { get; set; }
+
+        /// <summary>
         /// Holding registers of this track amplifier.
         /// The backing array is kept alive; assigning copies into it.
         /// </summary>

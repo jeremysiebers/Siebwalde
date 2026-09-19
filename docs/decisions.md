@@ -509,3 +509,35 @@ Decision: `ControlSafetyGuard.Reset()` revalidates every latched fault through `
 Evidence: Clearing the latch on request would restore movement permission without the underlying condition being fixed, which is exactly the unsafe state the latch exists to prevent.
 
 Impact: Recovery is: correct the condition (for example change the switch) -> explicit reset -> movement allowed again. Reset itself never issues movement, and `ControlDiagnostic.RequiredSwitchPosition` records what the route needed so revalidation does not have to re-derive it.
+
+## 2026-09-19: Real Occupancy Comes From The Existing Amplifier Data Path
+
+Decision: Real-mode occupancy is read from the existing amplifier holding registers through `TrackAmplifierOccupancyProvider`, and real mode reports occupancy as observable once valid amplifier data has been received. No firmware change was made.
+
+Evidence: `TrackAmplifier4.X/processio.c` already sets `HR_STATUS` bit 10 from `g_occ = CMP1_GetOutputStatus()`, the PIC32 master transports the 12 holding registers in the SLAVEINFO frame, `TrackCommClientAsync` stores them into `TrackAmplifierItem.HoldingReg` and raises `AmplifierDataReceived`, and the track-amplifier page already decodes the same bit. The `General.h` "(TODO: implement when occupancy source known)" comment is stale.
+
+Impact: `ModeObservability`'s static `OccupancyAvailable = false` for real mode was wrong and is replaced by `AmplifierOccupancyObservability`, which derives availability from `SlaveDetected` - the existing "a frame was parsed for this amplifier" signal - so no new freshness mechanism and no duplicate occupancy state were introduced.
+
+## 2026-09-19: Unknown Occupancy Is Not Clear
+
+Decision: `IOccupancyProvider` gained `IsBlockOccupancyKnown`. A block is only clear when every amplifier section covering it has valid data. Unknown is never reported to Koploper as free, never selected by look-ahead, and produces `StateUnknown` (Rejected) instead of `OccupancyMismatch` (StopRequired).
+
+Evidence: `HoldingReg` is initialised to zeros, so before the first frame arrives the occupied bit reads false. Treating that as "clear" would tell Koploper a block is safe and let the look-ahead pre-command into an unverified block.
+
+Impact: The occupancy bridge skips blocks whose occupancy is unknown and leaves them out of its change tracking, so a later known value still produces an event. `ControlSafetyGuard.Reset()` also requires the block to be known clear before an `OccupancyMismatch` is considered resolved.
+
+## 2026-09-19: Amplifier Occupancy Freshness Is Derived From The Frame Timestamp
+
+Decision: `TrackAmplifierItem.LastDataReceivedUtc` is stamped when a frame is parsed, and `TrackAmplifierDataFreshness` (default 2 s) decides whether a section's data is current. A section is current only when it is detected and fresh. Stale data is treated as unknown, never as clear, and a stale occupied reading is not promoted to definite occupancy.
+
+Evidence: no existing state proves freshness. `SlaveDetected` is written once and never cleared, `HoldingReg` keeps its last values, `TrackCommClientAsync._publishTimer` republishes `AmplifierDataReceived` every 100 ms for every `SlaveDetected != 0` amplifier regardless of new data, and `ITrackTransport` exposes no connection-loss or health signal. `MbReceiveCounter` is read from the frame, so its increment semantics cannot be verified from C# without a firmware change.
+
+Impact: the previous `SlaveDetected != 0` check was a genuine defect: after communication stopped, a block could stay "known clear" forever based on an old register value, which would tell Koploper a block is safe and let look-ahead pre-command into it. The timestamp is stamped in the same step that stores the registers, so there is still a single source of truth, no new timer, and no hardware polling. Staleness is evaluated when a consumer already runs (the comm client's publish event), so no new polling loop was introduced.
+
+## 2026-09-19: Stale Occupancy Does Not Become Definite Occupancy
+
+Decision: for a multi-section block, a fresh occupied section proves the block occupied even when another section is silent, but a stale occupied reading does not. Stale data yields unknown.
+
+Evidence: a stale "occupied" reading may describe a train that has already left, so promoting it to a definite occupancy would be a false claim; but treating it as clear would be unsafe. Unknown is the honest answer: it blocks look-ahead and reports `StateUnknown` (Rejected) without inventing a stop.
+
+Impact: definite occupancy is never turned into unknown (requirement preserved), and a previously latched `OccupancyMismatch` cannot be reset while its source is stale, because `IsResolved` requires the block to be known clear, which requires fresh data.

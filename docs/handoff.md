@@ -1,5 +1,146 @@
 # Handoff
 
+## Latest Session (2026-09-19, real-hardware occupancy validation)
+
+Branch `feature/real-occupancy-integration`. The existing occupancy path was validated on the real amplifier setup. **No production-code change was required**; this session is documentation only.
+
+### What was validated
+
+```
+PIC18 CMP1 -> HR_STATUS bit 10 -> PIC32/master transport -> TrackCommClientAsync
+  -> TrackAmplifierItem -> TrackAmplifierOccupancyProvider -> observability/freshness
+```
+
+Tested amplifiers: **1, 3, 4, 6** (four proto amplifiers), all `SlaveDetected = 1`, all `HR11 = 0x251F` (flash step found 0 slaves to flash).
+
+- Healthy frame intervals per amplifier: median **40-42 ms**, maximum **66-70 ms** -> the 2 s freshness timeout has roughly **30x margin**; no adjustment needed.
+- `HR_STATUS` bit 10 changed exactly with physical occupancy: amplifier 1 occupied `0x2E02` (bit 10 set), clear `0x2A01` (bit 10 clear). Only bit 10 was under test.
+- Provider once valid data flowed: blocks backed by detected amplifiers (sections 1, 3, 4) reported `known = true`; blocks whose sections do not exist (2, 5) stayed `known = false`. `OccupancyAvailable = true`. Non-existing sections were never falsely clear.
+
+### Freshness invariant physically confirmed
+
+The master stopped delivering fresh frames while the 100 ms C# republish kept firing (median interval rose ~41 ms -> ~94 ms). Old `HoldingReg` values stayed present, `LastDataReceivedUtc` went stale, `OccupancyAvailable` became false and every block became unknown. The old clear values were **not** treated as known-clear. This confirms `stale != clear` on real hardware and that `AmplifierDataReceived` alone is not proof of fresh data.
+
+### Not yet validated (not defects)
+
+- physical occupancy transition latency was not timestamped;
+- WPF occupancy indication was not compared during this validation;
+- the ECoS/Koploper occupancy bridge was not started, because Koploper was running and autonomous movement was intentionally avoided;
+- occupancy-driven live safety/look-ahead behaviour with a real train is a separate controlled test.
+
+### Validation-environment limitation (not a product defect)
+
+During the standalone hardware validation the temporary checker was able to leave the master communication session in a state that required reinitialization. This was **not** reproduced through the normal application lifecycle, where master/amplifier communication continues running continuously, load/amplifier disconnects are already detected and reported by the existing system, and a software reset/reinitialization path already exists. It is therefore recorded as a **test-harness limitation** of running a standalone checker outside the normal application lifecycle and communication ownership, not as a demonstrated production defect, and it does not warrant a backlog item.
+
+The production result from that event remains valid and is the relevant occupancy-validation outcome: when fresh SLAVEINFO data stopped arriving, old register values remained cached, and the new C# freshness logic correctly changed occupancy to **unknown** instead of continuing to report a stale clear state.
+
+### Files changed
+
+Documentation only: `docs/koploper-interface.md`, `docs/handoff.md`, `docs/backlog.md`, `docs/analysis-coverage.md`.
+
+### Best next step
+
+Start the ECoS/Koploper occupancy bridge in a controlled run (Koploper stopped or with autonomous movement prevented) to validate the bridge end-to-end, then the occupancy-driven safety/look-ahead behaviour with a real train.
+
+## Latest Session (2026-09-19, occupancy freshness review)
+
+Branch `feature/real-occupancy-integration`. Reviewed whether `SlaveDetected != 0` proves *current* data. **It does not.** A genuine freshness defect existed and is fixed; no firmware was changed.
+
+### What the existing state actually proves
+
+| Signal | Semantics |
+| --- | --- |
+| `SlaveDetected` | Written once per parsed frame (`TrackCommClientAsync:180`) and **never cleared**. Proves only that a frame was seen at some point. |
+| `HoldingReg` | Keeps its last received values indefinitely; nothing resets it after a loss. |
+| `AmplifierDataReceived` | Republished every 100 ms by `_publishTimer` for every `SlaveDetected != 0` amplifier, **regardless of new data**. Not a freshness signal. |
+| `MbReceiveCounter` | Read from the frame (not incremented by C#); its increment semantics cannot be verified without firmware. |
+| `ITrackTransport` | Exposes only `Open/Close/Send/Receive`; no connection-loss or health signal. |
+
+So no existing state provided freshness, and the previous `SlaveDetected != 0` check could leave a block "known clear" forever after communication stopped.
+
+### The fix
+
+- `TrackAmplifierItem.LastDataReceivedUtc` is stamped in `TrackCommClientAsync` in the same step that stores `HoldingReg` and `SlaveDetected` - one line, single source of truth, no new timer.
+- `TrackAmplifierDataFreshness` is the single policy: default 2 s, well above the 10 Hz republish cycle. `IsCurrentData` = detected **and** fresh.
+- `TrackAmplifierOccupancyProvider` and `AmplifierOccupancyObservability` use it. Staleness is evaluated when a consumer already runs, so no polling loop was added.
+- A fresh occupied section still proves a block occupied even when another section is silent; a **stale** occupied reading is not promoted to definite occupancy.
+
+### Final semantics per amplifier section
+
+| Section state | Meaning |
+| --- | --- |
+| fresh + occupied | occupied |
+| fresh + clear | clear |
+| stale (either value) | unknown |
+| never received | unknown |
+| not detected | unknown |
+
+Block: occupied if any covering section is fresh+occupied (even if another is unknown); known clear only if **every** covering section is fresh+clear; otherwise unknown.
+
+### Tests and checks
+
+- `dotnet build SiebwaldeApp.sln` -> **0 errors**, **175 warnings** (unchanged; no new warnings introduced).
+- `dotnet test` -> **227/227 passed** (was 218; +9).
+
+### Remaining concerns
+
+1. The 2 s freshness window is a policy value, not derived from the master's cycle. It has since been measured on real hardware (~30x margin), so no tuning is needed; see the hardware-validation session above.
+2. Real occupancy still needs a live hardware run to confirm end-to-end behaviour.
+3. The stale `General.h` comment remains (deliberately not touched in this task).
+
+### Best next step
+
+Controlled real-hardware occupancy test on the amplifier oval.
+
+## Latest Session (2026-09-19, real occupancy integration)
+
+Branch `feature/real-occupancy-integration` (from `master` at `f778a32`). Connects the existing real amplifier occupancy data to the new C# occupancy/divergence/safety architecture. **No firmware was changed.**
+
+### The existing occupancy path (verified)
+
+```
+PIC18 processio.c: g_occ = CMP1_GetOutputStatus() -> HR_STATUS (HoldingReg2) bit 10
+  -> PIC32 master SLAVEINFO frame
+  -> TrackCommClientAsync.HandleNewDataAsync: writes trackAmpItems[n].HoldingReg + SlaveDetected,
+     raises AmplifierDataReceived
+  -> TrackAmplifierItem.HoldingReg[2]
+```
+
+Both consumers read the same value: the track-amplifier page (`hr2 & TrackAmplifierRegisters.OccupiedBit`) and `TrackAmplifierOccupancyProvider` (`TrackAmplifierRegisters.IsOccupied(HoldingReg)`).
+
+### Why real mode previously reported occupancy unavailable
+
+`TrackControlHost` set `ModeObservability { OccupancyAvailable = false }` for real mode, based on the `General.h` "(TODO: implement when occupancy source known)" comment. That comment is **stale**: `processio.c` already sets the bit from a real comparator input.
+
+### What changed
+
+- `IOccupancyProvider` gained `IsBlockOccupancyKnown`; unknown is now distinct from clear.
+- `TrackAmplifierOccupancyProvider` reads `TrackAmplifierItem` (registers plus detection) and reports a block known only when every covering section has valid data.
+- `AmplifierOccupancyObservability` (Integration) replaces the hard-coded `false`: availability follows `SlaveDetected`, the existing "a frame was parsed" signal.
+- `DivergenceChecker`: occupied -> `OccupancyMismatch` (StopRequired); not occupied but unknown -> `StateUnknown` (Rejected, no stop).
+- `LookAheadPlanner` no longer pre-commands into a block whose occupancy is unknown.
+- `TrackAmplifierOccupancyBridge` skips unknown blocks instead of reporting them free, and leaves them out of change tracking.
+- `ControlSafetyGuard.Reset()` requires an `OccupancyMismatch` block to be known clear.
+
+### Files changed
+
+- Modified: `Core/Model/TrackApplication/Control/IOccupancyProvider.cs`, `TrackAmplifierOccupancyProvider.cs`, `LookAheadPlanner.cs`, `Integration/DivergenceChecker.cs`, `TrackAmplifierOccupancyBridge.cs`, `TrackControlIntegration.cs`, `TrackControlHost.cs`, `Observability.cs`, and the tests `TrackAmplifierOccupancyProviderTests.cs`, `TrackControlIntegrationTests.cs`, `DivergenceAndSafetyTests.cs`, `LookAheadPlannerTests.cs`, `TrackAmplifierHardwareBackendLookAheadTests.cs`, `TrackAmplifierOccupancyBridgeTests.cs`.
+
+### Tests and checks
+
+- `dotnet build SiebwaldeApp.sln` -> **0 errors**.
+- `dotnet test` -> **218/218 passed** (was 204; +14).
+
+### Remaining concerns
+
+1. Real occupancy has since been physically validated on the actual amplifiers; see the hardware-validation session above.
+2. Simulator mode still delivers occupancy as ECoS sensor events, so `OccupancyAvailable` stays false there (unchanged, out of scope).
+3. The stale `General.h` comment remains in the firmware; correcting it is a separate firmware change.
+
+### Best next step
+
+Validate real occupancy on the hardware oval with the amplifier firmware running, then consider the simulator occupancy provider.
+
 ## Latest Session (2026-09-19, safety movement interlock)
 
 Closes the gap that a latched `StopRequired` fault prevented repeated stops but not a later Koploper command from moving the affected locomotive again.

@@ -339,7 +339,7 @@ Consequence: for real hardware, amplifier occupancy must be reported as sensor i
 
 - `SiebwaldeApp.Core.AmplifierSpeedMapper` - done (ECoS 0..127 + direction -> PWM).
 - `SiebwaldeApp.Core.BlockTopology` - done: block -> amplifier mapping plus a routing model. Configuration sections: `amps: block:amp[+amp]` and `routes: from>to[@switchId:position][!]`; `!` forbids look-ahead (for example a station departure block).
-- `SiebwaldeApp.Core.IOccupancyProvider` - done: block occupancy abstraction. The real implementation (`TrackAmplifierOccupancyProvider`) is wired and used; it becomes reliable once the firmware populates the amplifier occupied bit.
+- `SiebwaldeApp.Core.IOccupancyProvider` - done: block occupancy abstraction, with an explicit `IsBlockOccupancyKnown` so "unknown" is never read as "clear". The real implementation (`TrackAmplifierOccupancyProvider`) reads the existing amplifier holding registers, the same value the track-amplifier page decodes.
 - `SiebwaldeApp.Core.LookAheadPlanner` - done: picks the next block to pre-command, filtered by switch position, excluding no-look-ahead transitions and occupied targets.
 - `SiebwaldeApp.Integration.TrackAmplifierHardwareBackend` - done: implements `IHardwareBackend`; resolves locomotive -> block, block -> amplifiers, speed -> PWM, queues writes, and (when a planner and occupancy provider are supplied) also commands the next block. `SetPower(false)` sets all mapped amplifiers to neutral. `SetSwitch` returns false and drives nothing, because switches are driven by accessory decoders and that real path is not wired yet.
 - `SiebwaldeApp.Core.SwitchMapping` - done: parses `SwitchMapConfig` (`ecosAddress:physicalAddress[:inverted][:g|r|keep]`), records invalid and duplicate entries in `Errors` instead of turning them into a plausible mapping.
@@ -366,6 +366,79 @@ Requested, commanded and observed stay separate: `SwitchController` records the 
 `IHardwareBackend.SetPower` and `SetLocoSpeed` return `bool`. When a movement is refused, `SimpleEcosBackend` replies `<END 8 (SAFETY_INTERLOCK)>`, keeps its logical speed unchanged and sends no `speed[...]`/`dir[...]` event, so Koploper is never told a refused movement succeeded. Rejections are reported once per locomotive per latch (`MovementRejectedBySafety`).
 
 Recovery is explicit: `ControlSafetyGuard.Reset()` revalidates every latched fault through `DivergenceChecker.IsResolved` and is refused with `ResetRefused` while the condition persists. Only after the correction plus a successful reset does movement become possible again.
+
+### Real occupancy path (verified, already working)
+
+The amplifier occupancy travels over the existing embedded transport; no firmware change is required.
+
+```
+PIC18 amplifier
+  processio.c: g_occ = CMP1_GetOutputStatus()
+  processio.c: HR_STATUS (HoldingReg2) bit 10 = g_occ
+  -> PIC32 master SLAVEINFO frame (12 holding registers + counters)
+  -> TrackCommClientAsync.HandleNewDataAsync
+       parses HEADER + SLAVEINFO, writes trackAmpItems[slaveNumber].HoldingReg
+       and sets SlaveDetected, then raises AmplifierDataReceived
+  -> TrackAmplifierItem.HoldingReg[2]
+```
+
+Both consumers read the same value:
+
+- the track-amplifier page decodes `IsOccupied = (hr2 & TrackAmplifierRegisters.OccupiedBit) != 0`;
+- `TrackAmplifierOccupancyProvider` uses `TrackAmplifierRegisters.IsOccupied(HoldingReg)` for the amplifier sections of a Koploper block, and therefore reads the identical bit from the identical array.
+
+**Stale comment:** `TrackAmplifier4.X/modbus/General.h` still annotates `HR_STATUS_OCCUPIED_BIT` with "(TODO: implement when occupancy source known)", but `processio.c` already implements it. The comment is wrong, not the firmware.
+
+**Known versus unknown.** `TrackAmplifierItem.LastDataReceivedUtc` is stamped when a frame is parsed, and `TrackAmplifierDataFreshness` decides whether that is recent enough (default 2 s, a policy value well above the comm client's 10 Hz republish cycle). A section counts as current only when it is detected **and** its data is fresh. `TrackAmplifierOccupancyProvider.IsBlockOccupancyKnown` requires every amplifier section that covers a block to be current; one silent section makes the whole block unknown. Unknown is never reported to Koploper as clear, is never treated as a free block by look-ahead, and produces `StateUnknown` (Rejected) rather than `OccupancyMismatch` (StopRequired) during a route check.
+
+**Why freshness is derived and not read from existing state.** `SlaveDetected` is written once per parsed frame and is never cleared, `HoldingReg` keeps its last values indefinitely, and `TrackCommClientAsync._publishTimer` republishes `AmplifierDataReceived` every 100 ms for every amplifier with `SlaveDetected != 0` regardless of whether new data arrived. `ITrackTransport` exposes no connection-loss or health signal. So none of the existing state proves that data is current; the frame timestamp is the only reliable signal, and it is stamped in the same place the registers are stored.
+
+### Physical validation (2026-09-19, real hardware)
+
+The whole path has now been validated on the real amplifier setup, not only from code:
+
+```
+PIC18 CMP1 -> HR_STATUS bit 10 -> PIC32/master transport -> TrackCommClientAsync
+  -> TrackAmplifierItem -> TrackAmplifierOccupancyProvider -> observability/freshness
+```
+
+Tested physical amplifier addresses: **1, 3, 4, 6** (the four proto amplifiers). All reported `SlaveDetected = 1` and the same firmware checksum `HR11 = 0x251F`, consistent with the CRC confirmation, so the initialization pipeline found 0 slaves to flash.
+
+**Frame intervals (healthy operation, per amplifier):** median **40-42 ms**, maximum **66-70 ms**. The 2-second freshness timeout therefore has roughly **30x margin** under normal operation, and no timeout adjustment is required. An aggregate view over all slaves that produced frames showed a worst interval of 112 ms (~18x margin).
+
+**Occupancy bit:** physical occupancy changed `HR_STATUS` bit 10 exactly as expected.
+
+| Amplifier 1 | `HR_STATUS` | bit 10 |
+| --- | --- | --- |
+| physically occupied | `0x2E02` | set |
+| clear (load removed) | `0x2A01` | clear |
+
+Only bit 10 was under test. The other `HR_STATUS` bits differ between these two samples and between amplifiers; no meaning is claimed for them here.
+
+**Provider result once valid data was flowing:**
+
+| Block (sections) | Backing | Result |
+| --- | --- | --- |
+| 1 (1), 3 (3), 4 (4) | detected physical amplifiers | `known = true`, `occupied = false` |
+| 2 (2), 5 (5) | sections that do not exist | `known = false` |
+
+`OccupancyAvailable = true` while fresh frames arrived. Missing or unavailable sections stayed **unknown** and were never falsely reported as clear.
+
+### Physical validation of the freshness invariant
+
+During the test the master stopped delivering fresh amplifier frames. This was observed for real, not simulated:
+
+- the existing 100 ms C# republish mechanism kept firing;
+- old `HoldingReg` values remained present in the container;
+- the tell-tale sign was the median frame interval rising from ~41 ms to ~94 ms, i.e. dominated by the republish timer instead of real frames;
+- `LastDataReceivedUtc` correctly became stale;
+- `OccupancyAvailable` became **false**;
+- every block became **unknown**;
+- the old clear values were **not** treated as known-clear.
+
+This physically confirms the safety invariant **`stale != clear`**, and confirms that `AmplifierDataReceived` on its own is not proof of fresh hardware data.
+
+**Validation-environment note.** The standalone checker used for this validation runs outside the normal application lifecycle and communication ownership. During the session it was able to leave the master communication session in a state that required reinitialization. This was not reproduced through the normal application lifecycle - where master/amplifier communication runs continuously, load/amplifier disconnects are already detected by the existing system, and a software reset path exists - so it is treated as a test-harness limitation rather than a production defect. The freshness result above is unaffected: it is about what the C# side does when fresh data stops arriving.
 
 
 

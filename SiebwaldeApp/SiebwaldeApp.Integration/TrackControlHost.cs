@@ -206,14 +206,11 @@ namespace SiebwaldeApp.Integration
 
             if (mode == TrackControlMode.Real)
             {
-                // Real mode cannot observe switch positions yet, and the amplifier occupancy bit
-                // is still a firmware TODO, so occupancy is not reliable either. Reporting that
-                // as unavailable prevents fabricated mismatches.
-                Observability = new ModeObservability
-                {
-                    SwitchFeedbackAvailable = false,
-                    OccupancyAvailable = false
-                };
+                // Occupancy comes from the existing amplifier data path (the master's SLAVEINFO
+                // frame -> holding registers), so it becomes observable as soon as valid
+                // amplifier data has been received. Switch feedback does not exist on real
+                // hardware yet, so it stays unavailable and is never a confirmation.
+                Observability = new AmplifierOccupancyObservability(variables!);
 
                 // The physical switch side is not wired to real hardware yet, so the real
                 // output deliberately drives nothing and says so. The translation path is

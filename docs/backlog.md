@@ -239,7 +239,7 @@ Done:
 | --- | --- | --- |
 | Simulator occupancy through the production abstraction. | Simulator occupancy arrives as ECoS sensor events, so `OccupancyAvailable` is false in simulator mode and route occupancy checks do not run there. | An `IOccupancyProvider` over the simulator exists and occupancy divergence is checked in simulator mode. |
 | Route checks are only wired into the real-mode look-ahead path. | `TrackAmplifierHardwareBackend.Divergence` is set in real mode; the simulator's checker is only reachable by explicit calls. | A route check also runs automatically in simulator mode. |
-| Watchdog for stale amplifier occupancy. | Event-driven occupancy has no timeout for missing updates. | Stale occupancy is detected and surfaced. |
+| ~~Watchdog for stale amplifier occupancy.~~ **Resolved.** | The comm client keeps republishing its cached container and never clears `SlaveDetected`, so cached data used to stay "valid" forever. `TrackAmplifierDataFreshness` now derives freshness from the frame timestamp. | Done: stale amplifier data is treated as unknown, never as clear. |
 | Investigate `TrackApplicationVariables` HoldingReg aliasing. | All 56 `trackAmpItems` share one `HoldingReg` array instance. | Confirmed intended or fixed. |
 | `EcosEmulatorServer` binds loopback only. | `IPAddress.Loopback` in `EcosEmulatorServer.Start`; correct while Koploper runs on the same PC. | Confirmed same-PC, or made configurable. |
 | `dir[...]` is refused during a loco safety latch even at speed 0. | `SimpleEcosBackend` routes `dir` through `SetLocoSpeed`, so the interlock treats it as movement. Conservative and safe. | Confirmed acceptable, or refined to allow a direction change at speed 0. |
@@ -251,10 +251,10 @@ Done:
 
 | Item | Evidence | Acceptance criteria |
 | --- | --- | --- |
-| Real amplifier occupancy bit. | `TrackAmplifier4.X/modbus/General.h` TODO; real mode reports `OccupancyAvailable = false`. | Firmware populates the occupied bit and real occupancy becomes reliable. |
+| ~~Real amplifier occupancy bit.~~ **Not a dependency.** | `TrackAmplifier4.X/processio.c` already sets `HR_STATUS` bit 10 from `g_occ = CMP1_GetOutputStatus()`. The `General.h` TODO comment is stale. Real mode now consumes it. | Done: real mode reads the existing amplifier occupancy. |
+| Stale firmware comment. | `TrackAmplifier4.X/modbus/General.h` line 95 still says "(TODO: implement when occupancy source known)" while `processio.c` implements it. | Comment corrected in firmware (not part of this increment). |
 
 ### Physical hardware dependency
-
 | Item | Evidence | Acceptance criteria |
 | --- | --- | --- |
 | Real physical switch output (accessory decoder). | `TrackAmplifierHardwareBackend.SetSwitch` returns false; the real switch sink drives nothing. | An accessory-decoder output path actuates mapped switches. |
