@@ -142,10 +142,13 @@ In the current simulator the causality is inverted (Koploper position -> simulat
 ## Implementation Status
 
 - `SiebwaldeApp.Core.AmplifierSpeedMapper` - done (ECoS 0..127 + direction -> PWM).
-- `SiebwaldeApp.Core.BlockTopology` - done (block -> amplifier mapping, parsed from configuration text).
-- `SiebwaldeApp.Integration.TrackAmplifierHardwareBackend` - done: implements `IHardwareBackend`, resolves locomotive -> block via `IBlockPositionProvider`, block -> amplifiers via `BlockTopology`, speed -> PWM via `AmplifierSpeedMapper`, and queues writes through `TrackApplicationVariables.SetDesiredAmplifierControl`. `SetPower(false)` sets all mapped amplifiers to neutral. `SetSwitch` is not handled yet.
+- `SiebwaldeApp.Core.BlockTopology` - done: block -> amplifier mapping plus a routing model. Configuration sections: `amps: block:amp[+amp]` and `routes: from>to[@switchId:position][!]`; `!` forbids look-ahead (for example a station departure block).
+- `SiebwaldeApp.Core.IOccupancyProvider` - done: block occupancy abstraction (real implementation still to be wired to amplifier occupancy).
+- `SiebwaldeApp.Core.LookAheadPlanner` - done: picks the next block to pre-command, filtered by switch position, excluding no-look-ahead transitions and occupied targets.
+- `SiebwaldeApp.Integration.TrackAmplifierHardwareBackend` - done: implements `IHardwareBackend`; resolves locomotive -> block, block -> amplifiers, speed -> PWM, queues writes, and (when a planner and occupancy provider are supplied) also commands the next block. `SetPower(false)` sets all mapped amplifiers to neutral. `SetSwitch` is not handled yet.
 - New non-UI project `SiebwaldeApp.Integration` (`net8.0-windows7.0`) references Core + EcosEmu; all translation logic stays out of the WPF project.
-- Still open: look-ahead (delta-sync and one-block-ahead fallback), occupancy feedback into `IHardwareFeedbackSink`, backend selection (real vs `TrackSimulatorBackend`), and the `app.config` topology setting plus settings-page editing.
+- Tests: 70/70 passing.
+- Still open: real `IOccupancyProvider` from amplifier occupancy, occupancy feedback into `IHardwareFeedbackSink`, switch mapping (real <-> Koploper + default init state), backend selection (real vs `TrackSimulatorBackend`), divergence check with ECoS stop, and the `app.config` topology/routing settings plus settings-page editing.
 
 
 

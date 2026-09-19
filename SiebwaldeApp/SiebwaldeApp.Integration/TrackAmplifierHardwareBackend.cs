@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using SiebwaldeApp.Core;
 using SiebwaldeApp.EcosEmu;
 
@@ -12,24 +13,40 @@ namespace SiebwaldeApp.Integration
     /// speed -> PWM comes from <see cref="AmplifierSpeedMapper"/>. The resulting
     /// setpoints are queued through <see cref="TrackApplicationVariables.SetDesiredAmplifierControl"/>
     /// and sent by the existing runtime writer.
+    ///
+    /// When a <see cref="LookAheadPlanner"/> and an <see cref="IOccupancyProvider"/> are
+    /// supplied, the same setpoint is also queued for the next block (look-ahead), unless
+    /// the transition forbids it (for example a station departure) or the next block is occupied.
     /// </summary>
     public sealed class TrackAmplifierHardwareBackend : IHardwareBackend
     {
+        private static readonly IReadOnlyDictionary<int, SwitchPosition> NoSwitches =
+            new Dictionary<int, SwitchPosition>();
+
         private readonly IBlockPositionProvider _blockPositionProvider;
         private readonly BlockTopology _topology;
         private readonly TrackApplicationVariables _variables;
         private readonly Action<string>? _log;
+        private readonly LookAheadPlanner? _lookAheadPlanner;
+        private readonly IOccupancyProvider? _occupancyProvider;
+        private readonly Func<IReadOnlyDictionary<int, SwitchPosition>>? _switchPositionProvider;
 
         public TrackAmplifierHardwareBackend(
             IBlockPositionProvider blockPositionProvider,
             BlockTopology topology,
             TrackApplicationVariables variables,
-            Action<string>? log = null)
+            Action<string>? log = null,
+            LookAheadPlanner? lookAheadPlanner = null,
+            IOccupancyProvider? occupancyProvider = null,
+            Func<IReadOnlyDictionary<int, SwitchPosition>>? switchPositionProvider = null)
         {
             _blockPositionProvider = blockPositionProvider ?? throw new ArgumentNullException(nameof(blockPositionProvider));
             _topology = topology ?? throw new ArgumentNullException(nameof(topology));
             _variables = variables ?? throw new ArgumentNullException(nameof(variables));
             _log = log;
+            _lookAheadPlanner = lookAheadPlanner;
+            _occupancyProvider = occupancyProvider;
+            _switchPositionProvider = switchPositionProvider;
         }
 
         /// <summary>Power off sets every mapped amplifier to neutral (standstill).</summary>
@@ -59,7 +76,7 @@ namespace SiebwaldeApp.Integration
 
         /// <summary>
         /// Translates a locomotive speed command into amplifier setpoints for the
-        /// block the locomotive currently occupies.
+        /// block the locomotive currently occupies, plus the look-ahead block.
         /// </summary>
         public void SetLocoSpeed(int address, int ecosSpeed, int direction)
         {
@@ -85,12 +102,42 @@ namespace SiebwaldeApp.Integration
 
             _log?.Invoke(
                 $"Loco {address}: block {block.Value} speed {ecosSpeed} dir {direction} -> PWM {pwm} on amp(s) {string.Join("+", amplifiers)}");
+
+            ApplyLookAhead(block.Value, pwm);
         }
 
         /// <summary>Switch handling is not part of the track-amplifier translation yet.</summary>
         public void SetSwitch(int decoderAddress, int outputIndex, bool on)
         {
             _log?.Invoke($"Switch addr={decoderAddress} index={outputIndex} state={on} (ignored)");
+        }
+
+        private void ApplyLookAhead(int currentBlock, int pwm)
+        {
+            if (_lookAheadPlanner is null || _occupancyProvider is null)
+            {
+                return;
+            }
+
+            var switchPositions = _switchPositionProvider?.Invoke() ?? NoSwitches;
+
+            if (!_lookAheadPlanner.TryPlanNext(currentBlock, switchPositions, _occupancyProvider, out var nextBlock))
+            {
+                return;
+            }
+
+            if (!_topology.TryGetAmplifiers(nextBlock, out var nextAmplifiers))
+            {
+                return;
+            }
+
+            foreach (var amplifier in nextAmplifiers)
+            {
+                _variables.SetDesiredAmplifierControl(amplifier, pwm, false);
+            }
+
+            _log?.Invoke(
+                $"Look-ahead: block {currentBlock} -> {nextBlock}, PWM {pwm} on amp(s) {string.Join("+", nextAmplifiers)}");
         }
     }
 }
