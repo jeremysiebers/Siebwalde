@@ -29,5 +29,17 @@ namespace SiebwaldeApp.Core
 
         /// <summary>UDP port used to receive from the Fiddle Yard controller.</summary>
         public static int FiddleYardReceivingPort => CoreSettings.Default.FYReceivingport;
+
+        /// <summary>Raw topology configuration text (amplifier sections and routes).</summary>
+        public static string BlockTopologyConfig => CoreSettings.Default.BlockTopologyConfig;
+
+        /// <summary>Raw Koploper block mapping text (block -> bezetmelders -> amplifier sections).</summary>
+        public static string KoploperBlockMapConfig => CoreSettings.Default.KoploperBlockMapConfig;
+
+        /// <summary>Parses <see cref="BlockTopologyConfig"/> into a topology.</summary>
+        public static BlockTopology BuildBlockTopology() => BlockTopology.Parse(BlockTopologyConfig);
+
+        /// <summary>Parses <see cref="KoploperBlockMapConfig"/> into a Koploper block map.</summary>
+        public static KoploperBlockMap BuildKoploperBlockMap() => KoploperBlockMap.Parse(KoploperBlockMapConfig);
     }
 }

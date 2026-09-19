@@ -21,6 +21,8 @@ namespace SiebwaldeApp
             public string LogDirectory = "";
             public string FiddleYardSendingPort = "";
             public string FiddleYardReceivingPort = "";
+            public string BlockTopologyConfig = "";
+            public string KoploperBlockMapConfig = "";
         }
 
         private readonly Stack<Snapshot> _undo = new();
@@ -34,6 +36,8 @@ namespace SiebwaldeApp
         public string LogDirectory { get; set; } = "";
         public string FiddleYardSendingPort { get; set; } = "";
         public string FiddleYardReceivingPort { get; set; } = "";
+        public string BlockTopologyConfig { get; set; } = "";
+        public string KoploperBlockMapConfig { get; set; } = "";
         public string Status { get; set; } = "";
         public bool CanUndo { get; set; }
 
@@ -76,6 +80,8 @@ namespace SiebwaldeApp
             LogDirectory = settings.LogDirectory;
             FiddleYardSendingPort = settings.FYSendingport.ToString(CultureInfo.InvariantCulture);
             FiddleYardReceivingPort = settings.FYReceivingport.ToString(CultureInfo.InvariantCulture);
+            BlockTopologyConfig = settings.BlockTopologyConfig;
+            KoploperBlockMapConfig = settings.KoploperBlockMapConfig;
         }
 
         private void SaveSettings()
@@ -98,6 +104,8 @@ namespace SiebwaldeApp
             settings.LogDirectory = LogDirectory;
             settings.FYSendingport = fySendingPort;
             settings.FYReceivingport = fyReceivingPort;
+            settings.BlockTopologyConfig = BlockTopologyConfig;
+            settings.KoploperBlockMapConfig = KoploperBlockMapConfig;
             settings.Save();
 
             Status = $"Settings saved at {DateTime.Now:HH:mm:ss}.";
@@ -152,7 +160,9 @@ namespace SiebwaldeApp
                 TrackAmplifierFirmwarePath = TrackAmplifierFirmwarePath,
                 LogDirectory = LogDirectory,
                 FiddleYardSendingPort = FiddleYardSendingPort,
-                FiddleYardReceivingPort = FiddleYardReceivingPort
+                FiddleYardReceivingPort = FiddleYardReceivingPort,
+                BlockTopologyConfig = BlockTopologyConfig,
+                KoploperBlockMapConfig = KoploperBlockMapConfig
             });
 
             CanUndo = true;
@@ -174,6 +184,8 @@ namespace SiebwaldeApp
             LogDirectory = snapshot.LogDirectory;
             FiddleYardSendingPort = snapshot.FiddleYardSendingPort;
             FiddleYardReceivingPort = snapshot.FiddleYardReceivingPort;
+            BlockTopologyConfig = snapshot.BlockTopologyConfig;
+            KoploperBlockMapConfig = snapshot.KoploperBlockMapConfig;
 
             CanUndo = _undo.Count > 0;
             Status = "Last change undone.";

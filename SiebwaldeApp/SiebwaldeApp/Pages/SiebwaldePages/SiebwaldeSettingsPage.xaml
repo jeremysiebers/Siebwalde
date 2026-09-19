@@ -172,6 +172,49 @@
                         Foreground="White"
                         Content="Reset logging defaults" />
 
+                <!-- Mapping -->
+                <TextBlock Foreground="{StaticResource ForegroundLightBrush}" FontSize="{StaticResource FontSizeXXLarge}">
+                    <Run Text="Block mapping (Koploper)" />
+                </TextBlock>
+
+                <Grid Margin="0 5 0 5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="300"/>
+                        <ColumnDefinition Width="900"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Foreground="{StaticResource ForegroundLightBrush}">
+                        <Run Text="Topology (amps/routes)" />
+                    </TextBlock>
+                    <TextBox Grid.Column="1"
+                             Height="60"
+                             TextWrapping="Wrap"
+                             AcceptsReturn="True"
+                             Background="{StaticResource TextBoxBackgroundBrush}"
+                             Foreground="{StaticResource BackgroundLightBrush}"
+                             Text="{Binding BlockTopologyConfig, UpdateSourceTrigger=PropertyChanged}" />
+                </Grid>
+
+                <Grid Margin="0 5 0 20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="300"/>
+                        <ColumnDefinition Width="900"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Foreground="{StaticResource ForegroundLightBrush}">
+                        <Run Text="Block - bezetmelders - amps" />
+                    </TextBlock>
+                    <TextBox Grid.Column="1"
+                             Height="60"
+                             TextWrapping="Wrap"
+                             AcceptsReturn="True"
+                             Background="{StaticResource TextBoxBackgroundBrush}"
+                             Foreground="{StaticResource BackgroundLightBrush}"
+                             Text="{Binding KoploperBlockMapConfig, UpdateSourceTrigger=PropertyChanged}" />
+                </Grid>
+
                 <!-- Actions -->
                 <StackPanel Orientation="Horizontal" Margin="0 10 0 10">
                     <Button Width="160" Margin="0 0 10 0" Command="{Binding Save}" Foreground="White" Content="Save" />

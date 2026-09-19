@@ -190,6 +190,30 @@ namespace SiebwaldeApp.Core.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("amps: 1:1,2:2,3:3,4:4,5:5 ; routes: 1>2,2>3,3>4,3>5,4>1,5>1")]
+        public string BlockTopologyConfig {
+            get {
+                return ((string)(this["BlockTopologyConfig"]));
+            }
+            set {
+                this["BlockTopologyConfig"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1:1.01+1.02:1, 2:1.03+1.04:2, 3:1.05+1.06:3, 4:1.07+1.08:4, 5:1.09+1.10:5")]
+        public string KoploperBlockMapConfig {
+            get {
+                return ((string)(this["KoploperBlockMapConfig"]));
+            }
+            set {
+                this["KoploperBlockMapConfig"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool UseFakeHardwareAdapters {
             get {
