@@ -29,7 +29,7 @@ namespace SiebwaldeApp.EcosEmu
             Console.WriteLine($"[HW] Loco addr={address} speed={ecosSpeed} dir={direction}");
         }
 
-        public void SetSwitch(int decoderAddress, int outputIndex, bool on)
+        public bool SetSwitch(int decoderAddress, int outputIndex, bool on)
         {
             Console.WriteLine($"[HW] Switch addr={decoderAddress} index={outputIndex} state={on}");
 
@@ -41,6 +41,7 @@ namespace SiebwaldeApp.EcosEmu
             //
             // External switch changes (e.g. hardware/manual changes) should use
             // the helper method SimulateExternalSwitchChangeAsync instead.
+            return true;
         }
 
         /// <summary>

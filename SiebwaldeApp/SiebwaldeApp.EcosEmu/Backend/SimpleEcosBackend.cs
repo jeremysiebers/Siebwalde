@@ -1092,7 +1092,14 @@ namespace SiebwaldeApp.EcosEmu
                 int outputIndex = side == 'g' ? 0 : 1;
                 bool on = true;
 
-                _hardware.SetSwitch(decoderAddress, outputIndex, on);
+                if (!_hardware.SetSwitch(decoderAddress, outputIndex, on))
+                {
+                    // Nothing moved (for example an address that is not mapped to a physical
+                    // output). Reporting a state change here would let the logical ECoS state
+                    // disagree with the layout, so no event is sent.
+                    Console.WriteLine("[SET SWITCH] not applied by the hardware backend; no state event is sent.");
+                    return;
+                }
 
                 // Update internal state and enqueue an event for Koploper.
                 var ev = UpdateSwitchStateAndCreateEvent(ecosId, decoderAddress, outputIndex);
@@ -1116,7 +1123,11 @@ namespace SiebwaldeApp.EcosEmu
 
                 int decoderAddress = ecosId; // simple 1:1 mapping for now
 
-                _hardware.SetSwitch(decoderAddress, outputIndex, true);
+                if (!_hardware.SetSwitch(decoderAddress, outputIndex, true))
+                {
+                    Console.WriteLine("[SET SWITCH] not applied by the hardware backend; no state event is sent.");
+                    return;
+                }
 
                 var ev = UpdateSwitchStateAndCreateEvent(ecosId, decoderAddress, outputIndex);
                 events.Add(ev);

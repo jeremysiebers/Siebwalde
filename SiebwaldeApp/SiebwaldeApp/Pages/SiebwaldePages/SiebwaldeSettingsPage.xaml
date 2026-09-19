@@ -215,6 +215,25 @@
                              Text="{Binding KoploperBlockMapConfig, UpdateSourceTrigger=PropertyChanged}" />
                 </Grid>
 
+                <Grid Margin="0 5 0 20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="300"/>
+                        <ColumnDefinition Width="900"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Foreground="{StaticResource ForegroundLightBrush}">
+                        <Run Text="Switches (ECoS:physical[:inverted][:g|r|keep])" />
+                    </TextBlock>
+                    <TextBox Grid.Column="1"
+                             Height="60"
+                             TextWrapping="Wrap"
+                             AcceptsReturn="True"
+                             Background="{StaticResource TextBoxBackgroundBrush}"
+                             Foreground="{StaticResource BackgroundLightBrush}"
+                             Text="{Binding SwitchMapConfig, UpdateSourceTrigger=PropertyChanged}" />
+                </Grid>
+
                 <Button HorizontalAlignment="Left"
                         Width="220"
                         Margin="0 5 0 20"

@@ -33,11 +33,15 @@ namespace SiebwaldeApp.Integration
         private readonly string _locoRepositoryPath;
         private readonly BlockTopology _topology;
         private readonly KoploperBlockMap _blockMap;
+        private readonly SwitchMapping _switchMapping;
         private readonly string _externalInfoHost;
         private readonly int _externalInfoPort;
         private readonly int _ecosListenPort;
         private readonly Func<IReadOnlyDictionary<int, SwitchPosition>>? _switchPositionProvider;
         private readonly Action<string>? _log;
+
+        private static readonly IReadOnlyDictionary<int, SwitchPosition> NoSwitches =
+            new Dictionary<int, SwitchPosition>();
 
         private KoploperExternalInfoClient? _externalInfo;
         private JsonLocoRepository? _locoRepository;
@@ -57,6 +61,7 @@ namespace SiebwaldeApp.Integration
             string locoRepositoryPath,
             BlockTopology topology,
             KoploperBlockMap blockMap,
+            SwitchMapping? switchMapping = null,
             int ecosListenPort = DefaultEcosListenPort,
             string koploperExternalInfoHost = "127.0.0.1",
             int koploperExternalInfoPort = DefaultKoploperExternalInfoPort,
@@ -69,6 +74,7 @@ namespace SiebwaldeApp.Integration
             _locoRepositoryPath = locoRepositoryPath;
             _topology = topology ?? throw new ArgumentNullException(nameof(topology));
             _blockMap = blockMap ?? throw new ArgumentNullException(nameof(blockMap));
+            _switchMapping = switchMapping ?? SwitchMapping.Parse(null);
             _ecosListenPort = ecosListenPort;
             _externalInfoHost = koploperExternalInfoHost;
             _externalInfoPort = koploperExternalInfoPort;
@@ -88,6 +94,7 @@ namespace SiebwaldeApp.Integration
                 Path.Combine(CoreConfiguration.LogDirectory, "locos.json"),
                 CoreConfiguration.BuildBlockTopology(),
                 CoreConfiguration.BuildKoploperBlockMap(),
+                CoreConfiguration.BuildSwitchMap(),
                 switchPositionProvider: switchPositionProvider,
                 log: log);
 
@@ -96,6 +103,12 @@ namespace SiebwaldeApp.Integration
 
         /// <inheritdoc />
         public TrackControlMode? Mode => _mode;
+
+        /// <summary>
+        /// The switch translation for the running host, or null when it is not running. The
+        /// same controller is used in real and simulator mode.
+        /// </summary>
+        public SwitchController? Switches { get; private set; }
 
         /// <inheritdoc />
         public async Task<EcosHostStartResult> StartAsync(
@@ -169,6 +182,16 @@ namespace SiebwaldeApp.Integration
 
             if (mode == TrackControlMode.Real)
             {
+                // The physical switch side is not wired to real hardware yet, so the real
+                // output deliberately drives nothing and says so. The translation path is
+                // still the shared one, so only this sink has to change later.
+                Switches = new SwitchController(
+                    _switchMapping,
+                    new DelegateSwitchOutput((address, position) => Log(
+                        $"Physical switch output {address} is not wired to real hardware yet; " +
+                        $"{position} was NOT driven.")),
+                    _log);
+
                 _integration = new TrackControlIntegration(
                     commClient!,
                     variables!,
@@ -177,8 +200,9 @@ namespace SiebwaldeApp.Integration
                     _blockMap,
                     _locoRepository,
                     feedbackSink: null,
-                    _switchPositionProvider,
-                    _log);
+                    CurrentSwitchPositions,
+                    _log,
+                    Switches);
 
                 _ecosBackend = _integration.EcosBackend
                     ?? throw new InvalidOperationException(
@@ -187,12 +211,30 @@ namespace SiebwaldeApp.Integration
             else
             {
                 _simulatorBackend = new TrackSimulatorBackend(_externalInfo);
-                _ecosBackend = new SimpleEcosBackend(_simulatorBackend, _locoRepository, _externalInfo);
+
+                // Same translation path as real mode; only the physical sink differs.
+                Switches = new SwitchController(
+                    _switchMapping,
+                    new DelegateSwitchOutput((address, position) =>
+                        _simulatorBackend.SetSwitch(
+                            address,
+                            position == SwitchPosition.Straight ? 0 : 1,
+                            true)),
+                    _log);
+
+                _ecosBackend = new SimpleEcosBackend(
+                    new SwitchTranslatingHardwareBackend(_simulatorBackend, Switches, _log),
+                    _locoRepository,
+                    _externalInfo);
 
                 // The simulator needs the ECoS backend as feedback sink, so hook it up
                 // before the external-info client starts producing block positions.
                 _simulatorBackend.AttachFeedbackSink(_ecosBackend);
             }
+
+            // Give every mapped switch a known state where one is configured. Entries marked
+            // 'keep' are intentionally not driven.
+            Switches.Initialize();
 
             // Order matters: the backend and its feedback sink must exist before the
             // external-info client starts, and the server needs a ready backend.
@@ -229,6 +271,7 @@ namespace SiebwaldeApp.Integration
             _locoRepository = null;
             _externalInfo = null;
             _mode = null;
+            Switches = null;
 
             if (stoppedMode is not null)
             {
@@ -257,6 +300,21 @@ namespace SiebwaldeApp.Integration
             {
                 _log(message);
             }
+        }
+
+        /// <summary>
+        /// Switch positions for routing and look-ahead. The logical (ECoS) positions come from
+        /// the shared switch controller; an explicit provider, when supplied, still wins so a
+        /// caller can override the source.
+        /// </summary>
+        private IReadOnlyDictionary<int, SwitchPosition> CurrentSwitchPositions()
+        {
+            if (_switchPositionProvider is not null)
+            {
+                return _switchPositionProvider.Invoke();
+            }
+
+            return Switches?.GetLogicalPositions() ?? NoSwitches;
         }
     }
 }

@@ -106,10 +106,16 @@ namespace SiebwaldeApp.Integration
             ApplyLookAhead(block.Value, pwm);
         }
 
-        /// <summary>Switch handling is not part of the track-amplifier translation yet.</summary>
-        public void SetSwitch(int decoderAddress, int outputIndex, bool on)
+        /// <summary>
+        /// Switch handling is not part of the track-amplifier translation: switches are driven
+        /// by accessory decoders, not by the track amplifiers, and that path is not wired to
+        /// real hardware yet. Returns false so the ECoS backend does not report a switch state
+        /// change that never reached the layout.
+        /// </summary>
+        public bool SetSwitch(int decoderAddress, int outputIndex, bool on)
         {
-            _log?.Invoke($"Switch addr={decoderAddress} index={outputIndex} state={on} (ignored)");
+            _log?.Invoke($"Switch addr={decoderAddress} index={outputIndex} state={on} (ignored: no real switch output path yet)");
+            return false;
         }
 
         private void ApplyLookAhead(int currentBlock, int pwm)

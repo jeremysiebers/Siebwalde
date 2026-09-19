@@ -1,4 +1,4 @@
-﻿using SiebwaldeApp.Core;
+using SiebwaldeApp.Core;
 using SiebwaldeApp.Core.Properties;
 using System;
 using System.Collections.Generic;
@@ -24,6 +24,7 @@ namespace SiebwaldeApp
             public string FiddleYardReceivingPort = "";
             public string BlockTopologyConfig = "";
             public string KoploperBlockMapConfig = "";
+            public string SwitchMapConfig = "";
         }
 
         private readonly Stack<Snapshot> _undo = new();
@@ -39,6 +40,7 @@ namespace SiebwaldeApp
         public string FiddleYardReceivingPort { get; set; } = "";
         public string BlockTopologyConfig { get; set; } = "";
         public string KoploperBlockMapConfig { get; set; } = "";
+        public string SwitchMapConfig { get; set; } = "";
         public string Status { get; set; } = "";
         public bool CanUndo { get; set; }
 
@@ -88,6 +90,7 @@ namespace SiebwaldeApp
             // instead of leaving the operator with a silently empty mapping.
             BlockTopologyConfig = CoreConfiguration.BlockTopologyConfig;
             KoploperBlockMapConfig = CoreConfiguration.KoploperBlockMapConfig;
+            SwitchMapConfig = CoreConfiguration.SwitchMapConfig;
         }
 
         private void SaveSettings()
@@ -112,6 +115,7 @@ namespace SiebwaldeApp
             settings.FYReceivingport = fyReceivingPort;
             settings.BlockTopologyConfig = BlockTopologyConfig;
             settings.KoploperBlockMapConfig = KoploperBlockMapConfig;
+            settings.SwitchMapConfig = SwitchMapConfig;
             settings.Save();
 
             Status = $"Settings saved at {DateTime.Now:HH:mm:ss}.";
@@ -151,6 +155,7 @@ namespace SiebwaldeApp
             PushUndo();
             BlockTopologyConfig = GetDefault("BlockTopologyConfig");
             KoploperBlockMapConfig = GetDefault("KoploperBlockMapConfig");
+            SwitchMapConfig = GetDefault("SwitchMapConfig");
             Status = "Block mapping reset to defaults (press Save to persist).";
         }
 
@@ -176,7 +181,8 @@ namespace SiebwaldeApp
                 FiddleYardSendingPort = FiddleYardSendingPort,
                 FiddleYardReceivingPort = FiddleYardReceivingPort,
                 BlockTopologyConfig = BlockTopologyConfig,
-                KoploperBlockMapConfig = KoploperBlockMapConfig
+                KoploperBlockMapConfig = KoploperBlockMapConfig,
+                SwitchMapConfig = SwitchMapConfig
             });
 
             CanUndo = true;
@@ -200,6 +206,7 @@ namespace SiebwaldeApp
             FiddleYardReceivingPort = snapshot.FiddleYardReceivingPort;
             BlockTopologyConfig = snapshot.BlockTopologyConfig;
             KoploperBlockMapConfig = snapshot.KoploperBlockMapConfig;
+            SwitchMapConfig = snapshot.SwitchMapConfig;
 
             CanUndo = _undo.Count > 0;
             Status = "Last change undone.";

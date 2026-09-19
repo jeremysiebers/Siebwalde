@@ -33,7 +33,8 @@ namespace SiebwaldeApp.Integration
             ILocoRepository? locoRepository = null,
             IHardwareFeedbackSink? feedbackSink = null,
             Func<IReadOnlyDictionary<int, SwitchPosition>>? switchPositionProvider = null,
-            Action<string>? log = null)
+            Action<string>? log = null,
+            SwitchController? switchController = null)
         {
             _commClient = commClient ?? throw new ArgumentNullException(nameof(commClient));
             if (variables is null) throw new ArgumentNullException(nameof(variables));
@@ -59,7 +60,13 @@ namespace SiebwaldeApp.Integration
             // standalone emulator host).
             if (locoRepository is not null)
             {
-                EcosBackend = new SimpleEcosBackend(RealBackend, locoRepository, blockPositionProvider);
+                // Switch commands must be translated through the shared switch mapping before
+                // they reach a hardware backend, so real and simulator mode behave alike.
+                IHardwareBackend hardware = switchController is null
+                    ? RealBackend
+                    : new SwitchTranslatingHardwareBackend(RealBackend, switchController, log);
+
+                EcosBackend = new SimpleEcosBackend(hardware, locoRepository, blockPositionProvider);
             }
 
             var sink = (IHardwareFeedbackSink?)EcosBackend

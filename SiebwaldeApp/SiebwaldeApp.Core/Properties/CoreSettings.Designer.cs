@@ -190,7 +190,7 @@ namespace SiebwaldeApp.Core.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("amps: 1:1,2:2,3:3,4:4,5:5 ; routes: 1>2,2>3,3>4,3>5,4>1,5>1")]
+        [global::System.Configuration.DefaultSettingValueAttribute("amps: 1:1,2:2,3:3,4:4,5:5 ; routes: 1>2,2>3,3>4@1:0,3>5@1:1,4>1,5>1")]
         public string BlockTopologyConfig {
             get {
                 return ((string)(this["BlockTopologyConfig"]));
@@ -209,6 +209,18 @@ namespace SiebwaldeApp.Core.Properties {
             }
             set {
                 this["KoploperBlockMapConfig"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("switches: 1:1:keep, 2:2:keep")]
+        public string SwitchMapConfig {
+            get {
+                return ((string)(this["SwitchMapConfig"]));
+            }
+            set {
+                this["SwitchMapConfig"] = value;
             }
         }
         

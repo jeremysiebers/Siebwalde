@@ -165,14 +165,14 @@ namespace SiebwaldeApp.EcosEmu
             }
         }
 
-        public void SetSwitch(int decoderAddress, int outputIndex, bool on)
+        public bool SetSwitch(int decoderAddress, int outputIndex, bool on)
         {
             lock (_lock)
             {
                 // Sla de toestand van deze coil op
                 _switchStates[(decoderAddress, outputIndex)] = on;
 
-                // 2-spoelen wissel: als één coil wordt geactiveerd,
+                // 2-spoelen wissel: als een coil wordt geactiveerd,
                 // beschouwen we de andere coil als "uit".
                 // ECoS stuurt bij omschakelen alleen de "aan" coil.
                 int otherIndex = outputIndex == 0 ? 1 : 0;
@@ -180,6 +180,8 @@ namespace SiebwaldeApp.EcosEmu
             }
 
             Console.WriteLine($"[SIM-HW] Switch addr={decoderAddress} out={outputIndex} on={on}");
+
+            return true;
         }
 
         /// <summary>

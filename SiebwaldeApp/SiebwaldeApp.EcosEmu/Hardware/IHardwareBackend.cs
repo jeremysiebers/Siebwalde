@@ -31,6 +31,12 @@ namespace SiebwaldeApp.EcosEmu
         /// <param name="outputIndex">The index of the output to set. Must be within the valid range of outputs for the specified decoder.</param>
         /// <param name="on">A value indicating whether the output should be turned on (<see langword="true"/>) or off (<see
         /// langword="false"/>).</param>
-        void SetSwitch(int decoderAddress, int outputIndex, bool on);
+        /// <returns>
+        /// <see langword="true"/> when the command was actually applied to the physical side.
+        /// <see langword="false"/> when it was not (for example an address that is not mapped to
+        /// any output). The ECoS backend uses this to avoid reporting a state change that never
+        /// happened, which would let the logical and physical switch state disagree.
+        /// </returns>
+        bool SetSwitch(int decoderAddress, int outputIndex, bool on);
     }
 }

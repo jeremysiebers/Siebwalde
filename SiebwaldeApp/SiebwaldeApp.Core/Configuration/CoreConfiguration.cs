@@ -44,11 +44,33 @@ namespace SiebwaldeApp.Core
             CoreSettings.Default.KoploperBlockMapConfig,
             nameof(CoreSettings.KoploperBlockMapConfig));
 
+        /// <summary>Raw switch mapping text (ECoS switch address -> physical switch output).</summary>
+        public static string SwitchMapConfig => ResolveSettingOrDefault(
+            CoreSettings.Default.SwitchMapConfig,
+            nameof(CoreSettings.SwitchMapConfig));
+
         /// <summary>Parses <see cref="BlockTopologyConfig"/> into a topology.</summary>
         public static BlockTopology BuildBlockTopology() => BlockTopology.Parse(BlockTopologyConfig);
 
         /// <summary>Parses <see cref="KoploperBlockMapConfig"/> into a Koploper block map.</summary>
         public static KoploperBlockMap BuildKoploperBlockMap() => KoploperBlockMap.Parse(KoploperBlockMapConfig);
+
+        /// <summary>
+        /// Parses <see cref="SwitchMapConfig"/> into a switch mapping. Invalid entries are
+        /// recorded in <see cref="SwitchMapping.Errors"/> and logged, so a malformed
+        /// configuration never silently becomes a plausible but wrong physical mapping.
+        /// </summary>
+        public static SwitchMapping BuildSwitchMap()
+        {
+            var mapping = SwitchMapping.Parse(SwitchMapConfig);
+
+            foreach (var error in mapping.Errors)
+            {
+                IoC.Logger.Log($"Switch mapping problem: {error}", "CoreConfiguration");
+            }
+
+            return mapping;
+        }
 
         /// <summary>
         /// Returns the effective setting value, or the declared default when the persisted user
