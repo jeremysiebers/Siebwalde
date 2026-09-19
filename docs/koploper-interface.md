@@ -157,6 +157,24 @@ The product owner's current Koploper oval was shared as screenshots:
 
 This confirms: a Koploper block (for example block 1) is described by a start and end bezetmelder, and one such block spans multiple amplifier sections.
 
+## Test / Simulation Oval (reference)
+
+This is the small oval used for simulation and interface testing. The real layout is much larger, and the hardware oval currently in use has **no switches** at the moment.
+
+Derived from a live Koploper session (trace `Logging\19-09-2026_EcosEmuTrace.txt`):
+
+- **Block chain**: `1 -> 2 -> 3 -> (4 or 5) -> 1`. Blocks 4 and 5 are the two parallel top tracks (the passing loop). In the observed session locomotive 1 used block 4 and locomotive 2 used block 5.
+- **Switches**: Koploper commands `set(11, switch[<address><g|r>])` for addresses **1, 2, 51, 52, 53, 54, 55** (`g` = straight, `r` = diverging).
+- **Occupancy**: the simulator reports a 16-bit mask on feedback module `100`; the values cluster per locomotive (bases `0xC0..` and `0x300..`), consistent with **2 sensors per block** (the minimum Koploper requires for brake + stop detection).
+- **Limitation**: the exact bezetmelder numbering (`block.point`, for example `1.03` / `1.04`) cannot be derived reliably from the emulator trace, because the simulator uses its own encoding and derives occupancy from the Koploper position. The authoritative source is Koploper's own configuration or the "Waar in blokken" data.
+
+Example topology configuration for this oval:
+
+```
+amps:   1:1, 2:2, 3:3, 4:4, 5:5
+routes: 1>2, 2>3, 3>4@<switch>:<position>, 3>5@<switch>:<position>, 4>1, 5>1
+```
+
 ## Trace Data (2026-09-11)
 
 - No Koploper/ECoS trace data exists in `Logging/` or anywhere else in the repository. The emulator and the external-info client log to the console only (`[EXT]`, `[LOCO]`, `[ECOS]`, `[HW-FEEDBACK]`, `TX:`), and no console capture was kept.
