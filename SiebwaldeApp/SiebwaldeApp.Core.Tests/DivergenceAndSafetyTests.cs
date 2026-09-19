@@ -33,9 +33,16 @@ namespace SiebwaldeApp.Core.Tests
         {
             private readonly HashSet<int> _occupied = new();
 
+            /// <summary>Set to false to model "no valid amplifier data yet".</summary>
+            public bool Known { get; set; } = true;
+
             public void Occupy(int block) => _occupied.Add(block);
 
+            public void Clear(int block) => _occupied.Remove(block);
+
             public bool IsBlockOccupied(int block) => _occupied.Contains(block);
+
+            public bool IsBlockOccupancyKnown(int block) => Known;
         }
 
         private sealed class RecordingSwitchOutput : ISwitchOutput
@@ -436,7 +443,8 @@ namespace SiebwaldeApp.Core.Tests
         [Fact]
         public void UnavailableOccupancy_DoesNotFabricateAMismatch()
         {
-            // Real mode: the amplifier occupancy bit is still a firmware TODO.
+            // Occupancy is not observable in this mode, so an occupied block must not be
+            // turned into a mismatch from unavailable data.
             var (checker, switches, stops, diagnostics, _, occupancy) = CreateChecker(occupancyAvailable: false);
             switches.TryApply(1, SwitchPosition.Straight, out _);
             occupancy.Occupy(4);
@@ -444,6 +452,127 @@ namespace SiebwaldeApp.Core.Tests
             Assert.Null(checker.CheckTransition(locoAddress: 1, fromBlock: 3, toBlock: 4));
             Assert.Empty(stops.StoppedLocos);
             Assert.False(diagnostics.IsUnsafe);
+        }
+
+        // ---------------------------------------------------------------------
+        // Occupancy known versus unknown (existing amplifier data path)
+        // ---------------------------------------------------------------------
+
+        [Fact]
+        public void KnownClearOccupancy_ReportsNothing()
+        {
+            var (checker, switches, stops, diagnostics, _, occupancy) = CreateChecker();
+            switches.TryApply(1, SwitchPosition.Straight, out _);
+            occupancy.Known = true;
+
+            Assert.Null(checker.CheckTransition(locoAddress: 1, fromBlock: 3, toBlock: 4));
+            Assert.Empty(stops.StoppedLocos);
+            Assert.False(diagnostics.IsUnsafe);
+        }
+
+        [Fact]
+        public void UnknownOccupancy_IsNotTreatedAsClear()
+        {
+            // Amplifier data has not been received, so the block occupancy cannot be confirmed.
+            var (checker, switches, stops, diagnostics, _, occupancy) = CreateChecker();
+            switches.TryApply(1, SwitchPosition.Straight, out _);
+            occupancy.Known = false;
+
+            var diagnostic = checker.CheckTransition(locoAddress: 1, fromBlock: 3, toBlock: 4);
+
+            Assert.NotNull(diagnostic);
+            Assert.Equal(DiagnosticCode.StateUnknown, diagnostic!.Code);
+            Assert.Equal(DiagnosticSeverity.Rejected, diagnostic.Severity);
+            Assert.Equal(4, diagnostic.Block);
+
+            // Unknown must not stop a train, but it must not be reported as safe either.
+            Assert.Empty(stops.StoppedLocos);
+            Assert.False(diagnostics.IsUnsafe);
+        }
+
+        [Fact]
+        public void OccupiedDestination_StopsTheLocoThroughTheExistingMismatch()
+        {
+            var (checker, switches, stops, diagnostics, _, occupancy) = CreateChecker();
+            switches.TryApply(1, SwitchPosition.Straight, out _);
+            occupancy.Known = true;
+            occupancy.Occupy(4);
+
+            var diagnostic = checker.CheckTransition(locoAddress: 1, fromBlock: 3, toBlock: 4);
+
+            Assert.Equal(DiagnosticCode.OccupancyMismatch, diagnostic!.Code);
+            Assert.Equal(SafetyAction.StopLoco, diagnostic.SafetyAction);
+            Assert.Equal(new[] { 1 }, stops.StoppedLocos);
+            Assert.True(diagnostics.IsUnsafe);
+        }
+
+        [Fact]
+        public void OccupancyMismatchReset_RequiresTheBlockToBeKnownClear()
+        {
+            var (checker, switches, _, _, guard, occupancy) = CreateChecker();
+            switches.TryApply(1, SwitchPosition.Straight, out _);
+            occupancy.Known = true;
+            occupancy.Occupy(4);
+
+            checker.CheckTransition(locoAddress: 1, fromBlock: 3, toBlock: 4);
+            guard.RevalidationCheck = checker.IsResolved;
+
+            // Still occupied: the reset must be refused.
+            Assert.False(guard.Reset());
+
+            // Cleared but no longer known: still not safe to release.
+            occupancy.Clear(4);
+            occupancy.Known = false;
+            Assert.False(guard.Reset());
+
+            // Known clear: now the reset may be applied.
+            occupancy.Known = true;
+            Assert.True(guard.Reset());
+        }
+
+        [Fact]
+        public void AmplifierOccupancyObservability_IsUnavailableUntilValidDataArrives()
+        {
+            var variables = new TrackApplicationVariables();
+            var observability = new AmplifierOccupancyObservability(variables);
+
+            // Nothing received yet.
+            Assert.False(observability.OccupancyAvailable);
+            Assert.False(observability.SwitchFeedbackAvailable);
+
+            // The comm client writes SlaveDetected together with the holding registers.
+            variables.trackAmpItems[3].SlaveDetected = 1;
+
+            Assert.True(observability.OccupancyAvailable);
+            Assert.False(observability.SwitchFeedbackAvailable);
+        }
+
+        [Fact]
+        public void LookAhead_DoesNotPreCommandIntoAnUnknownBlock()
+        {
+            var topology = BlockTopology.Parse(OvalTopology);
+            var planner = new LookAheadPlanner(topology);
+            var occupancy = new FakeOccupancy { Known = false };
+            var switches = new Dictionary<int, SwitchPosition>();
+
+            var planned = planner.TryPlanNext(1, switches, occupancy, out var nextBlock);
+
+            Assert.False(planned);
+            Assert.Equal(0, nextBlock);
+        }
+
+        [Fact]
+        public void LookAhead_PlansIntoAKnownClearBlock()
+        {
+            var topology = BlockTopology.Parse(OvalTopology);
+            var planner = new LookAheadPlanner(topology);
+            var occupancy = new FakeOccupancy { Known = true };
+            var switches = new Dictionary<int, SwitchPosition>();
+
+            var planned = planner.TryPlanNext(1, switches, occupancy, out var nextBlock);
+
+            Assert.True(planned);
+            Assert.Equal(2, nextBlock);
         }
 
         [Fact]

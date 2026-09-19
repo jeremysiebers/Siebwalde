@@ -42,7 +42,10 @@ namespace SiebwaldeApp.Core
 
             foreach (var candidate in candidates)
             {
-                if (!occupancy.IsBlockOccupied(candidate))
+                // Unknown is not the same as free: never pre-command into a block whose
+                // occupancy cannot be confirmed from valid data.
+                if (!occupancy.IsBlockOccupied(candidate) &&
+                    occupancy.IsBlockOccupancyKnown(candidate))
                 {
                     nextBlock = candidate;
                     return true;

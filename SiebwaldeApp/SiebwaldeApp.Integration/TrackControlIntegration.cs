@@ -46,9 +46,10 @@ namespace SiebwaldeApp.Integration
 
             var occupancyProvider = new TrackAmplifierOccupancyProvider(
                 blockMap,
-                section => GetHoldingRegisters(variables, section));
+                section => GetAmplifier(variables, section));
 
             OccupancyProvider = occupancyProvider;
+            Variables = variables;
 
             RealBackend = new TrackAmplifierHardwareBackend(
                 blockPositionProvider,
@@ -105,6 +106,12 @@ namespace SiebwaldeApp.Integration
         public IOccupancyProvider OccupancyProvider { get; }
 
         /// <summary>
+        /// The shared track variables this integration reads. Exposed so the composition root can
+        /// derive observability from the same data instead of keeping a second copy.
+        /// </summary>
+        public TrackApplicationVariables Variables { get; }
+
+        /// <summary>
         /// Subscribes to amplifier updates and performs one initial occupancy evaluation.
         /// </summary>
         public void Attach()
@@ -138,10 +145,7 @@ namespace SiebwaldeApp.Integration
             _ = Bridge.EvaluateAsync();
         }
 
-        private static ushort[]? GetHoldingRegisters(TrackApplicationVariables variables, ushort section)
-        {
-            var item = variables.trackAmpItems.FirstOrDefault(a => a.SlaveNumber == section);
-            return item?.HoldingReg;
-        }
+        private static TrackAmplifierItem? GetAmplifier(TrackApplicationVariables variables, ushort section)
+            => variables.trackAmpItems.FirstOrDefault(a => a.SlaveNumber == section);
     }
 }

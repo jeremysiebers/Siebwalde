@@ -63,17 +63,35 @@ namespace SiebwaldeApp.Integration
                 }
             }
 
-            if (_observability.OccupancyAvailable && _occupancy is not null && _occupancy.IsBlockOccupied(toBlock))
+            if (_observability.OccupancyAvailable && _occupancy is not null)
             {
-                return Report(new ControlDiagnostic
+                if (_occupancy.IsBlockOccupied(toBlock))
                 {
-                    Code = DiagnosticCode.OccupancyMismatch,
-                    Severity = DiagnosticSeverity.StopRequired,
-                    Subject = $"block {toBlock}",
-                    LocoAddress = locoAddress,
-                    Block = toBlock,
-                    Detail = $"Loco {locoAddress} is routed from block {fromBlock} into block {toBlock}, which is reported occupied."
-                });
+                    return Report(new ControlDiagnostic
+                    {
+                        Code = DiagnosticCode.OccupancyMismatch,
+                        Severity = DiagnosticSeverity.StopRequired,
+                        Subject = $"block {toBlock}",
+                        LocoAddress = locoAddress,
+                        Block = toBlock,
+                        Detail = $"Loco {locoAddress} is routed from block {fromBlock} into block {toBlock}, which is reported occupied."
+                    });
+                }
+
+                // Unknown is not clear: without valid amplifier data the block cannot be
+                // declared free, so the route is not silently treated as safe.
+                if (!_occupancy.IsBlockOccupancyKnown(toBlock))
+                {
+                    return Report(new ControlDiagnostic
+                    {
+                        Code = DiagnosticCode.StateUnknown,
+                        Severity = DiagnosticSeverity.Rejected,
+                        Subject = $"block {toBlock}",
+                        LocoAddress = locoAddress,
+                        Block = toBlock,
+                        Detail = $"Route {fromBlock}->{toBlock} cannot be verified: occupancy of block {toBlock} is not known (no valid amplifier data)."
+                    });
+                }
             }
 
             return null;
@@ -95,15 +113,25 @@ namespace SiebwaldeApp.Integration
                            && current == required;
 
                 case DiagnosticCode.StateUnknown:
-                    return fault.SwitchAddress is int unknownSwitch
-                           && _switches.GetLogicalPositions().ContainsKey(unknownSwitch);
+                    if (fault.SwitchAddress is int unknownSwitch)
+                    {
+                        return _switches.GetLogicalPositions().ContainsKey(unknownSwitch);
+                    }
+
+                    if (fault.Block is int unknownBlock)
+                    {
+                        return _occupancy is not null && _occupancy.IsBlockOccupancyKnown(unknownBlock);
+                    }
+
+                    return true;
 
                 case DiagnosticCode.OccupancyMismatch:
                     // Only meaningful where occupancy is actually observable.
                     return !_observability.OccupancyAvailable
                            || _occupancy is null
                            || fault.Block is null
-                           || !_occupancy.IsBlockOccupied(fault.Block.Value);
+                           || (!_occupancy.IsBlockOccupied(fault.Block.Value) &&
+                               _occupancy.IsBlockOccupancyKnown(fault.Block.Value));
 
                 default:
                     return true;

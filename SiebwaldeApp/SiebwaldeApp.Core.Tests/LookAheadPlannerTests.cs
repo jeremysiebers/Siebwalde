@@ -13,6 +13,8 @@ namespace SiebwaldeApp.Core.Tests
             public FakeOccupancy(params int[] occupied) => _occupied = new HashSet<int>(occupied);
 
             public bool IsBlockOccupied(int block) => _occupied.Contains(block);
+
+            public bool IsBlockOccupancyKnown(int block) => true;
         }
 
         [Fact]

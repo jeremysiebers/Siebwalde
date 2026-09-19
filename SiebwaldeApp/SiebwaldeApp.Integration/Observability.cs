@@ -54,4 +54,52 @@ namespace SiebwaldeApp.Integration
         /// <inheritdoc />
         public bool OccupancyAvailable { get; init; }
     }
+
+    /// <summary>
+    /// Real-mode observability over the existing amplifier data path.
+    ///
+    /// Occupancy becomes observable once valid amplifier data has been received.
+    /// <see cref="TrackAmplifierItem.SlaveDetected"/> is written in the same step that stores the
+    /// holding registers when the master's amplifier frame is parsed, so it is the existing
+    /// "valid data received" signal - no new freshness mechanism and no extra state are added.
+    ///
+    /// Switch feedback does not exist on real hardware yet, so it stays unavailable and is never
+    /// reported as a confirmation.
+    /// </summary>
+    public sealed class AmplifierOccupancyObservability : IObservability
+    {
+        private readonly TrackApplicationVariables _variables;
+
+        public AmplifierOccupancyObservability(TrackApplicationVariables variables)
+        {
+            _variables = variables ?? throw new ArgumentNullException(nameof(variables));
+        }
+
+        /// <inheritdoc />
+        public bool SwitchFeedbackAvailable => false;
+
+        /// <inheritdoc />
+        public bool OccupancyAvailable
+        {
+            get
+            {
+                var items = _variables.trackAmpItems;
+
+                if (items is null)
+                {
+                    return false;
+                }
+
+                foreach (var amplifier in items)
+                {
+                    if (amplifier is not null && amplifier.SlaveDetected != 0)
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        }
+    }
 }
