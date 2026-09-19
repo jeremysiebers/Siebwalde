@@ -29,6 +29,7 @@
   <ItemGroup>
     <ProjectReference Include="..\SiebwaldeApp.Core\SiebwaldeApp.Core.csproj" />
     <ProjectReference Include="..\SiebwaldeApp.EcosEmu\SiebwaldeApp.EcosEmu.csproj" />
+    <ProjectReference Include="..\SiebwaldeApp.Integration\SiebwaldeApp.Integration.csproj" />
   </ItemGroup>
 
   <!-- Preserve Settings/Resources designer behavior -->

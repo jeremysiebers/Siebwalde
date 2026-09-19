@@ -61,10 +61,10 @@ namespace SiebwaldeApp.Core.Tests
             => new(
                 commClient,
                 variables,
-                sink,
                 new FakeBlockPositionProvider(),
                 BlockTopology.Parse(OvalTopology),
-                KoploperBlockMap.Parse(OvalMapping));
+                KoploperBlockMap.Parse(OvalMapping),
+                feedbackSink: sink);
 
         [Fact]
         public void Attach_EstablishesInitialOccupancy()
