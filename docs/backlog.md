@@ -225,6 +225,31 @@ New items opened by this work:
 | Item | Evidence | Acceptance criteria |
 | --- | --- | --- |
 | Simulator occupancy provider. | Simulator occupancy arrives as ECoS sensor events, so `OccupancyAvailable` is false there. | An `IOccupancyProvider` over the simulator exists and occupancy divergence is checked in simulator mode. |
-| Latched fault does not block new commands. | The guard prevents repeated stops but not a new Koploper command. | A latched unsafe state also refuses or gates further movement commands. |
+| Latched fault does not block new commands. | The guard prevents repeated stops but not a new Koploper command. | **RESOLVED 2026-09-19**: `ControlSafetyInterlockBackend` refuses non-zero movement while a StopRequired fault is latched, with reset revalidation. |
+
+## Increment 6 Safety Movement Interlock (2026-09-19, sixth task)
+
+Done:
+
+- `ControlSafetyInterlockBackend` decorates the hardware backend in both modes, so every ECoS movement command passes one policy.
+- Loco-scoped latch refuses non-zero movement for that loco only; layout latch refuses it for all locos and refuses power-on. Stops, power-off and switch commands always pass.
+- `IHardwareBackend.SetPower`/`SetLocoSpeed` return `bool`; a refused movement is answered with `<END 8 (SAFETY_INTERLOCK)>` and produces no speed event.
+- Rejections are reported once per loco per latch (`MovementRejectedBySafety`).
+- `ControlSafetyGuard.Reset()` revalidates through `DivergenceChecker.IsResolved` and refuses while the condition persists (`ResetRefused`).
+
+**Increment 6 is complete.** The remaining items below are hardware/firmware dependencies, not code gaps.
+
+## Remaining hardware and firmware dependencies (out of scope)
+
+| Item | Evidence | Acceptance criteria |
+| --- | --- | --- |
+| Real amplifier occupancy firmware bit. | `TrackAmplifier4.X/modbus/General.h` TODO; real mode reports `OccupancyAvailable = false`. | Firmware populates the occupied bit and real occupancy becomes reliable. |
+| Real physical switch output. | `TrackAmplifierHardwareBackend.SetSwitch` returns false; the real switch sink drives nothing. | An accessory-decoder output path actuates mapped switches. |
+| Physical switch feedback. | `UnobservableSwitchObserver` always reports "not observable". | A real observer exists and the ECoS state reflects confirmed hardware state. |
+| Simulator occupancy through the production abstraction. | Simulator occupancy arrives as ECoS sensor events, so `OccupancyAvailable` is false there. | An `IOccupancyProvider` over the simulator exists and occupancy divergence is checked in simulator mode. |
+| Real-layout power-on switch positions. | `SwitchMapConfig` default is `keep`. | Confirmed positions are configured as `g`/`r`. |
+| Signals 51..55 as switches. | Koploper commands them via `switch[...]`; they are unmapped and ignored. | Signals are either mapped or deliberately documented as out of scope. |
+| Real switch output path (accessory decoder). | See above. | Mapped switches are actuated on the real layout. |
+| Latched fault and `dir` at speed 0. | `dir[...]` is treated as movement, so it is refused while latched. | Confirmed acceptable or refined. |
 
 

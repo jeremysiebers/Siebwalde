@@ -493,3 +493,19 @@ Decision: The first `StopRequired` diagnostic latches as the root cause and is n
 Evidence: Auto-clearing on the next command would hide the reason the layout stopped and could let a locomotive move into an unverified route.
 
 Impact: `ControlDiagnostics` keeps a bounded history (100) plus a separate `LatchedUnsafe`, so current critical state and history are both available to the UI without the critical state being overwritten. A later, different fault is recorded but does not replace the latched root cause.
+
+## 2026-09-19: A Safety Latch Interlocks Movement, It Does Not Freeze Everything
+
+Decision: `ControlSafetyInterlockBackend` decorates the hardware backend already in use, so every ECoS movement command passes the same policy. A loco-scoped latch refuses non-zero movement for that locomotive only; a layout-wide latch refuses it for every locomotive and refuses power-on. Stopping is always allowed, switch commands always pass, and a corrective switch command never unlatches anything.
+
+Evidence: A latch that only prevented repeated stops still let a later Koploper command move the affected locomotive again, which is the gap this closes. Freezing everything would block the corrective switch change that is usually the only way to resolve the divergence.
+
+Impact: `IHardwareBackend.SetPower`/`SetLocoSpeed` return `bool` (the same contract fix as `SetSwitch`), so `SimpleEcosBackend` replies `<END 8 (SAFETY_INTERLOCK)>` and emits no `speed[...]`/`dir[...]` event when a command is refused. Koploper is never told a refused movement succeeded. Rejections are reported once per locomotive per latch (`MovementRejectedBySafety`) to avoid a diagnostic storm.
+
+## 2026-09-19: A Safety Reset Revalidates Before It Clears
+
+Decision: `ControlSafetyGuard.Reset()` revalidates every latched fault through `DivergenceChecker.IsResolved` and refuses the reset while any condition is still present, reporting `ResetRefused`. A refused reset leaves both the latch and the movement interlock in place.
+
+Evidence: Clearing the latch on request would restore movement permission without the underlying condition being fixed, which is exactly the unsafe state the latch exists to prevent.
+
+Impact: Recovery is: correct the condition (for example change the switch) -> explicit reset -> movement allowed again. Reset itself never issues movement, and `ControlDiagnostic.RequiredSwitchPosition` records what the route needed so revalidation does not have to re-derive it.

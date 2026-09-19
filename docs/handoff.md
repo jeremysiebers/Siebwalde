@@ -1,5 +1,54 @@
 # Handoff
 
+## Latest Session (2026-09-19, safety movement interlock)
+
+Closes the gap that a latched `StopRequired` fault prevented repeated stops but not a later Koploper command from moving the affected locomotive again.
+
+### Where the interlock lives
+
+`SiebwaldeApp.Integration.ControlSafetyInterlockBackend` is a decorator over the hardware backend that is already in use. It is inserted between the ECoS backend and the hardware backend in both modes (simulator in `TrackControlHost`, real inside `TrackControlIntegration`), so every ECoS movement command passes through the same policy. No second control path was introduced, and no safety logic sits in WPF.
+
+### Blocking rules while a StopRequired fault is latched
+
+| Latch scope | Non-zero movement | Stop (speed 0) | Power off | Power on | Switch commands |
+| --- | --- | --- | --- | --- | --- |
+| Loco N | refused for N only | allowed | allowed | allowed | allowed |
+| Layout (unattributable fault) | refused for every loco | allowed | allowed | **refused** | allowed |
+
+A layout latch escalates over loco latches. Switch commands always pass, because a corrective switch change is often the only way to resolve the divergence, and a corrective command does not unlatch anything.
+
+### How a rejected movement is represented
+
+`IHardwareBackend.SetPower` and `SetLocoSpeed` now return `bool`, in the same spirit as the earlier `SetSwitch` fix. `SimpleEcosBackend` only updates its logical loco state and only emits a `speed[...]`/`dir[...]` event when the backend reports the command was applied; otherwise it replies `<END 8 (SAFETY_INTERLOCK)>` and reports nothing. Koploper is therefore never told a refused movement succeeded. `TrackAmplifierHardwareBackend.SetLocoSpeed` also returns false for a locomotive with no known block, so that case is no longer falsely acknowledged either.
+
+A rejection is reported once per affected locomotive per latch (`MovementRejectedBySafety`), so repeated commands cannot flood the diagnostics.
+
+### Reset and recovery
+
+`ControlSafetyGuard.Reset()` now **revalidates** every latched fault before clearing. `DivergenceChecker.IsResolved` decides: a `RouteSwitchMismatch` is resolved when the switch's known logical position now matches the required position; `StateUnknown` when the position is known; `OccupancyMismatch` when the block is no longer occupied. A refused reset reports `ResetRefused` and leaves the latch and the movement interlock in place. Reset never issues movement, and a corrective switch command does not unlatch by itself.
+
+### Files changed
+
+- Added: `SiebwaldeApp.Integration/ControlSafetyInterlockBackend.cs`.
+- Modified: `EcosEmu/Hardware/IHardwareBackend.cs` (SetPower/SetLocoSpeed return bool), `EcosEmu/Hardware/TrackSimulatorBackend.cs`, `EcosEmu/Hardware/DummyHardwareBackend.cs`, `EcosEmu/Backend/SimpleEcosBackend.cs`, `Integration/SwitchTranslatingHardwareBackend.cs`, `Integration/TrackAmplifierHardwareBackend.cs`, `Integration/ControlSafetyGuard.cs`, `Integration/DivergenceChecker.cs`, `Integration/TrackControlHost.cs`, `Integration/TrackControlIntegration.cs`, `Core/Model/TrackApplication/Diagnostics/DiagnosticTypes.cs` (+MovementRejectedBySafety, +ResetRefused), `Core/Model/TrackApplication/Diagnostics/ControlDiagnostic.cs` (+RequiredSwitchPosition), `Core/Model/TrackApplication/Control/IEcosHostService.cs`, `Core/Model/SiebwaldeApplicationModel.cs`, `SiebwaldeApp/ViewModel/SiebwaldeViewModels/SiebwaldeInitPageViewModel.cs`, `Core.Tests/DivergenceAndSafetyTests.cs`, `Core.Tests/SwitchControllerTests.cs`.
+
+### Tests and checks
+
+- `dotnet build SiebwaldeApp.sln` -> **0 errors**.
+- `dotnet test` -> **204/204 passed** (was 193; +11 interlock tests, including an integration-style test through `SimpleEcosBackend`).
+- Software-only scenario on port 15471 (temporary console host, since removed): divergence detected and loco 1 stopped; `set(1000,speed[40])` answered `<END 8 (SAFETY_INTERLOCK)>` with no speed event; four repeats produced one rejection diagnostic; `set(1000,speed[0])` answered `<END 0 (OK)>`; a corrective switch command was accepted and did not unlatch; reset while still wrong was refused; after correcting the switch the reset succeeded and `speed[40]` was accepted again.
+- No physical hardware was touched.
+
+### Remaining concerns
+
+1. Real mode still has no switch feedback and no reliable occupancy, so route checks cannot confirm anything there.
+2. The interlock blocks commands; it does not forcibly re-issue stops, which is correct but means a latched fault relies on the earlier safety stop having landed.
+3. `dir[...]` is treated as a movement command and goes through the same path, so a direction change is refused while the locomotive is latched even at speed 0. That is conservative and safe.
+
+### Increment 6 completion assessment
+
+**Increment 6 can be declared complete.** The translation path (speed/PWM, routing and look-ahead, occupancy, switch mapping), the ECoS host lifecycle with explicit mode semantics, the configurable mappings, and the divergence/safety/diagnostics layer including the movement interlock are implemented, tested and documented. What remains is deliberately out of scope and recorded in `docs/backlog.md`: the real amplifier occupancy firmware bit, the real accessory-decoder switch output, physical switch feedback, and simulator occupancy through the production occupancy abstraction. None of these block a first integration/PR; they are hardware and firmware dependencies.
+
 ## Latest Session (2026-09-19, item 4: divergence, safety stop, diagnostics)
 
 Increment 6 item 4 is implemented: a diagnostic/safety layer around the Koploper/ECoS translation path.

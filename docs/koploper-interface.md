@@ -358,6 +358,14 @@ Requested, commanded and observed stay separate: `SwitchController` records the 
 
 `DivergenceChecker` checks a route before the look-ahead pre-commands the next block. `ControlSafetyGuard` applies the reaction once per fault key (no stop storm); a loco-scoped fault stops that locomotive through the existing `SetLocoSpeed(address, 0, dir)` path, and an unattributable fault stops the layout through the existing `SetPower(false)` path (the same central stop as `set(1,stop)`). The first StopRequired latches until an explicit reset.
 
+### Safety movement interlock
+
+`ControlSafetyInterlockBackend` sits between the ECoS backend and the hardware backend, so every movement command passes one policy while a fault is latched: non-zero movement is refused for the affected locomotive (or for all locomotives when the fault is layout-wide), power-on is refused for a layout-wide fault, and stops, power-off and switch commands always pass. A corrective switch command never unlatches anything.
+
+`IHardwareBackend.SetPower` and `SetLocoSpeed` return `bool`. When a movement is refused, `SimpleEcosBackend` replies `<END 8 (SAFETY_INTERLOCK)>`, keeps its logical speed unchanged and sends no `speed[...]`/`dir[...]` event, so Koploper is never told a refused movement succeeded. Rejections are reported once per locomotive per latch (`MovementRejectedBySafety`).
+
+Recovery is explicit: `ControlSafetyGuard.Reset()` revalidates every latched fault through `DivergenceChecker.IsResolved` and is refused with `ResetRefused` while the condition persists. Only after the correction plus a successful reset does movement become possible again.
+
 
 
 ## Open Questions
