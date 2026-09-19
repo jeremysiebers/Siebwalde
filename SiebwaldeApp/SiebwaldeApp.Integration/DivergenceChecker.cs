@@ -80,6 +80,37 @@ namespace SiebwaldeApp.Integration
         }
 
         /// <summary>
+        /// Revalidates a latched fault for recovery. Returns true when the condition behind it is
+        /// resolved. A fault with no revalidation rule is treated as resolved, because only the
+        /// operator can judge it.
+        /// </summary>
+        public bool IsResolved(ControlDiagnostic fault)
+        {
+            switch (fault.Code)
+            {
+                case DiagnosticCode.RouteSwitchMismatch:
+                    return fault.SwitchAddress is int requiredSwitch
+                           && fault.RequiredSwitchPosition is SwitchPosition required
+                           && _switches.GetLogicalPositions().TryGetValue(requiredSwitch, out var current)
+                           && current == required;
+
+                case DiagnosticCode.StateUnknown:
+                    return fault.SwitchAddress is int unknownSwitch
+                           && _switches.GetLogicalPositions().ContainsKey(unknownSwitch);
+
+                case DiagnosticCode.OccupancyMismatch:
+                    // Only meaningful where occupancy is actually observable.
+                    return !_observability.OccupancyAvailable
+                           || _occupancy is null
+                           || fault.Block is null
+                           || !_occupancy.IsBlockOccupied(fault.Block.Value);
+
+                default:
+                    return true;
+            }
+        }
+
+        /// <summary>
         /// Reports that the control path cannot reach the hardware, so no state can be guaranteed.
         /// Not attributable to one locomotive, so the safety reaction is a layout stop.
         /// </summary>
@@ -148,6 +179,7 @@ namespace SiebwaldeApp.Integration
                     LocoAddress = locoAddress,
                     Block = fromBlock,
                     SwitchAddress = switchId,
+                    RequiredSwitchPosition = required,
                     Detail = $"Route {fromBlock}->{toBlock} requires switch {switchId} to be {required}, but the known logical position is {known}."
                 });
             }

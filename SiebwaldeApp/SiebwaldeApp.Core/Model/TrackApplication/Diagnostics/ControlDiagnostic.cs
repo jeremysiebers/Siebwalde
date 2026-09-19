@@ -29,6 +29,12 @@ namespace SiebwaldeApp.Core
         /// <summary>Affected ECoS/physical switch address, when applicable.</summary>
         public int? SwitchAddress { get; init; }
 
+        /// <summary>
+        /// The switch position the route requires, when the condition is a route/switch
+        /// mismatch. Kept so recovery can revalidate the condition without re-deriving it.
+        /// </summary>
+        public SwitchPosition? RequiredSwitchPosition { get; init; }
+
         /// <summary>When the condition was observed.</summary>
         public DateTimeOffset Timestamp { get; init; } = DateTimeOffset.Now;
 
@@ -51,6 +57,7 @@ namespace SiebwaldeApp.Core
             LocoAddress = LocoAddress,
             Block = Block,
             SwitchAddress = SwitchAddress,
+            RequiredSwitchPosition = RequiredSwitchPosition,
             Timestamp = Timestamp,
             SafetyAction = action
         };

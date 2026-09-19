@@ -294,12 +294,30 @@ namespace SiebwaldeApp.EcosEmu
             // Base object: power on/off of the central
             if (id == 1)
             {
+                var powerRejected = false;
+
                 foreach (var opt in cmd.Options)
                 {
                     if (opt.StartsWith("go", StringComparison.OrdinalIgnoreCase))
-                        _hardware.SetPower(true);
+                    {
+                        if (!_hardware.SetPower(true))
+                        {
+                            powerRejected = true;
+                        }
+                    }
                     else if (opt.StartsWith("stop", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Removing power is always allowed, even during a safety latch.
                         _hardware.SetPower(false);
+                    }
+                }
+
+                if (powerRejected)
+                {
+                    // Never tell Koploper the central came back on when it did not.
+                    Console.WriteLine("[SET POWER] refused by the hardware backend (safety interlock).");
+                    await WriteReplyAsync(writer, cmd.RawLine, 8, "SAFETY_INTERLOCK", null);
+                    return;
                 }
 
                 await WriteReplyAsync(writer, cmd.RawLine, 0, "OK", null);
@@ -326,6 +344,10 @@ namespace SiebwaldeApp.EcosEmu
             }
 
             var events = new List<string>();
+
+            // Set when a movement command was refused by the hardware backend (for example by
+            // the safety interlock), so Koploper is not told it succeeded.
+            var movementRejected = false;
 
             foreach (var opt in cmd.Options)
             {
@@ -354,11 +376,19 @@ namespace SiebwaldeApp.EcosEmu
                     var (ok, value) = ParseBracketInt(opt);
                     if (ok)
                     {
-                        loco.Speed = value;
-                        _hardware.SetLocoSpeed(loco.Address, loco.Speed, loco.Direction);
+                        if (!_hardware.SetLocoSpeed(loco.Address, value, loco.Direction))
+                        {
+                            // Refused (for example by the safety interlock): keep the logical
+                            // speed unchanged and report no speed change to Koploper.
+                            movementRejected = true;
+                        }
+                        else
+                        {
+                            loco.Speed = value;
 
-                        // Event: reflect new speed
-                        events.Add($"{id} speed[{loco.Speed}]");
+                            // Event: reflect new speed
+                            events.Add($"{id} speed[{loco.Speed}]");
+                        }
                     }
                 }
                 else if (opt.StartsWith("dir", StringComparison.OrdinalIgnoreCase))
@@ -366,11 +396,17 @@ namespace SiebwaldeApp.EcosEmu
                     var (ok, value) = ParseBracketInt(opt);
                     if (ok)
                     {
-                        loco.Direction = value;
-                        _hardware.SetLocoSpeed(loco.Address, loco.Speed, loco.Direction);
+                        if (!_hardware.SetLocoSpeed(loco.Address, loco.Speed, value))
+                        {
+                            movementRejected = true;
+                        }
+                        else
+                        {
+                            loco.Direction = value;
 
-                        // Event: reflect new direction
-                        events.Add($"{id} dir[{loco.Direction}]");
+                            // Event: reflect new direction
+                            events.Add($"{id} dir[{loco.Direction}]");
+                        }
                     }
                 }
                 else if (opt.StartsWith("addr", StringComparison.OrdinalIgnoreCase))
@@ -441,6 +477,14 @@ namespace SiebwaldeApp.EcosEmu
 
             // Without state to koploper
             // Reply to Koploper – for switch events we don't echo them in the reply body
+            if (movementRejected)
+            {
+                // Koploper must not be told a movement command succeeded when it did not.
+                Console.WriteLine("[SET LOCO] refused by the hardware backend (safety interlock).");
+                await WriteReplyAsync(writer, cmd.RawLine, 8, "SAFETY_INTERLOCK", null);
+                return;
+            }
+
             await WriteReplyAsync(writer, cmd.RawLine, 0, "OK", null);
 
             // Additionally send ECoS-style events back to the client (e.g. Koploper).

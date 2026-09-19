@@ -307,9 +307,12 @@ namespace SiebwaldeApp
         /// </summary>
         private void ResetControlSafetyNow()
         {
-            IoC.siebwaldeApplicationModel.ResetControlSafety();
+            var applied = IoC.siebwaldeApplicationModel.ResetControlSafety();
             UpdateControlStatus();
-            Log("Control safety reset requested.");
+
+            Log(applied
+                ? "Control safety reset applied."
+                : "Control safety reset refused: the underlying condition is still present.");
         }
 
         #endregion

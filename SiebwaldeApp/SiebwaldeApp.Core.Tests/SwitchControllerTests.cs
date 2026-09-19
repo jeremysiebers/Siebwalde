@@ -32,11 +32,17 @@ namespace SiebwaldeApp.Core.Tests
             public bool? Power { get; private set; }
             public List<(int Address, int Speed, int Direction)> LocoCommands { get; } = new();
 
-            public void SetPower(bool on) => Power = on;
+            public bool SetPower(bool on)
+            {
+                Power = on;
+                return true;
+            }
 
-            public void SetLocoSpeed(int address, int ecosSpeed, int direction)
-                => LocoCommands.Add((address, ecosSpeed, direction));
-
+            public bool SetLocoSpeed(int address, int ecosSpeed, int direction)
+            {
+                LocoCommands.Add((address, ecosSpeed, direction));
+                return true;
+            }
             public bool SetSwitch(int decoderAddress, int outputIndex, bool on)
             {
                 SwitchCalls.Add((decoderAddress, outputIndex, on));

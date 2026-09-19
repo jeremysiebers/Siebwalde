@@ -1,4 +1,4 @@
-﻿using SiebwaldeApp.Core.TrackApplication.Comm;
+using SiebwaldeApp.Core.TrackApplication.Comm;
 using System.Text;
 
 namespace SiebwaldeApp.Core
@@ -265,7 +265,8 @@ namespace SiebwaldeApp.Core
         /// <summary>
         /// Explicit recovery for a latched safety fault. A latched fault never clears itself.
         /// </summary>
-        public void ResetControlSafety() => _ecosHost?.ResetSafety();
+        /// <returns>True when the reset was applied, false when it was refused.</returns>
+        public bool ResetControlSafety() => _ecosHost?.ResetSafety() ?? false;
 
         /// <summary>
         /// Starts the ECoS host in simulator mode, so Koploper can be exercised without the
@@ -459,7 +460,7 @@ namespace SiebwaldeApp.Core
         }
                 
         /// <summary>
-        /// Dummy MAC payload (12×3): identifiers u..z,0..5; value=0; CR
+        /// Dummy MAC payload (12�3): identifiers u..z,0..5; value=0; CR
         /// Matches the wire format expected by FiddleYardController.
         /// </summary>
         private static byte[,] BuildDummyMacPayload()

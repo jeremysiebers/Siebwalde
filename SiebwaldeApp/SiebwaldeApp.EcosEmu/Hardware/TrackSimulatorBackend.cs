@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -51,7 +51,7 @@ namespace SiebwaldeApp.EcosEmu
         /// <remarks>When the power is turned off, the speed of all locomotives is set to zero.</remarks>
         /// <param name="on">A boolean value indicating the desired power state.  <see langword="true"/> to turn the power on; <see
         /// langword="false"/> to turn it off.</param>
-        public void SetPower(bool on)
+        public bool SetPower(bool on)
         {
             Console.WriteLine($"[SIM-HW] Power {(on ? "ON" : "OFF")}");
 
@@ -64,6 +64,8 @@ namespace SiebwaldeApp.EcosEmu
                         loco.SpeedSteps = 0;
                 }
             }
+
+            return true;
         }
 
         private void ResetAllSensors()
@@ -218,7 +220,7 @@ namespace SiebwaldeApp.EcosEmu
         }
 
 
-        public void SetLocoSpeed(int decoderAddress, int speedSteps, int direction)
+        public bool SetLocoSpeed(int decoderAddress, int speedSteps, int direction)
         {
             Console.WriteLine($"[SIM-HW] Loco addr={decoderAddress} speed={speedSteps} dir={direction}");
 
@@ -232,13 +234,13 @@ namespace SiebwaldeApp.EcosEmu
                     if (blockFromKoploper == null || blockFromKoploper <= 0)
                     {
                         // Locomotive is NOT on the layout, so ignore.
-                        return;
+                        return false;
                     }
 
                     if (!_blocks.TryGetValue(blockFromKoploper.Value, out _))
                     {
                         Console.WriteLine($"[SIM-HW] Unknown block {blockFromKoploper} for loco {decoderAddress}.");
-                        return;
+                        return false;
                     }
 
                     // ONLY create sim state, do NOT touch occupancy here.
@@ -259,6 +261,8 @@ namespace SiebwaldeApp.EcosEmu
                 loco.Direction = direction >= 0 ? 1 : -1;
                 loco.SpeedSteps = Math.Max(0, speedSteps);
             }
+
+            return true;
         }
 
         // ========== Simulatie-loop ==========
@@ -302,7 +306,7 @@ namespace SiebwaldeApp.EcosEmu
             {
                 foreach (var loco in _locos.Values)
                 {
-                    // Standing still → no movement, no sensor changes.
+                    // Standing still ? no movement, no sensor changes.
                     if (loco.SpeedSteps <= 0)
                         continue;
 
@@ -349,7 +353,7 @@ namespace SiebwaldeApp.EcosEmu
                         continue;
                     }
 
-                    // Leaving the current block → clear both sensors (if defined).
+                    // Leaving the current block ? clear both sensors (if defined).
                     if (block.EnterSensorId != 0)
                     {
                         sensorEvents.Add((block.EnterSensorId, false));
@@ -365,7 +369,7 @@ namespace SiebwaldeApp.EcosEmu
 
                     if (nextBlockId == null || !_blocks.TryGetValue(nextBlockId.Value, out var nextBlock))
                     {
-                        // No valid next block → train stops at the end of this block.
+                        // No valid next block ? train stops at the end of this block.
                         loco.SpeedSteps = 0;
                         continue;
                     }
@@ -375,7 +379,7 @@ namespace SiebwaldeApp.EcosEmu
                     loco.PositionMm = loco.Direction > 0 ? 0 : nextBlock.LengthMm;
                     loco.ExitZoneReached = false;
 
-                    // Entering the new block → first only the enter sensor becomes occupied.
+                    // Entering the new block ? first only the enter sensor becomes occupied.
                     if (nextBlock.EnterSensorId != 0)
                     {
                         sensorEvents.Add((nextBlock.EnterSensorId, true));
@@ -418,7 +422,7 @@ namespace SiebwaldeApp.EcosEmu
 
             if (loco.Direction > 0)
             {
-                // Rijrichting "vooruit" (zoals 1→2→3→(4/5)→1)
+                // Rijrichting "vooruit" (zoals 1?2?3?(4/5)?1)
 
                 if (currentBlockId == 3)
                 {
@@ -435,7 +439,7 @@ namespace SiebwaldeApp.EcosEmu
                 if (currentBlockId == 4)
                 {
                     // Vanuit blok 4 naar blok 1:
-                    // wissel 2 moet "recht" staan (0 = spoor 4 ↔ blok 1)
+                    // wissel 2 moet "recht" staan (0 = spoor 4 ? blok 1)
                     if (sw2Pos == 0) return 1;
 
                     // Wissel verkeerd -> geen geldig vervolgblok, trein stopt aan eind blok 4
@@ -445,7 +449,7 @@ namespace SiebwaldeApp.EcosEmu
                 if (currentBlockId == 5)
                 {
                     // Vanuit blok 5 naar blok 1:
-                    // wissel 2 moet "afbuigend" staan (1 = spoor 5 ↔ blok 1)
+                    // wissel 2 moet "afbuigend" staan (1 = spoor 5 ? blok 1)
                     if (sw2Pos == 1) return 1;
 
                     // Wissel verkeerd -> geen geldig vervolgblok, trein stopt aan eind blok 5
@@ -454,7 +458,7 @@ namespace SiebwaldeApp.EcosEmu
             }
             else // loco.Direction < 0
             {
-                // Rijrichting achteruit (zoals 1→(4/5)→3→2→1)
+                // Rijrichting achteruit (zoals 1?(4/5)?3?2?1)
 
                 if (currentBlockId == 1)
                 {
@@ -471,7 +475,7 @@ namespace SiebwaldeApp.EcosEmu
                 if (currentBlockId == 4)
                 {
                     // Vanuit blok 4 terug naar blok 3:
-                    // wissel 1 moet "recht" staan (0 = spoor 4 ↔ blok 3)
+                    // wissel 1 moet "recht" staan (0 = spoor 4 ? blok 3)
                     if (sw1Pos == 0) return 3;
 
                     // Wissel verkeerd -> geen geldig vervolgblok
@@ -481,7 +485,7 @@ namespace SiebwaldeApp.EcosEmu
                 if (currentBlockId == 5)
                 {
                     // Vanuit blok 5 terug naar blok 3:
-                    // wissel 1 moet "afbuigend" staan (1 = spoor 5 ↔ blok 3)
+                    // wissel 1 moet "afbuigend" staan (1 = spoor 5 ? blok 3)
                     if (sw1Pos == 1) return 3;
 
                     // Wissel verkeerd -> geen geldig vervolgblok
@@ -511,8 +515,8 @@ namespace SiebwaldeApp.EcosEmu
                 EnterSensorId: 1,
                 ExitSensorId: 2,
                 LengthMm: 1000,
-                NextBlockForward: 2,  // 1→2
-                NextBlockReverse: 3   // 1→3
+                NextBlockForward: 2,  // 1?2
+                NextBlockReverse: 3   // 1?3
             );
 
             // Blok 2: tussen blok 1 en 3
@@ -521,8 +525,8 @@ namespace SiebwaldeApp.EcosEmu
                 EnterSensorId: 3,
                 ExitSensorId: 4,
                 LengthMm: 1000,
-                NextBlockForward: 3,  // 2→3
-                NextBlockReverse: 1   // 2→1
+                NextBlockForward: 3,  // 2?3
+                NextBlockReverse: 1   // 2?1
             );
 
             // Blok 3: tussen blok 2 en 1 / wisselstraat
@@ -531,8 +535,8 @@ namespace SiebwaldeApp.EcosEmu
                 EnterSensorId: 5,
                 ExitSensorId: 6,
                 LengthMm: 1000,
-                NextBlockForward: 1,  // default hoofdbaan 3→1
-                NextBlockReverse: 2   // 3→2
+                NextBlockForward: 1,  // default hoofdbaan 3?1
+                NextBlockReverse: 2   // 3?2
             );
 
             // Blok 4: eerste spoor van wisselstraat
@@ -541,8 +545,8 @@ namespace SiebwaldeApp.EcosEmu
                 EnterSensorId: 7,
                 ExitSensorId: 8,
                 LengthMm: 800,
-                NextBlockForward: 1,  // 4→1
-                NextBlockReverse: 3   // 4→3
+                NextBlockForward: 1,  // 4?1
+                NextBlockReverse: 3   // 4?3
             );
 
             // Blok 5: tweede spoor van wisselstraat
@@ -551,8 +555,8 @@ namespace SiebwaldeApp.EcosEmu
                 EnterSensorId: 9,
                 ExitSensorId: 10,
                 LengthMm: 800,
-                NextBlockForward: 1,  // 5→1
-                NextBlockReverse: 3   // 5→3
+                NextBlockForward: 1,  // 5?1
+                NextBlockReverse: 3   // 5?3
             );
         }
 

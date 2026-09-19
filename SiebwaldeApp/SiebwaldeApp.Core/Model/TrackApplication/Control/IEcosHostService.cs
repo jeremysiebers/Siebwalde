@@ -31,10 +31,12 @@ namespace SiebwaldeApp.Core
         bool IsUnsafe { get; }
 
         /// <summary>
-        /// Explicit recovery: clears the latched safety state. A latched fault never clears
-        /// itself, not even when a later command arrives.
+        /// Explicit recovery: clears the latched safety state, but only when the underlying
+        /// condition revalidates as resolved. A latched fault never clears itself, not even
+        /// when a later command arrives.
         /// </summary>
-        void ResetSafety();
+        /// <returns>True when the reset was applied, false when it was refused.</returns>
+        bool ResetSafety();
 
         /// <summary>
         /// Starts the host in the requested mode and reports what happened.

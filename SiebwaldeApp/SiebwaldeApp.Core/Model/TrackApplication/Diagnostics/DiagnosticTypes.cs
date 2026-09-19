@@ -54,7 +54,20 @@ namespace SiebwaldeApp.Core
         /// The state is unknown while a safe operation requires knowing it. Distinct from
         /// <see cref="UnmappedAddress"/>: the element exists, but its state cannot be confirmed.
         /// </summary>
-        StateUnknown = 7
+        StateUnknown = 7,
+
+        /// <summary>
+        /// A movement command was refused because a safety fault is latched. Reported once per
+        /// affected locomotive while the latch holds, so repeated commands cannot flood the
+        /// diagnostics.
+        /// </summary>
+        MovementRejectedBySafety = 8,
+
+        /// <summary>
+        /// An explicit safety reset was refused because the underlying condition is still not
+        /// resolved.
+        /// </summary>
+        ResetRefused = 9
     }
 
     /// <summary>The safety reaction that was actually taken for a diagnostic.</summary>

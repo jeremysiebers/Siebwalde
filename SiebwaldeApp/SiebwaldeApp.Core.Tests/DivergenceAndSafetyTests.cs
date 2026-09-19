@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using SiebwaldeApp.Core;
+using SiebwaldeApp.EcosEmu;
 using SiebwaldeApp.Integration;
 using Xunit;
 
@@ -582,6 +583,274 @@ namespace SiebwaldeApp.Core.Tests
 
             // Feedback is unavailable by design, so no mismatch may be claimed.
             Assert.Empty(diagnostics.Recent);
+        }
+
+        // ---------------------------------------------------------------------
+        // Movement interlock while a StopRequired fault is latched
+        // ---------------------------------------------------------------------
+
+        private sealed class RecordingMovementBackend : IHardwareBackend
+        {
+            public List<(int Address, int Speed, int Direction)> LocoCommands { get; } = new();
+            public int PowerOffCount { get; private set; }
+            public int PowerOnCount { get; private set; }
+
+            public bool SetPower(bool on)
+            {
+                if (on) { PowerOnCount++; } else { PowerOffCount++; }
+                return true;
+            }
+
+            public bool SetLocoSpeed(int address, int ecosSpeed, int direction)
+            {
+                LocoCommands.Add((address, ecosSpeed, direction));
+                return true;
+            }
+
+            public bool SetSwitch(int decoderAddress, int outputIndex, bool on) => true;
+        }
+
+        private static (ControlSafetyInterlockBackend Interlock, RecordingMovementBackend Inner, RecordingStopSink Stops, ControlDiagnostics Diagnostics, ControlSafetyGuard Guard)
+            CreateInterlock()
+        {
+            var diagnostics = new ControlDiagnostics();
+            var stops = new RecordingStopSink();
+            var guard = new ControlSafetyGuard(stops, diagnostics);
+            var inner = new RecordingMovementBackend();
+
+            return (new ControlSafetyInterlockBackend(inner, guard, diagnostics), inner, stops, diagnostics, guard);
+        }
+
+        private static ControlDiagnostic LocoFault(int loco) => new()
+        {
+            Code = DiagnosticCode.RouteSwitchMismatch,
+            Severity = DiagnosticSeverity.StopRequired,
+            Subject = $"switch 1",
+            LocoAddress = loco,
+            Block = 3,
+            SwitchAddress = 1,
+            RequiredSwitchPosition = SwitchPosition.Straight,
+            Detail = "route requires switch 1 straight"
+        };
+
+        private static ControlDiagnostic LayoutFault() => new()
+        {
+            Code = DiagnosticCode.BackendUnavailable,
+            Severity = DiagnosticSeverity.StopRequired,
+            Subject = "backend",
+            Detail = "track controller unreachable"
+        };
+
+        [Fact]
+        public void LocoLatch_RejectsNonZeroMovementForThatLocoOnly()
+        {
+            var (interlock, inner, _, _, guard) = CreateInterlock();
+            guard.Apply(LocoFault(1));
+
+            Assert.False(interlock.SetLocoSpeed(1, 40, 0));
+            Assert.True(interlock.SetLocoSpeed(2, 40, 0));
+
+            // The refused command never reached the hardware backend.
+            Assert.Equal(new[] { (2, 40, 0) }, inner.LocoCommands);
+        }
+
+        [Fact]
+        public void LocoLatch_StillAcceptsStopAndCorrectiveSwitchCommands()
+        {
+            var (interlock, inner, _, _, guard) = CreateInterlock();
+            guard.Apply(LocoFault(1));
+
+            Assert.True(interlock.SetLocoSpeed(1, 0, 0));
+            Assert.True(interlock.SetSwitch(1, 0, true));
+            Assert.True(guard.AllowsSwitchCommand());
+
+            Assert.Equal(new[] { (1, 0, 0) }, inner.LocoCommands);
+        }
+
+        [Fact]
+        public void LocoLatch_RepeatedNonZeroCommandsDoNotBypass()
+        {
+            var (interlock, inner, _, _, guard) = CreateInterlock();
+            guard.Apply(LocoFault(1));
+
+            for (var i = 0; i < 5; i++)
+            {
+                Assert.False(interlock.SetLocoSpeed(1, 20 + i, 0));
+            }
+
+            Assert.Empty(inner.LocoCommands);
+        }
+
+        [Fact]
+        public void RejectedMovement_IsReportedOncePerLatch()
+        {
+            var (interlock, _, _, diagnostics, guard) = CreateInterlock();
+            guard.Apply(LocoFault(1));
+
+            for (var i = 0; i < 4; i++)
+            {
+                interlock.SetLocoSpeed(1, 30, 0);
+            }
+
+            Assert.Single(diagnostics.Recent, d => d.Code == DiagnosticCode.MovementRejectedBySafety);
+        }
+
+        [Fact]
+        public void LayoutLatch_BlocksMovementForEveryLocoAndRefusesPowerOn()
+        {
+            var (interlock, inner, _, _, guard) = CreateInterlock();
+            guard.Apply(LayoutFault());
+
+            Assert.False(interlock.SetLocoSpeed(1, 40, 0));
+            Assert.False(interlock.SetLocoSpeed(2, 40, 0));
+            Assert.False(interlock.SetPower(true));
+
+            Assert.Empty(inner.LocoCommands);
+            Assert.Equal(0, inner.PowerOnCount);
+        }
+
+        [Fact]
+        public void LayoutLatch_StillAllowsStopAndPowerOff()
+        {
+            var (interlock, inner, _, _, guard) = CreateInterlock();
+            guard.Apply(LayoutFault());
+
+            Assert.True(interlock.SetLocoSpeed(1, 0, 0));
+            Assert.True(interlock.SetPower(false));
+
+            Assert.Equal(1, inner.PowerOffCount);
+        }
+
+        [Fact]
+        public void ResetWithoutCorrection_DoesNotRestoreMovement()
+        {
+            var (interlock, inner, _, diagnostics, guard) = CreateInterlock();
+            guard.Apply(LocoFault(1));
+
+            // Revalidation says the route condition is still wrong.
+            guard.RevalidationCheck = _ => false;
+
+            Assert.False(guard.Reset());
+            Assert.True(guard.IsLatched);
+            Assert.False(interlock.SetLocoSpeed(1, 40, 0));
+            Assert.Empty(inner.LocoCommands);
+            Assert.Contains(diagnostics.Recent, d => d.Code == DiagnosticCode.ResetRefused);
+        }
+
+        [Fact]
+        public void ResetAfterCorrection_RestoresMovement()
+        {
+            var (interlock, inner, _, _, guard) = CreateInterlock();
+            guard.Apply(LocoFault(1));
+            guard.RevalidationCheck = _ => true;
+
+            Assert.True(guard.Reset());
+            Assert.False(guard.IsLatched);
+
+            Assert.True(interlock.SetLocoSpeed(1, 40, 0));
+            Assert.Equal(new[] { (1, 40, 0) }, inner.LocoCommands);
+        }
+
+        [Fact]
+        public void RouteMismatchThenCorrectionThenReset_EndToEnd()
+        {
+            var diagnostics = new ControlDiagnostics();
+            var stops = new RecordingStopSink();
+            var guard = new ControlSafetyGuard(stops, diagnostics);
+
+            var switchOutput = new RecordingSwitchOutput();
+            var switches = CreateController(switchOutput, diagnostics, guard);
+            var inner = new RecordingMovementBackend();
+            var interlock = new ControlSafetyInterlockBackend(inner, guard, diagnostics);
+
+            var checker = new DivergenceChecker(
+                BlockTopology.Parse(OvalTopology),
+                switches,
+                occupancy: null,
+                new ModeObservability { SwitchFeedbackAvailable = false, OccupancyAvailable = false },
+                diagnostics,
+                guard);
+
+            guard.RevalidationCheck = checker.IsResolved;
+
+            // 1) switch 1 is diverging, loco 1 wants 3 -> 4.
+            switches.TryApply(1, SwitchPosition.Diverging, out _);
+            var fault = checker.CheckTransition(locoAddress: 1, fromBlock: 3, toBlock: 4);
+
+            Assert.NotNull(fault);
+            Assert.Equal(new[] { 1 }, stops.StoppedLocos);
+
+            // 2) a new movement command for loco 1 is refused.
+            Assert.False(interlock.SetLocoSpeed(1, 40, 0));
+            Assert.Empty(inner.LocoCommands);
+
+            // 3) a reset is refused while the switch is still wrong.
+            Assert.False(guard.Reset());
+            Assert.False(interlock.SetLocoSpeed(1, 40, 0));
+
+            // 4) correct the switch; the corrective command is still allowed.
+            Assert.True(interlock.SetSwitch(1, 0, true));
+            switches.TryApply(1, SwitchPosition.Straight, out _);
+
+            // 5) now the reset succeeds and movement is allowed again.
+            Assert.True(guard.Reset());
+            Assert.True(interlock.SetLocoSpeed(1, 40, 0));
+            Assert.Equal(new[] { (1, 40, 0) }, inner.LocoCommands);
+        }
+
+        [Fact]
+        public void CorrectiveSwitchCommand_DoesNotUnlatchByItself()
+        {
+            var (interlock, _, _, _, guard) = CreateInterlock();
+            guard.Apply(LocoFault(1));
+
+            interlock.SetSwitch(1, 0, true);
+
+            Assert.True(guard.IsLatched);
+            Assert.False(interlock.SetLocoSpeed(1, 40, 0));
+        }
+
+        private sealed class FixedBlockPositionProvider : IBlockPositionProvider
+        {
+            public event System.Action<int, int>? BlockEntered;
+
+            public int? TryGetBlockForLoc(int loc) => 3;
+        }
+
+        [Fact]
+        public async System.Threading.Tasks.Task RejectedMovement_IsNotAcknowledgedThroughTheEcosPath()
+        {
+            var diagnostics = new ControlDiagnostics();
+            var guard = new ControlSafetyGuard(new RecordingStopSink(), diagnostics);
+            var inner = new RecordingMovementBackend();
+            var interlock = new ControlSafetyInterlockBackend(inner, guard, diagnostics);
+
+            var locoPath = System.IO.Path.Combine(
+                System.IO.Path.GetTempPath(), $"safety-locos-{System.Guid.NewGuid():N}.json");
+
+            var repository = new SiebwaldeApp.EcosEmu.JsonLocoRepository(locoPath);
+            await repository.LoadAsync();
+
+            var backend = new SiebwaldeApp.EcosEmu.SimpleEcosBackend(
+                interlock,
+                repository,
+                new FixedBlockPositionProvider());
+
+            guard.Apply(LocoFault(1000));
+
+            using var writer = new System.IO.StringWriter();
+            var command = new SiebwaldeApp.EcosEmu.SimpleEcosCommandParser().Parse("set(1000,speed[20])");
+
+            await backend.HandleAsync(command!, writer, System.Threading.CancellationToken.None);
+
+            var output = writer.ToString();
+
+            // Koploper is told the command was refused, and no speed change is reported.
+            Assert.Contains("SAFETY_INTERLOCK", output);
+            Assert.DoesNotContain("1000 speed[", output);
+            Assert.Empty(inner.LocoCommands);
+
+            try { System.IO.File.Delete(locoPath); } catch { /* temp cleanup */ }
         }
     }
 }

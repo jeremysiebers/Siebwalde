@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using SiebwaldeApp.Core;
 
 namespace SiebwaldeApp.Integration
@@ -17,7 +18,7 @@ namespace SiebwaldeApp.Integration
         private readonly ISafetyStopSink _stops;
         private readonly ControlDiagnostics _diagnostics;
         private readonly Action<string>? _log;
-        private readonly HashSet<string> _latchedKeys = new();
+        private readonly Dictionary<string, ControlDiagnostic> _latched = new();
         private readonly object _lock = new();
 
         public ControlSafetyGuard(
@@ -37,7 +38,38 @@ namespace SiebwaldeApp.Integration
             {
                 lock (_lock)
                 {
-                    return _latchedKeys.Count > 0;
+                    return _latched.Count > 0;
+                }
+            }
+        }
+
+        /// <summary>
+        /// True when a latched fault cannot be attributed to a single locomotive, so it applies
+        /// to the whole layout.
+        /// </summary>
+        public bool IsLayoutLatched
+        {
+            get
+            {
+                lock (_lock)
+                {
+                    return _latched.Values.Any(d => d.LocoAddress is null);
+                }
+            }
+        }
+
+        /// <summary>The locomotives that have a latched fault of their own.</summary>
+        public IReadOnlyCollection<int> LatchedLocos
+        {
+            get
+            {
+                lock (_lock)
+                {
+                    return _latched.Values
+                        .Where(d => d.LocoAddress is not null)
+                        .Select(d => d.LocoAddress!.Value)
+                        .Distinct()
+                        .ToList();
                 }
             }
         }
@@ -49,10 +81,63 @@ namespace SiebwaldeApp.Integration
             {
                 lock (_lock)
                 {
-                    return new List<string>(_latchedKeys);
+                    return new List<string>(_latched.Keys);
                 }
             }
         }
+
+        /// <summary>The latched faults themselves, used for revalidation.</summary>
+        public IReadOnlyCollection<ControlDiagnostic> LatchedFaults
+        {
+            get
+            {
+                lock (_lock)
+                {
+                    return new List<ControlDiagnostic>(_latched.Values);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Revalidates a latched fault before recovery is allowed. Returns true when the
+        /// condition is resolved. Set by the composition root; when unset, a fault is treated
+        /// as resolvable.
+        /// </summary>
+        public Func<ControlDiagnostic, bool>? RevalidationCheck { get; set; }
+
+        /// <summary>
+        /// True when a locomotive may be commanded to move. A layout-wide latch blocks every
+        /// locomotive; a loco-scoped latch blocks only the locomotives it names.
+        /// </summary>
+        public bool AllowsMovement(int locoAddress)
+        {
+            lock (_lock)
+            {
+                if (_latched.Count == 0)
+                {
+                    return true;
+                }
+
+                if (_latched.Values.Any(d => d.LocoAddress is null))
+                {
+                    return false;
+                }
+
+                return !_latched.Values.Any(d => d.LocoAddress == locoAddress);
+            }
+        }
+
+        /// <summary>
+        /// True when power may be switched back on. Only a layout-wide latch refuses this,
+        /// because only then was a layout stop part of the safety action.
+        /// </summary>
+        public bool AllowsPowerOn() => !IsLayoutLatched;
+
+        /// <summary>
+        /// Switch commands stay possible during a latch: a corrective switch change is often the
+        /// only way to resolve the divergence. Exposed so the rule is explicit and testable.
+        /// </summary>
+        public bool AllowsSwitchCommand() => true;
 
         /// <summary>
         /// Applies the safety action for a diagnostic and returns the action that was taken.
@@ -72,12 +157,14 @@ namespace SiebwaldeApp.Integration
 
             lock (_lock)
             {
-                if (!_latchedKeys.Add(diagnostic.Key))
+                if (_latched.ContainsKey(diagnostic.Key))
                 {
                     _log?.Invoke(
                         $"Safety fault '{diagnostic.Key}' is already latched; no repeated stop is issued.");
                     return SafetyAction.None;
                 }
+
+                _latched[diagnostic.Key] = diagnostic;
             }
 
             // A locomotive-scoped fault stops that locomotive so unrelated trains keep running.
@@ -120,18 +207,52 @@ namespace SiebwaldeApp.Integration
         }
 
         /// <summary>
-        /// Clears the latches and the latched unsafe state. This is the explicit recovery step:
-        /// a persistent fault never clears itself.
+        /// Clears the latches and the latched unsafe state, but only when every latched fault
+        /// revalidates as resolved. A persistent fault never clears itself, and a reset without
+        /// a correction is refused so movement permission is not restored prematurely.
         /// </summary>
-        public void Reset()
+        /// <returns>True when the reset was applied, false when it was refused.</returns>
+        public bool Reset()
         {
+            List<ControlDiagnostic> unresolved;
+
             lock (_lock)
             {
-                _latchedKeys.Clear();
+                unresolved = _latched.Values
+                    .Where(d => RevalidationCheck is not null && !RevalidationCheck(d))
+                    .ToList();
+            }
+
+            if (unresolved.Count > 0)
+            {
+                foreach (var fault in unresolved)
+                {
+                    _log?.Invoke($"Safety reset refused: '{fault.Key}' is still not resolved.");
+
+                    _diagnostics.Report(new ControlDiagnostic
+                    {
+                        Code = DiagnosticCode.ResetRefused,
+                        Severity = DiagnosticSeverity.Rejected,
+                        Subject = fault.Subject,
+                        Detail = $"Safety reset refused: the condition behind '{fault.Key}' is still present.",
+                        LocoAddress = fault.LocoAddress,
+                        Block = fault.Block,
+                        SwitchAddress = fault.SwitchAddress,
+                        RequiredSwitchPosition = fault.RequiredSwitchPosition
+                    });
+                }
+
+                return false;
+            }
+
+            lock (_lock)
+            {
+                _latched.Clear();
             }
 
             _diagnostics.ClearLatch();
             _log?.Invoke("Safety latches cleared by explicit reset.");
+            return true;
         }
     }
 }

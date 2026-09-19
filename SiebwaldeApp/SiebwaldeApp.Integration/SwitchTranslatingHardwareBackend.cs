@@ -30,10 +30,10 @@ namespace SiebwaldeApp.Integration
         }
 
         /// <inheritdoc />
-        public void SetPower(bool on) => _inner.SetPower(on);
+        public bool SetPower(bool on) => _inner.SetPower(on);
 
         /// <inheritdoc />
-        public void SetLocoSpeed(int address, int ecosSpeed, int direction)
+        public bool SetLocoSpeed(int address, int ecosSpeed, int direction)
             => _inner.SetLocoSpeed(address, ecosSpeed, direction);
 
         /// <inheritdoc />

@@ -34,7 +34,9 @@ namespace SiebwaldeApp.Integration
             IHardwareFeedbackSink? feedbackSink = null,
             Func<IReadOnlyDictionary<int, SwitchPosition>>? switchPositionProvider = null,
             Action<string>? log = null,
-            SwitchController? switchController = null)
+            SwitchController? switchController = null,
+            ControlSafetyGuard? safetyGuard = null,
+            ControlDiagnostics? diagnostics = null)
         {
             _commClient = commClient ?? throw new ArgumentNullException(nameof(commClient));
             if (variables is null) throw new ArgumentNullException(nameof(variables));
@@ -67,6 +69,13 @@ namespace SiebwaldeApp.Integration
                 IHardwareBackend hardware = switchController is null
                     ? RealBackend
                     : new SwitchTranslatingHardwareBackend(RealBackend, switchController, log);
+
+                // Movement commands pass through the safety interlock so a latched fault cannot
+                // be bypassed by a later command from Koploper.
+                if (safetyGuard is not null && diagnostics is not null)
+                {
+                    hardware = new ControlSafetyInterlockBackend(hardware, safetyGuard, diagnostics, log);
+                }
 
                 EcosBackend = new SimpleEcosBackend(hardware, locoRepository, blockPositionProvider);
             }

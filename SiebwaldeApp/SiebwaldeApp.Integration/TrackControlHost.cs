@@ -245,7 +245,9 @@ namespace SiebwaldeApp.Integration
                     feedbackSink: null,
                     CurrentSwitchPositions,
                     _log,
-                    Switches);
+                    Switches,
+                    Safety,
+                    Diagnostics);
 
                 _ecosBackend = _integration.EcosBackend
                     ?? throw new InvalidOperationException(
@@ -262,6 +264,8 @@ namespace SiebwaldeApp.Integration
 
                 _integration.RealBackend.Divergence = Divergence;
                 _stopSink.Hardware = _integration.RealBackend;
+
+                BindSafetyRevalidation();
             }
             else
             {
@@ -293,10 +297,12 @@ namespace SiebwaldeApp.Integration
                     new SimulatorSwitchObserver(_simulatorBackend),
                     Observability);
 
-                _ecosBackend = new SimpleEcosBackend(
-                    new SwitchTranslatingHardwareBackend(_simulatorBackend, Switches, _log),
-                    _locoRepository,
-                    _externalInfo);
+                // Movement commands pass through the safety interlock so a latched fault cannot
+                // be bypassed by a later command from Koploper.
+                IHardwareBackend hardware = new SwitchTranslatingHardwareBackend(_simulatorBackend, Switches, _log);
+                hardware = new ControlSafetyInterlockBackend(hardware, Safety, Diagnostics, _log);
+
+                _ecosBackend = new SimpleEcosBackend(hardware, _locoRepository, _externalInfo);
 
                 // The simulator needs the ECoS backend as feedback sink, so hook it up
                 // before the external-info client starts producing block positions.
@@ -311,6 +317,8 @@ namespace SiebwaldeApp.Integration
                     Diagnostics,
                     Safety,
                     _log);
+
+                BindSafetyRevalidation();
             }
 
             // Give every mapped switch a known state where one is configured. Entries marked
@@ -372,7 +380,19 @@ namespace SiebwaldeApp.Integration
         /// Explicit recovery: clears the latched safety state so the control path can continue.
         /// A latched fault never clears itself, not even when a later command arrives.
         /// </summary>
-        public void ResetSafety() => Safety?.Reset();
+        public bool ResetSafety() => Safety?.Reset() ?? false;
+
+        /// <summary>
+        /// Binds the divergence checker as the revalidation rule for recovery, so an explicit
+        /// reset is refused while the underlying condition is still present.
+        /// </summary>
+        private void BindSafetyRevalidation()
+        {
+            if (Safety is not null && Divergence is not null)
+            {
+                Safety.RevalidationCheck = Divergence.IsResolved;
+            }
+        }
 
         private void TryRun(Action action, string description)
         {

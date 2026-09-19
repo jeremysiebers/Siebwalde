@@ -50,12 +50,12 @@ namespace SiebwaldeApp.Integration
         }
 
         /// <summary>Power off sets every mapped amplifier to neutral (standstill).</summary>
-        public void SetPower(bool on)
+        public bool SetPower(bool on)
         {
             if (on)
             {
                 _log?.Invoke("Power ON");
-                return;
+                return true;
             }
 
             foreach (var block in _topology.Blocks)
@@ -72,25 +72,31 @@ namespace SiebwaldeApp.Integration
             }
 
             _log?.Invoke("Power OFF: all mapped amplifiers set to neutral");
+            return true;
         }
 
         /// <summary>
         /// Translates a locomotive speed command into amplifier setpoints for the
         /// block the locomotive currently occupies, plus the look-ahead block.
         /// </summary>
-        public void SetLocoSpeed(int address, int ecosSpeed, int direction)
+        /// <returns>
+        /// False when nothing could be commanded (the locomotive has no known position or its
+        /// block has no amplifier mapping), so the ECoS backend does not acknowledge a movement
+        /// command that had no effect.
+        /// </returns>
+        public bool SetLocoSpeed(int address, int ecosSpeed, int direction)
         {
             var block = _blockPositionProvider.TryGetBlockForLoc(address);
             if (block is null)
             {
                 _log?.Invoke($"Loco {address}: no known block, command ignored");
-                return;
+                return false;
             }
 
             if (!_topology.TryGetAmplifiers(block.Value, out var amplifiers))
             {
                 _log?.Invoke($"Loco {address}: block {block.Value} has no amplifier mapping");
-                return;
+                return false;
             }
 
             var pwm = AmplifierSpeedMapper.ToPwm(ecosSpeed, direction);
@@ -104,6 +110,8 @@ namespace SiebwaldeApp.Integration
                 $"Loco {address}: block {block.Value} speed {ecosSpeed} dir {direction} -> PWM {pwm} on amp(s) {string.Join("+", amplifiers)}");
 
             ApplyLookAhead(address, block.Value, pwm);
+
+            return true;
         }
 
         /// <summary>

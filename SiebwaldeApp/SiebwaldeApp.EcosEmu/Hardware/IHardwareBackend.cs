@@ -8,7 +8,15 @@ namespace SiebwaldeApp.EcosEmu
 {
     public interface IHardwareBackend
     {
-        void SetPower(bool on);
+        /// <summary>
+        /// Sets the power state of the layout.
+        /// </summary>
+        /// <returns>
+        /// <see langword="true"/> when the command was applied. <see langword="false"/> when it
+        /// was refused (for example a safety interlock), so the ECoS backend does not report a
+        /// power change that never happened.
+        /// </returns>
+        bool SetPower(bool on);
 
         /// <summary>
         /// Sets the speed and direction of a locomotive identified by its address.
@@ -19,7 +27,12 @@ namespace SiebwaldeApp.EcosEmu
         /// <param name="address">The unique address of the locomotive to control.</param>
         /// <param name="ecosSpeed">The speed value to set, typically ranging from 0 (stop) to a maximum value defined by the system.</param>
         /// <param name="direction">The direction of the locomotive, where 0 typically represents forward and 1 represents reverse.</param>
-        void SetLocoSpeed(int address, int ecosSpeed, int direction);
+        /// <returns>
+        /// <see langword="true"/> when the command was applied. <see langword="false"/> when it
+        /// was refused (for example a safety interlock or a locomotive with no known position),
+        /// so the ECoS backend never acknowledges a movement command that did not take effect.
+        /// </returns>
+        bool SetLocoSpeed(int address, int ecosSpeed, int direction);
 
         /// <summary>
         /// Sets the state of a specific output on a decoder.
