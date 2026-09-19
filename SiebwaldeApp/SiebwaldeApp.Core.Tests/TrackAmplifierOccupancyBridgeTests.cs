@@ -33,17 +33,30 @@ namespace SiebwaldeApp.Core.Tests
         private const string OvalMapping =
             "1:1.01+1.02:1, 2:1.03+1.04:2, 3:1.05+1.06:3, 4:1.07+1.08:4, 5:1.09+1.10:5";
 
-        [Fact]
-        public void SensorIdsFollowTheBlockNumbering()
+        [Theory]
+        [InlineData("1.01", 1)]
+        [InlineData("1.03", 3)]
+        [InlineData("1.10", 10)]
+        [InlineData("2.01", 17)]
+        public void TryGetSensorId_ConvertsBezetmelderNames(string name, int expected)
         {
-            Assert.Equal(1, TrackAmplifierOccupancyBridge.EnterSensor(1));
-            Assert.Equal(2, TrackAmplifierOccupancyBridge.ExitSensor(1));
-            Assert.Equal(9, TrackAmplifierOccupancyBridge.EnterSensor(5));
-            Assert.Equal(10, TrackAmplifierOccupancyBridge.ExitSensor(5));
+            Assert.True(TrackAmplifierOccupancyBridge.TryGetSensorId(name, out var sensorId));
+            Assert.Equal(expected, sensorId);
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData("garbage")]
+        [InlineData("1")]
+        [InlineData("1.17")]
+        [InlineData("0.01")]
+        public void TryGetSensorId_RejectsInvalidNames(string name)
+        {
+            Assert.False(TrackAmplifierOccupancyBridge.TryGetSensorId(name, out _));
         }
 
         [Fact]
-        public async Task FirstPoll_ReportsEveryBlock()
+        public async Task FirstPoll_ReportsEveryBezetmelder()
         {
             var occupancy = new FakeOccupancy();
             var sink = new RecordingFeedbackSink();
@@ -51,7 +64,7 @@ namespace SiebwaldeApp.Core.Tests
 
             await bridge.PollAsync();
 
-            // 5 blocks x (enter + exit)
+            // 5 blocks x 2 bezetmelders
             Assert.Equal(10, sink.SensorEvents.Count);
             Assert.All(sink.SensorEvents, e => Assert.False(e.Occupied));
         }
@@ -71,7 +84,7 @@ namespace SiebwaldeApp.Core.Tests
         }
 
         [Fact]
-        public async Task OccupancyChange_ReportsBothBezetmeldersOfThatBlock()
+        public async Task OccupancyChange_ReportsTheBezetmeldersOfThatBlock()
         {
             var occupancy = new FakeOccupancy();
             var sink = new RecordingFeedbackSink();
@@ -89,23 +102,17 @@ namespace SiebwaldeApp.Core.Tests
         }
 
         [Fact]
-        public async Task OccupancyCleared_ReportsBothBezetmeldersAsFree()
+        public async Task BlockWithSingleBezetmelder_ReportsOneEvent()
         {
             var occupancy = new FakeOccupancy();
-            occupancy.Occupied.Add(2);
-
             var sink = new RecordingFeedbackSink();
-            var bridge = new TrackAmplifierOccupancyBridge(KoploperBlockMap.Parse(OvalMapping), occupancy, sink);
+            var bridge = new TrackAmplifierOccupancyBridge(
+                KoploperBlockMap.Parse("7:1.11:7"), occupancy, sink);
 
             await bridge.PollAsync();
-            sink.SensorEvents.Clear();
 
-            occupancy.Occupied.Remove(2);
-            await bridge.PollAsync();
-
-            Assert.Equal(2, sink.SensorEvents.Count);
-            Assert.Contains((3, false), sink.SensorEvents);
-            Assert.Contains((4, false), sink.SensorEvents);
+            Assert.Single(sink.SensorEvents);
+            Assert.Equal((11, false), sink.SensorEvents[0]);
         }
     }
 }

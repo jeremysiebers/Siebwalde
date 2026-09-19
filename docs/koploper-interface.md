@@ -266,6 +266,13 @@ Verified against the live trace: loc1 in block 2 + loc2 in block 5 gives `0x104`
 
 Consequence: for real hardware, amplifier occupancy must be reported as sensor ids 1..10 (bit = id - 1) so Koploper sees the correct bezetmelders.
 
+## Test Setups And Detector Count
+
+- **Real hardware (current, near-term target)**: 4 proto amplifiers and an oval **without switches**. Koploper block = amplifier section 1-1. So 4 amplifiers, 4 blocks, maximum 2 trains running without collision. This is what we will test with Koploper next.
+- **Simulation (current Koploper oval)**: 5 blocks, 2 bezetmelders each, 2 switches, with a passing loop.
+- A Koploper block does **not** always have exactly 2 bezetmelders; it can have one or more. The physical minimum of 2 applies where precise stopping is required (for example a station: a brake detector plus a stop detector).
+- **Firmware status**: the test firmware (bootloader + communication layer) accepts setpoints and returns the occupancy signal. MMDC and further behaviour will be added later.
+
 ## Trace Data (2026-09-11)
 
 - No Koploper/ECoS trace data exists in `Logging/` or anywhere else in the repository. The emulator and the external-info client log to the console only (`[EXT]`, `[LOCO]`, `[ECOS]`, `[HW-FEEDBACK]`, `TX:`), and no console capture was kept.
