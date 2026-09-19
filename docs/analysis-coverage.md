@@ -101,7 +101,8 @@ Increment 1 (2026-09-11) fixed two of the confirmed items: the `SiebwaldeApp.Cor
 | Amplifier occupancy | Implemented + tested | `TrackAmplifierRegisters`, `TrackAmplifierOccupancyProvider`, tests. | Firmware still has a TODO for the occupied flag. |
 | Occupancy -> Koploper bridge | Implemented + tested | `TrackAmplifierOccupancyBridge`, tests. | Not yet wired into the running app. |
 | App composition (option A) | Partial | `TrackControlIntegration`; WPF app references Integration. | App startup wiring and mode selection pending. |
-| Unit tests | Implemented | `SiebwaldeApp.Core.Tests`, 98 tests passing. | UI-model and other areas still uncovered. |
+| Unit tests | Implemented | `SiebwaldeApp.Core.Tests`, 100 tests passing. | UI-model and other areas still uncovered. |
+| Mapping settings (item 5) | Completed | `BlockTopologyConfig`/`KoploperBlockMapConfig` in both `app.config` files, settings page with undo + reset, line-break-tolerant parsers. | Real-layout values still to be entered. |
 
 
 

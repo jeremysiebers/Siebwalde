@@ -149,7 +149,8 @@ Done this session:
 - Protocol reconnaissance, terminology, oval mapping, bezetmelder -> sensor mapping: `docs/koploper-interface.md`.
 - `AmplifierSpeedMapper`, `BlockTopology` routing + no-look-ahead marker, `IOccupancyProvider`, `LookAheadPlanner`, `KoploperBlockMap`, `TrackAmplifierRegisters`, `TrackAmplifierOccupancyProvider`.
 - `TrackAmplifierOccupancyBridge` (event-driven) and `TrackControlIntegration` (option A composition).
-- `BlockTopologyConfig` + `KoploperBlockMapConfig` editable on the settings page.
+- `BlockTopologyConfig` + `KoploperBlockMapConfig` editable on the settings page, with undo and a reset-to-defaults button, and explicit defaults in both `App.config` files.
+- `BlockTopology.Parse`/`KoploperBlockMap.Parse` accept line breaks as separators (the settings fields are multi-line), so an unprefixed section containing `>` is treated as routes instead of being silently dropped.
 - `locos.json` recreation/auto-sync validated; `locos.json` no longer pre-seeded.
 
 Still open (next steps):
@@ -157,7 +158,6 @@ Still open (next steps):
 | Item | Evidence | Acceptance criteria |
 | --- | --- | --- |
 | Finish the app startup wiring. | `TrackControlIntegration` is not yet created from `SiebwaldeApplicationModel`; the `EcosEmulatorServer` is not yet started in-process by the app. | The app creates the integration from `CoreConfiguration`, starts the ECoS server, calls `Attach()`, and offers a real-vs-simulator mode. |
-| Add the mapping settings to `App.config`. | `BlockTopologyConfig`/`KoploperBlockMapConfig` currently rely on Designer defaults. | Both `App.config` files carry explicit values. |
 | Switch mapping (real <-> Koploper + default init state). | Oval switch addresses are 1 and 2; the `3>4` vs `3>5` branch selection is still provisional in the topology config. | Switch mapping is configurable and the branch selection is confirmed from a trace. |
 | Divergence check with ECoS stop and diagnostics. | C# should stop Koploper and log what diverged when data drifts apart. | Divergence detected, Koploper stopped via ECoS, mismatch logged. |
 | Watchdog for stale amplifier occupancy. | Event-driven occupancy has no timeout for missing updates. | Stale occupancy is detected and surfaced. |

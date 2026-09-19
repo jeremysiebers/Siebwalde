@@ -383,3 +383,11 @@ Decision: `BlockTopologyConfig` and `KoploperBlockMapConfig` are user settings, 
 Evidence: Product owner requirement that the mapping be created and edited by the operator, not hard-coded.
 
 Impact: Defaults match the test oval; `CoreConfiguration.BuildBlockTopology()`/`BuildKoploperBlockMap()` parse them.
+
+## 2026-09-19: Mapping Parsers Accept Line Breaks
+
+Decision: `BlockTopology.Parse` and `KoploperBlockMap.Parse` treat a line break as a separator, and an unprefixed section containing `>` is treated as routes rather than amplifiers.
+
+Evidence: The settings fields are multi-line (`AcceptsReturn="True"`). With `;`/`,`-only splitting, an operator who pressed Enter instead of `;` got a silently empty topology (the amplifier entry consumed the following route text and failed to parse).
+
+Impact: A malformed-but-plausible entry now still yields a usable topology; unparseable entries are ignored rather than corrupting the rest. Parsing stays in Core (`CoreConfiguration`); the WPF view model only binds strings. Covered by `BlockTopologyRoutingTests.LineBreaksSeparateSectionsAndUnprefixedRoutes` and `KoploperBlockMapTests.LineBreaksSeparateEntries`.

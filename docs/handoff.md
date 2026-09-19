@@ -10,16 +10,16 @@ Completed on `feature/csharp-cleanup-startup` (all committed and pushed; `git st
 - **Koploper block mapping**: `KoploperBlockMap` (Koploper block -> bezetmelders -> amplifier sections, with reverse lookups). The authoritative oval mapping was extracted from the Koploper HTML export in `Logging\Ovaaltje\`.
 - **Occupancy path**: `TrackAmplifierRegisters` (mirrors `TrackAmplifier4.X/modbus/General.h`; HR_STATUS = HoldingReg2, bit 10 = occupied) and `TrackAmplifierOccupancyProvider` (block occupied when any covered section is occupied). `TrackAmplifierOccupancyBridge` forwards occupancy changes to Koploper as ECoS sensor events (event-driven).
 - **Composition (option A)**: `TrackControlIntegration` builds the occupancy provider, the real backend, the in-process `SimpleEcosBackend` (when a loco repository is supplied) and the bridge; `Attach()`/`Detach()` subscribe to `ITrackCommClient.AmplifierDataReceived`. The WPF app now references `SiebwaldeApp.Integration`.
-- **Editable mapping settings**: `BlockTopologyConfig` and `KoploperBlockMapConfig` user settings (oval defaults), exposed via `CoreConfiguration.BuildBlockTopology()`/`BuildKoploperBlockMap()`, editable on the settings page with undo.
+- **Editable mapping settings** (Increment 6 item 5, completed): `BlockTopologyConfig` and `KoploperBlockMapConfig` user settings (oval defaults), exposed via `CoreConfiguration.BuildBlockTopology()`/`BuildKoploperBlockMap()`, editable on the settings page with undo and a reset-to-defaults button, and with explicit defaults in both `App.config` files. `BlockTopology.Parse`/`KoploperBlockMap.Parse` now also accept line breaks as separators, so the multi-line settings fields cannot silently produce an empty configuration. Commit `bf2dd81`.
 - **Live Koploper session**: emulator trace capture added to the emulator host; verified `create`, `set(id, speedstep[n])`, occupancy events, `[EXT]` position records, the loco sync, and the bezetmelder -> sensor/bit mapping.
 
-Tests: `dotnet test` **98/98 passed**. `SiebwaldeApp.sln` builds with 0 errors.
+Tests: `dotnet test` **100/100 passed**. `SiebwaldeApp.sln` builds with 0 errors.
 
 ### Files changed this session
 
 Core (`SiebwaldeApp/SiebwaldeApp.Core`):
 - Added: `Model/TrackApplication/Control/IOccupancyProvider.cs`, `KoploperBlockMap.cs`, `LookAheadPlanner.cs`, `TrackAmplifierOccupancyProvider.cs`, `TrackAmplifierRegisters.cs`.
-- Modified: `Model/TrackApplication/Control/BlockTopology.cs`, `Configuration/CoreConfiguration.cs`, `Properties/CoreSettings.settings`, `Properties/CoreSettings.Designer.cs`.
+- Modified: `Model/TrackApplication/Control/BlockTopology.cs`, `Model/TrackApplication/Control/KoploperBlockMap.cs`, `Configuration/CoreConfiguration.cs`, `Properties/CoreSettings.settings`, `Properties/CoreSettings.Designer.cs`, `app.config`.
 
 Integration (`SiebwaldeApp/SiebwaldeApp.Integration`):
 - Added: `TrackAmplifierOccupancyBridge.cs`, `TrackControlIntegration.cs`.
@@ -58,12 +58,11 @@ Docs:
 ### Incomplete / uncertain
 
 1. **App startup wiring (rest of "2-rest")**: `TrackControlIntegration` is not yet created/started from `SiebwaldeApplicationModel`; the `EcosEmulatorServer` is not yet started in-process by the app; there is no real-vs-simulator mode selection in the app.
-2. The two new settings are not yet present in the `App.config` files (defaults currently come from the Designer attributes).
-3. **Switch mapping** (real <-> Koploper + default init state) not done; switch addresses for the oval are known (1 and 2) but the branch selection (`3>4` vs `3>5`) is still provisional in the topology config.
-4. **Divergence check + ECoS stop + operator diagnostics** not started.
-5. The firmware occupied flag has a TODO; live occupancy depends on firmware that populates it (the product owner states the real test firmware already returns it).
-6. `TrackApplicationVariables` gives all 56 items the same `HoldingReg` array instance (aliasing) - recorded in the backlog.
-7. `Logging/` (runtime logs, traces, `locos.json`, the Koploper HTML exports) is untracked and intentionally not committed.
+2. **Switch mapping** (real <-> Koploper + default init state) not done; switch addresses for the oval are known (1 and 2) but the branch selection (`3>4` vs `3>5`) is still provisional in the topology config.
+3. **Divergence check + ECoS stop + operator diagnostics** not started.
+4. The firmware occupied flag has a TODO; live occupancy depends on firmware that populates it (the product owner states the real test firmware already returns it).
+5. `TrackApplicationVariables` gives all 56 items the same `HoldingReg` array instance (aliasing) - recorded in the backlog.
+6. `Logging/` (runtime logs, traces, `locos.json`, the Koploper HTML exports) is untracked and intentionally not committed.
 
 ### Best next step
 
