@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using SiebwaldeApp.Core;
 using SiebwaldeApp.EcosEmu;
@@ -62,7 +62,7 @@ namespace SiebwaldeApp.Core.Tests
             var sink = new RecordingFeedbackSink();
             var bridge = new TrackAmplifierOccupancyBridge(KoploperBlockMap.Parse(OvalMapping), occupancy, sink);
 
-            await bridge.PollAsync();
+            await bridge.EvaluateAsync();
 
             // 5 blocks x 2 bezetmelders
             Assert.Equal(10, sink.SensorEvents.Count);
@@ -76,9 +76,9 @@ namespace SiebwaldeApp.Core.Tests
             var sink = new RecordingFeedbackSink();
             var bridge = new TrackAmplifierOccupancyBridge(KoploperBlockMap.Parse(OvalMapping), occupancy, sink);
 
-            await bridge.PollAsync();
+            await bridge.EvaluateAsync();
             sink.SensorEvents.Clear();
-            await bridge.PollAsync();
+            await bridge.EvaluateAsync();
 
             Assert.Empty(sink.SensorEvents);
         }
@@ -90,11 +90,11 @@ namespace SiebwaldeApp.Core.Tests
             var sink = new RecordingFeedbackSink();
             var bridge = new TrackAmplifierOccupancyBridge(KoploperBlockMap.Parse(OvalMapping), occupancy, sink);
 
-            await bridge.PollAsync();
+            await bridge.EvaluateAsync();
             sink.SensorEvents.Clear();
 
             occupancy.Occupied.Add(3);
-            await bridge.PollAsync();
+            await bridge.EvaluateAsync();
 
             Assert.Equal(2, sink.SensorEvents.Count);
             Assert.Contains((5, true), sink.SensorEvents);
@@ -109,10 +109,11 @@ namespace SiebwaldeApp.Core.Tests
             var bridge = new TrackAmplifierOccupancyBridge(
                 KoploperBlockMap.Parse("7:1.11:7"), occupancy, sink);
 
-            await bridge.PollAsync();
+            await bridge.EvaluateAsync();
 
             Assert.Single(sink.SensorEvents);
             Assert.Equal((11, false), sink.SensorEvents[0]);
         }
     }
 }
+

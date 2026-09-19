@@ -64,9 +64,15 @@ namespace SiebwaldeApp.Integration
         }
 
         /// <summary>
-        /// Reads the occupancy of every mapped block and forwards changes to Koploper.
+        /// Evaluates the occupancy of every mapped block and forwards changes to Koploper.
+        ///
+        /// This is event-driven, not polled: call it whenever amplifier data changes
+        /// (for example from TrackCommClientAsync.AmplifierDataReceived). Because the
+        /// bridge keeps the last known state, repeated calls without a change are cheap
+        /// and produce no ECoS traffic. Call it once after startup to establish the
+        /// initial state.
         /// </summary>
-        public async Task PollAsync()
+        public async Task EvaluateAsync()
         {
             foreach (var block in _blockMap.Blocks)
             {
