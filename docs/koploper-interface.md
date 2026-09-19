@@ -21,7 +21,7 @@ Locomotive control arrives as `set(<objectId>, speed[<value>])`, `set(<objectId>
 
 - `speed` and `dir` are applied to the locomotive and forwarded to `IHardwareBackend.SetLocoSpeed(loco.Address, loco.Speed, loco.Direction)`.
 - `func` updates `loco.Functions[index]`.
-- Switch commands forward to `IHardwareBackend.SetSwitch(decoderAddress, outputIndex, on)`.
+- Switch commands forward to `IHardwareBackend.SetSwitch(decoderAddress, outputIndex, on)`, which returns whether the command reached a physical output. When it returns false (an unmapped address), the ECoS backend sends no state event, so the logical state cannot silently disagree with the layout.
 
 This `set(id, speed[...])` / `set(id, dir[...])` traffic is the "per-encoder command" described by the product owner.
 
@@ -43,7 +43,7 @@ This `set(id, speed[...])` / `set(id, dir[...])` traffic is the "per-encoder com
 
 | Interface | Members | Role in the translation layer |
 | --- | --- | --- |
-| `IHardwareBackend` | `SetPower(bool)`, `SetLocoSpeed(address, ecosSpeed, direction)`, `SetSwitch(decoderAddress, outputIndex, on)` | Commands from Koploper. Replace/augment the simulator backend with a track-amplifier backend. |
+| `IHardwareBackend` | `SetPower(bool)`, `SetLocoSpeed(address, ecosSpeed, direction)`, `SetSwitch(decoderAddress, outputIndex, on) -> bool` | Commands from Koploper. The bool return tells the ECoS backend whether the command reached a physical output. |
 | `IHardwareFeedbackSink` | `OnSwitchChangedAsync(ecosId, decoderAddress, outputIndex)`, `OnSensorChangedAsync(sensorId, occupied)` | Occupancy/switch feedback to Koploper. |
 | `IBlockPositionProvider` | `TryGetBlockForLoc(loc)`, `BlockEntered(loco, block)` | Locomotive-to-block position from Koploper. |
 
@@ -236,10 +236,63 @@ The branch `3 -> 4` versus `3 -> 5` is controlled by the two switches (addresses
 
 ```
 amps:   1:1, 2:2, 3:3, 4:4, 5:5
-routes: 1>2, 2>3, 3>4@1:1, 3>5@2:1, 4>1, 5>1
+routes: 1>2, 2>3, 3>4@1:0, 3>5@1:1, 4>1, 5>1
 ```
 
-(The switch ids/positions in the `routes` line are provisional until the exact switch that selects 4 versus 5 is confirmed from a trace.)
+### Switch state that selects 3 -> 4 versus 3 -> 5 (PROVEN)
+
+Earlier revisions marked this as provisional. It is now proven from the live trace
+`Logging\19-09-2026_EcosEmuTrace.txt`, which repeats the pattern six times per route.
+
+Correlating every switch command for addresses 1 and 2 with the block Koploper last
+reported for the moving locomotive:
+
+| Locomotive | Route taken | Commands Koploper sends while in block 3 | Occurrences |
+| --- | --- | --- | --- |
+| Loc 1 | 3 -> 4 | `set(11,switch[1g])` then `set(11,switch[2r])` | 6 |
+| Loc 2 | 3 -> 5 | `set(11,switch[1r])` then `set(11,switch[2g])` | 6 |
+
+The block sequence confirms the destinations: loco 1 reaches block 4 (trace lines 512,
+1616, 2692, ...) and loco 2 reaches block 5 (lines 1074, 2158, ...).
+
+So **both** switches take part in selecting the branch, and they are always commanded as a
+complementary pair:
+
+| Route | Switch 1 | Switch 2 |
+| --- | --- | --- |
+| 3 -> 4 | `g` (straight, output 0) | `r` (diverging, output 1) |
+| 3 -> 5 | `r` (diverging, output 1) | `g` (straight, output 0) |
+
+Because the pair is complementary, the routing model can condition the transition on switch 1
+alone, which is what `routes: 3>4@1:0, 3>5@1:1` expresses. The `@<id>:<position>` id is the
+**ECoS/Koploper switch address** and the position uses ECoS semantics (0 = `g`/straight,
+1 = `r`/diverging).
+
+### Switch mapping configuration
+
+Switches are translated from ECoS/Koploper addresses to physical switch outputs by
+`SwitchMapConfig`, in the same style as the other mapping settings:
+
+```
+switches: <ecosAddress>:<physicalAddress>[:inverted][:g|r|keep], ...
+```
+
+- `ecosAddress` - the address in `set(<id>,switch[<addr>g|r])`.
+- `physicalAddress` - the accessory output address driven on the layout.
+- `inverted` - swap `g`/`r` between the ECoS request and the physical output.
+- `g` / `r` / `keep` - the position to drive to during initialization; `keep` (also the
+  default when omitted) leaves the output untouched.
+
+Shipped default: `switches: 1:1:keep, 2:2:keep` (identity mapping for the two oval switches).
+
+**Unresolved:** the power-on/rest position of the real layout switches is not known, so the
+shipped default is `keep`: no output is driven and no switch state is reported to Koploper,
+rather than guessing a position that could disagree with the layout. Set `g` or `r` per switch
+once the real rest position is confirmed.
+
+Note: addresses 51..55 are signals, not turnouts. They are commanded by Koploper in the same
+`switch[...]` form but are deliberately not mapped, so their commands are ignored and no
+switch state is reported for them.
 
 ### Bezetmelder to sensor/bit mapping (verified)
 
@@ -288,10 +341,14 @@ Consequence: for real hardware, amplifier occupancy must be reported as sensor i
 - `SiebwaldeApp.Core.BlockTopology` - done: block -> amplifier mapping plus a routing model. Configuration sections: `amps: block:amp[+amp]` and `routes: from>to[@switchId:position][!]`; `!` forbids look-ahead (for example a station departure block).
 - `SiebwaldeApp.Core.IOccupancyProvider` - done: block occupancy abstraction (real implementation still to be wired to amplifier occupancy).
 - `SiebwaldeApp.Core.LookAheadPlanner` - done: picks the next block to pre-command, filtered by switch position, excluding no-look-ahead transitions and occupied targets.
-- `SiebwaldeApp.Integration.TrackAmplifierHardwareBackend` - done: implements `IHardwareBackend`; resolves locomotive -> block, block -> amplifiers, speed -> PWM, queues writes, and (when a planner and occupancy provider are supplied) also commands the next block. `SetPower(false)` sets all mapped amplifiers to neutral. `SetSwitch` is not handled yet.
+- `SiebwaldeApp.Integration.TrackAmplifierHardwareBackend` - done: implements `IHardwareBackend`; resolves locomotive -> block, block -> amplifiers, speed -> PWM, queues writes, and (when a planner and occupancy provider are supplied) also commands the next block. `SetPower(false)` sets all mapped amplifiers to neutral. `SetSwitch` returns false and drives nothing, because switches are driven by accessory decoders and that real path is not wired yet.
+- `SiebwaldeApp.Core.SwitchMapping` - done: parses `SwitchMapConfig` (`ecosAddress:physicalAddress[:inverted][:g|r|keep]`), records invalid and duplicate entries in `Errors` instead of turning them into a plausible mapping.
+- `SiebwaldeApp.Integration.SwitchController` - done: translates an ECoS switch request into a physical drive, tracks the logical (ECoS) position for routing/look-ahead and the physical position for diagnostics, and initializes configured defaults.
+- `SiebwaldeApp.Integration.SwitchTranslatingHardwareBackend` - done: applies the shared switch translation in front of whichever hardware backend is active, so real and simulator mode use one control path.
+- `IHardwareBackend.SetSwitch` now returns `bool`: the ECoS backend only reports a switch state change when the command actually reached an output.
 - New non-UI project `SiebwaldeApp.Integration` (`net8.0-windows7.0`) references Core + EcosEmu; all translation logic stays out of the WPF project.
 - Tests: 70/70 passing.
-- Still open: real `IOccupancyProvider` from amplifier occupancy, occupancy feedback into `IHardwareFeedbackSink`, switch mapping (real <-> Koploper + default init state), backend selection (real vs `TrackSimulatorBackend`), divergence check with ECoS stop, and the `app.config` topology/routing settings plus settings-page editing.
+- Still open: divergence check with ECoS stop, a real switch-output path (accessory decoder), the real-layout power-on switch positions, and the watchdog for stale occupancy. Done: real `IOccupancyProvider` from amplifier occupancy, occupancy feedback into `IHardwareFeedbackSink`, switch mapping (real <-> Koploper + default init state), backend selection (real vs `TrackSimulatorBackend`), and the `app.config` topology/routing/switch settings plus settings-page editing.
 
 
 

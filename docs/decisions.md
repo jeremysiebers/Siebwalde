@@ -437,3 +437,35 @@ Decision: `CoreConfiguration.BlockTopologyConfig` and `KoploperBlockMapConfig` r
 Evidence: A legacy `user.config` written before the defaults existed keeps an empty string, which would silently disable the mapping and force the operator to find the Reset button. The declared default is read from `CoreSettings.Default.Properties[name].DefaultValue` so the Designer stays the single source of truth instead of the mapping string being duplicated in code.
 
 Impact: `BuildBlockTopology()`/`BuildKoploperBlockMap()` always see a usable default on a fresh or legacy profile, while a genuinely wrong non-empty value still produces an empty parse so the mistake is visible. The settings page reads the same resolved values, so the page and the runtime cannot disagree. The fallback is logged. Covered by `CoreConfigurationTests`.
+
+## 2026-09-19: One Shared Switch Translation Path
+
+Decision: ECoS switch commands are translated by a single `SwitchController` in front of whichever hardware backend is active, via `SwitchTranslatingHardwareBackend`. Real and simulator mode differ only in the `ISwitchOutput` behind the controller.
+
+Evidence: The simulator previously received switch commands directly while the real backend ignored them, which would have produced two divergent behaviours. The task requires no second control path for simulator mode.
+
+Impact: Mapping, inversion and initialization are implemented and tested once. Adding the real accessory-decoder path later means supplying a different `ISwitchOutput`, not changing the translation. `SwitchMapConfig` is parsed in Core and the controller lives in Integration, keeping the dependency direction intact.
+
+## 2026-09-19: Switch Route Conditions Are Proven, Not Inferred
+
+Decision: The oval route conditions are fixed as `3>4@1:0` and `3>5@1:1`, replacing the earlier provisional, unconditional `3>4`/`3>5`.
+
+Evidence: `Logging\19-09-2026_EcosEmuTrace.txt` repeats the pattern six times per route: loco 1 (which reaches block 4) is preceded by `set(11,switch[1g])` + `set(11,switch[2r])`, loco 2 (which reaches block 5) by `set(11,switch[1r])` + `set(11,switch[2g])`. Both switches are always commanded as a complementary pair, so conditioning the transition on switch 1 alone is correct and sufficient.
+
+Impact: Look-ahead through the passing loop now uses a real switch condition instead of treating both branches as always available. The `@<id>` is the ECoS/Koploper switch address, not the physical address.
+
+## 2026-09-19: Unknown Switch Rest Position Is 'keep', Not A Guess
+
+Decision: The shipped `SwitchMapConfig` default is `switches: 1:1:keep, 2:2:keep`. `keep` means "do not drive this output at initialization" and the switch is then not reported as having a known state.
+
+Evidence: The trace proves which state each route needs, but not the layout's power-on position. Inventing one would create a logical/physical disagreement at startup, which the task forbids.
+
+Impact: Initialization is deterministic (entries with `g`/`r` are driven and recorded; `keep` entries are left alone and stay unknown), and nothing is actuated on hardware that is not wired. The operator sets `g`/`r` per switch once the real rest position is known. A malformed or duplicate entry is recorded in `SwitchMapping.Errors` and logged rather than being turned into a plausible-but-wrong mapping.
+
+## 2026-09-19: SetSwitch Reports Whether The Command Reached An Output
+
+Decision: `IHardwareBackend.SetSwitch` returns `bool`, and the ECoS backend sends a `state[...]` event only when it returns true.
+
+Evidence: A live software-only test showed `set(11,switch[9g])` (an unmapped address) still produced `11 state[0]` for Koploper while nothing moved, i.e. the logical and physical switch state silently disagreed.
+
+Impact: Unmapped addresses (including the signals 51..55, which Koploper commands in the same `switch[...]` form) are ignored without fabricating a state. `TrackAmplifierHardwareBackend.SetSwitch` returns false because the real accessory path is not wired yet, so real-mode switch commands are honestly reported as not applied.

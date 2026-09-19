@@ -187,6 +187,26 @@ Done:
 - `EcosEmulatorServer` sets `ReuseAddress` so 15471 rebinds immediately during a transition.
 - Blank persisted mapping settings fall back to the declared default from the settings metadata; malformed non-empty values are still used as-is.
 
-The "Still open (next steps)" list in the app-startup-wiring section above remains the authoritative next-steps list. Item 3 (switch mapping) is next.
+The "Still open (next steps)" list in the app-startup-wiring section above remains the authoritative next-steps list.
+
+## Increment 6 Item 3: Switch Mapping (2026-09-19, fourth task)
+
+Done:
+
+- `SwitchMapping` (Core) parses `SwitchMapConfig`: `switches: <ecos>:<physical>[:inverted][:g|r|keep]`, recording invalid and duplicate entries instead of producing a plausible-but-wrong mapping.
+- `SwitchController` (Integration) translates ECoS switch requests to physical drives, tracks logical (ECoS) and physical positions separately, and initializes configured defaults.
+- `SwitchTranslatingHardwareBackend` applies the shared translation in front of whichever hardware backend runs, so real and simulator mode use one control path.
+- `IHardwareBackend.SetSwitch` now returns `bool`; the ECoS backend sends no state event when the command reached no output.
+- Proven route conditions shipped: `3>4@1:0, 3>5@1:1` (from `Logging\19-09-2026_EcosEmuTrace.txt`, 6 occurrences per route).
+- Settings page field with save/reset/undo and blank-value fallback.
+
+New items opened by this work:
+
+| Item | Evidence | Acceptance criteria |
+| --- | --- | --- |
+| Real switch output path (accessory decoder). | `TrackAmplifierHardwareBackend.SetSwitch` returns false and only logs. | Mapped switches are actuated on the real layout. |
+| Real-layout power-on switch positions. | `SwitchMapConfig` default is `keep` because the rest position is unknown. | Confirmed positions are configured as `g`/`r`. |
+| Physical switch feedback. | `ISwitchOutput.SetPosition` is void, so a failed drive cannot be reported. | A drive result/feedback path exists and the ECoS state reflects confirmed hardware state. |
+| Signals 51..55 as switches. | Koploper commands them via `switch[...]`; they are unmapped and ignored. | Signals are either mapped or deliberately documented as out of scope. |
 
 

@@ -1,5 +1,69 @@
 # Handoff
 
+## Latest Session (2026-09-19, item 3: switch mapping)
+
+Increment 6 item 3 is implemented: Koploper can control switches through the ECoS emulator, with one shared translation path for real and simulator mode.
+
+### Switch-command data flow
+
+```
+Koploper -> EcosEmulatorServer (15471) -> SimpleEcosBackend.HandleSwitchCommand
+        -> IHardwareBackend.SetSwitch(decoderAddress, outputIndex, on)   [now returns bool]
+        -> SwitchTranslatingHardwareBackend   (shared translation)
+        -> SwitchController.TryApply          (SwitchMapping lookup + invert)
+        -> ISwitchOutput.SetPosition(physicalAddress, position)
+             simulator: TrackSimulatorBackend switch store
+             real:      deliberate no-op that logs (accessory path not wired yet)
+```
+
+The ECoS backend only emits a `state[...]` event when `SetSwitch` returns true, so an unmapped address can no longer make the logical ECoS state disagree with the layout.
+
+### Proven mapping (not guessed)
+
+The `3 -> 4` versus `3 -> 5` question is now answered from the live trace `Logging\19-09-2026_EcosEmuTrace.txt`, six occurrences per route:
+
+- Loc 1 (goes to block 4): `set(11,switch[1g])` + `set(11,switch[2r])`
+- Loc 2 (goes to block 5): `set(11,switch[1r])` + `set(11,switch[2g])`
+
+Both switches are always commanded as a complementary pair, so conditioning the route on switch 1 alone is correct and sufficient. The shipped `BlockTopologyConfig` default now uses `routes: 1>2,2>3,3>4@1:0,3>5@1:1,4>1,5>1` (previously provisional and unconditional).
+
+### Configuration
+
+`SwitchMapConfig`, same style as the other mapping settings:
+
+```
+switches: <ecosAddress>:<physicalAddress>[:inverted][:g|r|keep], ...
+```
+
+Shipped default `switches: 1:1:keep, 2:2:keep`. Editable on the settings page with save/reset/undo, with the same blank-value fallback to the declared default as the other mappings. Invalid entries and duplicate ECoS addresses are recorded in `SwitchMapping.Errors`, logged, and never turned into a plausible-but-wrong mapping.
+
+### Startup state
+
+`SwitchController.Initialize()` runs during host start (before the server listens). Entries with `g`/`r` are driven and recorded as both logical and physical state; `keep` entries are left untouched and are deliberately **not** reported as known, so the logical and physical state cannot disagree silently. Real mode drives nothing because the accessory-decoder path does not exist yet, and it runs only after `StartTrackApplication()` has completed its initialization, so nothing can actuate early.
+
+### Files changed
+
+- Added: `SiebwaldeApp.Core/Model/TrackApplication/Control/ISwitchOutput.cs`, `SiebwaldeApp.Core/Model/TrackApplication/Control/SwitchMapping.cs`, `SiebwaldeApp.Integration/SwitchController.cs`, `SiebwaldeApp.Integration/SwitchTranslatingHardwareBackend.cs`, `SiebwaldeApp.Integration/DelegateSwitchOutput.cs`, `SiebwaldeApp.Core.Tests/SwitchMappingTests.cs`, `SiebwaldeApp.Core.Tests/SwitchControllerTests.cs`.
+- Modified: `SiebwaldeApp.EcosEmu/Hardware/IHardwareBackend.cs` (SetSwitch returns bool), `SiebwaldeApp.EcosEmu/Hardware/TrackSimulatorBackend.cs`, `SiebwaldeApp.EcosEmu/Hardware/DummyHardwareBackend.cs`, `SiebwaldeApp.EcosEmu/Backend/SimpleEcosBackend.cs`, `SiebwaldeApp.Integration/TrackAmplifierHardwareBackend.cs`, `SiebwaldeApp.Integration/TrackControlHost.cs`, `SiebwaldeApp.Integration/TrackControlIntegration.cs`, `SiebwaldeApp.Core/Configuration/CoreConfiguration.cs`, `SiebwaldeApp.Core/Properties/CoreSettings.settings`, `SiebwaldeApp.Core/Properties/CoreSettings.Designer.cs`, `SiebwaldeApp.Core/app.config`, `SiebwaldeApp/App.config`, `SiebwaldeApp/Pages/SiebwaldePages/SiebwaldeSettingsPage.xaml`, `SiebwaldeApp/ViewModel/SiebwaldeViewModels/SiebwaldeSettingsPageViewModel.cs`.
+
+### Tests and checks
+
+- `dotnet build SiebwaldeApp.sln` -> **0 errors**.
+- `dotnet test` -> **165/165 passed** (was 124; +41 across `SwitchMappingTests` and `SwitchControllerTests`).
+- Software-only integration test through the real ECoS port (temporary console host, since removed): started the host in simulator mode on 15471, sent `set(11,switch[1g])`, `[1r]`, `[2g]`, `[2r]` over TCP, and confirmed all four reached the expected logical and physical state; an unmapped `switch[9g]` drove nothing and sent no state event; the port was released on stop.
+- No physical hardware was touched.
+
+### Remaining concerns
+
+1. The real accessory-decoder output path does not exist, so real-mode switch commands are logged and not actuated (`TrackAmplifierHardwareBackend.SetSwitch` returns false).
+2. The real layout's power-on switch positions are unknown, hence the `keep` default.
+3. Signals 51..55 are commanded by Koploper as switches but are deliberately unmapped; they are ignored and no state is reported for them.
+4. A physical drive failure cannot be signalled back through `ISwitchOutput` (void), so the ECoS state reflects "commanded" rather than "confirmed at the layout". Real feedback would need an async/result path.
+
+### Best next step
+
+**Item 4: divergence check** (compare Koploper/ECoS state with the physical/simulated state, stop Koploper via ECoS on mismatch, and surface operator diagnostics).
+
 ## Latest Session (2026-09-19, ECoS host hardening)
 
 Two hardening changes on top of the app-startup wiring.
