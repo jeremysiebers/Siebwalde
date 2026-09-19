@@ -469,3 +469,27 @@ Decision: `IHardwareBackend.SetSwitch` returns `bool`, and the ECoS backend send
 Evidence: A live software-only test showed `set(11,switch[9g])` (an unmapped address) still produced `11 state[0]` for Koploper while nothing moved, i.e. the logical and physical switch state silently disagreed.
 
 Impact: Unmapped addresses (including the signals 51..55, which Koploper commands in the same `switch[...]` form) are ignored without fabricating a state. `TrackAmplifierHardwareBackend.SetSwitch` returns false because the real accessory path is not wired yet, so real-mode switch commands are honestly reported as not applied.
+
+## 2026-09-19: Requested, Commanded And Observed Are Separate
+
+Decision: The control path never collapses "command sent" into "physical state confirmed". `SwitchController` tracks the requested (logical ECoS) position and the commanded (physical) position separately, and only compares against an observed position when `IObservability.SwitchFeedbackAvailable` is true and an `ISwitchObserver` can actually read it.
+
+Evidence: Real switch actuation is not wired and there is no physical switch feedback, so a confirmation would be invented. The simulator, by contrast, can be read back.
+
+Impact: Real mode reports switch state as `StateUnknown`/Warning and never as a confirmation; `ISwitchOutput.IsAvailable` distinguishes "not wired yet" (a known limitation, not a fault) from "the backend refused" (`CommandNotApplied`). Unavailable feedback never creates a fault on its own.
+
+## 2026-09-19: Safety Reactions Reuse The Existing Stop Paths
+
+Decision: A safety stop uses only mechanisms the ECoS path already uses: per locomotive `IHardwareBackend.SetLocoSpeed(address, 0, direction)` (ECoS speed 0 = neutral setpoint), and for an unattributable fault `IHardwareBackend.SetPower(false)` - the same central power-off that Koploper's `set(1,stop)` triggers. `ControlSafetyGuard` is idempotent per fault key so a persistent condition cannot produce a stop storm.
+
+Evidence: The task forbids a second locomotive-control path, and the real backend's `SetLocoSpeed` resolves locomotive -> block -> amplifiers, which is exactly the existing translation.
+
+Impact: A loco-scoped divergence stops only that locomotive, so unrelated trains keep running; only a fault that cannot be attributed to one locomotive stops the whole layout. Safety decisions live in Integration/Core, never in WPF.
+
+## 2026-09-19: Safety Faults Latch Until An Explicit Reset
+
+Decision: The first `StopRequired` diagnostic latches as the root cause and is never cleared automatically - not by a later command and not by a lower-severity diagnostic. Recovery is only an explicit `ResetSafety()`. Warnings are transient and do not latch.
+
+Evidence: Auto-clearing on the next command would hide the reason the layout stopped and could let a locomotive move into an unverified route.
+
+Impact: `ControlDiagnostics` keeps a bounded history (100) plus a separate `LatchedUnsafe`, so current critical state and history are both available to the UI without the critical state being overwritten. A later, different fault is recorded but does not replace the latched root cause.

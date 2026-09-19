@@ -1,5 +1,64 @@
 # Handoff
 
+## Latest Session (2026-09-19, item 4: divergence, safety stop, diagnostics)
+
+Increment 6 item 4 is implemented: a diagnostic/safety layer around the Koploper/ECoS translation path.
+
+### Diagnostic model (Core)
+
+`SiebwaldeApp.Core` gained `DiagnosticSeverity` (Info, Warning, Rejected, StopRequired), `DiagnosticCode` (UnmappedAddress, InvalidConfiguration, RouteSwitchMismatch, CommandNotApplied, CommandedObservedMismatch, OccupancyMismatch, BackendUnavailable, StateUnknown), `SafetyAction` (None, StopLoco, StopLayout), the immutable `ControlDiagnostic` (code, severity, subject, detail, loco/block/switch context, timestamp, safety action taken) and `ControlDiagnostics` (bounded 100-entry history plus a separate latched unsafe state). The model carries no protocol or UI wording.
+
+### Requested / Commanded / Observed
+
+Kept explicitly apart. `SwitchController` records the requested (logical ECoS) position and the commanded (physical) position separately, and consults an `ISwitchObserver` only when `IObservability.SwitchFeedbackAvailable` is true. In real mode switch feedback does not exist, so an `UnobservableSwitchObserver` reports "not observable" and the command is reported as `StateUnknown`/Warning - never as a confirmation. `ISwitchOutput` exposes `IsAvailable` so a not-yet-wired output is a known limitation, not a fault.
+
+### What counts as divergence
+
+- unmapped switch address (Warning, command ignored);
+- route needs a switch position that differs from the known logical position (StopRequired);
+- route needs a switch whose position is unknown (Rejected);
+- route needs a switch that is not mapped at all (Rejected);
+- backend did not apply a commanded position (Rejected);
+- commanded vs observed mismatch, only where observation exists (StopRequired);
+- target block occupied, only when occupancy is observable (StopRequired);
+- backend/communication unavailable (StopRequired, layout-scoped);
+- invalid or duplicate switch mapping (Rejected, reported at controller construction).
+
+### Safety reaction and stop mechanism
+
+`ControlSafetyGuard` applies the reaction and is idempotent per fault key (`code|subject`): the first StopRequired for a fault issues a stop, repeats do nothing, a different fault still acts. A loco-scoped fault calls the existing per-loco path (`IHardwareBackend.SetLocoSpeed(address, 0, dir)` -> neutral PWM), so unrelated trains keep running; an unattributable fault calls the existing central path (`IHardwareBackend.SetPower(false)`, the same mechanism Koploper's `set(1,stop)` uses). No second locomotive-control path was introduced; `EcosHardwareStopSink` wraps the backend already in use.
+
+### Latching and recovery
+
+The first StopRequired latches and stays latched; lower-severity diagnostics and later commands never clear it. Recovery is only an explicit `ResetSafety()` (host -> guard -> diagnostics). Warnings are transient and do not latch.
+
+### Operator visibility
+
+`IEcosHostService`/`SiebwaldeApplicationModel` expose `Diagnostics`, `IsUnsafe` and `ResetSafety()`. The init page shows the active mode, the control-path health (`Control path: UNSAFE (latched)` or the current severity), the latest diagnostic text and a "Reset control safety" button. The view model only displays and requests; the decision stays in the host.
+
+### Files changed
+
+- Added: `Core/Model/TrackApplication/Diagnostics/DiagnosticTypes.cs`, `Diagnostics/ControlDiagnostic.cs`, `Diagnostics/ControlDiagnostics.cs`, `Diagnostics/ISafetyStopSink.cs`, `Integration/ControlSafetyGuard.cs`, `Integration/DivergenceChecker.cs`, `Integration/EcosHardwareStopSink.cs`, `Integration/Observability.cs`, `Core.Tests/DivergenceAndSafetyTests.cs`.
+- Modified: `Core/Model/TrackApplication/Control/ISwitchOutput.cs` (IsAvailable + bool return), `Core/Model/TrackApplication/Control/IEcosHostService.cs`, `Core/Model/SiebwaldeApplicationModel.cs`, `Integration/SwitchController.cs`, `Integration/DelegateSwitchOutput.cs`, `Integration/TrackAmplifierHardwareBackend.cs`, `Integration/TrackControlHost.cs`, `Integration/TrackControlIntegration.cs`, `EcosEmu/Hardware/TrackSimulatorBackend.cs`, `SiebwaldeApp/Pages/SiebwaldePages/SiebwaldeInitPage.xaml`, `SiebwaldeApp/ViewModel/SiebwaldeViewModels/SiebwaldeInitPageViewModel.cs`, `Core.Tests/SwitchControllerTests.cs`.
+
+### Tests and checks
+
+- `dotnet build SiebwaldeApp.sln` -> **0 errors**.
+- `dotnet test` -> **193/193 passed** (was 165; +28 in `DivergenceAndSafetyTests`).
+- Software-only scenario through the real ECoS path on 15471 (temporary console host, since removed): a valid route stayed healthy; setting switch 1 to diverging made `CheckTransition(3 -> 4)` return `RouteSwitchMismatch`/StopRequired with loco=1, block=3, switch=1 and action=StopLoco; five repeat evaluations produced five reports but only **one** stop; an unmapped `switch[9g]` produced a Warning; an explicit reset cleared the latch and a re-check stopped again for the still-present fault; only the targeted loco was stopped.
+- No physical hardware was touched.
+
+### Remaining concerns
+
+1. Route checks run from the look-ahead path (`TrackAmplifierHardwareBackend.Divergence`), so a route is only checked when a locomotive is about to be pre-commanded into the next block.
+2. Simulator occupancy is delivered as ECoS sensor events rather than through an `IOccupancyProvider`, so `OccupancyAvailable` is false there; occupancy divergence is covered by tests with fakes.
+3. Real mode reports both switch feedback and occupancy as unavailable, so no route check can currently confirm anything on real hardware.
+4. A latched fault stops a locomotive but does not prevent Koploper from commanding again; the guard only prevents repeated stops for the same fault.
+
+### Best next step
+
+Item 4 is the last planned Increment 6 item. Next candidates: the real accessory-decoder switch output path, real amplifier occupancy (firmware bit), or the first end-to-end integration with Koploper on the hardware oval.
+
 ## Latest Session (2026-09-19, item 3: switch mapping)
 
 Increment 6 item 3 is implemented: Koploper can control switches through the ECoS emulator, with one shared translation path for real and simulator mode.

@@ -206,7 +206,25 @@ New items opened by this work:
 | --- | --- | --- |
 | Real switch output path (accessory decoder). | `TrackAmplifierHardwareBackend.SetSwitch` returns false and only logs. | Mapped switches are actuated on the real layout. |
 | Real-layout power-on switch positions. | `SwitchMapConfig` default is `keep` because the rest position is unknown. | Confirmed positions are configured as `g`/`r`. |
-| Physical switch feedback. | `ISwitchOutput.SetPosition` is void, so a failed drive cannot be reported. | A drive result/feedback path exists and the ECoS state reflects confirmed hardware state. |
+| Physical switch feedback. | `ISwitchOutput.SetPosition` is bool but no real feedback exists; `UnobservableSwitchObserver` reports "not observable". | A real observer exists and the ECoS state reflects confirmed hardware state. |
 | Signals 51..55 as switches. | Koploper commands them via `switch[...]`; they are unmapped and ignored. | Signals are either mapped or deliberately documented as out of scope. |
+
+## Increment 6 Item 4: Divergence, Safety Stop And Diagnostics (2026-09-19, fifth task)
+
+Done:
+
+- Core diagnostics model: `DiagnosticSeverity`, `DiagnosticCode`, `SafetyAction`, immutable `ControlDiagnostic` with loco/block/switch context, and `ControlDiagnostics` with a bounded history plus a separate latched unsafe state.
+- Requested / Commanded / Observed kept separate; unavailable feedback is never reported as confirmation.
+- `ControlSafetyGuard` with idempotent per-fault stop (no stop storm) and explicit-reset-only recovery.
+- `DivergenceChecker` covering unmapped switch, route/switch mismatch, unknown switch state, command-not-applied, commanded/observed mismatch and occupancy mismatch, reusing `BlockTopology`, `SwitchController` and `IOccupancyProvider`.
+- Safety stops reuse the existing paths: per-loco `SetLocoSpeed(address, 0, dir)`, unattributable `SetPower(false)`.
+- Thin init-page surface: mode, control-path health, latest diagnostic, reset button.
+
+New items opened by this work:
+
+| Item | Evidence | Acceptance criteria |
+| --- | --- | --- |
+| Simulator occupancy provider. | Simulator occupancy arrives as ECoS sensor events, so `OccupancyAvailable` is false there. | An `IOccupancyProvider` over the simulator exists and occupancy divergence is checked in simulator mode. |
+| Latched fault does not block new commands. | The guard prevents repeated stops but not a new Koploper command. | A latched unsafe state also refuses or gates further movement commands. |
 
 

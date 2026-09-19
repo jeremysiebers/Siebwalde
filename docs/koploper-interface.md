@@ -348,7 +348,15 @@ Consequence: for real hardware, amplifier occupancy must be reported as sensor i
 - `IHardwareBackend.SetSwitch` now returns `bool`: the ECoS backend only reports a switch state change when the command actually reached an output.
 - New non-UI project `SiebwaldeApp.Integration` (`net8.0-windows7.0`) references Core + EcosEmu; all translation logic stays out of the WPF project.
 - Tests: 70/70 passing.
-- Still open: divergence check with ECoS stop, a real switch-output path (accessory decoder), the real-layout power-on switch positions, and the watchdog for stale occupancy. Done: real `IOccupancyProvider` from amplifier occupancy, occupancy feedback into `IHardwareFeedbackSink`, switch mapping (real <-> Koploper + default init state), backend selection (real vs `TrackSimulatorBackend`), and the `app.config` topology/routing/switch settings plus settings-page editing.
+- Still open: divergence check with ECoS stop, a real switch-output path (accessory decoder), the real-layout power-on switch positions, and the watchdog for stale occupancy. Done: real `IOccupancyProvider` from amplifier occupancy, occupancy feedback into `IHardwareFeedbackSink`, switch mapping (real <-> Koploper + default init state), backend selection (real vs `TrackSimulatorBackend`), the `app.config` topology/routing/switch settings plus settings-page editing, and the divergence/safety/diagnostics layer.
+
+### Divergence, safety stop and diagnostics
+
+`SiebwaldeApp.Core` models the control path's health without protocol or UI wording: `DiagnosticSeverity` (Info/Warning/Rejected/StopRequired), `DiagnosticCode` (UnmappedAddress, InvalidConfiguration, RouteSwitchMismatch, CommandNotApplied, CommandedObservedMismatch, OccupancyMismatch, BackendUnavailable, StateUnknown), `SafetyAction` (None/StopLoco/StopLayout) and the immutable `ControlDiagnostic` (code, severity, subject, detail, loco/block/switch context, timestamp, action taken). `ControlDiagnostics` keeps a bounded history and a separate latched unsafe state.
+
+Requested, commanded and observed stay separate: `SwitchController` records the requested (logical ECoS) position and the commanded (physical) position, and only compares against an observed position when switch feedback actually exists. Real mode has none, so its state is `StateUnknown`, never a confirmation.
+
+`DivergenceChecker` checks a route before the look-ahead pre-commands the next block. `ControlSafetyGuard` applies the reaction once per fault key (no stop storm); a loco-scoped fault stops that locomotive through the existing `SetLocoSpeed(address, 0, dir)` path, and an unattributable fault stops the layout through the existing `SetPower(false)` path (the same central stop as `set(1,stop)`). The first StopRequired latches until an explicit reset.
 
 
 
