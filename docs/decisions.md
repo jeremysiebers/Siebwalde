@@ -391,3 +391,27 @@ Decision: `BlockTopology.Parse` and `KoploperBlockMap.Parse` treat a line break 
 Evidence: The settings fields are multi-line (`AcceptsReturn="True"`). With `;`/`,`-only splitting, an operator who pressed Enter instead of `;` got a silently empty topology (the amplifier entry consumed the following route text and failed to parse).
 
 Impact: A malformed-but-plausible entry now still yields a usable topology; unparseable entries are ignored rather than corrupting the rest. Parsing stays in Core (`CoreConfiguration`); the WPF view model only binds strings. Covered by `BlockTopologyRoutingTests.LineBreaksSeparateSectionsAndUnprefixedRoutes` and `KoploperBlockMapTests.LineBreaksSeparateEntries`.
+
+## 2026-09-19: The ECoS Host Is Owned By An Integration Service
+
+Decision: `TrackControlHost` (in `SiebwaldeApp.Integration`) owns the ECoS host lifetime, and Core exposes only `IEcosHostService` plus `TrackControlMode`. `SiebwaldeApplicationModel` receives the host through its constructor and starts/stops it; the WPF layer only constructs it in `IoC.Setup()` and calls a start/stop command.
+
+Evidence: `SiebwaldeApp.Core` has no project references, so it cannot see `SiebwaldeApp.Integration` (which references Core and EcosEmu). Core would otherwise need to reference the integration layer, creating a cycle. The Core-internal `TrackCommClientAsync` and `TrackApplicationVariables` are needed to build the real backend, so starting the host from `StartTrackApplication` avoids widening the Core public API.
+
+Impact: Composition, mode selection, ordering and disposal live in Integration and are unit-testable without WPF or hardware (`TrackControlHostTests`). WPF holds no control logic. `IEcosHostService` may be null, so the app still runs without Koploper.
+
+## 2026-09-19: Real Mode Is Implicit, Simulator Mode Is Explicit
+
+Decision: The ECoS host starts in `Real` mode at the end of `StartTrackApplication()`, because real mode requires the track communication client that only exists after the track application starts. `Simulator` mode is a separate operator action ("ECoS simulator" on the init page).
+
+Evidence: Matches the existing Fiddle Yard pattern, where real mode is implied by "Start FiddleYard" and the simulator has its own button. Appending the start call after the existing initialization pipeline leaves the established sequencing untouched.
+
+Impact: Starting an already running host is ignored, so pressing the simulator button after a real start cannot take the server down under Koploper.
+
+## 2026-09-19: Port Roles Are Fixed And Explicit
+
+Decision: 15471 is the ECoS server that Koploper connects to; 5700 is Koploper's external-information server that C# connects to. The directions are opposite and must not be swapped.
+
+Evidence: `EcosEmulatorServer` listens on `IPAddress.Loopback` with port 15471; `KoploperExternalInfoClient(host: "127.0.0.1", port: 5700)` is an outbound client. A live session confirmed C# connecting out to 5700 and Koploper connecting in to 15471.
+
+Impact: Loopback is correct because Koploper runs on the same PC. If Koploper ever moves to another machine, the listen address must become configurable (recorded in the backlog).

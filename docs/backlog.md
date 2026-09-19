@@ -157,9 +157,24 @@ Still open (next steps):
 
 | Item | Evidence | Acceptance criteria |
 | --- | --- | --- |
-| Finish the app startup wiring. | `TrackControlIntegration` is not yet created from `SiebwaldeApplicationModel`; the `EcosEmulatorServer` is not yet started in-process by the app. | The app creates the integration from `CoreConfiguration`, starts the ECoS server, calls `Attach()`, and offers a real-vs-simulator mode. |
 | Switch mapping (real <-> Koploper + default init state). | Oval switch addresses are 1 and 2; the `3>4` vs `3>5` branch selection is still provisional in the topology config. | Switch mapping is configurable and the branch selection is confirmed from a trace. |
 | Divergence check with ECoS stop and diagnostics. | C# should stop Koploper and log what diverged when data drifts apart. | Divergence detected, Koploper stopped via ECoS, mismatch logged. |
 | Watchdog for stale amplifier occupancy. | Event-driven occupancy has no timeout for missing updates. | Stale occupancy is detected and surfaced. |
 | Investigate `TrackApplicationVariables` HoldingReg aliasing. | All 56 `trackAmpItems` share one `HoldingReg` array instance. | Confirmed intended or fixed. |
+| `EcosEmulatorServer` binds loopback only. | `IPAddress.Loopback` in `EcosEmulatorServer.Start`; correct while Koploper runs on the same PC. | Confirmed same-PC, or made configurable. |
+
+## Increment 6 App-Startup Wiring (2026-09-19, second task)
+
+Done:
+
+- `TrackControlMode` and `IEcosHostService` added to Core; `SiebwaldeApplicationModel` now takes the host and starts/stops it.
+- `TrackControlHost` (Integration) composes and owns the ECoS host, the ECoS server (15471) and the Koploper external-info client (5700), for both real and simulator modes.
+- Real mode starts automatically at the end of `StartTrackApplication()`; simulator mode is an explicit operator action on the init page.
+- `EcosEmulatorServer` shutdown now tolerates cancellation and a disposed listener.
+- Software-only validation: the host brought up 127.0.0.1:15471 in simulator mode, accepted a connection, and released the port on stop.
+
+Completed from the previous "still open" list: **Finish the app startup wiring.**
+
+Remaining concern: `CoreSettings` are User-scope, so an existing `user.config` can still hold an empty `BlockTopologyConfig` from before the defaults were added. Use Reload/Reset on the settings page if `CoreConfiguration.BuildBlockTopology()` returns no blocks.
+
 

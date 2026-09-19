@@ -100,9 +100,10 @@ Increment 1 (2026-09-11) fixed two of the confirmed items: the `SiebwaldeApp.Cor
 | Koploper block mapping | Implemented + tested | `KoploperBlockMap`, `KoploperBlockMapTests`; oval mapping from the Koploper export. | Real-layout mapping not yet entered. |
 | Amplifier occupancy | Implemented + tested | `TrackAmplifierRegisters`, `TrackAmplifierOccupancyProvider`, tests. | Firmware still has a TODO for the occupied flag. |
 | Occupancy -> Koploper bridge | Implemented + tested | `TrackAmplifierOccupancyBridge`, tests. | Not yet wired into the running app. |
-| App composition (option A) | Partial | `TrackControlIntegration`; WPF app references Integration. | App startup wiring and mode selection pending. |
-| Unit tests | Implemented | `SiebwaldeApp.Core.Tests`, 100 tests passing. | UI-model and other areas still uncovered. |
+| App composition (option A) | Completed | `TrackControlIntegration`; `TrackControlHost` owns the ECoS server (15471) and the Koploper external-info client (5700); `SiebwaldeApplicationModel` starts/stops it. | Mode switching while running is intentionally not supported. |
+| Unit tests | Implemented | `SiebwaldeApp.Core.Tests`, 107 tests passing. | UI-model and other areas still uncovered. |
 | Mapping settings (item 5) | Completed | `BlockTopologyConfig`/`KoploperBlockMapConfig` in both `app.config` files, settings page with undo + reset, line-break-tolerant parsers. | Real-layout values still to be entered. |
+| ECoS host startup wiring | Completed | `TrackControlMode`, `IEcosHostService`, `TrackControlHost`, `TrackControlHostTests`; software-only port 15471 validation. | Not yet exercised against real hardware (by design). |
 
 
 

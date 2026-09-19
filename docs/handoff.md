@@ -1,5 +1,51 @@
 # Handoff
 
+## Latest Session (2026-09-19, app-startup wiring)
+
+Completed on `feature/csharp-cleanup-startup`: the ECoS host is now composed, started and stopped by the application.
+
+### Architecture chosen
+
+Core defines `TrackControlMode` (Simulator/Real) and `IEcosHostService`. `SiebwaldeApp.Integration.TrackControlHost` implements it and owns the composition and lifetime: it creates the Koploper external-info client (5700), the loco repository, the mode-specific hardware backend, the ECoS backend and the `EcosEmulatorServer` (15471), and releases them all on `Stop()`.
+
+Core cannot reference Integration (Integration references Core, and Core has no project references at all), so `SiebwaldeApplicationModel` takes the host through its constructor. WPF only builds it in `IoC.Setup()` via `TrackControlHost.FromConfiguration()` and calls a start/stop command; it holds no control logic.
+
+### Mode selection
+
+- **Real**: started automatically at the end of `StartTrackApplication()`, so the established initialization sequencing is untouched. It needs the track communication client and shared variables, which only exist once the track application has started.
+- **Simulator**: explicit operator action, "ECoS simulator" on the init page (`InitEcosSimulator` -> `SiebwaldeApplicationModel.StartEcosHostSimulatorAsync()`). Software-only, no hardware.
+
+Starting an already running host is ignored, so the simulator button cannot take a running real host down under Koploper.
+
+### Ownership and lifetime
+
+`TrackControlHost` owns everything it creates. `SiebwaldeApplicationModel.StopEcosHost()` stops it, and `StopTrackApplication()` now calls that first, before its `_trackControlMain == null` early return, so simulator mode is also shut down cleanly.
+
+### Files changed
+
+- Added: `SiebwaldeApp.Core/Model/TrackApplication/Control/TrackControlMode.cs`, `SiebwaldeApp.Core/Model/TrackApplication/Control/IEcosHostService.cs`, `SiebwaldeApp.Integration/TrackControlHost.cs`, `SiebwaldeApp.Core.Tests/TrackControlHostTests.cs`.
+- Modified: `SiebwaldeApp.Core/Model/SiebwaldeApplicationModel.cs`, `SiebwaldeApp.EcosEmu/Server/EcosEmulatorServer.cs`, `SiebwaldeApp/IoC/IoC.cs`, `SiebwaldeApp/ViewModel/SiebwaldeViewModels/SiebwaldeInitPageViewModel.cs`, `SiebwaldeApp/Pages/SiebwaldePages/SiebwaldeInitPage.xaml`.
+
+`EcosEmulatorServer` now tolerates `OperationCanceledException` (shutdown while Koploper is connected) and `ObjectDisposedException` (listener closed with a pending accept); both previously produced unobserved task exceptions on shutdown.
+
+### Tests and checks
+
+- `dotnet build SiebwaldeApp.sln` -> **0 errors**.
+- `dotnet test` -> **107/107 passed** (was 100; +7 `TrackControlHostTests` covering simulator start, port release, empty loco repository creation, the real-mode guard, idempotent start, safe stop-when-never-started and the constructor guard).
+- Software-only startup validation with a temporary console host (outside the repository, since removed): started the host with the real configuration in simulator mode, confirmed `127.0.0.1:15471` listened and accepted a TCP connection, confirmed a clean stop released the port (`ConnectionRefused`), and confirmed the new settings were read (5 topology blocks, 5 block-map blocks).
+- During that validation Koploper was running on this PC and connected to the temporary listener; the external-info direction (C# -> 5700) also connected and reported `[EXT] Loc 1 -> Block 1`. No physical hardware was touched.
+
+### Remaining concerns
+
+1. `CoreSettings` are User-scope: an existing `user.config` can still hold an empty `BlockTopologyConfig` from before the defaults were added. If `CoreConfiguration.BuildBlockTopology()` returns no blocks, use Reload/Reset on the settings page. Real mode would then have no amplifier mapping.
+2. The ECoS host starts in real mode even before the firmware occupancy flag is populated, so Koploper sees no occupancy feedback on real hardware yet (firmware TODO).
+3. `EcosEmulatorServer` binds loopback only; correct while Koploper is on the same PC.
+4. `IoC.Setup()` now constructs the host, so a misconfigured `locos.json` path or an occupied port surfaces at startup; `StartEcosHostAsync` logs and continues rather than failing the app.
+
+### Best next step
+
+**Item 3: switch mapping** (real <-> Koploper designation plus the default initial position), followed by item 4 (divergence check with ECoS stop and operator diagnostics).
+
 ## Latest Session (2026-09-19)
 
 Completed on `feature/csharp-cleanup-startup` (all committed and pushed; `git status` clean for tracked files):
@@ -57,7 +103,7 @@ Docs:
 
 ### Incomplete / uncertain
 
-1. **App startup wiring (rest of "2-rest")**: `TrackControlIntegration` is not yet created/started from `SiebwaldeApplicationModel`; the `EcosEmulatorServer` is not yet started in-process by the app; there is no real-vs-simulator mode selection in the app.
+1. ~~**App startup wiring (rest of "2-rest")**~~ - **completed in the app-startup wiring session above** (`TrackControlHost`, real/simulator mode, clean shutdown).
 2. **Switch mapping** (real <-> Koploper + default init state) not done; switch addresses for the oval are known (1 and 2) but the branch selection (`3>4` vs `3>5`) is still provisional in the topology config.
 3. **Divergence check + ECoS stop + operator diagnostics** not started.
 4. The firmware occupied flag has a TODO; live occupancy depends on firmware that populates it (the product owner states the real test firmware already returns it).
