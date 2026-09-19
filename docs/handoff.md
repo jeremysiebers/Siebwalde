@@ -1,5 +1,55 @@
 # Handoff
 
+## Latest Session (2026-09-19, occupancy freshness review)
+
+Branch `feature/real-occupancy-integration`. Reviewed whether `SlaveDetected != 0` proves *current* data. **It does not.** A genuine freshness defect existed and is fixed; no firmware was changed.
+
+### What the existing state actually proves
+
+| Signal | Semantics |
+| --- | --- |
+| `SlaveDetected` | Written once per parsed frame (`TrackCommClientAsync:180`) and **never cleared**. Proves only that a frame was seen at some point. |
+| `HoldingReg` | Keeps its last received values indefinitely; nothing resets it after a loss. |
+| `AmplifierDataReceived` | Republished every 100 ms by `_publishTimer` for every `SlaveDetected != 0` amplifier, **regardless of new data**. Not a freshness signal. |
+| `MbReceiveCounter` | Read from the frame (not incremented by C#); its increment semantics cannot be verified without firmware. |
+| `ITrackTransport` | Exposes only `Open/Close/Send/Receive`; no connection-loss or health signal. |
+
+So no existing state provided freshness, and the previous `SlaveDetected != 0` check could leave a block "known clear" forever after communication stopped.
+
+### The fix
+
+- `TrackAmplifierItem.LastDataReceivedUtc` is stamped in `TrackCommClientAsync` in the same step that stores `HoldingReg` and `SlaveDetected` - one line, single source of truth, no new timer.
+- `TrackAmplifierDataFreshness` is the single policy: default 2 s, well above the 10 Hz republish cycle. `IsCurrentData` = detected **and** fresh.
+- `TrackAmplifierOccupancyProvider` and `AmplifierOccupancyObservability` use it. Staleness is evaluated when a consumer already runs, so no polling loop was added.
+- A fresh occupied section still proves a block occupied even when another section is silent; a **stale** occupied reading is not promoted to definite occupancy.
+
+### Final semantics per amplifier section
+
+| Section state | Meaning |
+| --- | --- |
+| fresh + occupied | occupied |
+| fresh + clear | clear |
+| stale (either value) | unknown |
+| never received | unknown |
+| not detected | unknown |
+
+Block: occupied if any covering section is fresh+occupied (even if another is unknown); known clear only if **every** covering section is fresh+clear; otherwise unknown.
+
+### Tests and checks
+
+- `dotnet build SiebwaldeApp.sln` -> **0 errors**, **175 warnings** (unchanged; no new warnings introduced).
+- `dotnet test` -> **227/227 passed** (was 218; +9).
+
+### Remaining concerns
+
+1. The 2 s freshness window is a policy value, not derived from the master's cycle; it may need tuning once real frame timing is observed.
+2. Real occupancy still needs a live hardware run to confirm end-to-end behaviour.
+3. The stale `General.h` comment remains (deliberately not touched in this task).
+
+### Best next step
+
+Controlled real-hardware occupancy test on the amplifier oval.
+
 ## Latest Session (2026-09-19, real occupancy integration)
 
 Branch `feature/real-occupancy-integration` (from `master` at `f778a32`). Connects the existing real amplifier occupancy data to the new C# occupancy/divergence/safety architecture. **No firmware was changed.**

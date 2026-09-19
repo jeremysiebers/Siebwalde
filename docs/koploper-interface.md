@@ -389,7 +389,9 @@ Both consumers read the same value:
 
 **Stale comment:** `TrackAmplifier4.X/modbus/General.h` still annotates `HR_STATUS_OCCUPIED_BIT` with "(TODO: implement when occupancy source known)", but `processio.c` already implements it. The comment is wrong, not the firmware.
 
-**Known versus unknown.** `SlaveDetected` is written in the same step that stores the holding registers, so it is the existing "valid amplifier data has been received" signal. `TrackAmplifierOccupancyProvider.IsBlockOccupancyKnown` requires every amplifier section that covers a block to have valid data; one silent section makes the whole block unknown. Unknown is never reported to Koploper as clear, is never treated as a free block by look-ahead, and produces `StateUnknown` (Rejected) rather than `OccupancyMismatch` (StopRequired) during a route check.
+**Known versus unknown.** `TrackAmplifierItem.LastDataReceivedUtc` is stamped when a frame is parsed, and `TrackAmplifierDataFreshness` decides whether that is recent enough (default 2 s, a policy value well above the comm client's 10 Hz republish cycle). A section counts as current only when it is detected **and** its data is fresh. `TrackAmplifierOccupancyProvider.IsBlockOccupancyKnown` requires every amplifier section that covers a block to be current; one silent section makes the whole block unknown. Unknown is never reported to Koploper as clear, is never treated as a free block by look-ahead, and produces `StateUnknown` (Rejected) rather than `OccupancyMismatch` (StopRequired) during a route check.
+
+**Why freshness is derived and not read from existing state.** `SlaveDetected` is written once per parsed frame and is never cleared, `HoldingReg` keeps its last values indefinitely, and `TrackCommClientAsync._publishTimer` republishes `AmplifierDataReceived` every 100 ms for every amplifier with `SlaveDetected != 0` regardless of whether new data arrived. `ITrackTransport` exposes no connection-loss or health signal. So none of the existing state proves that data is current; the frame timestamp is the only reliable signal, and it is stamped in the same place the registers are stored.
 
 
 
