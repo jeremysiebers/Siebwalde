@@ -58,10 +58,10 @@ namespace SiebwaldeApp.Integration
     /// <summary>
     /// Real-mode observability over the existing amplifier data path.
     ///
-    /// Occupancy becomes observable once valid amplifier data has been received.
-    /// <see cref="TrackAmplifierItem.SlaveDetected"/> is written in the same step that stores the
-    /// holding registers when the master's amplifier frame is parsed, so it is the existing
-    /// "valid data received" signal - no new freshness mechanism and no extra state are added.
+    /// Occupancy becomes observable once <b>fresh</b> amplifier data has been received.
+    /// <see cref="TrackAmplifierItem.LastDataReceivedUtc"/> is stamped when a frame is parsed and
+    /// <see cref="TrackAmplifierDataFreshness"/> decides whether it is still current, so stale
+    /// data does not keep occupancy observable after communication stops.
     ///
     /// Switch feedback does not exist on real hardware yet, so it stays unavailable and is never
     /// reported as a confirmation.
@@ -69,10 +69,17 @@ namespace SiebwaldeApp.Integration
     public sealed class AmplifierOccupancyObservability : IObservability
     {
         private readonly TrackApplicationVariables _variables;
+        private readonly Func<DateTimeOffset> _clock;
+        private readonly TimeSpan _staleAfter;
 
-        public AmplifierOccupancyObservability(TrackApplicationVariables variables)
+        public AmplifierOccupancyObservability(
+            TrackApplicationVariables variables,
+            Func<DateTimeOffset>? clock = null,
+            TimeSpan? staleAfter = null)
         {
             _variables = variables ?? throw new ArgumentNullException(nameof(variables));
+            _clock = clock ?? (() => DateTimeOffset.UtcNow);
+            _staleAfter = staleAfter ?? TrackAmplifierDataFreshness.DefaultStaleAfter;
         }
 
         /// <inheritdoc />
@@ -90,9 +97,11 @@ namespace SiebwaldeApp.Integration
                     return false;
                 }
 
+                var now = _clock();
+
                 foreach (var amplifier in items)
                 {
-                    if (amplifier is not null && amplifier.SlaveDetected != 0)
+                    if (TrackAmplifierDataFreshness.IsCurrentData(amplifier, now, _staleAfter))
                     {
                         return true;
                     }

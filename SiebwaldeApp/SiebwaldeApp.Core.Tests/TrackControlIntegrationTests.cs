@@ -67,14 +67,16 @@ namespace SiebwaldeApp.Core.Tests
                 feedbackSink: sink);
 
         /// <summary>
-        /// Marks amplifier sections as having received valid data, the way the comm client does
-        /// when it parses a master frame (SlaveDetected is written together with HoldingReg).
+        /// Marks amplifier sections as having received fresh valid data, the way the comm client
+        /// does when it parses a master frame (SlaveDetected and the frame timestamp are written
+        /// together with HoldingReg).
         /// </summary>
         private static void MarkDetected(TrackApplicationVariables variables, params int[] sections)
         {
             foreach (var section in sections)
             {
                 variables.trackAmpItems[section].SlaveDetected = 1;
+                variables.trackAmpItems[section].LastDataReceivedUtc = System.DateTimeOffset.UtcNow;
             }
         }
 

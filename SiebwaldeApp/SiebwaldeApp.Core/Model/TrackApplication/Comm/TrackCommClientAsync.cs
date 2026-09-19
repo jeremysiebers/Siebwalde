@@ -179,6 +179,7 @@ namespace SiebwaldeApp.Core
 
                     amplifier.SlaveDetected = slaveDetected;
                     amplifier.HoldingReg = holdingReg;
+                    amplifier.LastDataReceivedUtc = DateTimeOffset.UtcNow;
                     amplifier.MbReceiveCounter = mbReceiveCounter;
                     amplifier.MbSentCounter = mbSentCounter;
                     amplifier.MbCommError = mbCommError;
