@@ -26,6 +26,12 @@ namespace SiebwaldeApp.Core
         private SendNextFwDataPacket _sendNextFwDataPacket;
         private TrackAmplifierInitializationServiceAsync _trackInitService;
 
+        /// <summary>
+        /// ECoS host that serves Koploper. Owned by the host application and injected here
+        /// so this model can start and stop it as part of the application lifecycle.
+        /// </summary>
+        private readonly IEcosHostService? _ecosHost;
+
         private string LoggerInstance { get; set; }
         static ILogger GetLogger(string file, string loggerinstance)
         {
@@ -35,8 +41,19 @@ namespace SiebwaldeApp.Core
         #endregion
 
         #region Constructor
-        public SiebwaldeApplicationModel()
+
+        /// <summary>
+        /// Creates the application model.
+        /// </summary>
+        /// <param name="ecosHost">
+        /// The ECoS host that serves Koploper (port 15471), supplied by the host application
+        /// so the composition and lifetime stay outside the UI layer. May be null when the
+        /// application runs without Koploper.
+        /// </param>
+        public SiebwaldeApplicationModel(IEcosHostService? ecosHost = null)
         {
+            _ecosHost = ecosHost;
+
             IoC.Logger.Log("Siebwalde Application started.", "");
 
             _appCts?.Cancel();
@@ -222,6 +239,74 @@ namespace SiebwaldeApp.Core
             await _trackInitService.InitializeAsync(_appCts.Token);
 
             IoC.Logger.Log("Track Application started.", "");
+
+            // ---------------------------------------------------------------------
+            // 9) Serve Koploper: start the ECoS host on top of the real backend.
+            //    This runs last so the initialization sequencing above is unchanged.
+            // ---------------------------------------------------------------------
+            await StartEcosHostAsync(TrackControlMode.Real);
+        }
+
+        /// <summary>
+        /// Starts the ECoS host in simulator mode, so Koploper can be exercised without the
+        /// track controller or physical hardware.
+        /// </summary>
+        public async Task StartEcosHostSimulatorAsync()
+            => await StartEcosHostAsync(TrackControlMode.Simulator);
+
+        /// <summary>
+        /// Starts the ECoS host (the server Koploper connects to on port 15471) in the
+        /// requested mode. Does nothing when no host was supplied, and leaves an already
+        /// running host untouched.
+        /// </summary>
+        private async Task StartEcosHostAsync(TrackControlMode mode)
+        {
+            if (_ecosHost is null)
+            {
+                IoC.Logger.Log($"ECoS host not available; skipping the {mode} start.", LoggerInstance);
+                return;
+            }
+
+            if (_ecosHost.IsRunning)
+            {
+                IoC.Logger.Log(
+                    $"ECoS host already running in {_ecosHost.Mode} mode; skipping the {mode} start.",
+                    LoggerInstance);
+                return;
+            }
+
+            try
+            {
+                await _ecosHost.StartAsync(mode, _trackCommClient, _trackVariables, _appCts.Token);
+                IoC.Logger.Log($"ECoS host started in {mode} mode.", LoggerInstance);
+            }
+            catch (Exception ex)
+            {
+                // Serving Koploper must never take the application down.
+                IoC.Logger.Log($"ECoS host failed to start in {mode} mode: {ex.Message}", LoggerInstance);
+            }
+        }
+
+        /// <summary>
+        /// Stops the ECoS host when it is running. Safe to call when it was never started.
+        /// </summary>
+        public void StopEcosHost()
+        {
+            if (_ecosHost is null || !_ecosHost.IsRunning)
+                return;
+
+            IoC.Logger.Log("Stopping ECoS host...", LoggerInstance);
+
+            try
+            {
+                _ecosHost.Stop();
+            }
+            catch (Exception ex)
+            {
+                IoC.Logger.Log($"ECoS host failed to stop: {ex.Message}", LoggerInstance);
+            }
+
+            IoC.Logger.Log("ECoS host stopped.", LoggerInstance);
         }
 
 
@@ -233,6 +318,10 @@ namespace SiebwaldeApp.Core
         /// errors encountered during the stopping process are logged.</remarks>
         public void StopTrackApplication()
         {
+            // Stop the ECoS host first. In simulator mode it runs without a track
+            // controller, so it must also be stopped when _trackControlMain is null.
+            StopEcosHost();
+
             if (_trackControlMain == null)
                 return;
 

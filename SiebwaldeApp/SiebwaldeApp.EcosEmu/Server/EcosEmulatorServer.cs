@@ -52,6 +52,10 @@ namespace SiebwaldeApp.EcosEmu
             catch (OperationCanceledException)
             {
             }
+            catch (ObjectDisposedException)
+            {
+                // Stop() closed the listener while an accept was pending.
+            }
         }
 
         private async Task HandleClientAsync(TcpClient client, CancellationToken ct)
@@ -71,6 +75,11 @@ namespace SiebwaldeApp.EcosEmu
                     try
                     {
                         bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length, ct);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        // The host is shutting down while Koploper is still connected.
+                        break;
                     }
                     catch (IOException ioEx)
                     {

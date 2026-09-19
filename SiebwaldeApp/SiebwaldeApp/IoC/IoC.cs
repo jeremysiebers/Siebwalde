@@ -1,6 +1,7 @@
 ﻿using Ninject;
 using SiebwaldeApp;
 using SiebwaldeApp.Core;
+using SiebwaldeApp.Integration;
 
 namespace SiebwaldeApp
 {
@@ -67,8 +68,15 @@ namespace SiebwaldeApp
             // Bind to a single instance of Menu view model
             Kernel.Bind<SideMenuViewModel>().ToConstant(new SideMenuViewModel());
 
+            // Bind the ECoS host (the server Koploper connects to on port 15471). Its
+            // composition lives in the Integration layer; here we only create it from
+            // configuration and hand it to the application model.
+            var ecosHost = TrackControlHost.FromConfiguration(
+                log: message => SiebwaldeApp.Core.IoC.Logger.Log(message, "EcosHost"));
+            Kernel.Bind<IEcosHostService>().ToConstant(ecosHost);
+
             // Bind to a single instance of Siebwalde Application Model
-            Kernel.Bind<SiebwaldeApplicationModel>().ToConstant(new SiebwaldeApplicationModel());         
+            Kernel.Bind<SiebwaldeApplicationModel>().ToConstant(new SiebwaldeApplicationModel(ecosHost));         
         }
 
         #endregion

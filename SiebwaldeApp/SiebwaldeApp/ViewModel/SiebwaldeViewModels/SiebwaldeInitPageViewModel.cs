@@ -70,6 +70,9 @@ namespace SiebwaldeApp
         /// <summary>Start the Fiddle Yard in simulator mode (operator-activated).</summary>
         public ICommand InitFiddleYardSimulator { get; set; }
 
+        /// <summary>Start the ECoS host in simulator mode, so Koploper can connect without hardware.</summary>
+        public ICommand InitEcosSimulator { get; set; }
+
         #endregion
 
         #region Constructor
@@ -98,6 +101,7 @@ namespace SiebwaldeApp
             InitTrackController = new RelayCommand(async () => await StartTrackAsync());
             InitFiddleYardController = new RelayCommand(async () => await StartFiddleYardAsync(false));
             InitFiddleYardSimulator = new RelayCommand(async () => await StartFiddleYardAsync(true));
+            InitEcosSimulator = new RelayCommand(async () => await StartEcosSimulatorAsync());
 
             Log("Init page ready. Press 'Detect hosts' to scan for FiddleYard, TrackController and Koploper.");
 
@@ -225,6 +229,19 @@ namespace SiebwaldeApp
 
             await IoC.siebwaldeApplicationModel.StartFYController(simulator);
             Log("Fiddle Yard start requested.");
+        }
+
+        /// <summary>
+        /// Starts the ECoS host against the software simulator. No track controller or
+        /// hardware is required; Koploper can connect on port 15471.
+        /// </summary>
+        private async Task StartEcosSimulatorAsync()
+        {
+            Log("Starting ECoS host in simulator mode (Koploper can connect on port 15471)...");
+
+            await IoC.siebwaldeApplicationModel.StartEcosHostSimulatorAsync();
+
+            Log("ECoS simulator start requested.");
         }
 
         #endregion
