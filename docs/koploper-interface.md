@@ -241,6 +241,31 @@ routes: 1>2, 2>3, 3>4@1:1, 3>5@2:1, 4>1, 5>1
 
 (The switch ids/positions in the `routes` line are provisional until the exact switch that selects 4 versus 5 is confirmed from a trace.)
 
+### Bezetmelder to sensor/bit mapping (verified)
+
+The simulator's sensor numbering matches Koploper's bezetmelder numbering exactly:
+
+- `SimpleEcosBackend.OnSensorChangedAsync(sensorId, occupied)` sets `bit = sensorId - 1` in feedback module `100`.
+- `TrackSimulatorBackend.InitOvalWithLadder()` assigns block 1 -> sensors 1,2; block 2 -> 3,4; block 3 -> 5,6; block 4 -> 7,8; block 5 -> 9,10 (enter, exit).
+- Koploper bezetmelders: block 1 -> 1.01, 1.02; block 2 -> 1.03, 1.04; ... block 5 -> 1.09, 1.10.
+
+| Koploper bezetmelder | Sensor id | Bit in module 100 |
+| --- | --- | --- |
+| 1.01 | 1 | 0 |
+| 1.02 | 2 | 1 |
+| 1.03 | 3 | 2 |
+| 1.04 | 4 | 3 |
+| 1.05 | 5 | 4 |
+| 1.06 | 6 | 5 |
+| 1.07 | 7 | 6 |
+| 1.08 | 8 | 7 |
+| 1.09 | 9 | 8 |
+| 1.10 | 10 | 9 |
+
+Verified against the live trace: loc1 in block 2 + loc2 in block 5 gives `0x104` (bits 2+8); block 3 + block 5 gives `0x110` (bits 4+8); block 4 + block 5 gives `0x140` (bits 6+8). Transient values appear during a transition, which explains earlier confusion.
+
+Consequence: for real hardware, amplifier occupancy must be reported as sensor ids 1..10 (bit = id - 1) so Koploper sees the correct bezetmelders.
+
 ## Trace Data (2026-09-11)
 
 - No Koploper/ECoS trace data exists in `Logging/` or anywhere else in the repository. The emulator and the external-info client log to the console only (`[EXT]`, `[LOCO]`, `[ECOS]`, `[HW-FEEDBACK]`, `TX:`), and no console capture was kept.
