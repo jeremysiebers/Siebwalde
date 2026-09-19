@@ -1,0 +1,35 @@
+name: Build and test
+
+# Continuous integration for the managed .NET solution.
+# Pull requests against master and pushes to master are built and tested in Release.
+on:
+  pull_request:
+    branches: [ master ]
+  push:
+    branches: [ master ]
+
+jobs:
+  build-test:
+    name: Build and test (Release)
+    # The solution contains Windows/WPF projects (net8.0-windows), so a Windows runner is required.
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore SiebwaldeApp/SiebwaldeApp.sln
+
+      # Warnings are intentionally not suppressed: the build must stay honest about them.
+      - name: Build (Release)
+        run: dotnet build SiebwaldeApp/SiebwaldeApp.sln -c Release --no-restore
+
+      # Runs every test project in the solution. A failing test fails the workflow.
+      - name: Test (Release)
+        run: dotnet test SiebwaldeApp/SiebwaldeApp.sln -c Release --no-build
