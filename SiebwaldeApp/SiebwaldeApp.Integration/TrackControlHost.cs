@@ -98,18 +98,31 @@ namespace SiebwaldeApp.Integration
         public TrackControlMode? Mode => _mode;
 
         /// <inheritdoc />
-        public async Task StartAsync(
+        public async Task<EcosHostStartResult> StartAsync(
             TrackControlMode mode,
             ITrackCommClient? commClient,
             TrackApplicationVariables? variables,
             CancellationToken cancellationToken = default)
         {
-            if (IsRunning)
+            // Already in the requested mode: idempotent, nothing to do.
+            if (IsRunning && _mode == mode)
             {
-                Log($"ECoS host is already running in {_mode} mode; ignoring the {mode} start request.");
-                return;
+                Log($"ECoS host is already running in {mode} mode.");
+                return EcosHostStartResult.AlreadyActive;
             }
 
+            // Real mode outranks the simulator: a successfully started real track application
+            // must not stay hidden behind a simulator that was started earlier. The reverse
+            // request is refused, because replacing a live real host would take the real
+            // layout away from Koploper without the operator asking for it.
+            if (IsRunning && _mode == TrackControlMode.Real && mode == TrackControlMode.Simulator)
+            {
+                Log("Refusing to replace the running real ECoS host with the simulator.");
+                return EcosHostStartResult.Rejected;
+            }
+
+            // Validate before touching a running host, so a bad request cannot tear down a
+            // working host.
             if (mode == TrackControlMode.Real && (commClient is null || variables is null))
             {
                 throw new ArgumentException(
@@ -117,6 +130,38 @@ namespace SiebwaldeApp.Integration
                     nameof(commClient));
             }
 
+            var transitioning = IsRunning;
+            if (transitioning)
+            {
+                Log($"Switching the ECoS host from {_mode} to {mode}.");
+                Stop();
+            }
+
+            try
+            {
+                await ComposeAndStartAsync(mode, commClient, variables, cancellationToken).ConfigureAwait(false);
+            }
+            catch
+            {
+                // Never leave a half-started host behind: release the port and the
+                // external-info client before surfacing the failure.
+                Stop();
+                throw;
+            }
+
+            return transitioning ? EcosHostStartResult.Transitioned : EcosHostStartResult.Started;
+        }
+
+        /// <summary>
+        /// Composes the backend for the requested mode and brings up the ECoS server.
+        /// Assumes no host is running.
+        /// </summary>
+        private async Task ComposeAndStartAsync(
+            TrackControlMode mode,
+            ITrackCommClient? commClient,
+            TrackApplicationVariables? variables,
+            CancellationToken cancellationToken)
+        {
             _externalInfo = new KoploperExternalInfoClient(_externalInfoHost, _externalInfoPort);
 
             _locoRepository = new JsonLocoRepository(_locoRepositoryPath);

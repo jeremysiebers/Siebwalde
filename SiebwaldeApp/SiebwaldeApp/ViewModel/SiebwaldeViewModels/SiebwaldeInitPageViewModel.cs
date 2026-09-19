@@ -51,6 +51,12 @@ namespace SiebwaldeApp
         /// <summary>True while a detection pass is running.</summary>
         public bool IsDetecting { get; set; }
 
+        /// <summary>
+        /// Human-readable description of the ECoS mode that is actually active, so the page
+        /// shows reality instead of assuming a start request succeeded.
+        /// </summary>
+        public string EcosModeStatus { get; set; } = "ECoS host: not running";
+
         #endregion
 
         #region Public commands
@@ -213,6 +219,9 @@ namespace SiebwaldeApp
             Log("Starting track application...");
             await IoC.siebwaldeApplicationModel.StartTrackApplication();
             Log("Track application start requested.");
+
+            UpdateEcosModeStatus();
+            Log($"ECoS after track start: {EcosModeStatus}");
         }
 
         private async Task StartFiddleYardAsync(bool simulator)
@@ -239,9 +248,23 @@ namespace SiebwaldeApp
         {
             Log("Starting ECoS host in simulator mode (Koploper can connect on port 15471)...");
 
-            await IoC.siebwaldeApplicationModel.StartEcosHostSimulatorAsync();
+            var result = await IoC.siebwaldeApplicationModel.StartEcosHostSimulatorAsync();
 
-            Log("ECoS simulator start requested.");
+            UpdateEcosModeStatus();
+            Log($"ECoS simulator start result: {result}. {EcosModeStatus}");
+        }
+
+        /// <summary>
+        /// Refreshes <see cref="EcosModeStatus"/> from the application model so the page
+        /// always shows the mode that is really active.
+        /// </summary>
+        private void UpdateEcosModeStatus()
+        {
+            var mode = IoC.siebwaldeApplicationModel.ActiveEcosMode;
+
+            EcosModeStatus = mode is null
+                ? "ECoS host: not running"
+                : $"ECoS host: {mode} mode active";
         }
 
         #endregion

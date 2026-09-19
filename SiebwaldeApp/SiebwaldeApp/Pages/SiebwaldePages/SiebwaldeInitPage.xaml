@@ -210,6 +210,18 @@
                                  FontFamily="{StaticResource FontAwesome}"
                                  Foreground="{StaticResource ForegroundLightBrush}" />
                         </TextBlock>
+
+                        <!-- Which ECoS mode is actually active, so the operator never has to
+                             assume that a start request succeeded. -->
+                        <TextBlock
+                            Margin="20 0 0 0"
+                            FontSize="{StaticResource FontSizeRegular}"
+                            VerticalAlignment="Center"
+                            TextWrapping="Wrap">
+                            <Run Text="{Binding EcosModeStatus, Mode=OneWay}"
+                                 FontFamily="{StaticResource FontAwesome}"
+                                 Foreground="{StaticResource WordOrangeBrush}" />
+                        </TextBlock>
                     </StackPanel>
                 </Grid>
 

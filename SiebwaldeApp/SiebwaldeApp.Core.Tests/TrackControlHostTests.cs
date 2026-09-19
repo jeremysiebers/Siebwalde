@@ -2,17 +2,19 @@ using System;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 using SiebwaldeApp.Core;
+using SiebwaldeApp.EcosEmu;
 using SiebwaldeApp.Integration;
 using Xunit;
 
 namespace SiebwaldeApp.Core.Tests
 {
     /// <summary>
-    /// Software-only lifecycle tests for <see cref="TrackControlHost"/>. No track
-    /// controller, no hardware and no WPF are involved: the simulator path is exercised
-    /// on loopback only.
+    /// Software-only lifecycle and mode-transition tests for <see cref="TrackControlHost"/>.
+    /// No track controller, no hardware and no WPF are involved: the simulator and the real
+    /// backend are both driven on loopback with fakes.
     /// </summary>
     public class TrackControlHostTests : IDisposable
     {
@@ -22,6 +24,25 @@ namespace SiebwaldeApp.Core.Tests
         private static BlockTopology Topology => BlockTopology.Parse("amps: 1:1,2:2 ; routes: 1>2,2>1");
 
         private static KoploperBlockMap BlockMap => KoploperBlockMap.Parse("1:1.01:1, 2:1.02:2");
+
+        /// <summary>Minimal stand-in for the real track communication client.</summary>
+        private sealed class FakeCommClient : ITrackCommClient
+        {
+            public event EventHandler<AmplifierDataEventArgs>? AmplifierDataReceived;
+#pragma warning disable CS0067
+            public event EventHandler<ControlMessageEventArgs>? ControlMessageReceived;
+#pragma warning restore CS0067
+
+            public Task StartAsync(bool realHardwareMode, CancellationToken cancellationToken = default)
+                => Task.CompletedTask;
+
+            public Task StopAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+            public Task SendAsync(SendMessage message, CancellationToken cancellationToken = default)
+                => Task.CompletedTask;
+
+            public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+        }
 
         /// <summary>Reserves and releases a port so the test does not collide with 15471.</summary>
         private static int GetFreeTcpPort()
@@ -36,20 +57,33 @@ namespace SiebwaldeApp.Core.Tests
         private TrackControlHost CreateHost(int port)
             => new(_locoPath, Topology, BlockMap, ecosListenPort: port);
 
+        private static async Task AssertPortIsServed(int port)
+        {
+            using var client = new TcpClient();
+            await client.ConnectAsync(IPAddress.Loopback, port);
+            Assert.True(client.Connected);
+        }
+
+        private static async Task AssertPortIsFree(int port)
+        {
+            using var client = new TcpClient();
+            await Assert.ThrowsAnyAsync<SocketException>(
+                () => client.ConnectAsync(IPAddress.Loopback, port));
+        }
+
         [Fact]
         public async Task StartSimulator_BringsUpTheEcosListenerAndReportsMode()
         {
             var port = GetFreeTcpPort();
             var host = CreateHost(port);
 
-            await host.StartAsync(TrackControlMode.Simulator, commClient: null, variables: null);
+            var result = await host.StartAsync(TrackControlMode.Simulator, commClient: null, variables: null);
 
+            Assert.Equal(EcosHostStartResult.Started, result);
             Assert.True(host.IsRunning);
             Assert.Equal(TrackControlMode.Simulator, host.Mode);
 
-            using var client = new TcpClient();
-            await client.ConnectAsync(IPAddress.Loopback, port);
-            Assert.True(client.Connected);
+            await AssertPortIsServed(port);
 
             host.Stop();
         }
@@ -66,9 +100,7 @@ namespace SiebwaldeApp.Core.Tests
             Assert.False(host.IsRunning);
             Assert.Null(host.Mode);
 
-            using var client = new TcpClient();
-            await Assert.ThrowsAnyAsync<SocketException>(
-                () => client.ConnectAsync(IPAddress.Loopback, port));
+            await AssertPortIsFree(port);
         }
 
         [Fact]
@@ -96,18 +128,10 @@ namespace SiebwaldeApp.Core.Tests
         }
 
         [Fact]
-        public async Task Start_WhenAlreadyRunning_KeepsTheOriginalMode()
+        public async Task Constructor_WithoutLocoRepositoryPath_Throws()
         {
-            var port = GetFreeTcpPort();
-            var host = CreateHost(port);
-
-            await host.StartAsync(TrackControlMode.Simulator, null, null);
-            await host.StartAsync(TrackControlMode.Simulator, null, null);
-
-            Assert.True(host.IsRunning);
-            Assert.Equal(TrackControlMode.Simulator, host.Mode);
-
-            host.Stop();
+            Assert.Throws<ArgumentException>(
+                () => new TrackControlHost(" ", Topology, BlockMap));
         }
 
         [Fact]
@@ -121,11 +145,121 @@ namespace SiebwaldeApp.Core.Tests
             Assert.False(host.IsRunning);
         }
 
+        // ---------------------------------------------------------------------
+        // Mode transition semantics
+        // ---------------------------------------------------------------------
+
         [Fact]
-        public void Constructor_WithoutLocoRepositoryPath_Throws()
+        public async Task SimulatorToSimulator_IsIdempotent()
         {
-            Assert.Throws<ArgumentException>(
-                () => new TrackControlHost(" ", Topology, BlockMap));
+            var port = GetFreeTcpPort();
+            var host = CreateHost(port);
+
+            var first = await host.StartAsync(TrackControlMode.Simulator, null, null);
+            var second = await host.StartAsync(TrackControlMode.Simulator, null, null);
+
+            Assert.Equal(EcosHostStartResult.Started, first);
+            Assert.Equal(EcosHostStartResult.AlreadyActive, second);
+            Assert.Equal(TrackControlMode.Simulator, host.Mode);
+
+            await AssertPortIsServed(port);
+            host.Stop();
+        }
+
+        [Fact]
+        public async Task RealToReal_IsIdempotent()
+        {
+            var port = GetFreeTcpPort();
+            var host = CreateHost(port);
+            var variables = new TrackApplicationVariables();
+
+            var first = await host.StartAsync(TrackControlMode.Real, new FakeCommClient(), variables);
+            var second = await host.StartAsync(TrackControlMode.Real, new FakeCommClient(), variables);
+
+            Assert.Equal(EcosHostStartResult.Started, first);
+            Assert.Equal(EcosHostStartResult.AlreadyActive, second);
+            Assert.Equal(TrackControlMode.Real, host.Mode);
+
+            await AssertPortIsServed(port);
+            host.Stop();
+        }
+
+        [Fact]
+        public async Task RealToSimulator_IsRejectedAndKeepsTheRealHostRunning()
+        {
+            var port = GetFreeTcpPort();
+            var host = CreateHost(port);
+            var variables = new TrackApplicationVariables();
+
+            await host.StartAsync(TrackControlMode.Real, new FakeCommClient(), variables);
+            var result = await host.StartAsync(TrackControlMode.Simulator, null, null);
+
+            Assert.Equal(EcosHostStartResult.Rejected, result);
+            Assert.True(host.IsRunning);
+            Assert.Equal(TrackControlMode.Real, host.Mode);
+
+            // The rejection must not have disturbed the live host.
+            await AssertPortIsServed(port);
+            host.Stop();
+        }
+
+        [Fact]
+        public async Task SimulatorToReal_TransitionsAndKeepsThePortServed()
+        {
+            var port = GetFreeTcpPort();
+            var host = CreateHost(port);
+            var variables = new TrackApplicationVariables();
+
+            await host.StartAsync(TrackControlMode.Simulator, null, null);
+            var result = await host.StartAsync(TrackControlMode.Real, new FakeCommClient(), variables);
+
+            Assert.Equal(EcosHostStartResult.Transitioned, result);
+            Assert.True(host.IsRunning);
+            Assert.Equal(TrackControlMode.Real, host.Mode);
+
+            // The transition must not leave port 15471 (here: the test port) unserved.
+            await AssertPortIsServed(port);
+
+            host.Stop();
+            await AssertPortIsFree(port);
+        }
+
+        [Fact]
+        public async Task SimulatorToReal_WithoutTrackPieces_ThrowsAndLeavesTheSimulatorRunning()
+        {
+            var port = GetFreeTcpPort();
+            var host = CreateHost(port);
+
+            await host.StartAsync(TrackControlMode.Simulator, null, null);
+
+            // A real request without the runtime pieces is invalid: it must be rejected
+            // before the running simulator is torn down.
+            await Assert.ThrowsAsync<ArgumentException>(
+                () => host.StartAsync(TrackControlMode.Real, commClient: null, variables: null));
+
+            Assert.True(host.IsRunning);
+            Assert.Equal(TrackControlMode.Simulator, host.Mode);
+
+            await AssertPortIsServed(port);
+            host.Stop();
+        }
+
+        [Fact]
+        public async Task SimulatorToRealToSimulator_IsRejectedAfterTheTransition()
+        {
+            var port = GetFreeTcpPort();
+            var host = CreateHost(port);
+            var variables = new TrackApplicationVariables();
+
+            await host.StartAsync(TrackControlMode.Simulator, null, null);
+            await host.StartAsync(TrackControlMode.Real, new FakeCommClient(), variables);
+
+            var result = await host.StartAsync(TrackControlMode.Simulator, null, null);
+
+            Assert.Equal(EcosHostStartResult.Rejected, result);
+            Assert.Equal(TrackControlMode.Real, host.Mode);
+
+            host.Stop();
         }
 
         public void Dispose()

@@ -7,7 +7,11 @@ namespace SiebwaldeApp.Core
     /// Owns the ECoS host: the TCP server Koploper connects to (port 15471) and the
     /// translation layer behind it. The implementation lives outside the UI layer, so the
     /// composition, mode selection and lifetime stay out of WPF. WPF only initiates a
-    /// start or a stop.
+    /// start or a stop and reads back which mode is active.
+    ///
+    /// Mode semantics (see <see cref="StartAsync"/>):
+    /// real mode is authoritative over the simulator, because a successfully started real
+    /// track application must not stay hidden behind a simulator that was started earlier.
     /// </summary>
     public interface IEcosHostService
     {
@@ -18,12 +22,23 @@ namespace SiebwaldeApp.Core
         TrackControlMode? Mode { get; }
 
         /// <summary>
-        /// Starts the ECoS host. <see cref="TrackControlMode.Real"/> requires the track
-        /// communication client and the shared track variables; in
-        /// <see cref="TrackControlMode.Simulator"/> both may be null. Starting an already
-        /// running host is ignored so the caller cannot accidentally take down Koploper.
+        /// Starts the host in the requested mode and reports what happened.
+        ///
+        /// - requesting the already active mode is an idempotent no-op (<see cref="EcosHostStartResult.AlreadyActive"/>);
+        /// - requesting <see cref="TrackControlMode.Simulator"/> while
+        ///   <see cref="TrackControlMode.Real"/> is active is refused
+        ///   (<see cref="EcosHostStartResult.Rejected"/>);
+        /// - requesting <see cref="TrackControlMode.Real"/> while
+        ///   <see cref="TrackControlMode.Simulator"/> is active stops the simulator cleanly and
+        ///   transitions to real mode (<see cref="EcosHostStartResult.Transitioned"/>).
+        ///
+        /// A rejected or invalid request must never take a running host down.
         /// </summary>
-        Task StartAsync(
+        /// <exception cref="System.ArgumentException">
+        /// <see cref="TrackControlMode.Real"/> was requested without a track communication
+        /// client or shared variables. The running host is left untouched.
+        /// </exception>
+        Task<EcosHostStartResult> StartAsync(
             TrackControlMode mode,
             ITrackCommClient? commClient,
             TrackApplicationVariables? variables,

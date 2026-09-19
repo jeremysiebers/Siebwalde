@@ -30,16 +30,52 @@ namespace SiebwaldeApp.Core
         /// <summary>UDP port used to receive from the Fiddle Yard controller.</summary>
         public static int FiddleYardReceivingPort => CoreSettings.Default.FYReceivingport;
 
-        /// <summary>Raw topology configuration text (amplifier sections and routes).</summary>
-        public static string BlockTopologyConfig => CoreSettings.Default.BlockTopologyConfig;
+        /// <summary>
+        /// Raw topology configuration text (amplifier sections and routes). Falls back to the
+        /// setting's declared default when the persisted user value is null, empty or
+        /// whitespace, so a legacy user.config cannot silently disable the mapping.
+        /// </summary>
+        public static string BlockTopologyConfig => ResolveSettingOrDefault(
+            CoreSettings.Default.BlockTopologyConfig,
+            nameof(CoreSettings.BlockTopologyConfig));
 
         /// <summary>Raw Koploper block mapping text (block -> bezetmelders -> amplifier sections).</summary>
-        public static string KoploperBlockMapConfig => CoreSettings.Default.KoploperBlockMapConfig;
+        public static string KoploperBlockMapConfig => ResolveSettingOrDefault(
+            CoreSettings.Default.KoploperBlockMapConfig,
+            nameof(CoreSettings.KoploperBlockMapConfig));
 
         /// <summary>Parses <see cref="BlockTopologyConfig"/> into a topology.</summary>
         public static BlockTopology BuildBlockTopology() => BlockTopology.Parse(BlockTopologyConfig);
 
         /// <summary>Parses <see cref="KoploperBlockMapConfig"/> into a Koploper block map.</summary>
         public static KoploperBlockMap BuildKoploperBlockMap() => KoploperBlockMap.Parse(KoploperBlockMapConfig);
+
+        /// <summary>
+        /// Returns the effective setting value, or the declared default when the persisted user
+        /// value is missing or blank.
+        ///
+        /// A non-empty value is always used as-is, even when it is malformed: configuration
+        /// errors must stay diagnosable instead of being masked by the default.
+        /// </summary>
+        /// <param name="effectiveValue">The persisted user value, or the default when none was stored.</param>
+        /// <param name="settingName">Name of the setting, used to read the declared default.</param>
+        public static string ResolveSettingOrDefault(string? effectiveValue, string settingName)
+        {
+            if (!string.IsNullOrWhiteSpace(effectiveValue))
+            {
+                return effectiveValue;
+            }
+
+            // Read the default from the settings metadata instead of duplicating the mapping
+            // string in code, so the Designer remains the single source of truth.
+            var declaredDefault = CoreSettings.Default.Properties[settingName]?.DefaultValue as string
+                                  ?? string.Empty;
+
+            IoC.Logger.Log(
+                $"Setting '{settingName}' is empty; using the configured default.",
+                "CoreConfiguration");
+
+            return declaredDefault;
+        }
     }
 }

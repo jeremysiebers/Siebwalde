@@ -248,42 +248,46 @@ namespace SiebwaldeApp.Core
         }
 
         /// <summary>
-        /// Starts the ECoS host in simulator mode, so Koploper can be exercised without the
-        /// track controller or physical hardware.
+        /// The ECoS mode that is actually active, or null when the host is not running. The
+        /// UI reads this instead of assuming that a start request succeeded.
         /// </summary>
-        public async Task StartEcosHostSimulatorAsync()
+        public TrackControlMode? ActiveEcosMode => _ecosHost?.Mode;
+
+        /// <summary>
+        /// Starts the ECoS host in simulator mode, so Koploper can be exercised without the
+        /// track controller or physical hardware. Reports what actually happened.
+        /// </summary>
+        public async Task<EcosHostStartResult> StartEcosHostSimulatorAsync()
             => await StartEcosHostAsync(TrackControlMode.Simulator);
 
         /// <summary>
         /// Starts the ECoS host (the server Koploper connects to on port 15471) in the
-        /// requested mode. Does nothing when no host was supplied, and leaves an already
-        /// running host untouched.
+        /// requested mode and reports the outcome. Mode conflicts are resolved by the host;
+        /// see <see cref="IEcosHostService.StartAsync"/>.
         /// </summary>
-        private async Task StartEcosHostAsync(TrackControlMode mode)
+        private async Task<EcosHostStartResult> StartEcosHostAsync(TrackControlMode mode)
         {
             if (_ecosHost is null)
             {
                 IoC.Logger.Log($"ECoS host not available; skipping the {mode} start.", LoggerInstance);
-                return;
-            }
-
-            if (_ecosHost.IsRunning)
-            {
-                IoC.Logger.Log(
-                    $"ECoS host already running in {_ecosHost.Mode} mode; skipping the {mode} start.",
-                    LoggerInstance);
-                return;
+                return EcosHostStartResult.NotAvailable;
             }
 
             try
             {
-                await _ecosHost.StartAsync(mode, _trackCommClient, _trackVariables, _appCts.Token);
-                IoC.Logger.Log($"ECoS host started in {mode} mode.", LoggerInstance);
+                var result = await _ecosHost.StartAsync(mode, _trackCommClient, _trackVariables, _appCts.Token);
+
+                IoC.Logger.Log(
+                    $"ECoS host {mode} start result: {result}; active mode is {_ecosHost.Mode?.ToString() ?? "<none>"}.",
+                    LoggerInstance);
+
+                return result;
             }
             catch (Exception ex)
             {
                 // Serving Koploper must never take the application down.
                 IoC.Logger.Log($"ECoS host failed to start in {mode} mode: {ex.Message}", LoggerInstance);
+                return EcosHostStartResult.Failed;
             }
         }
 

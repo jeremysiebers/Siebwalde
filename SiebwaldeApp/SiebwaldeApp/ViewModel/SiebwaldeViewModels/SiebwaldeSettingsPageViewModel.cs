@@ -1,4 +1,5 @@
-﻿using SiebwaldeApp.Core.Properties;
+﻿using SiebwaldeApp.Core;
+using SiebwaldeApp.Core.Properties;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -82,8 +83,11 @@ namespace SiebwaldeApp
             LogDirectory = settings.LogDirectory;
             FiddleYardSendingPort = settings.FYSendingport.ToString(CultureInfo.InvariantCulture);
             FiddleYardReceivingPort = settings.FYReceivingport.ToString(CultureInfo.InvariantCulture);
-            BlockTopologyConfig = settings.BlockTopologyConfig;
-            KoploperBlockMapConfig = settings.KoploperBlockMapConfig;
+            // Read the mapping through CoreConfiguration so the page shows the value that is
+            // actually used: a blank persisted value falls back to the configured default
+            // instead of leaving the operator with a silently empty mapping.
+            BlockTopologyConfig = CoreConfiguration.BlockTopologyConfig;
+            KoploperBlockMapConfig = CoreConfiguration.KoploperBlockMapConfig;
         }
 
         private void SaveSettings()
