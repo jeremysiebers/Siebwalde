@@ -1,4 +1,4 @@
-﻿using SiebwaldeApp.Core.TrackApplication.Comm;
+using SiebwaldeApp.Core.TrackApplication.Comm;
 using System.Text;
 
 namespace SiebwaldeApp.Core
@@ -9,7 +9,6 @@ namespace SiebwaldeApp.Core
         public event EventHandler? InstantiateFiddleYardWinForms;
         public event EventHandler? FiddleYardShowWinForms;
         public event EventHandler? FiddleYardShowSettingsWinForms;
-        //public StationSettingsPageViewModel SettingsViewModel { get; private set; }
         public FiddleYardController? FYcontroller;
         public FiddleYardController? YDcontroller;
         public TrackControlMain? _trackControlMain;
@@ -20,13 +19,18 @@ namespace SiebwaldeApp.Core
         private CancellationTokenSource _appCts;
         private readonly NewMAC_IP_Conditioner _macIp = new();        
         private TrackApplicationVariables? _trackVariables;        
-        private const string FwPath = "C:\\Localdata\\Siebwalde\\TrackAmplifier4.X\\dist\\Offset\\production\\TrackAmplifier4.X.production.hex";
 
         private ILogger TrackApplicationLogging;
         private TrackCommClientAsync _trackCommClient;
         private TrackAmplifierBootloaderHelpers _bootloaderHelpers;
         private SendNextFwDataPacket _sendNextFwDataPacket;
         private TrackAmplifierInitializationServiceAsync _trackInitService;
+
+        /// <summary>
+        /// ECoS host that serves Koploper. Owned by the host application and injected here
+        /// so this model can start and stop it as part of the application lifecycle.
+        /// </summary>
+        private readonly IEcosHostService? _ecosHost;
 
         private string LoggerInstance { get; set; }
         static ILogger GetLogger(string file, string loggerinstance)
@@ -37,8 +41,19 @@ namespace SiebwaldeApp.Core
         #endregion
 
         #region Constructor
-        public SiebwaldeApplicationModel()
+
+        /// <summary>
+        /// Creates the application model.
+        /// </summary>
+        /// <param name="ecosHost">
+        /// The ECoS host that serves Koploper (port 15471), supplied by the host application
+        /// so the composition and lifetime stay outside the UI layer. May be null when the
+        /// application runs without Koploper.
+        /// </param>
+        public SiebwaldeApplicationModel(IEcosHostService? ecosHost = null)
         {
+            _ecosHost = ecosHost;
+
             IoC.Logger.Log("Siebwalde Application started.", "");
 
             _appCts?.Cancel();
@@ -61,7 +76,8 @@ namespace SiebwaldeApp.Core
             => FiddleYardShowSettingsWinForms?.Invoke(this, e);
 
         /// <summary>Fiddle Yard</summary>
-        public async Task StartFYController()
+        /// <param name="forceSimulator">When true, start the Fiddle Yard in simulator mode without probing the target.</param>
+        public async Task StartFYController(bool forceSimulator = false)
         {
             if (FYcontroller != null)
                 return;
@@ -87,21 +103,19 @@ namespace SiebwaldeApp.Core
             OnLaunchWinFormsFormRequested(EventArgs.Empty);
 
             IoC.Logger.Log("FiddleYard Controller starting...", "");
-            await FYcontroller.StartFiddleYardControllerAsync();
+            await FYcontroller.StartFiddleYardControllerAsync(forceSimulator);
             IoC.Logger.Log("FiddleYard Controller started.", "");
         }
 
 
 
         /// <summary>
-        /// Starts the track application, initializing and registering station tracks, and launching the simulation
-        /// controller.
+        /// Starts the track application: builds the UDP transport, the track communication client, the bootloader
+        /// helpers, the initialization pipeline, and the runtime write loop.
         /// </summary>
-        /// <remarks>This method initializes the track application if it has not already been started. It
-        /// retrieves the necessary input and output ports, registers station tracks with metadata, and starts the
-        /// application's main processing loop. Additionally, it starts the simulation controller to manage
-        /// simulation-related tasks.</remarks>
-        /// <returns></returns>
+        /// <remarks>If the runtime controller already exists, the method returns without doing anything. The
+        /// runtime write loop is started when initialization reaches the Completed status.</remarks>
+        /// <returns>A task that completes when the initialization pipeline has finished.</returns>
         public async Task StartTrackApplication()
         {
             // If the main controller already exists we assume the track application
@@ -137,9 +151,9 @@ namespace SiebwaldeApp.Core
             // ---------------------------------------------------------------------
             // 3) Build low-level Ethernet / Modbus transport
             // ---------------------------------------------------------------------
-            const string targetIpAddress = "192.168.1.193"; // PIC32 IP
-            const int targetPort = 10000;                  // PIC waiting for client
-            const int localPort = 10001;                   // same local port as Python bind
+            var targetIpAddress = CoreConfiguration.TrackControllerIpAddress;
+            var targetPort = CoreConfiguration.TrackControllerSendingPort;
+            var localPort = CoreConfiguration.TrackControllerReceivingPort;
 
             // Raw UDP client (simple wrapper around UdpClient).
             var rawUdp = new RawUdpTransport(targetIpAddress, targetPort, localPort);
@@ -156,7 +170,7 @@ namespace SiebwaldeApp.Core
             // 5) Bootloader helper objects (re-using legacy classes)
             // ---------------------------------------------------------------------
             _bootloaderHelpers ??= new TrackAmplifierBootloaderHelpers(
-                FwPath,
+                CoreConfiguration.TrackAmplifierFirmwarePath,
                 LoggerInstance);
 
             _sendNextFwDataPacket ??= new SendNextFwDataPacket(
@@ -225,6 +239,93 @@ namespace SiebwaldeApp.Core
             await _trackInitService.InitializeAsync(_appCts.Token);
 
             IoC.Logger.Log("Track Application started.", "");
+
+            // ---------------------------------------------------------------------
+            // 9) Serve Koploper: start the ECoS host on top of the real backend.
+            //    This runs last so the initialization sequencing above is unchanged.
+            // ---------------------------------------------------------------------
+            await StartEcosHostAsync(TrackControlMode.Real);
+        }
+
+        /// <summary>
+        /// The ECoS mode that is actually active, or null when the host is not running. The
+        /// UI reads this instead of assuming that a start request succeeded.
+        /// </summary>
+        public TrackControlMode? ActiveEcosMode => _ecosHost?.Mode;
+
+        /// <summary>
+        /// Diagnostics for the control path, or null when the ECoS host is not running. The UI
+        /// reads structured diagnostics from here instead of parsing log text.
+        /// </summary>
+        public ControlDiagnostics? ControlDiagnostics => _ecosHost?.Diagnostics;
+
+        /// <summary>True while an unsafe divergence is latched and not yet reset.</summary>
+        public bool IsControlPathUnsafe => _ecosHost?.IsUnsafe ?? false;
+
+        /// <summary>
+        /// Explicit recovery for a latched safety fault. A latched fault never clears itself.
+        /// </summary>
+        /// <returns>True when the reset was applied, false when it was refused.</returns>
+        public bool ResetControlSafety() => _ecosHost?.ResetSafety() ?? false;
+
+        /// <summary>
+        /// Starts the ECoS host in simulator mode, so Koploper can be exercised without the
+        /// track controller or physical hardware. Reports what actually happened.
+        /// </summary>
+        public async Task<EcosHostStartResult> StartEcosHostSimulatorAsync()
+            => await StartEcosHostAsync(TrackControlMode.Simulator);
+
+        /// <summary>
+        /// Starts the ECoS host (the server Koploper connects to on port 15471) in the
+        /// requested mode and reports the outcome. Mode conflicts are resolved by the host;
+        /// see <see cref="IEcosHostService.StartAsync"/>.
+        /// </summary>
+        private async Task<EcosHostStartResult> StartEcosHostAsync(TrackControlMode mode)
+        {
+            if (_ecosHost is null)
+            {
+                IoC.Logger.Log($"ECoS host not available; skipping the {mode} start.", LoggerInstance);
+                return EcosHostStartResult.NotAvailable;
+            }
+
+            try
+            {
+                var result = await _ecosHost.StartAsync(mode, _trackCommClient, _trackVariables, _appCts.Token);
+
+                IoC.Logger.Log(
+                    $"ECoS host {mode} start result: {result}; active mode is {_ecosHost.Mode?.ToString() ?? "<none>"}.",
+                    LoggerInstance);
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                // Serving Koploper must never take the application down.
+                IoC.Logger.Log($"ECoS host failed to start in {mode} mode: {ex.Message}", LoggerInstance);
+                return EcosHostStartResult.Failed;
+            }
+        }
+
+        /// <summary>
+        /// Stops the ECoS host when it is running. Safe to call when it was never started.
+        /// </summary>
+        public void StopEcosHost()
+        {
+            if (_ecosHost is null || !_ecosHost.IsRunning)
+                return;
+
+            IoC.Logger.Log("Stopping ECoS host...", LoggerInstance);
+
+            try
+            {
+                _ecosHost.Stop();
+            }
+            catch (Exception ex)
+            {
+                IoC.Logger.Log($"ECoS host failed to stop: {ex.Message}", LoggerInstance);
+            }
+
+            IoC.Logger.Log("ECoS host stopped.", LoggerInstance);
         }
 
 
@@ -236,6 +337,10 @@ namespace SiebwaldeApp.Core
         /// errors encountered during the stopping process are logged.</remarks>
         public void StopTrackApplication()
         {
+            // Stop the ECoS host first. In simulator mode it runs without a track
+            // controller, so it must also be stopped when _trackControlMain is null.
+            StopEcosHost();
+
             if (_trackControlMain == null)
                 return;
 
@@ -355,7 +460,7 @@ namespace SiebwaldeApp.Core
         }
                 
         /// <summary>
-        /// Dummy MAC payload (12×3): identifiers u..z,0..5; value=0; CR
+        /// Dummy MAC payload (12�3): identifiers u..z,0..5; value=0; CR
         /// Matches the wire format expected by FiddleYardController.
         /// </summary>
         private static byte[,] BuildDummyMacPayload()

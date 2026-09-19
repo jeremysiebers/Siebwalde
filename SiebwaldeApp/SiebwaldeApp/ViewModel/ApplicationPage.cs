@@ -29,8 +29,6 @@
 
         TrackPageInit = 20,
 
-        TrackAmplifier = 21,
-
-        StationSettings = 22
+        TrackAmplifier = 21
     }
 }

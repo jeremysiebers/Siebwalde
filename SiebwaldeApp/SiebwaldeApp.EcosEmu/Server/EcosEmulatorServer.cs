@@ -27,6 +27,15 @@ namespace SiebwaldeApp.EcosEmu
         {
             _cts = new CancellationTokenSource();
             _listener = new TcpListener(IPAddress.Loopback, _port);
+
+            // The host can switch from simulator to real mode, which stops and immediately
+            // restarts the listener on the same port. Allow the rebind while a previously
+            // accepted connection is still winding down.
+            _listener.Server.SetSocketOption(
+                SocketOptionLevel.Socket,
+                SocketOptionName.ReuseAddress,
+                true);
+
             _listener.Start();
             _ = AcceptLoopAsync(_cts.Token);
             Console.WriteLine($"ECoS emulator listens on 127.0.0.1:{_port}");
@@ -52,6 +61,10 @@ namespace SiebwaldeApp.EcosEmu
             catch (OperationCanceledException)
             {
             }
+            catch (ObjectDisposedException)
+            {
+                // Stop() closed the listener while an accept was pending.
+            }
         }
 
         private async Task HandleClientAsync(TcpClient client, CancellationToken ct)
@@ -71,6 +84,11 @@ namespace SiebwaldeApp.EcosEmu
                     try
                     {
                         bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length, ct);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        // The host is shutting down while Koploper is still connected.
+                        break;
                     }
                     catch (IOException ioEx)
                     {

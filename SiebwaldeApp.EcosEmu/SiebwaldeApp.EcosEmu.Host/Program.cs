@@ -1,13 +1,18 @@
-﻿using SiebwaldeApp.EcosEmu;
-using System.Diagnostics.Metrics;
-using System.Net;
+﻿using System;
+using System.IO;
+using System.Text;
+using SiebwaldeApp.EcosEmu;
 
 class Program
 {
     static void Main(string[] args)
     {
+        // Capture all console output (Koploper external info, ECoS commands, feedback)
+        // into a trace file so a Koploper session can be analysed afterwards.
+        using var trace = EcosEmuTrace.Start();
+
         var externalInfo = new KoploperExternalInfoClient();
-        
+
         var locoRepo = new JsonLocoRepository("C:\\Localdata\\Siebwalde\\Logging\\locos.json");
         locoRepo.LoadAsync().GetAwaiter().GetResult();
 
@@ -28,115 +33,73 @@ class Program
         Console.WriteLine("ENTER to stop");
         Console.ReadLine();
         server.Stop();
-
-        //// Koploper external information client (port 5700)
-        //var externalInfo = new KoploperExternalInfoClient();
-        //externalInfo.Start();
-
-        //// Hardware backend (dummy for now, but with feedback hook)
-        //var hardware = new DummyHardwareBackend();
-
-        //// Loco repository
-        //var locoRepository = new JsonLocoRepository("C:\\Localdata\\Siebwalde\\Logging\\locos.json");
-        //locoRepository.LoadAsync().GetAwaiter().GetResult();
-
-        //// ECoS emulator backend
-        //var backend = new SimpleEcosBackend(hardware, locoRepository, externalInfo);
-
-        //// Wire hardware feedback → backend (for switch/occupancy sensor events)
-        //if (backend is IHardwareFeedbackSink feedbackSink)
-        //{
-        //    hardware.AttachFeedbackSink(feedbackSink);
-        //}
-
-        //var server = new EcosEmulatorServer(15471, new SimpleEcosCommandParser(), backend);
-        //server.Start();
-
-        //_ = Task.Run(async () =>
-        //{
-        //    await Task.Delay(TimeSpan.FromSeconds(10));
-        //    await hardware.SimulateExternalSensorChangeAsync(1, true);
-        //    await Task.Delay(TimeSpan.FromSeconds(10));
-        //    await hardware.SimulateExternalSensorChangeAsync(1, false);
-        //});
-
-        //Console.WriteLine("ENTER to stop");
-        //Console.ReadLine();
-
-        //externalInfo.Stop();
     }
 }
 
-//class DummyHardwareBackend : IHardwareBackend
-//{
-//    private IHardwareFeedbackSink? _feedbackSink;
+/// <summary>
+/// Tees everything written to the console into a timestamped trace file under the
+/// Siebwalde Logging directory, so Koploper/ECoS sessions can be analysed later.
+/// </summary>
+internal static class EcosEmuTrace
+{
+    public static IDisposable Start()
+    {
+        try
+        {
+            const string logDirectory = "C:\\Localdata\\Siebwalde\\Logging";
+            Directory.CreateDirectory(logDirectory);
 
-//    /// <summary>
-//    /// Attaches a feedback sink so this hardware backend can report
-//    /// external changes (e.g. switch or sensor state) back to the ECoS backend.
-//    /// </summary>
-//    public void AttachFeedbackSink(IHardwareFeedbackSink sink)
-//    {
-//        _feedbackSink = sink ?? throw new ArgumentNullException(nameof(sink));
-//    }
+            var path = Path.Combine(logDirectory, $"{DateTime.Now:dd-MM-yyyy}_EcosEmuTrace.txt");
+            var fileWriter = new StreamWriter(path, append: true) { AutoFlush = true };
 
-//    public void SetPower(bool on)
-//    {
-//        Console.WriteLine($"[HW] Power {(on ? "ON" : "OFF")}");
-//    }
+            Console.SetOut(new TeeTextWriter(Console.Out, fileWriter));
+            Console.WriteLine($"=== ECoS emulator trace started {DateTime.Now:yyyy-MM-dd HH:mm:ss} ===");
 
-//    public void SetLocoSpeed(int address, int ecosSpeed, int direction)
-//    {
-//        Console.WriteLine($"[HW] Loco addr={address} speed={ecosSpeed} dir={direction}");
-//    }
+            return fileWriter;
+        }
+        catch
+        {
+            // Tracing must never prevent the emulator from starting.
+            return new NoopDisposable();
+        }
+    }
 
-//    public void SetSwitch(int decoderAddress, int outputIndex, bool on)
-//    {
-//        Console.WriteLine($"[HW] Switch addr={decoderAddress} index={outputIndex} state={on}");
+    private sealed class TeeTextWriter : TextWriter
+    {
+        private readonly TextWriter _first;
+        private readonly TextWriter _second;
 
-//        // IMPORTANT:
-//        // Do NOT call back into the feedback sink here for now, because this
-//        // method is usually triggered by the ECoS backend itself in response
-//        // to a "set(...)" command from Koploper. If we reported a change here
-//        // as external feedback, we would create duplicate events.
-//        //
-//        // External switch changes (e.g. hardware/manual changes) should use
-//        // the helper method SimulateExternalSwitchChangeAsync instead.
-//    }
+        public TeeTextWriter(TextWriter first, TextWriter second)
+        {
+            _first = first;
+            _second = second;
+        }
 
-//    /// <summary>
-//    /// Test helper: simulate an EXTERNAL switch change (not coming from Koploper).
-//    /// This will notify the ECoS backend via the feedback sink.
-//    /// </summary>
-//    public async Task SimulateExternalSwitchChangeAsync(int ecosId, int decoderAddress, int outputIndex)
-//    {
-//        if (_feedbackSink == null)
-//            return; // method is async Task → mag zonder waarde terugkeren
+        public override Encoding Encoding => _first.Encoding;
 
-//        Console.WriteLine($"[HW-SIM] External switch change ecosId={ecosId} addr={decoderAddress} idx={outputIndex}");
+        public override void Write(char value)
+        {
+            _first.Write(value);
+            _second.Write(value);
+        }
 
-//        // Delay 5 seconds
-//        await Task.Delay(TimeSpan.FromSeconds(1));
+        public override void Write(string? value)
+        {
+            _first.Write(value);
+            _second.Write(value);
+        }
 
-//        Console.WriteLine($"[HW-SIM] External switch change ecosId={ecosId} addr={decoderAddress} idx={outputIndex} (after delay)");
+        public override void WriteLine(string? value)
+        {
+            _first.WriteLine(value);
+            _second.WriteLine(value);
+        }
+    }
 
-//        await _feedbackSink.OnSwitchChangedAsync(ecosId, decoderAddress, outputIndex);
-//    }
-
-//    /// <summary>
-//    /// Test helper: simulate an EXTERNAL sensor/occupancy change.
-//    /// </summary>
-//    public async Task SimulateExternalSensorChangeAsync(int sensorId, bool occupied)
-//    {
-//        if (_feedbackSink == null)
-//            return;
-
-//        Console.WriteLine($"[HW-SIM] External sensor change requested sensorId={sensorId} occupied={occupied}");
-
-//        // ADD DELAY HERE
-//        await Task.Delay(TimeSpan.FromSeconds(1));
-
-//        Console.WriteLine($"[HW-SIM] External sensor change sensorId={sensorId} occupied={occupied}");
-//        await _feedbackSink.OnSensorChangedAsync(sensorId, occupied);
-//    }
-//}
+    private sealed class NoopDisposable : IDisposable
+    {
+        public void Dispose()
+        {
+        }
+    }
+}

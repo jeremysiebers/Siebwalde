@@ -678,12 +678,12 @@ namespace SiebwaldeApp
             ClearMessageBuffer = HasBit(hr1, 12);
             EnableAmplifier = HasBit(hr1, 15);
 
-            // HoldingReg2
+            // HoldingReg2 - bit layout is owned by TrackAmplifierRegisters (mirrors General.h)
             ReadBackEmf = GetBits(hr2, 0, 9);
-            IsOccupied = HasBit(hr2, 10);
-            ThermalFlag = HasBit(hr2, 11);
-            OverCurrent = HasBit(hr2, 12);
-            AmplifierIdSet = HasBit(hr2, 13);
+            IsOccupied = (hr2 & TrackAmplifierRegisters.OccupiedBit) != 0;
+            ThermalFlag = (hr2 & TrackAmplifierRegisters.ThermalBit) != 0;
+            OverCurrent = (hr2 & TrackAmplifierRegisters.OverCurrentBit) != 0;
+            AmplifierIdSet = (hr2 & TrackAmplifierRegisters.IdSetBit) != 0;
 
             // HoldingReg3
             AmplifierStatus = hr3;

@@ -8,6 +8,10 @@
         public SiebwaldeInitPage()
         {
             InitializeComponent();
+
+            // Keep the automatic host re-detection running only while this page is shown.
+            Loaded += (_, __) => (DataContext as SiebwaldeInitPageViewModel)?.StartDetection();
+            Unloaded += (_, __) => (DataContext as SiebwaldeInitPageViewModel)?.StopDetection();
         }
     }
 }

@@ -11,8 +11,249 @@
                 Title="SiebwaldeSettingsPage">
 
     <Grid>
-        <TextBlock>
-            <Run Text="Siebwalde Settings Page Loaded!" FontSize="100" />
-        </TextBlock>
+        <Grid.InputBindings>
+            <KeyBinding Key="Z" Modifiers="Control" Command="{Binding Undo}" />
+        </Grid.InputBindings>
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="50">
+
+                <TextBlock FontSize="{StaticResource FontSizeXXLarge}"
+                           Foreground="{StaticResource BackgroundLightBrush}"
+                           Margin="0 0 0 20">
+                    <Run Text="Settings"
+                         FontFamily="{StaticResource FontAwesome}" />
+                </TextBlock>
+
+                <!-- TrackController -->
+                <TextBlock Foreground="{StaticResource ForegroundLightBrush}" FontSize="{StaticResource FontSizeXXLarge}">
+                    <Run Text="TrackController" />
+                </TextBlock>
+
+                <Grid Margin="0 5 0 5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="300"/>
+                        <ColumnDefinition Width="500"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Foreground="{StaticResource ForegroundLightBrush}">
+                        <Run Text="IP address" />
+                    </TextBlock>
+                    <TextBox Grid.Column="1"
+                             Background="{StaticResource TextBoxBackgroundBrush}"
+                             Foreground="{StaticResource BackgroundLightBrush}"
+                             Text="{Binding TrackControllerIpAddress, UpdateSourceTrigger=PropertyChanged}" />
+                </Grid>
+
+                <Grid Margin="0 5 0 5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="300"/>
+                        <ColumnDefinition Width="500"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Foreground="{StaticResource ForegroundLightBrush}">
+                        <Run Text="Sending port" />
+                    </TextBlock>
+                    <TextBox Grid.Column="1"
+                             Background="{StaticResource TextBoxBackgroundBrush}"
+                             Foreground="{StaticResource BackgroundLightBrush}"
+                             Text="{Binding TrackControllerSendingPort, UpdateSourceTrigger=PropertyChanged}" />
+                </Grid>
+
+                <Grid Margin="0 5 0 5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="300"/>
+                        <ColumnDefinition Width="500"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Foreground="{StaticResource ForegroundLightBrush}">
+                        <Run Text="Receiving port" />
+                    </TextBlock>
+                    <TextBox Grid.Column="1"
+                             Background="{StaticResource TextBoxBackgroundBrush}"
+                             Foreground="{StaticResource BackgroundLightBrush}"
+                             Text="{Binding TrackControllerReceivingPort, UpdateSourceTrigger=PropertyChanged}" />
+                </Grid>
+
+                <Grid Margin="0 5 0 5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="300"/>
+                        <ColumnDefinition Width="500"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Foreground="{StaticResource ForegroundLightBrush}">
+                        <Run Text="Firmware hex path" />
+                    </TextBlock>
+                    <TextBox Grid.Column="1"
+                             Background="{StaticResource TextBoxBackgroundBrush}"
+                             Foreground="{StaticResource BackgroundLightBrush}"
+                             Text="{Binding TrackAmplifierFirmwarePath, UpdateSourceTrigger=PropertyChanged}" />
+                </Grid>
+
+                <Button HorizontalAlignment="Left"
+                        Width="220"
+                        Margin="0 5 0 20"
+                        Command="{Binding ResetTrack}"
+                        Foreground="White"
+                        Content="Reset TrackController defaults" />
+
+                <!-- Fiddle Yard -->
+                <TextBlock Foreground="{StaticResource ForegroundLightBrush}" FontSize="{StaticResource FontSizeXXLarge}">
+                    <Run Text="Fiddle Yard" />
+                </TextBlock>
+
+                <Grid Margin="0 5 0 5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="300"/>
+                        <ColumnDefinition Width="500"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Foreground="{StaticResource ForegroundLightBrush}">
+                        <Run Text="Sending port" />
+                    </TextBlock>
+                    <TextBox Grid.Column="1"
+                             Background="{StaticResource TextBoxBackgroundBrush}"
+                             Foreground="{StaticResource BackgroundLightBrush}"
+                             Text="{Binding FiddleYardSendingPort, UpdateSourceTrigger=PropertyChanged}" />
+                </Grid>
+
+                <Grid Margin="0 5 0 5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="300"/>
+                        <ColumnDefinition Width="500"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Foreground="{StaticResource ForegroundLightBrush}">
+                        <Run Text="Receiving port" />
+                    </TextBlock>
+                    <TextBox Grid.Column="1"
+                             Background="{StaticResource TextBoxBackgroundBrush}"
+                             Foreground="{StaticResource BackgroundLightBrush}"
+                             Text="{Binding FiddleYardReceivingPort, UpdateSourceTrigger=PropertyChanged}" />
+                </Grid>
+
+                <Button HorizontalAlignment="Left"
+                        Width="220"
+                        Margin="0 5 0 20"
+                        Command="{Binding ResetFiddleYard}"
+                        Foreground="White"
+                        Content="Reset Fiddle Yard defaults" />
+
+                <!-- Logging -->
+                <TextBlock Foreground="{StaticResource ForegroundLightBrush}" FontSize="{StaticResource FontSizeXXLarge}">
+                    <Run Text="Logging" />
+                </TextBlock>
+
+                <Grid Margin="0 5 0 5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="300"/>
+                        <ColumnDefinition Width="500"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Foreground="{StaticResource ForegroundLightBrush}">
+                        <Run Text="Log directory" />
+                    </TextBlock>
+                    <TextBox Grid.Column="1"
+                             Background="{StaticResource TextBoxBackgroundBrush}"
+                             Foreground="{StaticResource BackgroundLightBrush}"
+                             Text="{Binding LogDirectory, UpdateSourceTrigger=PropertyChanged}" />
+                </Grid>
+
+                <Button HorizontalAlignment="Left"
+                        Width="220"
+                        Margin="0 5 0 20"
+                        Command="{Binding ResetLogging}"
+                        Foreground="White"
+                        Content="Reset logging defaults" />
+
+                <!-- Mapping -->
+                <TextBlock Foreground="{StaticResource ForegroundLightBrush}" FontSize="{StaticResource FontSizeXXLarge}">
+                    <Run Text="Block mapping (Koploper)" />
+                </TextBlock>
+
+                <Grid Margin="0 5 0 5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="300"/>
+                        <ColumnDefinition Width="900"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Foreground="{StaticResource ForegroundLightBrush}">
+                        <Run Text="Topology (amps/routes)" />
+                    </TextBlock>
+                    <TextBox Grid.Column="1"
+                             Height="60"
+                             TextWrapping="Wrap"
+                             AcceptsReturn="True"
+                             Background="{StaticResource TextBoxBackgroundBrush}"
+                             Foreground="{StaticResource BackgroundLightBrush}"
+                             Text="{Binding BlockTopologyConfig, UpdateSourceTrigger=PropertyChanged}" />
+                </Grid>
+
+                <Grid Margin="0 5 0 20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="300"/>
+                        <ColumnDefinition Width="900"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Foreground="{StaticResource ForegroundLightBrush}">
+                        <Run Text="Block - bezetmelders - amps" />
+                    </TextBlock>
+                    <TextBox Grid.Column="1"
+                             Height="60"
+                             TextWrapping="Wrap"
+                             AcceptsReturn="True"
+                             Background="{StaticResource TextBoxBackgroundBrush}"
+                             Foreground="{StaticResource BackgroundLightBrush}"
+                             Text="{Binding KoploperBlockMapConfig, UpdateSourceTrigger=PropertyChanged}" />
+                </Grid>
+
+                <Grid Margin="0 5 0 20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="300"/>
+                        <ColumnDefinition Width="900"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Foreground="{StaticResource ForegroundLightBrush}">
+                        <Run Text="Switches (ECoS:physical[:inverted][:g|r|keep])" />
+                    </TextBlock>
+                    <TextBox Grid.Column="1"
+                             Height="60"
+                             TextWrapping="Wrap"
+                             AcceptsReturn="True"
+                             Background="{StaticResource TextBoxBackgroundBrush}"
+                             Foreground="{StaticResource BackgroundLightBrush}"
+                             Text="{Binding SwitchMapConfig, UpdateSourceTrigger=PropertyChanged}" />
+                </Grid>
+
+                <Button HorizontalAlignment="Left"
+                        Width="220"
+                        Margin="0 5 0 20"
+                        Command="{Binding ResetMapping}"
+                        Foreground="White"
+                        Content="Reset mapping defaults" />
+
+                <!-- Actions -->
+                <StackPanel Orientation="Horizontal" Margin="0 10 0 10">
+                    <Button Width="160" Margin="0 0 10 0" Command="{Binding Save}" Foreground="White" Content="Save" />
+                    <Button Width="160" Margin="0 0 10 0" Command="{Binding Reload}" Foreground="White" Content="Reload" />
+                    <Button Width="160" Command="{Binding Undo}" Foreground="White" Content="Undo (Ctrl-Z)" />
+                </StackPanel>
+
+                <TextBlock Foreground="{StaticResource ForegroundLightBrush}"
+                           FontSize="{StaticResource FontSizeXXLarge}"
+                           TextWrapping="Wrap"
+                           Text="{Binding Status, Mode=OneWay}" />
+
+            </StackPanel>
+        </ScrollViewer>
     </Grid>
 </local:BasePage>

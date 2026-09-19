@@ -8,10 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Program - Copy.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\SiebwaldeApp\SiebwaldeApp.Core\SiebwaldeApp.Core.csproj" />
   </ItemGroup>
 

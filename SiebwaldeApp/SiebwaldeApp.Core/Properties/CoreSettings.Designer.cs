@@ -104,48 +104,123 @@ namespace SiebwaldeApp.Core.Properties {
             }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("C:\\\\Localdata\\\\Siebwalde\\\\Logging\\\\")]
         public string LogDirectory {
             get {
                 return ((string)(this["LogDirectory"]));
             }
+            set {
+                this["LogDirectory"] = value;
+            }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("28671")]
         public ushort FYSendingport {
             get {
                 return ((ushort)(this["FYSendingport"]));
             }
+            set {
+                this["FYSendingport"] = value;
+            }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("28672")]
         public ushort FYReceivingport {
             get {
                 return ((ushort)(this["FYReceivingport"]));
             }
+            set {
+                this["FYReceivingport"] = value;
+            }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("60000")]
+        [global::System.Configuration.DefaultSettingValueAttribute("10000")]
         public ushort TrckSendingPort {
             get {
                 return ((ushort)(this["TrckSendingPort"]));
             }
+            set {
+                this["TrckSendingPort"] = value;
+            }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("60000")]
+        [global::System.Configuration.DefaultSettingValueAttribute("10001")]
         public ushort TrckReceivingPort {
             get {
                 return ((ushort)(this["TrckReceivingPort"]));
+            }
+            set {
+                this["TrckReceivingPort"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("192.168.1.193")]
+        public string TrckIpAddress {
+            get {
+                return ((string)(this["TrckIpAddress"]));
+            }
+            set {
+                this["TrckIpAddress"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\\\Localdata\\\\Siebwalde\\\\TrackAmplifier4.X\\\\dist\\\\Offset\\\\production\\\\TrackAmplifier4.X.production.hex")]
+        public string TrackAmplifierFwPath {
+            get {
+                return ((string)(this["TrackAmplifierFwPath"]));
+            }
+            set {
+                this["TrackAmplifierFwPath"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("amps: 1:1,2:2,3:3,4:4,5:5 ; routes: 1>2,2>3,3>4@1:0,3>5@1:1,4>1,5>1")]
+        public string BlockTopologyConfig {
+            get {
+                return ((string)(this["BlockTopologyConfig"]));
+            }
+            set {
+                this["BlockTopologyConfig"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1:1.01+1.02:1, 2:1.03+1.04:2, 3:1.05+1.06:3, 4:1.07+1.08:4, 5:1.09+1.10:5")]
+        public string KoploperBlockMapConfig {
+            get {
+                return ((string)(this["KoploperBlockMapConfig"]));
+            }
+            set {
+                this["KoploperBlockMapConfig"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("switches: 1:1:keep, 2:2:keep")]
+        public string SwitchMapConfig {
+            get {
+                return ((string)(this["SwitchMapConfig"]));
+            }
+            set {
+                this["SwitchMapConfig"] = value;
             }
         }
         

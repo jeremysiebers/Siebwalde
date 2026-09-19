@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,17 +19,19 @@ namespace SiebwaldeApp.EcosEmu
             _feedbackSink = sink ?? throw new ArgumentNullException(nameof(sink));
         }
 
-        public void SetPower(bool on)
+        public bool SetPower(bool on)
         {
             Console.WriteLine($"[HW] Power {(on ? "ON" : "OFF")}");
+            return true;
         }
 
-        public void SetLocoSpeed(int address, int ecosSpeed, int direction)
+        public bool SetLocoSpeed(int address, int ecosSpeed, int direction)
         {
             Console.WriteLine($"[HW] Loco addr={address} speed={ecosSpeed} dir={direction}");
+            return true;
         }
 
-        public void SetSwitch(int decoderAddress, int outputIndex, bool on)
+        public bool SetSwitch(int decoderAddress, int outputIndex, bool on)
         {
             Console.WriteLine($"[HW] Switch addr={decoderAddress} index={outputIndex} state={on}");
 
@@ -41,6 +43,7 @@ namespace SiebwaldeApp.EcosEmu
             //
             // External switch changes (e.g. hardware/manual changes) should use
             // the helper method SimulateExternalSwitchChangeAsync instead.
+            return true;
         }
 
         /// <summary>
@@ -54,7 +57,7 @@ namespace SiebwaldeApp.EcosEmu
         public async Task SimulateExternalSwitchChangeAsync(int ecosId, int decoderAddress, int outputIndex)
         {
             if (_feedbackSink == null)
-                return; // method is async Task → mag zonder waarde terugkeren
+                return; // method is async Task ? mag zonder waarde terugkeren
 
             Console.WriteLine($"[HW-SIM] External switch change ecosId={ecosId} addr={decoderAddress} idx={outputIndex}");
 

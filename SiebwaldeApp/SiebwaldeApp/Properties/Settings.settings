@@ -32,11 +32,5 @@
     <Setting Name="FYReceivingport" Type="System.UInt16" Scope="Application">
       <Value Profile="(Default)">28672</Value>
     </Setting>
-    <Setting Name="TrckSendingPort" Type="System.UInt16" Scope="Application">
-      <Value Profile="(Default)">60000</Value>
-    </Setting>
-    <Setting Name="TrckReceivingPort" Type="System.UInt16" Scope="Application">
-      <Value Profile="(Default)">60000</Value>
-    </Setting>
   </Settings>
 </SettingsFile>
