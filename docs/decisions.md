@@ -335,3 +335,51 @@ Decision: Added a new `SiebwaldeApp.Core.Tests` xUnit project (`net8.0-windows7.
 Evidence: 23 tests covering `TrackApplicationVariables` (PWM clamp 0..799, EmoStop bit 15, slave 0 ignored, pending-write semantics, default PWM setpoints), `TrackAmplifierInitializationServiceAsync` (step chaining, unknown initial/next step, error, Continue-then-Completed), and `SimpleEcosCommandParser` (id/options parsing, malformed input, quoted-comma limitation).
 
 Impact: `dotnet test` passes 23/23 and `SiebwaldeApp.sln` builds with 0 errors. The initialization-service tests would catch the previously fixed step-name defect. Documented behavior found while testing: a fresh `TrackAmplifierWriteData` starts at `Hr0Value` 0, so requesting PWM 0 on a fresh amplifier is treated as "no change" and not queued; also `TrackApplicationVariables` gives all 56 `trackAmpItems` the same `HoldingReg` array instance (aliasing, recorded as a finding).
+
+## 2026-09-19: Koploper Locomotive Sync Replaces Pre-Seeding
+
+Decision: Do not pre-seed `Logging/locos.json`. Koploper synchronizes its locomotive data with the digital central; an empty list prompts that sync. Pre-seeding causes duplicate locomotives for the same decoder address.
+
+Evidence: Product owner explanation plus a live session in which removing `locos.json` let Koploper recreate and populate it.
+
+Impact: `locos.json` is runtime state and stays untracked.
+
+## 2026-09-19: Koploper Terminology And Bezetmelder Mapping
+
+Decision: Keep Koploper terminology distinct. A **Koploper block** is a collection of **bezetmelders** (occupancy detectors) and can span several **amplifier sections**. A block may have one or more bezetmelders; two are the physical minimum where precise stopping is required. `BlockTopology` "blocks" are amplifier sections.
+
+Evidence: Product owner explanation plus the Koploper export `Logging\Ovaaltje\BaanOverzicht_*.html`; bezetmelder `module.point` maps to ECoS sensor id `(module-1)*16 + point`, bit = sensorId-1 in feedback module 100, verified against the live trace.
+
+Impact: `KoploperBlockMap` models block -> bezetmelders -> amplifier sections; the occupancy bridge forwards occupancy per bezetmelder.
+
+## 2026-09-19: Occupancy Is Event-Driven, Not Polled
+
+Decision: The occupancy bridge evaluates on `ITrackCommClient.AmplifierDataReceived` and only emits ECoS sensor events when a block's occupancy changes. No timer poll for occupancy.
+
+Evidence: Amplifier data already arrives as events; polling would only add latency and load.
+
+Impact: `TrackAmplifierOccupancyBridge.EvaluateAsync()` is called from the event handler plus once on attach. A watchdog for stale updates belongs to the diagnostics item.
+
+## 2026-09-19: Amplifier Status Register Is The Occupancy Source
+
+Decision: Occupancy comes from `HoldingReg2` bit 10 (`HR_STATUS_OCCUPIED_BIT`). `TrackAmplifierRegisters` in Core is the single source of truth for the register layout; the WPF amplifier view uses those constants instead of hard-coded bits.
+
+Evidence: `TrackAmplifier4.X/modbus/General.h` and the existing WPF decode (`IsOccupied = HasBit(hr2, 10)`). The register description is provisional and may change with new firmware.
+
+Impact: The register layout is defined in one place; the firmware still has a TODO to populate the occupied flag.
+
+## 2026-09-19: Option A - The App Is The Composition Root
+
+Decision: The WPF app composes the ECoS backend in-process with the real hardware backend; the standalone emulator host remains for simulation.
+
+Evidence: The real backend needs the app's `TrackApplicationVariables`; a separate process would duplicate state. The emulator host must not reference Integration to avoid a cycle.
+
+Impact: `TrackControlIntegration` builds the provider, real backend, in-process `SimpleEcosBackend` and bridge; the app references `SiebwaldeApp.Integration`. App startup wiring is still to be done.
+
+## 2026-09-19: Block Topology And Mapping Are Editable Settings
+
+Decision: `BlockTopologyConfig` and `KoploperBlockMapConfig` are user settings, editable on the settings page with undo.
+
+Evidence: Product owner requirement that the mapping be created and edited by the operator, not hard-coded.
+
+Impact: Defaults match the test oval; `CoreConfiguration.BuildBlockTopology()`/`BuildKoploperBlockMap()` parse them.

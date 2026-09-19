@@ -1,5 +1,74 @@
 # Handoff
 
+## Latest Session (2026-09-19)
+
+Completed on `feature/csharp-cleanup-startup` (all committed and pushed; `git status` clean for tracked files):
+
+- **Increment 6 step 1** (protocol reconnaissance) and **step 2-3**: documented in `docs/koploper-interface.md`.
+- **Speed -> PWM**: `AmplifierSpeedMapper` (ECoS 0..127 + direction -> neutral 399, forward 400..799, reverse 398..1, never 0).
+- **Routing + look-ahead**: `BlockTopology` extended with switch-conditioned transitions and a no-look-ahead marker (`!`) for station departures; `IOccupancyProvider`; `LookAheadPlanner`; look-ahead wired into `TrackAmplifierHardwareBackend`.
+- **Koploper block mapping**: `KoploperBlockMap` (Koploper block -> bezetmelders -> amplifier sections, with reverse lookups). The authoritative oval mapping was extracted from the Koploper HTML export in `Logging\Ovaaltje\`.
+- **Occupancy path**: `TrackAmplifierRegisters` (mirrors `TrackAmplifier4.X/modbus/General.h`; HR_STATUS = HoldingReg2, bit 10 = occupied) and `TrackAmplifierOccupancyProvider` (block occupied when any covered section is occupied). `TrackAmplifierOccupancyBridge` forwards occupancy changes to Koploper as ECoS sensor events (event-driven).
+- **Composition (option A)**: `TrackControlIntegration` builds the occupancy provider, the real backend, the in-process `SimpleEcosBackend` (when a loco repository is supplied) and the bridge; `Attach()`/`Detach()` subscribe to `ITrackCommClient.AmplifierDataReceived`. The WPF app now references `SiebwaldeApp.Integration`.
+- **Editable mapping settings**: `BlockTopologyConfig` and `KoploperBlockMapConfig` user settings (oval defaults), exposed via `CoreConfiguration.BuildBlockTopology()`/`BuildKoploperBlockMap()`, editable on the settings page with undo.
+- **Live Koploper session**: emulator trace capture added to the emulator host; verified `create`, `set(id, speedstep[n])`, occupancy events, `[EXT]` position records, the loco sync, and the bezetmelder -> sensor/bit mapping.
+
+Tests: `dotnet test` **98/98 passed**. `SiebwaldeApp.sln` builds with 0 errors.
+
+### Files changed this session
+
+Core (`SiebwaldeApp/SiebwaldeApp.Core`):
+- Added: `Model/TrackApplication/Control/IOccupancyProvider.cs`, `KoploperBlockMap.cs`, `LookAheadPlanner.cs`, `TrackAmplifierOccupancyProvider.cs`, `TrackAmplifierRegisters.cs`.
+- Modified: `Model/TrackApplication/Control/BlockTopology.cs`, `Configuration/CoreConfiguration.cs`, `Properties/CoreSettings.settings`, `Properties/CoreSettings.Designer.cs`.
+
+Integration (`SiebwaldeApp/SiebwaldeApp.Integration`):
+- Added: `TrackAmplifierOccupancyBridge.cs`, `TrackControlIntegration.cs`.
+- Modified: `TrackAmplifierHardwareBackend.cs`.
+
+WPF app (`SiebwaldeApp/SiebwaldeApp`):
+- Modified: `SiebwaldeApp.csproj` (added Integration reference), `Pages/SiebwaldePages/SiebwaldeSettingsPage.xaml`, `ViewModel/SiebwaldeViewModels/SiebwaldeSettingsPageViewModel.cs`, `ViewModel/TrackViewModels/TrackAmplifierPageViewModel.cs` (now uses the Core register constants).
+
+Emulator host:
+- Modified: `SiebwaldeApp.EcosEmu/SiebwaldeApp.EcosEmu.Host/Program.cs` (console trace capture) - committed earlier in the session.
+
+Tests (`SiebwaldeApp/SiebwaldeApp.Core.Tests`):
+- Added: `BlockTopologyRoutingTests.cs`, `KoploperBlockMapTests.cs`, `LookAheadPlannerTests.cs`, `TrackAmplifierHardwareBackendLookAheadTests.cs`, `TrackAmplifierOccupancyBridgeTests.cs`, `TrackAmplifierOccupancyProviderTests.cs`, `TrackControlIntegrationTests.cs`.
+
+Docs:
+- Modified: `docs/koploper-interface.md` (large additions), `docs/backlog.md`, `docs/handoff.md`.
+
+### Decisions and assumptions
+
+- **PWM mapping**: neutral 399, forward 400..799, reverse 398..1, never 0 (confirmed by the product owner). Speed steps are 0..127 (from the `ecos-master` library).
+- **A Koploper block can have one or more bezetmelders**, not always two; the physical minimum of two applies where precise stopping is required.
+- **Bezetmelder = sensor**: bezetmelder `module.point` maps to ECoS sensor id `(module-1)*16 + point`, bit = sensorId-1 in feedback module 100. Verified against the live trace.
+- **Occupancy is event-driven, not polled**: the bridge evaluates on `AmplifierDataReceived` and only emits events on change.
+- **Do not pre-seed `locos.json`**: Koploper syncs its locos to the central; pre-seeding creates duplicates.
+- **Option A**: the WPF app is the composition root and hosts the ECoS backend in-process with the real hardware backend.
+- **Assumption**: the current firmware reports a single occupied flag per amplifier section, so all bezetmelders of a Koploper block follow that flag until entry/exit can be distinguished.
+- **Assumption**: `TrackAmplifierRegisters` is the single source of truth for the amplifier register layout; the register description is provisional and may change with new firmware.
+
+### Tests and checks performed
+
+- `dotnet test "SiebwaldeApp\SiebwaldeApp.Core.Tests\SiebwaldeApp.Core.Tests.csproj" -c Debug` -> **98 passed, 0 failed**.
+- `dotnet build "SiebwaldeApp\SiebwaldeApp.sln" -c Debug` -> **0 errors**.
+- Live Koploper session against the emulator: loco sync, driving (`set(id, speedstep[n])`), occupancy events, position records - all verified from the trace.
+- No hardware was connected or controlled.
+
+### Incomplete / uncertain
+
+1. **App startup wiring (rest of "2-rest")**: `TrackControlIntegration` is not yet created/started from `SiebwaldeApplicationModel`; the `EcosEmulatorServer` is not yet started in-process by the app; there is no real-vs-simulator mode selection in the app.
+2. The two new settings are not yet present in the `App.config` files (defaults currently come from the Designer attributes).
+3. **Switch mapping** (real <-> Koploper + default init state) not done; switch addresses for the oval are known (1 and 2) but the branch selection (`3>4` vs `3>5`) is still provisional in the topology config.
+4. **Divergence check + ECoS stop + operator diagnostics** not started.
+5. The firmware occupied flag has a TODO; live occupancy depends on firmware that populates it (the product owner states the real test firmware already returns it).
+6. `TrackApplicationVariables` gives all 56 items the same `HoldingReg` array instance (aliasing) - recorded in the backlog.
+7. `Logging/` (runtime logs, traces, `locos.json`, the Koploper HTML exports) is untracked and intentionally not committed.
+
+### Best next step
+
+**Finish the app startup wiring**: in `SiebwaldeApplicationModel` (or a new `EcosEmulatorService`) create `TrackControlIntegration` from `CoreConfiguration.BuildBlockTopology()`/`BuildKoploperBlockMap()` plus the loco repository and `KoploperExternalInfoClient`, start the `EcosEmulatorServer`, call `Attach()`, and add a real-vs-simulator mode selection. Then add the two new settings to `App.config`.
+
 ## Latest Session (2026-09-17)
 
 Completed today (all on `feature/csharp-cleanup-startup`, pushed):

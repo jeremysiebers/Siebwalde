@@ -90,4 +90,18 @@ Still not re-verified: the Fiddle Yard error paths, `SendNextFwDataPacket` await
 
 Increment 1 (2026-09-11) fixed two of the confirmed items: the `SiebwaldeApp.Core.Host` logger setup and the initialization step sequencing. See `docs/build-test.md` for build results.
 
+## Increment 6 Coverage (2026-09-19)
+
+| Area | Status | Evidence | Remaining gaps |
+| --- | --- | --- | --- |
+| Koploper/ECoS protocol | Investigated | `docs/koploper-interface.md`; live session trace `Logging\19-09-2026_EcosEmuTrace.txt`. | Edge cases; MMDC. |
+| Speed -> PWM | Implemented + tested | `AmplifierSpeedMapper`, `AmplifierSpeedMapperTests`. | None known. |
+| Routing + look-ahead | Implemented + tested | `BlockTopology`, `LookAheadPlanner`, `TrackAmplifierHardwareBackend`, tests. | Switch branch selection provisional. |
+| Koploper block mapping | Implemented + tested | `KoploperBlockMap`, `KoploperBlockMapTests`; oval mapping from the Koploper export. | Real-layout mapping not yet entered. |
+| Amplifier occupancy | Implemented + tested | `TrackAmplifierRegisters`, `TrackAmplifierOccupancyProvider`, tests. | Firmware still has a TODO for the occupied flag. |
+| Occupancy -> Koploper bridge | Implemented + tested | `TrackAmplifierOccupancyBridge`, tests. | Not yet wired into the running app. |
+| App composition (option A) | Partial | `TrackControlIntegration`; WPF app references Integration. | App startup wiring and mode selection pending. |
+| Unit tests | Implemented | `SiebwaldeApp.Core.Tests`, 98 tests passing. | UI-model and other areas still uncovered. |
+
+
 
