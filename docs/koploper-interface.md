@@ -393,6 +393,51 @@ Both consumers read the same value:
 
 **Why freshness is derived and not read from existing state.** `SlaveDetected` is written once per parsed frame and is never cleared, `HoldingReg` keeps its last values indefinitely, and `TrackCommClientAsync._publishTimer` republishes `AmplifierDataReceived` every 100 ms for every amplifier with `SlaveDetected != 0` regardless of whether new data arrived. `ITrackTransport` exposes no connection-loss or health signal. So none of the existing state proves that data is current; the frame timestamp is the only reliable signal, and it is stamped in the same place the registers are stored.
 
+### Physical validation (2026-09-19, real hardware)
+
+The whole path has now been validated on the real amplifier setup, not only from code:
+
+```
+PIC18 CMP1 -> HR_STATUS bit 10 -> PIC32/master transport -> TrackCommClientAsync
+  -> TrackAmplifierItem -> TrackAmplifierOccupancyProvider -> observability/freshness
+```
+
+Tested physical amplifier addresses: **1, 3, 4, 6** (the four proto amplifiers). All reported `SlaveDetected = 1` and the same firmware checksum `HR11 = 0x251F`, consistent with the CRC confirmation, so the initialization pipeline found 0 slaves to flash.
+
+**Frame intervals (healthy operation, per amplifier):** median **40-42 ms**, maximum **66-70 ms**. The 2-second freshness timeout therefore has roughly **30x margin** under normal operation, and no timeout adjustment is required. An aggregate view over all slaves that produced frames showed a worst interval of 112 ms (~18x margin).
+
+**Occupancy bit:** physical occupancy changed `HR_STATUS` bit 10 exactly as expected.
+
+| Amplifier 1 | `HR_STATUS` | bit 10 |
+| --- | --- | --- |
+| physically occupied | `0x2E02` | set |
+| clear (load removed) | `0x2A01` | clear |
+
+Only bit 10 was under test. The other `HR_STATUS` bits differ between these two samples and between amplifiers; no meaning is claimed for them here.
+
+**Provider result once valid data was flowing:**
+
+| Block (sections) | Backing | Result |
+| --- | --- | --- |
+| 1 (1), 3 (3), 4 (4) | detected physical amplifiers | `known = true`, `occupied = false` |
+| 2 (2), 5 (5) | sections that do not exist | `known = false` |
+
+`OccupancyAvailable = true` while fresh frames arrived. Missing or unavailable sections stayed **unknown** and were never falsely reported as clear.
+
+### Physical validation of the freshness invariant
+
+During the test the master stopped delivering fresh amplifier frames. This was observed for real, not simulated:
+
+- the existing 100 ms C# republish mechanism kept firing;
+- old `HoldingReg` values remained present in the container;
+- the tell-tale sign was the median frame interval rising from ~41 ms to ~94 ms, i.e. dominated by the republish timer instead of real frames;
+- `LastDataReceivedUtc` correctly became stale;
+- `OccupancyAvailable` became **false**;
+- every block became **unknown**;
+- the old clear values were **not** treated as known-clear.
+
+This physically confirms the safety invariant **`stale != clear`**, and confirms that `AmplifierDataReceived` on its own is not proof of fresh hardware data.
+
 
 
 ## Open Questions

@@ -1,5 +1,45 @@
 # Handoff
 
+## Latest Session (2026-09-19, real-hardware occupancy validation)
+
+Branch `feature/real-occupancy-integration`. The existing occupancy path was validated on the real amplifier setup. **No production-code change was required**; this session is documentation only.
+
+### What was validated
+
+```
+PIC18 CMP1 -> HR_STATUS bit 10 -> PIC32/master transport -> TrackCommClientAsync
+  -> TrackAmplifierItem -> TrackAmplifierOccupancyProvider -> observability/freshness
+```
+
+Tested amplifiers: **1, 3, 4, 6** (four proto amplifiers), all `SlaveDetected = 1`, all `HR11 = 0x251F` (flash step found 0 slaves to flash).
+
+- Healthy frame intervals per amplifier: median **40-42 ms**, maximum **66-70 ms** -> the 2 s freshness timeout has roughly **30x margin**; no adjustment needed.
+- `HR_STATUS` bit 10 changed exactly with physical occupancy: amplifier 1 occupied `0x2E02` (bit 10 set), clear `0x2A01` (bit 10 clear). Only bit 10 was under test.
+- Provider once valid data flowed: blocks backed by detected amplifiers (sections 1, 3, 4) reported `known = true`; blocks whose sections do not exist (2, 5) stayed `known = false`. `OccupancyAvailable = true`. Non-existing sections were never falsely clear.
+
+### Freshness invariant physically confirmed
+
+The master stopped delivering fresh frames while the 100 ms C# republish kept firing (median interval rose ~41 ms -> ~94 ms). Old `HoldingReg` values stayed present, `LastDataReceivedUtc` went stale, `OccupancyAvailable` became false and every block became unknown. The old clear values were **not** treated as known-clear. This confirms `stale != clear` on real hardware and that `AmplifierDataReceived` alone is not proof of fresh data.
+
+### Not yet validated (not defects)
+
+- physical occupancy transition latency was not timestamped;
+- WPF occupancy indication was not compared during this validation;
+- the ECoS/Koploper occupancy bridge was not started, because Koploper was running and autonomous movement was intentionally avoided;
+- occupancy-driven live safety/look-ahead behaviour with a real train is a separate controlled test.
+
+### Master communication observation (separate investigation)
+
+During the test the PIC32/master entered a state where all amplifier communication became unavailable and initialization no longer completed. A master reset followed by a new initialization restored operation. This is recorded in `docs/backlog.md` for separate investigation and is **not** related to the C# freshness handling, which behaved correctly during the failure.
+
+### Files changed
+
+Documentation only: `docs/koploper-interface.md`, `docs/handoff.md`, `docs/backlog.md`, `docs/analysis-coverage.md`.
+
+### Best next step
+
+Start the ECoS/Koploper occupancy bridge in a controlled run (Koploper stopped or with autonomous movement prevented) to validate the bridge end-to-end, then the occupancy-driven safety/look-ahead behaviour with a real train.
+
 ## Latest Session (2026-09-19, occupancy freshness review)
 
 Branch `feature/real-occupancy-integration`. Reviewed whether `SlaveDetected != 0` proves *current* data. **It does not.** A genuine freshness defect existed and is fixed; no firmware was changed.
@@ -42,7 +82,7 @@ Block: occupied if any covering section is fresh+occupied (even if another is un
 
 ### Remaining concerns
 
-1. The 2 s freshness window is a policy value, not derived from the master's cycle; it may need tuning once real frame timing is observed.
+1. The 2 s freshness window is a policy value, not derived from the master's cycle. It has since been measured on real hardware (~30x margin), so no tuning is needed; see the hardware-validation session above.
 2. Real occupancy still needs a live hardware run to confirm end-to-end behaviour.
 3. The stale `General.h` comment remains (deliberately not touched in this task).
 
@@ -91,7 +131,7 @@ Both consumers read the same value: the track-amplifier page (`hr2 & TrackAmplif
 
 ### Remaining concerns
 
-1. Real occupancy still needs a live hardware run to confirm end-to-end behaviour with the actual amplifiers; only the data path is verified from code.
+1. Real occupancy has since been physically validated on the actual amplifiers; see the hardware-validation session above.
 2. Simulator mode still delivers occupancy as ECoS sensor events, so `OccupancyAvailable` stays false there (unchanged, out of scope).
 3. The stale `General.h` comment remains in the firmware; correcting it is a separate firmware change.
 
