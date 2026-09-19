@@ -73,5 +73,16 @@ namespace SiebwaldeApp.Core.Tests
             Assert.True(topology.TryGetAmplifiers(1, out var amplifiers));
             Assert.Equal(new ushort[] { 1 }, amplifiers);
         }
+
+        [Fact]
+        public void LineBreaksSeparateSectionsAndUnprefixedRoutes()
+        {
+            var topology = BlockTopology.Parse("amps: 1:1,2:2\nroutes: 1>2\n2>3");
+
+            Assert.True(topology.TryGetAmplifiers(2, out var amplifiers));
+            Assert.Equal(new ushort[] { 2 }, amplifiers);
+            Assert.Equal(2, topology.GetTransitionsFrom(1)[0].ToBlock);
+            Assert.Equal(3, topology.GetTransitionsFrom(2)[0].ToBlock);
+        }
     }
 }

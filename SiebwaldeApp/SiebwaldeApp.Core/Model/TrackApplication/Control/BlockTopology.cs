@@ -31,15 +31,18 @@ namespace SiebwaldeApp.Core
     /// Maps Koploper block numbers to track amplifier slave numbers and describes how
     /// blocks are chained.
     ///
-    /// Configuration text uses sections separated by ';':
+    /// Configuration text uses sections separated by ';' (a line break also separates
+    /// sections, because the settings field is multi-line):
     ///   "amps: 1:1,2:2,3:3 ; routes: 1>2,2>3,3>4,4>1"
     ///   - "amps:"   block:amplifier, multiple amplifiers with '+' (for example "10:1+2")
     ///   - "routes:" from>to, optionally "@switchId:position" and a trailing '!' to forbid look-ahead
     ///               for example "10>11@5:0,10>12@5:1!"
-    /// A section without a prefix is treated as amplifiers (backwards compatible).
+    /// A section without a prefix is treated as routes when it contains '>', otherwise as amplifiers.
     /// </summary>
     public sealed class BlockTopology
     {
+        private static readonly char[] SectionSeparators = { ';', '\r', '\n' };
+
         private readonly Dictionary<int, ushort[]> _blockToAmplifiers = new();
         private readonly Dictionary<int, List<BlockTransition>> _transitionsFrom = new();
 
@@ -65,7 +68,7 @@ namespace SiebwaldeApp.Core
                 return topology;
             }
 
-            foreach (var section in configuration.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            foreach (var section in configuration.Split(SectionSeparators, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
             {
                 if (section.StartsWith("routes:", StringComparison.OrdinalIgnoreCase))
                 {
@@ -74,6 +77,10 @@ namespace SiebwaldeApp.Core
                 else if (section.StartsWith("amps:", StringComparison.OrdinalIgnoreCase))
                 {
                     topology.ParseAmplifiers(section["amps:".Length..]);
+                }
+                else if (section.Contains('>'))
+                {
+                    topology.ParseRoutes(section);
                 }
                 else
                 {

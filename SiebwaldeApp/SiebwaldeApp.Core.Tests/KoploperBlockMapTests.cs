@@ -21,6 +21,17 @@ namespace SiebwaldeApp.Core.Tests
         }
 
         [Fact]
+        public void LineBreaksSeparateEntries()
+        {
+            var map = KoploperBlockMap.Parse("1:1.01:1\n2:1.02:2");
+
+            Assert.Equal(2, map.Blocks.Count);
+            Assert.True(map.TryGetByBlock(2, out var block2));
+            Assert.Equal(new[] { "1.02" }, block2.Bezetmelders);
+            Assert.Equal(new ushort[] { 2 }, block2.AmplifierSections);
+        }
+
+        [Fact]
         public void FindsBlockByBezetmelder()
         {
             var map = KoploperBlockMap.Parse(OvalMapping);

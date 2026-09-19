@@ -50,6 +50,7 @@ namespace SiebwaldeApp
         public ICommand ResetTrack { get; set; }
         public ICommand ResetFiddleYard { get; set; }
         public ICommand ResetLogging { get; set; }
+        public ICommand ResetMapping { get; set; }
         public ICommand Undo { get; set; }
 
         #endregion
@@ -61,6 +62,7 @@ namespace SiebwaldeApp
             ResetTrack = new RelayCommand(ResetTrackSettings);
             ResetFiddleYard = new RelayCommand(ResetFiddleYardSettings);
             ResetLogging = new RelayCommand(ResetLoggingSettings);
+            ResetMapping = new RelayCommand(ResetMappingSettings);
             Undo = new RelayCommand(UndoLast);
 
             ReloadSettings();
@@ -138,6 +140,14 @@ namespace SiebwaldeApp
             PushUndo();
             LogDirectory = GetDefault("LogDirectory");
             Status = "Logging settings reset to defaults (press Save to persist).";
+        }
+
+        private void ResetMappingSettings()
+        {
+            PushUndo();
+            BlockTopologyConfig = GetDefault("BlockTopologyConfig");
+            KoploperBlockMapConfig = GetDefault("KoploperBlockMapConfig");
+            Status = "Block mapping reset to defaults (press Save to persist).";
         }
 
         private static string GetDefault(string name)

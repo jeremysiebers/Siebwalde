@@ -21,9 +21,12 @@ namespace SiebwaldeApp.Core
     /// Configuration text uses comma-separated entries of the form
     /// "block:bezetmelder[+bezetmelder]:section[+section]", for example:
     ///   "1:1.01+1.02:1, 2:1.03+1.04:2, 3:1.05+1.06:3, 4:1.07+1.08:4, 5:1.09+1.10:5"
+    /// A line break also separates entries, because the settings field is multi-line.
     /// </summary>
     public sealed class KoploperBlockMap
     {
+        private static readonly char[] EntrySeparators = { ',', '\r', '\n' };
+
         private readonly List<KoploperBlock> _blocks = new();
 
         private KoploperBlockMap()
@@ -41,7 +44,7 @@ namespace SiebwaldeApp.Core
                 return map;
             }
 
-            foreach (var entry in configuration.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            foreach (var entry in configuration.Split(EntrySeparators, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
             {
                 var parts = entry.Split(':');
                 if (parts.Length != 3 || !int.TryParse(parts[0].Trim(), out var blockNumber))
