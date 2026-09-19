@@ -28,9 +28,11 @@ The master stopped delivering fresh frames while the 100 ms C# republish kept fi
 - the ECoS/Koploper occupancy bridge was not started, because Koploper was running and autonomous movement was intentionally avoided;
 - occupancy-driven live safety/look-ahead behaviour with a real train is a separate controlled test.
 
-### Master communication observation (separate investigation)
+### Validation-environment limitation (not a product defect)
 
-During the test the PIC32/master entered a state where all amplifier communication became unavailable and initialization no longer completed. A master reset followed by a new initialization restored operation. This is recorded in `docs/backlog.md` for separate investigation and is **not** related to the C# freshness handling, which behaved correctly during the failure.
+During the standalone hardware validation the temporary checker was able to leave the master communication session in a state that required reinitialization. This was **not** reproduced through the normal application lifecycle, where master/amplifier communication continues running continuously, load/amplifier disconnects are already detected and reported by the existing system, and a software reset/reinitialization path already exists. It is therefore recorded as a **test-harness limitation** of running a standalone checker outside the normal application lifecycle and communication ownership, not as a demonstrated production defect, and it does not warrant a backlog item.
+
+The production result from that event remains valid and is the relevant occupancy-validation outcome: when fresh SLAVEINFO data stopped arriving, old register values remained cached, and the new C# freshness logic correctly changed occupancy to **unknown** instead of continuing to report a stale clear state.
 
 ### Files changed
 

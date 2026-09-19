@@ -438,6 +438,8 @@ During the test the master stopped delivering fresh amplifier frames. This was o
 
 This physically confirms the safety invariant **`stale != clear`**, and confirms that `AmplifierDataReceived` on its own is not proof of fresh hardware data.
 
+**Validation-environment note.** The standalone checker used for this validation runs outside the normal application lifecycle and communication ownership. During the session it was able to leave the master communication session in a state that required reinitialization. This was not reproduced through the normal application lifecycle - where master/amplifier communication runs continuously, load/amplifier disconnects are already detected by the existing system, and a software reset path exists - so it is treated as a test-harness limitation rather than a production defect. The freshness result above is unaffected: it is about what the C# side does when fresh data stops arriving.
+
 
 
 ## Open Questions

@@ -255,10 +255,6 @@ Done:
 | Stale firmware comment. | `TrackAmplifier4.X/modbus/General.h` line 95 still says "(TODO: implement when occupancy source known)" while `processio.c` implements it. | Comment corrected in firmware (not part of this increment). |
 
 ### Physical hardware dependency
-
-| Item | Evidence | Acceptance criteria |
-| --- | --- | --- |
-| PIC32/master enters a state where all amplifier communication is unavailable. | Observed during the 2026-09-19 hardware validation: all amplifiers became unavailable and initialization no longer completed; a master reset plus a new initialization restored operation. The C# occupancy freshness handling behaved correctly during the failure and is unrelated to this. | Root cause identified and fixed in the master (separate investigation; no diagnosis attempted yet). |
 | Item | Evidence | Acceptance criteria |
 | --- | --- | --- |
 | Real physical switch output (accessory decoder). | `TrackAmplifierHardwareBackend.SetSwitch` returns false; the real switch sink drives nothing. | An accessory-decoder output path actuates mapped switches. |
