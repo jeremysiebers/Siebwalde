@@ -415,3 +415,25 @@ Decision: 15471 is the ECoS server that Koploper connects to; 5700 is Koploper's
 Evidence: `EcosEmulatorServer` listens on `IPAddress.Loopback` with port 15471; `KoploperExternalInfoClient(host: "127.0.0.1", port: 5700)` is an outbound client. A live session confirmed C# connecting out to 5700 and Koploper connecting in to 15471.
 
 Impact: Loopback is correct because Koploper runs on the same PC. If Koploper ever moves to another machine, the listen address must become configurable (recorded in the backlog).
+
+## 2026-09-19: Explicit ECoS Host Mode-Transition Semantics
+
+Decision: Real mode is authoritative over the simulator, and every start request reports an explicit outcome instead of being silently ignored.
+
+- requested mode already active -> `AlreadyActive` (idempotent no-op);
+- `Real` requested while `Simulator` runs -> stop the simulator cleanly, then start real (`Transitioned`);
+- `Simulator` requested while `Real` runs -> `Rejected`, the real host stays untouched;
+- `Real` requested without the track communication client or shared variables -> `ArgumentException` **before** any running host is touched;
+- no host configured -> `NotAvailable`; start failure -> `Failed`.
+
+Evidence: A silently ignored real-mode request after a successful track start would leave Koploper connected to the simulator while the real layout was live. That state must be impossible to reach without a visible signal.
+
+Impact: `IEcosHostService.StartAsync` returns `Task<EcosHostStartResult>` and `SiebwaldeApplicationModel.ActiveEcosMode` exposes the mode that is really running, which the init page shows as `EcosModeStatus`. If the transition fails, the host releases the port and the external-info client before rethrowing, so a failed switch never leaves a half-started host. `EcosEmulatorServer` sets `ReuseAddress` so the same port can be rebound immediately during a transition.
+
+## 2026-09-19: Blank Mapping Settings Fall Back To The Declared Default
+
+Decision: `CoreConfiguration.BlockTopologyConfig` and `KoploperBlockMapConfig` return the setting's declared default when the persisted user value is null, empty or whitespace. A non-empty value is always used as-is, even when malformed.
+
+Evidence: A legacy `user.config` written before the defaults existed keeps an empty string, which would silently disable the mapping and force the operator to find the Reset button. The declared default is read from `CoreSettings.Default.Properties[name].DefaultValue` so the Designer stays the single source of truth instead of the mapping string being duplicated in code.
+
+Impact: `BuildBlockTopology()`/`BuildKoploperBlockMap()` always see a usable default on a fresh or legacy profile, while a genuinely wrong non-empty value still produces an empty parse so the mistake is visible. The settings page reads the same resolved values, so the page and the runtime cannot disagree. The fallback is logged. Covered by `CoreConfigurationTests`.

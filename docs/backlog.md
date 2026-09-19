@@ -175,6 +175,18 @@ Done:
 
 Completed from the previous "still open" list: **Finish the app startup wiring.**
 
-Remaining concern: `CoreSettings` are User-scope, so an existing `user.config` can still hold an empty `BlockTopologyConfig` from before the defaults were added. Use Reload/Reset on the settings page if `CoreConfiguration.BuildBlockTopology()` returns no blocks.
+Remaining concern: `CoreSettings` are User-scope, so an existing `user.config` can still hold an empty `BlockTopologyConfig` from before the defaults were added. **Resolved in the ECoS host hardening pass below.**
+
+## Increment 6 ECoS Host Hardening (2026-09-19, third task)
+
+Done:
+
+- Explicit mode-transition semantics with a returned result: `AlreadyActive` (same mode), `Rejected` (simulator requested while real runs), `Transitioned` (real requested while simulator runs), plus `NotAvailable`/`Failed`. Real mode is authoritative.
+- Invalid real requests are rejected before a running host is touched; a failed transition releases the port and the external-info client.
+- Active mode exposed via `SiebwaldeApplicationModel.ActiveEcosMode` and shown on the init page (`EcosModeStatus`).
+- `EcosEmulatorServer` sets `ReuseAddress` so 15471 rebinds immediately during a transition.
+- Blank persisted mapping settings fall back to the declared default from the settings metadata; malformed non-empty values are still used as-is.
+
+The "Still open (next steps)" list in the app-startup-wiring section above remains the authoritative next-steps list. Item 3 (switch mapping) is next.
 
 

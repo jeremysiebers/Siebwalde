@@ -1,5 +1,46 @@
 # Handoff
 
+## Latest Session (2026-09-19, ECoS host hardening)
+
+Two hardening changes on top of the app-startup wiring.
+
+### Mode-transition semantics
+
+Real mode is authoritative. `IEcosHostService.StartAsync` now returns `Task<EcosHostStartResult>` (`Started`, `AlreadyActive`, `Transitioned`, `Rejected`, `NotAvailable`, `Failed`) instead of silently ignoring a start request:
+
+- requested mode already active -> `AlreadyActive` (idempotent);
+- `Simulator` requested while `Real` runs -> `Rejected`; the real host is left untouched;
+- `Real` requested while `Simulator` runs -> the simulator is stopped cleanly and real mode starts (`Transitioned`), so a successfully started real track application is never left hidden behind a simulator;
+- `Real` requested without the track client/variables -> `ArgumentException` **before** the running host is touched;
+- if the transition itself fails, the host releases the port and the external-info client before rethrowing.
+
+The active mode is exposed through `SiebwaldeApplicationModel.ActiveEcosMode` and shown on the init page as `EcosModeStatus` ("ECoS host: Real mode active"), so the operator never has to assume a start succeeded. `EcosEmulatorServer` sets `ReuseAddress` so port 15471 can be rebound immediately during a transition.
+
+### Blank mapping settings
+
+`CoreConfiguration.BlockTopologyConfig`/`KoploperBlockMapConfig` now fall back to the setting's declared default when the persisted user value is null/empty/whitespace, read from `CoreSettings.Default.Properties[name].DefaultValue` (the Designer stays the single source of truth). A non-empty value is used as-is, even when malformed, so configuration errors stay diagnosable instead of being masked. The settings page reads the same resolved values, so the page and the runtime cannot disagree.
+
+### Files changed
+
+- Added: `SiebwaldeApp.Core/Model/TrackApplication/Control/EcosHostStartResult.cs`, `SiebwaldeApp.Core.Tests/CoreConfigurationTests.cs`.
+- Modified: `SiebwaldeApp.Core/Model/TrackApplication/Control/IEcosHostService.cs`, `SiebwaldeApp.Core/Model/SiebwaldeApplicationModel.cs`, `SiebwaldeApp.Core/Configuration/CoreConfiguration.cs`, `SiebwaldeApp.Integration/TrackControlHost.cs`, `SiebwaldeApp.EcosEmu/Server/EcosEmulatorServer.cs`, `SiebwaldeApp/ViewModel/SiebwaldeViewModels/SiebwaldeInitPageViewModel.cs`, `SiebwaldeApp/ViewModel/SiebwaldeViewModels/SiebwaldeSettingsPageViewModel.cs`, `SiebwaldeApp/Pages/SiebwaldePages/SiebwaldeInitPage.xaml`, `SiebwaldeApp.Core.Tests/TrackControlHostTests.cs`.
+
+### Tests and checks
+
+- `dotnet build SiebwaldeApp.sln` -> **0 errors**.
+- `dotnet test` -> **124/124 passed** (was 107; +9 mode-transition/lifecycle tests, +8 settings-fallback tests). The transition test proves the port stays served across Simulator -> Real and is released on stop.
+
+### Remaining concerns
+
+1. The ECoS host starts in real mode before the firmware occupancy flag is populated, so Koploper sees no occupancy feedback on real hardware yet (firmware TODO).
+2. `EcosEmulatorServer` binds loopback only; correct while Koploper is on the same PC.
+3. `ReuseAddress` means another local process could bind 15471 while the host restarts; acceptable for this single-purpose host but worth remembering.
+4. Mode switching is a stop-and-start of the ECoS server, so Koploper sees a brief disconnect during a Simulator -> Real transition.
+
+### Best next step
+
+**Item 3: switch mapping** (real <-> Koploper designation plus the default initial position), followed by item 4 (divergence check with ECoS stop and operator diagnostics).
+
 ## Latest Session (2026-09-19, app-startup wiring)
 
 Completed on `feature/csharp-cleanup-startup`: the ECoS host is now composed, started and stopped by the application.
