@@ -52,7 +52,7 @@ Wire: `set(1000,speedstep[n])` only, protocol `DCC28`; every reply `<END 0 (OK)>
 ### New observations recorded as software follow-ups (not fixed)
 
 - `docs/backlog.md`: C# TrackAmplifier info page does not follow live data; updates should be event-based (the 10 Hz comm timer / 2 s update was built for the manual info page).
-- `docs/backlog.md`: a direction command issued while a locomotive has no known block is lost, so the locomotive can start in the wrong direction.
+- `docs/backlog.md`: an **unconfirmed** live observation that a direction command issued while a locomotive has no known block may be lost (not reproduced in the later successful validation; targeted reproduction pending).
 - `docs/backlog.md`: `SimpleEcosBackend` dispatch still depends on prefix ordering (`speed`/`speedstep`, `addr`/`addrext`).
 
 ### Next steps
