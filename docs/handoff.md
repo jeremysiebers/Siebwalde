@@ -57,6 +57,9 @@ Await Product Owner decision on the minimal safety correction and/or the physica
 
 **Open live prerequisite:** does Koploper allow reassigning a loco's block while speed is non-zero? If not, the harness block source produces the transition.
 
+### Harness disposition
+`SiebwaldeApp/SiebwaldeApp.StopReachabilityHarness/` is committed validation tooling on `feature/safety-stop-reachability` (commit `03f5221`), deliberately not in `SiebwaldeApp.sln`. Disposition: **committed validation tooling; final merge disposition undecided** (retain as reusable tooling, convert to automated regression tests, or remove before the final PR). Physical safety evidence must be tied to the exact committed harness revision.
+
 ### Next
 Await Product Owner decision on the refined primary test and/or the minimal safety correction.
 
