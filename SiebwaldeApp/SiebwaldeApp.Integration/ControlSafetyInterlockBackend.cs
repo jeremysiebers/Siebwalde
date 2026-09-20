@@ -23,7 +23,7 @@ namespace SiebwaldeApp.Integration
     /// repeated command cannot flood the diagnostics, and it is returned as "not applied" so the
     /// ECoS backend never acknowledges it.
     /// </summary>
-    public sealed class ControlSafetyInterlockBackend : IHardwareBackend
+    public sealed class ControlSafetyInterlockBackend : IHardwareBackend, IMovementSafetyGate
     {
         /// <summary>Rejection subject used for layout-wide (power) rejections.</summary>
         private const int LayoutSubject = -1;
@@ -84,6 +84,9 @@ namespace SiebwaldeApp.Integration
         /// <inheritdoc />
         public bool SetSwitch(int decoderAddress, int outputIndex, bool on)
             => _inner.SetSwitch(decoderAddress, outputIndex, on);
+
+        /// <inheritdoc />
+        public bool IsMovementBlocked(int address) => !_guard.AllowsMovement(address);
 
         private void ReportRejection(int subject, string detail)
         {

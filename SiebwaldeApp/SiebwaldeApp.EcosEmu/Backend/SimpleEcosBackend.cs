@@ -20,6 +20,9 @@ namespace SiebwaldeApp.EcosEmu
         private bool _initialFeedbackSent = false;
         // Flag to ensure we only send one initial sync for switch states
         private bool _initialSwitchFeedbackSent = false;
+        // Protocol assumed when a locomotive has no persisted protocol. Mirrors the
+        // LocoInfo.Protocol default so an unconfigured loco still gets a defined scale.
+        private const string DefaultLocoProtocol = "DCC28";
 
 
         /// <summary>
@@ -345,9 +348,14 @@ namespace SiebwaldeApp.EcosEmu
 
             var events = new List<string>();
 
-            // Set when a movement command was refused by the hardware backend (for example by
-            // the safety interlock), so Koploper is not told it succeeded.
+            // Set when a latched safety interlock refused non-zero movement, so Koploper is not
+            // told it succeeded. A command that merely has no physical target is not set here:
+            // it is logically accepted and retains the requested state.
             var movementRejected = false;
+
+            // Set when a protocol-specific speed step could not be interpreted safely, so the
+            // command is refused explicitly instead of being applied with a guessed scale.
+            var protocolRejected = false;
 
             foreach (var opt in cmd.Options)
             {
@@ -371,23 +379,44 @@ namespace SiebwaldeApp.EcosEmu
                 //}
 
                 // 2) LOCO-commando's
-                if (opt.StartsWith("speed", StringComparison.OrdinalIgnoreCase))
+                //
+                // speedstep[...] is the protocol-specific speed step (for example DCC28 0..28)
+                // and must be normalized to the 0..127 domain before it reaches the hardware.
+                // It has to be handled before the speed[...] branch below, because
+                // "speedstep[...]" also starts with "speed".
+                if (opt.StartsWith("speedstep", StringComparison.OrdinalIgnoreCase))
                 {
                     var (ok, value) = ParseBracketInt(opt);
                     if (ok)
                     {
-                        if (!_hardware.SetLocoSpeed(loco.Address, value, loco.Direction))
+                        string protocol = _locoRepository.GetByEcosId(id)?.Protocol ?? DefaultLocoProtocol;
+
+                        if (!ProtocolSpeedNormalizer.TryNormalize(protocol, value, out int normalizedSpeed))
                         {
-                            // Refused (for example by the safety interlock): keep the logical
-                            // speed unchanged and report no speed change to Koploper.
+                            // Unknown protocol: the step cannot be interpreted safely, so the
+                            // command is refused rather than applied with a guessed scale.
+                            protocolRejected = true;
+                        }
+                        else if (ApplyNormalizedLocoSpeed(id, loco, normalizedSpeed, events))
+                        {
+                            // Refused by a latched safety interlock: keep the logical speed
+                            // unchanged and report no speed change to Koploper.
                             movementRejected = true;
                         }
-                        else
+                    }
+                }
+                else if (opt.StartsWith("speed", StringComparison.OrdinalIgnoreCase))
+                {
+                    // speed[...] already carries the normalized 0..127 ECoS value, so it is
+                    // passed through unchanged and is never scaled again.
+                    var (ok, value) = ParseBracketInt(opt);
+                    if (ok)
+                    {
+                        if (ApplyNormalizedLocoSpeed(id, loco, value, events))
                         {
-                            loco.Speed = value;
-
-                            // Event: reflect new speed
-                            events.Add($"{id} speed[{loco.Speed}]");
+                            // Refused by a latched safety interlock: keep the logical speed
+                            // unchanged and report no speed change to Koploper.
+                            movementRejected = true;
                         }
                     }
                 }
@@ -396,17 +425,19 @@ namespace SiebwaldeApp.EcosEmu
                     var (ok, value) = ParseBracketInt(opt);
                     if (ok)
                     {
-                        if (!_hardware.SetLocoSpeed(loco.Address, loco.Speed, value))
-                        {
-                            movementRejected = true;
-                        }
-                        else
-                        {
-                            loco.Direction = value;
+                        // Direction is requested/logical state owned by the ECoS model. It must be
+                        // retained even when no physical amplifier is addressable, otherwise a
+                        // later speed command reuses a stale default direction (confirmed defect).
+                        loco.Direction = value;
 
-                            // Event: reflect new direction
-                            events.Add($"{id} dir[{loco.Direction}]");
-                        }
+                        // Best effort: reverse a locomotive that already has a physical target.
+                        // A refusal (no target, or a latched safety interlock blocking a non-zero
+                        // movement) must never discard the requested logical direction.
+                        _hardware.SetLocoSpeed(loco.Address, loco.Speed, value);
+
+                        // Event: reflect the requested logical direction. This is a logical state
+                        // notification, not a claim that a physical amplifier changed.
+                        events.Add($"{id} dir[{loco.Direction}]");
                     }
                 }
                 else if (opt.StartsWith("addr", StringComparison.OrdinalIgnoreCase))
@@ -461,12 +492,6 @@ namespace SiebwaldeApp.EcosEmu
                         events.Add($"{id} func[{index}][{(on ? 1 : 0)}]");
                     }
                 }
-                else if (opt.StartsWith("speedstep", StringComparison.OrdinalIgnoreCase))
-                {
-                    // Koploper sometimes sends speedstep[...]; for now we just ignore or log it.
-                    // var (ok, value) = ParseBracketInt(opt);
-                    // if (ok) { /* store if you want */ }
-                }
             }
 
             // Reply to Koploper, including any event lines we collected
@@ -477,21 +502,80 @@ namespace SiebwaldeApp.EcosEmu
 
             // Without state to koploper
             // Reply to Koploper – for switch events we don't echo them in the reply body
-            if (movementRejected)
+            if (protocolRejected)
             {
-                // Koploper must not be told a movement command succeeded when it did not.
-                Console.WriteLine("[SET LOCO] refused by the hardware backend (safety interlock).");
+                // A protocol-specific step we cannot interpret must not be applied with a
+                // guessed scale, and must not be acknowledged as if it had been applied.
+                Console.WriteLine("[SET LOCO] speedstep refused: the locomotive protocol is not supported.");
+                await WriteReplyAsync(writer, cmd.RawLine, 1, "UNSUPPORTED_PROTOCOL", null);
+            }
+            else if (movementRejected)
+            {
+                // A latched safety interlock refused non-zero movement. Koploper must not be told
+                // the movement succeeded. This is only used for a real safety refusal; a command
+                // that merely has no physical target is logically accepted (see
+                // ApplyNormalizedLocoSpeed) and is not reported as a safety interlock.
+                Console.WriteLine("[SET LOCO] refused by the safety interlock.");
                 await WriteReplyAsync(writer, cmd.RawLine, 8, "SAFETY_INTERLOCK", null);
-                return;
+            }
+            else
+            {
+                await WriteReplyAsync(writer, cmd.RawLine, 0, "OK", null);
             }
 
-            await WriteReplyAsync(writer, cmd.RawLine, 0, "OK", null);
-
-            // Additionally send ECoS-style events back to the client (e.g. Koploper).
+            // Additionally send ECoS-style events back to the client (e.g. Koploper). Events
+            // describe logical state that was accepted, so a direction retained while another
+            // option in the same command was refused is still reported to Koploper.
             foreach (var ev in events)
             {
                 await WriteEventAsync(writer, ev);
             }
+        }
+
+        /// <summary>
+        /// Applies a normalized (<c>0..127</c>) speed command to the logical locomotive state and,
+        /// best effort, to the hardware backend.
+        /// </summary>
+        /// <remarks>
+        /// The logical speed is owned by the ECoS model: a command that cannot currently reach a
+        /// physical amplifier (for example because the locomotive has no known block) is still a
+        /// meaningful requested state and is retained so a later command reuses it. No physical
+        /// movement is produced in that case.
+        ///
+        /// The one exception is a real safety refusal: while a latched safety interlock blocks
+        /// non-zero movement, the logical speed is left unchanged and the caller reports
+        /// <c>END 8 (SAFETY_INTERLOCK)</c>, so Koploper is never told a refused movement succeeded.
+        /// A stop (speed 0) is always accepted because standstill is safe and never blocked.
+        /// </remarks>
+        /// <returns>
+        /// True when a latched safety interlock refused the command; otherwise false. A return of
+        /// false does not imply the command reached a physical amplifier.
+        /// </returns>
+        private bool ApplyNormalizedLocoSpeed(int id, LocoState loco, int normalizedSpeed, List<string> events)
+        {
+            if (_hardware.SetLocoSpeed(loco.Address, normalizedSpeed, loco.Direction))
+            {
+                loco.Speed = normalizedSpeed;
+
+                // Event: reflect the normalized speed.
+                events.Add($"{id} speed[{loco.Speed}]");
+                return false;
+            }
+
+            if (normalizedSpeed != 0 &&
+                _hardware is IMovementSafetyGate safetyGate &&
+                safetyGate.IsMovementBlocked(loco.Address))
+            {
+                // A real safety interlock refused non-zero movement. Do not record a logical
+                // speed change and let the caller answer with the safety response.
+                return true;
+            }
+
+            // No physical target (or a stop): retain the requested logical speed. No physical
+            // movement was produced, and a later command reuses this value once a block is known.
+            loco.Speed = normalizedSpeed;
+            events.Add($"{id} speed[{loco.Speed}]");
+            return false;
         }
 
         /// <summary>

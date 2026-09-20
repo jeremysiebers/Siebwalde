@@ -1,5 +1,298 @@
 # Handoff
 
+## Latest Session (2026-09-20, live direction regression + safety reachability attempt)
+
+Branch `feature/live-koploper-occupancy-validation`, HEAD `a2125a7` (plus this documentation commit). Targeted operator-in-the-loop live regression of the direction fix and a safety-reachability investigation. **No production code was changed.**
+
+### Live process
+- WPF app (real mode) PID 12716, window `Siebwalde Application`; port 15471; Koploper reconnected by the operator.
+- Evidence: `Logging\live-validation-20260920-144552.stdout.txt`, `Logging\20-9-2026_TrackAppLog.txt`.
+- Cleanup completed: speed 0, last `[WRITE] slave=1 HR0=0x018F` (399), `Stop-Process -Id 12716`, PID terminated, port 15471 released. Motor disconnected (operator-confirmed).
+
+### Test A - direction defect regression: `LIVE DIRECTION REGRESSION PASS`
+- Forward: loco 2 (id 1001) unmapped, `set(1001,dir[0],speedstep[0])` -> `<END 0 (OK)>` + `dir[0]` event, no write; placed in block 1 (no movement on mapping); `set(1001,speedstep[1])` -> `speed[5]` -> `[WRITE] slave=1 HR0=0x01A0` = **416 forward**.
+- Reverse: unmapped `dir[1]` -> `<END 0 (OK)>` + event; re-mapped; `speedstep[1]` -> `HR0=0x017E` = **382 reverse**.
+- Both returns to 0 wrote 399.
+
+### Test B - retained non-zero speed while unmapped
+- B1 PASS: unmapped `speedstep[1]` -> logical `speed[5]`, no `[WRITE]`.
+- B2 PASS: re-mapping to block 1 caused **no** physical movement; slave 1 stayed 399.
+- B3 NOT REACHABLE via Koploper UI: Koploper requires speed 0 before a direction change, so the "direction-only command re-applies a retained non-zero speed" source-level nuance could not be exercised live. Not a product defect.
+
+### Test C/D - direction during a real safety latch, stop during latch: `NOT EXECUTED`
+- Real-mode switch-condition and commanded/observed latches are unreachable (no switch feedback; positions stay unknown -> `StateUnknown`).
+- The only theoretically live-reachable latch is `OccupancyMismatch` on a switch-less route, which would require additional physical state not present in this targeted setup.
+- No operator-accessible latch-injection control exists and fault injection is out of scope, so these were not executed and no hardware behaviour was simulated.
+
+### Test E - mapping-loss stop reachability: `INCONCLUSIVE / CONDITION NOT SAFELY REPRODUCIBLE`
+- Koploper blocks removing a loco from a block while it is driving (speed must be 0 first), so the precondition (mapping loss while the amplifier is non-neutral) could not be created through the normal UI.
+- The source-level safety reachability gap remains open as a HIGH PRIORITY backlog investigation.
+
+### Koploper UI behaviours observed
+- A direction change requires speed 0 first; Koploper then bundles the direction with `speedstep[0]` (e.g. `set(1001,dir[0],speedstep[0])`).
+- Removing a loco from a block requires speed 0 first.
+- No unexpected corrective/oscillating traffic; all replies `<END 0 (OK)>`; `END 8` never occurred.
+
+### Not verifiable / residual
+- Physical amplifier PWM is inferred from the write log (no hardware register read).
+- Motor-connected state is operator-reported.
+- The `IMovementSafetyGate` "future decorator outside the interlock" fragility remains a maintainability note (software review).
+
+### Next steps
+- Decide whether to pursue the HIGH PRIORITY safety reachability investigation with a controlled physical setup.
+- PR still not created.
+
+## Latest Session (2026-09-20, direction-before-known-block fix implemented and software-verified)
+
+Branch `feature/live-koploper-occupancy-validation`, based on HEAD `a223d7e`. The confirmed direction-before-known-block defect is **fixed in software and software-verified**; **no live/hardware validation was performed** in this task and none is claimed.
+
+### Root cause (confirmed)
+
+`SimpleEcosBackend.HandleSetAsync` assigned `loco.Direction` only when `IHardwareBackend.SetLocoSpeed` returned true. With no known block, `TrackAmplifierHardwareBackend.SetLocoSpeed` returns false, so the requested direction was discarded and a later speed command reused the stale default `Direction = 1`. The same single boolean also conflated "no physical target" with a latched safety refusal, so the reply was always `<END 8 (SAFETY_INTERLOCK)>`.
+
+### The fix
+
+- Requested/logical direction and speed are now owned by the ECoS model (`SimpleEcosBackend`). The `dir[...]` branch always updates `loco.Direction` and emits `id dir[n]`; physical application is best effort and its result no longer gates the logical state.
+- Speed application is factored into `SimpleEcosBackend.ApplyNormalizedLocoSpeed`. A stop (0) is always logically accepted; a non-zero speed that cannot reach a target retains the requested logical value; only a **real safety refusal** leaves the logical state unchanged and answers `<END 8 (SAFETY_INTERLOCK)>`.
+- A real safety refusal is distinguished from "no target" through the new optional capability `IMovementSafetyGate` (in `SiebwaldeApp.EcosEmu`, implemented by `ControlSafetyInterlockBackend`). `IHardwareBackend` signatures were **not** changed.
+- Queued events are emitted after any reply, so a logically-accepted direction is reported even if another option in the same command was refused. Events describe logical state, not a physical amplifier change.
+- DCC28 normalization (`ProtocolSpeedNormalizer`) and `AmplifierSpeedMapper` were not touched. The movement interlock (loco/layout latch, stop always allowed, switch commands pass) is unchanged.
+
+### Tests and checks
+
+- `dotnet build SiebwaldeApp.sln` -> **0 errors**, **175 warnings** (baseline 175; no new warnings).
+- `dotnet test SiebwaldeApp.sln` -> **280/280 passed** (was 267; +13).
+- `dotnet build SiebwaldeApp.sln -c Release` -> **0 errors**, **175 warnings**.
+- `dotnet test SiebwaldeApp.sln -c Release --no-build` -> **280/280 passed**.
+- New tests: `SimpleEcosBackendDirectionStateTests` (forward/reverse while unmapped, forward->reverse and reverse->forward most-recent-wins, live command order `dir[...]` + `speedstep[0]` -> block -> `speedstep[1]`, known-block direction handling, per-loco independence, unmapped stop, no false `SAFETY_INTERLOCK` for no-target, safety latch still rejects non-zero movement, retained direction used after reset).
+- No hardware was connected or controlled; no hardware-driving process was started.
+
+### Explicitly still pending
+
+- Physical regression validation of the direction fix on the layout (Integrator). The fix is **not** live-validated.
+- PR for `feature/live-koploper-occupancy-validation` still not created.
+
+### Uncertainty for the Integrator to check
+
+- The ECoS model now retains a requested non-zero speed when no physical target exists. No physical movement is produced; a later command consumes the retained value once a block is known. Live behaviour of Koploper when it receives a `dir[...]`/`speed[...]` event for a locomotive that is not physically addressable is not verified.
+- A `dir[...]` command is now logically accepted (`<END 0 (OK)>`) even while a safety latch blocks the physical application; the physical movement is still blocked by `ControlSafetyInterlockBackend`.
+
+## Latest Session (2026-09-20, direction-state defect confirmed by targeted reproduction)
+
+Branch `feature/live-koploper-occupancy-validation`, HEAD `953360f` (plus this documentation commit). A targeted, operator-in-the-loop reproduction confirmed a product defect: a direction command issued while a locomotive has no known block is discarded, and the stale default direction is used once the locomotive later gets a block. **No production code was changed.**
+
+### Reproduction
+
+- App restarted (real mode, PID 10716); Koploper reconnected to 15471.
+- loco 2 (ecosId 1001, address 2) placed on block 0 (no amplifier mapping). Koploper's UI showed forward.
+- `set(1001,dir[1],speedstep[0])` and `set(1001,dir[0],speedstep[0])` -> both `<END 8 (SAFETY_INTERLOCK)>`, no `dir[...]` event; the logical direction stayed at the default `1` (reverse).
+- loco 2 then placed in block 1 (`[EXT] Loc 2 -> Block 1`); `set(1001,speedstep[1])` -> `<END 0 (OK)>`, `1001 speed[5]`, runtime write `slave=1 HR0=0x017E` = **382 (reverse band)**. Forward would have been 416 (0x01A0).
+- Return to 0: `slave=1 HR0=0x018F` (399).
+
+### Root cause (confirmed in source)
+
+`SimpleEcosBackend.cs:438-454` assigns `loco.Direction` only when `IHardwareBackend.SetLocoSpeed` returns true. With no known block, `TrackAmplifierHardwareBackend.SetLocoSpeed` returns false (`TrackAmplifierHardwareBackend.cs:89-100`), so the requested direction is discarded. `LocoState.Direction` stays at its default `1` (reverse, `SimpleEcosBackend.cs:1548`) and the later speed command reuses it (`SimpleEcosBackend.cs:423`). `<END 8 (SAFETY_INTERLOCK)>` is emitted for any hardware false return, not only a latched fault.
+
+### Classification and follow-up
+
+- Verdict: `CONFIRMED PRODUCT DEFECT` (recorded in `docs/backlog.md`).
+- A Developer task is warranted but has **not** been started: retain the requested logical direction independently of hardware acceptance (or re-synchronise once a block is known), preserving the movement interlock for non-zero movement, with a focused unit test.
+- Coverage gap: the only existing `dir[...]` test covers the success path; there is no test for `dir` with a null block provider / false backend return.
+
+### Cleanup
+
+- Return to 0 verified (399); motor disconnected (operator-confirmed); `Stop-Process -Id 10716`; PID terminated; port 15471 released. No process restarted.
+
+### Next steps
+
+- Product Owner to approve a Developer task for the direction-retention fix.
+- PR still not created.
+
+## Latest Session (2026-09-20, live DCC28 + occupancy bridge validation on real hardware)
+
+Branch `feature/live-koploper-occupancy-validation`, HEAD `3be34891e5aa52233151e75824b4727ad2eb0987` at the end of the live run (implementation `5042f70`, docs `0b4f2b6`, context/agent policy `4c394d7`, `c7c0b7d`, `dde29cf`, `3be3489`). The DCC28 normalization and the occupancy bridge were validated live on the real amplifier setup. **No production code or firmware was changed during the live run.**
+
+### Live process and cleanup
+
+- WPF app (real mode) `SiebwaldeApp.exe`, PID 13384, window `Siebwalde Application`, working directory the Debug exe folder; started 12:35:30. The operator performed the normal production lifecycle (host detection + Start TrackController); the app started the track application and the real ECoS host.
+- Port 15471 owned by PID 13384, Koploper connected; port 5700 = Koploper.
+- Evidence: `Logging\live-validation-20260920-123530.stdout.txt`, runtime write log `Logging\20-9-2026_TrackAppLog.txt`, Core log.
+- Cleanup completed: locomotive speed 0, last runtime writes neutral `HR0=0x018F` (399) on slaves 1, 3, 4 (slave 6 never written), `Stop-Process -Id 13384` issued, PID terminated, port 15471 released. Operator confirmed the motor was disconnected from all amplifiers.
+
+### DCC28 live result (amplifier 1) - `LIVE DCC28 VALIDATION PASS`
+
+| DCC28 step | Normalized | PWM (HR0, slave 1) | Physical |
+| --- | --- | --- | --- |
+| 0 | 0 | 399 (0x018F) | motor stopped |
+| 1..27 | `(n*127+14)/28` | 400..~790 | motor ramps |
+| 24 | 109 | 742 (previously 475) | motor at high speed |
+| 28 | 127 | 799 (0x031F) | full throttle |
+| 0 | 0 | 399 (0x018F) | motor stopped |
+
+Wire: `set(1000,speedstep[n])` only, protocol `DCC28`; every reply `<END 0 (OK)>`; normalized `speed[...]` echo; no corrective/repeated traffic. "140 km/h" on Koploper's display = step 28; it never appears on the ECoS wire and no PWM above 799 was produced.
+
+### Block routing live result - PASS
+
+- block 1 -> amplifier 1 (slave 1).
+- block 3 -> amplifier 3 (slave 3); loc2.
+- block 4 -> amplifier 4 (slave 4); look-ahead (`4>1`, unconditional) also wrote slave 1 with the same PWM; no motor on amplifier 1.
+- The observed direction band matched the mapper (`dir[0]` forward, `dir[1]` reverse).
+
+### Occupancy bridge live result - `LIVE OCCUPANCY BRIDGE PASS` (blocks 1, 3, 4)
+
+| Block | Amplifier | Bezetmelders | Sensors | Module-100 bits | Occupy | Clear |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | 1 | 1.01, 1.02 | 1, 2 | 0, 1 | `0x00->0x01->0x03` | `0x03->0x02->0x00` |
+| 3 | 3 | 1.05, 1.06 | 5, 6 | 4, 5 | `0x00->0x10->0x30` | `0x30->0x20->0x00` |
+| 4 | 4 | 1.07, 1.08 | 7, 8 | 6, 7 | `0x00->0x40->0xC0` | `0xC0->0x80->0x00` |
+
+- Each change was pushed to the live Koploper client as `<EVENT 100>` + `100 state[...]` + `<END 0 (OK)>`, with no corrective/extra traffic.
+- `sensorId - 1` indexing confirmed across bits 0/1, 4/5, 6/7.
+- Amplifier 6 is installed but unmapped (not in `BlockTopologyConfig`/`KoploperBlockMapConfig`), so it is correctly absent from module 100 and Koploper; no temporary mapping was added.
+- An initial block-3 attempt reported block 4 because amplifier 3's switch had bad contact and amplifier 4's switch was engaged. After the operator re-established amplifier 3, block 3 reported correctly. **This was a physical test-setup issue, not a product defect.**
+
+### Not directly verified (inferred or operator-side)
+
+- Raw per-amplifier `HR_STATUS` (HoldingReg2) bit 10 is not written to any log; the amplifier-side comparator -> bit-10 step is inferred from `processio.c` plus the observed app-side events.
+- Koploper's UI rendering of the occupancy/bezetmelder and of the normalized `speed[...]` echo is operator-side; the wire events were proven delivered.
+- Precise occupancy transition latency was not measured (no per-frame timestamps in the logs).
+
+### New observations recorded as software follow-ups (not fixed)
+
+- `docs/backlog.md`: C# TrackAmplifier info page does not follow live data; updates should be event-based (the 10 Hz comm timer / 2 s update was built for the manual info page).
+- `docs/backlog.md`: **confirmed product defect** (targeted reproduction 2026-09-20): a direction command issued while a locomotive has no known block is lost, so the locomotive starts in the stale/default direction. See the direction-state session above.
+- `docs/backlog.md`: `SimpleEcosBackend` dispatch still depends on prefix ordering (`speed`/`speedstep`, `addr`/`addrext`).
+
+### Next steps
+
+- Decide on the software follow-ups above.
+- PR for `feature/live-koploper-occupancy-validation` has not been created.
+
+## Latest Session (2026-09-20, DCC28 speed normalization implemented)
+
+Branch `feature/live-koploper-occupancy-validation`, implementation commit `5042f70`, with this documentation commit on top. The confirmed DCC28 scaling defect is fixed in software; **physical verification is still pending** and must be performed by the Integrator, not the Developer.
+
+### Root cause (confirmed from source)
+
+`SimpleEcosBackend.HandleSetAsync` tested `opt.StartsWith("speed", ...)` before the `speedstep[...]` case. Because `"speedstep[...]"` also starts with `"speed"`, the protocol-specific step from Koploper (`set(id,speedstep[n])`, DCC28 `0..28`) was parsed by the `speed` branch and passed downstream unchanged as if it were the normalized `0..127` ECoS speed. The later `speedstep` branch was therefore dead code. This matches the live trace (`Logging\19-09-2026_EcosEmuTrace.txt`: `set(1000,speedstep[24])` -> `[SIM-HW] ... speed=24`) and the measured ~PWM 475.
+
+### The fix
+
+- New `SiebwaldeApp.EcosEmu.ProtocolSpeedNormalizer` (ECoS/protocol layer): `speedstep` -> normalized `0..127`. DCC28 `0..28` is scaled with round-half-up integer arithmetic `(step*127+14)/28`; DCC128 is passed through (already normalized); `speed[...]` is never scaled twice; step 0 is always 0; a non-zero step for an unknown protocol is refused explicitly (`END 1 UNSUPPORTED_PROTOCOL`).
+- `SimpleEcosBackend` handles `speedstep` before `speed`, stores the normalized value as `loco.Speed`, and emits the normalized `speed[...]` event. Direction handling (`dir[...]`) reuses the stored normalized speed, so direction changes do not alter normalization.
+- The hardware backend and `AmplifierSpeedMapper` were **not** changed: they still operate on normalized `0..127` and stay protocol-independent. No DCC28 knowledge was added to `TrackAmplifierHardwareBackend`, `AmplifierSpeedMapper`, or the physical amplifier model.
+
+### Tests and checks
+
+- `dotnet build SiebwaldeApp.sln` -> **0 errors**, **175 warnings** (unchanged from baseline).
+- `dotnet test SiebwaldeApp.sln` -> **267/267 passed** (was 227; +40).
+- `dotnet build SiebwaldeApp.sln -c Release` -> **0 errors**, **175 warnings**.
+- `dotnet test SiebwaldeApp.sln -c Release --no-build` -> **267/267 passed**.
+- New tests: `ProtocolSpeedNormalizerTests`, `SimpleEcosBackendSpeedNormalizationTests`.
+- No hardware was connected or controlled; no hardware-driving process was started.
+
+### Explicitly still pending at the time
+
+- ~~live DCC28 full-range verification through the amplifier (Integrator);~~ **done 2026-09-20; see the live-validation session above.**
+- ~~live occupancy bridge validation (`TrackAmplifierOccupancyBridge` -> module 100 -> Koploper bezetmelder);~~ **done 2026-09-20; see the live-validation session above.**
+- PR for `feature/live-koploper-occupancy-validation` still not created.
+
+### Uncertainty for the Integrator to check
+
+The emulator now echoes `speed[<normalized>]` for a `speedstep[<n>]` command (for DCC28 step 14 it echoes `speed[64]`, not `speed[14]`). Live validation 2026-09-20: Koploper accepted the normalized echo with `<END 0 (OK)>` and sent no corrective traffic; the UI/throttle rendering itself remains operator-side. The motor-side effect is unambiguous (normalized domain).
+
+### Safety note
+
+This session performed no live/hardware work. The amplifier-1 residual PWM 475 from the earlier live session was subsequently cleared during the 2026-09-20 live validation, which ended with all commanded outputs neutral and the process stopped.
+
+## Latest Session (2026-09-19, live Koploper setpoint validation + agent policy)
+
+Branch `feature/live-koploper-occupancy-validation`, HEAD `b09c697`. **No production code was changed.** One product defect was found and is recorded, not fixed.
+
+### Repository state
+
+- branch: `feature/live-koploper-occupancy-validation`
+- HEAD: `b09c697`
+- local branch matches `origin/feature/live-koploper-occupancy-validation`
+- tracked working tree clean
+- commits created this session: `b09c697` (agent policy only)
+
+### Verified live facts
+
+**Validation-harness limitation (not a product defect).** The initial standalone harness did not start `TrackControlMain.StartRuntime`, so setpoints stayed in `PendingWrites` and nothing reached the amplifiers. Once the production runtime loop was started, the real command path worked.
+
+**Proven physical command path:**
+
+```
+Koploper hand controller -> ECoS port 15471 -> SimpleEcosBackend
+  -> block/amplifier translation -> hardware backend -> runtime write loop
+  -> PIC32 master -> amplifier 1 -> physical motor
+```
+
+The motor physically responded to the Koploper hand controller. Observed C# -> amplifier response: **~120 ms** (consistent with the 10 Hz runtime loop plus a ~40 ms frame round-trip). No firmware was modified or flashed, no switch/accessory output was used, and movement happened only through the operator's hand controller on a free-running motor.
+
+**Confirmed product defect - DCC28 scaling.** Live evidence:
+
+| Item | Value |
+| --- | --- |
+| Locomotive protocol | `DCC28` |
+| Speed steps supplied by Koploper/ECoS | `0..28` |
+| Backend/hardware speed contract | normalized `0..127` |
+| `AmplifierSpeedMapper` domain | normalized `0..127` |
+| Live DCC28 step 24 | ~PWM 475 |
+
+DCC28 speed is therefore **under-scaled**: a full-throttle command reaches only roughly PWM 475 instead of approaching 799, so only part of the usable range is used.
+
+**Preferred correction (NOT implemented):**
+
+```
+protocol-specific ECoS speed -> normalize at the ECoS/protocol boundary
+  -> normalized 0..127 -> existing IHardwareBackend
+  -> existing AmplifierSpeedMapper -> amplifier PWM
+```
+
+Normalization belongs at the ECoS/protocol boundary; the hardware/backend layer stays protocol-independent.
+
+### Agent policy (committed)
+
+`b09c697` adds the live-hardware working policy to `.opencode/agents/project-lead.md` (+128) and `.opencode/agents/integrator.md` (+77). The single-agent default is unchanged; live hardware is now the explicit exception that delegates to the Integrator. `developer.md`, `architect.md` and `designer.md` were **not** modified.
+
+### NOT completed (do not assume otherwise)
+
+- ~~Developer implementation of DCC28 normalization;~~ **done 2026-09-20, commit `5042f70`**
+- ~~regression tests for the DCC28 scaling defect;~~ **done 2026-09-20, commit `5042f70`**
+- independent Integrator review of that fix;
+- live DCC28 full-range verification;
+- live occupancy bridge validation through `TrackAmplifierOccupancyBridge` -> ECoS module 100 -> Koploper bezetmelder;
+- PR for `feature/live-koploper-occupancy-validation`.
+
+### Agent workflow for the next session
+
+```
+Project Lead
+-> Developer implements and software-verifies the DCC28 fix
+-> Integrator independently reviews
+-> Integrator performs the later live validation
+-> Project Lead records results
+```
+
+The Developer must not perform the independent live validation of its own fix. Do not invoke Architect or Designer unless a concrete need arises.
+
+### Exact next task
+
+1. read the durable project documents;
+2. verify commit `b09c697`;
+3. confirm current branch/HEAD;
+4. use the Developer subagent to implement DCC28 normalization at the ECoS protocol boundary;
+5. add regression tests;
+6. run Debug and Release build/tests;
+7. commit and push the implementation;
+8. return to the Project Lead before any Integrator or live-validation step begins.
+
+### Safety note for the next live session
+
+When the last harness stopped it left **amplifier 1 at PWM 475** (HR0 `0x01DB`) instead of neutral; amplifiers 3, 4 and 6 were at 399. The harness did not command neutral on shutdown - exactly the gap the new cleanup policy addresses. Confirm amplifier 1 is safe (power-cycle, master reset, or an explicitly announced neutral command) before any further live work.
+
 ## Latest Session (2026-09-19, real-hardware occupancy validation)
 
 Branch `feature/real-occupancy-integration`. The existing occupancy path was validated on the real amplifier setup. **No production-code change was required**; this session is documentation only.

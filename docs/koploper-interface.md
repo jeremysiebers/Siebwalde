@@ -80,7 +80,7 @@ The emulator assigns the next object id (1002, 1003, ...) and persists them. Not
 
 ### Driving
 
-Koploper drives a locomotive with `set(<ecosId>, speedstep[<n>])`, ramping the step over time (observed 1,2,3,...,7 in quick succession). Direction uses `set(<ecosId>, dir[...])`. The emulator echoes `TX: <ecosId> speed[<n>]`.
+Koploper drives a locomotive with `set(<ecosId>, speedstep[<n>])`, ramping the step over time (observed 1,2,3,...,7 in quick succession). Direction uses `set(<ecosId>, dir[...])`. `speedstep[<n>]` is the **protocol-specific** step (for a `DCC28` locomotive the range is `0..28`), not the normalized ECoS speed. The emulator normalizes it to the `0..127` domain and echoes the normalized value as `TX: <ecosId> speed[<normalized>]`; see [Speed normalization](#speed-normalization) below.
 
 Important: Koploper drives the object id it created (for example 1002), not a pre-seeded one for the same decoder address. Pre-seeding `locos.json` with the same address but a different id therefore creates duplicates (1000/1001 seeded + 1002/1003 created).
 
@@ -348,8 +348,8 @@ Consequence: for real hardware, amplifier occupancy must be reported as sensor i
 - `SiebwaldeApp.Integration.ControlSafetyInterlockBackend` - done: refuses non-zero movement while a safety fault is latched (per loco, or layout-wide for an unattributable fault) while stops, power-off and switch commands stay allowed.
 - `IHardwareBackend.SetSwitch`, `SetPower` and `SetLocoSpeed` return `bool`: the ECoS backend never reports a state change or a movement that did not actually reach the hardware.
 - New non-UI project `SiebwaldeApp.Integration` (`net8.0-windows7.0`) references Core + EcosEmu; all translation logic stays out of the WPF project.
-- Tests: 204/204 passing in `SiebwaldeApp.Core.Tests`.
-- Still open: the real switch-output path (accessory decoder), physical switch feedback, the real-layout power-on switch positions, the amplifier occupancy firmware bit, simulator occupancy through the production abstraction, and the watchdog for stale occupancy. See `docs/backlog.md`.
+- Tests: 280/280 passing in `SiebwaldeApp.Core.Tests` (Debug and Release).
+- Still open: the real switch-output path (accessory decoder), physical switch feedback, the real-layout power-on switch positions, simulator occupancy through the production abstraction, and the event-based amplifier-info updates. See `docs/backlog.md`. The real amplifier occupancy path is implemented and live-validated; the stale-occupancy watchdog is resolved.
 
 ### Divergence, safety stop and diagnostics
 
@@ -363,7 +363,18 @@ Requested, commanded and observed stay separate: `SwitchController` records the 
 
 `ControlSafetyInterlockBackend` sits between the ECoS backend and the hardware backend, so every movement command passes one policy while a fault is latched: non-zero movement is refused for the affected locomotive (or for all locomotives when the fault is layout-wide), power-on is refused for a layout-wide fault, and stops, power-off and switch commands always pass. A corrective switch command never unlatches anything.
 
-`IHardwareBackend.SetPower` and `SetLocoSpeed` return `bool`. When a movement is refused, `SimpleEcosBackend` replies `<END 8 (SAFETY_INTERLOCK)>`, keeps its logical speed unchanged and sends no `speed[...]`/`dir[...]` event, so Koploper is never told a refused movement succeeded. Rejections are reported once per locomotive per latch (`MovementRejectedBySafety`).
+`IHardwareBackend.SetPower` and `SetLocoSpeed` return `bool`. A refusal can mean either "a latched safety interlock blocked non-zero movement" or "there is no physical target" (for example the locomotive has no known block). `SimpleEcosBackend` distinguishes them through the optional `IMovementSafetyGate` capability (implemented by `ControlSafetyInterlockBackend`):
+
+- **Real safety refusal:** the logical speed is left unchanged, no `speed[...]` event is sent, and the reply is `<END 8 (SAFETY_INTERLOCK)>`. Rejections are reported once per locomotive per latch (`MovementRejectedBySafety`).
+- **No physical target:** the command is still a meaningful requested state, so the logical speed/direction is retained and the corresponding `speed[...]`/`dir[...]` event is sent with `<END 0 (OK)>`. No physical movement is produced, and a later command reuses the retained state once a block is known. An unmapped command is therefore **not** reported as a safety interlock.
+
+### Requested direction and speed are logical state
+
+`SimpleEcosBackend` owns the requested/logical locomotive state (`LocoState.Speed`/`LocoState.Direction`); physical application is best effort through the hardware backend.
+
+- `set(id, dir[n])` always updates `loco.Direction` and emits `id dir[n]`, even when no amplifier is addressable. The `dir[...]` event describes the logical state, not a claim that a physical amplifier changed. It also attempts to apply the direction to a locomotive that already has a physical target, so a direction change on a known block keeps its previous behaviour.
+- `set(id, speedstep[n])` / `set(id, speed[v])` retain the requested logical speed when no target exists (a stop is always accepted). A real safety latch is the only case where the logical speed is not updated.
+- A later movement uses the most recent requested direction, so a direction command issued before a block is known is no longer lost to a stale default.
 
 Recovery is explicit: `ControlSafetyGuard.Reset()` revalidates every latched fault through `DivergenceChecker.IsResolved` and is refused with `ResetRefused` while the condition persists. Only after the correction plus a successful reset does movement become possible again.
 
@@ -438,20 +449,93 @@ During the test the master stopped delivering fresh amplifier frames. This was o
 
 This physically confirms the safety invariant **`stale != clear`**, and confirms that `AmplifierDataReceived` on its own is not proof of fresh hardware data.
 
+### Live command path validation (2026-09-19)
+
+The outbound setpoint path was validated live with a free-running DC motor on amplifier 1, driven manually from Koploper's hand controller:
+
+```
+Koploper hand controller -> ECoS port 15471 -> SimpleEcosBackend
+  -> block/amplifier translation -> hardware backend -> runtime write loop
+  -> PIC32 master -> amplifier 1 -> physical motor
+```
+
+The motor responded to the hand controller. Observed C# -> amplifier response: **~120 ms** (the 10 Hz runtime write loop plus a ~40 ms frame round-trip). No firmware was changed or flashed, and no switch/accessory output was used.
+
+**Harness lesson (not a product defect):** a standalone harness must start `TrackControlMain.StartRuntime`. Without the production runtime loop the setpoints stay in `PendingWrites` and never reach the amplifiers.
+
+**DCC28 speed scaling (defect fixed in software and live-validated 2026-09-20).** The locomotive protocol is `DCC28` and Koploper/ECoS supplied steps `0..28`, but `AmplifierSpeedMapper.ToPwm` scales by 127. Before the fix, live DCC28 step 24 was passed downstream unchanged as 24 and produced only **~PWM 475** instead of approaching 799, so only part of the usable 400..799 range was used.
+
+The correction is implemented: protocol-specific speed is normalized at the ECoS/protocol boundary (`ProtocolSpeedNormalizer` called from `SimpleEcosBackend`) into the existing normalized `0..127` contract, so `IHardwareBackend` and `AmplifierSpeedMapper` stay protocol-independent. **Live validation 2026-09-20 (amplifier 1):** the full `set(1000,speedstep[0..28])` ramp produced HR0 `399..799` (step 24 -> normalized 109 -> PWM 742, previously 475; step 28 -> 127 -> 799), the motor responded, every reply was `<END 0 (OK)>`, and Koploper sent no corrective/repeated traffic. Koploper's "140 km/h" display corresponds to step 28 and never appears on the ECoS wire.
+
 **Validation-environment note.** The standalone checker used for this validation runs outside the normal application lifecycle and communication ownership. During the session it was able to leave the master communication session in a state that required reinitialization. This was not reproduced through the normal application lifecycle - where master/amplifier communication runs continuously, load/amplifier disconnects are already detected by the existing system, and a software reset path exists - so it is treated as a test-harness limitation rather than a production defect. The freshness result above is unaffected: it is about what the C# side does when fresh data stops arriving.
 
+### Live occupancy bridge validation (2026-09-20)
 
+The full return path was validated live on the real amplifiers with the locomotive speed at zero:
+
+```
+physical occupancy -> amplifier comparator (CMP1) -> HR_STATUS bit 10
+  -> TrackCommClientAsync -> TrackAmplifierOccupancyProvider
+  -> TrackAmplifierOccupancyBridge -> SimpleEcosBackend.OnSensorChangedAsync
+  -> ECoS feedback module 100 (bit = sensorId - 1) -> Koploper bezetmelder
+```
+
+| Block | Amplifier | Bezetmelders | Sensors | Module-100 bits | Occupy | Clear |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | 1 | 1.01, 1.02 | 1, 2 | 0, 1 | `0x00->0x01->0x03` | `0x03->0x02->0x00` |
+| 3 | 3 | 1.05, 1.06 | 5, 6 | 4, 5 | `0x00->0x10->0x30` | `0x30->0x20->0x00` |
+| 4 | 4 | 1.07, 1.08 | 7, 8 | 6, 7 | `0x00->0x40->0xC0` | `0xC0->0x80->0x00` |
+
+- Every change was pushed to the connected Koploper client (`<EVENT 100>` + `100 state[...]` + `<END 0 (OK)>`), with no corrective/extra traffic.
+- `sensorId - 1` indexing is confirmed across bits 0/1, 4/5 and 6/7.
+- Amplifier 6 is installed but unmapped, so it is correctly absent from module 100 and Koploper; no temporary mapping was added.
+- An initial block-3 attempt reported block 4 because amplifier 3's switch had bad contact and amplifier 4's switch was engaged; after the operator re-established amplifier 3 the block-3 mapping was correct. This was a physical test-setup issue, not a product defect.
+- Raw per-amplifier `HR_STATUS` bit 10 is not written to any log, so the amplifier-side comparator step is inferred; the app-side path (provider -> bridge -> module 100 -> Koploper) is directly proven by the observed events.
+- Precise transition latency was not measured (no per-frame timestamps in the logs).
+
+### Koploper operator/UI behaviours observed (2026-09-20)
+
+During the live direction regression the following Koploper UI behaviours were observed (they are Koploper-side, not product defects):
+
+- A direction change requires the speed to be 0 first; Koploper then sends the direction bundled with a stop, e.g. `set(<id>,dir[0],speedstep[0])`.
+- Removing a locomotive from a block requires the speed to be 0 first; Koploper blocks removing a locomotive while it is driving.
+- For an unmapped locomotive the emulator now accepts the direction logically (`<END 0 (OK)>` plus a `dir[...]` event) with no physical write; after the locomotive is placed in a block, the next speed command uses the retained direction. See `docs/handoff.md` (live direction regression, 2026-09-20).
 
 ## Open Questions
 
-- Which ECoS speed range does Koploper send (0..126 or 0..28)? Needed for the speed-to-PWM mapping. - RESOLVED: **0..127 (128 steps)**. The `ecos-master` C# library (`Ecos ESU info/ecos-master.zip`, `ECoSEntities/Locomotive.cs`) returns `128` from `GetNumberOfSpeedsteps()` for MM128/DCC128, and sends `set(<id>, speedstep[<step>])`. The emulator's `opt.StartsWith("speed")` also matches `speedstep[...]`.
+- Which ECoS speed range does Koploper send (0..126 or 0..28)? Needed for the speed-to-PWM mapping. - RESOLVED, and the two properties must be kept apart. The ECoS `speed[...]` property is the normalized domain, **`0..127` (128 steps)**; the `ecos-master` C# library (`Ecos ESU info/ecos-master.zip`, `ECoSEntities/Locomotive.cs`) returns `128` from `GetNumberOfSpeedsteps()` for MM128/DCC128. Koploper instead drives with `set(<id>, speedstep[<step>])`, where `speedstep` is the **protocol-specific** step: for the live `DCC28` locomotives the range is `0..28`. Earlier notes were ambiguous because the emulator's `opt.StartsWith("speed")` also matched `speedstep[...]`, so both forms hit the same branch. The emulator now handles `speedstep[...]` before `speed[...]` and normalizes it (`ProtocolSpeedNormalizer`).
 - Do Koploper block numbers map 1:1 to ECoS sensor ids used for occupancy feedback? - Product owner: a mapping must be created in Koploper; a screenshot will follow, and the settings page will be extended so the mapping can be created and edited.
 - What are the exact look-ahead rules? - Product owner: Koploper reserves a route ahead internally from occupancy data and may report "loc x to block 4" while C# still has the loc in block 1; then C# can compute the delta and drive multiple amplifiers in sync. If Koploper does not provide this, C# checks whether the next block is free and pre-sets the same setpoint one block ahead. Testable with a Koploper test design, unit tests, or a simulator.
 - Should the track-amplifier backend replace or complement `TrackSimulatorBackend`? - RESOLVED: keep `TrackSimulatorBackend` as the simulation backend (it simulates blocks/trains/occupancy and reports sensors via `IHardwareFeedbackSink`) and add the real track-amplifier backend as an alternative, selectable like the Fiddle Yard real/simulator choice. `DummyHardwareBackend` is a minimal mock and can be kept for simple tests.
 
+## Speed normalization
+
+Koploper/ECoS uses two distinct speed properties, and they must not be conflated:
+
+| ECoS option | Meaning | Domain | Handling |
+| --- | --- | --- | --- |
+| `speed[<n>]` | normalized ECoS speed | `0..127` | passed through unchanged (never scaled again) |
+| `speedstep[<n>]` | protocol-specific speed step | `DCC28`: `0..28`, `DCC128`: `0..127` | normalized to `0..127` at the ECoS boundary |
+
+Implemented in `SiebwaldeApp.EcosEmu.ProtocolSpeedNormalizer` and called from `SimpleEcosBackend.HandleSetAsync` (the `speedstep` branch, which is checked before the `speed` branch because `"speedstep[...]"` also starts with `"speed"`).
+
+For `DCC28` the step is scaled linearly onto `0..127` with **round-half-up** integer arithmetic:
+
+```
+normalized = step <= 0      -> 0
+             step >= 28     -> 127
+             otherwise     -> (step * 127 + 14) / 28     (integer division)
+```
+
+Examples: step 0 -> 0, step 1 -> 5, step 14 -> 64, step 24 -> 109, step 28 -> 127. The output is always clamped to `0..127`. `DCC128` is already in the normalized domain and is passed through (clamped), so it is never scaled twice.
+
+A stop (step 0) is accepted for every protocol because standstill has the same meaning everywhere. A non-zero step for a protocol the emulator does not know is **refused explicitly** (`<END 1 (UNSUPPORTED_PROTOCOL)>`) and not applied, rather than being scaled with a guessed value. The normalized value is stored as the locomotive speed, so a later `dir[...]` command reuses it and direction changes never alter the normalization.
+
+`loco.Speed` (and therefore `request(...view)` / `get(...,speed)`) holds the normalized `0..127` value; the hardware backend and `AmplifierSpeedMapper` never see protocol-specific steps.
+
 ## Amplifier PWM Mapping (confirmed)
 
-- ECoS sends speed steps `0..127`.
+- `AmplifierSpeedMapper` receives the normalized `0..127` speed (see [Speed normalization](#speed-normalization)); protocol-specific steps are converted before this point.
 - The amplifier PWM is bidirectional: **neutral = 399**, **forward = 400..799**, **reverse = 398..1**.
 - PWM `0` must never be used: it produces a clipping artefact.
 - On the shuttle line (pendelbaan), after a locomotive change at the middle station and the relay switch-over, both amplifiers' driving direction must be reversed.

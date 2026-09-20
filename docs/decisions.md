@@ -541,3 +541,27 @@ Decision: for a multi-section block, a fresh occupied section proves the block o
 Evidence: a stale "occupied" reading may describe a train that has already left, so promoting it to a definite occupancy would be a false claim; but treating it as clear would be unsafe. Unknown is the honest answer: it blocks look-ahead and reports `StateUnknown` (Rejected) without inventing a stop.
 
 Impact: definite occupancy is never turned into unknown (requirement preserved), and a previously latched `OccupancyMismatch` cannot be reset while its source is stale, because `IsResolved` requires the block to be known clear, which requires fresh data.
+
+## 2026-09-19: Protocol-Specific Speed Is Normalized At The ECoS Boundary
+
+Decision: protocol-specific ECoS speed steps (for example `DCC28`, steps 0..28) are normalized to the existing `0..127` domain at the ECoS/protocol boundary (`SimpleEcosBackend`). The `IHardwareBackend` contract and `AmplifierSpeedMapper` keep operating on normalized `0..127`, so the hardware layer stays protocol-independent. **Implemented 2026-09-20** in `SiebwaldeApp.EcosEmu.ProtocolSpeedNormalizer`, called from `SimpleEcosBackend.HandleSetAsync`.
+
+Evidence: live validation on 2026-09-19 showed the locomotive protocol is `DCC28` and Koploper/ECoS supplied steps `0..28`, while `AmplifierSpeedMapper.ToPwm` scales by 127. Live DCC28 step 24 produced only ~PWM 475 instead of approaching 799, so a full-throttle command uses only part of the usable 400..799 range. The root cause in source is that `SimpleEcosBackend`'s `opt.StartsWith("speed")` branch also matched `speedstep[...]`, so the raw protocol step was passed downstream unchanged.
+
+Impact: the correction did not push DCC28 knowledge into the amplifier/backend layer; the boundary is the only place that knows the protocol. `speed[...]` (already normalized `0..127`) is passed through unchanged so it is not scaled twice; `DCC128` is passed through; a non-zero `speedstep` for an unknown protocol is refused explicitly instead of being scaled with a guessed value. Recorded as fixed in `docs/backlog.md` and `docs/analysis-coverage.md`. **Live full-range verification 2026-09-20:** the full `speedstep[0..28]` ramp on amplifier 1 produced HR0 `399..799` (step 24 -> 109 -> 742, previously 475), the motor responded, and Koploper accepted the normalized echo (`<END 0 (OK)>`, no corrective traffic).
+
+## 2026-09-19: Live Hardware Is An Explicit Delegation Exception
+
+Decision: the single-agent default is unchanged for normal work, but authorized live railway hardware validation is an explicit exception: live test execution and evidence collection are delegated to the `integrator`, while the Project Lead keeps scope, authorization, safety boundaries, sequencing, handoff, backlog and final documentation. The Developer implements and software-verifies only; the Developer must not run the physical motor, start a hardware-driving harness, or declare its own fix physically validated.
+
+Evidence: in the 2026-09-19 live session a standalone harness omitted the production runtime loop, and the harness was left running as a hidden background PID that also left amplifier 1 at PWM 475 instead of neutral on shutdown.
+
+Impact: `.opencode/agents/project-lead.md` and `.opencode/agents/integrator.md` now carry the live-hardware policy (process visibility with PID/command/working directory/session name/manual stop/timeout/neutral procedure, mandatory safe cleanup before handoff, and the budget-exhaustion procedure). `developer.md`, `architect.md` and `designer.md` were deliberately not modified.
+
+## 2026-09-20: Requested Locomotive State Is Owned By The ECoS Model
+
+Decision: the requested/logical locomotive state (`LocoState.Speed`/`LocoState.Direction`) is owned by `SimpleEcosBackend`; physical application through `IHardwareBackend.SetLocoSpeed` is best effort. A valid `dir[...]` always updates the logical direction and emits the `dir[...]` event, and a speed command that cannot reach a physical target (no known block) retains the requested logical speed. Only a real latched safety interlock refuses non-zero movement and leaves the logical state unchanged.
+
+Evidence: targeted live reproduction 2026-09-20 (loco 2 / ECoS id 1001 on unmapped block 0) showed that a direction command was discarded when the hardware backend returned false, so a later `speedstep[1]` used the stale default `Direction = 1` and produced reverse-band PWM 382 instead of forward 416. The single boolean return of `SetLocoSpeed` conflated "safety interlock refused" with "no physical target".
+
+Impact: `SimpleEcosBackend` has one helper (`ApplyNormalizedLocoSpeed`) for speed application and treats the `dir` branch as a logical state change plus a best-effort physical application. `IHardwareBackend` was **not** widened; instead the optional `IMovementSafetyGate` capability (`SiebwaldeApp.EcosEmu`) lets the ECoS backend ask whether non-zero movement is currently blocked, and `ControlSafetyInterlockBackend` implements it. A no-target command now answers `<END 0 (OK)>` and emits its logical `speed[...]`/`dir[...]` event, while a real safety refusal still answers `<END 8 (SAFETY_INTERLOCK)>` with no event. The movement interlock itself (loco/layout latch, stop always allowed, switch commands pass) is unchanged. ECoS events describe logical state, not a claim that a physical amplifier changed. Covered by `SimpleEcosBackendDirectionStateTests`; physical regression validation on the layout remains pending.
