@@ -54,6 +54,9 @@ namespace SiebwaldeApp.StopReachabilityHarness
         private readonly HarnessOptions _options;
         private readonly HarnessLogFactory _logFactory = new();
 
+        private ControlTraceLogger? _controlTrace;
+        private HarnessTraceCapture? _traceCapture;
+
         private TrackApplicationVariables _variables = new();
         private ControllableBlockPositionProvider _blockProvider = new();
         private ITrackCommClient? _commClient;
@@ -91,7 +94,18 @@ namespace SiebwaldeApp.StopReachabilityHarness
         public async Task ComposeAsync()
         {
             _logFactory.AddLogger(new HarnessConsoleLogger());
+            _traceCapture = new HarnessTraceCapture();
+            _logFactory.AddLogger(_traceCapture);
             IoC.ConfigureLogger(_logFactory);
+
+            // The production control trace over the harness log factory. The harness has no file
+            // logger by design, so the trace is captured in memory instead of being written to a
+            // file; the production WPF app registers the same ControlTraceLogger with a FileLogger.
+            _controlTrace = new ControlTraceLogger(_logFactory);
+            _controlTrace.SessionStart(
+                "SiebwaldeApp.StopReachabilityHarness",
+                _options.DryRun ? "DryRun" : "Live",
+                null);
 
             _variables = new TrackApplicationVariables();
             _blockProvider = new ControllableBlockPositionProvider();
@@ -128,9 +142,9 @@ namespace SiebwaldeApp.StopReachabilityHarness
             });
 
             _diagnostics = new ControlDiagnostics();
-            _stopSink = new EcosHardwareStopSink(Log);
+            _stopSink = new EcosHardwareStopSink(Log, _controlTrace);
             _recordingStopSink = new RecordingStopSink(_stopSink, Log);
-            _guard = new ControlSafetyGuard(_recordingStopSink, _diagnostics, Log);
+            _guard = new ControlSafetyGuard(_recordingStopSink, _diagnostics, Log, _controlTrace);
 
             var observability = new AmplifierOccupancyObservability(_variables);
 
@@ -175,7 +189,8 @@ namespace SiebwaldeApp.StopReachabilityHarness
                 switchController: _switches,
                 safetyGuard: _guard,
                 diagnostics: _diagnostics,
-                trackAmplifierGroups: _groups);
+                trackAmplifierGroups: _groups,
+                controlTrace: _controlTrace);
 
             _ecosBackend = _integration.EcosBackend
                 ?? throw new InvalidOperationException(
@@ -205,7 +220,7 @@ namespace SiebwaldeApp.StopReachabilityHarness
             _integration.Attach();
 
             // Real 10 Hz runtime writer over the same comm client.
-            _controlMain = new TrackControlMain(LoggerInstance, _commClient, _variables);
+            _controlMain = new TrackControlMain(LoggerInstance, _commClient, _variables, _controlTrace);
             _controlMain.StartRuntime(_cts.Token);
 
             _composed = true;
@@ -597,6 +612,7 @@ namespace SiebwaldeApp.StopReachabilityHarness
             await Stage5_SafetyStopAsync();
             await LayoutStopAsync();
             await VerifyClassificationAsync();
+            PrintControlTrace();
 
             Console.WriteLine();
             Console.WriteLine("DRY-RUN SCRIPT COMPLETE (no hardware was started, no socket was bound).");
@@ -656,6 +672,9 @@ namespace SiebwaldeApp.StopReachabilityHarness
                             break;
                         case "status":
                             PrintStatus();
+                            break;
+                        case "trace":
+                            PrintControlTrace();
                             break;
                         case "help":
                             PrintHelp();
@@ -823,9 +842,28 @@ namespace SiebwaldeApp.StopReachabilityHarness
             }
         }
 
-        private void PrintStatus()
+        private void PrintControlTrace()
         {
             Console.WriteLine();
+            Console.WriteLine("=== PRODUCTION CONTROL TRACE (ControlTraceLog) ===");
+
+            var records = _traceCapture?.Records ?? Array.Empty<string>();
+            if (records.Count == 0)
+            {
+                Console.WriteLine("  <no trace records>");
+                return;
+            }
+
+            foreach (var record in records)
+            {
+                Console.WriteLine("  " + record);
+            }
+
+            Console.WriteLine($"  ({records.Count} trace records captured in memory; the production app writes the same events to the daily ControlTraceLog file)");
+        }
+
+        private void PrintStatus()
+        {            Console.WriteLine();
             Console.WriteLine("--- status ---");
             Console.WriteLine($"  logical block for loco {_options.Address}: {_blockProvider.TryGetBlockForLoc(_options.Address)?.ToString() ?? "<none>"}");
             Console.WriteLine($"  safety latched: {_guard?.IsLatched} layoutLatched: {_guard?.IsLayoutLatched} unsafe: {_diagnostics?.IsUnsafe}");
@@ -848,6 +886,7 @@ namespace SiebwaldeApp.StopReachabilityHarness
             Console.WriteLine("  layoutstop             real layout stop: set(1,stop) -> SetPower(false)");
             Console.WriteLine("  backplanecheck         dry-run: verify 51..55 are never a track-amplifier target");
             Console.WriteLine("  resetsafety            explicit ControlSafetyGuard.Reset()");
+            Console.WriteLine("  trace                  print the captured production control trace");
             Console.WriteLine("  status | help | quit");
             Console.WriteLine();
             Console.WriteLine("Recovery chain if a locomotive is left non-neutral:");
