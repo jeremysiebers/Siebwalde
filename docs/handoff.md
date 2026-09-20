@@ -1,5 +1,36 @@
 # Handoff
 
+## Latest Session (2026-09-20, direction-state defect confirmed by targeted reproduction)
+
+Branch `feature/live-koploper-occupancy-validation`, HEAD `953360f` (plus this documentation commit). A targeted, operator-in-the-loop reproduction confirmed a product defect: a direction command issued while a locomotive has no known block is discarded, and the stale default direction is used once the locomotive later gets a block. **No production code was changed.**
+
+### Reproduction
+
+- App restarted (real mode, PID 10716); Koploper reconnected to 15471.
+- loco 2 (ecosId 1001, address 2) placed on block 0 (no amplifier mapping). Koploper's UI showed forward.
+- `set(1001,dir[1],speedstep[0])` and `set(1001,dir[0],speedstep[0])` -> both `<END 8 (SAFETY_INTERLOCK)>`, no `dir[...]` event; the logical direction stayed at the default `1` (reverse).
+- loco 2 then placed in block 1 (`[EXT] Loc 2 -> Block 1`); `set(1001,speedstep[1])` -> `<END 0 (OK)>`, `1001 speed[5]`, runtime write `slave=1 HR0=0x017E` = **382 (reverse band)**. Forward would have been 416 (0x01A0).
+- Return to 0: `slave=1 HR0=0x018F` (399).
+
+### Root cause (confirmed in source)
+
+`SimpleEcosBackend.cs:438-454` assigns `loco.Direction` only when `IHardwareBackend.SetLocoSpeed` returns true. With no known block, `TrackAmplifierHardwareBackend.SetLocoSpeed` returns false (`TrackAmplifierHardwareBackend.cs:89-100`), so the requested direction is discarded. `LocoState.Direction` stays at its default `1` (reverse, `SimpleEcosBackend.cs:1548`) and the later speed command reuses it (`SimpleEcosBackend.cs:423`). `<END 8 (SAFETY_INTERLOCK)>` is emitted for any hardware false return, not only a latched fault.
+
+### Classification and follow-up
+
+- Verdict: `CONFIRMED PRODUCT DEFECT` (recorded in `docs/backlog.md`).
+- A Developer task is warranted but has **not** been started: retain the requested logical direction independently of hardware acceptance (or re-synchronise once a block is known), preserving the movement interlock for non-zero movement, with a focused unit test.
+- Coverage gap: the only existing `dir[...]` test covers the success path; there is no test for `dir` with a null block provider / false backend return.
+
+### Cleanup
+
+- Return to 0 verified (399); motor disconnected (operator-confirmed); `Stop-Process -Id 10716`; PID terminated; port 15471 released. No process restarted.
+
+### Next steps
+
+- Product Owner to approve a Developer task for the direction-retention fix.
+- PR still not created.
+
 ## Latest Session (2026-09-20, live DCC28 + occupancy bridge validation on real hardware)
 
 Branch `feature/live-koploper-occupancy-validation`, HEAD `3be34891e5aa52233151e75824b4727ad2eb0987` at the end of the live run (implementation `5042f70`, docs `0b4f2b6`, context/agent policy `4c394d7`, `c7c0b7d`, `dde29cf`, `3be3489`). The DCC28 normalization and the occupancy bridge were validated live on the real amplifier setup. **No production code or firmware was changed during the live run.**
@@ -52,7 +83,7 @@ Wire: `set(1000,speedstep[n])` only, protocol `DCC28`; every reply `<END 0 (OK)>
 ### New observations recorded as software follow-ups (not fixed)
 
 - `docs/backlog.md`: C# TrackAmplifier info page does not follow live data; updates should be event-based (the 10 Hz comm timer / 2 s update was built for the manual info page).
-- `docs/backlog.md`: an **unconfirmed** live observation that a direction command issued while a locomotive has no known block may be lost (not reproduced in the later successful validation; targeted reproduction pending).
+- `docs/backlog.md`: **confirmed product defect** (targeted reproduction 2026-09-20): a direction command issued while a locomotive has no known block is lost, so the locomotive starts in the stale/default direction. See the direction-state session above.
 - `docs/backlog.md`: `SimpleEcosBackend` dispatch still depends on prefix ordering (`speed`/`speedstep`, `addr`/`addrext`).
 
 ### Next steps
