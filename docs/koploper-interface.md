@@ -493,6 +493,14 @@ physical occupancy -> amplifier comparator (CMP1) -> HR_STATUS bit 10
 - Raw per-amplifier `HR_STATUS` bit 10 is not written to any log, so the amplifier-side comparator step is inferred; the app-side path (provider -> bridge -> module 100 -> Koploper) is directly proven by the observed events.
 - Precise transition latency was not measured (no per-frame timestamps in the logs).
 
+### Koploper operator/UI behaviours observed (2026-09-20)
+
+During the live direction regression the following Koploper UI behaviours were observed (they are Koploper-side, not product defects):
+
+- A direction change requires the speed to be 0 first; Koploper then sends the direction bundled with a stop, e.g. `set(<id>,dir[0],speedstep[0])`.
+- Removing a locomotive from a block requires the speed to be 0 first; Koploper blocks removing a locomotive while it is driving.
+- For an unmapped locomotive the emulator now accepts the direction logically (`<END 0 (OK)>` plus a `dir[...]` event) with no physical write; after the locomotive is placed in a block, the next speed command uses the retained direction. See `docs/handoff.md` (live direction regression, 2026-09-20).
+
 ## Open Questions
 
 - Which ECoS speed range does Koploper send (0..126 or 0..28)? Needed for the speed-to-PWM mapping. - RESOLVED, and the two properties must be kept apart. The ECoS `speed[...]` property is the normalized domain, **`0..127` (128 steps)**; the `ecos-master` C# library (`Ecos ESU info/ecos-master.zip`, `ECoSEntities/Locomotive.cs`) returns `128` from `GetNumberOfSpeedsteps()` for MM128/DCC128. Koploper instead drives with `set(<id>, speedstep[<step>])`, where `speedstep` is the **protocol-specific** step: for the live `DCC28` locomotives the range is `0..28`. Earlier notes were ambiguous because the emulator's `opt.StartsWith("speed")` also matched `speedstep[...]`, so both forms hit the same branch. The emulator now handles `speedstep[...]` before `speed[...]` and normalizes it (`ProtocolSpeedNormalizer`).

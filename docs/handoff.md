@@ -1,5 +1,47 @@
 # Handoff
 
+## Latest Session (2026-09-20, live direction regression + safety reachability attempt)
+
+Branch `feature/live-koploper-occupancy-validation`, HEAD `a2125a7` (plus this documentation commit). Targeted operator-in-the-loop live regression of the direction fix and a safety-reachability investigation. **No production code was changed.**
+
+### Live process
+- WPF app (real mode) PID 12716, window `Siebwalde Application`; port 15471; Koploper reconnected by the operator.
+- Evidence: `Logging\live-validation-20260920-144552.stdout.txt`, `Logging\20-9-2026_TrackAppLog.txt`.
+- Cleanup completed: speed 0, last `[WRITE] slave=1 HR0=0x018F` (399), `Stop-Process -Id 12716`, PID terminated, port 15471 released. Motor disconnected (operator-confirmed).
+
+### Test A - direction defect regression: `LIVE DIRECTION REGRESSION PASS`
+- Forward: loco 2 (id 1001) unmapped, `set(1001,dir[0],speedstep[0])` -> `<END 0 (OK)>` + `dir[0]` event, no write; placed in block 1 (no movement on mapping); `set(1001,speedstep[1])` -> `speed[5]` -> `[WRITE] slave=1 HR0=0x01A0` = **416 forward**.
+- Reverse: unmapped `dir[1]` -> `<END 0 (OK)>` + event; re-mapped; `speedstep[1]` -> `HR0=0x017E` = **382 reverse**.
+- Both returns to 0 wrote 399.
+
+### Test B - retained non-zero speed while unmapped
+- B1 PASS: unmapped `speedstep[1]` -> logical `speed[5]`, no `[WRITE]`.
+- B2 PASS: re-mapping to block 1 caused **no** physical movement; slave 1 stayed 399.
+- B3 NOT REACHABLE via Koploper UI: Koploper requires speed 0 before a direction change, so the "direction-only command re-applies a retained non-zero speed" source-level nuance could not be exercised live. Not a product defect.
+
+### Test C/D - direction during a real safety latch, stop during latch: `NOT EXECUTED`
+- Real-mode switch-condition and commanded/observed latches are unreachable (no switch feedback; positions stay unknown -> `StateUnknown`).
+- The only theoretically live-reachable latch is `OccupancyMismatch` on a switch-less route, which would require additional physical state not present in this targeted setup.
+- No operator-accessible latch-injection control exists and fault injection is out of scope, so these were not executed and no hardware behaviour was simulated.
+
+### Test E - mapping-loss stop reachability: `INCONCLUSIVE / CONDITION NOT SAFELY REPRODUCIBLE`
+- Koploper blocks removing a loco from a block while it is driving (speed must be 0 first), so the precondition (mapping loss while the amplifier is non-neutral) could not be created through the normal UI.
+- The source-level safety reachability gap remains open as a HIGH PRIORITY backlog investigation.
+
+### Koploper UI behaviours observed
+- A direction change requires speed 0 first; Koploper then bundles the direction with `speedstep[0]` (e.g. `set(1001,dir[0],speedstep[0])`).
+- Removing a loco from a block requires speed 0 first.
+- No unexpected corrective/oscillating traffic; all replies `<END 0 (OK)>`; `END 8` never occurred.
+
+### Not verifiable / residual
+- Physical amplifier PWM is inferred from the write log (no hardware register read).
+- Motor-connected state is operator-reported.
+- The `IMovementSafetyGate` "future decorator outside the interlock" fragility remains a maintainability note (software review).
+
+### Next steps
+- Decide whether to pursue the HIGH PRIORITY safety reachability investigation with a controlled physical setup.
+- PR still not created.
+
 ## Latest Session (2026-09-20, direction-before-known-block fix implemented and software-verified)
 
 Branch `feature/live-koploper-occupancy-validation`, based on HEAD `a223d7e`. The confirmed direction-before-known-block defect is **fixed in software and software-verified**; **no live/hardware validation was performed** in this task and none is claimed.
