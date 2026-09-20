@@ -119,7 +119,7 @@ Branch `feature/live-koploper-occupancy-validation`, HEAD `3be34891e5aa52233151e
 - Evidence: `Logging\live-validation-20260920-123530.stdout.txt`, runtime write log `Logging\20-9-2026_TrackAppLog.txt`, Core log.
 - Cleanup completed: locomotive speed 0, last runtime writes neutral `HR0=0x018F` (399) on slaves 1, 3, 4 (slave 6 never written), `Stop-Process -Id 13384` issued, PID terminated, port 15471 released. Operator confirmed the motor was disconnected from all amplifiers.
 
-### DCC28 live result (amplifier 1) - PASS
+### DCC28 live result (amplifier 1) - `LIVE DCC28 VALIDATION PASS`
 
 | DCC28 step | Normalized | PWM (HR0, slave 1) | Physical |
 | --- | --- | --- | --- |
@@ -138,7 +138,7 @@ Wire: `set(1000,speedstep[n])` only, protocol `DCC28`; every reply `<END 0 (OK)>
 - block 4 -> amplifier 4 (slave 4); look-ahead (`4>1`, unconditional) also wrote slave 1 with the same PWM; no motor on amplifier 1.
 - The observed direction band matched the mapper (`dir[0]` forward, `dir[1]` reverse).
 
-### Occupancy bridge live result - PASS (blocks 1, 3, 4)
+### Occupancy bridge live result - `LIVE OCCUPANCY BRIDGE PASS` (blocks 1, 3, 4)
 
 | Block | Amplifier | Bezetmelders | Sensors | Module-100 bits | Occupy | Clear |
 | --- | --- | --- | --- | --- | --- | --- |
