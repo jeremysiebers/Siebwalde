@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Controlled stop-reachability TEST HARNESS (software only).
+
+    This project is intentionally NOT part of SiebwaldeApp.sln so it never affects the
+    production build or the existing test suite. It is a standalone console tool that
+    reuses the real production control path and substitutes only:
+      1. the logical block-location source (ControllableBlockPositionProvider), and
+      2. the diagnostic trigger that calls the real ControlSafetyGuard.Apply(...).
+    For the non-hardware dry run it additionally uses a recording ITrackCommClient as the
+    final hardware stand-in, which is explicitly permitted for call-ordering verification.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-windows7.0</TargetFramework>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>SiebwaldeApp.StopReachabilityHarness</RootNamespace>
+    <AssemblyName>SiebwaldeApp.StopReachabilityHarness</AssemblyName>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SiebwaldeApp.Core\SiebwaldeApp.Core.csproj" />
+    <ProjectReference Include="..\SiebwaldeApp.EcosEmu\SiebwaldeApp.EcosEmu.csproj" />
+    <ProjectReference Include="..\SiebwaldeApp.Integration\SiebwaldeApp.Integration.csproj" />
+  </ItemGroup>
+
+</Project>
