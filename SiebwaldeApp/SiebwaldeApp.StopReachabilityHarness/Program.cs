@@ -152,7 +152,7 @@ namespace SiebwaldeApp.StopReachabilityHarness
             Console.WriteLine("  --to <block>         target block of the A->B transition (default 3)");
             Console.WriteLine("  --help               show this help");
             Console.WriteLine();
-            Console.WriteLine("Interactive commands: stage0 stage1 stage2 stage3 stage4 stage5 layoutstop resetsafety status help quit");
+            Console.WriteLine("Interactive commands: stage0 stage1 stage2 stage3 stage4 stage5 layoutstop backplanecheck resetsafety status help quit");
         }
     }
 }
