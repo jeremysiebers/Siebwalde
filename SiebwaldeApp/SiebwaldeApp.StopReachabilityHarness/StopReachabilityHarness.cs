@@ -182,8 +182,12 @@ namespace SiebwaldeApp.StopReachabilityHarness
             _integration.RealBackend.Divergence = _divergence;
 
             // Critical production detail: the stop sink is bound to the real backend directly
-            // (not to the interlock decorator), exactly as TrackControlHost does.
+            // (not to the interlock decorator), exactly as TrackControlHost does. The neutralizer
+            // and the retained commanded-actuator tracker are bound as well, so the stop can
+            // reach orphaned physical targets and escalate to amplifier-centric neutralization.
             _stopSink.Hardware = _integration.RealBackend;
+            _stopSink.Neutralizer = _integration.RealBackend;
+            _stopSink.CommandTracker = _integration.CommandTracker;
             _guard.RevalidationCheck = _divergence.IsResolved;
 
             _switches.Initialize();
@@ -413,7 +417,7 @@ namespace SiebwaldeApp.StopReachabilityHarness
             Console.WriteLine(
                 $"STOP_LOCO LOCO={_options.Address} DIAG={diagnostic.Code}|{diagnostic.Subject} " +
                 $"GUARD_ACTION={action} SINK_RESULT={FormatBool(sinkResult)}");
-            Console.WriteLine("  BACKEND_RESULT=<not surfaced: EcosHardwareStopSink discards the backend return and always returns true>");
+            Console.WriteLine("  SINK_RESULT is the command-level result the guard now inspects (observed physical neutralization stays a separate state).");
 
             PrintPendingWrites();
 
@@ -428,7 +432,8 @@ namespace SiebwaldeApp.StopReachabilityHarness
             var amp3 = Amp(3).HoldingReg[TrackAmplifierRegisters.PwmCommand];
             Console.WriteLine(
                 $"  OBSERVED RESULT: AMP1={amp1} AMP3={amp3} " +
-                $"(expected current behaviour: amp3 neutral, amp1 still non-neutral)");
+                "(defect-reproduction revision 03f5221 expected amp3 neutral and amp1 still non-neutral; " +
+                "this post-fix revision expects both neutral)");
         }
 
         /// <summary>
