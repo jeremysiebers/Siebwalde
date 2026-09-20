@@ -20,6 +20,9 @@ namespace SiebwaldeApp.EcosEmu
         private bool _initialFeedbackSent = false;
         // Flag to ensure we only send one initial sync for switch states
         private bool _initialSwitchFeedbackSent = false;
+        // Protocol assumed when a locomotive has no persisted protocol. Mirrors the
+        // LocoInfo.Protocol default so an unconfigured loco still gets a defined scale.
+        private const string DefaultLocoProtocol = "DCC28";
 
 
         /// <summary>
@@ -349,6 +352,10 @@ namespace SiebwaldeApp.EcosEmu
             // the safety interlock), so Koploper is not told it succeeded.
             var movementRejected = false;
 
+            // Set when a protocol-specific speed step could not be interpreted safely, so the
+            // command is refused explicitly instead of being applied with a guessed scale.
+            var protocolRejected = false;
+
             foreach (var opt in cmd.Options)
             {
                 // 1) turnout / switch handling
@@ -371,8 +378,45 @@ namespace SiebwaldeApp.EcosEmu
                 //}
 
                 // 2) LOCO-commando's
-                if (opt.StartsWith("speed", StringComparison.OrdinalIgnoreCase))
+                //
+                // speedstep[...] is the protocol-specific speed step (for example DCC28 0..28)
+                // and must be normalized to the 0..127 domain before it reaches the hardware.
+                // It has to be handled before the speed[...] branch below, because
+                // "speedstep[...]" also starts with "speed".
+                if (opt.StartsWith("speedstep", StringComparison.OrdinalIgnoreCase))
                 {
+                    var (ok, value) = ParseBracketInt(opt);
+                    if (ok)
+                    {
+                        string protocol = _locoRepository.GetByEcosId(id)?.Protocol ?? DefaultLocoProtocol;
+
+                        if (!ProtocolSpeedNormalizer.TryNormalize(protocol, value, out int normalizedSpeed))
+                        {
+                            // Unknown protocol: the step cannot be interpreted safely, so the
+                            // command is refused rather than applied with a guessed scale.
+                            protocolRejected = true;
+                        }
+                        else if (!_hardware.SetLocoSpeed(loco.Address, normalizedSpeed, loco.Direction))
+                        {
+                            // Refused (for example by the safety interlock): keep the logical
+                            // speed unchanged and report no speed change to Koploper.
+                            movementRejected = true;
+                        }
+                        else
+                        {
+                            // The normalized value is what the rest of the system (backend
+                            // contract, direction changes, ECoS replies) works with.
+                            loco.Speed = normalizedSpeed;
+
+                            // Event: reflect the normalized speed
+                            events.Add($"{id} speed[{loco.Speed}]");
+                        }
+                    }
+                }
+                else if (opt.StartsWith("speed", StringComparison.OrdinalIgnoreCase))
+                {
+                    // speed[...] already carries the normalized 0..127 ECoS value, so it is
+                    // passed through unchanged and is never scaled again.
                     var (ok, value) = ParseBracketInt(opt);
                     if (ok)
                     {
@@ -461,12 +505,6 @@ namespace SiebwaldeApp.EcosEmu
                         events.Add($"{id} func[{index}][{(on ? 1 : 0)}]");
                     }
                 }
-                else if (opt.StartsWith("speedstep", StringComparison.OrdinalIgnoreCase))
-                {
-                    // Koploper sometimes sends speedstep[...]; for now we just ignore or log it.
-                    // var (ok, value) = ParseBracketInt(opt);
-                    // if (ok) { /* store if you want */ }
-                }
             }
 
             // Reply to Koploper, including any event lines we collected
@@ -477,6 +515,15 @@ namespace SiebwaldeApp.EcosEmu
 
             // Without state to koploper
             // Reply to Koploper – for switch events we don't echo them in the reply body
+            if (protocolRejected)
+            {
+                // A protocol-specific step we cannot interpret must not be applied with a
+                // guessed scale, and must not be acknowledged as if it had been applied.
+                Console.WriteLine("[SET LOCO] speedstep refused: the locomotive protocol is not supported.");
+                await WriteReplyAsync(writer, cmd.RawLine, 1, "UNSUPPORTED_PROTOCOL", null);
+                return;
+            }
+
             if (movementRejected)
             {
                 // Koploper must not be told a movement command succeeded when it did not.
