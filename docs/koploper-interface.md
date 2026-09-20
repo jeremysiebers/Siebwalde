@@ -348,7 +348,7 @@ Consequence: for real hardware, amplifier occupancy must be reported as sensor i
 - `SiebwaldeApp.Integration.ControlSafetyInterlockBackend` - done: refuses non-zero movement while a safety fault is latched (per loco, or layout-wide for an unattributable fault) while stops, power-off and switch commands stay allowed.
 - `IHardwareBackend.SetSwitch`, `SetPower` and `SetLocoSpeed` return `bool`: the ECoS backend never reports a state change or a movement that did not actually reach the hardware.
 - New non-UI project `SiebwaldeApp.Integration` (`net8.0-windows7.0`) references Core + EcosEmu; all translation logic stays out of the WPF project.
-- Tests: 267/267 passing in `SiebwaldeApp.Core.Tests` (Debug and Release).
+- Tests: 280/280 passing in `SiebwaldeApp.Core.Tests` (Debug and Release).
 - Still open: the real switch-output path (accessory decoder), physical switch feedback, the real-layout power-on switch positions, simulator occupancy through the production abstraction, and the event-based amplifier-info updates. See `docs/backlog.md`. The real amplifier occupancy path is implemented and live-validated; the stale-occupancy watchdog is resolved.
 
 ### Divergence, safety stop and diagnostics
@@ -363,7 +363,18 @@ Requested, commanded and observed stay separate: `SwitchController` records the 
 
 `ControlSafetyInterlockBackend` sits between the ECoS backend and the hardware backend, so every movement command passes one policy while a fault is latched: non-zero movement is refused for the affected locomotive (or for all locomotives when the fault is layout-wide), power-on is refused for a layout-wide fault, and stops, power-off and switch commands always pass. A corrective switch command never unlatches anything.
 
-`IHardwareBackend.SetPower` and `SetLocoSpeed` return `bool`. When a movement is refused, `SimpleEcosBackend` replies `<END 8 (SAFETY_INTERLOCK)>`, keeps its logical speed unchanged and sends no `speed[...]`/`dir[...]` event, so Koploper is never told a refused movement succeeded. Rejections are reported once per locomotive per latch (`MovementRejectedBySafety`).
+`IHardwareBackend.SetPower` and `SetLocoSpeed` return `bool`. A refusal can mean either "a latched safety interlock blocked non-zero movement" or "there is no physical target" (for example the locomotive has no known block). `SimpleEcosBackend` distinguishes them through the optional `IMovementSafetyGate` capability (implemented by `ControlSafetyInterlockBackend`):
+
+- **Real safety refusal:** the logical speed is left unchanged, no `speed[...]` event is sent, and the reply is `<END 8 (SAFETY_INTERLOCK)>`. Rejections are reported once per locomotive per latch (`MovementRejectedBySafety`).
+- **No physical target:** the command is still a meaningful requested state, so the logical speed/direction is retained and the corresponding `speed[...]`/`dir[...]` event is sent with `<END 0 (OK)>`. No physical movement is produced, and a later command reuses the retained state once a block is known. An unmapped command is therefore **not** reported as a safety interlock.
+
+### Requested direction and speed are logical state
+
+`SimpleEcosBackend` owns the requested/logical locomotive state (`LocoState.Speed`/`LocoState.Direction`); physical application is best effort through the hardware backend.
+
+- `set(id, dir[n])` always updates `loco.Direction` and emits `id dir[n]`, even when no amplifier is addressable. The `dir[...]` event describes the logical state, not a claim that a physical amplifier changed. It also attempts to apply the direction to a locomotive that already has a physical target, so a direction change on a known block keeps its previous behaviour.
+- `set(id, speedstep[n])` / `set(id, speed[v])` retain the requested logical speed when no target exists (a stop is always accepted). A real safety latch is the only case where the logical speed is not updated.
+- A later movement uses the most recent requested direction, so a direction command issued before a block is known is no longer lost to a stale default.
 
 Recovery is explicit: `ControlSafetyGuard.Reset()` revalidates every latched fault through `DivergenceChecker.IsResolved` and is refused with `ResetRefused` while the condition persists. Only after the correction plus a successful reset does movement become possible again.
 

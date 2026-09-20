@@ -1,5 +1,40 @@
 # Handoff
 
+## Latest Session (2026-09-20, direction-before-known-block fix implemented and software-verified)
+
+Branch `feature/live-koploper-occupancy-validation`, based on HEAD `a223d7e`. The confirmed direction-before-known-block defect is **fixed in software and software-verified**; **no live/hardware validation was performed** in this task and none is claimed.
+
+### Root cause (confirmed)
+
+`SimpleEcosBackend.HandleSetAsync` assigned `loco.Direction` only when `IHardwareBackend.SetLocoSpeed` returned true. With no known block, `TrackAmplifierHardwareBackend.SetLocoSpeed` returns false, so the requested direction was discarded and a later speed command reused the stale default `Direction = 1`. The same single boolean also conflated "no physical target" with a latched safety refusal, so the reply was always `<END 8 (SAFETY_INTERLOCK)>`.
+
+### The fix
+
+- Requested/logical direction and speed are now owned by the ECoS model (`SimpleEcosBackend`). The `dir[...]` branch always updates `loco.Direction` and emits `id dir[n]`; physical application is best effort and its result no longer gates the logical state.
+- Speed application is factored into `SimpleEcosBackend.ApplyNormalizedLocoSpeed`. A stop (0) is always logically accepted; a non-zero speed that cannot reach a target retains the requested logical value; only a **real safety refusal** leaves the logical state unchanged and answers `<END 8 (SAFETY_INTERLOCK)>`.
+- A real safety refusal is distinguished from "no target" through the new optional capability `IMovementSafetyGate` (in `SiebwaldeApp.EcosEmu`, implemented by `ControlSafetyInterlockBackend`). `IHardwareBackend` signatures were **not** changed.
+- Queued events are emitted after any reply, so a logically-accepted direction is reported even if another option in the same command was refused. Events describe logical state, not a physical amplifier change.
+- DCC28 normalization (`ProtocolSpeedNormalizer`) and `AmplifierSpeedMapper` were not touched. The movement interlock (loco/layout latch, stop always allowed, switch commands pass) is unchanged.
+
+### Tests and checks
+
+- `dotnet build SiebwaldeApp.sln` -> **0 errors**, **175 warnings** (baseline 175; no new warnings).
+- `dotnet test SiebwaldeApp.sln` -> **280/280 passed** (was 267; +13).
+- `dotnet build SiebwaldeApp.sln -c Release` -> **0 errors**, **175 warnings**.
+- `dotnet test SiebwaldeApp.sln -c Release --no-build` -> **280/280 passed**.
+- New tests: `SimpleEcosBackendDirectionStateTests` (forward/reverse while unmapped, forward->reverse and reverse->forward most-recent-wins, live command order `dir[...]` + `speedstep[0]` -> block -> `speedstep[1]`, known-block direction handling, per-loco independence, unmapped stop, no false `SAFETY_INTERLOCK` for no-target, safety latch still rejects non-zero movement, retained direction used after reset).
+- No hardware was connected or controlled; no hardware-driving process was started.
+
+### Explicitly still pending
+
+- Physical regression validation of the direction fix on the layout (Integrator). The fix is **not** live-validated.
+- PR for `feature/live-koploper-occupancy-validation` still not created.
+
+### Uncertainty for the Integrator to check
+
+- The ECoS model now retains a requested non-zero speed when no physical target exists. No physical movement is produced; a later command consumes the retained value once a block is known. Live behaviour of Koploper when it receives a `dir[...]`/`speed[...]` event for a locomotive that is not physically addressable is not verified.
+- A `dir[...]` command is now logically accepted (`<END 0 (OK)>`) even while a safety latch blocks the physical application; the physical movement is still blocked by `ControlSafetyInterlockBackend`.
+
 ## Latest Session (2026-09-20, direction-state defect confirmed by targeted reproduction)
 
 Branch `feature/live-koploper-occupancy-validation`, HEAD `953360f` (plus this documentation commit). A targeted, operator-in-the-loop reproduction confirmed a product defect: a direction command issued while a locomotive has no known block is discarded, and the stale default direction is used once the locomotive later gets a block. **No production code was changed.**
