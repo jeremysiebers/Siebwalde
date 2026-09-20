@@ -1,5 +1,65 @@
 # Handoff
 
+## Latest Session (2026-09-20, live DCC28 + occupancy bridge validation on real hardware)
+
+Branch `feature/live-koploper-occupancy-validation`, HEAD `3be34891e5aa52233151e75824b4727ad2eb0987` at the end of the live run (implementation `5042f70`, docs `0b4f2b6`, context/agent policy `4c394d7`, `c7c0b7d`, `dde29cf`, `3be3489`). The DCC28 normalization and the occupancy bridge were validated live on the real amplifier setup. **No production code or firmware was changed during the live run.**
+
+### Live process and cleanup
+
+- WPF app (real mode) `SiebwaldeApp.exe`, PID 13384, window `Siebwalde Application`, working directory the Debug exe folder; started 12:35:30. The operator performed the normal production lifecycle (host detection + Start TrackController); the app started the track application and the real ECoS host.
+- Port 15471 owned by PID 13384, Koploper connected; port 5700 = Koploper.
+- Evidence: `Logging\live-validation-20260920-123530.stdout.txt`, runtime write log `Logging\20-9-2026_TrackAppLog.txt`, Core log.
+- Cleanup completed: locomotive speed 0, last runtime writes neutral `HR0=0x018F` (399) on slaves 1, 3, 4 (slave 6 never written), `Stop-Process -Id 13384` issued, PID terminated, port 15471 released. Operator confirmed the motor was disconnected from all amplifiers.
+
+### DCC28 live result (amplifier 1) - PASS
+
+| DCC28 step | Normalized | PWM (HR0, slave 1) | Physical |
+| --- | --- | --- | --- |
+| 0 | 0 | 399 (0x018F) | motor stopped |
+| 1..27 | `(n*127+14)/28` | 400..~790 | motor ramps |
+| 24 | 109 | 742 (previously 475) | motor at high speed |
+| 28 | 127 | 799 (0x031F) | full throttle |
+| 0 | 0 | 399 (0x018F) | motor stopped |
+
+Wire: `set(1000,speedstep[n])` only, protocol `DCC28`; every reply `<END 0 (OK)>`; normalized `speed[...]` echo; no corrective/repeated traffic. "140 km/h" on Koploper's display = step 28; it never appears on the ECoS wire and no PWM above 799 was produced.
+
+### Block routing live result - PASS
+
+- block 1 -> amplifier 1 (slave 1).
+- block 3 -> amplifier 3 (slave 3); loc2.
+- block 4 -> amplifier 4 (slave 4); look-ahead (`4>1`, unconditional) also wrote slave 1 with the same PWM; no motor on amplifier 1.
+- The observed direction band matched the mapper (`dir[0]` forward, `dir[1]` reverse).
+
+### Occupancy bridge live result - PASS (blocks 1, 3, 4)
+
+| Block | Amplifier | Bezetmelders | Sensors | Module-100 bits | Occupy | Clear |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | 1 | 1.01, 1.02 | 1, 2 | 0, 1 | `0x00->0x01->0x03` | `0x03->0x02->0x00` |
+| 3 | 3 | 1.05, 1.06 | 5, 6 | 4, 5 | `0x00->0x10->0x30` | `0x30->0x20->0x00` |
+| 4 | 4 | 1.07, 1.08 | 7, 8 | 6, 7 | `0x00->0x40->0xC0` | `0xC0->0x80->0x00` |
+
+- Each change was pushed to the live Koploper client as `<EVENT 100>` + `100 state[...]` + `<END 0 (OK)>`, with no corrective/extra traffic.
+- `sensorId - 1` indexing confirmed across bits 0/1, 4/5, 6/7.
+- Amplifier 6 is installed but unmapped (not in `BlockTopologyConfig`/`KoploperBlockMapConfig`), so it is correctly absent from module 100 and Koploper; no temporary mapping was added.
+- An initial block-3 attempt reported block 4 because amplifier 3's switch had bad contact and amplifier 4's switch was engaged. After the operator re-established amplifier 3, block 3 reported correctly. **This was a physical test-setup issue, not a product defect.**
+
+### Not directly verified (inferred or operator-side)
+
+- Raw per-amplifier `HR_STATUS` (HoldingReg2) bit 10 is not written to any log; the amplifier-side comparator -> bit-10 step is inferred from `processio.c` plus the observed app-side events.
+- Koploper's UI rendering of the occupancy/bezetmelder and of the normalized `speed[...]` echo is operator-side; the wire events were proven delivered.
+- Precise occupancy transition latency was not measured (no per-frame timestamps in the logs).
+
+### New observations recorded as software follow-ups (not fixed)
+
+- `docs/backlog.md`: C# TrackAmplifier info page does not follow live data; updates should be event-based (the 10 Hz comm timer / 2 s update was built for the manual info page).
+- `docs/backlog.md`: a direction command issued while a locomotive has no known block is lost, so the locomotive can start in the wrong direction.
+- `docs/backlog.md`: `SimpleEcosBackend` dispatch still depends on prefix ordering (`speed`/`speedstep`, `addr`/`addrext`).
+
+### Next steps
+
+- Decide on the software follow-ups above.
+- PR for `feature/live-koploper-occupancy-validation` has not been created.
+
 ## Latest Session (2026-09-20, DCC28 speed normalization implemented)
 
 Branch `feature/live-koploper-occupancy-validation`, implementation commit `5042f70`, with this documentation commit on top. The confirmed DCC28 scaling defect is fixed in software; **physical verification is still pending** and must be performed by the Integrator, not the Developer.
@@ -23,19 +83,19 @@ Branch `feature/live-koploper-occupancy-validation`, implementation commit `5042
 - New tests: `ProtocolSpeedNormalizerTests`, `SimpleEcosBackendSpeedNormalizationTests`.
 - No hardware was connected or controlled; no hardware-driving process was started.
 
-### Explicitly still pending
+### Explicitly still pending at the time
 
-- live DCC28 full-range verification through the amplifier (Integrator);
-- live occupancy bridge validation (`TrackAmplifierOccupancyBridge` -> module 100 -> Koploper bezetmelder);
-- PR for `feature/live-koploper-occupancy-validation`.
+- ~~live DCC28 full-range verification through the amplifier (Integrator);~~ **done 2026-09-20; see the live-validation session above.**
+- ~~live occupancy bridge validation (`TrackAmplifierOccupancyBridge` -> module 100 -> Koploper bezetmelder);~~ **done 2026-09-20; see the live-validation session above.**
+- PR for `feature/live-koploper-occupancy-validation` still not created.
 
 ### Uncertainty for the Integrator to check
 
-The emulator now echoes `speed[<normalized>]` for a `speedstep[<n>]` command (for DCC28 step 14 it echoes `speed[64]`, not `speed[14]`). Whether Koploper's hand controller accepts or ignores that normalized echo must be confirmed live. The motor-side effect is unambiguous (normalized domain), but Koploper's own UI/throttle tracking is not software-verified here.
+The emulator now echoes `speed[<normalized>]` for a `speedstep[<n>]` command (for DCC28 step 14 it echoes `speed[64]`, not `speed[14]`). Live validation 2026-09-20: Koploper accepted the normalized echo with `<END 0 (OK)>` and sent no corrective traffic; the UI/throttle rendering itself remains operator-side. The motor-side effect is unambiguous (normalized domain).
 
 ### Safety note
 
-This session performed no live/hardware work. The previously recorded state (amplifier 1 left at PWM 475 instead of neutral) is unchanged and still applies to the next live session.
+This session performed no live/hardware work. The amplifier-1 residual PWM 475 from the earlier live session was subsequently cleared during the 2026-09-20 live validation, which ended with all commanded outputs neutral and the process stopped.
 
 ## Latest Session (2026-09-19, live Koploper setpoint validation + agent policy)
 

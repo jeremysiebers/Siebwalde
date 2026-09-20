@@ -348,8 +348,8 @@ Consequence: for real hardware, amplifier occupancy must be reported as sensor i
 - `SiebwaldeApp.Integration.ControlSafetyInterlockBackend` - done: refuses non-zero movement while a safety fault is latched (per loco, or layout-wide for an unattributable fault) while stops, power-off and switch commands stay allowed.
 - `IHardwareBackend.SetSwitch`, `SetPower` and `SetLocoSpeed` return `bool`: the ECoS backend never reports a state change or a movement that did not actually reach the hardware.
 - New non-UI project `SiebwaldeApp.Integration` (`net8.0-windows7.0`) references Core + EcosEmu; all translation logic stays out of the WPF project.
-- Tests: 204/204 passing in `SiebwaldeApp.Core.Tests`.
-- Still open: the real switch-output path (accessory decoder), physical switch feedback, the real-layout power-on switch positions, the amplifier occupancy firmware bit, simulator occupancy through the production abstraction, and the watchdog for stale occupancy. See `docs/backlog.md`.
+- Tests: 267/267 passing in `SiebwaldeApp.Core.Tests` (Debug and Release).
+- Still open: the real switch-output path (accessory decoder), physical switch feedback, the real-layout power-on switch positions, simulator occupancy through the production abstraction, and the event-based amplifier-info updates. See `docs/backlog.md`. The real amplifier occupancy path is implemented and live-validated; the stale-occupancy watchdog is resolved.
 
 ### Divergence, safety stop and diagnostics
 
@@ -452,13 +452,35 @@ The motor responded to the hand controller. Observed C# -> amplifier response: *
 
 **Harness lesson (not a product defect):** a standalone harness must start `TrackControlMain.StartRuntime`. Without the production runtime loop the setpoints stay in `PendingWrites` and never reach the amplifiers.
 
-**DCC28 speed scaling (defect fixed in software 2026-09-20, live verification pending).** The locomotive protocol is `DCC28` and Koploper/ECoS supplied steps `0..28`, but `AmplifierSpeedMapper.ToPwm` scales by 127. Before the fix, live DCC28 step 24 was passed downstream unchanged as 24 and produced only **~PWM 475** instead of approaching 799, so only part of the usable 400..799 range was used.
+**DCC28 speed scaling (defect fixed in software and live-validated 2026-09-20).** The locomotive protocol is `DCC28` and Koploper/ECoS supplied steps `0..28`, but `AmplifierSpeedMapper.ToPwm` scales by 127. Before the fix, live DCC28 step 24 was passed downstream unchanged as 24 and produced only **~PWM 475** instead of approaching 799, so only part of the usable 400..799 range was used.
 
-The correction is implemented: protocol-specific speed is normalized at the ECoS/protocol boundary (`ProtocolSpeedNormalizer` called from `SimpleEcosBackend`) into the existing normalized `0..127` contract, so `IHardwareBackend` and `AmplifierSpeedMapper` stay protocol-independent. Physical verification of the full DCC28 range has **not** been performed yet (that is an Integrator live step).
+The correction is implemented: protocol-specific speed is normalized at the ECoS/protocol boundary (`ProtocolSpeedNormalizer` called from `SimpleEcosBackend`) into the existing normalized `0..127` contract, so `IHardwareBackend` and `AmplifierSpeedMapper` stay protocol-independent. **Live validation 2026-09-20 (amplifier 1):** the full `set(1000,speedstep[0..28])` ramp produced HR0 `399..799` (step 24 -> normalized 109 -> PWM 742, previously 475; step 28 -> 127 -> 799), the motor responded, every reply was `<END 0 (OK)>`, and Koploper sent no corrective/repeated traffic. Koploper's "140 km/h" display corresponds to step 28 and never appears on the ECoS wire.
 
 **Validation-environment note.** The standalone checker used for this validation runs outside the normal application lifecycle and communication ownership. During the session it was able to leave the master communication session in a state that required reinitialization. This was not reproduced through the normal application lifecycle - where master/amplifier communication runs continuously, load/amplifier disconnects are already detected by the existing system, and a software reset path exists - so it is treated as a test-harness limitation rather than a production defect. The freshness result above is unaffected: it is about what the C# side does when fresh data stops arriving.
 
+### Live occupancy bridge validation (2026-09-20)
 
+The full return path was validated live on the real amplifiers with the locomotive speed at zero:
+
+```
+physical occupancy -> amplifier comparator (CMP1) -> HR_STATUS bit 10
+  -> TrackCommClientAsync -> TrackAmplifierOccupancyProvider
+  -> TrackAmplifierOccupancyBridge -> SimpleEcosBackend.OnSensorChangedAsync
+  -> ECoS feedback module 100 (bit = sensorId - 1) -> Koploper bezetmelder
+```
+
+| Block | Amplifier | Bezetmelders | Sensors | Module-100 bits | Occupy | Clear |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | 1 | 1.01, 1.02 | 1, 2 | 0, 1 | `0x00->0x01->0x03` | `0x03->0x02->0x00` |
+| 3 | 3 | 1.05, 1.06 | 5, 6 | 4, 5 | `0x00->0x10->0x30` | `0x30->0x20->0x00` |
+| 4 | 4 | 1.07, 1.08 | 7, 8 | 6, 7 | `0x00->0x40->0xC0` | `0xC0->0x80->0x00` |
+
+- Every change was pushed to the connected Koploper client (`<EVENT 100>` + `100 state[...]` + `<END 0 (OK)>`), with no corrective/extra traffic.
+- `sensorId - 1` indexing is confirmed across bits 0/1, 4/5 and 6/7.
+- Amplifier 6 is installed but unmapped, so it is correctly absent from module 100 and Koploper; no temporary mapping was added.
+- An initial block-3 attempt reported block 4 because amplifier 3's switch had bad contact and amplifier 4's switch was engaged; after the operator re-established amplifier 3 the block-3 mapping was correct. This was a physical test-setup issue, not a product defect.
+- Raw per-amplifier `HR_STATUS` bit 10 is not written to any log, so the amplifier-side comparator step is inferred; the app-side path (provider -> bridge -> module 100 -> Koploper) is directly proven by the observed events.
+- Precise transition latency was not measured (no per-frame timestamps in the logs).
 
 ## Open Questions
 
