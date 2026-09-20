@@ -1,5 +1,42 @@
 # Handoff
 
+## Latest Session (2026-09-20, DCC28 speed normalization implemented)
+
+Branch `feature/live-koploper-occupancy-validation`, implementation commit `5042f70`, with this documentation commit on top. The confirmed DCC28 scaling defect is fixed in software; **physical verification is still pending** and must be performed by the Integrator, not the Developer.
+
+### Root cause (confirmed from source)
+
+`SimpleEcosBackend.HandleSetAsync` tested `opt.StartsWith("speed", ...)` before the `speedstep[...]` case. Because `"speedstep[...]"` also starts with `"speed"`, the protocol-specific step from Koploper (`set(id,speedstep[n])`, DCC28 `0..28`) was parsed by the `speed` branch and passed downstream unchanged as if it were the normalized `0..127` ECoS speed. The later `speedstep` branch was therefore dead code. This matches the live trace (`Logging\19-09-2026_EcosEmuTrace.txt`: `set(1000,speedstep[24])` -> `[SIM-HW] ... speed=24`) and the measured ~PWM 475.
+
+### The fix
+
+- New `SiebwaldeApp.EcosEmu.ProtocolSpeedNormalizer` (ECoS/protocol layer): `speedstep` -> normalized `0..127`. DCC28 `0..28` is scaled with round-half-up integer arithmetic `(step*127+14)/28`; DCC128 is passed through (already normalized); `speed[...]` is never scaled twice; step 0 is always 0; a non-zero step for an unknown protocol is refused explicitly (`END 1 UNSUPPORTED_PROTOCOL`).
+- `SimpleEcosBackend` handles `speedstep` before `speed`, stores the normalized value as `loco.Speed`, and emits the normalized `speed[...]` event. Direction handling (`dir[...]`) reuses the stored normalized speed, so direction changes do not alter normalization.
+- The hardware backend and `AmplifierSpeedMapper` were **not** changed: they still operate on normalized `0..127` and stay protocol-independent. No DCC28 knowledge was added to `TrackAmplifierHardwareBackend`, `AmplifierSpeedMapper`, or the physical amplifier model.
+
+### Tests and checks
+
+- `dotnet build SiebwaldeApp.sln` -> **0 errors**, **175 warnings** (unchanged from baseline).
+- `dotnet test SiebwaldeApp.sln` -> **267/267 passed** (was 227; +40).
+- `dotnet build SiebwaldeApp.sln -c Release` -> **0 errors**, **175 warnings**.
+- `dotnet test SiebwaldeApp.sln -c Release --no-build` -> **267/267 passed**.
+- New tests: `ProtocolSpeedNormalizerTests`, `SimpleEcosBackendSpeedNormalizationTests`.
+- No hardware was connected or controlled; no hardware-driving process was started.
+
+### Explicitly still pending
+
+- live DCC28 full-range verification through the amplifier (Integrator);
+- live occupancy bridge validation (`TrackAmplifierOccupancyBridge` -> module 100 -> Koploper bezetmelder);
+- PR for `feature/live-koploper-occupancy-validation`.
+
+### Uncertainty for the Integrator to check
+
+The emulator now echoes `speed[<normalized>]` for a `speedstep[<n>]` command (for DCC28 step 14 it echoes `speed[64]`, not `speed[14]`). Whether Koploper's hand controller accepts or ignores that normalized echo must be confirmed live. The motor-side effect is unambiguous (normalized domain), but Koploper's own UI/throttle tracking is not software-verified here.
+
+### Safety note
+
+This session performed no live/hardware work. The previously recorded state (amplifier 1 left at PWM 475 instead of neutral) is unchanged and still applies to the next live session.
+
 ## Latest Session (2026-09-19, live Koploper setpoint validation + agent policy)
 
 Branch `feature/live-koploper-occupancy-validation`, HEAD `b09c697`. **No production code was changed.** One product defect was found and is recorded, not fixed.
@@ -54,8 +91,8 @@ Normalization belongs at the ECoS/protocol boundary; the hardware/backend layer 
 
 ### NOT completed (do not assume otherwise)
 
-- Developer implementation of DCC28 normalization;
-- regression tests for the DCC28 scaling defect;
+- ~~Developer implementation of DCC28 normalization;~~ **done 2026-09-20, commit `5042f70`**
+- ~~regression tests for the DCC28 scaling defect;~~ **done 2026-09-20, commit `5042f70`**
 - independent Integrator review of that fix;
 - live DCC28 full-range verification;
 - live occupancy bridge validation through `TrackAmplifierOccupancyBridge` -> ECoS module 100 -> Koploper bezetmelder;

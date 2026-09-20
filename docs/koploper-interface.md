@@ -80,7 +80,7 @@ The emulator assigns the next object id (1002, 1003, ...) and persists them. Not
 
 ### Driving
 
-Koploper drives a locomotive with `set(<ecosId>, speedstep[<n>])`, ramping the step over time (observed 1,2,3,...,7 in quick succession). Direction uses `set(<ecosId>, dir[...])`. The emulator echoes `TX: <ecosId> speed[<n>]`.
+Koploper drives a locomotive with `set(<ecosId>, speedstep[<n>])`, ramping the step over time (observed 1,2,3,...,7 in quick succession). Direction uses `set(<ecosId>, dir[...])`. `speedstep[<n>]` is the **protocol-specific** step (for a `DCC28` locomotive the range is `0..28`), not the normalized ECoS speed. The emulator normalizes it to the `0..127` domain and echoes the normalized value as `TX: <ecosId> speed[<normalized>]`; see [Speed normalization](#speed-normalization) below.
 
 Important: Koploper drives the object id it created (for example 1002), not a pre-seeded one for the same decoder address. Pre-seeding `locos.json` with the same address but a different id therefore creates duplicates (1000/1001 seeded + 1002/1003 created).
 
@@ -452,9 +452,9 @@ The motor responded to the hand controller. Observed C# -> amplifier response: *
 
 **Harness lesson (not a product defect):** a standalone harness must start `TrackControlMain.StartRuntime`. Without the production runtime loop the setpoints stay in `PendingWrites` and never reach the amplifiers.
 
-**Confirmed defect - DCC28 speed scaling.** The locomotive protocol is `DCC28` and Koploper/ECoS supplied steps `0..28`, but `AmplifierSpeedMapper.ToPwm` scales by 127. Live DCC28 step 24 produced only **~PWM 475** instead of approaching 799, so only part of the usable 400..799 range is used.
+**DCC28 speed scaling (defect fixed in software 2026-09-20, live verification pending).** The locomotive protocol is `DCC28` and Koploper/ECoS supplied steps `0..28`, but `AmplifierSpeedMapper.ToPwm` scales by 127. Before the fix, live DCC28 step 24 was passed downstream unchanged as 24 and produced only **~PWM 475** instead of approaching 799, so only part of the usable 400..799 range was used.
 
-Preferred correction (not implemented): normalize protocol-specific speed at the ECoS/protocol boundary into the existing normalized `0..127` contract, so `IHardwareBackend` and `AmplifierSpeedMapper` stay protocol-independent.
+The correction is implemented: protocol-specific speed is normalized at the ECoS/protocol boundary (`ProtocolSpeedNormalizer` called from `SimpleEcosBackend`) into the existing normalized `0..127` contract, so `IHardwareBackend` and `AmplifierSpeedMapper` stay protocol-independent. Physical verification of the full DCC28 range has **not** been performed yet (that is an Integrator live step).
 
 **Validation-environment note.** The standalone checker used for this validation runs outside the normal application lifecycle and communication ownership. During the session it was able to leave the master communication session in a state that required reinitialization. This was not reproduced through the normal application lifecycle - where master/amplifier communication runs continuously, load/amplifier disconnects are already detected by the existing system, and a software reset path exists - so it is treated as a test-harness limitation rather than a production defect. The freshness result above is unaffected: it is about what the C# side does when fresh data stops arriving.
 
@@ -462,14 +462,39 @@ Preferred correction (not implemented): normalize protocol-specific speed at the
 
 ## Open Questions
 
-- Which ECoS speed range does Koploper send (0..126 or 0..28)? Needed for the speed-to-PWM mapping. - RESOLVED: **0..127 (128 steps)**. The `ecos-master` C# library (`Ecos ESU info/ecos-master.zip`, `ECoSEntities/Locomotive.cs`) returns `128` from `GetNumberOfSpeedsteps()` for MM128/DCC128, and sends `set(<id>, speedstep[<step>])`. The emulator's `opt.StartsWith("speed")` also matches `speedstep[...]`.
+- Which ECoS speed range does Koploper send (0..126 or 0..28)? Needed for the speed-to-PWM mapping. - RESOLVED, and the two properties must be kept apart. The ECoS `speed[...]` property is the normalized domain, **`0..127` (128 steps)**; the `ecos-master` C# library (`Ecos ESU info/ecos-master.zip`, `ECoSEntities/Locomotive.cs`) returns `128` from `GetNumberOfSpeedsteps()` for MM128/DCC128. Koploper instead drives with `set(<id>, speedstep[<step>])`, where `speedstep` is the **protocol-specific** step: for the live `DCC28` locomotives the range is `0..28`. Earlier notes were ambiguous because the emulator's `opt.StartsWith("speed")` also matched `speedstep[...]`, so both forms hit the same branch. The emulator now handles `speedstep[...]` before `speed[...]` and normalizes it (`ProtocolSpeedNormalizer`).
 - Do Koploper block numbers map 1:1 to ECoS sensor ids used for occupancy feedback? - Product owner: a mapping must be created in Koploper; a screenshot will follow, and the settings page will be extended so the mapping can be created and edited.
 - What are the exact look-ahead rules? - Product owner: Koploper reserves a route ahead internally from occupancy data and may report "loc x to block 4" while C# still has the loc in block 1; then C# can compute the delta and drive multiple amplifiers in sync. If Koploper does not provide this, C# checks whether the next block is free and pre-sets the same setpoint one block ahead. Testable with a Koploper test design, unit tests, or a simulator.
 - Should the track-amplifier backend replace or complement `TrackSimulatorBackend`? - RESOLVED: keep `TrackSimulatorBackend` as the simulation backend (it simulates blocks/trains/occupancy and reports sensors via `IHardwareFeedbackSink`) and add the real track-amplifier backend as an alternative, selectable like the Fiddle Yard real/simulator choice. `DummyHardwareBackend` is a minimal mock and can be kept for simple tests.
 
+## Speed normalization
+
+Koploper/ECoS uses two distinct speed properties, and they must not be conflated:
+
+| ECoS option | Meaning | Domain | Handling |
+| --- | --- | --- | --- |
+| `speed[<n>]` | normalized ECoS speed | `0..127` | passed through unchanged (never scaled again) |
+| `speedstep[<n>]` | protocol-specific speed step | `DCC28`: `0..28`, `DCC128`: `0..127` | normalized to `0..127` at the ECoS boundary |
+
+Implemented in `SiebwaldeApp.EcosEmu.ProtocolSpeedNormalizer` and called from `SimpleEcosBackend.HandleSetAsync` (the `speedstep` branch, which is checked before the `speed` branch because `"speedstep[...]"` also starts with `"speed"`).
+
+For `DCC28` the step is scaled linearly onto `0..127` with **round-half-up** integer arithmetic:
+
+```
+normalized = step <= 0      -> 0
+             step >= 28     -> 127
+             otherwise     -> (step * 127 + 14) / 28     (integer division)
+```
+
+Examples: step 0 -> 0, step 1 -> 5, step 14 -> 64, step 24 -> 109, step 28 -> 127. The output is always clamped to `0..127`. `DCC128` is already in the normalized domain and is passed through (clamped), so it is never scaled twice.
+
+A stop (step 0) is accepted for every protocol because standstill has the same meaning everywhere. A non-zero step for a protocol the emulator does not know is **refused explicitly** (`<END 1 (UNSUPPORTED_PROTOCOL)>`) and not applied, rather than being scaled with a guessed value. The normalized value is stored as the locomotive speed, so a later `dir[...]` command reuses it and direction changes never alter the normalization.
+
+`loco.Speed` (and therefore `request(...view)` / `get(...,speed)`) holds the normalized `0..127` value; the hardware backend and `AmplifierSpeedMapper` never see protocol-specific steps.
+
 ## Amplifier PWM Mapping (confirmed)
 
-- ECoS sends speed steps `0..127`.
+- `AmplifierSpeedMapper` receives the normalized `0..127` speed (see [Speed normalization](#speed-normalization)); protocol-specific steps are converted before this point.
 - The amplifier PWM is bidirectional: **neutral = 399**, **forward = 400..799**, **reverse = 398..1**.
 - PWM `0` must never be used: it produces a clipping artefact.
 - On the shuttle line (pendelbaan), after a locomotive change at the middle station and the relay switch-over, both amplifiers' driving direction must be reversed.

@@ -544,11 +544,11 @@ Impact: definite occupancy is never turned into unknown (requirement preserved),
 
 ## 2026-09-19: Protocol-Specific Speed Is Normalized At The ECoS Boundary
 
-Decision: protocol-specific ECoS speed steps (for example `DCC28`, steps 0..28) are normalized to the existing `0..127` domain at the ECoS/protocol boundary (`SimpleEcosBackend`). The `IHardwareBackend` contract and `AmplifierSpeedMapper` keep operating on normalized `0..127`, so the hardware layer stays protocol-independent. **Not implemented yet.**
+Decision: protocol-specific ECoS speed steps (for example `DCC28`, steps 0..28) are normalized to the existing `0..127` domain at the ECoS/protocol boundary (`SimpleEcosBackend`). The `IHardwareBackend` contract and `AmplifierSpeedMapper` keep operating on normalized `0..127`, so the hardware layer stays protocol-independent. **Implemented 2026-09-20** in `SiebwaldeApp.EcosEmu.ProtocolSpeedNormalizer`, called from `SimpleEcosBackend.HandleSetAsync`.
 
-Evidence: live validation on 2026-09-19 showed the locomotive protocol is `DCC28` and Koploper/ECoS supplied steps `0..28`, while `AmplifierSpeedMapper.ToPwm` scales by 127. Live DCC28 step 24 produced only ~PWM 475 instead of approaching 799, so a full-throttle command uses only part of the usable 400..799 range.
+Evidence: live validation on 2026-09-19 showed the locomotive protocol is `DCC28` and Koploper/ECoS supplied steps `0..28`, while `AmplifierSpeedMapper.ToPwm` scales by 127. Live DCC28 step 24 produced only ~PWM 475 instead of approaching 799, so a full-throttle command uses only part of the usable 400..799 range. The root cause in source is that `SimpleEcosBackend`'s `opt.StartsWith("speed")` branch also matched `speedstep[...]`, so the raw protocol step was passed downstream unchanged.
 
-Impact: recorded as a confirmed product defect in `docs/backlog.md`. The correction must not push DCC28 knowledge into the amplifier/backend layer; the boundary is the only place that knows the protocol.
+Impact: the correction did not push DCC28 knowledge into the amplifier/backend layer; the boundary is the only place that knows the protocol. `speed[...]` (already normalized `0..127`) is passed through unchanged so it is not scaled twice; `DCC128` is passed through; a non-zero `speedstep` for an unknown protocol is refused explicitly instead of being scaled with a guessed value. Recorded as fixed in `docs/backlog.md` and `docs/analysis-coverage.md`; **physical full-range verification is still pending** and must be done by the Integrator.
 
 ## 2026-09-19: Live Hardware Is An Explicit Delegation Exception
 
