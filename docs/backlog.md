@@ -233,6 +233,17 @@ Done:
 
 ## Open work
 
+### Production control trace (implemented 2026-09-20)
+
+The supplemental Integrator review concluded `PRODUCTION TRACE INCOMPLETE`; the dedicated production trace is now implemented and software-verified (commits `4b14186` production trace + tests, `01414e1` harness). Physical post-fix validation remains PENDING.
+
+| Item | Evidence | Acceptance criteria |
+| --- | --- | --- |
+| **Dedicated production Koploper/ECoS control trace implemented.** | `ControlTraceLogger`/`IControlTrace` (Core) write one dedicated daily file `{CoreSettings.LogDirectory}{dd-M-yyyy}_ControlTraceLog.txt` through the existing `ILogFactory`/`BaseLogFactory`/`FileLogger`, registered in `SiebwaldeApp/IoC/IoC.cs` (`ControlTraceLogging.Register`). Events: `CONTROL_TRACE_START`, `ECOS_COMMAND`, `SPEED_DECISION`, `BLOCK_TRANSITION`, `AMPLIFIER_COMMAND`, `AMPLIFIER_WRITE`, `TRACKER_ADD/REMOVE/TRANSFER`, `SAFETY_STOP`, `SAFETY_STOP_RESULT`, `SAFETY_ESCALATION`, `EMERGENCY_TARGET_SET`, `MANUAL_CONTROL`, `ABNORMAL`. | Done: production registration creates the file automatically; formatting/causal-sequence tests pass; offline parsing is practical (stable `EVENT=`/`key=value` payload, invariant numbers, deterministic lists). |
+| **`FileLogger` limitations reused, not redesigned.** | `FileLogger` has no rotation/retention, is not thread-safe, uses `File.AppendAllText` and silently swallows write failures. `ControlTraceLogger` serializes only its own writes; the trace file is written only by the `ControlTraceLog` instance, so trace records cannot interleave. | Documented. A future hardening task (thread-safe/rotating writer) needs explicit approval and was deliberately not part of the trace task. |
+| **Correlation-id decision: not added.** | No existing request/event identity propagates through `IHardwareBackend`/`IAmplifierNeutralizer`/`AmplifierCommandTracker`; adding one would require invasive signature changes through several layers. | Decision: stable millisecond timestamps plus loco/amp/event fields suffice for offline reconstruction; revisit only if parsing proves insufficient. |
+| **Two previously identified low-cost safety tests added.** | `AmplifierClassificationAndSafetyDomainTests.EmptyGroupConfiguration_IsEquivalentToEmpty_AndNeverInfersMainRailway`; `AmplifierClassificationAndSafetyDomainTests.ConfiguredMountainRailway_IsIncludedByStrongestEmergency_ButNotByOrdinaryLayoutStop`. | Done. |
+
 ### Software follow-up
 
 | Item | Evidence | Acceptance criteria |

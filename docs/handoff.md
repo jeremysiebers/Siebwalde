@@ -1,5 +1,90 @@
 # Handoff
 
+## Latest Session (2026-09-20, dedicated production Koploper/ECoS control trace + two low-cost safety tests)
+
+Branch `feature/safety-stop-reachability`, on top of `a5ccf7d`. The supplemental Integrator review concluded `SOURCE DOCUMENTATION SUFFICIENT`, `PRODUCTION TRACE INCOMPLETE`, `OFFLINE PARSING NOT YET PRACTICAL`, `IMPLEMENT PRODUCTION TRACE BEFORE PHYSICAL VALIDATION`. **This session implements ONE dedicated production control-trace logfile using the existing logging infrastructure, adds the two remaining low-cost safety tests, and adapts the harness to initialize the production trace. No live hardware was started, no Integrator was started, no firmware was modified and no PR was created. Physical post-fix validation remains PENDING.**
+
+### Dedicated component logger and registration
+
+- Component/logger name: **`ControlTraceLog`** (`ControlTraceLogger.LoggerInstance`).
+- New Core files: `SiebwaldeApp.Core/Logging/Trace/IControlTrace.cs` (focused event interface), `ControlTraceLogger.cs` (the single production implementation over `ILogFactory`), `ControlTraceFormat.cs` (the one deterministic formatting convention), `ControlTraceLogging.cs` (registration helper).
+- Registration point (real production startup): `SiebwaldeApp/SiebwaldeApp/IoC/IoC.cs` `BindViewModels()`, which runs from `App.OnStartup` -> `ApplicationSetup` -> `IoC.Setup()`. It calls `ControlTraceLogging.Register(SiebwaldeApp.Core.IoC.Logger, CoreConfiguration.LogDirectory, "SiebwaldeApp")`, adds a `FileLogger` through `ILogFactory.AddLogger` and emits `EVENT=CONTROL_TRACE_START`. The trace is then passed to `TrackControlHost.FromConfiguration(..., controlTrace:)` and `SiebwaldeApplicationModel(ecosHost, controlTrace)`.
+- Reuse proof: `ControlTraceLogger` writes every event through `ILogFactory.Log(payload, "ControlTraceLog")`; the registration adds an existing `FileLogger`. No direct `StreamWriter`, no `File.AppendAllText`, no second logging library, no custom rotation/buffering and no FileLogger redesign.
+
+### Logfile filename convention and prefix
+
+- File: `{CoreSettings.LogDirectory}{dd-M-yyyy}_ControlTraceLog.txt`, resolved at registration time, e.g. `C:\Localdata\Siebwalde\Logging\20-9-2026_ControlTraceLog.txt`. This matches the existing component-log convention used by `TrackAppLog` (`Day-Month-Year_Component.txt`).
+- The existing `BaseLogFactory` prefix (timestamp with ms, source file, method, line) still precedes the payload, e.g. `[20-9-2026 23:23:12:182 > ControlTraceLogger.cs > Emit() > line 212] EVENT=...`.
+
+### Event format
+
+Payload convention (documented in `ControlTraceFormat`): `EVENT=<NAME> key=value key=value ...`; single-space field separator; `<none>` for null/unknown; comma-separated ordered lists with `<none>` for empty; `true`/`false` booleans; stable enum member names; invariant numeric formatting; embedded CR/LF replaced by a space. Format version is in `EVENT=CONTROL_TRACE_START ... format=1`.
+
+Event names: `CONTROL_TRACE_START`, `ECOS_COMMAND`, `SPEED_DECISION`, `BLOCK_TRANSITION`, `AMPLIFIER_COMMAND`, `AMPLIFIER_WRITE`, `TRACKER_ADD`, `TRACKER_REMOVE`, `TRACKER_TRANSFER`, `SAFETY_STOP`, `SAFETY_STOP_RESULT`, `SAFETY_ESCALATION`, `EMERGENCY_TARGET_SET`, `MANUAL_CONTROL`, `ABNORMAL`.
+
+### Covered boundaries
+
+- Input boundary (`ECOS_COMMAND`): `SimpleEcosBackend.HandleAsync`, only state-changing commands (`set`/`create`/`delete`); polling chatter (`get`/`request`/`queryObjects`/`release`) is not traced.
+- Parser/normalization boundary (`SPEED_DECISION`): `SimpleEcosBackend.HandleSetAsync` logs protocol, raw kind/value and normalized value; an unsupported protocol is `ABNORMAL`.
+- Logical block transition (`BLOCK_TRANSITION`): `SimpleEcosBackend.OnBlockEntered`, with a dedicated per-loco last-block tracker so `previous` is reliable.
+- Physical target decision (`AMPLIFIER_COMMAND`): `TrackAmplifierHardwareBackend` at the shared queue-acceptance boundary, with loco, block, `purpose` (Movement/LookAhead/PowerOff/EmergencyNeutral), `source` (Loco/Layout/Safety), pwm/hr0, operational group, speed and direction.
+- Concrete physical command boundary (`AMPLIFIER_WRITE`): `TrackControlMain` at the runtime transmission step, corresponding to the existing `[WRITE]` line.
+- Tracker lifecycle (`TRACKER_ADD`/`TRACKER_REMOVE`/`TRACKER_TRANSFER`): `AmplifierCommandTracker`; removal `reason` distinguishes `NeutralCommanded`, `GlobalNeutral`, `Clear`, `ClearAll` and never conflates a transfer.
+- Safety stop (`SAFETY_STOP`/`SAFETY_STOP_RESULT`): `ControlSafetyGuard` logs scope/loco/reason/block before the attempt; `EcosHardwareStopSink` logs succeeded/applied/backendunavailable/commanded/failed/retained/stale.
+- Escalation (`SAFETY_ESCALATION`): `ControlSafetyGuard.EscalateToLayoutNeutralization` logs `result=Requested` before and `result=Established`/`Incomplete` after; an attempt is never reported as established.
+- Emergency target set (`EMERGENCY_TARGET_SET`): `EcosHardwareStopSink.StopLayout` logs the final target set plus `excluded=51-55`, so a later verification can see the backplane class was not selected without spamming the exclusion per amplifier.
+- Manual control (`MANUAL_CONTROL`): `SiebwaldeApplicationModel.SetAmplifierControl` logs `source=Manual`; an invalid/backplane address presented to that command API is an `ABNORMAL` rejection. The manual path is still outside per-loco ownership (unchanged).
+
+### Requested / Commanded / Observed
+
+Preserved and never collapsed. Requested = the incoming command/speed step (`ECOS_COMMAND`, `SPEED_DECISION`). Commanded = a setpoint accepted at the pending-write queue (`AMPLIFIER_COMMAND`) or transmitted by the runtime writer (`AMPLIFIER_WRITE`); the protocol has no acknowledgement, so transmission/hardware reception is not claimed. Observed = a fresh returned register; the trace never fabricates it, and `SAFETY_STOP_RESULT` reports Commanded/Failed only.
+
+### Correlation-id decision
+
+No correlation id was added. No existing request/event identity propagates through `IHardwareBackend`/`IAmplifierNeutralizer`/`AmplifierCommandTracker`; adding one would require invasive signature changes through several layers. Stable millisecond timestamps plus loco/amp/event fields are sufficient for the current offline reconstruction. Recorded in `docs/backlog.md`.
+
+### Known FileLogger limitations (reused, not redesigned)
+
+`FileLogger` has no rotation/retention, is not thread-safe, uses `File.AppendAllText` and silently swallows write failures. The trace reuses it unchanged. `ControlTraceLogger` serializes only its own writes with a private lock, and the trace file is written only by the `ControlTraceLog` instance, so trace records cannot interleave; the shared logger's general limitations remain. This is not claimed to be durable/auditable beyond what the logger guarantees.
+
+### Two low-cost safety tests (previously identified)
+
+- `AmplifierClassificationAndSafetyDomainTests.EmptyGroupConfiguration_IsEquivalentToEmpty_AndNeverInfersMainRailway`: `"main: ; mountain: ; spare: "` (and null/blank) parses to the equivalent of `TrackAmplifierGroups.Empty`; no amplifier is inferred as `MainRailway` from its address.
+- `AmplifierClassificationAndSafetyDomainTests.ConfiguredMountainRailway_IsIncludedByStrongestEmergency_ButNotByOrdinaryLayoutStop`: a detected legitimate amplifier configured `MountainRailway` is included by the strongest emergency neutralization (`StopLayout`, cross-domain by design), while the ordinary layout power-off (`SetPower(false)`, topology/mapping-oriented) does not include the unmapped mountain amplifier merely because the emergency path would. No backplane addresses are used.
+
+### Files changed (production trace commit `4b14186`)
+
+- Added (Core): `Logging/Trace/IControlTrace.cs`, `ControlTraceLogger.cs`, `ControlTraceFormat.cs`, `ControlTraceLogging.cs`.
+- Added (tests): `SiebwaldeApp.Core.Tests/ControlTraceFormattingTests.cs`, `ControlTraceCausalSequenceTests.cs`.
+- Modified (Core): `SiebwaldeApplicationModel.cs`, `AmplifierCommandTracker.cs`, `TrackControlMain.cs`, `TrackApplicationVariables.cs`.
+- Modified (EcosEmu): `SimpleEcosBackend.cs`, `SiebwaldeApp.EcosEmu.csproj` (adds a `SiebwaldeApp.Core` project reference; Core has no project references, so the dependency stays acyclic).
+- Modified (Integration): `ControlSafetyGuard.cs`, `EcosHardwareStopSink.cs`, `TrackAmplifierHardwareBackend.cs`, `TrackControlHost.cs`, `TrackControlIntegration.cs`.
+- Modified (WPF): `SiebwaldeApp/IoC/IoC.cs` (production registration).
+- Modified (tests): `AmplifierClassificationAndSafetyDomainTests.cs`.
+
+### Harness (separate commit `01414e1`)
+
+`HarnessSupport.cs` adds `HarnessTraceCapture`; `StopReachabilityHarness.cs` creates the production `ControlTraceLogger` over its own log factory, emits `CONTROL_TRACE_START`, passes the trace through the real control path and prints the captured sequence (`PrintControlTrace`, also reachable as the `trace` interactive command). The harness keeps no file logger, so it writes no repository output. The historical defect revision `03f5221` is untouched; the post-fix harness revision is now `01414e1`.
+
+### Verification performed (software only)
+
+- `dotnet build SiebwaldeApp.sln -t:Rebuild` -> **0 errors, 175 warnings** (baseline 175; no new warnings).
+- `dotnet test SiebwaldeApp.sln` -> **339/339 passed** (was 322; +17: 12 formatting + 3 causal-sequence + 2 safety).
+- `dotnet build SiebwaldeApp.sln -c Release -t:Rebuild` -> **0 errors, 175 warnings**.
+- `dotnet test SiebwaldeApp.sln -c Release --no-build` -> **339/339 passed**.
+- `dotnet build SiebwaldeApp.StopReachabilityHarness/SiebwaldeApp.StopReachabilityHarness.csproj` -> **0 errors, 0 warnings**.
+- `SiebwaldeApp.EcosEmu.sln` and `SiebwaldeApp.Core.Host.sln` also build with 0 errors (the EcosEmu Core reference did not break them).
+- Generated file inspected through the real registration: `Logging\20-9-2026_ControlTraceLog.txt`, with the existing FileLogger prefix and the structured payload; 11 records for the representative sequence (no 10 Hz spam).
+- Harness dry run (`--dry-run --script`): Stage 3 amp 1 stays 416 (defect precondition), Stage 5 `SINK_RESULT=True` with `AMP1=399 AMP3=399`, `BACKPLANE SAFETY CHECK: PASS`, and the captured trace shows `BLOCK_TRANSITION previous=1 block=3` -> `AMPLIFIER_COMMAND` -> `TRACKER_ADD` -> `SAFETY_STOP` -> `TRACKER_REMOVE` -> `SAFETY_STOP_RESULT succeeded=true retained=1,3`. This is software-only evidence; it is not a physical result.
+
+### Explicitly pending
+
+- **Independent Integrator review of the production trace.**
+- **Physical post-fix verification on the layout (Integrator). The fix and the trace are not physically validated.**
+- Product Owner decision on the complete group/domain configuration and the cross-domain emergency policy (unchanged).
+- Startup/restart neutral guarantee (unchanged).
+- Optional stronger guarantee for the manual `SetAmplifierControl` path (unchanged).
+
 ## Latest Session (2026-09-20, stop-reachability review FAIL corrected: physical device classification)
 
 Branch `feature/safety-stop-reachability`, implementation commit `be05c37`, harness commit `15fcf7d`, on top of the accepted fix `66d75d0` and harness adaptation `c13d9fc`. The independent Integrator review verdict was `SOFTWARE REVIEW FAIL`: the core stop-reachability architecture was accepted, but the amplifier-centric fallback included backplane/configuration slaves `51..55`, which must never receive track-amplifier PWM semantics. **This session corrects that defect and the secondary safety weaknesses in software only. No live hardware was started and no physical validation is claimed.**
