@@ -1,5 +1,51 @@
 # Handoff
 
+## Latest Session (2026-09-20, stop-reachability safety fix implemented and software-verified)
+
+Branch `feature/safety-stop-reachability`, production implementation `66d75d0`, harness adaptation `c13d9fc`, on top of the defect confirmation `488ad45`. The confirmed physical safety defect is **fixed in software and software-verified**; **no live hardware was started and no physical validation is claimed**.
+
+### Root cause (confirmed by the physical evidence)
+
+`EcosHardwareStopSink.StopLoco` resolved its target purely from the locomotive's **current** block (`TrackAmplifierHardwareBackend.SetLocoSpeed`), discarded the backend return and always returned `true`; `ControlSafetyGuard` discarded the result. A normal A -> B transition never neutralizes the vacated amplifier, and look-ahead can command a second amplifier, so a previously commanded physical output became unreachable. Live evidence (harness `03f5221`): after block 1 -> block 3, amp 1 stayed at HR0 416; the loco stop neutralized only the resolved amp 3; the sink returned `True` with no failure diagnostic.
+
+### The fix (selected architecture)
+
+A retained **commanded-actuator ownership** model, not a single `lastAmplifier`:
+
+- `AmplifierCommandTracker` (Core) keeps the **set** of physical amplifiers each locomotive last commanded non-neutral. Add on a concrete non-neutral physical command (the queued HR0 setpoint); remove only after a neutral command is successfully issued; never remove because the loco moved, the route changed or the mapping disappeared. Ownership transfers to the most recent commanding loco, so one loco's stop cannot clear another loco's outstanding target; a deliberate global neutralization clears across locos.
+- `TrackAmplifierHardwareBackend` records current-block **and** look-ahead commands in the tracker and implements the new `IAmplifierNeutralizer` (`NeutralizeAmplifiers`, `GetKnownPhysicalAmplifiers`), independent of the block mapping and topology.
+- `EcosHardwareStopSink.StopLoco` runs the existing loco path (`SetLocoSpeed(address, 0, 0)`) **and then** neutralizes every retained outstanding target. It returns a `SafetyStopResult`; `ISafetyStopSink` now returns that result for both stop methods.
+- Stop success = **all required neutral commands were accepted for concrete physical amplifiers**; it never claims observed neutralization (observed state stays separate).
+- `ControlSafetyGuard` inspects the result: on an incomplete loco stop it emits `CommandNotApplied` (or `BackendUnavailable`), keeps the latch, and escalates to amplifier-centric layout neutralization (`SafetyAction.StopLayoutEscalated`); a failed escalation emits a second diagnostic and the latch remains. The latch is never cleared because a stop call returned.
+- Detected-but-unmapped policy: the fallback target set is detected hardware (`SlaveDetected`) **plus** configured topology **plus** all retained targets, so installed amp 6 is included. `SetPower(false)` keeps its topology-only logical semantics; the new primitive is used explicitly by the safety escalation.
+
+### Files changed
+
+- Added: `SiebwaldeApp.Core/Model/TrackApplication/Control/AmplifierCommandTracker.cs`, `.../Control/IAmplifierNeutralizer.cs`, `.../Diagnostics/SafetyStopResult.cs`, `SiebwaldeApp.Core.Tests/StopReachabilityTests.cs`.
+- Modified: `Diagnostics/ISafetyStopSink.cs`, `Diagnostics/DiagnosticTypes.cs` (+`SafetyAction.StopLayoutEscalated`), `Integration/ControlSafetyGuard.cs`, `Integration/EcosHardwareStopSink.cs`, `Integration/TrackAmplifierHardwareBackend.cs`, `Integration/TrackControlHost.cs`, `Integration/TrackControlIntegration.cs`, and the test fakes in `DivergenceAndSafetyTests.cs`, `SimpleEcosBackendDirectionStateTests.cs`, `SimpleEcosBackendSpeedNormalizationTests.cs`.
+- Harness (separate post-fix revision `c13d9fc`): `SiebwaldeApp.StopReachabilityHarness/HarnessSupport.cs`, `StopReachabilityHarness.cs`.
+
+### Tests and checks
+
+- `dotnet build SiebwaldeApp.sln -t:Rebuild` -> **0 errors, 175 warnings** (baseline 175; no new warnings).
+- `dotnet test SiebwaldeApp.sln` -> **297/297 passed** (was 280; +17 `StopReachabilityTests`).
+- `dotnet build SiebwaldeApp.sln -c Release` -> **0 errors, 175 warnings**.
+- `dotnet test SiebwaldeApp.sln -c Release --no-build` -> **297/297 passed**.
+- Harness: `dotnet build SiebwaldeApp.StopReachabilityHarness/SiebwaldeApp.StopReachabilityHarness.csproj` -> **0 errors, 0 warnings**.
+- Harness dry run (`--dry-run --script`, recording comm client, no socket, no hardware): Stage 3 still leaves amp 1 non-neutral (416, the defect precondition), and Stage 5 now reports `GUARD_ACTION=StopLoco SINK_RESULT=True` with `AMP1=399 AMP3=399` (amp 1 was reached through the retained target). This is software-only evidence, not a physical result.
+- New tests cover: A -> B orphaned actuator (amp 1 + amp 3 neutralized), mapping loss (unmapped and null block), look-ahead two outstanding targets, detected-but-unmapped amp 6 in the layout fallback, incomplete loco stop not reported as success, missing backend, guard escalation and failure diagnostics, latch retention, multiple-loco isolation, ownership transfer, and the normal stop.
+
+### Explicitly pending
+
+- **Physical post-fix verification on the layout (Integrator). The fix is not physically validated.** The historical defect reproduction with harness `03f5221` remains valid and untouched; the adapted harness `c13d9fc` is the post-fix validation revision.
+- Asynchronous send failure and observed physical neutralization are still not synchronously observable; the tracker tracks commanded state, not confirmed physical state.
+
+### Uncertainty for the Integrator to check
+
+- With the new contract a loco-scoped stop that cannot resolve any physical target now escalates to the amplifier-centric layout neutralization and reports `SafetyAction.StopLayoutEscalated`. Verify this is the intended operator-visible behaviour on the layout.
+- Confirm that commanding neutral to a detected-but-unmapped amplifier (for example amp 6) is accepted by the master/amplifier chain.
+- The tracker is process-lifetime state; verify the interaction with a Koploper `set(1,stop)` (which clears mapped targets through `SetPower(false)`) and with a master reset/reinitialization.
+
 ## Latest Session (2026-09-20, live stop-reachability validation - DEFECT CONFIRMED)
 
 Branch `feature/safety-stop-reachability`, live-test HEAD `a614efc`, harness commit `03f5221`. Targeted operator-in-the-loop live validation using the committed harness `SiebwaldeApp/SiebwaldeApp.StopReachabilityHarness/`. **No production code, firmware or configuration was changed; tracked tree clean throughout.**
