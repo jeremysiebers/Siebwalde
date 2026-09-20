@@ -20,13 +20,17 @@ namespace SiebwaldeApp.Core.Tests
             public List<int> StoppedLocos { get; } = new();
             public int LayoutStops { get; private set; }
 
-            public bool StopLoco(int address)
+            public SafetyStopResult StopLoco(int address)
             {
                 StoppedLocos.Add(address);
-                return true;
+                return SafetyStopResult.Commanded(new ushort[] { 1 });
             }
 
-            public void StopLayout() => LayoutStops++;
+            public SafetyStopResult StopLayout()
+            {
+                LayoutStops++;
+                return SafetyStopResult.Commanded(new ushort[] { 1 });
+            }
         }
 
         private sealed class FakeOccupancy : IOccupancyProvider

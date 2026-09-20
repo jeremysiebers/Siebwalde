@@ -9,16 +9,21 @@ namespace SiebwaldeApp.Core
     {
         /// <summary>
         /// Controlled stop of one locomotive, through the existing loco speed command path
-        /// (ECoS speed 0 = standstill). Returns false when the locomotive has no known position
-        /// so nothing could be commanded.
+        /// (ECoS speed 0 = standstill), extended to reach every physical amplifier still owned by
+        /// that locomotive. Returns a result that distinguishes "every required amplifier was
+        /// commanded neutral" from "the stop could not be delivered for some amplifier" and from
+        /// "no backend was available".
         /// </summary>
-        bool StopLoco(int address);
+        SafetyStopResult StopLoco(int address);
 
         /// <summary>
-        /// Controlled stop of the whole layout, through the existing central power-off path
-        /// (the same mechanism Koploper's <c>set(1,stop)</c> uses).
+        /// Amplifier-centric stop of the whole layout, independent of the current locomotive and
+        /// block mapping. It neutralizes every physical track amplifier the control path knows
+        /// about (detected hardware plus configured topology) and every retained outstanding
+        /// target. It is the conservative escalation when a loco-scoped stop cannot guarantee a
+        /// safe result.
         /// </summary>
-        void StopLayout();
+        SafetyStopResult StopLayout();
     }
 
     /// <summary>
