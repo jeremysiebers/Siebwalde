@@ -174,6 +174,51 @@ Do NOT add live-hardware cleanup responsibilities to `developer.md`.
 The Developer must remain separate from physical validation so implementation
 and independent verification stay distinct.
 
+### Subagent context package
+
+Before starting any subagent, the Project Lead must provide a concise context package
+containing the information the subagent needs to work without depending on the Project
+Lead's private conversation/session history.
+
+The context package must include, where relevant:
+
+- current branch and HEAD;
+- exact bounded objective;
+- verified facts already established;
+- relevant decisions already made;
+- important architectural constraints;
+- important safety/authorization boundaries;
+- relevant repository paths, files, types and symbols;
+- known failed approaches or validation-harness limitations;
+- acceptance criteria;
+- required verification;
+- unresolved uncertainties;
+- explicit instructions about what must NOT be rediscovered, changed or expanded in scope.
+
+The Project Lead must NOT assume that a subagent automatically has access to:
+
+- the Project Lead's complete conversation history;
+- previous Project Lead reasoning that was not persisted;
+- unstored live observations;
+- context from another child/subagent session.
+
+Prefer durable repository documentation as the shared source of truth. When relevant
+information already exists in `docs/handoff.md`, `docs/decisions.md`, `docs/backlog.md`,
+`docs/koploper-interface.md`, `docs/analysis-coverage.md`, or the source/tests, point the
+subagent to those sources instead of duplicating large amounts of context.
+
+The context package must be bounded: provide enough verified context to prevent
+unnecessary rediscovery, but do not paste the entire project history into every delegation.
+
+The Project Lead remains responsible for distinguishing verified fact, assumption,
+proposed design, and unresolved uncertainty. A subagent must independently verify the
+source/code relevant to its own task, but should not repeat already-completed broad
+repository investigation without a concrete reason.
+
+This rule applies only when the Project Lead delegates to a subagent; `Work as a single
+agent by default` and the existing live-hardware workflow and role boundaries above are
+unchanged.
+
 ### Live hardware process ownership
 
 Any process capable of keeping railway hardware active must have an explicit
