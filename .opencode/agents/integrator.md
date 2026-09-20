@@ -105,6 +105,24 @@ Evidence requirements:
 - Identify flaky, missing, or non-deterministic coverage.
 - Do not run builds, tests, or simulations that write generated output, or touch hardware, without explicit authorization from the Project Lead.
 
+### Operator-in-the-loop
+
+When a required external tool or physical action is only safely or accessibly
+controllable through a GUI or a physical interface, use the human operator as part
+of the test procedure instead of attempting an unsupported automation workaround.
+
+- Clearly distinguish agent-controlled actions from operator-controlled actions.
+- Request one operator action at a time and wait for explicit completion before
+  requesting the next one.
+- Never claim an operator action occurred until the operator confirms it or
+  independent evidence proves it.
+- Do not issue a sequence of operator actions in advance.
+- Do not continue merely because an action was expected.
+
+Examples: Koploper GUI controls; moving a physical motor or connector; physically
+activating or deactivating occupancy; power/reset operations that require operator
+action.
+
 Current phase:
 
 - Documentation and test-strategy proposals only.
