@@ -70,6 +70,7 @@ namespace SiebwaldeApp.StopReachabilityHarness
         private JsonLocoRepository? _locoRepository;
         private BlockTopology? _topology;
         private KoploperBlockMap? _blockMap;
+        private TrackAmplifierGroups? _groups;
         private CancellationTokenSource? _cts;
         private int _writeCursor;
         private bool _composed;
@@ -99,6 +100,15 @@ namespace SiebwaldeApp.StopReachabilityHarness
             _topology = CoreConfiguration.BuildBlockTopology();
             _blockMap = CoreConfiguration.BuildKoploperBlockMap();
             var switchMapping = CoreConfiguration.BuildSwitchMap();
+
+            // Explicit harness grouping so the dry run can demonstrate that the operational
+            // grouping is independent of the physical device class and is not inferred from the
+            // address range. Amp 6 is the installed prototype and is deliberately MountainRailway
+            // here to prove that a detected-but-unmapped amplifier is not silently MainRailway.
+            _groups = TrackAmplifierGroups.Create(
+                mainRailway: new[] { 1, 3, 4 },
+                mountainRailway: new[] { 6 },
+                spare: new[] { 50 });
 
             // The locomotive repository normally lives in the log directory. The harness keeps it
             // in a temporary folder so a run cannot overwrite the production locos.json.
@@ -164,7 +174,8 @@ namespace SiebwaldeApp.StopReachabilityHarness
                 log: Log,
                 switchController: _switches,
                 safetyGuard: _guard,
-                diagnostics: _diagnostics);
+                diagnostics: _diagnostics,
+                trackAmplifierGroups: _groups);
 
             _ecosBackend = _integration.EcosBackend
                 ?? throw new InvalidOperationException(
@@ -477,6 +488,80 @@ namespace SiebwaldeApp.StopReachabilityHarness
                 "  note: a slave already at the neutral value produces no pending write, so it can be targeted without appearing in [WRITE] records");
         }
 
+        /// <summary>
+        /// Physical-device-classification and backplane-safety verification (dry-run only).
+        ///
+        /// It seeds detected backplane/configuration slaves 51, 52 and 55 and an unmapped spare
+        /// track amplifier, then proves that:
+        /// - 1 and 50 classify as track amplifiers, 51/52/55 do not;
+        /// - the strongest physical safety neutralization never includes 51..55 and produces no
+        ///   HR0/PWM write for them;
+        /// - the operational grouping is independent of the physical class and is not inferred
+        ///   from the address range.
+        /// </summary>
+        public async Task VerifyClassificationAsync()
+        {
+            RequireComposed();
+            Console.WriteLine();
+            Console.WriteLine("=== CLASSIFICATION / BACKPLANE SAFETY CHECK (dry-run only) ===");
+
+            // Seed detected backplane/configuration slaves and an unmapped spare track amplifier,
+            // exactly the devices that the reviewed fallback wrongly treated as track amplifiers.
+            foreach (var slave in new ushort[] { 50, 51, 52, 55 })
+            {
+                SeedAmplifier(slave);
+            }
+
+            Console.WriteLine("  PHYSICAL DEVICE CLASS (authoritative TrackAmplifierAddress):");
+            foreach (var slave in new[] { 0, 1, 50, 51, 52, 55 })
+            {
+                Console.WriteLine(
+                    $"    slave {slave}: IsTrackAmplifierAddress={TrackAmplifierAddress.IsTrackAmplifierAddress(slave)} " +
+                    $"IsBackplaneConfigurationSlave={TrackAmplifierAddress.IsBackplaneConfigurationSlave(slave)}");
+            }
+
+            Console.WriteLine("  OPERATIONAL GROUP (independent of physical class and block mapping):");
+            foreach (var slave in new[] { 1, 3, 4, 6, 50, 51 })
+            {
+                Console.WriteLine(
+                    $"    slave {slave}: group={_integration!.RealBackend.GetOperationalGroup((ushort)slave)}");
+            }
+
+            var known = _integration!.RealBackend.GetKnownPhysicalAmplifiers();
+            Console.WriteLine($"  GetKnownPhysicalAmplifiers = [{string.Join(",", known)}]");
+
+            var before = _logFactory.WriteRecords.Count;
+            var result = _stopSink!.StopLayout();
+
+            var waitFor = known.Concat(new ushort[] { 51, 52, 55 }).ToArray();
+            await WaitForPendingWritesDrainedAsync(waitFor);
+
+            var writes = _logFactory.WriteRecords.Skip(before).ToArray();
+            var backplaneWrites = writes
+                .Where(w => w.Contains("slave=51", StringComparison.Ordinal) ||
+                            w.Contains("slave=52", StringComparison.Ordinal) ||
+                            w.Contains("slave=55", StringComparison.Ordinal))
+                .ToArray();
+            var backplaneInTargets = known.Where(a => a >= TrackAmplifierAddress.MinBackplaneSlave).ToArray();
+            var pendingBackplane = _variables.PendingWrites.Keys
+                .Where(k => k >= TrackAmplifierAddress.MinBackplaneSlave)
+                .ToArray();
+
+            Console.WriteLine(
+                $"  StopLayout succeeded={result.Succeeded} commanded=[{string.Join(",", result.CommandedAmplifiers)}] failed=[{string.Join(",", result.FailedAmplifiers)}]");
+            Console.WriteLine(
+                $"  backplane addresses in GetKnownPhysicalAmplifiers: {(backplaneInTargets.Length == 0 ? "NONE" : string.Join(",", backplaneInTargets))}");
+            Console.WriteLine(
+                $"  HR0/PWM writes to 51..55: {(backplaneWrites.Length == 0 ? "NONE" : string.Join(" | ", backplaneWrites))}");
+            Console.WriteLine(
+                $"  pending writes to 51..55: {(pendingBackplane.Length == 0 ? "NONE" : string.Join(",", pendingBackplane))}");
+            Console.WriteLine(
+                $"  PendingWrites keys: [{string.Join(",", _variables.PendingWrites.Keys.OrderBy(k => k))}]");
+
+            var pass = backplaneInTargets.Length == 0 && backplaneWrites.Length == 0 && pendingBackplane.Length == 0;
+            Console.WriteLine($"  BACKPLANE SAFETY CHECK: {(pass ? "PASS" : "FAIL")}");
+        }
+
         /// <summary>Explicit safety-latch reset (recovery step, not the per-loco stop test).</summary>
         public Task ResetSafetyAsync()
         {
@@ -511,6 +596,7 @@ namespace SiebwaldeApp.StopReachabilityHarness
             await Stage4_LowSpeedAsync(_options.TargetBlock);
             await Stage5_SafetyStopAsync();
             await LayoutStopAsync();
+            await VerifyClassificationAsync();
 
             Console.WriteLine();
             Console.WriteLine("DRY-RUN SCRIPT COMPLETE (no hardware was started, no socket was bound).");
@@ -560,6 +646,10 @@ namespace SiebwaldeApp.StopReachabilityHarness
                             break;
                         case "layoutstop":
                             await LayoutStopAsync();
+                            break;
+                        case "backplanecheck":
+                        case "classify":
+                            await VerifyClassificationAsync();
                             break;
                         case "resetsafety":
                             await ResetSafetyAsync();
@@ -756,6 +846,7 @@ namespace SiebwaldeApp.StopReachabilityHarness
             Console.WriteLine("  stage4 [block]         request the same low speed again in the new block");
             Console.WriteLine("  stage5                 inject a loco-scoped StopRequired diagnostic into the real guard");
             Console.WriteLine("  layoutstop             real layout stop: set(1,stop) -> SetPower(false)");
+            Console.WriteLine("  backplanecheck         dry-run: verify 51..55 are never a track-amplifier target");
             Console.WriteLine("  resetsafety            explicit ControlSafetyGuard.Reset()");
             Console.WriteLine("  status | help | quit");
             Console.WriteLine();
