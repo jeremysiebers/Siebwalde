@@ -1,5 +1,37 @@
 # Handoff
 
+## Latest Session (2026-09-20, live stop-reachability validation - DEFECT CONFIRMED)
+
+Branch `feature/safety-stop-reachability`, live-test HEAD `a614efc`, harness commit `03f5221`. Targeted operator-in-the-loop live validation using the committed harness `SiebwaldeApp/SiebwaldeApp.StopReachabilityHarness/`. **No production code, firmware or configuration was changed; tracked tree clean throughout.**
+
+### Traceability
+`Harness commit 03f5221 was used for the live physical validation.` Branch `feature/safety-stop-reachability`, live-test HEAD `a614efc`, executable `SiebwaldeApp\SiebwaldeApp.StopReachabilityHarness\bin\Debug\net8.0-windows7.0\SiebwaldeApp.StopReachabilityHarness.exe`, command `--live --ecos-id 1001 --address 2 --protocol DCC28 --from 1 --to 3`. Evidence: `Logging\stopreach-live-20260920-run2.*`. Harness PID 21964 (run 2), driver 10400, window `SIEBWALDE STOP-REACHABILITY LIVE`. (Run 1 hung at init because the master ignored the one-shot `CLIENT_CONNECTION_REQUEST`; after an operator master reset, the full production init pipeline completed.)
+
+### Results (amplifier 1 = motor, amplifier 3 = no motor)
+| Stage | Logical block | Amp 1 commanded/observed | Amp 3 commanded/observed | Physical |
+| --- | --- | --- | --- | --- |
+| Stage 0 baseline | - | -/399 | -/399 | stopped |
+| Stage 2 `speedstep[1]` | 1 | 416/416 | none/399 | motor slow forward |
+| Stage 3 transition 1->3 (no command) | 3 | none/**416** | none/399 | motor still forward |
+| Stage 4 `speedstep[1]` | 3 | none/**416** | 416/416 | motor still forward |
+| Stage 5 real loco-scoped safety stop | 3 | **none/416** | 399/399 | motor still forward |
+| Layout stop fallback | - | 399/399 | none/399 | motor stopped |
+
+- Stage 3 produced **no `[WRITE]`**: the logical A->B transition never neutralized the vacated amplifier.
+- Stage 5 invoked the REAL `ControlSafetyGuard.Apply` -> `EcosHardwareStopSink.StopLoco` -> real backend. It neutralized the currently resolved amp 3 only; amp 1 received no neutral write and stayed at HR0 416. The sink returned `True`, the guard reported `StopLoco`, and **no failure diagnostic** was raised.
+- Layout stop `SetPower(false)` neutralized amp 1 (and mapped amps 1/2/3/4/5); **amp 6 (installed, unmapped) was not targeted**.
+
+### Classifications
+- `STOP REACHABILITY DEFECT CONFIRMED`
+- `LAYOUT STOP FALLBACK PASS`
+- `STOP FAILURE REPORTING DEFECT CONFIRMED`
+
+### Cleanup
+`resetsafety` applied (no movement command); all observed HR0 = 399; harness 21964 + driver 10400 terminated; UDP 10001 released; TCP 15471 free; tracked tree clean.
+
+### Next
+The physical evidence justifies a Developer safety-fix task (not started): (a) the stop path must reach the last commanded physical amplifier, not only the currently resolved one; (b) honour the stop result and raise a diagnostic on failed/unconfirmed neutralization; (c) escalate to the amplifier-centric neutralization path and include detected-but-unmapped amplifiers. Harness disposition still undecided.
+
 ## Latest Session (2026-09-20, safety stop-reachability architecture investigation)
 
 Branch `feature/safety-stop-reachability` (new, from merged `master` at `0ee1b40`), HEAD `0ee1b40`. Architect source investigation only; **no code, firmware, or hardware was changed**.
