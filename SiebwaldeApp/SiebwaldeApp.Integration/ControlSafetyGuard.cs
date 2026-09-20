@@ -18,17 +18,20 @@ namespace SiebwaldeApp.Integration
         private readonly ISafetyStopSink _stops;
         private readonly ControlDiagnostics _diagnostics;
         private readonly Action<string>? _log;
+        private readonly IControlTrace? _trace;
         private readonly Dictionary<string, ControlDiagnostic> _latched = new();
         private readonly object _lock = new();
 
         public ControlSafetyGuard(
             ISafetyStopSink stops,
             ControlDiagnostics diagnostics,
-            Action<string>? log = null)
+            Action<string>? log = null,
+            IControlTrace? trace = null)
         {
             _stops = stops ?? throw new ArgumentNullException(nameof(stops));
             _diagnostics = diagnostics ?? throw new ArgumentNullException(nameof(diagnostics));
             _log = log;
+            _trace = trace;
         }
 
         /// <summary>True while at least one safety fault is latched.</summary>
@@ -180,6 +183,10 @@ namespace SiebwaldeApp.Integration
         {
             SafetyStopResult result;
 
+            // Before the attempt: loco, the safety reason and the block, so the stop can be
+            // reconstructed even when the stop itself cannot establish neutralization.
+            _trace?.SafetyStop("Loco", loco, diagnostic.Key, diagnostic.Block);
+
             try
             {
                 result = _stops.StopLoco(loco);
@@ -224,6 +231,10 @@ namespace SiebwaldeApp.Integration
         {
             SafetyStopResult result;
 
+            // Requested and established are deliberately distinct: an attempted escalation is
+            // never reported as a physical success.
+            _trace?.SafetyEscalation(loco, diagnostic.Key, "Requested");
+
             try
             {
                 result = _stops.StopLayout();
@@ -236,10 +247,12 @@ namespace SiebwaldeApp.Integration
 
             if (result.Succeeded)
             {
+                _trace?.SafetyEscalation(loco, diagnostic.Key, "Established");
                 _log?.Invoke($"Amplifier-centric neutralization issued for the layout ({diagnostic.Key}).");
                 return SafetyAction.StopLayoutEscalated;
             }
 
+            _trace?.SafetyEscalation(loco, diagnostic.Key, "Incomplete");
             _log?.Invoke(
                 "Amplifier-centric neutralization was incomplete; the safety concern remains latched.");
 
@@ -264,6 +277,8 @@ namespace SiebwaldeApp.Integration
         private SafetyAction StopLayout(ControlDiagnostic diagnostic)
         {
             SafetyStopResult result;
+
+            _trace?.SafetyStop("Layout", diagnostic.LocoAddress, diagnostic.Key, diagnostic.Block);
 
             try
             {

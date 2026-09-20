@@ -25,6 +25,7 @@ namespace SiebwaldeApp.Core
         private readonly string _loggerInstance;
         private readonly ITrackCommClient _trackCommClient;
         private readonly TrackApplicationVariables mTrackApplicationVariables;
+        private readonly IControlTrace? _controlTrace;
 
         private readonly System.Timers.Timer _runtimeTimer;
         private readonly object _syncRoot = new();
@@ -43,14 +44,21 @@ namespace SiebwaldeApp.Core
         /// <param name="loggerInstance">Logger instance name to use for IoC.Logger.</param>
         /// <param name="trackCommClient">Low-level track communication client.</param>
         /// <param name="variables">Shared track application variables.</param>
+        /// <param name="controlTrace">
+        /// Optional dedicated control trace. When supplied, every transmitted HoldingReg0 write
+        /// is also recorded as the concrete physical-command boundary event, corresponding to the
+        /// existing <c>[WRITE]</c> component-log line.
+        /// </param>
         public TrackControlMain(
             string loggerInstance,
             ITrackCommClient trackCommClient,
-            TrackApplicationVariables variables)
+            TrackApplicationVariables variables,
+            IControlTrace? controlTrace = null)
         {
             _loggerInstance = string.IsNullOrWhiteSpace(loggerInstance) ? "Track" : loggerInstance;
             _trackCommClient = trackCommClient ?? throw new ArgumentNullException(nameof(trackCommClient));
             mTrackApplicationVariables = variables ?? throw new ArgumentNullException(nameof(variables));
+            _controlTrace = controlTrace;
 
             // Runtime timer at 10 Hz (100 ms interval).
             _runtimeTimer = new System.Timers.Timer(100)
@@ -169,6 +177,10 @@ namespace SiebwaldeApp.Core
                         hr0Value);
 
                     await _trackCommClient.SendAsync(message, cancellationToken).ConfigureAwait(false);
+
+                    // The concrete physical-command boundary: this is the same write the
+                    // [WRITE] component-log line reports, now with a stable trace event.
+                    _controlTrace?.AmplifierWrite(writeData.SlaveNumber, hr0Value);
 
                     IoC.Logger.Log(
                         $"[WRITE] EXEC_MBUS_SLAVE_DATA_EXCH: slave={writeData.SlaveNumber}, HR0=0x{hr0Value:X4}",

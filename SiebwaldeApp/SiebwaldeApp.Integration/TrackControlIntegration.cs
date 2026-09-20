@@ -37,7 +37,8 @@ namespace SiebwaldeApp.Integration
             SwitchController? switchController = null,
             ControlSafetyGuard? safetyGuard = null,
             ControlDiagnostics? diagnostics = null,
-            TrackAmplifierGroups? trackAmplifierGroups = null)
+            TrackAmplifierGroups? trackAmplifierGroups = null,
+            IControlTrace? controlTrace = null)
         {
             _commClient = commClient ?? throw new ArgumentNullException(nameof(commClient));
             if (variables is null) throw new ArgumentNullException(nameof(variables));
@@ -55,7 +56,7 @@ namespace SiebwaldeApp.Integration
             // Safety reachability bookkeeping: retained per-locomotive physical targets. It is
             // shared with the stop sink so a loco-scoped stop can reach an amplifier whose block
             // mapping has since changed or disappeared.
-            CommandTracker = new AmplifierCommandTracker();
+            CommandTracker = new AmplifierCommandTracker(controlTrace);
 
             TrackAmplifierGroups = trackAmplifierGroups ?? TrackAmplifierGroups.Empty;
 
@@ -68,7 +69,8 @@ namespace SiebwaldeApp.Integration
                 occupancyProvider,
                 switchPositionProvider,
                 CommandTracker,
-                TrackAmplifierGroups);
+                TrackAmplifierGroups,
+                trace: controlTrace);
 
             // When a loco repository is supplied, host the ECoS backend in-process and use it
             // as the feedback sink. Otherwise the caller supplies its own sink (for example a
@@ -88,7 +90,7 @@ namespace SiebwaldeApp.Integration
                     hardware = new ControlSafetyInterlockBackend(hardware, safetyGuard, diagnostics, log);
                 }
 
-                EcosBackend = new SimpleEcosBackend(hardware, locoRepository, blockPositionProvider);
+                EcosBackend = new SimpleEcosBackend(hardware, locoRepository, blockPositionProvider, controlTrace);
             }
 
             var sink = (IHardwareFeedbackSink?)EcosBackend

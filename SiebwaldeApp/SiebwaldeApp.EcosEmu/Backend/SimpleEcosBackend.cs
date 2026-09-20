@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Text.RegularExpressions;
+using SiebwaldeApp.Core;
 namespace SiebwaldeApp.EcosEmu
 {
     public class SimpleEcosBackend : IEcosBackend, IHardwareFeedbackSink
@@ -23,6 +24,16 @@ namespace SiebwaldeApp.EcosEmu
         // Protocol assumed when a locomotive has no persisted protocol. Mirrors the
         // LocoInfo.Protocol default so an unconfigured loco still gets a defined scale.
         private const string DefaultLocoProtocol = "DCC28";
+
+        // Dedicated production control trace (optional). It records the input boundary, the
+        // protocol/normalization boundary and the logical block transition; it does not replace
+        // the existing Console output and does not log polling chatter.
+        private readonly IControlTrace? _trace;
+
+        // Last block reported per locomotive, used only to give the block-transition trace its
+        // previous block. It is independent of the runtime LocoState and the persisted loco info.
+        private readonly Dictionary<int, int> _lastKnownBlock = new();
+        private readonly object _lastKnownBlockLock = new();
 
 
         /// <summary>
@@ -52,16 +63,19 @@ namespace SiebwaldeApp.EcosEmu
         /// langword="null"/>.</param>
         /// <param name="blockPositionProvider">The provider responsible for tracking block positions and reporting block entry events.  This parameter
         /// cannot be <see langword="null"/>.</param>
+        /// <param name="trace">Optional dedicated production control trace.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="hardware"/>, <paramref name="locoRepository"/>, or  <paramref
         /// name="blockPositionProvider"/> is <see langword="null"/>.</exception>
         public SimpleEcosBackend(
             IHardwareBackend hardware,
             ILocoRepository locoRepository,
-            IBlockPositionProvider blockPositionProvider)
+            IBlockPositionProvider blockPositionProvider,
+            IControlTrace? trace = null)
         {
             _hardware = hardware ?? throw new ArgumentNullException(nameof(hardware));
             _locoRepository = locoRepository ?? throw new ArgumentNullException(nameof(locoRepository));
             _blockPositionProvider = blockPositionProvider ?? throw new ArgumentNullException(nameof(blockPositionProvider));
+            _trace = trace;
 
             // Update internal state and persistent locos when Koploper reports a new block
             _blockPositionProvider.BlockEntered += OnBlockEntered;
@@ -78,6 +92,19 @@ namespace SiebwaldeApp.EcosEmu
 
         private void OnBlockEntered(int locoAddress, int blockNumber)
         {
+            // Capture the previous logical block before it is replaced, so the trace can make the
+            // A -> B chronology (and the un-neutralized vacated amplifier) explicit. The runtime
+            // LocoState and the persisted loco info are not reliable sources for this: the state
+            // may not exist yet and the info block is not written here.
+            int? previousBlock;
+            lock (_lastKnownBlockLock)
+            {
+                previousBlock = _lastKnownBlock.TryGetValue(locoAddress, out var lastBlock)
+                    ? lastBlock
+                    : (int?)null;
+                _lastKnownBlock[locoAddress] = blockNumber;
+            }
+
             // Update runtime loco state if present
             var state = _locos.Values.FirstOrDefault(l => l.Address == locoAddress);
             if (state != null)
@@ -95,6 +122,7 @@ namespace SiebwaldeApp.EcosEmu
                 _ = _locoRepository.SaveAsync();
             }
 
+            _trace?.BlockTransition(locoAddress, previousBlock, blockNumber, "Koploper");
             Console.WriteLine($"[LOCO] Address {locoAddress} is now in block {blockNumber}.");
         }
         
@@ -117,6 +145,14 @@ namespace SiebwaldeApp.EcosEmu
             if (isFirstWriter)
             {
                 await EnsureInitialFeedbackAsync(writer);
+            }
+
+            // Input boundary: trace only state-changing control commands. Polling chatter
+            // (get/request/queryObjects/release) is deliberately not traced to keep the
+            // production trace low-noise.
+            if (cmd.Name is "set" or "create" or "delete")
+            {
+                _trace?.EcosCommand(cmd.Name, cmd.ObjectId, cmd.Options);
             }
 
             switch (cmd.Name)
@@ -396,12 +432,22 @@ namespace SiebwaldeApp.EcosEmu
                             // Unknown protocol: the step cannot be interpreted safely, so the
                             // command is refused rather than applied with a guessed scale.
                             protocolRejected = true;
+                            _trace?.Abnormal(
+                                "UnsupportedProtocol",
+                                null,
+                                $"loco {loco.Address} speedstep {value} refused: protocol '{protocol}' is not supported");
                         }
-                        else if (ApplyNormalizedLocoSpeed(id, loco, normalizedSpeed, events))
+                        else
                         {
-                            // Refused by a latched safety interlock: keep the logical speed
-                            // unchanged and report no speed change to Koploper.
-                            movementRejected = true;
+                            // Parser/normalization boundary: raw protocol step -> normalized C# speed.
+                            _trace?.SpeedDecision(protocol, id, loco.Address, "speedstep", value, normalizedSpeed);
+
+                            if (ApplyNormalizedLocoSpeed(id, loco, normalizedSpeed, events))
+                            {
+                                // Refused by a latched safety interlock: keep the logical speed
+                                // unchanged and report no speed change to Koploper.
+                                movementRejected = true;
+                            }
                         }
                     }
                 }
@@ -412,6 +458,8 @@ namespace SiebwaldeApp.EcosEmu
                     var (ok, value) = ParseBracketInt(opt);
                     if (ok)
                     {
+                        _trace?.SpeedDecision("ECOS", id, loco.Address, "speed", value, value);
+
                         if (ApplyNormalizedLocoSpeed(id, loco, value, events))
                         {
                             // Refused by a latched safety interlock: keep the logical speed
