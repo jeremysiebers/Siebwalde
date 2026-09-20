@@ -35,6 +35,31 @@ No Developer, Integrator live test, implementation, hardware process, or PR.
 ### Next
 Await Product Owner decision on the minimal safety correction and/or the physical reproduction.
 
+### Refined test plan (Integrator, 2026-09-20; NOT executed)
+
+`StopLoco` does not remove the mapping; the mapping *changes* through a normal block transition. Scenario classification:
+
+- **Scenario A (Koploper unplaces/block 0):** operator/admin edge case; the non-neutral precondition is prevented by Koploper's speed-0-first rule. Not the primary scenario.
+- **Scenario B (normal A -> B transition):** NORMAL running scenario; `OnBlockEntered` only updates logical state and never neutralizes the vacated amplifier, so amplifier A can stay non-neutral while the current mapping points to B.
+- **Scenario C (look-ahead multi-target):** NORMAL but conditional; `ApplyLookAhead` can hold two amplifiers non-neutral. Deferred (needs two simultaneous targets).
+
+**Recommended PRIMARY TEST = A->B TRANSITION, block 1 -> block 3** (lowest DCC28 step). In the current topology look-ahead is deterministic and absent here (amp 2 not installed blocks `1>2`; unknown switch 1 blocks `3>4`/`3>5`), so amp 1 is the only non-neutral target before the transition. Sequence: loco in block 1 -> low speed (amp 1 = 416) -> reassign loco to block 3 -> no write to amp 1 (stays 416) -> low speed again (amp 3 = 416) -> invoke the real per-loco safety stop -> amp 3 = 399, **amp 1 stays 416**.
+
+**Safety-stop trigger:** no normal real-mode condition deterministically reaches `ControlSafetyGuard`, so the narrowest controlled invocation is `ControlSafetyGuard.Apply(<loco-scoped StopRequired diagnostic>)` in a harness that reuses the real `ControlSafetyGuard`, `EcosHardwareStopSink`, `TrackAmplifierHardwareBackend`, `TrackControlMain` and amplifier comm, substituting only the trigger (and the block source if Koploper refuses an at-speed reassignment). A Koploper speed-0 command is only a normal-path control, not the safety-sink test.
+
+**Evidence per amplifier:** Requested (`LocoState.Speed`/echo), Commanded (`PendingWrites` + `[WRITE]` log), Observed (`HoldingReg[0]`/`PwmFeedback`). `StopLoco returned true` is not proof of a physical stop. Capture backend return, sink result, guard behaviour, diagnostics (expected: none) and actual HR0 to prove both the reachability failure and the failure-reporting failure.
+
+**Secondary test:** controlled no-mapping stop (block 0/unmapped) to isolate the failure-reporting failure (backend returns false, sink still returns true and logs success, no write).
+
+**Layout stop:** `SetPower(false)` neutralizes amps 1/3/4 (verified by observed HR0) but **not** the installed-but-unmapped amp 6.
+
+**Recovery (independent of the per-loco stop):** layout stop verified by observed HR0 -> master software reset -> physical amplifier/backplane power removal. A process exit is not neutralization. The operator must know the exact recovery action before non-zero PWM is applied.
+
+**Open live prerequisite:** does Koploper allow reassigning a loco's block while speed is non-zero? If not, the harness block source produces the transition.
+
+### Next
+Await Product Owner decision on the refined primary test and/or the minimal safety correction.
+
 ## Latest Session (2026-09-20, live direction regression + safety reachability attempt)
 
 Branch `feature/live-koploper-occupancy-validation`, HEAD `a2125a7` (plus this documentation commit). Targeted operator-in-the-loop live regression of the direction fix and a safety-reachability investigation. **No production code was changed.**
