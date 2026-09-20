@@ -36,6 +36,7 @@ namespace SiebwaldeApp.Integration
         private readonly IOccupancyProvider? _occupancyProvider;
         private readonly Func<IReadOnlyDictionary<int, SwitchPosition>>? _switchPositionProvider;
         private readonly AmplifierCommandTracker? _commandTracker;
+        private readonly IControlTrace? _trace;
 
         public TrackAmplifierHardwareBackend(
             IBlockPositionProvider blockPositionProvider,
@@ -46,7 +47,8 @@ namespace SiebwaldeApp.Integration
             IOccupancyProvider? occupancyProvider = null,
             Func<IReadOnlyDictionary<int, SwitchPosition>>? switchPositionProvider = null,
             AmplifierCommandTracker? commandTracker = null,
-            TrackAmplifierGroups? groups = null)
+            TrackAmplifierGroups? groups = null,
+            IControlTrace? trace = null)
         {
             _blockPositionProvider = blockPositionProvider ?? throw new ArgumentNullException(nameof(blockPositionProvider));
             _topology = topology ?? throw new ArgumentNullException(nameof(topology));
@@ -57,6 +59,7 @@ namespace SiebwaldeApp.Integration
             _switchPositionProvider = switchPositionProvider;
             _commandTracker = commandTracker;
             Groups = groups ?? TrackAmplifierGroups.Empty;
+            _trace = trace;
         }
 
         /// <summary>Power off sets every mapped amplifier to neutral (standstill).</summary>
@@ -85,7 +88,16 @@ namespace SiebwaldeApp.Integration
                         continue;
                     }
 
-                    _variables.SetDesiredAmplifierControl(amplifier, AmplifierSpeedMapper.NeutralPwm, false);
+                    QueueControl(
+                        locoAddress: null,
+                        amplifier,
+                        pwm: AmplifierSpeedMapper.NeutralPwm,
+                        emoStop: false,
+                        block: null,
+                        purpose: "PowerOff",
+                        source: "Layout",
+                        normalizedSpeed: null,
+                        direction: null);
                     neutralized.Add(amplifier);
                 }
             }
@@ -138,14 +150,23 @@ namespace SiebwaldeApp.Integration
 
             foreach (var amplifier in amplifiers)
             {
-                _variables.SetDesiredAmplifierControl(amplifier, pwm, false);
+                QueueControl(
+                    locoAddress: address,
+                    amplifier,
+                    pwm,
+                    emoStop: false,
+                    block: block.Value,
+                    purpose: "Movement",
+                    source: "Loco",
+                    normalizedSpeed: ecosSpeed,
+                    direction: direction);
                 RecordCommand(address, amplifier, pwm);
             }
 
             _log?.Invoke(
                 $"Loco {address}: block {block.Value} speed {ecosSpeed} dir {direction} -> PWM {pwm} on amp(s) {string.Join("+", amplifiers)}");
 
-            ApplyLookAhead(address, block.Value, pwm);
+            ApplyLookAhead(address, block.Value, pwm, ecosSpeed, direction);
 
             return true;
         }
@@ -162,7 +183,7 @@ namespace SiebwaldeApp.Integration
             return false;
         }
 
-        private void ApplyLookAhead(int locoAddress, int currentBlock, int pwm)
+        private void ApplyLookAhead(int locoAddress, int currentBlock, int pwm, int normalizedSpeed, int direction)
         {
             if (_lookAheadPlanner is null || _occupancyProvider is null)
             {
@@ -203,12 +224,54 @@ namespace SiebwaldeApp.Integration
 
             foreach (var amplifier in nextAmplifiers)
             {
-                _variables.SetDesiredAmplifierControl(amplifier, pwm, false);
+                QueueControl(
+                    locoAddress,
+                    amplifier,
+                    pwm,
+                    emoStop: false,
+                    block: nextBlock,
+                    purpose: "LookAhead",
+                    source: "Loco",
+                    normalizedSpeed,
+                    direction);
                 RecordCommand(locoAddress, amplifier, pwm);
             }
 
             _log?.Invoke(
                 $"Look-ahead: block {currentBlock} -> {nextBlock}, PWM {pwm} on amp(s) {string.Join("+", nextAmplifiers)}");
+        }
+
+        /// <summary>
+        /// Places one desired track-amplifier control value at the shared command-acceptance
+        /// boundary and records the resolved physical-target decision in the control trace. The
+        /// trace event is the "Commanded" value: it is a queued setpoint, never an observed
+        /// hardware confirmation.
+        /// </summary>
+        private void QueueControl(
+            int? locoAddress,
+            ushort amplifier,
+            int pwm,
+            bool emoStop,
+            int? block,
+            string purpose,
+            string source,
+            int? normalizedSpeed,
+            int? direction)
+        {
+            _variables.SetDesiredAmplifierControl(amplifier, pwm, emoStop);
+
+            var hr0 = TrackApplicationVariables.BuildHr0Value(pwm, emoStop);
+            _trace?.AmplifierCommand(
+                source,
+                locoAddress,
+                amplifier,
+                block,
+                purpose,
+                pwm,
+                hr0,
+                GetOperationalGroup(amplifier),
+                normalizedSpeed,
+                direction);
         }
 
         /// <summary>
@@ -306,12 +369,25 @@ namespace SiebwaldeApp.Integration
                 if (!TrackAmplifierAddress.IsTrackAmplifierAddress(amplifier))
                 {
                     failed.Add(amplifier);
+                    _trace?.Abnormal(
+                        "InvalidAmplifierAddress",
+                        amplifier,
+                        "neutralization refused: not a physical track amplifier");
                     _log?.Invoke(
                         $"Neutralization refused for slave {amplifier}: not a physical track amplifier.");
                     continue;
                 }
 
-                _variables.SetDesiredAmplifierControl(amplifier, AmplifierSpeedMapper.NeutralPwm, false);
+                QueueControl(
+                    locoAddress: null,
+                    amplifier,
+                    pwm: AmplifierSpeedMapper.NeutralPwm,
+                    emoStop: false,
+                    block: null,
+                    purpose: "EmergencyNeutral",
+                    source: "Safety",
+                    normalizedSpeed: null,
+                    direction: null);
                 queued.Add(amplifier);
             }
 

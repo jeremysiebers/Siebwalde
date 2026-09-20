@@ -127,7 +127,7 @@ namespace SiebwaldeApp.Core
         /// Bit 15    : EmoStop (1 = stop as fast as possible)
         /// Other bits are currently left as 0.
         /// </summary>
-        private static ushort BuildHr0FromControl(int pwmSetpoint, bool emoStop)
+        public static ushort BuildHr0Value(int pwmSetpoint, bool emoStop)
         {
             int clampedPwm = pwmSetpoint;
 
@@ -163,7 +163,7 @@ namespace SiebwaldeApp.Core
             if (!TrackAmplifierAddress.IsTrackAmplifierAddress(slaveNumber))
                 return;
 
-            ushort hr0 = BuildHr0FromControl(pwmSetpoint, emoStop);
+            ushort hr0 = BuildHr0Value(pwmSetpoint, emoStop);
 
             if (!PendingWrites.TryGetValue(slaveNumber, out var writeData))
             {

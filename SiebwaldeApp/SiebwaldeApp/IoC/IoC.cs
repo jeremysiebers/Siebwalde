@@ -68,15 +68,24 @@ namespace SiebwaldeApp
             // Bind to a single instance of Menu view model
             Kernel.Bind<SideMenuViewModel>().ToConstant(new SideMenuViewModel());
 
+            // Register the dedicated production control trace before the control path is
+            // composed, so the whole Koploper/ECoS session is captured. It reuses the existing
+            // ILogFactory/FileLogger infrastructure and the configured log directory.
+            var controlTrace = ControlTraceLogging.Register(
+                SiebwaldeApp.Core.IoC.Logger,
+                CoreConfiguration.LogDirectory,
+                "SiebwaldeApp");
+
             // Bind the ECoS host (the server Koploper connects to on port 15471). Its
             // composition lives in the Integration layer; here we only create it from
             // configuration and hand it to the application model.
             var ecosHost = TrackControlHost.FromConfiguration(
-                log: message => SiebwaldeApp.Core.IoC.Logger.Log(message, "EcosHost"));
+                log: message => SiebwaldeApp.Core.IoC.Logger.Log(message, "EcosHost"),
+                controlTrace: controlTrace);
             Kernel.Bind<IEcosHostService>().ToConstant(ecosHost);
 
             // Bind to a single instance of Siebwalde Application Model
-            Kernel.Bind<SiebwaldeApplicationModel>().ToConstant(new SiebwaldeApplicationModel(ecosHost));         
+            Kernel.Bind<SiebwaldeApplicationModel>().ToConstant(new SiebwaldeApplicationModel(ecosHost, controlTrace));         
         }
 
         #endregion

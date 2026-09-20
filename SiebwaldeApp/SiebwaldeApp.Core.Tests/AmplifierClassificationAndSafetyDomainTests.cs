@@ -275,6 +275,93 @@ namespace SiebwaldeApp.Core.Tests
         }
 
         // -----------------------------------------------------------------
+        // Low-cost safety regression: default/empty group configuration
+        // -----------------------------------------------------------------
+
+        [Fact]
+        public void EmptyGroupConfiguration_IsEquivalentToEmpty_AndNeverInfersMainRailway()
+        {
+            // The shipped default configuration is an empty assignment for all three groups.
+            var groups = TrackAmplifierGroups.Parse("main: ; mountain: ; spare: ");
+
+            Assert.Empty(groups.MainRailway);
+            Assert.Empty(groups.MountainRailway);
+            Assert.Empty(groups.Spare);
+            Assert.Empty(groups.AllConfigured);
+            Assert.Empty(groups.Errors);
+
+            // Exact equivalent of the static Empty instance: nothing is configured and no
+            // legitimate track amplifier is silently inferred as main railway from its address.
+            Assert.Equal(TrackAmplifierGroups.Empty.AllConfigured, groups.AllConfigured);
+            Assert.Equal(TrackAmplifierOperationalGroup.Unassigned, groups.Classify(1));
+            Assert.Equal(TrackAmplifierOperationalGroup.Unassigned, groups.Classify(3));
+            Assert.Equal(TrackAmplifierOperationalGroup.Unassigned, groups.Classify(50));
+            Assert.False(groups.IsConfigured(1));
+
+            // A null/blank configuration is the same empty grouping.
+            Assert.Equal(TrackAmplifierGroups.Empty.AllConfigured, TrackAmplifierGroups.Parse(null).AllConfigured);
+            Assert.Equal(TrackAmplifierGroups.Empty.AllConfigured, TrackAmplifierGroups.Parse("   ").AllConfigured);
+        }
+
+        // -----------------------------------------------------------------
+        // Low-cost safety regression: configured MountainRailway emergency inclusion
+        // -----------------------------------------------------------------
+
+        [Fact]
+        public void ConfiguredMountainRailway_IsIncludedByStrongestEmergency_ButNotByOrdinaryLayoutStop()
+        {
+            var variables = new TrackApplicationVariables();
+
+            // Amp 6 is a detected, legitimate track amplifier that is not in BlockTopology. It is
+            // configured as MountainRailway, a different operational domain from the main railway.
+            Seed(variables, 6);
+            Seed(variables, 1);
+
+            var groups = TrackAmplifierGroups.Create(
+                mainRailway: new[] { 1 },
+                mountainRailway: new[] { 6 },
+                spare: null);
+
+            var tracker = new AmplifierCommandTracker();
+            var backend = new TrackAmplifierHardwareBackend(
+                new NoBlockProvider(),
+                BlockTopology.Parse("amps: 1:1"),
+                variables,
+                commandTracker: tracker,
+                groups: groups);
+            var sink = new EcosHardwareStopSink
+            {
+                Hardware = backend,
+                Neutralizer = backend,
+                CommandTracker = tracker
+            };
+
+            Assert.Equal(TrackAmplifierOperationalGroup.MainRailway, backend.GetOperationalGroup(1));
+            Assert.Equal(TrackAmplifierOperationalGroup.MountainRailway, backend.GetOperationalGroup(6));
+
+            // The strongest emergency neutralization is intentionally allowed to cross the
+            // operational domains, so the configured mountain-railway amplifier is included.
+            var emergency = sink.StopLayout();
+
+            Assert.True(emergency.Succeeded);
+            Assert.Contains((ushort)1, emergency.CommandedAmplifiers);
+            Assert.Contains((ushort)6, emergency.CommandedAmplifiers);
+            Assert.Equal(Neutral, Pwm(variables, 6));
+
+            // Put a fresh non-neutral manual/operator value on the mountain amplifier so the
+            // ordinary layout stop can be observed in isolation.
+            variables.SetDesiredAmplifierControl(6, 500, false);
+            Assert.Equal(500, Pwm(variables, 6));
+
+            // The ordinary layout power-off is topology/mapping-oriented. It must not include the
+            // unmapped mountain amplifier merely because the emergency path would.
+            backend.SetPower(false);
+
+            Assert.Equal(Neutral, Pwm(variables, 1));
+            Assert.Equal(500, Pwm(variables, 6));
+        }
+
+        // -----------------------------------------------------------------
         // Stale / unavailable required targets
         // -----------------------------------------------------------------
 

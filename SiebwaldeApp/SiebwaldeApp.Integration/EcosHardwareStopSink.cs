@@ -39,10 +39,12 @@ namespace SiebwaldeApp.Integration
     public sealed class EcosHardwareStopSink : ISafetyStopSink
     {
         private readonly Action<string>? _log;
+        private readonly IControlTrace? _trace;
 
-        public EcosHardwareStopSink(Action<string>? log = null)
+        public EcosHardwareStopSink(Action<string>? log = null, IControlTrace? trace = null)
         {
             _log = log;
+            _trace = trace;
         }
 
         /// <summary>The backend the stop is issued through. Set once composition has finished.</summary>
@@ -66,10 +68,20 @@ namespace SiebwaldeApp.Integration
         {
             var neutralizer = Neutralizer ?? Hardware as IAmplifierNeutralizer;
 
+            // Captured before the stop so the trace can show which retained physical targets the
+            // stop had to reach, independent of what the stop manages to establish.
+            var retainedBefore = CommandTracker?.GetOutstanding(address) ?? Array.Empty<ushort>();
+
+            SafetyStopResult Finish(SafetyStopResult result)
+            {
+                EmitStopResult("Loco", address, result, retainedBefore, neutralizer);
+                return result;
+            }
+
             if (Hardware is null && neutralizer is null)
             {
                 _log?.Invoke($"Safety stop for loco {address} not delivered: no hardware backend is bound.");
-                return SafetyStopResult.Unavailable();
+                return Finish(SafetyStopResult.Unavailable());
             }
 
             var commanded = new List<ushort>();
@@ -144,18 +156,18 @@ namespace SiebwaldeApp.Integration
 
             if (failed.Count > 0)
             {
-                return SafetyStopResult.Partial(commanded, failed);
+                return Finish(SafetyStopResult.Partial(commanded, failed));
             }
 
             if (!applied)
             {
                 _log?.Invoke($"Safety stop for loco {address} not delivered: no resolvable physical target.");
-                return SafetyStopResult.NotApplied();
+                return Finish(SafetyStopResult.NotApplied());
             }
 
             _log?.Invoke(
                 $"Safety stop: loco {address} commanded neutral (amplifier-centric targets: {(commanded.Count == 0 ? "<none>" : string.Join(",", commanded))}).");
-            return SafetyStopResult.Commanded(commanded);
+            return Finish(SafetyStopResult.Commanded(commanded));
         }
 
         /// <inheritdoc />
@@ -163,6 +175,11 @@ namespace SiebwaldeApp.Integration
         {
             var neutralizer = Neutralizer ?? Hardware as IAmplifierNeutralizer;
 
+            // The strongest emergency neutralization is intentionally allowed to cross
+            // MainRailway/MountainRailway/Spare/Unassigned: unresolved traction is a physical
+            // safety condition, so the operational domain must never narrow the target set.
+            // Backplane/configuration devices remain excluded because they are a different
+            // physical device class, not because of their domain.
             var targets = new SortedSet<ushort>();
             var retained = new HashSet<ushort>();
 
@@ -189,6 +206,20 @@ namespace SiebwaldeApp.Integration
                 }
             }
 
+            var retainedBefore = retained.OrderBy(a => a).ToArray();
+
+            SafetyStopResult Finish(SafetyStopResult result)
+            {
+                EmitStopResult("Layout", null, result, retainedBefore, neutralizer);
+                return result;
+            }
+
+            // The final target set of the strongest emergency neutralization. It is already
+            // restricted to legitimate track amplifiers; 'excluded' records the policy so a
+            // later verification can see that the backplane/configuration class 51..55 was not
+            // selected, without spamming the normal exclusion on every event.
+            _trace?.EmergencyTargetSet(targets.ToArray(), "51-55");
+
             if (targets.Count == 0)
             {
                 // No amplifier inventory was available, so fall back to the existing central
@@ -196,21 +227,21 @@ namespace SiebwaldeApp.Integration
                 if (Hardware is null)
                 {
                     _log?.Invoke("Safety stop for the layout not delivered: no hardware backend is bound.");
-                    return SafetyStopResult.Unavailable();
+                    return Finish(SafetyStopResult.Unavailable());
                 }
 
                 try
                 {
                     var applied = Hardware.SetPower(false);
                     _log?.Invoke("Safety stop: layout power off (no amplifier inventory was available).");
-                    return applied
+                    return Finish(applied
                         ? SafetyStopResult.Commanded(Array.Empty<ushort>())
-                        : SafetyStopResult.NotApplied();
+                        : SafetyStopResult.NotApplied());
                 }
                 catch (Exception ex)
                 {
                     _log?.Invoke($"Layout safety stop failed: {ex.Message}");
-                    return SafetyStopResult.NotApplied();
+                    return Finish(SafetyStopResult.NotApplied());
                 }
             }
 
@@ -218,7 +249,7 @@ namespace SiebwaldeApp.Integration
             {
                 _log?.Invoke(
                     $"Safety stop for the layout not delivered: {targets.Count} physical amplifier(s) known but no amplifier neutralizer is bound.");
-                return SafetyStopResult.Partial(Array.Empty<ushort>(), targets.ToArray());
+                return Finish(SafetyStopResult.Partial(Array.Empty<ushort>(), targets.ToArray()));
             }
 
             var notCommanded = neutralizer.NeutralizeAmplifiers(targets.ToArray()) ?? Array.Empty<ushort>();
@@ -269,7 +300,7 @@ namespace SiebwaldeApp.Integration
 
                 _log?.Invoke(
                     $"Safety stop: layout commanded neutral on {commanded.Count} physical amplifier(s), including detected and mapped outputs.");
-                return SafetyStopResult.Commanded(commanded);
+                return Finish(SafetyStopResult.Commanded(commanded));
             }
 
             if (commanded.Count > 0)
@@ -279,7 +310,44 @@ namespace SiebwaldeApp.Integration
 
             _log?.Invoke(
                 $"Safety stop for the layout incomplete: amplifier(s) {string.Join(",", failed)} could not be established neutral (refused, stale or unavailable).");
-            return SafetyStopResult.Partial(commanded, failed);
+            return Finish(SafetyStopResult.Partial(commanded, failed));
+        }
+
+        /// <summary>
+        /// Records the command-level stop result. It reports Commanded/Failed, never Observed:
+        /// the trace never claims a physical neutralization the protocol cannot acknowledge.
+        /// </summary>
+        private void EmitStopResult(
+            string scope,
+            int? locoAddress,
+            SafetyStopResult result,
+            IReadOnlyList<ushort> retained,
+            IAmplifierNeutralizer? neutralizer)
+        {
+            _trace?.SafetyStopResult(
+                scope,
+                locoAddress,
+                result.Succeeded,
+                result.Applied,
+                result.BackendUnavailable,
+                result.CommandedAmplifiers,
+                result.FailedAmplifiers,
+                retained,
+                StaleFailed(neutralizer, result.FailedAmplifiers));
+        }
+
+        private static IReadOnlyList<ushort> StaleFailed(
+            IAmplifierNeutralizer? neutralizer,
+            IReadOnlyList<ushort> failed)
+        {
+            if (neutralizer is null || failed.Count == 0)
+            {
+                return Array.Empty<ushort>();
+            }
+
+            return failed
+                .Where(a => neutralizer.GetAmplifierCommunicationState(a) != AmplifierCommunicationState.Fresh)
+                .ToArray();
         }
     }
 }

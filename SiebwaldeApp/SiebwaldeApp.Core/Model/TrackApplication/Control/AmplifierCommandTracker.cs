@@ -31,6 +31,17 @@ namespace SiebwaldeApp.Core
     {
         private readonly Dictionary<int, HashSet<ushort>> _ownedByLoco = new();
         private readonly object _lock = new();
+        private readonly IControlTrace? _trace;
+
+        /// <summary>
+        /// Creates the tracker. When a trace is supplied, every safety-relevant change (target
+        /// added, removed because neutral was commanded, ownership transferred, deliberate clear)
+        /// is recorded as an event; the tracker is never logged continuously.
+        /// </summary>
+        public AmplifierCommandTracker(IControlTrace? trace = null)
+        {
+            _trace = trace;
+        }
 
         /// <summary>
         /// Records that a locomotive successfully issued a non-neutral command to an amplifier.
@@ -45,13 +56,28 @@ namespace SiebwaldeApp.Core
                 return;
             }
 
+            int? previousOwner = null;
+            IReadOnlyList<ushort> outstanding;
+
             lock (_lock)
             {
                 foreach (var entry in _ownedByLoco)
                 {
-                    if (entry.Key != locoAddress)
+                    if (entry.Key != locoAddress && entry.Value.Contains(amplifier))
                     {
-                        entry.Value.Remove(amplifier);
+                        previousOwner = entry.Key;
+                        break;
+                    }
+                }
+
+                if (previousOwner is not null)
+                {
+                    foreach (var entry in _ownedByLoco)
+                    {
+                        if (entry.Key != locoAddress)
+                        {
+                            entry.Value.Remove(amplifier);
+                        }
                     }
                 }
 
@@ -62,7 +88,15 @@ namespace SiebwaldeApp.Core
                 }
 
                 owned.Add(amplifier);
+                outstanding = owned.OrderBy(a => a).ToArray();
             }
+
+            if (previousOwner is int fromLoco)
+            {
+                _trace?.TrackerTransfer(amplifier, fromLoco, locoAddress);
+            }
+
+            _trace?.TrackerAdd(locoAddress, amplifier, outstanding);
         }
 
         /// <summary>Records several non-neutral amplifier commands for one locomotive.</summary>
@@ -90,6 +124,9 @@ namespace SiebwaldeApp.Core
                 return;
             }
 
+            bool removed = false;
+            IReadOnlyList<ushort> outstanding = System.Array.Empty<ushort>();
+
             lock (_lock)
             {
                 if (!_ownedByLoco.TryGetValue(locoAddress, out var owned))
@@ -97,12 +134,22 @@ namespace SiebwaldeApp.Core
                     return;
                 }
 
-                owned.Remove(amplifier);
+                removed = owned.Remove(amplifier);
 
                 if (owned.Count == 0)
                 {
                     _ownedByLoco.Remove(locoAddress);
                 }
+                else
+                {
+                    outstanding = owned.OrderBy(a => a).ToArray();
+                }
+            }
+
+            if (removed)
+            {
+                // Removal because a neutral command was established (distinct from a transfer).
+                _trace?.TrackerRemove(locoAddress, amplifier, "NeutralCommanded", outstanding);
             }
         }
 
@@ -141,6 +188,8 @@ namespace SiebwaldeApp.Core
                 return;
             }
 
+            var removed = new List<(int Loco, ushort Amplifier, ushort[] Outstanding)>();
+
             lock (_lock)
             {
                 var emptied = new List<int>();
@@ -149,7 +198,10 @@ namespace SiebwaldeApp.Core
                 {
                     foreach (var amplifier in toClear)
                     {
-                        entry.Value.Remove(amplifier);
+                        if (entry.Value.Remove(amplifier))
+                        {
+                            removed.Add((entry.Key, amplifier, entry.Value.OrderBy(a => a).ToArray()));
+                        }
                     }
 
                     if (entry.Value.Count == 0)
@@ -162,6 +214,11 @@ namespace SiebwaldeApp.Core
                 {
                     _ownedByLoco.Remove(locoAddress);
                 }
+            }
+
+            foreach (var (loco, amplifier, outstanding) in removed)
+            {
+                _trace?.TrackerRemove(loco, amplifier, "GlobalNeutral", outstanding);
             }
         }
 
@@ -215,18 +272,44 @@ namespace SiebwaldeApp.Core
         /// <summary>Forgets one locomotive's outstanding targets (does not command anything).</summary>
         public void Clear(int locoAddress)
         {
+            ushort[] removed;
+
             lock (_lock)
             {
+                removed = _ownedByLoco.TryGetValue(locoAddress, out var owned)
+                    ? owned.OrderBy(a => a).ToArray()
+                    : System.Array.Empty<ushort>();
+
                 _ownedByLoco.Remove(locoAddress);
+            }
+
+            foreach (var amplifier in removed)
+            {
+                _trace?.TrackerRemove(locoAddress, amplifier, "Clear", System.Array.Empty<ushort>());
             }
         }
 
         /// <summary>Forgets every outstanding target (does not command anything).</summary>
         public void ClearAll()
         {
+            var removed = new List<(int Loco, ushort Amplifier)>();
+
             lock (_lock)
             {
+                foreach (var entry in _ownedByLoco)
+                {
+                    foreach (var amplifier in entry.Value)
+                    {
+                        removed.Add((entry.Key, amplifier));
+                    }
+                }
+
                 _ownedByLoco.Clear();
+            }
+
+            foreach (var (loco, amplifier) in removed)
+            {
+                _trace?.TrackerRemove(loco, amplifier, "ClearAll", System.Array.Empty<ushort>());
             }
         }
     }

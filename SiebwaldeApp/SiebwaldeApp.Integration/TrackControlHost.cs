@@ -40,6 +40,7 @@ namespace SiebwaldeApp.Integration
         private readonly int _ecosListenPort;
         private readonly Func<IReadOnlyDictionary<int, SwitchPosition>>? _switchPositionProvider;
         private readonly Action<string>? _log;
+        private readonly IControlTrace? _controlTrace;
 
         private static readonly IReadOnlyDictionary<int, SwitchPosition> NoSwitches =
             new Dictionary<int, SwitchPosition>();
@@ -69,7 +70,8 @@ namespace SiebwaldeApp.Integration
             int koploperExternalInfoPort = DefaultKoploperExternalInfoPort,
             Func<IReadOnlyDictionary<int, SwitchPosition>>? switchPositionProvider = null,
             Action<string>? log = null,
-            TrackAmplifierGroups? trackAmplifierGroups = null)
+            TrackAmplifierGroups? trackAmplifierGroups = null,
+            IControlTrace? controlTrace = null)
         {
             if (string.IsNullOrWhiteSpace(locoRepositoryPath))
                 throw new ArgumentException("A locomotive repository path is required.", nameof(locoRepositoryPath));
@@ -84,6 +86,7 @@ namespace SiebwaldeApp.Integration
             _externalInfoPort = koploperExternalInfoPort;
             _switchPositionProvider = switchPositionProvider;
             _log = log;
+            _controlTrace = controlTrace;
         }
 
         /// <summary>
@@ -93,7 +96,8 @@ namespace SiebwaldeApp.Integration
         /// </summary>
         public static TrackControlHost FromConfiguration(
             Func<IReadOnlyDictionary<int, SwitchPosition>>? switchPositionProvider = null,
-            Action<string>? log = null)
+            Action<string>? log = null,
+            IControlTrace? controlTrace = null)
             => new(
                 Path.Combine(CoreConfiguration.LogDirectory, "locos.json"),
                 CoreConfiguration.BuildBlockTopology(),
@@ -101,7 +105,8 @@ namespace SiebwaldeApp.Integration
                 CoreConfiguration.BuildSwitchMap(),
                 switchPositionProvider: switchPositionProvider,
                 log: log,
-                trackAmplifierGroups: CoreConfiguration.BuildTrackAmplifierGroups());
+                trackAmplifierGroups: CoreConfiguration.BuildTrackAmplifierGroups(),
+                controlTrace: controlTrace);
 
         /// <inheritdoc />
         public bool IsRunning => _server is not null;
@@ -205,8 +210,8 @@ namespace SiebwaldeApp.Integration
 
             // Diagnostics and the safety reaction are shared by both modes.
             Diagnostics = new ControlDiagnostics();
-            _stopSink = new EcosHardwareStopSink(_log);
-            Safety = new ControlSafetyGuard(_stopSink, Diagnostics, _log);
+            _stopSink = new EcosHardwareStopSink(_log, _controlTrace);
+            Safety = new ControlSafetyGuard(_stopSink, Diagnostics, _log, _controlTrace);
 
             if (mode == TrackControlMode.Real)
             {
@@ -249,7 +254,8 @@ namespace SiebwaldeApp.Integration
                     Switches,
                     Safety,
                     Diagnostics,
-                    _trackAmplifierGroups);
+                    _trackAmplifierGroups,
+                    _controlTrace);
 
                 _ecosBackend = _integration.EcosBackend
                     ?? throw new InvalidOperationException(
@@ -309,7 +315,7 @@ namespace SiebwaldeApp.Integration
                 IHardwareBackend hardware = new SwitchTranslatingHardwareBackend(_simulatorBackend, Switches, _log);
                 hardware = new ControlSafetyInterlockBackend(hardware, Safety, Diagnostics, _log);
 
-                _ecosBackend = new SimpleEcosBackend(hardware, _locoRepository, _externalInfo);
+                _ecosBackend = new SimpleEcosBackend(hardware, _locoRepository, _externalInfo, _controlTrace);
 
                 // The simulator needs the ECoS backend as feedback sink, so hook it up
                 // before the external-info client starts producing block positions.

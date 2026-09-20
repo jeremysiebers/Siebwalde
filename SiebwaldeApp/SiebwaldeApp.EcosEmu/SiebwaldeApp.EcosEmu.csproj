@@ -6,4 +6,10 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <!-- The production control trace abstraction lives in Core. Core has no project
+         references, so this dependency stays acyclic. -->
+    <ProjectReference Include="..\SiebwaldeApp.Core\SiebwaldeApp.Core.csproj" />
+  </ItemGroup>
+
 </Project>
