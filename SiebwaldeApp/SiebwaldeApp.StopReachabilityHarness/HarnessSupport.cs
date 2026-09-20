@@ -244,10 +244,10 @@ namespace SiebwaldeApp.StopReachabilityHarness
     /// <summary>
     /// Observation-only decorator around the real <see cref="EcosHardwareStopSink"/>.
     ///
-    /// The real sink discards the backend result and always returns true, and
-    /// <c>ControlSafetyGuard</c> discards the sink result. The harness needs to record that
-    /// result as evidence, so it forwards every call to the real sink unchanged and only keeps
-    /// the returned value. The stop implementation and the hardware targeting stay real.
+    /// The real sink now reports command-level stop success/failure and
+    /// <c>ControlSafetyGuard</c> inspects that result and escalates when it is incomplete. The
+    /// harness forwards every call unchanged and records the returned success flag as evidence.
+    /// The stop implementation and the hardware targeting stay real.
     /// </summary>
     internal sealed class RecordingStopSink : ISafetyStopSink
     {
@@ -264,20 +264,21 @@ namespace SiebwaldeApp.StopReachabilityHarness
         public bool? LastStopLocoResult { get; private set; }
         public bool LayoutStopCalled { get; private set; }
 
-        public bool StopLoco(int address)
+        public SafetyStopResult StopLoco(int address)
         {
             LastStopLocoAddress = address;
             var result = _inner.StopLoco(address);
-            LastStopLocoResult = result;
-            _log($"real EcosHardwareStopSink.StopLoco({address}) returned {result} (the guard discards this).");
+            LastStopLocoResult = result.Succeeded;
+            _log($"real EcosHardwareStopSink.StopLoco({address}) succeeded={result.Succeeded} (the guard inspects this).");
             return result;
         }
 
-        public void StopLayout()
+        public SafetyStopResult StopLayout()
         {
             LayoutStopCalled = true;
-            _inner.StopLayout();
-            _log("real EcosHardwareStopSink.StopLayout() invoked.");
+            var result = _inner.StopLayout();
+            _log($"real EcosHardwareStopSink.StopLayout() succeeded={result.Succeeded}.");
+            return result;
         }
     }
 }
