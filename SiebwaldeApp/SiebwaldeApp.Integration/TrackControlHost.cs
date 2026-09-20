@@ -262,6 +262,11 @@ namespace SiebwaldeApp.Integration
                 _integration.RealBackend.Divergence = Divergence;
                 _stopSink.Hardware = _integration.RealBackend;
 
+                // A loco-scoped safety stop must reach the retained physical targets and be able
+                // to escalate to amplifier-centric neutralization, not only the current mapping.
+                _stopSink.Neutralizer = _integration.RealBackend;
+                _stopSink.CommandTracker = _integration.CommandTracker;
+
                 BindSafetyRevalidation();
             }
             else

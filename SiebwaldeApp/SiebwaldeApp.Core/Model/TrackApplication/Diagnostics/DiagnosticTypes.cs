@@ -83,6 +83,13 @@ namespace SiebwaldeApp.Core
         /// The whole layout was stopped through the existing central power-off path, used when
         /// no single locomotive can be held responsible.
         /// </summary>
-        StopLayout = 2
+        StopLayout = 2,
+
+        /// <summary>
+        /// A locomotive-scoped stop could not neutralize every required physical amplifier, so
+        /// the amplifier-centric layout neutralization was invoked instead. The accompanying
+        /// diagnostics record whether that escalation was complete.
+        /// </summary>
+        StopLayoutEscalated = 3
     }
 }
