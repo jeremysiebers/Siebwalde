@@ -34,6 +34,7 @@ namespace SiebwaldeApp.Integration
         private readonly BlockTopology _topology;
         private readonly KoploperBlockMap _blockMap;
         private readonly SwitchMapping _switchMapping;
+        private readonly TrackAmplifierGroups _trackAmplifierGroups;
         private readonly string _externalInfoHost;
         private readonly int _externalInfoPort;
         private readonly int _ecosListenPort;
@@ -67,7 +68,8 @@ namespace SiebwaldeApp.Integration
             string koploperExternalInfoHost = "127.0.0.1",
             int koploperExternalInfoPort = DefaultKoploperExternalInfoPort,
             Func<IReadOnlyDictionary<int, SwitchPosition>>? switchPositionProvider = null,
-            Action<string>? log = null)
+            Action<string>? log = null,
+            TrackAmplifierGroups? trackAmplifierGroups = null)
         {
             if (string.IsNullOrWhiteSpace(locoRepositoryPath))
                 throw new ArgumentException("A locomotive repository path is required.", nameof(locoRepositoryPath));
@@ -76,6 +78,7 @@ namespace SiebwaldeApp.Integration
             _topology = topology ?? throw new ArgumentNullException(nameof(topology));
             _blockMap = blockMap ?? throw new ArgumentNullException(nameof(blockMap));
             _switchMapping = switchMapping ?? SwitchMapping.Parse(null);
+            _trackAmplifierGroups = trackAmplifierGroups ?? TrackAmplifierGroups.Empty;
             _ecosListenPort = ecosListenPort;
             _externalInfoHost = koploperExternalInfoHost;
             _externalInfoPort = koploperExternalInfoPort;
@@ -97,7 +100,8 @@ namespace SiebwaldeApp.Integration
                 CoreConfiguration.BuildKoploperBlockMap(),
                 CoreConfiguration.BuildSwitchMap(),
                 switchPositionProvider: switchPositionProvider,
-                log: log);
+                log: log,
+                trackAmplifierGroups: CoreConfiguration.BuildTrackAmplifierGroups());
 
         /// <inheritdoc />
         public bool IsRunning => _server is not null;
@@ -244,7 +248,8 @@ namespace SiebwaldeApp.Integration
                     _log,
                     Switches,
                     Safety,
-                    Diagnostics);
+                    Diagnostics,
+                    _trackAmplifierGroups);
 
                 _ecosBackend = _integration.EcosBackend
                     ?? throw new InvalidOperationException(

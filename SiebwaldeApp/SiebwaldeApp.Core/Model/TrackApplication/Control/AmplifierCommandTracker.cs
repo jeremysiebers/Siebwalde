@@ -38,7 +38,9 @@ namespace SiebwaldeApp.Core
         /// </summary>
         public void RecordNonNeutral(int locoAddress, ushort amplifier)
         {
-            if (amplifier == 0)
+            // Only a legitimate physical track amplifier can carry a track-amplifier non-neutral
+            // command. This keeps backplane/configuration slaves out of the safety target set.
+            if (!TrackAmplifierAddress.IsTrackAmplifierAddress(amplifier))
             {
                 return;
             }
@@ -83,7 +85,7 @@ namespace SiebwaldeApp.Core
         /// </summary>
         public void RecordNeutral(int locoAddress, ushort amplifier)
         {
-            if (amplifier == 0)
+            if (!TrackAmplifierAddress.IsTrackAmplifierAddress(amplifier))
             {
                 return;
             }
@@ -130,7 +132,10 @@ namespace SiebwaldeApp.Core
                 return;
             }
 
-            var toClear = amplifiers.Where(a => a != 0).Distinct().ToArray();
+            var toClear = amplifiers
+                .Where(a => TrackAmplifierAddress.IsTrackAmplifierAddress(a))
+                .Distinct()
+                .ToArray();
             if (toClear.Length == 0)
             {
                 return;

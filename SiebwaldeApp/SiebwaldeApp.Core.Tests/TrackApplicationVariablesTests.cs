@@ -93,7 +93,8 @@ namespace SiebwaldeApp.Core.Tests
 
             variables.InitializeDefaultPwmSetpoints(400);
 
-            Assert.Equal(400, variables.trackAmpItems[0].HoldingReg[0] & 0x03FF);
+            // Slave 1 is the first legitimate track amplifier; slave 0 is not a track amplifier.
+            Assert.Equal(400, variables.trackAmpItems[1].HoldingReg[0] & 0x03FF);
         }
 
         [Fact]
@@ -103,7 +104,20 @@ namespace SiebwaldeApp.Core.Tests
 
             variables.InitializeDefaultPwmSetpoints(5000);
 
-            Assert.Equal(799, variables.trackAmpItems[0].HoldingReg[0] & 0x03FF);
+            Assert.Equal(799, variables.trackAmpItems[1].HoldingReg[0] & 0x03FF);
+        }
+
+        [Fact]
+        public void InitializeDefaultPwmSetpoints_DoesNotTouchBackplaneConfigurationSlaves()
+        {
+            var variables = new TrackApplicationVariables();
+            var backplane = variables.trackAmpItems[51];
+            backplane.HoldingReg[0] = 0x1234;
+
+            variables.InitializeDefaultPwmSetpoints(400);
+
+            // A backplane/configuration slave's HoldingReg0 is not a PWM setpoint.
+            Assert.Equal(0x1234, backplane.HoldingReg[0]);
         }
     }
 }

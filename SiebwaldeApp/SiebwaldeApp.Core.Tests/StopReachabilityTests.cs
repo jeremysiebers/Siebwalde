@@ -104,6 +104,13 @@ namespace SiebwaldeApp.Core.Tests
                 Requests.Add(amplifiers.ToArray());
                 return amplifiers.Where(a => _fail.Contains(a)).ToArray();
             }
+
+            // The fake reports every legitimate track amplifier as fresh; the physical
+            // classification is still the real one.
+            public AmplifierCommunicationState GetAmplifierCommunicationState(ushort amplifier)
+                => TrackAmplifierAddress.IsTrackAmplifierAddress(amplifier)
+                    ? AmplifierCommunicationState.Fresh
+                    : AmplifierCommunicationState.Invalid;
         }
 
         private static ControlDiagnostic LocoFault(int loco) => new()
@@ -118,6 +125,14 @@ namespace SiebwaldeApp.Core.Tests
 
         private static ushort Pwm(TrackApplicationVariables variables, ushort amplifier)
             => (ushort)(variables.PendingWrites[amplifier].Hr0Value & 0x03FF);
+
+        /// <summary>Marks a physical track amplifier as detected with fresh data.</summary>
+        private static void Seed(TrackApplicationVariables variables, ushort amplifier)
+        {
+            var item = variables.trackAmpItems.First(a => a.SlaveNumber == amplifier);
+            item.SlaveDetected = 1;
+            item.LastDataReceivedUtc = DateTimeOffset.UtcNow;
+        }
 
         // -----------------------------------------------------------------
         // A -> B orphaned actuator
@@ -137,6 +152,9 @@ namespace SiebwaldeApp.Core.Tests
                 Neutralizer = backend,
                 CommandTracker = tracker
             };
+
+            Seed(variables, 1);
+            Seed(variables, 3);
 
             // Loco drives in block 1 (amp 1 non-neutral), then logically moves to block 3.
             blocks.Set(7, 1);
@@ -171,6 +189,8 @@ namespace SiebwaldeApp.Core.Tests
                 CommandTracker = tracker
             };
 
+            Seed(variables, 1);
+
             blocks.Set(7, 1);
             Assert.True(backend.SetLocoSpeed(7, 1, 0));
 
@@ -198,6 +218,8 @@ namespace SiebwaldeApp.Core.Tests
                 Neutralizer = backend,
                 CommandTracker = tracker
             };
+
+            Seed(variables, 1);
 
             blocks.Set(7, 1);
             Assert.True(backend.SetLocoSpeed(7, 1, 0));
@@ -234,6 +256,9 @@ namespace SiebwaldeApp.Core.Tests
                 Neutralizer = backend,
                 CommandTracker = tracker
             };
+
+            Seed(variables, 1);
+            Seed(variables, 2);
 
             blocks.Set(7, 1);
             Assert.True(backend.SetLocoSpeed(7, 1, 0));
@@ -451,6 +476,9 @@ namespace SiebwaldeApp.Core.Tests
                 CommandTracker = tracker
             };
 
+            Seed(variables, 1);
+            Seed(variables, 3);
+
             blocks.Set(7, 1);
             Assert.True(backend.SetLocoSpeed(7, 1, 0));
 
@@ -513,6 +541,8 @@ namespace SiebwaldeApp.Core.Tests
                 Neutralizer = backend,
                 CommandTracker = tracker
             };
+
+            Seed(variables, 1);
 
             blocks.Set(7, 1);
             Assert.True(backend.SetLocoSpeed(7, 1, 0));

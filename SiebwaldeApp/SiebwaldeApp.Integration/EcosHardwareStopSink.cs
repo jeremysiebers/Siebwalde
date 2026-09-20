@@ -19,8 +19,22 @@ namespace SiebwaldeApp.Integration
     /// A loco-scoped stop must not depend on the current block mapping alone: a normal A -> B
     /// transition never neutralizes the vacated amplifier, and look-ahead can command a second
     /// amplifier, so the loco's outstanding physical targets are retained by
-    /// <see cref="AmplifierCommandTracker"/> and neutralized here as well. The result reports
-    /// command delivery, never an observed physical confirmation.
+    /// <see cref="AmplifierCommandTracker"/> and neutralized here as well.
+    ///
+    /// Physical-device class is enforced centrally: only legitimate track amplifiers
+    /// (<see cref="TrackAmplifierAddress.IsTrackAmplifierAddress"/>) can enter a target set or
+    /// receive a neutral write. Backplane/configuration slaves (51..55) never do.
+    ///
+    /// The result reports command delivery, never an observed physical confirmation:
+    /// - Requested  = the software wants the output neutral.
+    /// - Commanded  = a concrete neutral setpoint was accepted for a legitimate, communicable
+    ///                physical track amplifier at the command-acceptance boundary (the pending
+    ///                write queue). The protocol provides no acknowledgement, so transmission and
+    ///                hardware reception cannot be claimed.
+    /// - Observed   = a fresh returned amplifier register reports neutral. That stays separate.
+    ///
+    /// A required target whose amplifier is stale or never seen is NOT forgotten: it is reported
+    /// as unresolved and stays retained, so the safety concern remains latched.
     /// </summary>
     public sealed class EcosHardwareStopSink : ISafetyStopSink
     {
@@ -63,7 +77,8 @@ namespace SiebwaldeApp.Integration
             var applied = false;
 
             // 1. The existing loco-scoped path neutralizes the currently mapped block (and its
-            //    look-ahead target) and records those as neutral in the tracker.
+            //    look-ahead target) and records those as neutral in the tracker when the
+            //    amplifier's communication is fresh.
             if (Hardware is not null)
             {
                 try
@@ -78,7 +93,7 @@ namespace SiebwaldeApp.Integration
 
             // 2. Amplifier-centric coverage of every physical target the locomotive still owns.
             //    This is what reaches an amplifier whose block mapping has since changed, moved to
-            //    another block, or disappeared entirely.
+            //    another block, or disappeared entirely. Every target is a required safety target.
             var outstanding = CommandTracker?.GetOutstanding(address) ?? Array.Empty<ushort>();
 
             if (outstanding.Count > 0)
@@ -92,35 +107,37 @@ namespace SiebwaldeApp.Integration
                 else
                 {
                     var notCommanded = neutralizer.NeutralizeAmplifiers(outstanding) ?? Array.Empty<ushort>();
-                    var failedSet = new HashSet<ushort>(notCommanded);
+                    var notCommandedSet = new HashSet<ushort>(notCommanded);
 
                     foreach (var amplifier in outstanding)
                     {
-                        if (failedSet.Contains(amplifier))
-                        {
-                            failed.Add(amplifier);
-                        }
-                        else
+                        // A required target is established only when a neutral command was accepted
+                        // for a legitimate track amplifier AND that amplifier's communication is
+                        // fresh. A stale or never-seen amplifier keeps its outstanding target.
+                        var established =
+                            !notCommandedSet.Contains(amplifier) &&
+                            neutralizer.GetAmplifierCommunicationState(amplifier) == AmplifierCommunicationState.Fresh;
+
+                        if (established)
                         {
                             commanded.Add(amplifier);
                         }
+                        else
+                        {
+                            failed.Add(amplifier);
+                        }
                     }
 
-                    if (failed.Count == 0)
+                    if (commanded.Count > 0)
                     {
-                        CommandTracker?.RecordNeutral(address, outstanding);
+                        CommandTracker?.RecordNeutral(address, commanded);
                         applied = true;
                     }
-                    else
-                    {
-                        if (commanded.Count > 0)
-                        {
-                            CommandTracker?.RecordNeutral(address, commanded);
-                            applied = true;
-                        }
 
+                    if (failed.Count > 0)
+                    {
                         _log?.Invoke(
-                            $"Safety stop for loco {address}: amplifier(s) {string.Join(",", failed)} could not be commanded neutral.");
+                            $"Safety stop for loco {address}: amplifier(s) {string.Join(",", failed)} could not be established neutral (refused, stale or unavailable).");
                     }
                 }
             }
@@ -147,12 +164,13 @@ namespace SiebwaldeApp.Integration
             var neutralizer = Neutralizer ?? Hardware as IAmplifierNeutralizer;
 
             var targets = new SortedSet<ushort>();
+            var retained = new HashSet<ushort>();
 
             if (neutralizer is not null)
             {
                 foreach (var amplifier in neutralizer.GetKnownPhysicalAmplifiers() ?? Array.Empty<ushort>())
                 {
-                    if (amplifier != 0)
+                    if (TrackAmplifierAddress.IsTrackAmplifierAddress(amplifier))
                     {
                         targets.Add(amplifier);
                     }
@@ -163,9 +181,10 @@ namespace SiebwaldeApp.Integration
             {
                 foreach (var amplifier in CommandTracker.GetAllOutstanding())
                 {
-                    if (amplifier != 0)
+                    if (TrackAmplifierAddress.IsTrackAmplifierAddress(amplifier))
                     {
                         targets.Add(amplifier);
+                        retained.Add(amplifier);
                     }
                 }
             }
@@ -203,11 +222,34 @@ namespace SiebwaldeApp.Integration
             }
 
             var notCommanded = neutralizer.NeutralizeAmplifiers(targets.ToArray()) ?? Array.Empty<ushort>();
-            var failedSet = new HashSet<ushort>(notCommanded);
-            var commanded = targets.Where(a => !failedSet.Contains(a)).ToArray();
-            var failed = targets.Where(a => failedSet.Contains(a)).ToArray();
+            var notCommandedSet = new HashSet<ushort>(notCommanded);
 
-            if (failed.Length == 0)
+            var commanded = new List<ushort>();
+            var failed = new List<ushort>();
+
+            foreach (var amplifier in targets)
+            {
+                var state = neutralizer.GetAmplifierCommunicationState(amplifier);
+                var established = !notCommandedSet.Contains(amplifier) && state == AmplifierCommunicationState.Fresh;
+
+                // A target is required when it is a retained non-neutral command (its output may
+                // be latched) or when the amplifier is physically present (detected, fresh or
+                // stale). A topology entry that was never seen is a best-effort extra: the neutral
+                // command is still queued, but an absent amplifier is not a failed safety target.
+                var required = retained.Contains(amplifier) ||
+                               state is AmplifierCommunicationState.Fresh or AmplifierCommunicationState.Stale;
+
+                if (established)
+                {
+                    commanded.Add(amplifier);
+                }
+                else if (required)
+                {
+                    failed.Add(amplifier);
+                }
+            }
+
+            if (failed.Count == 0)
             {
                 CommandTracker?.ClearAll();
 
@@ -226,17 +268,17 @@ namespace SiebwaldeApp.Integration
                 }
 
                 _log?.Invoke(
-                    $"Safety stop: layout commanded neutral on {commanded.Length} physical amplifier(s), including detected and mapped outputs.");
+                    $"Safety stop: layout commanded neutral on {commanded.Count} physical amplifier(s), including detected and mapped outputs.");
                 return SafetyStopResult.Commanded(commanded);
             }
 
-            if (commanded.Length > 0)
+            if (commanded.Count > 0)
             {
                 CommandTracker?.RecordNeutralGlobally(commanded);
             }
 
             _log?.Invoke(
-                $"Safety stop for the layout incomplete: amplifier(s) {string.Join(",", failed)} could not be commanded neutral.");
+                $"Safety stop for the layout incomplete: amplifier(s) {string.Join(",", failed)} could not be established neutral (refused, stale or unavailable).");
             return SafetyStopResult.Partial(commanded, failed);
         }
     }

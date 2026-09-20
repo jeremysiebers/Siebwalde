@@ -45,7 +45,8 @@ namespace SiebwaldeApp.Integration
             LookAheadPlanner? lookAheadPlanner = null,
             IOccupancyProvider? occupancyProvider = null,
             Func<IReadOnlyDictionary<int, SwitchPosition>>? switchPositionProvider = null,
-            AmplifierCommandTracker? commandTracker = null)
+            AmplifierCommandTracker? commandTracker = null,
+            TrackAmplifierGroups? groups = null)
         {
             _blockPositionProvider = blockPositionProvider ?? throw new ArgumentNullException(nameof(blockPositionProvider));
             _topology = topology ?? throw new ArgumentNullException(nameof(topology));
@@ -55,6 +56,7 @@ namespace SiebwaldeApp.Integration
             _occupancyProvider = occupancyProvider;
             _switchPositionProvider = switchPositionProvider;
             _commandTracker = commandTracker;
+            Groups = groups ?? TrackAmplifierGroups.Empty;
         }
 
         /// <summary>Power off sets every mapped amplifier to neutral (standstill).</summary>
@@ -77,6 +79,12 @@ namespace SiebwaldeApp.Integration
 
                 foreach (var amplifier in amplifiers)
                 {
+                    // Only a legitimate physical track amplifier may receive a PWM/neutral write.
+                    if (!TrackAmplifierAddress.IsTrackAmplifierAddress(amplifier))
+                    {
+                        continue;
+                    }
+
                     _variables.SetDesiredAmplifierControl(amplifier, AmplifierSpeedMapper.NeutralPwm, false);
                     neutralized.Add(amplifier);
                 }
@@ -108,9 +116,21 @@ namespace SiebwaldeApp.Integration
                 return false;
             }
 
-            if (!_topology.TryGetAmplifiers(block.Value, out var amplifiers))
+            if (!_topology.TryGetAmplifiers(block.Value, out var mappedAmplifiers))
             {
                 _log?.Invoke($"Loco {address}: block {block.Value} has no amplifier mapping");
+                return false;
+            }
+
+            // A topology entry that names a backplane/configuration slave is a configuration
+            // error; it must never receive a track-amplifier PWM command.
+            var amplifiers = mappedAmplifiers
+                .Where(a => TrackAmplifierAddress.IsTrackAmplifierAddress(a))
+                .ToArray();
+
+            if (amplifiers.Length == 0)
+            {
+                _log?.Invoke($"Loco {address}: block {block.Value} maps no legitimate track amplifier");
                 return false;
             }
 
@@ -167,7 +187,16 @@ namespace SiebwaldeApp.Integration
                 return;
             }
 
-            if (!_topology.TryGetAmplifiers(nextBlock, out var nextAmplifiers))
+            if (!_topology.TryGetAmplifiers(nextBlock, out var mappedNextAmplifiers))
+            {
+                return;
+            }
+
+            var nextAmplifiers = mappedNextAmplifiers
+                .Where(a => TrackAmplifierAddress.IsTrackAmplifierAddress(a))
+                .ToArray();
+
+            if (nextAmplifiers.Length == 0)
             {
                 return;
             }
@@ -189,14 +218,21 @@ namespace SiebwaldeApp.Integration
         /// </summary>
         private void RecordCommand(int locoAddress, ushort amplifier, int pwm)
         {
-            if (_commandTracker is null)
+            if (_commandTracker is null || !TrackAmplifierAddress.IsTrackAmplifierAddress(amplifier))
             {
                 return;
             }
 
             if (pwm == AmplifierSpeedMapper.NeutralPwm)
             {
-                _commandTracker.RecordNeutral(locoAddress, amplifier);
+                // A neutral value placed in the pending-write queue only clears the outstanding
+                // target when the amplifier's communication is fresh. A stale/unavailable
+                // amplifier must remain a safety concern: a queued value is not proof that the
+                // neutral command reached the device.
+                if (GetAmplifierCommunicationState(amplifier) == AmplifierCommunicationState.Fresh)
+                {
+                    _commandTracker.RecordNeutral(locoAddress, amplifier);
+                }
             }
             else
             {
@@ -220,7 +256,12 @@ namespace SiebwaldeApp.Integration
             {
                 foreach (var amplifier in items)
                 {
-                    if (amplifier is not null && amplifier.SlaveNumber != 0 && amplifier.SlaveDetected != 0)
+                    // Backplane/configuration slaves are detected hardware too, but they are a
+                    // different physical class and must never enter the track-amplifier
+                    // neutralization target set.
+                    if (amplifier is not null &&
+                        amplifier.SlaveDetected != 0 &&
+                        TrackAmplifierAddress.IsTrackAmplifierAddress(amplifier.SlaveNumber))
                     {
                         known.Add(amplifier.SlaveNumber);
                     }
@@ -233,7 +274,7 @@ namespace SiebwaldeApp.Integration
                 {
                     foreach (var amplifier in amplifiers)
                     {
-                        if (amplifier != 0)
+                        if (TrackAmplifierAddress.IsTrackAmplifierAddress(amplifier))
                         {
                             known.Add(amplifier);
                         }
@@ -256,23 +297,75 @@ namespace SiebwaldeApp.Integration
             }
 
             var failed = new List<ushort>();
+            var queued = new List<ushort>();
 
             foreach (var amplifier in amplifiers.Distinct())
             {
-                if (amplifier == 0)
+                // Central device-class guard: a backplane/configuration slave (51..55) or any
+                // other non-track address is rejected and produces no write at all.
+                if (!TrackAmplifierAddress.IsTrackAmplifierAddress(amplifier))
                 {
                     failed.Add(amplifier);
+                    _log?.Invoke(
+                        $"Neutralization refused for slave {amplifier}: not a physical track amplifier.");
                     continue;
                 }
 
                 _variables.SetDesiredAmplifierControl(amplifier, AmplifierSpeedMapper.NeutralPwm, false);
+                queued.Add(amplifier);
             }
 
             _log?.Invoke(
-                $"Amplifier-centric neutralization queued for amp(s) {string.Join(",", amplifiers.Distinct())}");
+                $"Amplifier-centric neutralization queued for amp(s) {string.Join(",", queued)}");
 
             return failed;
         }
+
+        /// <summary>
+        /// The current communication state of the amplifier. "Fresh" is the only state in which a
+        /// queued neutral command can be treated as established; "Stale" and "NeverSeen" keep a
+        /// required target a safety concern.
+        /// </summary>
+        public AmplifierCommunicationState GetAmplifierCommunicationState(ushort amplifier)
+        {
+            if (!TrackAmplifierAddress.IsTrackAmplifierAddress(amplifier))
+            {
+                return AmplifierCommunicationState.Invalid;
+            }
+
+            var item = _variables.trackAmpItems?
+                .FirstOrDefault(a => a is not null && a.SlaveNumber == amplifier);
+
+            if (item is null || item.SlaveDetected == 0)
+            {
+                return AmplifierCommunicationState.NeverSeen;
+            }
+
+            return TrackAmplifierDataFreshness.IsFresh(item)
+                ? AmplifierCommunicationState.Fresh
+                : AmplifierCommunicationState.Stale;
+        }
+
+        /// <summary>
+        /// The configured operational grouping (main railway / mountain railway / spare). It is a
+        /// different concept from the physical device class and from the block mapping.
+        /// </summary>
+        public TrackAmplifierGroups Groups { get; }
+
+        /// <summary>
+        /// The configured operational group of a physical track amplifier, or
+        /// <see cref="TrackAmplifierOperationalGroup.Unassigned"/> when it is not configured or
+        /// is not a legitimate track amplifier. An address is never inferred as main railway from
+        /// its range alone.
+        /// </summary>
+        public TrackAmplifierOperationalGroup GetOperationalGroup(ushort amplifier)
+            => TrackAmplifierAddress.IsTrackAmplifierAddress(amplifier)
+                ? Groups.Classify(amplifier)
+                : TrackAmplifierOperationalGroup.Unassigned;
+
+        /// <summary>The configured addresses of one operational group, ordered.</summary>
+        public IReadOnlyList<ushort> GetConfiguredAmplifiers(TrackAmplifierOperationalGroup group)
+            => Groups.GetGroup(group);
 
         /// <summary>
         /// Divergence checks for the routes this backend is about to command. Bound after
