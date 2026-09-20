@@ -36,7 +36,8 @@ namespace SiebwaldeApp.Integration
             Action<string>? log = null,
             SwitchController? switchController = null,
             ControlSafetyGuard? safetyGuard = null,
-            ControlDiagnostics? diagnostics = null)
+            ControlDiagnostics? diagnostics = null,
+            TrackAmplifierGroups? trackAmplifierGroups = null)
         {
             _commClient = commClient ?? throw new ArgumentNullException(nameof(commClient));
             if (variables is null) throw new ArgumentNullException(nameof(variables));
@@ -56,6 +57,8 @@ namespace SiebwaldeApp.Integration
             // mapping has since changed or disappeared.
             CommandTracker = new AmplifierCommandTracker();
 
+            TrackAmplifierGroups = trackAmplifierGroups ?? TrackAmplifierGroups.Empty;
+
             RealBackend = new TrackAmplifierHardwareBackend(
                 blockPositionProvider,
                 topology,
@@ -64,7 +67,8 @@ namespace SiebwaldeApp.Integration
                 new LookAheadPlanner(topology),
                 occupancyProvider,
                 switchPositionProvider,
-                CommandTracker);
+                CommandTracker,
+                TrackAmplifierGroups);
 
             // When a loco repository is supplied, host the ECoS backend in-process and use it
             // as the feedback sink. Otherwise the caller supplies its own sink (for example a
@@ -104,6 +108,13 @@ namespace SiebwaldeApp.Integration
         /// stop sink. Exposed so the composition root can bind the stop sink to the same instance.
         /// </summary>
         public AmplifierCommandTracker CommandTracker { get; }
+
+        /// <summary>
+        /// The configured operational grouping of the physical track amplifiers. It is a separate
+        /// concept from the physical device class and from the block mapping; domain-scoped safety
+        /// behaviour is not decided here.
+        /// </summary>
+        public TrackAmplifierGroups TrackAmplifierGroups { get; }
 
         /// <summary>The in-process ECoS backend, when a loco repository was supplied.</summary>
         public SimpleEcosBackend? EcosBackend { get; }

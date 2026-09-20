@@ -49,11 +49,37 @@ namespace SiebwaldeApp.Core
             CoreSettings.Default.SwitchMapConfig,
             nameof(CoreSettings.SwitchMapConfig));
 
+        /// <summary>
+        /// Raw track-amplifier operational grouping text
+        /// (main railway / mountain railway / spare addresses). Physical device type is not
+        /// configured here: it is fixed by <see cref="TrackAmplifierAddress"/>.
+        /// </summary>
+        public static string TrackAmplifierGroupsConfig => ResolveSettingOrDefault(
+            CoreSettings.Default.TrackAmplifierGroupsConfig,
+            nameof(CoreSettings.TrackAmplifierGroupsConfig));
+
         /// <summary>Parses <see cref="BlockTopologyConfig"/> into a topology.</summary>
         public static BlockTopology BuildBlockTopology() => BlockTopology.Parse(BlockTopologyConfig);
 
         /// <summary>Parses <see cref="KoploperBlockMapConfig"/> into a Koploper block map.</summary>
         public static KoploperBlockMap BuildKoploperBlockMap() => KoploperBlockMap.Parse(KoploperBlockMapConfig);
+
+        /// <summary>
+        /// Parses <see cref="TrackAmplifierGroupsConfig"/> into the operational grouping and logs
+        /// configuration problems, so a malformed grouping never silently becomes a plausible but
+        /// wrong safety domain.
+        /// </summary>
+        public static TrackAmplifierGroups BuildTrackAmplifierGroups()
+        {
+            var groups = TrackAmplifierGroups.Parse(TrackAmplifierGroupsConfig);
+
+            foreach (var error in groups.Errors)
+            {
+                IoC.Logger.Log($"Track-amplifier grouping problem: {error}", "CoreConfiguration");
+            }
+
+            return groups;
+        }
 
         /// <summary>
         /// Parses <see cref="SwitchMapConfig"/> into a switch mapping. Invalid entries are

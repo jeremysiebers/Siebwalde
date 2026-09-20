@@ -53,6 +53,9 @@
     <Setting Name="SwitchMapConfig" Type="System.String" Scope="User">
       <Value Profile="(Default)">switches: 1:1:keep, 2:2:keep</Value>
     </Setting>
+    <Setting Name="TrackAmplifierGroupsConfig" Type="System.String" Scope="User">
+      <Value Profile="(Default)">main: ; mountain: ; spare: </Value>
+    </Setting>
     <Setting Name="UseFakeHardwareAdapters" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
