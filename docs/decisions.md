@@ -541,3 +541,19 @@ Decision: for a multi-section block, a fresh occupied section proves the block o
 Evidence: a stale "occupied" reading may describe a train that has already left, so promoting it to a definite occupancy would be a false claim; but treating it as clear would be unsafe. Unknown is the honest answer: it blocks look-ahead and reports `StateUnknown` (Rejected) without inventing a stop.
 
 Impact: definite occupancy is never turned into unknown (requirement preserved), and a previously latched `OccupancyMismatch` cannot be reset while its source is stale, because `IsResolved` requires the block to be known clear, which requires fresh data.
+
+## 2026-09-19: Protocol-Specific Speed Is Normalized At The ECoS Boundary
+
+Decision: protocol-specific ECoS speed steps (for example `DCC28`, steps 0..28) are normalized to the existing `0..127` domain at the ECoS/protocol boundary (`SimpleEcosBackend`). The `IHardwareBackend` contract and `AmplifierSpeedMapper` keep operating on normalized `0..127`, so the hardware layer stays protocol-independent. **Not implemented yet.**
+
+Evidence: live validation on 2026-09-19 showed the locomotive protocol is `DCC28` and Koploper/ECoS supplied steps `0..28`, while `AmplifierSpeedMapper.ToPwm` scales by 127. Live DCC28 step 24 produced only ~PWM 475 instead of approaching 799, so a full-throttle command uses only part of the usable 400..799 range.
+
+Impact: recorded as a confirmed product defect in `docs/backlog.md`. The correction must not push DCC28 knowledge into the amplifier/backend layer; the boundary is the only place that knows the protocol.
+
+## 2026-09-19: Live Hardware Is An Explicit Delegation Exception
+
+Decision: the single-agent default is unchanged for normal work, but authorized live railway hardware validation is an explicit exception: live test execution and evidence collection are delegated to the `integrator`, while the Project Lead keeps scope, authorization, safety boundaries, sequencing, handoff, backlog and final documentation. The Developer implements and software-verifies only; the Developer must not run the physical motor, start a hardware-driving harness, or declare its own fix physically validated.
+
+Evidence: in the 2026-09-19 live session a standalone harness omitted the production runtime loop, and the harness was left running as a hidden background PID that also left amplifier 1 at PWM 475 instead of neutral on shutdown.
+
+Impact: `.opencode/agents/project-lead.md` and `.opencode/agents/integrator.md` now carry the live-hardware policy (process visibility with PID/command/working directory/session name/manual stop/timeout/neutral procedure, mandatory safe cleanup before handoff, and the budget-exhaustion procedure). `developer.md`, `architect.md` and `designer.md` were deliberately not modified.

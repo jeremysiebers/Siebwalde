@@ -1,5 +1,93 @@
 # Handoff
 
+## Latest Session (2026-09-19, live Koploper setpoint validation + agent policy)
+
+Branch `feature/live-koploper-occupancy-validation`, HEAD `b09c697`. **No production code was changed.** One product defect was found and is recorded, not fixed.
+
+### Repository state
+
+- branch: `feature/live-koploper-occupancy-validation`
+- HEAD: `b09c697`
+- local branch matches `origin/feature/live-koploper-occupancy-validation`
+- tracked working tree clean
+- commits created this session: `b09c697` (agent policy only)
+
+### Verified live facts
+
+**Validation-harness limitation (not a product defect).** The initial standalone harness did not start `TrackControlMain.StartRuntime`, so setpoints stayed in `PendingWrites` and nothing reached the amplifiers. Once the production runtime loop was started, the real command path worked.
+
+**Proven physical command path:**
+
+```
+Koploper hand controller -> ECoS port 15471 -> SimpleEcosBackend
+  -> block/amplifier translation -> hardware backend -> runtime write loop
+  -> PIC32 master -> amplifier 1 -> physical motor
+```
+
+The motor physically responded to the Koploper hand controller. Observed C# -> amplifier response: **~120 ms** (consistent with the 10 Hz runtime loop plus a ~40 ms frame round-trip). No firmware was modified or flashed, no switch/accessory output was used, and movement happened only through the operator's hand controller on a free-running motor.
+
+**Confirmed product defect - DCC28 scaling.** Live evidence:
+
+| Item | Value |
+| --- | --- |
+| Locomotive protocol | `DCC28` |
+| Speed steps supplied by Koploper/ECoS | `0..28` |
+| Backend/hardware speed contract | normalized `0..127` |
+| `AmplifierSpeedMapper` domain | normalized `0..127` |
+| Live DCC28 step 24 | ~PWM 475 |
+
+DCC28 speed is therefore **under-scaled**: a full-throttle command reaches only roughly PWM 475 instead of approaching 799, so only part of the usable range is used.
+
+**Preferred correction (NOT implemented):**
+
+```
+protocol-specific ECoS speed -> normalize at the ECoS/protocol boundary
+  -> normalized 0..127 -> existing IHardwareBackend
+  -> existing AmplifierSpeedMapper -> amplifier PWM
+```
+
+Normalization belongs at the ECoS/protocol boundary; the hardware/backend layer stays protocol-independent.
+
+### Agent policy (committed)
+
+`b09c697` adds the live-hardware working policy to `.opencode/agents/project-lead.md` (+128) and `.opencode/agents/integrator.md` (+77). The single-agent default is unchanged; live hardware is now the explicit exception that delegates to the Integrator. `developer.md`, `architect.md` and `designer.md` were **not** modified.
+
+### NOT completed (do not assume otherwise)
+
+- Developer implementation of DCC28 normalization;
+- regression tests for the DCC28 scaling defect;
+- independent Integrator review of that fix;
+- live DCC28 full-range verification;
+- live occupancy bridge validation through `TrackAmplifierOccupancyBridge` -> ECoS module 100 -> Koploper bezetmelder;
+- PR for `feature/live-koploper-occupancy-validation`.
+
+### Agent workflow for the next session
+
+```
+Project Lead
+-> Developer implements and software-verifies the DCC28 fix
+-> Integrator independently reviews
+-> Integrator performs the later live validation
+-> Project Lead records results
+```
+
+The Developer must not perform the independent live validation of its own fix. Do not invoke Architect or Designer unless a concrete need arises.
+
+### Exact next task
+
+1. read the durable project documents;
+2. verify commit `b09c697`;
+3. confirm current branch/HEAD;
+4. use the Developer subagent to implement DCC28 normalization at the ECoS protocol boundary;
+5. add regression tests;
+6. run Debug and Release build/tests;
+7. commit and push the implementation;
+8. return to the Project Lead before any Integrator or live-validation step begins.
+
+### Safety note for the next live session
+
+When the last harness stopped it left **amplifier 1 at PWM 475** (HR0 `0x01DB`) instead of neutral; amplifiers 3, 4 and 6 were at 399. The harness did not command neutral on shutdown - exactly the gap the new cleanup policy addresses. Confirm amplifier 1 is safe (power-cycle, master reset, or an explicitly announced neutral command) before any further live work.
+
 ## Latest Session (2026-09-19, real-hardware occupancy validation)
 
 Branch `feature/real-occupancy-integration`. The existing occupancy path was validated on the real amplifier setup. **No production-code change was required**; this session is documentation only.

@@ -438,6 +438,24 @@ During the test the master stopped delivering fresh amplifier frames. This was o
 
 This physically confirms the safety invariant **`stale != clear`**, and confirms that `AmplifierDataReceived` on its own is not proof of fresh hardware data.
 
+### Live command path validation (2026-09-19)
+
+The outbound setpoint path was validated live with a free-running DC motor on amplifier 1, driven manually from Koploper's hand controller:
+
+```
+Koploper hand controller -> ECoS port 15471 -> SimpleEcosBackend
+  -> block/amplifier translation -> hardware backend -> runtime write loop
+  -> PIC32 master -> amplifier 1 -> physical motor
+```
+
+The motor responded to the hand controller. Observed C# -> amplifier response: **~120 ms** (the 10 Hz runtime write loop plus a ~40 ms frame round-trip). No firmware was changed or flashed, and no switch/accessory output was used.
+
+**Harness lesson (not a product defect):** a standalone harness must start `TrackControlMain.StartRuntime`. Without the production runtime loop the setpoints stay in `PendingWrites` and never reach the amplifiers.
+
+**Confirmed defect - DCC28 speed scaling.** The locomotive protocol is `DCC28` and Koploper/ECoS supplied steps `0..28`, but `AmplifierSpeedMapper.ToPwm` scales by 127. Live DCC28 step 24 produced only **~PWM 475** instead of approaching 799, so only part of the usable 400..799 range is used.
+
+Preferred correction (not implemented): normalize protocol-specific speed at the ECoS/protocol boundary into the existing normalized `0..127` contract, so `IHardwareBackend` and `AmplifierSpeedMapper` stay protocol-independent.
+
 **Validation-environment note.** The standalone checker used for this validation runs outside the normal application lifecycle and communication ownership. During the session it was able to leave the master communication session in a state that required reinitialization. This was not reproduced through the normal application lifecycle - where master/amplifier communication runs continuously, load/amplifier disconnects are already detected by the existing system, and a software reset path exists - so it is treated as a test-harness limitation rather than a production defect. The freshness result above is unaffected: it is about what the C# side does when fresh data stops arriving.
 
 

@@ -237,6 +237,9 @@ Done:
 
 | Item | Evidence | Acceptance criteria |
 | --- | --- | --- |
+| **CONFIRMED PRODUCT DEFECT: `AmplifierSpeedMapper` assumes 127 speed steps, so DCC28 speed is under-scaled.** | Live validation 2026-09-19: the locomotive protocol is `DCC28` and Koploper/ECoS supplied steps `0..28`, but `ToPwm` scales by 127. Live DCC28 step 24 produced only **~PWM 475** instead of approaching 799, so the motor never reaches the top of the usable 400..799 range. | Normalize protocol-specific speed at the ECoS/protocol boundary (`SimpleEcosBackend`) into the existing normalized `0..127` backend contract, so the hardware layer stays protocol-independent. Regression test for a 28-step loco at full speed. |
+| Item | Evidence | Acceptance criteria |
+| --- | --- | --- |
 | Simulator occupancy through the production abstraction. | Simulator occupancy arrives as ECoS sensor events, so `OccupancyAvailable` is false in simulator mode and route occupancy checks do not run there. | An `IOccupancyProvider` over the simulator exists and occupancy divergence is checked in simulator mode. |
 | Route checks are only wired into the real-mode look-ahead path. | `TrackAmplifierHardwareBackend.Divergence` is set in real mode; the simulator's checker is only reachable by explicit calls. | A route check also runs automatically in simulator mode. |
 | ~~Watchdog for stale amplifier occupancy.~~ **Resolved.** | The comm client keeps republishing its cached container and never clears `SlaveDetected`, so cached data used to stay "valid" forever. `TrackAmplifierDataFreshness` now derives freshness from the frame timestamp. | Done: stale amplifier data is treated as unknown, never as clear. |
