@@ -1,5 +1,40 @@
 # Handoff
 
+## Latest Session (2026-09-20, safety stop-reachability architecture investigation)
+
+Branch `feature/safety-stop-reachability` (new, from merged `master` at `0ee1b40`), HEAD `0ee1b40`. Architect source investigation only; **no code, firmware, or hardware was changed**.
+
+### Classification
+`SOURCE-CONFIRMED STOP-REACHABILITY GAP` (source architecture only; not a physically confirmed product defect).
+
+### Key findings (source)
+- `EcosHardwareStopSink.StopLoco` resolves the target purely from the loco's current block (`TrackAmplifierHardwareBackend.SetLocoSpeed:89-100`); when no amplifier mapping resolves it writes nothing, but the sink logs success and returns true (`EcosHardwareStopSink.cs:42-44`) and `ControlSafetyGuard` discards the result (`ControlSafetyGuard.cs:183`). A failed per-loco stop is silent.
+- No retained per-loco or per-amplifier physical target is consulted by any stop path.
+- Block transitions never neutralize the vacated amplifier (`SimpleEcosBackend.OnBlockEntered`), so a previously commanded amplifier can remain non-neutral; look-ahead can leave a second amplifier non-neutral when planning fails during a stop.
+- The layout stop `TrackAmplifierHardwareBackend.SetPower(false)` is amplifier-centric and mapping-independent (iterates all `BlockTopology` blocks), but is not auto-escalated to and omits detected-but-unmapped amplifiers.
+- `CommandNotApplied`/`BackendUnavailable` exist but are not raised by the stop path.
+- Requested (`LocoState.Speed`/`Direction`) / Commanded (`PendingWrites[amp].Hr0Value`, never compared to observed) / Observed (`TrackAmplifierItem.HoldingReg[0]`) are distinct; `SetLocoSpeed(...,0) == true` does not mean physically neutral.
+
+### Scenarios
+1. Per-loco stop after the loco's current block has no amplifier mapping -> no write, reported success.
+2. Layout stop -> reaches mapped amplifiers regardless of loco mapping (control that succeeds).
+3. Remap A -> B while A still holds a non-neutral setpoint -> A can be left energized (vacated blocks never neutralized).
+4. Communication/freshness unknown -> no stop-path gating, but no delivery confirmation, so an unobservable failure is possible.
+
+### Recommended next step (NOT approved/implemented)
+1. Minimal safety correction: honour the stop result, emit a failure diagnostic, escalate to the amplifier-centric neutralization path.
+2. Broader cleanup: amplifier-centric commanded-state ownership with confirmed neutralization, vacated-block neutralization, look-ahead target retention, commanded-vs-observed PWM confirmation.
+3. Optional diagnostics: surface unconfirmed neutralizations; wire `ReportBackendUnavailable`; fix misleading stop-sink log/XML.
+
+### Physical reproduction
+A minimal controlled plan exists (amplifier 1, lowest non-neutral PWM, operator-in-the-loop, or a harness substituting only the block source) with explicit abort/recovery criteria (process exit is NOT neutralization; amplifier power-cycle as final fallback). Not executed.
+
+### Not done
+No Developer, Integrator live test, implementation, hardware process, or PR.
+
+### Next
+Await Product Owner decision on the minimal safety correction and/or the physical reproduction.
+
 ## Latest Session (2026-09-20, live direction regression + safety reachability attempt)
 
 Branch `feature/live-koploper-occupancy-validation`, HEAD `a2125a7` (plus this documentation commit). Targeted operator-in-the-loop live regression of the direction fix and a safety-reachability investigation. **No production code was changed.**
