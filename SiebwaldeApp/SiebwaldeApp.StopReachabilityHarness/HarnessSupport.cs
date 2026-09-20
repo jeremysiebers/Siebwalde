@@ -119,6 +119,39 @@ namespace SiebwaldeApp.StopReachabilityHarness
     }
 
     /// <summary>
+    /// Captures the production control-trace records so the dry run can print the exact event
+    /// sequence. It only observes; the trace itself is the production <c>ControlTraceLogger</c>
+    /// over the same log factory, so the harness exercises the production logging path.
+    /// </summary>
+    internal sealed class HarnessTraceCapture : ILogger
+    {
+        private readonly List<string> _records = new();
+        private readonly object _gate = new();
+
+        public IReadOnlyList<string> Records
+        {
+            get
+            {
+                lock (_gate)
+                {
+                    return _records.ToArray();
+                }
+            }
+        }
+
+        public void Log(string message, LogLevel level, string loggerinstance)
+        {
+            if (loggerinstance != ControlTraceLogger.LoggerInstance)
+                return;
+
+            lock (_gate)
+            {
+                _records.Add(message);
+            }
+        }
+    }
+
+    /// <summary>
     /// Substitution 1 of 2: the logical block-location source.
     ///
     /// Production uses <c>KoploperExternalInfoClient</c>, which turns a Koploper external-info
