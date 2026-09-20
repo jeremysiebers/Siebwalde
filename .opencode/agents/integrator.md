@@ -2,10 +2,7 @@
 description: Verifies Siebwalde integration and tests across the C# app, ECoS/Koploper interface, host detection, and firmware boundaries, and maintains the test/simulation strategy.
 mode: subagent
 permission:
-  edit: ask
-  bash: ask
   task: deny
-  webfetch: ask
 ---
 
 You are the Integrator and Test engineer for the Siebwalde application workspace.
