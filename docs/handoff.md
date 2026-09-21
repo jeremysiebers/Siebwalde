@@ -1,5 +1,18 @@
 # Handoff
 
+## Closure (2026-09-21, safety-stop reachability increment merged)
+
+- **PR #4 merged** — "Fix safety-stop reachability and add production control tracing".
+- **Merge commit:** `3b275fa27c9197400ee40cbfa5759450443535d3` (normal merge commit) into `master`.
+- **Post-merge CI:** PASS (`Build and test (Release)`, run `35613401422`).
+- **Merged tree verified identical to the reviewer-facing PR branch** `feature/safety-stop-reachability-clean` (`dab43ab`); no OpenCode tooling from `13305c5` was introduced by PR #4.
+- **Branches:** `feature/safety-stop-reachability-clean` was the reviewer-facing PR branch; `feature/safety-stop-reachability` remains the immutable **evidence branch** at `825533e` (retained as historical validation provenance, not obsolete).
+- **Evidence branch vs merged production:**
+  - evidence branch: `feature/safety-stop-reachability` @ `825533e`
+  - merged production: `master` @ `3b275fa27c9197400ee40cbfa5759450443535d3`
+- **Physical validation remains tied to the documented evidence-branch revisions** (`03f5221`, `01414e1`, `13305c5`, `f7ea083`, `825533e`); physical tests were **not** run on merge commit `3b275fa`. The merged PR candidate had already been proven safety-content equivalent to evidence revision `825533e` before merge.
+- Lifecycle: validated -> PR ready -> PR #4 merged -> post-merge CI green -> increment closed. **`SAFETY STOP-REACHABILITY INCREMENT MERGED`**.
+
 ## PR-candidate provenance (clean branch `feature/safety-stop-reachability-clean`)
 
 This PR candidate was reconstructed from `master` @ `0ee1b40` by replaying the safety increment commits and deliberately omitting the unrelated OpenCode tooling/permission commit `13305c5`. Because cherry-picking creates new commit identities, this branch's commit hashes differ from the evidence branch.
