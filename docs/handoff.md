@@ -1,5 +1,11 @@
 # Handoff
 
+## PR-candidate provenance (clean branch `feature/safety-stop-reachability-clean`)
+
+This PR candidate was reconstructed from `master` @ `0ee1b40` by replaying the safety increment commits and deliberately omitting the unrelated OpenCode tooling/permission commit `13305c5`. Because cherry-picking creates new commit identities, this branch's commit hashes differ from the evidence branch.
+
+**Physical validation was performed on the evidence branch `feature/safety-stop-reachability`** at the explicitly documented evidence revisions (`03f5221`, `01414e1`, `13305c5`, `f7ea083`, `825533e`) — not on this PR candidate's commit hashes. This PR candidate was then verified content-equivalent to evidence revision `825533e` for all safety-relevant content (production Core/Integration/EcosEmu, WPF ControlTrace registration, ControlTrace source, `StopReachabilityHarness`, Core/safety tests, and durable safety documentation); the only differences are the six intentionally excluded OpenCode tooling paths (`opencode.json`, `.opencode/agents/*`). Physical Tests A/B/C were therefore not repeated solely because cherry-picking produced new commit identities.
+
 ## Latest Session (2026-09-21, physical safety validation of stop reachability - ORIGINAL SAFETY DEFECT CLOSED)
 
 Branch `feature/safety-stop-reachability`, final HEAD `f7ea083`. This session is **documentation only**: it records the completed software + physical stop-reachability safety validation so a future maintainer can reconstruct the original defect, the fix architecture, the software proof, the physical proof, which revisions produced evidence, and the command-level vs observed-hardware distinction. **No production code, harness, tests, firmware, configuration or OpenCode agent files were changed, no live hardware was used by this session, and no PR was created.** The Project Lead final review verdicts are recorded below; `ORIGINAL SAFETY DEFECT CLOSED: YES`.
