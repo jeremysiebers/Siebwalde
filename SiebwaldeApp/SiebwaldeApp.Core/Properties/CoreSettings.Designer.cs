@@ -226,6 +226,18 @@ namespace SiebwaldeApp.Core.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("main: ; mountain: ; spare: ")]
+        public string TrackAmplifierGroupsConfig {
+            get {
+                return ((string)(this["TrackAmplifierGroupsConfig"]));
+            }
+            set {
+                this["TrackAmplifierGroupsConfig"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool UseFakeHardwareAdapters {
             get {

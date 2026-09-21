@@ -1,5 +1,452 @@
 # Handoff
 
+## PR-candidate provenance (clean branch `feature/safety-stop-reachability-clean`)
+
+This PR candidate was reconstructed from `master` @ `0ee1b40` by replaying the safety increment commits and deliberately omitting the unrelated OpenCode tooling/permission commit `13305c5`. Because cherry-picking creates new commit identities, this branch's commit hashes differ from the evidence branch.
+
+**Physical validation was performed on the evidence branch `feature/safety-stop-reachability`** at the explicitly documented evidence revisions (`03f5221`, `01414e1`, `13305c5`, `f7ea083`, `825533e`) — not on this PR candidate's commit hashes. This PR candidate was then verified content-equivalent to evidence revision `825533e` for all safety-relevant content (production Core/Integration/EcosEmu, WPF ControlTrace registration, ControlTrace source, `StopReachabilityHarness`, Core/safety tests, and durable safety documentation); the only differences are the six intentionally excluded OpenCode tooling paths (`opencode.json`, `.opencode/agents/*`). Physical Tests A/B/C were therefore not repeated solely because cherry-picking produced new commit identities.
+
+## Latest Session (2026-09-21, physical safety validation of stop reachability - ORIGINAL SAFETY DEFECT CLOSED)
+
+Branch `feature/safety-stop-reachability`, final HEAD `f7ea083`. This session is **documentation only**: it records the completed software + physical stop-reachability safety validation so a future maintainer can reconstruct the original defect, the fix architecture, the software proof, the physical proof, which revisions produced evidence, and the command-level vs observed-hardware distinction. **No production code, harness, tests, firmware, configuration or OpenCode agent files were changed, no live hardware was used by this session, and no PR was created.** The Project Lead final review verdicts are recorded below; `ORIGINAL SAFETY DEFECT CLOSED: YES`.
+
+### Repository state
+
+- Branch: `feature/safety-stop-reachability`.
+- Final HEAD before this documentation commit: `f7ea083` (`Add clean live strongest-emergency harness trigger`).
+- Tracked tree clean; local branch equals `origin/feature/safety-stop-reachability`.
+- Historical commits preserved and untouched: `03f5221` (defect harness), `01414e1` (post-fix harness with production trace), `13305c5` (OpenCode permissions), `f7ea083` (clean strongest-emergency trigger).
+
+### Original physical defect (PRE-FIX HISTORICAL physical result, evidence commit `03f5221`)
+
+This is the **pre-fix historical** live result and must not be rewritten as though it occurred on the final branch. Harness revision `03f5221`, branch `feature/safety-stop-reachability`, live-test HEAD `a614efc`, command `--live --ecos-id 1001 --address 2 --protocol DCC28 --from 1 --to 3`, evidence `Logging\stopreach-live-20260920-run2.*`:
+
+- block 1 -> DCC28 `speedstep[1]` -> amp 1 = 416; block transition 1 -> 3 -> amp 1 remained 416 (no neutral write on the transition);
+- `speedstep[1]` in block 3 -> amp 3 = 416;
+- real loco-scoped safety stop -> amp 3 -> 399, amp 1 remained 416, motor continued running; `EcosHardwareStopSink.StopLoco` returned `True` and no failure diagnostic was emitted.
+
+Classifications: `STOP REACHABILITY DEFECT CONFIRMED`, `STOP FAILURE REPORTING DEFECT CONFIRMED`.
+
+### Final architecture summary (short; source comments remain primary)
+
+- `AmplifierCommandTracker` (Core): outstanding physical amplifier ownership is a **set**, not a single last amplifier. Block transitions, route changes and mapping changes never make an already-commanded physical output unreachable. Ownership transfers to the most recent commanding locomotive; a deliberate global neutralization clears across locomotives.
+- `IAmplifierNeutralizer` (production implementation `TrackAmplifierHardwareBackend`): amplifier-centric neutralization independent of `BlockTopology`.
+- `SafetyStopResult`: false success is not accepted when a required neutralization remains unresolved.
+- Device classes: `TrackAmplifier: 1..50`, `Backplane/configuration: 51..55`. Track HR0/PWM semantics never belong to the backplane class.
+- Operational domains `MainRailway` / `MountainRailway` / `Spare` / `Unassigned` are independent from physical device type and from `BlockTopology`. The strongest emergency may cross operational domains for valid `TrackAmplifier` devices while still excluding backplane devices.
+
+### Production ControlTrace evidence
+
+The dedicated production trace was implemented and independently reviewed **before** physical validation; verdict `CONTROL TRACE REVIEW PASS`. Boundaries: `ECOS_COMMAND`, `SPEED_DECISION`, `BLOCK_TRANSITION`, `AMPLIFIER_COMMAND`, `AMPLIFIER_WRITE`, `TRACKER_ADD`, `TRACKER_REMOVE`, `TRACKER_TRANSFER`, `SAFETY_STOP`, `SAFETY_STOP_RESULT`, `SAFETY_ESCALATION`, `EMERGENCY_TARGET_SET`.
+
+`Requested != Commanded != Observed` is preserved. `AMPLIFIER_COMMAND` is the command/application boundary; `AMPLIFIER_WRITE` is the transmission/write boundary; **neither is automatically a hardware ACK**. Physical/status observation is documented separately (`OBSERVED_HR0=...` read back from a fresh register).
+
+### Physical Test A - retained stop reachability (`PHYSICAL SAFETY VALIDATION PASS`)
+
+Traceability: repository commit `13305c5`, post-fix harness revision `01414e1`. Sequence (baseline amp1=399/amp3=399):
+
+- block 1 + `speedstep[1]` -> amp1 = 416;
+- block transition 1 -> 3 -> amp1 remained 416;
+- `speedstep[1]` in block 3 -> amp1 = 416, amp3 = 416;
+- real loco-scoped safety stop -> amp1 -> 399, amp3 -> 399, motor stopped.
+
+Verdicts: `PHYSICAL SAFETY VALIDATION PASS`, `TEST A - STOP REACHABILITY PASS`, `PHYSICAL MOTOR STOP PASS`, `SAFETY RESULT INTEGRITY PASS`, `PRODUCTION TRACE RECONSTRUCTION PASS`.
+
+Contrast: against `03f5221` amp1 remained 416 and the motor continued; post-fix amp1 = 399, amp3 = 399, motor stopped. Test A is tied to this earlier accepted production revision (repository `13305c5` / harness `01414e1`).
+
+### Physical Test B - backplane device-class boundary (`TEST B - BACKPLANE NON-TARGETING PASS`)
+
+Real detected inventory: TrackAmplifiers 1, 3, 4, 6; Backplane 51. **The physically proven backplane device is address 51; physical observation of 52-55 is not claimed.**
+
+- Production evidence: `EMERGENCY_TARGET_SET targets=1,2,3,4,5,6 excluded=51-55`.
+- Live evidence: detected 51 was not in the target set; no `AMPLIFIER_COMMAND` / `AMPLIFIER_WRITE` for 51; no track HR0/pending write for 51.
+
+Distinguish **physical evidence** (detected address 51 directly observed as excluded) from **software classification evidence** (the `51..55` range is proven by `TrackAmplifierAddress` and its tests, not by observing 52-55 on hardware).
+
+### Physical Test C - unmapped amp6 reachability (`TEST C - UNMAPPED AMP6 EMERGENCY REACHABILITY PASS`)
+
+amp6 was detected, a valid `TrackAmplifier`, unmapped in `BlockTopology`, and had no motor. The production strongest emergency included it naturally:
+
+- `AMPLIFIER_COMMAND amp=6 purpose=EmergencyNeutral pwm=399 hr0=399`
+- `AMPLIFIER_WRITE amp=6 hr0=399`
+- `[WRITE] slave=6 HR0=0x018F`
+- `OBSERVED_HR0=399`
+
+Boundary: a valid detected `TrackAmplifier` remains reachable by the strongest emergency independently of `BlockTopology`. amp6 was never intentionally driven non-neutral.
+
+### Clean strongest-emergency harness trigger (commit `f7ea083`)
+
+Command `strongeststop` (alias `emergencyneutralize`); call path `StrongestEmergencyTrigger.Invoke -> ISafetyStopSink.StopLayout() -> production EcosHardwareStopSink.StopLayout() -> IAmplifierNeutralizer`. Verdict `CLEAN LIVE EMERGENCY TRIGGER REVIEW PASS`.
+
+Properties: no synthetic detection seeding; no harness-side address filtering; no amp6 special-case; no direct harness HR0 writes; production target selection is authoritative; neutral-only trigger.
+
+### Binary provenance closure (`PHYSICAL B/C BINARY-PROVENANCE VALIDATION PASS`)
+
+Initial caveat: the harness executable was prebuilt, so its relation to `f7ea083` was inferred rather than established by an immediately controlled rebuild. Closure: a controlled rebuild at branch `feature/safety-stop-reachability`, HEAD `f7ea083`, Debug, `net8.0-windows7.0`, with the exact repository state verified; clean rebuild; harness executable SHA256 `EC042242C3664F3CF540DAD487A93658A910DCAE4D94A0CA23C64295FDC84D1B`; the hash was pinned with no build/test/clean/restore between pinning and launch; the hash was reverified immediately before launch; the same executable was used for the live B/C provenance rerun, B and C passed again, and cleanup passed.
+
+### Final physical evidence package (three boundaries)
+
+- **Boundary 1:** retained non-neutral amplifier after a block transition -> still reachable by a later loco safety stop -> neutralized (Test A).
+- **Boundary 2:** real detected backplane device -> excluded from the track target set -> no track HR0/PWM write (physically established for detected address 51; Test B).
+- **Boundary 3:** real detected valid `TrackAmplifier` + unmapped in `BlockTopology` -> still reachable by the strongest emergency (physically established with amp6; Test C).
+
+Final Project Lead conclusion: `ORIGINAL SAFETY DEFECT CLOSED: YES`.
+
+### Cleanup evidence
+
+Final observed track states where available: amp1 = 399, amp3 = 399, amp4 = 399, amp6 = 399; safety reset/known; harness stopped; driver/control process stopped; UDP 10001 free; TCP 15471 free; tracked tree clean; no master reset or physical power removal was required.
+
+### Important live-tooling warning (documentation only; no guard implemented)
+
+`backplanecheck` and `classify` are **synthetic** validation commands that can mutate/seed in-memory detection state. They must not be used before `strongeststop` in a live hardware validation session where genuine detected inventory is required as evidence. This is a procedural tooling constraint for the standalone harness, **not** production WPF behaviour.
+
+### Remaining known follow-ups (kept open; not blockers unless separately promoted)
+
+1. ControlTrace free-text quoting/escaping.
+2. Build/commit ID in `CONTROL_TRACE_START`.
+3. Additional trace test around false-success/escalation.
+4. Trace registration idempotence.
+5. Clarify retained/mapped/commanded/stale terminology.
+6. Optional WPF composition smoke test.
+7. Startup/restart established-neutral guarantee.
+8. Manual `SetAmplifierControl` ownership/tracking refinement.
+9. Stronger protocol ACK/Observed semantics if transport support becomes available.
+10. `FileLogger` concurrency/silent-write/retention redesign.
+11. Test project -> harness executable project dependency.
+12. Synthetic harness commands `backplanecheck`/`classify` have no live-mode guard.
+
+### Evidence-class labelling used in this entry
+
+`SOFTWARE EVIDENCE` (tests, source, classification range), `PHYSICAL EVIDENCE` / `OBSERVED HARDWARE EVIDENCE` (live register reads and motor behaviour), `COMMAND-LEVEL EVIDENCE` (queue/transmission boundaries). `AMPLIFIER_WRITE` is never an ACK, and absent hardware is never represented as physically tested.
+
+## Latest Session (2026-09-20, dedicated production Koploper/ECoS control trace + two low-cost safety tests)
+
+Branch `feature/safety-stop-reachability`, on top of `a5ccf7d`. The supplemental Integrator review concluded `SOURCE DOCUMENTATION SUFFICIENT`, `PRODUCTION TRACE INCOMPLETE`, `OFFLINE PARSING NOT YET PRACTICAL`, `IMPLEMENT PRODUCTION TRACE BEFORE PHYSICAL VALIDATION`. **This session implements ONE dedicated production control-trace logfile using the existing logging infrastructure, adds the two remaining low-cost safety tests, and adapts the harness to initialize the production trace. No live hardware was started, no Integrator was started, no firmware was modified and no PR was created. Physical post-fix validation remains PENDING.**
+
+### Dedicated component logger and registration
+
+- Component/logger name: **`ControlTraceLog`** (`ControlTraceLogger.LoggerInstance`).
+- New Core files: `SiebwaldeApp.Core/Logging/Trace/IControlTrace.cs` (focused event interface), `ControlTraceLogger.cs` (the single production implementation over `ILogFactory`), `ControlTraceFormat.cs` (the one deterministic formatting convention), `ControlTraceLogging.cs` (registration helper).
+- Registration point (real production startup): `SiebwaldeApp/SiebwaldeApp/IoC/IoC.cs` `BindViewModels()`, which runs from `App.OnStartup` -> `ApplicationSetup` -> `IoC.Setup()`. It calls `ControlTraceLogging.Register(SiebwaldeApp.Core.IoC.Logger, CoreConfiguration.LogDirectory, "SiebwaldeApp")`, adds a `FileLogger` through `ILogFactory.AddLogger` and emits `EVENT=CONTROL_TRACE_START`. The trace is then passed to `TrackControlHost.FromConfiguration(..., controlTrace:)` and `SiebwaldeApplicationModel(ecosHost, controlTrace)`.
+- Reuse proof: `ControlTraceLogger` writes every event through `ILogFactory.Log(payload, "ControlTraceLog")`; the registration adds an existing `FileLogger`. No direct `StreamWriter`, no `File.AppendAllText`, no second logging library, no custom rotation/buffering and no FileLogger redesign.
+
+### Logfile filename convention and prefix
+
+- File: `{CoreSettings.LogDirectory}{dd-M-yyyy}_ControlTraceLog.txt`, resolved at registration time, e.g. `C:\Localdata\Siebwalde\Logging\20-9-2026_ControlTraceLog.txt`. This matches the existing component-log convention used by `TrackAppLog` (`Day-Month-Year_Component.txt`).
+- The existing `BaseLogFactory` prefix (timestamp with ms, source file, method, line) still precedes the payload, e.g. `[20-9-2026 23:23:12:182 > ControlTraceLogger.cs > Emit() > line 212] EVENT=...`.
+
+### Event format
+
+Payload convention (documented in `ControlTraceFormat`): `EVENT=<NAME> key=value key=value ...`; single-space field separator; `<none>` for null/unknown; comma-separated ordered lists with `<none>` for empty; `true`/`false` booleans; stable enum member names; invariant numeric formatting; embedded CR/LF replaced by a space. Format version is in `EVENT=CONTROL_TRACE_START ... format=1`.
+
+Event names: `CONTROL_TRACE_START`, `ECOS_COMMAND`, `SPEED_DECISION`, `BLOCK_TRANSITION`, `AMPLIFIER_COMMAND`, `AMPLIFIER_WRITE`, `TRACKER_ADD`, `TRACKER_REMOVE`, `TRACKER_TRANSFER`, `SAFETY_STOP`, `SAFETY_STOP_RESULT`, `SAFETY_ESCALATION`, `EMERGENCY_TARGET_SET`, `MANUAL_CONTROL`, `ABNORMAL`.
+
+### Covered boundaries
+
+- Input boundary (`ECOS_COMMAND`): `SimpleEcosBackend.HandleAsync`, only state-changing commands (`set`/`create`/`delete`); polling chatter (`get`/`request`/`queryObjects`/`release`) is not traced.
+- Parser/normalization boundary (`SPEED_DECISION`): `SimpleEcosBackend.HandleSetAsync` logs protocol, raw kind/value and normalized value; an unsupported protocol is `ABNORMAL`.
+- Logical block transition (`BLOCK_TRANSITION`): `SimpleEcosBackend.OnBlockEntered`, with a dedicated per-loco last-block tracker so `previous` is reliable.
+- Physical target decision (`AMPLIFIER_COMMAND`): `TrackAmplifierHardwareBackend` at the shared queue-acceptance boundary, with loco, block, `purpose` (Movement/LookAhead/PowerOff/EmergencyNeutral), `source` (Loco/Layout/Safety), pwm/hr0, operational group, speed and direction.
+- Concrete physical command boundary (`AMPLIFIER_WRITE`): `TrackControlMain` at the runtime transmission step, corresponding to the existing `[WRITE]` line.
+- Tracker lifecycle (`TRACKER_ADD`/`TRACKER_REMOVE`/`TRACKER_TRANSFER`): `AmplifierCommandTracker`; removal `reason` distinguishes `NeutralCommanded`, `GlobalNeutral`, `Clear`, `ClearAll` and never conflates a transfer.
+- Safety stop (`SAFETY_STOP`/`SAFETY_STOP_RESULT`): `ControlSafetyGuard` logs scope/loco/reason/block before the attempt; `EcosHardwareStopSink` logs succeeded/applied/backendunavailable/commanded/failed/retained/stale.
+- Escalation (`SAFETY_ESCALATION`): `ControlSafetyGuard.EscalateToLayoutNeutralization` logs `result=Requested` before and `result=Established`/`Incomplete` after; an attempt is never reported as established.
+- Emergency target set (`EMERGENCY_TARGET_SET`): `EcosHardwareStopSink.StopLayout` logs the final target set plus `excluded=51-55`, so a later verification can see the backplane class was not selected without spamming the exclusion per amplifier.
+- Manual control (`MANUAL_CONTROL`): `SiebwaldeApplicationModel.SetAmplifierControl` logs `source=Manual`; an invalid/backplane address presented to that command API is an `ABNORMAL` rejection. The manual path is still outside per-loco ownership (unchanged).
+
+### Requested / Commanded / Observed
+
+Preserved and never collapsed. Requested = the incoming command/speed step (`ECOS_COMMAND`, `SPEED_DECISION`). Commanded = a setpoint accepted at the pending-write queue (`AMPLIFIER_COMMAND`) or transmitted by the runtime writer (`AMPLIFIER_WRITE`); the protocol has no acknowledgement, so transmission/hardware reception is not claimed. Observed = a fresh returned register; the trace never fabricates it, and `SAFETY_STOP_RESULT` reports Commanded/Failed only.
+
+### Correlation-id decision
+
+No correlation id was added. No existing request/event identity propagates through `IHardwareBackend`/`IAmplifierNeutralizer`/`AmplifierCommandTracker`; adding one would require invasive signature changes through several layers. Stable millisecond timestamps plus loco/amp/event fields are sufficient for the current offline reconstruction. Recorded in `docs/backlog.md`.
+
+### Known FileLogger limitations (reused, not redesigned)
+
+`FileLogger` has no rotation/retention, is not thread-safe, uses `File.AppendAllText` and silently swallows write failures. The trace reuses it unchanged. `ControlTraceLogger` serializes only its own writes with a private lock, and the trace file is written only by the `ControlTraceLog` instance, so trace records cannot interleave; the shared logger's general limitations remain. This is not claimed to be durable/auditable beyond what the logger guarantees.
+
+### Two low-cost safety tests (previously identified)
+
+- `AmplifierClassificationAndSafetyDomainTests.EmptyGroupConfiguration_IsEquivalentToEmpty_AndNeverInfersMainRailway`: `"main: ; mountain: ; spare: "` (and null/blank) parses to the equivalent of `TrackAmplifierGroups.Empty`; no amplifier is inferred as `MainRailway` from its address.
+- `AmplifierClassificationAndSafetyDomainTests.ConfiguredMountainRailway_IsIncludedByStrongestEmergency_ButNotByOrdinaryLayoutStop`: a detected legitimate amplifier configured `MountainRailway` is included by the strongest emergency neutralization (`StopLayout`, cross-domain by design), while the ordinary layout power-off (`SetPower(false)`, topology/mapping-oriented) does not include the unmapped mountain amplifier merely because the emergency path would. No backplane addresses are used.
+
+### Files changed (production trace commit `4b14186`)
+
+- Added (Core): `Logging/Trace/IControlTrace.cs`, `ControlTraceLogger.cs`, `ControlTraceFormat.cs`, `ControlTraceLogging.cs`.
+- Added (tests): `SiebwaldeApp.Core.Tests/ControlTraceFormattingTests.cs`, `ControlTraceCausalSequenceTests.cs`.
+- Modified (Core): `SiebwaldeApplicationModel.cs`, `AmplifierCommandTracker.cs`, `TrackControlMain.cs`, `TrackApplicationVariables.cs`.
+- Modified (EcosEmu): `SimpleEcosBackend.cs`, `SiebwaldeApp.EcosEmu.csproj` (adds a `SiebwaldeApp.Core` project reference; Core has no project references, so the dependency stays acyclic).
+- Modified (Integration): `ControlSafetyGuard.cs`, `EcosHardwareStopSink.cs`, `TrackAmplifierHardwareBackend.cs`, `TrackControlHost.cs`, `TrackControlIntegration.cs`.
+- Modified (WPF): `SiebwaldeApp/IoC/IoC.cs` (production registration).
+- Modified (tests): `AmplifierClassificationAndSafetyDomainTests.cs`.
+
+### Harness (separate commit `01414e1`)
+
+`HarnessSupport.cs` adds `HarnessTraceCapture`; `StopReachabilityHarness.cs` creates the production `ControlTraceLogger` over its own log factory, emits `CONTROL_TRACE_START`, passes the trace through the real control path and prints the captured sequence (`PrintControlTrace`, also reachable as the `trace` interactive command). The harness keeps no file logger, so it writes no repository output. The historical defect revision `03f5221` is untouched; the post-fix harness revision is now `01414e1`.
+
+### Verification performed (software only)
+
+- `dotnet build SiebwaldeApp.sln -t:Rebuild` -> **0 errors, 175 warnings** (baseline 175; no new warnings).
+- `dotnet test SiebwaldeApp.sln` -> **339/339 passed** (was 322; +17: 12 formatting + 3 causal-sequence + 2 safety).
+- `dotnet build SiebwaldeApp.sln -c Release -t:Rebuild` -> **0 errors, 175 warnings**.
+- `dotnet test SiebwaldeApp.sln -c Release --no-build` -> **339/339 passed**.
+- `dotnet build SiebwaldeApp.StopReachabilityHarness/SiebwaldeApp.StopReachabilityHarness.csproj` -> **0 errors, 0 warnings**.
+- `SiebwaldeApp.EcosEmu.sln` and `SiebwaldeApp.Core.Host.sln` also build with 0 errors (the EcosEmu Core reference did not break them).
+- Generated file inspected through the real registration: `Logging\20-9-2026_ControlTraceLog.txt`, with the existing FileLogger prefix and the structured payload; 11 records for the representative sequence (no 10 Hz spam).
+- Harness dry run (`--dry-run --script`): Stage 3 amp 1 stays 416 (defect precondition), Stage 5 `SINK_RESULT=True` with `AMP1=399 AMP3=399`, `BACKPLANE SAFETY CHECK: PASS`, and the captured trace shows `BLOCK_TRANSITION previous=1 block=3` -> `AMPLIFIER_COMMAND` -> `TRACKER_ADD` -> `SAFETY_STOP` -> `TRACKER_REMOVE` -> `SAFETY_STOP_RESULT succeeded=true retained=1,3`. This is software-only evidence; it is not a physical result.
+
+### Explicitly pending
+
+- **Independent Integrator review of the production trace.**
+- **Physical post-fix verification on the layout (Integrator). The fix and the trace are not physically validated.**
+- Product Owner decision on the complete group/domain configuration and the cross-domain emergency policy (unchanged).
+- Startup/restart neutral guarantee (unchanged).
+- Optional stronger guarantee for the manual `SetAmplifierControl` path (unchanged).
+
+## Latest Session (2026-09-20, stop-reachability review FAIL corrected: physical device classification)
+
+Branch `feature/safety-stop-reachability`, implementation commit `be05c37`, harness commit `15fcf7d`, on top of the accepted fix `66d75d0` and harness adaptation `c13d9fc`. The independent Integrator review verdict was `SOFTWARE REVIEW FAIL`: the core stop-reachability architecture was accepted, but the amplifier-centric fallback included backplane/configuration slaves `51..55`, which must never receive track-amplifier PWM semantics. **This session corrects that defect and the secondary safety weaknesses in software only. No live hardware was started and no physical validation is claimed.**
+
+### Exact root cause of the 51..55 inclusion
+
+`TrackAmplifierHardwareBackend.GetKnownPhysicalAmplifiers()` selected detected hardware with `amplifier.SlaveNumber != 0 && amplifier.SlaveDetected != 0`. The `trackAmpItems` container holds slaves `0..55`, so the backplane/configuration modules `51..55` (which are detected on the same bus) entered the safety target set. `NeutralizeAmplifiers` then queued the track-amplifier neutral value `399` (`0x018F`) to them. That is invalid: `TrackBackplane2.X/main_proto_backplane.c` `Set_Amplifier()` treats HoldingReg0 `ActValue` as a configuration/enable word for amplifier IDs, so writing `399` would alter configuration bits.
+
+### Authoritative physical device classification
+
+New `TrackAmplifierAddress` (Core) is the single definition: `IsTrackAmplifierAddress` = `1..50`; `IsBackplaneConfigurationSlave` = `51..55`. Verified against source: `TrackApplicationVariables.MaxAmplifiers`, `TrackAmplifierWriteData.SlaveNumber` doc, `TrackAmplifierPageViewModel` ("1..50 amplifiers", "51..55 backplane modules"), `FlashFwTrackamplifiersStep` and `EthernetTargetDataSimulator` (`< 51`), `TrackControlMain` ("data[0] = SlaveAddress (1..50)"), and `TrackBackplane2.X/main_proto_backplane.c` `Get_ID()` (`MODBUS_ADDRESS = 50 + ID pin`). The source confirmed the intended ranges; no contradiction was found.
+
+### Exact correction and central enforcement
+
+- `TrackApplicationVariables.SetDesiredAmplifierControl` — the lowest shared point through which every HR0 command passes (loco, look-ahead, safety, manual page) — refuses any non-track address. No track-amplifier PWM/neutral semantics can reach `51..55` through any path.
+- `TrackAmplifierHardwareBackend.GetKnownPhysicalAmplifiers` returns only legitimate track amplifiers; `NeutralizeAmplifiers` rejects non-track addresses (returned as not commanded, no write); `SetLocoSpeed`, `ApplyLookAhead`, `SetPower(false)` and `InitializeDefaultPwmSetpoints` filter topology/detected amplifiers to the track class; `RecordCommand` never records a non-track address.
+- `AmplifierCommandTracker` refuses to retain a non-track address (defense in depth).
+- `EcosHardwareStopSink` re-validates every target against `TrackAmplifierAddress` before it enters a set or a write.
+
+### Physical device type vs operational group vs block mapping
+
+Three independent concepts are now explicit. (1) Physical device type (`TrackAmplifierAddress`) decides whether PWM/HR0 semantics are legal. (2) Operational group / safety domain (`TrackAmplifierGroups`, new; `MainRailway` / `MountainRailway` / `Spare`) decides the domain; a legitimate track amplifier with no configured group stays `Unassigned` and is never inferred as main railway from its address, its detection, or its `BlockTopology` membership. (3) Logical block mapping (`BlockTopology`) only routes blocks to amplifiers. **No operational group/domain model existed before this session; it is introduced now**, backed by the new `TrackAmplifierGroupsConfig` setting (default `main: ; mountain: ; spare: `, i.e. unconfigured) and `CoreConfiguration.BuildTrackAmplifierGroups()`. The settings-page editor for it is deliberately deferred (next architecture task).
+
+### Proposed representation for MainRailway / MountainRailway / Spare
+
+`TrackAmplifierGroups.Parse`/`Create` accept explicit address collections; `Classify(address)` returns the group; `AllConfigured` and `GetGroup(group)` are available. Backplane addresses, invalid addresses and duplicates are recorded in `Errors` and ignored. A `Spare` is still physically a `TrackAmplifier` (tested) and is never inferred from detection state.
+
+### Which safety actions operate on which group/domain
+
+- `EcosHardwareStopSink.StopLoco` — the loco's retained targets, across whatever domain those amplifiers belong to. It is not domain-scoped.
+- `EcosHardwareStopSink.StopLayout` (strongest physical emergency, used by `ControlSafetyGuard` escalation) — every legitimate track amplifier the control path knows about (detected hardware plus configured topology) plus every retained target. It is not narrowed to one domain and not expanded to configured-but-undetected group members.
+- Normal logical `SetPower(false)` — unchanged: topology-only, mapping-oriented.
+
+### Pending Product Owner / architecture decision (NOT decided here)
+
+The cross-domain emergency policy is **PENDING**: whether a main-railway failure (`SafetyAction.StopLayoutEscalated`) must also neutralize the mountain railway, and whether a configured `Spare` is included in normal layout stop / main fallback / mountain fallback / strongest emergency. The current strongest emergency already targets all known legitimate track amplifiers (pre-existing accepted behaviour); it was deliberately not changed into a domain-scoped action, and no new cross-domain behaviour was added.
+
+### Amp 6 current classification / behaviour
+
+Amp 6 is a detected, unmapped prototype. Physical class: legitimate `TrackAmplifier` (`1..50`). Operational group: `Unassigned` by default; it is never silently classified as `MainRailway` from detection. Because it is detected, the strongest physical neutralization still reaches it (existing behaviour). The harness dry-run configures it as `MountainRailway` only to demonstrate that the group is independent of the physical class and the block mapping.
+
+### Stale / unavailable command semantics
+
+`IAmplifierNeutralizer.GetAmplifierCommunicationState` exposes `Invalid` / `NeverSeen` / `Stale` / `Fresh` (detected **and** fresh via `TrackAmplifierDataFreshness`). A required target is only established when a neutral command was accepted for a legitimate track amplifier **and** its state is `Fresh`. A stale or never-seen required target is reported as unresolved, keeps its retained target, and makes `SafetyStopResult.Succeeded` false; the guard keeps the latch and emits `CommandNotApplied`. A topology-only amplifier that was never seen remains a best-effort extra (neutral is still queued) and is not a false failed target. No hardware acknowledgement is invented.
+
+### Exact definition of neutralization success after correction
+
+Commanded = a neutral setpoint was accepted at the pending-write queue boundary for a legitimate, fresh track amplifier. `Succeeded` = every required target is Commanded and the backend is available. Transmission and observed physical neutralization are not claimed (the protocol provides no acknowledgement). Requested / Commanded / Observed remain distinct.
+
+### Tracker clearing semantics
+
+A retained target is cleared only after a neutral command is accepted for a fresh legitimate track amplifier (`RecordCommand` requires `Fresh`). Moving block, losing the mapping, or a stale/queued neutral never clears it. `StopLayout` clears all outstanding only when every required target is established; otherwise it keeps the unestablished ones.
+
+### Manual `SetAmplifierControl` conclusion
+
+Investigated: `SiebwaldeApplicationModel.SetAmplifierControl` queues an HR0 command directly and is not recorded in `AmplifierCommandTracker`, so the invariant "every commanded non-neutral track amplifier remains represented until neutralized" does not hold for loco-scoped tracking. The manual page is runtime but is an operator/diagnostic path outside loco ownership; the backplane boxes in `TrackAmplifierPage.xaml` expose no PWM/EmoStop controls. Correction: documented as outside loco ownership; the strongest physical neutralization (`StopLayout`) reaches a manually commanded, detected legitimate track amplifier (tested), while a loco-scoped stop cannot cover it. Bringing the manual path under a non-loco tracker owner at the shared choke point is a proposed follow-up needing Project Lead approval (recorded in `docs/backlog.md`).
+
+### Ownership-transfer status
+
+Preserved. The tracker remains per-loco/per-amplifier; a later legitimate command transfers ownership; a stale owner cannot clear another loco's target. Added test `OwnershipTransfer_IsPerAmplifier_AndDoesNotCrossIntoAnotherGroup` proves a loco commanding a mountain-railway amplifier does not affect another loco's main-railway target merely because the hardware type is identical.
+
+### Startup / restart / reset safety conclusion (reported, not hidden)
+
+Source: `TrackAmplifier4.X/regulator.c` `REGULATORxINIT()` sets `PWM3_LoadDutyValue(399)` and `PetitHoldingRegisters[HR_PWM_COMMAND].ActValue |= 399` at amplifier startup — a per-amplifier firmware default. C# initialization (`SetDefaultPwmSetpointsStep`) only sets the in-memory observed image to `400` and never sends neutral `399`; C# never observes neutral before allowing movement. The master-reset physical effect is not fully source-verifiable from the committed C#/firmware (`ControlCore_Update`/`Ramp_Update` are referenced in `main.c` but not defined in the tracked tree). **Conclusion: there is a partial per-amplifier firmware guarantee but no C#-established or C#-observed startup neutral guarantee.** Reported as a separate safety architecture gap in `docs/backlog.md`; firmware was not modified.
+
+### Files changed
+
+- Added: `SiebwaldeApp.Core/Model/TrackApplication/Control/TrackAmplifierAddress.cs`, `.../TrackAmplifierGroups.cs`, `SiebwaldeApp.Core.Tests/AmplifierClassificationAndSafetyDomainTests.cs`.
+- Modified: `AmplifierCommandTracker.cs`, `IAmplifierNeutralizer.cs`, `TrackApplicationVariables.cs`, `CoreConfiguration.cs`, `CoreSettings.settings`/`CoreSettings.Designer.cs`, `app.config`, `App.config`, `EcosHardwareStopSink.cs`, `TrackAmplifierHardwareBackend.cs`, `TrackControlHost.cs`, `TrackControlIntegration.cs`, `StopReachabilityTests.cs`, `TrackApplicationVariablesTests.cs`.
+- Harness (separate revision `15fcf7d`): `SiebwaldeApp.StopReachabilityHarness/Program.cs`, `StopReachabilityHarness.cs`.
+
+### Tests and checks (software only)
+
+- `dotnet build SiebwaldeApp.sln -t:Rebuild` -> **0 errors, 175 warnings** (baseline 175; no new warnings).
+- `dotnet test SiebwaldeApp.sln` -> **322/322 passed** (was 297; +25).
+- `dotnet build SiebwaldeApp.sln -c Release -t:Rebuild` -> **0 errors, 175 warnings**.
+- `dotnet test SiebwaldeApp.sln -c Release --no-build` -> **322/322 passed**.
+- Harness: `dotnet build SiebwaldeApp.StopReachabilityHarness/SiebwaldeApp.StopReachabilityHarness.csproj` -> **0 errors, 0 warnings**.
+- Harness dry run (`--dry-run --script`): Stage 3 still leaves amp 1 non-neutral (416, the defect precondition); Stage 5 reports `GUARD_ACTION=StopLoco SINK_RESULT=True` with `AMP1=399 AMP3=399`; the new classification check reports `slave 1/50 = track amplifier`, `slave 51/52/55 = backplane`, groups `MainRailway {1,3,4}` / `MountainRailway {6}` / `Spare {50}` / `Unassigned {51}`, `GetKnownPhysicalAmplifiers=[1,2,3,4,5,6,50]`, and `BACKPLANE SAFETY CHECK: PASS`. The harness does not perform the neutralization itself. Software-only evidence, not a physical result.
+
+### New tests
+
+`AmplifierClassificationAndSafetyDomainTests` (24 cases) covers the physical class (`1`/`50` in, `51`/`52`/`55`/`0`/`56`/`-1` out), backplane detection never becoming a target or producing an HR0 write, direct neutralizer refusal, a topology mapping a backplane slave being ignored, an unmapped track amplifier, a spare still classified as a track amplifier, operational grouping independent of class/mapping, no main-railway inference from `BlockTopology`, group parsing rejecting backplane/duplicates, never-seen and detected-but-stale required targets, a layout stop with one stale amplifier, the manual path, ownership transfer across groups, and startup device-class scoping. `TrackApplicationVariablesTests` adds a backplane-untouched startup test; `StopReachabilityTests` seeds detected/fresh amplifiers and keeps the accepted A->B, look-ahead, mapping-loss, failure-reporting and escalation coverage.
+
+### Traceability
+
+The historical physical-defect harness commit `03f5221` is untouched. The post-fix harness revision `15fcf7d` is the revision any future physical validation must cite together with the branch HEAD.
+
+### Explicitly pending
+
+- **Independent software re-review of `be05c37`/`15fcf7d` (Integrator).**
+- **Physical post-fix verification on the layout (Integrator). The fix is not physically validated.**
+- Product Owner decision on the complete group/domain configuration and the cross-domain emergency policy.
+- Startup/restart neutral guarantee (separate safety architecture gap).
+- Optional stronger guarantee for the manual `SetAmplifierControl` path.
+
+### Uncertainty for the Integrator to check
+
+- Confirm the classification test genuinely fails against `66d75d0` (it does: the reviewed `GetKnownPhysicalAmplifiers` returns `51`/`52`/`55`).
+- Confirm the chosen required-target rule: a topology-only never-seen amplifier is a best-effort extra, while a detected-but-stale amplifier is a required, failed target. Decide whether an absent mapped amplifier should be a failure instead.
+- Confirm that the default unconfigured grouping is acceptable until the Product Owner supplies the real MainRailway/MountainRailway/Spare assignment.
+
+## Latest Session (2026-09-20, stop-reachability safety fix implemented and software-verified)
+
+Branch `feature/safety-stop-reachability`, production implementation `66d75d0`, harness adaptation `c13d9fc`, on top of the defect confirmation `488ad45`. The confirmed physical safety defect is **fixed in software and software-verified**; **no live hardware was started and no physical validation is claimed**.
+
+### Root cause (confirmed by the physical evidence)
+
+`EcosHardwareStopSink.StopLoco` resolved its target purely from the locomotive's **current** block (`TrackAmplifierHardwareBackend.SetLocoSpeed`), discarded the backend return and always returned `true`; `ControlSafetyGuard` discarded the result. A normal A -> B transition never neutralizes the vacated amplifier, and look-ahead can command a second amplifier, so a previously commanded physical output became unreachable. Live evidence (harness `03f5221`): after block 1 -> block 3, amp 1 stayed at HR0 416; the loco stop neutralized only the resolved amp 3; the sink returned `True` with no failure diagnostic.
+
+### The fix (selected architecture)
+
+A retained **commanded-actuator ownership** model, not a single `lastAmplifier`:
+
+- `AmplifierCommandTracker` (Core) keeps the **set** of physical amplifiers each locomotive last commanded non-neutral. Add on a concrete non-neutral physical command (the queued HR0 setpoint); remove only after a neutral command is successfully issued; never remove because the loco moved, the route changed or the mapping disappeared. Ownership transfers to the most recent commanding loco, so one loco's stop cannot clear another loco's outstanding target; a deliberate global neutralization clears across locos.
+- `TrackAmplifierHardwareBackend` records current-block **and** look-ahead commands in the tracker and implements the new `IAmplifierNeutralizer` (`NeutralizeAmplifiers`, `GetKnownPhysicalAmplifiers`), independent of the block mapping and topology.
+- `EcosHardwareStopSink.StopLoco` runs the existing loco path (`SetLocoSpeed(address, 0, 0)`) **and then** neutralizes every retained outstanding target. It returns a `SafetyStopResult`; `ISafetyStopSink` now returns that result for both stop methods.
+- Stop success = **all required neutral commands were accepted for concrete physical amplifiers**; it never claims observed neutralization (observed state stays separate).
+- `ControlSafetyGuard` inspects the result: on an incomplete loco stop it emits `CommandNotApplied` (or `BackendUnavailable`), keeps the latch, and escalates to amplifier-centric layout neutralization (`SafetyAction.StopLayoutEscalated`); a failed escalation emits a second diagnostic and the latch remains. The latch is never cleared because a stop call returned.
+- Detected-but-unmapped policy: the fallback target set is detected hardware (`SlaveDetected`) **plus** configured topology **plus** all retained targets, so installed amp 6 is included. `SetPower(false)` keeps its topology-only logical semantics; the new primitive is used explicitly by the safety escalation.
+
+### Files changed
+
+- Added: `SiebwaldeApp.Core/Model/TrackApplication/Control/AmplifierCommandTracker.cs`, `.../Control/IAmplifierNeutralizer.cs`, `.../Diagnostics/SafetyStopResult.cs`, `SiebwaldeApp.Core.Tests/StopReachabilityTests.cs`.
+- Modified: `Diagnostics/ISafetyStopSink.cs`, `Diagnostics/DiagnosticTypes.cs` (+`SafetyAction.StopLayoutEscalated`), `Integration/ControlSafetyGuard.cs`, `Integration/EcosHardwareStopSink.cs`, `Integration/TrackAmplifierHardwareBackend.cs`, `Integration/TrackControlHost.cs`, `Integration/TrackControlIntegration.cs`, and the test fakes in `DivergenceAndSafetyTests.cs`, `SimpleEcosBackendDirectionStateTests.cs`, `SimpleEcosBackendSpeedNormalizationTests.cs`.
+- Harness (separate post-fix revision `c13d9fc`): `SiebwaldeApp.StopReachabilityHarness/HarnessSupport.cs`, `StopReachabilityHarness.cs`.
+
+### Tests and checks
+
+- `dotnet build SiebwaldeApp.sln -t:Rebuild` -> **0 errors, 175 warnings** (baseline 175; no new warnings).
+- `dotnet test SiebwaldeApp.sln` -> **297/297 passed** (was 280; +17 `StopReachabilityTests`).
+- `dotnet build SiebwaldeApp.sln -c Release` -> **0 errors, 175 warnings**.
+- `dotnet test SiebwaldeApp.sln -c Release --no-build` -> **297/297 passed**.
+- Harness: `dotnet build SiebwaldeApp.StopReachabilityHarness/SiebwaldeApp.StopReachabilityHarness.csproj` -> **0 errors, 0 warnings**.
+- Harness dry run (`--dry-run --script`, recording comm client, no socket, no hardware): Stage 3 still leaves amp 1 non-neutral (416, the defect precondition), and Stage 5 now reports `GUARD_ACTION=StopLoco SINK_RESULT=True` with `AMP1=399 AMP3=399` (amp 1 was reached through the retained target). This is software-only evidence, not a physical result.
+- New tests cover: A -> B orphaned actuator (amp 1 + amp 3 neutralized), mapping loss (unmapped and null block), look-ahead two outstanding targets, detected-but-unmapped amp 6 in the layout fallback, incomplete loco stop not reported as success, missing backend, guard escalation and failure diagnostics, latch retention, multiple-loco isolation, ownership transfer, and the normal stop.
+
+### Explicitly pending
+
+- **Physical post-fix verification on the layout (Integrator). The fix is not physically validated.** The historical defect reproduction with harness `03f5221` remains valid and untouched; the adapted harness `c13d9fc` is the post-fix validation revision.
+- Asynchronous send failure and observed physical neutralization are still not synchronously observable; the tracker tracks commanded state, not confirmed physical state.
+
+### Uncertainty for the Integrator to check
+
+- With the new contract a loco-scoped stop that cannot resolve any physical target now escalates to the amplifier-centric layout neutralization and reports `SafetyAction.StopLayoutEscalated`. Verify this is the intended operator-visible behaviour on the layout.
+- Confirm that commanding neutral to a detected-but-unmapped amplifier (for example amp 6) is accepted by the master/amplifier chain.
+- The tracker is process-lifetime state; verify the interaction with a Koploper `set(1,stop)` (which clears mapped targets through `SetPower(false)`) and with a master reset/reinitialization.
+
+## Latest Session (2026-09-20, live stop-reachability validation - DEFECT CONFIRMED)
+
+Branch `feature/safety-stop-reachability`, live-test HEAD `a614efc`, harness commit `03f5221`. Targeted operator-in-the-loop live validation using the committed harness `SiebwaldeApp/SiebwaldeApp.StopReachabilityHarness/`. **No production code, firmware or configuration was changed; tracked tree clean throughout.**
+
+### Traceability
+`Harness commit 03f5221 was used for the live physical validation.` Branch `feature/safety-stop-reachability`, live-test HEAD `a614efc`, executable `SiebwaldeApp\SiebwaldeApp.StopReachabilityHarness\bin\Debug\net8.0-windows7.0\SiebwaldeApp.StopReachabilityHarness.exe`, command `--live --ecos-id 1001 --address 2 --protocol DCC28 --from 1 --to 3`. Evidence: `Logging\stopreach-live-20260920-run2.*`. Harness PID 21964 (run 2), driver 10400, window `SIEBWALDE STOP-REACHABILITY LIVE`. (Run 1 hung at init because the master ignored the one-shot `CLIENT_CONNECTION_REQUEST`; after an operator master reset, the full production init pipeline completed.)
+
+### Results (amplifier 1 = motor, amplifier 3 = no motor)
+| Stage | Logical block | Amp 1 commanded/observed | Amp 3 commanded/observed | Physical |
+| --- | --- | --- | --- | --- |
+| Stage 0 baseline | - | -/399 | -/399 | stopped |
+| Stage 2 `speedstep[1]` | 1 | 416/416 | none/399 | motor slow forward |
+| Stage 3 transition 1->3 (no command) | 3 | none/**416** | none/399 | motor still forward |
+| Stage 4 `speedstep[1]` | 3 | none/**416** | 416/416 | motor still forward |
+| Stage 5 real loco-scoped safety stop | 3 | **none/416** | 399/399 | motor still forward |
+| Layout stop fallback | - | 399/399 | none/399 | motor stopped |
+
+- Stage 3 produced **no `[WRITE]`**: the logical A->B transition never neutralized the vacated amplifier.
+- Stage 5 invoked the REAL `ControlSafetyGuard.Apply` -> `EcosHardwareStopSink.StopLoco` -> real backend. It neutralized the currently resolved amp 3 only; amp 1 received no neutral write and stayed at HR0 416. The sink returned `True`, the guard reported `StopLoco`, and **no failure diagnostic** was raised.
+- Layout stop `SetPower(false)` neutralized amp 1 (and mapped amps 1/2/3/4/5); **amp 6 (installed, unmapped) was not targeted**.
+
+### Classifications
+- `STOP REACHABILITY DEFECT CONFIRMED`
+- `LAYOUT STOP FALLBACK PASS`
+- `STOP FAILURE REPORTING DEFECT CONFIRMED`
+
+### Cleanup
+`resetsafety` applied (no movement command); all observed HR0 = 399; harness 21964 + driver 10400 terminated; UDP 10001 released; TCP 15471 free; tracked tree clean.
+
+### Next
+The physical evidence justifies a Developer safety-fix task (not started): (a) the stop path must reach the last commanded physical amplifier, not only the currently resolved one; (b) honour the stop result and raise a diagnostic on failed/unconfirmed neutralization; (c) escalate to the amplifier-centric neutralization path and include detected-but-unmapped amplifiers. Harness disposition still undecided.
+
+## Latest Session (2026-09-20, safety stop-reachability architecture investigation)
+
+Branch `feature/safety-stop-reachability` (new, from merged `master` at `0ee1b40`), HEAD `0ee1b40`. Architect source investigation only; **no code, firmware, or hardware was changed**.
+
+### Classification
+`SOURCE-CONFIRMED STOP-REACHABILITY GAP` (source architecture only; not a physically confirmed product defect).
+
+### Key findings (source)
+- `EcosHardwareStopSink.StopLoco` resolves the target purely from the loco's current block (`TrackAmplifierHardwareBackend.SetLocoSpeed:89-100`); when no amplifier mapping resolves it writes nothing, but the sink logs success and returns true (`EcosHardwareStopSink.cs:42-44`) and `ControlSafetyGuard` discards the result (`ControlSafetyGuard.cs:183`). A failed per-loco stop is silent.
+- No retained per-loco or per-amplifier physical target is consulted by any stop path.
+- Block transitions never neutralize the vacated amplifier (`SimpleEcosBackend.OnBlockEntered`), so a previously commanded amplifier can remain non-neutral; look-ahead can leave a second amplifier non-neutral when planning fails during a stop.
+- The layout stop `TrackAmplifierHardwareBackend.SetPower(false)` is amplifier-centric and mapping-independent (iterates all `BlockTopology` blocks), but is not auto-escalated to and omits detected-but-unmapped amplifiers.
+- `CommandNotApplied`/`BackendUnavailable` exist but are not raised by the stop path.
+- Requested (`LocoState.Speed`/`Direction`) / Commanded (`PendingWrites[amp].Hr0Value`, never compared to observed) / Observed (`TrackAmplifierItem.HoldingReg[0]`) are distinct; `SetLocoSpeed(...,0) == true` does not mean physically neutral.
+
+### Scenarios
+1. Per-loco stop after the loco's current block has no amplifier mapping -> no write, reported success.
+2. Layout stop -> reaches mapped amplifiers regardless of loco mapping (control that succeeds).
+3. Remap A -> B while A still holds a non-neutral setpoint -> A can be left energized (vacated blocks never neutralized).
+4. Communication/freshness unknown -> no stop-path gating, but no delivery confirmation, so an unobservable failure is possible.
+
+### Recommended next step (NOT approved/implemented)
+1. Minimal safety correction: honour the stop result, emit a failure diagnostic, escalate to the amplifier-centric neutralization path.
+2. Broader cleanup: amplifier-centric commanded-state ownership with confirmed neutralization, vacated-block neutralization, look-ahead target retention, commanded-vs-observed PWM confirmation.
+3. Optional diagnostics: surface unconfirmed neutralizations; wire `ReportBackendUnavailable`; fix misleading stop-sink log/XML.
+
+### Physical reproduction
+A minimal controlled plan exists (amplifier 1, lowest non-neutral PWM, operator-in-the-loop, or a harness substituting only the block source) with explicit abort/recovery criteria (process exit is NOT neutralization; amplifier power-cycle as final fallback). Not executed.
+
+### Not done
+No Developer, Integrator live test, implementation, hardware process, or PR.
+
+### Next
+Await Product Owner decision on the minimal safety correction and/or the physical reproduction.
+
+### Refined test plan (Integrator, 2026-09-20; NOT executed)
+
+`StopLoco` does not remove the mapping; the mapping *changes* through a normal block transition. Scenario classification:
+
+- **Scenario A (Koploper unplaces/block 0):** operator/admin edge case; the non-neutral precondition is prevented by Koploper's speed-0-first rule. Not the primary scenario.
+- **Scenario B (normal A -> B transition):** NORMAL running scenario; `OnBlockEntered` only updates logical state and never neutralizes the vacated amplifier, so amplifier A can stay non-neutral while the current mapping points to B.
+- **Scenario C (look-ahead multi-target):** NORMAL but conditional; `ApplyLookAhead` can hold two amplifiers non-neutral. Deferred (needs two simultaneous targets).
+
+**Recommended PRIMARY TEST = A->B TRANSITION, block 1 -> block 3** (lowest DCC28 step). In the current topology look-ahead is deterministic and absent here (amp 2 not installed blocks `1>2`; unknown switch 1 blocks `3>4`/`3>5`), so amp 1 is the only non-neutral target before the transition. Sequence: loco in block 1 -> low speed (amp 1 = 416) -> reassign loco to block 3 -> no write to amp 1 (stays 416) -> low speed again (amp 3 = 416) -> invoke the real per-loco safety stop -> amp 3 = 399, **amp 1 stays 416**.
+
+**Safety-stop trigger:** no normal real-mode condition deterministically reaches `ControlSafetyGuard`, so the narrowest controlled invocation is `ControlSafetyGuard.Apply(<loco-scoped StopRequired diagnostic>)` in a harness that reuses the real `ControlSafetyGuard`, `EcosHardwareStopSink`, `TrackAmplifierHardwareBackend`, `TrackControlMain` and amplifier comm, substituting only the trigger (and the block source if Koploper refuses an at-speed reassignment). A Koploper speed-0 command is only a normal-path control, not the safety-sink test.
+
+**Evidence per amplifier:** Requested (`LocoState.Speed`/echo), Commanded (`PendingWrites` + `[WRITE]` log), Observed (`HoldingReg[0]`/`PwmFeedback`). `StopLoco returned true` is not proof of a physical stop. Capture backend return, sink result, guard behaviour, diagnostics (expected: none) and actual HR0 to prove both the reachability failure and the failure-reporting failure.
+
+**Secondary test:** controlled no-mapping stop (block 0/unmapped) to isolate the failure-reporting failure (backend returns false, sink still returns true and logs success, no write).
+
+**Layout stop:** `SetPower(false)` neutralizes amps 1/3/4 (verified by observed HR0) but **not** the installed-but-unmapped amp 6.
+
+**Recovery (independent of the per-loco stop):** layout stop verified by observed HR0 -> master software reset -> physical amplifier/backplane power removal. A process exit is not neutralization. The operator must know the exact recovery action before non-zero PWM is applied.
+
+**Open live prerequisite:** does Koploper allow reassigning a loco's block while speed is non-zero? If not, the harness block source produces the transition.
+
+### Harness disposition
+`SiebwaldeApp/SiebwaldeApp.StopReachabilityHarness/` is committed validation tooling on `feature/safety-stop-reachability` (commit `03f5221`), deliberately not in `SiebwaldeApp.sln`. Disposition: **committed validation tooling; final merge disposition undecided** (retain as reusable tooling, convert to automated regression tests, or remove before the final PR). Physical safety evidence must be tied to the exact committed harness revision.
+
+### Next
+Await Product Owner decision on the refined primary test and/or the minimal safety correction.
+
 ## Latest Session (2026-09-20, live direction regression + safety reachability attempt)
 
 Branch `feature/live-koploper-occupancy-validation`, HEAD `a2125a7` (plus this documentation commit). Targeted operator-in-the-loop live regression of the direction fix and a safety-reachability investigation. **No production code was changed.**

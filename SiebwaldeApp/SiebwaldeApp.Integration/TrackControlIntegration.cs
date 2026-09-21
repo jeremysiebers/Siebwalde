@@ -36,7 +36,9 @@ namespace SiebwaldeApp.Integration
             Action<string>? log = null,
             SwitchController? switchController = null,
             ControlSafetyGuard? safetyGuard = null,
-            ControlDiagnostics? diagnostics = null)
+            ControlDiagnostics? diagnostics = null,
+            TrackAmplifierGroups? trackAmplifierGroups = null,
+            IControlTrace? controlTrace = null)
         {
             _commClient = commClient ?? throw new ArgumentNullException(nameof(commClient));
             if (variables is null) throw new ArgumentNullException(nameof(variables));
@@ -51,6 +53,13 @@ namespace SiebwaldeApp.Integration
             OccupancyProvider = occupancyProvider;
             Variables = variables;
 
+            // Safety reachability bookkeeping: retained per-locomotive physical targets. It is
+            // shared with the stop sink so a loco-scoped stop can reach an amplifier whose block
+            // mapping has since changed or disappeared.
+            CommandTracker = new AmplifierCommandTracker(controlTrace);
+
+            TrackAmplifierGroups = trackAmplifierGroups ?? TrackAmplifierGroups.Empty;
+
             RealBackend = new TrackAmplifierHardwareBackend(
                 blockPositionProvider,
                 topology,
@@ -58,7 +67,10 @@ namespace SiebwaldeApp.Integration
                 log,
                 new LookAheadPlanner(topology),
                 occupancyProvider,
-                switchPositionProvider);
+                switchPositionProvider,
+                CommandTracker,
+                TrackAmplifierGroups,
+                trace: controlTrace);
 
             // When a loco repository is supplied, host the ECoS backend in-process and use it
             // as the feedback sink. Otherwise the caller supplies its own sink (for example a
@@ -78,7 +90,7 @@ namespace SiebwaldeApp.Integration
                     hardware = new ControlSafetyInterlockBackend(hardware, safetyGuard, diagnostics, log);
                 }
 
-                EcosBackend = new SimpleEcosBackend(hardware, locoRepository, blockPositionProvider);
+                EcosBackend = new SimpleEcosBackend(hardware, locoRepository, blockPositionProvider, controlTrace);
             }
 
             var sink = (IHardwareFeedbackSink?)EcosBackend
@@ -92,6 +104,19 @@ namespace SiebwaldeApp.Integration
 
         /// <summary>The real hardware backend (Koploper commands -> amplifier setpoints).</summary>
         public TrackAmplifierHardwareBackend RealBackend { get; }
+
+        /// <summary>
+        /// The retained commanded-actuator ownership shared with the real backend and the safety
+        /// stop sink. Exposed so the composition root can bind the stop sink to the same instance.
+        /// </summary>
+        public AmplifierCommandTracker CommandTracker { get; }
+
+        /// <summary>
+        /// The configured operational grouping of the physical track amplifiers. It is a separate
+        /// concept from the physical device class and from the block mapping; domain-scoped safety
+        /// behaviour is not decided here.
+        /// </summary>
+        public TrackAmplifierGroups TrackAmplifierGroups { get; }
 
         /// <summary>The in-process ECoS backend, when a loco repository was supplied.</summary>
         public SimpleEcosBackend? EcosBackend { get; }

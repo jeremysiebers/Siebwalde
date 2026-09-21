@@ -39,9 +39,9 @@ namespace SiebwaldeApp.Core.Tests
 
         private sealed class NullStopSink : ISafetyStopSink
         {
-            public bool StopLoco(int address) => true;
+            public SafetyStopResult StopLoco(int address) => SafetyStopResult.Commanded(new ushort[] { 1 });
 
-            public void StopLayout() { }
+            public SafetyStopResult StopLayout() => SafetyStopResult.Commanded(new ushort[] { 1 });
         }
 
         private sealed class StubBlockPositionProvider : IBlockPositionProvider

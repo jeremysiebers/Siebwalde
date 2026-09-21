@@ -18,17 +18,20 @@ namespace SiebwaldeApp.Integration
         private readonly ISafetyStopSink _stops;
         private readonly ControlDiagnostics _diagnostics;
         private readonly Action<string>? _log;
+        private readonly IControlTrace? _trace;
         private readonly Dictionary<string, ControlDiagnostic> _latched = new();
         private readonly object _lock = new();
 
         public ControlSafetyGuard(
             ISafetyStopSink stops,
             ControlDiagnostics diagnostics,
-            Action<string>? log = null)
+            Action<string>? log = null,
+            IControlTrace? trace = null)
         {
             _stops = stops ?? throw new ArgumentNullException(nameof(stops));
             _diagnostics = diagnostics ?? throw new ArgumentNullException(nameof(diagnostics));
             _log = log;
+            _trace = trace;
         }
 
         /// <summary>True while at least one safety fault is latched.</summary>
@@ -178,33 +181,142 @@ namespace SiebwaldeApp.Integration
 
         private SafetyAction StopLoco(ControlDiagnostic diagnostic, int loco)
         {
+            SafetyStopResult result;
+
+            // Before the attempt: loco, the safety reason and the block, so the stop can be
+            // reconstructed even when the stop itself cannot establish neutralization.
+            _trace?.SafetyStop("Loco", loco, diagnostic.Key, diagnostic.Block);
+
             try
             {
-                _stops.StopLoco(loco);
-                _log?.Invoke($"Safety stop issued for loco {loco} ({diagnostic.Key}).");
-                return SafetyAction.StopLoco;
+                result = _stops.StopLoco(loco);
             }
             catch (Exception ex)
             {
                 _log?.Invoke($"Safety stop for loco {loco} failed: {ex.Message}");
-                return SafetyAction.None;
+                result = SafetyStopResult.NotApplied();
             }
+
+            if (result.Succeeded)
+            {
+                _log?.Invoke($"Safety stop issued for loco {loco} ({diagnostic.Key}).");
+                return SafetyAction.StopLoco;
+            }
+
+            // The loco-scoped stop could not be delivered for every required physical output.
+            // Report it and escalate conservatively: the physical evidence showed the layout /
+            // amplifier-centric neutralization can reach outputs the loco stop cannot.
+            _log?.Invoke(
+                $"Safety stop for loco {loco} did not neutralize every required physical output; escalating to amplifier-centric neutralization.");
+
+            _diagnostics.Report(new ControlDiagnostic
+            {
+                Code = result.BackendUnavailable
+                    ? DiagnosticCode.BackendUnavailable
+                    : DiagnosticCode.CommandNotApplied,
+                Severity = DiagnosticSeverity.Rejected,
+                Subject = $"loco {loco} safety stop",
+                LocoAddress = loco,
+                Block = diagnostic.Block,
+                Detail = result.BackendUnavailable
+                    ? "Loco-scoped neutralization could not be delivered: no hardware backend is available."
+                    : $"Loco-scoped neutralization was incomplete (uncommanded amplifier(s): {DescribeAmplifiers(result.FailedAmplifiers)}); escalating to amplifier-centric neutralization.",
+                SafetyAction = SafetyAction.StopLayoutEscalated
+            });
+
+            return EscalateToLayoutNeutralization(diagnostic, loco);
+        }
+
+        private SafetyAction EscalateToLayoutNeutralization(ControlDiagnostic diagnostic, int loco)
+        {
+            SafetyStopResult result;
+
+            // Requested and established are deliberately distinct: an attempted escalation is
+            // never reported as a physical success.
+            _trace?.SafetyEscalation(loco, diagnostic.Key, "Requested");
+
+            try
+            {
+                result = _stops.StopLayout();
+            }
+            catch (Exception ex)
+            {
+                _log?.Invoke($"Amplifier-centric safety stop failed: {ex.Message}");
+                result = SafetyStopResult.NotApplied();
+            }
+
+            if (result.Succeeded)
+            {
+                _trace?.SafetyEscalation(loco, diagnostic.Key, "Established");
+                _log?.Invoke($"Amplifier-centric neutralization issued for the layout ({diagnostic.Key}).");
+                return SafetyAction.StopLayoutEscalated;
+            }
+
+            _trace?.SafetyEscalation(loco, diagnostic.Key, "Incomplete");
+            _log?.Invoke(
+                "Amplifier-centric neutralization was incomplete; the safety concern remains latched.");
+
+            _diagnostics.Report(new ControlDiagnostic
+            {
+                Code = result.BackendUnavailable
+                    ? DiagnosticCode.BackendUnavailable
+                    : DiagnosticCode.CommandNotApplied,
+                Severity = DiagnosticSeverity.Rejected,
+                Subject = "layout safety stop",
+                LocoAddress = loco,
+                Block = diagnostic.Block,
+                Detail = result.BackendUnavailable
+                    ? "Amplifier-centric neutralization could not be delivered: no hardware backend is available; the safety concern remains latched."
+                    : $"Amplifier-centric neutralization was incomplete (uncommanded amplifier(s): {DescribeAmplifiers(result.FailedAmplifiers)}); the safety concern remains latched.",
+                SafetyAction = SafetyAction.StopLayoutEscalated
+            });
+
+            return SafetyAction.StopLayoutEscalated;
         }
 
         private SafetyAction StopLayout(ControlDiagnostic diagnostic)
         {
+            SafetyStopResult result;
+
+            _trace?.SafetyStop("Layout", diagnostic.LocoAddress, diagnostic.Key, diagnostic.Block);
+
             try
             {
-                _stops.StopLayout();
-                _log?.Invoke($"Safety stop issued for the whole layout ({diagnostic.Key}).");
-                return SafetyAction.StopLayout;
+                result = _stops.StopLayout();
             }
             catch (Exception ex)
             {
                 _log?.Invoke($"Layout safety stop failed: {ex.Message}");
-                return SafetyAction.None;
+                result = SafetyStopResult.NotApplied();
             }
+
+            if (result.Succeeded)
+            {
+                _log?.Invoke($"Safety stop issued for the whole layout ({diagnostic.Key}).");
+                return SafetyAction.StopLayout;
+            }
+
+            _log?.Invoke("Layout safety stop was incomplete; the safety concern remains latched.");
+
+            _diagnostics.Report(new ControlDiagnostic
+            {
+                Code = result.BackendUnavailable
+                    ? DiagnosticCode.BackendUnavailable
+                    : DiagnosticCode.CommandNotApplied,
+                Severity = DiagnosticSeverity.Rejected,
+                Subject = "layout safety stop",
+                Block = diagnostic.Block,
+                Detail = result.BackendUnavailable
+                    ? "Layout neutralization could not be delivered: no hardware backend is available; the safety concern remains latched."
+                    : $"Layout neutralization was incomplete (uncommanded amplifier(s): {DescribeAmplifiers(result.FailedAmplifiers)}); the safety concern remains latched.",
+                SafetyAction = SafetyAction.StopLayout
+            });
+
+            return SafetyAction.StopLayout;
         }
+
+        private static string DescribeAmplifiers(IReadOnlyList<ushort> amplifiers)
+            => amplifiers.Count == 0 ? "<none>" : string.Join(",", amplifiers);
 
         /// <summary>
         /// Clears the latches and the latched unsafe state, but only when every latched fault

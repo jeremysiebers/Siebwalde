@@ -9,7 +9,7 @@ namespace SiebwaldeApp.Core
         /// <summary>
         /// Variables of this class
         /// </summary>
-        public const int MaxAmplifiers = 50;
+        public const int MaxAmplifiers = TrackAmplifierAddress.MaxTrackAmplifier;
         public List<TrackAmplifierItem> trackAmpItems;
         private TrackAmplifierItem trackAmp;
         public TrackControllerCommands trackControllerCommands;
@@ -98,6 +98,12 @@ namespace SiebwaldeApp.Core
 
             foreach (var amp in trackAmpItems)
             {
+                // Track-amplifier PWM semantics are only valid for a physical track amplifier.
+                // Backplane/configuration slaves (51..55) use HoldingReg0 as a configuration
+                // word and must never receive a PWM setpoint.
+                if (!TrackAmplifierAddress.IsTrackAmplifierAddress(amp.SlaveNumber))
+                    continue;
+
                 var regs = amp.HoldingReg;
                 if (regs == null || regs.Length == 0)
                     continue;
@@ -121,7 +127,7 @@ namespace SiebwaldeApp.Core
         /// Bit 15    : EmoStop (1 = stop as fast as possible)
         /// Other bits are currently left as 0.
         /// </summary>
-        private static ushort BuildHr0FromControl(int pwmSetpoint, bool emoStop)
+        public static ushort BuildHr0Value(int pwmSetpoint, bool emoStop)
         {
             int clampedPwm = pwmSetpoint;
 
@@ -145,13 +151,19 @@ namespace SiebwaldeApp.Core
         /// This does not send anything immediately; it only marks data as pending
         /// in <see cref="PendingWrites"/>.
         /// A periodic writer in TrackControlMain will consume and send the values.
+        ///
+        /// This is the lowest shared point through which every track-amplifier HR0 command
+        /// passes (loco commands, look-ahead, safety neutralization and the manual page). It is
+        /// also the central guard: an address that is not a legitimate physical track amplifier
+        /// (in particular a backplane/configuration slave 51..55) is refused here, so
+        /// track-amplifier PWM/neutral semantics can never reach it.
         /// </summary>
         public void SetDesiredAmplifierControl(ushort slaveNumber, int pwmSetpoint, bool emoStop)
         {
-            if (slaveNumber == 0)
+            if (!TrackAmplifierAddress.IsTrackAmplifierAddress(slaveNumber))
                 return;
 
-            ushort hr0 = BuildHr0FromControl(pwmSetpoint, emoStop);
+            ushort hr0 = BuildHr0Value(pwmSetpoint, emoStop);
 
             if (!PendingWrites.TryGetValue(slaveNumber, out var writeData))
             {

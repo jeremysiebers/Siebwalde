@@ -32,6 +32,12 @@ namespace SiebwaldeApp.Core
         /// </summary>
         private readonly IEcosHostService? _ecosHost;
 
+        /// <summary>
+        /// The dedicated production control trace, registered by the host application. It is
+        /// optional so the model still runs in tests without a trace.
+        /// </summary>
+        private readonly IControlTrace? _controlTrace;
+
         private string LoggerInstance { get; set; }
         static ILogger GetLogger(string file, string loggerinstance)
         {
@@ -50,9 +56,14 @@ namespace SiebwaldeApp.Core
         /// so the composition and lifetime stay outside the UI layer. May be null when the
         /// application runs without Koploper.
         /// </param>
-        public SiebwaldeApplicationModel(IEcosHostService? ecosHost = null)
+        /// <param name="controlTrace">
+        /// The dedicated production control trace registered by the host application. Optional
+        /// so the model can be constructed in tests without a trace.
+        /// </param>
+        public SiebwaldeApplicationModel(IEcosHostService? ecosHost = null, IControlTrace? controlTrace = null)
         {
             _ecosHost = ecosHost;
+            _controlTrace = controlTrace;
 
             IoC.Logger.Log("Siebwalde Application started.", "");
 
@@ -212,7 +223,8 @@ namespace SiebwaldeApp.Core
             _trackControlMain = new TrackControlMain(
                 LoggerInstance,
                 _trackCommClient,
-                _trackVariables);
+                _trackVariables,
+                _controlTrace);
 
             _trackInitService.StatusChanged += (s, status) =>
             {
@@ -460,7 +472,7 @@ namespace SiebwaldeApp.Core
         }
                 
         /// <summary>
-        /// Dummy MAC payload (12×3): identifiers u..z,0..5; value=0; CR
+        /// Dummy MAC payload (12ï¿½3): identifiers u..z,0..5; value=0; CR
         /// Matches the wire format expected by FiddleYardController.
         /// </summary>
         private static byte[,] BuildDummyMacPayload()
@@ -494,7 +506,28 @@ namespace SiebwaldeApp.Core
         /// </summary>
         public void  SetAmplifierControl(ushort slaveNumber, int pwmSetpoint, bool emoStop)
         {
-            _trackVariables?.SetDesiredAmplifierControl(slaveNumber, pwmSetpoint, emoStop);
+            if (_trackVariables is null)
+                return;
+
+            // The manual/operator path is outside per-loco ownership but can issue real physical
+            // control, so it must be visible in the production trace. An invalid or backplane
+            // address presented to this command API is an abnormal rejection, not a normal command.
+            if (!TrackAmplifierAddress.IsTrackAmplifierAddress(slaveNumber))
+            {
+                _controlTrace?.Abnormal(
+                    "InvalidAmplifierAddress",
+                    slaveNumber,
+                    "manual SetAmplifierControl rejected: not a physical track amplifier");
+                return;
+            }
+
+            _controlTrace?.ManualControl(
+                slaveNumber,
+                pwmSetpoint,
+                TrackApplicationVariables.BuildHr0Value(pwmSetpoint, emoStop),
+                emoStop);
+
+            _trackVariables.SetDesiredAmplifierControl(slaveNumber, pwmSetpoint, emoStop);
         }
 
     }
