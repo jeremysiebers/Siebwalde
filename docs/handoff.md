@@ -1,5 +1,118 @@
 # Handoff
 
+## Latest Session (2026-09-21, physical safety validation of stop reachability - ORIGINAL SAFETY DEFECT CLOSED)
+
+Branch `feature/safety-stop-reachability`, final HEAD `f7ea083`. This session is **documentation only**: it records the completed software + physical stop-reachability safety validation so a future maintainer can reconstruct the original defect, the fix architecture, the software proof, the physical proof, which revisions produced evidence, and the command-level vs observed-hardware distinction. **No production code, harness, tests, firmware, configuration or OpenCode agent files were changed, no live hardware was used by this session, and no PR was created.** The Project Lead final review verdicts are recorded below; `ORIGINAL SAFETY DEFECT CLOSED: YES`.
+
+### Repository state
+
+- Branch: `feature/safety-stop-reachability`.
+- Final HEAD before this documentation commit: `f7ea083` (`Add clean live strongest-emergency harness trigger`).
+- Tracked tree clean; local branch equals `origin/feature/safety-stop-reachability`.
+- Historical commits preserved and untouched: `03f5221` (defect harness), `01414e1` (post-fix harness with production trace), `13305c5` (OpenCode permissions), `f7ea083` (clean strongest-emergency trigger).
+
+### Original physical defect (PRE-FIX HISTORICAL physical result, evidence commit `03f5221`)
+
+This is the **pre-fix historical** live result and must not be rewritten as though it occurred on the final branch. Harness revision `03f5221`, branch `feature/safety-stop-reachability`, live-test HEAD `a614efc`, command `--live --ecos-id 1001 --address 2 --protocol DCC28 --from 1 --to 3`, evidence `Logging\stopreach-live-20260920-run2.*`:
+
+- block 1 -> DCC28 `speedstep[1]` -> amp 1 = 416; block transition 1 -> 3 -> amp 1 remained 416 (no neutral write on the transition);
+- `speedstep[1]` in block 3 -> amp 3 = 416;
+- real loco-scoped safety stop -> amp 3 -> 399, amp 1 remained 416, motor continued running; `EcosHardwareStopSink.StopLoco` returned `True` and no failure diagnostic was emitted.
+
+Classifications: `STOP REACHABILITY DEFECT CONFIRMED`, `STOP FAILURE REPORTING DEFECT CONFIRMED`.
+
+### Final architecture summary (short; source comments remain primary)
+
+- `AmplifierCommandTracker` (Core): outstanding physical amplifier ownership is a **set**, not a single last amplifier. Block transitions, route changes and mapping changes never make an already-commanded physical output unreachable. Ownership transfers to the most recent commanding locomotive; a deliberate global neutralization clears across locomotives.
+- `IAmplifierNeutralizer` (production implementation `TrackAmplifierHardwareBackend`): amplifier-centric neutralization independent of `BlockTopology`.
+- `SafetyStopResult`: false success is not accepted when a required neutralization remains unresolved.
+- Device classes: `TrackAmplifier: 1..50`, `Backplane/configuration: 51..55`. Track HR0/PWM semantics never belong to the backplane class.
+- Operational domains `MainRailway` / `MountainRailway` / `Spare` / `Unassigned` are independent from physical device type and from `BlockTopology`. The strongest emergency may cross operational domains for valid `TrackAmplifier` devices while still excluding backplane devices.
+
+### Production ControlTrace evidence
+
+The dedicated production trace was implemented and independently reviewed **before** physical validation; verdict `CONTROL TRACE REVIEW PASS`. Boundaries: `ECOS_COMMAND`, `SPEED_DECISION`, `BLOCK_TRANSITION`, `AMPLIFIER_COMMAND`, `AMPLIFIER_WRITE`, `TRACKER_ADD`, `TRACKER_REMOVE`, `TRACKER_TRANSFER`, `SAFETY_STOP`, `SAFETY_STOP_RESULT`, `SAFETY_ESCALATION`, `EMERGENCY_TARGET_SET`.
+
+`Requested != Commanded != Observed` is preserved. `AMPLIFIER_COMMAND` is the command/application boundary; `AMPLIFIER_WRITE` is the transmission/write boundary; **neither is automatically a hardware ACK**. Physical/status observation is documented separately (`OBSERVED_HR0=...` read back from a fresh register).
+
+### Physical Test A - retained stop reachability (`PHYSICAL SAFETY VALIDATION PASS`)
+
+Traceability: repository commit `13305c5`, post-fix harness revision `01414e1`. Sequence (baseline amp1=399/amp3=399):
+
+- block 1 + `speedstep[1]` -> amp1 = 416;
+- block transition 1 -> 3 -> amp1 remained 416;
+- `speedstep[1]` in block 3 -> amp1 = 416, amp3 = 416;
+- real loco-scoped safety stop -> amp1 -> 399, amp3 -> 399, motor stopped.
+
+Verdicts: `PHYSICAL SAFETY VALIDATION PASS`, `TEST A - STOP REACHABILITY PASS`, `PHYSICAL MOTOR STOP PASS`, `SAFETY RESULT INTEGRITY PASS`, `PRODUCTION TRACE RECONSTRUCTION PASS`.
+
+Contrast: against `03f5221` amp1 remained 416 and the motor continued; post-fix amp1 = 399, amp3 = 399, motor stopped. Test A is tied to this earlier accepted production revision (repository `13305c5` / harness `01414e1`).
+
+### Physical Test B - backplane device-class boundary (`TEST B - BACKPLANE NON-TARGETING PASS`)
+
+Real detected inventory: TrackAmplifiers 1, 3, 4, 6; Backplane 51. **The physically proven backplane device is address 51; physical observation of 52-55 is not claimed.**
+
+- Production evidence: `EMERGENCY_TARGET_SET targets=1,2,3,4,5,6 excluded=51-55`.
+- Live evidence: detected 51 was not in the target set; no `AMPLIFIER_COMMAND` / `AMPLIFIER_WRITE` for 51; no track HR0/pending write for 51.
+
+Distinguish **physical evidence** (detected address 51 directly observed as excluded) from **software classification evidence** (the `51..55` range is proven by `TrackAmplifierAddress` and its tests, not by observing 52-55 on hardware).
+
+### Physical Test C - unmapped amp6 reachability (`TEST C - UNMAPPED AMP6 EMERGENCY REACHABILITY PASS`)
+
+amp6 was detected, a valid `TrackAmplifier`, unmapped in `BlockTopology`, and had no motor. The production strongest emergency included it naturally:
+
+- `AMPLIFIER_COMMAND amp=6 purpose=EmergencyNeutral pwm=399 hr0=399`
+- `AMPLIFIER_WRITE amp=6 hr0=399`
+- `[WRITE] slave=6 HR0=0x018F`
+- `OBSERVED_HR0=399`
+
+Boundary: a valid detected `TrackAmplifier` remains reachable by the strongest emergency independently of `BlockTopology`. amp6 was never intentionally driven non-neutral.
+
+### Clean strongest-emergency harness trigger (commit `f7ea083`)
+
+Command `strongeststop` (alias `emergencyneutralize`); call path `StrongestEmergencyTrigger.Invoke -> ISafetyStopSink.StopLayout() -> production EcosHardwareStopSink.StopLayout() -> IAmplifierNeutralizer`. Verdict `CLEAN LIVE EMERGENCY TRIGGER REVIEW PASS`.
+
+Properties: no synthetic detection seeding; no harness-side address filtering; no amp6 special-case; no direct harness HR0 writes; production target selection is authoritative; neutral-only trigger.
+
+### Binary provenance closure (`PHYSICAL B/C BINARY-PROVENANCE VALIDATION PASS`)
+
+Initial caveat: the harness executable was prebuilt, so its relation to `f7ea083` was inferred rather than established by an immediately controlled rebuild. Closure: a controlled rebuild at branch `feature/safety-stop-reachability`, HEAD `f7ea083`, Debug, `net8.0-windows7.0`, with the exact repository state verified; clean rebuild; harness executable SHA256 `EC042242C3664F3CF540DAD487A93658A910DCAE4D94A0CA23C64295FDC84D1B`; the hash was pinned with no build/test/clean/restore between pinning and launch; the hash was reverified immediately before launch; the same executable was used for the live B/C provenance rerun, B and C passed again, and cleanup passed.
+
+### Final physical evidence package (three boundaries)
+
+- **Boundary 1:** retained non-neutral amplifier after a block transition -> still reachable by a later loco safety stop -> neutralized (Test A).
+- **Boundary 2:** real detected backplane device -> excluded from the track target set -> no track HR0/PWM write (physically established for detected address 51; Test B).
+- **Boundary 3:** real detected valid `TrackAmplifier` + unmapped in `BlockTopology` -> still reachable by the strongest emergency (physically established with amp6; Test C).
+
+Final Project Lead conclusion: `ORIGINAL SAFETY DEFECT CLOSED: YES`.
+
+### Cleanup evidence
+
+Final observed track states where available: amp1 = 399, amp3 = 399, amp4 = 399, amp6 = 399; safety reset/known; harness stopped; driver/control process stopped; UDP 10001 free; TCP 15471 free; tracked tree clean; no master reset or physical power removal was required.
+
+### Important live-tooling warning (documentation only; no guard implemented)
+
+`backplanecheck` and `classify` are **synthetic** validation commands that can mutate/seed in-memory detection state. They must not be used before `strongeststop` in a live hardware validation session where genuine detected inventory is required as evidence. This is a procedural tooling constraint for the standalone harness, **not** production WPF behaviour.
+
+### Remaining known follow-ups (kept open; not blockers unless separately promoted)
+
+1. ControlTrace free-text quoting/escaping.
+2. Build/commit ID in `CONTROL_TRACE_START`.
+3. Additional trace test around false-success/escalation.
+4. Trace registration idempotence.
+5. Clarify retained/mapped/commanded/stale terminology.
+6. Optional WPF composition smoke test.
+7. Startup/restart established-neutral guarantee.
+8. Manual `SetAmplifierControl` ownership/tracking refinement.
+9. Stronger protocol ACK/Observed semantics if transport support becomes available.
+10. `FileLogger` concurrency/silent-write/retention redesign.
+11. Test project -> harness executable project dependency.
+12. Synthetic harness commands `backplanecheck`/`classify` have no live-mode guard.
+
+### Evidence-class labelling used in this entry
+
+`SOFTWARE EVIDENCE` (tests, source, classification range), `PHYSICAL EVIDENCE` / `OBSERVED HARDWARE EVIDENCE` (live register reads and motor behaviour), `COMMAND-LEVEL EVIDENCE` (queue/transmission boundaries). `AMPLIFIER_WRITE` is never an ACK, and absent hardware is never represented as physically tested.
+
 ## Latest Session (2026-09-20, dedicated production Koploper/ECoS control trace + two low-cost safety tests)
 
 Branch `feature/safety-stop-reachability`, on top of `a5ccf7d`. The supplemental Integrator review concluded `SOURCE DOCUMENTATION SUFFICIENT`, `PRODUCTION TRACE INCOMPLETE`, `OFFLINE PARSING NOT YET PRACTICAL`, `IMPLEMENT PRODUCTION TRACE BEFORE PHYSICAL VALIDATION`. **This session implements ONE dedicated production control-trace logfile using the existing logging infrastructure, adds the two remaining low-cost safety tests, and adapts the harness to initialize the production trace. No live hardware was started, no Integrator was started, no firmware was modified and no PR was created. Physical post-fix validation remains PENDING.**
