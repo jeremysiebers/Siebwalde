@@ -275,6 +275,34 @@ namespace SiebwaldeApp.StopReachabilityHarness
     }
 
     /// <summary>
+    /// Harness-only orchestration of the production strongest-emergency / layout neutralization.
+    ///
+    /// It contains no safety policy and no detection/inventory state: it invokes the production
+    /// <see cref="ISafetyStopSink.StopLayout"/> exactly once and returns the production
+    /// <see cref="SafetyStopResult"/>. Valid track-amplifier classification, the strongest
+    /// emergency target set, backplane/configuration exclusion and neutralization remain owned by
+    /// the production implementation (<c>EcosHardwareStopSink</c> -&gt;
+    /// <c>IAmplifierNeutralizer</c> -&gt; <c>TrackAmplifierHardwareBackend</c>).
+    ///
+    /// This type has no reference to <c>TrackApplicationVariables</c> or any detection source, so
+    /// a call through it cannot seed or fabricate detected inventory. It is a thin trigger, not a
+    /// second neutralization implementation.
+    /// </summary>
+    internal static class StrongestEmergencyTrigger
+    {
+        /// <summary>Invokes the production strongest emergency/layout neutralization path.</summary>
+        public static SafetyStopResult Invoke(ISafetyStopSink stops)
+        {
+            if (stops is null)
+            {
+                throw new ArgumentNullException(nameof(stops));
+            }
+
+            return stops.StopLayout();
+        }
+    }
+
+    /// <summary>
     /// Observation-only decorator around the real <see cref="EcosHardwareStopSink"/>.
     ///
     /// The real sink now reports command-level stop success/failure and

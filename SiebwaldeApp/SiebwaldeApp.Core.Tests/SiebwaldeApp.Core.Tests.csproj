@@ -21,6 +21,8 @@
     <ProjectReference Include="..\SiebwaldeApp.Core\SiebwaldeApp.Core.csproj" />
     <ProjectReference Include="..\SiebwaldeApp.EcosEmu\SiebwaldeApp.EcosEmu.csproj" />
     <ProjectReference Include="..\SiebwaldeApp.Integration\SiebwaldeApp.Integration.csproj" />
+    <!-- Focused tests for the clean strongest-emergency harness trigger (internal seam). -->
+    <ProjectReference Include="..\SiebwaldeApp.StopReachabilityHarness\SiebwaldeApp.StopReachabilityHarness.csproj" />
   </ItemGroup>
 
 </Project>

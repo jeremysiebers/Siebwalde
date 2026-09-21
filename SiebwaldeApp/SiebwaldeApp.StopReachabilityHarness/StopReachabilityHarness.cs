@@ -577,6 +577,93 @@ namespace SiebwaldeApp.StopReachabilityHarness
             Console.WriteLine($"  BACKPLANE SAFETY CHECK: {(pass ? "PASS" : "FAIL")}");
         }
 
+        /// <summary>
+        /// Clean strongest-emergency / layout-neutralization trigger.
+        ///
+        /// This command invokes the production strongest-emergency/layout neutralization
+        /// (<see cref="EcosHardwareStopSink.StopLayout"/>) using the current detected inventory.
+        /// It does not seed or fabricate detection state. Production code owns the valid
+        /// TrackAmplifier addresses, the strongest emergency target set, the backplane/configuration
+        /// exclusion and the neutralization itself; this method only orchestrates the call and
+        /// reports the production <see cref="SafetyStopResult"/> and trace evidence.
+        ///
+        /// It is neutralization-only: it never issues a non-neutral HR0 command. Intended for
+        /// controlled integration validation; live use requires the Integrator/Product Owner
+        /// workflow authorization.
+        /// </summary>
+        public async Task<SafetyStopResult> StrongestEmergencyNeutralizeAsync()
+        {
+            RequireComposed();
+            Console.WriteLine();
+            Console.WriteLine("=== STRONGEST EMERGENCY / LAYOUT NEUTRALIZATION (production path, no synthetic detection) ===");
+            Console.WriteLine("  This command invokes the production strongest-emergency/layout neutralization");
+            Console.WriteLine("  using the current detected inventory. It does not seed or fabricate detection state.");
+            Console.WriteLine("  Production code owns the valid TrackAmplifier addresses, the strongest emergency");
+            Console.WriteLine("  target set, the backplane/configuration exclusion and the neutralization.");
+            Console.WriteLine("  Neutralization-only: this command issues no non-neutral HR0 command.");
+            Console.WriteLine("  Controlled integration validation only; live use requires Integrator/Product Owner authorization.");
+
+            var known = _integration!.RealBackend.GetKnownPhysicalAmplifiers();
+            Console.WriteLine($"  GetKnownPhysicalAmplifiers (production): [{string.Join(",", known)}]");
+
+            var detectionBefore = SnapshotDetectedInventory();
+            var detectedBackplane = detectionBefore
+                .Where(a => TrackAmplifierAddress.IsBackplaneConfigurationSlave(a))
+                .ToArray();
+            Console.WriteLine(
+                $"  Detected backplane/configuration slaves (51..55): {(detectedBackplane.Length == 0 ? "NONE" : string.Join(",", detectedBackplane))}");
+            Console.WriteLine($"  Detected inventory before: [{string.Join(",", detectionBefore)}]");
+
+            var writesBefore = _logFactory.WriteRecords.Count;
+
+            Console.WriteLine("  Requesting the production strongest emergency/layout neutralization (ISafetyStopSink.StopLayout)...");
+            var result = StrongestEmergencyTrigger.Invoke(_stopSink!);
+
+            // The production StopLayout call is synchronous and never touches detection state, so
+            // the immediate post-call inventory shows whether the call seeded anything.
+            var detectionAfter = SnapshotDetectedInventory();
+
+            var waitFor = known
+                .Concat(Enumerable.Range(
+                    TrackAmplifierAddress.MinBackplaneSlave,
+                    TrackAmplifierAddress.MaxBackplaneSlave - TrackAmplifierAddress.MinBackplaneSlave + 1)
+                    .Select(i => (ushort)i))
+                .Distinct()
+                .ToArray();
+            await WaitForPendingWritesDrainedAsync(waitFor);
+
+            var writes = _logFactory.WriteRecords.Skip(writesBefore).ToArray();
+            var backplaneWrites = writes
+                .Where(w => Enumerable
+                    .Range(TrackAmplifierAddress.MinBackplaneSlave,
+                        TrackAmplifierAddress.MaxBackplaneSlave - TrackAmplifierAddress.MinBackplaneSlave + 1)
+                    .Any(s => w.Contains($"slave={s},", StringComparison.Ordinal)))
+                .ToArray();
+            var backplanePending = _variables.PendingWrites.Keys
+                .Where(k => TrackAmplifierAddress.IsBackplaneConfigurationSlave(k))
+                .ToArray();
+            var backplaneTargeted = known
+                .Where(a => TrackAmplifierAddress.IsBackplaneConfigurationSlave(a))
+                .ToArray();
+
+            Console.WriteLine(
+                $"  SAFETY_STOP_RESULT succeeded={result.Succeeded} applied={result.Applied} backendUnavailable={result.BackendUnavailable}");
+            Console.WriteLine(
+                $"  commanded=[{string.Join(",", result.CommandedAmplifiers)}] failed=[{string.Join(",", result.FailedAmplifiers)}]");
+            Console.WriteLine(
+                $"  backplane/configuration addresses in the production target inventory: {(backplaneTargeted.Length == 0 ? "NONE" : string.Join(",", backplaneTargeted))}");
+            Console.WriteLine(
+                $"  HR0 writes to backplane/configuration 51..55: {(backplaneWrites.Length == 0 ? "NONE" : string.Join(" | ", backplaneWrites))}");
+            Console.WriteLine(
+                $"  pending writes to 51..55: {(backplanePending.Length == 0 ? "NONE" : string.Join(",", backplanePending))}");
+            Console.WriteLine(
+                $"  detected inventory immediately after the production call: [{string.Join(",", detectionAfter)}] " +
+                $"(unchanged by the call: {DetectionEqual(detectionBefore, detectionAfter)})");
+            Console.WriteLine("  Authoritative production trace evidence (command 'trace'): EMERGENCY_TARGET_SET, AMPLIFIER_COMMAND, AMPLIFIER_WRITE, SAFETY_STOP_RESULT.");
+
+            return result;
+        }
+
         /// <summary>Explicit safety-latch reset (recovery step, not the per-loco stop test).</summary>
         public Task ResetSafetyAsync()
         {
@@ -666,6 +753,10 @@ namespace SiebwaldeApp.StopReachabilityHarness
                         case "backplanecheck":
                         case "classify":
                             await VerifyClassificationAsync();
+                            break;
+                        case "strongeststop":
+                        case "emergencyneutralize":
+                            await StrongestEmergencyNeutralizeAsync();
                             break;
                         case "resetsafety":
                             await ResetSafetyAsync();
@@ -789,6 +880,20 @@ namespace SiebwaldeApp.StopReachabilityHarness
         private TrackAmplifierItem Amp(ushort slave)
             => _variables.trackAmpItems.First(a => a.SlaveNumber == slave);
 
+        /// <summary>
+        /// The addresses currently marked detected. Read-only; used to show that the clean
+        /// strongest-emergency command does not mutate or fabricate detected inventory.
+        /// </summary>
+        private ushort[] SnapshotDetectedInventory()
+            => _variables.trackAmpItems
+                .Where(a => a is not null && a.SlaveDetected != 0)
+                .Select(a => a.SlaveNumber)
+                .OrderBy(a => a)
+                .ToArray();
+
+        private static bool DetectionEqual(ushort[] before, ushort[] after)
+            => before.SequenceEqual(after);
+
         private static int NormalizeDcc28Step(int step)
             => ProtocolSpeedNormalizer.TryNormalize("DCC28", step, out var normalized) ? normalized : step;
 
@@ -885,9 +990,20 @@ namespace SiebwaldeApp.StopReachabilityHarness
             Console.WriteLine("  stage5                 inject a loco-scoped StopRequired diagnostic into the real guard");
             Console.WriteLine("  layoutstop             real layout stop: set(1,stop) -> SetPower(false)");
             Console.WriteLine("  backplanecheck         dry-run: verify 51..55 are never a track-amplifier target");
+            Console.WriteLine("  strongeststop          invoke the production strongest-emergency/layout neutralization");
+            Console.WriteLine("                         using the current detected inventory (live or dry-run)");
+            Console.WriteLine("                         (alias: emergencyneutralize)");
             Console.WriteLine("  resetsafety            explicit ControlSafetyGuard.Reset()");
             Console.WriteLine("  trace                  print the captured production control trace");
             Console.WriteLine("  status | help | quit");
+            Console.WriteLine();
+            Console.WriteLine("strongeststop / emergencyneutralize:");
+            Console.WriteLine("  This command invokes the production strongest-emergency/layout neutralization");
+            Console.WriteLine("  using the current detected inventory. It does not seed or fabricate detection state.");
+            Console.WriteLine("  It is neutralization-only and intended for controlled integration validation;");
+            Console.WriteLine("  live use requires Integrator/Product Owner workflow authorization.");
+            Console.WriteLine("  Production code owns the valid TrackAmplifier classification, the strongest emergency");
+            Console.WriteLine("  target set and the backplane/configuration exclusion.");
             Console.WriteLine();
             Console.WriteLine("Recovery chain if a locomotive is left non-neutral:");
             Console.WriteLine("  1) layoutstop (real SetPower(false); targets mapped amps, not unmapped amp 6)");
