@@ -35,11 +35,11 @@ These results belong to the verified baseline revision; re-run to confirm before
 ## Current agent/workflow baseline
 
 - **Workflow v1 is installed** (`docs/development-workflow.md`, v1.0).
-- **Project Lead contract: MIGRATED to Workflow v1 orchestration** (`chore/agent-workflow-v1`). The AI Project Lead is separated from the human Product Owner, owns the workflow, and may autonomously route bounded work to the registered roles within the active autonomy envelope (smallest sufficient role set). The old "work as a single agent by default" / "invoke subagents only when the user explicitly requests delegation" rule is removed.
-- **Developer / Architect / Integrator / Designer contracts: NOT yet migrated.** Their role files still carry the pre-v1 contract, including temporary phase wording.
+- **Project Lead contract: MIGRATED and fresh-session smoke-verified** (`chore/agent-workflow-v1`). The AI Project Lead is separated from the human Product Owner, owns the workflow, and may autonomously route bounded work to the registered roles within the active autonomy envelope (smallest sufficient role set). The old "work as a single agent by default" / "invoke subagents only when the user explicitly requests delegation" rule is removed.
+- **Developer, Architect, Integrator, Designer contracts: MIGRATED to permanent Workflow v1 role contracts** (`chore/agent-workflow-v1`). Each is subordinate to `docs/development-workflow.md`, states the tool-permission-vs-workflow-authority boundary, reports through the Agent Result Contract, keeps `task: deny` (no nested orchestration), and no longer contains temporary phase wording. The Integrator contract preserves the historical hardware/process-safety rules and the independent-review boundary (no fix-and-self-approve). The migration passed an independent governance consistency review.
 - **OpenCode permission normalization: NOT yet implemented.** The Project Lead still has `task: "*": ask` and the subagents still have `edit: ask` / `bash: ask` / `webfetch: ask` (OpenCode 1.18.30). No project-level `opencode.json` exists yet. This is temporary tooling friction and does **not** mean the Product Owner decides whether delegation is appropriate.
 - **Active State mechanism: NOT yet implemented.** `docs/current-state.md` is a compact snapshot, not yet an Active State Manifest.
-- Consequence: the Project Lead contract is migrated, but the full Workflow v1 migration is not complete. A **fresh Project Lead session** is required to actually load the new contract; the subagent contracts and permissions are migrated in later phases.
+- Consequence: the Project Lead and the four role contracts are migrated, but permission normalization, the Active State mechanism, and broader documentation-drift repair remain outstanding.
 
 ## Important current limitations / known follow-ups
 
@@ -49,7 +49,7 @@ Only currently material items; see `docs/backlog.md` for the full list.
 - **Open safety gap (investigate):** startup/restart established-neutral guarantee (C# does not establish/observe neutral before movement; only a partial firmware default exists).
 - **Manual `SetAmplifierControl`** is outside locomotive ownership (the strongest neutralization reaches it; a loco-scoped stop does not).
 - Software follow-ups: ControlTrace free-text quoting/escaping; build/commit ID in `CONTROL_TRACE_START`; trace registration idempotence; `FileLogger` hardening; synthetic `backplanecheck` / `classify` have no live-mode guard; test-project -> harness dependency.
-- Documentation drift still to repair in later phases: `AGENTS.md` and `docs/README.md` contain some stale current-state wording; broader drift repair is out of scope for the Phase 2 checkpoint.
+- Documentation drift still to repair: `AGENTS.md` and `docs/README.md` contain some stale current-state wording; broader documentation-drift repair is not yet complete.
 - Next product direction (not started): autonomous running of the physical 4-amplifier / 4-block test oval with 2 locomotives, driven by Koploper.
 
 ## Active development direction
