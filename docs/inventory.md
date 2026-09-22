@@ -8,7 +8,7 @@ The repository root is `C:\Localdata\Siebwalde`, a Git repository (`origin https
 
 | Directory | Classification | Evidence |
 | --- | --- | --- |
-| `SiebwaldeApp/` | Main solution root and shared active .NET source root. | `SiebwaldeApp/SiebwaldeApp.sln` includes `SiebwaldeApp`, `SiebwaldeApp.Core`, and `SiebwaldeApp.EcosEmu`. |
+| `SiebwaldeApp/` | Main solution root and shared active .NET source root. | `SiebwaldeApp/SiebwaldeApp.sln` includes `SiebwaldeApp`, `SiebwaldeApp.Core`, `SiebwaldeApp.EcosEmu`, `SiebwaldeApp.Core.Tests`, and `SiebwaldeApp.Integration`. |
 | `SiebwaldeApp.Core.Host/` | Separate console host for the core track application. | `SiebwaldeApp.Core.Host/SiebwaldeApp.Core.Host.sln` references `../SiebwaldeApp/SiebwaldeApp.Core/SiebwaldeApp.Core.csproj`. |
 | `SiebwaldeApp.EcosEmu/` | Separate ECoS emulator host solution plus an old source copy. | `SiebwaldeApp.EcosEmu/SiebwaldeApp.EcosEmu.sln` references `../SiebwaldeApp/SiebwaldeApp.EcosEmu/SiebwaldeApp.EcosEmu.csproj`. |
 | `TrackAmplifier4.X/` | Track amplifier firmware (PIC18F25K40, PetitModbus) and its own agent guidance. | Contains `main.c`, `processio.c`, `regulator.c`, `modbus/`, and `AGENT_TRACK_AMPLIFIER*.md`. |
@@ -26,7 +26,7 @@ The repository root is `C:\Localdata\Siebwalde`, a Git repository (`origin https
 | `Backup projects/` | Archived or backup firmware projects. | `ServoConverter.X/`, `TrackControllerPic18.X/`, `YardController_IOX.X/`. |
 | `Logging/` | Runtime log output and ECoS locomotive persistence. | `Logging/*.txt`, `Logging/locos.json`. |
 | `docs/` | Analysis, product, and handoff documentation. | This directory. |
-| `.opencode/` | OpenCode agent definitions and tooling (`node_modules` vendored). | `.opencode/agents/*.md`. |
+| `.opencode/` | OpenCode agent definitions and workflow tooling (`node_modules` vendored). | `.opencode/agents/*.md`, `.opencode/workflow/` (Active State mechanism). |
 
 ## Solutions And Projects
 
@@ -78,7 +78,7 @@ The repository root is `C:\Localdata\Siebwalde`, a Git repository (`origin https
 | `Ninject` `3.3.6` | `SiebwaldeApp/SiebwaldeApp/SiebwaldeApp.csproj` | UI service locator and view model binding. |
 | `Fody` and `PropertyChanged.Fody` | `SiebwaldeApp/SiebwaldeApp/SiebwaldeApp.csproj`, `FodyWeavers.xml` | Property change weaving for the desktop app. |
 | `System.Configuration.ConfigurationManager` `8.0.0` | `SiebwaldeApp/SiebwaldeApp/SiebwaldeApp.csproj`, `SiebwaldeApp/SiebwaldeApp.Core/SiebwaldeApp.Core.csproj` | App settings access. |
-| `Microsoft.NET.Test.Sdk`, `xunit`, `xunit.runner.visualstudio` | Formerly `SiebwaldeApp/SiebwaldeApp.Tests/SiebwaldeApp.Tests.csproj` | Test infrastructure; the project was removed on 2026-09-11. |
+| `Microsoft.NET.Test.Sdk`, `xunit`, `xunit.runner.visualstudio` | `SiebwaldeApp/SiebwaldeApp.Core.Tests/SiebwaldeApp.Core.Tests.csproj` | Active test infrastructure (xUnit). The obsolete `SiebwaldeApp.Tests` was removed on 2026-09-11. |
 
 ## Configuration And Persistence
 
@@ -103,7 +103,7 @@ The repository root is `C:\Localdata\Siebwalde`, a Git repository (`origin https
 
 ## Tests And Diagnostics
 
-- The former test project `SiebwaldeApp/SiebwaldeApp.Tests` (xUnit, station-domain tests) was removed on 2026-09-11 as an obsolete remnant. There is currently no active test project.
+- The former test project `SiebwaldeApp/SiebwaldeApp.Tests` (xUnit, station-domain tests) was removed on 2026-09-11 as an obsolete remnant. The active test project is `SiebwaldeApp/SiebwaldeApp.Core.Tests` (xUnit), included in `SiebwaldeApp.sln`.
 - Logging uses `FileLogger`, `DebugLogger`, `ConsoleLogger`, and `BaseLogFactory` in core; emulator diagnostics mostly use `Console.WriteLine`.
 
 ## Generated, Vendored, Duplicate, And Experimental Content

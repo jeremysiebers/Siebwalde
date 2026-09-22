@@ -244,7 +244,7 @@ Known gaps (tracked in `docs/backlog.md`):
 - Host detection on `SiebwaldeInitPage` (ping on host name; TCP connect for Koploper) (**Planned**).
 - Settings screen with default/undo (**Planned**).
 - Koploper translation path and look-ahead (**Planned**).
-- New unit tests for the window/program model (there is currently no active test project).
+- New unit tests for the window/program model (the active test project `SiebwaldeApp.Core.Tests` covers Core/Integration; UI-model tests remain to be added).
 - Not runtime-verified: Fiddle Yard error paths, `SendNextFwDataPacket` await behavior, `TrackCommClientAsync` publish-interval comment, ECoS multi-client behavior.
 
 ---

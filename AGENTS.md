@@ -2,12 +2,20 @@
 
 ## Reading Order
 
-1. `AGENTS.md` for shared rules and current project map.
-2. `docs/README.md` for the documentation index.
-3. `docs/product.md` for confirmed project purpose, scope, and open questions.
-4. `docs/handoff.md` for current progress and resume steps.
-5. `docs/analysis-coverage.md` for investigation status.
-6. `docs/inventory.md`, `docs/architecture.md`, `docs/implementation.md`, and `docs/build-test.md` for verified project knowledge.
+Startup (current-reading):
+1. `AGENTS.md` for shared rules, the project map, and the mandatory workflow reference.
+2. `docs/development-workflow.md` for the normative Siebwalde Development Workflow v1.
+3. `docs/current-state.md` for the compact verified current project snapshot.
+4. `.opencode/workflow/active-state.json` if present, for the operational Active State Manifest of the active increment (checkpoint/resume state; local and git-ignored, not durable project truth).
+5. Actual Git reality (`git branch --show-current`, `git rev-parse HEAD`, `git status`) before trusting any recorded state.
+6. `docs/product.md` for confirmed project purpose, scope, and open questions.
+7. `docs/README.md` for the documentation index.
+
+Targeted / domain reference (read only as needed):
+- `docs/koploper-interface.md`, `docs/architecture.md`, `docs/implementation.md`, `docs/inventory.md`, `docs/build-test.md`.
+
+Historical / durable history (read only when relevant):
+- `docs/handoff.md` (session history and resume steps), `docs/decisions.md`, `docs/backlog.md`, `docs/analysis-coverage.md`.
 
 ## Project Map
 
@@ -33,9 +41,9 @@ See `docs/inventory.md` for the full inventory and `docs/analysis-coverage.md` f
 
 ## Commands And Prerequisites
 
-- Verified environment command: `dotnet --info` reported SDK `9.0.318`, .NET 8 runtime, and .NET 8 Windows Desktop runtime on Windows. This was verified in the pre-migration workspace; re-run it in `C:\Localdata\Siebwalde` to reconfirm.
-- Proposed build commands are documented in `docs/build-test.md`; full build/test execution was not performed because it can update `bin/` and `obj/`.
-- The former test project `SiebwaldeApp/SiebwaldeApp.Tests` was removed on 2026-09-11 as an obsolete remnant of the abandoned station-in-C# approach. There is currently no active test project; new tests for the window/program model are planned.
+- Verified environment: `dotnet` SDK `9.0.318` with the .NET 8 and .NET 8 Windows Desktop runtimes on Windows (verified in `C:\Localdata\Siebwalde`).
+- Build/test commands are documented in `docs/build-test.md` and are run routinely. The current verified baseline is Debug `343/343`, Release `343/343`, and the `SiebwaldeApp.StopReachabilityHarness` build `0 errors / 0 warnings` (see `docs/current-state.md`).
+- The active test project is `SiebwaldeApp/SiebwaldeApp.Core.Tests/SiebwaldeApp.Core.Tests.csproj` (xUnit; 343 tests). The former `SiebwaldeApp/SiebwaldeApp.Tests` was removed on 2026-09-11 as an obsolete remnant of the abandoned station-in-C# approach; its design intent is archived in `docs/project-knowledge.md`.
 - Firmware projects use Microchip MPLAB X / XC compilers and Python tooling. Do not build, flash, or connect to hardware without explicit authorization.
 
 ## Constraints

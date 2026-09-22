@@ -1,0 +1,41 @@
+{
+  "format_version": 1,
+  "updated_at": "YYYY-MM-DDTHH:MM:SSZ",
+  "increment": "<increment id or working branch>",
+  "objective": "<one-line objective of the active increment>",
+  "target_branch": "master",
+  "working_branch": "<current git branch>",
+  "verified_revision": "<full git sha that current evidence belongs to>",
+  "primary_state": "IMPLEMENT",
+  "execution_status": "ACTIVE",
+  "autonomy_envelope": "SOFTWARE_IMPLEMENTATION",
+  "change_class": ["GOVERNANCE_CHANGE"],
+  "risk_class": "NORMAL",
+  "review_class": "R2",
+  "validation_class": "V0",
+  "acceptance_criteria": [
+    {
+      "id": "AC1",
+      "description": "<acceptance criterion>",
+      "status": "NOT_PROVEN",
+      "evidence_refs": [],
+      "notes": "",
+      "disposition": null
+    }
+  ],
+  "role_status": {
+    "architect": "not-required",
+    "developer": "not-required",
+    "integrator": "pending",
+    "designer": "not-required"
+  },
+  "evidence_completed": [],
+  "evidence_invalidated": [],
+  "open_findings": [],
+  "pending_authority": [],
+  "authority_validity": "none-granted",
+  "blockers": [],
+  "working_tree_state": "clean",
+  "next_safe_action": "<one bounded next action>",
+  "references": []
+}

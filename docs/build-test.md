@@ -25,6 +25,26 @@ Observed environment:
 - Firmware-dependent track initialization expects `C:\Localdata\Siebwalde\TrackAmplifier4.X\dist\Offset\production\TrackAmplifier4.X.production.hex`.
 - Logging and ECoS persistence use `C:\Localdata\Siebwalde\Logging\`.
 
+## Current Build/Test Procedure And Baseline
+
+The active test project is `SiebwaldeApp/SiebwaldeApp.Core.Tests/SiebwaldeApp.Core.Tests.csproj` (xUnit), included in `SiebwaldeApp.sln`. Normal commands, run from `C:\Localdata\Siebwalde`:
+
+```powershell
+dotnet test "SiebwaldeApp\SiebwaldeApp.sln"
+dotnet build "SiebwaldeApp\SiebwaldeApp.sln" -c Release
+dotnet test "SiebwaldeApp\SiebwaldeApp.sln" -c Release --no-build
+dotnet build "SiebwaldeApp\SiebwaldeApp.StopReachabilityHarness\SiebwaldeApp.StopReachabilityHarness.csproj"
+```
+
+Verified baseline at revision `f1caa6b838455afc4ac1d9f5d67d534dfc83c016` (re-run to confirm before relying on it):
+
+- Debug tests: 343/343 PASS.
+- Release tests: 343/343 PASS.
+- Release build: 0 errors / 175 warnings.
+- `SiebwaldeApp.StopReachabilityHarness` build: 0 errors / 0 warnings.
+
+Test counts are transient and belong to the stated revision, not to the procedure itself. For the current verified project snapshot see `docs/current-state.md`.
+
 ## Commands Not Fully Executed In This Assignment
 
 The following commands are the appropriate build/test commands based on project files, but they were not fully executed during this documentation-only assignment because `dotnet build` and normal `dotnet test` can update `bin/` and `obj/` outputs.
@@ -39,7 +59,7 @@ dotnet build "SiebwaldeApp.Core.Host\SiebwaldeApp.Core.Host.sln" -c Debug
 dotnet build "SiebwaldeApp.EcosEmu\SiebwaldeApp.EcosEmu.sln" -c Debug
 ```
 
-The former test project `SiebwaldeApp/SiebwaldeApp.Tests` was removed on 2026-09-11 (Increment 2) as an obsolete remnant; it was in no solution and could not compile. There is currently no active test project.
+The former test project `SiebwaldeApp/SiebwaldeApp.Tests` was removed on 2026-09-11 (Increment 2) as an obsolete remnant; it was in no solution and could not compile. The active test project is now `SiebwaldeApp/SiebwaldeApp.Core.Tests` (xUnit; see "Current Build/Test Procedure And Baseline" above).
 
 ## Former Test Check (Historical)
 
