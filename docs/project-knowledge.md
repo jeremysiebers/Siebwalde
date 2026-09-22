@@ -1,5 +1,7 @@
 # Project Knowledge
 
+> **Role.** This file is durable/historical supporting knowledge. The compact current project snapshot is `docs/current-state.md`, and the normative workflow is `docs/development-workflow.md`. Where this file disagrees with those sources about current reality, `current-state.md` (verified against actual Git state) wins.
+
 ## Verified Facts
 
 - Siebwalde is a model railway control application based on code evidence in track amplifier, Fiddle Yard, ECoS emulator, Koploper, and simulator components.
@@ -10,7 +12,7 @@
 - Active application projects target .NET 8 variants: `net8.0`, `net8.0-windows`, and `net8.0-windows7.0`.
 - `SiebwaldeApp.EcosEmu_old` is not referenced by discovered solution files and should be treated as potentially obsolete or experimental until the user decides its role.
 - Existing prior context is in `SiebwaldeApp/SiebwaldeApp_project_context.md`; it contains modernization goals and previous conversation context, not only verified current behavior.
-- Project-specific OpenCode agents were created under `.opencode/agents/`, but they require an OpenCode restart before use.
+- Project-specific OpenCode agents live under `.opencode/agents/` and now implement Siebwalde Development Workflow v1 (Project Lead plus Developer/Architect/Integrator/Designer); permissions are normalized in `opencode.json`. An OpenCode restart is required after changing agent definitions.
 - `TrackAmplifier4.X` maintains its own firmware guidance (`AGENT_TRACK_AMPLIFIER.md`, `AGENT_TRACK_AMPLIFIER_COMPACT.md`, `MODBUS_TRACK_AMPLIFIER_MAPPING.md`, `TRACK_AMPLIFIER_STATE_MACHINE.md`); it is referenced, not duplicated, in `docs/`.
 
 ## Product-Owner-Confirmed Context (2026-09-11)

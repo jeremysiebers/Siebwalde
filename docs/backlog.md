@@ -142,6 +142,16 @@ Increment 6 outline:
 | Define the layout/amplifier topology in `app.config`. | Product owner Round 5: topology is on paper only; amplifier IDs may be in candidate spreadsheets under `Backup projects/TrackControllerPic18.X/Doc/`. | Topology is transcribed into configuration and validated against the layout. |
 | Build a whole-layout diagnostics and manual-override visualization. | Product owner Round 5: to compare with Koploper data and manually operate switch streets/locomotives. | A view shows layout state and allows manual element/loco control. |
 
+## Workflow v1 Process-Improvement Candidates
+
+Discovered during the Workflow v1 bootstrap. Not approved for implementation; recorded so they are not lost. Implement in a dedicated workflow/governance increment, not mixed into product work.
+
+| Item | Evidence | Acceptance criteria |
+| --- | --- | --- |
+| `opencode.json` bash ask-guards are best-effort only. | The guards force push / hard reset / `clean` / history rewrite / interactive rebase / force branch delete, but pattern bypasses exist (for example `git -C`, aliases, refspec force) and `git clean -n` also triggers. Documented as a known limitation in `docs/current-state.md`. | Either accept and keep the documented limitation, or replace the guards with a more reliable mechanism. Workflow v1 remains the authority boundary either way. |
+| Active State authority invalidation is representable but not auto-detected. | `.opencode/workflow/active-state-check.ps1` validates `pending_authority` structure but does not compare `bound_revision` to Git or auto-mark `INVALIDATED`. | A revision change can be detected and surfaced as authority invalidation, or the limitation is accepted explicitly. |
+| Workflow v1 bootstrap branch is unmerged. | Branch `chore/agent-workflow-v1` implements Workflow v1; `master` does not yet use it. | After Product Owner merge authority, the branch is merged and post-merge verification passes. |
+
 ## Increment 6 Status (2026-09-19)
 
 Done this session:
