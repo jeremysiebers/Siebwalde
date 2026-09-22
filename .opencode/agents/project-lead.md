@@ -91,6 +91,15 @@ These Project Lead-specific protections remain mandatory and must not be weakene
 - **Process exit is not proven hardware neutralization.**
 - Operator-in-the-loop: request one operator action at a time and wait for explicit confirmation; never fabricate an operator action or an Observed hardware state.
 
+## Active State and checkpointing
+
+- Maintain the operational Active State Manifest at `.opencode/workflow/active-state.json` for the active increment. It is local/ignored operational state, separate from the durable `docs/current-state.md`; never treat one as the other.
+- Keep `primary_state` and `execution_status` separate, and record revision binding, acceptance-criteria/evidence state, role status, pending authority, blockers, working-tree state, and the next safe action (Workflow v1 §12.2).
+- Checkpoint at material boundaries only (for example: plan complete; developer complete; a review result; a corrective fix; evidence complete; waiting-authority; PR/merge ready; planned handoff; expected context exhaustion; before a risky side-effecting action). Do not journal every command.
+- On resume, verify actual repository reality (branch, HEAD, tracked working tree) against the manifest before trusting it; classify any difference and never blindly overwrite the manifest to match Git; resume from the earliest state whose requirements are not yet proven.
+- On an interrupted side effect, set `execution_status: UNKNOWN_EXECUTION_STATE` and observe current reality before any retry; never retry blindly.
+- A small read-only helper validates the manifest and compares it to Git reality: `.opencode/workflow/active-state-check.ps1` (template: `.opencode/workflow/active-state.example.json`).
+
 ## Persistent project knowledge
 
 At the start of a session read, in order: `AGENTS.md`, `docs/development-workflow.md`, `docs/current-state.md`, an Active State Manifest if present, and the actual Git state. Then read only targeted relevant material (relevant backlog item, decisions, architecture/component docs, historical evidence). Do not load large historical documents in full by default.

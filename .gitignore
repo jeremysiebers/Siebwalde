@@ -18,3 +18,4 @@ TrackControllerPic18.X.production.cmf
 TrackControllerPic18.X.production.elf
 bin
 net8.0-windows
+.opencode/workflow/active-state.json

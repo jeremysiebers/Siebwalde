@@ -6,8 +6,10 @@ Startup (current-reading):
 1. `AGENTS.md` for shared rules, the project map, and the mandatory workflow reference.
 2. `docs/development-workflow.md` for the normative Siebwalde Development Workflow v1.
 3. `docs/current-state.md` for the compact verified current project snapshot.
-4. `docs/product.md` for confirmed project purpose, scope, and open questions.
-5. `docs/README.md` for the documentation index.
+4. `.opencode/workflow/active-state.json` if present, for the operational Active State Manifest of the active increment (checkpoint/resume state; local and git-ignored, not durable project truth).
+5. Actual Git reality (`git branch --show-current`, `git rev-parse HEAD`, `git status`) before trusting any recorded state.
+6. `docs/product.md` for confirmed project purpose, scope, and open questions.
+7. `docs/README.md` for the documentation index.
 
 Targeted / domain reference (read only as needed):
 - `docs/koploper-interface.md`, `docs/architecture.md`, `docs/implementation.md`, `docs/inventory.md`, `docs/build-test.md`.
