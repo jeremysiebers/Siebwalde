@@ -34,10 +34,12 @@ These results belong to the verified baseline revision; re-run to confirm before
 
 ## Current agent/workflow baseline
 
-- **Workflow v1 is being installed through `chore/agent-workflow-v1`** (`docs/development-workflow.md`).
-- **Agent contracts are NOT yet migrated.** `.opencode/agents/project-lead.md`, `developer.md`, `architect.md`, `integrator.md` and `designer.md` still carry the pre-v1 contract, including the Project Lead's "work as a single agent by default" / "invoke subagents only when the user explicitly requests delegation" restriction, and the subagents' temporary phase wording.
-- **OpenCode permissions are NOT yet normalized.** The Project Lead still has `task: "*": ask` and the subagents still have `edit: ask` / `bash: ask` / `webfetch: ask` (OpenCode 1.18.30). No project-level `opencode.json` exists yet.
-- Consequence: the existence of `docs/development-workflow.md` does **not** mean Workflow v1 orchestration is active. Autonomy and orchestration changes take effect only after the later agent-contract and permission-migration phases.
+- **Workflow v1 is installed** (`docs/development-workflow.md`, v1.0).
+- **Project Lead contract: MIGRATED to Workflow v1 orchestration** (`chore/agent-workflow-v1`). The AI Project Lead is separated from the human Product Owner, owns the workflow, and may autonomously route bounded work to the registered roles within the active autonomy envelope (smallest sufficient role set). The old "work as a single agent by default" / "invoke subagents only when the user explicitly requests delegation" rule is removed.
+- **Developer / Architect / Integrator / Designer contracts: NOT yet migrated.** Their role files still carry the pre-v1 contract, including temporary phase wording.
+- **OpenCode permission normalization: NOT yet implemented.** The Project Lead still has `task: "*": ask` and the subagents still have `edit: ask` / `bash: ask` / `webfetch: ask` (OpenCode 1.18.30). No project-level `opencode.json` exists yet. This is temporary tooling friction and does **not** mean the Product Owner decides whether delegation is appropriate.
+- **Active State mechanism: NOT yet implemented.** `docs/current-state.md` is a compact snapshot, not yet an Active State Manifest.
+- Consequence: the Project Lead contract is migrated, but the full Workflow v1 migration is not complete. A **fresh Project Lead session** is required to actually load the new contract; the subagent contracts and permissions are migrated in later phases.
 
 ## Important current limitations / known follow-ups
 
