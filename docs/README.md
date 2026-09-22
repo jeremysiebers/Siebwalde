@@ -49,7 +49,7 @@ The `TrackAmplifier4.X/` project keeps its own maintained guidance. These files 
 
 This documentation set started as analysis, documentation and OpenCode agent setup, and has since implemented the C# cleanup and the Increment 6 Koploper/ECoS translation layer (speed/PWM, routing and look-ahead, occupancy, switch mapping, ECoS host lifecycle, divergence/safety/diagnostics), followed by the merged safety-stop reachability increment and the production `ControlTrace`. Application source and configuration in `SiebwaldeApp/` were changed as part of that work; firmware, PCB and Python tooling are inventoried but not deeply analyzed and have not been modified. The most recent work is governance: Siebwalde Development Workflow v1 (Project Lead orchestration, migrated role contracts, normalized permissions, and an Active State checkpoint/resume mechanism) is implemented on branch `chore/agent-workflow-v1` and is **not yet merged** to `master`. For the current verified snapshot see `docs/current-state.md`.
 
-See `docs/handoff.md` for the current state and `docs/backlog.md` for the open work, categorised into software follow-up, firmware dependency, physical hardware dependency, and configuration/user-input dependency.
+For the current state see `docs/current-state.md`; for open work see `docs/backlog.md`, categorised into software follow-up, firmware dependency, physical hardware dependency, and configuration/user-input dependency. `docs/handoff.md` is historical.
 
 ## Workspace Location
 

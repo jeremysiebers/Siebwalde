@@ -135,7 +135,7 @@ The former test project `SiebwaldeApp/SiebwaldeApp.Tests` was removed on 2026-09
 
 It referenced station-domain symbols with no definition in active source (`StationTrack`, `TrainType`, `TrackApplication`, `StationSide`, `TrackSensor`, `Signal`, `Amplifier`, `TrackBlock`, `TrackMetadata`, `TrackRole`, `ITrackIn`, `ITrackOut`) and `IoCTestBootstrap` used the old Ninject `IoC.Kernel`. It was in no solution and could not compile.
 
-The encoded station design intent is archived in `docs/project-knowledge.md`; the source is recoverable from git commit `104c1e6`. There is currently no active test project.
+The encoded station design intent is archived in `docs/project-knowledge.md`; the source is recoverable from git commit `104c1e6`. The active test project is `SiebwaldeApp/SiebwaldeApp.Core.Tests` (xUnit).
 
 ## Code-Inspected Risks
 
