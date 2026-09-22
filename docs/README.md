@@ -6,6 +6,8 @@ This directory stores durable analysis and handoff knowledge for future human an
 
 | File | Purpose |
 | --- | --- |
+| `development-workflow.md` | Normative Siebwalde Development Workflow v1: development, review, validation, evidence, Git, resume and agent-orchestration workflow. |
+| `current-state.md` | Compact verified current project snapshot for fast startup by future human and AI sessions. |
 | `application-guide.md` | Human-readable guide to the application: system overview, structure, workflows, endpoints, and status. |
 | `koploper-interface.md` | Verified Koploper/ECoS interface: ports, commands, position records, and the translation-layer design. |
 | `product.md` | Confirmed project purpose, current documentation scope, and separated open questions. |
@@ -31,7 +33,7 @@ The `TrackAmplifier4.X/` project keeps its own maintained guidance. These files 
 
 ## Current Scope
 
-This branch (`feature/csharp-cleanup-startup`) started as analysis, documentation and OpenCode agent setup, and has since implemented the C# cleanup and the Increment 6 Koploper/ECoS translation layer (speed/PWM, routing and look-ahead, occupancy, switch mapping, ECoS host lifecycle, divergence/safety/diagnostics). Application source and configuration in `SiebwaldeApp/` were changed as part of that work; firmware, PCB and Python tooling are inventoried but not deeply analyzed and have not been modified.
+This documentation set started as analysis, documentation and OpenCode agent setup, and has since implemented the C# cleanup and the Increment 6 Koploper/ECoS translation layer (speed/PWM, routing and look-ahead, occupancy, switch mapping, ECoS host lifecycle, divergence/safety/diagnostics), followed by the merged safety-stop reachability increment and the production `ControlTrace`. Application source and configuration in `SiebwaldeApp/` were changed as part of that work; firmware, PCB and Python tooling are inventoried but not deeply analyzed and have not been modified. For the current verified snapshot see `docs/current-state.md`.
 
 See `docs/handoff.md` for the current state and `docs/backlog.md` for the open work, categorised into software follow-up, firmware dependency, physical hardware dependency, and configuration/user-input dependency.
 

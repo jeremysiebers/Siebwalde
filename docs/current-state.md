@@ -1,0 +1,64 @@
+# Siebwalde — Current State
+
+**Nature of this document.** This is a compact, verified snapshot of the current project state for fast startup by future human and AI sessions. It is not a chat handoff, not a workflow journal, not a complete history, not an Active State Manifest, and not a replacement for architecture or product documentation. See the Source-of-truth note at the end.
+
+## Purpose
+
+Siebwalde is the control application for a model railway. Koploper owns driving behaviour and drives locomotives through the ECoS emulator; the C# application translates ECoS/Koploper commands into track-amplifier setpoints and returns occupancy feedback to Koploper. See `docs/product.md` for the confirmed purpose and scope.
+
+## Current product baseline
+
+- The safety-stop reachability increment is **MERGED / CLOSED** (PR #4, merge commit `3b275fa27c9197400ee40cbfa5759450443535d3`, post-merge CI PASS).
+- The merged production baseline includes: DCC28 protocol-speed normalization at the ECoS boundary; logical locomotive direction retention; authoritative TrackAmplifier (`1..50`) vs backplane/configuration (`51..55`) device classification; amplifier-centric safety neutralization (`IAmplifierNeutralizer`, `AmplifierCommandTracker`, fail-honest `SafetyStopResult`); and the dedicated production `ControlTrace` forensic log.
+- Do not reopen the closed safety increment. Detailed evidence lives in `docs/handoff.md`, `docs/backlog.md` and `docs/analysis-coverage.md`.
+
+## Current repository baseline
+
+- Repository root: `C:\Localdata\Siebwalde` (Git; `origin https://github.com/jeremysiebers/Siebwalde.git`).
+- Verified baseline revision: `f1caa6b838455afc4ac1d9f5d67d534dfc83c016` (branch `master`, equal to `origin/master` at the time of the Phase 1 audit).
+- The revision above is a **verified baseline reference**, not a permanently self-updating truth claim; always trust the actual Git state.
+- Main solution: `SiebwaldeApp/SiebwaldeApp.sln` (UI, Core, EcosEmu, Integration, Core.Tests). Separate hosts: `SiebwaldeApp.Core.Host.sln`, `SiebwaldeApp.EcosEmu.sln`. Validation harness: `SiebwaldeApp/SiebwaldeApp.StopReachabilityHarness` (not in the solution).
+- Immutable evidence branch retained: `feature/safety-stop-reachability` @ `825533e` (historical physical-validation provenance). Reviewer-facing branch: `feature/safety-stop-reachability-clean` @ `dab43ab`.
+- The workspace also contains firmware, PCB (KiCad), Python tooling, runtime `Logging/`, and `Backup projects/` (inventoried, not deeply analyzed). Many generated artifacts are untracked.
+
+## Current verification baseline
+
+Executed at the verified baseline revision:
+
+- Debug tests: **343/343 PASS** (`dotnet test SiebwaldeApp.sln`)
+- Release tests: **343/343 PASS** (`dotnet test SiebwaldeApp.sln -c Release --no-build`)
+- Release build: **0 errors / 175 warnings** (`dotnet build SiebwaldeApp.sln -c Release`)
+- `SiebwaldeApp.StopReachabilityHarness` build: **0 errors / 0 warnings**
+
+These results belong to the verified baseline revision; re-run to confirm before relying on them.
+
+## Current agent/workflow baseline
+
+- **Workflow v1 is being installed through `chore/agent-workflow-v1`** (`docs/development-workflow.md`).
+- **Agent contracts are NOT yet migrated.** `.opencode/agents/project-lead.md`, `developer.md`, `architect.md`, `integrator.md` and `designer.md` still carry the pre-v1 contract, including the Project Lead's "work as a single agent by default" / "invoke subagents only when the user explicitly requests delegation" restriction, and the subagents' temporary phase wording.
+- **OpenCode permissions are NOT yet normalized.** The Project Lead still has `task: "*": ask` and the subagents still have `edit: ask` / `bash: ask` / `webfetch: ask` (OpenCode 1.18.30). No project-level `opencode.json` exists yet.
+- Consequence: the existence of `docs/development-workflow.md` does **not** mean Workflow v1 orchestration is active. Autonomy and orchestration changes take effect only after the later agent-contract and permission-migration phases.
+
+## Important current limitations / known follow-ups
+
+Only currently material items; see `docs/backlog.md` for the full list.
+
+- **Open architecture decision (Product Owner):** complete track-amplifier group/domain configuration (`MainRailway` / `MountainRailway` / `Spare` / `Unassigned`) and the cross-domain emergency policy.
+- **Open safety gap (investigate):** startup/restart established-neutral guarantee (C# does not establish/observe neutral before movement; only a partial firmware default exists).
+- **Manual `SetAmplifierControl`** is outside locomotive ownership (the strongest neutralization reaches it; a loco-scoped stop does not).
+- Software follow-ups: ControlTrace free-text quoting/escaping; build/commit ID in `CONTROL_TRACE_START`; trace registration idempotence; `FileLogger` hardening; synthetic `backplanecheck` / `classify` have no live-mode guard; test-project -> harness dependency.
+- Documentation drift still to repair in later phases: `AGENTS.md` and `docs/README.md` contain some stale current-state wording; broader drift repair is out of scope for the Phase 2 checkpoint.
+- Next product direction (not started): autonomous running of the physical 4-amplifier / 4-block test oval with 2 locomotives, driven by Koploper.
+
+## Active development direction
+
+- The immediate work is **governance**: install and activate Workflow v1 (agent contracts, permission normalization, current-state architecture) before resuming product features.
+- After governance: the physical test oval (4 amplifiers at addresses 1, 3, 4, 6; 4 blocks; 2 locomotives; no switches) is the near-term target for autonomous Koploper-driven operation.
+
+## Open Product Owner decisions
+
+None currently blocking Workflow v1 bootstrap.
+
+## Source-of-truth note
+
+`docs/current-state.md` is a compact verified snapshot. It does not override: actual Git state; current source code; executed test/runtime evidence; explicit Product Owner decisions; or authoritative domain documentation (`docs/koploper-interface.md`, `docs/architecture.md`, `docs/implementation.md`, `docs/decisions.md`). Where this document and those sources disagree, the more authoritative source wins.
