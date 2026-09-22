@@ -28,6 +28,12 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+# Distinct exit codes so automation can distinguish outcomes.
+$exitConsistent      = 0
+$exitStateDrift      = 2
+$exitInvalidManifest = 3
+$exitManifestMissing = 4
+
 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 if (-not $ManifestPath) { $ManifestPath = Join-Path $PSScriptRoot 'active-state.json' }
 
@@ -42,8 +48,16 @@ function Invoke-Git {
 
 function Test-GitRevisionExists {
   param([string]$Rev)
-  & git -C $repoRoot cat-file -e "$Rev^{commit}" 2>$null | Out-Null
-  return ($LASTEXITCODE -eq 0)
+  # Native stderr (e.g. git "fatal: Not a valid object name") must not become a
+  # terminating NativeCommandError under $ErrorActionPreference = 'Stop' in PS 5.1.
+  $previous = $ErrorActionPreference
+  $ErrorActionPreference = 'Continue'
+  try {
+    & git -C $repoRoot cat-file -e "$Rev^{commit}" 2>$null | Out-Null
+    return ($LASTEXITCODE -eq 0)
+  } finally {
+    $ErrorActionPreference = $previous
+  }
 }
 
 $primaryStates = @('INTAKE','CLASSIFY','PLAN','ANALYZE_DESIGN','IMPLEMENT','SELF_VERIFY','INDEPENDENT_REVIEW','VALIDATION_PREP','VALIDATE','EVIDENCE_COMPLETE','PR_PREP','PR_ACTIVE','MERGE_READY','POST_MERGE_VERIFY','CLOSURE','RETROSPECTIVE','DONE','ABORTED')
@@ -52,6 +66,8 @@ $evidenceStatuses = @('PROVEN','PARTIALLY_PROVEN','NOT_PROVEN','NOT_APPLICABLE')
 $authorityTypes = @('PRODUCT_DECISION','LIVE_HARDWARE','FIRMWARE_FLASH','DESTRUCTIVE_ACTION','REMOTE_PUSH','CREATE_PR','HISTORY_REWRITE','MERGE','EVIDENCE_BRANCH_DELETE')
 $authorityStatuses = @('PENDING','GRANTED','DENIED','INVALIDATED','CONSUMED')
 $riskClasses = @('NORMAL','ELEVATED','SAFETY_RELEVANT')
+$reviewClasses = @('R0','R1','R2')
+$changeClasses = @('DOCUMENTATION','PRODUCT_SOFTWARE','TEST_HARNESS','ARCHITECTURE_INTERFACE','UI','WORKFLOW_TOOLING','GOVERNANCE_CHANGE','FIRMWARE','HARDWARE_SENSITIVE')
 $validationClasses = @('V0','V1','V2','V3','V4')
 $requiredFields = @('format_version','updated_at','increment','objective','target_branch','working_branch','verified_revision','primary_state','execution_status','autonomy_envelope','change_class','risk_class','review_class','validation_class','acceptance_criteria','role_status','evidence_completed','evidence_invalidated','open_findings','pending_authority','authority_validity','blockers','working_tree_state','next_safe_action','references')
 
@@ -97,7 +113,7 @@ if (-not (Test-Path -LiteralPath $ManifestPath)) {
   $result.drift_reasons += 'Active State Manifest not found.'
   $result.resume_guidance = 'No manifest: do not assume the workflow has no history. Reconstruct the active increment from Git, the Increment Contract, review/evidence records, PR state and durable docs before resuming.'
   Write-Result $result
-  exit 0
+  exit $exitManifestMissing
 }
 $result.manifest_present = $true
 
@@ -109,7 +125,7 @@ try {
   $result.schema_errors += "JSON parse error: $($_.Exception.Message)"
   $result.resume_guidance = 'Manifest is not valid JSON. Repair or reconstruct it before trusting recorded state.'
   Write-Result $result
-  exit 0
+  exit $exitInvalidManifest
 }
 
 foreach ($f in $requiredFields) {
@@ -118,6 +134,11 @@ foreach ($f in $requiredFields) {
 if ($m.primary_state -and ($primaryStates -notcontains $m.primary_state)) { $result.schema_errors += "invalid primary_state: $($m.primary_state)" }
 if ($m.execution_status -and ($execStatuses -notcontains $m.execution_status)) { $result.schema_errors += "invalid execution_status: $($m.execution_status)" }
 if ($m.risk_class -and ($riskClasses -notcontains $m.risk_class)) { $result.schema_errors += "invalid risk_class: $($m.risk_class)" }
+if ($m.review_class -and ($reviewClasses -notcontains $m.review_class)) { $result.schema_errors += "invalid review_class: $($m.review_class)" }
+foreach ($cc in @($m.change_class)) {
+  if ($null -eq $cc) { continue }
+  if ($changeClasses -notcontains $cc) { $result.schema_errors += "invalid change_class: $($cc)" }
+}
 if ($m.validation_class -and ($validationClasses -notcontains $m.validation_class)) { $result.schema_errors += "invalid validation_class: $($m.validation_class)" }
 foreach ($ac in @($m.acceptance_criteria)) {
   if ($null -eq $ac) { continue }
@@ -162,6 +183,13 @@ if (-not $result.working_tree_clean) { $result.drift_reasons += 'unexpected trac
 if ($m.verified_revision -and -not (Test-GitRevisionExists $m.verified_revision)) {
   $result.drift_reasons += "missing referenced revision: $($m.verified_revision)"
 }
+$declaredWorkingTree = [string]$m.working_tree_state
+if ($declaredWorkingTree -and $declaredWorkingTree.ToLowerInvariant() -eq 'clean' -and -not $result.working_tree_clean) {
+  $result.drift_reasons += "declared working_tree_state 'clean' but tracked working tree is dirty"
+}
+if ($declaredWorkingTree -and $declaredWorkingTree.ToLowerInvariant() -eq 'dirty' -and $result.working_tree_clean) {
+  $result.drift_reasons += "declared working_tree_state 'dirty' but tracked working tree is clean"
+}
 
 if (-not $result.schema_ok) {
   $result.drift = 'INVALID_MANIFEST'
@@ -184,5 +212,12 @@ if ($result.drift -ne 'CONSISTENT') {
   $result.resume_guidance += ' Do not blindly overwrite the manifest to match Git; classify the difference first.'
 }
 
+switch ($result.drift) {
+  'CONSISTENT'       { $exitCode = $exitConsistent }
+  'STATE_DRIFT'      { $exitCode = $exitStateDrift }
+  'INVALID_MANIFEST' { $exitCode = $exitInvalidManifest }
+  'MANIFEST_MISSING' { $exitCode = $exitManifestMissing }
+  default            { $exitCode = 1 }
+}
 Write-Result $result
-exit 0
+exit $exitCode
