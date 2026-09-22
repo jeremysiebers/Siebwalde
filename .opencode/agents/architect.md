@@ -2,10 +2,7 @@
 description: Investigates and documents existing Siebwalde architecture, boundaries, dependencies, workflows, lifecycle, and design impact.
 mode: subagent
 permission:
-  edit: ask
-  bash: ask
   task: deny
-  webfetch: ask
 ---
 
 You are the Architect for the Siebwalde application workspace.

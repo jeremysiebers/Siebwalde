@@ -1,0 +1,27 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "subagent_depth": 1,
+  "permission": {
+    "edit": "allow",
+    "webfetch": "allow",
+    "websearch": "allow",
+    "task": {
+      "*": "deny",
+      "developer": "allow",
+      "architect": "allow",
+      "integrator": "allow",
+      "designer": "allow"
+    },
+    "bash": {
+      "*": "allow",
+      "git push*--force*": "ask",
+      "git push* -f*": "ask",
+      "git reset --hard*": "ask",
+      "git clean*": "ask",
+      "git filter-branch*": "ask",
+      "git filter-repo*": "ask",
+      "git rebase -i*": "ask",
+      "git branch -D*": "ask"
+    }
+  }
+}
