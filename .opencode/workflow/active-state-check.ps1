@@ -61,7 +61,7 @@ function Test-GitRevisionExists {
 }
 
 $primaryStates = @('INTAKE','CLASSIFY','PLAN','ANALYZE_DESIGN','IMPLEMENT','SELF_VERIFY','INDEPENDENT_REVIEW','VALIDATION_PREP','VALIDATE','EVIDENCE_COMPLETE','PR_PREP','PR_ACTIVE','MERGE_READY','POST_MERGE_VERIFY','CLOSURE','RETROSPECTIVE','DONE','ABORTED')
-$execStatuses = @('ACTIVE','PAUSED','BLOCKED','WAITING_AUTHORITY','WAITING_PRODUCT_DECISION','UNKNOWN_EXECUTION_STATE')
+$execStatuses = @('ACTIVE','PAUSED','BLOCKED','WAITING_AUTHORITY','WAITING_PRODUCT_DECISION','UNKNOWN_EXECUTION_STATE','TERMINAL')
 $evidenceStatuses = @('PROVEN','PARTIALLY_PROVEN','NOT_PROVEN','NOT_APPLICABLE')
 $authorityTypes = @('PRODUCT_DECISION','LIVE_HARDWARE','FIRMWARE_FLASH','DESTRUCTIVE_ACTION','REMOTE_PUSH','CREATE_PR','HISTORY_REWRITE','MERGE','EVIDENCE_BRANCH_DELETE')
 $authorityStatuses = @('PENDING','GRANTED','DENIED','INVALIDATED','CONSUMED')
@@ -133,6 +133,11 @@ foreach ($f in $requiredFields) {
 }
 if ($m.primary_state -and ($primaryStates -notcontains $m.primary_state)) { $result.schema_errors += "invalid primary_state: $($m.primary_state)" }
 if ($m.execution_status -and ($execStatuses -notcontains $m.execution_status)) { $result.schema_errors += "invalid execution_status: $($m.execution_status)" }
+$terminalStates = @('DONE','ABORTED')
+$isTerminalPrimary = ($m.primary_state -and ($terminalStates -contains $m.primary_state))
+$isTerminalExec = ($m.execution_status -eq 'TERMINAL')
+if ($isTerminalPrimary -and -not $isTerminalExec) { $result.schema_errors += "terminal primary_state '$($m.primary_state)' requires execution_status 'TERMINAL'" }
+if ($isTerminalExec -and -not $isTerminalPrimary) { $result.schema_errors += "execution_status 'TERMINAL' requires a terminal primary_state (DONE or ABORTED)" }
 if ($m.risk_class -and ($riskClasses -notcontains $m.risk_class)) { $result.schema_errors += "invalid risk_class: $($m.risk_class)" }
 if ($m.review_class -and ($reviewClasses -notcontains $m.review_class)) { $result.schema_errors += "invalid review_class: $($m.review_class)" }
 foreach ($cc in @($m.change_class)) {
@@ -206,6 +211,7 @@ switch ($m.execution_status) {
   'WAITING_AUTHORITY'        { $result.resume_guidance = 'Do not perform the gated action; present a bounded, scoped authority request and wait.' }
   'WAITING_PRODUCT_DECISION' { $result.resume_guidance = 'Present options and the specific decision needed; do not choose for the Product Owner.' }
   'UNKNOWN_EXECUTION_STATE'  { $result.resume_guidance = 'Observe current reality before any retry (inspect remote / hardware / process state); do not blindly retry.' }
+  'TERMINAL'                 { $result.resume_guidance = 'Increment is terminal (DONE/ABORTED); there is no implementation to resume. Preserve evidence and close/archive the record.' }
   default                    { $result.resume_guidance = 'Unknown execution_status; re-derive workflow state from evidence before acting.' }
 }
 if ($result.drift -ne 'CONSISTENT') {

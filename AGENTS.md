@@ -17,6 +17,14 @@ Targeted / domain reference (read only as needed):
 Historical / durable history (read only when relevant):
 - `docs/handoff.md` (session history and resume steps), `docs/decisions.md`, `docs/backlog.md`, `docs/analysis-coverage.md`.
 
+## Primary Agents
+
+- `project-lead` — normal entry point for Siebwalde engineering increments; owns the Workflow v1 state machine and orchestration. It is configured as the default primary agent in `opencode.json`.
+- `plan` — optional exploratory analysis and planning mode; not an active Workflow v1 development increment.
+- `build` — optional deliberate direct OpenCode operation; not the normal Workflow v1 development path.
+
+See `docs/development-workflow.md` for the full orchestration model.
+
 ## Project Map
 
 The workspace root is a Git repository (`https://github.com/jeremysiebers/Siebwalde.git`) at `C:\Localdata\Siebwalde`. It is broader than the managed .NET application: it also contains microcontroller firmware, PCB hardware sources, Python tooling, runtime logs, and backup projects.

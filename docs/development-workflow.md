@@ -232,6 +232,7 @@ POST_MERGE_VERIFY
 CLOSURE
 RETROSPECTIVE
 DONE
+ABORTED
 ```
 
 States are conditional.
@@ -251,7 +252,12 @@ BLOCKED
 WAITING_AUTHORITY
 WAITING_PRODUCT_DECISION
 UNKNOWN_EXECUTION_STATE
+TERMINAL
 ```
+
+`TERMINAL` applies only when `primary_state` is a terminal state (`DONE` or `ABORTED`); a completed or aborted increment MUST NOT use a non-terminal execution status.
+
+Conversely, the non-terminal statuses (`ACTIVE`, `PAUSED`, `BLOCKED`, `WAITING_AUTHORITY`, `WAITING_PRODUCT_DECISION`, `UNKNOWN_EXECUTION_STATE`) apply only to non-terminal primary states.
 
 Example:
 
@@ -268,6 +274,8 @@ This distinction MUST be preserved so interruption or waiting conditions do not 
 `DONE` is the successful terminal state.
 
 `ABORTED` is the deliberate unsuccessful terminal state.
+
+For a terminal `primary_state` (`DONE` or `ABORTED`), `execution_status` MUST be `TERMINAL`. A terminal increment has no pending execution to resume, so `execution_status` MUST NOT be `ACTIVE`, `PAUSED`, `BLOCKED`, `WAITING_AUTHORITY`, `WAITING_PRODUCT_DECISION`, or `UNKNOWN_EXECUTION_STATE`.
 
 An aborted increment MAY still require cleanup, evidence preservation, and retrospective work before it is administratively closed.
 
@@ -2236,6 +2244,7 @@ Approved changes are implemented through a dedicated `GOVERNANCE_CHANGE` increme
 | CLOSURE | Durable project/admin closure |
 | RETROSPECTIVE | Lightweight process learning |
 | DONE | Successful terminal state |
+| ABORTED | Deliberate unsuccessful terminal state |
 
 ---
 
