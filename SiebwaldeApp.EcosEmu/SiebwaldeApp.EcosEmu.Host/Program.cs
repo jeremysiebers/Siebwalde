@@ -1,11 +1,12 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using SiebwaldeApp.EcosEmu;
 
 class Program
 {
-    static void Main(string[] args)
+    static async Task Main(string[] args)
     {
         // Capture all console output (Koploper external info, ECoS commands, feedback)
         // into a trace file so a Koploper session can be analysed afterwards.
@@ -32,7 +33,13 @@ class Program
 
         Console.WriteLine("ENTER to stop");
         Console.ReadLine();
-        server.Stop();
+
+        // Graceful shutdown: stop the server first (so no new Koploper connections arrive),
+        // then the external-info client, and finally the simulator loop. Each stop is bounded
+        // so a stuck connection cannot hang process exit.
+        await server.StopAsync();
+        await externalInfo.StopAsync();
+        await hardware.StopAsync();
     }
 }
 

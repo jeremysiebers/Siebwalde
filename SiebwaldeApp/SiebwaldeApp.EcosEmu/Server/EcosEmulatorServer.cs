@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -10,11 +11,16 @@ namespace SiebwaldeApp.EcosEmu
 {
     public class EcosEmulatorServer
     {
+        /// <summary>Upper bound for how long StopAsync waits for a stuck client handler.</summary>
+        private static readonly TimeSpan StopTimeout = TimeSpan.FromSeconds(5);
+
         private readonly int _port;
         private readonly IEcosCommandParser _parser;
         private readonly IEcosBackend _backend;
         private TcpListener? _listener;
         private CancellationTokenSource? _cts;
+        private Task? _acceptLoopTask;
+        private readonly ConcurrentDictionary<Task, byte> _clientTasks = new();
 
         public EcosEmulatorServer(int port, IEcosCommandParser parser, IEcosBackend backend)
         {
@@ -25,6 +31,10 @@ namespace SiebwaldeApp.EcosEmu
 
         public void Start()
         {
+            // Clear any completed client-handler bookkeeping from a previous run so a
+            // stop-then-start cycle starts clean.
+            _clientTasks.Clear();
+
             _cts = new CancellationTokenSource();
             _listener = new TcpListener(IPAddress.Loopback, _port);
 
@@ -37,25 +47,86 @@ namespace SiebwaldeApp.EcosEmu
                 true);
 
             _listener.Start();
-            _ = AcceptLoopAsync(_cts.Token);
+            _acceptLoopTask = AcceptLoopAsync(_cts.Token);
             Console.WriteLine($"ECoS emulator listens on 127.0.0.1:{_port}");
         }
 
+        /// <summary>
+        /// Synchronous, non-blocking stop for backward compatibility. Cancels the token and
+        /// stops/disposes the listener, but does not wait for the accept loop or client
+        /// handlers to finish. Idempotent.
+        /// </summary>
         public void Stop()
         {
-            _cts?.Cancel();
-            _listener?.Stop();
+            var cts = Interlocked.Exchange(ref _cts, null);
+            var listener = Interlocked.Exchange(ref _listener, null);
+
+            cts?.Cancel();
+            try
+            {
+                listener?.Stop();
+            }
+            catch (Exception)
+            {
+                // The listener may already be stopped/disposed; shutdown must not throw.
+            }
+            listener?.Dispose();
+        }
+
+        /// <summary>
+        /// Graceful stop: cancels the token, stops and disposes the listener, then awaits the
+        /// accept loop and every in-flight client handler with a bounded timeout so a stuck
+        /// client cannot hang shutdown forever. Idempotent and resets state so <see cref="Start"/>
+        /// can be called again.
+        /// </summary>
+        public async Task StopAsync(CancellationToken ct = default)
+        {
+            var cts = Interlocked.Exchange(ref _cts, null);
+            var listener = Interlocked.Exchange(ref _listener, null);
+            var acceptLoopTask = Interlocked.Exchange(ref _acceptLoopTask, null);
+
+            cts?.Cancel();
+            try
+            {
+                listener?.Stop();
+            }
+            catch (Exception)
+            {
+                // The listener may already be stopped/disposed; shutdown must not throw.
+            }
+            listener?.Dispose();
+
+            if (acceptLoopTask is not null)
+            {
+                await WaitBoundedAsync(acceptLoopTask, ct).ConfigureAwait(false);
+            }
+
+            // Await every in-flight client handler, then drop them all.
+            var handlers = _clientTasks.Keys.ToArray();
+            foreach (var handler in handlers)
+            {
+                await WaitBoundedAsync(handler, ct).ConfigureAwait(false);
+            }
+            _clientTasks.Clear();
         }
 
         private async Task AcceptLoopAsync(CancellationToken ct)
         {
+            // Capture the listener once so Stop()/StopAsync() nulling _listener in the tiny
+            // window between the loop check and AcceptTcpClientAsync cannot cause a null
+            // dereference. The captured instance is the same one Stop()/StopAsync() stop+dispose,
+            // so a stop still surfaces as the already-handled ObjectDisposedException,
+            // SocketException, or OperationCanceledException.
+            var listener = _listener
+                ?? throw new InvalidOperationException("The ECoS server has not been started.");
+
             try
             {
                 while (!ct.IsCancellationRequested)
                 {
-                    var client = await _listener!.AcceptTcpClientAsync(ct);
+                    var client = await listener.AcceptTcpClientAsync(ct);
                     Console.WriteLine("Koploper connected.");
-                    _ = HandleClientAsync(client, ct);
+                    StartClientHandler(client, ct);
                 }
             }
             catch (OperationCanceledException)
@@ -63,7 +134,59 @@ namespace SiebwaldeApp.EcosEmu
             }
             catch (ObjectDisposedException)
             {
-                // Stop() closed the listener while an accept was pending.
+                // Stop()/StopAsync() closed the listener while an accept was pending.
+            }
+            catch (SocketException)
+            {
+                // The listener socket was shut down while an accept was pending.
+            }
+        }
+
+        /// <summary>
+        /// Tracks a client-handler task so StopAsync can await it, and removes it from the
+        /// tracking set (and observes any exception) once it completes.
+        /// </summary>
+        private void StartClientHandler(TcpClient client, CancellationToken ct)
+        {
+            var task = HandleClientAsync(client, ct);
+            _clientTasks[task] = 0;
+            _ = task.ContinueWith(
+                t =>
+                {
+                    _ = t.Exception; // observe any fault so it never becomes unobserved
+                    _clientTasks.TryRemove(t, out _);
+                },
+                CancellationToken.None,
+                TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.Default);
+        }
+
+        /// <summary>Waits for a task with a bounded timeout, swallowing shutdown exceptions.</summary>
+        private static async Task WaitBoundedAsync(Task task, CancellationToken ct)
+        {
+            if (task.IsCompleted)
+            {
+                Observe(task);
+                return;
+            }
+
+            var completed = await Task.WhenAny(task, Task.Delay(StopTimeout, ct)).ConfigureAwait(false);
+            if (completed == task)
+            {
+                Observe(task);
+            }
+            // Otherwise the timeout elapsed (or ct was cancelled): give up so shutdown cannot hang.
+        }
+
+        private static void Observe(Task task)
+        {
+            try
+            {
+                task.GetAwaiter().GetResult();
+            }
+            catch (Exception)
+            {
+                // A faulted/cancelled handler must not make shutdown throw.
             }
         }
 

@@ -364,6 +364,7 @@ namespace SiebwaldeApp.Integration
             // Detach first so no occupancy update can reach a backend that is being torn down.
             TryRun(() => _integration?.Detach(), "detach the occupancy bridge");
             TryRun(() => _server?.Stop(), "stop the ECoS server");
+            TryRun(() => _simulatorBackend?.Stop(), "stop the simulator backend");
             TryRun(() => _externalInfo?.Stop(), "stop the Koploper external-info client");
 
             _server = null;
