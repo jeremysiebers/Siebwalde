@@ -232,6 +232,7 @@ POST_MERGE_VERIFY
 CLOSURE
 RETROSPECTIVE
 DONE
+ABORTED
 ```
 
 States are conditional.
@@ -2243,6 +2244,7 @@ Approved changes are implemented through a dedicated `GOVERNANCE_CHANGE` increme
 | CLOSURE | Durable project/admin closure |
 | RETROSPECTIVE | Lightweight process learning |
 | DONE | Successful terminal state |
+| ABORTED | Deliberate unsuccessful terminal state |
 
 ---
 
