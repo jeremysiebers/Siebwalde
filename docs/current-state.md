@@ -10,12 +10,13 @@ Siebwalde is the control application for a model railway. Koploper owns driving 
 
 - The safety-stop reachability increment is **MERGED / CLOSED** (PR #4, merge commit `3b275fa27c9197400ee40cbfa5759450443535d3`, post-merge CI PASS).
 - The merged production baseline includes: DCC28 protocol-speed normalization at the ECoS boundary; logical locomotive direction retention; authoritative TrackAmplifier (`1..50`) vs backplane/configuration (`51..55`) device classification; amplifier-centric safety neutralization (`IAmplifierNeutralizer`, `AmplifierCommandTracker`, fail-honest `SafetyStopResult`); and the dedicated production `ControlTrace` forensic log.
+- The ECoS emulator graceful-shutdown increment is **MERGED / CLOSED** (PR #8, merge commit `5fb751552b368015ba17f796d86f41c1d7fa7c13`, post-merge CI PASS). `EcosEmulatorServer`, `KoploperExternalInfoClient` and `TrackSimulatorBackend` now stop deterministically (idempotent, bounded `StopAsync` with tracked+awaited tasks and disposed listener/connection, plus a non-blocking sync `Stop` for the in-process host). Recorded as the completed foundation for a future Recovery & Maintenance System (see `docs/backlog.md`).
 - Do not reopen the closed safety increment. Detailed evidence lives in `docs/handoff.md`, `docs/backlog.md` and `docs/analysis-coverage.md`.
 
 ## Current repository baseline
 
 - Repository root: `C:\Localdata\Siebwalde` (Git; `origin https://github.com/jeremysiebers/Siebwalde.git`).
-- Current `master` HEAD: `a6b3467aca22e2f8be79c1133a5509f351c78135` (Workflow v1 merged via PR #5 on top of the prior baseline `f1caa6b838455afc4ac1d9f5d67d534dfc83c016`; equal to `origin/master`).
+- Current `master` HEAD: `5fb751552b368015ba17f796d86f41c1d7fa7c13` (equal to `origin/master`). This is a normal merge commit for PR #8 on top of the prior baselines `0cf6347` (PR #7, Workflow v1 operational improvements) and `ec990bc` (PR #6); earlier baselines: `a6b3467` (PR #5, Workflow v1) and `f1caa6b`.
 - The revision above is a **verified baseline reference**, not a permanently self-updating truth claim; always trust the actual Git state.
 - Main solution: `SiebwaldeApp/SiebwaldeApp.sln` (UI, Core, EcosEmu, Integration, Core.Tests). Separate hosts: `SiebwaldeApp.Core.Host.sln`, `SiebwaldeApp.EcosEmu.sln`. Validation harness: `SiebwaldeApp/SiebwaldeApp.StopReachabilityHarness` (not in the solution).
 - Immutable evidence branch retained: `feature/safety-stop-reachability` @ `825533e` (historical physical-validation provenance). Reviewer-facing branch: `feature/safety-stop-reachability-clean` @ `dab43ab`.
@@ -25,8 +26,8 @@ Siebwalde is the control application for a model railway. Koploper owns driving 
 
 Executed at the verified baseline revision:
 
-- Debug tests: **343/343 PASS** (`dotnet test SiebwaldeApp.sln`)
-- Release tests: **343/343 PASS** (`dotnet test SiebwaldeApp.sln -c Release --no-build`)
+- Debug tests: **350/350 PASS** (`dotnet test SiebwaldeApp.sln`)
+- Release tests: **350/350 PASS** (`dotnet test SiebwaldeApp.sln -c Release --no-build`)
 - Release build: **0 errors / 175 warnings** (`dotnet build SiebwaldeApp.sln -c Release`)
 - `SiebwaldeApp.StopReachabilityHarness` build: **0 errors / 0 warnings**
 
