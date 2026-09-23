@@ -15,7 +15,7 @@ Siebwalde is the control application for a model railway. Koploper owns driving 
 ## Current repository baseline
 
 - Repository root: `C:\Localdata\Siebwalde` (Git; `origin https://github.com/jeremysiebers/Siebwalde.git`).
-- Verified baseline revision: `f1caa6b838455afc4ac1d9f5d67d534dfc83c016` (branch `master`, equal to `origin/master` at the time of the Phase 1 audit).
+- Current `master` HEAD: `a6b3467aca22e2f8be79c1133a5509f351c78135` (Workflow v1 merged via PR #5 on top of the prior baseline `f1caa6b838455afc4ac1d9f5d67d534dfc83c016`; equal to `origin/master`).
 - The revision above is a **verified baseline reference**, not a permanently self-updating truth claim; always trust the actual Git state.
 - Main solution: `SiebwaldeApp/SiebwaldeApp.sln` (UI, Core, EcosEmu, Integration, Core.Tests). Separate hosts: `SiebwaldeApp.Core.Host.sln`, `SiebwaldeApp.EcosEmu.sln`. Validation harness: `SiebwaldeApp/SiebwaldeApp.StopReachabilityHarness` (not in the solution).
 - Immutable evidence branch retained: `feature/safety-stop-reachability` @ `825533e` (historical physical-validation provenance). Reviewer-facing branch: `feature/safety-stop-reachability-clean` @ `dab43ab`.
@@ -34,15 +34,14 @@ These results belong to the verified baseline revision; re-run to confirm before
 
 ## Current agent/workflow baseline
 
-- **Workflow v1 is installed** (`docs/development-workflow.md`, v1.0).
-- **Project Lead contract: MIGRATED and fresh-session smoke-verified** (`chore/agent-workflow-v1`). The AI Project Lead is separated from the human Product Owner, owns the workflow, and may autonomously route bounded work to the registered roles within the active autonomy envelope (smallest sufficient role set). The old "work as a single agent by default" / "invoke subagents only when the user explicitly requests delegation" rule is removed.
-- **Developer, Architect, Integrator, Designer contracts: MIGRATED to permanent Workflow v1 role contracts** (`chore/agent-workflow-v1`). Each is subordinate to `docs/development-workflow.md`, states the tool-permission-vs-workflow-authority boundary, reports through the Agent Result Contract, keeps `task: deny` (no nested orchestration), and no longer contains temporary phase wording. The Integrator contract preserves the historical hardware/process-safety rules and the independent-review boundary (no fix-and-self-approve). The migration passed an independent governance consistency review.
-- **OpenCode permission normalization: IMPLEMENTED and smoke-verified** (`opencode.json`, OpenCode 1.18.30). Project-wide defaults allow routine `edit`/`bash`/`webfetch`/`websearch` work; `task` is a fail-closed allow-list limited to the four registered roles; each subagent keeps `task: deny` and `subagent_depth` is `1`, so nested delegation stays denied. The Project Lead no longer carries `task: "*": ask`.
-- **Active State / checkpoint / resume: IMPLEMENTED and verified** (`.opencode/workflow/`, `chore/agent-workflow-v1`). The operational Active State Manifest (`.opencode/workflow/active-state.json`, local and git-ignored) is kept separate from this durable snapshot; a tracked template (`active-state.example.json`) and a small read-only validator/reality-check helper (`active-state-check.ps1`) accompany it. The mechanism passed an independent governance review after a corrective fix.
-- **Documentation reading order / current-state alignment: COMPLETED** (`AGENTS.md`, `docs/README.md`, `docs/build-test.md`, `docs/inventory.md`, `docs/project-knowledge.md`).
+- **Workflow v1 is ACTIVE ON MASTER** (`docs/development-workflow.md`, v1.0). Merged via PR #5 (`Introduce Siebwalde Development Workflow v1`), merge commit `a6b3467aca22e2f8be79c1133a5509f351c78135`, post-merge CI PASS.
+- **Project Lead contract: migrated and verified.** The AI Project Lead is separated from the human Product Owner, owns the workflow, and may autonomously route bounded work to the registered roles within the active autonomy envelope (smallest sufficient role set). The old "work as a single agent by default" / "invoke subagents only when the user explicitly requests delegation" rule is removed.
+- **Developer, Architect, Integrator, Designer contracts: migrated to permanent Workflow v1 role contracts.** Each is subordinate to `docs/development-workflow.md`, states the tool-permission-vs-workflow-authority boundary, reports through the Agent Result Contract, keeps `task: deny` (no nested orchestration), and no longer contains temporary phase wording. The Integrator contract preserves the historical hardware/process-safety rules and the independent-review boundary (no fix-and-self-approve). The migration passed an independent governance consistency review.
+- **OpenCode permission normalization: implemented and verified** (`opencode.json`, OpenCode 1.18.30). Project-wide defaults allow routine `edit`/`bash`/`webfetch`/`websearch` work; `task` is a fail-closed allow-list limited to the four registered roles; each subagent keeps `task: deny` and `subagent_depth` is `1`, so nested delegation stays denied. The Project Lead no longer carries `task: "*": ask`.
+- **Active State / checkpoint / resume: implemented and verified** (`.opencode/workflow/`). The operational Active State Manifest (`.opencode/workflow/active-state.json`, local and git-ignored) is kept separate from this durable snapshot; a tracked template (`active-state.example.json`) and a small read-only validator/reality-check helper (`active-state-check.ps1`) accompany it. The mechanism passed an independent governance review after a corrective fix.
+- **Documentation reading order / current-state alignment: completed** (`AGENTS.md`, `docs/README.md`, `docs/build-test.md`, `docs/inventory.md`, `docs/project-knowledge.md`).
+- **Fresh-primary-session resume acceptance test: PASS** (2026-09-22): manifest loaded, Git branch/HEAD reality verified, validator returned `CONSISTENT` (exit 0), increment recovered correctly without chat handoff, and revision-mismatch reasoning produced `STATE_DRIFT` semantics rather than blindly trusting the manifest.
 - **Final Workflow v1 end-to-end eval: PASSED** (E1-E12 semantics and the fresh-session drift reasoning; independent governance review of the full `master..chore/agent-workflow-v1` diff).
-- **Branch `chore/agent-workflow-v1`: implements Workflow v1 but is NOT yet merged to `master`.** Workflow v1 becomes current on `master` only after PR/merge authority is granted.
-- Consequence: the Workflow v1 bootstrap is complete on the branch; only the fresh-primary-session resume acceptance test and Product Owner PR/merge authority remain before it lands on `master`.
 
 ## Important current limitations / known follow-ups
 
@@ -58,12 +57,12 @@ Only currently material items; see `docs/backlog.md` for the full list.
 
 ## Active development direction
 
-- The immediate work is **governance**: install and activate Workflow v1 (agent contracts, permission normalization, current-state architecture) before resuming product features.
-- After governance: the physical test oval (4 amplifiers at addresses 1, 3, 4, 6; 4 blocks; 2 locomotives; no switches) is the near-term target for autonomous Koploper-driven operation.
+- Governance (Workflow v1 bootstrap) is **complete and merged**; the next work returns to product features.
+- Next product direction: the physical test oval (4 amplifiers at addresses 1, 3, 4, 6; 4 blocks; 2 locomotives; no switches) for autonomous Koploper-driven operation.
 
 ## Open Product Owner decisions
 
-None currently blocking Workflow v1 bootstrap.
+None currently blocking.
 
 ## Source-of-truth note
 
