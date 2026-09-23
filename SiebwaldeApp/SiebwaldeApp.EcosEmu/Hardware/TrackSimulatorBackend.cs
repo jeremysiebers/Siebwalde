@@ -267,6 +267,9 @@ namespace SiebwaldeApp.EcosEmu
 
         // ========== Simulatie-loop ==========
 
+        /// <summary>Upper bound for how long StopAsync waits for the simulation loop.</summary>
+        private static readonly TimeSpan StopTimeout = TimeSpan.FromSeconds(5);
+
         private void StartSimulationLoop()
         {
             if (_simTask != null)
@@ -276,20 +279,84 @@ namespace SiebwaldeApp.EcosEmu
             _simTask = Task.Run(() => SimLoopAsync(_simCts.Token));
         }
 
+        /// <summary>
+        /// Synchronous, non-blocking stop: only cancels the token so the loop winds down on its
+        /// own. Idempotent. Does not await the loop or reset state.
+        /// </summary>
+        public void Stop()
+        {
+            _simCts?.Cancel();
+        }
+
+        /// <summary>
+        /// Graceful stop: cancels the token, awaits the simulation loop with a bounded timeout,
+        /// disposes the token source and resets the task/token fields so the loop can be started
+        /// again. Idempotent.
+        /// </summary>
+        public async Task StopAsync(CancellationToken ct = default)
+        {
+            var cts = Interlocked.Exchange(ref _simCts, null);
+            cts?.Cancel();
+
+            var simTask = Interlocked.Exchange(ref _simTask, null);
+            if (simTask is not null)
+            {
+                await WaitBoundedAsync(simTask, ct).ConfigureAwait(false);
+            }
+
+            cts?.Dispose();
+        }
+
         private async Task SimLoopAsync(CancellationToken ct)
         {
             var sw = System.Diagnostics.Stopwatch.StartNew();
             double lastMs = sw.Elapsed.TotalMilliseconds;
 
-            while (!ct.IsCancellationRequested)
+            try
             {
-                var now = sw.Elapsed.TotalMilliseconds;
-                var dtMs = now - lastMs;
-                lastMs = now;
+                while (!ct.IsCancellationRequested)
+                {
+                    var now = sw.Elapsed.TotalMilliseconds;
+                    var dtMs = now - lastMs;
+                    lastMs = now;
 
-                StepSimulation(dtMs / 1000.0); // seconden
+                    StepSimulation(dtMs / 1000.0); // seconden
 
-                await Task.Delay(50, ct).ConfigureAwait(false); // ~20 Hz
+                    await Task.Delay(50, ct).ConfigureAwait(false); // ~20 Hz
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // Graceful shutdown: the delay was cancelled.
+            }
+        }
+
+        /// <summary>Waits for a task with a bounded timeout, swallowing shutdown exceptions.</summary>
+        private static async Task WaitBoundedAsync(Task task, CancellationToken ct)
+        {
+            if (task.IsCompleted)
+            {
+                Observe(task);
+                return;
+            }
+
+            var completed = await Task.WhenAny(task, Task.Delay(StopTimeout, ct)).ConfigureAwait(false);
+            if (completed == task)
+            {
+                Observe(task);
+            }
+            // Otherwise the timeout elapsed (or ct was cancelled): give up so shutdown cannot hang.
+        }
+
+        private static void Observe(Task task)
+        {
+            try
+            {
+                task.GetAwaiter().GetResult();
+            }
+            catch (Exception)
+            {
+                // A faulted/cancelled loop must not make shutdown throw.
             }
         }
 

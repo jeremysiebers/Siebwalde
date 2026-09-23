@@ -10,6 +10,9 @@ namespace SiebwaldeApp.EcosEmu
 {
     public class KoploperExternalInfoClient : IBlockPositionProvider
     {
+        /// <summary>Upper bound for how long StopAsync waits for the run task.</summary>
+        private static readonly TimeSpan StopTimeout = TimeSpan.FromSeconds(5);
+
         private readonly string _host;
         private readonly int _port;
 
@@ -20,6 +23,9 @@ namespace SiebwaldeApp.EcosEmu
         public event Action<int, int>? BlockEntered;
 
         private CancellationTokenSource? _cts;
+        private Task? _runTask;
+        private TcpClient? _client;
+        private NetworkStream? _stream;
 
         public KoploperExternalInfoClient(string host = "127.0.0.1", int port = 5700)
         {
@@ -35,42 +41,170 @@ namespace SiebwaldeApp.EcosEmu
         public void Start()
         {
             _cts = new CancellationTokenSource();
-            _ = Task.Run(() => RunAsync(_cts.Token));
+            _runTask = Task.Run(() => RunAsync(_cts.Token));
             Console.WriteLine("[EXT] ExternalInfo client started.");
         }
 
+        /// <summary>
+        /// Synchronous, non-blocking stop for backward compatibility: cancels the token and
+        /// disposes the current connection so a pending read is unblocked. Does not await the
+        /// run task. Idempotent.
+        /// </summary>
         public void Stop()
         {
-            _cts?.Cancel();
+            var cts = Interlocked.Exchange(ref _cts, null);
+            cts?.Cancel();
+
+            DisposeCurrentConnection();
+
             Console.WriteLine("[EXT] ExternalInfo client stopped.");
+        }
+
+        /// <summary>
+        /// Graceful stop: cancels the token, disposes the current connection, and awaits the
+        /// run task with a bounded timeout. Idempotent and resets state so <see cref="Start"/>
+        /// can be called again.
+        /// </summary>
+        public async Task StopAsync(CancellationToken ct = default)
+        {
+            var cts = Interlocked.Exchange(ref _cts, null);
+            cts?.Cancel();
+
+            DisposeCurrentConnection();
+
+            var runTask = Interlocked.Exchange(ref _runTask, null);
+            if (runTask is not null)
+            {
+                await WaitBoundedAsync(runTask, ct).ConfigureAwait(false);
+            }
+
+            Console.WriteLine("[EXT] ExternalInfo client stopped.");
+        }
+
+        /// <summary>
+        /// Disposes the current connection (if any) and clears the references, so a pending
+        /// synchronous/async read on that stream is unblocked. Uses a reference check so a
+        /// connection created by a concurrent restart is never clobbered here.
+        /// </summary>
+        private void DisposeCurrentConnection()
+        {
+            var stream = Interlocked.Exchange(ref _stream, null);
+            var client = Interlocked.Exchange(ref _client, null);
+            try { stream?.Dispose(); } catch { }
+            try { client?.Dispose(); } catch { }
         }
 
         private async Task RunAsync(CancellationToken ct)
         {
             while (!ct.IsCancellationRequested)
             {
+                TcpClient? client = null;
+                NetworkStream? stream = null;
                 try
                 {
-                    using var client = new TcpClient();
+                    client = new TcpClient();
+                    _client = client;
                     await client.ConnectAsync(_host, _port, ct);
                     Console.WriteLine("[EXT] Connected with Koploper external information (5700).");
 
-                    using var stream = client.GetStream();
+                    stream = client.GetStream();
+                    _stream = stream;
+
+                    var buffer = new byte[1];
 
                     while (!ct.IsCancellationRequested)
                     {
-                        int value = stream.ReadByte();
-                        if (value < 0)
+                        int bytesRead;
+                        try
+                        {
+                            bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length, ct);
+                        }
+                        catch (OperationCanceledException)
+                        {
+                            // Clean shutdown: the host is stopping while connected.
+                            break;
+                        }
+                        catch (IOException)
+                        {
+                            // Connection dropped by the peer or disposed by Stop()/StopAsync().
+                            break;
+                        }
+                        catch (ObjectDisposedException)
+                        {
+                            // Connection disposed by Stop()/StopAsync().
+                            break;
+                        }
+
+                        if (bytesRead <= 0)
                             break;
 
-                        ProcessByteFromKoploper((byte)value);
+                        ProcessByteFromKoploper(buffer[0]);
                     }
+                }
+                catch (OperationCanceledException)
+                {
+                    // Cancellation during ConnectAsync or the reconnect delay: exit cleanly.
+                    break;
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine("[EXT] Error: " + ex.Message);
-                    await Task.Delay(1000, ct);
+                    try
+                    {
+                        await Task.Delay(1000, ct);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        break;
+                    }
                 }
+                finally
+                {
+                    // Only clear the shared reference if it still points at this connection,
+                    // otherwise a concurrent restart's connection would be clobbered.
+                    if (stream is not null)
+                    {
+                        if (ReferenceEquals(_stream, stream))
+                            Interlocked.CompareExchange(ref _stream, null, stream);
+                        try { stream.Dispose(); } catch { }
+                    }
+
+                    if (client is not null)
+                    {
+                        if (ReferenceEquals(_client, client))
+                            Interlocked.CompareExchange(ref _client, null, client);
+                        try { client.Dispose(); } catch { }
+                    }
+                }
+            }
+        }
+
+        /// <summary>Waits for a task with a bounded timeout, swallowing shutdown exceptions.</summary>
+        private static async Task WaitBoundedAsync(Task task, CancellationToken ct)
+        {
+            if (task.IsCompleted)
+            {
+                Observe(task);
+                return;
+            }
+
+            var completed = await Task.WhenAny(task, Task.Delay(StopTimeout, ct)).ConfigureAwait(false);
+            if (completed == task)
+            {
+                Observe(task);
+            }
+            // Otherwise the timeout elapsed (or ct was cancelled): give up so shutdown cannot hang.
+        }
+
+        private static void Observe(Task task)
+        {
+            try
+            {
+                task.GetAwaiter().GetResult();
+            }
+            catch (Exception)
+            {
+                // A faulted/cancelled run task must not make shutdown throw.
             }
         }
 
