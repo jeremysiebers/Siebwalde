@@ -150,7 +150,7 @@ Discovered during the Workflow v1 bootstrap. Not approved for implementation; re
 | --- | --- | --- |
 | `opencode.json` bash ask-guards are best-effort only. | The guards force push / hard reset / `clean` / history rewrite / interactive rebase / force branch delete, but pattern bypasses exist (for example `git -C`, aliases, refspec force) and `git clean -n` also triggers. Documented as a known limitation in `docs/current-state.md`. | Either accept and keep the documented limitation, or replace the guards with a more reliable mechanism. Workflow v1 remains the authority boundary either way. |
 | Active State authority invalidation is representable but not auto-detected. | `.opencode/workflow/active-state-check.ps1` validates `pending_authority` structure but does not compare `bound_revision` to Git or auto-mark `INVALIDATED`. | A revision change can be detected and surfaced as authority invalidation, or the limitation is accepted explicitly. |
-| Workflow v1 bootstrap branch is unmerged. | Branch `chore/agent-workflow-v1` implements Workflow v1; `master` does not yet use it. | After Product Owner merge authority, the branch is merged and post-merge verification passes. |
+| Workflow v1 bootstrap merged to `master`. | Merged via PR #5 (`Introduce Siebwalde Development Workflow v1`), merge commit `a6b3467aca22e2f8be79c1133a5509f351c78135`; post-merge CI PASS. | DONE (2026-09-22). |
 
 ## Increment 6 Status (2026-09-19)
 
