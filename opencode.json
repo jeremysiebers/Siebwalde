@@ -1,5 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "default_agent": "project-lead",
   "subagent_depth": 1,
   "permission": {
     "edit": "allow",

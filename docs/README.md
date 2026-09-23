@@ -65,4 +65,4 @@ The project runs Siebwalde Development Workflow v1 (`docs/development-workflow.m
 - `.opencode/agents/integrator.md`, mode `subagent` - independent review and validation.
 - `.opencode/agents/designer.md`, mode `subagent` - conditional UI/UX work.
 
-Project permissions are normalized in `opencode.json`. The operational Active State Manifest is `.opencode/workflow/active-state.json` (local, git-ignored). Restart OpenCode from `C:\Localdata\Siebwalde` and select `project-lead`.
+Project permissions are normalized in `opencode.json`, which also sets `default_agent: "project-lead"`. The operational Active State Manifest is `.opencode/workflow/active-state.json` (local, git-ignored). Restart OpenCode from `C:\Localdata\Siebwalde`; `project-lead` is then the default primary agent, while `plan` and `build` remain available as optional built-in primary agents.
