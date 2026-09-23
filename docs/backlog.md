@@ -106,7 +106,7 @@ Increment 6 outline:
 | --- | --- | --- |
 | Clarify multi-client behavior. | `SimpleEcosBackend` stores one `_currentWriter`. | Multi-client policy is documented and enforced. |
 | Harden ECoS command parsing. | `SimpleEcosCommandParser` uses simple comma splitting. | Parser behavior for quoted values and malformed commands is tested. |
-| Add graceful stop for Koploper external info and simulator loops. | Background loops exist in `KoploperExternalInfoClient` and `TrackSimulatorBackend`. | Host shutdown cancels and awaits background tasks. |
+| Add graceful stop for Koploper external info and simulator loops. | DONE (2026-09-23, PR #8, merge commit `5fb751552b368015ba17f796d86f41c1d7fa7c13`): `EcosEmulatorServer`, `KoploperExternalInfoClient` and `TrackSimulatorBackend` now have idempotent, bounded `StopAsync` (tracked+awaited tasks, disposed listener/connection, restartable) plus a non-blocking sync `Stop` for the in-process host. | Host shutdown cancels and awaits background tasks. |
 
 ## Workspace Hygiene
 
@@ -298,5 +298,11 @@ The supplemental Integrator review concluded `PRODUCTION TRACE INCOMPLETE`; the 
 | Real-layout power-on switch positions. | `SwitchMapConfig` default is `keep` because the rest position is unknown. | Confirmed positions are configured as `g`/`r`. |
 | Real-layout topology, block map and switch addresses. | The shipped defaults describe the test oval. | The real layout values are entered on the settings page. |
 | Signals 51..55 as switches. | Koploper commands them via `switch[...]`; they are unmapped and ignored. | Signals are either mapped or deliberately documented as out of scope. |
+
+## Recovery & Maintenance System (future)
+
+The ECoS emulator graceful-shutdown work (merged 2026-09-23, PR #8, merge commit `5fb751552b368015ba17f796d86f41c1d7fa7c13`) is recorded as a **completed foundation** for a future Recovery & Maintenance System.
+
+The Product Owner has since issued a full assignment for this system. See the durable feature brief, architecture proposal, development roadmap and open Product Owner decisions in **`docs/recovery-maintenance-system.md`**. The first implementation increment (software-only, simulator mode: stop/start/restart of the C# track-control runtime from WPF) is described there; do not start implementation until the Product Owner approves it as a separate increment.
 
 

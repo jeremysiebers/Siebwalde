@@ -19,6 +19,7 @@ The operational Active State Manifest for the active increment is local and git-
 | File | Purpose |
 | --- | --- |
 | `product.md` | Confirmed project purpose, current documentation scope, and separated open questions. |
+| `recovery-maintenance-system.md` | Feature brief, architecture proposal, development roadmap and open Product Owner decisions for the Recovery & Maintenance System (operator/software/hardware recovery + control transfer). |
 | `application-guide.md` | Human-readable guide to the application: system overview, structure, workflows, endpoints, and status. |
 | `koploper-interface.md` | Verified Koploper/ECoS interface: ports, commands, position records, and the translation-layer design. |
 | `architecture.md` | Existing architecture, boundaries, workflows, lifecycle, concurrency, and cross-component dependencies. |
