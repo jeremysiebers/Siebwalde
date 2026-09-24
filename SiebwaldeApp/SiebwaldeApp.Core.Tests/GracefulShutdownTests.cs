@@ -38,6 +38,18 @@ namespace SiebwaldeApp.Core.Tests
             await task; // observe the result / propagate any exception
         }
 
+        /// <summary>Fails if the task does not complete within the bound, then returns its result.</summary>
+        public static async Task<T> TimeBoundAsync<T>(Task<T> task, int timeoutMs = 10000)
+        {
+            var completed = await Task.WhenAny(task, Task.Delay(timeoutMs));
+            if (!ReferenceEquals(completed, task))
+            {
+                throw new TimeoutException($"Operation did not complete within {timeoutMs}ms.");
+            }
+
+            return await task;
+        }
+
         /// <summary>Polls a condition until it becomes true or the bound expires.</summary>
         public static async Task WaitUntilAsync(Func<bool> condition, int timeoutMs = 5000)
         {
@@ -139,7 +151,7 @@ namespace SiebwaldeApp.Core.Tests
             await GracefulShutdownTestHelpers.WaitUntilAsync(() => backend.Count >= 1);
             Assert.True(backend.Count >= 1, "The client command should have been handled.");
 
-            await GracefulShutdownTestHelpers.TimeBoundAsync(server.StopAsync());
+            Assert.True(await GracefulShutdownTestHelpers.TimeBoundAsync(server.StopAsync()));
 
             // Port must be released and the active connection closed by the server.
             await GracefulShutdownTestHelpers.AssertPortIsFree(port);
@@ -150,7 +162,7 @@ namespace SiebwaldeApp.Core.Tests
             server.Start();
             await GracefulShutdownTestHelpers.AssertPortIsServed(port);
 
-            await GracefulShutdownTestHelpers.TimeBoundAsync(server.StopAsync());
+            Assert.True(await GracefulShutdownTestHelpers.TimeBoundAsync(server.StopAsync()));
             await GracefulShutdownTestHelpers.AssertPortIsFree(port);
         }
 
@@ -161,8 +173,8 @@ namespace SiebwaldeApp.Core.Tests
             var server = new EcosEmulatorServer(port, new FakeParser(), new CountingBackend());
 
             server.Start();
-            await GracefulShutdownTestHelpers.TimeBoundAsync(server.StopAsync());
-            await GracefulShutdownTestHelpers.TimeBoundAsync(server.StopAsync());
+            Assert.True(await GracefulShutdownTestHelpers.TimeBoundAsync(server.StopAsync()));
+            Assert.True(await GracefulShutdownTestHelpers.TimeBoundAsync(server.StopAsync()));
 
             await GracefulShutdownTestHelpers.AssertPortIsFree(port);
         }
@@ -236,7 +248,7 @@ namespace SiebwaldeApp.Core.Tests
             // Let the client settle into its read loop.
             await Task.Delay(200);
 
-            await GracefulShutdownTestHelpers.TimeBoundAsync(client.StopAsync());
+            Assert.True(await GracefulShutdownTestHelpers.TimeBoundAsync(client.StopAsync()));
 
             await GracefulShutdownTestHelpers.AssertConnectionClosed(serverSide);
             serverSide.Dispose();
@@ -253,7 +265,7 @@ namespace SiebwaldeApp.Core.Tests
             // Let the connect attempt fail and the client enter its reconnect delay.
             await Task.Delay(300);
 
-            await GracefulShutdownTestHelpers.TimeBoundAsync(client.StopAsync());
+            Assert.True(await GracefulShutdownTestHelpers.TimeBoundAsync(client.StopAsync()));
         }
 
         [Fact]
@@ -264,13 +276,13 @@ namespace SiebwaldeApp.Core.Tests
             var client = new KoploperExternalInfoClient("127.0.0.1", port);
             client.Start();
             await Task.Delay(200);
-            await GracefulShutdownTestHelpers.TimeBoundAsync(client.StopAsync());
+            Assert.True(await GracefulShutdownTestHelpers.TimeBoundAsync(client.StopAsync()));
 
             await using var listener = new FakeKoploperListener(port);
             client.Start();
             var serverSide = await listener.WaitForConnectionAsync();
 
-            await GracefulShutdownTestHelpers.TimeBoundAsync(client.StopAsync());
+            Assert.True(await GracefulShutdownTestHelpers.TimeBoundAsync(client.StopAsync()));
             await GracefulShutdownTestHelpers.AssertConnectionClosed(serverSide);
             serverSide.Dispose();
         }
@@ -326,7 +338,7 @@ namespace SiebwaldeApp.Core.Tests
             await Task.Delay(800);
             Assert.True(sink.Count > before, "The simulation loop should keep producing sensor events while running.");
 
-            await GracefulShutdownTestHelpers.TimeBoundAsync(backend.StopAsync());
+            Assert.True(await GracefulShutdownTestHelpers.TimeBoundAsync(backend.StopAsync()));
 
             // After stop, no more sensor events may be produced.
             int stopped = sink.Count;
@@ -337,7 +349,7 @@ namespace SiebwaldeApp.Core.Tests
             backend.AttachFeedbackSink(sink);
             Assert.True(sink.Count > stopped, "Restart should reset sensors and produce new events.");
 
-            await GracefulShutdownTestHelpers.TimeBoundAsync(backend.StopAsync());
+            Assert.True(await GracefulShutdownTestHelpers.TimeBoundAsync(backend.StopAsync()));
         }
     }
 }

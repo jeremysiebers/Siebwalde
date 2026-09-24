@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using SiebwaldeApp.Core;
 
 namespace SiebwaldeApp.EcosEmu
 {
@@ -21,6 +22,9 @@ namespace SiebwaldeApp.EcosEmu
         private CancellationTokenSource? _cts;
         private Task? _acceptLoopTask;
         private readonly ConcurrentDictionary<Task, byte> _clientTasks = new();
+
+        /// <summary>Raised when the accept loop faults unexpectedly (never on cancellation).</summary>
+        public event EventHandler<RuntimeFaultEventArgs>? Faulted;
 
         public EcosEmulatorServer(int port, IEcosCommandParser parser, IEcosBackend backend)
         {
@@ -48,6 +52,22 @@ namespace SiebwaldeApp.EcosEmu
 
             _listener.Start();
             _acceptLoopTask = AcceptLoopAsync(_cts.Token);
+
+            // Observe the accept loop and surface an unexpected fault. Cancellation and disposed
+            // listener are handled inside AcceptLoopAsync, so they never surface here as a fault.
+            _ = _acceptLoopTask.ContinueWith(
+                t =>
+                {
+                    if (t.IsFaulted)
+                    {
+                        var inner = t.Exception?.InnerException ?? t.Exception;
+                        Faulted?.Invoke(this, new RuntimeFaultEventArgs("EcosEmulatorServer.AcceptLoop", inner!));
+                    }
+                },
+                CancellationToken.None,
+                TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.Default);
+
             Console.WriteLine($"ECoS emulator listens on 127.0.0.1:{_port}");
         }
 
@@ -79,7 +99,7 @@ namespace SiebwaldeApp.EcosEmu
         /// client cannot hang shutdown forever. Idempotent and resets state so <see cref="Start"/>
         /// can be called again.
         /// </summary>
-        public async Task StopAsync(CancellationToken ct = default)
+        public async Task<bool> StopAsync(CancellationToken ct = default)
         {
             var cts = Interlocked.Exchange(ref _cts, null);
             var listener = Interlocked.Exchange(ref _listener, null);
@@ -96,18 +116,22 @@ namespace SiebwaldeApp.EcosEmu
             }
             listener?.Dispose();
 
+            var allCompleted = true;
+
             if (acceptLoopTask is not null)
             {
-                await WaitBoundedAsync(acceptLoopTask, ct).ConfigureAwait(false);
+                allCompleted &= await WaitBoundedAsync(acceptLoopTask, ct).ConfigureAwait(false);
             }
 
             // Await every in-flight client handler, then drop them all.
             var handlers = _clientTasks.Keys.ToArray();
             foreach (var handler in handlers)
             {
-                await WaitBoundedAsync(handler, ct).ConfigureAwait(false);
+                allCompleted &= await WaitBoundedAsync(handler, ct).ConfigureAwait(false);
             }
             _clientTasks.Clear();
+
+            return allCompleted;
         }
 
         private async Task AcceptLoopAsync(CancellationToken ct)
@@ -161,21 +185,27 @@ namespace SiebwaldeApp.EcosEmu
                 TaskScheduler.Default);
         }
 
-        /// <summary>Waits for a task with a bounded timeout, swallowing shutdown exceptions.</summary>
-        private static async Task WaitBoundedAsync(Task task, CancellationToken ct)
+        /// <summary>
+        /// Waits for a task with a bounded timeout, swallowing shutdown exceptions. Returns true
+        /// when the task completed within the bound, false when the bound expired (or the wait was
+        /// cancelled) and the wait gave up.
+        /// </summary>
+        private static async Task<bool> WaitBoundedAsync(Task task, CancellationToken ct)
         {
             if (task.IsCompleted)
             {
                 Observe(task);
-                return;
+                return true;
             }
 
             var completed = await Task.WhenAny(task, Task.Delay(StopTimeout, ct)).ConfigureAwait(false);
             if (completed == task)
             {
                 Observe(task);
+                return true;
             }
             // Otherwise the timeout elapsed (or ct was cancelled): give up so shutdown cannot hang.
+            return false;
         }
 
         private static void Observe(Task task)

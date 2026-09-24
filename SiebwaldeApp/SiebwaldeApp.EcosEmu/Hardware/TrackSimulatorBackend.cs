@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using SiebwaldeApp.Core;
 
 namespace SiebwaldeApp.EcosEmu
 {
@@ -21,6 +22,9 @@ namespace SiebwaldeApp.EcosEmu
         private CancellationTokenSource? _simCts;
         private Task? _simTask;
         private bool _powerOn;
+
+        /// <summary>Raised when the simulation loop faults unexpectedly (never on cancellation).</summary>
+        public event EventHandler<RuntimeFaultEventArgs>? Faulted;
         
         public TrackSimulatorBackend(IBlockPositionProvider blockPositionProvider)
         {
@@ -277,6 +281,21 @@ namespace SiebwaldeApp.EcosEmu
 
             _simCts = new CancellationTokenSource();
             _simTask = Task.Run(() => SimLoopAsync(_simCts.Token));
+
+            // Observe the simulation loop and surface an unexpected fault. Cancellation is handled
+            // inside SimLoopAsync, so it never surfaces here as a fault.
+            _ = _simTask.ContinueWith(
+                t =>
+                {
+                    if (t.IsFaulted)
+                    {
+                        var inner = t.Exception?.InnerException ?? t.Exception;
+                        Faulted?.Invoke(this, new RuntimeFaultEventArgs("TrackSimulatorBackend.SimLoop", inner!));
+                    }
+                },
+                CancellationToken.None,
+                TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.Default);
         }
 
         /// <summary>
@@ -293,18 +312,20 @@ namespace SiebwaldeApp.EcosEmu
         /// disposes the token source and resets the task/token fields so the loop can be started
         /// again. Idempotent.
         /// </summary>
-        public async Task StopAsync(CancellationToken ct = default)
+        public async Task<bool> StopAsync(CancellationToken ct = default)
         {
             var cts = Interlocked.Exchange(ref _simCts, null);
             cts?.Cancel();
 
             var simTask = Interlocked.Exchange(ref _simTask, null);
+            var completed = true;
             if (simTask is not null)
             {
-                await WaitBoundedAsync(simTask, ct).ConfigureAwait(false);
+                completed = await WaitBoundedAsync(simTask, ct).ConfigureAwait(false);
             }
 
             cts?.Dispose();
+            return completed;
         }
 
         private async Task SimLoopAsync(CancellationToken ct)
@@ -331,21 +352,27 @@ namespace SiebwaldeApp.EcosEmu
             }
         }
 
-        /// <summary>Waits for a task with a bounded timeout, swallowing shutdown exceptions.</summary>
-        private static async Task WaitBoundedAsync(Task task, CancellationToken ct)
+        /// <summary>
+        /// Waits for a task with a bounded timeout, swallowing shutdown exceptions. Returns true
+        /// when the task completed within the bound, false when the bound expired (or the wait was
+        /// cancelled) and the wait gave up.
+        /// </summary>
+        private static async Task<bool> WaitBoundedAsync(Task task, CancellationToken ct)
         {
             if (task.IsCompleted)
             {
                 Observe(task);
-                return;
+                return true;
             }
 
             var completed = await Task.WhenAny(task, Task.Delay(StopTimeout, ct)).ConfigureAwait(false);
             if (completed == task)
             {
                 Observe(task);
+                return true;
             }
             // Otherwise the timeout elapsed (or ct was cancelled): give up so shutdown cannot hang.
+            return false;
         }
 
         private static void Observe(Task task)

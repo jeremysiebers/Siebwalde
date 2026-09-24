@@ -305,4 +305,14 @@ The ECoS emulator graceful-shutdown work (merged 2026-09-23, PR #8, merge commit
 
 The Product Owner has since issued a full assignment for this system. See the durable feature brief, architecture proposal, development roadmap and open Product Owner decisions in **`docs/recovery-maintenance-system.md`**. The first implementation increment (software-only, simulator mode: stop/start/restart of the C# track-control runtime from WPF) is described there; do not start implementation until the Product Owner approves it as a separate increment.
 
+### Recovery & Maintenance — Increment 1 follow-ups (not implemented, deferred)
+
+| Item | Evidence | Suggested acceptance criteria |
+| --- | --- | --- |
+| No simulator `ITrackTransport`. | The real-mode track part (`RawUdpTransport`→`TrackCommClientAsync`→init→`TrackControlMain`) is composed but cannot be executed in simulator mode because no simulator `ITrackTransport`/init path exists (the legacy `EthernetTargetDataSimulator` feeds the old `TrackIOHandle` path). | A simulator transport + deterministic init path, so the full track part can run end-to-end without hardware (needed for a future software-only real-mode lifecycle test). |
+| `KoploperExternalInfoClient` lacks a `Faulted` event. | `EcosEmulatorServer` and `TrackSimulatorBackend` surface background-task faults; the external-info client catches broadly and retries, so a fault there is not surfaced to the runtime `Failed` state. | Either surface external-info faults the same way, or document that retry-forever is the intended behaviour. |
+| `OnEcosHostFaulted` ignores faults during `Starting`. | The runtime coordinator only maps `Running → Failed` on a host fault; a fault raised between host start and the `Running` transition is dropped and the start still reports `Running`. | A fault during `Starting` also transitions to `Failed` (or the window is provably impossible). |
+| WPF runtime surface not runtime-tested. | The init-page Start/Stop/Restart surface and `App.OnExit` graceful stop are build-verified (V1) only; the WPF app was not launched. | Manual/runtime smoke test of the WPF lifecycle surface (start/stop/restart buttons, state display, failure display). |
+| Stop/telemetry retention policy. | After a stop the runtime nulls `TrackApplicationVariables`, so the amplifier page clears (no "last known state" shown). Retaining last-known state as "stale" would be a product decision. | Product Owner decides whether to retain/display last-known amplifier state after stop. |
+
 

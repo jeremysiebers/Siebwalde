@@ -58,5 +58,25 @@ namespace SiebwaldeApp
 
             FyWinForm = new FiddleYardWinFormViewModel();
         }
+
+        /// <summary>
+        /// Best-effort graceful stop on exit, bounded so application shutdown cannot hang.
+        /// The process exit remains the final fallback, but the runtime stop is initiated (and,
+        /// in the normal case, completed) here instead of relying solely on process termination.
+        /// </summary>
+        protected override void OnExit(ExitEventArgs e)
+        {
+            base.OnExit(e);
+
+            try
+            {
+                using var cts = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(5));
+                IoC.TrackRuntime.StopAsync(cts.Token).GetAwaiter().GetResult();
+            }
+            catch
+            {
+                // Best-effort: process exit remains the final fallback.
+            }
+        }
     }
 }

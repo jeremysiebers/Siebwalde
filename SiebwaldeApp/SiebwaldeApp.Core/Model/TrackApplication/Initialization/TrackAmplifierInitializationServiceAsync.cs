@@ -19,6 +19,9 @@ namespace SiebwaldeApp.Core
         public event EventHandler<InitializationProgress>? ProgressChanged;
         public event EventHandler<InitializationStatus>? StatusChanged;
 
+        /// <summary>The current initialization status.</summary>
+        public InitializationStatus Status => _status;
+
         public IReadOnlyDictionary<string, IInitializationStep> Steps => _steps;
 
         /// <summary>
