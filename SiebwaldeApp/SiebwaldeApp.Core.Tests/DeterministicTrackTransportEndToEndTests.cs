@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using SiebwaldeApp.Core;
+using SiebwaldeApp.Core.Properties;
 using SiebwaldeApp.Core.TrackApplication.Simulator;
 using SiebwaldeApp.Integration;
 using Xunit;
@@ -76,27 +78,69 @@ namespace SiebwaldeApp.Core.Tests
             SimulatorFactory factory,
             Func<TrackApplicationRuntimeHost, CancellationToken, Task> testBody)
         {
-            // The real-mode init pipeline reads the firmware hex in FlashFwTrackamplifiersStep; without
-            // a present, parseable hex the init never reaches Completed and every test below fails.
-            Assert.True(
-                File.Exists(CoreConfiguration.TrackAmplifierFirmwarePath),
-                $"Track-amplifier firmware hex not found at '{CoreConfiguration.TrackAmplifierFirmwarePath}'. " +
-                "The real-mode init pipeline requires a present, parseable hex to reach Completed.");
-
-            using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(60));
-            var runtime = new TrackApplicationRuntimeHost(
-                new FakeEcosHostService(),
-                controlTrace: null,
-                transportFactory: factory.Create);
+            // The real-mode init pipeline reads the firmware hex in FlashFwTrackamplifiersStep even when
+            // flashing is skipped, so the test must not depend on the (untracked) repo dist/ hex being
+            // present. Generate a minimal self-contained hex whose checksum equals the simulator's
+            // FirmwareChecksum (0x251F), point the setting at it, then restore + delete on the way out.
+            var originalFwPath = CoreSettings.Default.TrackAmplifierFwPath;
+            var tempHexPath = Path.Combine(Path.GetTempPath(), $"siebwalde-test-firmware-{Guid.NewGuid():N}.hex");
 
             try
             {
-                await testBody(runtime, timeout.Token);
+                WriteTestFirmwareHex(tempHexPath);
+                CoreSettings.Default.TrackAmplifierFwPath = tempHexPath;
+
+                using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+                var runtime = new TrackApplicationRuntimeHost(
+                    new FakeEcosHostService(),
+                    controlTrace: null,
+                    transportFactory: factory.Create);
+
+                try
+                {
+                    await testBody(runtime, timeout.Token);
+                }
+                finally
+                {
+                    await runtime.DisposeAsync();
+                }
             }
             finally
             {
-                await runtime.DisposeAsync();
+                try { CoreSettings.Default.TrackAmplifierFwPath = originalFwPath; } catch { /* best-effort */ }
+                try { File.Delete(tempHexPath); } catch { /* best-effort */ }
             }
+        }
+
+        /// <summary>
+        /// Writes a minimal Intel HEX that <see cref="TrackAmplifierBootloaderHelpers.Execute"/> parses
+        /// to a file checksum of 0x251F: 1920 zero data rows, with the LAST row's first word set to
+        /// 0x251F little-endian (0x1F, 0x25) and its checksum word (bytes 14..15) left zero (that word is
+        /// excluded from the sum), followed by one 12-byte config row so the config word is "found".
+        /// </summary>
+        private static void WriteTestFirmwareHex(string path)
+        {
+            const int dataRows = (0x8000 - 0x800) / 16; // 1920, matching TrackAmplifierBootloaderHelpers.Execute
+
+            var sb = new StringBuilder();
+
+            for (int row = 0; row < dataRows; row++)
+            {
+                string address = (row * 16).ToString("X4");
+
+                // 32 hex chars = 16 data bytes. The checksum byte (CC) is not read by Execute().
+                string data = row == dataRows - 1
+                    ? "1F25" + new string('0', 28)
+                    : new string('0', 32);
+
+                sb.Append(':').Append("10").Append(address).Append("00").Append(data).Append("00").AppendLine();
+            }
+
+            // One config row: record length 0x0C (12 bytes -> 24 hex chars). Its content is only used
+            // when flashing, which is skipped, so any 12 bytes are acceptable.
+            sb.Append(':').Append("0C").Append("0000").Append("00").Append(new string('F', 24)).Append("00").AppendLine();
+
+            File.WriteAllText(path, sb.ToString());
         }
 
         private static async Task WaitUntilAsync(Func<bool> condition, TimeSpan timeout)
