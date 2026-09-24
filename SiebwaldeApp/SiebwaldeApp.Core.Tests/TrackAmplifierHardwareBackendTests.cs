@@ -106,5 +106,25 @@ namespace SiebwaldeApp.Core.Tests
 
             Assert.Empty(variables.PendingWrites);
         }
+
+        [Fact]
+        public void SetLocoSpeed_RefusedByMovementGate_ReturnsFalse_AndDoesNotQueueOrTrack()
+        {
+            var variables = new TrackApplicationVariables();
+            variables.MovementPermission = new MovementPermissionController(); // NotGranted
+            var tracker = new AmplifierCommandTracker();
+
+            var backend = new TrackAmplifierHardwareBackend(
+                new FakeBlockPositionProvider(2),
+                BlockTopology.Parse("1:1,2:2"),
+                variables,
+                commandTracker: tracker);
+
+            var accepted = backend.SetLocoSpeed(address: 42, ecosSpeed: 64, direction: 0);
+
+            Assert.False(accepted);
+            Assert.Empty(variables.PendingWrites);
+            Assert.Empty(tracker.GetOutstanding(42));
+        }
     }
 }

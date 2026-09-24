@@ -48,6 +48,12 @@ namespace SiebwaldeApp.Core
         /// <summary>True while an unsafe divergence is latched and not yet reset.</summary>
         bool IsControlPathUnsafe { get; }
 
+        /// <summary>
+        /// The current movement-permission state (observed neutral). Not granted until neutral has
+        /// been commanded to and observed on every configured amplifier.
+        /// </summary>
+        MovementPermissionState MovementPermission { get; }
+
         /// <summary>Explicit recovery for a latched safety fault. A latched fault never clears itself.</summary>
         bool ResetControlSafety();
 
@@ -65,11 +71,5 @@ namespace SiebwaldeApp.Core
         /// The values are queued and sent by the runtime write loop, not immediately.
         /// </summary>
         void SetAmplifierControl(ushort slaveNumber, int pwmSetpoint, bool emoStop);
-
-        /// <summary>Sets the PWM set point (0..799) for a given amplifier.</summary>
-        void SetAmplifierPwm(ushort slaveNumber, int pwm);
-
-        /// <summary>Sets or clears the emergency-stop bit (HoldingReg0 bit 15) for a given amplifier.</summary>
-        void SetAmplifierEmStop(ushort slaveNumber, bool isEmStop);
     }
 }

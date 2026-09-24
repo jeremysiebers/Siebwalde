@@ -148,9 +148,10 @@ namespace SiebwaldeApp.Integration
 
             var pwm = AmplifierSpeedMapper.ToPwm(ecosSpeed, direction);
 
+            bool allAccepted = true;
             foreach (var amplifier in amplifiers)
             {
-                QueueControl(
+                bool accepted = QueueControl(
                     locoAddress: address,
                     amplifier,
                     pwm,
@@ -160,7 +161,15 @@ namespace SiebwaldeApp.Integration
                     source: "Loco",
                     normalizedSpeed: ecosSpeed,
                     direction: direction);
-                RecordCommand(address, amplifier, pwm);
+
+                if (accepted)
+                {
+                    RecordCommand(address, amplifier, pwm);
+                }
+                else
+                {
+                    allAccepted = false;
+                }
             }
 
             _log?.Invoke(
@@ -168,7 +177,9 @@ namespace SiebwaldeApp.Integration
 
             ApplyLookAhead(address, block.Value, pwm, ecosSpeed, direction);
 
-            return true;
+            // A non-neutral movement that was refused (movement permission not granted) must be
+            // reported as "not applied" so the ECoS layer never silently acknowledges it.
+            return allAccepted;
         }
 
         /// <summary>
@@ -224,7 +235,7 @@ namespace SiebwaldeApp.Integration
 
             foreach (var amplifier in nextAmplifiers)
             {
-                QueueControl(
+                bool accepted = QueueControl(
                     locoAddress,
                     amplifier,
                     pwm,
@@ -234,7 +245,11 @@ namespace SiebwaldeApp.Integration
                     source: "Loco",
                     normalizedSpeed,
                     direction);
-                RecordCommand(locoAddress, amplifier, pwm);
+
+                if (accepted)
+                {
+                    RecordCommand(locoAddress, amplifier, pwm);
+                }
             }
 
             _log?.Invoke(
@@ -247,7 +262,13 @@ namespace SiebwaldeApp.Integration
         /// trace event is the "Commanded" value: it is a queued setpoint, never an observed
         /// hardware confirmation.
         /// </summary>
-        private void QueueControl(
+        /// <returns>
+        /// True when the setpoint was accepted and queued at the shared boundary. False when it
+        /// was refused (for example the movement gate refused a non-neutral setpoint while
+        /// movement permission is not granted); in that case nothing is queued and nothing is
+        /// traced as "Commanded".
+        /// </returns>
+        private bool QueueControl(
             int? locoAddress,
             ushort amplifier,
             int pwm,
@@ -258,7 +279,12 @@ namespace SiebwaldeApp.Integration
             int? normalizedSpeed,
             int? direction)
         {
-            _variables.SetDesiredAmplifierControl(amplifier, pwm, emoStop);
+            bool accepted = _variables.SetDesiredAmplifierControl(amplifier, pwm, emoStop);
+
+            if (!accepted)
+            {
+                return false;
+            }
 
             var hr0 = TrackApplicationVariables.BuildHr0Value(pwm, emoStop);
             _trace?.AmplifierCommand(
@@ -272,6 +298,8 @@ namespace SiebwaldeApp.Integration
                 GetOperationalGroup(amplifier),
                 normalizedSpeed,
                 direction);
+
+            return true;
         }
 
         /// <summary>

@@ -28,9 +28,18 @@ namespace SiebwaldeApp.Integration
         /// <summary>Upper bound for the stop/dispose await.</summary>
         private static readonly TimeSpan StopBudget = TimeSpan.FromSeconds(15);
 
+        /// <summary>
+        /// Default window for commanding + observing neutral on start/stop. It must exceed
+        /// <see cref="TrackAmplifierDataFreshness.DefaultStaleAfter"/> (2 s) so a freshly
+        /// echoed neutral readback stays "current" for the whole observation.
+        /// </summary>
+        private static readonly TimeSpan DefaultNeutralObserveWindow = TimeSpan.FromSeconds(5);
+
         private readonly IEcosHostService _ecosHost;
         private readonly IControlTrace? _controlTrace;
         private readonly Func<ITrackTransport>? _transportFactory;
+        private readonly TrackAmplifierGroups _amplifierGroups;
+        private readonly TimeSpan _neutralObserveWindow;
         private readonly SemaphoreSlim _gate = new(1, 1);
 
         private CancellationTokenSource? _cts;
@@ -46,6 +55,7 @@ namespace SiebwaldeApp.Integration
         private TrackControlMain? _trackControlMain;
         private string _loggerInstance = "TrackAppLog";
         private ILogger? _trackApplicationLogging;
+        private MovementPermissionController? _movementPermission;
 
         /// <inheritdoc />
         public event EventHandler<TrackRuntimeStatusChangedEventArgs>? StateChanged;
@@ -65,14 +75,26 @@ namespace SiebwaldeApp.Integration
         /// Optional transport factory. When null (production) the real UDP transport is built.
         /// Supplied only by tests so the real-mode composition path can be exercised without a track controller.
         /// </param>
+        /// <param name="amplifierGroups">
+        /// The configured operational grouping (the observed-neutral domain). Defaults to
+        /// <see cref="TrackAmplifierGroups.Empty"/>; production passes
+        /// <see cref="CoreConfiguration.BuildTrackAmplifierGroups"/> (shared with the ECoS host).
+        /// </param>
+        /// <param name="neutralObserveWindow">
+        /// Bounded window for commanding + observing neutral on start/stop. Defaults to 5 s.
+        /// </param>
         public TrackApplicationRuntimeHost(
             IEcosHostService ecosHost,
             IControlTrace? controlTrace = null,
-            Func<ITrackTransport>? transportFactory = null)
+            Func<ITrackTransport>? transportFactory = null,
+            TrackAmplifierGroups? amplifierGroups = null,
+            TimeSpan? neutralObserveWindow = null)
         {
             _ecosHost = ecosHost ?? throw new ArgumentNullException(nameof(ecosHost));
             _controlTrace = controlTrace;
             _transportFactory = transportFactory;
+            _amplifierGroups = amplifierGroups ?? TrackAmplifierGroups.Empty;
+            _neutralObserveWindow = neutralObserveWindow ?? DefaultNeutralObserveWindow;
 
             // Surface an unexpected background fault from the host while the runtime is Running.
             _ecosHost.Faulted += OnEcosHostFaulted;
@@ -89,6 +111,13 @@ namespace SiebwaldeApp.Integration
 
         /// <inheritdoc />
         public bool IsControlPathUnsafe => _ecosHost?.IsUnsafe ?? false;
+
+        /// <inheritdoc />
+        public MovementPermissionState MovementPermission
+            => _movementPermission?.State ?? MovementPermissionState.NotGranted;
+
+        /// <summary>True while movement is permitted (observed neutral established and not withdrawn).</summary>
+        public bool IsMovementSafe => _movementPermission?.IsGranted ?? false;
 
         /// <inheritdoc />
         public bool ResetControlSafety() => _ecosHost?.ResetSafety() ?? false;
@@ -146,6 +175,14 @@ namespace SiebwaldeApp.Integration
                         or EcosHostStartResult.AlreadyActive
                         or EcosHostStartResult.Transitioned)
                     {
+                        // Real mode: command + observe neutral on the configured domain before
+                        // reporting Running. Running does NOT imply movement-safe; the permission
+                        // state (and, on failure, the raised fault + diagnostic) carry the truth.
+                        if (mode == TrackControlMode.Real)
+                        {
+                            await EstablishObservedNeutralAsync(_cts.Token).ConfigureAwait(false);
+                        }
+
                         TransitionTo(TrackRuntimeState.Running);
                         return;
                     }
@@ -266,6 +303,12 @@ namespace SiebwaldeApp.Integration
             // 2) Fresh shared variable container (fresh PendingWrites per start).
             _trackVariables = new TrackApplicationVariables();
 
+            // Fresh movement-permission controller, shared by the movement gate (on the variables)
+            // and the safety interlock (via the ECoS host). Created NotGranted and only granted
+            // after observed neutral. Set BEFORE comm/host start so both paths see the same state.
+            _movementPermission = new MovementPermissionController();
+            _trackVariables.MovementPermission = _movementPermission;
+
             // 3) Build low-level Ethernet / Modbus transport.
             var transport = _transportFactory?.Invoke() ?? CreateRealTransport();
 
@@ -343,6 +386,145 @@ namespace SiebwaldeApp.Integration
             SiebwaldeApp.Core.IoC.Logger.Log("Track Application started.", "");
         }
 
+        // ---------------------------------------------------------------------------------
+        // Observed-neutral establishment
+        // ---------------------------------------------------------------------------------
+
+        /// <summary>
+        /// Commands neutral to every configured amplifier and waits (bounded) until every one of
+        /// them reports a fresh readback of the neutral PWM. On success the movement permission is
+        /// granted; on failure it stays NotGranted and a fault + a
+        /// <see cref="DiagnosticCode.NeutralNotEstablished"/> diagnostic are surfaced. This never
+        /// throws: the caller always proceeds to <see cref="TrackRuntimeState.Running"/> and the
+        /// permission state carries the truth.
+        /// </summary>
+        private async Task EstablishObservedNeutralAsync(CancellationToken ct)
+        {
+            if (_trackVariables is null)
+            {
+                return;
+            }
+
+            // Fail closed: an empty safety domain means there is nothing to observe, so movement
+            // permission must never be granted vacuously. This is the safe consequence of the open
+            // group/domain Product Owner decision; it is surfaced as a fault, not a silent grant.
+            if (_amplifierGroups.AllConfigured.Count == 0)
+            {
+                var emptyDomainFault = new InvalidOperationException(
+                    "No safety domain configured; movement blocked (observed neutral cannot be established for an empty domain).");
+
+                RaiseFault("TrackApplicationRuntimeHost.EstablishObservedNeutral", emptyDomainFault);
+
+                _ecosHost?.Diagnostics?.Report(new ControlDiagnostic
+                {
+                    Code = DiagnosticCode.NeutralNotEstablished,
+                    Severity = DiagnosticSeverity.Rejected,
+                    Subject = "movement permission",
+                    Detail = "No safety domain configured; movement blocked."
+                });
+
+                return;
+            }
+
+            // Command neutral to the whole configured domain. Neutral is always accepted by the
+            // gate, so this establishes the safe state without needing permission first.
+            foreach (var slave in _amplifierGroups.AllConfigured)
+            {
+                _trackVariables.SetDesiredAmplifierControl(slave, AmplifierSpeedMapper.NeutralPwm, false);
+            }
+
+            var observed = await ObserveNeutralAsync(ct).ConfigureAwait(false);
+
+            if (observed)
+            {
+                _movementPermission?.Grant();
+                return;
+            }
+
+            var fault = new InvalidOperationException(
+                "Observed neutral was not established for every configured amplifier within the window; movement permission is not granted.");
+
+            RaiseFault("TrackApplicationRuntimeHost.EstablishObservedNeutral", fault);
+
+            _ecosHost?.Diagnostics?.Report(new ControlDiagnostic
+            {
+                Code = DiagnosticCode.NeutralNotEstablished,
+                Severity = DiagnosticSeverity.Rejected,
+                Subject = "movement permission",
+                Detail = "Observed neutral was not established for every configured amplifier within the window; movement is not permitted."
+            });
+        }
+
+        /// <summary>
+        /// Polls until every configured amplifier reports current data whose PWM field equals the
+        /// neutral setpoint, or until the bounded window elapses / cancellation is requested.
+        /// </summary>
+        private async Task<bool> ObserveNeutralAsync(CancellationToken ct)
+        {
+            var deadline = DateTimeOffset.UtcNow + _neutralObserveWindow;
+
+            while (DateTimeOffset.UtcNow < deadline)
+            {
+                if (ct.IsCancellationRequested)
+                {
+                    break;
+                }
+
+                if (IsNeutralObserved())
+                {
+                    return true;
+                }
+
+                try
+                {
+                    await Task.Delay(25, ct).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+            }
+
+            return IsNeutralObserved();
+        }
+
+        /// <summary>True when every configured amplifier reports fresh, current neutral PWM.</summary>
+        private bool IsNeutralObserved()
+        {
+            if (_trackVariables is null)
+            {
+                return false;
+            }
+
+            var items = _trackVariables.trackAmpItems;
+            if (items is null)
+            {
+                return false;
+            }
+
+            foreach (var slave in _amplifierGroups.AllConfigured)
+            {
+                var item = items.FirstOrDefault(a => a is not null && a.SlaveNumber == slave);
+                if (!TrackAmplifierDataFreshness.IsCurrentData(item))
+                {
+                    return false;
+                }
+
+                var registers = item!.HoldingReg;
+                if (registers is null || registers.Length == 0)
+                {
+                    return false;
+                }
+
+                if ((registers[TrackAmplifierRegisters.PwmCommand] & 0x03FF) != AmplifierSpeedMapper.NeutralPwm)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         private static ITrackTransport CreateRealTransport()
         {
             var rawUdp = new RawUdpTransport(
@@ -361,40 +543,73 @@ namespace SiebwaldeApp.Integration
         /// then releases every runtime field and disposes the CTS. Throws when a stop cannot
         /// complete cleanly within the budget, so the caller transitions to
         /// <see cref="TrackRuntimeState.Failed"/> instead of reporting a proven stop.
+        ///
+        /// Teardown is guaranteed to run: the neutral-observe failure (and any teardown failure)
+        /// is surfaced only AFTER every owned resource has been released, so a failed stop never
+        /// leaves a stale loop/client/host/field behind.
         /// </summary>
         private async Task StopTrackPartAsync(CancellationToken budget)
         {
-            // 1) Stop the runtime write loop.
-            try
+            Exception? neutralFault = null;
+
+            // 0) Real-mode safety: withdraw movement permission, then command neutral to the whole
+            //    configured domain and observe it BEFORE any teardown. The runtime loop and comm
+            //    client must still be running for the neutral command to be written and echoed.
+            //    A stop that cannot observe neutral maps to Failed (a Stopped state means "neutral
+            //    was commanded AND observed before teardown"), but the fault is thrown only after
+            //    teardown has completed so no resource is left running.
+            if (_requestedMode == TrackControlMode.Real && _trackVariables is not null)
             {
-                _trackControlMain?.StopRuntime();
-            }
-            catch (Exception ex)
-            {
-                RaiseFault("TrackControlMain.StopRuntime", ex);
+                _movementPermission?.Withdraw();
+
+                foreach (var slave in _amplifierGroups.AllConfigured)
+                {
+                    _trackVariables.SetDesiredAmplifierControl(slave, AmplifierSpeedMapper.NeutralPwm, false);
+                }
+
+                if (!await ObserveNeutralAsync(budget).ConfigureAwait(false))
+                {
+                    neutralFault = new InvalidOperationException(
+                        "Neutral was not observed for every configured amplifier before teardown; the stop is not proven safe.");
+                }
             }
 
-            // 2) Cancel the coordinator CTS.
+            // Teardown always runs, even when neutral could not be observed or a teardown step
+            // fails: the try/finally guarantees every runtime field (and the CTS) is released.
             try
             {
-                _cts?.Cancel();
-            }
-            catch (Exception ex)
-            {
-                RaiseFault("CancellationTokenSource.Cancel", ex);
-            }
+                // 1) Stop the runtime write loop.
+                try
+                {
+                    _trackControlMain?.StopRuntime();
+                }
+                catch (Exception ex)
+                {
+                    RaiseFault("TrackControlMain.StopRuntime", ex);
+                }
 
-            // 3) Stop the ECoS host (bounded). A non-clean result means the stop is not proven.
-            var hostResult = await _ecosHost.StopAsync(budget).ConfigureAwait(false);
+                // 2) Cancel the coordinator CTS.
+                try
+                {
+                    _cts?.Cancel();
+                }
+                catch (Exception ex)
+                {
+                    RaiseFault("CancellationTokenSource.Cancel", ex);
+                }
 
-            // 4) Dispose the comm client, never blocking with .Wait(). The finally guarantees
-            //    every runtime field (and the CTS) is released even when the dispose throws, so
-            //    a failed stop never leaves stale resources behind.
-            try
-            {
+                // 3) Stop the ECoS host (bounded). A non-clean result means the stop is not proven.
+                var hostResult = await _ecosHost.StopAsync(budget).ConfigureAwait(false);
+
+                // 4) Dispose the comm client, never blocking with .Wait().
                 if (_trackCommClient is IAsyncDisposable disposable)
                 {
                     await disposable.DisposeAsync().AsTask().WaitAsync(budget).ConfigureAwait(false);
+                }
+
+                if (hostResult is not EcosHostStopResult.Stopped and not EcosHostStopResult.AlreadyStopped)
+                {
+                    throw new InvalidOperationException($"ECoS host stop did not complete cleanly: {hostResult}.");
                 }
             }
             finally
@@ -402,9 +617,12 @@ namespace SiebwaldeApp.Integration
                 ReleaseRuntimeFields();
             }
 
-            if (hostResult is not EcosHostStopResult.Stopped and not EcosHostStopResult.AlreadyStopped)
+            // Surface the neutral-observe failure only after teardown completed, so the caller
+            // maps it to Failed with fully-released resources.
+            if (neutralFault is not null)
             {
-                throw new InvalidOperationException($"ECoS host stop did not complete cleanly: {hostResult}.");
+                RaiseFault("TrackApplicationRuntimeHost.StopTrackPartAsync", neutralFault);
+                throw neutralFault;
             }
         }
 
@@ -430,6 +648,7 @@ namespace SiebwaldeApp.Integration
             _bootloaderHelpers = null;
             _sendNextFwDataPacket = null;
             _trackApplicationLogging = null;
+            _movementPermission = null;
 
             if (_cts is not null)
             {
@@ -441,69 +660,6 @@ namespace SiebwaldeApp.Integration
         // ---------------------------------------------------------------------------------
         // Amplifier command surface (verbatim move from SiebwaldeApplicationModel)
         // ---------------------------------------------------------------------------------
-
-        /// <inheritdoc />
-        public void SetAmplifierPwm(ushort slaveNumber, int pwm)
-        {
-            if (_trackVariables == null || _trackVariables.trackAmpItems == null)
-                return;
-
-            var amp = _trackVariables.trackAmpItems
-                .FirstOrDefault(a => a.SlaveNumber == slaveNumber);
-
-            if (amp == null)
-                return;
-
-            pwm = Math.Max(0, Math.Min(799, pwm));
-
-            var regs = amp.HoldingReg;
-            if (regs == null || regs.Length == 0)
-                return;
-
-            ushort reg0 = regs[0];
-
-            // Clear bits 0..9
-            reg0 = (ushort)(reg0 & ~0x03FF);
-
-            // Set new PWM in bits 0..9
-            reg0 |= (ushort)(pwm & 0x03FF);
-
-            regs[0] = reg0;
-            amp.HoldingReg = regs;
-        }
-
-        /// <inheritdoc />
-        public void SetAmplifierEmStop(ushort slaveNumber, bool isEmStop)
-        {
-            if (_trackVariables == null || _trackVariables.trackAmpItems == null)
-                return;
-
-            var amp = _trackVariables.trackAmpItems
-                .FirstOrDefault(a => a.SlaveNumber == slaveNumber);
-
-            if (amp == null)
-                return;
-
-            var regs = amp.HoldingReg;
-            if (regs == null || regs.Length == 0)
-                return;
-
-            ushort reg0 = regs[0];
-
-            if (isEmStop)
-            {
-                // Set bit 15
-                reg0 |= 0x8000;
-            }
-            else
-            {
-                // Clear bit 15
-                reg0 = (ushort)(reg0 & ~0x8000);
-            }
-
-            regs[0] = reg0;
-            amp.HoldingReg = regs;
-        }
 
         /// <inheritdoc />
         public void SetAmplifierControl(ushort slaveNumber, int pwmSetpoint, bool emoStop)
@@ -523,13 +679,23 @@ namespace SiebwaldeApp.Integration
                 return;
             }
 
-            _controlTrace?.ManualControl(
-                slaveNumber,
-                pwmSetpoint,
-                TrackApplicationVariables.BuildHr0Value(pwmSetpoint, emoStop),
-                emoStop);
+            bool accepted = _trackVariables.SetDesiredAmplifierControl(slaveNumber, pwmSetpoint, emoStop);
 
-            _trackVariables.SetDesiredAmplifierControl(slaveNumber, pwmSetpoint, emoStop);
+            if (accepted)
+            {
+                _controlTrace?.ManualControl(
+                    slaveNumber,
+                    pwmSetpoint,
+                    TrackApplicationVariables.BuildHr0Value(pwmSetpoint, emoStop),
+                    emoStop);
+            }
+            else
+            {
+                _controlTrace?.Abnormal(
+                    "MovementPermissionNotGranted",
+                    slaveNumber,
+                    "manual SetAmplifierControl refused: movement permission is not granted.");
+            }
         }
 
         // ---------------------------------------------------------------------------------

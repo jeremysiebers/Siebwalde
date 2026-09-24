@@ -121,6 +121,9 @@ namespace SiebwaldeApp.Core
         /// <summary>True while an unsafe divergence is latched and not yet reset.</summary>
         public bool IsControlPathUnsafe => _runtime.IsControlPathUnsafe;
 
+        /// <summary>The current movement-permission state (observed neutral).</summary>
+        public MovementPermissionState MovementPermission => _runtime.MovementPermission;
+
         /// <summary>Explicit recovery for a latched safety fault. A latched fault never clears itself.</summary>
         public bool ResetControlSafety() => _runtime.ResetControlSafety();
 
@@ -129,14 +132,6 @@ namespace SiebwaldeApp.Core
 
         /// <summary>Returns the current list of track amplifiers (empty when not running).</summary>
         public List<TrackAmplifierItem> GetAmplifierListing() => _runtime.GetAmplifierListing();
-
-        /// <summary>Sets the PWM set point (0..799) for a given amplifier.</summary>
-        public void SetAmplifierPwm(ushort slaveNumber, int pwm)
-            => _runtime.SetAmplifierPwm(slaveNumber, pwm);
-
-        /// <summary>Sets or clears the emergency stop bit for a given amplifier.</summary>
-        public void SetAmplifierEmStop(ushort slaveNumber, bool isEmStop)
-            => _runtime.SetAmplifierEmStop(slaveNumber, isEmStop);
 
         /// <summary>Updates the desired control parameters (PWM setpoint + EmoStop) for a given amplifier.</summary>
         public void SetAmplifierControl(ushort slaveNumber, int pwmSetpoint, bool emoStop)

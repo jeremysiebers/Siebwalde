@@ -31,6 +31,7 @@ namespace SiebwaldeApp.Integration
         private readonly IHardwareBackend _inner;
         private readonly ControlSafetyGuard _guard;
         private readonly ControlDiagnostics _diagnostics;
+        private readonly IMovementPermissionState? _movementPermission;
         private readonly Action<string>? _log;
         private readonly HashSet<int> _reportedRejections = new();
         private readonly object _lock = new();
@@ -39,13 +40,22 @@ namespace SiebwaldeApp.Integration
             IHardwareBackend inner,
             ControlSafetyGuard guard,
             ControlDiagnostics diagnostics,
-            Action<string>? log = null)
+            Action<string>? log = null,
+            IMovementPermissionState? movementPermission = null)
         {
             _inner = inner ?? throw new ArgumentNullException(nameof(inner));
             _guard = guard ?? throw new ArgumentNullException(nameof(guard));
             _diagnostics = diagnostics ?? throw new ArgumentNullException(nameof(diagnostics));
             _log = log;
+            _movementPermission = movementPermission;
         }
+
+        /// <summary>
+        /// True when movement is currently permitted (the shared movement permission is granted).
+        /// A null permission means "not gated" and is treated as granted, so callers that do not
+        /// participate in observed-neutral keep their existing behavior.
+        /// </summary>
+        private bool IsMovementPermissionGranted => _movementPermission?.IsGranted ?? true;
 
         /// <inheritdoc />
         public bool SetPower(bool on)
@@ -68,8 +78,24 @@ namespace SiebwaldeApp.Integration
         /// <inheritdoc />
         public bool SetLocoSpeed(int address, int ecosSpeed, int direction)
         {
-            // A stop command is always allowed, and an unlatched path is unaffected.
-            if (ecosSpeed == 0 || _guard.AllowsMovement(address))
+            // A stop command is always allowed.
+            if (ecosSpeed == 0)
+            {
+                return _inner.SetLocoSpeed(address, ecosSpeed, direction);
+            }
+
+            // Non-zero movement is additionally refused while movement permission is not granted
+            // (observed neutral has not been established). This is not a latched safety fault, so
+            // it is surfaced through <see cref="IsMovementBlocked"/> rather than the latch.
+            if (!IsMovementPermissionGranted)
+            {
+                _log?.Invoke(
+                    $"Movement for loco {address} refused: movement permission is not granted (observed neutral not established).");
+                return false;
+            }
+
+            // An unlatched path is unaffected.
+            if (_guard.AllowsMovement(address))
             {
                 return _inner.SetLocoSpeed(address, ecosSpeed, direction);
             }
@@ -86,7 +112,8 @@ namespace SiebwaldeApp.Integration
             => _inner.SetSwitch(decoderAddress, outputIndex, on);
 
         /// <inheritdoc />
-        public bool IsMovementBlocked(int address) => !_guard.AllowsMovement(address);
+        public bool IsMovementBlocked(int address)
+            => !_guard.AllowsMovement(address) || !IsMovementPermissionGranted;
 
         private void ReportRejection(int subject, string detail)
         {

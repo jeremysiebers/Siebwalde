@@ -361,7 +361,7 @@ namespace SiebwaldeApp
         }
 
         /// <summary>
-        /// PWM setpoint 0..799, middle (400) is standstill in dual-sided PWM.
+        /// PWM setpoint 0..799, middle (399) is standstill in dual-sided PWM.
         /// </summary>
         public int PwmSetpoint
         {
@@ -579,7 +579,7 @@ namespace SiebwaldeApp
         {
             _appModel = IoC.Get<SiebwaldeApplicationModel>();
             SlaveNumber = slaveNumber;
-            _pwmSetpoint = 400; // UI default for standstill (dual sided PWM)
+            _pwmSetpoint = AmplifierSpeedMapper.NeutralPwm; // UI default for standstill (dual sided PWM)
         }
 
         #endregion

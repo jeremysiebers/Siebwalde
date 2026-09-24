@@ -23,6 +23,15 @@ namespace SiebwaldeApp.Core
         public Dictionary<ushort, TrackAmplifierWriteData> PendingWrites { get; } =
             new Dictionary<ushort, TrackAmplifierWriteData>();
 
+        /// <summary>
+        /// Shared movement-permission state consulted by <see cref="SetDesiredAmplifierControl"/>.
+        /// When null (or not set), movement is not gated, which preserves the pre-gate behavior
+        /// for callers that do not participate in observed-neutral (for example unit tests and
+        /// the simulator path). The runtime coordinator sets it to a single shared
+        /// <see cref="MovementPermissionController"/> for the real mode.
+        /// </summary>
+        public IMovementPermissionState? MovementPermission { get; set; }
+
         #endregion
 
         #region Constructor
@@ -157,13 +166,27 @@ namespace SiebwaldeApp.Core
         /// also the central guard: an address that is not a legitimate physical track amplifier
         /// (in particular a backplane/configuration slave 51..55) is refused here, so
         /// track-amplifier PWM/neutral semantics can never reach it.
+        ///
+        /// It is additionally the movement gate: a non-neutral PWM setpoint is refused while
+        /// <see cref="MovementPermission"/> is not granted (observed neutral has not been
+        /// established). The neutral setpoint (399) is always accepted, because commanding neutral
+        /// is exactly what establishes the safe state. The EmoStop bit does not affect the gate
+        /// decision: only the PWM field is gated.
         /// </summary>
-        public void SetDesiredAmplifierControl(ushort slaveNumber, int pwmSetpoint, bool emoStop)
+        /// <returns>True when the value was accepted and queued; false when it was refused.</returns>
+        public bool SetDesiredAmplifierControl(ushort slaveNumber, int pwmSetpoint, bool emoStop)
         {
             if (!TrackAmplifierAddress.IsTrackAmplifierAddress(slaveNumber))
-                return;
+                return false;
 
             ushort hr0 = BuildHr0Value(pwmSetpoint, emoStop);
+
+            // Movement gate: a non-neutral PWM is only accepted once movement permission has been
+            // granted (observed neutral). Neutral is always accepted, and a null permission means
+            // "not gated" so non-participating callers keep their existing behavior.
+            int pwm = hr0 & 0x03FF;
+            if (pwm != AmplifierSpeedMapper.NeutralPwm && MovementPermission is { IsGranted: false })
+                return false;
 
             if (!PendingWrites.TryGetValue(slaveNumber, out var writeData))
             {
@@ -172,6 +195,7 @@ namespace SiebwaldeApp.Core
             }
 
             writeData.SetDesiredHr0(hr0);
+            return true;
         }
         #endregion
     }
