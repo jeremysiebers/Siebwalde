@@ -106,7 +106,7 @@ Increment 6 outline:
 | --- | --- | --- |
 | Clarify multi-client behavior. | `SimpleEcosBackend` stores one `_currentWriter`. | Multi-client policy is documented and enforced. |
 | Harden ECoS command parsing. | `SimpleEcosCommandParser` uses simple comma splitting. | Parser behavior for quoted values and malformed commands is tested. |
-| Add graceful stop for Koploper external info and simulator loops. | Background loops exist in `KoploperExternalInfoClient` and `TrackSimulatorBackend`. | Host shutdown cancels and awaits background tasks. |
+| Add graceful stop for Koploper external info and simulator loops. | DONE (2026-09-23, PR #8, merge commit `5fb751552b368015ba17f796d86f41c1d7fa7c13`): `EcosEmulatorServer`, `KoploperExternalInfoClient` and `TrackSimulatorBackend` now have idempotent, bounded `StopAsync` (tracked+awaited tasks, disposed listener/connection, restartable) plus a non-blocking sync `Stop` for the in-process host. | Host shutdown cancels and awaits background tasks. |
 
 ## Workspace Hygiene
 
@@ -298,5 +298,21 @@ The supplemental Integrator review concluded `PRODUCTION TRACE INCOMPLETE`; the 
 | Real-layout power-on switch positions. | `SwitchMapConfig` default is `keep` because the rest position is unknown. | Confirmed positions are configured as `g`/`r`. |
 | Real-layout topology, block map and switch addresses. | The shipped defaults describe the test oval. | The real layout values are entered on the settings page. |
 | Signals 51..55 as switches. | Koploper commands them via `switch[...]`; they are unmapped and ignored. | Signals are either mapped or deliberately documented as out of scope. |
+
+## Recovery & Maintenance System (future)
+
+The ECoS emulator graceful-shutdown work (merged 2026-09-23, PR #8, merge commit `5fb751552b368015ba17f796d86f41c1d7fa7c13`) is recorded as a **completed foundation** for a future Recovery & Maintenance System.
+
+The Product Owner has since issued a full assignment for this system. See the durable feature brief, architecture proposal, development roadmap and open Product Owner decisions in **`docs/recovery-maintenance-system.md`**. The first implementation increment (software-only, simulator mode: stop/start/restart of the C# track-control runtime from WPF) is described there; do not start implementation until the Product Owner approves it as a separate increment.
+
+### Recovery & Maintenance — Increment 1 follow-ups (not implemented, deferred)
+
+| Item | Evidence | Suggested acceptance criteria |
+| --- | --- | --- |
+| No simulator `ITrackTransport`. | The real-mode track part (`RawUdpTransport`→`TrackCommClientAsync`→init→`TrackControlMain`) is composed but cannot be executed in simulator mode because no simulator `ITrackTransport`/init path exists (the legacy `EthernetTargetDataSimulator` feeds the old `TrackIOHandle` path). | A simulator transport + deterministic init path, so the full track part can run end-to-end without hardware (needed for a future software-only real-mode lifecycle test). |
+| `KoploperExternalInfoClient` lacks a `Faulted` event. | `EcosEmulatorServer` and `TrackSimulatorBackend` surface background-task faults; the external-info client catches broadly and retries, so a fault there is not surfaced to the runtime `Failed` state. | Either surface external-info faults the same way, or document that retry-forever is the intended behaviour. |
+| `OnEcosHostFaulted` ignores faults during `Starting`. | The runtime coordinator only maps `Running → Failed` on a host fault; a fault raised between host start and the `Running` transition is dropped and the start still reports `Running`. | A fault during `Starting` also transitions to `Failed` (or the window is provably impossible). |
+| WPF runtime surface not runtime-tested. | The init-page Start/Stop/Restart surface and `App.OnExit` graceful stop are build-verified (V1) only; the WPF app was not launched. | Manual/runtime smoke test of the WPF lifecycle surface (start/stop/restart buttons, state display, failure display). |
+| Stop/telemetry retention policy. | After a stop the runtime nulls `TrackApplicationVariables`, so the amplifier page clears (no "last known state" shown). Retaining last-known state as "stale" would be a product decision. | Product Owner decides whether to retain/display last-known amplifier state after stop. |
 
 

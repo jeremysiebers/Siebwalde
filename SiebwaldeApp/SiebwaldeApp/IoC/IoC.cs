@@ -33,6 +33,12 @@ namespace SiebwaldeApp
         public static SiebwaldeApplicationModel siebwaldeApplicationModel => IoC.Get<SiebwaldeApplicationModel>();
 
         /// <summary>
+        /// A shortcut to access the <see cref="SiebwaldeApp.Core.ITrackApplicationRuntime"/>
+        /// coordinator that owns the track-control runtime lifecycle.
+        /// </summary>
+        public static ITrackApplicationRuntime TrackRuntime => IoC.Get<ITrackApplicationRuntime>();
+
+        /// <summary>
         /// A shortcut to access the <see cref="IFileManager"/>
         /// </summary>
         public static IFileManager File => IoC.Get<IFileManager>();
@@ -78,14 +84,19 @@ namespace SiebwaldeApp
 
             // Bind the ECoS host (the server Koploper connects to on port 15471). Its
             // composition lives in the Integration layer; here we only create it from
-            // configuration and hand it to the application model.
+            // configuration and hand it to the runtime coordinator.
             var ecosHost = TrackControlHost.FromConfiguration(
                 log: message => SiebwaldeApp.Core.IoC.Logger.Log(message, "EcosHost"),
                 controlTrace: controlTrace);
             Kernel.Bind<IEcosHostService>().ToConstant(ecosHost);
 
+            // The single runtime coordinator owns composition + lifetime of the track-control
+            // runtime (Core track part + ECoS host) and exposes the lifecycle to WPF.
+            var runtime = new TrackApplicationRuntimeHost(ecosHost, controlTrace);
+            Kernel.Bind<ITrackApplicationRuntime>().ToConstant(runtime);
+
             // Bind to a single instance of Siebwalde Application Model
-            Kernel.Bind<SiebwaldeApplicationModel>().ToConstant(new SiebwaldeApplicationModel(ecosHost, controlTrace));         
+            Kernel.Bind<SiebwaldeApplicationModel>().ToConstant(new SiebwaldeApplicationModel(runtime, controlTrace));
         }
 
         #endregion

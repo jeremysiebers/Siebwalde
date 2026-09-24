@@ -32,6 +32,9 @@ namespace SiebwaldeApp.Core
         event EventHandler<InitializationProgress>? ProgressChanged;
         event EventHandler<InitializationStatus>? StatusChanged;
 
+        /// <summary>The current initialization status (Idle, Running, Completed, Failed or Cancelled).</summary>
+        InitializationStatus Status { get; }
+
         /// <summary>
         /// Runs the full initialization and firmware process for all amplifiers.
         /// </summary>

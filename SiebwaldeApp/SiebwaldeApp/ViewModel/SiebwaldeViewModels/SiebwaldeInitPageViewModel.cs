@@ -23,6 +23,13 @@ namespace SiebwaldeApp
         /// <summary>Timer that triggers the automatic host re-detection on the UI thread.</summary>
         private readonly DispatcherTimer _detectionTimer;
 
+        /// <summary>The runtime coordinator that owns the track-control runtime lifecycle.</summary>
+        private readonly ITrackApplicationRuntime _runtime;
+
+        private readonly RelayCommand _startRuntimeCommand;
+        private readonly RelayCommand _stopRuntimeCommand;
+        private readonly RelayCommand _restartRuntimeCommand;
+
         #endregion
 
         #region Public properties
@@ -69,6 +76,12 @@ namespace SiebwaldeApp
         /// <summary>True when the control path is latched unsafe, so a reset is meaningful.</summary>
         public bool CanResetControlSafety { get; set; }
 
+        /// <summary>Human-readable lifecycle state of the track-control runtime.</summary>
+        public string RuntimeStateText { get; set; } = "Runtime: stopped";
+
+        /// <summary>Distinct failure line shown when the runtime enters the Failed state.</summary>
+        public string FailureText { get; set; } = "";
+
         #endregion
 
         #region Public commands
@@ -94,6 +107,15 @@ namespace SiebwaldeApp
         /// <summary>Explicit recovery for a latched control-path safety fault.</summary>
         public ICommand ResetControlSafety { get; set; }
 
+        /// <summary>Start the track-control runtime (simulator mode).</summary>
+        public ICommand StartRuntime => _startRuntimeCommand;
+
+        /// <summary>Stop the track-control runtime.</summary>
+        public ICommand StopRuntime => _stopRuntimeCommand;
+
+        /// <summary>Restart the track-control runtime.</summary>
+        public ICommand RestartRuntime => _restartRuntimeCommand;
+
         #endregion
 
         #region Constructor
@@ -101,6 +123,10 @@ namespace SiebwaldeApp
         public SiebwaldeInitPageViewModel()
         {
             Log2 = new ObservableCollection<string>();
+
+            _runtime = IoC.TrackRuntime;
+            _runtime.StateChanged += HandleRuntimeStateChanged;
+            _runtime.Faulted += HandleRuntimeFaulted;
 
             DetectHosts = new RelayCommand(async () => await DetectHostsAsync(logAlways: true));
 
@@ -124,6 +150,16 @@ namespace SiebwaldeApp
             InitFiddleYardSimulator = new RelayCommand(async () => await StartFiddleYardAsync(true));
             InitEcosSimulator = new RelayCommand(async () => await StartEcosSimulatorAsync());
             ResetControlSafety = new RelayCommand(ResetControlSafetyNow);
+
+            _startRuntimeCommand = new RelayCommand(
+                async () => await StartRuntimeAsync(),
+                () => TrackRuntimeControlPolicy.CanStart(_runtime.State));
+            _stopRuntimeCommand = new RelayCommand(
+                async () => await StopRuntimeAsync(),
+                () => TrackRuntimeControlPolicy.CanStop(_runtime.State));
+            _restartRuntimeCommand = new RelayCommand(
+                async () => await RestartRuntimeAsync(),
+                () => TrackRuntimeControlPolicy.CanRestart(_runtime.State));
 
             Log("Init page ready. Press 'Detect hosts' to scan for FiddleYard, TrackController and Koploper.");
 
@@ -264,10 +300,60 @@ namespace SiebwaldeApp
         {
             Log("Starting ECoS host in simulator mode (Koploper can connect on port 15471)...");
 
-            var result = await IoC.siebwaldeApplicationModel.StartEcosHostSimulatorAsync();
+            await IoC.siebwaldeApplicationModel.StartEcosHostSimulatorAsync();
 
             UpdateControlStatus();
-            Log($"ECoS simulator start result: {result}. {EcosModeStatus}");
+            Log($"ECoS simulator start requested. {EcosModeStatus}");
+        }
+
+        /// <summary>Starts the track-control runtime in simulator mode.</summary>
+        private async Task StartRuntimeAsync()
+        {
+            Log("Starting track-control runtime (simulator mode)...");
+            await _runtime.StartAsync(TrackControlMode.Simulator);
+            Log($"Track-control runtime start requested. {RuntimeStateText}");
+        }
+
+        /// <summary>Stops the track-control runtime.</summary>
+        private async Task StopRuntimeAsync()
+        {
+            Log("Stopping track-control runtime...");
+            await _runtime.StopAsync();
+            Log($"Track-control runtime stop requested. {RuntimeStateText}");
+        }
+
+        /// <summary>Restarts the track-control runtime.</summary>
+        private async Task RestartRuntimeAsync()
+        {
+            Log("Restarting track-control runtime...");
+            await _runtime.RestartAsync();
+            Log($"Track-control runtime restart requested. {RuntimeStateText}");
+        }
+
+        /// <summary>Marshals a runtime state change to the UI thread and refreshes the surface.</summary>
+        private void HandleRuntimeStateChanged(object? sender, TrackRuntimeStatusChangedEventArgs e)
+        {
+            _detectionTimer.Dispatcher.BeginInvoke(() =>
+            {
+                RuntimeStateText = $"Runtime: {e.State}";
+                if (e.FailureReason is not null)
+                {
+                    FailureText = $"Failure: {e.FailureReason}";
+                }
+
+                _startRuntimeCommand.RaiseCanExecuteChanged();
+                _stopRuntimeCommand.RaiseCanExecuteChanged();
+                _restartRuntimeCommand.RaiseCanExecuteChanged();
+            });
+        }
+
+        /// <summary>Marshals a runtime fault to the UI thread and shows a distinct failure line.</summary>
+        private void HandleRuntimeFaulted(object? sender, RuntimeFaultEventArgs e)
+        {
+            _detectionTimer.Dispatcher.BeginInvoke(() =>
+            {
+                FailureText = $"Fault: {e.Source}: {e.Exception.Message}";
+            });
         }
 
         /// <summary>

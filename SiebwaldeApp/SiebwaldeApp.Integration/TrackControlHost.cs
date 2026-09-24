@@ -54,6 +54,9 @@ namespace SiebwaldeApp.Integration
         private EcosHardwareStopSink? _stopSink;
         private TrackControlMode? _mode;
 
+        /// <inheritdoc />
+        public event EventHandler<RuntimeFaultEventArgs>? Faulted;
+
         /// <summary>
         /// Creates the host. The topology and block map come from configuration; the
         /// runtime pieces (track communication client and shared variables) are supplied
@@ -292,6 +295,7 @@ namespace SiebwaldeApp.Integration
                 };
 
                 _simulatorBackend = new TrackSimulatorBackend(_externalInfo);
+                _simulatorBackend.Faulted += OnPartFaulted;
 
                 // Same translation path as real mode; only the physical sink differs.
                 Switches = new SwitchController(
@@ -343,6 +347,7 @@ namespace SiebwaldeApp.Integration
             _externalInfo.Start();
 
             _server = new EcosEmulatorServer(_ecosListenPort, new SimpleEcosCommandParser(), _ecosBackend);
+            _server.Faulted += OnPartFaulted;
             _server.Start();
 
             _integration?.Attach();
@@ -387,6 +392,118 @@ namespace SiebwaldeApp.Integration
             }
         }
 
+        /// <summary>
+        /// Gracefully stops the ECoS host: detaches the occupancy bridge, then awaits the graceful
+        /// stop of the server, the simulator backend and the external-info client with a bounded
+        /// timeout, and releases every field (same set as <see cref="Stop"/>). Reports whether the
+        /// clean-stop guarantee was actually established.
+        /// </summary>
+        public async Task<EcosHostStopResult> StopAsync(CancellationToken ct = default)
+        {
+            if (!IsRunning && _integration is null && _externalInfo is null)
+            {
+                return EcosHostStopResult.AlreadyStopped;
+            }
+
+            var stoppedMode = _mode;
+
+            // Detach first so no occupancy update can reach a backend that is being torn down.
+            try
+            {
+                _integration?.Detach();
+            }
+            catch (Exception ex)
+            {
+                RaiseFault("TrackControlHost.Detach", ex);
+            }
+
+            var clean = true;
+            var timedOut = false;
+
+            try
+            {
+                if (_server is not null && !await _server.StopAsync(ct).ConfigureAwait(false))
+                {
+                    timedOut = true;
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                timedOut = true;
+            }
+            catch (Exception ex)
+            {
+                clean = false;
+                RaiseFault("EcosEmulatorServer.StopAsync", ex);
+            }
+
+            try
+            {
+                if (_simulatorBackend is not null && !await _simulatorBackend.StopAsync(ct).ConfigureAwait(false))
+                {
+                    timedOut = true;
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                timedOut = true;
+            }
+            catch (Exception ex)
+            {
+                clean = false;
+                RaiseFault("TrackSimulatorBackend.StopAsync", ex);
+            }
+
+            try
+            {
+                if (_externalInfo is not null && !await _externalInfo.StopAsync(ct).ConfigureAwait(false))
+                {
+                    timedOut = true;
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                timedOut = true;
+            }
+            catch (Exception ex)
+            {
+                clean = false;
+                RaiseFault("KoploperExternalInfoClient.StopAsync", ex);
+            }
+
+            // Release every field exactly as the synchronous Stop does.
+            _server = null;
+            _ecosBackend = null;
+            _simulatorBackend = null;
+            _integration = null;
+            _locoRepository = null;
+            _externalInfo = null;
+            _mode = null;
+            Switches = null;
+            Diagnostics = null;
+            Safety = null;
+            Observability = null;
+            Divergence = null;
+            _stopSink = null;
+
+            if (stoppedMode is not null)
+            {
+                Log($"ECoS host stopped (was running in {stoppedMode} mode).");
+            }
+
+            if (!clean)
+            {
+                return EcosHostStopResult.Faulted;
+            }
+
+            if (timedOut)
+            {
+                return EcosHostStopResult.Timeout;
+            }
+
+            return EcosHostStopResult.Stopped;
+        }
+
         /// <inheritdoc />
         public void Dispose() => Stop();
 
@@ -427,6 +544,13 @@ namespace SiebwaldeApp.Integration
                 _log(message);
             }
         }
+
+        private void RaiseFault(string source, Exception exception)
+            => Faulted?.Invoke(this, new RuntimeFaultEventArgs(source, exception));
+
+        /// <summary>Re-raises a part's fault so the coordinator observes a single host-level fault stream.</summary>
+        private void OnPartFaulted(object? sender, RuntimeFaultEventArgs e)
+            => Faulted?.Invoke(this, e);
 
         /// <summary>
         /// Switch positions for routing and look-ahead. The logical (ECoS) positions come from

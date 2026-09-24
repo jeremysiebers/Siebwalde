@@ -65,7 +65,7 @@ namespace SiebwaldeApp.EcosEmu
         /// run task with a bounded timeout. Idempotent and resets state so <see cref="Start"/>
         /// can be called again.
         /// </summary>
-        public async Task StopAsync(CancellationToken ct = default)
+        public async Task<bool> StopAsync(CancellationToken ct = default)
         {
             var cts = Interlocked.Exchange(ref _cts, null);
             cts?.Cancel();
@@ -73,12 +73,14 @@ namespace SiebwaldeApp.EcosEmu
             DisposeCurrentConnection();
 
             var runTask = Interlocked.Exchange(ref _runTask, null);
+            var completed = true;
             if (runTask is not null)
             {
-                await WaitBoundedAsync(runTask, ct).ConfigureAwait(false);
+                completed = await WaitBoundedAsync(runTask, ct).ConfigureAwait(false);
             }
 
             Console.WriteLine("[EXT] ExternalInfo client stopped.");
+            return completed;
         }
 
         /// <summary>
@@ -179,21 +181,27 @@ namespace SiebwaldeApp.EcosEmu
             }
         }
 
-        /// <summary>Waits for a task with a bounded timeout, swallowing shutdown exceptions.</summary>
-        private static async Task WaitBoundedAsync(Task task, CancellationToken ct)
+        /// <summary>
+        /// Waits for a task with a bounded timeout, swallowing shutdown exceptions. Returns true
+        /// when the task completed within the bound, false when the bound expired (or the wait was
+        /// cancelled) and the wait gave up.
+        /// </summary>
+        private static async Task<bool> WaitBoundedAsync(Task task, CancellationToken ct)
         {
             if (task.IsCompleted)
             {
                 Observe(task);
-                return;
+                return true;
             }
 
             var completed = await Task.WhenAny(task, Task.Delay(StopTimeout, ct)).ConfigureAwait(false);
             if (completed == task)
             {
                 Observe(task);
+                return true;
             }
             // Otherwise the timeout elapsed (or ct was cancelled): give up so shutdown cannot hang.
+            return false;
         }
 
         private static void Observe(Task task)

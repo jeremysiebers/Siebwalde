@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,6 +16,9 @@ namespace SiebwaldeApp.Core
     /// </summary>
     public interface IEcosHostService
     {
+        /// <summary>Raised when a component of the host reports a runtime fault.</summary>
+        event EventHandler<RuntimeFaultEventArgs>? Faulted;
+
         /// <summary>True while the ECoS server is listening.</summary>
         bool IsRunning { get; }
 
@@ -61,7 +65,18 @@ namespace SiebwaldeApp.Core
             TrackApplicationVariables? variables,
             CancellationToken cancellationToken = default);
 
-        /// <summary>Stops the ECoS host and releases everything it created.</summary>
+        /// <summary>
+        /// Gracefully stops the ECoS host: awaits every owned task with a bounded timeout and
+        /// releases everything it created. Reports whether the clean-stop guarantee was actually
+        /// established (<see cref="EcosHostStopResult.Stopped"/> / <see cref="EcosHostStopResult.AlreadyStopped"/>)
+        /// or not (<see cref="EcosHostStopResult.Timeout"/> / <see cref="EcosHostStopResult.Faulted"/>).
+        /// </summary>
+        Task<EcosHostStopResult> StopAsync(CancellationToken ct = default);
+
+        /// <summary>
+        /// Synchronous, non-blocking stop. Cancels and disposes listeners/connections without
+        /// awaiting the owned tasks; used by the internal mode-transition path. Idempotent.
+        /// </summary>
         void Stop();
     }
 }
