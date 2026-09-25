@@ -14,13 +14,15 @@ namespace SiebwaldeApp.EcosEmu
     public interface IMovementSafetyGate
     {
         /// <summary>
-        /// Returns whether non-zero movement for the locomotive is currently refused by a latched
-        /// safety interlock.
+        /// Returns whether non-zero movement for the locomotive is currently refused, either by a
+        /// latched safety interlock or because movement permission has not been granted (observed
+        /// neutral has not been established).
         /// </summary>
         /// <param name="address">The locomotive address the movement command was issued for.</param>
         /// <returns>
         /// True when a latched safety interlock is blocking non-zero movement for this locomotive
-        /// (or for the whole layout); otherwise false.
+        /// (or for the whole layout), or when movement permission has not been granted by observed
+        /// neutral; otherwise false.
         /// </returns>
         bool IsMovementBlocked(int address);
     }

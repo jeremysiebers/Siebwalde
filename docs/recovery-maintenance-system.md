@@ -164,14 +164,15 @@ Keep a clean seam for later: the coordinator sits behind the narrow Core `ITrack
 
 ## 4. Development roadmap
 
-Each increment is independently mergeable and (where possible) simulator-testable. Real-hardware restart is gated by decisions 1 and 2 (Increment 3).
+Each increment is independently mergeable and (where possible) software-tested. After PR #10 (the deterministic simulator transport), the roadmap is re-cut along the **software/protocol boundary vs physical boundary** (see §8): the C# neutralization/readback/stale-command logic can be built and software-proven first, and only the physical-fidelity half stays V4.
 
-1. **Increment 1 (software-only, simulator mode)** — stop/start/restart of the C# track-control runtime from WPF. Detailed below.
-2. **Increment 2** — real-mode graceful **stop** (movement-safe, no restart yet): cancellation + disposal + neutral-on-stop via the existing `SetPower(false)`/`StopLayout` path; prove a stopped runtime holds no stale writes. Validation V4 (`LIVE_HARDWARE`).
-3. **Increment 3** — startup/restart **neutralization guarantee**: establish + observe neutral before enabling movement after real start/restart; fix HoldingReg aliasing. Depends on decisions 1 and 2. Validation V4.
-4. **Increment 4** — control-source arbiter + **manual control path** (operator recovery): manual loco (incl. slow reverse) + switch control through the arbiter + safety interlock; `SetAmplifierControl` moved under `Manual` ownership. Validation V2 (simulator) then V4.
-5. **Increment 5** — **hand-back** workflow + WPF operator surface. Depends on decision 3; live Koploper validation.
-6. **Increment 6 (later)** — communication/hardware recovery + controlled **Maintenance Mode** (firmware dev/test), `FIRMWARE_FLASH`-gated; re-evaluate out-of-process split here.
+1. **(DONE) Increment 1** — stop/start/restart of the C# track-control runtime from WPF (software-only, simulator mode). See §7.
+2. **(DONE) Simulator transport (PR #10)** — `DeterministicTrackTransport` + end-to-end tests, so the full track runtime (comm → 9-step init → `TrackControlMain`) runs software-only.
+3. **Increment 2 (next, software-first, V1/V2)** — "Observed-neutral restart/stop safety — software half": neutral command on Stop and on Start/Restart; observed-neutral movement gate (fresh HR0 readback == 399); stale-command proof; failure state when neutral cannot be established. Proven against `DeterministicTrackTransport`. Gated by PO decisions 1, 2 and 5. Detailed in §8.
+4. **Increment 3 (V4 only)** — real-hardware restart/stop validation of Increment 2's software: confirm the physical-fidelity questions (does SLAVEINFO HR0 reflect physical PWM vs command echo; timing; hardware failure modes).
+5. **Increment 4** — control-source arbiter + **manual control path** (operator recovery): manual loco (incl. slow reverse) + switch control through the arbiter + safety interlock; `SetAmplifierControl` moved under `Manual` ownership. Validation V2 (simulator) then V4.
+6. **Increment 5** — **hand-back** workflow + WPF operator surface. Depends on decision 3; live Koploper validation.
+7. **Increment 6 (later)** — communication/hardware recovery + controlled **Maintenance Mode** (firmware dev/test), `FIRMWARE_FLASH`-gated; re-evaluate out-of-process split here.
 
 ### 4.1 Increment 1 — first proposed implementation (software-only, simulator)
 
@@ -225,7 +226,7 @@ Each increment is independently mergeable and (where possible) simulator-testabl
 ## 6. Risks / unknowns
 
 - No verified Koploper pause/hand-back API → control transfer relies on stop + occupancy + C#-side command masking; must be live-validated.
-- Neutral observation depends on fixing `TrackApplicationVariables` HoldingReg aliasing and on confirming amplifier HR0 readback semantics on real hardware.
+- Neutral observation depends on confirming amplifier HR0 readback semantics on real hardware (does SLAVEINFO HR0 reflect physical PWM or a command echo) — the V4 question. (The `TrackApplicationVariables` HoldingReg aliasing noted earlier is no longer present: `TrackAmplifierItem.HoldingReg` copies on assign and `TrackCommClientAsync.HandleNewData` assigns a fresh per-frame array.)
 - The sync `.Wait()` deadlock on the WPF dispatcher is removed only by making stop/restart fully async end-to-end.
 - Fire-and-forget writes (`_locoRepository.SaveAsync`, `OnSensorChangedAsync`) can race disposal during stop; the coordinator must sequence them.
 - The manual path currently bypasses ownership/safety until re-routed (Increment 4).
@@ -246,3 +247,41 @@ Increment 1 introduced the in-process, independently start/stop/restartable trac
 - **Amplifier data seam:** the read path is exposed on `ITrackApplicationRuntime` (`TrackAmplifiers`/`GetAmplifierListing`/re-published `AmplifierDataReceived`) so future consumers (Fiddle Yard / YardController / MMDC) consume the Core contract, not `TrackControlMain` or a WPF page. No generic-I/O/MMDC layer was added (deferred). The mutable `TrackApplicationVariables` stays inside the runtime; after stop it is nulled and the amplifier page clears (matching prior behaviour).
 - **Real-mode behaviour unchanged:** the track-part composition was moved verbatim from `SiebwaldeApplicationModel` into the coordinator (same 9 init steps and order); the only intentional changes are fresh-per-start helpers and the new init-failure→`Failed` observation. Real-mode end-to-end execution is not exercised in this simulator-only increment.
 - **Known limitations / follow-ups (see `docs/backlog.md`):** ~~no simulator `ITrackTransport` exists~~ **RESOLVED (2026-09-24)** — a deterministic `DeterministicTrackTransport` now lets the full real-mode track part run end-to-end software-only (see `docs/backlog.md`); `KoploperExternalInfoClient` has no `Faulted` event (its loop retries rather than faults); `OnEcosHostFaulted` ignores faults during `Starting`; the WPF surface is build-verified (V1), not runtime-observed.
+
+---
+
+## 8. Roadmap reassessment (post simulator transport) — and the next increment
+
+**Headline.** The deterministic simulator transport does not change *what* safe restart requires, only *when* the C# logic can be proven. The software/protocol half of the old "real graceful stop" (Increment 2) and "startup/restart neutralisation" (Increment 3) can now be built and proven software-only; only the physical-fidelity half stays V4. The roadmap is therefore re-cut along the **software/protocol boundary vs physical boundary**, not along **stop vs start**.
+
+**Code-level facts confirmed by independent source review (2026-09-24):**
+
+- **Neutral is `399`** (`AmplifierSpeedMapper.NeutralPwm`), but `SetDefaultPwmSetpointsStep` writes **`400`** (`AmplifierSpeedMapper.ForwardMinPwm`, the *lowest forward* step) into the in-memory image only — never transmitted, never equal to true neutral. The next increment must reconcile this to `399`.
+- **The `TrackApplicationVariables` HoldingReg aliasing is no longer present.** `TrackAmplifierItem.HoldingReg` copies on assignment and `TrackCommClientAsync.HandleNewData` assigns a fresh per-frame array; each `trackAmpItems` entry holds a distinct array. It should still be pinned by a targeted test, but it is not a blocker.
+- **There is no neutral command on the lifecycle stop/restart path.** `TrackApplicationRuntimeHost.StopTrackPartAsync` only stops the loop, cancels the CTS, stops the host and disposes the comm client. Neutral-on-stop exists only in `EcosHardwareStopSink` (the latched *safety* path), never in the *lifecycle* path. This is the concrete next-increment gap.
+- **The current "established" bar is commanded + fresh comm, not observed.** `EcosHardwareStopSink`/`AmplifierCommandTracker` track *commanded* neutral ("fresh + commanded" = established); there is no runtime movement-gate that requires *observed* HR0 == 399. Adding that gate is exactly the next increment.
+- **The simulator proves "commanded == readback" at the software/protocol boundary** (`DeterministicTrackTransport` writes the register then echoes it via SLAVEINFO). It does **not** prove physical PWM. This is the precise V4 boundary.
+
+**Software-provable now (against `DeterministicTrackTransport`):** stale-`PendingWrites`/command prevention across restart; neutral commanding on Stop/Restart (up to "commanded"); the observed-neutral *gating logic* (fresh HR0 readback == 399 before movement); amplifier readback/freshness (including deterministic staleness); and the "known state cannot be established → movement not enabled" failure state.
+
+**Still V4 (cannot be software-proven):** whether real SLAVEINFO HR0 reflects *physical* PWM vs a command echo; electrical/timing/RS-422 behaviour and the 10 Hz loop vs the real master round-trip; hardware failure modes (over-current/over-temp, stuck PIC32, backplane, silent amplifier, bootloader/flash); that commanding 399 physically stops the motor.
+
+### 8.1 Next increment (proposed, software-first)
+
+**Name:** "Observed-neutral restart/stop safety — software half (V1/V2 against `DeterministicTrackTransport`)."
+
+**Objective.** Establish the software side of the observed-neutral restart guarantee in real-mode composition (exercised software-only via the simulator): command neutral `399` to all configured legitimate track amplifiers on Stop and on Start/Restart; gate any non-zero movement on a fresh per-amplifier HR0 readback of `399`; hold the runtime in a not-movement-safe state (movement refused + fault surfaced) when neutral cannot be established within a bounded window; and prove the stale-command guard as part of the same increment.
+
+**In scope.** A neutral-command-on-stop path in the coordinator's real-mode `StopAsync` (reuse `IAmplifierNeutralizer.NeutralizeAmplifiers` / `SetPower(false)`, bounded); a neutral-command + observe-neutral gate on real-mode Start/Restart (command `399`, wait a bounded window for fresh HR0 == 399, then open the movement gate; otherwise keep it closed and raise a fault/Diagnostic); the gate as an orthogonal movement-permission gate at the single movement choke point (consistent with "unsafe" being orthogonal to runtime state); freshness/readback via `TrackAmplifierDataFreshness` + `TrackAmplifierItem.HoldingReg[PwmCommand]`; correct the `400` → `399` default-setpoint discrepancy; pin the HoldingReg no-aliasing behaviour with a targeted test.
+
+**Out of scope.** Real hardware (V4); electrical/timing; hardware failure modes; amplifier group/domain semantics beyond "all configured legitimate track amplifiers" (decision 1 default b); control-source arbiter/manual path; hand-back; generic I/O/MMDC; Maintenance Mode; Koploper live validation; firmware.
+
+**Software-proven vs deferred.** Command path, observation logic (fresh readback == 399), stale-command guard, and the not-movement-safe failure state are V1/V2-proven. The physical-fidelity questions above are V4 and explicitly deferred.
+
+**Does it move toward a truly safe restart of the real railway?** Yes, materially, but only the software half. It moves the software to "observed neutral before movement" (the Product Owner's stated direction) and makes the software ready for the V4 physical validation. It does not by itself make the real railway restart safe: the "observed" bar is only as trustworthy as the readback's physical fidelity, which stays unproven until V4.
+
+### 8.2 Product Owner decisions needed before this increment starts
+
+- **Decision 2 (observed-vs-commanded bar) — REQUIRED.** Confirm the increment may build the observation logic against the **simulated readback** (fresh HR0 readback == 399), establishing "observed" at the C# readback level, while the physical-fidelity question (does real readback reflect physical PWM) stays V4. Recommendation: yes — this is the natural software-first split of the already-stated "neutral must ultimately be observed" direction.
+- **Decision 1 (amplifier group/domain) — REQUIRED (or a scoped confirmation of option b).** Confirm "all configured legitimate track amplifiers (`1..50`) as one restart-safety domain" for this increment, deferring `MainRailway`/`MountainRailway`/`Spare` semantics. Recommendation: option (b).
+- **Decision 5 (stop semantics while moving) — RECOMMENDED confirm.** Confirm neutral-on-stop (safe default) is acceptable even while Koploper is driving. Recommendation: option (a), via the existing ECoS stop/power-off path.

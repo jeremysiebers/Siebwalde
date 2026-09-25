@@ -67,7 +67,13 @@ namespace SiebwaldeApp.Core
         /// An explicit safety reset was refused because the underlying condition is still not
         /// resolved.
         /// </summary>
-        ResetRefused = 9
+        ResetRefused = 9,
+
+        /// <summary>
+        /// Observed neutral could not be established for every configured amplifier within the
+        /// bounded window, so movement permission was not granted.
+        /// </summary>
+        NeutralNotEstablished = 10
     }
 
     /// <summary>The safety reaction that was actually taken for a diagnostic.</summary>

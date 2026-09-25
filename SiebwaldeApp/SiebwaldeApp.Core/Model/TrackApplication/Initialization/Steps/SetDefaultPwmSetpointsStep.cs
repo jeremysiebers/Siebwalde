@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 namespace SiebwaldeApp.Core
 {
     /// <summary>
-    /// Initialization step that sets a default PWM setpoint (e.g. 400)
+    /// Initialization step that sets the default PWM setpoint (neutral, 399)
     /// for all track amplifiers before they are enabled.
     /// This only writes HoldingReg0 bits 0..9 and does not enable power.
     /// </summary>
@@ -33,11 +33,11 @@ namespace SiebwaldeApp.Core
                 return Task.FromResult(InitStepResult.Next("EnableTrackamplifiers"));
             }
 
-            // Default idle PWM setpoint is 400 (standstill, dual-sided PWM).
-            _variables.InitializeDefaultPwmSetpoints(400);
+            // Default idle PWM setpoint is neutral (standstill, dual-sided PWM).
+            _variables.InitializeDefaultPwmSetpoints(AmplifierSpeedMapper.NeutralPwm);
 
             IoC.Logger.Log(
-                "Init: Default PWM setpoints set to 400 for all track amplifiers.",
+                $"Init: Default PWM setpoints set to {AmplifierSpeedMapper.NeutralPwm} (neutral) for all track amplifiers.",
                 _loggerInstance);
 
             _done = true;

@@ -11,12 +11,14 @@ Siebwalde is the control application for a model railway. Koploper owns driving 
 - The safety-stop reachability increment is **MERGED / CLOSED** (PR #4, merge commit `3b275fa27c9197400ee40cbfa5759450443535d3`, post-merge CI PASS).
 - The merged production baseline includes: DCC28 protocol-speed normalization at the ECoS boundary; logical locomotive direction retention; authoritative TrackAmplifier (`1..50`) vs backplane/configuration (`51..55`) device classification; amplifier-centric safety neutralization (`IAmplifierNeutralizer`, `AmplifierCommandTracker`, fail-honest `SafetyStopResult`); and the dedicated production `ControlTrace` forensic log.
 - The ECoS emulator graceful-shutdown increment is **MERGED / CLOSED** (PR #8, merge commit `5fb751552b368015ba17f796d86f41c1d7fa7c13`, post-merge CI PASS). `EcosEmulatorServer`, `KoploperExternalInfoClient` and `TrackSimulatorBackend` now stop deterministically (idempotent, bounded `StopAsync` with tracked+awaited tasks and disposed listener/connection, plus a non-blocking sync `Stop` for the in-process host). Recorded as the completed foundation for a future Recovery & Maintenance System (see `docs/backlog.md`).
+- The Recovery & Maintenance Increment 1 (controllable track runtime from WPF) is **MERGED / CLOSED** (PR #9, merge commit `a41302a42db62d1c23e98d1205a8189c0033b5d3`, post-merge CI PASS): a single in-process coordinator (`TrackApplicationRuntimeHost` behind Core `ITrackApplicationRuntime`) owns the track-control runtime lifecycle (`Stopped/Starting/Running/Stopping/Failed`), with a provable graceful stop, shared start/restart path, and failure semantics. Its B-classification limitation (no simulator `ITrackTransport`) was later closed by PR #10.
+- The software-only simulator transport is **MERGED / CLOSED** (PR #10, merge commit `33a231a01b5aff4aa4a99e162b69d723a778d31b`, post-merge CI PASS): `DeterministicTrackTransport` (Core `TrackApplication.Simulator`) emulates the PIC32 master protocol so the full track runtime (comm → 9-step init → `TrackControlMain`) runs end-to-end software-only. This is software/protocol simulation evidence only — not proof of physical PWM/timing/hardware behaviour.
 - Do not reopen the closed safety increment. Detailed evidence lives in `docs/handoff.md`, `docs/backlog.md` and `docs/analysis-coverage.md`.
 
 ## Current repository baseline
 
 - Repository root: `C:\Localdata\Siebwalde` (Git; `origin https://github.com/jeremysiebers/Siebwalde.git`).
-- Current `master` HEAD: `5fb751552b368015ba17f796d86f41c1d7fa7c13` (equal to `origin/master`). This is a normal merge commit for PR #8 on top of the prior baselines `0cf6347` (PR #7, Workflow v1 operational improvements) and `ec990bc` (PR #6); earlier baselines: `a6b3467` (PR #5, Workflow v1) and `f1caa6b`.
+- Current `master` HEAD: `33a231a01b5aff4aa4a99e162b69d723a778d31b` (equal to `origin/master`). This is a normal merge commit for PR #10 on top of `a41302a` (PR #9, Recovery & Maintenance Increment 1); earlier baselines: `5fb7515` (PR #8), `0cf6347` (PR #7), `ec990bc` (PR #6), `a6b3467` (PR #5).
 - The revision above is a **verified baseline reference**, not a permanently self-updating truth claim; always trust the actual Git state.
 - Main solution: `SiebwaldeApp/SiebwaldeApp.sln` (UI, Core, EcosEmu, Integration, Core.Tests). Separate hosts: `SiebwaldeApp.Core.Host.sln`, `SiebwaldeApp.EcosEmu.sln`. Validation harness: `SiebwaldeApp/SiebwaldeApp.StopReachabilityHarness` (not in the solution).
 - Immutable evidence branch retained: `feature/safety-stop-reachability` @ `825533e` (historical physical-validation provenance). Reviewer-facing branch: `feature/safety-stop-reachability-clean` @ `dab43ab`.
@@ -26,8 +28,8 @@ Siebwalde is the control application for a model railway. Koploper owns driving 
 
 Executed at the verified baseline revision:
 
-- Debug tests: **350/350 PASS** (`dotnet test SiebwaldeApp.sln`)
-- Release tests: **350/350 PASS** (`dotnet test SiebwaldeApp.sln -c Release --no-build`)
+- Debug tests: **388/388 PASS** (`dotnet test SiebwaldeApp.sln`)
+- Release tests: **388/388 PASS** (`dotnet test SiebwaldeApp.sln -c Release --no-build`)
 - Release build: **0 errors / 175 warnings** (`dotnet build SiebwaldeApp.sln -c Release`)
 - `SiebwaldeApp.StopReachabilityHarness` build: **0 errors / 0 warnings**
 
@@ -49,7 +51,7 @@ These results belong to the verified baseline revision; re-run to confirm before
 Only currently material items; see `docs/backlog.md` for the full list.
 
 - **Open architecture decision (Product Owner):** complete track-amplifier group/domain configuration (`MainRailway` / `MountainRailway` / `Spare` / `Unassigned`) and the cross-domain emergency policy.
-- **Open safety gap (investigate):** startup/restart established-neutral guarantee (C# does not establish/observe neutral before movement; only a partial firmware default exists).
+- **Open safety gap (investigate):** startup/restart established-neutral guarantee (C# does not establish/observe neutral before movement; only a partial firmware default exists). Now software-addressable via the deterministic simulator transport; the next Recovery & Maintenance increment targets its software half (see `docs/recovery-maintenance-system.md` §8).
 - **Manual `SetAmplifierControl`** is outside locomotive ownership (the strongest neutralization reaches it; a loco-scoped stop does not).
 - Software follow-ups: ControlTrace free-text quoting/escaping; build/commit ID in `CONTROL_TRACE_START`; trace registration idempotence; `FileLogger` hardening; synthetic `backplanecheck` / `classify` have no live-mode guard; test-project -> harness dependency.
 - Remaining documentation drift: some older domain/historical documents (for example `docs/application-guide.md`, `docs/implementation.md`) still contain pre-Workflow-v1 present-tense statements; broader drift repair is not yet complete.
@@ -58,12 +60,12 @@ Only currently material items; see `docs/backlog.md` for the full list.
 
 ## Active development direction
 
-- Governance (Workflow v1 bootstrap) is **complete and merged**; the next work returns to product features.
-- Next product direction: the physical test oval (4 amplifiers at addresses 1, 3, 4, 6; 4 blocks; 2 locomotives; no switches) for autonomous Koploper-driven operation.
+- The **Recovery & Maintenance System** is the active direction (see `docs/recovery-maintenance-system.md`). Completed: Increment 1 (controllable runtime from WPF, PR #9) and the software-only simulator transport (PR #10). Next proposed increment: "Observed-neutral restart/stop safety — software half" (gated by Product Owner decisions 1, 2 and 5 in `docs/recovery-maintenance-system.md` §5/§8).
+- The physical test oval autonomous running remains a separate, not-yet-started product direction.
 
 ## Open Product Owner decisions
 
-None currently blocking.
+- Recovery & Maintenance: see `docs/recovery-maintenance-system.md` §5 (decisions 1–5). Decisions **1** (amplifier group/domain), **2** (observed-vs-commanded neutral bar) and **5** (stop semantics while moving) gate the next increment (§8).
 
 ## Source-of-truth note
 

@@ -76,7 +76,9 @@ namespace SiebwaldeApp.Core.Tests
 
         private static async Task RunWithRuntimeAsync(
             SimulatorFactory factory,
-            Func<TrackApplicationRuntimeHost, CancellationToken, Task> testBody)
+            Func<TrackApplicationRuntimeHost, CancellationToken, Task> testBody,
+            TrackAmplifierGroups? amplifierGroups = null,
+            TimeSpan? neutralObserveWindow = null)
         {
             // The real-mode init pipeline reads the firmware hex in FlashFwTrackamplifiersStep even when
             // flashing is skipped, so the test must not depend on the (untracked) repo dist/ hex being
@@ -94,7 +96,9 @@ namespace SiebwaldeApp.Core.Tests
                 var runtime = new TrackApplicationRuntimeHost(
                     new FakeEcosHostService(),
                     controlTrace: null,
-                    transportFactory: factory.Create);
+                    transportFactory: factory.Create,
+                    amplifierGroups: amplifierGroups,
+                    neutralObserveWindow: neutralObserveWindow);
 
                 try
                 {
@@ -171,7 +175,11 @@ namespace SiebwaldeApp.Core.Tests
 
                 var simulator = Assert.Single(factory.Created);
 
-                Assert.Equal(ExpectedInitCommands, simulator.SentCommands.ToArray());
+                // The init commands are a prefix; observed-neutral establishment appends the
+                // neutral (108) writes for the configured domain.
+                Assert.Equal(
+                    ExpectedInitCommands,
+                    simulator.SentCommands.Take(ExpectedInitCommands.Length).ToArray());
 
                 for (int slave = 1; slave <= 3; slave++)
                 {
@@ -193,7 +201,7 @@ namespace SiebwaldeApp.Core.Tests
 
                 await runtime.StopAsync(ct);
                 Assert.Equal(TrackRuntimeState.Stopped, runtime.State);
-            });
+            }, Groups(1, 2, 3));
         }
 
         [Fact]
@@ -283,6 +291,245 @@ namespace SiebwaldeApp.Core.Tests
                 {
                     Assert.Equal(firstRegisters[slave], second.GetRegisters(slave));
                 }
+
+                await runtime.StopAsync(ct);
+                Assert.Equal(TrackRuntimeState.Stopped, runtime.State);
+            });
+        }
+
+        // -----------------------------------------------------------------
+        // Observed-neutral restart/stop safety (software half)
+        // -----------------------------------------------------------------
+
+        private static TrackAmplifierGroups Groups(params int[] mainRailway)
+            => TrackAmplifierGroups.Create(mainRailway, null, null);
+
+        [Fact]
+        public Task RealMode_AllDomainSlavesNeutral_MovementPermissionGranted_AndNonNeutralWrites108()
+        {
+            var factory = new SimulatorFactory(new TrackSimulatorConfig()); // detected 1,2,3
+            var groups = Groups(1, 2, 3);
+
+            return RunWithRuntimeAsync(factory, async (runtime, ct) =>
+            {
+                await runtime.StartAsync(TrackControlMode.Real, ct);
+
+                Assert.Equal(TrackRuntimeState.Running, runtime.State);
+                Assert.Equal(MovementPermissionState.Granted, runtime.MovementPermission);
+                Assert.True(runtime.IsMovementSafe);
+
+                var simulator = Assert.Single(factory.Created);
+
+                // A non-neutral control command now produces a 108 write with the non-neutral HR0.
+                // (This exercises the shared funnel; the ECoS SetLocoSpeed path is covered at the
+                // backend/interlock unit level, since this deterministic harness has no ECoS host.)
+                runtime.SetAmplifierControl(1, 500, false);
+
+                await WaitUntilAsync(
+                    () => simulator.GetRegisters(1)[0] == 0x01F4,
+                    TimeSpan.FromSeconds(5));
+                Assert.Contains((byte)TrackCommand.EXEC_MBUS_SLAVE_DATA_EXCH, simulator.SentCommands.ToArray());
+
+                await runtime.StopAsync(ct);
+                Assert.Equal(TrackRuntimeState.Stopped, runtime.State);
+            }, groups);
+        }
+
+        [Fact]
+        public Task RealMode_Stop_CommandsAndObservesNeutral_ThenTearsDown()
+        {
+            var factory = new SimulatorFactory(new TrackSimulatorConfig());
+            var groups = Groups(1, 2, 3);
+
+            return RunWithRuntimeAsync(factory, async (runtime, ct) =>
+            {
+                await runtime.StartAsync(TrackControlMode.Real, ct);
+                Assert.Equal(MovementPermissionState.Granted, runtime.MovementPermission);
+
+                // Put a non-neutral value on an amplifier so the stop must neutralize it.
+                runtime.SetAmplifierControl(1, 500, false);
+                await WaitUntilAsync(
+                    () => factory.Created[0].GetRegisters(1)[0] == 0x01F4,
+                    TimeSpan.FromSeconds(5));
+
+                await runtime.StopAsync(ct);
+
+                Assert.Equal(TrackRuntimeState.Stopped, runtime.State);
+                Assert.Equal(MovementPermissionState.NotGranted, runtime.MovementPermission);
+                Assert.False(runtime.IsMovementSafe);
+
+                var simulator = factory.Created[0];
+                // Neutral was written back and observed before teardown, and the transport is disposed.
+                Assert.Equal(AmplifierSpeedMapper.NeutralPwm, simulator.GetRegisters(1)[0] & 0x03FF);
+                Assert.True(simulator.IsDisposed);
+            }, groups);
+        }
+
+        [Fact]
+        public Task RealMode_WrongReadback_NeverGrants_AndRefusesNonNeutral()
+        {
+            var config = new TrackSimulatorConfig(
+                hr0ReadbackOverrides: new Dictionary<byte, ushort> { { 1, 400 } });
+            var factory = new SimulatorFactory(config);
+            var groups = Groups(1, 2, 3);
+            var faults = new List<RuntimeFaultEventArgs>();
+
+            return RunWithRuntimeAsync(factory, async (runtime, ct) =>
+            {
+                runtime.Faulted += (_, e) => faults.Add(e);
+
+                await runtime.StartAsync(TrackControlMode.Real, ct);
+
+                // Running does not imply movement-safe: neutral was NOT observed (readback 400).
+                Assert.Equal(TrackRuntimeState.Running, runtime.State);
+                Assert.Equal(MovementPermissionState.NotGranted, runtime.MovementPermission);
+                Assert.False(runtime.IsMovementSafe);
+                Assert.NotEmpty(faults);
+
+                var simulator = Assert.Single(factory.Created);
+
+                // A non-neutral command is refused by the gate, so amplifier 1 stays at neutral
+                // (399) instead of being overwritten with 500.
+                runtime.SetAmplifierControl(1, 500, false);
+                await Task.Delay(300, ct);
+
+                Assert.Equal(AmplifierSpeedMapper.NeutralPwm, simulator.GetRegisters(1)[0] & 0x03FF);
+
+                // A stop that cannot observe neutral is not a proven clean stop: it maps to Failed.
+                await runtime.StopAsync(ct);
+                Assert.Equal(TrackRuntimeState.Failed, runtime.State);
+            }, groups);
+        }
+
+        [Fact]
+        public Task RealMode_StaleReadback_NeverGrants_AndMovementBlocked()
+        {
+            var config = new TrackSimulatorConfig(droppedEchoSlaves: new byte[] { 1 });
+            var factory = new SimulatorFactory(config);
+            var groups = Groups(1, 2, 3);
+            var faults = new List<RuntimeFaultEventArgs>();
+
+            return RunWithRuntimeAsync(factory, async (runtime, ct) =>
+            {
+                runtime.Faulted += (_, e) => faults.Add(e);
+
+                await runtime.StartAsync(TrackControlMode.Real, ct);
+
+                // Slave 1 never echoes its write, so its readback goes stale: no grant.
+                Assert.Equal(TrackRuntimeState.Running, runtime.State);
+                Assert.Equal(MovementPermissionState.NotGranted, runtime.MovementPermission);
+                Assert.False(runtime.IsMovementSafe);
+                Assert.NotEmpty(faults);
+
+                // The stop also cannot observe neutral, so it maps to Failed (never Stopped).
+                await runtime.StopAsync(ct);
+                Assert.Equal(TrackRuntimeState.Failed, runtime.State);
+            }, groups);
+        }
+
+        [Fact]
+        public Task RealMode_ConfiguredButAbsentAmplifier_BlocksGrant()
+        {
+            var factory = new SimulatorFactory(new TrackSimulatorConfig()); // detected 1,2,3
+            var groups = Groups(1, 2, 4); // 4 is configured but never detected
+            var faults = new List<RuntimeFaultEventArgs>();
+
+            return RunWithRuntimeAsync(factory, async (runtime, ct) =>
+            {
+                runtime.Faulted += (_, e) => faults.Add(e);
+
+                await runtime.StartAsync(TrackControlMode.Real, ct);
+
+                Assert.Equal(TrackRuntimeState.Running, runtime.State);
+                Assert.Equal(MovementPermissionState.NotGranted, runtime.MovementPermission);
+                Assert.False(runtime.IsMovementSafe);
+                Assert.NotEmpty(faults);
+
+                // The absent amplifier also prevents observing neutral on stop: Failed, not Stopped.
+                await runtime.StopAsync(ct);
+                Assert.Equal(TrackRuntimeState.Failed, runtime.State);
+            }, groups);
+        }
+
+        [Fact]
+        public Task RealMode_DetectedButUnconfiguredAmplifier_IsNotRequired()
+        {
+            var factory = new SimulatorFactory(new TrackSimulatorConfig()); // detected 1,2,3
+            var groups = Groups(1, 2); // 3 is detected but unconfigured: not required
+
+            return RunWithRuntimeAsync(factory, async (runtime, ct) =>
+            {
+                await runtime.StartAsync(TrackControlMode.Real, ct);
+
+                Assert.Equal(TrackRuntimeState.Running, runtime.State);
+                Assert.Equal(MovementPermissionState.Granted, runtime.MovementPermission);
+                Assert.True(runtime.IsMovementSafe);
+
+                await runtime.StopAsync(ct);
+                Assert.Equal(TrackRuntimeState.Stopped, runtime.State);
+            }, groups);
+        }
+
+        [Fact]
+        public Task RealMode_Restart_FreshPermissionAndNoStalePendingWrites()
+        {
+            var factory = new SimulatorFactory(new TrackSimulatorConfig());
+            var groups = Groups(1, 2, 3);
+
+            return RunWithRuntimeAsync(factory, async (runtime, ct) =>
+            {
+                await runtime.StartAsync(TrackControlMode.Real, ct);
+                Assert.Equal(MovementPermissionState.Granted, runtime.MovementPermission);
+
+                // Queue a non-neutral command so there is a pending write before restart.
+                runtime.SetAmplifierControl(1, 500, false);
+
+                await runtime.RestartAsync(ct);
+
+                Assert.Equal(TrackRuntimeState.Running, runtime.State);
+                // A fresh start re-established neutral and re-created the permission.
+                Assert.Equal(MovementPermissionState.Granted, runtime.MovementPermission);
+                Assert.True(runtime.IsMovementSafe);
+
+                Assert.Equal(2, factory.Created.Count);
+                var second = factory.Created[1];
+
+                // Give the 10 Hz write loop a few ticks: no stale non-neutral write from the first
+                // run reaches the fresh transport, so amplifier 1 stays at neutral.
+                await Task.Delay(300, ct);
+                Assert.Equal(AmplifierSpeedMapper.NeutralPwm, second.GetRegisters(1)[0] & 0x03FF);
+
+                await runtime.StopAsync(ct);
+                Assert.Equal(TrackRuntimeState.Stopped, runtime.State);
+            }, groups);
+        }
+
+        [Fact]
+        public Task RealMode_EmptySafetyDomain_DoesNotGrant_AndBlocksMovement()
+        {
+            var factory = new SimulatorFactory(new TrackSimulatorConfig()); // detected 1,2,3
+            var faults = new List<RuntimeFaultEventArgs>();
+
+            // No amplifier groups configured: the safety domain is empty, so movement permission
+            // must never be granted vacuously.
+            return RunWithRuntimeAsync(factory, async (runtime, ct) =>
+            {
+                runtime.Faulted += (_, e) => faults.Add(e);
+
+                await runtime.StartAsync(TrackControlMode.Real, ct);
+
+                Assert.Equal(TrackRuntimeState.Running, runtime.State);
+                Assert.Equal(MovementPermissionState.NotGranted, runtime.MovementPermission);
+                Assert.False(runtime.IsMovementSafe);
+                Assert.NotEmpty(faults);
+
+                // Movement is blocked: a non-neutral command is refused, so the amplifier stays at
+                // its initial value (never neutral-commanded, never non-neutral).
+                runtime.SetAmplifierControl(1, 500, false);
+                await Task.Delay(300, ct);
+
+                var simulator = Assert.Single(factory.Created);
+                Assert.Equal(0, simulator.GetRegisters(1)[0] & 0x03FF);
 
                 await runtime.StopAsync(ct);
                 Assert.Equal(TrackRuntimeState.Stopped, runtime.State);

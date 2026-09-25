@@ -119,5 +119,101 @@ namespace SiebwaldeApp.Core.Tests
             // A backplane/configuration slave's HoldingReg0 is not a PWM setpoint.
             Assert.Equal(0x1234, backplane.HoldingReg[0]);
         }
+
+        // -----------------------------------------------------------------
+        // Movement-permission gate
+        // -----------------------------------------------------------------
+
+        [Fact]
+        public void SetDesiredAmplifierControl_RefusesNonNeutral_WhenPermissionNotGranted()
+        {
+            var variables = new TrackApplicationVariables();
+            variables.MovementPermission = new MovementPermissionController(); // NotGranted
+
+            var accepted = variables.SetDesiredAmplifierControl(1, 400, false);
+
+            Assert.False(accepted);
+            Assert.False(variables.PendingWrites.ContainsKey(1));
+        }
+
+        [Fact]
+        public void SetDesiredAmplifierControl_AcceptsNeutral_WhenPermissionNotGranted()
+        {
+            var variables = new TrackApplicationVariables();
+            variables.MovementPermission = new MovementPermissionController(); // NotGranted
+
+            var accepted = variables.SetDesiredAmplifierControl(1, AmplifierSpeedMapper.NeutralPwm, false);
+
+            Assert.True(accepted);
+            Assert.True(variables.PendingWrites[1].TryConsumeHr0(out var hr0));
+            Assert.Equal(AmplifierSpeedMapper.NeutralPwm, hr0 & 0x03FF);
+        }
+
+        [Fact]
+        public void SetDesiredAmplifierControl_AcceptsNonNeutral_WhenPermissionGranted()
+        {
+            var variables = new TrackApplicationVariables();
+            var permission = new MovementPermissionController();
+            permission.Grant();
+            variables.MovementPermission = permission;
+
+            var accepted = variables.SetDesiredAmplifierControl(1, 400, false);
+
+            Assert.True(accepted);
+            Assert.True(variables.PendingWrites[1].TryConsumeHr0(out var hr0));
+            Assert.Equal(400, hr0 & 0x03FF);
+        }
+
+        [Fact]
+        public void SetDesiredAmplifierControl_WithdrawnPermission_RefusesNonNeutral()
+        {
+            var variables = new TrackApplicationVariables();
+            var permission = new MovementPermissionController();
+            permission.Grant();
+            permission.Withdraw();
+            variables.MovementPermission = permission;
+
+            var accepted = variables.SetDesiredAmplifierControl(1, 500, false);
+
+            Assert.False(accepted);
+            Assert.False(variables.PendingWrites.ContainsKey(1));
+        }
+
+        [Fact]
+        public void SetDesiredAmplifierControl_NullPermission_DoesNotGate()
+        {
+            // No permission set: the gate is disabled, preserving pre-gate behavior.
+            var variables = new TrackApplicationVariables();
+
+            Assert.True(variables.SetDesiredAmplifierControl(1, 500, false));
+        }
+
+        [Fact]
+        public void SetDesiredAmplifierControl_NonTrackAddress_ReturnsFalse()
+        {
+            var variables = new TrackApplicationVariables();
+            variables.MovementPermission = new MovementPermissionController();
+
+            Assert.False(variables.SetDesiredAmplifierControl(51, 500, false));
+            Assert.False(variables.PendingWrites.ContainsKey(51));
+        }
+
+        // -----------------------------------------------------------------
+        // HoldingReg isolation
+        // -----------------------------------------------------------------
+
+        [Fact]
+        public void HoldingReg_MutatingOneItem_DoesNotAffectAnother()
+        {
+            var variables = new TrackApplicationVariables();
+
+            var item1 = variables.trackAmpItems[1];
+            var item2 = variables.trackAmpItems[2];
+
+            item1.HoldingReg[0] = 0x0123;
+
+            Assert.Equal(0x0123, item1.HoldingReg[0]);
+            Assert.NotEqual(0x0123, item2.HoldingReg[0]);
+        }
     }
 }

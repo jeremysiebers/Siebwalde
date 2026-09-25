@@ -100,7 +100,8 @@ namespace SiebwaldeApp.Integration
         public static TrackControlHost FromConfiguration(
             Func<IReadOnlyDictionary<int, SwitchPosition>>? switchPositionProvider = null,
             Action<string>? log = null,
-            IControlTrace? controlTrace = null)
+            IControlTrace? controlTrace = null,
+            TrackAmplifierGroups? trackAmplifierGroups = null)
             => new(
                 Path.Combine(CoreConfiguration.LogDirectory, "locos.json"),
                 CoreConfiguration.BuildBlockTopology(),
@@ -108,7 +109,7 @@ namespace SiebwaldeApp.Integration
                 CoreConfiguration.BuildSwitchMap(),
                 switchPositionProvider: switchPositionProvider,
                 log: log,
-                trackAmplifierGroups: CoreConfiguration.BuildTrackAmplifierGroups(),
+                trackAmplifierGroups: trackAmplifierGroups ?? CoreConfiguration.BuildTrackAmplifierGroups(),
                 controlTrace: controlTrace);
 
         /// <inheritdoc />

@@ -24,14 +24,34 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         /// <summary>ModBus slave addresses that the simulated master detects.</summary>
         public IReadOnlyList<byte> DetectedSlaves { get; }
 
+        /// <summary>
+        /// Detected slave addresses whose <c>EXEC_MBUS_SLAVE_DATA_EXCH</c> write produces no
+        /// SLAVEINFO echo (their readback therefore goes stale). Empty by default.
+        /// </summary>
+        public IReadOnlyCollection<byte> DroppedEchoSlaves { get; }
+
+        /// <summary>
+        /// Per-slave override for the HoldingReg0 (PWM command) value reported in a SLAVEINFO
+        /// readback, used to model "commanded neutral but observed non-neutral". Empty by default.
+        /// </summary>
+        public IReadOnlyDictionary<byte, ushort> Hr0ReadbackOverrides { get; }
+
         public TrackSimulatorConfig(
             ushort firmwareChecksum = DefaultFirmwareChecksum,
-            IReadOnlyList<byte>? detectedSlaves = null)
+            IReadOnlyList<byte>? detectedSlaves = null,
+            IReadOnlyCollection<byte>? droppedEchoSlaves = null,
+            IReadOnlyDictionary<byte, ushort>? hr0ReadbackOverrides = null)
         {
             FirmwareChecksum = firmwareChecksum;
             DetectedSlaves = detectedSlaves is null
                 ? DefaultDetectedSlaves
                 : new List<byte>(detectedSlaves);
+            DroppedEchoSlaves = droppedEchoSlaves is null
+                ? Array.Empty<byte>()
+                : new List<byte>(droppedEchoSlaves);
+            Hr0ReadbackOverrides = hr0ReadbackOverrides is null
+                ? new Dictionary<byte, ushort>()
+                : new Dictionary<byte, ushort>(hr0ReadbackOverrides);
         }
     }
 
@@ -56,6 +76,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         private readonly TrackSimulatorConfig _config;
         private readonly Dictionary<byte, ushort[]> _registers = new();
         private readonly HashSet<byte> _detected = new();
+        private readonly HashSet<byte> _droppedEchoSlaves = new();
         private readonly List<byte> _sentCommands = new();
         private readonly object _sync = new();
 
@@ -72,6 +93,11 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
                 registers[FirmwareChecksumRegister] = _config.FirmwareChecksum;
                 _registers[slave] = registers;
                 _detected.Add(slave);
+            }
+
+            foreach (var slave in _config.DroppedEchoSlaves)
+            {
+                _droppedEchoSlaves.Add(slave);
             }
         }
 
@@ -321,6 +347,11 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
                 registers[registerIndex] = value;
             }
 
+            // A configured "dropped echo" slave still receives the write but produces no
+            // SLAVEINFO readback, so the control path's copy of that slave goes stale.
+            if (_droppedEchoSlaves.Contains(slave))
+                return;
+
             writer.TryWrite(BuildSlaveInfoFrame(slave));
         }
 
@@ -332,14 +363,22 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
             => new byte[] { Header, sender, taskCommand, taskState, 0x00 };
 
         private byte[] BuildSlaveInfoFrame(byte slave)
-            => BuildSlaveInfoFrame(slave, _detected.Contains(slave) ? (byte)1 : (byte)0, GetOrCreateRegisters(slave));
+        {
+            var detected = _detected.Contains(slave) ? (byte)1 : (byte)0;
+            var registers = GetOrCreateRegisters(slave);
+            ushort? pwmOverride = _config.Hr0ReadbackOverrides.TryGetValue(slave, out var overrideValue)
+                ? overrideValue
+                : (ushort?)null;
+
+            return BuildSlaveInfoFrame(slave, detected, registers, pwmOverride);
+        }
 
         /// <summary>
         /// Exact 41-byte SLAVEINFO frame layout:
         /// <c>[0xAA, 0xFF, 0xAA, slave, detected, 0x00, HR0..HR11 LE, mbReceiveCounter LE,
         /// mbSentCounter LE, mbCommError LE(u32), mbExceptionCode, spiCommErrorCounter, 0x55]</c>.
         /// </summary>
-        private static byte[] BuildSlaveInfoFrame(byte slave, byte detected, ushort[] registers)
+        private static byte[] BuildSlaveInfoFrame(byte slave, byte detected, ushort[] registers, ushort? pwmOverride = null)
         {
             var frame = new byte[41];
 
@@ -352,8 +391,12 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
 
             for (int i = 0; i < HoldingRegisterCount; i++)
             {
-                frame[6 + i * 2] = (byte)(registers[i] & 0xFF);
-                frame[7 + i * 2] = (byte)((registers[i] >> 8) & 0xFF);
+                ushort value = (i == TrackAmplifierRegisters.PwmCommand && pwmOverride is not null)
+                    ? pwmOverride.Value
+                    : registers[i];
+
+                frame[6 + i * 2] = (byte)(value & 0xFF);
+                frame[7 + i * 2] = (byte)((value >> 8) & 0xFF);
             }
 
             // mbReceiveCounter (ushort LE) at 30..31

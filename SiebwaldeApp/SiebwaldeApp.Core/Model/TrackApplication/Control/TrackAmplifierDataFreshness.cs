@@ -62,5 +62,9 @@ namespace SiebwaldeApp.Core
             => amplifier is not null &&
                amplifier.SlaveDetected != 0 &&
                IsFresh(amplifier, now, staleAfter);
+
+        /// <summary>True when the amplifier is detected <b>and</b> its data is fresh as of now.</summary>
+        public static bool IsCurrentData(TrackAmplifierItem? amplifier)
+            => IsCurrentData(amplifier, DateTimeOffset.UtcNow, DefaultStaleAfter);
     }
 }

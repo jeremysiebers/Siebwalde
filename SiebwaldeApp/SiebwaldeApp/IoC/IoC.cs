@@ -82,17 +82,23 @@ namespace SiebwaldeApp
                 CoreConfiguration.LogDirectory,
                 "SiebwaldeApp");
 
+            // The operational amplifier grouping is built once and shared by the ECoS host (which
+            // uses it to classify the physical amplifiers) and the runtime coordinator (which uses
+            // it as the observed-neutral domain), so both always agree on the domain.
+            var amplifierGroups = CoreConfiguration.BuildTrackAmplifierGroups();
+
             // Bind the ECoS host (the server Koploper connects to on port 15471). Its
             // composition lives in the Integration layer; here we only create it from
             // configuration and hand it to the runtime coordinator.
             var ecosHost = TrackControlHost.FromConfiguration(
                 log: message => SiebwaldeApp.Core.IoC.Logger.Log(message, "EcosHost"),
-                controlTrace: controlTrace);
+                controlTrace: controlTrace,
+                trackAmplifierGroups: amplifierGroups);
             Kernel.Bind<IEcosHostService>().ToConstant(ecosHost);
 
             // The single runtime coordinator owns composition + lifetime of the track-control
             // runtime (Core track part + ECoS host) and exposes the lifecycle to WPF.
-            var runtime = new TrackApplicationRuntimeHost(ecosHost, controlTrace);
+            var runtime = new TrackApplicationRuntimeHost(ecosHost, controlTrace, amplifierGroups: amplifierGroups);
             Kernel.Bind<ITrackApplicationRuntime>().ToConstant(runtime);
 
             // Bind to a single instance of Siebwalde Application Model

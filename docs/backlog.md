@@ -315,4 +315,11 @@ The Product Owner has since issued a full assignment for this system. See the du
 | WPF runtime surface not runtime-tested. | The init-page Start/Stop/Restart surface and `App.OnExit` graceful stop are build-verified (V1) only; the WPF app was not launched. | Manual/runtime smoke test of the WPF lifecycle surface (start/stop/restart buttons, state display, failure display). |
 | Stop/telemetry retention policy. | After a stop the runtime nulls `TrackApplicationVariables`, so the amplifier page clears (no "last known state" shown). Retaining last-known state as "stale" would be a product decision. | Product Owner decides whether to retain/display last-known amplifier state after stop. |
 
+### Recovery & Maintenance — observed-neutral increment follow-ups (deferred)
+
+| Item | Evidence | Suggested acceptance criteria |
+| --- | --- | --- |
+| V3 integration test of the movement gate through a real `TrackControlHost`. | The gate + ECoS `SAFETY_INTERLOCK` surfacing is proven at unit level (`ControlSafetyInterlockBackendTests`, `TrackAmplifierHardwareBackendTests`) and end-to-end via the manual `SetAmplifierControl` funnel; a full `SetLocoSpeed` → `EXEC_MBUS_SLAVE_DATA_EXCH` → `SimpleEcosBackend` `END 8 (SAFETY_INTERLOCK)` run through a real `TrackControlHost` + `DeterministicTrackTransport` is not yet executed. | A software-only integration test drives `SetLocoSpeed` through the real host and asserts the ECoS refusal + the 108 write. |
+| Empty safety domain is fail-closed (movement blocked). | `TrackAmplifierGroups.AllConfigured` is empty with the production default config, so the observed-neutral gate now keeps movement blocked with a fault until the amplifier group/domain config is populated. This is the safe consequence of open Product Owner decision 1 (group/domain). | Product Owner configures the amplifier groups; optionally a dedicated "no safety domain" operator surface. |
+
 

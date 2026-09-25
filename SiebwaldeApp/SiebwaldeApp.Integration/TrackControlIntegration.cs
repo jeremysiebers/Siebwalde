@@ -84,10 +84,17 @@ namespace SiebwaldeApp.Integration
                     : new SwitchTranslatingHardwareBackend(RealBackend, switchController, log);
 
                 // Movement commands pass through the safety interlock so a latched fault cannot
-                // be bypassed by a later command from Koploper.
+                // be bypassed by a later command from Koploper. It also enforces the shared
+                // movement-permission gate (observed neutral) so a non-neutral movement while
+                // permission is not granted is reported as a safety interlock, not a silent OK.
                 if (safetyGuard is not null && diagnostics is not null)
                 {
-                    hardware = new ControlSafetyInterlockBackend(hardware, safetyGuard, diagnostics, log);
+                    hardware = new ControlSafetyInterlockBackend(
+                        hardware,
+                        safetyGuard,
+                        diagnostics,
+                        log,
+                        movementPermission: variables.MovementPermission);
                 }
 
                 EcosBackend = new SimpleEcosBackend(hardware, locoRepository, blockPositionProvider, controlTrace);
