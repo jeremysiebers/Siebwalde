@@ -18,6 +18,7 @@ namespace SiebwaldeApp.Core.Tests
     /// write loop on top of the software-only <see cref="DeterministicTrackTransport"/>, with a fake
     /// <see cref="IEcosHostService"/> so no port (15471) or Koploper dial (5700) is involved.
     /// </summary>
+    [Collection("RealModeEndToEnd")]
     public class DeterministicTrackTransportEndToEndTests
     {
         private sealed class FakeEcosHostService : IEcosHostService

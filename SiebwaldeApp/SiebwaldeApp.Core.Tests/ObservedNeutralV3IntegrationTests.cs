@@ -35,6 +35,7 @@ namespace SiebwaldeApp.Core.Tests
     /// Software-only: the simulated HR0 readback is the PIC18 holding-register echo, NOT applied
     /// physical PWM. No claim about physical neutral or physical movement is made here.
     /// </summary>
+    [Collection("RealModeEndToEnd")]
     public class ObservedNeutralV3IntegrationTests
     {
         private static BlockTopology Topology => BlockTopology.Parse("amps: 1:1,2:2 ; routes: 1>2,2>1");
