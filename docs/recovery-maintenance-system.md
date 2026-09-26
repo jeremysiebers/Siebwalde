@@ -285,3 +285,79 @@ Increment 1 introduced the in-process, independently start/stop/restartable trac
 - **Decision 2 (observed-vs-commanded bar) — REQUIRED.** Confirm the increment may build the observation logic against the **simulated readback** (fresh HR0 readback == 399), establishing "observed" at the C# readback level, while the physical-fidelity question (does real readback reflect physical PWM) stays V4. Recommendation: yes — this is the natural software-first split of the already-stated "neutral must ultimately be observed" direction.
 - **Decision 1 (amplifier group/domain) — REQUIRED (or a scoped confirmation of option b).** Confirm "all configured legitimate track amplifiers (`1..50`) as one restart-safety domain" for this increment, deferring `MainRailway`/`MountainRailway`/`Spare` semantics. Recommendation: option (b).
 - **Decision 5 (stop semantics while moving) — RECOMMENDED confirm.** Confirm neutral-on-stop (safe default) is acceptable even while Koploper is driving. Recommendation: option (a), via the existing ECoS stop/power-off path.
+
+---
+
+## 9. V4 physical-neutral validation preparation (analysis, 2026-09-25)
+
+Source-verified analysis of the full HR0/PWM/readback path and the V4 physical-neutral test matrix. No physical test or firmware change was performed.
+
+### 9.1 Headline — a firmware blocker precedes any physical validation
+
+The committed PIC18 firmware (`TrackAmplifier4.X`) is **mid-refactor and does not execute the HR0→PWM apply path**. In `main.c` the runtime loop calls `AmplifierPeriodicTasks()` → `CheckModbusTimeout()`, `Ramp_Update()`, `ControlCore_Update()` — none of which has a definition in the committed tree; `runtime_command.comms_lost` references an undefined symbol; `REGULATORxUPDATE()` (the only function that translates HR0 into a PWM3 duty) is only in a commented-out block; and `modbushooks.c/.h` (defining `OnHoldingRegisterWrite` and `last_modbus_activity_tick`, both referenced by tracked code) are **untracked**. There is also an `Update_AmplifierTicks` `uint8_t` vs `uint32_t` declaration mismatch. The `dist/*/production/*.lst` artifacts are from an **older** `main.c` that still called `REGULATORxUPDATE()`. **The committed source does not build cleanly and does not match the shipped artifact.** Consequence: "what 399 physically does" cannot be fully proven from the committed firmware, and any V4 test must first pin down which firmware image is actually flashed.
+
+### 9.2 HR0 data path (what the value means at each hop)
+
+| Hop | Where | Value | Meaning |
+|---|---|---|---|
+| C# write | `TrackApplicationVariables.BuildHr0Value` | PWM bits 0..9 + EMO bit 15 | **Requested** target (direction/brake/stop bits are NOT written by C#) |
+| Queue | `PendingWrites` / `TryConsumeHr0` | same | **Commanded** |
+| PIC32 → PIC18 | `slavehandler.c` FC16 write | same bytes | **Transmitted** (byte-transparent; the master does not reinterpret HR0) |
+| PIC18 | `PetitHoldingRegisters[HR_PWM_COMMAND].ActValue` | same value | **Stored command** (echoable) |
+| PWM3 (intended) | `regulator.c REGULATORxUPDATE` `duty = cmd & 0x03FF` | 0→1 clamp, `PWM3_LoadDutyValue` | **Applied** duty (dead code in committed tree) |
+| SLAVEINFO → C# | `TrackCommClientAsync.HandleNewData` `HoldingReg[0]` | `PetitHoldingRegisters[0]` | **Echo of stored command**, NOT applied duty, NOT measurement |
+
+- The master refreshes `HoldingReg[0]` only via its cyclic FC03 read (`slavehandler.c` MESSAGE1 reads HOLDINGREG0..1), not the write echo, so there is an inherent ≥1-poll-cycle lag.
+- There are **no input registers** (`NUMBER_OF_INPUT_PETITREGISTERS = 0`); the `MODBUS_TRACK_AMPLIFIER_MAPPING.md` v1.0 `InputReg5 CURRENT_PWM`/`InputReg6 TARGET_PWM` describe an **unimplemented** newer mapping. Read-only telemetry lives in HoldingReg2/4/5/6 today.
+- `REGULATORxINIT` (the only enabling PWM load that runs) sets duty 399 + HR0 399; `LM_BRAKE` is asserted at boot (`main.c:56`) and never cleared in the committed tree.
+
+### 9.3 What 399 physically means (source-derived, not physically confirmed)
+
+- PWM: `PR2 = 199` (10-bit), duty ratio = `duty / (4·(PR2+1))` = `399/800` = **49.875% ≈ 50%**. 400 = 50%, 799 = 99.875%, 1 = 0.125%. Dual-sided PWM with neutral at the midpoint — **50% duty ≈ zero net DC ≈ motor stopped** (design intent; electrical confirmation is physical).
+- Frequency is ambiguous (T2CKPS comment "1:4" vs `T2CON=0xA0`) — affects period, not the ~50% duty ratio.
+- Pin naming is misleading: PWM3 hardware output is on **RC6** (aliased "LM_DIR"); "LM_PWM" is RC4 (GPIO); "LM_BRAKE" is RC5. `LM_BRAKE=1` is the brake/output-stop signal.
+- EMO (bit 15) → `LM_BRAKE=true` + `LED_ERR=true` (skip PWM). Direction (bit 10) and brake (bit 11) are defined but **unused**; STOP (bit 12) is not in firmware.
+
+### 9.4 The four non-equivalent claims (boundary)
+
+1. **Commanded neutral** — HR0=399 accepted at the write queue (C# trace `[WRITE] HR0=0x018F`).
+2. **Protocol-observed neutral** — a fresh SLAVEINFO reports `HoldingReg[0] & 0x03FF == 399` (C# `IsNeutralObserved`). **This is still a command echo, not applied state.**
+3. **Physical PWM/output neutral** — scope: PWM ~50% duty; voltmeter: ~0 V average. **Only physical measurement.**
+4. **Motor actually stopped** — shaft/wheels at rest. **Only physical observation.**
+
+### 9.5 Scenarios where fresh HR0 == 399 but physical output is NOT neutral
+
+- **S1 (real):** apply path absent — writing HR0=399 changes only the stored register; nothing drives PWM3 after boot.
+- **S2 (real):** master echoes a stale register for ≥1 poll cycle.
+- **S5 (real):** `LM_BRAKE` stays asserted (boot) regardless of HR0 — a "brake held" state.
+- **S4 (real code, if apply ran):** EMO bit + brake latch passes `& 0x03FF == 399` but brakes and never loads 399.
+- **S10 (real):** amplifier reset returns HR0=399 while a stale master image may still show non-neutral (or vice versa).
+- Hypothetical: ramping (target 399 vs still-decelerating), PWM clock glitch, H-bridge fault (no fault handler), master-reset neutral broadcast (master does not broadcast neutral on reset).
+
+### 9.6 V4 test matrix (minimal physical action; scope on RC6/RC5/RC4 + voltmeter on motor)
+
+- **T0 (software, V3):** `SetLocoSpeed` → `EXEC_MBUS_SLAVE_DATA_EXCH(108)` → `SimpleEcosBackend` `END 8 (SAFETY_INTERLOCK)` through a real `TrackControlHost` + `DeterministicTrackTransport`. Proves Commanded/Protocol-observed neutral (software half only).
+- **T1 (physical):** moving/non-neutral → command 399 → observed 399 → scope ~50% duty + motor stops.
+- **T2 (physical):** runtime Stop during active non-neutral → neutral reached, no overshoot.
+- **T3 (physical):** Restart from active → permission only after observed neutral; no motion.
+- **T4 (physical/protocol):** stale/lost SLAVEINFO during neutralization → C# reports failure (not silent success), latch holds.
+- **T5 (physical):** amplifier reset → PWM/HR0 → 399 on reset; no runaway.
+- **T6 (physical):** controller reset → observe whether slave holds last PWM or goes neutral (currently unknown; document truth).
+- **T7 (physical):** brake/EMO/direction combos → EMO asserts brake line; DIR/BRAKE bits inert.
+
+Each physical test: one amplifier at a time, manual stop reachable, `399` + power-off recovery, one controlling session.
+
+### 9.7 Pre-V4 instrumentation (firmware; FIRMWARE_FLASH-gated)
+
+1. **Fix the firmware build** (blocking): define/implement or stub `CheckModbusTimeout`, `Ramp_Update`, `ControlCore_Update`, `runtime_command`; **commit/recover `modbushooks.c/.h`**; resolve the `Update_AmplifierTicks` type mismatch. Without this the flashed image cannot be trusted.
+2. **Expose applied PWM** (a read-only register carrying the duty actually loaded into PWM3), so the SLAVEINFO frame can distinguish command-vs-applied.
+3. **Expose brake/enable line state** (LM_BRAKE/LM_PWM/LM_DIR), addressing scenario S5.
+
+### 9.8 V3 prerequisite recommendation
+
+**Yes, do the V3 integration test first.** It is small (a bounded test addition, no production change), software-provable with the existing `DeterministicTrackTransport`, and it closes the software/protocol half (Commanded + Protocol-observed neutral), giving the V4 matrix a deterministic software baseline. It proves nothing physical and does not reduce the V4 requirement.
+
+### 9.9 PASS/FAIL for "is protocol-observed HR0==399 a sufficient basis for physical restart safety?"
+
+- **PASS only if** V4 demonstrates, on the actual flashed image, that every §9.5 scenario (especially S1/S5/S10) cannot occur — i.e. HR0==399 ⇒ applied 399 ⇒ physical neutral ⇒ stopped.
+- **FAIL (current default):** because (i) the committed firmware's apply path is absent, (ii) the brake latch is asserted and never released, and (iii) the protocol cannot distinguish command-vs-applied. **Until the firmware build is fixed and V4 confirms applied-neutral tracks the echo, protocol-observed HR0==399 must NOT be treated as a sufficient basis for physical restart safety.**
