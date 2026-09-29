@@ -88,6 +88,16 @@ The UI path starts from `SiebwaldeInitPageViewModel.InitFiddleYardController`, w
 
 `EcosEmulatorServer.Start` starts a `TcpListener` on `IPAddress.Loopback`. `AcceptLoopAsync` accepts clients and starts `HandleClientAsync` for each. Commands are accumulated until `)`, parsed by `SimpleEcosCommandParser.Parse`, and delegated to `SimpleEcosBackend.HandleAsync`.
 
+### Runtime modes (Real / Simulator / FullSimulation)
+
+`TrackControlMode` selects how the runtime coordinator (`TrackApplicationRuntimeHost`) composes the track part and which ECoS backend the host (`TrackControlHost`) drives:
+
+- `Real` — the full track-control chain (UDP transport → comm → 9-step init → `TrackControlMain` → movement-safety gate) with the real `TrackAmplifierHardwareBackend`; occupancy comes from the amplifier SLAVEINFO data path.
+- `FullSimulation` — the SAME full track-control chain, with only the transport swapped for `DeterministicTrackTransport` (the hardware/protocol-boundary replacement). It exposes a narrow `ISimulatedTrackIo` surface (occupancy/status injection) and an opt-in periodic SLAVEINFO heartbeat. No second control implementation.
+- `Simulator` — the lightweight ECoS-only `TrackSimulatorBackend` (a train-movement simulator around an oval), with no track part and no `TrackControlMain`.
+
+`TrackControlModeExtensions.IsFullTrackChain()` (Core) is the single predicate marking `Real` + `FullSimulation` as the full chain, used consistently by both Integration hosts.
+
 ## Major Workflows
 
 ### Track Initialization

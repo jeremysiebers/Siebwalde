@@ -347,5 +347,16 @@ are approved for implementation. See `docs/firmware-toolchain-readiness.md`.
 | Harness robustness hardening (optional, from F1 R2 review). | `tools/firmware/build-firmware.ps1` reads stdout to completion before stderr (latent deadlock on very noisy tools); `-OutputDir` is caller-controlled with no guard against a path inside the tracked tree. Neither affected the observed isolation. | Read stderr asynchronously, and reject/refuse an `-OutputDir` that resolves inside the repository. |
 | Firmware design-doc status banner (optional, from F1 R2 review). | The refactor design docs (`AGENT_TRACK_AMPLIFIER*.md`, `TRACK_AMPLIFIER_STATE_MACHINE.md`, `MODBUS_TRACK_AMPLIFIER_MAPPING.md`) carry no status banner; the "deferred/not-implemented" warning lives only in `docs/firmware-toolchain-readiness.md` §13.2. | Add a one-line status banner to each design doc marking it as deferred/not-implemented, so a direct reader cannot mistake target design for current behaviour. |
 
+## Firmware protocol findings (Full Software Simulation, 2026-09-29)
+
+Recorded during the Full Software Simulation increment (software-only); concrete findings for the firmware workstream, not C# changes. No firmware was modified. See also `docs/firmware-toolchain-readiness.md`.
+
+| Finding | Evidence | Relevance for firmware |
+| --- | --- | --- |
+| The real PIC32 master refreshes the C# holding-register view cyclically (FC03 polling), not only on write. | `TrackCommClientAsync` re-stamps amplifier freshness only on parsed SLAVEINFO frames; without periodic frames the data goes stale after `TrackAmplifierDataFreshness.DefaultStaleAfter` (2 s). The deterministic transport therefore gained an opt-in periodic SLAVEINFO heartbeat to model this. | Confirms the SLAVEINFO/telemetry frame is emitted cyclically in real operation (master polling), so occupancy/status updates are periodic, not edge-triggered. |
+| `HoldingReg2` bit 10 (`TrackAmplifierRegisters.OccupiedBit`) is the authoritative occupancy bit. | `TrackAmplifierOccupancyProvider` + `TrackAmplifierOccupancyBridge` read exactly this bit (fresh) to drive Koploper ECoS sensor events. The simulator now models it, enabling software-only occupancy/feedback testing. | No change needed; documents that occupancy telemetry already lives in HR2 bit 10 and is consumed by C#. |
+| SLAVEINFO `HoldingReg[0]` is a command echo, not applied PWM. | Confirmed by the deterministic transport (writes HR0 then echoes it) and by `docs/firmware-toolchain-readiness.md` (no `CURRENT_PWM`/`TARGET_PWM` register exists). The simulator deliberately does NOT model applied PWM. | The command-vs-applied distinction remains a firmware/hardware question; the simulator must never be cited as physical proof (see the "Expose applied PWM in readback" item above). |
+| No new protocol deviation found; simulator checksum `0x251F` matches the restored `dist/Offset` HEX. | `TrackSimulatorConfig.DefaultFirmwareChecksum = 0x251F` equals the F1-restored artifact checksum. | Confirms the simulator's firmware-checksum assumption stays aligned with the restored `928ea7c` baseline. |
+
 
 
