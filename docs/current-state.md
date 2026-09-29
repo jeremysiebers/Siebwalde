@@ -18,7 +18,7 @@ Siebwalde is the control application for a model railway. Koploper owns driving 
 ## Current repository baseline
 
 - Repository root: `C:\Localdata\Siebwalde` (Git; `origin https://github.com/jeremysiebers/Siebwalde.git`).
-- Current `master` HEAD: `33a231a01b5aff4aa4a99e162b69d723a778d31b` (equal to `origin/master`). This is a normal merge commit for PR #10 on top of `a41302a` (PR #9, Recovery & Maintenance Increment 1); earlier baselines: `5fb7515` (PR #8), `0cf6347` (PR #7), `ec990bc` (PR #6), `a6b3467` (PR #5).
+- Current `master` HEAD: `949a7f17a3b94caa956529ca33361454159be7db` (equal to `origin/master`). This is the normal merge commit for PR #12 (`feature/v3-software-integration-validation`) on top of `c5f626a` (PR #11, `feature/observed-neutral-restart-safety`), itself on `33a231a` (PR #10); earlier baselines: `33a231a` (PR #10), `5fb7515` (PR #8), `0cf6347` (PR #7), `ec990bc` (PR #6), `a6b3467` (PR #5). (Corrected 2026-09-29: an earlier snapshot still listed `33a231a` as HEAD.)
 - The revision above is a **verified baseline reference**, not a permanently self-updating truth claim; always trust the actual Git state.
 - Main solution: `SiebwaldeApp/SiebwaldeApp.sln` (UI, Core, EcosEmu, Integration, Core.Tests). Separate hosts: `SiebwaldeApp.Core.Host.sln`, `SiebwaldeApp.EcosEmu.sln`. Validation harness: `SiebwaldeApp/SiebwaldeApp.StopReachabilityHarness` (not in the solution).
 - Immutable evidence branch retained: `feature/safety-stop-reachability` @ `825533e` (historical physical-validation provenance). Reviewer-facing branch: `feature/safety-stop-reachability-clean` @ `dab43ab`.
@@ -62,10 +62,12 @@ Only currently material items; see `docs/backlog.md` for the full list.
 
 - The **Recovery & Maintenance System** is the active direction (see `docs/recovery-maintenance-system.md`). Completed: Increment 1 (controllable runtime from WPF, PR #9) and the software-only simulator transport (PR #10). Next proposed increment: "Observed-neutral restart/stop safety — software half" (gated by Product Owner decisions 1, 2 and 5 in `docs/recovery-maintenance-system.md` §5/§8).
 - The physical test oval autonomous running remains a separate, not-yet-started product direction.
+- **Firmware baseline restored (F1, 2026-09-29, branch `docs/firmware-toolchain-readiness`; not yet merged):** the `TrackAmplifier4.X` source was restored from the incomplete `b06f466` safety refactor to the last working `928ea7c` baseline (commit `1a94a90`; the refactor's history and design docs are preserved). A reproducible out-of-tree build harness (`tools/firmware/build-firmware.ps1`) builds the PIC18/PIC32 projects with pinned toolchains; the `Offset` configuration reproduces the committed `dist/Offset` HEX **byte-identically** with C# checksum `0x251F`; `TrackBackplane2.X`, the bootloader `No_Configurations` and `TrackController5` build cleanly. No hardware or flashing; the static bootloader is unchanged. See `docs/firmware-toolchain-readiness.md` §13.
 
 ## Open Product Owner decisions
 
 - Recovery & Maintenance: see `docs/recovery-maintenance-system.md` §5 (decisions 1–5). Decisions **1** (amplifier group/domain), **2** (observed-vs-commanded neutral bar) and **5** (stop semantics while moving) gate the next increment (§8).
+- Firmware (partly resolved 2026-09-29): the baseline-source-set decision is resolved (return to `928ea7c`). Remaining open items: toolchain/DFP pinning, bootloader `With_Configurations` device-support, firmware testability, and the Build-ID register mapping. See `docs/firmware-toolchain-readiness.md` §11 and §13.10. Any physical flashing requires `LIVE_HARDWARE` + `FIRMWARE_FLASH`.
 
 ## Source-of-truth note
 
