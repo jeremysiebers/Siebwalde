@@ -594,7 +594,11 @@ All builds via `tools/firmware/build-firmware.ps1` in out-of-tree copies; no har
 | `TrackBackplane2.X` / `default` | XC8 2.31 | v6.20 | PASS | 10 053 B | `506C8EDC249AA498` |
 | `TrackBackplane2.X` / `Proto_Backplane` | XC8 2.31 | v6.20 | PASS | 9 877 B | `AD819B079BEC103D` |
 | `TrackAmplifierBootLoader.X` / `No_Configurations` | XC8 2.40 + DFP 1.7.134 | v6.05 | PASS | 5 727 B | `161AE3210EAE5222` |
-| `TrackController5.X` / `Production` | XC32 2.50 + DFP 1.4.168 + Harmony v2_06 | v6.20 | PASS (0 errors/0 warnings) | 787 836 B | `C1672EA83F91A177` |
+| `TrackController5.X` / `Production` | XC32 2.50 + DFP 1.4.168 + Harmony v2_06 | v6.20 | PASS (0 errors/0 warnings) | 787 836 B | `C1672EA83F91A177` (single run; not byte-reproducible — see §13.9) |
+
+`-Project All` builds the **default** configuration of each project only; the
+`Proto_Backplane` row was produced explicitly with
+`-Project TrackBackplane2 -Configuration Proto_Backplane`.
 
 Program usage (executed): TA4 Offset 6358/30720 B (20.7 %); TB default 3519/32768 B (10.7 %);
 bootloader 1980/2048 B (96.7 %). Bootloader `With_Configurations` remains out of scope for

@@ -243,7 +243,7 @@ Results, revision `1a94a90` (after the F1 baseline restore), via the harness:
 | Project / configuration | Toolchain | Result |
 | --- | --- | --- |
 | `TrackAmplifier4.X` — `Offset` | XC8 v2.31 + MPLAB X v6.20 | PASS; HEX byte-identical to the committed `dist/Offset` artifact; C# checksum `0x251F` |
-| `TrackBackplane2.X` — `default` / `Proto_Backplane` | XC8 v2.31 + MPLAB X v6.20 | PASS |
+| `TrackBackplane2.X` — `default` (and `Proto_Backplane` via `-Project TrackBackplane2 -Configuration Proto_Backplane`) | XC8 v2.31 + MPLAB X v6.20 | PASS |
 | `TrackAmplifierBootLoader.X` — `No_Configurations` | XC8 v2.40 + DFP 1.7.134 (MPLAB X v6.05) | PASS |
 | `TrackAmplifierBootLoader.X` — `With_Configurations` | XC8 v3.10 + DFP 1.0.48 | out of scope for F1 (needs a DFP with XC8 device support) |
 | `TrackController5` — `Production` | XC32 v2.50 + DFP 1.4.168 (v6.20) + Harmony v2_06 | PASS (0 errors / 0 warnings); differs run-to-run only in an embedded `__TIME__` string (`src/controller.c:133`) |
