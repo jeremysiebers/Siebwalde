@@ -31,10 +31,10 @@ The product owner confirmed component roles and priorities on 2026-09-11 (see `d
 
 | Area | Status | Classification | Remaining gaps |
 | --- | --- | --- | --- |
-| `TrackAmplifier4.X/` | Not started (inventoried) | Track amplifier firmware with its own agent docs. | Deep firmware analysis; align with its own `*.md` guidance. |
-| `TrackAmplifierBootLoader.X/` | Not started (inventoried) | Bootloader firmware and Python tooling. | Deep analysis. |
-| `TrackBackplane2.X/` | Not started (inventoried) | Backplane slave firmware. | Deep analysis. |
-| `TrackController5/` | Not started (inventoried) | PIC32MZ controller firmware, Python tooling, vendor PDFs. | Deep analysis. |
+| `TrackAmplifier4.X/` | Investigated (build/toolchain + baseline) | Track amplifier firmware with its own agent docs; tracks XC8 2.31 / PIC18F25K40. HEAD does not compile (incomplete `b06f466` refactor); the pre-refactor `928ea7c` source builds and links cleanly. Details in `docs/firmware-toolchain-readiness.md`. | Control Core/ramp/watchdog refactor completion; baseline source-set decision; on-target validation. |
+| `TrackAmplifierBootLoader.X/` | Investigated (build/toolchain) | Bootloader firmware and Python tooling; `No_Configurations` builds with XC8 2.40 + DFP 1.7.134 (MPLAB X v6.05). Details in `docs/firmware-toolchain-readiness.md`. | `With_Configurations` needs a DFP with XC8 device support. |
+| `TrackBackplane2.X/` | Investigated (build/toolchain) | Backplane slave firmware; both `default` and `Proto_Backplane` configurations build cleanly. Details in `docs/firmware-toolchain-readiness.md`. | None known for build. |
+| `TrackController5/` | Investigated (build/toolchain) | PIC32MZ2048EFH144 controller firmware; builds cleanly (0 errors/0 warnings) with MPLAB X v6.20 + XC32 v2.50 + DFP 1.4.168 + Harmony v2_06. Details in `docs/firmware-toolchain-readiness.md`. | Host-side protocol tests and firmware logic tests still to be added. |
 | `ServoController.X/` | Not started (inventoried) | Servo driving firmware. | Deep analysis. |
 | `FiddleYard/` | Not started (inventoried) | PIC18F97J60 ethernet controller firmware. | Deep analysis; relates to core `FiddleYardApplication`. |
 | `Faller_Car_ucontroller2.X/`, `Faller_Car_uControllerBootLoader.X/` | Not started (inventoried) | Faller Car System firmware and bootloader. | Deep analysis. |
