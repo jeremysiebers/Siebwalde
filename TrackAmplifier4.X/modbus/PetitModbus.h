@@ -58,8 +58,6 @@ uint16_t                ProcessPetitModbus(void);
 extern volatile unsigned int LED_TX;
 extern volatile unsigned int LED_RX;
 
-void OnHoldingRegisterWrite(uint16_t addr, uint16_t value, bool broadcast);
-
 /****************************CRC stuff*****************************************/
 
 //#define CRC_CALC                                                              // When uncommented a CRC is calculated by the processor
