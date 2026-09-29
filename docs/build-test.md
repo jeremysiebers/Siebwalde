@@ -217,32 +217,36 @@ Coverage: `TrackApplicationVariables` (PWM clamp, EmoStop bit, slave 0, pending-
 
 ## Firmware Builds (PIC18 / PIC32) — 2026-09-29
 
-Executed during the `docs/firmware-toolchain-readiness` ANALYSIS increment. All builds
-were run in **temporary copies** under `C:\Users\jerem\AppData\Local\Temp\opencode\`;
-the repository (including the tracked `dist/*.hex`) was left unchanged. No hardware was
-touched. Full analysis in `docs/firmware-toolchain-readiness.md`.
-
-Generated MPLAB makefiles (`nbproject/Makefile-*.mk`) are **not committed**. Regenerate
-them first, then build:
+The reproducible firmware build harness is **`tools/firmware/build-firmware.ps1`** (with
+`tools/firmware/README.md`). It builds the MPLAB X projects from a clean out-of-tree copy
+with pinned toolchains, emits a per-revision manifest (git revision, configuration,
+compiler/DFP, SHA-256 and the C# flash checksum), and keeps all output under the git-ignored
+`build/`. It never builds in place, never touches `dist/` or git state, and never flashes or
+connects to hardware. Full analysis and the F1 outcome are in
+`docs/firmware-toolchain-readiness.md` (§13).
 
 ```powershell
-# Generate nbproject makefiles (use MPLAB X v6.05 for the bootloader; v6.20 for the rest)
-& "C:\Program Files\Microchip\MPLABX\v6.20\mplab_platform\bin\prjMakefilesGenerator.bat" "<project dir>"
-
-# Build (MPLAB X GNU make; NOT the winavr make that may be first on PATH)
-& "C:\Program Files\Microchip\MPLABX\v6.20\gnuBins\GnuWin32\bin\make.exe" -C "<project dir>" CONF=<configuration>
+# Build every project with its default configuration
+powershell -NoProfile -ExecutionPolicy Bypass -File tools\firmware\build-firmware.ps1 -Project All
+# Or one project
+powershell -NoProfile -ExecutionPolicy Bypass -File tools\firmware\build-firmware.ps1 -Project TrackAmplifier4 -Configuration Offset
 ```
 
-Results:
+The MPLAB `nbproject/Makefile-*.mk` files are **not committed**; the harness regenerates them
+in the temp copy. (Manual equivalent: run `prjMakefilesGenerator.bat` then the MPLAB X GNU
+make with `-f nbproject/Makefile-<CONF>.mk SUB=no .build-conf`; use MPLAB X v6.05 for the
+bootloader and v6.20 for the rest. The `make.exe` first on `PATH` is an unrelated winavr make
+and must not be used.)
+
+Results, revision `1a94a90` (after the F1 baseline restore), via the harness:
 
 | Project / configuration | Toolchain | Result |
 | --- | --- | --- |
-| `TrackBackplane2.X` — `default` / `Proto_Backplane` | XC8 (pinned) | PASS |
+| `TrackAmplifier4.X` — `Offset` | XC8 v2.31 + MPLAB X v6.20 | PASS; HEX byte-identical to the committed `dist/Offset` artifact; C# checksum `0x251F` |
+| `TrackBackplane2.X` — `default` / `Proto_Backplane` | XC8 v2.31 + MPLAB X v6.20 | PASS |
 | `TrackAmplifierBootLoader.X` — `No_Configurations` | XC8 v2.40 + DFP 1.7.134 (MPLAB X v6.05) | PASS |
-| `TrackAmplifierBootLoader.X` — `With_Configurations` | XC8 v3.10 + DFP 1.0.48 | FAIL (`(2103)` no device support; DFP lacks `xc8` folder) |
-| `TrackAmplifier4.X` — `Stand_Alone` / `Offset` / `Combined` (HEAD) | XC8 v2.31 | FAIL (incomplete refactor; first error `PetitModbus.h:61` `bool` under C90) |
-| `TrackAmplifier4.X` — `Stand_Alone` (pre-refactor `928ea7c` sources) | XC8 v2.31 + MPLAB X v6.20 | PASS (compiles + links; Program 4802/32768 B) |
-| `TrackController5` — `Production` | XC32 v2.50 + DFP 1.4.168 (v6.20) + Harmony v2_06 | PASS (0 errors / 0 warnings) |
+| `TrackAmplifierBootLoader.X` — `With_Configurations` | XC8 v3.10 + DFP 1.0.48 | out of scope for F1 (needs a DFP with XC8 device support) |
+| `TrackController5` — `Production` | XC32 v2.50 + DFP 1.4.168 (v6.20) + Harmony v2_06 | PASS (0 errors / 0 warnings); differs run-to-run only in an embedded `__TIME__` string (`src/controller.c:133`) |
 
 ## External Endpoints And Files
 

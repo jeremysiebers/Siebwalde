@@ -1,8 +1,10 @@
 # Firmware Development & Toolchain Readiness (PIC18 / PIC32)
 
-**Status:** ANALYSIS increment result. Documentation/analysis only. No firmware source,
-safety function, hardware or existing artifact was modified.
-**Increment:** `docs/firmware-toolchain-readiness`.
+**Status:** F1 increment (firmware baseline restore + build infrastructure) implemented on
+top of the initial ANALYSIS. The TrackAmplifier4.X source was restored to the last working
+pre-refactor baseline; no hardware or existing artifact was modified and the static
+bootloader is unchanged. See §13 for the F1 outcome.
+**Increment:** `docs/firmware-toolchain-readiness` (F1).
 **Working branch:** `docs/firmware-toolchain-readiness`.
 **Revision analysed:** `949a7f17a3b94caa956529ca33361454159be7db` (worktree
 `C:\Localdata\Siebwalde-Firmware`).
@@ -535,3 +537,145 @@ hashes/manifests. Record the executed evidence.
   `.../Initialization/Steps/FlashFwTrackamplifiersStep.cs`, `.../Services/PublicEnums.cs`,
   `.../Simulator/DeterministicTrackTransport.cs`
 - Commits: `928ea7c`, `b06f466`, `828c507`, HEAD `949a7f1`
+
+---
+
+## 13. F1 outcome — baseline restore and build evidence (implemented)
+
+This section records the implemented F1 increment (Product Owner decision: return to the
+last working TrackAmplifier4 firmware before the incomplete safety refactor; keep the
+refactor's history but do not continue it).
+
+### 13.1 Baseline revision selected
+
+- **Baseline = `928ea7cf6061737d26db56580c236347f0f746a8`** (`928ea7c`).
+- It is the **direct parent** of `b06f466` and the **last commit that touched
+  `TrackAmplifier4.X` before the refactor** (`git log 928ea7c..HEAD -- TrackAmplifier4.X`
+  returns only `b06f466`).
+- Verified, not assumed: this was confirmed before restoring.
+
+### 13.2 Files restored (commit `1a94a90`)
+
+`b06f466` changed exactly these five files under `TrackAmplifier4.X` (plus added design
+docs). All five were restored to the `928ea7c` blob via a normal `git checkout 928ea7c --`
+and committed as a **new** commit. No history rewrite, reset or force-push; the refactor
+commit and its design docs are preserved.
+
+| File | Refactor change reverted | Restored to |
+| --- | --- | --- |
+| `TrackAmplifier4.X/main.c` | tick helper + undefined Control-Core calls | working sequencer |
+| `TrackAmplifier4.X/modbus/PetitModbus.c` | 4 × `OnHoldingRegisterWrite` calls | baseline |
+| `TrackAmplifier4.X/modbus/PetitModbus.h` | `OnHoldingRegisterWrite` declaration | baseline |
+| `TrackAmplifier4.X/nbproject/configurations.xml` | 2 × `modbushooks.*` itemPath | baseline |
+| `TrackAmplifier4.X/MyConfig.mc3` | MCC config reshuffle | baseline |
+
+Not changed: `main.h`, `regulator.c/.h`, `processio.c/.h`, `mcc_generated_files/` (the
+refactor did not touch them, so they were already baseline). The static
+`TrackAmplifierBootLoader.X` project and the four added design docs (`AGENT_TRACK_AMPLIFIER*.md`,
+`TRACK_AMPLIFIER_STATE_MACHINE.md`, `MODBUS_TRACK_AMPLIFIER_MAPPING.md`) were left in place;
+those docs describe the **deferred, not-implemented** target design and must not be treated
+as current code behaviour.
+
+### 13.3 Functionally restored
+
+The working control path: main-loop sequencer `MEASURExBMF → REGULATORxUPDATE → ADCxIO`;
+HR0 (`HR_PWM_COMMAND`) setpoint + EMO handling; 399 neutral default at init; BEMF, analog
+telemetry (fuse voltage / H-bridge temperature / current) and occupancy/thermal status in
+`HR_FUSE_VOLTAGE`/`HR_HBRIDGE_TEMPERATURE`/`HR_HBRIDGE_CURRENT`/`HR_STATUS`; flash-checksum
+read + bootloader invoke via `RESET()`; 9th-bit Modbus addressing.
+
+### 13.4 Executed build matrix (revision `1a94a90`, 2026-09-29)
+
+All builds via `tools/firmware/build-firmware.ps1` in out-of-tree copies; no hardware.
+
+| Project / configuration | Toolchain | MPLAB X | Result | Artifact size | SHA-256 (first 16) |
+| --- | --- | --- | --- | --- | --- |
+| `TrackAmplifier4.X` / `Offset` | XC8 2.31 | v6.20 | PASS | 86 529 B | `B848EF040DBA538D` |
+| `TrackBackplane2.X` / `default` | XC8 2.31 | v6.20 | PASS | 10 053 B | `506C8EDC249AA498` |
+| `TrackBackplane2.X` / `Proto_Backplane` | XC8 2.31 | v6.20 | PASS | 9 877 B | `AD819B079BEC103D` |
+| `TrackAmplifierBootLoader.X` / `No_Configurations` | XC8 2.40 + DFP 1.7.134 | v6.05 | PASS | 5 727 B | `161AE3210EAE5222` |
+| `TrackController5.X` / `Production` | XC32 2.50 + DFP 1.4.168 + Harmony v2_06 | v6.20 | PASS (0 errors/0 warnings) | 787 836 B | `C1672EA83F91A177` |
+
+Program usage (executed): TA4 Offset 6358/30720 B (20.7 %); TB default 3519/32768 B (10.7 %);
+bootloader 1980/2048 B (96.7 %). Bootloader `With_Configurations` remains out of scope for
+F1 (see §11, decision 4) and does not block the Offset workflow.
+
+### 13.5 Generated Offset HEX vs the historical artifact
+
+**Byte-identical.** The freshly built `TrackAmplifier4.X` Offset HEX SHA-256 equals the
+committed historical `TrackAmplifier4.X/dist/Offset/production/TrackAmplifier4.X.production.hex`
+(`B848EF040DBA538D983EE92D96D84119AF922F686C7C879892E14323E1C1887D`, 86 529 bytes).
+This proves the committed Offset artifact is exactly reproducible from the restored
+`928ea7c` source with the pinned XC8 2.31 toolchain. It does **not** prove that the
+physically flashed amplifiers contain that image (no readback; see §10).
+
+### 13.6 C# firmware-check / checksum compatibility
+
+The harness computes the **same** checksum as `SiebwaldeApp.Core`
+(`TrackAmplifierBootloaderHelpers.Execute` with `PROGEMSIZE=0x8000`, `BOOTLOADEROFFSET=0x800`,
+`HEXROWWIDTH=16`, `JUMPSIZE=4`; 1920 rows; little-endian word sum skipping the final two
+bytes). For both the committed historical Offset HEX and the freshly built HEX the value is
+**`0x251F`**, equal to `TrackSimulatorConfig.DefaultFirmwareChecksum`. The existing C#
+firmware check therefore stays compatible: the host will compute the same checksum and
+correctly decide no re-flash is needed for an amplifier already carrying this image.
+
+### 13.7 Bootloader offsets and flash compatibility
+
+The restored Offset HEX contains **no data below `0x0800`**: lowest data address `0x000800`,
+0 records below the bootloader offset, application program region `0x0800..0x7FFF`
+(1922 records; config/ID records at the `0x200000`/`0x300000` extended regions). The Offset
+configuration was built with the bootloader sub-project suppressed (`SUB=no`), so the
+static bootloader was neither built nor modified.
+
+### 13.8 HR0 → PWM apply-path verification (source + link)
+
+Not a build-only claim. In the restored source:
+- `main.c:141` calls `REGULATORxINIT()`; the run loop `switch(Sequencer)` at `main.c:157`
+  calls `MEASURExBMF()` (`:159`), `REGULATORxUPDATE()` (`:166`) and `ADCxIO()` (`:173`).
+- `regulator.c:66` reads `PetitHoldingRegisters[HR_PWM_COMMAND].ActValue`; `:69` honours
+  `HR_PWM_EMO_BIT` (`LM_BRAKE_LAT = true; return`); `:78` `duty = cmd & HR_PWM_SETPOINT_MASK`;
+  `:81` clamps `duty == 0` to `1`; `:84` applies `PWM3_LoadDutyValue(duty)`.
+- `regulator.c:29,32` initialise the 399 neutral default.
+- Constants: `modbus/General.h:27` `HR_PWM_COMMAND 0u`, `:63` `HR_PWM_SETPOINT_MASK 0x03FFu`,
+  `:69` `HR_PWM_EMO_BIT (1u << 15)`.
+- Link proof from the build: the `.map` contains `_REGULATORxUPDATE` and
+  `_PWM3_LoadDutyValue`, and the `_REGULATORxUPDATE` call graph references
+  `_PWM3_LoadDutyValue`.
+
+### 13.9 Reproducibility
+
+- **PIC18** (TrackAmplifier4 Offset, TrackBackplane2, bootloader): byte-identical across
+  repeated runs.
+- **PIC32** (`TrackController5`): differs between runs in exactly one HEX record — an
+  embedded `__DATE__ " " __TIME__` string at `TrackController5/firmware/src/controller.c:133`.
+  This is a pre-existing source property (build-time string), not a harness defect; making
+  the PIC32 image byte-reproducible would require a firmware change and is out of F1 scope.
+
+### 13.10 Build-ID register mapping — proposal (no behaviour change)
+
+F1 only proposes; no firmware behaviour is changed. Constraints from the current map
+(`modbus/General.h`): HoldingReg0-11 are all assigned; input and diagnostic register counts
+are 0; the host consumes the 12 holding registers via the SLAVEINFO frame. Options:
+
+- **Option A (recommended, minimal):** reserve one currently-unused code point in the
+  existing holding map for a 16-bit firmware build id (for example a truncated Git SHA or a
+  monotonically increasing build number), exposed read-only, and document the exact packing.
+  This keeps the host frame layout unchanged.
+- **Option B:** implement the deferred Input-Register map from
+  `MODBUS_TRACK_AMPLIFIER_MAPPING.md` and expose a 32-bit build id there. This is a larger,
+  protocol-affecting change and belongs to a separate increment.
+
+Either option requires the Product Owner's register-map approval before implementation; a
+Git SHA cannot be stored only in the flash checksum word because that word is already the
+16-bit image checksum consumed by the C# check.
+
+### 13.11 What is needed before flashing new firmware
+
+1. Product Owner `LIVE_HARDWARE` **and** `FIRMWARE_FLASH` authority (non-transitive,
+   revision-bound; §8).
+2. Physical identity check of the currently flashed image (readback of `HR_SW_CHECKSUM`
+   and, if feasible, flash readback) — the flashed-image-vs-source question is otherwise
+   unproven.
+3. A scoped flashing plan with a visible session, manual stop, timeout and neutralization,
+   and post-flash checksum verification.
+4. For PIC32, accept the `__TIME__` string as cosmetic (no functional impact).
