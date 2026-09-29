@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using SiebwaldeApp.Core;
 using SiebwaldeApp.Core.TrackApplication.Comm;
+using SiebwaldeApp.Core.TrackApplication.Simulator;
 
 namespace SiebwaldeApp.Integration
 {
@@ -39,12 +40,14 @@ namespace SiebwaldeApp.Integration
         private readonly IControlTrace? _controlTrace;
         private readonly Func<ITrackTransport>? _transportFactory;
         private readonly TrackAmplifierGroups _amplifierGroups;
+        private readonly TrackSimulatorConfig? _simulatorConfig;
         private readonly TimeSpan _neutralObserveWindow;
         private readonly SemaphoreSlim _gate = new(1, 1);
 
         private CancellationTokenSource? _cts;
         private TrackRuntimeState _state = TrackRuntimeState.Stopped;
         private TrackControlMode? _requestedMode;
+        private ISimulatedTrackIo? _simulatedTrackIo;
 
         // Track-part fields (moved verbatim from SiebwaldeApplicationModel).
         private TrackApplicationVariables? _trackVariables;
@@ -83,18 +86,25 @@ namespace SiebwaldeApp.Integration
         /// <param name="neutralObserveWindow">
         /// Bounded window for commanding + observing neutral on start/stop. Defaults to 5 s.
         /// </param>
+        /// <param name="simulatorConfig">
+        /// Optional simulator configuration used when <see cref="TrackControlMode.FullSimulation"/>
+        /// is started without an explicit transport factory. Defaults to a periodic-SLAVEINFO
+        /// configuration over the default detected slaves {1,2,3}.
+        /// </param>
         public TrackApplicationRuntimeHost(
             IEcosHostService ecosHost,
             IControlTrace? controlTrace = null,
             Func<ITrackTransport>? transportFactory = null,
             TrackAmplifierGroups? amplifierGroups = null,
-            TimeSpan? neutralObserveWindow = null)
+            TimeSpan? neutralObserveWindow = null,
+            TrackSimulatorConfig? simulatorConfig = null)
         {
             _ecosHost = ecosHost ?? throw new ArgumentNullException(nameof(ecosHost));
             _controlTrace = controlTrace;
             _transportFactory = transportFactory;
             _amplifierGroups = amplifierGroups ?? TrackAmplifierGroups.Empty;
             _neutralObserveWindow = neutralObserveWindow ?? DefaultNeutralObserveWindow;
+            _simulatorConfig = simulatorConfig;
 
             // Surface an unexpected background fault from the host while the runtime is Running.
             _ecosHost.Faulted += OnEcosHostFaulted;
@@ -137,6 +147,9 @@ namespace SiebwaldeApp.Integration
         }
 
         /// <inheritdoc />
+        public ISimulatedTrackIo? SimulatedTrackIo => _simulatedTrackIo;
+
+        /// <inheritdoc />
         public List<TrackAmplifierItem> GetAmplifierListing()
             => _trackVariables?.GetAmplifierListing() ?? new List<TrackAmplifierItem>();
 
@@ -164,9 +177,9 @@ namespace SiebwaldeApp.Integration
 
                 try
                 {
-                    if (mode == TrackControlMode.Real)
+                    if (mode.IsFullTrackChain())
                     {
-                        await ComposeTrackPartAsync(_cts.Token).ConfigureAwait(false);
+                        await ComposeTrackPartAsync(mode, _cts.Token).ConfigureAwait(false);
                     }
 
                     var result = await _ecosHost.StartAsync(mode, _trackCommClient, _trackVariables, _cts.Token).ConfigureAwait(false);
@@ -175,10 +188,10 @@ namespace SiebwaldeApp.Integration
                         or EcosHostStartResult.AlreadyActive
                         or EcosHostStartResult.Transitioned)
                     {
-                        // Real mode: command + observe neutral on the configured domain before
+                        // Full-chain mode: command + observe neutral on the configured domain before
                         // reporting Running. Running does NOT imply movement-safe; the permission
                         // state (and, on failure, the raised fault + diagnostic) carry the truth.
-                        if (mode == TrackControlMode.Real)
+                        if (mode.IsFullTrackChain())
                         {
                             await EstablishObservedNeutralAsync(_cts.Token).ConfigureAwait(false);
                         }
@@ -287,7 +300,7 @@ namespace SiebwaldeApp.Integration
         // Track-part composition (verbatim move from SiebwaldeApplicationModel.StartTrackApplication)
         // ---------------------------------------------------------------------------------
 
-        private async Task ComposeTrackPartAsync(CancellationToken ct)
+        private async Task ComposeTrackPartAsync(TrackControlMode mode, CancellationToken ct)
         {
             // 0) Setup logging (fresh per start; removed on stop).
             _loggerInstance = "TrackAppLog";
@@ -310,7 +323,8 @@ namespace SiebwaldeApp.Integration
             _trackVariables.MovementPermission = _movementPermission;
 
             // 3) Build low-level Ethernet / Modbus transport.
-            var transport = _transportFactory?.Invoke() ?? CreateRealTransport();
+            var transport = _transportFactory?.Invoke()
+                ?? (mode == TrackControlMode.FullSimulation ? CreateSimulatorTransport() : CreateRealTransport());
 
             // 4) Communication client on top of the selected transport.
             _trackCommClient = new TrackCommClientAsync(transport, _trackVariables);
@@ -408,7 +422,10 @@ namespace SiebwaldeApp.Integration
             // Fail closed: an empty safety domain means there is nothing to observe, so movement
             // permission must never be granted vacuously. This is the safe consequence of the open
             // group/domain Product Owner decision; it is surfaced as a fault, not a silent grant.
-            if (_amplifierGroups.AllConfigured.Count == 0)
+            // (In FullSimulation the default domain is the simulator's detected slaves, so an empty
+            // configured group still yields a non-empty effective domain.)
+            var domain = EffectiveDomain();
+            if (domain.Count == 0)
             {
                 var emptyDomainFault = new InvalidOperationException(
                     "No safety domain configured; movement blocked (observed neutral cannot be established for an empty domain).");
@@ -428,7 +445,7 @@ namespace SiebwaldeApp.Integration
 
             // Command neutral to the whole configured domain. Neutral is always accepted by the
             // gate, so this establishes the safe state without needing permission first.
-            foreach (var slave in _amplifierGroups.AllConfigured)
+            foreach (var slave in domain)
             {
                 _trackVariables.SetDesiredAmplifierControl(slave, AmplifierSpeedMapper.NeutralPwm, false);
             }
@@ -502,7 +519,7 @@ namespace SiebwaldeApp.Integration
                 return false;
             }
 
-            foreach (var slave in _amplifierGroups.AllConfigured)
+            foreach (var slave in EffectiveDomain())
             {
                 var item = items.FirstOrDefault(a => a is not null && a.SlaveNumber == slave);
                 if (!TrackAmplifierDataFreshness.IsCurrentData(item))
@@ -534,6 +551,44 @@ namespace SiebwaldeApp.Integration
             return new RawUdpTrackTransport(rawUdp);
         }
 
+        /// <summary>
+        /// Builds the deterministic simulator transport for <see cref="TrackControlMode.FullSimulation"/>,
+        /// retains it as the simulated-amplifier I/O surface, and returns it.
+        /// </summary>
+        private ITrackTransport CreateSimulatorTransport()
+        {
+            var transport = new DeterministicTrackTransport(_simulatorConfig ?? DefaultFullSimulationConfig());
+            _simulatedTrackIo = transport;
+            return transport;
+        }
+
+        /// <summary>
+        /// The default FullSimulation transport config: the default detected slaves {1,2,3} with a
+        /// 500 ms cyclic SLAVEINFO refresh so injected occupancy/status stays fresh.
+        /// </summary>
+        private static TrackSimulatorConfig DefaultFullSimulationConfig()
+            => new TrackSimulatorConfig(periodicSlaveInfoInterval: TimeSpan.FromMilliseconds(500));
+
+        /// <summary>
+        /// The effective observed-neutral domain: the configured amplifier groups when non-empty,
+        /// else (FullSimulation only) the simulator's detected slaves, else empty. Real mode with an
+        /// unconfigured domain therefore stays fail-closed (no simulator to fall back on).
+        /// </summary>
+        private IReadOnlyCollection<byte> EffectiveDomain()
+        {
+            if (_amplifierGroups.AllConfigured.Count > 0)
+            {
+                return _amplifierGroups.AllConfigured.Select(a => (byte)a).ToArray();
+            }
+
+            if (_requestedMode == TrackControlMode.FullSimulation && _simulatedTrackIo is not null)
+            {
+                return _simulatedTrackIo.DetectedSlaves;
+            }
+
+            return Array.Empty<byte>();
+        }
+
         // ---------------------------------------------------------------------------------
         // Stop / cleanup
         // ---------------------------------------------------------------------------------
@@ -552,17 +607,19 @@ namespace SiebwaldeApp.Integration
         {
             Exception? neutralFault = null;
 
-            // 0) Real-mode safety: withdraw movement permission, then command neutral to the whole
+            // 0) Full-chain safety: withdraw movement permission, then command neutral to the whole
             //    configured domain and observe it BEFORE any teardown. The runtime loop and comm
             //    client must still be running for the neutral command to be written and echoed.
             //    A stop that cannot observe neutral maps to Failed (a Stopped state means "neutral
             //    was commanded AND observed before teardown"), but the fault is thrown only after
             //    teardown has completed so no resource is left running.
-            if (_requestedMode == TrackControlMode.Real && _trackVariables is not null)
+            if (_requestedMode is TrackControlMode requestedMode
+                && requestedMode.IsFullTrackChain()
+                && _trackVariables is not null)
             {
                 _movementPermission?.Withdraw();
 
-                foreach (var slave in _amplifierGroups.AllConfigured)
+                foreach (var slave in EffectiveDomain())
                 {
                     _trackVariables.SetDesiredAmplifierControl(slave, AmplifierSpeedMapper.NeutralPwm, false);
                 }
@@ -649,6 +706,7 @@ namespace SiebwaldeApp.Integration
             _sendNextFwDataPacket = null;
             _trackApplicationLogging = null;
             _movementPermission = null;
+            _simulatedTrackIo = null;
 
             if (_cts is not null)
             {

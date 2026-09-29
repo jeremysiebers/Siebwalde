@@ -180,17 +180,30 @@
                     </TextBlock>
 
                     <!-- Real mode starts automatically with the track application;
-                         this button runs the ECoS host against the software simulator. -->
-                    <Button
-                        Grid.Column="1"
-                        MinWidth="170"
-                        Height="50"
-                        Padding="12 4"
-                        FontSize="{StaticResource FontSizeSmall}"
-                        VerticalAlignment="Center"
-                        Command="{Binding InitEcosSimulator}"
-                        Foreground="White"
-                        Content="ECoS simulator" />
+                         these buttons run the ECoS host against the software simulator or the
+                         full software simulation. -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <Button
+                            MinWidth="170"
+                            Height="50"
+                            Padding="12 4"
+                            FontSize="{StaticResource FontSizeSmall}"
+                            VerticalAlignment="Center"
+                            Command="{Binding InitEcosSimulator}"
+                            Foreground="White"
+                            Content="ECoS simulator" />
+
+                        <Button
+                            MinWidth="170"
+                            Height="50"
+                            Margin="10 0 0 0"
+                            Padding="12 4"
+                            FontSize="{StaticResource FontSizeSmall}"
+                            VerticalAlignment="Center"
+                            Command="{Binding InitFullSimulation}"
+                            Foreground="White"
+                            Content="Full simulation" />
+                    </StackPanel>
 
                     <StackPanel Grid.Column="2" Margin="20 0 0 0" Orientation="Horizontal" VerticalAlignment="Center">
                         <Ellipse Style="{StaticResource HostStatusDot}">

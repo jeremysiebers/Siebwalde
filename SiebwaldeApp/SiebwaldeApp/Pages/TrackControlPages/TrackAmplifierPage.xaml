@@ -192,6 +192,16 @@
                                                     </Style>
                                                 </Border.Style>
                                             </Border>
+
+                                            <!-- Full-simulation occupancy toggle (visible/enabled only in FullSimulation) -->
+                                            <CheckBox Content="Occ"
+                                                      Margin="8,0,0,0"
+                                                      FontSize="10"
+                                                      Foreground="LightGray"
+                                                      VerticalAlignment="Center"
+                                                      IsChecked="{Binding SimulateOccupancy, Mode=TwoWay}"
+                                                      IsEnabled="{Binding CanSimulateOccupancy}"
+                                                      Visibility="{Binding CanSimulateOccupancy, Converter={local:BooleanToVisiblityConverter}, ConverterParameter=True}" />
                                         </StackPanel>
 
                                         <!-- PWM setpoint + EmStop (main controls) -->

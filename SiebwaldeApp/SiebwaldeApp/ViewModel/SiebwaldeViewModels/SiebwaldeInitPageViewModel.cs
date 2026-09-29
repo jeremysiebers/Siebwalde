@@ -104,6 +104,9 @@ namespace SiebwaldeApp
         /// <summary>Start the ECoS host in simulator mode, so Koploper can connect without hardware.</summary>
         public ICommand InitEcosSimulator { get; set; }
 
+        /// <summary>Start the full software simulation (real track-control chain on the deterministic transport).</summary>
+        public ICommand InitFullSimulation { get; set; }
+
         /// <summary>Explicit recovery for a latched control-path safety fault.</summary>
         public ICommand ResetControlSafety { get; set; }
 
@@ -149,6 +152,7 @@ namespace SiebwaldeApp
             InitFiddleYardController = new RelayCommand(async () => await StartFiddleYardAsync(false));
             InitFiddleYardSimulator = new RelayCommand(async () => await StartFiddleYardAsync(true));
             InitEcosSimulator = new RelayCommand(async () => await StartEcosSimulatorAsync());
+            InitFullSimulation = new RelayCommand(async () => await StartFullSimulationAsync());
             ResetControlSafety = new RelayCommand(ResetControlSafetyNow);
 
             _startRuntimeCommand = new RelayCommand(
@@ -304,6 +308,20 @@ namespace SiebwaldeApp
 
             UpdateControlStatus();
             Log($"ECoS simulator start requested. {EcosModeStatus}");
+        }
+
+        /// <summary>
+        /// Starts the full software simulation: the real track-control chain driven by the
+        /// deterministic transport, with a controllable simulated-amplifier I/O surface.
+        /// </summary>
+        private async Task StartFullSimulationAsync()
+        {
+            Log("Starting full software simulation (real track-control chain on the deterministic transport)...");
+
+            await IoC.siebwaldeApplicationModel.StartFullSimulationAsync();
+
+            UpdateControlStatus();
+            Log($"Full software simulation start requested. {EcosModeStatus}");
         }
 
         /// <summary>Starts the track-control runtime in simulator mode.</summary>

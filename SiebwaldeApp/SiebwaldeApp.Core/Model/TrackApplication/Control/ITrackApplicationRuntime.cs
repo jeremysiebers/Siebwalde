@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using SiebwaldeApp.Core.TrackApplication.Simulator;
 
 namespace SiebwaldeApp.Core
 {
@@ -62,6 +63,12 @@ namespace SiebwaldeApp.Core
 
         /// <summary>Read-only view of the current track amplifiers.</summary>
         IReadOnlyList<TrackAmplifierItem> TrackAmplifiers { get; }
+
+        /// <summary>
+        /// The controllable simulated-amplifier I/O surface, or null unless the runtime is running
+        /// in <see cref="TrackControlMode.FullSimulation"/>.
+        /// </summary>
+        ISimulatedTrackIo? SimulatedTrackIo { get; }
 
         /// <summary>Returns the current list of track amplifiers (empty when not running).</summary>
         List<TrackAmplifierItem> GetAmplifierListing();

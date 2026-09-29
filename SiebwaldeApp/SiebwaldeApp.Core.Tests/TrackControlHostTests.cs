@@ -262,6 +262,80 @@ namespace SiebwaldeApp.Core.Tests
             host.Stop();
         }
 
+        [Fact]
+        public async Task RealToFullSimulation_IsRejectedAndKeepsTheRealHostRunning()
+        {
+            var port = GetFreeTcpPort();
+            var host = CreateHost(port);
+            var variables = new TrackApplicationVariables();
+
+            await host.StartAsync(TrackControlMode.Real, new FakeCommClient(), variables);
+            var result = await host.StartAsync(TrackControlMode.FullSimulation, new FakeCommClient(), variables);
+
+            // Real mode outranks every simulation mode, so the request is refused before the
+            // running real host is torn down.
+            Assert.Equal(EcosHostStartResult.Rejected, result);
+            Assert.True(host.IsRunning);
+            Assert.Equal(TrackControlMode.Real, host.Mode);
+
+            await AssertPortIsServed(port);
+            host.Stop();
+        }
+
+        [Fact]
+        public async Task SimulatorToFullSimulation_TransitionsAndKeepsThePortServed()
+        {
+            var port = GetFreeTcpPort();
+            var host = CreateHost(port);
+            var variables = new TrackApplicationVariables();
+
+            await host.StartAsync(TrackControlMode.Simulator, null, null);
+            var result = await host.StartAsync(TrackControlMode.FullSimulation, new FakeCommClient(), variables);
+
+            Assert.Equal(EcosHostStartResult.Transitioned, result);
+            Assert.True(host.IsRunning);
+            Assert.Equal(TrackControlMode.FullSimulation, host.Mode);
+
+            await AssertPortIsServed(port);
+
+            host.Stop();
+            await AssertPortIsFree(port);
+        }
+
+        [Fact]
+        public async Task FullSimulationToSimulator_Transitions()
+        {
+            var port = GetFreeTcpPort();
+            var host = CreateHost(port);
+            var variables = new TrackApplicationVariables();
+
+            await host.StartAsync(TrackControlMode.FullSimulation, new FakeCommClient(), variables);
+            var result = await host.StartAsync(TrackControlMode.Simulator, null, null);
+
+            // FullSimulation is not authoritative, so dropping back to the lightweight simulator
+            // is allowed (unlike a request to replace a running real host).
+            Assert.Equal(EcosHostStartResult.Transitioned, result);
+            Assert.True(host.IsRunning);
+            Assert.Equal(TrackControlMode.Simulator, host.Mode);
+
+            await AssertPortIsServed(port);
+            host.Stop();
+        }
+
+        [Fact]
+        public async Task StartFullSimulation_WithNullCommClientOrVariables_Throws()
+        {
+            var port = GetFreeTcpPort();
+            var host = CreateHost(port);
+
+            // FullSimulation drives the same full-chain composition as Real, so it requires the
+            // track communication client and the shared track variables.
+            await Assert.ThrowsAsync<ArgumentException>(
+                () => host.StartAsync(TrackControlMode.FullSimulation, commClient: null, variables: null));
+
+            Assert.False(host.IsRunning);
+        }
+
         public void Dispose()
         {
             try

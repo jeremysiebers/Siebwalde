@@ -1,4 +1,5 @@
 using System.Text;
+using SiebwaldeApp.Core.TrackApplication.Simulator;
 
 namespace SiebwaldeApp.Core
 {
@@ -111,6 +112,16 @@ namespace SiebwaldeApp.Core
         /// </summary>
         public async Task StartEcosHostSimulatorAsync()
             => await _runtime.StartAsync(TrackControlMode.Simulator);
+
+        /// <summary>
+        /// Starts the full software simulation: the real track-control chain driven by the
+        /// deterministic transport, with a controllable simulated-amplifier I/O surface.
+        /// </summary>
+        public async Task StartFullSimulationAsync()
+            => await _runtime.StartAsync(TrackControlMode.FullSimulation);
+
+        /// <summary>The controllable simulated-amplifier I/O, or null when not in FullSimulation.</summary>
+        public ISimulatedTrackIo? SimulatedTrackIo => _runtime.SimulatedTrackIo;
 
         /// <summary>The ECoS mode that is actually active, or null when the host is not running.</summary>
         public TrackControlMode? ActiveEcosMode => _runtime.ActiveEcosMode;
