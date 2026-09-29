@@ -13,12 +13,14 @@ Siebwalde is the control application for a model railway. Koploper owns driving 
 - The ECoS emulator graceful-shutdown increment is **MERGED / CLOSED** (PR #8, merge commit `5fb751552b368015ba17f796d86f41c1d7fa7c13`, post-merge CI PASS). `EcosEmulatorServer`, `KoploperExternalInfoClient` and `TrackSimulatorBackend` now stop deterministically (idempotent, bounded `StopAsync` with tracked+awaited tasks and disposed listener/connection, plus a non-blocking sync `Stop` for the in-process host). Recorded as the completed foundation for a future Recovery & Maintenance System (see `docs/backlog.md`).
 - The Recovery & Maintenance Increment 1 (controllable track runtime from WPF) is **MERGED / CLOSED** (PR #9, merge commit `a41302a42db62d1c23e98d1205a8189c0033b5d3`, post-merge CI PASS): a single in-process coordinator (`TrackApplicationRuntimeHost` behind Core `ITrackApplicationRuntime`) owns the track-control runtime lifecycle (`Stopped/Starting/Running/Stopping/Failed`), with a provable graceful stop, shared start/restart path, and failure semantics. Its B-classification limitation (no simulator `ITrackTransport`) was later closed by PR #10.
 - The software-only simulator transport is **MERGED / CLOSED** (PR #10, merge commit `33a231a01b5aff4aa4a99e162b69d723a778d31b`, post-merge CI PASS): `DeterministicTrackTransport` (Core `TrackApplication.Simulator`) emulates the PIC32 master protocol so the full track runtime (comm → 9-step init → `TrackControlMain`) runs end-to-end software-only. This is software/protocol simulation evidence only — not proof of physical PWM/timing/hardware behaviour.
+- The observed-neutral restart/stop safety increment — software half — is **MERGED / CLOSED** (PR #11, merge commit `c5f626a1a8d4a3cefb310ee8ae46a42f10dd2df6`, post-merge CI PASS): a movement-safety gate at the single HR0 funnel (`TrackApplicationVariables.SetDesiredAmplifierControl`) allows neutral `399` unconditionally but refuses non-neutral movement until a fresh observed HR0 == 399 readback is established; Start/Restart command neutral and grant movement only after per-amplifier observed neutral (an empty safety domain is fail-closed); Stop withdraws movement permission, neutralizes, observes neutral, then tears down (unobservable neutral maps to `Failed`, never `Stopped`); stale-command protection; `SetDefaultPwmSetpointsStep` corrected 400 → 399. Proven V1/V2 against the deterministic simulator. Software/protocol only — physical neutral stays V4.
+- The V3 software integration validation increment is **MERGED / CLOSED** (PR #12, merge commit `949a7f17a3b94caa956529ca33361454159be7db`, post-merge CI PASS): `ObservedNeutralV3IntegrationTests` drives a normal locomotive-speed request through the REAL `TrackControlHost` + `TrackApplicationRuntimeHost` + `DeterministicTrackTransport` (no fake host, no second implementation), proving non-neutral movement is refused (`END 8 SAFETY_INTERLOCK`) until observed neutral, accepted (`END 0 OK` + `108` write) once granted, and a different caller (`SetAmplifierControl`) cannot bypass the gate; the HR0 readback is presented only as the PIC18 holding-register echo. It also preserved the V4-prep documentation and serialized the real-mode test classes to fix a CI settings race.
 - Do not reopen the closed safety increment. Detailed evidence lives in `docs/handoff.md`, `docs/backlog.md` and `docs/analysis-coverage.md`.
 
 ## Current repository baseline
 
 - Repository root: `C:\Localdata\Siebwalde` (Git; `origin https://github.com/jeremysiebers/Siebwalde.git`).
-- Current `master` HEAD: `33a231a01b5aff4aa4a99e162b69d723a778d31b` (equal to `origin/master`). This is a normal merge commit for PR #10 on top of `a41302a` (PR #9, Recovery & Maintenance Increment 1); earlier baselines: `5fb7515` (PR #8), `0cf6347` (PR #7), `ec990bc` (PR #6), `a6b3467` (PR #5).
+- Current `master` HEAD: `949a7f17a3b94caa956529ca33361454159be7db` (equal to `origin/master`). This is a normal merge commit for PR #12 on top of `c5f626a` (PR #11); earlier baselines: `33a231a` (PR #10), `a41302a` (PR #9), `5fb7515` (PR #8), `0cf6347` (PR #7), `ec990bc` (PR #6), `a6b3467` (PR #5).
 - The revision above is a **verified baseline reference**, not a permanently self-updating truth claim; always trust the actual Git state.
 - Main solution: `SiebwaldeApp/SiebwaldeApp.sln` (UI, Core, EcosEmu, Integration, Core.Tests). Separate hosts: `SiebwaldeApp.Core.Host.sln`, `SiebwaldeApp.EcosEmu.sln`. Validation harness: `SiebwaldeApp/SiebwaldeApp.StopReachabilityHarness` (not in the solution).
 - Immutable evidence branch retained: `feature/safety-stop-reachability` @ `825533e` (historical physical-validation provenance). Reviewer-facing branch: `feature/safety-stop-reachability-clean` @ `dab43ab`.
@@ -26,11 +28,11 @@ Siebwalde is the control application for a model railway. Koploper owns driving 
 
 ## Current verification baseline
 
-Executed at the verified baseline revision:
+Executed at the verified baseline revision `949a7f17a3b94caa956529ca33361454159be7db` (re-run 2026-09-29):
 
-- Debug tests: **388/388 PASS** (`dotnet test SiebwaldeApp.sln`)
-- Release tests: **388/388 PASS** (`dotnet test SiebwaldeApp.sln -c Release --no-build`)
-- Release build: **0 errors / 175 warnings** (`dotnet build SiebwaldeApp.sln -c Release`)
+- Debug tests: **416/416 PASS** (`dotnet test SiebwaldeApp.sln`)
+- Release tests: **416/416 PASS** (`dotnet test SiebwaldeApp.sln -c Release --no-build`)
+- Release build: **0 errors / 170 warnings** (`dotnet build SiebwaldeApp.sln -c Release`)
 - `SiebwaldeApp.StopReachabilityHarness` build: **0 errors / 0 warnings**
 
 These results belong to the verified baseline revision; re-run to confirm before relying on them.
@@ -51,7 +53,8 @@ These results belong to the verified baseline revision; re-run to confirm before
 Only currently material items; see `docs/backlog.md` for the full list.
 
 - **Open architecture decision (Product Owner):** complete track-amplifier group/domain configuration (`MainRailway` / `MountainRailway` / `Spare` / `Unassigned`) and the cross-domain emergency policy.
-- **Open safety gap (investigate):** startup/restart established-neutral guarantee (C# does not establish/observe neutral before movement; only a partial firmware default exists). Now software-addressable via the deterministic simulator transport; the next Recovery & Maintenance increment targets its software half (see `docs/recovery-maintenance-system.md` §8).
+- **Startup/restart neutral guarantee — software half implemented (PR #11); physical half still open (V4).** C# now commands neutral `399` and refuses non-neutral movement until a fresh observed HR0 == 399 readback is established (the movement gate). This is proven only at the software/protocol boundary against the deterministic simulator; the physical-fidelity question (does real SLAVEINFO HR0 reflect physical PWM vs a command echo) remains unproven (see `docs/recovery-maintenance-system.md` §8–§9).
+- **V4 physical-validation blocker (firmware source/artifact mismatch):** the committed PIC18 firmware (`TrackAmplifier4.X`) is mid-refactor and does not execute the HR0→PWM apply path — `CheckModbusTimeout`/`Ramp_Update`/`ControlCore_Update` are referenced but undefined, `REGULATORxUPDATE` is only in commented-out code, and `modbushooks.c/.h` are untracked. The shipped `dist/*/production` artifacts are from an older `main.c`, so committed source does not match the flashed image. Until the firmware build is fixed (FIRMWARE_FLASH-gated), protocol-observed HR0 == 399 must not be treated as a sufficient basis for physical restart safety (see `docs/recovery-maintenance-system.md` §9).
 - **Manual `SetAmplifierControl`** is outside locomotive ownership (the strongest neutralization reaches it; a loco-scoped stop does not).
 - Software follow-ups: ControlTrace free-text quoting/escaping; build/commit ID in `CONTROL_TRACE_START`; trace registration idempotence; `FileLogger` hardening; synthetic `backplanecheck` / `classify` have no live-mode guard; test-project -> harness dependency.
 - Remaining documentation drift: some older domain/historical documents (for example `docs/application-guide.md`, `docs/implementation.md`) still contain pre-Workflow-v1 present-tense statements; broader drift repair is not yet complete.
@@ -60,12 +63,12 @@ Only currently material items; see `docs/backlog.md` for the full list.
 
 ## Active development direction
 
-- The **Recovery & Maintenance System** is the active direction (see `docs/recovery-maintenance-system.md`). Completed: Increment 1 (controllable runtime from WPF, PR #9) and the software-only simulator transport (PR #10). Next proposed increment: "Observed-neutral restart/stop safety — software half" (gated by Product Owner decisions 1, 2 and 5 in `docs/recovery-maintenance-system.md` §5/§8).
+- The **Recovery & Maintenance System** is the active direction (see `docs/recovery-maintenance-system.md`). Completed: Increment 1 (controllable runtime from WPF, PR #9); the software-only simulator transport (PR #10); "Observed-neutral restart/stop safety — software half" (PR #11); and the V3 software integration test of the observed-neutral movement gate (PR #12). Remaining next step: the **V4 physical-neutral validation** of the software half — gated by Product Owner decisions 1, 2 and 5 plus the firmware source/artifact mismatch prerequisite (`docs/recovery-maintenance-system.md` §5/§8/§9) — followed by the manual-control/arbiter (Increment 4) and hand-back (Increment 5) increments.
 - The physical test oval autonomous running remains a separate, not-yet-started product direction.
 
 ## Open Product Owner decisions
 
-- Recovery & Maintenance: see `docs/recovery-maintenance-system.md` §5 (decisions 1–5). Decisions **1** (amplifier group/domain), **2** (observed-vs-commanded neutral bar) and **5** (stop semantics while moving) gate the next increment (§8).
+- Recovery & Maintenance: see `docs/recovery-maintenance-system.md` §5 (decisions 1–5). Decisions **1** (amplifier group/domain), **2** (observed-vs-commanded neutral bar) and **5** (stop semantics while moving) gate the remaining V4 physical-neutral validation and later increments (§8–§9). Decision 1 also has a safety consequence today: with the default (empty) amplifier group/domain config, the observed-neutral movement gate is **fail-closed** — non-neutral movement stays blocked with a fault until the domain is configured.
 
 ## Source-of-truth note
 
