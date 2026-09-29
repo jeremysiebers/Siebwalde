@@ -29,8 +29,9 @@ separate firmware development increments.
 ## 1. Deliverable 1 — Toolchain inventory (PIC18 and PIC32)
 
 All entries below were **executed/inspected on the local machine** during this
-increment. No Microchip toolchain environment variables are set in the shell, and there
-is no user `~/.mchp_packs` device-pack repository.
+increment. No Microchip toolchain environment variables are set in the shell. A user
+device-pack repository **does** exist at `C:\Users\jerem\.mchp_packs` (it holds, among
+others, `PIC18F-K_DFP` `1.0.48` and `1.13.292`, and `PIC32MZ-EF_DFP` `1.4.168`).
 
 | Toolchain | Version(s) present | Path | Used by |
 | --- | --- | --- | --- |
@@ -40,8 +41,8 @@ is no user `~/.mchp_packs` device-pack repository.
 | XC8 compiler | v2.31, v2.40 (classic `xc8.exe`), v3.10 (clang `xc8-cc.exe`) | `C:\Program Files\Microchip\xc8\<ver>\bin\` | PIC18 (`TrackAmplifier4.X`, bootloader, backplane) |
 | XC32 compiler | v2.50 (GCC 4.8.3), v5.00 (GCC 13.2.1) | `C:\Program Files\Microchip\xc32\<ver>\bin\` | PIC32 (`TrackController5`) |
 | MPLAB Harmony | v2_06 | `C:\Microchip\harmony\v2_06` | PIC32 `TrackController5` framework |
-| PIC18F-K DFP | `1.7.134` (bundled in MPLAB X v6.05 only), `1.0.48` + `1.13.292` (user packs) | `...\MPLABX\v6.05\packs\...`, `...\MPLABX\v6.20\packs\...` | PIC18F25K40 projects |
-| PIC32MZ-EF DFP | `1.4.168` (bundled in MPLAB X v6.20 **only**), `1.3.58` (v6.05) | `...\MPLABX\v6.20\packs\Microchip\PIC32MZ-EF_DFP\1.4.168` | `TrackController5` |
+| PIC18F-K DFP | `1.7.134` (bundled in MPLAB X v6.05; contains `xc8` device support), `1.13.292` (MPLAB X v6.20 + user packs; contains `xc8`), `1.0.48` (user packs only; **no** `xc8` folder) | `...\MPLABX\v6.05\packs\...`, `...\MPLABX\v6.20\packs\...`, `C:\Users\jerem\.mchp_packs\Microchip\PIC18F-K_DFP\<ver>\` | PIC18F25K40 projects |
+| PIC32MZ-EF DFP | `1.4.168` (MPLAB X v6.20 + user packs), `1.3.58` (MPLAB X v6.05) | `...\MPLABX\v6.20\packs\Microchip\PIC32MZ-EF_DFP\1.4.168`, `C:\Users\jerem\.mchp_packs\Microchip\PIC32MZ-EF_DFP\1.4.168` | `TrackController5` |
 | Python | 3.13 | `C:\Users\jerem\AppData\Local\Programs\Python\Python313\` | firmware/bootloader tooling |
 | Git | present | `C:\Program Files\Git\cmd\git.exe` | — |
 
@@ -159,7 +160,7 @@ deprecation warning.
 | `control_core.c/.h` (and ramp/watchdog/runtime-command definitions) | implied by `AGENT_TRACK_AMPLIFIER.md` §4/§9/§10 | Not yet created; no code exists |
 | `Update_AmplifierTicks` consistent type | `main.h:18` vs `main.c:27` | Compile error |
 | `<stdbool.h>` for `bool` in `PetitModbus.h` | `PetitModbus.h:61` | Compile error under C90 |
-| XC8 device-support (`xc8` folder) for DFP 1.0.48 | bootloader `With_Configurations` | `(2103) no device-support files specified` with XC8 v3.10 |
+| XC8 device-support (`xc8` folder) for DFP 1.0.48 | bootloader `With_Configurations` | `(2103) no device-support files specified` with XC8 v3.10; the user-pack DFP 1.13.292 **does** contain `xc8`, so this may be resolvable by pinning the project to 1.13.292 |
 | `.lst`/`.map` artifacts claimed by `docs/recovery-maintenance-system.md:297` | not present under `TrackAmplifier4.X/dist` at HEAD (only `.hex`) | That specific claim is not backed by the tree |
 
 Other observations (**inspected**):
