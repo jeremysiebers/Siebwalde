@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using SiebwaldeApp.Core;
+using SiebwaldeApp.Core.TrackApplication.Simulator;
 using SiebwaldeApp.EcosEmu;
 
 namespace SiebwaldeApp.Integration
@@ -53,6 +54,7 @@ namespace SiebwaldeApp.Integration
         private EcosEmulatorServer? _server;
         private EcosHardwareStopSink? _stopSink;
         private TrackControlMode? _mode;
+        private IMovementSimulation? _movementSimulation;
 
         /// <inheritdoc />
         public event EventHandler<RuntimeFaultEventArgs>? Faulted;
@@ -147,7 +149,8 @@ namespace SiebwaldeApp.Integration
             TrackControlMode mode,
             ITrackCommClient? commClient,
             TrackApplicationVariables? variables,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default,
+            IMovementSimulation? movementSimulation = null)
         {
             // Already in the requested mode: idempotent, nothing to do.
             if (IsRunning && _mode == mode)
@@ -186,7 +189,7 @@ namespace SiebwaldeApp.Integration
 
             try
             {
-                await ComposeAndStartAsync(mode, commClient, variables, cancellationToken).ConfigureAwait(false);
+                await ComposeAndStartAsync(mode, commClient, variables, cancellationToken, movementSimulation).ConfigureAwait(false);
             }
             catch
             {
@@ -207,9 +210,11 @@ namespace SiebwaldeApp.Integration
             TrackControlMode mode,
             ITrackCommClient? commClient,
             TrackApplicationVariables? variables,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            IMovementSimulation? movementSimulation = null)
         {
             _externalInfo = new KoploperExternalInfoClient(_externalInfoHost, _externalInfoPort);
+            _movementSimulation = movementSimulation;
 
             _locoRepository = new JsonLocoRepository(_locoRepositoryPath);
             await _locoRepository.LoadAsync(cancellationToken).ConfigureAwait(false);
@@ -261,7 +266,8 @@ namespace SiebwaldeApp.Integration
                     Safety,
                     Diagnostics,
                     _trackAmplifierGroups,
-                    _controlTrace);
+                    _controlTrace,
+                    movementSimulation: movementSimulation);
 
                 _ecosBackend = _integration.EcosBackend
                     ?? throw new InvalidOperationException(
@@ -382,6 +388,7 @@ namespace SiebwaldeApp.Integration
             _locoRepository = null;
             _externalInfo = null;
             _mode = null;
+            _movementSimulation = null;
             Switches = null;
             Diagnostics = null;
             Safety = null;
@@ -482,6 +489,7 @@ namespace SiebwaldeApp.Integration
             _locoRepository = null;
             _externalInfo = null;
             _mode = null;
+            _movementSimulation = null;
             Switches = null;
             Diagnostics = null;
             Safety = null;

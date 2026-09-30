@@ -73,6 +73,19 @@ namespace SiebwaldeApp.Core
         /// </summary>
         ISimulatedTrackIo? SimulatedTrackIo { get; }
 
+        /// <summary>
+        /// The movement simulator driving <see cref="TrackControlMode.FullSimulation"/>, or null
+        /// when the runtime is not running in FullSimulation. Read/write surface for the simulated
+        /// locomotives (positions, placement, speed).
+        /// </summary>
+        IMovementSimulation? MovementSimulation { get; }
+
+        /// <summary>
+        /// The name of the active layout profile driving FullSimulation, or null when no profile
+        /// is loaded. Used by the Simulation tab to show what the simulation is running against.
+        /// </summary>
+        string? ActiveProfileName { get; }
+
         /// <summary>Returns the current list of track amplifiers (empty when not running).</summary>
         List<TrackAmplifierItem> GetAmplifierListing();
 

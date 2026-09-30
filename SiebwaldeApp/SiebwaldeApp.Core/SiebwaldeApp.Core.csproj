@@ -12,6 +12,14 @@
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Repository-managed, human-readable layout profiles. Copied to the output directory so
+         the WPF runtime and tests can load them via LayoutProfileLoader.ExampleOvalPath
+         (resolved against AppContext.BaseDirectory). -->
+    <None Include="Topology\profiles\example-oval.json"
+          CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>DEBUG;TRACE</DefineConstants>
   </PropertyGroup>

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using SiebwaldeApp.Core;
 using SiebwaldeApp.Core.TrackApplication.Comm;
 using SiebwaldeApp.Core.TrackApplication.Simulator;
+using SiebwaldeApp.Core.TrackApplication.Topology;
 
 namespace SiebwaldeApp.Integration
 {
@@ -41,6 +42,7 @@ namespace SiebwaldeApp.Integration
         private readonly Func<ITrackTransport>? _transportFactory;
         private readonly TrackAmplifierGroups _amplifierGroups;
         private readonly TrackSimulatorConfig? _simulatorConfig;
+        private readonly LayoutProfile? _fullSimulationProfile;
         private readonly TimeSpan _neutralObserveWindow;
         private readonly SemaphoreSlim _gate = new(1, 1);
 
@@ -48,6 +50,8 @@ namespace SiebwaldeApp.Integration
         private TrackRuntimeState _state = TrackRuntimeState.Stopped;
         private TrackControlMode? _requestedMode;
         private ISimulatedTrackIo? _simulatedTrackIo;
+        private DeterministicMovementSimulator? _movementSimulator;
+        private MovementSimulationAdapter? _movementSimulationAdapter;
 
         // Track-part fields (moved verbatim from SiebwaldeApplicationModel).
         private TrackApplicationVariables? _trackVariables;
@@ -91,13 +95,19 @@ namespace SiebwaldeApp.Integration
         /// is started without an explicit transport factory. Defaults to a periodic-SLAVEINFO
         /// configuration over the default detected slaves {1,2,3}.
         /// </param>
+        /// <param name="fullSimulationProfile">
+        /// Optional layout profile that drives the FullSimulation movement simulator and (via its
+        /// detected slaves) the simulator transport config. When null, FullSimulation runs without
+        /// the deterministic movement simulator (the pre-existing config-driven transport only).
+        /// </param>
         public TrackApplicationRuntimeHost(
             IEcosHostService ecosHost,
             IControlTrace? controlTrace = null,
             Func<ITrackTransport>? transportFactory = null,
             TrackAmplifierGroups? amplifierGroups = null,
             TimeSpan? neutralObserveWindow = null,
-            TrackSimulatorConfig? simulatorConfig = null)
+            TrackSimulatorConfig? simulatorConfig = null,
+            LayoutProfile? fullSimulationProfile = null)
         {
             _ecosHost = ecosHost ?? throw new ArgumentNullException(nameof(ecosHost));
             _controlTrace = controlTrace;
@@ -105,6 +115,7 @@ namespace SiebwaldeApp.Integration
             _amplifierGroups = amplifierGroups ?? TrackAmplifierGroups.Empty;
             _neutralObserveWindow = neutralObserveWindow ?? DefaultNeutralObserveWindow;
             _simulatorConfig = simulatorConfig;
+            _fullSimulationProfile = fullSimulationProfile;
 
             // Surface an unexpected background fault from the host while the runtime is Running.
             _ecosHost.Faulted += OnEcosHostFaulted;
@@ -153,6 +164,12 @@ namespace SiebwaldeApp.Integration
         public ISimulatedTrackIo? SimulatedTrackIo => _simulatedTrackIo;
 
         /// <inheritdoc />
+        public IMovementSimulation? MovementSimulation => _movementSimulator;
+
+        /// <inheritdoc />
+        public string? ActiveProfileName => _fullSimulationProfile?.Name;
+
+        /// <inheritdoc />
         public List<TrackAmplifierItem> GetAmplifierListing()
             => _trackVariables?.GetAmplifierListing() ?? new List<TrackAmplifierItem>();
 
@@ -185,12 +202,21 @@ namespace SiebwaldeApp.Integration
                         await ComposeTrackPartAsync(mode, _cts.Token).ConfigureAwait(false);
                     }
 
-                    var result = await _ecosHost.StartAsync(mode, _trackCommClient, _trackVariables, _cts.Token).ConfigureAwait(false);
+                    var result = await _ecosHost.StartAsync(
+                        mode,
+                        _trackCommClient,
+                        _trackVariables,
+                        _cts.Token,
+                        _movementSimulator).ConfigureAwait(false);
 
                     if (result is EcosHostStartResult.Started
                         or EcosHostStartResult.AlreadyActive
                         or EcosHostStartResult.Transitioned)
                     {
+                        // Start the movement simulation once the ECoS host is up, so simulated
+                        // occupancy flows through the real transport -> comm -> occupancy path.
+                        _movementSimulationAdapter?.Start(_cts.Token);
+
                         // Full-chain mode: command + observe neutral on the configured domain before
                         // reporting Running. Running does NOT imply movement-safe; the permission
                         // state (and, on failure, the raised fault + diagnostic) carry the truth.
@@ -556,12 +582,34 @@ namespace SiebwaldeApp.Integration
 
         /// <summary>
         /// Builds the deterministic simulator transport for <see cref="TrackControlMode.FullSimulation"/>,
-        /// retains it as the simulated-amplifier I/O surface, and returns it.
+        /// retains it as the simulated-amplifier I/O surface, and returns it. When a layout profile
+        /// is supplied it also creates the deterministic movement simulator and its occupancy adapter.
         /// </summary>
         private ITrackTransport CreateSimulatorTransport()
         {
-            var transport = new DeterministicTrackTransport(_simulatorConfig ?? DefaultFullSimulationConfig());
+            var config = _simulatorConfig;
+            if (config is null && _fullSimulationProfile is not null)
+            {
+                // The profile is the single source of truth for the FullSimulation detected slaves.
+                config = new TrackSimulatorConfig(
+                    detectedSlaves: _fullSimulationProfile.DetectedSlaves,
+                    periodicSlaveInfoInterval: TimeSpan.FromMilliseconds(500));
+            }
+
+            config ??= DefaultFullSimulationConfig();
+
+            var transport = new DeterministicTrackTransport(config);
             _simulatedTrackIo = transport;
+
+            if (_fullSimulationProfile is not null)
+            {
+                _movementSimulator = new DeterministicMovementSimulator(_fullSimulationProfile);
+                _movementSimulationAdapter = new MovementSimulationAdapter(
+                    _movementSimulator,
+                    _fullSimulationProfile,
+                    () => _simulatedTrackIo);
+            }
+
             return transport;
         }
 
@@ -638,6 +686,16 @@ namespace SiebwaldeApp.Integration
             // fails: the try/finally guarantees every runtime field (and the CTS) is released.
             try
             {
+                // 0) Stop the movement simulation timer. Stop only halts; it emits no occupancy.
+                try
+                {
+                    _movementSimulationAdapter?.Stop();
+                }
+                catch (Exception ex)
+                {
+                    RaiseFault("MovementSimulationAdapter.Stop", ex);
+                }
+
                 // 1) Stop the runtime write loop.
                 try
                 {
@@ -710,6 +768,8 @@ namespace SiebwaldeApp.Integration
             _trackApplicationLogging = null;
             _movementPermission = null;
             _simulatedTrackIo = null;
+            _movementSimulator = null;
+            _movementSimulationAdapter = null;
 
             if (_cts is not null)
             {

@@ -1,0 +1,28 @@
+{
+  "name": "Example Oval",
+  "description": "A simple closed loop: 4 blocks, 4 sections, 4 detected track-amplifier slaves (1..4). Each block is one section with two bezetmelders (module 1, points 1..8). Routes form a forward loop 1>2>3>4>1 and, reversed, 1>4>3>2>1.",
+  "detectedSlaves": [1, 2, 3, 4],
+  "sections": [
+    { "id": 1, "amplifierSlave": 1, "bezetmelders": ["1.01", "1.02"], "lengthMm": 1000.0 },
+    { "id": 2, "amplifierSlave": 2, "bezetmelders": ["1.03", "1.04"], "lengthMm": 1000.0 },
+    { "id": 3, "amplifierSlave": 3, "bezetmelders": ["1.05", "1.06"], "lengthMm": 1000.0 },
+    { "id": 4, "amplifierSlave": 4, "bezetmelders": ["1.07", "1.08"], "lengthMm": 1000.0 }
+  ],
+  "blocks": [
+    { "id": 1, "sectionIds": [1] },
+    { "id": 2, "sectionIds": [2] },
+    { "id": 3, "sectionIds": [3] },
+    { "id": 4, "sectionIds": [4] }
+  ],
+  "switches": [],
+  "routes": [
+    { "fromBlock": 1, "toBlock": 2 },
+    { "fromBlock": 2, "toBlock": 3 },
+    { "fromBlock": 3, "toBlock": 4 },
+    { "fromBlock": 4, "toBlock": 1 }
+  ],
+  "locomotives": [
+    { "address": 1000, "initialBlock": 1 },
+    { "address": 1001, "initialBlock": 3 }
+  ]
+}

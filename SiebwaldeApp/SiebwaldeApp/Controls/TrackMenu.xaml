@@ -47,5 +47,13 @@
               ToolTip="Track amplifier info page."
               Foreground="White"  
                   />
+
+        <Button Grid.Row="4"
+              Style="{StaticResource IconButton}"
+              Command="{Binding TrackSimulationPage }"
+              Content="{StaticResource FontAwesomeMicroChip}" 
+              ToolTip="Simulation page."
+              Foreground="White"  
+                  />
     </Grid>
 </UserControl>

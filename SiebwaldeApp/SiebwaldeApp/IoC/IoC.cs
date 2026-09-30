@@ -87,18 +87,42 @@ namespace SiebwaldeApp
             // it as the observed-neutral domain), so both always agree on the domain.
             var amplifierGroups = CoreConfiguration.BuildTrackAmplifierGroups();
 
+            // Load the repository-managed layout profile (best-effort). When it loads, the profile
+            // drives the whole control-chain composition (topology, block map, switch mapping,
+            // grouping, FullSimulation transport + movement simulator); otherwise the settings-
+            // derived defaults are used unchanged.
+            var profileComposition = FullSimulationProfile.TryLoadExampleOval(out var profileErrors);
+            foreach (var profileError in profileErrors)
+            {
+                SiebwaldeApp.Core.IoC.Logger.Log($"Layout profile problem: {profileError}", "IoC");
+            }
+
             // Bind the ECoS host (the server Koploper connects to on port 15471). Its
             // composition lives in the Integration layer; here we only create it from
             // configuration and hand it to the runtime coordinator.
-            var ecosHost = TrackControlHost.FromConfiguration(
-                log: message => SiebwaldeApp.Core.IoC.Logger.Log(message, "EcosHost"),
-                controlTrace: controlTrace,
-                trackAmplifierGroups: amplifierGroups);
+            IEcosHostService ecosHost = profileComposition is not null
+                ? new TrackControlHost(
+                    System.IO.Path.Combine(CoreConfiguration.LogDirectory, "locos.json"),
+                    profileComposition.BlockTopology,
+                    profileComposition.KoploperBlockMap,
+                    profileComposition.SwitchMapping,
+                    log: message => SiebwaldeApp.Core.IoC.Logger.Log(message, "EcosHost"),
+                    trackAmplifierGroups: profileComposition.TrackAmplifierGroups,
+                    controlTrace: controlTrace)
+                : TrackControlHost.FromConfiguration(
+                    log: message => SiebwaldeApp.Core.IoC.Logger.Log(message, "EcosHost"),
+                    controlTrace: controlTrace,
+                    trackAmplifierGroups: amplifierGroups);
             Kernel.Bind<IEcosHostService>().ToConstant(ecosHost);
 
             // The single runtime coordinator owns composition + lifetime of the track-control
             // runtime (Core track part + ECoS host) and exposes the lifecycle to WPF.
-            var runtime = new TrackApplicationRuntimeHost(ecosHost, controlTrace, amplifierGroups: amplifierGroups);
+            var runtime = new TrackApplicationRuntimeHost(
+                ecosHost,
+                controlTrace,
+                amplifierGroups: profileComposition?.TrackAmplifierGroups ?? amplifierGroups,
+                simulatorConfig: profileComposition?.SimulatorConfig,
+                fullSimulationProfile: profileComposition?.Profile);
             Kernel.Bind<ITrackApplicationRuntime>().ToConstant(runtime);
 
             // Bind to a single instance of Siebwalde Application Model

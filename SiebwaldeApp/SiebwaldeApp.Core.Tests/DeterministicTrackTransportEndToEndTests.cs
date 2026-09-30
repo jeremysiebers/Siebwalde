@@ -36,7 +36,8 @@ namespace SiebwaldeApp.Core.Tests
                 TrackControlMode mode,
                 ITrackCommClient? commClient,
                 TrackApplicationVariables? variables,
-                CancellationToken cancellationToken = default)
+                CancellationToken cancellationToken = default,
+                IMovementSimulation? movementSimulation = null)
             {
                 Mode = mode;
                 IsRunning = true;

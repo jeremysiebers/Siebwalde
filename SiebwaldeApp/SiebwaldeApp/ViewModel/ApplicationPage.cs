@@ -29,6 +29,8 @@
 
         TrackPageInit = 20,
 
-        TrackAmplifier = 21
+        TrackAmplifier = 21,
+
+        TrackSimulation = 22
     }
 }

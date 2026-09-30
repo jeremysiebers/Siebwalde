@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using SiebwaldeApp.Core;
+using SiebwaldeApp.Core.TrackApplication.Simulator;
 using SiebwaldeApp.Integration;
 using Xunit;
 
@@ -95,7 +96,8 @@ namespace SiebwaldeApp.Core.Tests
                 TrackControlMode mode,
                 ITrackCommClient? commClient,
                 TrackApplicationVariables? variables,
-                CancellationToken cancellationToken = default)
+                CancellationToken cancellationToken = default,
+                IMovementSimulation? movementSimulation = null)
             {
                 Mode = mode;
                 IsRunning = true;

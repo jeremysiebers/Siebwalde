@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using SiebwaldeApp.Core.TrackApplication.Simulator;
 
 namespace SiebwaldeApp.Core
 {
@@ -63,7 +64,8 @@ namespace SiebwaldeApp.Core
             TrackControlMode mode,
             ITrackCommClient? commClient,
             TrackApplicationVariables? variables,
-            CancellationToken cancellationToken = default);
+            CancellationToken cancellationToken = default,
+            IMovementSimulation? movementSimulation = null);
 
         /// <summary>
         /// Gracefully stops the ECoS host: awaits every owned task with a bounded timeout and
