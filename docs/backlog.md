@@ -382,7 +382,7 @@ Non-blocking findings from the R2 review of the config-driven topology + movemen
 
 Firmware: no new firmware/protocol finding. The movement simulator reuses the existing HR2 bit 10 occupancy contract and the ""section == ModBus slave (1..50)"" mapping already mirrored by `DeterministicTrackTransport`; no firmware change is required.
 
-## Full Simulation profiles � follow-ups (2026-09-30 corrective loop)
+## Full Simulation profiles - follow-ups (2026-09-30 corrective loop)
 
 | Item | Evidence | Acceptance criteria |
 | --- | --- | --- |
