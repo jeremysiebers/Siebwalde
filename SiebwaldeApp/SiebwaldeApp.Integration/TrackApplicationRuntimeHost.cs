@@ -114,6 +114,9 @@ namespace SiebwaldeApp.Integration
         public TrackRuntimeState State => _state;
 
         /// <inheritdoc />
+        public TrackControlMode? LastRequestedMode => _requestedMode;
+
+        /// <inheritdoc />
         public TrackControlMode? ActiveEcosMode => _ecosHost?.Mode;
 
         /// <inheritdoc />

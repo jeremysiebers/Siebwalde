@@ -29,6 +29,9 @@ namespace SiebwaldeApp
         private readonly RelayCommand _startRuntimeCommand;
         private readonly RelayCommand _stopRuntimeCommand;
         private readonly RelayCommand _restartRuntimeCommand;
+        private readonly RelayCommand _initTrackControllerCommand;
+        private readonly RelayCommand _initEcosSimulatorCommand;
+        private readonly RelayCommand _initFullSimulationCommand;
 
         #endregion
 
@@ -93,7 +96,7 @@ namespace SiebwaldeApp
         public ICommand InitAllControllers { get; set; }
 
         /// <summary>Start the track application.</summary>
-        public ICommand InitTrackController { get; set; }
+        public ICommand InitTrackController => _initTrackControllerCommand;
 
         /// <summary>Start the Fiddle Yard in real mode (falls back to simulator when not found).</summary>
         public ICommand InitFiddleYardController { get; set; }
@@ -102,15 +105,15 @@ namespace SiebwaldeApp
         public ICommand InitFiddleYardSimulator { get; set; }
 
         /// <summary>Start the ECoS host in simulator mode, so Koploper can connect without hardware.</summary>
-        public ICommand InitEcosSimulator { get; set; }
+        public ICommand InitEcosSimulator => _initEcosSimulatorCommand;
 
         /// <summary>Start the full software simulation (real track-control chain on the deterministic transport).</summary>
-        public ICommand InitFullSimulation { get; set; }
+        public ICommand InitFullSimulation => _initFullSimulationCommand;
 
         /// <summary>Explicit recovery for a latched control-path safety fault.</summary>
         public ICommand ResetControlSafety { get; set; }
 
-        /// <summary>Start the track-control runtime (simulator mode).</summary>
+        /// <summary>Start the track-control runtime in the last used mode (defaults to simulator when none).</summary>
         public ICommand StartRuntime => _startRuntimeCommand;
 
         /// <summary>Stop the track-control runtime.</summary>
@@ -148,11 +151,8 @@ namespace SiebwaldeApp
                 }
             });
 
-            InitTrackController = new RelayCommand(async () => await StartTrackAsync());
             InitFiddleYardController = new RelayCommand(async () => await StartFiddleYardAsync(false));
             InitFiddleYardSimulator = new RelayCommand(async () => await StartFiddleYardAsync(true));
-            InitEcosSimulator = new RelayCommand(async () => await StartEcosSimulatorAsync());
-            InitFullSimulation = new RelayCommand(async () => await StartFullSimulationAsync());
             ResetControlSafety = new RelayCommand(ResetControlSafetyNow);
 
             _startRuntimeCommand = new RelayCommand(
@@ -164,6 +164,16 @@ namespace SiebwaldeApp
             _restartRuntimeCommand = new RelayCommand(
                 async () => await RestartRuntimeAsync(),
                 () => TrackRuntimeControlPolicy.CanRestart(_runtime.State));
+
+            _initTrackControllerCommand = new RelayCommand(
+                async () => await StartTrackAsync(),
+                () => TrackRuntimeControlPolicy.CanStart(_runtime.State));
+            _initEcosSimulatorCommand = new RelayCommand(
+                async () => await StartEcosSimulatorAsync(),
+                () => TrackRuntimeControlPolicy.CanStart(_runtime.State));
+            _initFullSimulationCommand = new RelayCommand(
+                async () => await StartFullSimulationAsync(),
+                () => TrackRuntimeControlPolicy.CanStart(_runtime.State));
 
             Log("Init page ready. Press 'Detect hosts' to scan for FiddleYard, TrackController and Koploper.");
 
@@ -266,6 +276,12 @@ namespace SiebwaldeApp
 
         private async Task StartTrackAsync()
         {
+            if (!TrackRuntimeControlPolicy.CanStart(_runtime.State))
+            {
+                Log($"Cannot start: runtime is {_runtime.State}.");
+                return;
+            }
+
             if (!TrackControllerPresent)
             {
                 Log("TrackController not detected. Detection or the real target is required before starting.");
@@ -302,6 +318,12 @@ namespace SiebwaldeApp
         /// </summary>
         private async Task StartEcosSimulatorAsync()
         {
+            if (!TrackRuntimeControlPolicy.CanStart(_runtime.State))
+            {
+                Log($"Cannot start: runtime is {_runtime.State}.");
+                return;
+            }
+
             Log("Starting ECoS host in simulator mode (Koploper can connect on port 15471)...");
 
             await IoC.siebwaldeApplicationModel.StartEcosHostSimulatorAsync();
@@ -316,6 +338,12 @@ namespace SiebwaldeApp
         /// </summary>
         private async Task StartFullSimulationAsync()
         {
+            if (!TrackRuntimeControlPolicy.CanStart(_runtime.State))
+            {
+                Log($"Cannot start: runtime is {_runtime.State}.");
+                return;
+            }
+
             Log("Starting full software simulation (real track-control chain on the deterministic transport)...");
 
             await IoC.siebwaldeApplicationModel.StartFullSimulationAsync();
@@ -324,11 +352,11 @@ namespace SiebwaldeApp
             Log($"Full software simulation start requested. {EcosModeStatus}");
         }
 
-        /// <summary>Starts the track-control runtime in simulator mode.</summary>
+        /// <summary>Start the track-control runtime in the last used mode (defaults to simulator when none).</summary>
         private async Task StartRuntimeAsync()
         {
-            Log("Starting track-control runtime (simulator mode)...");
-            await _runtime.StartAsync(TrackControlMode.Simulator);
+            Log($"Starting track-control runtime (mode: {_runtime.LastRequestedMode ?? TrackControlMode.Simulator})...");
+            await _runtime.StartAsync(_runtime.LastRequestedMode ?? TrackControlMode.Simulator);
             Log($"Track-control runtime start requested. {RuntimeStateText}");
         }
 
@@ -362,6 +390,9 @@ namespace SiebwaldeApp
                 _startRuntimeCommand.RaiseCanExecuteChanged();
                 _stopRuntimeCommand.RaiseCanExecuteChanged();
                 _restartRuntimeCommand.RaiseCanExecuteChanged();
+                _initTrackControllerCommand.RaiseCanExecuteChanged();
+                _initEcosSimulatorCommand.RaiseCanExecuteChanged();
+                _initFullSimulationCommand.RaiseCanExecuteChanged();
             });
         }
 

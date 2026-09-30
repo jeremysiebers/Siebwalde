@@ -40,6 +40,9 @@ namespace SiebwaldeApp.Core
         /// <summary>Controlled stop followed by a fresh start reusing the last started mode.</summary>
         Task RestartAsync(CancellationToken ct = default);
 
+        /// <summary>The mode last passed to <see cref="StartAsync"/>, or null if the runtime has never been started.</summary>
+        TrackControlMode? LastRequestedMode { get; }
+
         /// <summary>The ECoS mode that is actually active, or null when the host is not running.</summary>
         TrackControlMode? ActiveEcosMode { get; }
 
