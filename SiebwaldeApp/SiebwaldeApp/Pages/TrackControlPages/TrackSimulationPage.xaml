@@ -31,22 +31,22 @@
                 </StackPanel>
 
                 <TextBlock Foreground="LightGray" FontSize="12">
-                    <Run Text="Active profile: " /><Run Text="{Binding ProfileName}" FontWeight="Bold" Foreground="White" />
+                    <Run Text="Active profile: " /><Run Text="{Binding ProfileName, Mode=OneWay}" FontWeight="Bold" Foreground="White" />
                 </TextBlock>
                 <TextBlock Foreground="LightGray" FontSize="12">
-                    <Run Text="Runtime state: " /><Run Text="{Binding RuntimeState}" FontWeight="Bold" Foreground="White" />
+                    <Run Text="Runtime state: " /><Run Text="{Binding RuntimeState, Mode=OneWay}" FontWeight="Bold" Foreground="White" />
                 </TextBlock>
                 <TextBlock Foreground="LightGray" FontSize="12">
-                    <Run Text="Movement permission: " /><Run Text="{Binding MovementPermission}" FontWeight="Bold" Foreground="White" />
+                    <Run Text="Movement permission: " /><Run Text="{Binding MovementPermission, Mode=OneWay}" FontWeight="Bold" Foreground="White" />
                 </TextBlock>
                 <TextBlock Foreground="LightGray" FontSize="12">
-                    <Run Text="Active ECoS mode: " /><Run Text="{Binding ActiveMode}" FontWeight="Bold" Foreground="White" />
+                    <Run Text="Active ECoS mode: " /><Run Text="{Binding ActiveMode, Mode=OneWay}" FontWeight="Bold" Foreground="White" />
                 </TextBlock>
                 <TextBlock Foreground="LightGray" FontSize="12">
-                    <Run Text="Detected slaves: " /><Run Text="{Binding DetectedSlaves}" FontWeight="Bold" Foreground="White" />
+                    <Run Text="Detected slaves: " /><Run Text="{Binding DetectedSlaves, Mode=OneWay}" FontWeight="Bold" Foreground="White" />
                 </TextBlock>
                 <TextBlock Foreground="LightGray" FontSize="12">
-                    <Run Text="Movement simulator: " /><Run Text="{Binding MovementSimulationAvailable}" FontWeight="Bold" Foreground="White" />
+                    <Run Text="Movement simulator: " /><Run Text="{Binding MovementSimulationAvailable, Mode=OneWay}" FontWeight="Bold" Foreground="White" />
                 </TextBlock>
 
                 <TextBlock Text="Sections" FontSize="14" FontWeight="Bold" Foreground="White" Margin="0,16,0,4" />
