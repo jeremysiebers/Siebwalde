@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using SiebwaldeApp.Core.TrackApplication.Simulator;
 
 namespace SiebwaldeApp.Core
 {
@@ -39,6 +40,9 @@ namespace SiebwaldeApp.Core
         /// <summary>Controlled stop followed by a fresh start reusing the last started mode.</summary>
         Task RestartAsync(CancellationToken ct = default);
 
+        /// <summary>The mode last passed to <see cref="StartAsync"/>, or null if the runtime has never been started.</summary>
+        TrackControlMode? LastRequestedMode { get; }
+
         /// <summary>The ECoS mode that is actually active, or null when the host is not running.</summary>
         TrackControlMode? ActiveEcosMode { get; }
 
@@ -62,6 +66,12 @@ namespace SiebwaldeApp.Core
 
         /// <summary>Read-only view of the current track amplifiers.</summary>
         IReadOnlyList<TrackAmplifierItem> TrackAmplifiers { get; }
+
+        /// <summary>
+        /// The controllable simulated-amplifier I/O surface, or null unless the runtime is running
+        /// in <see cref="TrackControlMode.FullSimulation"/>.
+        /// </summary>
+        ISimulatedTrackIo? SimulatedTrackIo { get; }
 
         /// <summary>Returns the current list of track amplifiers (empty when not running).</summary>
         List<TrackAmplifierItem> GetAmplifierListing();

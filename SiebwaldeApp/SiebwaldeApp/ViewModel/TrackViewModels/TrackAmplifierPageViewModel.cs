@@ -1,4 +1,5 @@
 ﻿using SiebwaldeApp.Core;
+using SiebwaldeApp.Core.TrackApplication.Simulator;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -221,6 +222,8 @@ namespace SiebwaldeApp
 
         private bool _suppressCoreUpdate;
 
+        private bool _simulateOccupancy;
+
         #endregion
 
         #region Public properties
@@ -260,6 +263,32 @@ namespace SiebwaldeApp
                 {
                     _isOccupied = value;
                     OnPropertyChanged(nameof(IsOccupied));
+                }
+            }
+        }
+
+        /// <summary>
+        /// True while the full software simulation is active, so the simulated-amplifier
+        /// occupancy toggle is meaningful. Read-only; driven by the runtime's I/O surface.
+        /// </summary>
+        public bool CanSimulateOccupancy => IoC.TrackRuntime.SimulatedTrackIo is not null;
+
+        /// <summary>
+        /// Operator toggle that drives the simulated-amplifier occupancy bit. Only meaningful
+        /// when <see cref="CanSimulateOccupancy"/> is true; it writes the occupancy of this
+        /// amplifier's simulated slave via the runtime's I/O surface.
+        /// </summary>
+        public bool SimulateOccupancy
+        {
+            get => _simulateOccupancy;
+            set
+            {
+                if (_simulateOccupancy != value)
+                {
+                    _simulateOccupancy = value;
+                    OnPropertyChanged(nameof(SimulateOccupancy));
+
+                    IoC.TrackRuntime.SimulatedTrackIo?.SetSlaveOccupancy((byte)SlaveNumber, value);
                 }
             }
         }
@@ -590,6 +619,10 @@ namespace SiebwaldeApp
         {
             if (model == null)
                 return;
+
+            // Refresh the simulation affordance every poll so the toggle appears/disappears when
+            // the runtime enters/leaves FullSimulation.
+            OnPropertyChanged(nameof(CanSimulateOccupancy));
 
             _suppressCoreUpdate = true;
             try

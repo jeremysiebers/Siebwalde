@@ -159,19 +159,21 @@ namespace SiebwaldeApp.Integration
             // Real mode outranks the simulator: a successfully started real track application
             // must not stay hidden behind a simulator that was started earlier. The reverse
             // request is refused, because replacing a live real host would take the real
-            // layout away from Koploper without the operator asking for it.
-            if (IsRunning && _mode == TrackControlMode.Real && mode == TrackControlMode.Simulator)
+            // layout away from Koploper without the operator asking for it. (Simulator <->
+            // FullSimulation transitions are allowed; only the authoritative real host is
+            // protected.)
+            if (IsRunning && _mode == TrackControlMode.Real && mode != TrackControlMode.Real)
             {
-                Log("Refusing to replace the running real ECoS host with the simulator.");
+                Log("Refusing to replace the running real ECoS host with a non-real mode.");
                 return EcosHostStartResult.Rejected;
             }
 
             // Validate before touching a running host, so a bad request cannot tear down a
             // working host.
-            if (mode == TrackControlMode.Real && (commClient is null || variables is null))
+            if (mode.IsFullTrackChain() && (commClient is null || variables is null))
             {
                 throw new ArgumentException(
-                    "Real mode requires the track communication client and the shared track variables.",
+                    "Full-chain mode (Real/FullSimulation) requires the track communication client and the shared track variables.",
                     nameof(commClient));
             }
 
@@ -217,7 +219,7 @@ namespace SiebwaldeApp.Integration
             _stopSink = new EcosHardwareStopSink(_log, _controlTrace);
             Safety = new ControlSafetyGuard(_stopSink, Diagnostics, _log, _controlTrace);
 
-            if (mode == TrackControlMode.Real)
+            if (mode.IsFullTrackChain())
             {
                 // Occupancy comes from the existing amplifier data path (the master's SLAVEINFO
                 // frame -> holding registers), so it becomes observable as soon as valid

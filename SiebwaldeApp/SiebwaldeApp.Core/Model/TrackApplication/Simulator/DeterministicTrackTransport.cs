@@ -36,11 +36,19 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         /// </summary>
         public IReadOnlyDictionary<byte, ushort> Hr0ReadbackOverrides { get; }
 
+        /// <summary>
+        /// When set, the transport emits a fresh SLAVEINFO frame for every detected slave on this
+        /// interval (modelling the real master's cyclic FC03 refresh). When null, the transport
+        /// stays fully deterministic with no timer (the pre-existing contract).
+        /// </summary>
+        public TimeSpan? PeriodicSlaveInfoInterval { get; }
+
         public TrackSimulatorConfig(
             ushort firmwareChecksum = DefaultFirmwareChecksum,
             IReadOnlyList<byte>? detectedSlaves = null,
             IReadOnlyCollection<byte>? droppedEchoSlaves = null,
-            IReadOnlyDictionary<byte, ushort>? hr0ReadbackOverrides = null)
+            IReadOnlyDictionary<byte, ushort>? hr0ReadbackOverrides = null,
+            TimeSpan? periodicSlaveInfoInterval = null)
         {
             FirmwareChecksum = firmwareChecksum;
             DetectedSlaves = detectedSlaves is null
@@ -52,6 +60,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
             Hr0ReadbackOverrides = hr0ReadbackOverrides is null
                 ? new Dictionary<byte, ushort>()
                 : new Dictionary<byte, ushort>(hr0ReadbackOverrides);
+            PeriodicSlaveInfoInterval = periodicSlaveInfoInterval;
         }
     }
 
@@ -64,7 +73,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
     /// every run, so the real track runtime (comm client -> init pipeline -> <c>TrackControlMain</c>
     /// write loop) can be exercised end-to-end without any network or hardware.
     /// </summary>
-    public sealed class DeterministicTrackTransport : ITrackTransport
+    public sealed class DeterministicTrackTransport : ITrackTransport, ISimulatedTrackIo
     {
         private const byte Header = 0xAA;
         private const byte SlaveInfo = 0xFF;
@@ -82,6 +91,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
 
         private Channel<byte[]>? _frames;
         private CancellationTokenSource? _cts;
+        private Task? _heartbeatTask;
 
         public DeterministicTrackTransport(TrackSimulatorConfig config)
         {
@@ -159,6 +169,13 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
                     new UnboundedChannelOptions { SingleReader = true, SingleWriter = false });
 
                 OpenCallCount++;
+
+                // Cyclic SLAVEINFO refresh: models the real master's periodic FC03 read that keeps
+                // the C# holding-register view fresh. Only started when a non-null interval is set.
+                if (_config.PeriodicSlaveInfoInterval is { } interval)
+                {
+                    _heartbeatTask = Task.Run(() => HeartbeatLoopAsync(interval, _cts.Token));
+                }
             }
 
             return Task.CompletedTask;
@@ -252,6 +269,100 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         {
             await CloseAsync().ConfigureAwait(false);
             DisposeCallCount++;
+        }
+
+        // --------------------------------------------------------------------
+        // ISimulatedTrackIo
+        // --------------------------------------------------------------------
+
+        /// <inheritdoc />
+        public IReadOnlyList<byte> DetectedSlaves
+        {
+            get
+            {
+                lock (_sync)
+                {
+                    return new List<byte>(_config.DetectedSlaves);
+                }
+            }
+        }
+
+        /// <inheritdoc />
+        public void SetSlaveOccupancy(byte slaveNumber, bool occupied)
+        {
+            lock (_sync)
+            {
+                // Not-opened or unknown slave: safe no-op, mirroring the defensive dispatch behavior.
+                var writer = _frames?.Writer;
+                if (writer is null || !_registers.TryGetValue(slaveNumber, out var registers))
+                    return;
+
+                var status = registers[TrackAmplifierRegisters.Status];
+                if (occupied)
+                    status |= TrackAmplifierRegisters.OccupiedBit;
+                else
+                    status = (ushort)(status & ~TrackAmplifierRegisters.OccupiedBit);
+                registers[TrackAmplifierRegisters.Status] = status;
+
+                // Emit a fresh frame immediately so the change is observed before the next heartbeat.
+                writer.TryWrite(BuildSlaveInfoFrame(slaveNumber));
+            }
+        }
+
+        /// <inheritdoc />
+        public void SetSlaveStatus(byte slaveNumber, ushort status)
+        {
+            lock (_sync)
+            {
+                // Not-opened or unknown slave: safe no-op, mirroring the defensive dispatch behavior.
+                var writer = _frames?.Writer;
+                if (writer is null || !_registers.TryGetValue(slaveNumber, out var registers))
+                    return;
+
+                registers[TrackAmplifierRegisters.Status] = status;
+
+                // Emit a fresh frame immediately so the change is observed before the next heartbeat.
+                writer.TryWrite(BuildSlaveInfoFrame(slaveNumber));
+            }
+        }
+
+        /// <summary>
+        /// Emits a SLAVEINFO frame for every detected slave on <paramref name="interval"/> until
+        /// cancellation. Only started when <see cref="TrackSimulatorConfig.PeriodicSlaveInfoInterval"/>
+        /// is set; it is stopped by the transport's <c>_cts</c> cancellation in <see cref="CloseAsync"/>.
+        /// </summary>
+        private async Task HeartbeatLoopAsync(TimeSpan interval, CancellationToken ct)
+        {
+            try
+            {
+                while (!ct.IsCancellationRequested)
+                {
+                    try
+                    {
+                        await Task.Delay(interval, ct).ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        break;
+                    }
+
+                    lock (_sync)
+                    {
+                        var writer = _frames?.Writer;
+                        if (writer is null)
+                            break;
+
+                        foreach (var slave in _config.DetectedSlaves)
+                        {
+                            writer.TryWrite(BuildSlaveInfoFrame(slave));
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // Best-effort background loop; exits on cancellation or disposal.
+            }
         }
 
         // --------------------------------------------------------------------
