@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using SiebwaldeApp.Core;
 using SiebwaldeApp.Core.Properties;
 using SiebwaldeApp.Core.TrackApplication.Simulator;
+using SiebwaldeApp.Core.TrackApplication.Topology;
 using SiebwaldeApp.Integration;
 using Xunit;
 
@@ -32,11 +33,17 @@ namespace SiebwaldeApp.Core.Tests
 
             public bool ResetSafety() => false;
 
+            public void SetProfile(LayoutProfile profile) { }
+
+            public IReadOnlyDictionary<int, SwitchPosition> GetSwitchPositions()
+                => new Dictionary<int, SwitchPosition>();
+
             public Task<EcosHostStartResult> StartAsync(
                 TrackControlMode mode,
                 ITrackCommClient? commClient,
                 TrackApplicationVariables? variables,
-                CancellationToken cancellationToken = default)
+                CancellationToken cancellationToken = default,
+                IMovementSimulation? movementSimulation = null)
             {
                 Mode = mode;
                 IsRunning = true;

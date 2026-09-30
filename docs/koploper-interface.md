@@ -179,6 +179,8 @@ routes: 1>2, 2>3, 3>4@<switch>:<position>, 3>5@<switch>:<position>, 4>1, 5>1
 
 Source: `Logging\Ovaaltje\BaanOverzicht_20260919_1222_0001.html` (blocks) and `..._0002.html` (decoder outputs, bezetmelders, loco addresses).
 
+The Koploper backup archives (`Logging\Ovaaltje\JSIF_*.zip`, `Siebwalde_*.zip`) are password-protected. The password is `195c79f4-5eec-4adb-b917-063f639ec93f`. This password is intentionally public and is not treated as a secret: it only protects the model-layout configuration archives. The complete layout can be read back from these archives as plain ASCII and parsed into a Siebwalde `LayoutProfile`.
+
 ### Blocks and bezetmelders
 
 | Koploper block | Bezetmelders | Amplifier section |

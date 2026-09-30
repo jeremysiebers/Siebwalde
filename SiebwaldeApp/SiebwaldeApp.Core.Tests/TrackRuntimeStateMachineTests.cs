@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using SiebwaldeApp.Core;
+using SiebwaldeApp.Core.TrackApplication.Simulator;
+using SiebwaldeApp.Core.TrackApplication.Topology;
 using SiebwaldeApp.Integration;
 using Xunit;
 
@@ -33,6 +35,11 @@ namespace SiebwaldeApp.Core.Tests
 
             public bool ResetSafety() => false;
 
+            public void SetProfile(LayoutProfile profile) { }
+
+            public IReadOnlyDictionary<int, SwitchPosition> GetSwitchPositions()
+                => new Dictionary<int, SwitchPosition>();
+
             /// <summary>Raises the host's Faulted event so a test can simulate a background fault.</summary>
             public void RaiseFault(RuntimeFaultEventArgs args) => Faulted?.Invoke(this, args);
 
@@ -40,7 +47,8 @@ namespace SiebwaldeApp.Core.Tests
                 TrackControlMode mode,
                 ITrackCommClient? commClient,
                 TrackApplicationVariables? variables,
-                CancellationToken cancellationToken = default)
+                CancellationToken cancellationToken = default,
+                IMovementSimulation? movementSimulation = null)
             {
                 StartCallCount++;
                 Mode = mode;

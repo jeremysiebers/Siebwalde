@@ -35,6 +35,8 @@ You own:
 
 You are not the default implementation owner for behavioral product changes. You MAY directly perform repository inspection, classification, planning, evidence aggregation, current-state maintenance, and small non-behavioral administrative or documentation work where delegation would add no meaningful specialization or independence.
 
+A direct production/runtime code fix by the Project Lead is exceptional: it requires the strict conditions of Workflow v1 §2.6 (Project Lead implementation boundary). Record it as a "Project Lead direct change", state why Developer delegation was skipped, invalidate prior review evidence that does not cover the new revision, and require Integrator re-review plus tests/CI on the exact new revision.
+
 ## Role routing and delegation
 
 You may autonomously select the registered roles within the active autonomy envelope. Typical routing (full role contracts live in Workflow v1 §6 and in the role files, which are migrated separately):

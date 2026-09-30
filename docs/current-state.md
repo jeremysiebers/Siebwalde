@@ -29,9 +29,9 @@ Siebwalde is the control application for a model railway. Koploper owns driving 
 
 ## Current verification baseline
 
-Executed at the verified baseline revision `f0ce047c0e80caede945a11edffa509dcce4840b` (FullSimulation merged, PR #14, incl. the double-start crash fix; re-run 2026-09-30):
+Executed at the verified baseline revision `1b98358fbe75db3f6fb3dda0045bd9b363fa5b89` (Full Simulation with Koploper + configurable topology increment; re-run 2026-09-30):
 
-- Debug tests: **435/435 PASS** (`dotnet test SiebwaldeApp.sln`)
+- Debug tests: **454/454 PASS** (`dotnet test SiebwaldeApp.sln`)
 - Release tests: **435/435 PASS** (`dotnet test SiebwaldeApp.sln -c Release --no-build`)
 - Release build: **0 errors / 170 warnings** (`dotnet build SiebwaldeApp.sln -c Release`)
 - `SiebwaldeApp.StopReachabilityHarness` build: **0 errors / 0 warnings**
@@ -64,7 +64,7 @@ Only currently material items; see `docs/backlog.md` for the full list.
 
 ## Active development direction
 
-- The **Recovery & Maintenance System** is the active direction (see `docs/recovery-maintenance-system.md`). Completed: Increment 1 (controllable runtime from WPF, PR #9); the software-only simulator transport (PR #10); "Observed-neutral restart/stop safety — software half" (PR #11); the V3 software integration test of the observed-neutral movement gate (PR #12); and the Full Software Simulation environment (PR #14). Remaining next step: the **V4 physical-neutral validation** of the software half — gated by Product Owner decisions 1, 2 and 5 and the firmware physical-fidelity question (`docs/recovery-maintenance-system.md` §5/§8/§9) — followed by the manual-control/arbiter (Increment 4) and hand-back (Increment 5) increments.
+- The **Recovery & Maintenance System** is the active direction (see `docs/recovery-maintenance-system.md`). Completed: Increment 1 (controllable runtime from WPF, PR #9); the software-only simulator transport (PR #10); "Observed-neutral restart/stop safety — software half" (PR #11); the V3 software integration test of the observed-neutral movement gate (PR #12); and the Full Software Simulation environment (PR #14). In progress (this PR): the **Full Simulation with Koploper + configurable topology** increment adds a Core `LayoutProfile` (repo-managed JSON topology/mapping, Example Oval profile) and a Core `DeterministicMovementSimulator` (deterministic train movement → section occupancy through the real chain), plus a WPF Simulation tab. Remaining next step: the **V4 physical-neutral validation** of the software half — gated by Product Owner decisions 1, 2 and 5 and the firmware physical-fidelity question (`docs/recovery-maintenance-system.md` §5/§8/§9) — followed by the manual-control/arbiter (Increment 4) and hand-back (Increment 5) increments.
 - The physical test oval autonomous running remains a separate, not-yet-started product direction.
 - **Firmware baseline restored (F1, 2026-09-29, merged PR #13, merge commit `e845b9d2e97ed92f00e0d9e3e031ed3a6eae2a7b`):** the `TrackAmplifier4.X` source was restored from the incomplete `b06f466` safety refactor to the last working `928ea7c` baseline (commit `1a94a90`; the refactor's history and design docs are preserved). A reproducible out-of-tree build harness (`tools/firmware/build-firmware.ps1`) builds the PIC18/PIC32 projects with pinned toolchains; the `Offset` configuration reproduces the committed `dist/Offset` HEX **byte-identically** with C# checksum `0x251F`; `TrackBackplane2.X`, the bootloader `No_Configurations` and `TrackController5` build cleanly. No hardware or flashing; the static bootloader is unchanged. See `docs/firmware-toolchain-readiness.md` §13.
 

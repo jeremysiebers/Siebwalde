@@ -49,6 +49,11 @@ namespace SiebwaldeApp
         /// </summary>
         public ICommand TrackAmplifierPage { get; set; }
 
+        /// <summary>
+        /// The command to show the Simulation page
+        /// </summary>
+        public ICommand TrackSimulationPage { get; set; }
+
         #endregion
 
         #region Constructor
@@ -62,6 +67,7 @@ namespace SiebwaldeApp
             TrackMainPage = new RelayCommand(() => IoC.Application.CurrentPage = ApplicationPage.TrackControl);
             TrackInitPage = new RelayCommand(() => IoC.Application.CurrentPage = ApplicationPage.TrackControl);
             TrackAmplifierPage = new RelayCommand(() => IoC.Application.CurrentPage = ApplicationPage.TrackAmplifier);
+            TrackSimulationPage = new RelayCommand(() => IoC.Application.CurrentPage = ApplicationPage.TrackSimulation);
             #endregion
 
             #region SiebwaldeMenu commands

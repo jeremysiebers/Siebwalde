@@ -299,6 +299,15 @@ The supplemental Integrator review concluded `PRODUCTION TRACE INCOMPLETE`; the 
 | Real-layout topology, block map and switch addresses. | The shipped defaults describe the test oval. | The real layout values are entered on the settings page. |
 | Signals 51..55 as switches. | Koploper commands them via `switch[...]`; they are unmapped and ignored. | Signals are either mapped or deliberately documented as out of scope. |
 
+## Layout Profiles (topology vs binding)
+
+The three named topology profiles (`Simple Loop`, `Koploper Oval`, future `Siebwalde Real Layout`) share one JSON schema and are reusable independent of the deterministic simulator or the real PIC32/PIC18. The physical binding (real amplifier ModBus addresses) is deliberately NOT part of the topology.
+
+| Item | Evidence | Acceptance criteria |
+| --- | --- | --- |
+| Future physical Simple Loop binding. | The four prototype amplifiers are at ModBus addresses **1, 3, 4, 6** (from `docs/koploper-interface.md` §"Physical validation (2026-09-19)"). The `Simple Loop` profile currently uses simulated `amplifierSlave` values 1..4; these are the simulated slave mapping, NOT the real addresses. | Map the 4 logical sections to real amplifier addresses 1/3/4/6 as a separate, separately-configured physical input — to be confirmed against the actual wired hardware (not simulated addresses 1..4). |
+| Future Siebwalde Real Layout profile. | The real layout is much larger than the test oval (see `docs/koploper-interface.md`). Not built now. | A `Siebwalde Real Layout` profile using the SAME schema as `Simple Loop`/`Koploper Oval`, with its real block/bezetmelder/switch/amplifier mapping entered (see the "Configuration / user-input dependency" section). |
+
 ## Recovery & Maintenance System (future)
 
 The ECoS emulator graceful-shutdown work (merged 2026-09-23, PR #8, merge commit `5fb751552b368015ba17f796d86f41c1d7fa7c13`) is recorded as a **completed foundation** for a future Recovery & Maintenance System.
@@ -360,3 +369,31 @@ Recorded during the Full Software Simulation increment (software-only); concrete
 
 
 
+
+## Full Simulation with Koploper + Topology � follow-ups (2026-09-30)
+
+Non-blocking findings from the R2 review of the config-driven topology + movement-simulator increment. None affect the Example Oval (closed loop, no switches, no dead ends).
+
+| Item | Evidence | Acceptance criteria |
+| --- | --- | --- |
+| Movement simulator: dead-end boundary emits ""free"" before the loco is parked. | `DeterministicMovementSimulator.MoveLoco` adds `SectionOccupancyChanged(section, false)` before checking whether a next section exists, so a future dead-end layout would report the section free while the loco sits at the boundary. | At a dead end, the loco stops without clearing its own section occupancy. |
+| Loader does not reject a section referenced by more than one block. | `LayoutProfileLoader` validates that block sections exist but not cross-block uniqueness; the movement sim's `_sectionPlacement` dictionary would silently overwrite on a duplicate. | Duplicate section ownership is a validation error. |
+| Movement-sim timer/teardown race (theoretical). | Occupancy events fire outside the sim `_lock`; across a very fast Stop/Restart an in-flight tick could target a freshly created transport. `DeterministicTrackTransport.SetSlaveOccupancy` no-ops on a closed writer, so it is benign today. | (Optional) tighten event emission to observe a consistent transport reference across Stop/Restart. |
+
+Firmware: no new firmware/protocol finding. The movement simulator reuses the existing HR2 bit 10 occupancy contract and the ""section == ModBus slave (1..50)"" mapping already mirrored by `DeterministicTrackTransport`; no firmware change is required.
+
+## Full Simulation profiles � follow-ups (2026-09-30 corrective loop)
+
+| Item | Evidence | Acceptance criteria |
+| --- | --- | --- |
+| Observed-neutral grant race (pre-existing, software-only). | `EstablishObservedNeutralAsync` can grant movement from the in-memory `HoldingReg[0]=399` pre-seeded by `InitializeDefaultPwmSetpoints` plus a fresh timestamp from an occupancy/heartbeat frame, before the 10 Hz write loop has actually pushed the neutral 399 into the transport's registers. Manifests as a flaky restart assertion in `FullSimulation_OvalProfile_DrivesLoco_AndShiftsOccupancy`. | The movement gate grants only after a genuinely observed (echoed) neutral, not an in-memory default; pin with a deterministic test. |
+| FullSimulation switch output is a recorded-only virtual no-op. | To make the Koploper Oval passing-loop branch selectable, the FullSimulation switch sink was made ""available"" (recorded, no physical output); Real mode remains ""not wired"". | Documented as simulation-only switch semantics; physical switch output remains a separate V4 concern. |
+
+## Full Simulation interactive acceptance findings (2026-09-30, PR #16)
+
+Non-blocking system findings from the interactive WPF + real Koploper acceptance (all demo checks PASS).
+
+| Item | Evidence | Disposition |
+| --- | --- | --- |
+| Restart/resynchronization boundary (future recovery/ownership/resync question). | After a FullSimulation Stop/Restart, Siebwalde re-initializes the simulator state to the configured start positions (loco 1 -> block 1, loco 2 -> block 3), while the external Koploper client may retain its previous internal/visual loco position until the operator/client re-synchronizes. | Not a C# runtime defect; does not block PR #16. Recorded as an explicit future question: do NOT silently assume Koploper position is automatically correct after a Siebwalde runtime restart. |
+| Manual driving sends no turnout command. | Driving via the Koploper hand controller does not by itself send `switch[1|2]`; the passing loop therefore requires an explicit valid switch state. The automatic schedule sends the complementary switch pair correctly, and both branches (3->4 and 3->5) are interactively proven. | Correct and fail-safe for this increment. |

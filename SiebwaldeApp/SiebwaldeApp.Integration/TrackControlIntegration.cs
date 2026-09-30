@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using SiebwaldeApp.Core;
+using SiebwaldeApp.Core.TrackApplication.Simulator;
 using SiebwaldeApp.EcosEmu;
 
 namespace SiebwaldeApp.Integration
@@ -38,7 +39,8 @@ namespace SiebwaldeApp.Integration
             ControlSafetyGuard? safetyGuard = null,
             ControlDiagnostics? diagnostics = null,
             TrackAmplifierGroups? trackAmplifierGroups = null,
-            IControlTrace? controlTrace = null)
+            IControlTrace? controlTrace = null,
+            IMovementSimulation? movementSimulation = null)
         {
             _commClient = commClient ?? throw new ArgumentNullException(nameof(commClient));
             if (variables is null) throw new ArgumentNullException(nameof(variables));
@@ -60,8 +62,13 @@ namespace SiebwaldeApp.Integration
 
             TrackAmplifierGroups = trackAmplifierGroups ?? TrackAmplifierGroups.Empty;
 
+            // In FullSimulation the movement simulator is the authoritative block-position source
+            // for the real backend (so SetLocoSpeed resolves block -> amplifier from the simulated
+            // position). The ECoS backend keeps the original provider (Koploper external info).
+            var realBackendPositionProvider = movementSimulation ?? blockPositionProvider;
+
             RealBackend = new TrackAmplifierHardwareBackend(
-                blockPositionProvider,
+                realBackendPositionProvider,
                 topology,
                 variables,
                 log,
@@ -77,11 +84,17 @@ namespace SiebwaldeApp.Integration
             // standalone emulator host).
             if (locoRepository is not null)
             {
+                // The tee forwards movement + power to the movement simulator as well as the
+                // real backend, so both stay in sync.
+                IHardwareBackend target = movementSimulation is null
+                    ? RealBackend
+                    : new SimulationTeeHardwareBackend(RealBackend, movementSimulation);
+
                 // Switch commands must be translated through the shared switch mapping before
                 // they reach a hardware backend, so real and simulator mode behave alike.
                 IHardwareBackend hardware = switchController is null
-                    ? RealBackend
-                    : new SwitchTranslatingHardwareBackend(RealBackend, switchController, log);
+                    ? target
+                    : new SwitchTranslatingHardwareBackend(target, switchController, log);
 
                 // Movement commands pass through the safety interlock so a latched fault cannot
                 // be bypassed by a later command from Koploper. It also enforces the shared

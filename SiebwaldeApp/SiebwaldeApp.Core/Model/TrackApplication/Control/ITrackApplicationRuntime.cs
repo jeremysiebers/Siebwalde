@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using SiebwaldeApp.Core.TrackApplication.Simulator;
+using SiebwaldeApp.Core.TrackApplication.Topology;
 
 namespace SiebwaldeApp.Core
 {
@@ -72,6 +73,33 @@ namespace SiebwaldeApp.Core
         /// in <see cref="TrackControlMode.FullSimulation"/>.
         /// </summary>
         ISimulatedTrackIo? SimulatedTrackIo { get; }
+
+        /// <summary>
+        /// The movement simulator driving <see cref="TrackControlMode.FullSimulation"/>, or null
+        /// when the runtime is not running in FullSimulation. Read/write surface for the simulated
+        /// locomotives (positions, placement, speed).
+        /// </summary>
+        IMovementSimulation? MovementSimulation { get; }
+
+        /// <summary>
+        /// The name of the active layout profile driving FullSimulation, or null when no profile
+        /// is loaded. Used by the Simulation tab to show what the simulation is running against.
+        /// </summary>
+        string? ActiveProfileName { get; }
+
+        /// <summary>
+        /// The layout profile that drives FullSimulation: the profile last selected via
+        /// <see cref="SelectFullSimulationProfile"/>, or the constructor-supplied default when
+        /// none was selected.
+        /// </summary>
+        LayoutProfile? ActiveFullSimulationProfile { get; }
+
+        /// <summary>
+        /// Selects the layout profile to use for the next <see cref="StartAsync"/> in
+        /// <see cref="TrackControlMode.FullSimulation"/>. It also updates the underlying ECoS host's
+        /// composition inputs; only valid while the runtime is stopped.
+        /// </summary>
+        void SelectFullSimulationProfile(LayoutProfile profile);
 
         /// <summary>Returns the current list of track amplifiers (empty when not running).</summary>
         List<TrackAmplifierItem> GetAmplifierListing();
