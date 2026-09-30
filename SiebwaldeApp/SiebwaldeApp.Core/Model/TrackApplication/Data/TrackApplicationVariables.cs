@@ -96,6 +96,10 @@ namespace SiebwaldeApp.Core
         /// Initializes all known amplifiers with a default PWM set point
         /// in HoldingReg0 bits 0..9. This does not enable power; it only
         /// sets the idle value that will be used once the amplifiers are enabled.
+        ///
+        /// This is an in-memory default write, NOT a protocol readback: it clears
+        /// <see cref="TrackAmplifierItem.ProtocolReadbackObserved"/> so a neutral observer can never
+        /// mistake this local 399 for a genuine, current SLAVEINFO echo of neutral.
         /// </summary>
         public void InitializeDefaultPwmSetpoints(ushort defaultPwm)
         {
@@ -127,6 +131,11 @@ namespace SiebwaldeApp.Core
 
                 regs[0] = reg0;
                 amp.HoldingReg = regs;
+
+                // Writing the in-memory default overwrites the register value outside the protocol
+                // path, so the readback evidence is no longer valid. A neutral observer must not
+                // treat this locally-written 399 as a protocol-observed neutral.
+                amp.ProtocolReadbackObserved = false;
             }
         }
 

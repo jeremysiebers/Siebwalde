@@ -56,6 +56,25 @@ namespace SiebwaldeApp.Core
         public DateTimeOffset? LastDataReceivedUtc { get; set; }
 
         /// <summary>
+        /// True only when the current <see cref="HoldingReg"/> content was populated by a genuine
+        /// protocol SLAVEINFO readback in this runtime instance.
+        ///
+        /// This is the explicit evidence that separates "a register value is present" from "the
+        /// register value was actually received via protocol". <see cref="LastDataReceivedUtc"/>
+        /// alone proves a frame was parsed, not that the current <see cref="HoldingReg"/> values
+        /// are that frame: a local default write (for example
+        /// <c>InitializeDefaultPwmSetpoints</c>) overwrites the register values without touching
+        /// the timestamp, so a stale timestamp could otherwise make a locally-written default look
+        /// like a fresh protocol observation.
+        ///
+        /// The flag is stamped only by the comm client when it parses a SLAVEINFO frame, and is
+        /// cleared whenever the register content is overwritten outside the protocol path. A
+        /// neutral observer must require it (together with freshness) instead of trusting a
+        /// timestamp that could belong to an unrelated frame.
+        /// </summary>
+        public bool ProtocolReadbackObserved { get; set; }
+
+        /// <summary>
         /// Holding registers of this track amplifier.
         /// The backing array is kept alive; assigning copies into it.
         /// </summary>

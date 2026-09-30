@@ -527,8 +527,9 @@ namespace SiebwaldeApp.Integration
         }
 
         /// <summary>
-        /// Polls until every configured amplifier reports current data whose PWM field equals the
-        /// neutral setpoint, or until the bounded window elapses / cancellation is requested.
+        /// Polls until every configured amplifier reports a genuine, current, protocol SLAVEINFO
+        /// readback whose PWM field equals the neutral setpoint, or until the bounded window elapses /
+        /// cancellation is requested.
         /// </summary>
         private async Task<bool> ObserveNeutralAsync(CancellationToken ct)
         {
@@ -559,7 +560,12 @@ namespace SiebwaldeApp.Integration
             return IsNeutralObserved();
         }
 
-        /// <summary>True when every configured amplifier reports fresh, current neutral PWM.</summary>
+        /// <summary>
+        /// True when every configured amplifier reports a genuine, current, protocol SLAVEINFO
+        /// readback of the neutral PWM. The protocol-readback marker is required, so an in-memory
+        /// default value (for example the 399 written by <c>SetDefaultPwmSetpointsStep</c>) is never
+        /// mistaken for a protocol observation just because a stale timestamp is still fresh.
+        /// </summary>
         private bool IsNeutralObserved()
         {
             if (_trackVariables is null)
@@ -567,33 +573,9 @@ namespace SiebwaldeApp.Integration
                 return false;
             }
 
-            var items = _trackVariables.trackAmpItems;
-            if (items is null)
-            {
-                return false;
-            }
-
-            foreach (var slave in EffectiveDomain())
-            {
-                var item = items.FirstOrDefault(a => a is not null && a.SlaveNumber == slave);
-                if (!TrackAmplifierDataFreshness.IsCurrentData(item))
-                {
-                    return false;
-                }
-
-                var registers = item!.HoldingReg;
-                if (registers is null || registers.Length == 0)
-                {
-                    return false;
-                }
-
-                if ((registers[TrackAmplifierRegisters.PwmCommand] & 0x03FF) != AmplifierSpeedMapper.NeutralPwm)
-                {
-                    return false;
-                }
-            }
-
-            return true;
+            return TrackAmplifierNeutralObservation.AreAllObservedNeutral(
+                _trackVariables.trackAmpItems,
+                EffectiveDomain());
         }
 
         private static ITrackTransport CreateRealTransport()
