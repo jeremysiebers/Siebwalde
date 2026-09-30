@@ -355,6 +355,12 @@ namespace SiebwaldeApp
         /// <summary>Start the track-control runtime in the last used mode (defaults to simulator when none).</summary>
         private async Task StartRuntimeAsync()
         {
+            if (!TrackRuntimeControlPolicy.CanStart(_runtime.State))
+            {
+                Log($"Cannot start: runtime is {_runtime.State}.");
+                return;
+            }
+
             Log($"Starting track-control runtime (mode: {_runtime.LastRequestedMode ?? TrackControlMode.Simulator})...");
             await _runtime.StartAsync(_runtime.LastRequestedMode ?? TrackControlMode.Simulator);
             Log($"Track-control runtime start requested. {RuntimeStateText}");
