@@ -206,6 +206,28 @@ An increment is non-trivial when it materially affects one or more of:
 
 Pure spelling, formatting, comment-only, metadata-only, or similarly non-behavioral maintenance MAY be classified as trivial.
 
+### 2.6 Project Lead implementation boundary
+
+The Project Lead is primarily the orchestration owner and normally does **not** perform production/runtime code fixes itself. Implementation and behaviour changes are normally delegated to the Developer agent.
+
+A direct Project Lead change to production/runtime code is only permitted as an exceptional, strictly bounded unblock correction when ALL of the following hold:
+
+- the root cause is exactly and sufficiently certainly identified;
+- the change is small and local;
+- no new architecture or product decision is required;
+- delegation would add demonstrably disproportionate overhead;
+- the exception is explicitly recorded.
+
+Every direct Project Lead change that affects production or runtime behaviour MUST subsequently:
+
+- be explicitly recorded as a **Project Lead direct change**;
+- state why normal Developer delegation was skipped;
+- invalidate any prior independent review evidence that does not cover the new revision;
+- be independently re-reviewed by the Integrator on the exact new revision;
+- re-run (or demonstrably re-confirm) the applicable tests and CI on that revision before `MERGE_READY` may be claimed again.
+
+Direct Project Lead changes remain normally permitted for: workflow state / the Active State Manifest, mechanical repository administration, orchestration metadata, strictly non-behavioural documentation, and other administrative work explicitly allowed by Workflow v1.
+
 ---
 
 ## 3. Workflow state model
