@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using SiebwaldeApp.Core;
 using SiebwaldeApp.Core.TrackApplication.Simulator;
+using SiebwaldeApp.Core.TrackApplication.Topology;
 using SiebwaldeApp.Integration;
 using Xunit;
 
@@ -33,6 +34,11 @@ namespace SiebwaldeApp.Core.Tests
             public Func<CancellationToken, Task<EcosHostStopResult>>? StopHandler { get; set; }
 
             public bool ResetSafety() => false;
+
+            public void SetProfile(LayoutProfile profile) { }
+
+            public IReadOnlyDictionary<int, SwitchPosition> GetSwitchPositions()
+                => new Dictionary<int, SwitchPosition>();
 
             /// <summary>Raises the host's Faulted event so a test can simulate a background fault.</summary>
             public void RaiseFault(RuntimeFaultEventArgs args) => Faulted?.Invoke(this, args);

@@ -90,8 +90,9 @@ namespace SiebwaldeApp
             // Load the repository-managed layout profile (best-effort). When it loads, the profile
             // drives the whole control-chain composition (topology, block map, switch mapping,
             // grouping, FullSimulation transport + movement simulator); otherwise the settings-
-            // derived defaults are used unchanged.
-            var profileComposition = FullSimulationProfile.TryLoadExampleOval(out var profileErrors);
+            // derived defaults are used unchanged. Simple Loop is the default when no profile is
+            // selected at runtime.
+            FullSimulationProfile.TryLoadByName("Simple Loop", out var profileComposition, out var profileErrors);
             foreach (var profileError in profileErrors)
             {
                 SiebwaldeApp.Core.IoC.Logger.Log($"Layout profile problem: {profileError}", "IoC");

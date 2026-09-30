@@ -9,7 +9,7 @@ namespace SiebwaldeApp.Core.Tests
     {
         private const string ValidOvalJson = @"
 {
-  ""name"": ""Example Oval"",
+  ""name"": ""Simple Loop"",
   ""description"": ""4 blocks, 4 sections, 4 slaves."",
   ""detectedSlaves"": [1,2,3,4],
   ""sections"": [
@@ -51,7 +51,7 @@ namespace SiebwaldeApp.Core.Tests
             Assert.NotNull(profile);
             Assert.Empty(errors);
 
-            Assert.Equal("Example Oval", profile!.Name);
+            Assert.Equal("Simple Loop", profile!.Name);
             Assert.Equal(new byte[] { 1, 2, 3, 4 }, profile.DetectedSlaves);
             Assert.Equal(4, profile.Sections.Count);
             Assert.Equal(4, profile.Blocks.Count);
@@ -76,14 +76,74 @@ namespace SiebwaldeApp.Core.Tests
         }
 
         [Fact]
-        public void ExampleOvalFile_IsCopiedToOutput_AndLoads()
+        public void SimpleLoopFile_IsCopiedToOutput_AndLoads()
         {
             Assert.True(
-                LayoutProfileLoader.TryLoadFromFile(LayoutProfileLoader.ExampleOvalPath, out var profile, out var errors),
+                LayoutProfileLoader.TryLoadFromFile(LayoutProfileLoader.SimpleLoopPath, out var profile, out var errors),
+                string.Join("; ", errors));
+            Assert.NotNull(profile);
+            Assert.Equal("Simple Loop", profile!.Name);
+            Assert.Equal(4, profile.Blocks.Count);
+            Assert.Equal(new byte[] { 1, 2, 3, 4 }, profile.DetectedSlaves);
+        }
+
+        [Fact]
+        public void GetAvailableProfileNames_ContainsBothRepositoryProfiles()
+        {
+            var names = LayoutProfileLoader.GetAvailableProfileNames();
+            Assert.Contains("Simple Loop", names);
+            Assert.Contains("Koploper Oval", names);
+        }
+
+        [Fact]
+        public void TryLoadByName_SimpleLoop_Loads()
+        {
+            Assert.True(
+                LayoutProfileLoader.TryLoadByName("Simple Loop", out var profile, out var errors),
                 string.Join("; ", errors));
             Assert.NotNull(profile);
             Assert.Equal(4, profile!.Blocks.Count);
-            Assert.Equal(new byte[] { 1, 2, 3, 4 }, profile.DetectedSlaves);
+        }
+
+        [Fact]
+        public void TryLoadByName_KoploperOval_LoadsAndProjects()
+        {
+            Assert.True(
+                LayoutProfileLoader.TryLoadByName("Koploper Oval", out var profile, out var errors),
+                string.Join("; ", errors));
+            Assert.NotNull(profile);
+            Assert.Equal("Koploper Oval", profile!.Name);
+            Assert.Equal(new byte[] { 1, 2, 3, 4, 5 }, profile.DetectedSlaves);
+            Assert.Equal(5, profile.Sections.Count);
+            Assert.Equal(5, profile.Blocks.Count);
+            Assert.Equal(2, profile.Switches.Count);
+            Assert.Equal(6, profile.Routes.Count);
+            Assert.Equal(2, profile.Locomotives.Count);
+            Assert.Equal(1, profile.Locomotives[0].Address);
+            Assert.Equal(2, profile.Locomotives[1].Address);
+
+            // 10 bezetmelders, two per block (1.01 .. 1.10).
+            Assert.Equal(10, profile.Sections.SelectMany(s => s.Bezetmelders).Count());
+            Assert.Equal(new[] { "1.09", "1.10" }, profile.TryGetSection(5)!.Bezetmelders);
+
+            // Block topology: block 3 has the switch-conditional branch 3>4@1:0 and 3>5@1:1.
+            var topology = profile.ToBlockTopology();
+            var from3 = topology.GetTransitionsFrom(3);
+            Assert.Contains(from3, t => t.ToBlock == 4 && t.SwitchId == 1 && t.RequiredSwitchPosition == SwitchPosition.Straight);
+            Assert.Contains(from3, t => t.ToBlock == 5 && t.SwitchId == 1 && t.RequiredSwitchPosition == SwitchPosition.Diverging);
+
+            // Switch mapping projects both switches.
+            var switchMapping = profile.ToSwitchMapping();
+            Assert.True(switchMapping.IsMapped(1));
+            Assert.True(switchMapping.IsMapped(2));
+        }
+
+        [Fact]
+        public void TryLoadByName_UnknownName_Fails()
+        {
+            Assert.False(LayoutProfileLoader.TryLoadByName("Not A Layout", out var profile, out var errors));
+            Assert.Null(profile);
+            Assert.NotEmpty(errors);
         }
 
         // ---------------------------------------------------------------------------------

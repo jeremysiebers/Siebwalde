@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using SiebwaldeApp.Core;
 using SiebwaldeApp.Core.TrackApplication.Simulator;
+using SiebwaldeApp.Core.TrackApplication.Topology;
 using SiebwaldeApp.EcosEmu;
 
 namespace SiebwaldeApp.Integration
@@ -32,10 +33,10 @@ namespace SiebwaldeApp.Integration
         public const int DefaultKoploperExternalInfoPort = 5700;
 
         private readonly string _locoRepositoryPath;
-        private readonly BlockTopology _topology;
-        private readonly KoploperBlockMap _blockMap;
-        private readonly SwitchMapping _switchMapping;
-        private readonly TrackAmplifierGroups _trackAmplifierGroups;
+        private BlockTopology _topology;
+        private KoploperBlockMap _blockMap;
+        private SwitchMapping _switchMapping;
+        private TrackAmplifierGroups _trackAmplifierGroups;
         private readonly string _externalInfoHost;
         private readonly int _externalInfoPort;
         private readonly int _ecosListenPort;
@@ -233,11 +234,20 @@ namespace SiebwaldeApp.Integration
                 Observability = new AmplifierOccupancyObservability(variables!);
 
                 // The physical switch side is not wired to real hardware yet, so the real
-                // output deliberately drives nothing and says so. The translation path is
-                // still the shared one, so only this sink has to change later.
-                Switches = new SwitchController(
-                    _switchMapping,
-                    new DelegateSwitchOutput(
+                // output deliberately drives nothing and says so. FullSimulation runs on the
+                // deterministic simulator, so its switch output is virtual (available and
+                // recorded) so switch-conditional routes (e.g. 3>4@1:0 vs 3>5@1:1) are selectable.
+                // The translation path is still the shared one, so only this sink differs.
+                ISwitchOutput switchOutput = mode == TrackControlMode.FullSimulation
+                    ? new DelegateSwitchOutput(
+                        (address, position) =>
+                        {
+                            Log(
+                                $"FullSimulation switch output {address} driven to {position} (virtual; recorded only).");
+                            return true;
+                        },
+                        isAvailable: true)
+                    : new DelegateSwitchOutput(
                         (address, position) =>
                         {
                             Log(
@@ -245,7 +255,11 @@ namespace SiebwaldeApp.Integration
                                 $"{position} was NOT driven.");
                             return false;
                         },
-                        isAvailable: false),
+                        isAvailable: false);
+
+                Switches = new SwitchController(
+                    _switchMapping,
+                    switchOutput,
                     _log,
                     Diagnostics,
                     Safety,
@@ -523,6 +537,30 @@ namespace SiebwaldeApp.Integration
         /// A latched fault never clears itself, not even when a later command arrives.
         /// </summary>
         public bool ResetSafety() => Safety?.Reset() ?? false;
+
+        /// <inheritdoc />
+        public void SetProfile(LayoutProfile profile)
+        {
+            if (profile is null)
+            {
+                throw new ArgumentNullException(nameof(profile));
+            }
+
+            if (IsRunning)
+            {
+                throw new InvalidOperationException(
+                    "Cannot change the layout profile while the ECoS host is running.");
+            }
+
+            _topology = profile.ToBlockTopology();
+            _blockMap = profile.ToKoploperBlockMap();
+            _switchMapping = profile.ToSwitchMapping();
+            _trackAmplifierGroups = profile.ToTrackAmplifierGroups();
+        }
+
+        /// <inheritdoc />
+        public IReadOnlyDictionary<int, SwitchPosition> GetSwitchPositions()
+            => Switches?.GetLogicalPositions() ?? NoSwitches;
 
         /// <summary>
         /// Binds the divergence checker as the revalidation rule for recovery, so an explicit

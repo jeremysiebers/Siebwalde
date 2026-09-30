@@ -31,12 +31,97 @@ namespace SiebwaldeApp.Core.TrackApplication.Topology
         };
 
         /// <summary>
-        /// The repository-managed example oval profile, resolved against
-        /// <see cref="AppContext.BaseDirectory"/> (the file is copied to the output directory by
+        /// The directory of repository-managed profiles, resolved against
+        /// <see cref="AppContext.BaseDirectory"/> (the files are copied to the output directory by
         /// the Core project).
         /// </summary>
-        public static string ExampleOvalPath
-            => Path.Combine(AppContext.BaseDirectory, "Topology", "profiles", "example-oval.json");
+        public static string ProfilesDirectory
+            => Path.Combine(AppContext.BaseDirectory, "Topology", "profiles");
+
+        /// <summary>
+        /// The repository-managed "Simple Loop" profile file, resolved against
+        /// <see cref="AppContext.BaseDirectory"/>.
+        /// </summary>
+        public static string SimpleLoopPath
+            => Path.Combine(ProfilesDirectory, "simple-loop.json");
+
+        /// <summary>
+        /// The repository-managed "Koploper Oval" profile file, resolved against
+        /// <see cref="AppContext.BaseDirectory"/>.
+        /// </summary>
+        public static string KoploperOvalPath
+            => Path.Combine(ProfilesDirectory, "koploper-oval.json");
+
+        /// <summary>
+        /// Enumerates the display names (<see cref="LayoutProfile.Name"/>) of the loadable
+        /// repository profiles by scanning <c>Topology/profiles/*.json</c> under
+        /// <see cref="AppContext.BaseDirectory"/>. Files that fail to load or validate are skipped.
+        /// </summary>
+        public static IReadOnlyList<string> GetAvailableProfileNames()
+        {
+            var names = new List<string>();
+
+            foreach (var path in EnumerateProfileFiles())
+            {
+                if (TryLoadFromFile(path, out var profile, out _) &&
+                    profile is not null &&
+                    !string.IsNullOrWhiteSpace(profile.Name))
+                {
+                    names.Add(profile.Name);
+                }
+            }
+
+            return names;
+        }
+
+        /// <summary>
+        /// Loads the repository profile whose <see cref="LayoutProfile.Name"/> equals
+        /// <paramref name="name"/> (case-insensitive). Returns false (with an error) when no such
+        /// profile exists or it cannot be loaded/validated.
+        /// </summary>
+        public static bool TryLoadByName(
+            string? name,
+            out LayoutProfile? profile,
+            out IReadOnlyList<string> errors)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                profile = null;
+                errors = new List<string> { "No profile name was supplied." };
+                return false;
+            }
+
+            foreach (var path in EnumerateProfileFiles())
+            {
+                if (TryLoadFromFile(path, out var candidate, out _) && candidate is not null)
+                {
+                    if (string.Equals(candidate.Name, name, StringComparison.OrdinalIgnoreCase))
+                    {
+                        profile = candidate;
+                        errors = Array.Empty<string>();
+                        return true;
+                    }
+                }
+            }
+
+            profile = null;
+            errors = new List<string> { $"No repository profile named '{name}' was found in '{ProfilesDirectory}'." };
+            return false;
+        }
+
+        private static IEnumerable<string> EnumerateProfileFiles()
+        {
+            if (!Directory.Exists(ProfilesDirectory))
+            {
+                yield break;
+            }
+
+            foreach (var file in Directory.EnumerateFiles(ProfilesDirectory, "*.json")
+                         .OrderBy(path => path, StringComparer.OrdinalIgnoreCase))
+            {
+                yield return file;
+            }
+        }
 
         /// <summary>Loads a profile from JSON text. Returns false (with every error) on any problem.</summary>
         public static bool TryLoad(string? json, out LayoutProfile? profile, out IReadOnlyList<string> errors)

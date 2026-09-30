@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using SiebwaldeApp.Core.TrackApplication.Simulator;
+using SiebwaldeApp.Core.TrackApplication.Topology;
 
 namespace SiebwaldeApp.Core
 {
@@ -80,5 +82,19 @@ namespace SiebwaldeApp.Core
         /// awaiting the owned tasks; used by the internal mode-transition path. Idempotent.
         /// </summary>
         void Stop();
+
+        /// <summary>
+        /// Replaces the topology/block-map/switch-mapping (and operational grouping) the host
+        /// composes with on its next start, projected from the supplied profile. Only valid while
+        /// the host is not running; throws <see cref="InvalidOperationException"/> otherwise.
+        /// </summary>
+        void SetProfile(LayoutProfile profile);
+
+        /// <summary>
+        /// The logical switch positions known to the running host's switch controller, keyed by
+        /// ECoS/Koploper switch address. Empty when the host is not running or no switch position
+        /// is known yet.
+        /// </summary>
+        IReadOnlyDictionary<int, SwitchPosition> GetSwitchPositions();
     }
 }

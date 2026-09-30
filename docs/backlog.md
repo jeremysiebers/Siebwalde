@@ -299,6 +299,15 @@ The supplemental Integrator review concluded `PRODUCTION TRACE INCOMPLETE`; the 
 | Real-layout topology, block map and switch addresses. | The shipped defaults describe the test oval. | The real layout values are entered on the settings page. |
 | Signals 51..55 as switches. | Koploper commands them via `switch[...]`; they are unmapped and ignored. | Signals are either mapped or deliberately documented as out of scope. |
 
+## Layout Profiles (topology vs binding)
+
+The three named topology profiles (`Simple Loop`, `Koploper Oval`, future `Siebwalde Real Layout`) share one JSON schema and are reusable independent of the deterministic simulator or the real PIC32/PIC18. The physical binding (real amplifier ModBus addresses) is deliberately NOT part of the topology.
+
+| Item | Evidence | Acceptance criteria |
+| --- | --- | --- |
+| Future physical Simple Loop binding. | The four prototype amplifiers are at ModBus addresses **1, 3, 4, 6** (from `docs/koploper-interface.md` Â§"Physical validation (2026-09-19)"). The `Simple Loop` profile currently uses simulated `amplifierSlave` values 1..4; these are the simulated slave mapping, NOT the real addresses. | Map the 4 logical sections to real amplifier addresses 1/3/4/6 as a separate, separately-configured physical input â€” to be confirmed against the actual wired hardware (not simulated addresses 1..4). |
+| Future Siebwalde Real Layout profile. | The real layout is much larger than the test oval (see `docs/koploper-interface.md`). Not built now. | A `Siebwalde Real Layout` profile using the SAME schema as `Simple Loop`/`Koploper Oval`, with its real block/bezetmelder/switch/amplifier mapping entered (see the "Configuration / user-input dependency" section). |
+
 ## Recovery & Maintenance System (future)
 
 The ECoS emulator graceful-shutdown work (merged 2026-09-23, PR #8, merge commit `5fb751552b368015ba17f796d86f41c1d7fa7c13`) is recorded as a **completed foundation** for a future Recovery & Maintenance System.
@@ -361,7 +370,7 @@ Recorded during the Full Software Simulation increment (software-only); concrete
 
 
 
-## Full Simulation with Koploper + Topology — follow-ups (2026-09-30)
+## Full Simulation with Koploper + Topology ï¿½ follow-ups (2026-09-30)
 
 Non-blocking findings from the R2 review of the config-driven topology + movement-simulator increment. None affect the Example Oval (closed loop, no switches, no dead ends).
 
@@ -372,3 +381,10 @@ Non-blocking findings from the R2 review of the config-driven topology + movemen
 | Movement-sim timer/teardown race (theoretical). | Occupancy events fire outside the sim `_lock`; across a very fast Stop/Restart an in-flight tick could target a freshly created transport. `DeterministicTrackTransport.SetSlaveOccupancy` no-ops on a closed writer, so it is benign today. | (Optional) tighten event emission to observe a consistent transport reference across Stop/Restart. |
 
 Firmware: no new firmware/protocol finding. The movement simulator reuses the existing HR2 bit 10 occupancy contract and the ""section == ModBus slave (1..50)"" mapping already mirrored by `DeterministicTrackTransport`; no firmware change is required.
+
+## Full Simulation profiles — follow-ups (2026-09-30 corrective loop)
+
+| Item | Evidence | Acceptance criteria |
+| --- | --- | --- |
+| Observed-neutral grant race (pre-existing, software-only). | `EstablishObservedNeutralAsync` can grant movement from the in-memory `HoldingReg[0]=399` pre-seeded by `InitializeDefaultPwmSetpoints` plus a fresh timestamp from an occupancy/heartbeat frame, before the 10 Hz write loop has actually pushed the neutral 399 into the transport's registers. Manifests as a flaky restart assertion in `FullSimulation_OvalProfile_DrivesLoco_AndShiftsOccupancy`. | The movement gate grants only after a genuinely observed (echoed) neutral, not an in-memory default; pin with a deterministic test. |
+| FullSimulation switch output is a recorded-only virtual no-op. | To make the Koploper Oval passing-loop branch selectable, the FullSimulation switch sink was made ""available"" (recorded, no physical output); Real mode remains ""not wired"". | Documented as simulation-only switch semantics; physical switch output remains a separate V4 concern. |

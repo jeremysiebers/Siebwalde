@@ -1,6 +1,6 @@
 {
-  "name": "Example Oval",
-  "description": "A simple closed loop: 4 blocks, 4 sections, 4 detected track-amplifier slaves (1..4). Each block is one section with two bezetmelders (module 1, points 1..8). Routes form a forward loop 1>2>3>4>1 and, reversed, 1>4>3>2>1.",
+  "name": "Simple Loop",
+  "description": "The primary small reference railway: a 4-section closed loop with no switches. This profile is the deterministic software-development and automated-integration-test layout, the manual WPF FullSimulation layout, and the later physical test-oval validation target on the four prototype amplifiers. Note: the physical binding (real amplifier ModBus addresses 1/3/4/6) is a separate, future, separately-configured input, NOT these simulated amplifierSlave values 1..4.",
   "detectedSlaves": [1, 2, 3, 4],
   "sections": [
     { "id": 1, "amplifierSlave": 1, "bezetmelders": ["1.01", "1.02"], "lengthMm": 1000.0 },

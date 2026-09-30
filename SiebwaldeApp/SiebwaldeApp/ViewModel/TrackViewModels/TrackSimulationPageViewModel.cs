@@ -1,5 +1,6 @@
 using SiebwaldeApp.Core;
 using SiebwaldeApp.Core.TrackApplication.Simulator;
+using SiebwaldeApp.Core.TrackApplication.Topology;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -31,6 +32,7 @@ namespace SiebwaldeApp
         private string _placeBlock = "1";
         private string _driveAddress = "1000";
         private string _driveSpeed = "10";
+        private string _selectedProfileName = string.Empty;
 
         public TrackSimulationPageViewModel()
         {
@@ -39,6 +41,19 @@ namespace SiebwaldeApp
             PlaceLocoCommand = new RelayCommand(PlaceLoco);
             DriveLocoCommand = new RelayCommand(DriveLoco);
             StopAllCommand = new RelayCommand(StopAll);
+
+            // Profile selection comes from the repository profile files, never from WPF code.
+            foreach (var name in LayoutProfileLoader.GetAvailableProfileNames())
+            {
+                AvailableProfiles.Add(name);
+            }
+
+            var activeName = _runtime.ActiveFullSimulationProfile?.Name;
+            if (!string.IsNullOrWhiteSpace(activeName) && AvailableProfiles.Contains(activeName))
+            {
+                _selectedProfileName = activeName;
+                OnPropertyChanged(nameof(SelectedProfileName));
+            }
 
             _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
             _refreshTimer.Tick += Refresh;
@@ -53,6 +68,26 @@ namespace SiebwaldeApp
         {
             get => _profileName;
             private set { if (_profileName != value) { _profileName = value; OnPropertyChanged(nameof(ProfileName)); } }
+        }
+
+        /// <summary>
+        /// The profile the operator selected in the Simulation tab. Setting it loads the profile
+        /// from the repository and pushes it to the runtime's profile-selection seam.
+        /// </summary>
+        public string SelectedProfileName
+        {
+            get => _selectedProfileName;
+            set
+            {
+                if (_selectedProfileName == value)
+                {
+                    return;
+                }
+
+                _selectedProfileName = value;
+                OnPropertyChanged(nameof(SelectedProfileName));
+                ApplyProfileSelection(value);
+            }
         }
 
         public string RuntimeState
@@ -113,6 +148,9 @@ namespace SiebwaldeApp
 
         #region Collections
 
+        /// <summary>Selectable repository profile display names (Simple Loop / Koploper Oval / ...).</summary>
+        public ObservableCollection<string> AvailableProfiles { get; } = new();
+
         public ObservableCollection<SimulationSectionViewModel> Sections { get; } = new();
 
         public ObservableCollection<LocoPositionViewModel> Locos { get; } = new();
@@ -155,6 +193,31 @@ namespace SiebwaldeApp
         {
             _runtime.MovementSimulation?.SetPower(on: false);
             Refresh(this, EventArgs.Empty);
+        }
+
+        #endregion
+
+        #region Profile selection
+
+        private void ApplyProfileSelection(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return;
+            }
+
+            // The profile-selection seam is only valid while the runtime is stopped (it re-composes
+            // the host on the next start). Selecting while running would throw, so ignore it.
+            if (_runtime.State != TrackRuntimeState.Stopped)
+            {
+                return;
+            }
+
+            if (LayoutProfileLoader.TryLoadByName(name, out var profile, out _) && profile is not null)
+            {
+                _runtime.SelectFullSimulationProfile(profile);
+                Refresh(this, EventArgs.Empty);
+            }
         }
 
         #endregion

@@ -14,9 +14,12 @@
 
   <ItemGroup>
     <!-- Repository-managed, human-readable layout profiles. Copied to the output directory so
-         the WPF runtime and tests can load them via LayoutProfileLoader.ExampleOvalPath
-         (resolved against AppContext.BaseDirectory). -->
-    <None Include="Topology\profiles\example-oval.json"
+         the WPF runtime and tests can load them by name via LayoutProfileLoader.TryLoadByName /
+         LayoutProfileLoader.SimpleLoopPath / LayoutProfileLoader.KoploperOvalPath (resolved
+         against AppContext.BaseDirectory). -->
+    <None Include="Topology\profiles\simple-loop.json"
+          CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Topology\profiles\koploper-oval.json"
           CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 

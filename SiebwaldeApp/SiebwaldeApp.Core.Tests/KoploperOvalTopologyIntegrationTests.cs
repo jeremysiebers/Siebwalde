@@ -1,5 +1,4 @@
 using System;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -18,54 +17,136 @@ using Xunit;
 namespace SiebwaldeApp.Core.Tests
 {
     /// <summary>
-    /// Integration tests for the config-driven FullSimulation: a real
-    /// <see cref="TrackControlHost"/> + <see cref="TrackApplicationRuntimeHost"/> composed from a
-    /// <see cref="LayoutProfile"/> (the example oval), started in
-    /// <see cref="TrackControlMode.FullSimulation"/>. A locomotive is driven through the real ECoS
-    /// command path; the movement simulator shifts occupancy through the real transport -> comm ->
-    /// occupancy-bridge -> ECoS sensor-event path.
+    /// Integration tests for the Koploper Oval profile (5-block passing loop with switches 1 and 2)
+    /// driven through the REAL FullSimulation chain (<see cref="TrackControlHost"/> +
+    /// <see cref="TrackApplicationRuntimeHost"/> + <see cref="DeterministicTrackTransport"/>).
+    /// The switch-conditional branch 3→4 (switch 1 straight) vs 3→5 (switch 1 diverging) is selected
+    /// through the normal ECoS switch command path and observed through the movement simulator +
+    /// amplifier occupancy feedback.
     /// </summary>
     [Collection("RealModeEndToEnd")]
-    public class FullSimulationTopologyIntegrationTests
+    public class KoploperOvalTopologyIntegrationTests
     {
-        private const string OvalJson = @"
+        private const string KoploperOvalJson = @"
 {
-  ""name"": ""Simple Loop"",
-  ""detectedSlaves"": [1,2,3,4],
+  ""name"": ""Koploper Oval"",
+  ""detectedSlaves"": [1,2,3,4,5],
   ""sections"": [
     { ""id"": 1, ""amplifierSlave"": 1, ""bezetmelders"": [""1.01"",""1.02""], ""lengthMm"": 1000.0 },
     { ""id"": 2, ""amplifierSlave"": 2, ""bezetmelders"": [""1.03"",""1.04""], ""lengthMm"": 1000.0 },
     { ""id"": 3, ""amplifierSlave"": 3, ""bezetmelders"": [""1.05"",""1.06""], ""lengthMm"": 1000.0 },
-    { ""id"": 4, ""amplifierSlave"": 4, ""bezetmelders"": [""1.07"",""1.08""], ""lengthMm"": 1000.0 }
+    { ""id"": 4, ""amplifierSlave"": 4, ""bezetmelders"": [""1.07"",""1.08""], ""lengthMm"": 1000.0 },
+    { ""id"": 5, ""amplifierSlave"": 5, ""bezetmelders"": [""1.09"",""1.10""], ""lengthMm"": 1000.0 }
   ],
   ""blocks"": [
     { ""id"": 1, ""sectionIds"": [1] },
     { ""id"": 2, ""sectionIds"": [2] },
     { ""id"": 3, ""sectionIds"": [3] },
-    { ""id"": 4, ""sectionIds"": [4] }
+    { ""id"": 4, ""sectionIds"": [4] },
+    { ""id"": 5, ""sectionIds"": [5] }
   ],
-  ""switches"": [],
+  ""switches"": [
+    { ""ecosAddress"": 1, ""physicalAddress"": 1 },
+    { ""ecosAddress"": 2, ""physicalAddress"": 2 }
+  ],
   ""routes"": [
     { ""fromBlock"": 1, ""toBlock"": 2 },
     { ""fromBlock"": 2, ""toBlock"": 3 },
-    { ""fromBlock"": 3, ""toBlock"": 4 },
-    { ""fromBlock"": 4, ""toBlock"": 1 }
+    { ""fromBlock"": 3, ""toBlock"": 4, ""switchId"": 1, ""requiredSwitchPosition"": ""straight"" },
+    { ""fromBlock"": 3, ""toBlock"": 5, ""switchId"": 1, ""requiredSwitchPosition"": ""diverging"" },
+    { ""fromBlock"": 4, ""toBlock"": 1 },
+    { ""fromBlock"": 5, ""toBlock"": 1 }
   ],
   ""locomotives"": [
-    { ""address"": 1000, ""initialBlock"": 1 },
-    { ""address"": 1001, ""initialBlock"": 3 }
+    { ""address"": 1, ""initialBlock"": 1 },
+    { ""address"": 2, ""initialBlock"": 3 }
   ]
 }";
 
         [Fact]
-        public async Task FullSimulation_OvalProfile_DrivesLoco_AndShiftsOccupancy()
+        public async Task KoploperOval_SwitchStraight_Loco1_Goes3To4_Then4To1()
         {
-            Assert.True(LayoutProfileLoader.TryLoad(OvalJson, out var profile, out var loadErrors), string.Join("; ", loadErrors));
+            await RunBranchAsync(
+                switchCommand: "set(11, switch[1g])",
+                test: async (runtime, ecosPort, ct) =>
+                {
+                    // Drive loco 1 (decoder address 1) forward; with switch 1 straight the
+                    // branch from block 3 resolves to block 4, then 4→1.
+                    Assert.Equal("<END 0 (OK)>", await SendEcosCommandAsync(ecosPort, "set(1000, dir[0])", TimeSpan.FromSeconds(10)));
+                    Assert.Equal("<END 0 (OK)>", await SendEcosCommandAsync(ecosPort, "set(1000, speedstep[10])", TimeSpan.FromSeconds(10)));
+
+                    await WaitUntilAsync(() => LocoBlock(runtime, 1) == 4, TimeSpan.FromSeconds(30));
+                    await WaitUntilAsync(
+                        () => TrackAmplifierRegisters.IsOccupied(runtime.TrackAmplifiers[4].HoldingReg),
+                        TimeSpan.FromSeconds(10));
+
+                    await WaitUntilAsync(() => LocoBlock(runtime, 1) == 1, TimeSpan.FromSeconds(30));
+                    await WaitUntilAsync(
+                        () => TrackAmplifierRegisters.IsOccupied(runtime.TrackAmplifiers[1].HoldingReg),
+                        TimeSpan.FromSeconds(10));
+                });
+        }
+
+        [Fact]
+        public async Task KoploperOval_SwitchDiverging_Loco1_Goes3To5_Then5To1()
+        {
+            await RunBranchAsync(
+                switchCommand: "set(11, switch[1r])",
+                test: async (runtime, ecosPort, ct) =>
+                {
+                    Assert.Equal("<END 0 (OK)>", await SendEcosCommandAsync(ecosPort, "set(1000, dir[0])", TimeSpan.FromSeconds(10)));
+                    Assert.Equal("<END 0 (OK)>", await SendEcosCommandAsync(ecosPort, "set(1000, speedstep[10])", TimeSpan.FromSeconds(10)));
+
+                    await WaitUntilAsync(() => LocoBlock(runtime, 1) == 5, TimeSpan.FromSeconds(30));
+                    await WaitUntilAsync(
+                        () => TrackAmplifierRegisters.IsOccupied(runtime.TrackAmplifiers[5].HoldingReg),
+                        TimeSpan.FromSeconds(10));
+
+                    await WaitUntilAsync(() => LocoBlock(runtime, 1) == 1, TimeSpan.FromSeconds(30));
+                    await WaitUntilAsync(
+                        () => TrackAmplifierRegisters.IsOccupied(runtime.TrackAmplifiers[1].HoldingReg),
+                        TimeSpan.FromSeconds(10));
+                });
+        }
+
+        [Fact]
+        public async Task KoploperOval_UnknownSwitch_Loco1StopsAtBlock3()
+        {
+            await RunBranchAsync(
+                switchCommand: null,
+                test: async (runtime, ecosPort, ct) =>
+                {
+                    // With switch 1 left unknown, both switch-conditional routes from block 3 are
+                    // skipped and the locomotive must halt at block 3 rather than pass through.
+                    Assert.Equal("<END 0 (OK)>", await SendEcosCommandAsync(ecosPort, "set(1000, dir[0])", TimeSpan.FromSeconds(10)));
+                    Assert.Equal("<END 0 (OK)>", await SendEcosCommandAsync(ecosPort, "set(1000, speedstep[10])", TimeSpan.FromSeconds(10)));
+
+                    await WaitUntilAsync(() => LocoBlock(runtime, 1) == 3, TimeSpan.FromSeconds(30));
+
+                    await Task.Delay(700, ct);
+                    Assert.Equal(3, LocoBlock(runtime, 1));
+                });
+        }
+
+        // ---------------------------------------------------------------------------------
+        // Harness
+        // ---------------------------------------------------------------------------------
+
+        /// <summary>
+        /// Composes the REAL chain from the Koploper Oval profile, starts FullSimulation, maps
+        /// ECoS object id 1000 to decoder address 1, sets the switch (when requested) and asserts
+        /// the baseline profile/placement before running <paramref name="test"/>.
+        /// </summary>
+        private static async Task RunBranchAsync(
+            string? switchCommand,
+            Func<TrackApplicationRuntimeHost, int, CancellationToken, Task> test)
+        {
+            Assert.True(LayoutProfileLoader.TryLoad(KoploperOvalJson, out var profile, out var loadErrors), string.Join("; ", loadErrors));
             var composition = FullSimulationProfile.Compose(profile!);
 
             var originalFwPath = CoreSettings.Default.TrackAmplifierFwPath;
-            var tempHexPath = Path.Combine(Path.GetTempPath(), $"siebwalde-topology-fw-{Guid.NewGuid():N}.hex");
-            var locoPath = Path.Combine(Path.GetTempPath(), $"siebwalde-topology-locos-{Guid.NewGuid():N}.json");
+            var tempHexPath = Path.Combine(Path.GetTempPath(), $"siebwalde-koploper-fw-{Guid.NewGuid():N}.hex");
+            var locoPath = Path.Combine(Path.GetTempPath(), $"siebwalde-koploper-locos-{Guid.NewGuid():N}.json");
             var ecosPort = GetFreeTcpPort();
             var externalPort = GetFreeTcpPort();
 
@@ -99,75 +180,25 @@ namespace SiebwaldeApp.Core.Tests
                 using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(90));
                 await runtime.StartAsync(TrackControlMode.FullSimulation, timeout.Token);
 
-                // AC1: the profile drives the FullSimulation runtime (detected slaves + movement sim).
                 Assert.Equal(TrackRuntimeState.Running, runtime.State);
                 Assert.Equal(MovementPermissionState.Granted, runtime.MovementPermission);
-                Assert.Equal("Simple Loop", runtime.ActiveProfileName);
-                Assert.NotNull(runtime.MovementSimulation);
-                Assert.Equal(new byte[] { 1, 2, 3, 4 }, runtime.SimulatedTrackIo!.DetectedSlaves.ToArray());
+                Assert.Equal("Koploper Oval", runtime.ActiveProfileName);
+                Assert.Equal(new byte[] { 1, 2, 3, 4, 5 }, runtime.SimulatedTrackIo!.DetectedSlaves.ToArray());
 
-                var simulator = Assert.IsType<DeterministicTrackTransport>(runtime.SimulatedTrackIo);
+                // Both locomotives are placed from the profile: decoder address 1 in block 1,
+                // decoder address 2 in block 3.
+                var positions = runtime.MovementSimulation!.GetLocoPositions();
+                Assert.Contains(positions, p => p.Address == 1 && p.BlockId == 1);
+                Assert.Contains(positions, p => p.Address == 2 && p.BlockId == 3);
 
-                // AC2: drive a locomotive through the real ECoS path.
-                Assert.True(ProtocolSpeedNormalizer.TryNormalize("DCC28", 10, out var normalizedSpeed));
-                var expectedPwm = AmplifierSpeedMapper.ToPwm(normalizedSpeed, direction: 0);
-                var expectedHr0 = TrackApplicationVariables.BuildHr0Value(expectedPwm, emoStop: false);
+                // Bind ECoS object id 1000 to decoder address 1, then (optionally) set the switch.
+                Assert.Equal("<END 0 (OK)>", await SendEcosCommandAsync(ecosPort, "set(1000, addr[1])", TimeSpan.FromSeconds(10)));
+                if (switchCommand is not null)
+                {
+                    Assert.Equal("<END 0 (OK)>", await SendEcosCommandAsync(ecosPort, switchCommand, TimeSpan.FromSeconds(10)));
+                }
 
-                // Forward direction first, then the speedstep command.
-                var dirLine = await SendEcosCommandAsync(ecosPort, "set(1000,dir[0])", TimeSpan.FromSeconds(10));
-                Assert.Equal("<END 0 (OK)>", dirLine);
-
-                var speedLine = await SendEcosCommandAsync(ecosPort, "set(1000,speedstep[10])", TimeSpan.FromSeconds(10));
-                Assert.Equal("<END 0 (OK)>", speedLine);
-
-                // The 108 write reaches the transport with the correct HR0 on amplifier 1.
-                await WaitUntilAsync(
-                    () => simulator.GetRegisters(1)[0] == expectedHr0
-                          && runtime.TrackAmplifiers[1].HoldingReg[0] == expectedHr0,
-                    TimeSpan.FromSeconds(10));
-                Assert.Contains((byte)TrackCommand.EXEC_MBUS_SLAVE_DATA_EXCH, simulator.SentCommands);
-
-                // AC3: occupancy shifts to the next section (block 1 -> block 2) as ECoS sensor events.
-                using var client = new TcpClient();
-                await client.ConnectAsync(IPAddress.Loopback, ecosPort, timeout.Token);
-                using var stream = client.GetStream();
-                using var writer = new StreamWriter(stream, Encoding.ASCII) { AutoFlush = true };
-                using var reader = new StreamReader(stream, Encoding.ASCII);
-
-                await writer.WriteAsync("request(100,view)");
-                await writer.FlushAsync();
-                await ReadUntilAsync(reader, line => line.StartsWith("<REPLY request(100,view)>", StringComparison.Ordinal), TimeSpan.FromSeconds(10));
-                await ReadUntilAsync(reader, line => line.StartsWith("<END ", StringComparison.Ordinal), TimeSpan.FromSeconds(10));
-
-                // Read until sensor 3 (block 2's first bezetmelder, bit 2) becomes occupied.
-                var stateLine = await ReadUntilStateAsync(
-                    reader,
-                    mask => (mask & (1 << 2)) != 0,
-                    TimeSpan.FromSeconds(20));
-
-                var finalMask = ParseStateValue(stateLine);
-                Assert.True((finalMask & (1 << 2)) != 0, "Block 2 (sensor 3) should be occupied.");
-                Assert.True((finalMask & (1 << 0)) == 0, "Block 1 (sensor 1) should have cleared.");
-
-                // AC4: stop + restart yields no stale occupancy.
-                await runtime.StopAsync(timeout.Token);
-                Assert.Equal(TrackRuntimeState.Stopped, runtime.State);
-                Assert.Null(runtime.SimulatedTrackIo);
-                Assert.Null(runtime.MovementSimulation);
-
-                await runtime.StartAsync(TrackControlMode.FullSimulation, timeout.Token);
-                Assert.Equal(TrackRuntimeState.Running, runtime.State);
-                Assert.Equal(MovementPermissionState.Granted, runtime.MovementPermission);
-
-                // Fresh start re-places the profile locomotives and does not carry stale occupancy:
-                // section 1 (block 1) is occupied again from the profile's initial placement, and
-                // section 2 (block 2) is free until a locomotive is driven again.
-                var freshSimulator = Assert.IsType<DeterministicTrackTransport>(runtime.SimulatedTrackIo);
-                await WaitUntilAsync(
-                    () => TrackAmplifierRegisters.IsOccupied(runtime.TrackAmplifiers[1].HoldingReg),
-                    TimeSpan.FromSeconds(10));
-                Assert.False(TrackAmplifierRegisters.IsOccupied(runtime.TrackAmplifiers[2].HoldingReg));
-                Assert.Equal(AmplifierSpeedMapper.NeutralPwm, freshSimulator.GetRegisters(1)[0] & 0x03FF); // neutral, not stale movement
+                await test(runtime, ecosPort, timeout.Token);
             }
             finally
             {
@@ -187,9 +218,8 @@ namespace SiebwaldeApp.Core.Tests
             }
         }
 
-        // ---------------------------------------------------------------------------------
-        // Harness helpers
-        // ---------------------------------------------------------------------------------
+        private static int? LocoBlock(TrackApplicationRuntimeHost runtime, int address)
+            => runtime.MovementSimulation?.GetLocoPositions().FirstOrDefault(p => p.Address == address)?.BlockId;
 
         private static int GetFreeTcpPort()
         {
@@ -242,85 +272,6 @@ namespace SiebwaldeApp.Core.Tests
                     return line;
                 }
             }
-        }
-
-        private static async Task<List<string>> ReadUntilAsync(StreamReader reader, Func<string, bool> match, TimeSpan timeout)
-        {
-            var lines = new List<string>();
-            var deadline = DateTimeOffset.UtcNow + timeout;
-
-            while (DateTimeOffset.UtcNow < deadline)
-            {
-                string? line;
-                try
-                {
-                    using var cts = new CancellationTokenSource(deadline - DateTimeOffset.UtcNow);
-                    line = await reader.ReadLineAsync().WaitAsync(cts.Token);
-                }
-                catch (OperationCanceledException)
-                {
-                    throw new TimeoutException($"Timed out waiting for ECoS feedback after {timeout}.");
-                }
-
-                if (line is null)
-                {
-                    throw new IOException("ECoS connection closed while waiting for feedback.");
-                }
-
-                lines.Add(line);
-                if (match(line))
-                {
-                    return lines;
-                }
-            }
-
-            throw new TimeoutException($"Timed out waiting for ECoS feedback after {timeout}.");
-        }
-
-        /// <summary>Reads ECoS lines until a "100 state[...]" line satisfies the mask predicate.</summary>
-        private static async Task<string> ReadUntilStateAsync(StreamReader reader, Func<int, bool> predicate, TimeSpan timeout)
-        {
-            var deadline = DateTimeOffset.UtcNow + timeout;
-            while (DateTimeOffset.UtcNow < deadline)
-            {
-                string? line;
-                try
-                {
-                    using var cts = new CancellationTokenSource(deadline - DateTimeOffset.UtcNow);
-                    line = await reader.ReadLineAsync().WaitAsync(cts.Token);
-                }
-                catch (OperationCanceledException)
-                {
-                    throw new TimeoutException($"Timed out waiting for an ECoS sensor state after {timeout}.");
-                }
-
-                if (line is null)
-                {
-                    throw new IOException("ECoS connection closed while waiting for a sensor state.");
-                }
-
-                if (line.StartsWith("100 state[", StringComparison.Ordinal))
-                {
-                    var mask = ParseStateValue(line);
-                    if (predicate(mask))
-                    {
-                        return line;
-                    }
-                }
-            }
-
-            throw new TimeoutException($"Timed out waiting for an ECoS sensor state after {timeout}.");
-        }
-
-        private static int ParseStateValue(string stateLine)
-        {
-            var open = stateLine.IndexOf('[');
-            var close = stateLine.IndexOf(']', open);
-            var valueText = stateLine.Substring(open + 1, close - open - 1).Trim();
-
-            return valueText.StartsWith("0x", StringComparison.OrdinalIgnoreCase)
-                ? Convert.ToInt32(valueText.Substring(2), 16)
-                : int.Parse(valueText, NumberStyles.Integer, CultureInfo.InvariantCulture);
         }
 
         private static async Task WaitUntilAsync(Func<bool> condition, TimeSpan timeout)

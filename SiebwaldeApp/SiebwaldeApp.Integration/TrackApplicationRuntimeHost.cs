@@ -49,6 +49,7 @@ namespace SiebwaldeApp.Integration
         private CancellationTokenSource? _cts;
         private TrackRuntimeState _state = TrackRuntimeState.Stopped;
         private TrackControlMode? _requestedMode;
+        private LayoutProfile? _activeFullSimulationProfile;
         private ISimulatedTrackIo? _simulatedTrackIo;
         private DeterministicMovementSimulator? _movementSimulator;
         private MovementSimulationAdapter? _movementSimulationAdapter;
@@ -167,7 +168,31 @@ namespace SiebwaldeApp.Integration
         public IMovementSimulation? MovementSimulation => _movementSimulator;
 
         /// <inheritdoc />
-        public string? ActiveProfileName => _fullSimulationProfile?.Name;
+        public string? ActiveProfileName => EffectiveFullSimulationProfile?.Name;
+
+        /// <inheritdoc />
+        public LayoutProfile? ActiveFullSimulationProfile => EffectiveFullSimulationProfile;
+
+        /// <summary>
+        /// The profile that drives FullSimulation: the profile last selected via
+        /// <see cref="SelectFullSimulationProfile"/>, or the constructor-supplied default when none
+        /// was selected.
+        /// </summary>
+        private LayoutProfile? EffectiveFullSimulationProfile
+            => _activeFullSimulationProfile ?? _fullSimulationProfile;
+
+        /// <inheritdoc />
+        public void SelectFullSimulationProfile(LayoutProfile profile)
+        {
+            if (profile is null)
+            {
+                throw new ArgumentNullException(nameof(profile));
+            }
+
+            // The host guards "not running"; setting the host first keeps this selection atomic.
+            _ecosHost.SetProfile(profile);
+            _activeFullSimulationProfile = profile;
+        }
 
         /// <inheritdoc />
         public List<TrackAmplifierItem> GetAmplifierListing()
@@ -587,26 +612,33 @@ namespace SiebwaldeApp.Integration
         /// </summary>
         private ITrackTransport CreateSimulatorTransport()
         {
-            var config = _simulatorConfig;
-            if (config is null && _fullSimulationProfile is not null)
-            {
-                // The profile is the single source of truth for the FullSimulation detected slaves.
-                config = new TrackSimulatorConfig(
-                    detectedSlaves: _fullSimulationProfile.DetectedSlaves,
-                    periodicSlaveInfoInterval: TimeSpan.FromMilliseconds(500));
-            }
+            var profile = EffectiveFullSimulationProfile;
+
+            // The selected/default profile is the single source of truth for the FullSimulation
+            // detected slaves; the constructor-supplied config is only a fallback when no profile
+            // is present.
+            var config = profile is not null
+                ? new TrackSimulatorConfig(
+                    detectedSlaves: profile.DetectedSlaves,
+                    periodicSlaveInfoInterval: TimeSpan.FromMilliseconds(500))
+                : _simulatorConfig;
 
             config ??= DefaultFullSimulationConfig();
 
             var transport = new DeterministicTrackTransport(config);
             _simulatedTrackIo = transport;
 
-            if (_fullSimulationProfile is not null)
+            if (profile is not null)
             {
-                _movementSimulator = new DeterministicMovementSimulator(_fullSimulationProfile);
+                // The movement simulator resolves switch-conditional routes (e.g. 3>4@1:0 vs
+                // 3>5@1:1) from the host's live switch controller, so the selected passing-loop
+                // branch follows the actual (commanded) switch position.
+                _movementSimulator = new DeterministicMovementSimulator(
+                    profile,
+                    switchPositions: () => _ecosHost.GetSwitchPositions());
                 _movementSimulationAdapter = new MovementSimulationAdapter(
                     _movementSimulator,
-                    _fullSimulationProfile,
+                    profile,
                     () => _simulatedTrackIo);
             }
 

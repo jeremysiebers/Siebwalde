@@ -74,17 +74,23 @@ namespace SiebwaldeApp.Integration
         }
 
         /// <summary>
-        /// Loads the repository-managed example oval profile (resolved against
-        /// <see cref="AppContext.BaseDirectory"/>). Best-effort: returns null on any problem.
+        /// Loads a repository profile by its display name (<see cref="LayoutProfile.Name"/>) and
+        /// builds its composition. Returns false (with every error) when the profile is unknown or
+        /// cannot be read/validated.
         /// </summary>
-        public static FullSimulationComposition? TryLoadExampleOval(out IReadOnlyList<string> errors)
+        public static bool TryLoadByName(
+            string name,
+            out FullSimulationComposition? composition,
+            out IReadOnlyList<string> errors)
         {
-            if (TryLoadFromFile(LayoutProfileLoader.ExampleOvalPath, out var composition, out errors))
+            if (!LayoutProfileLoader.TryLoadByName(name, out var profile, out errors) || profile is null)
             {
-                return composition;
+                composition = null;
+                return false;
             }
 
-            return null;
+            composition = Compose(profile);
+            return true;
         }
     }
 }

@@ -6,9 +6,11 @@ using System.Text;
 namespace SiebwaldeApp.Core.TrackApplication.Topology
 {
     /// <summary>
-    /// One physical track section. <see cref="Id"/> is the section identifier and also the ModBus
-    /// slave address the section is associated with (1..50); <see cref="AmplifierSlave"/> is the
-    /// amplifier that reports this section's occupancy. In the simple oval these coincide.
+    /// One logical track section. <see cref="Id"/> is the LOGICAL section identifier (the identity
+    /// used by blocks, routes and occupancy); <see cref="AmplifierSlave"/> is the amplifier
+    /// (ModBus slave) that reports/drives this section. In FullSimulation this is the simulated
+    /// slave mapping; the REAL amplifier addresses are a separate physical binding and are NOT
+    /// part of this topology.
     /// </summary>
     public sealed class LayoutSection
     {
@@ -64,6 +66,12 @@ namespace SiebwaldeApp.Core.TrackApplication.Topology
     {
         public string Name { get; init; } = string.Empty;
         public string Description { get; init; } = string.Empty;
+
+        /// <summary>
+        /// The slaves the deterministic transport should detect: a simulation binding. The physical
+        /// binding (the REAL amplifier addresses) is a future, separately-configured input and is
+        /// NOT part of this topology.
+        /// </summary>
         public IReadOnlyList<byte> DetectedSlaves { get; init; } = Array.Empty<byte>();
         public IReadOnlyList<LayoutSection> Sections { get; init; } = Array.Empty<LayoutSection>();
         public IReadOnlyList<LayoutBlock> Blocks { get; init; } = Array.Empty<LayoutBlock>();

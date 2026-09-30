@@ -21,8 +21,17 @@
             <StackPanel Grid.Column="0" Margin="0,0,16,0">
                 <TextBlock Text="Simulation" FontSize="20" FontWeight="Bold" Foreground="White" Margin="0,0,0,12" />
 
+                <!-- Profile selector: the operator chooses the layout profile to run FullSimulation
+                     against. The list comes from the repository profile files, never from WPF code. -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                    <TextBlock Text="Profile" Foreground="LightGray" FontSize="12" VerticalAlignment="Center" Width="70" />
+                    <ComboBox ItemsSource="{Binding AvailableProfiles}"
+                              SelectedItem="{Binding SelectedProfileName, Mode=TwoWay}"
+                              MinWidth="180" FontSize="12" />
+                </StackPanel>
+
                 <TextBlock Foreground="LightGray" FontSize="12">
-                    <Run Text="Profile: " /><Run Text="{Binding ProfileName}" FontWeight="Bold" Foreground="White" />
+                    <Run Text="Active profile: " /><Run Text="{Binding ProfileName}" FontWeight="Bold" Foreground="White" />
                 </TextBlock>
                 <TextBlock Foreground="LightGray" FontSize="12">
                     <Run Text="Runtime state: " /><Run Text="{Binding RuntimeState}" FontWeight="Bold" Foreground="White" />

@@ -1,0 +1,35 @@
+{
+  "name": "Koploper Oval",
+  "description": "The real 5-block passing-loop test layout from the authoritative Koploper mapping (docs/koploper-interface.md §'Test / Simulation Oval - Authoritative Mapping'). Block chain 1→2→3→(4|5)→1, two bezetmelders per block (1.01..1.10), switches 1 and 2 select the passing-loop branch (route 3→4 vs 3→5 is conditioned on switch 1), and locomotives use decoder addresses 1 and 2.",
+  "detectedSlaves": [1, 2, 3, 4, 5],
+  "sections": [
+    { "id": 1, "amplifierSlave": 1, "bezetmelders": ["1.01", "1.02"], "lengthMm": 1000.0 },
+    { "id": 2, "amplifierSlave": 2, "bezetmelders": ["1.03", "1.04"], "lengthMm": 1000.0 },
+    { "id": 3, "amplifierSlave": 3, "bezetmelders": ["1.05", "1.06"], "lengthMm": 1000.0 },
+    { "id": 4, "amplifierSlave": 4, "bezetmelders": ["1.07", "1.08"], "lengthMm": 1000.0 },
+    { "id": 5, "amplifierSlave": 5, "bezetmelders": ["1.09", "1.10"], "lengthMm": 1000.0 }
+  ],
+  "blocks": [
+    { "id": 1, "sectionIds": [1] },
+    { "id": 2, "sectionIds": [2] },
+    { "id": 3, "sectionIds": [3] },
+    { "id": 4, "sectionIds": [4] },
+    { "id": 5, "sectionIds": [5] }
+  ],
+  "switches": [
+    { "ecosAddress": 1, "physicalAddress": 1 },
+    { "ecosAddress": 2, "physicalAddress": 2 }
+  ],
+  "routes": [
+    { "fromBlock": 1, "toBlock": 2 },
+    { "fromBlock": 2, "toBlock": 3 },
+    { "fromBlock": 3, "toBlock": 4, "switchId": 1, "requiredSwitchPosition": "straight" },
+    { "fromBlock": 3, "toBlock": 5, "switchId": 1, "requiredSwitchPosition": "diverging" },
+    { "fromBlock": 4, "toBlock": 1 },
+    { "fromBlock": 5, "toBlock": 1 }
+  ],
+  "locomotives": [
+    { "address": 1, "initialBlock": 1 },
+    { "address": 2, "initialBlock": 3 }
+  ]
+}
