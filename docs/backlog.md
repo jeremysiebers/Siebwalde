@@ -388,3 +388,12 @@ Firmware: no new firmware/protocol finding. The movement simulator reuses the ex
 | --- | --- | --- |
 | Observed-neutral grant race (pre-existing, software-only). | `EstablishObservedNeutralAsync` can grant movement from the in-memory `HoldingReg[0]=399` pre-seeded by `InitializeDefaultPwmSetpoints` plus a fresh timestamp from an occupancy/heartbeat frame, before the 10 Hz write loop has actually pushed the neutral 399 into the transport's registers. Manifests as a flaky restart assertion in `FullSimulation_OvalProfile_DrivesLoco_AndShiftsOccupancy`. | The movement gate grants only after a genuinely observed (echoed) neutral, not an in-memory default; pin with a deterministic test. |
 | FullSimulation switch output is a recorded-only virtual no-op. | To make the Koploper Oval passing-loop branch selectable, the FullSimulation switch sink was made ""available"" (recorded, no physical output); Real mode remains ""not wired"". | Documented as simulation-only switch semantics; physical switch output remains a separate V4 concern. |
+
+## Full Simulation interactive acceptance findings (2026-09-30, PR #16)
+
+Non-blocking system findings from the interactive WPF + real Koploper acceptance (all demo checks PASS).
+
+| Item | Evidence | Disposition |
+| --- | --- | --- |
+| Restart/resynchronization boundary (future recovery/ownership/resync question). | After a FullSimulation Stop/Restart, Siebwalde re-initializes the simulator state to the configured start positions (loco 1 -> block 1, loco 2 -> block 3), while the external Koploper client may retain its previous internal/visual loco position until the operator/client re-synchronizes. | Not a C# runtime defect; does not block PR #16. Recorded as an explicit future question: do NOT silently assume Koploper position is automatically correct after a Siebwalde runtime restart. |
+| Manual driving sends no turnout command. | Driving via the Koploper hand controller does not by itself send `switch[1|2]`; the passing loop therefore requires an explicit valid switch state. The automatic schedule sends the complementary switch pair correctly, and both branches (3->4 and 3->5) are interactively proven. | Correct and fail-safe for this increment. |
