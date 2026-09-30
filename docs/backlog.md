@@ -382,11 +382,11 @@ Non-blocking findings from the R2 review of the config-driven topology + movemen
 
 Firmware: no new firmware/protocol finding. The movement simulator reuses the existing HR2 bit 10 occupancy contract and the ""section == ModBus slave (1..50)"" mapping already mirrored by `DeterministicTrackTransport`; no firmware change is required.
 
-## Full Simulation profiles � follow-ups (2026-09-30 corrective loop)
+## Full Simulation profiles � follow-ups (2026-09-30 corrective loop)
 
 | Item | Evidence | Acceptance criteria |
 | --- | --- | --- |
-| Observed-neutral grant race (pre-existing, software-only). | `EstablishObservedNeutralAsync` can grant movement from the in-memory `HoldingReg[0]=399` pre-seeded by `InitializeDefaultPwmSetpoints` plus a fresh timestamp from an occupancy/heartbeat frame, before the 10 Hz write loop has actually pushed the neutral 399 into the transport's registers. Manifests as a flaky restart assertion in `FullSimulation_OvalProfile_DrivesLoco_AndShiftsOccupancy`. | The movement gate grants only after a genuinely observed (echoed) neutral, not an in-memory default; pin with a deterministic test. |
+| Observed-neutral grant race — **FIXED (post-merge corrective fix, 2026-09-30)**. | PR #16/post-merge CI made it reproducible: `EstablishObservedNeutralAsync` could grant movement from the in-memory `HoldingReg[0]=399` pre-seeded by `InitializeDefaultPwmSetpoints` plus a fresh-but-unrelated timestamp, before the transport actually echoed neutral. Corrected as a correctness defect: a new `TrackAmplifierItem.ProtocolReadbackObserved` marker (stamped only by the comm client on a genuine SLAVEINFO frame, cleared by the default setter) plus the Core `TrackAmplifierNeutralObservation.AreAllObservedNeutral` predicate now require a genuine, current protocol readback whose HR0 == 399 for every domain amplifier. | CLOSED — see `ObservedNeutralGrantEvidenceTests` (8 deterministic regression tests); movement gate grants only on genuinely echoed neutral. |
 | FullSimulation switch output is a recorded-only virtual no-op. | To make the Koploper Oval passing-loop branch selectable, the FullSimulation switch sink was made ""available"" (recorded, no physical output); Real mode remains ""not wired"". | Documented as simulation-only switch semantics; physical switch output remains a separate V4 concern. |
 
 ## Full Simulation interactive acceptance findings (2026-09-30, PR #16)
