@@ -66,5 +66,26 @@ namespace SiebwaldeApp.Core
         /// <summary>True when the amplifier is detected <b>and</b> its data is fresh as of now.</summary>
         public static bool IsCurrentData(TrackAmplifierItem? amplifier)
             => IsCurrentData(amplifier, DateTimeOffset.UtcNow, DefaultStaleAfter);
+
+        /// <summary>
+        /// True when the amplifier is detected, its data is fresh, <b>and</b> its current
+        /// <see cref="TrackAmplifierItem.HoldingReg"/> content was populated by a genuine protocol
+        /// SLAVEINFO readback in this runtime. This is the stronger check a neutral observer must
+        /// use: it rejects an in-memory default value that a stale (but still fresh) timestamp could
+        /// otherwise make look like a protocol observation.
+        /// </summary>
+        public static bool HasCurrentProtocolReadback(
+            TrackAmplifierItem? amplifier,
+            DateTimeOffset now,
+            TimeSpan staleAfter)
+            => amplifier is not null &&
+               amplifier.ProtocolReadbackObserved &&
+               IsCurrentData(amplifier, now, staleAfter);
+
+        /// <summary>
+        /// True when the amplifier has a detected, fresh, genuine protocol readback as of now.
+        /// </summary>
+        public static bool HasCurrentProtocolReadback(TrackAmplifierItem? amplifier)
+            => HasCurrentProtocolReadback(amplifier, DateTimeOffset.UtcNow, DefaultStaleAfter);
     }
 }

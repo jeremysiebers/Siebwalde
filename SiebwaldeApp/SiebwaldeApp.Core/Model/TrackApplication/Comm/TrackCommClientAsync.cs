@@ -179,6 +179,9 @@ namespace SiebwaldeApp.Core
 
                     amplifier.SlaveDetected = slaveDetected;
                     amplifier.HoldingReg = holdingReg;
+                    // Explicit protocol-readback evidence: the current HoldingReg content is a
+                    // genuine SLAVEINFO readback from this runtime, not a locally-written default.
+                    amplifier.ProtocolReadbackObserved = true;
                     amplifier.LastDataReceivedUtc = DateTimeOffset.UtcNow;
                     amplifier.MbReceiveCounter = mbReceiveCounter;
                     amplifier.MbSentCounter = mbSentCounter;
