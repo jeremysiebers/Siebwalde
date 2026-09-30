@@ -360,3 +360,15 @@ Recorded during the Full Software Simulation increment (software-only); concrete
 
 
 
+
+## Full Simulation with Koploper + Topology — follow-ups (2026-09-30)
+
+Non-blocking findings from the R2 review of the config-driven topology + movement-simulator increment. None affect the Example Oval (closed loop, no switches, no dead ends).
+
+| Item | Evidence | Acceptance criteria |
+| --- | --- | --- |
+| Movement simulator: dead-end boundary emits ""free"" before the loco is parked. | `DeterministicMovementSimulator.MoveLoco` adds `SectionOccupancyChanged(section, false)` before checking whether a next section exists, so a future dead-end layout would report the section free while the loco sits at the boundary. | At a dead end, the loco stops without clearing its own section occupancy. |
+| Loader does not reject a section referenced by more than one block. | `LayoutProfileLoader` validates that block sections exist but not cross-block uniqueness; the movement sim's `_sectionPlacement` dictionary would silently overwrite on a duplicate. | Duplicate section ownership is a validation error. |
+| Movement-sim timer/teardown race (theoretical). | Occupancy events fire outside the sim `_lock`; across a very fast Stop/Restart an in-flight tick could target a freshly created transport. `DeterministicTrackTransport.SetSlaveOccupancy` no-ops on a closed writer, so it is benign today. | (Optional) tighten event emission to observe a consistent transport reference across Stop/Restart. |
+
+Firmware: no new firmware/protocol finding. The movement simulator reuses the existing HR2 bit 10 occupancy contract and the ""section == ModBus slave (1..50)"" mapping already mirrored by `DeterministicTrackTransport`; no firmware change is required.

@@ -98,6 +98,13 @@ The UI path starts from `SiebwaldeInitPageViewModel.InitFiddleYardController`, w
 
 `TrackControlModeExtensions.IsFullTrackChain()` (Core) is the single predicate marking `Real` + `FullSimulation` as the full chain, used consistently by both Integration hosts.
 
+### Simulation topology and movement
+
+- `LayoutProfile` + `LayoutProfileLoader` (Core `TrackApplication.Topology`) model a layout as sections/blocks/routes/switches/detected-slaves/locomotives, loaded from a repo-managed JSON file (e.g. `Topology/profiles/example-oval.json`) and validated with error collection (no silent drop). It projects onto the existing `BlockTopology`/`KoploperBlockMap`/`SwitchMapping` types.
+- `DeterministicMovementSimulator` (Core `TrackApplication.Simulator`, implements `IMovementSimulation`/`IBlockPositionProvider`) moves locomotives along the profile at a fixed 10 mm/s-per-step scale and emits `SectionOccupancyChanged` events; it holds no ECoS/WPF dependency.
+- Integration wiring (`SimulationTeeHardwareBackend`, `MovementSimulationAdapter`, `FullSimulationProfile`) tees `SetLocoSpeed`/`SetPower` to the real `TrackAmplifierHardwareBackend` and the movement simulator, and binds the sim's section-occupancy events to `ISimulatedTrackIo.SetSlaveOccupancy` so occupancy flows through the real transport → occupancy-bridge → ECoS feedback path.
+- A WPF "Simulation" tab (dev view) exposes the active profile, simulated amplifiers/occupancy/status, runtime state, movement permission, loco positions, and controlled I/O injection.
+
 ## Major Workflows
 
 ### Track Initialization
