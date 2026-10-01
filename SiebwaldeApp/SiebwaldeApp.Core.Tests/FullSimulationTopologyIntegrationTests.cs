@@ -32,6 +32,12 @@ namespace SiebwaldeApp.Core.Tests
 {
   ""name"": ""Simple Loop"",
   ""detectedSlaves"": [1,2,3,4],
+  ""physicalAmplifierMapping"": [
+    { ""sectionId"": 1, ""physicalAmplifier"": 1 },
+    { ""sectionId"": 2, ""physicalAmplifier"": 3 },
+    { ""sectionId"": 3, ""physicalAmplifier"": 4 },
+    { ""sectionId"": 4, ""physicalAmplifier"": 6 }
+  ],
   ""sections"": [
     { ""id"": 1, ""amplifierSlave"": 1, ""bezetmelders"": [""1.01"",""1.02""], ""lengthMm"": 1000.0 },
     { ""id"": 2, ""amplifierSlave"": 2, ""bezetmelders"": [""1.03"",""1.04""], ""lengthMm"": 1000.0 },
@@ -62,6 +68,11 @@ namespace SiebwaldeApp.Core.Tests
         {
             Assert.True(LayoutProfileLoader.TryLoad(OvalJson, out var profile, out var loadErrors), string.Join("; ", loadErrors));
             var composition = FullSimulationProfile.Compose(profile!);
+
+            // The logical (simulated) mapping is unchanged by the physical binding: block 2 still
+            // maps to logical amplifier 2, not its physical amplifier 3.
+            Assert.True(composition.BlockTopology.TryGetAmplifiers(2, out var logicalBlock2));
+            Assert.Equal(new ushort[] { 2 }, logicalBlock2);
 
             var originalFwPath = CoreSettings.Default.TrackAmplifierFwPath;
             var tempHexPath = Path.Combine(Path.GetTempPath(), $"siebwalde-topology-fw-{Guid.NewGuid():N}.hex");
@@ -105,6 +116,11 @@ namespace SiebwaldeApp.Core.Tests
                 Assert.Equal("Simple Loop", runtime.ActiveProfileName);
                 Assert.NotNull(runtime.MovementSimulation);
                 Assert.Equal(new byte[] { 1, 2, 3, 4 }, runtime.SimulatedTrackIo!.DetectedSlaves.ToArray());
+
+                // FullSimulation is unchanged by the physical binding: the observed-neutral domain
+                // remains the detected slaves (movement granted on them), while the physical binding
+                // is exposed through the runtime surface for display/Real-mode use only.
+                Assert.Equal(new[] { 1, 3, 4, 6 }, runtime.PhysicalAmplifierBinding);
 
                 var simulator = Assert.IsType<DeterministicTrackTransport>(runtime.SimulatedTrackIo);
 

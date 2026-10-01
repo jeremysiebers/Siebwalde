@@ -1,12 +1,18 @@
 {
   "name": "Simple Loop",
-  "description": "The primary small reference railway: a 4-section closed loop with no switches. This profile is the deterministic software-development and automated-integration-test layout, the manual WPF FullSimulation layout, and the later physical test-oval validation target on the four prototype amplifiers. Note: the physical binding (real amplifier ModBus addresses 1/3/4/6) is a separate, future, separately-configured input, NOT these simulated amplifierSlave values 1..4.",
+  "description": "The primary small reference railway: a 4-section closed loop with no switches and ONE bezetmelder per block (1.01/1.02/1.03/1.04). Locomotives use DCC decoder addresses 1 and 2. physicalAmplifierMapping declares the real amplifier ModBus addresses 1/3/4/6; the amplifierSlave values 1..4 remain the simulated (FullSimulation) mapping.",
   "detectedSlaves": [1, 2, 3, 4],
+  "physicalAmplifierMapping": [
+    { "sectionId": 1, "physicalAmplifier": 1 },
+    { "sectionId": 2, "physicalAmplifier": 3 },
+    { "sectionId": 3, "physicalAmplifier": 4 },
+    { "sectionId": 4, "physicalAmplifier": 6 }
+  ],
   "sections": [
-    { "id": 1, "amplifierSlave": 1, "bezetmelders": ["1.01", "1.02"], "lengthMm": 1000.0 },
-    { "id": 2, "amplifierSlave": 2, "bezetmelders": ["1.03", "1.04"], "lengthMm": 1000.0 },
-    { "id": 3, "amplifierSlave": 3, "bezetmelders": ["1.05", "1.06"], "lengthMm": 1000.0 },
-    { "id": 4, "amplifierSlave": 4, "bezetmelders": ["1.07", "1.08"], "lengthMm": 1000.0 }
+    { "id": 1, "amplifierSlave": 1, "bezetmelders": ["1.01"], "lengthMm": 1000.0 },
+    { "id": 2, "amplifierSlave": 2, "bezetmelders": ["1.02"], "lengthMm": 1000.0 },
+    { "id": 3, "amplifierSlave": 3, "bezetmelders": ["1.03"], "lengthMm": 1000.0 },
+    { "id": 4, "amplifierSlave": 4, "bezetmelders": ["1.04"], "lengthMm": 1000.0 }
   ],
   "blocks": [
     { "id": 1, "sectionIds": [1] },
@@ -22,7 +28,7 @@
     { "fromBlock": 4, "toBlock": 1 }
   ],
   "locomotives": [
-    { "address": 1000, "initialBlock": 1 },
-    { "address": 1001, "initialBlock": 3 }
+    { "address": 1, "initialBlock": 1 },
+    { "address": 2, "initialBlock": 3 }
   ]
 }

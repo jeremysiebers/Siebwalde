@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using SiebwaldeApp.Core;
 using SiebwaldeApp.Core.Properties;
 using SiebwaldeApp.Core.TrackApplication.Simulator;
+using SiebwaldeApp.Core.TrackApplication.Topology;
 using SiebwaldeApp.EcosEmu;
 using SiebwaldeApp.Integration;
 using Xunit;
@@ -124,6 +125,114 @@ namespace SiebwaldeApp.Core.Tests
                 Assert.Equal(0, simulator.GetRegisters(1)[0] & 0x03FF);
             });
         }
+
+        [Fact]
+        public async Task RealMode_PhysicalMappingProfile_ResolvesPhysicalDomain_AndGrantsAfterObservedNeutral()
+        {
+            var profile = BuildPhysicalMappingProfile();
+
+            var originalFwPath = CoreSettings.Default.TrackAmplifierFwPath;
+            var tempHexPath = Path.Combine(Path.GetTempPath(), $"siebwalde-v3-physical-fw-{Guid.NewGuid():N}.hex");
+            var locoPath = Path.Combine(Path.GetTempPath(), $"siebwalde-v3-physical-locos-{Guid.NewGuid():N}.json");
+            var ecosPort = GetFreeTcpPort();
+            var externalPort = GetFreeTcpPort();
+
+            FakeKoploperExternalInfoServer? externalServer = null;
+            DeterministicTrackTransport? simulator = null;
+            TrackApplicationRuntimeHost? runtime = null;
+
+            try
+            {
+                WriteTestFirmwareHex(tempHexPath);
+                CoreSettings.Default.TrackAmplifierFwPath = tempHexPath;
+
+                externalServer = new FakeKoploperExternalInfoServer(externalPort, locoAddress: 1000, blockNumber: 1);
+
+                var ecosHost = new TrackControlHost(
+                    locoRepositoryPath: locoPath,
+                    topology: profile.ToBlockTopology(),
+                    blockMap: profile.ToKoploperBlockMap(),
+                    ecosListenPort: ecosPort,
+                    koploperExternalInfoHost: "127.0.0.1",
+                    koploperExternalInfoPort: externalPort,
+                    trackAmplifierGroups: TrackAmplifierGroups.Empty);
+
+                // Real mode must be profile-driven: bind the physical projection (1/3/4/6).
+                ecosHost.SetProfile(profile);
+
+                runtime = new TrackApplicationRuntimeHost(
+                    ecosHost,
+                    controlTrace: null,
+                    transportFactory: () =>
+                    {
+                        simulator = new DeterministicTrackTransport(
+                            new TrackSimulatorConfig(detectedSlaves: new byte[] { 1, 3, 4, 6 }));
+                        return simulator;
+                    },
+                    amplifierGroups: TrackAmplifierGroups.Empty,
+                    fullSimulationProfile: profile);
+
+                using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+                await runtime.StartAsync(TrackControlMode.Real, timeout.Token);
+
+                Assert.Equal(TrackRuntimeState.Running, runtime.State);
+
+                // The observed-neutral domain is the profile's physical binding {1,3,4,6}.
+                Assert.Equal(new[] { 1, 3, 4, 6 }, runtime.PhysicalAmplifierBinding);
+
+                // Movement permission is granted only after observed neutral on that physical domain.
+                Assert.Equal(MovementPermissionState.Granted, runtime.MovementPermission);
+                Assert.True(runtime.IsMovementSafe);
+            }
+            finally
+            {
+                if (runtime is not null)
+                {
+                    try { await runtime.DisposeAsync(); } catch { /* best-effort */ }
+                }
+
+                if (externalServer is not null)
+                {
+                    try { await externalServer.DisposeAsync(); } catch { /* best-effort */ }
+                }
+
+                try { CoreSettings.Default.TrackAmplifierFwPath = originalFwPath; } catch { /* best-effort */ }
+                try { File.Delete(tempHexPath); } catch { /* best-effort */ }
+                try { File.Delete(locoPath); } catch { /* best-effort */ }
+            }
+        }
+
+        /// <summary>
+        /// A 4-section Simple Loop profile whose REAL physical binding is the prototype amplifiers
+        /// 1/3/4/6 while the logical (simulated) amplifierSlave values remain 1..4.
+        /// </summary>
+        private static LayoutProfile BuildPhysicalMappingProfile()
+            => new LayoutProfile
+            {
+                Name = "Simple Loop (Real physical)",
+                Description = "4 sections; physical binding 1/3/4/6.",
+                Sections = new[]
+                {
+                    new LayoutSection { Id = 1, AmplifierSlave = 1, Bezetmelders = new[] { "1.01" }, LengthMm = 1000.0 },
+                    new LayoutSection { Id = 2, AmplifierSlave = 2, Bezetmelders = new[] { "1.02" }, LengthMm = 1000.0 },
+                    new LayoutSection { Id = 3, AmplifierSlave = 3, Bezetmelders = new[] { "1.03" }, LengthMm = 1000.0 },
+                    new LayoutSection { Id = 4, AmplifierSlave = 4, Bezetmelders = new[] { "1.04" }, LengthMm = 1000.0 }
+                },
+                Blocks = new[]
+                {
+                    new LayoutBlock { Id = 1, SectionIds = new[] { 1 } },
+                    new LayoutBlock { Id = 2, SectionIds = new[] { 2 } },
+                    new LayoutBlock { Id = 3, SectionIds = new[] { 3 } },
+                    new LayoutBlock { Id = 4, SectionIds = new[] { 4 } }
+                },
+                PhysicalAmplifierMapping = new[]
+                {
+                    new LayoutPhysicalAmplifierBinding { SectionId = 1, PhysicalAmplifier = 1 },
+                    new LayoutPhysicalAmplifierBinding { SectionId = 2, PhysicalAmplifier = 3 },
+                    new LayoutPhysicalAmplifierBinding { SectionId = 3, PhysicalAmplifier = 4 },
+                    new LayoutPhysicalAmplifierBinding { SectionId = 4, PhysicalAmplifier = 6 }
+                }
+            };
 
         // ---------------------------------------------------------------------------------
         // Harness

@@ -68,6 +68,13 @@ namespace SiebwaldeApp
         public string EcosModeStatus { get; set; } = "ECoS host: not running";
 
         /// <summary>
+        /// Human-readable description of the logical-section -&gt; physical-amplifier binding declared
+        /// by the active layout profile (for example "Physical binding: 1, 3, 4, 6" or
+        /// "Physical binding: none"). Read from the runtime's physical-amplifier projection.
+        /// </summary>
+        public string PhysicalBindingStatus { get; set; } = "Physical binding: none";
+
+        /// <summary>
         /// Health of the control path as reported by the diagnostics surface: healthy, warning
         /// or unsafe. This view model only displays it; the decision is made in the host.
         /// </summary>
@@ -133,6 +140,8 @@ namespace SiebwaldeApp
             _runtime = IoC.TrackRuntime;
             _runtime.StateChanged += HandleRuntimeStateChanged;
             _runtime.Faulted += HandleRuntimeFaulted;
+
+            UpdatePhysicalBindingStatus();
 
             DetectHosts = new RelayCommand(async () => await DetectHostsAsync(logAlways: true));
 
@@ -423,6 +432,8 @@ namespace SiebwaldeApp
                 ? "ECoS host: not running"
                 : $"ECoS host: {mode} mode active";
 
+            UpdatePhysicalBindingStatus();
+
             var diagnostics = IoC.siebwaldeApplicationModel.ControlDiagnostics;
             if (diagnostics is null)
             {
@@ -440,6 +451,18 @@ namespace SiebwaldeApp
             LatestDiagnostic = latest?.ToString() ?? "";
 
             CanResetControlSafety = diagnostics.IsUnsafe;
+        }
+
+        /// <summary>
+        /// Refreshes <see cref="PhysicalBindingStatus"/> from the runtime's physical-amplifier
+        /// projection so the page shows which REAL amplifiers the profile binds.
+        /// </summary>
+        private void UpdatePhysicalBindingStatus()
+        {
+            var binding = IoC.TrackRuntime.PhysicalAmplifierBinding;
+            PhysicalBindingStatus = binding is null || binding.Count == 0
+                ? "Physical binding: none"
+                : $"Physical binding: {string.Join(", ", binding)}";
         }
 
         /// <summary>

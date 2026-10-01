@@ -247,6 +247,18 @@
                                  FontFamily="{StaticResource FontAwesome}"
                                  Foreground="{StaticResource WordOrangeBrush}" />
                         </TextBlock>
+
+                        <!-- The logical-section -> physical-amplifier binding declared by the active
+                             layout profile, so the operator sees the REAL amplifier domain. -->
+                        <TextBlock
+                            Margin="20 0 0 0"
+                            FontSize="{StaticResource FontSizeRegular}"
+                            VerticalAlignment="Center"
+                            TextWrapping="Wrap">
+                            <Run Text="{Binding PhysicalBindingStatus, Mode=OneWay}"
+                                 FontFamily="{StaticResource FontAwesome}"
+                                 Foreground="{StaticResource WordOrangeBrush}" />
+                        </TextBlock>
                     </StackPanel>
                 </Grid>
 
