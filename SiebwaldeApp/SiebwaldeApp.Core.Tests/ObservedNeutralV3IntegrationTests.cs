@@ -285,6 +285,107 @@ namespace SiebwaldeApp.Core.Tests
         }
 
         [Fact]
+        public async Task RealMode_NonEmptyDomain_ButNoRealProjection_RoutesNoLogicalAmplifier()
+        {
+            // Isolates the ROUTING default from the DOMAIN default. The runtime resolves a NON-EMPTY
+            // observed-neutral domain (the profile's physical binding {1,3,4,6}) so movement
+            // permission IS granted, but the directly-constructed host has NO real projection (no
+            // SetProfile, no realTopology/realBlockMap), so the empty real routing maps no block to
+            // an amplifier. A pre-fix constructor (real = logical) would route block 1 -> logical
+            // amp 1 and emit a 108 write; this test must fail against that pre-fix default.
+            var profile = BuildPhysicalMappingProfile();
+
+            var originalFwPath = CoreSettings.Default.TrackAmplifierFwPath;
+            var tempHexPath = Path.Combine(Path.GetTempPath(), $"siebwalde-v3-nonempty-fw-{Guid.NewGuid():N}.hex");
+            var locoPath = Path.Combine(Path.GetTempPath(), $"siebwalde-v3-nonempty-locos-{Guid.NewGuid():N}.json");
+            var ecosPort = GetFreeTcpPort();
+            var externalPort = GetFreeTcpPort();
+
+            FakeKoploperExternalInfoServer? externalServer = null;
+            DeterministicTrackTransport? simulator = null;
+            TrackApplicationRuntimeHost? runtime = null;
+
+            try
+            {
+                WriteTestFirmwareHex(tempHexPath);
+                CoreSettings.Default.TrackAmplifierFwPath = tempHexPath;
+
+                externalServer = new FakeKoploperExternalInfoServer(externalPort, locoAddress: 1000, blockNumber: 1);
+
+                // NO SetProfile and NO explicit realTopology/realBlockMap: the constructor default
+                // keeps the real projection EMPTY (fail-closed routing), even though the runtime's
+                // observed-neutral domain (below) is non-empty.
+                var ecosHost = new TrackControlHost(
+                    locoRepositoryPath: locoPath,
+                    topology: Topology,
+                    blockMap: BlockMap,
+                    ecosListenPort: ecosPort,
+                    koploperExternalInfoHost: "127.0.0.1",
+                    koploperExternalInfoPort: externalPort,
+                    trackAmplifierGroups: TrackAmplifierGroups.Empty);
+
+                // fullSimulationProfile drives only the observed-neutral DOMAIN (physical {1,3,4,6});
+                // it does not touch the host's real routing. The transport detects {1,3,4,6} so
+                // neutral IS observed and movement permission IS granted.
+                runtime = new TrackApplicationRuntimeHost(
+                    ecosHost,
+                    controlTrace: null,
+                    transportFactory: () =>
+                    {
+                        simulator = new DeterministicTrackTransport(
+                            new TrackSimulatorConfig(detectedSlaves: new byte[] { 1, 3, 4, 6 }));
+                        return simulator;
+                    },
+                    amplifierGroups: TrackAmplifierGroups.Empty,
+                    fullSimulationProfile: profile);
+
+                using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+                await runtime.StartAsync(TrackControlMode.Real, timeout.Token);
+
+                Assert.Equal(TrackRuntimeState.Running, runtime.State);
+
+                // The DOMAIN is non-empty (physical {1,3,4,6}) and neutral was observed, so movement
+                // permission is granted. This proves the domain default is independent of the empty
+                // routing default.
+                Assert.Equal(new[] { 1, 3, 4, 6 }, runtime.PhysicalAmplifierBinding);
+                Assert.Equal(MovementPermissionState.Granted, runtime.MovementPermission);
+                Assert.True(runtime.IsMovementSafe);
+
+                // The neutral-establishment 108 writes already happened during StartAsync; snapshot
+                // the transport so we can prove the movement command adds no new write.
+                var commandsBefore = simulator!.SentCommands.Count;
+
+                var endLine = await SendEcosCommandAsync(ecosPort, "set(1000,speedstep[10])", TimeSpan.FromSeconds(10));
+
+                // No safety interlock: the domain granted movement permission. But the empty real
+                // routing maps no block to an amplifier, so the command has no physical target.
+                Assert.Equal("<END 0 (OK)>", endLine);
+
+                // Bounded negative assertion: the movement command produced no new outbound write.
+                // A pre-fix constructor (real = logical) would route block 1 -> logical amp 1 and
+                // emit an additional 108 write here.
+                await Task.Delay(300, timeout.Token);
+                Assert.Equal(commandsBefore, simulator.SentCommands.Count);
+            }
+            finally
+            {
+                if (runtime is not null)
+                {
+                    try { await runtime.DisposeAsync(); } catch { /* best-effort */ }
+                }
+
+                if (externalServer is not null)
+                {
+                    try { await externalServer.DisposeAsync(); } catch { /* best-effort */ }
+                }
+
+                try { CoreSettings.Default.TrackAmplifierFwPath = originalFwPath; } catch { /* best-effort */ }
+                try { File.Delete(tempHexPath); } catch { /* best-effort */ }
+                try { File.Delete(locoPath); } catch { /* best-effort */ }
+            }
+        }
+
+        [Fact]
         public async Task RealMode_PhysicalDomain_Amp6ReadsNonNeutral_NotGranted()
         {
             // Physical domain {1,3,4,6} with amplifier 6 reading back non-neutral (500): observed
