@@ -68,6 +68,16 @@ namespace SiebwaldeApp.Integration
         /// to <see cref="StartAsync"/> because they only exist once the track application
         /// has started.
         /// </summary>
+        /// <param name="realTopology">
+        /// Optional explicit REAL-mode block -&gt; amplifier projection. When null, Real mode
+        /// composes with an empty (fail-closed) routing and can never obtain movement permission
+        /// from an implicit logical-to-physical amplifier mapping. Callers that legitimately hold an
+        /// explicit real projection may pass it here; the profile-driven path is <see cref="SetProfile"/>.
+        /// </param>
+        /// <param name="realBlockMap">
+        /// Optional explicit REAL-mode Koploper block map (physical amplifier sections). When null,
+        /// Real mode is fail-closed (empty block map); see <paramref name="realTopology"/>.
+        /// </param>
         public TrackControlHost(
             string locoRepositoryPath,
             BlockTopology topology,
@@ -79,7 +89,9 @@ namespace SiebwaldeApp.Integration
             Func<IReadOnlyDictionary<int, SwitchPosition>>? switchPositionProvider = null,
             Action<string>? log = null,
             TrackAmplifierGroups? trackAmplifierGroups = null,
-            IControlTrace? controlTrace = null)
+            IControlTrace? controlTrace = null,
+            BlockTopology? realTopology = null,
+            KoploperBlockMap? realBlockMap = null)
         {
             if (string.IsNullOrWhiteSpace(locoRepositoryPath))
                 throw new ArgumentException("A locomotive repository path is required.", nameof(locoRepositoryPath));
@@ -87,11 +99,13 @@ namespace SiebwaldeApp.Integration
             _locoRepositoryPath = locoRepositoryPath;
             _topology = topology ?? throw new ArgumentNullException(nameof(topology));
             _blockMap = blockMap ?? throw new ArgumentNullException(nameof(blockMap));
-            // By default the real projection is the supplied (logical) topology/block map; it is
-            // only replaced with the profile's physical projection by SetProfile. FromConfiguration
-            // explicitly clears it so Real mode without a profile is fail-closed.
-            _realTopology = _topology;
-            _realBlockMap = _blockMap;
+            // Safety invariant: Real mode must never obtain movement permission from an implicit
+            // logical-to-physical amplifier mapping. Without an explicit real projection the real
+            // topology/block map default to empty (fail-closed); the profile-driven physical
+            // projection is applied by SetProfile, and callers with an explicit real projection
+            // pass it via the optional constructor parameters.
+            _realTopology = realTopology ?? BlockTopology.Parse(null);
+            _realBlockMap = realBlockMap ?? KoploperBlockMap.Parse(null);
             _switchMapping = switchMapping ?? SwitchMapping.Parse(null);
             _trackAmplifierGroups = trackAmplifierGroups ?? TrackAmplifierGroups.Empty;
             _ecosListenPort = ecosListenPort;
@@ -123,10 +137,8 @@ namespace SiebwaldeApp.Integration
                 trackAmplifierGroups: trackAmplifierGroups ?? CoreConfiguration.BuildTrackAmplifierGroups(),
                 controlTrace: controlTrace);
 
-            // Real mode without a profile is fail-closed: no physical projection is available.
-            host._realTopology = BlockTopology.Parse(null);
-            host._realBlockMap = KoploperBlockMap.Parse(null);
-
+            // Real mode without a profile remains fail-closed: the constructor default keeps the
+            // real projection empty until SetProfile binds the profile's physical projection.
             return host;
         }
 

@@ -202,6 +202,205 @@ namespace SiebwaldeApp.Core.Tests
             }
         }
 
+        [Fact]
+        public async Task RealMode_DefaultConstruction_NoProfile_NoRealProjection_FailsClosed_AndCannotAddressAmplifier()
+        {
+            // A directly-constructed host (no SetProfile, no explicit real projection) plus a
+            // runtime with no fullSimulationProfile must stay fail-closed: Real mode must not
+            // compose movement on an implicit logical-to-physical amplifier mapping.
+            var originalFwPath = CoreSettings.Default.TrackAmplifierFwPath;
+            var tempHexPath = Path.Combine(Path.GetTempPath(), $"siebwalde-v3-default-fw-{Guid.NewGuid():N}.hex");
+            var locoPath = Path.Combine(Path.GetTempPath(), $"siebwalde-v3-default-locos-{Guid.NewGuid():N}.json");
+            var ecosPort = GetFreeTcpPort();
+            var externalPort = GetFreeTcpPort();
+
+            FakeKoploperExternalInfoServer? externalServer = null;
+            DeterministicTrackTransport? simulator = null;
+            TrackApplicationRuntimeHost? runtime = null;
+
+            try
+            {
+                WriteTestFirmwareHex(tempHexPath);
+                CoreSettings.Default.TrackAmplifierFwPath = tempHexPath;
+
+                externalServer = new FakeKoploperExternalInfoServer(externalPort, locoAddress: 1000, blockNumber: 1);
+
+                // NO SetProfile and NO explicit realTopology/realBlockMap: the constructor default
+                // keeps the real projection empty (fail-closed), so Real mode cannot route on an
+                // implicit logical mapping.
+                var ecosHost = new TrackControlHost(
+                    locoRepositoryPath: locoPath,
+                    topology: Topology,
+                    blockMap: BlockMap,
+                    ecosListenPort: ecosPort,
+                    koploperExternalInfoHost: "127.0.0.1",
+                    koploperExternalInfoPort: externalPort,
+                    trackAmplifierGroups: TrackAmplifierGroups.Empty);
+
+                // NO fullSimulationProfile: the observed-neutral domain is empty, so permission
+                // stays NotGranted and no block can address an amplifier.
+                runtime = new TrackApplicationRuntimeHost(
+                    ecosHost,
+                    controlTrace: null,
+                    transportFactory: () =>
+                    {
+                        simulator = new DeterministicTrackTransport(
+                            new TrackSimulatorConfig(detectedSlaves: DetectedSlaves));
+                        return simulator;
+                    },
+                    amplifierGroups: TrackAmplifierGroups.Empty);
+
+                using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+                await runtime.StartAsync(TrackControlMode.Real, timeout.Token);
+
+                Assert.Equal(TrackRuntimeState.Running, runtime.State);
+                Assert.Equal(MovementPermissionState.NotGranted, runtime.MovementPermission);
+                Assert.False(runtime.IsMovementSafe);
+
+                // A normal locomotive-speed request is refused as a safety interlock and produces
+                // no 108 write, proving the default construction cannot address an amplifier.
+                var endLine = await SendEcosCommandAsync(ecosPort, "set(1000,speedstep[10])", TimeSpan.FromSeconds(10));
+                Assert.Equal("<END 8 (SAFETY_INTERLOCK)>", endLine);
+
+                await Task.Delay(300, timeout.Token);
+                Assert.DoesNotContain((byte)TrackCommand.EXEC_MBUS_SLAVE_DATA_EXCH, simulator!.SentCommands);
+                Assert.Equal(0, simulator.GetRegisters(1)[0] & 0x03FF);
+            }
+            finally
+            {
+                if (runtime is not null)
+                {
+                    try { await runtime.DisposeAsync(); } catch { /* best-effort */ }
+                }
+
+                if (externalServer is not null)
+                {
+                    try { await externalServer.DisposeAsync(); } catch { /* best-effort */ }
+                }
+
+                try { CoreSettings.Default.TrackAmplifierFwPath = originalFwPath; } catch { /* best-effort */ }
+                try { File.Delete(tempHexPath); } catch { /* best-effort */ }
+                try { File.Delete(locoPath); } catch { /* best-effort */ }
+            }
+        }
+
+        [Fact]
+        public async Task RealMode_PhysicalDomain_Amp6ReadsNonNeutral_NotGranted()
+        {
+            // Physical domain {1,3,4,6} with amplifier 6 reading back non-neutral (500): observed
+            // neutral can never be established, so movement permission stays NotGranted.
+            var config = new TrackSimulatorConfig(
+                detectedSlaves: new byte[] { 1, 3, 4, 6 },
+                hr0ReadbackOverrides: new Dictionary<byte, ushort> { { 6, 500 } });
+
+            await RunPhysicalProfileRealAsync(config, (runtime, _, ct) =>
+            {
+                Assert.Equal(TrackRuntimeState.Running, runtime.State);
+                Assert.Equal(new[] { 1, 3, 4, 6 }, runtime.PhysicalAmplifierBinding);
+
+                Assert.Equal(MovementPermissionState.NotGranted, runtime.MovementPermission);
+                Assert.False(runtime.IsMovementSafe);
+
+                return Task.CompletedTask;
+            });
+        }
+
+        [Fact]
+        public async Task RealMode_PhysicalDomain_LogicalAmp2CannotSubstituteForAmp6_NotGranted()
+        {
+            // Only {1,2,3,4} detected: amplifier 2 is present and neutral, but amplifier 6 is
+            // absent. The physical domain {1,3,4,6} still requires amplifier 6, so amplifier 2's
+            // neutral is irrelevant and movement permission stays NotGranted.
+            var config = new TrackSimulatorConfig(detectedSlaves: new byte[] { 1, 2, 3, 4 });
+
+            await RunPhysicalProfileRealAsync(config, (runtime, _, ct) =>
+            {
+                Assert.Equal(TrackRuntimeState.Running, runtime.State);
+                Assert.Equal(new[] { 1, 3, 4, 6 }, runtime.PhysicalAmplifierBinding);
+
+                Assert.Equal(MovementPermissionState.NotGranted, runtime.MovementPermission);
+                Assert.False(runtime.IsMovementSafe);
+
+                return Task.CompletedTask;
+            });
+        }
+
+        /// <summary>
+        /// Composes the REAL chain from <see cref="BuildPhysicalMappingProfile"/> (physical domain
+        /// {1,3,4,6}) with the supplied simulator config, starts Real mode and runs the test body.
+        /// The profile is bound both to the host (<see cref="IEcosHostService.SetProfile"/>) and to
+        /// the runtime (fullSimulationProfile), so the physical projection and the observed-neutral
+        /// domain are the profile's physical binding.
+        /// </summary>
+        private static async Task RunPhysicalProfileRealAsync(
+            TrackSimulatorConfig simulatorConfig,
+            Func<TrackApplicationRuntimeHost, DeterministicTrackTransport, CancellationToken, Task> testBody)
+        {
+            var profile = BuildPhysicalMappingProfile();
+
+            var originalFwPath = CoreSettings.Default.TrackAmplifierFwPath;
+            var tempHexPath = Path.Combine(Path.GetTempPath(), $"siebwalde-v3-physical-fw-{Guid.NewGuid():N}.hex");
+            var locoPath = Path.Combine(Path.GetTempPath(), $"siebwalde-v3-physical-locos-{Guid.NewGuid():N}.json");
+            var ecosPort = GetFreeTcpPort();
+            var externalPort = GetFreeTcpPort();
+
+            FakeKoploperExternalInfoServer? externalServer = null;
+            DeterministicTrackTransport? simulator = null;
+            TrackApplicationRuntimeHost? runtime = null;
+
+            try
+            {
+                WriteTestFirmwareHex(tempHexPath);
+                CoreSettings.Default.TrackAmplifierFwPath = tempHexPath;
+
+                externalServer = new FakeKoploperExternalInfoServer(externalPort, locoAddress: 1000, blockNumber: 1);
+
+                var ecosHost = new TrackControlHost(
+                    locoRepositoryPath: locoPath,
+                    topology: profile.ToBlockTopology(),
+                    blockMap: profile.ToKoploperBlockMap(),
+                    ecosListenPort: ecosPort,
+                    koploperExternalInfoHost: "127.0.0.1",
+                    koploperExternalInfoPort: externalPort,
+                    trackAmplifierGroups: TrackAmplifierGroups.Empty);
+
+                // Real mode must be profile-driven: bind the physical projection (1/3/4/6).
+                ecosHost.SetProfile(profile);
+
+                runtime = new TrackApplicationRuntimeHost(
+                    ecosHost,
+                    controlTrace: null,
+                    transportFactory: () =>
+                    {
+                        simulator = new DeterministicTrackTransport(simulatorConfig);
+                        return simulator;
+                    },
+                    amplifierGroups: TrackAmplifierGroups.Empty,
+                    fullSimulationProfile: profile);
+
+                using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+                await runtime.StartAsync(TrackControlMode.Real, timeout.Token);
+
+                await testBody(runtime, simulator!, timeout.Token);
+            }
+            finally
+            {
+                if (runtime is not null)
+                {
+                    try { await runtime.DisposeAsync(); } catch { /* best-effort */ }
+                }
+
+                if (externalServer is not null)
+                {
+                    try { await externalServer.DisposeAsync(); } catch { /* best-effort */ }
+                }
+
+                try { CoreSettings.Default.TrackAmplifierFwPath = originalFwPath; } catch { /* best-effort */ }
+                try { File.Delete(tempHexPath); } catch { /* best-effort */ }
+                try { File.Delete(locoPath); } catch { /* best-effort */ }
+            }
+        }
+
         /// <summary>
         /// A 4-section Simple Loop profile whose REAL physical binding is the prototype amplifiers
         /// 1/3/4/6 while the logical (simulated) amplifierSlave values remain 1..4.
@@ -276,7 +475,9 @@ namespace SiebwaldeApp.Core.Tests
                     ecosListenPort: ecosPort,
                     koploperExternalInfoHost: "127.0.0.1",
                     koploperExternalInfoPort: externalPort,
-                    trackAmplifierGroups: groups);
+                    trackAmplifierGroups: groups,
+                    realTopology: Topology,
+                    realBlockMap: BlockMap);
 
                 runtime = new TrackApplicationRuntimeHost(
                     ecosHost,

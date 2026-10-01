@@ -306,7 +306,9 @@ namespace SiebwaldeApp.Core.Tests
                     ecosListenPort: ecosPort,
                     koploperExternalInfoHost: "127.0.0.1",
                     koploperExternalInfoPort: externalPort,
-                    trackAmplifierGroups: groups);
+                    trackAmplifierGroups: groups,
+                    realTopology: Topology,
+                    realBlockMap: BlockMap);
 
                 if (mode == TrackControlMode.FullSimulation)
                 {
