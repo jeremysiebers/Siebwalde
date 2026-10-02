@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Threading.Tasks;
 using SiebwaldeApp.Core;
 using SiebwaldeApp.EcosEmu;
@@ -81,6 +82,9 @@ namespace SiebwaldeApp.Integration
                 // left out of the change tracking so a later known value still produces an event.
                 if (!_occupancy.IsBlockOccupancyKnown(block.Number))
                 {
+                    SiebwaldeApp.Core.IoC.Logger.Log(
+                        $"block {block.Number} unknown (skipped)",
+                        "SiebwaldeApp.Integration.OccupancyBridge");
                     continue;
                 }
 
@@ -92,6 +96,16 @@ namespace SiebwaldeApp.Integration
                 }
 
                 _lastState[block.Number] = occupied;
+
+                // Make the change-driven nature visible: this bridge only emits on change, so a
+                // block is only logged here when its state actually flipped (or was first seen).
+                var bezetmelders = string.Join(",", block.Bezetmelders);
+                var sensorIds = string.Join(",",
+                    block.Bezetmelders
+                        .Select(b => TryGetSensorId(b, out var sid) ? sid.ToString() : "<invalid>"));
+                SiebwaldeApp.Core.IoC.Logger.Log(
+                    $"block {block.Number} -> {(occupied ? "occupied" : "free")}, bezetmelders [{bezetmelders}], sensorIds [{sensorIds}]",
+                    "SiebwaldeApp.Integration.OccupancyBridge");
 
                 foreach (var bezetmelder in block.Bezetmelders)
                 {

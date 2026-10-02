@@ -82,6 +82,20 @@ namespace SiebwaldeApp
                 CoreConfiguration.LogDirectory,
                 "SiebwaldeApp");
 
+            // Dedicated file-backed diagnostic traces for the EcosEmu <-> Koploper traffic and
+            // the occupancy read path. Both reuse the existing ILogFactory/FileLogger
+            // infrastructure and the configured log directory; the component name is the logger
+            // instance, so each trace lands in its own date-based file.
+            var ecosEmuTracePath = EcosEmuTraceLogging.BuildLogFilePath(
+                CoreConfiguration.LogDirectory, "SiebwaldeApp.EcosEmu.EcosEmuTrace");
+            SiebwaldeApp.Core.IoC.Logger.AddLogger(
+                new SiebwaldeApp.Core.FileLogger(ecosEmuTracePath, "SiebwaldeApp.EcosEmu.EcosEmuTrace"));
+
+            var occupancyBridgePath = EcosEmuTraceLogging.BuildLogFilePath(
+                CoreConfiguration.LogDirectory, "SiebwaldeApp.Integration.OccupancyBridge");
+            SiebwaldeApp.Core.IoC.Logger.AddLogger(
+                new SiebwaldeApp.Core.FileLogger(occupancyBridgePath, "SiebwaldeApp.Integration.OccupancyBridge"));
+
             // The operational amplifier grouping is built once and shared by the ECoS host (which
             // uses it to classify the physical amplifiers) and the runtime coordinator (which uses
             // it as the observed-neutral domain), so both always agree on the domain.
