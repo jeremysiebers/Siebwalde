@@ -121,9 +121,11 @@ This roadmap grants NO live-hardware, firmware-flash or fault-injection authorit
 
 ---
 
-## 7. Step 2 — Physical Simple Loop with Existing Firmware (planned)
+## 7. Step 2 — Physical Simple Loop with Existing Firmware (IN PROGRESS — reference baseline recorded)
 
 Use the existing F1 firmware baseline to make the physical Simple Loop run; establish the physical reference baseline. No automatic firmware change; flash only with separate `FIRMWARE_FLASH` authority if unavoidable. Phased: Gate A (physical readiness, no movement), Gate B (communication + neutral validation, with V4 measurements, explicit protocol-echo vs applied-PWM distinction), Gate C (controlled single-locomotive movement). Document firmware identity/checksum (`0x251F` is a known reference, not proof), mapping, measured behavior, observed-neutral results, working vs missing feedback. Distinguish software-proven / protocol-proven / physically-measured / not-yet-proven; never administratively PASS an unexecuted physical test.
+
+**Progress (2026-10-02):** Gate A done; Gate B done at protocol level (detection 1/3/4/6, checksum `0x251F` confirmed, observed neutral; physical PWM measurement still pending); Gate C done for one loc (full loop) + two locs (with findings). Reference baseline recorded in `docs/simple-loop-reference-baseline.md`. Key findings: direction polarity fixed physically; communication hang / no watchdog; occupancy root cause was a Koploper config error; and a material architecture gap — **carry locomotive properties across the track** (PWM duty as a per-loc variable, neutralise vacated block, section-boundary duty match), which is the next increment.
 
 ---
 
