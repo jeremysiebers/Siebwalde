@@ -2,7 +2,7 @@
 
 **Status:** Physical validation of the Simple Loop oval (four prototype amplifiers, existing firmware) — software/protocol-level results recorded 2026-10-02. The missing "carry locomotive properties" mechanism is recorded as the next increment; see `docs/backlog.md`.
 
-**Scope note:** this is a **software/protocol + operator-observed** baseline, not a full physical-measurement baseline. Physical PWM duty at HR0=399 (scope/voltmeter) and electrical safety margins were **not** measured in this step — they remain V4.
+**Scope note:** this is a **software/protocol + operator-observed** baseline. Physical PWM behaviour (duty ~50% at HR0=399, motor stopped) was verified during the earlier **hardware development** (Product Owner-confirmed), **not re-measured in Step 2**. This step claims **no new V4 measurement evidence**. Three categories are kept distinct: (a) historical hardware-development verification, (b) current protocol observations (this step), (c) physical behaviour actually re-measured in this step (none). A new scope/multimeter measurement is only proposed when a concrete technical finding warrants it.
 
 ## 1. Reference environment
 
@@ -56,7 +56,7 @@
 
 ## 6. Evidence boundary (preserved)
 
-`Requested ≠ Commanded ≠ Transmitted ≠ Protocol-observed ≠ Physical-observed`. Protocol-observed HR0 == 399 is the PIC18 holding-register echo, not a physical PWM/neutral measurement. Physical PWM duty and electrical margins remain V4.
+`Requested ≠ Commanded ≠ Transmitted ≠ Protocol-observed ≠ Physical-observed`. Protocol-observed HR0 == 399 is the PIC18 holding-register echo, not a physical PWM/neutral measurement. Physical PWM duty was verified during hardware development (Product Owner-confirmed) but is **not re-measured here**; no new V4 measurement evidence is claimed.
 
 ## 7. Next increment
 
