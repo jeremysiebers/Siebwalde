@@ -27,6 +27,17 @@ namespace SiebwaldeApp.Core.TrackApplication.Topology
         public IReadOnlyList<int> SectionIds { get; init; } = Array.Empty<int>();
     }
 
+    /// <summary>
+    /// Binds one logical section to its REAL physical amplifier (ModBus slave) address. This is the
+    /// separate physical binding; <see cref="LayoutSection.AmplifierSlave"/> remains the logical /
+    /// simulated mapping and is not reinterpreted by this type.
+    /// </summary>
+    public sealed class LayoutPhysicalAmplifierBinding
+    {
+        public int SectionId { get; init; }
+        public int PhysicalAmplifier { get; init; }
+    }
+
     /// <summary>Maps an ECoS/Koploper switch address to a physical switch output.</summary>
     public sealed class LayoutSwitch
     {
@@ -73,6 +84,15 @@ namespace SiebwaldeApp.Core.TrackApplication.Topology
         /// NOT part of this topology.
         /// </summary>
         public IReadOnlyList<byte> DetectedSlaves { get; init; } = Array.Empty<byte>();
+
+        /// <summary>
+        /// The explicit logical-section -&gt; REAL-physical-amplifier binding. Empty means "no
+        /// physical binding declared" (Real mode stays fail-closed). It is independent of
+        /// <see cref="LayoutSection.AmplifierSlave"/>, which keeps its logical/simulated meaning.
+        /// </summary>
+        public IReadOnlyList<LayoutPhysicalAmplifierBinding> PhysicalAmplifierMapping { get; init; }
+            = Array.Empty<LayoutPhysicalAmplifierBinding>();
+
         public IReadOnlyList<LayoutSection> Sections { get; init; } = Array.Empty<LayoutSection>();
         public IReadOnlyList<LayoutBlock> Blocks { get; init; } = Array.Empty<LayoutBlock>();
         public IReadOnlyList<LayoutSwitch> Switches { get; init; } = Array.Empty<LayoutSwitch>();
@@ -88,18 +108,47 @@ namespace SiebwaldeApp.Core.TrackApplication.Topology
             => Blocks.FirstOrDefault(b => b.Id == blockId);
 
         /// <summary>
+        /// The REAL physical amplifier addresses bound by <see cref="PhysicalAmplifierMapping"/>,
+        /// deduplicated and sorted ascending. Empty when no physical binding is declared.
+        /// </summary>
+        public IReadOnlyList<byte> ToPhysicalDomain()
+            => PhysicalAmplifierMapping
+                .Select(binding => (byte)binding.PhysicalAmplifier)
+                .Distinct()
+                .OrderBy(address => address)
+                .ToArray();
+
+        /// <summary>
         /// Projects this profile into the production <see cref="SiebwaldeApp.Core.BlockTopology"/>.
         /// Block -&gt; amplifier(s) comes from the block's sections; routes come from
         /// <see cref="Routes"/>.
         /// </summary>
         public SiebwaldeApp.Core.BlockTopology ToBlockTopology()
-            => SiebwaldeApp.Core.BlockTopology.Parse(BuildBlockTopologyConfig());
+            => SiebwaldeApp.Core.BlockTopology.Parse(BuildBlockTopologyConfig(usePhysical: false));
 
         /// <summary>
         /// Projects this profile into the production <see cref="SiebwaldeApp.Core.KoploperBlockMap"/>.
         /// </summary>
         public SiebwaldeApp.Core.KoploperBlockMap ToKoploperBlockMap()
-            => SiebwaldeApp.Core.KoploperBlockMap.Parse(BuildKoploperBlockMapConfig());
+            => SiebwaldeApp.Core.KoploperBlockMap.Parse(BuildKoploperBlockMapConfig(usePhysical: false));
+
+        /// <summary>
+        /// Projects this profile into a REAL-mode <see cref="SiebwaldeApp.Core.BlockTopology"/> whose
+        /// block -&gt; amplifier entries use the physical amplifier addresses from
+        /// <see cref="PhysicalAmplifierMapping"/>. When no physical binding is declared, the result
+        /// is empty (fail-closed).
+        /// </summary>
+        public SiebwaldeApp.Core.BlockTopology ToRealBlockTopology()
+            => SiebwaldeApp.Core.BlockTopology.Parse(BuildBlockTopologyConfig(usePhysical: true));
+
+        /// <summary>
+        /// Projects this profile into a REAL-mode <see cref="SiebwaldeApp.Core.KoploperBlockMap"/>
+        /// whose amplifier sections are the physical amplifier addresses from
+        /// <see cref="PhysicalAmplifierMapping"/>. When no physical binding is declared, the result
+        /// is empty (fail-closed).
+        /// </summary>
+        public SiebwaldeApp.Core.KoploperBlockMap ToRealKoploperBlockMap()
+            => SiebwaldeApp.Core.KoploperBlockMap.Parse(BuildKoploperBlockMapConfig(usePhysical: true));
 
         /// <summary>
         /// Projects this profile into the production <see cref="SiebwaldeApp.Core.SwitchMapping"/>.
@@ -119,6 +168,15 @@ namespace SiebwaldeApp.Core.TrackApplication.Topology
 
         /// <summary>The amplifier slaves of a block's sections, in section order and deduplicated.</summary>
         public IReadOnlyList<int> GetBlockAmplifierSlaves(int blockId)
+            => GetBlockAmplifierSlaves(blockId, usePhysical: false);
+
+        /// <summary>
+        /// The amplifier slaves of a block's sections, in section order and deduplicated. When
+        /// <paramref name="usePhysical"/> is true the physical amplifier address from
+        /// <see cref="PhysicalAmplifierMapping"/> is used and a section without a physical binding
+        /// contributes no amplifier (mirroring the unknown-section skip).
+        /// </summary>
+        private IReadOnlyList<int> GetBlockAmplifierSlaves(int blockId, bool usePhysical)
         {
             var block = TryGetBlock(blockId);
             if (block is null)
@@ -131,21 +189,42 @@ namespace SiebwaldeApp.Core.TrackApplication.Topology
             foreach (var sectionId in block.SectionIds)
             {
                 var section = TryGetSection(sectionId);
-                if (section is not null && seen.Add(section.AmplifierSlave))
+                if (section is null)
                 {
-                    result.Add(section.AmplifierSlave);
+                    continue;
+                }
+
+                int amplifier;
+                if (usePhysical)
+                {
+                    var binding = PhysicalAmplifierMapping.FirstOrDefault(b => b.SectionId == sectionId);
+                    if (binding is null)
+                    {
+                        continue;
+                    }
+
+                    amplifier = binding.PhysicalAmplifier;
+                }
+                else
+                {
+                    amplifier = section.AmplifierSlave;
+                }
+
+                if (seen.Add(amplifier))
+                {
+                    result.Add(amplifier);
                 }
             }
 
             return result;
         }
 
-        private string BuildBlockTopologyConfig()
+        private string BuildBlockTopologyConfig(bool usePhysical)
         {
             var sb = new StringBuilder();
 
             var ampEntries = Blocks
-                .Select(block => $"{block.Id}:{string.Join("+", GetBlockAmplifierSlaves(block.Id))}")
+                .Select(block => $"{block.Id}:{string.Join("+", GetBlockAmplifierSlaves(block.Id, usePhysical))}")
                 .Where(entry => !entry.EndsWith(":", StringComparison.Ordinal));
             sb.Append("amps: ").Append(string.Join(",", ampEntries));
 
@@ -173,7 +252,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Topology
             return entry;
         }
 
-        private string BuildKoploperBlockMapConfig()
+        private string BuildKoploperBlockMapConfig(bool usePhysical)
         {
             var entries = new List<string>();
             foreach (var block in Blocks)
@@ -188,10 +267,26 @@ namespace SiebwaldeApp.Core.TrackApplication.Topology
                         continue;
                     }
 
-                    bezetmelders.AddRange(section.Bezetmelders);
-                    if (!sections.Contains(section.AmplifierSlave))
+                    int amplifier;
+                    if (usePhysical)
                     {
-                        sections.Add(section.AmplifierSlave);
+                        var binding = PhysicalAmplifierMapping.FirstOrDefault(b => b.SectionId == sectionId);
+                        if (binding is null)
+                        {
+                            continue; // mirror the unknown-section skip: no amplifier, no bezetmelders
+                        }
+
+                        amplifier = binding.PhysicalAmplifier;
+                    }
+                    else
+                    {
+                        amplifier = section.AmplifierSlave;
+                    }
+
+                    bezetmelders.AddRange(section.Bezetmelders);
+                    if (!sections.Contains(amplifier))
+                    {
+                        sections.Add(amplifier);
                     }
                 }
 

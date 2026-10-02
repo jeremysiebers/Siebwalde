@@ -173,6 +173,12 @@ namespace SiebwaldeApp.Integration
         /// <inheritdoc />
         public LayoutProfile? ActiveFullSimulationProfile => EffectiveFullSimulationProfile;
 
+        /// <inheritdoc />
+        public IReadOnlyList<int> PhysicalAmplifierBinding
+            => EffectiveFullSimulationProfile is { } profile
+                ? profile.ToPhysicalDomain().Select(address => (int)address).ToArray()
+                : Array.Empty<int>();
+
         /// <summary>
         /// The profile that drives FullSimulation: the profile last selected via
         /// <see cref="SelectFullSimulationProfile"/>, or the constructor-supplied default when none
@@ -636,8 +642,9 @@ namespace SiebwaldeApp.Integration
 
         /// <summary>
         /// The effective observed-neutral domain: the configured amplifier groups when non-empty,
-        /// else (FullSimulation only) the simulator's detected slaves, else empty. Real mode with an
-        /// unconfigured domain therefore stays fail-closed (no simulator to fall back on).
+        /// else (FullSimulation only) the simulator's detected slaves, else (Real only) the profile's
+        /// physical binding, else empty. Real mode with an unconfigured domain and no physical
+        /// binding therefore stays fail-closed.
         /// </summary>
         private IReadOnlyCollection<byte> EffectiveDomain()
         {
@@ -649,6 +656,15 @@ namespace SiebwaldeApp.Integration
             if (_requestedMode == TrackControlMode.FullSimulation && _simulatedTrackIo is not null)
             {
                 return _simulatedTrackIo.DetectedSlaves;
+            }
+
+            if (_requestedMode == TrackControlMode.Real)
+            {
+                var physicalDomain = EffectiveFullSimulationProfile?.ToPhysicalDomain();
+                if (physicalDomain is not null && physicalDomain.Count > 0)
+                {
+                    return physicalDomain;
+                }
             }
 
             return Array.Empty<byte>();

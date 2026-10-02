@@ -101,19 +101,33 @@ namespace SiebwaldeApp
             // Bind the ECoS host (the server Koploper connects to on port 15471). Its
             // composition lives in the Integration layer; here we only create it from
             // configuration and hand it to the runtime coordinator.
-            IEcosHostService ecosHost = profileComposition is not null
-                ? new TrackControlHost(
+            IEcosHostService ecosHost;
+            if (profileComposition is not null)
+            {
+                var host = new TrackControlHost(
                     System.IO.Path.Combine(CoreConfiguration.LogDirectory, "locos.json"),
                     profileComposition.BlockTopology,
                     profileComposition.KoploperBlockMap,
                     profileComposition.SwitchMapping,
                     log: message => SiebwaldeApp.Core.IoC.Logger.Log(message, "EcosHost"),
                     trackAmplifierGroups: profileComposition.TrackAmplifierGroups,
-                    controlTrace: controlTrace)
-                : TrackControlHost.FromConfiguration(
+                    controlTrace: controlTrace);
+
+                // Make Real mode profile-driven too: bind the profile's REAL physical projection.
+                // The host is not running yet, so this is legal. It also re-applies the logical
+                // composition (identical to the constructor arguments above).
+                host.SetProfile(profileComposition.Profile);
+
+                ecosHost = host;
+            }
+            else
+            {
+                ecosHost = TrackControlHost.FromConfiguration(
                     log: message => SiebwaldeApp.Core.IoC.Logger.Log(message, "EcosHost"),
                     controlTrace: controlTrace,
                     trackAmplifierGroups: amplifierGroups);
+            }
+
             Kernel.Bind<IEcosHostService>().ToConstant(ecosHost);
 
             // The single runtime coordinator owns composition + lifetime of the track-control

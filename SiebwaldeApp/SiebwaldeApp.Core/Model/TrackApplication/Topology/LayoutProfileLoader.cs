@@ -203,11 +203,14 @@ namespace SiebwaldeApp.Core.TrackApplication.Topology
 
             var detectedSlaves = BuildDetectedSlaves(dto.DetectedSlaves, errors);
 
+            var physicalMapping = BuildPhysicalAmplifierMapping(dto.PhysicalAmplifierMapping, sectionIds, errors);
+
             return new LayoutProfile
             {
                 Name = dto.Name ?? string.Empty,
                 Description = dto.Description ?? string.Empty,
                 DetectedSlaves = detectedSlaves,
+                PhysicalAmplifierMapping = physicalMapping,
                 Sections = sections,
                 Blocks = blocks,
                 Switches = switches,
@@ -502,6 +505,76 @@ namespace SiebwaldeApp.Core.TrackApplication.Topology
         }
 
         /// <summary>
+        /// Validates the logical-section -&gt; REAL-physical-amplifier binding. The WHOLE mapping being
+        /// absent/empty is LEGAL (meaning "no physical binding declared"; Real mode stays
+        /// fail-closed). When present, every problem is collected (never silent):
+        /// (1) unknown section, (2) duplicate section, (3) physical amplifier outside the track
+        /// amplifier range 1..50, (4) two sections sharing one physical amplifier, and
+        /// (5) a declared mapping that does not cover every known section exactly once.
+        /// </summary>
+        private static List<LayoutPhysicalAmplifierBinding> BuildPhysicalAmplifierMapping(
+            List<PhysicalAmplifierDto>? mappingDtos,
+            HashSet<int> sectionIds,
+            List<string> errors)
+        {
+            var result = new List<LayoutPhysicalAmplifierBinding>();
+            if (mappingDtos is null || mappingDtos.Count == 0)
+            {
+                return result;
+            }
+
+            var seenSections = new HashSet<int>();
+            var seenAmplifiers = new HashSet<int>();
+
+            foreach (var dto in mappingDtos)
+            {
+                if (!sectionIds.Contains(dto.SectionId))
+                {
+                    errors.Add($"Physical amplifier mapping references unknown section {dto.SectionId}.");
+                    continue;
+                }
+
+                if (!seenSections.Add(dto.SectionId))
+                {
+                    errors.Add($"Duplicate physical amplifier mapping for section {dto.SectionId}.");
+                    continue;
+                }
+
+                if (dto.PhysicalAmplifier < TrackAmplifierAddress.MinTrackAmplifier ||
+                    dto.PhysicalAmplifier > TrackAmplifierAddress.MaxTrackAmplifier)
+                {
+                    errors.Add(
+                        $"Physical amplifier mapping for section {dto.SectionId} has an invalid amplifier " +
+                        $"{dto.PhysicalAmplifier} (valid {TrackAmplifierAddress.MinTrackAmplifier}..{TrackAmplifierAddress.MaxTrackAmplifier}).");
+                    continue;
+                }
+
+                if (!seenAmplifiers.Add(dto.PhysicalAmplifier))
+                {
+                    errors.Add($"Physical amplifier {dto.PhysicalAmplifier} is mapped to more than one section.");
+                    continue;
+                }
+
+                result.Add(new LayoutPhysicalAmplifierBinding
+                {
+                    SectionId = dto.SectionId,
+                    PhysicalAmplifier = dto.PhysicalAmplifier
+                });
+            }
+
+            // A declared mapping must cover every known section exactly once.
+            foreach (var sectionId in sectionIds)
+            {
+                if (!seenSections.Contains(sectionId))
+                {
+                    errors.Add($"Physical amplifier mapping is missing section {sectionId}.");
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
         /// Parses a bezetmelder name such as "1.03" (module 1, point 3) into its module and point.
         /// Module is 1..N; point is 1..<see cref="PointsPerModule"/>.
         /// </summary>
@@ -564,6 +637,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Topology
             public string? Name { get; set; }
             public string? Description { get; set; }
             public List<byte>? DetectedSlaves { get; set; }
+            public List<PhysicalAmplifierDto>? PhysicalAmplifierMapping { get; set; }
             public List<SectionDto>? Sections { get; set; }
             public List<BlockDto>? Blocks { get; set; }
             public List<SwitchDto>? Switches { get; set; }
@@ -583,6 +657,12 @@ namespace SiebwaldeApp.Core.TrackApplication.Topology
         {
             public int Id { get; set; }
             public List<int>? SectionIds { get; set; }
+        }
+
+        private sealed class PhysicalAmplifierDto
+        {
+            public int SectionId { get; set; }
+            public int PhysicalAmplifier { get; set; }
         }
 
         private sealed class SwitchDto

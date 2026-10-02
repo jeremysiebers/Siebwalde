@@ -1,0 +1,16 @@
+{
+  "purpose": "Reference mapping observed/selected for JSIF Simple Loop; not Siebwalde LayoutProfile production schema",
+  "profile": "simple-loop",
+  "layout": {"orderedBlocks": [1, 2, 3, 4], "switches": []},
+  "blocks": [
+    {"koploperBlock": 1, "koploperFeedback": "1.01", "storedFeedbackId": 101, "logicalSection": 1, "plannedPhysicalAmplifierSlave": 1, "nextBlock": 2},
+    {"koploperBlock": 2, "koploperFeedback": "1.02", "storedFeedbackId": 102, "logicalSection": 2, "plannedPhysicalAmplifierSlave": 3, "nextBlock": 3},
+    {"koploperBlock": 3, "koploperFeedback": "1.03", "storedFeedbackId": 103, "logicalSection": 3, "plannedPhysicalAmplifierSlave": 4, "nextBlock": 4},
+    {"koploperBlock": 4, "koploperFeedback": "1.04", "storedFeedbackId": 104, "logicalSection": 4, "plannedPhysicalAmplifierSlave": 6, "nextBlock": 1}
+  ],
+  "locomotives": [
+    {"dccDecoderAddress": 1, "existingEcosObjectId": 1000, "storedInitialBlock": 1},
+    {"dccDecoderAddress": 2, "existingEcosObjectId": 1001, "storedInitialBlock": 3}
+  ],
+  "caveat": "Physical amplifier bindings are intended future C# Real bindings and are not encoded by Koploper block numbers themselves."
+}

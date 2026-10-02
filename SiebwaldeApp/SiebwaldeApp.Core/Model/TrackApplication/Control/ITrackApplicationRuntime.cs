@@ -95,6 +95,13 @@ namespace SiebwaldeApp.Core
         LayoutProfile? ActiveFullSimulationProfile { get; }
 
         /// <summary>
+        /// The REAL physical amplifier addresses bound by the active layout profile's
+        /// physical-amplifier mapping (the observed-neutral domain for Real mode), or empty when
+        /// no physical binding is declared / no profile is loaded.
+        /// </summary>
+        IReadOnlyList<int> PhysicalAmplifierBinding { get; }
+
+        /// <summary>
         /// Selects the layout profile to use for the next <see cref="StartAsync"/> in
         /// <see cref="TrackControlMode.FullSimulation"/>. It also updates the underlying ECoS host's
         /// composition inputs; only valid while the runtime is stopped.

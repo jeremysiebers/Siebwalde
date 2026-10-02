@@ -35,6 +35,8 @@ namespace SiebwaldeApp.Integration
         private readonly string _locoRepositoryPath;
         private BlockTopology _topology;
         private KoploperBlockMap _blockMap;
+        private BlockTopology _realTopology;
+        private KoploperBlockMap _realBlockMap;
         private SwitchMapping _switchMapping;
         private TrackAmplifierGroups _trackAmplifierGroups;
         private readonly string _externalInfoHost;
@@ -66,6 +68,16 @@ namespace SiebwaldeApp.Integration
         /// to <see cref="StartAsync"/> because they only exist once the track application
         /// has started.
         /// </summary>
+        /// <param name="realTopology">
+        /// Optional explicit REAL-mode block -&gt; amplifier projection. When null, Real mode
+        /// composes with an empty (fail-closed) routing and can never obtain movement permission
+        /// from an implicit logical-to-physical amplifier mapping. Callers that legitimately hold an
+        /// explicit real projection may pass it here; the profile-driven path is <see cref="SetProfile"/>.
+        /// </param>
+        /// <param name="realBlockMap">
+        /// Optional explicit REAL-mode Koploper block map (physical amplifier sections). When null,
+        /// Real mode is fail-closed (empty block map); see <paramref name="realTopology"/>.
+        /// </param>
         public TrackControlHost(
             string locoRepositoryPath,
             BlockTopology topology,
@@ -77,7 +89,9 @@ namespace SiebwaldeApp.Integration
             Func<IReadOnlyDictionary<int, SwitchPosition>>? switchPositionProvider = null,
             Action<string>? log = null,
             TrackAmplifierGroups? trackAmplifierGroups = null,
-            IControlTrace? controlTrace = null)
+            IControlTrace? controlTrace = null,
+            BlockTopology? realTopology = null,
+            KoploperBlockMap? realBlockMap = null)
         {
             if (string.IsNullOrWhiteSpace(locoRepositoryPath))
                 throw new ArgumentException("A locomotive repository path is required.", nameof(locoRepositoryPath));
@@ -85,6 +99,13 @@ namespace SiebwaldeApp.Integration
             _locoRepositoryPath = locoRepositoryPath;
             _topology = topology ?? throw new ArgumentNullException(nameof(topology));
             _blockMap = blockMap ?? throw new ArgumentNullException(nameof(blockMap));
+            // Safety invariant: Real mode must never obtain movement permission from an implicit
+            // logical-to-physical amplifier mapping. Without an explicit real projection the real
+            // topology/block map default to empty (fail-closed); the profile-driven physical
+            // projection is applied by SetProfile, and callers with an explicit real projection
+            // pass it via the optional constructor parameters.
+            _realTopology = realTopology ?? BlockTopology.Parse(null);
+            _realBlockMap = realBlockMap ?? KoploperBlockMap.Parse(null);
             _switchMapping = switchMapping ?? SwitchMapping.Parse(null);
             _trackAmplifierGroups = trackAmplifierGroups ?? TrackAmplifierGroups.Empty;
             _ecosListenPort = ecosListenPort;
@@ -105,7 +126,8 @@ namespace SiebwaldeApp.Integration
             Action<string>? log = null,
             IControlTrace? controlTrace = null,
             TrackAmplifierGroups? trackAmplifierGroups = null)
-            => new(
+        {
+            var host = new TrackControlHost(
                 Path.Combine(CoreConfiguration.LogDirectory, "locos.json"),
                 CoreConfiguration.BuildBlockTopology(),
                 CoreConfiguration.BuildKoploperBlockMap(),
@@ -114,6 +136,11 @@ namespace SiebwaldeApp.Integration
                 log: log,
                 trackAmplifierGroups: trackAmplifierGroups ?? CoreConfiguration.BuildTrackAmplifierGroups(),
                 controlTrace: controlTrace);
+
+            // Real mode without a profile remains fail-closed: the constructor default keeps the
+            // real projection empty until SetProfile binds the profile's physical projection.
+            return host;
+        }
 
         /// <inheritdoc />
         public bool IsRunning => _server is not null;
@@ -217,6 +244,12 @@ namespace SiebwaldeApp.Integration
             _externalInfo = new KoploperExternalInfoClient(_externalInfoHost, _externalInfoPort);
             _movementSimulation = movementSimulation;
 
+            // Real mode composes from the profile's physical projection; every other mode uses the
+            // logical (simulated) projection. Real mode without a profile stays fail-closed because
+            // the constructor initializes the real projection to empty.
+            var topology = mode == TrackControlMode.Real ? _realTopology : _topology;
+            var blockMap = mode == TrackControlMode.Real ? _realBlockMap : _blockMap;
+
             _locoRepository = new JsonLocoRepository(_locoRepositoryPath);
             await _locoRepository.LoadAsync(cancellationToken).ConfigureAwait(false);
 
@@ -270,8 +303,8 @@ namespace SiebwaldeApp.Integration
                     commClient!,
                     variables!,
                     _externalInfo,
-                    _topology,
-                    _blockMap,
+                    topology,
+                    blockMap,
                     _locoRepository,
                     feedbackSink: null,
                     CurrentSwitchPositions,
@@ -288,7 +321,7 @@ namespace SiebwaldeApp.Integration
                         "The integration did not create an in-process ECoS backend.");
 
                 Divergence = new DivergenceChecker(
-                    _topology,
+                    topology,
                     Switches,
                     _integration.OccupancyProvider,
                     Observability,
@@ -350,7 +383,7 @@ namespace SiebwaldeApp.Integration
                 _stopSink.Hardware = _simulatorBackend;
 
                 Divergence = new DivergenceChecker(
-                    _topology,
+                    topology,
                     Switches,
                     occupancy: null,
                     Observability,
@@ -556,6 +589,8 @@ namespace SiebwaldeApp.Integration
             _blockMap = profile.ToKoploperBlockMap();
             _switchMapping = profile.ToSwitchMapping();
             _trackAmplifierGroups = profile.ToTrackAmplifierGroups();
+            _realTopology = profile.ToRealBlockTopology();
+            _realBlockMap = profile.ToRealKoploperBlockMap();
         }
 
         /// <inheritdoc />
