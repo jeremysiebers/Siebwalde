@@ -1,6 +1,6 @@
 # Simple Loop — Physical Integration & Firmware Evolution Program
 
-**Status:** Overarching Product Owner program (2026-10-01). Step 1 is the active increment; Steps 2–4 are planned and architecturally prepared but NOT executed until the preceding step is closed and the Product Owner authorizes the transition.
+**Status:** Overarching Product Owner program (2026-10-01). **Step 1 is DONE / MERGED** (PR #18, merge commit `ccfd119`, post-merge CI PASS, 482/482). Steps 2–4 are planned and architecturally prepared but NOT executed until the preceding step is closed and the Product Owner authorizes the transition.
 
 **Audience:** Product Owner (authority), Project Lead, Architect, Developer, Integrator.
 
@@ -101,7 +101,7 @@ This roadmap grants NO live-hardware, firmware-flash or fault-injection authorit
 
 ---
 
-## 6. Step 1 — Simple Loop: C# / Real-mode Readiness (ACTIVE)
+## 6. Step 1 — Simple Loop: C# / Real-mode Readiness (DONE — MERGED, PR #18)
 
 **Objective.** Prepare the existing C# application so the same Simple Loop that works in FullSimulation can be consciously selected and used in Real mode. No physical hardware is driven; no firmware change.
 
