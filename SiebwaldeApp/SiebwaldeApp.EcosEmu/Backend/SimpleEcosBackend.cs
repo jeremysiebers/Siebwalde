@@ -138,6 +138,14 @@ namespace SiebwaldeApp.EcosEmu
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task HandleAsync(EcosCommand cmd, TextWriter writer, CancellationToken ct)
         {
+            // Diagnostic trace: record every incoming Koploper command (object id + option
+            // summary). The ControlTrace already captures the protocol/normalization boundary for
+            // state-changing commands, so this stays a lightweight raw input log.
+            var objectIdText = cmd.ObjectId?.ToString() ?? "<none>";
+            SiebwaldeApp.Core.IoC.Logger.Log(
+                $"IN name={cmd.Name} object={objectIdText} options=[{string.Join(",", cmd.Options)}] raw={cmd.RawLine}",
+                "SiebwaldeApp.EcosEmu.EcosEmuTrace");
+
             // Detect first writer attachment so we can send initial sensor/switch feedback once.
             bool isFirstWriter = _currentWriter == null;
             _currentWriter = writer;
@@ -1099,6 +1107,9 @@ namespace SiebwaldeApp.EcosEmu
             {
                 // No writer yet: just keep the state cached, do not send anything.
                 Console.WriteLine("!! EVENT CACHED (no writer yet)");
+                SiebwaldeApp.Core.IoC.Logger.Log(
+                    $"OCCUPANCY sensorId={sensorId} occupied={(occupied ? "true" : "false")} event={ev} -> cached (no writer)",
+                    "SiebwaldeApp.EcosEmu.EcosEmuTrace");
                 return;
             }
 
@@ -1126,6 +1137,9 @@ namespace SiebwaldeApp.EcosEmu
                 string initialEv = $"{module.Id} state[0x{module.StateMask:X}]";
                 Console.WriteLine($"[HW-FEEDBACK] Initial sync: {initialEv}");
                 await WriteEventAsync(writer, initialEv);
+                SiebwaldeApp.Core.IoC.Logger.Log(
+                    $"OCCUPANCY sensorId={sensorId} occupied={(occupied ? "true" : "false")} event={initialEv} -> sent (initial sync)",
+                    "SiebwaldeApp.EcosEmu.EcosEmuTrace");
 
                 // We can return here because initialEv already represents the current state,
                 // including this last change.
@@ -1134,6 +1148,9 @@ namespace SiebwaldeApp.EcosEmu
 
             // Normal case: writer is available and initial sync already sent.
             await WriteEventAsync(writer, ev);
+            SiebwaldeApp.Core.IoC.Logger.Log(
+                $"OCCUPANCY sensorId={sensorId} occupied={(occupied ? "true" : "false")} event={ev} -> sent",
+                "SiebwaldeApp.EcosEmu.EcosEmuTrace");
         }
 
         /// <summary>
@@ -1531,6 +1548,11 @@ namespace SiebwaldeApp.EcosEmu
         {
             string header = $"<REPLY {cmdText}>";
             string end = $"<END {errorCode} ({errorText})>";
+
+            // Diagnostic trace: record the reply header (which echoes the command) and the final
+            // reply code, so the IN/OUT pair is greppable in the EcosEmu trace.
+            SiebwaldeApp.Core.IoC.Logger.Log($"OUT {header}", "SiebwaldeApp.EcosEmu.EcosEmuTrace");
+            SiebwaldeApp.Core.IoC.Logger.Log($"OUT {end}", "SiebwaldeApp.EcosEmu.EcosEmuTrace");
 
             try
             {
