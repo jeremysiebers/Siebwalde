@@ -50,8 +50,8 @@ See `docs/inventory.md` for the full inventory and `docs/analysis-coverage.md` f
 ## Commands And Prerequisites
 
 - Verified environment: `dotnet` SDK `9.0.318` with the .NET 8 and .NET 8 Windows Desktop runtimes on Windows (verified in `C:\Localdata\Siebwalde`).
-- Build/test commands are documented in `docs/build-test.md` and are run routinely. The current verified baseline is Debug `343/343`, Release `343/343`, and the `SiebwaldeApp.StopReachabilityHarness` build `0 errors / 0 warnings` (see `docs/current-state.md`).
-- The active test project is `SiebwaldeApp/SiebwaldeApp.Core.Tests/SiebwaldeApp.Core.Tests.csproj` (xUnit; 343 tests). The former `SiebwaldeApp/SiebwaldeApp.Tests` was removed on 2026-09-11 as an obsolete remnant of the abandoned station-in-C# approach; its design intent is archived in `docs/project-knowledge.md`.
+- Build/test commands are documented in `docs/build-test.md` and are run routinely. The current verified baseline is Debug `482/482`, Release `482/482`, and the `SiebwaldeApp.StopReachabilityHarness` build `0 errors / 0 warnings` (see `docs/current-state.md`).
+- The active test project is `SiebwaldeApp/SiebwaldeApp.Core.Tests/SiebwaldeApp.Core.Tests.csproj` (xUnit; 482 tests). The former `SiebwaldeApp/SiebwaldeApp.Tests` was removed on 2026-09-11 as an obsolete remnant of the abandoned station-in-C# approach; its design intent is archived in `docs/project-knowledge.md`.
 - Firmware projects use Microchip MPLAB X / XC compilers and Python tooling. Do not build, flash, or connect to hardware without explicit authorization.
 
 ## Constraints

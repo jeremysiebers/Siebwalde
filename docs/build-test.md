@@ -36,11 +36,11 @@ dotnet test "SiebwaldeApp\SiebwaldeApp.sln" -c Release --no-build
 dotnet build "SiebwaldeApp\SiebwaldeApp.StopReachabilityHarness\SiebwaldeApp.StopReachabilityHarness.csproj"
 ```
 
-Verified baseline at revision `f1caa6b838455afc4ac1d9f5d67d534dfc83c016` (re-run to confirm before relying on it):
+Verified baseline (re-run to confirm before relying on it):
 
-- Debug tests: 343/343 PASS.
-- Release tests: 343/343 PASS.
-- Release build: 0 errors / 175 warnings.
+- Debug tests: 482/482 PASS.
+- Release tests: 482/482 PASS.
+- Release build: 0 errors / 170 warnings.
 - `SiebwaldeApp.StopReachabilityHarness` build: 0 errors / 0 warnings.
 
 Test counts are transient and belong to the stated revision, not to the procedure itself. For the current verified project snapshot see `docs/current-state.md`.
