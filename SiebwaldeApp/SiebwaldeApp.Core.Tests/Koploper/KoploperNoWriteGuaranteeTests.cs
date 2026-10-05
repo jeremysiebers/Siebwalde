@@ -52,11 +52,16 @@ namespace SiebwaldeApp.Core.Tests.Koploper
                              BindingFlags.Public | BindingFlags.NonPublic |
                              BindingFlags.DeclaredOnly))
                 {
-                    string? entryPoint = method.GetCustomAttribute<DllImportAttribute>()?.EntryPoint;
-                    if (!string.IsNullOrEmpty(entryPoint))
+                    DllImportAttribute? dllImport = method.GetCustomAttribute<DllImportAttribute>();
+                    if (dllImport is null)
                     {
-                        entryPoints.Add(entryPoint);
+                        continue;
                     }
+
+                    // EntryPoint is null when the DllImport omits an explicit EntryPoint;
+                    // the effective entry point then defaults to the method name.
+                    string entryPoint = dllImport.EntryPoint ?? method.Name;
+                    entryPoints.Add(entryPoint);
                 }
             }
 
