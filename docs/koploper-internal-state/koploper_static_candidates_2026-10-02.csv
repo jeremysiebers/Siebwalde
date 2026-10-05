@@ -1,0 +1,18 @@
+﻿hint;literal;file_offset_hex;va_if_code;context
+TBlok (class RTTI kandidaat);TBlok;0x2d50cb;0x6d5ccb;"Delphi class/type record nabij deze marker; RTTI en VMT relaties nader reconstrueren"
+TLokRij (class RTTI kandidaat);TLokRij;0x2a86ee;0x6a92ee;Locomotief/rijstatus-object, type record nabij marker
+TBlokBaan (class RTTI kandidaat);TBlokBaan;0x184399;0x584f99;"Baanblok-object, mogelijk GUI/model; nog niet gelijkstellen aan reserveringsobject"
+Log: onvoldoende blokken reserveren;Kan onvoldoende blokken reserveren!;0x2be504;0x6bf104;"Directe stringreferentie op VA 0x006BE68A; logging/diagnostiek, niet per se reserveringsmutatie"
+Log: reeds gereserveerd; reeds gereserveerd;0x2be2ec;0x6beeec;Diagnostiek bij reserveringscontrole
+Log: vervolg blok/wisselstraat bezet;Vervolg blok/wisselstraat bezet!;0x2be530;0x6bf130;Diagnostiek voor mislukte vervolgkeuze
+Class/method hint vrijgeven;TBlok.VrijOphef: aanvullen!;0x2db058;0x6dbc58;"Directe stringreferentie in code rond VA 0x006DBBA6; analyseren in Ghidra"
+Cond: blok door loc gereserveerd;Blok is gereserveerd door locomotief;0x2f4b90;0x6f5790;"Stringreferentie rond VA 0x006F49D9, maar dat is een string-initialisatieroutine; de conditie-evaluator nog zoeken"
+Cond: loc komend uit blok;Blok is gereserveerd door locomotief komend uit blok;0x2f4bec;0x6f57ec;Conditionele semantiek met herkomstblok
+Config: alleen als volgend blok gereserveerd;Alleen als volgend blok is gereserveerd;0xfa9f4;0x4fb5f4;Geïntegreerde statuscheck in logische programmastroom
+Config: negeer extra blokkenreservering;Negeer extra blokken reservering;0xeed3c;0x4ef93c;Gebruikersoptie, laat zien dat Koploper meerdere vervolgblokken overweegt
+Config: één vervolgblok claimen;n vervolg blok: claim dat blok;0xeee02;0x4efa02;Ingestelde claimstrategie
+Tekst: max >2 gereserveerd;Maximum @ (meer dan 2 blokken gereserveerd);0x2c98c8;0x6ca4c8;Op regeling betrokken reserveringsdiepte, niet per-blok objectmapping
+Tekst: gemiddeld 2 gereserveerd;Gemiddelde @ (zijn 2 blokken gereserveerd);0x2c98fc;0x6ca4fc;Gerelateerd aan reserveringsdiepte
+Tekst: minimum 1 gereserveerd;Minimum @ (is nog 1 blok gereserveerd);0x2c9930;0x6ca530;Gerelateerd aan reserveringsdiepte
+UI: statusbalk reserveringen;Blok (reserveringen);0x3ebb8b;resource;Delphi DFM Tf_inst, combobox cmb_statusbalk, geen TCP-API
+UI: lengte gereserveerde rijweg;Lengte gereserveerde rijweg;0x3e65db;resource;Delphi DFM Tf_insr, combobox cmb_snelh

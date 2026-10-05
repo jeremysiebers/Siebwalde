@@ -1,0 +1,19 @@
+﻿VA,Ghidra function,Evidence,Confidence,Purpose
+00676330,FUN_00676330,lookup block by root +0x5AC; block key +0x14C,high,Block registry root list / identifier
+00676380,FUN_00676380,lookup locomotive by root +0x5C8; loc key +0x1A8,high,Loc registry root list / identifier
+0040F05C,FUN_0040f05c,"TList [list+4] items, [list+8] count, [list+12] capacity",high,External reader layout helper
+0040F2AC,FUN_0040f2ac,"TList pointer equality lookup, [list+4]/[list+8]",high,External reader layout helper
+006A9498,FUN_006a9498,"Getter object+0x58, compared with block pointers elsewhere",high for offset; medium semantic,Related block reference
+006A949C,FUN_006a949c,"Getter object+0x54, compared with block pointers elsewhere",high for offset; medium semantic,Related block reference
+006D6BA4,FUN_006d6ba4,Constructs TBlok; initializes +0x16C and +0x1C4 collections,high,Object layout
+006D7A80,FUN_006d7a80,Adds locomotive object to block+0x16C keyed by loco+0x1A8,high,Reservation/claim list INSERT
+006D7AE4,FUN_006d7ae4,"Deletes from +0x16C by identifier, -1 clears all",high,Reservation/claim list REMOVE
+006DDB14,FUN_006ddb14,Checks +0x16C nonempty; optionally excludes supplied loco,high,Claim collision check
+006DDB4C,FUN_006ddb4c,Checks membership of given loco in +0x16C,high,Claim membership check
+006AB81C,FUN_006ab81c,Iterates candidate path list (+0x4D8) and calls 006D7A80 on TBlok,medium-high,Route -> block claim propagation
+0069F228,FUN_0069f228,Also calls 006D7A80 for list entries,medium,Alternative claim path
+006BBFB8,FUN_006bbfb8,Includes already-claimed/already-reserved checks; calls membership/add,high for checks; uncertain full decompile,Route decision/error path
+006DF0C8,FUN_006df0c8,Writes block+0x1AC=loc; removes this loc from +0x16C; logs change,high,Occupancy/current-owner assignment
+006DF4C4,FUN_006df4c4,Labels block state as bezet door / vrij van,high,Occupancy log/reference
+006DEFE0,FUN_006defe0,Sets or clears block+0x1AC; invokes current-owner logging,high,Set/clear current-owner
+006DB6C0,FUN_006db6c0,"TBlok.VrijOphef marker, loops +0x1C4 mixed item types",high for free-path; uncertain relation to claims,Block release path
