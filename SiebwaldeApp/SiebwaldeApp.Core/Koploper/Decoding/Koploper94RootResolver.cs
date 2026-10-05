@@ -3,8 +3,9 @@ using System;
 namespace SiebwaldeApp.Core.Koploper
 {
     /// <summary>
-    /// Root resolver for the Koploper 9.4 layout: reads the central root pointer at
-    /// <c>moduleBase + RootPointerRva</c>.
+    /// Root resolver for the Koploper 9.4 layout. The proven runtime layout uses a double
+    /// dereference: <c>moduleBase + RootPointerRva</c> is a global pointer-cell, and that cell
+    /// holds the active heap root object address.
     /// </summary>
     public sealed class Koploper94RootResolver : IKoploperRootResolver
     {
@@ -18,17 +19,33 @@ namespace SiebwaldeApp.Core.Koploper
         }
 
         /// <inheritdoc />
-        public bool TryResolveRoot(nuint moduleBase, out nuint rootPointer)
+        public bool TryResolveRoot(nuint moduleBase, out nuint root)
         {
-            rootPointer = 0;
+            root = 0;
 
+            // First dereference: the profile RVA points at a global pointer-cell holding the
+            // address of the active root pointer slot.
             nuint rootPointerAddress = checked(moduleBase + _layout.RootPointerRva);
-            if (!_reader.TryReadPointer32(rootPointerAddress, out uint root))
+            if (!_reader.TryReadPointer32(rootPointerAddress, out uint rootCell))
+            {
+                return false;
+            }
+            if (rootCell == 0)
             {
                 return false;
             }
 
-            rootPointer = root;
+            // Second dereference: the root cell holds the actual heap root object address.
+            if (!_reader.TryReadPointer32(rootCell, out uint finalRoot))
+            {
+                return false;
+            }
+            if (finalRoot == 0)
+            {
+                return false;
+            }
+
+            root = finalRoot;
             return true;
         }
     }

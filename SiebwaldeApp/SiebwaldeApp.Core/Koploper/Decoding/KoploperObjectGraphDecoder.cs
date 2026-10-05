@@ -38,8 +38,18 @@ namespace SiebwaldeApp.Core.Koploper
                 return KoploperObjectGraphDecodeResult.RootInvalid;
             }
 
-            // Block registry.
-            if (!TryReadList(reader, checked(root + _layout.RootBlockListOffset), out KoploperTList blockList))
+            // Block registry: the root field holds a pointer to the block TList (not the TList
+            // inline); dereference it before reading the list.
+            nuint blockListPointerAddress = checked(root + _layout.RootBlockListOffset);
+            if (!reader.TryReadPointer32(blockListPointerAddress, out uint blockListPointer))
+            {
+                return KoploperObjectGraphDecodeResult.PointerInvalid;
+            }
+            if (blockListPointer == 0)
+            {
+                return KoploperObjectGraphDecodeResult.PointerInvalid;
+            }
+            if (!TryReadList(reader, blockListPointer, out KoploperTList blockList))
             {
                 return KoploperObjectGraphDecodeResult.PointerInvalid;
             }
@@ -79,8 +89,18 @@ namespace SiebwaldeApp.Core.Koploper
                 blocks.Add(new KoploperRawBlock(internalId, displayId, ownerPointer, rawState, changedFlag, updateTick));
             }
 
-            // Locomotive registry.
-            if (!TryReadList(reader, checked(root + _layout.RootLocoListOffset), out KoploperTList locoList))
+            // Locomotive registry: the root field holds a pointer to the loco TList (not the
+            // TList inline); dereference it before reading the list.
+            nuint locoListPointerAddress = checked(root + _layout.RootLocoListOffset);
+            if (!reader.TryReadPointer32(locoListPointerAddress, out uint locoListPointer))
+            {
+                return KoploperObjectGraphDecodeResult.PointerInvalid;
+            }
+            if (locoListPointer == 0)
+            {
+                return KoploperObjectGraphDecodeResult.PointerInvalid;
+            }
+            if (!TryReadList(reader, locoListPointer, out KoploperTList locoList))
             {
                 return KoploperObjectGraphDecodeResult.PointerInvalid;
             }

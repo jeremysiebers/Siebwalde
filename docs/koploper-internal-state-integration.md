@@ -191,30 +191,57 @@ Bij imagebase `0x00400000`:
 RVA = 0x003259B0
 ```
 
-Runtimeconcept:
+Runtimeconcept (dubbele dereferentie):
 
 ```text
-moduleBase = actual base address of koploper.exe
-rootPointerAddress = moduleBase + 0x3259B0
-root = ReadU32(rootPointerAddress)
+moduleBase         = actual base address of koploper.exe
+rootPointerAddress = moduleBase + 0x3259B0   // global pointer-cell
+rootCell           = ReadU32(rootPointerAddress) // first dereference -> cell address
+root               = ReadU32(rootCell)           // second dereference -> active heap root object
 ```
 
-Een geobserveerde root tijdens één PoC-run was:
+`0x3259B0` wijst dus niet rechtstreeks naar het rootobject, maar naar een globale pointer-cell.
+De eerste dereferentie levert het adres van die cell op; de tweede dereferentie levert het actieve
+heap-rootobject op. Run-specifieke heap-adressen mogen **nooit hardcoded worden**.
+
+Een geobserveerd rootobject tijdens één PoC-run was:
 
 ```text
 0x028A981C
 ```
 
-Dit adres is uitsluitend een runtimevoorbeeld en **mag nooit hardcoded worden**.
+Dit is het uiteindelijke heap-rootobject (ná de dubbele dereferentie) en is uitsluitend een
+runtimevoorbeeld; het **mag nooit hardcoded worden**.
+
+> **Classificatie:** dit was een PoC-naar-handoff transcriptiefout — de tweede dereferentie
+> (dubbele indirection) was in de oorspronkelijke handoff weggelaten. Deze correctie herstelt
+> alleen de beschrijving van de bestaande runtime-layout; het verandert de daadwerkelijke
+> runtime-layout van Koploper niet.
 
 ## 6.2 Centrale objectlijsten
 
-Binnen het rootobject:
+Binnen het rootobject bevinden zich twee **pointervelden** (niet de lijsten zelf). Elk veld bevat
+een pointer naar een apart toegewezen Delphi `TList` object:
 
 | Offset | Betekenis | Status |
 |---|---|---|
-| `root + 0x5AC` | lijst van `TBlok*` | runtime bevestigd |
-| `root + 0x5C8` | lijst van locomotiefobjecten | runtime bevestigd |
+| `root + 0x5AC` | pointer naar de block-`TList` (van `TBlok*`) | runtime bevestigd |
+| `root + 0x5C8` | pointer naar de locomotief-`TList` | runtime bevestigd |
+
+Volledige bewezen pointerketen:
+
+```text
+moduleBase + 0x3259B0 -> rootCell -> root (actief heap-rootobject)
+root + 0x5AC           -> blockListPtr -> Delphi TList (blocklijst)
+root + 0x5C8           -> locoListPtr  -> Delphi TList (loclijst)
+TList: +0x00 VMT, +0x04 item-array pointer, +0x08 count, +0x0C capacity
+```
+
+> **Classificatie:** dit was een tweede PoC-naar-handoff transcriptiefout — de lijst-pointer
+> indirection (rootveld → pointer → `TList`) was in de oorspronkelijke handoff weggelaten; de
+> lijsten werden als inline `root+offset` beschreven. Deze correctie herstelt alleen de
+> beschrijving van de bestaande runtime-layout; het verandert de daadwerkelijke runtime-layout
+> van Koploper niet.
 
 Ghidra-functies:
 
@@ -223,7 +250,11 @@ Ghidra-functies:
 
 ## 6.3 Delphi `TList` layout
 
-Voor de gevonden eenvoudige lijsten:
+De block- en locomotieflijsten zijn **apart toegewezen** `TList` objecten. Ze worden bereikt door
+het bijbehorende pointerveld in het rootobject te dereferencen (zie §6.2); de `TList` zelf ligt dus
+niet inline in het rootobject.
+
+Op het `TList` objectadres geldt voor de gevonden eenvoudige lijsten:
 
 ```text
 +0x00  VMT pointer
@@ -788,8 +819,8 @@ Versieprofiel met uitsluitend offsets/RVA's:
 
 ```text
 RootPointerRva = 0x3259B0
-Root_BlockList = 0x5AC
-Root_LocoList  = 0x5C8
+Root_BlockList = 0x5AC   // pointer field in root -> block TList object (dereference to reach)
+Root_LocoList  = 0x5C8   // pointer field in root -> loco TList object (dereference to reach)
 
 TList_Items    = 0x04
 TList_Count    = 0x08
@@ -806,6 +837,9 @@ TLoc_InternalId    = 0x1A8
 TLoc_BlockRef54    = 0x54   // unverified semantic
 TLoc_BlockRef58    = 0x58   // strong current-block candidate
 ```
+
+De `Root_BlockList`/`Root_LocoList` offsets zijn pointervelden in het rootobject: de waarde op dat
+offset is een pointer naar een apart toegewezen `TList` object (zie §6.2/§6.3), niet de `TList` zelf.
 
 ## 14.5 `KoploperSnapshotReader`
 
@@ -1070,7 +1104,7 @@ Acceptance:
 Deliverables:
 
 - `Koploper94MemoryLayout`;
-- root resolver via modulebase + `0x3259B0`;
+- root resolver via modulebase + `0x3259B0` (dubbele dereferentie: globale pointer-cell → actief heap-rootobject);
 - TList reader;
 - block/loc raw objects;
 - pointer/count sanity checks;
@@ -1418,8 +1452,8 @@ If context is limited, the new AI should read this document first and retain the
 
 1. Koploper 9.4 build 9 exact hash is known.
 2. Use read-only Windows memory APIs, no patching.
-3. Resolve root using modulebase + RVA `0x3259B0`.
-4. `root+0x5AC` = block list; `root+0x5C8` = loco list.
+3. Resolve root with a double dereference: `moduleBase + 0x3259B0` is a global pointer-cell; read the cell pointer, then read the active heap root object from that cell.
+4. `root+0x5AC` / `root+0x5C8` are list-pointer fields; dereference them to reach the block/loco `TList` objects.
 5. `TBlok+0x14C` = internal block ID.
 6. `TBlok+0x15C` = display block candidate; map explicitly.
 7. `TBlok+0x1AC` = loc ownerpointer.
