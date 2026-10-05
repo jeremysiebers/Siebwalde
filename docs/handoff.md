@@ -1,5 +1,23 @@
 # Handoff
 
+## Session (2026-10-06, KIS-02 corrective loop + PR #23 MERGED — KIS-01/02 DONE / TERMINAL)
+
+Branch `feature/koploper-internal-state-kis01-02`, final HEAD `9d3ee38c91df00406f932ce7a07e9700b21eda32`. This session completed the KIS-01/02 corrective loop for PR #23 (KIS-01 + KIS-02: read-only, version-gated Koploper 9.4 process/memory foundation + objectgraph decoder), then merged it into `master`.
+
+**Merge:** normal merge commit `53270cb13f3a35e4b5adac3a008e8639dcee5cdf` (Product Owner revision-bound merge authority on `9d3ee38…`). Post-merge CI **PASS** (`Build and test`, run `37380448260`). **KIS-01 — DONE / TERMINAL; KIS-02 — DONE / TERMINAL.** KIS-03 not started (awaiting separate Product Owner authorization). No squash/rebase/force-push/branch-deletion.
+
+Two proven PoC-to-handoff transcription errors were fixed (both were "indirection omitted", not changes to Koploper's actual runtime layout):
+1. **Root double dereference** — `Koploper94RootResolver` previously did `root = ReadPointer32(moduleBase + 0x3259B0)`. Proven correct chain: `rootPointerAddress = moduleBase + 0x3259B0` → `rootCell = ReadPointer32(rootPointerAddress)` (= `0x007287E4`) → `root = ReadPointer32(rootCell)` (= `0x027E981C`, the active heap root).
+2. **List pointer indirection** — `KoploperObjectGraphDecoder` previously read the block/loco TList inline at `root + 0x5AC`/`root + 0x5C8`. Proven correct chain: those root fields hold POINTERS to separately allocated Delphi TLists (`blockListPtr = ReadPointer32(root + 0x5AC)`; `locoListPtr = ReadPointer32(root + 0x5C8)`), then the TList header (`+0x04` items, `+0x08` count, `+0x0C` capacity) is read at that pointer.
+
+Final verification (all on `9d3ee38`):
+- Debug tests **517/517 PASS**, Release tests **517/517 PASS**, no-write (`KoploperNoWriteGuaranteeTests`) **4/4 PASS**.
+- Live acceptance (read-only, PID 1576, Koploper 9.4.0.9, SHA-256 `645B…79D2E`): `moduleBase 0x00400000`, `rootPointerAddress 0x007259B0`, `rootCell 0x007287E4`, `root 0x027E981C`, `blockListPointer 0x027E97FC` (count 30 / capacity 44), `locoListPointer 0x02822F08` (count 3 / capacity 4), **30 blocks / 3 locos / IDs {2,8,24}**, `decode=Success`.
+- Integrator independent **R2 PASS** on `9d3ee38` (mutation-proven regressions: single-deref revert → 7 failures, inline-list revert → 5 failures; no-write intact; no KIS-03 scope creep).
+- CI **PASS** (Build and test (Release), 5m34s).
+
+Resume: PR #23 is **MERGED** — merge commit `53270cb13f3a35e4b5adac3a008e8639dcee5cdf` on `master`, ancestor `9d3ee38c91df00406f932ce7a07e9700b21eda32` verified, post-merge CI PASS. **KIS-01 + KIS-02 are DONE / TERMINAL.** KIS-03 (state semantics) and later increments are not started and await separate Product Owner authorization. The two regressions are committed under `Koploper94RootResolverTests.DoubleDereference_ReturnsFinalRoot_NotRootCell` and `KoploperObjectGraphDecoderTests.Decode_ValidMap_SuccessWithAllRawFields`.
+
 ## Closure (2026-09-21, safety-stop reachability increment merged)
 
 - **PR #4 merged** — "Fix safety-stop reachability and add production control tracing".
