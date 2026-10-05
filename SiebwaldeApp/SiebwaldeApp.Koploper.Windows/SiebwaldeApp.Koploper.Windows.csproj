@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Windows-targeted P/Invoke adapter for the read-only Koploper internal-state source
+    (KIS-01 + KIS-02). This is the ONLY project in the solution that declares native
+    Windows P/Invoke declarations; the pure Core logic in SiebwaldeApp.Core.Koploper
+    stays net8.0 and dependency-free of Windows interop.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows7.0</TargetFramework>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>SiebwaldeApp.Koploper.Windows</RootNamespace>
+    <AssemblyName>SiebwaldeApp.Koploper.Windows</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SiebwaldeApp.Core\SiebwaldeApp.Core.csproj" />
+  </ItemGroup>
+
+</Project>

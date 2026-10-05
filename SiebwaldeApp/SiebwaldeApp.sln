@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SiebwaldeApp.Core.Tests", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SiebwaldeApp.Integration", "SiebwaldeApp.Integration\SiebwaldeApp.Integration.csproj", "{E62C2219-5DE5-4175-BE76-6DFB5A136728}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SiebwaldeApp.Koploper.Windows", "SiebwaldeApp.Koploper.Windows\SiebwaldeApp.Koploper.Windows.csproj", "{84D342B4-B649-47FD-8C90-661EF582FEED}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -83,6 +85,18 @@ Global
 		{E62C2219-5DE5-4175-BE76-6DFB5A136728}.Release|x64.Build.0 = Release|Any CPU
 		{E62C2219-5DE5-4175-BE76-6DFB5A136728}.Release|x86.ActiveCfg = Release|Any CPU
 		{E62C2219-5DE5-4175-BE76-6DFB5A136728}.Release|x86.Build.0 = Release|Any CPU
+		{84D342B4-B649-47FD-8C90-661EF582FEED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{84D342B4-B649-47FD-8C90-661EF582FEED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{84D342B4-B649-47FD-8C90-661EF582FEED}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{84D342B4-B649-47FD-8C90-661EF582FEED}.Debug|x64.Build.0 = Debug|Any CPU
+		{84D342B4-B649-47FD-8C90-661EF582FEED}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{84D342B4-B649-47FD-8C90-661EF582FEED}.Debug|x86.Build.0 = Debug|Any CPU
+		{84D342B4-B649-47FD-8C90-661EF582FEED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{84D342B4-B649-47FD-8C90-661EF582FEED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{84D342B4-B649-47FD-8C90-661EF582FEED}.Release|x64.ActiveCfg = Release|Any CPU
+		{84D342B4-B649-47FD-8C90-661EF582FEED}.Release|x64.Build.0 = Release|Any CPU
+		{84D342B4-B649-47FD-8C90-661EF582FEED}.Release|x86.ActiveCfg = Release|Any CPU
+		{84D342B4-B649-47FD-8C90-661EF582FEED}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
