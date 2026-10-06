@@ -44,6 +44,12 @@ namespace SiebwaldeApp.Core.Koploper
         KOPLOPER_BLOCK_MAPPING_MISSING = 11,
 
         /// <summary>A Koploper block maps to more than one conflicting Siebwalde section/amplifier.</summary>
-        KOPLOPER_BLOCK_MAPPING_CONFLICT = 12
+        KOPLOPER_BLOCK_MAPPING_CONFLICT = 12,
+
+        /// <summary>
+        /// A block has an owner pointer in a state (0 or 9) where the validated profile expects
+        /// none; the block is not published as a valid Free/Reserved/Occupied state.
+        /// </summary>
+        KOPLOPER_STATE_OWNER_INCONSISTENT = 13
     }
 }

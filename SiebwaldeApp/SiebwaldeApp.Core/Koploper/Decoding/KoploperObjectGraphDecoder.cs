@@ -134,7 +134,7 @@ namespace SiebwaldeApp.Core.Koploper
                     return KoploperObjectGraphDecodeResult.DuplicateLocoId;
                 }
 
-                locomotives.Add(new KoploperRawLocomotive(internalId, blockRef54, blockRef58));
+                locomotives.Add(new KoploperRawLocomotive(internalId, blockRef54, blockRef58, (uint)locoAddress));
             }
 
             registry = new KoploperRawRegistry(blocks, locomotives);

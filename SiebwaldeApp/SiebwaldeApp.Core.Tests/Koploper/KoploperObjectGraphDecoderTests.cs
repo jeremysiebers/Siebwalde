@@ -68,6 +68,9 @@ namespace SiebwaldeApp.Core.Tests.Koploper
             Assert.Equal(0x54u, loco2.BlockRef54);
             Assert.Equal(0x58u, loco2.BlockRef58);
 
+            // ObjectAddress preserves the loco's own TList item pointer (its object address).
+            Assert.Equal(LocoObjectsBase, loco2.ObjectAddress);
+
             KoploperRawLocomotive loco24 = registry.Locomotives[2];
             Assert.Equal(24u, loco24.InternalLocomotiveId);
         }
