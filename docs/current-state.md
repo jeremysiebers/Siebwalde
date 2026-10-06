@@ -22,7 +22,7 @@ Siebwalde is the control application for a model railway. Koploper owns driving 
 ## Current repository baseline
 
 - Repository root: `C:\Localdata\Siebwalde` (Git; `origin https://github.com/jeremysiebers/Siebwalde.git`).
-- Current `master` HEAD: `53270cb13f3a35e4b5adac3a008e8639dcee5cdf` (normal merge commit for PR #23, KIS-01/02 Koploper process/memory foundation + objectgraph decoder). Earlier software baselines: `b425349` (PR #22 test-baseline refresh), `ccfd119` (PR #18 Simple Loop C#/Real-mode Readiness), `1d808b4` (PR #17), `7f03012` (PR #16 Full Simulation), `f0ce047c` (PR #14), `949a7f1` (PR #12), `c5f626a` (PR #11), `33a231a` (PR #10), `a41302a` (PR #9), `5fb7515` (PR #8), `0cf6347` (PR #7), `ec990bc` (PR #6), `a6b3467` (PR #5).
+- Current `master` HEAD: `229afd485da8d7a669e6259f544457ea5f372a68` (normal merge commit for PR #25, KIS-03 typed Koploper block state decoder). Earlier software baselines: `063c0ff` (PR #24 KIS-01/02 docs closure), `53270cb` (PR #23 KIS-01/02), `b425349` (PR #22 test-baseline refresh), `ccfd119` (PR #18 Simple Loop C#/Real-mode Readiness), `1d808b4` (PR #17), `7f03012` (PR #16 Full Simulation), `f0ce047c` (PR #14), `949a7f1` (PR #12), `c5f626a` (PR #11), `33a231a` (PR #10), `a41302a` (PR #9), `5fb7515` (PR #8), `0cf6347` (PR #7), `ec990bc` (PR #6), `a6b3467` (PR #5).
 - The revision above is a **verified baseline reference**, not a permanently self-updating truth claim; always trust the actual Git state.
 - Main solution: `SiebwaldeApp/SiebwaldeApp.sln` (UI, Core, EcosEmu, Integration, Core.Tests). Separate hosts: `SiebwaldeApp.Core.Host.sln`, `SiebwaldeApp.EcosEmu.sln`. Validation harness: `SiebwaldeApp/SiebwaldeApp.StopReachabilityHarness` (not in the solution).
 - Immutable evidence branch retained: `feature/safety-stop-reachability` @ `825533e` (historical physical-validation provenance). Reviewer-facing branch: `feature/safety-stop-reachability-clean` @ `dab43ab`.
@@ -30,15 +30,15 @@ Siebwalde is the control application for a model railway. Koploper owns driving 
 
 ## Current verification baseline
 
-Current verified baseline (post-merge `master` `53270cb13f3a35e4b5adac3a008e8639dcee5cdf`, PR #23 KIS-01/02, post-merge CI PASS):
+Current verified baseline (post-merge `master` `229afd485da8d7a669e6259f544457ea5f372a68`, PR #25 KIS-03, post-merge CI PASS):
 
-- Debug tests: **517/517 PASS** (`dotnet test SiebwaldeApp.sln`)
-- Release tests: **517/517 PASS** (`dotnet test SiebwaldeApp.sln -c Release`)
+- Debug tests: **537/537 PASS** (`dotnet test SiebwaldeApp.sln`)
+- Release tests: **537/537 PASS** (`dotnet test SiebwaldeApp.sln -c Release`)
 - No-write tests (`KoploperNoWriteGuaranteeTests`): **4/4 PASS**
 - Release build: **0 errors** (`dotnet build SiebwaldeApp.sln -c Release`)
 - `SiebwaldeApp.StopReachabilityHarness` build: **0 errors / 0 warnings** (unchanged; not in the solution)
 
-Earlier baseline (PR #18, revision `b8d6f9c05da925123aff5d9faed9bbcd59b036c3`, merged as `ccfd119`): Debug/Release **482/482 PASS**.
+Earlier baselines: PR #23 KIS-01/02 (`53270cb`): Debug/Release **517/517**; PR #18 (`b8d6f9c`, merged as `ccfd119`): Debug/Release **482/482**.
 
 These results belong to the stated verified baseline revisions; re-run to confirm before relying on them.
 
@@ -68,7 +68,7 @@ Only currently material items; see `docs/backlog.md` for the full list.
 
 ## Active development direction
 
-- The **Koploper Internal State program** (`docs/koploper-internal-state-integration.md` is the authoritative technical handoff; PoC01–06 evidence under `docs/koploper-internal-state/`). The first software-only increment **KIS-01 + KIS-02** (read-only, version-gated Windows process/memory foundation + Koploper 9.4 objectgraph decoder; no state semantics, no hardware writes) is **MERGED / CLOSED** (PR #23, normal merge commit `53270cb13f3a35e4b5adac3a008e8639dcee5cdf`, PR head `9d3ee38c91df00406f932ce7a07e9700b21eda32`, post-merge CI PASS). **KIS-01 — DONE / TERMINAL; KIS-02 — DONE / TERMINAL.** A corrective loop fixed two proven PoC-to-handoff transcription errors (root **double dereference** `moduleBase+0x3259B0 → root cell → heap root`; and block/loco lists behind **pointer fields** `root+0x5AC`/`root+0x5C8 → TList pointer → Delphi TList`). Verified: Debug/Release **517/517**, no-write **4/4**, live acceptance against PID 1576 (root `0x027E981C`, **30 blocks / 3 locos / IDs {2,8,24}**, `decode=Success`), Integrator **R2 PASS**, CI **PASS**. KIS-03 (state semantics) and later increments are **not started** — they await separate Product Owner authorization.
+- The **Koploper Internal State program** (`docs/koploper-internal-state-integration.md` is the authoritative technical handoff; PoC01–06 evidence under `docs/koploper-internal-state/`). The first software-only increment **KIS-01 + KIS-02** (read-only, version-gated Windows process/memory foundation + Koploper 9.4 objectgraph decoder; no state semantics, no hardware writes) is **MERGED / CLOSED** (PR #23, merge commit `53270cb13f3a35e4b5adac3a008e8639dcee5cdf`, PR head `9d3ee38c91df00406f932ce7a07e9700b21eda32`). **KIS-01 — DONE / TERMINAL; KIS-02 — DONE / TERMINAL.** A corrective loop fixed two proven PoC-to-handoff transcription errors (root **double dereference** and block/loco-list **pointer fields**). **KIS-03 (Typed Koploper Block State Decoder) is MERGED / CLOSED** (PR #25, merge commit `229afd485da8d7a669e6259f544457ea5f372a68`, PR head `b77741f8092d0a951af7e37cdbd547bee0e18c86`). **KIS-03 — DONE / TERMINAL.** KIS-03 adds `KoploperBlockState` (Unknown/Free/Reserved/Occupied/Transition) + `KoploperBlockSnapshot` and a pure stateless `KoploperBlockStateDecoder` with owner validation (fail-closed; owner pointer → internal loco ID via an additive `ObjectAddress` field). Verified: Debug/Release **537/537**, no-write **4/4**, live read-only smoke (PID 3172) observed **0→Free / 1→Reserved / 2→Occupied / 9→Transition**, Integrator **R2 PASS**, CI **PASS**. **KIS-04 (Coherent Snapshot + Freshness) is NOT started** — KIS-03 types individual block records only; a coherent full snapshot is not yet proven. KIS-04 and later await separate Product Owner authorization.
 - The **Simple Loop program** (`docs/simple-loop-validation-roadmap.md`) is the current product direction. **Step 1 (Simple Loop — C# / Real-mode Readiness) is MERGED / CLOSED (PR #18, `ccfd119`).** Steps 2–4 (physical validation with existing firmware; amplifier firmware MMDC/observability; fault injection/recovery) are planned but **NOT started** — Step 2 awaits a separate Product Owner assignment (physical preflight, Gate A/B/C, explicit `LIVE_HARDWARE` authority).
 - The **Recovery & Maintenance System** (`docs/recovery-maintenance-system.md`) remains an ongoing direction; its V4 physical-neutral validation and the later manual-control/arbiter (Increment 4) and hand-back (Increment 5) increments remain gated by the open Product Owner decisions 1, 2 and 5 and the firmware physical-fidelity question (§5/§8/§9).
 - The physical test oval autonomous running remains a separate, not-yet-started product direction.

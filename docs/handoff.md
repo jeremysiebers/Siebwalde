@@ -1,5 +1,23 @@
 # Handoff
 
+## Session (2026-10-06, KIS-03 typed block state decoder MERGED — KIS-03 DONE / TERMINAL)
+
+Branch `feature/koploper-internal-state-kis03`, final HEAD `b77741f8092d0a951af7e37cdbd547bee0e18c86`. This session implemented and merged KIS-03 (Typed Koploper Block State Decoder) into `master`.
+
+**Merge:** normal merge commit `229afd485da8d7a669e6259f544457ea5f372a68` (Product Owner revision-bound merge authority on `b77741f…`). Post-merge CI **PASS** (`Build and test`, run `37525375149`). **KIS-03 — DONE / TERMINAL.** KIS-04 not started (awaiting separate Product Owner authorization). No squash/rebase/force-push/branch-deletion.
+
+KIS-03 adds the typed domain model + decoder:
+- `KoploperBlockState { Unknown = -1, Free = 0, Reserved = 1, Occupied = 2, Transition = 9 }` and `KoploperBlockSnapshot`.
+- Pure stateless `KoploperBlockStateDecoder` + `KoploperBlockStateDecodeResult`/`KoploperBlockDiagnostic`.
+- Owner→loco-ID resolution via an additive `ObjectAddress` field on `KoploperRawLocomotive` (the already-read TList item pointer — not a new offset/indirection).
+- New diagnostic `KOPLOPER_STATE_OWNER_INCONSISTENT = 13`.
+
+Validation matrix: raw 0→Free, 1→Reserved, 2→Occupied, 9→Transition, other→Unknown. State 1/2 require a resolved owner (`KOPLOPER_OWNER_NOT_FOUND` otherwise); state 0/9 with an owner → Unknown (`KOPLOPER_STATE_OWNER_INCONSISTENT`). Transition never Free; unknown raw never coerced; invalid combos fail closed.
+
+Verification: Debug/Release **537/537**, no-write **4/4**, Integrator **R2 PASS**, live read-only smoke (PID 3172, Koploper 9.4.0.9) observed **0→Free (block 1), 1→Reserved (block 8 → loc 2), 2→Occupied (block 7 → loc 2), 9→Transition (block 4)**, internal/display separation (block 24 → display 23), no diagnostics.
+
+KIS-04 boundary (recorded for the next stage): KIS-03 types **individual** block records. This does NOT prove that a collection of block/loco records is one coherent full snapshot (ReadProcessMemory is non-atomic). KIS-04 (Coherent Snapshot + Freshness) must determine when multiple reads are coherent and fresh enough to publish. KIS-04 is not started.
+
 ## Session (2026-10-06, KIS-02 corrective loop + PR #23 MERGED — KIS-01/02 DONE / TERMINAL)
 
 Branch `feature/koploper-internal-state-kis01-02`, final HEAD `9d3ee38c91df00406f932ce7a07e9700b21eda32`. This session completed the KIS-01/02 corrective loop for PR #23 (KIS-01 + KIS-02: read-only, version-gated Koploper 9.4 process/memory foundation + objectgraph decoder), then merged it into `master`.
