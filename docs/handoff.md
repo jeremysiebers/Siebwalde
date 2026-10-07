@@ -1,5 +1,26 @@
 # Handoff
 
+## Session (2026-10-07, KIS-05 reservation observer MERGED — KIS-05 DONE / TERMINAL)
+
+Branch `feature/koploper-internal-state-kis05`, final HEAD `42a9f254948a2c3f15771373383582e183cf00ae`. This session implemented and merged KIS-05 (Reservation Observer) into `master`.
+
+**Merge:** normal merge commit `01b7b9398d10ad392c0574356e3faf2fb688136b` (Product Owner revision-bound merge authority on `42a9f25…`). Post-merge CI **PASS** (`Build and test`, run `37682652326`). **KIS-05 — DONE / TERMINAL.** KIS-06 not started (awaiting separate Product Owner authorization). No squash/rebase/force-push/branch-deletion.
+
+KIS-05 turns KIS-04 coherent full snapshots into a consumer-facing read-only reservation state:
+- `KoploperReservationAggregator` — per-loco aggregation (occupied block + reserved block set) with an explicit SourceHealth→authority policy.
+- `KoploperReservationObserver` — configurable polling lifecycle, atomic immutable-record publication (volatile), no stale inheritance (full snapshot is truth).
+- New diagnostic `KOPLOPER_MULTIPLE_OCCUPIED_BLOCKS = 14`.
+
+**Authority matrix (final, after corrective loop):**
+- Healthy + no diagnostics/conflicts → Authoritative (true).
+- Degraded + RetryCount>0 + no block diagnostics + no conflicts → DegradedRetryRecovered (true).
+- Degraded + any block diagnostic (unknown/unresolved/inconsistent owner) → SemanticUnknown (FALSE).
+- Any ownership conflict (multiple Occupied per loco) → OwnershipConflict (FALSE).
+- Stale / Inconsistent / UnsupportedVersion / ProcessNotFound / Unavailable → false.
+- `IsAuthoritative == true` ⟺ complete reliable reservation authority (presence AND absence both meaningful). Per-loco authority flags under a globally non-authoritative observation are diagnostic-only.
+
+Live evidence (read-only): PID 12296 200/200 authoritative (loc24 Reserved→Occupied same owner `24:11/12/19/21`); restart PID 4892 (new generation, source sequence 1..30, fresh state, 30/30 recovery, no old ownership). Multiple-Reserved: unit+golden proven, not live-sampled. Echte Koploper "Reserved → cancelled without Occupied": NOT live-proven (open for KIS-06/09). PollingInterval 500ms + MaxSnapshotAge 5s are placeholders, not physical-control budgets.
+
 ## Session (2026-10-07, KIS-04 coherent snapshot + freshness MERGED — KIS-04 DONE / TERMINAL)
 
 Branch `feature/koploper-internal-state-kis04`, final HEAD `041d3c52e391eaf4c06fd55bd3c023ce5fc1c565`. This session implemented and merged KIS-04 (Coherent Snapshot + Freshness) into `master`.
