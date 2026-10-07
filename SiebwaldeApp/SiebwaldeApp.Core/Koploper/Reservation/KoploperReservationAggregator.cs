@@ -8,8 +8,10 @@ namespace SiebwaldeApp.Core.Koploper
     /// Evaluates one snapshot read into a reservation observation. Pure and stateless: it never
     /// retains state between calls, never merges with a previous observation, and rebuilds the
     /// per-locomotive trajectories from scratch each cycle (the full snapshot is the truth).
-    /// A non-authoritative result always publishes empty trajectories and conflicts — no stale
-    /// ownership is ever inherited.
+    /// A non-authoritative result never inherits stale ownership: trajectories/conflicts are
+    /// empty for source-level failures, while the <c>OwnershipConflict</c> case keeps the global
+    /// <see cref="KoploperReservationObservation.IsAuthoritative"/> = <c>false</c> (the single
+    /// authority gate) while still exposing per-loco detail for diagnostics.
     /// </summary>
     public static class KoploperReservationAggregator
     {
