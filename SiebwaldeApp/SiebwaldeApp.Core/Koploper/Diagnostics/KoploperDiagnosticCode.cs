@@ -50,6 +50,9 @@ namespace SiebwaldeApp.Core.Koploper
         /// A block has an owner pointer in a state (0 or 9) where the validated profile expects
         /// none; the block is not published as a valid Free/Reserved/Occupied state.
         /// </summary>
-        KOPLOPER_STATE_OWNER_INCONSISTENT = 13
+        KOPLOPER_STATE_OWNER_INCONSISTENT = 13,
+
+        /// <summary>A locomotive owns more than one occupied block in the same snapshot.</summary>
+        KOPLOPER_MULTIPLE_OCCUPIED_BLOCKS = 14
     }
 }
