@@ -1,5 +1,23 @@
 # Handoff
 
+## Session (2026-10-07, KIS-04 coherent snapshot + freshness MERGED — KIS-04 DONE / TERMINAL)
+
+Branch `feature/koploper-internal-state-kis04`, final HEAD `041d3c52e391eaf4c06fd55bd3c023ce5fc1c565`. This session implemented and merged KIS-04 (Coherent Snapshot + Freshness) into `master`.
+
+**Merge:** normal merge commit `68dd0b2bfb0ff9282f461663fab14b4fcf137db6` (Product Owner revision-bound merge authority on `041d3c5…`). Post-merge CI **PASS** (`Build and test`, run `37666086782`). **KIS-04 — DONE / TERMINAL.** KIS-05 not started (awaiting separate Product Owner authorization). No squash/rebase/force-push/branch-deletion.
+
+KIS-04 introduces the coherent-snapshot boundary above KIS-02/03:
+- `KoploperRawObjectGraphReader` (graph walk + coherency anchors); `KoploperObjectGraphDecoder` refactored internally to delegate (public contract unchanged).
+- `KoploperSnapshotReader` — bounded two-pass coherent read (PASS A + PASS B compared by `KoploperCoherencyValidator`), retry (`MaxAttempts=4`, no sleeps), process-generation/restart invalidation, sequence/timestamp/read-duration/retry-count.
+- `KoploperStateSnapshot` + `KoploperSourceHealth` (Healthy/Degraded/Unavailable/UnsupportedVersion/ProcessNotFound/Stale/Inconsistent).
+- `KoploperSnapshotFreshness` via injectable clock + configurable `MaxSnapshotAge` (test default 5s, NOT a physical-control budget — deferred to KIS-05/08/09).
+
+Coherency invariants: resolved root, both TList headers, both item-address arrays, per-block owner/state/changedFlag/updateTick (+ids), per-loco ids/refs must all be equal across PASS A/B. Semantic Unknown/inconsistent blocks keep the snapshot coherent but Degraded (per-block no-authority; never whole-snapshot non-authoritative).
+
+Live evidence (read-only): PID 3172 500/500 coherent (0 torn, mean 2.21 ms); PID 20040 (moving) 500/500 coherent with 1 torn read recovered via retry (RetryCount=1), all 4 states observed, mean 2.46 ms; process restart (PID 3172 → 20040) → new generation, re-resolved root `0x028C981C`, no pointer reuse, sequence 1/2/3.
+
+SourceHealth/Degraded semantics (explicit): the payload is fully re-read and coherent; Degraded signals transient inconsistency/retry evidence, NOT a half/torn payload. KIS-05 must not silently invent reservation-authority for Degraded — the consumer-authority policy is designed when the Reservation Observer is built.
+
 ## Session (2026-10-06, KIS-03 typed block state decoder MERGED — KIS-03 DONE / TERMINAL)
 
 Branch `feature/koploper-internal-state-kis03`, final HEAD `b77741f8092d0a951af7e37cdbd547bee0e18c86`. This session implemented and merged KIS-03 (Typed Koploper Block State Decoder) into `master`.
