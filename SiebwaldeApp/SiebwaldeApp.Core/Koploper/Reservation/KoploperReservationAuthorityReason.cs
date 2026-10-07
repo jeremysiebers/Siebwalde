@@ -12,8 +12,8 @@ namespace SiebwaldeApp.Core.Koploper
         /// <summary>Fresh and coherent, degraded only by retries with no per-block diagnostics.</summary>
         DegradedRetryRecovered = 1,
 
-        /// <summary>Fresh and coherent, degraded with per-block diagnostics; Unknown blocks are excluded.</summary>
-        DegradedSemanticUnknown = 2,
+        /// <summary>Non-authoritative; block ownership/state could not be reliably derived.</summary>
+        SemanticUnknown = 2,
 
         /// <summary>The snapshot exceeded the configured maximum age.</summary>
         Stale = 3,
@@ -28,6 +28,9 @@ namespace SiebwaldeApp.Core.Koploper
         UnsupportedVersion = 6,
 
         /// <summary>The Koploper process is not running.</summary>
-        ProcessNotFound = 7
+        ProcessNotFound = 7,
+
+        /// <summary>A locomotive owns more than one occupied block; the observation is not complete reservation authority.</summary>
+        OwnershipConflict = 8
     }
 }

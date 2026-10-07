@@ -94,7 +94,12 @@ namespace SiebwaldeApp.Core.Koploper
                 case KoploperSourceHealth.Degraded:
                     if (snapshot.BlockDiagnostics.Count > 0)
                     {
-                        authorityReason = KoploperReservationAuthorityReason.DegradedSemanticUnknown;
+                        return SemanticUnknownObservation(
+                            snapshot,
+                            observerSequence,
+                            observedAtUtc,
+                            isFresh,
+                            readResult.Diagnostics);
                     }
                     else if (snapshot.RetryCount > 0)
                     {
@@ -142,6 +147,12 @@ namespace SiebwaldeApp.Core.Koploper
                 diagnostics.Add(KoploperDiagnosticCode.KOPLOPER_MULTIPLE_OCCUPIED_BLOCKS);
             }
 
+            bool isAuthoritative = conflicts.Count == 0;
+            if (!isAuthoritative)
+            {
+                authorityReason = KoploperReservationAuthorityReason.OwnershipConflict;
+            }
+
             return new KoploperReservationObservation(
                 Generation: snapshot.Generation,
                 SourceSequence: snapshot.Sequence,
@@ -151,7 +162,7 @@ namespace SiebwaldeApp.Core.Koploper
                 IsFresh: true,
                 IsConsistent: snapshot.IsConsistent,
                 SourceHealth: snapshot.SourceHealth,
-                IsAuthoritative: true,
+                IsAuthoritative: isAuthoritative,
                 AuthorityReason: authorityReason,
                 Locomotives: locomotives,
                 Conflicts: conflicts,
@@ -181,6 +192,36 @@ namespace SiebwaldeApp.Core.Koploper
                 Locomotives: Array.Empty<KoploperLocomotiveTrajectory>(),
                 Conflicts: Array.Empty<KoploperReservationConflict>(),
                 Diagnostics: readDiagnostics.ToArray());
+        }
+
+        private static KoploperReservationObservation SemanticUnknownObservation(
+            KoploperStateSnapshot snapshot,
+            long observerSequence,
+            DateTimeOffset observedAtUtc,
+            bool isFresh,
+            IReadOnlyList<KoploperDiagnosticCode> readDiagnostics)
+        {
+            var diagnostics = new List<KoploperDiagnosticCode>(readDiagnostics.Count + snapshot.BlockDiagnostics.Count);
+            diagnostics.AddRange(readDiagnostics);
+            foreach (KoploperBlockDiagnostic blockDiagnostic in snapshot.BlockDiagnostics)
+            {
+                diagnostics.Add(blockDiagnostic.Code);
+            }
+
+            return new KoploperReservationObservation(
+                Generation: snapshot.Generation,
+                SourceSequence: snapshot.Sequence,
+                ObserverSequence: observerSequence,
+                CapturedAtUtc: snapshot.CapturedAtUtc,
+                ObservedAtUtc: observedAtUtc,
+                IsFresh: isFresh,
+                IsConsistent: snapshot.IsConsistent,
+                SourceHealth: snapshot.SourceHealth,
+                IsAuthoritative: false,
+                AuthorityReason: KoploperReservationAuthorityReason.SemanticUnknown,
+                Locomotives: Array.Empty<KoploperLocomotiveTrajectory>(),
+                Conflicts: Array.Empty<KoploperReservationConflict>(),
+                Diagnostics: diagnostics);
         }
 
         private static (IReadOnlyList<KoploperLocomotiveTrajectory>, IReadOnlyList<KoploperReservationConflict>) Aggregate(

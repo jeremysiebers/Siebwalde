@@ -271,6 +271,9 @@ namespace SiebwaldeApp.Core.Tests.Koploper
 
             KoploperReservationObservation observation = Evaluate(KoploperReservationTestFixtures.ReadResult(KoploperSourceHealth.Healthy, snapshot));
 
+            Assert.False(observation.IsAuthoritative);
+            Assert.Equal(KoploperReservationAuthorityReason.OwnershipConflict, observation.AuthorityReason);
+
             KoploperReservationConflict conflict = Assert.Single(observation.Conflicts);
             Assert.Equal(24, conflict.InternalLocomotiveId);
             Assert.Equal(new[] { 1, 2 }, conflict.OccupiedBlocks);
@@ -282,6 +285,58 @@ namespace SiebwaldeApp.Core.Tests.Koploper
             Assert.Empty(trajectory.ReservedBlocks);
 
             Assert.Contains(KoploperDiagnosticCode.KOPLOPER_MULTIPLE_OCCUPIED_BLOCKS, observation.Diagnostics);
+        }
+
+        [Fact]
+        public void DegradedRetryRecovered_WithOwnershipConflict_GlobalNonAuthoritative()
+        {
+            var snapshot = KoploperReservationTestFixtures.Snapshot(
+                health: KoploperSourceHealth.Degraded,
+                retryCount: 1,
+                blocks: new[]
+                {
+                    KoploperReservationTestFixtures.Block(2, 24, KoploperBlockState.Occupied),
+                    KoploperReservationTestFixtures.Block(1, 24, KoploperBlockState.Occupied)
+                },
+                locomotives: new[] { KoploperReservationTestFixtures.Locomotive(24) });
+
+            KoploperReservationObservation observation = Evaluate(KoploperReservationTestFixtures.ReadResult(KoploperSourceHealth.Degraded, snapshot));
+
+            Assert.False(observation.IsAuthoritative);
+            Assert.Equal(KoploperReservationAuthorityReason.OwnershipConflict, observation.AuthorityReason);
+            Assert.Single(observation.Conflicts);
+        }
+
+        [Fact]
+        public void OwnershipConflict_OtherLocosRemainPerLocoAuthoritative()
+        {
+            var snapshot = KoploperReservationTestFixtures.Snapshot(
+                health: KoploperSourceHealth.Healthy,
+                blocks: new[]
+                {
+                    KoploperReservationTestFixtures.Block(1, 24, KoploperBlockState.Occupied),
+                    KoploperReservationTestFixtures.Block(2, 24, KoploperBlockState.Occupied),
+                    KoploperReservationTestFixtures.Block(3, 7, KoploperBlockState.Occupied)
+                },
+                locomotives: new[]
+                {
+                    KoploperReservationTestFixtures.Locomotive(24),
+                    KoploperReservationTestFixtures.Locomotive(7)
+                });
+
+            KoploperReservationObservation observation = Evaluate(KoploperReservationTestFixtures.ReadResult(KoploperSourceHealth.Healthy, snapshot));
+
+            Assert.False(observation.IsAuthoritative);
+            Assert.Equal(KoploperReservationAuthorityReason.OwnershipConflict, observation.AuthorityReason);
+
+            KoploperLocomotiveTrajectory conflicted = Assert.Single(observation.Locomotives.Where(l => l.InternalLocomotiveId == 24));
+            Assert.False(conflicted.IsAuthoritative);
+            Assert.Equal(KoploperLocomotiveTrajectoryReason.MultipleOccupiedBlocks, conflicted.Reason);
+
+            KoploperLocomotiveTrajectory other = Assert.Single(observation.Locomotives.Where(l => l.InternalLocomotiveId == 7));
+            Assert.True(other.IsAuthoritative);
+            Assert.Equal(KoploperLocomotiveTrajectoryReason.Authoritative, other.Reason);
+            Assert.Equal(3, other.OccupiedBlock);
         }
 
         // ---------------------------------------------------------------- authority matrix
@@ -321,7 +376,7 @@ namespace SiebwaldeApp.Core.Tests.Koploper
         }
 
         [Fact]
-        public void Degraded_Semantic_AuthoritativeUnknownExcluded()
+        public void Degraded_SemanticUnknown_NonAuthoritative()
         {
             var snapshot = KoploperReservationTestFixtures.Snapshot(
                 health: KoploperSourceHealth.Degraded,
@@ -339,14 +394,14 @@ namespace SiebwaldeApp.Core.Tests.Koploper
 
             KoploperReservationObservation observation = Evaluate(KoploperReservationTestFixtures.ReadResult(KoploperSourceHealth.Degraded, snapshot));
 
-            Assert.True(observation.IsAuthoritative);
-            Assert.Equal(KoploperReservationAuthorityReason.DegradedSemanticUnknown, observation.AuthorityReason);
-
-            // The valid occupied block is still published; the Unknown block is excluded and
-            // surfaced only as a diagnostic.
-            KoploperLocomotiveTrajectory trajectory = Assert.Single(observation.Locomotives);
-            Assert.Equal(1, trajectory.OccupiedBlock);
+            Assert.False(observation.IsAuthoritative);
+            Assert.Equal(KoploperReservationAuthorityReason.SemanticUnknown, observation.AuthorityReason);
+            Assert.Empty(observation.Locomotives);
+            Assert.Empty(observation.Conflicts);
             Assert.Contains(KoploperDiagnosticCode.KOPLOPER_UNKNOWN_BLOCK_STATE, observation.Diagnostics);
+            Assert.Equal(KoploperSourceHealth.Degraded, observation.SourceHealth);
+            Assert.True(observation.IsFresh);
+            Assert.True(observation.IsConsistent);
         }
 
         [Fact]
@@ -368,8 +423,10 @@ namespace SiebwaldeApp.Core.Tests.Koploper
 
             KoploperReservationObservation observation = Evaluate(KoploperReservationTestFixtures.ReadResult(KoploperSourceHealth.Degraded, snapshot));
 
-            Assert.True(observation.IsAuthoritative);
-            Assert.Equal(KoploperReservationAuthorityReason.DegradedSemanticUnknown, observation.AuthorityReason);
+            Assert.False(observation.IsAuthoritative);
+            Assert.Equal(KoploperReservationAuthorityReason.SemanticUnknown, observation.AuthorityReason);
+            Assert.Empty(observation.Locomotives);
+            Assert.Contains(KoploperDiagnosticCode.KOPLOPER_OWNER_NOT_FOUND, observation.Diagnostics);
         }
 
         [Fact]
