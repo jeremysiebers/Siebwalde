@@ -305,6 +305,67 @@ Directe `9 -> 1` herreservering is eveneens waargenomen.
 
 `Loc+0x58` is nuttig voor coherentiecontrole maar **geen onafhankelijke safety-authority**.
 
+## 6.6 KIS-06 block-administration findings (bounded investigation)
+
+Aanvullende, live gevalideerde bevindingen uit de KIS-06 cross-validation en
+bounded administration investigation (zelfde ondersteunde binary `9.4.0.9`).
+
+### Manual occupied / manually blocked — `TBlok+0x198` (LIVE PROVEN)
+
+| Waarde | Betekenis |
+|---:|---|
+| `0` | niet handmatig bezet/geblokkeerd |
+| `1` | handmatig bezet/geblokkeerd |
+
+Classificatie: **LIVE PROVEN**. Bewijs: blok 3 doorliep reproduceerbaar
+`free (0) → manual (1) → free (0) → manual (1)`; controleblokken met een
+automatisch bezette trein (blokken 4, 14) bleven `0`. Tijdens manual
+occupancy blijft `+0x1ED` onafhankelijk (bv. `0`/Free).
+
+`+0x198` is dus een **aparte state-dimensie** naast `+0x1ED`. Het is nog NIET
+in KIS-03/04/05 production decoding geïntegreerd; de juiste plaats in het
+toekomstige consumer model moet bewust worden ontworpen (zie §27).
+
+### Correlated candidate — `TBlok+0x120` (STRONG CANDIDATE, NIET bewezen)
+
+Waargenomen: `1` bij vrij/automatisch bezet, `2` bij manual occupied. Deze
+correlatie was reproduceerbaar, maar de **semantische betekenis is NIET
+bewezen**. Niet als production semantic authority gebruiken; geen decoder
+voor implementeren zonder nieuw bewijs.
+
+### Display colour — `TBlok+0x054..0x056` (display-only)
+
+Een configureerbare 3-byte RGB GUI-kleur (Instellingen per database → Kleuren).
+Waargenomen in de gebruikte database: `C0 C0 C0` (grijs, vrij), `FF FF FF`
+(wit, handmatig bezet), `FF FF 00` (geel, in geobserveerde automatic/display
+scenario's). Kleuren zijn **configureerbaar** en Koploper kent meerdere
+visuele states; de RGB-waarde is daarom **geen semantic control authority**.
+Gebruik uitsluitend voor diagnostics / GUI cross-validation / RE-evidence.
+
+### Route/wisselstraat is een apart objectdomein (NOT PROVEN)
+
+De geel weergegeven "tussensectie" na een blok is **geen TBlok** maar een
+wisselstraat-/route-segment. Bewezen (LIVE PROVEN): een TBlok kan volledig
+Free zijn (`+0x1ED=0`, owner none, `+0x198=0`) terwijl de aparte wisselstraat
+nog actief/gekleurd is. De memory-representatie van de wisselstraat
+(root/list/objectgraph, route-object, route-owner, lock/claim-field,
+release-semantics, route-order) is **NOT PROVEN** en wordt als apart deferred
+item geregistreerd, niet onder KIS-06 gedecodeerd.
+
+### Identity mapping (CROSS-IMPLEMENTATION CONFIRMED)
+
+Live bevestigd (komt overeen met PoC-handoff): `22→25, 23→22, 24→23, 25→24,
+30→2, 31→30`. Interne block-ID, display block number, 5700-identiteit, logische
+Siebwalde section en fysieke amplifier-adres blijven strikt gescheiden.
+
+### Safety/evidence boundary
+
+`AutomaticState == Free` betekent alleen "geen automatic owner/reservation via
+`+0x1ED`". Het betekent NIET: niet handmatig geblokkeerd (`+0x198`), geen
+wisselstraatclaim elders, fysiek onbezet, hardware-safe, of
+movement-authoritative. ManualBlocked en het route/wisselstraat-domein moeten
+apart worden beschouwd wanneer dat later voor movement authority relevant wordt.
+
 ---
 
 # 7. Belangrijke Ghidra-functies
@@ -1438,7 +1499,10 @@ Bewaar onderstaande bestanden als onderliggende evidence. Het masterdocument is 
 - performance/freshness budget for live physical control;
 - physical amplifier behavior driven by observer;
 - safety case for production hardware authorization;
-- compatibility with other Koploper binaries/hashes.
+- compatibility with other Koploper binaries/hashes;
+- **semantic meaning of `TBlok+0x120`** (only a correlated candidate, see §6.6);
+- **route/wisselstraat object graph** (root/list, route-object, route-owner, lock/claim field, release semantics, route-order) — a separate deferred domain, not decoded under KIS-06 (see §6.6);
+- **consumer-model placement of the `TBlok+0x198` manual-occupied dimension** — found LIVE PROVEN but deliberately NOT integrated into KIS-03/04/05 production decoding; to be designed explicitly before safety-relevant use (see §6.6).
 
 ## Architectural decision
 

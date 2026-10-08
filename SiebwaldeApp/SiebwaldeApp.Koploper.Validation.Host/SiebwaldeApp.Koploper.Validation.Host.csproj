@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    KIS-06 simulator cross-validation harness (software only).
+
+    This project is intentionally NOT part of SiebwaldeApp.sln so it never affects the
+    production build or the existing test suite. It is a standalone console tool that reuses the
+    real read-only Koploper internal-state pipeline (Windows process locator + memory reader +
+    object-graph decoder + snapshot reader + reservation observer) and writes the validation
+    trace as JSONL. No write access to Koploper and no hardware actions are performed.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-windows7.0</TargetFramework>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>SiebwaldeApp.Koploper.Validation.Host</RootNamespace>
+    <AssemblyName>SiebwaldeApp.Koploper.Validation.Host</AssemblyName>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SiebwaldeApp.Core\SiebwaldeApp.Core.csproj" />
+    <ProjectReference Include="..\SiebwaldeApp.Koploper.Windows\SiebwaldeApp.Koploper.Windows.csproj" />
+  </ItemGroup>
+
+</Project>
