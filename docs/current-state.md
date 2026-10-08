@@ -40,8 +40,6 @@ Current verified baseline (post-merge `master` `df7482f6c26398cb8c3082d325426a6e
 
 Earlier baselines: PR #29 KIS-05 (`01b7b93`): **613/613**; PR #27 KIS-04 (`68dd0b2`): **575/575**; PR #25 KIS-03 (`229afd4`): **537/537**; PR #23 KIS-01/02 (`53270cb`): **517/517**; PR #18 (`ccfd119`): **482/482**.
 
-Earlier baselines: PR #27 KIS-04 (`68dd0b2`): Debug/Release **575/575**; PR #25 KIS-03 (`229afd4`): **537/537**; PR #23 KIS-01/02 (`53270cb`): **517/517**; PR #18 (`ccfd119`): **482/482**.
-
 These results belong to the stated verified baseline revisions; re-run to confirm before relying on them.
 
 ## Current agent/workflow baseline
