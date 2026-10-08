@@ -1,5 +1,22 @@
 # Handoff
 
+## Session (2026-10-08, KIS-06 cross-validation MERGED — KIS-06 DONE / TERMINAL)
+
+Branch `feature/koploper-internal-state-kis06`, final HEAD `96503bcf80a401c072c3f4a5a2ef75e740fabe13`. This session implemented and merged KIS-06 (Simulator / Independent Cross-Validation + bounded administration findings) into `master`.
+
+**Merge:** normal merge commit `df7482f6c26398cb8c3082d325426a6e78756a5f` (Product Owner revision-bound merge authority on `96503bc…`). Post-merge CI **PASS** (`Build and test`, run `37839900850`). **KIS-06 — DONE / TERMINAL.** KIS-07 not started (awaiting separate Product Owner authorization). No squash/rebase/force-push/branch-deletion.
+
+KIS-06 adds validation tooling (no production authority) and documents block-administration findings:
+- Validation: `Core/Koploper/Validation/` (mismatch taxonomy, comparison engine, contradiction classifier, JSONL trace writer, merge-block policy, pure port-5700 parser) + standalone `SiebwaldeApp.Koploper.Validation.Host` console (validate/replay, not in the solution).
+- **`TBlok+0x198` = manual occupied/blocked flag (LIVE PROVEN 0/1)** — separate dimension from the automatic state `+0x1ED`; NOT integrated into KIS-03/04/05 production decoding.
+- **`TBlok+0x120` = correlated candidate (STRONG CANDIDATE, semantics NOT proven).**
+- **`TBlok+0x054..0x056` = configurable display colour (diagnostic-only).**
+- **Route/wisselstraat = separate object domain (memory representation NOT decoded, deferred).**
+
+Cross-validation evidence: current-position GUI match (trein 3/7/12 via internal↔display mapping `22→25, 23→22, 24→23, 25→24, 30→2, 31→30`); Reserved→Occupied same owner (loc 24: `24:11/12/19/21`); multiple-Reserved LIVE PROVEN (loc 24); automatic reservation disappearance after train removal LIVE PROVEN. Echte "Reserved → cancelled without occupation" NOT proven. No-write boundary intact; Debug/Release 632/632.
+
+Deferred open items: route/wisselstraat objectgraph (root/list, route-object, owner, lock/claim, release, order); +0x120 semantics; consumer-model placement of +0x198; real route-cancellation-without-occupation. PollingInterval 500ms + MaxSnapshotAge 5s remain placeholders.
+
 ## Session (2026-10-07, KIS-05 reservation observer MERGED — KIS-05 DONE / TERMINAL)
 
 Branch `feature/koploper-internal-state-kis05`, final HEAD `42a9f254948a2c3f15771373383582e183cf00ae`. This session implemented and merged KIS-05 (Reservation Observer) into `master`.
