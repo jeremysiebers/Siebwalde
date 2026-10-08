@@ -1499,7 +1499,10 @@ Bewaar onderstaande bestanden als onderliggende evidence. Het masterdocument is 
 - performance/freshness budget for live physical control;
 - physical amplifier behavior driven by observer;
 - safety case for production hardware authorization;
-- compatibility with other Koploper binaries/hashes.
+- compatibility with other Koploper binaries/hashes;
+- **semantic meaning of `TBlok+0x120`** (only a correlated candidate, see §6.6);
+- **route/wisselstraat object graph** (root/list, route-object, route-owner, lock/claim field, release semantics, route-order) — a separate deferred domain, not decoded under KIS-06 (see §6.6);
+- **consumer-model placement of the `TBlok+0x198` manual-occupied dimension** — found LIVE PROVEN but deliberately NOT integrated into KIS-03/04/05 production decoding; to be designed explicitly before safety-relevant use (see §6.6).
 
 ## Architectural decision
 
