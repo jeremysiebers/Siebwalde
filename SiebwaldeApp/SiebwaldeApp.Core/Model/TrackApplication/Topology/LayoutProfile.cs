@@ -38,6 +38,14 @@ namespace SiebwaldeApp.Core.TrackApplication.Topology
         public int PhysicalAmplifier { get; init; }
     }
 
+    /// <summary>
+    /// Binds one Koploper internal block id (the machine identity) to one logical section id. This
+    /// is the declarative mapping used by the Koploper logical-section shadow; it is independent of
+    /// <see cref="LayoutBlock"/> (which groups sections into Koploper display blocks) and of
+    /// <see cref="LayoutPhysicalAmplifierBinding"/> (the physical amplifier binding).
+    /// </summary>
+    public sealed record KoploperBlockBinding(int KoploperInternalBlockId, int LogicalSectionId);
+
     /// <summary>Maps an ECoS/Koploper switch address to a physical switch output.</summary>
     public sealed class LayoutSwitch
     {
@@ -92,6 +100,15 @@ namespace SiebwaldeApp.Core.TrackApplication.Topology
         /// </summary>
         public IReadOnlyList<LayoutPhysicalAmplifierBinding> PhysicalAmplifierMapping { get; init; }
             = Array.Empty<LayoutPhysicalAmplifierBinding>();
+
+        /// <summary>
+        /// The declarative Koploper internal block -&gt; logical section binding. Empty/absent means
+        /// "no binding declared" (legal at load, but the logical-section shadow then cannot map
+        /// owned blocks and is not valid). Internal block ids are the machine identity, not display
+        /// block numbers.
+        /// </summary>
+        public IReadOnlyList<KoploperBlockBinding> KoploperBlockBindings { get; init; }
+            = Array.Empty<KoploperBlockBinding>();
 
         public IReadOnlyList<LayoutSection> Sections { get; init; } = Array.Empty<LayoutSection>();
         public IReadOnlyList<LayoutBlock> Blocks { get; init; } = Array.Empty<LayoutBlock>();

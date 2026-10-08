@@ -96,19 +96,38 @@ namespace SiebwaldeApp.Core.Koploper
                         break;
                 }
 
+                // The manual-blocked dimension is independent of the automatic state derivation:
+                // it never changes <c>state</c>/<c>ownerId</c> above.
+                KoploperManualBlockState manualBlocked = block.ManualBlockedRaw switch
+                {
+                    0 => KoploperManualBlockState.NotBlocked,
+                    1 => KoploperManualBlockState.Blocked,
+                    _ => KoploperManualBlockState.Invalid
+                };
+
                 snapshots.Add(new KoploperBlockSnapshot(
                     (int)block.InternalBlockId,
                     (int?)block.DisplayBlockNumber,
                     ownerId,
                     state,
                     block.RawState,
-                    block.UpdateTick));
+                    block.UpdateTick,
+                    manualBlocked));
 
                 if (diagnostic.HasValue)
                 {
                     diagnostics.Add(new KoploperBlockDiagnostic(
                         (int)block.InternalBlockId,
                         diagnostic.Value,
+                        block.RawState,
+                        block.OwnerPointer));
+                }
+
+                if (manualBlocked == KoploperManualBlockState.Invalid)
+                {
+                    diagnostics.Add(new KoploperBlockDiagnostic(
+                        (int)block.InternalBlockId,
+                        KoploperDiagnosticCode.KOPLOPER_MANUAL_BLOCK_INVALID,
                         block.RawState,
                         block.OwnerPointer));
                 }

@@ -52,6 +52,9 @@ namespace SiebwaldeApp.Core.Koploper
         /// <summary>Offset of the update tick within a TBlok object.</summary>
         uint BlockUpdateTickOffset { get; }
 
+        /// <summary>Offset of the manual-blocked flag within a TBlok object.</summary>
+        uint BlockManualBlockedOffset { get; }
+
         /// <summary>Offset of the internal locomotive id within a locomotive object.</summary>
         uint LocoInternalIdOffset { get; }
 

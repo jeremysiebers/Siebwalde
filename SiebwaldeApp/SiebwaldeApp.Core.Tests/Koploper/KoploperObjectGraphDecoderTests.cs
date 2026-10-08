@@ -375,7 +375,8 @@ namespace SiebwaldeApp.Core.Tests.Koploper
             uint owner,
             byte state,
             byte changed,
-            uint tick)
+            uint tick,
+            byte manualBlocked = 0)
         {
             reader.SetU32((nuint)(address + Layout.BlockInternalIdOffset), internalId);
             reader.SetU32((nuint)(address + Layout.BlockDisplayIdOffset), displayId);
@@ -383,6 +384,7 @@ namespace SiebwaldeApp.Core.Tests.Koploper
             reader.SetBytes((nuint)(address + Layout.BlockStateOffset), new[] { state });
             reader.SetBytes((nuint)(address + Layout.BlockChangedFlagOffset), new[] { changed });
             reader.SetU32((nuint)(address + Layout.BlockUpdateTickOffset), tick);
+            reader.SetBytes((nuint)(address + Layout.BlockManualBlockedOffset), new[] { manualBlocked });
         }
 
         private static void WriteLoco(

@@ -254,7 +254,7 @@ namespace SiebwaldeApp.Core.Tests.Koploper
         }
 
         private static KoploperRawBlock Block(uint id, uint display, uint owner, byte state, uint tick = 0)
-            => new(id, display, owner, state, 0, tick);
+            => new(id, display, owner, state, 0, tick, 0);
 
         private static KoploperRawLocomotive Loco()
             => Loco(LocoObjectAddress, LocoInternalId);

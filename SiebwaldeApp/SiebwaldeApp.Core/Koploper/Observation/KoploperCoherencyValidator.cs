@@ -90,7 +90,8 @@ namespace SiebwaldeApp.Core.Koploper
                 && first.OwnerPointer == second.OwnerPointer
                 && first.RawState == second.RawState
                 && first.ChangedFlag == second.ChangedFlag
-                && first.UpdateTick == second.UpdateTick;
+                && first.UpdateTick == second.UpdateTick
+                && first.ManualBlockedRaw == second.ManualBlockedRaw;
         }
 
         private static bool LocomotivesEqual(IReadOnlyList<KoploperRawLocomotive> first, IReadOnlyList<KoploperRawLocomotive> second)

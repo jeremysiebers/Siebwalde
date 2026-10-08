@@ -205,12 +205,15 @@ namespace SiebwaldeApp.Core.TrackApplication.Topology
 
             var physicalMapping = BuildPhysicalAmplifierMapping(dto.PhysicalAmplifierMapping, sectionIds, errors);
 
+            var koploperBlockBindings = BuildKoploperBlockBindings(dto.KoploperBlockBindings, sectionIds, errors);
+
             return new LayoutProfile
             {
                 Name = dto.Name ?? string.Empty,
                 Description = dto.Description ?? string.Empty,
                 DetectedSlaves = detectedSlaves,
                 PhysicalAmplifierMapping = physicalMapping,
+                KoploperBlockBindings = koploperBlockBindings,
                 Sections = sections,
                 Blocks = blocks,
                 Switches = switches,
@@ -575,6 +578,60 @@ namespace SiebwaldeApp.Core.TrackApplication.Topology
         }
 
         /// <summary>
+        /// Validates the Koploper internal block -&gt; logical section binding. The WHOLE mapping
+        /// being absent/empty is LEGAL (meaning "no binding declared"; the logical-section shadow
+        /// then cannot map owned blocks and is not valid). When present, every problem is collected
+        /// (never silent): (1) an internal block id &lt;= 0, (2) a duplicate internal block id,
+        /// (3) a logical section id that is not a known section, and (4) a logical section bound to
+        /// more than one internal block.
+        /// </summary>
+        private static List<KoploperBlockBinding> BuildKoploperBlockBindings(
+            List<KoploperBlockBindingDto>? bindingDtos,
+            HashSet<int> sectionIds,
+            List<string> errors)
+        {
+            var result = new List<KoploperBlockBinding>();
+            if (bindingDtos is null || bindingDtos.Count == 0)
+            {
+                return result;
+            }
+
+            var seenInternalIds = new HashSet<int>();
+            var seenSections = new HashSet<int>();
+
+            foreach (var dto in bindingDtos)
+            {
+                if (dto.KoploperInternalBlockId <= 0)
+                {
+                    errors.Add($"Koploper block binding has an invalid internal block id {dto.KoploperInternalBlockId} (must be > 0).");
+                    continue;
+                }
+
+                if (!seenInternalIds.Add(dto.KoploperInternalBlockId))
+                {
+                    errors.Add($"Duplicate Koploper block binding for internal block id {dto.KoploperInternalBlockId}.");
+                    continue;
+                }
+
+                if (!sectionIds.Contains(dto.LogicalSectionId))
+                {
+                    errors.Add($"Koploper block binding for internal block id {dto.KoploperInternalBlockId} references unknown section {dto.LogicalSectionId}.");
+                    continue;
+                }
+
+                if (!seenSections.Add(dto.LogicalSectionId))
+                {
+                    errors.Add($"Logical section {dto.LogicalSectionId} is bound to more than one Koploper internal block.");
+                    continue;
+                }
+
+                result.Add(new KoploperBlockBinding(dto.KoploperInternalBlockId, dto.LogicalSectionId));
+            }
+
+            return result;
+        }
+
+        /// <summary>
         /// Parses a bezetmelder name such as "1.03" (module 1, point 3) into its module and point.
         /// Module is 1..N; point is 1..<see cref="PointsPerModule"/>.
         /// </summary>
@@ -638,6 +695,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Topology
             public string? Description { get; set; }
             public List<byte>? DetectedSlaves { get; set; }
             public List<PhysicalAmplifierDto>? PhysicalAmplifierMapping { get; set; }
+            public List<KoploperBlockBindingDto>? KoploperBlockBindings { get; set; }
             public List<SectionDto>? Sections { get; set; }
             public List<BlockDto>? Blocks { get; set; }
             public List<SwitchDto>? Switches { get; set; }
@@ -663,6 +721,12 @@ namespace SiebwaldeApp.Core.TrackApplication.Topology
         {
             public int SectionId { get; set; }
             public int PhysicalAmplifier { get; set; }
+        }
+
+        private sealed class KoploperBlockBindingDto
+        {
+            public int KoploperInternalBlockId { get; set; }
+            public int LogicalSectionId { get; set; }
         }
 
         private sealed class SwitchDto
