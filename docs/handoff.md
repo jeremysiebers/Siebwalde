@@ -1,5 +1,22 @@
 # Handoff
 
+## Session (2026-10-09, KIS-08 logical-physical reconciliation MERGED — KIS-08 DONE / TERMINAL)
+
+Branch `feature/koploper-internal-state-kis08`, final HEAD `92ff09c414f9f324616466112fd912347dc06dac`. This session implemented and merged KIS-08 (Logical ↔ Physical Reconciliation + Section Safety Eligibility, SHADOW / NO CONTROL WRITES) into `master`.
+
+**Merge:** normal merge commit `b67f7311e75fba1171ecaf2a82cb4385b7353abc` (Product Owner revision-bound merge authority on `92ff09c…`). Post-merge CI **PASS** (`Build and test`, run `37917355279`). **KIS-08 — DONE / TERMINAL.** KIS-09 not started (requires separate `LIVE_HARDWARE` authorization). No squash/rebase/force-push/branch-deletion.
+
+KIS-08 reconciles the KIS-07 logical-section shadow with physical section occupancy (Clear/Occupied/Unknown, no locomotive identity) into a per-section reconciliation state + section safety eligibility.
+
+- Physical observation keyed by `LogicalSectionId` via `LayoutPhysicalAmplifierBinding`; reuses `TrackAmplifierDataFreshness` + `TrackAmplifierRegisters`.
+- Conservative matrix: Free+Clear→ConsistFreeClear (Denied); Reserved+Clear→ConsistReservedClear (Eligible); Occupied+Occupied→ConsistOccupied (Eligible); Free+Occupied / Occupied+Clear / Reserved+Occupied→contradiction (Denied); Unknown/stale/missing→NotAssessable; ManualBlocked→Denied; invalid shadow / profile mismatch→non-assessable. No Unknown→Clear fallback.
+- `SectionSafetyEligibility.Eligible` = ONLY "this section's current logical+physical inputs are consistent with the known owner" — NOT movement authority. No MovementAuthority/CanMove/RunAllowed API.
+- Physical occupancy never assigns locomotive identity. No hardware/PWM/HR0/Carrier/switch writes; existing safety infra untouched.
+
+Verified: Debug/Release 736/736, no-write 4/4 + reconciliation no-write 2/2, Integrator R2 PASS (mutation Unknown→Clear proven), live pipeline (PID 19228, 120/120 assessable, DERIVED/NON-INDEPENDENT physical source classified).
+
+Deferred: independent real physical occupancy (LIVE_HARDWARE pilot), hardware timing/hysteresis, route/wisselstraat graph, MovementAuthority, Carrier/PWM/HR0/amplifier authority.
+
 ## Session (2026-10-09, KIS-07 logical-section mapping MERGED — KIS-07 DONE / TERMINAL)
 
 Branch `feature/koploper-internal-state-kis07`, final HEAD `58958e4be46fe6620a75ab2ed6e0cde300b7d8e0`. This session implemented and merged KIS-07 (Koploper Block → Siebwalde Logical Section Mapping, SHADOW ONLY) into `master`.
