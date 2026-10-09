@@ -60,6 +60,9 @@ namespace SiebwaldeApp.Core.Koploper
         public uint BlockUpdateTickOffset => 0x1F0u;
 
         /// <inheritdoc />
+        public uint BlockManualBlockedOffset => 0x198u;
+
+        /// <inheritdoc />
         public uint LocoInternalIdOffset => 0x1A8u;
 
         /// <inheritdoc />

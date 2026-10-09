@@ -12,5 +12,6 @@ namespace SiebwaldeApp.Core.Koploper
         int? OwnerLocomotiveId,
         KoploperBlockState State,
         uint RawState,
-        uint? RawUpdateTick);
+        uint? RawUpdateTick,
+        KoploperManualBlockState ManualBlocked);
 }

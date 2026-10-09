@@ -53,6 +53,18 @@ namespace SiebwaldeApp.Core.Koploper
         KOPLOPER_STATE_OWNER_INCONSISTENT = 13,
 
         /// <summary>A locomotive owns more than one occupied block in the same snapshot.</summary>
-        KOPLOPER_MULTIPLE_OCCUPIED_BLOCKS = 14
+        KOPLOPER_MULTIPLE_OCCUPIED_BLOCKS = 14,
+
+        /// <summary>A block's manual-blocked raw byte (+0x198) was not a known value (0/1).</summary>
+        KOPLOPER_MANUAL_BLOCK_INVALID = 15,
+
+        /// <summary>A block is both manually blocked and automatically reserved/occupied.</summary>
+        KOPLOPER_MANUAL_AUTOMATIC_CONFLICT = 16,
+
+        /// <summary>An owned block (reserved/occupied with an owner) has no logical-section binding.</summary>
+        KOPLOPER_UNMAPPED_OWNED_BLOCK = 17,
+
+        /// <summary>A manually blocked block has no logical-section binding.</summary>
+        KOPLOPER_UNMAPPED_MANUAL_BLOCK = 18
     }
 }

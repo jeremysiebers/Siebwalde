@@ -90,6 +90,7 @@ namespace SiebwaldeApp.Core.Tests.Koploper
             public uint BlockStateOffset => 0;
             public uint BlockChangedFlagOffset => 0;
             public uint BlockUpdateTickOffset => 0;
+            public uint BlockManualBlockedOffset => 0;
             public uint LocoInternalIdOffset => 0;
             public uint LocoBlockRef54Offset => 0;
             public uint LocoBlockRef58Offset => 0;

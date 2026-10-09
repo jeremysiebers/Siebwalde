@@ -115,7 +115,7 @@ namespace SiebwaldeApp.Core.Tests.Koploper
             => new(blocks, locomotives);
 
         private static KoploperRawBlock Block(uint id, byte state, uint owner, uint tick = 0)
-            => new(id, id, owner, state, 0, tick);
+            => new(id, id, owner, state, 0, tick, 0);
 
         private static KoploperRawLocomotive Loco(uint objectAddress, uint internalId)
             => new(internalId, 0, 0, objectAddress);

@@ -80,7 +80,8 @@ namespace SiebwaldeApp.Core.Koploper
                     !reader.TryReadPointer32(checked(blockAddress + _layout.BlockOwnerOffset), out uint ownerPointer) ||
                     !reader.TryReadByte(checked(blockAddress + _layout.BlockStateOffset), out byte rawState) ||
                     !reader.TryReadByte(checked(blockAddress + _layout.BlockChangedFlagOffset), out byte changedFlag) ||
-                    !reader.TryReadUInt32(checked(blockAddress + _layout.BlockUpdateTickOffset), out uint updateTick))
+                    !reader.TryReadUInt32(checked(blockAddress + _layout.BlockUpdateTickOffset), out uint updateTick) ||
+                    !reader.TryReadByte(checked(blockAddress + _layout.BlockManualBlockedOffset), out byte manualBlockedRaw))
                 {
                     return KoploperObjectGraphDecodeResult.PointerInvalid;
                 }
@@ -91,7 +92,7 @@ namespace SiebwaldeApp.Core.Koploper
                 }
 
                 blockItemAddresses.Add(blockAddress);
-                blocks.Add(new KoploperRawBlock(internalId, displayId, ownerPointer, rawState, changedFlag, updateTick));
+                blocks.Add(new KoploperRawBlock(internalId, displayId, ownerPointer, rawState, changedFlag, updateTick, manualBlockedRaw));
             }
 
             // Locomotive registry: the root field holds a pointer to the loco TList (not the

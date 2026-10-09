@@ -21,7 +21,14 @@ namespace SiebwaldeApp.Core.Tests.Koploper
             => new("Koploper", "9.4.0.9", "HASH", 0x00400000);
 
         public static KoploperBlockSnapshot Block(int internalBlockId, int? ownerLocomotiveId, KoploperBlockState state)
-            => new(internalBlockId, internalBlockId, ownerLocomotiveId, state, (uint)state, null);
+            => Block(internalBlockId, ownerLocomotiveId, state, KoploperManualBlockState.NotBlocked);
+
+        public static KoploperBlockSnapshot Block(
+            int internalBlockId,
+            int? ownerLocomotiveId,
+            KoploperBlockState state,
+            KoploperManualBlockState manualBlocked)
+            => new(internalBlockId, internalBlockId, ownerLocomotiveId, state, (uint)state, null, manualBlocked);
 
         public static KoploperLocomotiveSnapshot Locomotive(int internalLocomotiveId)
             => new(internalLocomotiveId, (uint)(0x00800000 + (internalLocomotiveId * 0x200)));

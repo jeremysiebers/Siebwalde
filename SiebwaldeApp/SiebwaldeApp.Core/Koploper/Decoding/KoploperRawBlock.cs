@@ -10,5 +10,6 @@ namespace SiebwaldeApp.Core.Koploper
         uint OwnerPointer,
         byte RawState,
         byte ChangedFlag,
-        uint UpdateTick);
+        uint UpdateTick,
+        byte ManualBlockedRaw);
 }

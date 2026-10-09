@@ -22,6 +22,7 @@ namespace SiebwaldeApp.Core.Tests.Koploper
             Assert.Equal(0x1EDu, layout.BlockStateOffset);
             Assert.Equal(0x1EEu, layout.BlockChangedFlagOffset);
             Assert.Equal(0x1F0u, layout.BlockUpdateTickOffset);
+            Assert.Equal(0x198u, layout.BlockManualBlockedOffset);
             Assert.Equal(0x1A8u, layout.LocoInternalIdOffset);
             Assert.Equal(0x54u, layout.LocoBlockRef54Offset);
             Assert.Equal(0x58u, layout.LocoBlockRef58Offset);

@@ -152,7 +152,7 @@ namespace SiebwaldeApp.Core.Tests.Koploper
                 LocoList: new KoploperTList(0x3000, 1, 1),
                 LocoItemAddresses: new nuint[] { 0x5000 },
                 Registry: new KoploperRawRegistry(
-                    new[] { new KoploperRawBlock(1, 101, 0xA000, 1, 0, 0x1000) },
+                    new[] { new KoploperRawBlock(1, 101, 0xA000, 1, 0, 0x1000, 0) },
                     new[] { new KoploperRawLocomotive(24, 0x54, 0x58, 0x5000) }));
         }
 
