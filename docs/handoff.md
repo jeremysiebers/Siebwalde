@@ -1,5 +1,23 @@
 # Handoff
 
+## Session (2026-10-09, KIS-07 logical-section mapping MERGED — KIS-07 DONE / TERMINAL)
+
+Branch `feature/koploper-internal-state-kis07`, final HEAD `58958e4be46fe6620a75ab2ed6e0cde300b7d8e0`. This session implemented and merged KIS-07 (Koploper Block → Siebwalde Logical Section Mapping, SHADOW ONLY) into `master`.
+
+**Merge:** normal merge commit `e5887358678cc899edabfa540f90af60063a55d9` (Product Owner revision-bound merge authority on `58958e4…`). Post-merge CI **PASS** (`Build and test`, run `37897750378`). **KIS-07 — DONE / TERMINAL.** KIS-08 not started (awaiting separate Product Owner authorization). No squash/rebase/force-push/branch-deletion.
+
+KIS-07 integrates the proven `+0x198` manual-blocked flag coherently into the KIS-04 snapshot (+ coherency anchor), adds a declarative `KoploperBlockBinding` (Koploper internal block id → logical section id) with fail-closed `LayoutProfile` validation, and a SHADOW projector/observer projecting automatic ownership + manual-blocked state to logical sections.
+
+- `KoploperManualBlockState { Invalid, NotBlocked, Blocked }`; automatic `+0x1ED` semantics unchanged; no RGB, no `+0x120`.
+- `KoploperLogicalSectionShadowObservation` with four flags: SourceAuthoritative / MappingValid / ManualStateValid / ShadowValid.
+- Unmapped owned/manual fail closed; ManualBlocked+Reserved/Occupied → conflict (no wins); ManualBlocked+Free → valid manual-blocked section; identity discipline (internal block id is the mapping key, not numeric equality).
+
+Authoritative Oval binding (runtime-bewezen, PID 19228): internal 1..5 → logical sections 1..5.
+
+Live shadow acceptance (read-only): 120/120 ShadowValid, 2 locs (internal 1, 2), sections 1..5 projected; ManualBlocked toggle (block 2 → section 2) + release (no stale). No hardware writes.
+
+Deferred: route/wisselstraat object graph, +0x120 semantics, future non-1:1 cardinality, Carrier/PWM/physical amplifier authority.
+
 ## Session (2026-10-08, KIS-06 cross-validation MERGED — KIS-06 DONE / TERMINAL)
 
 Branch `feature/koploper-internal-state-kis06`, final HEAD `96503bcf80a401c072c3f4a5a2ef75e740fabe13`. This session implemented and merged KIS-06 (Simulator / Independent Cross-Validation + bounded administration findings) into `master`.
