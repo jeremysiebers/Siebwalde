@@ -8,6 +8,16 @@
     { "sectionId": 3, "physicalAmplifier": 4 },
     { "sectionId": 4, "physicalAmplifier": 6 }
   ],
+  "koploperBlockBindings": [
+    { "koploperInternalBlockId": 1, "logicalSectionId": 1 },
+    { "koploperInternalBlockId": 2, "logicalSectionId": 2 },
+    { "koploperInternalBlockId": 3, "logicalSectionId": 3 },
+    { "koploperInternalBlockId": 4, "logicalSectionId": 4 }
+  ],
+  "locomotiveBindings": [
+    { "internalLocomotiveId": 1, "dccAddress": 1 },
+    { "internalLocomotiveId": 2, "dccAddress": 2 }
+  ],
   "sections": [
     { "id": 1, "amplifierSlave": 1, "bezetmelders": ["1.01"], "lengthMm": 1000.0 },
     { "id": 2, "amplifierSlave": 2, "bezetmelders": ["1.02"], "lengthMm": 1000.0 },

@@ -34,6 +34,7 @@ namespace SiebwaldeApp.Core.Tests.Koploper
             {
                 SlaveNumber = slave,
                 SlaveDetected = 1,
+                ProtocolReadbackObserved = true, // a genuine SLAVEINFO readback sets this true
                 HoldingReg = regs,
                 LastDataReceivedUtc = receivedAt
             };

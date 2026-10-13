@@ -32,6 +32,7 @@ namespace SiebwaldeApp.Integration
         private readonly ControlSafetyGuard _guard;
         private readonly ControlDiagnostics _diagnostics;
         private readonly IMovementPermissionState? _movementPermission;
+        private readonly Func<bool>? _authorityNotReady;
         private readonly Action<string>? _log;
         private readonly HashSet<int> _reportedRejections = new();
         private readonly object _lock = new();
@@ -41,13 +42,15 @@ namespace SiebwaldeApp.Integration
             ControlSafetyGuard guard,
             ControlDiagnostics diagnostics,
             Action<string>? log = null,
-            IMovementPermissionState? movementPermission = null)
+            IMovementPermissionState? movementPermission = null,
+            Func<bool>? authorityNotReady = null)
         {
             _inner = inner ?? throw new ArgumentNullException(nameof(inner));
             _guard = guard ?? throw new ArgumentNullException(nameof(guard));
             _diagnostics = diagnostics ?? throw new ArgumentNullException(nameof(diagnostics));
             _log = log;
             _movementPermission = movementPermission;
+            _authorityNotReady = authorityNotReady;
         }
 
         /// <summary>
@@ -56,6 +59,13 @@ namespace SiebwaldeApp.Integration
         /// participate in observed-neutral keep their existing behavior.
         /// </summary>
         private bool IsMovementPermissionGranted => _movementPermission?.IsGranted ?? true;
+
+        /// <summary>
+        /// True during startup before the first valid authoritative KIS shadow (carrier authority
+        /// not ready). A null delegate means "not gated". This is a non-latching fail-closed
+        /// condition: movement is denied but no layout stop is latched.
+        /// </summary>
+        private bool IsAuthorityNotReady => _authorityNotReady?.Invoke() ?? false;
 
         /// <inheritdoc />
         public bool SetPower(bool on)
@@ -82,6 +92,16 @@ namespace SiebwaldeApp.Integration
             if (ecosSpeed == 0)
             {
                 return _inner.SetLocoSpeed(address, ecosSpeed, direction);
+            }
+
+            // Non-zero movement is refused during startup before the first valid authoritative KIS
+            // shadow (authority not ready). This is not a latched safety fault and not an emergency
+            // stop: it is surfaced through <see cref="IsMovementBlocked"/> rather than the latch.
+            if (IsAuthorityNotReady)
+            {
+                _log?.Invoke(
+                    $"Movement for loco {address} refused: KIS_AUTHORITY_NOT_READY (no valid authoritative KIS shadow established yet).");
+                return false;
             }
 
             // Non-zero movement is additionally refused while movement permission is not granted
@@ -113,7 +133,7 @@ namespace SiebwaldeApp.Integration
 
         /// <inheritdoc />
         public bool IsMovementBlocked(int address)
-            => !_guard.AllowsMovement(address) || !IsMovementPermissionGranted;
+            => IsAuthorityNotReady || !_guard.AllowsMovement(address) || !IsMovementPermissionGranted;
 
         private void ReportRejection(int subject, string detail)
         {

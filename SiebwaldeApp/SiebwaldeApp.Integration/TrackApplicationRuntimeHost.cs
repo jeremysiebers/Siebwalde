@@ -37,6 +37,21 @@ namespace SiebwaldeApp.Integration
         /// </summary>
         private static readonly TimeSpan DefaultNeutralObserveWindow = TimeSpan.FromSeconds(5);
 
+        /// <summary>
+        /// Stage 1 — occupancy deassert filter window (later user-configurable). A physical
+        /// Occupied → Clear transition only becomes "filtered Clear" after remaining continuously
+        /// Clear for this long (100 ms). Rising edges stay immediate; this is not a safety/control
+        /// budget.
+        /// </summary>
+        private static readonly TimeSpan OccupancyClearDebounceMs = PhysicalOccupancyDeassertFilter.DefaultClearDebounceMs;
+
+        /// <summary>
+        /// Stage 2 — post-clear release tail hold (later user-configurable). After a departed source
+        /// becomes filtered Clear, it is held driven for this long (500 ms) before it is released
+        /// (HR0=399). It only delays releasing the OLD source; the target is already powered.
+        /// </summary>
+        private static readonly TimeSpan SourceReleaseTailHoldMs = LocomotiveCarrierController.DefaultSourceReleaseTailHold;
+
         private readonly IEcosHostService _ecosHost;
         private readonly IControlTrace? _controlTrace;
         private readonly Func<ITrackTransport>? _transportFactory;
@@ -64,6 +79,10 @@ namespace SiebwaldeApp.Integration
         private string _loggerInstance = "TrackAppLog";
         private ILogger? _trackApplicationLogging;
         private MovementPermissionController? _movementPermission;
+        private Kis09PassiveObserver? _kis09PassiveObserver;
+        private Kis09PassiveObserverConsumer? _kis09PassiveConsumer;
+        private LocomotiveCarrierFeeder? _kis09CarrierFeeder;
+        private CarrierTimingTrace? _carrierTimingTrace;
 
         /// <inheritdoc />
         public event EventHandler<TrackRuntimeStatusChangedEventArgs>? StateChanged;
@@ -204,6 +223,16 @@ namespace SiebwaldeApp.Integration
         public List<TrackAmplifierItem> GetAmplifierListing()
             => _trackVariables?.GetAmplifierListing() ?? new List<TrackAmplifierItem>();
 
+        /// <summary>
+        /// The shared track-application variables container (the same container the control stack and
+        /// comm client use). Read-only exposure for a passive KIS-09 observer; it does NOT expose the
+        /// comm client or any write path. Null before the track part is composed.
+        /// </summary>
+        public TrackApplicationVariables? TrackVariables => _trackVariables;
+
+        /// <summary>The passive KIS-09 observer (KIS-07 shadow + KIS-08 reconciliation over the production variables), or null.</summary>
+        public Kis09PassiveObserver? Kis09PassiveObserver => _kis09PassiveObserver;
+
         // ---------------------------------------------------------------------------------
         // Lifecycle
         // ---------------------------------------------------------------------------------
@@ -254,6 +283,24 @@ namespace SiebwaldeApp.Integration
                         if (mode.IsFullTrackChain())
                         {
                             await EstablishObservedNeutralAsync(_cts.Token).ConfigureAwait(false);
+                        }
+
+                        // Phase 3: feed the ownership-aware carrier from the KIS-09 passive observer
+                        // (same shared variables/shadow) and route its escalation flags into the
+                        // existing safety latch. No second comm client.
+                        if (mode.IsFullTrackChain() &&
+                            _kis09PassiveObserver is { } carrierObserver &&
+                            _ecosHost is TrackControlHost carrierHost &&
+                            carrierHost.Carrier is { } carrier &&
+                            carrierHost.Safety is { } carrierSafety)
+                        {
+                            _kis09CarrierFeeder = new LocomotiveCarrierFeeder(
+                                carrierObserver,
+                                carrier,
+                                decision => CarrierEscalation.Route(decision, carrierSafety, carrier.AuthorityLifecycle),
+                                clearDebounceMs: OccupancyClearDebounceMs,
+                                timingTrace: _carrierTimingTrace);
+                            _kis09CarrierFeeder.Start(_cts.Token);
                         }
 
                         TransitionTo(TrackRuntimeState.Running);
@@ -426,12 +473,19 @@ namespace SiebwaldeApp.Integration
                 SiebwaldeApp.Core.IoC.Logger.Log($"Track init: {e.StepName} - {e.Message}", _loggerInstance);
             };
 
+            // 6b) Carrier timing trace: a non-blocking JSONL diagnostic for the carrier-chain
+            //     latency. Best-effort; created before the runtime writer so the write latency hook
+            //     is available.
+            _carrierTimingTrace = new CarrierTimingTrace(
+                Path.Combine(CoreConfiguration.LogDirectory, "carrier-timing.jsonl"));
+
             // 7) Create TrackControlMain and hook StatusChanged to start the runtime loop.
             _trackControlMain = new TrackControlMain(
                 _loggerInstance,
                 _trackCommClient,
                 _trackVariables,
-                _controlTrace);
+                _controlTrace,
+                onAmplifierWrite: _carrierTimingTrace.RecordWrite);
 
             _trackInitService.StatusChanged += (_, status) =>
             {
@@ -456,6 +510,25 @@ namespace SiebwaldeApp.Integration
                 throw new InvalidOperationException(
                     $"Track initialization did not complete: {_trackInitService.Status}.");
             }
+
+            // 9) Passive KIS-09 observer: KIS-07 shadow + KIS-08 reconciliation reading the SAME
+            //    TrackApplicationVariables container the control stack uses. No second comm client.
+            if (_trackVariables is not null && EffectiveFullSimulationProfile is { } passiveProfile)
+            {
+                _kis09PassiveObserver = Kis09PassiveObserverFactory.Create(_trackVariables, passiveProfile);
+
+                // 10) Bounded background consumer that drives the observer and writes the passive JSONL trace.
+                _kis09PassiveConsumer = new Kis09PassiveObserverConsumer(
+                    _kis09PassiveObserver,
+                    Path.Combine(CoreConfiguration.LogDirectory, "kis09-passive.jsonl"));
+                _kis09PassiveConsumer.Start(_cts.Token);
+            }
+
+            SiebwaldeApp.Core.IoC.Logger.Log(
+                $"Carrier physical-source release (two-stage): " +
+                $"OccupancyClearDebounceMs={OccupancyClearDebounceMs.TotalMilliseconds} ms, " +
+                $"SourceReleaseTailHoldMs={SourceReleaseTailHoldMs.TotalMilliseconds} ms.",
+                "");
 
             SiebwaldeApp.Core.IoC.Logger.Log("Track Application started.", "");
         }
@@ -755,6 +828,32 @@ namespace SiebwaldeApp.Integration
                     await disposable.DisposeAsync().AsTask().WaitAsync(budget).ConfigureAwait(false);
                 }
 
+                // 5) Stop the passive KIS-09 consumer (bounded).
+                if (_kis09PassiveConsumer is not null)
+                {
+                    try
+                    {
+                        await _kis09PassiveConsumer.StopAsync().WaitAsync(budget).ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        RaiseFault("Kis09PassiveObserverConsumer.Stop", ex);
+                    }
+                }
+
+                // 6) Stop the ownership-aware carrier feeder (bounded).
+                if (_kis09CarrierFeeder is not null)
+                {
+                    try
+                    {
+                        await _kis09CarrierFeeder.StopAsync().WaitAsync(budget).ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        RaiseFault("LocomotiveCarrierFeeder.Stop", ex);
+                    }
+                }
+
                 if (hostResult is not EcosHostStopResult.Stopped and not EcosHostStopResult.AlreadyStopped)
                 {
                     throw new InvalidOperationException($"ECoS host stop did not complete cleanly: {hostResult}.");
@@ -792,6 +891,11 @@ namespace SiebwaldeApp.Integration
             _trackControlMain = null;
             _trackCommClient = null;
             _trackInitService = null;
+            _kis09PassiveConsumer = null;
+            _kis09CarrierFeeder = null;
+            _carrierTimingTrace = null;
+            _kis09PassiveObserver?.Dispose();
+            _kis09PassiveObserver = null;
             _trackVariables = null;
             _bootloaderHelpers = null;
             _sendNextFwDataPacket = null;

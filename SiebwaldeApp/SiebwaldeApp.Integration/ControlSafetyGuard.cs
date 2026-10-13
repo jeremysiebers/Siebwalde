@@ -143,6 +143,21 @@ namespace SiebwaldeApp.Integration
         public bool AllowsSwitchCommand() => true;
 
         /// <summary>
+        /// Records a diagnostic without latching or taking any safety action. Used for conditions
+        /// that must be visible but are NOT a safety fault — for example the startup
+        /// authority-not-ready state, which fails closed but must never latch a layout stop.
+        /// </summary>
+        public void Notify(ControlDiagnostic diagnostic)
+        {
+            if (diagnostic is null)
+            {
+                throw new ArgumentNullException(nameof(diagnostic));
+            }
+
+            _diagnostics.Report(diagnostic);
+        }
+
+        /// <summary>
         /// Applies the safety action for a diagnostic and returns the action that was taken.
         /// Idempotent per fault key.
         /// </summary>

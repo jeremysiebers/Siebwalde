@@ -56,7 +56,12 @@ namespace SiebwaldeApp.Core.Koploper
 
                 PhysicalOccupancy occupancy;
                 bool isFresh;
-                if (item is not null && TrackAmplifierDataFreshness.IsCurrentData(item, capturedAtUtc, staleAfter))
+                // A fresh, genuine protocol readback is sufficient — NOT SlaveDetected, which is a
+                // DETECT-phase flag. Residual risk: because the master streams all slave slots
+                // regardless of presence, a section bound to a never-detected amplifier now reports
+                // Clear (not Unknown); this is bounded to the read-only reconciliation path
+                // (movement authority unaffected).
+                if (item is not null && TrackAmplifierDataFreshness.HasFreshProtocolReadback(item, capturedAtUtc, staleAfter))
                 {
                     occupancy = TrackAmplifierRegisters.IsOccupied(item.HoldingReg)
                         ? PhysicalOccupancy.Occupied

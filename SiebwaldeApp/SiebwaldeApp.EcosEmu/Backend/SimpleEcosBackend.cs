@@ -110,6 +110,16 @@ namespace SiebwaldeApp.EcosEmu
             if (state != null)
             {
                 state.Block = blockNumber;
+
+                // Re-apply the retained speed to the newly-entered section's amplifier(s) + look-ahead
+                // when the locomotive is actually moving and the block genuinely changed (avoid
+                // redundant writes on duplicate block reports). Without this a section change leaves
+                // the freshly-entered amplifier running at a stale duty cycle, because the backend
+                // otherwise only commands speed when Koploper sends a speed command.
+                if (state.Speed != 0 && previousBlock != blockNumber)
+                {
+                    _hardware.SetLocoSpeed(locoAddress, state.Speed, state.Direction);
+                }
             }
 
             // Update persistent loco info

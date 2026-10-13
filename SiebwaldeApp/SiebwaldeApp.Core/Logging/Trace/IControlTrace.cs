@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace SiebwaldeApp.Core
@@ -73,6 +74,13 @@ namespace SiebwaldeApp.Core
         /// </summary>
         void AmplifierWrite(ushort amplifier, int hr0);
 
+        /// <summary>
+        /// A fresh protocol readback (SLAVEINFO) reported HoldingReg0. This is PROTOCOL-OBSERVED
+        /// state, not mechanical proof of the physical output; when no fresh readback exists it is
+        /// simply absent. <paramref name="fresh"/> is the protocol-readback freshness gate.
+        /// </summary>
+        void AmplifierObserved(ushort amplifier, int hr0, bool fresh);
+
         /// <summary>A retained non-neutral physical target was added for a locomotive.</summary>
         void TrackerAdd(int locoAddress, ushort amplifier, IReadOnlyList<ushort> outstanding);
 
@@ -125,5 +133,22 @@ namespace SiebwaldeApp.Core
         /// track-amplifier command API.
         /// </summary>
         void Abnormal(string kind, ushort? amplifier, string detail);
+
+        /// <summary>
+        /// A carrier authority-lifecycle TRANSITION (not a per-cycle state). Values are the
+        /// transition labels: <c>AUTHORITY_NOT_YET_OBSERVED</c>, <c>AUTHORITY_VALID</c>,
+        /// <c>AUTHORITY_SUSPECT_ENTER</c>, <c>AUTHORITY_SUSPECT_CONTINUE</c>,
+        /// <c>AUTHORITY_TRANSIENT_INVALID_RECOVERED</c>, <c>AUTHORITY_LOST_AFTER_VALID</c>,
+        /// <c>AUTHORITY_RECOVERED_BUT_LATCH_REMAINS</c>. The optional fields carry the N+X
+        /// qualification numbers for the events that need them (<paramref name="invalidCount"/>,
+        /// <paramref name="invalidDurationMs"/>, <paramref name="firstInvalidAtUtc"/>,
+        /// <paramref name="reason"/>).
+        /// </summary>
+        void CarrierAuthorityLifecycle(
+            string transition,
+            int? invalidCount = null,
+            long? invalidDurationMs = null,
+            DateTimeOffset? firstInvalidAtUtc = null,
+            string? reason = null);
     }
 }

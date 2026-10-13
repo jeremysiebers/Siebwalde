@@ -112,6 +112,16 @@ namespace SiebwaldeApp.Core
                 ControlTraceFormat.Field("hr0", hr0)));
 
         /// <inheritdoc />
+        public void AmplifierObserved(ushort amplifier, int hr0, bool fresh)
+            => Emit(ControlTraceFormat.Join(
+                ControlTraceFormat.Event("AMPLIFIER_OBSERVED"),
+                ControlTraceFormat.Field("amp", (int)amplifier),
+                ControlTraceFormat.Field("register", "HR0"),
+                ControlTraceFormat.Field("observed", "PROTOCOL-OBSERVED"),
+                ControlTraceFormat.Field("hr0", hr0),
+                ControlTraceFormat.Field("fresh", fresh)));
+
+        /// <inheritdoc />
         public void TrackerAdd(int locoAddress, ushort amplifier, IReadOnlyList<ushort> outstanding)
             => Emit(ControlTraceFormat.Join(
                 ControlTraceFormat.Event("TRACKER_ADD"),
@@ -204,6 +214,21 @@ namespace SiebwaldeApp.Core
                 ControlTraceFormat.Field("kind", kind),
                 ControlTraceFormat.Field("amp", amplifier.HasValue ? (int?)amplifier.Value : null),
                 ControlTraceFormat.Field("detail", detail)));
+
+        /// <inheritdoc />
+        public void CarrierAuthorityLifecycle(
+            string transition,
+            int? invalidCount = null,
+            long? invalidDurationMs = null,
+            DateTimeOffset? firstInvalidAtUtc = null,
+            string? reason = null)
+            => Emit(ControlTraceFormat.Join(
+                ControlTraceFormat.Event("CARRIER_AUTHORITY_LIFECYCLE"),
+                ControlTraceFormat.Field("transition", transition),
+                ControlTraceFormat.Field("count", invalidCount),
+                ControlTraceFormat.Field("durationms", invalidDurationMs),
+                ControlTraceFormat.Field("firstinvalid", firstInvalidAtUtc?.ToString("o")),
+                ControlTraceFormat.Field("reason", reason)));
 
         private void Emit(string payload)
         {
