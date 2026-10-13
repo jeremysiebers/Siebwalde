@@ -49,6 +49,14 @@ namespace SiebwaldeApp.Core
         public static string Field(string key, int? value)
             => key + "=" + (value.HasValue ? value.Value.ToString(CultureInfo.InvariantCulture) : None);
 
+        /// <summary>Formats a long integer field with the invariant culture.</summary>
+        public static string Field(string key, long value)
+            => key + "=" + value.ToString(CultureInfo.InvariantCulture);
+
+        /// <summary>Formats a nullable long integer field; null becomes <see cref="None"/>.</summary>
+        public static string Field(string key, long? value)
+            => key + "=" + (value.HasValue ? value.Value.ToString(CultureInfo.InvariantCulture) : None);
+
         /// <summary>Formats a boolean field as <c>true</c>/<c>false</c>.</summary>
         public static string Field(string key, bool value)
             => key + "=" + (value ? "true" : "false");

@@ -42,6 +42,7 @@ namespace SiebwaldeApp.Core.Tests.Koploper
             {
                 SlaveNumber = slave,
                 SlaveDetected = detected ? (ushort)1 : (ushort)0,
+                ProtocolReadbackObserved = true, // a genuine SLAVEINFO readback sets this true
                 HoldingReg = regs,
                 LastDataReceivedUtc = receivedAt
             };
@@ -145,9 +146,11 @@ namespace SiebwaldeApp.Core.Tests.Koploper
         }
 
         [Fact]
-        public void Project_UndetectedAmplifier_IsUnknown()
+        public void Project_UndetectedAmplifier_WithFreshReadback_ProjectsOccupancy()
         {
-            // The amplifier exists but was never detected: not current, therefore unknown.
+            // SlaveDetected == 0 is a DETECT-phase flag, not a live-presence signal: a genuine, fresh
+            // protocol readback still projects from the occupancy bit (residual-risk note: a
+            // never-detected but fresh-clear amplifier projects Clear, not Unknown).
             var items = new Dictionary<ushort, TrackAmplifierItem>
             {
                 [1] = Amplifier(1, occupied: true, receivedAt: Now, detected: false)
@@ -156,8 +159,8 @@ namespace SiebwaldeApp.Core.Tests.Koploper
             var result = Project(Mapping, items);
 
             var undetected = Assert.Single(result.Sections, s => s.LogicalSectionId == 1);
-            Assert.Equal(PhysicalOccupancy.Unknown, undetected.Occupancy);
-            Assert.False(undetected.IsFresh);
+            Assert.Equal(PhysicalOccupancy.Occupied, undetected.Occupancy);
+            Assert.True(undetected.IsFresh);
         }
 
         // ---------------------------------------------------------------------

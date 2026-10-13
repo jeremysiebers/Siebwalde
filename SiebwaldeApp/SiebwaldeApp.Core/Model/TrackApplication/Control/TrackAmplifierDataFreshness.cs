@@ -87,5 +87,28 @@ namespace SiebwaldeApp.Core
         /// </summary>
         public static bool HasCurrentProtocolReadback(TrackAmplifierItem? amplifier)
             => HasCurrentProtocolReadback(amplifier, DateTimeOffset.UtcNow, DefaultStaleAfter);
+
+        /// <summary>
+        /// True when the amplifier's current <see cref="TrackAmplifierItem.HoldingReg"/> content was
+        /// populated by a genuine protocol SLAVEINFO readback in this runtime AND that readback is
+        /// fresh — WITHOUT requiring <see cref="TrackAmplifierItem.SlaveDetected"/> != 0.
+        /// <para>
+        /// <see cref="TrackAmplifierItem.SlaveDetected"/> is a DETECT-phase flag (command 101), not a
+        /// live-presence signal: a re-run of DETECT after the slaves are configured can clear it while
+        /// the SLAVEINFO stream still carries valid, fresh occupancy. This is the correct gate for the
+        /// read-only physical-reconciliation source (movement authority is unaffected).
+        /// </para>
+        /// </summary>
+        public static bool HasFreshProtocolReadback(
+            TrackAmplifierItem? amplifier,
+            DateTimeOffset now,
+            TimeSpan staleAfter)
+            => amplifier is not null &&
+               amplifier.ProtocolReadbackObserved &&
+               IsFresh(amplifier, now, staleAfter);
+
+        /// <summary>True when the amplifier has a fresh, genuine protocol readback as of now.</summary>
+        public static bool HasFreshProtocolReadback(TrackAmplifierItem? amplifier)
+            => HasFreshProtocolReadback(amplifier, DateTimeOffset.UtcNow, DefaultStaleAfter);
     }
 }

@@ -2,10 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using SiebwaldeApp.Core.Koploper;
 using SiebwaldeApp.Core.Koploper.Validation;
+using SiebwaldeApp.Core.TrackApplication.Topology;
+using SiebwaldeApp.Koploper.Windows;
 
 namespace SiebwaldeApp.Koploper.Validation.Host
 {
@@ -23,6 +27,7 @@ namespace SiebwaldeApp.Koploper.Validation.Host
     public static class Program
     {
         private const string DefaultTracePath = "koploper-validation.jsonl";
+        private const string ReadonlyDefaultTracePath = "readonly-validation.jsonl";
         private const int DefaultCycles = 10;
         private const int DefaultIntervalMs = 500;
 
@@ -43,6 +48,8 @@ namespace SiebwaldeApp.Koploper.Validation.Host
             {
                 "validate" => RunValidate(rest),
                 "replay" => RunReplay(rest),
+                "identify" => RunIdentify(rest),
+                "readonly-validate" => RunReadonlyValidate(rest),
                 "--help" or "-h" or "/?" => Help(),
                 _ => Unknown(command)
             };
@@ -234,6 +241,246 @@ namespace SiebwaldeApp.Koploper.Validation.Host
             return total == agree ? 0 : 1;
         }
 
+        // ---------------------------------------------------------------- identify (live, read-only)
+
+        private static int RunIdentify(string[] args)
+        {
+            if (args.Length != 0)
+            {
+                Console.Error.WriteLine("identify takes no arguments.");
+                return 2;
+            }
+
+            KoploperSnapshotReader snapshotReader = CreateSnapshotReader();
+            KoploperSnapshotReadResult result = snapshotReader.ReadSnapshot();
+
+            Console.WriteLine($"Health: {result.Health}");
+
+            bool failure = result.Snapshot is null
+                || result.Health is KoploperSourceHealth.UnsupportedVersion
+                    or KoploperSourceHealth.Unavailable
+                    or KoploperSourceHealth.Inconsistent
+                    or KoploperSourceHealth.ProcessNotFound;
+
+            if (result.Snapshot is null)
+            {
+                Console.WriteLine($"Diagnostics: {string.Join(", ", result.Diagnostics)}");
+                return failure ? 1 : 0;
+            }
+
+            KoploperStateSnapshot snapshot = result.Snapshot;
+
+            Console.WriteLine($"ExecutableVersion: {snapshot.ExecutableIdentity.Version}");
+            Console.WriteLine($"ExecutableSha256: {snapshot.ExecutableIdentity.Sha256Hex}");
+            Console.WriteLine($"ProcessId: {snapshot.Generation.ProcessId}");
+            Console.WriteLine($"ProcessStartTimeUtc: {snapshot.Generation.ProcessStartTimeUtc.ToString("O")}");
+            Console.WriteLine($"Sequence: {snapshot.Sequence}");
+            Console.WriteLine($"CapturedAtUtc: {snapshot.CapturedAtUtc.ToString("O")}");
+            Console.WriteLine($"IsConsistent: {snapshot.IsConsistent}");
+            Console.WriteLine($"SourceHealth: {snapshot.SourceHealth}");
+            Console.WriteLine($"RetryCount: {snapshot.RetryCount}");
+            Console.WriteLine($"BlockCount: {snapshot.Blocks.Count}");
+
+            foreach (KoploperBlockSnapshot block in snapshot.Blocks.OrderBy(b => b.InternalBlockId))
+            {
+                Console.WriteLine(
+                    $"BLOCK InternalBlockId={block.InternalBlockId} " +
+                    $"DisplayBlockNumber={(block.DisplayBlockNumber?.ToString() ?? "NULL")} " +
+                    $"State={block.State} RawState={block.RawState} " +
+                    $"OwnerLocomotiveId={(block.OwnerLocomotiveId?.ToString() ?? "NULL")} " +
+                    $"ManualBlocked={block.ManualBlocked}");
+            }
+
+            Console.WriteLine($"LocomotiveCount: {snapshot.Locomotives.Count}");
+            foreach (KoploperLocomotiveSnapshot loco in snapshot.Locomotives)
+            {
+                Console.WriteLine($"LOCO InternalLocomotiveId={loco.InternalLocomotiveId}");
+            }
+
+            return failure ? 1 : 0;
+        }
+
+        private static KoploperSnapshotReader CreateSnapshotReader()
+        {
+            IKoploperMemoryLayout layout = Koploper94MemoryLayout.Instance;
+            IKoploperProcessLocator processLocator = new WindowsKoploperProcessLocator();
+            IKoploperExecutableVerifier executableVerifier = new KoploperExecutableVerifier(layout);
+            Func<IKoploperMemoryReader> memoryReaderFactory = () => new WindowsKoploperMemoryReader();
+            IKoploperRawObjectGraphReader rawGraphReader =
+                new KoploperRawObjectGraphReader(layout, new KoploperDecodePlausibility());
+            IKoploperBlockStateDecoder blockStateDecoder = new KoploperBlockStateDecoder();
+
+            return new KoploperSnapshotReader(
+                processLocator,
+                executableVerifier,
+                memoryReaderFactory,
+                rawGraphReader,
+                blockStateDecoder,
+                options: null,
+                clock: () => DateTimeOffset.UtcNow);
+        }
+
+        // ---------------------------------------------------------------- readonly-validate
+
+        private static int RunReadonlyValidate(string[] args)
+        {
+            bool live = false;
+            bool warm = false;
+            int cycles = DefaultCycles;
+            int intervalMs = DefaultIntervalMs;
+            string tracePath = ReadonlyDefaultTracePath;
+
+            for (int i = 0; i < args.Length; i++)
+            {
+                switch (args[i].ToLowerInvariant())
+                {
+                    case "--live":
+                        live = true;
+                        break;
+                    case "--warm":
+                        warm = true;
+                        break;
+                    case "--cycles" when i + 1 < args.Length:
+                        cycles = int.Parse(args[++i]);
+                        break;
+                    case "--interval-ms" when i + 1 < args.Length:
+                        intervalMs = int.Parse(args[++i]);
+                        break;
+                    case "--trace" when i + 1 < args.Length:
+                        tracePath = args[++i];
+                        break;
+                    default:
+                        Console.Error.WriteLine($"Unknown readonly-validate argument: {args[i]}");
+                        return 2;
+                }
+            }
+
+            if (cycles < 0)
+            {
+                Console.Error.WriteLine("--cycles must be >= 0.");
+                return 2;
+            }
+
+            ReadOnlyTelemetryValidationHost host = ReadOnlyTelemetryValidationHost.Create("Simple Loop");
+
+            var jsonOptions = new JsonSerializerOptions
+            {
+                WriteIndented = false,
+                Converters = { new JsonStringEnumConverter() }
+            };
+
+            try
+            {
+                Console.WriteLine("== readonly-validate composition ==");
+                Console.WriteLine($"Profile: {host.Profile.Name}");
+                Console.WriteLine($"KoploperBlockBindings: {host.KoploperBlockBindingMap.Count}");
+                foreach (KeyValuePair<int, int> binding in host.KoploperBlockBindingMap.OrderBy(kv => kv.Key))
+                {
+                    Console.WriteLine($"  internalBlock {binding.Key} -> logicalSection {binding.Value}");
+                }
+
+                Console.WriteLine($"PhysicalAmplifierMapping: {host.Profile.PhysicalAmplifierMapping.Count}");
+                foreach (LayoutPhysicalAmplifierBinding binding in host.Profile.PhysicalAmplifierMapping)
+                {
+                    Console.WriteLine($"  section {binding.SectionId} -> physicalAmplifier {binding.PhysicalAmplifier}");
+                }
+
+                if (!live)
+                {
+                    Console.WriteLine("--live not supplied: composing only; NO transport opened, NO command transmitted.");
+                }
+                else if (warm)
+                {
+                    // Warm reconnect: the ONLY outbound transmission is CLIENT_CONNECTION_REQUEST (250).
+                    host.StartAsync().GetAwaiter().GetResult();
+                    host.EnableWarmReconnectAsync().GetAwaiter().GetResult();
+                }
+                else
+                {
+                    // Cold start: the ONLY outbound transmissions are the six telemetry-enablement
+                    // commands in the mandated order (250→100→101→104→106→105).
+                    host.StartAsync().GetAwaiter().GetResult();
+                    host.EnableSessionAsync().GetAwaiter().GetResult();
+                }
+
+                using var file = new StreamWriter(
+                    tracePath,
+                    append: true,
+                    new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+
+                file.WriteLine(JsonSerializer.Serialize(new
+                {
+                    type = "readonlyValidateScenarioStart",
+                    live,
+                    profileId = host.Profile.Name,
+                    timestampUtc = DateTimeOffset.UtcNow.ToString("O")
+                }, jsonOptions));
+
+                for (int cycle = 0; cycle < cycles; cycle++)
+                {
+                    LogicalPhysicalReconciliationObservation observation = host.Refresh();
+                    PhysicalSectionOccupancyObservation physical = host.ReadPhysicalObservation();
+
+                    KoploperTelemetryTraceRecord trace = KoploperTelemetryTraceBuilder.Build(
+                        cycle,
+                        DateTimeOffset.UtcNow,
+                        host.SessionCommandGuard,
+                        physical,
+                        observation,
+                        host.Profile,
+                        host.Variables);
+
+                    file.WriteLine(JsonSerializer.Serialize(trace, jsonOptions));
+
+                    if (cycle < cycles - 1)
+                    {
+                        Thread.Sleep(intervalMs);
+                    }
+                }
+
+                file.WriteLine(JsonSerializer.Serialize(new
+                {
+                    type = "readonlyValidateScenarioEnd",
+                    live,
+                    profileId = host.Profile.Name,
+                    timestampUtc = DateTimeOffset.UtcNow.ToString("O")
+                }, jsonOptions));
+            }
+            finally
+            {
+                if (live)
+                {
+                    host.StopAsync().GetAwaiter().GetResult();
+                }
+
+                host.DisposeAsync().GetAwaiter().GetResult();
+            }
+
+            Console.WriteLine("== readonly-validate summary ==");
+            Console.WriteLine(
+                $"Mode: {(live ? "live" : "dry (no transmission)")}; " +
+                $"session: {(warm ? "warm-reconnect (250 only)" : "cold-start (250→100→101→104→106→105)")}");
+
+            KoploperSessionCommandCounters counters = host.SessionCommandGuard.GetCounters();
+            Console.WriteLine("Telemetry-enablement (session) commands — transmitted / acknowledged:");
+            Console.WriteLine($"  CLIENT_CONNECTION_REQUEST: {counters.ClientConnectionRequestTransmitted} / {counters.ClientConnectionRequestAcknowledged}");
+            Console.WriteLine($"  EXEC_MBUS_STATE_SLAVES_ON: {counters.ExecMbusStateSlavesOnTransmitted} / {counters.ExecMbusStateSlavesOnAcknowledged}");
+            Console.WriteLine($"  EXEC_MBUS_STATE_SLAVE_DETECT: {counters.ExecMbusStateSlaveDetectTransmitted} / {counters.ExecMbusStateSlaveDetectAcknowledged}");
+            Console.WriteLine($"  EXEC_MBUS_STATE_SLAVE_INIT: {counters.ExecMbusStateSlaveInitTransmitted} / {counters.ExecMbusStateSlaveInitAcknowledged}");
+            Console.WriteLine($"  EXEC_MBUS_STATE_START_DATA_UPLOAD: {counters.ExecMbusStateStartDataUploadTransmitted} / {counters.ExecMbusStateStartDataUploadAcknowledged}");
+            Console.WriteLine($"  EXEC_MBUS_STATE_SLAVE_ENABLE: {counters.ExecMbusStateSlaveEnableTransmitted} / {counters.ExecMbusStateSlaveEnableAcknowledged}");
+            Console.WriteLine($"Rejected (allowlist) commands: {counters.RejectedCommands}");
+            Console.WriteLine($"Order violations: {counters.OrderViolations}");
+            Console.WriteLine($"Acknowledgement timeouts: {counters.AcknowledgementTimeouts}");
+            Console.WriteLine(
+                "Application/movement control (always 0 by construction): " +
+                $"registerWrite(108)={counters.AmplifierRegisterWrite} hr0={counters.AmplifierHr0Writes} " +
+                $"pwm={counters.PwmWrites} direction={counters.DirectionWrites} brake={counters.BrakeWrites} " +
+                $"emo={counters.EmoStopWrites} switch={counters.SwitchWrites} loco={counters.LocomotiveCommands}");
+            Console.WriteLine($"Trace: {tracePath}");
+            return 0;
+        }
+
         // ---------------------------------------------------------------- sample flattening
 
         private static KoploperValidationSample ToSample(
@@ -289,7 +536,16 @@ namespace SiebwaldeApp.Koploper.Validation.Host
                 "      JSONL, and print a summary.\n" +
                 "  replay <golden.jsonl>\n" +
                 "      Feed golden KoploperGoldenComparison JSONL through KoploperComparisonEngine\n" +
-                "      deterministically and verify each expected result.\n");
+                "      deterministically and verify each expected result.\n" +
+                "  identify\n" +
+                "      Read one coherent read-only Koploper snapshot and dump the raw per-block identity\n" +
+                "      table (InternalBlockId vs DisplayBlockNumber) plus snapshot metadata.\n" +
+                "  readonly-validate [--live] [--warm] [--cycles N] [--interval-ms N] [--trace PATH]\n" +
+                "      Compose the bounded telemetry-enablement reconciliation host and run a bounded\n" +
+                "      reconciliation loop writing machine-readable JSONL. Without --live nothing is\n" +
+                "      transmitted. With --live it sends the six-command cold sequence\n" +
+                "      (250→100→101→104→106→105) through the guard; with --warm it sends only 250\n" +
+                "      (warm reconnect). 108/107 and any other command remain unreachable.\n");
         }
     }
 }

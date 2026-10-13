@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using SiebwaldeApp.Core;
 using SiebwaldeApp.Core.TrackApplication.Simulator;
+using SiebwaldeApp.Core.TrackApplication.Topology;
 using SiebwaldeApp.EcosEmu;
 
 namespace SiebwaldeApp.Integration
@@ -40,7 +41,10 @@ namespace SiebwaldeApp.Integration
             ControlDiagnostics? diagnostics = null,
             TrackAmplifierGroups? trackAmplifierGroups = null,
             IControlTrace? controlTrace = null,
-            IMovementSimulation? movementSimulation = null)
+            IMovementSimulation? movementSimulation = null,
+            IReadOnlyDictionary<int, int>? locomotiveIdentity = null,
+            IReadOnlyList<LayoutPhysicalAmplifierBinding>? physicalAmplifierMapping = null,
+            TimeSpan? sourceReleaseTailHoldMs = null)
         {
             _commClient = commClient ?? throw new ArgumentNullException(nameof(commClient));
             if (variables is null) throw new ArgumentNullException(nameof(variables));
@@ -62,6 +66,20 @@ namespace SiebwaldeApp.Integration
 
             TrackAmplifierGroups = trackAmplifierGroups ?? TrackAmplifierGroups.Empty;
 
+            // The ownership-aware carrier (Phase 2) is wired only when an identity map AND a physical
+            // mapping are supplied (Real mode). Otherwise the topology/look-ahead path is retained.
+            if (locomotiveIdentity is { Count: > 0 } && physicalAmplifierMapping is { Count: > 0 })
+            {
+                Carrier = new LocomotiveCarrierController(
+                    variables,
+                    CommandTracker,
+                    controlTrace,
+                    locomotiveIdentity,
+                    topology,
+                    physicalAmplifierMapping,
+                    tailHoldWindow: sourceReleaseTailHoldMs);
+            }
+
             // In FullSimulation the movement simulator is the authoritative block-position source
             // for the real backend (so SetLocoSpeed resolves block -> amplifier from the simulated
             // position). The ECoS backend keeps the original provider (Koploper external info).
@@ -77,7 +95,8 @@ namespace SiebwaldeApp.Integration
                 switchPositionProvider,
                 CommandTracker,
                 TrackAmplifierGroups,
-                trace: controlTrace);
+                trace: controlTrace,
+                locomotiveCarrier: Carrier);
 
             // When a loco repository is supplied, host the ECoS backend in-process and use it
             // as the feedback sink. Otherwise the caller supplies its own sink (for example a
@@ -107,7 +126,8 @@ namespace SiebwaldeApp.Integration
                         safetyGuard,
                         diagnostics,
                         log,
-                        movementPermission: variables.MovementPermission);
+                        movementPermission: variables.MovementPermission,
+                        authorityNotReady: () => Carrier?.IsAuthorityNotReady ?? false);
                 }
 
                 EcosBackend = new SimpleEcosBackend(hardware, locoRepository, blockPositionProvider, controlTrace);
@@ -130,6 +150,9 @@ namespace SiebwaldeApp.Integration
         /// stop sink. Exposed so the composition root can bind the stop sink to the same instance.
         /// </summary>
         public AmplifierCommandTracker CommandTracker { get; }
+
+        /// <summary>The ownership-aware locomotive carrier (Phase 2), or null when not wired.</summary>
+        public LocomotiveCarrierController? Carrier { get; }
 
         /// <summary>
         /// The configured operational grouping of the physical track amplifiers. It is a separate

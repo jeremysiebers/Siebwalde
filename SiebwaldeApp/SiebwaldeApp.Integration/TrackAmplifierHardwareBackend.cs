@@ -37,6 +37,7 @@ namespace SiebwaldeApp.Integration
         private readonly Func<IReadOnlyDictionary<int, SwitchPosition>>? _switchPositionProvider;
         private readonly AmplifierCommandTracker? _commandTracker;
         private readonly IControlTrace? _trace;
+        private readonly LocomotiveCarrierController? _locomotiveCarrier;
 
         public TrackAmplifierHardwareBackend(
             IBlockPositionProvider blockPositionProvider,
@@ -48,7 +49,8 @@ namespace SiebwaldeApp.Integration
             Func<IReadOnlyDictionary<int, SwitchPosition>>? switchPositionProvider = null,
             AmplifierCommandTracker? commandTracker = null,
             TrackAmplifierGroups? groups = null,
-            IControlTrace? trace = null)
+            IControlTrace? trace = null,
+            LocomotiveCarrierController? locomotiveCarrier = null)
         {
             _blockPositionProvider = blockPositionProvider ?? throw new ArgumentNullException(nameof(blockPositionProvider));
             _topology = topology ?? throw new ArgumentNullException(nameof(topology));
@@ -60,6 +62,7 @@ namespace SiebwaldeApp.Integration
             _commandTracker = commandTracker;
             Groups = groups ?? TrackAmplifierGroups.Empty;
             _trace = trace;
+            _locomotiveCarrier = locomotiveCarrier;
         }
 
         /// <summary>Power off sets every mapped amplifier to neutral (standstill).</summary>
@@ -121,6 +124,13 @@ namespace SiebwaldeApp.Integration
         /// </returns>
         public bool SetLocoSpeed(int address, int ecosSpeed, int direction)
         {
+            // When the ownership-aware carrier is wired, drive-authority comes from the KIS-07
+            // shadow via the carrier projector — never from the topology/look-ahead alone.
+            if (_locomotiveCarrier is not null)
+            {
+                return _locomotiveCarrier.SetLocoSpeed(address, ecosSpeed, direction);
+            }
+
             var block = _blockPositionProvider.TryGetBlockForLoc(address);
             if (block is null)
             {

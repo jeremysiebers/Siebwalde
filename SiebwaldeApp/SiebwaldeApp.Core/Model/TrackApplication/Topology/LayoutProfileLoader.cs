@@ -207,6 +207,8 @@ namespace SiebwaldeApp.Core.TrackApplication.Topology
 
             var koploperBlockBindings = BuildKoploperBlockBindings(dto.KoploperBlockBindings, sectionIds, errors);
 
+            var locomotiveBindings = BuildLocomotiveBindings(dto.LocomotiveBindings, errors);
+
             return new LayoutProfile
             {
                 Name = dto.Name ?? string.Empty,
@@ -214,6 +216,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Topology
                 DetectedSlaves = detectedSlaves,
                 PhysicalAmplifierMapping = physicalMapping,
                 KoploperBlockBindings = koploperBlockBindings,
+                LocomotiveBindings = locomotiveBindings,
                 Sections = sections,
                 Blocks = blocks,
                 Switches = switches,
@@ -632,6 +635,59 @@ namespace SiebwaldeApp.Core.TrackApplication.Topology
         }
 
         /// <summary>
+        /// Validates the Koploper internal locomotive -&gt; DCC decoder address binding. The WHOLE
+        /// mapping being absent/empty is LEGAL (meaning "no identity binding declared"; a KIS-active
+        /// locomotive without a binding then contributes zero physical targets). When present, every
+        /// problem is collected (never silent): (1) an internal locomotive id &lt;= 0, (2) a DCC
+        /// address &lt;= 0, (3) a duplicate internal locomotive id, and (4) a DCC address bound to
+        /// more than one internal locomotive id (ambiguous).
+        /// </summary>
+        private static List<LocomotiveBinding> BuildLocomotiveBindings(
+            List<LocomotiveBindingDto>? bindingDtos,
+            List<string> errors)
+        {
+            var result = new List<LocomotiveBinding>();
+            if (bindingDtos is null || bindingDtos.Count == 0)
+            {
+                return result;
+            }
+
+            var seenInternalIds = new HashSet<int>();
+            var seenDccAddresses = new HashSet<int>();
+
+            foreach (var dto in bindingDtos)
+            {
+                if (dto.InternalLocomotiveId <= 0)
+                {
+                    errors.Add($"Locomotive binding has an invalid internal locomotive id {dto.InternalLocomotiveId} (must be > 0).");
+                    continue;
+                }
+
+                if (dto.DccAddress <= 0)
+                {
+                    errors.Add($"Locomotive binding for internal locomotive id {dto.InternalLocomotiveId} has an invalid DCC address {dto.DccAddress} (must be > 0).");
+                    continue;
+                }
+
+                if (!seenInternalIds.Add(dto.InternalLocomotiveId))
+                {
+                    errors.Add($"Duplicate locomotive binding for internal locomotive id {dto.InternalLocomotiveId}.");
+                    continue;
+                }
+
+                if (!seenDccAddresses.Add(dto.DccAddress))
+                {
+                    errors.Add($"DCC address {dto.DccAddress} is bound to more than one internal locomotive id.");
+                    continue;
+                }
+
+                result.Add(new LocomotiveBinding(dto.InternalLocomotiveId, dto.DccAddress));
+            }
+
+            return result;
+        }
+
+        /// <summary>
         /// Parses a bezetmelder name such as "1.03" (module 1, point 3) into its module and point.
         /// Module is 1..N; point is 1..<see cref="PointsPerModule"/>.
         /// </summary>
@@ -696,6 +752,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Topology
             public List<byte>? DetectedSlaves { get; set; }
             public List<PhysicalAmplifierDto>? PhysicalAmplifierMapping { get; set; }
             public List<KoploperBlockBindingDto>? KoploperBlockBindings { get; set; }
+            public List<LocomotiveBindingDto>? LocomotiveBindings { get; set; }
             public List<SectionDto>? Sections { get; set; }
             public List<BlockDto>? Blocks { get; set; }
             public List<SwitchDto>? Switches { get; set; }
@@ -727,6 +784,12 @@ namespace SiebwaldeApp.Core.TrackApplication.Topology
         {
             public int KoploperInternalBlockId { get; set; }
             public int LogicalSectionId { get; set; }
+        }
+
+        private sealed class LocomotiveBindingDto
+        {
+            public int InternalLocomotiveId { get; set; }
+            public int DccAddress { get; set; }
         }
 
         private sealed class SwitchDto

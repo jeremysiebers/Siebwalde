@@ -46,6 +46,14 @@ namespace SiebwaldeApp.Core.TrackApplication.Topology
     /// </summary>
     public sealed record KoploperBlockBinding(int KoploperInternalBlockId, int LogicalSectionId);
 
+    /// <summary>
+    /// Binds one Koploper internal locomotive id (the machine identity) to one DCC decoder address.
+    /// This is the declarative identity mapping used by the ownership-aware carrier to attribute a
+    /// physical target to a DCC locomotive. It is independent of <see cref="LayoutLocomotive"/> (which
+    /// only names a decoder address and an initial block).
+    /// </summary>
+    public sealed record LocomotiveBinding(int InternalLocomotiveId, int DccAddress);
+
     /// <summary>Maps an ECoS/Koploper switch address to a physical switch output.</summary>
     public sealed class LayoutSwitch
     {
@@ -110,6 +118,14 @@ namespace SiebwaldeApp.Core.TrackApplication.Topology
         public IReadOnlyList<KoploperBlockBinding> KoploperBlockBindings { get; init; }
             = Array.Empty<KoploperBlockBinding>();
 
+        /// <summary>
+        /// The declarative Koploper internal locomotive id -&gt; DCC decoder address binding. Empty
+        /// means "no binding declared"; a KIS-active locomotive without a binding contributes zero
+        /// physical targets (fail-closed).
+        /// </summary>
+        public IReadOnlyList<LocomotiveBinding> LocomotiveBindings { get; init; }
+            = Array.Empty<LocomotiveBinding>();
+
         public IReadOnlyList<LayoutSection> Sections { get; init; } = Array.Empty<LayoutSection>();
         public IReadOnlyList<LayoutBlock> Blocks { get; init; } = Array.Empty<LayoutBlock>();
         public IReadOnlyList<LayoutSwitch> Switches { get; init; } = Array.Empty<LayoutSwitch>();
@@ -148,6 +164,37 @@ namespace SiebwaldeApp.Core.TrackApplication.Topology
         /// </summary>
         public SiebwaldeApp.Core.KoploperBlockMap ToKoploperBlockMap()
             => SiebwaldeApp.Core.KoploperBlockMap.Parse(BuildKoploperBlockMapConfig(usePhysical: false));
+
+        /// <summary>
+        /// Builds a dictionary keyed by the Koploper INTERNAL block id (the machine identity, NOT
+        /// the display block number) mapping to the bound logical section id, in declaration order.
+        /// </summary>
+        public IReadOnlyDictionary<int, int> ToKoploperBlockBindingMap()
+        {
+            var map = new Dictionary<int, int>();
+            foreach (var binding in KoploperBlockBindings)
+            {
+                map[binding.KoploperInternalBlockId] = binding.LogicalSectionId;
+            }
+
+            return map;
+        }
+
+        /// <summary>
+        /// Builds a dictionary keyed by the Koploper INTERNAL locomotive id mapping to the DCC decoder
+        /// address, in declaration order. This is the <c>identity</c> input for the ownership-aware
+        /// locomotive carrier.
+        /// </summary>
+        public IReadOnlyDictionary<int, int> ToLocomotiveBindingMap()
+        {
+            var map = new Dictionary<int, int>();
+            foreach (var binding in LocomotiveBindings)
+            {
+                map[binding.InternalLocomotiveId] = binding.DccAddress;
+            }
+
+            return map;
+        }
 
         /// <summary>
         /// Projects this profile into a REAL-mode <see cref="SiebwaldeApp.Core.BlockTopology"/> whose

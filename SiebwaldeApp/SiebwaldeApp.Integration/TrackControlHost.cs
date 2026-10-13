@@ -39,12 +39,16 @@ namespace SiebwaldeApp.Integration
         private KoploperBlockMap _realBlockMap;
         private SwitchMapping _switchMapping;
         private TrackAmplifierGroups _trackAmplifierGroups;
+        private IReadOnlyList<LayoutPhysicalAmplifierBinding> _physicalAmplifierMapping =
+            Array.Empty<LayoutPhysicalAmplifierBinding>();
+        private IReadOnlyDictionary<int, int> _locomotiveIdentity = new Dictionary<int, int>();
         private readonly string _externalInfoHost;
         private readonly int _externalInfoPort;
         private readonly int _ecosListenPort;
         private readonly Func<IReadOnlyDictionary<int, SwitchPosition>>? _switchPositionProvider;
         private readonly Action<string>? _log;
         private readonly IControlTrace? _controlTrace;
+        private readonly TimeSpan? _sourceReleaseTailHoldMs;
 
         private static readonly IReadOnlyDictionary<int, SwitchPosition> NoSwitches =
             new Dictionary<int, SwitchPosition>();
@@ -91,7 +95,8 @@ namespace SiebwaldeApp.Integration
             TrackAmplifierGroups? trackAmplifierGroups = null,
             IControlTrace? controlTrace = null,
             BlockTopology? realTopology = null,
-            KoploperBlockMap? realBlockMap = null)
+            KoploperBlockMap? realBlockMap = null,
+            TimeSpan? sourceReleaseTailHoldMs = null)
         {
             if (string.IsNullOrWhiteSpace(locoRepositoryPath))
                 throw new ArgumentException("A locomotive repository path is required.", nameof(locoRepositoryPath));
@@ -114,6 +119,7 @@ namespace SiebwaldeApp.Integration
             _switchPositionProvider = switchPositionProvider;
             _log = log;
             _controlTrace = controlTrace;
+            _sourceReleaseTailHoldMs = sourceReleaseTailHoldMs;
         }
 
         /// <summary>
@@ -314,7 +320,10 @@ namespace SiebwaldeApp.Integration
                     Diagnostics,
                     _trackAmplifierGroups,
                     _controlTrace,
-                    movementSimulation: movementSimulation);
+                    movementSimulation: movementSimulation,
+                    locomotiveIdentity: mode == TrackControlMode.Real && _locomotiveIdentity.Count > 0 ? _locomotiveIdentity : null,
+                    physicalAmplifierMapping: mode == TrackControlMode.Real && _physicalAmplifierMapping.Count > 0 ? _physicalAmplifierMapping : null,
+                    sourceReleaseTailHoldMs: _sourceReleaseTailHoldMs);
 
                 _ecosBackend = _integration.EcosBackend
                     ?? throw new InvalidOperationException(
@@ -571,6 +580,9 @@ namespace SiebwaldeApp.Integration
         /// </summary>
         public bool ResetSafety() => Safety?.Reset() ?? false;
 
+        /// <summary>The ownership-aware locomotive carrier, or null when not wired (Real mode only).</summary>
+        public LocomotiveCarrierController? Carrier => _integration?.Carrier;
+
         /// <inheritdoc />
         public void SetProfile(LayoutProfile profile)
         {
@@ -591,6 +603,8 @@ namespace SiebwaldeApp.Integration
             _trackAmplifierGroups = profile.ToTrackAmplifierGroups();
             _realTopology = profile.ToRealBlockTopology();
             _realBlockMap = profile.ToRealKoploperBlockMap();
+            _physicalAmplifierMapping = profile.PhysicalAmplifierMapping;
+            _locomotiveIdentity = profile.ToLocomotiveBindingMap();
         }
 
         /// <inheritdoc />
