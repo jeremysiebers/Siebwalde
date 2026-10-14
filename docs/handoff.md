@@ -1,5 +1,11 @@
 # Handoff
 
+## KIS-10 closure (2026-10-14) — MERGED / CLOSED
+
+Branch `feature/koploper-multi-section-kis10`, final PR head `5944cb6b87de687683f77d31662691b1fb3b82bb`, merged into `master` via PR #38 with a normal merge commit `a8b3b5622884a358745b759febe38c3cd165d4e7` (post-merge CI PASS, run `38539465965`). **KIS-10 — DONE / TERMINAL.**
+
+Scope: multi-section Koploper logical blocks (1..N); `KoploperBlockBinding` 1:N with legacy N=1 bridge; block-level shadow + `KoploperDriveGroupProjector`/`KoploperSectionTopology`; block-level carrier (whole drive group follows owner speed/direction while authorized; section-Clear does not remove authority); per-section feedback bridge + read-only `KoploperMappingViewProjector`; new `ovaaltje-loop2.json` profile (3 blocks, block 3 → sections [3,4] → amps 4+6). Verified: Debug/Release **971/971**, StopReachabilityHarness 0/0, final Integrator PASS. Live (one-loco + two-loco passive) proven; operator physical confirmation + power-off. `AUTHORITY_LOST_AFTER_VALID` at ~23:50:35-36 is inferred from operator stopping Koploper (shadow-source loss), not a running-trial loss.
+
 ## Developer handoff (2026-10-13, KIS-10 Release and selected-profile wiring)
 
 Software-only self-verification on `feature/koploper-multi-section-kis10`, HEAD `fe17ebedd33f21717d69e03190d5e22a50d6b9e2` plus the existing uncommitted KIS-10 work. No production defect found; no production code changed by this task. Added `SiebwaldeApp/SiebwaldeApp.Core.Tests/OvaaltjeLoop2CompositionTests.cs` (2 facts): `RuntimeSelection_OverridesSimpleLoop_RealCarrierAndFeedbackReceiveSelectedProfile` and `PassiveFactory_SelectedProfileFeedsOneToManyShadowBinding_WithoutStartingReaders`.
