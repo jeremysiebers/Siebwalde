@@ -48,8 +48,9 @@ namespace SiebwaldeApp.Core
 
             await _transport.OpenAsync(_cts.Token).ConfigureAwait(false);
 
+            var token = _cts.Token;
             _receiveLoopTask = Task.Run(
-                () => ReceiveLoopAsync(_cts.Token),
+                () => ReceiveLoopAsync(token),
                 CancellationToken.None);
 
             // Start 2 Hz container-to-UI publish
