@@ -82,6 +82,9 @@ namespace SiebwaldeApp.Integration
         private Kis09PassiveObserver? _kis09PassiveObserver;
         private Kis09PassiveObserverConsumer? _kis09PassiveConsumer;
         private LocomotiveCarrierFeeder? _kis09CarrierFeeder;
+        public GlobalStopController GlobalStop { get; } = new();
+        private GlobalStopMonitor? _globalStopMonitor;
+        private Task? _globalStopTask;
         private CarrierTimingTrace? _carrierTimingTrace;
 
         /// <inheritdoc />
@@ -130,6 +133,8 @@ namespace SiebwaldeApp.Integration
             LayoutProfile? fullSimulationProfile = null)
         {
             _ecosHost = ecosHost ?? throw new ArgumentNullException(nameof(ecosHost));
+            if (ecosHost is TrackControlHost controlHost) controlHost.GlobalStop = GlobalStop;
+            GlobalStop.Latched += () => _movementSimulator?.SetPower(false);
             _controlTrace = controlTrace;
             _transportFactory = transportFactory;
             _amplifierGroups = amplifierGroups ?? TrackAmplifierGroups.Empty;
@@ -304,6 +309,7 @@ namespace SiebwaldeApp.Integration
                         }
 
                         TransitionTo(TrackRuntimeState.Running);
+                        _globalStopMonitor?.EstablishLink(DateTimeOffset.UtcNow);
                         return;
                     }
 
@@ -422,6 +428,7 @@ namespace SiebwaldeApp.Integration
 
             // 2) Fresh shared variable container (fresh PendingWrites per start).
             _trackVariables = new TrackApplicationVariables();
+            _trackVariables.GlobalStop = GlobalStop;
 
             // Fresh movement-permission controller, shared by the movement gate (on the variables)
             // and the safety interlock (via the ECoS host). Created NotGranted and only granted
@@ -435,6 +442,7 @@ namespace SiebwaldeApp.Integration
 
             // 4) Communication client on top of the selected transport.
             _trackCommClient = new TrackCommClientAsync(transport, _trackVariables);
+            _globalStopMonitor = new GlobalStopMonitor(_trackCommClient, _trackVariables);
 
             // Re-publish amplifier data so consumers observe the same frames.
             _trackCommClient.AmplifierDataReceived += (_, e) => AmplifierDataReceived?.Invoke(this, e);
@@ -501,6 +509,7 @@ namespace SiebwaldeApp.Integration
 
             // 8) Start communication and run the initialization pipeline.
             await _trackCommClient.StartAsync(true, ct).ConfigureAwait(false);
+            _globalStopTask = MonitorGlobalStopAsync(ct);
             await _trackInitService.InitializeAsync(ct).ConfigureAwait(false);
 
             // A genuine init failure/cancellation never throws from InitializeAsync; observe the
@@ -681,7 +690,7 @@ namespace SiebwaldeApp.Integration
             var config = profile is not null
                 ? new TrackSimulatorConfig(
                     detectedSlaves: profile.DetectedSlaves,
-                    periodicSlaveInfoInterval: TimeSpan.FromMilliseconds(500))
+                    periodicSlaveInfoInterval: TimeSpan.FromMilliseconds(500), emitGlobalStopArmedStatus: true)
                 : _simulatorConfig;
 
             config ??= DefaultFullSimulationConfig();
@@ -711,7 +720,7 @@ namespace SiebwaldeApp.Integration
         /// 500 ms cyclic SLAVEINFO refresh so injected occupancy/status stays fresh.
         /// </summary>
         private static TrackSimulatorConfig DefaultFullSimulationConfig()
-            => new TrackSimulatorConfig(periodicSlaveInfoInterval: TimeSpan.FromMilliseconds(500));
+            => new TrackSimulatorConfig(periodicSlaveInfoInterval: TimeSpan.FromMilliseconds(500), emitGlobalStopArmedStatus: true);
 
         /// <summary>
         /// The effective observed-neutral domain: the configured amplifier groups when non-empty,
@@ -820,6 +829,12 @@ namespace SiebwaldeApp.Integration
                 }
 
                 // 3) Stop the ECoS host (bounded). A non-clean result means the stop is not proven.
+                if (_globalStopTask is not null)
+                {
+                    try { await _globalStopTask.WaitAsync(budget).ConfigureAwait(false); }
+                    catch (OperationCanceledException) when (_cts?.IsCancellationRequested == true) { }
+                }
+                _globalStopMonitor?.Dispose();
                 var hostResult = await _ecosHost.StopAsync(budget).ConfigureAwait(false);
 
                 // 4) Dispose the comm client, never blocking with .Wait().
@@ -889,6 +904,8 @@ namespace SiebwaldeApp.Integration
             }
 
             _trackControlMain = null;
+            _globalStopTask = null;
+            _globalStopMonitor = null;
             _trackCommClient = null;
             _trackInitService = null;
             _kis09PassiveConsumer = null;
@@ -896,6 +913,7 @@ namespace SiebwaldeApp.Integration
             _carrierTimingTrace = null;
             _kis09PassiveObserver?.Dispose();
             _kis09PassiveObserver = null;
+            _trackVariables?.DetachGlobalStop();
             _trackVariables = null;
             _bootloaderHelpers = null;
             _sendNextFwDataPacket = null;
@@ -950,6 +968,26 @@ namespace SiebwaldeApp.Integration
                     "MovementPermissionNotGranted",
                     slaveNumber,
                     "manual SetAmplifierControl refused: movement permission is not granted.");
+            }
+        }
+
+        public void EmergencyStop() => GlobalStop.Latch(GlobalStopReason.Operator);
+
+        private async Task MonitorGlobalStopAsync(CancellationToken ct)
+        {
+            try
+            {
+                while (!ct.IsCancellationRequested)
+                {
+                    await _globalStopMonitor!.TickAsync(DateTimeOffset.UtcNow, ct).ConfigureAwait(false);
+                    await Task.Delay(50, ct).ConfigureAwait(false);
+                }
+            }
+            catch (OperationCanceledException) when (ct.IsCancellationRequested) { }
+            catch (Exception ex)
+            {
+                GlobalStop.Latch(GlobalStopReason.Pic32Lost);
+                RaiseFault("GlobalStopMonitor", ex);
             }
         }
 

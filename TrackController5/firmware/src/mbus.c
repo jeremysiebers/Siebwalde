@@ -62,6 +62,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "slavefwhandler.h"
 #include "ethernet.h"
 #include "enums.h"
+#include "controller.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -102,6 +103,7 @@ volatile    uint16_t    UploadSlaveData = false;
 static      uint16_t    NextSlaveCounter = 1;
 static      uint16_t    MaxSlaveUploadCount = 55;
 static      uint32_t    SizeOfSlaveInfo = sizeof(SlaveInfo[0]);
+static      bool        GlobalStopServiceStarted = false;
 
             udpTrans_t  EthernetSendData;
 
@@ -162,6 +164,7 @@ void MBUS_Initialize ( void )
 {
     /* Place the App state machine in its initial state. */
     mbusData.state = MBUS_STATE_INIT;
+    GlobalStopServiceStarted = false;
     
     /* Pass address of array of struct for data storage. */
     INITxPETITXMODBUS(SlaveInfo, SlaveDump, NUMBER_OF_SLAVES_SIZE);
@@ -196,6 +199,15 @@ void MBUS_Initialize ( void )
 void MBUS_Tasks ( void )
 {
     uint32_t    task_id     = MBUS;
+    /* A latch must service the stop mailbox even if ordinary control was waiting
+     * or configuring. Keep later enable/reset/config commands from undoing it. */
+    if (ISxGLOBALxSTOPxLATCHED() && mbusData.state != MBUS_STATE_INIT) {
+        if (!GlobalStopServiceStarted) {
+            DRV_TMR_Start(mbusData.ModbusCommCycleHandle);
+            GlobalStopServiceStarted = true;
+        }
+        mbusData.state = MBUS_STATE_SERVICE_TASKS;
+    }
     
     /* Check the application's current state. */
     switch ( mbusData.state )

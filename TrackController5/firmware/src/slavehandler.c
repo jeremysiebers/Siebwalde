@@ -12,6 +12,8 @@
 #include <stdlib.h>
 #include "slavecommhandler.h"
 #include "mbus.h"
+#include "controller.h"
+#include "modbus/PetitModbus.h"
 
 #define MAILBOXRCD 100
 
@@ -176,6 +178,11 @@ bool SendNextMessage(void)
      * -------------------------------------------------------------------- */
     if (Rcd_Ptr_prev != Rcd_Ptr)
     {
+        /* Keep the same FIFO entry pending until the cooperative transport can
+         * accept it; no task/ISR can change Petit_Tx_State between these calls. */
+        if (!PetitModbusIsReady()) {
+            return false;
+        }
         if (Rcd_Ptr_prev >= &Rcd[MAILBOXRCD])
         {
             Rcd_Ptr_prev = &Rcd[0];
@@ -377,6 +384,12 @@ bool PROCESSxSLAVExCOMMUNICATION(){
 
 void ADDxNEWxSLAVExDATAxCMDxTOxSLAVExMAILBOX(uint8_t *data)
 {
+    /* HR0 is the first register; reject the whole write if it could move a track. */
+    if (ISxGLOBALxSTOPxLATCHED() && data[1] == WRITE &&
+        data[2] > 0 && data[3] == HOLDINGREG0 &&
+        (((uint16_t)data[5] << 8) | data[4]) != GLOBAL_STOP_NEUTRAL_HR0) {
+        return;
+    }
     // Calculate the next write position
     REGISTER_PROCESSING *next = Rcd_Ptr + 1;
     if (next >= &Rcd[MAILBOXRCD]) {
@@ -414,5 +427,25 @@ void ADDxNEWxSLAVExDATAxCMDxTOxSLAVExMAILBOX(uint8_t *data)
         EXEC_MBUS_SLAVE_DATA_EXCH,
         DONE,
         NONE);
+}
+
+void ENQUEUExGLOBALxSTOP(uint16_t hr0)
+{
+    uint8_t slave;
+    /* Drop pre-latch pending commands. At most 50 stop entries fit in 99 slots.
+     * No per-entry notification: the controller emits one latch status only.
+     * An already transmitted request cannot be recalled. */
+    Rcd_Ptr = Rcd_Ptr_prev = &Rcd[0];
+    for (slave = 1; slave <= NUMBER_OF_AMPLIFIERS; ++slave) {
+        if (MASTER_SLAVE_DATA[slave].SlaveDetected) {
+            Rcd_Ptr->SlaveAddress = slave;
+            Rcd_Ptr->Direction = WRITE;
+            Rcd_Ptr->NoOfRegisters = 1;
+            Rcd_Ptr->StartRegister = HOLDINGREG0;
+            Rcd_Ptr->RegData0 = hr0;
+            Rcd_Ptr->RegData1 = 0;
+            ++Rcd_Ptr;
+        }
+    }
 }
 

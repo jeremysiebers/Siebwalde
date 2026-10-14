@@ -49,6 +49,31 @@ namespace SiebwaldeApp.EcosEmu
         /// <remarks>This field may be <see langword="null"/> if no writer is currently
         /// assigned.</remarks>
         private TextWriter? _currentWriter;
+        private readonly SemaphoreSlim _outputGate = new(1, 1);
+        public GlobalStopController GlobalStop { get; private set; } = new();
+        public Task StopNotificationTask { get; private set; } = Task.CompletedTask;
+
+        public void BindGlobalStop(GlobalStopController stop)
+        {
+            GlobalStop.Latched -= OnGlobalStop;
+            GlobalStop = stop;
+            GlobalStop.Latched += OnGlobalStop;
+            if (stop.IsLatched) OnGlobalStop();
+        }
+
+        public void DetachGlobalStop() => GlobalStop.Latched -= OnGlobalStop;
+
+        private void OnGlobalStop()
+        {
+            if (_currentWriter is { } writer && GlobalStop.TryClaimStopNotification())
+                StopNotificationTask = NotifyStopAsync(writer);
+        }
+
+        private async Task NotifyStopAsync(TextWriter writer)
+        {
+            try { await WriteEventAsync(writer, "1 status[STOP]"); }
+            catch (Exception ex) { Console.WriteLine($"[GLOBAL STOP] notification failed: {ex.Message}"); }
+        }
         
         /// <summary>
         /// Initializes a new instance of the <see cref="SimpleEcosBackend"/> class,  providing integration with
@@ -76,6 +101,7 @@ namespace SiebwaldeApp.EcosEmu
             _locoRepository = locoRepository ?? throw new ArgumentNullException(nameof(locoRepository));
             _blockPositionProvider = blockPositionProvider ?? throw new ArgumentNullException(nameof(blockPositionProvider));
             _trace = trace;
+            BindGlobalStop(GlobalStop);
 
             // Update internal state and persistent locos when Koploper reports a new block
             _blockPositionProvider.BlockEntered += OnBlockEntered;
@@ -116,7 +142,7 @@ namespace SiebwaldeApp.EcosEmu
                 // redundant writes on duplicate block reports). Without this a section change leaves
                 // the freshly-entered amplifier running at a stale duty cycle, because the backend
                 // otherwise only commands speed when Koploper sends a speed command.
-                if (state.Speed != 0 && previousBlock != blockNumber)
+                if (state.Speed != 0 && previousBlock != blockNumber && !GlobalStop.IsLatched)
                 {
                     _hardware.SetLocoSpeed(locoAddress, state.Speed, state.Direction);
                 }
@@ -159,6 +185,7 @@ namespace SiebwaldeApp.EcosEmu
             // Detect first writer attachment so we can send initial sensor/switch feedback once.
             bool isFirstWriter = _currentWriter == null;
             _currentWriter = writer;
+            if (GlobalStop.IsLatched) OnGlobalStop();
 
             if (isFirstWriter)
             {
@@ -357,15 +384,17 @@ namespace SiebwaldeApp.EcosEmu
                 {
                     if (opt.StartsWith("go", StringComparison.OrdinalIgnoreCase))
                     {
-                        if (!_hardware.SetPower(true))
+                        if (GlobalStop.IsLatched || !_hardware.SetPower(true))
                         {
                             powerRejected = true;
                         }
                     }
                     else if (opt.StartsWith("stop", StringComparison.OrdinalIgnoreCase))
                     {
-                        // Removing power is always allowed, even during a safety latch.
-                        _hardware.SetPower(false);
+                        // Stop requests remain accepted while latched. Apply SetPower(false) only
+                        // on a fresh latch; repeated stops do not repeat the backend call.
+                        if (GlobalStop.Latch(GlobalStopReason.Koploper)) _hardware.SetPower(false);
+                        await StopNotificationTask;
                     }
                 }
 
@@ -499,7 +528,8 @@ namespace SiebwaldeApp.EcosEmu
                         // Best effort: reverse a locomotive that already has a physical target.
                         // A refusal (no target, or a latched safety interlock blocking a non-zero
                         // movement) must never discard the requested logical direction.
-                        _hardware.SetLocoSpeed(loco.Address, loco.Speed, value);
+                        if (!GlobalStop.IsLatched || loco.Speed == 0)
+                            _hardware.SetLocoSpeed(loco.Address, loco.Speed, value);
 
                         // Event: reflect the requested logical direction. This is a logical state
                         // notification, not a claim that a physical amplifier changed.
@@ -619,6 +649,7 @@ namespace SiebwaldeApp.EcosEmu
         /// </returns>
         private bool ApplyNormalizedLocoSpeed(int id, LocoState loco, int normalizedSpeed, List<string> events)
         {
+            if (normalizedSpeed != 0 && GlobalStop.IsLatched) return true;
             if (_hardware.SetLocoSpeed(loco.Address, normalizedSpeed, loco.Direction))
             {
                 loco.Speed = normalizedSpeed;
@@ -669,13 +700,14 @@ namespace SiebwaldeApp.EcosEmu
             int id = cmd.ObjectId.Value;
 
             // Special case: base object ECoS info
-            if (id == 1 && cmd.Options.Length > 0 &&
-                string.Equals(cmd.Options[0], "info", StringComparison.OrdinalIgnoreCase))
+            if (id == 1)
             {
                 var lines = new List<string>
         {
             "1 info[\"SiebwaldeEmu 0.2\"]"
         };
+                if (cmd.Options.Any(o => string.Equals(o, "status", StringComparison.OrdinalIgnoreCase)))
+                    lines.Add(CentralStatus);
 
                 await WriteReplyAsync(writer, cmd.RawLine, 0, "OK", lines);
                 return;
@@ -1554,18 +1586,15 @@ namespace SiebwaldeApp.EcosEmu
         /// <param name="lines">An optional collection of lines to include in the body of the reply. If <c>null</c>, no body lines will be
         /// written.</param>
         /// <returns></returns>
-        private static async Task WriteReplyAsync(TextWriter writer,string cmdText, int errorCode, string errorText, IEnumerable<string>? lines)
+        private async Task WriteReplyAsync(TextWriter writer,string cmdText, int errorCode, string errorText, IEnumerable<string>? lines)
         {
-            string header = $"<REPLY {cmdText}>";
-            string end = $"<END {errorCode} ({errorText})>";
-
-            // Diagnostic trace: record the reply header (which echoes the command) and the final
-            // reply code, so the IN/OUT pair is greppable in the EcosEmu trace.
-            SiebwaldeApp.Core.IoC.Logger.Log($"OUT {header}", "SiebwaldeApp.EcosEmu.EcosEmuTrace");
-            SiebwaldeApp.Core.IoC.Logger.Log($"OUT {end}", "SiebwaldeApp.EcosEmu.EcosEmuTrace");
-
+            await _outputGate.WaitAsync();
             try
             {
+                string header = $"<REPLY {cmdText}>";
+                string end = $"<END {errorCode} ({errorText})>";
+                SiebwaldeApp.Core.IoC.Logger.Log($"OUT {header}", "SiebwaldeApp.EcosEmu.EcosEmuTrace");
+                SiebwaldeApp.Core.IoC.Logger.Log($"OUT {end}", "SiebwaldeApp.EcosEmu.EcosEmuTrace");
                 Console.WriteLine("TX: " + header);
                 await writer.WriteLineAsync(header);
 
@@ -1591,8 +1620,11 @@ namespace SiebwaldeApp.EcosEmu
             {
                 // stream/writer al dicht, niets meer aan doen
                 Console.WriteLine("  !! Writer/stream already closed at TX.");
-            }                        
+            }
+            finally { _outputGate.Release(); }
         }
+
+        private string CentralStatus => GlobalStop.IsLatched ? "1 status[STOP]" : "1 status[GO]";
 
         /// <summary>
         /// Sends an unsolicited ECoS event to the connected client.
@@ -1601,33 +1633,29 @@ namespace SiebwaldeApp.EcosEmu
         /// <param name="eventLine">
         /// The raw event payload, for example: "11 state[0]" or "1000 speed[40]".
         /// </param>
-        private static async Task WriteEventAsync(TextWriter writer, string eventPayload)
+        private async Task WriteEventAsync(TextWriter writer, string eventPayload)
         {
             if (writer == null)
                 return;
+            await _outputGate.WaitAsync();
+            try
+            {
 
-            // eventPayload is bijvoorbeeld: "100 state[1]" of "11 state[0]"
-            // Eerste token vóór de spatie is de object-id.
-            string idPart = eventPayload;
-            int spaceIndex = eventPayload.IndexOf(' ');
-            if (spaceIndex > 0)
-                idPart = eventPayload.Substring(0, spaceIndex);
-
-            // 1) EVENT header
-            string header = $"<EVENT {idPart}>";
-            Console.WriteLine("TX: " + header);
-            await writer.WriteLineAsync(header);
-
-            // 2) Payload regel
-            Console.WriteLine("TX: " + eventPayload);
-            await writer.WriteLineAsync(eventPayload);
-
-            // 3) END-regel
-            const string endLine = "<END 0 (OK)>";
-            Console.WriteLine("TX: " + endLine);
-            await writer.WriteLineAsync(endLine);
-
-            await writer.FlushAsync();
+                // Serialize the entire frame with replies and other events (not just each line).
+                string idPart = eventPayload;
+                int spaceIndex = eventPayload.IndexOf(' ');
+                if (spaceIndex > 0) idPart = eventPayload.Substring(0, spaceIndex);
+                string header = $"<EVENT {idPart}>";
+                Console.WriteLine("TX: " + header);
+                await writer.WriteLineAsync(header);
+                Console.WriteLine("TX: " + eventPayload);
+                await writer.WriteLineAsync(eventPayload);
+                const string endLine = "<END 0 (OK)>";
+                Console.WriteLine("TX: " + endLine);
+                await writer.WriteLineAsync(endLine);
+                await writer.FlushAsync();
+            }
+            finally { _outputGate.Release(); }
         }
         //private static async Task WriteEventAsync(TextWriter writer, string eventLine)
         //{

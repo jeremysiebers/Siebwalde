@@ -127,6 +127,7 @@ namespace SiebwaldeApp
 
         /// <summary>Explicit recovery for a latched control-path safety fault.</summary>
         public ICommand ResetControlSafety { get; set; }
+        public ICommand GlobalEmergencyStop { get; }
 
         /// <summary>Start the track-control runtime in the last used mode (defaults to simulator when none).</summary>
         public ICommand StartRuntime => _startRuntimeCommand;
@@ -146,6 +147,11 @@ namespace SiebwaldeApp
             Log2 = new ObservableCollection<string>();
 
             _runtime = IoC.TrackRuntime;
+            GlobalEmergencyStop = new RelayCommand(() =>
+            {
+                try { _runtime.EmergencyStop(); }
+                catch (Exception ex) { Log($"Emergency stop failed: {ex.Message}"); }
+            });
             _runtime.StateChanged += HandleRuntimeStateChanged;
             _runtime.Faulted += HandleRuntimeFaulted;
 

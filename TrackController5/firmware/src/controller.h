@@ -58,6 +58,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include <stdlib.h>
 #include "system_config.h"
 #include "system_definitions.h"
+#include "enums.h"
 
 // DOM-IGNORE-BEGIN
 #ifdef __cplusplus  // Provide C++ Compatibility
@@ -118,6 +119,10 @@ typedef struct
     /* TODO: Define any additional data used by the application. */
 
 } CONTROLLER_DATA;
+
+/* Called only from cooperative Ethernet/controller tasks, never an ISR. */
+bool CONTROLLERxHANDLExSAFETYxCOMMAND(const udpTrans_t *frame);
+bool ISxGLOBALxSTOPxLATCHED(void);
 
 // *****************************************************************************
 // *****************************************************************************

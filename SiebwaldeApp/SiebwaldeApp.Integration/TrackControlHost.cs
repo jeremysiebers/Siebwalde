@@ -62,6 +62,7 @@ namespace SiebwaldeApp.Integration
         private KoploperExternalInfoClient? _externalInfo;
         private JsonLocoRepository? _locoRepository;
         private SimpleEcosBackend? _ecosBackend;
+        public GlobalStopController GlobalStop { get; set; } = new();
         private TrackSimulatorBackend? _simulatorBackend;
         private TrackControlIntegration? _integration;
         private EcosEmulatorServer? _server;
@@ -413,6 +414,8 @@ namespace SiebwaldeApp.Integration
                 BindSafetyRevalidation();
             }
 
+            _ecosBackend.BindGlobalStop(GlobalStop);
+
             // Give every mapped switch a known state where one is configured. Entries marked
             // 'keep' are intentionally not driven.
             Switches.Initialize();
@@ -448,6 +451,7 @@ namespace SiebwaldeApp.Integration
             TryRun(() => _externalInfo?.Stop(), "stop the Koploper external-info client");
 
             _server = null;
+            _ecosBackend?.DetachGlobalStop();
             _ecosBackend = null;
             _simulatorBackend = null;
             _integration = null;
@@ -549,6 +553,7 @@ namespace SiebwaldeApp.Integration
 
             // Release every field exactly as the synchronous Stop does.
             _server = null;
+            _ecosBackend?.DetachGlobalStop();
             _ecosBackend = null;
             _simulatorBackend = null;
             _integration = null;

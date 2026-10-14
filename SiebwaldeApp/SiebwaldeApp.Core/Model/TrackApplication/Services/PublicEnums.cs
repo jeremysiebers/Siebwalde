@@ -116,6 +116,11 @@
         public const byte EXEC_MBUS_STATE_START_DATA_UPLOAD = 106;
         public const byte EXEC_MBUS_STATE_RESET = 107;
         public const byte EXEC_MBUS_SLAVE_DATA_EXCH = 108;
+        // Frozen mirror: TrackController5/firmware/src/enums.h (PIC32 TASK_COMMANDS).
+        public const byte EXEC_GLOBAL_STOP = 109; // payload: primitive 0 (HR0=399), reserved 0
+        public const byte HOST_HEARTBEAT = 110; // payload: u16 little-endian sequence
+        public const byte GLOBAL_STOP_STATE = 111; // sender 10, DONE=7; see GlobalStopStatusMessage
+        // 112 REARM_GLOBAL_STOP is reserved, deliberately not implemented.
 
         /* FWHANDLER COMMANDS */
         public const byte EXEC_FW_STATE_RECEIVE_FW_FILE = 120;
@@ -187,6 +192,15 @@
         public const byte RESET_SLAVE_DATA_TIMEOUT = 241;
         public const byte RESET_SLAVE_OK = 242;
         public const byte RESET_SLAVE_NOK = 243;
+    }
+
+    // Frozen mirror: TrackController5/firmware/src/enums.h (GLOBAL_STOP_STATE message codes).
+    public static class GlobalStopStatusMessage
+    {
+        public const byte Disarmed = 0;
+        public const byte LatchedHostLoss = 1;
+        public const byte LatchedHostInitiated = 2;
+        public const byte Armed = 3;
     }
 
     public class TaskMessages

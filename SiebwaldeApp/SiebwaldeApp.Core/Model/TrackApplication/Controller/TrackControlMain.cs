@@ -161,12 +161,9 @@ namespace SiebwaldeApp.Core
         private async Task ProcessPendingAmplifierWritesAsync(CancellationToken cancellationToken)
         {
             var pending = mTrackApplicationVariables.PendingWrites;
-            if (pending == null || pending.Count == 0)
-                return;
-
-            // Take a snapshot to avoid issues if the dictionary is modified
-            // while we are iterating.
-            var items = pending.Values.ToArray();
+            TrackAmplifierWriteData[] items;
+            var stop = mTrackApplicationVariables.GlobalStop;
+            lock (stop.SyncRoot) items = pending.Values.ToArray();
 
             foreach (var writeData in items)
             {
@@ -176,15 +173,25 @@ namespace SiebwaldeApp.Core
                 if (writeData == null)
                     continue;
 
-                if (writeData.TryConsumeHr0(out ushort hr0Value))
+                Task? send = null;
+                ushort hr0Value;
+                lock (stop.SyncRoot)
                 {
+                    if (stop.SuppressSlaveWrites) return;
+                    if (!pending.TryGetValue(writeData.SlaveNumber, out var current) || !ReferenceEquals(current, writeData)) continue;
+                    if (!writeData.TryConsumeHr0(out hr0Value)) continue;
+                    if (stop.IsLatched && (hr0Value & 0x03FF) != AmplifierSpeedMapper.NeutralPwm) continue;
                     // We only write HoldingReg0 (index 0) for now
                     var message = BuildSlaveDataExchWriteMessage(
                         writeData.SlaveNumber,
                         startRegister: 0,
                         hr0Value);
 
-                    await _trackCommClient.SendAsync(message, cancellationToken).ConfigureAwait(false);
+                    send = _trackCommClient.SendAsync(message, cancellationToken);
+                }
+                if (send is not null)
+                {
+                    await send.ConfigureAwait(false);
 
                     // The concrete physical-command boundary: this is the same write the
                     // [WRITE] component-log line reports, now with a stable trace event.

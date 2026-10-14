@@ -56,6 +56,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "ethernet.h"
 #include "system_definitions.h"
 #include "enums.h"
+#include "controller.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -140,6 +141,18 @@ static TCP_SOCKET         logSocket = INVALID_SOCKET;
 void        PutDataInReceiveMailBox (udpTrans_t data);
 udpTrans_t *GetDataFromSendMailBox (void);
 bool        CheckDataInSendMailBox (void);
+
+/* True when a received EXEC_MBUS_SLAVE_DATA_EXCH frame is complete for its
+ * declared register count. data[2] is the register count (1..2); the frame is
+ * HEADER(1)+command(1)+[slave,dir,count,startReg](4)+2*count register bytes. */
+static bool ISxVALIDxSLAVExDATAxEXCHxFRAME(const uint8_t *data, int32_t rxed)
+{
+    uint8_t count;
+    if (rxed < 6) return false;
+    count = data[2];
+    if (count < 1u || count > 2u) return false;
+    return rxed >= (int32_t)(6u + (uint32_t)count * 2u);
+}
 
 
 // *****************************************************************************
@@ -323,7 +336,18 @@ void ETHERNET_Tasks ( void )
             
             // Transfer the data out of the TCP RX FIFO and into our local processing buffer.
             int32_t rxed = TCPIP_UDP_ArrayGet(ethernetData.recvsocket, (char *)&udpRecv, sizeof(udpTrans_t));
-            PutDataInReceiveMailBox(udpRecv);
+            /* Safety commands bypass the ordinary FIFO/controller MBUS wait.
+             * Reject truncated payloads before zero-filled bytes look valid. */
+            if (udpRecv.header == HEADER && udpRecv.command >= EXEC_GLOBAL_STOP &&
+                udpRecv.command <= REARM_GLOBAL_STOP) {
+                if (rxed >= 2 && wMaxGet <= sizeof(udpTrans_t) &&
+                    ((udpRecv.command != EXEC_GLOBAL_STOP && udpRecv.command != HOST_HEARTBEAT) || rxed >= 4)) {
+                    CONTROLLERxHANDLExSAFETYxCOMMAND(&udpRecv);
+                }
+            } else if (udpRecv.command != EXEC_MBUS_SLAVE_DATA_EXCH ||
+                       ISxVALIDxSLAVExDATAxEXCHxFRAME(udpRecv.data, rxed)) {
+                PutDataInReceiveMailBox(udpRecv);
+            }
 //            if(udpRecv.command < CMD2ASCII){
 //                unsigned char *ptr = Cmd2Ascii[udpRecv.command];
 //                LOG_Push("Received command: '%s' (length %d)\r\n", ptr, rxed);

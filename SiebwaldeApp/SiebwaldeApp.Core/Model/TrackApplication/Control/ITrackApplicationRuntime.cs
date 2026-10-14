@@ -37,6 +37,8 @@ namespace SiebwaldeApp.Core
         /// silently to <see cref="TrackRuntimeState.Stopped"/>.
         /// </summary>
         Task StopAsync(CancellationToken ct = default);
+        /// <summary>Sticky controlled emergency stop; does not tear down occupancy/admin communication.</summary>
+        void EmergencyStop() => throw new NotSupportedException("This runtime does not implement global stop.");
 
         /// <summary>Controlled stop followed by a fresh start reusing the last started mode.</summary>
         Task RestartAsync(CancellationToken ct = default);
