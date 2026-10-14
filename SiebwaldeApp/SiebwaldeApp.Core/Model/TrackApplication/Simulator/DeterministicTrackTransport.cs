@@ -42,13 +42,17 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         /// stays fully deterministic with no timer (the pre-existing contract).
         /// </summary>
         public TimeSpan? PeriodicSlaveInfoInterval { get; }
+        /// <summary>Opt-in armed confirmation on the first host heartbeat, modelling PIC32 bootstrap.
+        /// Software protocol model only, not proof of physical watchdog behaviour.</summary>
+        public bool EmitGlobalStopArmedStatus { get; }
 
         public TrackSimulatorConfig(
             ushort firmwareChecksum = DefaultFirmwareChecksum,
             IReadOnlyList<byte>? detectedSlaves = null,
             IReadOnlyCollection<byte>? droppedEchoSlaves = null,
             IReadOnlyDictionary<byte, ushort>? hr0ReadbackOverrides = null,
-            TimeSpan? periodicSlaveInfoInterval = null)
+            TimeSpan? periodicSlaveInfoInterval = null,
+            bool emitGlobalStopArmedStatus = false)
         {
             FirmwareChecksum = firmwareChecksum;
             DetectedSlaves = detectedSlaves is null
@@ -61,6 +65,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
                 ? new Dictionary<byte, ushort>()
                 : new Dictionary<byte, ushort>(hr0ReadbackOverrides);
             PeriodicSlaveInfoInterval = periodicSlaveInfoInterval;
+            EmitGlobalStopArmedStatus = emitGlobalStopArmedStatus;
         }
     }
 
@@ -87,6 +92,12 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         private readonly HashSet<byte> _detected = new();
         private readonly HashSet<byte> _droppedEchoSlaves = new();
         private readonly List<byte> _sentCommands = new();
+        private bool _globalStopArmed;
+        private readonly List<byte[]> _sentFrames = new();
+        public IReadOnlyList<byte[]> SentFrames
+        {
+            get { lock (_sync) return _sentFrames.ConvertAll(f => (byte[])f.Clone()); }
+        }
         private readonly object _sync = new();
 
         private Channel<byte[]>? _frames;
@@ -169,6 +180,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
                     new UnboundedChannelOptions { SingleReader = true, SingleWriter = false });
 
                 OpenCallCount++;
+                _globalStopArmed = false;
 
                 // Cyclic SLAVEINFO refresh: models the real master's periodic FC03 read that keeps
                 // the C# holding-register view fresh. Only started when a non-null interval is set.
@@ -223,6 +235,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
                 {
                     byte command = copy[1];
                     _sentCommands.Add(command);
+                    _sentFrames.Add(copy);
                     Dispatch(command, copy);
                 }
             }
@@ -407,6 +420,21 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
 
                 case TrackCommand.EXEC_MBUS_STATE_SLAVE_ENABLE: // 105
                     writer.TryWrite(BuildControlFrame(TaskId.MBUS, EnumMbusStatus.MBUS_STATE_SLAVE_ENABLE, TaskStates.DONE));
+                    break;
+
+                case TrackCommand.HOST_HEARTBEAT:
+                    if (_config.EmitGlobalStopArmedStatus && !_globalStopArmed && frame.Length == 4)
+                    {
+                        _globalStopArmed = true;
+                        writer.TryWrite(new byte[] { Header, TaskId.CONTROLLER, TrackCommand.GLOBAL_STOP_STATE,
+                            TaskStates.DONE, GlobalStopStatusMessage.Armed });
+                    }
+                    break;
+
+                case TrackCommand.EXEC_GLOBAL_STOP:
+                    if (frame.Length == 4 && frame[2] == 0 && frame[3] == 0)
+                        writer.TryWrite(new byte[] { Header, TaskId.CONTROLLER, TrackCommand.GLOBAL_STOP_STATE, TaskStates.DONE, 2 });
+                    // Per-amplifier neutral is deliberately recorded through the production 108 writer.
                     break;
 
                 case TrackCommand.EXEC_MBUS_SLAVE_DATA_EXCH: // 108

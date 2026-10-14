@@ -551,7 +551,17 @@ uint16_t CRC_ReverseValue(uint16_t crc)
  * @How to use          : 
  */
 
+unsigned char PetitModbusIsReady(void)
+{
+    return (Petit_Tx_State == PETIT_RXTX_IDLE);
+}
+
 unsigned char SENDxPETITxMODBUS(unsigned char Address, unsigned char Function, unsigned char *DataBuf, unsigned short DataLen){
+    /* Cooperative task ownership: reject busy requests before touching the
+     * in-flight transaction or marking another slave busy. */
+    if (Petit_Tx_State != PETIT_RXTX_IDLE) {
+        return 0;
+    }
     
     unsigned char return_val = 0;
     

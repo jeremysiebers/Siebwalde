@@ -108,8 +108,13 @@ void __ISR(_UART2_RX_VECTOR, ipl1AUTO) _IntHandlerDrvUsartReceiveInstance0(void)
             DRV_TMR_Start(mbusData.ModbusCharacterTimeoutHandle);
 
             // Message timeout: restart once after draining FIFO
+            // At 2 Mbaud/9N1 (~5.5 us/char), contiguous RX gaps are below the
+            // ~250 us timeout, even across multiple FIFO-drain ISR bursts.
+            // Restart allows a full silence period: complete replies already
+            // reach IDLE; truncated replies time out and release WAIT_ANSWER.
             DRV_TMR_Stop(mbusData.ModbusReceiveTimeoutHandle);
             DRV_TMR_CounterClear(mbusData.ModbusReceiveTimeoutHandle);
+            DRV_TMR_Start(mbusData.ModbusReceiveTimeoutHandle);
         }
 
         SYS_INT_SourceStatusClear(INT_SOURCE_USART_2_RECEIVE);

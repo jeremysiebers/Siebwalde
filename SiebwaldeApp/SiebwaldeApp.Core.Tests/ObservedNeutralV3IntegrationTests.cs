@@ -352,8 +352,8 @@ namespace SiebwaldeApp.Core.Tests
                 Assert.True(runtime.IsMovementSafe);
 
                 // The neutral-establishment 108 writes already happened during StartAsync; snapshot
-                // the transport so we can prove the movement command adds no new write.
-                var commandsBefore = simulator!.SentCommands.Count;
+                // the amplifier writes so heartbeat traffic does not count as movement output.
+                var writesBefore = simulator!.SentCommands.Count(c => c == TrackCommand.EXEC_MBUS_SLAVE_DATA_EXCH);
 
                 var endLine = await SendEcosCommandAsync(ecosPort, "set(1000,speedstep[10])", TimeSpan.FromSeconds(10));
 
@@ -365,7 +365,7 @@ namespace SiebwaldeApp.Core.Tests
                 // A pre-fix constructor (real = logical) would route block 1 -> logical amp 1 and
                 // emit an additional 108 write here.
                 await Task.Delay(300, timeout.Token);
-                Assert.Equal(commandsBefore, simulator.SentCommands.Count);
+                Assert.Equal(writesBefore, simulator.SentCommands.Count(c => c == TrackCommand.EXEC_MBUS_SLAVE_DATA_EXCH));
             }
             finally
             {

@@ -84,6 +84,7 @@ typedef struct
 // Main Functions
 extern void             INITxPETITXMODBUS(SLAVE_INFO *location, SLAVE_INFO *Dump, unsigned char AmountOfSlaves);
 extern void             PROCESSxPETITxMODBUS(void);
+extern unsigned char    PetitModbusIsReady(void);
 extern unsigned char    SENDxPETITxMODBUS(unsigned char Address, unsigned char Function, unsigned char *DataBuf, unsigned short DataLen);
 
 void HandlePetitModbusWriteSingleRegisterSlaveReadback(void);

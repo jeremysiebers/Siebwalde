@@ -83,6 +83,12 @@ extern "C" {
 #define MILISECONDS (SECONDS / 1000)
 #define MICROSECONDS (SECONDS / 1000000)
 
+/* Host-authority timing, using the existing 126 MHz core timer. */
+#define HOST_HEARTBEAT_REFERENCE_MS 500u
+#define HOST_AUTHORITY_WATCHDOG_MS 2000u
+#define GLOBAL_STOP_NEUTRAL_HR0 399u
+#define GLOBAL_STOP_EMO_HR0 0x8000u
+
     // *****************************************************************************
     // *****************************************************************************
     // Section: Data Types
@@ -153,6 +159,13 @@ typedef enum
 	EXEC_MBUS_STATE_START_DATA_UPLOAD           				= 106,
 	EXEC_MBUS_STATE_RESET                       				= 107,
     EXEC_MBUS_SLAVE_DATA_EXCH                                   = 108,
+    /* Command field 109 is distinct from TASK_MESSAGES.DATA_SENT_TO_SLAVE=109. */
+    EXEC_GLOBAL_STOP                                           = 109,
+    HOST_HEARTBEAT                                             = 110,
+    /* Status message: 0=disarmed, 1=latched-host-loss,
+     * 2=latched-host-initiated, 3=armed. Sender=CONTROLLER, state=DONE. */
+    GLOBAL_STOP_STATE                                          = 111,
+    REARM_GLOBAL_STOP                                          = 112, /* Reserved; not implemented. */
 						
 	/* FWHANDLER COMMANDS */						
     EXEC_FW_STATE_RECEIVE_FW_FILE         						= 120,

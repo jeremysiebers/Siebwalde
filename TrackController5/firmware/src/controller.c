@@ -84,6 +84,81 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
         uint8_t         ControllerCommand;
         udpTrans_t      *EthernetRecvData;
 
+typedef enum { GLOBAL_STOP_DISARMED, GLOBAL_STOP_ARMED, GLOBAL_STOP_LATCHED } GLOBAL_STOP_LATCH;
+static GLOBAL_STOP_LATCH GlobalStopLatch = GLOBAL_STOP_DISARMED;
+static uint32_t LastHostHeartbeat;
+static uint8_t GlobalStopReason;
+
+bool ISxGLOBALxSTOPxLATCHED(void)
+{
+    return GlobalStopLatch == GLOBAL_STOP_LATCHED;
+}
+
+static void REPORTxGLOBALxSTOPxSTATE(void)
+{
+    /* Message: 0=disarmed, 1=latched-host-loss, 2=latched-host-initiated, 3=armed. */
+    CREATExTASKxSTATUSxMESSAGE(CONTROLLER, GLOBAL_STOP_STATE, DONE,
+        GlobalStopLatch == GLOBAL_STOP_DISARMED ? 0u :
+        GlobalStopLatch == GLOBAL_STOP_ARMED ? 3u : GlobalStopReason);
+}
+
+static void LATCHxGLOBALxSTOP(uint8_t reason, uint16_t hr0)
+{
+    if (ISxGLOBALxSTOPxLATCHED()) return;
+    GlobalStopLatch = GLOBAL_STOP_LATCHED;
+    GlobalStopReason = reason;
+    ENQUEUExGLOBALxSTOP(hr0);
+    REPORTxGLOBALxSTOPxSTATE();
+}
+
+static void CHECKxHOSTxAUTHORITY(void)
+{
+    if (GlobalStopLatch == GLOBAL_STOP_ARMED &&
+        (uint32_t)(READxCORExTIMER() - LastHostHeartbeat) >=
+            HOST_AUTHORITY_WATCHDOG_MS * (uint32_t)MILISECONDS) {
+        LATCHxGLOBALxSTOP(1u, GLOBAL_STOP_NEUTRAL_HR0);
+    }
+}
+
+bool CONTROLLERxHANDLExSAFETYxCOMMAND(const udpTrans_t *frame)
+{
+    if (frame->header != HEADER) return false;
+    /* Expiry wins over a late heartbeat; the latch never automatically re-arms. */
+    CHECKxHOSTxAUTHORITY();
+    switch (frame->command) {
+        case EXEC_GLOBAL_STOP:
+            if (frame->data[0] <= 1u && frame->data[1] == 0u) {
+                LATCHxGLOBALxSTOP(2u, frame->data[0] == 0u ?
+                    GLOBAL_STOP_NEUTRAL_HR0 : GLOBAL_STOP_EMO_HR0);
+            } else {
+                CREATExTASKxSTATUSxMESSAGE(CONTROLLER, RECEIVED_BAD_COMMAND, ERROR, NONE);
+            }
+            return true;
+        case HOST_HEARTBEAT:
+            /* Payload is a diagnostic LE sequence only; it is NOT used for anti-replay
+             * or freshness and does NOT prove absolute message age. Every valid 110
+             * frame renews authority unconditionally. Authority expires relative to
+             * RECEIPT (processing) time (READxCORExTIMER()), not the sender's time: a
+             * queued/delayed heartbeat extends authority only from when it is processed.
+             * Delivery latency and superloop-stall bounds are NOT established, so there
+             * is no proven maximum wall-clock host-loss stopping time. This watchdog does
+             * NOT protect against a stalled PIC32 (a stall also stalls this check). */
+            LastHostHeartbeat = READxCORExTIMER();
+            if (GlobalStopLatch == GLOBAL_STOP_DISARMED) {
+                GlobalStopLatch = GLOBAL_STOP_ARMED;
+                REPORTxGLOBALxSTOPxSTATE();
+            }
+            return true;
+        case GLOBAL_STOP_STATE:
+            REPORTxGLOBALxSTOPxSTATE();
+            return true;
+        case REARM_GLOBAL_STOP:
+            return true; /* Reserved no-op, including while latched. */
+        default:
+            return false;
+    }
+}
+
 // *****************************************************************************
 // *****************************************************************************
 // Section: Application Callback Functions
@@ -122,6 +197,9 @@ void CONTROLLER_Initialize ( void )
 {
     /* Place the App state machine in its initial state. */
     controllerData.state = CONTROLLER_STATE_INIT;
+    GlobalStopLatch = GLOBAL_STOP_DISARMED;
+    LastHostHeartbeat = 0;
+    GlobalStopReason = 0;
 
     
     /* TODO: Initialize your application's state machine and other
@@ -145,6 +223,7 @@ void CONTROLLER_Initialize ( void )
 void CONTROLLER_Tasks ( void )
 {
     uint32_t    task_id     = CONTROLLER;
+    CHECKxHOSTxAUTHORITY(); /* Runs independently of controller/MBUS wait states. */
     
     /* Check the application's current state. */
     switch ( controllerData.state )
@@ -194,6 +273,14 @@ void CONTROLLER_Tasks ( void )
         case CONTROLLER_STATE_HANDLE_COMM_DATA:
         {
             switch(EthernetRecvData->command){
+                case EXEC_GLOBAL_STOP:
+                case HOST_HEARTBEAT:
+                case GLOBAL_STOP_STATE:
+                case REARM_GLOBAL_STOP:
+                {
+                    CONTROLLERxHANDLExSAFETYxCOMMAND(EthernetRecvData);
+                    break;
+                }
                 case CLIENT_CONNECTION_REQUEST:
                 {
                     CREATExTASKxSTATUSxMESSAGE(task_id, CONNECTED, DONE, NONE); // assume same client is connecting again

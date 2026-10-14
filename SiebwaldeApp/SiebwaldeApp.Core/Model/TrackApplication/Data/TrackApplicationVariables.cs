@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace SiebwaldeApp.Core
 {
@@ -32,6 +33,35 @@ namespace SiebwaldeApp.Core
         /// </summary>
         public IMovementPermissionState? MovementPermission { get; set; }
 
+        private GlobalStopController _globalStop = new();
+        public GlobalStopController GlobalStop
+        {
+            get => _globalStop;
+            set
+            {
+                _globalStop.Latched -= ApplyGlobalStop;
+                _globalStop = value;
+                _globalStop.Latched += ApplyGlobalStop;
+                if (_globalStop.IsLatched) ApplyGlobalStop();
+            }
+        }
+
+        private void ApplyGlobalStop()
+        {
+            lock (GlobalStop.SyncRoot)
+            {
+                // Drop cached desired values too: an already-neutral amplifier must receive a new stop write.
+                var knownCommands = PendingWrites.Keys.ToHashSet();
+                PendingWrites.Clear();
+                if (GlobalStop.SuppressSlaveWrites) return;
+                foreach (var amp in trackAmpItems)
+                    if ((amp.SlaveDetected != 0 || amp.ProtocolReadbackObserved || knownCommands.Contains(amp.SlaveNumber)) &&
+                        TrackAmplifierAddress.IsTrackAmplifierAddress(amp.SlaveNumber))
+                        SetDesiredAmplifierControl(amp.SlaveNumber, AmplifierSpeedMapper.NeutralPwm, false);
+            }
+        }
+        public void DetachGlobalStop() => _globalStop.Latched -= ApplyGlobalStop;
+
         #endregion
 
         #region Constructor
@@ -41,6 +71,7 @@ namespace SiebwaldeApp.Core
         /// </summary>
         public TrackApplicationVariables()
         {
+            _globalStop.Latched += ApplyGlobalStop;
             #region Instantiate List of TrackAmplifierItem and add items
 
             ushort[] HoldingRegInit = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -185,26 +216,29 @@ namespace SiebwaldeApp.Core
         /// <returns>True when the value was accepted and queued; false when it was refused.</returns>
         public bool SetDesiredAmplifierControl(ushort slaveNumber, int pwmSetpoint, bool emoStop)
         {
-            if (!TrackAmplifierAddress.IsTrackAmplifierAddress(slaveNumber))
-                return false;
-
-            ushort hr0 = BuildHr0Value(pwmSetpoint, emoStop);
-
-            // Movement gate: a non-neutral PWM is only accepted once movement permission has been
-            // granted (observed neutral). Neutral is always accepted, and a null permission means
-            // "not gated" so non-participating callers keep their existing behavior.
-            int pwm = hr0 & 0x03FF;
-            if (pwm != AmplifierSpeedMapper.NeutralPwm && MovementPermission is { IsGranted: false })
-                return false;
-
-            if (!PendingWrites.TryGetValue(slaveNumber, out var writeData))
+            lock (GlobalStop.SyncRoot)
             {
-                writeData = new TrackAmplifierWriteData(slaveNumber);
-                PendingWrites[slaveNumber] = writeData;
-            }
+                if (!TrackAmplifierAddress.IsTrackAmplifierAddress(slaveNumber))
+                    return false;
 
-            writeData.SetDesiredHr0(hr0);
-            return true;
+                ushort hr0 = BuildHr0Value(pwmSetpoint, emoStop);
+                int pwm = hr0 & 0x03FF;
+                // Global stop is orthogonal to observed-neutral permission. Neither GO nor a
+                // control-safety reset can bypass it. On receive loss, do not queue even neutral.
+                if (GlobalStop.SuppressSlaveWrites) return false;
+                if (pwm != AmplifierSpeedMapper.NeutralPwm &&
+                    (GlobalStop.IsLatched || MovementPermission is { IsGranted: false }))
+                    return false;
+
+                if (!PendingWrites.TryGetValue(slaveNumber, out var writeData))
+                {
+                    writeData = new TrackAmplifierWriteData(slaveNumber);
+                    PendingWrites[slaveNumber] = writeData;
+                }
+
+                writeData.SetDesiredHr0(hr0);
+                return true;
+            }
         }
         #endregion
     }

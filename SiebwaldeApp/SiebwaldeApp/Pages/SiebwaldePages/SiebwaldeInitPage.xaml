@@ -295,6 +295,9 @@
                     Foreground="White"
                     Content="Reset control safety" />
 
+                <Button Margin="0 10 0 0" Padding="12 8" Background="DarkRed" Foreground="White"
+                        Command="{Binding GlobalEmergencyStop}" Content="GLOBAL EMERGENCY STOP (latched)" />
+
                 <!-- Track-control runtime lifecycle surface. The coordinator owns the state;
                      these buttons only request start/stop/restart and enable/disable from the
                      runtime state policy. -->
