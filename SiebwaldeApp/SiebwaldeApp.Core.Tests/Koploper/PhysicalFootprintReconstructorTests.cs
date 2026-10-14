@@ -35,8 +35,12 @@ namespace SiebwaldeApp.Core.Tests.Koploper
             PhysicalSectionOccupancyObservation? physical,
             string topology,
             (int Section, int Amp)[] mapping,
-            Dictionary<int, int> identity)
-            => PhysicalFootprintReconstructor.Reconstruct(shadow, physical, Topology(topology), Mapping(mapping), identity);
+            Dictionary<int, int> identity,
+            IReadOnlyDictionary<int, IReadOnlyList<int>>? blockToSections = null)
+            => PhysicalFootprintReconstructor.Reconstruct(
+                shadow, physical, Topology(topology), Mapping(mapping),
+                blockToSections ?? ReconciliationTestFixtures.BlockMap(mapping.Select(p => p.Section).ToArray()),
+                identity);
 
         [Fact]
         public void Reconstruct_OccupiedReservedAdjacentOccupied_AttributesBothSections()

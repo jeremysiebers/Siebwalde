@@ -35,7 +35,8 @@ namespace SiebwaldeApp.Core.Tests.Koploper
             string topology,
             (int Section, int Amp)[] mapping,
             TimeSpan? tailHoldWindow = null,
-            Func<DateTimeOffset>? clock = null)
+            Func<DateTimeOffset>? clock = null,
+            IReadOnlyDictionary<int, IReadOnlyList<int>>? blockToSections = null)
         {
             var parsedTopology = BlockTopology.Parse(topology);
             var parsedMapping = mapping
@@ -43,6 +44,7 @@ namespace SiebwaldeApp.Core.Tests.Koploper
                 .ToArray();
             return new LocomotiveCarrierController(
                 variables, tracker, trace: null, identity, parsedTopology, parsedMapping,
+                blockToSections ?? ReconciliationTestFixtures.BlockMap(mapping.Select(p => p.Section).ToArray()),
                 tailHoldWindow: tailHoldWindow, clock: clock);
         }
 

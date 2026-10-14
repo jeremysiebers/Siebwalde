@@ -14,18 +14,19 @@ namespace SiebwaldeApp.Core.Tests.Koploper
     public class LogicalPhysicalReconciliationProjectorTests
     {
         private static readonly DateTimeOffset Now = ReconciliationTestFixtures.Now;
-        private static readonly int[] BoundSections = { 1, 2, 3, 4 };
+        private static readonly IReadOnlyDictionary<int, IReadOnlyList<int>> BoundBlocks =
+            ReconciliationTestFixtures.BlockMap(1, 2, 3, 4);
 
         private static LogicalPhysicalReconciliationObservation Reconcile(
             KoploperLogicalSectionShadowObservation? shadow,
             PhysicalSectionOccupancyObservation? physical,
-            IReadOnlyCollection<int>? bound = null,
+            IReadOnlyDictionary<int, IReadOnlyList<int>>? blocks = null,
             long sequence = 1,
             DateTimeOffset? evaluatedAt = null)
             => LogicalPhysicalReconciliationProjector.Reconcile(
                 shadow,
                 physical,
-                bound ?? BoundSections,
+                blocks ?? BoundBlocks,
                 sequence,
                 evaluatedAt ?? Now);
 
@@ -563,14 +564,14 @@ namespace SiebwaldeApp.Core.Tests.Koploper
             Assert.Equal(2, obs.Locomotives.Count);
 
             var loco10 = Assert.Single(obs.Locomotives, l => l.LocomotiveId == 10);
-            Assert.Equal(1, loco10.OccupiedSection);
-            Assert.Equal(new[] { 2, 3 }, loco10.ReservedSections);
+            Assert.Equal(1, loco10.OccupiedBlock);
+            Assert.Equal(new[] { 2, 3 }, loco10.ReservedBlocks);
             Assert.True(loco10.AllOwnedSectionsAssessable);
             Assert.True(loco10.AllOwnedSectionsConsistent);
 
             var loco20 = Assert.Single(obs.Locomotives, l => l.LocomotiveId == 20);
-            Assert.Null(loco20.OccupiedSection);
-            Assert.Equal(new[] { 4 }, loco20.ReservedSections);
+            Assert.Null(loco20.OccupiedBlock);
+            Assert.Equal(new[] { 4 }, loco20.ReservedBlocks);
             Assert.True(loco20.AllOwnedSectionsAssessable);
             Assert.True(loco20.AllOwnedSectionsConsistent);
         }
@@ -632,6 +633,60 @@ namespace SiebwaldeApp.Core.Tests.Koploper
             Assert.NotSame(firstSections, second.Sections);
             Assert.Equal(LogicalSectionReconciliationState.ConsistReservedClear, firstState);
             Assert.Equal(LogicalSectionReconciliationState.ContradictionReservedPhysicallyOccupied, Section(second, 1).ReconciliationState);
+        }
+
+        // ---------------------------------------------------------------------
+        // Block-level roll-up (KIS10-02): a logical block is Eligible iff ALL its sections are Eligible.
+        // ---------------------------------------------------------------------
+
+        [Fact]
+        public void Reconcile_MultiSectionBlock_AllSectionsEligible_BlockEligible()
+        {
+            // Block 10 -> sections {1, 2}; both physically Clear and Reserved(A): both Eligible.
+            var blocks = ReconciliationTestFixtures.BlockMap((10, new[] { 1, 2 }));
+            var shadow = ReconciliationTestFixtures.Shadow(
+                locomotives: new[] { ReconciliationTestFixtures.Loco(10, null, 10) });
+            var physical = ReconciliationTestFixtures.Physical(
+                sections: new[]
+                {
+                    ReconciliationTestFixtures.PhysicalState(1, PhysicalOccupancy.Clear),
+                    ReconciliationTestFixtures.PhysicalState(2, PhysicalOccupancy.Clear)
+                });
+
+            LogicalPhysicalReconciliationObservation obs = Reconcile(shadow, physical, blocks);
+
+            var block = Assert.Single(obs.Blocks);
+            Assert.Equal(10, block.InternalBlockId);
+            Assert.Equal(10, block.LogicalOwnerLocomotiveId);
+            Assert.True(block.AllSectionsEligible);
+
+            Assert.Equal(new[] { 1, 2 }, obs.Sections.Select(s => s.LogicalSectionId));
+            Assert.All(obs.Sections, s => Assert.Equal(SectionSafetyEligibility.Eligible, s.SectionSafetyEligibility));
+        }
+
+        [Fact]
+        public void Reconcile_MultiSectionBlock_OneSectionNotEligible_BlockNotEligible()
+        {
+            // Block 10 -> sections {1, 2}; section 1 Reserved(A) clear (Eligible), section 2
+            // physically Occupied (Reserved + Occupied -> contradiction -> Denied).
+            var blocks = ReconciliationTestFixtures.BlockMap((10, new[] { 1, 2 }));
+            var shadow = ReconciliationTestFixtures.Shadow(
+                locomotives: new[] { ReconciliationTestFixtures.Loco(10, null, 10) });
+            var physical = ReconciliationTestFixtures.Physical(
+                sections: new[]
+                {
+                    ReconciliationTestFixtures.PhysicalState(1, PhysicalOccupancy.Clear),
+                    ReconciliationTestFixtures.PhysicalState(2, PhysicalOccupancy.Occupied)
+                });
+
+            LogicalPhysicalReconciliationObservation obs = Reconcile(shadow, physical, blocks);
+
+            var block = Assert.Single(obs.Blocks);
+            Assert.False(block.AllSectionsEligible);
+
+            // The per-section enum is still present: section 1 Eligible, section 2 Denied.
+            Assert.Equal(SectionSafetyEligibility.Eligible, Section(obs, 1).SectionSafetyEligibility);
+            Assert.Equal(SectionSafetyEligibility.Denied, Section(obs, 2).SectionSafetyEligibility);
         }
     }
 }

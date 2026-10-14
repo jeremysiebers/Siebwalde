@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using SiebwaldeApp.Core;
+using SiebwaldeApp.Core.Koploper;
 using Xunit;
 
 namespace SiebwaldeApp.Core.Tests
@@ -267,6 +268,72 @@ namespace SiebwaldeApp.Core.Tests
             // HR_STATUS bit 10 per TrackAmplifier4.X/modbus/General.h
             Assert.Equal(1 << 10, TrackAmplifierRegisters.OccupiedBit);
             Assert.Equal(2, TrackAmplifierRegisters.Status);
+        }
+
+        // ---------------------------------------------------------------------
+        // Per-amplifier occupancy (IAmplifierOccupancyProvider, KIS10-06)
+        // ---------------------------------------------------------------------
+
+        [Fact]
+        public void GetAmplifierOccupancy_FreshOccupied_ReturnsOccupied()
+        {
+            var provider = CreateProvider(new Dictionary<ushort, TrackAmplifierItem>
+            {
+                [3] = Fresh(3, occupied: true)
+            });
+
+            Assert.Equal(PhysicalOccupancy.Occupied, provider.GetAmplifierOccupancy(3));
+        }
+
+        [Fact]
+        public void GetAmplifierOccupancy_FreshClear_ReturnsClear()
+        {
+            var provider = CreateProvider(new Dictionary<ushort, TrackAmplifierItem>
+            {
+                [3] = Fresh(3, occupied: false)
+            });
+
+            Assert.Equal(PhysicalOccupancy.Clear, provider.GetAmplifierOccupancy(3));
+        }
+
+        [Fact]
+        public void GetAmplifierOccupancy_StaleOrMissing_ReturnsUnknown()
+        {
+            var provider = CreateProvider(new Dictionary<ushort, TrackAmplifierItem>
+            {
+                [3] = Amplifier(3, occupied: false, receivedAt: Stale)
+            });
+
+            Assert.Equal(PhysicalOccupancy.Unknown, provider.GetAmplifierOccupancy(3));
+            Assert.Equal(PhysicalOccupancy.Unknown, provider.GetAmplifierOccupancy(99));
+        }
+
+        [Fact]
+        public void GetAmplifierOccupancy_BackplaneAddress_ReturnsUnknown()
+        {
+            // KIS-09 invariant: backplane/configuration addresses (51..55) are never track sections.
+            var provider = CreateProvider(new Dictionary<ushort, TrackAmplifierItem>
+            {
+                [3] = Fresh(3, occupied: true)
+            });
+
+            Assert.Equal(PhysicalOccupancy.Unknown, provider.GetAmplifierOccupancy(51));
+            Assert.Equal(PhysicalOccupancy.Unknown, provider.GetAmplifierOccupancy(55));
+        }
+
+        [Fact]
+        public void PerSectionAndBlockLevelDerivedStatus_CoexistCorrectly()
+        {
+            // Block 10 spans sections/amps 6 and 7: section 6 occupied, section 7 clear.
+            var provider = CreateTwoSectionProvider(Fresh(6, true), Fresh(7, false));
+
+            // Per-section: each amplifier reflects its own section (no aggregation).
+            Assert.Equal(PhysicalOccupancy.Occupied, provider.GetAmplifierOccupancy(6));
+            Assert.Equal(PhysicalOccupancy.Clear, provider.GetAmplifierOccupancy(7));
+
+            // Block-level derived status remains correct for look-ahead/safety.
+            Assert.True(provider.IsBlockOccupied(10));
+            Assert.True(provider.IsBlockOccupancyKnown(10));
         }
     }
 }

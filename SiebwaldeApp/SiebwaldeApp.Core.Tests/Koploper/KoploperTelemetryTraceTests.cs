@@ -61,6 +61,7 @@ namespace SiebwaldeApp.Core.Tests.Koploper
                         Array.Empty<ReconciliationDiagnosticCode>())
                 },
                 Array.Empty<LogicalLocomotiveReconciliation>(),
+                Array.Empty<LogicalBlockReconciliation>(),
                 Array.Empty<ReconciliationDiagnosticCode>());
 
             KoploperTelemetryTraceRecord trace =
@@ -135,6 +136,7 @@ namespace SiebwaldeApp.Core.Tests.Koploper
                         new[] { ReconciliationDiagnosticCode.ReconPhysicalUnknown })
                 },
                 Array.Empty<LogicalLocomotiveReconciliation>(),
+                Array.Empty<LogicalBlockReconciliation>(),
                 Array.Empty<ReconciliationDiagnosticCode>());
 
             KoploperTelemetryTraceRecord trace =

@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using SiebwaldeApp.Core;
+using SiebwaldeApp.Core.Koploper;
+using SiebwaldeApp.Core.TrackApplication.Topology;
 using SiebwaldeApp.EcosEmu;
 using SiebwaldeApp.Integration;
 using Xunit;
@@ -9,16 +11,15 @@ namespace SiebwaldeApp.Core.Tests
 {
     public class TrackAmplifierOccupancyBridgeTests
     {
-        private sealed class FakeOccupancy : IOccupancyProvider
+        /// <summary>Per-section occupancy fake: each amplifier carries its own tri-state.</summary>
+        private sealed class FakeAmplifierOccupancy : IAmplifierOccupancyProvider
         {
-            public HashSet<int> Occupied { get; } = new();
+            private readonly Dictionary<int, PhysicalOccupancy> _states = new();
 
-            /// <summary>Set to false to model "no valid amplifier data yet".</summary>
-            public bool Known { get; set; } = true;
+            public void Set(int amplifier, PhysicalOccupancy state) => _states[amplifier] = state;
 
-            public bool IsBlockOccupied(int block) => Occupied.Contains(block);
-
-            public bool IsBlockOccupancyKnown(int block) => Known;
+            public PhysicalOccupancy GetAmplifierOccupancy(int amplifierAddress)
+                => _states.TryGetValue(amplifierAddress, out var state) ? state : PhysicalOccupancy.Unknown;
         }
 
         private sealed class RecordingFeedbackSink : IHardwareFeedbackSink
@@ -63,9 +64,15 @@ namespace SiebwaldeApp.Core.Tests
         [Fact]
         public async Task FirstPoll_ReportsEveryBezetmelder()
         {
-            var occupancy = new FakeOccupancy();
+            var occupancy = new FakeAmplifierOccupancy();
+            for (int amp = 1; amp <= 5; amp++)
+            {
+                occupancy.Set(amp, PhysicalOccupancy.Clear);
+            }
+
             var sink = new RecordingFeedbackSink();
-            var bridge = new TrackAmplifierOccupancyBridge(KoploperBlockMap.Parse(OvalMapping), occupancy, sink);
+            var bridge = new TrackAmplifierOccupancyBridge(
+                KoploperBlockMap.Parse(OvalMapping).ToKoploperFeedbackMap(), occupancy, sink);
 
             await bridge.EvaluateAsync();
 
@@ -77,9 +84,15 @@ namespace SiebwaldeApp.Core.Tests
         [Fact]
         public async Task SecondPoll_WithoutChange_SendsNothing()
         {
-            var occupancy = new FakeOccupancy();
+            var occupancy = new FakeAmplifierOccupancy();
+            for (int amp = 1; amp <= 5; amp++)
+            {
+                occupancy.Set(amp, PhysicalOccupancy.Clear);
+            }
+
             var sink = new RecordingFeedbackSink();
-            var bridge = new TrackAmplifierOccupancyBridge(KoploperBlockMap.Parse(OvalMapping), occupancy, sink);
+            var bridge = new TrackAmplifierOccupancyBridge(
+                KoploperBlockMap.Parse(OvalMapping).ToKoploperFeedbackMap(), occupancy, sink);
 
             await bridge.EvaluateAsync();
             sink.SensorEvents.Clear();
@@ -91,14 +104,20 @@ namespace SiebwaldeApp.Core.Tests
         [Fact]
         public async Task OccupancyChange_ReportsTheBezetmeldersOfThatBlock()
         {
-            var occupancy = new FakeOccupancy();
+            var occupancy = new FakeAmplifierOccupancy();
+            for (int amp = 1; amp <= 5; amp++)
+            {
+                occupancy.Set(amp, PhysicalOccupancy.Clear);
+            }
+
             var sink = new RecordingFeedbackSink();
-            var bridge = new TrackAmplifierOccupancyBridge(KoploperBlockMap.Parse(OvalMapping), occupancy, sink);
+            var bridge = new TrackAmplifierOccupancyBridge(
+                KoploperBlockMap.Parse(OvalMapping).ToKoploperFeedbackMap(), occupancy, sink);
 
             await bridge.EvaluateAsync();
             sink.SensorEvents.Clear();
 
-            occupancy.Occupied.Add(3);
+            occupancy.Set(3, PhysicalOccupancy.Occupied);
             await bridge.EvaluateAsync();
 
             Assert.Equal(2, sink.SensorEvents.Count);
@@ -109,16 +128,81 @@ namespace SiebwaldeApp.Core.Tests
         [Fact]
         public async Task BlockWithSingleBezetmelder_ReportsOneEvent()
         {
-            var occupancy = new FakeOccupancy();
+            var occupancy = new FakeAmplifierOccupancy();
+            occupancy.Set(7, PhysicalOccupancy.Clear);
+
             var sink = new RecordingFeedbackSink();
             var bridge = new TrackAmplifierOccupancyBridge(
-                KoploperBlockMap.Parse("7:1.11:7"), occupancy, sink);
+                KoploperBlockMap.Parse("7:1.11:7").ToKoploperFeedbackMap(), occupancy, sink);
 
             await bridge.EvaluateAsync();
 
             Assert.Single(sink.SensorEvents);
             Assert.Equal((11, false), sink.SensorEvents[0]);
         }
+
+        [Fact]
+        public async Task MultiSectionBlock_EachBezetmelderReflectsItsOwnSection()
+        {
+            // A block with two sections/amps/bezetmelders: section1 occupied, section2 clear.
+            var feedbackMap = new List<KoploperFeedbackBlock>
+            {
+                new()
+                {
+                    BlockNumber = 10,
+                    Sections = new List<KoploperFeedbackSection>
+                    {
+                        new() { SectionId = 1, Amplifier = 1, Bezetmelders = new[] { "1.01" } },
+                        new() { SectionId = 2, Amplifier = 2, Bezetmelders = new[] { "1.02" } }
+                    }
+                }
+            };
+
+            var occupancy = new FakeAmplifierOccupancy();
+            occupancy.Set(1, PhysicalOccupancy.Occupied);
+            occupancy.Set(2, PhysicalOccupancy.Clear);
+
+            var sink = new RecordingFeedbackSink();
+            var bridge = new TrackAmplifierOccupancyBridge(feedbackMap, occupancy, sink);
+
+            await bridge.EvaluateAsync();
+
+            // No aggregation: bezetmelder 1.01 (sensor 1) reflects ITS section (occupied) and
+            // bezetmelder 1.02 (sensor 2) reflects ITS section (clear).
+            Assert.Equal(2, sink.SensorEvents.Count);
+            Assert.Contains((1, true), sink.SensorEvents);
+            Assert.Contains((2, false), sink.SensorEvents);
+        }
+
+        [Fact]
+        public async Task MultiSectionBlock_UnknownSection_IsNeverReportedAsClear()
+        {
+            // One section occupied, one section unknown: the unknown section must not be pushed as free.
+            var feedbackMap = new List<KoploperFeedbackBlock>
+            {
+                new()
+                {
+                    BlockNumber = 10,
+                    Sections = new List<KoploperFeedbackSection>
+                    {
+                        new() { SectionId = 1, Amplifier = 1, Bezetmelders = new[] { "1.01" } },
+                        new() { SectionId = 2, Amplifier = 2, Bezetmelders = new[] { "1.02" } }
+                    }
+                }
+            };
+
+            var occupancy = new FakeAmplifierOccupancy();
+            occupancy.Set(1, PhysicalOccupancy.Occupied);
+            // amp 2 left Unknown
+
+            var sink = new RecordingFeedbackSink();
+            var bridge = new TrackAmplifierOccupancyBridge(feedbackMap, occupancy, sink);
+
+            await bridge.EvaluateAsync();
+
+            // Only the occupied section produces an event; the unknown section is skipped.
+            Assert.Single(sink.SensorEvents);
+            Assert.Equal((1, true), sink.SensorEvents[0]);
+        }
     }
 }
-

@@ -16,7 +16,7 @@ namespace SiebwaldeApp.Core.Tests.Koploper
     public class KoploperLogicalSectionShadowObserverTests
     {
         private static readonly DateTimeOffset Now = KoploperReservationTestFixtures.Now;
-        private static readonly Dictionary<int, int> Map = new() { { 30, 2 } };
+        private static readonly Dictionary<int, IReadOnlyList<int>> Map = new() { { 30, new[] { 2 } } };
 
         private static KoploperSnapshotReadResult AuthoritativeReadResult()
         {
@@ -91,7 +91,7 @@ namespace SiebwaldeApp.Core.Tests.Koploper
             Assert.True(shadow.ShadowValid);
             Assert.True(shadow.SourceAuthoritative);
             var loco = Assert.Single(shadow.Locomotives);
-            Assert.Equal(2, loco.OccupiedLogicalSection);
+            Assert.Equal(30, loco.OccupiedLogicalBlock);
         }
 
         [Fact]

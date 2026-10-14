@@ -17,19 +17,20 @@ namespace SiebwaldeApp.Core.Tests.Koploper
     public class LogicalPhysicalReconciliationObserverTests
     {
         private static readonly DateTimeOffset Now = ReconciliationTestFixtures.Now;
-        private static readonly int[] BoundSections = { 1, 2, 3, 4 };
+        private static readonly IReadOnlyDictionary<int, IReadOnlyList<int>> BoundBlocks =
+            ReconciliationTestFixtures.BlockMap(1, 2, 3, 4);
 
         private static LogicalPhysicalReconciliationObserver CreateObserver(
             FakeKoploperLogicalSectionShadowObserver shadowObserver,
             FakePhysicalSectionOccupancySource physicalSource,
-            IReadOnlyCollection<int>? bound = null,
+            IReadOnlyDictionary<int, IReadOnlyList<int>>? blocks = null,
             LogicalPhysicalReconciliationObserverOptions? options = null,
             Func<DateTimeOffset>? clock = null)
             => new(
                 shadowObserver,
                 physicalSource,
                 "simple-loop",
-                bound ?? BoundSections,
+                blocks ?? BoundBlocks,
                 options,
                 clock ?? (() => Now));
 

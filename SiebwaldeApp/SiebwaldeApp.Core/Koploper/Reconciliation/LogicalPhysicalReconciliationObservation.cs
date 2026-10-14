@@ -24,5 +24,6 @@ namespace SiebwaldeApp.Core.Koploper
         bool ReconciliationAssessable,
         IReadOnlyList<LogicalSectionReconciliation> Sections,
         IReadOnlyList<LogicalLocomotiveReconciliation> Locomotives,
+        IReadOnlyList<LogicalBlockReconciliation> Blocks,
         IReadOnlyList<ReconciliationDiagnosticCode> Diagnostics);
 }

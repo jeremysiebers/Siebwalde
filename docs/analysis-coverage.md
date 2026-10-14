@@ -8,6 +8,10 @@ The product owner confirmed component roles and priorities on 2026-09-11 (see `d
 
 ## Current Continuation Pass
 
+### KIS-10 selected-profile composition (2026-10-13)
+
+**Investigated (software-only):** `TrackSimulationPageViewModel.ApplyProfileSelection` -> `TrackApplicationRuntimeHost.SelectFullSimulationProfile` -> `TrackControlHost.SetProfile` -> Real `TrackControlIntegration` carrier/feedback; `TrackApplicationRuntimeHost.ComposeTrackPartAsync` -> `Kis09PassiveObserverFactory.Create` -> `KoploperLogicalSectionShadowObserver` 1:N map. `OvaaltjeLoop2CompositionTests` adds 2 executed wiring checks (real host with inert comm and loopback only; passive factory without starting readers). Full Debug/Release **971/971** on HEAD `fe17ebe` plus uncommitted KIS-10 work. No defect or production fix. Remaining gap: interactive WPF guard, full selected-profile startup and live/physical validation were not exercised by these targeted checks. See the dated Developer entry in `docs/handoff.md`.
+
 | Area | Status | Evidence | Remaining gaps |
 | --- | --- | --- | --- |
 | Original deliverable completeness review | In progress | User requested continuation and gap review after initial investigation. | Complete `docs/application-guide.md`, `docs/product.md`, persistent knowledge workflow updates, subagent cross-checks, and safe build verification. |

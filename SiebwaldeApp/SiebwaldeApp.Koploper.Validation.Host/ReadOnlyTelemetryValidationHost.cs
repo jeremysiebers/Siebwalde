@@ -46,7 +46,7 @@ namespace SiebwaldeApp.Koploper.Validation.Host
 
         private ReadOnlyTelemetryValidationHost(
             LayoutProfile profile,
-            IReadOnlyDictionary<int, int> koploperBlockBindingMap,
+            IReadOnlyDictionary<int, IReadOnlyList<int>> koploperBlockBindingMap,
             TrackApplicationVariables variables,
             KoploperSessionCommandGuard sessionCommandGuard,
             KoploperReservationObserver reservationObserver,
@@ -67,8 +67,11 @@ namespace SiebwaldeApp.Koploper.Validation.Host
         /// <summary>The loaded "Simple Loop" profile (the declarative source of the bindings).</summary>
         public LayoutProfile Profile { get; }
 
-        /// <summary>The profile's explicit Koploper internal-block -&gt; logical-section binding map.</summary>
-        public IReadOnlyDictionary<int, int> KoploperBlockBindingMap { get; }
+        /// <summary>
+        /// The profile's explicit Koploper internal-block -&gt; logical-section(s) binding map (the
+        /// KIS10-01 1:N form; the shadow is block-level since KIS10-02).
+        /// </summary>
+        public IReadOnlyDictionary<int, IReadOnlyList<int>> KoploperBlockBindingMap { get; }
 
         /// <summary>The read-side track-amplifier data container feeding the physical source.</summary>
         public TrackApplicationVariables Variables => _variables;
@@ -170,7 +173,7 @@ namespace SiebwaldeApp.Koploper.Validation.Host
         /// Composes the real bounded telemetry-enablement host from the named profile (default "Simple Loop").
         /// <list type="bullet">
         ///   <item>Loads the profile and reads <see cref="LayoutProfile.KoploperBlockBindings"/> via
-        ///       <see cref="LayoutProfile.ToKoploperBlockBindingMap"/> and
+        ///       <see cref="LayoutProfile.ToKoploperBlockBindingMap"/> (the KIS10-01 1:N map) and
         ///       <see cref="LayoutProfile.PhysicalAmplifierMapping"/> (no hardcoded dictionary).</item>
         ///   <item>Wires a real comm client (read side) behind a <see cref="KoploperSessionCommandGuard"/>.</item>
         ///   <item>Composes the KIS-07 shadow observer from the real Koploper process pipeline with the
@@ -229,13 +232,15 @@ namespace SiebwaldeApp.Koploper.Validation.Host
             var reservationObserver = new KoploperReservationObserver(reservationReader, reservationOptions, sharedClock);
 
             // KIS-07 shadow observer uses an independent snapshot reader (manual-state read) plus the
-            // reservation observer, with the profile's explicit binding map.
+            // reservation observer, with the profile's explicit 1:N binding map (block-level shadow,
+            // KIS10-02).
+            IReadOnlyDictionary<int, IReadOnlyList<int>> koploperBlockBindingMap = profile.ToKoploperBlockBindingMap();
             IKoploperSnapshotReader shadowReader = BuildSnapshotReader(sharedClock, snapshotReadOptions);
             var shadowObserver = new KoploperLogicalSectionShadowObserver(
                 shadowReader,
                 reservationObserver,
                 profile.Name,
-                profile.ToKoploperBlockBindingMap(),
+                koploperBlockBindingMap,
                 shadowOptions,
                 sharedClock);
 
@@ -251,13 +256,13 @@ namespace SiebwaldeApp.Koploper.Validation.Host
                 shadowObserver,
                 physicalSource,
                 profile.Name,
-                profile.KoploperBlockBindings.Select(b => b.LogicalSectionId).ToArray(),
+                profile.ToKoploperBlockBindingMap(),
                 reconciliationOptions,
                 sharedClock);
 
             return new ReadOnlyTelemetryValidationHost(
                 profile,
-                profile.ToKoploperBlockBindingMap(),
+                koploperBlockBindingMap,
                 variables,
                 sessionCommandGuard,
                 reservationObserver,

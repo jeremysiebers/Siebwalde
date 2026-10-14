@@ -5,30 +5,38 @@ using System.Linq;
 namespace SiebwaldeApp.Core.Koploper
 {
     /// <summary>
-    /// Projects a logical-section shadow and a physical section occupancy observation into a single
-    /// <see cref="LogicalPhysicalReconciliationObservation"/>. Pure and stateless: it rebuilds the
-    /// reconciliation from scratch each call and never retains state between calls, so there is no
+    /// Projects a block-level logical shadow and a physical section occupancy observation into a
+    /// single <see cref="LogicalPhysicalReconciliationObservation"/>. Pure and stateless: it rebuilds
+    /// the reconciliation from scratch each call and never retains state between calls, so there is no
     /// stale-ownership inheritance. It is a total function — null or invalid inputs yield a
     /// non-assessable observation and it never throws.
+    /// <para>
+    /// KIS10-02: the shadow is block-level, so the projector inverts block-level occupied/reserved
+    /// into per-section roles using the 1:N <paramref name="blockToSections"/> map. The per-section
+    /// reconciliation state and <see cref="SectionSafetyEligibility"/> stay section-level; a block-level
+    /// roll-up (<see cref="LogicalBlockReconciliation"/>) is added WITHOUT removing the per-section enum.
+    /// </para>
     /// </summary>
     public static class LogicalPhysicalReconciliationProjector
     {
         /// <summary>
-        /// Reconciles <paramref name="shadow"/> (logical) against <paramref name="physical"/>
-        /// (physical) for the sections in <paramref name="logicallyBoundSectionIds"/>. Global gates
-        /// G1–G3 run first; a failed gate yields a non-assessable observation with every section
-        /// marked NotAssessable/Denied. On success each section is evaluated by the per-section
-        /// precedence P1–P11.
+        /// Reconciles <paramref name="shadow"/> (logical, block-level) against <paramref name="physical"/>
+        /// (physical, section-level). <paramref name="blockToSections"/> maps each Koploper internal
+        /// block to its 1..N bound logical sections; its flattened section set is the logical-binding
+        /// domain used by the P1 binding check. Global gates G1–G3 run first; a failed gate yields a
+        /// non-assessable observation with every section marked NotAssessable/Denied. On success each
+        /// section is evaluated by the per-section precedence P1–P11, and each owned block is rolled up.
         /// </summary>
         public static LogicalPhysicalReconciliationObservation Reconcile(
             KoploperLogicalSectionShadowObservation? shadow,
             PhysicalSectionOccupancyObservation? physical,
-            IReadOnlyCollection<int> logicallyBoundSectionIds,
+            IReadOnlyDictionary<int, IReadOnlyList<int>> blockToSections,
             long reconciliationSequence,
             DateTimeOffset evaluatedAtUtc)
         {
-            IReadOnlyCollection<int> boundIds = logicallyBoundSectionIds ?? Array.Empty<int>();
-            var boundSet = new HashSet<int>(boundIds);
+            IReadOnlyDictionary<int, IReadOnlyList<int>> blockMap =
+                blockToSections ?? new Dictionary<int, IReadOnlyList<int>>();
+            var boundSet = new HashSet<int>(blockMap.Values.SelectMany(sections => sections ?? Array.Empty<int>()));
 
             // G1: logical source must be present and shadow-valid.
             bool logicalSourceValid = shadow is not null && shadow.ShadowValid;
@@ -62,26 +70,45 @@ namespace SiebwaldeApp.Core.Koploper
 
             string profileId = shadow?.ProfileId ?? physical?.ProfileId ?? string.Empty;
 
-            // Invert the shadow's per-loco projection into per-section roles. Occupied wins over
-            // reserved on conflict; a section listed by no locomotive is None.
+            // Invert the shadow's per-loco BLOCK projection into per-section roles AND per-block roles.
+            // Occupied wins over reserved on conflict; a section/block listed by no locomotive is None.
             var roleBySection = new Dictionary<int, (AutomaticSectionRole Role, int? Owner)>();
+            var roleByBlock = new Dictionary<int, (AutomaticSectionRole Role, int? Owner)>();
             if (shadow is not null)
             {
                 foreach (LogicalLocomotiveShadow loco in shadow.Locomotives)
                 {
-                    if (loco.OccupiedLogicalSection is int occupiedSection)
+                    if (loco.OccupiedLogicalBlock is int occupiedBlock)
                     {
-                        roleBySection[occupiedSection] = (AutomaticSectionRole.Occupied, loco.InternalLocomotiveId);
+                        roleByBlock[occupiedBlock] = (AutomaticSectionRole.Occupied, loco.InternalLocomotiveId);
+                        if (blockMap.TryGetValue(occupiedBlock, out IReadOnlyList<int>? occupiedSections))
+                        {
+                            foreach (int section in occupiedSections)
+                            {
+                                roleBySection[section] = (AutomaticSectionRole.Occupied, loco.InternalLocomotiveId);
+                            }
+                        }
                     }
                 }
 
                 foreach (LogicalLocomotiveShadow loco in shadow.Locomotives)
                 {
-                    foreach (int reservedSection in loco.ReservedLogicalSections)
+                    foreach (int reservedBlock in loco.ReservedLogicalBlocks)
                     {
-                        if (!roleBySection.ContainsKey(reservedSection))
+                        if (!roleByBlock.ContainsKey(reservedBlock))
                         {
-                            roleBySection[reservedSection] = (AutomaticSectionRole.Reserved, loco.InternalLocomotiveId);
+                            roleByBlock[reservedBlock] = (AutomaticSectionRole.Reserved, loco.InternalLocomotiveId);
+                        }
+
+                        if (blockMap.TryGetValue(reservedBlock, out IReadOnlyList<int>? reservedSections))
+                        {
+                            foreach (int section in reservedSections)
+                            {
+                                if (!roleBySection.ContainsKey(section))
+                                {
+                                    roleBySection[section] = (AutomaticSectionRole.Reserved, loco.InternalLocomotiveId);
+                                }
+                            }
                         }
                     }
                 }
@@ -143,8 +170,27 @@ namespace SiebwaldeApp.Core.Koploper
             {
                 foreach (LogicalLocomotiveShadow loco in shadow.Locomotives.OrderBy(l => l.InternalLocomotiveId))
                 {
-                    locomotives.Add(BuildLocomotive(loco, sectionMap, assessable));
+                    locomotives.Add(BuildLocomotive(loco, blockMap, sectionMap, assessable));
                 }
+            }
+
+            // Block-level roll-up: a logical block is Eligible iff ALL its bound sections are Eligible.
+            var blocks = new List<LogicalBlockReconciliation>(roleByBlock.Count);
+            foreach (var (blockId, role) in roleByBlock.OrderBy(kv => kv.Key))
+            {
+                bool allEligible = assessable;
+                if (assessable && blockMap.TryGetValue(blockId, out IReadOnlyList<int>? blockSections) && blockSections is { Count: > 0 })
+                {
+                    allEligible = blockSections.All(sectionId =>
+                        sectionMap.TryGetValue(sectionId, out LogicalSectionReconciliation? section) &&
+                        section.SectionSafetyEligibility == SectionSafetyEligibility.Eligible);
+                }
+                else if (assessable)
+                {
+                    allEligible = false;
+                }
+
+                blocks.Add(new LogicalBlockReconciliation(blockId, role.Owner, allEligible));
             }
 
             return new LogicalPhysicalReconciliationObservation(
@@ -161,6 +207,7 @@ namespace SiebwaldeApp.Core.Koploper
                 ReconciliationAssessable: assessable,
                 Sections: sections,
                 Locomotives: locomotives,
+                Blocks: blocks,
                 Diagnostics: globalDiagnostics.Distinct().OrderBy(d => d).ToArray());
         }
 
@@ -327,6 +374,7 @@ namespace SiebwaldeApp.Core.Koploper
 
         private static LogicalLocomotiveReconciliation BuildLocomotive(
             LogicalLocomotiveShadow loco,
+            IReadOnlyDictionary<int, IReadOnlyList<int>> blockMap,
             IReadOnlyDictionary<int, LogicalSectionReconciliation> sectionMap,
             bool assessable)
         {
@@ -334,19 +382,26 @@ namespace SiebwaldeApp.Core.Koploper
             {
                 return new LogicalLocomotiveReconciliation(
                     loco.InternalLocomotiveId,
-                    loco.OccupiedLogicalSection,
-                    loco.ReservedLogicalSections,
+                    loco.OccupiedLogicalBlock,
+                    loco.ReservedLogicalBlocks,
                     AllOwnedSectionsAssessable: false,
                     AllOwnedSectionsConsistent: false);
             }
 
             var ownedSectionIds = new List<int>();
-            if (loco.OccupiedLogicalSection is int occupiedSection)
+            if (loco.OccupiedLogicalBlock is int occupiedBlock &&
+                blockMap.TryGetValue(occupiedBlock, out IReadOnlyList<int>? occupiedSections))
             {
-                ownedSectionIds.Add(occupiedSection);
+                ownedSectionIds.AddRange(occupiedSections);
             }
 
-            ownedSectionIds.AddRange(loco.ReservedLogicalSections);
+            foreach (int reservedBlock in loco.ReservedLogicalBlocks)
+            {
+                if (blockMap.TryGetValue(reservedBlock, out IReadOnlyList<int>? reservedSections))
+                {
+                    ownedSectionIds.AddRange(reservedSections);
+                }
+            }
 
             bool allAssessable = ownedSectionIds.All(id =>
                 sectionMap.TryGetValue(id, out LogicalSectionReconciliation? section)
@@ -358,8 +413,8 @@ namespace SiebwaldeApp.Core.Koploper
 
             return new LogicalLocomotiveReconciliation(
                 loco.InternalLocomotiveId,
-                loco.OccupiedLogicalSection,
-                loco.ReservedLogicalSections,
+                loco.OccupiedLogicalBlock,
+                loco.ReservedLogicalBlocks,
                 allAssessable,
                 allConsistent);
         }

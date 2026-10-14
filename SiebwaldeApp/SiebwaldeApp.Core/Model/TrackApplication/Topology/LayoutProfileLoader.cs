@@ -52,6 +52,9 @@ namespace SiebwaldeApp.Core.TrackApplication.Topology
         public static string KoploperOvalPath
             => Path.Combine(ProfilesDirectory, "koploper-oval.json");
 
+        public static string OvaaltjeLoop2Path
+            => Path.Combine(ProfilesDirectory, "ovaaltje-loop2.json");
+
         /// <summary>
         /// Enumerates the display names (<see cref="LayoutProfile.Name"/>) of the loadable
         /// repository profiles by scanning <c>Topology/profiles/*.json</c> under
@@ -205,7 +208,12 @@ namespace SiebwaldeApp.Core.TrackApplication.Topology
 
             var physicalMapping = BuildPhysicalAmplifierMapping(dto.PhysicalAmplifierMapping, sectionIds, errors);
 
-            var koploperBlockBindings = BuildKoploperBlockBindings(dto.KoploperBlockBindings, sectionIds, errors);
+            var physicallyBoundSections = new HashSet<int>(physicalMapping.Select(b => b.SectionId));
+
+            var koploperBlockBindings = BuildKoploperBlockBindings(
+                dto.KoploperBlockBindings, sectionIds, physicallyBoundSections, errors);
+
+            ValidateNoAmplifierInTwoBlocks(physicalMapping, koploperBlockBindings, errors);
 
             var locomotiveBindings = BuildLocomotiveBindings(dto.LocomotiveBindings, errors);
 
@@ -581,16 +589,21 @@ namespace SiebwaldeApp.Core.TrackApplication.Topology
         }
 
         /// <summary>
-        /// Validates the Koploper internal block -&gt; logical section binding. The WHOLE mapping
+        /// Validates the Koploper internal block -&gt; logical section(s) binding. The WHOLE mapping
         /// being absent/empty is LEGAL (meaning "no binding declared"; the logical-section shadow
-        /// then cannot map owned blocks and is not valid). When present, every problem is collected
-        /// (never silent): (1) an internal block id &lt;= 0, (2) a duplicate internal block id,
-        /// (3) a logical section id that is not a known section, and (4) a logical section bound to
-        /// more than one internal block.
+        /// then cannot map owned blocks and is not valid). Each entry accepts EITHER the legacy
+        /// single-int <c>logicalSectionId</c> OR the new <c>sectionIds</c> array (1..N), normalized
+        /// to the list form. When present, every problem is collected (never silent):
+        /// (1) an internal block id &lt;= 0, (2) a duplicate internal block id, (3) both legacy and
+        /// new forms on one entry, (4) a section id that is not a known section, (5) a section bound
+        /// to more than one internal block, and (6) an incomplete drive group — a block with no
+        /// sections, or with any bound section (partial drive group) / all bound sections (empty
+        /// drive group) lacking a physical amplifier binding.
         /// </summary>
         private static List<KoploperBlockBinding> BuildKoploperBlockBindings(
             List<KoploperBlockBindingDto>? bindingDtos,
             HashSet<int> sectionIds,
+            HashSet<int> physicallyBoundSections,
             List<string> errors)
         {
             var result = new List<KoploperBlockBinding>();
@@ -616,22 +629,147 @@ namespace SiebwaldeApp.Core.TrackApplication.Topology
                     continue;
                 }
 
-                if (!sectionIds.Contains(dto.LogicalSectionId))
+                bool hasLegacy = dto.LogicalSectionId.HasValue;
+                bool hasNew = dto.SectionIds is { Count: > 0 };
+
+                if (hasLegacy && hasNew)
                 {
-                    errors.Add($"Koploper block binding for internal block id {dto.KoploperInternalBlockId} references unknown section {dto.LogicalSectionId}.");
+                    errors.Add(
+                        $"Koploper block binding for internal block id {dto.KoploperInternalBlockId} " +
+                        "specifies both 'logicalSectionId' and 'sectionIds'; use only 'sectionIds'.");
                     continue;
                 }
 
-                if (!seenSections.Add(dto.LogicalSectionId))
+                var boundSections = new List<int>();
+                if (hasLegacy)
                 {
-                    errors.Add($"Logical section {dto.LogicalSectionId} is bound to more than one Koploper internal block.");
+                    boundSections.Add(dto.LogicalSectionId!.Value);
+                }
+                else if (hasNew)
+                {
+                    boundSections.AddRange(dto.SectionIds!);
+                }
+
+                // A section listed more than once within one binding is a single binding.
+                var uniqueSections = new List<int>();
+                var seenInBinding = new HashSet<int>();
+                foreach (var sectionId in boundSections)
+                {
+                    if (seenInBinding.Add(sectionId))
+                    {
+                        uniqueSections.Add(sectionId);
+                    }
+                }
+
+                if (uniqueSections.Count == 0)
+                {
+                    errors.Add(
+                        $"Koploper block binding for internal block id {dto.KoploperInternalBlockId} " +
+                        "is an empty drive group (no sections).");
                     continue;
                 }
 
-                result.Add(new KoploperBlockBinding(dto.KoploperInternalBlockId, dto.LogicalSectionId));
+                bool allKnown = true;
+                bool anyDuplicate = false;
+                foreach (var sectionId in uniqueSections)
+                {
+                    if (!sectionIds.Contains(sectionId))
+                    {
+                        errors.Add(
+                            $"Koploper block binding for internal block id {dto.KoploperInternalBlockId} " +
+                            $"references unknown section {sectionId}.");
+                        allKnown = false;
+                        continue;
+                    }
+
+                    if (!seenSections.Add(sectionId))
+                    {
+                        errors.Add($"Logical section {sectionId} is bound to more than one Koploper internal block.");
+                        anyDuplicate = true;
+                    }
+                }
+
+                // Drive-group completeness: every bound section must resolve to a physical amplifier.
+                // A block with SOME bound sections unbound (partial drive group) is rejected (F2), as
+                // is a block with ALL bound sections unbound (empty drive group).
+                if (allKnown && !anyDuplicate)
+                {
+                    int[] unboundSections = uniqueSections
+                        .Where(sectionId => !physicallyBoundSections.Contains(sectionId))
+                        .ToArray();
+
+                    if (unboundSections.Length == uniqueSections.Count)
+                    {
+                        errors.Add(
+                            $"Koploper block binding for internal block id {dto.KoploperInternalBlockId} " +
+                            "is an empty drive group (none of its sections have a physical amplifier binding).");
+                        continue;
+                    }
+
+                    if (unboundSections.Length > 0)
+                    {
+                        errors.Add(
+                            $"Koploper block binding for internal block id {dto.KoploperInternalBlockId} " +
+                            $"is a partial drive group: section(s) {string.Join(", ", unboundSections)} " +
+                            "have no physical amplifier binding.");
+                        continue;
+                    }
+                }
+
+                if (!allKnown || anyDuplicate)
+                {
+                    continue;
+                }
+
+                result.Add(new KoploperBlockBinding(dto.KoploperInternalBlockId, uniqueSections.ToArray()));
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Defensive scan: a physical amplifier must not resolve to logical sections in two DIFFERENT
+        /// Koploper internal blocks. Because each section belongs to exactly one block (enforced above)
+        /// and each physical amplifier is currently mapped to at most one section, this is a no-op under
+        /// the KIS10-01 rules; it becomes meaningful in KIS10-02+ when one amplifier may legitimately
+        /// drive multiple sections WITHIN a single block.
+        /// </summary>
+        private static void ValidateNoAmplifierInTwoBlocks(
+            List<LayoutPhysicalAmplifierBinding> physicalMapping,
+            List<KoploperBlockBinding> koploperBlockBindings,
+            List<string> errors)
+        {
+            var sectionToBlock = new Dictionary<int, int>();
+            foreach (var binding in koploperBlockBindings)
+            {
+                foreach (var sectionId in binding.SectionIds)
+                {
+                    sectionToBlock[sectionId] = binding.KoploperInternalBlockId;
+                }
+            }
+
+            var blockByAmplifier = new Dictionary<int, int>();
+            foreach (var mapping in physicalMapping)
+            {
+                if (!sectionToBlock.TryGetValue(mapping.SectionId, out int blockId))
+                {
+                    continue; // section not bound to a Koploper internal block -> not part of a drive group
+                }
+
+                if (blockByAmplifier.TryGetValue(mapping.PhysicalAmplifier, out int existingBlock))
+                {
+                    if (existingBlock != blockId)
+                    {
+                        errors.Add(
+                            $"Physical amplifier {mapping.PhysicalAmplifier} resolves to sections in more " +
+                            $"than one Koploper internal block ({existingBlock} and {blockId}).");
+                    }
+                }
+                else
+                {
+                    blockByAmplifier[mapping.PhysicalAmplifier] = blockId;
+                }
+            }
         }
 
         /// <summary>
@@ -783,7 +921,12 @@ namespace SiebwaldeApp.Core.TrackApplication.Topology
         private sealed class KoploperBlockBindingDto
         {
             public int KoploperInternalBlockId { get; set; }
-            public int LogicalSectionId { get; set; }
+
+            /// <summary>The legacy single-section form (pre-KIS10). Null when absent.</summary>
+            public int? LogicalSectionId { get; set; }
+
+            /// <summary>The new 1..N form (KIS10-01). Null when absent.</summary>
+            public List<int>? SectionIds { get; set; }
         }
 
         private sealed class LocomotiveBindingDto

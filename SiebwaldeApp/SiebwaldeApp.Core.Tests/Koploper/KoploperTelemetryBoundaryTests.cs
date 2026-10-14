@@ -42,14 +42,14 @@ namespace SiebwaldeApp.Core.Tests.Koploper
         {
             var profile = new LayoutProfile
             {
-                KoploperBlockBindings = new[] { new KoploperBlockBinding(30, 2) }
+                KoploperBlockBindings = new[] { new KoploperBlockBinding(30, new[] { 2 }) }
             };
 
             var map = profile.ToKoploperBlockBindingMap();
 
             Assert.Single(map);
             Assert.True(map.ContainsKey(30));       // keyed by the INTERNAL block id
-            Assert.Equal(2, map[30]);
+            Assert.Equal(new[] { 2 }, map[30]);
             Assert.False(map.ContainsKey(2));        // NOT keyed by the logical section id (no numeric shortcut)
         }
 

@@ -16,7 +16,8 @@ namespace SiebwaldeApp.Core.Tests.Koploper
     public class LogicalPhysicalReconciliationObserverConcurrencyTests
     {
         private static readonly DateTimeOffset Now = ReconciliationTestFixtures.Now;
-        private static readonly int[] BoundSections = { 1, 2, 3, 4 };
+        private static readonly IReadOnlyDictionary<int, IReadOnlyList<int>> BoundBlocks =
+            ReconciliationTestFixtures.BlockMap(1, 2, 3, 4);
 
         [Fact]
         public void CurrentObservation_VolatilePublication_VisibleAcrossThreads()
@@ -30,7 +31,7 @@ namespace SiebwaldeApp.Core.Tests.Koploper
                 shadowObserver,
                 physicalSource,
                 "simple-loop",
-                BoundSections,
+                BoundBlocks,
                 options,
                 () => Now);
             using var cts = new CancellationTokenSource();

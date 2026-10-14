@@ -23,6 +23,30 @@ namespace SiebwaldeApp.Core.Tests.Koploper
         public static LogicalLocomotiveShadow Loco(int id, int? occupied = null, params int[] reserved)
             => new(id, occupied, reserved);
 
+        /// <summary>N=1 block → section map (each section is its own block).</summary>
+        public static IReadOnlyDictionary<int, IReadOnlyList<int>> BlockMap(params int[] sections)
+        {
+            var map = new Dictionary<int, IReadOnlyList<int>>();
+            foreach (int section in sections)
+            {
+                map[section] = new[] { section };
+            }
+
+            return map;
+        }
+
+        /// <summary>Explicit 1:N block → sections map.</summary>
+        public static IReadOnlyDictionary<int, IReadOnlyList<int>> BlockMap(params (int Block, int[] Sections)[] entries)
+        {
+            var map = new Dictionary<int, IReadOnlyList<int>>();
+            foreach ((int block, int[] sections) in entries)
+            {
+                map[block] = sections;
+            }
+
+            return map;
+        }
+
         /// <summary>
         /// Builds a logical-section shadow. <see cref="KoploperLogicalSectionShadowObservation.ShadowValid"/>
         /// defaults to <c>sourceAuthoritative &amp;&amp; mappingValid &amp;&amp; manualStateValid</c>,

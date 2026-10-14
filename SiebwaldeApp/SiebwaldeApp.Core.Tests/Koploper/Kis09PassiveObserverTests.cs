@@ -152,8 +152,8 @@ namespace SiebwaldeApp.Core.Tests.Koploper
                 },
                 KoploperBlockBindings = new[]
                 {
-                    new KoploperBlockBinding(1, 1),
-                    new KoploperBlockBinding(2, 2),
+                    new KoploperBlockBinding(1, new[] { 1 }),
+                    new KoploperBlockBinding(2, new[] { 2 }),
                 }
             };
 

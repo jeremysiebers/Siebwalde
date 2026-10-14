@@ -1,4 +1,5 @@
 using System;
+using SiebwaldeApp.Core.Koploper;
 
 namespace SiebwaldeApp.Core
 {
@@ -18,8 +19,11 @@ namespace SiebwaldeApp.Core
     /// seen at some point in the past.
     ///
     /// The block -> amplifier section mapping comes from <see cref="KoploperBlockMap"/>.
+    ///
+    /// It also implements <see cref="IAmplifierOccupancyProvider"/> so the occupancy bridge can
+    /// resolve the fresh per-section occupancy of a single amplifier address (KIS10-06).
     /// </summary>
-    public sealed class TrackAmplifierOccupancyProvider : IOccupancyProvider
+    public sealed class TrackAmplifierOccupancyProvider : IOccupancyProvider, IAmplifierOccupancyProvider
     {
         private readonly KoploperBlockMap _blockMap;
         private readonly Func<ushort, TrackAmplifierItem?> _getAmplifierBySection;
@@ -93,6 +97,30 @@ namespace SiebwaldeApp.Core
             }
 
             return true;
+        }
+
+        /// <inheritdoc />
+        public PhysicalOccupancy GetAmplifierOccupancy(int amplifierAddress)
+        {
+            // KIS-09 invariant: backplane/configuration addresses (51..55) are never track
+            // sections/amplifiers, so they can never produce an occupancy reading.
+            if (!TrackAmplifierAddress.IsTrackAmplifierAddress(amplifierAddress))
+            {
+                return PhysicalOccupancy.Unknown;
+            }
+
+            var amplifier = _getAmplifierBySection((ushort)amplifierAddress);
+            var now = _clock();
+
+            // Only a fresh reading is meaningful; stale/never-received data is unknown, never clear.
+            if (!TrackAmplifierDataFreshness.IsCurrentData(amplifier, now, _staleAfter))
+            {
+                return PhysicalOccupancy.Unknown;
+            }
+
+            return TrackAmplifierRegisters.IsOccupied(amplifier!.HoldingReg)
+                ? PhysicalOccupancy.Occupied
+                : PhysicalOccupancy.Clear;
         }
     }
 }
