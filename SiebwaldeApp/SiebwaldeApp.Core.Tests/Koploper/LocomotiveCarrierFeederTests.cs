@@ -94,7 +94,8 @@ namespace SiebwaldeApp.Core.Tests.Koploper
                 {
                     new LayoutPhysicalAmplifierBinding { SectionId = 1, PhysicalAmplifier = 1 },
                     new LayoutPhysicalAmplifierBinding { SectionId = 2, PhysicalAmplifier = 3 }
-                });
+                },
+                ReconciliationTestFixtures.BlockMap(1, 2));
 
             var escalations = new List<CarrierDecision>();
             var feeder = new LocomotiveCarrierFeeder(
@@ -134,7 +135,8 @@ namespace SiebwaldeApp.Core.Tests.Koploper
                 {
                     new LayoutPhysicalAmplifierBinding { SectionId = 1, PhysicalAmplifier = 1 },
                     new LayoutPhysicalAmplifierBinding { SectionId = 2, PhysicalAmplifier = 3 }
-                });
+                },
+                ReconciliationTestFixtures.BlockMap(1, 2));
 
             string path = Path.Combine(Path.GetTempPath(), $"carrier-timing-{Guid.NewGuid():N}.jsonl");
             var timing = new CarrierTimingTrace(path);
@@ -182,8 +184,8 @@ namespace SiebwaldeApp.Core.Tests.Koploper
                 },
                 KoploperBlockBindings = new[]
                 {
-                    new KoploperBlockBinding(1, 1),
-                    new KoploperBlockBinding(2, 2)
+                    new KoploperBlockBinding(1, new[] { 1 }),
+                    new KoploperBlockBinding(2, new[] { 2 })
                 }
             };
 

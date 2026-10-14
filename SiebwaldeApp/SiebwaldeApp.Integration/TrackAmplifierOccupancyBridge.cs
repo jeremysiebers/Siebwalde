@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Threading.Tasks;
 using SiebwaldeApp.Core;
+using SiebwaldeApp.Core.Koploper;
+using SiebwaldeApp.Core.TrackApplication.Topology;
 using SiebwaldeApp.EcosEmu;
 
 namespace SiebwaldeApp.Integration
@@ -11,10 +12,11 @@ namespace SiebwaldeApp.Integration
     /// <summary>
     /// Bridges track amplifier occupancy to Koploper ECoS sensor events.
     ///
-    /// For every Koploper block the bridge reads the occupancy (from the amplifier
-    /// sections that cover the block) and forwards changes to the ECoS feedback sink
-    /// for each bezetmelder of that block. A Koploper block can have one or more
-    /// bezetmelders; the block-to-bezetmelder mapping comes from <see cref="KoploperBlockMap"/>.
+    /// Each Koploper bezetmelder reflects the occupancy of ITS OWN section (KIS10-06): the bridge
+    /// resolves every bezetmelder to its section's amplifier (via the per-section feedback map) and
+    /// forwards that section's fresh Clear/Occupied state to the ECoS feedback sink. The block-level
+    /// aggregate is NOT substituted for the per-section data; the derived block status remains
+    /// available through <see cref="IOccupancyProvider"/> for look-ahead/safety consumers.
     ///
     /// A bezetmelder name such as "1.03" means module 1, point 3; the ECoS sensor id is
     /// (module - 1) * 16 + point, and the bit in feedback module 100 is sensorId - 1.
@@ -23,17 +25,17 @@ namespace SiebwaldeApp.Integration
     {
         private const int SensorsPerModule = 16;
 
-        private readonly KoploperBlockMap _blockMap;
-        private readonly IOccupancyProvider _occupancy;
+        private readonly IReadOnlyList<KoploperFeedbackBlock> _feedbackMap;
+        private readonly IAmplifierOccupancyProvider _occupancy;
         private readonly IHardwareFeedbackSink _feedbackSink;
         private readonly Dictionary<int, bool> _lastState = new();
 
         public TrackAmplifierOccupancyBridge(
-            KoploperBlockMap blockMap,
-            IOccupancyProvider occupancy,
+            IReadOnlyList<KoploperFeedbackBlock> feedbackMap,
+            IAmplifierOccupancyProvider occupancy,
             IHardwareFeedbackSink feedbackSink)
         {
-            _blockMap = blockMap ?? throw new ArgumentNullException(nameof(blockMap));
+            _feedbackMap = feedbackMap ?? throw new ArgumentNullException(nameof(feedbackMap));
             _occupancy = occupancy ?? throw new ArgumentNullException(nameof(occupancy));
             _feedbackSink = feedbackSink ?? throw new ArgumentNullException(nameof(feedbackSink));
         }
@@ -65,52 +67,55 @@ namespace SiebwaldeApp.Integration
         }
 
         /// <summary>
-        /// Evaluates the occupancy of every mapped block and forwards changes to Koploper.
+        /// Evaluates the occupancy of every mapped bezetmelder and forwards changes to Koploper.
         ///
         /// This is event-driven, not polled: call it whenever amplifier data changes
         /// (for example from TrackCommClientAsync.AmplifierDataReceived). Because the
-        /// bridge keeps the last known state, repeated calls without a change are cheap
-        /// and produce no ECoS traffic. Call it once after startup to establish the
+        /// bridge keeps the last known state per bezetmelder, repeated calls without a change are
+        /// cheap and produce no ECoS traffic. Call it once after startup to establish the
         /// initial state.
         /// </summary>
         public async Task EvaluateAsync()
         {
-            foreach (var block in _blockMap.Blocks)
+            foreach (var block in _feedbackMap)
             {
-                // Never report "free" for a block whose occupancy cannot be confirmed: unknown is
-                // not clear, and a false clear would tell Koploper the block is safe. The block is
-                // left out of the change tracking so a later known value still produces an event.
-                if (!_occupancy.IsBlockOccupancyKnown(block.Number))
+                foreach (var section in block.Sections)
                 {
-                    SiebwaldeApp.Core.IoC.Logger.Log(
-                        $"block {block.Number} unknown (skipped)",
-                        "SiebwaldeApp.Integration.OccupancyBridge");
-                    continue;
-                }
+                    var occupancy = _occupancy.GetAmplifierOccupancy(section.Amplifier);
 
-                var occupied = _occupancy.IsBlockOccupied(block.Number);
-
-                if (_lastState.TryGetValue(block.Number, out var previous) && previous == occupied)
-                {
-                    continue;
-                }
-
-                _lastState[block.Number] = occupied;
-
-                // Make the change-driven nature visible: this bridge only emits on change, so a
-                // block is only logged here when its state actually flipped (or was first seen).
-                var bezetmelders = string.Join(",", block.Bezetmelders);
-                var sensorIds = string.Join(",",
-                    block.Bezetmelders
-                        .Select(b => TryGetSensorId(b, out var sid) ? sid.ToString() : "<invalid>"));
-                SiebwaldeApp.Core.IoC.Logger.Log(
-                    $"block {block.Number} -> {(occupied ? "occupied" : "free")}, bezetmelders [{bezetmelders}], sensorIds [{sensorIds}]",
-                    "SiebwaldeApp.Integration.OccupancyBridge");
-
-                foreach (var bezetmelder in block.Bezetmelders)
-                {
-                    if (TryGetSensorId(bezetmelder, out var sensorId))
+                    // Never report "free" for a section whose occupancy cannot be confirmed: unknown
+                    // is not clear, and a false clear would tell Koploper the section is safe. The
+                    // bezetmelder is left out of the change tracking so a later known value still
+                    // produces an event.
+                    if (occupancy == PhysicalOccupancy.Unknown)
                     {
+                        continue;
+                    }
+
+                    var occupied = occupancy == PhysicalOccupancy.Occupied;
+
+                    foreach (var bezetmelder in section.Bezetmelders)
+                    {
+                        if (!TryGetSensorId(bezetmelder, out var sensorId))
+                        {
+                            continue;
+                        }
+
+                        if (_lastState.TryGetValue(sensorId, out var previous) && previous == occupied)
+                        {
+                            continue;
+                        }
+
+                        _lastState[sensorId] = occupied;
+
+                        // Make the change-driven nature visible: this bridge only emits on change, so
+                        // a bezetmelder is only logged here when its state actually flipped (or was
+                        // first seen).
+                        SiebwaldeApp.Core.IoC.Logger.Log(
+                            $"block {block.BlockNumber} section {section.SectionId} amp {section.Amplifier} " +
+                            $"bezetmelder {bezetmelder} -> {(occupied ? "occupied" : "free")}",
+                            "SiebwaldeApp.Integration.OccupancyBridge");
+
                         await _feedbackSink.OnSensorChangedAsync(sensorId, occupied).ConfigureAwait(false);
                     }
                 }

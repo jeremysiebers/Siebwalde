@@ -39,12 +39,13 @@ namespace SiebwaldeApp.Core.TrackApplication.Topology
     }
 
     /// <summary>
-    /// Binds one Koploper internal block id (the machine identity) to one logical section id. This
-    /// is the declarative mapping used by the Koploper logical-section shadow; it is independent of
-    /// <see cref="LayoutBlock"/> (which groups sections into Koploper display blocks) and of
-    /// <see cref="LayoutPhysicalAmplifierBinding"/> (the physical amplifier binding).
+    /// Binds one Koploper internal block id (the machine identity) to one or more logical section ids.
+    /// This is the declarative mapping used by the Koploper logical-section shadow and the KIS-09
+    /// carrier; it is independent of <see cref="LayoutBlock"/> (which groups sections into Koploper
+    /// display blocks) and of <see cref="LayoutPhysicalAmplifierBinding"/> (the physical amplifier
+    /// binding). KIS10-01 generalizes the former 1:1 assumption (one block == one section) to 1..N.
     /// </summary>
-    public sealed record KoploperBlockBinding(int KoploperInternalBlockId, int LogicalSectionId);
+    public sealed record KoploperBlockBinding(int KoploperInternalBlockId, IReadOnlyList<int> SectionIds);
 
     /// <summary>
     /// Binds one Koploper internal locomotive id (the machine identity) to one DCC decoder address.
@@ -110,10 +111,10 @@ namespace SiebwaldeApp.Core.TrackApplication.Topology
             = Array.Empty<LayoutPhysicalAmplifierBinding>();
 
         /// <summary>
-        /// The declarative Koploper internal block -&gt; logical section binding. Empty/absent means
+        /// The declarative Koploper internal block -&gt; logical section(s) binding. Empty/absent means
         /// "no binding declared" (legal at load, but the logical-section shadow then cannot map
         /// owned blocks and is not valid). Internal block ids are the machine identity, not display
-        /// block numbers.
+        /// block numbers. Each binding maps to 1..N logical sections (KIS10-01).
         /// </summary>
         public IReadOnlyList<KoploperBlockBinding> KoploperBlockBindings { get; init; }
             = Array.Empty<KoploperBlockBinding>();
@@ -166,18 +167,100 @@ namespace SiebwaldeApp.Core.TrackApplication.Topology
             => SiebwaldeApp.Core.KoploperBlockMap.Parse(BuildKoploperBlockMapConfig(usePhysical: false));
 
         /// <summary>
-        /// Builds a dictionary keyed by the Koploper INTERNAL block id (the machine identity, NOT
-        /// the display block number) mapping to the bound logical section id, in declaration order.
+        /// Builds a 1:N dictionary keyed by the Koploper INTERNAL block id (the machine identity, NOT
+        /// the display block number) mapping to the bound logical section ids, in declaration order.
         /// </summary>
-        public IReadOnlyDictionary<int, int> ToKoploperBlockBindingMap()
+        public IReadOnlyDictionary<int, IReadOnlyList<int>> ToKoploperBlockBindingMap()
+        {
+            var map = new Dictionary<int, IReadOnlyList<int>>();
+            foreach (var binding in KoploperBlockBindings)
+            {
+                map[binding.KoploperInternalBlockId] = binding.SectionIds;
+            }
+
+            return map;
+        }
+
+        /// <summary>
+        /// Flattens the 1:N binding to a 1:1 internal-block -&gt; section map, valid only while every
+        /// block binds EXACTLY ONE section (the KIS10-01 N=1 compatibility bridge). A block bound to
+        /// zero or more than one section is skipped (not flattened), so the KIS-07 shadow and the
+        /// KIS-09 carrier keep their existing single-section semantics unchanged for N=1 profiles.
+        /// TODO(KIS10-02): replace this with block-level shadow authority / drive-group projection.
+        /// </summary>
+        public IReadOnlyDictionary<int, int> ToSingleSectionKoploperBlockBindingMap()
         {
             var map = new Dictionary<int, int>();
             foreach (var binding in KoploperBlockBindings)
             {
-                map[binding.KoploperInternalBlockId] = binding.LogicalSectionId;
+                if (binding.SectionIds.Count == 1)
+                {
+                    map[binding.KoploperInternalBlockId] = binding.SectionIds[0];
+                }
             }
 
             return map;
+        }
+
+        /// <summary>
+        /// Projects the authoritative per-section feedback map (KIS10-06/08): for each Koploper
+        /// internal block (from <see cref="KoploperBlockBindings"/>), the bound sections in
+        /// declaration order with their amplifier + bezetmelder identity.
+        /// </summary>
+        /// <param name="usePhysical">
+        /// When true the amplifier is the REAL physical amplifier from
+        /// <see cref="PhysicalAmplifierMapping"/> (a section without a physical binding contributes
+        /// no section); when false the amplifier is the logical <see cref="LayoutSection.AmplifierSlave"/>.
+        /// </param>
+        public IReadOnlyList<KoploperFeedbackBlock> ToKoploperFeedbackMap(bool usePhysical)
+        {
+            var blocks = new List<KoploperFeedbackBlock>();
+            foreach (KoploperBlockBinding binding in KoploperBlockBindings)
+            {
+                var sections = new List<KoploperFeedbackSection>();
+                foreach (int sectionId in binding.SectionIds)
+                {
+                    LayoutSection? section = TryGetSection(sectionId);
+                    if (section is null)
+                    {
+                        continue;
+                    }
+
+                    int amplifier;
+                    if (usePhysical)
+                    {
+                        LayoutPhysicalAmplifierBinding? physical =
+                            PhysicalAmplifierMapping.FirstOrDefault(b => b.SectionId == sectionId);
+                        if (physical is null)
+                        {
+                            // A bound section without a physical amplifier is a partial drive group;
+                            // it is rejected at load and must not silently appear as a feedback section.
+                            continue;
+                        }
+
+                        amplifier = physical.PhysicalAmplifier;
+                    }
+                    else
+                    {
+                        amplifier = section.AmplifierSlave;
+                    }
+
+                    sections.Add(new KoploperFeedbackSection
+                    {
+                        SectionId = sectionId,
+                        Amplifier = amplifier,
+                        Bezetmelders = section.Bezetmelders
+                    });
+                }
+
+                blocks.Add(new KoploperFeedbackBlock
+                {
+                    BlockNumber = binding.KoploperInternalBlockId,
+                    Sections = sections
+                });
+            }
+
+            return blocks;
         }
 
         /// <summary>

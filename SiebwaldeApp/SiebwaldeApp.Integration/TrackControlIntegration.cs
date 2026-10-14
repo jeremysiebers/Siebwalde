@@ -44,6 +44,8 @@ namespace SiebwaldeApp.Integration
             IMovementSimulation? movementSimulation = null,
             IReadOnlyDictionary<int, int>? locomotiveIdentity = null,
             IReadOnlyList<LayoutPhysicalAmplifierBinding>? physicalAmplifierMapping = null,
+            IReadOnlyDictionary<int, IReadOnlyList<int>>? koploperBlockBindingMap = null,
+            IReadOnlyList<KoploperFeedbackBlock>? koploperFeedbackMap = null,
             TimeSpan? sourceReleaseTailHoldMs = null)
         {
             _commClient = commClient ?? throw new ArgumentNullException(nameof(commClient));
@@ -77,6 +79,7 @@ namespace SiebwaldeApp.Integration
                     locomotiveIdentity,
                     topology,
                     physicalAmplifierMapping,
+                    koploperBlockBindingMap ?? new Dictionary<int, IReadOnlyList<int>>(),
                     tailHoldWindow: sourceReleaseTailHoldMs);
             }
 
@@ -139,7 +142,13 @@ namespace SiebwaldeApp.Integration
                            "Provide either a loco repository (in-process ECoS backend) or a feedback sink.",
                            nameof(feedbackSink));
 
-            Bridge = new TrackAmplifierOccupancyBridge(blockMap, occupancyProvider, sink);
+            // Per-section feedback (KIS10-06): the bridge reports each bezetmelder's OWN section.
+            // The authoritative per-section map comes from the profile (passed in by the host); when
+            // absent, fall back to the block-level map's positional projection so legacy string-config
+            // composition (harness / settings fallback) keeps its historic behaviour.
+            var feedbackMap = koploperFeedbackMap ?? blockMap.ToKoploperFeedbackMap();
+
+            Bridge = new TrackAmplifierOccupancyBridge(feedbackMap, occupancyProvider, sink);
         }
 
         /// <summary>The real hardware backend (Koploper commands -> amplifier setpoints).</summary>

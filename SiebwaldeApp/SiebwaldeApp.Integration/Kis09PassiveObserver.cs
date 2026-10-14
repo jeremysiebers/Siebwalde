@@ -52,7 +52,7 @@ namespace SiebwaldeApp.Integration
                 _shadowObserver,
                 _physicalSource,
                 profile.Name,
-                profile.KoploperBlockBindings.Select(b => b.LogicalSectionId).ToArray(),
+                profile.ToKoploperBlockBindingMap(),
                 options,
                 sharedClock);
         }

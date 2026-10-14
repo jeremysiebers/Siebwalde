@@ -5,10 +5,11 @@ using System.Linq;
 namespace SiebwaldeApp.Core.Koploper
 {
     /// <summary>
-    /// Projects a KIS-05 reservation observation plus a KIS-04 state snapshot onto Siebwalde
-    /// logical sections, producing a <see cref="KoploperLogicalSectionShadowObservation"/>. Pure
-    /// and stateless: it never retains state between calls and rebuilds the projection from scratch
-    /// each cycle (no stale ownership is inherited).
+    /// Projects a KIS-05 reservation observation plus a KIS-04 state snapshot onto Koploper internal
+    /// BLOCKS, producing a <see cref="KoploperLogicalSectionShadowObservation"/>. Pure and stateless:
+    /// it never retains state between calls and rebuilds the projection from scratch each cycle (no
+    /// stale ownership is inherited). KIS10-02: the shadow is block-level — a locomotive's
+    /// occupied/reserved members are Koploper internal block ids (1 block resolves to 1..N sections).
     /// <para>
     /// The authority gate is the reservation observation's <see cref="KoploperReservationObservation.IsAuthoritative"/>
     /// (KIS-05). The per-block manual-blocked state, the per-block automatic state and the owner all
@@ -20,26 +21,28 @@ namespace SiebwaldeApp.Core.Koploper
     {
         /// <summary>
         /// Projects <paramref name="observation"/> and <paramref name="snapshot"/> into a shadow
-        /// observation. <paramref name="internalBlockToSection"/> maps a Koploper internal block id
-        /// (machine identity) to a Siebwalde logical section id. <paramref name="shadowSequence"/> is
-        /// the shadow observer's own monotonic counter, <paramref name="observedAtUtc"/> the
-        /// observation instant, and <paramref name="maxSnapshotAge"/> (when non-null) bounds the
-        /// freshness of the manual-state snapshot.
+        /// observation. <paramref name="internalBlockToSections"/> maps a Koploper internal block id
+        /// (machine identity) to its 1..N Siebwalde logical section ids (KIS10-02). The shadow stays
+        /// block-level: a locomotive's occupied/reserved members are Koploper internal block ids, not
+        /// per-section ids. <paramref name="shadowSequence"/> is the shadow observer's own monotonic
+        /// counter, <paramref name="observedAtUtc"/> the observation instant, and
+        /// <paramref name="maxSnapshotAge"/> (when non-null) bounds the freshness of the manual-state
+        /// snapshot.
         /// </summary>
         public static KoploperLogicalSectionShadowObservation Project(
             KoploperReservationObservation observation,
             KoploperStateSnapshot? snapshot,
             string profileId,
-            IReadOnlyDictionary<int, int> internalBlockToSection,
+            IReadOnlyDictionary<int, IReadOnlyList<int>> internalBlockToSections,
             long shadowSequence,
             DateTimeOffset observedAtUtc,
             TimeSpan? maxSnapshotAge)
         {
             ArgumentNullException.ThrowIfNull(observation);
-            ArgumentNullException.ThrowIfNull(internalBlockToSection);
+            ArgumentNullException.ThrowIfNull(internalBlockToSections);
             ArgumentNullException.ThrowIfNull(profileId);
 
-            bool mappingValid = IsOneToOne(internalBlockToSection);
+            bool mappingValid = IsValidBlockSectionMap(internalBlockToSections);
             bool sourceAuthoritative = observation.IsAuthoritative;
 
             if (!sourceAuthoritative)
@@ -65,7 +68,8 @@ namespace SiebwaldeApp.Core.Koploper
 
             bool manualStateValid = snapshot.Blocks.All(block => block.ManualBlocked != KoploperManualBlockState.Invalid);
 
-            // Per-loco projection buckets, lazily created for any owner id encountered.
+            // Per-loco projection buckets, lazily created for any owner id encountered. Occupied and
+            // reserved carry Koploper INTERNAL BLOCK ids (block-level shadow), never section ids.
             var occupied = new Dictionary<int, int?>();
             var reserved = new Dictionary<int, HashSet<int>>();
 
@@ -78,7 +82,7 @@ namespace SiebwaldeApp.Core.Koploper
 
             foreach (KoploperBlockSnapshot block in snapshot.Blocks)
             {
-                bool mapped = internalBlockToSection.TryGetValue(block.InternalBlockId, out int sectionId);
+                bool mapped = internalBlockToSections.TryGetValue(block.InternalBlockId, out IReadOnlyList<int>? sectionIds);
 
                 if (!mapped)
                 {
@@ -119,7 +123,6 @@ namespace SiebwaldeApp.Core.Koploper
                     conflicts.Add(new KoploperLogicalSectionConflict(
                         KoploperLogicalSectionConflictKind.ManualVsAutomatic,
                         block.InternalBlockId,
-                        sectionId,
                         block.OwnerLocomotiveId));
                     diagnostics.Add(KoploperDiagnosticCode.KOPLOPER_MANUAL_AUTOMATIC_CONFLICT);
                     continue;
@@ -130,20 +133,21 @@ namespace SiebwaldeApp.Core.Koploper
                     switch (block.State)
                     {
                         case KoploperBlockState.Occupied:
+                            // Block-level occupancy: the shadow records the internal BLOCK id, and a
+                            // locomotive occupying two different mapped blocks is a fail-closed conflict.
                             if (occupied.TryGetValue(ownerId, out int? existingOccupied) && existingOccupied.HasValue)
                             {
-                                if (existingOccupied.Value != sectionId)
+                                if (existingOccupied.Value != block.InternalBlockId)
                                 {
                                     conflicts.Add(new KoploperLogicalSectionConflict(
-                                        KoploperLogicalSectionConflictKind.MultipleOccupiedSections,
+                                        KoploperLogicalSectionConflictKind.MultipleOccupiedBlocks,
                                         block.InternalBlockId,
-                                        sectionId,
                                         ownerId));
                                 }
                             }
                             else
                             {
-                                occupied[ownerId] = sectionId;
+                                occupied[ownerId] = block.InternalBlockId;
                             }
 
                             break;
@@ -155,7 +159,7 @@ namespace SiebwaldeApp.Core.Koploper
                                 reserved[ownerId] = set;
                             }
 
-                            set.Add(sectionId);
+                            set.Add(block.InternalBlockId);
                             break;
 
                         default:
@@ -166,7 +170,15 @@ namespace SiebwaldeApp.Core.Koploper
 
                 if (manualBlockedMapped)
                 {
-                    manualBlockedSections.Add(sectionId);
+                    // Manual-blocked stays section-level in the observation: a manual-blocked block
+                    // contributes ALL of its bound sections (1..N).
+                    if (sectionIds is not null)
+                    {
+                        foreach (int sectionId in sectionIds)
+                        {
+                            manualBlockedSections.Add(sectionId);
+                        }
+                    }
                 }
             }
 
@@ -226,22 +238,32 @@ namespace SiebwaldeApp.Core.Koploper
         }
 
         /// <summary>
-        /// The binding map is valid when it is non-empty AND one-to-one (no two internal block ids
-        /// map to the same logical section).
+        /// The 1:N block-section map is valid when it is non-empty, no block binds an EMPTY section
+        /// list, and no logical section appears in two different blocks. (A section bound to exactly
+        /// one block is the invariant that keeps the per-section manual-blocked flattening and the
+        /// downstream section-level consumers unambiguous.)
         /// </summary>
-        private static bool IsOneToOne(IReadOnlyDictionary<int, int> internalBlockToSection)
+        private static bool IsValidBlockSectionMap(IReadOnlyDictionary<int, IReadOnlyList<int>> internalBlockToSections)
         {
-            if (internalBlockToSection.Count == 0)
+            if (internalBlockToSections.Count == 0)
             {
                 return false;
             }
 
             var seenSections = new HashSet<int>();
-            foreach (int section in internalBlockToSection.Values)
+            foreach (KeyValuePair<int, IReadOnlyList<int>> entry in internalBlockToSections)
             {
-                if (!seenSections.Add(section))
+                if (entry.Value is null || entry.Value.Count == 0)
                 {
                     return false;
+                }
+
+                foreach (int section in entry.Value)
+                {
+                    if (!seenSections.Add(section))
+                    {
+                        return false;
+                    }
                 }
             }
 

@@ -35,6 +35,7 @@ namespace SiebwaldeApp.Integration
         private readonly IReadOnlyDictionary<int, int> _identity;
         private readonly BlockTopology _topology;
         private readonly IReadOnlyList<LayoutPhysicalAmplifierBinding> _mapping;
+        private readonly IReadOnlyDictionary<int, IReadOnlyList<int>> _blockToSections;
         private readonly TimeSpan _confirmationWindow;
         private readonly TimeSpan _tailHoldWindow;
         private readonly Func<DateTimeOffset> _clock;
@@ -68,6 +69,7 @@ namespace SiebwaldeApp.Integration
             IReadOnlyDictionary<int, int> identity,
             BlockTopology topology,
             IReadOnlyList<LayoutPhysicalAmplifierBinding> mapping,
+            IReadOnlyDictionary<int, IReadOnlyList<int>> blockToSections,
             TimeSpan? confirmationWindow = null,
             TimeSpan? tailHoldWindow = null,
             Func<DateTimeOffset>? clock = null,
@@ -80,6 +82,7 @@ namespace SiebwaldeApp.Integration
             _identity = identity ?? throw new ArgumentNullException(nameof(identity));
             _topology = topology ?? throw new ArgumentNullException(nameof(topology));
             _mapping = mapping ?? throw new ArgumentNullException(nameof(mapping));
+            _blockToSections = blockToSections ?? throw new ArgumentNullException(nameof(blockToSections));
             _confirmationWindow = confirmationWindow ?? DefaultConfirmationWindow;
             _tailHoldWindow = tailHoldWindow ?? DefaultSourceReleaseTailHold;
             _clock = clock ?? (() => DateTimeOffset.UtcNow);
@@ -208,6 +211,7 @@ namespace SiebwaldeApp.Integration
                 _physical,
                 _topology,
                 _mapping,
+                _blockToSections,
                 _previousTargets,
                 _footprint,
                 _confirmationWindow);
@@ -356,7 +360,7 @@ namespace SiebwaldeApp.Integration
             }
 
             IReadOnlyDictionary<int, int> reconstructed = PhysicalFootprintReconstructor.Reconstruct(
-                _shadow, _physical, _topology, _mapping, _identity);
+                _shadow, _physical, _topology, _mapping, _blockToSections, _identity);
 
             foreach (var (section, owner) in reconstructed)
             {

@@ -18,7 +18,7 @@ namespace SiebwaldeApp.Core.Koploper
         private readonly IKoploperLogicalSectionShadowObserver _shadowObserver;
         private readonly IPhysicalSectionOccupancySource _physicalSource;
         private readonly string _profileId;
-        private readonly IReadOnlyCollection<int> _logicallyBoundSectionIds;
+        private readonly IReadOnlyDictionary<int, IReadOnlyList<int>> _blockToSections;
         private readonly LogicalPhysicalReconciliationObserverOptions _options;
         private readonly Func<DateTimeOffset> _clock;
 
@@ -33,14 +33,14 @@ namespace SiebwaldeApp.Core.Koploper
             IKoploperLogicalSectionShadowObserver shadowObserver,
             IPhysicalSectionOccupancySource physicalSource,
             string profileId,
-            IReadOnlyCollection<int> logicallyBoundSectionIds,
+            IReadOnlyDictionary<int, IReadOnlyList<int>> blockToSections,
             LogicalPhysicalReconciliationObserverOptions? options = null,
             Func<DateTimeOffset>? clock = null)
         {
             _shadowObserver = shadowObserver ?? throw new ArgumentNullException(nameof(shadowObserver));
             _physicalSource = physicalSource ?? throw new ArgumentNullException(nameof(physicalSource));
             _profileId = profileId ?? throw new ArgumentNullException(nameof(profileId));
-            _logicallyBoundSectionIds = logicallyBoundSectionIds ?? throw new ArgumentNullException(nameof(logicallyBoundSectionIds));
+            _blockToSections = blockToSections ?? throw new ArgumentNullException(nameof(blockToSections));
             _options = options ?? new LogicalPhysicalReconciliationObserverOptions();
             _clock = clock ?? (() => DateTimeOffset.UtcNow);
         }
@@ -148,7 +148,7 @@ namespace SiebwaldeApp.Core.Koploper
             return LogicalPhysicalReconciliationProjector.Reconcile(
                 shadow,
                 physical,
-                _logicallyBoundSectionIds,
+                _blockToSections,
                 reconciliationSequence,
                 evaluatedAtUtc);
         }
@@ -214,6 +214,7 @@ namespace SiebwaldeApp.Core.Koploper
                 ReconciliationAssessable: false,
                 Sections: Array.Empty<LogicalSectionReconciliation>(),
                 Locomotives: Array.Empty<LogicalLocomotiveReconciliation>(),
+                Blocks: Array.Empty<LogicalBlockReconciliation>(),
                 Diagnostics: Array.Empty<ReconciliationDiagnosticCode>());
         }
     }

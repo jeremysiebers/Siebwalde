@@ -1,4 +1,5 @@
 using SiebwaldeApp.Core;
+using SiebwaldeApp.Core.TrackApplication.Topology;
 using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
@@ -75,6 +76,13 @@ namespace SiebwaldeApp
         public string PhysicalBindingStatus { get; set; } = "Physical binding: none";
 
         /// <summary>
+        /// READ-ONLY Koploper logical-block -&gt; section -&gt; amplifier -&gt; bezetmelder mapping for
+        /// the active profile, plus the validation status (conflicts/missing mapping). This is a view
+        /// only: the <c>LayoutProfile</c> JSON remains the single runtime configuration authority.
+        /// </summary>
+        public string KoploperMappingStatus { get; set; } = "Koploper mapping: none";
+
+        /// <summary>
         /// Health of the control path as reported by the diagnostics surface: healthy, warning
         /// or unsafe. This view model only displays it; the decision is made in the host.
         /// </summary>
@@ -142,6 +150,7 @@ namespace SiebwaldeApp
             _runtime.Faulted += HandleRuntimeFaulted;
 
             UpdatePhysicalBindingStatus();
+            UpdateKoploperMappingStatus();
 
             DetectHosts = new RelayCommand(async () => await DetectHostsAsync(logAlways: true));
 
@@ -433,6 +442,7 @@ namespace SiebwaldeApp
                 : $"ECoS host: {mode} mode active";
 
             UpdatePhysicalBindingStatus();
+            UpdateKoploperMappingStatus();
 
             var diagnostics = IoC.siebwaldeApplicationModel.ControlDiagnostics;
             if (diagnostics is null)
@@ -463,6 +473,19 @@ namespace SiebwaldeApp
             PhysicalBindingStatus = binding is null || binding.Count == 0
                 ? "Physical binding: none"
                 : $"Physical binding: {string.Join(", ", binding)}";
+        }
+
+        /// <summary>
+        /// Refreshes <see cref="KoploperMappingStatus"/> from the active profile via the pure
+        /// <see cref="KoploperMappingViewProjector"/>. The projector is read-only and holds no
+        /// runtime authority; this view model only renders its text.
+        /// </summary>
+        private void UpdateKoploperMappingStatus()
+        {
+            var profile = IoC.TrackRuntime.ActiveFullSimulationProfile;
+            KoploperMappingStatus = profile is null
+                ? "Koploper mapping: none"
+                : KoploperMappingViewProjector.Build(profile).ToDisplayText();
         }
 
         /// <summary>

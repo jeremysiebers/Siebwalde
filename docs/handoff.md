@@ -1,5 +1,17 @@
 # Handoff
 
+## Developer handoff (2026-10-13, KIS-10 Release and selected-profile wiring)
+
+Software-only self-verification on `feature/koploper-multi-section-kis10`, HEAD `fe17ebedd33f21717d69e03190d5e22a50d6b9e2` plus the existing uncommitted KIS-10 work. No production defect found; no production code changed by this task. Added `SiebwaldeApp/SiebwaldeApp.Core.Tests/OvaaltjeLoop2CompositionTests.cs` (2 facts): `RuntimeSelection_OverridesSimpleLoop_RealCarrierAndFeedbackReceiveSelectedProfile` and `PassiveFactory_SelectedProfileFeedsOneToManyShadowBinding_WithoutStartingReaders`.
+
+- Initial requested Release checks: solution build **0 errors / 175 warnings**; tests **969 passed / 0 failed / 0 skipped**; explicit Release harness build **0 errors / 0 warnings**.
+- After the 2 test additions: full Debug and Release **971 passed / 0 failed / 0 skipped** each; Release solution incremental build **0 errors / 13 warnings**; explicit Release harness build **0 errors / 0 warnings**. Warning counts differ because unchanged projects were not recompiled; this is not evidence of warning fixes.
+- Profile source and WPF Release output copy SHA-256 both `971ED92DB020E6A6910A1E7417FB41F0D50D09CCA6C4EF9E7691A097C63A8BB5`.
+- Inspection: WPF `TrackSimulationPageViewModel.ApplyProfileSelection` ignores selection unless `Stopped`; runtime `SelectFullSimulationProfile` calls host `SetProfile` then updates the effective selection. Host Real composition passes selected 1:N block bindings, physical mapping, identity and physical feedback to `TrackControlIntegration`. Runtime `ComposeTrackPartAsync` passes `EffectiveFullSimulationProfile` to `Kis09PassiveObserverFactory.Create`.
+- Executed wiring evidence: real host composition (inert comm client, isolated loopback ports, no track init) receives block map `{1:[1],2:[2],3:[3,4]}`, block 3 drive group `[4,6]`, feedback `(3,4,1.03)/(4,6,1.04)`, and DCC bindings 1/2. Passive factory's constructed shadow observer receives the same 1:N map; its readers are never started/refreshed. Private-field probes avoid test-only production APIs.
+- Unverified: interactive WPF selection/guard, full selected-profile runtime startup and live observer reads were not executed by the new tests. These paths were inspected; no hardware, live application, firmware or physical behavior was exercised. No staging/commit/PR or workflow state change.
+- Advisory next action: independent review of the new tests, then continue `VALIDATION_PREP / WAITING_AUTHORITY`; live hardware remains separately gated. Exact command output logs are local under `C:/Users/jerem/AppData/Local/Temp/opencode/kis10-*.log` (not durable Git evidence).
+
 ## Session (2026-10-09, KIS-08 logical-physical reconciliation MERGED — KIS-08 DONE / TERMINAL)
 
 Branch `feature/koploper-internal-state-kis08`, final HEAD `92ff09c414f9f324616466112fd912347dc06dac`. This session implemented and merged KIS-08 (Logical ↔ Physical Reconciliation + Section Safety Eligibility, SHADOW / NO CONTROL WRITES) into `master`.

@@ -6,11 +6,18 @@ using SiebwaldeApp.Core.TrackApplication.Topology;
 namespace SiebwaldeApp.Core.Koploper
 {
     /// <summary>
-    /// The PURE, STATELESS ownership-aware locomotive carrier projector (Phase 1). It reconciles the
-    /// KIS-07 logical-section shadow (authority, only when <c>ShadowValid</c>) against the KIS-08
-    /// physical section occupancy and the physical amplifier mapping, and emits one
-    /// <see cref="CarrierAmplifierDecision"/> per amplifier. It performs no side effects, holds no
-    /// static state, and does no I/O. It is not yet wired into the live control path (Phase 2).
+    /// The PURE, STATELESS ownership-aware locomotive carrier projector. It reconciles the KIS-07
+    /// BLOCK-level shadow (authority, only when <c>ShadowValid</c>) against the KIS-08 physical section
+    /// occupancy and the physical amplifier mapping, and emits one <see cref="CarrierAmplifierDecision"/>
+    /// per amplifier. It performs no side effects, holds no static state, and does no I/O.
+    /// <para>
+    /// KIS10-04: authority is BLOCK-level. <c>blockOwner</c> (internal block → DCC) is built from
+    /// <c>OccupiedLogicalBlock</c> first then <c>ReservedLogicalBlocks</c> (fill), same precedence as
+    /// before. Every physical amplifier resolves to its block via section → block, and ALL amplifiers
+    /// of one owned block form that locomotive's DRIVE GROUP and follow the SAME speed/direction
+    /// (PO §21 intra-block release semantics: an individual section becoming physically Clear does NOT
+    /// neutralize its amp while the block remains authorized).
+    /// </para>
     /// </summary>
     public static class LocomotiveCarrierReconciliation
     {
@@ -23,6 +30,7 @@ namespace SiebwaldeApp.Core.Koploper
             PhysicalSectionOccupancyObservation? physical,
             BlockTopology topology,
             IReadOnlyList<LayoutPhysicalAmplifierBinding> mapping,
+            IReadOnlyDictionary<int, IReadOnlyList<int>> blockToSections,
             IReadOnlyDictionary<int, (int OwnerDcc, int Hr0)>? previousTargets,
             IReadOnlyDictionary<int, int>? physicalFootprint,
             TimeSpan confirmationWindow)
@@ -31,6 +39,7 @@ namespace SiebwaldeApp.Core.Koploper
             ArgumentNullException.ThrowIfNull(identity);
             ArgumentNullException.ThrowIfNull(topology);
             ArgumentNullException.ThrowIfNull(mapping);
+            ArgumentNullException.ThrowIfNull(blockToSections);
 
             var diagnostics = new List<string>();
             var decisions = new Dictionary<int, CarrierAmplifierDecision>();
@@ -66,10 +75,10 @@ namespace SiebwaldeApp.Core.Koploper
                     new Dictionary<int, int>());
             }
 
-            // 2) Per-loco logical ownership: section -> owner dcc.
-            var sectionOwner = new Dictionary<int, int>();
-            var locoOccupied = new Dictionary<int, int?>();
-            var locoReserved = new Dictionary<int, HashSet<int>>();
+            // 2) Per-loco logical ownership at BLOCK level, then expanded to sections.
+            var locoOccupiedBlock = new Dictionary<int, int?>();
+            var locoReservedBlocks = new Dictionary<int, HashSet<int>>();
+            var blockOwner = new Dictionary<int, int>();
 
             foreach (var loco in shadow.Locomotives)
             {
@@ -81,18 +90,18 @@ namespace SiebwaldeApp.Core.Koploper
                     continue;
                 }
 
-                locoOccupied[dcc] = loco.OccupiedLogicalSection;
-                locoReserved[dcc] = new HashSet<int>(loco.ReservedLogicalSections ?? Array.Empty<int>());
+                locoOccupiedBlock[dcc] = loco.OccupiedLogicalBlock;
+                locoReservedBlocks[dcc] = new HashSet<int>(loco.ReservedLogicalBlocks ?? Array.Empty<int>());
 
-                // Occupied ownership is resolved first: an Occupied(B) section is never taken over
-                // by a Reserved(A) section, regardless of shadow iteration order.
-                if (loco.OccupiedLogicalSection is int occ)
+                // Occupied ownership is resolved first: an Occupied(B) block is never taken over by a
+                // Reserved(A) block, regardless of shadow iteration order.
+                if (loco.OccupiedLogicalBlock is int occBlock)
                 {
-                    sectionOwner[occ] = dcc;
+                    blockOwner[occBlock] = dcc;
                 }
             }
 
-            // Reserved ownership fills only sections that no locomotive already occupies.
+            // Reserved ownership fills only blocks that no locomotive already occupies.
             foreach (var loco in shadow.Locomotives)
             {
                 if (!identity.TryGetValue(loco.InternalLocomotiveId, out int dcc))
@@ -100,13 +109,58 @@ namespace SiebwaldeApp.Core.Koploper
                     continue;
                 }
 
-                foreach (var r in loco.ReservedLogicalSections ?? Array.Empty<int>())
+                foreach (var r in loco.ReservedLogicalBlocks ?? Array.Empty<int>())
                 {
-                    if (!sectionOwner.ContainsKey(r))
+                    if (!blockOwner.ContainsKey(r))
                     {
-                        sectionOwner[r] = dcc;
+                        blockOwner[r] = dcc;
                     }
                 }
+            }
+
+            // Section -> block (reverse of blockToSections), and section -> owner (block owner expanded).
+            var sectionToBlock = new Dictionary<int, int>();
+            foreach (KeyValuePair<int, IReadOnlyList<int>> entry in blockToSections)
+            {
+                if (entry.Value is null)
+                {
+                    continue;
+                }
+
+                foreach (int section in entry.Value)
+                {
+                    sectionToBlock[section] = entry.Key;
+                }
+            }
+
+            var sectionOwner = new Dictionary<int, int>();
+            foreach (var (block, dcc) in blockOwner)
+            {
+                if (!blockToSections.TryGetValue(block, out IReadOnlyList<int>? sections))
+                {
+                    continue;
+                }
+
+                foreach (int section in sections)
+                {
+                    sectionOwner[section] = dcc;
+                }
+            }
+
+            // Reserved sections per locomotive (block reserved -> sections), for section-level checks.
+            var locoReservedSections = new Dictionary<int, HashSet<int>>();
+            foreach (var (dcc, reservedBlocks) in locoReservedBlocks)
+            {
+                var sections = new HashSet<int>();
+                foreach (int block in reservedBlocks)
+                {
+                    if (blockToSections.TryGetValue(block, out IReadOnlyList<int>? blockSections))
+                    {
+                        sections.UnionWith(blockSections);
+                    }
+                }
+
+                locoReservedSections[dcc] = sections;
             }
 
             // 3) Physical state per logical section.
@@ -119,7 +173,7 @@ namespace SiebwaldeApp.Core.Koploper
                 }
             }
 
-            // 4) Amp -> sections (generic: one section maps to one amp, several sections may map to one amp).
+            // 4) Amp -> sections and section -> amp.
             var sectionsByAmp = new Dictionary<int, List<int>>();
             foreach (var binding in mapping)
             {
@@ -132,52 +186,137 @@ namespace SiebwaldeApp.Core.Koploper
                 list.Add(binding.SectionId);
             }
 
-            // Section -> amplifier (one-to-one in the carrier model), used by the partial-footprint
-            // containment detector to resolve a section to its amplifier for drive-history lookup.
             var sectionToAmp = new Dictionary<int, int>();
             foreach (var binding in mapping)
             {
                 sectionToAmp[binding.SectionId] = binding.PhysicalAmplifier;
             }
 
-            // Partial-footprint containment: a locomotive whose occupied anchor has an adjacent,
-            // physically-Occupied section that is NOT safely attributable to it must not drive its
-            // partial footprint forward (see requirement 7). Detected fresh every cycle from the
-            // current shadow, physical occupancy, footprint residue and drive history.
+            Dictionary<int, List<int>> sectionAdjacency = KoploperSectionTopology.BuildSectionAdjacency(blockToSections, topology);
+
+            var manualBlockedSections = new HashSet<int>(shadow.ManualBlockedSections ?? Array.Empty<int>());
+
+            // 5) Partial-footprint containment (section-level flood).
             HashSet<int> containedDccs = DetectContainedLocos(
                 sectionOwner,
-                locoReserved,
-                locoOccupied,
+                locoReservedSections,
+                locoOccupiedBlock,
+                blockToSections,
                 physicalBySection,
                 sectionToAmp,
-                topology,
+                sectionAdjacency,
                 physicalFootprint,
                 previousTargets);
-
-            var manualBlocked = new HashSet<int>(shadow.ManualBlockedSections ?? Array.Empty<int>());
 
             var locoStop = new HashSet<int>();
             var latched = new HashSet<int>();
 
-            // 5) Per-amplifier decisions.
+            // 6) Block-level drive decisions for every owned block (one verdict per block's drive group).
+            var blockVerdicts = new Dictionary<int, (CarrierVerdict Verdict, CarrierReason Reason, int Hr0, int? Owner)>();
+            foreach (var (block, dcc) in blockOwner)
+            {
+                if (!blockToSections.TryGetValue(block, out IReadOnlyList<int>? sections) || sections.Count == 0)
+                {
+                    continue;
+                }
+
+                // Drive-group completeness (PO §21 / F1): resolve the block's COMPLETE drive group
+                // through the projector. An EMPTY projection means a bound section has no physical
+                // amplifier binding, so the block must NOT be partially energized — fail closed.
+                IReadOnlyList<int> driveGroup = KoploperDriveGroupProjector.Project(block, blockToSections, mapping);
+                if (driveGroup.Count == 0)
+                {
+                    int[] unboundSections = sections.Where(s => !sectionToAmp.ContainsKey(s)).ToArray();
+                    diagnostics.Add(
+                        $"Block {block} has an incomplete drive group: section(s) " +
+                        $"{string.Join(", ", unboundSections)} have no physical amplifier binding; " +
+                        "fail closed (no partial block energization).");
+                    blockVerdicts[block] = (CarrierVerdict.Neutral, CarrierReason.MissingBinding, Neutral, dcc);
+                    continue;
+                }
+
+                bool manualBlocked = sections.Any(s => manualBlockedSections.Contains(s));
+                bool isOccupied = locoOccupiedBlock.TryGetValue(dcc, out int? occ) && occ == block;
+                bool contained = containedDccs.Contains(dcc);
+                PhysicalOccupancy blockOcc = BlockOccupancy(sections, physicalBySection);
+                (int Speed, int Direction) desired = desiredLocoStates.TryGetValue(dcc, out var d)
+                    ? d
+                    : (0, 1);
+
+                if (manualBlocked)
+                {
+                    blockVerdicts[block] = (CarrierVerdict.Deny, CarrierReason.ManualBlocked, Neutral, dcc);
+                    continue;
+                }
+
+                if (blockOcc == PhysicalOccupancy.Unknown)
+                {
+                    // Fail closed: unknown/stale telemetry over the whole block.
+                    blockVerdicts[block] = (CarrierVerdict.Neutral, CarrierReason.PhysicalUnknownStale, Neutral, dcc);
+                    continue;
+                }
+
+                if (desired.Speed <= 0)
+                {
+                    blockVerdicts[block] = (CarrierVerdict.Neutral, CarrierReason.SpeedZeroNeutral, Neutral, dcc);
+                    continue;
+                }
+
+                if (contained)
+                {
+                    // Neutral-only containment: no loco-stop, no latch, no layout stop.
+                    blockVerdicts[block] = (CarrierVerdict.Neutral, CarrierReason.PartialFootprintContain, Neutral, dcc);
+                    continue;
+                }
+
+                int hr0 = AmplifierSpeedMapper.ToPwm(desired.Speed, desired.Direction);
+
+                if (isOccupied)
+                {
+                    // PO §21: an authorized (Occupied) block drives its COMPLETE drive group at the
+                    // owner's speed, regardless of per-section physical occupancy.
+                    blockVerdicts[block] = (CarrierVerdict.Drive, CarrierReason.OccupiedConsistent, hr0, dcc);
+                    continue;
+                }
+
+                // Reserved block.
+                if (blockOcc == PhysicalOccupancy.Clear)
+                {
+                    blockVerdicts[block] = (CarrierVerdict.Drive, CarrierReason.ReservedPreEnergize, hr0, dcc);
+                    continue;
+                }
+
+                // Reserved + physically occupied: expected boundary lead, or revoke + loco-stop + latch.
+                if (IsExpectedBoundaryLead(locoOccupiedBlock.GetValueOrDefault(dcc), block, blockToSections, topology, physicalBySection, confirmationWindow))
+                {
+                    blockVerdicts[block] = (CarrierVerdict.Drive, CarrierReason.ExpectedBoundaryLead, hr0, dcc);
+                }
+                else
+                {
+                    locoStop.Add(dcc);
+                    latched.Add(dcc);
+                    blockVerdicts[block] = (CarrierVerdict.Revoke, CarrierReason.ReservedNotExpectedRevoke, Neutral, dcc);
+                }
+            }
+
+            // 7) Per-amplifier decisions.
             foreach (var amp in domain)
             {
                 CarrierAmplifierDecision? decision = DecideAmplifier(
                     amp,
-                    sectionOwner,
-                    locoOccupied,
-                    locoReserved,
-                    physicalBySection,
                     sectionsByAmp,
-                    manualBlocked,
-                    topology,
-                    desiredLocoStates,
-                    confirmationWindow,
+                    sectionToBlock,
+                    blockOwner,
+                    sectionOwner,
+                    blockVerdicts,
+                    manualBlockedSections,
+                    physicalBySection,
                     physicalFootprint,
-                    diagnostics,
-                    locoStop,
-                    latched,
-                    containedDccs);
+                    containedDccs,
+                    desiredLocoStates,
+                    locoOccupiedBlock,
+                    locoReservedBlocks,
+                    diagnostics);
 
                 if (decision is not null)
                 {
@@ -185,20 +324,14 @@ namespace SiebwaldeApp.Core.Koploper
                 }
             }
 
-            // 6) Physical source hold (two-stage release, Stage 1 deassert already applied upstream):
-            //    a previously-driven target whose section is no longer in any locomotive's logical
-            //    set stays DRIVEN at the previous owner's retained speed while it is still physically
-            //    occupied, or is filtered Clear but within the post-clear tail hold, or has gone
-            //    stale. KIS removing the section from the owner's logical set does NOT by itself
-            //    neutralize it; only a speed-zero / safety stop releases it immediately here (the
-            //    tail-hold timing is applied by the stateful controller, not this pure projector).
+            // 8) Physical source hold (two-stage release, Stage 1 deassert already applied upstream):
+            //    a previously-driven target whose section is no longer in any locomotive's logical set
+            //    stays DRIVEN at the previous owner's retained speed while it is still physically
+            //    occupied, or is filtered Clear but within the post-clear tail hold, or has gone stale.
             if (previousTargets is not null)
             {
                 foreach (var (amp, (prevOwner, _)) in previousTargets)
                 {
-                    // A previously-driven amp whose section now has a (possibly different) logical
-                    // owner is a handover, not a departed source: the normal decision already applies
-                    // and must not be overwritten by the previous owner's hold (explicit safe handover).
                     if (HasCurrentOwner(amp, sectionsByAmp, sectionOwner))
                     {
                         continue;
@@ -206,14 +339,11 @@ namespace SiebwaldeApp.Core.Koploper
 
                     if (decisions.TryGetValue(amp, out var existing))
                     {
-                        // A mapping collision is a hard contradiction and must not be overridden.
                         if (existing.Verdict == CarrierVerdict.Conflict)
                         {
                             continue;
                         }
 
-                        // A reserved section that is unexpectedly occupied is an escalation (loco
-                        // stop + latch), not a departed overlap; leave it as Revoke.
                         if (existing.Verdict == CarrierVerdict.Revoke &&
                             existing.Reason == CarrierReason.ReservedNotExpectedRevoke)
                         {
@@ -221,10 +351,6 @@ namespace SiebwaldeApp.Core.Koploper
                         }
                     }
 
-                    // Speed zero / safety stop means NON-NEUTRAL DRIVE MUST END; it does NOT mean the
-                    // locomotive physically disappeared. The departed source stays attributed to its
-                    // owner (neutral), so the next cycle does not reinterpret the same physical
-                    // occupancy as an ownerless Free+Occupied intrusion.
                     if (!desiredLocoStates.TryGetValue(prevOwner, out var prevDesired) || prevDesired.Speed <= 0)
                     {
                         decisions[amp] = new CarrierAmplifierDecision(
@@ -233,8 +359,6 @@ namespace SiebwaldeApp.Core.Koploper
                         continue;
                     }
 
-                    // A contained locomotive (partial footprint) must not have its departed source
-                    // re-driven by the hold; keep it neutral and attributed (no release, no drive).
                     if (containedDccs.Contains(prevOwner))
                     {
                         decisions[amp] = new CarrierAmplifierDecision(
@@ -243,9 +367,7 @@ namespace SiebwaldeApp.Core.Koploper
                         continue;
                     }
 
-                    // Authority gate: a departed source must not be re-driven once its owner became
-                    // logically Free (no occupied, no reserved), even with a stale retained Speed > 0.
-                    if (!HoldsLogicalAuthority(prevOwner, locoOccupied, locoReserved))
+                    if (!HoldsLogicalAuthority(prevOwner, locoOccupiedBlock, locoReservedBlocks))
                     {
                         decisions[amp] = new CarrierAmplifierDecision(
                             amp, prevOwner, Neutral, CarrierVerdict.DepartingPhysicalStop,
@@ -282,139 +404,99 @@ namespace SiebwaldeApp.Core.Koploper
                 PhysicalFootprint: BuildFootprint(mapping, sectionOwner, physicalFootprint, previousTargets, physicalBySection));
         }
 
-        /// <summary>
-        /// Derives the section -&gt; owner physical footprint RESIDUE to persist into the next cycle.
-        /// Logical ownership (Occupied + Reserved) is recomputed fresh from the shadow every cycle and
-        /// is therefore NOT stored here. The residue is only the stateful part: sections that are no
-        /// longer logically owned but are still physically attributed to a locomotive — a departed
-        /// source whose tail is still on the section, or a reconstructed extension at startup. This is
-        /// what prevents a stopped spanning locomotive from being reclassified as an ownerless
-        /// intrusion.
-        /// </summary>
-        private static IReadOnlyDictionary<int, int> BuildFootprint(
-            IReadOnlyList<LayoutPhysicalAmplifierBinding> mapping,
-            IReadOnlyDictionary<int, int> sectionOwner,
-            IReadOnlyDictionary<int, int>? physicalFootprint,
-            IReadOnlyDictionary<int, (int OwnerDcc, int Hr0)>? previousTargets,
+        /// <summary>Aggregated physical occupancy of a block's sections (Unknown dominates).</summary>
+        private static PhysicalOccupancy BlockOccupancy(
+            IReadOnlyList<int> sections,
             IReadOnlyDictionary<int, PhysicalSectionState> physicalBySection)
         {
-            var footprint = new Dictionary<int, int>();
-
-            foreach (LayoutPhysicalAmplifierBinding binding in mapping)
+            bool anyUnknown = false;
+            bool anyOccupied = false;
+            foreach (int section in sections)
             {
-                int section = binding.SectionId;
-
-                // Logical ownership is recomputed fresh every cycle, not remembered.
-                if (sectionOwner.ContainsKey(section))
+                if (!physicalBySection.TryGetValue(section, out PhysicalSectionState? state) ||
+                    !state.IsFresh ||
+                    state.Occupancy == PhysicalOccupancy.Unknown)
                 {
+                    anyUnknown = true;
                     continue;
                 }
 
-                // An existing residue section keeps its attribution (released later by the tail hold).
-                if (physicalFootprint is not null &&
-                    physicalFootprint.TryGetValue(section, out int retainedOwner))
+                if (state.Occupancy == PhysicalOccupancy.Occupied)
                 {
-                    footprint[section] = retainedOwner;
-                    continue;
-                }
-
-                // A previously-driven target whose section has just left its owner's logical set is a
-                // newly-departed source: remember it as residue while it is still physically present
-                // (occupied or stale/unknown), so a later speed-zero stop does not de-attribute it.
-                if (previousTargets is not null &&
-                    previousTargets.TryGetValue(binding.PhysicalAmplifier, out var prev) &&
-                    IsPhysicallyPresent(physicalBySection, section))
-                {
-                    footprint[section] = prev.OwnerDcc;
+                    anyOccupied = true;
                 }
             }
 
-            return footprint;
-        }
-
-        private static bool IsPhysicallyPresent(
-            IReadOnlyDictionary<int, PhysicalSectionState> physicalBySection,
-            int section)
-        {
-            if (!physicalBySection.TryGetValue(section, out PhysicalSectionState? state))
+            if (anyUnknown)
             {
-                return true; // unknown -> fail closed (keep attribution)
+                return PhysicalOccupancy.Unknown;
             }
 
-            if (!state.IsFresh || state.Occupancy == PhysicalOccupancy.Unknown)
-            {
-                return true; // stale/unknown -> fail closed (keep attribution)
-            }
-
-            return state.Occupancy == PhysicalOccupancy.Occupied;
-        }
-
-        /// <summary>
-        /// True when a locomotive still holds valid LOGICAL authority: it either occupies a logical
-        /// section or reserves at least one. A locomotive that became logically Free (no occupied, no
-        /// reserved) has no authority to drive, even if a stale retained <c>Speed &gt; 0</c> survives
-        /// in the desired-loco states.
-        /// </summary>
-        private static bool HoldsLogicalAuthority(
-            int dcc,
-            IReadOnlyDictionary<int, int?> locoOccupied,
-            IReadOnlyDictionary<int, HashSet<int>> locoReserved)
-        {
-            if (locoOccupied.TryGetValue(dcc, out var occ) && occ is not null) return true;
-            return locoReserved.TryGetValue(dcc, out var reserved) && reserved.Count > 0;
+            return anyOccupied ? PhysicalOccupancy.Occupied : PhysicalOccupancy.Clear;
         }
 
         private static CarrierAmplifierDecision? DecideAmplifier(
             int amp,
-            IReadOnlyDictionary<int, int> sectionOwner,
-            IReadOnlyDictionary<int, int?> locoOccupied,
-            IReadOnlyDictionary<int, HashSet<int>> locoReserved,
-            IReadOnlyDictionary<int, PhysicalSectionState> physicalBySection,
             IReadOnlyDictionary<int, List<int>> sectionsByAmp,
-            HashSet<int> manualBlocked,
-            BlockTopology topology,
-            IReadOnlyDictionary<int, (int Speed, int Direction)> desiredLocoStates,
-            TimeSpan confirmationWindow,
+            IReadOnlyDictionary<int, int> sectionToBlock,
+            IReadOnlyDictionary<int, int> blockOwner,
+            IReadOnlyDictionary<int, int> sectionOwner,
+            IReadOnlyDictionary<int, (CarrierVerdict Verdict, CarrierReason Reason, int Hr0, int? Owner)> blockVerdicts,
+            HashSet<int> manualBlockedSections,
+            IReadOnlyDictionary<int, PhysicalSectionState> physicalBySection,
             IReadOnlyDictionary<int, int>? physicalFootprint,
-            List<string> diagnostics,
-            HashSet<int> locoStop,
-            HashSet<int> latched,
-            HashSet<int> containedDccs)
+            HashSet<int> containedDccs,
+            IReadOnlyDictionary<int, (int Speed, int Direction)> desiredLocoStates,
+            IReadOnlyDictionary<int, int?> locoOccupiedBlock,
+            IReadOnlyDictionary<int, HashSet<int>> locoReservedBlocks,
+            List<string> diagnostics)
         {
-            // (a) Mapping collision: multiple sections with different owners -> Conflict.
-            if (sectionsByAmp.TryGetValue(amp, out var sections) && sections.Count > 1)
+            if (!sectionsByAmp.TryGetValue(amp, out var sections) || sections.Count == 0)
             {
-                var owners = sections
-                    .Select(s => sectionOwner.TryGetValue(s, out var o) ? (int?)o : null)
-                    .Distinct()
-                    .ToList();
+                return null; // amplifier exists only via previousTargets (handled later)
+            }
 
-                if (owners.Count > 1)
+            // Resolve the amplifier to its block (all of its sections must be in one block).
+            var blocks = new SortedSet<int>();
+            foreach (int section in sections)
+            {
+                if (sectionToBlock.TryGetValue(section, out int block))
                 {
-                    return new CarrierAmplifierDecision(
-                        amp, null, Neutral, CarrierVerdict.Conflict,
-                        CarrierReason.MappingCollisionConflict, "mapping-collision");
+                    blocks.Add(block);
                 }
             }
 
-            // An amplifier with no mapped section exists only via previousTargets (handled later).
-            int? section = sections is { Count: > 0 } ? sections[0] : null;
-            if (section is not int sec)
-            {
-                return null;
-            }
-
-            // (b) Manual blocked -> Deny + Neutral.
-            if (manualBlocked.Contains(sec))
+            // Mapping collision: one amplifier resolves to sections in more than one block.
+            if (blocks.Count > 1)
             {
                 return new CarrierAmplifierDecision(
-                    amp, sectionOwner.TryGetValue(sec, out var mbOwner) ? mbOwner : null, Neutral,
-                    CarrierVerdict.Deny, CarrierReason.ManualBlocked, "manual-blocked");
+                    amp, null, Neutral, CarrierVerdict.Conflict,
+                    CarrierReason.MappingCollisionConflict, "mapping-collision");
             }
 
-            // (c) Physical unknown/stale -> fail closed. A footprint-attributed section keeps its
-            // attribution (neutral) even when its telemetry is stale, so a spanning locomotive is not
-            // silently de-attributed.
+            // (b) Manual blocked -> Deny + Neutral (block-level: any bound section manual-blocked).
+            if (manualBlockedSections.Overlaps(sections))
+            {
+                int? manualOwner = blocks.Count == 1 && blockOwner.TryGetValue(blocks.First(), out int mbOwner)
+                    ? mbOwner
+                    : (sections.Count == 1 && sectionOwner.TryGetValue(sections[0], out int so) ? so : null);
+                return new CarrierAmplifierDecision(
+                    amp, manualOwner, Neutral, CarrierVerdict.Deny, CarrierReason.ManualBlocked, "manual-blocked");
+            }
+
+            // Owned block -> use the cached block drive-group verdict.
+            if (blocks.Count == 1 && blockOwner.TryGetValue(blocks.First(), out int dcc))
+            {
+                (CarrierVerdict Verdict, CarrierReason Reason, int Hr0, int? Owner) blockVerdict = blockVerdicts[blocks.First()];
+                return new CarrierAmplifierDecision(
+                    amp, dcc, blockVerdict.Hr0, blockVerdict.Verdict, blockVerdict.Reason,
+                    Evidence(blockVerdict.Verdict, blockVerdict.Reason));
+            }
+
+            // Free / unbound section: per-section decision over the representative section.
+            int sec = sections[0];
+
+            // (c) Physical unknown/stale -> fail closed.
             PhysicalSectionState? phys = physicalBySection.TryGetValue(sec, out var p) ? p : null;
             PhysicalOccupancy occupancy = phys?.Occupancy ?? PhysicalOccupancy.Unknown;
             bool physicalFresh = phys is { IsFresh: true };
@@ -429,25 +511,17 @@ namespace SiebwaldeApp.Core.Koploper
                 }
 
                 return new CarrierAmplifierDecision(
-                    amp, sectionOwner.TryGetValue(sec, out var staleOwner) ? staleOwner : null, Neutral,
-                    CarrierVerdict.Neutral, CarrierReason.PhysicalUnknownStale, "physical-unknown-stale");
+                    amp, null, Neutral, CarrierVerdict.Neutral, CarrierReason.PhysicalUnknownStale, "physical-unknown-stale");
             }
 
             // (d) No logical owner.
-            if (!sectionOwner.TryGetValue(sec, out int dcc))
+            if (!sectionOwner.TryGetValue(sec, out int freeOwner) &&
+                (blocks.Count == 0 || !blockOwner.ContainsKey(blocks.First())))
             {
-                // A section still physically attributed to a locomotive (departed source or a
-                // reconstructed extension) is NOT an ownerless intrusion. Its drive state now depends
-                // on the footprint owner's CURRENT retained speed (so a reconstructed startup
-                // extension is driven on the first valid speed command, and a speed-zero stop
-                // neutralizes it while keeping the attribution). It is released through the normal
-                // two-stage physical release (deassert filter + tail hold) once it actually clears.
                 if (physicalFootprint is not null && physicalFootprint.TryGetValue(sec, out int footprintOwner))
                 {
                     if (occupancy == PhysicalOccupancy.Occupied)
                     {
-                        // A contained locomotive (partial footprint) must not drive its footprint
-                        // extension forward: neutral, attributed, escalated locally.
                         if (containedDccs.Contains(footprintOwner))
                         {
                             diagnostics.Add(
@@ -458,15 +532,11 @@ namespace SiebwaldeApp.Core.Koploper
                                 CarrierReason.PartialFootprintContain, "footprint-partial-contain");
                         }
 
-                        // The footprint owner's current retained speed drives the extension, but only
-                        // while the owner still holds valid logical authority. A logically-Free loco
-                        // with a stale retained speed must not re-drive its footprint residue.
                         if (desiredLocoStates.TryGetValue(footprintOwner, out var footprintDesired) &&
                             footprintDesired.Speed > 0 &&
-                            HoldsLogicalAuthority(footprintOwner, locoOccupied, locoReserved))
+                            HoldsLogicalAuthority(footprintOwner, locoOccupiedBlock, locoReservedBlocks))
                         {
-                            int footprintHr0 = AmplifierSpeedMapper.ToPwm(
-                                footprintDesired.Speed, footprintDesired.Direction);
+                            int footprintHr0 = AmplifierSpeedMapper.ToPwm(footprintDesired.Speed, footprintDesired.Direction);
                             return new CarrierAmplifierDecision(
                                 amp, footprintOwner, footprintHr0, CarrierVerdict.DepartingPhysicalHold,
                                 CarrierReason.DepartedPhysicalHold, "footprint-occupied-driven");
@@ -496,138 +566,163 @@ namespace SiebwaldeApp.Core.Koploper
                     amp, null, Neutral, CarrierVerdict.Deny, CarrierReason.FreeClearDeny, "free-clear");
             }
 
-            // (e) Owned by dcc.
-            int? occupiedSection = locoOccupied.TryGetValue(dcc, out var occ) ? occ : null;
-            bool isOccupied = occupiedSection == sec;
-            bool isReserved = locoReserved.TryGetValue(dcc, out var reserved) && reserved.Contains(sec);
-
-            (int Speed, int Direction) desired = desiredLocoStates.TryGetValue(dcc, out var d)
-                ? d
-                : (0, 1);
-
-            // Speed 0 -> all targets neutral.
-            if (desired.Speed <= 0)
-            {
-                return new CarrierAmplifierDecision(
-                    amp, dcc, Neutral, CarrierVerdict.Neutral, CarrierReason.SpeedZeroNeutral, "speed-zero");
-            }
-
-            int hr0 = AmplifierSpeedMapper.ToPwm(desired.Speed, desired.Direction);
-
-            if (isOccupied)
-            {
-                if (occupancy == PhysicalOccupancy.Occupied)
-                {
-                    // A contained locomotive (partial footprint) must not drive its occupied anchor
-                    // forward: neutral, attributed, escalated locally (no layout stop, no latch).
-                    if (containedDccs.Contains(dcc))
-                    {
-                        diagnostics.Add(
-                            $"Partial footprint containment: loco {dcc} held neutral on occupied " +
-                            $"section {sec} (neutral-only, no loco-stop escalation).");
-                        return new CarrierAmplifierDecision(
-                            amp, dcc, Neutral, CarrierVerdict.Revoke,
-                            CarrierReason.PartialFootprintContain, "occupied-partial-contain");
-                    }
-
-                    return new CarrierAmplifierDecision(
-                        amp, dcc, hr0, CarrierVerdict.Drive, CarrierReason.OccupiedConsistent,
-                        "occupied-consistent");
-                }
-
-                // Occupied(A) + Clear -> Release (the loco left its occupied section).
-                return new CarrierAmplifierDecision(
-                    amp, dcc, Neutral, CarrierVerdict.Release, CarrierReason.OccupiedClearRelease,
-                    "occupied-clear-release");
-            }
-
-            if (isReserved)
-            {
-                if (occupancy == PhysicalOccupancy.Clear)
-                {
-                    // A contained locomotive (partial footprint) must not pre-energize its reserved
-                    // target forward: neutral, attributed (neutral-only, no loco-stop escalation).
-                    if (containedDccs.Contains(dcc))
-                    {
-                        return new CarrierAmplifierDecision(
-                            amp, dcc, Neutral, CarrierVerdict.Neutral,
-                            CarrierReason.PartialFootprintContain, "reserved-contained");
-                    }
-
-                    return new CarrierAmplifierDecision(
-                        amp, dcc, hr0, CarrierVerdict.Drive, CarrierReason.ReservedPreEnergize,
-                        "reserved-pre-energize");
-                }
-
-                // Reserved(A) + Occupied: expected boundary lead, or revoke + loco-stop + latch.
-                if (IsExpectedBoundaryLead(occupiedSection, sec, topology, physicalBySection, confirmationWindow))
-                {
-                    // A contained locomotive (partial footprint) must not drive its expected boundary
-                    // lead forward: neutral, attributed (neutral-only, no loco-stop escalation).
-                    if (containedDccs.Contains(dcc))
-                    {
-                        return new CarrierAmplifierDecision(
-                            amp, dcc, Neutral, CarrierVerdict.Neutral,
-                            CarrierReason.PartialFootprintContain, "boundary-lead-contained");
-                    }
-
-                    return new CarrierAmplifierDecision(
-                        amp, dcc, hr0, CarrierVerdict.Drive, CarrierReason.ExpectedBoundaryLead,
-                        "reserved-expected-lead");
-                }
-
-                locoStop.Add(dcc);
-                latched.Add(dcc);
-                return new CarrierAmplifierDecision(
-                    amp, dcc, Neutral, CarrierVerdict.Revoke, CarrierReason.ReservedNotExpectedRevoke,
-                    "reserved-not-expected");
-            }
-
-            // Defensive: owned but neither occupied nor reserved for dcc.
+            // Defensive: a section with a logical owner but no block verdict (unmapped edge) is denied.
             return new CarrierAmplifierDecision(
-                amp, dcc, Neutral, CarrierVerdict.Deny, CarrierReason.OtherLocoOwns, "other-loco-owns");
+                amp, null, Neutral, CarrierVerdict.Deny, CarrierReason.OtherLocoOwns, "other-loco-owns");
         }
 
+        private static string Evidence(CarrierVerdict verdict, CarrierReason reason)
+            => reason switch
+            {
+                CarrierReason.OccupiedConsistent => "occupied-consistent",
+                CarrierReason.ReservedPreEnergize => "reserved-pre-energize",
+                CarrierReason.ExpectedBoundaryLead => "reserved-expected-lead",
+                CarrierReason.ReservedNotExpectedRevoke => "reserved-not-expected",
+                CarrierReason.SpeedZeroNeutral => "speed-zero",
+                CarrierReason.PartialFootprintContain => "partial-contain",
+                CarrierReason.ManualBlocked => "manual-blocked",
+                CarrierReason.PhysicalUnknownStale => "physical-unknown-stale",
+                _ => "block-level",
+            };
+
         private static bool IsExpectedBoundaryLead(
-            int? occupiedSection,
-            int reservedSection,
+            int? occupiedBlock,
+            int reservedBlock,
+            IReadOnlyDictionary<int, IReadOnlyList<int>> blockToSections,
             BlockTopology topology,
             IReadOnlyDictionary<int, PhysicalSectionState> physicalBySection,
             TimeSpan confirmationWindow)
         {
-            if (occupiedSection is not int occ)
+            if (occupiedBlock is not int occ)
             {
                 return false;
             }
 
-            // A switch-free route S -> T must exist. Switch-gated transitions are conservatively
-            // treated as NOT expected because no switch position is supplied to this pure projector.
-            if (!topology.TryGetNextBlocks(
-                    occ,
-                    new Dictionary<int, SwitchPosition>(),
-                    lookAheadOnly: false,
-                    out var nextBlocks) ||
-                !nextBlocks.Contains(reservedSection))
+            // A switch-free route occ -> reservedBlock must exist.
+            if (!topology.TryGetNextBlocks(occ, new Dictionary<int, SwitchPosition>(), lookAheadOnly: false, out var nextBlocks) ||
+                !nextBlocks.Contains(reservedBlock))
             {
                 return false;
             }
 
-            if (!physicalBySection.TryGetValue(occ, out var occState) ||
-                occState.Occupancy != PhysicalOccupancy.Occupied ||
-                !occState.IsFresh)
+            if (!blockToSections.TryGetValue(occ, out IReadOnlyList<int>? occSections) ||
+                !IsBlockPhysicallyOccupiedFresh(occSections, physicalBySection))
             {
                 return false;
             }
 
-            if (!physicalBySection.TryGetValue(reservedSection, out var resState) ||
-                resState.Occupancy != PhysicalOccupancy.Occupied ||
-                !resState.IsFresh)
+            if (!blockToSections.TryGetValue(reservedBlock, out IReadOnlyList<int>? resSections) ||
+                !IsBlockPhysicallyOccupiedFresh(resSections, physicalBySection))
             {
                 return false;
             }
 
             // Expiry: a boundary lead older than the confirmation window is no longer expected.
-            return resState.Age <= confirmationWindow;
+            return MaxBlockAge(resSections, physicalBySection) <= confirmationWindow;
+        }
+
+        private static bool IsBlockPhysicallyOccupiedFresh(
+            IReadOnlyList<int> sections,
+            IReadOnlyDictionary<int, PhysicalSectionState> physicalBySection)
+        {
+            bool anyOccupied = false;
+            foreach (int section in sections)
+            {
+                if (!physicalBySection.TryGetValue(section, out PhysicalSectionState? state) ||
+                    !state.IsFresh ||
+                    state.Occupancy == PhysicalOccupancy.Unknown)
+                {
+                    return false;
+                }
+
+                if (state.Occupancy == PhysicalOccupancy.Occupied)
+                {
+                    anyOccupied = true;
+                }
+            }
+
+            return anyOccupied;
+        }
+
+        private static TimeSpan MaxBlockAge(
+            IReadOnlyList<int> sections,
+            IReadOnlyDictionary<int, PhysicalSectionState> physicalBySection)
+        {
+            TimeSpan max = TimeSpan.Zero;
+            foreach (int section in sections)
+            {
+                if (physicalBySection.TryGetValue(section, out PhysicalSectionState? state) &&
+                    state.Occupancy == PhysicalOccupancy.Occupied &&
+                    state.Age > max)
+                {
+                    max = state.Age;
+                }
+            }
+
+            return max;
+        }
+
+        private static IReadOnlyDictionary<int, int> BuildFootprint(
+            IReadOnlyList<LayoutPhysicalAmplifierBinding> mapping,
+            IReadOnlyDictionary<int, int> sectionOwner,
+            IReadOnlyDictionary<int, int>? physicalFootprint,
+            IReadOnlyDictionary<int, (int OwnerDcc, int Hr0)>? previousTargets,
+            IReadOnlyDictionary<int, PhysicalSectionState> physicalBySection)
+        {
+            var footprint = new Dictionary<int, int>();
+
+            foreach (LayoutPhysicalAmplifierBinding binding in mapping)
+            {
+                int section = binding.SectionId;
+
+                // Logical ownership is recomputed fresh every cycle, not remembered.
+                if (sectionOwner.ContainsKey(section))
+                {
+                    continue;
+                }
+
+                if (physicalFootprint is not null &&
+                    physicalFootprint.TryGetValue(section, out int retainedOwner))
+                {
+                    footprint[section] = retainedOwner;
+                    continue;
+                }
+
+                if (previousTargets is not null &&
+                    previousTargets.TryGetValue(binding.PhysicalAmplifier, out var prev) &&
+                    IsPhysicallyPresent(physicalBySection, section))
+                {
+                    footprint[section] = prev.OwnerDcc;
+                }
+            }
+
+            return footprint;
+        }
+
+        private static bool IsPhysicallyPresent(
+            IReadOnlyDictionary<int, PhysicalSectionState> physicalBySection,
+            int section)
+        {
+            if (!physicalBySection.TryGetValue(section, out PhysicalSectionState? state))
+            {
+                return true;
+            }
+
+            if (!state.IsFresh || state.Occupancy == PhysicalOccupancy.Unknown)
+            {
+                return true;
+            }
+
+            return state.Occupancy == PhysicalOccupancy.Occupied;
+        }
+
+        private static bool HoldsLogicalAuthority(
+            int dcc,
+            IReadOnlyDictionary<int, int?> locoOccupiedBlock,
+            IReadOnlyDictionary<int, HashSet<int>> locoReservedBlocks)
+        {
+            if (locoOccupiedBlock.TryGetValue(dcc, out var occ) && occ is not null) return true;
+            return locoReservedBlocks.TryGetValue(dcc, out var reserved) && reserved.Count > 0;
         }
 
         private static IReadOnlyList<CarrierAmplifierDecision> OrderDecisions(
@@ -647,11 +742,6 @@ namespace SiebwaldeApp.Core.Koploper
             return sections.Any(s => sectionOwner.ContainsKey(s));
         }
 
-        /// <summary>
-        /// The filtered physical occupancy of a departed source's mapped section(s): Occupied when any
-        /// mapped section is fresh + Occupied, Clear when every mapped section is fresh + Clear, and
-        /// Unknown (fail closed) when any mapped section is missing, not fresh, or Unknown.
-        /// </summary>
         private static PhysicalOccupancy DepartedSourceOccupancy(
             int amp,
             IReadOnlyDictionary<int, List<int>> sectionsByAmp,
@@ -689,79 +779,70 @@ namespace SiebwaldeApp.Core.Koploper
             return anyOccupied ? PhysicalOccupancy.Occupied : PhysicalOccupancy.Clear;
         }
 
-        /// <summary>
-        /// Detects locomotives that must NOT drive a PARTIAL footprint forward, so the caller commands
-        /// them neutral. Two independent fail-closed triggers add a locomotive to the contained set:
-        /// <list type="number">
-        /// <item>
-        /// (Product Owner Decision B2) A REQUIRED section — one the locomotive actively reserves
-        /// (<c>Reserved(A)</c>) or one retained in its physical footprint residue — is physically
-        /// stale/Unknown or its physical amplifier mapping is missing/invalid. This blocks a PARTIAL
-        /// UNSAFE FIRST DEPARTURE: the locomotive may not drive its known subset while one of its own
-        /// required sections is unresolved.
-        /// </item>
-        /// <item>
-        /// (requirement 7) The occupied anchor's connected physically-Occupied component extends into a
-        /// fresh, mapped, physically-Occupied section that no rule safely attributes to the locomotive
-        /// (competing ownership / ambiguity).
-        /// </item>
-        /// </list>
-        /// A section owned or reserved by a DIFFERENT locomotive remains a HARD BOUNDARY (Decision A):
-        /// it stops the flood but is never itself a containment trigger. An unrelated stale/Unknown or
-        /// unmapped branch that is neither <c>Reserved(A)</c> nor in A's retained footprint is local
-        /// fail-closed neutrality (Decision B1) and does NOT contain A.
-        /// </summary>
         private static HashSet<int> DetectContainedLocos(
             IReadOnlyDictionary<int, int> sectionOwner,
-            IReadOnlyDictionary<int, HashSet<int>> locoReserved,
-            IReadOnlyDictionary<int, int?> locoOccupied,
+            IReadOnlyDictionary<int, HashSet<int>> locoReservedSections,
+            IReadOnlyDictionary<int, int?> locoOccupiedBlock,
+            IReadOnlyDictionary<int, IReadOnlyList<int>> blockToSections,
             IReadOnlyDictionary<int, PhysicalSectionState> physicalBySection,
             IReadOnlyDictionary<int, int> sectionToAmp,
-            BlockTopology topology,
+            IReadOnlyDictionary<int, List<int>> sectionAdjacency,
             IReadOnlyDictionary<int, int>? physicalFootprint,
             IReadOnlyDictionary<int, (int OwnerDcc, int Hr0)>? previousTargets)
         {
             var contained = new HashSet<int>();
 
-            // (Decision B2) A locomotive whose OWN required section (Reserved(A) or a retained-footprint
-            // section) is stale/Unknown or unmapped must not depart with a partial footprint.
             DetectRequiredFootprintContain(
-                locoReserved, locoOccupied, physicalBySection, sectionToAmp, physicalFootprint, contained);
+                locoReservedSections, locoOccupiedBlock, blockToSections, physicalBySection,
+                sectionToAmp, physicalFootprint, contained);
 
-            var noSwitches = new Dictionary<int, SwitchPosition>();
-
-            foreach (var (dcc, occupiedSection) in locoOccupied)
+            foreach (var (dcc, occupiedBlock) in locoOccupiedBlock)
             {
-                if (occupiedSection is not int source)
+                if (occupiedBlock is not int sourceBlock ||
+                    !blockToSections.TryGetValue(sourceBlock, out IReadOnlyList<int>? sourceSections))
                 {
                     continue;
                 }
 
-                // A valid anchor must be mapped, fresh and physically occupied.
-                if (!sectionToAmp.ContainsKey(source) ||
-                    !IsPhysicallyOccupiedFresh(physicalBySection, source))
+                // Anchor: the occupied block's fresh, physically occupied, mapped sections.
+                var anchor = new List<int>();
+                bool anchorInvalid = false;
+                foreach (int section in sourceSections)
+                {
+                    if (!IsPhysicallyOccupiedFresh(physicalBySection, section))
+                    {
+                        continue;
+                    }
+
+                    if (!sectionToAmp.ContainsKey(section))
+                    {
+                        anchorInvalid = true;
+                        break;
+                    }
+
+                    anchor.Add(section);
+                }
+
+                if (anchorInvalid || anchor.Count == 0)
                 {
                     continue;
                 }
 
-                // Flood-fill the physically-Occupied connected component around the anchor. Any
-                // reached section that is not entitled to this locomotive marks the footprint partial.
-                var visited = new HashSet<int> { source };
-                var queue = new Queue<int>();
-                queue.Enqueue(source);
+                var visited = new HashSet<int>(anchor);
+                var queue = new Queue<int>(anchor);
 
                 while (queue.Count > 0)
                 {
                     int current = queue.Dequeue();
 
-                    foreach (int candidate in topology.Blocks)
+                    if (!sectionAdjacency.TryGetValue(current, out List<int>? neighbors))
                     {
-                        if (candidate == current || visited.Contains(candidate))
-                        {
-                            continue;
-                        }
+                        continue;
+                    }
 
-                        if (!AreAdjacent(topology, current, candidate, noSwitches))
+                    foreach (int candidate in neighbors)
+                    {
+                        if (visited.Contains(candidate))
                         {
                             continue;
                         }
@@ -772,31 +853,25 @@ namespace SiebwaldeApp.Core.Koploper
                             continue;
                         }
 
-                        // A candidate cleanly owned or reserved by a DIFFERENT locomotive is that other
-                        // train's territory, not a partial-footprint trigger for this locomotive: stop
-                        // the flood here (mirror PhysicalFootprintReconstructor's stop-at-other-owner).
                         if (sectionOwner.TryGetValue(candidate, out int candidateOwner) &&
                             candidateOwner != dcc)
                         {
                             continue;
                         }
 
-                        if (ReservedByOther(dcc, candidate, locoReserved))
+                        if (ReservedByOther(dcc, candidate, locoReservedSections))
                         {
                             continue;
                         }
 
                         visited.Add(candidate);
 
-                        if (IsEntitledTo(
-                                dcc, candidate, sectionOwner, locoReserved, physicalFootprint,
-                                previousTargets, sectionToAmp))
+                        if (IsEntitledTo(dcc, candidate, sectionOwner, locoReservedSections, physicalFootprint, previousTargets, sectionToAmp))
                         {
                             queue.Enqueue(candidate);
                         }
                         else
                         {
-                            // Occupied but not attributable: partial footprint -> contain this loco.
                             contained.Add(dcc);
                         }
                     }
@@ -806,27 +881,18 @@ namespace SiebwaldeApp.Core.Koploper
             return contained;
         }
 
-        /// <summary>
-        /// (Product Owner Decision B2) A locomotive holding logical authority must not depart with a
-        /// PARTIAL footprint: if any section it REQUIRES — one it actively reserves (<c>Reserved(A)</c>)
-        /// or one retained in its physical footprint residue — is physically stale/Unknown OR its
-        /// physical amplifier mapping is missing/invalid, the locomotive is contained. Its drive-eligible
-        /// targets are then commanded neutral with reason <see cref="CarrierReason.PartialFootprintContain"/>
-        /// (neutral-only: no layout stop, no latch, no loco-stop). A stale/Unknown/unmapped section that
-        /// is NOT required by the locomotive (an unrelated topology-adjacent branch) is NOT a trigger
-        /// (Decision B1) and stays local fail-closed.
-        /// </summary>
         private static void DetectRequiredFootprintContain(
-            IReadOnlyDictionary<int, HashSet<int>> locoReserved,
-            IReadOnlyDictionary<int, int?> locoOccupied,
+            IReadOnlyDictionary<int, HashSet<int>> locoReservedSections,
+            IReadOnlyDictionary<int, int?> locoOccupiedBlock,
+            IReadOnlyDictionary<int, IReadOnlyList<int>> blockToSections,
             IReadOnlyDictionary<int, PhysicalSectionState> physicalBySection,
             IReadOnlyDictionary<int, int> sectionToAmp,
             IReadOnlyDictionary<int, int>? physicalFootprint,
             HashSet<int> contained)
         {
-            foreach (var (dcc, reserved) in locoReserved)
+            foreach (var (dcc, reserved) in locoReservedSections)
             {
-                if (!HoldsLogicalAuthority(dcc, locoOccupied, locoReserved))
+                if (!HoldsLogicalAuthority(dcc, locoOccupiedBlock, locoReservedSections))
                 {
                     continue;
                 }
@@ -854,12 +920,6 @@ namespace SiebwaldeApp.Core.Koploper
             }
         }
 
-        /// <summary>
-        /// True when a section is mapped to a physical amplifier AND has a fresh, non-Unknown physical
-        /// occupancy observation, i.e. it is resolved enough to be safely attributable and driven. A
-        /// missing mapping or a missing/stale/Unknown physical observation leaves it unresolved (fail
-        /// closed).
-        /// </summary>
         private static bool IsResolvableFresh(
             IReadOnlyDictionary<int, int> sectionToAmp,
             IReadOnlyDictionary<int, PhysicalSectionState> physicalBySection,
@@ -873,26 +933,21 @@ namespace SiebwaldeApp.Core.Koploper
             int dcc,
             int section,
             IReadOnlyDictionary<int, int> sectionOwner,
-            IReadOnlyDictionary<int, HashSet<int>> locoReserved,
+            IReadOnlyDictionary<int, HashSet<int>> locoReservedSections,
             IReadOnlyDictionary<int, int>? physicalFootprint,
             IReadOnlyDictionary<int, (int OwnerDcc, int Hr0)>? previousTargets,
             IReadOnlyDictionary<int, int> sectionToAmp)
         {
-            // Logically occupied by the locomotive.
             if (sectionOwner.TryGetValue(section, out int owner) && owner == dcc)
             {
                 return true;
             }
 
-            // Actively reserved by the locomotive (even when another locomotive occupies it — the
-            // reservation boundary is handled by the normal boundary-lead / exclusivity policy, not
-            // by partial-footprint containment).
-            if (locoReserved.TryGetValue(dcc, out var reserved) && reserved.Contains(section))
+            if (locoReservedSections.TryGetValue(dcc, out var reserved) && reserved.Contains(section))
             {
                 return true;
             }
 
-            // Attributed by the physical footprint residue.
             if (physicalFootprint is not null &&
                 physicalFootprint.TryGetValue(section, out int footprintOwner) &&
                 footprintOwner == dcc)
@@ -900,7 +955,6 @@ namespace SiebwaldeApp.Core.Koploper
                 return true;
             }
 
-            // A departed source still held in the drive history.
             if (sectionToAmp.TryGetValue(section, out int amp) &&
                 previousTargets is not null &&
                 previousTargets.TryGetValue(amp, out var prev) &&
@@ -912,42 +966,17 @@ namespace SiebwaldeApp.Core.Koploper
             return false;
         }
 
-        /// <summary>
-        /// True when a section is reserved by a locomotive OTHER than <paramref name="dcc"/>. Such a
-        /// section is a reservation boundary, not a partial-footprint trigger for <paramref name="dcc"/>.
-        /// </summary>
         private static bool ReservedByOther(
             int dcc,
             int section,
-            IReadOnlyDictionary<int, HashSet<int>> locoReserved)
+            IReadOnlyDictionary<int, HashSet<int>> locoReservedSections)
         {
-            foreach (var (owner, reserved) in locoReserved)
+            foreach (var (owner, reserved) in locoReservedSections)
             {
                 if (owner != dcc && reserved.Contains(section))
                 {
                     return true;
                 }
-            }
-
-            return false;
-        }
-
-        private static bool AreAdjacent(
-            BlockTopology topology,
-            int a,
-            int b,
-            IReadOnlyDictionary<int, SwitchPosition> switchPositions)
-        {
-            if (topology.TryGetNextBlocks(a, switchPositions, lookAheadOnly: false, out var next) &&
-                next.Contains(b))
-            {
-                return true;
-            }
-
-            if (topology.TryGetNextBlocks(b, switchPositions, lookAheadOnly: false, out var prev) &&
-                prev.Contains(a))
-            {
-                return true;
             }
 
             return false;

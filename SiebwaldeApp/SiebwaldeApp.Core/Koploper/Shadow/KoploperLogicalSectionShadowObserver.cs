@@ -28,7 +28,7 @@ namespace SiebwaldeApp.Core.Koploper
         private readonly IKoploperSnapshotReader _snapshotReader;
         private readonly IKoploperReservationObserver _reservationObserver;
         private readonly string _profileId;
-        private readonly IReadOnlyDictionary<int, int> _internalBlockToSection;
+        private readonly IReadOnlyDictionary<int, IReadOnlyList<int>> _internalBlockToSections;
         private readonly KoploperLogicalSectionShadowObserverOptions _options;
         private readonly Func<DateTimeOffset> _clock;
 
@@ -43,14 +43,14 @@ namespace SiebwaldeApp.Core.Koploper
             IKoploperSnapshotReader snapshotReader,
             IKoploperReservationObserver reservationObserver,
             string profileId,
-            IReadOnlyDictionary<int, int> internalBlockToSection,
+            IReadOnlyDictionary<int, IReadOnlyList<int>> internalBlockToSections,
             KoploperLogicalSectionShadowObserverOptions? options = null,
             Func<DateTimeOffset>? clock = null)
         {
             _snapshotReader = snapshotReader ?? throw new ArgumentNullException(nameof(snapshotReader));
             _reservationObserver = reservationObserver ?? throw new ArgumentNullException(nameof(reservationObserver));
             _profileId = profileId ?? throw new ArgumentNullException(nameof(profileId));
-            _internalBlockToSection = internalBlockToSection ?? throw new ArgumentNullException(nameof(internalBlockToSection));
+            _internalBlockToSections = internalBlockToSections ?? throw new ArgumentNullException(nameof(internalBlockToSections));
             _options = options ?? new KoploperLogicalSectionShadowObserverOptions();
             _clock = clock ?? (() => DateTimeOffset.UtcNow);
         }
@@ -163,7 +163,7 @@ namespace SiebwaldeApp.Core.Koploper
                 observation,
                 readResult.Snapshot,
                 _profileId,
-                _internalBlockToSection,
+                _internalBlockToSections,
                 shadowSequence,
                 observedAtUtc,
                 _options.MaxSnapshotAge);

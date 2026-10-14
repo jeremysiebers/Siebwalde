@@ -685,7 +685,7 @@ namespace SiebwaldeApp.Core.Tests
             var provider = CreateRealProvider(variables, () => clock);
             var sink = new RecordingFeedbackSink();
             var bridge = new TrackAmplifierOccupancyBridge(
-                KoploperBlockMap.Parse(OvalBlockMap), provider, sink);
+                KoploperBlockMap.Parse(OvalBlockMap).ToKoploperFeedbackMap(), provider, sink);
 
             // Fresh clear: the initial snapshot reports the blocks free.
             await bridge.EvaluateAsync();

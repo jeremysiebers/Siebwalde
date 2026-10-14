@@ -87,6 +87,7 @@ namespace SiebwaldeApp.Core.Tests.Koploper
                 mapping
                     .Select(p => new LayoutPhysicalAmplifierBinding { SectionId = p.Section, PhysicalAmplifier = p.Amp })
                     .ToArray(),
+                ReconciliationTestFixtures.BlockMap(mapping.Select(p => p.Section).ToArray()),
                 clock: clock,
                 consecutiveInvalidRequired: consecutiveInvalidRequired,
                 authorityInvalidMinimumDuration: authorityInvalidMinimumDuration);

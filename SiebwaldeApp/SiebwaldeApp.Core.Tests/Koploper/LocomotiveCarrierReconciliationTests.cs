@@ -45,10 +45,13 @@ namespace SiebwaldeApp.Core.Tests.Koploper
             PhysicalSectionOccupancyObservation? physical,
             BlockTopology topology,
             IReadOnlyList<LayoutPhysicalAmplifierBinding> mapping,
+            IReadOnlyDictionary<int, IReadOnlyList<int>>? blockToSections = null,
             Dictionary<int, (int OwnerDcc, int Hr0)>? previousTargets = null,
             Dictionary<int, int>? physicalFootprint = null)
             => LocomotiveCarrierReconciliation.Reconcile(
-                desired, identity, shadow, physical, topology, mapping, previousTargets, physicalFootprint, Window);
+                desired, identity, shadow, physical, topology, mapping,
+                blockToSections ?? ReconciliationTestFixtures.BlockMap(mapping.Select(b => b.SectionId).ToArray()),
+                previousTargets, physicalFootprint, Window);
 
         private static CarrierAmplifierDecision Decision(CarrierDecision decision, int amp)
             => Assert.Single(decision.Amplifiers, d => d.Amplifier == amp);

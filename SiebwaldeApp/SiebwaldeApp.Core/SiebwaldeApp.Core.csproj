@@ -21,6 +21,7 @@
           CopyToOutputDirectory="PreserveNewest" />
     <None Include="Topology\profiles\koploper-oval.json"
           CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Topology\profiles\ovaaltje-loop2.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

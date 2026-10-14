@@ -74,5 +74,35 @@ namespace SiebwaldeApp.Core.Tests
 
             Assert.Single(map.Blocks);
         }
+
+        [Fact]
+        public void ToKoploperFeedbackMap_SingleAmplifier_AllBezetmeldersMapToIt()
+        {
+            var map = KoploperBlockMap.Parse("1:1.01+1.02:1");
+
+            var feedback = map.ToKoploperFeedbackMap();
+
+            var block = Assert.Single(feedback);
+            Assert.Equal(1, block.BlockNumber);
+            var section = Assert.Single(block.Sections);
+            Assert.Equal(1, section.Amplifier);
+            Assert.Equal(new[] { "1.01", "1.02" }, section.Bezetmelders);
+        }
+
+        [Fact]
+        public void ToKoploperFeedbackMap_MultipleAmplifiers_PairsPositionally()
+        {
+            var map = KoploperBlockMap.Parse("10:1.11+1.12:6+7");
+
+            var feedback = map.ToKoploperFeedbackMap();
+
+            var block = Assert.Single(feedback);
+            Assert.Equal(10, block.BlockNumber);
+            Assert.Equal(2, block.Sections.Count);
+            Assert.Equal(6, block.Sections[0].Amplifier);
+            Assert.Equal(new[] { "1.11" }, block.Sections[0].Bezetmelders);
+            Assert.Equal(7, block.Sections[1].Amplifier);
+            Assert.Equal(new[] { "1.12" }, block.Sections[1].Bezetmelders);
+        }
     }
 }

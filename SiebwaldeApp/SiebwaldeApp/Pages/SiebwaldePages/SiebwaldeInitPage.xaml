@@ -259,6 +259,19 @@
                                  FontFamily="{StaticResource FontAwesome}"
                                  Foreground="{StaticResource WordOrangeBrush}" />
                         </TextBlock>
+
+                        <!-- READ-ONLY Koploper logical-block -> section -> amplifier -> bezetmelder
+                             mapping for the active profile, plus the validation status. This is a
+                             view only: the LayoutProfile JSON remains the single runtime authority. -->
+                        <TextBlock
+                            Margin="20 0 0 0"
+                            FontSize="{StaticResource FontSizeRegular}"
+                            VerticalAlignment="Top"
+                            TextWrapping="Wrap">
+                            <Run Text="{Binding KoploperMappingStatus, Mode=OneWay}"
+                                 FontFamily="{StaticResource FontAwesome}"
+                                 Foreground="{StaticResource WordOrangeBrush}" />
+                        </TextBlock>
                     </StackPanel>
                 </Grid>
 

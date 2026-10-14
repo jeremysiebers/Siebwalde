@@ -42,6 +42,12 @@ namespace SiebwaldeApp.Integration
         private IReadOnlyList<LayoutPhysicalAmplifierBinding> _physicalAmplifierMapping =
             Array.Empty<LayoutPhysicalAmplifierBinding>();
         private IReadOnlyDictionary<int, int> _locomotiveIdentity = new Dictionary<int, int>();
+        private IReadOnlyDictionary<int, IReadOnlyList<int>> _koploperBlockBindingMap =
+            new Dictionary<int, IReadOnlyList<int>>();
+        private IReadOnlyList<KoploperFeedbackBlock> _koploperFeedbackMap =
+            Array.Empty<KoploperFeedbackBlock>();
+        private IReadOnlyList<KoploperFeedbackBlock> _realKoploperFeedbackMap =
+            Array.Empty<KoploperFeedbackBlock>();
         private readonly string _externalInfoHost;
         private readonly int _externalInfoPort;
         private readonly int _ecosListenPort;
@@ -111,6 +117,8 @@ namespace SiebwaldeApp.Integration
             // pass it via the optional constructor parameters.
             _realTopology = realTopology ?? BlockTopology.Parse(null);
             _realBlockMap = realBlockMap ?? KoploperBlockMap.Parse(null);
+            _koploperFeedbackMap = blockMap.ToKoploperFeedbackMap();
+            _realKoploperFeedbackMap = _realBlockMap.ToKoploperFeedbackMap();
             _switchMapping = switchMapping ?? SwitchMapping.Parse(null);
             _trackAmplifierGroups = trackAmplifierGroups ?? TrackAmplifierGroups.Empty;
             _ecosListenPort = ecosListenPort;
@@ -323,6 +331,8 @@ namespace SiebwaldeApp.Integration
                     movementSimulation: movementSimulation,
                     locomotiveIdentity: mode == TrackControlMode.Real && _locomotiveIdentity.Count > 0 ? _locomotiveIdentity : null,
                     physicalAmplifierMapping: mode == TrackControlMode.Real && _physicalAmplifierMapping.Count > 0 ? _physicalAmplifierMapping : null,
+                    koploperBlockBindingMap: mode == TrackControlMode.Real && _koploperBlockBindingMap.Count > 0 ? _koploperBlockBindingMap : null,
+                    koploperFeedbackMap: mode == TrackControlMode.Real ? _realKoploperFeedbackMap : _koploperFeedbackMap,
                     sourceReleaseTailHoldMs: _sourceReleaseTailHoldMs);
 
                 _ecosBackend = _integration.EcosBackend
@@ -605,6 +615,9 @@ namespace SiebwaldeApp.Integration
             _realBlockMap = profile.ToRealKoploperBlockMap();
             _physicalAmplifierMapping = profile.PhysicalAmplifierMapping;
             _locomotiveIdentity = profile.ToLocomotiveBindingMap();
+            _koploperBlockBindingMap = profile.ToKoploperBlockBindingMap();
+            _koploperFeedbackMap = profile.ToKoploperFeedbackMap(usePhysical: false);
+            _realKoploperFeedbackMap = profile.ToKoploperFeedbackMap(usePhysical: true);
         }
 
         /// <inheritdoc />

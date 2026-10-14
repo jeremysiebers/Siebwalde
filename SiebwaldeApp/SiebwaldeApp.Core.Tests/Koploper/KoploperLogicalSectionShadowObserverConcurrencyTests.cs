@@ -16,7 +16,7 @@ namespace SiebwaldeApp.Core.Tests.Koploper
     public class KoploperLogicalSectionShadowObserverConcurrencyTests
     {
         private static readonly DateTimeOffset Now = KoploperReservationTestFixtures.Now;
-        private static readonly Dictionary<int, int> Map = new() { { 30, 2 } };
+        private static readonly Dictionary<int, IReadOnlyList<int>> Map = new() { { 30, new[] { 2 } } };
 
         [Fact]
         public void CurrentShadow_VolatilePublication_VisibleAcrossThreads()

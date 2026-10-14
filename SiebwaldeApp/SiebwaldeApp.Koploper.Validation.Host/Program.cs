@@ -374,9 +374,9 @@ namespace SiebwaldeApp.Koploper.Validation.Host
                 Console.WriteLine("== readonly-validate composition ==");
                 Console.WriteLine($"Profile: {host.Profile.Name}");
                 Console.WriteLine($"KoploperBlockBindings: {host.KoploperBlockBindingMap.Count}");
-                foreach (KeyValuePair<int, int> binding in host.KoploperBlockBindingMap.OrderBy(kv => kv.Key))
+                foreach (KeyValuePair<int, IReadOnlyList<int>> binding in host.KoploperBlockBindingMap.OrderBy(kv => kv.Key))
                 {
-                    Console.WriteLine($"  internalBlock {binding.Key} -> logicalSection {binding.Value}");
+                    Console.WriteLine($"  internalBlock {binding.Key} -> logicalSections [{string.Join(", ", binding.Value)}]");
                 }
 
                 Console.WriteLine($"PhysicalAmplifierMapping: {host.Profile.PhysicalAmplifierMapping.Count}");

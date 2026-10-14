@@ -96,5 +96,51 @@ namespace SiebwaldeApp.Core
             block = _blocks.FirstOrDefault(b => b.AmplifierSections.Contains(amplifierSection))!;
             return block is not null;
         }
+
+        /// <summary>
+        /// Projects a per-section feedback map (<see cref="SiebwaldeApp.Core.TrackApplication.Topology.KoploperFeedbackBlock"/>)
+        /// from this block-level map. This is the LEGACY fallback used only when no authoritative
+        /// <see cref="SiebwaldeApp.Core.TrackApplication.Topology.LayoutProfile"/> is available: the
+        /// string config cannot express which bezetmelder belongs to which section, so bezetmelders
+        /// are paired positionally to amplifiers (bezetmelder[i] -&gt; amplifier[i], with any
+        /// remaining bezetmelders attached to the last amplifier). A single-amplifier block maps all
+        /// its bezetmelders to that one amplifier, preserving the historic block-level behaviour.
+        /// </summary>
+        public IReadOnlyList<TrackApplication.Topology.KoploperFeedbackBlock> ToKoploperFeedbackMap()
+        {
+            var result = new List<TrackApplication.Topology.KoploperFeedbackBlock>();
+            foreach (KoploperBlock block in _blocks)
+            {
+                if (block.AmplifierSections.Count == 0)
+                {
+                    continue;
+                }
+
+                var sections = new List<TrackApplication.Topology.KoploperFeedbackSection>();
+                for (int i = 0; i < block.AmplifierSections.Count; i++)
+                {
+                    int amp = block.AmplifierSections[i];
+                    bool isLast = i == block.AmplifierSections.Count - 1;
+                    var bezetmelders = block.Bezetmelders
+                        .Where((_, index) => isLast ? index >= i : index == i)
+                        .ToArray();
+
+                    sections.Add(new TrackApplication.Topology.KoploperFeedbackSection
+                    {
+                        SectionId = amp,
+                        Amplifier = amp,
+                        Bezetmelders = bezetmelders
+                    });
+                }
+
+                result.Add(new TrackApplication.Topology.KoploperFeedbackBlock
+                {
+                    BlockNumber = block.Number,
+                    Sections = sections
+                });
+            }
+
+            return result;
+        }
     }
 }
