@@ -20,6 +20,7 @@ The operational Active State Manifest for the active increment is local and git-
 | --- | --- |
 | `product.md` | Confirmed project purpose, current documentation scope, and separated open questions. |
 | `recovery-maintenance-system.md` | Feature brief, architecture proposal, development roadmap and open Product Owner decisions for the Recovery & Maintenance System (operator/software/hardware recovery + control transfer). |
+| `amplifier-system-requirements.md` | Consolidated amplifier-system requirements (global stop, drive behavior, parameter ownership, initialization, protection/recovery, BEMF, FY/yard transfer, shutdown) with agreed/verify/research/deferred status markers. |
 | `firmware-toolchain-readiness.md` | PIC18/PIC32 firmware development and toolchain readiness assessment under Workflow v1: toolchain inventory, executed build results, source/artifact baseline analysis, and proposals for automated builds/tests, artifact traceability, simulator integration, controlled flashing, and firmware increments. |
 | `application-guide.md` | Human-readable guide to the application: system overview, structure, workflows, endpoints, and status. |
 | `koploper-interface.md` | Verified Koploper/ECoS interface: ports, commands, position records, and the translation-layer design. |
