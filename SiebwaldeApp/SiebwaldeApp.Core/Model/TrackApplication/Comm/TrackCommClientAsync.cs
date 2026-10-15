@@ -1,6 +1,7 @@
 ﻿using SiebwaldeApp; // TrackApplicationVariables, TrackAmplifierItem, ReceivedMessage, SendMessage
 using System;
 using System.IO;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
@@ -48,8 +49,9 @@ namespace SiebwaldeApp.Core
 
             await _transport.OpenAsync(_cts.Token).ConfigureAwait(false);
 
+            var token = _cts.Token;
             _receiveLoopTask = Task.Run(
-                () => ReceiveLoopAsync(_cts.Token),
+                () => ReceiveLoopAsync(token),
                 CancellationToken.None);
 
             // Start 2 Hz container-to-UI publish
@@ -67,13 +69,16 @@ namespace SiebwaldeApp.Core
 
             _publishTimer.Stop();
 
+            ExceptionDispatchInfo? failure = null;
             if (_receiveLoopTask != null)
             {
                 try { await _receiveLoopTask.ConfigureAwait(false); }
                 catch (OperationCanceledException) { /* ignore */ }
+                catch (Exception ex) { failure = ExceptionDispatchInfo.Capture(ex); }
             }
 
-            await _transport.CloseAsync(cancellationToken).ConfigureAwait(false);
+            try { await _transport.CloseAsync(cancellationToken).ConfigureAwait(false); }
+            finally { failure?.Throw(); } // Preserve the receive failure even if cleanup also fails.
         }
 
         // --------------------------------------------------------------------
@@ -252,8 +257,12 @@ namespace SiebwaldeApp.Core
 
         public async ValueTask DisposeAsync()
         {
-            await StopAsync().ConfigureAwait(false);
-            await _transport.DisposeAsync().ConfigureAwait(false);
+            ExceptionDispatchInfo? failure = null;
+            try { await StopAsync().ConfigureAwait(false); }
+            catch (Exception ex) { failure = ExceptionDispatchInfo.Capture(ex); }
+
+            try { await _transport.DisposeAsync().ConfigureAwait(false); }
+            finally { failure?.Throw(); }
         }
     }
 }
