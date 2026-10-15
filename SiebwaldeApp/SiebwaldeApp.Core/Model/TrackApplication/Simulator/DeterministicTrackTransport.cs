@@ -186,7 +186,8 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
                 // the C# holding-register view fresh. Only started when a non-null interval is set.
                 if (_config.PeriodicSlaveInfoInterval is { } interval)
                 {
-                    _heartbeatTask = Task.Run(() => HeartbeatLoopAsync(interval, _cts.Token));
+                    var token = _cts.Token;
+                    _heartbeatTask = Task.Run(() => HeartbeatLoopAsync(interval, token));
                 }
             }
 

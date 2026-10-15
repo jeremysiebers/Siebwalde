@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using System.Runtime.ExceptionServices;
 using System.Threading.Channels;
 
 namespace SiebwaldeApp.Core.TrackApplication.Comm
@@ -28,6 +29,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Comm
                 throw new InvalidOperationException("Transport already opened.");
 
             _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            var token = _cts.Token;
 
             // Start the receive loop on the inner UDP transport.
             _receiveLoopTask = _inner.StartReceiveLoopAsync(
@@ -35,10 +37,10 @@ namespace SiebwaldeApp.Core.TrackApplication.Comm
                 {
                     // Push every datagram into the channel.
                     // No await here except the channel write.
-                    await _frames.Writer.WriteAsync(payload, _cts.Token)
+                    await _frames.Writer.WriteAsync(payload, token)
                                      .ConfigureAwait(false);
                 },
-                _cts.Token);
+                token);
         }
 
         public async Task CloseAsync(CancellationToken cancellationToken = default)
@@ -50,13 +52,16 @@ namespace SiebwaldeApp.Core.TrackApplication.Comm
             _cts = null;
             cts.Cancel();
 
+            ExceptionDispatchInfo? failure = null;
             if (_receiveLoopTask != null)
             {
                 try { await _receiveLoopTask.ConfigureAwait(false); }
                 catch (OperationCanceledException) { /* ignore */ }
+                catch (Exception ex) { failure = ExceptionDispatchInfo.Capture(ex); }
             }
 
             _frames.Writer.TryComplete();
+            failure?.Throw();
         }
 
         public Task SendAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken = default)
@@ -97,8 +102,12 @@ namespace SiebwaldeApp.Core.TrackApplication.Comm
 
         public async ValueTask DisposeAsync()
         {
-            await CloseAsync().ConfigureAwait(false);
-            _inner.Dispose();
+            ExceptionDispatchInfo? failure = null;
+            try { await CloseAsync().ConfigureAwait(false); }
+            catch (Exception ex) { failure = ExceptionDispatchInfo.Capture(ex); }
+
+            try { _inner.Dispose(); }
+            finally { failure?.Throw(); }
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using SiebwaldeApp; // TrackApplicationVariables, TrackAmplifierItem, ReceivedMessage, SendMessage
 using System;
 using System.IO;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
@@ -68,13 +69,16 @@ namespace SiebwaldeApp.Core
 
             _publishTimer.Stop();
 
+            ExceptionDispatchInfo? failure = null;
             if (_receiveLoopTask != null)
             {
                 try { await _receiveLoopTask.ConfigureAwait(false); }
                 catch (OperationCanceledException) { /* ignore */ }
+                catch (Exception ex) { failure = ExceptionDispatchInfo.Capture(ex); }
             }
 
-            await _transport.CloseAsync(cancellationToken).ConfigureAwait(false);
+            try { await _transport.CloseAsync(cancellationToken).ConfigureAwait(false); }
+            finally { failure?.Throw(); } // Preserve the receive failure even if cleanup also fails.
         }
 
         // --------------------------------------------------------------------
@@ -253,8 +257,12 @@ namespace SiebwaldeApp.Core
 
         public async ValueTask DisposeAsync()
         {
-            await StopAsync().ConfigureAwait(false);
-            await _transport.DisposeAsync().ConfigureAwait(false);
+            ExceptionDispatchInfo? failure = null;
+            try { await StopAsync().ConfigureAwait(false); }
+            catch (Exception ex) { failure = ExceptionDispatchInfo.Capture(ex); }
+
+            try { await _transport.DisposeAsync().ConfigureAwait(false); }
+            finally { failure?.Throw(); }
         }
     }
 }
