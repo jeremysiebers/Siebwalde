@@ -33,6 +33,10 @@
       <itemPath>main.h</itemPath>
       <itemPath>processio.h</itemPath>
       <itemPath>regulator.h</itemPath>
+      <itemPath>amp_model.h</itemPath>
+      <itemPath>amp_adapter.h</itemPath>
+      <itemPath>amp_core.h</itemPath>
+      <itemPath>modbus/modbushooks.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -70,6 +74,9 @@
       <itemPath>main.c</itemPath>
       <itemPath>processio.c</itemPath>
       <itemPath>regulator.c</itemPath>
+      <itemPath>amp_adapter.c</itemPath>
+      <itemPath>amp_core.c</itemPath>
+      <itemPath>modbus/modbushooks.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

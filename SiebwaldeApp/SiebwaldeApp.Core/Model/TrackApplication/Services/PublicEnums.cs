@@ -6,6 +6,7 @@
         public ushort Taskcommand;
         public ushort Taskstate;
         public ushort Taskmessage;
+        public byte[]? Payload;
 
         public ReceivedMessage(ushort taskid, ushort taskcommand, ushort taskstate, ushort taskmessage)
         {
@@ -13,6 +14,7 @@
             Taskcommand = taskcommand;
             Taskstate = taskstate;
             Taskmessage = taskmessage;
+            Payload = null;
         }
 
         public static bool operator ==(ReceivedMessage c1, ReceivedMessage c2)
@@ -120,7 +122,7 @@
         public const byte EXEC_GLOBAL_STOP = 109; // payload: primitive 0 (HR0=399), reserved 0
         public const byte HOST_HEARTBEAT = 110; // payload: u16 little-endian sequence
         public const byte GLOBAL_STOP_STATE = 111; // sender 10, DONE=7; see GlobalStopStatusMessage
-        // 112 REARM_GLOBAL_STOP is reserved, deliberately not implemented.
+        public const byte REARM_GLOBAL_STOP = 112; // R8-2: PIC32 LATCHED -> ARMED (no auto re-arm)
 
         /* FWHANDLER COMMANDS */
         public const byte EXEC_FW_STATE_RECEIVE_FW_FILE = 120;

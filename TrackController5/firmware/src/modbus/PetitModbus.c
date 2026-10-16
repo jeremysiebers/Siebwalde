@@ -598,7 +598,7 @@ unsigned char SENDxPETITxMODBUS(unsigned char Address, unsigned char Function, u
             g_lastReqQty   = ((uint16_t)DataBuf[2] << 8) | (uint16_t)DataBuf[3];
         }
         
-        if(Petit_Rx_Data.Address > SlaveAmount){
+        if(Address > SlaveAmount){
             DUMP_SLAVE_DATA[0].MbSentCounter += 1;
         }
         else{
@@ -632,7 +632,8 @@ void HandlePetitModbusReadHoldingRegistersSlaveReadback(void)
 
     if (reqAddr == Petit_Rx_Data.Address)
     {
-        if (bytes == Petit_Rx_Data.DataBuf[0])
+        if (qty > 0 && start + qty <= NUMBER_OF_HOLDING_PETITREGISTERS &&
+            bytes == Petit_Rx_Data.DataBuf[0])
         {
             BufReadIndex = 0;
 
@@ -671,6 +672,10 @@ void HandlePetitModbusReadHoldingRegistersSlaveReadback(void)
 //                    (unsigned)(MASTER_SLAVE_DATA[reqAddr].HoldingReg[10])
 //                        );
 //            }
+        }
+        else {
+            if (reqAddr > SlaveAmount) DUMP_SLAVE_DATA[0].MbCommError = SLAVE_DATA_NOK;
+            else MASTER_SLAVE_DATA[reqAddr].MbCommError = SLAVE_DATA_NOK;
         }
     }
     else

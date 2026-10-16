@@ -76,5 +76,65 @@ namespace SiebwaldeApp.Core
             IReadOnlyList<TrackAmplifierItem>? items,
             IReadOnlyCollection<byte> domain)
             => AreAllObservedNeutral(items, domain, DateTimeOffset.UtcNow, TrackAmplifierDataFreshness.DefaultStaleAfter);
+
+        /// <summary>
+        /// True when every amplifier in <paramref name="domain"/> has a genuine, current protocol
+        /// readback whose <b>applied</b> PWM field (<see cref="TrackAmplifierRegisters.AppliedPwm"/>,
+        /// HR14) equals neutral. The applied register is the value the firmware last wrote to the PWM
+        /// peripheral — the distinct "applied" evidence, never the <c>HR_COMMAND</c>/<c>HR_REQUESTED_PWM</c>
+        /// echo. An amplifier without the applied-readback capability bit (HR7 bit 12) fails closed:
+        /// applied evidence is unavailable, so it must never be treated as observed neutral.
+        /// </summary>
+        public static bool AreAllAppliedNeutral(
+            IReadOnlyList<TrackAmplifierItem>? items,
+            IReadOnlyCollection<byte> domain,
+            DateTimeOffset now,
+            TimeSpan staleAfter)
+        {
+            if (domain is null || domain.Count == 0)
+            {
+                return true;
+            }
+
+            if (items is null)
+            {
+                return false;
+            }
+
+            foreach (var slave in domain)
+            {
+                var item = items.FirstOrDefault(a => a is not null && a.SlaveNumber == slave);
+                if (!TrackAmplifierDataFreshness.HasCurrentProtocolReadback(item, now, staleAfter))
+                {
+                    return false;
+                }
+
+                var registers = item!.HoldingReg;
+                if (registers is null || registers.Length < TrackAmplifierRegisters.Count)
+                {
+                    return false;
+                }
+
+                if (!TrackAmplifierRegisters.HasAppliedReadbackCapability(
+                        registers[TrackAmplifierRegisters.Identity]))
+                {
+                    return false; // no applied-readback => do not rely on HR_APPLIED_PWM; fail closed
+                }
+
+                if ((registers[TrackAmplifierRegisters.AppliedPwm] & TrackAmplifierRegisters.PwmMask)
+                    != AmplifierSpeedMapper.NeutralPwm)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>True when every amplifier in <paramref name="domain"/> is applied-neutral as of now.</summary>
+        public static bool AreAllAppliedNeutral(
+            IReadOnlyList<TrackAmplifierItem>? items,
+            IReadOnlyCollection<byte> domain)
+            => AreAllAppliedNeutral(items, domain, DateTimeOffset.UtcNow, TrackAmplifierDataFreshness.DefaultStaleAfter);
     }
 }

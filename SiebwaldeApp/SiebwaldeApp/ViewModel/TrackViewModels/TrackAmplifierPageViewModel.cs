@@ -674,15 +674,15 @@ namespace SiebwaldeApp
         {
             ushort hr0 = GetReg(regs, 0);
             ushort hr1 = GetReg(regs, 1);
-            ushort hr2 = GetReg(regs, 2);
-            ushort hr3 = GetReg(regs, 3);
-            ushort hr4 = GetReg(regs, 4);
-            ushort hr5 = GetReg(regs, 5);
-            ushort hr6 = GetReg(regs, 6);
-            ushort hr7 = GetReg(regs, 7);
-            ushort hr8 = GetReg(regs, 8);
-            ushort hr9 = GetReg(regs, 9);
-            ushort hr10 = GetReg(regs, 10);
+            ushort hr2 = GetReg(regs, TrackAmplifierRegisters.Validity);
+            ushort hr3 = GetReg(regs, TrackAmplifierRegisters.State);
+            ushort hr4 = GetReg(regs, TrackAmplifierRegisters.FuseVoltage);
+            ushort hr5 = GetReg(regs, TrackAmplifierRegisters.HBridgeTemperature);
+            ushort hr6 = GetReg(regs, TrackAmplifierRegisters.HBridgeCurrent);
+            ushort hr7 = GetReg(regs, TrackAmplifierRegisters.MessagesReceived);
+            ushort hr8 = GetReg(regs, TrackAmplifierRegisters.MessagesSent);
+            ushort hr9 = GetReg(regs, TrackAmplifierRegisters.Address);
+            ushort hr10 = GetReg(regs, TrackAmplifierRegisters.ConfigRamp);
             ushort hr11 = GetReg(regs, 11);
 
             //ADC 5V ref scale
@@ -704,19 +704,19 @@ namespace SiebwaldeApp
             // EmoStop readback
             EmoStopFeedback = HasBit(hr0, 15);
 
-            // HoldingReg1
-            SetBemfSpeed = GetBits(hr1, 0, 9);
-            SetCsReg = HasBit(hr1, 10);
-            ClearAmpStatus = HasBit(hr1, 11);
-            ClearMessageBuffer = HasBit(hr1, 12);
-            EnableAmplifier = HasBit(hr1, 15);
+            // Legacy BEMF/CS fields have no Phase-1 equivalent. Do not decode config as BEMF.
+            SetBemfSpeed = 0;
+            SetCsReg = false;
+            ClearAmpStatus = HasBit(hr1, 12);
+            ClearMessageBuffer = HasBit(hr1, 11);
+            EnableAmplifier = (hr3 & TrackAmplifierRegisters.EnableActiveBit) != 0;
 
             // HoldingReg2 - bit layout is owned by TrackAmplifierRegisters (mirrors General.h)
-            ReadBackEmf = GetBits(hr2, 0, 9);
+            ReadBackEmf = 0;
             IsOccupied = (hr2 & TrackAmplifierRegisters.OccupiedBit) != 0;
             ThermalFlag = (hr2 & TrackAmplifierRegisters.ThermalBit) != 0;
             OverCurrent = (hr2 & TrackAmplifierRegisters.OverCurrentBit) != 0;
-            AmplifierIdSet = (hr2 & TrackAmplifierRegisters.IdSetBit) != 0;
+            AmplifierIdSet = (hr3 & TrackAmplifierRegisters.IdSetBit) != 0;
 
             // HoldingReg3
             AmplifierStatus = hr3;
@@ -732,8 +732,8 @@ namespace SiebwaldeApp
 
             // HoldingReg9
             AmplifierId = GetBits(hr9, 0, 5);
-            SinglePwmMode = HasBit(hr9, 6);
-            ResetSlave = HasBit(hr9, 15);
+            SinglePwmMode = false;
+            ResetSlave = false;
 
             // HoldingReg10
             AccelerationPar = GetBits(hr10, 0, 7);

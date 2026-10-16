@@ -86,8 +86,32 @@ extern "C" {
 /* Host-authority timing, using the existing 126 MHz core timer. */
 #define HOST_HEARTBEAT_REFERENCE_MS 500u
 #define HOST_AUTHORITY_WATCHDOG_MS 2000u
-#define GLOBAL_STOP_NEUTRAL_HR0 399u
+#define GLOBAL_STOP_NEUTRAL_HR0 (399u | 0x1000u)
 #define GLOBAL_STOP_EMO_HR0 0x8000u
+#define MOTION_LEASE_TIMEOUT_MS 500u
+#define MOTION_LEASE_RENEWAL_MS 100u
+#define MOTION_PERMISSION_HR1 0x4000u
+#define GLOBAL_STOP_MAX_ATTEMPTS 3u
+#define GLOBAL_STOP_CONFIRM_MS 1000u
+/* Cross-layer mirror of the frozen PIC18 General.h register map. */
+#define HR_IDENTITY 7u
+#define HR_STATE 8u
+#define HR_REQUESTED_PWM 12u
+#define HR_TARGET_PWM 13u
+#define HR_APPLIED_PWM 14u
+#define HR_WRITE_RESULT 15u
+#define HR_MEAS_VOLTAGE 16u
+#define HR_MEAS_TEMP 17u
+#define HR_MEAS_CURRENT 18u
+#define HR_MSGS_RX 19u
+#define HR_MSGS_TX 20u
+#define HR_STATE_STOPPING_ACTIVE 0x0800u
+#define HR_STATE_INHIBITED 0x8000u
+#define HR_APPLIED_PWM_MASK 0x03ffu
+/* Amendment A2: 2-bit results packed LSB-first in GLOBAL_STOP_STATE payload. */
+#define GLOBAL_STOP_CONFIRMED 0u
+#define GLOBAL_STOP_PENDING 1u
+#define GLOBAL_STOP_FAILED 2u
 
     // *****************************************************************************
     // *****************************************************************************
@@ -165,7 +189,7 @@ typedef enum
     /* Status message: 0=disarmed, 1=latched-host-loss,
      * 2=latched-host-initiated, 3=armed. Sender=CONTROLLER, state=DONE. */
     GLOBAL_STOP_STATE                                          = 111,
-    REARM_GLOBAL_STOP                                          = 112, /* Reserved; not implemented. */
+    REARM_GLOBAL_STOP                                          = 112,
 						
 	/* FWHANDLER COMMANDS */						
     EXEC_FW_STATE_RECEIVE_FW_FILE         						= 120,

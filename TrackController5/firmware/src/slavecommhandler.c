@@ -12,6 +12,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include "slavecommhandler.h"
+#include "slavestartup.h"
 
 /*#--------------------------------------------------------------------------#*/
 /*  Description: INITxSLAVExSTARTUP(SLAVE_INFO *location)
@@ -74,6 +75,12 @@ typedef struct
 void SLAVExCOMMUNICATIONxHANDLER(){
     
     uint8_t length = 0;    
+    if (Data.Direction == WRITE && Data.SlaveAddress > 0 &&
+        Data.SlaveAddress <= NUMBER_OF_AMPLIFIERS &&
+        !ISxAMPLIFIERxCOMPATIBLE(Data.SlaveAddress)) {
+        MASTER_SLAVE_DATA[Data.SlaveAddress].MbCommError = SLAVE_DATA_NOK;
+        return;
+    }
     
     if(Data.Direction == WRITE && Data.NoOfRegisters > 0){
         if(Data.NoOfRegisters > 0){

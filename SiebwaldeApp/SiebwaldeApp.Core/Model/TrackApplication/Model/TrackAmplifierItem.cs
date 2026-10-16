@@ -14,7 +14,10 @@ namespace SiebwaldeApp.Core
         #region Private fields
 
         private ushort _slaveNumber;
-        private ushort[] _holdingReg = new ushort[12];
+        private ushort[] _holdingReg = new ushort[TrackAmplifierRegisters.Count];
+        public long ProtocolReadbackSequence { get; set; }
+        public bool ConfigurationVerified { get; set; }
+        public string? Phase1Failure { get; set; }
         private ushort _mbReceiveCounter;
         private ushort _slaveDetected;
         private ushort _spiCommErrorCounter;

@@ -13,6 +13,8 @@
 #include "slavecommhandler.h"
 #include "mbus.h"
 #include "controller.h"
+#include "ethernet.h"
+#include "slavestartup.h"
 #include "modbus/PetitModbus.h"
 
 #define MAILBOXRCD 100
@@ -24,11 +26,12 @@ enum SLAVE{
     MESSAGE2        = 2,
     MESSAGE3        = 3,
     
-    SIPBOXSIZE      = 4,                                                        // How many messages are non-critical
+    SIPBOXSIZE      = 9,                                                        // HR4..HR20, two per read (last single)
     SIP1            = 1,
     SIP2            = 2,
     SIP3            = 3,
-    SIP4            = 4,    
+    SIP4            = 4,
+    SIP5 = 5, SIP6 = 6, SIP7 = 7, SIP8 = 8, SIP9 = 9,
 };
 
 static REGISTER_PROCESSING          Rcd[MAILBOXRCD];                            // message mailbox
@@ -57,6 +60,95 @@ bool SendNextMessage(void);
 /*#--------------------------------------------------------------------------#*/
 static SLAVE_INFO *MASTER_SLAVE_DATA = 0;                                       // Holds the address were the received slave data is stored
 static SLAVE_INFO *DUMP_SLAVE_DATA   = 0;                                       // Holds the address were the received slave data is stored
+
+typedef enum { STOP_UNUSED, STOP_QUEUED, STOP_WRITE_WAIT, STOP_STATE_READ,
+    STOP_STATE_WAIT, STOP_PWM_READ, STOP_PWM_WAIT, STOP_CONFIRMED,
+    STOP_FAILED } STOP_DELIVERY;
+static STOP_DELIVERY StopDelivery[NUMBER_OF_AMPLIFIERS + 1];
+static uint8_t StopAttempts[NUMBER_OF_AMPLIFIERS + 1];
+static uint8_t StopSlave;
+static uint8_t StopReportReason;
+static uint16_t StopWord, StopState;
+static uint32_t StopStarted, LastLeaseRenewal;
+
+void REPORTxGLOBALxSTOPxDELIVERY(uint8_t reason)
+{
+    udpTrans_t frame = {0};
+    uint8_t slave, count = 0;
+    if (!ISxGLOBALxSTOPxLATCHED()) return;
+    StopReportReason = reason;
+    frame.header = HEADER;
+    frame.command = CONTROLLER;
+    frame.data[0] = GLOBAL_STOP_STATE;
+    frame.data[1] = DONE;
+    frame.data[2] = reason;
+    /* A2: ascending detected IDs captured at latch time, four entries/byte,
+     * least-significant pair first. Count excludes backplanes and master. */
+    for (slave = 1; slave <= NUMBER_OF_AMPLIFIERS; ++slave) {
+        if (StopDelivery[slave] != STOP_UNUSED) {
+            uint8_t result = StopDelivery[slave] == STOP_CONFIRMED ? GLOBAL_STOP_CONFIRMED :
+                StopDelivery[slave] == STOP_FAILED ? GLOBAL_STOP_FAILED : GLOBAL_STOP_PENDING;
+            frame.data[4u + count / 4u] |= (uint8_t)(result << (2u * (count % 4u)));
+            ++count;
+        }
+    }
+    frame.data[3] = count;
+    PUTxDATAxINxSENDxMAILxBOX(&frame);
+}
+
+/* Sole owner of stop completion. Ordinary polling must not consume MbCommError
+ * while active. Every confirmation uses two new FC03 transactions. */
+static bool SERVICExGLOBALxSTOP(void)
+{
+    uint8_t status;
+    if (!PetitModbusIsReady()) return false;
+    if (StopSlave != 0) {
+        status = CHECKxMODBUSxCOMMxSTATUS(StopSlave, true);
+        if (status == SLAVEBUSY) return false;
+        if (status != SLAVEOK || (uint32_t)(READxCORExTIMER() - StopStarted) >=
+                GLOBAL_STOP_CONFIRM_MS * (uint32_t)MILISECONDS) {
+            StopDelivery[StopSlave] = StopAttempts[StopSlave] < GLOBAL_STOP_MAX_ATTEMPTS ?
+                STOP_QUEUED : STOP_FAILED;
+            if (StopDelivery[StopSlave] == STOP_FAILED) REPORTxGLOBALxSTOPxDELIVERY(StopReportReason);
+            StopSlave = 0;
+        } else if (StopDelivery[StopSlave] == STOP_WRITE_WAIT) {
+            StopDelivery[StopSlave] = STOP_STATE_READ;
+        } else if (StopDelivery[StopSlave] == STOP_STATE_WAIT) {
+            StopState = MASTER_SLAVE_DATA[StopSlave].HoldingReg[HR_STATE];
+            StopDelivery[StopSlave] = STOP_PWM_READ;
+        } else if (StopDelivery[StopSlave] == STOP_PWM_WAIT) {
+            if ((MASTER_SLAVE_DATA[StopSlave].HoldingReg[HR_IDENTITY] & 0x1000u) != 0 &&
+                (StopState & (HR_STATE_INHIBITED | HR_STATE_STOPPING_ACTIVE)) == HR_STATE_INHIBITED &&
+                (MASTER_SLAVE_DATA[StopSlave].HoldingReg[HR_APPLIED_PWM] & HR_APPLIED_PWM_MASK) == 399u) {
+                StopDelivery[StopSlave] = STOP_CONFIRMED;
+                REPORTxGLOBALxSTOPxDELIVERY(StopReportReason);
+                StopSlave = 0;
+            } else StopDelivery[StopSlave] = STOP_STATE_READ;
+        }
+    }
+    if (StopSlave == 0) {
+        uint8_t slave;
+        for (slave = 1; slave <= NUMBER_OF_AMPLIFIERS; ++slave)
+            if (StopDelivery[slave] == STOP_QUEUED) { StopSlave = slave; break; }
+    }
+    if (StopSlave == 0) return false;
+    Data.SlaveAddress = StopSlave;
+    Data.NoOfRegisters = 1;
+    if (StopDelivery[StopSlave] == STOP_QUEUED) {
+        Data.Direction = WRITE;
+        Data.StartRegister = HOLDINGREG0;
+        Data.RegData0 = StopWord;
+        ++StopAttempts[StopSlave];
+        StopStarted = READxCORExTIMER();
+        StopDelivery[StopSlave] = STOP_WRITE_WAIT;
+    } else {
+        Data.Direction = READ;
+        Data.StartRegister = StopDelivery[StopSlave] == STOP_STATE_READ ? HR_STATE : HR_APPLIED_PWM;
+        StopDelivery[StopSlave] = StopDelivery[StopSlave] == STOP_STATE_READ ? STOP_STATE_WAIT : STOP_PWM_WAIT;
+    }
+    SLAVExCOMMUNICATIONxHANDLER();
+    return true;
+}
 
 void INITxSLAVExHANDLER(SLAVE_INFO *location, SLAVE_INFO *Dump){
     MASTER_SLAVE_DATA  =  location;
@@ -173,6 +265,24 @@ bool SendNextMessage(void)
 {
     bool return_val = false;
 
+    if (!PetitModbusIsReady()) return false;
+    if (ISxGLOBALxSTOPxLATCHED()) {
+        if (SERVICExGLOBALxSTOP()) return true;
+        if (StopSlave != 0) return false;
+    }
+    /* Direct periodic broadcast, independent of mailbox purge/fullness. */
+    if (!ISxGLOBALxSTOPxLATCHED() && (uint32_t)(READxCORExTIMER() - LastLeaseRenewal) >=
+            MOTION_LEASE_RENEWAL_MS * (uint32_t)MILISECONDS) {
+        Data.SlaveAddress = BROADCAST_ADDRESS;
+        Data.Direction = WRITE;
+        Data.NoOfRegisters = 1;
+        Data.StartRegister = HOLDINGREG1;
+        Data.RegData0 = MOTION_PERMISSION_HR1;
+        SLAVExCOMMUNICATIONxHANDLER();
+        LastLeaseRenewal = READxCORExTIMER();
+        return true;
+    }
+
     /* --------------------------------------------------------------------
      * 1) High priority: berichten uit de mailbox (PC -> Master -> Slave)
      * -------------------------------------------------------------------- */
@@ -274,6 +384,14 @@ bool SendNextMessage(void)
                         SLAVExCOMMUNICATIONxHANDLER();
                         break;
 
+                    case SIP5: case SIP6: case SIP7: case SIP8: case SIP9:
+                        Data.SlaveAddress = ProcessSlave;
+                        Data.Direction = READ;
+                        Data.StartRegister = HR_REQUESTED_PWM + 2u * (SlaveInfoProcessor - SIP5);
+                        Data.NoOfRegisters = SlaveInfoProcessor == SIP9 ? 1 : 2;
+                        SLAVExCOMMUNICATIONxHANDLER();
+                        break;
+
                     default:
                         break;
                 }
@@ -319,6 +437,7 @@ bool SendNextMessage(void)
 bool PROCESSxSLAVExCOMMUNICATION(){
     
     bool return_Val = false;
+    if (ISxGLOBALxSTOPxLATCHED() && StopSlave != 0) return false;
     
     
     /* Verify communication was OK */
@@ -384,10 +503,13 @@ bool PROCESSxSLAVExCOMMUNICATION(){
 
 void ADDxNEWxSLAVExDATAxCMDxTOxSLAVExMAILBOX(uint8_t *data)
 {
-    /* HR0 is the first register; reject the whole write if it could move a track. */
+    /* No host broadcast/initial-address writes: they bypass identity gating. */
+    if (data[1] == WRITE && (data[0] == 0 || data[0] > NUMBER_OF_SLAVES ||
+        (data[0] <= NUMBER_OF_AMPLIFIERS && !ISxAMPLIFIERxCOMPATIBLE(data[0])))) return;
+    /* No amplifier writes while latched, including host-originated lease
+     * renewal/config/enable. Only this worker owns stop delivery. */
     if (ISxGLOBALxSTOPxLATCHED() && data[1] == WRITE &&
-        data[2] > 0 && data[3] == HOLDINGREG0 &&
-        (((uint16_t)data[5] << 8) | data[4]) != GLOBAL_STOP_NEUTRAL_HR0) {
+        data[0] <= NUMBER_OF_AMPLIFIERS) {
         return;
     }
     // Calculate the next write position
@@ -432,19 +554,16 @@ void ADDxNEWxSLAVExDATAxCMDxTOxSLAVExMAILBOX(uint8_t *data)
 void ENQUEUExGLOBALxSTOP(uint16_t hr0)
 {
     uint8_t slave;
-    /* Drop pre-latch pending commands. At most 50 stop entries fit in 99 slots.
-     * No per-entry notification: the controller emits one latch status only.
-     * An already transmitted request cannot be recalled. */
+    /* Drop pre-latch pending commands. In-flight requests cannot be recalled.
+     * Delivery retry is not a new latch edge. */
     Rcd_Ptr = Rcd_Ptr_prev = &Rcd[0];
+    StopSlave = 0;
+    StopWord = hr0;
     for (slave = 1; slave <= NUMBER_OF_AMPLIFIERS; ++slave) {
+        StopDelivery[slave] = STOP_UNUSED;
+        StopAttempts[slave] = 0;
         if (MASTER_SLAVE_DATA[slave].SlaveDetected) {
-            Rcd_Ptr->SlaveAddress = slave;
-            Rcd_Ptr->Direction = WRITE;
-            Rcd_Ptr->NoOfRegisters = 1;
-            Rcd_Ptr->StartRegister = HOLDINGREG0;
-            Rcd_Ptr->RegData0 = hr0;
-            Rcd_Ptr->RegData1 = 0;
-            ++Rcd_Ptr;
+            StopDelivery[slave] = ISxAMPLIFIERxCOMPATIBLE(slave) ? STOP_QUEUED : STOP_FAILED;
         }
     }
 }

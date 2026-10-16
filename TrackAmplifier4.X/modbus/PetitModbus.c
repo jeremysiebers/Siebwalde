@@ -3,6 +3,8 @@
 #include "PetitModbusPort.h"
 #include "General.h"
 #include "../mcc_generated_files/mcc.h"
+#include "modbushooks.h"
+#include "../amp_adapter.h"
 
 /*******************************ModBus Functions*******************************/
 #define PETITMODBUS_READ_COILS                  1
@@ -189,7 +191,7 @@ unsigned char PetitSendMessage(void)
     if (Petit_Tx_State != PETIT_RXTX_IDLE){
         return FALSE;
     }
-	PetitHoldingRegisters[HR_MESSAGES_SENT].ActValue += 1;    // Count the amount of transmitted messages
+    AmpAdapter_OnTransmit();
     Petit_Tx_Current  =0;
     Petit_Tx_State    =PETIT_RXTX_START;
 
@@ -228,6 +230,10 @@ void HandlePetitModbusError(unsigned char ErrorCode, unsigned char Function)
 #if PETITMODBUS_READ_HOLDING_REGISTERS_ENABLED > 0
 void HandlePetitModbusReadHoldingRegisters(void)
 {
+    if (Petit_Rx_Data.DataLen != 4u) {
+        HandlePetitModbusError(PETIT_ERROR_CODE_03, PETITMODBUS_READ_HOLDING_REGISTERS);
+        return;
+    }
     // Holding registers are effectively numerical outputs that can be written to by the host.
     // They can be control registers or analogue outputs.
     // We potientially have one - the pwm output value
@@ -244,7 +250,8 @@ void HandlePetitModbusReadHoldingRegisters(void)
         return;
     }
     // If it is bigger than RegisterNumber return error to Modbus Master
-    else if((Petit_StartAddress+Petit_NumberOfRegisters)>NUMBER_OF_HOLDING_PETITREGISTERS){
+    else if(!Petit_NumberOfRegisters || Petit_StartAddress >= NUMBER_OF_HOLDING_PETITREGISTERS ||
+            Petit_NumberOfRegisters > NUMBER_OF_HOLDING_PETITREGISTERS - Petit_StartAddress){
         HandlePetitModbusError(PETIT_ERROR_CODE_02, PETITMODBUS_READ_HOLDING_REGISTERS);
     }
     else
@@ -332,6 +339,12 @@ void HandlePetitModbusWriteSingleRegister(void)
     unsigned int    Petit_Address   = 0;
     unsigned int    Petit_Value     = 0;
     unsigned char   Petit_i         = 0;
+    uint8_t result;
+
+    if (Petit_Rx_Data.DataLen != 4u) {
+        HandlePetitModbusError(PETIT_ERROR_CODE_03, PETITMODBUS_WRITE_SINGLE_REGISTER);
+        return;
+    }
 
     // The message contains the requested start address and number of registers
     Petit_Address   = ((unsigned int) (Petit_Rx_Data.DataBuf[0]) << 8) + (unsigned int) (Petit_Rx_Data.DataBuf[1]);
@@ -342,17 +355,15 @@ void HandlePetitModbusWriteSingleRegister(void)
     Petit_Tx_Data.Address     = PETITMODBUS_SLAVE_ADDRESS;
     Petit_Tx_Data.DataLen     = 4;
 
-    if (Petit_Rx_Data.Address == PETITMODBUS_BROADCAST_ADDRESS)                 // Broadcast cannot process back communication (all slaves would have to respond!)
-    {
-        PetitHoldingRegisters[Petit_Address].ActValue=Petit_Value;
+    result = OnHoldingRegisterWrite(Petit_Rx_Data.Address, Petit_Address, Petit_Value,
+        Petit_Rx_Data.Address == PETITMODBUS_BROADCAST_ADDRESS);
+    if (result && result != AMP_WRITE_SATURATED) {
+        HandlePetitModbusError(result == AMP_WRITE_READ_ONLY || Petit_Address >= NUMBER_OF_HOLDING_PETITREGISTERS ?
+            PETIT_ERROR_CODE_02 : PETIT_ERROR_CODE_03, PETITMODBUS_WRITE_SINGLE_REGISTER);
         return;
     }
-    else if(Petit_Address>=NUMBER_OF_HOLDING_PETITREGISTERS){
-        HandlePetitModbusError(PETIT_ERROR_CODE_03, PETITMODBUS_WRITE_SINGLE_REGISTER);
-    }
-    else
+    if (Petit_Rx_Data.Address == PETITMODBUS_BROADCAST_ADDRESS) return;
     {
-        PetitHoldingRegisters[Petit_Address].ActValue=Petit_Value;
         // Output data buffer is exact copy of input buffer
         for (Petit_i = 0; Petit_i < 4; ++Petit_i)
             Petit_Tx_Data.DataBuf[Petit_i] = Petit_Rx_Data.DataBuf[Petit_i];
@@ -427,26 +438,50 @@ void HandleMPetitodbusWriteMultipleRegisters(void)
     unsigned int    Petit_NumberOfRegisters       =0;
     unsigned int    Petit_i                       =0;
     unsigned int	Petit_Value                   =0;
+    uint8_t result;
+    bool broadcast = Petit_Rx_Data.Address == PETITMODBUS_BROADCAST_ADDRESS;
+
+    if (Petit_Rx_Data.DataLen < 5u) {
+        HandlePetitModbusError(PETIT_ERROR_CODE_03, PETITMODBUS_WRITE_MULTIPLE_REGISTERS);
+        return;
+    }
 
     // The message contains the requested start address and number of registers
     Petit_StartAddress        = ((unsigned int) (Petit_Rx_Data.DataBuf[0]) << 8) + (unsigned int) (Petit_Rx_Data.DataBuf[1]);
     Petit_NumberOfRegisters   = ((unsigned int) (Petit_Rx_Data.DataBuf[2]) << 8) + (unsigned int) (Petit_Rx_Data.DataBuf[3]);
     Petit_ByteCount           = Petit_Rx_Data.DataBuf[4];
 
-    if (Petit_Rx_Data.Address == PETITMODBUS_BROADCAST_ADDRESS)                 // Broadcast cannot process back communication (all slaves would have to respond!)
-    {
-        for (Petit_i = 0; Petit_i <Petit_NumberOfRegisters; Petit_i++)
-        {
-            Petit_Value = ((unsigned int)Petit_Rx_Data.DataBuf[5+2*Petit_i]<<8)+((unsigned int)Petit_Rx_Data.DataBuf[6+2*Petit_i]);
-            PetitHoldingRegisters[Petit_StartAddress+Petit_i].ActValue=Petit_Value;
-        }
+    if (!Petit_NumberOfRegisters || Petit_StartAddress >= NUMBER_OF_HOLDING_PETITREGISTERS ||
+        Petit_NumberOfRegisters > NUMBER_OF_HOLDING_PETITREGISTERS - Petit_StartAddress) {
+        /* Record invalid address without indexing the mirror (including broadcasts). */
+        AmpAdapter_OnWrite(Petit_StartAddress >= NUMBER_OF_HOLDING_PETITREGISTERS ? Petit_StartAddress : 21u, 0u, broadcast);
+        HandlePetitModbusError(PETIT_ERROR_CODE_02, PETITMODBUS_WRITE_MULTIPLE_REGISTERS);
         return;
     }
-    else if((Petit_StartAddress+Petit_NumberOfRegisters)>NUMBER_OF_HOLDING_PETITREGISTERS){
+    if (Petit_ByteCount != 2u * Petit_NumberOfRegisters || Petit_Rx_Data.DataLen != 5u + Petit_ByteCount) {
         HandlePetitModbusError(PETIT_ERROR_CODE_03, PETITMODBUS_WRITE_MULTIPLE_REGISTERS);
-        // If it is bigger than RegisterNumber return error to Modbus Master
+        return;
     }
-    else
+    /* Preflight the entire bounded frame: no partial writes on invalid fields. */
+    for (Petit_i = 0; Petit_i < Petit_NumberOfRegisters; Petit_i++) {
+        Petit_Value = ((unsigned int)Petit_Rx_Data.DataBuf[5+2*Petit_i]<<8) | Petit_Rx_Data.DataBuf[6+2*Petit_i];
+        result = ValidateHoldingRegisterWrite(Petit_Rx_Data.Address, Petit_StartAddress+Petit_i, Petit_Value);
+        if (result) {
+            OnHoldingRegisterWrite(Petit_Rx_Data.Address, Petit_StartAddress+Petit_i, Petit_Value, broadcast);
+            HandlePetitModbusError(result == AMP_WRITE_READ_ONLY ? PETIT_ERROR_CODE_02 : PETIT_ERROR_CODE_03,
+                PETITMODBUS_WRITE_MULTIPLE_REGISTERS);
+            return;
+        }
+    }
+    for (Petit_i = 0; Petit_i < Petit_NumberOfRegisters; Petit_i++) {
+        Petit_Value = ((unsigned int)Petit_Rx_Data.DataBuf[5+2*Petit_i]<<8) | Petit_Rx_Data.DataBuf[6+2*Petit_i];
+        result = OnHoldingRegisterWrite(Petit_Rx_Data.Address, Petit_StartAddress+Petit_i, Petit_Value, broadcast);
+        if (result && result != AMP_WRITE_SATURATED) {
+            HandlePetitModbusError(PETIT_ERROR_CODE_03, PETITMODBUS_WRITE_MULTIPLE_REGISTERS);
+            return;
+        }
+    }
+    if (broadcast) return;
     {
         // Initialise the output buffer. The first byte in the buffer says how many outputs we have set
         Petit_Tx_Data.Function    = PETITMODBUS_WRITE_MULTIPLE_REGISTERS;
@@ -457,12 +492,6 @@ void HandleMPetitodbusWriteMultipleRegisters(void)
         Petit_Tx_Data.DataBuf[2]  = Petit_Rx_Data.DataBuf[2];
         Petit_Tx_Data.DataBuf[3]  = Petit_Rx_Data.DataBuf[3];
 
-        // Output data buffer is exact copy of input buffer
-        for (Petit_i = 0; Petit_i <Petit_NumberOfRegisters; Petit_i++)
-        {
-            Petit_Value = ((unsigned int)Petit_Rx_Data.DataBuf[5+2*Petit_i]<<8) + ((unsigned int)Petit_Rx_Data.DataBuf[6+2*Petit_i]);
-            PetitHoldingRegisters[Petit_StartAddress+Petit_i].ActValue=Petit_Value;
-        }
 		
         PetitSendMessage();
     }
@@ -754,9 +783,7 @@ unsigned int ProcessPetitModbus(void)
     {
         if ((Petit_Rx_Data.Address == PETITMODBUS_SLAVE_ADDRESS) || (Petit_Rx_Data.Address == PETITMODBUS_BROADCAST_ADDRESS)) // Is Data for us?
         {
-            if (Petit_Rx_Data.Address == PETITMODBUS_SLAVE_ADDRESS){
-                PetitHoldingRegisters[HR_MESSAGES_RECEIVED].ActValue += 1;// Count the amount of received messages, not the broadcast messages
-            }
+            AmpAdapter_OnFrame(Petit_Rx_Data.Address, Petit_Rx_Data.Function);
             
             switch (Petit_Rx_Data.Function)                                     // Data is for us but which function?
             {

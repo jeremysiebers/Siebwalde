@@ -84,6 +84,7 @@ namespace SiebwaldeApp.Integration
         private LocomotiveCarrierFeeder? _kis09CarrierFeeder;
         public GlobalStopController GlobalStop { get; } = new();
         private GlobalStopMonitor? _globalStopMonitor;
+        private GlobalStopConfirmationState? _stopConfirmation;
         private Task? _globalStopTask;
         private CarrierTimingTrace? _carrierTimingTrace;
 
@@ -282,11 +283,12 @@ namespace SiebwaldeApp.Integration
                         // occupancy flows through the real transport -> comm -> occupancy path.
                         _movementSimulationAdapter?.Start(_cts.Token);
 
-                        // Full-chain mode: command + observe neutral on the configured domain before
-                        // reporting Running. Running does NOT imply movement-safe; the permission
-                        // state (and, on failure, the raised fault + diagnostic) carry the truth.
+                        // Full-chain mode: identity-check + config-download + APPLY + verify each
+                        // domain amplifier (fail-closed), then command + observe neutral (command
+                        // echo AND applied PWM) before reporting Running.
                         if (mode.IsFullTrackChain())
                         {
+                            await InitializePhase1AmplifiersAsync(_cts.Token).ConfigureAwait(false);
                             await EstablishObservedNeutralAsync(_cts.Token).ConfigureAwait(false);
                         }
 
@@ -443,6 +445,7 @@ namespace SiebwaldeApp.Integration
             // 4) Communication client on top of the selected transport.
             _trackCommClient = new TrackCommClientAsync(transport, _trackVariables);
             _globalStopMonitor = new GlobalStopMonitor(_trackCommClient, _trackVariables);
+            _stopConfirmation = new GlobalStopConfirmationState(_trackCommClient);
 
             // Re-publish amplifier data so consumers observe the same frames.
             _trackCommClient.AmplifierDataReceived += (_, e) => AmplifierDataReceived?.Invoke(this, e);
@@ -547,6 +550,129 @@ namespace SiebwaldeApp.Integration
         // ---------------------------------------------------------------------------------
 
         /// <summary>
+        /// Phase-1 identity gate + config download + APPLY + readback verification for every
+        /// domain amplifier (AC6 / AC2/AC3). An amplifier whose HR7 identity is incompatible is
+        /// left with <c>Phase1Failure = "incompatible firmware"</c> and is never configured,
+        /// enabled or granted drive. A compatible amplifier has its config set downloaded and
+        /// APPLYed, and only becomes <see cref="TrackAmplifierItem.ConfigurationVerified"/> once
+        /// <c>HR_STATE</c> reports <c>INIT_DONE</c>+<c>CONFIG_OK</c> with the config echoed back.
+        /// Failures are reported per amplifier (never thrown), and the grant path blocks on them.
+        /// </summary>
+        private async Task InitializePhase1AmplifiersAsync(CancellationToken ct)
+        {
+            if (_trackVariables is null || _trackCommClient is null)
+            {
+                return;
+            }
+
+            var domain = EffectiveDomain();
+            if (domain.Count == 0)
+            {
+                return;
+            }
+
+            // The 111 stop-confirmation payload is decoded against the physical detected-amplifier
+            // list in ascending slave-address order (the PIC32 packs StopDelivery[i] != STOP_UNUSED,
+            // i.e. SlaveDetected, ascending) — NOT the effective/configured domain.
+            _stopConfirmation?.SetDetectedAmplifiers(
+                _trackVariables.trackAmpItems
+                    .Where(a => TrackAmplifierAddress.IsTrackAmplifierAddress(a.SlaveNumber) && a.SlaveDetected != 0)
+                    .OrderBy(a => a.SlaveNumber)
+                    .Select(a => a.SlaveNumber)
+                    .ToArray());
+
+            // Re-establish a fresh, genuine protocol readback for every domain amplifier before the
+            // identity/config gate: SetDefaultPwmSetpointsStep clears ProtocolReadbackObserved, so a
+            // fresh read is required to re-prove "detected + fresh + genuine" before checking HR7.
+            await RefreshReadbackAsync(domain, ct).ConfigureAwait(false);
+
+            var downloader = new AmplifierConfigurationDownloader(_trackCommClient);
+            var config = new AmplifierConfiguration();
+
+            foreach (var slave in domain)
+            {
+                if (ct.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                var item = _trackVariables.trackAmpItems[slave];
+                if (item.SlaveDetected == 0)
+                {
+                    item.Phase1Failure ??= "not detected";
+                    item.ConfigurationVerified = false;
+                    continue;
+                }
+
+                if (!AmplifierPhase1Safety.Compatible(item))
+                {
+                    // Identity fail-closed: never download, never enable, never grant for this amp.
+                    item.Phase1Failure ??= AmplifierPhase1Safety.IncompatibleFirmware;
+                    item.ConfigurationVerified = false;
+                    continue;
+                }
+
+                var ok = await downloader.DownloadAsync(item, config, ct).ConfigureAwait(false);
+                if (!ok)
+                {
+                    item.ConfigurationVerified = false;
+                }
+            }
+        }
+
+        /// <summary>Issues a fresh FC03 read to every domain amplifier and waits (bounded) until each
+        /// has a genuine protocol readback, re-proving detected + fresh + genuine evidence.</summary>
+        private async Task RefreshReadbackAsync(IReadOnlyCollection<byte> domain, CancellationToken ct)
+        {
+            foreach (var slave in domain)
+            {
+                await _trackCommClient!.SendAsync(
+                    AmplifierConfigurationDownloader.Exchange(slave, TrackAmplifierRegisters.Identity, 0, read: true),
+                    ct).ConfigureAwait(false);
+            }
+
+            var deadline = DateTimeOffset.UtcNow + TimeSpan.FromSeconds(2);
+            while (DateTimeOffset.UtcNow < deadline)
+            {
+                if (ct.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                if (domain.All(s => _trackVariables!.trackAmpItems[s].ProtocolReadbackObserved))
+                {
+                    return;
+                }
+
+                await Task.Delay(10, ct).ConfigureAwait(false);
+            }
+        }
+
+        /// <summary>
+        /// True when every domain amplifier has passed the identity gate and completed config
+        /// download + APPLY + readback verification. Movement permission must never be granted
+        /// while any domain amplifier is unconfigured (fail closed).
+        /// </summary>
+        private bool AllDomainAmplifiersConfigured(IReadOnlyCollection<byte> domain)
+        {
+            if (_trackVariables is null)
+            {
+                return false;
+            }
+
+            foreach (var slave in domain)
+            {
+                var item = _trackVariables.trackAmpItems[slave];
+                if (!item.ConfigurationVerified || item.Phase1Failure is not null)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
         /// Commands neutral to every configured amplifier and waits (bounded) until every one of
         /// them reports a fresh readback of the neutral PWM. On success the movement permission is
         /// granted; on failure it stays NotGranted and a fault + a
@@ -593,15 +719,16 @@ namespace SiebwaldeApp.Integration
             }
 
             var observed = await ObserveNeutralAsync(ct).ConfigureAwait(false);
+            var configured = AllDomainAmplifiersConfigured(domain);
 
-            if (observed)
+            if (observed && configured)
             {
                 _movementPermission?.Grant();
                 return;
             }
 
             var fault = new InvalidOperationException(
-                "Observed neutral was not established for every configured amplifier within the window; movement permission is not granted.");
+                "Observed neutral (command echo + applied PWM) was not established and config APPLY verified for every configured amplifier within the window; movement permission is not granted.");
 
             RaiseFault("TrackApplicationRuntimeHost.EstablishObservedNeutral", fault);
 
@@ -654,6 +781,15 @@ namespace SiebwaldeApp.Integration
         /// default value (for example the 399 written by <c>SetDefaultPwmSetpointsStep</c>) is never
         /// mistaken for a protocol observation just because a stale timestamp is still fresh.
         /// </summary>
+        /// <summary>
+        /// True when every configured amplifier reports a genuine, current, protocol SLAVEINFO
+        /// readback of the neutral PWM, both as the command echo (HR0) AND as the applied output
+        /// (HR14). The applied-PWM requirement is the "applied evidence" of the Phase-1 movement
+        /// gate: the command echo alone is never treated as applied/observed. The protocol-readback
+        /// marker is required, so an in-memory default value (for example the 399 written by
+        /// <c>SetDefaultPwmSetpointsStep</c>) is never mistaken for a protocol observation just
+        /// because a stale timestamp is still fresh.
+        /// </summary>
         private bool IsNeutralObserved()
         {
             if (_trackVariables is null)
@@ -661,9 +797,13 @@ namespace SiebwaldeApp.Integration
                 return false;
             }
 
+            var domain = EffectiveDomain();
             return TrackAmplifierNeutralObservation.AreAllObservedNeutral(
-                _trackVariables.trackAmpItems,
-                EffectiveDomain());
+                    _trackVariables.trackAmpItems,
+                    domain) &&
+                TrackAmplifierNeutralObservation.AreAllAppliedNeutral(
+                    _trackVariables.trackAmpItems,
+                    domain);
         }
 
         private static ITrackTransport CreateRealTransport()
@@ -906,6 +1046,8 @@ namespace SiebwaldeApp.Integration
             _trackControlMain = null;
             _globalStopTask = null;
             _globalStopMonitor = null;
+            _stopConfirmation?.Dispose();
+            _stopConfirmation = null;
             _trackCommClient = null;
             _trackInitService = null;
             _kis09PassiveConsumer = null;
@@ -972,6 +1114,33 @@ namespace SiebwaldeApp.Integration
         }
 
         public void EmergencyStop() => GlobalStop.Latch(GlobalStopReason.Operator);
+
+        /// <summary>
+        /// Release authority (R8-2 / Amendment A2 item 5): confirms physical stop inputs clear,
+        /// emits <c>REARM_GLOBAL_STOP</c> (112), then a fresh valid non-neutral command — never a
+        /// restore of a previous PWM. Release is refused while any amplifier is stop-unconfirmed or
+        /// when physical stop inputs are not confirmed clear. By default no physical evidence is
+        /// assumed (fail closed); a caller may inject a V4 evidence source via
+        /// <paramref name="physicalStopInputsClear"/>.
+        /// </summary>
+        public async Task<AmplifierReleaseResult> ReleaseMovementAsync(
+            ushort slaveNumber,
+            int pwmSetpoint,
+            Func<bool>? physicalStopInputsClear = null,
+            CancellationToken ct = default)
+        {
+            if (_trackCommClient is null || _trackVariables is null)
+            {
+                return new AmplifierReleaseResult(AmplifierReleaseResultKind.Failed, "runtime is not running.");
+            }
+
+            var authority = new TrackAmplifierReleaseAuthority(
+                _trackCommClient,
+                physicalStopInputsClear ?? (() => false),
+                allAmplifiersConfirmed: () => _stopConfirmation?.AreAllConfirmed ?? false);
+
+            return await authority.ReleaseAsync(slaveNumber, pwmSetpoint, ct).ConfigureAwait(false);
+        }
 
         private async Task MonitorGlobalStopAsync(CancellationToken ct)
         {

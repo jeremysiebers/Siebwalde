@@ -12,7 +12,7 @@
 #ifndef __PETITMODBUS__H
 #define __PETITMODBUS__H
                                                                                 // 1 register is 16 bits. The largest register is used to determine receive and transmit buffer size!
-#define NUMBER_OF_HOLDING_PETITREGISTERS                 12                     // Petit Modbus RTU Slave Holding Registers (read/write), Have to put a number of registers here It has to be bigger than 0 (zero)!!
+#define NUMBER_OF_HOLDING_PETITREGISTERS                 21                     // Frozen Phase-1 HR0..HR20 map
 #define NUMBER_OF_INPUT_PETITREGISTERS                   0                      // Number of (read only) input registers)
 #define NUMBER_OF_DIAGNOSTIC_PETITREGISTERS              0                      // Number of diagnostic registers (send/receive counters)
 
