@@ -36,6 +36,10 @@ namespace SiebwaldeApp.Core
         public static bool HasCompatibleIdentityFields(ushort identity)
             => (identity & 0xFF) == 1 && ((identity >> 8) & 0xF) == 1 && (identity & 0xF000) != 0;
 
+        /// <summary>True when the identity reports the applied-readback capability (HR7 bit 12).</summary>
+        public static bool HasAppliedReadbackCapability(ushort identity)
+            => (identity & AppliedReadbackCapability) != 0;
+
         public static bool IsOccupied(ushort[]? holdingRegisters)
             => holdingRegisters is { Length: > Validity } && (holdingRegisters[Validity] & OccupiedBit) != 0;
     }

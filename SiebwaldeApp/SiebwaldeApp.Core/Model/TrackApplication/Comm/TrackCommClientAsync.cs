@@ -187,6 +187,24 @@ namespace SiebwaldeApp.Core
 
                     amplifier.SlaveDetected = slaveDetected;
                     amplifier.HoldingReg = holdingReg;
+                    amplifier.ProtocolReadbackSequence++;
+                    // Identity fail-closed (AC6): a track amplifier whose HR7 does not carry the
+                    // compatible identity fields is blocked. Backplane/config slaves (51..55) use a
+                    // different register semantics and are not identity-checked here.
+                    if (TrackAmplifierAddress.IsTrackAmplifierAddress(slaveNumber))
+                    {
+                        var identity = holdingReg[TrackAmplifierRegisters.Identity];
+                        if (TrackAmplifierRegisters.HasCompatibleIdentityFields(identity))
+                        {
+                            if (amplifier.Phase1Failure == AmplifierPhase1Safety.IncompatibleFirmware)
+                                amplifier.Phase1Failure = null;
+                        }
+                        else
+                        {
+                            amplifier.Phase1Failure = AmplifierPhase1Safety.IncompatibleFirmware;
+                            amplifier.ConfigurationVerified = false;
+                        }
+                    }
                     // Explicit protocol-readback evidence: the current HoldingReg content is a
                     // genuine SLAVEINFO readback from this runtime, not a locally-written default.
                     amplifier.ProtocolReadbackObserved = true;
@@ -211,6 +229,7 @@ namespace SiebwaldeApp.Core
                 byte taskMessage = reader.ReadByte();
 
                 var msg = new ReceivedMessage(sender, taskCommand, taskState, taskMessage);
+                msg.Payload = buffer.Length > 5 ? buffer[5..] : null;
 
                 // In de oude TrackIOHandle werd trackControllerCommands.ReceivedMessage gezet :contentReference[oaicite:7]{index=7}
                 _variables.trackControllerCommands.ReceivedMessage = msg;

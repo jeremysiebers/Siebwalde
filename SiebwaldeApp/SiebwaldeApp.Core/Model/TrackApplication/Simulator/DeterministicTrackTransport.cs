@@ -37,6 +37,13 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         public IReadOnlyDictionary<byte, ushort> Hr0ReadbackOverrides { get; }
 
         /// <summary>
+        /// Per-slave override for the HR_APPLIED_PWM (HoldingReg14) value reported in a SLAVEINFO
+        /// readback, used to model "command echo neutral but applied output non-neutral" — the
+        /// applied-evidence mismatch the Phase-1 movement gate must NOT paper over. Empty by default.
+        /// </summary>
+        public IReadOnlyDictionary<byte, ushort> AppliedPwmReadbackOverrides { get; }
+
+        /// <summary>
         /// When set, the transport emits a fresh SLAVEINFO frame for every detected slave on this
         /// interval (modelling the real master's cyclic FC03 refresh). When null, the transport
         /// stays fully deterministic with no timer (the pre-existing contract).
@@ -51,6 +58,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
             IReadOnlyList<byte>? detectedSlaves = null,
             IReadOnlyCollection<byte>? droppedEchoSlaves = null,
             IReadOnlyDictionary<byte, ushort>? hr0ReadbackOverrides = null,
+            IReadOnlyDictionary<byte, ushort>? appliedPwmReadbackOverrides = null,
             TimeSpan? periodicSlaveInfoInterval = null,
             bool emitGlobalStopArmedStatus = false)
         {
@@ -64,6 +72,9 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
             Hr0ReadbackOverrides = hr0ReadbackOverrides is null
                 ? new Dictionary<byte, ushort>()
                 : new Dictionary<byte, ushort>(hr0ReadbackOverrides);
+            AppliedPwmReadbackOverrides = appliedPwmReadbackOverrides is null
+                ? new Dictionary<byte, ushort>()
+                : new Dictionary<byte, ushort>(appliedPwmReadbackOverrides);
             PeriodicSlaveInfoInterval = periodicSlaveInfoInterval;
             EmitGlobalStopArmedStatus = emitGlobalStopArmedStatus;
         }
@@ -84,11 +95,9 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         private const byte SlaveInfo = 0xFF;
         private const byte Footer = 0x55;
         private const byte WriteDirection = 0xAA;   // Enums.WRITE
-        private const int HoldingRegisterCount = TrackAmplifierRegisters.Count;
-        private const int FirmwareChecksumRegister = TrackAmplifierRegisters.SwChecksum; // 11
 
         private readonly TrackSimulatorConfig _config;
-        private readonly Dictionary<byte, ushort[]> _registers = new();
+        private readonly Dictionary<byte, SimulatedTrackAmplifier> _amplifiers = new();
         private readonly HashSet<byte> _detected = new();
         private readonly HashSet<byte> _droppedEchoSlaves = new();
         private readonly List<byte> _sentCommands = new();
@@ -110,9 +119,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
 
             foreach (var slave in _config.DetectedSlaves)
             {
-                var registers = new ushort[HoldingRegisterCount];
-                registers[FirmwareChecksumRegister] = _config.FirmwareChecksum;
-                _registers[slave] = registers;
+                _amplifiers[slave] = new SimulatedTrackAmplifier(slave, firmwareChecksum: _config.FirmwareChecksum);
                 _detected.Add(slave);
             }
 
@@ -131,12 +138,10 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         {
             lock (_sync)
             {
-                if (!_registers.TryGetValue(slaveNumber, out var registers))
+                if (!_amplifiers.TryGetValue(slaveNumber, out var amplifier))
                     throw new KeyNotFoundException($"No registers for slave {slaveNumber}.");
 
-                var copy = new ushort[registers.Length];
-                Array.Copy(registers, copy, registers.Length);
-                return copy;
+                return amplifier.Snapshot();
             }
         }
 
@@ -308,15 +313,15 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
             {
                 // Not-opened or unknown slave: safe no-op, mirroring the defensive dispatch behavior.
                 var writer = _frames?.Writer;
-                if (writer is null || !_registers.TryGetValue(slaveNumber, out var registers))
+                if (writer is null || !_amplifiers.TryGetValue(slaveNumber, out var amplifier))
                     return;
 
-                var status = registers[TrackAmplifierRegisters.Status];
+                var status = amplifier.Status;
                 if (occupied)
                     status |= TrackAmplifierRegisters.OccupiedBit;
                 else
                     status = (ushort)(status & ~TrackAmplifierRegisters.OccupiedBit);
-                registers[TrackAmplifierRegisters.Status] = status;
+                amplifier.SetStatus(status);
 
                 // Emit a fresh frame immediately so the change is observed before the next heartbeat.
                 writer.TryWrite(BuildSlaveInfoFrame(slaveNumber));
@@ -330,10 +335,10 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
             {
                 // Not-opened or unknown slave: safe no-op, mirroring the defensive dispatch behavior.
                 var writer = _frames?.Writer;
-                if (writer is null || !_registers.TryGetValue(slaveNumber, out var registers))
+                if (writer is null || !_amplifiers.TryGetValue(slaveNumber, out var amplifier))
                     return;
 
-                registers[TrackAmplifierRegisters.Status] = status;
+                amplifier.SetStatus(status);
 
                 // Emit a fresh frame immediately so the change is observed before the next heartbeat.
                 writer.TryWrite(BuildSlaveInfoFrame(slaveNumber));
@@ -449,9 +454,11 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         }
 
         /// <summary>
-        /// Handles an <c>EXEC_MBUS_SLAVE_DATA_EXCH</c> write:
+        /// Handles an <c>EXEC_MBUS_SLAVE_DATA_EXCH</c> exchange:
         /// <c>data = frame[2..]</c> with <c>slave=data[0]</c>, <c>direction=data[1]</c>,
         /// <c>regCount=data[2]</c>, <c>startReg=data[3]</c>, then <c>regCount</c> ushort LE values.
+        /// A write (0xAA) is applied to the amplifier model; a read (0x55) advances the model one
+        /// tick and returns a fresh SLAVEINFO readback (modelling the master's FC03 poll).
         /// </summary>
         private void HandleDataExchange(byte[] frame, ChannelWriter<byte[]> writer)
         {
@@ -464,27 +471,26 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
             byte regCount = frame[4];
             byte startReg = frame[5];
 
-            if (direction != WriteDirection)
-                return; // only writes are emulated
+            var amplifier = GetOrCreateAmplifier(slave);
 
-            var registers = GetOrCreateRegisters(slave);
-
-            for (int i = 0; i < regCount; i++)
+            if (direction == WriteDirection)
             {
-                int registerIndex = startReg + i;
-                if (registerIndex < 0 || registerIndex >= registers.Length)
-                    continue;
+                var values = new ushort[regCount];
+                for (int i = 0; i < regCount; i++)
+                {
+                    int byteIndex = 6 + i * 2;
+                    if (byteIndex + 1 >= frame.Length)
+                        break;
 
-                // Never overwrite the firmware checksum (HR11) reported to the init pipeline.
-                if (registerIndex == FirmwareChecksumRegister)
-                    continue;
+                    values[i] = (ushort)(frame[byteIndex] | (frame[byteIndex + 1] << 8));
+                }
 
-                int byteIndex = 6 + i * 2;
-                if (byteIndex + 1 >= frame.Length)
-                    break;
-
-                ushort value = (ushort)(frame[byteIndex] | (frame[byteIndex + 1] << 8));
-                registers[registerIndex] = value;
+                amplifier.ApplyWrite(startReg, values);
+            }
+            else
+            {
+                // A fresh FC03 read: advance the ramp/lease one tick before the readback snapshot.
+                amplifier.Step();
             }
 
             // A configured "dropped echo" slave still receives the write but produces no
@@ -493,6 +499,30 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
                 return;
 
             writer.TryWrite(BuildSlaveInfoFrame(slave));
+        }
+
+        /// <summary>Advances the ramp/lease of every known amplifier by one tick (test-visible).</summary>
+        public void StepAll()
+        {
+            lock (_sync)
+            {
+                foreach (var amplifier in _amplifiers.Values)
+                {
+                    amplifier.Step();
+                }
+            }
+        }
+
+        /// <summary>Advances the ramp/lease of one amplifier by one tick (test-visible).</summary>
+        public void Step(byte slave)
+        {
+            lock (_sync)
+            {
+                if (_amplifiers.TryGetValue(slave, out var amplifier))
+                {
+                    amplifier.Step();
+                }
+            }
         }
 
         // --------------------------------------------------------------------
@@ -505,12 +535,15 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         private byte[] BuildSlaveInfoFrame(byte slave)
         {
             var detected = _detected.Contains(slave) ? (byte)1 : (byte)0;
-            var registers = GetOrCreateRegisters(slave);
+            var registers = GetOrCreateAmplifier(slave).Snapshot();
             ushort? pwmOverride = _config.Hr0ReadbackOverrides.TryGetValue(slave, out var overrideValue)
                 ? overrideValue
                 : (ushort?)null;
+            ushort? appliedOverride = _config.AppliedPwmReadbackOverrides.TryGetValue(slave, out var appliedValue)
+                ? appliedValue
+                : (ushort?)null;
 
-            return BuildSlaveInfoFrame(slave, detected, registers, pwmOverride);
+            return BuildSlaveInfoFrame(slave, detected, registers, pwmOverride, appliedOverride);
         }
 
         /// <summary>
@@ -518,23 +551,26 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         /// <c>[0xAA, 0xFF, 0xAA, slave, detected, 0x00, HR0..HR20 LE, mbReceiveCounter LE,
         /// mbSentCounter LE, mbCommError LE(u32), mbExceptionCode, spiCommErrorCounter, 0x55]</c>.
         /// </summary>
-        private static byte[] BuildSlaveInfoFrame(byte slave, byte detected, ushort[] registers, ushort? pwmOverride = null)
+        private static byte[] BuildSlaveInfoFrame(byte slave, byte detected, ushort[] registers,
+            ushort? pwmOverride = null, ushort? appliedOverride = null)
         {
             var snapshot = (ushort[])registers.Clone();
             if (pwmOverride is { } value) snapshot[TrackAmplifierRegisters.PwmCommand] = value;
+            if (appliedOverride is { } applied) snapshot[TrackAmplifierRegisters.AppliedPwm] = applied;
             return TrackSlaveInfoFrame.Encode(slave, detected, snapshot);
         }
 
-        /// <summary>Gets the register array for a slave, creating a fresh one when absent. Call under <c>_sync</c>.</summary>
-        private ushort[] GetOrCreateRegisters(byte slave)
+        /// <summary>Gets the amplifier model for a slave, creating a fresh (identity-less) one when
+        /// absent. Call under <c>_sync</c>.</summary>
+        private SimulatedTrackAmplifier GetOrCreateAmplifier(byte slave)
         {
-            if (!_registers.TryGetValue(slave, out var registers))
+            if (!_amplifiers.TryGetValue(slave, out var amplifier))
             {
-                registers = new ushort[HoldingRegisterCount];
-                _registers[slave] = registers;
+                amplifier = new SimulatedTrackAmplifier(slave, identity: 0);
+                _amplifiers[slave] = amplifier;
             }
 
-            return registers;
+            return amplifier;
         }
     }
 }
