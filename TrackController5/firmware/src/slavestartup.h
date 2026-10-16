@@ -20,7 +20,8 @@ extern "C" {
     // linkage so the functions can be used by the c code. 
     extern void INITxSLAVExSTARTUP(SLAVE_INFO *location, SLAVE_INFO *Dump);
     extern bool SLAVExINITxANDxCONFIG(void);
-    extern unsigned int ENABLExAMPLIFIER(void);
+    extern bool ENABLExAMPLIFIER(void);
+    extern bool ISxAMPLIFIERxCOMPATIBLE(uint8_t slave);
 
 #ifdef	__cplusplus
 }
