@@ -74,8 +74,6 @@ namespace SiebwaldeApp.Core
             _globalStop.Latched += ApplyGlobalStop;
             #region Instantiate List of TrackAmplifierItem and add items
 
-            ushort[] HoldingRegInit = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-
             trackAmpItems = new List<TrackAmplifierItem>();
 
             for (ushort i = 0; i < 56; i++)
@@ -84,7 +82,7 @@ namespace SiebwaldeApp.Core
                 {
                     SlaveNumber = i,
                     SlaveDetected = 0,
-                    HoldingReg = HoldingRegInit,
+                    HoldingReg = new ushort[TrackAmplifierRegisters.Count],
                     MbReceiveCounter = 0,
                     MbSentCounter = 0,
                     MbCommError = 0,

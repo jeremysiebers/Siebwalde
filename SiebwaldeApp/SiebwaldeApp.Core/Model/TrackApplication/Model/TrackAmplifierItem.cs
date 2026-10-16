@@ -14,7 +14,7 @@ namespace SiebwaldeApp.Core
         #region Private fields
 
         private ushort _slaveNumber;
-        private ushort[] _holdingReg = new ushort[12];
+        private ushort[] _holdingReg = new ushort[TrackAmplifierRegisters.Count];
         private ushort _mbReceiveCounter;
         private ushort _slaveDetected;
         private ushort _spiCommErrorCounter;

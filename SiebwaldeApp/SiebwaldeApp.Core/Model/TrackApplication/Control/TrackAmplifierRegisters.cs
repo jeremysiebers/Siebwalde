@@ -1,63 +1,42 @@
 namespace SiebwaldeApp.Core
 {
-    /// <summary>
-    /// Register and bit definitions for the track amplifier ModBus holding registers,
-    /// mirroring TrackAmplifier4.X/modbus/General.h.
-    /// NOTE: the register description is provisional and may change with new firmware.
-    /// </summary>
+    /// <summary>Frozen Phase-1 map; docs/amplifier-system-architecture.md R8-4.</summary>
     public static class TrackAmplifierRegisters
     {
-        /// <summary>HoldingReg0: PWM command word.</summary>
-        public const int PwmCommand = 0;
+        public const int Count = 21;
+        public const int PwmCommand = 0, Control = 1, Address = 2;
+        public const int ConfigRamp = 3, ConfigFastStop = 4, ConfigWatchdog = 5, ConfigTag = 6;
+        public const int Identity = 7, State = 8, Fault = 9, Validity = 10, SwChecksum = 11;
+        public const int RequestedPwm = 12, TargetPwm = 13, AppliedPwm = 14, WriteResult = 15;
+        public const int FuseVoltage = 16, HBridgeTemperature = 17, HBridgeCurrent = 18;
+        public const int MessagesReceived = 19, MessagesSent = 20;
 
-        /// <summary>HoldingReg1: BEMF speed / control word.</summary>
-        public const int BemfControl = 1;
+        // Existing consumer names now refer to the clean-sheet map, not the legacy addresses.
+        public const int BemfControl = Control, Status = Validity, AmplifierStatus = State;
+        public const int ConfigIdPwm = Address, AccelParams = ConfigRamp;
+        public const ushort PwmMask = 0x03FF;
+        public const ushort DirectionBit = 1 << 10, BrakeBit = 1 << 11;
+        public const ushort StopRequestBit = 1 << 12, EmergencyStopBit = 1 << 15;
+        public const ushort EnableBit = 1 << 15, MotionPermissionBit = 1 << 14;
+        public const ushort ApplyConfigBit = 1 << 13, ClearFaultBit = 1 << 12;
+        public const ushort ResetCountersBit = 1 << 11, DisableBit = 1 << 10;
+        public const ushort EnableActiveBit = 1 << 8, InitDoneBit = 1 << 9, ConfigOkBit = 1 << 10;
+        public const ushort StoppingActiveBit = 1 << 11, BrakeActiveBit = 1 << 12;
+        public const ushort DirectionActiveBit = 1 << 13, IdSetBit = 1 << 14, InhibitedBit = 1 << 15;
+        public const ushort ConfigInvalidFaultBit = 1 << 4, CommsLostFaultBit = 1 << 5;
+        public const ushort LeaseExpiredFaultBit = 1 << 7;
+        public const ushort OccupiedBit = 1 << 8, ThermalBit = 1 << 9, OverCurrentBit = 1 << 10;
+        public const ushort AppliedBrakeBit = 1 << 10, AppliedDirectionBit = 1 << 11;
+        public const ushort AppliedReadbackCapability = 1 << 12, RampCapability = 1 << 13;
+        public const ushort WatchdogCapability = 1 << 14, TwoPhaseConfigCapability = 1 << 15;
+        public const ushort WriteRetainedBit = 1 << 15;
+        public const int LeaseExpiredState = 7;
 
-        /// <summary>HoldingReg2: status / feedback (BEMF, occupied, thermal, overcurrent).</summary>
-        public const int Status = 2;
+        /// <summary>Shape check only. NOT identity authorization: requires PIC32 fresh-read evidence.</summary>
+        public static bool HasCompatibleIdentityFields(ushort identity)
+            => (identity & 0xFF) == 1 && ((identity >> 8) & 0xF) == 1 && (identity & 0xF000) != 0;
 
-        /// <summary>HoldingReg3: amplifier status word.</summary>
-        public const int AmplifierStatus = 3;
-
-        /// <summary>HoldingReg4: H-bridge fuse voltage.</summary>
-        public const int FuseVoltage = 4;
-
-        /// <summary>HoldingReg5: H-bridge temperature.</summary>
-        public const int HBridgeTemperature = 5;
-
-        /// <summary>HoldingReg6: H-bridge current.</summary>
-        public const int HBridgeCurrent = 6;
-
-        /// <summary>HoldingReg7: messages received from master.</summary>
-        public const int MessagesReceived = 7;
-
-        /// <summary>HoldingReg8: messages sent to master.</summary>
-        public const int MessagesSent = 8;
-
-        /// <summary>HoldingReg9: amplifier ID, PWM mode, reset.</summary>
-        public const int ConfigIdPwm = 9;
-
-        /// <summary>HoldingReg10: acceleration / deceleration parameters.</summary>
-        public const int AccelParams = 10;
-
-        /// <summary>HoldingReg11: firmware checksum.</summary>
-        public const int SwChecksum = 11;
-
-        /// <summary>HR_STATUS bit 10: track occupied flag.</summary>
-        public const ushort OccupiedBit = 1 << 10;
-
-        /// <summary>HR_STATUS bit 11: H-bridge thermal flag.</summary>
-        public const ushort ThermalBit = 1 << 11;
-
-        /// <summary>HR_STATUS bit 12: overcurrent detected.</summary>
-        public const ushort OverCurrentBit = 1 << 12;
-
-        /// <summary>HR_STATUS bit 13: amplifier ID programmed by master.</summary>
-        public const ushort IdSetBit = 1 << 13;
-
-        /// <summary>Returns true when the status register reports the track as occupied.</summary>
         public static bool IsOccupied(ushort[]? holdingRegisters)
-            => holdingRegisters is { Length: > Status } &&
-               (holdingRegisters[Status] & OccupiedBit) != 0;
+            => holdingRegisters is { Length: > Validity } && (holdingRegisters[Validity] & OccupiedBit) != 0;
     }
 }

@@ -263,11 +263,11 @@ namespace SiebwaldeApp.Core.Tests
         }
 
         [Fact]
-        public void OccupiedBit_MatchesGeneralHeader()
+        public void OccupiedBit_MatchesFrozenPhase1Map()
         {
-            // HR_STATUS bit 10 per TrackAmplifier4.X/modbus/General.h
-            Assert.Equal(1 << 10, TrackAmplifierRegisters.OccupiedBit);
-            Assert.Equal(2, TrackAmplifierRegisters.Status);
+            // R8-4: HR_VALIDITY bit 8 is occupancy-live.
+            Assert.Equal(1 << 8, TrackAmplifierRegisters.OccupiedBit);
+            Assert.Equal(10, TrackAmplifierRegisters.Status);
         }
 
         // ---------------------------------------------------------------------

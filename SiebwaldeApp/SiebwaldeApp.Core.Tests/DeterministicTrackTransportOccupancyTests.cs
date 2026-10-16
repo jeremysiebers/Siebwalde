@@ -94,7 +94,7 @@ namespace SiebwaldeApp.Core.Tests
 
             transport.SetSlaveOccupancy(1, true);
 
-            // HR2 status register now carries the occupied bit.
+            // HR10 validity/live-status register carries the occupied bit.
             var regs = transport.GetRegisters(1);
             Assert.NotEqual(0, regs[TrackAmplifierRegisters.Status] & TrackAmplifierRegisters.OccupiedBit);
 
@@ -103,7 +103,8 @@ namespace SiebwaldeApp.Core.Tests
             Assert.NotNull(frame);
             Assert.Equal(0xFF, frame![1]);
             Assert.Equal(1, frame[3]);
-            var statusFromFrame = (ushort)(frame[10] | (frame[11] << 8));
+            int statusOffset = TrackSlaveInfoFrame.RegisterOffset + 2 * TrackAmplifierRegisters.Validity;
+            var statusFromFrame = (ushort)(frame[statusOffset] | (frame[statusOffset + 1] << 8));
             Assert.NotEqual(0, statusFromFrame & TrackAmplifierRegisters.OccupiedBit);
 
             // Clearing occupancy removes the bit.
@@ -128,7 +129,8 @@ namespace SiebwaldeApp.Core.Tests
             Assert.NotNull(frame);
             Assert.Equal(0xFF, frame![1]);
             Assert.Equal(1, frame[3]);
-            Assert.Equal(0xABCD, (ushort)(frame[10] | (frame[11] << 8)));
+            int statusOffset = TrackSlaveInfoFrame.RegisterOffset + 2 * TrackAmplifierRegisters.Validity;
+            Assert.Equal(0xABCD, (ushort)(frame[statusOffset] | (frame[statusOffset + 1] << 8)));
 
             await transport.DisposeAsync();
         }

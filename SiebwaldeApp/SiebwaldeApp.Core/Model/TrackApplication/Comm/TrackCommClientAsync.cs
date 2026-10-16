@@ -154,6 +154,9 @@ namespace SiebwaldeApp.Core
             // 1) Amplifier data frame: HEADER + SLAVEINFO
             if (header == HEADER && sender == SLAVEINFO)
             {
+                // Never interpret a legacy/truncated map as a Phase-1 observation.
+                if (buffer.Length != TrackSlaveInfoFrame.Length || buffer[2] != HEADER || buffer[^1] != FOOTER)
+                    return;
                 // EXACT dezelfde volgorde als in TrackIOHandle.HandleNewData :contentReference[oaicite:6]{index=6}
 
                 ushort mbHeader = reader.ReadByte();
@@ -161,8 +164,8 @@ namespace SiebwaldeApp.Core
                 ushort slaveDetected = reader.ReadByte();
                 ushort padding = reader.ReadByte();
 
-                ushort[] holdingReg = new ushort[12];
-                for (int i = 0; i < 12; i++)
+                ushort[] holdingReg = new ushort[TrackAmplifierRegisters.Count];
+                for (int i = 0; i < TrackAmplifierRegisters.Count; i++)
                 {
                     holdingReg[i] = reader.ReadUInt16();
                 }
@@ -202,6 +205,7 @@ namespace SiebwaldeApp.Core
             // 2) Controller/bootloader message frame: HEADER + iets anders dan SLAVEINFO
             else if (header == HEADER)
             {
+                if (buffer.Length < 5) return;
                 byte taskCommand = reader.ReadByte();
                 byte taskState = reader.ReadByte();
                 byte taskMessage = reader.ReadByte();

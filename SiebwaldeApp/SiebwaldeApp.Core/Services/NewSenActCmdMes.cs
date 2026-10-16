@@ -499,7 +499,7 @@ namespace SiebwaldeApp.Core
         public UInt16 MbHeader { get; set; }
         public UInt16 SlaveNumber { get; set; }
         public UInt16 SlaveDetected { get; set; }
-        public UInt16[] HoldingReg = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, };
+        public UInt16[] HoldingReg = new UInt16[TrackAmplifierRegisters.Count];
         public UInt16 MbReceiveCounter { get; set; }
         public UInt16 MbSentCounter { get; set; }
         public UInt32 MbCommError { get; set; }

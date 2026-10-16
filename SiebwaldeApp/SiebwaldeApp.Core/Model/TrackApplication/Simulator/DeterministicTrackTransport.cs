@@ -84,7 +84,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         private const byte SlaveInfo = 0xFF;
         private const byte Footer = 0x55;
         private const byte WriteDirection = 0xAA;   // Enums.WRITE
-        private const int HoldingRegisterCount = 12;
+        private const int HoldingRegisterCount = TrackAmplifierRegisters.Count;
         private const int FirmwareChecksumRegister = TrackAmplifierRegisters.SwChecksum; // 11
 
         private readonly TrackSimulatorConfig _config;
@@ -514,55 +514,15 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         }
 
         /// <summary>
-        /// Exact 41-byte SLAVEINFO frame layout:
-        /// <c>[0xAA, 0xFF, 0xAA, slave, detected, 0x00, HR0..HR11 LE, mbReceiveCounter LE,
+        /// Exact register-count-derived SLAVEINFO frame layout:
+        /// <c>[0xAA, 0xFF, 0xAA, slave, detected, 0x00, HR0..HR20 LE, mbReceiveCounter LE,
         /// mbSentCounter LE, mbCommError LE(u32), mbExceptionCode, spiCommErrorCounter, 0x55]</c>.
         /// </summary>
         private static byte[] BuildSlaveInfoFrame(byte slave, byte detected, ushort[] registers, ushort? pwmOverride = null)
         {
-            var frame = new byte[41];
-
-            frame[0] = Header;      // HEADER
-            frame[1] = SlaveInfo;   // SLAVEINFO
-            frame[2] = Header;      // mbHeader
-            frame[3] = slave;
-            frame[4] = detected;
-            frame[5] = 0x00;        // padding
-
-            for (int i = 0; i < HoldingRegisterCount; i++)
-            {
-                ushort value = (i == TrackAmplifierRegisters.PwmCommand && pwmOverride is not null)
-                    ? pwmOverride.Value
-                    : registers[i];
-
-                frame[6 + i * 2] = (byte)(value & 0xFF);
-                frame[7 + i * 2] = (byte)((value >> 8) & 0xFF);
-            }
-
-            // mbReceiveCounter (ushort LE) at 30..31
-            frame[30] = 0x00;
-            frame[31] = 0x00;
-
-            // mbSentCounter (ushort LE) at 32..33
-            frame[32] = 0x00;
-            frame[33] = 0x00;
-
-            // mbCommError (uint32 LE) at 34..37
-            frame[34] = 0x00;
-            frame[35] = 0x00;
-            frame[36] = 0x00;
-            frame[37] = 0x00;
-
-            // mbExceptionCode at 38
-            frame[38] = 0x00;
-
-            // spiCommErrorCounter at 39
-            frame[39] = 0x00;
-
-            // footer at 40
-            frame[40] = Footer; // 0x55
-
-            return frame;
+            var snapshot = (ushort[])registers.Clone();
+            if (pwmOverride is { } value) snapshot[TrackAmplifierRegisters.PwmCommand] = value;
+            return TrackSlaveInfoFrame.Encode(slave, detected, snapshot);
         }
 
         /// <summary>Gets the register array for a slave, creating a fresh one when absent. Call under <c>_sync</c>.</summary>
