@@ -29,6 +29,21 @@ static uint8_t LastAmplifierTick = 0;
 static uint8_t MeasurementTick = 0;
 static bool MeasurementPending = false;
 
+/* Amendment A1: this is a startup operation, not a runtime register write. */
+bool Amplifier_IsBootloaderWrite(uint8_t frame_address, uint16_t addr, uint16_t value)
+{
+    return Config && Startup_Machine == 1u && MODBUS_ADDRESS == 0xAAu &&
+        frame_address == 0xAAu && addr == HR_SW_CHECKSUM && value == 0u;
+}
+
+bool Amplifier_TryBootloaderWrite(uint8_t frame_address, uint16_t addr, uint16_t value)
+{
+    if (!Amplifier_IsBootloaderWrite(frame_address, addr, value)) return false;
+    amp_model.checksum = 0u;
+    /* Existing state 1 observes zero, then states 2/3 drain the reply and reset. */
+    return true;
+}
+
 static void Amplifier_ServiceTick(void)
 {
     /* Atomic byte read, modulo-256 counter retained. Never clear the ISR counter. */

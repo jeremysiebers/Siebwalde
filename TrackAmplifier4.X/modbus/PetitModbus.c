@@ -355,7 +355,7 @@ void HandlePetitModbusWriteSingleRegister(void)
     Petit_Tx_Data.Address     = PETITMODBUS_SLAVE_ADDRESS;
     Petit_Tx_Data.DataLen     = 4;
 
-    result = OnHoldingRegisterWrite(Petit_Address, Petit_Value,
+    result = OnHoldingRegisterWrite(Petit_Rx_Data.Address, Petit_Address, Petit_Value,
         Petit_Rx_Data.Address == PETITMODBUS_BROADCAST_ADDRESS);
     if (result && result != AMP_WRITE_SATURATED) {
         HandlePetitModbusError(result == AMP_WRITE_READ_ONLY || Petit_Address >= NUMBER_OF_HOLDING_PETITREGISTERS ?
@@ -465,9 +465,9 @@ void HandleMPetitodbusWriteMultipleRegisters(void)
     /* Preflight the entire bounded frame: no partial writes on invalid fields. */
     for (Petit_i = 0; Petit_i < Petit_NumberOfRegisters; Petit_i++) {
         Petit_Value = ((unsigned int)Petit_Rx_Data.DataBuf[5+2*Petit_i]<<8) | Petit_Rx_Data.DataBuf[6+2*Petit_i];
-        result = AmpAdapter_ValidateWrite(Petit_StartAddress+Petit_i, Petit_Value);
+        result = ValidateHoldingRegisterWrite(Petit_Rx_Data.Address, Petit_StartAddress+Petit_i, Petit_Value);
         if (result) {
-            OnHoldingRegisterWrite(Petit_StartAddress+Petit_i, Petit_Value, broadcast);
+            OnHoldingRegisterWrite(Petit_Rx_Data.Address, Petit_StartAddress+Petit_i, Petit_Value, broadcast);
             HandlePetitModbusError(result == AMP_WRITE_READ_ONLY ? PETIT_ERROR_CODE_02 : PETIT_ERROR_CODE_03,
                 PETITMODBUS_WRITE_MULTIPLE_REGISTERS);
             return;
@@ -475,7 +475,7 @@ void HandleMPetitodbusWriteMultipleRegisters(void)
     }
     for (Petit_i = 0; Petit_i < Petit_NumberOfRegisters; Petit_i++) {
         Petit_Value = ((unsigned int)Petit_Rx_Data.DataBuf[5+2*Petit_i]<<8) | Petit_Rx_Data.DataBuf[6+2*Petit_i];
-        result = OnHoldingRegisterWrite(Petit_StartAddress+Petit_i, Petit_Value, broadcast);
+        result = OnHoldingRegisterWrite(Petit_Rx_Data.Address, Petit_StartAddress+Petit_i, Petit_Value, broadcast);
         if (result && result != AMP_WRITE_SATURATED) {
             HandlePetitModbusError(PETIT_ERROR_CODE_03, PETITMODBUS_WRITE_MULTIPLE_REGISTERS);
             return;

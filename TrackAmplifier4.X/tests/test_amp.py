@@ -25,7 +25,7 @@ match = re.search(r"void AmpHw_SetDuty\(uint16_t duty\)\s*\{[^}]*\}", regulator)
 assert match, "Production PWM accessor must be extracted unchanged"
 
 def function(text, name):
-    found = re.search(r"^void " + re.escape(name) + r"\(void\)\s*\{", text, re.MULTILINE)
+    found = re.search(r"^(?:void|bool) " + re.escape(name) + r"\([^)]*\)\s*\{", text, re.MULTILINE)
     assert found, name
     depth = 1
     tokens = re.compile(r'//[^\n]*|/\*.*?\*/|"(?:\\.|[^"\\])*"|[{}]', re.DOTALL)
@@ -59,9 +59,26 @@ static void HandlePetitModbusError(uint8_t code, uint8_t fn) {
 static void PetitSendMessage(void) { sends++; }
 '''
 petit = (SRC / "modbus/PetitModbus.c").read_text()
+main = (SRC / "main.c").read_text()
+# Compile unchanged startup guards and the actual state-1 body, mocking only IO.
+startup_prefix = '\n#include "main.h"\n'
+for name in ("MODBUS_ADDRESS", "Config", "Startup_Machine"):
+    declaration = re.search(r"^static uint8_t " + name + r" = [^;]+;", main, re.MULTILINE)
+    assert declaration, name
+    startup_prefix += declaration.group() + "\n"
+startup_prefix += r'''
+static uint8_t ID_PORT, LED_ERR, LED_ERR_LAT, LED_RUN_LAT, LED_WAR_LAT, LED_TX_LAT, LED_RX_LAT;
+static uint8_t ProcessPetitModbus(void) { return 1; }
+void Led_Blink(void) { }
+static void InitPetitModbus(uint8_t address) { (void)address; }
+'''
+startup_prefix += function(main, "Amplifier_IsBootloaderWrite") + "\n"
+startup_prefix += function(main, "Amplifier_TryBootloaderWrite") + "\n"
+state1 = main[main.index("                case 1 :"):main.index("                case 2 :")]
+startup_prefix += "\nstatic void service_startup(void) { uint8_t result = 0; switch (Startup_Machine) {\n" + state1 + "\ndefault: break; } (void)result; }\n"
 # PIC18 unsigned int is 16-bit; host unsigned int is 32-bit. Suppress narrowing
 # only around the unchanged legacy transport functions, not the core/adapter.
-transport = transport_prefix + "\n#pragma warning(push)\n#pragma warning(disable:4244)\n" + "\n".join(function(petit, name) for name in (
+transport = transport_prefix + startup_prefix + "\n#pragma warning(push)\n#pragma warning(disable:4244)\n" + "\n".join(function(petit, name) for name in (
     "HandlePetitModbusReadHoldingRegisters", "HandlePetitModbusWriteSingleRegister",
     "HandleMPetitodbusWriteMultipleRegisters")) + "\n#pragma warning(pop)\n" + (SRC / "tests/test_transport.c").read_text()
 with tempfile.TemporaryDirectory(prefix="pic18-control-", dir=base) as directory:

@@ -64,31 +64,37 @@ plus scheduler delay). This is not a measured wall-clock or physical-stop bound.
   CLEAR_FAULT does not invent a way to qualify disappearance of unimplemented
   electrical causes. Identity is fixed at `0xF101`.
 
-## Blocking contract contradiction (Lead / Architect decision required)
+## HR11 bootloader entry — Amendment A1 resolution
 
-Frozen R8-4 requires **all HR11 writes to fail with exception 02**, while the
-task also requires preserving the working bootloader-entry handshake.
-The actual existing master path is
-`TrackController5/firmware/src/slavefwhandler.c:FlashSequencer`, case 6
-(lines 934-942 at base `6436c95`): FC write HR11 = 0 at address `0xAA`.
-PIC18 `main` startup case 1 detects checksum zero, then cases 2/3 wait for
-response completion and reset. Rejecting the master's write makes this normal
-entry path unreachable for an ordinary nonzero-checksum application image.
+Frozen R8-4 keeps HR11 (`HR_SW_CHECKSUM`) read-only at the runtime address
+after configuration. The bootloader-entry write is the master's `FlashSequencer`
+FC write of HR11 = 0 at the boot address `0xAA` during startup, and must be
+preserved. Contract Amendment A1 separates the two mechanisms:
 
-This implementation deliberately follows frozen R8 read-only protection,
-retains the zero-checksum/reset sequence, and tests the HR11 rejection. It does
-**not** claim preserved operational bootloader entry. Do not flash this image
-or declare the full work package accepted. The Lead must route a scoped contract
-clarification (for example a narrowly authorized assign-window bootloader
-operation) to Architect, then Developer correction and independent R2 review.
-No frozen documentation or master behavior was changed here.
+- `amp_adapter.c` `AmpAdapter_ValidateWrite`/`AmpAdapter_OnWrite` keep HR11
+  read-only (`addr >= HR_IDENTITY`), so any runtime-address HR11 write is
+  rejected with exception 02 and a `read-only` write-result (0x820B for HR11).
+- `main.c` `Amplifier_IsBootloaderWrite`/`Amplifier_TryBootloaderWrite`
+  recognize only the pre-runtime strobe (`Config` set, `Startup_Machine == 1`,
+  `MODBUS_ADDRESS == 0xAA`, frame address `0xAA`, HR11, value 0) and zero
+  `amp_model.checksum`. The unchanged startup state-1 body observes that zero
+  and advances to state 2 (drain reply) then state 3 (reset).
+- `modbus/modbushooks.c` `ValidateHoldingRegisterWrite`/`OnHoldingRegisterWrite`
+  consult the bootloader check before the adapter's read-only rule, so the
+  boot-address HR11=0 write is never routed through read-only rejection. It is
+  refused for broadcasts (`!broadcast` guard) and outside the boot window.
+
+The host shim exercises both paths for FC06 and FC16: the boot-address HR11=0
+write selects state 2, and the runtime-address write after configuration is
+rejected as read-only. Bootloader entry is software-proven only; it is not
+exercised on hardware.
 
 ## AC evidence disposition (Developer self-verification only)
 
 | AC | Disposition at this boundary |
 |---|---|
 | AC1 | F1 Offset compile/link succeeded during development; final clean-tree harness result and HEX hash are returned in the role result. Existing/new compiler warnings are not claimed absent. |
-| AC2 | Software-proven validation, retained active config, write-result and explicit zero saturation; bootloader HR11 exception conflict remains above. |
+| AC2 | Software-proven validation, retained active config, write-result and explicit zero saturation; HR11 bootloader-entry strobe is preserved via the A1 pre-runtime path, runtime-address writes stay read-only. |
 | AC3 | Software-proven reset/neutral/config/enable gating. Actual bridge behavior unverified. |
 | AC4 | Software-proven exact PWM call argument tracking, including EMO where target and applied differ; no peripheral/physical observation. |
 | AC5 | Software-proven watchdog expiry and fast ramp; timeout detection plus ramp, not a claim of neutral before the timeout itself. |
@@ -97,5 +103,6 @@ No frozen documentation or master behavior was changed here.
 
 Independent R2 review, cross-layer V3 integration, physical stopping, UART/CRC
 interoperability, full-complement timing and Phase-2 protection remain outside
-this software-only self-verification. Overall work-package completion is blocked
-by the HR11 contract conflict, not waived by passing software tests.
+this software-only self-verification. The HR11 conflict is resolved by Amendment
+A1 (source + host-shim only); bootloader entry has not been exercised on
+hardware.
