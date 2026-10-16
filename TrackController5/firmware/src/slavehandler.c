@@ -13,6 +13,7 @@
 #include "slavecommhandler.h"
 #include "mbus.h"
 #include "controller.h"
+#include "ethernet.h"
 #include "slavestartup.h"
 #include "modbus/PetitModbus.h"
 
@@ -66,21 +67,33 @@ typedef enum { STOP_UNUSED, STOP_QUEUED, STOP_WRITE_WAIT, STOP_STATE_READ,
 static STOP_DELIVERY StopDelivery[NUMBER_OF_AMPLIFIERS + 1];
 static uint8_t StopAttempts[NUMBER_OF_AMPLIFIERS + 1];
 static uint8_t StopSlave;
+static uint8_t StopReportReason;
 static uint16_t StopWord, StopState;
 static uint32_t StopStarted, LastLeaseRenewal;
 
-static void REPORTxSTOPxSLAVE(uint8_t slave)
+void REPORTxGLOBALxSTOPxDELIVERY(uint8_t reason)
 {
-    CREATExTASKxSTATUSxMESSAGE(CONTROLLER, GLOBAL_STOP_STATE, DONE,
-        slave | (StopDelivery[slave] == STOP_CONFIRMED ? GLOBAL_STOP_CONFIRMED :
-            StopDelivery[slave] == STOP_FAILED ? GLOBAL_STOP_FAILED : GLOBAL_STOP_PENDING));
-}
-
-void REPORTxGLOBALxSTOPxDELIVERY(void)
-{
-    uint8_t slave;
-    for (slave = 1; slave <= NUMBER_OF_AMPLIFIERS; ++slave)
-        if (StopDelivery[slave] != STOP_UNUSED) REPORTxSTOPxSLAVE(slave);
+    udpTrans_t frame = {0};
+    uint8_t slave, count = 0;
+    if (!ISxGLOBALxSTOPxLATCHED()) return;
+    StopReportReason = reason;
+    frame.header = HEADER;
+    frame.command = CONTROLLER;
+    frame.data[0] = GLOBAL_STOP_STATE;
+    frame.data[1] = DONE;
+    frame.data[2] = reason;
+    /* A2: ascending detected IDs captured at latch time, four entries/byte,
+     * least-significant pair first. Count excludes backplanes and master. */
+    for (slave = 1; slave <= NUMBER_OF_AMPLIFIERS; ++slave) {
+        if (StopDelivery[slave] != STOP_UNUSED) {
+            uint8_t result = StopDelivery[slave] == STOP_CONFIRMED ? GLOBAL_STOP_CONFIRMED :
+                StopDelivery[slave] == STOP_FAILED ? GLOBAL_STOP_FAILED : GLOBAL_STOP_PENDING;
+            frame.data[4u + count / 4u] |= (uint8_t)(result << (2u * (count % 4u)));
+            ++count;
+        }
+    }
+    frame.data[3] = count;
+    PUTxDATAxINxSENDxMAILxBOX(&frame);
 }
 
 /* Sole owner of stop completion. Ordinary polling must not consume MbCommError
@@ -96,7 +109,7 @@ static bool SERVICExGLOBALxSTOP(void)
                 GLOBAL_STOP_CONFIRM_MS * (uint32_t)MILISECONDS) {
             StopDelivery[StopSlave] = StopAttempts[StopSlave] < GLOBAL_STOP_MAX_ATTEMPTS ?
                 STOP_QUEUED : STOP_FAILED;
-            if (StopDelivery[StopSlave] == STOP_FAILED) REPORTxSTOPxSLAVE(StopSlave);
+            if (StopDelivery[StopSlave] == STOP_FAILED) REPORTxGLOBALxSTOPxDELIVERY(StopReportReason);
             StopSlave = 0;
         } else if (StopDelivery[StopSlave] == STOP_WRITE_WAIT) {
             StopDelivery[StopSlave] = STOP_STATE_READ;
@@ -108,7 +121,7 @@ static bool SERVICExGLOBALxSTOP(void)
                 (StopState & (HR_STATE_INHIBITED | HR_STATE_STOPPING_ACTIVE)) == HR_STATE_INHIBITED &&
                 (MASTER_SLAVE_DATA[StopSlave].HoldingReg[HR_APPLIED_PWM] & HR_APPLIED_PWM_MASK) == 399u) {
                 StopDelivery[StopSlave] = STOP_CONFIRMED;
-                REPORTxSTOPxSLAVE(StopSlave);
+                REPORTxGLOBALxSTOPxDELIVERY(StopReportReason);
                 StopSlave = 0;
             } else StopDelivery[StopSlave] = STOP_STATE_READ;
         }
@@ -551,7 +564,6 @@ void ENQUEUExGLOBALxSTOP(uint16_t hr0)
         StopAttempts[slave] = 0;
         if (MASTER_SLAVE_DATA[slave].SlaveDetected) {
             StopDelivery[slave] = ISxAMPLIFIERxCOMPATIBLE(slave) ? STOP_QUEUED : STOP_FAILED;
-            REPORTxSTOPxSLAVE(slave);
         }
     }
 }

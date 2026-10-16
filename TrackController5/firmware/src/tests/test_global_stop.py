@@ -76,6 +76,7 @@ static REGISTER_PROCESSING Data;
 static uint8_t ReadData[4], WriteData[9];
 static struct { unsigned ModbusReceiveTimeoutHandle; } mbusData;
 static uint32_t now, reports, last_command, last_message;
+static udpTrans_t last_frame;
 static unsigned wire_count;
 static uint8_t GoToCase, StartupMachine, EnableMachine, EnableSlave;
 static uint32_t DelayCount1, DelayCount2, threshold;
@@ -100,8 +101,12 @@ void CREATExTASKxSTATUSxMESSAGE(uint32_t id, uint32_t command,
                               uint32_t state, uint32_t message) {
     (void)id; (void)state; ++reports; last_command=command; last_message=message;
 }
+void PUTxDATAxINxSENDxMAILxBOX(udpTrans_t *frame) {
+    last_frame=*frame;
+    ++reports; last_command=frame->data[0]; last_message=frame->data[2];
+}
 void ENQUEUExGLOBALxSTOP(uint16_t hr0);
-void REPORTxGLOBALxSTOPxDELIVERY(void);
+void REPORTxGLOBALxSTOPxDELIVERY(uint8_t reason);
 void SLAVExCOMMUNICATIONxHANDLER(void);
 uint8_t CHECKxMODBUSxCOMMxSTATUS(uint8_t slave, bool overwrite);
 bool ISxAMPLIFIERxCOMPATIBLE(uint8_t slave);

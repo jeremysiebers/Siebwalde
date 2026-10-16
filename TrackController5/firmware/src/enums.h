@@ -108,11 +108,10 @@ extern "C" {
 #define HR_STATE_STOPPING_ACTIVE 0x0800u
 #define HR_STATE_INHIBITED 0x8000u
 #define HR_APPLIED_PWM_MASK 0x03ffu
-/* GLOBAL_STOP_STATE message high bits, low 6 bits = amplifier 1..50.
- * Existing global messages 0..3 remain unchanged. */
-#define GLOBAL_STOP_PENDING 0x40u
-#define GLOBAL_STOP_CONFIRMED 0x80u
-#define GLOBAL_STOP_FAILED 0xc0u
+/* Amendment A2: 2-bit results packed LSB-first in GLOBAL_STOP_STATE payload. */
+#define GLOBAL_STOP_CONFIRMED 0u
+#define GLOBAL_STOP_PENDING 1u
+#define GLOBAL_STOP_FAILED 2u
 
     // *****************************************************************************
     // *****************************************************************************

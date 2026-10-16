@@ -96,6 +96,10 @@ bool ISxGLOBALxSTOPxLATCHED(void)
 
 static void REPORTxGLOBALxSTOPxSTATE(void)
 {
+    if (ISxGLOBALxSTOPxLATCHED()) {
+        REPORTxGLOBALxSTOPxDELIVERY(GlobalStopReason);
+        return;
+    }
     /* Message: 0=disarmed, 1=latched-host-loss, 2=latched-host-initiated, 3=armed. */
     CREATExTASKxSTATUSxMESSAGE(CONTROLLER, GLOBAL_STOP_STATE, DONE,
         GlobalStopLatch == GLOBAL_STOP_DISARMED ? 0u :
@@ -151,7 +155,6 @@ bool CONTROLLERxHANDLExSAFETYxCOMMAND(const udpTrans_t *frame)
             return true;
         case GLOBAL_STOP_STATE:
             REPORTxGLOBALxSTOPxSTATE();
-            REPORTxGLOBALxSTOPxDELIVERY();
             return true;
         case REARM_GLOBAL_STOP:
             if (ISxGLOBALxSTOPxLATCHED()) {

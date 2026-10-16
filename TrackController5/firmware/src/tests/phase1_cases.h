@@ -13,6 +13,7 @@ static void reset(void) {
     Message=MESSAGE1; SlaveInfoProcessor=1; loopcount=0;
     GlobalStopLatch=GLOBAL_STOP_DISARMED; LastHostHeartbeat=0; GlobalStopReason=0;
     StopSlave=0; LastLeaseRenewal=0; now=0; reports=0;
+    StopReportReason=0; memset(&last_frame,0,sizeof(last_frame));
     GoToCase=StartupMachine=EnableMachine=EnableSlave=0;
 }
 static void command(uint8_t cmd, uint8_t a) {
@@ -159,7 +160,7 @@ static void test_stop_confirmation(void) {
     reply(HR_STATE_INHIBITED);
     assert(SendNextMessage() && g_lastReqStart==14); reply(399u|0x0400u);
     assert(!SendNextMessage() && StopDelivery[1]==STOP_CONFIRMED);
-    assert(last_message==(GLOBAL_STOP_CONFIRMED|1u));
+    assert(last_message==2 && last_frame.data[3]==1 && (last_frame.data[4]&3u)==GLOBAL_STOP_CONFIRMED);
     assert(slaves[1].MbSentCounter==7); /* ACK alone and cached data cannot confirm. */
     puts("PASS: ACK distinct from fresh HR8/HR14 stable completion; applied duty mask\n");
 }
@@ -216,6 +217,54 @@ static void test_transport_busy(void) {
     }
     puts("PASS: production transport busy rejection remains non-destructive\n");
 }
+static void test_a2_encoding_and_bootloader(void) {
+    unsigned i, before;
+    reset();
+    slaves[1].SlaveDetected=slaves[3].SlaveDetected=slaves[7].SlaveDetected=true;
+    slaves[20].SlaveDetected=slaves[50].SlaveDetected=true;
+    slaves[0].SlaveDetected=slaves[51].SlaveDetected=true;
+    AmplifierCompatible[1]=AmplifierCompatible[3]=AmplifierCompatible[7]=true;
+    AmplifierCompatible[20]=AmplifierCompatible[50]=true;
+    command(EXEC_GLOBAL_STOP,0);
+    assert(last_frame.header==HEADER && last_frame.command==CONTROLLER);
+    assert(last_frame.data[0]==111 && last_frame.data[1]==DONE && last_frame.data[2]==2);
+    assert(last_frame.data[3]==5 && last_frame.data[4]==0x55 && last_frame.data[5]==1);
+    StopDelivery[1]=STOP_CONFIRMED; StopDelivery[3]=STOP_QUEUED;
+    StopDelivery[7]=STOP_FAILED; StopDelivery[20]=STOP_CONFIRMED; StopDelivery[50]=STOP_FAILED;
+    command(GLOBAL_STOP_STATE,0);
+    assert(last_frame.data[3]==5 && last_frame.data[4]==0x24 && last_frame.data[5]==2);
+    for(i=6;i<80;++i) assert(last_frame.data[i]==0);
+    /* Captured detected list is stable; no holes indexed by raw slave address. */
+    slaves[3].SlaveDetected=false; command(GLOBAL_STOP_STATE,0);
+    assert(last_frame.data[3]==5 && last_frame.data[4]==0x24);
+    reset();
+    for(i=1;i<=50;++i) { slaves[i].SlaveDetected=true; AmplifierCompatible[i]=true; }
+    command(EXEC_GLOBAL_STOP,0);
+    assert(last_frame.data[3]==50);
+    for(i=4;i<16;++i) assert(last_frame.data[i]==0x55);
+    assert(last_frame.data[16]==0x05); /* Final byte has two entries, no padding garbage. */
+    for(i=1;i<=50;++i) StopDelivery[i]=STOP_FAILED;
+    command(GLOBAL_STOP_STATE,0);
+    for(i=4;i<16;++i) assert(last_frame.data[i]==0xaa);
+    assert(last_frame.data[16]==0x0a);
+    for(i=1;i<=50;++i) StopDelivery[i]=STOP_CONFIRMED;
+    command(GLOBAL_STOP_STATE,0);
+    for(i=4;i<80;++i) assert(last_frame.data[i]==0);
+    reset(); command(EXEC_GLOBAL_STOP,0);
+    assert(last_frame.data[3]==0);
+    for(i=4;i<80;++i) assert(last_frame.data[i]==0);
+    before=reports; command(REARM_GLOBAL_STOP,0);
+    REPORTxGLOBALxSTOPxDELIVERY(2); assert(reports==before+1); /* No stale latched report. */
+    /* Existing FlashSequencer boot-address HR11=0 must bypass runtime gating. */
+    reset(); Data.SlaveAddress=0xaa; Data.Direction=WRITE;
+    Data.NoOfRegisters=1; Data.StartRegister=HOLDINGREG11; Data.RegData0=0;
+    SLAVExCOMMUNICATIONxHANDLER();
+    assert(Petit_Tx_State==PETIT_RXTX_START && Petit_Tx_Data.Address==0xaa);
+    assert(Petit_Tx_Data.Function==16 && Petit_Tx_Data.DataBuf[1]==11);
+    assert(Petit_Tx_Data.DataBuf[5]==0 && Petit_Tx_Data.DataBuf[6]==0);
+    assert(dump[0].MbSentCounter==1 && !ISxAMPLIFIERxCOMPATIBLE(1));
+    puts("PASS: A2 sparse/full/empty packed confirmation payload, query/re-arm, boot-address HR11 write\n");
+}
 static void test_heartbeat_and_mailbox(void) {
     unsigned i, before;
     uint8_t write[8]={1,WRITE,1,0,0x8f,0x01,0,0};
@@ -247,5 +296,6 @@ int main(void) {
     test_identity(); test_initialization_path(); test_poll_and_lease(); test_stop_confirmation();
     test_retries_and_failures(); test_heartbeat_and_mailbox();
     test_transport_busy();
+    test_a2_encoding_and_bootloader();
     ExitProcess(0); return 0;
 }
