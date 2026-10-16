@@ -920,3 +920,20 @@ No BLOCKING. No new PO decision. The two existing gates remain and neither block
 **NOT frozen (tunable, operational — separate from wire format):** `WATCHDOG_MS` (250 ms prototype placeholder; full-complement value = R5‑C measurement gate); ramp steps `2/2/8`; `MOTION_LEASE_TIMEOUT_MS=500` / `MOTION_LEASE_RENEWAL_MS=100` (tunable firmware constants); F3 electrical-limit values (Phase 2).
 
 **Baseline:** contract authored at working-tree `master @ 11ba5e3`; implementation begins on branch `feature/amplifier-phase1`.
+
+---
+
+## Phase-1 Contract Amendments (2026-10-16, during implementation)
+
+These two clarifications resolve cross-layer gaps found during Phase-1 implementation. They refine, not contradict, the frozen §R8‑4.
+
+### Amendment A1 — HR11 access (bootloader entry preserved)
+
+§R8‑4 lists `HR_SW_CHECKSUM` (HR11) as `R` (read-only). Clarification: HR11 is read-only **at the runtime address (1–50) after configuration**. The bootloader-entry write (`HR11 = 0` at the **boot address `0xAA` during startup**, handled by the existing startup state machine state 1 — NOT the runtime adapter) is a pre-runtime mechanism and is preserved unchanged. The PIC32 `FlashSequencer` `HR11=0` bootloader-entry write remains valid. The runtime adapter must NOT reject the boot-address `HR11=0` write during startup; its "read-only" rule for HR11 applies only after the amplifier is configured to a runtime address.
+
+### Amendment A2 — PIC32→C# result encodings (identity + stop confirmation)
+
+§R8‑4 froze the identity and stop-confirmation *semantics* but did not allocate their PIC32→C# *encodings*. Define:
+
+- **Identity (per amplifier):** the PIC32's two-fresh-read HR7 check gates per-amplifier ENABLE — an incompatible amplifier is **not enabled** and remains `NOT_INITIALIZED`. C# reads `HR7` (MAP_VERSION/DEVICE_CLASS/capability) and `HR_STATE` (INIT_DONE/CONFIG_OK) from the 21-register SLAVEINFO frame and applies its own fail-closed compatibility check. **No new wire encoding is required** — the identity result is observable via the already-carried HR7/HR_STATE registers.
+- **Stop confirmation (per amplifier):** the PIC32's per-amplifier stop-confirmation {confirmed, pending, failed} is reported to C# via the existing `GLOBAL_STOP_STATE` (command 111) status, extended with a per-amplifier confirmation payload: for each detected amplifier, a 2-bit field encodes {0=confirmed, 1=pending, 2=failed} (little-endian packed over the detected-amplifier list). C# consumes this to block release/exit while any amplifier is non-confirmed.
