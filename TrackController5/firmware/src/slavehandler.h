@@ -22,6 +22,7 @@ extern bool     PROCESSxNEXTxSLAVE                  (void);
 extern bool     PROCESSxSLAVExCOMMUNICATION         (void);
 extern void     ADDxNEWxSLAVExDATAxCMDxTOxSLAVExMAILBOX   (uint8_t *data);
 extern void     ENQUEUExGLOBALxSTOP(uint16_t hr0);
+extern void     REPORTxGLOBALxSTOPxDELIVERY(void);
 
 #ifdef	__cplusplus
 }

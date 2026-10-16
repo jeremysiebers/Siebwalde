@@ -6,6 +6,57 @@
 #include "../TrackController5.X/../../mbus.h"
 #include "../TrackController5.X/../../slavecommhandler.h"
 #include "../TrackController5.X/../../enums.h"
+#include "modbus/PetitModbus.h"
+#include "controller.h"
+
+static bool AmplifierCompatible[NUMBER_OF_AMPLIFIERS + 1];
+static SLAVE_INFO *MASTER_SLAVE_DATA;
+static SLAVE_INFO *DUMP_SLAVE_DATA;
+
+bool ISxAMPLIFIERxCOMPATIBLE(uint8_t slave)
+{
+    return slave > 0 && slave <= NUMBER_OF_AMPLIFIERS && AmplifierCompatible[slave];
+}
+
+/* Called exclusively during selected-slot initialization, before ANY amplifier
+ * write. Each observation follows its own completed FC03, never SLAVEINFO. */
+static bool VERIFYxAMPLIFIERxIDENTITY(uint8_t slave)
+{
+    static uint8_t phase;
+    static uint16_t first;
+    uint8_t status;
+    uint16_t identity;
+    if (phase == 0 || phase == 2) {
+        if (!PetitModbusIsReady()) return false;
+        Data.SlaveAddress = SLAVE_INITIAL_ADDR;
+        Data.Direction = READ;
+        Data.NoOfRegisters = 1;
+        Data.StartRegister = HR_IDENTITY;
+        SLAVExCOMMUNICATIONxHANDLER();
+        ++phase;
+        return false;
+    }
+    status = CHECKxMODBUSxCOMMxSTATUS(SLAVE_INITIAL_ADDR, true);
+    if (status == SLAVEBUSY) return false;
+    identity = DUMP_SLAVE_DATA[0].HoldingReg[HR_IDENTITY];
+    if (status == SLAVEOK && phase == 1) {
+        first = identity;
+        phase = 2;
+        return false;
+    }
+    AmplifierCompatible[slave] = status == SLAVEOK && phase == 3 &&
+        identity == first && (identity & 0xffu) == 1u &&
+        (identity & 0x0f00u) == 0x0100u && (identity & 0xf000u) != 0;
+    MASTER_SLAVE_DATA[slave].HoldingReg[HR_IDENTITY] =
+        AmplifierCompatible[slave] ? identity : 0;
+    /* Init status: BUSY + 0x80|id = two-read compatible; ERROR + id = blocked.
+     * Overall init completion remains the existing DONE/NONE notification. */
+    CREATExTASKxSTATUSxMESSAGE(MBUS, EXEC_MBUS_STATE_SLAVE_INIT,
+        AmplifierCompatible[slave] ? BUSY : ERROR,
+        AmplifierCompatible[slave] ? (0x80u | slave) : slave);
+    phase = 0;
+    return true;
+}
 
 bool    ConfigureSlave       (uint8_t TrackBackPlaneID, uint16_t AmplifierLatchSet, uint8_t TrackAmplifierId, uint8_t Mode);
 bool    DetectSlave          (uint8_t SlaveId);
@@ -42,8 +93,6 @@ static uint32_t     threshold       = 0;
  *  Notes      :
  */
 /*#--------------------------------------------------------------------------#*/
-static SLAVE_INFO *MASTER_SLAVE_DATA = 0;                                       // Holds the address were the received slave data is stored
-static SLAVE_INFO *DUMP_SLAVE_DATA   = 0;                                       // Holds the address were the received slave data is stored
 
 void INITxSLAVExSTARTUP(SLAVE_INFO *location, SLAVE_INFO *Dump){
     MASTER_SLAVE_DATA  =  location;
@@ -434,9 +483,11 @@ uint8_t StartupMachine = 0;
 
 bool ConfigureSlave(uint8_t BackplaneId, uint16_t AmplifierLatchSet, uint8_t TrackAmplifierId, uint8_t Mode){
     bool return_val = false;
+    (void)Mode; /* Retained legacy call signature; no alternate write/probe mode. */
     
     switch(StartupMachine){
         case 0:
+            AmplifierCompatible[TrackAmplifierId] = false;
             if (MASTER_SLAVE_DATA[BackplaneId].SlaveDetected == true && 
                 MASTER_SLAVE_DATA[TrackAmplifierId].SlaveDetected == true){
                 StartupMachine++;
@@ -468,7 +519,7 @@ bool ConfigureSlave(uint8_t BackplaneId, uint16_t AmplifierLatchSet, uint8_t Tra
         case 2:
             switch(CHECKxMODBUSxCOMMxSTATUS(BackplaneId, true)){
                 case SLAVEOK:  
-                    GoToCase = StartupMachine + 1;
+                    GoToCase = 10; /* Two fresh identity reads before address write. */
                     StartupMachine = WAIT;
                     DelayCount1 = READxCORExTIMER();
                     break;                    
@@ -481,7 +532,13 @@ bool ConfigureSlave(uint8_t BackplaneId, uint16_t AmplifierLatchSet, uint8_t Tra
             }
             break;
             
-        /* Program new SlaveId to slave */
+        case 10:
+            if (VERIFYxAMPLIFIERxIDENTITY(TrackAmplifierId)) {
+                StartupMachine = ISxAMPLIFIERxCOMPATIBLE(TrackAmplifierId) ? 3 : 5;
+            }
+            break;
+
+        /* Program new SlaveId only after compatibility was established. */
         case 3:
             Data.SlaveAddress  = SLAVE_INITIAL_ADDR;
             Data.Direction     = WRITE;
@@ -505,6 +562,10 @@ bool ConfigureSlave(uint8_t BackplaneId, uint16_t AmplifierLatchSet, uint8_t Tra
                     //DRV_USART0_WriteByte('4');
                     break;                    
                 case SLAVENOK: 
+                    AmplifierCompatible[TrackAmplifierId] = false;
+                    MASTER_SLAVE_DATA[TrackAmplifierId].HoldingReg[HR_IDENTITY] = 0;
+                    CREATExTASKxSTATUSxMESSAGE(MBUS, EXEC_MBUS_STATE_SLAVE_INIT,
+                        ERROR, TrackAmplifierId);
                     StartupMachine++;
                     //DRV_USART0_WriteByte('4');
                     break;
@@ -580,19 +641,29 @@ bool ConfigureSlave(uint8_t BackplaneId, uint16_t AmplifierLatchSet, uint8_t Tra
  */
 /*#--------------------------------------------------------------------------#*/
 uint8_t EnableMachine = 0;
+static uint8_t EnableSlave;
 
 bool ENABLExAMPLIFIER(void){
     bool return_val = false;
         
     switch(EnableMachine){
         case 0:
+            EnableSlave = 1;
             GoToCase = 1;
             EnableMachine = WAIT;
             DelayCount1 = READxCORExTIMER();
             break;
 
         case 1:
-            Data.SlaveAddress  = BROADCAST_ADDRESS;
+            if (ISxGLOBALxSTOPxLATCHED()) return false;
+            while (EnableSlave <= NUMBER_OF_AMPLIFIERS &&
+                   !ISxAMPLIFIERxCOMPATIBLE(EnableSlave)) ++EnableSlave;
+            if (EnableSlave > NUMBER_OF_AMPLIFIERS) {
+                EnableMachine = 2;
+                break;
+            }
+            if (!PetitModbusIsReady()) break;
+            Data.SlaveAddress  = EnableSlave++;
             Data.Direction     = WRITE;
             Data.NoOfRegisters = 1;
             Data.StartRegister = HOLDINGREG1;
@@ -603,7 +674,7 @@ bool ENABLExAMPLIFIER(void){
 //            WriteData1Register[2] = 0x80;               // Register Value Hi,
 //            WriteData1Register[3] = 0x00;               // Register Value Lo.
 //            SLAVExCOMMUNICATIONxHANDLER(BROADCAST_ADDRESS, 0, Write, WriteData1Register, 4);
-            GoToCase = 2;
+            GoToCase = 1;
             EnableMachine = WAIT;
             DelayCount1 = READxCORExTIMER();
             break;

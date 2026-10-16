@@ -151,9 +151,16 @@ bool CONTROLLERxHANDLExSAFETYxCOMMAND(const udpTrans_t *frame)
             return true;
         case GLOBAL_STOP_STATE:
             REPORTxGLOBALxSTOPxSTATE();
+            REPORTxGLOBALxSTOPxDELIVERY();
             return true;
         case REARM_GLOBAL_STOP:
-            return true; /* Reserved no-op, including while latched. */
+            if (ISxGLOBALxSTOPxLATCHED()) {
+                GlobalStopLatch = GLOBAL_STOP_ARMED;
+                /* Bounded grace to the next heartbeat, not a permanent bypass. */
+                LastHostHeartbeat = READxCORExTIMER();
+                REPORTxGLOBALxSTOPxSTATE();
+            }
+            return true;
         default:
             return false;
     }
