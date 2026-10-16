@@ -439,8 +439,8 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
 
                 case TrackCommand.EXEC_GLOBAL_STOP:
                     if (frame.Length == 4 && frame[2] == 0 && frame[3] == 0)
-                        writer.TryWrite(new byte[] { Header, TaskId.CONTROLLER, TrackCommand.GLOBAL_STOP_STATE, TaskStates.DONE, 2 });
-                    // Per-amplifier neutral is deliberately recorded through the production 108 writer.
+                        writer.TryWrite(BuildGlobalStopStateFrame(GlobalStopStatusMessage.LatchedHostInitiated));
+                    // Per-amplifier neutral is delivered through the production 108 writer.
                     break;
 
                 case TrackCommand.EXEC_MBUS_SLAVE_DATA_EXCH: // 108
@@ -531,6 +531,31 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
 
         private static byte[] BuildControlFrame(byte sender, byte taskCommand, byte taskState)
             => new byte[] { Header, sender, taskCommand, taskState, 0x00 };
+
+        /// <summary>
+        /// Builds the Amendment A2 <c>GLOBAL_STOP_STATE</c> (111) frame the PIC32 emits on stop
+        /// delivery: <c>[HEADER, CONTROLLER, 111, DONE, reason, count, codes...]</c>. <c>count</c> is
+        /// the number of detected amplifiers; the 2-bit per-amplifier codes are packed LSB-first,
+        /// four per byte, in ascending detected slave-address order (mirror of
+        /// <c>REPORTxGLOBALxSTOPxDELIVERY</c>). The deterministic simulator applies the stop write
+        /// synchronously, so every detected amplifier reports <c>Confirmed</c> (0) and the packed
+        /// code bytes are all zero.
+        /// </summary>
+        private byte[] BuildGlobalStopStateFrame(byte reason)
+        {
+            var detected = _config.DetectedSlaves;
+            int count = detected.Count;
+            int codeBytes = (count + 3) / 4; // ceil(count / 4)
+            var frame = new byte[6 + codeBytes]; // header, sender, cmd, state, reason, count, codes
+            frame[0] = Header;
+            frame[1] = TaskId.CONTROLLER;
+            frame[2] = TrackCommand.GLOBAL_STOP_STATE;
+            frame[3] = TaskStates.DONE;
+            frame[4] = reason;
+            frame[5] = (byte)count;
+            // frame[6..] stay zero: all-detected Confirmed (0).
+            return frame;
+        }
 
         private byte[] BuildSlaveInfoFrame(byte slave)
         {

@@ -49,7 +49,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         private bool _configApplied;
 
         private int _leaseTicks;
-        private bool _leaseArmed;           // true after the first MOTION_PERMISSION write
+        private bool _leaseArmed;           // false until the first MOTION_PERMISSION renewal; the lease starts EXPIRED
 
         public byte SlaveNumber { get; }
 
@@ -367,7 +367,14 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
             }
         }
 
-        private bool LeaseFresh() => !_leaseArmed || _leaseTicks < LeaseTimeoutTicks;
+        /// <summary>
+        /// The lease is only fresh while it has been explicitly armed (by a MOTION_PERMISSION
+        /// renewal) AND the renewal window has not yet elapsed. Mirrors the PIC18
+        /// (<c>amp_core.c</c>: <c>lease_ticks = AMP_LEASE_TICKS</c> at init): the lease starts
+        /// EXPIRED, so a never-renewed amplifier is never lease-fresh and a non-neutral command
+        /// cannot produce RUN until a renewal has armed it.
+        /// </summary>
+        private bool LeaseFresh() => _leaseArmed && _leaseTicks < LeaseTimeoutTicks;
 
         // --------------------------------------------------------------------
         // Helpers

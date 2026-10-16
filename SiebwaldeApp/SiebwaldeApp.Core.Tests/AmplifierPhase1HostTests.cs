@@ -249,6 +249,30 @@ namespace SiebwaldeApp.Core.Tests
             Assert.Equal(AmplifierSpeedMapper.NeutralPwm, regs[TrackAmplifierRegisters.AppliedPwm] & TrackAmplifierRegisters.PwmMask);
         }
 
+        [Fact]
+        public void Simulator_LeaseStartsExpired_NoRunUntilRenewalThenFreshCommand()
+        {
+            var amplifier = new SimulatedTrackAmplifier(1);
+            // Configure + APPLY + ENABLE so the only missing precondition is a fresh lease.
+            amplifier.ApplyWrite(TrackAmplifierRegisters.ConfigRamp, new ushort[] { 0x0403 }); // accel 3, decel 4
+            amplifier.ApplyWrite(TrackAmplifierRegisters.ConfigFastStop, new ushort[] { 9 });
+            amplifier.ApplyWrite(TrackAmplifierRegisters.ConfigWatchdog, new ushort[] { 300 });
+            amplifier.ApplyWrite(TrackAmplifierRegisters.Control, new ushort[] { TrackAmplifierRegisters.ApplyConfigBit });
+            amplifier.ApplyWrite(TrackAmplifierRegisters.Control, new ushort[] { TrackAmplifierRegisters.EnableBit });
+
+            // A fresh non-neutral command BEFORE any renewal must NOT produce RUN: the lease starts
+            // expired (mirrors PIC18 amp_core.c lease_ticks = AMP_LEASE_TICKS at init).
+            amplifier.ApplyWrite(TrackAmplifierRegisters.PwmCommand, new ushort[] { 600 });
+            Assert.NotEqual(2, amplifier.Snapshot()[TrackAmplifierRegisters.State] & 0xF); // not RUN
+
+            // An explicit MOTION_PERMISSION renewal arms the lease.
+            amplifier.ApplyWrite(TrackAmplifierRegisters.Control, new ushort[] { TrackAmplifierRegisters.MotionPermissionBit });
+
+            // A fresh non-neutral command AFTER the renewal produces RUN.
+            amplifier.ApplyWrite(TrackAmplifierRegisters.PwmCommand, new ushort[] { 500 });
+            Assert.Equal(2, amplifier.Snapshot()[TrackAmplifierRegisters.State] & 0xF); // RUN
+        }
+
         // ---------------------------------------------------------------------
         // 111 stop-confirmation consumption (item 4)
         // ---------------------------------------------------------------------
@@ -257,8 +281,9 @@ namespace SiebwaldeApp.Core.Tests
         public void StopConfirmation_DecodesTwoBitsPerAmplifier()
         {
             var detected = new ushort[] { 1, 2, 3, 4 };
-            // Amplifier 0: confirmed (0b00), 1: pending (0b01), 2: failed (0b10), 3: reserved (0b11 -> failed).
-            var payload = new byte[] { 0b11_10_01_00 };
+            // A2 wire layout: payload[0] = count (4), then one packed byte: amplifier 0 confirmed
+            // (0b00), 1 pending (0b01), 2 failed (0b10), 3 reserved (0b11 -> failed).
+            var payload = new byte[] { 4, 0b11_10_01_00 };
 
             var decoded = TrackAmplifierStopConfirmation.Decode(payload, detected);
 
@@ -269,10 +294,27 @@ namespace SiebwaldeApp.Core.Tests
             Assert.False(TrackAmplifierStopConfirmation.AllConfirmed(payload, detected));
         }
 
+        [Fact]
+        public void StopConfirmation_CountByteBoundsDecode_NoZeroPaddingLeak()
+        {
+            // The PIC32 encodes count=2 for detected {1,2}; the single code byte's upper bits are
+            // zero-padding and must NOT be decoded as extra "confirmed" amplifiers beyond count.
+            var detected = new ushort[] { 1, 2, 3, 4 };
+            var payload = new byte[] { 2, 0b00_00 }; // 0x00
+
+            var decoded = TrackAmplifierStopConfirmation.Decode(payload, detected);
+
+            Assert.Equal(AmplifierStopConfirmation.Confirmed, decoded[1]);
+            Assert.Equal(AmplifierStopConfirmation.Confirmed, decoded[2]);
+            Assert.Equal(AmplifierStopConfirmation.Failed, decoded[3]); // beyond count => failed
+            Assert.Equal(AmplifierStopConfirmation.Failed, decoded[4]); // beyond count => failed
+            Assert.False(TrackAmplifierStopConfirmation.AllConfirmed(payload, detected));
+        }
+
         [Theory]
-        [InlineData(new byte[] { 0x00 }, true)]  // all confirmed
-        [InlineData(new byte[] { 0x01 }, false)] // one pending
-        [InlineData(new byte[] { 0x02 }, false)] // one failed
+        [InlineData(new byte[] { 1, 0x00 }, true)]  // count=1, confirmed
+        [InlineData(new byte[] { 1, 0x01 }, false)] // count=1, pending
+        [InlineData(new byte[] { 1, 0x02 }, false)] // count=1, failed
         public void StopConfirmation_AllConfirmed_GatesRelease(byte[] payload, bool expected)
         {
             var detected = new ushort[] { 1 };
@@ -282,8 +324,8 @@ namespace SiebwaldeApp.Core.Tests
         [Fact]
         public void StopConfirmation_TruncatedPayload_IsNotConfirmed()
         {
-            var detected = new ushort[] { 1, 2, 3, 4, 5 }; // needs 10 bits => 2 bytes
-            Assert.False(TrackAmplifierStopConfirmation.AllConfirmed(new byte[] { 0x00 }, detected));
+            var detected = new ushort[] { 1, 2, 3, 4, 5 }; // count=5 needs 2 code bytes
+            Assert.False(TrackAmplifierStopConfirmation.AllConfirmed(new byte[] { 5, 0x00 }, detected));
         }
 
         [Fact]
@@ -296,13 +338,39 @@ namespace SiebwaldeApp.Core.Tests
             using var state = new GlobalStopConfirmationState(client);
             state.SetDetectedAmplifiers(new ushort[] { 1, 2, 3 });
 
-            // A 111 payload with amplifiers 1 confirmed, 2 pending, 3 confirmed.
-            var payload = new byte[] { 0b00_01_00 };
+            // A2 wire payload with amplifiers 1 confirmed, 2 pending, 3 confirmed: count=3 then codes.
+            var payload = new byte[] { 3, 0b00_01_00 };
             state.FeedPayload(payload);
             Assert.False(state.AreAllConfirmed);
 
-            state.FeedPayload(new byte[] { 0x00 });
+            state.FeedPayload(new byte[] { 3, 0x00 });
             Assert.True(state.AreAllConfirmed);
+
+            await client.DisposeAsync();
+        }
+
+        [Fact]
+        public async Task GlobalStopConfirmationState_DecodesWireShapedA2Payload_ThroughTransport()
+        {
+            var variables = new TrackApplicationVariables();
+            var transport = new DeterministicTrackTransport(new TrackSimulatorConfig(
+                detectedSlaves: new byte[] { 1, 2, 3 }));
+            var client = new TrackCommClientAsync(transport, variables);
+            await client.StartAsync(false);
+
+            using var state = new GlobalStopConfirmationState(client);
+            // Physical detected order = ascending slave address (the PIC32 pack order).
+            state.SetDetectedAmplifiers(new ushort[] { 1, 2, 3 });
+
+            // Trigger the stop; the simulator emits the real >=6-byte A2 payload (count + codes)
+            // through the transport receive path, not via FeedPayload.
+            await client.SendAsync(new SendMessage(TrackCommand.EXEC_GLOBAL_STOP, new byte[] { 0, 0 }));
+
+            await WaitUntilAsync(() => state.AreAllConfirmed, TimeSpan.FromSeconds(2));
+
+            Assert.Equal(AmplifierStopConfirmation.Confirmed, state.Confirmations[1]);
+            Assert.Equal(AmplifierStopConfirmation.Confirmed, state.Confirmations[2]);
+            Assert.Equal(AmplifierStopConfirmation.Confirmed, state.Confirmations[3]);
 
             await client.DisposeAsync();
         }

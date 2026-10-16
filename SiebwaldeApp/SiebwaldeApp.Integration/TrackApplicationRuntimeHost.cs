@@ -571,8 +571,15 @@ namespace SiebwaldeApp.Integration
                 return;
             }
 
-            // The 111 stop-confirmation payload is decoded against the ordered domain amplifier list.
-            _stopConfirmation?.SetDetectedAmplifiers(domain.OrderBy(a => a).Select(a => (ushort)a).ToArray());
+            // The 111 stop-confirmation payload is decoded against the physical detected-amplifier
+            // list in ascending slave-address order (the PIC32 packs StopDelivery[i] != STOP_UNUSED,
+            // i.e. SlaveDetected, ascending) — NOT the effective/configured domain.
+            _stopConfirmation?.SetDetectedAmplifiers(
+                _trackVariables.trackAmpItems
+                    .Where(a => TrackAmplifierAddress.IsTrackAmplifierAddress(a.SlaveNumber) && a.SlaveDetected != 0)
+                    .OrderBy(a => a.SlaveNumber)
+                    .Select(a => a.SlaveNumber)
+                    .ToArray());
 
             // Re-establish a fresh, genuine protocol readback for every domain amplifier before the
             // identity/config gate: SetDefaultPwmSetpointsStep clears ProtocolReadbackObserved, so a
