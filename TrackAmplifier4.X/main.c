@@ -14,6 +14,8 @@
 #include "modbus/General.h"
 #include "processio.h"
 #include "regulator.h"
+#include "amp_core.h"
+#include "amp_adapter.h"
 
 static uint8_t MODBUS_ADDRESS = 0;
 static uint8_t LED_TX_prev, LED_RX_prev, LED_ERR_prev, LED_WAR_prev = 0;
@@ -23,6 +25,23 @@ static uint8_t Config = 1;
 static uint8_t Startup_Machine = 0;
 static uint8_t Sequencer = 0;
 volatile uint8_t Update_AmplifierTicks = 0;
+static uint8_t LastAmplifierTick = 0;
+static uint8_t MeasurementTick = 0;
+static bool MeasurementPending = false;
+
+static void Amplifier_ServiceTick(void)
+{
+    /* Atomic byte read, modulo-256 counter retained. Never clear the ISR counter. */
+    uint8_t now = Update_AmplifierTicks;
+    if (now != LastAmplifierTick) {
+        LastAmplifierTick++; /* bounded catch-up, one tick per super-loop pass */
+        REGULATORxUPDATE();
+        AmpAdapter_Refresh();
+        LED_RUN_LAT = amp_model.status.state == AMP_ST_RUN;
+        LED_ERR_LAT = amp_model.status.state == AMP_ST_FAULT || amp_model.command.emo ||
+            (amp_model.fault.causes & AMP_FAULT_COMMS) != 0;
+    }
+}
 
 //static uint8_t test = 0xFE;
 
@@ -34,7 +53,8 @@ void main(void) {
     SYSTEM_Initialize();
     
     /* Store firmware checksum to HoldingReg11 (HR_SW_CHECKSUM) for flash checking */
-    PetitHoldingRegisters[HR_SW_CHECKSUM].ActValue = ReadFlashChecksum();
+    AmpCore_Init(ReadFlashChecksum());
+    AmpAdapter_Init();
 
     /* Enable the Global Interrupts */
     INTERRUPT_GlobalInterruptEnable();
@@ -55,9 +75,11 @@ void main(void) {
     
     MODBUS_ADDRESS = 0xAA;                                  //...listen to get configured when ID pin is pulled low 170 dec.    
     InitPetitModbus(MODBUS_ADDRESS);
+    REGULATORxINIT();
 /*----------------------------------------------------------------------------*/
 //<editor-fold defaultstate="collapsed" desc="CONFIG SECTION">
         while(Config){
+            Amplifier_ServiceTick();
             
             switch(Startup_Machine){
                 case 0 :
@@ -72,12 +94,12 @@ void main(void) {
                     LED_ERR++;                
                     Led_Blink();
                     if (ID_PORT){                               //...d, check if a new ID is set, otherwise go back to initial state
-                        if((PetitHoldingRegisters[HR_STATUS].ActValue & HR_STATUS_CONFIG_ID_MASK)!= 0 ){
+                        if(amp_model.address != 0u){
                             LED_ERR         = 0; 
                             LED_ERR_LAT     = 0;                        
-                            MODBUS_ADDRESS  = (PetitHoldingRegisters[HR_STATUS].ActValue & HR_STATUS_CONFIG_ID_MASK);
+                            MODBUS_ADDRESS  = amp_model.address;
                             /* Mark that the ID has been programmed by the master */
-                            PetitHoldingRegisters[HR_STATUS].ActValue |= HR_STATUS_ID_SET_BIT;
+                            AmpAdapter_AddressAssigned();
                             InitPetitModbus(MODBUS_ADDRESS);
                             Startup_Machine = 5;
                        }  
@@ -93,7 +115,7 @@ void main(void) {
                         }
                     }
                     /* If checksum is zero, go into bootloader invoke sequence */
-                    if(PetitHoldingRegisters[HR_SW_CHECKSUM].ActValue == 0){
+                    if(amp_model.checksum == 0){
                         Startup_Machine = 2;
                         //RESET();                                                    // Called for bootloader invoking
                     }
@@ -119,15 +141,13 @@ void main(void) {
                     ProcessPetitModbus();
                     LED_WAR++;
                     Led_Blink();
-                    /* Wait until the amplifier is enabled by the Master
-                     * (bit 15 in HR_BEMF_CTRL / HoldingReg1)
-                     */
-                    if ((PetitHoldingRegisters[HR_BEMF_CTRL].ActValue & HR_BEMF_ENABLE_AMPLIFIER_BIT)){
+                    /* Addressing complete: enter monitoring even before enable/config. */
+                    if (amp_model.status.id_set){
                         Startup_Machine = 0;
                         Config          = 0;
                         LED_WAR         = 0;
                         LED_WAR_LAT     = 0;
-                        LED_RUN_LAT     = 1;
+                        LED_RUN_LAT     = 0;
                     }
                     break;
                     
@@ -138,11 +158,11 @@ void main(void) {
     
 //</editor-fold>
         
-        REGULATORxINIT();
         
 //<editor-fold defaultstate="collapsed" desc="RUN SECTION">
         
         while(1){
+            Amplifier_ServiceTick();
             
             //PT2_SetHigh();
             ProcessPetitModbus();
@@ -150,7 +170,8 @@ void main(void) {
             
             Led_Blink();
             
-            if (Update_AmplifierTicks){
+            if (MeasurementPending || Update_AmplifierTicks != MeasurementTick){
+                MeasurementPending = true;
                                 
                 LED_OCC_LAT = CMP1_GetOutputStatus();
                 
@@ -158,32 +179,37 @@ void main(void) {
                     case 0:
                         if(MEASURExBMF() == true){
                             Sequencer = 1;
-                            Update_AmplifierTicks = 0;
+                            MeasurementPending = false;
+                            MeasurementTick = Update_AmplifierTicks;
                         }
                         break;
                         
                     case 1:
-                        if(REGULATORxUPDATE() == true){
+                        { /* PWM/control runs at loop top, independent of ADC/BEMF progress. */
                             Sequencer = 2;
-                            Update_AmplifierTicks = 0;
+                            MeasurementPending = false;
+                            MeasurementTick = Update_AmplifierTicks;
                         }
                         break;
                         
                     case 2:
                         if(ADCxIO() == true){
                             Sequencer = 0;
-                            Update_AmplifierTicks = 0;
+                            MeasurementPending = false;
+                            MeasurementTick = Update_AmplifierTicks;
                         }
                         break;
                         
                     case 3:
                         Sequencer = 0;
-                            Update_AmplifierTicks = 0;
+                        MeasurementPending = false;
+                        MeasurementTick = Update_AmplifierTicks;
                         break;
                         
                     default:
                         Sequencer = 0;
-                            Update_AmplifierTicks = 0;
+                        MeasurementPending = false;
+                        MeasurementTick = Update_AmplifierTicks;
                         break;
                 }            
                 

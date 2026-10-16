@@ -1,5 +1,6 @@
 #include "processio.h"
 #include "modbus/General.h"
+#include "amp_model.h"
 #include "mcc_generated_files/mcc.h"
 #include "mcc_generated_files/adcc.h"
 
@@ -111,7 +112,7 @@ uint16_t MEASURExBMF(){
  *  Notes      : 
  *
  *  This function performs the actual ADC conversion of the back-EMF
- *  and stores it into the status holding register (HR_STATUS).
+ *  and stores it in the internal BEMF model (not exposed in the Phase-1 map).
  */
 /*#--------------------------------------------------------------------------#*/
 static uint16_t Sequence_Bmf = 0;
@@ -129,7 +130,8 @@ void ADC_BMF (){
             case 1:
                 if (ADCON0bits.ADGO==0){
                     {
-                        g_bemf = (uint16_t)(ADCC_GetConversionResult() & HR_STATUS_BEMF_MASK);                        
+                        g_bemf = (uint16_t)(ADCC_GetConversionResult() & 0x03FFu);
+                        amp_model.bemf = g_bemf;
                     }
                     Sequence_Bmf = 0;
                     //NC_2_LAT = true;
@@ -158,13 +160,13 @@ void ADC_BMF (){
  *  Notes      : 
  *
  *  This function multiplexes several ADC channels and places the
- *  measurements into the corresponding Modbus holding registers:
+ *  measurements into the internal model (adapter publishes HR16..18):
  *
- *  - LM_V     -> HR_FUSE_VOLTAGE          (HoldingReg4)
- *  - LM_TEMP  -> HR_HBRIDGE_TEMPERATURE   (HoldingReg5)
- *  - LM_CURR  -> HR_HBRIDGE_CURRENT       (HoldingReg6)
+ *  - LM_V     -> voltage
+ *  - LM_TEMP  -> temperature
+ *  - LM_CURR  -> current
  *
- *  It also updates the thermal flag bit in HR_STATUS from LM_THFLG.
+ *  It also reports live occupancy/thermal and measurement validity.
  */
 /*#--------------------------------------------------------------------------#*/
 static uint16_t sequence = 2;
@@ -175,31 +177,15 @@ uint16_t ADCxIO (){
     
     uint16_t Return_Val = false;
     
-    /* Update HR_STATUS only here */
+    /* Sample live digital status, without introducing Phase-2 protection. */
     g_occ = CMP1_GetOutputStatus();
     g_tflg = LM_THFLG_GetValue();
     
-    uint16_t status = PetitHoldingRegisters[HR_STATUS].ActValue;
+    /* Retain sampling sequence; publish live signals through the model only. */
+    amp_model.fault.validity &= (uint16_t)~0x03C0u;
+    if (g_occ) amp_model.fault.validity |= 0x0100u;
+    if (g_tflg) amp_model.fault.validity |= 0x0200u;
 
-    // clear only fields we own
-    status &= ~(HR_STATUS_OCCUPIED_BIT | HR_STATUS_THERMAL_BIT | HR_STATUS_BEMF_MASK);
-
-    // set from latest sampled values
-    if (g_occ)  status |= HR_STATUS_OCCUPIED_BIT;
-    if (g_tflg) status |= HR_STATUS_THERMAL_BIT;
-    status |= (g_bemf & HR_STATUS_BEMF_MASK);
-
-    PetitHoldingRegisters[HR_STATUS].ActValue = status;
-    /* End of update of HR_STATUS */
-
-    /*check data to master*/
-//    PetitHoldingRegisters[HR_CONFIG_ID_PWM].ActValue++;
-//    
-//    PetitHoldingRegisters[HR_ACCEL_PARAMS].ActValue =
-//    (g_occ ? 1 : 0) |
-//    (LED_OCC_LAT ? 2 : 0);
-    /* end of check */
-    
     if (ADCON0bits.ADGO==0){                                                    // extra check if conversion is done
     
         switch(sequence){
@@ -224,7 +210,8 @@ uint16_t ADCxIO (){
             case 3:
                 if (ADCON0bits.ADGO==0){
                     /* H-bridge fuse voltage */
-                    PetitHoldingRegisters[HR_FUSE_VOLTAGE].ActValue = ADCC_GetConversionResult();
+                    amp_model.voltage = ADCC_GetConversionResult();
+                    amp_model.fault.validity &= (uint16_t)~0x0003u;
                     sequence++;
                     Return_Val = true;
                 }            
@@ -238,7 +225,8 @@ uint16_t ADCxIO (){
             case 5: 
                 if (ADCON0bits.ADGO==0){
                     /* H-bridge temperature */
-                    PetitHoldingRegisters[HR_HBRIDGE_TEMPERATURE].ActValue = ADCC_GetConversionResult();
+                    amp_model.temperature = ADCC_GetConversionResult();
+                    amp_model.fault.validity &= (uint16_t)~0x000Cu;
                     sequence++;
                     Return_Val = true;
                 }            
@@ -252,7 +240,8 @@ uint16_t ADCxIO (){
             case 7:
                 if (ADCON0bits.ADGO==0){
                     /* H-bridge current */
-                    PetitHoldingRegisters[HR_HBRIDGE_CURRENT].ActValue = ADCC_GetConversionResult();
+                    amp_model.current = ADCC_GetConversionResult();
+                    amp_model.fault.validity &= (uint16_t)~0x0030u;
                     sequence = 2;
                     Return_Val = true;
                 }            
