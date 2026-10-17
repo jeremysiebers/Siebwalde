@@ -31,6 +31,8 @@ static uint8_t AmpAdapter_Result(uint16_t addr, uint8_t result)
 void AmpAdapter_Init(void)
 {
     PetitHoldingRegisters[HR_IDENTITY].ActValue = AMP_IDENTITY;
+    PetitHoldingRegisters[HR_FW_VERSION].ActValue = (AMP_FW_MAJOR << 8) | AMP_FW_MINOR;
+    PetitHoldingRegisters[HR_FW_VERSION_PATCH_PROTO].ActValue = (AMP_FW_PATCH << 8) | AMP_PROTOCOL_VERSION;
     PetitHoldingRegisters[HR_WRITE_RESULT].ActValue = amp_model.write_result;
     AmpAdapter_EncodeWritable();
     AmpAdapter_Refresh();
@@ -52,7 +54,7 @@ void AmpAdapter_AddressAssigned(void)
 
 uint8_t AmpAdapter_ValidateWrite(uint16_t addr, uint16_t v)
 {
-    if (addr >= 21u) return AMP_WRITE_RANGE;
+    if (addr >= 23u) return AMP_WRITE_RANGE;
     if (addr >= HR_IDENTITY) return AMP_WRITE_READ_ONLY;
     switch (addr) {
     case HR_COMMAND:

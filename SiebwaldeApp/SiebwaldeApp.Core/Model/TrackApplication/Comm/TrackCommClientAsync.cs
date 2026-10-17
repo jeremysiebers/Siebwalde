@@ -234,6 +234,17 @@ namespace SiebwaldeApp.Core
                 // In de oude TrackIOHandle werd trackControllerCommands.ReceivedMessage gezet :contentReference[oaicite:7]{index=7}
                 _variables.trackControllerCommands.ReceivedMessage = msg;
 
+                // Surface the PIC32 semantic version from a GET_CONTROLLER_VERSION (113) reply:
+                // sender=CONTROLLER(10), data[0]=echo 113, data[1..3]=MAJOR/MINOR/PATCH,
+                // data[4]=PROTOCOL_VERSION, data[5]=0, data[6..N]=build date. Informational only.
+                if (sender == TaskId.CONTROLLER && taskCommand == TrackCommand.GET_CONTROLLER_VERSION &&
+                    msg.Payload is { Length: >= 3 } payload)
+                {
+                    _variables.trackControllerCommands.ControllerVersion = new TrackControllerVersion(
+                        taskState, taskMessage, payload[0], payload[1],
+                        DecodeBuildDate(payload, 3));
+                }
+
                 ControlMessageReceived?.Invoke(
                     this,
                     new ControlMessageEventArgs(msg));
@@ -245,6 +256,14 @@ namespace SiebwaldeApp.Core
         }
 
         // NEW: periodic publish of current container data to UI (no bus I/O)
+        private static string? DecodeBuildDate(byte[] payload, int offset)
+        {
+            int end = offset;
+            while (end < payload.Length && payload[end] != 0) end++;
+            if (end == offset) return null;
+            return System.Text.Encoding.ASCII.GetString(payload, offset, end - offset);
+        }
+
         private void PublishTimerElapsed(object? sender, ElapsedEventArgs e)
         {
             if (_publishTickInProgress)

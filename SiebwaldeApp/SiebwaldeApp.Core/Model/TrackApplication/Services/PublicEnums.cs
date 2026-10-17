@@ -123,6 +123,7 @@
         public const byte HOST_HEARTBEAT = 110; // payload: u16 little-endian sequence
         public const byte GLOBAL_STOP_STATE = 111; // sender 10, DONE=7; see GlobalStopStatusMessage
         public const byte REARM_GLOBAL_STOP = 112; // R8-2: PIC32 LATCHED -> ARMED (no auto re-arm)
+        public const byte GET_CONTROLLER_VERSION = 113; // sender 10; MAJOR.MINOR.PATCH + protocol + build date
 
         /* FWHANDLER COMMANDS */
         public const byte EXEC_FW_STATE_RECEIVE_FW_FILE = 120;

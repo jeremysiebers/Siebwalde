@@ -3,7 +3,7 @@
 #include "amp_core.h"
 #include "modbus/General.h"
 #include "petit_shim.h"
-PetitRegStructure PetitHoldingRegisters[21];
+PetitRegStructure PetitHoldingRegisters[23];
 static uint16_t peripheral_duty;
 static bool peripheral_brake, peripheral_enable;
 static unsigned checks;
@@ -57,6 +57,8 @@ int main(void)
     CHECK(amp_model.status.state == AMP_ST_NOT_INITIALIZED);
     CHECK(peripheral_duty == 399u && amp_model.status.applied_pwm == 399u);
     CHECK(PetitHoldingRegisters[HR_IDENTITY].ActValue == 0xF101u);
+    CHECK(PetitHoldingRegisters[HR_FW_VERSION].ActValue == 0x0100u);
+    CHECK(PetitHoldingRegisters[HR_FW_VERSION_PATCH_PROTO].ActValue == 0x0001u);
     CHECK(write_reg(HR_CONTROL, HR_CONTROL_ENABLE | HR_CONTROL_LEASE) == 0);
     CHECK(write_reg(HR_COMMAND, 799u) == 0);
     tick();
@@ -82,7 +84,7 @@ int main(void)
     CHECK(amp_model.pending.watchdog_ms == saved.watchdog_ms && amp_model.pending.accel_step == 2u);
     CHECK(!(amp_model.fault.causes & AMP_FAULT_CONFIG));
     CHECK(PetitHoldingRegisters[HR_WRITE_RESULT].ActValue == 0x8101u);
-    for (i = 7u; i < 21u; i++) {
+    for (i = 7u; i < 23u; i++) {
         previous = PetitHoldingRegisters[i].ActValue;
         CHECK(write_reg((uint16_t)i, 0u) == AMP_WRITE_READ_ONLY);
         if (i != HR_WRITE_RESULT) CHECK(PetitHoldingRegisters[i].ActValue == previous);

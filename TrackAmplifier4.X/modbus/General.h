@@ -6,6 +6,7 @@
 #include "Interrupts.h"
 #include "PetitModbus.h"
 #endif
+#include "../version.h"
 /* Frozen R8 map. Pure wire definitions, usable by the host-shim tests. */
 #define HR_COMMAND 0u
 #define HR_CONTROL 1u
@@ -28,6 +29,8 @@
 #define HR_MEAS_CURRENT 18u
 #define HR_MSGS_RX 19u
 #define HR_MSGS_TX 20u
+#define HR_FW_VERSION 21u
+#define HR_FW_VERSION_PATCH_PROTO 22u
 #define HR_PWM_SETPOINT_MASK 0x03FFu
 #define HR_PWM_DIR_BIT 0x0400u
 #define HR_PWM_BRAKE_BIT 0x0800u
@@ -39,6 +42,5 @@
 #define HR_CONTROL_CLEAR 0x1000u
 #define HR_CONTROL_RESET 0x0800u
 #define HR_CONTROL_DISABLE 0x0400u
-#define AMP_IDENTITY 0xF101u
 extern volatile unsigned int Timer1_Tick_Counter;
 #endif

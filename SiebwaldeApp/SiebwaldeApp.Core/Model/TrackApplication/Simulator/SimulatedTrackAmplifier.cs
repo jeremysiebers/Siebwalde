@@ -4,7 +4,7 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
 {
     /// <summary>
     /// Deterministic, software-only model of one PIC18 track amplifier per the frozen Phase-1
-    /// wire contract (docs/amplifier-system-architecture.md §R8-4). It owns the 21 holding
+    /// wire contract (docs/amplifier-system-architecture.md §R8-4). It owns the 23 holding
     /// registers plus the dynamic control/protection state the contract requires:
     /// identity, two-phase config + APPLY, per-register write validation + write-result,
     /// <c>INIT_DONE</c>/<c>CONFIG_OK</c> gating, the applied-PWM ramp (distinct from the command
@@ -59,6 +59,9 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
             SlaveNumber = slaveNumber;
             _registers[TrackAmplifierRegisters.Identity] = identity;
             _registers[TrackAmplifierRegisters.SwChecksum] = firmwareChecksum;
+            // Firmware semantic version (mirrors PIC18 AmpAdapter_Init): 1.0.0, protocol 0x01.
+            _registers[TrackAmplifierRegisters.FwVersionMajorMinor] = 0x0100;
+            _registers[TrackAmplifierRegisters.FwVersionPatchProtocol] = 0x0001;
             _state = 0; // NOT_INITIALIZED
             RefreshState(); // seeds HR8 (ID_SET) + HR12/13/14 (neutral)
         }
