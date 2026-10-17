@@ -98,6 +98,7 @@ $ProjectDefs = [ordered]@{
         ArtifactRel     = 'dist/{conf}/production/TrackAmplifier4.X.production.hex'
         RequiresHarmony = $false
         Checksum        = $true
+        VersionHeader   = 'TrackAmplifier4.X\version.h'
     }
     'TrackBackplane2' = [ordered]@{
         DefaultConf     = 'default'
@@ -146,6 +147,7 @@ $ProjectDefs = [ordered]@{
         ArtifactRel     = 'dist/{conf}/production/TrackController5.X.production.hex'
         RequiresHarmony = $true
         Checksum        = $false
+        VersionHeader   = 'TrackController5\firmware\src\version.h'
     }
 }
 
@@ -331,6 +333,34 @@ function Get-DistHashes {
     })
 }
 
+function Get-DefineValue {
+    # Extracts an integer #define by its name suffix (e.g. '_FW_MAJOR', 'PROTOCOL_VERSION').
+    param([string]$Content, [string]$Suffix)
+    $m = [regex]::Match($Content, '(?m)^\s*#define\s+\w*' + $Suffix + '\s+([0-9A-Fa-fxXuUlL]+)')
+    if (-not $m.Success) { throw "version header missing '#define *$Suffix'" }
+    $raw = $m.Groups[1].Value -replace '[uUlL]', ''
+    if ($raw -match '^0[xX]') { return [Convert]::ToInt32($raw.Substring(2), 16) }
+    return [Convert]::ToInt32($raw, 10)
+}
+
+function Get-FirmwareVersion {
+    # Parses an authoritative committed version.h (major/minor/patch/protocol).
+    param([string]$Path)
+    if (-not (Test-Path -LiteralPath $Path)) { throw "Version header not found: $Path" }
+    $content = Get-Content -LiteralPath $Path -Raw
+    $major = Get-DefineValue $content '_FW_MAJOR'
+    $minor = Get-DefineValue $content '_FW_MINOR'
+    $patch = Get-DefineValue $content '_FW_PATCH'
+    $proto = Get-DefineValue $content 'PROTOCOL_VERSION'
+    return [pscustomobject]@{
+        Major      = $major
+        Minor      = $minor
+        Patch      = $patch
+        Protocol   = $proto
+        Version    = ('{0}.{1}.{2}' -f $major, $minor, $patch)
+    }
+}
+
 # ---------------------------------------------------------------------------------
 # Pre-flight: git reality, tracked artefact baseline, toolchain presence.
 # ---------------------------------------------------------------------------------
@@ -446,6 +476,7 @@ foreach ($key in $targets) {
         DevicePack    = $def.Dfp
         Harmony       = $harmonyNote
         Status        = 'PASS'
+        GitShortRef   = $gitBefore.ShortSha
         Artifact = [ordered]@{
             SourcePath = $artifactTemp
             OutputPath = $artifactOut
@@ -454,6 +485,12 @@ foreach ($key in $targets) {
             Sha256     = $sha
         }
         Commands = $commands
+    }
+
+    if ($def.Contains('VersionHeader')) {
+        $ver = Get-FirmwareVersion -Path (Join-Path $RepoRoot $def.VersionHeader)
+        $entry['FirmwareVersion'] = $ver.Version
+        $entry['ProtocolVersion'] = ('0x{0:X2}' -f $ver.Protocol)
     }
 
     if ($def.Checksum) {

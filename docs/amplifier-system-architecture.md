@@ -864,7 +864,7 @@ Side-effect / idempotency: `APPLY_CONFIG` re-validates the (unchanged, re-seeded
 
 ### R8‑4. Final consolidated wire contract (SUPERSEDES ALL PRIOR REVISIONS)
 
-**Register map (21 holding registers).** `R/W` = writable/validated; `R` = read-only (write ⇒ exception 02 + write-result `read-only`). Reserved bits must be 0.
+**Register map (23 holding registers).** `R/W` = writable/validated; `R` = read-only (write ⇒ exception 02 + write-result `read-only`). Reserved bits must be 0. HR0–HR20 are the frozen Phase-1 map; HR21/HR22 are an **additive** firmware-versioning extension (`MAP_VERSION` stays `0x01`).
 
 | HR | Name | Acc | Final bit allocation |
 |---|---|---|---|
@@ -886,6 +886,8 @@ Side-effect / idempotency: `APPLY_CONFIG` re-validates the (unchanged, re-seeded
 | 15 | `HR_WRITE_RESULT` | R | 0–7 addr; 8–10 result (0/1/2/3/4); 15 retained. |
 | 16–18 | `HR_MEAS_VOLTAGE/TEMP/CURRENT` | R | raw ADC. |
 | 19–20 | `HR_MSGS_RX/TX` | R | counters. |
+| 21 | `HR_FW_VERSION` | R | firmware semantic version `(MAJOR<<8)&#124;MINOR` (1.0 → `0x0100`). |
+| 22 | `HR_FW_VERSION_PATCH_PROTO` | R | `(PATCH<<8)&#124;PROTOCOL_VERSION` (patch 0, protocol `0x01` → `0x0001`). |
 
 **PWM range:** duty 0..799, neutral 399, forward 400..799, reverse 398..1 (applied); wire 10-bit `0x03FF`; **800..1023 rejected**; requested 0 legal (clamped to applied 1). Direction in the duty value.
 
@@ -916,6 +918,8 @@ No BLOCKING. No new PO decision. The two existing gates remain and neither block
 **Frozen:** 2026-10-16 (Product Owner authorization). **Normative contract:** §R8‑4 (Final consolidated wire contract) — this is the single frozen authority for all wire-visible addresses, bit allocations, encodings, command/status semantics, and the movement-permission lease. §R8‑1 (HR1 command-strobe), §R8‑2 (release/re-arm), §R8‑3 (host-loss budget) are frozen normative semantics. All earlier revision text/addenda (Rev 2–7) are historical and must not override the frozen §R8‑4.
 
 **Frozen (wire-visible):** 21-register map (HR0–HR20) with all bit allocations; PWM 0..799/neutral 399/800..1023-rejected; HR7 identity (MAP_VERSION 0x01, DEVICE_CLASS 1, capability bits) + two-fresh-read disambiguation; HR1 per-bit semantics (ENABLE/DISABLE/MOTION_PERMISSION set-only, APPLY/CLEAR_FAULT/RESET_COUNTERS edge 0→1); two-phase pending/active APPLY; movement-permission lease (HR1 bit14, 500/100, LEASE_EXPIRED, INHIBITED); STOP_REQUEST `399|0x1000`; EMO `0x8000`; REARM 112; state priority; stop-completion evidence; status/fault/validity/write-result encoding.
+
+**Additive firmware-versioning extension (semantic versioning, `MAP_VERSION` unchanged at `0x01`):** HR21 `HR_FW_VERSION` = `(MAJOR<<8)|MINOR` (first release `1.0.0` → `0x0100`), HR22 `HR_FW_VERSION_PATCH_PROTO` = `(PATCH<<8)|PROTOCOL_VERSION` (`0x0001`), read-only, served by FC03. PIC32 also gains command 113 `GET_CONTROLLER_VERSION` (reply: `data[0]`=echo 113, `data[1..3]`=MAJOR/MINOR/PATCH, `data[4]`=PROTOCOL_VERSION, `data[5]`=0, `data[6..N]`=build-date string). This does not change any HR0–HR20 meaning.
 
 **NOT frozen (tunable, operational — separate from wire format):** `WATCHDOG_MS` (250 ms prototype placeholder; full-complement value = R5‑C measurement gate); ramp steps `2/2/8`; `MOTION_LEASE_TIMEOUT_MS=500` / `MOTION_LEASE_RENEWAL_MS=100` (tunable firmware constants); F3 electrical-limit values (Phase 2).
 

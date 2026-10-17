@@ -26,12 +26,12 @@ enum SLAVE{
     MESSAGE2        = 2,
     MESSAGE3        = 3,
     
-    SIPBOXSIZE      = 9,                                                        // HR4..HR20, two per read (last single)
+    SIPBOXSIZE      = 10,                                                       // HR4..HR22, two per read (last single)
     SIP1            = 1,
     SIP2            = 2,
     SIP3            = 3,
     SIP4            = 4,
-    SIP5 = 5, SIP6 = 6, SIP7 = 7, SIP8 = 8, SIP9 = 9,
+    SIP5 = 5, SIP6 = 6, SIP7 = 7, SIP8 = 8, SIP9 = 9, SIP10 = 10,
 };
 
 static REGISTER_PROCESSING          Rcd[MAILBOXRCD];                            // message mailbox
@@ -384,11 +384,11 @@ bool SendNextMessage(void)
                         SLAVExCOMMUNICATIONxHANDLER();
                         break;
 
-                    case SIP5: case SIP6: case SIP7: case SIP8: case SIP9:
+                    case SIP5: case SIP6: case SIP7: case SIP8: case SIP9: case SIP10:
                         Data.SlaveAddress = ProcessSlave;
                         Data.Direction = READ;
                         Data.StartRegister = HR_REQUESTED_PWM + 2u * (SlaveInfoProcessor - SIP5);
-                        Data.NoOfRegisters = SlaveInfoProcessor == SIP9 ? 1 : 2;
+                        Data.NoOfRegisters = SlaveInfoProcessor == SIP10 ? 1 : 2;
                         SLAVExCOMMUNICATIONxHANDLER();
                         break;
 

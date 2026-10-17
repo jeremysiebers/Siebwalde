@@ -105,6 +105,8 @@ extern "C" {
 #define HR_MEAS_CURRENT 18u
 #define HR_MSGS_RX 19u
 #define HR_MSGS_TX 20u
+#define HR_FW_VERSION 21u
+#define HR_FW_VERSION_PATCH_PROTO 22u
 #define HR_STATE_STOPPING_ACTIVE 0x0800u
 #define HR_STATE_INHIBITED 0x8000u
 #define HR_APPLIED_PWM_MASK 0x03ffu
@@ -190,6 +192,7 @@ typedef enum
      * 2=latched-host-initiated, 3=armed. Sender=CONTROLLER, state=DONE. */
     GLOBAL_STOP_STATE                                          = 111,
     REARM_GLOBAL_STOP                                          = 112,
+    GET_CONTROLLER_VERSION                                     = 113,
 						
 	/* FWHANDLER COMMANDS */						
     EXEC_FW_STATE_RECEIVE_FW_FILE         						= 120,

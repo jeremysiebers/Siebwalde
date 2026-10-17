@@ -138,7 +138,7 @@ namespace SiebwaldeApp.Core
 
             foreach (TrackAmplifierItem amplifier in _variables.trackAmpItems)
             {
-                if (checksum != amplifier.HoldingReg[11] &&
+                if (checksum != amplifier.HoldingReg[TrackAmplifierRegisters.SwChecksum] &&
                     amplifier.SlaveDetected == 1 &&
                     amplifier.SlaveNumber > 0 &&
                     amplifier.SlaveNumber < 51)
@@ -147,7 +147,7 @@ namespace SiebwaldeApp.Core
 
                     IoC.Logger.Log(
                         "State.FlashFwTrackamplifiers => Slave " + amplifier.SlaveNumber +
-                        " has checksum = 0x" + amplifier.HoldingReg[11].ToString("X") +
+                        " has checksum = 0x" + amplifier.HoldingReg[TrackAmplifierRegisters.SwChecksum].ToString("X") +
                         " and requires flashing.",
                         _loggerInstance);
                 }

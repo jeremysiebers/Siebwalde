@@ -454,7 +454,7 @@ void HandleMPetitodbusWriteMultipleRegisters(void)
     if (!Petit_NumberOfRegisters || Petit_StartAddress >= NUMBER_OF_HOLDING_PETITREGISTERS ||
         Petit_NumberOfRegisters > NUMBER_OF_HOLDING_PETITREGISTERS - Petit_StartAddress) {
         /* Record invalid address without indexing the mirror (including broadcasts). */
-        AmpAdapter_OnWrite(Petit_StartAddress >= NUMBER_OF_HOLDING_PETITREGISTERS ? Petit_StartAddress : 21u, 0u, broadcast);
+        AmpAdapter_OnWrite(Petit_StartAddress >= NUMBER_OF_HOLDING_PETITREGISTERS ? Petit_StartAddress : NUMBER_OF_HOLDING_PETITREGISTERS, 0u, broadcast);
         HandlePetitModbusError(PETIT_ERROR_CODE_02, PETITMODBUS_WRITE_MULTIPLE_REGISTERS);
         return;
     }

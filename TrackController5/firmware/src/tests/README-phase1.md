@@ -29,8 +29,8 @@ harness outside the source tree. No command above flashes or connects hardware.
 - `slavehandler.c::SendNextMessage` schedules the direct address-0 HR1 `0x4000`
   broadcast when the 100 ms deadline is due and transport is ready, ahead of the
   mailbox. While latched, no renewal or host amplifier write is dispatched.
-  Cyclic FC03 polling resumes after stop delivery finishes. HR4..HR20 rotates in
-  nine SIP cases; HR20 is a single-register request. SLAVEINFO grows through
+  Cyclic FC03 polling resumes after stop delivery finishes. HR4..HR22 rotates in
+  ten SIP cases; HR22 is a single-register request. SLAVEINFO grows through
   `NUMBER_OF_HOLDING_PETITREGISTERS`, without an added struct field.
 - `SERVICExGLOBALxSTOP` owns stop transactions and their `MbCommError` results.
   There are at most three stop-write attempts per amplifier. ACK is not completion:
@@ -102,7 +102,7 @@ with MSVC `/W4 /WX`; `phase1_cases.h` supplies cases. Timer/UART/ACK delivery is
 mocked, but transaction submission, FC03 parsing, compatibility, configure/enable,
 poll traversal, latch/watchdog, lease scheduling, stop retry and confirmation
 decisions execute production C. Cases cover legacy counter `0x1101 -> 0x1102`,
-cached identity rejection, read timeouts, full 21-register traversal, full-mailbox
+cached identity rejection, read timeouts, full 23-register traversal, full-mailbox
 lease priority, 50 amplifiers with three timeouts each, malformed FC03, confirmation
 deadline, unsupported applied capability, EMO, heartbeat rollover and re-arm. A2
 cases cover sparse/empty/full detected lists, every result code, final-byte padding,

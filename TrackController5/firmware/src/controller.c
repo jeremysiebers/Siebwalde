@@ -58,6 +58,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "mbus.h"
 #include "slavehandler.h"
 #include "enums.h"
+#include "version.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -113,6 +114,28 @@ static void LATCHxGLOBALxSTOP(uint8_t reason, uint16_t hr0)
     GlobalStopReason = reason;
     ENQUEUExGLOBALxSTOP(hr0);
     REPORTxGLOBALxSTOPxSTATE();
+}
+
+/* Reply header=HEADER, command=CONTROLLER, data[0]=echo 113, data[1..3]=MAJOR/MINOR/PATCH,
+ * data[4]=PROTOCOL_VERSION, data[5]=0, data[6..N]=CTRL_BUILD_DATE (null-terminated string). */
+static void REPLYxCONTROLLERxVERSION(void)
+{
+    udpTrans_t frame = {0};
+    const char *build = CTRL_BUILD_DATE;
+    unsigned i = 0;
+    frame.header = HEADER;
+    frame.command = CONTROLLER;
+    frame.data[0] = GET_CONTROLLER_VERSION;
+    frame.data[1] = CTRL_FW_MAJOR;
+    frame.data[2] = CTRL_FW_MINOR;
+    frame.data[3] = CTRL_FW_PATCH;
+    frame.data[4] = CTRL_PROTOCOL_VERSION;
+    frame.data[5] = 0u;
+    while (build[i] && i < (sizeof(frame.data) - 6u)) {
+        frame.data[6u + i] = (uint8_t)build[i];
+        ++i;
+    }
+    PUTxDATAxINxSENDxMAILxBOX(&frame);
 }
 
 static void CHECKxHOSTxAUTHORITY(void)
@@ -218,7 +241,7 @@ void CONTROLLER_Initialize ( void )
     LOG_Push("\033[2J\033[1;1H");//clear terminal
     LOG_Push("--------------------------------------------------------------------------------");    
     LOG_Push("Controller\t: Starting Siebwalde TrackController.");
-    LOG_Push("Controller\t: Application created " __DATE__ " " __TIME__ ".");
+    LOG_Push("Controller\t: Application created " CTRL_BUILD_DATE ".");
 }
 
 
@@ -289,6 +312,11 @@ void CONTROLLER_Tasks ( void )
                 case REARM_GLOBAL_STOP:
                 {
                     CONTROLLERxHANDLExSAFETYxCOMMAND(EthernetRecvData);
+                    break;
+                }
+                case GET_CONTROLLER_VERSION:
+                {
+                    REPLYxCONTROLLERxVERSION();
                     break;
                 }
                 case CLIENT_CONNECTION_REQUEST:

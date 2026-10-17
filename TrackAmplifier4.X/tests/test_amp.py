@@ -41,7 +41,7 @@ transport_prefix = r'''
 #include "modbus/General.h"
 #include "modbus/modbushooks.h"
 #include "tests/petit_shim.h"
-#define NUMBER_OF_HOLDING_PETITREGISTERS 21u
+#define NUMBER_OF_HOLDING_PETITREGISTERS 23u
 #define PETITMODBUS_READ_HOLDING_REGISTERS 3
 #define PETITMODBUS_WRITE_SINGLE_REGISTER 6
 #define PETITMODBUS_WRITE_MULTIPLE_REGISTERS 16
