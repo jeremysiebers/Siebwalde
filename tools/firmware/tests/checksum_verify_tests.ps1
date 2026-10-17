@@ -4,8 +4,9 @@
 
 .DESCRIPTION
     Loads the independent Intel HEX verification library (checksum-verify.ps1), verifies a
-    real built Offset HEX (positive case: checksum must equal 0xE906), then generates a set
-    of deliberately corrupted HEX fixtures and asserts the verify step REJECTS each one.
+    real built Offset HEX (positive case: the linker-embedded checksum word must equal an
+    independent word-sum recompute — the value is image-specific, not hardcoded), then
+    generates deliberately corrupted HEX fixtures and asserts the verify step REJECTS each.
 
     The fixture generator recomputes the expected checksum with the address-driven
     Get-Pic18RecomputedChecksum, an INDEPENDENT code path from the row-based
@@ -109,8 +110,12 @@ Write-Host ("HEX: {0}" -f $HexPath)
 Write-Host "Positive case (real built HEX):"
 $embedded   = Get-Pic18EmbeddedChecksum -Path $HexPath
 $recomputed = Get-Pic18RecomputedChecksum -Path $HexPath
-Assert-True ($embedded -eq 0xE906) ("embedded checksum word == 0xE906 (got 0x{0:X4})" -f $embedded)
-Assert-True ($recomputed -eq 0xE906) ("independent recompute == 0xE906 (got 0x{0:X4})" -f $recomputed)
+# The durable contract is self-consistency: the linker-embedded word at 0x7FFE/0x7FFF
+# must equal an independent word-sum over 0x800..0x7FFD. The concrete value is
+# image-specific (0xE906 for current source, 0x251F for the legacy F1 baseline), so
+# assert the invariant rather than a hardcoded literal.
+Assert-True ($embedded -eq $recomputed) ("embedded checksum word == independent recompute (embedded=0x{0:X4}, recomputed=0x{1:X4})" -f $embedded, $recomputed)
+Write-Host ("Positive: embedded=0x{0:X4}, recomputed=0x{1:X4} (self-consistent)" -f $embedded, $recomputed)
 try {
     $v = Test-Pic18ChecksumVerification -Path $HexPath
     Assert-True $v.Pass "verify step accepted the real built HEX"
