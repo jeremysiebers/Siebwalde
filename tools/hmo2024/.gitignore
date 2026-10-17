@@ -1,0 +1,6 @@
+# Python bytecode and caches
+__pycache__/
+*.pyc
+
+# Transient/one-off local verification output (not durable evidence)
+tmp/
