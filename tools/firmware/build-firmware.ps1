@@ -51,6 +51,9 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+# Independent Intel HEX structural + PIC18 checksum verification library.
+. (Join-Path $PSScriptRoot 'checksum-verify.ps1')
+
 # ---------------------------------------------------------------------------------
 # Pinned toolchain matrix (absolute paths).
 # ---------------------------------------------------------------------------------
@@ -506,6 +509,22 @@ foreach ($key in $targets) {
             RecordCount            = $range.RecordCount
             RecordsBelowBootOffset = $range.RecordsBelowBootOffset
         }
+
+        # 5b) Independent VERIFY step (fail-closed). Parse the final Intel HEX, validate
+        #     the Intel HEX record checksums, reject overlap/duplicate rows and any
+        #     program-memory byte outside 0x800..0x7FFF, require 0x7FFE/0x7FFF, extract
+        #     the linker-embedded checksum word, recompute over 0x800..0x7FFD and assert
+        #     equality. Any failure throws (non-zero exit) and no manifest is written, so
+        #     ARTIFACT_VERIFIED is never marked true.
+        $entry['ARTIFACT_VERIFIED'] = $false
+        $verify = Test-Pic18ChecksumVerification -Path $artifactTemp
+        if ($verify.EmbeddedChecksum -ne $chk) {
+            throw ("PIC18 checksum VERIFY FAILED for {0}: linker-embedded word 0x{1:X4} != Get-CSharpHexChecksum 0x{2:X4}." -f $artifactTemp, $verify.EmbeddedChecksum, $chk)
+        }
+        Write-Log ("PIC18 checksum VERIFY PASS: embedded=0x{0:X4}, recomputed=0x{1:X4}, Get-CSharpHexChecksum=0x{2:X4}." -f $verify.EmbeddedChecksum, $verify.RecomputedChecksum, $chk)
+        $entry['ChecksumVerified'] = $true
+        $entry['ChecksumAddress']  = ('0x{0:X4}' -f $verify.ChecksumAddress)
+        $entry['ARTIFACT_VERIFIED'] = $true
     }
 
     [void]$manifestBuilds.Add($entry)

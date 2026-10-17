@@ -117,11 +117,11 @@ static void LATCHxGLOBALxSTOP(uint8_t reason, uint16_t hr0)
 }
 
 /* Reply header=HEADER, command=CONTROLLER, data[0]=echo 113, data[1..3]=MAJOR/MINOR/PATCH,
- * data[4]=PROTOCOL_VERSION, data[5]=0, data[6..N]=CTRL_BUILD_DATE (null-terminated string). */
+ * data[4]=PROTOCOL_VERSION, data[5]=0, data[6..N]=CTRL_RELEASE_TIMESTAMP (null-terminated string). */
 static void REPLYxCONTROLLERxVERSION(void)
 {
     udpTrans_t frame = {0};
-    const char *build = CTRL_BUILD_DATE;
+    const char *build = CTRL_RELEASE_TIMESTAMP;
     unsigned i = 0;
     frame.header = HEADER;
     frame.command = CONTROLLER;
@@ -241,7 +241,7 @@ void CONTROLLER_Initialize ( void )
     LOG_Push("\033[2J\033[1;1H");//clear terminal
     LOG_Push("--------------------------------------------------------------------------------");    
     LOG_Push("Controller\t: Starting Siebwalde TrackController.");
-    LOG_Push("Controller\t: Application created " CTRL_BUILD_DATE ".");
+    LOG_Push("Controller\t: Application created " CTRL_RELEASE_TIMESTAMP ".");
 }
 
 

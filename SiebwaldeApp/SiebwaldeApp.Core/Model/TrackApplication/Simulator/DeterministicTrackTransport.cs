@@ -96,6 +96,14 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
         private const byte Footer = 0x55;
         private const byte WriteDirection = 0xAA;   // Enums.WRITE
 
+        // Simulated PIC32 controller identity, mirroring TrackController5/firmware/src/version.h
+        // (CTRL_FW_MAJOR/MINOR/PATCH, CTRL_PROTOCOL_VERSION, CTRL_RELEASE_TIMESTAMP).
+        private const byte ControllerFwMajor = 1;
+        private const byte ControllerFwMinor = 0;
+        private const byte ControllerFwPatch = 0;
+        private const byte ControllerProtocolVersion = 0x01;
+        private const string ControllerReleaseTimestamp = "2026-10-17";
+
         private readonly TrackSimulatorConfig _config;
         private readonly Dictionary<byte, SimulatedTrackAmplifier> _amplifiers = new();
         private readonly HashSet<byte> _detected = new();
@@ -400,6 +408,10 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
                     writer.TryWrite(BuildControlFrame(TaskId.CONTROLLER, TaskStates.CONNECTED, TaskStates.DONE));
                     break;
 
+                case TrackCommand.GET_CONTROLLER_VERSION: // 113
+                    writer.TryWrite(BuildControllerVersionFrame());
+                    break;
+
                 case TrackCommand.EXEC_MBUS_STATE_RESET: // 107
                     writer.TryWrite(BuildControlFrame(TaskId.MBUS, EnumMbusStatus.MBUS_STATE_RESET, TaskStates.DONE));
                     break;
@@ -531,6 +543,27 @@ namespace SiebwaldeApp.Core.TrackApplication.Simulator
 
         private static byte[] BuildControlFrame(byte sender, byte taskCommand, byte taskState)
             => new byte[] { Header, sender, taskCommand, taskState, 0x00 };
+
+        /// <summary>
+        /// Builds the <c>GET_CONTROLLER_VERSION</c> (113) reply frame the PIC32 master emits,
+        /// mirroring <c>REPLYxCONTROLLERxVERSION</c> in controller.c:
+        /// <c>[HEADER, CONTROLLER, 113, MAJOR, MINOR, PATCH, PROTOCOL, 0, build-date..., 0]</c>.
+        /// </summary>
+        private static byte[] BuildControllerVersionFrame()
+        {
+            var build = System.Text.Encoding.ASCII.GetBytes(ControllerReleaseTimestamp);
+            var frame = new byte[8 + build.Length + 1]; // +1 null terminator (already zero)
+            frame[0] = Header;
+            frame[1] = TaskId.CONTROLLER;
+            frame[2] = TrackCommand.GET_CONTROLLER_VERSION;
+            frame[3] = ControllerFwMajor;
+            frame[4] = ControllerFwMinor;
+            frame[5] = ControllerFwPatch;
+            frame[6] = ControllerProtocolVersion;
+            frame[7] = 0; // reserved
+            Array.Copy(build, 0, frame, 8, build.Length);
+            return frame;
+        }
 
         /// <summary>
         /// Builds the Amendment A2 <c>GLOBAL_STOP_STATE</c> (111) frame the PIC32 emits on stop

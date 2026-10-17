@@ -463,6 +463,7 @@ namespace SiebwaldeApp.Integration
             var steps = new IInitializationStep[]
             {
                 new ConnectToEthernetTargetStep(_trackCommClient, _trackVariables, _loggerInstance),
+                new QueryControllerVersionStep(_trackCommClient, _trackVariables, _loggerInstance),
                 new ResetAllSlavesStep(_trackCommClient, _trackVariables, _loggerInstance),
                 new DataUploadStep(_trackCommClient, _trackVariables, _loggerInstance),
                 new DetectSlavesStep(_trackCommClient, _trackVariables, _loggerInstance),
