@@ -1,6 +1,8 @@
 # Amplifier Phase-1 Hardware Bring-Up — Preflight (revised)
 
-**Status:** Preflight. **No firmware flashing authorized yet.** This documents the historical artifacts, recovery routes, compatibility matrix and migration order so deployment is safe once authorized.
+> **CURRENT-STATUS SUPERSESSION NOTE (2026-10-18):** the four blockers listed below are **historical** and no longer active. Baseline-0 PIC32 `A90E44…` is now **Git-backed** and its actual running content was **readback-matched** (100 % over 267,316 populated bytes). PIC32 1.0.0 (`6CEC61D4…`) completed a real ICD3 **flash → rollback → reflash** cycle (each "Programming/Verify complete"). A bounded, scoped **PO standing authorization** for isolated prototype PIC32-ICD3 and PIC18-bootloader flash/verify/rollback now exists. **PENDING:** PIC32 command 113 application readback, and the first PIC18 hardware flash. PR #47/#48 are OPEN (merge not authorized). See `docs/firmware-flash-recovery-technical-reference.md` for the current authoritative cross-layer reference. The historical chronology below is preserved as-is.
+
+**Status:** Preflight (historical). **No firmware flashing authorized yet.** This documents the historical artifacts, recovery routes, compatibility matrix and migration order so deployment is safe once authorized.
 
 ## 1. Historical HEX inventory (verified)
 

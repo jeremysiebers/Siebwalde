@@ -1,5 +1,7 @@
 # Firmware Development & Toolchain Readiness (PIC18 / PIC32)
 
+> **Current cross-layer reference:** `docs/firmware-flash-recovery-technical-reference.md` (2026-10-18) is now the authoritative reference for firmware flashing, recovery, baselines and hardware bring-up. The F1 build/inventory evidence below is preserved as **historical**; the later PIC32 ICD3 round-trip, command-113 and PIC18 flash facts live in the new reference.
+
 **Status:** F1 increment (firmware baseline restore + build infrastructure) implemented on
 top of the initial ANALYSIS. The TrackAmplifier4.X source was restored to the last working
 pre-refactor baseline; no hardware or existing artifact was modified and the static
