@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using SiebwaldeApp.Core;
@@ -9,12 +10,12 @@ namespace SiebwaldeApp.Core.Tests
     public class AmplifierPhase1MapTests
     {
         [Fact]
-        public void SlaveInfoRoundTrip_PreservesAll21RegistersAndTrailer()
+        public void SlaveInfoRoundTrip_PreservesAll23RegistersAndTrailer()
         {
             var registers = Enumerable.Range(0, TrackAmplifierRegisters.Count)
                 .Select(i => (ushort)(0x1000 + i)).ToArray();
             var frame = TrackSlaveInfoFrame.Encode(3, 1, registers, 123, 456, 0x11223344, 5, 6);
-            Assert.Equal(59, frame.Length);
+            Assert.Equal(63, frame.Length);
             var variables = new TrackApplicationVariables();
             var client = new TrackCommClientAsync(new UnusedTransport(), variables);
             Parse(client, frame);
@@ -47,10 +48,10 @@ namespace SiebwaldeApp.Core.Tests
 
         [Theory]
         [InlineData(2)]
-        [InlineData(58)]
+        [InlineData(62)]
         public void WrongEnvelope_DoesNotEstablishReadback(int offset)
         {
-            var frame = TrackSlaveInfoFrame.Encode(1, 1, new ushort[21]);
+            var frame = TrackSlaveInfoFrame.Encode(1, 1, new ushort[23]);
             frame[offset] = 0;
             var variables = new TrackApplicationVariables();
             var client = new TrackCommClientAsync(new UnusedTransport(), variables);
@@ -69,18 +70,41 @@ namespace SiebwaldeApp.Core.Tests
             => Assert.Equal(expected, TrackAmplifierRegisters.HasCompatibleIdentityFields((ushort)value));
 
         [Fact]
-        public void DefaultRegisterArrays_Are21AndNotSharedBetweenAmplifiers()
+        public void DefaultRegisterArrays_Are23AndNotSharedBetweenAmplifiers()
         {
             var variables = new TrackApplicationVariables();
-            Assert.All(variables.trackAmpItems, item => Assert.Equal(21, item.HoldingReg.Length));
-            variables.trackAmpItems[1].HoldingReg[20] = 42;
-            Assert.Equal(0, variables.trackAmpItems[2].HoldingReg[20]);
-            Assert.Equal(21, new TrackAmplifierItem().HoldingReg.Length);
+            Assert.All(variables.trackAmpItems, item => Assert.Equal(23, item.HoldingReg.Length));
+            variables.trackAmpItems[1].HoldingReg[22] = 42;
+            Assert.Equal(0, variables.trackAmpItems[2].HoldingReg[22]);
+            Assert.Equal(23, new TrackAmplifierItem().HoldingReg.Length);
         }
 
         [Fact]
         public void Encoder_RejectsLegacyRegisterArray()
             => Assert.Throws<ArgumentException>(() => TrackSlaveInfoFrame.Encode(1, 1, new ushort[12]));
+
+        [Fact]
+        public void ControllerVersionReply_SurfacesVersionWithoutGating()
+        {
+            var variables = new TrackApplicationVariables();
+            var client = new TrackCommClientAsync(new UnusedTransport(), variables);
+
+            // sender=CONTROLLER(10), data[0]=echo 113, data[1..3]=MAJOR/MINOR/PATCH,
+            // data[4]=PROTOCOL_VERSION, data[5]=0, data[6..N]=build date.
+            var frame = new List<byte> { 0xAA, TaskId.CONTROLLER, TrackCommand.GET_CONTROLLER_VERSION, 1, 0, 0, 1, 0 };
+            frame.AddRange(System.Text.Encoding.ASCII.GetBytes("Oct 17 2026 12:34:56"));
+            frame.Add(0);
+            Parse(client, frame.ToArray());
+
+            var version = variables.trackControllerCommands.ControllerVersion;
+            Assert.NotNull(version);
+            Assert.Equal(1, version!.Value.Major);
+            Assert.Equal(0, version.Value.Minor);
+            Assert.Equal(0, version.Value.Patch);
+            Assert.Equal(1, version.Value.ProtocolVersion);
+            Assert.Equal("Oct 17 2026 12:34:56", version.Value.BuildDate);
+            Assert.Equal("1.0.0", version.Value.ToString());
+        }
 
         private static void Parse(TrackCommClientAsync client, byte[] frame)
             => typeof(TrackCommClientAsync).GetMethod("HandleNewData", BindingFlags.NonPublic | BindingFlags.Instance)!

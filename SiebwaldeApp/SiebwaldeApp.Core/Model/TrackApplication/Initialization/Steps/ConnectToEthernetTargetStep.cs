@@ -121,8 +121,8 @@
                     _loggerInstance);
 
                 // We want to continue with the next step in the sequence.
-                // The name "ResetAllSlaves" must correspond to another IInitializationStep.Name.
-                return InitStepResult.Next("ResetAllSlaves");
+                // The name "QueryControllerVersion" must correspond to another IInitializationStep.Name.
+                return InitStepResult.Next("QueryControllerVersion");
             }
 
             // Message is not the one we are looking for, keep waiting.

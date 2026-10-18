@@ -51,6 +51,9 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+# Independent Intel HEX structural + PIC18 checksum verification library.
+. (Join-Path $PSScriptRoot 'checksum-verify.ps1')
+
 # ---------------------------------------------------------------------------------
 # Pinned toolchain matrix (absolute paths).
 # ---------------------------------------------------------------------------------
@@ -98,6 +101,7 @@ $ProjectDefs = [ordered]@{
         ArtifactRel     = 'dist/{conf}/production/TrackAmplifier4.X.production.hex'
         RequiresHarmony = $false
         Checksum        = $true
+        VersionHeader   = 'TrackAmplifier4.X\version.h'
     }
     'TrackBackplane2' = [ordered]@{
         DefaultConf     = 'default'
@@ -146,6 +150,7 @@ $ProjectDefs = [ordered]@{
         ArtifactRel     = 'dist/{conf}/production/TrackController5.X.production.hex'
         RequiresHarmony = $true
         Checksum        = $false
+        VersionHeader   = 'TrackController5\firmware\src\version.h'
     }
 }
 
@@ -331,6 +336,34 @@ function Get-DistHashes {
     })
 }
 
+function Get-DefineValue {
+    # Extracts an integer #define by its name suffix (e.g. '_FW_MAJOR', 'PROTOCOL_VERSION').
+    param([string]$Content, [string]$Suffix)
+    $m = [regex]::Match($Content, '(?m)^\s*#define\s+\w*' + $Suffix + '\s+([0-9A-Fa-fxXuUlL]+)')
+    if (-not $m.Success) { throw "version header missing '#define *$Suffix'" }
+    $raw = $m.Groups[1].Value -replace '[uUlL]', ''
+    if ($raw -match '^0[xX]') { return [Convert]::ToInt32($raw.Substring(2), 16) }
+    return [Convert]::ToInt32($raw, 10)
+}
+
+function Get-FirmwareVersion {
+    # Parses an authoritative committed version.h (major/minor/patch/protocol).
+    param([string]$Path)
+    if (-not (Test-Path -LiteralPath $Path)) { throw "Version header not found: $Path" }
+    $content = Get-Content -LiteralPath $Path -Raw
+    $major = Get-DefineValue $content '_FW_MAJOR'
+    $minor = Get-DefineValue $content '_FW_MINOR'
+    $patch = Get-DefineValue $content '_FW_PATCH'
+    $proto = Get-DefineValue $content 'PROTOCOL_VERSION'
+    return [pscustomobject]@{
+        Major      = $major
+        Minor      = $minor
+        Patch      = $patch
+        Protocol   = $proto
+        Version    = ('{0}.{1}.{2}' -f $major, $minor, $patch)
+    }
+}
+
 # ---------------------------------------------------------------------------------
 # Pre-flight: git reality, tracked artefact baseline, toolchain presence.
 # ---------------------------------------------------------------------------------
@@ -446,6 +479,7 @@ foreach ($key in $targets) {
         DevicePack    = $def.Dfp
         Harmony       = $harmonyNote
         Status        = 'PASS'
+        GitShortRef   = $gitBefore.ShortSha
         Artifact = [ordered]@{
             SourcePath = $artifactTemp
             OutputPath = $artifactOut
@@ -454,6 +488,12 @@ foreach ($key in $targets) {
             Sha256     = $sha
         }
         Commands = $commands
+    }
+
+    if ($def.Contains('VersionHeader')) {
+        $ver = Get-FirmwareVersion -Path (Join-Path $RepoRoot $def.VersionHeader)
+        $entry['FirmwareVersion'] = $ver.Version
+        $entry['ProtocolVersion'] = ('0x{0:X2}' -f $ver.Protocol)
     }
 
     if ($def.Checksum) {
@@ -469,6 +509,22 @@ foreach ($key in $targets) {
             RecordCount            = $range.RecordCount
             RecordsBelowBootOffset = $range.RecordsBelowBootOffset
         }
+
+        # 5b) Independent VERIFY step (fail-closed). Parse the final Intel HEX, validate
+        #     the Intel HEX record checksums, reject overlap/duplicate rows and any
+        #     program-memory byte outside 0x800..0x7FFF, require 0x7FFE/0x7FFF, extract
+        #     the linker-embedded checksum word, recompute over 0x800..0x7FFD and assert
+        #     equality. Any failure throws (non-zero exit) and no manifest is written, so
+        #     ARTIFACT_VERIFIED is never marked true.
+        $entry['ARTIFACT_VERIFIED'] = $false
+        $verify = Test-Pic18ChecksumVerification -Path $artifactTemp
+        if ($verify.EmbeddedChecksum -ne $chk) {
+            throw ("PIC18 checksum VERIFY FAILED for {0}: linker-embedded word 0x{1:X4} != Get-CSharpHexChecksum 0x{2:X4}." -f $artifactTemp, $verify.EmbeddedChecksum, $chk)
+        }
+        Write-Log ("PIC18 checksum VERIFY PASS: embedded=0x{0:X4}, recomputed=0x{1:X4}, Get-CSharpHexChecksum=0x{2:X4}." -f $verify.EmbeddedChecksum, $verify.RecomputedChecksum, $chk)
+        $entry['ChecksumVerified'] = $true
+        $entry['ChecksumAddress']  = ('0x{0:X4}' -f $verify.ChecksumAddress)
+        $entry['ARTIFACT_VERIFIED'] = $true
     }
 
     [void]$manifestBuilds.Add($entry)

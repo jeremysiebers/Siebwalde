@@ -80,7 +80,7 @@ namespace SiebwaldeApp.Core.Tests
             }
         }
 
-        private static readonly byte[] ExpectedInitCommands = { 250, 107, 100, 106, 101, 104, 105 };
+        private static readonly byte[] ExpectedInitCommands = { 250, 113, 107, 100, 106, 101, 104, 105 };
 
         private static async Task RunWithRuntimeAsync(
             SimulatorFactory factory,

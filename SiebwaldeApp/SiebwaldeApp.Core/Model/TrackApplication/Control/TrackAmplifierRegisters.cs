@@ -3,13 +3,14 @@ namespace SiebwaldeApp.Core
     /// <summary>Frozen Phase-1 map; docs/amplifier-system-architecture.md R8-4.</summary>
     public static class TrackAmplifierRegisters
     {
-        public const int Count = 21;
+        public const int Count = 23;
         public const int PwmCommand = 0, Control = 1, Address = 2;
         public const int ConfigRamp = 3, ConfigFastStop = 4, ConfigWatchdog = 5, ConfigTag = 6;
         public const int Identity = 7, State = 8, Fault = 9, Validity = 10, SwChecksum = 11;
         public const int RequestedPwm = 12, TargetPwm = 13, AppliedPwm = 14, WriteResult = 15;
         public const int FuseVoltage = 16, HBridgeTemperature = 17, HBridgeCurrent = 18;
         public const int MessagesReceived = 19, MessagesSent = 20;
+        public const int FwVersionMajorMinor = 21, FwVersionPatchProtocol = 22;
 
         // Existing consumer names now refer to the clean-sheet map, not the legacy addresses.
         public const int BemfControl = Control, Status = Validity, AmplifierStatus = State;
@@ -35,6 +36,18 @@ namespace SiebwaldeApp.Core
         /// <summary>Shape check only. NOT identity authorization: requires PIC32 fresh-read evidence.</summary>
         public static bool HasCompatibleIdentityFields(ushort identity)
             => (identity & 0xFF) == 1 && ((identity >> 8) & 0xF) == 1 && (identity & 0xF000) != 0;
+
+        /// <summary>Firmware MAJOR from the HR21 (major&lt;&lt;8 | minor) register.</summary>
+        public static int FwMajor(ushort fwVersionMajorMinor) => (fwVersionMajorMinor >> 8) & 0xFF;
+
+        /// <summary>Firmware MINOR from the HR21 (major&lt;&lt;8 | minor) register.</summary>
+        public static int FwMinor(ushort fwVersionMajorMinor) => fwVersionMajorMinor & 0xFF;
+
+        /// <summary>Firmware PATCH from the HR22 (patch&lt;&lt;8 | protocolVersion) register.</summary>
+        public static int FwPatch(ushort fwVersionPatchProtocol) => (fwVersionPatchProtocol >> 8) & 0xFF;
+
+        /// <summary>Wire PROTOCOL_VERSION from the HR22 (patch&lt;&lt;8 | protocolVersion) register.</summary>
+        public static int FwProtocolVersion(ushort fwVersionPatchProtocol) => fwVersionPatchProtocol & 0xFF;
 
         /// <summary>True when the identity reports the applied-readback capability (HR7 bit 12).</summary>
         public static bool HasAppliedReadbackCapability(ushort identity)

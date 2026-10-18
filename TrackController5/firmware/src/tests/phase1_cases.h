@@ -74,21 +74,21 @@ static void test_poll_and_lease(void) {
             SlaveInfoProcessor=(uint8_t)sip; assert(SendNextMessage());
             assert(Petit_Tx_Data.Function==3);
             start=g_lastReqStart; qty=g_lastReqQty;
-            assert(qty==(start==20?1u:2u) && start+qty<=21);
+            assert(qty==(start==22?1u:2u) && start+qty<=23);
             for(reg=start;reg<start+qty;++reg) seen |= 1u<<reg;
             ack();
         }
     }
-    assert(seen==0x1fffffu && sizeof(slaves[1].HoldingReg)==42);
+    assert(seen==0x7fffffu && sizeof(slaves[1].HoldingReg)==46);
     reset(); slaves[0].SlaveDetected=slaves[1].SlaveDetected=true; seen=0;
-    for(sip=0;sip<27;++sip) {
+    for(sip=0;sip<30;++sip) {
         unsigned calls=0;
         while(!PROCESSxNEXTxSLAVE()) assert(++calls<10);
         assert(Data.SlaveAddress==1 && Data.Direction==READ);
         for(reg=g_lastReqStart;reg<(unsigned)g_lastReqStart+g_lastReqQty;++reg) seen |= 1u<<reg;
         ack();
     }
-    assert(seen==0x1fffffu); ProcessSlave=1;
+    assert(seen==0x7fffffu); ProcessSlave=1;
     now=99u*MILISECONDS; Message=MESSAGE1;
     assert(SendNextMessage() && Data.Direction==READ); ack();
     now=100u*MILISECONDS;
@@ -100,7 +100,7 @@ static void test_poll_and_lease(void) {
     assert(SendNextMessage() && Data.SlaveAddress==0 && Data.RegData0==0x4000); ack();
     now+=HOST_AUTHORITY_WATCHDOG_MS*MILISECONDS; CHECKxHOSTxAUTHORITY();
     assert(ISxGLOBALxSTOPxLATCHED()); /* Re-arm without heartbeat isn't infinite authority. */
-    puts("PASS: full 21-register poll rotation; 100 ms direct lease, latch gating and re-arm\n");
+    puts("PASS: full 23-register poll rotation; 100 ms direct lease, latch gating and re-arm\n");
 }
 static void test_initialization_path(void) {
     unsigned compatible;

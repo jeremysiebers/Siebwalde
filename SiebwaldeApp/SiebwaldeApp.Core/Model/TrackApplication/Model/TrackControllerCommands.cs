@@ -1,6 +1,30 @@
 ﻿namespace SiebwaldeApp.Core
 {
     /// <summary>
+    /// Semantic version surfaced by the PIC32 master's <c>GET_CONTROLLER_VERSION</c> (113) reply.
+    /// Purely informational: the value is surfaced but NOT used as a protocol gate.
+    /// </summary>
+    public readonly struct TrackControllerVersion
+    {
+        public byte Major { get; }
+        public byte Minor { get; }
+        public byte Patch { get; }
+        public byte ProtocolVersion { get; }
+        public string? BuildDate { get; }
+
+        public TrackControllerVersion(byte major, byte minor, byte patch, byte protocolVersion, string? buildDate)
+        {
+            Major = major;
+            Minor = minor;
+            Patch = patch;
+            ProtocolVersion = protocolVersion;
+            BuildDate = buildDate;
+        }
+
+        public override string ToString() => $"{Major}.{Minor}.{Patch}";
+    }
+
+    /// <summary>
     /// Commands and state used by the track controller.
     /// </summary>
     /// <remarks>
@@ -43,6 +67,12 @@
         /// Last message received from the Ethernet target.
         /// </summary>
         public ReceivedMessage ReceivedMessage { get; set; }
+
+        /// <summary>
+        /// Last PIC32 semantic version surfaced from a <c>GET_CONTROLLER_VERSION</c> (113) reply.
+        /// Null until such a reply has been parsed. Informational only — not a protocol gate.
+        /// </summary>
+        public TrackControllerVersion? ControllerVersion { get; set; }
 
         #endregion
 
